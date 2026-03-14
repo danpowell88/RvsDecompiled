@@ -1,3 +1,9 @@
+//=============================================================================
+// R6DecalManager - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6DecalManager.uc 
 // Created By       Cyrille Lauzon
@@ -8,59 +14,69 @@
 //
 //============================================================================//
 class R6DecalManager extends Actor
-	native;
+	native
+ notplaceable;
 
 enum eDecalType
 {
-	DECAL_Footstep,
-	DECAL_Bullet,
-    DECAL_BloodSplats,
-    DECAL_BloodBaths,
-    DECAL_GrenadeDecals
+	DECAL_Footstep,                 // 0
+	DECAL_Bullet,                   // 1
+	DECAL_BloodSplats,              // 2
+	DECAL_BloodBaths,               // 3
+	DECAL_GrenadeDecals             // 4
 };
 
-var(R6DecalManager) R6DecalGroup m_FootSteps;
-var(R6DecalManager) R6DecalGroup m_WallHit;
-var(R6DecalManager) R6DecalGroup m_BloodSplats;
-var(R6DecalManager) R6DecalGroup m_BloodBaths;
-var(R6DecalManager) R6DecalGroup m_GrenadeDecals;
-var(R6DecalManager) bool		 m_bActive;
+var() bool m_bActive;
+var() R6DecalGroup m_FootSteps;
+var() R6DecalGroup m_WallHit;
+var() R6DecalGroup m_BloodSplats;
+var() R6DecalGroup m_BloodBaths;
+var() R6DecalGroup m_GrenadeDecals;
 
+// Export UR6DecalManager::execAddDecal(FFrame&, void* const)
+ native(2900) final function AddDecal(Vector Position, Rotator Rotation, Texture decalTexture, R6DecalManager.eDecalType type, int iFov, float fDuration, float fStartTime, float fMaxTraceDistance, optional float CullDistance);
 
-native(2900) final function AddDecal(vector position, rotator rotation, Texture decalTexture, eDecalType type, INT iFov, FLOAT fDuration, FLOAT fStartTime, FLOAT fMaxTraceDistance);
-native(2901) final function KillDecal();
+// Export UR6DecalManager::execKillDecal(FFrame&, void* const)
+ native(2901) final function KillDecal();
 
 simulated event Destroyed()
 {
-    if ( m_FootSteps != none ) {
-        m_FootSteps.destroy();
-        m_FootSteps = none;
-    }
-
-    if ( m_WallHit != none ) {
-        m_WallHit.destroy();
-        m_WallHit = none;
-    }
-    if ( m_BloodSplats != none ) {
-        m_BloodSplats.destroy();
-        m_BloodSplats = none;
-    }
-
-    if ( m_BloodBaths != none ) {
-        m_BloodBaths.destroy();
-        m_BloodBaths = none;
-    }
-
-    if ( m_GrenadeDecals != none ) {
-        m_GrenadeDecals.destroy();
-        m_GrenadeDecals = none;
-    }
-    
-    Super.Destroyed();
+	// End:0x1E
+	if(__NFUN_119__(m_FootSteps, none))
+	{
+		m_FootSteps.__NFUN_279__();
+		m_FootSteps = none;
+	}
+	// End:0x3C
+	if(__NFUN_119__(m_WallHit, none))
+	{
+		m_WallHit.__NFUN_279__();
+		m_WallHit = none;
+	}
+	// End:0x5A
+	if(__NFUN_119__(m_BloodSplats, none))
+	{
+		m_BloodSplats.__NFUN_279__();
+		m_BloodSplats = none;
+	}
+	// End:0x78
+	if(__NFUN_119__(m_BloodBaths, none))
+	{
+		m_BloodBaths.__NFUN_279__();
+		m_BloodBaths = none;
+	}
+	// End:0x96
+	if(__NFUN_119__(m_GrenadeDecals, none))
+	{
+		m_GrenadeDecals.__NFUN_279__();
+		m_GrenadeDecals = none;
+	}
+	super.Destroyed();
+	return;
 }
 
 defaultproperties
 {
-     m_bActive=True
-     bHidden=True
+	m_bActive=true
+	bHidden=true
 }

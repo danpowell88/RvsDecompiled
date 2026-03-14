@@ -1,3 +1,9 @@
+//=============================================================================
+// R6ClimbableObject - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //------------------------------------------------------------------
 // R6ClimbableObject: an object that can be climbed by pawn.
 //	An R6ClimbableObject as an orientation that shows the
@@ -7,202 +13,196 @@
 //  those kind
 //------------------------------------------------------------------
 class R6ClimbableObject extends R6AbstractClimbableObj
-    native
-    ; //placeable; // R6CLIMBABLEOBJECT
+ native;
 
-#exec OBJ LOAD FILE=..\Textures\R6ActionIcons.utx PACKAGE=R6ActionIcons
-
-enum EClimbHeight 
+enum EClimbHeight
 {
-    EClimbNone,
-    EClimb64,
-    EClimb96,
+	EClimbNone,                     // 0
+	EClimb64,                       // 1
+	EClimb96                        // 2
 };
-
-var              vector              m_vClimbDir;
-var              R6ClimbablePoint    m_climbablePoint;
-var              R6ClimbablePoint    m_insideClimbablePoint;
-var(Collision)   EClimbHeight        m_eClimbHeight;
-
-replication
-{
-    // data server sends to client
-    unreliable if (bNetInitial && Role == ROLE_Authority)
-        m_vClimbDir, m_climbablePoint, m_eClimbHeight;
-}
 
 enum eClimbableObjectCircumstantialAction
 {
-    COBJ_None,
-    COBJ_Climb
+	COBJ_None,                      // 0
+	COBJ_Climb                      // 1
 };
+
+var(Collision) R6ClimbableObject.EClimbHeight m_eClimbHeight;
+var R6ClimbablePoint m_climbablePoint;
+var R6ClimbablePoint m_insideClimbablePoint;
+var Vector m_vClimbDir;
+
+replication
+{
+	// Pos:0x000
+	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		m_climbablePoint, m_eClimbHeight, 
+		m_vClimbDir;
+}
 
 function PostBeginPlay()
 {
-	Super.PostBeginPlay();
-    m_vClimbDir = vector(Rotation);
-    m_vClimbDir = normal(m_vClimbDir);
+	super(Actor).PostBeginPlay();
+	m_vClimbDir = Vector(Rotation);
+	m_vClimbDir = __NFUN_226__(m_vClimbDir);
+	return;
 }
 
-simulated function bool IsClimbableBy( R6pawn p, bool bCheckCylinderTranslation, bool bCheckRotation )
+simulated function bool IsClimbableBy(R6Pawn P, bool bCheckCylinderTranslation, bool bCheckRotation)
 {
-    local   rotator rPawnRot;
-    local   float fFootZ;
-    local   float fDistance2d;
-    local   vector vStart, vDest;
-    local   vector vPawnLocation;
-   
-    // if prone or if he's climbing
-    if ( p.m_bIsProne || p.m_climbObject != none )
-    {
-        //log( p.name$ " 1- if prone or if he's climbing" );
-        return false;
-    }
+	local Rotator rPawnRot;
+	local float fFootZ, fDistance2d;
+	local Vector vStart, vDest, vPawnLocation;
 
-    fFootZ = p.location.Z - p.CollisionHeight;
-    // if the foot are not inbetween the location of ClimbObj and the floor
-    if ( !(fFootZ <= location.Z && location.Z - CollisionHeight <= fFootZ) )
-    {
-        //log( p.name$ " 2- footZ" );
-        return false;
-    }
-
-	rPawnRot = p.rotation;
-	rPawnRot.pitch = 0;
-    
-    // check angle
-	if ( bCheckRotation && vector(rPawnRot) dot m_vClimbDir < 0) 
-    {
-        //log( p.name$ " 3- rotation" );
-        return false;
-    }
-    else
-    {
-        vPawnLocation = p.Location;
-        vPawnLocation.Z = Location.Z;
-
-        fDistance2d = VSize(vPawnLocation - Location ) - CollisionRadius - p.CollisionRadius;
-        
-        // check if minimum distance 
-        if ( fDistance2d > m_fCircumstantialActionRange )
-        {
-            //log( p.name$ " 4- distance" );
-            return false;
-        }
-        // check if enough space for the collision cylinder 
-        else if ( bCheckCylinderTranslation )
-        {
-            // *1.9 instead of 2: more sensible to circumtantial action activation
-            vDest = p.Location + vector( rPawnRot )*p.collisionRadius*1.9; 
-            vDest.Z += CollisionHeight*2;
-
-            vStart = p.Location;
-            vStart.Z = vDest.Z;
-            
-            if ( !p.CheckCylinderTranslation( vStart, vDest, self ) )
-            {
-                //log( p.name$ " 5- CylinderTranslation" );
-                return false;
-            }
-        }
-    }
-    
-    return true;
+	// End:0x2A
+	if(__NFUN_132__(P.m_bIsProne, __NFUN_119__(P.m_climbObject, none)))
+	{
+		return false;
+	}
+	fFootZ = __NFUN_175__(P.Location.Z, P.CollisionHeight);
+	// End:0x88
+	if(__NFUN_129__(__NFUN_130__(__NFUN_178__(fFootZ, Location.Z), __NFUN_178__(__NFUN_175__(Location.Z, CollisionHeight), fFootZ))))
+	{
+		return false;
+	}
+	rPawnRot = P.Rotation;
+	rPawnRot.Pitch = 0;
+	// End:0xCE
+	if(__NFUN_130__(bCheckRotation, __NFUN_176__(__NFUN_219__(Vector(rPawnRot), m_vClimbDir), float(0))))
+	{
+		return false;		
+	}
+	else
+	{
+		vPawnLocation = P.Location;
+		vPawnLocation.Z = Location.Z;
+		fDistance2d = __NFUN_175__(__NFUN_175__(__NFUN_225__(__NFUN_216__(vPawnLocation, Location)), CollisionRadius), P.CollisionRadius);
+		// End:0x136
+		if(__NFUN_177__(fDistance2d, m_fCircumstantialActionRange))
+		{
+			return false;			
+		}
+		else
+		{
+			// End:0x1D1
+			if(bCheckCylinderTranslation)
+			{
+				vDest = __NFUN_215__(P.Location, __NFUN_212__(__NFUN_212__(Vector(rPawnRot), P.CollisionRadius), 1.9000000));
+				__NFUN_184__(vDest.Z, __NFUN_171__(CollisionHeight, float(2)));
+				vStart = P.Location;
+				vStart.Z = vDest.Z;
+				// End:0x1D1
+				if(__NFUN_129__(P.__NFUN_1507__(vStart, vDest, self)))
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+	return;
 }
 
-event Bump( Actor Other )
+event Bump(Actor Other)
 {
-    local r6pawn p;
+	local R6Pawn P;
 
-    p = R6Pawn(Other);
-    
-    if ( p == none )
-        return;
-
-    
-    if ( p.m_bIsPlayer )
-        return; // human player, return. they use the circumstantial action.
-
-    // log( p.name$ " bump" );
-    
-    if ( p.controller != none &&
-         R6AIController(p.controller).CanClimbObject() &&
-         IsClimbableBy( p, false, false )  && // don't check cylinder and don't check rotation
-         !p.controller.IsInState( 'ClimbObject' ) ) // no already tring to climb
-    {
-        p.StartClimbObject( self );
-    }
+	P = R6Pawn(Other);
+	// End:0x1D
+	if(__NFUN_114__(P, none))
+	{
+		return;
+	}
+	// End:0x31
+	if(P.m_bIsPlayer)
+	{
+		return;
+	}
+	// End:0xAA
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(P.Controller, none), R6AIController(P.Controller).CanClimbObject()), IsClimbableBy(P, false, false)), __NFUN_129__(P.Controller.__NFUN_281__('ClimbObject'))))
+	{
+		P.StartClimbObject(self);
+	}
+	return;
 }
 
-simulated event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
+simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
 {
-    local R6Pawn p;
-    p = r6pawn(playerController.pawn);
-    
-    Query.iHasAction = 1; 
-  
-    // not prone, in range and climbable?
-    if( IsClimbableBy( p, true, true ) )
-    {
-        Query.iInRange = 1;
-        p.PotentialClimbableObject( self );
-    }
-    else
-    {
-        Query.iInRange = 0;
-        p.RemovePotentialClimbableObject( self );
-    }
+	local R6Pawn P;
 
-    Query.textureIcon = Texture'R6ActionIcons.ClimbObject';
-
-    Query.iPlayerActionID      = eClimbableObjectCircumstantialAction.COBJ_Climb;
-    Query.iTeamActionID        = eClimbableObjectCircumstantialAction.COBJ_None;
-    Query.iTeamActionIDList[0] = eClimbableObjectCircumstantialAction.COBJ_None;
-    Query.iTeamActionIDList[1] = eClimbableObjectCircumstantialAction.COBJ_None;
-    Query.iTeamActionIDList[2] = eClimbableObjectCircumstantialAction.COBJ_None;
-    Query.iTeamActionIDList[3] = eClimbableObjectCircumstantialAction.COBJ_None;
+	P = R6Pawn(PlayerController.Pawn);
+	Query.iHasAction = 1;
+	// End:0x5E
+	if(IsClimbableBy(P, true, true))
+	{
+		Query.iInRange = 1;
+		P.PotentialClimbableObject(self);		
+	}
+	else
+	{
+		Query.iInRange = 0;
+		P.RemovePotentialClimbableObject(self);
+	}
+	Query.textureIcon = Texture'R6ActionIcons.ClimbObject';
+	Query.iPlayerActionID = 1;
+	Query.iTeamActionID = 0;
+	Query.iTeamActionIDList[0] = 0;
+	Query.iTeamActionIDList[1] = 0;
+	Query.iTeamActionIDList[2] = 0;
+	Query.iTeamActionIDList[3] = 0;
+	return;
 }
 
-simulated function string R6GetCircumstantialActionString( INT iAction )
+simulated function string R6GetCircumstantialActionString(int iAction)
 {
-    switch( iAction )
-    {
-		case eClimbableObjectCircumstantialAction.COBJ_Climb:	return Localize("RDVOrder", "Order_Climb", "R6Menu");
-    }
-
-    return "";
+	switch(iAction)
+	{
+		// End:0x34
+		case int(1):
+			return Localize("RDVOrder", "Order_Climb", "R6Menu");
+		// End:0xFFFF
+		default:
+			return "";
+			break;
+	}
+	return;
 }
 
-event Attach( Actor pActor )
+event Attach(Actor pActor)
 {
-    local R6Pawn pPawn;
+	local R6Pawn pPawn;
 
-    pPawn = R6Pawn(pActor);
-    if(pPawn!=none)
-    {
-        pPawn.AttachToClimbableObject(Self);
-    }
+	pPawn = R6Pawn(pActor);
+	// End:0x2B
+	if(__NFUN_119__(pPawn, none))
+	{
+		pPawn.AttachToClimbableObject(self);
+	}
+	return;
 }
 
-event Detach( Actor pActor )
+event Detach(Actor pActor)
 {
-    local R6Pawn pPawn;
+	local R6Pawn pPawn;
 
-    pPawn = R6Pawn(pActor);
-    if(pPawn!=none)
-    {
-        pPawn.DetachFromClimbableObject(Self);
-    }
+	pPawn = R6Pawn(pActor);
+	// End:0x2B
+	if(__NFUN_119__(pPawn, none))
+	{
+		pPawn.DetachFromClimbableObject(self);
+	}
+	return;
 }
 
 defaultproperties
 {
-     bCollideActors=True
-     bBlockActors=True
-     bBlockPlayers=True
-     bDirectional=True
-     bObsolete=True
-     CollisionRadius=40.000000
-     CollisionHeight=32.000000
-     m_fCircumstantialActionRange=30.000000
+	bCollideActors=true
+	bBlockActors=true
+	bBlockPlayers=true
+	bDirectional=true
+	bObsolete=true
+	CollisionRadius=40.0000000
+	CollisionHeight=32.0000000
+	m_fCircumstantialActionRange=30.0000000
 }

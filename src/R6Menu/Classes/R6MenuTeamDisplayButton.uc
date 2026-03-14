@@ -1,70 +1,78 @@
 //=============================================================================
+// R6MenuTeamDisplayButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuTeamDisplayButton.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/09 * Created by Chaouky Garram
 //=============================================================================
+class R6MenuTeamDisplayButton extends R6WindowButton;
 
-class R6MenuTeamDisplayButton extends R6WindowButton;//R6WindowStayDownButton;
-
-var INT     m_iTeamColor;
-var Region  m_ActiveRegion;
+var int m_iTeamColor;
 var Texture m_ActiveTexture;
+var Region m_ActiveRegion;
 
 function Created()
 {
-	bNoKeyboard = True;
+	bNoKeyboard = true;
+	return;
 }
 
-function BeforePaint(Canvas C, FLOAT X, FLOAT Y){}
-function Tick(FLOAT fDelta){}
-
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function BeforePaint(Canvas C, float X, float Y)
 {
-    Super.Paint(C,X,Y);
-    //Draw the button inside.
-    //Draw the button inside.
-    if(m_bSelected == true)
-    {
-        C.SetDrawColor(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
-        DrawStretchedTextureSegment( C, 0, 0, WinWidth, WinHeight, m_ActiveRegion.X, m_ActiveRegion.Y, m_ActiveRegion.W, m_ActiveRegion.H, m_ActiveTexture );
-    }
+	return;
 }
 
-function LMouseDown(FLOAT X, FLOAT Y)
+function Tick(float fDelta)
 {
-    local FLOAT fGlobalX;
-    local FLOAT fGlobalY;
+	return;
+}
 
-#ifndefMPDEMO            
-    if(!bDisabled && (m_iTeamColor !=  R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam))
-    {
-        Super.LMouseDown(X, Y);
-    
-        m_bSelected = !m_bSelected;
-        R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[m_iTeamColor].SetPathDisplay(m_bSelected);
+function Paint(Canvas C, float X, float Y)
+{
+	super.Paint(C, X, Y);
+	// End:0x9F
+	if(__NFUN_242__(m_bSelected, true))
+	{
+		C.__NFUN_2626__(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
+		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, float(m_ActiveRegion.X), float(m_ActiveRegion.Y), float(m_ActiveRegion.W), float(m_ActiveRegion.H), m_ActiveTexture);
+	}
+	return;
+}
 
+function LMouseDown(float X, float Y)
+{
+	local float fGlobalX, fGlobalY;
 
-        R6MenuRootWindow(Root).m_PlanningWidget.CloseAllPopup();
-
-    }
-#endif
+	// End:0x91
+	if(__NFUN_130__(__NFUN_129__(bDisabled), __NFUN_155__(m_iTeamColor, R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam)))
+	{
+		super(UWindowWindow).LMouseDown(X, Y);
+		m_bSelected = __NFUN_129__(m_bSelected);
+		R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[m_iTeamColor].SetPathDisplay(m_bSelected);
+		R6MenuRootWindow(Root).m_PlanningWidget.CloseAllPopup();
+	}
+	return;
 }
 
 defaultproperties
 {
-     m_ActiveTexture=Texture'R6MenuTextures.Gui_BoxScroll'
-     m_ActiveRegion=(X=172,Y=43,W=28,H=23)
-     m_iDrawStyle=5
-     bUseRegion=True
-     m_bSelected=True
-     UpTexture=Texture'R6MenuTextures.Gui_03'
-     DownTexture=Texture'R6MenuTextures.Gui_03'
-     DisabledTexture=Texture'R6MenuTextures.Gui_03'
-     OverTexture=Texture'R6MenuTextures.Gui_03'
-     UpRegion=(X=189,Y=92,W=28,H=23)
-     DownRegion=(X=189,Y=138,W=28,H=23)
-     DisabledRegion=(X=189,Y=161,W=28,H=23)
-     OverRegion=(X=189,Y=115,W=28,H=23)
+	m_ActiveTexture=Texture'R6MenuTextures.Gui_BoxScroll'
+	m_ActiveRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=44066,ZoneNumber=0)
+	m_iDrawStyle=5
+	bUseRegion=true
+	m_bSelected=true
+	UpTexture=Texture'R6MenuTextures.Gui_03'
+	DownTexture=Texture'R6MenuTextures.Gui_03'
+	DisabledTexture=Texture'R6MenuTextures.Gui_03'
+	OverTexture=Texture'R6MenuTextures.Gui_03'
+	UpRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=48418,ZoneNumber=0)
+	DownRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=48418,ZoneNumber=0)
+	DisabledRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=48418,ZoneNumber=0)
+	OverRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=48418,ZoneNumber=0)
 }

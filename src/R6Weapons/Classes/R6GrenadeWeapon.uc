@@ -1,4 +1,10 @@
 //=============================================================================
+// R6GrenadeWeapon - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6GrenadeWeapon.uc : "Weapon" used for throwing grenades
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,673 +13,871 @@
 //    2001/11/07 * taken over by Joel Tremblay
 //=============================================================================
 class R6GrenadeWeapon extends R6Gadget
-	native
-    abstract;
+	abstract
+ native;
 
-var r6pawn.eGrenadeThrow    m_eThrow;
-var BOOL                    m_bCanThrowGrenade;
-var BOOL                    m_bFistPersonAnimFinish;
-var BOOL                    m_bPinToRemove;
-var BOOL                    m_bReadyToThrow;
+var Pawn.eGrenadeThrow m_eThrow;
+var bool m_bCanThrowGrenade;
+var bool m_bFistPersonAnimFinish;
+var bool m_bPinToRemove;
+var bool m_bReadyToThrow;
 
 replication
 {
-    reliable if (Role==ROLE_Authority)
-        ClientThrowGrenade;
+	// Pos:0x01A
+	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		ServerImReadyToThrow, ServerSetThrow;
 
-    reliable if (Role < ROLE_Authority)
-        ServerSetGrenade;
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		ClientThrowGrenade;
 
-    unreliable if (Role < ROLE_Authority)
-        ServerSetThrow, ServerImReadyToThrow;
+	// Pos:0x00D
+	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		ServerSetGrenade;
 }
 
 simulated function PostBeginPlay()
 {
-    local R6RainbowAI localRainbowAI;
-    Super.PostBeginPlay();
+	local R6RainbowAI localRainbowAI;
 
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::PostBeginPlay"); #endif
-    //Get the grenade display
-    if(m_pBulletClass != none)  //some gadgets might throw interactive objects, the Bullet class is none.
-    {
-        SetStaticMesh(m_pBulletClass.Default.StaticMesh);
-    }
-    if (Pawn(Owner)!=none)
-    {
-        if(Pawn(Owner).controller != none)
-        {
-            localRainbowAI = R6RainbowAI(Pawn(Owner).controller);
-            if ((localRainbowAI!=none) && 
-                (localRainbowAI.m_TeamManager != none))
-            {
-                localRainbowAI.m_TeamManager.UpdateTeamGrenadeStatus();
-            }
-        }
-    }
+	super(R6Weapons).PostBeginPlay();
+	// End:0x25
+	if(__NFUN_119__(m_pBulletClass, none))
+	{
+		SetStaticMesh(m_pBulletClass.default.StaticMesh);
+	}
+	// End:0xA5
+	if(__NFUN_119__(Pawn(Owner), none))
+	{
+		// End:0xA5
+		if(__NFUN_119__(Pawn(Owner).Controller, none))
+		{
+			localRainbowAI = R6RainbowAI(Pawn(Owner).Controller);
+			// End:0xA5
+			if(__NFUN_130__(__NFUN_119__(localRainbowAI, none), __NFUN_119__(localRainbowAI.m_TeamManager, none)))
+			{
+				localRainbowAI.m_TeamManager.UpdateTeamGrenadeStatus();
+			}
+		}
+	}
+	return;
 }
- 
-function ServerImReadyToThrow(BOOL bReady)
+
+function ServerImReadyToThrow(bool bReady)
 {
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ServerImReadyToThrow"); #endif
-    m_bReadyToThrow=bReady;
+	m_bReadyToThrow = bReady;
+	return;
 }
 
 simulated function DropGrenade()
 {
-    local R6Grenade aGrenade;
-    local vector    vStart;
+	local R6Grenade aGrenade;
+	local Vector vStart;
 
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::DropGrenade"); #endif
-    //Get grenade start location.
-	if(R6Pawn(owner).m_bIsPlayer)
-		vStart = R6Pawn(Owner).GetGrenadeStartLocation(m_eThrow);
+	// End:0x39
+	if(R6Pawn(Owner).m_bIsPlayer)
+	{
+		vStart = R6Pawn(Owner).GetGrenadeStartLocation(m_eThrow);		
+	}
 	else
+	{
 		vStart = R6Pawn(Owner).GetHandLocation();
-	
-	aGrenade = R6Grenade( Spawn( m_pBulletClass, Self,, vStart ) );
+	}
+	aGrenade = R6Grenade(__NFUN_278__(m_pBulletClass, self,, vStart));
 	aGrenade.Instigator = Pawn(Owner);
-    aGrenade.SetSpeed(0);
+	aGrenade.SetSpeed(0.0000000);
+	return;
 }
 
 simulated function StartFalling()
 {
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::StartFalling"); #endif
-    //don't drop any grenandes on the ground if the character has none left.
-    if(m_iNbBulletsInWeapon != 0)
-    {
-        //Drop a live ammo
-        if(m_bReadyToThrow==true)
-        {
-            bHidden=true;
-            if(Level.NetMode != NM_Client)
-                DropGrenade();
-        }
-        else
-        {
-            super.StartFalling();
-        }
-    }
+	// End:0x49
+	if(__NFUN_155__(int(m_iNbBulletsInWeapon), 0))
+	{
+		// End:0x43
+		if(__NFUN_242__(m_bReadyToThrow, true))
+		{
+			bHidden = true;
+			// End:0x40
+			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			{
+				DropGrenade();
+			}			
+		}
+		else
+		{
+			super(R6Weapons).StartFalling();
+		}
+	}
+	return;
 }
 
-function FLOAT GetExplosionDelay()
+function float GetExplosionDelay()
 {
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::GetExplosionDelay"); #endif
-	if(m_pBulletClass == none)
-		return 2.f;
+	// End:0x14
+	if(__NFUN_114__(m_pBulletClass, none))
+	{
+		return 2.0000000;		
+	}
 	else
-		return m_pBulletClass.Default.m_fExplosionDelay;
+	{
+		return m_pBulletClass.default.m_fExplosionDelay;
+	}
+	return;
 }
 
-function Fire( FLOAT fValue )
+function Fire(float fValue)
 {
-   #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::Fire"); #endif
-    GotoState('StandByToThrow');
+	__NFUN_113__('StandByToThrow');
+	return;
 }
 
 function ServerSetThrow(Pawn.eGrenadeThrow eThrow)
 {
-   #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ServerSetThrow"); #endif
 	m_eThrow = eThrow;
-}
-
-// FiringSpeed is used in UW as the rate parameter in playanim.
-state StandByToThrow
-{
-    function BeginState()
-    {
-		local R6PlayerController PController;
-
-		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::StandByToThrow::BeginState"); #endif
-        R6Pawn(Owner).m_bIsFiringState = FALSE;
-        if (bShowLog) log("**** IN  STANDBY TO THROW *******");
-
-		if (m_iNbBulletsInWeapon==0)
-		{
-			if (bShowLog) log("**** No more Grenades, Autoswitch to Primary Weapon *******");
-
-			// Auto switch to primary weapon!
-			PController = R6PlayerController(Pawn(Owner).controller);
-			if (PController!=none)
-			{
-				if(R6Pawn(Owner).m_WeaponsCarried[0] != None)
-				    PController.PrimaryWeapon();
-				else
-				    PController.SecondaryWeapon();
-            }
-		}
-    }   
-
-    function Fire( FLOAT fValue )
-    {
-		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::StandByToThrow::Fire"); #endif
-    // The grenade doesn't do nothing by pressing the fire button.
-    // do something in the HUD!
-        if (bShowLog) log("StandByToThrow =" @ m_bCanThrowGrenade);
-        if ((m_iNbBulletsInWeapon > 0) && m_bCanThrowGrenade)
-        {
-            if(R6PlayerController(Pawn(Owner).controller) != none)
-            {
-                Pawn(Owner).controller.m_bLockWeaponActions = true;
-                if(R6Pawn(Owner).IsPeeking() && !R6Pawn(Owner).m_bIsProne )
-                {
-                    if(R6PlayerController(Pawn(Owner).controller).m_bPeekLeft == 1)
-                        m_eThrow = GRENADE_PeekLeftThrow;
-                    else
-                        m_eThrow = GRENADE_PeekRightThrow;
-                }
-                else
-                    m_eThrow = GRENADE_Throw;
-            }
-			ServerSetThrow(m_eThrow);
-            GotoState('ReadyToThrow');
-        }
-    }
-
-    function AltFire( FLOAT fValue )
-    {
- 		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::StandByToThrow::AltFire"); #endif
-        // The grenade doesn't do nothing by pressing the fire button.
-        // do something in the HUD!
-        if ((m_iNbBulletsInWeapon > 0) && m_bCanThrowGrenade)
-        {
-            if(R6PlayerController(Pawn(Owner).controller) != none)
-            {
-                Pawn(Owner).controller.m_bLockWeaponActions = true;
-                if(R6Pawn(Owner).IsPeeking() && !R6Pawn(Owner).m_bIsProne )
-                {
-                    if(R6PlayerController(Pawn(Owner).controller).m_bPeekLeft == 1)
-                        m_eThrow = GRENADE_PeekLeft;
-                    else
-                        m_eThrow = GRENADE_PeekRight;
-                }
-                else
-				    m_eThrow = GRENADE_Roll;
-            }
-			ServerSetThrow(m_eThrow);
-			GotoState('ReadyToThrow');
-        }
-    }
-    function FirstPersonAnimOver()
-    {
-		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::StandByToThrow::FirstPersonAnimOver"); #endif
-        Pawn(Owner).controller.m_bLockWeaponActions = false;
-    }
+	return;
 }
 
 function ServerSetGrenade(Pawn.eGrenadeThrow eGrenade)
 {
-    local R6Pawn PawnOwner;
- 	#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ServerSetGrenade"); #endif
+	local R6Pawn pawnOwner;
 
-    PawnOwner = R6Pawn(Owner);
-
-    PawnOwner.m_ePlayerIsUsingHands = HANDS_None;
-	PawnOwner.m_eGrenadeThrow = eGrenade;
-	PawnOwner.m_eRepGrenadeThrow = eGrenade;	
-	PawnOwner.PlayWeaponAnimation();
-   	if (bShowLog) log("ServerSetGrenade");
-}
-
-
-state ReadyToThrow
-{
-    function Fire( FLOAT fValue ) {}
-    function AltFire( FLOAT fValue ) {}
-    function StopFire(optional BOOL bSoundOnly) {}
-	function StopAltFire() {}
-
-    function BeginState()
-    {
- 		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ReadyToThrow::BeginState"); #endif
-
-        if (bShowLog) log("**** IN  READY TO THROW *******");
-        R6Pawn(Owner).m_bIsFiringState = TRUE;
-        m_bFistPersonAnimFinish=true;
-        ServerImReadyToThrow(true);
-        m_bReadyToThrow=true;
-        m_PawnWaitAnimLow='StandGrenade_nt';
-        m_PawnWaitAnimHigh='StandGrenade_nt';
-        m_PawnWaitAnimProne='ProneGrenade_nt';
-
-        if (R6Pawn(Owner).m_bIsPlayer)
-        {
-            if(R6PlayerController(Pawn(Owner).controller).bBehindView == FALSE)
-            {
-                if(m_FPHands != none)
-                {
-                    m_bFistPersonAnimFinish=false;
-                    m_FPHands.GotoState('FiringWeapon');
-                    if(bShowLog) log("Calling Fire SingleShot");
-                    m_FPHands.FireSingleShot();
-                }
-            }
-        }
-        
-        if (m_bPinToRemove)
-            ServerSetGrenade(GRENADE_RemovePin);
-    }
-    function FirstPersonAnimOver()
-    {
-  		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ReadyToThrow::FirstPersonAnimOver"); #endif
-        m_bFistPersonAnimFinish=true;
-        if(bShowLog)log("ReadyToThrow = FirstPersonAnimFinish");
-    }
-
-    simulated function Tick(FLOAT fDeltaTime)
-    {
-        local R6Pawn PawnOwner;
-
-  		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ReadyToThrow::Tick"); #endif
-        PawnOwner = R6Pawn(Owner);
-
-        if ((PawnOwner.Controller != none) && (PawnOwner.Controller.bFire == 0) && (PawnOwner.Controller.bAltFire == 0) && (PawnOwner.m_bWeaponTransition == FALSE) && m_bFistPersonAnimFinish) 
-        {            
-            m_bCanThrowGrenade = false;
-            m_bFistPersonAnimFinish = false;
-            
-            if (bShowLog) log("!!!!!!!!!!!!!!! THROW GRENADE!!!!!!!!!!!!!!!");
-            
-            ServerSetGrenade(m_eThrow);
-
-            if (PawnOwner.m_bIsPlayer)
-            {
-                if(R6PlayerController(PawnOwner.controller).bBehindView == FALSE)
-                {
-                    if(m_FPHands != none)
-                    {
-                        m_bFistPersonAnimFinish=false;
-                        if ((m_eThrow == GRENADE_Throw) || (m_eThrow == GRENADE_PeekLeftThrow) || (m_eThrow == GRENADE_PeekRightThrow))
-                            m_FPHands.FireGrenadeThrow();
-                        else
-                            m_FPHands.FireGrenadeRoll();
-                    }
-                }
-            }
-            GotoState('WaitEndOfThrow');
-        }
-    }
-}
-
-state WaitEndOfThrow
-{
-    function Fire( FLOAT fValue ) {}
-    function AltFire( FLOAT fValue ) {}
-	function StopFire(optional BOOL bSoundOnly) {}
-	function StopAltFire() {}
-
-    function FirstPersonAnimOver()
-    {
-  		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::WaitEndOfThrow::FirstPersonAnimOver"); #endif
-        m_bFistPersonAnimFinish = true;
-        if(bShowLog) log("ReadyToThrow = FirstPersonAnimFinish");
-    }
-
-    simulated function Tick(FLOAT fDeltaTime)
-    {
-   		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::WaitEndOfThrow::Tick"); #endif
-        if (m_bFistPersonAnimFinish && m_bCanThrowGrenade)
-        {
-            ServerSetGrenade(GRENADE_None);
-
-            if (bShowLog) log("ClientThrowGrenade()" @ m_iNbBulletsInWeapon);
-            if (m_iNbBulletsInWeapon == 0)
-            {
-                SetStaticMesh(none);
-                m_PawnWaitAnimLow='StandNoGun_nt';
-                m_PawnWaitAnimHigh='StandNoGun_nt';
-                m_PawnWaitAnimProne='StandNoGun_nt';
-                GotoState('NoGrenadeLeft');
-            }
-            else
-            {
-                if (m_FPHands != none)
-                {
-                    if(m_FPHands.IsInState('RaiseWeapon'))
-                        m_FPHands.BeginState();
-                    else
-                        m_FPHands.GotoState('RaiseWeapon');
-                }
-            }
-            GotoState('StandByToThrow');
-        }
-    }
-    function BeginState()
-    {
-   		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::WaitEndOfThrow::BeginState"); #endif
-        if (bShowLog) log("WEAPON - BeginState of WaitEndOfThrow for "$self);
-    }
-}
-
-
-
-state NoGrenadeLeft
-{
-    function Fire( FLOAT fValue );
-	function StopFire(optional BOOL bSoundOnly) {}
-	function AltFire( FLOAT fValue ) {}
-	function StopAltFire() {}
-
-    function BeginState()
+	pawnOwner = R6Pawn(Owner);
+	pawnOwner.m_ePlayerIsUsingHands = 0;
+	pawnOwner.m_eGrenadeThrow = eGrenade;
+	pawnOwner.m_eRepGrenadeThrow = eGrenade;
+	pawnOwner.PlayWeaponAnimation();
+	// End:0x75
+	if(bShowLog)
 	{
-   		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::NoGrenadeLeft::BeginState"); #endif
-        R6Pawn(Owner).m_bIsFiringState = FALSE;
-		if(bShowLog) log(self$" state NoChargesLeft : BeginState()...");
-		Pawn(Owner).controller.m_bHideReticule = TRUE;
-        Pawn(Owner).controller.m_bLockWeaponActions = FALSE;
+		__NFUN_231__("ServerSetGrenade");
 	}
+	return;
 }
 
 function DestroyReticules()
 {
-    local R6Reticule aReticule;
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::DestroyReticules"); #endif
-    
-    aReticule = m_ReticuleInstance;
-    m_ReticuleInstance = none;
+	local R6Reticule aReticule;
 
-    if(aReticule != none)
-		aReticule.Destroy();
+	aReticule = m_ReticuleInstance;
+	m_ReticuleInstance = none;
+	// End:0x29
+	if(__NFUN_119__(aReticule, none))
+	{
+		aReticule.__NFUN_279__();
+	}
+	return;
 }
 
 function ThrowGrenade()
 {
-    local vector    vStart; 
-    local rotator   rFiringDir; 
+	local Vector vStart;
+	local Rotator rFiringDir;
+	local R6Grenade aGrenade;
+	local R6RainbowAI localRainbowAI;
+	local R6Pawn pawnOwner;
 
-    local R6Grenade aGrenade;
-    local R6RainbowAI localRainbowAI;
-
-    local R6Pawn PawnOwner;
-
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ThrowGrenade"); #endif
-    PawnOwner = R6Pawn(Owner);
-	
-    //log("ThrowGrenade");
-    if (m_iNbBulletsInWeapon > 0)
-    {
-        m_iNbBulletsInWeapon--;
-
-        // if we ran out of grenades then send notification
-        // for players RoseDesVents
-        if ((m_iNbBulletsInWeapon==0) && (PawnOwner!=none))
-        {
-            SetStaticMesh(none);
-
-            localRainbowAI = R6RainbowAI(PawnOwner.controller);
-            if ((localRainbowAI!=none) && 
-                (localRainbowAI.m_TeamManager != none))
-            {
-                localRainbowAI.m_TeamManager.UpdateTeamGrenadeStatus();
-            }
-        }
-
-        //Get the firing direction vStart is used as temporary variable
-        GetFiringDirection(vStart, rFiringDir);
-        
-		//Get grenade start location.
-		if(PawnOwner.m_bIsPlayer)
-			vStart = PawnOwner.GetGrenadeStartLocation(m_eThrow);
+	pawnOwner = R6Pawn(Owner);
+	// End:0x173
+	if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+	{
+		__NFUN_140__(m_iNbBulletsInWeapon);
+		// End:0x97
+		if(__NFUN_130__(__NFUN_154__(int(m_iNbBulletsInWeapon), 0), __NFUN_119__(pawnOwner, none)))
+		{
+			SetStaticMesh(none);
+			localRainbowAI = R6RainbowAI(pawnOwner.Controller);
+			// End:0x97
+			if(__NFUN_130__(__NFUN_119__(localRainbowAI, none), __NFUN_119__(localRainbowAI.m_TeamManager, none)))
+			{
+				localRainbowAI.m_TeamManager.UpdateTeamGrenadeStatus();
+			}
+		}
+		GetFiringDirection(vStart, rFiringDir);
+		// End:0xD6
+		if(pawnOwner.m_bIsPlayer)
+		{
+			vStart = pawnOwner.GetGrenadeStartLocation(m_eThrow);			
+		}
 		else
-		    vStart = PawnOwner.GetHandLocation();
-		
-	    aGrenade = R6Grenade( Spawn( m_pBulletClass, Self,, vStart,rFiringDir ) );
-		aGrenade.Instigator = PawnOwner;
-
-        m_bReadyToThrow=false;
-
-        if(PawnOwner.m_bIsProne == true)
-        {
-            aGrenade.SetSpeed(m_fMuzzleVelocity*0.5);
-        }
-        else
-        {
-            aGrenade.SetSpeed(m_fMuzzleVelocity);
-        }
-        
-        ClientThrowGrenade();
-    }
+		{
+			vStart = pawnOwner.GetHandLocation();
+		}
+		aGrenade = R6Grenade(__NFUN_278__(m_pBulletClass, self,, vStart, rFiringDir));
+		aGrenade.Instigator = pawnOwner;
+		m_bReadyToThrow = false;
+		// End:0x159
+		if(__NFUN_242__(pawnOwner.m_bIsProne, true))
+		{
+			aGrenade.SetSpeed(__NFUN_171__(m_fMuzzleVelocity, 0.5000000));			
+		}
+		else
+		{
+			aGrenade.SetSpeed(m_fMuzzleVelocity);
+		}
+		ClientThrowGrenade();
+	}
+	return;
 }
 
 function ClientThrowGrenade()
 {
-    #ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::ClientThrowGrenade"); #endif
-    m_bCanThrowGrenade = true;
-}
-
-state RaiseWeapon
-{
-    function FirstPersonAnimOver()
-    {
-		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::RaiseWeapon::FirstPersonAnimOver"); #endif
-
-        if(bShowLog) log("GRENADE - RaiseWeapon Calling SWUAD");
-        R6PlayerController(Pawn(Owner).controller).ServerWeaponUpAnimDone();
-        GotoState('StandByToThrow');
-
-        //Values are set here to remove the parameters of R6WeaponShake.
-        R6Pawn(Owner).m_fWeaponJump = m_stAccuracyValues.fWeaponJump;
-    }
-
-    simulated function EndState()
-    {
-		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::RaiseWeapon::EndState"); #endif
-
-        if(bShowLog) log("GRENADE - Leaving state Raise Weapon");
-        Pawn(Owner).controller.m_bHideReticule = false;
-        Pawn(Owner).controller.m_bLockWeaponActions = false;
-        m_bCanThrowGrenade=true;
-    }
-
-    simulated function BeginState()
-    {
-		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::RaiseWeapon::BeginState"); #endif
-
-        if (bShowLog) log("WEAPON - BeginState of RaiseWeapon for "$self);
-        Pawn(Owner).controller.m_bLockWeaponActions = true;
-
-        if(m_FPHands != none)
-        {
-            if(m_FPHands.IsInState('RaiseWeapon'))
-                m_FPHands.BeginState();
-            else
-                m_FPHands.GotoState('RaiseWeapon');
-            m_FPWeapon.m_smGun.bHidden = FALSE;
-        }
-        else
-        {
-            FirstPersonAnimOver();
-        }
-    }
-
-}
-
-state DiscardWeapon
-{
-    function Fire( float Value ) {}
-    function AltFire( float Value ) {}
-    function StopFire(optional BOOL bSoundOnly) {}
-    function StopAltFire() {}
-    function PlayReloading() {}
-
-    simulated function BeginState()
-    {
-		local Pawn aPawn;
-
-		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::DiscardWeapon::BeginState"); #endif
-        if (bShowLog) log("IN:"@self@"::DiscardWeapon::BeginState()");
-
-        if(m_FPHands != none)
-        {
-			aPawn = Pawn(Owner);
-			if(aPawn.controller != none)
-            {
-				aPawn.controller.m_bLockWeaponActions = true;
-				aPawn.controller.m_bHideReticule = true;
-            }
-			if (m_iNbBulletsInWeapon > 0)
-                m_FPHands.GotoState('DiscardWeapon');
-            else
-                FirstPersonAnimOver();
-        }
-    }
-    simulated function EndState()
-    {
-        if (bShowLog) log("IN:"@self@"::DiscardWeapon::EndState()");
-    }
-}
-
-//When the character has to use his hands before doing an action
-state PutWeaponDown
-{
-    simulated function BeginState()
-    {
- 		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::PutWeaponDown::BeginState"); #endif
-
-        if(bShowLog) log("WEAPON - "$self$" - BeginState of PutWeaponDown for "$self);
-        if(m_FPHands != none)
-        {
-            if(m_iNbBulletsInWeapon == 0)
-            {
-                GotoState('NoGrenadeLeft');
-            }
-            else
-            {
-			    if(m_FPHands.IsInState('FiringWeapon'))
-			    {
-				    GotoState('');
-				    return;
-			    }
-                Pawn(Owner).controller.m_bLockWeaponActions = true;
-			    m_FPHands.GotoState('PutWeaponDown');
-            }
-        }
-    }
-}
-
-//When the action is over, use this state to bring the weapon up.
-state BringWeaponUp
-{
-    simulated function BeginState()
-    {
- 		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::BringWeaponUp::BeginState"); #endif
-
-        if(bShowLog) log("WEAPON - "$self$" - BeginState of BringWeaponUp for "$self);
-        if(m_FPHands != none)
-        {
-            if(m_iNbBulletsInWeapon == 0)
-            {
-                GotoState('NoGrenadeLeft');
-            }
-            else
-            {
-                m_FPHands.GotoState('BringWeaponUp');
-            }
-        }
-        else
-        {
-            FirstPersonAnimOver();
-        }
-    }
-    function FirstPersonAnimOver()
-    {
- 		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::BringWeaponUp::FirstPersonAnimOver"); #endif
-
-        if((Pawn(Owner).Controller != none) && (Pawn(Owner).Controller.bFire == 1))
-        {
-            GotoState('NormalFire');
-        }
-        else
-        {
-            GotoState('StandByToThrow');
-        }
-    }
-    simulated function EndState()
-    {
- 		#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::BringWeaponUp::EndState"); #endif
-
-        m_bCanThrowGrenade=true;
-        Pawn(Owner).controller.m_bHideReticule = false;
-        Pawn(Owner).controller.m_bLockWeaponActions = false;
-    }
+	m_bCanThrowGrenade = true;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetSaveDistanceToThrow: return the save distance from the grenade
 //	to be for avoiding any harm.
 //------------------------------------------------------------------
-function FLOAT GetSaveDistanceToThrow() 
-{ 
- 	#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::GetSaveDistanceToThrow"); #endif
-
-    // if it's bigger than 30, it will cause a lot's of damage (ie: exception for the flashbang)
-    if ( m_pBulletClass.default.m_fKillBlastRadius > 30 ) 
-    {
-        return m_pBulletClass.default.m_fExplosionRadius;
-    }
-    else
-    {
-        return 0;
-    }
+function float GetSaveDistanceToThrow()
+{
+	// End:0x29
+	if(__NFUN_177__(m_pBulletClass.default.m_fKillBlastRadius, float(30)))
+	{
+		return m_pBulletClass.default.m_fExplosionRadius;		
+	}
+	else
+	{
+		return 0.0000000;
+	}
+	return;
 }
 
-simulated function WeaponInitialization( Pawn pawnOwner )
+simulated function WeaponInitialization(Pawn pawnOwner)
 {
- 	#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::WeaponInitialization"); #endif
-
-    Super.WeaponInitialization( pawnOwner );
-
-    if(Level.NetMode == NM_DedicatedServer)
-        return;
-    
-    if (m_iNbBulletsInWeapon == 0)
-        HideAttachment();
+	super(R6Weapons).WeaponInitialization(pawnOwner);
+	// End:0x26
+	if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+	{
+		return;
+	}
+	// End:0x39
+	if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+	{
+		HideAttachment();
+	}
+	return;
 }
 
 simulated event HideAttachment()
 {
- 	#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::HideAttachment"); #endif
-
-    Super.HideAttachment();
-    if (bShowLog) log("***** HideAttachment for" @ Self @ "******");
-    SetDrawType(DT_None);
-}    
-
-function BOOL CanSwitchToWeapon()
-{
- 	#ifdefDEBUG if(bShowLog) log("R6GrenadeWeapon::CanSwitchToWeapon"); #endif
-
-    if (m_iNbBulletsInWeapon > 0)
-        return true;
-    else
-        return false;
+	super(R6Weapons).HideAttachment();
+	// End:0x3A
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__(__NFUN_168__("***** HideAttachment for", string(self)), "******"));
+	}
+	SetDrawType(0);
+	return;
 }
 
-#ifdefDEBUG
-simulated function ShowInfo()
+function bool CanSwitchToWeapon()
 {
-    super.ShowInfo();
-    
-    log("m_bReadyToThrow : "$m_bReadyToThrow);
+	// End:0x12
+	if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+	{
+		return true;		
+	}
+	else
+	{
+		return false;
+	}
+	return;
 }
-#endif
+
+state StandByToThrow
+{
+	function BeginState()
+	{
+		local R6PlayerController PController;
+
+		R6Pawn(Owner).m_bIsFiringState = false;
+		// End:0x44
+		if(bShowLog)
+		{
+			__NFUN_231__("**** IN  STANDBY TO THROW *******");
+		}
+		// End:0xFE
+		if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+		{
+			// End:0x99
+			if(bShowLog)
+			{
+				__NFUN_231__("**** No more Grenades, Autoswitch to Primary Weapon *******");
+			}
+			PController = R6PlayerController(Pawn(Owner).Controller);
+			// End:0xFE
+			if(__NFUN_119__(PController, none))
+			{
+				// End:0xEF
+				if(__NFUN_119__(R6Pawn(Owner).m_WeaponsCarried[0], none))
+				{
+					PController.PrimaryWeapon();					
+				}
+				else
+				{
+					PController.SecondaryWeapon();
+				}
+			}
+		}
+		return;
+	}
+
+	function Fire(float fValue)
+	{
+		// End:0x27
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__("StandByToThrow =", string(m_bCanThrowGrenade)));
+		}
+		// End:0x107
+		if(__NFUN_130__(__NFUN_151__(int(m_iNbBulletsInWeapon), 0), m_bCanThrowGrenade))
+		{
+			// End:0xF5
+			if(__NFUN_119__(R6PlayerController(Pawn(Owner).Controller), none))
+			{
+				Pawn(Owner).Controller.m_bLockWeaponActions = true;
+				// End:0xED
+				if(__NFUN_130__(R6Pawn(Owner).IsPeeking(), __NFUN_129__(R6Pawn(Owner).m_bIsProne)))
+				{
+					// End:0xE2
+					if(__NFUN_154__(int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft), 1))
+					{
+						m_eThrow = 6;						
+					}
+					else
+					{
+						m_eThrow = 7;
+					}					
+				}
+				else
+				{
+					m_eThrow = 1;
+				}
+			}
+			ServerSetThrow(m_eThrow);
+			__NFUN_113__('ReadyToThrow');
+		}
+		return;
+	}
+
+	function AltFire(float fValue)
+	{
+		// End:0xE0
+		if(__NFUN_130__(__NFUN_151__(int(m_iNbBulletsInWeapon), 0), m_bCanThrowGrenade))
+		{
+			// End:0xCE
+			if(__NFUN_119__(R6PlayerController(Pawn(Owner).Controller), none))
+			{
+				Pawn(Owner).Controller.m_bLockWeaponActions = true;
+				// End:0xC6
+				if(__NFUN_130__(R6Pawn(Owner).IsPeeking(), __NFUN_129__(R6Pawn(Owner).m_bIsProne)))
+				{
+					// End:0xBB
+					if(__NFUN_154__(int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft), 1))
+					{
+						m_eThrow = 4;						
+					}
+					else
+					{
+						m_eThrow = 5;
+					}					
+				}
+				else
+				{
+					m_eThrow = 2;
+				}
+			}
+			ServerSetThrow(m_eThrow);
+			__NFUN_113__('ReadyToThrow');
+		}
+		return;
+	}
+
+	function FirstPersonAnimOver()
+	{
+		Pawn(Owner).Controller.m_bLockWeaponActions = false;
+		return;
+	}
+	stop;
+}
+
+state ReadyToThrow
+{
+	function Fire(float fValue)
+	{
+		return;
+	}
+
+	function AltFire(float fValue)
+	{
+		return;
+	}
+
+	function StopFire(optional bool bSoundOnly)
+	{
+		return;
+	}
+
+	function StopAltFire()
+	{
+		return;
+	}
+
+	function BeginState()
+	{
+		// End:0x2C
+		if(bShowLog)
+		{
+			__NFUN_231__("**** IN  READY TO THROW *******");
+		}
+		R6Pawn(Owner).m_bIsFiringState = true;
+		m_bFistPersonAnimFinish = true;
+		ServerImReadyToThrow(true);
+		m_bReadyToThrow = true;
+		m_PawnWaitAnimLow = 'StandGrenade_nt';
+		m_PawnWaitAnimHigh = 'StandGrenade_nt';
+		m_PawnWaitAnimProne = 'ProneGrenade_nt';
+		// End:0x10F
+		if(R6Pawn(Owner).m_bIsPlayer)
+		{
+			// End:0x10F
+			if(__NFUN_242__(R6PlayerController(Pawn(Owner).Controller).bBehindView, false))
+			{
+				// End:0x10F
+				if(__NFUN_119__(m_FPHands, none))
+				{
+					m_bFistPersonAnimFinish = false;
+					m_FPHands.__NFUN_113__('FiringWeapon');
+					// End:0x100
+					if(bShowLog)
+					{
+						__NFUN_231__("Calling Fire SingleShot");
+					}
+					m_FPHands.FireSingleShot();
+				}
+			}
+		}
+		// End:0x120
+		if(m_bPinToRemove)
+		{
+			ServerSetGrenade(3);
+		}
+		return;
+	}
+
+	function FirstPersonAnimOver()
+	{
+		m_bFistPersonAnimFinish = true;
+		// End:0x39
+		if(bShowLog)
+		{
+			__NFUN_231__("ReadyToThrow = FirstPersonAnimFinish");
+		}
+		return;
+	}
+
+	simulated function Tick(float fDeltaTime)
+	{
+		local R6Pawn pawnOwner;
+
+		pawnOwner = R6Pawn(Owner);
+		// End:0x180
+		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(pawnOwner.Controller, none), __NFUN_154__(int(pawnOwner.Controller.bFire), 0)), __NFUN_154__(int(pawnOwner.Controller.bAltFire), 0)), __NFUN_242__(pawnOwner.m_bWeaponTransition, false)), m_bFistPersonAnimFinish))
+		{
+			m_bCanThrowGrenade = false;
+			m_bFistPersonAnimFinish = false;
+			// End:0xD1
+			if(bShowLog)
+			{
+				__NFUN_231__("!!!!!!!!!!!!!!! THROW GRENADE!!!!!!!!!!!!!!!");
+			}
+			ServerSetGrenade(m_eThrow);
+			// End:0x179
+			if(pawnOwner.m_bIsPlayer)
+			{
+				// End:0x179
+				if(__NFUN_242__(R6PlayerController(pawnOwner.Controller).bBehindView, false))
+				{
+					// End:0x179
+					if(__NFUN_119__(m_FPHands, none))
+					{
+						m_bFistPersonAnimFinish = false;
+						// End:0x16A
+						if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(m_eThrow), int(1)), __NFUN_154__(int(m_eThrow), int(6))), __NFUN_154__(int(m_eThrow), int(7))))
+						{
+							m_FPHands.FireGrenadeThrow();							
+						}
+						else
+						{
+							m_FPHands.FireGrenadeRoll();
+						}
+					}
+				}
+			}
+			__NFUN_113__('WaitEndOfThrow');
+		}
+		return;
+	}
+	stop;
+}
+
+state WaitEndOfThrow
+{
+	function Fire(float fValue)
+	{
+		return;
+	}
+
+	function AltFire(float fValue)
+	{
+		return;
+	}
+
+	function StopFire(optional bool bSoundOnly)
+	{
+		return;
+	}
+
+	function StopAltFire()
+	{
+		return;
+	}
+
+	function FirstPersonAnimOver()
+	{
+		m_bFistPersonAnimFinish = true;
+		// End:0x39
+		if(bShowLog)
+		{
+			__NFUN_231__("ReadyToThrow = FirstPersonAnimFinish");
+		}
+		return;
+	}
+
+	simulated function Tick(float fDeltaTime)
+	{
+		// End:0xCD
+		if(__NFUN_130__(m_bFistPersonAnimFinish, m_bCanThrowGrenade))
+		{
+			ServerSetGrenade(0);
+			// End:0x46
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__("ClientThrowGrenade()", string(m_iNbBulletsInWeapon)));
+			}
+			// End:0x85
+			if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+			{
+				SetStaticMesh(none);
+				m_PawnWaitAnimLow = 'StandNoGun_nt';
+				m_PawnWaitAnimHigh = 'StandNoGun_nt';
+				m_PawnWaitAnimProne = 'StandNoGun_nt';
+				__NFUN_113__('NoGrenadeLeft');				
+			}
+			else
+			{
+				// End:0xC6
+				if(__NFUN_119__(m_FPHands, none))
+				{
+					// End:0xB6
+					if(m_FPHands.__NFUN_281__('RaiseWeapon'))
+					{
+						m_FPHands.BeginState();						
+					}
+					else
+					{
+						m_FPHands.__NFUN_113__('RaiseWeapon');
+					}
+				}
+			}
+			__NFUN_113__('StandByToThrow');
+		}
+		return;
+	}
+
+	function BeginState()
+	{
+		// End:0x3C
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__("WEAPON - BeginState of WaitEndOfThrow for ", string(self)));
+		}
+		return;
+	}
+	stop;
+}
+
+state NoGrenadeLeft
+{
+	function StopFire(optional bool bSoundOnly)
+	{
+		return;
+	}
+
+	function AltFire(float fValue)
+	{
+		return;
+	}
+
+	function StopAltFire()
+	{
+		return;
+	}
+
+	function BeginState()
+	{
+		R6Pawn(Owner).m_bIsFiringState = false;
+		// End:0x4E
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(string(self), " state NoChargesLeft : BeginState()..."));
+		}
+		Pawn(Owner).Controller.m_bHideReticule = true;
+		Pawn(Owner).Controller.m_bLockWeaponActions = false;
+		return;
+	}
+	stop;
+}
+
+state RaiseWeapon
+{
+	function FirstPersonAnimOver()
+	{
+		// End:0x30
+		if(bShowLog)
+		{
+			__NFUN_231__("GRENADE - RaiseWeapon Calling SWUAD");
+		}
+		R6PlayerController(Pawn(Owner).Controller).ServerWeaponUpAnimDone();
+		__NFUN_113__('StandByToThrow');
+		R6Pawn(Owner).m_fWeaponJump = m_stAccuracyValues.fWeaponJump;
+		return;
+	}
+
+	simulated function EndState()
+	{
+		// End:0x31
+		if(bShowLog)
+		{
+			__NFUN_231__("GRENADE - Leaving state Raise Weapon");
+		}
+		Pawn(Owner).Controller.m_bHideReticule = false;
+		Pawn(Owner).Controller.m_bLockWeaponActions = false;
+		m_bCanThrowGrenade = true;
+		return;
+	}
+
+	simulated function BeginState()
+	{
+		// End:0x39
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__("WEAPON - BeginState of RaiseWeapon for ", string(self)));
+		}
+		Pawn(Owner).Controller.m_bLockWeaponActions = true;
+		// End:0xB6
+		if(__NFUN_119__(m_FPHands, none))
+		{
+			// End:0x89
+			if(m_FPHands.__NFUN_281__('RaiseWeapon'))
+			{
+				m_FPHands.BeginState();				
+			}
+			else
+			{
+				m_FPHands.__NFUN_113__('RaiseWeapon');
+			}
+			m_FPWeapon.m_smGun.bHidden = false;			
+		}
+		else
+		{
+			FirstPersonAnimOver();
+		}
+		return;
+	}
+	stop;
+}
+
+state DiscardWeapon
+{
+	function Fire(float Value)
+	{
+		return;
+	}
+
+	function AltFire(float Value)
+	{
+		return;
+	}
+
+	function StopFire(optional bool bSoundOnly)
+	{
+		return;
+	}
+
+	function StopAltFire()
+	{
+		return;
+	}
+
+	function PlayReloading()
+	{
+		return;
+	}
+
+	simulated function BeginState()
+	{
+		local Pawn aPawn;
+
+		// End:0x36
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__(__NFUN_168__("IN:", string(self)), "::DiscardWeapon::BeginState()"));
+		}
+		// End:0xBF
+		if(__NFUN_119__(m_FPHands, none))
+		{
+			aPawn = Pawn(Owner);
+			// End:0x99
+			if(__NFUN_119__(aPawn.Controller, none))
+			{
+				aPawn.Controller.m_bLockWeaponActions = true;
+				aPawn.Controller.m_bHideReticule = true;
+			}
+			// End:0xB9
+			if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+			{
+				m_FPHands.__NFUN_113__('DiscardWeapon');				
+			}
+			else
+			{
+				FirstPersonAnimOver();
+			}
+		}
+		return;
+	}
+
+	simulated function EndState()
+	{
+		// End:0x34
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__(__NFUN_168__("IN:", string(self)), "::DiscardWeapon::EndState()"));
+		}
+		return;
+	}
+	stop;
+}
+
+state PutWeaponDown
+{
+	simulated function BeginState()
+	{
+		// End:0x47
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WEAPON - ", string(self)), " - BeginState of PutWeaponDown for "), string(self)));
+		}
+		// End:0xB5
+		if(__NFUN_119__(m_FPHands, none))
+		{
+			// End:0x69
+			if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+			{
+				__NFUN_113__('NoGrenadeLeft');				
+			}
+			else
+			{
+				// End:0x86
+				if(m_FPHands.__NFUN_281__('FiringWeapon'))
+				{
+					__NFUN_113__('None');
+					return;
+				}
+				Pawn(Owner).Controller.m_bLockWeaponActions = true;
+				m_FPHands.__NFUN_113__('PutWeaponDown');
+			}
+		}
+		return;
+	}
+	stop;
+}
+
+state BringWeaponUp
+{
+	simulated function BeginState()
+	{
+		// End:0x47
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WEAPON - ", string(self)), " - BeginState of BringWeaponUp for "), string(self)));
+		}
+		// End:0x7C
+		if(__NFUN_119__(m_FPHands, none))
+		{
+			// End:0x69
+			if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+			{
+				__NFUN_113__('NoGrenadeLeft');				
+			}
+			else
+			{
+				m_FPHands.__NFUN_113__('BringWeaponUp');
+			}			
+		}
+		else
+		{
+			FirstPersonAnimOver();
+		}
+		return;
+	}
+
+	function FirstPersonAnimOver()
+	{
+		// End:0x49
+		if(__NFUN_130__(__NFUN_119__(Pawn(Owner).Controller, none), __NFUN_154__(int(Pawn(Owner).Controller.bFire), 1)))
+		{
+			__NFUN_113__('NormalFire');			
+		}
+		else
+		{
+			__NFUN_113__('StandByToThrow');
+		}
+		return;
+	}
+
+	simulated function EndState()
+	{
+		m_bCanThrowGrenade = true;
+		Pawn(Owner).Controller.m_bHideReticule = false;
+		Pawn(Owner).Controller.m_bLockWeaponActions = false;
+		return;
+	}
+	stop;
+}
 
 defaultproperties
 {
-     m_bCanThrowGrenade=True
-     m_bPinToRemove=True
-     m_iClipCapacity=3
-     m_fMuzzleVelocity=1500.000000
-     m_pReticuleClass=Class'R6Weapons.R6GrenadeReticule'
-     m_stWeaponCaps=(bSingle=1)
-     m_pFPHandsClass=Class'R61stWeapons.R61stHandsGripGrenade'
-     m_eWeaponType=WT_Grenade
-     m_bDisplayHudInfo=True
-     m_ReloadSnd=Sound'Foley_CommonGrenade.Play_Grenade_Degoupille'
-     m_BurstFireStereoSnd=Sound'Foley_CommonGrenade.Play_Grenade_Throw'
-     m_PawnWaitAnimLow="StandGrenade_nt"
-     m_PawnWaitAnimHigh="StandGrenade_nt"
-     m_PawnWaitAnimProne="ProneGrenade_nt"
-     m_AttachPoint="TagGrenadeHand"
-     bCollideWorld=True
+	m_bCanThrowGrenade=true
+	m_bPinToRemove=true
+	m_iClipCapacity=3
+	m_fMuzzleVelocity=1500.0000000
+	m_stWeaponCaps=(bSingle=1)
+	m_szReticuleClass="GRENADE"
+	m_pFPHandsClass=Class'R61stWeapons.R61stHandsGripGrenade'
+	m_eWeaponType=6
+	m_bDisplayHudInfo=true
+	m_ReloadSnd=Sound'Foley_CommonGrenade.Play_Grenade_Degoupille'
+	m_BurstFireStereoSnd=Sound'Foley_CommonGrenade.Play_Grenade_Throw'
+	m_PawnWaitAnimLow="StandGrenade_nt"
+	m_PawnWaitAnimHigh="StandGrenade_nt"
+	m_PawnWaitAnimProne="ProneGrenade_nt"
+	m_AttachPoint="TagGrenadeHand"
+	bCollideWorld=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function ShowInfo

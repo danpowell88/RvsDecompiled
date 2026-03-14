@@ -1,83 +1,62 @@
 //=============================================================================
+// R6WithWeaponReticule - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WithWeaponReticule.uc : Simple cross reticule
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/27 * Eric Begin				- Creation
 //=============================================================================
-class R6WithWeaponReticule extends R6Reticule;
+class R6WithWeaponReticule extends R6Reticule
+	config(User)
+ notplaceable;
 
-#exec OBJ LOAD FILE=..\textures\R6TexturesReticule.utx PACKAGE=R6TexturesReticule
-
-var (Textures) texture m_LineTexture;
-
-
-var const int   c_iLineWidth;
-var const int   c_iLineHeight; 
-
+var const int c_iLineWidth;
+var const int c_iLineHeight;
+var(Textures) Texture m_LineTexture;
 
 // Speed gives us the current speed.
-simulated function PostRender( canvas C)
+simulated function PostRender(Canvas C)
 {
-	// Draw the reticule
-    local FLOAT fScale;
-    local INT   iWidth;
-    local INT   iHeight;
-    local FLOAT fAjustedAccuracy;
+	local float fScale;
+	local int iWidth, iHeight;
+	local float fAjustedAccuracy, fPositionAjustment, fCenterOffsetX, fCenterOffsetY;
 
-    local FLOAT fPositionAjustment;
-    // In 640x480, we offset the center by 1 pixel, the following variable are use to offset the center
-    // of the reticule depending of the current resolution
-    local FLOAT fCenterOffsetX;
-    local FLOAT fCenterOffsetY;
-
-    // height and width of recticule line draw
-    iWidth  = c_iLineWidth;
-    iHeight = c_iLineHeight;  //Init to Width, to get a dot at maximum precision 
-
-    fAjustedAccuracy = m_fAccuracy - 0.25;
-    if(fAjustedAccuracy < 0.0)
-    {
-        fAjustedAccuracy = 0.0;
-    }
-    
-    iHeight += c_iLineHeight * fAjustedAccuracy * 0.02; //   fAjustedAccuracy / 50
-
+	iWidth = c_iLineWidth;
+	iHeight = c_iLineHeight;
+	fAjustedAccuracy = __NFUN_175__(m_fAccuracy, 0.2500000);
+	// End:0x42
+	if(__NFUN_176__(fAjustedAccuracy, 0.0000000))
+	{
+		fAjustedAccuracy = 0.0000000;
+	}
+	__NFUN_161__(iHeight, int(__NFUN_171__(__NFUN_171__(float(c_iLineHeight), fAjustedAccuracy), 0.0200000)));
 	SetReticuleInfo(C);
-    C.Style = ERenderStyle.STY_Normal;
-    
-    C.UseVirtualSize(false);
-
-    // Reticule Offset from the center of the screen (based on 640x480)
-    fCenterOffsetX = C.SizeX/640.0f;
-    fCenterOffsetY = C.SizeY/480.0f;
-    
-    // the Dot
-    C.SetPos(m_fReticuleOffsetX + fCenterOffsetX, m_fReticuleOffsetY + fCenterOffsetY);
-	C.DrawRect(m_LineTexture, c_iLineWidth, c_iLineWidth);
-    
-    fPositionAjustment = m_fReticuleOffsetY * fAjustedAccuracy * 0.02; //   fAjustedAccuracy / 50    0 is middle 50 is on the edge of the screen
-
-    // Top line
-	C.SetPos(m_fReticuleOffsetX + fCenterOffsetX, m_fReticuleOffsetY - iHeight - fPositionAjustment + fCenterOffsetY);
-	C.DrawRect(m_LineTexture, iWidth, iHeight );
-
-    // Bottom line
-	C.SetPos(m_fReticuleOffsetX + fCenterOffsetX, m_fReticuleOffsetY + fPositionAjustment + fCenterOffsetY + 1);
-	C.DrawRect(m_LineTexture, iWidth, iHeight );
-
-    // Left Line
-	C.SetPos(m_fReticuleOffsetX - iHeight - fPositionAjustment + fCenterOffsetX, m_fReticuleOffsetY + fCenterOffsetY);
-	C.DrawRect(m_LineTexture, iHeight, iWidth);
-
-    // Right Line
-	C.SetPos(m_fReticuleOffsetX + fPositionAjustment + fCenterOffsetX + 1, m_fReticuleOffsetY + fCenterOffsetY);
-	C.DrawRect(m_LineTexture, iHeight, iWidth);
+	C.Style = 1;
+	C.__NFUN_1606__(false);
+	fCenterOffsetX = __NFUN_172__(float(C.SizeX), 640.0000000);
+	fCenterOffsetY = __NFUN_172__(float(C.SizeY), 480.0000000);
+	C.__NFUN_2623__(__NFUN_174__(m_fReticuleOffsetX, fCenterOffsetX), __NFUN_174__(m_fReticuleOffsetY, fCenterOffsetY));
+	C.DrawRect(m_LineTexture, float(c_iLineWidth), float(c_iLineWidth));
+	fPositionAjustment = __NFUN_171__(__NFUN_171__(m_fReticuleOffsetY, fAjustedAccuracy), 0.0200000);
+	C.__NFUN_2623__(__NFUN_174__(m_fReticuleOffsetX, fCenterOffsetX), __NFUN_174__(__NFUN_175__(__NFUN_175__(m_fReticuleOffsetY, float(iHeight)), fPositionAjustment), fCenterOffsetY));
+	C.DrawRect(m_LineTexture, float(iWidth), float(iHeight));
+	C.__NFUN_2623__(__NFUN_174__(m_fReticuleOffsetX, fCenterOffsetX), __NFUN_174__(__NFUN_174__(__NFUN_174__(m_fReticuleOffsetY, fPositionAjustment), fCenterOffsetY), float(1)));
+	C.DrawRect(m_LineTexture, float(iWidth), float(iHeight));
+	C.__NFUN_2623__(__NFUN_174__(__NFUN_175__(__NFUN_175__(m_fReticuleOffsetX, float(iHeight)), fPositionAjustment), fCenterOffsetX), __NFUN_174__(m_fReticuleOffsetY, fCenterOffsetY));
+	C.DrawRect(m_LineTexture, float(iHeight), float(iWidth));
+	C.__NFUN_2623__(__NFUN_174__(__NFUN_174__(__NFUN_174__(m_fReticuleOffsetX, fPositionAjustment), fCenterOffsetX), float(1)), __NFUN_174__(m_fReticuleOffsetY, fCenterOffsetY));
+	C.DrawRect(m_LineTexture, float(iHeight), float(iWidth));
+	return;
 }
 
 defaultproperties
 {
-     c_iLineWidth=1
-     c_iLineHeight=8
-     m_LineTexture=Texture'UWindow.WhiteTexture'
+	c_iLineWidth=1
+	c_iLineHeight=8
+	m_LineTexture=Texture'UWindow.WhiteTexture'
 }

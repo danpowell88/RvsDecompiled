@@ -1,48 +1,48 @@
-class MusicTrigger extends Triggers;
+//=============================================================================
+// MusicTrigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class MusicTrigger extends Triggers
+ placeable;
 
-var()				string		Song;
-var()				float		FadeInTime;
-var()				float		FadeOutTime;
-var()				bool		FadeOutAllSongs;
+var() bool FadeOutAllSongs;
+var() float FadeInTime;
+var() float FadeOutTime;
+var() string Song;
+var transient int SongHandle;
+var transient bool Triggered;
 
-var		transient	bool		Triggered;
-var 	transient	int			SongHandle;
-
-function Trigger( Actor Other, Pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
-	if( FadeOutAllSongs )
-	{
-//#ifndef R6SOUND
-//		EventInstigator.StopAllMusic( FadeOutTime );
-//#endif // R6SOUND
+	// End:0x0C
+	if(FadeOutAllSongs)
+	{		
 	}
 	else
 	{
-		if( !Triggered )
+		// End:0x22
+		if(__NFUN_129__(Triggered))
 		{
-			Triggered	= true;
-//#ifndef R6SOUND
-//			SongHandle	= EventInstigator.PlayMusic( Song, FadeInTime );
-//#endif // R6SOUND
+			Triggered = true;			
 		}
 		else
 		{
-			Triggered	= false;
-			if( SongHandle != 0 )
-			{
-//#ifndef R6SOUND
-//				EventInstigator.StopMusic( SongHandle, FadeOutTime );
-//#endif //R6SOUND
+			Triggered = false;
+			// End:0x38
+			if(__NFUN_155__(SongHandle, 0))
+			{				
 			}
 			else
 			{
-				Log("WARNING: invalid song handle");
+				__NFUN_231__("WARNING: invalid song handle");
 			}
 		}
 	}
+	return;
 }
 
 defaultproperties
 {
-     bCollideActors=False
+	bCollideActors=false
 }

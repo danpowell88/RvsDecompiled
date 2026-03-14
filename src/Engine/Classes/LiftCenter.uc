@@ -1,123 +1,133 @@
 //=============================================================================
+// LiftCenter - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // LiftCenter.
 //=============================================================================
 class LiftCenter extends NavigationPoint
+	native
 	placeable
-	native;
+ hidecategories(Lighting,LightColor,Karma,Force);
 
-#exec Texture Import File=Textures\Lift_center.pcx Name=S_LiftCenter Mips=Off MASKED=1
-
-var() name LiftTag;
-var	 mover MyLift;
-var() name LiftTrigger;
-var trigger RecommendedTrigger;
 var float MaxDist2D;
-var vector LiftOffset;	// starting vector between MyLift location and LiftCenter location
+var Mover MyLift;
+var Trigger RecommendedTrigger;
+var() name LiftTag;
+var() name LiftTrigger;
+var Vector LiftOffset;  // starting vector between MyLift location and LiftCenter location
 
 function PostBeginPlay()
 {
-	// log(self$" attached to "$MyLift);
-	if ( LiftTrigger != '' )
-		ForEach DynamicActors(class'Trigger', RecommendedTrigger, LiftTrigger )
-			break;
-	Super.PostBeginPlay();
+	// End:0x29
+	if(__NFUN_255__(LiftTrigger, 'None'))
+	{
+		// End:0x28
+		foreach __NFUN_313__(Class'Engine.Trigger', RecommendedTrigger, LiftTrigger)
+		{
+			// End:0x28
+			break;			
+		}		
+	}
+	super(Actor).PostBeginPlay();
+	return;
 }
-
-/* SpecialHandling is called by the navigation code when the next path has been found.  
-It gives that path an opportunity to modify the result based on any special considerations
-
-Here, we check if the mover needs to be triggered
-*/
 
 function Actor SpecialHandling(Pawn Other)
 {
-	// if no lift, no special handling
-	if ( MyLift == None )
-		return self;
-
-	// check whether or not need to trigger the lift
-	if ( !MyLift.IsInState('StandOpenTimed') )
+	// End:0x0D
+	if(__NFUN_114__(MyLift, none))
 	{
-		if ( MyLift.bClosed 
-			&& (RecommendedTrigger != None) )
+		return self;
+	}
+	// End:0x4B
+	if(__NFUN_129__(MyLift.__NFUN_281__('StandOpenTimed')))
+	{
+		// End:0x48
+		if(__NFUN_130__(MyLift.bClosed, __NFUN_119__(RecommendedTrigger, none)))
+		{
 			return RecommendedTrigger;
-	}	
-	else if ( MyLift.BumpType == BT_PlayerBump && !Other.IsPlayerPawn() )
-		return None;
-
+		}		
+	}
+	else
+	{
+		// End:0x7C
+		if(__NFUN_130__(__NFUN_154__(int(MyLift.BumpType), int(0)), __NFUN_129__(Other.IsPlayerPawn())))
+		{
+			return none;
+		}
+	}
 	return self;
+	return;
 }
 
-/* 
-Check if mover is positioned to allow Pawn to get on
-*/
 function bool SuggestMovePreparation(Pawn Other)
 {
-	// if already on lift, no problem 
-	if ( Other.base == MyLift )
+	// End:0x1A
+	if(__NFUN_114__(Other.Base, MyLift))
+	{
 		return false;
-
-	// make sure LiftCenter is correctly positioned on the lift
-	SetLocation(MyLift.Location + LiftOffset);
-	SetBase(MyLift);
-
-	// if mover is moving, wait
-	if ( MyLift.bInterpolating || !ProceedWithMove(Other) )
+	}
+	__NFUN_267__(__NFUN_215__(MyLift.Location, LiftOffset));
+	__NFUN_298__(MyLift);
+	// End:0x7D
+	if(__NFUN_132__(MyLift.bInterpolating, __NFUN_129__(ProceedWithMove(Other))))
 	{
 		Other.Controller.WaitForMover(MyLift);
 		return true;
 	}
-
 	return false;
+	return;
 }
 
 function bool ProceedWithMove(Pawn Other)
 {
 	local LiftExit Start;
-	local float dist2D;
-	local vector dir;
+	local float Dist2D;
+	local Vector Dir;
 
-	// see if mover is at appropriate location/keyframe
 	Start = LiftExit(Other.Anchor);
-
-	if ( (Start != None) && (Start.KeyFrame != 255) )
+	// End:0x67
+	if(__NFUN_130__(__NFUN_119__(Start, none), __NFUN_155__(int(Start.KeyFrame), 255)))
 	{
-		if ( MyLift.KeyNum == Start.KeyFrame )
+		// End:0x64
+		if(__NFUN_154__(int(MyLift.KeyNum), int(Start.KeyFrame)))
+		{
 			return true;
+		}		
 	}
 	else
 	{
-		//check distance directly - make sure close
-		dir = Location - Other.Location;
-		dir.Z = 0;
-		dist2d = vsize(dir);
-		if ( (Location.Z - CollisionHeight < Other.Location.Z - Other.CollisionHeight + MAXSTEPHEIGHT)
-			&& (Location.Z - CollisionHeight > Other.Location.Z - Other.CollisionHeight - 1200)
-			&& ( dist2D < MaxDist2D) )
+		Dir = __NFUN_216__(Location, Other.Location);
+		Dir.Z = 0.0000000;
+		Dist2D = __NFUN_225__(Dir);
+		// End:0x136
+		if(__NFUN_130__(__NFUN_130__(__NFUN_176__(__NFUN_175__(Location.Z, CollisionHeight), __NFUN_174__(__NFUN_175__(Other.Location.Z, Other.CollisionHeight), 33.0000000)), __NFUN_177__(__NFUN_175__(Location.Z, CollisionHeight), __NFUN_175__(__NFUN_175__(Other.Location.Z, Other.CollisionHeight), float(1200)))), __NFUN_176__(Dist2D, MaxDist2D)))
 		{
 			return true;
 		}
 	}
-
-	// if mover not operating, need to start it
-	if ( MyLift.bClosed )
+	// End:0x164
+	if(MyLift.bClosed)
 	{
 		Other.SetMoveTarget(SpecialHandling(Other));
 		return true;
 	}
-
 	return false;
+	return;
 }
 
 defaultproperties
 {
-     MaxDist2D=400.000000
-     ExtraCost=400
-     bNeverUseStrafing=True
-     bForceNoStrafing=True
-     bSpecialMove=True
-     bNoAutoConnect=True
-     RemoteRole=ROLE_None
-     bStatic=False
-     Texture=Texture'Engine.S_LiftCenter'
+	MaxDist2D=400.0000000
+	ExtraCost=400
+	bNeverUseStrafing=true
+	bForceNoStrafing=true
+	bSpecialMove=true
+	bNoAutoConnect=true
+	RemoteRole=0
+	bStatic=false
+	Texture=Texture'Engine.S_LiftCenter'
 }

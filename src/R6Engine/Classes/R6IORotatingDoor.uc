@@ -1,4 +1,10 @@
 //=============================================================================
+// R6IORotatingDoor - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6IORotatingDoor : This should allow action moves on the door
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -8,111 +14,99 @@
 //  Note: if you make R6IORotatingDoor native then you will need to take care so
 //  that the names in eDoorCircumstantialAction do not conflict with other enums
 //=============================================================================
-
 class R6IORotatingDoor extends R6IActionObject
 	native
-	placeable;
-
-// R6CIRCUMSTANTIALACTION
-#exec OBJ LOAD FILE=..\Textures\R6ActionIcons.utx PACKAGE=R6ActionIcons
-#exec OBJ LOAD FILE=..\Textures\R6Planning.utx PACKAGE=R6Planning
-// R6CIRCUMSTANTIALACTION
-
-var()       R6Door      m_DoorActorA;   
-var()       R6Door      m_DoorActorB;
-
-var  array<R6AbstractBullet> m_BreachAttached;      // breach attached to the door (if any)
-
-var()       BOOL        m_bTreatDoorAsWindow;       // should be set to true for shudders and windows that behave like doors.
-var()		FLOAT		m_fWindowWidth;				// this field is only used when m_bTreatDoorAsWindow==true
-var(Debug)  BOOL		bShowLog;
-var			BOOL		m_bInProcessOfClosing;
-var			BOOL		m_bInProcessOfOpening;
-var			BOOL		m_bUseWheel;
-
-var()		BOOL		m_bForceNoFormation;		// force ROOM_None (no formation/single file) on either side of door
-
-var (R6Damage)  INT     m_iLockHP;                  // lock HP to open door with bullets or explosions.
-var             INT     m_iCurrentLockHP;           // Current Lock Hit Points
+ placeable;
 
 enum eDoorCircumstantialAction
 {
-    CA_None,
-        
-    // Closed door
-    CA_Open,
-    CA_OpenAndClear,
-    CA_OpenAndGrenade,
-    CA_OpenGrenadeAndClear,
-
-    // Open door
-    CA_Close,
-    CA_Clear,
-    CA_Grenade,
-    CA_GrenadeAndClear,
-	
-	// Grenade
-	CA_GrenadeFrag,
-	CA_GrenadeGas,
-	CA_GrenadeFlash,
-	CA_GrenadeSmoke,
-
-    // Locked door
-    CA_Unlock,
-
-    // Use only for the sound
-    CA_Lock,
-    CA_LockPickStop
+	CA_None,                        // 0
+	CA_Open,                        // 1
+	CA_OpenAndClear,                // 2
+	CA_OpenAndGrenade,              // 3
+	CA_OpenGrenadeAndClear,         // 4
+	CA_Close,                       // 5
+	CA_Clear,                       // 6
+	CA_Grenade,                     // 7
+	CA_GrenadeAndClear,             // 8
+	CA_GrenadeFrag,                 // 9
+	CA_GrenadeGas,                  // 10
+	CA_GrenadeFlash,                // 11
+	CA_GrenadeSmoke,                // 12
+	CA_Unlock,                      // 13
+	CA_Lock,                        // 14
+	CA_LockPickStop                 // 15
 };
 
-//-----------------------------------------------------------------------------
-// Audio.
-var(R6DoorSounds) sound      m_OpeningSound;		    // When start opening.
-var(R6DoorSounds) sound      m_OpeningWheelSound;	    // When start opening with the wheel.
-var(R6DoorSounds) sound      m_ClosingSound;		    // When start closing.
-var(R6DoorSounds) sound      m_ClosingWheelSound;		// When start closing with the wheel.
-var(R6DoorSounds) sound      m_LockSound;	            // Try to open when the door is lock.
-var(R6DoorSounds) sound      m_UnlockSound;	            // When the door is unlock stat the sound.
-var(R6DoorSounds) sound      m_MoveAmbientSound;	    // Optional ambient sound when moving.
-var(R6DoorSounds) sound      m_MoveAmbientSoundStop;	// Stop optional ambient sound closing door.
-var(R6DoorSounds) sound      m_LockPickSound;	        // Use lock pick when the door is lock
-var(R6DoorSounds) sound      m_LockPickSoundStop;	    // Stop unlocking the door.
-var(R6DoorSounds) sound      m_ExplosionSound;			// Explosion sound.
-
-//-----------------------------------------------------------------------------
-// Editables.
-var(R6DoorProperties) BOOL	m_bIsOpeningClockWise;	//Is the door opening Clockwise
-var(R6DoorProperties) INT   m_iMaxOpeningDeg;	    //Determine how many degrees the door can open (In degrees)
-var(R6DoorProperties) BOOL  m_bIsDoorLocked;	    //Is the door Locked
-var                   BOOL sm_bIsDoorLocked;
-var(R6DoorProperties) INT	m_iInitialOpeningDeg;	//Opening of the door at level creation (In degrees)
-var(R6DoorProperties) FLOAT m_fUnlockBaseTime;      // Base time required for opening the door, will be affected by skills
-
+var(R6Damage) int m_iLockHP;  // lock HP to open door with bullets or explosions.
+var int m_iCurrentLockHP;  // Current Lock Hit Points
+var(R6DoorProperties) int m_iMaxOpeningDeg;  // Determine how many degrees the door can open (In degrees)
+var(R6DoorProperties) int m_iInitialOpeningDeg;  // Opening of the door at level creation (In degrees)
 //-----------------------------------------------------------------------------
 // Internal
-var INT		m_iYawInit;				//Start Yaw point of the door when it's closed
-var INT		m_iYawMax;				//End Yaw point of the door when it's fully opened
-var vector	m_vNormal;				//The normal at the begining of the action
-var vector  m_vCenterOfDoor;        //Center of the door (Location is the pivot point)
-var vector	m_vDoorADir2D;          //The direction toward DoorA (direction toward DoorB is -m_vDoorADir2D
-var BOOL    m_bIsDoorClosed;        //Is the door open or not
-var INT     m_iMaxOpening;          //Determine how many degrees the door can open (In degrees)
-var INT     m_iInitialOpening;      //Opening of the door at level creation (In degrees)
-var	INT		m_iCurrentOpening;
-
-native(1511) final function bool WillOpenOnTouch( R6Pawn r6pawn );
-native(2018) final function AddBreach(R6AbstractBullet BreachAttached);
-native(2019) final function RemoveBreach(R6AbstractBullet BreachAttached);
+var int m_iYawInit;  // Start Yaw point of the door when it's closed
+var int m_iYawMax;  // End Yaw point of the door when it's fully opened
+var int m_iMaxOpening;  // Determine how many degrees the door can open (In degrees)
+var int m_iInitialOpening;  // Opening of the door at level creation (In degrees)
+var int m_iCurrentOpening;
+var() bool m_bTreatDoorAsWindow;  // should be set to true for shudders and windows that behave like doors.
+var(Debug) bool bShowLog;
+var bool m_bInProcessOfClosing;
+var bool m_bInProcessOfOpening;
+var bool m_bUseWheel;
+var() bool m_bForceNoFormation;  // force ROOM_None (no formation/single file) on either side of door
+//-----------------------------------------------------------------------------
+// Editables.
+var(R6DoorProperties) bool m_bIsOpeningClockWise;  // Is the door opening Clockwise
+var(R6DoorProperties) bool m_bIsDoorLocked;  // Is the door Locked
+var bool sm_bIsDoorLocked;
+var bool m_bIsDoorClosed;  // Is the door open or not
+var() float m_fWindowWidth;  // this field is only used when m_bTreatDoorAsWindow==true
+var(R6DoorProperties) float m_fUnlockBaseTime;  // Base time required for opening the door, will be affected by skills
+var() R6Door m_DoorActorA;
+var() R6Door m_DoorActorB;
+//-----------------------------------------------------------------------------
+// Audio.
+var(R6DoorSounds) Sound m_OpeningSound;  // When start opening.
+var(R6DoorSounds) Sound m_OpeningWheelSound;  // When start opening with the wheel.
+var(R6DoorSounds) Sound m_ClosingSound;  // When start closing.
+var(R6DoorSounds) Sound m_ClosingWheelSound;  // When start closing with the wheel.
+var(R6DoorSounds) Sound m_LockSound;  // Try to open when the door is lock.
+var(R6DoorSounds) Sound m_UnlockSound;  // When the door is unlock stat the sound.
+var(R6DoorSounds) Sound m_MoveAmbientSound;  // Optional ambient sound when moving.
+var(R6DoorSounds) Sound m_MoveAmbientSoundStop;  // Stop optional ambient sound closing door.
+var(R6DoorSounds) Sound m_LockPickSound;  // Use lock pick when the door is lock
+var(R6DoorSounds) Sound m_LockPickSoundStop;  // Stop unlocking the door.
+var(R6DoorSounds) Sound m_ExplosionSound;  // Explosion sound.
+var array<R6AbstractBullet> m_BreachAttached;  // breach attached to the door (if any)
+var Vector m_vNormal;  // The normal at the begining of the action
+var Vector m_vCenterOfDoor;  // Center of the door (Location is the pivot point)
+var Vector m_vDoorADir2D;  // The direction toward DoorA (direction toward DoorB is -m_vDoorADir2D
 
 replication
 {
-    // function client asks server to do
-    unreliable if (bNetInitial && (Role == ROLE_Authority))
-        m_iInitialOpeningDeg, m_bIsDoorLocked, m_iMaxOpeningDeg, m_bIsOpeningClockWise, 
-        m_DoorActorA,m_DoorActorB;
-    unreliable if (Role == ROLE_Authority)
-        m_bIsDoorClosed, m_bInProcessOfClosing, m_bInProcessOfOpening, m_iYawMax, m_iYawInit, m_iMaxOpening, m_iInitialOpening;
+	// Pos:0x000
+	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		m_DoorActorA, m_DoorActorB, 
+		m_bIsDoorLocked, m_bIsOpeningClockWise, 
+		m_iInitialOpeningDeg, m_iMaxOpeningDeg;
+
+	// Pos:0x018
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_bInProcessOfClosing, m_bInProcessOfOpening, 
+		m_bIsDoorClosed, m_iInitialOpening, 
+		m_iMaxOpening, m_iYawInit, 
+		m_iYawMax;
 }
+
+// Export UR6IORotatingDoor::execWillOpenOnTouch(FFrame&, void* const)
+ native(1511) final function bool WillOpenOnTouch(R6Pawn R6Pawn);
+
+// Export UR6IORotatingDoor::execAddBreach(FFrame&, void* const)
+ native(2018) final function AddBreach(R6AbstractBullet BreachAttached);
+
+// Export UR6IORotatingDoor::execRemoveBreach(FFrame&, void* const)
+ native(2019) final function RemoveBreach(R6AbstractBullet BreachAttached);
 
 //------------------------------------------------------------------
 // SaveOriginalData
@@ -120,11 +114,15 @@ replication
 //------------------------------------------------------------------
 simulated function SaveOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( true );
-    Super.SaveOriginalData();
-
-    sm_bIsDoorLocked    = m_bIsDoorLocked;
-    sm_rotation         = rotation;
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(true);
+	}
+	super(R6InteractiveObject).SaveOriginalData();
+	sm_bIsDoorLocked = m_bIsDoorLocked;
+	sm_Rotation = Rotation;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -133,222 +131,171 @@ simulated function SaveOriginalData()
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-	local rotator rNewRotation;
-    local rotator rTempRotation;
-    local bool bCA;
-    local bool bBA;
-    local bool bBP;
+	local Rotator rNewRotation, rTempRotation;
+	local bool bCA, bBA, bBP;
 
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
-
-    m_bBulletGoThrough   = false;
-    m_bHidePortal        = true;
-    m_bUseWheel          = false;
-    m_bIsDoorLocked      = sm_bIsDoorLocked;
-    
-    m_fPlayerCAStartTime = 0;
-    SetDoorProcessStates(false, false);
-    m_iCurrentLockHP     = m_iLockHP;
-
-    //Initialization of the door parameters	
-	m_iInitialOpening = m_iInitialOpeningDeg * 65536 / 360;
-	m_iMaxOpening = m_iMaxOpeningDeg * 65536 / 360;
-
-	m_iMaxOpening = Clamp(m_iMaxOpening,0,65535);
-	m_iInitialOpening = Clamp(m_iInitialOpening,0,m_iMaxOpening);
-
-    // Set initial rotation
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super(R6InteractiveObject).ResetOriginalData();
+	m_bBulletGoThrough = false;
+	m_bHidePortal = true;
+	m_bUseWheel = false;
+	m_bIsDoorLocked = sm_bIsDoorLocked;
+	m_fPlayerCAStartTime = 0.0000000;
+	SetDoorProcessStates(false, false);
+	m_iCurrentLockHP = m_iLockHP;
+	m_iInitialOpening = __NFUN_145__(__NFUN_144__(m_iInitialOpeningDeg, 65536), 360);
+	m_iMaxOpening = __NFUN_145__(__NFUN_144__(m_iMaxOpeningDeg, 65536), 360);
+	m_iMaxOpening = __NFUN_251__(m_iMaxOpening, 0, 65535);
+	m_iInitialOpening = __NFUN_251__(m_iInitialOpening, 0, m_iMaxOpening);
 	rTempRotation = sm_Rotation;
-	rTempRotation.Yaw = sm_Rotation.Yaw & 65535;
-    bCA = bCollideActors;
-    bBA = bBlockActors;
-    bBP = bBlockPlayers;
-    SetCollision( false, false, false );
-	SetRotation(rTempRotation);
-    SetCollision( bCA, bBA, bBP );
-
-    DesiredRotation      = rTempRotation;
-    bRotateToDesired     = false;
-
-	// Get the initial position of door
-	#ifdefDEBUG if(bShowLog) log(self$" ResetOriginalData: Rotation.Yaw="$Rotation.Yaw); #endif
-	
-	m_iYawInit = Rotation.Yaw; 
-
-    // Center of door
+	rTempRotation.Yaw = __NFUN_156__(sm_Rotation.Yaw, 65535);
+	bCA = bCollideActors;
+	bBA = bBlockActors;
+	bBP = bBlockPlayers;
+	__NFUN_262__(false, false, false);
+	__NFUN_299__(rTempRotation);
+	__NFUN_262__(bCA, bBA, bBP);
+	DesiredRotation = rTempRotation;
+	bRotateToDesired = false;
+	m_iYawInit = Rotation.Yaw;
 	rNewRotation.Yaw = m_iYawInit;
-    m_vCenterOfDoor = Location - 64*vector(rNewRotation);
-
-	//Determine the Normal of the door
-	m_vNormal = vector(rNewRotation) cross vect(0,0,1);
-
-    // DoorA direction
-    if(m_DoorActorA != none)
-		m_vDoorADir2D = m_DoorActorA.Location - m_vCenterOfDoor;
-    m_vDoorADir2D.Z = 0;
-    m_vDoorADir2D = Normal(m_vDoorADir2D);
-
+	m_vCenterOfDoor = __NFUN_216__(Location, __NFUN_213__(float(64), Vector(rNewRotation)));
+	m_vNormal = __NFUN_220__(Vector(rNewRotation), vect(0.0000000, 0.0000000, 1.0000000));
+	// End:0x1B1
+	if(__NFUN_119__(m_DoorActorA, none))
+	{
+		m_vDoorADir2D = __NFUN_216__(m_DoorActorA.Location, m_vCenterOfDoor);
+	}
+	m_vDoorADir2D.Z = 0.0000000;
+	m_vDoorADir2D = __NFUN_226__(m_vDoorADir2D);
 	rNewRotation = Rotation;
-
-	//Determine rotation bounderies and Initial opening of the door
+	// End:0x21B
 	if(m_bIsOpeningClockWise)
 	{
-		m_iYawMax = m_iYawInit + m_iMaxOpening;		
-		rNewRotation.Yaw = (Rotation.Yaw ) + Clamp(m_iInitialOpening,0,m_iMaxOpening);	
-	}		
+		m_iYawMax = __NFUN_146__(m_iYawInit, m_iMaxOpening);
+		rNewRotation.Yaw = __NFUN_146__(Rotation.Yaw, __NFUN_251__(m_iInitialOpening, 0, m_iMaxOpening));		
+	}
 	else
 	{
-		m_iYawMax = m_iYawInit - m_iMaxOpening;		
-		rNewRotation.Yaw = (Rotation.Yaw ) - Clamp(m_iInitialOpening,0,m_iMaxOpening);
+		m_iYawMax = __NFUN_147__(m_iYawInit, m_iMaxOpening);
+		rNewRotation.Yaw = __NFUN_147__(Rotation.Yaw, __NFUN_251__(m_iInitialOpening, 0, m_iMaxOpening));
 	}
-	m_iYawMax = m_iYawMax & 65535;
-
-	#ifdefDEBUG if(bShowLog) log(self$" m_iYawInit="$m_iYawInit$" m_iYawMax="$m_iYawMax$" m_iMaxOpening="$m_iMaxOpening);    #endif
-	#ifdefDEBUG if(bShowLog) log(self$" rNewRotation="$rNewRotation$" m_iInitialOpening="$m_iInitialOpening);  #endif
-    desiredRotation = rNewRotation;
-
-    // door is partially opened
-	if(rNewRotation.Yaw != m_iYawInit)
-	{        
-        m_bUseWheel = true;
+	m_iYawMax = __NFUN_156__(m_iYawMax, 65535);
+	DesiredRotation = rNewRotation;
+	// End:0x2CE
+	if(__NFUN_155__(rNewRotation.Yaw, m_iYawInit))
+	{
+		m_bUseWheel = true;
 		SetDoorState(false);
-        m_bHidePortal = m_bIsDoorClosed;
-		// rbrek 4 feb 2003
-		// set the door's rotation to its desired initial opening (rather than wait for server to replicate the rotation)
-		// on slow connections (MODEM) a door that is initially set to open appears closed on the client, whereas it is open on the server
-		if(Level.NetMode == NM_Client)
-			SetRotation(rNewRotation);
-        ClientSetDoor(rNewRotation, true);
+		m_bHidePortal = m_bIsDoorClosed;
+		// End:0x2BF
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		{
+			__NFUN_299__(rNewRotation);
+		}
+		ClientSetDoor(rNewRotation, true);		
 	}
-    else
-        SetDoorState(true);
-    
-    m_BreachAttached.Remove( 0, m_BreachAttached.Length );
+	else
+	{
+		SetDoorState(true);
+	}
+	m_BreachAttached.Remove(0, m_BreachAttached.Length);
+	return;
 }
-
-#ifdefDEBUG
-//------------------------------------------------------------------
-// dbgLogActor
-//	
-//------------------------------------------------------------------
-simulated function dbgLogActor( bool bVerbose )
-{
-    Super.dbgLogActor( bVerbose );
-
-    log("Name= " $name );
-    log("  m_bHidePortal    = " $m_bHidePortal );
-    log("  m_bUseWheel      = " $m_bUseWheel );
-    log("  m_bIsDoorClosed  = " $m_bIsDoorClosed );
-    log("  m_bIsDoorLocked  = " $m_bIsDoorLocked );
-    log("  sm_rotation      = " $sm_rotation );
-    log("  desiredRotation  = " $desiredRotation );
-    log("  bRotateToDesired = " $bRotateToDesired );
-    log("  m_fPlayerCAStartTime= " $m_fPlayerCAStartTime );
-	log("  m_bInProcessOfClosing= " $m_bInProcessOfClosing );
-	log("  m_bInProcessOfOpening= " $m_bInProcessOfOpening );
-    log("  m_iCurrentLockHP = " $m_iCurrentLockHP );
-    log("  m_iInitialOpeningDeg= " $m_iInitialOpeningDeg );
-	log("  m_iInitialOpening= " $m_iInitialOpening );
-    log("  m_iMaxOpeningDeg = " $m_iMaxOpeningDeg  );
-	log("  m_iMaxOpening    = " $m_iMaxOpening  );
-    log("  rotation.yaw     = " $rotation );
-	log("  m_iYawInit       = " $m_iYawInit  );
-	log("  m_vNormal        = " $m_vNormal  );
-	log("  m_bIsOpeningClockWise= " $m_bIsOpeningClockWise );
-	log("  m_iYawMax        = " $m_iYawMax  );
-    log("  m_bUseWheel      = " $m_bUseWheel );
-	log("  m_bIsDoorClosed  = " $m_bIsDoorClosed );
-    log("  m_bHidePortal    = " $m_bHidePortal );
-}
-#endif
 
 function PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    //This flag must be false on doors.  To shoot through door, it has to be done in the marerial properties.
-    m_bBulletGoThrough = false;
+	super(R6InteractiveObject).PostBeginPlay();
+	m_bBulletGoThrough = false;
+	return;
 }
 
 //This function should always be defined in subclass
-function bool startAction(FLOAT fDeltaMouse, Actor actionInstigator)
-{	
-	return true;		
+function bool startAction(float fDeltaMouse, Actor actionInstigator)
+{
+	return true;
+	return;
 }
 
 function SetDoorProcessStates(bool bOpening, bool bClosing)
 {
 	m_bInProcessOfOpening = bOpening;
 	m_bInProcessOfClosing = bClosing;
-
-    if(bOpening || bClosing)
-        Enable('Tick');
+	// End:0x35
+	if(__NFUN_132__(bOpening, bClosing))
+	{
+		__NFUN_117__('Tick');
+	}
+	return;
 }
 
-function bool updateAction(FLOAT fDeltaMouse, Actor actionInstigator)
+function bool updateAction(float fDeltaMouse, Actor actionInstigator)
 {
-	local rotator rNewRotation;
-	local rotator rRotation;
-    local FLOAT fDoorMouvement;
-	local INT iMaxDoorMove;	
-	local FLOAT fTempSide;
-	local INT iNewOpening;
+	local Rotator rNewRotation, rRotation;
+	local float fDoorMouvement;
+	local int iMaxDoorMove;
+	local float fTempSide;
+	local int iNewOpening;
 
-    SetDoorProcessStates(false, false);
-
-    // if a fDeltaMouse is zero, do nothing...
-    if(fDeltaMouse == 0.f)
-        return false;
-
-    RotationRate.Yaw = default.RotationRate.Yaw;
-
-    if(!m_bIsOpeningClockWise)
-        fDeltaMouse *= -1f;
-
-    fDoorMouvement = fDeltaMouse;
-
-	//Determine how much to open the door based on
-	//the mouse movement scaled
-	fDoorMouvement = fDoorMouvement * m_iMaxOpening / m_fMaxMouseMove;
-	
-	//Scale the door movement depending of it's mass
-	if(Default.Mass != 0 && Mass != 0)
+	SetDoorProcessStates(false, false);
+	// End:0x19
+	if(__NFUN_180__(fDeltaMouse, 0.0000000))
 	{
-		fDoorMouvement = fDoorMouvement * Default.Mass / Mass;
+		return false;
 	}
-	
-	rNewRotation = rotation;
-	rRotation = rotation;
-
+	RotationRate.Yaw = default.RotationRate.Yaw;
+	// End:0x47
+	if(__NFUN_129__(m_bIsOpeningClockWise))
+	{
+		__NFUN_182__(fDeltaMouse, float(-1));
+	}
+	fDoorMouvement = fDeltaMouse;
+	fDoorMouvement = __NFUN_172__(__NFUN_171__(fDoorMouvement, float(m_iMaxOpening)), m_fMaxMouseMove);
+	// End:0xA2
+	if(__NFUN_130__(__NFUN_181__(default.Mass, float(0)), __NFUN_181__(Mass, float(0))))
+	{
+		fDoorMouvement = __NFUN_172__(__NFUN_171__(fDoorMouvement, default.Mass), Mass);
+	}
+	rNewRotation = Rotation;
+	rRotation = Rotation;
+	// End:0x104
 	if(m_bIsOpeningClockWise)
 	{
-		iNewOpening = m_iCurrentOpening + fDoorMouvement;
-		iNewOpening = Clamp(iNewOpening,0,m_iMaxOpening);	
-		rNewRotation.Yaw = m_iYawInit + iNewOpening;	
+		iNewOpening = int(__NFUN_174__(float(m_iCurrentOpening), fDoorMouvement));
+		iNewOpening = __NFUN_251__(iNewOpening, 0, m_iMaxOpening);
+		rNewRotation.Yaw = __NFUN_146__(m_iYawInit, iNewOpening);		
 	}
 	else
 	{
-		iNewOpening = m_iCurrentOpening - fDoorMouvement;
-		iNewOpening = Clamp(iNewOpening,0,m_iMaxOpening);	
-		rNewRotation.Yaw = m_iYawInit - iNewOpening;
+		iNewOpening = int(__NFUN_175__(float(m_iCurrentOpening), fDoorMouvement));
+		iNewOpening = __NFUN_251__(iNewOpening, 0, m_iMaxOpening);
+		rNewRotation.Yaw = __NFUN_147__(m_iYawInit, iNewOpening);
 	}
-
-    if ((!m_bUseWheel && (rRotation.yaw == m_iYawInit)) && (rNewRotation.Yaw != m_iYawInit))
-    {
-        if (m_OpeningWheelSound != none)
-            PlaySound(m_OpeningWheelSound, SLOT_SFX);
-        AmbientSound = m_MoveAmbientSound;
-        AmbientSoundStop = m_MoveAmbientSoundStop;
-        m_bUseWheel = true;
-    }
-
-    ClientSetDoor(rNewRotation);
-	return true;		
+	// End:0x1AE
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bUseWheel), __NFUN_154__(rRotation.Yaw, m_iYawInit)), __NFUN_155__(rNewRotation.Yaw, m_iYawInit)))
+	{
+		// End:0x190
+		if(__NFUN_119__(m_OpeningWheelSound, none))
+		{
+			__NFUN_264__(m_OpeningWheelSound, 3);
+		}
+		AmbientSound = m_MoveAmbientSound;
+		AmbientSoundStop = m_MoveAmbientSoundStop;
+		m_bUseWheel = true;
+	}
+	ClientSetDoor(rNewRotation);
+	return true;
+	return;
 }
 
 simulated function R6CircumstantialActionCancel()
 {
-	performDoorAction(eDoorCircumstantialAction.CA_LockPickStop);
+	performDoorAction(int(15));
+	return;
 }
 
 //==============================================================================//
@@ -357,704 +304,856 @@ simulated function R6CircumstantialActionCancel()
 // either stQuery.iTeamActionID or stQuery.iPlayerActionID should be passed...  //
 // TODO : replace SetRotation with use of bRotateToDesired                      //
 //==============================================================================//
-function performDoorAction(INT iActionID)
+function performDoorAction(int iActionID)
 {
-    if(iActionID == eDoorCircumstantialAction.CA_Close)
-    {
-        closeDoor( none );
-    }
-    else if(iActionID == eDoorCircumstantialAction.CA_Open)
-    {
-        openDoor( none );
-    }
-    else if(iActionID == eDoorCircumstantialAction.CA_Unlock)
-    {
-        UnLockDoor();
-        PlaySound(m_UnlockSound, SLOT_SFX);
-    }
-    else if(iActionID == eDoorCircumstantialAction.CA_Lock) 
-    {
-        PlaySound(m_LockSound, SLOT_SFX);
-    }
-    else if(iActionID == eDoorCircumstantialAction.CA_LockPickStop) 
-    {
-        PlaySound(m_LockPickSoundStop, SLOT_SFX);
-    }
-}
-
-function ClientSetDoor(rotator rNewRotation, optional bool bForce)
-{
-    // the following condition would be the case for certain MP games (dedicated servers)
-    if(bForce || desiredRotation != rNewRotation)
-    {
-        Enable('Tick');
-        bRotateToDesired = true;
-		desiredRotation = rNewRotation;
-    }
-}
-
-
-simulated event bool EncroachingOn( actor Other )
-{
-	local R6Pawn P;
-    local R6AIController ai;
-
-    #ifdefDEBUG if(bShowLog) log(Other.name $ " encroach door " $ name ); #endif
-
-	P = R6Pawn(other);
-    
-    if(P != none && P.IsAlive())
+	// End:0x18
+	if(__NFUN_154__(iActionID, int(5)))
 	{
-		if(!P.m_bIsPlayer)
-        {
-            ai = R6AIController(P.Controller);
-			ai.m_BumpedBy = self;
-			ai.GotoBumpBackUpState(ai.GetStateName());
-        }
-		return true;
-	}	
-	return false;
-}
-
-function openDoor( Pawn opener, OPTIONAL INT iRotationRate )
-{
-    local rotator rNewRotation;
-
-    if ( iRotationRate == 0 )
-    {
-        iRotationRate = default.RotationRate.Yaw;    
-    }
-
-    RotationRate.Yaw = iRotationRate;
-
-    if ( opener != none )
-    {
-        Instigator = opener;
-    }
-
-    if ( Instigator != none )
-        Instigator.R6MakeNoise( SNDTYPE_Door );
-    
-    #ifdefDEBUG if(bShowLog) log("opening door"); #endif
-
-    rNewRotation = rotation;
-
-    if( m_iYawInit < m_iYawMax )
-    {
-        if(rotation.yaw > m_iYawMax)    
-            rNewRotation.yaw -= 65536; 
-    }
-    else
-    {
-        if(rotation.yaw > m_iYawInit)
-            rNewRotation.yaw -= 65536;
-    }
-
-    if ((!m_bUseWheel) && (rNewRotation.Yaw == m_iYawInit))
-    {
-        if (m_OpeningSound != None)
-        {
-            PlaySound(m_OpeningSound, SLOT_SFX);
-        } 
-        AmbientSound = m_MoveAmbientSound;
-        AmbientSoundStop = m_MoveAmbientSoundStop;
-        m_bUseWheel = true;
-    }
- 
-    rNewRotation.yaw = m_iYawMax;
-    bRotateToDesired = true;
-    desiredRotation = rNewRotation;
-    SetDoorProcessStates(true, false);
-    ClientSetDoor(rNewRotation);
-}
-
-simulated function closeDoor( r6pawn pawn , OPTIONAL INT iRotationRate)
-{
-    local rotator rNewRotation;
-    if ( iRotationRate == 0 )
-    {
-        iRotationRate = default.RotationRate.Yaw;    
-    }
-
-    RotationRate.Yaw = iRotationRate;
-
-    if ( pawn != none  )
-        Instigator = pawn;
-
-    if ( Instigator != none )
-        Instigator.R6MakeNoise( SNDTYPE_Door );
-        
-    #ifdefDEBUG if(bShowLog) log("closing door"); #endif
-    rNewRotation = rotation;
-    rNewRotation.yaw = m_iYawInit;
-    bRotateToDesired = true;
-    desiredRotation = rNewRotation;
-    SetDoorProcessStates(false, true);
-    ClientSetDoor(rNewRotation);
-}
-
-function bool DoorOpenTowardsActor(actor aActor)
-{   
-    // what side is this pawn on...?
-    if(vector(aActor.Rotation) dot m_vNormal > 0)
-    {
-        // clockwise opens away....
-        if(m_bIsOpeningClockWise)
-            return false;
-        else 
-            return true;
-    }
-    else
-    {
-        // counterclockwise opens away...
-        if(m_bIsOpeningClockWise)
-            return true;
-        else
-            return false;
-    }
-}
-
-function INT R6TakeDamage(INT iKillValue, INT iStunValue, Pawn instigatedBy, vector vHitLocation, 
-                           vector vMomentum, INT iPenetrationFactor, optional int iBulletGroup)
-{
-    local FLOAT fPercentage;
-    local FLOAT fBulletDamMultiplier;
-    local INT i;
-
-    if((Level.NetMode == NM_Standalone) || (Role == ROLE_Authority))
-    {
-        if(iBulletGroup == -1)// a door was hit by a bullet
-        {
-            if( m_iHitPoints < 2500 )
-            {
-                fBulletDamMultiplier = 0.05 * iPenetrationFactor;
-            }
-            else
-            {
-                fBulletDamMultiplier = 0.005 * iPenetrationFactor;
-            }
-            //log("Door Hit By bullet HP : "$m_iHitPoints$" Mult "$fBulletDamMultiplier);
-            
-            if((m_iCurrentLockHP != 0) && HitLock(vHitLocation))
-            {
-                m_iCurrentLockHP = max(m_iCurrentLockHP - max(iKillValue * fBulletDamMultiplier * 10, 400), 0);
-
-                //log("Lock "$m_iCurrentLockHP);
-                if((m_iYawInit != Rotation.Yaw) || (m_iCurrentLockHP == 0))
-                {
-                    UnLockDoor();
-                    OpenDoorWhenHit(vHitLocation, vMomentum, 2048 * iPenetrationFactor, false);
-                }
-            }
-            else //door without lock or lock is destroyed
-            {
-                m_iCurrentHitPoints = max(m_iCurrentHitPoints - (iKillValue * fBulletDamMultiplier), 0);
-                // open the door.
-                //log("Door "$m_iCurrentHitPoints$" Init: "$m_iYawInit$" Yaw: "$Rotation.Yaw$" Lock: "$m_iCurrentLockHP);
-                if((m_iYawInit != Rotation.Yaw) || (m_iCurrentLockHP == 0))
-                { 
-                    OpenDoorWhenHit(vHitLocation,vMomentum, 2048 * iPenetrationFactor, false);
-                }
-            }
-        }
-        else
-        {
-            #ifdefDEBUG if (bShowLog) log("m_iCurrentHitPoints = "$m_iCurrentHitPoints$" Damage: " $ iKillValue); #endif
-            m_iCurrentHitPoints = max(m_iCurrentHitPoints - iKillValue, 0);
-            m_iCurrentLockHP = max(m_iCurrentLockHP - iKillValue, 0);
-
-            //If door is not destroyed and lock is then open the door
-            //if door had no hitpoints(undestructible) open it
-            if(m_iCurrentLockHP == 0)
-            {
-                UnLockDoor();
-                //log("Explosion "$vHitLocation$" Momentum "$vMomentum);
-                OpenDoorWhenHit(vHitLocation, vMomentum, 0, true);
-            }
-        }
-       
-        // Compute the percentage
-        fPercentage = m_iCurrentHitPoints * 100 / m_iHitPoints;  
-        
-        #ifdefDEBUG if (bShowLog) log("New Hit Point = " $ m_iCurrentHitPoints $" Percentage: " $ fPercentage $" Lock HP : "$m_iCurrentLockHP$" : "$iKillValue$" : "$fBulletDamMultiplier*iKillValue); #endif
-        SetNewDamageState(fPercentage);
-        
-        if( m_bBroken )
-        {
-			// Play sound explosion
-            PlaySound(m_ExplosionSound, SLOT_SFX);
-
-			// Notify the game that the interactive object was destroyed
-            R6AbstractGameInfo(Level.Game).IObjectDestroyed(instigatedBy, Self);
-
-            // Make noise for AI
-            Instigator = instigatedBy;
-            R6MakeNoise2( m_fAIBreakNoiseRadius, NOISE_Threat, PAWN_All );
-
-            while(m_BreachAttached.Length != 0)
-            {
-                if(m_BreachAttached[0] == none)
-                    m_BreachAttached.Remove( 0, 1 );
-                else
-                    m_BreachAttached[0].DoorExploded();
-            }
-        }
-    }
-    
-    return m_iCurrentHitPoints;
-}
-
-function BOOL HitLock(vector vHitVector)
-{
-    local vector  vTemp2;
-    local vector  vTemp3;
-
-    //Check only if the height is ok
-    vTemp2 = vHitVector;
-    vTemp3 = Location;
-
-    // lock is located 8 cm under the door center.
-    if((vTemp2.Z - vTemp3.Z > -8 ) || (vTemp2.Z - vTemp3.Z < -24 ))
-        return false;
-
-    vTemp2.Z = 0;
-    vTemp3.Z = 0;
-
-    //Not on the side of the door, it's not opening. 
-    if(VSize(vTemp2 - vTemp3) < 112)
-        return false;
-    
-    return true;
-}
-
-function OpenDoorWhenHit(vector vHitLocation, vector vBulletDirection, INT YawVariation, BOOL bExplosion)
-{
-    local rotator rBulletAsRotator;
-    local vector  vTemp2;
-    local vector  vTemp3;
-    local INT     iYawDifference;
-    local BOOL    bShootTurnCCW;
-
-    //First, check if the door can be open if hit from this point.
-    vTemp2 = vHitLocation;
-    vTemp2.Z = 0;
-    vTemp3 = Location;
-    vTemp3.Z = 0;
-
-    //Not on the side of the door, it's not opening.
-    if((VSize(vTemp2 - vTemp3) < 96) && !bExplosion)
-        return;
-
-    rBulletAsRotator = Rotator(vBulletDirection);
-    if(rBulletAsRotator.Yaw < 0)
-        rBulletAsRotator.Yaw += 65536;
-
-    iYawDifference = rBulletAsRotator.Yaw - Rotation.Yaw;
-    if(iYawDifference < 0)
-        iYawDifference += 65536;
-
-    //Bullet makes the door turn Counter Clockwise
-    if(iYawDifference < 32768)
-    {
-        YawVariation = -YawVariation;
-        bShootTurnCCW=true;
-    }
-
-    desiredRotation.yaw += YawVariation;
-    rotationRate.Yaw = 65000;
-
-    if(bExplosion == false)
-    {
-        #ifdefDEBUG if(bShowLog) log("CW : "$m_bIsOpeningClockWise$" Shoot="$bShootTurnCCW$" Door.Yaw="$Rotation.Yaw$" YInit="$m_iYawInit$" YMax="$m_iYawMax$" YVar="$YawVariation$" DesY="$desiredRotation.yaw); #endif
-        if(m_bIsOpeningClockWise)
-        {
-            if(m_bInProcessOfClosing == true)
-            {
-                if(bShootTurnCCW == false)//open the door
-                {
-                    SetDoorProcessStates(m_bInProcessOfOpening, false);
-                    desiredRotation.yaw = Rotation.Yaw;
-                }
-            }
-            else if(m_bInProcessOfOpening == true)
-            {
-                if(bShootTurnCCW == true)//close the door
-                {
-                    //stop the door from closing
-                    SetDoorProcessStates(false, false);
-                    desiredRotation.yaw = Rotation.Yaw;
-                }
-            }
-
-
-            //If we're not shooting a closed or open door 
-            if(!(((bShootTurnCCW == true) && (m_iYawInit == Rotation.Yaw)) || 
-                 ((bShootTurnCCW == false) && (m_iYawMax == Rotation.Yaw))))
-            {
-                if(m_iYawInit > m_iYawMax)
-                {
-                    if((desiredRotation.yaw > m_iYawMax) && (desiredRotation.yaw < m_iYawInit))
-                    {
-                        //door open CW, and moving CW
-                        if(YawVariation > 0)
-                            desiredRotation.yaw = m_iYawMax;
-                        else
-                            desiredRotation.yaw = m_iYawInit;
-                    }
-                }
-                else
-                {
-                    if(desiredRotation.yaw > m_iYawMax)
-                    {
-                        desiredRotation.yaw = m_iYawMax;
-                    }
-                    else if (desiredRotation.yaw < m_iYawInit)
-                    {
-                        desiredRotation.yaw = m_iYawInit;
-                    }
-                }
-            }
-            else
-            {
-                //Do not change the desired rotation
-                if(bShootTurnCCW == true)
-                    desiredRotation.yaw = m_iYawInit;
-                else
-                    desiredRotation.yaw = m_iYawMax;
-            }
-        }
-        else
-        {
-            if(m_bInProcessOfClosing == true)
-            {
-                if(bShootTurnCCW == true)//open the door
-                {
-                    SetDoorProcessStates(m_bInProcessOfOpening, false);
-                    desiredRotation.yaw = Rotation.Yaw;
-                }
-            }
-            else if(m_bInProcessOfOpening == true)
-            {
-                if(bShootTurnCCW == false)//close the door
-                {
-                    //stop the door from closing
-                    SetDoorProcessStates(false, false);
-                    desiredRotation.yaw = Rotation.Yaw;
-                }
-            }
-
-            if(!(((bShootTurnCCW == false) && (m_iYawInit == Rotation.Yaw)) || 
-                 ((bShootTurnCCW == true) && (m_iYawMax == Rotation.Yaw))))
-            {
-                if(m_iYawInit < m_iYawMax)
-                {
-                    //Ajust the value between 0 and 65536
-                    if(desiredRotation.yaw > 65536)
-                        desiredRotation.yaw -= 65536;
-
-                    if((desiredRotation.yaw < m_iYawMax) && (desiredRotation.yaw > m_iYawInit))
-                    {
-                        //door open CW, and moving CW
-                        if(YawVariation < 0)
-                            desiredRotation.yaw = m_iYawMax;
-                        else
-                            desiredRotation.yaw = m_iYawInit;
-                    }
-                }
-                else
-                {
-                    if(desiredRotation.yaw < m_iYawMax) 
-                    {
-                        desiredRotation.yaw = m_iYawMax;
-                    }
-                    else if (desiredRotation.yaw > m_iYawInit)
-                    {
-                        desiredRotation.yaw = m_iYawInit;
-                    }
-                }
-            }
-            else
-            {
-                //Do not change the desired rotation
-                if(bShootTurnCCW == false)
-                    desiredRotation.yaw = m_iYawInit;
-                else
-                    desiredRotation.yaw = m_iYawMax;
-            }
-        }
-    }
-    else
-    {
-        //Explosion cancel all opening or closing.
-        SetDoorProcessStates(false, false);
-        if(Rotation.Yaw == m_iYawInit)
-        {
-            if((m_bIsOpeningClockWise && (iYawDifference > 32768)) ||
-               (!m_bIsOpeningClockWise && (iYawDifference < 32768)))
-            {
-                openDoor( none, 65000 );
-            }
-            else
-            {
-                if(m_bIsOpeningClockWise)
-                {
-                    if(m_iYawInit > m_iYawMax)
-                       desiredRotation.yaw = ((m_iYawMax + m_iYawInit) / 2) + 32768;
-                    else
-                       desiredRotation.yaw = (m_iYawMax + m_iYawInit) / 2;
-                }
-                else
-                {
-                    if(m_iYawInit < m_iYawMax)
-                        desiredRotation.yaw = ((m_iYawMax + m_iYawInit) / 2) + 32768;
-                    else
-                        desiredRotation.yaw = (m_iYawMax + m_iYawInit) / 2;
-                }
-            }
-        }
-        else if(Rotation.Yaw == m_iYawMax)
-        {
-            if((m_bIsOpeningClockWise && (iYawDifference < 32768)) ||
-               (!m_bIsOpeningClockWise && (iYawDifference > 32768)))
-            {
-                closeDoor( none, 65000 );
-            }
-            else
-            {
-                if(!m_bIsOpeningClockWise)
-                {
-                    if(m_iYawInit < m_iYawMax)
-                       desiredRotation.yaw = ((m_iYawMax + m_iYawInit) / 2) + 32768;
-                    else
-                       desiredRotation.yaw = (m_iYawMax + m_iYawInit) / 2;
-                }
-                else
-                {
-                    if(m_iYawInit > m_iYawMax)
-                        desiredRotation.yaw = ((m_iYawMax + m_iYawInit) / 2) + 32768;
-                    else
-                        desiredRotation.yaw = (m_iYawMax + m_iYawInit) / 2;
-                }
-            }
-        }
-        else
-        {
-            if((m_bIsOpeningClockWise && (iYawDifference < 32768)) ||
-               (!m_bIsOpeningClockWise && (iYawDifference > 32768)))
-            {
-                closeDoor( none , 65000);
-            }
-            else
-            {
-                openDoor( none , 65000);
-            }
-        }
-    }
-
-    bRotateToDesired=true;
-    Enable('Tick');
-
-    if(desiredRotation.yaw > 65536) 
-        desiredRotation.yaw -= 65536;
-    else if(desiredRotation.yaw < 0) 
-        desiredRotation.yaw += 65536;
-
-    if ((Rotation.yaw == m_iYawInit) && (desiredRotation.yaw != m_iYawInit))
-    {
-        if (m_OpeningWheelSound != none)
-            PlaySound(m_OpeningWheelSound, SLOT_SFX);
-        AmbientSound = m_MoveAmbientSound;
-        AmbientSoundStop = m_MoveAmbientSoundStop;
-        m_bUseWheel = true;
-    }
-
-}
-
-simulated event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
-{
-    local BOOL		bDisplayOpenIcon;
-	local vector	vDistance;
-	local BOOL		bOpensTowardsPawn;
-
-    Query.iHasAction = 1;
-
-	// recalculate distance from player to door (want to use the center of the door, not the hinge, and not the location we are looking at)
-	if(m_bIsDoorClosed) // open < 90 degrees
-	{
-		vDistance = m_vVisibleCenter - playerController.pawn.location;
-		vDistance.z = 0.f;
-		fDistance = VSize(vDistance);
+		CloseDoor(none);		
 	}
-	
-    // In range ?
-    if( fDistance < m_fCircumstantialActionRange )           // ? Do they all have the same action range ?
-    {
-        Query.iInRange = 1;
-    }
-    else
-    {
-        Query.iInRange = 0;
-    }
-
-    // rbrek 28 feb 2002
-	// this was added so that while a door is moving, the player has the icon to reverse the action
-	// so if a player is caught behind a door that is blocked on them, they can push the door away.
-	if(m_bInProcessOfClosing)
-		bDisplayOpenIcon = true;
-	else if(m_bInProcessOfOpening)
-		bDisplayOpenIcon = false;
-	else if(m_bIsDoorClosed)
-		bDisplayOpenIcon = true;
 	else
-		bDisplayOpenIcon = false;
-    
-    // Set the icon and actions     
-    if(!bDisplayOpenIcon)
 	{
-		if(m_bTreatDoorAsWindow)
-			Query.textureIcon = Texture'R6ActionIcons.CloseWindow';                
-		else
-			Query.textureIcon = Texture'R6ActionIcons.CloseDoor';                
-        Query.iPlayerActionID      = eDoorCircumstantialAction.CA_Close;
-    }
-    else
-    {
-        Query.bCanBeInterrupted = m_bIsDoorLocked;
-		if(R6Rainbow(playerController.pawn).m_bHasLockPickKit)
-			Query.fPlayerActionTimeRequired = m_fUnlockBaseTime / 2.0;
-        else
-			Query.fPlayerActionTimeRequired = m_fUnlockBaseTime;
-
-		if( m_bIsDoorLocked )
+		// End:0x30
+		if(__NFUN_154__(iActionID, int(1)))
 		{
-			Query.textureIcon = Texture'R6ActionIcons.UnlockDoor';	
-			Query.iPlayerActionID      = eDoorCircumstantialAction.CA_Unlock;			
+			OpenDoor(none);			
 		}
-        else
-        {
-			// select the appropriate icon
-			bOpensTowardsPawn = DoorOpenTowardsActor(playerController.pawn);
-			if(bOpensTowardsPawn)
+		else
+		{
+			// End:0x51
+			if(__NFUN_154__(iActionID, int(13)))
 			{
-				if(m_bIsOpeningClockWise)
-				{
-					if(m_bTreatDoorAsWindow)
-						Query.textureIcon = Texture'R6ActionIcons.OpenWin_T_CW';
-					else
-						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_T_CW';
-				}					
-				else
-				{
-					if(m_bTreatDoorAsWindow)
-						Query.textureIcon = Texture'R6ActionIcons.OpenWin_T_CCW';
-					else
-						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_T_CCW';
-				}
+				UnlockDoor();
+				__NFUN_264__(m_UnlockSound, 3);				
 			}
 			else
 			{
-				if(m_bIsOpeningClockWise)
+				// End:0x6C
+				if(__NFUN_154__(iActionID, int(14)))
 				{
-					if(m_bTreatDoorAsWindow)
-						Query.textureIcon = Texture'R6ActionIcons.OpenWin_A_CW';
-					else
-						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_A_CW';
+					__NFUN_264__(m_LockSound, 3);					
 				}
 				else
 				{
-					if(m_bTreatDoorAsWindow)
-						Query.textureIcon = Texture'R6ActionIcons.OpenWin_A_CCW';
-					else
-						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_A_CCW';
+					// End:0x84
+					if(__NFUN_154__(iActionID, int(15)))
+					{
+						__NFUN_264__(m_LockPickSoundStop, 3);
+					}
 				}
-			} 
-            Query.iPlayerActionID      = eDoorCircumstantialAction.CA_Open;
-        }
-    }
-
-	if(m_bIsDoorClosed)
-	{
-        Query.iTeamActionID        = eDoorCircumstantialAction.CA_Open;
-        Query.iTeamActionIDList[0] = eDoorCircumstantialAction.CA_Open;
-
-		if(!m_bTreatDoorAsWindow)
-        {
-			Query.iTeamActionIDList[1] = eDoorCircumstantialAction.CA_OpenAndClear;
-			Query.iTeamActionIDList[2] = eDoorCircumstantialAction.CA_OpenAndGrenade;
-			Query.iTeamActionIDList[3] = eDoorCircumstantialAction.CA_OpenGrenadeAndClear;
-
-			R6FillSubAction( Query, 0, eDoorCircumstantialAction.CA_None );
-			R6FillSubAction( Query, 1, eDoorCircumstantialAction.CA_None );
-			R6FillGrenadeSubAction( Query, 2 );
-			R6FillGrenadeSubAction( Query, 3 );
+			}
 		}
-		else
+	}
+	return;
+}
+
+function ClientSetDoor(Rotator rNewRotation, optional bool bForce)
+{
+	// End:0x34
+	if(__NFUN_132__(bForce, __NFUN_203__(DesiredRotation, rNewRotation)))
+	{
+		__NFUN_117__('Tick');
+		bRotateToDesired = true;
+		DesiredRotation = rNewRotation;
+	}
+	return;
+}
+
+simulated event bool EncroachingOn(Actor Other)
+{
+	local R6Pawn P;
+	local R6AIController AI;
+
+	P = R6Pawn(Other);
+	// End:0x89
+	if(__NFUN_130__(__NFUN_119__(P, none), P.IsAlive()))
+	{
+		// End:0x87
+		if(__NFUN_129__(P.m_bIsPlayer))
 		{
-			Query.iTeamActionIDList[1] = eDoorCircumstantialAction.CA_None;
-			Query.iTeamActionIDList[2] = eDoorCircumstantialAction.CA_None;
-			Query.iTeamActionIDList[3] = eDoorCircumstantialAction.CA_None;
+			AI = R6AIController(P.Controller);
+			AI.m_BumpedBy = self;
+			AI.GotoBumpBackUpState(AI.__NFUN_284__());
+		}
+		return true;
+	}
+	return false;
+	return;
+}
+
+function OpenDoor(Pawn opener, optional int iRotationRate)
+{
+	local Rotator rNewRotation;
+
+	// End:0x1B
+	if(__NFUN_154__(iRotationRate, 0))
+	{
+		iRotationRate = default.RotationRate.Yaw;
+	}
+	RotationRate.Yaw = iRotationRate;
+	// End:0x41
+	if(__NFUN_119__(opener, none))
+	{
+		Instigator = opener;
+	}
+	// End:0x5D
+	if(__NFUN_119__(Instigator, none))
+	{
+		Instigator.R6MakeNoise(13);
+	}
+	rNewRotation = Rotation;
+	// End:0x9F
+	if(__NFUN_150__(m_iYawInit, m_iYawMax))
+	{
+		// End:0x9C
+		if(__NFUN_151__(Rotation.Yaw, m_iYawMax))
+		{
+			__NFUN_162__(rNewRotation.Yaw, 65536);
 		}		
 	}
 	else
-    {
-		Query.iTeamActionID        = eDoorCircumstantialAction.CA_Close;        
-        Query.iTeamActionIDList[0] = eDoorCircumstantialAction.CA_Close;
-		
-		if(!m_bTreatDoorAsWindow)
-        {
-			Query.iTeamActionIDList[1] = eDoorCircumstantialAction.CA_Clear;
-			Query.iTeamActionIDList[2] = eDoorCircumstantialAction.CA_Grenade;
-			Query.iTeamActionIDList[3] = eDoorCircumstantialAction.CA_GrenadeAndClear;
+	{
+		// End:0xC4
+		if(__NFUN_151__(Rotation.Yaw, m_iYawInit))
+		{
+			__NFUN_162__(rNewRotation.Yaw, 65536);
+		}
+	}
+	// End:0x118
+	if(__NFUN_130__(__NFUN_129__(m_bUseWheel), __NFUN_154__(rNewRotation.Yaw, m_iYawInit)))
+	{
+		// End:0xFA
+		if(__NFUN_119__(m_OpeningSound, none))
+		{
+			__NFUN_264__(m_OpeningSound, 3);
+		}
+		AmbientSound = m_MoveAmbientSound;
+		AmbientSoundStop = m_MoveAmbientSoundStop;
+		m_bUseWheel = true;
+	}
+	rNewRotation.Yaw = m_iYawMax;
+	bRotateToDesired = true;
+	DesiredRotation = rNewRotation;
+	SetDoorProcessStates(true, false);
+	ClientSetDoor(rNewRotation);
+	return;
+}
 
-			R6FillSubAction( Query, 0, eDoorCircumstantialAction.CA_None );
-			R6FillSubAction( Query, 1, eDoorCircumstantialAction.CA_None );
-			R6FillGrenadeSubAction( Query, 2 );
-			R6FillGrenadeSubAction( Query, 3 );
+simulated function CloseDoor(R6Pawn Pawn, optional int iRotationRate)
+{
+	local Rotator rNewRotation;
+
+	// End:0x1B
+	if(__NFUN_154__(iRotationRate, 0))
+	{
+		iRotationRate = default.RotationRate.Yaw;
+	}
+	RotationRate.Yaw = iRotationRate;
+	// End:0x41
+	if(__NFUN_119__(Pawn, none))
+	{
+		Instigator = Pawn;
+	}
+	// End:0x5D
+	if(__NFUN_119__(Instigator, none))
+	{
+		Instigator.R6MakeNoise(13);
+	}
+	rNewRotation = Rotation;
+	rNewRotation.Yaw = m_iYawInit;
+	bRotateToDesired = true;
+	DesiredRotation = rNewRotation;
+	SetDoorProcessStates(false, true);
+	ClientSetDoor(rNewRotation);
+	return;
+}
+
+function bool DoorOpenTowardsActor(Actor aActor)
+{
+	// End:0x32
+	if(__NFUN_177__(__NFUN_219__(Vector(aActor.Rotation), m_vNormal), float(0)))
+	{
+		// End:0x2D
+		if(m_bIsOpeningClockWise)
+		{
+			return false;			
 		}
 		else
 		{
-			Query.iTeamActionIDList[1] = eDoorCircumstantialAction.CA_None;
-			Query.iTeamActionIDList[2] = eDoorCircumstantialAction.CA_None;
-			Query.iTeamActionIDList[3] = eDoorCircumstantialAction.CA_None;
+			return true;
+		}		
+	}
+	else
+	{
+		// End:0x40
+		if(m_bIsOpeningClockWise)
+		{
+			return true;			
+		}
+		else
+		{
+			return false;
 		}
 	}
+	return;
+}
 
-	#ifdefDEBUG if(bShowLog) log(self$" m_bHidePortal="$m_bHidePortal$" rotation.yaw="$rotation.yaw$" m_iYawInit="$m_iYawInit$" m_iYawMax="$m_iYawMax);	 #endif
-}    
-
-function R6FillGrenadeSubAction( Out R6AbstractCircumstantialActionQuery Query, INT iSubMenu )
+function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iPenetrationFactor, optional int iBulletGroup)
 {
-    local INT i;
-    local INT j;
+	local float fPercentage, fBulletDamMultiplier;
+	local int i;
 
-    if (R6ActionCanBeExecuted(eDoorCircumstantialAction.CA_GrenadeFrag))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eDoorCircumstantialAction.CA_GrenadeFrag;
-        i++;
-    }
+	// End:0x25E
+	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	{
+		// End:0x166
+		if(__NFUN_154__(iBulletGroup, -1))
+		{
+			// End:0x60
+			if(__NFUN_150__(m_iHitPoints, 2500))
+			{
+				fBulletDamMultiplier = __NFUN_171__(0.0500000, float(iPenetrationFactor));				
+			}
+			else
+			{
+				fBulletDamMultiplier = __NFUN_171__(0.0050000, float(iPenetrationFactor));
+			}
+			// End:0x103
+			if(__NFUN_130__(__NFUN_155__(m_iCurrentLockHP, 0), HitLock(vHitLocation)))
+			{
+				m_iCurrentLockHP = __NFUN_250__(__NFUN_147__(m_iCurrentLockHP, __NFUN_250__(int(__NFUN_171__(__NFUN_171__(float(iKillValue), fBulletDamMultiplier), float(10))), 400)), 0);
+				// End:0x100
+				if(__NFUN_132__(__NFUN_155__(m_iYawInit, Rotation.Yaw), __NFUN_154__(m_iCurrentLockHP, 0)))
+				{
+					UnlockDoor();
+					OpenDoorWhenHit(vHitLocation, vMomentum, __NFUN_144__(2048, iPenetrationFactor), false);
+				}				
+			}
+			else
+			{
+				m_iCurrentHitPoints = __NFUN_250__(int(__NFUN_175__(float(m_iCurrentHitPoints), __NFUN_171__(float(iKillValue), fBulletDamMultiplier))), 0);
+				// End:0x163
+				if(__NFUN_132__(__NFUN_155__(m_iYawInit, Rotation.Yaw), __NFUN_154__(m_iCurrentLockHP, 0)))
+				{
+					OpenDoorWhenHit(vHitLocation, vMomentum, __NFUN_144__(2048, iPenetrationFactor), false);
+				}
+			}			
+		}
+		else
+		{
+			m_iCurrentHitPoints = __NFUN_250__(__NFUN_147__(m_iCurrentHitPoints, iKillValue), 0);
+			m_iCurrentLockHP = __NFUN_250__(__NFUN_147__(m_iCurrentLockHP, iKillValue), 0);
+			// End:0x1B3
+			if(__NFUN_154__(m_iCurrentLockHP, 0))
+			{
+				UnlockDoor();
+				OpenDoorWhenHit(vHitLocation, vMomentum, 0, true);
+			}
+		}
+		fPercentage = float(__NFUN_145__(__NFUN_144__(m_iCurrentHitPoints, 100), m_iHitPoints));
+		SetNewDamageState(fPercentage);
+		// End:0x25E
+		if(m_bBroken)
+		{
+			__NFUN_264__(m_ExplosionSound, 3);
+			R6AbstractGameInfo(Level.Game).IObjectDestroyed(instigatedBy, self);
+			Instigator = instigatedBy;
+			R6MakeNoise2(m_fAIBreakNoiseRadius, 2, 4);
+			J0x226:
 
-    if (R6ActionCanBeExecuted(eDoorCircumstantialAction.CA_GrenadeGas))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eDoorCircumstantialAction.CA_GrenadeGas;
-        i++;
-    }
+			// End:0x25E [Loop If]
+			if(__NFUN_155__(m_BreachAttached.Length, 0))
+			{
+				// End:0x24A
+				if(__NFUN_114__(m_BreachAttached[0], none))
+				{
+					m_BreachAttached.Remove(0, 1);					
+				}
+				else
+				{
+					m_BreachAttached[0].DoorExploded();
+				}
+				// [Loop Continue]
+				goto J0x226;
+			}
+		}
+	}
+	return m_iCurrentHitPoints;
+	return;
+}
 
-    if (R6ActionCanBeExecuted(eDoorCircumstantialAction.CA_GrenadeFlash))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eDoorCircumstantialAction.CA_GrenadeFlash;
-        i++;
-    }
+function bool HitLock(Vector vHitVector)
+{
+	local Vector vTemp2, vTemp3;
 
-    if (R6ActionCanBeExecuted(eDoorCircumstantialAction.CA_GrenadeSmoke))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eDoorCircumstantialAction.CA_GrenadeSmoke;
-		i++;
-    }
+	vTemp2 = vHitVector;
+	vTemp3 = Location;
+	// End:0x5E
+	if(__NFUN_132__(__NFUN_177__(__NFUN_175__(vTemp2.Z, vTemp3.Z), float(-8)), __NFUN_176__(__NFUN_175__(vTemp2.Z, vTemp3.Z), float(-24))))
+	{
+		return false;
+	}
+	vTemp2.Z = 0.0000000;
+	vTemp3.Z = 0.0000000;
+	// End:0x97
+	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(vTemp2, vTemp3)), float(112)))
+	{
+		return false;
+	}
+	return true;
+	return;
+}
 
-    for(j = i ; j < 4; j++)
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + j] = eDoorCircumstantialAction.CA_None;
-    }
+function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVariation, bool bExplosion)
+{
+	local Rotator rBulletAsRotator;
+	local Vector vTemp2, vTemp3;
+	local int iYawDifference;
+	local bool bShootTurnCCW;
+
+	vTemp2 = vHitLocation;
+	vTemp2.Z = 0.0000000;
+	vTemp3 = Location;
+	vTemp3.Z = 0.0000000;
+	// End:0x5C
+	if(__NFUN_130__(__NFUN_176__(__NFUN_225__(__NFUN_216__(vTemp2, vTemp3)), float(96)), __NFUN_129__(bExplosion)))
+	{
+		return;
+	}
+	rBulletAsRotator = Rotator(vBulletDirection);
+	// End:0x8A
+	if(__NFUN_150__(rBulletAsRotator.Yaw, 0))
+	{
+		__NFUN_161__(rBulletAsRotator.Yaw, 65536);
+	}
+	iYawDifference = __NFUN_147__(rBulletAsRotator.Yaw, Rotation.Yaw);
+	// End:0xBD
+	if(__NFUN_150__(iYawDifference, 0))
+	{
+		__NFUN_161__(iYawDifference, 65536);
+	}
+	// End:0xE1
+	if(__NFUN_150__(iYawDifference, 32768))
+	{
+		YawVariation = __NFUN_143__(YawVariation);
+		bShootTurnCCW = true;
+	}
+	__NFUN_161__(DesiredRotation.Yaw, YawVariation);
+	RotationRate.Yaw = 65000;
+	// End:0x484
+	if(__NFUN_242__(bExplosion, false))
+	{
+		// End:0x2BB
+		if(m_bIsOpeningClockWise)
+		{
+			// End:0x154
+			if(__NFUN_242__(m_bInProcessOfClosing, true))
+			{
+				// End:0x151
+				if(__NFUN_242__(bShootTurnCCW, false))
+				{
+					SetDoorProcessStates(m_bInProcessOfOpening, false);
+					DesiredRotation.Yaw = Rotation.Yaw;
+				}				
+			}
+			else
+			{
+				// End:0x189
+				if(__NFUN_242__(m_bInProcessOfOpening, true))
+				{
+					// End:0x189
+					if(__NFUN_242__(bShootTurnCCW, true))
+					{
+						SetDoorProcessStates(false, false);
+						DesiredRotation.Yaw = Rotation.Yaw;
+					}
+				}
+			}
+			// End:0x289
+			if(__NFUN_129__(__NFUN_132__(__NFUN_130__(__NFUN_242__(bShootTurnCCW, true), __NFUN_154__(m_iYawInit, Rotation.Yaw)), __NFUN_130__(__NFUN_242__(bShootTurnCCW, false), __NFUN_154__(m_iYawMax, Rotation.Yaw)))))
+			{
+				// End:0x23B
+				if(__NFUN_151__(m_iYawInit, m_iYawMax))
+				{
+					// End:0x238
+					if(__NFUN_130__(__NFUN_151__(DesiredRotation.Yaw, m_iYawMax), __NFUN_150__(DesiredRotation.Yaw, m_iYawInit)))
+					{
+						// End:0x228
+						if(__NFUN_151__(YawVariation, 0))
+						{
+							DesiredRotation.Yaw = m_iYawMax;							
+						}
+						else
+						{
+							DesiredRotation.Yaw = m_iYawInit;
+						}
+					}					
+				}
+				else
+				{
+					// End:0x262
+					if(__NFUN_151__(DesiredRotation.Yaw, m_iYawMax))
+					{
+						DesiredRotation.Yaw = m_iYawMax;						
+					}
+					else
+					{
+						// End:0x286
+						if(__NFUN_150__(DesiredRotation.Yaw, m_iYawInit))
+						{
+							DesiredRotation.Yaw = m_iYawInit;
+						}
+					}
+				}				
+			}
+			else
+			{
+				// End:0x2A8
+				if(__NFUN_242__(bShootTurnCCW, true))
+				{
+					DesiredRotation.Yaw = m_iYawInit;					
+				}
+				else
+				{
+					DesiredRotation.Yaw = m_iYawMax;
+				}
+			}			
+		}
+		else
+		{
+			// End:0x2F8
+			if(__NFUN_242__(m_bInProcessOfClosing, true))
+			{
+				// End:0x2F5
+				if(__NFUN_242__(bShootTurnCCW, true))
+				{
+					SetDoorProcessStates(m_bInProcessOfOpening, false);
+					DesiredRotation.Yaw = Rotation.Yaw;
+				}				
+			}
+			else
+			{
+				// End:0x32D
+				if(__NFUN_242__(m_bInProcessOfOpening, true))
+				{
+					// End:0x32D
+					if(__NFUN_242__(bShootTurnCCW, false))
+					{
+						SetDoorProcessStates(false, false);
+						DesiredRotation.Yaw = Rotation.Yaw;
+					}
+				}
+			}
+			// End:0x452
+			if(__NFUN_129__(__NFUN_132__(__NFUN_130__(__NFUN_242__(bShootTurnCCW, false), __NFUN_154__(m_iYawInit, Rotation.Yaw)), __NFUN_130__(__NFUN_242__(bShootTurnCCW, true), __NFUN_154__(m_iYawMax, Rotation.Yaw)))))
+			{
+				// End:0x404
+				if(__NFUN_150__(m_iYawInit, m_iYawMax))
+				{
+					// End:0x3A9
+					if(__NFUN_151__(DesiredRotation.Yaw, 65536))
+					{
+						__NFUN_162__(DesiredRotation.Yaw, 65536);
+					}
+					// End:0x401
+					if(__NFUN_130__(__NFUN_150__(DesiredRotation.Yaw, m_iYawMax), __NFUN_151__(DesiredRotation.Yaw, m_iYawInit)))
+					{
+						// End:0x3F1
+						if(__NFUN_150__(YawVariation, 0))
+						{
+							DesiredRotation.Yaw = m_iYawMax;							
+						}
+						else
+						{
+							DesiredRotation.Yaw = m_iYawInit;
+						}
+					}					
+				}
+				else
+				{
+					// End:0x42B
+					if(__NFUN_150__(DesiredRotation.Yaw, m_iYawMax))
+					{
+						DesiredRotation.Yaw = m_iYawMax;						
+					}
+					else
+					{
+						// End:0x44F
+						if(__NFUN_151__(DesiredRotation.Yaw, m_iYawInit))
+						{
+							DesiredRotation.Yaw = m_iYawInit;
+						}
+					}
+				}				
+			}
+			else
+			{
+				// End:0x471
+				if(__NFUN_242__(bShootTurnCCW, false))
+				{
+					DesiredRotation.Yaw = m_iYawInit;					
+				}
+				else
+				{
+					DesiredRotation.Yaw = m_iYawMax;
+				}
+			}
+		}		
+	}
+	else
+	{
+		SetDoorProcessStates(false, false);
+		// End:0x594
+		if(__NFUN_154__(Rotation.Yaw, m_iYawInit))
+		{
+			// End:0x4E7
+			if(__NFUN_132__(__NFUN_130__(m_bIsOpeningClockWise, __NFUN_151__(iYawDifference, 32768)), __NFUN_130__(__NFUN_129__(m_bIsOpeningClockWise), __NFUN_150__(iYawDifference, 32768))))
+			{
+				OpenDoor(none, 65000);				
+			}
+			else
+			{
+				// End:0x542
+				if(m_bIsOpeningClockWise)
+				{
+					// End:0x524
+					if(__NFUN_151__(m_iYawInit, m_iYawMax))
+					{
+						DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);						
+					}
+					else
+					{
+						DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+					}					
+				}
+				else
+				{
+					// End:0x576
+					if(__NFUN_150__(m_iYawInit, m_iYawMax))
+					{
+						DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);						
+					}
+					else
+					{
+						DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+					}
+				}
+			}			
+		}
+		else
+		{
+			// End:0x69E
+			if(__NFUN_154__(Rotation.Yaw, m_iYawMax))
+			{
+				// End:0x5EF
+				if(__NFUN_132__(__NFUN_130__(m_bIsOpeningClockWise, __NFUN_150__(iYawDifference, 32768)), __NFUN_130__(__NFUN_129__(m_bIsOpeningClockWise), __NFUN_151__(iYawDifference, 32768))))
+				{
+					CloseDoor(none, 65000);					
+				}
+				else
+				{
+					// End:0x64C
+					if(__NFUN_129__(m_bIsOpeningClockWise))
+					{
+						// End:0x62E
+						if(__NFUN_150__(m_iYawInit, m_iYawMax))
+						{
+							DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);							
+						}
+						else
+						{
+							DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+						}						
+					}
+					else
+					{
+						// End:0x680
+						if(__NFUN_151__(m_iYawInit, m_iYawMax))
+						{
+							DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);							
+						}
+						else
+						{
+							DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+						}
+					}
+				}				
+			}
+			else
+			{
+				// End:0x6E5
+				if(__NFUN_132__(__NFUN_130__(m_bIsOpeningClockWise, __NFUN_150__(iYawDifference, 32768)), __NFUN_130__(__NFUN_129__(m_bIsOpeningClockWise), __NFUN_151__(iYawDifference, 32768))))
+				{
+					CloseDoor(none, 65000);					
+				}
+				else
+				{
+					OpenDoor(none, 65000);
+				}
+			}
+		}
+	}
+	bRotateToDesired = true;
+	__NFUN_117__('Tick');
+	// End:0x728
+	if(__NFUN_151__(DesiredRotation.Yaw, 65536))
+	{
+		__NFUN_162__(DesiredRotation.Yaw, 65536);		
+	}
+	else
+	{
+		// End:0x749
+		if(__NFUN_150__(DesiredRotation.Yaw, 0))
+		{
+			__NFUN_161__(DesiredRotation.Yaw, 65536);
+		}
+	}
+	// End:0x7A6
+	if(__NFUN_130__(__NFUN_154__(Rotation.Yaw, m_iYawInit), __NFUN_155__(DesiredRotation.Yaw, m_iYawInit)))
+	{
+		// End:0x788
+		if(__NFUN_119__(m_OpeningWheelSound, none))
+		{
+			__NFUN_264__(m_OpeningWheelSound, 3);
+		}
+		AmbientSound = m_MoveAmbientSound;
+		AmbientSoundStop = m_MoveAmbientSoundStop;
+		m_bUseWheel = true;
+	}
+	return;
+}
+
+simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
+{
+	local bool bDisplayOpenIcon;
+	local Vector vDistance;
+	local bool bOpensTowardsPawn;
+
+	Query.iHasAction = 1;
+	// End:0x5B
+	if(m_bIsDoorClosed)
+	{
+		vDistance = __NFUN_216__(m_vVisibleCenter, PlayerController.Pawn.Location);
+		vDistance.Z = 0.0000000;
+		fDistance = __NFUN_225__(vDistance);
+	}
+	// End:0x7E
+	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	{
+		Query.iInRange = 1;		
+	}
+	else
+	{
+		Query.iInRange = 0;
+	}
+	// End:0xA3
+	if(m_bInProcessOfClosing)
+	{
+		bDisplayOpenIcon = true;		
+	}
+	else
+	{
+		// End:0xB7
+		if(m_bInProcessOfOpening)
+		{
+			bDisplayOpenIcon = false;			
+		}
+		else
+		{
+			// End:0xCB
+			if(m_bIsDoorClosed)
+			{
+				bDisplayOpenIcon = true;				
+			}
+			else
+			{
+				bDisplayOpenIcon = false;
+			}
+		}
+	}
+	// End:0x126
+	if(__NFUN_129__(bDisplayOpenIcon))
+	{
+		// End:0xFE
+		if(m_bTreatDoorAsWindow)
+		{
+			Query.textureIcon = Texture'R6ActionIcons.CloseWindow';			
+		}
+		else
+		{
+			Query.textureIcon = Texture'R6ActionIcons.CloseDoor';
+		}
+		Query.iPlayerActionID = 5;		
+	}
+	else
+	{
+		Query.bCanBeInterrupted = m_bIsDoorLocked;
+		// End:0x17A
+		if(R6Rainbow(PlayerController.Pawn).m_bHasLockPickKit)
+		{
+			Query.fPlayerActionTimeRequired = __NFUN_172__(m_fUnlockBaseTime, 2.0000000);			
+		}
+		else
+		{
+			Query.fPlayerActionTimeRequired = m_fUnlockBaseTime;
+		}
+		// End:0x1BF
+		if(m_bIsDoorLocked)
+		{
+			Query.textureIcon = Texture'R6ActionIcons.UnlockDoor';
+			Query.iPlayerActionID = 13;			
+		}
+		else
+		{
+			bOpensTowardsPawn = DoorOpenTowardsActor(PlayerController.Pawn);
+			// End:0x25A
+			if(bOpensTowardsPawn)
+			{
+				// End:0x223
+				if(m_bIsOpeningClockWise)
+				{
+					// End:0x20C
+					if(m_bTreatDoorAsWindow)
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenWin_T_CW';						
+					}
+					else
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_T_CW';
+					}					
+				}
+				else
+				{
+					// End:0x243
+					if(m_bTreatDoorAsWindow)
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenWin_T_CCW';						
+					}
+					else
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_T_CCW';
+					}
+				}				
+			}
+			else
+			{
+				// End:0x29A
+				if(m_bIsOpeningClockWise)
+				{
+					// End:0x283
+					if(m_bTreatDoorAsWindow)
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenWin_A_CW';						
+					}
+					else
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_A_CW';
+					}					
+				}
+				else
+				{
+					// End:0x2BA
+					if(m_bTreatDoorAsWindow)
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenWin_A_CCW';						
+					}
+					else
+					{
+						Query.textureIcon = Texture'R6ActionIcons.OpenDoor_A_CCW';
+					}
+				}
+			}
+			Query.iPlayerActionID = 1;
+		}
+	}
+	// End:0x3D7
+	if(m_bIsDoorClosed)
+	{
+		Query.iTeamActionID = 1;
+		Query.iTeamActionIDList[0] = 1;
+		// End:0x399
+		if(__NFUN_129__(m_bTreatDoorAsWindow))
+		{
+			Query.iTeamActionIDList[1] = 2;
+			Query.iTeamActionIDList[2] = 3;
+			Query.iTeamActionIDList[3] = 4;
+			R6FillSubAction(Query, 0, int(0));
+			R6FillSubAction(Query, 1, int(0));
+			R6FillGrenadeSubAction(Query, 2, PlayerController);
+			R6FillGrenadeSubAction(Query, 3, PlayerController);			
+		}
+		else
+		{
+			Query.iTeamActionIDList[1] = 0;
+			Query.iTeamActionIDList[2] = 0;
+			Query.iTeamActionIDList[3] = 0;
+		}		
+	}
+	else
+	{
+		Query.iTeamActionID = 5;
+		Query.iTeamActionIDList[0] = 5;
+		// End:0x488
+		if(__NFUN_129__(m_bTreatDoorAsWindow))
+		{
+			Query.iTeamActionIDList[1] = 6;
+			Query.iTeamActionIDList[2] = 7;
+			Query.iTeamActionIDList[3] = 8;
+			R6FillSubAction(Query, 0, int(0));
+			R6FillSubAction(Query, 1, int(0));
+			R6FillGrenadeSubAction(Query, 2, PlayerController);
+			R6FillGrenadeSubAction(Query, 3, PlayerController);			
+		}
+		else
+		{
+			Query.iTeamActionIDList[1] = 0;
+			Query.iTeamActionIDList[2] = 0;
+			Query.iTeamActionIDList[3] = 0;
+		}
+	}
+	return;
+}
+
+function R6FillGrenadeSubAction(out R6AbstractCircumstantialActionQuery Query, int iSubMenu, PlayerController PlayerController)
+{
+	local int i, j;
+
+	// End:0x3B
+	if(R6ActionCanBeExecuted(int(9), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 9;
+		__NFUN_165__(i);
+	}
+	// End:0x76
+	if(R6ActionCanBeExecuted(int(10), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 10;
+		__NFUN_165__(i);
+	}
+	// End:0xB1
+	if(R6ActionCanBeExecuted(int(11), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 11;
+		__NFUN_165__(i);
+	}
+	// End:0xEC
+	if(R6ActionCanBeExecuted(int(12), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 12;
+		__NFUN_165__(i);
+	}
+	j = i;
+	J0xF7:
+
+	// End:0x12F [Loop If]
+	if(__NFUN_150__(j, 4))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), j)] = 0;
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0xF7;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1063,171 +1162,231 @@ function R6FillGrenadeSubAction( Out R6AbstractCircumstantialActionQuery Query, 
 //------------------------------------------------------------------
 function SetBroken()
 {
-    Super.SetBroken();
-    
+	super(R6InteractiveObject).SetBroken();
 	SetDoorState(false);
 	m_bHidePortal = false;
+	return;
 }
 
 function bool ShouldBeBreached()
 {
+	// End:0x0B
 	if(m_bBroken)
+	{
 		return false;
-
+	}
+	// End:0x16
 	if(m_bTreatDoorAsWindow)
+	{
 		return false;
-	
-	// if door is not COMPLETELY closed, do not try to breach
-	if(!m_bIsDoorClosed || (m_iCurrentOpening != 0))
+	}
+	// End:0x30
+	if(__NFUN_132__(__NFUN_129__(m_bIsDoorClosed), __NFUN_155__(m_iCurrentOpening, 0)))
+	{
 		return false;
-
+	}
 	return true;
+	return;
 }
 
 event EndedRotation()
 {
-    bRotateToDesired = false;
+	bRotateToDesired = false;
+	return;
 }
 
-event Tick(FLOAT FDelta)
+event Tick(float fDelta)
 {
-	local INT   rDesYaw;
+	local int rDesYaw;
 
+	// End:0x12
 	if(m_bBroken)
 	{
-		Disable('Tick');
+		__NFUN_118__('Tick');
 		return;
 	}
-	
-	if(!m_bInProcessOfOpening && !m_bInProcessOfClosing && !bRotateToDesired)
-		Disable('Tick');
-	
-    rDesYaw = desiredRotation.yaw;
-	if(rDesYaw < 0)
-		rDesYaw += 65536;
-	else if(rDesYaw > 65536)
-		rDesYaw -= 65536;
-
-	if(rotation.yaw == rDesYaw)
+	// End:0x3E
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bInProcessOfOpening), __NFUN_129__(m_bInProcessOfClosing)), __NFUN_129__(bRotateToDesired)))
 	{
-        if(m_bInProcessOfClosing || m_bInProcessOfOpening)
-		{
-            if (m_bInProcessOfClosing)
-            {
-                if (m_ClosingSound != None)
-                {
-                    PlaySound(m_ClosingSound, SLOT_SFX);
-                }
-                AmbientSound = none;
-                m_bUseWheel = false;
-            }
-            SetDoorProcessStates(false, false);
-		}
-
-        if (( m_bUseWheel) && (desiredRotation.yaw == m_iYawInit))
-        {
-            if (m_ClosingWheelSound != none)
-                PlaySound(m_ClosingWheelSound, SLOT_SFX);
-            
-            AmbientSound = none;
-            m_bUseWheel = false;
-        }
+		__NFUN_118__('Tick');
 	}
-
-	// rbrek 8 may 2002
-    // when we allow the physics to take care of the rotation of the door (using bRotateToDesired)
-    // the physics will set the yaw between 0 and 65535...
-    // if opened more than 80%, consider the door open
-	if(m_bIsOpeningClockWise)
-		m_iCurrentOpening = (rotation.yaw - m_iYawInit) & 65535;
+	rDesYaw = DesiredRotation.Yaw;
+	// End:0x68
+	if(__NFUN_150__(rDesYaw, 0))
+	{
+		__NFUN_161__(rDesYaw, 65536);		
+	}
 	else
-		m_iCurrentOpening = (m_iYawInit - rotation.yaw) & 65535;		
-	SetDoorState(m_iCurrentOpening < 16384);
-    
-	if(!m_bTreatDoorAsWindow)
-        m_vVisibleCenter = Location - 64*vector(rotation);  
-    else
-        m_vVisibleCenter = Location - m_fWindowWidth*0.5*vector(rotation);  
-
-    // set m_bHidePortal to true only when door is completely closed 
-	m_bHidePortal = (m_iCurrentOpening == 0); 	
+	{
+		// End:0x83
+		if(__NFUN_151__(rDesYaw, 65536))
+		{
+			__NFUN_162__(rDesYaw, 65536);
+		}
+	}
+	// End:0x123
+	if(__NFUN_154__(Rotation.Yaw, rDesYaw))
+	{
+		// End:0xE0
+		if(__NFUN_132__(m_bInProcessOfClosing, m_bInProcessOfOpening))
+		{
+			// End:0xD8
+			if(m_bInProcessOfClosing)
+			{
+				// End:0xC9
+				if(__NFUN_119__(m_ClosingSound, none))
+				{
+					__NFUN_264__(m_ClosingSound, 3);
+				}
+				AmbientSound = none;
+				m_bUseWheel = false;
+			}
+			SetDoorProcessStates(false, false);
+		}
+		// End:0x123
+		if(__NFUN_130__(m_bUseWheel, __NFUN_154__(DesiredRotation.Yaw, m_iYawInit)))
+		{
+			// End:0x114
+			if(__NFUN_119__(m_ClosingWheelSound, none))
+			{
+				__NFUN_264__(m_ClosingWheelSound, 3);
+			}
+			AmbientSound = none;
+			m_bUseWheel = false;
+		}
+	}
+	// End:0x14D
+	if(m_bIsOpeningClockWise)
+	{
+		m_iCurrentOpening = __NFUN_156__(__NFUN_147__(Rotation.Yaw, m_iYawInit), 65535);		
+	}
+	else
+	{
+		m_iCurrentOpening = __NFUN_156__(__NFUN_147__(m_iYawInit, Rotation.Yaw), 65535);
+	}
+	SetDoorState(__NFUN_150__(m_iCurrentOpening, 16384));
+	// End:0x1A5
+	if(__NFUN_129__(m_bTreatDoorAsWindow))
+	{
+		m_vVisibleCenter = __NFUN_216__(Location, __NFUN_213__(float(64), Vector(Rotation)));		
+	}
+	else
+	{
+		m_vVisibleCenter = __NFUN_216__(Location, __NFUN_213__(__NFUN_171__(m_fWindowWidth, 0.5000000), Vector(Rotation)));
+	}
+	m_bHidePortal = __NFUN_154__(m_iCurrentOpening, 0);
+	return;
 }
 
-simulated function UnLockDoor()
+simulated function UnlockDoor()
 {
-    if ( !m_bIsDoorLocked ) // we won't change the cost if the door is not locked
-        return;
-
-    m_bIsDoorLocked = false;
-    m_DoorActorA.ExtraCost = m_DoorActorA.default.ExtraCost;
+	// End:0x0D
+	if(__NFUN_129__(m_bIsDoorLocked))
+	{
+		return;
+	}
+	m_bIsDoorLocked = false;
+	m_DoorActorA.ExtraCost = m_DoorActorA.default.ExtraCost;
 	m_DoorActorB.ExtraCost = m_DoorActorB.default.ExtraCost;
+	return;
 }
 
-simulated function SetDoorState(bool bIsClosed )
-{	
+simulated function SetDoorState(bool bIsClosed)
+{
 	m_bIsDoorClosed = bIsClosed;
-	
+	// End:0x18
 	if(m_bTreatDoorAsWindow)
+	{
 		return;
-
+	}
+	// End:0x92
 	if(m_bIsDoorClosed)
 	{
+		// End:0x55
 		if(m_bIsDoorLocked)
 		{
 			m_DoorActorA.ExtraCost = 1000;
-			m_DoorActorB.ExtraCost = 1000;
+			m_DoorActorB.ExtraCost = 1000;			
 		}
 		else
 		{
 			m_DoorActorA.ExtraCost = m_DoorActorA.default.ExtraCost;
 			m_DoorActorB.ExtraCost = m_DoorActorB.default.ExtraCost;
-		}
+		}		
 	}
 	else
 	{
 		m_DoorActorA.ExtraCost = 0;
-		m_DoorActorB.ExtraCost = 0;		
+		m_DoorActorB.ExtraCost = 0;
 	}
+	return;
 }
 
 //===========================================================================//
 // R6GetCircumstantialActionString()                                         //
 //===========================================================================//
-simulated function string R6GetCircumstantialActionString( INT iAction )
+simulated function string R6GetCircumstantialActionString(int iAction)
 {
-    switch( iAction )
-    {
-		case eDoorCircumstantialAction.CA_Close:                return Localize("RDVOrder", "Order_Close", "R6Menu");
-		case eDoorCircumstantialAction.CA_Clear:                return Localize("RDVOrder", "Order_Clear", "R6Menu");
-		case eDoorCircumstantialAction.CA_Grenade:              return Localize("RDVOrder", "Order_Grenade", "R6Menu");
-		case eDoorCircumstantialAction.CA_GrenadeAndClear:      return Localize("RDVOrder", "Order_GrenadeClear", "R6Menu");
-		case eDoorCircumstantialAction.CA_Open:                 return Localize("RDVOrder", "Order_Open", "R6Menu");
-		case eDoorCircumstantialAction.CA_OpenAndClear:         return Localize("RDVOrder", "Order_OpenClear", "R6Menu");
-		case eDoorCircumstantialAction.CA_OpenAndGrenade:       return Localize("RDVOrder", "Order_OpenGrenade", "R6Menu");
-		case eDoorCircumstantialAction.CA_OpenGrenadeAndClear:  return Localize("RDVOrder", "Order_OpenGrenadeClear", "R6Menu");
-		case eDoorCircumstantialAction.CA_GrenadeFrag:			return Localize("RDVOrder", "Order_FragGrenade", "R6Menu");
-		case eDoorCircumstantialAction.CA_GrenadeGas:			return Localize("RDVOrder", "Order_GasGrenade", "R6Menu");
-		case eDoorCircumstantialAction.CA_GrenadeFlash:			return Localize("RDVOrder", "Order_FlashGrenade", "R6Menu");
-		case eDoorCircumstantialAction.CA_GrenadeSmoke:			return Localize("RDVOrder", "Order_SmokeGrenade", "R6Menu");	
-    }
-
-    return "";
+	switch(iAction)
+	{
+		// End:0x34
+		case int(5):
+			return Localize("RDVOrder", "Order_Close", "R6Menu");
+		// End:0x61
+		case int(6):
+			return Localize("RDVOrder", "Order_Clear", "R6Menu");
+		// End:0x90
+		case int(7):
+			return Localize("RDVOrder", "Order_Grenade", "R6Menu");
+		// End:0xC4
+		case int(8):
+			return Localize("RDVOrder", "Order_GrenadeClear", "R6Menu");
+		// End:0xF0
+		case int(1):
+			return Localize("RDVOrder", "Order_Open", "R6Menu");
+		// End:0x121
+		case int(2):
+			return Localize("RDVOrder", "Order_OpenClear", "R6Menu");
+		// End:0x154
+		case int(3):
+			return Localize("RDVOrder", "Order_OpenGrenade", "R6Menu");
+		// End:0x18C
+		case int(4):
+			return Localize("RDVOrder", "Order_OpenGrenadeClear", "R6Menu");
+		// End:0x1BF
+		case int(9):
+			return Localize("RDVOrder", "Order_FragGrenade", "R6Menu");
+		// End:0x1F1
+		case int(10):
+			return Localize("RDVOrder", "Order_GasGrenade", "R6Menu");
+		// End:0x225
+		case int(11):
+			return Localize("RDVOrder", "Order_FlashGrenade", "R6Menu");
+		// End:0x259
+		case int(12):
+			return Localize("RDVOrder", "Order_SmokeGrenade", "R6Menu");
+		// End:0xFFFF
+		default:
+			return "";
+			break;
+	}
+	return;
 }
-
 
 //===========================================================================//
 // R6CircumstantialActionProgressStart()                                     //
 //===========================================================================//
-function R6CircumstantialActionProgressStart( R6AbstractCircumstantialActionQuery Query )
+function R6CircumstantialActionProgressStart(R6AbstractCircumstantialActionQuery Query)
 {
-    m_fPlayerCAStartTime = Level.TimeSeconds;
-
+	m_fPlayerCAStartTime = Level.TimeSeconds;
 	PlayLockPickSound();
+	return;
 }
 
 function PlayLockPickSound()
 {
-    PlaySound(m_LockPickSound, SLOT_SFX);
+	__NFUN_264__(m_LockPickSound, 3);
+	return;
 }
 
 //===========================================================================//
@@ -1235,131 +1394,154 @@ function PlayLockPickSound()
 //   Update the door unlocking progress (if it's locked)                     //
 //   Should be affected by the skills of the pawn unlocking it               //
 //===========================================================================//
-function INT  R6GetCircumstantialActionProgress( R6AbstractCircumstantialActionQuery Query, Pawn actingPawn )
+function int R6GetCircumstantialActionProgress(R6AbstractCircumstantialActionQuery Query, Pawn actingPawn)
 {
-    local FLOAT fPercentage;
+	local float fPercentage;
 
-    if( m_bIsDoorLocked ) 
-		fPercentage = (Level.TimeSeconds - m_fPlayerCAStartTime) / (Query.fPlayerActionTimeRequired * (2.0 - R6Pawn(actingPawn).ArmorSkillEffect()));
+	// End:0x54
+	if(m_bIsDoorLocked)
+	{
+		fPercentage = __NFUN_172__(__NFUN_175__(Level.TimeSeconds, m_fPlayerCAStartTime), __NFUN_171__(Query.fPlayerActionTimeRequired, __NFUN_175__(2.0000000, R6Pawn(actingPawn).ArmorSkillEffect())));		
+	}
 	else
-        fPercentage = 1.0f;
-	
-    return fPercentage*100;
+	{
+		fPercentage = 1.0000000;
+	}
+	return int(__NFUN_171__(fPercentage, float(100)));
+	return;
 }
-
 
 //===========================================================================//
 // R6ActionCanBeExecuted()												     //
 //	Check if the action specified can be executed. Useful to disable choice  //
 //	in the rose des vents.													 //
 //===========================================================================//
-simulated function BOOL R6ActionCanBeExecuted( INT iAction )
+simulated function bool R6ActionCanBeExecuted(int iAction, PlayerController PlayerController)
 {
-    local R6PlayerController playerController;
+	local R6PlayerController pPlayerCtrl;
 
-    if (iAction == eDoorCircumstantialAction.CA_None)
-        return false;
-
-    foreach DynamicActors( class'R6PlayerController', playerController )
-    {
-        break;
-    }
-
-    if( playerController == none || playerController.m_TeamManager == none )
-        return false;
-
-    switch(iAction)
-    {
-    case eDoorCircumstantialAction.CA_GrenadeFrag:
-            return playerController.m_TeamManager.HaveRainbowWithGrenadeType( GT_GrenadeFrag );
-            break;
-    case eDoorCircumstantialAction.CA_GrenadeGas:
-            return playerController.m_TeamManager.HaveRainbowWithGrenadeType( GT_GrenadeGas );
-            break;
-    case eDoorCircumstantialAction.CA_GrenadeFlash:
-            return playerController.m_TeamManager.HaveRainbowWithGrenadeType( GT_GrenadeFlash );
-            break;
-    case eDoorCircumstantialAction.CA_GrenadeSmoke:
-            return playerController.m_TeamManager.HaveRainbowWithGrenadeType( GT_GrenadeSmoke );
-            break;
-    }
-    
-    return true;
+	// End:0x10
+	if(__NFUN_154__(iAction, int(0)))
+	{
+		return false;
+	}
+	pPlayerCtrl = R6PlayerController(PlayerController);
+	// End:0x43
+	if(__NFUN_132__(__NFUN_114__(pPlayerCtrl, none), __NFUN_114__(pPlayerCtrl.m_TeamManager, none)))
+	{
+		return false;
+	}
+	switch(iAction)
+	{
+		// End:0x6F
+		case int(9):
+			return pPlayerCtrl.m_TeamManager.HaveRainbowWithGrenadeType(1);
+			// End:0xE1
+			break;
+		// End:0x94
+		case int(10):
+			return pPlayerCtrl.m_TeamManager.HaveRainbowWithGrenadeType(2);
+			// End:0xE1
+			break;
+		// End:0xB9
+		case int(11):
+			return pPlayerCtrl.m_TeamManager.HaveRainbowWithGrenadeType(3);
+			// End:0xE1
+			break;
+		// End:0xDE
+		case int(12):
+			return pPlayerCtrl.m_TeamManager.HaveRainbowWithGrenadeType(4);
+			// End:0xE1
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return true;
+	return;
 }
-
 
 //============================================================================
 // Bump - 
 //============================================================================
-event Bump( Actor other )
+event Bump(Actor Other)
 {
-	local R6Pawn    pawn;
-    local vector    vDoorDir;
-    local rotator   rPawnRot;
-    local vector    vPawnDir;
+	local R6Pawn Pawn;
+	local Vector vDoorDir;
+	local Rotator rPawnRot;
+	local Vector vPawnDir;
 
-	pawn = R6Pawn(other);
-
-    if ( pawn == none )
-        return;
-
-    // npc and if door is partially open
-    if ( WillOpenOnTouch(pawn) ) 
-    {
-        openDoor( pawn );
-        return;
-    }
-
+	Pawn = R6Pawn(Other);
+	// End:0x1D
+	if(__NFUN_114__(Pawn, none))
+	{
+		return;
+	}
+	// End:0x35
+	if(__NFUN_1511__(Pawn))
+	{
+		OpenDoor(Pawn);
+		return;
+	}
+	return;
 }
 
 //============================================================================
 // bool ActorIsOnSideA - 
 //============================================================================
-function bool ActorIsOnSideA( Actor aActor )
+function bool ActorIsOnSideA(Actor aActor)
 {
-    local vector vActorDir2D;
+	local Vector vActorDir2D;
 
-    vActorDir2D = aActor.Location - m_vCenterOfDoor;
-    vActorDir2D.Z = 0;
-    vActorDir2D = Normal( vActorDir2D );
-
-    return ((vActorDir2D dot m_vDoorADir2D) > 0);
+	vActorDir2D = __NFUN_216__(aActor.Location, m_vCenterOfDoor);
+	vActorDir2D.Z = 0.0000000;
+	vActorDir2D = __NFUN_226__(vActorDir2D);
+	return __NFUN_177__(__NFUN_219__(vActorDir2D, m_vDoorADir2D), float(0));
+	return;
 }
 
-function vector GetTarget( Actor aActor, float fDistanceFromDoor, OPTIONAL bool bBackup )
+function Vector GetTarget(Actor aActor, float fDistanceFromDoor, optional bool bBackup)
 {
-    local vector vTarget;
+	local Vector vTarget;
 
-    if ( bBackup )
-        fDistanceFromDoor *= -1;
-
-    vTarget = m_vCenterOfDoor;
-
-    if (ActorIsOnSideA(aActor))
-        vTarget -= fDistanceFromDoor * m_vDoorADir2D;
-    else
-        vTarget += fDistanceFromDoor * m_vDoorADir2D;
-
-    vTarget.Z = aActor.Location.Z;
-
-    return vTarget;
+	// End:0x17
+	if(bBackup)
+	{
+		__NFUN_182__(fDistanceFromDoor, float(-1));
+	}
+	vTarget = m_vCenterOfDoor;
+	// End:0x46
+	if(ActorIsOnSideA(aActor))
+	{
+		__NFUN_224__(vTarget, __NFUN_213__(fDistanceFromDoor, m_vDoorADir2D));		
+	}
+	else
+	{
+		__NFUN_223__(vTarget, __NFUN_213__(fDistanceFromDoor, m_vDoorADir2D));
+	}
+	vTarget.Z = aActor.Location.Z;
+	return vTarget;
+	return;
 }
 
 defaultproperties
 {
-     m_iLockHP=1000
-     m_iMaxOpeningDeg=90
-     m_fUnlockBaseTime=5.000000
-     m_iHitPoints=2000
-     Physics=PHYS_MovingBrush
-     m_eDisplayFlag=DF_ShowOnlyIn3DView
-     m_bUseR6Availability=False
-     m_bSkipHitDetection=True
-     m_bUseDifferentVisibleCollide=True
-     m_bUseOriginalRotationInPlanning=True
-     m_bSpriteShowFlatInPlanning=True
-     m_bOutlinedInPlanning=False
-     m_fCircumstantialActionRange=132.000000
-     NetPriority=2.700000
-     RotationRate=(Yaw=20000)
+	m_iLockHP=1000
+	m_iMaxOpeningDeg=90
+	m_fUnlockBaseTime=5.0000000
+	m_iHitPoints=2000
+	Physics=8
+	m_eDisplayFlag=1
+	m_bUseR6Availability=false
+	m_bSkipHitDetection=true
+	m_bUseDifferentVisibleCollide=true
+	m_bUseOriginalRotationInPlanning=true
+	m_bSpriteShowFlatInPlanning=true
+	m_bOutlinedInPlanning=false
+	m_fCircumstantialActionRange=132.0000000
+	NetPriority=2.7000000
+	RotationRate=(Pitch=0,Yaw=20000,Roll=0)
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function dbgLogActor

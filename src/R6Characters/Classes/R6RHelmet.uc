@@ -1,4 +1,10 @@
 //=============================================================================
+// R6RHelmet - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6RHelmet.uc : rainbow helmet base class
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,20 +12,18 @@
 //		2001/10/03 * Created by Rima Brek
 //=============================================================================
 class R6RHelmet extends R6AbstractHelmet
-	abstract;
-   
-#exec OBJ LOAD FILE=..\Textures\R6Characters_T.utx PACKAGE=R6Characters_T
+ abstract;
 
 defaultproperties
 {
-     RemoteRole=ROLE_None
-     bStatic=False
-     bWorldGeometry=False
-     m_bDrawFromBase=True
-     bShadowCast=False
-     bCollideActors=False
-     bBlockActors=False
-     bBlockPlayers=False
-     bEdShouldSnap=False
-     DrawScale3D=(X=-1.000000,Y=-1.000000)
+	RemoteRole=0
+	bStatic=false
+	bWorldGeometry=false
+	m_bDrawFromBase=true
+	bShadowCast=false
+	bCollideActors=false
+	bBlockActors=false
+	bBlockPlayers=false
+	bEdShouldSnap=false
+	DrawScale3D=(X=-1.0000000,Y=-1.0000000,Z=1.0000000)
 }

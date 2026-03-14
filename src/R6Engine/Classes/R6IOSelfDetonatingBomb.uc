@@ -1,167 +1,132 @@
 //=============================================================================
+// R6IOSelfDetonatingBomb - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6IOSelfDetonatingBomb : MissionPAck1
 //  Like IOBomb, but it can self-detonate after a given amount of time
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================
-
 class R6IOSelfDetonatingBomb extends R6IOBomb
-    placeable;
+ placeable;
 
-var(R6ActionObject) FLOAT m_fSelfDetonationTime;   // MissionPack1 - Time required to self-detonate
-var FLOAT   m_fDefusedTimeMessage;    // defused message shown for 3 secs
-/*
-simulated function ResetOriginalData()
-{
-    Super.ResetOriginalData();
-
-	if(m_fSelfDetonationTime > 0)
-	{
-		m_fTimeLeft = m_fSelfDetonationTime;
-		m_fTimeOfExplosion = m_fSelfDetonationTime;
-		m_bIsActivated = false; //to be sure it's activated, when replaying missions
-		ArmBomb(none);
-	}
-
-}
-*/
+var(R6ActionObject) float m_fSelfDetonationTime;  // MissionPack1 - Time required to self-detonate
+var float m_fDefusedTimeMessage;  // defused message shown for 3 secs
 
 function StartTimer()
 {
-    #ifdefDEBUG log("Bomb arming... time="$m_fSelfDetonationTime); #endif//Mp1DEBUG
-	if(m_fSelfDetonationTime > 0)
+	// End:0x32
+	if(__NFUN_177__(m_fSelfDetonationTime, float(0)))
 	{
 		m_fTimeLeft = m_fSelfDetonationTime;
 		m_fTimeOfExplosion = m_fSelfDetonationTime;
-		m_bIsActivated = false; //to be sure it's activated, when replaying missions
+		m_bIsActivated = false;
 		ArmBomb(none);
 	}
-
+	return;
 }
-
 
 simulated function Timer()
 {
-
-    if(Level.game != none) // MPF_Milan_8_1_2003 - avoid accessed none for Multiplayer clients
-    {
-	if(R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus != eMissionObjStatus_success &&
-		R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus != eMissionObjStatus_failed)
-	    Super.Timer();
+	// End:0x7F
+	if(__NFUN_119__(Level.Game, none))
+	{
+		// End:0x7C
+		if(__NFUN_130__(__NFUN_155__(int(R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus), int(1)), __NFUN_155__(int(R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus), int(2))))
+		{
+			super.Timer();
+		}		
+	}
+	else
+	{
+		super.Timer();
+	}
+	return;
 }
-    else
-    {
-        Super.Timer();
-    }
 
-}
-
-
-simulated function PostRender(canvas C )
+simulated function PostRender(Canvas C)
 {
-	local FLOAT fStrSizeX, fStrSizeY;
-	local INT X, Y;
+	local float fStrSizeX, fStrSizeY;
+	local int X, Y;
 	local string sTime;
-//	local int iMinsLeft, iSecsLeft;
 	local int iTimeLeft;
 
-    if(Level.NetMode == NM_Client)
-        iTimeLeft = int(m_fRepTimeLeft);
-    else
-    	iTimeLeft = int(m_fTimeLeft);
-        
-    #ifdefDEBUG log("LevelTimeSeconds="$Level.TimeSeconds$" ,m_fDefusedTimeMessage="$m_fDefusedTimeMessage$" time left="$m_fTimeLeft);  #endif
+	// End:0x29
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	{
+		iTimeLeft = int(m_fRepTimeLeft);		
+	}
+	else
+	{
+		iTimeLeft = int(m_fTimeLeft);
+	}
+	// End:0x196
 	if(m_bIsActivated)
 	{
-//		iMinsLeft = int(m_fTimeLeft)/60;//DetonationTime - Level.TimeSeconds)/60;
-//		iSecsLeft = int( m_fTimeLeft) - iMinsLeft*60;
-		
-		sTime=  Localize("Game", "TimeLeft", "R6GameInfo") $ " ";
-	    sTime = sTime $ ConvertIntTimeToString( iTimeLeft, true );
-		
-		C.UseVirtualSize(true, 640, 480);
-		X = C.HalfClipX;
-        Y = C.HalfClipY/8;//MPF_Milan_9_12_2003 - was /16
-		C.Font = font'R6Font.Rainbow6_14pt'; 
-		
-		if ( iTimeLeft > 20 )
-			C.SetDrawColor(255,255,255);    // white
-		else if ( iTimeLeft > 10 )
-			C.SetDrawColor(255,255,0);      // yellow
-		else
-			C.SetDrawColor(255,0,0);        // red
-
-		C.StrLen( sTime, fStrSizeX, fStrSizeY );
-		C.SetPos( X - fStrSizeX/2, Y + 24 );
-		C.DrawText( sTime );
-	}
-	/*else
-	{
-		log("LevelTimeSeconds="$Level.TimeSeconds$" ,m_fDefusedTimeMessage="$m_fDefusedTimeMessage);
-		if((Level.TimeSeconds - m_fDefusedTimeMessage) < 3)
+		sTime = __NFUN_112__(Localize("Game", "TimeLeft", "R6GameInfo"), " ");
+		sTime = __NFUN_112__(sTime, __NFUN_1520__(iTimeLeft, true));
+		C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+		X = int(C.HalfClipX);
+		Y = int(__NFUN_172__(C.HalfClipY, float(8)));
+		C.Font = Font'R6Font.Rainbow6_14pt';
+		// End:0x106
+		if(__NFUN_151__(iTimeLeft, 20))
 		{
-			sTime=  Localize("Game", "BombDefused", "R6GameInfo") $ " ";
-			C.UseVirtualSize(true, 640, 480);
-			X = C.HalfClipX;
-			Y = C.HalfClipY/16;
-			C.Font = font'R6Font.Rainbow6_14pt';
-			C.SetDrawColor(255,255,255);    // white
-			C.StrLen( sTime, fStrSizeX, fStrSizeY );
-			C.SetPos( X - fStrSizeX/2, Y + 48 );
-			C.DrawText( sTime );
-
+			C.__NFUN_2626__(byte(255), byte(255), byte(255));			
 		}
-		
+		else
+		{
+			// End:0x12B
+			if(__NFUN_151__(iTimeLeft, 10))
+			{
+				C.__NFUN_2626__(byte(255), byte(255), 0);				
+			}
+			else
+			{
+				C.__NFUN_2626__(byte(255), 0, 0);
+			}
+		}
+		C.__NFUN_464__(sTime, fStrSizeX, fStrSizeY);
+		C.__NFUN_2623__(__NFUN_175__(float(X), __NFUN_172__(fStrSizeX, float(2))), float(__NFUN_146__(Y, 24)));
+		C.__NFUN_465__(sTime);
 	}
-	*/
-
-    /*C.UseVirtualSize(true, 640, 480);
-    X = C.HalfClipX;
-	Y = C.HalfClipY/16;
-	C.Font = font'R6Font.Rainbow6_14pt'; 
-	
-	if ( iTimeLeft > 20 )
-		C.SetDrawColor(255,255,255);    // white
-	else if ( iTimeLeft > 10 )
-		C.SetDrawColor(255,255,0);      // yellow
-	else
-		C.SetDrawColor(255,0,0);        // red
-
-	C.StrLen( sTime, fStrSizeX, fStrSizeY );
-	C.SetPos( X - fStrSizeX/2, Y + 24 );
-	C.DrawText( sTime );*/
-
+	return;
 }
 
-simulated function PostRender2(canvas C )
+simulated function PostRender2(Canvas C)
 {
-	local FLOAT fStrSizeX, fStrSizeY;
-	local INT X, Y;
+	local float fStrSizeX, fStrSizeY;
+	local int X, Y;
 	local string sTime;
 
+	// End:0x1D
 	if(m_bIsActivated)
-		m_fDefusedTimeMessage = Level.TimeSeconds;
-
-	if(!m_bIsActivated)
 	{
-		log("LevelTimeSeconds="$Level.TimeSeconds$" ,m_fDefusedTimeMessage="$m_fDefusedTimeMessage);
-		if((Level.TimeSeconds - m_fDefusedTimeMessage) < 3)
-		{
-			sTime=  Localize("Game", "BombDefused", "R6GameInfo") $ " ";
-			C.UseVirtualSize(true, 640, 480);
-			X = C.HalfClipX;
-            Y = C.HalfClipY/8; //MPF_Milan_9_12_2003 - was /16
-			C.Font = font'R6Font.Rainbow6_14pt';
-			C.SetDrawColor(255,255,255);    // white
-			C.StrLen( sTime, fStrSizeX, fStrSizeY );
-			C.SetPos( X - fStrSizeX/2, Y + 48 );
-			C.DrawText( sTime );
-
-		}
-		
+		m_fDefusedTimeMessage = Level.TimeSeconds;
 	}
+	// End:0x142
+	if(__NFUN_129__(m_bIsActivated))
+	{
+		// End:0x142
+		if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, m_fDefusedTimeMessage), float(3)))
+		{
+			sTime = __NFUN_112__(Localize("Game", "BombDefused", "R6GameInfo"), " ");
+			C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+			X = int(C.HalfClipX);
+			Y = int(__NFUN_172__(C.HalfClipY, float(8)));
+			C.Font = Font'R6Font.Rainbow6_14pt';
+			C.__NFUN_2626__(byte(255), byte(255), byte(255));
+			C.__NFUN_464__(sTime, fStrSizeX, fStrSizeY);
+			C.__NFUN_2623__(__NFUN_175__(float(X), __NFUN_172__(fStrSizeX, float(2))), float(__NFUN_146__(Y, 48)));
+			C.__NFUN_465__(sTime);
+		}
+	}
+	return;
 }
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function ResetOriginalData

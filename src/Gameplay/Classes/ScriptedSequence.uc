@@ -1,50 +1,55 @@
 //=============================================================================
+// ScriptedSequence - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // ScriptedSequence
 // used for setting up scripted sequences for pawns.
 // A ScriptedController is spawned to carry out the scripted sequence.
 //=============================================================================
 class ScriptedSequence extends AIScript;
 
-var(AIScript) export editinline Array<ScriptedAction> Actions;
-var class<ScriptedController>  ScriptControllerClass;
+var Class<ScriptedController> ScriptControllerClass;
+var(AIScript) export editinline array<export editinline ScriptedAction> Actions;
 
-/* SpawnController()
-Spawn and initialize an AI Controller (called by a non-player controlled Pawn at level startup)
-*/
 function SpawnControllerFor(Pawn P)
 {
-	Super.SpawnControllerFor(P);
+	super.SpawnControllerFor(P);
 	TakeOver(P);
+	return;
 }
 
-/* TakeOver()
-Spawn a scripted controller, which temporarily takes over the actions of the pawn,
-unless pawn is currently controlled by a scripted controller - then just change its script
-*/
 function TakeOver(Pawn P)
 {
 	local ScriptedController S;
 
-	if ( ScriptedController(P.Controller) != None )
-		S = ScriptedController(P.Controller);
+	// End:0x35
+	if(__NFUN_119__(ScriptedController(P.Controller), none))
+	{
+		S = ScriptedController(P.Controller);		
+	}
 	else
 	{
-		S = spawn(ScriptControllerClass);
+		S = __NFUN_278__(ScriptControllerClass);
 		S.PendingController = P.Controller;
-		if ( S.PendingController != None )
+		// End:0x8C
+		if(__NFUN_119__(S.PendingController, none))
+		{
 			S.PendingController.PendingStasis();
+		}
 	}
 	S.MyScript = self;
 	S.TakeControlOf(P);
 	S.SetNewScript(self);
+	return;
 }
-		
-//*****************************************************************************************
-// Script Changes
 
-function bool ValidAction(Int N)
+function bool ValidAction(int N)
 {
 	return true;
+	return;
 }
 
 function SetActions(ScriptedController C)
@@ -52,61 +57,84 @@ function SetActions(ScriptedController C)
 	local ScriptedSequence NewScript;
 	local bool bDone;
 
-	if ( C.CurrentAnimation != None )
-		C.CurrentAnimation.SetCurrentAnimationFor(C);
-	while ( !bDone )
+	// End:0x31
+	if(__NFUN_119__(C.CurrentAnimation, none))
 	{
-		if ( C.ActionNum < Actions.Length )
+		C.CurrentAnimation.SetCurrentAnimationFor(C);
+	}
+	J0x31:
+
+	// End:0x2C8 [Loop If]
+	if(__NFUN_129__(bDone))
+	{
+		// End:0xF8
+		if(__NFUN_150__(C.ActionNum, Actions.Length))
 		{
-			if ( ValidAction(C.ActionNum) )
-				NewScript = Actions[C.ActionNum].GetScript(self);
+			// End:0x94
+			if(ValidAction(C.ActionNum))
+			{
+				NewScript = Actions[C.ActionNum].GetScript(self);				
+			}
 			else
 			{
-				NewScript = None;
-				warn(GetItemName(string(self))$" action "$C.ActionNum@Actions[C.ActionNum].GetActionString()$" NOT VALID!!!");
-			}
+				NewScript = none;
+				__NFUN_232__(__NFUN_112__(__NFUN_168__(__NFUN_112__(__NFUN_112__(GetItemName(string(self)), " action "), string(C.ActionNum)), Actions[C.ActionNum].GetActionString()), " NOT VALID!!!"));
+			}			
 		}
-		else 
-			NewScript = None;
-		if ( NewScript == None )
+		else
 		{
-			C.CurrentAction = None;
+			NewScript = none;
+		}
+		// End:0x11C
+		if(__NFUN_114__(NewScript, none))
+		{
+			C.CurrentAction = none;
 			return;
 		}
-		if ( NewScript != self )
+		// End:0x13D
+		if(__NFUN_119__(NewScript, self))
 		{
 			C.SetNewScript(NewScript);
 			return;
 		}
-		if ( Actions[C.ActionNum] == None )
+		// End:0x196
+		if(__NFUN_114__(Actions[C.ActionNum], none))
 		{
-			Warn(self$" no action "$C.ActionNum$"!!!");
-			C.CurrentAction = None;
+			__NFUN_232__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " no action "), string(C.ActionNum)), "!!!"));
+			C.CurrentAction = none;
 			return;
 		}
 		bDone = Actions[C.ActionNum].InitActionFor(C);
-		if ( bLoggingEnabled )
-			log(GetItemName(string(C.Pawn))$" script "$GetItemName(string(tag))$" action "$C.ActionNum@Actions[C.ActionNum].GetActionString());
-		if  ( !bDone )
+		// End:0x23A
+		if(bLoggingEnabled)
 		{
-			if ( Actions[C.ActionNum] == None )
+			__NFUN_231__(__NFUN_168__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetItemName(string(C.Pawn)), " script "), GetItemName(string(Tag))), " action "), string(C.ActionNum)), Actions[C.ActionNum].GetActionString()));
+		}
+		// End:0x2C5
+		if(__NFUN_129__(bDone))
+		{
+			// End:0x2A2
+			if(__NFUN_114__(Actions[C.ActionNum], none))
 			{
-				Warn(self$" has no action "$C.ActionNum$"!!!");
-				C.CurrentAction = None;
+				__NFUN_232__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " has no action "), string(C.ActionNum)), "!!!"));
+				C.CurrentAction = none;
 				return;
 			}
 			Actions[C.ActionNum].ProceedToNextAction(C);
 		}
+		// [Loop Continue]
+		goto J0x31;
 	}
+	return;
 }
 
 defaultproperties
 {
-     ScriptControllerClass=Class'Gameplay.ScriptedController'
-     bNavigate=True
-     bStatic=False
-     bCollideWhenPlacing=True
-     bDirectional=True
-     CollisionRadius=50.000000
-     CollisionHeight=100.000000
+	ScriptControllerClass=Class'Gameplay.ScriptedController'
+	bNavigate=true
+	bStatic=false
+	bCollideWhenPlacing=true
+	bDirectional=true
+	CollisionRadius=50.0000000
+	CollisionHeight=100.0000000
 }

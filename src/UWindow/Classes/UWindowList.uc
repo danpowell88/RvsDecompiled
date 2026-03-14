@@ -1,65 +1,63 @@
 //=============================================================================
+// UWindowList - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // UWindowList - a generic linked list class
 //=============================================================================
 class UWindowList extends UWindowBase;
 
-var UWindowList	Next;
-var UWindowList	Last;		// Only valid for sentinel
-var UWindowList	Prev;
-var UWindowList	Sentinel;
-var int			InternalCount;
-var bool		bItemOrderChanged;
-
-var bool		bSuspendableSort;
-
-var int			CompareCount;
-var bool		bSortSuspended;
-var UWindowList CurrentSortItem;
-
+var int InternalCount;
+var int CompareCount;
+var bool bItemOrderChanged;
+var bool bSuspendableSort;
+var bool bSortSuspended;
 // Binary tree variables for sentinel
-var bool		bTreeSort;
-
+var bool bTreeSort;
+var bool m_bShowThisItem;
+var UWindowList Next;
+var UWindowList Last;  // Only valid for sentinel
+var UWindowList Prev;
+var UWindowList Sentinel;
+var UWindowList CurrentSortItem;
 // Binary tree variables for each element
 var UWindowList BranchLeft;
 var UWindowList BranchRight;
 var UWindowList ParentNode;
 
-var BOOL		m_bShowThisItem;
-
-/* Tree Sorting:
-
-- Items must be added with AppendItem()
-- Items which require resorting must call MoveItemSorted()
-- Should call Tick and set bSuspendableSort - for large sorts!
-
-*/
-
-/********** These things can be called on any element **********/
-
 function UWindowList CreateItem(Class<UWindowList> C)
 {
 	local UWindowList NewElement;
 
-	NewElement = New C;
+	NewElement = new C;
 	return NewElement;
+	return;
 }
 
 function GraftLeft(UWindowList NewLeft)
 {
 	assert(Sentinel.bTreeSort);
-
 	BranchLeft = NewLeft;
-	if(NewLeft != None)
-		NewLeft.ParentNode = Self;
+	// End:0x38
+	if(__NFUN_119__(NewLeft, none))
+	{
+		NewLeft.ParentNode = self;
+	}
+	return;
 }
 
 function GraftRight(UWindowList NewRight)
 {
 	assert(Sentinel.bTreeSort);
-
 	BranchRight = NewRight;
-	if(NewRight != None)
-		NewRight.ParentNode = Self;
+	// End:0x38
+	if(__NFUN_119__(NewRight, none))
+	{
+		NewRight.ParentNode = self;
+	}
+	return;
 }
 
 // Return rightmost child of subtree
@@ -68,15 +66,23 @@ function UWindowList RightMost()
 	local UWindowList L;
 
 	assert(Sentinel.bTreeSort);
+	// End:0x1F
+	if(__NFUN_114__(BranchRight, none))
+	{
+		return none;
+	}
+	L = self;
+	J0x26:
 
-	if(BranchRight == None)
-		return None;
-
-	L = Self;
-	while(L.BranchRight != None)
+	// End:0x51 [Loop If]
+	if(__NFUN_119__(L.BranchRight, none))
+	{
 		L = L.BranchRight;
-
+		// [Loop Continue]
+		goto J0x26;
+	}
 	return L;
+	return;
 }
 
 // Return leftmost child of subtree
@@ -85,78 +91,100 @@ function UWindowList LeftMost()
 	local UWindowList L;
 
 	assert(Sentinel.bTreeSort);
+	// End:0x1F
+	if(__NFUN_114__(BranchLeft, none))
+	{
+		return none;
+	}
+	L = self;
+	J0x26:
 
-	if(BranchLeft == None)
-		return None;
-
-	L = Self;
-	while(L.BranchLeft != None)
+	// End:0x51 [Loop If]
+	if(__NFUN_119__(L.BranchLeft, none))
+	{
 		L = L.BranchLeft;
-
+		// [Loop Continue]
+		goto J0x26;
+	}
 	return L;
+	return;
 }
 
 function Remove()
 {
-	local UWindowList T;
+	local UWindowList t;
 
-	if(Next != None)
-		Next.Prev = Prev;
-	
-	if(Prev != None)
-		Prev.Next = Next;
-	
-	if(Sentinel != None)
+	// End:0x1F
+	if(__NFUN_119__(Next, none))
 	{
-		if(Sentinel.bTreeSort && ParentNode!=None)
+		Next.Prev = Prev;
+	}
+	// End:0x3E
+	if(__NFUN_119__(Prev, none))
+	{
+		Prev.Next = Next;
+	}
+	// End:0x1BD
+	if(__NFUN_119__(Sentinel, none))
+	{
+		// End:0x15F
+		if(__NFUN_130__(Sentinel.bTreeSort, __NFUN_119__(ParentNode, none)))
 		{
-			if(BranchLeft != None)
+			// End:0xFA
+			if(__NFUN_119__(BranchLeft, none))
 			{
-				if(ParentNode.BranchLeft == Self)
+				// End:0x9B
+				if(__NFUN_114__(ParentNode.BranchLeft, self))
+				{
 					ParentNode.GraftLeft(BranchLeft);
-				if(ParentNode.BranchRight == Self)
+				}
+				// End:0xC3
+				if(__NFUN_114__(ParentNode.BranchRight, self))
+				{
 					ParentNode.GraftRight(BranchLeft);
-
-				// If we had a right branch we better move it
-				// into the far right of the left branch.
-
-				T = BranchLeft.Rightmost();
-				if(T != None)
-					T.GraftRight(BranchRight);
+				}
+				t = BranchLeft.RightMost();
+				// End:0xF7
+				if(__NFUN_119__(t, none))
+				{
+					t.GraftRight(BranchRight);
+				}				
 			}
 			else
 			{
-				if(ParentNode.BranchLeft == Self)
+				// End:0x122
+				if(__NFUN_114__(ParentNode.BranchLeft, self))
+				{
 					ParentNode.GraftLeft(BranchRight);
-				if(ParentNode.BranchRight == Self)
+				}
+				// End:0x14A
+				if(__NFUN_114__(ParentNode.BranchRight, self))
+				{
 					ParentNode.GraftRight(BranchRight);
-
-				// no left branch to worry about.
+				}
 			}
-	
-			ParentNode = None;
-			BranchLeft = None;
-			BranchRight = None;
+			ParentNode = none;
+			BranchLeft = none;
+			BranchRight = none;
 		}
-
-		Sentinel.InternalCount--;
-		Sentinel.bItemOrderChanged = True;
-
-		if(Sentinel.Last == Self)
+		__NFUN_166__(Sentinel.InternalCount);
+		Sentinel.bItemOrderChanged = true;
+		// End:0x1A8
+		if(__NFUN_114__(Sentinel.Last, self))
+		{
 			Sentinel.Last = Prev;
-
-		Prev=None;
-		Next=None;
-	
-	/*	Sentinel.Validate();  */
-		Sentinel = None;
+		}
+		Prev = none;
+		Next = none;
+		Sentinel = none;
 	}
+	return;
 }
 
-function int Compare(UWindowList T, UWindowList B)
+function int Compare(UWindowList t, UWindowList B)
 {
-	// declare actual sort method in subclass
 	return 0;
+	return;
 }
 
 // Inserts a new element before us.  DO NOT CALL on the sentinel.
@@ -166,8 +194,8 @@ function UWindowList InsertBefore(Class<UWindowList> C)
 
 	NewElement = CreateItem(C);
 	InsertItemBefore(NewElement);
-
 	return NewElement;
+	return;
 }
 
 function UWindowList InsertAfter(Class<UWindowList> C)
@@ -176,49 +204,64 @@ function UWindowList InsertAfter(Class<UWindowList> C)
 
 	NewElement = CreateItem(C);
 	InsertItemAfter(NewElement);
-
 	return NewElement;
+	return;
 }
-
 
 // Inserts an element before us.  DO NOT CALL on the sentinel.
 function InsertItemBefore(UWindowList NewElement)
 {
-	assert(Sentinel != Self);
-
-	NewElement.BranchLeft = None;
-	NewElement.BranchRight = None;
-	NewElement.ParentNode = None;
-	NewElement.Sentinel = Sentinel;	
-	NewElement.BranchLeft = None;
-	NewElement.BranchRight = None;
-	NewElement.ParentNode = None;
-	NewElement.Prev = Prev;	
+	assert(__NFUN_119__(Sentinel, self));
+	NewElement.BranchLeft = none;
+	NewElement.BranchRight = none;
+	NewElement.ParentNode = none;
+	NewElement.Sentinel = Sentinel;
+	NewElement.BranchLeft = none;
+	NewElement.BranchRight = none;
+	NewElement.ParentNode = none;
+	NewElement.Prev = Prev;
 	Prev.Next = NewElement;
 	Prev = NewElement;
-	NewElement.Next = Self;
-
-	if(Sentinel.Next == Self)
+	NewElement.Next = self;
+	// End:0xEA
+	if(__NFUN_114__(Sentinel.Next, self))
+	{
 		Sentinel.Next = NewElement;
-
-	Sentinel.InternalCount++;
-	Sentinel.bItemOrderChanged = True;
+	}
+	__NFUN_165__(Sentinel.InternalCount);
+	Sentinel.bItemOrderChanged = true;
+	return;
 }
 
 function InsertItemAfter(UWindowList NewElement, optional bool bCheckShowItem)
 {
 	local UWindowList N;
-	
-	N = Next;
-	if(bCheckShowItem)
-		while(N != None && !N.ShowThisItem())
-			N = N.Next; 
 
-	if(N != None)
-		N.InsertItemBefore(NewElement);
+	N = Next;
+	// End:0x4C
+	if(bCheckShowItem)
+	{
+		J0x14:
+
+		// End:0x4C [Loop If]
+		if(__NFUN_130__(__NFUN_119__(N, none), __NFUN_129__(N.ShowThisItem())))
+		{
+			N = N.Next;
+			// [Loop Continue]
+			goto J0x14;
+		}
+	}
+	// End:0x6E
+	if(__NFUN_119__(N, none))
+	{
+		N.InsertItemBefore(NewElement);		
+	}
 	else
+	{
 		Sentinel.DoAppendItem(NewElement);
-	Sentinel.bItemOrderChanged = True;
+	}
+	Sentinel.bItemOrderChanged = true;
+	return;
 }
 
 function ContinueSort()
@@ -226,254 +269,324 @@ function ContinueSort()
 	local UWindowList N;
 
 	CompareCount = 0;
-	bSortSuspended = False;
+	bSortSuspended = false;
+	J0x0F:
 
-	while(CurrentSortItem != None)
+	// End:0x6B [Loop If]
+	if(__NFUN_119__(CurrentSortItem, none))
 	{
 		N = CurrentSortItem.Next;
 		AppendItem(CurrentSortItem);
 		CurrentSortItem = N;
-
-		// split sort over multiple frames, if it's BIG
-		if(CompareCount >= 10000 && bSuspendableSort)
+		// End:0x68
+		if(__NFUN_130__(__NFUN_153__(CompareCount, 10000), bSuspendableSort))
 		{
-			bSortSuspended = True;
+			bSortSuspended = true;
 			return;
 		}
-	}		
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	return;
 }
 
 function Tick(float Delta)
 {
+	// End:0x0F
 	if(bSortSuspended)
+	{
 		ContinueSort();
+	}
+	return;
 }
 
 function UWindowList Sort()
 {
-	local UWindowList S;
-	local UWindowList CurrentItem;
-	local UWindowList Previous;
-	local UWindowList Best;
-	local UWindowList BestPrev;
+	local UWindowList S, CurrentItem, Previous, Best, BestPrev;
 
+	// End:0x33
 	if(bTreeSort)
 	{
+		// End:0x1A
 		if(bSortSuspended)
 		{
 			ContinueSort();
-			return Self;
+			return self;
 		}
-
 		CurrentSortItem = Next;
 		DisconnectList();
 		ContinueSort();
-		return Self;
+		return self;
 	}
+	CurrentItem = self;
+	J0x3A:
 
-	CurrentItem = Self;
-
-	while(CurrentItem != None)
+	// End:0x218 [Loop If]
+	if(__NFUN_119__(CurrentItem, none))
 	{
-		S = CurrentItem.Next;	Best = CurrentItem.Next;
-		Previous = CurrentItem;	BestPrev = CurrentItem;
-		
-		// Find the best server
-		while(S != None)
+		S = CurrentItem.Next;
+		Best = CurrentItem.Next;
+		Previous = CurrentItem;
+		BestPrev = CurrentItem;
+		J0x83:
+
+		// End:0xE5 [Loop If]
+		if(__NFUN_119__(S, none))
 		{
-			if(CurrentItem.Compare(S, Best) <= 0) 
+			// End:0xC3
+			if(__NFUN_152__(CurrentItem.Compare(S, Best), 0))
 			{
 				Best = S;
 				BestPrev = Previous;
 			}
-			
 			Previous = S;
 			S = S.Next;
+			// [Loop Continue]
+			goto J0x83;
 		}
-
-		// If we're not already in the right order, move the best one next.
-		if(Best != CurrentItem.Next)
+		// End:0x201
+		if(__NFUN_119__(Best, CurrentItem.Next))
 		{
-			// Delete Best's old position
 			BestPrev.Next = Best.Next;
-			if(BestPrev.Next != None)
+			// End:0x14B
+			if(__NFUN_119__(BestPrev.Next, none))
+			{
 				BestPrev.Next.Prev = BestPrev;
-
-			// Fix Self and Best
+			}
 			Best.Prev = CurrentItem;
 			Best.Next = CurrentItem.Next;
-			CurrentItem.Next.Prev = Best; 
+			CurrentItem.Next.Prev = Best;
 			CurrentItem.Next = Best;
-			
-			// Fix up Sentinel if Best was also Last 
-			if(Sentinel.Last == Best)
+			// End:0x201
+			if(__NFUN_114__(Sentinel.Last, Best))
 			{
 				Sentinel.Last = BestPrev;
-				if(Sentinel.Last == None)
+				// End:0x201
+				if(__NFUN_114__(Sentinel.Last, none))
+				{
 					Sentinel.Last = Sentinel;
+				}
 			}
 		}
-
 		CurrentItem = CurrentItem.Next;
+		// [Loop Continue]
+		goto J0x3A;
 	}
-
-	//Validate();
-	return Self;
+	return self;
+	return;
 }
 
-function DisconnectList() 
+function DisconnectList()
 {
-	Next=None;
-	Last=Self;
-	Prev=None;
-	BranchLeft = None;
-	BranchRight = None;
-	ParentNode = None;
+	Next = none;
+	Last = self;
+	Prev = none;
+	BranchLeft = none;
+	BranchRight = none;
+	ParentNode = none;
 	InternalCount = 0;
-	Sentinel.bItemOrderChanged = True;
+	Sentinel.bItemOrderChanged = true;
+	return;
 }
 
-function DestroyList() 
+function DestroyList()
 {
-	local UWindowList L, Temp;
+	local UWindowList L, temp;
+
 	L = Next;
-
 	InternalCount = 0;
-	if(Sentinel != None)
-		Sentinel.bItemOrderChanged = True;
-
-	while(L != None)
+	// End:0x2E
+	if(__NFUN_119__(Sentinel, none))
 	{
-		Temp = L.Next;
+		Sentinel.bItemOrderChanged = true;
+	}
+	J0x2E:
+
+	// End:0x6A [Loop If]
+	if(__NFUN_119__(L, none))
+	{
+		temp = L.Next;
 		L.DestroyListItem();
-		L = Temp;
+		L = temp;
+		// [Loop Continue]
+		goto J0x2E;
 	}
 	DestroyListItem();
+	return;
 }
 
 function DestroyListItem()
 {
-	Next=None;
-	Last=Self;
-	Sentinel=None;
-	Prev=None;
-	BranchLeft=None;
-	BranchRight=None;
-	ParentNode=None;
+	Next = none;
+	Last = self;
+	Sentinel = none;
+	Prev = none;
+	BranchLeft = none;
+	BranchRight = none;
+	ParentNode = none;
+	return;
 }
 
-function int CountShown() 
+function int CountShown()
 {
 	local int C;
-	local UWindowList I;
+	local UWindowList i;
 
-	for(I = Next;I != None; I = I.Next)
-		if(I.ShowThisItem())
-			C++;
+	i = Next;
+	J0x0B:
 
+	// End:0x46 [Loop If]
+	if(__NFUN_119__(i, none))
+	{
+		// End:0x2F
+		if(i.ShowThisItem())
+		{
+			__NFUN_165__(C);
+		}
+		i = i.Next;
+		// [Loop Continue]
+		goto J0x0B;
+	}
 	return C;
+	return;
 }
 
 function UWindowList CopyExistingListItem(Class<UWindowList> ItemClass, UWindowList SourceItem)
 {
-	local UWindowList I;
+	local UWindowList i;
 
-	I = Append(ItemClass);
-	Sentinel.bItemOrderChanged = True;
-
-	return I;
+	i = Append(ItemClass);
+	Sentinel.bItemOrderChanged = true;
+	return i;
+	return;
 }
 
 // for Listboxes only (so far)
 function bool ShowThisItem()
 {
 	return m_bShowThisItem;
-//	return True;
+	return;
 }
 
-/********** These things can only be called on the sentinel **********/
-function int Count() 
+function int Count()
 {
 	return InternalCount;
+	return;
 }
 
 function MoveItemSorted(UWindowList Item)
 {
 	local UWindowList L;
 
+	// End:0x26
 	if(bTreeSort)
 	{
 		Item.Remove();
-		AppendItem(Item);
+		AppendItem(Item);		
 	}
 	else
 	{
-		for(L=Next;L != None; L = L.Next)
-			if(Compare(Item, L) <= 0) break;
+		L = Next;
+		J0x31:
 
-		if(L != Item)
+		// End:0x6C [Loop If]
+		if(__NFUN_119__(L, none))
+		{
+			// End:0x55
+			if(__NFUN_152__(Compare(Item, L), 0))
+			{
+				// [Explicit Break]
+				goto J0x6C;
+			}
+			L = L.Next;
+			// [Loop Continue]
+			goto J0x31;
+		}
+		J0x6C:
+
+		// End:0xB7
+		if(__NFUN_119__(L, Item))
 		{
 			Item.Remove();
-			if(L == None)
-				AppendItem(Item);
+			// End:0xA3
+			if(__NFUN_114__(L, none))
+			{
+				AppendItem(Item);				
+			}
 			else
+			{
 				L.InsertItemBefore(Item);
+			}
 		}
 	}
+	return;
 }
 
 function SetupSentinel(optional bool bInTreeSort)
 {
-	Last = Self;
-	Next = None;
-	Prev = None;
-	BranchLeft = None;
-	BranchRight = None;
-	ParentNode = None;
-	Sentinel = Self;
+	Last = self;
+	Next = none;
+	Prev = none;
+	BranchLeft = none;
+	BranchRight = none;
+	ParentNode = none;
+	Sentinel = self;
 	InternalCount = 0;
-	bItemOrderChanged = True;
+	bItemOrderChanged = true;
 	bTreeSort = bInTreeSort;
+	return;
 }
 
 function Validate()
 {
-	local UWindowList I, Previous;
+	local UWindowList i, Previous;
 	local int Count;
 
-	if(Sentinel != Self)
+	// End:0x46
+	if(__NFUN_119__(Sentinel, self))
 	{
-		Log("Calling Sentinel.Validate() from "$Self);
+		__NFUN_231__(__NFUN_112__("Calling Sentinel.Validate() from ", string(self)));
 		Sentinel.Validate();
 		return;
 	}
-
-	Log("BEGIN Validate(): "$Class);
-
+	__NFUN_231__(__NFUN_112__("BEGIN Validate(): ", string(Class)));
 	Count = 0;
-	Previous = Self;
+	Previous = self;
+	i = Next;
+	J0x7E:
 
-	for(I = Next; I != None; I = I.Next)
+	// End:0x1FD [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		Log("Checking item: "$Count);
-
-		if(I.Sentinel != Self)
-			Log("   I.Sentinel reference is broken");
-	
-		if(I.Prev != Previous)
-			Log("   I.Prev reference is broken");
-
-		if(Last == I && I.Next != None)
-			Log("   Item is Sentinel.Last but Item has valid Next");
-
-		if(I.Next == None && Last != I)
-			Log("   Item is Item.Next is none, but Item is not Sentinel.Last");
-
-		Previous = I;
-		Count++;
+		__NFUN_231__(__NFUN_112__("Checking item: ", string(Count)));
+		// End:0xDE
+		if(__NFUN_119__(i.Sentinel, self))
+		{
+			__NFUN_231__("   I.Sentinel reference is broken");
+		}
+		// End:0x117
+		if(__NFUN_119__(i.Prev, Previous))
+		{
+			__NFUN_231__("   I.Prev reference is broken");
+		}
+		// End:0x170
+		if(__NFUN_130__(__NFUN_114__(Last, i), __NFUN_119__(i.Next, none)))
+		{
+			__NFUN_231__("   Item is Sentinel.Last but Item has valid Next");
+		}
+		// End:0x1D4
+		if(__NFUN_130__(__NFUN_114__(i.Next, none), __NFUN_119__(Last, i)))
+		{
+			__NFUN_231__("   Item is Item.Next is none, but Item is not Sentinel.Last");
+		}
+		Previous = i;
+		__NFUN_165__(Count);
+		i = i.Next;
+		// [Loop Continue]
+		goto J0x7E;
 	}
-
-	Log("END Validate(): "$Class);		
+	__NFUN_231__(__NFUN_112__("END Validate(): ", string(Class)));
+	return;
 }
 
 // For sentinel only
@@ -482,104 +595,123 @@ function UWindowList Append(Class<UWindowList> C)
 	local UWindowList NewElement;
 
 	NewElement = CreateItem(C);
-	AppendItem(NewElement);	
-	
+	AppendItem(NewElement);
 	return NewElement;
+	return;
 }
 
 function AppendItem(UWindowList NewElement)
 {
-	local UWindowList Node, OldNode, Temp;
-	local int Test;
+	local UWindowList Node, OldNode, temp;
+	local int test;
 
+	// End:0x225
 	if(bTreeSort)
 	{
-		// Check for worst cases!
-		if(Next != None && Last != Self)
+		// End:0xB8
+		if(__NFUN_130__(__NFUN_119__(Next, none), __NFUN_119__(Last, self)))
 		{
-			if(Compare(NewElement, Last) >= 0)
+			// End:0x6D
+			if(__NFUN_153__(Compare(NewElement, Last), 0))
 			{
-				// put at end of list
 				Node = Last;
-				Node.InsertItemAfter(NewElement, False);
+				Node.InsertItemAfter(NewElement, false);
 				Node.GraftRight(NewElement);
-				return;	
+				return;
 			}
-
-			if(Compare(NewElement, Next) <= 0)
+			// End:0xB8
+			if(__NFUN_152__(Compare(NewElement, Next), 0))
 			{
-				// put at front of list
 				Node = Next;
 				Node.InsertItemBefore(NewElement);
 				Node.GraftLeft(NewElement);
 				return;
 			}
 		}
+		Node = self;
+		J0xBF:
 
-		Node = Self;
-		while(True)
+		// End:0x222 [Loop If]
+		if(true)
 		{
-			if(Node == Self)
-				Test = 1;
+			// End:0xD8
+			if(__NFUN_114__(Node, self))
+			{
+				test = 1;				
+			}
 			else
-				Test = Compare(NewElement, Node);
+			{
+				test = Compare(NewElement, Node);
+			}
+			// End:0x113
+			if(__NFUN_154__(test, 0))
+			{
+				Node.InsertItemAfter(NewElement, false);
+				return;				
+			}
+			else
+			{
+				// End:0x1CB
+				if(__NFUN_151__(test, 0))
+				{
+					OldNode = Node;
+					Node = Node.BranchRight;
+					// End:0x1C8
+					if(__NFUN_114__(Node, none))
+					{
+						temp = OldNode;
+						J0x153:
 
-			// special case for equality
-			if(Test == 0)
-			{
-				Node.InsertItemAfter(NewElement, False);
-				return;
-			}
-			else
-			if(Test > 0)
-			{
-				// Traverse right
-				OldNode = Node;
-				Node = Node.BranchRight;
-				if(Node == None)
+						// End:0x19D [Loop If]
+						if(__NFUN_130__(__NFUN_119__(temp.Next, none), __NFUN_114__(temp.Next.ParentNode, none)))
+						{
+							temp = temp.Next;
+							// [Loop Continue]
+							goto J0x153;
+						}
+						temp.InsertItemAfter(NewElement, false);
+						OldNode.GraftRight(NewElement);
+						return;
+					}					
+				}
+				else
 				{
-					// Move past equal values
-					Temp = OldNode;
-					while(Temp.Next != None && Temp.Next.ParentNode == None)
-						Temp = Temp.Next;
-					
-					Temp.InsertItemAfter(NewElement, False);
-					OldNode.GraftRight(NewElement);
-					return;
+					OldNode = Node;
+					Node = Node.BranchLeft;
+					// End:0x21F
+					if(__NFUN_114__(Node, none))
+					{
+						OldNode.InsertItemBefore(NewElement);
+						OldNode.GraftLeft(NewElement);
+						return;
+					}
 				}
 			}
-			else
-			{
-				// Traverse left
-				OldNode = Node;
-				Node = Node.BranchLeft;
-				if(Node == None)
-				{
-					OldNode.InsertItemBefore(NewElement);
-					OldNode.GraftLeft(NewElement);
-					return;
-				}
-			}
-		}
+			// [Loop Continue]
+			goto J0xBF;
+		}		
 	}
 	else
+	{
 		DoAppendItem(NewElement);
+	}
+	return;
 }
 
 function DoAppendItem(UWindowList NewElement)
 {
-	NewElement.Next = None;
+	NewElement.Next = none;
 	Last.Next = NewElement;
 	NewElement.Prev = Last;
-	NewElement.Sentinel = Self;
-	NewElement.BranchLeft = None;
-	NewElement.BranchRight = None;
-	NewElement.ParentNode = None;
+	NewElement.Sentinel = self;
+	NewElement.BranchLeft = none;
+	NewElement.BranchRight = none;
+	NewElement.ParentNode = none;
 	Last = NewElement;
-	Sentinel.InternalCount++;
-	Sentinel.bItemOrderChanged = True;
+	__NFUN_165__(Sentinel.InternalCount);
+	Sentinel.bItemOrderChanged = true;
+	return;
 }
-
 
 // For sentinel only
 function UWindowList Insert(Class<UWindowList> C)
@@ -588,60 +720,92 @@ function UWindowList Insert(Class<UWindowList> C)
 
 	NewElement = CreateItem(C);
 	InsertItem(NewElement);
-	
 	return NewElement;
+	return;
 }
 
 function InsertItem(UWindowList NewElement)
 {
 	NewElement.Next = Next;
-	if(Next != None)
+	// End:0x33
+	if(__NFUN_119__(Next, none))
+	{
 		Next.Prev = NewElement;
+	}
 	Next = NewElement;
-	if(Last == Self)
+	// End:0x54
+	if(__NFUN_114__(Last, self))
+	{
 		Last = Next;
-	NewElement.Prev = Self;
-	NewElement.Sentinel = Self;	
-	NewElement.BranchLeft = None;
-	NewElement.BranchRight = None;
-	NewElement.ParentNode = None;
-	Sentinel.InternalCount++;
-	Sentinel.bItemOrderChanged = True;
+	}
+	NewElement.Prev = self;
+	NewElement.Sentinel = self;
+	NewElement.BranchLeft = none;
+	NewElement.BranchRight = none;
+	NewElement.ParentNode = none;
+	__NFUN_165__(Sentinel.InternalCount);
+	Sentinel.bItemOrderChanged = true;
+	return;
 }
 
 // For sentinel only
 function UWindowList FindEntry(int Index)
 {
-	local UWindowList l;
+	local UWindowList L;
 	local int i;
 
-	l = Next;
-	for(i=0;i<Index;i++) 
+	L = Next;
+	i = 0;
+	J0x12:
+
+	// End:0x4C [Loop If]
+	if(__NFUN_150__(i, Index))
 	{
-		l = l.Next;
-		if(l==None) return None;
+		L = L.Next;
+		// End:0x42
+		if(__NFUN_114__(L, none))
+		{
+			return none;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x12;
 	}
-	return l;
+	return L;
+	return;
 }
 
 function AppendListCopy(UWindowList L)
 {
-	if(L == None)
+	// End:0x0D
+	if(__NFUN_114__(L, none))
+	{
 		return;
+	}
+	L = L.Next;
+	J0x21:
 
-	for(L = L.Next;L != None; L = L.Next)
+	// End:0x5C [Loop If]
+	if(__NFUN_119__(L, none))
+	{
 		CopyExistingListItem(L.Class, L);
+		L = L.Next;
+		// [Loop Continue]
+		goto J0x21;
+	}
+	return;
 }
 
 function Clear()
 {
 	InternalCount = 0;
-	ParentNode = None;
-	BranchLeft = None;
-	BranchRight = None;
-	bItemOrderChanged = True;
-	Next = None;	
-	Last = Self;
+	ParentNode = none;
+	BranchLeft = none;
+	BranchRight = none;
+	bItemOrderChanged = true;
+	Next = none;
+	Last = self;
+	return;
 }
 
 //=====================================================================================
@@ -649,10 +813,10 @@ function Clear()
 //=====================================================================================
 function ClearItem()
 {
-	// clear variables
+	return;
 }
 
 defaultproperties
 {
-     m_bShowThisItem=True
+	m_bShowThisItem=true
 }

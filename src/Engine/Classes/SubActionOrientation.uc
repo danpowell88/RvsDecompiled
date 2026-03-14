@@ -1,15 +1,22 @@
 //=============================================================================
+// SubActionOrientation - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // SubActionOrientation:
 //
 // Changes the camera orientation.
 //=============================================================================
 class SubActionOrientation extends MatSubAction
-	native;
+	native
+	editinlinenew;
 
-var(Orientation)	Orientation		CamOrientation;
+var(Orientation) Orientation CamOrientation;
 
 defaultproperties
 {
-     Icon=Texture'Engine.SubActionOrientation'
-     Desc="Orientation"
+	Icon=Texture'Engine.SubActionOrientation'
+	Desc="Orientation"
 }

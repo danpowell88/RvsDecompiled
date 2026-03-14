@@ -1,27 +1,30 @@
 //=============================================================================
+// KarmaParamsRBFull - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // This is the full set of Karma parameters, including inertia tensor and 
 // centre-of-mass position, which are normally stored with the StaticMesh.
 // This gives you a chance to overrids these values.
 // NB: All parameters are in KARMA scale!
 //=============================================================================
-
 class KarmaParamsRBFull extends KarmaParams
-	editinlinenew
-	native;
+	native
+	editinlinenew;
 
 // Inertia tensor of object assuming a mass of 1 - symmetric so just store 6 elements:
 // (0 1 2)
 // (1 3 4)
 // (2 4 5)
 // This will be scaled by the mass of the object to work out its actual inertia tensor.
-var()    float   KInertiaTensor[6];
-var()    vector  KCOMOffset;         // Position of centre of mass in body ref. frame
-
-// default is sphere with radius 1
+var() float KInertiaTensor[6];
+var() Vector KCOMOffset;  // Position of centre of mass in body ref. frame
 
 defaultproperties
 {
-     KInertiaTensor(0)=0.400000
-     KInertiaTensor(3)=0.400000
-     KInertiaTensor(5)=0.400000
+	KInertiaTensor[0]=0.4000000
+	KInertiaTensor[3]=0.4000000
+	KInertiaTensor[5]=0.4000000
 }

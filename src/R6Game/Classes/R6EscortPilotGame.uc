@@ -1,40 +1,40 @@
 //=============================================================================
+// R6EscortPilotGame - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6EscortPilotGame.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/12/17 * Created by Aristomenis Kolokathis
 //=============================================================================
+class R6EscortPilotGame extends R6AdversarialTeamGame
+	config
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-class R6EscortPilotGame extends R6AdversarialTeamGame;
-
-
-var R6MObjGoToExtraction        m_objGoToExtraction;
-
-
-var R6PlayerController  m_pilotController;
-var R6PlayerController  m_previousPilot;
-
-var string              m_szPilotSkin;
-
-var config BOOL EnablePilotPrimaryWeapon;
-var config BOOL EnablePilotSecondaryWeapon;
-var config BOOL EnablePilotTertiaryWeapon;
-
+var config bool EnablePilotPrimaryWeapon;
+var config bool EnablePilotSecondaryWeapon;
+var config bool EnablePilotTertiaryWeapon;
+var R6MObjGoToExtraction m_objGoToExtraction;
+var R6PlayerController m_pilotController;
+var R6PlayerController m_previousPilot;
 var Sound m_sndPilot;
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    LoadConfig( "R6EscortPilotGame.ini" );
-    
-    if ( bShowLog )
-    {
-        log( "EnablePilotPrimaryWeapon   =" $EnablePilotPrimaryWeapon );
-        log( "EnablePilotSecondaryWeapon =" $EnablePilotSecondaryWeapon );
-        log( "EnablePilotTertiaryWeapon  =" $EnablePilotTertiaryWeapon );
-    }
-
+	super.PostBeginPlay();
+	__NFUN_1010__("R6EscortPilotGame.ini");
+	// End:0xA7
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_112__("EnablePilotPrimaryWeapon   =", string(EnablePilotPrimaryWeapon)));
+		__NFUN_231__(__NFUN_112__("EnablePilotSecondaryWeapon =", string(EnablePilotSecondaryWeapon)));
+		__NFUN_231__(__NFUN_112__("EnablePilotTertiaryWeapon  =", string(EnablePilotTertiaryWeapon)));
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -43,41 +43,40 @@ event PostBeginPlay()
 //------------------------------------------------------------------
 function InitObjectives()
 {
-    local int iLength;
+	local int iLength;
 
-    // mission objective: go to extraction
-    m_objGoToExtraction = new(none) class'R6Game.R6MObjGoToExtraction';
-    m_objGoToExtraction.m_bIfCompletedMissionIsSuccessfull = true;
-    m_objGoToExtraction.m_bIfFailedMissionIsAborted        = true;
-    m_objGoToExtraction.SetPawnToExtract( none ); // force to have none if there's no rainbow in green
-
-    iLength = m_missionMgr.m_aMissionObjectives.Length;
-    m_missionMgr.m_aMissionObjectives[iLength] = m_objGoToExtraction;
-    iLength++;
-
-    m_objGoToExtraction.m_szDescriptionInMenu = "EscortPilotToExtraction";
-
-    // init the manager
-    m_missionMgr.m_bOnSuccessAllObjectivesAreCompleted = false;
-    Level.m_bUseDefaultMoralityRules = false;
-    Super.InitObjectives();
+	m_objGoToExtraction = new (none) Class'R6Game.R6MObjGoToExtraction';
+	m_objGoToExtraction.m_bIfCompletedMissionIsSuccessfull = true;
+	m_objGoToExtraction.m_bIfFailedMissionIsAborted = true;
+	m_objGoToExtraction.SetPawnToExtract(none);
+	iLength = m_missionMgr.m_aMissionObjectives.Length;
+	m_missionMgr.m_aMissionObjectives[iLength] = m_objGoToExtraction;
+	__NFUN_165__(iLength);
+	m_objGoToExtraction.m_szDescriptionInMenu = "EscortPilotToExtraction";
+	m_missionMgr.m_bOnSuccessAllObjectivesAreCompleted = false;
+	Level.m_bUseDefaultMoralityRules = false;
+	super.InitObjectives();
+	return;
 }
 
 //------------------------------------------------------------------
 // PawnKilled
 //	
 //------------------------------------------------------------------
-function PawnKilled( Pawn killedPawn )
+function PawnKilled(Pawn killedPawn)
 {
-    if ( m_bGameOver )
-        return;
-
-    if ( R6Pawn( killedPawn ) == m_objGoToExtraction.m_pawnToExtract )
-    {
-        BroadcastMissionObjMsg( "", "", "PilotWasKilled" );
-    }
-
-    super.PawnKilled( killedPawn );
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	// End:0x42
+	if(__NFUN_114__(R6Pawn(killedPawn), m_objGoToExtraction.m_pawnToExtract))
+	{
+		BroadcastMissionObjMsg("", "", "PilotWasKilled");
+	}
+	super(R6GameInfo).PawnKilled(killedPawn);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -86,21 +85,19 @@ function PawnKilled( Pawn killedPawn )
 //------------------------------------------------------------------
 function UnselectPilot()
 {
-        // remove the flag
-    if ( m_pilotController != none )
-    {
-        m_pilotController.PlayerReplicationInfo.m_bIsEscortedPilot = false;
-        m_previousPilot = m_pilotController;
-        
-        // the pilot has disconnected
-        if ( m_previousPilot.m_pawn != none &&
-             m_previousPilot.m_pawn.m_bSuicideType == DEATHMSG_CONNECTIONLOST )
-        {
-            m_previousPilot = none;
-        }
-    }
-    
-    m_pilotController = none;
+	// End:0x6C
+	if(__NFUN_119__(m_pilotController, none))
+	{
+		m_pilotController.PlayerReplicationInfo.m_bIsEscortedPilot = false;
+		m_previousPilot = m_pilotController;
+		// End:0x6C
+		if(__NFUN_130__(__NFUN_119__(m_previousPilot.m_pawn, none), __NFUN_154__(int(m_previousPilot.m_pawn.m_bSuicideType), 1)))
+		{
+			m_previousPilot = none;
+		}
+	}
+	m_pilotController = none;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -109,279 +106,207 @@ function UnselectPilot()
 //------------------------------------------------------------------
 function EndGame(PlayerReplicationInfo Winner, string Reason)
 {
-    local R6GameReplicationInfo gameRepInfo;
+	local R6GameReplicationInfo gameRepInfo;
 
-    if (m_bGameOver)    
-        return;
-    
-    gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
-    if ( m_objGoToExtraction.m_bCompleted )
-    {
-        if ( bShowLog ) log( "** Game : the pilot was extracted" );
-        
-        BroadcastGameMsg(       "", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, GetGameMsgLifeTime() );
-        BroadcastMissionObjMsg( "", "", "PilotHasEscaped", none, GetGameMsgLifeTime() );
-        AddTeamWonRound( c_iAlphaTeam );
-    }
-    else if ( m_objGoToExtraction.m_bFailed )
-    {
-        if ( bShowLog ) log( "** Game : the pilot was killed " );
-        BroadcastGameMsg( "",  "", "RedTeamWonRound", m_sndRedTeamWonRound, GetGameMsgLifeTime() );
-       AddTeamWonRound( c_iBravoTeam );
-       UnselectPilot();
-    }
-    else if ( m_objDeathmatch.m_bFailed )                // all player are dead: draw
-    {
-        if ( bShowLog ) log( "** Game : it's a draw" );
-        BroadcastGameMsg( "", "", "RoundIsADraw", m_sndRoundIsADraw, GetGameMsgLifeTime() );
-        UnselectPilot();
-    }
-    else if ( m_objDeathmatch.m_bCompleted )        // a team was neutralized
-    {
-        if ( m_objDeathmatch.m_iWinningTeam == c_iTeamNumAlpha )
-        {
-            if ( bShowLog ) log( "** Game : alpha eleminated bravo" );
-            BroadcastGameMsg(       "", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, GetGameMsgLifeTime() );
-            BroadcastMissionObjMsg( "", "", "GreenNeutralizedRed", none, GetGameMsgLifeTime() );
-            AddTeamWonRound( c_iAlphaTeam );
-        }
-        else if ( m_objDeathmatch.m_iWinningTeam == c_iTeamNumBravo )
-        {
-            if ( bShowLog ) log( "** Game : bravo eleminated alpha" );
-            BroadcastGameMsg(       "", "", "RedTeamWonRound", m_sndRedTeamWonRound, GetGameMsgLifeTime() );
-            BroadcastMissionObjMsg( "", "", "RedNeutralizedGreen", none, GetGameMsgLifeTime() );
-            AddTeamWonRound( c_iBravoTeam );
-            UnselectPilot();
-        }
-    }
-    else
-    {
-        if ( bShowLog ) log( "** Game : bravo prevented the escape of the pilot " );
-        BroadcastGameMsg(       "", "", "RedTeamWonRound", m_sndRedTeamWonRound, GetGameMsgLifeTime() );
-        BroadcastMissionObjMsg( "", "", "PilotHasNotEscaped", none, GetGameMsgLifeTime() );
-        AddTeamWonRound( c_iBravoTeam );
-        UnselectPilot();
-    }
-
-    Super.EndGame(Winner, Reason);
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
+	// End:0xB7
+	if(m_objGoToExtraction.m_bCompleted)
+	{
+		// End:0x5B
+		if(bShowLog)
+		{
+			__NFUN_231__("** Game : the pilot was extracted");
+		}
+		BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
+		BroadcastMissionObjMsg("", "", "PilotHasEscaped", none, int(GetGameMsgLifeTime()));
+		AddTeamWonRound(c_iAlphaTeam);		
+	}
+	else
+	{
+		// End:0x131
+		if(m_objGoToExtraction.m_bFailed)
+		{
+			// End:0xF5
+			if(bShowLog)
+			{
+				__NFUN_231__("** Game : the pilot was killed ");
+			}
+			BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
+			AddTeamWonRound(c_iBravoTeam);
+			UnselectPilot();			
+		}
+		else
+		{
+			// End:0x193
+			if(m_objDeathmatch.m_bFailed)
+			{
+				// End:0x165
+				if(bShowLog)
+				{
+					__NFUN_231__("** Game : it's a draw");
+				}
+				BroadcastGameMsg("", "", "RoundIsADraw", m_sndRoundIsADraw, int(GetGameMsgLifeTime()));
+				UnselectPilot();				
+			}
+			else
+			{
+				// End:0x2ED
+				if(m_objDeathmatch.m_bCompleted)
+				{
+					// End:0x247
+					if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 2))
+					{
+						// End:0x1E7
+						if(bShowLog)
+						{
+							__NFUN_231__("** Game : alpha eleminated bravo");
+						}
+						BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
+						BroadcastMissionObjMsg("", "", "GreenNeutralizedRed", none, int(GetGameMsgLifeTime()));
+						AddTeamWonRound(c_iAlphaTeam);						
+					}
+					else
+					{
+						// End:0x2EA
+						if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 3))
+						{
+							// End:0x289
+							if(bShowLog)
+							{
+								__NFUN_231__("** Game : bravo eleminated alpha");
+							}
+							BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
+							BroadcastMissionObjMsg("", "", "RedNeutralizedGreen", none, int(GetGameMsgLifeTime()));
+							AddTeamWonRound(c_iBravoTeam);
+							UnselectPilot();
+						}
+					}					
+				}
+				else
+				{
+					// End:0x32C
+					if(bShowLog)
+					{
+						__NFUN_231__("** Game : bravo prevented the escape of the pilot ");
+					}
+					BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
+					BroadcastMissionObjMsg("", "", "PilotHasNotEscaped", none, int(GetGameMsgLifeTime()));
+					AddTeamWonRound(c_iBravoTeam);
+					UnselectPilot();
+				}
+			}
+		}
+	}
+	super.EndGame(Winner, Reason);
+	return;
 }
-
 
 //------------------------------------------------------------------
 // CanAutoBalancePlayer
 //	
 //------------------------------------------------------------------
-function bool CanAutoBalancePlayer( R6PlayerController pCtrl )
+function bool CanAutoBalancePlayer(R6PlayerController pCtrl)
 {
-    // don't swap the pilot
-    if ( pCtrl.PlayerReplicationInfo.m_bIsEscortedPilot )
-        return false;
-
-    return true;
+	// End:0x1D
+	if(pCtrl.PlayerReplicationInfo.m_bIsEscortedPilot)
+	{
+		return false;
+	}
+	return true;
+	return;
 }
 
-//------------------------------------------------------------------
-// InBetweenRoundMenu
-//	
-//------------------------------------------------------------------
-auto state InBetweenRoundMenu
+// NEW IN 1.60
+function R6SetPilotClassInMultiPlayer(Controller PlayerController)
 {
-    function EndState()
-    {
-        local Controller P;
-        local int iTeamACount;  // the team arrays not set up yet
-        local int iNewGen;
-        local int i;
-        local int iTotalPilot;
+	local R6ModMgr pModManager;
 
-
-        // valid and update the pilot flag
-        for (P=Level.ControllerList; P!=None; P=P.NextController )
-        {
-            if ( !P.IsA('PlayerController') )
-                continue;
-
-            // pilot is in Alpha and was previously a pilot
-            if( R6PlayerController(P).m_TeamSelection == PTS_Alpha && 
-                P.PlayerReplicationInfo.m_bIsEscortedPilot && iTotalPilot < 1 )
-            {
-                // check if he still can be a pilot
-                if ( R6PlayerController(P).m_bPenaltyBox  )
-                    P.PlayerReplicationInfo.m_bIsEscortedPilot = false;
-                else
-                    iTotalPilot++;
-            }
-            else
-            {
-                P.PlayerReplicationInfo.m_bIsEscortedPilot = false;            
-            }
-        }
-
-        // make sure we have all player in the both team
-        ProcessAutoBalanceTeam();
-
-        // we need to determine who his the pilot is before the pawns are spawned
-        m_pilotController = none;
-        for (P=Level.ControllerList; P!=None; P=P.NextController )
-        {
-            if ( !P.IsA('PlayerController') )
-                continue;
-
-            if( R6PlayerController(P).m_TeamSelection == PTS_Alpha )
-            {
-                // if pilot is not set yet and doesn't have a penalty
-                if ( m_pilotController == none && P.PlayerReplicationInfo.m_bIsEscortedPilot)
-                {
-                    if ( bShowLog ) log( "InBetweenRoundMenu: still the same pilot" );
-                    m_pilotController = R6PlayerController(P);
-                }
-                else
-                {
-                    if ( !R6PlayerController(P).m_bPenaltyBox )
-                        iTeamACount++;
-                }
-            }
-        }
-
-        if ( m_pilotController == none )    // pick a random pilot among alpha team
-        {
-            iNewGen = rand(iTeamACount);
-            i = 0;
-            P=Level.ControllerList; 
-            
-            while ( P != None )
-            {
-                if ( P.IsA('PlayerController') && 
-                     (R6PlayerController(P).m_TeamSelection == PTS_Alpha &&
-                      !R6PlayerController(P).m_bPenaltyBox) )
-                {
-                    if (i == iNewGen)
-                    {
-                        // it's the same pilot has before, find a another one
-                        if ( m_previousPilot == R6PlayerController(P) )
-                        {
-                            if ( iTeamACount == 1 ) // only person, we don't have a choice
-                            {
-                                m_pilotController = R6PlayerController(P);
-                            }
-                            else
-                            {
-                                // get a number number and start to loop again
-                                while ( iNewGen == i )
-                                {
-                                    iNewGen = rand(iTeamACount);
-                                }
-
-                                i = 0;
-                                P = Level.ControllerList;  
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            m_pilotController = R6PlayerController(P);
-                        }
-
-                        if ( m_pilotController != none )
-                        {
-                            if ( bShowLog )  log( "InBetweenRoundMenu: set new pilot" );
-                            
-                		    P.PawnClass = class<Pawn>(DynamicLoadObject(m_szPilotSkin, class'Class'));
-                            m_pilotController.PlayerReplicationInfo.m_bIsEscortedPilot = true;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        i++;
-                    }
-                }
-                
-                if ( P != none )
-                    P = P.NextController;
-            }
-        } // end should we pick a random General
-
-        // we don't need m_previousPilot 
-        m_previousPilot = none;
-
-        // now that we have the pilot we can spawn the actor and pawn correclty
-        Super.EndState();
-    }
+	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	R6PlayerController(PlayerController).PawnClass = pModManager.GetDefaultPilotPawn();
+	return;
 }
 
 //------------------------------------------------------------------
 // R6SetPawnClassInMultiPlayer
 //	
 //------------------------------------------------------------------
-function R6SetPawnClassInMultiPlayer(Controller playerController)
+function R6SetPawnClassInMultiPlayer(Controller PlayerController)
 {
-    if ( playerController == m_pilotController )
-    {
-        R6PlayerController(playerController).PawnClass = 
-            class<Pawn>(DynamicLoadObject( m_szPilotSkin, class'Class'));
-    }
-    else
-    {
-        Super.R6SetPawnClassInMultiPlayer( playerController );
-    }
+	// End:0x1D
+	if(__NFUN_114__(PlayerController, m_pilotController))
+	{
+		R6SetPilotClassInMultiPlayer(PlayerController);		
+	}
+	else
+	{
+		super(R6GameInfo).R6SetPawnClassInMultiPlayer(PlayerController);
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // RestartPlayer
 //	
 //------------------------------------------------------------------
-function RestartPlayer( Controller aPlayer )
+function RestartPlayer(Controller aPlayer)
 {
-    Super.RestartPlayer(aPlayer);
-    
-    if ( aPlayer == m_pilotController)
-    {
-        m_objGoToExtraction.SetPawnToExtract( R6Pawn(m_pilotController.pawn) );
-    }
+	super(R6GameInfo).RestartPlayer(aPlayer);
+	// End:0x3C
+	if(__NFUN_114__(aPlayer, m_pilotController))
+	{
+		m_objGoToExtraction.SetPawnToExtract(R6Pawn(m_pilotController.Pawn));
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // IsPrimaryWeaponRestrictedToPawn
 //	restriction for the pilot
 //------------------------------------------------------------------
-function bool IsPrimaryWeaponRestrictedToPawn( Pawn aPawn )
+function bool IsPrimaryWeaponRestrictedToPawn(Pawn aPawn)
 {
-    if ( m_objGoToExtraction.m_pawnToExtract == aPawn )
-    {
-        return !EnablePilotPrimaryWeapon;
-    }
-    
-    return false;
+	// End:0x21
+	if(__NFUN_114__(m_objGoToExtraction.m_pawnToExtract, aPawn))
+	{
+		return __NFUN_129__(EnablePilotPrimaryWeapon);
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // IsSecondaryWeaponRestrictedToPawn
 //	restriction for the pilot
 //------------------------------------------------------------------
-function bool IsSecondaryWeaponRestrictedToPawn( Pawn aPawn )
+function bool IsSecondaryWeaponRestrictedToPawn(Pawn aPawn)
 {
-    if ( m_objGoToExtraction.m_pawnToExtract == aPawn )
-    {
-        return !EnablePilotSecondaryWeapon;
-    }
-
-    return false;
+	// End:0x21
+	if(__NFUN_114__(m_objGoToExtraction.m_pawnToExtract, aPawn))
+	{
+		return __NFUN_129__(EnablePilotSecondaryWeapon);
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // IsTertiaryWeaponRestrictedToPawn
 //	restriction for the pilot
 //------------------------------------------------------------------
-function bool IsTertiaryWeaponRestrictedToPawn( Pawn aPawn )
+function bool IsTertiaryWeaponRestrictedToPawn(Pawn aPawn)
 {
-    if ( m_objGoToExtraction.m_pawnToExtract == aPawn )
-    {
-        return !EnablePilotTertiaryWeapon;
-    }
-    
-    return false;
+	// End:0x21
+	if(__NFUN_114__(m_objGoToExtraction.m_pawnToExtract, aPawn))
+	{
+		return __NFUN_129__(EnablePilotTertiaryWeapon);
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -390,35 +315,212 @@ function bool IsTertiaryWeaponRestrictedToPawn( Pawn aPawn )
 //------------------------------------------------------------------
 function BroadcastGameTypeDescription()
 {
-    local Controller P;
-    local R6PlayerController playerController;
+	local Controller P;
+	local R6PlayerController PlayerController;
 
-    Super.BroadcastGameTypeDescription();
+	super(R6GameInfo).BroadcastGameTypeDescription();
+	// End:0x13
+	if(__NFUN_114__(m_pilotController, none))
+	{
+		return;
+	}
+	// End:0x29
+	if(__NFUN_114__(m_pilotController.PlayerReplicationInfo, none))
+	{
+		return;
+	}
+	m_pilotController.ClientPlaySound(m_sndPilot, 7);
+	P = Level.ControllerList;
+	J0x53:
 
-    if ( m_pilotController == none )
-        return;
+	// End:0xE5 [Loop If]
+	if(__NFUN_119__(P, none))
+	{
+		PlayerController = R6PlayerController(P);
+		// End:0xCE
+		if(__NFUN_130__(__NFUN_119__(PlayerController, none), __NFUN_154__(int(PlayerController.m_TeamSelection), int(2))))
+		{
+			PlayerController.ClientMissionObjMsg("", m_pilotController.PlayerReplicationInfo.PlayerName, "PlayerIsThePilot");
+		}
+		P = P.nextController;
+		// [Loop Continue]
+		goto J0x53;
+	}
+	return;
+}
 
-    if ( m_pilotController.PlayerReplicationInfo == none )
-        return;
+auto state InBetweenRoundMenu
+{
+	function EndState()
+	{
+		local Controller P;
+		local int iTeamACount, iNewGen, i, iTotalPilot;
 
-    
-    m_pilotController.ClientPlaySound(m_sndPilot, SLOT_Speak);
-    // send to green team who is the pilot
-    for (P=Level.ControllerList; P!=None; P=P.NextController )
-    {
-        playerController = R6PlayerController(p);
-        if ( playerController != none && playerController.m_TeamSelection == PTS_Alpha )
-        {
-            playerController.ClientMissionObjMsg( "", m_pilotController.PlayerReplicationInfo.PlayerName, 
-                                                  "PlayerIsThePilot" );
-        }
-    }
+		P = Level.ControllerList;
+		J0x14:
+
+		// End:0xEF [Loop If]
+		if(__NFUN_119__(P, none))
+		{
+			// End:0x38
+			if(__NFUN_129__(P.__NFUN_303__('PlayerController')))
+			{				
+			}
+			else
+			{
+				// End:0xBE
+				if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2)), P.PlayerReplicationInfo.m_bIsEscortedPilot), __NFUN_150__(iTotalPilot, 1)))
+				{
+					// End:0xB4
+					if(R6PlayerController(P).m_bPenaltyBox)
+					{
+						P.PlayerReplicationInfo.m_bIsEscortedPilot = false;						
+					}
+					else
+					{
+						__NFUN_165__(iTotalPilot);
+					}					
+				}
+				else
+				{
+					P.PlayerReplicationInfo.m_bIsEscortedPilot = false;
+				}
+			}
+			P = P.nextController;
+			// [Loop Continue]
+			goto J0x14;
+		}
+		ProcessAutoBalanceTeam();
+		m_pilotController = none;
+		P = Level.ControllerList;
+		J0x110:
+
+		// End:0x1F9 [Loop If]
+		if(__NFUN_119__(P, none))
+		{
+			// End:0x134
+			if(__NFUN_129__(P.__NFUN_303__('PlayerController')))
+			{				
+			}
+			else
+			{
+				// End:0x1E2
+				if(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2)))
+				{
+					// End:0x1C2
+					if(__NFUN_130__(__NFUN_114__(m_pilotController, none), P.PlayerReplicationInfo.m_bIsEscortedPilot))
+					{
+						// End:0x1AF
+						if(bShowLog)
+						{
+							__NFUN_231__("InBetweenRoundMenu: still the same pilot");
+						}
+						m_pilotController = R6PlayerController(P);						
+					}
+					else
+					{
+						// End:0x1E2
+						if(__NFUN_129__(R6PlayerController(P).m_bPenaltyBox))
+						{
+							__NFUN_165__(iTeamACount);
+						}
+					}
+				}
+			}
+			P = P.nextController;
+			// [Loop Continue]
+			goto J0x110;
+		}
+		// End:0x3A4
+		if(__NFUN_114__(m_pilotController, none))
+		{
+			iNewGen = __NFUN_167__(iTeamACount);
+			i = 0;
+			P = Level.ControllerList;
+			J0x22C:
+
+			// End:0x3A4 [Loop If]
+			if(__NFUN_119__(P, none))
+			{
+				// End:0x382
+				if(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_130__(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2)), __NFUN_129__(R6PlayerController(P).m_bPenaltyBox))))
+				{
+					// End:0x37B
+					if(__NFUN_154__(i, iNewGen))
+					{
+						// End:0x307
+						if(__NFUN_114__(m_previousPilot, R6PlayerController(P)))
+						{
+							// End:0x2C7
+							if(__NFUN_154__(iTeamACount, 1))
+							{
+								m_pilotController = R6PlayerController(P);								
+							}
+							else
+							{
+								J0x2C7:
+
+								// End:0x2E6 [Loop If]
+								if(__NFUN_154__(iNewGen, i))
+								{
+									iNewGen = __NFUN_167__(iTeamACount);
+									// [Loop Continue]
+									goto J0x2C7;
+								}
+								i = 0;
+								P = Level.ControllerList;
+								goto J0x3A1;
+							}							
+						}
+						else
+						{
+							m_pilotController = R6PlayerController(P);
+						}
+						// End:0x378
+						if(__NFUN_119__(m_pilotController, none))
+						{
+							// End:0x350
+							if(bShowLog)
+							{
+								__NFUN_231__("InBetweenRoundMenu: set new pilot");
+							}
+							R6SetPilotClassInMultiPlayer(P);
+							m_pilotController.PlayerReplicationInfo.m_bIsEscortedPilot = true;
+							// [Explicit Break]
+							goto J0x3A4;
+						}						
+					}
+					else
+					{
+						__NFUN_165__(i);
+					}
+				}
+				// End:0x3A1
+				if(__NFUN_119__(P, none))
+				{
+					P = P.nextController;
+				}
+				J0x3A1:
+
+				// [Loop Continue]
+				goto J0x22C;
+			}
+		}
+		J0x3A4:
+
+		m_previousPilot = none;
+		super.EndState();
+		return;
+	}
+	stop;
 }
 
 defaultproperties
 {
-     m_sndPilot=Sound'Voices_Control_Multiplayer.Play_YouAreThePilot'
-     m_szPilotSkin="R6Characters.R6RainbowPilot"
-     m_iUbiComGameMode=5
-     m_szGameTypeFlag="RGM_EscortAdvMode"
+	m_sndPilot=Sound'Voices_Control_Multiplayer.Play_YouAreThePilot'
+	m_iUbiComGameMode=5
+	m_szGameTypeFlag="RGM_EscortAdvMode"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_szPilotSkin

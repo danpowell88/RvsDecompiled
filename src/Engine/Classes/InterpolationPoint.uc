@@ -1,14 +1,19 @@
 //=============================================================================
+// InterpolationPoint - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // InterpolationPoint.
 // Used as destinations to move the camera to in Matinee scenes.
 //=============================================================================
 class InterpolationPoint extends Keypoint
-	native;
-
-#exec Texture Import File=Textures\IntrpPnt.pcx Name=S_Interp Mips=Off MASKED=1
+	native
+ placeable;
 
 defaultproperties
 {
-     bDirectional=True
-     Texture=Texture'Engine.S_Interp'
+	bDirectional=true
+	Texture=Texture'Engine.S_Interp'
 }

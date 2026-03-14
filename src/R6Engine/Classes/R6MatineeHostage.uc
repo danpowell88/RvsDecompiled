@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MatineeHostage - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MatineeHostage.uc : A placeable Hostage Class for Matinee. 
 //
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -7,85 +13,65 @@
 //    2002/04/03 * Created by Cyrille Lauzon
 //=============================================================================
 class R6MatineeHostage extends R6Hostage
-    placeable
-    native;
+ native;
 
-#exec OBJ LOAD FILE=..\Animations\R6Hostage_UKX.ukx PACKAGE=R6Hostage_UKX
-
-//Equipment:
-var(R6Equipment)		 class<R6Hostage>m_HostageTemplate;
-var(R6Equipment)		 bool			 m_bUseHostageTemplate;
-
+var(R6Equipment) bool m_bUseHostageTemplate;
 //Private Variables:
-var		R6MatineeAttach	 m_MatineeAttach;
+var R6MatineeAttach m_MatineeAttach;
+// NEW IN 1.60
+var(R6Equipment) Class<R6Hostage> m_HostageTemplate;
 
 event PostBeginPlay()
 {
-
-	//Initialize the attachement object:
-	m_MatineeAttach = New(None) class'R6MatineeAttach'; //class<R6MatineeAttach>(DynamicLoadObject("MatineeAttach", class'R6Engine.R6MatineeAttach'));
-	
-	//Dress and equip the Hostage:
-	if(m_HostageTemplate!=none && m_bUseHostageTemplate)
+	m_MatineeAttach = new (none) Class'R6Engine.R6MatineeAttach';
+	// End:0x4D
+	if(__NFUN_130__(__NFUN_119__(m_HostageTemplate, none), m_bUseHostageTemplate))
 	{
-		Skins = m_HostageTemplate.Default.Skins;
- 		LinkMesh( m_HostageTemplate.Default.Mesh );
+		Skins = m_HostageTemplate.default.Skins;
+		LinkMesh(m_HostageTemplate.default.Mesh);
 	}
-
 	super.PostBeginPlay();
-	
-	// Spawn the controller
-	if(Controller!=None)
+	// End:0x64
+	if(__NFUN_119__(Controller, none))
 	{
 		UnPossessed();
 	}
-	Controller = Spawn(ControllerClass);
-	Controller.Possess( Self );
-
-	m_controller = R6HostageAI(controller);		
-	SetPhysics(Physics);
+	Controller = __NFUN_278__(ControllerClass);
+	Controller.Possess(self);
+	m_controller = R6HostageAI(Controller);
+	__NFUN_3970__(Physics);
+	return;
 }
 
 function SetAttachVar(Actor AttachActor, string StaticMeshTag, name PawnTag)
 {
-	m_MatineeAttach.m_AttachActor   = AttachActor;
-	
+	m_MatineeAttach.m_AttachActor = AttachActor;
 	m_MatineeAttach.m_StaticMeshTag = StaticMeshTag;
-	m_MatineeAttach.m_PawnTag		= PawnTag;
-
-	m_MatineeAttach.m_AttachPawn	= self;
-	
+	m_MatineeAttach.m_PawnTag = PawnTag;
+	m_MatineeAttach.m_AttachPawn = self;
 	m_MatineeAttach.InitAttach();
+	return;
 }
 
 function MatineeAttach()
 {
 	m_MatineeAttach.MatineeAttach();
+	return;
 }
 
 function MatineeDetach()
 {
 	m_MatineeAttach.MatineeDetach();
+	return;
 }
 
 defaultproperties
 {
-     m_bUseHostageTemplate=True
-     CollisionHeight=85.000000
-     Mesh=SkeletalMesh'R6Hostage_UKX.CasualManMesh'
-     Begin Object Class=KarmaParamsSkel Name=KarmaParamsSkel18
-         KConvulseSpacing=(Max=2.200000)
-         KSkeleton="terroskel"
-         KStartEnabled=True
-         bHighDetailOnly=False
-         KLinearDamping=0.500000
-         KAngularDamping=0.500000
-         KBuoyancy=1.000000
-         KVelDropBelowThreshold=50.000000
-         KFriction=0.600000
-         KRestitution=0.300000
-         KImpactThreshold=150.000000
-         Name="KarmaParamsSkel18"
-     End Object
-     KParams=KarmaParamsSkel'R6Engine.KarmaParamsSkel18'
+	m_bUseHostageTemplate=true
+	CollisionHeight=85.0000000
+	Mesh=SkeletalMesh'R6Hostage_UKX.CasualManMesh'
+	KParams=KarmaParamsSkel'R6Engine.KarmaParamsSkel18'
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var classR6Hostagem_HostageTemplate

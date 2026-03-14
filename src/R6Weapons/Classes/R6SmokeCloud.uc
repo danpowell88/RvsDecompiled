@@ -1,4 +1,10 @@
 //=============================================================================
+// R6SmokeCloud - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6SmokeCloud.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,28 +12,28 @@
 //    2002/03/06 * Created by Guillaume Borgia
 //=============================================================================
 class R6SmokeCloud extends Actor
-    native;
+	native
+ notplaceable;
 
+var float m_fStartTime;
+var float m_fExpansionTime;  // Time needed to reach maximum radius
+var float m_fFinalRadius;
+var float m_fCurrentRadius;
 var R6Grenade m_grenade;
-var FLOAT     m_fStartTime;
-var FLOAT     m_fExpansionTime;       // Time needed to reach maximum radius
-var FLOAT     m_fFinalRadius;
-var FLOAT     m_fCurrentRadius;
-
 
 //============================================================================
 // SetCloud - 
 //============================================================================
-function SetCloud( R6Grenade aGrenade, FLOAT fExpansionTime, FLOAT fFinalRadius, FLOAT fDuration )
+function SetCloud(R6Grenade aGrenade, float fExpansionTime, float fFinalRadius, float fDuration)
 {
-    m_grenade = aGrenade;
-    m_fExpansionTime = fExpansionTime;
-    m_fFinalRadius = fFinalRadius;
-    LifeSpan = fDuration;
-
-    m_fStartTime = Level.TimeSeconds;
-    Instigator = none;
-    SetTimer( 0.25f, true );
+	m_grenade = aGrenade;
+	m_fExpansionTime = fExpansionTime;
+	m_fFinalRadius = fFinalRadius;
+	LifeSpan = fDuration;
+	m_fStartTime = Level.TimeSeconds;
+	Instigator = none;
+	__NFUN_280__(0.2500000, true);
+	return;
 }
 
 //============================================================================
@@ -35,32 +41,34 @@ function SetCloud( R6Grenade aGrenade, FLOAT fExpansionTime, FLOAT fFinalRadius,
 //============================================================================
 event Timer()
 {
-    local FLOAT fElapsedTime;
-    
-    fElapsedTime = Level.TimeSeconds - m_fStartTime;
+	local float fElapsedTime;
 
-    if( m_grenade != none && m_grenade.Physics != PHYS_None)
-        SetLocation( m_grenade.Location + vect(0,0,125) );
-
-    if( fElapsedTime < m_fExpansionTime )
-    {
-        m_fCurrentRadius = fElapsedTime/m_fExpansionTime * m_fFinalRadius;
-    }
-    else
-    {
-        m_fCurrentRadius = m_fFinalRadius;
-        SetTimer(0, false);
-    }
-
-    SetCollisionSize( m_fCurrentRadius, CollisionHeight );
+	fElapsedTime = __NFUN_175__(Level.TimeSeconds, m_fStartTime);
+	// End:0x61
+	if(__NFUN_130__(__NFUN_119__(m_grenade, none), __NFUN_155__(int(m_grenade.Physics), int(0))))
+	{
+		__NFUN_267__(__NFUN_215__(m_grenade.Location, vect(0.0000000, 0.0000000, 125.0000000)));
+	}
+	// End:0x8C
+	if(__NFUN_176__(fElapsedTime, m_fExpansionTime))
+	{
+		m_fCurrentRadius = __NFUN_171__(__NFUN_172__(fElapsedTime, m_fExpansionTime), m_fFinalRadius);		
+	}
+	else
+	{
+		m_fCurrentRadius = m_fFinalRadius;
+		__NFUN_280__(0.0000000, false);
+	}
+	__NFUN_283__(m_fCurrentRadius, CollisionHeight);
+	return;
 }
 
 defaultproperties
 {
-     RemoteRole=ROLE_None
-     DrawType=DT_None
-     m_bDeleteOnReset=True
-     bCollideActors=True
-     CollisionRadius=10.000000
-     CollisionHeight=125.000000
+	RemoteRole=0
+	DrawType=0
+	m_bDeleteOnReset=true
+	bCollideActors=true
+	CollisionRadius=10.0000000
+	CollisionHeight=125.0000000
 }

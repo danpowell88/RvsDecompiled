@@ -1,4 +1,10 @@
 //=============================================================================
+// Time - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 /// Time-management class.
 /// Not yet implemented.
 /// This is a built-in Unreal class and it shouldn't be modified.
@@ -27,57 +33,22 @@
 ///  http://www.jat.org/jtt/datetime.html
 ///  http://www.eunet.pt/ano2000/gen_8601.htm
 //=============================================================================
-class Time
-	extends Object
-	transient;
+class Time extends Object
+ transient;
 
-/*
-/// Returns current globally-consistent Coordinated Universal Time.
-static final function long GetGlobalTime();
 
-/// Converts global time to local time, taking into account the
-/// local timezone and daylight savings time.
-static final function long GlobalToLocal();
-
-/// Converts local time to global time, taking into account the
-/// local timezone and daylight savings time.
-static final function long LocalToGlobal();
-
-/// Return nanoseconds part of Time, 0-999.
-static final invariant function long GetNSecs( long Time );
-
-/// Returns microseconds part of Time, 0-999.
-static final invariant function long GetUSecs( long Time );
-
-/// Returns milliseconds part of Time, 0-999.
-static final invariant function long GetMSecs( long Time );
-
-/// Returns seconds part of Time, 0-59.
-static final invariant function long GetSeconds( long Time );
-
-/// Returns minutes part of Time, 0-59.
-static final invariant function long GetMinutes( long Time );
-
-/// Returns hours part of Time, 0-23.
-static final invariant function long GetHours( long Time );
-
-/// Returns days part of Time, 0 (first day of month)-31 (or last day, depends on month)
-static final invariant function long GetDays( long Time );
-
-/// Return day of week, 0 (Sunday)-6 (Saturday)
-static final invariant function long DayOfWeek( long Time );
-
-/// Return months part of Time, 0 (January) - 11 (December)
-static final invariant function long GetMonths( long Time );
-
-/// Return year.
-static final invariant function long GetYears( long Time );
-
-/// Convert the difference between times Later and Earlier to
-/// a floating point value expressed in seconds.
-static final invariant function float SpanSeconds( long Later, long Earlier );
-*/
-
-defaultproperties
-{
-}
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function GetGlobalTime
+// REMOVED IN 1.60: function GlobalToLocal
+// REMOVED IN 1.60: function LocalToGlobal
+// REMOVED IN 1.60: function GetNSecs
+// REMOVED IN 1.60: function GetUSecs
+// REMOVED IN 1.60: function GetMSecs
+// REMOVED IN 1.60: function GetSeconds
+// REMOVED IN 1.60: function GetMinutes
+// REMOVED IN 1.60: function GetHours
+// REMOVED IN 1.60: function GetDays
+// REMOVED IN 1.60: function DayOfWeek
+// REMOVED IN 1.60: function GetMonths
+// REMOVED IN 1.60: function GetYears
+// REMOVED IN 1.60: function SpanSeconds

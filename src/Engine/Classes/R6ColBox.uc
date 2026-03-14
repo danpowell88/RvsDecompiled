@@ -1,150 +1,163 @@
 //=============================================================================
+// R6ColBox - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6ColBox.uc : 
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================
-
 class R6ColBox extends Actor
-    notplaceable
-    native;
+	native
+ notplaceable;
 
-var bool       m_bActive; // true when colliding, cannot be replaced by bCollideWorld/bCollideActor
-var bool       m_bCheckForEdges;        // check for edges (not when peeking)
-var bool       m_bCanStepUp;            // when prone, will try to step up/down
-var bool       m_bCollisionDetected;    // true when collide with something for a tick. 
-var float      m_fFeetColBoxRadius;    
+var bool m_bActive;  // true when colliding, cannot be replaced by bCollideWorld/bCollideActor
+var bool m_bCheckForEdges;  // check for edges (not when peeking)
+var bool m_bCanStepUp;  // when prone, will try to step up/down
+var bool m_bCollisionDetected;  // true when collide with something for a tick.
+var float m_fFeetColBoxRadius;
 
+replication
+{
+	// Pos:0x000
+	reliable if(__NFUN_132__(__NFUN_130__(bNetOwner, __NFUN_150__(int(Role), int(ROLE_Authority))), __NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+		m_bActive;
+
+	// Pos:0x037
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_fFeetColBoxRadius;
+}
+
+// Export UR6ColBox::execEnableCollision(FFrame&, void* const)
 //#ifdef R6CODE - pgaron 27 jan 2002
-native(1503) final function EnableCollision( bool bEnable, OPTIONAL bool bCheckForEdges, OPTIONAL bool bCanStepUp ); 
-//#endif
+ native(1503) final function EnableCollision(bool bEnable, optional bool bCheckForEdges, optional bool bCanStepUp);
 
-replication 
+function logC(string S)
 {
-    // insure that data is rep from owner of this pawn to the server || server sends the data to the non owners of this pawn    
-    reliable if ((bNetOwner && (Role<ROLE_Authority)) || (!bNetOwner && (Role==ROLE_Authority)))
-        m_bActive;
+	local string Time;
+	local name baseName;
 
-    // data server sends to client
-    reliable if (Role == ROLE_Authority )
-        m_fFeetColBoxRadius;
+	// End:0x1F
+	if(__NFUN_119__(Base, none))
+	{
+		baseName = Base.Name;
+	}
+	Time = string(Level.TimeSeconds);
+	Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
+	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("[", Time), "] COL BOX ("), string(baseName)), "): "), S));
+	return;
 }
 
-function logC( string s )
+event Trigger(Actor Other, Pawn EventInstigator)
 {
- 	local string time;
-    local name baseName;
-
-    if ( Base != none )
-    {
-        baseName = Base.name;
-    }
-
-    time = string(Level.TimeSeconds);
-	time = Left(Time, InStr(Time, ".") + 3); // 2 digits after the dot
-
-    log( "[" $time$ "] COL BOX ("$baseName$"): " $s );
+	Base.Trigger(Other, EventInstigator);
+	return;
 }
 
-event Trigger( Actor Other, Pawn EventInstigator )
+event UnTrigger(Actor Other, Pawn EventInstigator)
 {
-    Base.Trigger( Other, EventInstigator );
+	Base.UnTrigger(Other, EventInstigator);
+	return;
 }
 
-event UnTrigger( Actor Other, Pawn EventInstigator )
+event HitWall(Vector HitNormal, Actor HitWall)
 {
-    Base.UnTrigger( Other, EventInstigator );
+	// End:0x37
+	if(__NFUN_119__(Pawn(Base), none))
+	{
+		Pawn(Base).Controller.HitWall(HitNormal, HitWall);
+	}
+	return;
 }
 
-
-event HitWall( vector HitNormal, actor HitWall )
+event Touch(Actor Other)
 {
-    // logC( "hitWall" );
-
-    if ( Pawn(Base) != none )
-        Pawn(Base).controller.HitWall( HitNormal, HitWall );
+	// End:0x1F
+	if(__NFUN_119__(Base, none))
+	{
+		Base.Touch(Other);
+	}
+	return;
 }
 
-event Touch( Actor Other )
+event PostTouch(Actor Other)
 {
-    // logC( "touching " $Other.name );
-
-    if ( Base != none ) 
-        Base.touch( Other );
-}
-event PostTouch( Actor Other )
-{
-    Base.PostTouch( Other );
-}
-event UnTouch( Actor Other )
-{
-    if ( Base != none ) 
-        Base.UnTouch( Other );
+	Base.PostTouch(Other);
+	return;
 }
 
-event Bump( Actor Other )
+event UnTouch(Actor Other)
 {
-    // logC( "bumped " $Other.name );
-
-    if ( Pawn(Base) != none )
-    {
-        Pawn(Base).controller.NotifyBump( Other );
-    }
-
-}
-      
-event bool EncroachingOn( actor Other )
-{
-    // logC( "EncroachingOn: " $Other.name );
-
-    return Base.EncroachingOn(Other);
+	// End:0x1F
+	if(__NFUN_119__(Base, none))
+	{
+		Base.UnTouch(Other);
+	}
+	return;
 }
 
-event EncroachedBy( actor Other )
+event Bump(Actor Other)
 {
-    // logC( "EncroachedBy: " $Other.name );
+	// End:0x32
+	if(__NFUN_119__(Pawn(Base), none))
+	{
+		Pawn(Base).Controller.NotifyBump(Other);
+	}
+	return;
+}
 
-    Base.EncroachedBy(Other);
+event bool EncroachingOn(Actor Other)
+{
+	return Base.EncroachingOn(Other);
+	return;
+}
+
+event EncroachedBy(Actor Other)
+{
+	Base.EncroachedBy(Other);
+	return;
 }
 
 event BaseChange()
 {
-    // logC( "BaseChange" );
+	return;
 }
 
-function INT R6TakeDamage( INT iKillValue, INT iStunValue, Pawn instigatedBy, 
-						   vector vHitLocation, vector vMomentum, INT iBulletToArmorModifier, optional int iBulletGoup)
+function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
-    // logC( "R6TakeDamage" );
-
-    return Base.R6TakeDamage( iKillValue, iStunValue, instigatedBy, vHitLocation, vMomentum, iBulletToArmorModifier, iBulletGoup);
+	return Base.R6TakeDamage(iKillValue, iStunValue, instigatedBy, vHitLocation, vMomentum, iBulletToArmorModifier, iBulletGoup);
+	return;
 }
 
-event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
+event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
 {
-    Query.aQueryTarget = Base;
-    // redirect the call
-    Base.R6QueryCircumstantialAction( fDistance, Query, playerController );
+	Query.aQueryTarget = Base;
+	Base.R6QueryCircumstantialAction(fDistance, Query, PlayerController);
+	return;
 }
 
 simulated event Destroyed()
 {
-    EnableCollision( false );
-    
-    Super.Destroyed();
+	__NFUN_1503__(false);
+	super.Destroyed();
+	return;
 }
 
-simulated event bool GetReticuleInfo( Pawn ownerReticule, OUT string szName ) 
+simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
 {
-    return Base.GetReticuleInfo( ownerReticule, szName );
+	return Base.GetReticuleInfo(ownerReticule, szName);
+	return;
 }
 
 defaultproperties
 {
-     DrawType=DT_None
-     bHidden=True
-     m_bReticuleInfo=True
-     bBlockActors=True
-     bBlockPlayers=True
-     CollisionRadius=10.000000
-     CollisionHeight=10.000000
+	DrawType=0
+	bHidden=true
+	m_bReticuleInfo=true
+	bBlockActors=true
+	bBlockPlayers=true
+	CollisionRadius=10.0000000
+	CollisionHeight=10.0000000
 }

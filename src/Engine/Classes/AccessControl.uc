@@ -1,4 +1,10 @@
 //=============================================================================
+// AccessControl - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // AccessControl.
 //
 // AccessControl is a helper class for GameInfo.
@@ -8,217 +14,182 @@
 //
 //=============================================================================
 
-/* #ifndef R6CODE 
-class AccessControl extends Info;
-#else */
+/* #ifndef R6CODE
 class AccessControl extends Info
-    config(BanList);
-/* #endif R6CODE */
+	config(BanList)
+	notplaceable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-
-
-/* #ifndef R6CODE 
-var globalconfig string     IPPolicies[50];
-var	localized string          IPBanned;
-#endif R6CODE */
-
-var class<Admin> AdminClass;
-
-/* #ifndef R6CODE 
-var private globalconfig string AdminPassword;	    // Password to receive bAdmin privileges.
-var private globalconfig string GamePassword;		    // Password to enter game.
-#else */
-var private string AdminPassword;	    // Password to receive bAdmin privileges.
-var private string GamePassword;		    // Password to enter game.
-
-var config Array<string> Banned;
-
-/* #endif R6CODE */
-
+var config array<string> Banned;
+var private string AdminPassword;  // Password to receive bAdmin privileges.
+var private string GamePassword;  // Password to enter game.
 
 function SetAdminPassword(string P)
 {
 	AdminPassword = P;
+	return;
 }
 
 function SetGamePassword(string P)
 {
 	GamePassword = P;
+	return;
 }
 
 //#ifdef R6CODE 
 function string GetGamePassword()
 {
-    return GamePassword;
-}
-// added by John Bennett - April 2002
-// This funtions simply returns a boolean to indicate if this game
-// requires a password or not, this information is used in UDPBeacon.uc
-
-function BOOL GamePasswordNeeded()
-{
-    return ( GamePassword != "" );
+	return GamePassword;
+	return;
 }
 
-
-
-function KickBan( string S ) 
+function bool GamePasswordNeeded()
 {
-    local Controller _Ctrl;
+	return __NFUN_123__(GamePassword, "");
+	return;
+}
+
+function KickBan(string S)
+{
+	local Controller _Ctrl;
 	local PlayerController P;
 	local string ID;
-	local int j;
-    local int i;
+	local int j, i;
 
-    for (_Ctrl=Level.ControllerList; _Ctrl!=None; _Ctrl=_Ctrl.NextController )
-    {
-        P = PlayerController(_Ctrl);
-        if ( (P != none) && 
-            (P.PlayerReplicationInfo.PlayerName~=S) &&
-            (NetConnection(P.Player)!=None) )
-        {
+	_Ctrl = Level.ControllerList;
+	J0x14:
+
+	// End:0xEC [Loop If]
+	if(__NFUN_119__(_Ctrl, none))
+	{
+		P = PlayerController(_Ctrl);
+		// End:0xD5
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(P, none), __NFUN_124__(P.PlayerReplicationInfo.PlayerName, S)), __NFUN_119__(NetConnection(P.Player), none)))
+		{
 			ID = P.m_szGlobalID;
-
-            // check if not alredy banned
-			if( !IsGlobalIDBanned(ID) )
+			// End:0xD3
+			if(__NFUN_129__(IsGlobalIDBanned(ID)))
 			{
-				//ID = Left(ID, InStr(ID, ":"));
-				Log("Adding ID Ban for: "$Caps(ID) );
-                Banned[Banned.Length] = Caps(ID);
-                SaveConfig();
+				__NFUN_231__(__NFUN_112__("Adding ID Ban for: ", __NFUN_235__(ID)));
+				Banned[Banned.Length] = __NFUN_235__(ID);
+				__NFUN_536__();
 			}
 			return;
-        }
-    }
+		}
+		_Ctrl = _Ctrl.nextController;
+		// [Loop Continue]
+		goto J0x14;
+	}
+	return;
 }
 
 function int RemoveBan(string szBanPrefix)
 {
-    local int i;
-    local int iMatchesFound;
-    local int iPosFound;
+	local int i, iMatchesFound, iPosFound;
 
-    iMatchesFound = 0;
+	iMatchesFound = 0;
+	i = -1;
+	J0x12:
 
-    i=-1;
-    do
-    {
-        i++;
-        i = NextMatchingID(szBanPrefix, i);
-        if (i>-1)
-        {
-            iMatchesFound++;
-            iPosFound = i;
-        }
-    }
-    until (i == -1);
-
-    if (iMatchesFound==1)
-    {
-        Banned.Remove(iPosFound,1);
-        SaveConfig();
-    }
-    return iMatchesFound;
+	__NFUN_165__(i);
+	i = NextMatchingID(szBanPrefix, i);
+	// End:0x50
+	if(__NFUN_151__(i, -1))
+	{
+		__NFUN_165__(iMatchesFound);
+		iPosFound = i;
+	}
+	// End:0x12
+	if(!(__NFUN_154__(i, -1)))
+		goto J0x12;
+	// End:0x79
+	if(__NFUN_154__(iMatchesFound, 1))
+	{
+		Banned.Remove(iPosFound, 1);
+		__NFUN_536__();
+	}
+	return iMatchesFound;
+	return;
 }
 
 function int NextMatchingID(string szBanPrefix, int iLastIt)
 {
-    local int i;
-    for ( i = iLastIt; i < Banned.Length; i++ )
-    {
-        if ( Strnicmp(Banned[i], szBanPrefix, Len(szBanPrefix))==0)
-        {
-            //log("Matches "$Banned[i]);
-            return i;
-        }
-    }
-    if (i >= Banned.Length)
-    {
-        return -1;
-    }
+	local int i;
+
+	i = iLastIt;
+	J0x0B:
+
+	// End:0x4B [Loop If]
+	if(__NFUN_150__(i, Banned.Length))
+	{
+		// End:0x41
+		if(__NFUN_154__(__NFUN_1306__(Banned[i], szBanPrefix, __NFUN_125__(szBanPrefix)), 0))
+		{
+			return i;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x0B;
+	}
+	// End:0x61
+	if(__NFUN_153__(i, Banned.Length))
+	{
+		return -1;
+	}
+	return;
 }
 
-//function bool AdminLogin( PlayerController P, string Password )
-//{
-//    log("This is the wrong AdminLogin in "$self);
-//	if (AdminPassword == "")
-//		return false;
-//
-//	if (Password == AdminPassword)
-//	{
-//		Log("Administrator logged in.");
-//		Level.Game.Broadcast( P, P.PlayerReplicationInfo.PlayerName$"logged in as a server administrator." );
-//		return true;
-//	}
-//	return false;
-//}
-
-//
-// Accept or reject a player on the server.
-// Fails login if you set the Error to a non-empty string.
-//
-
-// R6MODIFICATION
-event PreLogin
-(
-	string Options,
-	string Address,
-	out string Error,
-	out string FailCode,
-	bool bSpectator
-)
-
+// NEW IN 1.60
+event PreLogin(string Options, string Address, out string Error, out string FailCode, bool bSpectator)
 {
-	// Do any name or password or name validation here.
 	local string InPassword, SpectatorClass;
 	local PlayerController P;
 
-	Error="";
-	InPassword = Level.Game.ParseOption( Options, "Password" );
-
-	if( (Level.NetMode != NM_Standalone) && Level.Game.AtCapacity(bSpectator) )
+	Error = "";
+	InPassword = Level.Game.ParseOption(Options, "Password");
+	// End:0x92
+	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), Level.Game.AtCapacity(bSpectator)))
 	{
-        Error="PopUp_Error_ServerFull";
+		Error = "PopUp_Error_ServerFull";		
 	}
-
-    // Changed by J. Bennett.  Removed the caps macro so that
-    // the passwords would be case sensitive (to be compatible
-    // with ubi.com)
-    //
-    //  old code:
-    //
-    //	&&	caps(InPassword)!=caps(GamePassword)
-    //	&&	(AdminPassword=="" || caps(InPassword)!=caps(AdminPassword)) )
-
-	else if
-	(	GamePassword!=""
-	&&	(InPassword)!=(GamePassword)
-	&&	(AdminPassword=="" || (InPassword)!=(AdminPassword)) )
+	else
 	{
-        Error = "PopUp_Error_PassWd";
-        FailCode = "WRONGPW";
-    }
-
-/* r6code now it's done later...
-	if(!CheckIDPolicy(Address))
-		Error = IPBanned;
-*/    
+		// End:0xF7
+		if(__NFUN_130__(__NFUN_130__(__NFUN_123__(GamePassword, ""), __NFUN_123__(InPassword, GamePassword)), __NFUN_132__(__NFUN_122__(AdminPassword, ""), __NFUN_123__(InPassword, AdminPassword))))
+		{
+			Error = "PopUp_Error_PassWd";
+			FailCode = "WRONGPW";
+		}
+	}
+	return;
 }
 
-
-event bool IsGlobalIDBanned(string GlobalID )
+event bool IsGlobalIDBanned(string GlobalID)
 {
 	local int i;
-    local string szGlobalID;
-    for ( i = 0; i < Banned.Length; ++i )
-    {
-        if ( Banned[i] ~= GlobalID )
-            return true;
-    }
-    return false;
+	local string szGlobalID;
+
+	i = 0;
+	J0x07:
+
+	// End:0x38 [Loop If]
+	if(__NFUN_150__(i, Banned.Length))
+	{
+		// End:0x2E
+		if(__NFUN_124__(Banned[i], GlobalID))
+		{
+			return true;
+		}
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return false;
+	return;
 }
 
-defaultproperties
-{
-     AdminClass=Class'Engine.Admin'
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var IPPolicies50
+// REMOVED IN 1.60: var IPBanned
+// REMOVED IN 1.60: var AdminClass

@@ -1,9 +1,15 @@
+//=============================================================================
+// AnimBrowserMesh - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class AnimBrowserMesh extends Actor
-	native;
+	native
+ notplaceable;
 
 defaultproperties
 {
-     DrawType=DT_Mesh
-     AmbientGlow=255
-     SoundOcclusion=OCCLUSION_None
+	DrawType=2
+	AmbientGlow=255
+	SoundOcclusion=1
 }

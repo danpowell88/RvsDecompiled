@@ -1,160 +1,159 @@
 //=============================================================================
+// KHinge - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // The Hinge joint class.
 //=============================================================================
 
 #exec Texture Import File=Textures\S_KHinge.pcx Name=S_KHinge Mips=Off MASKED=1
-
-
 class KHinge extends KConstraint
-    native
-    placeable;
+	native
+ placeable;
 
-
-// Spatial light effect to use.
-var(KarmaConstraint) enum EHingeType
+enum EHingeType
 {
-	HT_Normal,
-	HT_Springy,
-	HT_Motor,
-    HT_Controlled
-} KHingeType;
+	HT_Normal,                      // 0
+	HT_Springy,                     // 1
+	HT_Motor,                       // 2
+	HT_Controlled                   // 3
+};
 
-
+// NEW IN 1.60
+var(KarmaConstraint) KHinge.EHingeType KHingeType;
+var bool KUseAltDesired;
 // SPRINGY - around hinge axis, default position being KDesiredAngle (below)
 var(KarmaConstraint) float KStiffness;
 var(KarmaConstraint) float KDamping;
-
 // MOTOR - tries to achieve angular velocity
-var(KarmaConstraint) float KDesiredAngVel; // 65535 = 1 rotation per second
+var(KarmaConstraint) float KDesiredAngVel;  // 65535 = 1 rotation per second
 var(KarmaConstraint) float KMaxTorque;
-
 // CONTROLLED - achieve a certain angle
 // Uses AngularVelocity and MaxForce from above.
 // Within 'ProportionalGap' of DesiredAngle, 
-var(KarmaConstraint) float KDesiredAngle; // 65535 = 360 degrees
-var(KarmaConstraint) float KProportionalGap; // 65535 = 360 degrees
-
+var(KarmaConstraint) float KDesiredAngle;  // 65535 = 360 degrees
+var(KarmaConstraint) float KProportionalGap;  // 65535 = 360 degrees
 // This is the alternative 'desired' angle, and the bool that indicates whether to use it.
 // See ToggleDesired and ControlDesired below.
-var(KarmaConstraint) float KAltDesiredAngle; // 65535 = 360 degrees
-var					 bool  KUseAltDesired;
-
+var(KarmaConstraint) float KAltDesiredAngle;  // 65535 = 360 degrees
 // output - current angular position of joint // 65535 = 360 degrees
 var const float KCurrentAngle;
 
-// In this state nothing will happen if this hinge is triggered or untriggered.
 auto state Default
-{
-ignores Trigger, Untrigger;
-
+{	stop;
 }
 
-// In this state, Trigger will cause the hinge type to change to HT_Motor.
-// Another trigger will toggle it to HT_Controlled, and it will try and maintain its current angle.
 state() ToggleMotor
 {
-ignores Untrigger;
-	function Trigger( actor Other, pawn EventInstigator )
+	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		//Log("ToggleMotor - Trigger");
-		if(KHingeType == HT_Motor)
+		// End:0x2E
+		if(__NFUN_154__(int(KHingeType), int(2)))
 		{
 			KDesiredAngle = KCurrentAngle;
-			KUseAltDesired = False;
-			KHingeType = HT_Controlled;
+			KUseAltDesired = false;
+			KHingeType = 3;			
 		}
 		else
-			KHingeType = HT_Motor;
-
+		{
+			KHingeType = 2;
+		}
 		KUpdateConstraintParams();
-		KConstraintActor1.KWake(); // force re-enable of simulation on this actor.
+		KConstraintActor1.KWake();
+		return;
 	}
-
 Begin:
-	KHingeType = HT_Controlled;
-	KUseAltDesired = False;
+
+	KHingeType = 3;
+	KUseAltDesired = false;
 	KUpdateConstraintParams();
+	stop;	
 }
 
-// In this state, Trigger will turn motor on.
-// Untrigger will turn toggle it to HT_Controlled, and it will try and maintain its current angle.
 state() ControlMotor
 {
-	function Trigger( actor Other, pawn EventInstigator )
+	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		//Log("ControlMotor - Trigger");
-		if(KHingeType != HT_Motor)
+		// End:0x2D
+		if(__NFUN_155__(int(KHingeType), int(2)))
 		{
-			KHingeType = HT_Motor;
+			KHingeType = 2;
 			KUpdateConstraintParams();
 			KConstraintActor1.KWake();
 		}
+		return;
 	}
 
-	function Untrigger( actor Other, pawn EventInstigator )
+	function UnTrigger(Actor Other, Pawn EventInstigator)
 	{
-		//Log("ControlMotor - Untrigger");
-		if(KHingeType == HT_Motor)
+		// End:0x40
+		if(__NFUN_154__(int(KHingeType), int(2)))
 		{
 			KDesiredAngle = KCurrentAngle;
-			KUseAltDesired = False;
-			KHingeType = HT_Controlled;
+			KUseAltDesired = false;
+			KHingeType = 3;
 			KUpdateConstraintParams();
 			KConstraintActor1.KWake();
 		}
+		return;
 	}
-
 Begin:
-	KHingeType = HT_Controlled;
-	KUseAltDesired = False;
+
+	KHingeType = 3;
+	KUseAltDesired = false;
 	KUpdateConstraintParams();
+	stop;	
 }
 
-// In this state a trigger will toggle the hinge between using KDesiredAngle and KAltDesiredAngle.
-// It will use whatever the current KHingeType is to achieve this, so this is only useful with HT_Controlled and HT_Springy.
 state() ToggleDesired
 {
-ignores Untrigger;
-
-	function Trigger( actor Other, pawn EventInstigator )
+	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		//Log("ToggleDesired - Trigger");
+		// End:0x14
 		if(KUseAltDesired)
-			KUseAltDesired = False;
+		{
+			KUseAltDesired = false;			
+		}
 		else
-			KUseAltDesired = True;
-		//Log("UseAlt"$KUseAltDesired);
+		{
+			KUseAltDesired = true;
+		}
 		KUpdateConstraintParams();
 		KConstraintActor1.KWake();
+		return;
 	}
+	stop;
 }
 
-// In this state, trigger will cause the hinge to use KAltDesiredAngle, untrigger will caus it to use KAltDesiredAngle
 state() ControlDesired
 {
-	function Trigger( actor Other, pawn EventInstigator )
+	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		//Log("ControlDesired - Trigger");
-		KUseAltDesired = True;
-		//Log("UseAlt"$KUseAltDesired);
+		KUseAltDesired = true;
 		KUpdateConstraintParams();
 		KConstraintActor1.KWake();
+		return;
 	}
 
-	function Untrigger( actor Other, pawn EventInstigator )
+	function UnTrigger(Actor Other, Pawn EventInstigator)
 	{
-		//Log("ControlDesired - Untrigger");
-		KUseAltDesired = False;
-		//Log("UseAlt"$KUseAltDesired);
+		KUseAltDesired = false;
 		KUpdateConstraintParams();
 		KConstraintActor1.KWake();
+		return;
 	}
+	stop;
 }
 
 defaultproperties
 {
-     KStiffness=50.000000
-     KProportionalGap=8200.000000
-     bDirectional=True
-     Texture=Texture'Engine.S_KHinge'
+	KStiffness=50.0000000
+	KProportionalGap=8200.0000000
+	bDirectional=true
+	Texture=Texture'Engine.S_KHinge'
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var EHingeType

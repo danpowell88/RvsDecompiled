@@ -1,3 +1,8 @@
+//=============================================================================
+// R6RainbowOtherTeamVoices - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6RainbowOtherTeamVoices extends R6Voices;
 
 var Sound m_sndSniperHasTarget;
@@ -47,150 +52,242 @@ var Sound m_sndStatusSniperUntilCharlie;
 
 function PlayRainbowOtherTeamVoices(R6Pawn aPawn, Pawn.ERainbowOtherTeamVoices eRainbowVoices)
 {
-    switch(eRainbowVoices)
-    {
-        case ROTV_SniperHasTarget:
-            aPawn.PlayVoices(m_sndSniperHasTarget, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_SniperLooseTarget:
-             aPawn.PlayVoices(m_sndSniperLooseTarget, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_SniperTangoDown:
-             aPawn.PlayVoices(m_sndSniperTangoDown, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_MemberDown:
-             aPawn.PlayVoices(m_sndMemberDown, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_RainbowHitRainbow:
-             aPawn.PlayVoices(m_sndRainbowHitRainbow, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective1:
-             aPawn.PlayVoices(m_sndObjective1, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective2:
-             aPawn.PlayVoices(m_sndObjective2, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective3:
-             aPawn.PlayVoices(m_sndObjective3, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective4:
-             aPawn.PlayVoices(m_sndObjective4, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective5:
-             aPawn.PlayVoices(m_sndObjective5, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective6:
-             aPawn.PlayVoices(m_sndObjective6, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective7:
-             aPawn.PlayVoices(m_sndObjective7, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective8:
-             aPawn.PlayVoices(m_sndObjective8, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective9:
-             aPawn.PlayVoices(m_sndObjective9, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_Objective10:
-             aPawn.PlayVoices(m_sndObjective10, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_WaitAlpha:
-             aPawn.PlayVoices(m_sndWaitAlpha, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_WaitBravo:
-             aPawn.PlayVoices(m_sndWaitBravo, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_WaitCharlie:
-             aPawn.PlayVoices(m_sndWaitCharlie, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_WaitZulu:
-             aPawn.PlayVoices(m_sndWaitZulu, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_EntersSmoke:
-//             aPawn.PlayVoices(m_sndEntersSmoke, SLOT_Talk, 5, SSTATUS_SendToAll);
-            break;
-        case ROTV_EntersGas:
-             aPawn.PlayVoices(m_sndEntersGas, SLOT_Talk, 5, SSTATUS_SendToAll);
-            break;
-        case ROTV_StatusEngaging:
-             aPawn.PlayVoices(m_sndStatusEngaging, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusMoving:
-             aPawn.PlayVoices(m_sndStatusMoving, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusWaiting:
-             aPawn.PlayVoices(m_sndStatusWaiting, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusWaitAlpha:
-             aPawn.PlayVoices(m_sndStatusWaitAlpha, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusWaitBravo:
-             aPawn.PlayVoices(m_sndStatusWaitBravo, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusWaitCharlie:
-             aPawn.PlayVoices(m_sndStatusWaitCharlie, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusWaitZulu:
-             aPawn.PlayVoices(m_sndStatusWaitZulu, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusSniperWaitAlpha:
-             aPawn.PlayVoices(m_sndStatusSniperWaitAlpha, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusSniperWaitBravo:
-             aPawn.PlayVoices(m_sndStatusSniperWaitBravo, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusSniperWaitCharlie:
-             aPawn.PlayVoices(m_sndStatusSniperWaitCharlie, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusSniperUntilAlpha:
-             aPawn.PlayVoices(m_sndStatusSniperUntilAlpha, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusSniperUntilBravo:
-             aPawn.PlayVoices(m_sndStatusSniperUntilBravo, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case ROTV_StatusSniperUntilCharlie:
-             aPawn.PlayVoices(m_sndStatusSniperUntilCharlie, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-    }
+	switch(eRainbowVoices)
+	{
+		// End:0x27
+		case 0:
+			aPawn.__NFUN_2730__(m_sndSniperHasTarget, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x47
+		case 1:
+			aPawn.__NFUN_2730__(m_sndSniperLooseTarget, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x67
+		case 2:
+			aPawn.__NFUN_2730__(m_sndSniperTangoDown, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x87
+		case 3:
+			aPawn.__NFUN_2730__(m_sndMemberDown, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0xA7
+		case 4:
+			aPawn.__NFUN_2730__(m_sndRainbowHitRainbow, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0xC7
+		case 5:
+			aPawn.__NFUN_2730__(m_sndObjective1, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0xE7
+		case 6:
+			aPawn.__NFUN_2730__(m_sndObjective2, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x107
+		case 7:
+			aPawn.__NFUN_2730__(m_sndObjective3, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x127
+		case 8:
+			aPawn.__NFUN_2730__(m_sndObjective4, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x147
+		case 9:
+			aPawn.__NFUN_2730__(m_sndObjective5, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x167
+		case 10:
+			aPawn.__NFUN_2730__(m_sndObjective6, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x187
+		case 11:
+			aPawn.__NFUN_2730__(m_sndObjective7, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x1A7
+		case 12:
+			aPawn.__NFUN_2730__(m_sndObjective8, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x1C7
+		case 13:
+			aPawn.__NFUN_2730__(m_sndObjective9, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x1E7
+		case 14:
+			aPawn.__NFUN_2730__(m_sndObjective10, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x207
+		case 15:
+			aPawn.__NFUN_2730__(m_sndWaitAlpha, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x227
+		case 16:
+			aPawn.__NFUN_2730__(m_sndWaitBravo, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x247
+		case 17:
+			aPawn.__NFUN_2730__(m_sndWaitCharlie, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x267
+		case 18:
+			aPawn.__NFUN_2730__(m_sndWaitZulu, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x26F
+		case 19:
+			// End:0x431
+			break;
+		// End:0x28E
+		case 20:
+			aPawn.__NFUN_2730__(m_sndEntersGas, 6, 5, 2);
+			// End:0x431
+			break;
+		// End:0x2AE
+		case 21:
+			aPawn.__NFUN_2730__(m_sndStatusEngaging, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x2CE
+		case 22:
+			aPawn.__NFUN_2730__(m_sndStatusMoving, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x2EE
+		case 23:
+			aPawn.__NFUN_2730__(m_sndStatusWaiting, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x30E
+		case 24:
+			aPawn.__NFUN_2730__(m_sndStatusWaitAlpha, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x32E
+		case 25:
+			aPawn.__NFUN_2730__(m_sndStatusWaitBravo, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x34E
+		case 26:
+			aPawn.__NFUN_2730__(m_sndStatusWaitCharlie, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x36E
+		case 27:
+			aPawn.__NFUN_2730__(m_sndStatusWaitZulu, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x38E
+		case 28:
+			aPawn.__NFUN_2730__(m_sndStatusSniperWaitAlpha, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x3AE
+		case 29:
+			aPawn.__NFUN_2730__(m_sndStatusSniperWaitBravo, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x3CE
+		case 30:
+			aPawn.__NFUN_2730__(m_sndStatusSniperWaitCharlie, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x3EE
+		case 31:
+			aPawn.__NFUN_2730__(m_sndStatusSniperUntilAlpha, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x40E
+		case 32:
+			aPawn.__NFUN_2730__(m_sndStatusSniperUntilBravo, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0x42E
+		case 33:
+			aPawn.__NFUN_2730__(m_sndStatusSniperUntilCharlie, 8, 15, 0, true);
+			// End:0x431
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
-function PlayRainbowTeamVoices(R6Pawn aPawn, R6Pawn.ERainbowTeamVoices eRainbowVoices)
+function PlayRainbowTeamVoices(R6Pawn aPawn, Pawn.ERainbowTeamVoices eRainbowVoices)
 {
-    switch(eRainbowVoices)
-    {
-        case RTV_PlacingBug:
-             aPawn.PlayVoices(m_sndPlacingBug, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_BugActivated:
-             aPawn.PlayVoices(m_sndBugActivated, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_AccessingComputer:
-             aPawn.PlayVoices(m_sndAccessingComputer, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_ComputerHacked:
-             aPawn.PlayVoices(m_sndComputerHacked, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_EscortingHostage:
-             aPawn.PlayVoices(m_sndEscortingHostage, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_HostageSecured:
-             aPawn.PlayVoices(m_sndHostageSecured, SLOT_HeadSet, 15, SSTATUS_SendToAll, true);
-            break;
-        case RTV_PlacingExplosives:
-             aPawn.PlayVoices(m_sndPlacingExplosives, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_ExplosivesReady:
-             aPawn.PlayVoices(m_sndExplosivesReady, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_DesactivatingSecurity:
-             aPawn.PlayVoices(m_sndDesactivatingSecurity, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-        case RTV_SecurityDeactivated:
-             aPawn.PlayVoices(m_sndSecurityDeactivated, SLOT_HeadSet, 15, SSTATUS_SendToPlayer, true);
-            break;
-    }
+	switch(eRainbowVoices)
+	{
+		// End:0x27
+		case 0:
+			aPawn.__NFUN_2730__(m_sndPlacingBug, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0x47
+		case 1:
+			aPawn.__NFUN_2730__(m_sndBugActivated, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0x67
+		case 2:
+			aPawn.__NFUN_2730__(m_sndAccessingComputer, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0x87
+		case 3:
+			aPawn.__NFUN_2730__(m_sndComputerHacked, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0xA7
+		case 4:
+			aPawn.__NFUN_2730__(m_sndEscortingHostage, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0xC7
+		case 5:
+			aPawn.__NFUN_2730__(m_sndHostageSecured, 8, 15, 2, true);
+			// End:0x14A
+			break;
+		// End:0xE7
+		case 6:
+			aPawn.__NFUN_2730__(m_sndPlacingExplosives, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0x107
+		case 7:
+			aPawn.__NFUN_2730__(m_sndExplosivesReady, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0x127
+		case 8:
+			aPawn.__NFUN_2730__(m_sndDesactivatingSecurity, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0x147
+		case 9:
+			aPawn.__NFUN_2730__(m_sndSecurityDeactivated, 8, 15, 0, true);
+			// End:0x14A
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
-defaultproperties
-{
-}

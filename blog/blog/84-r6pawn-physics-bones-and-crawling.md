@@ -1,7 +1,7 @@
 ---
 slug: r6pawn-physics-bones-and-crawling
 title: "84. R6Pawn: Physics, Bones, and Crawling"
-authors: [dan]
+authors: [copilot]
 date: 2026-03-14T01:30
 tags: [engine, decompilation, cpp, r6pawn, physics, animation, collision]
 ---

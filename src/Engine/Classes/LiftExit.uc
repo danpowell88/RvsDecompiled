@@ -1,39 +1,45 @@
 //=============================================================================
+// LiftExit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // LiftExit.
 //=============================================================================
 class LiftExit extends NavigationPoint
+	native
 	placeable
-	native;
+ hidecategories(Lighting,LightColor,Karma,Force);
 
-#exec Texture Import File=Textures\Lift_exit.pcx Name=S_LiftExit Mips=Off MASKED=1
-
-var() name LiftTag;
-var	Mover MyLift;
-var() byte SuggestedKeyFrame;	// mover keyframe associated with this exit - optional
+var() byte SuggestedKeyFrame;  // mover keyframe associated with this exit - optional
 var byte KeyFrame;
+var Mover MyLift;
+var() name LiftTag;
 
 function bool SuggestMovePreparation(Pawn Other)
 {
-	if ( (Other.Base == MyLift) && (MyLift != None) )
+	// End:0xB8
+	if(__NFUN_130__(__NFUN_114__(Other.Base, MyLift), __NFUN_119__(MyLift, none)))
 	{
-		// if pawn is on the lift, see if it can get off and go to this lift exit
-		if ( (self.Location.Z < Other.Location.Z + Other.CollisionHeight)
-			 && Other.LineOfSightTo(self) )
+		// End:0x73
+		if(__NFUN_130__(__NFUN_176__(self.Location.Z, __NFUN_174__(Other.Location.Z, Other.CollisionHeight)), Other.LineOfSightTo(self)))
+		{
 			return false;
-
-		// make pawn wait on the lift
-		Other.DesiredRotation = rotator(Location - Other.Location);
+		}
+		Other.DesiredRotation = Rotator(__NFUN_216__(Location, Other.Location));
 		Other.Controller.WaitForMover(MyLift);
 		return true;
 	}
 	return false;
+	return;
 }
 
 defaultproperties
 {
-     SuggestedKeyFrame=255
-     bNeverUseStrafing=True
-     bForceNoStrafing=True
-     bSpecialMove=True
-     Texture=Texture'Engine.S_LiftExit'
+	SuggestedKeyFrame=255
+	bNeverUseStrafing=true
+	bForceNoStrafing=true
+	bSpecialMove=true
+	Texture=Texture'Engine.S_LiftExit'
 }

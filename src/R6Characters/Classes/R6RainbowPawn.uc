@@ -1,4 +1,10 @@
 //=============================================================================
+// R6RainbowPawn - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6RainbowPawn.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,113 +12,249 @@
 //    2001/08/15 * Created by Rima Brek
 //=============================================================================
 class R6RainbowPawn extends R6Rainbow
-	abstract; 
- 
-#exec OBJ LOAD FILE=..\Animations\R6Rainbow_UKX.ukx PACKAGE=R6Rainbow_UKX
-#exec OBJ LOAD FILE="..\textures\R61stWeapons_T.utx" Package="R61stWeapons_T"
+ abstract;
 
-simulated event PostBeginPlay() 
+simulated event PostBeginPlay()
 {
-   LinkSkelAnim(MeshAnimation'R6Rainbow_UKX.RainbowAnim');
-    Super.PostBeginPlay();
+	// End:0x3F
+	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	{
+		m_iTeam = m_iDefaultTeam;
+	}
+	// End:0x151
+	if(__NFUN_242__(m_bUseSpecialSkin, false))
+	{
+		// End:0xE3
+		if(__NFUN_130__(__NFUN_154__(m_iDefaultTeam, 3), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+		{
+			Skins[0] = Level.RedTeamSkin;
+			Skins[1] = Level.RedHeadSkin;
+			Skins[2] = Level.RedGogglesSkin;
+			Skins[5] = Level.RedHandSkin;
+			LinkMesh(Level.RedMesh);			
+		}
+		else
+		{
+			Skins[0] = Level.GreenTeamSkin;
+			Skins[1] = Level.GreenHeadSkin;
+			Skins[2] = Level.GreenGogglesSkin;
+			Skins[5] = Level.GreenHandSkin;
+			LinkMesh(Level.GreenMesh);
+		}
+	}
+	LinkSkelAnim(MeshAnimation'R6Rainbow_UKX.RainbowAnim');
+	super.PostBeginPlay();
+	return;
 }
 
 simulated event PostNetBeginPlay()
 {
-	Super.PostNetBeginPlay();
+	super.PostNetBeginPlay();
+	return;
 }
 
 simulated function SetFemaleParameters()
-{		
-	// scale pawn's mesh
-	SetPawnScale(0.95);
-    //If the pawn scale changes, don't forget to change the Attach factor.
-	m_fAttachFactor=0.95;
-	m_fPrePivotPawnInitialOffset = -4.0;
-	if(Level.NetMode != NM_Client)
-		PrePivot.Z += m_fPrePivotPawnInitialOffset;
+{
+	__NFUN_2212__(0.9500000);
+	m_fAttachFactor = 0.9500000;
+	m_fPrePivotPawnInitialOffset = -4.0000000;
+	// End:0x48
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	{
+		__NFUN_184__(PrePivot.Z, m_fPrePivotPawnInitialOffset);
+	}
+	return;
 }
 
 simulated function SetRainbowFaceTexture()
 {
-	local	INT			iFaceIndex;
-    local	string		aFaceTexture;
-    local	Texture		aTexture;
+	local int iFaceIndex;
+	local string aFaceTexture;
+	local Texture aTexture;
 
-	if(bShowLog) log(self$" SetRainbowFaceTexture() : bIsFemale ="$bIsFemale$" m_iOperativeID="$m_iOperativeID);
+	// End:0x5F
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " SetRainbowFaceTexture() : bIsFemale ="), string(bIsFemale)), " m_iOperativeID="), string(m_iOperativeID)));
+	}
 	iFaceIndex = 3;
-
+	// End:0xB4
 	if(bIsFemale)
 	{
 		SetFemaleParameters();
-
-		// scale helmet for female operatives
-		if(m_Helmet != none)
-			m_Helmet.DrawScale=1.0;
-
-		// scale nightvision for female operatives
-		if(m_NightVision != none)
-			m_NightVision.DrawScale=1.0;
+		// End:0x95
+		if(__NFUN_119__(m_Helmet, none))
+		{
+			m_Helmet.DrawScale = 1.0000000;
+		}
+		// End:0xB4
+		if(__NFUN_119__(m_NightVision, none))
+		{
+			m_NightVision.DrawScale = 1.0000000;
+		}
 	}
-
 	switch(m_iOperativeID)
 	{
-		// presence of this : Skins[iFaceIndex]=Texture'R6Characters_t.RainbowFaces.R6RFaceBurke';	
-		// causes the texture to be loaded automatically...
-		case 0:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceArnavisca";		break;
-		case 1:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceBeckenbauer";	break;
-		case 2:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceBogart";			break;
-		case 3:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceBurke";			break;
-		case 4:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceChaves";			break;
-		case 5:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceDuBarry";		break;	
-		case 6:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceFilatov";		break;
-		case 7:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceGalanos";		break;
-		case 8:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceHaider";			break;
-		case 9:		aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceHanley";			break;
-		case 10:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceHomer";			break;
-		case 11:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceLofquist";		break;
-		case 12:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceLoiselle";		break;
-		case 13:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMaldini";		break;
-		case 14:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMcAllen";		break;
-		case 15:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMorris";			break;
-		case 16:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMurad";			break;
-		case 17:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceNarino";			break;
-		case 18:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceNoronha";		break;
-		case 19:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceNovikov";		break;
-		case 20:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceSuo_Won";		break;
-		case 21:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFacePetersen";		break;
-		case 22:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFacePrice";			break;
-		case 23:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceRakuzanka";		break;
-		case 24:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceRaymond";		break;
-		case 25:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceWalter";			break;
-		case 26:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceWeber";			break;
-		case 27:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceWoo";			break;
-		case 28:	aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceYakoby";			break;	
+		// End:0xF6
+		case 0:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceArnavisca";
+			// End:0x775
+			break;
+		// End:0x133
+		case 1:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceBeckenbauer";
+			// End:0x775
+			break;
+		// End:0x16C
+		case 2:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceBogart";
+			// End:0x775
+			break;
+		// End:0x1A4
+		case 3:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceBurke";
+			// End:0x775
+			break;
+		// End:0x1DD
+		case 4:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceChaves";
+			// End:0x775
+			break;
+		// End:0x217
+		case 5:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceDuBarry";
+			// End:0x775
+			break;
+		// End:0x251
+		case 6:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceFilatov";
+			// End:0x775
+			break;
+		// End:0x28B
+		case 7:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceGalanos";
+			// End:0x775
+			break;
+		// End:0x2C4
+		case 8:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceHaider";
+			// End:0x775
+			break;
+		// End:0x2FD
+		case 9:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceHanley";
+			// End:0x775
+			break;
+		// End:0x335
+		case 10:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceHomer";
+			// End:0x775
+			break;
+		// End:0x370
+		case 11:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceLofquist";
+			// End:0x775
+			break;
+		// End:0x3AB
+		case 12:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceLoiselle";
+			// End:0x775
+			break;
+		// End:0x3E5
+		case 13:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMaldini";
+			// End:0x775
+			break;
+		// End:0x41F
+		case 14:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMcAllen";
+			// End:0x775
+			break;
+		// End:0x458
+		case 15:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMorris";
+			// End:0x775
+			break;
+		// End:0x490
+		case 16:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceMurad";
+			// End:0x775
+			break;
+		// End:0x4C9
+		case 17:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceNarino";
+			// End:0x775
+			break;
+		// End:0x503
+		case 18:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceNoronha";
+			// End:0x775
+			break;
+		// End:0x53D
+		case 19:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceNovikov";
+			// End:0x775
+			break;
+		// End:0x577
+		case 20:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceSuo_Won";
+			// End:0x775
+			break;
+		// End:0x5B2
+		case 21:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFacePetersen";
+			// End:0x775
+			break;
+		// End:0x5EA
+		case 22:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFacePrice";
+			// End:0x775
+			break;
+		// End:0x626
+		case 23:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceRakuzanka";
+			// End:0x775
+			break;
+		// End:0x660
+		case 24:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceRaymond";
+			// End:0x775
+			break;
+		// End:0x699
+		case 25:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceWalter";
+			// End:0x775
+			break;
+		// End:0x6D1
+		case 26:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceWeber";
+			// End:0x775
+			break;
+		// End:0x707
+		case 27:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceWoo";
+			// End:0x775
+			break;
+		// End:0x740
+		case 28:
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceYakoby";
+			// End:0x775
+			break;
+		// End:0xFFFF
 		default:
-			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceReserve";					
+			aFaceTexture = "R6Characters_t.RainbowFaces.R6RFaceReserve";
+			break;
 	}
-
-	if(aFaceTexture != "")
-		Skins[iFaceIndex] = Texture(DynamicLoadObject(aFaceTexture, class'Texture'));
+	// End:0x7A2
+	if(__NFUN_123__(aFaceTexture, ""))
+	{
+		Skins[iFaceIndex] = Texture(DynamicLoadObject(aFaceTexture, Class'Engine.Texture'));
+	}
+	return;
 }
 
 defaultproperties
 {
-     m_FOVClass=Class'R6Characters.R6FieldOfView'
-     Begin Object Class=KarmaParamsSkel Name=KarmaParamsSkel213
-         KConvulseSpacing=(Max=2.200000)
-         KSkeleton="terroskel"
-         KStartEnabled=True
-         bHighDetailOnly=False
-         KLinearDamping=0.500000
-         KAngularDamping=0.500000
-         KBuoyancy=1.000000
-         KVelDropBelowThreshold=50.000000
-         KFriction=0.600000
-         KRestitution=0.300000
-         KImpactThreshold=150.000000
-         Name="KarmaParamsSkel213"
-     End Object
-     KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel213'
-     Skins(5)=Texture'R61stWeapons_T.Hands.R61stHands'
+	m_FOVClass=Class'R6Characters.R6FieldOfView'
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel213'
 }

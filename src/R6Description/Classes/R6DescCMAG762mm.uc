@@ -1,18 +1,22 @@
+//=============================================================================
+// R6DescCMAG762mm - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  R6DescCMAG762mm.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class R6DescCMAG762mm extends R6WeaponGadgetDescription;
+class R6DescCMAG762mm extends R6WeaponGadgetDescription;
 
 defaultproperties
 {
-     m_bPriGadgetWAvailable=True
-     m_bSecGadgetWAvailable=True
-     m_2DMenuTexture=Texture'R6TextureMenuEquipment.Weapons_00'
-     m_2dMenuRegion=(X=387,Y=42)
-     m_NameID="CMAG"
-     m_NameTag="CMAG"
-     m_ClassName="R63rdWeapons.R63rdCMAG762mm"
+	m_bPriGadgetWAvailable=true
+	m_bSecGadgetWAvailable=true
+	m_2DMenuTexture=Texture'R6TextureMenuEquipment.Weapons_00'
+	m_2dMenuRegion=(Zone=Class'R6Description.R6PistolsDescription',iLeaf=99106,ZoneNumber=0)
+	m_NameID="CMAG"
+	m_NameTag="CMAG"
+	m_ClassName="R63rdWeapons.R63rdCMAG762mm"
 }

@@ -1,22 +1,24 @@
-class R6WindowConfirmationButton extends R6WindowButton;
+//=============================================================================
+// R6WindowconfirmationButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class R6WindowconfirmationButton extends R6WindowButton;
 
-
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-	if(m_buttonFont != NONE)
-		C.Font = m_buttonFont;
+	// End:0x22
+	if(__NFUN_119__(m_buttonFont, none))
+	{
+		C.Font = m_buttonFont;		
+	}
 	else
+	{
 		C.Font = Root.Fonts[Font];
-	
-	//C.Style = 3;
-
-	Super.Paint(C,X,Y);
+	}
+	super.Paint(C, X, Y);
 	C.Style = 1;
-	R6WindowLookAndFeel(LookAndFeel).DrawButtonBorder(Self, C);
-
-	
+	R6WindowLookAndFeel(LookAndFeel).DrawButtonBorder(self, C);
+	return;
 }
 
-defaultproperties
-{
-}

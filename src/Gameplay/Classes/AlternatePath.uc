@@ -1,15 +1,21 @@
 //=============================================================================
+// AlternatePath - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // AlternatePath.
 //=============================================================================
 class AlternatePath extends NavigationPoint
-	notplaceable;
+ hidecategories(Lighting,LightColor,Karma,Force);
 
 var() byte Team;
-var() float SelectionWeight;
 var() bool bReturnOnly;
+var() float SelectionWeight;
 
 defaultproperties
 {
-     SelectionWeight=1.000000
-     bObsolete=True
+	SelectionWeight=1.0000000
+	bObsolete=true
 }

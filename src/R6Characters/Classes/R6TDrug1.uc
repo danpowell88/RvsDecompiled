@@ -1,4 +1,10 @@
 //=============================================================================
+// R6TDrug1 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6TDrug1.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,21 +15,8 @@ class R6TDrug1 extends R6TerroristPawn;
 
 defaultproperties
 {
-     m_eTerroType=TTYPE_D1T1
-     Mesh=SkeletalMesh'R6Terrorist_UKX.DrugMesh'
-     Begin Object Class=KarmaParamsSkel Name=KarmaParamsSkel264
-         KConvulseSpacing=(Max=2.200000)
-         KSkeleton="terroskel"
-         KStartEnabled=True
-         bHighDetailOnly=False
-         KLinearDamping=0.500000
-         KAngularDamping=0.500000
-         KBuoyancy=1.000000
-         KVelDropBelowThreshold=50.000000
-         KFriction=0.600000
-         KRestitution=0.300000
-         KImpactThreshold=150.000000
-         Name="KarmaParamsSkel264"
-     End Object
-     KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel264'
+	m_eTerroType=21
+	Mesh=SkeletalMesh'R6Terrorist_UKX.DrugMesh'
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel264'
+	Skins=/* Array type was not detected. */
 }

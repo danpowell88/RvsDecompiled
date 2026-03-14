@@ -1,3 +1,9 @@
+//=============================================================================
+// R6MatineeAttach - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6MatineeAttach.uc 
 // Created By       Cyrille Lauzon
@@ -7,76 +13,71 @@
 //Revision history:
 // 2002/02/21	    Cyrille Lauzon: Creation
 //============================================================================//
-
 class R6MatineeAttach extends Object
-	native
-	notplaceable;
+ native;
 
-var				Actor		m_AttachActor;
-
-var				string		m_StaticMeshTag;
-var				name		m_PawnTag;
-
-
-var				name		m_BoneName;
-var				R6Pawn		m_AttachPawn;
-
-var				bool		m_bInitialized;
-
+var bool m_bInitialized;
+var Actor m_AttachActor;
+var R6Pawn m_AttachPawn;
+var name m_PawnTag;
+var name m_BoneName;
 //The <docking> position
-var				vector		m_InteractionPos;
-var				rotator		m_InteractionRot;
-
+var Vector m_InteractionPos;
+var Rotator m_InteractionRot;
 //The <offset> position
-var			vector			m_OffsetPos;
-var			rotator			m_OffsetRot;
+var Vector m_OffsetPos;
+var Rotator m_OffsetRot;
+var string m_StaticMeshTag;
 
-native(2907) final function GetBoneInformation();
-native(2908) final function TestLocation();
+// Export UR6MatineeAttach::execGetBoneInformation(FFrame&, void* const)
+ native(2907) final function GetBoneInformation();
+
+// Export UR6MatineeAttach::execTestLocation(FFrame&, void* const)
+ native(2908) final function TestLocation();
 
 function InitAttach()
 {
-	local vector MeshPos;
-	local rotator MeshRot;
-	
-	if(m_PawnTag!='' && m_AttachActor!=none)
-	{
-		//Get the bone name
-		GetBoneInformation();
-		
-		m_AttachActor.GetTagInformations(m_StaticMeshTag, MeshPos, MeshRot);
-		m_InteractionPos = m_AttachActor.Location + MeshPos;
-		m_InteractionRot = m_AttachActor.Rotation + MeshRot;
+	local Vector MeshPos;
+	local Rotator MeshRot;
 
-		m_bInitialized=true;
+	// End:0x7C
+	if(__NFUN_130__(__NFUN_255__(m_PawnTag, 'None'), __NFUN_119__(m_AttachActor, none)))
+	{
+		__NFUN_2907__();
+		m_AttachActor.__NFUN_2008__(m_StaticMeshTag, MeshPos, MeshRot);
+		m_InteractionPos = __NFUN_215__(m_AttachActor.Location, MeshPos);
+		m_InteractionRot = __NFUN_316__(m_AttachActor.Rotation, MeshRot);
+		m_bInitialized = true;		
 	}
 	else
 	{
-		m_bInitialized=false;
+		m_bInitialized = false;
 	}
+	return;
 }
 
 function MatineeAttach()
 {
-	if(m_bInitialized == true)
+	// End:0x4D
+	if(__NFUN_242__(m_bInitialized, true))
 	{
 		m_AttachPawn.AttachToBone(m_AttachActor, m_BoneName);
 		m_AttachActor.SetRelativeLocation(m_OffsetPos);
 		m_AttachActor.SetRelativeRotation(m_OffsetRot);
 	}
+	return;
 }
 
 function MatineeDetach()
 {
-	local vector  location;
-	local rotator rotation;
+	local Vector Location;
+	local Rotator Rotation;
 
-	if(m_bInitialized==true)
+	// End:0x20
+	if(__NFUN_242__(m_bInitialized, true))
 	{
-		m_AttachPawn.DetachFromBone(m_AttachActor);		
+		m_AttachPawn.DetachFromBone(m_AttachActor);
 	}
+	return;
 }
 
-defaultproperties
-{
-}

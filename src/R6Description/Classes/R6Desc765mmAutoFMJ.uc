@@ -1,17 +1,21 @@
+//=============================================================================
+// R6Desc765mmAutoFMJ - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  R6Desc765mmAutoFMJ.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class R6Desc765mmAutoFMJ extends R6BulletDescription;
+class R6Desc765mmAutoFMJ extends R6BulletDescription;
 
 defaultproperties
 {
-     m_SubsonicClassName="R6Weapons.Ammo765mmAutoSubsonicFMJ"
-     m_2DMenuTexture=Texture'R6TextureMenuEquipment.Weapons_03'
-     m_2dMenuRegion=(X=192,Y=136)
-     m_NameID="765MMAUTOFMJ"
-     m_NameTag="FMJ"
-     m_ClassName="R6Weapons.Ammo765mmAutoNormalFMJ"
+	m_SubsonicClassName="R6Weapons.Ammo765mmAutoSubsonicFMJ"
+	m_2DMenuTexture=Texture'R6TextureMenuEquipment.Weapons_03'
+	m_2dMenuRegion=(Zone=Class'R6Description.R6PistolsDescription',iLeaf=49186,ZoneNumber=0)
+	m_NameID="765MMAUTOFMJ"
+	m_NameTag="FMJ"
+	m_ClassName="R6Weapons.Ammo765mmAutoNormalFMJ"
 }

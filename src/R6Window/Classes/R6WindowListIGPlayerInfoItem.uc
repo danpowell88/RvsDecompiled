@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowListIGPlayerInfoItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowListBoxItem.uc : Class used to hold the values for the entries
 //  in the list of servers in the multi player menu.
 //
@@ -7,88 +13,87 @@
 //  Revision history:
 //    2002/03/28 * Created by John Bennett
 //=============================================================================
-
-
 class R6WindowListIGPlayerInfoItem extends UWindowListBoxItem;
+
+const C_NB_OF_PLAYER_INFO = 11;
 
 enum ePlStatus
 {
-    ePlayerStatus_Alive,
-    ePlayerStatus_Wounded,
-    ePlayerStatus_Incapacitated,
-    ePlayerStatus_Dead,
-	ePlayerStatus_Spectator,
-    ePlayerStatus_TooLate
+	ePlayerStatus_Alive,            // 0
+	ePlayerStatus_Wounded,          // 1
+	ePlayerStatus_Incapacitated,    // 2
+	ePlayerStatus_Dead,             // 3
+	ePlayerStatus_Spectator,        // 4
+	ePlayerStatus_TooLate           // 5
 };
 
-// this enum serve for store value in array (the order is what's displaying on the screen)
 enum ePLInfo
 {
-	ePL_Ready,
-	ePL_HealthStatus,
-	ePL_Name,
-	ePL_RoundsWon,
-	ePL_Kill,
-	ePL_DeadCounter,
-	ePL_Efficiency,
-	ePL_RoundFired,
-	ePL_RoundHit,
-	ePL_KillerName,
-	ePL_PingTime,
+	ePL_Ready,                      // 0
+	ePL_HealthStatus,               // 1
+	ePL_Name,                       // 2
+	ePL_RoundsWon,                  // 3
+	ePL_Kill,                       // 4
+	ePL_DeadCounter,                // 5
+	ePL_Efficiency,                 // 6
+	ePL_RoundFired,                 // 7
+	ePL_RoundHit,                   // 8
+	ePL_KillerName,                 // 9
+	ePL_PingTime                    // 10
 };
 
 struct stSettings
 {
-    var FLOAT    fXPos;
-    var FLOAT    fWidth;
-	var BOOL	 bDisplay;
+	var float fXPos;
+	var float fWidth;
+	var bool bDisplay;
 };
 
-const C_NB_OF_PLAYER_INFO  = 11;
-
+var R6WindowListIGPlayerInfoItem.ePlStatus eStatus;  // Status of the player at the end of the round
+var int iKills;  // Number of kills
+var int iMyDeadCounter;  // Number of time I die
+var int iEfficiency;  // Efficiency (hits/shot)
+var int iRoundsFired;  // Rounds fired (Bullets shot by the player)
+var int iRoundsHit;  // Bullets shot by the player and that hit somebody
+var int iPingTime;  // ping (The delay between player and server communication)
+var int m_iRainbowTeam;  // This is for single player to know in wich team the rainbow is //0= Red, 1=Green, 2=Gold
+var int m_iOperativeID;  // This is usefull when we try to retreive the r6rainbow class
+var bool bOwnPlayer;  // This player is the player on this computer
+var bool bReady;  // The player is ready
+// NEW IN 1.60
+var stSettings stTagCoord[11];
 // Variables holding infomation on servers
-var string      szPlName;                   // Player name
-var string      szKillBy;                   // Kill by (This icon show the name of the killer)
-var string		szRoundsWon;				// Nb of rounds wons on nb of round play
+var string szPlName;  // Player name
+var string szKillBy;  // Kill by (This icon show the name of the killer)
+var string szRoundsWon;  // Nb of rounds wons on nb of round play
 
-var ePlStatus   eStatus;                    // Status of the player at the end of the round
-
-var INT         iKills;                     // Number of kills
-var INT			iMyDeadCounter;				// Number of time I die
-var INT         iEfficiency;                // Efficiency (hits/shot)
-var INT         iRoundsFired;               // Rounds fired (Bullets shot by the player)
-var INT         iRoundsHit;                 // Bullets shot by the player and that hit somebody
-var INT         iPingTime;                  // ping (The delay between player and server communication)
-
-var BOOL        bOwnPlayer;                 // This player is the player on this computer
-var BOOL		bReady;						// The player is ready
-
-var INT         m_iRainbowTeam;             // This is for single player to know in wich team the rainbow is //0= Red, 1=Green, 2=Gold
-var INT         m_iOperativeID;             // This is usefull when we try to retreive the r6rainbow class
-
-// Variables used to define X position of the fields in the
-// server list menu.
-var stSettings  stTagCoord[C_NB_OF_PLAYER_INFO];   //
-
-function INT GetHealth( ePlStatus _ePLStatus)
+function int GetHealth(R6WindowListIGPlayerInfoItem.ePlStatus _ePLStatus)
 {
-    switch( _ePLStatus )
-    {
-		case ePlayerStatus_Alive:
+	switch(_ePLStatus)
+	{
+		// End:0x0E
+		case 0:
 			return 0;
-		case ePlayerStatus_Wounded:
+		// End:0x15
+		case 1:
 			return 1;
-        case ePlayerStatus_Incapacitated:
-            return 2;
-		case ePlayerStatus_Dead:
+		// End:0x1D
+		case 2:
+			return 2;
+		// End:0x25
+		case 3:
 			return 3;
-		case ePlayerStatus_Spectator:
+		// End:0x2D
+		case 4:
 			return 4;
+		// End:0xFFFF
 		default:
 			return 0;
-    }
+			break;
+	}
+	return;
 }
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var stTagCoordC_NB_OF_PLAYER_INFO

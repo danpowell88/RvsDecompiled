@@ -1,51 +1,62 @@
 //=============================================================================
+// UWindowSBDownButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // UWindowSBDownButton - Scrollbar up button
 //=============================================================================
 class UWindowSBDownButton extends UWindowButton;
 
+var bool m_bHideSBWhenDisable;
 var float NextClickTime;
-var bool  m_bHideSBWhenDisable;
 
 function Created()
 {
-	bNoKeyboard = True;
-	Super.Created();
-    LookAndFeel.SB_SetupDownButton(Self);
+	bNoKeyboard = true;
+	super.Created();
+	LookAndFeel.SB_SetupDownButton(self);
+	return;
 }
 
-
-
-function Paint(Canvas C, float X, float Y) 
+function Paint(Canvas C, float X, float Y)
 {
-    if ( bDisabled && m_bHideSBWhenDisable  )
-            return;
-
-    Super.Paint(C, X, Y);
+	// End:0x16
+	if(__NFUN_130__(bDisabled, m_bHideSBWhenDisable))
+	{
+		return;
+	}
+	super.Paint(C, X, Y);
+	return;
 }
 
 function LMouseDown(float X, float Y)
 {
-	Super.LMouseDown(X, Y);
+	super(UWindowWindow).LMouseDown(X, Y);
+	// End:0x1B
 	if(bDisabled)
+	{
 		return;
-	UWindowVScrollBar(ParentWindow).Scroll(UWindowVScrollBar(ParentWindow).ScrollAmount);
-	NextClickTime = Root.GetPlayerOwner().Level.TimeSeconds + 0.5;
+	}
+	UWindowVScrollbar(ParentWindow).Scroll(UWindowVScrollbar(ParentWindow).ScrollAmount);
+	NextClickTime = __NFUN_174__(Root.GetPlayerOwner().Level.TimeSeconds, 0.5000000);
+	return;
 }
 
 function Tick(float Delta)
 {
-	if(bMouseDown && (NextClickTime > 0) && (NextClickTime < Root.GetPlayerOwner().Level.TimeSeconds))
+	// End:0x9A
+	if(__NFUN_130__(__NFUN_130__(bMouseDown, __NFUN_177__(NextClickTime, float(0))), __NFUN_176__(NextClickTime, Root.GetPlayerOwner().Level.TimeSeconds)))
 	{
-		UWindowVScrollBar(ParentWindow).Scroll(UWindowVScrollBar(ParentWindow).ScrollAmount);
-		NextClickTime = Root.GetPlayerOwner().Level.TimeSeconds + 0.1;
+		UWindowVScrollbar(ParentWindow).Scroll(UWindowVScrollbar(ParentWindow).ScrollAmount);
+		NextClickTime = __NFUN_174__(Root.GetPlayerOwner().Level.TimeSeconds, 0.1000000);
 	}
-
-	if(!bMouseDown)
+	// End:0xB0
+	if(__NFUN_129__(bMouseDown))
 	{
-		NextClickTime = 0;
+		NextClickTime = 0.0000000;
 	}
+	return;
 }
 
-defaultproperties
-{
-}

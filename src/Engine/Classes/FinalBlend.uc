@@ -1,32 +1,39 @@
+//=============================================================================
+// FinalBlend - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class FinalBlend extends Modifier
-	showcategories(Material)
-	native;
+	native
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
 enum EFrameBufferBlending
 {
-	FB_Overwrite,
-	FB_Modulate,
-	FB_AlphaBlend,
-	FB_AlphaModulate_MightNotFogCorrectly,
-	FB_Translucent,
-	FB_Darken,
-	FB_Brighten,
-	FB_Invisible,
-    FB_Modulate1X,
-    FB_Highlight
+	FB_Overwrite,                   // 0
+	FB_Modulate,                    // 1
+	FB_AlphaBlend,                  // 2
+	FB_AlphaModulate_MightNotFogCorrectly,// 3
+	FB_Translucent,                 // 4
+	FB_Darken,                      // 5
+	FB_Brighten,                    // 6
+	FB_Invisible,                   // 7
+	FB_Modulate1X,                  // 8
+	FB_Highlight                    // 9
 };
 
-var() EFrameBufferBlending FrameBufferBlending;
+var() FinalBlend.EFrameBufferBlending FrameBufferBlending;
+var() byte AlphaRef;
 var() bool ZWrite;
 var() bool ZTest;
 var() bool AlphaTest;
 var() bool TwoSided;
-var() byte AlphaRef;
 //R6CODE
 var() bool m_bAddZBias;
 
 defaultproperties
 {
-     ZWrite=True
-     ZTest=True
+	ZWrite=true
+	ZTest=true
 }

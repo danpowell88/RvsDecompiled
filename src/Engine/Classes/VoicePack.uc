@@ -1,24 +1,35 @@
 //=============================================================================
+// VoicePack - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // VoicePack.
 //=============================================================================
 class VoicePack extends Info
-	abstract;
-	
-/* 
-ClientInitialize() sets up playing the appropriate voice segment, and returns a string
- representation of the message
-*/
-function ClientInitialize(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageIndex);
-function PlayerSpeech(name Type, int Index, int Callsign);
+	abstract
+	notplaceable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
+
+function ClientInitialize(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageIndex)
+{
+	return;
+}
+
+function PlayerSpeech(name type, int Index, int Callsign)
+{
+	return;
+}
 
 static function byte GetMessageIndex(name PhraseName)
 {
 	return 0;
+	return;
 }
-	
 
 defaultproperties
 {
-     RemoteRole=ROLE_None
-     LifeSpan=10.000000
+	RemoteRole=0
+	LifeSpan=10.0000000
 }

@@ -1,96 +1,87 @@
 //=============================================================================
+// Trigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Trigger: senses things happening in its proximity and generates 
 // sends Trigger/UnTrigger to actors whose names match 'EventName'.
 //=============================================================================
 class Trigger extends Triggers
-	native;
+	native
+ placeable;
 
-#exec Texture Import File=Textures\Trigger.pcx Name=S_Trigger Mips=Off MASKED=1
-
-//-----------------------------------------------------------------------------
-// Trigger variables.
-
-// Trigger type.
-var() enum ETriggerType
+enum ETriggerType
 {
-	TT_PlayerProximity,	// Trigger is activated by player proximity.
-	TT_PawnProximity,	// Trigger is activated by any pawn's proximity
-	TT_ClassProximity,	// Trigger is activated by actor of ClassProximityType only
-	TT_AnyProximity,    // Trigger is activated by any actor in proximity.
-	TT_Shoot,		    // Trigger is activated by player shooting it.
-	TT_HumanPlayerProximity,	// Trigger activated by human player (not bot)
-} TriggerType;
+	TT_PlayerProximity,             // 0
+	TT_PawnProximity,               // 1
+	TT_ClassProximity,              // 2
+	TT_AnyProximity,                // 3
+	TT_Shoot,                       // 4
+	TT_HumanPlayerProximity         // 5
+};
 
+// NEW IN 1.60
+var() Trigger.ETriggerType TriggerType;
+// Only trigger once and then go dormant.
+var() bool bTriggerOnceOnly;
+// For triggers that are activated/deactivated by other triggers.
+var() bool bInitiallyActive;
+var bool bSavedInitialCollision;
+var bool bSavedInitialActive;
+//R6Alarms
+var(R6Alarm) bool m_bAlarm;
+var() float RepeatTriggerTime;  // if > 0, repeat trigger message at this interval is still touching other
+var() float ReTriggerDelay;  // minimum time before trigger can be triggered again
+var float TriggerTime;
+var() float DamageThreshold;  // minimum damage to trigger if TT_Shoot
+// AI vars
+var Actor TriggerActor;  // actor that triggers this trigger
+var Actor TriggerActor2;
+var(R6Alarm) R6Alarm m_pAlarm;
+var() Class<Actor> ClassProximityType;
 // Human readable triggering message.
 var() localized string Message;
 
-// Only trigger once and then go dormant.
-var() bool bTriggerOnceOnly;
-
-// For triggers that are activated/deactivated by other triggers.
-var() bool bInitiallyActive;
-
-var() class<actor> ClassProximityType;
-
-var() float	RepeatTriggerTime; //if > 0, repeat trigger message at this interval is still touching other
-var() float ReTriggerDelay; //minimum time before trigger can be triggered again
-var	  float TriggerTime;
-var() float DamageThreshold; //minimum damage to trigger if TT_Shoot
-
-// AI vars
-var	actor TriggerActor;	// actor that triggers this trigger
-var actor TriggerActor2;
-
-// store for reset
-
-var bool bSavedInitialCollision;
-var bool bSavedInitialActive;
-
-//R6Alarms
-var(R6Alarm)  bool            m_bAlarm;
-var(R6Alarm)  R6Alarm         m_pAlarm;
-
-
-//=============================================================================
-// AI related functions
-
 function PreBeginPlay()
 {
-	Super.PreBeginPlay();
-
-	if ( (TriggerType == TT_PlayerProximity)
-		|| (TriggerType == TT_PawnProximity)
-		|| (TriggerType == TT_HumanPlayerProximity)
-		|| ((TriggerType == TT_ClassProximity) && ClassIsChildOf(ClassProximityType,class'Pawn')) )	
+	super(Actor).PreBeginPlay();
+	// End:0x65
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(TriggerType), int(0)), __NFUN_154__(int(TriggerType), int(1))), __NFUN_154__(int(TriggerType), int(5))), __NFUN_130__(__NFUN_154__(int(TriggerType), int(2)), __NFUN_258__(ClassProximityType, Class'Engine.Pawn'))))
+	{
 		OnlyAffectPawns(true);
+	}
+	return;
 }
 
 function PostBeginPlay()
 {
-	if ( !bInitiallyActive )
+	// End:0x11
+	if(__NFUN_129__(bInitiallyActive))
+	{
 		FindTriggerActor();
-	if ( TriggerType == TT_Shoot )
+	}
+	// End:0x39
+	if(__NFUN_154__(int(TriggerType), int(4)))
 	{
 		bHidden = false;
 		bProjTarget = true;
-		SetDrawType(DT_None);
+		SetDrawType(0);
 	}
 	bSavedInitialActive = bInitiallyActive;
 	bSavedInitialCollision = bCollideActors;
-	Super.PostBeginPlay();
+	super(Actor).PostBeginPlay();
+	return;
 }
 
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
 function Reset()
 {
-	Super.Reset();
-
-	// collision, bInitiallyactive
+	super(Actor).Reset();
 	bInitiallyActive = bSavedInitialActive;
-	SetCollision(bSavedInitialCollision, bBlockActors, bBlockPlayers );
-}	
+	__NFUN_262__(bSavedInitialCollision, bBlockActors, bBlockPlayers);
+	return;
+}
 
 //------------------------------------------------------------------
 // ResetOriginalData
@@ -98,197 +89,218 @@ function Reset()
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
-
-	// collision, bInitiallyactive
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super(Actor).ResetOriginalData();
 	bInitiallyActive = bSavedInitialActive;
-	SetCollision(bSavedInitialCollision, bBlockActors, bBlockPlayers );
+	__NFUN_262__(bSavedInitialCollision, bBlockActors, bBlockPlayers);
+	return;
 }
 
 function FindTriggerActor()
 {
 	local Actor A;
 
-	TriggerActor = None;
-	TriggerActor2 = None;
-	ForEach AllActors(class 'Actor', A)
-		if ( A.Event == Tag)
+	TriggerActor = none;
+	TriggerActor2 = none;
+	// End:0x5E
+	foreach __NFUN_304__(Class'Engine.Actor', A)
+	{
+		// End:0x5D
+		if(__NFUN_254__(A.Event, Tag))
 		{
-			if (TriggerActor == None)
-				TriggerActor = A;
-			else
+			// End:0x4F
+			if(__NFUN_114__(TriggerActor, none))
 			{
-				TriggerActor2 = A;
-				return;
+				TriggerActor = A;
+				// End:0x5D
+				continue;
 			}
-		}
+			TriggerActor2 = A;			
+			return;
+		}		
+	}	
+	return;
 }
 
 function Actor SpecialHandling(Pawn Other)
 {
 	local Actor A;
 
-	if ( bTriggerOnceOnly && !bCollideActors )
-		return None;
-
-	if ( (TriggerType == TT_HumanPlayerProximity) && !Other.IsHumanControlled() )
-		return None;
-
-	if ( (TriggerType == TT_PlayerProximity) && !Other.IsPlayerPawn() )
-		return None;
-
-	if ( !bInitiallyActive )
+	// End:0x18
+	if(__NFUN_130__(bTriggerOnceOnly, __NFUN_129__(bCollideActors)))
 	{
-		if ( TriggerActor == None )
-			FindTriggerActor();
-		if ( TriggerActor == None )
-			return None;
-		if ( (TriggerActor2 != None) 
-			&& (VSize(TriggerActor2.Location - Other.Location) < VSize(TriggerActor.Location - Other.Location)) )
-			return TriggerActor2;
-		else
-			return TriggerActor;
+		return none;
 	}
-
-	// is this a shootable trigger?
-	if ( TriggerType == TT_Shoot )
-		return Other.ShootSpecial(self);
-
-	// can other trigger it right away?
-	if ( IsRelevant(Other) )
+	// End:0x40
+	if(__NFUN_130__(__NFUN_154__(int(TriggerType), int(5)), __NFUN_129__(Other.IsHumanControlled())))
 	{
-		ForEach TouchingActors(class'Actor', A)
-			if ( A == Other )
+		return none;
+	}
+	// End:0x68
+	if(__NFUN_130__(__NFUN_154__(int(TriggerType), int(0)), __NFUN_129__(Other.IsPlayerPawn())))
+	{
+		return none;
+	}
+	// End:0xF2
+	if(__NFUN_129__(bInitiallyActive))
+	{
+		// End:0x84
+		if(__NFUN_114__(TriggerActor, none))
+		{
+			FindTriggerActor();
+		}
+		// End:0x91
+		if(__NFUN_114__(TriggerActor, none))
+		{
+			return none;
+		}
+		// End:0xEC
+		if(__NFUN_130__(__NFUN_119__(TriggerActor2, none), __NFUN_176__(__NFUN_225__(__NFUN_216__(TriggerActor2.Location, Other.Location)), __NFUN_225__(__NFUN_216__(TriggerActor.Location, Other.Location)))))
+		{
+			return TriggerActor2;			
+		}
+		else
+		{
+			return TriggerActor;
+		}
+	}
+	// End:0x12E
+	if(IsRelevant(Other))
+	{
+		// End:0x12B
+		foreach __NFUN_307__(Class'Engine.Actor', A)
+		{
+			// End:0x12A
+			if(__NFUN_114__(A, Other))
+			{
 				Touch(Other);
+			}			
+		}		
 		return self;
 	}
-
 	return self;
+	return;
 }
-
-// when trigger gets turned on, check its touch list
 
 function CheckTouchList()
 {
 	local Actor A;
 
-	ForEach TouchingActors(class'Actor', A)
-		Touch(A);
-}
-
-//=============================================================================
-// Trigger states.
-
-// Trigger is always active.
-state() NormalTrigger
-{
-}
-
-// Other trigger toggles this trigger's activity.
-state() OtherTriggerToggles
-{
-	function Trigger( actor Other, pawn EventInstigator )
+	// End:0x1C
+	foreach __NFUN_307__(Class'Engine.Actor', A)
 	{
-		bInitiallyActive = !bInitiallyActive;
-		if ( bInitiallyActive )
-			CheckTouchList();
-	}
+		Touch(A);		
+	}	
+	return;
 }
-
-// Other trigger turns this on.
-state() OtherTriggerTurnsOn
-{
-	function Trigger( actor Other, pawn EventInstigator )
-	{
-		local bool bWasActive;
-
-		bWasActive = bInitiallyActive;
-		bInitiallyActive = true;
-		if ( !bWasActive )
-			CheckTouchList();
-	}
-}
-
-// Other trigger turns this off.
-state() OtherTriggerTurnsOff
-{
-	function Trigger( actor Other, pawn EventInstigator )
-	{
-		bInitiallyActive = false;
-	}
-}
-
-//=============================================================================
-// Trigger logic.
 
 //
 // See whether the other actor is relevant to this trigger.
 //
-function bool IsRelevant( actor Other )
+function bool IsRelevant(Actor Other)
 {
-	if( !bInitiallyActive )
-		return false;
-	switch( TriggerType )
+	// End:0x0D
+	if(__NFUN_129__(bInitiallyActive))
 	{
-	case TT_HumanPlayerProximity:
-			return (Pawn(Other) != None) && Pawn(Other).IsHumanControlled();
-		case TT_PlayerProximity:
-			return (Pawn(Other) != None) && Pawn(Other).IsPlayerPawn();
-		case TT_PawnProximity:
-			return (Pawn(Other) != None) && Pawn(Other).CanTrigger(self);
-		case TT_ClassProximity:
-			return ClassIsChildOf(Other.Class, ClassProximityType);
-		case TT_AnyProximity:
+		return false;
+	}
+	switch(TriggerType)
+	{
+		// End:0x40
+		case 5:
+			return __NFUN_130__(__NFUN_119__(Pawn(Other), none), Pawn(Other).IsHumanControlled());
+		// End:0x6C
+		case 0:
+			return __NFUN_130__(__NFUN_119__(Pawn(Other), none), Pawn(Other).IsPlayerPawn());
+		// End:0x99
+		case 1:
+			return __NFUN_130__(__NFUN_119__(Pawn(Other), none), Pawn(Other).CanTrigger(self));
+		// End:0xB5
+		case 2:
+			return __NFUN_258__(Other.Class, ClassProximityType);
+		// End:0xBC
+		case 3:
 			return true;
-		case TT_Shoot:
-			return ( (Projectile(Other) != None) && (Projectile(Other).Damage >= DamageThreshold) );
+		// End:0xFFFF
+		default:
+			return;
+			break;
 	}
 }
+
 //
 // Called when something touches the trigger.
 //
-function Touch( actor Other )
+function Touch(Actor Other)
 {
 	local int i;
 
-	if( IsRelevant( Other ) )
+	// End:0x18C
+	if(IsRelevant(Other))
 	{
-		if ( ReTriggerDelay > 0 )
+		// End:0x50
+		if(__NFUN_177__(ReTriggerDelay, float(0)))
 		{
-			if ( Level.TimeSeconds - TriggerTime < ReTriggerDelay )
+			// End:0x3C
+			if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, TriggerTime), ReTriggerDelay))
+			{
 				return;
+			}
 			TriggerTime = Level.TimeSeconds;
 		}
-		// Broadcast the Trigger message to all matching actors.
 		TriggerEvent(Event, self, Other.Instigator);
-
-//R6CODE
-        if(m_bAlarm)
-        {
-            m_pAlarm.SetAlarm(Other.Location);
-        }
-
-		if ( (Pawn(Other) != None) && (Pawn(Other).Controller != None) )
+		// End:0x90
+		if(m_bAlarm)
 		{
-			for ( i=0;i<4;i++ )
-				if ( Pawn(Other).Controller.GoalList[i] == self )
-				{
-					Pawn(Other).Controller.GoalList[i] = None;
-					break;
-				}
-		}	
-				
-		if( (Message != "") && (Other.Instigator != None) )
-			// Send a string message to the toucher.
-			Other.Instigator.ClientMessage( Message );
+			m_pAlarm.SetAlarm(Other.Location);
+		}
+		// End:0x127
+		if(__NFUN_130__(__NFUN_119__(Pawn(Other), none), __NFUN_119__(Pawn(Other).Controller, none)))
+		{
+			i = 0;
+			J0xC2:
 
-		if( bTriggerOnceOnly )
-			// Ignore future touches.
-			SetCollision(False);
-		else if ( RepeatTriggerTime > 0 )
-			SetTimer(RepeatTriggerTime, false);
+			// End:0x127 [Loop If]
+			if(__NFUN_150__(i, 4))
+			{
+				// End:0x11D
+				if(__NFUN_114__(Pawn(Other).Controller.GoalList[i], self))
+				{
+					Pawn(Other).Controller.GoalList[i] = none;
+					// [Explicit Break]
+					goto J0x127;
+				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0xC2;
+			}
+		}
+		J0x127:
+
+		// End:0x166
+		if(__NFUN_130__(__NFUN_123__(Message, ""), __NFUN_119__(Other.Instigator, none)))
+		{
+			Other.Instigator.ClientMessage(Message);
+		}
+		// End:0x176
+		if(bTriggerOnceOnly)
+		{
+			__NFUN_262__(false);			
+		}
+		else
+		{
+			// End:0x18C
+			if(__NFUN_177__(RepeatTriggerTime, float(0)))
+			{
+				__NFUN_280__(RepeatTriggerTime, false);
+			}
+		}
 	}
+	return;
 }
 
 function Timer()
@@ -297,68 +309,127 @@ function Timer()
 	local Actor A;
 
 	bKeepTiming = false;
-
-	ForEach TouchingActors(class'Actor', A)
-		if ( IsRelevant(A) )
+	// End:0x3A
+	foreach __NFUN_307__(Class'Engine.Actor', A)
+	{
+		// End:0x39
+		if(IsRelevant(A))
 		{
 			bKeepTiming = true;
 			Touch(A);
-		}
-
-	if ( bKeepTiming )
-		SetTimer(RepeatTriggerTime, false);
+		}		
+	}	
+	// End:0x4D
+	if(bKeepTiming)
+	{
+		__NFUN_280__(RepeatTriggerTime, false);
+	}
+	return;
 }
 
-function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation, 
-						Vector momentum, class<DamageType> damageType)
+function int TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
-	if ( bInitiallyActive && (TriggerType == TT_Shoot) && (Damage >= DamageThreshold) && (instigatedBy != None) )
+	// End:0xE1
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bInitiallyActive, __NFUN_154__(int(TriggerType), int(4))), __NFUN_179__(float(iKillValue), DamageThreshold)), __NFUN_119__(instigatedBy, none)))
 	{
-		if ( ReTriggerDelay > 0 )
+		// End:0x7D
+		if(__NFUN_177__(ReTriggerDelay, float(0)))
 		{
-			if ( Level.TimeSeconds - TriggerTime < ReTriggerDelay )
-				return;
+			// End:0x69
+			if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, TriggerTime), ReTriggerDelay))
+			{
+				return 0;
+			}
 			TriggerTime = Level.TimeSeconds;
 		}
-		// Broadcast the Trigger message to all matching actors.
 		TriggerEvent(Event, self, instigatedBy);
-//R6CODE
-        if(m_bAlarm)
-        {
-            m_pAlarm.SetAlarm(hitlocation);
-        }
-
-		if( Message != "" )
-			// Send a string message to the toucher.
-			instigatedBy.Instigator.ClientMessage( Message );
-
-		if( bTriggerOnceOnly )
-			// Ignore future touches.
-			SetCollision(False);
+		// End:0xAB
+		if(m_bAlarm)
+		{
+			m_pAlarm.SetAlarm(vHitLocation);
+		}
+		// End:0xD4
+		if(__NFUN_123__(Message, ""))
+		{
+			instigatedBy.Instigator.ClientMessage(Message);
+		}
+		// End:0xE1
+		if(bTriggerOnceOnly)
+		{
+			__NFUN_262__(false);
+		}
 	}
+	return 0;
+	return;
 }
-
-//#ifdef R6CODE
-function INT R6TakeDamage( INT iKillValue, INT iStunValue, Pawn instigatedBy, 
-						   vector vHitLocation, vector vMomentum, INT iBulletToArmorModifier, optional int iBulletGoup)
-{
-    TakeDamage( iKillValue, instigatedBy, vHitLocation, vMomentum, none);
-    return iKillValue;
-}
-//#endif // #ifdef R6CODE
 
 //
 // When something untouches the trigger.
 //
-function UnTouch( actor Other )
+function UnTouch(Actor Other)
 {
-	if( IsRelevant( Other ) )
-		UntriggerEvent(event, self, Other.Instigator);
+	// End:0x28
+	if(IsRelevant(Other))
+	{
+		UntriggerEvent(Event, self, Other.Instigator);
+	}
+	return;
+}
+
+state() NormalTrigger
+{	stop;
+}
+
+state() OtherTriggerToggles
+{
+	function Trigger(Actor Other, Pawn EventInstigator)
+	{
+		bInitiallyActive = __NFUN_129__(bInitiallyActive);
+		// End:0x1E
+		if(bInitiallyActive)
+		{
+			CheckTouchList();
+		}
+		return;
+	}
+	stop;
+}
+
+state() OtherTriggerTurnsOn
+{
+	function Trigger(Actor Other, Pawn EventInstigator)
+	{
+		local bool bWasActive;
+
+		bWasActive = bInitiallyActive;
+		bInitiallyActive = true;
+		// End:0x26
+		if(__NFUN_129__(bWasActive))
+		{
+			CheckTouchList();
+		}
+		return;
+	}
+	stop;
+}
+
+state() OtherTriggerTurnsOff
+{
+	function Trigger(Actor Other, Pawn EventInstigator)
+	{
+		bInitiallyActive = false;
+		return;
+	}
+	stop;
 }
 
 defaultproperties
 {
-     bInitiallyActive=True
-     Texture=Texture'Engine.S_Trigger'
-     InitialState="NormalTrigger"
+	bInitiallyActive=true
+	Texture=Texture'Engine.S_Trigger'
+	InitialState="NormalTrigger"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var ETriggerType
+// REMOVED IN 1.60: function R6TakeDamage

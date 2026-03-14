@@ -1,3 +1,9 @@
+//=============================================================================
+// R6SFX - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6SFX 
 // Created By       Carl Lavoie
@@ -9,10 +15,11 @@
 //
 //============================================================================//
 class R6SFX extends Emitter
-	abstract;
+	abstract
+ placeable;
 
 defaultproperties
 {
-     bNoDelete=False
-     m_bDeleteOnReset=True
+	bNoDelete=false
+	m_bDeleteOnReset=true
 }

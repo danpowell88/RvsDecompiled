@@ -1,522 +1,258 @@
 //=============================================================================
+// CheatManager - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // CheatManager
 // Object within playercontroller that manages "cheat" commands
 // only spawned in single player mode
 //=============================================================================
-
 class CheatManager extends Object within PlayerController
-	native;
-
-var rotator LockedRotation;
+ native;
 
 //R6CODE+
-var bool    m_bUnlockAllCheat;
-
+var bool m_bUnlockAllCheat;
+var Rotator LockedRotation;
 
 function bool CanExec()
 {
-#ifdefMPDEMO
-    ClientErrorMessageLocalized( "Exec" );
-    return false;
-#endif
-
-    if ( m_bUnlockAllCheat )
-        return true;
-
-    // nothing would be executed on the client
-    // but, the client can ask the server, see ServerGod
-    if ( Level.NetMode == NM_Client ) 
-    {
-        ClientErrorMessageLocalized( "Exec" );
-        return false;
-    }
-
-    if ( Level.NetMode == NM_Standalone )
-        return true;
-
-    ClientErrorMessageLocalized( "Exec" );
-    return false;
-}
-//R6CODE-
-
-
-/* Used for correlating game situation with log file
- */
-/* R6CODE+ 
-exec function FreezeFrame(float delay)
-{
-	Level.Game.SetPause(true,outer);
-	Level.PauseDelay = Level.TimeSeconds + delay;
-}
-
-exec function WriteToLog()
-{
-	log("NOW!");
-}
-
-exec function SetFlash(float F)
-{
-	FlashScale.X = F;
-}
-
-exec function SetFogR(float F)
-{
-	FlashFog.X = F;
-}
-
-exec function SetFogG(float F)
-{
-	FlashFog.Y = F;
-}
-
-exec function SetFogB(float F)
-{
-	FlashFog.Z = F;
-}
-
-// LogScriptedSequences()
-//Toggles logging of scripted sequences on and off
-//
-exec function LogScriptedSequences()
-{
-	local AIScript S;
-
-	ForEach AllActors(class'AIScript',S)
-		S.bLoggingEnabled = !S.bLoggingEnabled;
-}
-
-// Teleport()
-//Teleport to surface player is looking at
-//
-exec function Teleport()
-{
-	local actor HitActor;
-	local vector HitNormal, HitLocation;
-
-	HitActor = Trace(HitLocation, HitNormal, ViewTarget.Location + 10000 * vector(Rotation),ViewTarget.Location, true);
-	if ( HitActor == None )
-		HitLocation = ViewTarget.Location + 10000 * vector(Rotation);
-	else
-		HitLocation = HitLocation + ViewTarget.CollisionRadius * HitNormal;
-
-	ViewTarget.SetLocation(HitLocation);
-}
-
-// 
-// Scale the player's size to be F * default size
-//
-exec function ChangeSize( float F )
-{
-	if ( Pawn.SetCollisionSize(Pawn.Default.CollisionRadius * F,Pawn.Default.CollisionHeight * F) )
+	// End:0x0B
+	if(m_bUnlockAllCheat)
 	{
-		Pawn.SetDrawScale(F);
-		Pawn.SetLocation(Pawn.Location);
+		return true;
 	}
-}
-
-exec function LockCamera()
-{
-	local vector LockedLocation;
-	local rotator LockedRot;
-	local actor LockedActor;
-
-	if ( !bCameraPositionLocked )
+	// End:0x44
+	if(__NFUN_154__(int(Outer.Level.NetMode), int(NM_Client)))
 	{
-		PlayerCalcView(LockedActor,LockedLocation,LockedRot);
-		Outer.SetLocation(LockedLocation);
-		LockedRotation = LockedRot;
-		SetViewTarget(outer);
+		Outer.ClientErrorMessageLocalized("Exec");
+		return false;
 	}
-	else
-		SetViewTarget(Pawn);
-
-	bCameraPositionLocked = !bCameraPositionLocked;
-	bBehindView = bCameraPositionLocked;
-	bFreeCamera = false;
-}
-
-exec function SetCameraDist( float F )
-{
-	CameraDist = FMax(F,2);
-}
-
-// Stop interpolation
-//
-exec function EndPath()
-{
-}
-
-// 
-// Camera and pawn aren't rotated together in behindview when bFreeCamera is true
-//
-exec function FreeCamera( bool B )
-{
-	bFreeCamera = B;
-	bBehindView = B;
-}
-
-exec function CauseEvent( name EventName )
-{
-	TriggerEvent( EventName, Pawn, Pawn);
-}
-
-exec function Amphibious()
-{
-	Pawn.UnderwaterTime = +999999.0;
-}
-exec function Fly()
-{
-	Pawn.UnderWaterTime = Pawn.Default.UnderWaterTime;	
-	ClientMessage("You feel much lighter");
-	Pawn.SetCollision(true, true , true);
-	Pawn.bCollideWorld = true;
-	bCheatFlying = true;
-	Outer.GotoState('PlayerFlying');
-}
-
-exec function Walk()
-{	
-	if ( Pawn != None )
+	// End:0x68
+	if(__NFUN_154__(int(Outer.Level.NetMode), int(NM_Standalone)))
 	{
-		bCheatFlying = false;
-		Pawn.UnderWaterTime = Pawn.Default.UnderWaterTime;	
-		Pawn.SetCollision(true, true , true);
-		Pawn.SetPhysics(PHYS_Walking);
-		Pawn.bCollideWorld = true;
-		ClientReStart();
+		return true;
 	}
+	Outer.ClientErrorMessageLocalized("Exec");
+	return false;
+	return;
 }
 
-exec function Ghost()
+exec function SloMo(float t)
 {
-	Pawn.UnderWaterTime = -1.0;	
-	ClientMessage("You feel ethereal");
-	Pawn.SetCollision(false, false, false);
-	Pawn.bCollideWorld = false;
-	bCheatFlying = true;
-	Outer.GotoState('PlayerFlying');
+	// End:0x0D
+	if(__NFUN_129__(CanExec()))
+	{
+		return;
+	}
+	Outer.Level.Game.SetGameSpeed(t);
+	Outer.Level.Game.__NFUN_536__();
+	Outer.Level.Game.GameReplicationInfo.__NFUN_536__();
+	return;
 }
 
-
-exec function Invisible(bool B)
-{
-	Pawn.bHidden = B;
-
-	if (B)
-		Pawn.Visibility = 0;
-	else
-		Pawn.Visibility = Pawn.Default.Visibility;
-}
-R6CODE- */
-
-// R6CHANGEWEAPONSYSTEM
-//exec function AllAmmo()
-//{
-//	local Inventory Inv;
-//
-//	for( Inv=Pawn.Inventory; Inv!=None; Inv=Inv.Inventory ) 
-//		if (Ammunition(Inv)!=None) 
-//		{
-//			Ammunition(Inv).AmmoAmount  = 999;
-//			Ammunition(Inv).MaxAmmo  = 999;				
-//		}
-//}	
-	
-exec function SloMo( float T )
-{
-   if ( !CanExec() )
-        return;
-
-    Level.Game.SetGameSpeed(T);
-	Level.Game.SaveConfig(); 
-	Level.Game.GameReplicationInfo.SaveConfig();
-
-}
-/* R6CODE+
-exec function SetJumpZ( float F )
-{
-	Pawn.JumpZ = F;
-}
-
-exec function SetGravity( float F )
-{
-	PhysicsVolume.Gravity.Z = F;
-}
-
-exec function SetDebugSpeed( float F )
-{
-	Pawn.GroundSpeed = Pawn.Default.GroundSpeed * f;
-	Pawn.WaterSpeed = Pawn.Default.WaterSpeed * f;
-}
-R6CODE- */
-
-exec function KillAll(class<actor> aClass)
+exec function KillAll(Class<Actor> aClass)
 {
 	local Actor A;
 
-    // R6CODE+
-    if ( !CanExec() ) return;
-
-	if ( ClassIsChildOf(aClass, class'Pawn') )
+	// End:0x0D
+	if(__NFUN_129__(CanExec()))
 	{
-		KillAllPawns(class<Pawn>(aClass));
 		return;
 	}
-	ForEach DynamicActors(class 'Actor', A)
-		if ( ClassIsChildOf(A.class, aClass) )
-			A.Destroy();
+	// End:0x2F
+	if(__NFUN_258__(aClass, Class'Engine.Pawn'))
+	{
+		KillAllPawns(Class<Pawn>(aClass));
+		return;
+	}
+	// End:0x6E
+	foreach Outer.__NFUN_313__(Class'Engine.Actor', A)
+	{
+		// End:0x6D
+		if(__NFUN_258__(A.Class, aClass))
+		{
+			A.__NFUN_279__();
+		}		
+	}	
+	return;
 }
 
 // Kill non-player pawns and their controllers
-function KillAllPawns(class<Pawn> aClass)
+function KillAllPawns(Class<Pawn> aClass)
 {
 	local Pawn P;
 
-	ForEach DynamicActors(class'Pawn', P)
-		if ( ClassIsChildOf(P.Class, aClass)
-			&& !P.IsHumanControlled() )
-		{
-			if ( P.Controller != None )
-				P.Controller.Destroy();
-
-			P.Destroy();
-		}
-}
-
-/* R6CODE+
-exec function KillPawns()
-{
-    KillAllPawns(class'Pawn');
-}
-
-// Avatar()
-// Possess a pawn of the requested class
-//
-exec function Avatar( string ClassName )
-{
-	local class<actor> NewClass;
-	local Pawn P;
-		
-	NewClass = class<actor>( DynamicLoadObject( ClassName, class'Class' ) );
-	if( NewClass!=None )
+	// End:0x7E
+	foreach Outer.__NFUN_313__(Class'Engine.Pawn', P)
 	{
-		Foreach DynamicActors(class'Pawn',P)
+		// End:0x7D
+		if(__NFUN_130__(__NFUN_258__(P.Class, aClass), __NFUN_129__(P.IsHumanControlled())))
 		{
-			if ( (P.Class == NewClass) && (P != Pawn) )
+			// End:0x71
+			if(__NFUN_119__(P.Controller, none))
 			{
-				if ( Pawn.Controller != None )
-					Pawn.Controller.PawnDied();
-				Possess(P);
-				break;
+				P.Controller.__NFUN_279__();
 			}
-		}
-	}
+			P.__NFUN_279__();
+		}		
+	}	
+	return;
 }
-
-exec function Summon( string ClassName )
-{
-	local class<actor> NewClass;
-	local vector SpawnLoc;
-
-	log( "Fabricate " $ ClassName );
-	NewClass = class<actor>( DynamicLoadObject( ClassName, class'Class' ) );
-	if( NewClass!=None )
-	{
-		if ( Pawn != None )
-			SpawnLoc = Pawn.Location;
-		else
-			SpawnLoc = Location;
-		Spawn( NewClass,,,SpawnLoc + 72 * Vector(Rotation) + vect(0,0,1) * 15 );
-	}
-}
-
-exec function PlayersOnly()
-{
-	Level.bPlayersOnly = !Level.bPlayersOnly;
-}
-
-exec function CheatView( class<actor> aClass, optional bool bQuiet )
-{
-	ViewClass(aClass,bQuiet, true);
-}
-
-// ***********************************************************
-// Navigation Aids (for testing)
-
-// remember spot for path testing (display path using ShowDebug)
-exec function RememberSpot()
-{
-	if ( Pawn != None )
-		Destination = Pawn.Location;
-	else
-		Destination = Location;
-}
-R6CODE- */
-
-// ***********************************************************
-// Changing viewtarget
 
 exec function ViewSelf(optional bool bQuiet)
 {
-	bBehindView = false;
-	if ( Pawn != None )
-		SetViewTarget(Pawn);
-	else
-		SetViewtarget(outer);
-	if (!bQuiet )
-		ClientMessage(OwnCamera, 'Event');
-	FixFOV();
-}
-
-/* R6CODE+
-exec function ViewPlayer( string S )
-{
-	local Controller P;
-
-	for ( P=Level.ControllerList; P!=None; P= P.NextController )
-		if ( P.bIsPlayer && (P.PlayerReplicationInfo.PlayerName ~= S) )
-			break;
-
-	if ( P.Pawn != None )
+	Outer.bBehindView = false;
+	// End:0x45
+	if(__NFUN_119__(Outer.Pawn, none))
 	{
-		ClientMessage(ViewingFrom@P.PlayerReplicationInfo.PlayerName, 'Event');
-		SetViewTarget(P.Pawn);
+		Outer.SetViewTarget(Outer.Pawn);		
 	}
-
-	bBehindView = ( ViewTarget != Pawn );
-	if ( bBehindView )
-		ViewTarget.BecomeViewTarget();
+	else
+	{
+		Outer.SetViewTarget(Outer);
+	}
+	// End:0x86
+	if(__NFUN_129__(bQuiet))
+	{
+		Outer.ClientMessage(Outer.OwnCamera, 'Event');
+	}
+	Outer.FixFOV();
+	return;
 }
- R6CODE- */
 
-exec function ViewActor( name ActorName)
+exec function ViewActor(name ActorName)
 {
 	local Actor A;
 
-    // R6CODE+
-    if ( !CanExec() ) return;
-    
-	ForEach AllActors(class'Actor', A)
-		if ( A.Name == ActorName )
+	// End:0x0D
+	if(__NFUN_129__(CanExec()))
+	{
+		return;
+	}
+	// End:0x67
+	foreach Outer.__NFUN_304__(Class'Engine.Actor', A)
+	{
+		// End:0x66
+		if(__NFUN_254__(A.Name, ActorName))
 		{
-			SetViewTarget(A);
-			bBehindView = true;
+			Outer.SetViewTarget(A);
+			Outer.bBehindView = true;			
 			return;
-		}
+		}		
+	}	
+	return;
 }
 
-/* R6CODE+
-exec function ViewBot()
+exec function ViewClass(Class<Actor> aClass, optional bool bQuiet, optional bool bCheat)
 {
-	local actor first;
-	local bool bFound;
-	local Controller C;
-
-	For ( C=Level.ControllerList; C!=None; C=C.NextController )
-		if ( C.IsA('AIController') && (C.Pawn != None) )
-	{
-		if ( bFound || (first == None) )
-		{
-			first = C.Pawn;
-			if ( bFound )
-				break;
-		}
-		if ( C.Pawn == ViewTarget ) 
-			bFound = true;
-	}  
-
-	if ( first != None )
-	{
-		SetViewTarget(first);
-		bBehindView = true;
-		ViewTarget.BecomeViewTarget();
-		FixFOV();
-	}
-	else
-		ViewSelf(true);
-}
-R6CODE- */
-
-exec function ViewClass( class<actor> aClass, optional bool bQuiet, optional bool bCheat )
-{
-	local actor other, first;
+	local Actor Other, first;
 	local bool bFound;
 
-    // R6CODE+
-    if ( !CanExec() ) return;
-    
-	if ( !bCheat && (Level.Game != None) && !Level.Game.bCanViewOthers )
+	// End:0x0D
+	if(__NFUN_129__(CanExec()))
+	{
 		return;
-
-	first = None;
-
-	ForEach AllActors( aClass, other )
+	}
+	// End:0x61
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bCheat), __NFUN_119__(Outer.Level.Game, none)), __NFUN_129__(Outer.Level.Game.bCanViewOthers)))
 	{
-		if ( bFound || (first == None) )
+		return;
+	}
+	first = none;
+	// End:0xF8
+	foreach Outer.__NFUN_304__(aClass, Other)
+	{
+		// End:0xD7
+		if(__NFUN_132__(bFound, __NFUN_114__(first, none)))
 		{
-            if( Pawn(other)==none || Pawn(other).IsAlive() )
-            {
-			    first = other;
-			    if ( bFound )
-				    break;
-            }
+			// End:0xD7
+			if(__NFUN_132__(__NFUN_114__(Pawn(Other), none), Pawn(Other).IsAlive()))
+			{
+				first = Other;
+				// End:0xD7
+				if(bFound)
+				{
+					// End:0xF8
+					break;
+				}
+			}
 		}
-		if ( other == ViewTarget ) 
-			bFound = true;
-	}  
-
-	if ( first != None )
-	{
-		if ( !bQuiet )
+		// End:0xF7
+		if(__NFUN_114__(Other, Outer.ViewTarget))
 		{
-			if ( Pawn(first) != None )
-				ClientMessage(ViewingFrom@First.GetHumanReadableName(), 'Event');
+			bFound = true;
+		}		
+	}	
+	// End:0x1F5
+	if(__NFUN_119__(first, none))
+	{
+		// End:0x180
+		if(__NFUN_129__(bQuiet))
+		{
+			// End:0x155
+			if(__NFUN_119__(Pawn(first), none))
+			{
+				Outer.ClientMessage(__NFUN_168__(Outer.ViewingFrom, first.GetHumanReadableName()), 'Event');				
+			}
 			else
-				ClientMessage(ViewingFrom@first, 'Event');
+			{
+				Outer.ClientMessage(__NFUN_168__(Outer.ViewingFrom, string(first)), 'Event');
+			}
 		}
-		SetViewTarget(first);
-		bBehindView = ( ViewTarget != outer );
-
-		if ( bBehindView )
-			ViewTarget.BecomeViewTarget();
-
-		FixFOV();
+		Outer.SetViewTarget(first);
+		Outer.bBehindView = __NFUN_119__(Outer.ViewTarget, Outer);
+		// End:0x1E3
+		if(Outer.bBehindView)
+		{
+			Outer.ViewTarget.BecomeViewTarget();
+		}
+		Outer.FixFOV();		
 	}
 	else
-		ViewSelf(bQuiet);
-}
-
-/*R6CHANGEWEAPONSYSTEM
-exec function Loaded()
-{
-	local inventory Inv;
-	local weapon Weap;
-
-	if( Level.Netmode!=NM_Standalone )
-		return;
-
-	Pawn.GiveWeapon("WarClassLight.WeapCOGAssaultRifle");
-	Pawn.GiveWeapon("WarClassLight.WeapCOGLightPlasma");
-	Pawn.GiveWeapon("WarClassLight.WeapCOGPistol");
-	Pawn.GiveWeapon("WarClassHeavy.WeapCOGMinigun");
-	Pawn.GiveWeapon("WarClassLight.WeapGeistSniperRifle");
-	Pawn.GiveWeapon("WarClassLight.WeapGeistGrenadeLauncher");
-	
-	for ( inv=Pawn.inventory; inv!=None; inv=inv.inventory )
 	{
-		weap = Weapon(inv);
-		if ( (weap != None) && (weap.AmmoType != None) )
-			weap.AmmoType.AmmoAmount = weap.AmmoType.MaxAmmo;
+		ViewSelf(bQuiet);
 	}
+	return;
 }
-*/
 
 // R6CODE +
-exec event LogThis( OPTIONAL bool bDontTraceActor, OPTIONAL Actor anActor )
+exec event LogThis(optional bool bDontTraceActor, optional Actor anActor)
 {
+	return;
 }
-// R6CODE -
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function FreezeFrame
+// REMOVED IN 1.60: function WriteToLog
+// REMOVED IN 1.60: function SetFlash
+// REMOVED IN 1.60: function SetFogR
+// REMOVED IN 1.60: function SetFogG
+// REMOVED IN 1.60: function SetFogB
+// REMOVED IN 1.60: function LogScriptedSequences
+// REMOVED IN 1.60: function Teleport
+// REMOVED IN 1.60: function ChangeSize
+// REMOVED IN 1.60: function LockCamera
+// REMOVED IN 1.60: function SetCameraDist
+// REMOVED IN 1.60: function EndPath
+// REMOVED IN 1.60: function FreeCamera
+// REMOVED IN 1.60: function CauseEvent
+// REMOVED IN 1.60: function Amphibious
+// REMOVED IN 1.60: function Fly
+// REMOVED IN 1.60: function Walk
+// REMOVED IN 1.60: function Ghost
+// REMOVED IN 1.60: function Invisible
+// REMOVED IN 1.60: function SetJumpZ
+// REMOVED IN 1.60: function SetGravity
+// REMOVED IN 1.60: function SetDebugSpeed
+// REMOVED IN 1.60: function KillPawns
+// REMOVED IN 1.60: function Avatar
+// REMOVED IN 1.60: function Summon
+// REMOVED IN 1.60: function PlayersOnly
+// REMOVED IN 1.60: function CheatView
+// REMOVED IN 1.60: function RememberSpot
+// REMOVED IN 1.60: function ViewPlayer
+// REMOVED IN 1.60: function ViewBot
+// REMOVED IN 1.60: function Loaded

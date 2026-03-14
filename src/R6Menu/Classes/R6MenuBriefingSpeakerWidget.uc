@@ -1,70 +1,57 @@
+//=============================================================================
+// R6MenuBriefingSpeakerWidget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6MenuBriefingSpeakerWidget extends UWindowWindow;
 
+var float m_fHBorderHeight;
+// NEW IN 1.60
+var float m_fVBorderWidth;
+var float m_fHBorderPadding;
+// NEW IN 1.60
+var float m_fVBorderPadding;
 var Texture m_Texture[4];
-var Region  m_TextureRegion[4];
-
-var Texture m_HBorderTexture, m_VBorderTexture;
-var Region m_HBorderTextureRegion, m_VBorderTextureRegion;
-
-var float m_fHBorderHeight, m_fVBorderWidth;
-var float m_fHBorderPadding, m_fVBorderPadding;
-//var color m_BorderColor;
+var Texture m_HBorderTexture;
+// NEW IN 1.60
+var Texture m_VBorderTexture;
+var Region m_TextureRegion[4];
+var Region m_HBorderTextureRegion;
+// NEW IN 1.60
+var Region m_VBorderTextureRegion;
 
 function Created()
 {
-	m_Texture[0] = Texture(DynamicLoadObject("R6BlackSnow.Mission.3dmodel", class'Texture'));
-	m_TextureRegion[0] = NewRegion(0, 0, 151, 113);
+	m_Texture[0] = Texture(DynamicLoadObject("R6BlackSnow.Mission.3dmodel", Class'Engine.Texture'));
+	m_TextureRegion[0] = NewRegion(0.0000000, 0.0000000, 151.0000000, 113.0000000);
+	return;
 }
 
-
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-	
-	C.SetDrawColor(m_BorderColor.R,m_BorderColor.G,m_BorderColor.B);
-    C.Style = m_BorderStyle;
-    
-	if(m_HBorderTexture != NONE)
+	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.Style = byte(m_BorderStyle);
+	// End:0x178
+	if(__NFUN_119__(m_HBorderTexture, none))
 	{
-		//top
-		DrawStretchedTextureSegment( C, m_fHBorderPadding, 0, WinWidth - (2* m_fHBorderPadding),
-											m_fHBorderHeight, m_HBorderTextureRegion.X, m_HBorderTextureRegion.Y, 
-											m_HBorderTextureRegion.W, m_HBorderTextureRegion.H, m_HBorderTexture );
-		//Bottom
-		DrawStretchedTextureSegment( C, m_fHBorderPadding, WinHeight - m_fHBorderHeight, 
-											WinWidth  - (2* m_fHBorderPadding), 
-											m_fHBorderHeight, m_HBorderTextureRegion.X, m_HBorderTextureRegion.Y, 
-											m_HBorderTextureRegion.W, m_HBorderTextureRegion.H, m_HBorderTexture );
-		//Middle
-		DrawStretchedTextureSegment( C, m_fHBorderPadding, m_fHBorderHeight + m_TextureRegion[0].H, 
-											WinWidth, 
-											m_fHBorderHeight, m_HBorderTextureRegion.X, m_HBorderTextureRegion.Y, 
-											m_HBorderTextureRegion.W, m_HBorderTextureRegion.H, m_HBorderTexture );
+		DrawStretchedTextureSegment(C, m_fHBorderPadding, 0.0000000, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+		DrawStretchedTextureSegment(C, m_fHBorderPadding, __NFUN_175__(WinHeight, m_fHBorderHeight), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+		DrawStretchedTextureSegment(C, m_fHBorderPadding, __NFUN_174__(m_fHBorderHeight, float(m_TextureRegion[0].H)), WinWidth, m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 	}
-
-	if(m_VBorderTexture != NONE)
+	// End:0x274
+	if(__NFUN_119__(m_VBorderTexture, none))
 	{
-		//Left
-		DrawStretchedTextureSegment( C, 0, m_fHBorderHeight + m_fVBorderPadding, m_fVBorderWidth, 
-											WinHeight - (2 * m_fHBorderHeight) - (2 * m_fVBorderPadding) , 
-											m_VBorderTextureRegion.X, m_VBorderTextureRegion.Y, 
-											m_VBorderTextureRegion.W, m_VBorderTextureRegion.H, m_VBorderTexture );
-		//Right
-		DrawStretchedTextureSegment( C, WinWidth - m_fVBorderWidth, m_fHBorderHeight + m_fVBorderPadding, m_fVBorderWidth, 
-											WinHeight - (2 * m_fHBorderHeight) - (2 * m_fVBorderPadding), 
-											m_VBorderTextureRegion.X, m_VBorderTextureRegion.Y, 
-											m_VBorderTextureRegion.W, m_VBorderTextureRegion.H, m_VBorderTexture );		
+		DrawStretchedTextureSegment(C, 0.0000000, __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+		DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, m_fVBorderWidth), __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 	}
-
-	C.SetDrawColor(255,255,255);
-	
-	
-
-	DrawStretchedTextureSegment( C, m_fVBorderWidth, m_fHBorderHeight , m_TextureRegion[0].W, 
-											m_TextureRegion[0].H, 
-											m_TextureRegion[0].X, m_TextureRegion[0].Y, 
-											m_TextureRegion[0].W, m_TextureRegion[0].H, m_Texture[0] );		    
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	DrawStretchedTextureSegment(C, m_fVBorderWidth, m_fHBorderHeight, float(m_TextureRegion[0].W), float(m_TextureRegion[0].H), float(m_TextureRegion[0].X), float(m_TextureRegion[0].Y), float(m_TextureRegion[0].W), float(m_TextureRegion[0].H), m_Texture[0]);
+	return;
 }
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var e
+// REMOVED IN 1.60: var n
+// REMOVED IN 1.60: var h
+// REMOVED IN 1.60: var g

@@ -1,4 +1,10 @@
 //=============================================================================
+// PlayerController - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // PlayerController
 //
 // PlayerControllers are used by human players to control pawns.
@@ -7,80 +13,135 @@
 // for the change in Possess().
 //=============================================================================
 class PlayerController extends Controller
-	config(user)
 	native
-	nativereplication;
+	nativereplication
+	config(User)
+ notplaceable;
 
-import class R6GameMenuCom;
+const K_GlobalID_size = 16;
 
-// Player info.
-var const player Player;
+enum eCameraMode
+{
+	CAMERA_FirstPerson,             // 0
+	CAMERA_3rdPersonFixed,          // 1
+	CAMERA_3rdPersonFree,           // 2
+	CAMERA_Ghost                    // 3
+};
 
+struct PlayerPrefInfo
+{
+	var string m_CharacterName;
+	var string m_ArmorName;
+	var string m_WeaponName1;
+	var string m_WeaponName2;
+	var string m_WeaponGadgetName1;
+	var string m_WeaponGadgetName2;
+	var string m_BulletType1;
+	var string m_BulletType2;
+	var string m_GadgetName1;
+	var string m_GadgetName2;
+};
+
+// NEW IN 1.60
+var input byte bStrafe;
+// NEW IN 1.60
+var input byte bSnapLevel;
+// NEW IN 1.60
+var input byte bLook;
+// NEW IN 1.60
+var input byte bFreeLook;
+// NEW IN 1.60
+var input byte bTurn180;
+// NEW IN 1.60
+var input byte bTurnToNearest;
+// NEW IN 1.60
+var input byte bXAxis;
+// NEW IN 1.60
+var input byte bYAxis;
+var Actor.EDoubleClickDir DoubleClickDir;  // direction of movement key double click (for special moves)
+var Actor.EMusicTransition Transition;
+var Object.ePlayerTeamSelection m_TeamSelection;
+// NEW IN 1.60
+var PlayerController.eCameraMode m_eCameraMode;
+// Camera info.
+var int ShowFlags;
+var int Misc1;
+// NEW IN 1.60
+var int Misc2;
+var int RendMap;
+var int WeaponUpdate;
+var config int EnemyTurnSpeed;
+var int GroundPitch;
+// Demo recording view rotation
+var int DemoViewPitch;
+var int DemoViewYaw;
+var int m_iChangeNameLastTime;  // last time change name was requested
+//#ifdef R6PUNKBUSTER
+//__WITH_PB__
+var int iPBEnabled;
 // player input control
-var globalconfig	bool 	bLookUpStairs;	// look up/down stairs (player)
-var globalconfig	bool	bSnapToLevel;	// Snap to level eyeheight when not mouselooking
-var globalconfig	bool	bAlwaysMouseLook;
-var globalconfig	bool	bKeyboardLook;	// no snapping when true
-var bool					bCenterView;
-
+var globalconfig bool bLookUpStairs;  // look up/down stairs (player)
+var globalconfig bool bSnapToLevel;  // Snap to level eyeheight when not mouselooking
+var globalconfig bool bAlwaysMouseLook;
+var globalconfig bool bKeyboardLook;  // no snapping when true
+var bool bCenterView;
 // Player control flags
-var bool		bBehindView;    // Outside-the-player view.
-var bool		bFrozen;		// set when game ends or player dies to temporarily prevent player from restarting (until cleared by timer)
-var bool		bPressedJump;
-var bool		bUpdatePosition;
-var bool		bIsTyping;
-var bool		bFixedCamera;	// used to fix camera in position (to view animations)
-var bool		bJumpStatus;	// used in net games
-var	bool		bUpdating;
-
-//#ifndef R6CODE
-//var globalconfig bool	bNeverSwitchOnPickup;	// if true, don't automatically switch to picked up weapon
-//#endif // #ifndef R6CODE
-
-var bool		bZooming;
-var	bool		bOnlySpectator;	// This controller is not allowed to possess pawns
-
+var bool bBehindView;  // Outside-the-player view.
+var bool bFrozen;  // set when game ends or player dies to temporarily prevent player from restarting (until cleared by timer)
+var bool bPressedJump;
+var bool bUpdatePosition;
+var bool bIsTyping;
+var bool bFixedCamera;  // used to fix camera in position (to view animations)
+var bool bJumpStatus;  // used in net games
+var bool bUpdating;
+var bool bZooming;
+var bool bOnlySpectator;  // This controller is not allowed to possess pawns
 //#ifdef R6CODE
-var bool		m_bReadyToEnterSpectatorMode;
-//#endif
-
+var bool m_bReadyToEnterSpectatorMode;
 //#ifndef R6CODE
 //var globalconfig bool bAlwaysLevel;
 //#endif // #ifndef R6CODE
-var bool		bSetTurnRot;
-var bool		bCheatFlying;	// instantly stop in flying mode
-var bool		bFreeCamera;	// free camera when in behindview mode (for checking out player models and animations)
-var	bool		bZeroRoll;
-var	bool		bCameraPositionLocked;
+var bool bSetTurnRot;
+var bool bCheatFlying;  // instantly stop in flying mode
+var bool bFreeCamera;  // free camera when in behindview mode (for checking out player models and animations)
+var bool bZeroRoll;
+var bool bCameraPositionLocked;
 //#ifndef R6CODE
 //var globalconfig bool ngSecretSet;
 //#endif // #ifndef R6CODE
-var bool		ReceivedSecretChecksum;
-
-var float AimingHelp;
-var float WaitDelay;			// Delay time until can restart
-
-var input float
-	aBaseX, aBaseY, aBaseZ,	aMouseX, aMouseY,
-	aForward, aTurn, aStrafe, aUp, aLookUp;
-
-var input byte
-	bStrafe, bSnapLevel, bLook, bFreeLook, bTurn180, bTurnToNearest, bXAxis, bYAxis;
-
-var EDoubleClickDir DoubleClickDir;		// direction of movement key double click (for special moves)
-
+var bool ReceivedSecretChecksum;
 //#ifdef R6CODE
-var BOOL   m_bInitFirstTick;
-
-// Camera info.
-var int ShowFlags;
-var int Misc1,Misc2;
-var int RendMap;
-var float        OrthoZoom;     // Orthogonal/map view zoom factor.
-var const actor ViewTarget;
-var float CameraDist;		// multiplier for behindview camera dist
-var transient array<CameraEffect> CameraEffects;	// A stack of camera effects.
-
+var bool m_bInitFirstTick;
+var bool m_PreLogOut;  // this controller is about to be destroyed
+//R6CODE
+var bool m_bRadarActive;
+var bool m_bHeatVisionActive;
+var bool m_bLoadSoundGun;
+var bool m_bInstructionTouch;  // Use in the traning to start the text.
+var float AimingHelp;
+var float WaitDelay;  // Delay time until can restart
+// NEW IN 1.60
+var input float aBaseX;
+// NEW IN 1.60
+var input float aBaseY;
+// NEW IN 1.60
+var input float aBaseZ;
+// NEW IN 1.60
+var input float aMouseX;
+// NEW IN 1.60
+var input float aMouseY;
+// NEW IN 1.60
+var input float aForward;
+// NEW IN 1.60
+var input float aTurn;
+// NEW IN 1.60
+var input float aStrafe;
+// NEW IN 1.60
+var input float aUp;
+// NEW IN 1.60
+var input float aLookUp;
+var float OrthoZoom;  // Orthogonal/map view zoom factor.
+var float CameraDist;  // multiplier for behindview camera dist
 //#ifdef R6CODE
 var float DesiredFOV;
 var float DefaultFOV;
@@ -88,787 +149,838 @@ var float DefaultFOV;
 //var globalconfig float DesiredFOV;
 //var globalconfig float DefaultFOV;
 //#endif R6CODE
-var float		ZoomLevel;
-
-// Screen flashes
-var vector FlashScale, FlashFog;
-var float DesiredFlashScale, ConstantGlowScale, InstantFlash;
-var vector DesiredFlashFog, ConstantGlowFog, InstantFog;
-
-// Remote Pawn ViewTargets
-var rotator		TargetViewRotation; 
-var float		TargetEyeHeight;
-var vector		TargetWeaponViewOffset;
-
-var HUD	myHUD;	// heads up display info
-
+var float ZoomLevel;
+var float DesiredFlashScale;
+// NEW IN 1.60
+var float ConstantGlowScale;
+// NEW IN 1.60
+var float InstantFlash;
+var float TargetEyeHeight;
 var float LastPlaySound;
-//#ifndef R6CODE
-//var globalconfig int AnnouncerVolume;
-//#endif // #ifndef R6CODE
-
-// Music info.
-var string				Song;
-var EMusicTransition	Transition;
-
+var float CurrentTimeStamp;
+// NEW IN 1.60
+var float LastUpdateTime;
+// NEW IN 1.60
+var float ServerTimeStamp;
+// NEW IN 1.60
+var float TimeMargin;
+// NEW IN 1.60
+var float ClientUpdateTime;
+var globalconfig float MaxTimeMargin;
+var float ProgressTimeOut;
+// view shaking (affects roll, and offsets camera position)
+var float MaxShakeRoll;  // max magnitude to roll camera
+var float ShakeRollRate;  // rate to change roll
+var float ShakeRollTime;  // how long to roll.  if value is < 1.0, then MaxShakeOffset gets damped by this, else if > 1 then its the number of times to repeat undamped
+var globalconfig float NetClientMaxTickRate;
+var float m_fNextUpdateTime;
+var float m_fLoginTime;
+// Player info.
+var const Player Player;
+var const Actor ViewTarget;
+var HUD myHUD;  // heads up display info
 // Move buffering for network games.  Clients save their un-acknowledged moves in order to replay them
 // when they get position updates from the server.
-var SavedMove SavedMoves;	// buffered moves pending position updates
-var SavedMove FreeMoves;	// freed moves, available for buffering
-var SavedMove PendingMove;	
-var float CurrentTimeStamp,LastUpdateTime,ServerTimeStamp,TimeMargin, ClientUpdateTime;
-var globalconfig float MaxTimeMargin;
-/*R6CHANGEWEAPONSYSTEM
-var Weapon OldClientWeapon;
-*/
-var int WeaponUpdate;
-
+var SavedMove SavedMoves;  // buffered moves pending position updates
+var SavedMove FreeMoves;  // freed moves, available for buffering
+var SavedMove PendingMove;
+// ReplicationInfo
+var GameReplicationInfo GameReplicationInfo;
+var Pawn TurnTarget;
+// Components ( inner classes )
+//R6CODE
+var CheatManager CheatManager;  // Object within playercontroller that manages "cheat" commands
+var R6RainbowStartInfo m_PlayerStartInfo;
+var Actor m_SaveOldClientBase;
+var Class<LocalMessage> LocalMessageClass;
+//var private CheatManager	CheatManager;	// Object within playercontroller that manages "cheat" commands
+var Class<CheatManager> CheatClass;  // class of my CheatManager
+var Class<PlayerInput> InputClass;  // class of my PlayerInput
+// Screen flashes
+var Vector FlashScale;
+// NEW IN 1.60
+var Vector FlashFog;
+var Vector DesiredFlashFog;
+// NEW IN 1.60
+var Vector ConstantGlowFog;
+// NEW IN 1.60
+var Vector InstantFog;
+// Remote Pawn ViewTargets
+var Rotator TargetViewRotation;
+var Vector TargetWeaponViewOffset;
+var Color ProgressColor[4];
+var Vector MaxShakeOffset;  // max magnitude to offset camera position
+var Vector ShakeOffsetRate;
+var Vector ShakeOffset;  // current magnitude to offset camera from shake
+var Vector ShakeOffsetTime;
+var Rotator TurnRot180;
+var Vector OldFloor;  // used by PlayerSpider mode - floor for which old rotation was based;
+var PlayerVerCDKeyStatus m_stPlayerVerCDKeyStatus;
+var PlayerVerCDKeyStatus m_stPlayerVerModCDKeyStatus;
+var PlayerPrefInfo m_PlayerPrefs;
+// Music info.
+var string Song;
 // Progess Indicator - used by the engine to provide status messages (HUD is responsible for displaying these).
-var string	ProgressMessage[4];
-var color	ProgressColor[4];
-var float	ProgressTimeOut;
-
+var string ProgressMessage[4];
 // Localized strings
 var localized string QuickSaveString;
 var localized string NoPauseMessage;
 var localized string ViewingFrom;
 var localized string OwnCamera;
-
-// ReplicationInfo
-var GameReplicationInfo GameReplicationInfo;
-
 // ngWorldStats Logging
-var globalconfig private string ngWorldSecret;
-
-var class<LocalMessage> LocalMessageClass;
-
-// view shaking (affects roll, and offsets camera position)
-var float	MaxShakeRoll; // max magnitude to roll camera
-var vector	MaxShakeOffset; // max magnitude to offset camera position
-var float	ShakeRollRate;	// rate to change roll
-var vector	ShakeOffsetRate;
-var vector	ShakeOffset; //current magnitude to offset camera from shake
-var float	ShakeRollTime; // how long to roll.  if value is < 1.0, then MaxShakeOffset gets damped by this, else if > 1 then its the number of times to repeat undamped
-var vector	ShakeOffsetTime;
-
-var Pawn		TurnTarget;
-var config int	EnemyTurnSpeed;
-var int			GroundPitch;
-var rotator		TurnRot180;
-
-var vector OldFloor;		// used by PlayerSpider mode - floor for which old rotation was based;
-
-// Components ( inner classes )
-//R6CODE
-var CheatManager	CheatManager;	// Object within playercontroller that manages "cheat" commands
-//var private CheatManager	CheatManager;	// Object within playercontroller that manages "cheat" commands
-var class<CheatManager>		CheatClass;		// class of my CheatManager
-var private transient PlayerInput	PlayerInput;	// Object within playercontroller that manages player input.
-var class<PlayerInput>		InputClass;		// class of my PlayerInput
-
-// Demo recording view rotation
-var int DemoViewPitch;
-var int DemoViewYaw;
-var globalconfig float NetClientMaxTickRate;
-var float m_fNextUpdateTime;
-
-//R6CODE
-const K_GlobalID_size = 16;
-var string  m_szGlobalID;
-var PlayerVerCDKeyStatus m_stPlayerVerCDKeyStatus;
-var PlayerVerCDKeyStatus m_stPlayerVerModCDKeyStatus;
-
-var int     m_iChangeNameLastTime; // last time change name was requested
-var BOOL    m_PreLogOut;        // this controller is about to be destroyed
-struct PlayerPrefInfo
-{
-    var string m_CharacterName;
-    var string m_ArmorName;
-
-    var string m_WeaponName1;
-    var string m_WeaponName2;
-
-    var string m_WeaponGadgetName1;
-    var string m_WeaponGadgetName2;
-    
-    var string m_BulletType1;
-    var string m_BulletType2;
-
-    var string m_GadgetName1;
-    var string m_GadgetName2;
-};
-
-var PlayerPrefInfo m_PlayerPrefs;
-var R6RainbowStartInfo  m_PlayerStartInfo;
-var FLOAT   m_fLoginTime;
-var string  m_szIpAddr;                     // IP address withou port number used to identfy players in beacon code
-
-//R6CODE
-var BOOL m_bRadarActive;
-var BOOL m_bHeatVisionActive;
-
-var actor m_SaveOldClientBase;
-
-var R6GameMenuCom.ePlayerTeamSelection	m_TeamSelection;
-var BOOL m_bLoadSoundGun;
-//end r6code
-
-//R6CODE
-// Variable used to keep track of user cd key validation
-
-//#ifdef R6PUNKBUSTER
-//__WITH_PB__
-var int              iPBEnabled ;
-//#endif //R6PUNKBUSTER
-
-var BOOL             m_bInstructionTouch;   // Use in the traning to start the text.
-
-//var travel string    m_szUbiUserID;
-//end r6code
-
-// r6code
-var enum eCameraMode
-{
-	CAMERA_FirstPerson,
-	CAMERA_3rdPersonFixed,
-	CAMERA_3rdPersonFree,
-	CAMERA_Ghost
-} m_eCameraMode;
-// end r6code
+var private globalconfig string ngWorldSecret;
+var string m_szGlobalID;
+var string m_szIpAddr;  // IP address withou port number used to identfy players in beacon code
+var private transient PlayerInput PlayerInput;  // Object within playercontroller that manages player input.
+var transient array<CameraEffect> CameraEffects;  // A stack of camera effects.
 
 replication
 {
-	// Things the server should send to the client.
-	reliable if( bNetDirty && bNetOwner && Role==ROLE_Authority )
-		ViewTarget, GameReplicationInfo,bOnlySpectator, /* r6code */ m_eCameraMode, m_TeamSelection;  /* end r6code */
-	unreliable if ( bNetOwner && Role==ROLE_Authority && (ViewTarget != Pawn) && (Pawn(ViewTarget) != None) )
-		TargetViewRotation, TargetEyeHeight, TargetWeaponViewOffset;
-	reliable if( bDemoRecording && Role==ROLE_Authority )
-		DemoViewPitch, DemoViewYaw;
-
-	reliable if( bNetDirty && (Role==ROLE_Authority) )
-		m_bRadarActive;
-	// Functions server can call.
-	reliable if( Role==ROLE_Authority )
-		ClientSetHUD,ClientReliablePlaySound, /*R6CODE FOV, */StartZoom, 
-		ToggleZoom, StopZoom, EndZoom, ClientSetMusic, ClientRestart,
-		ClientReplicateSkins, ClientAdjustGlow, 
-		ClientSetBehindView, ClientSetFixedCamera, ClearProgressMessages, 
-		SetProgressMessage, SetProgressTime,
-		GivePawn, ClientGotoState,ClientAdjustBase,
-        ResettingLevel, ClientErrorMessageLocalized, 
-        ClientChangeName, ClientCantRequestChangeNameYet,ClientPBKickedOutMessage; // R6CODE
-
-	reliable if ( (Role == ROLE_Authority) && (!bDemoRecording || (bClientDemoRecording && bClientDemoNetFunc)) )
-		ClientMessage, TeamMessage, ReceiveLocalizedMessage;
-	unreliable if( Role==ROLE_Authority && !bDemoRecording )
+	// Pos:0x0CB
+	unreliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_129__(bDemoRecording)))
 		ClientPlaySound, ClientStopSound;
-	reliable if( Role==ROLE_Authority && !bDemoRecording )
-		ClientTravel;
-	unreliable if( Role==ROLE_Authority )
-		SetFOVAngle, ClientShake, ClientFlash, ClientInstantFlash, ClientSetFlash, 
-		ClientAdjustPosition, ShortClientAdjustPosition, VeryShortClientAdjustPosition, LongClientAdjustPosition;
-	unreliable if( (!bDemoRecording || bClientDemoRecording && bClientDemoNetFunc) && Role==ROLE_Authority )
+
+	// Pos:0x0FF
+	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		ClientAdjustPosition, ClientFlash, 
+		ClientInstantFlash, ClientSetFlash, 
+		ClientShake, LongClientAdjustPosition, 
+		SetFOVAngle, ShortClientAdjustPosition, 
+		VeryShortClientAdjustPosition;
+
+	// Pos:0x10C
+	unreliable if(__NFUN_130__(__NFUN_132__(__NFUN_129__(bDemoRecording), __NFUN_130__(bClientDemoRecording, bClientDemoNetFunc)), __NFUN_154__(int(Role), int(ROLE_Authority))))
 		ClientHearSound;
 
-	// Functions client can call.
-	unreliable if( Role<ROLE_Authority )
-		ShorterServerMove, ShortServerMove, ServerMove, Say, TeamSay, ServerViewNextPlayer, ServerViewSelf,ServerUse,
-        ServerTKPopUpDone;
-    reliable if( Role<ROLE_Authority )
-		Speech, Pause, SetPause, ServerPlayerPref,ServerTeamRequested,
-		PrevItem, ActivateItem, ServerReStartGame, AskForPawn, ServerToggleRadar, ServerToggleHeatVision, 
-		ChangeName, ChangeTeam, Suicide, ThrowWeapon, Typing, ServerSetPlayerReadyStatus, ServerReadyToLoadWeaponSound,
-        ServerChangeName; // R6CODE
-    //@@@DEBUG BehindView; 
+	// Pos:0x13C
+	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		Say, ServerMove, 
+		ServerTKPopUpDone, ServerViewNextPlayer, 
+		ServerViewSelf, ShortServerMove, 
+		ShorterServerMove, TeamSay;
+
+	// Pos:0x000
+	reliable if(__NFUN_130__(__NFUN_130__(bNetDirty, bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+		GameReplicationInfo, ViewTarget, 
+		bOnlySpectator, m_TeamSelection, 
+		m_eCameraMode;
+
+	// Pos:0x023
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bNetOwner, __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_119__(ViewTarget, Pawn)), __NFUN_119__(Pawn(ViewTarget), none)))
+		TargetEyeHeight, TargetViewRotation, 
+		TargetWeaponViewOffset;
+
+	// Pos:0x05E
+	reliable if(__NFUN_130__(bDemoRecording, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		DemoViewPitch, DemoViewYaw;
+
+	// Pos:0x076
+	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		m_bRadarActive;
+
+	// Pos:0x08E
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		ClientAdjustBase, ClientAdjustGlow, 
+		ClientCantRequestChangeNameYet, ClientChangeName, 
+		ClientErrorMessageLocalized, ClientGotoState, 
+		ClientPBKickedOutMessage, ClientReStart, 
+		ClientReliablePlaySound, ClientReplicateSkins, 
+		ClientSetBehindView, ClientSetFixedCamera, 
+		ClientSetHUD, ClientSetMusic, 
+		EndZoom, GivePawn, 
+		ResettingLevel, SetProgressTime, 
+		StartZoom, StopZoom, 
+		ToggleZoom;
+
+	// Pos:0x09B
+	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_132__(__NFUN_129__(bDemoRecording), __NFUN_130__(bClientDemoRecording, bClientDemoNetFunc))))
+		ClientMessage, ReceiveLocalizedMessage, 
+		TeamMessage;
+
+	// Pos:0x0E5
+	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_129__(bDemoRecording)))
+		ClientTravel;
+
+	// Pos:0x149
+	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		AskForPawn, ChangeName, 
+		Pause, ServerChangeName, 
+		ServerPlayerPref, ServerReadyToLoadWeaponSound, 
+		ServerRestartGame, ServerSetPlayerReadyStatus, 
+		ServerTeamRequested, ServerToggleHeatVision, 
+		ServerToggleRadar, SetPause, 
+		Suicide, Typing;
 }
 
 //#ifdef R6CODE clauzon those functions are called to properly  initialize the 
 //member variables for matinee.
-function InitMatineeCamera();
-function EndMatineeCamera();
-//#endif
+function InitMatineeCamera()
+{
+	return;
+}
+
+function EndMatineeCamera()
+{
+	return;
+}
 
 // R6CODE
-simulated function ResettingLevel(int iNbOfRestart);
-function ServerSetPlayerReadyStatus(BOOL _bPlayerReady);
-function ServerTKPopUpDone(BOOL _bApplyTeamKillerPenalty);
-function ServerTeamRequested(ePlayerTeamSelection eTeamSelected, optional bool bForceSelection);
-// END R6CODE
+simulated function ResettingLevel(int iNbOfRestart)
+{
+	return;
+}
 
+function ServerSetPlayerReadyStatus(bool _bPlayerReady)
+{
+	return;
+}
 
+function ServerTKPopUpDone(bool _bApplyTeamKillerPenalty)
+{
+	return;
+}
+
+function ServerTeamRequested(Object.ePlayerTeamSelection eTeamSelected, optional bool bForceSelection)
+{
+	return;
+}
+
+// Export UPlayerController::execGetPBConnectStatus(FFrame&, void* const)
 //#ifdef R6PUNKBUSTER
 //__WITH_PB__
-native (1317) final function string GetPBConnectStatus();
-native (1318) static final function int IsPBEnabled();
-//#endif //R6PUNKBUSTER
+ native(1317) final function string GetPBConnectStatus();
 
-native final function string GetPlayerNetworkAddress();
-native (1282) final function SpecialDestroy();
-native function string ConsoleCommand( string Command );
-native final function LevelInfo GetEntryLevel();
-native(544) final function ResetKeyboard();
-native final function SetViewTarget(Actor NewViewTarget);
-native event ClientTravel( string URL, ETravelType TravelType, bool bItems );
-native(546) final function UpdateURL(string NewOption, string NewValue, bool bSaveDefault);
-native final function string GetDefaultURL(string Option);
+// Export UPlayerController::execIsPBEnabled(FFrame&, void* const)
+ native(1318) static final function int IsPBEnabled();
+
+// Export UPlayerController::execGetPlayerNetworkAddress(FFrame&, void* const)
+ native final function string GetPlayerNetworkAddress();
+
+// Export UPlayerController::execSpecialDestroy(FFrame&, void* const)
+ native(1282) final function SpecialDestroy();
+
+// Export UPlayerController::execConsoleCommand(FFrame&, void* const)
+ native function string ConsoleCommand(string Command);
+
+// Export UPlayerController::execGetEntryLevel(FFrame&, void* const)
+ native final function LevelInfo GetEntryLevel();
+
+// Export UPlayerController::execResetKeyboard(FFrame&, void* const)
+ native(544) final function ResetKeyboard();
+
+// Export UPlayerController::execSetViewTarget(FFrame&, void* const)
+ native final function SetViewTarget(Actor NewViewTarget);
+
+// Export UPlayerController::execClientTravel(FFrame&, void* const)
+ native event ClientTravel(string URL, Actor.ETravelType TravelType, bool bItems);
+
+// Export UPlayerController::execUpdateURL(FFrame&, void* const)
+ native(546) final function UpdateURL(string NewOption, string NewValue, bool bSaveDefault);
+
+// Export UPlayerController::execGetDefaultURL(FFrame&, void* const)
+ native final function string GetDefaultURL(string Option);
+
+// Export UPlayerController::execCopyToClipboard(FFrame&, void* const)
 // Execute a console command in the context of this player, then forward to Actor.ConsoleCommand.
-native function CopyToClipboard( string Text );
-native function string PasteFromClipboard();
-simulated function BOOL IsPlayerPassiveSpectator();
+ native function CopyToClipboard(string Text);
 
-/* FindStairRotation()
-returns an integer to use as a pitch to orient player view along current ground (flat, up, or down)
-*/
-native(524) final function int FindStairRotation(float DeltaTime);
+// Export UPlayerController::execPasteFromClipboard(FFrame&, void* const)
+ native function string PasteFromClipboard();
+
+simulated event bool IsPlayerPassiveSpectator()
+{
+	return;
+}
+
+// Export UPlayerController::execFindStairRotation(FFrame&, void* const)
+ native(524) final function int FindStairRotation(float DeltaTime);
 
 //#ifdef R6CODE 
-function ServerReadyToLoadWeaponSound();
-function ServerPlayerPref(PlayerPrefInfo newPlayerPrefs);
-event SetMatchResult(string _UserUbiID, INT iField, INT iValue);
-event string GetLocalPlayerIp();
+function ServerReadyToLoadWeaponSound()
+{
+	return;
+}
 
-native(2706) final function BYTE GetKey(string szActionKey, optional BOOL bPlanningInput);
-native(2707) final function string GetActionKey(BYTE Key, optional BOOL bPlanningInput);
-native(2708) final function string GetEnumName(BYTE Key, optional BOOL bPlanningInput);
-native(2709) final function ChangeInputSet(BYTE iInputSet);
-native(2710) final function SetKey(string szKeyAndAction);
-native(2713) final function SetSoundOptions();
-native(2714) final function ChangeVolumeTypeLinear(ESoundSlot eVolumeLine, FLOAT fVolumeLinear);
+function ServerPlayerPref(PlayerPrefInfo newPlayerPrefs)
+{
+	return;
+}
+
+event SetMatchResult(string _UserUbiID, int iField, int iValue)
+{
+	return;
+}
+
+event string GetLocalPlayerIp()
+{
+	return;
+}
+
+// Export UPlayerController::execGetKey(FFrame&, void* const)
+ native(2706) final function byte GetKey(string szActionKey, optional bool bPlanningInput);
+
+// Export UPlayerController::execGetActionKey(FFrame&, void* const)
+ native(2707) final function string GetActionKey(byte Key, optional bool bPlanningInput);
+
+// Export UPlayerController::execGetEnumName(FFrame&, void* const)
+ native(2708) final function string GetEnumName(byte Key, optional bool bPlanningInput);
+
+// Export UPlayerController::execChangeInputSet(FFrame&, void* const)
+ native(2709) final function ChangeInputSet(byte iInputSet);
+
+// Export UPlayerController::execSetKey(FFrame&, void* const)
+ native(2710) final function SetKey(string szKeyAndAction);
+
+// Export UPlayerController::execSetSoundOptions(FFrame&, void* const)
+ native(2713) final function SetSoundOptions();
+
+// Export UPlayerController::execChangeVolumeTypeLinear(FFrame&, void* const)
+ native(2714) final function ChangeVolumeTypeLinear(Actor.ESoundSlot eVolumeLine, float fVolumeLinear);
+
+// Export UPlayerController::execPB_CanPlayerSpawn(FFrame&, void* const)
 //#ifdef R6PUNKBUSTER
-native(1320) final function bool PB_CanPlayerSpawn();
-//#endif R6PUNKBUSTER
+ native(1320) final function bool PB_CanPlayerSpawn();
 
-//endif R6CODE
-
-native event ClientHearSound(Actor Actor, Sound S, ESoundSlot Id);
-
-/*
-native event ClientHearSound ( 
-	actor Actor, 
-	int Id, 
-	sound S, 
-	vector SoundLocation, 
-	vector Parameters,
-	bool Attenuate
-);
-*/
+// Export UPlayerController::execClientHearSound(FFrame&, void* const)
+ native event ClientHearSound(Actor Actor, Sound S, Actor.ESoundSlot ID);
 
 // r6code
 function bool ShouldDisplayIncomingMessages()
 {
-    return true;
+	return true;
+	return;
 }
 
 // r6code: give access to the private var PlayerInput
 simulated function PlayerInput getPlayerInput()
 {
-    return PlayerInput;
+	return PlayerInput;
+	return;
 }
 
 event PostBeginPlay()
 {
-	Super.PostBeginPlay();
+	super.PostBeginPlay();
 	SpawnDefaultHUD();
-	if (Level.LevelEnterText != "" )
+	// End:0x35
+	if(__NFUN_123__(Level.LevelEnterText, ""))
+	{
 		ClientMessage(Level.LevelEnterText);
-
+	}
 	DesiredFOV = DefaultFOV;
-	SetViewTarget(self);  // MUST have a view target!
-	if ( Level.NetMode == NM_Standalone )
+	SetViewTarget(self);
+	// End:0x66
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
 		AddCheats();
+	}
+	return;
 }
 
 function PendingStasis()
 {
 	bStasis = true;
-	Pawn = None;
-	GotoState('Scripting');
+	Pawn = none;
+	__NFUN_113__('Scripting');
+	return;
 }
 
 function AddCheats()
 {
-    //R6CODE don't spawn cheat managers in entry
-    if(Level.bKNoInit)
-        return;
-
-	if ( CheatManager == None )
+	// End:0x14
+	if(Level.bKNoInit)
+	{
+		return;
+	}
+	// End:0x2E
+	if(__NFUN_114__(CheatManager, none))
+	{
 		CheatManager = new CheatClass;
+	}
+	return;
 }
 
-/* SpawnDefaultHUD()
-Spawn a HUD (make sure that PlayerController always has valid HUD, even if \
-ClientSetHUD() hasn't been called\
-*/
 function SpawnDefaultHUD()
 {
-	myHUD = spawn(class'HUD',self);
+	myHUD = __NFUN_278__(Class'Engine.HUD', self);
+	return;
 }
-	
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
+
 function Reset()
 {
 	PawnDied();
-	Super.Reset();
+	super.Reset();
 	SetViewTarget(self);
 	bBehindView = false;
-	WaitDelay = Level.TimeSeconds + 2;
-	GotoState('BaseSpectating'); //	GotoState('PlayerWaiting');
+	WaitDelay = __NFUN_174__(Level.TimeSeconds, float(2));
+	__NFUN_113__('BaseSpectating');
+	return;
 }
 
-/* InitInputSystem()
-Spawn the appropriate class of PlayerInput
-Only called for playercontrollers that belong to local players
-*/
-
-
 //R6CODE
-event InitMultiPlayerOptions();
-//R6CODE END
+event InitMultiPlayerOptions()
+{
+	return;
+}
 
 event InitInputSystem()
 {
 	PlayerInput = new InputClass;
-//#ifdef R6CODE
 	UpdateOptions();
+	return;
 }
 
 function UpdateOptions()
 {
 	PlayerInput.UpdateMouseOptions();
+	return;
 }
-//#endif
 
-/* ClientGotoState()
-server uses this to force client into NewState
-*/
 function ClientGotoState(name NewState, name NewLabel)
 {
-	GotoState(NewState,NewLabel);	
+	__NFUN_113__(NewState, NewLabel);
+	return;
 }
 
 function AskForPawn()
 {
-	if ( Pawn != None )
-		GivePawn(Pawn);
-	else if ( IsInState('GameEnded') )
-		ClientGotoState('GameEnded', 'Begin');
-	else if ( IsInState('Dead') )
+	// End:0x19
+	if(__NFUN_119__(Pawn, none))
 	{
-		bFrozen = false;
-		ServerRestartPlayer();
-	}		
-}	
+		GivePawn(Pawn);		
+	}
+	else
+	{
+		// End:0x37
+		if(__NFUN_281__('GameEnded'))
+		{
+			ClientGotoState('GameEnded', 'Begin');			
+		}
+		else
+		{
+			// End:0x50
+			if(__NFUN_281__('Dead'))
+			{
+				bFrozen = false;
+				ServerReStartPlayer();
+			}
+		}
+	}
+	return;
+}
 
 function GivePawn(Pawn NewPawn)
 {
-	if ( NewPawn == None )
+	// End:0x0D
+	if(__NFUN_114__(NewPawn, none))
+	{
 		return;
+	}
 	Pawn = NewPawn;
 	NewPawn.Controller = self;
-	ClientRestart();
-}	
+	ClientReStart();
+	return;
+}
 
-/* GetFacingDirection()
-returns direction faced relative to movement dir
-0 = forward
-16384 = right
-32768 = back
-49152 = left
-*/
 function int GetFacingDirection()
 {
-	local vector X,Y,Z, Dir;
+	local Vector X, Y, Z, Dir;
 
-	GetAxes(Pawn.Rotation, X,Y,Z);
-	Dir = Normal(Pawn.Acceleration);
-	if ( Y Dot Dir > 0 )
-		return ( 49152 + 16384 * (X Dot Dir) );
+	__NFUN_229__(Pawn.Rotation, X, Y, Z);
+	Dir = __NFUN_226__(Pawn.Acceleration);
+	// End:0x6D
+	if(__NFUN_177__(__NFUN_219__(Y, Dir), float(0)))
+	{
+		return int(__NFUN_174__(float(49152), __NFUN_171__(float(16384), __NFUN_219__(X, Dir))));		
+	}
 	else
-		return ( 16384 - 16384 * (X Dot Dir) );
+	{
+		return int(__NFUN_175__(float(16384), __NFUN_171__(float(16384), __NFUN_219__(X, Dir))));
+	}
+	return;
 }
 
 // Possess a pawn
 function Possess(Pawn aPawn)
 {
-	if ( bOnlySpectator )
+	// End:0x0B
+	if(bOnlySpectator)
+	{
 		return;
-
-	SetRotation(aPawn.Rotation);
+	}
+	__NFUN_299__(aPawn.Rotation);
 	aPawn.PossessedBy(self);
 	Pawn = aPawn;
 	Pawn.bStasis = false;
-	if(PlayerReplicationInfo != none)	//R6CODE
+	// End:0x72
+	if(__NFUN_119__(PlayerReplicationInfo, none))
+	{
 		PlayerReplicationInfo.bIsFemale = Pawn.bIsFemale;
-//#ifndef R6CODE
-//	ServerSetHandedness(Handedness);
-//#endif // #ifndef R6CODE
+	}
 	Restart();
+	return;
 }
 
 // unpossessed a pawn (not because pawn was killed)
 function UnPossess()
 {
-	if ( Pawn != None )
+	// End:0x52
+	if(__NFUN_119__(Pawn, none))
 	{
-		SetLocation(Pawn.Location);
+		__NFUN_267__(Pawn.Location);
 		Pawn.RemoteRole = ROLE_SimulatedProxy;
 		Pawn.UnPossessed();
-		if ( Viewtarget == Pawn )
+		// End:0x52
+		if(__NFUN_114__(ViewTarget, Pawn))
+		{
 			SetViewTarget(self);
+		}
 	}
-    Pawn.Controller = none;
+	Pawn.Controller = none;
 	Pawn = none;
-	GotoState('Spectating');
+	__NFUN_113__('Spectating');
+	return;
 }
 
 //#ifdef R6CODE
-function bool GetGender();
-//#endif
+function bool GetGender()
+{
+	return;
+}
 
 // unpossessed a pawn (because pawn was killed)
 function PawnDied()
 {
 	EndZoom();
-	if ( Pawn != None )
+	// End:0x22
+	if(__NFUN_119__(Pawn, none))
+	{
 		Pawn.RemoteRole = ROLE_SimulatedProxy;
-	if ( ViewTarget == Pawn )
+	}
+	// End:0x39
+	if(__NFUN_114__(ViewTarget, Pawn))
+	{
 		bBehindView = true;
-
-	Super.PawnDied();
+	}
+	super.PawnDied();
+	return;
 }
 
-function ClientSetHUD(class<HUD> newHUDType, class<Scoreboard> newScoringType)
+function ClientSetHUD(Class<HUD> newHUDType, Class<ScoreBoard> newScoringType)
 {
-	local HUD NewHUD;
-//#ifdef R6CODE
-    local HUD OldHUD;
+	local HUD NewHUD, OldHUD;
 
-    // don't spawn huds in entry
-    if(Level.bKNoInit)
-        return;
-//#endif // #ifdef R6CODE
-
-	if ( (myHUD == None) || ((newHUDType != None) && (newHUDType != myHUD.Class)) )
+	// End:0x14
+	if(Level.bKNoInit)
 	{
-		NewHUD = spawn(newHUDType, self); 
-		if ( NewHUD != None )
+		return;
+	}
+	// End:0x8D
+	if(__NFUN_132__(__NFUN_114__(myHUD, none), __NFUN_130__(__NFUN_119__(newHUDType, none), __NFUN_119__(newHUDType, myHUD.Class))))
+	{
+		NewHUD = __NFUN_278__(newHUDType, self);
+		// End:0x8D
+		if(__NFUN_119__(NewHUD, none))
 		{
-//#ifndef R6CODE
-//			if ( myHUD != None )
-//				myHUD.Destroy();
-//			myHUD = NewHUD;
-//#else
-            OldHUD = myHUD;
+			OldHUD = myHUD;
 			myHUD = NewHUD;
-			if ( OldHUD != None )
-				OldHUD.Destroy();
-//#endif // #ifdef R6CODE
+			// End:0x8D
+			if(__NFUN_119__(OldHUD, none))
+			{
+				OldHUD.__NFUN_279__();
+			}
 		}
 	}
-//#ifndef R6CODE
-//	if ( (myHUD != None) && (newScoringType != None) )
-//		MyHUD.SpawnScoreBoard(newScoringType);
-//#endif // #ifdef R6CODE
+	return;
 }
 
-/*R6CHANGEWEAPONSYSTEM
-function HandlePickup(Pickup pick)
-{
-	ReceiveLocalizedMessage( pick.MessageClass, 0, None, None, pick.Class );
-}
-*/	
 function ViewFlash(float DeltaTime)
 {
-	local vector goalFog;
-	local float goalscale, delta;
+	local Vector goalFog;
+	local float goalscale, Delta;
 
-	delta = FMin(0.1, DeltaTime);
-	goalScale = 1 + DesiredFlashScale + ConstantGlowScale;
-	goalFog = DesiredFlashFog + ConstantGlowFog;
-
-	if ( Pawn != None )
+	Delta = __NFUN_244__(0.1000000, DeltaTime);
+	goalscale = __NFUN_174__(__NFUN_174__(1.0000000, DesiredFlashScale), ConstantGlowScale);
+	goalFog = __NFUN_215__(DesiredFlashFog, ConstantGlowFog);
+	// End:0x89
+	if(__NFUN_119__(Pawn, none))
 	{
-		goalScale += Pawn.HeadVolume.ViewFlash.X; 
-		goalFog += Pawn.HeadVolume.ViewFog;
+		__NFUN_184__(goalscale, Pawn.HeadVolume.ViewFlash.X);
+		__NFUN_223__(goalFog, Pawn.HeadVolume.ViewFog);
 	}
-
-	DesiredFlashScale -= DesiredFlashScale * 2 * delta;  
-	DesiredFlashFog -= DesiredFlashFog * 2 * delta;
-	FlashScale.X += (goalScale - FlashScale.X + InstantFlash) * 10 * delta;
-	FlashFog += (goalFog - FlashFog + InstantFog) * 10 * delta;
-	InstantFlash = 0;
-	InstantFog = vect(0,0,0);
-
-	if ( FlashScale.X > 0.981 )
-		FlashScale.X = 1;
-	FlashScale = FlashScale.X * vect(1,1,1);
-
-	if ( FlashFog.X < 0.019 )
-		FlashFog.X = 0;
-	if ( FlashFog.Y < 0.019 )
-		FlashFog.Y = 0;
-	if ( FlashFog.Z < 0.019 )
-		FlashFog.Z = 0;
+	__NFUN_185__(DesiredFlashScale, __NFUN_171__(__NFUN_171__(DesiredFlashScale, float(2)), Delta));
+	__NFUN_224__(DesiredFlashFog, __NFUN_212__(__NFUN_212__(DesiredFlashFog, float(2)), Delta));
+	__NFUN_184__(FlashScale.X, __NFUN_171__(__NFUN_171__(__NFUN_174__(__NFUN_175__(goalscale, FlashScale.X), InstantFlash), float(10)), Delta));
+	__NFUN_223__(FlashFog, __NFUN_212__(__NFUN_212__(__NFUN_215__(__NFUN_216__(goalFog, FlashFog), InstantFog), float(10)), Delta));
+	InstantFlash = 0.0000000;
+	InstantFog = vect(0.0000000, 0.0000000, 0.0000000);
+	// End:0x155
+	if(__NFUN_177__(FlashScale.X, 0.9810000))
+	{
+		FlashScale.X = 1.0000000;
+	}
+	FlashScale = __NFUN_213__(FlashScale.X, vect(1.0000000, 1.0000000, 1.0000000));
+	// End:0x198
+	if(__NFUN_176__(FlashFog.X, 0.0190000))
+	{
+		FlashFog.X = 0.0000000;
+	}
+	// End:0x1BC
+	if(__NFUN_176__(FlashFog.Y, 0.0190000))
+	{
+		FlashFog.Y = 0.0000000;
+	}
+	// End:0x1E0
+	if(__NFUN_176__(FlashFog.Z, 0.0190000))
+	{
+		FlashFog.Z = 0.0000000;
+	}
+	return;
 }
 
-event ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject )
+event ReceiveLocalizedMessage(Class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
-	Message.Static.ClientReceive( Self, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject );
+	Message.static.ClientReceive(self, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject);
+	return;
 }
 
 //R6CODE+
-function ClientErrorMessageLocalized( coerce string szKeyID )
+function ClientErrorMessageLocalized(coerce string szKeyID)
 {
-    myHUD.AddTextMessage(Localize( "Errors", szKeyID, "R6Engine" ), class'LocalMessage');
-}
-//R6CODE-
-
-event ClientMessage( coerce string S, optional Name Type )
-{
-	if (Type == '')
-		Type = 'Event';
-	TeamMessage(PlayerReplicationInfo, S, Type);
+	myHUD.AddTextMessage(Localize("Errors", szKeyID, "R6Engine"), Class'Engine.LocalMessage');
+	return;
 }
 
-event TeamMessage( PlayerReplicationInfo PRI, coerce string S, name Type  )
+event ClientMessage(coerce string S, optional name type)
 {
-//#ifndef R6CODE
-//    myHUD.Message( PRI, S, Type );  // Message will be sent to the HUD by the InteractionMaster
-//#endif // #ifndef R6CODE
-
-	if ( (Type == 'Say') || (Type == 'TeamSay') )
-		S = PRI.PlayerName$": "$S;
-
-//	Player.Console.Message( S, 6.0 );
-	Player.InteractionMaster.Process_Message( S,6.0, Player.LocalInteractions);
+	// End:0x1A
+	if(__NFUN_254__(type, 'None'))
+	{
+		type = 'Event';
+	}
+	TeamMessage(PlayerReplicationInfo, S, type);
+	return;
 }
 
-simulated function PlayBeepSound();
+event TeamMessage(PlayerReplicationInfo PRI, coerce string S, name type)
+{
+	// End:0x41
+	if(__NFUN_132__(__NFUN_254__(type, 'Say'), __NFUN_254__(type, 'TeamSay')))
+	{
+		S = __NFUN_112__(__NFUN_112__(PRI.PlayerName, ": "), S);
+	}
+	Player.InteractionMaster.Process_Message(S, 6.0000000, Player.LocalInteractions);
+	return;
+}
 
-//Play a sound client side (so only client will hear it
+simulated function PlayBeepSound()
+{
+	return;
+}
 
 //R6CODE
-simulated function ClientPlaySound(sound ASound, ESoundSlot eSlot )
-{	
-	if (Pawn != None)
-		Pawn.PlaySound(ASound, eSlot);
-	else
-		ViewTarget.PlaySound(ASound, eSlot);  
-}
-
-simulated function ClientStopSound(sound ASound)
-{	
-	if (Pawn != None)
-		Pawn.StopSound(ASound);
-	else
-		ViewTarget.StopSound(ASound);  
-}
-
-simulated function ClientReliablePlaySound(sound ASound, optional bool bVolumeControl )
+simulated function ClientPlaySound(Sound ASound, Actor.ESoundSlot eSlot)
 {
-	ClientPlaySound(ASound, SLOT_SFX);
+	// End:0x24
+	if(__NFUN_119__(Pawn, none))
+	{
+		Pawn.__NFUN_264__(ASound, eSlot);		
+	}
+	else
+	{
+		ViewTarget.__NFUN_264__(ASound, eSlot);
+	}
+	return;
 }
-//R6CODE end
+
+simulated function ClientStopSound(Sound ASound)
+{
+	// End:0x1F
+	if(__NFUN_119__(Pawn, none))
+	{
+		Pawn.__NFUN_2725__(ASound);		
+	}
+	else
+	{
+		ViewTarget.__NFUN_2725__(ASound);
+	}
+	return;
+}
+
+simulated function ClientReliablePlaySound(Sound ASound, optional bool bVolumeControl)
+{
+	ClientPlaySound(ASound, 3);
+	return;
+}
 
 simulated event Destroyed()
 {
 	local SavedMove Next;
 
-//#ifdef R6CODE	
-	if( bOnlySpectator )
+	// End:0x10
+	if(bOnlySpectator)
+	{
 		Pawn = none;
-//#endif
-	if ( Pawn != None )
+	}
+	// End:0x49
+	if(__NFUN_119__(Pawn, none))
 	{
 		Pawn.Health = 0;
-		Pawn.Died( self, class'Suicided', Pawn.Location );
-    }
+		Pawn.Died(self, Pawn.Location);
+	}
+	// End:0x60
+	if(__NFUN_119__(CheatManager, none))
+	{
+		CheatManager.__NFUN_1850__();
+	}
+	CheatManager = none;
+	// End:0x7E
+	if(__NFUN_119__(PlayerInput, none))
+	{
+		PlayerInput.__NFUN_1850__();
+	}
+	PlayerInput = none;
+	super.Destroyed();
+	myHUD.__NFUN_279__();
+	myHUD = none;
+	J0x9E:
 
-    //#ifdef R6BUGFIX
-    // Remove CheatManager and PlayerInput reference to be sure they are garbage collected
-    if(CheatManager!=none)
-        CheatManager.ClearOuter();
-    CheatManager = none;
-
-    if(PlayerInput!=none)
-        PlayerInput.ClearOuter();
-    PlayerInput = none;
-    //#endif // #ifdef R6BUGFIX
-
-	Super.Destroyed();
-	myHud.Destroy();
-    myHud = none; // R6CODE
-
-	while ( FreeMoves != None )
+	// End:0xD7 [Loop If]
+	if(__NFUN_119__(FreeMoves, none))
 	{
 		Next = FreeMoves.NextMove;
-		FreeMoves.Destroy();
+		FreeMoves.__NFUN_279__();
 		FreeMoves = Next;
+		// [Loop Continue]
+		goto J0x9E;
 	}
-	while ( SavedMoves != None )
+	J0xD7:
+
+	// End:0x110 [Loop If]
+	if(__NFUN_119__(SavedMoves, none))
 	{
 		Next = SavedMoves.NextMove;
-		SavedMoves.Destroy();
+		SavedMoves.__NFUN_279__();
 		SavedMoves = Next;
+		// [Loop Continue]
+		goto J0xD7;
 	}
+	return;
 }
 
-function ClientSetMusic( string NewSong, EMusicTransition NewTransition )
+function ClientSetMusic(string NewSong, Actor.EMusicTransition NewTransition)
 {
-// #ifndef R6SOUND
-//	StopAllMusic( 0.0 );
-//  PlayMusic( NewSong, 3.0 );
-// #endif R6SOUND
-
-	Song        = NewSong;
-	Transition  = NewTransition;
+	Song = NewSong;
+	Transition = NewTransition;
+	return;
 }
-	
-// ------------------------------------------------------------------------
-// Zooming/FOV change functions
 
 function ToggleZoom()
 {
-	if ( DefaultFOV != DesiredFOV )
-		EndZoom();
+	// End:0x18
+	if(__NFUN_181__(DefaultFOV, DesiredFOV))
+	{
+		EndZoom();		
+	}
 	else
+	{
 		StartZoom();
+	}
+	return;
 }
-	
+
 function StartZoom()
 {
-	ZoomLevel = 0.0;
+	ZoomLevel = 0.0000000;
 	bZooming = true;
+	return;
 }
 
 function StopZoom()
 {
 	bZooming = false;
+	return;
 }
 
 function EndZoom()
 {
 	bZooming = false;
 	DesiredFOV = DefaultFOV;
+	return;
 }
 
 function FixFOV()
 {
-	FOVAngle = Default.DefaultFOV;
-	DesiredFOV = Default.DefaultFOV;
-	DefaultFOV = Default.DefaultFOV;
+	FovAngle = default.DefaultFOV;
+	DesiredFOV = default.DefaultFOV;
+	DefaultFOV = default.DefaultFOV;
+	return;
 }
 
 function SetFOV(float NewFOV)
 {
 	DesiredFOV = NewFOV;
-	FOVAngle = NewFOV;
+	FovAngle = NewFOV;
+	return;
 }
 
 function ResetFOV()
 {
 	DesiredFOV = DefaultFOV;
-	FOVAngle = DefaultFOV;
+	FovAngle = DefaultFOV;
+	return;
 }
 
-/*R6CODE
-exec function FOV(float F)
+exec function SetSensitivity(float f)
 {
-	if( (F >= 80.0) || (Level.Netmode==NM_Standalone) )
-	{
-		DefaultFOV = FClamp(F, 1, 170);
-		DesiredFOV = DefaultFOV;
-		SaveConfig();
-	}
+	PlayerInput.UpdateSensitivity(f);
+	return;
 }
-*/
-
-exec function SetSensitivity(float F)
-{
-	PlayerInput.UpdateSensitivity(F);
-}
-
-#ifdefDEBUG
-exec function ForceReload()
-{
-/*R6CHANGEWEAPONSYSTEM
-	if ( (Pawn != None) && (Pawn.Weapon != None) )
-		Pawn.Weapon.ForceReload();
-*/
-}
-#endif
-
-// ------------------------------------------------------------------------
-// Messaging functions
 
 // Send a message to all players.
-exec function Say( string Msg )
+exec function Say(string Msg)
 {
-    //R6CODE
-    if(Msg == "" || Level.NetMode == NM_Standalone)
-        return;
-    
+	// End:0x29
+	if(__NFUN_132__(__NFUN_122__(Msg, ""), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	{
+		return;
+	}
 	Level.Game.Broadcast(self, Msg, 'Say');
+	return;
 }
 
-exec function TeamSay( string Msg )
+exec function TeamSay(string Msg)
 {
-    //R6CODE
-    if(Msg == "" || Level.NetMode == NM_Standalone)
-        return;
-
+	// End:0x29
+	if(__NFUN_132__(__NFUN_122__(Msg, ""), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	{
+		return;
+	}
 	Level.Game.BroadcastTeam(self, Msg, 'TeamSay');
+	return;
 }
-// ------------------------------------------------------------------------
-
-//#ifndef R6CODE
-//function ServerSetHandedness( float hand)
-//{
-//	Handedness = hand;
-//	if ( Pawn.Weapon != None )
-//	Pawn.Weapon.SetHand(Handedness);
-//}
-
-//function SetHand()
-//{
-//	ServerSetHandedness(Handedness);
-//}
-
-//function ChangeSetHand( string S )
-//{
-//	if ( S ~= "Left" )
-//		Handedness = -1;
-//	else if ( S~= "Right" )
-//		Handedness = 1;
-//	else if ( S ~= "Center" )
-//		Handedness = 0;
-//	else if ( S ~= "Hidden" )
-//		Handedness = 2;
-//	SetHand();
-//}
-//#endif // #ifndef R6CODE
 
 event PreClientTravel()
 {
+	return;
 }
 
 function ClientSetFixedCamera(bool B)
 {
 	bFixedCamera = B;
+	return;
 }
 
 function ClientSetBehindView(bool B)
 {
 	bBehindView = B;
+	return;
 }
 
 function ClientReplicateSkins(Material Skin1, optional Material Skin2, optional Material Skin3, optional Material Skin4)
 {
-	// do nothing (just loading other player skins onto client)
-	log("Getting "$Skin1$", "$Skin2$", "$Skin3$", "$Skin4);
+	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Getting ", string(Skin1)), ", "), string(Skin2)), ", "), string(Skin3)), ", "), string(Skin4)));
+	return;
 	return;
 }
 
@@ -876,764 +988,646 @@ function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo 
 {
 	local VoicePack V;
 
-	if ( (Sender == None) || (Sender.voicetype == None) || (Player.Console == None) )
+	// End:0x39
+	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(Sender, none), __NFUN_114__(Sender.VoiceType, none)), __NFUN_114__(Player.Console, none)))
+	{
 		return;
-		
-	V = Spawn(Sender.voicetype, self);
-	if ( V != None )
+	}
+	V = __NFUN_278__(Sender.VoiceType, self);
+	// End:0x7F
+	if(__NFUN_119__(V, none))
+	{
 		V.ClientInitialize(Sender, Recipient, messagetype, messageID);
+	}
+	return;
 }
 
-/* ForceDeathUpdate()
-Make sure ClientAdjustPosition immediately informs client of pawn's death
-*/
 function ForceDeathUpdate()
 {
-	LastUpdateTime = Level.TimeSeconds - 10;
+	LastUpdateTime = __NFUN_175__(Level.TimeSeconds, float(10));
+	return;
 }
 
-/* ShorterServerMove()
-compressed version of server move for bandwidth saving
-*/
-function ShorterServerMove
-(
-	float TimeStamp, 
-	vector ClientLoc,
-	int View,
-// #ifdef R6PlayerMovements
-    int iNewRotOffset
-// #endif R6PlayerMovements
-)
+// NEW IN 1.60
+function ShorterServerMove(float TimeStamp, Vector ClientLoc, int View, int iNewRotOffset)
 {
-	ServerMove(TimeStamp,vect(0,0,0),ClientLoc,false,false,false,View,
-// #ifdef R6PlayerMovements
-    iNewRotOffset
-// #endif R6PlayerMovements
-        );
+	ServerMove(TimeStamp, vect(0.0000000, 0.0000000, 0.0000000), ClientLoc, false, false, false, View, iNewRotOffset);
+	return;
 }
 
-/* ShortServerMove()
-compressed version of server move for bandwidth saving
-*/
-function ShortServerMove
-(
-	float TimeStamp, 
-	vector ClientLoc,
-	bool NewbRun,
-	bool NewbDuck,
-//#ifdef R6CODE
-	bool NewbCrawl, 
-//#else
-//#endif R6CODE
-	int View,
-// #ifdef R6PlayerMovements
-    int iNewRotOffset
-// #endif R6PlayerMovements
-)
+// NEW IN 1.60
+function ShortServerMove(float TimeStamp, Vector ClientLoc, bool NewbRun, bool NewbDuck, bool NewbCrawl, int View, int iNewRotOffset)
 {
-	ServerMove(TimeStamp,vect(0,0,0),ClientLoc,NewbRun,NewbDuck,NewbCrawl,View,
-// #ifdef R6PlayerMovements
-    iNewRotOffset
-// #endif R6PlayerMovements
-        );
+	ServerMove(TimeStamp, vect(0.0000000, 0.0000000, 0.0000000), ClientLoc, NewbRun, NewbDuck, NewbCrawl, View, iNewRotOffset);
+	return;
 }
 
-/* ServerMove() 
-- replicated function sent by client to server - contains client movement and firing info
-Passes acceleration in components so it doesn't get rounded.
-*/
-function ServerMove
-(
-	float TimeStamp, 
-	vector InAccel, 
-	vector ClientLoc,
-	bool NewbRun,
-	bool NewbDuck,
-// #ifdef R6PlayerMovements
-	bool NewbCrawl, 
-// #endif R6PlayerMovements
-//	eDoubleClickDir DoubleClickMove, 
-//	byte ClientRoll, 
-	int View,
-// #ifdef R6PlayerMovements
-    int iNewRotOffset,
-// #endif R6PlayerMovements
-	optional byte OldTimeDelta,
-	optional int OldAccel
-)
+function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool NewbRun, bool NewbDuck, bool NewbCrawl, int View, int iNewRotOffset, optional byte OldTimeDelta, optional int OldAccel)
 {
 	local float DeltaTime, clientErr, OldTimeStamp;
-	local rotator DeltaRot, Rot, ViewRot;
-	local vector Accel, LocDiff, ClientVel, ClientFloor;
-// #ifdef R6PlayerMovements
-    local rotator rNewRotOffset;
-// #endif R6PlayerMovements
+	local Rotator DeltaRot, Rot, ViewRot;
+	local Vector Accel, LocDiff, ClientVel, ClientFloor;
+	local Rotator rNewRotOffset;
 	local int maxPitch, ViewPitch, ViewYaw;
-	local bool OldbCrawl, OldbRun, OldbDuck; //rb NewbPressedJump
-	local eDoubleClickDir OldDoubleClickMove;
-	local actor ClientBase;
-	local ePhysics ClientPhysics;
+	local bool OldbCrawl, OldbRun, OldbDuck;
+	local Actor.EDoubleClickDir OldDoubleClickMove;
+	local Actor ClientBase;
+	local Actor.EPhysics ClientPhysics;
 
-
-	// If this move is outdated, discard it.
-	if ( CurrentTimeStamp >= TimeStamp )
-		return;
-
-	// if OldTimeDelta corresponds to a lost packet, process it first
-	if (  OldTimeDelta != 0 )
+	// End:0x11
+	if(__NFUN_179__(CurrentTimeStamp, TimeStamp))
 	{
-		OldTimeStamp = TimeStamp - float(OldTimeDelta)/500 - 0.001;
-		if ( CurrentTimeStamp < OldTimeStamp - 0.001 )
+		return;
+	}
+	// End:0x1DB
+	if(__NFUN_155__(int(OldTimeDelta), 0))
+	{
+		OldTimeStamp = __NFUN_175__(__NFUN_175__(TimeStamp, __NFUN_172__(float(OldTimeDelta), float(500))), 0.0010000);
+		// End:0x1DB
+		if(__NFUN_176__(CurrentTimeStamp, __NFUN_175__(OldTimeStamp, 0.0010000)))
 		{
-			// split out components of lost move (approx)
-			Accel.X = OldAccel >>> 23;
-			if ( Accel.X > 127 )
-				Accel.X = -1 * (Accel.X - 128);
-
-			Accel.Y = (OldAccel >>> 15) & 255;
-			if ( Accel.Y > 127 )
-				Accel.Y = -1 * (Accel.Y - 128);
-
-			Accel.Z = (OldAccel >>> 7) & 255;
-			if ( Accel.Z > 127 )
-				Accel.Z = -1 * (Accel.Z - 128);
-			Accel *= 20;
-
-
-			OldbRun = ( (OldAccel & 64) != 0 );
-			OldbDuck = ( (OldAccel & 32) != 0 );
-			OldbCrawl = ( (OldAccel & 16) != 0 );
-		//rb	NewbPressedJump = ( (OldAccel & 16) != 0 );
-		//rb	if ( NewbPressedJump )
-		//rb		bJumpStatus = NewbJumpStatus;
-
-//			switch (OldAccel & 7)
-//			{
-//				case 0:
-					OldDoubleClickMove = DCLICK_None;
-//					break;
-//				case 1:
-//					OldDoubleClickMove = DCLICK_Left;
-//					break;
-//				case 2:
-//					OldDoubleClickMove = DCLICK_Right;
-//					break;
-//				case 3:
-//					OldDoubleClickMove = DCLICK_Forward;
-//					break;
-//				case 4:
-//					OldDoubleClickMove = DCLICK_Back;
-//					break;
-//			}
-			//log("Recovered move from "$OldTimeStamp$" acceleration "$Accel$" from "$OldAccel);
-			MoveAutonomous(OldTimeStamp - CurrentTimeStamp, OldbRun, OldbDuck, OldbCrawl, OldDoubleClickMove, Accel, rot(0,0,0));
+			Accel.X = float(__NFUN_196__(OldAccel, 23));
+			// End:0xA3
+			if(__NFUN_177__(Accel.X, float(127)))
+			{
+				Accel.X = __NFUN_171__(-1.0000000, __NFUN_175__(Accel.X, float(128)));
+			}
+			Accel.Y = float(__NFUN_156__(int(float(__NFUN_196__(OldAccel, 15))), 255));
+			// End:0xF6
+			if(__NFUN_177__(Accel.Y, float(127)))
+			{
+				Accel.Y = __NFUN_171__(-1.0000000, __NFUN_175__(Accel.Y, float(128)));
+			}
+			Accel.Z = float(__NFUN_156__(int(float(__NFUN_196__(OldAccel, 7))), 255));
+			// End:0x149
+			if(__NFUN_177__(Accel.Z, float(127)))
+			{
+				Accel.Z = __NFUN_171__(-1.0000000, __NFUN_175__(Accel.Z, float(128)));
+			}
+			__NFUN_221__(Accel, float(20));
+			OldbRun = __NFUN_155__(__NFUN_156__(OldAccel, 64), 0);
+			OldbDuck = __NFUN_155__(__NFUN_156__(OldAccel, 32), 0);
+			OldbCrawl = __NFUN_155__(__NFUN_156__(OldAccel, 16), 0);
+			OldDoubleClickMove = 0;
+			MoveAutonomous(__NFUN_175__(OldTimeStamp, CurrentTimeStamp), OldbRun, OldbDuck, OldbCrawl, OldDoubleClickMove, Accel, rot(0, 0, 0));
 			CurrentTimeStamp = OldTimeStamp;
 		}
 	}
-
-	// View components
-	ViewPitch = View/32768;
-	ViewYaw = 2 * (View - 32768 * ViewPitch);
-	ViewPitch *= 2;
-	// Make acceleration.
-	Accel = InAccel/10;
-
-	//rb NewbPressedJump = (bJumpStatus != NewbJumpStatus);
-	//rb bJumpStatus = NewbJumpStatus;
-
-	// Save move parameters.
-	DeltaTime = TimeStamp - CurrentTimeStamp;
-	if ( ServerTimeStamp > 0 )
+	ViewPitch = __NFUN_145__(View, 32768);
+	ViewYaw = __NFUN_144__(2, __NFUN_147__(View, __NFUN_144__(32768, ViewPitch)));
+	__NFUN_159__(ViewPitch, float(2));
+	Accel = __NFUN_214__(InAccel, float(10));
+	DeltaTime = __NFUN_175__(TimeStamp, CurrentTimeStamp);
+	// End:0x2BD
+	if(__NFUN_177__(ServerTimeStamp, float(0)))
 	{
-		// allow 1% error
-		TimeMargin += DeltaTime - 1.01 * (Level.TimeSeconds - ServerTimeStamp);
-		if ( TimeMargin > MaxTimeMargin )
+		__NFUN_184__(TimeMargin, __NFUN_175__(DeltaTime, __NFUN_171__(1.0100000, __NFUN_175__(Level.TimeSeconds, ServerTimeStamp))));
+		// End:0x2BD
+		if(__NFUN_177__(TimeMargin, MaxTimeMargin))
 		{
-			// player is too far ahead
-			TimeMargin -= DeltaTime;
-			if ( TimeMargin < 0.5 )
-				MaxTimeMargin = Default.MaxTimeMargin;
+			__NFUN_185__(TimeMargin, DeltaTime);
+			// End:0x2A7
+			if(__NFUN_176__(TimeMargin, 0.5000000))
+			{
+				MaxTimeMargin = default.MaxTimeMargin;				
+			}
 			else
-				MaxTimeMargin = 0.5;
-			DeltaTime = 0;
+			{
+				MaxTimeMargin = 0.5000000;
+			}
+			DeltaTime = 0.0000000;
 		}
 	}
-
 	CurrentTimeStamp = TimeStamp;
 	ServerTimeStamp = Level.TimeSeconds;
 	ViewRot.Pitch = ViewPitch;
 	ViewRot.Yaw = ViewYaw;
 	ViewRot.Roll = 0;
-	SetRotation(ViewRot);
-
-	if ( Pawn != None )
+	__NFUN_299__(ViewRot);
+	// End:0x48E
+	if(__NFUN_119__(Pawn, none))
 	{
-        //R6CODE
-        rNewRotOffset.Pitch =  2 * (iNewRotOffset/32768);
-        rNewRotOffset.Yaw = 2 * (32767 & iNewRotOffset);
-        pawn.m_rRotationOffset = rNewRotOffset;
-    
-		Rot.Roll = 0;//256 * ClientRoll;
+		rNewRotOffset.Pitch = __NFUN_144__(2, __NFUN_145__(iNewRotOffset, 32768));
+		rNewRotOffset.Yaw = __NFUN_144__(2, __NFUN_156__(32767, iNewRotOffset));
+		Pawn.m_rRotationOffset = rNewRotOffset;
+		Rot.Roll = 0;
 		Rot.Yaw = ViewYaw;
-		if ( (Pawn.Physics == PHYS_Swimming) || (Pawn.Physics == PHYS_Flying) )
-			maxPitch = 2;
-		else
-			maxPitch = 1;
-		If ( (ViewPitch > maxPitch * RotationRate.Pitch) && (ViewPitch < 65536 - maxPitch * RotationRate.Pitch) )
+		// End:0x3C0
+		if(__NFUN_132__(__NFUN_154__(int(Pawn.Physics), int(3)), __NFUN_154__(int(Pawn.Physics), int(4))))
 		{
-			If (ViewPitch < 32768) 
-				Rot.Pitch = maxPitch * RotationRate.Pitch;
-			else
-				Rot.Pitch = 65536 - maxPitch * RotationRate.Pitch;
+			maxPitch = 2;			
 		}
 		else
-			Rot.Pitch = ViewPitch;
-		DeltaRot = (Rotation - Rot);
-		Pawn.SetRotation(Rot);
-	}
-
-	// Perform actual movement.
-	if ( (Level.Pauser == None) && (DeltaTime > 0) )
-    {
-		MoveAutonomous(DeltaTime, NewbRun, NewbDuck, NewbCrawl, DCLICK_None, Accel, DeltaRot);
-	}
-	
-	// Accumulate movement error.
-	if ( Level.TimeSeconds - LastUpdateTime > 0.3 )
-		ClientErr = 10000;
-	else if ( Level.TimeSeconds - LastUpdateTime > 180.0/Player.CurrentNetSpeed )
-	{
-		if ( Pawn == None )
-			LocDiff = Location - ClientLoc;
+		{
+			maxPitch = 1;
+		}
+		// End:0x45A
+		if(__NFUN_130__(__NFUN_151__(ViewPitch, __NFUN_144__(maxPitch, RotationRate.Pitch)), __NFUN_150__(ViewPitch, __NFUN_147__(65536, __NFUN_144__(maxPitch, RotationRate.Pitch)))))
+		{
+			// End:0x434
+			if(__NFUN_150__(ViewPitch, 32768))
+			{
+				Rot.Pitch = __NFUN_144__(maxPitch, RotationRate.Pitch);				
+			}
+			else
+			{
+				Rot.Pitch = __NFUN_147__(65536, __NFUN_144__(maxPitch, RotationRate.Pitch));
+			}			
+		}
 		else
-			LocDiff = Pawn.Location - ClientLoc;
-		ClientErr = LocDiff Dot LocDiff;
+		{
+			Rot.Pitch = ViewPitch;
+		}
+		DeltaRot = __NFUN_317__(Rotation, Rot);
+		Pawn.__NFUN_299__(Rot);
 	}
-
-	// If client has accumulated a noticeable positional error, correct him.
-    if ( ClientErr > 3 )
+	// End:0x4DA
+	if(__NFUN_130__(__NFUN_114__(Level.Pauser, none), __NFUN_177__(DeltaTime, float(0))))
 	{
-		if ( Pawn == None )
+		MoveAutonomous(DeltaTime, NewbRun, NewbDuck, NewbCrawl, 0, Accel, DeltaRot);
+	}
+	// End:0x507
+	if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, LastUpdateTime), 0.3000000))
+	{
+		clientErr = 10000.0000000;		
+	}
+	else
+	{
+		// End:0x585
+		if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, LastUpdateTime), __NFUN_172__(180.0000000, float(Player.CurrentNetSpeed))))
+		{
+			// End:0x558
+			if(__NFUN_114__(Pawn, none))
+			{
+				LocDiff = __NFUN_216__(Location, ClientLoc);				
+			}
+			else
+			{
+				LocDiff = __NFUN_216__(Pawn.Location, ClientLoc);
+			}
+			clientErr = __NFUN_219__(LocDiff, LocDiff);
+		}
+	}
+	// End:0x84B
+	if(__NFUN_177__(clientErr, float(3)))
+	{
+		// End:0x5C2
+		if(__NFUN_114__(Pawn, none))
 		{
 			ClientPhysics = Physics;
 			ClientLoc = Location;
-			ClientVel = Velocity;
+			ClientVel = Velocity;			
 		}
 		else
 		{
 			ClientPhysics = Pawn.Physics;
 			ClientVel = Pawn.Velocity;
 			ClientBase = Pawn.Base;
-			if ( Mover(Pawn.Base) != None )
-				ClientLoc = Pawn.Location - Pawn.Base.Location;
-			else
-				ClientLoc = Pawn.Location;
-			ClientFloor = Pawn.Floor;
-		}
-		//log("Client Error at "$TimeStamp$" is "$ClientErr$" with acceleration "$Accel$" LocDiff "$LocDiff$" Physics "$Pawn.Physics);
-		LastUpdateTime = Level.TimeSeconds;
-
-        if (m_SaveOldClientBase!=ClientBase)
-        {
-            m_SaveOldClientBase=ClientBase;
-            ClientAdjustBase(ClientBase);
-        }
-
-		if ( (Pawn == None) || (Pawn.Physics != PHYS_Spider) )
-		{
-			if ( ClientVel == vect(0,0,0) )
+			// End:0x647
+			if(__NFUN_119__(Mover(Pawn.Base), none))
 			{
-				if ( IsInState('PlayerWalking') && (Pawn != None) && (Pawn.Physics == PHYS_Walking) )
-				{					
-					VeryShortClientAdjustPosition
-					(
-						TimeStamp,
-						ClientLoc.X,
-						ClientLoc.Y,
-						ClientLoc.Z
-//						ClientBase
-					);
-				}
-				else
-					ShortClientAdjustPosition
-					(
-						TimeStamp, 
-						GetStateName(), 
-						ClientPhysics, 
-						ClientLoc.X, 
-						ClientLoc.Y, 
-						ClientLoc.Z 
-//						ClientBase
-					);
+				ClientLoc = __NFUN_216__(Pawn.Location, Pawn.Base.Location);				
 			}
 			else
-				ClientAdjustPosition
-				(
-					TimeStamp, 
-					GetStateName(), 
-					ClientPhysics, 
-					ClientLoc.X, 
-					ClientLoc.Y, 
-					ClientLoc.Z, 
-					ClientVel.X, 
-					ClientVel.Y, 
-					ClientVel.Z
-//					ClientBase
-				);
+			{
+				ClientLoc = Pawn.Location;
+			}
+			ClientFloor = Pawn.Floor;
+		}
+		LastUpdateTime = Level.TimeSeconds;
+		// End:0x6A8
+		if(__NFUN_119__(m_SaveOldClientBase, ClientBase))
+		{
+			m_SaveOldClientBase = ClientBase;
+			ClientAdjustBase(ClientBase);
+		}
+		// End:0x7D9
+		if(__NFUN_132__(__NFUN_114__(Pawn, none), __NFUN_155__(int(Pawn.Physics), int(9))))
+		{
+			// End:0x782
+			if(__NFUN_217__(ClientVel, vect(0.0000000, 0.0000000, 0.0000000)))
+			{
+				// End:0x749
+				if(__NFUN_130__(__NFUN_130__(__NFUN_281__('PlayerWalking'), __NFUN_119__(Pawn, none)), __NFUN_154__(int(Pawn.Physics), int(1))))
+				{
+					VeryShortClientAdjustPosition(TimeStamp, ClientLoc.X, ClientLoc.Y, ClientLoc.Z, ClientBase);					
+				}
+				else
+				{
+					ShortClientAdjustPosition(TimeStamp, __NFUN_284__(), ClientPhysics, ClientLoc.X, ClientLoc.Y, ClientLoc.Z, ClientBase);
+				}				
+			}
+			else
+			{
+				ClientAdjustPosition(TimeStamp, __NFUN_284__(), ClientPhysics, ClientLoc.X, ClientLoc.Y, ClientLoc.Z, ClientVel.X, ClientVel.Y, ClientVel.Z, ClientBase);
+			}			
 		}
 		else
-			LongClientAdjustPosition
-			(
-				TimeStamp, 
-				GetStateName(), 
-				ClientPhysics, 
-				ClientLoc.X, 
-				ClientLoc.Y, 
-				ClientLoc.Z, 
-				ClientVel.X, 
-				ClientVel.Y, 
-				ClientVel.Z,
-//				ClientBase,
-				ClientFloor.X,
-				ClientFloor.Y,
-				ClientFloor.Z
-			);
+		{
+			LongClientAdjustPosition(TimeStamp, __NFUN_284__(), ClientPhysics, ClientLoc.X, ClientLoc.Y, ClientLoc.Z, ClientVel.X, ClientVel.Y, ClientVel.Z, ClientBase, ClientFloor.X, ClientFloor.Y, ClientFloor.Z);
+		}
 	}
-	//log("Server moved stamp "$TimeStamp$" location "$Pawn.Location$" Acceleration "$Pawn.Acceleration$" Velocity "$Pawn.Velocity);
-}	
-
-function ProcessMove ( float DeltaTime, vector newAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)
-{
-	if ( Pawn != None )
-		Pawn.Acceleration = newAccel;
+	return;
 }
 
-final function MoveAutonomous
-(	
-	float DeltaTime, 	
-	bool NewbRun,
-	bool NewbDuck,
-	bool NewbCrawl, 
-	eDoubleClickDir DoubleClickMove, 
-	vector newAccel, 
-	rotator DeltaRot
-)
+function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
 {
-	if ( NewbRun )
-		bRun = 1;
-	else
-		bRun = 0;
-
-//#ifdefR6CODE
-	if( Level.NetMode != NM_Client )
+	// End:0x1F
+	if(__NFUN_119__(Pawn, none))
 	{
-//#endif
-		if ( NewbDuck )
-			bDuck = 1;
-		else
-			bDuck = 0;
-
-		if ( NewbCrawl )
-			m_bCrawl = true;
-		else
-			m_bCrawl = false;
-//#ifdefR6CODE
+		Pawn.Acceleration = NewAccel;
 	}
-//#endif
+	return;
+}
 
-	HandleWalking();
-	ProcessMove(DeltaTime, newAccel, DoubleClickMove, DeltaRot);
-	if ( Pawn != None )	
-		Pawn.AutonomousPhysics(DeltaTime);
+// NEW IN 1.60
+final function MoveAutonomous(float DeltaTime, bool NewbRun, bool NewbDuck, bool NewbCrawl, Actor.EDoubleClickDir DoubleClickMove, Vector NewAccel, Rotator DeltaRot)
+{
+	// End:0x14
+	if(NewbRun)
+	{
+		bRun = 1;		
+	}
 	else
-		AutonomousPhysics(DeltaTime);
-// #ifdef R6PlayerMovements
-    if (pawn!=none)
-    {
-        pawn.m_vEyeLocation = pawn.GetBoneCoords('R6 PonyTail1').Origin;
-    }
-// #endif R6PlayerMovements
-
-	//log("Role "$Role$" moveauto time "$100 * DeltaTime$" ("$Level.TimeDilation$")");
+	{
+		bRun = 0;
+	}
+	// End:0x6D
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	{
+		// End:0x49
+		if(NewbDuck)
+		{
+			bDuck = 1;			
+		}
+		else
+		{
+			bDuck = 0;
+		}
+		// End:0x65
+		if(NewbCrawl)
+		{
+			m_bCrawl = true;			
+		}
+		else
+		{
+			m_bCrawl = false;
+		}
+	}
+	HandleWalking();
+	ProcessMove(DeltaTime, NewAccel, DoubleClickMove, DeltaRot);
+	// End:0xAC
+	if(__NFUN_119__(Pawn, none))
+	{
+		Pawn.__NFUN_3971__(DeltaTime);		
+	}
+	else
+	{
+		__NFUN_3971__(DeltaTime);
+	}
+	// End:0xE7
+	if(__NFUN_119__(Pawn, none))
+	{
+		Pawn.m_vEyeLocation = Pawn.GetBoneCoords('R6 PonyTail1').Origin;
+	}
+	return;
 }
 
-/* VeryShortClientAdjustPosition
-bandwidth saving version, when velocity is zeroed, and pawn is walking
-*/
-function VeryShortClientAdjustPosition
-(
-	float TimeStamp, 
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ 
-//	Actor NewBase
-)
+// NEW IN 1.60
+function VeryShortClientAdjustPosition(float TimeStamp, float NewLocX, float NewLocY, float NewLocZ, Actor NewBase)
 {
-	local vector Floor;
+	local Vector Floor;
 
-    if ( Pawn != None )
-        Floor = Pawn.Floor;
-	
-    // #ifdef R6CODE
-    // rbrek 17 feb 2002 - added a safe guard, somehow the server invokes this function call on a client whose pawn is not in PHYS_Walking...
-    //					   (i.e. when player is trying to get on ladder and is in PHYS_RootMotion -	this should never happen???  TOFIX)
-    if ((pawn!=none)&&(pawn.physics != PHYS_Walking)&&(pawn.physics != PHYS_None))
-        return;
-    // #endif
-
-    LongClientAdjustPosition(TimeStamp,'PlayerWalking',PHYS_Walking,NewLocX,NewLocY,NewLocZ,0,0,0,//NewBase,
-        Floor.X,Floor.Y,Floor.Z);
-}
-
-/* ShortClientAdjustPosition
-bandwidth saving version, when velocity is zeroed
-*/
-function ShortClientAdjustPosition
-(
-	float TimeStamp, 
-	name newState, 
-	EPhysics newPhysics,
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ 
-//	Actor NewBase
-)
-{
-	local vector Floor;
-
-	if ( Pawn != None )
+	// End:0x1F
+	if(__NFUN_119__(Pawn, none))
+	{
 		Floor = Pawn.Floor;
-	LongClientAdjustPosition(TimeStamp,newState,newPhysics,NewLocX,NewLocY,NewLocZ,0,0,0,//NewBase,
-        Floor.X,Floor.Y,Floor.Z);
+	}
+	// End:0x62
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Pawn, none), __NFUN_155__(int(Pawn.Physics), int(1))), __NFUN_155__(int(Pawn.Physics), int(0))))
+	{
+		return;
+	}
+	LongClientAdjustPosition(TimeStamp, 'PlayerWalking', 1, NewLocX, NewLocY, NewLocZ, 0.0000000, 0.0000000, 0.0000000, NewBase, Floor.X, Floor.Y, Floor.Z);
+	return;
 }
 
-/* ClientAdjustPosition
-- pass newloc and newvel in components so they don't get rounded
-*/
-function ClientAdjustPosition
-(
-	float TimeStamp, 
-	name newState, 
-	EPhysics newPhysics,
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ, 
-	float NewVelX, 
-	float NewVelY, 
-	float NewVelZ
-//	Actor NewBase
-)
+// NEW IN 1.60
+function ShortClientAdjustPosition(float TimeStamp, name NewState, Actor.EPhysics newPhysics, float NewLocX, float NewLocY, float NewLocZ, Actor NewBase)
 {
-	local vector Floor;
+	local Vector Floor;
 
-	if ( Pawn != None )
+	// End:0x1F
+	if(__NFUN_119__(Pawn, none))
+	{
 		Floor = Pawn.Floor;
-	LongClientAdjustPosition(TimeStamp,newState,newPhysics,NewLocX,NewLocY,NewLocZ,NewVelX,NewVelY,NewVelZ,//NewBase,
-        Floor.X,Floor.Y,Floor.Z);
+	}
+	LongClientAdjustPosition(TimeStamp, NewState, newPhysics, NewLocX, NewLocY, NewLocZ, 0.0000000, 0.0000000, 0.0000000, NewBase, Floor.X, Floor.Y, Floor.Z);
+	return;
 }
 
-/* LongClientAdjustPosition 
-long version, when care about pawn's floor normal
-*/
-function LongClientAdjustPosition
-(
-	float TimeStamp, 
-	name newState, 
-	EPhysics newPhysics,
-	float NewLocX, 
-	float NewLocY, 
-	float NewLocZ, 
-	float NewVelX, 
-	float NewVelY, 
-	float NewVelZ,
-//	Actor NewBase,
-	float NewFloorX,
-	float NewFloorY,
-	float NewFloorZ
-)
-
+// NEW IN 1.60
+function ClientAdjustPosition(float TimeStamp, name NewState, Actor.EPhysics newPhysics, float NewLocX, float NewLocY, float NewLocZ, float NewVelX, float NewVelY, float NewVelZ, Actor NewBase)
 {
-	local vector NewLocation, NewFloor;
+	local Vector Floor;
+
+	// End:0x1F
+	if(__NFUN_119__(Pawn, none))
+	{
+		Floor = Pawn.Floor;
+	}
+	LongClientAdjustPosition(TimeStamp, NewState, newPhysics, NewLocX, NewLocY, NewLocZ, NewVelX, NewVelY, NewVelZ, NewBase, Floor.X, Floor.Y, Floor.Z);
+	return;
+}
+
+// NEW IN 1.60
+function LongClientAdjustPosition(float TimeStamp, name NewState, Actor.EPhysics newPhysics, float NewLocX, float NewLocY, float NewLocZ, float NewVelX, float NewVelY, float NewVelZ, Actor NewBase, float NewFloorX, float NewFloorY, float NewFloorZ)
+{
+	local Vector NewLocation, NewFloor;
 	local Actor MoveActor;
 
-	if ( Pawn != None )
+	// End:0x7B
+	if(__NFUN_119__(Pawn, none))
 	{
-        if (!bNetOwner)
-        {
-            pawn.m_vEyeLocation = pawn.GetBoneCoords('R6 PonyTail1').Origin;
-        }
-		if ( Pawn.bTearOff || Pawn.m_bUseRagdoll )
+		// End:0x3E
+		if(__NFUN_129__(bNetOwner))
 		{
-			//Pawn = None;
-			GotoState('Dead');
+			Pawn.m_vEyeLocation = Pawn.GetBoneCoords('R6 PonyTail1').Origin;
+		}
+		// End:0x6D
+		if(__NFUN_132__(Pawn.bTearOff, Pawn.m_bUseRagdoll))
+		{
+			__NFUN_113__('Dead');
 			return;
 		}
-		MoveActor = Pawn;
+		MoveActor = Pawn;		
 	}
-	else 
+	else
+	{
 		MoveActor = self;
-
-	if ( CurrentTimeStamp > TimeStamp )
+	}
+	// End:0x93
+	if(__NFUN_177__(CurrentTimeStamp, TimeStamp))
+	{
 		return;
+	}
 	CurrentTimeStamp = TimeStamp;
-
 	NewLocation.X = NewLocX;
 	NewLocation.Y = NewLocY;
 	NewLocation.Z = NewLocZ;
 	MoveActor.Velocity.X = NewVelX;
 	MoveActor.Velocity.Y = NewVelY;
 	MoveActor.Velocity.Z = NewVelZ;
-
 	NewFloor.X = NewFloorX;
 	NewFloor.Y = NewFloorY;
 	NewFloor.Z = NewFloorZ;
-//	MoveActor.SetBase(NewBase, NewFloor);
-//	if ( Mover(NewBase) != None )
-//		NewLocation += NewBase.Location;
-
-    if(NewLocation != MoveActor.Location)   // R6CODE {}
-    {
-        //log("Client "$Role$" adjust "$self$" stamp "$TimeStamp$" location "$MoveActor.Location);
-        MoveActor.bCanTeleport = false;
-        
-        MoveActor.SetLocation(NewLocation);
-        MoveActor.bCanTeleport = true;
-    }                                       // R6CODE {}
-    if(newPhysics != MoveActor.Physics)     // R6CODE {}
-    {
-        // Never change physics for Karma from network, always do this localy
-        if(newPhysics != PHYS_KarmaRagDoll && MoveActor.Physics != PHYS_KarmaRagDoll)
-            MoveActor.SetPhysics(newPhysics);
-    }                                       // R6CODE {}
-
-	if( GetStateName() != newstate )
-		GotoState(newstate);
-
+	MoveActor.__NFUN_298__(NewBase, NewFloor);
+	// End:0x184
+	if(__NFUN_119__(Mover(NewBase), none))
+	{
+		__NFUN_223__(NewLocation, NewBase.Location);
+	}
+	// End:0x1CF
+	if(__NFUN_218__(NewLocation, MoveActor.Location))
+	{
+		MoveActor.bCanTeleport = false;
+		MoveActor.__NFUN_267__(NewLocation);
+		MoveActor.bCanTeleport = true;
+	}
+	// End:0x227
+	if(__NFUN_155__(int(newPhysics), int(MoveActor.Physics)))
+	{
+		// End:0x227
+		if(__NFUN_130__(__NFUN_155__(int(newPhysics), int(14)), __NFUN_155__(int(MoveActor.Physics), int(14))))
+		{
+			MoveActor.__NFUN_3970__(newPhysics);
+		}
+	}
+	// End:0x23B
+	if(__NFUN_255__(__NFUN_284__(), NewState))
+	{
+		__NFUN_113__(NewState);
+	}
 	bUpdatePosition = true;
+	return;
 }
 
-function ClientAdjustBase(actor newClientBase)
+function ClientAdjustBase(Actor newClientBase)
 {
 	local Actor MoveActor;
 
-	if ( Pawn != None )
-		MoveActor = Pawn;
-	else 
+	// End:0x19
+	if(__NFUN_119__(Pawn, none))
+	{
+		MoveActor = Pawn;		
+	}
+	else
+	{
 		MoveActor = self;
-
-    // the floor should be okay
-	MoveActor.SetBase(newClientBase);
+	}
+	MoveActor.__NFUN_298__(newClientBase);
+	return;
 }
 
 function ClientUpdatePosition()
 {
 	local SavedMove CurrentMove;
 	local int realbRun, realbDuck;
-	local bool realbCrawl; 
-//#ifndef R6CODE 
-//	local bool bRealJump;
-//#endif
+	local bool realbCrawl;
 	local float TotalTime;
- 
+
 	bUpdatePosition = false;
-	realbRun= bRun;
-	realbDuck = bDuck;
+	realbRun = int(bRun);
+	realbDuck = int(bDuck);
 	realbCrawl = m_bCrawl;
-//#ifndef R6CODE 
-//	bRealJump = bPressedJump;
-//#endif
 	CurrentMove = SavedMoves;
 	bUpdating = true;
-	
-	while ( CurrentMove != None )
+	J0x42:
+
+	// End:0x14B [Loop If]
+	if(__NFUN_119__(CurrentMove, none))
 	{
-		if ( CurrentMove.TimeStamp <= CurrentTimeStamp )
+		// End:0xB5
+		if(__NFUN_178__(CurrentMove.TimeStamp, CurrentTimeStamp))
 		{
 			SavedMoves = CurrentMove.NextMove;
 			CurrentMove.NextMove = FreeMoves;
 			FreeMoves = CurrentMove;
 			FreeMoves.Clear();
-			CurrentMove = SavedMoves;
+			CurrentMove = SavedMoves;			
 		}
 		else
 		{
-//			if ( (TotalTime > 0) && (Pawn != None) )
-//				AdjustRadius(CurrentMove.Delta * Pawn.GroundSpeed);
-			TotalTime += CurrentMove.Delta;
-            MoveAutonomous(CurrentMove.Delta, CurrentMove.bRun, CurrentMove.bDuck, CurrentMove.m_bCrawl, 
-                CurrentMove.DoubleClickMove, CurrentMove.Acceleration, rot(0,0,0));
+			__NFUN_184__(TotalTime, CurrentMove.Delta);
+			MoveAutonomous(CurrentMove.Delta, CurrentMove.bRun, CurrentMove.bDuck, CurrentMove.m_bCrawl, CurrentMove.DoubleClickMove, CurrentMove.Acceleration, rot(0, 0, 0));
 			CurrentMove = CurrentMove.NextMove;
 		}
+		// [Loop Continue]
+		goto J0x42;
 	}
-	//log("Client updated position to "$Pawn.Location);
 	bUpdating = false;
-	bDuck = realbDuck;
-	bRun = realbRun;
+	bDuck = byte(realbDuck);
+	bRun = byte(realbRun);
 	m_bCrawl = realbCrawl;
-//#ifndef R6CODE 
-//	bPressedJump = bRealJump;
-//#endif
+	return;
 }
 
 function AdjustRadius(float MaxMove)
 {
 	local Pawn P;
-	local vector Dir;
+	local Vector Dir;
 
-	// if other pawn moving away from player, push it away if its close
-	// since the client-side position is behind the server side position
-	ForEach DynamicActors(class'Pawn', P)
-		if ( (P != Pawn) && (P.Velocity != vect(0,0,0)) && P.bBlockPlayers )
+	// End:0x135
+	foreach __NFUN_313__(Class'Engine.Pawn', P)
+	{
+		// End:0x134
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(P, Pawn), __NFUN_218__(P.Velocity, vect(0.0000000, 0.0000000, 0.0000000))), P.bBlockPlayers))
 		{
-			Dir = Normal(P.Location - Pawn.Location);
-			if ( (Pawn.Velocity Dot Dir > 0) && (P.Velocity Dot Dir > 0) )
+			Dir = __NFUN_226__(__NFUN_216__(P.Location, Pawn.Location));
+			// End:0x134
+			if(__NFUN_130__(__NFUN_177__(__NFUN_219__(Pawn.Velocity, Dir), float(0)), __NFUN_177__(__NFUN_219__(P.Velocity, Dir), float(0))))
 			{
-				if ( VSize(P.Location - Pawn.Location) < P.CollisionRadius + Pawn.CollisionRadius + MaxMove )
-					P.MoveSmooth(P.Velocity * 0.5 * PlayerReplicationInfo.Ping);
+				// End:0x134
+				if(__NFUN_176__(__NFUN_225__(__NFUN_216__(P.Location, Pawn.Location)), __NFUN_174__(__NFUN_174__(P.CollisionRadius, Pawn.CollisionRadius), MaxMove)))
+				{
+					P.__NFUN_3969__(__NFUN_212__(__NFUN_212__(P.Velocity, 0.5000000), float(PlayerReplicationInfo.Ping)));
+				}
 			}
-		} 
+		}		
+	}	
+	return;
 }
 
 final function SavedMove GetFreeMove()
 {
-	local SavedMove s, first;
+	local SavedMove S, first;
 	local int i;
 
-	if ( FreeMoves == None )
+	// End:0xF6
+	if(__NFUN_114__(FreeMoves, none))
 	{
-		// don't allow more than 30 saved moves
-		For ( s=SavedMoves; s!=None; s=s.NextMove )
+		S = SavedMoves;
+		J0x16:
+
+		// End:0xEA [Loop If]
+		if(__NFUN_119__(S, none))
 		{
-			i++;
-			if ( i > 30 )
+			__NFUN_165__(i);
+			// End:0xD3
+			if(__NFUN_151__(i, 30))
 			{
 				first = SavedMoves;
 				SavedMoves = SavedMoves.NextMove;
 				first.Clear();
-				first.NextMove = None;
-				// clear out all the moves
-				While ( SavedMoves != None )
+				first.NextMove = none;
+				J0x72:
+
+				// End:0xCD [Loop If]
+				if(__NFUN_119__(SavedMoves, none))
 				{
-					s = SavedMoves;
+					S = SavedMoves;
 					SavedMoves = SavedMoves.NextMove;
-					s.Clear();
-					s.NextMove = FreeMoves;
-					FreeMoves = s;
+					S.Clear();
+					S.NextMove = FreeMoves;
+					FreeMoves = S;
+					// [Loop Continue]
+					goto J0x72;
 				}
 				return first;
 			}
+			S = S.NextMove;
+			// [Loop Continue]
+			goto J0x16;
 		}
-		return Spawn(class'SavedMove');
+		return __NFUN_278__(Class'Engine.SavedMove');		
 	}
 	else
 	{
-		s = FreeMoves;
+		S = FreeMoves;
 		FreeMoves = FreeMoves.NextMove;
-		s.NextMove = None;
-		return s;
-	}	
+		S.NextMove = none;
+		return S;
+	}
+	return;
 }
 
 function int CompressAccel(int C)
 {
-	if ( C >= 0 )
-		C = Min(C, 127);
+	// End:0x1D
+	if(__NFUN_153__(C, 0))
+	{
+		C = __NFUN_249__(C, 127);		
+	}
 	else
-		C = Min(abs(C), 127) + 128;
+	{
+		C = __NFUN_146__(__NFUN_249__(int(__NFUN_186__(float(C))), 127), 128);
+	}
 	return C;
+	return;
 }
 
-/* 
-========================================================================
-Here's how player movement prediction, replication and correction works in network games:
-
-Every tick, the PlayerTick() function is called.  It calls the PlayerMove() function (which is implemented 
-in various states).  PlayerMove() figures out the acceleration and rotation, and then calls ProcessMove() 
-(for single player or listen servers), or ReplicateMove() (if its a network client).
-
-ReplicateMove() saves the move (in the PendingMove list), calls ProcessMove(), and then replicates the move 
-to the server by calling the replicated function ServerMove() - passing the movement parameters, the client's 
-resultant position, and a timestamp.
-
-ServerMove() is executed on the server.  It decodes the movement parameters and causes the appropriate movement 
-to occur.  It then looks at the resulting position and if enough time has passed since the last response, or the 
-position error is significant enough, the server calls ClientAdjustPosition(), a replicated function.
-
-ClientAdjustPosition() is executed on the client.  The client sets its position to the servers version of position, 
-and sets the bUpdatePosition flag to true.  
-
-When PlayerTick() is called on the client again, if bUpdatePosition is true, the client will call 
-ClientUpdatePosition() before calling PlayerMove().  ClientUpdatePosition() replays all the moves in the pending 
-move list which occured after the timestamp of the move the server was adjusting.
-*/
-
-//
-// Replicate this client's desired movement to the server.
-//
-function ReplicateMove
-(
-	float DeltaTime, 
-	vector NewAccel, 
-	eDoubleClickDir DoubleClickMove, 
-	rotator DeltaRot
-)
+// NEW IN 1.60
+function ReplicateMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
 {
 	local SavedMove NewMove, OldMove, LastMove;
-//	local byte ClientRoll;
 	local float OldTimeDelta, NetMoveDelta;
 	local int i, OldAccel;
-	local vector BuildAccel, AccelNorm, MoveLoc;
-    local rotator rSendRot;
+	local Vector BuildAccel, AccelNorm, MoveLoc;
+	local Rotator rSendRot;
 
-	// Get a SavedMove actor to store the movement in.
-	if ( PendingMove != None )
-    {
-        PendingMove.SetMoveFor(self, DeltaTime, NewAccel, DoubleClickMove);//, MoveEyeLoc);
-    }
-
-	if ( SavedMoves != None )
+	// End:0x2A
+	if(__NFUN_119__(PendingMove, none))
+	{
+		PendingMove.SetMoveFor(self, DeltaTime, NewAccel, DoubleClickMove);
+	}
+	// End:0x16C
+	if(__NFUN_119__(SavedMoves, none))
 	{
 		NewMove = SavedMoves;
-		AccelNorm = Normal(NewAccel);
-		while ( NewMove.NextMove != None )
-		{
-			// find most recent interesting move to send redundantly
-			if ( /* //rb NewMove.bPressedJump ||*/ ((NewMove.DoubleClickMove != DCLICK_NONE) && (NewMove.DoubleClickMove < 5))
-				|| ((NewMove.Acceleration != NewAccel) && ((normal(NewMove.Acceleration) Dot AccelNorm) < 0.95)) 
-                )
-				OldMove = NewMove;
-			NewMove = NewMove.NextMove;
-		}
-		if ( /* //rb NewMove.bPressedJump || */ ((NewMove.DoubleClickMove != DCLICK_NONE) && (NewMove.DoubleClickMove < 5))
-			|| ((NewMove.Acceleration != NewAccel) && ((normal(NewMove.Acceleration) Dot AccelNorm) < 0.95)) 
-            )
-			OldMove = NewMove;
-	}
+		AccelNorm = __NFUN_226__(NewAccel);
+		J0x4D:
 
+		// End:0xF2 [Loop If]
+		if(__NFUN_119__(NewMove.NextMove, none))
+		{
+			// End:0xDB
+			if(__NFUN_132__(__NFUN_130__(__NFUN_155__(int(NewMove.DoubleClickMove), int(0)), __NFUN_150__(int(NewMove.DoubleClickMove), 5)), __NFUN_130__(__NFUN_218__(NewMove.Acceleration, NewAccel), __NFUN_176__(__NFUN_219__(__NFUN_226__(NewMove.Acceleration), AccelNorm), 0.9500000))))
+			{
+				OldMove = NewMove;
+			}
+			NewMove = NewMove.NextMove;
+			// [Loop Continue]
+			goto J0x4D;
+		}
+		// End:0x16C
+		if(__NFUN_132__(__NFUN_130__(__NFUN_155__(int(NewMove.DoubleClickMove), int(0)), __NFUN_150__(int(NewMove.DoubleClickMove), 5)), __NFUN_130__(__NFUN_218__(NewMove.Acceleration, NewAccel), __NFUN_176__(__NFUN_219__(__NFUN_226__(NewMove.Acceleration), AccelNorm), 0.9500000))))
+		{
+			OldMove = NewMove;
+		}
+	}
 	LastMove = NewMove;
 	NewMove = GetFreeMove();
-	if ( NewMove == None )
+	// End:0x190
+	if(__NFUN_114__(NewMove, none))
+	{
 		return;
+	}
 	NewMove.SetMoveFor(self, DeltaTime, NewAccel, DoubleClickMove);
-	
-	// adjust radius of nearby players with uncertain location
-//	if ( Pawn != None )
-//		AdjustRadius(NewMove.Delta * Pawn.GroundSpeed);
-
-	// Simulate the movement locally.
 	ProcessMove(NewMove.Delta, NewMove.Acceleration, NewMove.DoubleClickMove, DeltaRot);
-	if ( Pawn != None )
-		Pawn.AutonomousPhysics(NewMove.Delta);
+	// End:0x20C
+	if(__NFUN_119__(Pawn, none))
+	{
+		Pawn.__NFUN_3971__(NewMove.Delta);		
+	}
 	else
-		AutonomousPhysics(DeltaTime);
-
-	//log("Role "$Role$" repmove at "$Level.TimeSeconds$" Move time "$100 * DeltaTime$" ("$Level.TimeDilation$")");
-
-	// Decide whether to hold off on move
-	// send if double click move, jump, or fire unless really too soon, or if newmove.delta big enough
-	// on client side, save extra buffered time in LastUpdateTime
-	if ( PendingMove == None )
-		PendingMove = NewMove;
+	{
+		__NFUN_3971__(DeltaTime);
+	}
+	// End:0x22D
+	if(__NFUN_114__(PendingMove, none))
+	{
+		PendingMove = NewMove;		
+	}
 	else
 	{
 		NewMove.NextMove = FreeMoves;
@@ -1641,217 +1635,190 @@ function ReplicateMove
 		FreeMoves.Clear();
 		NewMove = PendingMove;
 	}
-    
-    //UT2K3	NetMoveDelta = FMax(64.0/Player.CurrentNetSpeed, 0.011);
-    NetMoveDelta = FMax(80.0/Player.CurrentNetSpeed, 0.015);
-	
-	if (/* //rb !PendingMove.bPressedJump && */ (PendingMove.Delta < NetMoveDelta - ClientUpdateTime) )
+	NetMoveDelta = __NFUN_245__(__NFUN_172__(80.0000000, float(Player.CurrentNetSpeed)), 0.0150000);
+	// End:0x2AE
+	if(__NFUN_176__(PendingMove.Delta, __NFUN_175__(NetMoveDelta, ClientUpdateTime)))
 	{
-		// save as pending move
-		return;
+		return;		
 	}
-	else if ( (ClientUpdateTime < 0) && (PendingMove.Delta < NetMoveDelta - ClientUpdateTime) )
-		return;
 	else
 	{
-		ClientUpdateTime = PendingMove.Delta - NetMoveDelta;
-		if ( SavedMoves == None )
-			SavedMoves = PendingMove;
+		// End:0x2E1
+		if(__NFUN_130__(__NFUN_176__(ClientUpdateTime, float(0)), __NFUN_176__(PendingMove.Delta, __NFUN_175__(NetMoveDelta, ClientUpdateTime))))
+		{
+			return;			
+		}
 		else
-			LastMove.NextMove = PendingMove;
-		PendingMove = None;
+		{
+			ClientUpdateTime = __NFUN_175__(PendingMove.Delta, NetMoveDelta);
+			// End:0x315
+			if(__NFUN_114__(SavedMoves, none))
+			{
+				SavedMoves = PendingMove;				
+			}
+			else
+			{
+				LastMove.NextMove = PendingMove;
+			}
+			PendingMove = none;
+		}
 	}
-
-	// check if need to redundantly send previous move
-	if ( OldMove != None )
+	// End:0x44D
+	if(__NFUN_119__(OldMove, none))
 	{
-		// log("Redundant send timestamp "$OldMove.TimeStamp$" accel "$OldMove.Acceleration$" at "$Level.Timeseconds$" New accel "$NewAccel);
-		// old move important to replicate redundantly
-		OldTimeDelta = FMin(255, (Level.TimeSeconds - OldMove.TimeStamp) * 500);
-		BuildAccel = 0.05 * OldMove.Acceleration + vect(0.5, 0.5, 0.5);
-		OldAccel = (CompressAccel(BuildAccel.X) << 23) 
-					+ (CompressAccel(BuildAccel.Y) << 15) 
-					+ (CompressAccel(BuildAccel.Z) << 7);
-		if ( OldMove.bRun )
-			OldAccel += 64;
-		if ( OldMove.bDuck )
-			OldAccel += 32;
-		if ( OldMove.m_bCrawl )	//rb if ( OldMove.bPressedJump )
-			OldAccel += 16;
-		OldAccel += OldMove.DoubleClickMove;
+		OldTimeDelta = __NFUN_244__(255.0000000, __NFUN_171__(__NFUN_175__(Level.TimeSeconds, OldMove.TimeStamp), float(500)));
+		BuildAccel = __NFUN_215__(__NFUN_213__(0.0500000, OldMove.Acceleration), vect(0.5000000, 0.5000000, 0.5000000));
+		OldAccel = __NFUN_146__(__NFUN_146__(__NFUN_148__(CompressAccel(int(BuildAccel.X)), 23), __NFUN_148__(CompressAccel(int(BuildAccel.Y)), 15)), __NFUN_148__(CompressAccel(int(BuildAccel.Z)), 7));
+		// End:0x400
+		if(OldMove.bRun)
+		{
+			__NFUN_161__(OldAccel, 64);
+		}
+		// End:0x41B
+		if(OldMove.bDuck)
+		{
+			__NFUN_161__(OldAccel, 32);
+		}
+		// End:0x436
+		if(OldMove.m_bCrawl)
+		{
+			__NFUN_161__(OldAccel, 16);
+		}
+		__NFUN_161__(OldAccel, int(OldMove.DoubleClickMove));
 	}
-	//else
-	//	log("No redundant timestamp at "$Level.TimeSeconds$" with accel "$NewAccel);
-	//log("Replicate move at "$NewMove.TimeStamp$" location "$Pawn.Location);
-	// Send to the server
-//	ClientRoll = (Rotation.Roll >> 8) & 255;
-	
-	//rb if ( NewMove.bPressedJump )
-	//rb	bJumpStatus = !bJumpStatus;
-
-	if ( Pawn == None )
-    {
-        MoveLoc = Location;
-    }
+	// End:0x466
+	if(__NFUN_114__(Pawn, none))
+	{
+		MoveLoc = Location;		
+	}
 	else
-    {
-        rSendRot = pawn.m_rRotationOffset;
-        MoveLoc = Pawn.Location;
-    }
-
-    if (Level.TimeSeconds > m_fNextUpdateTime)
-    {
-        m_fNextUpdateTime = Level.TimeSeconds + (1/NetClientMaxTickRate);
-    }
-    else
-    {
-        return;
-    }
-
-	if ( (NewMove.Acceleration == vect(0,0,0)) && (NewMove.DoubleClickMove == DCLICK_None) )
-    {
-        if ((NewMove.bDuck==false) && (NewMove.bRun==false) && (NewMove.m_bCrawl==false))
-        {
-            ShorterServerMove
-            (
-			    NewMove.TimeStamp, 
-			    MoveLoc, 
-			    (32767 & (Rotation.Pitch/2)) * 32768 + (32767 & (Rotation.Yaw/2)),
-// #ifdef R6PlayerMovements
-			    (32767 & (rSendRot.Pitch/2)) * 32768 + (32767 & (rSendRot.Yaw/2))
-// #endif R6PlayerMovements
-            );
-        }
-        else
-            ShortServerMove
-		    (
-			    NewMove.TimeStamp, 
-			    MoveLoc, 
-			    NewMove.bRun,
-			    NewMove.bDuck,
-			    NewMove.m_bCrawl,  //rb bJumpStatus, 
-//   			ClientRoll,
-			    (32767 & (Rotation.Pitch/2)) * 32768 + (32767 & (Rotation.Yaw/2)),
-// #ifdef R6PlayerMovements
-			    (32767 & (rSendRot.Pitch/2)) * 32768 + (32767 & (rSendRot.Yaw/2))
-// #endif R6PlayerMovements
-		);
-    }
+	{
+		rSendRot = Pawn.m_rRotationOffset;
+		MoveLoc = Pawn.Location;
+	}
+	// End:0x4C9
+	if(__NFUN_177__(Level.TimeSeconds, m_fNextUpdateTime))
+	{
+		m_fNextUpdateTime = __NFUN_174__(Level.TimeSeconds, __NFUN_172__(float(1), NetClientMaxTickRate));		
+	}
 	else
-		ServerMove
-		(
-			NewMove.TimeStamp, 
-			NewMove.Acceleration * 10, 
-			MoveLoc, 
-			NewMove.bRun,
-			NewMove.bDuck,
-			NewMove.m_bCrawl,  //rb bJumpStatus, 
-//			NewMove.DoubleClickMove, 
-//			ClientRoll,
-			(32767 & (Rotation.Pitch/2)) * 32768 + (32767 & (Rotation.Yaw/2)),
-// #ifdef R6PlayerMovements
-			(32767 & (rSendRot.Pitch/2)) * 32768 + (32767 & (rSendRot.Yaw/2)),
-// #endif R6PlayerMovements
-			OldTimeDelta,
-			OldAccel
-		);
+	{
+		return;
+	}
+	// End:0x67A
+	if(__NFUN_130__(__NFUN_217__(NewMove.Acceleration, vect(0.0000000, 0.0000000, 0.0000000)), __NFUN_154__(int(NewMove.DoubleClickMove), int(0))))
+	{
+		// End:0x5CB
+		if(__NFUN_130__(__NFUN_130__(__NFUN_242__(NewMove.bDuck, false), __NFUN_242__(NewMove.bRun, false)), __NFUN_242__(NewMove.m_bCrawl, false)))
+		{
+			ShorterServerMove(NewMove.TimeStamp, MoveLoc, __NFUN_146__(__NFUN_144__(__NFUN_156__(32767, __NFUN_145__(Rotation.Pitch, 2)), 32768), __NFUN_156__(32767, __NFUN_145__(Rotation.Yaw, 2))), __NFUN_146__(__NFUN_144__(__NFUN_156__(32767, __NFUN_145__(rSendRot.Pitch, 2)), 32768), __NFUN_156__(32767, __NFUN_145__(rSendRot.Yaw, 2))));			
+		}
+		else
+		{
+			ShortServerMove(NewMove.TimeStamp, MoveLoc, NewMove.bRun, NewMove.bDuck, NewMove.m_bCrawl, __NFUN_146__(__NFUN_144__(__NFUN_156__(32767, __NFUN_145__(Rotation.Pitch, 2)), 32768), __NFUN_156__(32767, __NFUN_145__(Rotation.Yaw, 2))), __NFUN_146__(__NFUN_144__(__NFUN_156__(32767, __NFUN_145__(rSendRot.Pitch, 2)), 32768), __NFUN_156__(32767, __NFUN_145__(rSendRot.Yaw, 2))));
+		}		
+	}
+	else
+	{
+		ServerMove(NewMove.TimeStamp, __NFUN_212__(NewMove.Acceleration, float(10)), MoveLoc, NewMove.bRun, NewMove.bDuck, NewMove.m_bCrawl, __NFUN_146__(__NFUN_144__(__NFUN_156__(32767, __NFUN_145__(Rotation.Pitch, 2)), 32768), __NFUN_156__(32767, __NFUN_145__(Rotation.Yaw, 2))), __NFUN_146__(__NFUN_144__(__NFUN_156__(32767, __NFUN_145__(rSendRot.Pitch, 2)), 32768), __NFUN_156__(32767, __NFUN_145__(rSendRot.Yaw, 2))), byte(OldTimeDelta), OldAccel);
+	}
+	return;
 }
 
 function HandleWalking()
 {
-	if ( Pawn != None )
-		Pawn.SetWalking(((bRun != 0) || (bDuck != 0)) && !Region.Zone.IsA('WarpZoneInfo')); 
+	// End:0x50
+	if(__NFUN_119__(Pawn, none))
+	{
+		Pawn.SetWalking(__NFUN_130__(__NFUN_132__(__NFUN_155__(int(bRun), 0), __NFUN_155__(int(bDuck), 0)), __NFUN_129__(Region.Zone.__NFUN_303__('WarpZoneInfo'))));
+	}
+	return;
 }
 
 function ServerRestartGame()
 {
+	return;
 }
 
-function SetFOVAngle(float newFOV)
+function SetFOVAngle(float NewFOV)
 {
-	FOVAngle = newFOV;
-}
-	 
-function ClientFlash( float scale, vector fog )
-{
-	DesiredFlashScale = scale;
-	DesiredFlashFog = 0.001 * fog;
+	FovAngle = NewFOV;
+	return;
 }
 
-function ClientSetFlash(vector Scale, vector Fog)
+function ClientFlash(float Scale, Vector fog)
 {
-	FlashScale=Scale;
-	FlashFog=Fog;
+	DesiredFlashScale = Scale;
+	DesiredFlashFog = __NFUN_213__(0.0010000, fog);
+	return;
 }
 
-function ClientInstantFlash( float scale, vector fog )
+function ClientSetFlash(Vector Scale, Vector fog)
 {
-	InstantFlash = scale;
-	InstantFog = 0.001 * fog;
-}
-   
-function ClientAdjustGlow( float scale, vector fog )
-{
-	ConstantGlowScale += scale;
-	ConstantGlowFog += 0.001 * fog;
+	FlashScale = Scale;
+	FlashFog = fog;
+	return;
 }
 
-/* ClientShake()
-Function called on client to shake view.
-Only ShakeView() should call ClientShake()
-*/
-private function ClientShake(vector ShakeRoll, vector OffsetMag, vector ShakeRate, float OffsetTime)
+function ClientInstantFlash(float Scale, Vector fog)
 {
-	if ( (MaxShakeRoll < ShakeRoll.X) || (ShakeRollTime < 0.01 * ShakeRoll.Y) )
+	InstantFlash = Scale;
+	InstantFog = __NFUN_213__(0.0010000, fog);
+	return;
+}
+
+function ClientAdjustGlow(float Scale, Vector fog)
+{
+	__NFUN_184__(ConstantGlowScale, Scale);
+	__NFUN_223__(ConstantGlowFog, __NFUN_213__(0.0010000, fog));
+	return;
+}
+
+private function ClientShake(Vector ShakeRoll, Vector OffsetMag, Vector ShakeRate, float OffsetTime)
+{
+	// End:0x6F
+	if(__NFUN_132__(__NFUN_176__(MaxShakeRoll, ShakeRoll.X), __NFUN_176__(ShakeRollTime, __NFUN_171__(0.0100000, ShakeRoll.Y))))
 	{
 		MaxShakeRoll = ShakeRoll.X;
-		ShakeRollTime = 0.01 * ShakeRoll.Y;	
-		ShakeRollRate = 0.01 * ShakeRoll.Z;
+		ShakeRollTime = __NFUN_171__(0.0100000, ShakeRoll.Y);
+		ShakeRollRate = __NFUN_171__(0.0100000, ShakeRoll.Z);
 	}
-	if ( VSize(OffsetMag) > VSize(MaxShakeOffset) )
+	// End:0xB2
+	if(__NFUN_177__(__NFUN_225__(OffsetMag), __NFUN_225__(MaxShakeOffset)))
 	{
-		ShakeOffsetTime = OffsetTime * vect(1,1,1);
+		ShakeOffsetTime = __NFUN_213__(OffsetTime, vect(1.0000000, 1.0000000, 1.0000000));
 		MaxShakeOffset = OffsetMag;
 		ShakeOffsetRate = ShakeRate;
 	}
+	return;
 }
 
-
-/* ShakeView()
-Call this function to shake the player's view
-shaketime = how long to roll view
-RollMag = how far to roll view as it shakes
-OffsetMag = max view offset
-RollRate = how fast to roll view
-OffsetRate = how fast to offset view
-OffsetTime = how long to offset view (number of shakes)
-*/
-function ShakeView( float shaketime, float RollMag, vector OffsetMag, float RollRate, vector OffsetRate, float OffsetTime)
+function ShakeView(float shaketime, float RollMag, Vector OffsetMag, float RollRate, Vector OffsetRate, float OffsetTime)
 {
-	local vector ShakeRoll;
+	local Vector ShakeRoll;
 
 	ShakeRoll.X = RollMag;
-	ShakeRoll.Y = 100 * shaketime;
-	ShakeRoll.Z = 100 * rollrate;
+	ShakeRoll.Y = __NFUN_171__(100.0000000, shaketime);
+	ShakeRoll.Z = __NFUN_171__(100.0000000, RollRate);
 	ClientShake(ShakeRoll, OffsetMag, OffsetRate, OffsetTime);
+	return;
 }
 
-function damageAttitudeTo(pawn Other, float Damage)
-{
-	if ( (Other != None) && (Other != Pawn) && (Damage > 0) )
-		Enemy = Other;
-}
-
-function Typing( bool bTyping )
+function Typing(bool bTyping)
 {
 	bIsTyping = bTyping;
-	if ( bTyping && (Pawn != None) && !Pawn.bTearOff )
+	// End:0x48
+	if(__NFUN_130__(__NFUN_130__(bTyping, __NFUN_119__(Pawn, none)), __NFUN_129__(Pawn.bTearOff)))
+	{
 		Pawn.ChangeAnimation();
-
-	if (Level.Game.StatLog != None)
-		Level.Game.StatLog.LogTypingEvent(bTyping, Self);
+	}
+	// End:0x8D
+	if(__NFUN_119__(Level.Game.StatLog, none))
+	{
+		Level.Game.StatLog.LogTypingEvent(bTyping, self);
+	}
+	return;
 }
-
 
 //*************************************************************************************
 // Normal gameplay execs
@@ -1859,923 +1826,553 @@ function Typing( bool bTyping )
 // R6CODE
 exec function Bind(string szKeyAndCommand)
 {
+	local string szResult;
+	local int iPos;
 
-    local string szResult;
-    local INT iPos;
-
-    if (InPlanningMode() && !Level.m_bInGamePlanningActive)
-        szResult = "INPUTPLANNING" @ szKeyAndCommand;
-    else
-        szResult = "INPUT" @ szKeyAndCommand;
-
-    SetKey(szResult);
-
-    // Only the console can be change at the same time in the inputplanning and the inputgame.
-    iPos = InStr(szKeyAndCommand," ");
-	szResult = Right(szKeyAndCommand, Len(szKeyAndCommand) - iPos - 1);
-    if (szResult ~= "CONSOLE")
-    {
-        if (InPlanningMode() && !Level.m_bInGamePlanningActive)
-            szResult = "INPUT" @ szKeyAndCommand;
-        else
-            szResult = "INPUTPLANNING" @ szKeyAndCommand;
-
-        SetKey(szResult);
-    }
+	// End:0x3B
+	if(__NFUN_130__(__NFUN_2014__(), __NFUN_129__(Level.m_bInGamePlanningActive)))
+	{
+		szResult = __NFUN_168__("INPUTPLANNING", szKeyAndCommand);		
+	}
+	else
+	{
+		szResult = __NFUN_168__("INPUT", szKeyAndCommand);
+	}
+	__NFUN_2710__(szResult);
+	iPos = __NFUN_126__(szKeyAndCommand, " ");
+	szResult = __NFUN_234__(szKeyAndCommand, __NFUN_147__(__NFUN_147__(__NFUN_125__(szKeyAndCommand), iPos), 1));
+	// End:0xEF
+	if(__NFUN_124__(szResult, "CONSOLE"))
+	{
+		// End:0xCB
+		if(__NFUN_130__(__NFUN_2014__(), __NFUN_129__(Level.m_bInGamePlanningActive)))
+		{
+			szResult = __NFUN_168__("INPUT", szKeyAndCommand);			
+		}
+		else
+		{
+			szResult = __NFUN_168__("INPUTPLANNING", szKeyAndCommand);
+		}
+		__NFUN_2710__(szResult);
+	}
+	return;
 }
 
 exec function SetOption(string szKeyAndCommand)
 {
-    local string szResult;
+	local string szResult;
 
-    szResult = "R6GAMEOPTIONS" @ szKeyAndCommand;
-
-    SetKey(szResult);
+	szResult = __NFUN_168__("R6GAMEOPTIONS", szKeyAndCommand);
+	__NFUN_2710__(szResult);
+	return;
 }
-// R6CODE END
 
-exec function Jump( optional float F )
+exec function Jump(optional float f)
 {
-/*@@@DEBUG	
-	if ( Level.Pauser == PlayerReplicationInfo )
-		SetPause(False);
-	else
-		bPressedJump = true;
-@@@DEBUG */
+	return;
 }
 
-// Send a voice message of a certain type to a certain player.
-exec function Speech( name Type, int Index, int Callsign )
-{
-/* R6CODE+
-	local VoicePack V;
-
-	V = Spawn( PlayerReplicationInfo.VoiceType, Self );
-	if (V != None)
-		V.PlayerSpeech( Type, Index, Callsign );
-R6CODE- */
-}
-
-
-exec function RestartLevel()
-{
-    /* R6CODE+
-	if( Level.Netmode==NM_Standalone )
-		ClientTravel( "?restart", TRAVEL_Relative, false );
-    */
-}
-/* R6CODE+
-exec function LocalTravel( string URL )
-{
-	if( Level.Netmode==NM_Standalone )
-		ClientTravel( URL, TRAVEL_Relative, true );
-}
-*/
-
-// ------------------------------------------------------------------------
-// Loading and saving
-
-/* QuickSave()
-Save game to slot 9
-*/
-/* R6CODE+
-exec function QuickSave()
-{
-	if ( (Pawn.Health > 0) 
-		&& (Level.NetMode == NM_Standalone) )
-	{
-		ClientMessage(QuickSaveString);
-		ConsoleCommand("SaveGame 9");
-	}
-}
-R6CODE- */
-
-/* QuickLoad()
-Load game from slot 9
-*/
-/* R6CODE+
-exec function QuickLoad()
-{
-	if ( Level.NetMode == NM_Standalone )
-		ClientTravel( "?load=9", TRAVEL_Absolute, false);
-}
-R6CODE-        */
-
-/* SetPause()
- Try to pause game; returns success indicator.
- Replicated to server in network games.
- */
-function bool SetPause( BOOL bPause )
+function bool SetPause(bool bPause)
 {
 	return Level.Game.SetPause(bPause, self);
+	return;
 }
 
-//ifdefR6CODE
-/* Pause()
-Command to try to pause the game.
-*/
 exec function Pause()
 {
-#ifdefDEBUG
-	if( !SetPause(Level.Pauser==None) )
-        ClientMessage(NoPauseMessage);
-#endif
-}
-//#endif R6CODE
-
-// Activate specific inventory item
-exec function ActivateInventoryItem( class InvItem )
-{
-/*R6CHANGEWEAPONSYSTEM
-	local Powerups Inv;
-
-	Inv = Powerups(Pawn.FindInventoryType(InvItem));
-	if ( Inv != None )
-		Inv.Activate();
-*/
-}
-
-// ------------------------------------------------------------------------
-// Weapon changing functions
-
-/* ThrowWeapon()
-Throw out current weapon, and switch to a new weapon
-*/
-exec function ThrowWeapon()
-{
-/*R6CHANGEWEAPONSYSTEM
-	if( Level.NetMode == NM_Client )
-		return;
-	if( Pawn.Weapon==None || !Pawn.Weapon.bCanThrow )
-		return;
-	Pawn.Weapon.bTossedOut = true;
-	Pawn.TossWeapon(Vector(Rotation) * 500 + vect(0,0,220));
-	if ( Pawn.Weapon == None )
-		SwitchToBestWeapon();
-*/
-}
-
-/* PrevWeapon()
-- switch to previous inventory group weapon
-*/
-exec function PrevWeapon()
-{
-/*R6CHANGEWEAPONSYSTEM
-	if( Level.Pauser!=None )
-		return;
-	if ( Pawn.Weapon == None )
-	{
-		SwitchToBestWeapon();
-		return;
-	}
-	if ( Pawn.PendingWeapon != None )
-		Pawn.PendingWeapon = Pawn.Inventory.PrevWeapon(None, Pawn.PendingWeapon);
-	else
-		Pawn.PendingWeapon = Pawn.Inventory.PrevWeapon(None, Pawn.Weapon);
-
-	if ( Pawn.PendingWeapon != None )
-		Pawn.Weapon.PutDown();
-*/
-}
-
-/* NextWeapon()
-- switch to next inventory group weapon
-*/
-exec function NextWeapon()
-{
-/*R6CHANGEWEAPONSYSTEM
-	if( Level.Pauser!=None )
-		return;
-	if ( Pawn.Weapon == None )
-	{
-		SwitchToBestWeapon();
-		return;
-	}
-	if ( Pawn.PendingWeapon != None )
-		Pawn.PendingWeapon = Pawn.Inventory.NextWeapon(None, Pawn.PendingWeapon);
-	else
-		Pawn.PendingWeapon = Pawn.Inventory.NextWeapon(None, Pawn.Weapon);
-
-	if ( Pawn.PendingWeapon != None )
-		Pawn.Weapon.PutDown();
-*/
-}
-
-// The player wants to switch to weapon group number F.
-exec function SwitchWeapon (byte F )
-{
-/*R6CHANGEWEAPONSYSTEM
-	local weapon newWeapon;
-
-	if ( (Level.Pauser!=None) || (Pawn == None) || (Pawn.Inventory == None) )
-		return;
-	if ( (Pawn.Weapon != None) && (Pawn.Weapon.Inventory != None) )
-		newWeapon = Pawn.Weapon.Inventory.WeaponChange(F);
-	else
-		newWeapon = None;	
-	if ( newWeapon == None )
-		newWeapon = Pawn.Inventory.WeaponChange(F);
-
-	if ( newWeapon == None )
-		return;
-
-	if ( Pawn.Weapon == None )
-	{
-		Pawn.PendingWeapon = newWeapon;
-		Pawn.ChangedWeapon();
-	}
-	else if ( Pawn.Weapon != newWeapon )
-	{
-		Pawn.PendingWeapon = newWeapon;
-		if ( !Pawn.Weapon.PutDown() )
-			Pawn.PendingWeapon = None;
-	}
-*/
-}
-
-/*R6CHANGEWEAPONSYSTEM
-exec function GetWeapon(class<Weapon> NewWeaponClass )
-{
-	local Inventory Inv;
-
-	if ( (Pawn.Inventory == None) || (NewWeaponClass == None)
-		|| ((Pawn.Weapon != None) && (Pawn.Weapon.Class == NewWeaponClass)) )
-		return;
-
-	for ( Inv=Pawn.Inventory; Inv!=None; Inv=Inv.Inventory )
-		if ( Inv.Class == NewWeaponClass )
-		{
-			Pawn.PendingWeapon = Weapon(Inv);
-			if ( !Pawn.PendingWeapon.HasAmmo() )
-			{
-				ClientMessage( Pawn.PendingWeapon.ItemName$Pawn.PendingWeapon.MessageNoAmmo );
-				Pawn.PendingWeapon = None;
-				return;
-			}
-			Pawn.Weapon.PutDown();
-			return;
-		}
-}
-*/
-	
-// The player wants to select previous item
-exec function PrevItem()
-{
-/*R6CHANGEWEAPONSYSTEM
-	local Inventory Inv;
-	local Powerups LastItem;
-
-	if ( Level.Pauser!=None )
-		return;
-
-	if (Pawn.SelectedItem==None) 
-	{
-		Pawn.SelectedItem = Pawn.Inventory.SelectNext();
-		Return;
-	}
-	if (Pawn.SelectedItem.Inventory!=None) 
-		for( Inv=Pawn.SelectedItem.Inventory; Inv!=None; Inv=Inv.Inventory ) 
-		{
-			if (Inv==None) Break;
-			if ( Inv.IsA('Powerups') && Powerups(Inv).bActivatable) LastItem=Powerups(Inv);
-		}
-	for( Inv=Pawn.Inventory; Inv!=Pawn.SelectedItem; Inv=Inv.Inventory ) 
-	{
-		if (Inv==None) Break;
-		if ( Inv.IsA('Powerups') && Powerups(Inv).bActivatable) LastItem=Powerups(Inv);
-	}
-	if (LastItem!=None) 
-		Pawn.SelectedItem = LastItem;
-*/
-}
-
-// The player wants to active selected item
-exec function ActivateItem()
-{
-/*R6CHANGEWEAPONSYSTEM
-	if( Level.Pauser!=None )
-		return;
-	if ( (Pawn != None) && (Pawn.SelectedItem!=None) ) 
-		Pawn.SelectedItem.Activate();
-*/
+	return;
 }
 
 // The player wants to fire.
-exec function Fire( optional float F )
+exec function Fire(optional float f)
 {
-	if ( Level.Pauser == PlayerReplicationInfo )
+	// End:0x21
+	if(__NFUN_114__(Level.Pauser, PlayerReplicationInfo))
 	{
 		SetPause(false);
 		return;
 	}
-/*R6CHANGEWEAPONSYSTEM
-	if( Pawn.Weapon!=None )
-		Pawn.Weapon.Fire(F);
-*/	
-//#ifndef R6CODE
-//    if ( Pawn.EngineWeapon!=None )
-//#else
-	if( (Pawn != none) && (Pawn.EngineWeapon != none) && !GameReplicationInfo.m_bGameOverRep )
-//#endif R6CODE
+	// End:0x75
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Pawn, none), __NFUN_119__(Pawn.EngineWeapon, none)), __NFUN_129__(GameReplicationInfo.m_bGameOverRep)))
 	{
-		Pawn.EngineWeapon.Fire(F);
+		Pawn.EngineWeapon.Fire(f);
 	}
+	return;
 }
 
 // The player wants to alternate-fire.
-exec function AltFire( optional float F )
+exec function AltFire(optional float f)
 {
-	if ( Level.Pauser == PlayerReplicationInfo )
+	// End:0x21
+	if(__NFUN_114__(Level.Pauser, PlayerReplicationInfo))
 	{
 		SetPause(false);
 		return;
 	}
-/*R6CHANGEWEAPONSYSTEM
-	if( Pawn.Weapon!=None )
-		Pawn.Weapon.AltFire(F);
-*/
-	if( Pawn.EngineWeapon!=None )
+	// End:0x52
+	if(__NFUN_119__(Pawn.EngineWeapon, none))
 	{
-//        Pawn.PlayFiring();
-		Pawn.EngineWeapon.AltFire(F);
+		Pawn.EngineWeapon.AltFire(f);
 	}
+	return;
 }
-
-// The player wants to use something in the level.
-exec function Use()
-{
-	ServerUse();
-}
-
-function ServerUse()
-{
-    /* R6CODE +
-	local Actor A;
-
-	if ( Level.Pauser == PlayerReplicationInfo )
-	{
-		SetPause(false);
-		return;
-	}
-
-	if (Pawn==None)
-		return;
-	
-	// Send the 'DoUse' event to each actor player is touching.
-	ForEach Pawn.TouchingActors(class'Actor', A)
-	{
-		A.UsedBy(Pawn);
-	}
-    R6CODE- */
-}
-
-
 
 exec function Suicide()
 {
-//#ifndef R6CODE
-//	Pawn.KilledBy( None );
-//#endif // #ifndef R6CODE
+	return;
 }
 
 // R6CODE+
-event HandleServerMsg(string _szServerMsg, OPTIONAL int iLifeTime )
+event HandleServerMsg(string _szServerMsg, optional int iLifeTime)
 {
-    myHUD.AddTextServerMessage(_szServerMsg, class'LocalMessage', iLifeTime );
+	myHUD.AddTextServerMessage(_szServerMsg, Class'Engine.LocalMessage', iLifeTime);
+	return;
 }
 
 function ClientCantRequestChangeNameYet()
 {
-    HandleServerMsg(Localize("Game", "CantRequestChangeNameYet", "R6GameInfo"));
+	HandleServerMsg(Localize("Game", "CantRequestChangeNameYet", "R6GameInfo"));
+	return;
 }
 
-simulated function ServerChangeName( string s )
+simulated function ServerChangeName(string S)
 {
-    local int iChangeNameTime;
+	local int iChangeNameTime;
 
-    iChangeNameTime = class'Actor'.static.GetGameOptions().ChangeNameTime;
-
-    if ( m_iChangeNameLastTime == 0 ||
-         Level.TimeSeconds > m_iChangeNameLastTime + iChangeNameTime )
-    {
-        m_iChangeNameLastTime = Level.TimeSeconds;
-        ClientChangeName( s );
-    }
-    else
-    {
-        ClientCantRequestChangeNameYet();
-    }
-}
-
-simulated function ClientChangeName( string s )
-{
-    ChangeName(S);
-	UpdateURL("Name", S, true);
-	SaveConfig();
-	class'Actor'.static.GetGameOptions().CharacterName = S; // update game options name
-	class'Actor'.static.GetGameOptions().SaveConfig();
-}
-// R6CODE-
-
-exec function Name( coerce string S )
-{
-    // R6CODE
-    ServerChangeName( S );
-
-    /*     
-	ChangeName(S);
-	UpdateURL("Name", S, true);
-	SaveConfig();
-	class'Actor'.static.GetGameOptions().CharacterName = S; // update game options name
-	class'Actor'.static.GetGameOptions().SaveConfig();
-    */
-}
-
-exec function SetName( coerce string S)
-{
-    // R6CODE
-    ServerChangeName( S );
-
-    /*
-	ChangeName(S);
-	UpdateURL("Name", S, true);
-	SaveConfig();
-	class'Actor'.static.GetGameOptions().CharacterName = S; // update game options name
-	class'Actor'.static.GetGameOptions().SaveConfig();
-    */
-}
-
-simulated function ChangeName( coerce out string S )
-{
- 	if ( Len(S) > 15 )
-		S = left(S,15);
-	
-    ReplaceText(S, " ", "_");
-    // R6CODE
-    ReplaceText(S, "~", "_");
-    ReplaceText(S, "?", "_");
-    ReplaceText(S, ",", "_");
-    ReplaceText(S, "#", "_");
-    ReplaceText(S, "/", "_");
-    S = RemoveInvalidChars(S);
-
-	if(Level.NetMode != NM_Standalone)
-		Level.Game.ChangeName( self, S, false );
-}
-
-/*
-exec function SwitchTeam()
-{
-	if ( (PlayerReplicationInfo.Team == None) || (PlayerReplicationInfo.Team.TeamIndex == 1) )
-		ChangeTeam(0);
+	iChangeNameTime = Class'Engine.Actor'.static.__NFUN_1009__().ChangeNameTime;
+	// End:0x88
+	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(m_iChangeNameLastTime, 0), __NFUN_177__(Level.TimeSeconds, float(__NFUN_146__(m_iChangeNameLastTime, iChangeNameTime)))), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	{
+		m_iChangeNameLastTime = int(Level.TimeSeconds);
+		ClientChangeName(S);		
+	}
 	else
-		ChangeTeam(1);
-}
-*/
-
-function ChangeTeam( int N )
-{
-	local TeamInfo OldTeam;
-
-	OldTeam = PlayerReplicationInfo.Team;
-	Level.Game.ChangeTeam(self, N);
-	if ( Level.Game.bTeamGame && (PlayerReplicationInfo.Team != OldTeam) )
-		Pawn.Died( None, class'DamageType', Pawn.Location );
-}
-
-/* R6CODE
-exec function SwitchLevel( string URL )
-{
-	if( Level.NetMode==NM_Standalone || Level.netMode==NM_ListenServer )
-		Level.ServerTravel( URL, false );
-}
-*/
-exec function ClearProgressMessages()
-{
-/* R6CODE
-	local int i;
-
-	for (i=0; i<ArrayCount(ProgressMessage); i++)
 	{
-		ProgressMessage[i] = "";
-		ProgressColor[i] = class'Canvas'.Static.MakeColor(255,255,255);
+		ClientCantRequestChangeNameYet();
 	}
-*/
+	return;
 }
 
-exec event SetProgressMessage( int Index, string S, color C )
+simulated function ClientChangeName(string S)
 {
-/* R6CODE
-	if ( Index < ArrayCount(ProgressMessage) )
+	ChangeName(S);
+	// End:0x28
+	if(__NFUN_151__(__NFUN_125__(S), 15))
 	{
-		ProgressMessage[Index] = S;
-		ProgressColor[Index] = C;
+		S = __NFUN_128__(S, 15);
 	}
-*/
+	ReplaceText(S, " ", "_");
+	ReplaceText(S, "~", "_");
+	ReplaceText(S, "?", "_");
+	ReplaceText(S, ",", "_");
+	ReplaceText(S, "#", "_");
+	ReplaceText(S, "/", "_");
+	S = __NFUN_238__(S);
+	__NFUN_546__("Name", S, true);
+	__NFUN_536__();
+	Class'Engine.Actor'.static.__NFUN_1009__().characterName = S;
+	Class'Engine.Actor'.static.__NFUN_1009__().__NFUN_536__();
+	return;
 }
 
-exec event SetProgressTime( float T )
+exec function Name(coerce string S)
 {
-	ProgressTimeOut = T + Level.TimeSeconds;
+	ServerChangeName(S);
+	return;
+}
+
+exec function SetName(coerce string S)
+{
+	ServerChangeName(S);
+	return;
+}
+
+simulated function ChangeName(coerce out string S)
+{
+	// End:0x1D
+	if(__NFUN_151__(__NFUN_125__(S), 15))
+	{
+		S = __NFUN_128__(S, 15);
+	}
+	ReplaceText(S, " ", "_");
+	ReplaceText(S, "~", "_");
+	ReplaceText(S, "?", "_");
+	ReplaceText(S, ",", "_");
+	ReplaceText(S, "#", "_");
+	ReplaceText(S, "/", "_");
+	S = __NFUN_238__(S);
+	// End:0xC8
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		Level.Game.ChangeName(self, S, false);
+	}
+	return;
+}
+
+exec event SetProgressTime(float t)
+{
+	ProgressTimeOut = __NFUN_174__(t, Level.TimeSeconds);
+	return;
 }
 
 function Restart()
 {
-	Super.Restart();
-	ServerTimeStamp = 0;
-	TimeMargin = 0;
+	super.Restart();
+	ServerTimeStamp = 0.0000000;
+	TimeMargin = 0.0000000;
 	EnterStartState();
 	SetViewTarget(Pawn);
 	bBehindView = Pawn.PointOfView();
-	ClientRestart();
+	ClientReStart();
+	return;
 }
 
 function EnterStartState()
 {
 	local name NewState;
 
-	if ( Pawn.PhysicsVolume.bWaterVolume )
+	// End:0x6A
+	if(Pawn.PhysicsVolume.bWaterVolume)
 	{
-		if ( Pawn.HeadVolume.bWaterVolume )
+		// End:0x53
+		if(Pawn.HeadVolume.bWaterVolume)
+		{
 			Pawn.BreathTime = Pawn.UnderWaterTime;
-		NewState = Pawn.WaterMovementState;
+		}
+		NewState = Pawn.WaterMovementState;		
 	}
-	else  
-    NewState = Pawn.LandMovementState;
-
-	if ( IsInState(NewState) )
-		BeginState();
 	else
-		GotoState(NewState);
+	{
+		NewState = Pawn.LandMovementState;
+	}
+	// End:0x92
+	if(__NFUN_281__(NewState))
+	{
+		BeginState();		
+	}
+	else
+	{
+		__NFUN_113__(NewState);
+	}
+	return;
 }
 
-function ClientRestart()
+function ClientReStart()
 {
-	if ( Pawn == None )
+	// End:0x14
+	if(__NFUN_114__(Pawn, none))
 	{
-		GotoState('WaitingForPawn');
+		__NFUN_113__('WaitingForPawn');
 		return;
 	}
-	Pawn.ClientRestart();
+	Pawn.ClientReStart();
 	SetViewTarget(Pawn);
 	bBehindView = Pawn.PointOfView();
-	EnterStartState();	
+	EnterStartState();
+	return;
 }
 
-exec function BehindView( Bool B )
+exec function BehindView(bool B)
 {
-    // R6CODE
-    if ( !CheatManager.CanExec() )
-        return;
-
+	// End:0x16
+	if(__NFUN_129__(CheatManager.CanExec()))
+	{
+		return;
+	}
 	bBehindView = B;
 	ClientSetBehindView(bBehindView);
-}
-
-//=============================================================================
-// functions.
-
-// Just changed to pendingWeapon
-function ChangedWeapon()
-{
-/*R6CHANGEWEAPONSYSTEM
-	if ( Pawn.PendingWeapon != None )
-		Pawn.PendingWeapon.SetHand(Handedness);
-*/
+	return;
 }
 
 event TravelPostAccept()
 {
-	if ( Pawn.Health <= 0 )
-		Pawn.Health = Pawn.Default.Health;
+	// End:0x31
+	if(__NFUN_152__(Pawn.Health, 0))
+	{
+		Pawn.Health = Pawn.default.Health;
+	}
+	return;
 }
 
-event PlayerTick( float DeltaTime )
+event PlayerTick(float DeltaTime)
 {
 	PlayerInput.PlayerInput(DeltaTime);
-	if ( bUpdatePosition )
+	// End:0x23
+	if(bUpdatePosition)
+	{
 		ClientUpdatePosition();
-
+	}
 	PlayerMove(DeltaTime);
+	return;
 }
 
-function PlayerMove(float DeltaTime);
-
-//
-/* AdjustAim()
-Calls this version for player aiming help.
-Aimerror not used in this version.
-Only adjusts aiming at pawns
-*/
-/*R6CHANGEWEAPONSYSTEM
-function rotator AdjustAim(Ammunition FiredAmmunition, vector projStart, int aimerror)
+function PlayerMove(float DeltaTime)
 {
-	local vector FireDir, AimSpot, HitNormal, HitLocation, OldAim, AimOffset;
-	local actor BestTarget;
-	local float bestAim, bestDist, projspeed;
-	local actor HitActor;
-	local bool bNoZAdjust, bLeading;
-	local rotator AimRot;
-
-	FireDir = vector(Rotation);
-	if ( FiredAmmunition.bInstantHit )
-		HitActor = Trace(HitLocation, HitNormal, projStart + 10000 * FireDir, projStart, true);
-	else 
-		HitActor = Trace(HitLocation, HitNormal, projStart + 4000 * FireDir, projStart, true);
-	if ( (HitActor != None) && HitActor.bProjTarget )
-	{
-		FiredAmmunition.WarnTarget(Target,Pawn,FireDir);
-		BestTarget = HitActor;
-		bNoZAdjust = true;
-		OldAim = HitLocation;
-		BestDist = VSize(BestTarget.Location - Pawn.Location);
-	}
-	else
-	{
-		// adjust aim based on FOV
-		bestAim = 0.95;
-		if ( AimingHelp == 1 )
-		{
-			bestAim = 0.93;
-			if ( FiredAmmunition.bInstantHit )
-				bestAim = 0.97; 
-			if ( FOVAngle < DefaultFOV - 8 )
-				bestAim = 0.99;
-		}
-		else
-		{
-			if ( FiredAmmunition.bInstantHit )
-				bestAim = 0.98; 
-			if ( FOVAngle != DefaultFOV )
-				bestAim = 0.995;
-		}
-		BestTarget = PickTarget(bestAim, bestDist, FireDir, projStart);
-		if ( BestTarget == None )
-		{
-			if (bBehindView)
-				return Pawn.Rotation;
-			else
-			return Rotation;
-		}
-		FiredAmmunition.WarnTarget(Target,Pawn,FireDir);
-		OldAim = projStart + FireDir * bestDist;
-	}
-	if ( AimingHelp == 0 )
-	{
-		if (bBehindView)
-			return Pawn.Rotation;
-		else
-		return Rotation;
-	}
-
-	// aim at target - help with leading also
-	if ( !FiredAmmunition.bInstantHit )
-	{
-		projspeed = FiredAmmunition.ProjectileClass.default.speed;
-		BestDist = vsize(BestTarget.Location + BestTarget.Velocity * FMin(2, 0.02 + BestDist/projSpeed) - projStart); 
-		bLeading = true;
-		FireDir = BestTarget.Location + BestTarget.Velocity * FMin(2, 0.02 + BestDist/projSpeed) - projStart;
-		AimSpot = projStart + bestDist * Normal(FireDir);
-		// if splash damage weapon, try aiming at feet - trace down to find floor
-		if ( FiredAmmunition.bTrySplash 
-			&& ((BestTarget.Velocity != vect(0,0,0)) || (BestDist > 1500)) )
-		{
-			HitActor = Trace(HitLocation, HitNormal, AimSpot - BestTarget.CollisionHeight * vect(0,0,2), AimSpot, false);
-			if ( (HitActor != None)
-				&& FastTrace(HitLocation + vect(0,0,4),projstart) )
-				return rotator(HitLocation + vect(0,0,6) - projStart);
-		}
-	}
-	else
-	{
-		FireDir = BestTarget.Location - projStart;
-		AimSpot = projStart + bestDist * Normal(FireDir);
-	}
-	AimOffset = AimSpot - OldAim;
-
-	// adjust Z of shooter if necessary
-	if ( bNoZAdjust || (bLeading && (Abs(AimOffset.Z) < BestTarget.CollisionHeight)) )
-		AimSpot.Z = OldAim.Z;
-	else if ( AimOffset.Z < 0 )
-		AimSpot.Z = BestTarget.Location.Z + 0.4 * BestTarget.CollisionHeight;
-	else
-		AimSpot.Z = BestTarget.Location.Z - 0.7 * BestTarget.CollisionHeight;
-
-	if ( !bLeading )
-	{
-		// if not leading, add slight random error ( significant at long distances )
-		if ( !bNoZAdjust )
-		{
-			AimRot = rotator(AimSpot - projStart);
-			if ( FOVAngle < DefaultFOV - 8 )
-				AimRot.Yaw = AimRot.Yaw + 200 - Rand(400);
-			else
-				AimRot.Yaw = AimRot.Yaw + 375 - Rand(750);
-			return AimRot;
-		}	
-	}
-	else if ( !FastTrace(projStart + 0.9 * bestDist * Normal(FireDir), projStart) )
-	{
-		FireDir = BestTarget.Location - projStart;
-		AimSpot = projStart + bestDist * Normal(FireDir);
-	}
-		
-	return rotator(AimSpot - projStart);
+	return;
 }
-*/
 
-function bool NotifyLanded(vector HitNormal)
+function bool NotifyLanded(Vector HitNormal)
 {
 	return bUpdating;
+	return;
 }
 
-function eAttitude AttitudeTo(Pawn Other)
+function Controller.EAttitude AttitudeTo(Pawn Other)
 {
-	if ( Other.Controller == None )
-		return ATTITUDE_Ignore;	
-	if ( Other.IsPlayerPawn() )
-		return AttitudeToPlayer;
-	return Other.Controller.AttitudeToPlayer;
-}
-
-//=============================================================================
-// Player Control
-
-// Player view.
-// Compute the rendering viewpoint for the player.
-//
-
-function AdjustView(float DeltaTime )
-{
-	// teleporters affect your FOV, so adjust it back down
-	if ( FOVAngle != DesiredFOV )
+	// End:0x17
+	if(__NFUN_114__(Other.Controller, none))
 	{
-		if ( FOVAngle > DesiredFOV )
-			FOVAngle = FOVAngle - FMax(7, 0.9 * DeltaTime * (FOVAngle - DesiredFOV)); 
-		else 
-			FOVAngle = FOVAngle - FMin(-7, 0.9 * DeltaTime * (FOVAngle - DesiredFOV)); 
-		if ( Abs(FOVAngle - DesiredFOV) <= 10 )
-			FOVAngle = DesiredFOV;
+		return 4;
 	}
-
-	// adjust FOV for weapon zooming
-	if ( bZooming )
-	{	
-		ZoomLevel += DeltaTime * 1.0;
-		if (ZoomLevel > 0.9)
-			ZoomLevel = 0.9;
-		DesiredFOV = FClamp(90.0 - (ZoomLevel * 88.0), 1, 170);
-	} 
+	// End:0x2F
+	if(Other.IsPlayerPawn())
+	{
+		return AttitudeToPlayer;
+	}
+	return Other.Controller.AttitudeToPlayer;
+	return;
 }
 
-function CalcBehindView(out vector CameraLocation, out rotator CameraRotation, float Dist)
+function AdjustView(float DeltaTime)
 {
-	local vector View,HitLocation,HitNormal;
+	// End:0x9F
+	if(__NFUN_181__(FovAngle, DesiredFOV))
+	{
+		// End:0x4F
+		if(__NFUN_177__(FovAngle, DesiredFOV))
+		{
+			FovAngle = __NFUN_175__(FovAngle, __NFUN_245__(7.0000000, __NFUN_171__(__NFUN_171__(0.9000000, DeltaTime), __NFUN_175__(FovAngle, DesiredFOV))));			
+		}
+		else
+		{
+			FovAngle = __NFUN_175__(FovAngle, __NFUN_244__(-7.0000000, __NFUN_171__(__NFUN_171__(0.9000000, DeltaTime), __NFUN_175__(FovAngle, DesiredFOV))));
+		}
+		// End:0x9F
+		if(__NFUN_178__(__NFUN_186__(__NFUN_175__(FovAngle, DesiredFOV)), float(10)))
+		{
+			FovAngle = DesiredFOV;
+		}
+	}
+	// End:0xFA
+	if(bZooming)
+	{
+		__NFUN_184__(ZoomLevel, __NFUN_171__(DeltaTime, 1.0000000));
+		// End:0xD5
+		if(__NFUN_177__(ZoomLevel, 0.9000000))
+		{
+			ZoomLevel = 0.9000000;
+		}
+		DesiredFOV = __NFUN_246__(__NFUN_175__(90.0000000, __NFUN_171__(ZoomLevel, 88.0000000)), 1.0000000, 170.0000000);
+	}
+	return;
+}
+
+function CalcBehindView(out Vector CameraLocation, out Rotator CameraRotation, float Dist)
+{
+	local Vector View, HitLocation, HitNormal;
 	local float ViewDist;
 
 	CameraRotation = Rotation;
-	View = vect(1,0,0) >> CameraRotation;
-	if( Trace( HitLocation, HitNormal, CameraLocation - (Dist + 30) * vector(CameraRotation), CameraLocation ) != None )
-		ViewDist = FMin( (CameraLocation - HitLocation) Dot View, Dist );
+	View = __NFUN_276__(vect(1.0000000, 0.0000000, 0.0000000), CameraRotation);
+	// End:0x7C
+	if(__NFUN_119__(__NFUN_277__(HitLocation, HitNormal, __NFUN_216__(CameraLocation, __NFUN_213__(__NFUN_174__(Dist, float(30)), Vector(CameraRotation))), CameraLocation), none))
+	{
+		ViewDist = __NFUN_244__(__NFUN_219__(__NFUN_216__(CameraLocation, HitLocation), View), Dist);		
+	}
 	else
+	{
 		ViewDist = Dist;
-	CameraLocation -= (ViewDist - 30) * View; 
+	}
+	__NFUN_224__(CameraLocation, __NFUN_213__(__NFUN_175__(ViewDist, float(30)), View));
+	return;
 }
 
-function CalcFirstPersonView( out vector CameraLocation, out rotator CameraRotation )
+function CalcFirstPersonView(out Vector CameraLocation, out Rotator CameraRotation)
 {
-	// First-person view.
 	CameraRotation = Rotation;
-	CameraLocation = CameraLocation + Pawn.EyePosition() + ShakeOffset;
+	CameraLocation = __NFUN_215__(__NFUN_215__(CameraLocation, Pawn.EyePosition()), ShakeOffset);
+	return;
 }
 
-event AddCameraEffect(CameraEffect NewEffect,optional bool RemoveExisting)
+event AddCameraEffect(CameraEffect NewEffect, optional bool RemoveExisting)
 {
+	// End:0x14
 	if(RemoveExisting)
+	{
 		RemoveCameraEffect(NewEffect);
-
-	CameraEffects.Length = CameraEffects.Length + 1;
-	CameraEffects[CameraEffects.Length - 1] = NewEffect;
+	}
+	CameraEffects.Length = __NFUN_146__(CameraEffects.Length, 1);
+	CameraEffects[__NFUN_147__(CameraEffects.Length, 1)] = NewEffect;
+	return;
 }
 
 event RemoveCameraEffect(CameraEffect ExEffect)
 {
-	local int	EffectIndex;
+	local int EffectIndex;
 
-	for(EffectIndex = 0;EffectIndex < CameraEffects.Length;EffectIndex++)
-		if(CameraEffects[EffectIndex] == ExEffect)
+	EffectIndex = 0;
+	J0x07:
+
+	// End:0x44 [Loop If]
+	if(__NFUN_150__(EffectIndex, CameraEffects.Length))
+	{
+		// End:0x3A
+		if(__NFUN_114__(CameraEffects[EffectIndex], ExEffect))
 		{
-			CameraEffects.Remove(EffectIndex,1);
+			CameraEffects.Remove(EffectIndex, 1);
 			return;
 		}
+		__NFUN_165__(EffectIndex);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
-/* R6CODE
-exec function CreateCameraEffect(class<CameraEffect> EffectClass)
+function Rotator GetViewRotation()
 {
-	AddCameraEffect(new EffectClass);
-}*/
-
-function rotator GetViewRotation()
-{
-	if ( bBehindView && (Pawn != None) )
+	// End:0x25
+	if(__NFUN_130__(bBehindView, __NFUN_119__(Pawn, none)))
+	{
 		return Pawn.Rotation;
+	}
 	return Rotation;
+	return;
 }
 
-event PlayerCalcView(out actor ViewActor, out vector CameraLocation, out rotator CameraRotation )
+event PlayerCalcView(out Actor ViewActor, out Vector CameraLocation, out Rotator CameraRotation)
 {
 	local Pawn PTarget;
 
-	if ( (ViewTarget == None) || ViewTarget.bDeleteMe )
+	// End:0x78
+	if(__NFUN_132__(__NFUN_114__(ViewTarget, none), ViewTarget.bDeleteMe))
 	{
-		log("No VIEWTARGET in PlayerCalcView");
-		if ( (Pawn != None) && !Pawn.bDeleteMe )
-			SetViewTarget(Pawn);
+		__NFUN_231__("No VIEWTARGET in PlayerCalcView");
+		// End:0x71
+		if(__NFUN_130__(__NFUN_119__(Pawn, none), __NFUN_129__(Pawn.bDeleteMe)))
+		{
+			SetViewTarget(Pawn);			
+		}
 		else
+		{
 			SetViewTarget(self);
+		}
 	}
-
 	ViewActor = ViewTarget;
 	CameraLocation = ViewTarget.Location;
-
-	if ( ViewTarget == Pawn )
+	// End:0xE9
+	if(__NFUN_114__(ViewTarget, Pawn))
 	{
-		if( bBehindView ) //up and behind
-			CalcBehindView(CameraLocation, CameraRotation, CameraDist * Pawn.Default.CollisionRadius);
-		else
-			CalcFirstPersonView( CameraLocation, CameraRotation );
-		return;
-	}
-	if ( ViewTarget == self )
-	{
-		if ( bCameraPositionLocked )
-			CameraRotation = CheatManager.LockedRotation;
-		else
-			CameraRotation = Rotation;
-		return;
-	}
-//#ifdef R6CODE
-	else if ( ViewTarget != none )
-	{
-		if( bBehindView ) //up and behind
-			CalcBehindView( CameraLocation, CameraRotation, CameraDist * Pawn(ViewTarget).Default.CollisionRadius );
-		else
-			CalcFirstPersonView( CameraLocation, CameraRotation );
-		return;
-	}
-//#endif
-
-	CameraRotation = ViewTarget.Rotation;
-	PTarget = Pawn(ViewTarget);
-	if ( PTarget != None )
-	{
-		if ( Level.NetMode == NM_Client )
+		// End:0xD7
+		if(bBehindView)
 		{
-			if ( PTarget.IsPlayerPawn() )
-			{
-				PTarget.SetViewRotation(TargetViewRotation);
-				CameraRotation = TargetViewRotation;
-			}
-//R6CODE			PTarget.EyeHeight = TargetEyeHeight;
-/*R6CHANGEWEAPONSYSTEM
-			if ( PTarget.Weapon != None )
-				PTarget.Weapon.PlayerViewOffset = TargetWeaponViewOffset;
-*/
+			CalcBehindView(CameraLocation, CameraRotation, __NFUN_171__(CameraDist, Pawn.default.CollisionRadius));			
 		}
-		else if ( PTarget.IsPlayerPawn() )
-			CameraRotation = PTarget.GetViewRotation();
-		if ( !bBehindView )
-			CameraLocation += PTarget.EyePosition();
-	}
-	if ( bBehindView )
-	{
-		CameraLocation = CameraLocation + (ViewTarget.Default.CollisionHeight - ViewTarget.CollisionHeight) * vect(0,0,1);
-		CalcBehindView(CameraLocation, CameraRotation, CameraDist * ViewTarget.Default.CollisionRadius);
-	}
-}
-
-function CheckShake(out float MaxOffset, out float Offset, out float Rate, out float Time)
-{
-	if ( abs(Offset) < abs(MaxOffset) )
-		return;
-
-	Offset = MaxOffset;
-	if ( Time > 1 )
-	{
-		if ( Time * abs(MaxOffset/Rate) <= 1 )
-			MaxOffset = MaxOffset * (1/Time - 1);
 		else
-			MaxOffset *= -1;
-		Time -= 1;
-		Rate *= -1;
+		{
+			CalcFirstPersonView(CameraLocation, CameraRotation);
+		}
+		return;
+	}
+	// End:0x124
+	if(__NFUN_114__(ViewTarget, self))
+	{
+		// End:0x114
+		if(bCameraPositionLocked)
+		{
+			CameraRotation = CheatManager.LockedRotation;			
+		}
+		else
+		{
+			CameraRotation = Rotation;
+		}
+		return;		
 	}
 	else
 	{
-		MaxOffset = 0;
-		Offset = 0;
-		Rate = 0;
+		// End:0x177
+		if(__NFUN_119__(ViewTarget, none))
+		{
+			// End:0x165
+			if(bBehindView)
+			{
+				CalcBehindView(CameraLocation, CameraRotation, __NFUN_171__(CameraDist, Pawn(ViewTarget).default.CollisionRadius));				
+			}
+			else
+			{
+				CalcFirstPersonView(CameraLocation, CameraRotation);
+			}
+			return;
+		}
 	}
+	CameraRotation = ViewTarget.Rotation;
+	PTarget = Pawn(ViewTarget);
+	// End:0x23B
+	if(__NFUN_119__(PTarget, none))
+	{
+		// End:0x1F3
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		{
+			// End:0x1F0
+			if(PTarget.IsPlayerPawn())
+			{
+				PTarget.SetViewRotation(TargetViewRotation);
+				CameraRotation = TargetViewRotation;
+			}			
+		}
+		else
+		{
+			// End:0x21A
+			if(PTarget.IsPlayerPawn())
+			{
+				CameraRotation = PTarget.GetViewRotation();
+			}
+		}
+		// End:0x23B
+		if(__NFUN_129__(bBehindView))
+		{
+			__NFUN_223__(CameraLocation, PTarget.EyePosition());
+		}
+	}
+	// End:0x2A3
+	if(bBehindView)
+	{
+		CameraLocation = __NFUN_215__(CameraLocation, __NFUN_213__(__NFUN_175__(ViewTarget.default.CollisionHeight, ViewTarget.CollisionHeight), vect(0.0000000, 0.0000000, 1.0000000)));
+		CalcBehindView(CameraLocation, CameraRotation, __NFUN_171__(CameraDist, ViewTarget.default.CollisionRadius));
+	}
+	return;
+}
+
+function CheckShake(out float MaxOffset, out float offset, out float Rate, out float Time)
+{
+	// End:0x15
+	if(__NFUN_176__(__NFUN_186__(offset), __NFUN_186__(MaxOffset)))
+	{
+		return;
+	}
+	offset = MaxOffset;
+	// End:0x92
+	if(__NFUN_177__(Time, float(1)))
+	{
+		// End:0x69
+		if(__NFUN_178__(__NFUN_171__(Time, __NFUN_186__(__NFUN_172__(MaxOffset, Rate))), float(1)))
+		{
+			MaxOffset = __NFUN_171__(MaxOffset, __NFUN_175__(__NFUN_172__(float(1), Time), float(1)));			
+		}
+		else
+		{
+			__NFUN_182__(MaxOffset, float(-1));
+		}
+		__NFUN_185__(Time, float(1));
+		__NFUN_182__(Rate, float(-1));		
+	}
+	else
+	{
+		MaxOffset = 0.0000000;
+		offset = 0.0000000;
+		Rate = 0.0000000;
+	}
+	return;
 }
 
 function ViewShake(float DeltaTime)
@@ -2783,1445 +2380,199 @@ function ViewShake(float DeltaTime)
 	local Rotator ViewRotation;
 	local float FRoll;
 
-	if ( ShakeOffsetRate != vect(0,0,0) )
+	// End:0xF8
+	if(__NFUN_218__(ShakeOffsetRate, vect(0.0000000, 0.0000000, 0.0000000)))
 	{
-		// modify shake offset
-		ShakeOffset.X += DeltaTime * ShakeOffsetRate.X;
+		__NFUN_184__(ShakeOffset.X, __NFUN_171__(DeltaTime, ShakeOffsetRate.X));
 		CheckShake(MaxShakeOffset.X, ShakeOffset.X, ShakeOffsetRate.X, ShakeOffsetTime.X);
-		
-		ShakeOffset.Y += DeltaTime * ShakeOffsetRate.Y;
+		__NFUN_184__(ShakeOffset.Y, __NFUN_171__(DeltaTime, ShakeOffsetRate.Y));
 		CheckShake(MaxShakeOffset.Y, ShakeOffset.Y, ShakeOffsetRate.Y, ShakeOffsetTime.Y);
-		
-		ShakeOffset.Z += DeltaTime * ShakeOffsetRate.Z;
+		__NFUN_184__(ShakeOffset.Z, __NFUN_171__(DeltaTime, ShakeOffsetRate.Z));
 		CheckShake(MaxShakeOffset.Z, ShakeOffset.Z, ShakeOffsetRate.Z, ShakeOffsetTime.Z);
-	}				
-
-	ViewRotation = Rotation;
-
-	if ( ShakeRollRate != 0 )
-	{
-		ViewRotation.Roll = ((ViewRotation.Roll & 65535) + ShakeRollRate * DeltaTime) & 65535;
-		if ( ViewRotation.Roll > 32768 )
-			ViewRotation.Roll -= 65536;
-		FRoll = ViewRotation.Roll;
-		CheckShake(MaxShakeRoll, FRoll, ShakeRollRate, ShakeRollTime);
-		ViewRotation.Roll = FRoll;
 	}
-	else if ( bZeroRoll )
-		ViewRotation.Roll = 0;
-	SetRotation(ViewRotation);
+	ViewRotation = Rotation;
+	// End:0x1AB
+	if(__NFUN_181__(ShakeRollRate, float(0)))
+	{
+		ViewRotation.Roll = __NFUN_156__(int(__NFUN_174__(float(__NFUN_156__(ViewRotation.Roll, 65535)), __NFUN_171__(ShakeRollRate, DeltaTime))), 65535);
+		// End:0x16A
+		if(__NFUN_151__(ViewRotation.Roll, 32768))
+		{
+			__NFUN_162__(ViewRotation.Roll, 65536);
+		}
+		FRoll = float(ViewRotation.Roll);
+		CheckShake(MaxShakeRoll, FRoll, ShakeRollRate, ShakeRollTime);
+		ViewRotation.Roll = int(FRoll);		
+	}
+	else
+	{
+		// End:0x1C0
+		if(bZeroRoll)
+		{
+			ViewRotation.Roll = 0;
+		}
+	}
+	__NFUN_299__(ViewRotation);
+	return;
 }
 
-function bool TurnTowardNearestEnemy();
+function bool TurnTowardNearestEnemy()
+{
+	return;
+}
 
 function TurnAround()
 {
-	if ( !bSetTurnRot )
+	// End:0x2F
+	if(__NFUN_129__(bSetTurnRot))
 	{
 		TurnRot180 = Rotation;
-		TurnRot180.Yaw += 32768;
+		__NFUN_161__(TurnRot180.Yaw, 32768);
 		bSetTurnRot = true;
 	}
-	
 	DesiredRotation = TurnRot180;
-	bRotateToDesired = ( DesiredRotation.Yaw != Rotation.Yaw );
+	bRotateToDesired = __NFUN_155__(DesiredRotation.Yaw, Rotation.Yaw);
+	return;
 }
-					
+
 function UpdateRotation(float DeltaTime, float maxPitch)
 {
-	local rotator newRotation, ViewRotation;
+	local Rotator NewRotation, ViewRotation;
 
-	if ( bInterpolating || ((Pawn != None) && Pawn.bInterpolating) )
+	// End:0x37
+	if(__NFUN_132__(bInterpolating, __NFUN_130__(__NFUN_119__(Pawn, none), Pawn.bInterpolating)))
 	{
-		ViewShake(deltaTime);
+		ViewShake(DeltaTime);
 		return;
 	}
 	ViewRotation = Rotation;
-	DesiredRotation = ViewRotation; //save old rotation
-	if ( bTurnToNearest != 0 )
-		TurnTowardNearestEnemy();
-	else if ( bTurn180 != 0 )
-		TurnAround();
+	DesiredRotation = ViewRotation;
+	// End:0x63
+	if(__NFUN_155__(int(bTurnToNearest), 0))
+	{
+		TurnTowardNearestEnemy();		
+	}
 	else
 	{
-		TurnTarget = None;
-		bRotateToDesired = false;
-		bSetTurnRot = false;
-		ViewRotation.Yaw += 32.0 * DeltaTime * aTurn;
-		ViewRotation.Pitch += 32.0 * DeltaTime * aLookUp;
-	}
-	ViewRotation.Pitch = ViewRotation.Pitch & 65535;
-	If ((ViewRotation.Pitch > 18000) && (ViewRotation.Pitch < 49152))
-	{
-		If (aLookUp > 0) 
-			ViewRotation.Pitch = 18000;
+		// End:0x79
+		if(__NFUN_155__(int(bTurn180), 0))
+		{
+			TurnAround();			
+		}
 		else
-			ViewRotation.Pitch = 49152;
+		{
+			TurnTarget = none;
+			bRotateToDesired = false;
+			bSetTurnRot = false;
+			__NFUN_161__(ViewRotation.Yaw, int(__NFUN_171__(__NFUN_171__(32.0000000, DeltaTime), aTurn)));
+			__NFUN_161__(ViewRotation.Pitch, int(__NFUN_171__(__NFUN_171__(32.0000000, DeltaTime), aLookUp)));
+		}
 	}
-
-	SetRotation(ViewRotation);
-
-	ViewShake(deltaTime);
-	ViewFlash(deltaTime);
-		
+	ViewRotation.Pitch = __NFUN_156__(ViewRotation.Pitch, 65535);
+	// End:0x148
+	if(__NFUN_130__(__NFUN_151__(ViewRotation.Pitch, 18000), __NFUN_150__(ViewRotation.Pitch, 49152)))
+	{
+		// End:0x138
+		if(__NFUN_177__(aLookUp, float(0)))
+		{
+			ViewRotation.Pitch = 18000;			
+		}
+		else
+		{
+			ViewRotation.Pitch = 49152;
+		}
+	}
+	__NFUN_299__(ViewRotation);
+	ViewShake(DeltaTime);
+	ViewFlash(DeltaTime);
 	NewRotation = ViewRotation;
 	NewRotation.Roll = Rotation.Roll;
-
-	if ( !bRotateToDesired && (Pawn != None) && (!bFreeCamera || !bBehindView) )
-		Pawn.FaceRotation(NewRotation, deltatime);
+	// End:0x1D1
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bRotateToDesired), __NFUN_119__(Pawn, none)), __NFUN_132__(__NFUN_129__(bFreeCamera), __NFUN_129__(bBehindView))))
+	{
+		Pawn.FaceRotation(NewRotation, DeltaTime);
+	}
+	return;
 }
 
 function ClearDoubleClick()
 {
-	if (PlayerInput != None)
-		PlayerInput.DoubleClickTimer = 0.0;
+	// End:0x1F
+	if(__NFUN_119__(PlayerInput, none))
+	{
+		PlayerInput.DoubleClickTimer = 0.0000000;
+	}
+	return;
 }
-
-// Player movement.
-// Player Standing, walking, running, falling.
-state PlayerWalking
-{
-ignores SeePlayer, HearNoise, Bump;
-
-	function bool NotifyPhysicsVolumeChange( PhysicsVolume NewVolume )
-	{
-		if ( NewVolume.bWaterVolume )
-			GotoState(Pawn.WaterMovementState);
-		return false;
-	}
-
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
-	{
-		local vector OldAccel;
-		local bool OldCrouch;
-
-		if(Pawn == none)
-			return;
-		
-		OldAccel = Pawn.Acceleration;
-		Pawn.Acceleration = NewAccel;
-		if ( bPressedJump )
-			Pawn.DoJump(bUpdating);
-		if ( Pawn.Physics != PHYS_Falling )
-		{
-			OldCrouch = Pawn.bWantsToCrouch;
-			if (bDuck == 0)
-				Pawn.ShouldCrouch(false);
-			else if ( Pawn.bCanCrouch )
-				Pawn.ShouldCrouch(true);
-		}
-	}
-
-	function PlayerMove( float DeltaTime )
-	{
-		local vector X,Y,Z, NewAccel;
-		local eDoubleClickDir DoubleClickMove;
-		local rotator OldRotation, ViewRotation;
-		local bool	bSaveJump;
-
-		GetAxes(Pawn.Rotation,X,Y,Z);
-
-		// Update acceleration.
-		NewAccel = aForward*X + aStrafe*Y; 
-		NewAccel.Z = 0;
-		if ( VSize(NewAccel) < 1.0 )
-			NewAccel = vect(0,0,0);
-		DoubleClickMove = PlayerInput.CheckForDoubleClickMove(DeltaTime);
-		
-		GroundPitch = 0;	
-		ViewRotation = Rotation;
-//#ifndef R6CODE
-//		if ( Pawn.Physics == PHYS_Walking )
-//		{
-//			// tell pawn about any direction changes to give it a chance to play appropriate animation
-//			//if walking, look up/down stairs - unless player is rotating view
-//			if ( (bLook == 0) 
-//				&& (((Pawn.Acceleration != Vect(0,0,0)) && bAlwaysLevel && bSnapToLevel) || !bKeyboardLook) )
-//			{
-//				if ( bLookUpStairs || bSnapToLevel )
-//				{
-//					GroundPitch = FindStairRotation(deltaTime);
-//					ViewRotation.Pitch = GroundPitch;
-//				}
-//				else if ( bCenterView )
-//				{
-//					ViewRotation.Pitch = ViewRotation.Pitch & 65535;
-//					if (ViewRotation.Pitch > 32768)
-//						ViewRotation.Pitch -= 65536;
-//					ViewRotation.Pitch = ViewRotation.Pitch * (1 - 12 * FMin(0.0833, deltaTime));
-//					if ( Abs(ViewRotation.Pitch) < 1000 )
-//						ViewRotation.Pitch = 0;	
-//				}
-//			}
-//		}	
-//		else
-//#else
-	    if ( Pawn.Physics != PHYS_Walking )
-//#endif // #ifndef R6CODE
-		{
-			if ( !bKeyboardLook && (bLook == 0) && bCenterView )
-			{
-				ViewRotation.Pitch = ViewRotation.Pitch & 65535;
-				if (ViewRotation.Pitch > 32768)
-					ViewRotation.Pitch -= 65536;
-				ViewRotation.Pitch = ViewRotation.Pitch * (1 - 12 * FMin(0.0833, deltaTime));
-				if ( Abs(ViewRotation.Pitch) < 1000 )
-					ViewRotation.Pitch = 0;	
-			}
-		}
-		Pawn.CheckBob(DeltaTime, Y);
-
-		// Update rotation.
-		SetRotation(ViewRotation);
-		OldRotation = Rotation;
-		UpdateRotation(DeltaTime, 1);
-
-		if ( bPressedJump && Pawn.CannotJumpNow() )
-		{
-			bSaveJump = true;
-			bPressedJump = false;
-		}
-		else
-			bSaveJump = false;
-
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, OldRotation - Rotation);
-		else
-			ProcessMove(DeltaTime, NewAccel, DoubleClickMove, OldRotation - Rotation);
-		bPressedJump = bSaveJump;
-	}
-
-	function BeginState()
-	{
-
-		if ( Pawn.Mesh == None )
-			Pawn.SetMesh();
-		DoubleClickDir = DCLICK_None;
-		Pawn.ShouldCrouch(false);
-		bPressedJump = false;
-		if (Pawn.Physics != PHYS_Falling && Pawn.Physics != PHYS_Karma) // FIXME HACK!!!
-			Pawn.SetPhysics(PHYS_Walking);
-		GroundPitch = 0;
-	}
-	
-	function EndState()
-	{
-
-		GroundPitch = 0;
-		if ( Pawn != None && bDuck==0 )
-		{
-			Pawn.ShouldCrouch(false);
-	}
-}
-}
-
-// player is climbing ladder
-state PlayerClimbing
-{
-ignores SeePlayer, HearNoise, Bump;
-
-	function bool NotifyPhysicsVolumeChange( PhysicsVolume NewVolume )
-	{
-		if ( NewVolume.bWaterVolume )
-			GotoState(Pawn.WaterMovementState);
-		else
-		GotoState(Pawn.LandMovementState);
-		return false;
-	}
-
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
-	{
-		local vector OldAccel;
-
-		OldAccel = Pawn.Acceleration;
-		Pawn.Acceleration = NewAccel;
-
-		if ( bPressedJump )
-		{
-			Pawn.DoJump(bUpdating);
-			if ( Pawn.Physics == PHYS_Falling )
-				GotoState('PlayerWalking');
-		}
-	}
-
-	function PlayerMove( float DeltaTime )
-	{
-		local vector X,Y,Z, NewAccel;
-		local eDoubleClickDir DoubleClickMove;
-		local rotator OldRotation, ViewRotation;
-		local bool	bSaveJump;
-
-		GetAxes(Rotation,X,Y,Z);
-
-		// Update acceleration.
-		if ( Pawn.OnLadder != None )
-			NewAccel = aForward*Pawn.OnLadder.ClimbDir; 
-		else
-			NewAccel = aForward*X + aStrafe*Y;
-		if ( VSize(NewAccel) < 1.0 )
-			NewAccel = vect(0,0,0);
-		
-//#ifdef R6CODE - rbrek 12 may 2002
-		ViewRotation = Pawn.Rotation;
-//		ViewRotation = Rotation;
-//#endif
-
-		// Update rotation.
-		SetRotation(ViewRotation);
-		OldRotation = Rotation;
-		UpdateRotation(DeltaTime, 1);
-
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, OldRotation - Rotation);
-		else
-			ProcessMove(DeltaTime, NewAccel, DoubleClickMove, OldRotation - Rotation);
-		bPressedJump = bSaveJump;
-	}
-
-	function BeginState()
-	{
-		Pawn.ShouldCrouch(false);
-		bPressedJump = false;
-	}
-	
-	function EndState()
-	{
-		if ( Pawn != None )
-			Pawn.ShouldCrouch(false);
-	}
-}
-
-//#ifndef R6CODE
-// Player movement.
-// Player Driving a Karma vehicle.
-//state PlayerDriving
-//{
-//ignores SeePlayer, HearNoise, Bump;
-//
-//    event PlayerCalcView(out actor ViewActor, out vector CameraLocation, out rotator CameraRotation )
-//    {
-//        local vector View, CamLookAt, HitLocation, HitNormal;
-//        local plane CamView;
-//		local KVehicle DrivenVehicle;
-//
-//	    ViewActor = ViewTarget;
-//	    CameraLocation = ViewTarget.Location;
-//
-//	    if ( ViewTarget == Pawn )
-//	    {
-//		    if( !bBehindView ) // not drawing car
-//            {
-//    		    CalcBehindView(CameraLocation, CameraRotation, CameraDist * ViewTarget.Default.CollisionRadius);
-//            }
-//		    else // drawing car (use vehicles camera position info)
-//            {
-//				DrivenVehicle = KVehicle(Pawn);
-//                CamView = DrivenVehicle.CamPos[DrivenVehicle.CamPosIndex];
-//
-//                // Only follow vehicle rotation in 'in car' view.
-//                //if(DrivenVehicle.CamPosIndex == 0)
-//	                //CameraRotation = Rotation+ViewTarget.Rotation;
-//                //else
-//	                //CameraRotation = Rotation;
-//
-//				//if(VSize(DrivenVehicle.Velocity) > 10)
-//				//	CameraRotation = Rotator(DrivenVehicle.Velocity);
-//				//else
-//					CameraRotation = Rotation;
-//
-//	            View = CamView >> ViewTarget.Rotation;
-//	            CameraLocation += View;
-//				CamLookAt = CameraLocation;
-//
-//	            View = (vect(1, 0, 0) * CamView.W) >> CameraRotation;
-//	            CameraLocation -= View;
-//				
-//				if( Trace( HitLocation, HitNormal, CameraLocation, CamLookAt, false ) != None )
-//				{
-//					CameraLocation = HitLocation;
-//				}
-//            }
-//		    return;
-//	    }
-//	    if ( ViewTarget == self )
-//	    {
-//		    CameraRotation = Rotation;
-//		    return;
-//	    }
-//	    CameraRotation = ViewTarget.Rotation;
-//	    if ( bBehindView )
-//	    {
-//		    CameraLocation = CameraLocation + (ViewTarget.Default.CollisionHeight - ViewTarget.CollisionHeight) * vect(0,0,1);
-//		    CalcBehindView(CameraLocation, CameraRotation, CameraDist * ViewTarget.Default.CollisionRadius);
-//	    }
-//    }
-//
-//	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
-//	{
-//
-//	}
-//
-//    exec function Fire(optional float F)
-//    {
-//
-//    }
-//
-//    exec function AltFire(optional float F)
-//    {
-//		local KVehicle DrivenVehicle;
-//		DrivenVehicle = KVehicle(Pawn);
-//
-//		if(DrivenVehicle != None)
-//			DrivenVehicle.bLookSteer = !DrivenVehicle.bLookSteer;
-//    }
-//
-//	function PlayerMove( float DeltaTime )
-//	{
-//		local KVehicle DrivenVehicle;
-//		local vector Right, Forward, Up, LookDir, LookDirInPlane;
-//		local float UpComp, DesYaw;
-//
-//
-//		DrivenVehicle = KVehicle(Pawn);
-//        if(DrivenVehicle == None)
-//        {
-//            log("PlayerDriving.PlayerMove: No Vehicle");
-//            return;
-//        }
-//
-//        // check for 'jump' to throw the driver out.
-//        if(bPressedJump)
-//        {
-//            GotoState('PlayerWalking');
-//            return;
-//        }
-//
-//		//log("Drive:"$aForward$" Steer:"$aStrafe);
-//
-//        if(aForward > 1)
-//        {
-//            DrivenVehicle.Throttle = 1;
-//        }
-//        else if(aForward < -1)
-//        {
-//            DrivenVehicle.Throttle = -1;
-//        }
-//        else
-//        {
-//            DrivenVehicle.Throttle = 0;
-//        }
-//
-//		// If we are using 'look steer' - take steering from current look vector.
-//		if(DrivenVehicle.bLookSteer)
-//		{
-//			GetAxes(DrivenVehicle.Rotation,Right,Forward,Up);
-//			LookDir = -1 * vector(Rotation);
-//
-//			UpComp = LookDir Dot Up;
-//
-//			//If we are looking straight up or down, don't do any steering (go straight) 
-//			if(Abs(UpComp) > 0.98f)
-//			{
-//				DrivenVehicle.Steering = 0;
-//			}
-//			else
-//			{
-//				LookDirInPlane = Normal(LookDir - (Up * UpComp));
-//
-//				DesYaw = -65535/6.2832 * Acos(FClamp(LookDirInPlane Dot Forward, -1.0, 1.0));
-//				if((LookDirInPlane Dot Right) > 0)
-//					DesYaw *= -1;
-//
-//				DrivenVehicle.Steering = FClamp(DesYaw * DrivenVehicle.LookSteerSens, -1.0, 1.0);
-//			}
-//		}
-//		// otherwise use the strafe keys for steering.
-//		// TODO: Add proper follow-cam - but what does mouse do then?
-//		else 
-//		{
-//			if(aStrafe < -1)
-//				DrivenVehicle.Steering = 1;
-//			else if(aStrafe > 1)
-//				DrivenVehicle.Steering = -1;
-//			else
-//				DrivenVehicle.Steering = 0;
-//		}
-//
-//        // update 'looking' rotation - no affect on driving
-//		UpdateRotation(DeltaTime, 2);
-//	}
-//
-//
-//	function BeginState()
-//	{
-//		SetRotation(rotator( vect(0, -1, 0) >> Pawn.Rotation ));
-//        bBehindView = true;
-//		bFreeCamera = true;
-//	}
-//	
-//	function EndState()
-//	{
-//		local KVehicle DrivenVehicle;
-//
-//		DrivenVehicle = KVehicle(Pawn);
-//        DrivenVehicle.KDriverLeave(); // execute 'Leave' event
-//		bBehindView = false;
-//		bFreeCamera = false;
-//	}
-//#endif // #ifndef R6CODE
-
-// Player movement.
-// Player walking on walls
-state PlayerSpidering
-{
-ignores SeePlayer, HearNoise, Bump;
-
-	event bool NotifyHitWall(vector HitNormal, actor HitActor)
-	{
-		Pawn.SetPhysics(PHYS_Spider);
-		Pawn.SetBase(HitActor, HitNormal);	
-		return true;
-	}
-
-	// if spider mode, update rotation based on floor					
-	function UpdateRotation(float DeltaTime, float maxPitch)
-	{
-		local rotator TempRot, ViewRotation;
-		local vector MyFloor, CrossDir, FwdDir, OldFwdDir, OldX, RealFloor;
-
-		if ( bInterpolating || Pawn.bInterpolating )
-		{
-			ViewShake(deltaTime);
-			return;
-		}
-
-		TurnTarget = None;
-		bRotateToDesired = false;
-		bSetTurnRot = false;
-
-		if ( (Pawn.Base == None) || (Pawn.Floor == vect(0,0,0)) )
-			MyFloor = vect(0,0,1);
-		else
-			MyFloor = Pawn.Floor;
-
-		if ( MyFloor != OldFloor )
-		{
-			// smoothly change floor
-			RealFloor = MyFloor;
-			MyFloor = Normal(6*DeltaTime * MyFloor + (1 - 6*DeltaTime) * OldFloor);
-			if ( (RealFloor Dot MyFloor) > 0.999 )
-				MyFloor = RealFloor;
-
-			// translate view direction
-			CrossDir = Normal(RealFloor Cross OldFloor);
-			FwdDir = CrossDir Cross MyFloor;
-			OldFwdDir = CrossDir Cross OldFloor;
-			ViewX = MyFloor * (OldFloor Dot ViewX) 
-						+ CrossDir * (CrossDir Dot ViewX) 
-						+ FwdDir * (OldFwdDir Dot ViewX);
-			ViewX = Normal(ViewX);
-			
-			ViewZ = MyFloor * (OldFloor Dot ViewZ) 
-						+ CrossDir * (CrossDir Dot ViewZ) 
-						+ FwdDir * (OldFwdDir Dot ViewZ);
-			ViewZ = Normal(ViewZ);
-			OldFloor = MyFloor;  
-			ViewY = Normal(MyFloor Cross ViewX); 
-		}
-
-		if ( (aTurn != 0) || (aLookUp != 0) )
-		{
-			// adjust Yaw based on aTurn
-			if ( aTurn != 0 )
-				ViewX = Normal(ViewX + 2 * ViewY * Sin(0.0005*DeltaTime*aTurn));
-
-			// adjust Pitch based on aLookUp
-			if ( aLookUp != 0 )
-			{
-				OldX = ViewX;
-				ViewX = Normal(ViewX + 2 * ViewZ * Sin(0.0005*DeltaTime*aLookUp));
-				ViewZ = Normal(ViewX Cross ViewY);
-
-				// bound max pitch
-				if ( (ViewZ Dot MyFloor) < 0.707   )
-				{
-					OldX = Normal(OldX - MyFloor * (MyFloor Dot OldX));
-					if ( (ViewX Dot MyFloor) > 0)
-						ViewX = Normal(OldX + MyFloor);
-					else
-						ViewX = Normal(OldX - MyFloor);
-
-					ViewZ = Normal(ViewX Cross ViewY);
-				}
-			}
-			
-			// calculate new Y axis
-			ViewY = Normal(MyFloor Cross ViewX);
-		}
-		ViewRotation =  OrthoRotation(ViewX,ViewY,ViewZ);
-		SetRotation(ViewRotation);
-		ViewShake(deltaTime);
-		ViewFlash(deltaTime);
-		Pawn.FaceRotation(ViewRotation, deltaTime );
-	}
-
-	function bool NotifyLanded(vector HitNormal)
-	{
-		Pawn.SetPhysics(PHYS_Spider);
-		return bUpdating;
-	}
-
-	function bool NotifyPhysicsVolumeChange( PhysicsVolume NewVolume )
-	{
-		if ( NewVolume.bWaterVolume )
-			GotoState(Pawn.WaterMovementState);
-		return false;
-	}
-	
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
-	{
-		local vector OldAccel;
-
-		OldAccel = Pawn.Acceleration;
-		Pawn.Acceleration = NewAccel;
-
-		if ( bPressedJump )
-			Pawn.DoJump(bUpdating);
-	}
-
-	function PlayerMove( float DeltaTime )
-	{
-		local vector NewAccel;
-		local eDoubleClickDir DoubleClickMove;
-		local rotator OldRotation, ViewRotation;
-		local bool	bSaveJump;
-
-		GroundPitch = 0;	
-		ViewRotation = Rotation;
-
-		if ( !bKeyboardLook && (bLook == 0) && bCenterView )
-		{
-			// FIXME - center view rotation based on current floor
-		}
-		Pawn.CheckBob(DeltaTime,vect(0,0,0));
-
-		// Update rotation.
-		SetRotation(ViewRotation);
-		OldRotation = Rotation;
-		UpdateRotation(DeltaTime, 1);
-
-		// Update acceleration.
-		NewAccel = aForward*Normal(ViewX - OldFloor * (OldFloor Dot ViewX)) + aStrafe*ViewY; 
-		if ( VSize(NewAccel) < 1.0 )
-			NewAccel = vect(0,0,0);
-
-		if ( bPressedJump && Pawn.CannotJumpNow() )
-		{
-			bSaveJump = true;
-			bPressedJump = false;
-		}
-		else
-			bSaveJump = false;
-
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, OldRotation - Rotation);
-		else
-			ProcessMove(DeltaTime, NewAccel, DoubleClickMove, OldRotation - Rotation);
-		bPressedJump = bSaveJump;
-	}
-
-	function BeginState()
-	{
-		local Rotator NewRot;
-
-		if ( Pawn.Mesh == None )
-			Pawn.SetMesh();
-		OldFloor = vect(0,0,1);
-		GetAxes(Rotation,ViewX,ViewY,ViewZ);
-		DoubleClickDir = DCLICK_None;
-		Pawn.ShouldCrouch(false);
-		bPressedJump = false;
-		if (Pawn.Physics != PHYS_Falling) 
-			Pawn.SetPhysics(PHYS_Spider);
-		GroundPitch = 0;
-		Pawn.bCrawler = true;
-		Pawn.SetCollisionSize(Pawn.Default.CollisionHeight,Pawn.Default.CollisionHeight);
-	}
-	
-	function EndState()
-	{
-		GroundPitch = 0;
-		if ( Pawn != None )
-		{
-			Pawn.SetCollisionSize(Pawn.Default.CollisionRadius,Pawn.Default.CollisionHeight);
-			Pawn.ShouldCrouch(false);
-			Pawn.bCrawler = Pawn.Default.bCrawler;
-		}
-	}
-}
-	
-// Player movement.
-// Player Swimming
-state PlayerSwimming
-{
-ignores SeePlayer, HearNoise, Bump;
-
-	function bool WantsSmoothedView()
-	{
-		return ( !Pawn.bJustLanded );
-	}
-
-	function bool NotifyLanded(vector HitNormal)
-	{
-		if ( Pawn.PhysicsVolume.bWaterVolume )
-			Pawn.SetPhysics(PHYS_Swimming);
-		else
-			GotoState(Pawn.LandMovementState);
-		return bUpdating;
-	}
-	
-	function bool NotifyPhysicsVolumeChange( PhysicsVolume NewVolume )
-	{
-		local actor HitActor;
-		local vector HitLocation, HitNormal, checkpoint;
-
-		if ( !NewVolume.bWaterVolume )
-		{
-			Pawn.SetPhysics(PHYS_Falling);
-			if (Pawn.bUpAndOut && Pawn.CheckWaterJump(HitNormal)) //check for waterjump
-			{
-				Pawn.velocity.Z = FMax(Pawn.JumpZ,420) + 2 * Pawn.CollisionRadius; //set here so physics uses this for remainder of tick
-				GotoState(Pawn.LandMovementState);
-			}				
-			else if ( (Pawn.Velocity.Z > 160) || !Pawn.TouchingWaterVolume() )
-				GotoState(Pawn.LandMovementState);
-			else //check if in deep water
-			{
-				checkpoint = Pawn.Location;
-				checkpoint.Z -= (Pawn.CollisionHeight + 6.0);
-				HitActor = Trace(HitLocation, HitNormal, checkpoint, Pawn.Location, false);
-				if (HitActor != None)
-					GotoState(Pawn.LandMovementState);
-				else
-				{
-					Enable('Timer');
-					SetTimer(0.7,false);
-				}
-			}
-		}
-		else
-		{
-			Disable('Timer');
-			Pawn.SetPhysics(PHYS_Swimming);
-		}
-		return false;
-	}
-
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
-	{
-		local vector X,Y,Z, OldAccel;
-	
-		GetAxes(Rotation,X,Y,Z);
-		OldAccel = Pawn.Acceleration;
-		Pawn.Acceleration = NewAccel;
-		Pawn.bUpAndOut = ((X Dot Pawn.Acceleration) > 0) && ((Pawn.Acceleration.Z > 0) || (Rotation.Pitch > 2048));
-		if ( !Pawn.PhysicsVolume.bWaterVolume ) //check for waterjump
-			NotifyPhysicsVolumeChange(Pawn.PhysicsVolume);
-	}
-
-	function PlayerMove(float DeltaTime)
-	{
-		local rotator oldRotation;
-		local vector X,Y,Z, NewAccel;
-	
-		GetAxes(Rotation,X,Y,Z);
-
-		NewAccel = aForward*X + aStrafe*Y + aUp*vect(0,0,1); 
-		if ( VSize(NewAccel) < 1.0 )
-			NewAccel = vect(0,0,0);
-	
-		//add bobbing when swimming
-		Pawn.CheckBob(DeltaTime, Y);
-
-		// Update rotation.
-		oldRotation = Rotation;
-		UpdateRotation(DeltaTime, 2);
-
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, NewAccel, DCLICK_None, OldRotation - Rotation);
-		else
-			ProcessMove(DeltaTime, NewAccel, DCLICK_None, OldRotation - Rotation);
-		bPressedJump = false;
-	}
-
-	function Timer()
-	{
-		if ( !Pawn.PhysicsVolume.bWaterVolume && (Role == ROLE_Authority) )
-			GotoState(Pawn.LandMovementState);
-	
-		Disable('Timer');
-	}
-	
-	function BeginState()
-	{
-		Disable('Timer');
-		Pawn.SetPhysics(PHYS_Swimming);
-	}
-}
-	
-state PlayerFlying
-{
-ignores SeePlayer, HearNoise, Bump;
-
-	function PlayerMove(float DeltaTime)
-	{
-		local vector X,Y,Z;
-
-		GetAxes(Rotation,X,Y,Z);
-
-		Pawn.Acceleration = aForward*X + aStrafe*Y; 
-		if ( VSize(Pawn.Acceleration) < 1.0 )
-			Pawn.Acceleration = vect(0,0,0);
-		if ( bCheatFlying && (Pawn.Acceleration == vect(0,0,0)) )
-			Pawn.Velocity = vect(0,0,0);
-		// Update rotation.
-		UpdateRotation(DeltaTime, 2);
-		
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
-		else
-			ProcessMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
-	}
-	
-	function BeginState()
-	{
-		Pawn.SetPhysics(PHYS_Flying);
-	}
-}
-
-state PlayerHelicoptering extends PlayerFlying
-{
-	function PlayerMove(float DeltaTime)
-	{
-		local vector X,Y,Z;
-
-		GetAxes(Rotation,X,Y,Z);
-
-		Pawn.Acceleration = aForward*X + aStrafe*Y + aUp*vect(0,0,1); 
-		if ( VSize(Pawn.Acceleration) < 1.0 )
-			Pawn.Acceleration = vect(0,0,0);
-		if ( bCheatFlying && (Pawn.Acceleration == vect(0,0,0)) )
-			Pawn.Velocity = vect(0,0,0);
-		// Update rotation.
-		UpdateRotation(DeltaTime, 2);
-		
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
-		else
-			ProcessMove(DeltaTime, Pawn.Acceleration, DCLICK_None, rot(0,0,0));
-	}
-}
-
-state BaseSpectating
-{
-	function ProcessMove(float DeltaTime, vector NewAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)	
-	{
-		Acceleration = NewAccel;
-		MoveSmooth(Acceleration * DeltaTime);
-	}
-
-	function PlayerMove(float DeltaTime)
-	{
-		local rotator newRotation;
-		local vector X,Y,Z;
-
-		GetAxes(Rotation,X,Y,Z);
-	
-		Acceleration = 0.02 * (aForward*X + aStrafe*Y + aUp*vect(0,0,1));  
-
-		UpdateRotation(DeltaTime, 1);
-
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, Acceleration, DCLICK_None, rot(0,0,0));
-		else
-			ProcessMove(DeltaTime, Acceleration, DCLICK_None, rot(0,0,0));
-	}
-}
-
-state Scripting
-{
-	// FIXME - IF HIT FIRE, AND NOT bInterpolating, Leave script
-	exec function Fire( optional float F )
-	{
-	}
-
-	exec function AltFire( optional float F )
-	{
-		Fire(F);
-	}
-	}
 
 function ServerViewNextPlayer()
-	{
+{
 	local Controller C;
 	local Pawn Pick;
 	local bool bFound, bRealSpec;
 
 	bRealSpec = bOnlySpectator;
 	bOnlySpectator = true;
-			
-			// view next player
-			for ( C=Level.ControllerList; C!=None; C=C.NextController )
+	C = Level.ControllerList;
+	J0x29:
+
+	// End:0x144 [Loop If]
+	if(__NFUN_119__(C, none))
 	{
-		log("Check spectate "$C.Pawn$" can "$Level.Game.CanSpectate(self,true,C.Pawn));
-		if ( (C.Pawn != None) && Level.Game.CanSpectate(self,true,C.Pawn) )
-				{
-					if ( Pick == None )
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Check spectate ", string(C.Pawn)), " can "), string(Level.Game.CanSpectate(self, true, C.Pawn))));
+		// End:0x12D
+		if(__NFUN_130__(__NFUN_119__(C.Pawn, none), Level.Game.CanSpectate(self, true, C.Pawn)))
+		{
+			// End:0xEE
+			if(__NFUN_114__(Pick, none))
+			{
 				Pick = C.Pawn;
-					if ( bFound )
-					{
+			}
+			// End:0x111
+			if(bFound)
+			{
 				Pick = C.Pawn;
-						break;
-					}	
-					else
-						bFound = ( ViewTarget == C.Pawn );
-				}
-	}
-	log("best is "$Pick);
-	SetViewTarget(Pick);
-	log("Viewtarget is "$ViewTarget);		 
-			if ( ViewTarget == self )
-				bBehindView = false;
+				// [Explicit Break]
+				goto J0x144;				
+			}
 			else
-				bBehindView = true; //bChaseCam;
-	bOnlySpectator = bRealSpec;
-
+			{
+				bFound = __NFUN_114__(ViewTarget, C.Pawn);
+			}
 		}
+		C = C.nextController;
+		// [Loop Continue]
+		goto J0x29;
+	}
+	J0x144:
 
-event ClientSetNewViewTarget();
+	__NFUN_231__(__NFUN_112__("best is ", string(Pick)));
+	SetViewTarget(Pick);
+	__NFUN_231__(__NFUN_112__("Viewtarget is ", string(ViewTarget)));
+	// End:0x195
+	if(__NFUN_114__(ViewTarget, self))
+	{
+		bBehindView = false;		
+	}
+	else
+	{
+		bBehindView = true;
+	}
+	bOnlySpectator = bRealSpec;
+	return;
+}
+
+event ClientSetNewViewTarget()
+{
+	return;
+}
 
 function ServerViewSelf()
 {
 	bBehindView = false;
-	SetViewtarget(self);
+	SetViewTarget(self);
 	ClientMessage(OwnCamera, 'Event');
-}
-
-state Spectating extends BaseSpectating
-{
-	ignores SwitchWeapon, RestartLevel, ClientRestart, Suicide,
-	 ThrowWeapon, NotifyPhysicsVolumeChange, NotifyHeadVolumeChange;
-
-	exec function Fire( optional float F )
-	{
-		bBehindView = true;
-		ServerViewNextPlayer();
-	}
-
-	// Return to spectator's own camera.
-	exec function AltFire( optional float F )
-	{
-		bBehindView = false;
-		ServerViewSelf();
-	}
-
-	function BeginState()
-	{
-		if ( Pawn != None )
-		{
-			SetLocation(Pawn.Location);
-			UnPossess();
-		}
-		bCollideWorld = true;
-	}
-
-	function EndState()
-	{
-		if(PlayerReplicationInfo != none)	//R6CODE
-			PlayerReplicationInfo.bIsSpectator = false;		
-		bCollideWorld = false;
-	}
-}
-
-auto state PlayerWaiting extends BaseSpectating
-{
-ignores SeePlayer, HearNoise, NotifyBump, TakeDamage, PhysicsVolumeChange;
-
-	exec function Jump( optional float F )
-	{
-	}
-
-	exec function Suicide()
-	{
-	}
-
-	function ChangeTeam( int N )
-	{
-		Level.Game.ChangeTeam(self, N);
-	}
-
-	function ServerReStartPlayer()
-	{
-		if ( Level.TimeSeconds < WaitDelay )
-			return;
-		if ( Level.NetMode == NM_Client )
-			return;
-		if ( Level.Game.bWaitingToStartMatch )
-			PlayerReplicationInfo.bReadyToPlay = true;
-		else
-			Level.Game.RestartPlayer(self);
-	}
-
-	exec function Fire(optional float F)
-	{
-		ServerReStartPlayer();
-	}
-	
-	exec function AltFire(optional float F)
-	{
-		ServerReStartPlayer();
-	}
-
-	function EndState()
-	{
-		if ( Pawn != None )
-			Pawn.SetMesh();
-		if(PlayerReplicationInfo != none)	//R6CODE
-			PlayerReplicationInfo.SetWaitingPlayer(false);
-		bCollideWorld = false;
-	}
-
-	function BeginState()
-	{
-		if ( PlayerReplicationInfo != None )
-			PlayerReplicationInfo.SetWaitingPlayer(true);
-		bCollideWorld = true;
-		myHUD.bShowScores = false;
-	}
-}
-
-state WaitingForPawn extends BaseSpectating
-{
-ignores SeePlayer, HearNoise, KilledBy, SwitchWeapon;
-
-	exec function Fire( optional float F )
-	{
-	}
-
-	exec function AltFire( optional float F )
-	{
-	}
-
-	function LongClientAdjustPosition
-	(
-		float TimeStamp, 
-		name newState, 
-		EPhysics newPhysics,
-		float NewLocX, 
-		float NewLocY, 
-		float NewLocZ, 
-		float NewVelX, 
-		float NewVelY, 
-		float NewVelZ,
-//		Actor NewBase,
-		float NewFloorX,
-		float NewFloorY,
-		float NewFloorZ
-	)
-	{
-	}
-
-	function PlayerTick(float DeltaTime)
-	{
-		Global.PlayerTick(DeltaTime);
-
-		if ( Pawn != None )
-		{
-			Pawn.Controller = self;
-			ClientRestart();
-		}
-	}
-
-	function Timer()
-	{
-		AskForPawn();
-	}
-
-	function BeginState()
-	{
-		SetTimer(0.2, true);
-	}
-
-	function EndState()
-	{
-		SetTimer(0.0, false);
-	}
-}
-
-state GameEnded
-{
-ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyHeadVolumeChange, NotifyPhysicsVolumeChange, Falling, TakeDamage, Suicide;
-
-	exec function ThrowWeapon()
-	{
-	}
-
-	function ServerReStartGame()
-	{
-		Level.Game.RestartGame();
-	}
-
-	exec function Fire( optional float F )
-	{
-		if ( Role < ROLE_Authority)
-			return;
-		if ( !bFrozen )
-			ServerReStartGame();
-		else if ( TimerRate <= 0 )
-			SetTimer(1.5, false);
-	}
-	
-	exec function AltFire( optional float F )
-	{
-		Fire(F);
-	}
-
-	function PlayerMove(float DeltaTime)
-	{
-		local vector X,Y,Z;
-		local Rotator ViewRotation;
-
-		GetAxes(Rotation,X,Y,Z);
-		// Update view rotation.
-
-		if ( !bFixedCamera )
-		{
-			ViewRotation = Rotation;
-			ViewRotation.Yaw += 32.0 * DeltaTime * aTurn;
-			ViewRotation.Pitch += 32.0 * DeltaTime * aLookUp;
-			ViewRotation.Pitch = ViewRotation.Pitch & 65535;
-			If ((ViewRotation.Pitch > 18000) && (ViewRotation.Pitch < 49152))
-			{
-				If (aLookUp > 0) 
-					ViewRotation.Pitch = 18000;
-				else
-					ViewRotation.Pitch = 49152;
-			}
-			SetRotation(ViewRotation);
-		}
-		else if ( ViewTarget != None )
-			SetRotation(ViewTarget.Rotation);
-
-		ViewShake(DeltaTime);
-		ViewFlash(DeltaTime);
-
-		if ( Role < ROLE_Authority ) // then save this move and replicate it
-			ReplicateMove(DeltaTime, vect(0,0,0), DCLICK_None, rot(0,0,0));
-		else
-			ProcessMove(DeltaTime, vect(0,0,0), DCLICK_None, rot(0,0,0));
-		bPressedJump = false;
-	}
-
-	function ServerMove
-	(
-		float TimeStamp, 
-		vector InAccel, 
-		vector ClientLoc,
-		bool NewbRun,
-		bool NewbDuck,
-		bool NewbCrawl,  //rb bool NewbJumpStatus, 
-//		eDoubleClickDir DoubleClickMove, 
-//		byte ClientRoll, 
-		int View,
-// #ifdef R6PlayerMovements
-        int iNewRotOffset,
-// #endif R6PlayerMovements
-		optional byte OldTimeDelta,
-		optional int OldAccel
-	)
-	{
-		Global.ServerMove(TimeStamp, InAccel, ClientLoc, NewbRun, NewbDuck, NewbCrawl,
-							//DoubleClickMove, ClientRoll, 
-                            (32767 & (Rotation.Pitch/2)) * 32768 + (32767 & (Rotation.Yaw/2)),
-// #ifdef R6PlayerMovements
-                            0
-// #endif R6PlayerMovements
-                            );
-
-	}
-
-	function FindGoodView()
-	{
-		local vector cameraLoc;
-		local rotator cameraRot, ViewRotation;
-		local int tries, besttry;
-		local float bestdist, newdist;
-		local int startYaw;
-		local actor ViewActor;
-		
-		ViewRotation = Rotation;
-		ViewRotation.Pitch = 56000;
-		tries = 0;
-		besttry = 0;
-		bestdist = 0.0;
-		startYaw = ViewRotation.Yaw;
-		
-		for (tries=0; tries<16; tries++)
-		{
-			cameraLoc = ViewTarget.Location;
-			PlayerCalcView(ViewActor, cameraLoc, cameraRot);
-			newdist = VSize(cameraLoc - ViewTarget.Location);
-			if (newdist > bestdist)
-			{
-				bestdist = newdist;	
-				besttry = tries;
-			}
-			ViewRotation.Yaw += 4096;
-		}
-			
-		ViewRotation.Yaw = startYaw + besttry * 4096;
-		SetRotation(ViewRotation);
-	}
-	
-	function Timer()
-	{
-		bFrozen = false;
-	}
-	
-	function BeginState()
-	{
-		local Pawn P;
-
-        Level.m_bInGamePlanningActive = false;
-		EndZoom();
-		bFire = 0;
-		bAltFire = 0;
-		if ( Pawn != None )
-		{
-			Pawn.SimAnim.AnimRate = 0;
-			Pawn.bPhysicsAnimUpdate = false;
-			Pawn.StopAnimating();
-			Pawn.SetCollision(false,false,false);
-		}
-		myHUD.bShowScores = true;
-		bFrozen = true;
-		if ( !bFixedCamera )
-		{
-			//FindGoodView();
-			bBehindView = true;
-		}
-		SetTimer(1.5, false);
-		SetPhysics(PHYS_None);
-		ForEach DynamicActors(class'Pawn', P)
-		{
-			P.Velocity = vect(0,0,0);
-			P.SetPhysics(PHYS_None);
-		}
-	}
-}
-
-state Dead
-{
-ignores SeePlayer, HearNoise, KilledBy, SwitchWeapon;
-
-	function ServerRestartPlayer()
-	{
-		Super.ServerRestartPlayer();
-	}
-
-	exec function Fire( optional float F )
-	{
-			ServerReStartPlayer();
-	}
-	
-	exec function AltFire( optional float F )
-	{
-		if (myHUD.bShowScores)
-		Fire(F);
-		else
-			Timer();
-	}
-
-	function ServerMove
-	(
-		float TimeStamp, 
-		vector Accel, 
-		vector ClientLoc,
-		bool NewbRun,
-		bool NewbDuck,
-		bool NewbCrawl, //rb bool NewbJumpStatus,
-//		eDoubleClickDir DoubleClickMove, 
-//		byte ClientRoll, 
-		int View,
-// #ifdef R6PlayerMovements
-        int iNewRotOffset,
-// #endif R6PlayerMovements
-		optional byte OldTimeDelta,
-		optional int OldAccel
-	)
-	{
-		Global.ServerMove(
-					TimeStamp,
-					Accel, 
-					ClientLoc,
-					false,
-					false,
-					false,
-//					DoubleClickMove, 
-//					ClientRoll, 
-					View,
-// #ifdef R6PlayerMovements
-                    iNewRotOffset,
-// #endif R6PlayerMovements
-                    );
-	}
-
-	function PlayerMove(float DeltaTime)
-	{
-		local vector X,Y,Z;
-		local rotator ViewRotation;
-
-		if ( !bFrozen )
-		{
-			if ( bPressedJump )
-			{
-				Fire(0);
-				bPressedJump = false;
-			}
-			GetAxes(Rotation,X,Y,Z);
-			// Update view rotation.
-			ViewRotation = Rotation;
-			ViewRotation.Yaw += 32.0 * DeltaTime * aTurn;
-			ViewRotation.Pitch += 32.0 * DeltaTime * aLookUp;
-			ViewRotation.Pitch = ViewRotation.Pitch & 65535;
-			If ((ViewRotation.Pitch > 18000) && (ViewRotation.Pitch < 49152))
-			{
-				If (aLookUp > 0) 
-					ViewRotation.Pitch = 18000;
-				else
-					ViewRotation.Pitch = 49152;
-			}
-			SetRotation(ViewRotation);
-			if ( Role < ROLE_Authority ) // then save this move and replicate it
-				ReplicateMove(DeltaTime, vect(0,0,0), DCLICK_None, rot(0,0,0));
-		}
-		ViewShake(DeltaTime);
-		ViewFlash(DeltaTime);
-	}
-
-	function FindGoodView()
-	{
-		local vector cameraLoc;
-		local rotator cameraRot, ViewRotation;
-		local int tries, besttry;
-		local float bestdist, newdist;
-		local int startYaw;
-		local actor ViewActor;
-		
-		if(ViewTarget == none)
-			return;
-
-		////log("Find good death scene view");
-		ViewRotation = Rotation;
-		ViewRotation.Pitch = 56000;
-		tries = 0;
-		besttry = 0;
-		bestdist = 0.0;
-		startYaw = ViewRotation.Yaw;
-		
-		for (tries=0; tries<16; tries++)
-		{
-			cameraLoc = ViewTarget.Location;
-			PlayerCalcView(ViewActor, cameraLoc, cameraRot);
-			newdist = VSize(cameraLoc - ViewTarget.Location);
-			if (newdist > bestdist)
-			{
-				bestdist = newdist;	
-				besttry = tries;
-			}
-			ViewRotation.Yaw += 4096;
-		}
-			
-		ViewRotation.Yaw = startYaw + besttry * 4096;
-		SetRotation(ViewRotation);
-	}
-	
-	function Timer()
-	{
-
-		if (!bFrozen)
-			return;
-			
-		bFrozen = false;
-		myHUD.bShowScores = true;
-		bPressedJump = false;
-	}
-	
-	function BeginState()
-	{
-		local SavedMove Next;
-//#ifdef R6CODE
-		local SavedMove Current;
-//#endif // #ifdef R6CODE
-
-		Enemy = None;
-		bBehindView = true;
-		bFrozen = true;
-		bPressedJump = false;
-		//FindGoodView();
-//#ifndef R6CODE 		
-//		SetTimer(6.0, true);
-//#endif
-
-		// clean out saved moves
-		while ( SavedMoves != None )
-		{
-			Next = SavedMoves.NextMove;
-//#ifdef R6CODE
-            Current = SavedMoves;
-			SavedMoves = Next;
-			Current.Destroy();
-//#else
-//			SavedMoves.Destroy();
-//			SavedMoves = Next;
-//#endif // #ifdef R6CODE
-		}
-		if ( PendingMove != None )
-		{
-//#ifdef R6CODE
-            Current = PendingMove;
-			PendingMove = None;
-			Current.Destroy();
-//#else
-//			PendingMove.Destroy();
-//			PendingMove = None;
-//#endif // #ifdef R6CODE
-		}
-	}
-	
-	function EndState()
-	{
-		local SavedMove Next;
-
-		// clean out saved moves
-		while ( SavedMoves != None )
-		{
-			Next = SavedMoves.NextMove;
-			SavedMoves.Destroy();
-			SavedMoves = Next;
-		}
-		if ( PendingMove != None )
-		{
-			PendingMove.Destroy();
-			PendingMove = None;
-		}
-		Velocity = vect(0,0,0);
-		Acceleration = vect(0,0,0);
-		bBehindView = false;
-		myHUD.bShowScores = false;
-		bPressedJump = false;
-		//Log(self$" exiting dying with remote role "$RemoteRole$" and role "$Role);
-	}
+	return;
 }
 
 //------------------------------------------------------------------------------
@@ -4229,87 +2580,1405 @@ ignores SeePlayer, HearNoise, KilledBy, SwitchWeapon;
 function string GetNGSecret()
 {
 	return ngWorldSecret;
+	return;
 }
 
 function SetNGSecret(string newSecret)
 {
 	ngWorldSecret = newSecret;
+	return;
 }
 
 //------------------------------------------------------------------------------
 // Control options	
-function ChangeStairLook( bool B )
+function ChangeStairLook(bool B)
 {
 	bLookUpStairs = B;
-	if ( bLookUpStairs )
+	// End:0x1E
+	if(bLookUpStairs)
+	{
 		bAlwaysMouseLook = false;
+	}
+	return;
 }
 
-function ChangeAlwaysMouseLook(Bool B)
+function ChangeAlwaysMouseLook(bool B)
 {
 	bAlwaysMouseLook = B;
-	if ( bAlwaysMouseLook )
+	// End:0x1E
+	if(bAlwaysMouseLook)
+	{
 		bLookUpStairs = false;
+	}
+	return;
 }
 
 //R6Radar begin
-event ToggleRadar(BOOL _bRadar)
+event ToggleRadar(bool _bRadar)
 {
-    ServerToggleRadar(_bRadar);
+	ServerToggleRadar(_bRadar);
+	return;
 }
 
-function ServerToggleRadar(BOOL _bRadar)
+function ServerToggleRadar(bool _bRadar)
 {
-    m_bRadarActive = _bRadar;
+	m_bRadarActive = _bRadar;
+	return;
 }
 
-function ServerToggleHeatVision(BOOL bHeatVisionActive)
+function ServerToggleHeatVision(bool bHeatVisionActive)
 {
-    m_bHeatVisionActive = bHeatVisionActive;
+	m_bHeatVisionActive = bHeatVisionActive;
+	return;
 }
-
-//R6Radar end
-
-//#ifdef R6CODE
 
 event ClientPBKickedOutMessage(string PBMessage)
 {
-    Player.Console.R6ConnectionFailed(PBMessage);
+	Player.Console.R6ConnectionFailed(PBMessage);
+	return;
 }
 
 // 
 function ClientPBKickMsg(string PBMessage)
 {
-    Player.Console.R6ConnectionFailed(PBMessage);
+	Player.Console.R6ConnectionFailed(PBMessage);
+	return;
 }
 
-//#endif R6CODE
+state PlayerWalking
+{
+	function bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
+	{
+		// End:0x22
+		if(NewVolume.bWaterVolume)
+		{
+			__NFUN_113__(Pawn.WaterMovementState);
+		}
+		return false;
+		return;
+	}
+
+	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
+	{
+		local Vector OldAccel;
+		local bool OldCrouch;
+
+		// End:0x0D
+		if(__NFUN_114__(Pawn, none))
+		{
+			return;
+		}
+		OldAccel = Pawn.Acceleration;
+		Pawn.Acceleration = NewAccel;
+		// End:0x53
+		if(bPressedJump)
+		{
+			Pawn.DoJump(bUpdating);
+		}
+		// End:0xC4
+		if(__NFUN_155__(int(Pawn.Physics), int(2)))
+		{
+			OldCrouch = Pawn.bWantsToCrouch;
+			// End:0xA2
+			if(__NFUN_154__(int(bDuck), 0))
+			{
+				Pawn.ShouldCrouch(false);				
+			}
+			else
+			{
+				// End:0xC4
+				if(Pawn.bCanCrouch)
+				{
+					Pawn.ShouldCrouch(true);
+				}
+			}
+		}
+		return;
+	}
+
+	function PlayerMove(float DeltaTime)
+	{
+		local Vector X, Y, Z, NewAccel;
+		local Actor.EDoubleClickDir DoubleClickMove;
+		local Rotator OldRotation, ViewRotation;
+		local bool bSaveJump;
+
+		__NFUN_229__(Pawn.Rotation, X, Y, Z);
+		NewAccel = __NFUN_215__(__NFUN_213__(aForward, X), __NFUN_213__(aStrafe, Y));
+		NewAccel.Z = 0.0000000;
+		// End:0x73
+		if(__NFUN_176__(__NFUN_225__(NewAccel), 1.0000000))
+		{
+			NewAccel = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		DoubleClickMove = PlayerInput.CheckForDoubleClickMove(DeltaTime);
+		GroundPitch = 0;
+		ViewRotation = Rotation;
+		// End:0x176
+		if(__NFUN_155__(int(Pawn.Physics), int(1)))
+		{
+			// End:0x176
+			if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bKeyboardLook), __NFUN_154__(int(bLook), 0)), bCenterView))
+			{
+				ViewRotation.Pitch = __NFUN_156__(ViewRotation.Pitch, 65535);
+				// End:0x11E
+				if(__NFUN_151__(ViewRotation.Pitch, 32768))
+				{
+					__NFUN_162__(ViewRotation.Pitch, 65536);
+				}
+				ViewRotation.Pitch = int(__NFUN_171__(float(ViewRotation.Pitch), __NFUN_175__(float(1), __NFUN_171__(float(12), __NFUN_244__(0.0833000, DeltaTime)))));
+				// End:0x176
+				if(__NFUN_176__(__NFUN_186__(float(ViewRotation.Pitch)), float(1000)))
+				{
+					ViewRotation.Pitch = 0;
+				}
+			}
+		}
+		Pawn.CheckBob(DeltaTime, Y);
+		__NFUN_299__(ViewRotation);
+		OldRotation = Rotation;
+		UpdateRotation(DeltaTime, 1.0000000);
+		// End:0x1E2
+		if(__NFUN_130__(bPressedJump, Pawn.CannotJumpNow()))
+		{
+			bSaveJump = true;
+			bPressedJump = false;			
+		}
+		else
+		{
+			bSaveJump = false;
+		}
+		// End:0x21F
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, __NFUN_317__(OldRotation, Rotation));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, NewAccel, DoubleClickMove, __NFUN_317__(OldRotation, Rotation));
+		}
+		bPressedJump = bSaveJump;
+		return;
+	}
+
+	function BeginState()
+	{
+		// End:0x23
+		if(__NFUN_114__(Pawn.Mesh, none))
+		{
+			Pawn.SetMesh();
+		}
+		DoubleClickDir = 0;
+		Pawn.ShouldCrouch(false);
+		bPressedJump = false;
+		// End:0x85
+		if(__NFUN_130__(__NFUN_155__(int(Pawn.Physics), int(2)), __NFUN_155__(int(Pawn.Physics), int(13))))
+		{
+			Pawn.__NFUN_3970__(1);
+		}
+		GroundPitch = 0;
+		return;
+	}
+
+	function EndState()
+	{
+		GroundPitch = 0;
+		// End:0x31
+		if(__NFUN_130__(__NFUN_119__(Pawn, none), __NFUN_154__(int(bDuck), 0)))
+		{
+			Pawn.ShouldCrouch(false);
+		}
+		return;
+	}
+	stop;
+}
+
+state PlayerClimbing
+{
+	function bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
+	{
+		// End:0x25
+		if(NewVolume.bWaterVolume)
+		{
+			__NFUN_113__(Pawn.WaterMovementState);			
+		}
+		else
+		{
+			__NFUN_113__(Pawn.LandMovementState);
+		}
+		return false;
+		return;
+	}
+
+	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
+	{
+		local Vector OldAccel;
+
+		OldAccel = Pawn.Acceleration;
+		Pawn.Acceleration = NewAccel;
+		// End:0x66
+		if(bPressedJump)
+		{
+			Pawn.DoJump(bUpdating);
+			// End:0x66
+			if(__NFUN_154__(int(Pawn.Physics), int(2)))
+			{
+				__NFUN_113__('PlayerWalking');
+			}
+		}
+		return;
+	}
+
+	function PlayerMove(float DeltaTime)
+	{
+		local Vector X, Y, Z, NewAccel;
+		local Actor.EDoubleClickDir DoubleClickMove;
+		local Rotator OldRotation, ViewRotation;
+		local bool bSaveJump;
+
+		__NFUN_229__(Rotation, X, Y, Z);
+		// End:0x51
+		if(__NFUN_119__(Pawn.OnLadder, none))
+		{
+			NewAccel = __NFUN_213__(aForward, Pawn.OnLadder.ClimbDir);			
+		}
+		else
+		{
+			NewAccel = __NFUN_215__(__NFUN_213__(aForward, X), __NFUN_213__(aStrafe, Y));
+		}
+		// End:0x95
+		if(__NFUN_176__(__NFUN_225__(NewAccel), 1.0000000))
+		{
+			NewAccel = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		ViewRotation = Pawn.Rotation;
+		__NFUN_299__(ViewRotation);
+		OldRotation = Rotation;
+		UpdateRotation(DeltaTime, 1.0000000);
+		// End:0x101
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, __NFUN_317__(OldRotation, Rotation));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, NewAccel, DoubleClickMove, __NFUN_317__(OldRotation, Rotation));
+		}
+		bPressedJump = bSaveJump;
+		return;
+	}
+
+	function BeginState()
+	{
+		Pawn.ShouldCrouch(false);
+		bPressedJump = false;
+		return;
+	}
+
+	function EndState()
+	{
+		// End:0x1B
+		if(__NFUN_119__(Pawn, none))
+		{
+			Pawn.ShouldCrouch(false);
+		}
+		return;
+	}
+	stop;
+}
+
+state PlayerSpidering
+{
+	event bool NotifyHitWall(Vector HitNormal, Actor HitActor)
+	{
+		Pawn.__NFUN_3970__(9);
+		Pawn.__NFUN_298__(HitActor, HitNormal);
+		return true;
+		return;
+	}
+
+	function UpdateRotation(float DeltaTime, float maxPitch)
+	{
+		local Rotator TempRot, ViewRotation;
+		local Vector MyFloor, CrossDir, FwdDir, OldFwdDir, OldX, RealFloor;
+
+		// End:0x2A
+		if(__NFUN_132__(bInterpolating, Pawn.bInterpolating))
+		{
+			ViewShake(DeltaTime);
+			return;
+		}
+		TurnTarget = none;
+		bRotateToDesired = false;
+		bSetTurnRot = false;
+		// End:0x8D
+		if(__NFUN_132__(__NFUN_114__(Pawn.Base, none), __NFUN_217__(Pawn.Floor, vect(0.0000000, 0.0000000, 0.0000000))))
+		{
+			MyFloor = vect(0.0000000, 0.0000000, 1.0000000);			
+		}
+		else
+		{
+			MyFloor = Pawn.Floor;
+		}
+		// End:0x206
+		if(__NFUN_218__(MyFloor, OldFloor))
+		{
+			RealFloor = MyFloor;
+			MyFloor = __NFUN_226__(__NFUN_215__(__NFUN_213__(__NFUN_171__(float(6), DeltaTime), MyFloor), __NFUN_213__(__NFUN_175__(float(1), __NFUN_171__(float(6), DeltaTime)), OldFloor)));
+			// End:0x10F
+			if(__NFUN_177__(__NFUN_219__(RealFloor, MyFloor), 0.9990000))
+			{
+				MyFloor = RealFloor;
+			}
+			CrossDir = __NFUN_226__(__NFUN_220__(RealFloor, OldFloor));
+			FwdDir = __NFUN_220__(CrossDir, MyFloor);
+			OldFwdDir = __NFUN_220__(CrossDir, OldFloor);
+			ViewX = __NFUN_215__(__NFUN_215__(__NFUN_212__(MyFloor, __NFUN_219__(OldFloor, ViewX)), __NFUN_212__(CrossDir, __NFUN_219__(CrossDir, ViewX))), __NFUN_212__(FwdDir, __NFUN_219__(OldFwdDir, ViewX)));
+			ViewX = __NFUN_226__(ViewX);
+			ViewZ = __NFUN_215__(__NFUN_215__(__NFUN_212__(MyFloor, __NFUN_219__(OldFloor, ViewZ)), __NFUN_212__(CrossDir, __NFUN_219__(CrossDir, ViewZ))), __NFUN_212__(FwdDir, __NFUN_219__(OldFwdDir, ViewZ)));
+			ViewZ = __NFUN_226__(ViewZ);
+			OldFloor = MyFloor;
+			ViewY = __NFUN_226__(__NFUN_220__(MyFloor, ViewX));
+		}
+		// End:0x35C
+		if(__NFUN_132__(__NFUN_181__(aTurn, float(0)), __NFUN_181__(aLookUp, float(0))))
+		{
+			// End:0x260
+			if(__NFUN_181__(aTurn, float(0)))
+			{
+				ViewX = __NFUN_226__(__NFUN_215__(ViewX, __NFUN_212__(__NFUN_213__(float(2), ViewY), __NFUN_187__(__NFUN_171__(__NFUN_171__(0.0005000, DeltaTime), aTurn)))));
+			}
+			// End:0x348
+			if(__NFUN_181__(aLookUp, float(0)))
+			{
+				OldX = ViewX;
+				ViewX = __NFUN_226__(__NFUN_215__(ViewX, __NFUN_212__(__NFUN_213__(float(2), ViewZ), __NFUN_187__(__NFUN_171__(__NFUN_171__(0.0005000, DeltaTime), aLookUp)))));
+				ViewZ = __NFUN_226__(__NFUN_220__(ViewX, ViewY));
+				// End:0x348
+				if(__NFUN_176__(__NFUN_219__(ViewZ, MyFloor), 0.7070000))
+				{
+					OldX = __NFUN_226__(__NFUN_216__(OldX, __NFUN_212__(MyFloor, __NFUN_219__(MyFloor, OldX))));
+					// End:0x320
+					if(__NFUN_177__(__NFUN_219__(ViewX, MyFloor), float(0)))
+					{
+						ViewX = __NFUN_226__(__NFUN_215__(OldX, MyFloor));						
+					}
+					else
+					{
+						ViewX = __NFUN_226__(__NFUN_216__(OldX, MyFloor));
+					}
+					ViewZ = __NFUN_226__(__NFUN_220__(ViewX, ViewY));
+				}
+			}
+			ViewY = __NFUN_226__(__NFUN_220__(MyFloor, ViewX));
+		}
+		ViewRotation = OrthoRotation(ViewX, ViewY, ViewZ);
+		__NFUN_299__(ViewRotation);
+		ViewShake(DeltaTime);
+		ViewFlash(DeltaTime);
+		Pawn.FaceRotation(ViewRotation, DeltaTime);
+		return;
+	}
+
+	function bool NotifyLanded(Vector HitNormal)
+	{
+		Pawn.__NFUN_3970__(9);
+		return bUpdating;
+		return;
+	}
+
+	function bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
+	{
+		// End:0x22
+		if(NewVolume.bWaterVolume)
+		{
+			__NFUN_113__(Pawn.WaterMovementState);
+		}
+		return false;
+		return;
+	}
+
+	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
+	{
+		local Vector OldAccel;
+
+		OldAccel = Pawn.Acceleration;
+		Pawn.Acceleration = NewAccel;
+		// End:0x46
+		if(bPressedJump)
+		{
+			Pawn.DoJump(bUpdating);
+		}
+		return;
+	}
+
+	function PlayerMove(float DeltaTime)
+	{
+		local Vector NewAccel;
+		local Actor.EDoubleClickDir DoubleClickMove;
+		local Rotator OldRotation, ViewRotation;
+		local bool bSaveJump;
+
+		GroundPitch = 0;
+		ViewRotation = Rotation;
+		// End:0x37
+		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bKeyboardLook), __NFUN_154__(int(bLook), 0)), bCenterView))
+		{
+		}
+		Pawn.CheckBob(DeltaTime, vect(0.0000000, 0.0000000, 0.0000000));
+		__NFUN_299__(ViewRotation);
+		OldRotation = Rotation;
+		UpdateRotation(DeltaTime, 1.0000000);
+		NewAccel = __NFUN_215__(__NFUN_213__(aForward, __NFUN_226__(__NFUN_216__(ViewX, __NFUN_212__(OldFloor, __NFUN_219__(OldFloor, ViewX))))), __NFUN_213__(aStrafe, ViewY));
+		// End:0xD6
+		if(__NFUN_176__(__NFUN_225__(NewAccel), 1.0000000))
+		{
+			NewAccel = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		// End:0x106
+		if(__NFUN_130__(bPressedJump, Pawn.CannotJumpNow()))
+		{
+			bSaveJump = true;
+			bPressedJump = false;			
+		}
+		else
+		{
+			bSaveJump = false;
+		}
+		// End:0x143
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, __NFUN_317__(OldRotation, Rotation));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, NewAccel, DoubleClickMove, __NFUN_317__(OldRotation, Rotation));
+		}
+		bPressedJump = bSaveJump;
+		return;
+	}
+
+	function BeginState()
+	{
+		local Rotator newRot;
+
+		// End:0x23
+		if(__NFUN_114__(Pawn.Mesh, none))
+		{
+			Pawn.SetMesh();
+		}
+		OldFloor = vect(0.0000000, 0.0000000, 1.0000000);
+		__NFUN_229__(Rotation, ViewX, ViewY, ViewZ);
+		DoubleClickDir = 0;
+		Pawn.ShouldCrouch(false);
+		bPressedJump = false;
+		// End:0x93
+		if(__NFUN_155__(int(Pawn.Physics), int(2)))
+		{
+			Pawn.__NFUN_3970__(9);
+		}
+		GroundPitch = 0;
+		Pawn.bCrawler = true;
+		Pawn.__NFUN_283__(Pawn.default.CollisionHeight, Pawn.default.CollisionHeight);
+		return;
+	}
+
+	function EndState()
+	{
+		GroundPitch = 0;
+		// End:0x69
+		if(__NFUN_119__(Pawn, none))
+		{
+			Pawn.__NFUN_283__(Pawn.default.CollisionRadius, Pawn.default.CollisionHeight);
+			Pawn.ShouldCrouch(false);
+			Pawn.bCrawler = Pawn.default.bCrawler;
+		}
+		return;
+	}
+	stop;
+}
+
+state PlayerSwimming
+{
+	function bool WantsSmoothedView()
+	{
+		return __NFUN_129__(Pawn.bJustLanded);
+		return;
+	}
+
+	function bool NotifyLanded(Vector HitNormal)
+	{
+		// End:0x2C
+		if(Pawn.PhysicsVolume.bWaterVolume)
+		{
+			Pawn.__NFUN_3970__(3);			
+		}
+		else
+		{
+			__NFUN_113__(Pawn.LandMovementState);
+		}
+		return bUpdating;
+		return;
+	}
+
+	function bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
+	{
+		local Actor HitActor;
+		local Vector HitLocation, HitNormal, checkpoint;
+
+		// End:0x171
+		if(__NFUN_129__(NewVolume.bWaterVolume))
+		{
+			Pawn.__NFUN_3970__(2);
+			// End:0x9F
+			if(__NFUN_130__(Pawn.bUpAndOut, Pawn.CheckWaterJump(HitNormal)))
+			{
+				Pawn.Velocity.Z = __NFUN_174__(__NFUN_245__(Pawn.JumpZ, 420.0000000), __NFUN_171__(float(2), Pawn.CollisionRadius));
+				__NFUN_113__(Pawn.LandMovementState);				
+			}
+			else
+			{
+				// End:0xE4
+				if(__NFUN_132__(__NFUN_177__(Pawn.Velocity.Z, float(160)), __NFUN_129__(Pawn.TouchingWaterVolume())))
+				{
+					__NFUN_113__(Pawn.LandMovementState);					
+				}
+				else
+				{
+					checkpoint = Pawn.Location;
+					__NFUN_185__(checkpoint.Z, __NFUN_174__(Pawn.CollisionHeight, 6.0000000));
+					HitActor = __NFUN_277__(HitLocation, HitNormal, checkpoint, Pawn.Location, false);
+					// End:0x15E
+					if(__NFUN_119__(HitActor, none))
+					{
+						__NFUN_113__(Pawn.LandMovementState);						
+					}
+					else
+					{
+						__NFUN_117__('Timer');
+						__NFUN_280__(0.7000000, false);
+					}
+				}
+			}			
+		}
+		else
+		{
+			__NFUN_118__('Timer');
+			Pawn.__NFUN_3970__(3);
+		}
+		return false;
+		return;
+	}
+
+	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
+	{
+		local Vector X, Y, Z, OldAccel;
+
+		__NFUN_229__(Rotation, X, Y, Z);
+		OldAccel = Pawn.Acceleration;
+		Pawn.Acceleration = NewAccel;
+		Pawn.bUpAndOut = __NFUN_130__(__NFUN_177__(__NFUN_219__(X, Pawn.Acceleration), float(0)), __NFUN_132__(__NFUN_177__(Pawn.Acceleration.Z, float(0)), __NFUN_151__(Rotation.Pitch, 2048)));
+		// End:0xCC
+		if(__NFUN_129__(Pawn.PhysicsVolume.bWaterVolume))
+		{
+			NotifyPhysicsVolumeChange(Pawn.PhysicsVolume);
+		}
+		return;
+	}
+
+	function PlayerMove(float DeltaTime)
+	{
+		local Rotator OldRotation;
+		local Vector X, Y, Z, NewAccel;
+
+		__NFUN_229__(Rotation, X, Y, Z);
+		NewAccel = __NFUN_215__(__NFUN_215__(__NFUN_213__(aForward, X), __NFUN_213__(aStrafe, Y)), __NFUN_213__(aUp, vect(0.0000000, 0.0000000, 1.0000000)));
+		// End:0x70
+		if(__NFUN_176__(__NFUN_225__(NewAccel), 1.0000000))
+		{
+			NewAccel = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		Pawn.CheckBob(DeltaTime, Y);
+		OldRotation = Rotation;
+		UpdateRotation(DeltaTime, 2.0000000);
+		// End:0xD6
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, NewAccel, 0, __NFUN_317__(OldRotation, Rotation));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, NewAccel, 0, __NFUN_317__(OldRotation, Rotation));
+		}
+		bPressedJump = false;
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x3F
+		if(__NFUN_130__(__NFUN_129__(Pawn.PhysicsVolume.bWaterVolume), __NFUN_154__(int(Role), int(ROLE_Authority))))
+		{
+			__NFUN_113__(Pawn.LandMovementState);
+		}
+		__NFUN_118__('Timer');
+		return;
+	}
+
+	function BeginState()
+	{
+		__NFUN_118__('Timer');
+		Pawn.__NFUN_3970__(3);
+		return;
+	}
+	stop;
+}
+
+state PlayerFlying
+{
+	function PlayerMove(float DeltaTime)
+	{
+		local Vector X, Y, Z;
+
+		__NFUN_229__(Rotation, X, Y, Z);
+		Pawn.Acceleration = __NFUN_215__(__NFUN_213__(aForward, X), __NFUN_213__(aStrafe, Y));
+		// End:0x75
+		if(__NFUN_176__(__NFUN_225__(Pawn.Acceleration), 1.0000000))
+		{
+			Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		// End:0xBC
+		if(__NFUN_130__(bCheatFlying, __NFUN_217__(Pawn.Acceleration, vect(0.0000000, 0.0000000, 0.0000000))))
+		{
+			Pawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		UpdateRotation(DeltaTime, 2.0000000);
+		// End:0x107
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, Pawn.Acceleration, 0, rot(0, 0, 0));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, Pawn.Acceleration, 0, rot(0, 0, 0));
+		}
+		return;
+	}
+
+	function BeginState()
+	{
+		Pawn.__NFUN_3970__(4);
+		return;
+	}
+	stop;
+}
+
+state PlayerHelicoptering extends PlayerFlying
+{
+	function PlayerMove(float DeltaTime)
+	{
+		local Vector X, Y, Z;
+
+		__NFUN_229__(Rotation, X, Y, Z);
+		Pawn.Acceleration = __NFUN_215__(__NFUN_215__(__NFUN_213__(aForward, X), __NFUN_213__(aStrafe, Y)), __NFUN_213__(aUp, vect(0.0000000, 0.0000000, 1.0000000)));
+		// End:0x8B
+		if(__NFUN_176__(__NFUN_225__(Pawn.Acceleration), 1.0000000))
+		{
+			Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		// End:0xD2
+		if(__NFUN_130__(bCheatFlying, __NFUN_217__(Pawn.Acceleration, vect(0.0000000, 0.0000000, 0.0000000))))
+		{
+			Pawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		UpdateRotation(DeltaTime, 2.0000000);
+		// End:0x11D
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, Pawn.Acceleration, 0, rot(0, 0, 0));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, Pawn.Acceleration, 0, rot(0, 0, 0));
+		}
+		return;
+	}
+	stop;
+}
+
+state BaseSpectating
+{
+	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
+	{
+		Acceleration = NewAccel;
+		__NFUN_3969__(__NFUN_212__(Acceleration, DeltaTime));
+		return;
+	}
+
+	function PlayerMove(float DeltaTime)
+	{
+		local Rotator NewRotation;
+		local Vector X, Y, Z;
+
+		__NFUN_229__(Rotation, X, Y, Z);
+		Acceleration = __NFUN_213__(0.0200000, __NFUN_215__(__NFUN_215__(__NFUN_213__(aForward, X), __NFUN_213__(aStrafe, Y)), __NFUN_213__(aUp, vect(0.0000000, 0.0000000, 1.0000000))));
+		UpdateRotation(DeltaTime, 1.0000000);
+		// End:0x95
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, Acceleration, 0, rot(0, 0, 0));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, Acceleration, 0, rot(0, 0, 0));
+		}
+		return;
+	}
+	stop;
+}
+
+state Scripting
+{
+// The player wants to fire.
+	exec function Fire(optional float f)
+	{
+		return;
+	}
+
+// The player wants to alternate-fire.
+	exec function AltFire(optional float f)
+	{
+		Fire(f);
+		return;
+	}
+	stop;
+}
+
+state Spectating extends BaseSpectating
+{
+	ignores Suicide, ClientReStart;
+
+// The player wants to fire.
+	exec function Fire(optional float f)
+	{
+		bBehindView = true;
+		ServerViewNextPlayer();
+		return;
+	}
+
+// The player wants to alternate-fire.
+	exec function AltFire(optional float f)
+	{
+		bBehindView = false;
+		ServerViewSelf();
+		return;
+	}
+
+	function BeginState()
+	{
+		// End:0x22
+		if(__NFUN_119__(Pawn, none))
+		{
+			__NFUN_267__(Pawn.Location);
+			UnPossess();
+		}
+		bCollideWorld = true;
+		return;
+	}
+
+	function EndState()
+	{
+		// End:0x1C
+		if(__NFUN_119__(PlayerReplicationInfo, none))
+		{
+			PlayerReplicationInfo.bIsSpectator = false;
+		}
+		bCollideWorld = false;
+		return;
+	}
+	stop;
+}
+
+auto state PlayerWaiting extends BaseSpectating
+{
+	ignores R6TakeDamage;
+
+	exec function Jump(optional float f)
+	{
+		return;
+	}
+
+	exec function Suicide()
+	{
+		return;
+	}
+
+	function ServerReStartPlayer()
+	{
+		// End:0x1A
+		if(__NFUN_176__(Level.TimeSeconds, WaitDelay))
+		{
+			return;
+		}
+		// End:0x35
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		{
+			return;
+		}
+		// End:0x64
+		if(Level.Game.bWaitingToStartMatch)
+		{
+			PlayerReplicationInfo.bReadyToPlay = true;			
+		}
+		else
+		{
+			Level.Game.RestartPlayer(self);
+		}
+		return;
+	}
+
+// The player wants to fire.
+	exec function Fire(optional float f)
+	{
+		ServerReStartPlayer();
+		return;
+	}
+
+// The player wants to alternate-fire.
+	exec function AltFire(optional float f)
+	{
+		ServerReStartPlayer();
+		return;
+	}
+
+	function EndState()
+	{
+		// End:0x1A
+		if(__NFUN_119__(Pawn, none))
+		{
+			Pawn.SetMesh();
+		}
+		// End:0x35
+		if(__NFUN_119__(PlayerReplicationInfo, none))
+		{
+			PlayerReplicationInfo.SetWaitingPlayer(false);
+		}
+		bCollideWorld = false;
+		return;
+	}
+
+	function BeginState()
+	{
+		// End:0x1B
+		if(__NFUN_119__(PlayerReplicationInfo, none))
+		{
+			PlayerReplicationInfo.SetWaitingPlayer(true);
+		}
+		bCollideWorld = true;
+		myHUD.bShowScores = false;
+		return;
+	}
+	stop;
+}
+
+state WaitingForPawn extends BaseSpectating
+{
+	ignores KilledBy;
+
+// The player wants to fire.
+	exec function Fire(optional float f)
+	{
+		return;
+	}
+
+// The player wants to alternate-fire.
+	exec function AltFire(optional float f)
+	{
+		return;
+	}
+
+// NEW IN 1.60
+	function LongClientAdjustPosition(float TimeStamp, name NewState, Actor.EPhysics newPhysics, float NewLocX, float NewLocY, float NewLocZ, float NewVelX, float NewVelY, float NewVelZ, Actor NewBase, float NewFloorX, float NewFloorY, float NewFloorZ)
+	{
+		return;
+	}
+
+	function PlayerTick(float DeltaTime)
+	{
+		global.PlayerTick(DeltaTime);
+		// End:0x2C
+		if(__NFUN_119__(Pawn, none))
+		{
+			Pawn.Controller = self;
+			ClientReStart();
+		}
+		return;
+	}
+
+	function Timer()
+	{
+		AskForPawn();
+		return;
+	}
+
+	function BeginState()
+	{
+		__NFUN_280__(0.2000000, true);
+		return;
+	}
+
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		return;
+	}
+	stop;
+}
+
+state GameEnded
+{
+	ignores Suicide, R6TakeDamage, KilledBy;
+
+	function ServerRestartGame()
+	{
+		Level.Game.RestartGame();
+		return;
+	}
+
+// The player wants to fire.
+	exec function Fire(optional float f)
+	{
+		// End:0x12
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			return;
+		}
+		// End:0x26
+		if(__NFUN_129__(bFrozen))
+		{
+			ServerRestartGame();			
+		}
+		else
+		{
+			// End:0x3C
+			if(__NFUN_178__(TimerRate, float(0)))
+			{
+				__NFUN_280__(1.5000000, false);
+			}
+		}
+		return;
+	}
+
+// The player wants to alternate-fire.
+	exec function AltFire(optional float f)
+	{
+		Fire(f);
+		return;
+	}
+
+	function PlayerMove(float DeltaTime)
+	{
+		local Vector X, Y, Z;
+		local Rotator ViewRotation;
+
+		__NFUN_229__(Rotation, X, Y, Z);
+		// End:0xEF
+		if(__NFUN_129__(bFixedCamera))
+		{
+			ViewRotation = Rotation;
+			__NFUN_161__(ViewRotation.Yaw, int(__NFUN_171__(__NFUN_171__(32.0000000, DeltaTime), aTurn)));
+			__NFUN_161__(ViewRotation.Pitch, int(__NFUN_171__(__NFUN_171__(32.0000000, DeltaTime), aLookUp)));
+			ViewRotation.Pitch = __NFUN_156__(ViewRotation.Pitch, 65535);
+			// End:0xE4
+			if(__NFUN_130__(__NFUN_151__(ViewRotation.Pitch, 18000), __NFUN_150__(ViewRotation.Pitch, 49152)))
+			{
+				// End:0xD4
+				if(__NFUN_177__(aLookUp, float(0)))
+				{
+					ViewRotation.Pitch = 18000;					
+				}
+				else
+				{
+					ViewRotation.Pitch = 49152;
+				}
+			}
+			__NFUN_299__(ViewRotation);			
+		}
+		else
+		{
+			// End:0x10B
+			if(__NFUN_119__(ViewTarget, none))
+			{
+				__NFUN_299__(ViewTarget.Rotation);
+			}
+		}
+		ViewShake(DeltaTime);
+		ViewFlash(DeltaTime);
+		// End:0x15B
+		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		{
+			ReplicateMove(DeltaTime, vect(0.0000000, 0.0000000, 0.0000000), 0, rot(0, 0, 0));			
+		}
+		else
+		{
+			ProcessMove(DeltaTime, vect(0.0000000, 0.0000000, 0.0000000), 0, rot(0, 0, 0));
+		}
+		bPressedJump = false;
+		return;
+	}
+
+	function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool NewbRun, bool NewbDuck, bool NewbCrawl, int View, int iNewRotOffset, optional byte OldTimeDelta, optional int OldAccel)
+	{
+		global.ServerMove(TimeStamp, InAccel, ClientLoc, NewbRun, NewbDuck, NewbCrawl, __NFUN_146__(__NFUN_144__(__NFUN_156__(32767, __NFUN_145__(Rotation.Pitch, 2)), 32768), __NFUN_156__(32767, __NFUN_145__(Rotation.Yaw, 2))), 0);
+		return;
+	}
+
+	function FindGoodView()
+	{
+		local Vector cameraLoc;
+		local Rotator cameraRot, ViewRotation;
+		local int tries, besttry;
+		local float bestDist, newdist;
+		local int startYaw;
+		local Actor ViewActor;
+
+		ViewRotation = Rotation;
+		ViewRotation.Pitch = 56000;
+		tries = 0;
+		besttry = 0;
+		bestDist = 0.0000000;
+		startYaw = ViewRotation.Yaw;
+		tries = 0;
+		J0x4B:
+
+		// End:0xDD [Loop If]
+		if(__NFUN_150__(tries, 16))
+		{
+			cameraLoc = ViewTarget.Location;
+			PlayerCalcView(ViewActor, cameraLoc, cameraRot);
+			newdist = __NFUN_225__(__NFUN_216__(cameraLoc, ViewTarget.Location));
+			// End:0xC2
+			if(__NFUN_177__(newdist, bestDist))
+			{
+				bestDist = newdist;
+				besttry = tries;
+			}
+			__NFUN_161__(ViewRotation.Yaw, 4096);
+			__NFUN_165__(tries);
+			// [Loop Continue]
+			goto J0x4B;
+		}
+		ViewRotation.Yaw = __NFUN_146__(startYaw, __NFUN_144__(besttry, 4096));
+		__NFUN_299__(ViewRotation);
+		return;
+	}
+
+	function Timer()
+	{
+		bFrozen = false;
+		return;
+	}
+
+	function BeginState()
+	{
+		local Pawn P;
+
+		Level.m_bInGamePlanningActive = false;
+		EndZoom();
+		bFire = 0;
+		bAltFire = 0;
+		// End:0x77
+		if(__NFUN_119__(Pawn, none))
+		{
+			Pawn.SimAnim.AnimRate = 0;
+			Pawn.bPhysicsAnimUpdate = false;
+			Pawn.StopAnimating();
+			Pawn.__NFUN_262__(false, false, false);
+		}
+		myHUD.bShowScores = true;
+		bFrozen = true;
+		// End:0xA3
+		if(__NFUN_129__(bFixedCamera))
+		{
+			bBehindView = true;
+		}
+		__NFUN_280__(1.5000000, false);
+		__NFUN_3970__(0);
+		// End:0xEC
+		foreach __NFUN_313__(Class'Engine.Pawn', P)
+		{
+			P.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+			P.__NFUN_3970__(0);			
+		}		
+		return;
+	}
+	stop;
+}
+
+state Dead
+{
+	ignores KilledBy;
+
+	function ServerReStartPlayer()
+	{
+		super.ServerReStartPlayer();
+		return;
+	}
+
+// The player wants to fire.
+	exec function Fire(optional float f)
+	{
+		ServerReStartPlayer();
+		return;
+	}
+
+// The player wants to alternate-fire.
+	exec function AltFire(optional float f)
+	{
+		// End:0x20
+		if(myHUD.bShowScores)
+		{
+			Fire(f);			
+		}
+		else
+		{
+			Timer();
+		}
+		return;
+	}
+
+	function ServerMove(float TimeStamp, Vector Accel, Vector ClientLoc, bool NewbRun, bool NewbDuck, bool NewbCrawl, int View, int iNewRotOffset, optional byte OldTimeDelta, optional int OldAccel)
+	{
+		global.ServerMove(TimeStamp, Accel, ClientLoc, false, false, false, View, iNewRotOffset);
+		return;
+	}
+
+	function PlayerMove(float DeltaTime)
+	{
+		local Vector X, Y, Z;
+		local Rotator ViewRotation;
+
+		// End:0x13F
+		if(__NFUN_129__(bFrozen))
+		{
+			// End:0x27
+			if(bPressedJump)
+			{
+				Fire(0.0000000);
+				bPressedJump = false;
+			}
+			__NFUN_229__(Rotation, X, Y, Z);
+			ViewRotation = Rotation;
+			__NFUN_161__(ViewRotation.Yaw, int(__NFUN_171__(__NFUN_171__(32.0000000, DeltaTime), aTurn)));
+			__NFUN_161__(ViewRotation.Pitch, int(__NFUN_171__(__NFUN_171__(32.0000000, DeltaTime), aLookUp)));
+			ViewRotation.Pitch = __NFUN_156__(ViewRotation.Pitch, 65535);
+			// End:0x100
+			if(__NFUN_130__(__NFUN_151__(ViewRotation.Pitch, 18000), __NFUN_150__(ViewRotation.Pitch, 49152)))
+			{
+				// End:0xF0
+				if(__NFUN_177__(aLookUp, float(0)))
+				{
+					ViewRotation.Pitch = 18000;					
+				}
+				else
+				{
+					ViewRotation.Pitch = 49152;
+				}
+			}
+			__NFUN_299__(ViewRotation);
+			// End:0x13F
+			if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+			{
+				ReplicateMove(DeltaTime, vect(0.0000000, 0.0000000, 0.0000000), 0, rot(0, 0, 0));
+			}
+		}
+		ViewShake(DeltaTime);
+		ViewFlash(DeltaTime);
+		return;
+	}
+
+	function FindGoodView()
+	{
+		local Vector cameraLoc;
+		local Rotator cameraRot, ViewRotation;
+		local int tries, besttry;
+		local float bestDist, newdist;
+		local int startYaw;
+		local Actor ViewActor;
+
+		// End:0x0D
+		if(__NFUN_114__(ViewTarget, none))
+		{
+			return;
+		}
+		ViewRotation = Rotation;
+		ViewRotation.Pitch = 56000;
+		tries = 0;
+		besttry = 0;
+		bestDist = 0.0000000;
+		startYaw = ViewRotation.Yaw;
+		tries = 0;
+		J0x58:
+
+		// End:0xEA [Loop If]
+		if(__NFUN_150__(tries, 16))
+		{
+			cameraLoc = ViewTarget.Location;
+			PlayerCalcView(ViewActor, cameraLoc, cameraRot);
+			newdist = __NFUN_225__(__NFUN_216__(cameraLoc, ViewTarget.Location));
+			// End:0xCF
+			if(__NFUN_177__(newdist, bestDist))
+			{
+				bestDist = newdist;
+				besttry = tries;
+			}
+			__NFUN_161__(ViewRotation.Yaw, 4096);
+			__NFUN_165__(tries);
+			// [Loop Continue]
+			goto J0x58;
+		}
+		ViewRotation.Yaw = __NFUN_146__(startYaw, __NFUN_144__(besttry, 4096));
+		__NFUN_299__(ViewRotation);
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x0D
+		if(__NFUN_129__(bFrozen))
+		{
+			return;
+		}
+		bFrozen = false;
+		myHUD.bShowScores = true;
+		bPressedJump = false;
+		return;
+	}
+
+	function BeginState()
+	{
+		local SavedMove Next, Current;
+
+		Enemy = none;
+		bBehindView = true;
+		bFrozen = true;
+		bPressedJump = false;
+		J0x1F:
+
+		// End:0x63 [Loop If]
+		if(__NFUN_119__(SavedMoves, none))
+		{
+			Next = SavedMoves.NextMove;
+			Current = SavedMoves;
+			SavedMoves = Next;
+			Current.__NFUN_279__();
+			// [Loop Continue]
+			goto J0x1F;
+		}
+		// End:0x8C
+		if(__NFUN_119__(PendingMove, none))
+		{
+			Current = PendingMove;
+			PendingMove = none;
+			Current.__NFUN_279__();
+		}
+		return;
+	}
+
+	function EndState()
+	{
+		local SavedMove Next;
+
+		J0x00:
+		// End:0x39 [Loop If]
+		if(__NFUN_119__(SavedMoves, none))
+		{
+			Next = SavedMoves.NextMove;
+			SavedMoves.__NFUN_279__();
+			SavedMoves = Next;
+			// [Loop Continue]
+			goto J0x00;
+		}
+		// End:0x57
+		if(__NFUN_119__(PendingMove, none))
+		{
+			PendingMove.__NFUN_279__();
+			PendingMove = none;
+		}
+		Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+		Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+		bBehindView = false;
+		myHUD.bShowScores = false;
+		bPressedJump = false;
+		return;
+	}
+	stop;
+}
 
 defaultproperties
 {
-     EnemyTurnSpeed=45000
-     bAlwaysMouseLook=True
-     bKeyboardLook=True
-     bZeroRoll=True
-     OrthoZoom=40000.000000
-     CameraDist=9.000000
-     DesiredFOV=85.000000
-     DefaultFOV=85.000000
-     MaxTimeMargin=1.000000
-     NetClientMaxTickRate=15.000000
-     LocalMessageClass=Class'Engine.LocalMessage'
-     CheatClass=Class'Engine.CheatManager'
-     InputClass=Class'Engine.PlayerInput'
-     FlashScale=(X=1.000000,Y=1.000000,Z=1.000000)
-     QuickSaveString="Quick Saving"
-     NoPauseMessage="Game is not pauseable"
-     ViewingFrom="Now viewing from"
-     OwnCamera="Now viewing from own camera"
-     bIsPlayer=True
-     bCanOpenDoors=True
-     bCanDoSpecial=True
-     FovAngle=85.000000
-     Handedness=1.000000
-     bTravel=True
-     NetPriority=3.000000
+	EnemyTurnSpeed=45000
+	bAlwaysMouseLook=true
+	bKeyboardLook=true
+	bZeroRoll=true
+	OrthoZoom=40000.0000000
+	CameraDist=9.0000000
+	DesiredFOV=85.0000000
+	DefaultFOV=85.0000000
+	MaxTimeMargin=1.0000000
+	NetClientMaxTickRate=15.0000000
+	LocalMessageClass=Class'Engine.LocalMessage'
+	CheatClass=Class'Engine.CheatManager'
+	InputClass=Class'Engine.PlayerInput'
+	FlashScale=(X=1.0000000,Y=1.0000000,Z=1.0000000)
+	QuickSaveString="Quick Saving"
+	NoPauseMessage="Game is not pauseable"
+	ViewingFrom="Now viewing from"
+	OwnCamera="Now viewing from own camera"
+	bIsPlayer=true
+	bCanOpenDoors=true
+	bCanDoSpecial=true
+	FovAngle=85.0000000
+	Handedness=1.0000000
+	bTravel=true
+	NetPriority=3.0000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var float
+// REMOVED IN 1.60: var byte
+// REMOVED IN 1.60: var g
+// REMOVED IN 1.60: var e
+// REMOVED IN 1.60: var h
+// REMOVED IN 1.60: var p
+// REMOVED IN 1.60: var n
+// REMOVED IN 1.60: var OldClientWeapon
+// REMOVED IN 1.60: var eCameraMode
+// REMOVED IN 1.60: function HandlePickup
+// REMOVED IN 1.60: function FOV
+// REMOVED IN 1.60: function ForceReload
+// REMOVED IN 1.60: function damageAttitudeTo
+// REMOVED IN 1.60: function Speech
+// REMOVED IN 1.60: function RestartLevel
+// REMOVED IN 1.60: function LocalTravel
+// REMOVED IN 1.60: function QuickSave
+// REMOVED IN 1.60: function QuickLoad
+// REMOVED IN 1.60: function ActivateInventoryItem
+// REMOVED IN 1.60: function ThrowWeapon
+// REMOVED IN 1.60: function PrevWeapon
+// REMOVED IN 1.60: function NextWeapon
+// REMOVED IN 1.60: function SwitchWeapon
+// REMOVED IN 1.60: function GetWeapon
+// REMOVED IN 1.60: function PrevItem
+// REMOVED IN 1.60: function ActivateItem
+// REMOVED IN 1.60: function Use
+// REMOVED IN 1.60: function ServerUse
+// REMOVED IN 1.60: function SwitchTeam
+// REMOVED IN 1.60: function ChangeTeam
+// REMOVED IN 1.60: function SwitchLevel
+// REMOVED IN 1.60: function ClearProgressMessages
+// REMOVED IN 1.60: function SetProgressMessage
+// REMOVED IN 1.60: function ChangedWeapon
+// REMOVED IN 1.60: function AdjustAim
+// REMOVED IN 1.60: function AttitudeTo
+// REMOVED IN 1.60: function CreateCameraEffect

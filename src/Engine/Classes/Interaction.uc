@@ -1,3 +1,9 @@
+//=============================================================================
+// Interaction - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 // ====================================================================
 //  Class:  Engine.Interaction
 //  
@@ -15,119 +21,155 @@
 //
 // (c) 2001, Epic Games, Inc.  All Rights Reserved
 // ====================================================================
+class Interaction extends Interactions
+ native;
 
-class Interaction extends Interactions;
+var bool bActive;  // Is this interaction Getting Input
+var bool bVisible;  // Is this interaction being Displayed
+var bool bRequiresTick;  // Does this interaction require game TICK
+var Player ViewportOwner;  // Pointer to the ViewPort that "Owns" this interaction or none if it's Global
+var InteractionMaster Master;  // Pointer to the Interaction Master
 
-var bool bActive;			// Is this interaction Getting Input
-var bool bVisible;			// Is this interaction being Displayed
-var bool bRequiresTick; 	// Does this interaction require game TICK
+// Export UInteraction::execInitialize(FFrame&, void* const)
+ native function Initialize();
 
-// These entries get filled out upon creation.
+// Export UInteraction::execConsoleCommand(FFrame&, void* const)
+ native function bool ConsoleCommand(coerce string S);
 
-var Player ViewportOwner;		// Pointer to the ViewPort that "Owns" this interaction or none if it's Global
-var InteractionMaster Master;	// Pointer to the Interaction Master
-
-//-----------------------------------------------------------------------------
-// natives.
-
-native function Initialize();							// setup the state system and stack frame
-native function bool ConsoleCommand( coerce string S );	// Executes a console command
-
-// WorldToScreen converts a vector in the world 
-
+// Export UInteraction::execWorldToScreen(FFrame&, void* const)
 // ====================================================================
 // WorldToScreen - Returns the X/Y screen coordinates in to a viewport of a given vector
 // in the world. 
 // ====================================================================
-native function vector WorldToScreen(vector Location, optional vector CameraLocation, optional rotator CameraRotation);
+ native function Vector WorldToScreen(Vector Location, optional Vector CameraLocation, optional Rotator CameraRotation);
 
+// Export UInteraction::execScreenToWorld(FFrame&, void* const)
 // ====================================================================
 // ScreenToWorld - Converts an X/Y screen coordinate in to a world vector
 // ====================================================================
-native function vector ScreenToWorld(vector Location, optional vector CameraLocation, optional rotator CameraRotation); 
+ native function Vector ScreenToWorld(Vector Location, optional Vector CameraLocation, optional Rotator CameraRotation);
 
-// ====================================================================
-// Initialized - Called directly after an Interaction Object has been created
-// and Initialized.  Should be subclassed
-// ====================================================================
-
-event Initialized(); 
-event ServerDisconnected();
-//#ifdef R6CODE
-event UserDisconnected(); //The user asked to be disconnected
-//#endif // #ifdef R6CODE
-event ConnectionFailed();
-//#ifdef R6CODE
-event R6ConnectionFailed( string szError );
-event R6ConnectionSuccess();
-event R6ConnectionInterrupted();
-event R6ConnectionInProgress();
-event R6ProgressMsg( string _Str1, string _Str2, FLOAT Seconds);
-function object SetGameServiceLinks(PlayerController _localPlayer);
-event NotifyLevelChange();
-event NotifyAfterLevelChange();
-event MenuLoadProfile( BOOL _bServerProfile);
-event LaunchR6MainMenu();
-//#endif R6Code
-
-function SendGoCode(EGoCode eGo);
-// ====================================================================
-// Message - This event allows interactions to receive messages
-// ====================================================================
-
-function Message( coerce string Msg, float MsgLife)
+event Initialized()
 {
-} // Message
-
-// ====================================================================
-// ====================================================================
-// Input Routines - These two routines are the entry points for input.  They both
-// return true if the data has been processed and should now discarded.
-
-// Both functions should be handled in a subclass of Interaction
-// ====================================================================
-// ====================================================================
-
-function bool KeyType( out EInputKey Key )
-{
-	return false;	
+	return;
 }
 
-function bool KeyEvent( out EInputKey Key, out EInputAction Action, FLOAT Delta )
+event ServerDisconnected()
+{
+	return;
+}
+
+//#ifdef R6CODE
+event UserDisconnected()
+{
+	return;
+}
+
+//#endif // #ifdef R6CODE
+event ConnectionFailed()
+{
+	return;
+}
+
+//#ifdef R6CODE
+event R6ConnectionFailed(string szError)
+{
+	return;
+}
+
+event R6ConnectionSuccess()
+{
+	return;
+}
+
+event R6ConnectionInterrupted()
+{
+	return;
+}
+
+event R6ConnectionInProgress()
+{
+	return;
+}
+
+event R6ProgressMsg(string _Str1, string _Str2, float Seconds)
+{
+	return;
+}
+
+function Object SetGameServiceLinks(PlayerController _localPlayer)
+{
+	return;
+}
+
+event NotifyLevelChange()
+{
+	return;
+}
+
+event NotifyAfterLevelChange()
+{
+	return;
+}
+
+event MenuLoadProfile(bool _bServerProfile)
+{
+	return;
+}
+
+event LaunchR6MainMenu()
+{
+	return;
+}
+
+// NEW IN 1.60
+event string GetStoreGamePwd()
+{
+	return;
+}
+
+function SendGoCode(Object.EGoCode eGo)
+{
+	return;
+}
+
+function Message(coerce string Msg, float MsgLife)
+{
+	return;
+}
+
+function bool KeyType(out Interactions.EInputKey Key)
 {
 	return false;
+	return;
 }
 
-// ====================================================================
-// ====================================================================
-// Render Routines - All Interactions recieve both PreRender and PostRender
-// calls.
+function bool KeyEvent(out Interactions.EInputKey Key, out Interactions.EInputAction Action, float Delta)
+{
+	return false;
+	return;
+}
 
-// Both functions should be handled in a subclass of Interaction
-// ====================================================================
-// ====================================================================
+function PreRender(Canvas Canvas)
+{
+	return;
+}
 
-
-function PreRender( canvas Canvas );
-function PostRender( canvas Canvas );
-
-// ====================================================================
-// SetFocus - This function cases the Interaction to gain "focus" in the interaction
-// system.  Global interactions's focus superceed locals.
-// ====================================================================
+function PostRender(Canvas Canvas)
+{
+	return;
+}
 
 function SetFocus()
 {
-	Master.SetFocusTo(self,ViewportOwner);
+	Master.SetFocusTo(self, ViewportOwner);
+	return;
+}
 
-} // SetFocus
-	
-// ====================================================================
-// Tick - By default, Interactions do not get ticked, but you can
-// simply turn on bRequiresTick.
-// ====================================================================
-
-function Tick(float DeltaTime);
+function Tick(float DeltaTime)
+{
+	return;
+}
 
 //#ifdef R6CODE
 // ====================================================================
@@ -135,41 +177,45 @@ function Tick(float DeltaTime);
 // Ex: english to french : A is A -- Space is Espace -- Backspace is reculer etc...
 //	   the localization is in R6Menu.int 
 // ====================================================================
-event string ConvertKeyToLocalisation( BYTE _Key, string _szEnumKeyName)
+event string ConvertKeyToLocalisation(byte _Key, string _szEnumKeyName)
 {
 	local string szResult;
 
-	// number
-	if (( _Key > EInputKey.IK_0 - 1) && ( _Key < EInputKey.IK_9 + 1))
+	// End:0x40
+	if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(48), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(57), 1))))
 	{
-		szResult = string(_Key - EInputKey.IK_0);
-	}
-	// alphabet
-	else if (( _Key > EInputKey.IK_A - 1) && ( _Key < EInputKey.IK_Z + 1))
-	{
-		szResult = Chr(_Key);
-	}
-	// F1 to F24
-	else if (( _Key > EInputKey.IK_F1 - 1) && ( _Key < EInputKey.IK_F24 + 1))
-	{
-		szResult = "F"$(_Key - EInputKey.IK_F1 + 1); //+1 because of the substraction
+		szResult = string(__NFUN_147__(int(_Key), int(48)));		
 	}
 	else
 	{
-		szResult = Localize("Interactions", "IK_"$_szEnumKeyName, "R6Menu");
-		
-		// if the key is not define
-		if ( szResult == Localize("Interactions", "IK_None", "R6Menu"))
+		// End:0x7A
+		if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(65), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(90), 1))))
 		{
-			szResult = "";
+			szResult = __NFUN_236__(int(_Key));			
+		}
+		else
+		{
+			// End:0xC2
+			if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(112), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(135), 1))))
+			{
+				szResult = __NFUN_112__("F", string(__NFUN_146__(__NFUN_147__(int(_Key), int(112)), 1)));				
+			}
+			else
+			{
+				szResult = Localize("Interactions", __NFUN_112__("IK_", _szEnumKeyName), "R6Menu");
+				// End:0x127
+				if(__NFUN_122__(szResult, Localize("Interactions", "IK_None", "R6Menu")))
+				{
+					szResult = "";
+				}
+			}
 		}
 	}
-
 	return szResult;
+	return;
 }
-//#endif R6CODE
 
 defaultproperties
 {
-     bActive=True
+	bActive=true
 }

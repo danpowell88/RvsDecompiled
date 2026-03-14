@@ -1,118 +1,137 @@
+//=============================================================================
+// UWindowWrappedTextArea - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowWrappedTextArea extends UWindowTextAreaControl;
 
-
-function BeforePaint( Canvas C, float X, float Y )
+function BeforePaint(Canvas C, float X, float Y)
 {
-    if (m_bWrapClipText)
-    {
-        m_bWrapClipText = false; // reset on clear() method only
-        NewAddText(C); // we just add a fct to not allocate 3 array of szTextArraySize each time before paint was processed
-    }
+	// End:0x1C
+	if(m_bWrapClipText)
+	{
+		m_bWrapClipText = false;
+		NewAddText(C);
+	}
+	return;
 }
 
-
-function Paint( Canvas C, float X, float Y )
+function Paint(Canvas C, float X, float Y)
 {
-	local FLOAT XL, YL;
-	local INT   i,                // index
-                j,                // index
-                AddLine;          // the number of line to add depending the offset
-    local bool  bUseAreaFont;     // Use the area font for display
-	
-    // if no lines add in TextArea...
-    //log("Lines: "$Lines);
-	if(Lines == 0)
-		return;    
+	local float XL, YL;
+	local int i, j, AddLine;
+	local bool bUseAreaFont;
 
-    // to verify
-    bUseAreaFont = false;
-   	if(AbsoluteFont != None)
-    {
-		C.Font = AbsoluteFont; // this is set in UWindowTextAreaControl
-    }
-    else
-    {
-        if (TextFontArea[0] != None)
-        {
-            bUseAreaFont = true;
-            C.Font = TextFontArea[0];
-        }
-        else
-        {
-            C.Font = AbsoluteFont;
-        }
-    }
-
-    // in the case of textareafont array, the empty line offset is relative (depending of all the textareafont choice)
-	TextSize(C, "TEST", XL, YL); 
-
-    // add some lines depending the initial offset 
-    AddLine = m_fYOffSet/YL;
-    AddLine += 1;     // give a one line of security to avoid cut line at the end
-    AddLine += Lines; // add original total lines -- real total lines now
-
-    //Calculate the visible rows
-	VisibleRows = WinHeight / YL;
-
-    i = 0;
-
-	if (bScrollable)
+	// End:0x0D
+	if(__NFUN_154__(Lines, 0))
 	{
-        //why substract 1, because the last line (depending of the offset will be cut by 
-		VertSB.SetRange(0, AddLine, VisibleRows, 0);//VisibleRows - 1, 0); 
-        // assign the pos of Scrollbar to index
-        i = VertSB.Pos;
+		return;
 	}
+	bUseAreaFont = false;
+	// End:0x37
+	if(__NFUN_119__(AbsoluteFont, none))
+	{
+		C.Font = AbsoluteFont;		
+	}
+	else
+	{
+		// End:0x65
+		if(__NFUN_119__(TextFontArea[0], none))
+		{
+			bUseAreaFont = true;
+			C.Font = TextFontArea[0];			
+		}
+		else
+		{
+			C.Font = AbsoluteFont;
+		}
+	}
+	TextSize(C, "TEST", XL, YL);
+	AddLine = int(__NFUN_172__(m_fYOffSet, YL));
+	__NFUN_161__(AddLine, 1);
+	__NFUN_161__(AddLine, Lines);
+	VisibleRows = int(__NFUN_172__(WinHeight, YL));
+	i = 0;
+	// End:0x11E
+	if(bScrollable)
+	{
+		VertSB.SetRange(0.0000000, float(AddLine), float(VisibleRows), 0.0000000);
+		i = int(VertSB.pos);
+	}
+	j = 0;
+	J0x125:
 
+	// End:0x208 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(j, VisibleRows), __NFUN_150__(__NFUN_146__(i, j), Lines)))
+	{
+		C.__NFUN_2626__(TextColorArea[__NFUN_146__(i, j)].R, TextColorArea[__NFUN_146__(i, j)].G, TextColorArea[__NFUN_146__(i, j)].B);
+		// End:0x1C7
+		if(bUseAreaFont)
+		{
+			C.Font = TextFontArea[__NFUN_146__(i, j)];
+		}
+		ClipText(C, m_fXOffSet, __NFUN_174__(m_fYOffSet, __NFUN_171__(YL, float(j))), TextArea[__NFUN_146__(i, j)]);
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x125;
+	}
+	// End:0x265
+	if(__NFUN_151__(__NFUN_146__(i, j), Lines))
+	{
+		j = 0;
+		J0x225:
 
-    for( j=0; j < VisibleRows && i+j < Lines; j++)
-    {
-        C.SetDrawColor(TextColorArea[i+j].R,TextColorArea[i+j].G,TextColorArea[i+j].B);
-
-        if (bUseAreaFont) //&& ( i+j < Lines)) // the last condition is to prevent the empty add line at the end
-            C.Font = TextFontArea[i+j];
-
-        //in fact the text is already clip, but for use some code of clip text fct, we use it anyway
-        ClipText( C, m_fXOffSet, m_fYOffSet + (YL*j), TextArea[i + j]);   
-    }
-
-    if ( i + j > Lines)
-    {
-        for( j=0; j < AddLine; j++)
-        {
-            ClipText( C, m_fXOffSet, m_fYOffSet + (YL*j), "");
-        }
-    }
+		// End:0x265 [Loop If]
+		if(__NFUN_150__(j, AddLine))
+		{
+			ClipText(C, m_fXOffSet, __NFUN_174__(m_fYOffSet, __NFUN_171__(YL, float(j))), "");
+			__NFUN_165__(j);
+			// [Loop Continue]
+			goto J0x225;
+		}
+	}
+	return;
 }
 
 // INTERN FONCTION FOR THIS CLASS ONLY, see before paint comment
 function NewAddText(Canvas C)
 {
-    local INT i, iTempLines;
-    local Font   TempTextFontArea[szTextArraySize];
-    local color  TempTextColorArea[szTextArraySize];
-    local string TempTextArea[szTextArraySize]; 
+	local int i, iTempLines;
+	local Font TempTextFontArea[80];
+	local Color TempTextColorArea[80];
+	local string TempTextArea[80];
 
-    if(Lines == 0)
-    	return;
+	// End:0x0D
+	if(__NFUN_154__(Lines, 0))
+	{
+		return;
+	}
+	i = 0;
+	J0x14:
 
-    // do a copy to not overwrite the original add text
-    for ( i = 0; i < Lines; i++)
-    {
-        TempTextFontArea[i] = TextFontArea[i];    
-        TempTextColorArea[i] = TextColorArea[i];
-        TempTextArea[i] = TextArea[i];
-    }
+	// End:0x72 [Loop If]
+	if(__NFUN_150__(i, Lines))
+	{
+		TempTextFontArea[i] = TextFontArea[i];
+		TempTextColorArea[i] = TextColorArea[i];
+		TempTextArea[i] = TextArea[i];
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x14;
+	}
+	iTempLines = Lines;
+	Clear(true);
+	i = 0;
+	J0x8B:
 
-    iTempLines = Lines;
-    Clear( true); // array only
-
-    for ( i = 0; i < iTempLines; i++)
-    {
-        AddTextWithCanvas( C, m_fXOffSet, m_fYOffSet, TempTextArea[i], TempTextFontArea[i], TempTextColorArea[i]);
-    }
+	// End:0xDA [Loop If]
+	if(__NFUN_150__(i, iTempLines))
+	{
+		AddTextWithCanvas(C, m_fXOffSet, m_fYOffSet, TempTextArea[i], TempTextFontArea[i], TempTextColorArea[i]);
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x8B;
+	}
+	return;
 }
 
-defaultproperties
-{
-}

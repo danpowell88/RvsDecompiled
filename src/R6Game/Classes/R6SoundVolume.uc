@@ -1,4 +1,10 @@
 //=============================================================================
+// R6SoundVolume - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6SoundVolume.uc : This class allow to have sound when the player enter 
 //					   and leave a Volume.  All other volume should derive this
 //                     class in order to allow sound designer to reuse other 
@@ -10,98 +16,137 @@
 //    2001/01/13 * Created by Eric Begin
 //============================================================================//
 class R6SoundVolume extends Volume
-	native;
+ native;
 
-var (R6Sound) array<Sound> m_EntrySound;
-var (R6Sound) array<Sound> m_ExitSound;
-var (R6Sound) ESoundSlot   m_eSoundSlot; 
-
-
-
+var(R6Sound) Actor.ESoundSlot m_eSoundSlot;
+var(R6Sound) array<Sound> m_EntrySound;
+var(R6Sound) array<Sound> m_ExitSound;
 
 simulated event Touch(Actor Other)
 {
-    local INT iSoundIndex;
+	local int iSoundIndex;
 	local Controller C;
-    local bool bMissionPack;
+	local bool bMissionPack;
 
-	Super.Touch(Other);
-
-    if (Other.IsA('R6Pawn'))
-        C = Pawn(Other).Controller;
-    else if (Other.IsA('R6PlayerController'))
-        C = Controller(Other);
-
-    if (C != none)
-    {
+	super(Actor).Touch(Other);
+	// End:0x3B
+	if(Other.__NFUN_303__('R6Pawn'))
+	{
+		C = Pawn(Other).Controller;		
+	}
+	else
+	{
+		// End:0x5F
+		if(Other.__NFUN_303__('R6PlayerController'))
+		{
+			C = Controller(Other);
+		}
+	}
+	// End:0x190
+	if(__NFUN_119__(C, none))
+	{
 		C.m_CurrentAmbianceObject = self;
 		C.m_CurrentVolumeSound = self;
-		C.m_bUseExitSounds = FALSE;
+		C.m_bUseExitSounds = false;
+		// End:0x190
+		if(__NFUN_130__(__NFUN_119__(PlayerController(C), none), __NFUN_119__(Viewport(PlayerController(C).Player), none)))
+		{
+			bMissionPack = Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack();
+			// End:0x12A
+			if(__NFUN_129__(bMissionPack))
+			{
+				iSoundIndex = 0;
+				J0xFA:
 
-        if ((PlayerController(C) != None)  && (Viewport(PlayerController(C).Player) != None))
-        {
-            bMissionPack = class'Actor'.static.GetModMgr().IsMissionPack();
-            if ( !bMissionPack )
-            {
-			    for (iSoundIndex = 0; iSoundIndex < m_EntrySound.Length; iSoundIndex++)
-			    {
-				    PlaySound(m_EntrySound[iSoundIndex], m_eSoundSlot);
-			    }
-            }
-            else
-            {
-			    for (iSoundIndex = 0; iSoundIndex < m_EntrySound.Length; iSoundIndex++)
-			    {
-				    //PlaySound(m_EntrySound[iSoundIndex], m_eSoundSlot);//MissionPack1
-				    //////Begin MissionPack1
-				    if(m_bPlayOnlyOnce)
-				    {
-					    if(!m_bSoundWasPlayed)
-					    {
-						    PlaySound(m_EntrySound[iSoundIndex], m_eSoundSlot);
-						    m_bSoundWasPlayed = true;
-					    }
-				    }
-				    else
-					    PlaySound(m_EntrySound[iSoundIndex], m_eSoundSlot);
-				    //////End MissionPack1
-			    }
-            }
-	    }
-     }
+				// End:0x127 [Loop If]
+				if(__NFUN_150__(iSoundIndex, m_EntrySound.Length))
+				{
+					__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot);
+					__NFUN_165__(iSoundIndex);
+					// [Loop Continue]
+					goto J0xFA;
+				}				
+			}
+			else
+			{
+				iSoundIndex = 0;
+				J0x131:
+
+				// End:0x190 [Loop If]
+				if(__NFUN_150__(iSoundIndex, m_EntrySound.Length))
+				{
+					// End:0x173
+					if(m_bPlayOnlyOnce)
+					{
+						// End:0x170
+						if(__NFUN_129__(m_bSoundWasPlayed))
+						{
+							__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot);
+							m_bSoundWasPlayed = true;
+						}
+						// [Explicit Continue]
+						goto J0x186;
+					}
+					__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot);
+					J0x186:
+
+					__NFUN_165__(iSoundIndex);
+					// [Loop Continue]
+					goto J0x131;
+				}
+			}
+		}
+	}
+	return;
 }
 
 simulated event UnTouch(Actor Other)
 {
-    local INT iSoundIndex;
+	local int iSoundIndex;
 	local Controller C;
 
-	Super.untouch(Other);
-
-    if (Other.IsA('R6Pawn'))
-        C = Pawn(Other).Controller;
-    else if (Other.IsA('R6PlayerController'))
-        C = Controller(Other);
-
-    if (C != none)
-	{		
+	super(Actor).UnTouch(Other);
+	// End:0x3B
+	if(Other.__NFUN_303__('R6Pawn'))
+	{
+		C = Pawn(Other).Controller;		
+	}
+	else
+	{
+		// End:0x5F
+		if(Other.__NFUN_303__('R6PlayerController'))
+		{
+			C = Controller(Other);
+		}
+	}
+	// End:0xFF
+	if(__NFUN_119__(C, none))
+	{
 		C.m_CurrentAmbianceObject = self;
 		C.m_CurrentVolumeSound = self;
-		C.m_bUseExitSounds = TRUE;
-    
-        if ((PlayerController(C) != None)  && (Viewport(PlayerController(C).Player) != None))
+		C.m_bUseExitSounds = true;
+		// End:0xFF
+		if(__NFUN_130__(__NFUN_119__(PlayerController(C), none), __NFUN_119__(Viewport(PlayerController(C).Player), none)))
 		{
-			for (iSoundIndex = 0; iSoundIndex < m_ExitSound.Length; iSoundIndex++)
+			iSoundIndex = 0;
+			J0xD2:
+
+			// End:0xFF [Loop If]
+			if(__NFUN_150__(iSoundIndex, m_ExitSound.Length))
 			{
-				PlaySound(m_ExitSound[iSoundIndex], m_eSoundSlot);
+				__NFUN_264__(m_ExitSound[iSoundIndex], m_eSoundSlot);
+				__NFUN_165__(iSoundIndex);
+				// [Loop Continue]
+				goto J0xD2;
 			}
 		}
 	}
+	return;
 }
 
 defaultproperties
 {
-     m_eSoundSlot=SLOT_Ambient
-     m_b3DSound=False
-     m_bSeeThrough=True
+	m_eSoundSlot=1
+	m_b3DSound=false
+	m_bSeeThrough=true
 }

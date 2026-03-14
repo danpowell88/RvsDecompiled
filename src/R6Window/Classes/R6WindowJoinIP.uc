@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowJoinIP - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowJoinIP.uc : This class handles the logic and pop up windows
 //                      associated with the user joining a server by using
 //                      the Join IP button
@@ -10,249 +16,264 @@
 //=============================================================================
 class R6WindowJoinIP extends UWindowWindow;
 
+const K_MAX_TIME_BEACON = 5.0;
 
-// ASE DEVELOPMENT - Eric Begin - May 11th, 2003
-//
-// Added a new state 'EJOINIP_WAITING_FOR_UBICOMLOGIN' to make sure the ubi.com process is finished before logging in
-// on the game server
-//
 enum eJoinIPState
 {
-    EJOINIP_ENTER_IP,               // User needs to enter an IP
-    EJOINIP_WAITING_FOR_BEACON,     // Waiting for response from the server
-    EJOINIP_BEACON_FAIL,            // no response from server
-	EJOINIP_WAITING_FOR_UBICOMLOGIN // Waiting to be logged in on Ubi.Com
+	EJOINIP_ENTER_IP,               // 0
+	EJOINIP_WAITING_FOR_BEACON,     // 1
+	EJOINIP_BEACON_FAIL,            // 2
+	EJOINIP_WAITING_FOR_UBICOMLOGIN // 3
 };
 
-const K_MAX_TIME_BEACON  = 5.0;                     // Maximum 5 second delay before timing out.  
-
-var R6WindowPopUpBox    m_pEnterIP;                 // The enter IP window
-var R6WindowPopUpBox    m_pPleaseWait;              // Ask user to wait while we get authorization ID (pop up window)
-var R6WindowPopUpBox    m_pError;                   // Error pop up window
-var R6GSServers         m_GameService;              // Manages servers from game service
-var UWindowWindow       m_pSendMessageDest;         // Window to which the send message function will communicate
-var string              m_szIP;                     // IP address entered by user
-var eJoinIPState        eState;                     // Enumeration used in state machine for JOIN IO procedure
-var FLOAT               m_fBeaconTime;              // Time at which beacon was sent to query server
-var BOOL                m_bRoomValid;               // ubi.com room valid
-
+var R6WindowJoinIP.eJoinIPState eState;  // Enumeration used in state machine for JOIN IO procedure
+var bool m_bRoomValid;  // ubi.com room valid
 // ASE DEVELOPMENT - Eric Begin - May 11th, 2003
 //
 // This variable is set locally to prevent hidding and showing windows for nothing.
-var BOOL				m_bStartByCmdLine;
+var bool m_bStartByCmdLine;
+var float m_fBeaconTime;  // Time at which beacon was sent to query server
+var R6WindowPopUpBox m_pEnterIP;  // The enter IP window
+var R6WindowPopUpBox m_pPleaseWait;  // Ask user to wait while we get authorization ID (pop up window)
+var R6WindowPopUpBox m_pError;  // Error pop up window
+var R6GSServers m_GameService;  // Manages servers from game service
+var UWindowWindow m_pSendMessageDest;  // Window to which the send message function will communicate
+var string m_szIP;  // IP address entered by user
 
 //=======================================================================
 // StartJoinIPProcedure - Called from the menus when the user should
 // enter an IP of the server he wishes to join
 //=======================================================================
-function StartJoinIPProcedure( UWindowWindow _pCurrentWidget, string _szLastIP )
+function StartJoinIPProcedure(UWindowWindow _pCurrentWidget, string _szLastIP)
 {
-    // 
-    m_pSendMessageDest = _pCurrentWidget;
-    ShowWindow();
-    eState = EJOINIP_ENTER_IP;
-    m_pEnterIP.ShowWindow();
-    R6WindowEditBox(m_pEnterIP.m_ClientArea).SetValue( _szLastIP );
+	m_pSendMessageDest = _pCurrentWidget;
+	ShowWindow();
+	eState = 0;
+	m_pEnterIP.ShowWindow();
+	R6WindowEditBox(m_pEnterIP.m_ClientArea).SetValue(_szLastIP);
 	m_bStartByCmdLine = false;
+	return;
 }
 
 // ASE DEVELOPMENT - Eric Begin - May 11th, 2003
 //
 // Add a new function to deal with the fact that when the player connect to a server via the
 // command line, chances are that he won't be connect on ubi.com.
-function StartCmdLineJoinIPProcedure( UWindowWindow _pCurrentWidget, string _szLastIP )
+function StartCmdLineJoinIPProcedure(UWindowWindow _pCurrentWidget, string _szLastIP)
 {
-	log("R6WindowJoinIP::StartCmdLineJoinIPProcedure");
-    m_pSendMessageDest = _pCurrentWidget;
-    ShowWindow();
-    eState = EJOINIP_WAITING_FOR_UBICOMLOGIN;
-    m_pPleaseWait.ShowWindow();
-	log("R6WindowJoinIP::SetValue");
-    R6WindowEditBox(m_pEnterIP.m_ClientArea).SetValue( _szLastIP );
+	__NFUN_231__("R6WindowJoinIP::StartCmdLineJoinIPProcedure");
+	m_pSendMessageDest = _pCurrentWidget;
+	ShowWindow();
+	eState = 3;
+	m_pPleaseWait.ShowWindow();
+	__NFUN_231__("R6WindowJoinIP::SetValue");
+	R6WindowEditBox(m_pEnterIP.m_ClientArea).SetValue(_szLastIP);
 	m_bStartByCmdLine = true;
+	return;
 }
 
-//=======================================================================
-// Manager - Should be called regularly by the parent window whenever
-// a request is in progress
-//=======================================================================
-
-function Manager( UWindowWindow _pCurrentWidget )
+function Manager(UWindowWindow _pCurrentWidget)
 {
-    local FLOAT elapsedTime;       // Elapsed time waiting for response from server
+	local float elapsedTime;
 
-    switch ( eState )
-    {
-		// ASE DEVELOPMENT - Eric Begin - May 11th, 2003
-		//
-		// We have to add a new state for waiting the ubi.com login process to finish
-		//
-		case EJOINIP_WAITING_FOR_UBICOMLOGIN:
-			if ( m_GameService.m_bLoggedInUbiDotCom )
+	switch(eState)
+	{
+		// End:0x2B
+		case 3:
+			// End:0x28
+			if(m_GameService.m_bLoggedInUbiDotCom)
 			{
-				PopUpBoxDone(MR_OK, EPopUpID_EnterIP);
+				PopUpBoxDone(3, 10);
 			}
+			// End:0x312
 			break;
-
-        case EJOINIP_WAITING_FOR_BEACON:
-            // Response has been received from the server
-            if ( m_GameService.m_ClientBeacon.PreJoinInfo.bResponseRcvd )
-            {
-                // Verify that the server is the same version as the game
-                if ( Root.Console.ViewportOwner.Actor.GetGameVersion() != m_GameService.m_ClientBeacon.PreJoinInfo.szGameVersion )
-                {
-                    eState = EJOINIP_BEACON_FAIL;
-                    m_pPleaseWait.HideWindow();
-                    m_pError.ShowWindow();
-	                R6WindowTextLabel(m_pError.m_ClientArea).Text = Localize("MultiPlayer","PopUp_Error_BadVersion","R6Menu");
-                }
-                else if (R6Console(Root.console).m_bNonUbiMatchMaking)
-                {
-                    _pCurrentWidget.SendMessage( MWM_UBI_JOINIP_SUCCESS );
-					if (!m_bStartByCmdLine)
-						HideWindow();
-                }
-                // Only allow user to join internet servers using the Join IP button
-                else if ( !m_GameService.m_ClientBeacon.PreJoinInfo.bInternetServer )
-                {
-                    eState = EJOINIP_BEACON_FAIL;
-                    m_pPleaseWait.HideWindow();
-                    m_pError.ShowWindow();
-	                R6WindowTextLabel(m_pError.m_ClientArea).Text = Localize("MultiPlayer","PopUp_Error_LanServer","R6Menu");
-                }
-                else
-                {
-                    m_bRoomValid = ( m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID != 0 &&
-                                     m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID != 0    );
-                    _pCurrentWidget.SendMessage( MWM_UBI_JOINIP_SUCCESS );
-                    HideWindow();
-                }
-            }
-            else
-            {
-                // Check if beacon has timed out, if so put up error message
-                elapsedTime = m_GameService.NativeGetSeconds() - m_fBeaconTime;
-                if ( elapsedTime > K_MAX_TIME_BEACON )
-                {
-                    eState = EJOINIP_BEACON_FAIL;
-                    m_pPleaseWait.HideWindow();
-                    m_pError.ShowWindow();
-	                R6WindowTextLabel(m_pError.m_ClientArea).Text = Localize("MultiPlayer","PopUp_Error_NoServer","R6Menu");
-                }
-            }
-
-            break;
-//        case EJOINIP_BEACON_FAIL:
-//            break;
-    }
+		// End:0x30F
+		case 1:
+			// End:0x26F
+			if(m_GameService.m_ClientBeacon.PreJoinInfo.bResponseRcvd)
+			{
+				// End:0x12B
+				if(__NFUN_123__(Root.Console.ViewportOwner.Actor.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield())), m_GameService.m_ClientBeacon.PreJoinInfo.szGameVersion))
+				{
+					eState = 2;
+					m_pPleaseWait.HideWindow();
+					m_pError.ShowWindow();
+					R6WindowTextLabel(m_pError.m_ClientArea).SetNewText(Localize("MultiPlayer", "PopUp_Error_BadVersion", "R6Menu"), true);					
+				}
+				else
+				{
+					// End:0x170
+					if(R6Console(Root.Console).m_bNonUbiMatchMaking)
+					{
+						_pCurrentWidget.SendMessage(6);
+						// End:0x16D
+						if(__NFUN_129__(m_bStartByCmdLine))
+						{
+							HideWindow();
+						}						
+					}
+					else
+					{
+						// End:0x20B
+						if(__NFUN_129__(m_GameService.m_ClientBeacon.PreJoinInfo.bInternetServer))
+						{
+							eState = 2;
+							m_pPleaseWait.HideWindow();
+							m_pError.ShowWindow();
+							R6WindowTextLabel(m_pError.m_ClientArea).SetNewText(Localize("MultiPlayer", "PopUp_Error_LanServer", "R6Menu"), true);							
+						}
+						else
+						{
+							m_bRoomValid = __NFUN_130__(__NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID, 0), __NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID, 0));
+							_pCurrentWidget.SendMessage(6);
+							HideWindow();
+						}
+					}
+				}				
+			}
+			else
+			{
+				elapsedTime = __NFUN_175__(m_GameService.__NFUN_3530__(), m_fBeaconTime);
+				// End:0x30C
+				if(__NFUN_177__(elapsedTime, 5.0000000))
+				{
+					eState = 2;
+					m_pPleaseWait.HideWindow();
+					m_pError.ShowWindow();
+					R6WindowTextLabel(m_pError.m_ClientArea).SetNewText(Localize("MultiPlayer", "PopUp_Error_NoServer", "R6Menu"), true);
+				}
+			}
+			// End:0x312
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
-
-//=======================================================================
-// PopUpBoxCreate - Creates the pop up windows
-//=======================================================================
 
 function PopUpBoxCreate()
 {
-    local R6WindowEditBox pR6EditBoxTemp;
-    local R6WindowTextLabel    pR6TextLabelTemp;
+	local R6WindowEditBox pR6EditBoxTemp;
+	local R6WindowTextLabel pR6TextLabelTemp;
 
-    // Create PopUp frame for the Enter IP window
-
-    m_pEnterIP = R6WindowPopUpBox(CreateWindow( class'R6WindowPopUpBox', 0, 0, 640, 480));
-    m_pEnterIP.CreateStdPopUpWindow( Localize("MultiPlayer","PopUp_Join","R6Menu"), 30, 205, 170, 230, 50);
-    m_pEnterIP.CreateClientWindow( class'R6WindowEditBox');
-    m_pEnterIP.m_ePopUpID = EPopUpID_EnterIP;
-    pR6EditBoxTemp = R6WindowEditBox(m_pEnterIP.m_ClientArea);
-    pR6EditBoxTemp.TextColor = Root.Colors.BlueLight;
-    pR6EditBoxTemp.SetFont(F_PopUpTitle);
+	m_pEnterIP = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
+	m_pEnterIP.CreateStdPopUpWindow(Localize("MultiPlayer", "PopUp_Join", "R6Menu"), 30.0000000, 205.0000000, 170.0000000, 230.0000000, 50.0000000);
+	m_pEnterIP.CreateClientWindow(Class'R6Window.R6WindowEditBox');
+	m_pEnterIP.m_ePopUpID = 10;
+	pR6EditBoxTemp = R6WindowEditBox(m_pEnterIP.m_ClientArea);
+	pR6EditBoxTemp.TextColor = Root.Colors.BlueLight;
+	pR6EditBoxTemp.SetFont(8);
 	pR6EditBoxTemp.MaxLength = 21;
-    m_pEnterIP.HideWindow();
-
-    // Create PopUp frame for error window
-
-    m_pError = R6WindowPopUpBox(CreateWindow( class'R6WindowPopUpBox', 0, 0, 640, 480));
-    m_pError.CreateStdPopUpWindow( Localize("MultiPlayer","PopUp_Error_Title","R6Menu"), 30, 205, 170, 230, 50, 2);
-    m_pError.CreateClientWindow( class'R6WindowTextLabel');
-    m_pError.m_ePopUpID = EPopUpID_JoinIPError;
-    pR6TextLabelTemp = R6WindowTextLabel(m_pError.m_ClientArea);
-	pR6TextLabelTemp.Text = Localize("MultiPlayer","PopUp_Error_NoServer","R6Menu");
-	pR6TextLabelTemp.Align = TA_Center;
-	pR6TextLabelTemp.m_Font = Root.Fonts[F_VerySmallTitle];
+	m_pEnterIP.HideWindow();
+	m_pError = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
+	m_pError.CreateStdPopUpWindow(Localize("MultiPlayer", "PopUp_Error_Title", "R6Menu"), 30.0000000, 205.0000000, 170.0000000, 230.0000000, 50.0000000, int(2));
+	m_pError.CreateClientWindow(Class'R6Window.R6WindowTextLabel');
+	m_pError.m_ePopUpID = 11;
+	pR6TextLabelTemp = R6WindowTextLabel(m_pError.m_ClientArea);
+	pR6TextLabelTemp.Text = Localize("MultiPlayer", "PopUp_Error_NoServer", "R6Menu");
+	pR6TextLabelTemp.Align = 2;
+	pR6TextLabelTemp.m_Font = Root.Fonts[6];
 	pR6TextLabelTemp.TextColor = Root.Colors.BlueLight;
-	pR6TextLabelTemp.m_BGTexture = None;
-	pR6TextLabelTemp.m_HBorderTexture = None;
-	pR6TextLabelTemp.m_VBorderTexture = None;
-    pR6TextLabelTemp.m_TextDrawstyle  = ERenderStyle.STY_Alpha;
-    m_pError.HideWindow();
-
-    // Create PopUp frame for please wait window
-
-    m_pPleaseWait = R6WindowPopUpBox(CreateWindow( class'R6WindowPopUpBox', 0, 0, 640, 480));
-    m_pPleaseWait.CreateStdPopUpWindow( Localize("MultiPlayer","PopUp_Wait","R6Menu"), 30, 205, 170, 230, 50, 2);
-    m_pPleaseWait.CreateClientWindow( class'R6WindowTextLabel');
-    m_pPleaseWait.m_ePopUpID = EPopUpID_JoinIPWait;
-    pR6TextLabelTemp = R6WindowTextLabel(m_pPleaseWait.m_ClientArea);
-	pR6TextLabelTemp.Text = Localize("MultiPlayer","PopUp_Cancel","R6Menu");
-	pR6TextLabelTemp.Align = TA_Center;
-	pR6TextLabelTemp.m_Font = Root.Fonts[F_VerySmallTitle];
+	pR6TextLabelTemp.m_BGTexture = none;
+	pR6TextLabelTemp.m_HBorderTexture = none;
+	pR6TextLabelTemp.m_VBorderTexture = none;
+	pR6TextLabelTemp.m_TextDrawstyle = int(5);
+	m_pError.HideWindow();
+	m_pPleaseWait = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
+	m_pPleaseWait.CreateStdPopUpWindow(Localize("MultiPlayer", "PopUp_Wait", "R6Menu"), 30.0000000, 205.0000000, 170.0000000, 230.0000000, 50.0000000, int(2));
+	m_pPleaseWait.CreateClientWindow(Class'R6Window.R6WindowTextLabel');
+	m_pPleaseWait.m_ePopUpID = 12;
+	pR6TextLabelTemp = R6WindowTextLabel(m_pPleaseWait.m_ClientArea);
+	pR6TextLabelTemp.Text = Localize("MultiPlayer", "PopUp_Cancel", "R6Menu");
+	pR6TextLabelTemp.Align = 2;
+	pR6TextLabelTemp.m_Font = Root.Fonts[6];
 	pR6TextLabelTemp.TextColor = Root.Colors.BlueLight;
-	pR6TextLabelTemp.m_BGTexture = None;
-	pR6TextLabelTemp.m_HBorderTexture = None;
-	pR6TextLabelTemp.m_VBorderTexture = None;
-    pR6TextLabelTemp.m_TextDrawstyle  = ERenderStyle.STY_Alpha;
-    m_pPleaseWait.HideWindow();
+	pR6TextLabelTemp.m_BGTexture = none;
+	pR6TextLabelTemp.m_HBorderTexture = none;
+	pR6TextLabelTemp.m_VBorderTexture = none;
+	pR6TextLabelTemp.m_TextDrawstyle = int(5);
+	m_pPleaseWait.HideWindow();
+	return;
 }
 
 //==============================================================================
 // PopUpBoxDone -  receive the result of the popup box  
 //==============================================================================
-function PopUpBoxDone( MessageBoxResult Result, ePopUpID _ePopUpID)
+function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
-    if (Result == MR_OK)
-    {
-        switch ( _ePopUpID )
-        {
-            case EPopUpID_EnterIP:
+	// End:0x147
+	if(__NFUN_154__(int(Result), int(3)))
+	{
+		switch(_ePopUpID)
+		{
+			// End:0xC4
+			case 10:
 				m_szIP = R6WindowEditBox(m_pEnterIP.m_ClientArea).GetValue();
-				if (m_GameService.m_ClientBeacon.PreJoinQuery( m_szIP, 0 )==false)
-				{ // handle invalid ip string format here
-					PopUpBoxDone(MR_OK,EPopUpID_JoinIPError);
-					log("Invalid IP string entered");
-					break;
+				// End:0x8D
+				if(__NFUN_242__(m_GameService.m_ClientBeacon.PreJoinQuery(m_szIP, 0), false))
+				{
+					PopUpBoxDone(3, 11);
+					__NFUN_231__("Invalid IP string entered");
+					// [Explicit Continue]
+					goto J0x144;
 				}
-				if (!m_bStartByCmdLine)
+				// End:0xA7
+				if(__NFUN_129__(m_bStartByCmdLine))
+				{
 					m_pPleaseWait.ShowWindow();
-				m_fBeaconTime =  m_GameService.NativeGetSeconds();
-				eState = EJOINIP_WAITING_FOR_BEACON;
-
-                break;
-            case EPopUpID_JoinIPWait:
-                m_pPleaseWait.HideWindow();
-                m_pError.HideWindow();
-                m_pSendMessageDest.SendMessage( MWM_UBI_JOINIP_FAIL );
-                HideWindow();
-                break;
-            case EPopUpID_JoinIPError:
-                m_pPleaseWait.HideWindow();
-                m_pError.HideWindow();
-                m_pEnterIP.ShowWindow();
-                eState = EJOINIP_ENTER_IP;
-                break;
-       }
-    }
-    else if (Result == MR_Cancel)
-    {
-        switch ( _ePopUpID )
-        {
-            case EPopUpID_EnterIP:
-                m_pEnterIP.HideWindow();
-                m_pSendMessageDest.SendMessage( MWM_UBI_JOINIP_FAIL );
-                HideWindow();
-                break;
-        }
-    }
+				}
+				m_fBeaconTime = m_GameService.__NFUN_3530__();
+				eState = 1;
+				// End:0x144
+				break;
+			// End:0x101
+			case 12:
+				m_pPleaseWait.HideWindow();
+				m_pError.HideWindow();
+				m_pSendMessageDest.SendMessage(7);
+				HideWindow();
+				// End:0x144
+				break;
+			// End:0x13E
+			case 11:
+				m_pPleaseWait.HideWindow();
+				m_pError.HideWindow();
+				m_pEnterIP.ShowWindow();
+				eState = 0;
+				// End:0x144
+				break;
+			// End:0xFFFF
+			default:
+				// End:0x144
+				break;
+				break;
+		}
+		J0x144:
+		
+	}
+	else
+	{
+		// End:0x192
+		if(__NFUN_154__(int(Result), int(4)))
+		{
+			switch(_ePopUpID)
+			{
+				// End:0x186
+				case 10:
+					m_pEnterIP.HideWindow();
+					m_pSendMessageDest.SendMessage(7);
+					// End:0x18C
+					break;
+				// End:0xFFFF
+				default:
+					// End:0x18C
+					break;
+					break;
+			}
+			HideWindow();
+		}
+	}
+	return;
 }
 
-defaultproperties
-{
-}

@@ -1,3 +1,9 @@
+//=============================================================================
+// R6FootStep - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6Footstep.uc 
 // Created By       Cyrille Lauzon
@@ -8,30 +14,29 @@
 //                  2002/10/09 - Rewritten by Jean-Francois Dube
 //============================================================================//
 class R6FootStep extends Actor
-    abstract
-    native;
+	abstract
+	native
+ notplaceable;
 
-// Normal footsteps
-var(Rainbow) Texture    m_DecalLeftFootTexture;
-var(Rainbow) Texture    m_DecalRightFootTexture;
-var(Rainbow) Texture    m_DecalLeftFootTextureDirty;
-var(Rainbow) Texture    m_DecalRightFootTextureDirty;
-var(Rainbow) FLOAT      m_fDuration;
-
+var(Rainbow) float m_fDuration;
 // Dirty footsteps
-var(Rainbow) FLOAT      m_fDurationDirty;
-var(Rainbow) FLOAT      m_fDirtyTime;
-
-var          FLOAT      m_fFootStepDuration;
-var          FLOAT      m_fFootStepCurrentTime;
-var          Texture    m_DecalFootTexture;
+var(Rainbow) float m_fDurationDirty;
+var(Rainbow) float m_fDirtyTime;
+var float m_fFootStepDuration;
+var float m_fFootStepCurrentTime;
+// Normal footsteps
+var(Rainbow) Texture m_DecalLeftFootTexture;
+var(Rainbow) Texture m_DecalRightFootTexture;
+var(Rainbow) Texture m_DecalLeftFootTextureDirty;
+var(Rainbow) Texture m_DecalRightFootTextureDirty;
+var Texture m_DecalFootTexture;
 
 defaultproperties
 {
-     m_fDurationDirty=10.000000
-     RemoteRole=ROLE_None
-     DrawType=DT_None
-     bHidden=True
-     m_fSoundRadiusSaturation=150.000000
-     Texture=None
+	m_fDurationDirty=10.0000000
+	RemoteRole=0
+	DrawType=0
+	bHidden=true
+	m_fSoundRadiusSaturation=150.0000000
+	Texture=none
 }

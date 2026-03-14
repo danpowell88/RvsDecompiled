@@ -1,21 +1,37 @@
-class MaterialTrigger extends Triggers;
-
-#exec Texture Import File=Textures\MaterialTrigger.pcx Name=S_MaterialTrigger Mips=Off MASKED=1
+//=============================================================================
+// MaterialTrigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class MaterialTrigger extends Triggers
+ placeable;
 
 var() array<Material> MaterialsToTrigger;
 
-function Trigger( Actor Other, Pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
 	local int i;
-	for( i=0;i<MaterialsToTrigger.Length;i++ )
+
+	i = 0;
+	J0x07:
+
+	// End:0x51 [Loop If]
+	if(__NFUN_150__(i, MaterialsToTrigger.Length))
 	{
-		if( MaterialsToTrigger[i] != None )
-			MaterialsToTrigger[i].Trigger( Other, EventInstigator );
+		// End:0x47
+		if(__NFUN_119__(MaterialsToTrigger[i], none))
+		{
+			MaterialsToTrigger[i].Trigger(Other, EventInstigator);
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
 	}
+	return;
 }
 
 defaultproperties
 {
-     bCollideActors=False
-     Texture=Texture'Engine.S_MaterialTrigger'
+	bCollideActors=false
+	Texture=Texture'Engine.S_MaterialTrigger'
 }

@@ -1,53 +1,55 @@
 //=============================================================================
+// Dispatcher - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Dispatcher: receives one trigger (corresponding to its name) as input, 
 // then triggers a set of specifid events with optional delays.
 // OBSOLETE - superceded by ScriptedTrigger
 //=============================================================================
-class Dispatcher extends Triggers
-	notplaceable;
+class Dispatcher extends Triggers;
 
-#exec Texture Import File=Textures\Dispatch.pcx Name=S_Dispatcher Mips=Off MASKED=1
-
-//-----------------------------------------------------------------------------
-// Dispatcher variables.
-
-var() name  OutEvents[32]; // Events to generate.
-var() float OutDelays[32]; // Relative delays before generating events.
-var int i;                // Internal counter.
-
-//=============================================================================
-// Dispatcher logic.
+var int i;  // Internal counter.
+var() float OutDelays[32];  // Relative delays before generating events.
+var() name OutEvents[32];  // Events to generate.
 
 //
 // When dispatcher is triggered...
 //
-function Trigger( actor Other, pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
 	Instigator = EventInstigator;
-	gotostate('Dispatch');
+	__NFUN_113__('Dispatch');
+	return;
 }
 
-//
-// Dispatch events.
-//
 state Dispatch
-{
-	ignores trigger;
+{Begin:
 
-Begin:
-	for( i=0; i<ArrayCount(OutEvents); i++ )
+	i = 0;
+	J0x07:
+
+	// End:0x6E [Loop If]
+	if(__NFUN_150__(i, 32))
 	{
-		if( (OutEvents[i] != '') && (OutEvents[i] != 'None') )
+		// End:0x64
+		if(__NFUN_130__(__NFUN_255__(OutEvents[i], 'None'), __NFUN_255__(OutEvents[i], 'None')))
 		{
-			Sleep( OutDelays[i] );
-			TriggerEvent(OutEvents[i],self,Instigator);
+			__NFUN_256__(OutDelays[i]);
+			TriggerEvent(OutEvents[i], self, Instigator);
 		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
 	}
-	GotoState('');
+	__NFUN_113__('None');
+	stop;		
 }
 
 defaultproperties
 {
-     bObsolete=True
-     Texture=Texture'Gameplay.S_Dispatcher'
+	bObsolete=true
+	Texture=Texture'Gameplay.S_Dispatcher'
 }

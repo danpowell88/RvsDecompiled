@@ -1,25 +1,36 @@
-class ACTION_EndSection extends ScriptedAction;
+//=============================================================================
+// ACTION_EndSection - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_EndSection extends ScriptedAction
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
 function ProceedToNextAction(ScriptedController C)
 {
-	if ( C.IterationCounter > 0 )
+	// End:0x44
+	if(__NFUN_151__(C.IterationCounter, 0))
 	{
 		C.ActionNum = C.IterationSectionStart;
-		C.IterationCounter--;
+		__NFUN_166__(C.IterationCounter);		
 	}
 	else
 	{
-		C.ActionNum += 1;
+		__NFUN_161__(C.ActionNum, 1);
 		C.IterationSectionStart = -1;
 	}
+	return;
 }
 
 function bool EndsSection()
 {
 	return true;
+	return;
 }
 
 defaultproperties
 {
-     ActionString="end section"
+	ActionString="end section"
 }

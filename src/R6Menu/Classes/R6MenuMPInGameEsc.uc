@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuMPInGameEsc - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuMPInGameEsc.uc : The first multi player menu window
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -8,55 +14,46 @@
 //=============================================================================
 class R6MenuMPInGameEsc extends R6MenuWidget;
 
-const C_fNAVBAR_HEIGHT				= 55;			// the height of the nav bar
-const C_fREFRESH_OBJ				= 2;			// refresh the objectives
+const C_fNAVBAR_HEIGHT = 55;
+const C_fREFRESH_OBJ = 2;
 
-var R6MenuMPInGameEscNavBar			m_pEscNavBar;
-
-var R6MenuMPInGameObj				m_pInGameObj;
-
-var FLOAT							m_fTimeForRefreshObj;
-
-var BOOL							m_bExitGamePopUp;
-var BOOL							m_bEscAvailable;
+var bool m_bExitGamePopUp;
+var bool m_bEscAvailable;
+var float m_fTimeForRefreshObj;
+var R6MenuMPInGameEscNavBar m_pEscNavBar;
+var R6MenuMPInGameObj m_pInGameObj;
 
 //===================================================================================
 // Create the window and all the area for displaying game information
 //===================================================================================
 function Created()
 {
-	local R6MenuInGameMultiPlayerRootWindow R6Root; 
-	local FLOAT fYNavBarPos;
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
+	local float fYNavBarPos;
 
-	R6Root = R6MenuInGameMultiPlayerRootWindow(OwnerWindow);
-
-    m_pEscNavBar = R6MenuMPInGameEscNavBar( CreateWindow(class'R6MenuMPInGameEscNavBar', 
-                                            R6Root.m_REscPopUp.X,
-                                            R6Root.m_REscPopUp.Y + R6Root.C_iESC_POP_UP_HEIGHT + R6Root.m_REscPopUp.H - C_fNAVBAR_HEIGHT,
-                                            R6Root.m_REscPopUp.W,
-                                            C_fNAVBAR_HEIGHT));
-
-	m_pInGameObj = R6MenuMPInGameObj(CreateWindow(class'R6MenuMPInGameObj', 
-												  r6Root.m_REscPopUp.X, r6Root.m_REscPopUp.Y + r6Root.C_iESC_POP_UP_HEIGHT, 
-												  r6Root.m_REscPopUp.W, r6Root.m_REscPopUp.H - C_fNAVBAR_HEIGHT, self));
+	r6Root = R6MenuInGameMultiPlayerRootWindow(OwnerWindow);
+	m_pEscNavBar = R6MenuMPInGameEscNavBar(CreateWindow(Root.MenuClassDefines.ClassInGameEscNavBar, float(r6Root.m_REscPopUp.X), float(__NFUN_147__(__NFUN_146__(__NFUN_146__(r6Root.m_REscPopUp.Y, r6Root.30), r6Root.m_REscPopUp.H), 55)), float(r6Root.m_REscPopUp.W), 55.0000000));
+	m_pInGameObj = R6MenuMPInGameObj(CreateWindow(Root.MenuClassDefines.ClassInGameObjectives, float(r6Root.m_REscPopUp.X), float(__NFUN_146__(r6Root.m_REscPopUp.Y, r6Root.30)), float(r6Root.m_REscPopUp.W), float(__NFUN_147__(r6Root.m_REscPopUp.H, 55)), self));
+	return;
 }
 
-function Tick(float deltaTime)
+function Tick(float DeltaTime)
 {
-	if (m_fTimeForRefreshObj >= C_fREFRESH_OBJ)
+	// End:0x2B
+	if(__NFUN_179__(m_fTimeForRefreshObj, float(2)))
 	{
 		m_pInGameObj.UpdateObjectives();
-		m_fTimeForRefreshObj = 0;
+		m_fTimeForRefreshObj = 0.0000000;		
 	}
 	else
 	{
-		// Incremant timer for refresh
-		m_fTimeForRefreshObj += deltaTime;
+		__NFUN_184__(m_fTimeForRefreshObj, DeltaTime);
 	}
+	return;
 }
 
 defaultproperties
 {
-     m_bEscAvailable=True
-     m_fTimeForRefreshObj=2.000000
+	m_bEscAvailable=true
+	m_fTimeForRefreshObj=2.0000000
 }

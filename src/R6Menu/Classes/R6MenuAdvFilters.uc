@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuAdvFilters - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuAdvFilters.uc : 
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,76 +13,82 @@
 //=============================================================================
 class R6MenuAdvFilters extends UWindowDialogClientWindow;
 
-var R6WindowListRestKit					m_pListGen;
+var R6WindowListRestKit m_pListGen;
 
 function Created()
 {
-	m_pListGen = R6WindowListRestKit(CreateWindow( class'R6WindowListRestKit', 0, 0, WinWidth, WinHeight, self));
-	m_pListGen.m_fXItemOffset = 5;
+	m_pListGen = R6WindowListRestKit(CreateWindow(Class'R6Window.R6WindowListRestKit', 0.0000000, 0.0000000, WinWidth, WinHeight, self));
+	m_pListGen.m_fXItemOffset = 5.0000000;
 	m_pListGen.bAlwaysBehind = true;
+	return;
 }
 
-function AddButtonInList( BOOL _bSelected, string _szLoc, string _szTip, INT _iButtonID)
+function AddButtonInList(bool _bSelected, string _szLoc, string _szTip, int _iButtonID)
 {
 	local R6WindowListGeneralItem NewItem;
-	local FLOAT fXOffset, fYOffset, fYStep, fWidth, fHeight;
-	local Font  ButtonFont;
-	local INT	i;
+	local float fXOffset, fYOffset, fYStep, fWidth, fHeight;
 
-	//create buttons
-	fXOffset = 5;
-	fYOffset = 7;
-	fWidth = WinWidth - (2 * fXOffset); // - 15;
-	fHeight = 15;
-	ButtonFont = Root.Fonts[F_SmallTitle];
+	local Font ButtonFont;
+	local int i;
 
-	NewItem = R6WindowListGeneralItem(m_pListGen.GetItemAtIndex( m_pListGen.Items.CountShown()));
-	NewItem.m_pR6WindowButtonBox = R6WindowButtonBox( CreateControl( class'R6WindowButtonBox', fXOffset, 0, fWidth, fHeight, self)); 
-	NewItem.m_pR6WindowButtonBox.m_TextFont		= ButtonFont;
-	NewItem.m_pR6WindowButtonBox.m_vTextColor	= Root.Colors.White;
-	NewItem.m_pR6WindowButtonBox.m_vBorder		= Root.Colors.White;
-	NewItem.m_pR6WindowButtonBox.m_bSelected	= _bSelected;
-	NewItem.m_pR6WindowButtonBox.m_szMiscText	= "";
+	fXOffset = 5.0000000;
+	fYOffset = 7.0000000;
+	fWidth = __NFUN_175__(WinWidth, __NFUN_171__(float(2), fXOffset));
+	fHeight = 15.0000000;
+	ButtonFont = Root.Fonts[5];
+	NewItem = R6WindowListGeneralItem(m_pListGen.GetItemAtIndex(m_pListGen.Items.CountShown()));
+	NewItem.m_pR6WindowButtonBox = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, 0.0000000, fWidth, fHeight, self));
+	NewItem.m_pR6WindowButtonBox.m_TextFont = ButtonFont;
+	NewItem.m_pR6WindowButtonBox.m_vTextColor = Root.Colors.White;
+	NewItem.m_pR6WindowButtonBox.m_vBorder = Root.Colors.White;
+	NewItem.m_pR6WindowButtonBox.m_bSelected = _bSelected;
+	NewItem.m_pR6WindowButtonBox.m_szMiscText = "";
 	NewItem.m_pR6WindowButtonBox.m_AdviceWindow = self;
-	NewItem.m_pR6WindowButtonBox.CreateTextAndBox( _szLoc, _szTip, 0, _iButtonID);
+	NewItem.m_pR6WindowButtonBox.CreateTextAndBox(_szLoc, _szTip, 0.0000000, _iButtonID);
+	return;
 }
 
 function Notify(UWindowDialogControl C, byte E)
 {
-	if (C.IsA('R6WindowButtonBox'))
+	// End:0x4B
+	if(C.__NFUN_303__('R6WindowButtonBox'))
 	{
-		if (E == DE_Click)
+		// End:0x4B
+		if(__NFUN_154__(int(E), 2))
 		{
-			if (OwnerWindow != None)
+			// End:0x4B
+			if(__NFUN_119__(OwnerWindow, none))
 			{
-				R6MenuMPMenuTab(OwnerWindow).Notify( C, E);
+				R6MenuMPMenuTab(OwnerWindow).Notify(C, E);
 			}
 		}
 	}
+	return;
 }
 
 //=======================================================================================
 // MouseWheelDown: advice scroll bar for mouse wheel down
 //=======================================================================================
-function MouseWheelDown(FLOAT X, FLOAT Y)
+function MouseWheelDown(float X, float Y)
 {
-	if (m_pListGen != None)
+	// End:0x24
+	if(__NFUN_119__(m_pListGen, none))
 	{
-		m_pListGen.MouseWheelDown( X, Y);
+		m_pListGen.MouseWheelDown(X, Y);
 	}
+	return;
 }
 
 //=======================================================================================
 // MouseWheelUp: advice scroll bar for mouse wheel up
 //=======================================================================================
-function MouseWheelUp(FLOAT X, FLOAT Y)
+function MouseWheelUp(float X, float Y)
 {
-	if (m_pListGen != None)
+	// End:0x24
+	if(__NFUN_119__(m_pListGen, none))
 	{
-		m_pListGen.MouseWheelUp( X, Y);
+		m_pListGen.MouseWheelUp(X, Y);
 	}
+	return;
 }
 
-defaultproperties
-{
-}

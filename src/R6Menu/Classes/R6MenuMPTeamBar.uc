@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuMPTeamBar - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuMPTeamBar.uc : The team bar with the name of each player and theirs stats
 //  the size of the window is 640 * 480
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -8,855 +14,755 @@
 //=============================================================================
 class R6MenuMPTeamBar extends UWindowWindow;
 
-// THIS IS A COPY OF ePLINFO in R6WindowListIGPlayerInfoItem
+const C_fTEAMBAR_ICON_HEIGHT = 15;
+const C_fTEAMBAR_TOT_HEIGHT = 12;
+const C_iMISSION_TITLE_H = 20;
+const C_iREADY = 0;
+const C_iTEAM_NAME = 1;
+const C_iROUNDSWON = 2;
+const C_iNUMBER_OF_KILLS = 3;
+const C_iNUMBER_OF_MYDEAD = 4;
+const C_iPERCENT_EFFICIENT = 5;
+const C_iROUND_FIRED = 6;
+const C_iTOT_ROUND_TAKEN = 7;
+const C_iTOTAL_TEAM_STATUS = 8;
+const C_iPLAYER_MAX = 16;
+
 enum eMenuLayout
 {
-	eML_Ready,
-	eML_HealthStatus,
-	eML_Name,
-	eML_RoundsWon,
-	eML_Kill,
-	eML_DeadCounter,
-	eML_Efficiency,
-	eML_RoundFired,
-	eML_RoundHit,
-	eML_KillerName,
-	eML_PingTime
+	eML_Ready,                      // 0
+	eML_HealthStatus,               // 1
+	eML_Name,                       // 2
+	eML_RoundsWon,                  // 3
+	eML_Kill,                       // 4
+	eML_DeadCounter,                // 5
+	eML_Efficiency,                 // 6
+	eML_RoundFired,                 // 7
+	eML_RoundHit,                   // 8
+	eML_KillerName,                 // 9
+	eML_PingTime                    // 10
 };
 
-enum eIconType 
+enum eIconType
 {
-	IT_Ready,
-	IT_Health,
-	IT_RoundsWon,
-	IT_Kill,		// X icon
-	IT_DeadCounter, // Skull icon
-	IT_Efficiency,	// % icon
-	IT_RoundFired,  // Bullet icon
-	IT_RoundTaken,	// Target icon
-	IT_KillerName,	// Gun icon
-	IT_Ping
+	IT_Ready,                       // 0
+	IT_Health,                      // 1
+	IT_RoundsWon,                   // 2
+	IT_Kill,                        // 3
+	IT_DeadCounter,                 // 4
+	IT_Efficiency,                  // 5
+	IT_RoundFired,                  // 6
+	IT_RoundTaken,                  // 7
+	IT_KillerName,                  // 8
+	IT_Ping                         // 9
 };
-
 
 struct stCoord
 {
-    var FLOAT    fXPos;
-    var FLOAT    fWidth;
+	var float fXPos;
+	var float fWidth;
 };
 
-const C_fTEAMBAR_ICON_HEIGHT = 15; // the height of the team bar at the top of the window 
-const C_fTEAMBAR_TOT_HEIGHT  = 12; // the height of the team bar at the bottom of the window 
-const C_iMISSION_TITLE_H     = 20; // the height of the mission title
-
-// text array index
-const C_iREADY				 = 0;
-const C_iTEAM_NAME			 = 1;
-const C_iROUNDSWON			 = 2;
-const C_iNUMBER_OF_KILLS	 = 3;
-const C_iNUMBER_OF_MYDEAD	 = 4;
-const C_iPERCENT_EFFICIENT	 = 5;
-const C_iROUND_FIRED		 = 6;
-const C_iTOT_ROUND_TAKEN	 = 7;
-const C_iTOTAL_TEAM_STATUS	 = 8;
-
-const C_iPLAYER_MAX			 = 16; // number of maximum player
-
-var Texture                     m_TIcon;					// where are the icon tex
-var Color                       m_vTeamColor;               // the color of the team
-
-var R6WindowTextLabelExt        m_pTextTeamBar;             // display the names of the team and nb of players
-var R6WindowIGPlayerInfoListBox m_IGPlayerInfoListBox;      // List of players with scroll bar
-
-var string                      m_szTeamName;
-
-var stCoord						m_stMenuCoord[11];			// the coordinates of all menu
-
-var INT                         m_iIndex[9];                // array of text label
-var INT                         m_iTotalKills;              // Team total Number of kills
-var INT							m_iTotalNbOfDead;			// Team total Number of Dead
-var INT                         m_iTotalEfficiency;         // Team total Efficiency (hits/shot)
-var INT                         m_iTotalRoundsFired;        // Team total Rounds fired (Bullets shot by the player)
-var INT                         m_iTotalRoundsTaken;        // Team total Rounds taken (Rounds that hits the player)
-var INT							m_iTotalRoomTake;
-
-var BOOL						m_bTeamMenuLayout;			// for team menu layout (team deathmatch, tema survivor, team etc!!!)
-
+var int m_iIndex[9];  // array of text label
+var int m_iTotalKills;  // Team total Number of kills
+var int m_iTotalNbOfDead;  // Team total Number of Dead
+var int m_iTotalEfficiency;  // Team total Efficiency (hits/shot)
+var int m_iTotalRoundsFired;  // Team total Rounds fired (Bullets shot by the player)
+var int m_iTotalRoundsTaken;  // Team total Rounds taken (Rounds that hits the player)
+var int m_iTotalRoomTake;
+var bool m_bTeamMenuLayout;  // for team menu layout (team deathmatch, tema survivor, team etc!!!)
+var bool m_bDisplayObj;  // display the objectives
+var Texture m_TIcon;  // where are the icon tex
+var R6WindowTextLabelExt m_pTextTeamBar;  // display the names of the team and nb of players
+var R6WindowIGPlayerInfoListBox m_IGPlayerInfoListBox;  // List of players with scroll bar
 // COOP
-var	R6WindowTextLabel			m_pTitleCoop;   
-var R6MenuMPInGameObj			m_pMissionObj;
-var bool						m_bDisplayObj;				// display the objectives
+var R6WindowTextLabel m_pTitleCoop;
+var R6MenuMPInGameObj m_pMissionObj;
+var Color m_vTeamColor;  // the color of the team
+var stCoord m_stMenuCoord[11];  // the coordinates of all menu
+var string m_szTeamName;
 
-
-
-
-
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-	C.Style = ERenderStyle.STY_Alpha;
-
-	if (!m_bDisplayObj)
+	C.Style = 5;
+	// End:0x150
+	if(__NFUN_129__(m_bDisplayObj))
 	{
-		if ( m_vTeamColor == Root.Colors.TeamColorLight[0])
-			DrawSimpleBackGround( C, 2, 0, WinWidth - 4, WinHeight, Root.Colors.TeamColorDark[0]);
+		// End:0x83
+		if(m_vTeamColor == Root.Colors.TeamColorLight[0])
+		{
+			DrawSimpleBackGround(C, 2.0000000, 0.0000000, __NFUN_175__(WinWidth, float(4)), WinHeight, Root.Colors.TeamColorDark[0]);			
+		}
 		else
-			DrawSimpleBackGround( C, 2, 0, WinWidth - 4, WinHeight, Root.Colors.TeamColorDark[1]);
-
-		C.SetDrawColor( m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
-		DrawInGameTeamBar( C, 0, C_fTEAMBAR_ICON_HEIGHT);
-		DrawInGameTeamBarUpBorder( C, 2, 0, WinWidth - 4, C_fTEAMBAR_ICON_HEIGHT); // 2 is the frame border 
-		DrawInGameTeamBarDownBorder( C, 2, WinHeight - C_fTEAMBAR_TOT_HEIGHT, WinWidth - 4, C_fTEAMBAR_TOT_HEIGHT); // 2 is the frame border 
+		{
+			DrawSimpleBackGround(C, 2.0000000, 0.0000000, __NFUN_175__(WinWidth, float(4)), WinHeight, Root.Colors.TeamColorDark[1]);
+		}
+		C.__NFUN_2626__(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
+		DrawInGameTeamBar(C, 0.0000000, 15.0000000);
+		DrawInGameTeamBarUpBorder(C, 2.0000000, 0.0000000, __NFUN_175__(WinWidth, float(4)), 15.0000000);
+		DrawInGameTeamBarDownBorder(C, 2.0000000, __NFUN_175__(WinHeight, float(12)), __NFUN_175__(WinWidth, float(4)), 12.0000000);
 	}
+	return;
 }
-
 
 //===============================================================================
 // Set the new parameters of this window and the child
 //===============================================================================
-function SetWindowSize( FLOAT _fX, FLOAT _fY, FLOAT _fW, FLOAT _fH)
+function SetWindowSize(float _fX, float _fY, float _fW, float _fH)
 {
-    local FLOAT fOldTop, fOldLeft;
+	local float fOldTop, fOldLeft;
 
-    fOldTop   = WinTop;
-    fOldLeft  = WinLeft;
-
-    WinTop    = _fY;
-	WinLeft   = _fX;
-	WinWidth  = _fW;
+	fOldTop = WinTop;
+	fOldLeft = WinLeft;
+	WinTop = _fY;
+	WinLeft = _fX;
+	WinWidth = _fW;
 	WinHeight = _fH;
-
-	if (m_bDisplayObj)
+	// End:0x112
+	if(m_bDisplayObj)
 	{
-		if (m_pTitleCoop != None)
+		// End:0x92
+		if(__NFUN_119__(m_pTitleCoop, none))
 		{
-			m_pTitleCoop.WinTop    = 0;
-			m_pTitleCoop.WinWidth  = _fW;
-			m_pTitleCoop.WinHeight = C_iMISSION_TITLE_H;
+			m_pTitleCoop.WinTop = 0.0000000;
+			m_pTitleCoop.WinWidth = _fW;
+			m_pTitleCoop.WinHeight = 20.0000000;
 		}
-
-		if (m_pMissionObj != None)
+		// End:0x112
+		if(__NFUN_119__(m_pMissionObj, none))
 		{
-			m_pMissionObj.WinTop    = C_iMISSION_TITLE_H;
-			m_pMissionObj.WinWidth  = _fW;
-			m_pMissionObj.WinHeight = _fH - C_iMISSION_TITLE_H;
-			m_pMissionObj.SetNewObjWindowSizes( _fX, _fY, _fW, _fH, true);
-
-			m_pMissionObj.UpdateObjectives(); // max of 5 obj for now -- need dev for more
+			m_pMissionObj.WinTop = 20.0000000;
+			m_pMissionObj.WinWidth = _fW;
+			m_pMissionObj.WinHeight = __NFUN_175__(_fH, float(20));
+			m_pMissionObj.SetNewObjWindowSizes(_fX, _fY, _fW, _fH, true);
+			m_pMissionObj.UpdateObjectives();
 		}
 	}
-
-    if ( m_pTextTeamBar != None)
-    {
-        // replace the text window pos
-        m_pTextTeamBar.WinTop    = 0;//( _fY - fOldTop);
-        m_pTextTeamBar.WinWidth  = _fW;
-        m_pTextTeamBar.WinHeight = _fH;
-
-        Refresh();
-    }
-
-    if ( m_IGPlayerInfoListBox != None)
-    {
-        m_IGPlayerInfoListBox.WinTop    = C_fTEAMBAR_ICON_HEIGHT;//( _fY - fOldTop);
-        m_IGPlayerInfoListBox.WinWidth  = _fW;
-        m_IGPlayerInfoListBox.WinHeight = _fH - GetPlayerListBorderHeight();
-
-//        RefreshInfoListBox();
-    }
+	// End:0x15F
+	if(__NFUN_119__(m_pTextTeamBar, none))
+	{
+		m_pTextTeamBar.WinTop = 0.0000000;
+		m_pTextTeamBar.WinWidth = _fW;
+		m_pTextTeamBar.WinHeight = _fH;
+		Refresh();
+	}
+	// End:0x1AE
+	if(__NFUN_119__(m_IGPlayerInfoListBox, none))
+	{
+		m_IGPlayerInfoListBox.WinTop = 15.0000000;
+		m_IGPlayerInfoListBox.WinWidth = _fW;
+		m_IGPlayerInfoListBox.WinHeight = __NFUN_175__(_fH, GetPlayerListBorderHeight());
+	}
+	return;
 }
-
 
 //===============================================================================
 // Refresh server info
 //===============================================================================
-function RefreshTeamBarInfo( INT _iTeam)
+function RefreshTeamBarInfo(int _iTeam)
 {
-	local INT iTotalOfPlayers;
-	local R6MenuInGameMultiPlayerRootWindow R6Root;
-	R6Root = R6MenuInGameMultiPlayerRootWindow(Root);
+	local int iTotalOfPlayers;
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
-
-    // update 
-    if ( R6Root.m_szCurrentGameType == "RGM_DeathmatchMode")
-    {
-		iTotalOfPlayers = 16;
-    }
-    else 
-    {
+	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
+	// End:0x42
+	if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_DeathmatchMode"))
+	{
+		iTotalOfPlayers = 16;		
+	}
+	else
+	{
 		iTotalOfPlayers = 8;
-    }
-
-    m_iTotalKills       = 0;
-	m_iTotalNbOfDead	= 0;
-    m_iTotalEfficiency  = 0;
-    m_iTotalRoundsFired = 0;
-    m_iTotalRoundsTaken = 0;
-	m_iTotalRoomTake    = 0;
-    ClearListOfItem();
-    
-    AddItems( _iTeam, iTotalOfPlayers);
-
-    // update 
-    if ( R6Root.m_szCurrentGameType == "RGM_DeathmatchMode")
-    {
-        m_pTextTeamBar.ChangeTextLabel( Localize("MPInGame","PlayersName","R6Menu"), m_iIndex[C_iTEAM_NAME]); // players names 
-        m_pTextTeamBar.ChangeTextLabel( "", m_iIndex[C_iTOTAL_TEAM_STATUS]); // deathmatch -- only players name 
-        m_pTextTeamBar.ChangeTextLabel( "", m_iIndex[C_iNUMBER_OF_KILLS]); // total number of kills 
-        m_pTextTeamBar.ChangeTextLabel( "", m_iIndex[C_iNUMBER_OF_MYDEAD]); // total number of kills 
-        m_pTextTeamBar.ChangeTextLabel( "", m_iIndex[C_iPERCENT_EFFICIENT]); // total % efficient
-        m_pTextTeamBar.ChangeTextLabel( "", m_iIndex[C_iROUND_FIRED]); // total Round fired
-        m_pTextTeamBar.ChangeTextLabel( "", m_iIndex[C_iTOT_ROUND_TAKEN]); // total Round taken
-    }
-    else 
-    {
-        m_pTextTeamBar.ChangeTextLabel( m_szTeamName, m_iIndex[C_iTEAM_NAME]); // alpha/bravo team 
-        m_pTextTeamBar.ChangeTextLabel( Localize("MPInGame","TotalTeamStatus","R6Menu"), m_iIndex[C_iTOTAL_TEAM_STATUS]); // alpha/bravo team 
-        m_pTextTeamBar.ChangeTextLabel( string(m_iTotalKills), m_iIndex[C_iNUMBER_OF_KILLS]); // total number of kills 
-		m_pTextTeamBar.ChangeTextLabel( string(m_iTotalNbOfDead), m_iIndex[C_iNUMBER_OF_MYDEAD]); // total number my dead -- iDeadCounter 
-        m_pTextTeamBar.ChangeTextLabel( string(m_iTotalEfficiency), m_iIndex[C_iPERCENT_EFFICIENT]); // total % efficient
-        m_pTextTeamBar.ChangeTextLabel( string(m_iTotalRoundsFired), m_iIndex[C_iROUND_FIRED]); // total Round fired
-        m_pTextTeamBar.ChangeTextLabel( string(m_iTotalRoundsTaken), m_iIndex[C_iTOT_ROUND_TAKEN]); // total Round taken
-    }
+	}
+	m_iTotalKills = 0;
+	m_iTotalNbOfDead = 0;
+	m_iTotalEfficiency = 0;
+	m_iTotalRoundsFired = 0;
+	m_iTotalRoundsTaken = 0;
+	m_iTotalRoomTake = 0;
+	ClearListOfItem();
+	AddItems(_iTeam, iTotalOfPlayers);
+	// End:0x185
+	if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_DeathmatchMode"))
+	{
+		m_pTextTeamBar.ChangeTextLabel(Localize("MPInGame", "PlayersName", "R6Menu"), m_iIndex[1]);
+		m_pTextTeamBar.ChangeTextLabel("", m_iIndex[8]);
+		m_pTextTeamBar.ChangeTextLabel("", m_iIndex[3]);
+		m_pTextTeamBar.ChangeTextLabel("", m_iIndex[4]);
+		m_pTextTeamBar.ChangeTextLabel("", m_iIndex[5]);
+		m_pTextTeamBar.ChangeTextLabel("", m_iIndex[6]);
+		m_pTextTeamBar.ChangeTextLabel("", m_iIndex[7]);		
+	}
+	else
+	{
+		m_pTextTeamBar.ChangeTextLabel(m_szTeamName, m_iIndex[1]);
+		m_pTextTeamBar.ChangeTextLabel(Localize("MPInGame", "TotalTeamStatus", "R6Menu"), m_iIndex[8]);
+		m_pTextTeamBar.ChangeTextLabel(string(m_iTotalKills), m_iIndex[3]);
+		m_pTextTeamBar.ChangeTextLabel(string(m_iTotalNbOfDead), m_iIndex[4]);
+		m_pTextTeamBar.ChangeTextLabel(string(m_iTotalEfficiency), m_iIndex[5]);
+		m_pTextTeamBar.ChangeTextLabel(string(m_iTotalRoundsFired), m_iIndex[6]);
+		m_pTextTeamBar.ChangeTextLabel(string(m_iTotalRoundsTaken), m_iIndex[7]);
+	}
+	return;
 }
-
 
 //===============================================================================
 // Refresh: The fix team bar parameters are refresh (because we change the window size)
 //===============================================================================
 function Refresh()
 {
-    local FLOAT fXOffset, fYOffset, fYStep, fWidth;
+	local float fXOffset, fYOffset, fYStep, fWidth;
 
-    m_pTextTeamBar.Clear();
-
-	// at the top
-    fYOffset = 2; 
-    fXOffset = m_stMenuCoord[ eMenuLayout.eML_Name].fXPos;
-    fWidth = m_stMenuCoord[ eMenuLayout.eML_Name].fWidth;
-    m_iIndex[C_iTEAM_NAME] = m_pTextTeamBar.AddTextLabel( m_szTeamName, fXOffset, fYOffset, fWidth, TA_Left, false); 
-
-    //score
-//	if (!m_bTeamMenuLayout)
-//	{
-//		fXOffset = m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fXPos;
-//		fWidth   = m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fWidth; 
-//		m_iIndex[C_iROUNDSWON] = m_pTextTeamBar.AddTextLabel( "ROUNDS WON", fXOffset, fYOffset, fWidth, TA_Center, false);
-//	}
-	
-
-	// at the bottom
-    fXOffset = 4;
-    fYOffset = WinHeight - C_fTEAMBAR_TOT_HEIGHT + 1;//fYOffset;
-    m_iIndex[C_iTOTAL_TEAM_STATUS] = m_pTextTeamBar.AddTextLabel( "", fXOffset, fYOffset, fWidth, TA_Left, false);
-
-    fXOffset = m_stMenuCoord[ eMenuLayout.eML_Kill].fXPos;
-    fWidth   = m_stMenuCoord[ eMenuLayout.eML_Kill].fWidth; 
-    m_iIndex[C_iNUMBER_OF_KILLS] = m_pTextTeamBar.AddTextLabel( "00", fXOffset, fYOffset, fWidth, TA_Center, false);
-
-    fXOffset = m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fXPos;
-    fWidth   = m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fWidth;
-    m_iIndex[C_iNUMBER_OF_MYDEAD] = m_pTextTeamBar.AddTextLabel( "00", fXOffset, fYOffset, fWidth, TA_Center, false);
-
-    fXOffset = m_stMenuCoord[ eMenuLayout.eML_Efficiency].fXPos;
-    fWidth   = m_stMenuCoord[ eMenuLayout.eML_Efficiency].fWidth;
-    m_iIndex[C_iPERCENT_EFFICIENT] = m_pTextTeamBar.AddTextLabel( "00", fXOffset, fYOffset, fWidth, TA_Center, false);
-
-    fXOffset = m_stMenuCoord[ eMenuLayout.eML_RoundFired].fXPos;
-    fWidth   = m_stMenuCoord[ eMenuLayout.eML_RoundFired].fWidth;
-    m_iIndex[C_iROUND_FIRED] = m_pTextTeamBar.AddTextLabel( "00", fXOffset, fYOffset, fWidth, TA_Center, false);
-
-    fXOffset = m_stMenuCoord[ eMenuLayout.eML_RoundHit].fXPos;
-    fWidth   = m_stMenuCoord[ eMenuLayout.eML_RoundHit].fWidth;
-    m_iIndex[C_iTOT_ROUND_TAKEN] = m_pTextTeamBar.AddTextLabel( "00", fXOffset, fYOffset, fWidth, TA_Center, false);
+	m_pTextTeamBar.Clear();
+	fYOffset = 2.0000000;
+	fXOffset = m_stMenuCoord[int(2)].fXPos;
+	fWidth = m_stMenuCoord[int(2)].fWidth;
+	m_iIndex[1] = m_pTextTeamBar.AddTextLabel(m_szTeamName, fXOffset, fYOffset, fWidth, 0, false);
+	fXOffset = 4.0000000;
+	fYOffset = __NFUN_174__(__NFUN_175__(WinHeight, float(12)), float(1));
+	m_iIndex[8] = m_pTextTeamBar.AddTextLabel("", fXOffset, fYOffset, fWidth, 0, false);
+	fXOffset = m_stMenuCoord[int(4)].fXPos;
+	fWidth = m_stMenuCoord[int(4)].fWidth;
+	m_iIndex[3] = m_pTextTeamBar.AddTextLabel("00", fXOffset, fYOffset, fWidth, 2, false);
+	fXOffset = m_stMenuCoord[int(5)].fXPos;
+	fWidth = m_stMenuCoord[int(5)].fWidth;
+	m_iIndex[4] = m_pTextTeamBar.AddTextLabel("00", fXOffset, fYOffset, fWidth, 2, false);
+	fXOffset = m_stMenuCoord[int(6)].fXPos;
+	fWidth = m_stMenuCoord[int(6)].fWidth;
+	m_iIndex[5] = m_pTextTeamBar.AddTextLabel("00", fXOffset, fYOffset, fWidth, 2, false);
+	fXOffset = m_stMenuCoord[int(7)].fXPos;
+	fWidth = m_stMenuCoord[int(7)].fWidth;
+	m_iIndex[6] = m_pTextTeamBar.AddTextLabel("00", fXOffset, fYOffset, fWidth, 2, false);
+	fXOffset = m_stMenuCoord[int(8)].fXPos;
+	fWidth = m_stMenuCoord[int(8)].fWidth;
+	m_iIndex[7] = m_pTextTeamBar.AddTextLabel("00", fXOffset, fYOffset, fWidth, 2, false);
+	return;
 }
 
-
-
-function AddItems( INT _iTeam, INT _iTotalOfPlayers)
+function AddItems(int _iTeam, int _iTotalOfPlayers)
 {
-    local R6WindowListIGPlayerInfoItem NewItem;
+	local R6WindowListIGPlayerInfoItem NewItem;
 	local UWindowList CurItem, ParseItem;
-	local R6MenuInGameMultiPlayerRootWindow R6Root;
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
 	local R6WindowIGPlayerInfoListBox pListTemp;
-    local INT i, iIndex, j;
-	local BOOL bAddItem;
-    local Actor.PlayerMenuInfo _PlayerMenuInfo;
-    local R6MenuMPInterWidget MpInter;
+	local int i, iIndex, j;
+	local bool bAddItem;
+	local PlayerMenuInfo _PlayerMenuInfo;
+	local R6MenuMPInterWidget MpInter;
+	local int iTeamPlayerCount;
 
-	R6Root = R6MenuInGameMultiPlayerRootWindow(Root);
-
-	//log("AddItems----- team name"$_iTeam);
-    if (R6Root.m_R6GameMenuCom != None)
-    {
-		/*
-		if (m_IGPlayerInfoListBox.Items.Next == None)
-		{
-			log("THIS SHOULD NOT HAPPEN");
-		}
-		*/
-        
-        MpInter = R6MenuMPInterWidget(OwnerWindow);
+	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
+	// End:0x96D
+	if(__NFUN_119__(r6Root.m_R6GameMenuCom, none))
+	{
+		MpInter = R6MenuMPInterWidget(OwnerWindow);
 		CurItem = m_IGPlayerInfoListBox.Items.Next;
+		iTeamPlayerCount = 0;
+		i = 0;
+		J0x5F:
 
-        for ( i = 0; i < R6Root.m_R6GameMenuCom.m_iLastValidIndex ; i++ )
-        {
+		// End:0x950 [Loop If]
+		if(__NFUN_150__(i, r6Root.m_R6GameMenuCom.m_iLastValidIndex))
+		{
 			bAddItem = true;
-
-			iIndex   = R6Root.m_R6GameMenuCom.GeTTeamSelection(i);
-		    GetLevel().GetFPlayerMenuInfo(i, _PlayerMenuInfo);
-
-            if (iIndex != _iTeam) // not in the same team or in a team
-            {
+			iIndex = r6Root.m_R6GameMenuCom.GeTTeamSelection(i);
+			GetLevel().__NFUN_1230__(i, _PlayerMenuInfo);
+			// End:0x1FB
+			if(__NFUN_155__(iIndex, _iTeam))
+			{
 				bAddItem = false;
-				if (iIndex == R6Root.m_R6GameMenuCom.ePlayerTeamSelection.PTS_Spectator)
+				// End:0x1FB
+				if(__NFUN_154__(iIndex, int(r6Root.m_R6GameMenuCom.4)))
 				{
-					if (_iTeam == R6Root.m_R6GameMenuCom.ePlayerTeamSelection.PTS_Alpha)
+					// End:0x133
+					if(__NFUN_154__(_iTeam, int(r6Root.m_R6GameMenuCom.2)))
 					{
-						if ( m_iTotalRoomTake < _iTotalOfPlayers)
+						// End:0x130
+						if(__NFUN_150__(m_iTotalRoomTake, _iTotalOfPlayers))
 						{
-							bAddItem = true;	
-						}
+							bAddItem = true;
+						}						
 					}
-					else if (MpInter.m_pR6AlphaTeam.m_iTotalRoomTake == _iTotalOfPlayers)// it's BravoTeam so just add it at the end
+					else
 					{
-						bAddItem =  true;
-						
-						pListTemp = MpInter.m_pR6AlphaTeam.m_IGPlayerInfoListBox;
-						ParseItem = pListTemp.Items.Next;
-
-						// check if it's not already in alpha list
-						for ( j = 0; j < _iTotalOfPlayers; j++)
+						// End:0x1FB
+						if(__NFUN_154__(MpInter.m_pR6AlphaTeam.m_iTotalRoomTake, _iTotalOfPlayers))
 						{
-							if (Left(_PlayerMenuInfo.szPlayerName, 15) ~= R6WindowListIGPlayerInfoItem(ParseItem).szPlName)
+							bAddItem = true;
+							pListTemp = MpInter.m_pR6AlphaTeam.m_IGPlayerInfoListBox;
+							ParseItem = pListTemp.Items.Next;
+							j = 0;
+							J0x19D:
+
+							// End:0x1FB [Loop If]
+							if(__NFUN_150__(j, _iTotalOfPlayers))
 							{
-								bAddItem = false;
-								break;
+								// End:0x1DD
+								if(__NFUN_124__(__NFUN_128__(_PlayerMenuInfo.szPlayerName, 15), R6WindowListIGPlayerInfoItem(ParseItem).szPlName))
+								{
+									bAddItem = false;
+									// [Explicit Break]
+									goto J0x1FB;
+								}
+								ParseItem = ParseItem.Next;
+								__NFUN_165__(j);
+								// [Loop Continue]
+								goto J0x19D;
 							}
-							ParseItem = ParseItem.Next;
 						}
 					}
 				}
 			}
-			
-			if (bAddItem)
+			J0x1FB:
+
+			// End:0x946
+			if(bAddItem)
 			{
 				NewItem = R6WindowListIGPlayerInfoItem(CurItem);
-
-				iIndex = NewItem.ePLInfo.ePL_Ready;
-                NewItem.bReady							= _PlayerMenuInfo.bPlayerReady;
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_Ready].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_Ready].fWidth;            
-
-				iIndex = NewItem.ePLInfo.ePL_HealthStatus;
-				if (_PlayerMenuInfo.bSpectator)
-	                NewItem.eStatus						= NewItem.ePlStatus.ePlayerStatus_Spectator; 
-				else if (_PlayerMenuInfo.bJoinedTeamLate)
-    	                NewItem.eStatus						= NewItem.ePlStatus.ePlayerStatus_TooLate; 
-                else
-                {
-                    switch(_PlayerMenuInfo.iHealth)
+				iIndex = int(NewItem.0);
+				NewItem.bReady = _PlayerMenuInfo.bPlayerReady;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(0)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(0)].fWidth;
+				iIndex = int(NewItem.1);
+				// End:0x2D2
+				if(_PlayerMenuInfo.bSpectator)
+				{
+					NewItem.eStatus = NewItem.4;					
+				}
+				else
+				{
+					// End:0x2FD
+					if(_PlayerMenuInfo.bJoinedTeamLate)
 					{
-					case 0:
-						NewItem.eStatus                 = NewItem.ePlStatus.ePlayerStatus_Alive;
-						break;
-					case 1:
-						NewItem.eStatus                 = NewItem.ePlStatus.ePlayerStatus_Wounded;
-						break;					
-					case 2: //There is no incapacitated state in MP
-                    default:
-						NewItem.eStatus                 = NewItem.ePlStatus.ePlayerStatus_Dead;
-						break;                    
+						NewItem.eStatus = NewItem.5;						
 					}
-                    
-                }
-                        
-
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_Name;
-                NewItem.szPlName						= Left(_PlayerMenuInfo.szPlayerName, 15); // max 15 caracteres
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_Name].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_Name].fWidth;            
-
-				iIndex = NewItem.ePLInfo.ePL_RoundsWon;
-				NewItem.stTagCoord[iIndex].bDisplay		= !m_bTeamMenuLayout;
-				NewItem.szRoundsWon						= string(_PlayerMenuInfo.iRoundsWon) $ "/" $ string(_PlayerMenuInfo.iRoundsPlayed);
-				NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fXPos;
-				NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_Kill;
-                NewItem.iKills							= _PlayerMenuInfo.iKills;
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_Kill].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_Kill].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_DeadCounter;
-                NewItem.iMyDeadCounter					= _PlayerMenuInfo.iDeathCount; 
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_Efficiency;
-                NewItem.iEfficiency						= _PlayerMenuInfo.iEfficiency;
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_Efficiency].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_Efficiency].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_RoundFired;
-                NewItem.iRoundsFired					= _PlayerMenuInfo.iRoundsFired;
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_RoundFired].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_RoundFired].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_RoundHit;
-                NewItem.iRoundsHit						= _PlayerMenuInfo.iRoundsHit;
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_RoundHit].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_RoundHit].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_KillerName;
-                NewItem.szKillBy						= _PlayerMenuInfo.szKilledBy;
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_KillerName].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_KillerName].fWidth;
-
-				iIndex = NewItem.ePLInfo.ePL_PingTime;
-                NewItem.iPingTime						= _PlayerMenuInfo.iPingTime;
-                NewItem.stTagCoord[iIndex].fXPos		= m_stMenuCoord[ eMenuLayout.eML_PingTime].fXPos;
-                NewItem.stTagCoord[iIndex].fWidth		= m_stMenuCoord[ eMenuLayout.eML_PingTime].fWidth;
-
-				NewItem.bOwnPlayer						= _PlayerMenuInfo.bOwnPlayer;
-
-                m_iTotalKills       += NewItem.iKills;
-				m_iTotalNbOfDead	+= NewItem.iMyDeadCounter;
-                m_iTotalEfficiency  += NewItem.iEfficiency;
-                m_iTotalRoundsFired += NewItem.iRoundsFired;
-                m_iTotalRoundsTaken += NewItem.iRoundsHit;
-
-				m_iTotalRoomTake += 1;
-
+					else
+					{
+						switch(_PlayerMenuInfo.iHealth)
+						{
+							// End:0x32A
+							case 0:
+								NewItem.eStatus = NewItem.0;
+								// End:0x370
+								break;
+							// End:0x34B
+							case 1:
+								NewItem.eStatus = NewItem.1;
+								// End:0x370
+								break;
+							// End:0x350
+							case 2:
+							// End:0xFFFF
+							default:
+								NewItem.eStatus = NewItem.3;
+								// End:0x370
+								break;
+								break;
+						}
+					}
+				}
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(1)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(1)].fWidth;
+				iIndex = int(NewItem.2);
+				NewItem.szPlName = __NFUN_128__(_PlayerMenuInfo.szPlayerName, 15);
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(2)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(2)].fWidth;
+				iIndex = int(NewItem.3);
+				NewItem.stTagCoord[iIndex].bDisplay = __NFUN_129__(m_bTeamMenuLayout);
+				NewItem.szRoundsWon = __NFUN_112__(__NFUN_112__(string(_PlayerMenuInfo.iRoundsWon), "/"), string(_PlayerMenuInfo.iRoundsPlayed));
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(3)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(3)].fWidth;
+				iIndex = int(NewItem.4);
+				NewItem.iKills = _PlayerMenuInfo.iKills;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(4)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(4)].fWidth;
+				iIndex = int(NewItem.5);
+				NewItem.iMyDeadCounter = _PlayerMenuInfo.iDeathCount;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(5)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(5)].fWidth;
+				iIndex = int(NewItem.6);
+				NewItem.iEfficiency = _PlayerMenuInfo.iEfficiency;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(6)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(6)].fWidth;
+				iIndex = int(NewItem.7);
+				NewItem.iRoundsFired = _PlayerMenuInfo.iRoundsFired;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(7)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(7)].fWidth;
+				iIndex = int(NewItem.8);
+				NewItem.iRoundsHit = _PlayerMenuInfo.iRoundsHit;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(8)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(8)].fWidth;
+				iIndex = int(NewItem.9);
+				NewItem.szKillBy = _PlayerMenuInfo.szKilledBy;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(9)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(9)].fWidth;
+				iIndex = int(NewItem.10);
+				NewItem.iPingTime = _PlayerMenuInfo.iPingTime;
+				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(10)].fXPos;
+				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(10)].fWidth;
+				NewItem.bOwnPlayer = _PlayerMenuInfo.bOwnPlayer;
+				__NFUN_161__(m_iTotalKills, NewItem.iKills);
+				__NFUN_161__(m_iTotalNbOfDead, NewItem.iMyDeadCounter);
+				__NFUN_161__(m_iTotalEfficiency, NewItem.iEfficiency);
+				__NFUN_161__(m_iTotalRoundsFired, NewItem.iRoundsFired);
+				__NFUN_161__(m_iTotalRoundsTaken, NewItem.iRoundsHit);
+				__NFUN_161__(m_iTotalRoomTake, 1);
+				// End:0x921
+				if(__NFUN_130__(__NFUN_129__(_PlayerMenuInfo.bSpectator), __NFUN_129__(_PlayerMenuInfo.bJoinedTeamLate)))
+				{
+					__NFUN_165__(iTeamPlayerCount);
+				}
 				NewItem.m_bShowThisItem = true;
-				// take the next element
 				CurItem = CurItem.Next;
-            }
-        }
-
-		if (m_IGPlayerInfoListBox.Items.CountShown() > 0)
-            m_iTotalEfficiency = m_iTotalEfficiency / m_IGPlayerInfoListBox.Items.CountShown();
-    }
-    
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x5F;
+		}
+		// End:0x96D
+		if(__NFUN_151__(iTeamPlayerCount, 0))
+		{
+			m_iTotalEfficiency = __NFUN_145__(m_iTotalEfficiency, iTeamPlayerCount);
+		}
+	}
+	return;
 }
 
 function ClearListOfItem()
 {
-    local R6WindowListIGPlayerInfoItem NewItem;
+	local R6WindowListIGPlayerInfoItem NewItem;
 	local UWindowList CurItem;
-    local INT i;
-	local BOOL bAlreadyCreate;
+	local int i;
+	local bool bAlreadyCreate;
 
-	if (m_IGPlayerInfoListBox.Items.Next != None)
+	// End:0x42
+	if(__NFUN_119__(m_IGPlayerInfoListBox.Items.Next, none))
 	{
-		bAlreadyCreate = True;
+		bAlreadyCreate = true;
 		CurItem = m_IGPlayerInfoListBox.Items.Next;
 	}
-	
-	// create the listitem
-	for( i = 0; i < C_iPLAYER_MAX ; i++)
+	i = 0;
+	J0x49:
+
+	// End:0xD2 [Loop If]
+	if(__NFUN_150__(i, 16))
 	{
-		if (bAlreadyCreate)
+		// End:0x86
+		if(bAlreadyCreate)
 		{
 			CurItem.m_bShowThisItem = false;
 			CurItem = CurItem.Next;
+			// [Explicit Continue]
+			goto J0xC8;
 		}
-		else
-		{
-			NewItem = R6WindowListIGPlayerInfoItem(m_IGPlayerInfoListBox.Items.Append(m_IGPlayerInfoListBox.ListClass));
-			NewItem.m_bShowThisItem = false;
-		}
+		NewItem = R6WindowListIGPlayerInfoItem(m_IGPlayerInfoListBox.Items.Append(m_IGPlayerInfoListBox.ListClass));
+		NewItem.m_bShowThisItem = false;
+		J0xC8:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x49;
 	}
-
-	//    m_IGPlayerInfoListBox.Items.Clear(); // the item still in memory!!!
+	return;
 }
-
 
 //===============================================================================
 // Get the total height of the header ALPHA TEAM and TOTAL TEAM STATUS
 //===============================================================================
-function FLOAT GetPlayerListBorderHeight()
+function float GetPlayerListBorderHeight()
 {
-    return (C_fTEAMBAR_ICON_HEIGHT + C_fTEAMBAR_TOT_HEIGHT);
+	return __NFUN_174__(15.0000000, float(12));
+	return;
 }
-
-
-//=================================================================================================
-//============================= DRAW FUNCTIONS AND UTILITIES ======================================
-//=================================================================================================
 
 //=================================================================================================
 // DrawInGameTeamBar: This function draw the in-game team bar, icons and lines
 //=================================================================================================
-function DrawInGameTeamBar( Canvas C, FLOAT _fY, FLOAT _fHeight)  
+function DrawInGameTeamBar(Canvas C, float _fY, float _fHeight)
 {
-	local FLOAT fXOffSet, fWidth;
+	local float fXOffset, fWidth;
 
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_Ready].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_Ready].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_Ready);	
-//	fXOffSet = fXOffSet + fWidth;
-//	AddVerticalLine( C, fXOffSet, _fY, m_BorderTextureRegion.W, WinHeight - C_fTEAMBAR_ICON_HEIGHT);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_Health);
-//	fXOffSet = fXOffSet + fWidth;
-//	AddVerticalLine( C, fXOffSet, _fY, m_BorderTextureRegion.W, WinHeight - C_fTEAMBAR_ICON_HEIGHT);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_Name].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_Name].fWidth;
-	fXOffSet = fXOffSet + fWidth;
-	AddVerticalLine( C, fXOffSet, _fY, m_BorderTextureRegion.W, WinHeight);
-
-	if (!m_bTeamMenuLayout)
+	fXOffset = m_stMenuCoord[int(0)].fXPos;
+	fWidth = m_stMenuCoord[int(0)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 0);
+	fXOffset = m_stMenuCoord[int(1)].fXPos;
+	fWidth = m_stMenuCoord[int(1)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 1);
+	fXOffset = m_stMenuCoord[int(2)].fXPos;
+	fWidth = m_stMenuCoord[int(2)].fWidth;
+	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
+	// End:0x186
+	if(__NFUN_129__(m_bTeamMenuLayout))
 	{
-		fXOffset = m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fXPos;
-		fWidth	 = m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fWidth;
-		AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_RoundsWon);
-		fXOffSet = fXOffSet + fWidth;
-		AddVerticalLine( C, fXOffSet, _fY, m_BorderTextureRegion.W, WinHeight);
+		fXOffset = m_stMenuCoord[int(3)].fXPos;
+		fWidth = m_stMenuCoord[int(3)].fWidth;
+		AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 2);
+		fXOffset = __NFUN_174__(fXOffset, fWidth);
+		AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
 	}
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_Kill].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_Kill].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_Kill);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_DeadCounter);
-	fXOffSet = fXOffSet + fWidth;
-	AddVerticalLine( C, fXOffSet, _fY, m_BorderTextureRegion.W, WinHeight);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_Efficiency].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_Efficiency].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_Efficiency);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_RoundFired].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_RoundFired].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_RoundFired);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_RoundHit].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_RoundHit].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_RoundTaken);
-	fXOffSet = fXOffSet + fWidth;
-	AddVerticalLine( C, fXOffSet, _fY, m_BorderTextureRegion.W, WinHeight);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_KillerName].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_KillerName].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_KillerName);
-	fXOffSet = fXOffSet + fWidth;
-	AddVerticalLine( C, fXOffSet, _fY, m_BorderTextureRegion.W, WinHeight);
-
-	fXOffset = m_stMenuCoord[ eMenuLayout.eML_PingTime].fXPos;
-	fWidth	 = m_stMenuCoord[ eMenuLayout.eML_PingTime].fWidth;
-	AddIcon( C, fXOffset, _fY, fWidth, _fHeight, IT_Ping);
+	fXOffset = m_stMenuCoord[int(4)].fXPos;
+	fWidth = m_stMenuCoord[int(4)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 3);
+	fXOffset = m_stMenuCoord[int(5)].fXPos;
+	fWidth = m_stMenuCoord[int(5)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 4);
+	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
+	fXOffset = m_stMenuCoord[int(6)].fXPos;
+	fWidth = m_stMenuCoord[int(6)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 5);
+	fXOffset = m_stMenuCoord[int(7)].fXPos;
+	fWidth = m_stMenuCoord[int(7)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 6);
+	fXOffset = m_stMenuCoord[int(8)].fXPos;
+	fWidth = m_stMenuCoord[int(8)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 7);
+	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
+	fXOffset = m_stMenuCoord[int(9)].fXPos;
+	fWidth = m_stMenuCoord[int(9)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 8);
+	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
+	fXOffset = m_stMenuCoord[int(10)].fXPos;
+	fWidth = m_stMenuCoord[int(10)].fWidth;
+	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 9);
+	return;
 }
 
-function AddVerticalLine( Canvas C, FLOAT _fX, FLOAT _fY, FLOAT _fWidth, FLOAT _fHeight)
+function AddVerticalLine(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-    // draw separation
-    DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, _fHeight,
-                                   m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, _fHeight, float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	return;
 }
 
-
-function AddIcon( Canvas C, FLOAT _fX, FLOAT _fY, FLOAT _fWidth, FLOAT _fHeight, eIconType _eIconType)
+function AddIcon(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight, R6MenuMPTeamBar.eIconType _eIconType)
 {
-    local Region RIconRegion, RIconToDraw;
+	local Region RIconRegion, RIconToDraw;
 	local R6MenuRSLookAndFeel R6LAF;
-	local FLOAT fY;
+	local float fY;
 
 	R6LAF = R6MenuRSLookAndFeel(LookAndFeel);
-
 	fY = _fY;
-
-	switch( _eIconType)
+	switch(_eIconType)
 	{
-		case IT_Ready:
+		// End:0x5E
+		case 0:
 			RIconToDraw.X = 18;
 			RIconToDraw.Y = 14;
 			RIconToDraw.W = 8;
-			RIconToDraw.H = 14;		
+			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_Health:
+		// End:0x99
+		case 1:
 			RIconToDraw.X = 0;
 			RIconToDraw.Y = 28;
 			RIconToDraw.W = 13;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_RoundsWon:
+		// End:0xD5
+		case 2:
 			RIconToDraw.X = 27;
 			RIconToDraw.Y = 14;
 			RIconToDraw.W = 8;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_Kill:
+		// End:0x111
+		case 3:
 			RIconToDraw.X = 36;
 			RIconToDraw.Y = 14;
 			RIconToDraw.W = 12;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_DeadCounter:
+		// End:0x14C
+		case 4:
 			RIconToDraw.X = 14;
 			RIconToDraw.Y = 0;
 			RIconToDraw.W = 13;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_Efficiency:
+		// End:0x187
+		case 5:
 			RIconToDraw.X = 28;
 			RIconToDraw.Y = 0;
 			RIconToDraw.W = 14;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_RoundFired:
+		// End:0x1C3
+		case 6:
 			RIconToDraw.X = 49;
 			RIconToDraw.Y = 14;
 			RIconToDraw.W = 7;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_RoundTaken:
+		// End:0x1FF
+		case 7:
 			RIconToDraw.X = 14;
 			RIconToDraw.Y = 28;
 			RIconToDraw.W = 16;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_KillerName:
+		// End:0x23A
+		case 8:
 			RIconToDraw.X = 0;
 			RIconToDraw.Y = 14;
 			RIconToDraw.W = 17;
 			RIconToDraw.H = 14;
+			// End:0x278
 			break;
-		case IT_Ping:
-			RIconToDraw.X = 46; // the zone is reduce because we don't see the beginning
+		// End:0x275
+		case 9:
+			RIconToDraw.X = 46;
 			RIconToDraw.Y = 0;
 			RIconToDraw.W = 13;
 			RIconToDraw.H = 14;
+			// End:0x278
+			break;
+		// End:0xFFFF
+		default:
 			break;
 	}
-
-	RIconRegion = R6LAF.CenterIconInBox( _fX, fY, _fWidth, _fHeight, RIconToDraw);
-    DrawStretchedTextureSegment( C, RIconRegion.X, RIconRegion.Y, RIconToDraw.W, RIconToDraw.H, 
-                                    RIconToDraw.X, RIconToDraw.Y, RIconToDraw.W, RIconToDraw.H, m_TIcon);
+	RIconRegion = R6LAF.CenterIconInBox(_fX, fY, _fWidth, _fHeight, RIconToDraw);
+	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
+	return;
 }
-
-
 
 //=======================================================================================================
 // Draw in game team bar up border. This function is right now call by DrawInGameTeamBar
 //=======================================================================================================
-function DrawInGameTeamBarUpBorder( Canvas C, FLOAT _fX, FLOAT _fY, FLOAT _fWidth, FLOAT _fHeight)
+function DrawInGameTeamBarUpBorder(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-    C.SetDrawColor( m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
-    //Top
-    DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, m_BorderTextureRegion.H, 
-                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    //Bottom
-    DrawStretchedTextureSegment(C, _fX, _fY + _fHeight, _fWidth, m_BorderTextureRegion.H , 
-                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    /*
-    //Left
-    DrawStretchedTextureSegment(C, _fX, _fY, m_BorderTextureRegion.W, _fHeight, 
-                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    //Right
-    DrawStretchedTextureSegment(C, WinWidth - m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTextureRegion.W, WinHeight - (2* m_BorderTextureRegion.H), 
-                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-                                     */
+	C.__NFUN_2626__(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
+	DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fX, __NFUN_174__(_fY, _fHeight), _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	return;
 }
-
 
 //=======================================================================================================
 // Draw in game team bar down border. This function is right now call by DrawInGameTeamBar
 //=======================================================================================================
-function DrawInGameTeamBarDownBorder( Canvas C, FLOAT _fX, FLOAT _fY, FLOAT _fWidth, FLOAT _fHeight)
+function DrawInGameTeamBarDownBorder(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-    C.SetDrawColor( m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
-    /*
-    //Top
-    DrawStretchedTextureSegment(C, _fX, _fY, WinWidth, m_BorderTextureRegion.H , 
-                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-                                     */
-    //Bottom
-    DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, m_BorderTextureRegion.H , 
-                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-
-    //Left
-//    DrawStretchedTextureSegment(C, 140, _fY, m_BorderTextureRegion.W, _fHeight, 
-//                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    //Right
-//    DrawStretchedTextureSegment(C, 340, _fY, m_BorderTextureRegion.W, _fHeight, 
-//                                     m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-
+	C.__NFUN_2626__(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
+	DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	return;
 }
-
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
-
-
-
-
-
-
-
-
-//***************************** INIT SECTION *******************************
 
 //===============================================================================
 // Init text header
 //===============================================================================
 function InitTeamBar()
 {
-    local FLOAT fXOffset, fYOffset, fYStep, fWidth, fHeight;
-    local Font ButtonFont;
+	local float fXOffset, fYOffset, fYStep, fWidth, fHeight;
 
-    if (m_pTextTeamBar == None)
-    {
-        // Use text array with R6WindowTextLabelExt
-        m_pTextTeamBar = R6WindowTextLabelExt( CreateWindow(class'R6WindowTextLabelExt', 0, 0, WinWidth, WinHeight, self));
-        m_pTextTeamBar.bAlwaysBehind = true;
-        m_pTextTeamBar.SetNoBorder();
+	local Font ButtonFont;
 
-        // text part
-        m_pTextTeamBar.m_Font = Root.Fonts[F_VerySmallTitle];//F_SmallTitle];
-        m_pTextTeamBar.m_vTextColor = m_vTeamColor;
-
-        Refresh();
-
-        InitIGPlayerInfoList();
-    }
+	// End:0x96
+	if(__NFUN_114__(m_pTextTeamBar, none))
+	{
+		m_pTextTeamBar = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, WinWidth, WinHeight, self));
+		m_pTextTeamBar.bAlwaysBehind = true;
+		m_pTextTeamBar.SetNoBorder();
+		m_pTextTeamBar.m_Font = Root.Fonts[6];
+		m_pTextTeamBar.m_vTextColor = m_vTeamColor;
+		Refresh();
+		InitIGPlayerInfoList();
+	}
+	return;
 }
 
-
 function InitIGPlayerInfoList()
-{	
-	// Create window for serever list
- 	m_IGPlayerInfoListBox = R6WindowIGPlayerInfoListBox(CreateWindow( class'R6WindowIGPlayerInfoListBox', 0, C_fTEAMBAR_ICON_HEIGHT, WinWidth, WinHeight -  GetPlayerListBorderHeight(), self));
-	m_IGPlayerInfoListBox.SetCornerType(No_Borders);
-
-    // TODO might need to add something for specific fonts, textures, etc.
-
-    m_IGPlayerInfoListBox.m_Font = Root.Fonts[F_VerySmallTitle];//F_ListItemSmall];
-	
+{
+	m_IGPlayerInfoListBox = R6WindowIGPlayerInfoListBox(CreateWindow(Class'R6Window.R6WindowIGPlayerInfoListBox', 0.0000000, 15.0000000, WinWidth, __NFUN_175__(WinHeight, GetPlayerListBorderHeight()), self));
+	m_IGPlayerInfoListBox.SetCornerType(1);
+	m_IGPlayerInfoListBox.m_Font = Root.Fonts[6];
+	return;
 }
 
 function InitMissionWindows()
 {
-		m_pTitleCoop = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', 0, 0, WinWidth, C_iMISSION_TITLE_H, self));
-		m_pTitleCoop.Text			= Localize("MPInGame","Coop_MissionDebr","R6Menu");
-		m_pTitleCoop.Align			= TA_Center;
-		m_pTitleCoop.m_Font			= Root.Fonts[F_PopUpTitle];
-		m_pTitleCoop.TextColor		= Root.Colors.White;
-		m_pTitleCoop.m_fHBorderPadding = 2;
-		m_pTitleCoop.m_VBorderTexture  = None;
-
-		m_pMissionObj = R6MenuMPInGameObj(CreateWindow(class'R6MenuMPInGameObj', 
-		  											   0, C_iMISSION_TITLE_H, WinWidth, WinHeight - C_iMISSION_TITLE_H, self));
+	m_pTitleCoop = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 0.0000000, WinWidth, 20.0000000, self));
+	m_pTitleCoop.Text = Localize("MPInGame", "Coop_MissionDebr", "R6Menu");
+	m_pTitleCoop.Align = 2;
+	m_pTitleCoop.m_Font = Root.Fonts[8];
+	m_pTitleCoop.TextColor = Root.Colors.White;
+	m_pTitleCoop.m_fHBorderPadding = 2.0000000;
+	m_pTitleCoop.m_VBorderTexture = none;
+	m_pMissionObj = R6MenuMPInGameObj(CreateWindow(Root.MenuClassDefines.ClassInGameObjectives, 0.0000000, 20.0000000, WinWidth, __NFUN_175__(WinHeight, float(20)), self));
+	return;
 }
 
 //===================================================================================
 // InitMenuLayout: init menu layout (the size of the winwidth is 590)
 //===================================================================================
-function InitMenuLayout( INT _MenuToDisplay)
+function InitMenuLayout(int _MenuToDisplay)
 {
 	m_bTeamMenuLayout = false;
-
-	if (_MenuToDisplay == 1) // team 
+	// End:0x2E9
+	if(__NFUN_154__(_MenuToDisplay, 1))
 	{
 		m_bTeamMenuLayout = true;
-
-		m_stMenuCoord[ eMenuLayout.eML_Ready].fXPos			= 4;
-		m_stMenuCoord[ eMenuLayout.eML_Ready].fWidth		= 15;
-
-		m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fXPos	= m_stMenuCoord[ eMenuLayout.eML_Ready].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Ready].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fWidth	= 21;
-
-		m_stMenuCoord[ eMenuLayout.eML_Name].fXPos			= m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_Name].fWidth			= 153;
-
-		m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fXPos		= 0; // desactivate
-		m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fWidth	= 0; // desactivate 
-
-		m_stMenuCoord[ eMenuLayout.eML_Kill].fXPos			= m_stMenuCoord[ eMenuLayout.eML_Name].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Name].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_Kill].fWidth			= 42;
-
-		m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fXPos	= m_stMenuCoord[ eMenuLayout.eML_Kill].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Kill].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fWidth	= 41;
-
-		m_stMenuCoord[ eMenuLayout.eML_Efficiency].fXPos	= m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_Efficiency].fWidth	= 40;
-
-		m_stMenuCoord[ eMenuLayout.eML_RoundFired].fXPos	= m_stMenuCoord[ eMenuLayout.eML_Efficiency].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Efficiency].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_RoundFired].fWidth	= 40;
-
-		m_stMenuCoord[ eMenuLayout.eML_RoundHit].fXPos		= m_stMenuCoord[ eMenuLayout.eML_RoundFired].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_RoundFired].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_RoundHit].fWidth		= 40;
-
-		m_stMenuCoord[ eMenuLayout.eML_KillerName].fXPos	= m_stMenuCoord[ eMenuLayout.eML_RoundHit].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_RoundHit].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_KillerName].fWidth	= m_stMenuCoord[ eMenuLayout.eML_Name].fWidth;
-
-		m_stMenuCoord[ eMenuLayout.eML_PingTime].fXPos		= m_stMenuCoord[ eMenuLayout.eML_KillerName].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_KillerName].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_PingTime].fWidth		= 41;
+		m_stMenuCoord[int(0)].fXPos = 4.0000000;
+		m_stMenuCoord[int(0)].fWidth = 15.0000000;
+		m_stMenuCoord[int(1)].fXPos = __NFUN_174__(m_stMenuCoord[int(0)].fXPos, m_stMenuCoord[int(0)].fWidth);
+		m_stMenuCoord[int(1)].fWidth = 21.0000000;
+		m_stMenuCoord[int(2)].fXPos = __NFUN_174__(m_stMenuCoord[int(1)].fXPos, m_stMenuCoord[int(1)].fWidth);
+		m_stMenuCoord[int(2)].fWidth = 153.0000000;
+		m_stMenuCoord[int(3)].fXPos = 0.0000000;
+		m_stMenuCoord[int(3)].fWidth = 0.0000000;
+		m_stMenuCoord[int(4)].fXPos = __NFUN_174__(m_stMenuCoord[int(2)].fXPos, m_stMenuCoord[int(2)].fWidth);
+		m_stMenuCoord[int(4)].fWidth = 42.0000000;
+		m_stMenuCoord[int(5)].fXPos = __NFUN_174__(m_stMenuCoord[int(4)].fXPos, m_stMenuCoord[int(4)].fWidth);
+		m_stMenuCoord[int(5)].fWidth = 41.0000000;
+		m_stMenuCoord[int(6)].fXPos = __NFUN_174__(m_stMenuCoord[int(5)].fXPos, m_stMenuCoord[int(5)].fWidth);
+		m_stMenuCoord[int(6)].fWidth = 40.0000000;
+		m_stMenuCoord[int(7)].fXPos = __NFUN_174__(m_stMenuCoord[int(6)].fXPos, m_stMenuCoord[int(6)].fWidth);
+		m_stMenuCoord[int(7)].fWidth = 40.0000000;
+		m_stMenuCoord[int(8)].fXPos = __NFUN_174__(m_stMenuCoord[int(7)].fXPos, m_stMenuCoord[int(7)].fWidth);
+		m_stMenuCoord[int(8)].fWidth = 40.0000000;
+		m_stMenuCoord[int(9)].fXPos = __NFUN_174__(m_stMenuCoord[int(8)].fXPos, m_stMenuCoord[int(8)].fWidth);
+		m_stMenuCoord[int(9)].fWidth = m_stMenuCoord[int(2)].fWidth;
+		m_stMenuCoord[int(10)].fXPos = __NFUN_174__(m_stMenuCoord[int(9)].fXPos, m_stMenuCoord[int(9)].fWidth);
+		m_stMenuCoord[int(10)].fWidth = 41.0000000;		
 	}
-	else // the default one
+	else
 	{
-		m_stMenuCoord[ eMenuLayout.eML_Ready].fXPos			= 2;
-		m_stMenuCoord[ eMenuLayout.eML_Ready].fWidth		= 15;
-
-		m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fXPos	= m_stMenuCoord[ eMenuLayout.eML_Ready].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Ready].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fWidth	= 15;
-
-		m_stMenuCoord[ eMenuLayout.eML_Name].fXPos			= m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_HealthStatus].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_Name].fWidth			= 153;
-
-		m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fXPos		= m_stMenuCoord[ eMenuLayout.eML_Name].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Name].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fWidth	= 37; 
-
-		m_stMenuCoord[ eMenuLayout.eML_Kill].fXPos			= m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_RoundsWon].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_Kill].fWidth			= 36;
-
-		m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fXPos	= m_stMenuCoord[ eMenuLayout.eML_Kill].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Kill].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fWidth	= 36;
-
-		m_stMenuCoord[ eMenuLayout.eML_Efficiency].fXPos	= m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_DeadCounter].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_Efficiency].fWidth	= 36;
-
-		m_stMenuCoord[ eMenuLayout.eML_RoundFired].fXPos	= m_stMenuCoord[ eMenuLayout.eML_Efficiency].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_Efficiency].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_RoundFired].fWidth	= 36;
-
-		m_stMenuCoord[ eMenuLayout.eML_RoundHit].fXPos		= m_stMenuCoord[ eMenuLayout.eML_RoundFired].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_RoundFired].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_RoundHit].fWidth		= 36;
-
-		m_stMenuCoord[ eMenuLayout.eML_KillerName].fXPos	= m_stMenuCoord[ eMenuLayout.eML_RoundHit].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_RoundHit].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_KillerName].fWidth	= m_stMenuCoord[ eMenuLayout.eML_Name].fWidth;
-
-		m_stMenuCoord[ eMenuLayout.eML_PingTime].fXPos		= m_stMenuCoord[ eMenuLayout.eML_KillerName].fXPos + 
-															  m_stMenuCoord[ eMenuLayout.eML_KillerName].fWidth;
-		m_stMenuCoord[ eMenuLayout.eML_PingTime].fWidth		= 35;
+		m_stMenuCoord[int(0)].fXPos = 2.0000000;
+		m_stMenuCoord[int(0)].fWidth = 15.0000000;
+		m_stMenuCoord[int(1)].fXPos = __NFUN_174__(m_stMenuCoord[int(0)].fXPos, m_stMenuCoord[int(0)].fWidth);
+		m_stMenuCoord[int(1)].fWidth = 15.0000000;
+		m_stMenuCoord[int(2)].fXPos = __NFUN_174__(m_stMenuCoord[int(1)].fXPos, m_stMenuCoord[int(1)].fWidth);
+		m_stMenuCoord[int(2)].fWidth = 153.0000000;
+		m_stMenuCoord[int(3)].fXPos = __NFUN_174__(m_stMenuCoord[int(2)].fXPos, m_stMenuCoord[int(2)].fWidth);
+		m_stMenuCoord[int(3)].fWidth = 37.0000000;
+		m_stMenuCoord[int(4)].fXPos = __NFUN_174__(m_stMenuCoord[int(3)].fXPos, m_stMenuCoord[int(3)].fWidth);
+		m_stMenuCoord[int(4)].fWidth = 36.0000000;
+		m_stMenuCoord[int(5)].fXPos = __NFUN_174__(m_stMenuCoord[int(4)].fXPos, m_stMenuCoord[int(4)].fWidth);
+		m_stMenuCoord[int(5)].fWidth = 36.0000000;
+		m_stMenuCoord[int(6)].fXPos = __NFUN_174__(m_stMenuCoord[int(5)].fXPos, m_stMenuCoord[int(5)].fWidth);
+		m_stMenuCoord[int(6)].fWidth = 36.0000000;
+		m_stMenuCoord[int(7)].fXPos = __NFUN_174__(m_stMenuCoord[int(6)].fXPos, m_stMenuCoord[int(6)].fWidth);
+		m_stMenuCoord[int(7)].fWidth = 36.0000000;
+		m_stMenuCoord[int(8)].fXPos = __NFUN_174__(m_stMenuCoord[int(7)].fXPos, m_stMenuCoord[int(7)].fWidth);
+		m_stMenuCoord[int(8)].fWidth = 36.0000000;
+		m_stMenuCoord[int(9)].fXPos = __NFUN_174__(m_stMenuCoord[int(8)].fXPos, m_stMenuCoord[int(8)].fWidth);
+		m_stMenuCoord[int(9)].fWidth = m_stMenuCoord[int(2)].fWidth;
+		m_stMenuCoord[int(10)].fXPos = __NFUN_174__(m_stMenuCoord[int(9)].fXPos, m_stMenuCoord[int(9)].fWidth);
+		m_stMenuCoord[int(10)].fWidth = 35.0000000;
 	}
+	return;
 }
 
 defaultproperties
 {
-     m_TIcon=Texture'R6MenuTextures.Credits.TeamBarIcon'
+	m_TIcon=Texture'R6MenuTextures.Credits.TeamBarIcon'
 }

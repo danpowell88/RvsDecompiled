@@ -1,32 +1,37 @@
+//=============================================================================
+// TexOscillator - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class TexOscillator extends TexModifier
+	native
 	editinlinenew
-	native;
-
+	collapsecategories
+ hidecategories(Object,Material);
 
 enum ETexOscillationType
 {
-	OT_Pan,
-	OT_Stretch,
-	OT_StretchRepeat
+	OT_Pan,                         // 0
+	OT_Stretch,                     // 1
+	OT_StretchRepeat                // 2
 };
 
-var() Float UOscillationRate;
-var() Float VOscillationRate;
-var() Float UOscillationPhase;
-var() Float VOscillationPhase;
-var() Float UOscillationAmplitude;
-var() Float VOscillationAmplitude;
-var() ETexOscillationType UOscillationType;
-var() ETexOscillationType VOscillationType;
+var() TexOscillator.ETexOscillationType UOscillationType;
+var() TexOscillator.ETexOscillationType VOscillationType;
+var() float UOscillationRate;
+var() float VOscillationRate;
+var() float UOscillationPhase;
+var() float VOscillationPhase;
+var() float UOscillationAmplitude;
+var() float VOscillationAmplitude;
 var() float UOffset;
 var() float VOffset;
-
 var Matrix M;
 
 defaultproperties
 {
-     UOscillationRate=1.000000
-     VOscillationRate=1.000000
-     UOscillationAmplitude=0.100000
-     VOscillationAmplitude=0.100000
+	UOscillationRate=1.0000000
+	VOscillationRate=1.0000000
+	UOscillationAmplitude=0.1000000
+	VOscillationAmplitude=0.1000000
 }

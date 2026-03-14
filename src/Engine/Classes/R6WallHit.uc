@@ -1,3 +1,9 @@
+//=============================================================================
+// R6WallHit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6WallHit.uc 
 // Created By       
@@ -9,50 +15,57 @@
 // 2002/02/07	    Cyrille Lauzon: Added the new R6Decals, out effects are not
 //									taken in account.
 //============================================================================//
-
 class R6WallHit extends R6DecalsBase
-    native
-    abstract;
+	abstract
+	native
+ notplaceable;
 
-
-var (Rainbow)sound m_ImpactSound;
-var (Rainbow)sound m_ExitSound;
-var (Rainbow)sound m_RicochetSound;
-
-var (Rainbow)class<R6SFX> m_pSparksIn;
-
-var (Rainbow)Array<Texture> m_DecalTexture;
-var (Rainbow)ESoundType     m_eSoundType;
-var (Rainbow)bool           m_bGoreLevelHigh;
-
-var enum EHitType
+enum EHitType
 {
-	HIT_Impact,
-    HIT_Ricochet,
-	HIT_Exit,
-} m_eHitType;
+	HIT_Impact,                     // 0
+	HIT_Ricochet,                   // 1
+	HIT_Exit                        // 2
+};
 
-var BOOL m_bPlayEffectSound;  // if you want to Play Sound for the WallHit (espacially use for the shotgun).
-
+var(Rainbow) Actor.ESoundType m_eSoundType;
+// NEW IN 1.60
+var R6WallHit.EHitType m_eHitType;
+// NEW IN 1.60
+var bool m_bDoubleFace;
+var(Rainbow) bool m_bGoreLevelHigh;
+// NEW IN 1.60
+var() bool bProjectOnlyFirst;
+var bool m_bPlayEffectSound;  // if you want to Play Sound for the WallHit (espacially use for the shotgun).
+var(Rainbow) Sound m_ImpactSound;
+var(Rainbow) Sound m_ExitSound;
+var(Rainbow) Sound m_RicochetSound;
+var(Rainbow) Class<R6SFX> m_pSparksIn;
+var(Rainbow) array<Texture> m_DecalTexture;
 
 replication
 {
-	unreliable if( Role==ROLE_Authority )
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
 		m_bPlayEffectSound;
 }
 
 simulated function FirstPassReset()
 {
-    Destroy();
+	__NFUN_279__();
+	return;
 }
 
 defaultproperties
 {
-     m_eSoundType=SNDTYPE_BulletImpact
-     m_bPlayEffectSound=True
-     bHidden=True
-     bNetOptional=True
-     m_bDeleteOnReset=True
-     LifeSpan=5.000000
-     Texture=None
+	m_eSoundType=2
+	m_bPlayEffectSound=true
+	bHidden=true
+	bNetOptional=true
+	m_bDeleteOnReset=true
+	LifeSpan=5.0000000
+	CullDistance=1700.0000000
+	Texture=none
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var EHitType

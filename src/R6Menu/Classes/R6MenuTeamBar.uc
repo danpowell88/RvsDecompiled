@@ -1,142 +1,167 @@
 //=============================================================================
+// R6MenuTeamBar - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuTeamBar.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/28 * Created by Chaouky Garram
 //=============================================================================
-
 class R6MenuTeamBar extends UWindowWindow;
 
-var R6MenuTeamDisplayButton m_DisplayList[3];
-var R6MenuTeamButton        m_ActiveList[3];
+const PosX2 = 2;
+const ButtonWidth = 28;
+const SmallWidth = 14;
 
-const PosX2=2;
-const ButtonWidth=28;
-const SmallWidth=14;
+var R6MenuTeamDisplayButton m_DisplayList[3];
+var R6MenuTeamButton m_ActiveList[3];
 
 function Created()
 {
-    local INT i;
-    local INT xPosition;
+	local int i, xPosition;
 
-   
-    xPosition=4;
+	xPosition = 4;
+	i = 0;
+	J0x0F:
 
-    for(i=0;i<3;i++)
-    {
-        m_ActiveList[i] = R6MenuTeamButton(CreateWindow( class'R6MenuTeamButton' , xPosition, 1, class'R6MenuTeamButton'.default.UpRegion.W, 23, self));
-        m_ActiveList[i].m_iTeamColor = i;
-        m_ActiveList[i].ToolTipString = Localize("PlanningMenu","TeamActive","R6Menu");
-        m_ActiveList[i].m_vButtonColor=Root.Colors.TeamColorLight[i];
+	// End:0xFA [Loop If]
+	if(__NFUN_150__(i, 3))
+	{
+		m_ActiveList[i] = R6MenuTeamButton(CreateWindow(Class'R6Menu.R6MenuTeamButton', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTeamButton'.default.UpRegion.W), 23.0000000, self));
+		m_ActiveList[i].m_iTeamColor = i;
+		m_ActiveList[i].ToolTipString = Localize("PlanningMenu", "TeamActive", "R6Menu");
+		m_ActiveList[i].m_vButtonColor = Root.Colors.TeamColorLight[i];
+		__NFUN_161__(xPosition, 14);
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	i = 0;
+	J0x101:
 
-        xPosition += SmallWidth;
-    }
-    
-    for(i=0;i<3;i++)
-    {
-        m_DisplayList[i] = R6MenuTeamDisplayButton(CreateWindow( class'R6MenuTeamDisplayButton', xPosition, 1, class'R6MenuTeamDisplayButton'.default.UpRegion.W, 23, self));
-        m_DisplayList[i].m_iTeamColor = i;
-        m_DisplayList[i].m_vButtonColor=Root.Colors.TeamColorLight[i];
-        m_DisplayList[i].ToolTipString = Localize("PlanningMenu","TeamDisplay","R6Menu");
-
-        xPosition += ButtonWidth - PosX2;
-    }
-
-	WinWidth = xPosition+4;
-    // Init
-    SetTeamActive(0);
-
-     m_BorderColor=Root.Colors.GrayLight;
+	// End:0x1F1 [Loop If]
+	if(__NFUN_150__(i, 3))
+	{
+		m_DisplayList[i] = R6MenuTeamDisplayButton(CreateWindow(Class'R6Menu.R6MenuTeamDisplayButton', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTeamDisplayButton'.default.UpRegion.W), 23.0000000, self));
+		m_DisplayList[i].m_iTeamColor = i;
+		m_DisplayList[i].m_vButtonColor = Root.Colors.TeamColorLight[i];
+		m_DisplayList[i].ToolTipString = Localize("PlanningMenu", "TeamDisplay", "R6Menu");
+		__NFUN_161__(xPosition, __NFUN_147__(28, 2));
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x101;
+	}
+	WinWidth = float(__NFUN_146__(xPosition, 4));
+	SetTeamActive(0);
+	m_BorderColor = Root.Colors.GrayLight;
+	return;
 }
 
 function Reset()
 {
-    local R6PlanningCtrl OwnerCtrl;
-    OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	local R6PlanningCtrl OwnerCtrl;
 
-    //Reset the active team.
-    m_ActiveList[0].m_bSelected = true;
-    m_ActiveList[1].m_bSelected = false;
-    m_ActiveList[2].m_bSelected = false;
-
-    //Display All Team    
-    m_DisplayList[0].m_bSelected = true;
-    m_DisplayList[1].m_bSelected = true;
-    m_DisplayList[2].m_bSelected = true;
-
-    if(OwnerCtrl != none)
-    {
-        OwnerCtrl.m_pTeamInfo[0].SetPathDisplay(true);
-        OwnerCtrl.m_pTeamInfo[1].SetPathDisplay(true);
-        OwnerCtrl.m_pTeamInfo[2].SetPathDisplay(true);
-    }
+	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	m_ActiveList[0].m_bSelected = true;
+	m_ActiveList[1].m_bSelected = false;
+	m_ActiveList[2].m_bSelected = false;
+	m_DisplayList[0].m_bSelected = true;
+	m_DisplayList[1].m_bSelected = true;
+	m_DisplayList[2].m_bSelected = true;
+	// End:0xE2
+	if(__NFUN_119__(OwnerCtrl, none))
+	{
+		OwnerCtrl.m_pTeamInfo[0].SetPathDisplay(true);
+		OwnerCtrl.m_pTeamInfo[1].SetPathDisplay(true);
+		OwnerCtrl.m_pTeamInfo[2].SetPathDisplay(true);
+	}
+	return;
 }
 
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-    DrawSimpleBorder(C);
+	DrawSimpleBorder(C);
+	return;
 }
 
 function EscClose()
 {
+	return;
 }
 
-function SetTeamActive(INT iActive)
+function SetTeamActive(int iActive)
 {
-    local R6PlanningCtrl OwnerCtrl;
-    OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	local R6PlanningCtrl OwnerCtrl;
 
-    m_ActiveList[0].m_bSelected = false;
-    m_ActiveList[1].m_bSelected = false;
-    m_ActiveList[2].m_bSelected = false;
-    m_ActiveList[iActive].m_bSelected = true;
-
-    if(OwnerCtrl != none)
-    {
-        switch(iActive)
-        {
-        case 0:
-            OwnerCtrl.SwitchToRedTeam(true);
-            m_DisplayList[0].m_bSelected = true;
-            break;
-        case 1:
-            OwnerCtrl.SwitchToGreenTeam(true);
-            m_DisplayList[1].m_bSelected = true;
-            break;
-        case 2:
-            OwnerCtrl.SwitchToGoldTeam(true);
-            m_DisplayList[2].m_bSelected = true;
-            break;
-        }
-    }
+	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	m_ActiveList[0].m_bSelected = false;
+	m_ActiveList[1].m_bSelected = false;
+	m_ActiveList[2].m_bSelected = false;
+	m_ActiveList[iActive].m_bSelected = true;
+	// End:0xF7
+	if(__NFUN_119__(OwnerCtrl, none))
+	{
+		switch(iActive)
+		{
+			// End:0x9E
+			case 0:
+				OwnerCtrl.SwitchToRedTeam(true);
+				m_DisplayList[0].m_bSelected = true;
+				// End:0xF7
+				break;
+			// End:0xC8
+			case 1:
+				OwnerCtrl.SwitchToGreenTeam(true);
+				m_DisplayList[1].m_bSelected = true;
+				// End:0xF7
+				break;
+			// End:0xF4
+			case 2:
+				OwnerCtrl.SwitchToGoldTeam(true);
+				m_DisplayList[2].m_bSelected = true;
+				// End:0xF7
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	else
+	{
+		return;
+	}
 }
 
-function ResetTeams(INT iWhatToReset)
+function ResetTeams(int iWhatToReset)
 {
-    //Take the information from the planning controller to change the menu.
-    local R6PlanningCtrl OwnerCtrl;
-    OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	local R6PlanningCtrl OwnerCtrl;
 
-    //New team selected
-    if((iWhatToReset < 3) && (m_ActiveList[OwnerCtrl.m_iCurrentTeam].m_bSelected != true))
-    {
-        m_ActiveList[0].m_bSelected = false;
-        m_ActiveList[1].m_bSelected = false;
-        m_ActiveList[2].m_bSelected = false;
-        m_ActiveList[OwnerCtrl.m_iCurrentTeam].m_bSelected = true;
-        if(!m_DisplayList[OwnerCtrl.m_iCurrentTeam].m_bSelected)
-        {
-            m_DisplayList[OwnerCtrl.m_iCurrentTeam].m_bSelected = true;
-        }
-    }
-    else if( iWhatToReset > 2)
-    {
-        m_DisplayList[iWhatToReset - 3].m_bSelected = !m_DisplayList[iWhatToReset - 3].m_bSelected;
-    }
-
+	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	// End:0xE3
+	if(__NFUN_130__(__NFUN_150__(iWhatToReset, 3), __NFUN_243__(m_ActiveList[OwnerCtrl.m_iCurrentTeam].m_bSelected, true)))
+	{
+		m_ActiveList[0].m_bSelected = false;
+		m_ActiveList[1].m_bSelected = false;
+		m_ActiveList[2].m_bSelected = false;
+		m_ActiveList[OwnerCtrl.m_iCurrentTeam].m_bSelected = true;
+		// End:0xE0
+		if(__NFUN_129__(m_DisplayList[OwnerCtrl.m_iCurrentTeam].m_bSelected))
+		{
+			m_DisplayList[OwnerCtrl.m_iCurrentTeam].m_bSelected = true;
+		}		
+	}
+	else
+	{
+		// End:0x124
+		if(__NFUN_151__(iWhatToReset, 2))
+		{
+			m_DisplayList[__NFUN_147__(iWhatToReset, 3)].m_bSelected = __NFUN_129__(m_DisplayList[__NFUN_147__(iWhatToReset, 3)].m_bSelected);
+		}
+	}
+	return;
 }
 
-defaultproperties
-{
-}

@@ -1,141 +1,133 @@
 //=============================================================================
+// R6MenuListActionButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuListActionButton.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/09 * Created by Chaouky Garram
 //=============================================================================
-
 class R6MenuListActionButton extends R6MenuPopupListButton;
 
-var bool    m_bAutoSelect;
+var bool m_bAutoSelect;
 
 function Created()
 {
-    Super.Created();
-
-    m_FontForButtons=Root.Fonts[F_HelpWindow];
-
-    m_fItemHeight = R6MenuRSLookAndFeel(LookAndFeel).m_BLTitleL.Up.H;
-    //m_bCanBeUnselected=true;
-    //---------------------------------------------
-    m_ButtonItem[EPlanAction.PACT_None] = R6WindowListButtonItem(Items.Append( ListClass));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_None]).m_eAction = PACT_None;
-    m_ButtonItem[EPlanAction.PACT_None].m_Button = R6WindowButton(CreateWindow( class'R6MenuPopUpStayDownButton', 0, 0, WinWidth, m_fItemHeight, self));
-    m_ButtonItem[EPlanAction.PACT_None].m_Button.SetText( Localize("Order","Action_None","R6Menu"));
-    m_ButtonItem[EPlanAction.PACT_None].m_Button.m_buttonFont=m_FontForButtons;
-    //---------------------------------------------
-    m_ButtonItem[EPlanAction.PACT_Frag] = R6WindowListButtonItem(Items.Append( ListClass));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_Frag]).m_eAction = PACT_Frag;
-    m_ButtonItem[EPlanAction.PACT_Frag].m_Button = R6WindowButton(CreateWindow( class'R6MenuPopUpStayDownButton', 0, 0, WinWidth, m_fItemHeight, self));
-    m_ButtonItem[EPlanAction.PACT_Frag].m_Button.SetText( Localize("Order","Action_FragRoom","R6Menu"));
-    m_ButtonItem[EPlanAction.PACT_Frag].m_Button.m_buttonFont=m_FontForButtons;
-    //---------------------------------------------
-    m_ButtonItem[EPlanAction.PACT_Flash] = R6WindowListButtonItem(Items.Append( ListClass));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_Flash]).m_eAction = PACT_Flash;
-    m_ButtonItem[EPlanAction.PACT_Flash].m_Button = R6WindowButton(CreateWindow( class'R6MenuPopUpStayDownButton', 0, 0, WinWidth, m_fItemHeight, self));
-    m_ButtonItem[EPlanAction.PACT_Flash].m_Button.SetText( Localize("Order","Action_FlashRoom","R6Menu"));
-    m_ButtonItem[EPlanAction.PACT_Flash].m_Button.m_buttonFont=m_FontForButtons;
-    //---------------------------------------------
-    m_ButtonItem[EPlanAction.PACT_Gas] = R6WindowListButtonItem(Items.Append( ListClass));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_Gas]).m_eAction = PACT_Gas;
-    m_ButtonItem[EPlanAction.PACT_Gas].m_Button = R6WindowButton(CreateWindow( class'R6MenuPopUpStayDownButton', 0, 0, WinWidth, m_fItemHeight, self));
-    m_ButtonItem[EPlanAction.PACT_Gas].m_Button.SetText( Localize("Order","Action_Gas","R6Menu"));
-    m_ButtonItem[EPlanAction.PACT_Gas].m_Button.m_buttonFont=m_FontForButtons;
-    //---------------------------------------------
-    m_ButtonItem[EPlanAction.PACT_Smoke] = R6WindowListButtonItem(Items.Append( ListClass));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_Smoke]).m_eAction = PACT_Smoke;
-    m_ButtonItem[EPlanAction.PACT_Smoke].m_Button = R6WindowButton(CreateWindow( class'R6MenuPopUpStayDownButton', 0, 0, WinWidth, m_fItemHeight, self));
-    m_ButtonItem[EPlanAction.PACT_Smoke].m_Button.SetText( Localize("Order","Action_Smoke","R6Menu"));
-    m_ButtonItem[EPlanAction.PACT_Smoke].m_Button.m_buttonFont=m_FontForButtons;
-    //---------------------------------------------
-    m_ButtonItem[EPlanAction.PACT_SnipeGoCode] = R6WindowListButtonItem(Items.Append( ListClass));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_SnipeGoCode]).m_eAction = PACT_SnipeGoCode;
-    m_ButtonItem[EPlanAction.PACT_SnipeGoCode].m_Button = R6WindowButton(CreateWindow( class'R6MenuPopUpStayDownButton', 0, 0, WinWidth, m_fItemHeight, self));
-    m_ButtonItem[EPlanAction.PACT_SnipeGoCode].m_Button.SetText( Localize("Order","Action_Snipe","R6Menu"));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_SnipeGoCode]).m_Button.bDisabled=TRUE;
-    m_ButtonItem[EPlanAction.PACT_SnipeGoCode].m_Button.m_buttonFont=m_FontForButtons;
-
-    //---------------------------------------------
-    m_ButtonItem[EPlanAction.PACT_Breach] = R6WindowListButtonItem(Items.Append( ListClass));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_Breach]).m_eAction = PACT_Breach;
-    m_ButtonItem[EPlanAction.PACT_Breach].m_Button = R6WindowButton(CreateWindow( class'R6MenuPopUpStayDownButton', 0, 0, WinWidth, m_fItemHeight, self));
-    m_ButtonItem[EPlanAction.PACT_Breach].m_Button.SetText( Localize("Order","Action_BreachDoor","R6Menu"));
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_Breach]).m_Button.bDisabled=TRUE;
-    m_ButtonItem[EPlanAction.PACT_Breach].m_Button.m_buttonFont=m_FontForButtons;
+	super(R6WindowListRadioButton).Created();
+	m_FontForButtons = Root.Fonts[12];
+	m_fItemHeight = float(R6MenuRSLookAndFeel(LookAndFeel).m_BLTitleL.Up.H);
+	m_ButtonItem[int(0)] = R6WindowListButtonItem(Items.Append(ListClass));
+	R6MenuActionButtonItem(m_ButtonItem[int(0)]).m_eAction = 0;
+	m_ButtonItem[int(0)].m_Button = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuPopUpStayDownButton', 0.0000000, 0.0000000, WinWidth, m_fItemHeight, self));
+	m_ButtonItem[int(0)].m_Button.SetText(Localize("Order", "Action_None", "R6Menu"));
+	m_ButtonItem[int(0)].m_Button.m_buttonFont = m_FontForButtons;
+	m_ButtonItem[int(1)] = R6WindowListButtonItem(Items.Append(ListClass));
+	R6MenuActionButtonItem(m_ButtonItem[int(1)]).m_eAction = 1;
+	m_ButtonItem[int(1)].m_Button = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuPopUpStayDownButton', 0.0000000, 0.0000000, WinWidth, m_fItemHeight, self));
+	m_ButtonItem[int(1)].m_Button.SetText(Localize("Order", "Action_FragRoom", "R6Menu"));
+	m_ButtonItem[int(1)].m_Button.m_buttonFont = m_FontForButtons;
+	m_ButtonItem[int(2)] = R6WindowListButtonItem(Items.Append(ListClass));
+	R6MenuActionButtonItem(m_ButtonItem[int(2)]).m_eAction = 2;
+	m_ButtonItem[int(2)].m_Button = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuPopUpStayDownButton', 0.0000000, 0.0000000, WinWidth, m_fItemHeight, self));
+	m_ButtonItem[int(2)].m_Button.SetText(Localize("Order", "Action_FlashRoom", "R6Menu"));
+	m_ButtonItem[int(2)].m_Button.m_buttonFont = m_FontForButtons;
+	m_ButtonItem[int(3)] = R6WindowListButtonItem(Items.Append(ListClass));
+	R6MenuActionButtonItem(m_ButtonItem[int(3)]).m_eAction = 3;
+	m_ButtonItem[int(3)].m_Button = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuPopUpStayDownButton', 0.0000000, 0.0000000, WinWidth, m_fItemHeight, self));
+	m_ButtonItem[int(3)].m_Button.SetText(Localize("Order", "Action_Gas", "R6Menu"));
+	m_ButtonItem[int(3)].m_Button.m_buttonFont = m_FontForButtons;
+	m_ButtonItem[int(4)] = R6WindowListButtonItem(Items.Append(ListClass));
+	R6MenuActionButtonItem(m_ButtonItem[int(4)]).m_eAction = 4;
+	m_ButtonItem[int(4)].m_Button = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuPopUpStayDownButton', 0.0000000, 0.0000000, WinWidth, m_fItemHeight, self));
+	m_ButtonItem[int(4)].m_Button.SetText(Localize("Order", "Action_Smoke", "R6Menu"));
+	m_ButtonItem[int(4)].m_Button.m_buttonFont = m_FontForButtons;
+	m_ButtonItem[int(5)] = R6WindowListButtonItem(Items.Append(ListClass));
+	R6MenuActionButtonItem(m_ButtonItem[int(5)]).m_eAction = 5;
+	m_ButtonItem[int(5)].m_Button = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuPopUpStayDownButton', 0.0000000, 0.0000000, WinWidth, m_fItemHeight, self));
+	m_ButtonItem[int(5)].m_Button.SetText(Localize("Order", "Action_Snipe", "R6Menu"));
+	R6MenuActionButtonItem(m_ButtonItem[int(5)]).m_Button.bDisabled = true;
+	m_ButtonItem[int(5)].m_Button.m_buttonFont = m_FontForButtons;
+	m_ButtonItem[int(6)] = R6WindowListButtonItem(Items.Append(ListClass));
+	R6MenuActionButtonItem(m_ButtonItem[int(6)]).m_eAction = 6;
+	m_ButtonItem[int(6)].m_Button = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuPopUpStayDownButton', 0.0000000, 0.0000000, WinWidth, m_fItemHeight, self));
+	m_ButtonItem[int(6)].m_Button.SetText(Localize("Order", "Action_BreachDoor", "R6Menu"));
+	R6MenuActionButtonItem(m_ButtonItem[int(6)]).m_Button.bDisabled = true;
+	m_ButtonItem[int(6)].m_Button.m_buttonFont = m_FontForButtons;
+	return;
 }
 
 function SetSelectedItem(UWindowListBoxItem NewSelected)
 {
-    local R6PlanningInfo    Planning;
-    local R6PlanningCtrl OwnerCtrl;
-    local R6MenuActionButtonItem SelectedItem;
+	local R6PlanningInfo Planning;
+	local R6PlanningCtrl OwnerCtrl;
+	local R6MenuActionButtonItem SelectedItem;
 
-    Super.SetSelectedItem( NewSelected);
-
-    OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
-    SelectedItem = R6MenuActionButtonItem(m_SelectedItem);
-    
-    if(m_SelectedItem == None)
-    {
-        log("NoSelected Item in action button menu? that's weird!");
-        return;
-    }
-
-    Planning = OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam];
-
-    if(!m_bAutoSelect)
-    {
-        Planning.SetCurrentPointAction(SelectedItem.m_eAction);
-        if((SelectedItem.m_eAction == PACT_Frag)||
-           (SelectedItem.m_eAction == PACT_Flash)||
-           (SelectedItem.m_eAction == PACT_Gas)||
-           (SelectedItem.m_eAction == PACT_Smoke))
-        {
-            OwnerCtrl.m_bClickToFindLocation = true;
-            OwnerCtrl.m_bClickedOnRange = false;
-            R6MenuRootWindow(Root).m_bUseAimIcon = true;
-        }
-
-        if(SelectedItem.m_eAction == PACT_SnipeGoCode)
-        {
-            OwnerCtrl.m_bSetSnipeDirection = true;
-            R6MenuRootWindow(Root).m_bUseAimIcon = true;
-        }
-#ifndefMPDEMO
-        R6MenuRootWindow(Root).m_PlanningWidget.m_bClosePopup = true;
-#endif
-    }
+	super(R6WindowListRadioButton).SetSelectedItem(NewSelected);
+	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
+	SelectedItem = R6MenuActionButtonItem(m_SelectedItem);
+	// End:0x71
+	if(__NFUN_114__(m_SelectedItem, none))
+	{
+		__NFUN_231__("NoSelected Item in action button menu? that's weird!");
+		return;
+	}
+	Planning = OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam];
+	// End:0x1BD
+	if(__NFUN_129__(m_bAutoSelect))
+	{
+		Planning.SetCurrentPointAction(SelectedItem.m_eAction);
+		// End:0x15E
+		if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(SelectedItem.m_eAction), int(1)), __NFUN_154__(int(SelectedItem.m_eAction), int(2))), __NFUN_154__(int(SelectedItem.m_eAction), int(3))), __NFUN_154__(int(SelectedItem.m_eAction), int(4))))
+		{
+			OwnerCtrl.m_bClickToFindLocation = true;
+			OwnerCtrl.m_bClickedOnRange = false;
+			R6MenuRootWindow(Root).m_bUseAimIcon = true;
+		}
+		// End:0x19E
+		if(__NFUN_154__(int(SelectedItem.m_eAction), int(5)))
+		{
+			OwnerCtrl.m_bSetSnipeDirection = true;
+			R6MenuRootWindow(Root).m_bUseAimIcon = true;
+		}
+		R6MenuRootWindow(Root).m_PlanningWidget.m_bClosePopup = true;
+	}
+	return;
 }
 
-function DisplaySnipeButton(BOOL bDoIDisplay)
+function DisplaySnipeButton(bool bDoIDisplay)
 {
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_SnipeGoCode]).m_Button.bDisabled=!bDoIDisplay;
+	R6MenuActionButtonItem(m_ButtonItem[int(5)]).m_Button.bDisabled = __NFUN_129__(bDoIDisplay);
+	return;
 }
 
-function DisplayBreachDoor(BOOL bDoIDisplay)
+function DisplayBreachDoor(bool bDoIDisplay)
 {
-    R6MenuActionButtonItem(m_ButtonItem[EPlanAction.PACT_Breach]).m_Button.bDisabled=!bDoIDisplay;
+	R6MenuActionButtonItem(m_ButtonItem[int(6)]).m_Button.bDisabled = __NFUN_129__(bDoIDisplay);
+	return;
 }
 
 function ShowWindow()
 {
-    local EPlanAction   eAction;
+	local Object.EPlanAction eAction;
 
-    Super.ShowWindow();
-
-    eAction = R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam].GetAction();
-
-    m_bAutoSelect=true;
-    if(m_ButtonItem[eAction] != m_SelectedItem)
-    {
-        SetSelectedItem(m_ButtonItem[eAction]);
-    }
-    m_bAutoSelect=false;
+	super(UWindowWindow).ShowWindow();
+	eAction = R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam].GetAction();
+	m_bAutoSelect = true;
+	// End:0x71
+	if(__NFUN_119__(m_ButtonItem[int(eAction)], m_SelectedItem))
+	{
+		SetSelectedItem(m_ButtonItem[int(eAction)]);
+	}
+	m_bAutoSelect = false;
+	return;
 }
 
 defaultproperties
 {
-     m_iNbButton=7
-     ListClass=Class'R6Menu.R6MenuActionButtonItem'
+	m_iNbButton=7
+	ListClass=Class'R6Menu.R6MenuActionButtonItem'
 }

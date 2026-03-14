@@ -1,39 +1,44 @@
+//=============================================================================
+// UWindowComboListItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowComboListItem extends UWindowList;
 
-var string					Value;
-var string					Value2;		// A second, non-displayed value
-var int						SortWeight;
+var int SortWeight;
+var bool bDisabled;
+var float ItemTop;
+var string Value;
+var string Value2;  // A second, non-displayed value
 
-var float					ItemTop;
-
-var BOOL					bDisabled;
-
-function int Compare(UWindowList T, UWindowList B)
+function int Compare(UWindowList t, UWindowList B)
 {
 	local UWindowComboListItem TI, BI;
 	local string TS, BS;
 
-	TI = UWindowComboListItem(T);
+	TI = UWindowComboListItem(t);
 	BI = UWindowComboListItem(B);
-
-	if(TI.SortWeight == BI.SortWeight)
+	// End:0x98
+	if(__NFUN_154__(TI.SortWeight, BI.SortWeight))
 	{
-		TS = caps(TI.Value);
-		BS = caps(BI.Value);
-
-		if(TS == BS)
+		TS = __NFUN_235__(TI.Value);
+		BS = __NFUN_235__(BI.Value);
+		// End:0x7E
+		if(__NFUN_122__(TS, BS))
+		{
 			return 0;
-
-		if(TS < BS)
+		}
+		// End:0x93
+		if(__NFUN_115__(TS, BS))
+		{
 			return -1;
-
-		return 1;
-
+		}
+		return 1;		
 	}
 	else
-		return TI.SortWeight - BI.SortWeight;
+	{
+		return __NFUN_147__(TI.SortWeight, BI.SortWeight);
+	}
+	return;
 }
 
-defaultproperties
-{
-}

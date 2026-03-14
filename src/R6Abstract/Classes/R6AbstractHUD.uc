@@ -1,4 +1,10 @@
 //=============================================================================
+// R6AbstractHUD - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6AstractHUD.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,110 +12,94 @@
 //    2001/09/16 * Created by Guillaume Borgia
 //=============================================================================
 class R6AbstractHUD extends HUD
-	native
-    abstract;
+	abstract
+ native;
 
-#exec OBJ LOAD FILE=..\Textures\R6HudFonts.utx PACKAGE=R6HudFonts
-
-var		INT				        m_iCycleHUDLayer;
-var		BOOL		        	m_bToggleHelmet;
-
+var int m_iCycleHUDLayer;
+var bool m_bToggleHelmet;
+var bool m_bGetRes;
 // HUD resolution
-var     FLOAT                   m_fNewHUDResX;
-var     FLOAT                   m_fNewHUDResY;
-var     BOOL                    m_bGetRes;
-var     string                  m_szStatusDetail;   // this string is displayed 5 sec. 
+var float m_fNewHUDResX;
+var float m_fNewHUDResY;
+var string m_szStatusDetail;  // this string is displayed 5 sec.
 
-function PostRender( Canvas C )
+function PostRender(Canvas C)
 {
-    // If HUDRes exec function was called, resize the virtual canvas screen
-    if( m_fNewHUDResX > 0 && m_fNewHUDResY > 0 )
-    {
-        C.SetVirtualSize( m_fNewHUDResX, m_fNewHUDResY );
-        m_fNewHUDResX = 0;
-        m_fNewHUDResY = 0;
-    }
-
-    if( m_bGetRes )
-    {
-        PlayerController(Owner).ClientMessage( C.SizeX @ "x" @ C.SizeY );
-        m_bGetRes = false;
-    }
-
-    Super.PostRender( C );
+	// End:0x48
+	if(__NFUN_130__(__NFUN_177__(m_fNewHUDResX, float(0)), __NFUN_177__(m_fNewHUDResY, float(0))))
+	{
+		C.__NFUN_1607__(m_fNewHUDResX, m_fNewHUDResY);
+		m_fNewHUDResX = 0.0000000;
+		m_fNewHUDResY = 0.0000000;
+	}
+	// End:0x94
+	if(m_bGetRes)
+	{
+		PlayerController(Owner).ClientMessage(__NFUN_168__(__NFUN_168__(string(C.SizeX), "x"), string(C.SizeY)));
+		m_bGetRes = false;
+	}
+	super.PostRender(C);
+	return;
 }
-
 
 //===========================================================================//
 // DrawTextCenteredInBox()                                                   //
 //===========================================================================//
-function DrawTextCenteredInBox( Canvas C, string strText, FLOAT fPosX, FLOAT fPosY, FLOAT fWidth, FLOAT fHeight )
+function DrawTextCenteredInBox(Canvas C, string strText, float fPosX, float fPosY, float fWidth, float fHeight)
 {
-    local FLOAT fTextWidth;
-    local FLOAT fTextHeight;
+	local float fTextWidth, fTextHeight;
+	local bool bBackCenter;
+	local float fBackOrgX, fBackOrgY, fBackClipX, fBackClipY;
 
-    local BOOL  bBackCenter;
-    local FLOAT fBackOrgX;
-    local FLOAT fBackOrgY;
-    local FLOAT fBackClipX;
-    local FLOAT fBackClipY;
-
-    // Keep original canvas settings to restore them later
-    bBackCenter = C.bCenter;
-    fBackOrgX   = C.OrgX;
-    fBackOrgY   = C.OrgY;
-    fBackClipX  = C.ClipX;
-    fBackClipY  = C.ClipY;
-
-    C.bCenter = true;
-    C.OrgX    = fPosX;
-    C.OrgY    = fPosY;
-    C.ClipX   = fWidth;
-    C.ClipY   = fHeight;
-
-    C.StrLen( strText, fTextWidth, fTextHeight );
-    C.SetPos( 0, (fHeight-fTextHeight) / 2.0f );
-    C.DrawText( strText );
-    
-    // Restore original canvas settings
-    C.bCenter = bBackCenter;
-    C.OrgX    = fBackOrgX;
-    C.OrgY    = fBackOrgY;
-    C.ClipX   = fBackClipX;
-    C.ClipY   = fBackClipY;
+	bBackCenter = C.bCenter;
+	fBackOrgX = C.OrgX;
+	fBackOrgY = C.OrgY;
+	fBackClipX = C.ClipX;
+	fBackClipY = C.ClipY;
+	C.bCenter = true;
+	C.OrgX = fPosX;
+	C.OrgY = fPosY;
+	C.ClipX = fWidth;
+	C.ClipY = fHeight;
+	C.__NFUN_464__(strText, fTextWidth, fTextHeight);
+	C.__NFUN_2623__(0.0000000, __NFUN_172__(__NFUN_175__(fHeight, fTextHeight), 2.0000000));
+	C.__NFUN_465__(strText);
+	C.bCenter = bBackCenter;
+	C.OrgX = fBackOrgX;
+	C.OrgY = fBackOrgY;
+	C.ClipX = fBackClipX;
+	C.ClipY = fBackClipY;
+	return;
 }
-
 
 //===========================================================================//
 // DrawTexturePart()                                                         //
 //===========================================================================//
-function DrawTexturePart( Canvas C, Texture tex, FLOAT fUStart, FLOAT fVStart, FLOAT fSizeX, FLOAT fSizeY )
+function DrawTexturePart(Canvas C, Texture Tex, float fUStart, float fVStart, float fSizeX, float fSizeY)
 {
-    C.DrawTile( tex, fSizeX, fSizeY, fUStart, fVStart, fSizeX, fSizeY );
+	C.__NFUN_466__(Tex, fSizeX, fSizeY, fUStart, fVStart, fSizeX, fSizeY);
+	return;
 }
-
 
 //===========================================================================//
 // HUDRes()                                                                  //
 //  Change HUD resolution to make it appear bigger or smaller on screen.     //
 //===========================================================================//
-exec function HUDRes( String strRes )
+exec function HUDRes(string strRes)
 {
-    local INT iPos;
-    local INT X, Y;
+	local int iPos, X, Y;
 
-    iPos = InStr( strRes, "x" );
-
-    X = INT(Left(strRes,iPos));
-    Y = INT(Mid(strRes,iPos+1));
-    
-    if( X > 0 && Y > 0 )
-    {
-        m_fNewHUDResX = X;
-        m_fNewHUDResY = Y;
-    }
+	iPos = __NFUN_126__(strRes, "x");
+	X = int(__NFUN_128__(strRes, iPos));
+	Y = int(__NFUN_127__(strRes, __NFUN_146__(iPos, 1)));
+	// End:0x6D
+	if(__NFUN_130__(__NFUN_151__(X, 0), __NFUN_151__(Y, 0)))
+	{
+		m_fNewHUDResX = float(X);
+		m_fNewHUDResY = float(Y);
+	}
+	return;
 }
-
 
 //===========================================================================//
 // GetRes()                                                                  //
@@ -117,45 +107,71 @@ exec function HUDRes( String strRes )
 //===========================================================================//
 exec function GetRes()
 {
-    m_bGetRes = true;
+	m_bGetRes = true;
+	return;
 }
-
 
 //===========================================================================//
 // GetGoCodeStr()                                                            //
 //===========================================================================//
-function String GetGoCodeStr( eGoCode goCode )
+function string GetGoCodeStr(Object.EGoCode goCode)
 {
 	switch(goCode)
 	{
-	case GOCODE_Alpha:		return "A";
-	case GOCODE_Bravo:		return "B";
-	case GOCODE_Charlie:	return "C";
-	case GOCODE_Zulu:		return "D";
+		// End:0x10
+		case 0:
+			return "A";
+		// End:0x19
+		case 1:
+			return "B";
+		// End:0x22
+		case 2:
+			return "C";
+		// End:0x2B
+		case 3:
+			return "D";
+		// End:0xFFFF
+		default:
+			return "";
+			break;
 	}
-	
-	return "";
+	return;
 }
-
 
 exec function ToggleHelmet()
 {
-    m_bToggleHelmet = !m_bToggleHelmet;
+	m_bToggleHelmet = __NFUN_129__(m_bToggleHelmet);
+	return;
 }
-
 
 exec function CycleHUDLayer()
 {
-    m_iCycleHUDLayer++;
-	if (m_iCycleHUDLayer == 4)
+	__NFUN_165__(m_iCycleHUDLayer);
+	// End:0x1A
+	if(__NFUN_154__(m_iCycleHUDLayer, 4))
+	{
 		m_iCycleHUDLayer = 0;
+	}
+	return;
 }
 
-function StartFadeToBlack( int iSec, int iPercentageOfBlack );
-function StopFadeToBlack();
-function UpdateHudFilter();
-function ActivateNoDeathCameraMsg( bool bToggleOn );
-
-defaultproperties
+function StartFadeToBlack(int iSec, int iPercentageOfBlack)
 {
+	return;
 }
+
+function StopFadeToBlack()
+{
+	return;
+}
+
+function UpdateHudFilter()
+{
+	return;
+}
+
+function ActivateNoDeathCameraMsg(bool bToggleOn)
+{
+	return;
+}
+

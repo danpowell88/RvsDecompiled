@@ -1,119 +1,124 @@
+//=============================================================================
+// R6GenericHB - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6GenericHB extends R6InteractiveObject
-    abstract
-    native;
+	abstract
+	native
+ placeable;
 
-var BOOL    m_bFirstImpact;
-var Sound   m_ImpactSound;		// Sound made when projectile hits something.
-var Sound   m_ImpactGroundSound;
-var Sound   m_ImpactWaterSound;
+var bool m_bFirstImpact;
+var Sound m_ImpactSound;  // Sound made when projectile hits something.
+var Sound m_ImpactGroundSound;
+var Sound m_ImpactWaterSound;
 
-
-simulated function SetSpeed(FLOAT fSpeed)
+simulated function SetSpeed(float fSpeed)
 {
-    Velocity = fSpeed * vector(Rotation);
-    Acceleration = vector(Rotation) * 50;
-    SetDrawType(DT_StaticMesh);
+	Velocity = __NFUN_213__(fSpeed, Vector(Rotation));
+	Acceleration = __NFUN_212__(Vector(Rotation), float(50));
+	SetDrawType(8);
+	return;
 }
 
-simulated event HitWall( vector HitNormal, actor Wall )
+simulated event HitWall(Vector HitNormal, Actor Wall)
 {
-    local vector    vTraceEnd;
-    local rotator   rotGrenade;
-    local FLOAT     fOldHeight;
-	local vector    vHitLocation, vHitNormal;
-    local actor     pHit;
-    local material  HitMaterial;
+	local Vector vTraceEnd;
+	local Rotator rotGrenade;
+	local float fOldHeight;
+	local Vector vHitLocation, vHitNormal;
+	local Actor pHit;
+	local Material HitMaterial;
 
-    // Check if it's an InteractiveObject that bullet pass through
-    if (Wall != none)
-    {
-		if((Instigator != none) && (Instigator.m_CollisionBox == Wall))
+	// End:0xDE
+	if(__NFUN_119__(Wall, none))
+	{
+		// End:0x55
+		if(__NFUN_130__(__NFUN_119__(Instigator, none), __NFUN_114__(Instigator.m_collisionBox, Wall)))
 		{
-			vTraceEnd = Location + 10*normal(velocity);
-			SetLocation(vTraceEnd, true);
+			vTraceEnd = __NFUN_215__(Location, __NFUN_213__(float(10), __NFUN_226__(Velocity)));
+			__NFUN_267__(vTraceEnd, true);
 			return;
 		}
-        
-		if( Wall.m_bBulletGoThrough && Wall.IsA( 'R6InteractiveObject' ) )
-        {
-            Wall.R6TakeDamage( 10000, 10000, Instigator, Wall.Location , Velocity, 0);
-            vTraceEnd = Location - 10*HitNormal;
-            SetLocation(vTraceEnd, true);
-            Velocity *= 0.5;
-            return;
-        }
-    }
-        
-    DesiredRotation = RotRand();
-
-    // The grenade will bounce off the wall with 33% of it's original velocity
-    Velocity = 0.33 * MirrorVectorByNormal( Velocity, HitNormal );
-
-    // FRand() only affect visual here... does not modify any position
-    RotationRate.Yaw   = 1000*VSize(Velocity) * FRand() - 500*VSize(Velocity);
-    RotationRate.Pitch = 1000*VSize(Velocity) * FRand() - 500*VSize(Velocity);
-    RotationRate.Roll  = 1000*VSize(Velocity) * FRand() - 500*VSize(Velocity);
-
-    if( Velocity.Z > 400 )      // Max falling speed
-    {
-        Velocity.Z = 400;
-    }
-    else if ( VSize(Velocity) < 50 )
-    {
-        SetPhysics(PHYS_None);
-        bBounce = false;
-    }
-
-
-    // Play a sound on client
-
-	if (m_bFirstImpact)
+		// End:0xDE
+		if(__NFUN_130__(Wall.m_bBulletGoThrough, Wall.__NFUN_303__('R6InteractiveObject')))
+		{
+			Wall.R6TakeDamage(10000, 10000, Instigator, Wall.Location, Velocity, 0);
+			vTraceEnd = __NFUN_216__(Location, __NFUN_213__(float(10), HitNormal));
+			__NFUN_267__(vTraceEnd, true);
+			__NFUN_221__(Velocity, 0.5000000);
+			return;
+		}
+	}
+	DesiredRotation = __NFUN_320__();
+	Velocity = __NFUN_213__(0.3300000, __NFUN_300__(Velocity, HitNormal));
+	RotationRate.Yaw = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+	RotationRate.Pitch = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+	RotationRate.Roll = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+	// End:0x1C3
+	if(__NFUN_177__(Velocity.Z, float(400)))
 	{
-        m_bFirstImpact =  false;
-        if ( Level.NetMode != NM_DedicatedServer )
-        {
-	        // Set a sound by default
-	        m_ImpactSound = m_ImpactGroundSound;
-
-	        pHit = Trace(vHitLocation, vHitNormal, Location - vect(0,0,40), Location, false,, HitMaterial);
-
-	        if ((HitMaterial != none) && ((HitMaterial.m_eSurfIdForSnd == SURF_WaterPuddle) || (HitMaterial.m_eSurfIdForSnd == SURF_DeepWater)))
-	        {
-		        m_ImpactSound = m_ImpactWaterSound;
-	        }
-	        PlaySound( m_ImpactSound, SLOT_SFX);
-        }
-    }
-	R6MakeNoise( SNDTYPE_GrenadeLike );
+		Velocity.Z = 400.0000000;		
+	}
+	else
+	{
+		// End:0x1E0
+		if(__NFUN_176__(__NFUN_225__(Velocity), float(50)))
+		{
+			__NFUN_3970__(0);
+			bBounce = false;
+		}
+	}
+	// End:0x29E
+	if(m_bFirstImpact)
+	{
+		m_bFirstImpact = false;
+		// End:0x29E
+		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		{
+			m_ImpactSound = m_ImpactGroundSound;
+			pHit = __NFUN_277__(vHitLocation, vHitNormal, __NFUN_216__(Location, vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
+			// End:0x294
+			if(__NFUN_130__(__NFUN_119__(HitMaterial, none), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(12)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(13)))))
+			{
+				m_ImpactSound = m_ImpactWaterSound;
+			}
+			__NFUN_264__(m_ImpactSound, 3);
+		}
+	}
+	R6MakeNoise(4);
+	return;
 }
 
-
-simulated function Landed( vector HitNormal )
+simulated function Landed(Vector HitNormal)
 {
-     HitWall( HitNormal, None );
+	HitWall(HitNormal, none);
+	return;
 }
 
-simulated singular function Touch(Actor Other)
+singular simulated function Touch(Actor Other)
 {
+	return;
 }
 
-simulated function ProcessTouch(Actor Other, vector vHitLocation)
+simulated function ProcessTouch(Actor Other, Vector vHitLocation)
 {
-    HitWall( vHitLocation, Other);
+	HitWall(vHitLocation, Other);
+	return;
 }
 
 defaultproperties
 {
-     m_bFirstImpact=True
-     m_ImpactGroundSound=Sound'Foley_CommonGrenade.Play_Grenades_GroundImpacts'
-     m_iHitPoints=1
-     m_bBlockCoronas=True
-     Physics=PHYS_Falling
-     DrawType=DT_StaticMesh
-     bNoDelete=False
-     bSkipActorPropertyReplication=False
-     bCollideWorld=True
-     bProjTarget=True
-     m_bPawnGoThrough=True
-     bFixedRotationDir=True
+	m_bFirstImpact=true
+	m_ImpactGroundSound=Sound'Foley_CommonGrenade.Play_Grenades_GroundImpacts'
+	m_iHitPoints=1
+	m_bBlockCoronas=true
+	Physics=2
+	DrawType=8
+	bNoDelete=false
+	bSkipActorPropertyReplication=false
+	bCollideWorld=true
+	bProjTarget=true
+	m_bPawnGoThrough=true
+	bFixedRotationDir=true
 }

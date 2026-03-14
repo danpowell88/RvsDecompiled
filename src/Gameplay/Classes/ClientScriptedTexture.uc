@@ -1,26 +1,41 @@
-class ClientScriptedTexture extends Info;
+//=============================================================================
+// ClientScriptedTexture - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ClientScriptedTexture extends Info
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
 var() Texture ScriptedTexture;
 
 simulated function BeginPlay()
 {
-	if(ScriptedTexture != None)
-		ScriptedTexture(ScriptedTexture).NotifyActor = Self;
+	// End:0x20
+	if(__NFUN_119__(ScriptedTexture, none))
+	{
+		ScriptedTexture(ScriptedTexture).NotifyActor = self;
+	}
+	return;
 }
 
 simulated function Destroyed()
 {
-	if(ScriptedTexture != None)
-		ScriptedTexture(ScriptedTexture).NotifyActor = None;
+	// End:0x20
+	if(__NFUN_119__(ScriptedTexture, none))
+	{
+		ScriptedTexture(ScriptedTexture).NotifyActor = none;
+	}
+	return;
 }
 
 simulated event RenderTexture(ScriptedTexture Tex)
 {
+	return;
 }
 
 defaultproperties
 {
-     RemoteRole=ROLE_SimulatedProxy
-     bNoDelete=True
-     bAlwaysRelevant=True
+	RemoteRole=2
+	bNoDelete=true
+	bAlwaysRelevant=true
 }

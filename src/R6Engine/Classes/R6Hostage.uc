@@ -1,4 +1,10 @@
 //=============================================================================
+// R6Hostage - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6Hostage.uc : This is the pawn class for all hostages
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,142 +12,149 @@
 //    2001/04/11 * Created by Rima Brek
 //=============================================================================
 class R6Hostage extends R6Pawn
-    notplaceable
-    native
-    abstract;
+	abstract
+ native;
 
-import class R6HostageMgr;
- 
 enum EHandsUpType
 {
-    HANDSUP_none,
-    HANDSUP_kneeling,
-    HANDSUP_standing
+	HANDSUP_none,                   // 0
+	HANDSUP_kneeling,               // 1
+	HANDSUP_standing                // 2
 };
 
 enum EStartingPosition
 {
-    POS_Stand,
-    POS_Kneel,
-    POS_Prone,
-    POS_Foetus,
-    POS_Crouch,
-    POS_Random
+	POS_Stand,                      // 0
+	POS_Kneel,                      // 1
+	POS_Prone,                      // 2
+	POS_Foetus,                     // 3
+	POS_Crouch,                     // 4
+	POS_Random                      // 5
 };
 
 enum ECivPatrolType
 {
-    CIVPATROL_None,
-    CIVPATROL_Path,
-    CIVPATROL_Area,
-    CIVPATROL_Point
+	CIVPATROL_None,                 // 0
+	CIVPATROL_Path,                 // 1
+	CIVPATROL_Area,                 // 2
+	CIVPATROL_Point                 // 3
 };
 
 enum EStandWalkingAnim
 {
-    eStandWalkingAnim_default,
-    eStandWalkingAnim_scared,
+	eStandWalkingAnim_default,      // 0
+	eStandWalkingAnim_scared        // 1
+};
+
+enum eHostageOrder
+{
+	HOrder_None,                    // 0
+	HOrder_ComeWithMe,              // 1
+	HOrder_StayHere,                // 2
+	HOrder_Surrender,               // 3
+	HOrder_GotoExtraction           // 4
 };
 
 struct STRepHostageAnim
 {
-    var EStandWalkingAnim m_eRepStandWalkingAnim;
-    var bool m_bRepPlayMoving;
+	var R6Hostage.EStandWalkingAnim m_eRepStandWalkingAnim;
+	var bool m_bRepPlayMoving;
 };
 
-
-// random time: keep a state
-var(StayInThisState) RandomTweenNum         m_stayInFoetusTime;
-var(StayInThisState) RandomTweenNum         m_stayFrozenTime;
-var(StayInThisState) RandomTweenNum         m_stayProneTime;
-var(StayInThisState) RandomTweenNum         m_stayCautiousGuardedStateTime;
-var()                RandomTweenNum         m_patrolAreaWaitTween;
-var()                RandomTweenNum         m_changeOrientationTween;
-var()                RandomTweenNum         m_sightRadiusTween;
-var()                RandomTweenNum         m_updatePaceTween;
-var()                RandomTweenNum         m_waitingGoCrouchTween;
-
-// initialized by the template
-var                  string                 m_szUsedTemplate;
-var (Personality)    EHostagePersonality    m_ePersonality;         // type of personality
-var                  R6DeploymentZone       m_DZone;                // deployment zone
-var                  BOOL                   m_bInitFinished;        // true when the initializing process of dzone is over
-var                  bool                   m_bStartAsCivilian;     // start has a civilian
-var                 bool                    m_bCivilian;                // true when civilian (faster than isInState('Civilian')
-var (StartingPosition) EStartingPosition    m_ePosition;            // kneel or standing
-var                  ECivPatrolType         m_eCivPatrol;           // type of patrol in the depZone
-
-var                  R6DZonePathNode        m_currentNode;          // when in CivPatrolPath
-var                  BOOL                   m_bPatrolForward;       // when in CivPatrolPath
-
-// MPF1
-var bool			m_bPoliceManMp1;// policeMan for MissionPack1 (ignores SeePlayer, HearNoise and QueryAction=0)
-var bool			m_bPoliceManHasWeapon;
-var bool			m_bPoliceManCanSeeRainbows;
-var name			m_NocsWaitingName;//MissionPack1
-var name			m_NocsSeeRainbowsName;//MissionPack1
-
-var bool            m_bIsKneeling;
-var bool            m_bIsFoetus;
-var bool            m_bFrozen;          // frozen for kneeling/standing anim
-var name            m_globalState;      // used to check if we are in the GotoState('')
-var EHandsUpType    m_eHandsUpType;     // used to know if we have to play anim transition when hands are up/down
-var R6HostageMgr    m_mgr;              // quick reference
-var R6HostageAI     m_controller;       // quick reference
-var bool            m_bReactionAnim;    // true when playing a reaction anim
-var INT             m_iIndex;           // Used in the TerroristMgr to rapidely find an hostage already in the array
-var bool            m_bCrouchToScaredStandBegin; // true when play this anim
-
-var       R6Rainbow             m_escortedByRainbow;
-var       bool                  m_bFreed;                   // true when not guarded 
-var       bool                  m_bEscorted;           // in escorte mode
-var       bool                  m_bExtracted;          // true when enter an extration zone
-var       bool                  m_bFeedbackExtracted;  // true when we process the feedback
-
+var(Personality) R6Pawn.EHostagePersonality m_ePersonality;  // type of personality
+var(StartingPosition) R6Hostage.EStartingPosition m_ePosition;  // kneel or standing
+var R6Hostage.ECivPatrolType m_eCivPatrol;  // type of patrol in the depZone
+var R6Hostage.EHandsUpType m_eHandsUpType;  // used to know if we have to play anim transition when hands are up/down
 var byte m_bRepWaitAnimIndex;
 var byte m_bSavedRepWaitAnimIndex;
-
+var int m_iIndex;  // Used in the TerroristMgr to rapidely find an hostage already in the array
+// NEW IN 1.60
+var int m_iPrisonierTeam;
+var bool m_bInitFinished;  // true when the initializing process of dzone is over
+var bool m_bStartAsCivilian;  // start has a civilian
+var bool m_bCivilian;  // true when civilian (faster than isInState('Civilian')
+var bool m_bPatrolForward;  // when in CivPatrolPath
+// MPF1
+var bool m_bPoliceManMp1;  // policeMan for MissionPack1 (ignores SeePlayer, HearNoise and QueryAction=0)
+var bool m_bPoliceManHasWeapon;
+var bool m_bPoliceManCanSeeRainbows;
+var bool m_bIsKneeling;
+var bool m_bIsFoetus;
+var bool m_bFrozen;  // frozen for kneeling/standing anim
+var bool m_bReactionAnim;  // true when playing a reaction anim
+var bool m_bCrouchToScaredStandBegin;  // true when play this anim
+var bool m_bFreed;  // true when not guarded
+var bool m_bEscorted;  // in escorte mode
+var bool m_bExtracted;  // true when enter an extration zone
+var bool m_bFeedbackExtracted;  // true when we process the feedback
+// NEW IN 1.60
+var bool m_bClassicMissionCivilian;
+var R6DeploymentZone m_DZone;  // deployment zone
+var R6DZonePathNode m_currentNode;  // when in CivPatrolPath
+var R6HostageMgr m_mgr;  // quick reference
+var R6HostageAI m_controller;  // quick reference
+var R6Rainbow m_escortedByRainbow;
+var name m_NocsWaitingName;  // MissionPack1
+var name m_NocsSeeRainbowsName;  // MissionPack1
+var name m_globalState;  // used to check if we are in the GotoState('')
+// random time: keep a state
+var(StayInThisState) RandomTweenNum m_stayInFoetusTime;
+var(StayInThisState) RandomTweenNum m_stayFrozenTime;
+var(StayInThisState) RandomTweenNum m_stayProneTime;
+var(StayInThisState) RandomTweenNum m_stayCautiousGuardedStateTime;
+var() RandomTweenNum m_patrolAreaWaitTween;
+var() RandomTweenNum m_changeOrientationTween;
+var() RandomTweenNum m_sightRadiusTween;
+var() RandomTweenNum m_updatePaceTween;
+var() RandomTweenNum m_waitingGoCrouchTween;
 var STRepHostageAnim m_eSavedRepHostageAnim;
 var STRepHostageAnim m_eCurrentRepHostageAnim;
+// initialized by the template
+var string m_szUsedTemplate;
 
 replication
 {
-    reliable if (Role == ROLE_Authority)
-        m_eCurrentRepHostageAnim,m_bRepWaitAnimIndex,m_ePosition,m_escortedByRainbow,
-        m_bFreed,m_bEscorted,m_bFrozen,m_bIsFoetus,m_bIsKneeling,m_bExtracted,m_eHandsUpType;
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_bEscorted, m_bExtracted, 
+		m_bFreed, m_bFrozen, 
+		m_bIsFoetus, m_bIsKneeling, 
+		m_bRepWaitAnimIndex, m_eCurrentRepHostageAnim, 
+		m_eHandsUpType, m_ePosition, 
+		m_escortedByRainbow;
 }
 
-simulated function Tick(FLOAT fDeltaTime)
+simulated function Tick(float fDeltaTime)
 {
-    if (Role<ROLE_Authority)
-    {        
-        if ( (m_eSavedRepHostageAnim.m_bRepPlayMoving != m_eCurrentRepHostageAnim.m_bRepPlayMoving) ||
-             (m_eSavedRepHostageAnim.m_eRepStandWalkingAnim != m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim ) 
-           )
-        {
-            SetStandWalkingAnim(m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim,m_eCurrentRepHostageAnim.m_bRepPlayMoving);
-            m_eSavedRepHostageAnim = m_eCurrentRepHostageAnim;
-        }
-
-        if (m_bSavedRepWaitAnimIndex != m_bRepWaitAnimIndex)
-        {
-            m_bSavedRepWaitAnimIndex = m_bRepWaitAnimIndex;
-            SetAnimInfo(m_bRepWaitAnimIndex);
-        }
-    }
-    
-    UpdateVisualEffects(fDeltaTime);
+	// End:0x9B
+	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	{
+		// End:0x70
+		if(__NFUN_132__(__NFUN_243__(m_eSavedRepHostageAnim.m_bRepPlayMoving, m_eCurrentRepHostageAnim.m_bRepPlayMoving), __NFUN_155__(int(m_eSavedRepHostageAnim.m_eRepStandWalkingAnim), int(m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim))))
+		{
+			SetStandWalkingAnim(m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim, m_eCurrentRepHostageAnim.m_bRepPlayMoving);
+			m_eSavedRepHostageAnim = m_eCurrentRepHostageAnim;
+		}
+		// End:0x9B
+		if(__NFUN_155__(int(m_bSavedRepWaitAnimIndex), int(m_bRepWaitAnimIndex)))
+		{
+			m_bSavedRepWaitAnimIndex = m_bRepWaitAnimIndex;
+			SetAnimInfo(int(m_bRepWaitAnimIndex));
+		}
+	}
+	UpdateVisualEffects(fDeltaTime);
+	return;
 }
 
 //------------------------------------------------------------------
 // GetReticuleInfo
 //	
 //------------------------------------------------------------------
-simulated event BOOL GetReticuleInfo( Pawn ownerReticule, OUT string szName )
-{ 
-    szName = "";
-
-    return ownerReticule.isFriend( self ) || ownerReticule.isNeutral( self );
+simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
+{
+	szName = "";
+	return __NFUN_132__(ownerReticule.IsFriend(self), ownerReticule.IsNeutral(self));
+	return;
 }
 
 //============================================================================
@@ -149,186 +162,199 @@ simulated event BOOL GetReticuleInfo( Pawn ownerReticule, OUT string szName )
 //============================================================================
 event FinishInitialization()
 {
-    // Spawn the controller
-    if(Controller!=None)
-    {
-        UnPossessed();
-    }
-	Controller = Spawn(ControllerClass);
-    Controller.Possess( Self );
-
-    // Sound setting 
-    Controller.m_PawnRepInfo.m_PawnType = m_ePawnType;
-    Controller.m_PawnRepInfo.m_bSex = bIsFemale;
-    if (m_SoundRepInfo != none)
-        m_SoundRepInfo.m_PawnRepInfo = Controller.m_PawnRepInfo;
-
-    // Sound setting END
-
-
-    m_controller = R6HostageAI(controller);
+	// End:0x11
+	if(__NFUN_119__(Controller, none))
+	{
+		UnPossessed();
+	}
+	Controller = __NFUN_278__(ControllerClass);
+	Controller.Possess(self);
+	Controller.m_PawnRepInfo.m_PawnType = m_ePawnType;
+	Controller.m_PawnRepInfo.m_bSex = bIsFemale;
+	// End:0x93
+	if(__NFUN_119__(m_SoundRepInfo, none))
+	{
+		m_SoundRepInfo.m_PawnRepInfo = Controller.m_PawnRepInfo;
+	}
+	m_controller = R6HostageAI(Controller);
+	return;
 }
 
 //------------------------------------------------------------------
 // logAnim: special log for anim
 //------------------------------------------------------------------
-function logAnim( string sz )
+function logAnim(string sz)
 {
-   #ifdefDEBUG if ( bShowLog ) logX( "[ANIM] " $sz ); #endif
+	return;
 }
 
 //------------------------------------------------------------------
 // HasBumpPriority
 //	
 //------------------------------------------------------------------
-function bool HasBumpPriority( R6Pawn bumpedBy )
+function bool HasBumpPriority(R6Pawn bumpedBy)
 {
-    if ( !bumpedBy.m_bIsPlayer && R6AIController( bumpedBy.controller ).isInState( 'BumpBackUp' ) )
-        return false; // help him move back
-    
-    if ( IsFriend( bumpedBy ) && !bumpedBy.IsStationary() )
-        return false; // i don't have priority over a rainbow who his moving
-
-    return true;
+	// End:0x3A
+	if(__NFUN_130__(__NFUN_129__(bumpedBy.m_bIsPlayer), R6AIController(bumpedBy.Controller).__NFUN_281__('BumpBackUp')))
+	{
+		return false;
+	}
+	// End:0x60
+	if(__NFUN_130__(IsFriend(bumpedBy), __NFUN_129__(bumpedBy.IsStationary())))
+	{
+		return false;
+	}
+	return true;
+	return;
 }
 
 //------------------------------------------------------------------
 // AnimEnd
 //	inherited to detect a modification m_bPostureTransition
 //------------------------------------------------------------------
-simulated event AnimEnd(INT iChannel)
+simulated event AnimEnd(int iChannel)
 {
-    local bool bPreviousPostureTransition;
-    
-    bPreviousPostureTransition = m_bPostureTransition;
-	
-    Super.AnimEnd( iChannel );
+	local bool bPreviousPostureTransition;
 
-    // grenade reaction
-    if( iChannel == C_iBaseAnimChannel )
-	{		
-        if ( physics != PHYS_RootMotion && !m_bPawnSpecificAnimInProgress )		
-        {
-			if ( m_eEffectiveGrenade == GTYPE_TearGas )
-            {
-                SetNextPendingAction( PENDING_Coughing );
-            }
-            else if ( m_eEffectiveGrenade == GTYPE_FlashBang || m_eEffectiveGrenade == GTYPE_BreachingCharge )
-            {
-                SetNextPendingAction( PENDING_Blinded );
-            }
-        }
-	}
-    else if((iChannel == C_iPawnSpecificChannel) && m_bPawnSpecificAnimInProgress)
+	bPreviousPostureTransition = m_bPostureTransition;
+	super.AnimEnd(iChannel);
+	// End:0x88
+	if(__NFUN_154__(iChannel, 0))
 	{
-        #ifdefDEBUG logAnim( "anim end: set m_bPawnSpecificAnimInProgress = false" ); #endif
-		m_bPawnSpecificAnimInProgress = false;	
-
-        if ( m_eEffectiveGrenade == GTYPE_TearGas )
-        {
-            SetNextPendingAction( PENDING_Coughing );
-        }
-        else if ( m_eEffectiveGrenade == GTYPE_FlashBang || m_eEffectiveGrenade == GTYPE_BreachingCharge )
-        {
-            SetNextPendingAction( PENDING_Blinded );
-        }
+		// End:0x85
+		if(__NFUN_130__(__NFUN_155__(int(Physics), int(12)), __NFUN_129__(m_bPawnSpecificAnimInProgress)))
+		{
+			// End:0x5B
+			if(__NFUN_154__(int(m_eEffectiveGrenade), int(2)))
+			{
+				SetNextPendingAction(1);				
+			}
+			else
+			{
+				// End:0x85
+				if(__NFUN_132__(__NFUN_154__(int(m_eEffectiveGrenade), int(3)), __NFUN_154__(int(m_eEffectiveGrenade), int(4))))
+				{
+					SetNextPendingAction(3);
+				}
+			}
+		}		
 	}
-
-    if ( bPreviousPostureTransition && !m_bPostureTransition )
-    {
-        #ifdefDEBUG logAnim( "transition: end" ); #endif
-
-        if ( m_bCrouchToScaredStandBegin )
-        {
-            AnimNotify_CrouchToScaredStandEnd();
-        }
-	    m_bPostureTransition = false;
-        m_bReactionAnim = false;
-        R6ResetAnimBlendParams(C_iBaseBlendAnimChannel);
-
-        // PlayAnim('Stand_nt', 1.0, 0.2, C_iBaseBlendAnimChannel);  
-        // commented out: causing problem with after a posture transition
-        //   the only purpose for doing this is to make sure that there is another 
-        //   animation presetn in this channel, so that the next time it does not 
-        //   ignore the tween time...
-        PlayMoving();  // force to update all his animation played after the transition
-        PlayWaiting(); // force to have a wait anim in the new posture.
-    }
+	else
+	{
+		// End:0xEC
+		if(__NFUN_130__(__NFUN_154__(iChannel, 16), m_bPawnSpecificAnimInProgress))
+		{
+			m_bPawnSpecificAnimInProgress = false;
+			// End:0xC2
+			if(__NFUN_154__(int(m_eEffectiveGrenade), int(2)))
+			{
+				SetNextPendingAction(1);				
+			}
+			else
+			{
+				// End:0xEC
+				if(__NFUN_132__(__NFUN_154__(int(m_eEffectiveGrenade), int(3)), __NFUN_154__(int(m_eEffectiveGrenade), int(4))))
+				{
+					SetNextPendingAction(3);
+				}
+			}
+		}
+	}
+	// End:0x134
+	if(__NFUN_130__(bPreviousPostureTransition, __NFUN_129__(m_bPostureTransition)))
+	{
+		// End:0x111
+		if(m_bCrouchToScaredStandBegin)
+		{
+			AnimNotify_CrouchToScaredStandEnd();
+		}
+		m_bPostureTransition = false;
+		m_bReactionAnim = false;
+		R6ResetAnimBlendParams(1);
+		PlayMoving();
+		PlayWaiting();
+	}
+	return;
 }
 
-simulated event PlaySpecialPendingAction( EPendingAction eAction )
+simulated event PlaySpecialPendingAction(R6Pawn.EPendingAction eAction, int iActionInt)
 {
-    if ( eAction == PENDING_HostageAnim )    
-    {
-        if ( Role != ROLE_Authority ) // the client
-        {
-            SetAnimInfo( m_iPendingActionInt[m_iLocalCurrentActionIndex] );
-        }
-    }
-    else
-    {
-        Super.PlaySpecialPendingAction( eAction );
-    }
+	// End:0x36
+	if(__NFUN_154__(int(eAction), int(38)))
+	{
+		// End:0x33
+		if(__NFUN_155__(int(Role), int(ROLE_Authority)))
+		{
+			SetAnimInfo(m_iPendingActionInt[int(m_iLocalCurrentActionIndex)]);
+		}		
+	}
+	else
+	{
+		super.PlaySpecialPendingAction(eAction, iActionInt);
+	}
+	return;
 }
+
 //------------------------------------------------------------------
 // SetAnimInfo: set the current anim to play based on his
 //	properties. 
 //------------------------------------------------------------------
-simulated event SetAnimInfo( INT id )
+simulated event SetAnimInfo(int ID)
 {
-    local R6HostageMgr.AnimInfo animInfo;
+	local AnimInfo AnimInfo;
 
-    if ( m_mgr == none )
-        return;
-
-    animInfo = m_mgr.GetAnimInfo(id);
-    
-    if ( animInfo.m_eGroupAnim == eGroupAnim_transition && m_bReactionAnim )
-    {
-        #ifdefDEBUG logAnim( "a reaction is played and starts a transition " ); #endif
-    }
-    // a transition is played AND NOT a new transition must be played, finish posture transition
-    else if ( m_bPostureTransition && animInfo.m_eGroupAnim != eGroupAnim_transition  )
-    {
-        #ifdefDEBUG logAnim( "* WARNING * SetAnimInfo called when m_bPostureTransition was true (problem?)" ); #endif
-        
-        if ( Level.NetMode == NM_Client )
-            m_bPostureTransition = false; // client should follow server update
-        else
-            return;
-    }
-
-    // set the anim for the client
-    if ( Role == Role_Authority && Level.NetMode != NM_Standalone )
-    {
-        if ( animInfo.m_eGroupAnim == eGroupAnim_wait )
-            m_bRepWaitAnimIndex = id;
-        else
-            SetNextPendingAction( PENDING_HostageAnim, id );
-    }
-    
-    if ( animInfo.m_eGroupAnim == eGroupAnim_reaction || animInfo.m_eGroupAnim == eGroupAnim_transition )
-    {
-        #ifdefDEBUG logAnim( "transition: begin" ); #endif
-        m_bPostureTransition = true;
-        AnimBlendParams( C_iBaseBlendAnimChannel, 1.0, 0.3, 0.0); // 1= blendAlpha 0.3=rate
-        PlayAnim( animInfo.m_name, 1.0, 0.2, C_iBaseBlendAnimChannel);
-        m_bReactionAnim = animInfo.m_eGroupAnim == eGroupAnim_reaction;
-    }
-    else
-    {
-        // todop: it was disabled because of tween problem
-        // if ( animInfo.m_ePlayType == ePlayType_Random )
-        // {
-        //     if ( rand( 2 ) == 1 ) // 1 out 2
-        //     {
-        //         fRate *= -1;
-        //     }
-        // }
-
-        R6LoopAnim( animInfo.m_name ); // always loop anim to allow blending
-    }
-    #ifdefDEBUG logAnim( "play anim: "$animInfo.m_name ); #endif
+	// End:0x0D
+	if(__NFUN_114__(m_mgr, none))
+	{
+		return;
+	}
+	AnimInfo = m_mgr.GetAnimInfo(ID);
+	// End:0x4A
+	if(__NFUN_130__(__NFUN_154__(int(AnimInfo.m_eGroupAnim), int(1)), m_bReactionAnim))
+	{		
+	}
+	else
+	{
+		// End:0x90
+		if(__NFUN_130__(m_bPostureTransition, __NFUN_155__(int(AnimInfo.m_eGroupAnim), int(1))))
+		{
+			// End:0x8E
+			if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+			{
+				m_bPostureTransition = false;				
+			}
+			else
+			{
+				return;
+			}
+		}
+	}
+	// End:0xED
+	if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+	{
+		// End:0xE0
+		if(__NFUN_154__(int(AnimInfo.m_eGroupAnim), int(2)))
+		{
+			m_bRepWaitAnimIndex = byte(ID);			
+		}
+		else
+		{
+			SetNextPendingAction(38, ID);
+		}
+	}
+	// End:0x16B
+	if(__NFUN_132__(__NFUN_154__(int(AnimInfo.m_eGroupAnim), int(3)), __NFUN_154__(int(AnimInfo.m_eGroupAnim), int(1))))
+	{
+		m_bPostureTransition = true;
+		AnimBlendParams(1, 1.0000000, 0.3000000, 0.0000000);
+		__NFUN_259__(AnimInfo.m_name, 1.0000000, 0.2000000, 1);
+		m_bReactionAnim = __NFUN_154__(int(AnimInfo.m_eGroupAnim), int(3));		
+	}
+	else
+	{
+		R6LoopAnim(AnimInfo.m_name);
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -340,107 +366,117 @@ simulated event SetAnimInfo( INT id )
 //   If so, it will blend the current anim with the transition one.
 // - If option 1 and 2 failed, it will set the anim and set the new pawn state   
 //------------------------------------------------------------------
-simulated function SetAnimTransition( INT iAnimToPlay, name pawnStateToGo )
+simulated function SetAnimTransition(int iAnimToPlay, name pawnStateToGo)
 {
-    local R6HostageMgr.AnimInfo animInfo;
+	local AnimInfo AnimInfo;
 
-    SetAnimInfo( iAnimToPlay );
-    if ( !m_bUseRagdoll )
-        GotoState( pawnStateToGo );
+	SetAnimInfo(iAnimToPlay);
+	// End:0x1D
+	if(__NFUN_129__(m_bUseRagdoll))
+	{
+		__NFUN_113__(pawnStateToGo);
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // Initialize the default value 
 //------------------------------------------------------------------
 simulated event PostBeginPlay()
 {
-    local INT i;
+	local int i;
 
-    if ( Level.Game != none  )
-    {
-        assert( default.m_iTeam == R6AbstractGameInfo(Level.Game).c_iTeamNumHostage );
-    }
-
-    m_globalState = GetStateName();
-    Super.PostBeginPlay();
-	SetPhysics(PHYS_Walking);
-
-    AttachCollisionBox( 1 );
-    m_mgr = R6HostageMgr( level.GetHostageMgr() );
-
+	// End:0x36
+	if(__NFUN_119__(Level.Game, none))
+	{
+		assert(__NFUN_154__(default.m_iTeam, R6AbstractGameInfo(Level.Game).0));
+	}
+	m_globalState = __NFUN_284__();
+	super.PostBeginPlay();
+	__NFUN_3970__(1);
+	AttachCollisionBox(1);
+	m_mgr = R6HostageMgr(Level.GetHostageMgr());
+	return;
 }
 
 simulated event PostNetBeginPlay()
 {
-    Super.PostNetBeginPlay();
-    switch ( m_ePosition )
-    {
-    case POS_Crouch:
-        GotoCrouch(); 
-        break;
-        
-    case POS_Kneel:        
-        GotoKneel();
-        break;
-        
-    case POS_Foetus:       
-        GotoFoetus(); 
-        break;
-        
-    case POS_Prone:        
-        GotoProne(); 
-        break;
-        
-    default:
-        GotoStand();
-        break;
-    }
-
+	super.PostNetBeginPlay();
+	switch(m_ePosition)
+	{
+		// End:0x1B
+		case 4:
+			GotoCrouch();
+			// End:0x51
+			break;
+		// End:0x29
+		case 1:
+			GotoKneel();
+			// End:0x51
+			break;
+		// End:0x37
+		case 3:
+			GotoFoetus();
+			// End:0x51
+			break;
+		// End:0x45
+		case 2:
+			GotoProne();
+			// End:0x51
+			break;
+		// End:0xFFFF
+		default:
+			GotoStand();
+			// End:0x51
+			break;
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // may freeze when the hostage see a new terrorist or rainbow
 //------------------------------------------------------------------
-function setFrozen( bool bFreeze )
+function setFrozen(bool bFreeze)
 {
-    #ifdefDEBUG if (bShowLog) logX( "setFrozen: "$bFreeze ); #endif
-    m_bFrozen = bFreeze;
+	m_bFrozen = bFreeze;
+	return;
 }
 
 //------------------------------------------------------------------
 // setCrouch
 //------------------------------------------------------------------
-function setCrouch( bool bIsCrouch )
+function setCrouch(bool bIsCrouch)
 {
-    #ifdefDEBUG if(bShowLog) logX( "setCrouch: " $bIsCrouch$ "(bWantsToCrouch: " $bWantsToCrouch$ " bIsCrouched: " $bIsCrouched$ ")" ); #endif
-
-    bWantsToCrouch = bIsCrouch;
-
-    if ( bWantsToCrouch )
-    {
-        if ( Level.NetMode != NM_Client )
-            m_eHandsUpType = HANDSUP_none;
-    }
+	bWantsToCrouch = bIsCrouch;
+	// End:0x37
+	if(bWantsToCrouch)
+	{
+		// End:0x37
+		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		{
+			m_eHandsUpType = 0;
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // setProne
 //------------------------------------------------------------------
-function setProne( bool bIsProne )
+function setProne(bool bIsProne)
 {
-    #ifdefDEBUG if(bShowLog) logX( "setProne: " $bIsProne ); #endif
-
-    m_bWantsToProne = bIsProne;
+	m_bWantsToProne = bIsProne;
+	return;
 }
-
 
 //=============================================================================
 // isStanding: return true if hostage is standing
 //=============================================================================
 function bool isStanding()
 {
-    return (getStateName() == m_globalState);
+	return __NFUN_254__(__NFUN_284__(), m_globalState);
+	return;
 }
 
 //=============================================================================
@@ -448,16 +484,17 @@ function bool isStanding()
 //=============================================================================
 function bool isStandingHandUp()
 {
-    return (m_eHandsUpType == HANDSUP_standing);
+	return __NFUN_154__(int(m_eHandsUpType), int(2));
+	return;
 }
-
 
 //=============================================================================
 // isFoetus: return true if hostage is in foetus position
 //=============================================================================
 function bool isFoetus()
 {
-    return m_bIsFoetus;
+	return m_bIsFoetus;
+	return;
 }
 
 //=============================================================================
@@ -465,44 +502,43 @@ function bool isFoetus()
 //=============================================================================
 function bool isKneeling()
 {
-    return m_bIsKneeling;
+	return m_bIsKneeling;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // R6TakeDamage: when wounded, will sets the HurtAnim
 //	- inherited
 //------------------------------------------------------------------
-function INT R6TakeDamage( INT iKillValue, INT iStunValue, 
-                            Pawn instigatedBy, vector vHitLocation, 
-                            vector vMomentum, INT iBulletToArmorModifier, optional int iBulletGoup)
+function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
-    local eHealth ePreviousHealth;
-    local INT iResult;
-    local int iSndIndex;
+	local Pawn.eHealth ePreviousHealth;
+	local int iResult, iSndIndex;
 
-    if ( m_bExtracted )
-        return 0;
-
-    ePreviousHealth = m_eHealth;
-    iResult = Super.R6TakeDamage( iKillValue, iStunValue, instigatedBy, vHitLocation, 
-                                  vMomentum, iBulletToArmorModifier, iBulletGoup);
-
-    // is alive and shoot by a friend
-    if ( ePreviousHealth != m_eHealth && eHealth.HEALTH_Wounded <= m_eHealth )
-    {
-        if ( m_controller != none ) 
-            m_controller.SetMovementPace( false );
-        
-        if ( m_escortedByRainbow != none )
-        {
-            m_escortedByRainbow.Escort_UpdateTeamSpeed();
-        }
-        
-        PlayMoving();
-    }
-
-    return iResult;
+	// End:0x0B
+	if(m_bExtracted)
+	{
+		return 0;
+	}
+	ePreviousHealth = m_eHealth;
+	iResult = super.R6TakeDamage(iKillValue, iStunValue, instigatedBy, vHitLocation, vMomentum, iBulletToArmorModifier, iBulletGoup);
+	// End:0xA5
+	if(__NFUN_130__(__NFUN_155__(int(ePreviousHealth), int(m_eHealth)), __NFUN_152__(int(1), int(m_eHealth))))
+	{
+		// End:0x85
+		if(__NFUN_119__(m_controller, none))
+		{
+			m_controller.SetMovementPace(false);
+		}
+		// End:0x9F
+		if(__NFUN_119__(m_escortedByRainbow, none))
+		{
+			m_escortedByRainbow.Escort_UpdateTeamSpeed();
+		}
+		PlayMoving();
+	}
+	return iResult;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -511,55 +547,50 @@ function INT R6TakeDamage( INT iKillValue, INT iStunValue,
 //------------------------------------------------------------------
 function PlayWeaponAnimation()
 {
-	//MissionPack1 // MPF1
-	if(m_bPoliceManMp1)// to become m_bPoliceManMp1
-		Super.PlayWeaponAnimation();
-
+	// End:0x0F
+	if(m_bPoliceManMp1)
+	{
+		super.PlayWeaponAnimation();
+	}
+	return;
 }
+
 function ResetWeaponAnimation()
 {
+	return;
 }
 
-//------------------------------------------------------------------
-// SetStandWalkingAnim: set the current name for anim to play when
-//	walking
-//------------------------------------------------------------------
-
-simulated function SetStandWalkingAnim( EStandWalkingAnim eAnim, bool bUpdatePlayMoving )
+simulated function SetStandWalkingAnim(R6Hostage.EStandWalkingAnim eAnim, bool bUpdatePlayMoving)
 {
-    #ifdefDEBUG if(bShowLog) logX( "SetStandWalkingAnim: " $eAnim ); #endif
-
-    m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim = eAnim;
-    m_eCurrentRepHostageAnim.m_bRepPlayMoving = bUpdatePlayMoving;
-
-    if ( eAnim == eStandWalkingAnim_default )
-    {
-        SetDefaultWalkAnim();
-        m_fWalkingSpeed = 134.0; 
-    }
-    else 
-    {
-        m_standWalkForwardName  = 'ScaredStandWalkForward';
-        m_standWalkBackName     = 'ScaredStandWalkBack';
-        m_standWalkLeftName     = 'ScaredStandWalkLeft';
-        m_standWalkRightName    = 'ScaredStandWalkRight';
-        m_standTurnLeftName     = 'ScaredStandTurnLeft';
-        m_standTurnRightName    = 'ScaredStandTurnRight';
-        m_standDefaultAnimName  = 'ScaredStand_nt';
-        
-        m_standClimb64DefaultAnimName = 'ScaredStandClimb64Up';
-        m_standClimb96DefaultAnimName = 'ScaredStandClimb96Up';
-        
-        m_fWalkingSpeed         = default.m_fWalkingSpeed;
-    }
-
-    // hurt anim
-    m_hurtStandWalkLeftName  = m_standWalkLeftName;
-    m_hurtStandWalkRightName = m_standWalkRightName;    
-
-    // update MovementAnims
-    if ( bUpdatePlayMoving )
-        PlayMoving();
+	m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim = eAnim;
+	m_eCurrentRepHostageAnim.m_bRepPlayMoving = bUpdatePlayMoving;
+	// End:0x46
+	if(__NFUN_154__(int(eAnim), int(0)))
+	{
+		SetDefaultWalkAnim();
+		m_fWalkingSpeed = 134.0000000;		
+	}
+	else
+	{
+		m_standWalkForwardName = 'ScaredStandWalkForward';
+		m_standWalkBackName = 'ScaredStandWalkBack';
+		m_standWalkLeftName = 'ScaredStandWalkLeft';
+		m_standWalkRightName = 'ScaredStandWalkRight';
+		m_standTurnLeftName = 'ScaredStandTurnLeft';
+		m_standTurnRightName = 'ScaredStandTurnRight';
+		m_standDefaultAnimName = 'ScaredStand_nt';
+		m_standClimb64DefaultAnimName = 'ScaredStandClimb64Up';
+		m_standClimb96DefaultAnimName = 'ScaredStandClimb96Up';
+		m_fWalkingSpeed = default.m_fWalkingSpeed;
+	}
+	m_hurtStandWalkLeftName = m_standWalkLeftName;
+	m_hurtStandWalkRightName = m_standWalkRightName;
+	// End:0xD9
+	if(bUpdatePlayMoving)
+	{
+		PlayMoving();
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -568,30 +599,37 @@ simulated function SetStandWalkingAnim( EStandWalkingAnim eAnim, bool bUpdatePla
 //------------------------------------------------------------------
 function PlayReaction()
 {
-    local INT result; 
+	local int Result;
 
-    if ( m_bFrozen || m_bReactionAnim )
-        return;
-
-    if ( isStandingHandUp()  )
-    {
-        result = rand( 100 );
-        
-        if ( result < 33 )
-        {
-            SetAnimInfo( m_mgr.ANIM_eStandHandUpReact01 );
-        }
-        else if ( result < 66 )
-        {
-            SetAnimInfo( m_mgr.ANIM_eStandHandUpReact02 );
-        }
-        else
-        {
-            SetAnimInfo( m_mgr.ANIM_eStandHandUpReact03 );
-        }
-    }
+	// End:0x16
+	if(__NFUN_132__(m_bFrozen, m_bReactionAnim))
+	{
+		return;
+	}
+	// End:0x83
+	if(isStandingHandUp())
+	{
+		Result = __NFUN_167__(100);
+		// End:0x4C
+		if(__NFUN_150__(Result, 33))
+		{
+			SetAnimInfo(m_mgr.ANIM_eStandHandUpReact01);			
+		}
+		else
+		{
+			// End:0x6F
+			if(__NFUN_150__(Result, 66))
+			{
+				SetAnimInfo(m_mgr.ANIM_eStandHandUpReact02);				
+			}
+			else
+			{
+				SetAnimInfo(m_mgr.ANIM_eStandHandUpReact03);
+			}
+		}
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // PlayWaiting: play waiting animation randomly
@@ -599,256 +637,338 @@ function PlayReaction()
 //------------------------------------------------------------------
 simulated function PlayWaiting()
 {
-    local INT animIndex;
-    local INT result;
+	local int animIndex, Result;
 
-    if ( m_bPostureTransition )
-    {
-        // logX( "PlayWaiting skipped because m_bPostureTransition is TRUE" );
-        return;
-    }
-
-    if(physics == PHYS_Falling)	{		PlayFalling();				    return;	}
-    if(m_bIsClimbingLadder) 	{		AnimateStoppedOnLadder();	    return; }
-
-    if ( m_bIsKneeling )
-    {
-        result = rand( 100 );
-        if ( m_bFrozen )
-        {
-            SetAnimInfo( m_mgr.ANIM_eKneelFreeze );
-        }
-        else // MPF1
+	// End:0x0B
+	if(m_bPostureTransition)
+	{
+		return;
+	}
+	// End:0x23
+	if(__NFUN_154__(int(Physics), int(2)))
+	{
+		PlayFalling();
+		return;
+	}
+	// End:0x34
+	if(m_bIsClimbingLadder)
+	{
+		AnimateStoppedOnLadder();
+		return;
+	}
+	// End:0x120
+	if(m_bIsKneeling)
+	{
+		Result = __NFUN_167__(100);
+		// End:0x67
+		if(m_bFrozen)
 		{
-			if(m_bCivilian)//Begin MissionPack1
+			SetAnimInfo(m_mgr.ANIM_eKneelFreeze);			
+		}
+		else
+		{
+			// End:0xC1
+			if(m_bCivilian)
 			{
+				// End:0x87
 				if(m_bPoliceManMp1)
 				{
-					R6LoopAnim(m_NocsWaitingName);
-
+					R6LoopAnim(m_NocsWaitingName);					
 				}
 				else
 				{
-					if( result < 50 ) 
+					// End:0xAA
+					if(__NFUN_150__(Result, 50))
 					{
-						SetAnimInfo( m_mgr.ANIM_eFoetusWait01 );
-					}
-					else 
-					{
-						SetAnimInfo( m_mgr.ANIM_eFoetusWait02 );
-					}
-				}
-
-			}
-			else
-			{//End MissionPack1
-				if ( result < 33 )
-				{
-					SetAnimInfo( m_mgr.ANIM_eKneelWait01 );
-				}
-				else if ( result < 66 )
-				{
-					SetAnimInfo( m_mgr.ANIM_eKneelWait02 );
-				}
-				else 
-				{
-					SetAnimInfo( m_mgr.ANIM_eKneelWait03 );
-				}    
-			}//MissionPack1
-        }
-        
-        return;
-    }
-    else if ( m_bIsFoetus )
-    {
-        result = rand( 100 );
-        
-        if ( result < 50 )
-        {
-            SetAnimInfo( m_mgr.ANIM_eFoetusWait01 );
-        }
-        else 
-        {
-            SetAnimInfo( m_mgr.ANIM_eFoetusWait02 );
-        }
-        return;
-    }
-    else if ( m_bIsProne )
-    {
-        SetAnimInfo( m_mgr.ANIM_eProneWaitBreathe );
-        return;
-    }
-    else if ( bWantsToCrouch || bIsCrouched ) // the transition might not be over
-    {
-        if (  bWantsToCrouch  &&  bIsCrouched ) // the transition might not be over
-        {
-            // Wait02 seems to cause problem with Crouch/Uncrouch
-            if (  rand(5) < 1 ) 
-            {
-                SetAnimInfo( m_mgr.ANIM_eCrouchWait02 );
-            }
-            else
-            {
-                SetAnimInfo( m_mgr.ANIM_eCrouchWait01 );
-            }
-        }
-        return;
-    }
-
-    if ( !m_bFreed ) // if guarded by terror
-    {
-        if ( m_bFrozen ) 
-        {
-            SetAnimInfo( m_mgr.ANIM_eStandHandUpFreeze );
-            
-            if ( Level.NetMode != NM_Client )
-                m_eHandsUpType = HANDSUP_standing;
-        }
-        else
-        {   // guarded: play waiting or transition to hands up anim
-
-            // escorted by a terrorist
-            if ( m_bEscorted )
-            { // MPF1
-				if(m_bPoliceManMp1)//Begin MissionPack1
-				{
-					R6LoopAnim(m_NocsWaitingName);
-
-				}
-				else//End MissionPack1
-                SetAnimInfo( m_mgr.ANIM_eStandWaitShiftWeight );
-            }
-            // if hands are not raised 
-            else if ( m_eHandsUpType == HANDSUP_none ) 
-            {
-                SetAnimTransition( m_mgr.ANIM_eStandHandDownToUp, '' );
-                if ( Level.NetMode != NM_Client )
-                    m_eHandsUpType = HANDSUP_standing;
-            }
-            // hands are raised
-            else if ( m_eHandsUpType == HANDSUP_standing )
-            {  // MPF1
-				if(m_bCivilian)//Begin MissionPack1
-				{
-					if( rand(100) < 60 ) 
-					{
-						SetAnimInfo( m_mgr.ANIM_eScaredStandWait02 );
+						SetAnimInfo(m_mgr.ANIM_eFoetusWait01);						
 					}
 					else
 					{
-						SetAnimInfo( m_mgr.ANIM_eScaredStandWait01 );
-					}				
-
+						SetAnimInfo(m_mgr.ANIM_eFoetusWait02);
+					}
+				}				
+			}
+			else
+			{
+				// End:0xE4
+				if(__NFUN_150__(Result, 33))
+				{
+					SetAnimInfo(m_mgr.ANIM_eKneelWait01);					
 				}
-				else//End MissionPack1
-                SetAnimInfo( m_mgr.ANIM_eStandHandUpWait01  );
-            }
-        }
-    }
-    else
-    {
-        // my hands are up,
-        if ( m_eHandsUpType == HANDSUP_standing )
-        {
-            SetAnimTransition( m_mgr.ANIM_eStandHandUpToDown, '' );
-            
-            if ( Level.NetMode != NM_Client )
-                m_eHandsUpType = HANDSUP_none;
-        }
-        else if ( m_escortedByRainbow != none )
-        {
-            // climbing ladder anim are using the stand posture
-            if ( Physics == PHYS_Ladder )
-            {
-                // sometimes this anim seems to tween with the root motion anim that climbs
-                SetAnimInfo( m_mgr.ANIM_eStandWaitShiftWeight );
-            }
-            // Wait02 seems to cause problem with Crouch/Uncrouch
-            else if ( rand(5) < 1 ) 
-            {
-                SetAnimTransition( m_mgr.ANIM_eScaredStandWait02, '' );
-            }
-            else
-            {
-                SetAnimTransition( m_mgr.ANIM_eScaredStandWait01, '' );                
-            }
-        }
-        else 
-        {
-            if ( rand( 100 ) < 75 )
-            {
-                SetAnimInfo( m_mgr.ANIM_eStandWaitShiftWeight );
-            }
-            else
-            {
-                SetAnimInfo( m_mgr.ANIM_eStandWaitCough );
-            }
-        }
-    }
+				else
+				{
+					// End:0x107
+					if(__NFUN_150__(Result, 66))
+					{
+						SetAnimInfo(m_mgr.ANIM_eKneelWait02);						
+					}
+					else
+					{
+						SetAnimInfo(m_mgr.ANIM_eKneelWait03);
+					}
+				}
+			}
+		}
+		return;		
+	}
+	else
+	{
+		// End:0x16F
+		if(m_bIsFoetus)
+		{
+			Result = __NFUN_167__(100);
+			// End:0x156
+			if(__NFUN_150__(Result, 50))
+			{
+				SetAnimInfo(m_mgr.ANIM_eFoetusWait01);				
+			}
+			else
+			{
+				SetAnimInfo(m_mgr.ANIM_eFoetusWait02);
+			}
+			return;			
+		}
+		else
+		{
+			// End:0x191
+			if(m_bIsProne)
+			{
+				SetAnimInfo(m_mgr.ANIM_eProneWaitBreathe);
+				return;				
+			}
+			else
+			{
+				// End:0x1F0
+				if(__NFUN_132__(bWantsToCrouch, bIsCrouched))
+				{
+					// End:0x1EE
+					if(__NFUN_130__(bWantsToCrouch, bIsCrouched))
+					{
+						// End:0x1DA
+						if(__NFUN_150__(__NFUN_167__(5), 1))
+						{
+							SetAnimInfo(m_mgr.ANIM_eCrouchWait02);							
+						}
+						else
+						{
+							SetAnimInfo(m_mgr.ANIM_eCrouchWait01);
+						}
+					}
+					return;
+				}
+			}
+		}
+	}
+	// End:0x390
+	if(__NFUN_129__(m_bFreed))
+	{
+		// End:0x23C
+		if(m_bFrozen)
+		{
+			SetAnimInfo(m_mgr.ANIM_eStandHandUpFreeze);
+			// End:0x239
+			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			{
+				m_eHandsUpType = 2;
+			}			
+		}
+		else
+		{
+			// End:0x273
+			if(m_bEscorted)
+			{
+				// End:0x25C
+				if(m_bPoliceManMp1)
+				{
+					R6LoopAnim(m_NocsWaitingName);					
+				}
+				else
+				{
+					SetAnimInfo(m_mgr.ANIM_eStandWaitShiftWeight);
+				}				
+			}
+			else
+			{
+				// End:0x2E5
+				if(__NFUN_154__(int(m_eHandsUpType), int(0)))
+				{
+					// End:0x2A8
+					if(m_bClassicMissionCivilian)
+					{
+						SetAnimTransition(m_mgr.ANIM_eScaredStandWait01, 'None');						
+					}
+					else
+					{
+						SetAnimTransition(m_mgr.ANIM_eStandHandDownToUp, 'None');
+					}
+					// End:0x2E2
+					if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+					{
+						m_eHandsUpType = 2;
+					}					
+				}
+				else
+				{
+					// End:0x38D
+					if(__NFUN_154__(int(m_eHandsUpType), int(2)))
+					{
+						// End:0x379
+						if(m_bCivilian)
+						{
+							// End:0x340
+							if(m_bClassicMissionCivilian)
+							{
+								// End:0x329
+								if(__NFUN_150__(__NFUN_167__(100), 50))
+								{
+									SetAnimInfo(m_mgr.ANIM_eStandWaitCough);									
+								}
+								else
+								{
+									SetAnimInfo(m_mgr.ANIM_eStandWaitShiftWeight);
+								}								
+							}
+							else
+							{
+								// End:0x362
+								if(__NFUN_150__(__NFUN_167__(100), 60))
+								{
+									SetAnimInfo(m_mgr.ANIM_eScaredStandWait02);									
+								}
+								else
+								{
+									SetAnimInfo(m_mgr.ANIM_eScaredStandWait01);
+								}
+							}							
+						}
+						else
+						{
+							SetAnimInfo(m_mgr.ANIM_eStandHandUpWait01);
+						}
+					}
+				}
+			}
+		}		
+	}
+	else
+	{
+		// End:0x3DD
+		if(__NFUN_154__(int(m_eHandsUpType), int(2)))
+		{
+			SetAnimTransition(m_mgr.ANIM_eStandHandUpToDown, 'None');
+			// End:0x3DA
+			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			{
+				m_eHandsUpType = 0;
+			}			
+		}
+		else
+		{
+			// End:0x451
+			if(__NFUN_119__(m_escortedByRainbow, none))
+			{
+				// End:0x40F
+				if(__NFUN_154__(int(Physics), int(11)))
+				{
+					SetAnimInfo(m_mgr.ANIM_eStandWaitShiftWeight);					
+				}
+				else
+				{
+					// End:0x435
+					if(__NFUN_150__(__NFUN_167__(5), 1))
+					{
+						SetAnimTransition(m_mgr.ANIM_eScaredStandWait02, 'None');						
+					}
+					else
+					{
+						SetAnimTransition(m_mgr.ANIM_eScaredStandWait01, 'None');
+					}
+				}				
+			}
+			else
+			{
+				// End:0x473
+				if(__NFUN_150__(__NFUN_167__(100), 75))
+				{
+					SetAnimInfo(m_mgr.ANIM_eStandWaitShiftWeight);					
+				}
+				else
+				{
+					SetAnimInfo(m_mgr.ANIM_eStandWaitCough);
+				}
+			}
+		}
+	}
+	return;
 }
 
 //////////////////////////////////////////////
 simulated event GotoStand()
 {
-    #ifdefDEBUG if (bShowLog) logX( "::GotoStand" ); #endif
-
-    setCrouch( false );    
-    GotoState('');
+	setCrouch(false);
+	__NFUN_113__('None');
+	return;
 }
 
 ///////////////////////////////////////////////
 simulated event GotoCrouch()
 {
-    #ifdefDEBUG if (bShowLog) logX( "::gotoCrouch" ); #endif
-
-    GotoState( 'Crouching' );
+	__NFUN_113__('Crouching');
+	return;
 }
 
 //////////////////////////////////////////////
 simulated event GotoKneel()
 {
-    #ifdefDEBUG if (bShowLog) logX( "::GotoKneel" ); #endif
-    
-    setCrouch( false );
-    
-    if ( Level.NetMode != NM_Client )
-        m_eHandsUpType = HANDSUP_kneeling;
-    
-	if(m_bPoliceManMp1)//Begin MissionPack1  // MPF1
-		GotoState('Kneeling');
-	else//EndMissionPack1
-    SetAnimTransition( m_mgr.ANIM_eStandToKneel, 'Kneeling' );
+	setCrouch(false);
+	// End:0x28
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	{
+		m_eHandsUpType = 1;
+	}
+	// End:0x3B
+	if(m_bPoliceManMp1)
+	{
+		__NFUN_113__('Kneeling');		
+	}
+	else
+	{
+		SetAnimTransition(m_mgr.ANIM_eStandToKneel, 'Kneeling');
+	}
+	return;
 }
 
 //////////////////////////////////////////////
 simulated event GotoFoetus()
 {
-    #ifdefDEBUG if (bShowLog) logX( "::GotoFoetus" ); #endif
-
-    setCrouch( false );
-    
-    if ( Level.NetMode != NM_Client )
-        m_eHandsUpType = HANDSUP_none;
-
-    SetAnimTransition( m_mgr.ANIM_eStandToFoetus, 'Foetus' );
+	setCrouch(false);
+	// End:0x28
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	{
+		m_eHandsUpType = 0;
+	}
+	SetAnimTransition(m_mgr.ANIM_eStandToFoetus, 'Foetus');
+	return;
 }
 
 //////////////////////////////////////////////
 simulated event GotoProne()
 {
-    #ifdefDEBUG if (bShowLog) logX( "::GotoProne" ); #endif
- 
-    GotoState('Prone' );
+	__NFUN_113__('Prone');
+	return;
 }
 
 /////////////////////////////////////////////
 function GotoFrozen()
 {
-    setFrozen( true );
-    SetAnimInfo( m_mgr.ANIM_eStandHandUpFreeze );
-    
-    if ( Level.NetMode != NM_Client )
-        m_eHandsUpType = HANDSUP_standing;
+	setFrozen(true);
+	SetAnimInfo(m_mgr.ANIM_eStandHandUpFreeze);
+	// End:0x3C
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	{
+		m_eHandsUpType = 2;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -857,10 +977,9 @@ function GotoFrozen()
 //------------------------------------------------------------------
 function AnimNotify_CrouchToScaredStandEnd()
 {
-    #ifdefDEBUG logAnim( "Notify CrouchToScaredStandEnd" ); #endif
-    
-    m_bCrouchToScaredStandBegin = false;
-    setCrouch( false );
+	m_bCrouchToScaredStandBegin = false;
+	setCrouch(false);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -869,11 +988,9 @@ function AnimNotify_CrouchToScaredStandEnd()
 //------------------------------------------------------------------
 function AnimNotify_CrouchToScaredStandBegin()
 {
-    #ifdefDEBUG logAnim( "Notify CrouchToScaredStandBegin" ); #endif
-    
-    m_bCrouchToScaredStandBegin = true;
+	m_bCrouchToScaredStandBegin = true;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // PlayDuck
@@ -881,473 +998,333 @@ function AnimNotify_CrouchToScaredStandBegin()
 //------------------------------------------------------------------
 function PlayDuck()
 {
-    // inherited to do nothing...
+	return;
 }
 
 //------------------------------------------------------------------
 // PlayCrouchToProne
 //	- inherited
 //------------------------------------------------------------------
-simulated function PlayCrouchToProne( OPTIONAL bool bForcedByClient )
+simulated function PlayCrouchToProne(optional bool bForcedByClient)
 {
-    SetAnimInfo( m_mgr.ANIM_eCrouchToProne );
+	SetAnimInfo(m_mgr.ANIM_eCrouchToProne);
+	return;
 }
-//------------------------------------------------------------------
-// state Crouching
-//	- inherited
-//------------------------------------------------------------------
-simulated state Crouching
-{
-    simulated function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-
-        if ( m_bIsProne )
-        {
-            setProne( false );
-        }
-        
-        if ( !bWantsToCrouch || !bIsCrouched )
-        {
-            setCrouch( true );
-        }
-    }
-
-    simulated event GotoCrouch()
-    {
-    }
-
-    simulated event GotoFoetus()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoFoetus" ); #endif
-        SetAnimTransition( m_mgr.ANIM_eFoetus_nt, 'Foetus' );
-        setCrouch( false );
-    }
-
-    simulated event GotoStand()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoStand" ); #endif
-        SetAnimTransition( m_mgr.ANIM_eCrouchToScaredStand, '' );
-        // the function AnimNotify_CrouchToScaredStandEnd will call setCrouch( false )
-    }
-
-    simulated event GotoProne()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoProne" ); #endif
-
-        GotoState( 'Prone' );
-    }
-
-    simulated event GotoKneel()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoKneel" ); #endif
-
-        SetAnimTransition( m_mgr.ANIM_eKneelWait01, 'Kneeling' );
-    }
-}
-
-//------------------------------------------------------------------
-// State kneeling: 
-//	
-//------------------------------------------------------------------
-simulated state Kneeling
-{
-    /////////////////////////////////////////////////////////////////////////
-    simulated function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::BeginState" ); #endif
-
-        m_bIsKneeling = true;
-
-        if ( Level.NetMode != NM_Client )
-            m_eHandsUpType = HANDSUP_kneeling;
-        setCrouch( false );
-    }
-
-    simulated function EndState()
-    {
-        if ( Level.NetMode != NM_Client )
-            m_eHandsUpType = HANDSUP_none;
-
-        m_bIsKneeling = false;
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    simulated function PlayReaction()
-    {
-        local INT result; 
-
-        if ( m_bFrozen || m_bReactionAnim )
-            return;
-
-        result = rand( 100 );
-    
-        if ( result < 33 )
-        {
-            SetAnimInfo( m_mgr.ANIM_eKneelReact01 );
-        }
-        else if ( result < 66 )
-        {
-            SetAnimInfo( m_mgr.ANIM_eKneelReact02 );
-        }
-        else
-        {
-            SetAnimInfo( m_mgr.ANIM_eKneelReact03 );
-        }
-    }
-    
-    simulated function GotoFrozen()
-    {
-        setFrozen( true );
-        SetAnimInfo( m_mgr.ANIM_eKneelFreeze );
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoStand()
-    {
-        #ifdefDEBUG if (bShowLog) logX("::GotoStand"); #endif
-        SetAnimTransition( m_mgr.ANIM_eKneelToStand, '' );
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoKneel()
-    {
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoFoetus()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoFoestus" ); #endif
-
-        SetAnimTransition( m_mgr.ANIM_eKneelToFoetus, 'Foetus' );
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoProne()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoProne" ); #endif
-        SetAnimTransition( m_mgr.ANIM_eKneelToProne, 'Prone' ); 
-    }
-
-    simulated event GotoCrouch()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoCrouch" ); #endif
-        SetAnimTransition( m_mgr.ANIM_eKneelToCrouch, 'Crouching' );
-    }
-}
-
 
 //------------------------------------------------------------------
 // PlayProneToCrouch
 //	- inherited
 //------------------------------------------------------------------
-simulated function PlayProneToCrouch( OPTIONAL bool bForcedByClient )
+simulated function PlayProneToCrouch(optional bool bForcedByClient)
 {
-    SetAnimInfo( m_mgr.ANIM_eProneToCrouch );
-
-    if ( Level.NetMode == NM_Client )
-    {
-        m_bWantsToProne = false;
-        bWantsToCrouch  = true;
-    }
-}
-
-//------------------------------------------------------------------
-// 
-//	
-//------------------------------------------------------------------
-simulated state Prone
-{
-    simulated function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-
-        if ( !m_bWantsToProne || !m_bIsProne )
-        {
-            setProne( true );
-        }
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoStand()
-    {
-        #ifdefDEBUG if (bShowLog) logX("::GotoStand but go to crouch"); #endif
-        SetAnimTransition( m_mgr.ANIM_eProneToCrouch, 'Crouching' );
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoKneel()
-    {
-        #ifdefDEBUG if (bShowLog) logX("::GotoKneel do nothing..."); #endif
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoFoetus()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoFoetus do nothing" ); #endif
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoProne()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoProne" ); #endif
-    }
-
-    simulated event GotoCrouch()
-    {
-       #ifdefDEBUG if (bShowLog) logX( "::GotoCrouch" ); #endif
-       GotoState( 'Crouching' );
-    }
-
-}
-
-/*******************************************************************************/
-// State foetus: 
-//
-//
-simulated state Foetus
-{
-    simulated event GotoStand()
-    {
-        #ifdefDEBUG if (bShowLog) logX("::GotoStand"); #endif
-        SetAnimTransition( m_mgr.ANIM_eFoetusToStand, '' );
-    }
-
-    simulated event GotoKneel()
-    {
-        #ifdefDEBUG if (bShowLog) logX("::GotoKneel"); #endif
-        SetAnimTransition( m_mgr.ANIM_eFoetusToKneel, 'Kneeling' );
-    }
-
-    simulated event GotoFoetus()
-    {
-        #ifdefDEBUG if (bShowLog) logX("GotoFoetus"); #endif
-    }
-    
-    simulated event GotoCrouch()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoCrouch" ); #endif
-        SetAnimTransition( m_mgr.ANIM_eFoetusToCrouch, 'Crouching' );
-    }
-
-    //////////////////////////////////////////////
-    simulated event GotoProne()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::GotoProne" ); #endif
-        SetAnimTransition( m_mgr.ANIM_eFoetusToProne, 'Prone' ); 
-    }
-
-    simulated function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::BeginState" ); #endif
-        m_bIsFoetus = true;
-    }
-
-    simulated function EndState()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "::EndState" ); #endif
-        m_bIsFoetus = false;
-    }
-
+	SetAnimInfo(m_mgr.ANIM_eProneToCrouch);
+	// End:0x3D
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	{
+		m_bWantsToProne = false;
+		bWantsToCrouch = true;
+	}
+	return;
 }
 
 simulated function PlayCoughing()
 {
-    local name animName;
+	local name animName;
 
-    #ifdefDEBUG logAnim( "PlayCoughing" ); #endif
-    
-    if ( m_bIsClimbingLadder )
-    {
-        return;
-    }
-    
-    m_bPawnSpecificAnimInProgress = true;
-
-    if ( m_bIsProne )
-    {
-        AnimBlendParams( C_iPawnSpecificChannel, 1.0,,, 'R6 Pelvis' );
-        animName = 'ProneGazed';
-    }
-    else
-    {
-        AnimBlendParams( C_iPawnSpecificChannel, 1.0,,, 'R6 Spine2' );
-        animName = 'Gazed';
-    }
-
-    PlayAnim( animName, 1, 0.5, C_iPawnSpecificChannel );
-
+	// End:0x0B
+	if(m_bIsClimbingLadder)
+	{
+		return;
+	}
+	m_bPawnSpecificAnimInProgress = true;
+	// End:0x3E
+	if(m_bIsProne)
+	{
+		AnimBlendParams(16, 1.0000000,,, 'R6 Pelvis');
+		animName = 'ProneGazed';		
+	}
+	else
+	{
+		AnimBlendParams(16, 1.0000000,,, 'R6 Spine2');
+		animName = 'Gazed';
+	}
+	__NFUN_259__(animName, 1.0000000, 0.5000000, 16);
+	return;
 }
 
 simulated function PlayBlinded()
 {
-    local name animName;
-    
-    if ( m_bIsClimbingLadder )
-    {
-        return;
-    }
+	local name animName;
 
-    #ifdefDEBUG logAnim( "PlayBlinded" ); #endif
-    
-    m_bPawnSpecificAnimInProgress = true;
-        
-    if ( m_bIsProne )
-    {
-        AnimBlendParams( C_iPawnSpecificChannel, 1.0,,, 'R6 Pelvis' );
-        animName = 'ProneBlinded';
-    }
-    else
-    {
-        AnimBlendParams( C_iPawnSpecificChannel, 1.0,,, 'R6 Spine2' );
-        animName = 'Blinded';
-    }
-
-    PlayAnim( animName, 1, 0.5, C_iPawnSpecificChannel );
+	// End:0x0B
+	if(m_bIsClimbingLadder)
+	{
+		return;
+	}
+	m_bPawnSpecificAnimInProgress = true;
+	// End:0x3E
+	if(m_bIsProne)
+	{
+		AnimBlendParams(16, 1.0000000,,, 'R6 Pelvis');
+		animName = 'ProneBlinded';		
+	}
+	else
+	{
+		AnimBlendParams(16, 1.0000000,,, 'R6 Spine2');
+		animName = 'Blinded';
+	}
+	__NFUN_259__(animName, 1.0000000, 0.5000000, 16);
+	return;
 }
 
 //------------------------------------------------------------------
 // CanBeAffectedByGrenade: return true if can be affected by the grenade 
 //   at this moment
 //------------------------------------------------------------------
-simulated function bool CanBeAffectedByGrenade( Actor aGrenade, EGrenadeType eType )
+simulated function bool CanBeAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 {
-    local bool bAffected;
+	local bool bAffected;
 
-    #ifdefDEBUG logAnim( "CanBeAffectedByGrenade" ); #endif
-
-    bAffected = Super.CanBeAffectedByGrenade( aGrenade, eType );
-
-    if ( !bAffected )
-        return false;
-
-    if ( isInState('foetus') || m_bPostureTransition )
-        return false;
-    
-    return true;
+	bAffected = super.CanBeAffectedByGrenade(aGrenade, eType);
+	// End:0x24
+	if(__NFUN_129__(bAffected))
+	{
+		return false;
+	}
+	// End:0x3C
+	if(__NFUN_132__(__NFUN_281__('Foetus'), m_bPostureTransition))
+	{
+		return false;
+	}
+	return true;
+	return;
 }
 
-simulated function PlayDoorAnim(R6IORotatingDoor door)
+simulated function PlayDoorAnim(R6IORotatingDoor Door)
 {
-    local   bool    bOpensTowardsPawn;
+	local bool bOpensTowardsPawn;
 
-    #ifdefDEBUG logAnim( "PlayDoorAnim" ); #endif
-
-    m_bPawnSpecificAnimInProgress = true;
-    AnimBlendParams( C_iPawnSpecificChannel, 1.0,,, 'R6 Spine2' );
-
-	bOpensTowardsPawn = door.DoorOpenTowardsActor(self);
-
-    // door opens towards pawn
-    if(bOpensTowardsPawn)
-		PlayAnim('StandDoorPull', 1.0, 0.2, C_iPawnSpecificChannel);
-    else  // door opens away from pawn
-		PlayAnim('StandDoorPush', 1.0, 0.2, C_iPawnSpecificChannel);
+	m_bPawnSpecificAnimInProgress = true;
+	AnimBlendParams(16, 1.0000000,,, 'R6 Spine2');
+	bOpensTowardsPawn = Door.DoorOpenTowardsActor(self);
+	// End:0x53
+	if(bOpensTowardsPawn)
+	{
+		__NFUN_259__('StandDoorPull', 1.0000000, 0.2000000, 16);		
+	}
+	else
+	{
+		__NFUN_259__('StandDoorPush', 1.0000000, 0.2000000, 16);
+	}
+	return;
 }
 
-
-event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
-{ 
-    if( !IsAlive() || m_bExtracted || IsEnemy( playerController.pawn ) )
-    {
-        Query.iHasAction = 0;
-    }
-    else
-    {
-        Query.iHasAction = 1;
-        if (fDistance < m_fCircumstantialActionRange)
-            Query.iInRange = 1;
-        else
-            Query.iInRange = 0;
-
-        if( m_controller.Order_canFollowMe() )
-        {
-            Query.textureIcon = Texture'R6ActionIcons.HostageFollowMe';
-            Query.iPlayerActionID		= m_controller.eHostageOrder.HOrder_ComeWithMe;
-			Query.iTeamActionID			= m_controller.eHostageOrder.HOrder_ComeWithMe;
-			Query.iTeamActionIDList[0]	= m_controller.eHostageOrder.HOrder_ComeWithMe;
-        }
-        else 
-        {
-            Query.textureIcon = Texture'R6ActionIcons.HostageStayHere';
-            Query.iPlayerActionID		= m_controller.eHostageOrder.HOrder_StayHere;
-			Query.iTeamActionID			= m_controller.eHostageOrder.HOrder_StayHere;
-			Query.iTeamActionIDList[0]	= m_controller.eHostageOrder.HOrder_StayHere;
-        }
-
-        Query.iTeamActionIDList[1] = m_controller.eHostageOrder.HOrder_None;
-        Query.iTeamActionIDList[2] = m_controller.eHostageOrder.HOrder_None;
-        Query.iTeamActionIDList[3] = m_controller.eHostageOrder.HOrder_None;
-    }		
+event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
+{
+	// End:0x4E
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_129__(IsAlive()), m_bExtracted), IsEnemy(PlayerController.Pawn)), m_bClassicMissionCivilian))
+	{
+		Query.iHasAction = 0;		
+	}
+	else
+	{
+		Query.iHasAction = 1;
+		// End:0x82
+		if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+		{
+			Query.iInRange = 1;			
+		}
+		else
+		{
+			Query.iInRange = 0;
+		}
+		// End:0x24F
+		if(__NFUN_122__(PlayerController.GameReplicationInfo.m_szGameTypeFlagRep, "RGM_LimitSeatsAdvMode"))
+		{
+			// End:0x197
+			if(m_controller.Order_canFollowMe())
+			{
+				// End:0x183
+				if(__NFUN_114__(R6PlayerController(PlayerController).m_pawn.m_aEscortedHostage[0], none))
+				{
+					Query.textureIcon = Texture'R6ActionIcons.HostageFollowMe';
+					Query.iPlayerActionID = 1;
+					Query.iTeamActionID = 1;
+					Query.iTeamActionIDList[0] = 1;
+					Query.iTeamActionIDList[1] = 0;
+					Query.iTeamActionIDList[2] = 0;
+					Query.iTeamActionIDList[3] = 0;					
+				}
+				else
+				{
+					Query.iHasAction = 0;
+				}				
+			}
+			else
+			{
+				// End:0x1C8
+				if(__NFUN_119__(m_escortedByRainbow, R6PlayerController(PlayerController).m_pawn))
+				{
+					Query.iHasAction = 0;					
+				}
+				else
+				{
+					Query.textureIcon = Texture'R6ActionIcons.HostageStayHere';
+					Query.iPlayerActionID = 2;
+					Query.iTeamActionID = 2;
+					Query.iTeamActionIDList[0] = 2;
+					Query.iTeamActionIDList[1] = 0;
+					Query.iTeamActionIDList[2] = 0;
+					Query.iTeamActionIDList[3] = 0;
+				}
+			}			
+		}
+		else
+		{
+			// End:0x2AD
+			if(m_controller.Order_canFollowMe())
+			{
+				Query.textureIcon = Texture'R6ActionIcons.HostageFollowMe';
+				Query.iPlayerActionID = 1;
+				Query.iTeamActionID = 1;
+				Query.iTeamActionIDList[0] = 1;				
+			}
+			else
+			{
+				Query.textureIcon = Texture'R6ActionIcons.HostageStayHere';
+				Query.iPlayerActionID = 2;
+				Query.iTeamActionID = 2;
+				Query.iTeamActionIDList[0] = 2;
+			}
+			Query.iTeamActionIDList[1] = 0;
+			Query.iTeamActionIDList[2] = 0;
+			Query.iTeamActionIDList[3] = 0;
+		}
+	}
+	return;
 }
 
-simulated function string R6GetCircumstantialActionString( INT iAction )
+simulated function string R6GetCircumstantialActionString(int iAction)
 {
-    switch( iAction )
-    {
-		case m_controller.eHostageOrder.HOrder_ComeWithMe:  return Localize("RDVOrder", "Order_FollowMe", "R6Menu");
-		case m_controller.eHostageOrder.HOrder_StayHere:    return Localize("RDVOrder", "Order_StayHere", "R6Menu");
-    }
-
-    return "";
+	switch(iAction)
+	{
+		// End:0x37
+		case int(1):
+			return Localize("RDVOrder", "Order_FollowMe", "R6Menu");
+		// End:0x67
+		case int(2):
+			return Localize("RDVOrder", "Order_StayHere", "R6Menu");
+		// End:0xFFFF
+		default:
+			return "";
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // EnteredExtractionZone
 //	
 //------------------------------------------------------------------
-function EnteredExtractionZone( R6AbstractExtractionZone zone )
+function EnteredExtractionZone(R6AbstractExtractionZone Zone)
 {
-	// MPF1
-    if(!m_bCivilian && !m_bPoliceManMp1){//MissionPack1
-		if ( m_controller != none )
+	// End:0x32
+	if(__NFUN_130__(__NFUN_129__(m_bCivilian), __NFUN_129__(m_bPoliceManMp1)))
+	{
+		// End:0x32
+		if(__NFUN_119__(m_controller, none))
 		{
 			m_controller.SetStateExtracted();
 		}
-	}//MissionPack1
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // ProcessBuildDeathMessage
 //	
 //------------------------------------------------------------------
-function bool ProcessBuildDeathMessage( Pawn Killer, OUT string szPlayerName )
+function bool ProcessBuildDeathMessage(Pawn Killer, out string szPlayerName)
 {
-    if ( Killer.m_ePawnType == PAWN_Rainbow )
-    {
-        m_bSuicideType = DEATHMSG_HOSTAGE_KILLEDBY;
-    }
-    else if ( Killer.m_ePawnType == PAWN_Terrorist )
-    {
-        m_bSuicideType = DEATHMSG_HOSTAGE_KILLEDBYTERRO;
-    }
-    else
-    {
-        m_bSuicideType = DEATHMSG_HOSTAGE_DIED;
-    }
-
-    return true;    
+	// End:0x83
+	if(__NFUN_154__(int(Killer.m_ePawnType), int(1)))
+	{
+		// End:0x78
+		if(__NFUN_119__(Level.Game, none))
+		{
+			// End:0x6D
+			if(__NFUN_129__(__NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_LimitSeatsAdvMode")))
+			{
+				m_bSuicideType = 6;				
+			}
+			else
+			{
+				m_bSuicideType = 10;
+			}			
+		}
+		else
+		{
+			m_bSuicideType = 6;
+		}		
+	}
+	else
+	{
+		// End:0xA7
+		if(__NFUN_154__(int(Killer.m_ePawnType), int(2)))
+		{
+			m_bSuicideType = 7;			
+		}
+		else
+		{
+			m_bSuicideType = 5;
+		}
+	}
+	return true;
+	return;
 }
 
 //============================================================================
 // vector EyePosition - 
 //============================================================================
-event vector EyePosition()
+event Vector EyePosition()
 {
-    local vector vEyeHeight;
+	local Vector vEyeHeight;
 
-    if(bIsCrouched)
-        vEyeHeight.Z = 30;
-    else if(m_bIsProne)
-        vEyeHeight.Z = 0;
-    else if(m_bIsKneeling)
-        vEyeHeight.Z = 25;
-    else if(m_bIsFoetus)
-        vEyeHeight.Z = -60;
-    else
-        vEyeHeight.Z = 65;
-
-    return vEyeHeight;
+	// End:0x1C
+	if(bIsCrouched)
+	{
+		vEyeHeight.Z = 30.0000000;		
+	}
+	else
+	{
+		// End:0x38
+		if(m_bIsProne)
+		{
+			vEyeHeight.Z = 0.0000000;			
+		}
+		else
+		{
+			// End:0x54
+			if(m_bIsKneeling)
+			{
+				vEyeHeight.Z = 25.0000000;				
+			}
+			else
+			{
+				// End:0x70
+				if(m_bIsFoetus)
+				{
+					vEyeHeight.Z = -60.0000000;					
+				}
+				else
+				{
+					vEyeHeight.Z = 65.0000000;
+				}
+			}
+		}
+	}
+	return vEyeHeight;
+	return;
 }
 
  // MPF1
@@ -1358,96 +1335,332 @@ event vector EyePosition()
 //============================================================================
 function SetToNormalWeapon()
 {
-    // Get the primary Weapon
 	EngineWeapon = GetWeaponInGroup(1);
-    if(EngineWeapon==None)
-    {
-		logx("SetToNormalWeapon-No weapon!!!");
-        EngineWeapon = GetWeaponInGroup(2);
-    }
-    EngineWeapon.RemoteRole = ROLE_SimulatedProxy;
-    if(EngineWeapon!=none)
-    {
-        AttachWeapon(EngineWeapon, 'TagRightHand');
-
-        EngineWeapon.WeaponInitialization( Self );
-        m_pBulletManager.SetBulletParameter( EngineWeapon );
-    }
-
-    #ifdefDEBUG if(bShowLog) logX( " got the weapon " $ EngineWeapon ); #endif
+	// End:0x4C
+	if(__NFUN_114__(EngineWeapon, none))
+	{
+		logX("SetToNormalWeapon-No weapon!!!");
+		EngineWeapon = GetWeaponInGroup(2);
+	}
+	EngineWeapon.RemoteRole = ROLE_SimulatedProxy;
+	// End:0x9C
+	if(__NFUN_119__(EngineWeapon, none))
+	{
+		AttachWeapon(EngineWeapon, 'TagRightHand');
+		EngineWeapon.WeaponInitialization(self);
+		m_pBulletManager.SetBulletParameter(EngineWeapon);
+	}
+	return;
 }
-/////MissionPack1
-///////////////////////////////
+
+simulated state Crouching
+{
+	simulated function BeginState()
+	{
+		// End:0x10
+		if(m_bIsProne)
+		{
+			setProne(false);
+		}
+		// End:0x2F
+		if(__NFUN_132__(__NFUN_129__(bWantsToCrouch), __NFUN_129__(bIsCrouched)))
+		{
+			setCrouch(true);
+		}
+		return;
+	}
+
+///////////////////////////////////////////////
+	simulated event GotoCrouch()
+	{
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoFoetus()
+	{
+		SetAnimTransition(m_mgr.ANIM_eFoetus_nt, 'Foetus');
+		setCrouch(false);
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoStand()
+	{
+		SetAnimTransition(m_mgr.ANIM_eCrouchToScaredStand, 'None');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoProne()
+	{
+		__NFUN_113__('Prone');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoKneel()
+	{
+		SetAnimTransition(m_mgr.ANIM_eKneelWait01, 'Kneeling');
+		return;
+	}
+	stop;
+}
+
+simulated state Kneeling
+{
+	simulated function BeginState()
+	{
+		m_bIsKneeling = true;
+		// End:0x29
+		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		{
+			m_eHandsUpType = 1;
+		}
+		setCrouch(false);
+		return;
+	}
+
+	simulated function EndState()
+	{
+		// End:0x21
+		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		{
+			m_eHandsUpType = 0;
+		}
+		m_bIsKneeling = false;
+		return;
+	}
+
+//------------------------------------------------------------------
+// PlayReaction: if not frozen, play a reaction animation 
+//	
+//------------------------------------------------------------------
+	simulated function PlayReaction()
+	{
+		local int Result;
+
+		// End:0x16
+		if(__NFUN_132__(m_bFrozen, m_bReactionAnim))
+		{
+			return;
+		}
+		Result = __NFUN_167__(100);
+		// End:0x43
+		if(__NFUN_150__(Result, 33))
+		{
+			SetAnimInfo(m_mgr.ANIM_eKneelReact01);			
+		}
+		else
+		{
+			// End:0x66
+			if(__NFUN_150__(Result, 66))
+			{
+				SetAnimInfo(m_mgr.ANIM_eKneelReact02);				
+			}
+			else
+			{
+				SetAnimInfo(m_mgr.ANIM_eKneelReact03);
+			}
+		}
+		return;
+	}
+
+/////////////////////////////////////////////
+	simulated function GotoFrozen()
+	{
+		setFrozen(true);
+		SetAnimInfo(m_mgr.ANIM_eKneelFreeze);
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoStand()
+	{
+		SetAnimTransition(m_mgr.ANIM_eKneelToStand, 'None');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoKneel()
+	{
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoFoetus()
+	{
+		SetAnimTransition(m_mgr.ANIM_eKneelToFoetus, 'Foetus');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoProne()
+	{
+		SetAnimTransition(m_mgr.ANIM_eKneelToProne, 'Prone');
+		return;
+	}
+
+///////////////////////////////////////////////
+	simulated event GotoCrouch()
+	{
+		SetAnimTransition(m_mgr.ANIM_eKneelToCrouch, 'Crouching');
+		return;
+	}
+	stop;
+}
+
+simulated state Prone
+{
+	simulated function BeginState()
+	{
+		// End:0x1F
+		if(__NFUN_132__(__NFUN_129__(m_bWantsToProne), __NFUN_129__(m_bIsProne)))
+		{
+			setProne(true);
+		}
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoStand()
+	{
+		SetAnimTransition(m_mgr.ANIM_eProneToCrouch, 'Crouching');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoKneel()
+	{
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoFoetus()
+	{
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoProne()
+	{
+		return;
+	}
+
+///////////////////////////////////////////////
+	simulated event GotoCrouch()
+	{
+		__NFUN_113__('Crouching');
+		return;
+	}
+	stop;
+}
+
+simulated state Foetus
+{
+//////////////////////////////////////////////
+	simulated event GotoStand()
+	{
+		SetAnimTransition(m_mgr.ANIM_eFoetusToStand, 'None');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoKneel()
+	{
+		SetAnimTransition(m_mgr.ANIM_eFoetusToKneel, 'Kneeling');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoFoetus()
+	{
+		return;
+	}
+
+///////////////////////////////////////////////
+	simulated event GotoCrouch()
+	{
+		SetAnimTransition(m_mgr.ANIM_eFoetusToCrouch, 'Crouching');
+		return;
+	}
+
+//////////////////////////////////////////////
+	simulated event GotoProne()
+	{
+		SetAnimTransition(m_mgr.ANIM_eFoetusToProne, 'Prone');
+		return;
+	}
+
+	simulated function BeginState()
+	{
+		m_bIsFoetus = true;
+		return;
+	}
+
+	simulated function EndState()
+	{
+		m_bIsFoetus = false;
+		return;
+	}
+	stop;
+}
 
 defaultproperties
 {
-     m_ePersonality=HPERSO_Normal
-     m_iIndex=-1
-     m_bPatrolForward=True
-     m_stayInFoetusTime=(m_fMin=5.000000,m_fMax=8.000000)
-     m_stayFrozenTime=(m_fMin=1.000000,m_fMax=3.000000)
-     m_stayProneTime=(m_fMin=3.000000,m_fMax=4.000000)
-     m_stayCautiousGuardedStateTime=(m_fMin=7.000000,m_fMax=10.000000)
-     m_patrolAreaWaitTween=(m_fMin=2.000000,m_fMax=4.000000)
-     m_changeOrientationTween=(m_fMin=5.000000,m_fMax=15.000000)
-     m_sightRadiusTween=(m_fMin=4000.000000,m_fMax=5000.000000)
-     m_updatePaceTween=(m_fMin=1.500000,m_fMax=2.600000)
-     m_waitingGoCrouchTween=(m_fMin=2.500000,m_fMax=4.000000)
-     m_bAutoClimbLadders=True
-     m_bAvoidFacingWalls=False
-     m_fWalkingSpeed=250.000000
-     m_fWalkingBackwardStrafeSpeed=100.000000
-     m_fRunningSpeed=400.000000
-     m_fRunningBackwardStrafeSpeed=320.000000
-     m_fCrouchedWalkingSpeed=125.000000
-     m_fCrouchedWalkingBackwardStrafeSpeed=100.000000
-     m_fCrouchedRunningSpeed=250.000000
-     m_fCrouchedRunningBackwardStrafeSpeed=250.000000
-     m_standRunBackName="ScaredStandWalkBack"
-     m_standWalkBackName="ScaredStandWalkBack"
-     m_standFallName="ScaredStandFall"
-     m_standLandName="ScaredStandLand"
-     m_crouchFallName="crouchFall"
-     m_crouchWalkForwardName="CrouchRunForward"
-     m_standStairWalkUpName="StandStairWalkUp"
-     m_standStairWalkUpBackName="StandStairWalkUp"
-     m_standStairWalkDownName="StandStairWalkDown"
-     m_standStairWalkDownBackName="StandStairWalkDown"
-     m_standStairWalkDownRightName="StandWalkRight"
-     m_standStairRunUpName="StandStairRunUp"
-     m_standStairRunUpBackName="StandStairRunUp"
-     m_standStairRunUpRightName="StandWalkRight"
-     m_standStairRunDownName="StandStairRunDown"
-     m_standStairRunDownBackName="StandStairRunDown"
-     m_standStairRunDownRightName="StandWalkRight"
-     m_crouchStairWalkDownName="CrouchStairWalkDown"
-     m_crouchStairWalkDownBackName="CrouchStairWalkUp"
-     m_crouchStairWalkDownRightName="CrouchWalkRight"
-     m_crouchStairWalkUpName="CrouchStairWalkUp"
-     m_crouchStairWalkUpBackName="CrouchStairWalkDown"
-     m_crouchStairWalkUpRightName="CrouchWalkRight"
-     m_crouchStairRunUpName="CrouchStairWalkUp"
-     m_crouchStairRunDownName="CrouchStairWalkDown"
-     m_crouchDefaultAnimName="Crouch_nt"
-     m_standDefaultAnimName="Stand_nt"
-     m_ePawnType=PAWN_Hostage
-     m_bMakesTrailsWhenProning=True
-     ControllerClass=Class'R6Engine.R6HostageAI'
-     CollisionHeight=80.000000
-     Begin Object Class=KarmaParamsSkel Name=KarmaParamsSkel17
-         KConvulseSpacing=(Max=2.200000)
-         KSkeleton="terroskel"
-         KStartEnabled=True
-         bHighDetailOnly=False
-         KLinearDamping=0.500000
-         KAngularDamping=0.500000
-         KBuoyancy=1.000000
-         KVelDropBelowThreshold=50.000000
-         KFriction=0.600000
-         KRestitution=0.300000
-         KImpactThreshold=150.000000
-         Name="KarmaParamsSkel17"
-     End Object
-     KParams=KarmaParamsSkel'R6Engine.KarmaParamsSkel17'
-     RotationRate=(Yaw=45000)
+	m_ePersonality=1
+	m_iIndex=-1
+	m_bPatrolForward=true
+	m_stayInFoetusTime=(m_fMin=5.0000000,m_fMax=8.0000000)
+	m_stayFrozenTime=(m_fMin=1.0000000,m_fMax=3.0000000)
+	m_stayProneTime=(m_fMin=3.0000000,m_fMax=4.0000000)
+	m_stayCautiousGuardedStateTime=(m_fMin=7.0000000,m_fMax=10.0000000)
+	m_patrolAreaWaitTween=(m_fMin=2.0000000,m_fMax=4.0000000)
+	m_changeOrientationTween=(m_fMin=5.0000000,m_fMax=15.0000000)
+	m_sightRadiusTween=(m_fMin=4000.0000000,m_fMax=5000.0000000)
+	m_updatePaceTween=(m_fMin=1.5000000,m_fMax=2.6000000)
+	m_waitingGoCrouchTween=(m_fMin=2.5000000,m_fMax=4.0000000)
+	m_bAutoClimbLadders=true
+	m_bAvoidFacingWalls=false
+	m_fWalkingSpeed=250.0000000
+	m_fWalkingBackwardStrafeSpeed=100.0000000
+	m_fRunningSpeed=400.0000000
+	m_fRunningBackwardStrafeSpeed=320.0000000
+	m_fCrouchedWalkingSpeed=125.0000000
+	m_fCrouchedWalkingBackwardStrafeSpeed=100.0000000
+	m_fCrouchedRunningSpeed=250.0000000
+	m_fCrouchedRunningBackwardStrafeSpeed=250.0000000
+	m_standRunBackName="ScaredStandWalkBack"
+	m_standWalkBackName="ScaredStandWalkBack"
+	m_standFallName="ScaredStandFall"
+	m_standLandName="ScaredStandLand"
+	m_crouchFallName="crouchFall"
+	m_crouchWalkForwardName="CrouchRunForward"
+	m_standStairWalkUpName="StandStairWalkUp"
+	m_standStairWalkUpBackName="StandStairWalkUp"
+	m_standStairWalkDownName="StandStairWalkDown"
+	m_standStairWalkDownBackName="StandStairWalkDown"
+	m_standStairWalkDownRightName="StandWalkRight"
+	m_standStairRunUpName="StandStairRunUp"
+	m_standStairRunUpBackName="StandStairRunUp"
+	m_standStairRunUpRightName="StandWalkRight"
+	m_standStairRunDownName="StandStairRunDown"
+	m_standStairRunDownBackName="StandStairRunDown"
+	m_standStairRunDownRightName="StandWalkRight"
+	m_crouchStairWalkDownName="CrouchStairWalkDown"
+	m_crouchStairWalkDownBackName="CrouchStairWalkUp"
+	m_crouchStairWalkDownRightName="CrouchWalkRight"
+	m_crouchStairWalkUpName="CrouchStairWalkUp"
+	m_crouchStairWalkUpBackName="CrouchStairWalkDown"
+	m_crouchStairWalkUpRightName="CrouchWalkRight"
+	m_crouchStairRunUpName="CrouchStairWalkUp"
+	m_crouchStairRunDownName="CrouchStairWalkDown"
+	m_crouchDefaultAnimName="Crouch_nt"
+	m_standDefaultAnimName="Stand_nt"
+	m_ePawnType=3
+	m_bMakesTrailsWhenProning=true
+	ControllerClass=Class'R6Engine.R6HostageAI'
+	CollisionHeight=80.0000000
+	KParams=KarmaParamsSkel'R6Engine.KarmaParamsSkel17'
+	RotationRate=(Pitch=4096,Yaw=45000,Roll=0)
 }

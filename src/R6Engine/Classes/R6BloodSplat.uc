@@ -1,3 +1,9 @@
+//=============================================================================
+// R6BloodSplat - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6BloodSplat.uc 
 // Created By       
@@ -7,30 +13,30 @@
 //Revision history:
 // 2002/02/24    Jean-Francois Dube: Creation
 //============================================================================//
-
 class R6BloodSplat extends R6DecalsBase;
 
-var texture m_BloodSplatTexture;
+var Texture m_BloodSplatTexture;
 
 simulated function PostBeginPlay()
 {
-    local Rotator DecalRot;
+	local Rotator DecalRot;
 
-	if(Level.NetMode != NM_DedicatedServer)
-    {
-        DecalRot = Rotation;
-        DecalRot.Roll = Rand(65535);
-        Level.m_DecalManager.AddDecal(Location, DecalRot, m_BloodSplatTexture, DECAL_BloodSplats, 1, 0, 0, 300);
-    }
-
-    Super.PostBeginPlay();
+	// End:0x6C
+	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	{
+		DecalRot = Rotation;
+		DecalRot.Roll = __NFUN_167__(65535);
+		Level.m_DecalManager.__NFUN_2900__(Location, DecalRot, m_BloodSplatTexture, 2, 1, 0.0000000, 0.0000000, 300.0000000);
+	}
+	super.PostBeginPlay();
+	return;
 }
 
 defaultproperties
 {
-     m_BloodSplatTexture=Texture'Inventory_t.BloodSplats.BloodSplat'
-     bHidden=True
-     bNetOptional=True
-     LifeSpan=0.100000
-     Texture=None
+	m_BloodSplatTexture=Texture'Inventory_t.BloodSplats.BloodSplat'
+	bHidden=true
+	bNetOptional=true
+	LifeSpan=0.1000000
+	Texture=none
 }

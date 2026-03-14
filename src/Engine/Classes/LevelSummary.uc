@@ -1,19 +1,19 @@
 //=============================================================================
+// LevelSummary - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // LevelSummary contains the summary properties from the LevelInfo actor.
 // Designed for fast loading.
 //=============================================================================
 class LevelSummary extends Object
-	native;
+ native;
 
-//-----------------------------------------------------------------------------
-// Properties.
-
+var() int IdealPlayerCount;
 // From LevelInfo.
 var() localized string Title;
-var()           string Author;
-var() int	IdealPlayerCount;
+var() string Author;
 var() localized string LevelEnterText;
 
-defaultproperties
-{
-}

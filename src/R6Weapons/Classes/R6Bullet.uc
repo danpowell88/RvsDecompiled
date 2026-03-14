@@ -1,3 +1,9 @@
+//=============================================================================
+// R6Bullet - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            r6bullet
 // Created By       Joel Tremblay
@@ -8,308 +14,312 @@
 //
 //============================================================================//
 class R6Bullet extends R6AbstractBullet
-    native;
+ native;
 
 enum eHitResult
 {
-    HR_NoMaterial,
-    HR_Explode,
-    HR_Ricochet,
-    HR_GoThrough,
+	HR_NoMaterial,                  // 0
+	HR_Explode,                     // 1
+	HR_Ricochet,                    // 2
+	HR_GoThrough                    // 3
 };
 
-//#exec OBJ LOAD FILE="..\textures\R6TextureWeapons.utx"  Package="R6TextureWeapons.Tracer"
-#exec NEW StaticMesh FILE="models\Tracer.ASE" NAME="Tracer" Yaw=16384
-//#exec TEXTURE IMPORT NAME=TracerTexture FILE=textures\Tracer.dds GROUP=Skins Mips=Off
-
-var (Rainbow)string m_szAmmoName;
-var (Rainbow)string m_szAmmoType;
-var (Rainbow)string m_szBulletType;
-
-var (Rainbow)INT m_iEnergy;
-var (Rainbow)FLOAT m_fKillStunTransfer;
-//for Range Conversion  x²/m_fRangeConversionConst + x  (for Kill)  x²/m_fRangeConversionConst (stun)
-var (Rainbow)FLOAT m_fRangeConversionConst;
-var (Rainbow)INT   m_iPenetrationFactor;
-
-var (Rainbow)FLOAT m_fRange;
-var (Rainbow)INT   m_iNoArmorModifier;
-
-var(R6Grenade) FLOAT   m_fExplosionRadius;           
-var(R6Grenade) FLOAT   m_fKillBlastRadius;
-
-var(Rainbow) FLOAT      m_fExplosionDelay;  // delay before explosion (for grenades and mines)
-
-var   BOOL   m_bBulletIsGone;
-var   BOOL   m_bIsGrenade;
-
-var   BOOL   m_bBulletDeactivated;
-var   vector m_vSpawnedPosition;            //used by BulletGoesThroughSurface
-
-var   BOOL   bShowLog;
-
-var   INT    m_iBulletGroupID;    // Especially for shotguns, this is used to determine which other bullets where spawned
+var(Rainbow) int m_iEnergy;
+var(Rainbow) int m_iPenetrationFactor;
+var(Rainbow) int m_iNoArmorModifier;
+var int m_iBulletGroupID;  // Especially for shotguns, this is used to determine which other bullets where spawned
+var bool m_bBulletIsGone;
+var bool m_bIsGrenade;
+var bool m_bBulletDeactivated;
+var bool bShowLog;
+var(Rainbow) float m_fKillStunTransfer;
+//for Range Conversion  xï¿½/m_fRangeConversionConst + x  (for Kill)  xï¿½/m_fRangeConversionConst (stun)
+var(Rainbow) float m_fRangeConversionConst;
+var(Rainbow) float m_fRange;
+var(R6Grenade) float m_fExplosionRadius;
+var(R6Grenade) float m_fKillBlastRadius;
+var(Rainbow) float m_fExplosionDelay;  // delay before explosion (for grenades and mines)
                                   // at the same time from the same weapon (I don't mean from rapid fire but fragments from 
                                   // shells)
-var   actor m_AffectedActor;      // which pawn did this bullet/fragment affect.
+var Actor m_AffectedActor;  // which pawn did this bullet/fragment affect.
 var R6BulletManager m_BulletManager;
+var Vector m_vSpawnedPosition;  // used by BulletGoesThroughSurface
+var(Rainbow) string m_szAmmoName;
+var(Rainbow) string m_szAmmoType;
+var(Rainbow) string m_szBulletType;
 
+// Export UR6Bullet::execBulletGoesThroughSurface(FFrame&, void* const)
+ native(2001) final function R6Bullet.eHitResult BulletGoesThroughSurface(Actor TouchedSurface, Vector vHitLocation, out Vector vBulletVelocity, out Vector vRealHitLocation, out Vector vexitLocation, out Vector vexitNormal, out Class<R6WallHit> TouchedEffects, out Class<R6WallHit> ExitEffects);
 
-native(2001) final function eHitResult BulletGoesThroughSurface(Actor TouchedSurface,
-                                                                vector vHitLocation,
-                                                                out vector vBulletVelocity,         //Velocity is used for direction and ca be changed by the native function
-                                                                out vector vRealHitLocation,        //Real hit location on the wall
-                                                                out vector vexitLocation,           //Output Only
-                                                                out vector vexitNormal,             //Output Only
-                                                                out class<R6WallHit> TouchedEffects,
-                                                                out class<R6WallHit> ExitEffects);
-
-function BOOL DestroyedByImpact()  // for demolition gadgets
+function bool DestroyedByImpact()
 {
-    return false;
+	return false;
+	return;
 }
 
 simulated function PostBeginPlay()
 {
-    Super.PostBeginPlay();
-
-    m_vSpawnedPosition = Location;
-
-    m_bBulletIsGone = TRUE;
+	super(Actor).PostBeginPlay();
+	m_vSpawnedPosition = Location;
+	m_bBulletIsGone = true;
+	return;
 }
 
-simulated function SetSpeed(FLOAT fBulletSpeed)
+simulated function SetSpeed(float fBulletSpeed)
 {
-    Velocity = fBulletSpeed * vector(Rotation);
+	Velocity = __NFUN_213__(fBulletSpeed, Vector(Rotation));
+	return;
 }
 
 // Bullet are not destroyed, but Deactivated and the reactivated by the bullet manager.
 function DeactivateBullet()
 {
-    SetPhysics(PHYS_None);
-    bStasis=TRUE;
-    SetCollision(false, false, false);
-    m_bBulletDeactivated=true;
+	__NFUN_3970__(0);
+	bStasis = true;
+	__NFUN_262__(false, false, false);
+	m_bBulletDeactivated = true;
+	return;
 }
 
 //==============
 // Touching
-simulated singular function Touch(Actor Other)
+singular simulated function Touch(Actor Other)
 {
-    local actor HitActor;
-    local vector vHitLocation, vHitNormal;
-    local Material pMaterial;
+	local Actor HitActor;
+	local Vector vHitLocation, vHitNormal;
+	local Material pMaterial;
 
-    if(Other == Instigator || m_bBulletIsGone == FALSE || (m_bBulletDeactivated == true) ||
-       Instigator.m_collisionBox == Other) // hit the instigator colbox
-    	return;
-    
-    if(R6Bullet(Other) != None)
-    {
-        if(R6Bullet(Other).DestroyedByImpact())
-            DeactivateBullet();
-    }
-
-    if ( Other.bProjTarget || (Other.bBlockActors && Other.bBlockPlayers) || Other.IsA( 'R6ColBox' ) )
-    {
-        //get exact vHitLocation
-        HitActor = Instigator.R6Trace(vHitLocation, vHitNormal, Location + Other.CollisionRadius * Normal(Location - m_vSpawnedPosition), m_vSpawnedPosition, TF_LineOfFire|TF_TraceActors );
-
-        if (HitActor == Other)
-        {
-            ProcessTouch(Other, vHitLocation);
-            if(pMaterial!=none)
-                SpawnSFX( pMaterial.m_pHitEffect, vHitLocation, Rotator(vHitNormal), Other, HIT_Impact );
-        }
-        else
-        {
-            ProcessTouch(Other, Other.Location + Other.CollisionRadius * Normal(Location - Other.Location));
-        }
-    }
+	// End:0x47
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_114__(Other, Instigator), __NFUN_242__(m_bBulletIsGone, false)), __NFUN_242__(m_bBulletDeactivated, true)), __NFUN_114__(Instigator.m_collisionBox, Other)))
+	{
+		return;
+	}
+	// End:0x74
+	if(__NFUN_119__(R6Bullet(Other), none))
+	{
+		// End:0x74
+		if(R6Bullet(Other).DestroyedByImpact())
+		{
+			DeactivateBullet();
+		}
+	}
+	// End:0x1A5
+	if(__NFUN_132__(__NFUN_132__(Other.bProjTarget, __NFUN_130__(Other.bBlockActors, Other.bBlockPlayers)), Other.__NFUN_303__('R6ColBox')))
+	{
+		HitActor = Instigator.__NFUN_1806__(vHitLocation, vHitNormal, __NFUN_215__(Location, __NFUN_213__(Other.CollisionRadius, __NFUN_226__(__NFUN_216__(Location, m_vSpawnedPosition)))), m_vSpawnedPosition, __NFUN_158__(4, 1));
+		// End:0x163
+		if(__NFUN_114__(HitActor, Other))
+		{
+			ProcessTouch(Other, vHitLocation);
+			// End:0x160
+			if(__NFUN_119__(pMaterial, none))
+			{
+				SpawnSFX(pMaterial.m_pHitEffect, vHitLocation, Rotator(vHitNormal), Other, 0);
+			}			
+		}
+		else
+		{
+			ProcessTouch(Other, __NFUN_215__(Other.Location, __NFUN_213__(Other.CollisionRadius, __NFUN_226__(__NFUN_216__(Location, Other.Location)))));
+		}
+	}
+	return;
 }
+
 //============================================================================
 // function ProcessTouch - 
 //============================================================================
-simulated function ProcessTouch(Actor Other, vector vHitLocation)
+simulated function ProcessTouch(Actor Other, Vector vHitLocation)
 {
-    local FLOAT     fResultKillEnergy;
-    local FLOAT     fResultStunEnergy;
-    local FLOAT     fRange;
-    local R6Pawn    otherPawn;
-    local R6Pawn    instigatorPawn;
+	local float fResultKillEnergy, fResultStunEnergy, fRange;
+	local R6Pawn OtherPawn, instigatorPawn;
 
-    if(Other != Instigator)
-    {
-        if(Role == ROLE_Authority)
-        {
-            //Calculate distance
-            fRange = VSize(Location - m_vSpawnedPosition);
-            fRange /= 100;  //Centimeters to meters;
-
-            //if the bullet reach the maximum kill distance, set it to zero
-            fResultKillEnergy = m_iEnergy - RangeConversion(fRange);
-
-            if(fResultKillEnergy < 10.0f)
-                fResultKillEnergy = 10.0f;
-
-            fResultStunEnergy = m_iEnergy + fResultKillEnergy * m_fKillStunTransfer - StunLoss(fRange);
-            if(fResultKillEnergy < 15.0f)
-                fResultKillEnergy = 15.0f;
-
-            if(bShowLog) log("Bullet"$self$" Hit "$Other$" By :"$Instigator$" at location "$vHitLocation$" with energy : "$fResultKillEnergy$" : "$fResultKillEnergy);
-            otherPawn = R6Pawn(Other);
-            if ( otherPawn == none && Other.isA( 'R6ColBox' ) )
-            {
-                if ( R6ColBox( Other ).m_fFeetColBoxRadius != 0.f )
-                    otherPawn = R6Pawn(Other.Base.Base); 
-                else
-                    otherPawn = R6Pawn(Other.Base); 
-            }
-            instigatorPawn = R6Pawn(Instigator);
-				                     
-            // friendlyfire: if applicable, don't hurt friend/neutral pawn 
-			if( otherPawn != none
-                && 
-                (!instigatorPawn.m_bCanFireFriends  && instigatorPawn.IsFriend(otherPawn))  ||
-                (!instigatorPawn.m_bCanFireNeutrals && instigatorPawn.IsNeutral(otherPawn))
-              )
-            {
-				m_iEnergy = 0;
-            }
-			else
-            {
-                m_iEnergy = Other.R6TakeDamage(fResultKillEnergy, fResultStunEnergy, Instigator, vHitLocation,
-                    Velocity, m_iNoArmorModifier, m_iBulletGroupID);
-            }
-			if(( m_iEnergy == 0) || (m_szBulletType == "JHP"))
+	// End:0x2CC
+	if(__NFUN_119__(Other, Instigator))
+	{
+		// End:0x2A3
+		if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		{
+			fRange = __NFUN_225__(__NFUN_216__(Location, m_vSpawnedPosition));
+			__NFUN_183__(fRange, float(100));
+			fResultKillEnergy = __NFUN_175__(float(m_iEnergy), RangeConversion(fRange));
+			// End:0x72
+			if(__NFUN_176__(fResultKillEnergy, 10.0000000))
 			{
-                DeactivateBullet();
-		    }
-        }
-        if(bShowLog) log(Self@"Hit :"$Other.name);
-    }
+				fResultKillEnergy = 10.0000000;
+			}
+			fResultStunEnergy = __NFUN_175__(__NFUN_174__(float(m_iEnergy), __NFUN_171__(fResultKillEnergy, m_fKillStunTransfer)), StunLoss(fRange));
+			// End:0xB4
+			if(__NFUN_176__(fResultKillEnergy, 15.0000000))
+			{
+				fResultKillEnergy = 15.0000000;
+			}
+			// End:0x136
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Bullet", string(self)), " Hit "), string(Other)), " By :"), string(Instigator)), " at location "), string(vHitLocation)), " with energy : "), string(fResultKillEnergy)), " : "), string(fResultKillEnergy)));
+			}
+			OtherPawn = R6Pawn(Other);
+			// End:0x1C2
+			if(__NFUN_130__(__NFUN_114__(OtherPawn, none), Other.__NFUN_303__('R6ColBox')))
+			{
+				// End:0x1A9
+				if(__NFUN_181__(R6ColBox(Other).m_fFeetColBoxRadius, 0.0000000))
+				{
+					OtherPawn = R6Pawn(Other.Base.Base);					
+				}
+				else
+				{
+					OtherPawn = R6Pawn(Other.Base);
+				}
+			}
+			instigatorPawn = R6Pawn(Instigator);
+			// End:0x245
+			if(__NFUN_132__(__NFUN_130__(__NFUN_119__(OtherPawn, none), __NFUN_130__(__NFUN_129__(instigatorPawn.m_bCanFireFriends), instigatorPawn.IsFriend(OtherPawn))), __NFUN_130__(__NFUN_129__(instigatorPawn.m_bCanFireNeutrals), instigatorPawn.IsNeutral(OtherPawn))))
+			{
+				m_iEnergy = 0;				
+			}
+			else
+			{
+				m_iEnergy = Other.R6TakeDamage(int(fResultKillEnergy), int(fResultStunEnergy), Instigator, vHitLocation, Velocity, m_iNoArmorModifier, m_iBulletGroupID);
+			}
+			// End:0x2A3
+			if(__NFUN_132__(__NFUN_154__(m_iEnergy, 0), __NFUN_122__(m_szBulletType, "JHP")))
+			{
+				DeactivateBullet();
+			}
+		}
+		// End:0x2CC
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_168__(string(self), "Hit :"), string(Other.Name)));
+		}
+	}
+	return;
 }
 
 //============================================================================
 // function SpawnSFX - 
 //============================================================================
-simulated function SpawnSFX( class<R6WallHit> fxClass, vector vLocation, Rotator vRotation, Actor pSource, R6WallHit.EHitType eType )
+simulated function SpawnSFX(Class<R6WallHit> fxClass, Vector vLocation, Rotator vRotation, Actor pSource, R6WallHit.EHitType eType)
 {
-    local R6WallHit WallHitEffect;
+	local R6WallHit WallHitEffect;
 
-    if(fxClass!=none)
-    {
-        WallHitEffect = Spawn(fxClass, , , vLocation, vRotation);
-
-        // Check if you want to hear the bullet on the wall (For shotGun)
-        if (WallHitEffect != none)
-        {
-            if (m_BulletManager.AffectActor(m_iBulletGroupID, pSource) == false)
-            {
-                WallHitEffect.m_bPlayEffectSound = false;
-            }
-        }
-        WallHitEffect.m_eHitType = eType;
-    }
+	// End:0x74
+	if(__NFUN_119__(fxClass, none))
+	{
+		WallHitEffect = __NFUN_278__(fxClass,,, vLocation, vRotation);
+		// End:0x60
+		if(__NFUN_119__(WallHitEffect, none))
+		{
+			// End:0x60
+			if(__NFUN_242__(m_BulletManager.AffectActor(m_iBulletGroupID, pSource), false))
+			{
+				WallHitEffect.m_bPlayEffectSound = false;
+			}
+		}
+		WallHitEffect.m_eHitType = eType;
+	}
+	return;
 }
 
 //============================================================================
 // event HitWall  - 
 //============================================================================
-simulated event HitWall (vector vHitNormal, actor Wall)
+simulated event HitWall(Vector vHitNormal, Actor Wall)
 {
-    local eHitResult    eHitResult;
-    local class<R6WallHit>     CurrentHitEffect;
-    local class<R6WallHit>     ExitHitEffect;
-    local vector        vRealHitLocation;
-    local vector        vExitLocation;
-    local vector        vExitNormal;
+	local R6Bullet.eHitResult eHitResult;
+	local Class<R6WallHit> CurrentHitEffect, ExitHitEffect;
+	local Vector vRealHitLocation, vexitLocation, vexitNormal;
+	local int iInitialEnergy;
+	local Vector vRangeVector;
+	local float fDistance;
 
-    local INT           iInitialEnergy;
-    local vector        vRangeVector;
-    local FLOAT         fDistance;
-
-    iInitialEnergy = m_iEnergy;
-    eHitResult = BulletGoesThroughSurface(Wall, Location, Velocity, vRealHitLocation, vExitLocation, vExitNormal, CurrentHitEffect, ExitHitEffect);
-
-    if(Wall.IsA('R6InteractiveObject'))
-    {
-		vRangeVector = vRealHitLocation - m_vSpawnedPosition;
-		fDistance = VSize(vRangeVector) * 0.01;  //Centimeters to Meters;
-        Wall.R6TakeDamage(iInitialEnergy - RangeConversion(fDistance), 0, Instigator, vRealHitLocation, 
-                           Velocity, m_iPenetrationFactor, -1);
-    }
-
-    switch(eHitResult)
-    {
-        case HR_GoThrough:
-            //Spawn the impact effect
-            SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, HIT_Impact);
-            //Spawn the exit material
-            SpawnSFX(ExitHitEffect, vExitLocation, Rotator(vExitNormal), Wall, HIT_Exit);
-            //Set the bullet Location
-            if(!SetLocation(vExitLocation + vExitNormal*2))
-                DeactivateBullet();
-            break;
-        
-        case HR_Explode:
-            //bullet leaves a mark and is deactivated
-            //log("!!! Explode !!!");
-            SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, HIT_Impact);
-            DeactivateBullet();
-            break;
-            
-        case HR_Ricochet:
-            //bullet leaves a mark and is deactivated
-            //log("!!! Ricochet !!!" @ CurrentHitEffect);
-            SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, HIT_Ricochet);
-            DeactivateBullet();
-            break;
-
-        //usually Skybox and old textures have no material
-        case HR_NoMaterial:  
-            DeactivateBullet();
-            break;
-        
-        default:
-            log("!!! We have a serious problem HERE !!!");
-    }
+	iInitialEnergy = m_iEnergy;
+	eHitResult = __NFUN_2001__(Wall, Location, Velocity, vRealHitLocation, vexitLocation, vexitNormal, CurrentHitEffect, ExitHitEffect);
+	// End:0xE1
+	if(__NFUN_132__(__NFUN_132__(Wall.__NFUN_303__('R6InteractiveObject'), Wall.__NFUN_303__('R6MorphMeshActor')), Wall.__NFUN_303__('Mover')))
+	{
+		vRangeVector = __NFUN_216__(vRealHitLocation, m_vSpawnedPosition);
+		fDistance = __NFUN_171__(__NFUN_225__(vRangeVector), 0.0100000);
+		Wall.R6TakeDamage(int(__NFUN_175__(float(iInitialEnergy), RangeConversion(fDistance))), 0, Instigator, vRealHitLocation, Velocity, m_iPenetrationFactor, -1);
+	}
+	switch(eHitResult)
+	{
+		// End:0x14C
+		case 3:
+			SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, 0);
+			SpawnSFX(ExitHitEffect, vexitLocation, Rotator(vexitNormal), Wall, 2);
+			// End:0x149
+			if(__NFUN_129__(__NFUN_267__(__NFUN_215__(vexitLocation, __NFUN_212__(vexitNormal, float(2))))))
+			{
+				DeactivateBullet();
+			}
+			// End:0x1DF
+			break;
+		// End:0x178
+		case 1:
+			SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, 0);
+			DeactivateBullet();
+			// End:0x1DF
+			break;
+		// End:0x1A4
+		case 2:
+			SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, 1);
+			DeactivateBullet();
+			// End:0x1DF
+			break;
+		// End:0x1B2
+		case 0:
+			DeactivateBullet();
+			// End:0x1DF
+			break;
+		// End:0xFFFF
+		default:
+			__NFUN_231__("!!! We have a serious problem HERE !!!");
+			break;
+	}
+	return;
 }
 
-function FLOAT RangeConversion(FLOAT fRange)
+function float RangeConversion(float fRange)
 {
-    return fRange * fRange * m_fRangeConversionConst + m_fRangeConversionConst;
+	return __NFUN_174__(__NFUN_171__(__NFUN_171__(fRange, fRange), m_fRangeConversionConst), m_fRangeConversionConst);
+	return;
 }
 
-function FLOAT StunLoss(FLOAT fRange)
+function float StunLoss(float fRange)
 {
-    return fRange * fRange * m_fRangeConversionConst;
+	return __NFUN_171__(__NFUN_171__(fRange, fRange), m_fRangeConversionConst);
+	return;
 }
 
 defaultproperties
 {
-     m_iEnergy=100
-     m_iPenetrationFactor=1
-     m_fKillStunTransfer=0.010000
-     m_fRangeConversionConst=0.100000
-     m_fRange=100.000000
-     m_szAmmoName="R6Bullet"
-     m_szAmmoType="Normal"
-     m_szBulletType="JHP"
-     RemoteRole=ROLE_None
-     DrawType=DT_None
-     AmbientGlow=167
-     SoundPitch=100
-     bHidden=True
-     bStasis=True
-     bNetTemporary=True
-     bReplicateInstigator=True
-     m_bDeleteOnReset=True
-     bGameRelevant=True
-     bCollideActors=True
-     bCollideWorld=True
-     m_bDoPerBoneTrace=True
-     bBounce=True
-     SoundRadius=4.000000
-     NetPriority=2.500000
+	m_iEnergy=100
+	m_iPenetrationFactor=1
+	m_fKillStunTransfer=0.0100000
+	m_fRangeConversionConst=0.1000000
+	m_fRange=100.0000000
+	m_szAmmoName="R6Bullet"
+	m_szAmmoType="Normal"
+	m_szBulletType="JHP"
+	RemoteRole=0
+	DrawType=0
+	AmbientGlow=167
+	SoundPitch=100
+	bHidden=true
+	bStasis=true
+	bNetTemporary=true
+	bReplicateInstigator=true
+	m_bDeleteOnReset=true
+	bGameRelevant=true
+	bCollideActors=true
+	bCollideWorld=true
+	m_bDoPerBoneTrace=true
+	bBounce=true
+	SoundRadius=4.0000000
+	NetPriority=2.5000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function BulletGoesThroughSurface

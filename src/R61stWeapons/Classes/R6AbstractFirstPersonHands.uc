@@ -1,655 +1,844 @@
+//=============================================================================
+// R6AbstractFirstPersonHands - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //===============================================================================
 //  [R6AbstractFirstPersonHands] 
 //===============================================================================
+class R6AbstractFirstPersonHands extends R6AbstractFirstPersonWeapon
+ abstract;
 
-class R6AbstractFirstPersonHands extends R6AbstractFirstPersonWeapon 
-    abstract;
-
-var R6AbstractFirstPersonWeapon     AssociatedWeapon;
-var R6AbstractGadget				AssociatedGadget;
-var BOOL                            m_bPlayWaitAnim;        // hands are playing a waiting anim
-var BOOL                            m_bCanQuitOnAnimEnd;    // once this animation calls anim end qe can quit the state
-var BOOL                            m_bCannotPlayEmpty;     // If this is false, fireEmpty does not do anything
-var BOOL                            m_bInBurst;             // this is true while the hands are firing a burst
-var BOOL                            m_bBipodDeployed;       // use weapon bipod animation
-var BOOL                            bShowLog;
-var BOOL                            bPlayerWalking;
-
-var FLOAT                           m_fAnimAcceleration;
-
-var (R6HandAnimation)name m_HandFire;
-var (R6HandAnimation)name m_HandFireLast;
-var (R6HandAnimation)name m_HandBipodFire;
-var (R6HandAnimation)name m_HandReloadEmpty;
-var (R6HandAnimation)name m_HandBipodReloadEmpty;
-var (R6HandAnimation)name m_WaitAnim1;
-var (R6HandAnimation)name m_WaitAnim2;
-var (R6HandAnimation)name m_WalkAnim;
+var bool m_bPlayWaitAnim;  // hands are playing a waiting anim
+var bool m_bCanQuitOnAnimEnd;  // once this animation calls anim end qe can quit the state
+var bool m_bCannotPlayEmpty;  // If this is false, fireEmpty does not do anything
+var bool m_bInBurst;  // this is true while the hands are firing a burst
+var bool m_bBipodDeployed;  // use weapon bipod animation
+var bool bShowLog;
+var bool bPlayerWalking;
+var float m_fAnimAcceleration;
+var R6AbstractFirstPersonWeapon AssociatedWeapon;
+var R6AbstractGadget AssociatedGadget;
+var(R6HandAnimation) name m_HandFire;
+var(R6HandAnimation) name m_HandFireLast;
+var(R6HandAnimation) name m_HandBipodFire;
+var(R6HandAnimation) name m_HandReloadEmpty;
+var(R6HandAnimation) name m_HandBipodReloadEmpty;
+var(R6HandAnimation) name m_WaitAnim1;
+var(R6HandAnimation) name m_WaitAnim2;
+var(R6HandAnimation) name m_WalkAnim;
 
 function PostBeginPlay()
 {
-    if(!HasAnim('Fire'))
-    {
-        m_HandFire = 'Neutral';
-    }
-    if(!HasAnim('FireLast'))
-    {
-        m_HandFireLast = m_HandFire;
-    }
-
-    if(!HasAnim('BipodFire'))
-    {
-        m_HandBipodFire=m_HandFire;
-    }
-    
-    if(!HasAnim('ReloadEmpty'))
-    {
-        m_HandReloadEmpty = 'Reload';
-    }
-    if(!HasAnim('BipodReloadEmpty'))
-    {
-        m_HandBipodReloadEmpty = 'BipodReload';
-    }
-
-    if(!HasAnim('Wait01'))
-    {
-        m_WaitAnim1 = 'Wait_c';
-    }
-    if(!HasAnim('Wait02'))
-    {
-        m_WaitAnim2 = m_WaitAnim1;
-    }
-    if(!HasAnim('walk_c'))
-    {
-        m_WalkAnim = 'Wait_c';
-    }
-
-    Super.PostBeginPlay();
+	// End:0x18
+	if(__NFUN_129__(__NFUN_263__('Fire')))
+	{
+		m_HandFire = 'Neutral';
+	}
+	// End:0x30
+	if(__NFUN_129__(__NFUN_263__('FireLast')))
+	{
+		m_HandFireLast = m_HandFire;
+	}
+	// End:0x48
+	if(__NFUN_129__(__NFUN_263__('BipodFire')))
+	{
+		m_HandBipodFire = m_HandFire;
+	}
+	// End:0x60
+	if(__NFUN_129__(__NFUN_263__('ReloadEmpty')))
+	{
+		m_HandReloadEmpty = 'Reload';
+	}
+	// End:0x78
+	if(__NFUN_129__(__NFUN_263__('BipodReloadEmpty')))
+	{
+		m_HandBipodReloadEmpty = 'BipodReload';
+	}
+	// End:0x90
+	if(__NFUN_129__(__NFUN_263__('Wait01')))
+	{
+		m_WaitAnim1 = 'Wait_c';
+	}
+	// End:0xA8
+	if(__NFUN_129__(__NFUN_263__('Wait02')))
+	{
+		m_WaitAnim2 = m_WaitAnim1;
+	}
+	// End:0xC0
+	if(__NFUN_129__(__NFUN_263__('walk_c')))
+	{
+		m_WalkAnim = 'Wait_c';
+	}
+	super.PostBeginPlay();
+	return;
 }
 
 function ResetNeutralAnim()
 {
-    AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
-    AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
+	AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
+	AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
+	return;
 }
 
 function PlayWalkingAnimation()
 {
-    if(IsInState('Waiting'))
-    {
-        LoopAnim(m_WalkAnim);
-    }
-    bPlayerWalking=true;
+	// End:0x13
+	if(__NFUN_281__('Waiting'))
+	{
+		__NFUN_260__(m_WalkAnim);
+	}
+	bPlayerWalking = true;
+	return;
 }
 
 function StopWalkingAnimation()
 {
-    if(IsInState('Waiting'))
-    {
-        LoopAnim('Wait_c');
-    }
-    bPlayerWalking=false;
+	// End:0x13
+	if(__NFUN_281__('Waiting'))
+	{
+		__NFUN_260__('Wait_c');
+	}
+	bPlayerWalking = false;
+	return;
 }
 
 simulated function SetAssociatedWeapon(R6AbstractFirstPersonWeapon AWeapon)
 {
-    AssociatedWeapon = AWeapon;
+	AssociatedWeapon = AWeapon;
+	return;
 }
 
 simulated function SetAssociatedGadget(R6AbstractGadget AGadget)
 {
 	AssociatedGadget = AGadget;
+	return;
 }
 
 state Reloading
 {
-    function EndState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  Leaving State Reloading");
-    }
-    simulated event AnimEnd(int Channel)
-    {
-        //this event is called only in FirstPerson
-        if(Channel == 0)
-        {
-            //Weapon Animation
-            if(m_bBipodDeployed)
-            {
-                AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_BipodNeutral;
-            }
-            else
-            {
-                AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
-            }
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
+	function EndState()
+	{
+		// End:0x39
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Leaving State Reloading"));
+		}
+		return;
+	}
 
-            // returning to normal state
-            Gotostate('Waiting');
-            AssociatedWeapon.GotoState('');
-            R6AbstractWeapon(Owner).FirstPersonAnimOver();
-        }
-    }
+	simulated event AnimEnd(int Channel)
+	{
+		// End:0x96
+		if(__NFUN_154__(Channel, 0))
+		{
+			// End:0x34
+			if(m_bBipodDeployed)
+			{
+				AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_BipodNeutral;				
+			}
+			else
+			{
+				AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
+			}
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
+			__NFUN_113__('Waiting');
+			AssociatedWeapon.__NFUN_113__('None');
+			R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		}
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  Begin State Reloading");
-        R6Pawn(Owner.Owner).ServerPlayReloadAnimAgain();
-        AssociatedWeapon.GotoState('Reloading');
-        if(m_bReloadEmpty == true)
-        {
-            if(m_bBipodDeployed)
-            {
-                PlayAnim(m_HandBipodReloadEmpty);
-                AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodReloadEmpty);
-            }
-            else
-            {
-                PlayAnim(m_HandReloadEmpty);
-                AssociatedWeapon.PlayAnim(AssociatedWeapon.m_ReloadEmpty);
-            }
-            m_bReloadEmpty=FALSE;
-        }
-        else
-        {
-            if(m_bBipodDeployed)
-            {
-                PlayAnim('BipodReload');
-                AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodReload);
-            }
-            else
-            {
-                PlayAnim('Reload');
-                AssociatedWeapon.PlayAnim(AssociatedWeapon.m_Reload);
-            } 
-        }
-    }
+	simulated function BeginState()
+	{
+		// End:0x37
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Begin State Reloading"));
+		}
+		R6Pawn(Owner.Owner).ServerPlayReloadAnimAgain();
+		AssociatedWeapon.__NFUN_113__('Reloading');
+		// End:0x13B
+		if(__NFUN_242__(m_bReloadEmpty, true))
+		{
+			// End:0xD6
+			if(m_bBipodDeployed)
+			{
+				__NFUN_259__(m_HandBipodReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);				
+			}
+			else
+			{
+				__NFUN_259__(m_HandReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_ReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+			}
+			m_bReloadEmpty = false;			
+		}
+		else
+		{
+			// End:0x1A1
+			if(m_bBipodDeployed)
+			{
+				__NFUN_259__('BipodReload', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodReload, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);				
+			}
+			else
+			{
+				__NFUN_259__('Reload', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_Reload, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+			}
+		}
+		return;
+	}
+	stop;
 }
 
-//Discard weapon is when a character is changing weapon, then drawtype is set to None
 state DiscardWeapon
 {
-    simulated event AnimEnd(int Channel)
-    {
-        if(bShowLog)log("HANDS - "$self$" -  "$self$" -   IN:"@self@"::DiscardWeapon::AnimEnd()");
-		if(Owner == none)
+	simulated event AnimEnd(int Channel)
+	{
+		// End:0x56
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  "), string(self)), " -   IN:"), string(self)), "::DiscardWeapon::AnimEnd()"));
+		}
+		// End:0x63
+		if(__NFUN_114__(Owner, none))
+		{
 			return;
-		
-        if(Channel == 0)
-        {
-            //Hide this weapon.
-            SetDrawType(DT_None);
-            R6AbstractWeapon(Owner).FirstPersonAnimOver();
-        }
-//        if(bShowLog)log("HANDS - "$self$" -  OUT:"@self@"::DiscardWeapon::AnimEnd()");
-    }
+		}
+		// End:0x8A
+		if(__NFUN_154__(Channel, 0))
+		{
+			SetDrawType(0);
+			R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		}
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  IN:"@self@"::DiscardWeapon::BeginState()");
-
-        Owner.Owner.PlaySound(R6AbstractWeapon(Owner).m_UnEquipSnd, SLOT_SFX);
-
-        if(m_bBipodDeployed)
-        {
-            PlayAnim('BipodEnd', R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration);
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodDiscard);
-        }
-        else
-        {
-            PlayAnim('End', R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration);
-        }
-//        if(bShowLog)log("HANDS - "$self$" -  OUT:"@self@"::DiscardWeapon::BeginState()");
-    }
+	simulated function BeginState()
+	{
+		// End:0x4B
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  IN:"), string(self)), "::DiscardWeapon::BeginState()"));
+		}
+		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_UnEquipSnd, 3);
+		// End:0xC7
+		if(m_bBipodDeployed)
+		{
+			__NFUN_259__('BipodEnd', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodDiscard);			
+		}
+		else
+		{
+			__NFUN_259__('End', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
+		}
+		return;
+	}
+	stop;
 }
 
 state RaiseWeapon
 {
-    simulated event AnimEnd(int Channel)
-    {
-        if(Channel == 0)
-        {
-            Gotostate('Waiting');
-            R6AbstractWeapon(Owner).FirstPersonAnimOver();
-        }
-    }
-    
-    simulated function BeginState()
-    {
-        //Draw the weapon.
-        if(bShowLog) log("HANDS - "$self$" -  RaiseWeapon, Animation Begin");
-        SetDrawType(DT_Mesh);
+	simulated event AnimEnd(int Channel)
+	{
+		// End:0x26
+		if(__NFUN_154__(Channel, 0))
+		{
+			__NFUN_113__('Waiting');
+			R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		}
+		return;
+	}
 
-        m_bBipodDeployed = R6Pawn(Owner.Owner).m_bIsProne && R6AbstractWeapon(Owner).GotBipod();
-        AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
-
-        Owner.Owner.PlaySound(R6AbstractWeapon(Owner).m_EquipSnd, SLOT_SFX);
-
-
-        if(m_bBipodDeployed)
-        {
-            PlayAnim('BipodBegin',R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration);
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodRaise);
-        }
-        else
-        {
-            PlayAnim('Begin', R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration);
-        }
-    }
+	simulated function BeginState()
+	{
+		// End:0x3E
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  RaiseWeapon, Animation Begin"));
+		}
+		SetDrawType(2);
+		m_bBipodDeployed = __NFUN_130__(R6Pawn(Owner.Owner).m_bIsProne, R6AbstractWeapon(Owner).GotBipod());
+		AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
+		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_EquipSnd, 3);
+		// End:0x115
+		if(m_bBipodDeployed)
+		{
+			__NFUN_259__('BipodBegin', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodRaise);			
+		}
+		else
+		{
+			__NFUN_259__('Begin', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
+		}
+		return;
+	}
+	stop;
 }
 
-//Weapon is still active, character needs his two hands.
 state PutWeaponDown
 {
-    simulated event AnimEnd(int Channel)
-    {
-        if(Channel == 0)
-        {
-            //Hide this weapon.
-            SetDrawType(DT_None);
-            R6AbstractWeapon(Owner).FirstPersonAnimOver();
-        }
-    }
+	simulated event AnimEnd(int Channel)
+	{
+		// End:0x27
+		if(__NFUN_154__(Channel, 0))
+		{
+			SetDrawType(0);
+			R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		}
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        Owner.Owner.PlaySound(R6AbstractWeapon(Owner).m_UnEquipSnd, SLOT_SFX);
-
-        if(m_bBipodDeployed)
-        {
-            PlayAnim('BipodEnd');
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodDiscard, R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration);
-        }
-        else
-        {
-            PlayAnim('End', R6Pawn(Owner.Owner).ArmorSkillEffect() * 1.5);
-        }
-    }
+	simulated function BeginState()
+	{
+		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_UnEquipSnd, 3);
+		// End:0x7C
+		if(m_bBipodDeployed)
+		{
+			__NFUN_259__('BipodEnd');
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodDiscard, __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));			
+		}
+		else
+		{
+			__NFUN_259__('End', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), 1.5000000));
+		}
+		return;
+	}
+	stop;
 }
 
 state BringWeaponUp
 {
-    simulated function BeginState()
-    {
-        //Draw the weapon.
-        SetDrawType(DT_Mesh);
+	simulated function BeginState()
+	{
+		SetDrawType(2);
+		m_bBipodDeployed = __NFUN_130__(R6Pawn(Owner.Owner).m_bIsProne, R6AbstractWeapon(Owner).GotBipod());
+		AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
+		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_EquipSnd, 3);
+		// End:0xD7
+		if(m_bBipodDeployed)
+		{
+			__NFUN_259__('BipodBegin');
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodRaise, __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));			
+		}
+		else
+		{
+			__NFUN_259__('Begin', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), 1.5000000));
+		}
+		return;
+	}
 
-        m_bBipodDeployed = R6Pawn(Owner.Owner).m_bIsProne && R6AbstractWeapon(Owner).GotBipod();
-        AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
-
-        Owner.Owner.PlaySound(R6AbstractWeapon(Owner).m_EquipSnd, SLOT_SFX);
-
-        if(m_bBipodDeployed)
-        {
-            PlayAnim('BipodBegin');
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodRaise, R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration);
-        }
-        else
-        {
-            PlayAnim('Begin', R6Pawn(Owner.Owner).ArmorSkillEffect() * 1.5);
-        }
-    }
-
-    simulated event AnimEnd(int Channel)
-    {
-        if(Channel == 0)
-        {
-            Gotostate('Waiting');
-            R6AbstractWeapon(Owner).FirstPersonAnimOver();
-        }
-    }
+	simulated event AnimEnd(int Channel)
+	{
+		// End:0x26
+		if(__NFUN_154__(Channel, 0))
+		{
+			__NFUN_113__('Waiting');
+			R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		}
+		return;
+	}
+	stop;
 }
 
 auto state Waiting
 {
-    simulated function Timer()
-    {
-        local INT WhichAnim;
-        local INT HowLongBeforeWait;
+	simulated function Timer()
+	{
+		local int WhichAnim, HowLongBeforeWait;
 
-        if(DrawType != DT_None)
-        {
-            StopAnimating();
-            WhichAnim = rand(10);
-            if(WhichAnim < 5)
-            {
-                PlayAnim(m_WaitAnim1);
-            }
-            else
-            {
-                PlayAnim(m_WaitAnim2);
-            }
-            m_bPlayWaitAnim = true;
+		// End:0x60
+		if(__NFUN_155__(int(DrawType), int(0)))
+		{
+			StopAnimating();
+			WhichAnim = __NFUN_167__(10);
+			// End:0x37
+			if(__NFUN_150__(WhichAnim, 5))
+			{
+				__NFUN_259__(m_WaitAnim1);				
+			}
+			else
+			{
+				__NFUN_259__(m_WaitAnim2);
+			}
+			m_bPlayWaitAnim = true;
+			HowLongBeforeWait = __NFUN_167__(10);
+			__NFUN_280__(float(__NFUN_146__(HowLongBeforeWait, 5)), false);
+		}
+		return;
+	}
 
-            HowLongBeforeWait = rand(10);
-            SetTimer(HowLongBeforeWait + 5, false);
-        }
-    }
+	event AnimEnd(int iChannel)
+	{
+		// End:0x47
+		if(__NFUN_242__(m_bPlayWaitAnim, true))
+		{
+			m_bPlayWaitAnim = false;
+			// End:0x28
+			if(m_bBipodDeployed)
+			{
+				__NFUN_260__('Bipod_nt');				
+			}
+			else
+			{
+				// End:0x3F
+				if(__NFUN_242__(bPlayerWalking, true))
+				{
+					__NFUN_260__(m_WalkAnim);					
+				}
+				else
+				{
+					__NFUN_260__('Wait_c');
+				}
+			}
+		}
+		return;
+	}
 
-    event AnimEnd(INT iChannel)
-    {
-        if(m_bPlayWaitAnim == true)
-        {
-            m_bPlayWaitAnim = false;
-            if(m_bBipodDeployed)
-            {
-                LoopAnim('Bipod_nt');
-            }
-            else if (bPlayerWalking == true)
-            {
-                LoopAnim(m_WalkAnim);
-            }
-            else
-            {
-                LoopAnim('Wait_c');
-            }
-        }
-    }
+	function StopTimer()
+	{
+		__NFUN_280__(0.0000000, false);
+		return;
+	}
 
-    function StopTimer()
-    {
-        SetTimer(0, false);
-    }
+	function StartTimer()
+	{
+		local int HowLongBeforeWait;
 
-    function StartTimer()
-    {
-        local INT HowLongBeforeWait;
-        if(DrawType != DT_None)
-        {
-            HowLongBeforeWait = rand(10);
-            SetTimer(HowLongBeforeWait + 5, false);
-        }
-    }
+		// End:0x29
+		if(__NFUN_155__(int(DrawType), int(0)))
+		{
+			HowLongBeforeWait = __NFUN_167__(10);
+			__NFUN_280__(float(__NFUN_146__(HowLongBeforeWait, 5)), false);
+		}
+		return;
+	}
 
-    simulated function EndState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  Waiting::EndState ");
-        StopAnimating();
-        StopTimer();
-    }
+	simulated function EndState()
+	{
+		// End:0x34
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Waiting::EndState "));
+		}
+		StopAnimating();
+		StopTimer();
+		return;
+	}
 
-    //The original BeginState, for wait Anims()
-    simulated function BeginState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  Waiting::BeginState ");
-        if(m_bBipodDeployed)
-        {
-            LoopAnim('Bipod_nt');
-        }
-        else if (bPlayerWalking == true)
-        {
-            LoopAnim(m_WalkAnim);
-        }
-        else
-        {
-            LoopAnim('Wait_c');
-        }
-        StartTimer();
-    }
+	simulated function BeginState()
+	{
+		// End:0x36
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Waiting::BeginState "));
+		}
+		// End:0x4A
+		if(m_bBipodDeployed)
+		{
+			__NFUN_260__('Bipod_nt');			
+		}
+		else
+		{
+			// End:0x61
+			if(__NFUN_242__(bPlayerWalking, true))
+			{
+				__NFUN_260__(m_WalkAnim);				
+			}
+			else
+			{
+				__NFUN_260__('Wait_c');
+			}
+		}
+		StartTimer();
+		return;
+	}
+	stop;
 }
 
 simulated state FiringWeapon
 {
-    function EndState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  Leaving State FiringWeapon");
-        //Stop blending
-        AnimBlendParams(1, 0);
-    
-    }
-    
-    function AnimEnd(INT iChannel)
-    {
-        if(iChannel != 0 || (owner == none))
-        {
-            return;
-        }
+	function EndState()
+	{
+		// End:0x3C
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Leaving State FiringWeapon"));
+		}
+		AnimBlendParams(1, 0.0000000);
+		return;
+	}
 
-        if(bShowLog)log("HANDS - "$self$" -  FiringWeapon::AnimEnd Can quit: "$m_bCanQuitOnAnimEnd$" In burst "$m_bInBurst);
+	function AnimEnd(int iChannel)
+	{
+		// End:0x1A
+		if(__NFUN_132__(__NFUN_155__(iChannel, 0), __NFUN_114__(Owner, none)))
+		{
+			return;
+		}
+		// End:0x7E
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  FiringWeapon::AnimEnd Can quit: "), string(m_bCanQuitOnAnimEnd)), " In burst "), string(m_bInBurst)));
+		}
+		// End:0x131
+		if(__NFUN_242__(m_bCanQuitOnAnimEnd, true))
+		{
+			// End:0xD5
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  EndAnim, goto wait Owner : "), string(R6AbstractWeapon(Owner))));
+			}
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
+			AnimBlendParams(1, 0.0000000);
+			__NFUN_113__('Waiting');
+			R6AbstractWeapon(Owner).FirstPersonAnimOver();
+			m_bCanQuitOnAnimEnd = false;
+			m_bCannotPlayEmpty = false;
+			m_bInBurst = false;			
+		}
+		else
+		{
+			// End:0x1BE
+			if(__NFUN_242__(m_bInBurst, true))
+			{
+				// End:0x172
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  EndAnim, loop Burst"));
+				}
+				AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
+				__NFUN_260__('Fireburst_c', R6AbstractWeapon(Owner).m_fFireAnimRate, 0.1000000);
+				AssociatedWeapon.LoopWeaponBurst();				
+			}
+			else
+			{
+				// End:0x1FC
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  EndAnim, playing fireburst_2"));
+				}
+				m_bCannotPlayEmpty = true;
+				m_bCanQuitOnAnimEnd = true;
+				AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
+				__NFUN_259__('Fireburst_e',, 0.1000000);
+				AssociatedWeapon.StopWeaponBurst();
+			}
+		}
+		return;
+	}
 
-        if(m_bCanQuitOnAnimEnd == true)
-        {
-            if(bShowLog) log("HANDS - "$self$" -  EndAnim, goto wait Owner : "$R6AbstractWeapon(Owner));
-            //Play the weapon animation
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
+	function StopFiring()
+	{
+		// End:0x2C
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  StopFiring"));
+		}
+		m_bInBurst = false;
+		AnimEnd(0);
+		return;
+	}
 
-            AnimBlendParams(1, 0);
-            GotoState('Waiting');
-            R6AbstractWeapon(Owner).FirstPersonAnimOver();
-            //Reset the variables for animations
-            m_bCanQuitOnAnimEnd=false;
-            m_bCannotPlayEmpty=false;
-            m_bInBurst=false;
-        }
-        else if(m_bInBurst == true)
-        {
-            if(bShowLog)log("HANDS - "$self$" -  EndAnim, loop Burst");
-            //Loop the fireburst if InBurst is true
-            AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-            LoopAnim('FireBurst_c', R6AbstractWeapon(Owner).m_fFireAnimRate, 0.1);
-            AssociatedWeapon.LoopWeaponBurst();
-        }
-        else
-        {
-            if(bShowLog)log("HANDS - "$self$" -  EndAnim, playing fireburst_2");
-            m_bCannotPlayEmpty = true;
-            m_bCanQuitOnAnimEnd = true;
-            AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-            PlayAnim('FireBurst_e',,0.1);
-            AssociatedWeapon.StopWeaponBurst();
-        }
-    }
+	function InterruptFiring()
+	{
+		// End:0x31
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  InterruptFiring"));
+		}
+		m_bCanQuitOnAnimEnd = true;
+		m_bInBurst = false;
+		AnimEnd(0);
+		return;
+	}
 
-    function StopFiring()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  StopFiring");
-        //Stop the burst loop animation
-        m_bInBurst = false;
-        AnimEnd(0);
-    }
+	function FireEmpty()
+	{
+		// End:0x2C
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Fire Empty"));
+		}
+		// End:0x51
+		if(__NFUN_129__(m_bBipodDeployed))
+		{
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_FireEmpty);
+		}
+		// End:0x6D
+		if(__NFUN_242__(m_bCannotPlayEmpty, false))
+		{
+			__NFUN_259__('FireEmpty');
+			m_bCanQuitOnAnimEnd = true;
+		}
+		return;
+	}
 
-    function InterruptFiring()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  InterruptFiring");
-        //interrupt the 3 bullets burst animation
-        m_bCanQuitOnAnimEnd = true;
-        m_bInBurst = false;
-        AnimEnd(0);
-    }
+	function FireLastBullet()
+	{
+		// End:0x30
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  FireLastBullet"));
+		}
+		AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
+		// End:0x7B
+		if(m_bBipodDeployed)
+		{
+			__NFUN_259__(m_HandBipodFire);
+			AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_BipodNeutral;			
+		}
+		else
+		{
+			__NFUN_259__(m_HandFireLast);
+			// End:0xB7
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_112__("New neutral anim is: ", string(AssociatedWeapon.m_Empty)));
+			}
+			AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Empty;
+			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_FireLast);
+		}
+		m_bCanQuitOnAnimEnd = true;
+		return;
+	}
 
-    function FireEmpty()
-    {
-        if(bShowLog) log("HANDS - "$self$" -  Fire Empty");
-        //Weapon Animation
-        if(!m_bBipodDeployed)
-        {
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_FireEmpty);
-        }
+	function FireSingleShot()
+	{
+		// End:0x30
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  FireSingleShot"));
+		}
+		AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
+		// End:0x5E
+		if(m_bBipodDeployed)
+		{
+			__NFUN_259__(m_HandBipodFire);			
+		}
+		else
+		{
+			__NFUN_259__(m_HandFire);
+		}
+		m_bCanQuitOnAnimEnd = true;
+		return;
+	}
 
-        if(m_bCannotPlayEmpty == false)
-        {
-            PlayAnim('FireEmpty');
-            m_bCanQuitOnAnimEnd = true;
-        }
-    }
+	function FireThreeShots()
+	{
+		// End:0x72
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  FireThreeShots rate = "), string(R6AbstractWeapon(Owner).m_fFireAnimRate)), "Blend = "), string(R6AbstractWeapon(Owner).m_fFPBlend)));
+		}
+		AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
+		__NFUN_259__('Fireburst_b', R6AbstractWeapon(Owner).m_fFireAnimRate);
+		m_bCanQuitOnAnimEnd = false;
+		return;
+	}
 
-    function FireLastBullet()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  FireLastBullet");
-        //Blend With Anim playing in channel 1
-        AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-        if(m_bBipodDeployed)
-        {
-            PlayAnim(m_HandBipodFire);
-            AssociatedWeapon.m_WeaponNeutralAnim=AssociatedWeapon.m_BipodNeutral;
-        }
-        else
-        {
-            PlayAnim(m_HandFireLast);
-            if(bShowLog)log("New neutral anim is: "$AssociatedWeapon.m_Empty);
-            AssociatedWeapon.m_WeaponNeutralAnim=AssociatedWeapon.m_Empty;
-            AssociatedWeapon.PlayAnim(AssociatedWeapon.m_FireLast);
-        }
-        m_bCanQuitOnAnimEnd = true;
-    }
+	function StartBurst()
+	{
+		// End:0x70
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  StartBurst rate = "), string(R6AbstractWeapon(Owner).m_fFireAnimRate)), "  Blend = "), string(R6AbstractWeapon(Owner).m_fFPBlend)));
+		}
+		m_bCanQuitOnAnimEnd = false;
+		AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
+		__NFUN_259__('Fireburst_b', R6AbstractWeapon(Owner).m_fFireAnimRate);
+		m_bInBurst = true;
+		AssociatedWeapon.StartWeaponBurst();
+		return;
+	}
 
-    function FireSingleShot()
-    {
-        if(bShowLog) log("HANDS - "$self$" -  FireSingleShot");
-        //Blend With Anim playing in channel 1
-        AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-        if(m_bBipodDeployed)
-        {
-            PlayAnim(m_HandBipodFire);
-        }
-        else
-        {
-            PlayAnim(m_HandFire);
-        }
-        m_bCanQuitOnAnimEnd=true;
-    }
-
-    function FireThreeShots()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  FireThreeShots rate = "$R6AbstractWeapon(Owner).m_fFireAnimRate$"Blend = "$R6AbstractWeapon(Owner).m_fFPBlend);
-        //Blend With Anim playing in channel 1
-        AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-        PlayAnim('FireBurst_b', R6AbstractWeapon(Owner).m_fFireAnimRate);
-        m_bCanQuitOnAnimEnd=false;
-    }
-
-    function StartBurst()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  StartBurst rate = "$R6AbstractWeapon(Owner).m_fFireAnimRate$"  Blend = "$R6AbstractWeapon(Owner).m_fFPBlend);
-        //Blend With Anim playing in channel 1
-        m_bCanQuitOnAnimEnd=false;
-        AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-        PlayAnim('FireBurst_b', R6AbstractWeapon(Owner).m_fFireAnimRate);
-        m_bInBurst = true;
-        AssociatedWeapon.StartWeaponBurst();
-    }
-
-    function BeginState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  Begin Firing Anims");
-        //Start Looping in channel 0;
-        LoopAnim('Neutral',,,1);
-    }
+	function BeginState()
+	{
+		// End:0x34
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Begin Firing Anims"));
+		}
+		__NFUN_260__('Neutral',,, 1);
+		return;
+	}
+	stop;
 }
 
 state HandsDown
 {
-    simulated function EndState()
-    {
-        StopAnimating();
-        PlayAnim('OneHand_e');
-    }
+	simulated function EndState()
+	{
+		StopAnimating();
+		__NFUN_259__('OneHand_e');
+		return;
+	}
 
-    Event AnimEnd(INT iChannel)
-    {
-        LoopAnim('OneHand_nt');
-    }
+	event AnimEnd(int iChannel)
+	{
+		__NFUN_260__('OneHand_nt');
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        PlayAnim('OneHand_b');
-    }
+	simulated function BeginState()
+	{
+		__NFUN_259__('OneHand_b');
+		return;
+	}
+	stop;
 }
 
 state DeployBipod
 {
-    event AnimEnd(INT iChannel)
-    {
-        if(bShowLog)log("HANDS - "$self$" -  DeployBipod::AnimEnd");
-        GotoState('Waiting');
-        R6AbstractWeapon(Owner).FirstPersonAnimOver();
-    }
+	event AnimEnd(int iChannel)
+	{
+		// End:0x36
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  DeployBipod::AnimEnd"));
+		}
+		__NFUN_113__('Waiting');
+		R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  DeployBipod::BeginState");
-        PlayAnim('Bipod_b');
-        AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodDeploy);
-        m_bBipodDeployed = true;
-        AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
-        AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_BipodNeutral;
-    }
-    function EndState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  DeployBipod::EndState");
-    }
+	simulated function BeginState()
+	{
+		// End:0x39
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  DeployBipod::BeginState"));
+		}
+		__NFUN_259__('Bipod_b');
+		AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodDeploy);
+		m_bBipodDeployed = true;
+		AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
+		AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_BipodNeutral;
+		return;
+	}
+
+	function EndState()
+	{
+		// End:0x37
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  DeployBipod::EndState"));
+		}
+		return;
+	}
+	stop;
 }
 
 state CloseBipod
 {
-    simulated function EndState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  CloseBipod::EndState");
-        m_bBipodDeployed = false;
-        AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
-        AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
-    }
+	simulated function EndState()
+	{
+		// End:0x36
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  CloseBipod::EndState"));
+		}
+		m_bBipodDeployed = false;
+		AssociatedWeapon.m_bWeaponBipodDeployed = m_bBipodDeployed;
+		AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
+		return;
+	}
 
-    Event AnimEnd(INT iChannel)
-    {
-        if(bShowLog)log("HANDS - "$self$" -  CloseBipod::AnimEnd");
-        GotoState('Waiting');
-        R6AbstractWeapon(Owner).FirstPersonAnimOver();
-    }
+	event AnimEnd(int iChannel)
+	{
+		// End:0x35
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  CloseBipod::AnimEnd"));
+		}
+		__NFUN_113__('Waiting');
+		R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        if(bShowLog)log("HANDS - "$self$" -  CloseBipod::BeginState");
-        PlayAnim('Bipod_e');
-        AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodClose);
-    }
+	simulated function BeginState()
+	{
+		// End:0x38
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  CloseBipod::BeginState"));
+		}
+		__NFUN_259__('Bipod_e');
+		AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodClose);
+		return;
+	}
+	stop;
 }
 
 state ZoomIn
 {
-    Event AnimEnd(INT iChannel)
-    {
-        if(bShowLog)log("HANDS - "$self$" -  ZoomIn::AnimEnd");
-        GotoState('Waiting');
-        R6AbstractWeapon(Owner).FirstPersonAnimOver();
-    }
+	event AnimEnd(int iChannel)
+	{
+		// End:0x31
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  ZoomIn::AnimEnd"));
+		}
+		__NFUN_113__('Waiting');
+		R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        if(HasAnim('ZoomIn'))
-            PlayAnim('ZoomIn');
-        else
-            AnimEnd(0);
-    }
+	simulated function BeginState()
+	{
+		// End:0x16
+		if(__NFUN_263__('ZoomIn'))
+		{
+			__NFUN_259__('ZoomIn');			
+		}
+		else
+		{
+			AnimEnd(0);
+		}
+		return;
+	}
+	stop;
 }
 
 state ZoomOut
 {
-    Event AnimEnd(INT iChannel)
-    {
-        LoopAnim(AssociatedWeapon.m_WeaponNeutralAnim);
-        GotoState('Waiting');
-        R6AbstractWeapon(Owner).FirstPersonAnimOver();
-    }
+	event AnimEnd(int iChannel)
+	{
+		__NFUN_260__(AssociatedWeapon.m_WeaponNeutralAnim);
+		__NFUN_113__('Waiting');
+		R6AbstractWeapon(Owner).FirstPersonAnimOver();
+		return;
+	}
 
-    simulated function BeginState()
-    {
-        if(HasAnim('ZoomOut'))
-            PlayAnim('ZoomOut');
-        else
-            AnimEnd(0);
-    }
+	simulated function BeginState()
+	{
+		// End:0x16
+		if(__NFUN_263__('ZoomOut'))
+		{
+			__NFUN_259__('ZoomOut');			
+		}
+		else
+		{
+			AnimEnd(0);
+		}
+		return;
+	}
+	stop;
 }
 
 defaultproperties
 {
-     m_fAnimAcceleration=1.200000
-     m_HandFire="Fire"
-     m_HandFireLast="FireLast"
-     m_HandBipodFire="BipodFire"
-     m_HandReloadEmpty="ReloadEmpty"
-     m_HandBipodReloadEmpty="BipodReloadEmpty"
-     m_WaitAnim1="Wait01"
-     m_WaitAnim2="Wait02"
-     m_WalkAnim="walk_c"
-     bHidden=True
+	m_fAnimAcceleration=1.2000000
+	m_HandFire="Fire"
+	m_HandFireLast="FireLast"
+	m_HandBipodFire="BipodFire"
+	m_HandReloadEmpty="ReloadEmpty"
+	m_HandBipodReloadEmpty="BipodReloadEmpty"
+	m_WaitAnim1="Wait01"
+	m_WaitAnim2="Wait02"
+	m_WalkAnim="walk_c"
+	bHidden=true
 }

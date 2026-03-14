@@ -1,50 +1,48 @@
 //=============================================================================
+// R6WithWeaponDotReticule - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WithWeaponDotReticule.uc : Simple cross reticule with dot in the middle when zooming
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/27 * Eric Begin				- Creation
 //=============================================================================
-class R6WithWeaponDotReticule extends R6WithWeaponReticule;
+class R6WithWeaponDotReticule extends R6WithWeaponReticule
+	config(User)
+ notplaceable;
 
-simulated function PostRender( canvas C)
+simulated function PostRender(Canvas C)
 {
-	local	R6PlayerController  player;
-	local	Pawn				pawnOwner;
+	local R6PlayerController Player;
+	local Pawn pawnOwner;
+	local float fCenterOffsetX, fCenterOffsetY;
 
-    // In 640x480, we offset the center by 1 pixel, the following variable are use to offset the center
-    // of the reticule depending of the current resolution
-    local FLOAT fCenterOffsetX;
-    local FLOAT fCenterOffsetY;
-    
-	// Draw in the middle of the screen
-    super.PostRender(C);
-
+	super.PostRender(C);
 	pawnOwner = Pawn(Owner);
-	if(pawnOwner == none || pawnOwner.controller == none)
+	// End:0x3E
+	if(__NFUN_132__(__NFUN_114__(pawnOwner, none), __NFUN_114__(pawnOwner.Controller, none)))
+	{
 		return;
-
-	player = R6PlayerController(pawnOwner.controller);
-    if(player != none && player.m_bHelmetCameraOn)
-    {        
+	}
+	Player = R6PlayerController(pawnOwner.Controller);
+	// End:0x1BC
+	if(__NFUN_130__(__NFUN_119__(Player, none), Player.m_bHelmetCameraOn))
+	{
 		SetReticuleInfo(C);
-        C.Style = ERenderStyle.STY_Normal;
-
-        // Reticule Offset from the center of the screen (based on 640x480)
-        fCenterOffsetX = C.SizeX/640.0f;
-        fCenterOffsetY = C.SizeY/480.0f;
-
-        // the Dot
-	    C.SetPos(m_fReticuleOffsetX - 1.0 + fCenterOffsetX, m_fReticuleOffsetY - 2.0 + fCenterOffsetY);
-	    C.DrawRect(m_LineTexture, 3 , 1 );
-	    C.SetPos(m_fReticuleOffsetX - 2.0 + fCenterOffsetX, m_fReticuleOffsetY - 1.0 + fCenterOffsetY);
-	    C.DrawRect(m_LineTexture, 5 , 3 );
-	    C.SetPos(m_fReticuleOffsetX - 1.0 + fCenterOffsetX, m_fReticuleOffsetY + 2.0 + fCenterOffsetY);
-	    C.DrawRect(m_LineTexture, 3 , 1 );
-    }
-
+		C.Style = 1;
+		fCenterOffsetX = __NFUN_172__(float(C.SizeX), 640.0000000);
+		fCenterOffsetY = __NFUN_172__(float(C.SizeY), 480.0000000);
+		C.__NFUN_2623__(__NFUN_174__(__NFUN_175__(m_fReticuleOffsetX, 1.0000000), fCenterOffsetX), __NFUN_174__(__NFUN_175__(m_fReticuleOffsetY, 2.0000000), fCenterOffsetY));
+		C.DrawRect(m_LineTexture, 3.0000000, 1.0000000);
+		C.__NFUN_2623__(__NFUN_174__(__NFUN_175__(m_fReticuleOffsetX, 2.0000000), fCenterOffsetX), __NFUN_174__(__NFUN_175__(m_fReticuleOffsetY, 1.0000000), fCenterOffsetY));
+		C.DrawRect(m_LineTexture, 5.0000000, 3.0000000);
+		C.__NFUN_2623__(__NFUN_174__(__NFUN_175__(m_fReticuleOffsetX, 1.0000000), fCenterOffsetX), __NFUN_174__(__NFUN_174__(m_fReticuleOffsetY, 2.0000000), fCenterOffsetY));
+		C.DrawRect(m_LineTexture, 3.0000000, 1.0000000);
+	}
+	return;
 }
 
-defaultproperties
-{
-}

@@ -1,4 +1,10 @@
 //=============================================================================
+// R6Reticule - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6Reticule.uc : Base class of R6 reticules
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,111 +12,80 @@
 //    2001/05/02 * Aristomenis Kolokathis	- Creation
 //    2001/08/26 * Eric Begin				- New reticule system
 //=============================================================================
-class R6Reticule extends actor
-    native
-	config(user)
-    abstract;
-
-var FLOAT m_fAccuracy; // accuracy adjustement: only used for to modifie the view
+class R6Reticule extends Actor
+	abstract
+	native
+	config(User)
+ notplaceable;
 
 // Those variables are use to place the non-functionnal (Fixed) part of the reticule
-var () INT m_iNonFunctionnalX;
-var () INT m_iNonFunctionnalY;
-
-var config Color    m_Color;
-var     FLOAT       m_fZoomScale;  // the scale to apply when zooming (helmet camera)
-
-var     FLOAT       m_fReticuleOffsetX;
-var     FLOAT       m_fReticuleOffsetY;
-
-var		BOOL		m_bIdentifyCharacter;
-var		BOOL		m_bAimingAtFriendly;
-var		BOOL		m_bShowNames;
-var		string		m_CharacterName;
-var		font		m_SmallFont_14pt;
-
+var() int m_iNonFunctionnalX;
+var() int m_iNonFunctionnalY;
+var bool m_bIdentifyCharacter;
+var bool m_bAimingAtFriendly;
+var bool m_bShowNames;
+var float m_fAccuracy;  // accuracy adjustement: only used for to modifie the view
+var float m_fZoomScale;  // the scale to apply when zooming (helmet camera)
+var float m_fReticuleOffsetX;
+var float m_fReticuleOffsetY;
+var Font m_SmallFont_14pt;
+var config Color m_color;
+var string m_CharacterName;
 
 // Speed gives us the current speed.
-simulated function PostRender( canvas C)
+simulated function PostRender(Canvas C)
 {
-    // Draw in the middle of the screen
-	m_iNonFunctionnalX = C.HalfClipX;
-	m_iNonFunctionnalY = C.HalfClipY;
-
-	C.SetDrawColor(m_Color.R, m_Color.G, m_Color.B);
-
-	C.SetPos(m_iNonFunctionnalX, m_iNonFunctionnalY);
-	C.DrawText("(NO RETICULE)");
+	m_iNonFunctionnalX = int(C.HalfClipX);
+	m_iNonFunctionnalY = int(C.HalfClipY);
+	C.__NFUN_2626__(m_color.R, m_color.G, m_color.B);
+	C.__NFUN_2623__(float(m_iNonFunctionnalX), float(m_iNonFunctionnalY));
+	C.__NFUN_465__("(NO RETICULE)");
+	return;
 }
 
 simulated function SetReticuleInfo(Canvas C)
 {
-    local color aColor;
-    local R6GameOptions GameOptions;
+	local Color aColor;
+	local R6GameOptions GameOptions;
 
-	C.SetDrawColor(m_Color.R, m_Color.G, m_Color.B);
-
-    GameOptions = GetGameOptions();	
-
-    if(m_bAimingAtFriendly)
-    {
-        aColor = GameOptions.m_reticuleFriendColour;
-        C.SetDrawColor(aColor.R, aColor.G, aColor.B ); 
-    }
+	C.__NFUN_2626__(m_color.R, m_color.G, m_color.B);
+	GameOptions = __NFUN_1009__();
+	// End:0x7A
+	if(m_bAimingAtFriendly)
+	{
+		aColor = GameOptions.m_reticuleFriendColour;
+		C.__NFUN_2626__(aColor.R, aColor.G, aColor.B);
+	}
+	return;
 }
 
 simulated function SetIdentificationReticule(Canvas C)
 {
-	local FLOAT fStrSizeX, fStrSizeY;
-	local INT X, Y;
+	local float fStrSizeX, fStrSizeY;
+	local int X, Y;
 
-    if(m_bIdentifyCharacter && m_bShowNames)
-    {
-        C.UseVirtualSize(true, 640, 480);
-	    X = C.HalfClipX;
-	    Y = C.HalfClipY;
-	    C.Font = m_SmallFont_14pt; 
-	    C.StrLen( m_CharacterName, fStrSizeX, fStrSizeY );
-	    C.SetPos( X - fStrSizeX/2, Y + 24 );
-	    C.DrawText( m_CharacterName );
-    }
+	// End:0xC2
+	if(__NFUN_130__(m_bIdentifyCharacter, m_bShowNames))
+	{
+		C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+		X = int(C.HalfClipX);
+		Y = int(C.HalfClipY);
+		C.Font = m_SmallFont_14pt;
+		C.__NFUN_464__(m_CharacterName, fStrSizeX, fStrSizeY);
+		C.__NFUN_2623__(__NFUN_175__(float(X), __NFUN_172__(fStrSizeX, float(2))), float(__NFUN_146__(Y, 24)));
+		C.__NFUN_465__(m_CharacterName);
+	}
+	return;
 }
-
-/*
-////////////////////////////////////////////////////////////////////////////////
-// UpdateReticule( R6PlayerController r6Pawn, FLOAT fNewAccuracy )
-//  - update the reticule accuracy and 
-//  - set the zoom scale of the reticule
-//  R6PlayerController ThePlayerController   : the controller who owns the reticule
-//  FLOAT fNewAccuracy                       : the new accuracy absolute (not adjusted)
-////////////////////////////////////////////////////////////////////////////////
-simulated function UpdateReticule( R6PlayerController ThePlayerController, FLOAT fNewAccuracy )
-{
-    if(ThePlayerController != none)
-    {
-        // helmet camera not activated && not yet at the desired FOV value
-        if ( (!ThePlayerController.m_bHelmetCameraOn && 
-              ThePlayerController.default.desiredFOV == ThePlayerController.FOVangle) ||
-             (ThePlayerController.Pawn.EngineWeapon.IsSniperRifle() == TRUE ))
-        {
-            m_fZoomScale = 1;   // 1 = default scale
-        }
-        else
-        {
-            // set the reticule scale based on the interpolation of the FOV
-            m_fZoomScale = ThePlayerController.default.desiredFOV / ThePlayerController.FOVangle;
-        }
-        m_bIsFlashing = R6Weapons(ThePlayerController.Pawn.EngineWeapon).m_bIsStable;
-		m_fAccuracy = fNewAccuracy * m_fZoomScale;
-    }
-}
-*/
 
 defaultproperties
 {
-     m_fZoomScale=1.000000
-     m_SmallFont_14pt=Font'R6Font.Rainbow6_14pt'
-     m_color=(R=255)
-     RemoteRole=ROLE_None
-     bHidden=True
+	m_fZoomScale=1.0000000
+	m_SmallFont_14pt=Font'R6Font.Rainbow6_14pt'
+	m_color=(R=255,G=0,B=0,A=0)
+	RemoteRole=0
+	bHidden=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function UpdateReticule

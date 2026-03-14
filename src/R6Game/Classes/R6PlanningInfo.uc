@@ -1,4 +1,10 @@
 //=============================================================================
+// R6PlanningInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6PlanningInfo.uc : Team info about the planning
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -8,1190 +14,1280 @@
 //  TODO: PACT_OpenDoor
 //
 //=============================================================================
-
 class R6PlanningInfo extends R6AbstractPlanningInfo
-    native
-    transient;
+	transient
+ native;
 
-native(1411) final function bool AddToTeam( R6ActionPoint pNewPoint );
-native(1412) final private function bool InsertToTeam( R6ActionPoint pNewPoint );
-native(1413) final private function bool DeletePoint();
-native(2007) final private function bool FindPathToNextPoint(R6ActionPoint pStartPoint, R6ActionPoint pPointToReach);
+// Export UR6PlanningInfo::execAddToTeam(FFrame&, void* const)
+ native(1411) final function bool AddToTeam(R6ActionPoint pNewPoint);
+
+// Export UR6PlanningInfo::execInsertToTeam(FFrame&, void* const)
+private native(1412) final function bool InsertToTeam(R6ActionPoint pNewPoint);
+
+// Export UR6PlanningInfo::execDeletePoint(FFrame&, void* const)
+private native(1413) final function bool DeletePoint();
+
+// Export UR6PlanningInfo::execFindPathToNextPoint(FFrame&, void* const)
+private native(2007) final function bool FindPathToNextPoint(R6ActionPoint pStartPoint, R6ActionPoint pPointToReach);
 
 // Super Function
-function Tick(FLOAT fDelta)
+function Tick(float fDelta)
 {
-    local R6GameInfo Game;
-    local INT           iCurrentActionPoint;
+	local R6GameInfo Game;
+	local int iCurrentActionPoint;
 
-    if((m_iNbNode > 1) && (m_NodeList[0].InPlanningMode()))
-    {
-        for(iCurrentActionPoint = 1; iCurrentActionPoint < m_iNbNode; iCurrentActionPoint++)
-        {
-            R6ActionPoint(m_NodeList[iCurrentActionPoint]).DrawPath(bDisplayDbgInfo);
-        }
-    }
-    if(bDisplayDbgInfo == true)
-        bDisplayDbgInfo = false;
+	// End:0x5E
+	if(__NFUN_130__(__NFUN_151__(m_iNbNode, 1), m_NodeList[0].__NFUN_2014__()))
+	{
+		iCurrentActionPoint = 1;
+		J0x25:
+
+		// End:0x5E [Loop If]
+		if(__NFUN_150__(iCurrentActionPoint, m_iNbNode))
+		{
+			R6ActionPoint(m_NodeList[iCurrentActionPoint]).DrawPath(bDisplayDbgInfo);
+			__NFUN_165__(iCurrentActionPoint);
+			// [Loop Continue]
+			goto J0x25;
+		}
+	}
+	// End:0x72
+	if(__NFUN_242__(bDisplayDbgInfo, true))
+	{
+		bDisplayDbgInfo = false;
+	}
+	return;
 }
 
-function InitPlanning(INT iTeamID, R6PlanningCtrl pPlanningCtrl)
+function InitPlanning(int iTeamId, R6PlanningCtrl pPlanningCtrl)
 {
-    local INT iBackupLastNode;
-    local INT iCurrentActionPoint;
-    local INT iLoadedNumberOfNodes;
-    local R6ActionPoint pCurrentPoint;    
-    local R6ActionPoint pNextPoint;
+	local int iBackupLastNode, iCurrentActionPoint, iLoadedNumberOfNodes;
+	local R6ActionPoint pCurrentPoint, pNextPoint;
 
-    #ifdefDEBUG if(bShowLog) log("Init Planning for "$Self$" NB Nodes: "$m_iNbNode$" Current "$m_iCurrentNode); #endif
-    
-    if(m_iNbNode == 0)
-    {
-        return;
-    }
-    iBackupLastNode = m_iCurrentNode;
+	// End:0x0D
+	if(__NFUN_154__(m_iNbNode, 0))
+	{
+		return;
+	}
+	iBackupLastNode = m_iCurrentNode;
+	iLoadedNumberOfNodes = m_iNbNode;
+	iCurrentActionPoint = 0;
+	J0x2A:
 
-    iLoadedNumberOfNodes = m_iNbNode;
-    for(iCurrentActionPoint = 0; iCurrentActionPoint < iLoadedNumberOfNodes; iCurrentActionPoint++)
-    {
-        pCurrentPoint = R6ActionPoint(m_NodeList[iCurrentActionPoint]);
-        if(iCurrentActionPoint == 0) //Change the texture for the first point.
-        {
-            pCurrentPoint.SetFirstPointTexture();  //Change the sprite
-            pCurrentPoint.UnselectPoint();         //Set the new texture
-        }
-        pCurrentPoint.m_pPlanningCtrl = pPlanningCtrl;
-        pCurrentPoint.m_iRainbowTeamName = iTeamID;
-        if(iCurrentActionPoint != iLoadedNumberOfNodes - 1)
-        {
-            pNextPoint = R6ActionPoint(m_NodeList[iCurrentActionPoint+1]);
-
-            pNextPoint.prevActionPoint = pCurrentPoint;
-            FindPathToNextPoint(pCurrentPoint, pNextPoint);
-
-        }
-        //Set color
-        pCurrentPoint.SetDrawColor(m_TeamColor);
-
-        if(iCurrentActionPoint != 0) // First point does not have a path flag
-        {
-            pCurrentPoint.prevActionPoint = R6ActionPoint(m_NodeList[iCurrentActionPoint-1]);
-            //Set the path flag
-            pCurrentPoint.InitMyPathFlag();
-        }
-
-        //Set the Reference Icon for the current point
-        pCurrentPoint.ChangeActionType(pCurrentPoint.m_eActionType);
-        pCurrentPoint.SetPointAction(pCurrentPoint.m_eAction,true);
-    }
-
-    ResetPointsOrientation();
-    if(iBackupLastNode != -1)
-    {
-        //Select the last node
-        SetAsCurrentNode(R6ActionPoint(m_NodeList[iBackupLastNode]));
-    }
+	// End:0x181 [Loop If]
+	if(__NFUN_150__(iCurrentActionPoint, iLoadedNumberOfNodes))
+	{
+		pCurrentPoint = R6ActionPoint(m_NodeList[iCurrentActionPoint]);
+		// End:0x78
+		if(__NFUN_154__(iCurrentActionPoint, 0))
+		{
+			pCurrentPoint.SetFirstPointTexture();
+			pCurrentPoint.UnselectPoint();
+		}
+		pCurrentPoint.m_pPlanningCtrl = pPlanningCtrl;
+		pCurrentPoint.m_iRainbowTeamName = iTeamId;
+		// End:0xEC
+		if(__NFUN_155__(iCurrentActionPoint, __NFUN_147__(iLoadedNumberOfNodes, 1)))
+		{
+			pNextPoint = R6ActionPoint(m_NodeList[__NFUN_146__(iCurrentActionPoint, 1)]);
+			pNextPoint.prevActionPoint = pCurrentPoint;
+			__NFUN_2007__(pCurrentPoint, pNextPoint);
+		}
+		pCurrentPoint.SetDrawColor(m_TeamColor);
+		// End:0x13C
+		if(__NFUN_155__(iCurrentActionPoint, 0))
+		{
+			pCurrentPoint.prevActionPoint = R6ActionPoint(m_NodeList[__NFUN_147__(iCurrentActionPoint, 1)]);
+			pCurrentPoint.InitMyPathFlag();
+		}
+		pCurrentPoint.ChangeActionType(pCurrentPoint.m_eActionType);
+		pCurrentPoint.SetPointAction(pCurrentPoint.m_eAction, true);
+		__NFUN_165__(iCurrentActionPoint);
+		// [Loop Continue]
+		goto J0x2A;
+	}
+	ResetPointsOrientation();
+	// End:0x1AC
+	if(__NFUN_155__(iBackupLastNode, -1))
+	{
+		SetAsCurrentNode(R6ActionPoint(m_NodeList[iBackupLastNode]));
+	}
+	return;
 }
 
 function ResetPointsOrientation()
 {
-    //Set all the points orientation and set the current node to the first one
-    SetToStartNode();
-    while(GetNextPoint() != None)
-    {
-        SetPointRotation();
-        SetToNextNode();
-    }
-    SetPointRotation();
-    SetToStartNode();
+	SetToStartNode();
+	J0x06:
+
+	// End:0x21 [Loop If]
+	if(__NFUN_119__(GetNextPoint(), none))
+	{
+		SetPointRotation();
+		SetToNextNode();
+		// [Loop Continue]
+		goto J0x06;
+	}
+	SetPointRotation();
+	SetToStartNode();
+	return;
 }
 
 // Set On/Off the display of the team path
 function SetPathDisplay(bool bDisplay)
 {
-    local INT iCurrentNode;
-    local R6ActionPoint pCurrentPoint;
+	local int iCurrentNode;
+	local R6ActionPoint pCurrentPoint;
 
-    m_bDisplayPath=bDisplay;
-    if(m_iCurrentNode != -1)
-    {
-        iCurrentNode = 0;
-        while(iCurrentNode < m_NodeList.Length)
-        {
-            pCurrentPoint = R6ActionPoint(m_NodeList[iCurrentNode]);
-            pCurrentPoint.bHidden = !bDisplay;
-            if(pCurrentPoint.m_pMyPathFlag != none)
-            {
-                pCurrentPoint.m_pMyPathFlag.bHidden = !bDisplay;
-            }
-            if(pCurrentPoint.m_pActionIcon != none)
-            {
-                pCurrentPoint.m_pActionIcon.bHidden = !bDisplay;
-            }
-            iCurrentNode++;
-        }
-    }
+	m_bDisplayPath = bDisplay;
+	// End:0xD5
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		iCurrentNode = 0;
+		J0x23:
+
+		// End:0xD5 [Loop If]
+		if(__NFUN_150__(iCurrentNode, m_NodeList.Length))
+		{
+			pCurrentPoint = R6ActionPoint(m_NodeList[iCurrentNode]);
+			pCurrentPoint.bHidden = __NFUN_129__(bDisplay);
+			// End:0x96
+			if(__NFUN_119__(pCurrentPoint.m_pMyPathFlag, none))
+			{
+				pCurrentPoint.m_pMyPathFlag.bHidden = __NFUN_129__(bDisplay);
+			}
+			// End:0xCB
+			if(__NFUN_119__(pCurrentPoint.m_pActionIcon, none))
+			{
+				pCurrentPoint.m_pActionIcon.bHidden = __NFUN_129__(bDisplay);
+			}
+			__NFUN_165__(iCurrentNode);
+			// [Loop Continue]
+			goto J0x23;
+		}
+	}
+	return;
 }
 
-function SelectTeam(BOOL bIsSelected)
+function SelectTeam(bool bIsSelected)
 {
-    local R6ActionPoint pCurrentPoint;
-    pCurrentPoint = GetPoint();
+	local R6ActionPoint pCurrentPoint;
 
-    if(pCurrentPoint != none)
-    {
-        pCurrentPoint.m_PlanningColor = pCurrentPoint.m_CurrentColor;
-        if(bIsSelected == true)
-        {
-            pCurrentPoint.SetTimer(0.5,true);
-        }
-        else
-        {
-            pCurrentPoint.SetTimer(0,false);
-        }
-    }
-    else
-    {
-        //No points return to insertion zone.
-        R6PlanningCtrl(m_pTeamManager).PositionCameraOnInsertionZone();
-    }
+	pCurrentPoint = GetPoint();
+	// End:0x6A
+	if(__NFUN_119__(pCurrentPoint, none))
+	{
+		pCurrentPoint.m_PlanningColor = pCurrentPoint.m_CurrentColor;
+		// End:0x55
+		if(__NFUN_242__(bIsSelected, true))
+		{
+			pCurrentPoint.__NFUN_280__(0.5000000, true);			
+		}
+		else
+		{
+			pCurrentPoint.__NFUN_280__(0.0000000, false);
+		}		
+	}
+	else
+	{
+		R6PlanningCtrl(m_pTeamManager).PositionCameraOnInsertionZone();
+	}
+	return;
 }
 
 //-----------------------------------------------------------------------------
 //      Action Point Management function
 //-----------------------------------------------------------------------------
-function BOOL InsertPoint(R6ActionPoint pNewPoint)
+function bool InsertPoint(R6ActionPoint pNewPoint)
 {
-    local R6ActionPoint BehindMe, FrontMe;
+	local R6ActionPoint BehindMe, FrontMe;
 
-    BehindMe = GetPoint();
-    FrontMe = GetNextPoint();
-
-    if((FindPathToNextPoint(BehindMe, pNewPoint) == true) &&  // Set the path between the current point and the new point
-       (FindPathToNextPoint(pNewPoint, FrontMe) == true))     // Set the path between the new point and the point in front.
-    {
-        // link the node the others, Next/Prev and PathFlags
-        InsertToTeam(pNewPoint);
-        ResetID();
-
-        // refresh the location of the PathFlag behind & front
-        FrontMe.m_pMyPathFlag.RefreshLocation();
-
-        pNewPoint.m_eMovementMode = BehindMe.m_eMovementMode;
-        pNewPoint.m_eMovementSpeed = BehindMe.m_eMovementSpeed;
-
-        pNewPoint.SetDrawColor(m_TeamColor);
-        pNewPoint.InitMyPathFlag();
-
-        //Change the textures
-        BehindMe.UnselectPoint();
-        pNewPoint.SelectPoint();
-
-        //Reset the orientation of the new point and the two it was inserted between.
-        SetPointRotation();
-        SetToNextNode();
-        SetPointRotation();
-        SetToNextNode();
-        SetPointRotation();
-        SetToPrevNode();
-
-        #ifdefDEBUG if(bShowLog) Log(self$" Insert  BehindMe: "$BehindMe$"  FrontMe : "$FrontMe); #endif
-    }
-    else
-    {
-        pNewPoint.Destroy();
-        pNewPoint = none;
-        return false;
-    }
-    return true;
+	BehindMe = GetPoint();
+	FrontMe = GetNextPoint();
+	// End:0x108
+	if(__NFUN_130__(__NFUN_242__(__NFUN_2007__(BehindMe, pNewPoint), true), __NFUN_242__(__NFUN_2007__(pNewPoint, FrontMe), true)))
+	{
+		__NFUN_1412__(pNewPoint);
+		ResetID();
+		FrontMe.m_pMyPathFlag.RefreshLocation();
+		pNewPoint.m_eMovementMode = BehindMe.m_eMovementMode;
+		pNewPoint.m_eMovementSpeed = BehindMe.m_eMovementSpeed;
+		pNewPoint.SetDrawColor(m_TeamColor);
+		pNewPoint.InitMyPathFlag();
+		BehindMe.UnselectPoint();
+		pNewPoint.SelectPoint();
+		SetPointRotation();
+		SetToNextNode();
+		SetPointRotation();
+		SetToNextNode();
+		SetPointRotation();
+		SetToPrevNode();		
+	}
+	else
+	{
+		pNewPoint.__NFUN_279__();
+		pNewPoint = none;
+		return false;
+	}
+	return true;
+	return;
 }
 
 // And the node in the team and cast the path
-function BOOL AddPoint(R6ActionPoint pNewPoint)
+function bool AddPoint(R6ActionPoint pNewPoint)
 {
-    local R6ActionPoint BehindMe; //Point behind the new current point
+	local R6ActionPoint BehindMe;
 
-    if(m_iCurrentNode != -1)
-    {
-        BehindMe = GetPoint();
-    }
-
-    // Display the PathFlag behind & init my PathFlag
-    if(BehindMe!=none)
-    {
-        if(FindPathToNextPoint(BehindMe, pNewPoint) == true)
-        {
-            AddToTeam(pNewPoint);
-            ResetID();
-
-            // link the node the others , Next and PathFlags
-            pNewPoint.m_eMovementMode = BehindMe.m_eMovementMode;
-            pNewPoint.m_eMovementSpeed = BehindMe.m_eMovementSpeed;
-
-            pNewPoint.SetDrawColor(m_TeamColor);
-            pNewPoint.InitMyPathFlag();
-
-            //Set the Previous point orientation.
-            SetPointRotation();
-            SetToNextNode();
-            SetPointRotation();
-        }
-        else
-        {
-            pNewPoint.Destroy();
-            pNewPoint = none;
-            return false;
-        }
-    }
-    else
-    {
-        //First point to Add
-        AddToTeam(pNewPoint);
-        ResetID();
-        pNewPoint.SetDrawColor(m_TeamColor);
-        pNewPoint.SelectPoint();
-    }
-    return true;
+	// End:0x1B
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		BehindMe = GetPoint();
+	}
+	// End:0xD1
+	if(__NFUN_119__(BehindMe, none))
+	{
+		// End:0xB9
+		if(__NFUN_242__(__NFUN_2007__(BehindMe, pNewPoint), true))
+		{
+			__NFUN_1411__(pNewPoint);
+			ResetID();
+			pNewPoint.m_eMovementMode = BehindMe.m_eMovementMode;
+			pNewPoint.m_eMovementSpeed = BehindMe.m_eMovementSpeed;
+			pNewPoint.SetDrawColor(m_TeamColor);
+			pNewPoint.InitMyPathFlag();
+			SetPointRotation();
+			SetToNextNode();
+			SetPointRotation();			
+		}
+		else
+		{
+			pNewPoint.__NFUN_279__();
+			pNewPoint = none;
+			return false;
+		}		
+	}
+	else
+	{
+		__NFUN_1411__(pNewPoint);
+		ResetID();
+		pNewPoint.SetDrawColor(m_TeamColor);
+		pNewPoint.SelectPoint();
+	}
+	return true;
+	return;
 }
 
-function BOOL MoveCurrentPoint()
+function bool MoveCurrentPoint()
 {
-    local R6ActionPoint BehindMe, FrontMe, CurrentPoint;
+	local R6ActionPoint BehindMe, FrontMe, CurrentPoint;
 
-    CurrentPoint = GetPoint();
-    BehindMe = R6ActionPoint(CurrentPoint.prevActionPoint);
-    FrontMe = GetNextPoint();
-
-    if(BehindMe != none)
-    {
-        if(FindPathToNextPoint(BehindMe, CurrentPoint) == true)
-        {
-            CurrentPoint.InitMyPathFlag();
-        }
-        else 
-        {
-            return false;
-        }
-    }
-    if(FrontMe != none)
-    {
-        if(FindPathToNextPoint(CurrentPoint, FrontMe) == true)
-        {
-            
-            FrontMe.InitMyPathFlag();
-        }
-        else 
-        {
-            return false;
-        }
-    }
-    return true;
+	CurrentPoint = GetPoint();
+	BehindMe = R6ActionPoint(CurrentPoint.prevActionPoint);
+	FrontMe = GetNextPoint();
+	// End:0x63
+	if(__NFUN_119__(BehindMe, none))
+	{
+		// End:0x61
+		if(__NFUN_242__(__NFUN_2007__(BehindMe, CurrentPoint), true))
+		{
+			CurrentPoint.InitMyPathFlag();			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	// End:0x95
+	if(__NFUN_119__(FrontMe, none))
+	{
+		// End:0x93
+		if(__NFUN_242__(__NFUN_2007__(CurrentPoint, FrontMe), true))
+		{
+			FrontMe.InitMyPathFlag();			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	return true;
+	return;
 }
 
 function SetLastPointRotation()
 {
-    local vector vDirection;
-    local R6InsertionZone anInsertionZone;
-    local rotator        rFirstPointRotation;
-    local R6ActionPoint pCurrentPoint;
-    pCurrentPoint = GetPoint();
+	local Vector vDirection;
+	local R6InsertionZone anInsertionZone;
+	local Rotator rFirstPointRotation;
+	local R6ActionPoint pCurrentPoint;
 
-    //At least two points two points in the list.
-    if(m_NodeList.Length > 1)
-    {
-        //Set the point orientation.
-        if(pCurrentPoint.prevActionPoint.m_PathToNextPoint.Length != 0)
-        {
-            vDirection = pCurrentPoint.Location - pCurrentPoint.prevActionPoint.m_PathToNextPoint[pCurrentPoint.prevActionPoint.m_PathToNextPoint.Length-1].Location;
-        }
-        else
-        {
-            vDirection = pCurrentPoint.Location - pCurrentPoint.prevActionPoint.Location;
-        }
-
-        vDirection.Z = 0;
-        vDirection = Normal(vDirection);
-        pCurrentPoint.SetRotation(Rotator(vDirection));
-        pCurrentPoint.m_u8SpritePlanningAngle = pCurrentPoint.Rotation.Yaw / 255;
-    }
-    else //Orientation of the first point.
-    {
-        foreach m_pTeamManager.AllActors( class 'R6InsertionZone', anInsertionZone )
-        {
-            if(anInsertionZone.IsAvailableInGameType(R6AbstractGameInfo(m_pTeamManager.Level.Game).m_szGameTypeFlag) && (anInsertionZone.m_iInsertionNumber == m_iStartingPointNumber))
-                rFirstPointRotation = anInsertionZone.Rotation;
-        }
-
-        pCurrentPoint.SetRotation(rFirstPointRotation);
-        pCurrentPoint.m_u8SpritePlanningAngle = pCurrentPoint.Rotation.Yaw / 255;
-    }
+	pCurrentPoint = GetPoint();
+	// End:0x113
+	if(__NFUN_151__(m_NodeList.Length, 1))
+	{
+		// End:0x8B
+		if(__NFUN_155__(pCurrentPoint.prevActionPoint.m_PathToNextPoint.Length, 0))
+		{
+			vDirection = __NFUN_216__(pCurrentPoint.Location, pCurrentPoint.prevActionPoint.m_PathToNextPoint[__NFUN_147__(pCurrentPoint.prevActionPoint.m_PathToNextPoint.Length, 1)].Location);			
+		}
+		else
+		{
+			vDirection = __NFUN_216__(pCurrentPoint.Location, pCurrentPoint.prevActionPoint.Location);
+		}
+		vDirection.Z = 0.0000000;
+		vDirection = __NFUN_226__(vDirection);
+		pCurrentPoint.__NFUN_299__(Rotator(vDirection));
+		pCurrentPoint.m_u8SpritePlanningAngle = byte(__NFUN_145__(pCurrentPoint.Rotation.Yaw, 255));		
+	}
+	else
+	{
+		// End:0x18F
+		foreach m_pTeamManager.__NFUN_304__(Class'R6Game.R6InsertionZone', anInsertionZone)
+		{
+			// End:0x18E
+			if(__NFUN_130__(anInsertionZone.__NFUN_1513__(R6AbstractGameInfo(m_pTeamManager.Level.Game).m_szGameTypeFlag), __NFUN_154__(anInsertionZone.m_iInsertionNumber, m_iStartingPointNumber)))
+			{
+				rFirstPointRotation = anInsertionZone.Rotation;
+			}			
+		}		
+		pCurrentPoint.__NFUN_299__(rFirstPointRotation);
+		pCurrentPoint.m_u8SpritePlanningAngle = byte(__NFUN_145__(pCurrentPoint.Rotation.Yaw, 255));
+	}
+	return;
 }
 
 function SetPointRotation()
 {
-    local vector vDirection;
-    local R6ActionPoint pCurrentPoint;
-    pCurrentPoint = GetPoint();
+	local Vector vDirection;
+	local R6ActionPoint pCurrentPoint;
 
-    //Reset the Action flag here, for retry action.
-    pCurrentPoint.m_bActionCompleted=false;
-	pCurrentPoint.m_bActionPointReached=false;
-
-    if(GetNextPoint() != none)
-    {
-        //Set the point orientation.
-        if(pCurrentPoint.m_PathToNextPoint.Length != 0)
-        {
-            vDirection = pCurrentPoint.m_PathToNextPoint[0].Location - pCurrentPoint.Location;
-        }
-        else
-        {
-            vDirection = GetNextPoint().Location - pCurrentPoint.Location;
-        }
-
-        vDirection.Z = 0;
-        vDirection = Normal(vDirection);
-        
-        pCurrentPoint.SetRotation(Rotator(vDirection));
-        pCurrentPoint.m_u8SpritePlanningAngle = pCurrentPoint.Rotation.Yaw / 255;
-    }
-    else
-    {
-        //Setting rotation for the last point
-        SetLastPointRotation();
-    }
+	pCurrentPoint = GetPoint();
+	pCurrentPoint.m_bActionCompleted = false;
+	pCurrentPoint.m_bActionPointReached = false;
+	// End:0x101
+	if(__NFUN_119__(GetNextPoint(), none))
+	{
+		// End:0x81
+		if(__NFUN_155__(pCurrentPoint.m_PathToNextPoint.Length, 0))
+		{
+			vDirection = __NFUN_216__(pCurrentPoint.m_PathToNextPoint[0].Location, pCurrentPoint.Location);			
+		}
+		else
+		{
+			vDirection = __NFUN_216__(GetNextPoint().Location, pCurrentPoint.Location);
+		}
+		vDirection.Z = 0.0000000;
+		vDirection = __NFUN_226__(vDirection);
+		pCurrentPoint.__NFUN_299__(Rotator(vDirection));
+		pCurrentPoint.m_u8SpritePlanningAngle = byte(__NFUN_145__(pCurrentPoint.Rotation.Yaw, 255));		
+	}
+	else
+	{
+		SetLastPointRotation();
+	}
+	return;
 }
 
 function SetToPrevNode()
 {
-    // if current node is -1, there's no node in the list and if 0, it's the first point
-    if(m_iCurrentNode > 0)
-    {
-        GetPoint().UnselectPoint();
-        m_iCurrentNode--;
-        GetPoint().SelectPoint();
-    }
+	// End:0x32
+	if(__NFUN_151__(m_iCurrentNode, 0))
+	{
+		GetPoint().UnselectPoint();
+		__NFUN_166__(m_iCurrentNode);
+		GetPoint().SelectPoint();
+	}
+	return;
 }
 
 function SetToNextNode()
 {
-    //Need more than one point and not the last one
-    if(m_iCurrentNode != m_NodeList.Length -1)
-    {
-        GetPoint().UnselectPoint();
-        m_iCurrentNode++;
-        GetPoint().SelectPoint();
-    }
+	// End:0x3A
+	if(__NFUN_155__(m_iCurrentNode, __NFUN_147__(m_NodeList.Length, 1)))
+	{
+		GetPoint().UnselectPoint();
+		__NFUN_165__(m_iCurrentNode);
+		GetPoint().SelectPoint();
+	}
+	return;
 }
 
 function SetToStartNode()
 {
-    if(m_iNbNode != 0)
-    {
-        if(m_iCurrentNode != -1)
-            GetPoint().UnselectPoint();
-        m_iCurrentNode = 0;
-        GetPoint().SelectPoint();
-        m_iCurrentPathIndex = -1;
-    }
+	// End:0x4C
+	if(__NFUN_155__(m_iNbNode, 0))
+	{
+		// End:0x2A
+		if(__NFUN_155__(m_iCurrentNode, -1))
+		{
+			GetPoint().UnselectPoint();
+		}
+		m_iCurrentNode = 0;
+		GetPoint().SelectPoint();
+		m_iCurrentPathIndex = -1;
+	}
+	return;
 }
 
 function SetToEndNode()
 {
-    if(m_iCurrentNode != -1)
-    {
-        GetPoint().UnselectPoint();
-        m_iCurrentNode = m_NodeList.Length -1;
-        GetPoint().SelectPoint();
-    }
+	// End:0x3E
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		GetPoint().UnselectPoint();
+		m_iCurrentNode = __NFUN_147__(m_NodeList.Length, 1);
+		GetPoint().SelectPoint();
+	}
+	return;
 }
 
 function RemovePointsRefsToCtrl()
 {
-    local R6ActionPoint pActionPoint;
-    local INT           iCurrentNode;
-    for(iCurrentNode = 0; iCurrentNode<m_NodeList.Length; iCurrentNode++)
-    {
-        pActionPoint=R6ActionPoint(m_NodeList[iCurrentNode]);
-        pActionPoint.m_pPlanningCtrl = none;
-    }
+	local R6ActionPoint pActionPoint;
+	local int iCurrentNode;
+
+	iCurrentNode = 0;
+	J0x07:
+
+	// End:0x47 [Loop If]
+	if(__NFUN_150__(iCurrentNode, m_NodeList.Length))
+	{
+		pActionPoint = R6ActionPoint(m_NodeList[iCurrentNode]);
+		pActionPoint.m_pPlanningCtrl = none;
+		__NFUN_165__(iCurrentNode);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
 // Reset the ID of all the ActionPoint
 function ResetID()
 {
-    local R6ActionPoint pNode;
+	local R6ActionPoint pNode;
 
-    //If  current node is not -1, there is at least one action point in the list
-    m_iNbMilestone = 0;
-    for(m_iNbNode = 0; m_iNbNode<m_NodeList.Length; m_iNbNode++)
-    {
-        pNode=R6ActionPoint(m_NodeList[m_iNbNode]);
-        pNode.m_iNodeID=m_iNbNode;
-        if(pNode.m_eActionType==PACTTYP_Milestone)
-        {
-            m_iNbMilestone++;
-            pNode.m_iMileStoneNum=m_iNbMilestone;
-            pNode.SetMileStoneIcon(m_iNbMilestone);
-        }
-    }
+	m_iNbMilestone = 0;
+	m_iNbNode = 0;
+	J0x0E:
+
+	// End:0x9A [Loop If]
+	if(__NFUN_150__(m_iNbNode, m_NodeList.Length))
+	{
+		pNode = R6ActionPoint(m_NodeList[m_iNbNode]);
+		pNode.m_iNodeID = m_iNbNode;
+		// End:0x90
+		if(__NFUN_154__(int(pNode.m_eActionType), int(1)))
+		{
+			__NFUN_165__(m_iNbMilestone);
+			pNode.m_iMileStoneNum = m_iNbMilestone;
+			pNode.SetMileStoneIcon(m_iNbMilestone);
+		}
+		__NFUN_165__(m_iNbNode);
+		// [Loop Continue]
+		goto J0x0E;
+	}
+	return;
 }
 
 function bool SetAsCurrentNode(R6ActionPoint pSelectedNode)
 {
-    if(m_iCurrentNode != -1)
-    {
-        GetPoint().UnselectPoint();
-    }
-    
-    for(m_iCurrentNode = 0; m_iCurrentNode < m_NodeList.Length; m_iCurrentNode++)
-    {
-        if(GetPoint() == pSelectedNode)
-        {
-            GetPoint().SelectPoint();
-            return true;
-        }
-    }
-    m_iCurrentNode = 0;
-    log("WARNING - Could not find current node in Planning Info!!");
+	// End:0x1F
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		GetPoint().UnselectPoint();
+	}
+	m_iCurrentNode = 0;
+	J0x26:
 
-    return false;
+	// End:0x62 [Loop If]
+	if(__NFUN_150__(m_iCurrentNode, m_NodeList.Length))
+	{
+		// End:0x58
+		if(__NFUN_114__(GetPoint(), pSelectedNode))
+		{
+			GetPoint().SelectPoint();
+			return true;
+		}
+		__NFUN_165__(m_iCurrentNode);
+		// [Loop Continue]
+		goto J0x26;
+	}
+	m_iCurrentNode = 0;
+	__NFUN_231__("WARNING - Could not find current node in Planning Info!!");
+	return false;
+	return;
 }
 
 // Delete the current ActionPoint
-function BOOL DeleteNode()
+function bool DeleteNode()
 {
-    local R6ActionPoint pCurrentPoint;
-    local R6ReferenceIcons tempAI;
-    local R6PathFlag tempPF;
+	local R6ActionPoint pCurrentPoint;
+	local R6ReferenceIcons tempAI;
+	local R6PathFlag tempPF;
 
-    //No node to delete
-    if(m_iCurrentNode == -1)
-    {
-        return false;
-    }
-
-    pCurrentPoint = GetPoint();
-    if(!((m_iCurrentNode == 0) && (m_NodeList.Length > 1)))
-    {
-        //Delete the action icon of current point (if any)
-        if(pCurrentPoint.m_pActionIcon != none)
-        {
-            tempAI = pCurrentPoint.m_pActionIcon;
-            pCurrentPoint.m_pActionIcon = none;
-            tempAI.Destroy();
-            pCurrentPoint.m_vActionDirection = Vect(0,0,0);
-        }
-        if(pCurrentPoint.m_pMyPathFlag != none)
-        {
-            tempPF = pCurrentPoint.m_pMyPathFlag;
-            pCurrentPoint.m_pMyPathFlag = none;
-            tempPF.Destroy();
-        }
-
-        if(m_iCurrentNode == 0)
-            m_bPlacedFirstPoint = false;
-
-        //Delete the Action Point from list
-        DeletePoint();
-        ResetID();
-
-        if(m_iCurrentNode == m_NodeList.Length)
-        {
-            //reset the current node number if it's the last node we are deleting
-            m_iCurrentNode--;
-            
-            if(m_iCurrentNode == -1)
-            {
-                //no nodes in the list
-                return true;
-            }
-            pCurrentPoint = GetPoint();
-            pCurrentPoint.SelectPoint();
-            //Reset the last Point's orientation
-            SetPointRotation();
-        }
-        else
-        {
-            m_iCurrentNode--;
-
-            pCurrentPoint = GetPoint();
-            GetNextPoint().prevActionPoint = pCurrentPoint;
-
-            FindPathToNextPoint(pCurrentPoint, GetNextPoint());
-            GetNextPoint().m_pMyPathFlag.RefreshLocation();
-
-            pCurrentPoint.SelectPoint();
-            //Reset the two points' orientation
-            SetPointRotation();
-            SetToNextNode();
-            SetPointRotation();
-            SetToPrevNode();
-        }
-
-    }
-    else
-    {
-        log("Cannot delete start location, when there's other points in the list");
-        return false;
-    }
-
-    return true;
+	// End:0x11
+	if(__NFUN_154__(m_iCurrentNode, -1))
+	{
+		return false;
+	}
+	pCurrentPoint = GetPoint();
+	// End:0x1BD
+	if(__NFUN_129__(__NFUN_130__(__NFUN_154__(m_iCurrentNode, 0), __NFUN_151__(m_NodeList.Length, 1))))
+	{
+		// End:0x98
+		if(__NFUN_119__(pCurrentPoint.m_pActionIcon, none))
+		{
+			tempAI = pCurrentPoint.m_pActionIcon;
+			pCurrentPoint.m_pActionIcon = none;
+			tempAI.__NFUN_279__();
+			pCurrentPoint.m_vActionDirection = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		// End:0xDC
+		if(__NFUN_119__(pCurrentPoint.m_pMyPathFlag, none))
+		{
+			tempPF = pCurrentPoint.m_pMyPathFlag;
+			pCurrentPoint.m_pMyPathFlag = none;
+			tempPF.__NFUN_279__();
+		}
+		// End:0xEF
+		if(__NFUN_154__(m_iCurrentNode, 0))
+		{
+			m_bPlacedFirstPoint = false;
+		}
+		__NFUN_1413__();
+		ResetID();
+		// End:0x144
+		if(__NFUN_154__(m_iCurrentNode, m_NodeList.Length))
+		{
+			__NFUN_166__(m_iCurrentNode);
+			// End:0x120
+			if(__NFUN_154__(m_iCurrentNode, -1))
+			{
+				return true;
+			}
+			pCurrentPoint = GetPoint();
+			pCurrentPoint.SelectPoint();
+			SetPointRotation();			
+		}
+		else
+		{
+			__NFUN_166__(m_iCurrentNode);
+			pCurrentPoint = GetPoint();
+			GetNextPoint().prevActionPoint = pCurrentPoint;
+			__NFUN_2007__(pCurrentPoint, GetNextPoint());
+			GetNextPoint().m_pMyPathFlag.RefreshLocation();
+			pCurrentPoint.SelectPoint();
+			SetPointRotation();
+			SetToNextNode();
+			SetPointRotation();
+			SetToPrevNode();
+		}		
+	}
+	else
+	{
+		__NFUN_231__("Cannot delete start location, when there's other points in the list");
+		return false;
+	}
+	return true;
+	return;
 }
 
 // Delete all ActionPoint in the Team
 function DeleteAllNode()
 {
-    //No node to delete
+	m_iCurrentNode = __NFUN_147__(m_NodeList.Length, 1);
+	J0x0F:
 
-    m_iCurrentNode = m_NodeList.Length -1;
-    while(m_iCurrentNode != -1)
-    {
-        DeleteNode();
-    }
-    m_bPlacedFirstPoint = false;
+	// End:0x27 [Loop If]
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		DeleteNode();
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	m_bPlacedFirstPoint = false;
+	return;
 }
 
 // Set the Action type of the current ActionPoint , grenades or sniping or other?!
-function SetCurrentPointAction(EPlanAction eAction)
+function SetCurrentPointAction(Object.EPlanAction eAction)
 {
-    if(GetPoint() == None) 
-    {
-        Log("WARNING: CurrentNode null");
-        return;
-    }
-
-    //Set the action type
-    GetPoint().SetPointAction(eAction);
+	// End:0x2B
+	if(__NFUN_114__(GetPoint(), none))
+	{
+		__NFUN_231__("WARNING: CurrentNode null");
+		return;
+	}
+	GetPoint().SetPointAction(eAction);
+	return;
 }
 
-function AjustSnipeDirection(vector vHitLocation)
+function AjustSnipeDirection(Vector vHitLocation)
 {
-    if(m_iCurrentNode != -1)
-    {
-        GetPoint().m_rActionRotation = R6PlanningSnipe(GetPoint().m_pActionIcon).SetDirectionRotator(vHitLocation);
-    }
+	// End:0x42
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		GetPoint().m_rActionRotation = R6PlanningSnipe(GetPoint().m_pActionIcon).SetDirectionRotator(vHitLocation);
+	}
+	return;
 }
 
-function GetSnipingCoordinates(out vector vLocation, out rotator rRotation)
+function GetSnipingCoordinates(out Vector vLocation, out Rotator rRotation)
 {
 	vLocation = GetPoint().Location;
 	rRotation = GetPoint().m_rActionRotation;
+	return;
 }
 
-function actor GetDoorToBreach()
+function Actor GetDoorToBreach()
 {
 	return GetPoint().pDoor;
+	return;
 }
 
-function actor GetNextDoorToBreach(actor aPoint)
+function Actor GetNextDoorToBreach(Actor aPoint)
 {
 	local R6ActionPoint nextActionPoint;
 
-	if(R6ActionPoint(aPoint) != none)
-		return R6ActionPoint(aPoint).pDoor; 
-
+	// End:0x24
+	if(__NFUN_119__(R6ActionPoint(aPoint), none))
+	{
+		return R6ActionPoint(aPoint).pDoor;
+	}
 	nextActionPoint = GetNextPoint();
-	if(nextActionPoint != none)
+	// End:0x4A
+	if(__NFUN_119__(nextActionPoint, none))
+	{
 		return nextActionPoint.pDoor;
+	}
+	return;
 }
 
-function BOOL SetGrenadeLocation(vector vHitLocation)
+function bool SetGrenadeLocation(Vector vHitLocation)
 {
-    if(GetPoint() != none)
-    {
-        vHitLocation.Z += 100;
-        return GetPoint().SetGrenade(vHitLocation);
-    }
-    return false;
+	// End:0x32
+	if(__NFUN_119__(GetPoint(), none))
+	{
+		__NFUN_184__(vHitLocation.Z, float(100));
+		return GetPoint().SetGrenade(vHitLocation);
+	}
+	return false;
+	return;
 }
 
-function SetActionType(EPlanActionType eNewType)
+function SetActionType(Object.EPlanActionType eNewType)
 {
-    if(m_iCurrentNode != -1)
-    {
-        GetPoint().ChangeActionType(eNewType);
-    }
+	// End:0x24
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		GetPoint().ChangeActionType(eNewType);
+	}
+	return;
 }
 
 function R6ActionPoint GetPoint()
 {
-    if(m_iCurrentNode != -1)
-    {
-        return R6ActionPoint(m_NodeList[m_iCurrentNode]);
-    }
-    return none;
+	// End:0x20
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		return R6ActionPoint(m_NodeList[m_iCurrentNode]);
+	}
+	return none;
+	return;
 }
 
 function R6ActionPoint GetNextPoint()
 {
-    if((m_iCurrentNode != -1) && (m_iCurrentNode+1 != m_NodeList.length))
-    {
-        return R6ActionPoint(m_NodeList[m_iCurrentNode+1]);
-    }
-    return none;
+	// End:0x38
+	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_155__(__NFUN_146__(m_iCurrentNode, 1), m_NodeList.Length)))
+	{
+		return R6ActionPoint(m_NodeList[__NFUN_146__(m_iCurrentNode, 1)]);
+	}
+	return none;
+	return;
 }
 
-function EPlanActionType GetActionType()
+function Object.EPlanActionType GetActionType()
 {
-    if(m_iCurrentNode != -1)
-    {
-        return GetPoint().m_eActionType;
-    }
-    return m_eDefaultActionType;
+	// End:0x1F
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		return GetPoint().m_eActionType;
+	}
+	return m_eDefaultActionType;
+	return;
 }
 
-function SetAction(EPlanAction eNewAction)
+function SetAction(Object.EPlanAction eNewAction)
 {
-    if(m_iCurrentNode != -1)
-    {
-        GetPoint().m_eAction = eNewAction;
-    }
+	// End:0x24
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		GetPoint().m_eAction = eNewAction;
+	}
+	return;
 }
 
-function EPlanAction GetAction()// Abstract
+function Object.EPlanAction GetAction()
 {
-    if(m_iCurrentNode != -1)
-    {
-        return GetPoint().m_eAction;
-    }
-    return m_eDefaultAction;
+	// End:0x1F
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		return GetPoint().m_eAction;
+	}
+	return m_eDefaultAction;
+	return;
 }
 
-function EPlanAction NextActionPointHasAction(actor aPoint)
+function Object.EPlanAction NextActionPointHasAction(Actor aPoint)
 {
 	local R6ActionPoint actionPoint, nextActionPoint;
 
 	actionPoint = R6ActionPoint(aPoint);
-	if(actionPoint == none)
+	// End:0x75
+	if(__NFUN_114__(actionPoint, none))
 	{
-		// we are moving towards a regular pathnode
 		nextActionPoint = GetNextPoint();
-		if(nextActionPoint != none && (VSize(nextActionPoint.location - aPoint.location) < 300))
-			return nextActionPoint.m_eAction; 
+		// End:0x72
+		if(__NFUN_130__(__NFUN_119__(nextActionPoint, none), __NFUN_176__(__NFUN_225__(__NFUN_216__(nextActionPoint.Location, aPoint.Location)), float(300))))
+		{
+			return nextActionPoint.m_eAction;			
+		}
 		else
-			return PACT_None;
+		{
+			return 0;
+		}
 	}
-
 	return actionPoint.m_eAction;
+	return;
 }
 
-function SetMovementMode(EMovementMode eNewMode)
+function SetMovementMode(Object.EMovementMode eNewMode)
 {
-    if(m_iCurrentNode != -1)
-    {
-        #ifdefDEBUG if(bShowLog) log("New Movement Mode : "$eNewMode$" : "$GetPoint()); #endif
-        GetPoint().m_eMovementMode = eNewMode;
-        GetPoint().m_pMyPathFlag.SetModeDisplay(eNewMode);
-    }
+	// End:0x42
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		GetPoint().m_eMovementMode = eNewMode;
+		GetPoint().m_pMyPathFlag.SetModeDisplay(eNewMode);
+	}
+	return;
 }
 
-function EMovementMode GetMovementMode()// Abstract
+function Object.EMovementMode GetMovementMode()
 {
-    if(m_iCurrentNode != -1)
-    {
-        #ifdefDEBUG if(bShowLog) log("Get Movement Mode : "$GetPoint().m_eMovementMode$" : "$GetPoint()); #endif
-        if(m_iCurrentPathIndex != -1)
-            return GetNextPoint().m_eMovementMode;
-        else
-            return GetPoint().m_eMovementMode;
-    }
-    return m_eDefaultMode;
+	// End:0x41
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		// End:0x31
+		if(__NFUN_155__(m_iCurrentPathIndex, -1))
+		{
+			return GetNextPoint().m_eMovementMode;			
+		}
+		else
+		{
+			return GetPoint().m_eMovementMode;
+		}
+	}
+	return m_eDefaultMode;
+	return;
 }
 
-function SetMovementSpeed(EMovementSpeed eNewSpeed)
+function SetMovementSpeed(Object.EMovementSpeed eNewSpeed)
 {
-    if(m_iCurrentNode != -1)
-    {
-        #ifdefDEBUG if(bShowLog) log("New Movement Speed : "$eNewSpeed$" : "$GetPoint()); #endif
-        GetPoint().m_eMovementSpeed = eNewSpeed;
-    }
+	// End:0x24
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		GetPoint().m_eMovementSpeed = eNewSpeed;
+	}
+	return;
 }
 
-function EMovementSpeed GetMovementSpeed()// Abstract
+function Object.EMovementSpeed GetMovementSpeed()
 {
-    if(m_iCurrentNode != -1)
-    {
-        #ifdefDEBUG if(bShowLog) log("Get Movement Speed : "$GetPoint().m_eMovementSpeed$" : "$GetPoint()); #endif
-        if(m_iCurrentPathIndex != -1)
-            return GetNextPoint().m_eMovementSpeed;
-        else
-            return GetPoint().m_eMovementSpeed;
-    }
-    return m_eDefaultSpeed;
+	// End:0x41
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		// End:0x31
+		if(__NFUN_155__(m_iCurrentPathIndex, -1))
+		{
+			return GetNextPoint().m_eMovementSpeed;			
+		}
+		else
+		{
+			return GetPoint().m_eMovementSpeed;
+		}
+	}
+	return m_eDefaultSpeed;
+	return;
 }
 
-function actor GetFirstActionPoint()
+function Actor GetFirstActionPoint()
 {
-    return GetPoint();
+	return GetPoint();
+	return;
 }
 
 function SkipCurrentDestination()
 {
-    local R6ActionPoint pPrevPoint;
-    local R6ActionPoint pCurrentPoint;
-    local R6RainbowTeam pCurrentTeam;
+	local R6ActionPoint pPrevPoint, pCurrentPoint;
+	local R6RainbowTeam pCurrentTeam;
 
-    pCurrentPoint = GetPoint();
-    pCurrentTeam = R6RainbowTeam(m_pTeamManager);
-
-    //Node completed, get the next One
-    if((m_iCurrentNode != -1) && (m_iCurrentNode != m_NodeList.Length -1))
-    {
-        if(m_iCurrentPathIndex == pCurrentPoint.m_PathToNextPoint.Length - 1)
-        {
-            pPrevPoint = pCurrentPoint;
-            //The action is now completed.
-            pCurrentPoint.m_bActionCompleted = true;
-
-            m_iCurrentPathIndex = -1;
-            m_iCurrentNode++;
-        }
-        else
-        {
-            m_iCurrentPathIndex++;
-        }
-
-        if(m_iCurrentPathIndex == -1)
-        {
-            //Reached a point, and changing the parameters to reach the new one 
-            // Check if there is a new movement mode and notify
-            if(pPrevPoint.m_eMovementMode != pCurrentPoint.m_eMovementMode)
-                pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewMode, GOCODE_None);
-            if(pPrevPoint.m_eMovementSpeed != pCurrentPoint.m_eMovementSpeed)
-                pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewSpeed, GOCODE_None);
-        }
-        else if(m_iCurrentPathIndex == 0)
-        {
-            //Reached a point, and changing the parameters to reach the new one 
-            // Check if there is a new movement mode and notify
-            if(GetNextPoint().m_eMovementMode != pCurrentPoint.m_eMovementMode)
-                pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewMode, GOCODE_None);
-            if(GetNextPoint().m_eMovementSpeed != pCurrentPoint.m_eMovementSpeed)
-                pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewSpeed, GOCODE_None);
-        }
-
-        #ifdefDEBUG if(bShowLog) Log("Skipping destination, Sending NODEMSG_NewNode; action point to reach "$pCurrentPoint$" : "$m_iCurrentPathIndex); #endif
-        pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewNode, GOCODE_None);
-    }
-    else
-    {
-        //skipped to last node
-        m_iCurrentNode=-1;
-    }
+	pCurrentPoint = GetPoint();
+	pCurrentTeam = R6RainbowTeam(m_pTeamManager);
+	// End:0x1A9
+	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_155__(m_iCurrentNode, __NFUN_147__(m_NodeList.Length, 1))))
+	{
+		// End:0x8D
+		if(__NFUN_154__(m_iCurrentPathIndex, __NFUN_147__(pCurrentPoint.m_PathToNextPoint.Length, 1)))
+		{
+			pPrevPoint = pCurrentPoint;
+			pCurrentPoint.m_bActionCompleted = true;
+			m_iCurrentPathIndex = -1;
+			__NFUN_165__(m_iCurrentNode);			
+		}
+		else
+		{
+			__NFUN_165__(m_iCurrentPathIndex);
+		}
+		// End:0x116
+		if(__NFUN_154__(m_iCurrentPathIndex, -1))
+		{
+			// End:0xDB
+			if(__NFUN_155__(int(pPrevPoint.m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+			{
+				pCurrentTeam.TeamNotifyActionPoint(1, 4);
+			}
+			// End:0x113
+			if(__NFUN_155__(int(pPrevPoint.m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+			{
+				pCurrentTeam.TeamNotifyActionPoint(2, 4);
+			}			
+		}
+		else
+		{
+			// End:0x193
+			if(__NFUN_154__(m_iCurrentPathIndex, 0))
+			{
+				// End:0x15A
+				if(__NFUN_155__(int(GetNextPoint().m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+				{
+					pCurrentTeam.TeamNotifyActionPoint(1, 4);
+				}
+				// End:0x193
+				if(__NFUN_155__(int(GetNextPoint().m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+				{
+					pCurrentTeam.TeamNotifyActionPoint(2, 4);
+				}
+			}
+		}
+		pCurrentTeam.TeamNotifyActionPoint(3, 4);		
+	}
+	else
+	{
+		m_iCurrentNode = -1;
+	}
+	return;
 }
 
-function actor GetNextActionPoint()// Abstract
+function Actor GetNextActionPoint()
 {
-    local actor pPointToReturn;
-    local R6ActionPoint pCurrentPoint;
-    pCurrentPoint = GetPoint();
+	local Actor pPointToReturn;
+	local R6ActionPoint pCurrentPoint;
 
-    //return none, for team without planning
-    if((m_iCurrentNode != -1) && (m_iCurrentNode < m_NodeList.Length)) 
-    {
-        if((m_iCurrentPathIndex != -1) && (m_iCurrentPathIndex < pCurrentPoint.m_PathToNextPoint.Length))
-        {
-            pPointToReturn = pCurrentPoint.m_PathToNextPoint[m_iCurrentPathIndex];
-        }
-        else
-        {
-            pPointToReturn = pCurrentPoint;
-        }
-    }
-    else 
-    {
-        pPointToReturn = none;
-    }
-
-    return pPointToReturn;
+	pCurrentPoint = GetPoint();
+	// End:0x82
+	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_150__(m_iCurrentNode, m_NodeList.Length)))
+	{
+		// End:0x74
+		if(__NFUN_130__(__NFUN_155__(m_iCurrentPathIndex, -1), __NFUN_150__(m_iCurrentPathIndex, pCurrentPoint.m_PathToNextPoint.Length)))
+		{
+			pPointToReturn = pCurrentPoint.m_PathToNextPoint[m_iCurrentPathIndex];			
+		}
+		else
+		{
+			pPointToReturn = pCurrentPoint;
+		}		
+	}
+	else
+	{
+		pPointToReturn = none;
+	}
+	return pPointToReturn;
+	return;
 }
 
-function actor PreviewNextActionPoint()
+function Actor PreviewNextActionPoint()
 {
-    local actor pPointToReturn;
-    //return none, for team without planning
-    if(m_iCurrentNode != -1)
-    {
-        if(m_iCurrentPathIndex + 1 < GetPoint().m_PathToNextPoint.Length)
-        {
-            pPointToReturn = GetPoint().m_PathToNextPoint[m_iCurrentPathIndex + 1];
-        }
-        else
-        {
-            pPointToReturn = GetNextPoint();
-        }
-    }
+	local Actor pPointToReturn;
 
-    #ifdefDEBUG if(bShowLog)log(self$" Preview next Point of #"$m_iCurrentNode$","$m_iCurrentPathIndex$" = "$pPointToReturn); #endif
-
-    return pPointToReturn;
+	// End:0x59
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		// End:0x4D
+		if(__NFUN_150__(__NFUN_146__(m_iCurrentPathIndex, 1), GetPoint().m_PathToNextPoint.Length))
+		{
+			pPointToReturn = GetPoint().m_PathToNextPoint[__NFUN_146__(m_iCurrentPathIndex, 1)];			
+		}
+		else
+		{
+			pPointToReturn = GetNextPoint();
+		}
+	}
+	return pPointToReturn;
+	return;
 }
 
 function SetToPreviousActionPoint()
 {
-	// if team has already reached current node (an action may remain) or is close enough to current node, do not go back to previous node	
-	if(GetPoint().m_bActionPointReached || (VSize(R6RainbowTeam(m_pTeamManager).m_Team[0].location - GetPoint().location) < 200))
+	// End:0x51
+	if(__NFUN_132__(GetPoint().m_bActionPointReached, __NFUN_176__(__NFUN_225__(__NFUN_216__(R6RainbowTeam(m_pTeamManager).m_Team[0].Location, GetPoint().Location)), float(200))))
+	{
 		return;
-
-    if((m_iCurrentNode != -1) && !((m_iCurrentNode == 0) && (m_iCurrentPathIndex == -1)))
-    {
-        if(m_iCurrentPathIndex != -1)
-        {
-            m_iCurrentPathIndex -= 1;
-        }
-        else
-        {
-            m_iCurrentNode--;
-            m_iCurrentPathIndex = GetPoint().m_PathToNextPoint.Length - 1;
-        }
-    }
-    #ifdefDEBUG if(bShowLog) log(self$"Settin Previous Point #"$m_iCurrentNode$","$m_iCurrentPathIndex); #endif
+	}
+	// End:0xBA
+	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_129__(__NFUN_130__(__NFUN_154__(m_iCurrentNode, 0), __NFUN_154__(m_iCurrentPathIndex, -1)))))
+	{
+		// End:0x9A
+		if(__NFUN_155__(m_iCurrentPathIndex, -1))
+		{
+			__NFUN_162__(m_iCurrentPathIndex, 1);			
+		}
+		else
+		{
+			__NFUN_166__(m_iCurrentNode);
+			m_iCurrentPathIndex = __NFUN_147__(GetPoint().m_PathToNextPoint.Length, 1);
+		}
+	}
+	return;
 }
 
-function INT GetActionPointID()// Abstract
+function int GetActionPointID()
 {
-    if(m_iCurrentNode != -1)
-    {
-        return GetPoint().m_iNodeID;
-    }
-    return -1;
+	// End:0x1F
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		return GetPoint().m_iNodeID;
+	}
+	return -1;
+	return;
 }
 
-function INT GetNbActionPoint()// Abstract
+function int GetNbActionPoint()
 {
-    return m_iNbNode;
+	return m_iNbNode;
+	return;
 }
 
-function Vector GetActionLocation()// Abstract
+function Vector GetActionLocation()
 {
-    if(m_iCurrentNode != -1)
-    {
-        return GetPoint().m_vActionDirection;
-    }
-    return vect(0,0,0);
+	// End:0x1F
+	if(__NFUN_155__(m_iCurrentNode, -1))
+	{
+		return GetPoint().m_vActionDirection;
+	}
+	return vect(0.0000000, 0.0000000, 0.0000000);
+	return;
 }
 
 // Message management between the TeamAI and PlayerController
-function NotifyActionPoint(ENodeNotify eMsg, EGoCode eCode)// Abstract
+function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 {
-    local R6ActionPoint pPrevPoint;
-    local R6RainbowTeam pCurrentTeam;
-    local R6ActionPoint pCurrentPoint;
+	local R6ActionPoint pPrevPoint;
+	local R6RainbowTeam pCurrentTeam;
+	local R6ActionPoint pCurrentPoint;
 
-    #ifdefDEBUG if(bShowLog) log("--> R6PlanningInfo Notify Action Point, msg: "$eMsg$" code : "$eCode$" TM: "$R6RainbowTeam(m_pTeamManager)$" CurrentNode"$m_iCurrentNode); #endif
-
-    pCurrentTeam = R6RainbowTeam(m_pTeamManager);
-    pCurrentPoint = GetPoint();
-    if((pCurrentTeam!=None) && (m_iCurrentNode != -1))
-    {
-        switch(eMsg)
-        {
-        // not used this side
-        case NODEMSG_NewAction:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_NewAction"); #endif
-            return;
-
-        // not used this side
-        case NODEMSG_NewMode:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_NewMode"); #endif
-            return;
-
-        // come from player - the player called a GoCode
-        case NODEMSG_GoCodeLaunched:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_GoCodeLaunched"); #endif
-            
-			// if team is waiting for ZULU, then ignore all other GoCodes that may be issued...
-			if(pCurrentTeam.m_eGoCode == GOCODE_Zulu)
-			{
-				#ifdefDEBUG if(bShowLog) Log("Doing nothing on that gocode, team is waiting for ZULU..."); #endif
+	pCurrentTeam = R6RainbowTeam(m_pTeamManager);
+	pCurrentPoint = GetPoint();
+	// End:0x3D8
+	if(__NFUN_130__(__NFUN_119__(pCurrentTeam, none), __NFUN_155__(m_iCurrentNode, -1)))
+	{
+		switch(eMsg)
+		{
+			// End:0x46
+			case 0:
 				return;
-			}
-			
-            // Check if we want this GoCode
-            if(m_eGoCodeState[eCode] == GOCODESTATE_Waiting)
-            {
-                m_eGoCodeState[eCode] = GOCODESTATE_None;
-                if( pCurrentPoint.m_eAction != PACT_None )
-                {
-                    #ifdefDEBUG if(bShowLog) Log("NODEMSG_GoCodeLaunched throwing Grenade"); #endif
-                    pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewAction, GOCODE_None);
-                }
-                else
-                {
-                    #ifdefDEBUG if(bShowLog) Log("NODEMSG_GoCodeLaunched, no action means node completed"); #endif
-                    NotifyActionPoint( NODEMSG_ActionNodeCompleted, GOCODE_None);
-                }
-				pCurrentTeam.ResetTeamGoCode();
-            }
-            else if(m_eGoCodeState[eCode] == GOCODESTATE_Snipe)
-            {
-                #ifdefDEBUG if(bShowLog) Log("GoCodeLaunched stop sniping and call ReadNode()"); #endif
-                m_eGoCodeState[eCode] = GOCODESTATE_None;
-                pCurrentTeam.TeamSnipingOver();
-				pCurrentTeam.ResetTeamGoCode();
-            }
-            else if(m_eGoCodeState[eCode] == GOCODESTATE_Breach)
-            {
-                #ifdefDEBUG if(bShowLog) Log("GoCodeLaunched blow the door and call ReadNode()"); #endif
-                m_eGoCodeState[eCode] = GOCODESTATE_None;
-                pCurrentTeam.BreachDoor();
-				pCurrentTeam.ResetTeamGoCode();
-            }
-            else
-            {
-                #ifdefDEBUG if(bShowLog) Log("Doing nothing on that gocode."); #endif
-            }
-            return;
-
-        // from team-manager or me
-        case NODEMSG_ActionNodeCompleted:
-            // prepare to move to the next node
-            if(m_iCurrentNode != m_iNbNode-1) //Last node reached
-            {
-                #ifdefDEBUG if(bShowLog) Log("NODEMSG_ActionNodeCompleted"); #endif
-
-                //The action is now completed.
-                pCurrentPoint.m_bActionCompleted = true;
-
-                //to change speed and ROE
-                pPrevPoint = pCurrentPoint;
-
-                //log("HERE :"$m_iCurrentPathIndex$" : "$pCurrentPoint.m_PathToNextPoint.Length);
-                //Node completed, get the next One
-                if(m_iCurrentPathIndex == pCurrentPoint.m_PathToNextPoint.Length - 1)
-                {
-                    m_iCurrentPathIndex = -1;
-                    m_iCurrentNode++;
-                    pCurrentPoint = GetPoint();
-                }
-                else
-                {
-                    m_iCurrentPathIndex++;
-                }
-
-                if(m_iCurrentPathIndex == -1)
-                {
-                    //Reached a point, and changing the parameters to reach the new one 
-                    // Check if there is a new movement mode and notify
-                    if(pPrevPoint.m_eMovementMode != pCurrentPoint.m_eMovementMode)
-                    {
-                        #ifdefDEBUG if(bShowLog) Log("Sending NODEMSG_NewMode To Point"); #endif
-                        pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewMode, GOCODE_None);
-                    }
-                    if(pPrevPoint.m_eMovementSpeed != pCurrentPoint.m_eMovementSpeed)
-                    {
-                        #ifdefDEBUG if(bShowLog) Log("Sending NODEMSG_NewSpeed"); #endif
-                        pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewSpeed, GOCODE_None);
-                    }
-                }
-                else if(m_iCurrentPathIndex == 0)
-                {
-                    //Reached a point, and changing the parameters to reach the new one 
-                    // Check if there is a new movement mode and notify
-                    if(GetNextPoint().m_eMovementMode != pCurrentPoint.m_eMovementMode)
-                    {
-                        #ifdefDEBUG if(bShowLog) Log("Sending NODEMSG_NewMode to next path"); #endif
-                        pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewMode, GOCODE_None);
-                    }
-                    if(GetNextPoint().m_eMovementSpeed != pCurrentPoint.m_eMovementSpeed)
-                    {
-                        #ifdefDEBUG if(bShowLog) Log("Sending NODEMSG_NewSpeed"); #endif
-                        pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewSpeed, GOCODE_None);
-                    }
-                }
-                // Notify the new node to reach
-                #ifdefDEBUG if(bShowLog) Log("Sending NODEMSG_NewNode; action point to reach "$pCurrentPoint$" : "$m_iCurrentPathIndex); #endif
-                pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewNode, GOCODE_None);
-            }
-            else
-            {
-                #ifdefDEBUG if(bShowLog) Log("EndNode reached Now we do what!"); #endif
-                m_iCurrentNode=-1;
-            }
-            return;
-
-        // from me
-        case NODEMSG_WaitingGoCode:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_WaitingGoCode : "$eCode); #endif
-            m_eGoCodeState[eCode] = GOCODESTATE_Waiting;
-            pCurrentTeam.TeamNotifyActionPoint( NODEMSG_WaitingGoCode, eCode);
-            return;
-
-        case NODEMSG_SnipeUntilGoCode:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_SnipeUntilGoCode : "$eCode); #endif
-            m_eGoCodeState[eCode] = GOCODESTATE_Snipe;
-            pCurrentTeam.TeamNotifyActionPoint( NODEMSG_SnipeUntilGoCode, eCode);
-            return;
-
-        case NODEMSG_BreachDoorAtGoCode:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_BreachDoorAtGoCode : "$eCode); #endif
-            m_eGoCodeState[eCode] = GOCODESTATE_Breach;
-            pCurrentTeam.TeamNotifyActionPoint( NODEMSG_BreachDoorAtGoCode, eCode);
-            return;
-
-            // from team-manager // team AI only
-        case NODEMSG_NodeReached:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_NodeReached call ReadNode()"); #endif
-			pCurrentPoint.m_bActionPointReached = true;
-            ReadNode();
-            return;
-
-        // from team-manager
-        case NODEMSG_PlayerLeft:
-            #ifdefDEBUG if(bShowLog) Log("NODEMSG_PlayerLeft"); #endif
-
-            // The Player has left the Team, send the Team to the previous ActionPoint
-            SetToPreviousActionPoint();
-
-            pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewNode, GOCODE_None);
-            return;
-        }
-    }
-    else
-    {
-        #ifdefDEBUG if(bShowLog) Log(self$" "$m_TeamColor.R$" "$m_TeamColor.G$" "$m_TeamColor.B$" m_pTeamManager or pCurrentPoint invalid"); #endif
-    }
+			// End:0x4D
+			case 1:
+				return;
+			// End:0x174
+			case 4:
+				// End:0x6D
+				if(__NFUN_154__(int(pCurrentTeam.m_eGoCode), int(3)))
+				{
+					return;
+				}
+				// End:0xE0
+				if(__NFUN_154__(int(m_eGoCodeState[int(eCode)]), int(1)))
+				{
+					m_eGoCodeState[int(eCode)] = 0;
+					// End:0xC4
+					if(__NFUN_155__(int(pCurrentPoint.m_eAction), int(0)))
+					{
+						pCurrentTeam.TeamNotifyActionPoint(0, 4);						
+					}
+					else
+					{
+						NotifyActionPoint(5, 4);
+					}
+					pCurrentTeam.ResetTeamGoCode();					
+				}
+				else
+				{
+					// End:0x129
+					if(__NFUN_154__(int(m_eGoCodeState[int(eCode)]), int(2)))
+					{
+						m_eGoCodeState[int(eCode)] = 0;
+						pCurrentTeam.TeamSnipingOver();
+						pCurrentTeam.ResetTeamGoCode();						
+					}
+					else
+					{
+						// End:0x172
+						if(__NFUN_154__(int(m_eGoCodeState[int(eCode)]), int(3)))
+						{
+							m_eGoCodeState[int(eCode)] = 0;
+							pCurrentTeam.BreachDoor();
+							pCurrentTeam.ResetTeamGoCode();							
+						}
+					}
+				}
+				return;
+			// End:0x30D
+			case 5:
+				// End:0x300
+				if(__NFUN_155__(m_iCurrentNode, __NFUN_147__(m_iNbNode, 1)))
+				{
+					pCurrentPoint.m_bActionCompleted = true;
+					pPrevPoint = pCurrentPoint;
+					// End:0x1E4
+					if(__NFUN_154__(m_iCurrentPathIndex, __NFUN_147__(pCurrentPoint.m_PathToNextPoint.Length, 1)))
+					{
+						m_iCurrentPathIndex = -1;
+						__NFUN_165__(m_iCurrentNode);
+						pCurrentPoint = GetPoint();						
+					}
+					else
+					{
+						__NFUN_165__(m_iCurrentPathIndex);
+					}
+					// End:0x26D
+					if(__NFUN_154__(m_iCurrentPathIndex, -1))
+					{
+						// End:0x232
+						if(__NFUN_155__(int(pPrevPoint.m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+						{
+							pCurrentTeam.TeamNotifyActionPoint(1, 4);
+						}
+						// End:0x26A
+						if(__NFUN_155__(int(pPrevPoint.m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+						{
+							pCurrentTeam.TeamNotifyActionPoint(2, 4);
+						}						
+					}
+					else
+					{
+						// End:0x2EA
+						if(__NFUN_154__(m_iCurrentPathIndex, 0))
+						{
+							// End:0x2B1
+							if(__NFUN_155__(int(GetNextPoint().m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+							{
+								pCurrentTeam.TeamNotifyActionPoint(1, 4);
+							}
+							// End:0x2EA
+							if(__NFUN_155__(int(GetNextPoint().m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+							{
+								pCurrentTeam.TeamNotifyActionPoint(2, 4);
+							}
+						}
+					}
+					pCurrentTeam.TeamNotifyActionPoint(3, 4);					
+				}
+				else
+				{
+					m_iCurrentNode = -1;
+				}
+				return;
+			// End:0x33A
+			case 6:
+				m_eGoCodeState[int(eCode)] = 1;
+				pCurrentTeam.TeamNotifyActionPoint(6, eCode);
+				return;
+			// End:0x367
+			case 9:
+				m_eGoCodeState[int(eCode)] = 2;
+				pCurrentTeam.TeamNotifyActionPoint(9, eCode);
+				return;
+			// End:0x394
+			case 10:
+				m_eGoCodeState[int(eCode)] = 3;
+				pCurrentTeam.TeamNotifyActionPoint(10, eCode);
+				return;
+			// End:0x3B2
+			case 7:
+				pCurrentPoint.m_bActionPointReached = true;
+				ReadNode();
+				return;
+			// End:0x3D2
+			case 8:
+				SetToPreviousActionPoint();
+				pCurrentTeam.TeamNotifyActionPoint(3, 4);
+				return;
+			// End:0xFFFF
+			default:
+				// End:0x3D8
+				break;
+				break;
+		}
+	}
+	return;
 }
 
 // check if this team has reach this action point
-function bool MemberReached(R6ActionPoint pTarget)
+function bool MemberReached(R6ActionPoint PTarget)
 {
-    local INT i;
-	local vector vDiff;
-	local FLOAT fZDiff;
-    
-    if(pTarget!=None)
-    {
-        if(m_pTeamManager!=None)
-        {
-            if(R6RainbowTeam(m_pTeamManager).m_bLeaderIsAPlayer)
-            {
-				vDiff = R6RainbowTeam(m_pTeamManager).m_TeamLeader.Location - pTarget.Location;
-				fZDiff = vDiff.z;
-				vDiff.z = 0;
-                if((VSize(vDiff) < m_fReachRange) && (fZDiff < m_fZReachRange))
-                {
-                    return true;
-                }
-            }
-        }
-    }
-    
-    // DEBUG CODE
-    /*if(pTarget!=None)
-    {
-        if((DEB_iStartTime + 5) < Level.TimeSeconds)
-        {
-            DEB_iStartTime = Level.TimeSeconds;
-            if(bShowLog) Log("   MemberReached at "$Level.TimeSeconds);
-            return true;
-        }
-    }*/
-    return false;
+	local int i;
+	local Vector vDiff;
+	local float fZDiff;
+
+	// End:0xA3
+	if(__NFUN_119__(PTarget, none))
+	{
+		// End:0xA3
+		if(__NFUN_119__(m_pTeamManager, none))
+		{
+			// End:0xA3
+			if(R6RainbowTeam(m_pTeamManager).m_bLeaderIsAPlayer)
+			{
+				vDiff = __NFUN_216__(R6RainbowTeam(m_pTeamManager).m_TeamLeader.Location, PTarget.Location);
+				fZDiff = vDiff.Z;
+				vDiff.Z = 0.0000000;
+				// End:0xA3
+				if(__NFUN_130__(__NFUN_176__(__NFUN_225__(vDiff), m_fReachRange), __NFUN_176__(fZDiff, m_fZReachRange)))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+	return;
 }
 
 // Read info in the node
 function ReadNode()
 {
-    local R6PlayerController pMyPlayer;
-    local actor NextPoint;
-    local R6RainbowTeam pCurrentTeam;
-    local R6ActionPoint pCurrentPoint;
+	local R6PlayerController pMyPlayer;
+	local Actor NextPoint;
+	local R6RainbowTeam pCurrentTeam;
+	local R6ActionPoint pCurrentPoint;
 
-    pCurrentPoint = GetPoint();
-    pCurrentTeam = R6RainbowTeam(m_pTeamManager);
-
-    if(pCurrentPoint.m_bActionCompleted != true)
-    {
-        switch(pCurrentPoint.m_eActionType)
-        {
-        case PACTTYP_Milestone:
-            // Tell the player we have reach this Milestone
-            ForEach m_pTeamManager.Level.AllActors(class'R6PlayerController',pMyPlayer)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP_Milestone #"$pCurrentPoint.m_iMileStoneNum); #endif
-                pMyPlayer.DisplayMilestoneMessage(pCurrentTeam.m_iRainbowTeamName, pCurrentPoint.m_iMileStoneNum);
-            }
-
-            //Keep going like normal once milestone has been dispatched
-        case PACTTYP_Normal:
-            // Send Action to the TeamManager
-            if(pCurrentPoint.m_eAction != PACT_None)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Normal eAction = "$pCurrentPoint.m_eAction); #endif
-                pCurrentTeam.TeamNotifyActionPoint(NODEMSG_NewAction, GOCODE_None);
-            }
-            else
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Normal eAction = none"); #endif
-                NotifyActionPoint( NODEMSG_ActionNodeCompleted, GOCODE_None);
-            }
-            break;
-        
-        case PACTTYP_GoCodeA:
-            // Set my Team in standby to this GoCode
-            if(pCurrentPoint.m_eAction == PACT_SnipeGoCode)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Alpha snipe"); #endif
-                NotifyActionPoint( NODEMSG_SnipeUntilGoCode, GOCODE_Alpha);
-            }
-            else if(pCurrentPoint.m_eAction == PACT_Breach)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Alpha Breach"); #endif
-                NotifyActionPoint( NODEMSG_BreachDoorAtGoCode, GOCODE_Alpha );
-            }
-            else
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Alpha Wait"); #endif
-                NotifyActionPoint( NODEMSG_WaitingGoCode, GOCODE_Alpha);
-            }
-            break;
-        case PACTTYP_GoCodeB:
-            // Set my Team in standby to this GoCode
-            if(pCurrentPoint.m_eAction == PACT_SnipeGoCode)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Bravo Snipe"); #endif
-                NotifyActionPoint( NODEMSG_SnipeUntilGoCode, GOCODE_Bravo);
-            }
-            else if(pCurrentPoint.m_eAction == PACT_Breach)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Bravo Breach"); #endif
-                NotifyActionPoint( NODEMSG_BreachDoorAtGoCode, GOCODE_Bravo );
-            }
-            else
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Bravo Wait"); #endif
-                NotifyActionPoint( NODEMSG_WaitingGoCode, GOCODE_Bravo);
-            }
-            break;
-        case PACTTYP_GoCodeC:
-            // Set my Team in standby to this GoCode
-            if(pCurrentPoint.m_eAction == PACT_SnipeGoCode)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Charlie snipe"); #endif
-                NotifyActionPoint( NODEMSG_SnipeUntilGoCode, GOCODE_Charlie);
-            }
-            else if(pCurrentPoint.m_eAction == PACT_Breach)
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Charlie Breach"); #endif
-                NotifyActionPoint( NODEMSG_BreachDoorAtGoCode, GOCODE_Charlie );
-            }
-            else
-            {
-                #ifdefDEBUG if(bShowLog) log("PACTTYP Bravo Wait"); #endif
-                NotifyActionPoint( NODEMSG_WaitingGoCode, GOCODE_Charlie);
-            }
-            break;
-        }
-    }
-    else
-    {
-        #ifdefDEBUG if(bShowLog) log("Read node is not an action point, sending NODEMSG_ActionNodeCompleted"); #endif
-        NotifyActionPoint( NODEMSG_ActionNodeCompleted, GOCODE_None);
-    }
+	pCurrentPoint = GetPoint();
+	pCurrentTeam = R6RainbowTeam(m_pTeamManager);
+	// End:0x1F6
+	if(__NFUN_243__(pCurrentPoint.m_bActionCompleted, true))
+	{
+		switch(pCurrentPoint.m_eActionType)
+		{
+			// End:0x95
+			case 1:
+				// End:0x94
+				foreach m_pTeamManager.Level.__NFUN_304__(Class'R6Engine.R6PlayerController', pMyPlayer)
+				{
+					pMyPlayer.DisplayMilestoneMessage(pCurrentTeam.m_iRainbowTeamName, pCurrentPoint.m_iMileStoneNum);					
+				}				
+			// End:0xD6
+			case 0:
+				// End:0xC9
+				if(__NFUN_155__(int(pCurrentPoint.m_eAction), int(0)))
+				{
+					pCurrentTeam.TeamNotifyActionPoint(0, 4);					
+				}
+				else
+				{
+					NotifyActionPoint(5, 4);
+				}
+				// End:0x1F3
+				break;
+			// End:0x134
+			case 2:
+				// End:0x101
+				if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(5)))
+				{
+					NotifyActionPoint(9, 0);					
+				}
+				else
+				{
+					// End:0x127
+					if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(6)))
+					{
+						NotifyActionPoint(10, 0);						
+					}
+					else
+					{
+						NotifyActionPoint(6, 0);
+					}
+				}
+				// End:0x1F3
+				break;
+			// End:0x192
+			case 3:
+				// End:0x15F
+				if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(5)))
+				{
+					NotifyActionPoint(9, 1);					
+				}
+				else
+				{
+					// End:0x185
+					if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(6)))
+					{
+						NotifyActionPoint(10, 1);						
+					}
+					else
+					{
+						NotifyActionPoint(6, 1);
+					}
+				}
+				// End:0x1F3
+				break;
+			// End:0x1F0
+			case 4:
+				// End:0x1BD
+				if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(5)))
+				{
+					NotifyActionPoint(9, 2);					
+				}
+				else
+				{
+					// End:0x1E3
+					if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(6)))
+					{
+						NotifyActionPoint(10, 2);						
+					}
+					else
+					{
+						NotifyActionPoint(6, 2);
+					}
+				}
+				// End:0x1F3
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}		
+	}
+	else
+	{
+		NotifyActionPoint(5, 4);
+	}
+	return;
 }
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function GetActionType
+// REMOVED IN 1.60: function GetAction
+// REMOVED IN 1.60: function NextActionPointHasAction
+// REMOVED IN 1.60: function GetMovementMode
+// REMOVED IN 1.60: function GetMovementSpeed

@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuHelpWindow - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuHelpWindow.uc : This is the help window where the tooltip is suppose to be display
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,65 +13,54 @@
 //=============================================================================
 class R6MenuHelpWindow extends R6WindowSimpleFramedWindowExt;
 
-var BOOL			m_bForceRefreshOnSameTip;			// force to clear wrapped text area for a same tip
+var bool m_bForceRefreshOnSameTip;  // force to clear wrapped text area for a same tip
 
 function Created()
 {
-    local UWindowWrappedTextArea pHelpZone;
-    local FLOAT fWidth;
-    fWidth = 1;
+	local UWindowWrappedTextArea pHelpZone;
+	local float fWidth;
 
-    /* Std position and size of this window in the menu
-    WinTop    = 125;
-    WinLeft   = 430;
-    WinWidth  = 394;
-    WinHeight = 40;
-    */
-
-    m_ClientArea = CreateWindow(class'UWindowWrappedTextArea', 0, 0, WinWidth, WinHeight, OwnerWindow);
-
-    SetBorderParam( 0, 7, 0, fWidth, Root.Colors.White);         // Top border
-    SetBorderParam( 1, 7, 0, fWidth, Root.Colors.White);         // Bottom border
-    ActiveBorder( 2, false);                         // Left border
-    ActiveBorder( 3, false);                         // Rigth border
-    ActiveBackGround( true, Root.Colors.Black);                  // draw background
-
-    m_eCornerType = All_Corners;
-    SetCornerColor( 3, Root.Colors.White);   // 3 = all corners
-
-    //create the tooltip text window zone
+	fWidth = 1.0000000;
+	m_ClientArea = CreateWindow(Class'UWindow.UWindowWrappedTextArea', 0.0000000, 0.0000000, WinWidth, WinHeight, OwnerWindow);
+	SetBorderParam(0, 7.0000000, 0.0000000, fWidth, Root.Colors.White);
+	SetBorderParam(1, 7.0000000, 0.0000000, fWidth, Root.Colors.White);
+	ActiveBorder(2, false);
+	ActiveBorder(3, false);
+	ActiveBackGround(true, Root.Colors.Black);
+	m_eCornerType = 3;
+	SetCornerColor(3, Root.Colors.White);
 	pHelpZone = UWindowWrappedTextArea(m_ClientArea);
 	pHelpZone.SetScrollable(false);
+	return;
 }
-
 
 /////////////////////////////////////////////////////////////////
 // display the help text in the m_pHelpTextWindow (derivate for uwindowwindow
 /////////////////////////////////////////////////////////////////
-function ToolTip(string strTip) 
+function ToolTip(string strTip)
 {
-	if ((strTip != ToolTipString) || (m_bForceRefreshOnSameTip))
+	// End:0xB8
+	if(__NFUN_132__(__NFUN_123__(strTip, ToolTipString), m_bForceRefreshOnSameTip))
 	{
 		ToolTipString = strTip;
 		UWindowWrappedTextArea(m_ClientArea).Clear();
-
-        if (ToolTipString != "")
-        {
-            UWindowWrappedTextArea(m_ClientArea).m_fXOffset = 5;
-            UWindowWrappedTextArea(m_ClientArea).m_fYOffset = 5;
-		    UWindowWrappedTextArea(m_ClientArea).AddText(ToolTipString, Root.Colors.ToolTipColor, Root.Fonts[F_HelpWindow]);					
-        }
+		// End:0xB8
+		if(__NFUN_123__(ToolTipString, ""))
+		{
+			UWindowWrappedTextArea(m_ClientArea).m_fXOffSet = 5.0000000;
+			UWindowWrappedTextArea(m_ClientArea).m_fYOffSet = 5.0000000;
+			UWindowWrappedTextArea(m_ClientArea).AddText(ToolTipString, Root.Colors.ToolTipColor, Root.Fonts[12]);
+		}
 	}
+	return;
 }
 
 //==========================================================================
 // AddTipText: Call this after a new tooltip. Force to put the next on the next line
 //==========================================================================
-function AddTipText( string _szNewText)
+function AddTipText(string _szNewText)
 {
-	UWindowWrappedTextArea(m_ClientArea).AddText( _szNewText, Root.Colors.ToolTipColor, Root.Fonts[F_HelpWindow]);
+	UWindowWrappedTextArea(m_ClientArea).AddText(_szNewText, Root.Colors.ToolTipColor, Root.Fonts[12]);
+	return;
 }
 
-defaultproperties
-{
-}

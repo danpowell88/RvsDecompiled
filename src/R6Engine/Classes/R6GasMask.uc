@@ -1,28 +1,32 @@
 //=============================================================================
+// R6GasMask - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6GasMask.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/06/14 * Created by Rima Brek
-//============================================================================= 
+//=============================================================================
 class R6GasMask extends StaticMeshActor;
-
-#exec NEW StaticMesh File="models\R6GasMask.ASE" Name="R6GasMask"
 
 defaultproperties
 {
-     RemoteRole=ROLE_None
-     bStatic=False
-     bWorldGeometry=False
-     m_bDeleteOnReset=True
-     m_bDrawFromBase=True
-     bShadowCast=False
-     bCollideActors=False
-     bBlockActors=False
-     bBlockPlayers=False
-     bEdShouldSnap=False
-     DrawScale=1.100000
-     StaticMesh=StaticMesh'R6Engine.R6GasMask'
-     Skins(0)=Texture'R6Characters_T.Rainbow.R6GasMask'
-     DrawScale3D=(X=-1.000000,Y=-1.000000)
+	RemoteRole=0
+	bStatic=false
+	bWorldGeometry=false
+	m_bDeleteOnReset=true
+	m_bDrawFromBase=true
+	bShadowCast=false
+	bCollideActors=false
+	bBlockActors=false
+	bBlockPlayers=false
+	bEdShouldSnap=false
+	DrawScale=1.1000000
+	StaticMesh=StaticMesh'R6Engine.R6GasMask'
+	Skins=/* Array type was not detected. */
+	DrawScale3D=(X=-1.0000000,Y=-1.0000000,Z=1.0000000)
 }

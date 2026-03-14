@@ -1,605 +1,810 @@
-	//=============================================================================
+//=============================================================================
+// WindowConsole - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // WindowConsole - console replacer to implement UWindow UI System
 //=============================================================================
-class WindowConsole extends Console;
+class WindowConsole extends Console
+ config;
 
-// Constants.
-const MaxLines=64;
-const TextMsgSize=128;
+const MaxLines = 64;
+const TextMsgSize = 128;
 
-// Variables.
-var viewport Viewport;
-var int Scrollback, NumLines, TopLine, TextLines;
-var float MsgTime, MsgTickTime;
-var string MsgText[64];
-var float MsgTick[64];
+var int Scrollback;
+// NEW IN 1.60
+var int numLines;
+// NEW IN 1.60
+var int TopLine;
+// NEW IN 1.60
+var int TextLines;
 var int ConsoleLines;
-var bool bNoStuff, bTyping;
+var bool bNoStuff;
+// NEW IN 1.60
+var bool bTyping;
 var bool bShowLog;
-
-// ---------
-
-
-var UWindowRootWindow	Root;
-var() config string		RootWindow;
-
-var float				OldClipX;
-var float				OldClipY;
-var bool				bCreatedRoot;
-var float				MouseX;
-var float				MouseY;
-
-var class<UWindowConsoleWindow> ConsoleClass;
-var config float		MouseScale;
-var config bool			bShowConsole;
-var bool				bBlackout;
-var bool				bUWindowType;
-
-var bool				bUWindowActive;
-var bool				bLocked;
-var bool				bLevelChange;
-var string				OldLevel;
-
-//#ifndef R6CODE
-//var config EInputKey	UWindowKey;
-//#endif // #ifndef R6CODE
-
-//ORIGINAL UNREAL CONSOLE var UWindowConsoleWindow ConsoleWindow; 
-
+var bool bCreatedRoot;
+var config bool bShowConsole;
+var bool bBlackout;
+var bool bUWindowType;
+var bool bUWindowActive;
+var bool bLocked;
+var bool bLevelChange;
+var float MsgTime;
+// NEW IN 1.60
+var float MsgTickTime;
+var float MsgTick[64];
+var float OldClipX;
+var float OldClipY;
+var float MouseX;
+var float MouseY;
+var config float MouseScale;
+// Variables.
+var Viewport Viewport;
+var UWindowRootWindow Root;
 // R6CODE
-var name ConsoleState;   
-var string szStoreIP;           // String used to store IP of host server
+var name ConsoleState;
+var Class<UWindowConsoleWindow> ConsoleClass;
+var string MsgText[64];
+var() config string RootWindow;
+var string OldLevel;
+var string szStoreIP;  // String used to store IP of host server
+
 //function class<object> GetRestKitDescName(string WeaponNameTag);
-function GetRestKitDescName(GameReplicationInfo _GRI, R6ServerInfo  pServerOptions);
-// R6CODE END
+function GetRestKitDescName(GameReplicationInfo _GRI, R6ServerInfo pServerOptions)
+{
+	return;
+}
 
 function ResetUWindow()
 {
-    if(bShowLog)log("WindowConsole::ResetUWindow");
-
-	if(Root != None)
+	// End:0x28
+	if(bShowLog)
+	{
+		__NFUN_231__("WindowConsole::ResetUWindow");
+	}
+	// End:0x42
+	if(__NFUN_119__(Root, none))
+	{
 		Root.Close();
-	Root = None;
-	bCreatedRoot = False;
-//ORIGINAL UNREAL CONSOLE	ConsoleWindow = None;
-	bShowConsole = False;
+	}
+	Root = none;
+	bCreatedRoot = false;
+	bShowConsole = false;
 	CloseUWindow();
+	return;
 }
 
-function bool KeyEvent( EInputKey Key, EInputAction Action, FLOAT Delta )
+function bool KeyEvent(Interactions.EInputKey Key, Interactions.EInputAction Action, float Delta)
 {
 	local byte k;
+
 	k = Key;
-    if(bShowLog)log("WindowConsole state \" KeyEvent eAction"@Action@"Key"@Key);
+	// End:0x57
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("WindowConsole state \" KeyEvent eAction", string(Action)), "Key"), string(Key)));
+	}
 	switch(Action)
 	{
-	case IST_Press:
-        if (k == ViewportOwner.Actor.GetKey("Console"))
-        {
-			if (bLocked)
+		// End:0xD8
+		case 1:
+			// End:0xB3
+			if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+			{
+				// End:0x9A
+				if(bLocked)
+				{
+					return true;
+				}
+				LaunchUWindow();
+				// End:0xB1
+				if(__NFUN_129__(bShowConsole))
+				{
+					ShowConsole();
+				}
 				return true;
-
-			LaunchUWindow();
-			if(!bShowConsole)
-				ShowConsole();
-			return true;
-        }
-        
-		switch(k)
-		{
-		case EInputKey.IK_Escape:
-			if (bLocked)
-				return true;
-
-			LaunchUWindow();
-			return true;
-		}
-		break;
+			}
+			switch(k)
+			{
+				// End:0xD2
+				case 27:
+					// End:0xCA
+					if(bLocked)
+					{
+						return true;
+					}
+					LaunchUWindow();
+					return true;
+				// End:0xFFFF
+				default:
+					// End:0xDB
+					break;
+					break;
+			}
+		// End:0xFFFF
+		default:
+			return false;
+			break;
 	}
-
-	return False; 
-	//!! because of ConsoleKey
-	//!! return Super.KeyEvent(Key, Action, Delta);
+	return;
 }
 
 function ShowConsole()
 {
 	bShowConsole = true;
-//ORIGINAL UNREAL CONSOLE	if(bCreatedRoot)
-//ORIGINAL UNREAL CONSOLE		ConsoleWindow.ShowWindow();
+	return;
 }
 
 function HideConsole()
 {
 	ConsoleLines = 0;
 	bShowConsole = false;
-//ORIGINAL UNREAL CONSOLE	if (ConsoleWindow != None)
-//ORIGINAL UNREAL CONSOLE		ConsoleWindow.HideWindow();
-}
-
-/*
-event Tick( float Delta )
-{
-	Super.Tick(Delta);
-
-	if(bLevelChange && Root != None && string(ViewportOwner.Actor.Level) != OldLevel)
-	{
-		OldLevel = string(ViewportOwner.Actor.Level);
-		// if this is Entry, we could be falling through to another level...
-		if(ViewportOwner.Actor.Level != ViewportOwner.Actor.GetEntryLevel())
-			bLevelChange = False;
-		Root.NotifyAfterLevelChange();
-	}
-}
-*/
-
-state UWindowCanPlay
-{
-    function BeginState()
-    {
-        if(bShowLog)log("UWindowCanPlay::BeginState");
-        ConsoleState = GetStateName();
-    }
-    
-    event Tick( float Delta )
-	{
-		Global.Tick(Delta);
-		if(Root != None)
-			Root.DoTick(Delta);
-	}
-
-	function PostRender( canvas Canvas )
-	{
-        if(bShowLog)log("UWindowCanPlay::PostRender");
-
-		if(Root != None)
-			Root.bUWindowActive = True;
-		RenderUWindow( Canvas );
-	}
-
-	function bool KeyType( EInputKey Key )
-	{
-        if(bShowLog)log("WindowConsole state UWindowCanPlay KeyType Key"@Key);
-		if (Root != None)
-			Root.WindowEvent(WM_KeyType, None, MouseX, MouseY, Key);
-		return True;
-	}
-
-	function bool KeyEvent( EInputKey Key, EInputAction Action, FLOAT Delta )
-	{
-		local byte k;
-		k = Key;
-        if(bShowLog)log("WindowConsole state UWindowCanPlay KeyEvent eAction"@Action@"Key"@Key);
-		switch (Action)
-		{
-		
-        case IST_Release:
-			if(Root != None)
-				Root.WindowEvent(WM_KeyUp, None, MouseX, MouseY, k);
-			break;
-
-        case IST_Press:
-            if (k == ViewportOwner.Actor.GetKey("Console"))
-            {
-                if (bLocked)
-                    return true;
-
-                Type();
-                return true;
-
-            }
-
-            switch (k)
-			{
-			case EInputKey.IK_F9:	// Screenshot
-				return Global.KeyEvent(Key, Action, Delta);
-				break;
-//			case EInputKey.IK_Escape:
-//				if(Root != None)
-//					Root.CloseActiveWindow();
-//				break;
-			default:
-				if(Root != None)
-					Root.WindowEvent(WM_KeyDown, None, MouseX, MouseY, k);
-				break;
-			}
-			break;
-		default:
-			break;
-		}
-
-        if (k >= EInputKey.IK_0 && k<= EInputKey.IK_9)
-            return true;
-        else 
-            return false;
-
-	}
-}
-
-state UWindow
-{
-
-	event Tick( float Delta )
-	{
-		Global.Tick(Delta);
-		if(Root != None)
-			Root.DoTick(Delta);
-	}
-
-	function PostRender( canvas Canvas )
-	{
-        if(bShowLog)log("Window Console state UWindow::PostRender");
-
-		if(Root != None)
-			Root.bUWindowActive = True;
-		RenderUWindow( Canvas );
-	}
-
-	function bool KeyType( EInputKey Key )
-	{
-        if(bShowLog)log("WindowConsole state UWindow KeyType Key"@Key);
-		if (Root != None)
-			Root.WindowEvent(WM_KeyType, None, MouseX, MouseY, Key);
-		return True;
-	}
-
-	function bool KeyEvent( EInputKey Key, EInputAction Action, FLOAT Delta )
-	{
-		local byte k;
-		k = Key;
-        if(bShowLog)log("WindowConsole state UWindow KeyEvent eAction"@Action@"Key"@Key);
-		switch (Action)
-		{
-		case IST_Release:
-			switch (k)
-			{
-			case EInputKey.IK_LeftMouse:
-				if(Root != None) 
-					Root.WindowEvent(WM_LMouseUp, None, MouseX, MouseY, k);
-				break;
-			case EInputKey.IK_RightMouse:
-				if(Root != None)
-					Root.WindowEvent(WM_RMouseUp, None, MouseX, MouseY, k);
-				break;
-			case EInputKey.IK_MiddleMouse:
-				if(Root != None)
-					Root.WindowEvent(WM_MMouseUp, None, MouseX, MouseY, k);
-				break;
-			default:
-				if(Root != None)
-					Root.WindowEvent(WM_KeyUp, None, MouseX, MouseY, k);
-				break;
-			}
-			break;
-
-		case IST_Press:
-            if (k == ViewportOwner.Actor.GetKey("Console"))
-            {
-				if (bShowConsole)
-				{
-					HideConsole();
-				}
-				else
-				{
-					if(Root.bAllowConsole)
-						ShowConsole();
-					else
-						Root.WindowEvent(WM_KeyDown, None, MouseX, MouseY, k);
-				}
-				break;
-            }
-
-            switch (k)
-			{
-			case EInputKey.IK_F9:	// Screenshot
-				return Global.KeyEvent(Key, Action, Delta);
-				break;
-			case EInputKey.IK_Escape:
-				if(Root != None)
-					Root.CloseActiveWindow();
-				break;
-			case EInputKey.IK_LeftMouse:
-				if(Root != None)
-					Root.WindowEvent(WM_LMouseDown, None, MouseX, MouseY, k);
-				break;
-			case EInputKey.IK_RightMouse:
-				if(Root != None)
-					Root.WindowEvent(WM_RMouseDown, None, MouseX, MouseY, k);
-				break;
-			case EInputKey.IK_MiddleMouse:
-				if(Root != None)
-					Root.WindowEvent(WM_MMouseDown, None, MouseX, MouseY, k);
-				break;
-			default:
-				if(Root != None)
-					Root.WindowEvent(WM_KeyDown, None, MouseX, MouseY, k);
-				break;
-			}
-			break;
-		case IST_Axis:
-			switch (Key)
-			{
-			case IK_MouseX:
-				MouseX = MouseX + (MouseScale * Delta);
-				break;
-			case IK_MouseY:
-				MouseY = MouseY - (MouseScale * Delta);
-				break;					
-			}
-		default:
-			break;
-		}
-
-		return true;
-	}
-
-Begin:
+	return;
 }
 
 function ToggleUWindow()
 {
+	return;
 }
 
 function LaunchUWindow()
-{	
-
-    if(bShowLog)log("WindowConsole::LaunchUWindow");
-
-    ViewportOwner.bSuspendPrecaching = True;
-	bUWindowActive = True;    
-	ViewportOwner.bShowWindowsMouse = True;
-
-	if(Root != None)
-		Root.bWindowVisible = True;
-
-	GotoState('UWindow');
+{
+	// End:0x29
+	if(bShowLog)
+	{
+		__NFUN_231__("WindowConsole::LaunchUWindow");
+	}
+	ViewportOwner.bSuspendPrecaching = true;
+	bUWindowActive = true;
+	ViewportOwner.bShowWindowsMouse = true;
+	// End:0x6F
+	if(__NFUN_119__(Root, none))
+	{
+		Root.bWindowVisible = true;
+	}
+	__NFUN_113__('UWindow');
+	return;
 }
 
 function CloseUWindow()
 {
- 
-    if(bShowLog)log("WindowConsole::CloseUWindow");
-
-	bUWindowActive = False;
-	ViewportOwner.bShowWindowsMouse = False;   
-
-	if(Root != None)
-		Root.bWindowVisible = False;
-
-	GotoState('Game');
-	ViewportOwner.bSuspendPrecaching = False;
+	// End:0x28
+	if(bShowLog)
+	{
+		__NFUN_231__("WindowConsole::CloseUWindow");
+	}
+	bUWindowActive = false;
+	ViewportOwner.bShowWindowsMouse = false;
+	// End:0x5D
+	if(__NFUN_119__(Root, none))
+	{
+		Root.bWindowVisible = false;
+	}
+	__NFUN_113__('Game');
+	ViewportOwner.bSuspendPrecaching = false;
+	return;
 }
 
 function CreateRootWindow(Canvas Canvas)
 {
 	local int i;
 
-    if(bShowLog)log("WindowConsole::CreateRootWindow");
-
-	if(Canvas != None)
+	// End:0x2C
+	if(bShowLog)
+	{
+		__NFUN_231__("WindowConsole::CreateRootWindow");
+	}
+	// End:0x62
+	if(__NFUN_119__(Canvas, none))
 	{
 		OldClipX = Canvas.ClipX;
-		OldClipY = Canvas.ClipY;
+		OldClipY = Canvas.ClipY;		
 	}
 	else
 	{
-		OldClipX = 0;
-		OldClipY = 0;
+		OldClipX = 0.0000000;
+		OldClipY = 0.0000000;
 	}
-	
-	// R6CODE log("Creating root window: "$RootWindow);
-	
-	Root = New(None) class<UWindowRootWindow>(DynamicLoadObject(RootWindow, class'Class'));
-
-    // R6CODE log( Root );
-    
+	Root = new (none) Class<UWindowRootWindow>(DynamicLoadObject(RootWindow, Class'Core.Class'));
 	Root.BeginPlay();
-	Root.WinTop = 0;
-	Root.WinLeft = 0;
-
-	if(Canvas != None)
+	Root.WinTop = 0.0000000;
+	Root.WinLeft = 0.0000000;
+	// End:0x170
+	if(__NFUN_119__(Canvas, none))
 	{
-		Root.WinWidth = Canvas.ClipX / Root.GUIScale;
-		Root.WinHeight = Canvas.ClipY / Root.GUIScale;
+		Root.WinWidth = __NFUN_172__(Canvas.ClipX, Root.GUIScale);
+		Root.WinHeight = __NFUN_172__(Canvas.ClipY, Root.GUIScale);
 		Root.RealWidth = Canvas.ClipX;
-		Root.RealHeight = Canvas.ClipY;
+		Root.RealHeight = Canvas.ClipY;		
 	}
 	else
 	{
-		Root.WinWidth = 0;
-		Root.WinHeight = 0;
-		Root.RealWidth = 0;
-		Root.RealHeight = 0;
+		Root.WinWidth = 0.0000000;
+		Root.WinHeight = 0.0000000;
+		Root.RealWidth = 0.0000000;
+		Root.RealHeight = 0.0000000;
 	}
-
 	Root.ClippingRegion.X = 0;
 	Root.ClippingRegion.Y = 0;
-	Root.ClippingRegion.W = Root.WinWidth;
-	Root.ClippingRegion.H = Root.WinHeight;
-
-	Root.Console = Self;
-
+	Root.ClippingRegion.W = int(Root.WinWidth);
+	Root.ClippingRegion.H = int(Root.WinHeight);
+	Root.Console = self;
 	Root.bUWindowActive = bUWindowActive;
-    if(bShowLog)log("CreateRootWindow Setting Root.bUWindowActive="@Root.bUWindowActive);
-
+	// End:0x2A5
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__("CreateRootWindow Setting Root.bUWindowActive=", string(Root.bUWindowActive)));
+	}
 	Root.Created();
-	bCreatedRoot = True;
-
-	// Create the console window.
-//ORIGINAL UNREAL CONSOLE	ConsoleWindow = UWindowConsoleWindow(Root.CreateWindow(ConsoleClass, 100, 100, 200, 200));
-	if(!bShowConsole)
+	bCreatedRoot = true;
+	// End:0x2CD
+	if(__NFUN_129__(bShowConsole))
+	{
 		HideConsole();
-
-//ORIGINAL UNREAL CONSOLE	UWindowConsoleClientWindow(ConsoleWindow.ClientArea).TextArea.AddText(" ");
-//ORIGINAL UNREAL CONSOLE	for (I=0; I<4; I++)
-//ORIGINAL UNREAL CONSOLE		UWindowConsoleClientWindow(ConsoleWindow.ClientArea).TextArea.AddText(MsgText[I]);
+	}
+	return;
 }
 
-function RenderUWindow( canvas Canvas )
+function RenderUWindow(Canvas Canvas)
 {
 	local UWindowWindow NewFocusWindow;
 	local R6GameOptions pGameOptions;
 
-    if(bShowLog)log("WindowConsole::RenderUWindow state"@ GetStateName());
-
-	pGameOptions = class'Actor'.static.GetGameOptions();
-
-	Canvas.bNoSmooth = False;
-	Canvas.Z = 1;
-	Canvas.Style = 1;	
-	Canvas.SetDrawColor(255, 255,255);
-    
-    // R6CODE
-    MouseScale = Clamp(pGameOptions.MouseSensitivity, 10, 100) / 32.0f;
-
-	if(ViewportOwner.bWindowsMouseAvailable && Root != None)
+	// End:0x36
+	if(bShowLog)
 	{
-		MouseX = ViewportOwner.WindowsMouseX/Root.GUIScale;
-		MouseY = ViewportOwner.WindowsMouseY/Root.GUIScale;
+		__NFUN_231__(__NFUN_168__("WindowConsole::RenderUWindow state", string(__NFUN_284__())));
 	}
-
-	if(!bCreatedRoot) 
+	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	Canvas.bNoSmooth = false;
+	Canvas.Z = 1.0000000;
+	Canvas.Style = 1;
+	Canvas.__NFUN_2626__(byte(255), byte(255), byte(255));
+	MouseScale = __NFUN_172__(float(__NFUN_251__(int(pGameOptions.MouseSensitivity), 10, 100)), 32.0000000);
+	// End:0x122
+	if(__NFUN_130__(ViewportOwner.bWindowsMouseAvailable, __NFUN_119__(Root, none)))
+	{
+		MouseX = __NFUN_172__(ViewportOwner.WindowsMouseX, Root.GUIScale);
+		MouseY = __NFUN_172__(ViewportOwner.WindowsMouseY, Root.GUIScale);
+	}
+	// End:0x138
+	if(__NFUN_129__(bCreatedRoot))
+	{
 		CreateRootWindow(Canvas);
-	
-	Root.bWindowVisible = True;
-	Root.bUWindowActive = bUWindowActive;
-    if(bShowLog)log("RenderUWindow Setting"@Root@".bUWindowActive="@Root.bUWindowActive);
-
-	// this is to keep the good values of canvas for the root 
-	if(Canvas.ClipX != Canvas.SizeX || Canvas.ClipY != Canvas.SizeY)
-	{
-		Canvas.ClipX = Canvas.SizeX;
-		Canvas.ClipY = Canvas.SizeY;
 	}
-
-	if(Canvas.ClipX != OldClipX || Canvas.ClipY != OldClipY)
+	Root.bWindowVisible = true;
+	Root.bUWindowActive = bUWindowActive;
+	// End:0x1B1
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("RenderUWindow Setting", string(Root)), ".bUWindowActive="), string(Root.bUWindowActive)));
+	}
+	// End:0x237
+	if(__NFUN_132__(__NFUN_181__(Canvas.ClipX, float(Canvas.SizeX)), __NFUN_181__(Canvas.ClipY, float(Canvas.SizeY))))
+	{
+		Canvas.ClipX = float(Canvas.SizeX);
+		Canvas.ClipY = float(Canvas.SizeY);
+	}
+	// End:0x3CE
+	if(__NFUN_132__(__NFUN_181__(Canvas.ClipX, OldClipX), __NFUN_181__(Canvas.ClipY, OldClipY)))
 	{
 		OldClipX = Canvas.ClipX;
 		OldClipY = Canvas.ClipY;
-		
-		Root.WinTop = 0;
-		Root.WinLeft = 0;
-		Root.WinWidth = Canvas.ClipX / Root.GUIScale;
-		Root.WinHeight = Canvas.ClipY / Root.GUIScale;
-
+		Root.WinTop = 0.0000000;
+		Root.WinLeft = 0.0000000;
+		Root.WinWidth = __NFUN_172__(Canvas.ClipX, Root.GUIScale);
+		Root.WinHeight = __NFUN_172__(Canvas.ClipY, Root.GUIScale);
 		Root.RealWidth = Canvas.ClipX;
 		Root.RealHeight = Canvas.ClipY;
-
 		Root.ClippingRegion.X = 0;
 		Root.ClippingRegion.Y = 0;
-		Root.ClippingRegion.W = Root.WinWidth;
-		Root.ClippingRegion.H = Root.WinHeight;
-
+		Root.ClippingRegion.W = int(Root.WinWidth);
+		Root.ClippingRegion.H = int(Root.WinHeight);
 		Root.Resized();
 	}
-
-	//if(MouseX > Root.WinWidth) MouseX = Root.WinWidth;
-	//if(MouseY > Root.WinHeight) MouseY = Root.WinHeight;
-    if(MouseX > Canvas.SizeX) MouseX    = Canvas.SizeX;
-    if(MouseY > Canvas.SizeY) MouseY     = Canvas.SizeY;
-	if(MouseX < 0) MouseX = 0;
-	if(MouseY < 0) MouseY = 0;
-
-
-	// Check for keyboard focus
-	NewFocusWindow = Root.CheckKeyFocusWindow();
-
-	if(NewFocusWindow != Root.KeyFocusWindow)
+	// End:0x3FE
+	if(__NFUN_177__(MouseX, float(Canvas.SizeX)))
 	{
-		Root.KeyFocusWindow.KeyFocusExit();		
+		MouseX = float(Canvas.SizeX);
+	}
+	// End:0x42E
+	if(__NFUN_177__(MouseY, float(Canvas.SizeY)))
+	{
+		MouseY = float(Canvas.SizeY);
+	}
+	// End:0x446
+	if(__NFUN_176__(MouseX, float(0)))
+	{
+		MouseX = 0.0000000;
+	}
+	// End:0x45E
+	if(__NFUN_176__(MouseY, float(0)))
+	{
+		MouseY = 0.0000000;
+	}
+	NewFocusWindow = Root.CheckKeyFocusWindow();
+	// End:0x4CF
+	if(__NFUN_119__(NewFocusWindow, Root.KeyFocusWindow))
+	{
+		Root.KeyFocusWindow.KeyFocusExit();
 		Root.KeyFocusWindow = NewFocusWindow;
 		Root.KeyFocusWindow.KeyFocusEnter();
 	}
-
-    if(bShowLog)log("WindowConsole::RenderUWindow root"@root);
-    
+	// End:0x506
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__("WindowConsole::RenderUWindow root", string(Root)));
+	}
 	Root.ApplyResolutionOnWindowsPos(MouseX, MouseY);
 	Root.MoveMouse(MouseX, MouseY);
-	Root.WindowEvent(WM_Paint, Canvas, MouseX, MouseY, 0);
-	if ((bUWindowActive) && ViewportOwner.bShowWindowsMouse)
+	Root.WindowEvent(11, Canvas, MouseX, MouseY, 0);
+	// End:0x58A
+	if(__NFUN_130__(bUWindowActive, ViewportOwner.bShowWindowsMouse))
+	{
 		Root.DrawMouse(Canvas);
+	}
+	return;
 }
 
-event Message( coerce string Msg, float MsgLife )
+event Message(coerce string Msg, float MsgLife)
 {
-	Super.Message( Msg, MsgLife );
-
-	if ( ViewportOwner.Actor == None )
+	super.Message(Msg, MsgLife);
+	// End:0x26
+	if(__NFUN_114__(ViewportOwner.Actor, none))
+	{
 		return;
-
-//ORIGINAL UNREAL CONSOLE	if( (Msg!="") && (ConsoleWindow != None) )
-//ORIGINAL UNREAL CONSOLE		UWindowConsoleClientWindow(ConsoleWindow.ClientArea).TextArea.AddText(MsgText[TopLine]);
+	}
+	return;
 }
 
 function UpdateHistory()
 {
-	// Update history buffer.
-	History[HistoryCur++ % MaxHistory] = TypedStr;
-	if( HistoryCur > HistoryBot )
-		HistoryBot++;
-	if( HistoryCur - HistoryTop >= MaxHistory )
-		HistoryTop = HistoryCur - MaxHistory + 1;
+	History[int(__NFUN_173__(float(__NFUN_165__(HistoryCur)), float(16)))] = TypedStr;
+	// End:0x33
+	if(__NFUN_151__(HistoryCur, HistoryBot))
+	{
+		__NFUN_165__(HistoryBot);
+	}
+	// End:0x58
+	if(__NFUN_153__(__NFUN_147__(HistoryCur, HistoryTop), 16))
+	{
+		HistoryTop = __NFUN_146__(__NFUN_147__(HistoryCur, 16), 1);
+	}
+	return;
 }
 
 function HistoryUp()
 {
-	if( HistoryCur > HistoryTop )
+	// End:0x47
+	if(__NFUN_151__(HistoryCur, HistoryTop))
 	{
-		History[HistoryCur % MaxHistory] = TypedStr;
-		TypedStr = History[--HistoryCur % MaxHistory];
+		History[int(__NFUN_173__(float(HistoryCur), float(16)))] = TypedStr;
+		TypedStr = History[int(__NFUN_173__(float(__NFUN_164__(HistoryCur)), float(16)))];
 	}
+	return;
 }
 
 function HistoryDown()
 {
-	History[HistoryCur % MaxHistory] = TypedStr;
-	if( HistoryCur < HistoryBot )
-		TypedStr = History[++HistoryCur % MaxHistory];
+	History[int(__NFUN_173__(float(HistoryCur), float(16)))] = TypedStr;
+	// End:0x4A
+	if(__NFUN_150__(HistoryCur, HistoryBot))
+	{
+		TypedStr = History[int(__NFUN_173__(float(__NFUN_163__(HistoryCur)), float(16)))];		
+	}
 	else
-		TypedStr="";
+	{
+		TypedStr = "";
+	}
+	return;
 }
 
 function NotifyLevelChange()
 {
-    if(bShowLog)log("WindowConsole NotifyLevelChange");
-    //Super.NotifyLevelChange();
-	
-	// rbrek - temporary fix (yjoly, adionne)
-	if(GetStateName() == 'Typing' )
+	// End:0x2C
+	if(bShowLog)
 	{
-		if(TypedStr!="")
-		{
-			TypedStr="";
-			HistoryCur = HistoryTop;	
-		}
-		GotoState(ConsoleState);
+		__NFUN_231__("WindowConsole NotifyLevelChange");
 	}
-
-	bLevelChange = True;
-	if(Root != None)
+	// End:0x5F
+	if(__NFUN_254__(__NFUN_284__(), 'Typing'))
+	{
+		// End:0x58
+		if(__NFUN_123__(TypedStr, ""))
+		{
+			TypedStr = "";
+			HistoryCur = HistoryTop;
+		}
+		__NFUN_113__(ConsoleState);
+	}
+	bLevelChange = true;
+	// End:0x81
+	if(__NFUN_119__(Root, none))
+	{
 		Root.NotifyBeforeLevelChange();
+	}
+	return;
 }
 
 function NotifyAfterLevelChange()
 {
-    if(bShowLog)log("WindowConsole NotifyAfterLevelChange");
-	if(bLevelChange && Root != None)
-	{	
-	    bLevelChange = False;
+	// End:0x31
+	if(bShowLog)
+	{
+		__NFUN_231__("WindowConsole NotifyAfterLevelChange");
+	}
+	// End:0x5E
+	if(__NFUN_130__(bLevelChange, __NFUN_119__(Root, none)))
+	{
+		bLevelChange = false;
 		Root.NotifyAfterLevelChange();
 	}
+	return;
 }
 
 //===========================================================================================
 // MenuLoadProfile: A profile was load
 //===========================================================================================
-function MenuLoadProfile( BOOL _bServerProfile)
+function MenuLoadProfile(bool _bServerProfile)
 {
-	Root.MenuLoadProfile( _bServerProfile);
+	Root.MenuLoadProfile(_bServerProfile);
+	return;
+}
+
+state UWindowCanPlay
+{
+	function BeginState()
+	{
+		// End:0x27
+		if(bShowLog)
+		{
+			__NFUN_231__("UWindowCanPlay::BeginState");
+		}
+		ConsoleState = __NFUN_284__();
+		return;
+	}
+
+	event Tick(float Delta)
+	{
+		global.Tick(Delta);
+		// End:0x2A
+		if(__NFUN_119__(Root, none))
+		{
+			Root.DoTick(Delta);
+		}
+		return;
+	}
+
+	function PostRender(Canvas Canvas)
+	{
+		// End:0x27
+		if(bShowLog)
+		{
+			__NFUN_231__("UWindowCanPlay::PostRender");
+		}
+		// End:0x43
+		if(__NFUN_119__(Root, none))
+		{
+			Root.bUWindowActive = true;
+		}
+		RenderUWindow(Canvas);
+		return;
+	}
+
+	function bool KeyType(Interactions.EInputKey Key)
+	{
+		// End:0x44
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__("WindowConsole state UWindowCanPlay KeyType Key", string(Key)));
+		}
+		// End:0x72
+		if(__NFUN_119__(Root, none))
+		{
+			Root.WindowEvent(10, none, MouseX, MouseY, int(Key));
+		}
+		return true;
+		return;
+	}
+
+	function bool KeyEvent(Interactions.EInputKey Key, Interactions.EInputAction Action, float Delta)
+	{
+		local byte k;
+
+		k = Key;
+		// End:0x64
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("WindowConsole state UWindowCanPlay KeyEvent eAction", string(Action)), "Key"), string(Key)));
+		}
+		switch(Action)
+		{
+			// End:0xA1
+			case 3:
+				// End:0x9E
+				if(__NFUN_119__(Root, none))
+				{
+					Root.WindowEvent(8, none, MouseX, MouseY, int(k));
+				}
+				// End:0x147
+				break;
+			// End:0x141
+			case 1:
+				// End:0xE5
+				if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+				{
+					// End:0xDD
+					if(bLocked)
+					{
+						return true;
+					}
+					type();
+					return true;
+				}
+				switch(k)
+				{
+					// End:0x10A
+					case 120:
+						return global.KeyEvent(Key, Action, Delta);
+						// End:0x13E
+						break;
+					// End:0xFFFF
+					default:
+						// End:0x13B
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(9, none, MouseX, MouseY, int(k));
+						}
+						// End:0x13E
+						break;
+						break;
+				}
+				// End:0x147
+				break;
+			// End:0xFFFF
+			default:
+				// End:0x147
+				break;
+				break;
+		}
+		// End:0x16E
+		if(__NFUN_130__(__NFUN_153__(int(k), int(48)), __NFUN_152__(int(k), int(57))))
+		{
+			return true;			
+		}
+		else
+		{
+			return false;
+		}
+		return;
+	}
+	stop;
+}
+
+state UWindow
+{
+	event Tick(float Delta)
+	{
+		global.Tick(Delta);
+		// End:0x2A
+		if(__NFUN_119__(Root, none))
+		{
+			Root.DoTick(Delta);
+		}
+		return;
+	}
+
+	function PostRender(Canvas Canvas)
+	{
+		// End:0x35
+		if(bShowLog)
+		{
+			__NFUN_231__("Window Console state UWindow::PostRender");
+		}
+		// End:0x51
+		if(__NFUN_119__(Root, none))
+		{
+			Root.bUWindowActive = true;
+		}
+		RenderUWindow(Canvas);
+		return;
+	}
+
+	function bool KeyType(Interactions.EInputKey Key)
+	{
+		// End:0x3D
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__("WindowConsole state UWindow KeyType Key", string(Key)));
+		}
+		// End:0x6B
+		if(__NFUN_119__(Root, none))
+		{
+			Root.WindowEvent(10, none, MouseX, MouseY, int(Key));
+		}
+		return true;
+		return;
+	}
+
+	function bool KeyEvent(Interactions.EInputKey Key, Interactions.EInputAction Action, float Delta)
+	{
+		local byte k;
+
+		k = Key;
+		// End:0x5D
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("WindowConsole state UWindow KeyEvent eAction", string(Action)), "Key"), string(Key)));
+		}
+		switch(Action)
+		{
+			// End:0x149
+			case 3:
+				switch(k)
+				{
+					// End:0xA6
+					case 1:
+						// End:0xA3
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(1, none, MouseX, MouseY, int(k));
+						}
+						// End:0x146
+						break;
+					// End:0xDC
+					case 2:
+						// End:0xD9
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(5, none, MouseX, MouseY, int(k));
+						}
+						// End:0x146
+						break;
+					// End:0x112
+					case 4:
+						// End:0x10F
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(3, none, MouseX, MouseY, int(k));
+						}
+						// End:0x146
+						break;
+					// End:0xFFFF
+					default:
+						// End:0x143
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(8, none, MouseX, MouseY, int(k));
+						}
+						// End:0x146
+						break;
+						break;
+				}
+				goto J0x344;
+			// End:0x2ED
+			case 1:
+				// End:0x1CD
+				if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+				{
+					// End:0x18C
+					if(bShowConsole)
+					{
+						HideConsole();						
+					}
+					else
+					{
+						// End:0x1A7
+						if(Root.bAllowConsole)
+						{
+							ShowConsole();							
+						}
+						else
+						{
+							Root.WindowEvent(9, none, MouseX, MouseY, int(k));
+						}
+					}
+					// [Explicit Continue]
+					goto J0x344;
+				}
+				switch(k)
+				{
+					// End:0x1F2
+					case 120:
+						return global.KeyEvent(Key, Action, Delta);
+						// End:0x2EA
+						break;
+					// End:0x214
+					case 27:
+						// End:0x211
+						if(__NFUN_119__(Root, none))
+						{
+							Root.CloseActiveWindow();
+						}
+						// End:0x2EA
+						break;
+					// End:0x24A
+					case 1:
+						// End:0x247
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(0, none, MouseX, MouseY, int(k));
+						}
+						// End:0x2EA
+						break;
+					// End:0x280
+					case 2:
+						// End:0x27D
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(4, none, MouseX, MouseY, int(k));
+						}
+						// End:0x2EA
+						break;
+					// End:0x2B6
+					case 4:
+						// End:0x2B3
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(2, none, MouseX, MouseY, int(k));
+						}
+						// End:0x2EA
+						break;
+					// End:0xFFFF
+					default:
+						// End:0x2E7
+						if(__NFUN_119__(Root, none))
+						{
+							Root.WindowEvent(9, none, MouseX, MouseY, int(k));
+						}
+						// End:0x2EA
+						break;
+						break;
+				}
+				goto J0x344;
+			// End:0x33E
+			case 4:
+				switch(Key)
+				{
+					// End:0x31A
+					case 228:
+						MouseX = __NFUN_174__(MouseX, __NFUN_171__(MouseScale, Delta));
+						// End:0x33E
+						break;
+					// End:0x33B
+					case 229:
+						MouseY = __NFUN_175__(MouseY, __NFUN_171__(MouseScale, Delta));
+						// End:0x33E
+						break;
+					// End:0xFFFF
+					default:
+						break;
+				}
+			// End:0xFFFF
+			default:
+				// End:0x344
+				break;
+				break;
+		}
+		J0x344:
+
+		return true;
+		return;
+	}
+Begin:
+
+	stop;			
 }
 
 defaultproperties
 {
-     MouseScale=0.600000
-     RootWindow="UWindow.UWindowRootWindow"
+	MouseScale=0.6000000
+	RootWindow="UWindow.UWindowRootWindow"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var s
+// REMOVED IN 1.60: var e
+// REMOVED IN 1.60: var g

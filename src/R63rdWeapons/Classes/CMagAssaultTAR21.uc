@@ -1,34 +1,38 @@
+//=============================================================================
+// CMagAssaultTAR21 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  CMagAssaultTAR21.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class CMagAssaultTAR21 extends AssaultTAR21;
+class CMagAssaultTAR21 extends AssaultTAR21;
 
 defaultproperties
 {
-     m_iClipCapacity=100
-     m_iNbOfClips=2
-     m_iNbOfExtraClips=1
-     m_fMuzzleVelocity=53400.000000
-     m_MuzzleScale=0.529467
-     m_fFireSoundRadius=3560.000000
-     m_fRateOfFire=0.072727
-     m_pReticuleClass=Class'R6Weapons.R6RifleReticule'
-     m_pBulletClass=Class'R6Weapons.ammo556mmNATONormalFMJ'
-     m_stAccuracyValues=(fBaseAccuracy=1.055427,fShuffleAccuracy=2.007944,fWalkingAccuracy=3.011917,fWalkingFastAccuracy=12.424156,fRunningAccuracy=12.424156,fReticuleTime=1.174062,fAccuracyChange=6.285569,fWeaponJump=8.023257)
-     m_fFireAnimRate=1.375000
-     m_fFPBlend=0.363336
-     m_EquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Equip'
-     m_UnEquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Unequip'
-     m_ReloadSnd=Sound'Assault_TAR21_Reloads.Play_TAR21_Reload'
-     m_ReloadEmptySnd=Sound'Assault_TAR21_Reloads.Play_TAR21_ReloadEmpty'
-     m_ChangeROFSnd=Sound'CommonAssaultRiffles.Play_Assault_ROF'
-     m_SingleFireStereoSnd=Sound'Assault_TAR21.Play_TAR21_SingleShots'
-     m_FullAutoStereoSnd=Sound'Assault_TAR21.Play_TAR21_AutoShots'
-     m_FullAutoEndStereoSnd=Sound'Assault_TAR21.Stop_TAR21_AutoShots_Go'
-     m_TriggerSnd=Sound'CommonAssaultRiffles.Play_Assault_Trigger'
-     m_szMagazineClass="R63rdWeapons.R63rdCMAG556mm"
-     m_szMuzzleClass="R6WeaponGadgets.R63rdMuzzleAssault556"
+	m_iClipCapacity=100
+	m_iNbOfClips=2
+	m_iNbOfExtraClips=1
+	m_fMuzzleVelocity=53400.0000000
+	m_MuzzleScale=0.5294670
+	m_fFireSoundRadius=3560.0000000
+	m_fRateOfFire=0.0727270
+	m_pBulletClass=Class'R6Weapons.ammo556mmNATONormalFMJ'
+	m_stAccuracyValues=(fBaseAccuracy=1.0554270,fShuffleAccuracy=2.0079440,fWalkingAccuracy=3.0119170,fWalkingFastAccuracy=12.4241600,fRunningAccuracy=12.4241600,fReticuleTime=1.1740620,fAccuracyChange=6.2855690,fWeaponJump=8.0232570)
+	m_szReticuleClass="RIFLE"
+	m_fFireAnimRate=1.3750000
+	m_fFPBlend=0.3633360
+	m_EquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Equip'
+	m_UnEquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Unequip'
+	m_ReloadSnd=Sound'Assault_TAR21_Reloads.Play_TAR21_Reload'
+	m_ReloadEmptySnd=Sound'Assault_TAR21_Reloads.Play_TAR21_ReloadEmpty'
+	m_ChangeROFSnd=Sound'CommonAssaultRiffles.Play_Assault_ROF'
+	m_SingleFireStereoSnd=Sound'Assault_TAR21.Play_TAR21_SingleShots'
+	m_FullAutoStereoSnd=Sound'Assault_TAR21.Play_TAR21_AutoShots'
+	m_FullAutoEndStereoSnd=Sound'Assault_TAR21.Stop_TAR21_AutoShots_Go'
+	m_TriggerSnd=Sound'CommonAssaultRiffles.Play_Assault_Trigger'
+	m_szMagazineClass="R63rdWeapons.R63rdCMAG556mm"
+	m_szMuzzleClass="R6WeaponGadgets.R63rdMuzzleAssault556"
 }

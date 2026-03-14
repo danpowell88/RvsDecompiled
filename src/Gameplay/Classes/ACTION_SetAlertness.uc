@@ -1,39 +1,66 @@
-class ACTION_SetAlertness extends ScriptedAction;
+//=============================================================================
+// ACTION_SetAlertness - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_SetAlertness extends ScriptedAction
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
 enum EAlertnessType
 {
-	ALERTNESS_IgnoreAll,			// ignore any damage, etc. (even the physics part)
-	ALERTNESS_IgnoreEnemies,		// react normally, but don't try to fight or anything
-	ALERTNESS_StayOnScript,			// stay on script, but fight when possible
-	ALERTNESS_LeaveScriptForCombat	// leave script when acquire enemy
+	ALERTNESS_IgnoreAll,            // 0
+	ALERTNESS_IgnoreEnemies,        // 1
+	ALERTNESS_StayOnScript,         // 2
+	ALERTNESS_LeaveScriptForCombat  // 3
 };
 
-var(Action) EAlertnessType Alertness;
+var(Action) ACTION_SetAlertness.EAlertnessType Alertness;
 
 function bool InitActionFor(ScriptedController C)
 {
 	C.SetEnemyReaction(int(Alertness));
-	return false;	
+	return false;
+	return;
 }
 
 function string GetActionString()
 {
-	local String S;
+	local string S;
 
-	Switch(Alertness)
+	switch(Alertness)
 	{
-		case ALERTNESS_IgnoreAll: S="Ignore all"; break;
-		case ALERTNESS_IgnoreEnemies: S="Ignore enemies"; break;
-		case ALERTNESS_StayOnScript: S="Stay on script"; break;
-		case ALERTNESS_LeaveScriptForCombat: S="Leave script for combat"; break;
+		// End:0x21
+		case 0:
+			S = "Ignore all";
+			// End:0x87
+			break;
+		// End:0x3F
+		case 1:
+			S = "Ignore enemies";
+			// End:0x87
+			break;
+		// End:0x5D
+		case 2:
+			S = "Stay on script";
+			// End:0x87
+			break;
+		// End:0x84
+		case 3:
+			S = "Leave script for combat";
+			// End:0x87
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
-	return ActionString@S;
+	return __NFUN_168__(ActionString, S);
+	return;
 }
-
-	
 
 defaultproperties
 {
-     bValidForTrigger=False
-     ActionString="set alertness"
+	bValidForTrigger=false
+	ActionString="set alertness"
 }

@@ -1,41 +1,40 @@
 //=============================================================================
+// R6RifleReticule - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6CircleReticule.uc : Simple circular reticule
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/27 * Eric Begin				- Creation
 //=============================================================================
-class R6RifleReticule extends R6CrossReticule;
+class R6RifleReticule extends R6CrossReticule
+	config(User)
+ notplaceable;
 
-#exec OBJ LOAD FILE=..\textures\R6TexturesReticule.utx PACKAGE=R6TexturesReticule
-
-var (Textures) texture m_FixedPart;
-var (Temp) FLOAT m_fBaseReticuleHeight; // This is the size that we want the texture has when we are at the best accuracy
+var(temp) float m_fBaseReticuleHeight;  // This is the size that we want the texture has when we are at the best accuracy
+var(Textures) Texture m_FixedPart;
 
 // Speed gives us the current speed.
-simulated function PostRender( canvas C)
+simulated function PostRender(Canvas C)
 {
-	// Draw in the middle of the screen
+	local float X, Y, fScale;
 
-	local FLOAT X;
-	local FLOAT Y;
-    local FLOAT fScale;
-
-    Super.PostRender(C);
-
-    fScale = 32/m_FixedPart.VSize * m_fZoomScale;
-
-	X = m_fReticuleOffsetX - m_FixedPart.USize/2 * fScale;
+	super.PostRender(C);
+	fScale = __NFUN_171__(__NFUN_172__(32.0000000, float(m_FixedPart.VSize)), m_fZoomScale);
+	X = __NFUN_175__(m_fReticuleOffsetX, __NFUN_171__(float(__NFUN_145__(m_FixedPart.USize, 2)), fScale));
 	Y = m_fReticuleOffsetY;
-
-	// Circle
-    C.Style = ERenderStyle.STY_Alpha;
-	C.SetPos(X, Y + 2);
+	C.Style = 5;
+	C.__NFUN_2623__(X, __NFUN_174__(Y, float(2)));
 	C.DrawIcon(m_FixedPart, fScale);
+	return;
 }
 
 defaultproperties
 {
-     m_fBaseReticuleHeight=5.000000
-     m_FixedPart=Texture'R6TexturesReticule.Rifle_Gun'
+	m_fBaseReticuleHeight=5.0000000
+	m_FixedPart=Texture'R6TexturesReticule.Rifle_Gun'
 }

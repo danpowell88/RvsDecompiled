@@ -1,23 +1,35 @@
-class ACTION_PlayLocalSound extends ScriptedAction;
+//=============================================================================
+// ACTION_PlayLocalSound - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_PlayLocalSound extends ScriptedAction
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
-var(Action)		sound	Sound;
+var(Action) Sound Sound;
 
 function bool InitActionFor(ScriptedController C)
 {
 	local PlayerController P;
 
-	// play appropriate sound
-		ForEach C.DynamicActors(class'PlayerController', P)
-			P.ClientPlaySound(Sound, SLOT_SFX); //R6CODE
-	return false;	
+	// End:0x30
+	foreach C.__NFUN_313__(Class'Engine.PlayerController', P)
+	{
+		P.ClientPlaySound(Sound, 3);		
+	}	
+	return false;
+	return;
 }
 
 function string GetActionString()
 {
-	return ActionString@Sound;
+	return __NFUN_168__(ActionString, string(Sound));
+	return;
 }
 
 defaultproperties
 {
-     ActionString="play sound"
+	ActionString="play sound"
 }

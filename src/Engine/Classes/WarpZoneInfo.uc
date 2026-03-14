@@ -1,196 +1,257 @@
 //=============================================================================
+// WarpZoneInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // WarpZoneInfo. For making disjoint spaces appear as if they were connected;
 // supports both in-level warp zones and cross-level warp zones.
 //=============================================================================
 class WarpZoneInfo extends ZoneInfo
-	native;
+	native
+	placeable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-//-----------------------------------------------------------------------------
-// Information set by the level designer.
-
-var() string     OtherSideURL;
-var() name       ThisTag;
-var() bool		 bNoTeleFrag;
-
-//-----------------------------------------------------------------------------
-// Internal.
-
-var const int              iWarpZone;
-var const coords           WarpCoords;
+var const int iWarpZone;
+var int numDestinations;
+var() bool bNoTeleFrag;
+var() name ThisTag;
+var const Coords WarpCoords;
+var() string OtherSideURL;
+var() string Destinations[8];
 var transient WarpZoneInfo OtherSideActor;
-var transient object       OtherSideLevel;
-var() string		       Destinations[8];
-var int					   numDestinations;
-
-//-----------------------------------------------------------------------------
-// Network replication.
+var transient Object OtherSideLevel;
 
 replication
 {
-	reliable if( Role==ROLE_Authority )
-		OtherSideURL, ThisTag, OtherSideActor;
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		OtherSideActor, OtherSideURL, 
+		ThisTag;
 }
 
-//-----------------------------------------------------------------------------
-// Functions.
-
+// Export UWarpZoneInfo::execWarp(FFrame&, void* const)
 // Warp coordinate system transformations.
-native(314) final function Warp  ( out vector Loc, out vector Vel, out rotator R );
-native(315) final function UnWarp( out vector Loc, out vector Vel, out rotator R );
+ native(314) final function Warp(out Vector Loc, out Vector Vel, out Rotator R);
+
+// Export UWarpZoneInfo::execUnWarp(FFrame&, void* const)
+ native(315) final function UnWarp(out Vector Loc, out Vector Vel, out Rotator R);
 
 function PreBeginPlay()
 {
-	Super.PreBeginPlay();
-
-	// Generate the local connection.
+	super.PreBeginPlay();
 	Generate();
-
-	// Setup destination list.
 	numDestinations = 0;
-	While( numDestinations < 8 )
-		if (Destinations[numDestinations] != "")
-			numDestinations++;
-		else
-			numDestinations = 8;
+	J0x13:
 
-	// Generate URL if necessary.
-	if( numDestinations>0 && (OtherSideURL == "") )
+	// End:0x46 [Loop If]
+	if(__NFUN_150__(numDestinations, 8))
+	{
+		// End:0x3B
+		if(__NFUN_123__(Destinations[numDestinations], ""))
+		{
+			__NFUN_165__(numDestinations);			
+		}
+		else
+		{
+			numDestinations = 8;
+		}
+		// [Loop Continue]
+		goto J0x13;
+	}
+	// End:0x6C
+	if(__NFUN_130__(__NFUN_151__(numDestinations, 0), __NFUN_122__(OtherSideURL, "")))
+	{
 		OtherSideURL = Destinations[0];
+	}
+	return;
 }
 
-function Trigger( actor Other, pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
 	local int nextPick;
-	if (numDestinations == 0)
-		return;
-	
-	nextPick = 0;
-	While( (nextPick < 8) && (Destinations[nextPick] != OtherSideURL )  )
-		nextPick++;
 
-	nextPick++;
-	if ( (nextPick > 7) || (Destinations[nextPick] == "") )
+	// End:0x0D
+	if(__NFUN_154__(numDestinations, 0))
+	{
+		return;
+	}
+	nextPick = 0;
+	J0x14:
+
+	// End:0x41 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(nextPick, 8), __NFUN_123__(Destinations[nextPick], OtherSideURL)))
+	{
+		__NFUN_165__(nextPick);
+		// [Loop Continue]
+		goto J0x14;
+	}
+	__NFUN_165__(nextPick);
+	// End:0x6F
+	if(__NFUN_132__(__NFUN_151__(nextPick, 7), __NFUN_122__(Destinations[nextPick], "")))
+	{
 		nextPick = 0;
-	
+	}
 	OtherSideURL = Destinations[nextPick];
 	ForceGenerate();
+	return;
 }
 
 // Set up this warp zone's destination.
 simulated event Generate()
 {
-	if( OtherSideLevel != None )
+	// End:0x0D
+	if(__NFUN_119__(OtherSideLevel, none))
+	{
 		return;
+	}
 	ForceGenerate();
+	return;
 }
 
 // Set up this warp zone's destination.
 simulated event ForceGenerate()
 {
-	if( InStr(OtherSideURL,"/") >= 0 )
+	// End:0x21
+	if(__NFUN_153__(__NFUN_126__(OtherSideURL, "/"), 0))
 	{
-		// Remote level.
-		//log( "Warpzone " $ Self $ " remote" );
-		OtherSideLevel = None;
-		OtherSideActor = None;
+		OtherSideLevel = none;
+		OtherSideActor = none;		
 	}
 	else
 	{
-		// Local level.
 		OtherSideLevel = XLevel;
-		foreach AllActors( class 'WarpZoneInfo', OtherSideActor )
-			if( string(OtherSideActor.ThisTag)~=OtherSideURL && OtherSideActor!=Self )
+		// End:0x67
+		foreach __NFUN_304__(Class'Engine.WarpZoneInfo', OtherSideActor)
+		{
+			// End:0x66
+			if(__NFUN_130__(__NFUN_124__(string(OtherSideActor.ThisTag), OtherSideURL), __NFUN_119__(OtherSideActor, self)))
+			{
+				// End:0x67
 				break;
-		//log( "Warpzone " $ Self $ " local, connected to " $ OtherSideActor );
+			}			
+		}		
 	}
+	return;
 }
 
 // When an actor enters this warp zone.
-simulated function ActorEntered( actor Other )
+simulated function ActorEntered(Actor Other)
 {
-	local vector L;
-	local rotator R;
+	local Vector L;
+	local Rotator R;
 	local Controller P;
 
-	//if ( Other.Role == ROLE_AutonomousProxy )
-	//	return; // don't simulate for client players
-	if( !Other.bJustTeleported )
+	// End:0x241
+	if(__NFUN_129__(Other.bJustTeleported))
 	{
 		Generate();
-		if( OtherSideActor != None )
+		// End:0x241
+		if(__NFUN_119__(OtherSideActor, none))
 		{
-			// This needs to also perform a coordinate system transformation,
-			// in case the portals aren't directionally aligned. This is easy to
-			// do but UnrealScript doesn't provide coordinate system operators yet.
-			Other.Disable('Touch');
-			Other.Disable('UnTouch');
-
+			Other.__NFUN_118__('Touch');
+			Other.__NFUN_118__('UnTouch');
 			L = Other.Location;
-			if( Pawn(Other) != None )
-				R = Pawn(Other).GetViewRotation();
-
-			UnWarp( L, Other.Velocity, R );
-			OtherSideActor.Warp( L, Other.Velocity, R );
-
-			if( Other.IsA('Pawn') )
+			// End:0x83
+			if(__NFUN_119__(Pawn(Other), none))
 			{
-				Pawn(Other).bWarping = bNoTelefrag;
-				if ( Other.SetLocation(L) )
+				R = Pawn(Other).GetViewRotation();
+			}
+			__NFUN_315__(L, Other.Velocity, R);
+			OtherSideActor.__NFUN_314__(L, Other.Velocity, R);
+			// End:0x1FF
+			if(Other.__NFUN_303__('Pawn'))
+			{
+				Pawn(Other).bWarping = bNoTeleFrag;
+				// End:0x1F5
+				if(Other.__NFUN_267__(L))
 				{
-					//tell enemies about teleport
-					if ( Role == ROLE_Authority )
-						For ( P=Level.ControllerList; P!=None; P=P.NextController )
-							if (P.Enemy == Other)
-								P.LineOfSightTo(Other); 
+					// End:0x174
+					if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+					{
+						P = Level.ControllerList;
+						J0x129:
+
+						// End:0x174 [Loop If]
+						if(__NFUN_119__(P, none))
+						{
+							// End:0x15D
+							if(__NFUN_114__(P.Enemy, Other))
+							{
+								P.__NFUN_514__(Other);
+							}
+							P = P.nextController;
+							// [Loop Continue]
+							goto J0x129;
+						}
+					}
 					R.Roll = 0;
 					Pawn(Other).SetViewRotation(R);
-					Pawn(Other).ClientSetLocation(L, R );
-					if ( Pawn(Other).Controller != None )
-						Pawn(Other).Controller.MoveTimer = -1.0;
+					Pawn(Other).ClientSetLocation(L, R);
+					// End:0x1F2
+					if(__NFUN_119__(Pawn(Other).Controller, none))
+					{
+						Pawn(Other).Controller.MoveTimer = -1.0000000;
+					}					
 				}
 				else
 				{
-					// set up to keep trying to teleport
-					GotoState('DelayedWarp');
-				}
+					__NFUN_113__('DelayedWarp');
+				}				
 			}
 			else
 			{
-				Other.SetLocation(L);
-				Other.SetRotation( R );
+				Other.__NFUN_267__(L);
+				Other.__NFUN_299__(R);
 			}
-			Other.Enable('Touch');
-			Other.Enable('UnTouch');
-			// Change rotation according to portal's rotational change.
+			Other.__NFUN_117__('Touch');
+			Other.__NFUN_117__('UnTouch');
 		}
 	}
+	return;
 }
 
-event ActorLeaving( actor Other )
+event ActorLeaving(Actor Other)
 {
-	If ( Other.IsA('Pawn') )
+	// End:0x2A
+	if(Other.__NFUN_303__('Pawn'))
+	{
 		Pawn(Other).bWarping = false;
+	}
+	return;
 }
 
-State DelayedWarp
+state DelayedWarp
 {
 	function Tick(float DeltaTime)
 	{
 		local Controller P;
 		local bool bFound;
 
-		For ( P=Level.ControllerList; P!=None; P=P.NextController )
-			if ( P.Pawn.bWarping && (P.Pawn.Region.Zone == Self) )
+		P = Level.ControllerList;
+		J0x14:
+
+		// End:0x88 [Loop If]
+		if(__NFUN_119__(P, none))
+		{
+			// End:0x71
+			if(__NFUN_130__(P.Pawn.bWarping, __NFUN_114__(P.Pawn.Region.Zone, self)))
 			{
 				bFound = true;
 				ActorEntered(P);
 			}
-
-		If ( !bFound )
-			GotoState('');
+			P = P.nextController;
+			// [Loop Continue]
+			goto J0x14;
+		}
+		// End:0x9A
+		if(__NFUN_129__(bFound))
+		{
+			__NFUN_113__('None');
+		}
+		return;
 	}
+	stop;
 }
 
-defaultproperties
-{
-}

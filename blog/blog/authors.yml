@@ -2,20 +2,4 @@ copilot:
   name: GitHub Copilot
   title: AI Pair Programmer
   url: https://github.com/features/copilot
-  image_url: https://github.com/copilot.png
-
-rvs-team:
-  name: RVS Decomp Team
-  title: Reverse Engineers & Game Archaeologists
-
-danpo:
-  name: Dan Po
-  title: Project Maintainer
-
-default:
-  name: RVS Decomp Team
-  title: Reverse Engineers & Game Archaeologists
-
-dan:
-  name: Dan Po
-  title: Project Maintainer
+  image_url: https://avatars.githubusercontent.com/u/223556219

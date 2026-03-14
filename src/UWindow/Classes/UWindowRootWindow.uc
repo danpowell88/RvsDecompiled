@@ -1,370 +1,402 @@
 //=============================================================================
+// UWindowRootWindow - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // UWindowRootWindow - the root window.
 //=============================================================================
-class UWindowRootWindow extends UWindowWindow;
+class UWindowRootWindow extends UWindowWindow
+ config;
 
-//#exec TEXTURE IMPORT NAME=MouseCursor FILE=Textures\MouseCursor.dds GROUP="Icons" MIPS=OFF ALPHA=1 MASKED=1
-#exec TEXTURE IMPORT NAME=MouseMove FILE=Textures\MouseMove.bmp GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-#exec TEXTURE IMPORT NAME=MouseDiag1 FILE=Textures\MouseDiag1.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-#exec TEXTURE IMPORT NAME=MouseDiag2 FILE=Textures\MouseDiag2.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-#exec TEXTURE IMPORT NAME=MouseNS FILE=Textures\MouseNS.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-#exec TEXTURE IMPORT NAME=MouseWE FILE=Textures\MouseWE.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-#exec TEXTURE IMPORT NAME=MouseHand FILE=Textures\MouseHand.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-#exec TEXTURE IMPORT NAME=MouseHSplit FILE=Textures\MouseHSplit.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-#exec TEXTURE IMPORT NAME=MouseVSplit FILE=Textures\MouseVSplit.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-//#exec TEXTURE IMPORT NAME=MouseWait FILE=Textures\MouseWait.dds GROUP="Icons" ALPHA=1 MASKED=1 MIPS=OFF
-//R6Code
-#exec OBJ LOAD FILE=..\Textures\R6MenuTextures.utx PACKAGE=R6MenuTextures
-#exec OBJ LOAD FILE=..\Textures\R6Planning.utx PACKAGE=R6Planning
-#exec OBJ LOAD FILE=..\Textures\R6Font.utx PACKAGE=R6Font
-//End R6Code
-
-//!! Japanese text (experimental).
-//#exec OBJ LOAD FILE=..\Textures\Japanese.utx
-
-var UWindowWindow		MouseWindow;		// The window the mouse is over
-var bool				bMouseCapture;
-var float				MouseX, MouseY;
-var float				OldMouseX, OldMouseY;
-var WindowConsole		Console;
-var UWindowWindow		FocusedWindow;
-var UWindowWindow		KeyFocusWindow;		// window with keyboard focus
-var MouseCursor			NormalCursor, MoveCursor, DiagCursor1, HandCursor, HSplitCursor, VSplitCursor, DiagCursor2, NSCursor, WECursor, WaitCursor;
-var UWindowHotkeyWindowList	HotkeyWindows;
-
-//var config float		GUIScale;
-var  FLOAT		        GUIScale; //Alex- This is to prevent set res call to ovewrite this value in config file
-
-
-var float				RealWidth, RealHeight;
-var Font				Fonts[30];
-var UWindowLookAndFeel	LooksAndFeels[20];
-var config string		LookAndFeelClass;
-var bool				bRequestQuit;
-var float				QuitTime;
-var bool				bAllowConsole;
-//R6Code
-var BOOL                m_bUseAimIcon;
-var BOOL                m_bUseDragIcon;
-var MouseCursor			AimCursor;
-var MouseCursor			DragCursor;
-var R6GameColors        Colors;
-var UWindowMenuClassDefines  MenuClassDefines;
-
-var FLOAT				m_fWindowScaleX,
-						m_fWindowScaleY;
-var BOOL				m_bScaleWindowToRoot;
-
-//End R6Code
-
-var enum eRootID
+enum eRootID
 {
-    RootID_UWindow,
-    RootID_R6Menu,
-    RootID_R6MenuInGame,
-    RootID_R6MenuInGameMulti
-} m_eRootId;
-
-//Mainly to provide the R6Console the ability to change the current Widget
-enum eGameWidgetID
-{
-    WidgetID_None,    
-    InGameID_EscMenu,
-    InGameID_Debriefing,
-	InGameID_TrainingInstruction,
-    TrainingWidgetID,
-    SinglePlayerWidgetID,
-    CampaignPlanningID,
-	MainMenuWidgetID,       
-	IntelWidgetID,    
-	PlanningWidgetID,
-    RetryCampaignPlanningID,
-    RetryCustomMissionPlanningID,
-	GearRoomWidgetID,
-    ExecuteWidgetID,
-	CustomMissionWidgetID,
-	MultiPlayerWidgetID,
-	OptionsWidgetID,
-    PreviousWidgetID,	
-	CreditsWidgetID,
-    MPCreateGameWidgetID,    
-    UbiComWidgetID,
-    NonUbiWidgetID,
-	InGameMPWID_Writable,
-    InGameMPWID_TeamJoin,
-    InGameMPWID_Intermission,
-    InGameMPWID_InterEndRound,
-    InGameMPWID_EscMenu,
-    InGameMpWID_RecMessages,
-    InGameMpWID_MsgOffensive,
-    InGameMpWID_MsgDefensive,
-    InGameMpWID_MsgReply,
-    InGameMpWID_MsgStatus,
-	InGameMPWID_Vote,
-    InGameMPWID_CountDown,
-    InGameID_OperativeSelector,
-    MultiPlayerError,
-    MultiPlayerErrorUbiCom,
-    MenuQuitID    
+	RootID_UWindow,                 // 0
+	RootID_R6Menu,                  // 1
+	RootID_R6MenuInGame,            // 2
+	RootID_R6MenuInGameMulti        // 3
 };
 
-
-var eGameWidgetID       m_eCurWidgetInUse;           // Current widget ID display on screen
-var eGameWidgetID       m_ePrevWidgetInUse;          // Previous widget ID display on screen
-
-var BOOL				m_bWidgetResolutionFix;		 // this is set in root by a widget to tell to the options if resolution is fix or not
-
-function ChangeCurrentWidget( eGameWidgetID widgetID ); 
-function ResetMenus( optional BOOL _bConnectionFailed);
-function UpdateMenus(INT iWhatToUpdate);
-function ChangeInstructionWidget( Actor pISV, BOOL bShow, INT iBox, INT iParagraph );
-function StopPlayMode();
-function BOOL PlanningShouldProcessKey();
-function BOOL PlanningShouldDrawPath();
-#ifdefDEBUG
-exec function SaveTrainingPlanning();
-#endif
-
-// SimplePopUp fct
-function ePopUpID GetSimplePopUpID();
-function SimplePopUp( string _szTitle, string _szText, ePopUpID _ePopUpID, optional INT _iButtonsType, OPTIONAL BOOL bAddDisableDlg, optional UWindowWindow OwnerWindow);
-function ModifyPopUpInsideText( array<string> _ANewText);
-
-function BOOL GetMapNameLocalisation( string _szMapName, OUT string _szMapNameLoc, optional BOOL _bReturnInitName);
-
-function BeginPlay() 
+enum eGameWidgetID
 {
-	Root = Self;
-	MouseWindow = Self;
-	KeyFocusWindow = Self;
+	WidgetID_None,                  // 0
+	InGameID_EscMenu,               // 1
+	InGameID_Debriefing,            // 2
+	InGameID_TrainingInstruction,   // 3
+	TrainingWidgetID,               // 4
+	SinglePlayerWidgetID,           // 5
+	CampaignPlanningID,             // 6
+	MainMenuWidgetID,               // 7
+	IntelWidgetID,                  // 8
+	PlanningWidgetID,               // 9
+	RetryCampaignPlanningID,        // 10
+	RetryCustomMissionPlanningID,   // 11
+	GearRoomWidgetID,               // 12
+	ExecuteWidgetID,                // 13
+	CustomMissionWidgetID,          // 14
+	MultiPlayerWidgetID,            // 15
+	OptionsWidgetID,                // 16
+	PreviousWidgetID,               // 17
+	CreditsWidgetID,                // 18
+	MPCreateGameWidgetID,           // 19
+	UbiComWidgetID,                 // 20
+	UbiComModWidgetID,              // 21
+	NonUbiWidgetID,                 // 22
+	InGameMPWID_Writable,           // 23
+	InGameMPWID_TeamJoin,           // 24
+	InGameMPWID_Intermission,       // 25
+	InGameMPWID_InterEndRound,      // 26
+	InGameMPWID_EscMenu,            // 27
+	InGameMpWID_RecMessages,        // 28
+	InGameMpWID_MsgOffensive,       // 29
+	InGameMpWID_MsgDefensive,       // 30
+	InGameMpWID_MsgReply,           // 31
+	InGameMpWID_MsgStatus,          // 32
+	InGameMPWID_Vote,               // 33
+	InGameMPWID_CountDown,          // 34
+	InGameID_OperativeSelector,     // 35
+	MultiPlayerError,               // 36
+	MultiPlayerErrorUbiCom,         // 37
+	MenuQuitID                      // 38
+};
+
+// NEW IN 1.60
+var UWindowRootWindow.eRootID m_eRootId;
+var UWindowRootWindow.eGameWidgetID m_eCurWidgetInUse;  // Current widget ID display on screen
+var UWindowRootWindow.eGameWidgetID m_ePrevWidgetInUse;  // Previous widget ID display on screen
+var bool bMouseCapture;
+var bool bRequestQuit;
+var bool bAllowConsole;
+//R6Code
+var bool m_bUseAimIcon;
+var bool m_bUseDragIcon;
+var bool m_bScaleWindowToRoot;
+var bool m_bWidgetResolutionFix;  // this is set in root by a widget to tell to the options if resolution is fix or not
+var float MouseX;
+// NEW IN 1.60
+var float MouseY;
+var float OldMouseX;
+// NEW IN 1.60
+var float OldMouseY;
+//var config float		GUIScale;
+var float GUIScale;  // Alex- This is to prevent set res call to ovewrite this value in config file
+var float RealWidth;
+// NEW IN 1.60
+var float RealHeight;
+var float QuitTime;
+var float m_fWindowScaleX;
+// NEW IN 1.60
+var float m_fWindowScaleY;
+var UWindowWindow MouseWindow;  // The window the mouse is over
+var WindowConsole Console;
+var UWindowWindow FocusedWindow;
+var UWindowWindow KeyFocusWindow;  // window with keyboard focus
+var UWindowHotkeyWindowList HotkeyWindows;
+var Font Fonts[30];
+var UWindowLookAndFeel LooksAndFeels[20];
+var R6GameColors Colors;
+var UWindowMenuClassDefines MenuClassDefines;
+// NEW IN 1.60
+var UWindowWindow m_NotifyMsgWindow;
+var MouseCursor NormalCursor;
+// NEW IN 1.60
+var MouseCursor MoveCursor;
+// NEW IN 1.60
+var MouseCursor DiagCursor1;
+// NEW IN 1.60
+var MouseCursor HandCursor;
+// NEW IN 1.60
+var MouseCursor HSplitCursor;
+// NEW IN 1.60
+var MouseCursor VSplitCursor;
+// NEW IN 1.60
+var MouseCursor DiagCursor2;
+// NEW IN 1.60
+var MouseCursor NSCursor;
+// NEW IN 1.60
+var MouseCursor WECursor;
+// NEW IN 1.60
+var MouseCursor WaitCursor;
+var MouseCursor AimCursor;
+var MouseCursor DragCursor;
+var config string LookAndFeelClass;
+
+function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
+{
+	return;
 }
 
-function UWindowLookAndFeel GetLookAndFeel(String LFClassName)
+function ResetMenus(optional bool _bConnectionFailed)
+{
+	return;
+}
+
+function UpdateMenus(int iWhatToUpdate)
+{
+	return;
+}
+
+function ChangeInstructionWidget(Actor pISV, bool bShow, int iBox, int iParagraph)
+{
+	return;
+}
+
+function StopPlayMode()
+{
+	return;
+}
+
+function bool PlanningShouldProcessKey()
+{
+	return;
+}
+
+function bool PlanningShouldDrawPath()
+{
+	return;
+}
+
+function UWindowBase.EPopUpID GetSimplePopUpID()
+{
+	return;
+}
+
+function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePopUpID, optional int _iButtonsType, optional bool bAddDisableDlg, optional UWindowWindow OwnerWindow)
+{
+	return;
+}
+
+function ModifyPopUpInsideText(array<string> _ANewText)
+{
+	return;
+}
+
+function bool GetMapNameLocalisation(string _szMapName, out string _szMapNameLoc, optional bool _bReturnInitName)
+{
+	return;
+}
+
+function BeginPlay()
+{
+	Root = self;
+	MouseWindow = self;
+	KeyFocusWindow = self;
+	return;
+}
+
+function UWindowLookAndFeel GetLookAndFeel(string LFClassName)
 {
 	local int i;
-	local class<UWindowLookAndFeel> LFClass;
+	local Class<UWindowLookAndFeel> LFClass;
 
-	LFClass = class<UWindowLookAndFeel>(DynamicLoadObject(LFClassName, class'Class'));
+	LFClass = Class<UWindowLookAndFeel>(DynamicLoadObject(LFClassName, Class'Core.Class'));
+	i = 0;
+	J0x22:
 
-	for(i=0;i<20;i++)
+	// End:0xA9 [Loop If]
+	if(__NFUN_150__(i, 20))
 	{
-		if(LooksAndFeels[i] == None)
+		// End:0x75
+		if(__NFUN_114__(LooksAndFeels[i], none))
 		{
 			LooksAndFeels[i] = new LFClass;
 			LooksAndFeels[i].Setup();
 			return LooksAndFeels[i];
 		}
-
-		if(LooksAndFeels[i].Class == LFClass)
+		// End:0x9F
+		if(__NFUN_114__(LooksAndFeels[i].Class, LFClass))
+		{
 			return LooksAndFeels[i];
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x22;
 	}
-	Log("Out of LookAndFeel array space!!");
-	return None;
+	__NFUN_231__("Out of LookAndFeel array space!!");
+	return none;
+	return;
 }
 
-
-function Created() 
+function Created()
 {
-    m_eRootId = RootID_UWindow;
-
+	m_eRootId = 0;
 	LookAndFeel = GetLookAndFeel(LookAndFeelClass);
 	SetupFonts();
-
-	NormalCursor.tex = Texture'R6MenuTextures.MouseCursor';
+	NormalCursor.Tex = Texture'R6MenuTextures.MouseCursor';
 	NormalCursor.HotX = 0;
 	NormalCursor.HotY = 0;
-	NormalCursor.WindowsCursor = Console.ViewportOwner.IDC_ARROW;
-
-	MoveCursor.tex = Texture'MouseMove';
+	NormalCursor.WindowsCursor = Console.ViewportOwner.0;
+	MoveCursor.Tex = Texture'UWindow.Icons.MouseMove';
 	MoveCursor.HotX = 8;
 	MoveCursor.HotY = 8;
-	MoveCursor.WindowsCursor = Console.ViewportOwner.IDC_SIZEALL;
-	
-	DiagCursor1.tex = Texture'MouseDiag1';
+	MoveCursor.WindowsCursor = Console.ViewportOwner.1;
+	DiagCursor1.Tex = Texture'UWindow.Icons.MouseDiag1';
 	DiagCursor1.HotX = 8;
 	DiagCursor1.HotY = 8;
-	DiagCursor1.WindowsCursor = Console.ViewportOwner.IDC_SIZENWSE;
-	
-	HandCursor.tex = Texture'MouseHand';
+	DiagCursor1.WindowsCursor = Console.ViewportOwner.4;
+	HandCursor.Tex = Texture'UWindow.Icons.MouseHand';
 	HandCursor.HotX = 11;
 	HandCursor.HotY = 1;
-	HandCursor.WindowsCursor = Console.ViewportOwner.IDC_ARROW;
-
-	HSplitCursor.tex = Texture'MouseHSplit';
+	HandCursor.WindowsCursor = Console.ViewportOwner.0;
+	HSplitCursor.Tex = Texture'UWindow.Icons.MouseHSplit';
 	HSplitCursor.HotX = 9;
 	HSplitCursor.HotY = 9;
-	HSplitCursor.WindowsCursor = Console.ViewportOwner.IDC_SIZEWE;
-
-	VSplitCursor.tex = Texture'MouseVSplit';
+	HSplitCursor.WindowsCursor = Console.ViewportOwner.5;
+	VSplitCursor.Tex = Texture'UWindow.Icons.MouseVSplit';
 	VSplitCursor.HotX = 9;
 	VSplitCursor.HotY = 9;
-	VSplitCursor.WindowsCursor = Console.ViewportOwner.IDC_SIZENS;
-
-	DiagCursor2.tex = Texture'MouseDiag2';
+	VSplitCursor.WindowsCursor = Console.ViewportOwner.3;
+	DiagCursor2.Tex = Texture'UWindow.Icons.MouseDiag2';
 	DiagCursor2.HotX = 7;
 	DiagCursor2.HotY = 7;
-	DiagCursor2.WindowsCursor = Console.ViewportOwner.IDC_SIZENESW;
-
-	NSCursor.tex = Texture'MouseNS';
+	DiagCursor2.WindowsCursor = Console.ViewportOwner.2;
+	NSCursor.Tex = Texture'UWindow.Icons.MouseNS';
 	NSCursor.HotX = 3;
 	NSCursor.HotY = 7;
-	NSCursor.WindowsCursor = Console.ViewportOwner.IDC_SIZENS;
-
-	WECursor.tex = Texture'MouseWE';
+	NSCursor.WindowsCursor = Console.ViewportOwner.3;
+	WECursor.Tex = Texture'UWindow.Icons.MouseWE';
 	WECursor.HotX = 7;
 	WECursor.HotY = 3;
-	WECursor.WindowsCursor = Console.ViewportOwner.IDC_SIZEWE;
-
-	WaitCursor.tex = Texture'R6MenuTextures.MouseWait';
+	WECursor.WindowsCursor = Console.ViewportOwner.5;
+	WaitCursor.Tex = Texture'R6MenuTextures.MouseWait';
 	WECursor.HotX = 6;
 	WECursor.HotY = 9;
-	WECursor.WindowsCursor = Console.ViewportOwner.IDC_WAIT;     
-
-//R6Code
-    AimCursor.Tex=Texture'R6Planning.Cursors.PlanCursor_Aim';
-    AimCursor.HotX=16;
-    AimCursor.HotY=16;
-
-    DragCursor.Tex=Texture'R6Planning.Cursors.PlanCursor_Drag';
-    DragCursor.HotX=5;
-    DragCursor.HotY=5;
-
-    Colors = new(None) class'R6GameColors';
-	MenuClassDefines = new(None) class'UWindowMenuClassDefines'; 
+	WECursor.WindowsCursor = Console.ViewportOwner.6;
+	AimCursor.Tex = Texture'R6Planning.Cursors.PlanCursor_Aim';
+	AimCursor.HotX = 16;
+	AimCursor.HotY = 16;
+	DragCursor.Tex = Texture'R6Planning.Cursors.PlanCursor_Drag';
+	DragCursor.HotX = 5;
+	DragCursor.HotY = 5;
+	Colors = new (none) Class'Engine.R6GameColors';
+	MenuClassDefines = new (none) Class'UWindow.UWindowMenuClassDefines';
 	MenuClassDefines.Created();
-//End R6Code
-
-	HotkeyWindows = New class'UWindowHotkeyWindowList';
+	HotkeyWindows = new Class'UWindow.UWindowHotkeyWindowList';
 	HotkeyWindows.Last = HotkeyWindows;
-	HotkeyWindows.Next = None;
+	HotkeyWindows.Next = none;
 	HotkeyWindows.Sentinel = HotkeyWindows;
-
 	Cursor = NormalCursor;
+	return;
 }
 
 function MoveMouse(float X, float Y)
 {
 	local UWindowWindow NewMouseWindow;
-	local float tx, ty;
+	local float tX, tY;
 
 	MouseX = X;
 	MouseY = Y;
-
-	if(!bMouseCapture)
-		NewMouseWindow = FindWindowUnder(X, Y);
+	// End:0x3A
+	if(__NFUN_129__(bMouseCapture))
+	{
+		NewMouseWindow = FindWindowUnder(X, Y);		
+	}
 	else
+	{
 		NewMouseWindow = MouseWindow;
-
-	if(NewMouseWindow != MouseWindow)
+	}
+	// End:0x7D
+	if(__NFUN_119__(NewMouseWindow, MouseWindow))
 	{
 		MouseWindow.MouseLeave();
 		NewMouseWindow.MouseEnter();
 		MouseWindow = NewMouseWindow;
 	}
-
-	if(MouseX != OldMouseX || MouseY != OldMouseY)
+	// End:0xE5
+	if(__NFUN_132__(__NFUN_181__(MouseX, OldMouseX), __NFUN_181__(MouseY, OldMouseY)))
 	{
 		OldMouseX = MouseX;
 		OldMouseY = MouseY;
-
-		MouseWindow.GetMouseXY(tx, ty);
-		MouseWindow.MouseMove(tx, ty);
+		MouseWindow.GetMouseXY(tX, tY);
+		MouseWindow.MouseMove(tX, tY);
 	}
+	return;
 }
 
-function DrawMouse(Canvas C) 
+function DrawMouse(Canvas C)
 {
 	local float X, Y;
 
+	// End:0x49
 	if(Console.ViewportOwner.bWindowsMouseAvailable)
 	{
-		// Set the windows cursor...
-		Console.ViewportOwner.SelectedCursor = MouseWindow.Cursor.WindowsCursor;
+		Console.ViewportOwner.SelectedCursor = MouseWindow.Cursor.WindowsCursor;		
 	}
 	else
 	{
-		C.SetDrawColor(255,255,255);
-
-		C.SetPos(MouseX * GUIScale - MouseWindow.Cursor.HotX, MouseY * GUIScale - MouseWindow.Cursor.HotY);
-		C.DrawIcon(MouseWindow.Cursor.tex, 1.0);
+		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+		C.__NFUN_2623__(__NFUN_175__(__NFUN_171__(MouseX, GUIScale), float(MouseWindow.Cursor.HotX)), __NFUN_175__(__NFUN_171__(MouseY, GUIScale), float(MouseWindow.Cursor.HotY)));
+		C.DrawIcon(MouseWindow.Cursor.Tex, 1.0000000);
 	}
-
-
-
-	/* DEBUG - show which window mouse is over
-
-	MouseWindow.GetMouseXY(X, Y);
-	C.Font = Fonts[F_Normal];
-
-	C.DrawColor.R = 0;
-	C.DrawColor.G = 0;
-	C.DrawColor.B = 0;
-	C.SetPos(MouseX * GUIScale - MouseWindow.Cursor.HotX, MouseY * GUIScale - MouseWindow.Cursor.HotY);
-	C.DrawText( GetPlayerOwner().GetItemName(string(MouseWindow))$" "$int(MouseX * GUIScale)$", "$int(MouseY * GUIScale)$" ("$int(X)$", "$int(Y)$")");
-
-	C.DrawColor.R = 255;
-	C.DrawColor.G = 255;
-	C.DrawColor.B = 0;
-	C.SetPos(-1 + MouseX * GUIScale - MouseWindow.Cursor.HotX, -1 + MouseY * GUIScale - MouseWindow.Cursor.HotY);
-	C.DrawText( GetPlayerOwner().GetItemName(string(MouseWindow))$" "$int(MouseX * GUIScale)$", "$int(MouseY * GUIScale)$" ("$int(X)$", "$int(Y)$")");
-
-	*/
+	return;
 }
 
 function bool CheckCaptureMouseUp()
 {
 	local float X, Y;
 
-	if(bMouseCapture) {
+	// End:0x45
+	if(bMouseCapture)
+	{
 		MouseWindow.GetMouseXY(X, Y);
 		MouseWindow.LMouseUp(X, Y);
-		bMouseCapture = False;
-		return True;
+		bMouseCapture = false;
+		return true;
 	}
-	return False;
+	return false;
+	return;
 }
 
 function bool CheckCaptureMouseDown()
 {
 	local float X, Y;
 
-	if(bMouseCapture) {
+	// End:0x45
+	if(bMouseCapture)
+	{
 		MouseWindow.GetMouseXY(X, Y);
 		MouseWindow.LMouseDown(X, Y);
-		bMouseCapture = False;
-		return True;
+		bMouseCapture = false;
+		return true;
 	}
-	return False;
+	return false;
+	return;
 }
-
 
 function CancelCapture()
 {
-	bMouseCapture = False;
+	bMouseCapture = false;
+	return;
 }
-
 
 function CaptureMouse(optional UWindowWindow W)
 {
-	bMouseCapture = True;
-	if(W != None)
+	bMouseCapture = true;
+	// End:0x1E
+	if(__NFUN_119__(W, none))
+	{
 		MouseWindow = W;
-	//Log(MouseWindow.Class$": Captured Mouse");
+	}
+	return;
 }
 
 function Texture GetLookAndFeelTexture()
 {
-	Return LookAndFeel.Active;
+	return LookAndFeel.Active;
+	return;
 }
 
 function bool IsActive()
 {
-	Return True;
+	return true;
+	return;
 }
 
 function AddHotkeyWindow(UWindowWindow W)
 {
-	UWindowHotkeyWindowList(HotkeyWindows.Insert(class'UWindowHotkeyWindowList')).Window = W;
+	UWindowHotkeyWindowList(HotkeyWindows.Insert(Class'UWindow.UWindowHotkeyWindowList')).Window = W;
+	return;
 }
 
 function RemoveHotkeyWindow(UWindowWindow W)
@@ -372,230 +404,277 @@ function RemoveHotkeyWindow(UWindowWindow W)
 	local UWindowHotkeyWindowList L;
 
 	L = HotkeyWindows.FindWindow(W);
-	if(L != None)
+	// End:0x34
+	if(__NFUN_119__(L, none))
 	{
 		L.Remove();
 	}
+	return;
 }
 
-function BOOL IsAHotKeyWindow(UWindowWindow W)
+function bool IsAHotKeyWindow(UWindowWindow W)
 {
 	local UWindowHotkeyWindowList L;
 
 	L = HotkeyWindows.FindWindow(W);
-
-	if (L != None)
+	// End:0x27
+	if(__NFUN_119__(L, none))
+	{
 		return true;
-
-	return false;
-}
-
-function WindowEvent(WinMessage Msg, Canvas C, float X, float Y, int Key) 
-{
-	switch(Msg) {
-	case WM_KeyDown:
-		if(HotKeyDown(Key, X, Y))
-			return;
-		break;
-	case WM_KeyUp:
-		if(HotKeyUp(Key, X, Y))
-			return;
-		break;
-    case WM_LMouseDown:
-//    case WM_LMouseUp:
-    case WM_MMouseDown:
-//    case WM_MMouseUp:
-    case WM_RMouseDown:
-//    case WM_RMouseUp:
-		if (MouseUpDown(Key, X, Y))
-			return;
-		break;
 	}
-
-	Super.WindowEvent(Msg, C, X, Y, Key);
+	return false;
+	return;
 }
 
+function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, int Key)
+{
+	switch(Msg)
+	{
+		// End:0x29
+		case 9:
+			// End:0x26
+			if(HotKeyDown(Key, X, Y))
+			{
+				return;
+			}
+			// End:0x7A
+			break;
+		// End:0x4B
+		case 8:
+			// End:0x48
+			if(HotKeyUp(Key, X, Y))
+			{
+				return;
+			}
+			// End:0x7A
+			break;
+		// End:0x50
+		case 0:
+		// End:0x55
+		case 2:
+		// End:0x77
+		case 4:
+			// End:0x74
+			if(MouseUpDown(Key, X, Y))
+			{
+				return;
+			}
+			// End:0x7A
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	super.WindowEvent(Msg, C, X, Y, Key);
+	return;
+}
 
 function bool HotKeyDown(int Key, float X, float Y)
 {
-	local UWindowHotkeyWindowList l;
+	local UWindowHotkeyWindowList L;
 
-	l = UWindowHotkeyWindowList(HotkeyWindows.Next);
-	while(l != None) 
+	L = UWindowHotkeyWindowList(HotkeyWindows.Next);
+	J0x19:
+
+	// End:0x82 [Loop If]
+	if(__NFUN_119__(L, none))
 	{
-		if(l.Window != Self && l.Window.HotKeyDown(Key, X, Y)) return True;
-		l = UWindowHotkeyWindowList(l.Next);
+		// End:0x66
+		if(__NFUN_130__(__NFUN_119__(L.Window, self), L.Window.HotKeyDown(Key, X, Y)))
+		{
+			return true;
+		}
+		L = UWindowHotkeyWindowList(L.Next);
+		// [Loop Continue]
+		goto J0x19;
 	}
-
-	return False;
+	return false;
+	return;
 }
 
 function bool HotKeyUp(int Key, float X, float Y)
 {
-	local UWindowHotkeyWindowList l;
+	local UWindowHotkeyWindowList L;
 
-	l = UWindowHotkeyWindowList(HotkeyWindows.Next);
-	while(l != None) 
+	L = UWindowHotkeyWindowList(HotkeyWindows.Next);
+	J0x19:
+
+	// End:0x82 [Loop If]
+	if(__NFUN_119__(L, none))
 	{
-		if(l.Window != Self && l.Window.HotKeyUp(Key, X, Y)) return True;
-		l = UWindowHotkeyWindowList(l.Next);
+		// End:0x66
+		if(__NFUN_130__(__NFUN_119__(L.Window, self), L.Window.HotKeyUp(Key, X, Y)))
+		{
+			return true;
+		}
+		L = UWindowHotkeyWindowList(L.Next);
+		// [Loop Continue]
+		goto J0x19;
 	}
-
-	return False;
+	return false;
+	return;
 }
 
 function bool MouseUpDown(int Key, float X, float Y)
 {
-	local UWindowHotkeyWindowList l;
+	local UWindowHotkeyWindowList L;
 
-	l = UWindowHotkeyWindowList(HotkeyWindows.Next);
-	while(l != None) 
+	L = UWindowHotkeyWindowList(HotkeyWindows.Next);
+	J0x19:
+
+	// End:0x82 [Loop If]
+	if(__NFUN_119__(L, none))
 	{
-		if(l.Window != Self && l.Window.MouseUpDown(Key, X, Y)) return True;
-		l = UWindowHotkeyWindowList(l.Next);
+		// End:0x66
+		if(__NFUN_130__(__NFUN_119__(L.Window, self), L.Window.MouseUpDown(Key, X, Y)))
+		{
+			return true;
+		}
+		L = UWindowHotkeyWindowList(L.Next);
+		// [Loop Continue]
+		goto J0x19;
 	}
-
-	return False;
+	return false;
+	return;
 }
 
 function CloseActiveWindow()
 {
-	if(ActiveWindow != None)
-		ActiveWindow.EscClose();
+	// End:0x1D
+	if(__NFUN_119__(ActiveWindow, none))
+	{
+		ActiveWindow.EscClose();		
+	}
 	else
+	{
 		Console.CloseUWindow();
+	}
+	return;
 }
 
 function Resized()
 {
 	ResolutionChanged(WinWidth, WinHeight);
+	return;
 }
 
 function SetScale(float NewScale)
 {
-	WinWidth = RealWidth / NewScale;
-	WinHeight = RealHeight / NewScale;
-
+	WinWidth = __NFUN_172__(RealWidth, NewScale);
+	WinHeight = __NFUN_172__(RealHeight, NewScale);
 	GUIScale = NewScale;
-
 	ClippingRegion.X = 0;
 	ClippingRegion.Y = 0;
-	ClippingRegion.W = WinWidth;
-	ClippingRegion.H = WinHeight;
-
+	ClippingRegion.W = int(WinWidth);
+	ClippingRegion.H = int(WinHeight);
 	SetupFonts();
-
 	Resized();
+	return;
 }
 
-function SetResolution( FLOAT _NewWidth, FLOAT _NewHeight)
+function SetResolution(float _NewWidth, float _NewHeight)
 {
 	WinWidth = _NewWidth;
 	WinHeight = _NewHeight;
-
 	ClippingRegion.X = 0;
 	ClippingRegion.Y = 0;
-	ClippingRegion.W = WinWidth;
-	ClippingRegion.H = WinHeight;
-
+	ClippingRegion.W = int(WinWidth);
+	ClippingRegion.H = int(WinHeight);
 	Resized();
+	return;
 }
 
 function SetupFonts()
 {
-	//!! Japanese text (experimental).
-	/*if( true )
-	{
-		Fonts[F_Normal]    = Font(DynamicLoadObject("Japanese.Japanese", class'Font'));
-		Fonts[F_Bold]      = Font(DynamicLoadObject("Japanese.Japanese", class'Font'));
-		Fonts[F_Large]     = Font(DynamicLoadObject("Japanese.Japanese", class'Font'));
-		Fonts[F_LargeBold] = Font(DynamicLoadObject("Japanese.Japanese", class'Font'));
-		return;
-	}*/    
-
-    // News fonts system
-    Fonts[F_MenuMainTitle]   = font'R6Font.Rainbow6_36pt';
-    Fonts[F_SmallTitle]      = font'R6Font.Rainbow6_14pt';
-    Fonts[F_VerySmallTitle]  = font'R6Font.Rainbow6_12pt';
-    Fonts[F_TabMainTitle]    = font'R6Font.Rainbow6_15pt';
-    Fonts[F_PopUpTitle]      = font'R6Font.Rainbow6_15pt';
-    Fonts[F_IntelTitle]      = font'R6Font.OcraExt_14pt';
-
-    Fonts[F_ListItemSmall]   = font'R6Font.Arial_10pt';
-    Fonts[F_ListItemBig]     = font'R6Font.Rainbow6_14pt';
-    Fonts[F_HelpWindow]      = font'R6Font.Rainbow6_12pt';
-
-    Fonts[F_FirstMenuButton] = font'R6Font.Rainbow6_36pt';
-    Fonts[F_MainButton]      = font'R6Font.Rainbow6_17pt';
-    Fonts[F_PrincipalButton] = font'R6Font.Rainbow6_17pt';
-//    Fonts[F_SmallButton]     = font'R6Font.Rainbow6_14pt';
-    Fonts[F_CheckBoxButton]  = font'R6Font.Rainbow6_12pt';
-
-// to remove 
-
-    Fonts[F_Normal]      = font'R6Font.Rainbow6_12pt'; // this one prevent access none everywhere take care to remove that for the moment YJ
-
+	Fonts[4] = Font'R6Font.Rainbow6_36pt';
+	Fonts[5] = Font'R6Font.Rainbow6_14pt';
+	Fonts[6] = Font'R6Font.Rainbow6_12pt';
+	Fonts[7] = Font'R6Font.Rainbow6_15pt';
+	Fonts[8] = Font'R6Font.Rainbow6_15pt';
+	Fonts[9] = Font'R6Font.OcraExt_14pt';
+	Fonts[10] = Font'R6Font.Arial_10pt';
+	Fonts[11] = Font'R6Font.Rainbow6_14pt';
+	Fonts[12] = Font'R6Font.Rainbow6_12pt';
+	Fonts[14] = Font'R6Font.Rainbow6_36pt';
+	Fonts[15] = Font'R6Font.Rainbow6_17pt';
+	Fonts[16] = Font'R6Font.Rainbow6_17pt';
+	Fonts[17] = Font'R6Font.Rainbow6_12pt';
+	Fonts[0] = Font'R6Font.Rainbow6_12pt';
+	return;
 }
 
 function ChangeLookAndFeel(string NewLookAndFeel)
 {
 	LookAndFeelClass = NewLookAndFeel;
-	SaveConfig();
-
-	// Completely restart UWindow system on the next paint
+	__NFUN_536__();
 	Console.ResetUWindow();
+	return;
 }
 
 function HideWindow()
 {
+	return;
 }
 
 function SetMousePos(float X, float Y)
 {
 	Console.MouseX = X;
 	Console.MouseY = Y;
+	return;
 }
 
 function QuitGame()
 {
-	bRequestQuit = True;
-	QuitTime = 0;
+	bRequestQuit = true;
+	QuitTime = 0.0000000;
 	NotifyQuitUnreal();
+	return;
 }
 
 function DoQuitGame()
 {
-	SaveConfig();
-	//Console.SaveConfig();
-	//Console.ViewportOwner.Actor.SaveConfig();
-	Close();
+	__NFUN_536__();
 	Console.ViewportOwner.Actor.ConsoleCommand("exit");
+	return;
 }
 
 function Tick(float Delta)
 {
+	// End:0x2A
 	if(bRequestQuit)
 	{
-		// Give everything time to close itself down (ie sockets).
-		if(QuitTime > 0.25)
+		// End:0x1E
+		if(__NFUN_177__(QuitTime, 0.2500000))
+		{
 			DoQuitGame();
-		QuitTime += Delta;
+		}
+		__NFUN_184__(QuitTime, Delta);
 	}
-
-	Super.Tick(Delta);
+	super.Tick(Delta);
+	return;
 }
 
 //ifdef R6CODE
 // MPF Yannick
-function SetNewMODS( string _szNewBkgFolder, optional BOOL _bForceRefresh) {}
-function SetLoadRandomBackgroundImage( string _szFolder) {}
+function SetNewMODS(string _szNewBkgFolder, optional bool _bForceRefresh)
+{
+	return;
+}
 
-function PaintBackground( Canvas C, UWindowWindow _WidgetWindow) {}
+function SetLoadRandomBackgroundImage(string _szFolder)
+{
+	return;
+}
+
+function PaintBackground(Canvas C, UWindowWindow _WidgetWindow)
+{
+	return;
+}
 
 //===================================================================
 // DrawBackGroundEffect: draw a background fullscreen -- need for pop-up 
 //===================================================================
-function DrawBackGroundEffect( Canvas C, Color _BGColor)
+function DrawBackGroundEffect(Canvas C, Color _BGColor)
 {
 	local float OrgX, OrgY, ClipX, ClipY;
 
@@ -603,88 +682,63 @@ function DrawBackGroundEffect( Canvas C, Color _BGColor)
 	OrgY = C.OrgY;
 	ClipX = C.ClipX;
 	ClipY = C.ClipY;
-
-	// bypass current window origin and clipping by parameters of the root
-	C.SetOrigin( 0, 0);
-	C.SetClip( C.SizeX, C.SizeY);
-
-    C.SetDrawColor( _BGColor.R, _BGColor.G, _BGColor.B, _BGColor.A);
-
-	C.SetPos( 0, 0);
-	C.DrawTile( Texture'UWindow.WhiteTexture', C.SizeX, C.SizeY, 0, 0, 10, 10);
-
-	// restore current window parameters
-	C.SetClip(ClipX, ClipY);
-	C.SetOrigin(OrgX, OrgY);
+	C.__NFUN_2624__(0.0000000, 0.0000000);
+	C.__NFUN_2625__(float(C.SizeX), float(C.SizeY));
+	C.__NFUN_2626__(_BGColor.R, _BGColor.G, _BGColor.B, _BGColor.A);
+	C.__NFUN_2623__(0.0000000, 0.0000000);
+	C.__NFUN_466__(Texture'UWindow.WhiteTexture', float(C.SizeX), float(C.SizeY), 0.0000000, 0.0000000, 10.0000000, 10.0000000);
+	C.__NFUN_2625__(ClipX, ClipY);
+	C.__NFUN_2624__(OrgX, OrgY);
+	return;
 }
-//endif
 
 //===================================================================
 // TrapKey: Menu trap the key
 //===================================================================
-function BOOL TrapKey( BOOL _bIncludeMouseMove)
+function bool TrapKey(bool _bIncludeMouseMove)
 {
 	return true;
+	return;
 }
 
-#ifdefDEBUG
-function string GetGameWidgetID( eGameWidgetID _eGameWidgetID)
+// NEW IN 1.60
+function RegisterMsgWindow(UWindowWindow _NotifyMsgWindow)
 {
-	local string szResult;
-
-	switch(_eGameWidgetID)
-	{
-		case WidgetID_None:							szResult = "WidgetID_None"; break;
-		case InGameID_EscMenu:						szResult = "InGameID_EscMenu"; break;
-		case InGameID_Debriefing:					szResult = "InGameID_Debriefing"; break;
-		case InGameID_TrainingInstruction:			szResult = "InGameID_TrainingInstruction";	break;
-		case SinglePlayerWidgetID:					szResult = "SinglePlayerWidgetID";	break;
-        case TrainingWidgetID:                      szResult = "TrainingWidgetID";	break;
-		case CampaignPlanningID:					szResult = "CampaignPlanningID"; break;
-		case MainMenuWidgetID:						szResult = "MainMenuWidgetID"; break;
-		case IntelWidgetID:							szResult = "IntelWidgetID";	break;
-		case PlanningWidgetID:						szResult = "PlanningWidgetID";	break;
-		case RetryCampaignPlanningID:				szResult = "RetryCampaignPlanningID"; break;
-		case RetryCustomMissionPlanningID:			szResult = "RetryCustomMissionPlanningID";	break;
-		case GearRoomWidgetID:						szResult = "GearRoomWidgetID";	break;
-		case ExecuteWidgetID:						szResult = "ExecuteWidgetID"; break;
-		case CustomMissionWidgetID:					szResult = "CustomMissionWidgetID";	break;
-		case MultiPlayerWidgetID:					szResult = "MultiPlayerWidgetID"; break;
-		case OptionsWidgetID:						szResult = "OptionsWidgetID"; break;
-		case PreviousWidgetID:						szResult = "PreviousWidgetID"; break;
-		case CreditsWidgetID:						szResult = "CreditsWidgetID"; break;
-		case MPCreateGameWidgetID:					szResult = "MPCreateGameWidgetID"; break;
-		case UbiComWidgetID:						szResult = "UbiComWidgetID"; break;
-		case NonUbiWidgetID:						szResult = "UbiComWidgetID"; break;
-		case InGameMPWID_Writable:					szResult = "InGameMPWID_Writable";	break;
-		case InGameMPWID_TeamJoin:					szResult = "InGameMPWID_TeamJoin";	break;
-		case InGameMPWID_Intermission:				szResult = "InGameMPWID_Intermission"; break;
-		case InGameMPWID_InterEndRound:				szResult = "InGameMPWID_InterEndRound";	break;
-		case InGameMPWID_EscMenu:					szResult = "InGameMPWID_EscMenu"; break;
-		case InGameMpWID_RecMessages:				szResult = "InGameMpWID_RecMessages"; break;
-		case InGameMpWID_MsgOffensive:				szResult = "InGameMpWID_MsgOffensive"; break;
-		case InGameMpWID_MsgDefensive:				szResult = "InGameMpWID_MsgDefensive"; break;
-		case InGameMpWID_MsgReply:					szResult = "InGameMpWID_MsgReply"; break;
-		case InGameMpWID_MsgStatus:					szResult = "InGameMpWID_MsgStatus";	break;
-		case InGameMPWID_Vote:						szResult = "InGameMPWID_Vote"; break;
-		case InGameMPWID_CountDown:					szResult = "InGameMPWID_CountDown"; break;
-		case InGameID_OperativeSelector:			szResult = "InGameID_OperativeSelector"; break;
-		case MultiPlayerError:						szResult = "MultiPlayerError"; break;
-		case MultiPlayerErrorUbiCom:				szResult = "MultiPlayerErrorUbiCom"; break;
-		case MenuQuitID:							szResult = "MenuQuitID"; break;
-		default:
-			szResult = "WIDGET ID NOT DEFINE IN GetGameWidgetID()";
-			break;
-	}
-
-	return szResult;
+	m_NotifyMsgWindow = _NotifyMsgWindow;
+	return;
 }
-#endif
+
+// NEW IN 1.60
+function UnRegisterMsgWindow()
+{
+	m_NotifyMsgWindow = none;
+	return;
+}
+
+// NEW IN 1.60
+function ProcessGSMsg(string _szMsg)
+{
+	// End:0x1F
+	if(__NFUN_119__(m_NotifyMsgWindow, none))
+	{
+		m_NotifyMsgWindow.ProcessGSMsg(_szMsg);
+	}
+	return;
+}
 
 defaultproperties
 {
-     bAllowConsole=True
-     GUIScale=1.000000
-     m_fWindowScaleX=1.000000
-     m_fWindowScaleY=1.000000
+	bAllowConsole=true
+	GUIScale=1.0000000
+	m_fWindowScaleX=1.0000000
+	m_fWindowScaleY=1.0000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var Y
+// REMOVED IN 1.60: var r
+// REMOVED IN 1.60: var t
+// REMOVED IN 1.60: var eRootID
+// REMOVED IN 1.60: function SaveTrainingPlanning
+// REMOVED IN 1.60: function GetSimplePopUpID
+// REMOVED IN 1.60: function GetGameWidgetID

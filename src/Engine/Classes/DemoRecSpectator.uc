@@ -1,99 +1,60 @@
 //=============================================================================
+// DemoRecSpectator - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // DemoRecSpectator - spectator for demo recordings to replicate ClientMessages
 //=============================================================================
-
-class DemoRecSpectator extends MessagingSpectator;
+class DemoRecSpectator extends MessagingSpectator
+	config(User)
+ notplaceable;
 
 var PlayerController PlaybackActor;
 var GameReplicationInfo PlaybackGRI;
 
-function ClientMessage( coerce string S, optional name Type )
+replication
 {
-	RepClientMessage( S, Type );
+	// Pos:0x000
+	reliable if(bDemoRecording)
+		RepClientMessage, RepClientVoiceMessage, 
+		RepReceiveLocalizedMessage;
+}
+
+function ClientMessage(coerce string S, optional name type)
+{
+	RepClientMessage(S, type);
+	return;
 }
 
 function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID)
 {
 	RepClientVoiceMessage(Sender, Recipient, messagetype, messageID);
+	return;
 }
 
-function ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject )
+function ReceiveLocalizedMessage(Class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
-	RepReceiveLocalizedMessage( Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject );
+	RepReceiveLocalizedMessage(Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject);
+	return;
 }
 
-//==== Called during demo playback ============================================
-/*
-simulated function Tick(float Delta)
+simulated function RepClientMessage(coerce string S, optional name type)
 {
-	local PlayerController p;
-	local GameReplicationInfo g;
-
-	// find local playerpawn and attach.
-	if(Level.NetMode == NM_Client)
-	{
-		if(PlaybackActor == None)
-		{
-			foreach DynamicActors(class'PlayerController', p)
-			{
-				if( p.Player.IsA('Viewport') )
-				{
-					PlaybackActor = p;
-					if(PlaybackGRI != None)
-						PlaybackActor.GameReplicationInfo = PlaybackGRI;
-
-					Log("Attached to player "$p);
-					
-					break;
-				}
-			}
-		}
-
-		if(PlaybackGRI == None)
-		{
-			foreach DynamicActors(class'GameReplicationInfo', g)
-			{
-				PlaybackGRI = g;
-				if(PlaybackActor != None)
-					PlaybackActor.GameReplicationInfo = PlaybackGRI;
-				break;
-			}
-		}
-
-		if(PlaybackActor != None && PlaybackGRI != None)
-			Disable('Tick');
-
-	}
-	else
-	{
-		Disable('Tick');
-	}
-}
-*/
-simulated function RepClientMessage( coerce string S, optional name Type )
-{	
-	//if(PlaybackActor != None && PlaybackActor.Role == ROLE_Authority)
-	//	PlaybackActor.ClientMessage( S, Type );
+	return;
 }
 
 simulated function RepClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID)
 {
-	//if(PlaybackActor != None && PlaybackActor.Role == ROLE_Authority)
-	//	PlaybackActor.ClientVoiceMessage(Sender, Recipient, messagetype, messageID);
+	return;
 }
 
-simulated function RepReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject )
+simulated function RepReceiveLocalizedMessage(Class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
-	//if(PlaybackActor != None && PlaybackActor.Role == ROLE_Authority)
-	//	PlaybackActor.ReceiveLocalizedMessage( Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject );
+	return;
 }
 
-replication
-{
-	reliable if ( bDemoRecording )
-		RepClientMessage, RepClientVoiceMessage, RepReceiveLocalizedMessage;
-}
 
-defaultproperties
-{
-}
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function Tick

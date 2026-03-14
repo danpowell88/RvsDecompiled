@@ -1,753 +1,1017 @@
+//=============================================================================
+// UWindowEditBox - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 // UWindowEditBox - simple edit box, for use in other controls such as 
 // UWindowComboxBoxControl, UWindowEditBoxControl etc.
-
 class UWindowEditBox extends UWindowDialogControl;
 
-var string		            Value;
-var string		            Value2;
-var string                  OldValue;
-var int			            CaretOffset;
-var int			            MaxLength;
-var float		            LastDrawTime;
-var bool		            bShowCaret;
-var float		            Offset;
-var UWindowDialogControl	NotifyOwner;
-var bool		            bNumericOnly;
-var bool		            bNumericFloat;
-var bool	            	bCanEdit;
-var bool		            bAllSelected;
-var bool		            bDelayedNotify;
-var bool		            bChangePending;
-var bool		            bControlDown;
-var bool		            bShiftDown;
-var bool		            bHistory;
-var bool		            bKeyDown;
-var bool					m_bMouseOn;			// the mouse is over the window edit box
-var BOOL					m_bDrawEditBorders;
-var BOOL					m_bUseNewPaint;
-var BOOL                    m_CurrentlyEditing;
-var bool		            bSelectOnFocus;
-var BOOL					bPassword;
-var BOOL					m_bDrawEditBoxBG;	// draw the edit box background
-var UWindowEditBoxHistory	HistoryList;
-var UWindowEditBoxHistory	CurrentHistory;
-
-
-var BOOL                    bShowLog;
-
+var int CaretOffset;
+var int MaxLength;
+var bool bShowCaret;
+var bool bNumericOnly;
+var bool bNumericFloat;
+var bool bCanEdit;
+var bool bAllSelected;
+var bool bDelayedNotify;
+var bool bChangePending;
+var bool bControlDown;
+var bool bShiftDown;
+var bool bHistory;
+var bool bKeyDown;
+var bool m_bMouseOn;  // the mouse is over the window edit box
+var bool m_bDrawEditBorders;
+var bool m_bUseNewPaint;
+var bool m_CurrentlyEditing;
+var bool bSelectOnFocus;
+var bool bPassword;
+var bool m_bDrawEditBoxBG;  // draw the edit box background
+var bool bShowLog;
+var float LastDrawTime;
+var float offset;
+var UWindowDialogControl NotifyOwner;
+var UWindowEditBoxHistory HistoryList;
+var UWindowEditBoxHistory CurrentHistory;
+var string Value;
+var string Value2;
+var string OldValue;
 
 function Created()
 {
-	Super.Created();
-
+	super.Created();
 	LastDrawTime = GetTime();
+	return;
 }
 
 function SetHistory(bool bInHistory)
 {
 	bHistory = bInHistory;
- 
-	if(bHistory && HistoryList==None)
+	// End:0x4B
+	if(__NFUN_130__(bHistory, __NFUN_114__(HistoryList, none)))
 	{
-		HistoryList = new(None) class'UWindowEditBoxHistory';
+		HistoryList = new (none) Class'UWindow.UWindowEditBoxHistory';
 		HistoryList.SetupSentinel();
-		CurrentHistory = None;
+		CurrentHistory = none;		
 	}
 	else
-	if(!bHistory && HistoryList!=None)
 	{
-		HistoryList = None;
-		CurrentHistory = None;
+		// End:0x71
+		if(__NFUN_130__(__NFUN_129__(bHistory), __NFUN_119__(HistoryList, none)))
+		{
+			HistoryList = none;
+			CurrentHistory = none;
+		}
 	}
-  
- 
+	return;
 }
 
 function SetEditable(bool bEditable)
 {
 	bCanEdit = bEditable;
+	return;
 }
 
 function SetValue(string NewValue, optional string NewValue2, optional bool noUpdateHistory)
-{    
-	Value = Left(NewValue, MaxLength); // limite the value to the maxlength
+{
+	Value = __NFUN_128__(NewValue, MaxLength);
 	Value2 = NewValue2;
-      
-    CaretOffset = Len(Value);	
-    Offset = 0;
-    
-    if(!bHistory)
-    {
-        OldValue = Value;
-    }    
-    else  if(!noUpdateHistory)
+	CaretOffset = __NFUN_125__(Value);
+	offset = 0.0000000;
+	// End:0x4E
+	if(__NFUN_129__(bHistory))
 	{
-		if(Value != "")
-		{
-			CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(class'UWindowEditBoxHistory'));
-			CurrentHistory.HistoryText = Value;
-            if(bShowLog)log("Set value CurrentHistory.HistoryText"@CurrentHistory.HistoryText);
-
-		}
-		CurrentHistory = HistoryList;
+		OldValue = Value;		
 	}
-	Notify(DE_Change);
+	else
+	{
+		// End:0xE4
+		if(__NFUN_129__(noUpdateHistory))
+		{
+			// End:0xD9
+			if(__NFUN_123__(Value, ""))
+			{
+				CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(Class'UWindow.UWindowEditBoxHistory'));
+				CurrentHistory.HistoryText = Value;
+				// End:0xD9
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Set value CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+				}
+			}
+			CurrentHistory = HistoryList;
+		}
+	}
+	Notify(1);
+	return;
 }
 
 function Clear()
 {
 	CaretOffset = 0;
-	Value="";
-	Value2="";
-	bAllSelected = False;
+	Value = "";
+	Value2 = "";
+	bAllSelected = false;
+	// End:0x33
 	if(bDelayedNotify)
-		bChangePending = True;
+	{
+		bChangePending = true;		
+	}
 	else
-		Notify(DE_Change);
+	{
+		Notify(1);
+	}
+	return;
 }
 
 //This is the default function for enabling editing
 function SelectAll()
 {
-    if(bShowLog)log("SelectAll Begin: bcanedit"@bCanEdit@"m_CurrentlyEditing"@m_CurrentlyEditing@"value"@Value@"bAllSelected"@bAllSelected);
-	
-    if(bCanEdit)
-    {
-        m_CurrentlyEditing = true;
-		SetAcceptsFocus();
-    }
-    
-    if(Value != "")
-	{              
-		CaretOffset = Len(Value);
-		bAllSelected = !bAllSelected;
+	// End:0x7A
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("SelectAll Begin: bcanedit", string(bCanEdit)), "m_CurrentlyEditing"), string(m_CurrentlyEditing)), "value"), Value), "bAllSelected"), string(bAllSelected)));
 	}
-
-    if(bShowLog)log("SelectAll End: bcanedit"@bCanEdit@"m_CurrentlyEditing"@m_CurrentlyEditing@"value"@Value@"bAllSelected"@bAllSelected);
+	// End:0x91
+	if(bCanEdit)
+	{
+		m_CurrentlyEditing = true;
+		SetAcceptsFocus();
+	}
+	// End:0xB9
+	if(__NFUN_123__(Value, ""))
+	{
+		CaretOffset = __NFUN_125__(Value);
+		bAllSelected = __NFUN_129__(bAllSelected);
+	}
+	// End:0x131
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("SelectAll End: bcanedit", string(bCanEdit)), "m_CurrentlyEditing"), string(m_CurrentlyEditing)), "value"), Value), "bAllSelected"), string(bAllSelected)));
+	}
+	return;
 }
 
 function string GetValue()
 {
 	return Value;
+	return;
 }
 
 function string GetValue2()
 {
 	return Value2;
+	return;
 }
 
 function Notify(byte E)
 {
-	if(NotifyOwner != None)
+	// End:0x22
+	if(__NFUN_119__(NotifyOwner, none))
 	{
-		NotifyOwner.Notify(E);
-	} else {
-		Super.Notify(E);
+		NotifyOwner.Notify(E);		
 	}
+	else
+	{
+		super.Notify(E);
+	}
+	return;
 }
 
 function InsertText(string Text)
 {
 	local int i;
 
-	for(i=0;i<Len(Text);i++)
-		Insert(Asc(Mid(Text,i,1)));
+	i = 0;
+	J0x07:
+
+	// End:0x39 [Loop If]
+	if(__NFUN_150__(i, __NFUN_125__(Text)))
+	{
+		Insert(byte(__NFUN_237__(__NFUN_127__(Text, i, 1))));
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
 // Inserts a character at the current caret position
 function bool Insert(byte C)
 {
-	local string	NewValue;
+	local string NewValue;
 
-	NewValue = Left(Value, CaretOffset) $ Chr(C) $ Mid(Value, CaretOffset);
-
-	if(Len(NewValue) > MaxLength) 
-		return False;
-
-	CaretOffset++;
-
+	NewValue = __NFUN_112__(__NFUN_112__(__NFUN_128__(Value, CaretOffset), __NFUN_236__(int(C))), __NFUN_127__(Value, CaretOffset));
+	// End:0x3E
+	if(__NFUN_151__(__NFUN_125__(NewValue), MaxLength))
+	{
+		return false;
+	}
+	__NFUN_165__(CaretOffset);
 	Value = NewValue;
+	// End:0x64
 	if(bDelayedNotify)
-		bChangePending = True;
+	{
+		bChangePending = true;		
+	}
 	else
-		Notify(DE_Change);
-	return True;
+	{
+		Notify(1);
+	}
+	return true;
+	return;
 }
 
 function bool Backspace()
 {
-	local string	NewValue;
+	local string NewValue;
 
-	if(CaretOffset == 0) return False;
-
-	NewValue = Left(Value, CaretOffset - 1) $ Mid(Value, CaretOffset);
-	CaretOffset--;
-
-	Value = NewValue;    
-
+	// End:0x0D
+	if(__NFUN_154__(CaretOffset, 0))
+	{
+		return false;
+	}
+	NewValue = __NFUN_112__(__NFUN_128__(Value, __NFUN_147__(CaretOffset, 1)), __NFUN_127__(Value, CaretOffset));
+	__NFUN_166__(CaretOffset);
+	Value = NewValue;
+	// End:0x56
 	if(bDelayedNotify)
-		bChangePending = True;
+	{
+		bChangePending = true;		
+	}
 	else
-		Notify(DE_Change);
-	return True;
+	{
+		Notify(1);
+	}
+	return true;
+	return;
 }
 
 function bool Delete()
 {
-	local string	NewValue;
+	local string NewValue;
 
-	if(CaretOffset == Len(Value)) return False;
-
-	NewValue = Left(Value, CaretOffset) $ Mid(Value, CaretOffset + 1);
-
+	// End:0x13
+	if(__NFUN_154__(CaretOffset, __NFUN_125__(Value)))
+	{
+		return false;
+	}
+	NewValue = __NFUN_112__(__NFUN_128__(Value, CaretOffset), __NFUN_127__(Value, __NFUN_146__(CaretOffset, 1)));
 	Value = NewValue;
-	Notify(DE_Change);
-	return True;
+	Notify(1);
+	return true;
+	return;
 }
 
 function bool WordLeft()
 {
-	while(CaretOffset > 0 && Mid(Value, CaretOffset - 1, 1) == " ")
-		CaretOffset--;
-	while(CaretOffset > 0 && Mid(Value, CaretOffset - 1, 1) != " ")
-		CaretOffset--;
+	J0x00:
+	// End:0x2F [Loop If]
+	if(__NFUN_130__(__NFUN_151__(CaretOffset, 0), __NFUN_122__(__NFUN_127__(Value, __NFUN_147__(CaretOffset, 1), 1), " ")))
+	{
+		__NFUN_166__(CaretOffset);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	J0x2F:
 
+	// End:0x5E [Loop If]
+	if(__NFUN_130__(__NFUN_151__(CaretOffset, 0), __NFUN_123__(__NFUN_127__(Value, __NFUN_147__(CaretOffset, 1), 1), " ")))
+	{
+		__NFUN_166__(CaretOffset);
+		// [Loop Continue]
+		goto J0x2F;
+	}
 	LastDrawTime = GetTime();
-	bShowCaret = True;
-
-	return True;	
+	bShowCaret = true;
+	return true;
+	return;
 }
 
 function bool MoveLeft()
 {
-	if(CaretOffset == 0) return False;
-	CaretOffset--;
-
+	// End:0x0D
+	if(__NFUN_154__(CaretOffset, 0))
+	{
+		return false;
+	}
+	__NFUN_166__(CaretOffset);
 	LastDrawTime = GetTime();
-	bShowCaret = True;
-
-	return True;	
+	bShowCaret = true;
+	return true;
+	return;
 }
 
 function bool MoveRight()
 {
-	if(CaretOffset == Len(Value)) return False;
-	CaretOffset++;
-
+	// End:0x13
+	if(__NFUN_154__(CaretOffset, __NFUN_125__(Value)))
+	{
+		return false;
+	}
+	__NFUN_165__(CaretOffset);
 	LastDrawTime = GetTime();
-	bShowCaret = True;
-
-	return True;	
+	bShowCaret = true;
+	return true;
+	return;
 }
 
 function bool WordRight()
 {
-	while(CaretOffset < Len(Value) && Mid(Value, CaretOffset, 1) != " ")
-		CaretOffset++;
-	while(CaretOffset < Len(Value) && Mid(Value, CaretOffset, 1) == " ")
-		CaretOffset++;
+	J0x00:
+	// End:0x32 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(CaretOffset, __NFUN_125__(Value)), __NFUN_123__(__NFUN_127__(Value, CaretOffset, 1), " ")))
+	{
+		__NFUN_165__(CaretOffset);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	J0x32:
 
+	// End:0x64 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(CaretOffset, __NFUN_125__(Value)), __NFUN_122__(__NFUN_127__(Value, CaretOffset, 1), " ")))
+	{
+		__NFUN_165__(CaretOffset);
+		// [Loop Continue]
+		goto J0x32;
+	}
 	LastDrawTime = GetTime();
-	bShowCaret = True;
-
-	return True;	
+	bShowCaret = true;
+	return true;
+	return;
 }
 
 function bool MoveHome()
 {
 	CaretOffset = 0;
-
 	LastDrawTime = GetTime();
-	bShowCaret = True;
-
-	return True;	
+	bShowCaret = true;
+	return true;
+	return;
 }
 
 function bool MoveEnd()
 {
-	CaretOffset = Len(Value);
-
+	CaretOffset = __NFUN_125__(Value);
 	LastDrawTime = GetTime();
-	bShowCaret = True;
-
-	return True;	
+	bShowCaret = true;
+	return true;
+	return;
 }
 
 function EditCopy()
 {
-	if((bAllSelected || !bCanEdit) && m_CurrentlyEditing)
+	// End:0x36
+	if(__NFUN_130__(__NFUN_132__(bAllSelected, __NFUN_129__(bCanEdit)), m_CurrentlyEditing))
+	{
 		GetPlayerOwner().CopyToClipboard(Value);
+	}
+	return;
 }
 
 function EditPaste()
 {
-	if(bCanEdit && m_CurrentlyEditing)
+	// End:0x39
+	if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
 	{
+		// End:0x23
 		if(bAllSelected)
+		{
 			Clear();
+		}
 		InsertText(GetPlayerOwner().PasteFromClipboard());
 	}
+	return;
 }
 
 function EditCut()
 {
-	if(bCanEdit && m_CurrentlyEditing)
+	// End:0x43
+	if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
 	{
+		// End:0x40
 		if(bAllSelected)
 		{
 			GetPlayerOwner().CopyToClipboard(Value);
-			bAllSelected = False;
+			bAllSelected = false;
 			Clear();
-		}
+		}		
 	}
 	else
+	{
 		EditCopy();
+	}
+	return;
 }
 
-function KeyType( int Key, float MouseX, float MouseY )
+function KeyType(int Key, float MouseX, float MouseY)
 {
-
-    if(bShowLog)log("UWindowEditBox::KeyType bCanEdit"@bCanEdit@"bKeyDown"@bKeyDown@"m_CurrentlyEditing"@m_CurrentlyEditing);
-
-        
-    if(bCanEdit && bKeyDown && m_CurrentlyEditing)
+	// End:0x6D
+	if(bShowLog)
 	{
-		if( !bControlDown )
+		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("UWindowEditBox::KeyType bCanEdit", string(bCanEdit)), "bKeyDown"), string(bKeyDown)), "m_CurrentlyEditing"), string(m_CurrentlyEditing)));
+	}
+	// End:0x10B
+	if(__NFUN_130__(__NFUN_130__(bCanEdit, bKeyDown), m_CurrentlyEditing))
+	{
+		// End:0x10B
+		if(__NFUN_129__(bControlDown))
 		{
+			// End:0xA6
 			if(bAllSelected)
+			{
 				Clear();
-
-			bAllSelected = False;
-
+			}
+			bAllSelected = false;
+			// End:0xE1
 			if(bNumericOnly)
-            {
-				if( Key>=0x30 && Key<=0x39 )  
+			{
+				// End:0xDE
+				if(__NFUN_130__(__NFUN_153__(Key, 48), __NFUN_152__(Key, 57)))
 				{
-					Insert(Key);
-				}
+					Insert(byte(Key));
+				}				
 			}
 			else
 			{
-				if( Key>=0x20 && Key<0x100 )
+				// End:0x10B
+				if(__NFUN_130__(__NFUN_153__(Key, 32), __NFUN_150__(Key, 256)))
 				{
-					Insert(Key);
+					Insert(byte(Key));
 				}
 			}
 		}
 	}
+	return;
 }
 
 function KeyUp(int Key, float X, float Y)
-{	
-	bKeyDown = False;
-
-	switch (Key)
+{
+	bKeyDown = false;
+	switch(Key)
 	{
-	case Root.Console.EInputKey.IK_Ctrl:
-		bControlDown = False;
-		break;
-	case Root.Console.EInputKey.IK_Shift:
-		bShiftDown = False;
-		break;
+		// End:0x33
+		case int(Root.Console.17):
+			bControlDown = false;
+			// End:0x5A
+			break;
+		// End:0x57
+		case int(Root.Console.16):
+			bShiftDown = false;
+			// End:0x5A
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
+	return;
 }
 
 function KeyDown(int Key, float X, float Y)
 {
-
-
-	bKeyDown = True;
-
-
-	switch (Key)
+	bKeyDown = true;
+	switch(Key)
 	{
-	case Root.Console.EInputKey.IK_Ctrl:
-		bControlDown = True;
-		break;
-	case Root.Console.EInputKey.IK_Shift:
-		bShiftDown = True;
-		break;
-	case Root.Console.EInputKey.IK_Escape:
-        if(bCanEdit && m_CurrentlyEditing)
-		{			
-            if(bShowLog)log("Escape pressed");
-
-            if(!bHistory)
-            {
-                SetValue(OldValue, "",true);	                                
-            }
-			else if(CurrentHistory != None && CurrentHistory.Next != None)
+		// End:0x33
+		case int(Root.Console.17):
+			bControlDown = true;
+			// End:0x6D3
+			break;
+		// End:0x57
+		case int(Root.Console.16):
+			bShiftDown = true;
+			// End:0x6D3
+			break;
+		// End:0x191
+		case int(Root.Console.27):
+			// End:0x18E
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
 			{
-                if(bShowLog)log("CurrentHistory.HistoryText"@CurrentHistory.HistoryText);
-                if(bShowLog)log("CurrentHistory.Next.HistoryText"@UWindowEditBoxHistory(CurrentHistory.Next).HistoryText);
-
-				SetValue(UWindowEditBoxHistory(CurrentHistory.Next).HistoryText, "",true);	                
-			}            
-            MoveEnd();                
-            DropSelection();
-		}         
-		break;
-	case Root.Console.EInputKey.IK_Enter:
-		if(bCanEdit && m_CurrentlyEditing)
-		{
-            if(!bHistory)
-            {
-               OldValue = Value;
-            }
-			else
-			{
-				if(Value != "")
+				// End:0x9F
+				if(bShowLog)
 				{
-					CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(class'UWindowEditBoxHistory'));
-					CurrentHistory.HistoryText = Value;
-                    if(bShowLog)log("Set value CurrentHistory.HistoryText"@CurrentHistory.HistoryText);
+					__NFUN_231__("Escape pressed");
 				}
-				CurrentHistory = HistoryList;
-			}
-            MoveEnd();                
-            DropSelection();
-			Notify(DE_EnterPressed); 
-		}
-		break;
-	case Root.Console.EInputKey.IK_MouseWheelUp:
-		if(bCanEdit)
-			Notify(DE_WheelUpPressed);
-		break;
-	case Root.Console.EInputKey.IK_MouseWheelDown:
-		if(bCanEdit)
-			Notify(DE_WheelDownPressed);
-		break;
-
-	case Root.Console.EInputKey.IK_Right:
-		if(bCanEdit && m_CurrentlyEditing) 
-		{
-			if(bControlDown)
-				WordRight();
-			else
-				MoveRight();
-            
-
-            bAllSelected = False;
-        }
-		
-		break;
-	case Root.Console.EInputKey.IK_Left:
-		if(bCanEdit && m_CurrentlyEditing)
-		{
-			if(bControlDown)
-				WordLeft();
-			else
-				MoveLeft();
-
-
-            bAllSelected = False;
-		}
-		
-		break;
-	case Root.Console.EInputKey.IK_Up:
-		if(bCanEdit && bHistory && m_CurrentlyEditing)
-		{
-			bAllSelected = False;
-			if(CurrentHistory != None && CurrentHistory.Next != None)
-			{
-				CurrentHistory = UWindowEditBoxHistory(CurrentHistory.Next);
-				SetValue(CurrentHistory.HistoryText,"",true);	                
+				// End:0xBB
+				if(__NFUN_129__(bHistory))
+				{
+					SetValue(OldValue, "", true);					
+				}
+				else
+				{
+					// End:0x182
+					if(__NFUN_130__(__NFUN_119__(CurrentHistory, none), __NFUN_119__(CurrentHistory.Next, none)))
+					{
+						// End:0x113
+						if(bShowLog)
+						{
+							__NFUN_231__(__NFUN_168__("CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+						}
+						// End:0x15D
+						if(bShowLog)
+						{
+							__NFUN_231__(__NFUN_168__("CurrentHistory.Next.HistoryText", UWindowEditBoxHistory(CurrentHistory.Next).HistoryText));
+						}
+						SetValue(UWindowEditBoxHistory(CurrentHistory.Next).HistoryText, "", true);
+					}
+				}
 				MoveEnd();
+				DropSelection();
 			}
-		}
-		break;
-	case Root.Console.EInputKey.IK_Down:
-		if(bCanEdit && bHistory && m_CurrentlyEditing)
-		{
-			bAllSelected = False;
-			if(CurrentHistory != None && CurrentHistory.Prev != None)
+			// End:0x6D3
+			break;
+		// End:0x279
+		case int(Root.Console.13):
+			// End:0x276
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
 			{
-				CurrentHistory = UWindowEditBoxHistory(CurrentHistory.Prev);
-				SetValue(CurrentHistory.HistoryText,"",true);	                
+				// End:0x1D7
+				if(__NFUN_129__(bHistory))
+				{
+					OldValue = Value;					
+				}
+				else
+				{
+					// End:0x257
+					if(__NFUN_123__(Value, ""))
+					{
+						CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(Class'UWindow.UWindowEditBoxHistory'));
+						CurrentHistory.HistoryText = Value;
+						// End:0x257
+						if(bShowLog)
+						{
+							__NFUN_231__(__NFUN_168__("Set value CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+						}
+					}
+					CurrentHistory = HistoryList;
+				}
 				MoveEnd();
+				DropSelection();
+				Notify(7);
 			}
-		}
-		break;
-	case Root.Console.EInputKey.IK_Home:
-		if(bCanEdit && m_CurrentlyEditing)
-        {
-            MoveHome();
-		    bAllSelected = False;
-        }			
-		break;
-	case Root.Console.EInputKey.IK_End:
-		if(bCanEdit && m_CurrentlyEditing)
-        {
-            MoveEnd();
-		    bAllSelected = False;
-        }			
-		break;
-	case Root.Console.EInputKey.IK_Backspace:
-		if(bCanEdit && m_CurrentlyEditing)
-		{
-			if(bAllSelected)
-				Clear();
+			// End:0x6D3
+			break;
+		// End:0x2A6
+		case int(Root.Console.236):
+			// End:0x2A3
+			if(bCanEdit)
+			{
+				Notify(14);
+			}
+			// End:0x6D3
+			break;
+		// End:0x2D3
+		case int(Root.Console.237):
+			// End:0x2D0
+			if(bCanEdit)
+			{
+				Notify(15);
+			}
+			// End:0x6D3
+			break;
+		// End:0x323
+		case int(Root.Console.39):
+			// End:0x320
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			{
+				// End:0x312
+				if(bControlDown)
+				{
+					WordRight();					
+				}
+				else
+				{
+					MoveRight();
+				}
+				bAllSelected = false;
+			}
+			// End:0x6D3
+			break;
+		// End:0x373
+		case int(Root.Console.37):
+			// End:0x370
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			{
+				// End:0x362
+				if(bControlDown)
+				{
+					WordLeft();					
+				}
+				else
+				{
+					MoveLeft();
+				}
+				bAllSelected = false;
+			}
+			// End:0x6D3
+			break;
+		// End:0x40D
+		case int(Root.Console.38):
+			// End:0x40A
+			if(__NFUN_130__(__NFUN_130__(bCanEdit, bHistory), m_CurrentlyEditing))
+			{
+				bAllSelected = false;
+				// End:0x40A
+				if(__NFUN_130__(__NFUN_119__(CurrentHistory, none), __NFUN_119__(CurrentHistory.Next, none)))
+				{
+					CurrentHistory = UWindowEditBoxHistory(CurrentHistory.Next);
+					SetValue(CurrentHistory.HistoryText, "", true);
+					MoveEnd();
+				}
+			}
+			// End:0x6D3
+			break;
+		// End:0x4A7
+		case int(Root.Console.40):
+			// End:0x4A4
+			if(__NFUN_130__(__NFUN_130__(bCanEdit, bHistory), m_CurrentlyEditing))
+			{
+				bAllSelected = false;
+				// End:0x4A4
+				if(__NFUN_130__(__NFUN_119__(CurrentHistory, none), __NFUN_119__(CurrentHistory.Prev, none)))
+				{
+					CurrentHistory = UWindowEditBoxHistory(CurrentHistory.Prev);
+					SetValue(CurrentHistory.HistoryText, "", true);
+					MoveEnd();
+				}
+			}
+			// End:0x6D3
+			break;
+		// End:0x4E5
+		case int(Root.Console.36):
+			// End:0x4E2
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			{
+				MoveHome();
+				bAllSelected = false;
+			}
+			// End:0x6D3
+			break;
+		// End:0x523
+		case int(Root.Console.35):
+			// End:0x520
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			{
+				MoveEnd();
+				bAllSelected = false;
+			}
+			// End:0x6D3
+			break;
+		// End:0x573
+		case int(Root.Console.8):
+			// End:0x570
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			{
+				// End:0x562
+				if(bAllSelected)
+				{
+					Clear();					
+				}
+				else
+				{
+					Backspace();
+				}
+				bAllSelected = false;
+			}
+			// End:0x6D3
+			break;
+		// End:0x5C3
+		case int(Root.Console.46):
+			// End:0x5C0
+			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			{
+				// End:0x5B2
+				if(bAllSelected)
+				{
+					Clear();					
+				}
+				else
+				{
+					Delete();
+				}
+				bAllSelected = false;
+			}
+			// End:0x6D3
+			break;
+		// End:0x5DC
+		case int(Root.Console.190):
+		// End:0x60E
+		case int(Root.Console.110):
+			// End:0x60B
+			if(bNumericFloat)
+			{
+				Insert(byte(__NFUN_237__(".")));
+			}
+			// End:0x6D3
+			break;
+		// End:0xFFFF
+		default:
+			// End:0x68F
+			if(bControlDown)
+			{
+				// End:0x640
+				if(__NFUN_132__(__NFUN_154__(Key, __NFUN_237__("c")), __NFUN_154__(Key, __NFUN_237__("C"))))
+				{
+					EditCopy();
+				}
+				// End:0x666
+				if(__NFUN_132__(__NFUN_154__(Key, __NFUN_237__("v")), __NFUN_154__(Key, __NFUN_237__("V"))))
+				{
+					EditPaste();
+				}
+				// End:0x68C
+				if(__NFUN_132__(__NFUN_154__(Key, __NFUN_237__("x")), __NFUN_154__(Key, __NFUN_237__("X"))))
+				{
+					EditCut();
+				}				
+			}
 			else
-				Backspace();
-
-            bAllSelected = False;
-		}		
-		break;
-	case Root.Console.EInputKey.IK_Delete:
-		if(bCanEdit && m_CurrentlyEditing)
-		{
-			if(bAllSelected)
-				Clear();
-			else
-				Delete();
-
-
-            bAllSelected = False;
-		}		
-		break;
-	case Root.Console.EInputKey.IK_Period:
-	case Root.Console.EInputKey.IK_NumPadPeriod:
-		if (bNumericFloat)
-			Insert(Asc("."));
-		break;
-	default:
-		if( bControlDown )
-		{
-			if( Key == Asc("c") || Key == Asc("C"))
-				EditCopy();
-
-			if( Key == Asc("v") || Key == Asc("V"))
-				EditPaste();
-
-			if( Key == Asc("x") || Key == Asc("X"))
-				EditCut();
-		}
-		else
-		{
-			if(NotifyOwner != None)
-				NotifyOwner.KeyDown(Key, X, Y);
-			else
-				Super.KeyDown(Key, X, Y);
-		}
-		break;
+			{
+				// End:0x6BB
+				if(__NFUN_119__(NotifyOwner, none))
+				{
+					NotifyOwner.KeyDown(Key, X, Y);					
+				}
+				else
+				{
+					super.KeyDown(Key, X, Y);
+				}
+			}
+			// End:0x6D3
+			break;
+			break;
 	}
+	return;
 }
 
 function Click(float X, float Y)
 {
-	Notify(DE_Click); 
-    if(bShowLog)log("UWindowEditBox::Click");
+	Notify(2);
+	// End:0x2A
+	if(bShowLog)
+	{
+		__NFUN_231__("UWindowEditBox::Click");
+	}
+	return;
 }
 
 function LMouseDown(float X, float Y)
 {
-    if(bShowLog)log("UWindowEditBox::LMouseDown");
-	Super.LMouseDown(X, Y);
-
-    if(bShowLog)log("UWindowEditBox::LMouseDown ->SelectAll()");
-    SelectAll();
-	Notify(DE_LMouseDown);
-    
+	// End:0x27
+	if(bShowLog)
+	{
+		__NFUN_231__("UWindowEditBox::LMouseDown");
+	}
+	super(UWindowWindow).LMouseDown(X, Y);
+	// End:0x6C
+	if(bShowLog)
+	{
+		__NFUN_231__("UWindowEditBox::LMouseDown ->SelectAll()");
+	}
+	SelectAll();
+	Notify(10);
+	return;
 }
 
 function Paint(Canvas C, float X, float Y)
 {
-	local float W, H;
-	local float TextY;
+	local float W, H, TextY;
 
 	C.Font = Root.Fonts[Font];
 	TextColor = Root.Colors.BlueLight;
-
-	if (m_bUseNewPaint)
+	// End:0x19B
+	if(m_bUseNewPaint)
 	{
 		TextSize(C, Value, W, H);
-		TextY = (WinHeight - H) / 2;
-
+		TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
 		switch(Align)
 		{
-	//		case TA_Left:
-	//			Offset = Offset + 1;
-	//			break;
-	//		case TA_Right:
-	//			TextX = WinWidth - W - (Len(Text) * m_fFontSpacing) -m_fVBorderWidth;
-	//			break;
-			case TA_Center:
-				Offset = (WinWidth - W - 14) / 2; // 14 is the button size
+			// End:0xA9
+			case 2:
+				offset = __NFUN_172__(__NFUN_175__(__NFUN_175__(WinWidth, W), float(14)), float(2));
+				// End:0xBF
 				break;
+			// End:0xFFFF
 			default:
-				Offset = Offset + 1;
+				offset = __NFUN_174__(offset, float(1));
+				// End:0xBF
+				break;
 				break;
 		}
-
-		C.SetDrawColor(TextColor.R,TextColor.G,TextColor.B);
-
-		if(m_CurrentlyEditing && bAllSelected)
+		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		// End:0x17E
+		if(__NFUN_130__(m_CurrentlyEditing, bAllSelected))
 		{
-			DrawStretchedTexture(C, Offset, TextY, W, H, Texture'UWindow.WhiteTexture');
-
-			// Invert Colors
-			C.SetDrawColor(255 ^ C.DrawColor.R,255 ^ C.DrawColor.G,255 ^ C.DrawColor.B);
+			DrawStretchedTexture(C, offset, TextY, W, H, Texture'UWindow.WhiteTexture');
+			C.__NFUN_2626__(byte(__NFUN_157__(255, int(C.DrawColor.R))), byte(__NFUN_157__(255, int(C.DrawColor.G))), byte(__NFUN_157__(255, int(C.DrawColor.B))));
 		}
-
-		// display the text
-		ClipText(C, Offset, TextY,  Value);
+		ClipText(C, offset, TextY, Value);		
 	}
 	else
 	{
 		TextSize(C, "A", W, H);
-		TextY = (WinHeight - H) / 2;
-
-		TextSize(C, Left(Value, CaretOffset), W, H);
-
-		if(W + Offset < 0)
-			Offset = -W;
-
-		if(W + Offset > (WinWidth - 2))
+		TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
+		TextSize(C, __NFUN_128__(Value, CaretOffset), W, H);
+		// End:0x20F
+		if(__NFUN_176__(__NFUN_174__(W, offset), float(0)))
 		{
-			Offset = (WinWidth - 2) - W;
-			if(Offset > 0) Offset = 0;
+			offset = __NFUN_169__(W);
 		}
-
-		C.SetDrawColor(TextColor.R,TextColor.G,TextColor.B);
-
-		if(m_CurrentlyEditing && bAllSelected)
+		// End:0x25B
+		if(__NFUN_177__(__NFUN_174__(W, offset), __NFUN_175__(WinWidth, float(2))))
 		{
-			DrawStretchedTexture(C, Offset + 1, TextY, W, H, Texture'UWindow.WhiteTexture');
-
-			// Invert Colors
-			C.SetDrawColor(255 ^ C.DrawColor.R,255 ^ C.DrawColor.G,255 ^ C.DrawColor.B);
+			offset = __NFUN_175__(__NFUN_175__(WinWidth, float(2)), W);
+			// End:0x25B
+			if(__NFUN_177__(offset, float(0)))
+			{
+				offset = 0.0000000;
+			}
 		}
-
-		// display the text
-		ClipText(C, Offset + 1, TextY,  Value);
+		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		// End:0x31F
+		if(__NFUN_130__(m_CurrentlyEditing, bAllSelected))
+		{
+			DrawStretchedTexture(C, __NFUN_174__(offset, float(1)), TextY, W, H, Texture'UWindow.WhiteTexture');
+			C.__NFUN_2626__(byte(__NFUN_157__(255, int(C.DrawColor.R))), byte(__NFUN_157__(255, int(C.DrawColor.G))), byte(__NFUN_157__(255, int(C.DrawColor.B))));
+		}
+		ClipText(C, __NFUN_174__(offset, float(1)), TextY, Value);
 	}
-    
-	// show the caret
-	if( (!m_CurrentlyEditing) || (!bHasKeyboardFocus) || (!bCanEdit) )
-		bShowCaret = False;
+	// End:0x36E
+	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_CurrentlyEditing), __NFUN_129__(bHasKeyboardFocus)), __NFUN_129__(bCanEdit)))
+	{
+		bShowCaret = false;		
+	}
 	else
 	{
-		if((GetTime() > LastDrawTime + 0.3) || (GetTime() < LastDrawTime))
+		// End:0x3B2
+		if(__NFUN_132__(__NFUN_177__(GetTime(), __NFUN_174__(LastDrawTime, 0.3000000)), __NFUN_176__(GetTime(), LastDrawTime)))
 		{
 			LastDrawTime = GetTime();
-			bShowCaret = !bShowCaret;
+			bShowCaret = __NFUN_129__(bShowCaret);
 		}
 	}
-
+	// End:0x3DF
 	if(bShowCaret)
-		ClipText(C, Offset + W - 1, TextY, "|");
-
-	// draw the editbox border
-	if (m_bDrawEditBorders)
+	{
+		ClipText(C, __NFUN_175__(__NFUN_174__(offset, W), float(1)), TextY, "|");
+	}
+	// End:0x3F3
+	if(m_bDrawEditBorders)
+	{
 		DrawSimpleBorder(C);
+	}
+	return;
 }
 
 function Close(optional bool bByParent)
 {
-    DropSelection();
-	Super.Close(bByParent);
+	DropSelection();
+	super(UWindowWindow).Close(bByParent);
+	return;
 }
 
 function FocusWindow()
 {
-	Super.FocusWindow();
-    if(bShowLog)log("FocusWindow ->SelectAll()");
-    
-    if(!m_CurrentlyEditing)
-	    SelectAll(); // select all the edit box when the focus go on the window
+	super(UWindowWindow).FocusWindow();
+	// End:0x2C
+	if(bShowLog)
+	{
+		__NFUN_231__("FocusWindow ->SelectAll()");
+	}
+	// End:0x3D
+	if(__NFUN_129__(m_CurrentlyEditing))
+	{
+		SelectAll();
+	}
+	return;
 }
 
 function FocusOtherWindow(UWindowWindow W)
 {
-    if(bShowLog)log("FocusOtherWindow");
+	// End:0x1D
+	if(bShowLog)
+	{
+		__NFUN_231__("FocusOtherWindow");
+	}
 	DropSelection();
-
-	if(NotifyOwner != None)
-		NotifyOwner.FocusOtherWindow(W);
+	// End:0x45
+	if(__NFUN_119__(NotifyOwner, none))
+	{
+		NotifyOwner.FocusOtherWindow(W);		
+	}
 	else
-		Super.FocusOtherWindow(W);
+	{
+		super(UWindowWindow).FocusOtherWindow(W);
+	}
+	return;
 }
-
 
 function DoubleClick(float X, float Y)
 {
-	Super.DoubleClick(X, Y);
-    if(bShowLog)log("DoubleClick ->SelectAll()");
-	SelectAll();    
+	super(UWindowWindow).DoubleClick(X, Y);
+	// End:0x36
+	if(bShowLog)
+	{
+		__NFUN_231__("DoubleClick ->SelectAll()");
+	}
+	SelectAll();
+	return;
 }
 
 function KeyFocusEnter()
 {
-   if(bShowLog)log("UWindowEditBox::KeyFocusEnter");
-    
-	if(bSelectOnFocus && !bHasKeyboardFocus)
-    {
-        if(bShowLog)log("KeyFocusEnter ->SelectAll()");
-        SelectAll();        
-    }
-		
-
-	Super.KeyFocusEnter();
+	// End:0x2A
+	if(bShowLog)
+	{
+		__NFUN_231__("UWindowEditBox::KeyFocusEnter");
+	}
+	// End:0x6E
+	if(__NFUN_130__(bSelectOnFocus, __NFUN_129__(bHasKeyboardFocus)))
+	{
+		// End:0x68
+		if(bShowLog)
+		{
+			__NFUN_231__("KeyFocusEnter ->SelectAll()");
+		}
+		SelectAll();
+	}
+	super.KeyFocusEnter();
+	return;
 }
 
 function KeyFocusExit()
 {
-    if(bShowLog)log("KeyFocusExit");
-    if(bCanEdit && m_CurrentlyEditing)
-	{        
-        if(!bHistory)
-        {            
-            OldValue = Value;
-        }    
-        else
+	// End:0x19
+	if(bShowLog)
+	{
+		__NFUN_231__("KeyFocusExit");
+	}
+	// End:0xD1
+	if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+	{
+		// End:0x46
+		if(__NFUN_129__(bHistory))
 		{
-			if(Value != "")
+			OldValue = Value;			
+		}
+		else
+		{
+			// End:0xC6
+			if(__NFUN_123__(Value, ""))
 			{
-				CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(class'UWindowEditBoxHistory'));
+				CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(Class'UWindow.UWindowEditBoxHistory'));
 				CurrentHistory.HistoryText = Value;
-                if(bShowLog)log("Set value CurrentHistory.HistoryText"@CurrentHistory.HistoryText);
+				// End:0xC6
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Set value CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+				}
 			}
 			CurrentHistory = HistoryList;
 		}
-    }
+	}
 	DropSelection();
-	Super.KeyFocusExit();
+	super.KeyFocusExit();
+	return;
 }
 
 function DropSelection()
-{    
-    if(m_CurrentlyEditing)
-    {
-        if(bChangePending)
-	    {
-		    bChangePending = False;
-		    Notify(DE_Change);
-	    }     
-    }   
-    bAllSelected = False;
-    m_CurrentlyEditing = False;
-    bKeyDown = False;
-    MoveHome();
-
+{
+	// End:0x22
+	if(m_CurrentlyEditing)
+	{
+		// End:0x22
+		if(bChangePending)
+		{
+			bChangePending = false;
+			Notify(1);
+		}
+	}
+	bAllSelected = false;
+	m_CurrentlyEditing = false;
+	bKeyDown = false;
+	MoveHome();
 	CancelAcceptsFocus();
+	return;
 }
 
 function MouseEnter()
 {
-	Super.MouseEnter();
+	super.MouseEnter();
 	m_bMouseOn = true;
+	return;
 }
 
 function MouseLeave()
 {
-	Super.MouseLeave();
+	super.MouseLeave();
 	m_bMouseOn = false;
+	return;
 }
-
-	
 
 defaultproperties
 {
-     MaxLength=255
-     bCanEdit=True
+	MaxLength=255
+	bCanEdit=true
 }

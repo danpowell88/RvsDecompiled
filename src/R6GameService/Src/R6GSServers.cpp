@@ -325,7 +325,7 @@ INT UR6GSServers::InitGSClient()
 	INT iVar1 = -1; // stub: GameSpy defunct (would return S_OK on success)
 	bStep1OK = (INT)(-1 < iVar1); // 1 if iVar1 >= 0
 
-	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step1=%d"), bStep1OK);
+	if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step1=%d"), bStep1OK);
 
 	if (bStep1OK)
 	{
@@ -333,7 +333,7 @@ INT UR6GSServers::InitGSClient()
 		// iVar1 = FUN_100188e0();
 		iVar1 = -1; // stub: GameSpy defunct
 		bStep1OK = (INT)(-1 < iVar1);
-		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step2=%d"), bStep1OK);
+		if (GsLogDebug != 0) GLog->Logf(TEXT("InitGSClient step2=%d"), bStep1OK);
 	}
 
 	return bStep1OK;
@@ -521,11 +521,11 @@ INT UR6GSServers::MSCLientLeaveServer()
 	// UINT uVar1 = FUN_100323c0(GsMSClientConnHandle, GsMSClientConnParam);
 	UINT uVar1 = 0; // stub: GameSpy defunct
 
-	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("MSCLientLeaveServer result=%d"), uVar1 & 0xff);
+	if (GsLogDebug != 0) GLog->Logf(TEXT("MSCLientLeaveServer result=%d"), uVar1 & 0xff);
 
 	if ((uVar1 & 0xff) == 0)
 	{
-		// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("MSCLientLeaveServer: failed"));
+		if (GsLogDebug != 0) GLog->Logf(TEXT("MSCLientLeaveServer: failed"));
 		return retval; // 0
 	}
 
@@ -978,7 +978,7 @@ INT UR6GSServers::SetGSClientComInterface()
 	HRESULT hr = GetActiveObject((const CLSID&)GsComCLSID, NULL, &pInterface); // DAT_10073074
 	if (FAILED(hr))
 	{
-		// TODO: GLog->Logf(TEXT("SetGSClientComInterface: GetActiveObject failed 0x%08x"), hr);
+		GLog->Logf(TEXT("SetGSClientComInterface: GetActiveObject failed 0x%08x"), hr);
 	}
 
 	bOK = (INT)SUCCEEDED(hr);
@@ -989,7 +989,7 @@ INT UR6GSServers::SetGSClientComInterface()
 		hr = pInterface->QueryInterface((const IID&)GsComIID, (void**)&GsComInterface); // DAT_10072ff8
 		if (FAILED(hr))
 		{
-			// TODO: GLog->Logf(TEXT("SetGSClientComInterface: QueryInterface failed 0x%08x"), hr);
+			GLog->Logf(TEXT("SetGSClientComInterface: QueryInterface failed 0x%08x"), hr);
 			bOK = 0;
 		}
 	}
@@ -1051,7 +1051,7 @@ INT UR6GSServers::UnInitMSClient()
 	GsLoggedInUbi   = 0; // DAT_10091e68 = 0
 	GsUbiState1     = 0; // DAT_10091e64 = 0
 
-	// TODO: if (GsLogDebug != 0) GLog->Logf(TEXT("UnInitMSClient"));
+	if (GsLogDebug != 0) GLog->Logf(TEXT("UnInitMSClient"));
 
 	// TODO: UINT uVar1 = FUN_10032300() — GameSpy MS client close; returns status byte.
 	UINT uVar1 = 0; // stub: GameSpy defunct

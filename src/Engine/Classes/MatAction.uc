@@ -1,65 +1,61 @@
 //=============================================================================
+// MatAction - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // MatAction: Base class for Matinee actions.
 //=============================================================================
-
 class MatAction extends MatObject
 	abstract
-	native;
+ native;
 
-import class Actor;
-
-var()		interpolationpoint	IntPoint;	// The interpolation point that we want to move to/wait at.
-var()		string				Comment;	// User can enter a comment here that will appear on the GUI viewport
-
-var(Time)	float	Duration;		// How many seconds this action should take
-
-var(Sub)	export	editinline	array<MatSubAction>	SubActions;		// Sub actions are actions to perform while the main action is happening
-
-var(Path) bool		bSmoothCorner;			// true by default - when one control point is adjusted, other is moved to keep tangents the same
-var(Path) vector	StartControlPoint;		// Offset from the current interpolation point
-var(Path) vector	EndControlPoint;		// Offset from the interpolation point we're moving to (InPointName)
-var(Path) bool		bConstantPathVelocity;
-var(Path) float		PathVelocity;
-
-var		float		PathLength;
-
-var		transient array<vector> SampleLocations;
-var		transient float	PctStarting;
-var		transient float	PctEnding;
-var		transient float	PctDuration;
-
-//#ifdef R6MATINEE
-var				texture		Icon;			//The icon to use in the matinee UI
-//#endif 
-
+var(R6Pawn) Actor.EPhysics m_PhysicsActor;  // Physics of the target Actor during the Action
+var(Path) bool bSmoothCorner;  // true by default - when one control point is adjusted, other is moved to keep tangents the same
+var(Path) bool bConstantPathVelocity;
 //#ifdef R6CODE
-var(R6Pawn)		bool				m_bCollideActor; //If this Actor.bCollide==true during the action
-var(R6Pawn)		Actor.ePhysics		m_PhysicsActor;  //Physics of the target Actor during the Action
+var(R6Pawn) bool m_bCollideActor;  // If this Actor.bCollide==true during the action
+var(Time) float Duration;  // How many seconds this action should take
+var(Path) float PathVelocity;
+var float PathLength;
+var() InterpolationPoint IntPoint;  // The interpolation point that we want to move to/wait at.
+//#ifdef R6MATINEE
+var Texture Icon;  // The icon to use in the matinee UI
+var(Sub) export editinline array<export editinline MatSubAction> SubActions;  // Sub actions are actions to perform while the main action is happening
+var(Path) Vector StartControlPoint;  // Offset from the current interpolation point
+var(Path) Vector EndControlPoint;  // Offset from the interpolation point we're moving to (InPointName)
+var() string Comment;  // User can enter a comment here that will appear on the GUI viewport
+var transient float PctStarting;
+var transient float PctEnding;
+var transient float PctDuration;
+var transient array<Vector> SampleLocations;
 
-
-event Initialize();
-
+event Initialize()
+{
+	return;
+}
 
 //This action must be overloaded to have a more customized behavior
-event ActionStart(Actor viewer)
+event ActionStart(Actor Viewer)
 {
-	if(m_bCollideActor==true)
+	// End:0x1E
+	if(__NFUN_242__(m_bCollideActor, true))
 	{
-		Viewer.SetCollision(true, true, true);
+		Viewer.__NFUN_262__(true, true, true);		
 	}
 	else
 	{
-		Viewer.SetCollision(true, false, false);
+		Viewer.__NFUN_262__(true, false, false);
 	}
-
-	Viewer.SetPhysics(m_PhysicsActor);
-	viewer.bInterpolating = true;
+	Viewer.__NFUN_3970__(m_PhysicsActor);
+	Viewer.bInterpolating = true;
+	return;
 }
-//#endif R6CODE
 
 defaultproperties
 {
-     bSmoothCorner=True
-     StartControlPoint=(X=800.000000,Y=800.000000)
-     EndControlPoint=(X=-800.000000,Y=-800.000000)
+	bSmoothCorner=true
+	StartControlPoint=(X=800.0000000,Y=800.0000000,Z=0.0000000)
+	EndControlPoint=(X=-800.0000000,Y=-800.0000000,Z=0.0000000)
 }

@@ -1,74 +1,97 @@
 //=============================================================================
+// R6DeploymentZone - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6DeploymentZone.uc : Zone for terrorist deployment
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/10/10 * Created by Guillaume Borgia
 //=============================================================================
-
 class R6DeploymentZone extends Actor
-    native
-	abstract;
-
-import class R6AIController;
-import class R6TerroristAI;
-
-#exec OBJ LOAD FILE=..\Textures\R6Engine_T.utx PACKAGE=R6Engine_T
+	abstract
+	native
+ notplaceable;
 
 const C_NB_Template = 5;
 
 struct STTemplate
 {
-    var()   String  m_szName;
-    var()   INT     m_iChance;
+	var() string m_szName;
+	var() int m_iChance;
 };
 
-var(Debug)              BOOL                m_bDontSeePlayer;       // Only for debug purpose
-var(Debug)              BOOL                m_bDontHearPlayer;      // Only for debug purpose
-var(Debug)              BOOL                m_bHearNothing;         // Only for debug purpose
+var(R6DZoneTerrorist) R6Terrorist.EDefCon m_eDefCon;
+var(R6DZoneTerrorist) R6TerroristAI.EEngageReaction m_eEngageReaction;
+var(R6DZoneTerrorist) int m_iGroupID;
+var(R6DZoneTerrorist) int m_HostageShootChance;
+var(R6DZoneTerrorist) int m_iMinTerrorist;
+var(R6DZoneTerrorist) int m_iMaxTerrorist;
+// NEW IN 1.60
+var(R6DZoneTerrorist) int m_iChanceToUseGrenadeAtFirstReaction;
+var(R6DZoneHostage) int m_iMinHostage;
+var(R6DZoneHostage) int m_iMaxHostage;
+// NEW IN 1.60
+var(R6DZoneHostage) int m_iPrisonerTeam;
+var(Debug) bool m_bDontSeePlayer;  // Only for debug purpose
+var(Debug) bool m_bDontHearPlayer;  // Only for debug purpose
+var(Debug) bool m_bHearNothing;  // Only for debug purpose
+var(R6DZoneTerrorist) bool m_bAllowLeave;
+var(R6DZoneTerrorist) bool m_bPreventCrouching;
+var(R6DZoneTerrorist) bool m_bKnowInPlanning;
+var(R6DZoneTerrorist) bool m_bHuntDisallowed;
+var(R6DZoneTerrorist) bool m_bHuntFromStart;
+var bool m_bAlreadyInitialized;
+// NEW IN 1.60
+var(R6DZoneTerrorist) bool m_bUseGrenade;
+// NEW IN 1.60
+var(MP2Civilian) bool m_bClassicMissionCivilian;
+var(R6DZoneTerrorist) R6InteractiveObject m_InteractiveObject;
+var(R6DZoneTerrorist) editinline array<editinline int> m_iGroupIDsToCall;
+var(R6DZoneTerrorist) array<R6DeploymentZone> m_HostageZoneToCheck;
+// NEW IN 1.60
+var(MP2Civilian) array<PathNode> m_pListOfCoverNodes;
+var const array<R6Terrorist> m_aTerrorist;
+var const array<R6Hostage> m_aHostage;
+// NEW IN 1.60
+var(R6DZoneTerrorist) STTemplate m_Template[5];
+// NEW IN 1.60
+var(R6DZoneHostage) STTemplate m_HostageTemplates[5];
 
-var(R6DZoneTerrorist)   BOOL                m_bAllowLeave;
-var(R6DZoneTerrorist)   BOOL                m_bPreventCrouching;
-var(R6DZoneTerrorist)   BOOL                m_bKnowInPlanning;
+// Export UR6DeploymentZone::execFirstInit(FFrame&, void* const)
+ native(1830) final function FirstInit();
 
-var(R6DZoneTerrorist)   BOOL				m_bHuntDisallowed;
-var(R6DZoneTerrorist)   BOOL				m_bHuntFromStart;
+// Export UR6DeploymentZone::execFindRandomPointInArea(FFrame&, void* const)
+ native(1831) final function Vector FindRandomPointInArea();
 
-var                     BOOL                m_bAlreadyInitialized;
+// Export UR6DeploymentZone::execIsPointInZone(FFrame&, void* const)
+ native(1832) final function bool IsPointInZone(Vector vPoint);
 
-var(R6DZoneTerrorist)   INT                 m_iGroupID;
-var(R6DZoneTerrorist)   editinline array<INT>           m_iGroupIDsToCall;
-var(R6DZoneTerrorist)   array<R6DeploymentZone>         m_HostageZoneToCheck;
-var(R6DZoneTerrorist)   INT                             m_HostageShootChance;
-var(R6DZoneTerrorist)   R6Terrorist.EDefCon             m_eDefCon;
-var(R6DZoneTerrorist)   R6TerroristAI.EEngageReaction   m_eEngageReaction;
-var(R6DZoneTerrorist)   INT                 m_iMinTerrorist;
-var(R6DZoneTerrorist)   INT                 m_iMaxTerrorist;
+// Export UR6DeploymentZone::execFindClosestPointTo(FFrame&, void* const)
+ native(1833) final function Vector FindClosestPointTo(Vector vPoint);
 
-var(R6DZoneTerrorist)   STTemplate          m_Template[C_NB_Template]; // Terrorist template
+// Export UR6DeploymentZone::execHaveTerrorist(FFrame&, void* const)
+ native(1834) final function bool HaveTerrorist();
 
-var(R6DZoneTerrorist)   R6InteractiveObject m_InteractiveObject;
+// Export UR6DeploymentZone::execHaveHostage(FFrame&, void* const)
+ native(1835) final function bool HaveHostage();
 
-var(R6DZoneHostage)     INT                 m_iMinHostage;
-var(R6DZoneHostage)     INT                 m_iMaxHostage;
-var(R6DZoneHostage)     STTemplate          m_HostageTemplates[C_NB_Template];
+// Export UR6DeploymentZone::execAddHostage(FFrame&, void* const)
+ native(1836) final function AddHostage(R6Hostage hostage);
 
-var const Array<R6Terrorist>    m_aTerrorist;
-var const Array<R6Hostage>      m_aHostage;
+// Export UR6DeploymentZone::execOrderTerroListFromDistanceTo(FFrame&, void* const)
+ native(1837) final function OrderTerroListFromDistanceTo(Vector vPoint);
 
-native(1830) final function FirstInit();
-native(1831) final function vector FindRandomPointInArea();
-native(1832) final function BOOL IsPointInZone( Vector vPoint );
-native(1833) final function vector FindClosestPointTo( Vector vPoint );
-native(1834) final function BOOL HaveTerrorist();
-native(1835) final function BOOL HaveHostage();
-native(1836) final function AddHostage( R6Hostage hostage );
-native(1837) final function OrderTerroListFromDistanceTo( Vector vPoint );
-native(1838) final function R6Hostage GetClosestHostage( Vector vPoint );
+// Export UR6DeploymentZone::execGetClosestHostage(FFrame&, void* const)
+ native(1838) final function R6Hostage GetClosestHostage(Vector vPoint);
 
 function InitZone()
 {
-    FirstInit();
+	__NFUN_1830__();
+	return;
 }
 
 //------------------------------------------------------------------
@@ -77,26 +100,36 @@ function InitZone()
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
-    
-    m_aTerrorist.Remove( 0, m_aTerrorist.Length );
-    m_aHostage.Remove( 0, m_aHostage.Length );
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super.ResetOriginalData();
+	m_aTerrorist.Remove(0, m_aTerrorist.Length);
+	m_aHostage.Remove(0, m_aHostage.Length);
+	return;
 }
 
 defaultproperties
 {
-     m_eDefCon=DEFCON_3
-     m_iMinTerrorist=1
-     m_iMaxTerrorist=1
-     m_bAllowLeave=True
-     m_bKnowInPlanning=True
-     bStatic=True
-     bHidden=True
-     bNoDelete=True
-     m_bUseR6Availability=True
-     DrawScale=3.000000
-     CollisionRadius=40.000000
-     CollisionHeight=85.000000
-     Texture=Texture'R6Engine_T.Icons.DZoneTer'
+	m_eDefCon=3
+	m_iMinTerrorist=1
+	m_iMaxTerrorist=1
+	m_iChanceToUseGrenadeAtFirstReaction=100
+	m_bAllowLeave=true
+	m_bKnowInPlanning=true
+	m_bUseGrenade=true
+	bStatic=true
+	bHidden=true
+	bNoDelete=true
+	m_bUseR6Availability=true
+	DrawScale=3.0000000
+	CollisionRadius=40.0000000
+	CollisionHeight=85.0000000
+	Texture=Texture'R6Engine_T.Icons.DZoneTer'
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_TemplateC_NB_Template
+// REMOVED IN 1.60: var m_HostageTemplatesC_NB_Template

@@ -1,4 +1,10 @@
 //=============================================================================
+// R6AbstractPlanningInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6AbstractPlanningInfo.uc : This is the abstract class for the R6PlanningInfo class.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,140 +12,162 @@
 //    august 8th, 2001 * Created by Chaouky Garram
 //=============================================================================
 class R6AbstractPlanningInfo extends Object
-    native;
-
-
-enum EGoCodeState
-{
-    GOCODESTATE_None,
-    GOCODESTATE_Waiting,
-    GOCODESTATE_Snipe,
-    GOCODESTATE_Breach,
-    GOCODESTATE_Done
-};
-
-// Planning Data
-var array<Actor>           m_NodeList;              // List of Node
-var       INT              m_iCurrentNode;          // Index of current node
-var       INT              m_iCurrentPathIndex;     // Current point in the path to the next point.
-var       INT              m_iStartingPointNumber;  //Index of the starting location.
-
-var       actor         m_pTeamManager;     // RainbowTeam having this "path"
-var       EGoCodeState  m_eGoCodeState[4];  // State of GoCode of the [EGoCode] team
-var       INT           m_iNbNode;          // Number of ActionPoint in the team path
-var       INT           m_iNbMilestone;     // Number of Milestone in planning.
-var       FLOAT         m_fReachRange;      // Distance (x,y) between the team and the node to be considerate as reach!
-var		  FLOAT			m_fZReachRange;		// Distance in Z between the team and the node
-var       BOOL          m_bDisplayPath;     // Is this path display? -USED IN MENU ONLY
-var       BOOL          m_bPlanningOver;    // RainbowTeam has finished the planning
-var       BOOL          m_bPlacedFirstPoint;// Placing first point in insertion zone (used only during Planning phase)
-
-// Default value of ActionPoint
-var const EMovementMode     m_eDefaultMode;
-var const EMovementSpeed    m_eDefaultSpeed;
-var const EPlanAction       m_eDefaultAction;
-var const EPlanActionType   m_eDefaultActionType;
-
-// Team Data
-var Color                   m_TeamColor;    // Color of the team
-
-// Debug Data
-var       INT           DEB_iStartTime;
-var(Debug)BOOL          bShowLog;
+ native;
 
 const R6InputKey_NewNode = 1025;
 
-var BOOL bDisplayDbgInfo;
+enum EGoCodeState
+{
+	GOCODESTATE_None,               // 0
+	GOCODESTATE_Waiting,            // 1
+	GOCODESTATE_Snipe,              // 2
+	GOCODESTATE_Breach,             // 3
+	GOCODESTATE_Done                // 4
+};
+
+var R6AbstractPlanningInfo.EGoCodeState m_eGoCodeState[4];  // State of GoCode of the [EGoCode] team
+// Default value of ActionPoint
+var const Object.EMovementMode m_eDefaultMode;
+var const Object.EMovementSpeed m_eDefaultSpeed;
+var const Object.EPlanAction m_eDefaultAction;
+var const Object.EPlanActionType m_eDefaultActionType;
+var int m_iCurrentNode;  // Index of current node
+var int m_iCurrentPathIndex;  // Current point in the path to the next point.
+var int m_iStartingPointNumber;  // Index of the starting location.
+var int m_iNbNode;  // Number of ActionPoint in the team path
+var int m_iNbMilestone;  // Number of Milestone in planning.
+// Debug Data
+var int DEB_iStartTime;
+var bool m_bDisplayPath;  // Is this path display? -USED IN MENU ONLY
+var bool m_bPlanningOver;  // RainbowTeam has finished the planning
+var bool m_bPlacedFirstPoint;  // Placing first point in insertion zone (used only during Planning phase)
+var(Debug) bool bShowLog;
+var bool bDisplayDbgInfo;
+var float m_fReachRange;  // Distance (x,y) between the team and the node to be considerate as reach!
+var float m_fZReachRange;  // Distance in Z between the team and the node
+var Actor m_pTeamManager;  // RainbowTeam having this "path"
+// Planning Data
+var array<Actor> m_NodeList;  // List of Node
+// Team Data
+var Color m_TeamColor;  // Color of the team
 
 function ResetPointsOrientation()
-{}
-
-function NotifyActionPoint(ENodeNotify eMsg, EGoCode eCode)
-{}
-
-function EPlanAction GetAction()
 {
-    return PACT_None;
+	return;
 }
 
-function EMovementMode GetMovementMode()
+function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 {
-    return MOVE_Assault;
+	return;
 }
 
-function EMovementSpeed GetMovementSpeed()
+function Object.EPlanAction GetAction()
 {
-    return SPEED_Normal;
+	return 0;
+	return;
 }
 
-function SkipCurrentDestination();
-
-function actor GetFirstActionPoint()
+function Object.EMovementMode GetMovementMode()
 {
-    return m_NodeList[0];
+	return 0;
+	return;
 }
 
-function actor GetNextActionPoint()
+function Object.EMovementSpeed GetMovementSpeed()
 {
-    return none;
+	return 1;
+	return;
 }
 
-function actor PreviewNextActionPoint()
+function SkipCurrentDestination()
 {
-    return none;
+	return;
 }
 
-function EPlanAction NextActionPointHasAction(actor aPoint)
+function Actor GetFirstActionPoint()
 {
-	return PACT_None;
+	return m_NodeList[0];
+	return;
 }
 
-function actor GetPreviousActor()
+function Actor GetNextActionPoint()
 {
-    return none;
+	return none;
+	return;
 }
 
-function INT GetActionPointID()
+function Actor PreviewNextActionPoint()
 {
-    return 0;
+	return none;
+	return;
 }
 
-function INT GetNbActionPoint()
+function Object.EPlanAction NextActionPointHasAction(Actor aPoint)
 {
-    return 0;
+	return 0;
+	return;
+}
+
+function Actor GetPreviousActor()
+{
+	return none;
+	return;
+}
+
+function int GetActionPointID()
+{
+	return 0;
+	return;
+}
+
+function int GetNbActionPoint()
+{
+	return 0;
+	return;
 }
 
 function Vector GetActionLocation()
 {
-    return Vect(0,0,0);
+	return vect(0.0000000, 0.0000000, 0.0000000);
+	return;
 }
 
 function PlayerStart GetStartingPoint()
 {
-    return None;
+	return none;
+	return;
 }
 
-function GetSnipingCoordinates(out vector vLocation, out rotator rRotation)
+function GetSnipingCoordinates(out Vector vLocation, out Rotator rRotation)
 {
+	return;
 }
 
-function actor GetDoorToBreach()
+function Actor GetDoorToBreach()
 {
 	return none;
+	return;
 }
 
-function actor GetNextDoorToBreach(actor aPoint)
+function Actor GetNextDoorToBreach(Actor aPoint)
 {
 	return none;
+	return;
 }
 
 function ResetID()
 {
-    //Defined in R6PlanningInfo
+	return;
 }
 
-function DeleteAllNode();
-
-defaultproperties
+function DeleteAllNode()
 {
+	return;
 }
+
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function GetAction
+// REMOVED IN 1.60: function GetMovementMode
+// REMOVED IN 1.60: function GetMovementSpeed
+// REMOVED IN 1.60: function NextActionPointHasAction

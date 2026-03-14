@@ -1,4 +1,10 @@
 //=============================================================================
+// GameInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // GameInfo.
 //
 // The GameInfo defines the game being played: the game rules, scoring, what actors 
@@ -14,281 +20,249 @@
 //
 //=============================================================================
 class GameInfo extends Info
-	native;
+	native
+	config
+	notplaceable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-//-----------------------------------------------------------------------------
-// Variables.
-
-var	byte					  Difficulty;
-var bool				      bRestartLevel;			// Level should be restarted when player dies
-var bool				      bPauseable;				// Whether the game is pauseable.
+var byte Difficulty;
+var globalconfig int GoreLevel;  // 0=Normal, increasing values=less gore
+var int MaxSpectators;  // Maximum number of spectators.
+var int NumSpectators;  // Current number of spectators.
+var int MaxPlayers;
+var int NumPlayers;  // number of human players
+var int NumBots;  // number of non-human players (AI controlled but participating as a player)
+var int CurrentID;
+var bool bRestartLevel;  // Level should be restarted when player dies
+var bool bPauseable;  // Whether the game is pauseable.
 //#ifndef R6CODE
 //var config bool				  bCoopWeaponMode;			// Whether or not weapons stay when picked up.
 //#endif // #ifndef R6CODE
-var	bool				      bCanChangeSkin;			// Allow player to change skins in game.
-var bool				      bTeamGame;				// This is a team game.
-var	bool					  bGameEnded;				// set when game ends
-var	bool					  bOverTime;
-var localized bool			  bAlternateMode;
-var	bool					  bCanViewOthers;
-var bool					  bDelayedStart;
-var bool					  bWaitingToStartMatch;
-var globalconfig bool		  bChangeLevels;
+var bool bCanChangeSkin;  // Allow player to change skins in game.
+var bool bGameEnded;  // set when game ends
+var bool bOverTime;
+var localized bool bAlternateMode;
+var bool bCanViewOthers;
+var bool bDelayedStart;
+var bool bWaitingToStartMatch;
+var globalconfig bool bChangeLevels;
 //#ifdef R6CODE
-var bool                      m_bChangedServerConfig;
+var bool m_bChangedServerConfig;
 //#endif
-var		bool				  bAlreadyChanged;
-
-var	  globalconfig int		  GoreLevel;				// 0=Normal, increasing values=less gore
+var bool bAlreadyChanged;
+var globalconfig bool bLocalLog;
+var globalconfig bool bWorldLog;
+var bool bLoggingGame;  // Does this gametype log?
+//#ifdef R6CODE
+// m_bGameStarted has the game started, usefull in MP in order to prevent other players from joining the game 
+// exception needs to be made for spectating
+var bool m_bGameStarted;
+var bool m_bGameOver;
+var bool m_bCompilingStats;  // are we compiling statistics for GameMenuStats page
+var bool m_bUseClarkVoice;
+var bool m_bPlayIntroVideo;
+var bool m_bPlayOutroVideo;
+var bool m_bPendingLevelExists;
 //#ifndef R6CODE
 //var   globalconfig float	  AutoAim;					// How much autoaiming to do (1 = none, 0 = always).
 //#endif // #ifndef R6CODE
 														// (cosine of max error to correct)
-var   globalconfig float	  GameSpeed;				// Scale applied to game rate.
-var   float                   StartTime;
-
-var   string				  DefaultPlayerClassName;
-
+var globalconfig float GameSpeed;  // Scale applied to game rate.
+var float StartTime;
+var AccessControl AccessControl;  // AccessControl controls whether players can enter and/or become admins
+var BroadcastHandler BroadcastHandler;  // handles message (text and localized) broadcasts
+var GameReplicationInfo GameReplicationInfo;
+// Statistics Logging
+var StatLog StatLog;
+// Message classes.
+var Class<LocalMessage> DeathMessageClass;
+var Class<GameMessage> GameMessageClass;
+var Class<PlayerController> PlayerControllerClass;  // type of player controller to spawn for players logging in
+// ReplicationInfo
+var() Class<GameReplicationInfo> GameReplicationInfoClass;
+var Class<StatLog> StatLogClass;
+var array<string> m_BankListToLoad;
+var string DefaultPlayerClassName;
 // user interface
 //#ifndef R6CODE
 //var	  string				  ScoreBoardType;
 //#endif
-var   string			      BotMenuType;				// Type of bot menu to display.
-var   string			      RulesMenuType;			// Type of rules menu to display.
-var   string				  SettingsMenuType;			// Type of settings menu to display.
-var   string				  GameUMenuType;			// Type of Game dropdown to display.
-var   string				  MultiplayerUMenuType;		// Type of Multiplayer dropdown to display.
-var   string				  GameOptionsMenuType;		// Type of options dropdown to display.
-var	  string				  HUDType;					// HUD class this game uses.
-var   string				  MapListType;				// Maplist this game uses.
-var   string			      MapPrefix;				// Prefix characters for names of maps for this game type.
-var   string			      BeaconName;				// Identifying string used for finding LAN servers.
-
-var   int	                  MaxSpectators;			// Maximum number of spectators.
-var	  int					  NumSpectators;			// Current number of spectators.
-var   int		              MaxPlayers; 
-var   int					  NumPlayers;				// number of human players
-var	  int					  NumBots;					// number of non-human players (AI controlled but participating as a player)
-var   int					  CurrentID;
-var localized string	      DefaultPlayerName;
-var localized string	      GameName;
-
-// Message classes.
-var class<LocalMessage>		  DeathMessageClass;
-var class<GameMessage>		  GameMessageClass;
-
-//-------------------------------------
-// GameInfo components
-var string MutatorClass;
-var Mutator BaseMutator;				// linked list of Mutators (for modifying actors as they enter the game)
+var string BotMenuType;  // Type of bot menu to display.
+var string RulesMenuType;  // Type of rules menu to display.
+var string SettingsMenuType;  // Type of settings menu to display.
+var string GameUMenuType;  // Type of Game dropdown to display.
+var string MultiplayerUMenuType;  // Type of Multiplayer dropdown to display.
+var string GameOptionsMenuType;  // Type of options dropdown to display.
+var string HUDType;  // HUD class this game uses.
+var string MapListType;  // Maplist this game uses.
+var string MapPrefix;  // Prefix characters for names of maps for this game type.
+var string BeaconName;  // Identifying string used for finding LAN servers.
+var localized string DefaultPlayerName;
+var localized string GameName;
 var string AccessControlClass;
-var AccessControl AccessControl;		// AccessControl controls whether players can enter and/or become admins
-var GameRules GameRulesModifiers;		// linked list of modifier classes which affect game rules
 var string BroadcastHandlerClass;
-var BroadcastHandler BroadcastHandler;	// handles message (text and localized) broadcasts
-
-var class<PlayerController> PlayerControllerClass;	// type of player controller to spawn for players logging in
 var string PlayerControllerClassName;
-
-// ReplicationInfo
-var() class<GameReplicationInfo> GameReplicationInfoClass;
-var GameReplicationInfo GameReplicationInfo;
-
-// Statistics Logging
-var StatLog						StatLog;
-var globalconfig bool			bLocalLog;
-var globalconfig bool			bWorldLog;
-var bool						bLoggingGame;			// Does this gametype log?
-var class<StatLog>				StatLogClass;
-
 //#ifdef R6LOAD_IFGAMEMODE
 var string m_szGameTypeFlag;
-//#endif R6LOAD_IFGAMEMODE
-
-//#ifdef R6CODE
-// m_bGameStarted has the game started, usefull in MP in order to prevent other players from joining the game 
-// exception needs to be made for spectating
-var BOOL m_bGameStarted;
-var BOOL m_bGameOver;
-var BOOL m_bCompilingStats; // are we compiling statistics for GameMenuStats page
-var BOOL m_bLadderStats;    // are we compiling statistics for Ladder page
-//#endif R6CODE
-
 //#ifdef R6CODE // Added by John Bennett, April 2002
-var string m_szCurrGameType;     // The current game type being played (Deathmatch, team death match, etc).
-var string m_szGameOptions;     // List of command line options
-var BOOL   m_bUseClarkVoice;
-var Array<string> m_BankListToLoad;
-var BOOL   m_bPlayIntroVideo;
-var BOOL   m_bPlayOutroVideo;
-var BOOL   m_bPendingLevelExists;
-//#endif R6CODE
+var string m_szCurrGameType;  // The current game type being played (Deathmatch, team death match, etc).
+var string m_szGameOptions;  // List of command line options
 
 //#ifdef R6CODE
-function SetJumpingMaps(bool _flagSetting, int iNextMapIndex);
-function AbortScoreSubmission();
-function RestartGameMgr();
-event PreLogOut(PlayerController ExitingPlayer);
-event bool CanPlayIntroVideo();
-event bool CanPlayOutroVideo();
-event UpdateServer();
-//#endif R6CODE
+function SetJumpingMaps(bool _flagSetting, int iNextMapIndex)
+{
+	return;
+}
+
+// Export UGameInfo::execAbortScoreSubmission(FFrame&, void* const)
+ native(1210) final function AbortScoreSubmission();
+
+function RestartGameMgr()
+{
+	return;
+}
+
+event PreLogOut(PlayerController ExitingPlayer)
+{
+	return;
+}
+
+event bool CanPlayIntroVideo()
+{
+	return;
+}
+
+event bool CanPlayOutroVideo()
+{
+	return;
+}
+
+event UpdateServer()
+{
+	return;
+}
 
 // #ifdef R6NOISE
-function R6GameInfoMakeNoise( Actor.ESoundType eType, Actor soundsource );
-// #endif // #ifdef R6NOISE
-
-#ifdefDEBUG
-exec function ToggleRestart();
-#endif
-
-//------------------------------------------------------------------------------
-// Engine notifications.    
+function R6GameInfoMakeNoise(Actor.ESoundType eType, Actor soundsource)
+{
+	return;
+}
 
 function PreBeginPlay()
 {
-	StartTime = 0;
+	StartTime = 0.0000000;
 	SetGameSpeed(GameSpeed);
-	GameReplicationInfo = Spawn(GameReplicationInfoClass);
+	GameReplicationInfo = __NFUN_278__(GameReplicationInfoClass);
 	InitGameReplicationInfo();
+	return;
 }
 
 function PostBeginPlay()
 {
-	if ( bAlternateMode )
+	// End:0x11
+	if(bAlternateMode)
+	{
 		GoreLevel = 2;
+	}
 	InitLogging();
-	Super.PostBeginPlay();
+	super(Actor).PostBeginPlay();
+	return;
 }
 
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
 function Reset()
 {
-	Super.Reset();
+	super(Actor).Reset();
 	bGameEnded = false;
 	bOverTime = false;
 	bWaitingToStartMatch = true;
 	InitGameReplicationInfo();
+	return;
 }
 
-/* InitLogging()
-Set up statistics logging
-*/
 function InitLogging()
 {
 	local bool bLoggingWorld;
 
-	if ( !bLoggingGame )
-		return;
-
-	bLoggingWorld = bWorldLog &&
-		((Level.NetMode == NM_DedicatedServer) || (Level.NetMode == NM_ListenServer));
-	if ( bLocalLog || bLoggingWorld )
+	// End:0x0D
+	if(__NFUN_129__(bLoggingGame))
 	{
-		StatLog = spawn(StatLogClass);
-		Log("Initiating logging using "$StatLog$" class "$Statlogclass);
+		return;
+	}
+	bLoggingWorld = __NFUN_130__(bWorldLog, __NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))));
+	// End:0xDC
+	if(__NFUN_132__(bLocalLog, bLoggingWorld))
+	{
+		StatLog = __NFUN_278__(StatLogClass);
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Initiating logging using ", string(StatLog)), " class "), string(StatLogClass)));
 		StatLog.GenerateLogs(bLocalLog, bLoggingWorld);
 		StatLog.StartLog();
 		LogGameParameters();
 	}
+	return;
 }
 
 function Timer()
 {
 	BroadcastHandler.UpdateSentText();
+	return;
 }
 
 // Called when game shutsdown.
 event GameEnding()
 {
 	EndLogging("serverquit");
+	return;
 }
-
-//------------------------------------------------------------------------------
-// Replication
 
 function InitGameReplicationInfo()
 {
-	GameReplicationInfo.bTeamGame = bTeamGame;
 	GameReplicationInfo.GameName = GameName;
 	GameReplicationInfo.GameClass = string(Class);
+	return;
 }
 
-native function string GetNetworkNumber();
-//#ifdef R6CODE
-native(1514) final function ProcessR6Availabilty( string szGameType );
-native(1280) final function INT GetCurrentMapNum();
-native(1281) final function SetCurrentMapNum(INT iMapNum);
-function SetUdpBeacon(InternetInfo _udpBeacon);
-//#endif R6CODE
+// Export UGameInfo::execGetNetworkNumber(FFrame&, void* const)
+ native function string GetNetworkNumber();
 
-//------------------------------------------------------------------------------
-// Game Querying.
+// Export UGameInfo::execProcessR6Availabilty(FFrame&, void* const)
+//#ifdef R6CODE
+ native(1514) final function ProcessR6Availabilty(string szGameType);
+
+// Export UGameInfo::execGetCurrentMapNum(FFrame&, void* const)
+ native(1280) final function int GetCurrentMapNum();
+
+// Export UGameInfo::execSetCurrentMapNum(FFrame&, void* const)
+ native(1281) final function SetCurrentMapNum(int iMapNum);
+
+function SetUdpBeacon(InternetInfo _udpBeacon)
+{
+	return;
+}
 
 function string GetInfo()
 {
 	local string ResultSet;
 
-	// World logging enabled and working
-	if ( StatLog.bWorld && !StatLog.bWorldBatcherError )
-		ResultSet = "\\worldlog\\true";
-	else
-		ResultSet = "\\worldlog\\false";
-
-	// World logging activated
-	if ( StatLog.bWorld )
-		ResultSet = ResultSet$"\\wantworldlog\\true";
-	else
-		ResultSet = ResultSet$"\\wantworldlog\\false";
-
-	return ResultSet;
-}
-
-function string GetRules()
-{
-	local string ResultSet;
-	local Mutator M;
-	local string NextMutator, NextDesc;
-	local string EnabledMutators;
-	local int Num, i;
-
-	ResultSet = "";
-
-	EnabledMutators = "";
-	for (M = BaseMutator.NextMutator; M != None; M = M.NextMutator)
+	// End:0x41
+	if(__NFUN_130__(StatLog.bWorld, __NFUN_129__(StatLog.bWorldBatcherError)))
 	{
-		Num = 0;
-		NextMutator = "";
-		GetNextIntDesc("Engine.Mutator", 0, NextMutator, NextDesc);
-		while( (NextMutator != "") && (Num < 50) )
-		{
-			if(NextMutator ~= string(M.Class))
-			{
-				i = InStr(NextDesc, ",");
-				if(i != -1)
-					NextDesc = Left(NextDesc, i);
-
-				if(EnabledMutators != "")
-					EnabledMutators = EnabledMutators $ ", ";
-				 EnabledMutators = EnabledMutators $ NextDesc;
-				 break;
-			}
-			
-			Num++;
-			GetNextIntDesc("Engine.Mutator", Num, NextMutator, NextDesc);
-		}
+		ResultSet = "\\worldlog\\true";		
 	}
-	if(EnabledMutators != "")
-		ResultSet = ResultSet $ "\\mutators\\"$EnabledMutators;
-
-	ResultSet = ResultSet $ "\\listenserver\\"$string(Level.NetMode==NM_ListenServer);
-	Resultset = ResultSet$"\\changelevels\\"$bChangeLevels;
-	if ( GameRulesModifiers != None )
-		ResultSet = ResultSet$GameRulesModifiers.GetRules();
-
+	else
+	{
+		ResultSet = "\\worldlog\\false";
+	}
+	// End:0x8E
+	if(StatLog.bWorld)
+	{
+		ResultSet = __NFUN_112__(ResultSet, "\\wantworldlog\\true");		
+	}
+	else
+	{
+		ResultSet = __NFUN_112__(ResultSet, "\\wantworldlog\\false");
+	}
 	return ResultSet;
+	return;
 }
 
 // Return the server's port number.
@@ -297,730 +271,600 @@ function int GetServerPort()
 	local string S;
 	local int i;
 
-	// Figure out the server's port.
 	S = Level.GetAddressURL();
-	i = InStr( S, ":" );
-	assert(i>=0);
-	return int(Mid(S,i+1));
+	i = __NFUN_126__(S, ":");
+	assert(__NFUN_153__(i, 0));
+	return int(__NFUN_127__(S, __NFUN_146__(i, 1)));
+	return;
 }
 
-function bool SetPause( BOOL bPause, PlayerController P )
+function bool SetPause(bool bPause, PlayerController P)
 {
-	if( bPauseable || P.IsA('Admin') || Level.Netmode==NM_Standalone )
+	// End:0x62
+	if(__NFUN_132__(bPauseable, __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
 	{
-		if( bPause )
-			Level.Pauser=P.PlayerReplicationInfo;
+		// End:0x4D
+		if(bPause)
+		{
+			Level.Pauser = P.PlayerReplicationInfo;			
+		}
 		else
-			Level.Pauser=None;
-		return True;
+		{
+			Level.Pauser = none;
+		}
+		return true;		
 	}
-	else return False;
+	else
+	{
+		return false;
+	}
+	return;
 }
-
-//------------------------------------------------------------------------------
-// Stat Logging.
 
 function LogGameParameters()
 {
-	local Mutator M;
-
-	for (M = BaseMutator; M != None; M = M.NextMutator)
-		StatLog.LogMutator(M);
-
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"GameName"$Chr(9)$GameName);
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"GameClass"$Chr(9)$Class);// <-- Move to c++
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"GameVersion"$Chr(9)$Level.EngineVersion);
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"MinNetVersion"$Chr(9)$Level.MinNetVersion);
-//#ifndef R6CODE
-//	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"WeaponsStay"$Chr(9)$bCoopWeaponMode);
-//#endif // #ifndef R6CODE
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"GoreLevel"$Chr(9)$GoreLevel);
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"TeamGame"$Chr(9)$bTeamGame);
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"GameSpeed"$Chr(9)$int(GameSpeed*100));
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"MaxSpectators"$Chr(9)$MaxSpectators);
-	StatLog.LogEventString(StatLog.GetTimeStamp()$Chr(9)$"game"$Chr(9)$"MaxPlayers"$Chr(9)$MaxPlayers);
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameName"), __NFUN_236__(9)), GameName));
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameClass"), __NFUN_236__(9)), string(Class)));
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameVersion"), __NFUN_236__(9)), Level.EngineVersion));
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "MinNetVersion"), __NFUN_236__(9)), Level.MinNetVersion));
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GoreLevel"), __NFUN_236__(9)), string(GoreLevel)));
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameSpeed"), __NFUN_236__(9)), string(int(__NFUN_171__(GameSpeed, float(100))))));
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "MaxSpectators"), __NFUN_236__(9)), string(MaxSpectators)));
+	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "MaxPlayers"), __NFUN_236__(9)), string(MaxPlayers)));
+	return;
 }
-
-//------------------------------------------------------------------------------
-// Game parameters.
 
 //
 // Set gameplay speed.
 //
-function SetGameSpeed( Float T )
+function SetGameSpeed(float t)
 {
 	local float OldSpeed;
 
-#ifdefMPDEMO
-    T = 1;
-#endif
-    
 	OldSpeed = GameSpeed;
-	GameSpeed = FMax(T, 0.1);
+	GameSpeed = __NFUN_245__(t, 0.1000000);
 	Level.TimeDilation = GameSpeed;
-	if ( GameSpeed != OldSpeed )
-		SaveConfig();
-	SetTimer(Level.TimeDilation, true);
+	// End:0x43
+	if(__NFUN_181__(GameSpeed, OldSpeed))
+	{
+		__NFUN_536__();
+	}
+	__NFUN_280__(Level.TimeDilation, true);
+	return;
 }
 
 //#ifdef R6CODE
 function SetGamePassword(string szPasswd)
 {
-    local R6ServerInfo  pServerOptions;
+	local R6ServerInfo pServerOptions;
 
-    pServerOptions = class'Actor'.static.GetServerOptions();
-
-    AccessControl.SetGamePassword(szPasswd);
-    pServerOptions.GamePassword = szPasswd;
-    pServerOptions.UsePassword = !(szPasswd=="");
-    pServerOptions.SaveConfig();
+	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	AccessControl.SetGamePassword(szPasswd);
+	pServerOptions.GamePassword = szPasswd;
+	pServerOptions.UsePassword = __NFUN_129__(__NFUN_122__(szPasswd, ""));
+	pServerOptions.__NFUN_536__();
+	return;
 }
-//#endif R6CODE
 
 //
 // Called after setting low or high detail mode.
 //
 event DetailChange()
 {
-	local actor A;
-	local zoneinfo Z;
+	local Actor A;
+	local ZoneInfo Z;
 
-	if( !Level.bHighDetailMode )
+	// End:0x5A
+	if(__NFUN_129__(Level.bHighDetailMode))
 	{
-		foreach DynamicActors(class'Actor', A)
+		// End:0x59
+		foreach __NFUN_313__(Class'Engine.Actor', A)
 		{
-			if( A.bHighDetail && !A.bGameRelevant )
-				A.Destroy();
-		}
+			// End:0x58
+			if(__NFUN_130__(A.bHighDetail, __NFUN_129__(A.bGameRelevant)))
+			{
+				A.__NFUN_279__();
+			}			
+		}		
 	}
-	foreach AllActors(class'ZoneInfo', Z)
-		Z.LinkToSkybox();
+	// End:0x7A
+	foreach __NFUN_304__(Class'Engine.ZoneInfo', Z)
+	{
+		Z.LinkToSkybox();		
+	}	
+	return;
 }
-
-//------------------------------------------------------------------------------
-// Player start functions
 
 //
 // Grab the next option from a string.
 //
-function bool GrabOption( out string Options, out string Result )
+function bool GrabOption(out string Options, out string Result)
 {
-	if( Left(Options,1)=="?" )
+	// End:0x8A
+	if(__NFUN_122__(__NFUN_128__(Options, 1), "?"))
 	{
-		// Get result.
-		Result = Mid(Options,1);
-		if( InStr(Result,"?")>=0 )
-			Result = Left( Result, InStr(Result,"?") );
-
-		// Update options.
-		Options = Mid(Options,1);
-		if( InStr(Options,"?")>=0 )
-			Options = Mid( Options, InStr(Options,"?") );
+		Result = __NFUN_127__(Options, 1);
+		// End:0x45
+		if(__NFUN_153__(__NFUN_126__(Result, "?"), 0))
+		{
+			Result = __NFUN_128__(Result, __NFUN_126__(Result, "?"));
+		}
+		Options = __NFUN_127__(Options, 1);
+		// End:0x7D
+		if(__NFUN_153__(__NFUN_126__(Options, "?"), 0))
+		{
+			Options = __NFUN_127__(Options, __NFUN_126__(Options, "?"));			
+		}
 		else
+		{
 			Options = "";
-
-		return true;
+		}
+		return true;		
 	}
-	else return false;
+	else
+	{
+		return false;
+	}
+	return;
 }
 
 //
 // Break up a key=value pair into its key and value.
 //
-function GetKeyValue( string Pair, out string Key, out string Value )
+function GetKeyValue(string Pair, out string Key, out string Value)
 {
-	if( InStr(Pair,"=")>=0 )
+	// End:0x44
+	if(__NFUN_153__(__NFUN_126__(Pair, "="), 0))
 	{
-		Key   = Left(Pair,InStr(Pair,"="));
-		Value = Mid(Pair,InStr(Pair,"=")+1);
+		Key = __NFUN_128__(Pair, __NFUN_126__(Pair, "="));
+		Value = __NFUN_127__(Pair, __NFUN_146__(__NFUN_126__(Pair, "="), 1));		
 	}
 	else
 	{
-		Key   = Pair;
+		Key = Pair;
 		Value = "";
 	}
+	return;
 }
 
-/* ParseOption()
- Find an option in the options string and return it.
-*/
-function string ParseOption( string Options, string InKey )
+function string ParseOption(string Options, string InKey)
 {
 	local string Pair, Key, Value;
-	while( GrabOption( Options, Pair ) )
+
+	J0x00:
+	// End:0x40 [Loop If]
+	if(GrabOption(Options, Pair))
 	{
-		GetKeyValue( Pair, Key, Value );
-		if( Key ~= InKey )
+		GetKeyValue(Pair, Key, Value);
+		// End:0x3D
+		if(__NFUN_124__(Key, InKey))
+		{
 			return Value;
+		}
+		// [Loop Continue]
+		goto J0x00;
 	}
 	return "";
+	return;
 }
 
-/* Initialize the game.
- The GameInfo's InitGame() function is called before any other scripts (including 
- PreBeginPlay() ), and is used by the GameInfo to initialize parameters and spawn 
- its helper classes.
- Warning: this is called before actors' PreBeginPlay.
-*/
-event InitGame( string Options, out string Error )
+event InitGame(string Options, out string Error)
 {
 	local string InOpt, LeftOpt;
 	local int pos;
-	local class<Mutator> MClass;
-	local class<AccessControl> ACClass;
-	local class<GameRules> GRClass;
-	local class<BroadcastHandler> BHClass;
+	local Class<AccessControl> ACClass;
+	local Class<BroadcastHandler> BHClass;
 
-	log( "InitGame:" @ Options );
-	MaxPlayers = Min( 32,GetIntOption( Options, "MaxPlayers", MaxPlayers ));
-	Difficulty = GetIntOption(Options, "Difficulty", Difficulty);
-
-	InOpt = ParseOption( Options, "GameSpeed");
-	if( InOpt != "" )
+	__NFUN_231__(__NFUN_168__("InitGame:", Options));
+	MaxPlayers = __NFUN_249__(32, GetIntOption(Options, "MaxPlayers", MaxPlayers));
+	Difficulty = byte(GetIntOption(Options, "Difficulty", int(Difficulty)));
+	InOpt = ParseOption(Options, "GameSpeed");
+	// End:0xA9
+	if(__NFUN_123__(InOpt, ""))
 	{
-		log("GameSpeed"@InOpt);
+		__NFUN_231__(__NFUN_168__("GameSpeed", InOpt));
 		SetGameSpeed(float(InOpt));
 	}
-
-	MClass = class<Mutator>(DynamicLoadObject(MutatorClass, class'Class'));
-	BaseMutator = spawn(MClass);
-
-	log("### MutatorClass: "$MutatorClass);
-	
-	BHClass = class<BroadcastHandler>(DynamicLoadObject(BroadcastHandlerClass,Class'Class'));
-	BroadcastHandler = spawn(BHClass);
-    
-	InOpt = ParseOption( Options, "AccessControl");
-	if( InOpt != "" )
-		ACClass = class<AccessControl>(DynamicLoadObject(InOpt, class'Class'));
-	if ( ACClass != None )
-		AccessControl = Spawn(ACClass);
+	BHClass = Class<BroadcastHandler>(DynamicLoadObject(BroadcastHandlerClass, Class'Core.Class'));
+	BroadcastHandler = __NFUN_278__(BHClass);
+	InOpt = ParseOption(Options, "AccessControl");
+	// End:0x119
+	if(__NFUN_123__(InOpt, ""))
+	{
+		ACClass = Class<AccessControl>(DynamicLoadObject(InOpt, Class'Core.Class'));
+	}
+	// End:0x135
+	if(__NFUN_119__(ACClass, none))
+	{
+		AccessControl = __NFUN_278__(ACClass);		
+	}
 	else
 	{
-		ACClass = class<AccessControl>(DynamicLoadObject(AccessControlClass, class'Class'));
-		AccessControl = Spawn(ACClass);
+		ACClass = Class<AccessControl>(DynamicLoadObject(AccessControlClass, Class'Core.Class'));
+		AccessControl = __NFUN_278__(ACClass);
 	}
-
-	InOpt = ParseOption( Options, "AdminPassword");
-	if( InOpt!="" )
+	InOpt = ParseOption(Options, "AdminPassword");
+	// End:0x19E
+	if(__NFUN_123__(InOpt, ""))
+	{
 		AccessControl.SetAdminPassword(InOpt);
-
-	InOpt = ParseOption( Options, "GameRules");
-	if ( InOpt != "" )
-	{
-		log("Game Rules"@InOpt);
-		while ( InOpt != "" )
-		{
-			pos = InStr(InOpt,",");
-			if ( pos > 0 )
-			{
-				LeftOpt = Left(InOpt, pos);
-				InOpt = Right(InOpt, Len(InOpt) - pos - 1);
-			}
-			else
-			{
-				LeftOpt = InOpt;
-				InOpt = "";
-			}
-			log("Add game rules "$LeftOpt);
-			GRClass = class<GameRules>(DynamicLoadObject(LeftOpt, class'Class'));
-			if ( GRClass != None )
-			{
-				if ( GameRulesModifiers == None )
-					GameRulesModifiers = Spawn(GRClass);
-				else	
-					GameRulesModifiers.AddGameRules(Spawn(GRClass));
-			}
-		}
 	}
-
-	log("Base Mutator is "$BaseMutator);
-	InOpt = ParseOption( Options, "Mutator");
-	if ( InOpt != "" )
+	InOpt = ParseOption(Options, "GamePassword");
+	// End:0x1F4
+	if(__NFUN_123__(InOpt, ""))
 	{
-		log("Mutators"@InOpt);
-		while ( InOpt != "" )
-		{
-			pos = InStr(InOpt,",");
-			if ( pos > 0 )
-			{
-				LeftOpt = Left(InOpt, pos);
-				InOpt = Right(InOpt, Len(InOpt) - pos - 1);
-			}
-			else
-			{
-				LeftOpt = InOpt;
-				InOpt = "";
-			}
-			log("Add mutator "$LeftOpt);
-			MClass = class<Mutator>(DynamicLoadObject(LeftOpt, class'Class'));
-			if ( MClass != None )	
-				BaseMutator.AddMutator(Spawn(MClass));
-		}
+		AccessControl.SetGamePassword(InOpt);
+		__NFUN_231__(__NFUN_168__("GamePassword", InOpt));
 	}
-
-	InOpt = ParseOption( Options, "GamePassword");
-	if( InOpt != "" )
+	InOpt = ParseOption(Options, "LocalLog");
+	// End:0x227
+	if(__NFUN_124__(InOpt, "true"))
 	{
-		AccessControl.SetGamePassWord(InOpt);
-		log( "GamePassword" @ InOpt );
+		bLocalLog = true;
 	}
-
-	InOpt = ParseOption( Options, "LocalLog");
-	if( InOpt ~= "true" )
-		bLocalLog = True;
-
-	InOpt = ParseOption( Options, "WorldLog");
-	if( InOpt ~= "true" )
-		bWorldLog = True;
-
+	InOpt = ParseOption(Options, "WorldLog");
+	// End:0x25A
+	if(__NFUN_124__(InOpt, "true"))
+	{
+		bWorldLog = true;
+	}
+	return;
 }
 
 // Deploy all characters in the map after all options were selected in the menus.
 //#ifdef R6BUILDPLANNINGPHASE
 function DeployCharacters(PlayerController PController)
 {
-    //Defined in R6GameInfo
-    log("Wrong Deploy character");
+	__NFUN_231__("Wrong Deploy character");
+	return;
 }
-//#ifdef R6BUILDPLANNINGPHASE
 
 //
 // Return beacon text for serverbeacon.
 //
 event string GetBeaconText()
-{	
-	return
-		Level.ComputerName
-	@	Left(Level.Title,24) 
-	@	BeaconName
-	@	NumPlayers
-	$	"/"
-	$	MaxPlayers;
+{
+	return __NFUN_112__(__NFUN_112__(__NFUN_168__(__NFUN_168__(__NFUN_168__(Level.ComputerName, __NFUN_128__(Level.Title, 24)), BeaconName), string(NumPlayers)), "/"), string(MaxPlayers));
+	return;
 }
 
-/* ProcessServerTravel()
- Optional handling of ServerTravel for network games.
-*/
-function ProcessServerTravel( string URL, bool bItems )
+function ProcessServerTravel(string URL, bool bItems)
 {
-	local playercontroller P, LocalPlayer;
+	local PlayerController P, LocalPlayer;
 
 	EndLogging("mapchange");
-
-	// Notify clients we're switching level and give them time to receive.
-	// We call PreClientTravel directly on any local PlayerPawns (ie listen server)
-//#ifdef R6Code
-    m_bPendingLevelExists=true;
-//#endif
-	foreach DynamicActors( class'PlayerController', P )
-		if( NetConnection( P.Player)!=None )
-//#ifndef R6Code
-//		if( NetConnection( P.Player)!=None )
-//            P.ClientTravel( URL, TRAVEL_Relative, bItems );
-//#else 
-		if( NetConnection( P.Player)!=None )
-			P.ClientTravel( URL$"?Password="$AccessControl.GetGamePassword(), TRAVEL_Relative, bItems );
-//#endif
-		else
-		{	
+	m_bPendingLevelExists = true;
+	// End:0xB4
+	foreach __NFUN_313__(Class'Engine.PlayerController', P)
+	{
+		// End:0xB3
+		if(__NFUN_119__(NetConnection(P.Player), none))
+		{
+			// End:0x99
+			if(__NFUN_119__(NetConnection(P.Player), none))
+			{
+				P.ClientTravel(__NFUN_112__(__NFUN_112__(URL, "?Password="), AccessControl.GetGamePassword()), 2, bItems);
+				// End:0xB3
+				continue;
+			}
 			LocalPlayer = P;
 			P.PreClientTravel();
-		}
-//#ifndef R6Code
-//	if ( (Level.NetMode == NM_ListenServer) && (LocalPlayer != None) )
-//		Level.NextURL = Level.NextURL$"?Skin="$LocalPlayer.GetDefaultURL("Skin")
-//					 $"?Face="$LocalPlayer.GetDefaultURL("Face")
-//					 $"?Team="$LocalPlayer.GetDefaultURL("Team")
-//					 $"?Name="$LocalPlayer.GetDefaultURL("Name")
-//					 $"?Class="$LocalPlayer.GetDefaultURL("Class");
-//#else
-
-	if ( (Level.NetMode == NM_ListenServer) && (LocalPlayer != None) )
-		Level.NextURL = Level.NextURL$"?Skin="$LocalPlayer.GetDefaultURL("Skin")
-					 $"?Face="$LocalPlayer.GetDefaultURL("Face")
-					 $"?Team="$LocalPlayer.GetDefaultURL("Team")
-					 $"?Name="$LocalPlayer.GetDefaultURL("Name")
-					 $"?Class="$LocalPlayer.GetDefaultURL("Class")
-                     $"?Password="$AccessControl.GetGamePassword();
-//#endif
-	// Switch immediately if not networking.
-	if( Level.NetMode!=NM_DedicatedServer && Level.NetMode!=NM_ListenServer )
-		Level.NextSwitchCountdown = 0.0;
+		}		
+	}	
+	// End:0x1BE
+	if(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_119__(LocalPlayer, none)))
+	{
+		Level.NextURL = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(Level.NextURL, "?Skin="), LocalPlayer.GetDefaultURL("Skin")), "?Face="), LocalPlayer.GetDefaultURL("Face")), "?Team="), LocalPlayer.GetDefaultURL("Team")), "?Name="), LocalPlayer.GetDefaultURL("Name")), "?Class="), LocalPlayer.GetDefaultURL("Class")), "?Password="), AccessControl.GetGamePassword());
+	}
+	// End:0x206
+	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_155__(int(Level.NetMode), int(NM_ListenServer))))
+	{
+		Level.NextSwitchCountdown = 0.0000000;
+	}
+	return;
 }
 
-//
-// Accept or reject a player on the server.
-// Fails login if you set the Error to a non-empty string.
-//
-event PreLogin
-(
-	string Options,
-	string Address,
-	out string Error,
-	out string FailCode
-)
+// NEW IN 1.60
+event PreLogin(string Options, string Address, out string Error, out string FailCode)
 {
 	local bool bSpectator;
 	local string spec;
 
-	spec = ParseOption ( Options, "SpectatorOnly" );	
-	bSpectator = ( spec != "" );
-
+	spec = ParseOption(Options, "SpectatorOnly");
+	bSpectator = __NFUN_123__(spec, "");
 	AccessControl.PreLogin(Options, Address, Error, FailCode, bSpectator);
+	return;
 }
 
-function int GetIntOption( string Options, string ParseString, int CurrentValue)
+function int GetIntOption(string Options, string ParseString, int CurrentValue)
 {
 	local string InOpt;
 
-	InOpt = ParseOption( Options, ParseString );
-	if ( InOpt != "" )
+	InOpt = ParseOption(Options, ParseString);
+	// End:0x38
+	if(__NFUN_123__(InOpt, ""))
 	{
-		log(ParseString@InOpt);
+		__NFUN_231__(__NFUN_168__(ParseString, InOpt));
 		return int(InOpt);
-	}	
+	}
 	return CurrentValue;
+	return;
 }
 
 function bool AtCapacity(bool bSpectator)
 {
-	if ( Level.NetMode == NM_Standalone )
+	// End:0x1B
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
 		return false;
-
-	if ( bSpectator )
-		return ( (NumSpectators >= MaxSpectators)
-			&& ((Level.NetMode != NM_ListenServer) || (NumPlayers > 0)) );
+	}
+	// End:0x5C
+	if(bSpectator)
+	{
+		return __NFUN_130__(__NFUN_153__(NumSpectators, MaxSpectators), __NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_151__(NumPlayers, 0)));		
+	}
 	else
-		return ( (MaxPlayers>0) && (NumPlayers>=MaxPlayers) );
+	{
+		return __NFUN_130__(__NFUN_151__(MaxPlayers, 0), __NFUN_153__(NumPlayers, MaxPlayers));
+	}
+	return;
 }
 
-//
-// Log a player in.
-// Fails login if you set the Error string.
-// PreLogin is called before Login, but significant game time may pass before
-// Login is called, especially if content is downloaded.
-//
-event PlayerController Login
-(
-	string Portal,
-	string Options,
-	out string Error
-)
+// NEW IN 1.60
+event PlayerController Login(string Portal, string Options, out string Error)
 {
 	local NavigationPoint StartSpot;
 	local PlayerController NewPlayer;
-	local class<Pawn> DesiredPawnClass;
-	local Pawn      TestPawn;
-	local string          InName, InPassword, InChecksum, InClass;
-	local byte            InTeam;
+	local Class<Pawn> DesiredPawnClass;
+	local Pawn TestPawn;
+	local string InName, InPassword, InChecksum, InClass;
+	local byte InTeam;
 	local bool bSpectator;
 
-	bSpectator = ( ParseOption( Options, "SpectatorOnly" ) != "" );
-
-	// Make sure there is capacity. (This might have changed since the PreLogin call).
-	if ( AtCapacity(bSpectator) )
+	bSpectator = __NFUN_123__(ParseOption(Options, "SpectatorOnly"), "");
+	// End:0x4A
+	if(AtCapacity(bSpectator))
 	{
-		Error=GameMessageClass.Default.MaxedOutMessage;
-		return None;
+		Error = GameMessageClass.default.MaxedOutMessage;
+		return none;
 	}
-
-	BaseMutator.ModifyLogin(Portal, Options);
-
-	// Get URL options.
-	InName     = Left(ParseOption ( Options, "Name"), 20);
-	InTeam     = GetIntOption( Options, "Team", 255 ); // default to "no team"
-	InPassword = ParseOption ( Options, "Password" );
-	InChecksum = ParseOption ( Options, "Checksum" );
-
-	log( "Login:" @ InName );
-	if( InPassword != "" )
-		log( "Password"@InPassword );
-	
-	// Pick a team (if need teams)
-	InTeam = PickTeam(InTeam);
-		 
-	// Find a start spot.
-	StartSpot = FindPlayerStart( None, InTeam, Portal );
-
-	if( StartSpot == None )
+	InName = __NFUN_128__(ParseOption(Options, "Name"), 20);
+	InTeam = byte(GetIntOption(Options, "Team", 255));
+	InPassword = ParseOption(Options, "Password");
+	InChecksum = ParseOption(Options, "Checksum");
+	__NFUN_231__(__NFUN_168__("Login:", InName));
+	// End:0xE6
+	if(__NFUN_123__(InPassword, ""))
 	{
-        Error=Localize("MPMiscMessages", "FailedPlaceMessage", "R6GameInfo");
-		return None;
+		__NFUN_231__(__NFUN_168__("Password", InPassword));
 	}
-
-	// Init player's administrative privileges
-//	if ( AccessControl.AdminLogin(NewPlayer, InPassword) )
-//	{
-//		NewPlayer = spawn(AccessControl.AdminClass,,,StartSpot.Location,StartSpot.Rotation);
-//		bSpectator = true;
-//	}
-//	else
-//	{
-		if ( PlayerControllerClass == None )
-			PlayerControllerClass = class<PlayerController>(DynamicLoadObject(PlayerControllerClassName, class'Class'));
-		NewPlayer = spawn(PlayerControllerClass,,,StartSpot.Location,StartSpot.Rotation);
-//	}
-
-	// Handle spawn failure.
-	if( NewPlayer == None )
+	StartSpot = FindPlayerStart(none, InTeam, Portal);
+	// End:0x146
+	if(__NFUN_114__(StartSpot, none))
 	{
-		log("Couldn't spawn player controller of class "$PlayerControllerClass);
-		Error = GameMessageClass.Default.FailedSpawnMessage;
-		return None;
+		Error = Localize("MPMiscMessages", "FailedPlaceMessage", "R6GameInfo");
+		return none;
 	}
-
+	// End:0x16C
+	if(__NFUN_114__(PlayerControllerClass, none))
+	{
+		PlayerControllerClass = Class<PlayerController>(DynamicLoadObject(PlayerControllerClassName, Class'Core.Class'));
+	}
+	NewPlayer = __NFUN_278__(PlayerControllerClass,,, StartSpot.Location, StartSpot.Rotation);
+	// End:0x1F0
+	if(__NFUN_114__(NewPlayer, none))
+	{
+		__NFUN_231__(__NFUN_112__("Couldn't spawn player controller of class ", string(PlayerControllerClass)));
+		Error = GameMessageClass.default.FailedSpawnMessage;
+		return none;
+	}
 	NewPlayer.StartSpot = StartSpot;
-
-	// Init player's name
-	if( InName=="" )
-		InName=DefaultPlayerName;
-	
-	if(NewPlayer.PlayerReplicationInfo != none)		// R6CODE
+	// End:0x21B
+	if(__NFUN_122__(InName, ""))
 	{
-		if( Level.NetMode!=NM_Standalone || NewPlayer.PlayerReplicationInfo.PlayerName==DefaultPlayerName )
-			ChangeName( NewPlayer, InName, false );
-
-		// Init player's replication info
+		InName = DefaultPlayerName;
+	}
+	// End:0x290
+	if(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none))
+	{
+		// End:0x27C
+		if(__NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_122__(NewPlayer.PlayerReplicationInfo.PlayerName, DefaultPlayerName)))
+		{
+			ChangeName(NewPlayer, InName, false);
+		}
 		NewPlayer.GameReplicationInfo = GameReplicationInfo;
 	}
-
-	NewPlayer.GotoState('Spectating');
-
-	if ( bSpectator )
+	NewPlayer.__NFUN_113__('Spectating');
+	// End:0x2E1
+	if(bSpectator)
 	{
 		NewPlayer.bOnlySpectator = true;
 		NewPlayer.PlayerReplicationInfo.bIsSpectator = true;
-		NumSpectators++;
+		__NFUN_165__(NumSpectators);
 		return NewPlayer;
 	}
-
-	// Change player's team.
-	if ( !ChangeTeam(newPlayer, InTeam) )
+	// End:0x314
+	if(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none))
 	{
-		Error = GameMessageClass.Default.FailedTeamMessage;
-		return None;
+		NewPlayer.PlayerReplicationInfo.PlayerID = __NFUN_165__(CurrentID);
 	}
-
-	// Set the player's ID.
-	if(NewPlayer.PlayerReplicationInfo != none)		// R6CODE
-		NewPlayer.PlayerReplicationInfo.PlayerID = CurrentID++;
-
-	InClass = ParseOption( Options, "Class" );
-	if ( InClass != "" )
+	InClass = ParseOption(Options, "Class");
+	// End:0x372
+	if(__NFUN_123__(InClass, ""))
 	{
-		DesiredPawnClass = class<Pawn>(DynamicLoadObject(InClass, class'Class'));
-		if ( DesiredPawnClass != None )
+		DesiredPawnClass = Class<Pawn>(DynamicLoadObject(InClass, Class'Core.Class'));
+		// End:0x372
+		if(__NFUN_119__(DesiredPawnClass, none))
+		{
 			NewPlayer.PawnClass = DesiredPawnClass;
+		}
 	}
-
-	// Log it.
-	if ( StatLog != None )
+	// End:0x391
+	if(__NFUN_119__(StatLog, none))
+	{
 		StatLog.LogPlayerConnect(NewPlayer);
-	NewPlayer.ReceivedSecretChecksum = !(InChecksum ~= "NoChecksum");
-
-	NumPlayers++;
-
-	// If we are a server, broadcast a welcome message.
-	if( Level.NetMode==NM_DedicatedServer || Level.NetMode==NM_ListenServer )
+	}
+	NewPlayer.ReceivedSecretChecksum = __NFUN_129__(__NFUN_124__(InChecksum, "NoChecksum"));
+	__NFUN_165__(NumPlayers);
+	// End:0x40B
+	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	{
 		BroadcastLocalizedMessage(GameMessageClass, 1, NewPlayer.PlayerReplicationInfo);
-
-	// if delayed start, don't give a pawn to the player yet
-	// Normal for multiplayer games
-	if ( bDelayedStart )
-	{
-		NewPlayer.GotoState('BaseSpectating'); //		NewPlayer.GotoState('PlayerWaiting');
-		return NewPlayer;	
 	}
-
-	// Try to match up to existing unoccupied player in level,
-	// for savegames and coop level switching.
-	ForEach DynamicActors(class'Pawn', TestPawn )
+	// End:0x42A
+	if(bDelayedStart)
 	{
-		if ( (TestPawn!=None) && (PlayerController(TestPawn.Controller)!=None) && (PlayerController(TestPawn.Controller).Player==None) && (TestPawn.Health > 0)
-			&&  (TestPawn.OwnerName~=InName) )
+		NewPlayer.__NFUN_113__('BaseSpectating');
+		return NewPlayer;
+	}
+	// End:0x519
+	foreach __NFUN_313__(Class'Engine.Pawn', TestPawn)
+	{
+		// End:0x518
+		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(TestPawn, none), __NFUN_119__(PlayerController(TestPawn.Controller), none)), __NFUN_114__(PlayerController(TestPawn.Controller).Player, none)), __NFUN_151__(TestPawn.Health, 0)), __NFUN_124__(TestPawn.OwnerName, InName)))
 		{
-            NewPlayer.Destroy();
-            TestPawn.SetRotation(TestPawn.Controller.Rotation);
-            TestPawn.bInitializeAnimation = false; // FIXME - temporary workaround for lack of meshinstance serialization
-            TestPawn.PlayWaiting();
-            return PlayerController(TestPawn.Controller);
-		}
-	}
+			NewPlayer.__NFUN_279__();
+			TestPawn.__NFUN_299__(TestPawn.Controller.Rotation);
+			TestPawn.bInitializeAnimation = false;
+			TestPawn.PlayWaiting();			
+			return PlayerController(TestPawn.Controller);
+		}		
+	}	
+	return NewPlayer;
+	return;
+}
 
-	return newPlayer;
-}	
-
-/* StartMatch()
-Start the game - inform all actors that the match is starting, and spawn player pawns
-*/
 function StartMatch()
-{	
+{
 	local Controller P;
-	local Actor A; 
+	local Actor A;
 
-	if (StatLog != None)
+	// End:0x1A
+	if(__NFUN_119__(StatLog, none))
+	{
 		StatLog.LogGameStart();
+	}
+	// End:0x3A
+	foreach __NFUN_304__(Class'Engine.Actor', A)
+	{
+		A.MatchStarting();		
+	}	
+	P = Level.ControllerList;
+	J0x4F:
 
-	// tell all actors the game is starting
-	ForEach AllActors(class'Actor', A)
-		A.MatchStarting();
-
-	// start human players first
-	for ( P = Level.ControllerList; P!=None; P=P.nextController )
-		if ( P.IsA('PlayerController') && (P.Pawn == None) )
+	// End:0xCD [Loop If]
+	if(__NFUN_119__(P, none))
+	{
+		// End:0xB6
+		if(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_114__(P.Pawn, none)))
 		{
-			if ( bGameEnded ) return; // telefrag ended the game with ridiculous frag limit
-			else if ( !PlayerController(P).bOnlySpectator  )
-                RestartPlayer(P);
-			SendStartMessage(PlayerController(P));
+			// End:0x92
+			if(bGameEnded)
+			{
+				return;				
+			}
+			else
+			{
+				// End:0xB6
+				if(__NFUN_129__(PlayerController(P).bOnlySpectator))
+				{
+					RestartPlayer(P);
+				}
+			}
 		}
-
-	// start AI players
-//#ifdef R6CODE
-//	for ( P = Level.ControllerList; P!=None; P=P.nextController )
-//		if ( P.bIsPlayer && !P.IsA('PlayerController') )
-//			RestartPlayer(P);
-//
-//        bWaitingToStartMatch = false;
-//#endif R6CODE
+		P = P.nextController;
+		// [Loop Continue]
+		goto J0x4F;
+	}
+	return;
 }
 
 //
 // Restart a player.
 //
-function RestartPlayer( Controller aPlayer )	
+function RestartPlayer(Controller aPlayer)
 {
-    /* // r6code: not needed. it spawn a useless pawn in the entry level.
-    
-	local NavigationPoint startSpot;
-	local int TeamNum;
-	local class<Pawn> DefaultPlayerClass;
-
-	if( bRestartLevel && Level.NetMode!=NM_DedicatedServer && Level.NetMode!=NM_ListenServer )
-        return;
-//#ifndef R6CODE we don't need this
-//	if ( (aPlayer.PlayerReplicationInfo == None) || (aPlayer.PlayerReplicationInfo.Team == None) )
-//        TeamNum = 255;
-//	else
-//    {
-//        TeamNum = aPlayer.PlayerReplicationInfo.Team.TeamIndex;
-//    }
-//#endif R6CODE
-	startSpot = FindPlayerStart(aPlayer, TeamNum);
-	if( startSpot == None )
-	{
-		log(" Player start not found!!!");
-		return;
-	}	
-
-//#ifndef R6CODE  we don't need this
-//	if ( (aPlayer.PlayerReplicationInfo.Team != None)
-//		&& ((aPlayer.PawnClass == None) || !aPlayer.PlayerReplicationInfo.Team.BelongsOnTeam(aPlayer.PawnClass)) )
-//			aPlayer.PawnClass = aPlayer.PlayerReplicationInfo.Team.DefaultPlayerClass;
-//    if (aPlayer.PreviousPawnClass!=None && aPlayer.PawnClass != aPlayer.PreviousPawnClass)
-//		BaseMutator.PlayerChangedClass(aPlayer);			
-//#endif R6CODE
-	if ( aPlayer.PawnClass != None )
-		aPlayer.Pawn = Spawn(aPlayer.PawnClass,,,StartSpot.Location,StartSpot.Rotation);
-
- 
-	if( aPlayer.Pawn==None )
-	{
-		aPlayer.PawnClass = GetDefaultPlayerClass();
-		aPlayer.Pawn = Spawn(aPlayer.PawnClass,,,StartSpot.Location,StartSpot.Rotation,true);
-	}
-	if ( aPlayer.Pawn == None )
-	{
-		log("Couldn't spawn player of type "$aPlayer.PawnClass$" at "$StartSpot);
-		aPlayer.GotoState('Dead');
-		return;
-	}
-
-	aPlayer.PreviousPawnClass = aPlayer.Pawn.Class;
-
-	aPlayer.Possess(aPlayer.Pawn);
-	aPlayer.PawnClass = aPlayer.Pawn.Class;
-
-	aPlayer.PlayTeleportEffect(true, true);
-	aPlayer.ClientSetRotation(aPlayer.Pawn.Rotation);
-
-	AddDefaultInventory(aPlayer.Pawn);
-	TriggerEvent( StartSpot.Event, StartSpot, aPlayer.Pawn);
-    */
+	return;
 }
 
-function class<Pawn> GetDefaultPlayerClass()
+function Class<Pawn> GetDefaultPlayerClass()
 {
-	return class<Pawn>(DynamicLoadObject(DefaultPlayerClassName,class'Class'));
-}
-
-function SendStartMessage(PlayerController P)
-{
-	P.ClearProgressMessages();
+	return Class<Pawn>(DynamicLoadObject(DefaultPlayerClassName, Class'Core.Class'));
+	return;
 }
 
 //
 // Called after a successful login. This is the first place
 // it is safe to call replicated functions on the PlayerPawn.
 //
-event PostLogin( PlayerController NewPlayer )
+event PostLogin(PlayerController NewPlayer)
 {
 	local Controller P;
-//#ifndef R6CODE
-//	local class<Scoreboard> S;
-//#endif
-	local class<HUD> H;
+	local Class<HUD> H;
 
-	if ( !bDelayedStart )
+	// End:0x3D
+	if(__NFUN_129__(bDelayedStart))
 	{
-		// start match, or let player enter, immediately
-		bRestartLevel = false;	// let player spawn once in levels that must be restarted after every death
-		if ( bWaitingToStartMatch )
-			StartMatch();
+		bRestartLevel = false;
+		// End:0x25
+		if(bWaitingToStartMatch)
+		{
+			StartMatch();			
+		}
 		else
-            RestartPlayer(newPlayer);
-		bRestartLevel = Default.bRestartLevel;
+		{
+			RestartPlayer(NewPlayer);
+		}
+		bRestartLevel = default.bRestartLevel;
 	}
-    
-	// Start player's music.
-	NewPlayer.ClientSetMusic( Level.Song, MTRAN_Fade );
-	
-	// tell client what hud and scoreboard to use
-	H = class<HUD>(DynamicLoadObject(HUDType, class'Class'));
-//#ifndef R6Code
-//	S = class<Scoreboard>(DynamicLoadObject(ScoreboardType, class'Class'));
-//#end R6CODE
-	NewPlayer.ClientSetHUD(H,none);
-
-	if ( NewPlayer.Pawn != None )
+	NewPlayer.ClientSetMusic(Level.Song, 3);
+	H = Class<HUD>(DynamicLoadObject(HUDType, Class'Core.Class'));
+	NewPlayer.ClientSetHUD(H, none);
+	// End:0xCF
+	if(__NFUN_119__(NewPlayer.Pawn, none))
+	{
 		NewPlayer.Pawn.ClientSetRotation(NewPlayer.Pawn.Rotation);
+	}
+	return;
 }
 
 //
 // Player exits.
 //
-function Logout( Controller Exiting )
+function Logout(Controller Exiting)
 {
 	local bool bMessage;
 
 	bMessage = true;
-	if ( PlayerController(Exiting) != None )
+	// End:0x61
+	if(__NFUN_119__(PlayerController(Exiting), none))
 	{
-		if ( PlayerController(Exiting).bOnlySpectator )
+		// End:0x5A
+		if(PlayerController(Exiting).bOnlySpectator)
 		{
 			bMessage = false;
-			if ( Level.NetMode == NM_DedicatedServer )
-				NumSpectators--;
+			// End:0x57
+			if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+			{
+				__NFUN_166__(NumSpectators);
+			}			
 		}
 		else
-			NumPlayers--;
+		{
+			__NFUN_166__(NumPlayers);
+		}
 	}
-	if( bMessage && (Level.NetMode==NM_DedicatedServer || Level.NetMode==NM_ListenServer) )
+	// End:0xBB
+	if(__NFUN_130__(bMessage, __NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))))
+	{
 		BroadcastLocalizedMessage(GameMessageClass, 4, Exiting.PlayerReplicationInfo);
-
-	if ( StatLog != None )
+	}
+	// End:0xDA
+	if(__NFUN_119__(StatLog, none))
+	{
 		StatLog.LogPlayerDisconnect(Exiting);
+	}
+	return;
 }
 
 //
@@ -1034,310 +878,120 @@ function Logout( Controller Exiting )
 // the HUD inventory rendering messed up (AcceptInventory should pick another
 // applicable weapon/item as current).
 //
-event AcceptInventory(pawn PlayerPawn)
+event AcceptInventory(Pawn PlayerPawn)
 {
-	//default accept all inventory except default weapon (spawned explicitly)
+	return;
 }
 
-//
-// Spawn any default inventory for the player.
-//
-function AddDefaultInventory( pawn PlayerPawn )
-{
-/*R6CHANGEWEAPONSYSTEM
-	local Weapon newWeapon;
-	local class<Weapon> WeapClass;
-
-	// Spawn default weapon.
-	WeapClass = BaseMutator.GetDefaultWeapon();
-	if( (WeapClass!=None) && (PlayerPawn.FindInventoryType(WeapClass)==None) )
-	{
-		newWeapon = Spawn(WeapClass,,,PlayerPawn.Location);
-		if( newWeapon != None )
-		{
-			newWeapon.GiveTo(PlayerPawn);
-			newWeapon.BringUp();
-			newWeapon.bCanThrow = false; // don't allow default weapon to be thrown out
-		}
-	}
-	SetPlayerDefaults(PlayerPawn);
-*/
-}
-
-/* SetPlayerDefaults()
- first make sure pawn properties are back to default, then give mutators an opportunity
- to modify them
-*/
 function SetPlayerDefaults(Pawn PlayerPawn)
 {
-	PlayerPawn.JumpZ = PlayerPawn.Default.JumpZ;
-	PlayerPawn.AirControl = PlayerPawn.Default.AirControl;
-	BaseMutator.ModifyPlayer(PlayerPawn);
+	PlayerPawn.JumpZ = PlayerPawn.default.JumpZ;
+	PlayerPawn.AirControl = PlayerPawn.default.AirControl;
+	return;
 }
 
-function NotifyKilled(Controller Killer, Controller Killed, Pawn KilledPawn )
-{
-	local Controller C;
-
-	for ( C=Level.ControllerList; C!=None; C=C.nextController )
-		C.NotifyKilled(Killer, Killed, KilledPawn);
-}
-
-function Killed( Controller Killer, Controller Killed, Pawn KilledPawn, class<DamageType> damageType )
-{
-	local String KillerWeapon, OtherWeapon;
-
-	NotifyKilled(Killer,Killed,KilledPawn);
-
-	if ( Killed.bIsPlayer )
-	{
-		Killed.PlayerReplicationInfo.Deaths += 1;
-		BroadcastDeathMessage(Killer, Killed, damageType);
-		if ( (StatLog != None) && (Killer != None) && Killer.bIsPlayer )
-		{
-			if ( DamageType.Default.DamageWeaponName != "" )
-				KillerWeapon = DamageType.Default.DamageWeaponName;
-			else
-				KillerWeapon = "None";
-
-/*R6CHANGEWEAPONSYSTEM
-			if (KilledPawn.Weapon != None)
-				OtherWeapon = KilledPawn.Weapon.ItemName;
-			else
-*/
-				OtherWeapon = "None";
-            StatLog.LogKill(
-				Killer.PlayerReplicationInfo,
-				Killed.PlayerReplicationInfo,
-				KillerWeapon,
-				OtherWeapon,
-				damageType
-			);
-		}
-	}
-	ScoreKill(Killer, Killed);
-/*R6CHANGEWEAPONSYSTEM
-	DiscardInventory(KilledPawn);
-*/
-}
-
-function bool PreventDeath(Pawn Killed, Controller Killer, class<DamageType> damageType, vector HitLocation)
-{
-	if ( GameRulesModifiers == None )
-		return false;
-	return GameRulesModifiers.PreventDeath(Killed,Killer, damageType,HitLocation);
-}
-
-function BroadcastDeathMessage(Controller Killer, Controller Other, class<DamageType> damageType)
-{
-	if ( (Killer == Other) || (Killer == None) )
-		BroadcastLocalizedMessage(DeathMessageClass, 1, None, Other.PlayerReplicationInfo, damageType);
-	else 
-		BroadcastLocalizedMessage(DeathMessageClass, 0, Killer.PlayerReplicationInfo, Other.PlayerReplicationInfo, damageType);
-}
-
-
+// Export UGameInfo::execParseKillMessage(FFrame&, void* const)
 // %k = Owner's PlayerName (Killer)
 // %o = Other's PlayerName (Victim)
 // %w = Owner's Weapon ItemName
-static native function string ParseKillMessage( string KillerName, string VictimName, string DeathMessage );
-/* R6CODE
-function Kick( string S )
-{
-	AccessControl.Kick(S);
-}*/
-function KickBan( string S )
+ native static function string ParseKillMessage(string KillerName, string VictimName, string DeathMessage);
+
+function KickBan(string S)
 {
 	AccessControl.KickBan(S);
+	return;
 }
-
-function bool IsOnTeam(Controller Other, int TeamNum)
-{
-	if ( bTeamGame && (Other != None) 
-		&& (Other.PlayerReplicationInfo.Team != None)
-		&& (Other.PlayerReplicationInfo.Team.TeamIndex == TeamNum) )
-		return true;
-	return false;
-}
-
-//-------------------------------------------------------------------------------------
-// Level gameplay modification.
 
 //
 // Return whether Viewer is allowed to spectate from the
 // point of view of ViewTarget.
 //
-function bool CanSpectate( PlayerController Viewer, bool bOnlySpectator, actor ViewTarget )
+function bool CanSpectate(PlayerController Viewer, bool bOnlySpectator, Actor ViewTarget)
 {
 	return true;
+	return;
 }
 
-/* Use reduce damage for teamplay modifications, etc.
-*/
-function int ReduceDamage( int Damage, pawn injured, pawn instigatedBy, vector HitLocation, vector Momentum, class<DamageType> DamageType )
+function ChangeName(Controller Other, coerce string S, bool bNameChange, optional bool bDontBroadcastNameChange)
 {
-	local int OriginalDamage;
-//	local armor FirstArmor;
+	local string szNewNameMessage, _szNewName;
 
-	OriginalDamage = Damage;
-
-	if( injured.PhysicsVolume.bNeutralZone )
-		Damage = 0;
-	else if ( injured.InGodMode() ) // God mode
-		return 0;
-// R6CHANGEWEAPONSYSTEM
-//    else if ( (injured.Inventory != None) && (damage > 0) ) //then check if carrying armor
-//	{
-//		FirstArmor = injured.inventory.PrioritizeArmor(Damage, DamageType, HitLocation);
-//		while( (FirstArmor != None) && (Damage > 0) )
-//		{
-//			Damage = FirstArmor.ArmorAbsorbDamage(Damage, DamageType, HitLocation);
-//			FirstArmor = FirstArmor.nextArmor;
-//		} 
-//	}
-
-    if ( GameRulesModifiers != None )
-		return GameRulesModifiers.NetDamage( OriginalDamage, Damage,injured,instigatedBy,HitLocation,Momentum,DamageType );
-
-	return Damage;
-}
-
-//#ifndef R6CODE
-// Return whether an item should respawn.
-//function bool ShouldRespawn( Pickup Other )
-//{
-//	if( Level.NetMode == NM_StandAlone )
-//		return false;
-//
-//	return Other.ReSpawnTime!=0.0;
-//}
-
-// Called when pawn has a chance to pick Item up (i.e. when 
-//  the pawn touches a weapon pickup). Should return true if 
-//  he wants to pick it up, false if he does not want it.
-//function bool PickupQuery( Pawn Other, Pickup item )
-//{
-//	local byte bAllowPickup;
-//
-//	if ( (GameRulesModifiers != None) && GameRulesModifiers.OverridePickupQuery(Other, item, bAllowPickup) )
-//		return (bAllowPickup == 1);
-//
-//    if ( Other.Inventory == None )
-//		return true;
-//	else
-//        return false;
-//}
-
-// Discard a player's inventory after he dies.
-//function DiscardInventory( Pawn Other )
-//{
-//	local inventory Inv,Next;
-//	local float speed;
-//
-//	if( (Other.Weapon!=None) && Other.Weapon.bCanThrow && Other.Weapon.HasAmmo() )
-//	{
-//		if ( Other.Weapon.PickupAmmoCount == 0 )
-//			Other.Weapon.PickupAmmoCount = 1;
-//		speed = VSize(Other.Velocity);
-//		if (speed != 0)
-//			Other.TossWeapon(Normal(Other.Velocity/speed + 0.5 * VRand()) * (speed + 280));
-//		else 
-//			Other.TossWeapon(vect(0,0,0));
-//	}
-//	Other.Weapon = None;
-//	Other.SelectedItem = None;
-//	Inv = Other.Inventory;
-//	while ( Inv != None )
-//	{
-//		Next = Inv.Inventory;
-//		Inv.Destroy();
-//		Inv = Next;
-//	}	
-//}
-//#endif // #ifndef R6CODE
-
-/* Try to change a player's name.
-*/	
-function ChangeName( Controller Other, coerce string S, bool bNameChange, optional bool bDontBroadcastNameChange )
-{
-    local string szNewNameMessage;
-    local string _szNewName;
-
-    _szNewName = TransformName(Other.PlayerReplicationInfo, S);
-
-	if( _szNewName == "" )
+	_szNewName = TransformName(Other.PlayerReplicationInfo, S);
+	// End:0x2D
+	if(__NFUN_122__(_szNewName, ""))
+	{
 		return;
-
-    if(Caps(Other.PlayerReplicationInfo.PlayerName) == Caps(_szNewName))
-        bDontBroadcastNameChange = true;
-
-	if ( StatLog != None)
+	}
+	// End:0x5A
+	if(__NFUN_122__(__NFUN_235__(Other.PlayerReplicationInfo.PlayerName), __NFUN_235__(_szNewName)))
+	{
+		bDontBroadcastNameChange = true;
+	}
+	// End:0x79
+	if(__NFUN_119__(StatLog, none))
+	{
 		StatLog.LogNameChange(Other);
-
+	}
 	Other.PlayerReplicationInfo.SetPlayerName(_szNewName);
-
-	if( bNameChange && (PlayerController(Other) != None) )
-		BroadcastLocalizedMessage( GameMessageClass, 2, Other.PlayerReplicationInfo );	
-
-    /*  R6CODE
-    if(bDontBroadcastNameChange == false)
-        Broadcast( none, szNewNameMessage, 'ServerMessage');
-    */
+	// End:0xCC
+	if(__NFUN_130__(bNameChange, __NFUN_119__(PlayerController(Other), none)))
+	{
+		BroadcastLocalizedMessage(GameMessageClass, 2, Other.PlayerReplicationInfo);
+	}
+	return;
 }
 
 // this function will return a unique player name based on the one requested
 function string TransformName(PlayerReplicationInfo PRI, string NameRequested)
 {
-    local int _index;
+	local int _index;
 
-    if (!NameInUse(PRI, NameRequested))
-        return NameRequested;
-    else
-    {
-        _index = 1;
-        while (NameInUse(PRI, NameRequested $"(" $ _index $")" ) )
-        {
-            _index++;
-        }
-        return NameRequested $"(" $ _index $")";
-    }
+	// End:0x1E
+	if(__NFUN_129__(NameInUse(PRI, NameRequested)))
+	{
+		return NameRequested;		
+	}
+	else
+	{
+		_index = 1;
+		J0x25:
+
+		// End:0x55 [Loop If]
+		if(NameInUse(PRI, __NFUN_112__(__NFUN_112__(__NFUN_112__(NameRequested, "("), string(_index)), ")")))
+		{
+			__NFUN_165__(_index);
+			// [Loop Continue]
+			goto J0x25;
+		}
+		return __NFUN_112__(__NFUN_112__(__NFUN_112__(NameRequested, "("), string(_index)), ")");
+	}
+	return;
 }
 
 // returns true if name is currently being used
 function bool NameInUse(PlayerReplicationInfo PRI, string NameRequested)
 {
-    local PlayerReplicationInfo _PRI;
-    foreach DynamicActors(class'PlayerReplicationInfo', _PRI)
-    {
-        if((PRI != _PRI) && Caps(_PRI.PlayerName) == Caps(NameRequested))
-            return true;    // yes this name is in use
-    }
-    return false;   // this name is not in use
+	local PlayerReplicationInfo _PRI;
+
+	// End:0x41
+	foreach __NFUN_313__(Class'Engine.PlayerReplicationInfo', _PRI)
+	{
+		// End:0x40
+		if(__NFUN_130__(__NFUN_119__(PRI, _PRI), __NFUN_122__(__NFUN_235__(_PRI.PlayerName), __NFUN_235__(NameRequested))))
+		{			
+			return true;
+		}		
+	}	
+	return false;
+	return;
 }
 
-/* Return whether a team change is allowed.
-*/
-function bool ChangeTeam(Controller Other, int N)
+function SendPlayer(PlayerController aPlayer, string URL)
 {
-	return true;
+	aPlayer.ClientTravel(URL, 2, false);
+	return;
 }
 
-/* Return a picked team number if none was specified
-*/
-function byte PickTeam(byte Current)
-{
-	return Current;
-}
-
-/* Send a player to a URL.
-*/
-function SendPlayer( PlayerController aPlayer, string URL )
-{
-	aPlayer.ClientTravel( URL, TRAVEL_Relative, false );
-}
-
-/* Restart the game.
-*/
 // #ifndef R6CODE
 //function RestartGame()
 //{
@@ -1378,280 +1032,261 @@ function RestartGame()
 {
 	local string NextMap;
 	local MapList myList;
-    local R6ServerInfo  pServerOptions;
+	local R6ServerInfo pServerOptions;
 
-    pServerOptions = class'Actor'.static.GetServerOptions();
-
-	if ( (GameRulesModifiers != None) && GameRulesModifiers.HandleRestartGame() )
-		return;
-
-	// these server travels should all be relative to the current URL
-    if ( bChangeLevels && !bAlreadyChanged )
+	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	// End:0xCF
+	if(__NFUN_130__(bChangeLevels, __NFUN_129__(bAlreadyChanged)))
 	{
-		// open a the nextmap actor for this game type and get the next map
 		bAlreadyChanged = true;
-        myList = pServerOptions.m_ServerMapList;
-        if (m_bChangedServerConfig==true)
-        {
-            NextMap = myList.GetNextMap(1);
-        }
-        else
-        {
-            NextMap = myList.GetNextMap(myList.K_NextDefaultMap);
-        }
-		if ( NextMap == "" )
-			NextMap = GetMapName(MapPrefix, NextMap,1);
-
-		if ( NextMap != "" )
+		myList = pServerOptions.m_ServerMapList;
+		// End:0x69
+		if(__NFUN_242__(m_bChangedServerConfig, true))
+		{
+			NextMap = myList.GetNextMap(1);			
+		}
+		else
+		{
+			NextMap = myList.GetNextMap(myList.-2);
+		}
+		// End:0xAC
+		if(__NFUN_122__(NextMap, ""))
+		{
+			NextMap = __NFUN_539__(MapPrefix, NextMap, 1);
+		}
+		// End:0xCF
+		if(__NFUN_123__(NextMap, ""))
 		{
 			Level.ServerTravel(NextMap, false);
 			return;
 		}
 	}
-
-	Level.ServerTravel( "?Restart", true );
+	Level.ServerTravel("?Restart", true);
+	return;
 }
-//#endif R6CODE
 
-//==========================================================================
-// Message broadcasting functions (handled by the BroadCastHandler)
-
-event Broadcast( Actor Sender, coerce string Msg, optional name Type )
+event Broadcast(Actor Sender, coerce string Msg, optional name type)
 {
-	BroadcastHandler.Broadcast(Sender,Msg,Type);
+	BroadcastHandler.Broadcast(Sender, Msg, type);
+	return;
 }
 
-function BroadcastTeam( Actor Sender, coerce string Msg, optional name Type )
+function BroadcastTeam(Actor Sender, coerce string Msg, optional name type)
 {
-	BroadcastHandler.BroadcastTeam(Sender,Msg,Type);
+	BroadcastHandler.BroadcastTeam(Sender, Msg, type);
+	return;
 }
 
-/*
- Broadcast a localized message to all players.
- Most message deal with 0 to 2 related PRIs.
- The LocalMessage class defines how the PRI's and optional actor are used.
-*/
-event BroadcastLocalized( actor Sender, class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject )
+event BroadcastLocalized(Actor Sender, Class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
-	BroadcastHandler.AllowBroadcastLocalized(Sender,Message,Switch,RelatedPRI_1,RelatedPRI_2,OptionalObject);
+	BroadcastHandler.AllowBroadcastLocalized(Sender, Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject);
+	return;
 }
 
-//==========================================================================
-	
 function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 {
 	local Controller P;
 
-	if ( (GameRulesModifiers != None) && !GameRulesModifiers.CheckEndGame(Winner, Reason) )
-		return false;
+	P = Level.ControllerList;
+	J0x14:
 
-	// all player cameras focus on winner or final scene (picked by gamerules)
-	for ( P=Level.ControllerList; P!=None; P=P.NextController )
+	// End:0x55 [Loop If]
+	if(__NFUN_119__(P, none))
 	{
 		P.ClientGameEnded();
-		P.GotoState('GameEnded');
-	}	
+		P.__NFUN_113__('GameEnded');
+		P = P.nextController;
+		// [Loop Continue]
+		goto J0x14;
+	}
 	return true;
+	return;
 }
 
-/* End of game.
-*/
-function EndGame( PlayerReplicationInfo Winner, string Reason )
+function EndGame(PlayerReplicationInfo Winner, string Reason)
 {
-	// don't end game if not really ready
-	if ( !CheckEndGame(Winner, Reason) )
+	// End:0x1F
+	if(__NFUN_129__(CheckEndGame(Winner, Reason)))
 	{
 		bOverTime = true;
 		return;
 	}
-
 	bGameEnded = true;
-	TriggerEvent('EndGame', self, None);
+	TriggerEvent('EndGame', self, none);
 	EndLogging(Reason);
+	return;
 }
 
 function EndLogging(string Reason)
 {
-	if ( StatLog == None )
+	// End:0x0D
+	if(__NFUN_114__(StatLog, none))
+	{
 		return;
+	}
 	StatLog.LogGameEnd(Reason);
 	StatLog.StopLog();
-	StatLog.Destroy();
-	StatLog = None;
+	StatLog.__NFUN_279__();
+	StatLog = none;
+	return;
 }
 
-/* Return the 'best' player start for this player to start from.
- */
-function NavigationPoint FindPlayerStart( Controller Player, optional byte InTeam, optional string incomingName )
+function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam, optional string incomingName)
 {
 	local NavigationPoint N, BestStart;
 	local Teleporter Tel;
 	local float BestRating, NewRating;
-	local byte Team;
 
-	// always pick StartSpot at start of match
-	if ( (Player != None) && (Player.StartSpot != None)
-		&& (bWaitingToStartMatch || ((Player.PlayerReplicationInfo != None) && Player.PlayerReplicationInfo.bWaitingPlayer))  )
+	// End:0x6E
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Player, none), __NFUN_119__(Player.StartSpot, none)), __NFUN_132__(bWaitingToStartMatch, __NFUN_130__(__NFUN_119__(Player.PlayerReplicationInfo, none), Player.PlayerReplicationInfo.bWaitingPlayer))))
 	{
 		return Player.StartSpot;
-	}	
-
-	if ( GameRulesModifiers != None )
-	{
-		N = GameRulesModifiers.FindPlayerStart(Player,InTeam,incomingName);
-		if ( N != None )
-		    return N;
 	}
-
-	// if incoming start is specified, then just use it
-	if( incomingName!="" )
-		foreach AllActors( class 'Teleporter', Tel )
-			if( string(Tel.Tag)~=incomingName )
+	// End:0xAD
+	if(__NFUN_123__(incomingName, ""))
+	{
+		// End:0xAC
+		foreach __NFUN_304__(Class'Engine.Teleporter', Tel)
+		{
+			// End:0xAB
+			if(__NFUN_124__(string(Tel.Tag), incomingName))
+			{				
 				return Tel;
-
-	// use InTeam if player doesn't have a team yet
-	if ( (Player != None) && (Player.PlayerReplicationInfo != None) )
-	{
-		if ( Player.PlayerReplicationInfo.Team != None )
-			Team = Player.PlayerReplicationInfo.Team.TeamIndex;
-		else
-			Team = 0;
+			}			
+		}		
 	}
-	else
-		Team = InTeam;
+	N = Level.NavigationPointList;
+	J0xC1:
 
-	for ( N=Level.NavigationPointList; N!=None; N=N.NextNavigationPoint )
+	// End:0x123 [Loop If]
+	if(__NFUN_119__(N, none))
 	{
-		NewRating = RatePlayerStart(N,InTeam,Player);
-		if ( NewRating > BestRating )
+		NewRating = RatePlayerStart(N, InTeam, Player);
+		// End:0x10C
+		if(__NFUN_177__(NewRating, BestRating))
 		{
 			BestRating = NewRating;
 			BestStart = N;
 		}
+		N = N.nextNavigationPoint;
+		// [Loop Continue]
+		goto J0xC1;
 	}
-	
-	if ( BestStart == None )
+	// End:0x1AE
+	if(__NFUN_114__(BestStart, none))
 	{
-		log("Warning - PATHS NOT DEFINED or NO PLAYERSTART");			
-		foreach AllActors( class 'NavigationPoint', N )
+		__NFUN_231__("Warning - PATHS NOT DEFINED or NO PLAYERSTART");
+		// End:0x1AD
+		foreach __NFUN_304__(Class'Engine.NavigationPoint', N)
 		{
-			NewRating = RatePlayerStart(N,0,Player);
-			if ( NewRating > BestRating )
+			NewRating = RatePlayerStart(N, 0, Player);
+			// End:0x1AC
+			if(__NFUN_177__(NewRating, BestRating))
 			{
 				BestRating = NewRating;
-				BestStart = N;	
-			}
-		}
+				BestStart = N;
+			}			
+		}		
 	}
-
 	return BestStart;
+	return;
 }
 
-/* Rate whether player should choose this NavigationPoint as its start
-default implementation is for single player game
-*/
 function float RatePlayerStart(NavigationPoint N, byte Team, Controller Player)
 {
 	local PlayerStart P;
 
 	P = PlayerStart(N);
-	if ( P != None )
+	// End:0x51
+	if(__NFUN_119__(P, none))
 	{
-		if ( P.bSinglePlayerStart )
+		// End:0x4B
+		if(P.bSinglePlayerStart)
 		{
-			if ( P.bEnabled )
-				return 1000;
-			return 20;
+			// End:0x45
+			if(P.bEnabled)
+			{
+				return 1000.0000000;
+			}
+			return 20.0000000;
 		}
-		return 10;
+		return 10.0000000;
 	}
-	return 0;
-}
-
-function ScoreObjective(PlayerReplicationInfo Scorer, Int Score)
-{
-	if ( Scorer != None )
-	{
-		Scorer.Score += Score;
-		if ( Scorer.Team != None )
-			Scorer.Team.Score += Score;
-	}
-	if ( GameRulesModifiers != None )
-		GameRulesModifiers.ScoreObjective(Scorer,Score);
-
-	CheckScore(Scorer);
-}
-
-/* CheckScore()
-see if this score means the game ends
-*/
-function CheckScore(PlayerReplicationInfo Scorer)
-{
-	if ( (GameRulesModifiers != None) && GameRulesModifiers.CheckScore(Scorer) )
-		return;
-} 
-	
-function ScoreKill(Controller Killer, Controller Other)
-{
-	if( (killer == Other) || (killer == None) )
-		Other.PlayerReplicationInfo.Score -= 1;
-	else if ( killer.PlayerReplicationInfo != None )
-		killer.PlayerReplicationInfo.Score += 1;
-
-	if ( GameRulesModifiers != None )
-		GameRulesModifiers.ScoreKill(Killer, Other);
-
-	CheckScore(Killer.PlayerReplicationInfo);
+	return 0.0000000;
+	return;
 }
 
 function bool TooManyBots()
 {
 	return false;
+	return;
 }
 
-function INT MPSelectOperativeFace(bool bIsFemale)
+function int MPSelectOperativeFace(bool bIsFemale)
 {
 	return -1;
+	return;
 }
 
 // weather we should be compiling the stats for in game stats page
-function SetCompilingStats(BOOL bStatsSetting)
+function SetCompilingStats(bool bStatsSetting)
 {
-    m_bCompilingStats = bStatsSetting;
+	m_bCompilingStats = bStatsSetting;
+	return;
 }
 
-function SetRoundRestartedByJoinFlag(BOOL bRestartableByJoin)
+function SetRoundRestartedByJoinFlag(bool bRestartableByJoin)
 {
-    GameReplicationInfo.m_bRestartableByJoin = bRestartableByJoin;
+	GameReplicationInfo.m_bRestartableByJoin = bRestartableByJoin;
+	return;
 }
-
-//R6CODE+
-//R6CODE-
 
 defaultproperties
 {
-     Difficulty=3
-     MaxSpectators=2
-     MaxPlayers=16
-     bRestartLevel=True
-     bPauseable=True
-     bCanChangeSkin=True
-     bCanViewOthers=True
-     bWaitingToStartMatch=True
-     bLocalLog=True
-     bWorldLog=True
-     m_bCompilingStats=True
-     GameSpeed=1.000000
-     DeathMessageClass=Class'Engine.LocalMessage'
-     GameMessageClass=Class'Engine.GameMessage'
-     GameReplicationInfoClass=Class'Engine.GameReplicationInfo'
-     StatLogClass=Class'Engine.StatLogFile'
-     HUDType="Engine.HUD"
-     DefaultPlayerName="Player"
-     GameName="Game"
-     MutatorClass="Engine.Mutator"
-     AccessControlClass="Engine.AccessControl"
-     BroadcastHandlerClass="R6Game.R6BroadcastHandler"
-     PlayerControllerClassName="Engine.PlayerController"
-     m_szGameTypeFlag="RGM_AllMode"
+	Difficulty=3
+	MaxSpectators=2
+	MaxPlayers=16
+	bRestartLevel=true
+	bPauseable=true
+	bCanChangeSkin=true
+	bCanViewOthers=true
+	bWaitingToStartMatch=true
+	bLocalLog=true
+	bWorldLog=true
+	m_bCompilingStats=true
+	GameSpeed=1.0000000
+	DeathMessageClass=Class'Engine.LocalMessage'
+	GameMessageClass=Class'Engine.GameMessage'
+	GameReplicationInfoClass=Class'Engine.GameReplicationInfo'
+	StatLogClass=Class'Engine.StatLogFile'
+	HUDType="Engine.HUD"
+	DefaultPlayerName="Player"
+	GameName="Game"
+	AccessControlClass="Engine.AccessControl"
+	BroadcastHandlerClass="R6Game.R6BroadcastHandler"
+	PlayerControllerClassName="Engine.PlayerController"
+	m_szGameTypeFlag="RGM_AllMode"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var bTeamGame
+// REMOVED IN 1.60: var MutatorClass
+// REMOVED IN 1.60: var BaseMutator
+// REMOVED IN 1.60: var GameRulesModifiers
+// REMOVED IN 1.60: var m_bLadderStats
+// REMOVED IN 1.60: function ToggleRestart
+// REMOVED IN 1.60: function GetRules
+// REMOVED IN 1.60: function SendStartMessage
+// REMOVED IN 1.60: function AddDefaultInventory
+// REMOVED IN 1.60: function NotifyKilled
+// REMOVED IN 1.60: function Killed
+// REMOVED IN 1.60: function PreventDeath
+// REMOVED IN 1.60: function BroadcastDeathMessage
+// REMOVED IN 1.60: function Kick
+// REMOVED IN 1.60: function IsOnTeam
+// REMOVED IN 1.60: function ReduceDamage
+// REMOVED IN 1.60: function ChangeTeam
+// REMOVED IN 1.60: function PickTeam
+// REMOVED IN 1.60: function ScoreObjective
+// REMOVED IN 1.60: function CheckScore
+// REMOVED IN 1.60: function ScoreKill

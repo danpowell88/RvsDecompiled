@@ -1,22 +1,32 @@
+//=============================================================================
+// UWindowHotkeyWindowList - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowHotkeyWindowList extends UWindowList;
 
-
-var UWindowWindow		Window;
-
+var UWindowWindow Window;
 
 function UWindowHotkeyWindowList FindWindow(UWindowWindow W)
 {
-	local UWindowHotkeyWindowList l;
+	local UWindowHotkeyWindowList L;
 
-	l = UWindowHotkeyWindowList(Next);
-	while(l != None) 
+	L = UWindowHotkeyWindowList(Next);
+	J0x10:
+
+	// End:0x55 [Loop If]
+	if(__NFUN_119__(L, none))
 	{
-		if(l.Window == W) return l;
-		l = UWindowHotkeyWindowList(l.Next);
+		// End:0x39
+		if(__NFUN_114__(L.Window, W))
+		{
+			return L;
+		}
+		L = UWindowHotkeyWindowList(L.Next);
+		// [Loop Continue]
+		goto J0x10;
 	}
-	return None;
+	return none;
+	return;
 }
 
-defaultproperties
-{
-}

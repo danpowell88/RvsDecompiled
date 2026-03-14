@@ -1,394 +1,474 @@
 //=============================================================================
+// TestInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // For internal testing.
 //=============================================================================
-class TestInfo extends Info;
+class TestInfo extends Info
+	notplaceable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
+const Pie = 3.14;
+const Str = "Tim";
+const Lotus = vect(1,2,3);
+
+struct STest
+{
+	var bool b1;
+	var int i;
+	var bool b2;
+	var bool b3;
+};
+
+var() int xnum;
+var int MyArray[2];
 var() bool bTrue1;
 var() bool bFalse1;
 var() bool bTrue2;
 var() bool bFalse2;
 var bool bBool1;
 var bool bBool2;
-var() int xnum;
 var float ppp;
+var Vector v1;
+// NEW IN 1.60
+var Vector v2;
+// NEW IN 1.60
+var STest ST;
 var string sxx;
-var int MyArray[2];
-var vector v1,v2;
 var string TestRepStr;
-//var string[32] teststring;
-
-const Pie=3.14;
-const Str="Tim";
-const Lotus=vect(1,2,3);
-
-var struct STest
-{
-	var bool b1;
-	var int i;
-	var bool b2;
-	var bool b3;
-} ST;
 
 function TestQ()
 {
-	local vector v;
-	v.x = 2;
-	v.y = 3;
-	v.z = 4;
-	assert(v==vect(2,3,4));
-	assert(v.z==4);
-	assert(v.y==3);
-	assert(v.x==2);
+	local Vector V;
+
+	V.X = 2.0000000;
+	V.Y = 3.0000000;
+	V.Z = 4.0000000;
+	assert(__NFUN_217__(V, vect(2.0000000, 3.0000000, 4.0000000)));
+	assert(__NFUN_180__(V.Z, float(4)));
+	assert(__NFUN_180__(V.Y, float(3)));
+	assert(__NFUN_180__(V.X, float(2)));
+	return;
 }
 
 static function test()
 {
-	class'testinfo'.default.v1 = vect(1,2,3);
+	Class'Engine.TestInfo'.default.v1 = vect(1.0000000, 2.0000000, 3.0000000);
+	return;
 }
 
 function PostBeginPlay()
 {
-	local object o;
-	local actor TempActor;
-	log("!!BEGIN");
+	local Object o;
+	local Actor TempActor;
 
-	default.v1=vect(5,4,3);
-	assert(default.v1==vect(5,4,3));
+	__NFUN_231__("!!BEGIN");
+	default.v1 = vect(5.0000000, 4.0000000, 3.0000000);
+	assert(__NFUN_217__(default.v1, vect(5.0000000, 4.0000000, 3.0000000)));
 	test();
-	assert(default.v1==vect(1,2,3));
-
-	assert(IsA('Actor'));
-	assert(IsA('TestInfo'));
-	assert(IsA('Info'));
-	assert(!IsA('LevelInfo'));
-	assert(!IsA('Texture'));
-	//o=dynamicloadobject( "UnrealShare.AutoMag.Reload", class'object' );
-	//assert(o!=None);
-	//assert(o==None);
-	log("!!END");
+	assert(__NFUN_217__(default.v1, vect(1.0000000, 2.0000000, 3.0000000)));
+	assert(__NFUN_303__('Actor'));
+	assert(__NFUN_303__('TestInfo'));
+	assert(__NFUN_303__('Info'));
+	assert(__NFUN_129__(__NFUN_303__('LevelInfo')));
+	assert(__NFUN_129__(__NFUN_303__('Texture')));
+	__NFUN_231__("!!END");
+	return;
 }
 
 function TestStructBools()
 {
-	assert(ST.b1==false);
-	assert(ST.b2==false);
-	assert(ST.b3==false);
-
-	ST.b1=true;
-	assert(ST.b1==true);
-	assert(ST.b2==false);
-	assert(ST.b3==false);
-
-	ST.b2=true;
-	assert(ST.b1==true);
-	assert(ST.b2==true);
-	assert(ST.b3==false);
-
-	ST.b3=true;
-	assert(ST.b1==true);
-	assert(ST.b2==true);
-	assert(ST.b3==true);
-
-	ST.b1=false;
-	ST.b2=false;
-	ST.b3=false;
+	assert(__NFUN_242__(ST.b1, false));
+	assert(__NFUN_242__(ST.b2, false));
+	assert(__NFUN_242__(ST.b3, false));
+	ST.b1 = true;
+	assert(__NFUN_242__(ST.b1, true));
+	assert(__NFUN_242__(ST.b2, false));
+	assert(__NFUN_242__(ST.b3, false));
+	ST.b2 = true;
+	assert(__NFUN_242__(ST.b1, true));
+	assert(__NFUN_242__(ST.b2, true));
+	assert(__NFUN_242__(ST.b3, false));
+	ST.b3 = true;
+	assert(__NFUN_242__(ST.b1, true));
+	assert(__NFUN_242__(ST.b2, true));
+	assert(__NFUN_242__(ST.b3, true));
+	ST.b1 = false;
+	ST.b2 = false;
+	ST.b3 = false;
+	return;
 }
 
 function BeginPlay()
 {
-	local testobj to;
-	local object oo;
-	to = new class'TestObj';
-	to = new()class'TestObj';
-	to = new(self)class'TestObj';
-	to = new(self,"")class'TestObj';
-	to = new(self,"",0)class'TestObj';
-	to.Test();
+	local TestObj to;
+	local Object oo;
+
+	to = new Class'Engine.TestObj';
+	to = new Class'Engine.TestObj';
+	to = new (self) Class'Engine.TestObj';
+	to = new (self, "") Class'Engine.TestObj';
+	to = new (self, "", 0) Class'Engine.TestObj';
+	to.test();
 	TestStructBools();
+	return;
 }
 
-function TestX( bool bResource )
+function TestX(bool bResource)
 {
-	local int n;
-	n = int(bResource);
-	MyArray[ int(bResource) ] = 0;
-	MyArray[ int(bResource) ]++;
+	local int N;
+
+	N = int(bResource);
+	MyArray[int(bResource)] = 0;
+	__NFUN_165__(MyArray[int(bResource)]);
+	return;
 }
 
 function bool RecurseTest()
 {
-	bBool1=true;
+	bBool1 = true;
 	return false;
+	return;
 }
 
-function TestLimitor( class c )
+function TestLimitor(Class C)
 {
-	local class<actor> NewClass;
-	NewClass = class<actor>( c );
+	local Class<Actor> NewClass;
+
+	NewClass = Class<Actor>(C);
+	return;
 }
 
-static function int OtherStatic( int i )
+static function int OtherStatic(int i)
 {
-	assert(i==246);
-	assert(default.xnum==777);
+	assert(__NFUN_154__(i, 246));
+	assert(__NFUN_154__(default.xnum, 777));
 	return 555;
+	return;
 }
 
-static function int TestStatic( int i )
+static function int TestStatic(int i)
 {
-	assert(i==123);
-	assert(default.xnum==777);
-	assert(OtherStatic(i*2)==555);
+	assert(__NFUN_154__(i, 123));
+	assert(__NFUN_154__(default.xnum, 777));
+	assert(__NFUN_154__(OtherStatic(__NFUN_144__(i, 2)), 555));
 	return i;
+	return;
 }
 
 function TestContinueFor()
 {
 	local int i;
-	log("TestContinue");
-	for( i=0; i<20; i++ )
+
+	__NFUN_231__("TestContinue");
+	i = 0;
+	J0x17:
+
+	// End:0x76 [Loop If]
+	if(__NFUN_150__(i, 20))
 	{
-		log("iteration "$i);
-		if(i==7||i==9||i==19)
-			continue;
-		log("...");
+		__NFUN_231__(__NFUN_112__("iteration ", string(i)));
+		// End:0x65
+		if(__NFUN_132__(__NFUN_132__(__NFUN_154__(i, 7), __NFUN_154__(i, 9)), __NFUN_154__(i, 19)))
+		{
+			// [Explicit Continue]
+			goto J0x6C;
+		}
+		__NFUN_231__("...");
+		J0x6C:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x17;
 	}
-	log("DoneContinue");
+	__NFUN_231__("DoneContinue");
+	return;
 }
 
 function TestContinueWhile()
 {
 	local int i;
-	log("TestContinue");
-	while( ++i <= 20 )
+
+	__NFUN_231__("TestContinue");
+	J0x10:
+
+	// End:0x5C [Loop If]
+	if(__NFUN_152__(__NFUN_163__(i), 20))
 	{
-		log("iteration "$i);
-		if(i==7||i==9)
-			continue;
-		log("...");
+		__NFUN_231__(__NFUN_112__("iteration ", string(i)));
+		// End:0x52
+		if(__NFUN_132__(__NFUN_154__(i, 7), __NFUN_154__(i, 9)))
+		{			
+		}
+		else
+		{
+			__NFUN_231__("...");
+		}
+		// [Loop Continue]
+		goto J0x10;
 	}
-	log("DoneContinue");
+	__NFUN_231__("DoneContinue");
+	return;
 }
 
 function TestContinueDoUntil()
 {
 	local int i;
-	log("TestContinue");
-	do
+
+	__NFUN_231__("TestContinue");
+	J0x10:
+
+	__NFUN_165__(i);
+	__NFUN_231__(__NFUN_112__("iteration ", string(i)));
+	// End:0x59
+	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(i, 7), __NFUN_154__(i, 9)), __NFUN_151__(i, 18)))
+	{		
+	}
+	else
 	{
-		i++;
-		log("iteration "$i);
-		if(i==7||i==9||i>18)
-			continue;
-		log("...");
-	} until( i>20 );
-	log("DoneContinue");
+		__NFUN_231__("...");
+	}
+	// End:0x10
+	if(!(__NFUN_151__(i, 20)))
+		goto J0x10;
+	__NFUN_231__("DoneContinue");
+	return;
 }
 
 function TestContinueForEach()
 {
-	local actor a;
-	log("TestContinue");
-	foreach AllActors( class'Actor', a )
+	local Actor A;
+
+	__NFUN_231__("TestContinue");
+	// End:0x4F
+	foreach __NFUN_304__(Class'Engine.Actor', A)
 	{
-		log("actor "$a);
-		if(light(a)==none)
-			continue;
-		log("...");
-	}
-	log("DoneContinue");
+		__NFUN_231__(__NFUN_112__("actor ", string(A)));
+		// End:0x47
+		if(__NFUN_114__(Light(A), none))
+		{
+			continue;			
+		}
+		__NFUN_231__("...");		
+	}	
+	__NFUN_231__("DoneContinue");
+	return;
 }
 
-
-function SubTestOptionalOut( optional out int a, optional out int b, optional out int c )
+function SubTestOptionalOut(optional out int A, optional out int B, optional out int C)
 {
-	a *= 2;
-	b = b*2;
-	c += c;
+	__NFUN_159__(A, float(2));
+	B = __NFUN_144__(B, 2);
+	__NFUN_161__(C, C);
+	return;
 }
+
 function TestOptionalOut()
 {
-	local int a,b,c;
-	a=1; b=2; c=3;
+	local int A, B, C;
 
-	SubTestOptionalOut(a,b,c);
-	assert(a==2); assert(b==4); assert(c==6);
-
-	SubTestOptionalOut(a,b);
-	assert(a==4); assert(b==8); assert(c==6);
-
-	SubTestOptionalOut(,b,c);
-	assert(a==4); assert(b==16); assert(c==12);
-
+	A = 1;
+	B = 2;
+	C = 3;
+	SubTestOptionalOut(A, B, C);
+	assert(__NFUN_154__(A, 2));
+	assert(__NFUN_154__(B, 4));
+	assert(__NFUN_154__(C, 6));
+	SubTestOptionalOut(A, B);
+	assert(__NFUN_154__(A, 4));
+	assert(__NFUN_154__(B, 8));
+	assert(__NFUN_154__(C, 6));
+	SubTestOptionalOut(, B, C);
+	assert(__NFUN_154__(A, 4));
+	assert(__NFUN_154__(B, 16));
+	assert(__NFUN_154__(C, 12));
 	SubTestOptionalOut();
-	assert(a==4); assert(b==16); assert(c==12);
-
-	SubTestOptionalOut(a,b,c);
-	assert(a==8); assert(b==32); assert(c==24);
-
-	log("TestOptionalOut ok!");
+	assert(__NFUN_154__(A, 4));
+	assert(__NFUN_154__(B, 16));
+	assert(__NFUN_154__(C, 12));
+	SubTestOptionalOut(A, B, C);
+	assert(__NFUN_154__(A, 8));
+	assert(__NFUN_154__(B, 32));
+	assert(__NFUN_154__(C, 24));
+	__NFUN_231__("TestOptionalOut ok!");
+	return;
 }
 
-function TestNullContext( actor a )
+function TestNullContext(Actor A)
 {
-	bHidden = a.bHidden;
-	a.bHidden = bHidden;
+	bHidden = A.bHidden;
+	A.bHidden = bHidden;
+	return;
 }
 
 function TestSwitch()
 {
-	local string s;
+	local string S;
 	local int i;
-	local bool b;
-	s="Tim";
-	i=2;
-	switch( i )
+	local bool B;
+
+	S = "Tim";
+	i = 2;
+	switch(i)
 	{
+		// End:0x25
 		case 0:
 			assert(false);
+			// End:0x3F
 			break;
+		// End:0x35
 		case 2:
-			b=true;
+			B = true;
+			// End:0x3F
 			break;
+		// End:0xFFFF
 		default:
 			assert(false);
+			// End:0x3F
+			break;
 			break;
 	}
-	assert(b);
-	switch( s )
+	assert(B);
+	switch(S)
 	{
+		// End:0x5B
 		case "":
 			assert(false);
+			// End:0x7A
 			break;
+		// End:0x6C
 		case "xyzzy":
 			assert(false);
+			// End:0x7A
 			break;
+		// End:0xFFFF
 		default:
-			b=false;
+			B = false;
+			// End:0x7A
+			break;
 			break;
 	}
-	assert(!b);
-	log("testswitch succeeded");
+	assert(__NFUN_129__(B));
+	__NFUN_231__("testswitch succeeded");
+	return;
 }
 
-function Tick( float DeltaTime )
+function Tick(float DeltaTime)
 {
-	local class C;
-	local class<testinfo> TC;
-	local actor a;
+	local Class C;
+	local Class<TestInfo> TC;
+	local Actor A;
 
-	log("time="$Level.TimeSeconds);
-
+	__NFUN_231__(__NFUN_112__("time=", string(Level.TimeSeconds)));
 	TestOptionalOut();
-	TestNullContext( self );
-	TestNullContext( None );
+	TestNullContext(self);
+	TestNullContext(none);
 	TestSwitch();
-
-	v1=vect(1,2,3);
-	v2=vect(2,4,6);
-	assert(v1!=v2);
-	assert(!(v1==v2));
-	assert(v1==vect(1,2,3));
-	assert(v2==vect(2,4,6));
-	assert(vect(1,2,5)!=v1);
-	assert(v1*2==v2);
-	assert(v1==v2/2);
-
-	assert(Pie==3.14);
-	assert(Pie!=2);
-	assert(Str=="Tim");
-	assert(Str!="Bob");
-	assert(Lotus==vect(1,2,3));
-
-	assert(GetPropertyText("sxx")=="Tim");
-	assert(GetPropertyText("ppp")!="123");
-	assert(GetPropertyText("bogus")=="");
-	xnum=345;
-	assert(GetPropertyText("xnum")=="345");
-	SetPropertyText("xnum","999");
-	assert(xnum==999);
-	assert(xnum!=666);
-
-	assert(bTrue1==true);
-	assert(bFalse1==false);
-	assert(bTrue2==true);
-	assert(bFalse2==false);
-
-	assert(default.bTrue1==true);
-	assert(default.bFalse1==false);
-	assert(default.bTrue2==true);
-	assert(default.bFalse2==false);
-
-	assert(class'TestInfo'.default.bTrue1==true);
-	assert(class'TestInfo'.default.bFalse1==false);
-	assert(class'TestInfo'.default.bTrue2==true);
-	assert(class'TestInfo'.default.bFalse2==false);
-
-	TC=Class;
-	assert(TC.default.bTrue1==true);
-	assert(TC.default.bFalse1==false);
-	assert(TC.default.bTrue2==true);
-	assert(TC.default.bFalse2==false);
-
-	C=Class;
-	assert(class<testinfo>(C).default.bTrue1==true);
-	assert(class<testinfo>(C).default.bFalse1==false);
-	assert(class<testinfo>(C).default.bTrue2==true);
-	assert(class<testinfo>(C).default.bFalse2==false);
-
-	assert(default.xnum==777);
+	v1 = vect(1.0000000, 2.0000000, 3.0000000);
+	v2 = vect(2.0000000, 4.0000000, 6.0000000);
+	assert(__NFUN_218__(v1, v2));
+	assert(__NFUN_129__(__NFUN_217__(v1, v2)));
+	assert(__NFUN_217__(v1, vect(1.0000000, 2.0000000, 3.0000000)));
+	assert(__NFUN_217__(v2, vect(2.0000000, 4.0000000, 6.0000000)));
+	assert(__NFUN_218__(vect(1.0000000, 2.0000000, 5.0000000), v1));
+	assert(__NFUN_217__(__NFUN_212__(v1, float(2)), v2));
+	assert(__NFUN_217__(v1, __NFUN_214__(v2, float(2))));
+	assert(__NFUN_180__(3.1400000, 3.1400000));
+	assert(__NFUN_181__(3.1400000, float(2)));
+	assert(__NFUN_122__("Tim", "Tim"));
+	assert(__NFUN_123__("Tim", "Bob"));
+	assert(__NFUN_217__(vect(1.0000000, 2.0000000, 3.0000000), vect(1.0000000, 2.0000000, 3.0000000)));
+	assert(__NFUN_122__(GetPropertyText("sxx"), "Tim"));
+	assert(__NFUN_123__(GetPropertyText("ppp"), "123"));
+	assert(__NFUN_122__(GetPropertyText("bogus"), ""));
+	xnum = 345;
+	assert(__NFUN_122__(GetPropertyText("xnum"), "345"));
+	SetPropertyText("xnum", "999");
+	assert(__NFUN_154__(xnum, 999));
+	assert(__NFUN_155__(xnum, 666));
+	assert(__NFUN_242__(bTrue1, true));
+	assert(__NFUN_242__(bFalse1, false));
+	assert(__NFUN_242__(bTrue2, true));
+	assert(__NFUN_242__(bFalse2, false));
+	assert(__NFUN_242__(default.bTrue1, true));
+	assert(__NFUN_242__(default.bFalse1, false));
+	assert(__NFUN_242__(default.bTrue2, true));
+	assert(__NFUN_242__(default.bFalse2, false));
+	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bTrue1, true));
+	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bFalse1, false));
+	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bTrue2, true));
+	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bFalse2, false));
+	TC = Class;
+	assert(__NFUN_242__(TC.default.bTrue1, true));
+	assert(__NFUN_242__(TC.default.bFalse1, false));
+	assert(__NFUN_242__(TC.default.bTrue2, true));
+	assert(__NFUN_242__(TC.default.bFalse2, false));
+	C = Class;
+	assert(__NFUN_242__(Class<TestInfo>(C).default.bTrue1, true));
+	assert(__NFUN_242__(Class<TestInfo>(C).default.bFalse1, false));
+	assert(__NFUN_242__(Class<TestInfo>(C).default.bTrue2, true));
+	assert(__NFUN_242__(Class<TestInfo>(C).default.bFalse2, false));
+	assert(__NFUN_154__(default.xnum, 777));
 	TestStatic(123);
 	TC.static.TestStatic(123);
-	class<testinfo>(C).static.TestStatic(123);
-
-	bBool2=RecurseTest();
-	assert(bBool2==false);
-
+	Class<TestInfo>(C).static.TestStatic(123);
+	bBool2 = RecurseTest();
+	assert(__NFUN_242__(bBool2, false));
 	TestStructBools();
 	TestQ();
-
-	log( "All tests passed" );
+	__NFUN_231__("All tests passed");
+	return;
 }
 
-function f();
+function f()
+{
+	return;
+}
 
 function temp()
 {
 	local int i;
-	local playercontroller PlayerOwner;
+	local PlayerController PlayerOwner;
 	local name LeftList[20];
+
 	temp();
+	return;
 }
 
 state AA
-{
-	function f();
+{	stop;
 }
+
 state BB
-{
-	function f();
+{	stop;
 }
+
 state CCAA extends AA
-{
-	function f();
+{	stop;
 }
+
 state DDAA extends AA
-{
-	function f();
+{	stop;
 }
+
 state EEDDAA extends DDAA
-{
-	function f();
+{	stop;
 }
 
 defaultproperties
 {
-     xnum=777
-     bTrue1=True
-     bTrue2=True
-     ppp=3.140000
-     sxx="Tim"
-     RemoteRole=ROLE_SimulatedProxy
-     bHidden=False
-     bAlwaysRelevant=True
+	xnum=777
+	bTrue1=true
+	bTrue2=true
+	ppp=3.1400000
+	sxx="Tim"
+	RemoteRole=2
+	bHidden=false
+	bAlwaysRelevant=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var STest

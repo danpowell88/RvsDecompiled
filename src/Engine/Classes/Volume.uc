@@ -1,4 +1,10 @@
 //=============================================================================
+// Volume - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Volume:  a bounding volume
 // touch() and untouch() notifications to the volume as actors enter or leave it
 // enteredvolume() and leftvolume() notifications when center of actor enters the volume
@@ -6,62 +12,80 @@
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class Volume extends Brush
-	native;
+	native
+ notplaceable;
 
-var Actor AssociatedActor;			// this actor gets touch() and untouch notifications as the volume is entered or left
-var() name AssociatedActorTag;		// Used by L.D. to specify tag of associated actor
 var() int LocationPriority;
+var Actor AssociatedActor;  // this actor gets touch() and untouch notifications as the volume is entered or left
+var() edfindable DecorationList DecoList;  // A list of decorations to be spawned inside the volume when the level starts
+var() name AssociatedActorTag;  // Used by L.D. to specify tag of associated actor
 var() localized string LocationName;
-var() edfindable decorationlist DecoList;		// A list of decorations to be spawned inside the volume when the level starts
 
-native function bool Encompasses(Actor Other); // returns true if center of actor is within volume
+// Export UVolume::execEncompasses(FFrame&, void* const)
+ native function bool Encompasses(Actor Other);
 
 function PostBeginPlay()
 {
-	Super.PostBeginPlay();
-
-	if ( (AssociatedActorTag != '') && (AssociatedActorTag != 'None') )
-		ForEach AllActors(class'Actor',AssociatedActor, AssociatedActorTag)
-			break;
-	if ( AssociatedActor != None )
+	super(Actor).PostBeginPlay();
+	// End:0x40
+	if(__NFUN_130__(__NFUN_255__(AssociatedActorTag, 'None'), __NFUN_255__(AssociatedActorTag, 'None')))
 	{
-		GotoState('AssociatedTouch');
-		InitialState = GetStateName();
+		// End:0x3F
+		foreach __NFUN_304__(Class'Engine.Actor', AssociatedActor, AssociatedActorTag)
+		{
+			// End:0x3F
+			break;			
+		}		
 	}
+	// End:0x5B
+	if(__NFUN_119__(AssociatedActor, none))
+	{
+		__NFUN_113__('AssociatedTouch');
+		InitialState = __NFUN_284__();
+	}
+	return;
 }
-	
+
 function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
-	Super.DisplayDebug(Canvas,YL,YPos);
-	Canvas.DrawText("AssociatedActor "$AssociatedActor, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
+	super(Actor).DisplayDebug(Canvas, YL, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__("AssociatedActor ", string(AssociatedActor)), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	return;
 }
 
-State AssociatedTouch
+state AssociatedTouch
 {
-	event touch( Actor Other )
+	event Touch(Actor Other)
 	{
-		AssociatedActor.touch(Other);
+		AssociatedActor.Touch(Other);
+		return;
 	}
 
-	event untouch( Actor Other )
+	event UnTouch(Actor Other)
 	{
-		AssociatedActor.untouch(Other);
+		AssociatedActor.UnTouch(Other);
+		return;
 	}
 
 	function BeginState()
 	{
 		local Actor A;
 
-		ForEach TouchingActors(class'Actor', A)
-			Touch(A);
+		// End:0x1C
+		foreach __NFUN_307__(Class'Engine.Actor', A)
+		{
+			Touch(A);			
+		}		
+		return;
 	}
+	stop;
 }
 
 defaultproperties
 {
-     LocationName="unspecified"
-     bSkipActorPropertyReplication=True
-     bCollideActors=True
+	LocationName="unspecified"
+	bSkipActorPropertyReplication=true
+	bCollideActors=true
 }

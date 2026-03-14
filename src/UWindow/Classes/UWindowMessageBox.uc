@@ -1,67 +1,76 @@
+//=============================================================================
+// UWindowMessageBox - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowMessageBox extends UWindowFramedWindow;
 
-var MessageBoxResult Result;
-var float TimeOutTime;
+var UWindowBase.MessageBoxResult Result;
 var int TimeOut;
-var bool bSetupSize;
 var int FrameCount;
+var bool bSetupSize;
+var float TimeOutTime;
 
-function SetupMessageBox(string Title, string Message, MessageBoxButtons Buttons, MessageBoxResult InESCResult, optional MessageBoxResult InEnterResult, optional int InTimeOut)
+function SetupMessageBox(string Title, string Message, UWindowBase.MessageBoxButtons Buttons, UWindowBase.MessageBoxResult InESCResult, optional UWindowBase.MessageBoxResult InEnterResult, optional int InTimeOut)
 {
 	WindowTitle = Title;
 	UWindowMessageBoxCW(ClientArea).SetupMessageBoxClient(Message, Buttons, InEnterResult);
 	Result = InESCResult;
-	TimeOutTime = 0;
+	TimeOutTime = 0.0000000;
 	TimeOut = InTimeOut;
 	FrameCount = 0;
+	return;
 }
 
 function BeforePaint(Canvas C, float X, float Y)
 {
 	local Region R;
 
-	if(!bSetupSize)
+	// End:0xBC
+	if(__NFUN_129__(bSetupSize))
 	{
-		SetSize(200, WinHeight);		
-		R = LookAndFeel.FW_GetClientArea(Self);
-		SetSize(200, (WinHeight - R.H) + UWindowMessageBoxCW(ClientArea).GetHeight(C));
-		WinLeft = int((Root.WinWidth - WinWidth) / 2);
-		WinTop = int((Root.WinHeight - WinHeight) / 2);
-		bSetupSize = True;
+		SetSize(200.0000000, WinHeight);
+		R = LookAndFeel.FW_GetClientArea(self);
+		SetSize(200.0000000, __NFUN_174__(__NFUN_175__(WinHeight, float(R.H)), UWindowMessageBoxCW(ClientArea).GetHeight(C)));
+		WinLeft = float(int(__NFUN_172__(__NFUN_175__(Root.WinWidth, WinWidth), float(2))));
+		WinTop = float(int(__NFUN_172__(__NFUN_175__(Root.WinHeight, WinHeight), float(2))));
+		bSetupSize = true;
 	}
-
-	Super.BeforePaint(C, X, Y);
+	super.BeforePaint(C, X, Y);
+	return;
 }
 
 function AfterPaint(Canvas C, float X, float Y)
 {
-	Super.AfterPaint(C, X, Y);
-
-	if(TimeOut != 0)
+	super(UWindowWindow).AfterPaint(C, X, Y);
+	// End:0x58
+	if(__NFUN_155__(TimeOut, 0))
 	{
-		FrameCount++;
-		
-		if(FrameCount >= 5)
+		__NFUN_165__(FrameCount);
+		// End:0x58
+		if(__NFUN_153__(FrameCount, 5))
 		{
-			TimeOutTime = GetEntryLevel().TimeSeconds + TimeOut;
+			TimeOutTime = __NFUN_174__(GetEntryLevel().TimeSeconds, float(TimeOut));
 			TimeOut = 0;
 		}
 	}
-
-	if(TimeOutTime != 0 && GetEntryLevel().TimeSeconds > TimeOutTime)
+	// End:0x91
+	if(__NFUN_130__(__NFUN_181__(TimeOutTime, float(0)), __NFUN_177__(GetEntryLevel().TimeSeconds, TimeOutTime)))
 	{
-		TimeOutTime = 0;
+		TimeOutTime = 0.0000000;
 		Close();
 	}
+	return;
 }
 
 function Close(optional bool bByParent)
 {
-	Super.Close(bByParent);
-	OwnerWindow.MessageBoxDone(Self, Result);
+	super(UWindowWindow).Close(bByParent);
+	OwnerWindow.MessageBoxDone(self, Result);
+	return;
 }
 
 defaultproperties
 {
-     ClientClass=Class'UWindow.UWindowMessageBoxCW'
+	ClientClass=Class'UWindow.UWindowMessageBoxCW'
 }

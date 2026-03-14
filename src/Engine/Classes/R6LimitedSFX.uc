@@ -1,3 +1,9 @@
+//=============================================================================
+// R6LimitedSFX - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6SFX 
 // Created By       Carl Lavoie
@@ -9,20 +15,23 @@
 //
 //============================================================================//
 class R6LimitedSFX extends R6SFX
-	abstract;
+	abstract
+ placeable;
 
 simulated function PostBeginPlay()
 {
-    if(Level.m_aLimitedSFX[Level.m_iLimitedSFXCount] != none)
-        Level.m_aLimitedSFX[Level.m_iLimitedSFXCount].Kill();
-
-    Level.m_aLimitedSFX[Level.m_iLimitedSFXCount] = self;
-
-    Level.m_iLimitedSFXCount++;
-    if(Level.m_iLimitedSFXCount == 6)
-        Level.m_iLimitedSFXCount = 0;
+	// End:0x4A
+	if(__NFUN_119__(Level.m_aLimitedSFX[Level.m_iLimitedSFXCount], none))
+	{
+		Level.m_aLimitedSFX[Level.m_iLimitedSFXCount].Kill();
+	}
+	Level.m_aLimitedSFX[Level.m_iLimitedSFXCount] = self;
+	__NFUN_165__(Level.m_iLimitedSFXCount);
+	// End:0x9E
+	if(__NFUN_154__(Level.m_iLimitedSFXCount, 6))
+	{
+		Level.m_iLimitedSFXCount = 0;
+	}
+	return;
 }
 
-defaultproperties
-{
-}

@@ -1,4 +1,10 @@
 //=============================================================================
+// UWindowListControl - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // UWindowListControl - Abstract class for list controls
 //	- List boxes
 //	- Dropdown Menus
@@ -6,111 +12,153 @@
 //=============================================================================
 class UWindowListControl extends UWindowDialogControl;
 
-var class<UWindowList>	ListClass;
-var UWindowList			Items;
+var UWindowList Items;
+var Class<UWindowList> ListClass;
 
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
-	// Declared in Subclass
+	return;
 }
 
 function Created()
 {
-	Super.Created();
-
-	Items = New ListClass;
+	super.Created();
+	Items = new ListClass;
 	Items.Last = Items;
-	Items.Next = None;	
-	Items.Prev = None;
+	Items.Next = none;
+	Items.Prev = none;
 	Items.Sentinel = Items;
+	return;
 }
 
-function UWindowList GetItemAtIndex( INT _iIndex)
+function UWindowList GetItemAtIndex(int _iIndex)
 {
 	local UWindowList CurItem;
-	local INT i;
+	local int i;
 
-	if (Items.Next == None)
+	// End:0x39
+	if(__NFUN_114__(Items.Next, none))
 	{
-		if (_iIndex == 0) 
-			return Items.Append(ListClass); // create the item
-		else
-			return None; // if the index is > 0 and you don't have an item, problem!!!
-	}
-
-	CurItem = Items.Next;
-	i =0;
-
-	while( CurItem != None)
-	{
-		if (i == _iIndex)
+		// End:0x37
+		if(__NFUN_154__(_iIndex, 0))
 		{
-			CurItem.m_bShowThisItem = true; // show the item 
-			break;
+			return Items.Append(ListClass);			
 		}
-
-		CurItem = CurItem.Next;
-		i++;
+		else
+		{
+			return none;
+		}
 	}
+	CurItem = Items.Next;
+	i = 0;
+	J0x54:
 
-	if ( CurItem == None)
-		return Items.Append(ListClass); // create the item
+	// End:0xA0 [Loop If]
+	if(__NFUN_119__(CurItem, none))
+	{
+		// End:0x82
+		if(__NFUN_154__(i, _iIndex))
+		{
+			CurItem.m_bShowThisItem = true;
+			// [Explicit Break]
+			goto J0xA0;
+		}
+		CurItem = CurItem.Next;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x54;
+	}
+	J0xA0:
+
+	// End:0xC3
+	if(__NFUN_114__(CurItem, none))
+	{
+		return Items.Append(ListClass);		
+	}
 	else
+	{
 		return CurItem;
+	}
+	return;
 }
 
-function UWindowList GetNextItem( INT _iIndex, UWindowList prevItem)
+function UWindowList GetNextItem(int _iIndex, UWindowList prevItem)
 {
 	local UWindowList CurItem;
-	local INT i;
+	local int i;
 
-	if (Items.Next == None)
+	// End:0x39
+	if(__NFUN_114__(Items.Next, none))
 	{
-		if (_iIndex == 0) 
-			return Items.Append(ListClass); // create the item
+		// End:0x37
+		if(__NFUN_154__(_iIndex, 0))
+		{
+			return Items.Append(ListClass);			
+		}
 		else
-			return None; // if the index is > 0 and you don't have an item, problem!!!
+		{
+			return none;
+		}
 	}
-
-	if (_iIndex == 0)
-		CurItem = Items.Next;
+	// End:0x5B
+	if(__NFUN_154__(_iIndex, 0))
+	{
+		CurItem = Items.Next;		
+	}
 	else
-		curItem = prevItem.Next;
-
-	if ( CurItem == None)
-		return Items.Append(ListClass); // create the item
-
-	CurItem.m_bShowThisItem = true; // show the item 
-
+	{
+		// End:0x7A
+		if(__NFUN_119__(prevItem, none))
+		{
+			CurItem = prevItem.Next;
+		}
+	}
+	// End:0x9A
+	if(__NFUN_114__(CurItem, none))
+	{
+		return Items.Append(ListClass);
+	}
+	CurItem.m_bShowThisItem = true;
 	return CurItem;
+	return;
 }
-
 
 function ClearListOfItems()
 {
 	local UWindowList CurItem;
-    local INT i, iListLength;
+	local int i, iListLength;
 
-	if (Items.Next == None)
+	// End:0x16
+	if(__NFUN_114__(Items.Next, none))
+	{
 		return;
-
+	}
 	CurItem = Items.Next;
 	iListLength = Items.Count();
+	i = 0;
+	J0x46:
 
-	for ( i = 0; i < iListLength; i++)
+	// End:0x93 [Loop If]
+	if(__NFUN_150__(i, iListLength))
 	{
-		if (CurItem != None)
+		// End:0x86
+		if(__NFUN_119__(CurItem, none))
 		{
-			CurItem.ClearItem(); // clear the item except the link with the list
+			CurItem.ClearItem();
 			CurItem = CurItem.Next;
+			// [Explicit Continue]
+			goto J0x89;
 		}
-		else
-		{
-			break;
-		}
+		// [Explicit Break]
+		goto J0x93;
+		J0x89:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x46;
 	}
+	J0x93:
+
+	return;
 }
 
-defaultproperties
-{
-}

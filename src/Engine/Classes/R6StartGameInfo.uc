@@ -1,3 +1,9 @@
+//=============================================================================
+// R6StartGameInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 /********************************************************************
 	created:	2001/06/19
 	filename: 	R6StartGameInfo.uc
@@ -11,35 +17,35 @@
 	Modification:
 
 *********************************************************************/
+class R6StartGameInfo extends Actor
+	native
+	config
+ notplaceable;
 
-class R6StartGameInfo extends actor
-    native;
-
-var  string  m_MapName;
-var     INT  m_DifficultyLevel;
-var     INT  m_CurrentMenu;
-var  string  m_GameMode;
-var    BOOL  m_SkipPlanningPhase; // Once the map is in memory, start directly whithout planning
-var    BOOL  m_ReloadPlanning;    // Once the map is in memory, load backup/backup.pln  
-var    BOOL  m_ReloadActionPointOnly; // when loading backup plan, do not load operatives 
-var     INT  m_iNbTerro;           // This is for terro hunt  
-
+var int m_DifficultyLevel;
+var int m_CurrentMenu;
+var int m_iNbTerro;  // This is for terro hunt
+var int m_iTeamStart;
+var bool m_SkipPlanningPhase;  // Once the map is in memory, start directly whithout planning
+var bool m_ReloadPlanning;  // Once the map is in memory, load backup/backup.pln
+var bool m_ReloadActionPointOnly;  // when loading backup plan, do not load operatives
+var bool m_bIsPlaying;
 var Object m_CurrentMission;
-
-var config R6TeamStartInfo  m_TeamInfo[3];
-var    BOOL m_bIsPlaying;
-var    INT  m_iTeamStart;
-//var             CustomMissionInfo;
+var config R6TeamStartInfo m_TeamInfo[3];
+var string m_MapName;
+var string m_GameMode;
 
 function Save()
 {
+	return;
 }
 
 function Load()
 {
+	return;
 }
 
 defaultproperties
 {
-     m_iNbTerro=35
+	m_iNbTerro=35
 }

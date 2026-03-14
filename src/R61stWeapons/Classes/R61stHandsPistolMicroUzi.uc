@@ -1,15 +1,18 @@
+//=============================================================================
+// R61stHandsPistolMicroUzi - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //===============================================================================
 //  [R61stHandsPistolMicroUzi] 
 //===============================================================================
-
 class R61stHandsPistolMicroUzi extends R61stHandsGripPistol;
 
 function PostBeginPlay()
 {
-    LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsPistolMicroUziA');
-    super.PostBeginPlay();
+	LinkSkelAnim(MeshAnimation'R61stPistol_UKX.R61stHandsPistolMicroUziA');
+	super.PostBeginPlay();
+	return;
 }
 
-defaultproperties
-{
-}

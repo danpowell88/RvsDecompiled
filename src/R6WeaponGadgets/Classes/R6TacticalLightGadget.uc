@@ -1,4 +1,10 @@
 //=============================================================================
+// R6TacticalLightGadget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6TacticalLightGadget.uc : This is the base Class for all gadgets avalaible for weapons.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -13,97 +19,73 @@ var R6TacticalGlowLight m_GlowLight;
 
 simulated event Destroyed()
 {
-    Super.Destroyed();
-/*
-    if (m_TacticalBeam != none)
-    {
-        m_TacticalBeam.destroy();
-        m_TacticalBeam=none;
-    }
-*/
-    if (m_GlowLight != none)
-    {
-        m_GlowLight.destroy();
-        m_GlowLight=none;
-    }
+	super.Destroyed();
+	// End:0x24
+	if(__NFUN_119__(m_GlowLight, none))
+	{
+		m_GlowLight.__NFUN_279__();
+		m_GlowLight = none;
+	}
+	return;
 }
 
-    
-function ActivateGadget(BOOL bActivate, OPTIONAL BOOL bControllerInBehindView)
+function ActivateGadget(bool bActivate, optional bool bControllerInBehindView)
 {
-    local vector vTagLocation;
-    local rotator rTagRotator; 
-    local vector vGlowLightLocation;
-    local rotator rGlowLightRotator;
+	local Vector vTagLocation;
+	local Rotator rTagRotator;
+	local Vector vGlowLightLocation;
+	local Rotator rGlowLightRotator;
 
-    if (bActivate == true)
-    {
-        if ((bControllerInBehindView == TRUE) || (Level.NetMode != NM_Standalone))
-        {
-/*
-            if (m_TacticalBeam == none)
-            {
-                m_TacticalBeam = Spawn(m_pTacticalBeamClass);
-            }
-*/
-
-            if (m_GlowLight == none)
-            {
-                m_GlowLight = Spawn(class'Engine.R6TacticalGlowLight');
-                m_GlowLight.SetOwner(m_WeaponOwner);
-            }
-            
-            m_WeaponOwner.GetTagInformations( "TagGadget", vTagLocation, rTagRotator, m_OwnerCharacter.m_fAttachFactor);
-/*
-            m_TacticalBeam.SetBase( none );
-            m_TacticalBeam.SetBase( m_WeaponOwner, m_WeaponOwner.Location );
-            m_TacticalBeam.SetRelativeLocation(vTagLocation);
-            m_TacticalBeam.SetRelativeRotation(rTagRotator);
-*/
-            m_GlowLight.SetBase( none );
-            m_GlowLight.SetBase( m_WeaponOwner, m_WeaponOwner.Location );
-            m_GlowLight.SetRelativeLocation(vTagLocation + vGlowLightLocation);
-            m_GlowLight.SetRelativeRotation(rTagRotator + rGlowLightRotator);
-        }
-    }
-    else
-    {
-/*
-        if (m_TacticalBeam != none)
-        {
-            m_TacticalBeam.SetBase( none );
-            m_TacticalBeam.Destroy();
-            m_TacticalBeam = none;
-        }
-*/
-        if (m_GlowLight != None)
-        {
-            m_GlowLight.SetBase( none );
-            m_GlowLight.Destroy();
-            m_GlowLight = none;        
-        }
-    }
+	// End:0xF2
+	if(__NFUN_242__(bActivate, true))
+	{
+		// End:0xEF
+		if(__NFUN_132__(__NFUN_242__(bControllerInBehindView, true), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+		{
+			// End:0x5D
+			if(__NFUN_114__(m_GlowLight, none))
+			{
+				m_GlowLight = __NFUN_278__(Class'R6WeaponGadgets.R6TacticalGlowLight');
+				m_GlowLight.__NFUN_272__(m_WeaponOwner);
+			}
+			m_WeaponOwner.__NFUN_2008__("TagGadget", vTagLocation, rTagRotator, m_OwnerCharacter.m_fAttachFactor);
+			m_GlowLight.__NFUN_298__(none);
+			m_GlowLight.__NFUN_298__(m_WeaponOwner, m_WeaponOwner.Location);
+			m_GlowLight.SetRelativeLocation(__NFUN_215__(vTagLocation, vGlowLightLocation));
+			m_GlowLight.SetRelativeRotation(__NFUN_316__(rTagRotator, rGlowLightRotator));
+		}		
+	}
+	else
+	{
+		// End:0x11D
+		if(__NFUN_119__(m_GlowLight, none))
+		{
+			m_GlowLight.__NFUN_298__(none);
+			m_GlowLight.__NFUN_279__();
+			m_GlowLight = none;
+		}
+	}
+	return;
 }
 
-simulated function UpdateAttachment( R6EngineWeapon weapOwner )
+simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 {
-    local vector vTagLocation;
-    local rotator rTagRotator;    
+	local Vector vTagLocation;
+	local Rotator rTagRotator;
 
-    Super.UpdateAttachment( weapOwner );
-
-    SetBase( none );
-    SetBase( weapOwner, weapOwner.Location );
-
-    weapOwner.GetTagInformations( "TagGadget", vTagLocation, rTagRotator );
-    SetRelativeLocation(vTagLocation);
-    SetRelativeRotation(rTagRotator);
+	super.UpdateAttachment(weapOwner);
+	__NFUN_298__(none);
+	__NFUN_298__(weapOwner, weapOwner.Location);
+	weapOwner.__NFUN_2008__("TagGadget", vTagLocation, rTagRotator);
+	SetRelativeLocation(vTagLocation);
+	SetRelativeRotation(rTagRotator);
+	return;
 }
 
 defaultproperties
 {
-     m_eGadgetType=GAD_Light
-     DrawType=DT_StaticMesh
-     m_bDrawFromBase=True
-     StaticMesh=StaticMesh'R63rdWeapons_SM.Gadgets.R63rdTACSubGuns'
+	m_eGadgetType=6
+	DrawType=8
+	m_bDrawFromBase=true
+	StaticMesh=StaticMesh'R63rdWeapons_SM.Gadgets.R63rdTACSubGuns'
 }

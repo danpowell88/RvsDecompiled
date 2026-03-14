@@ -1,51 +1,61 @@
 //=============================================================================
+// R6TrainingMgr - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6TrainingMgr.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/09/19 * Created by Guillaume Borgia
 //=============================================================================
-
-class R6TrainingMgr extends R6PracticeModeGame;
-
-enum ETrainingWeapons
-{
-    TW_SMG,
-    TW_Pistol,
-    TW_Sniper,
-    TW_HBSensor,
-    TW_Assault,
-    TW_AssaultSilenced,
-    TW_LMG,
-    TW_Shotgun,
-    TW_Grenades,
-    TW_BreachCharge,
-    TW_RemoteCharge,
-    TW_Claymore,
-    TW_MAX
-};
+class R6TrainingMgr extends R6PracticeModeGame
+	config
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
 const C_NbWeapons = 12;
 
-var ETrainingWeapons    m_eCurrentWeapon;
+enum ETrainingWeapons
+{
+	TW_SMG,                         // 0
+	TW_Pistol,                      // 1
+	TW_Sniper,                      // 2
+	TW_HBSensor,                    // 3
+	TW_Assault,                     // 4
+	TW_AssaultSilenced,             // 5
+	TW_LMG,                         // 6
+	TW_Shotgun,                     // 7
+	TW_Grenades,                    // 8
+	TW_BreachCharge,                // 9
+	TW_RemoteCharge,                // 10
+	TW_Claymore,                    // 11
+	TW_MAX                          // 12
+};
 
-var R6EngineWeapon      m_Weapons[C_NbWeapons];
-var string              m_WeaponsName[C_NbWeapons];
-var INT                 m_WeaponsSlot[C_NbWeapons];
-var bool                m_bInitialized;
-
+var R6TrainingMgr.ETrainingWeapons m_eCurrentWeapon;
+// NEW IN 1.60
+var int m_WeaponsSlot[12];
+var bool m_bInitialized;
+// NEW IN 1.60
+var R6EngineWeapon m_Weapons[12];
+// NEW IN 1.60
+var string m_WeaponsName[12];
 
 function bool IsBasicMap()
 {
-    local string szMapName;
-    
-    szMapName = class'Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_MapName;
-    szMapName = Caps( szMapName );
+	local string szMapName;
 
-    if ( szMapName == "TRAINING_BASICS" )
-        return true;
-
-    return false;
+	szMapName = Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_MapName;
+	szMapName = __NFUN_235__(szMapName);
+	// End:0x69
+	if(__NFUN_122__(szMapName, "TRAINING_BASICS"))
+	{
+		return true;
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -54,102 +64,131 @@ function bool IsBasicMap()
 //------------------------------------------------------------------
 function float GetEndGamePauseTime()
 {
-    if ( IsBasicMap() )
-        return 20;
-    
-    return Super.GetEndGamePauseTime();
+	// End:0x0F
+	if(IsBasicMap())
+	{
+		return 20.0000000;
+	}
+	return super(R6AbstractGameInfo).GetEndGamePauseTime();
+	return;
 }
 
 //============================================================================
 // BOOL CanChangeText - 
 //============================================================================
-function BOOL CanChangeText( INT iBoxNumber )
+function bool CanChangeText(int iBoxNumber)
 {
-    // can be used to keep the last message on screen
-
-    return true;
+	return true;
+	return;
 }
 
 //============================================================================
 // Object GetTrainingMgr - 
 //============================================================================
-function R6TrainingMgr GetTrainingMgr( R6Pawn p )
+function R6TrainingMgr GetTrainingMgr(R6Pawn P)
 {
-    return Self;
-} 
+	return self;
+	return;
+}
 
 //============================================================================
 // DeployCharacters - 
 //============================================================================
 function DeployCharacters(PlayerController ControlledByPlayer)
 {
-    local R6RainbowAI aRainbowAI;
-    local INT i;
-    local R6PlayerController aPC;
-    local R6Pawn pPawn;
-    local string                szMapName;
-    local R6StartGameInfo       startGameInfo;
+	local R6RainbowAI aRainbowAI;
+	local int i;
+	local R6PlayerController aPC;
+	local R6Pawn pPawn;
+	local string szMapName;
+	local R6StartGameInfo StartGameInfo;
 
-    Super.DeployCharacters( ControlledByPlayer );
+	super(R6GameInfo).DeployCharacters(ControlledByPlayer);
+	StartGameInfo = Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo;
+	szMapName = StartGameInfo.m_MapName;
+	szMapName = __NFUN_235__(szMapName);
+	// End:0xC1
+	if(__NFUN_129__(__NFUN_132__(__NFUN_132__(__NFUN_122__(szMapName, "TRAINING_BASICS"), __NFUN_122__(szMapName, "TRAINING_SHOOTING")), __NFUN_122__(szMapName, "TRAINING_EXPLOSIVES"))))
+	{
+		return;
+	}
+	m_Player.bGodMode = true;
+	pPawn = R6Pawn(m_Player.Pawn);
+	aPC = R6PlayerController(m_Player);
+	i = 0;
+	J0x102:
 
-    startGameInfo = class'Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo;
-
-    szMapName = StartGameInfo.m_MapName;
-    szMapName = caps( szMapName  );
-    if ( !(szMapName == "TRAINING_BASICS"    ||
-           szMapName == "TRAINING_SHOOTING"  ||
-           szMapName == "TRAINING_EXPLOSIVES" ))
-    {
-        return; // it will use the default planning
-    }
-
-    // so the player can play with explosives without dying.
-    m_Player.bGodMode = true;     
-
-    // load special weapon
-    pPawn = R6Pawn(m_Player.Pawn);
-    aPC = R6PlayerController(m_Player);
-
-    // Load all weapon sounds
-    for(i=0; i<C_NbWeapons; i++)
-        R6PlayerController(m_Player).SetWeaponSound(m_Player.m_PawnRepInfo, m_WeaponsName[i], 0);
-
-    R6PlayerController(m_Player).ClientFinalizeLoading(pPawn.Region.Zone);
-    
-    LoadWeapons();
-    
+	// End:0x147 [Loop If]
+	if(__NFUN_150__(i, 12))
+	{
+		R6PlayerController(m_Player).SetWeaponSound(m_Player.m_PawnRepInfo, m_WeaponsName[i], 0);
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x102;
+	}
+	R6PlayerController(m_Player).ClientFinalizeLoading(pPawn.Region.Zone);
+	LoadWeapons();
+	return;
 }
-
 
 //============================================================================
 // LoadWeapons - 
 //============================================================================
 function LoadWeapons()
 {
-    local INT i;
-    local R6Pawn pPawn;
+	local int i;
+	local R6Pawn pPawn;
 
-    pPawn = R6Pawn(m_Player.Pawn);
+	pPawn = R6Pawn(m_Player.Pawn);
+	i = 0;
+	J0x20:
 
-    for(i=0; i<C_NbWeapons; i++)
-    {
-        if(i==0) // TW_SMG
-            pPawn.ServerGivesWeaponToClient( m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6MiniScopeGadget" );
-        else if(i==2) // TW_Sniper
-            pPawn.ServerGivesWeaponToClient( m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6ThermalScopeGadget" );
-        else if (i==4) // TW_Assault
-            pPawn.ServerGivesWeaponToClient( m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6MiniScopeGadget" );
-        else if (i==5) // TW_AssaultSilenced
-            pPawn.ServerGivesWeaponToClient( m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6SilencerGadget" );
-        else
-            pPawn.ServerGivesWeaponToClient( m_WeaponsName[i], 1, "", "" );
-
-        m_Weapons[i] = pPawn.m_WeaponsCarried[0];
-        pPawn.m_WeaponsCarried[0] = none;
-        ShowWeaponAndAttachment( m_Weapons[i], false );
-        m_Weapons[i].WeaponInitialization( pPawn );
-        m_Weapons[i].LoadFirstPersonWeapon();
-    }
+	// End:0x201 [Loop If]
+	if(__NFUN_150__(i, 12))
+	{
+		// End:0x7A
+		if(__NFUN_154__(i, 0))
+		{
+			pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6MiniScopeGadget");			
+		}
+		else
+		{
+			// End:0xCC
+			if(__NFUN_154__(i, 2))
+			{
+				pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6ThermalScopeGadget");				
+			}
+			else
+			{
+				// End:0x11B
+				if(__NFUN_154__(i, 4))
+				{
+					pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6MiniScopeGadget");					
+				}
+				else
+				{
+					// End:0x169
+					if(__NFUN_154__(i, 5))
+					{
+						pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6SilencerGadget");						
+					}
+					else
+					{
+						pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "");
+					}
+				}
+			}
+		}
+		m_Weapons[i] = pPawn.m_WeaponsCarried[0];
+		pPawn.m_WeaponsCarried[0] = none;
+		ShowWeaponAndAttachment(m_Weapons[i], false);
+		m_Weapons[i].WeaponInitialization(pPawn);
+		m_Weapons[i].LoadFirstPersonWeapon();
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x20;
+	}
+	return;
 }
 
 //============================================================================
@@ -157,305 +196,398 @@ function LoadWeapons()
 //============================================================================
 function ResetGunAmmo()
 {
-    local INT i;
+	local int i;
 
-    for(i=0; i<4; i++)
-    {
-        if(R6Pawn(m_Player.Pawn).m_WeaponsCarried[i]!=none)
-            R6Pawn(m_Player.Pawn).m_WeaponsCarried[i].FillClips();
-    }
+	i = 0;
+	J0x07:
+
+	// End:0x71 [Loop If]
+	if(__NFUN_150__(i, 4))
+	{
+		// End:0x67
+		if(__NFUN_119__(R6Pawn(m_Player.Pawn).m_WeaponsCarried[i], none))
+		{
+			R6Pawn(m_Player.Pawn).m_WeaponsCarried[i].FillClips();
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
 //============================================================================
 // ShowWeaponAndAttachment - 
 //============================================================================
-function ShowWeaponAndAttachment( R6EngineWeapon aWeapon, BOOL bShow )
+function ShowWeaponAndAttachment(R6EngineWeapon AWeapon, bool bShow)
 {
-    local R6AbstractWeapon pWeapon;
+	local R6AbstractWeapon pWeapon;
 
-    pWeapon = R6AbstractWeapon(aWeapon);
-    if(pWeapon==none)
-        return;
-
-    pWeapon.bHidden = !bShow;
-
-    if( pWeapon.m_SelectedWeaponGadget != none )
-        pWeapon.m_SelectedWeaponGadget.bHidden = !bShow;
-
-    if( pWeapon.m_MuzzleGadget != none )
-        pWeapon.m_MuzzleGadget.bHidden = !bShow;
-
-    if( pWeapon.m_ScopeGadget != none )
-        pWeapon.m_ScopeGadget.bHidden = !bShow;
-
-    if( pWeapon.m_BipodGadget != none )
-        pWeapon.m_BipodGadget.bHidden = !bShow;
-
-    if( pWeapon.m_MagazineGadget != none )
-        pWeapon.m_MagazineGadget.bHidden = !bShow;
+	pWeapon = R6AbstractWeapon(AWeapon);
+	// End:0x1D
+	if(__NFUN_114__(pWeapon, none))
+	{
+		return;
+	}
+	pWeapon.bHidden = __NFUN_129__(bShow);
+	// End:0x6A
+	if(__NFUN_119__(pWeapon.m_SelectedWeaponGadget, none))
+	{
+		pWeapon.m_SelectedWeaponGadget.bHidden = __NFUN_129__(bShow);
+	}
+	// End:0x9F
+	if(__NFUN_119__(pWeapon.m_MuzzleGadget, none))
+	{
+		pWeapon.m_MuzzleGadget.bHidden = __NFUN_129__(bShow);
+	}
+	// End:0xD4
+	if(__NFUN_119__(pWeapon.m_ScopeGadget, none))
+	{
+		pWeapon.m_ScopeGadget.bHidden = __NFUN_129__(bShow);
+	}
+	// End:0x109
+	if(__NFUN_119__(pWeapon.m_BipodGadget, none))
+	{
+		pWeapon.m_BipodGadget.bHidden = __NFUN_129__(bShow);
+	}
+	// End:0x13E
+	if(__NFUN_119__(pWeapon.m_MagazineGadget, none))
+	{
+		pWeapon.m_MagazineGadget.bHidden = __NFUN_129__(bShow);
+	}
+	return;
 }
 
 //============================================================================
 // SwitchToWeapon - 
 //============================================================================
-function SwitchToWeapon( ETrainingWeapons eWT, BOOL bSwitch )
+function SwitchToWeapon(R6TrainingMgr.ETrainingWeapons eWT, bool bSwitch)
 {
-    local R6Pawn pPawn;
-    local R6DemolitionsGadget pGadget;
-    local R6EngineWeapon      wpn;
+	local R6Pawn pPawn;
+	local R6DemolitionsGadget pGadget;
+	local R6EngineWeapon wpn;
 
-    pPawn = R6Pawn(m_Player.Pawn);
-
-    if( R6PlayerController(m_Player).m_TeamManager.m_iRainbowTeamName!=0 || pPawn.m_iPermanentID!=0 )
-        return;
-
-    //Cancel Zoom Here!
-    R6PlayerController(m_Player).DoZoom(true);
-    
-    if( eWT>= TW_Grenades )
-    {
-        pGadget = R6DemolitionsGadget(m_Weapons[eWT]);
-        if (pGadget != none && !pGadget.IsInState('ChargeArmed'))
-        {
-            pGadget.UpdateHands();
-        }
-        
-        if (!m_Weapons[eWT].HasAmmo())
-        {
-            pPawn.EngineWeapon.GotoState('RaiseWeapon');
-        }
-        
-        m_Weapons[eWT].FullAmmo();
-    }
-    else
-    {
-        R6AbstractWeapon(m_Weapons[eWT]).m_FPHands.ResetNeutralAnim();
-        wpn = R6Pawn(m_Player.Pawn).m_WeaponsCarried[m_WeaponsSlot[eWT]];
-        if ( wpn != none ) // the first time this function is called, there's no wpn
-            wpn.FillClips();
-    }
-
-
-    if( m_eCurrentWeapon == eWT )
-        return;
-
-    //log("SwitchToWeapon " $ eWT $ " from " $ m_eCurrentWeapon @ m_Weapons[eWT] @ m_WeaponsSlot[eWT] );
-
-    ShowWeaponAndAttachment( pPawn.m_WeaponsCarried[m_WeaponsSlot[eWT]], false );
-    ShowWeaponAndAttachment( m_Weapons[eWT], true );
-
-    StopAllSoundsActor(pPawn.m_SoundRepInfo);
-    pPawn.m_WeaponsCarried[m_WeaponsSlot[eWT]] = m_Weapons[eWT];
-    R6PlayerController(m_Player).SetWeaponSound(m_Player.m_PawnRepInfo, m_WeaponsName[eWT], m_WeaponsSlot[eWT]);
-    if (pPawn.m_SoundRepInfo != none)
-        pPawn.m_SoundRepInfo.m_CurrentWeapon = m_WeaponsSlot[eWT];
-
-    m_eCurrentWeapon = eWT;
-    if(bSwitch)
-    {
-        if(pPawn.EngineWeapon!=none)
-        {
-            pPawn.EngineWeapon.bHidden=true;
-	        pPawn.EngineWeapon.GotoState('PutWeaponDown');
-        }
-        pPawn.ServerChangedWeapon( pPawn.EngineWeapon, m_Weapons[eWT] );
-        
-        if(pPawn.EngineWeapon!=none)
-            pPawn.EngineWeapon.GotoState('RaiseWeapon');
-    }
-    else
-    {
-        m_Weapons[eWT].bHidden = true;
-    }
+	pPawn = R6Pawn(m_Player.Pawn);
+	// End:0x53
+	if(__NFUN_132__(__NFUN_155__(R6PlayerController(m_Player).m_TeamManager.m_iRainbowTeamName, 0), __NFUN_155__(pPawn.m_iPermanentID, 0)))
+	{
+		return;
+	}
+	R6PlayerController(m_Player).DoZoom(true);
+	// End:0x111
+	if(__NFUN_153__(int(eWT), int(8)))
+	{
+		pGadget = R6DemolitionsGadget(m_Weapons[int(eWT)]);
+		// End:0xC2
+		if(__NFUN_130__(__NFUN_119__(pGadget, none), __NFUN_129__(pGadget.__NFUN_281__('ChargeArmed'))))
+		{
+			pGadget.UpdateHands();
+		}
+		// End:0xF7
+		if(__NFUN_129__(m_Weapons[int(eWT)].HasAmmo()))
+		{
+			pPawn.EngineWeapon.__NFUN_113__('RaiseWeapon');
+		}
+		m_Weapons[int(eWT)].FullAmmo();		
+	}
+	else
+	{
+		R6AbstractWeapon(m_Weapons[int(eWT)]).m_FPHands.ResetNeutralAnim();
+		wpn = R6Pawn(m_Player.Pawn).m_WeaponsCarried[m_WeaponsSlot[int(eWT)]];
+		// End:0x180
+		if(__NFUN_119__(wpn, none))
+		{
+			wpn.FillClips();
+		}
+	}
+	// End:0x195
+	if(__NFUN_154__(int(m_eCurrentWeapon), int(eWT)))
+	{
+		return;
+	}
+	ShowWeaponAndAttachment(pPawn.m_WeaponsCarried[m_WeaponsSlot[int(eWT)]], false);
+	ShowWeaponAndAttachment(m_Weapons[int(eWT)], true);
+	__NFUN_2719__(pPawn.m_SoundRepInfo);
+	pPawn.m_WeaponsCarried[m_WeaponsSlot[int(eWT)]] = m_Weapons[int(eWT)];
+	R6PlayerController(m_Player).SetWeaponSound(m_Player.m_PawnRepInfo, m_WeaponsName[int(eWT)], byte(m_WeaponsSlot[int(eWT)]));
+	// End:0x280
+	if(__NFUN_119__(pPawn.m_SoundRepInfo, none))
+	{
+		pPawn.m_SoundRepInfo.m_CurrentWeapon = byte(m_WeaponsSlot[int(eWT)]);
+	}
+	m_eCurrentWeapon = eWT;
+	// End:0x335
+	if(bSwitch)
+	{
+		// End:0x2DB
+		if(__NFUN_119__(pPawn.EngineWeapon, none))
+		{
+			pPawn.EngineWeapon.bHidden = true;
+			pPawn.EngineWeapon.__NFUN_113__('PutWeaponDown');
+		}
+		pPawn.ServerChangedWeapon(pPawn.EngineWeapon, m_Weapons[int(eWT)]);
+		// End:0x332
+		if(__NFUN_119__(pPawn.EngineWeapon, none))
+		{
+			pPawn.EngineWeapon.__NFUN_113__('RaiseWeapon');
+		}		
+	}
+	else
+	{
+		m_Weapons[int(eWT)].bHidden = true;
+	}
+	return;
 }
 
 function LoadPlanningInTraining()
 {
-    local R6FileManagerPlanning pFileManager;
-    local R6StartGameInfo       startGameInfo;
-    local string                szLoadErrorMsgMapName;
-    local string                szLoadErrorMsgGameType;
-    local string                szMapName;
-    local string                szGameTypeDirName;
-    local string                szEnglishGTDirectory;
-    local R6MissionDescription  missionDescription;
-    local INT                   i,j;
+	local R6FileManagerPlanning pFileManager;
+	local R6StartGameInfo StartGameInfo;
+	local string szLoadErrorMsgMapName, szLoadErrorMsgGameType, szMapName, szGameTypeDirName, szEnglishGTDirectory;
 
-    startGameInfo = class'Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo;
-    pFileManager = new(None) class'R6FileManagerPlanning';
+	local R6MissionDescription missionDescription;
+	local int i, j;
 
-    missionDescription = R6MissionDescription(startGameInfo.m_CurrentMission);
+	StartGameInfo = Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo;
+	pFileManager = new (none) Class'R6Game.R6FileManagerPlanning';
+	missionDescription = R6MissionDescription(StartGameInfo.m_CurrentMission);
+	szMapName = Localize(missionDescription.m_MapName, "ID_MENUNAME", missionDescription.LocalizationFile, true);
+	// End:0xB4
+	if(__NFUN_122__(szMapName, ""))
+	{
+		szMapName = StartGameInfo.m_MapName;
+	}
+	Level.GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
+	// End:0x1B5
+	if(pFileManager.__NFUN_1416__(missionDescription.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, __NFUN_112__(__NFUN_112__(missionDescription.m_ShortName, ""), m_szDefaultActionPlan), StartGameInfo, szLoadErrorMsgMapName, szLoadErrorMsgGameType))
+	{
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("LoadPlanningInTraining failed  map=", StartGameInfo.m_MapName), " filename="), missionDescription.m_ShortName), ""), m_szDefaultActionPlan));
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Planning Was Created for : ", szLoadErrorMsgMapName), " : "), szLoadErrorMsgGameType));
+	}
+	i = 0;
+	J0x1BC:
 
-    szMapName = Localize( missionDescription.m_MapName, "ID_MENUNAME", missionDescription.LocalizationFile, true );
-    if( szMapName == "" ) // failed to find the name, use the map filename
-    {
-        szMapName = StartGameInfo.m_MapName;
-    }
+	// End:0x67D [Loop If]
+	if(__NFUN_150__(i, 3))
+	{
+		R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).InitPlanning(i, none);
+		// End:0x25C
+		if(__NFUN_151__(R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).GetNbActionPoint(), 0))
+		{
+			R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).m_iCurrentNode = 0;			
+		}
+		else
+		{
+			R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).m_iCurrentNode = -1;
+		}
+		j = 0;
+		J0x294:
 
-    Level.GetGameTypeSaveDirectories( szGameTypeDirName, szEnglishGTDirectory );
-
-    if ( pFileManager.LoadPlanning( missionDescription.m_MapName, 
-                                    szMapName,
-                                    szEnglishGTDirectory,
-                                    szGameTypeDirName,
-                                    missionDescription.m_ShortName$ "" $m_szDefaultActionPlan ,
-                                    startGameInfo,
-                                    szLoadErrorMsgMapName, szLoadErrorMsgGameType ) )
-    {
-        log( "LoadPlanningInTraining failed  map=" $StartGameInfo.m_MapName$ " filename=" $missionDescription.m_ShortName$ "" $m_szDefaultActionPlan );
-        log( "Planning Was Created for : "$szLoadErrorMsgMapName$" : "$szLoadErrorMsgGameType);
-    }
-    
-
-    for(i=0; i<3; i++)
-    {
-        R6PlanningInfo(startGameInfo.m_TeamInfo[i].m_pPlanning).InitPlanning(i,none);
-        if(R6PlanningInfo(startGameInfo.m_TeamInfo[i].m_pPlanning).GetNbActionPoint() > 0)
-            R6PlanningInfo(startGameInfo.m_TeamInfo[i].m_pPlanning).m_iCurrentNode = 0;
-        else
-            R6PlanningInfo(startGameInfo.m_TeamInfo[i].m_pPlanning).m_iCurrentNode = -1;
-
-        for(j=0; j<startGameInfo.m_TeamInfo[i].m_iNumberOfMembers; j++)
-        {
-            startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_CharacterName   = Localize( "Training", "ROOKIE", "R6Menu", true );
-            startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceTexture          =  class'R6RookieAssault'.default.m_TMenuFaceSmall;
-            startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.X         =  class'R6RookieAssault'.default.m_RMenuFaceSmallX;
-            startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.Y         =  class'R6RookieAssault'.default.m_RMenuFaceSmallY;
-            startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.Z         =  class'R6RookieAssault'.default.m_RMenuFaceSmallW;
-            startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.W         =  class'R6RookieAssault'.default.m_RMenuFaceSmallH;
-            if((i==2) && (j==0))
-				startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_szSpecialityID  = "ID_SNIPER";
-            else
-				startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_szSpecialityID  = "ID_ASSAULT";
-
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillAssault = 0.85f;
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillDemolitions = 0.85f;
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillElectronics = 0.85f;
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillSniper = 0.85f;
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillStealth = 0.85f;
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillSelfControl = 0.85f;
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillLeadership = 0.85f;
-			startGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillObservation = 0.85f;  
-        }
-    }
+		// End:0x673 [Loop If]
+		if(__NFUN_150__(j, StartGameInfo.m_TeamInfo[i].m_iNumberOfMembers))
+		{
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_CharacterName = Localize("Training", "ROOKIE", "R6Menu", true);
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceTexture = Class'R6Game.R6RookieAssault'.default.m_TMenuFaceSmall;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.X = float(Class'R6Game.R6RookieAssault'.default.m_RMenuFaceSmallX);
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.Y = float(Class'R6Game.R6RookieAssault'.default.m_RMenuFaceSmallY);
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.Z = float(Class'R6Game.R6RookieAssault'.default.m_RMenuFaceSmallW);
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.W = float(Class'R6Game.R6RookieAssault'.default.m_RMenuFaceSmallH);
+			// End:0x4A0
+			if(__NFUN_130__(__NFUN_154__(i, 2), __NFUN_154__(j, 0)))
+			{
+				StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_szSpecialityID = "ID_SNIPER";				
+			}
+			else
+			{
+				StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_szSpecialityID = "ID_ASSAULT";
+			}
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillAssault = 0.8500000;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillDemolitions = 0.8500000;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillElectronics = 0.8500000;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillSniper = 0.8500000;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillStealth = 0.8500000;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillSelfControl = 0.8500000;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillLeadership = 0.8500000;
+			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillObservation = 0.8500000;
+			__NFUN_165__(j);
+			// [Loop Continue]
+			goto J0x294;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x1BC;
+	}
+	return;
 }
 
 //============================================================================
 // LaunchAction - 
 //============================================================================
-function LaunchAction( INT iBoxNb, INT iSoundIndex )
+function LaunchAction(int iBoxNb, int iSoundIndex)
 {
-    local R6GameReplicationInfo aGRI;
+	local R6GameReplicationInfo aGRI;
 
-    if(m_Player==none || R6Pawn(m_Player.Pawn)==none)
-        return;
-
-    aGRI = R6GameReplicationInfo(GameReplicationInfo);
-
-    if(iSoundIndex==0)
-    {
-        switch(iBoxNb)
-        {
-            case 1:
-                break;
-
-            case 8:
-                SwitchToWeapon( TW_Pistol, false );
-                SwitchToWeapon( TW_SMG, true ); // needed for rate of fire
-                break;
-            case 9:
-                SwitchToWeapon( TW_SMG, true ); 
-                break;
-            case 10:
-                SwitchToWeapon( TW_Pistol, true );
-                break;
-            case 11:
-                SwitchToWeapon( TW_SMG, true );
-                break;
-            case 12:
-                SwitchToWeapon( TW_Assault, true );
-                break;
-            case 13:
-                SwitchToWeapon( TW_Shotgun, true );
-                break;
-            case 14:
-                SwitchToWeapon( TW_Sniper, true );
-                break;
-            case 15:
-                SwitchToWeapon( TW_LMG, true );
-                break;
-            case 16:
-                SwitchToWeapon( TW_Claymore, false );
-                SwitchToWeapon( TW_Grenades, true  );
-                break;
-            case 17:
-                SwitchToWeapon( TW_Grenades, true );
-                break;
-            case 18:
-                SwitchToWeapon( TW_BreachCharge, true );
-                break;
-            case 19:
-                SwitchToWeapon( TW_Claymore, true );
-                break;
-            case 20:
-                SwitchToWeapon( TW_RemoteCharge, true );
-                break;
-            
-            case 21: // RoomClearing1Box1
-            case 24: // RoomClearing2Box1
-            case 25: // RoomClearing3Box1
-            case 26: // HostageRescue1
-            case 27: // HostageRescue2
-            case 28: // HostageRescue3
-                break;
-        }
-    }
+	// End:0x28
+	if(__NFUN_132__(__NFUN_114__(m_Player, none), __NFUN_114__(R6Pawn(m_Player.Pawn), none)))
+	{
+		return;
+	}
+	aGRI = R6GameReplicationInfo(GameReplicationInfo);
+	// End:0x164
+	if(__NFUN_154__(iSoundIndex, 0))
+	{
+		switch(iBoxNb)
+		{
+			// End:0x51
+			case 1:
+				// End:0x164
+				break;
+			// End:0x6B
+			case 8:
+				SwitchToWeapon(1, false);
+				SwitchToWeapon(0, true);
+				// End:0x164
+				break;
+			// End:0x7C
+			case 9:
+				SwitchToWeapon(0, true);
+				// End:0x164
+				break;
+			// End:0x8D
+			case 10:
+				SwitchToWeapon(1, true);
+				// End:0x164
+				break;
+			// End:0x9E
+			case 11:
+				SwitchToWeapon(0, true);
+				// End:0x164
+				break;
+			// End:0xAF
+			case 12:
+				SwitchToWeapon(4, true);
+				// End:0x164
+				break;
+			// End:0xC0
+			case 13:
+				SwitchToWeapon(7, true);
+				// End:0x164
+				break;
+			// End:0xD1
+			case 14:
+				SwitchToWeapon(2, true);
+				// End:0x164
+				break;
+			// End:0xE2
+			case 15:
+				SwitchToWeapon(6, true);
+				// End:0x164
+				break;
+			// End:0xFC
+			case 16:
+				SwitchToWeapon(11, false);
+				SwitchToWeapon(8, true);
+				// End:0x164
+				break;
+			// End:0x10D
+			case 17:
+				SwitchToWeapon(8, true);
+				// End:0x164
+				break;
+			// End:0x11E
+			case 18:
+				SwitchToWeapon(9, true);
+				// End:0x164
+				break;
+			// End:0x12F
+			case 19:
+				SwitchToWeapon(11, true);
+				// End:0x164
+				break;
+			// End:0x140
+			case 20:
+				SwitchToWeapon(10, true);
+				// End:0x164
+				break;
+			// End:0x145
+			case 21:
+			// End:0x14A
+			case 24:
+			// End:0x14F
+			case 25:
+			// End:0x154
+			case 26:
+			// End:0x159
+			case 27:
+			// End:0x161
+			case 28:
+				// End:0x164
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	else
+	{
+		return;
+	}
 }
 
-function string GetIntelVideoName( R6MissionDescription desc )
+function string GetIntelVideoName(R6MissionDescription Desc)
 {
-    return "";
+	return "";
+	return;
 }
 
-function EndGame( PlayerReplicationInfo Winner, string Reason ) 
+function EndGame(PlayerReplicationInfo Winner, string Reason)
 {
-    if ( m_bGameOver )
-        return;
-
-    class'Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_SkipPlanningPhase = false;
-    class'Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_ReloadPlanning = false;
-    class'Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_ReloadActionPointOnly = false;    
-
-    if ( IsBasicMap() )
-        Level.m_sndMissionComplete = none;
-
-    Super.EndGame( Winner, Reason );
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_SkipPlanningPhase = false;
+	Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_ReloadPlanning = false;
+	Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_ReloadActionPointOnly = false;
+	// End:0xD8
+	if(IsBasicMap())
+	{
+		Level.m_sndMissionComplete = none;
+	}
+	super(R6StoryModeGame).EndGame(Winner, Reason);
+	return;
 }
 
 defaultproperties
 {
-     m_eCurrentWeapon=TW_MAX
-     m_WeaponsSlot(1)=1
-     m_WeaponsSlot(3)=2
-     m_WeaponsSlot(8)=2
-     m_WeaponsSlot(9)=2
-     m_WeaponsSlot(10)=2
-     m_WeaponsSlot(11)=3
-     m_WeaponsName(0)="R63rdWeapons.NormalSubMP5A4"
-     m_WeaponsName(1)="R63rdWeapons.NormalPistolUSP"
-     m_WeaponsName(2)="R63rdWeapons.NormalSniperM82A1"
-     m_WeaponsName(3)="R6Weapons.R6HBSGadget"
-     m_WeaponsName(4)="R63rdWeapons.NormalAssaultM4"
-     m_WeaponsName(5)="R63rdWeapons.SilencedAssaultM4"
-     m_WeaponsName(6)="R63rdWeapons.NormalLMGM60E4"
-     m_WeaponsName(7)="R63rdWeapons.BuckShotgunM1"
-     m_WeaponsName(8)="R6Weapons.R6FragGrenadeGadget"
-     m_WeaponsName(9)="R6Weapons.R6BreachingChargeGadget"
-     m_WeaponsName(10)="R6Weapons.R6RemoteChargeGadget"
-     m_WeaponsName(11)="R6Weapons.R6ClaymoreGadget"
-     m_bUsingCampaignBriefing=False
-     m_szDefaultActionPlan="_MISSION_DEFAULT"
-     m_bUseClarkVoice=False
-     m_bPlayIntroVideo=False
-     m_bPlayOutroVideo=False
+	m_eCurrentWeapon=12
+	m_WeaponsSlot[1]=1
+	m_WeaponsSlot[3]=2
+	m_WeaponsSlot[8]=2
+	m_WeaponsSlot[9]=2
+	m_WeaponsSlot[10]=2
+	m_WeaponsSlot[11]=3
+	m_WeaponsName[0]="R63rdWeapons.NormalSubMP5A4"
+	m_WeaponsName[1]="R63rdWeapons.NormalPistolUSP"
+	m_WeaponsName[2]="R63rdWeapons.NormalSniperM82A1"
+	m_WeaponsName[3]="R6Weapons.R6HBSGadget"
+	m_WeaponsName[4]="R63rdWeapons.NormalAssaultM4"
+	m_WeaponsName[5]="R63rdWeapons.SilencedAssaultM4"
+	m_WeaponsName[6]="R63rdWeapons.NormalLMGM60E4"
+	m_WeaponsName[7]="R63rdWeapons.BuckShotgunM1"
+	m_WeaponsName[8]="R6Weapons.R6FragGrenadeGadget"
+	m_WeaponsName[9]="R6Weapons.R6BreachingChargeGadget"
+	m_WeaponsName[10]="R6Weapons.R6RemoteChargeGadget"
+	m_WeaponsName[11]="R6Weapons.R6ClaymoreGadget"
+	m_bUsingCampaignBriefing=false
+	m_szDefaultActionPlan="_MISSION_DEFAULT"
+	m_bUseClarkVoice=false
+	m_bPlayIntroVideo=false
+	m_bPlayOutroVideo=false
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_WeaponsC_NbWeapons
+// REMOVED IN 1.60: var m_WeaponsNameC_NbWeapons
+// REMOVED IN 1.60: var m_WeaponsSlotC_NbWeapons

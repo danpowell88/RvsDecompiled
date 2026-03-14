@@ -1,12 +1,19 @@
 //=============================================================================
+// R6SquadDeathmatch - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6SquadDeathmatch.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================
+class R6SquadDeathmatch extends R6AdversarialTeamGame
+	config
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-class R6SquadDeathmatch extends R6AdversarialTeamGame;
-
-var INT m_iNextPlayerTeamID;
+var int m_iNextPlayerTeamID;
 
 //------------------------------------------------------------------
 // InitObjectives
@@ -14,87 +21,45 @@ var INT m_iNextPlayerTeamID;
 //------------------------------------------------------------------
 function InitObjectives()
 {
-    m_iNextPlayerTeamID = c_iTeamNumAlpha;
-
-    Level.m_bUseDefaultMoralityRules = false;
-    Super.InitObjectives();
+	m_iNextPlayerTeamID = 2;
+	Level.m_bUseDefaultMoralityRules = false;
+	super.InitObjectives();
+	return;
 }
-
 
 //------------------------------------------------------------------
 // GetNbOfRainbowAIToSpawn
 //	
 //------------------------------------------------------------------
-function int GetNbOfRainbowAIToSpawn( PlayerController aController )
+function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 {
-    if ( R6PlayerController(aController).m_TeamSelection == PTS_Alpha )
-        return m_iNbOfRainbowAIToSpawn;
-    else
-        return 0;
+	// End:0x27
+	if(__NFUN_154__(int(R6PlayerController(aController).m_TeamSelection), int(2)))
+	{
+		return m_iNbOfRainbowAIToSpawn;		
+	}
+	else
+	{
+		return 0;
+	}
+	return;
 }
-
-//------------------------------------------------------------------
-// 
-//	set the number of ai to spawn based on the 
-//------------------------------------------------------------------
-auto state InBetweenRoundMenu
-{
-    function EndState()
-    {
-        local int         iNbOfPlayer;
-        local Controller  P;
-
-        for (P=Level.ControllerList; P!=None; P=P.NextController )
-        {
-            if (    P.IsA('PlayerController') && P.PlayerReplicationInfo != None 
-                 && R6PlayerController(P).m_TeamSelection == PTS_Alpha )
-            {
-                ++iNbOfPlayer;
-            }
-        }
-
-        switch ( iNbOfPlayer  )
-        {
-            case  0: m_iNbOfRainbowAIToSpawn = 0; break;
-            case  1: m_iNbOfRainbowAIToSpawn = 4; break;
-            case  2: m_iNbOfRainbowAIToSpawn = 3; break;
-            case  3: m_iNbOfRainbowAIToSpawn = 3; break;
-            case  4: m_iNbOfRainbowAIToSpawn = 3; break;
-            case  5: m_iNbOfRainbowAIToSpawn = 2; break;
-            case  6: m_iNbOfRainbowAIToSpawn = 2; break;
-            case  7: m_iNbOfRainbowAIToSpawn = 1; break;
-            case  8: m_iNbOfRainbowAIToSpawn = 1; break;
-            case  9: m_iNbOfRainbowAIToSpawn = 1; break;
-            case 10: m_iNbOfRainbowAIToSpawn = 1; break;
-        
-            default: m_iNbOfRainbowAIToSpawn = 0;
-        }
-
-        if ( bShowLog ) 
-            log( "NotifyMatchStart nb of player: " $iNbOfPlayer$ " AI in a team: " $m_iNbOfRainbowAIToSpawn );
-
-        Super.EndState();
-    }
-}
-
 
 //------------------------------------------------------------------
 // ResetPlayerTeam
 //	set pawn's m_iTeam 
 //------------------------------------------------------------------
-function ResetPlayerTeam( Controller aPlayer )	
+function ResetPlayerTeam(Controller aPlayer)
 {
-    local R6Pawn aPawn;
-    
-    Super.ResetPlayerTeam( aPlayer );
-    
-    aPawn = R6Pawn(aPlayer.pawn);
-    // now that we know how many player are playing, set the teamID
-    aPawn.PlayerReplicationInfo.TeamID = m_iNextPlayerTeamID;
-    aPawn.m_iTeam = m_iNextPlayerTeamID;
-    m_iNextPlayerTeamID++;
+	local R6Pawn aPawn;
 
-    R6PlayerController( aPlayer ).m_TeamManager.SetMemberTeamID( aPawn.m_iTeam );
+	super.ResetPlayerTeam(aPlayer);
+	aPawn = R6Pawn(aPlayer.Pawn);
+	aPawn.PlayerReplicationInfo.TeamID = m_iNextPlayerTeamID;
+	aPawn.m_iTeam = m_iNextPlayerTeamID;
+	__NFUN_165__(m_iNextPlayerTeamID);
+	R6PlayerController(aPlayer).m_TeamManager.SetMemberTeamID(aPawn.m_iTeam);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -103,11 +68,9 @@ function ResetPlayerTeam( Controller aPlayer )
 //------------------------------------------------------------------
 function SetPawnTeamFriendlies(Pawn aPawn)
 {
-    // this is pure deathmatch, everybody is everyone else's enemy
-    // only friendly to yourself and team mate
-    aPawn.m_iFriendlyTeams  = GetTeamNumBit( aPawn.m_iTeam );   
-    // and an enemy to everyone else
-    aPawn.m_iEnemyTeams     = ~aPawn.m_iFriendlyTeams;      
+	aPawn.m_iFriendlyTeams = GetTeamNumBit(aPawn.m_iTeam);
+	aPawn.m_iEnemyTeams = __NFUN_141__(aPawn.m_iFriendlyTeams);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -116,32 +79,134 @@ function SetPawnTeamFriendlies(Pawn aPawn)
 //------------------------------------------------------------------
 function EndGame(PlayerReplicationInfo Winner, string Reason)
 {
-    local R6GameReplicationInfo gameRepInfo;
+	local R6GameReplicationInfo gameRepInfo;
 
-    if (m_bGameOver)    
-        return;
-    
-    gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
-    BroadcastGameMsg( "", "", "GameOver", none, GetGameMsgLifeTime() );
-        
-    if ( m_objDeathmatch.m_bCompleted )
-    {
-        if ( bShowLog ) log( "** Game : the pilot was extracted" );
-        
-        BroadcastGameMsg( "", m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.PlayerName, "HasWonTheRound", 
-                          none, GetGameMsgLifeTime() );
-    }
-    else
-    {
-        if ( bShowLog ) log( "** Game : it's a draw" );
+	// End:0x0B
+	if(m_bGameOver)
+	{
+		return;
+	}
+	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
+	BroadcastGameMsg("", "", "GameOver", none, int(GetGameMsgLifeTime()));
+	// End:0xBC
+	if(m_objDeathmatch.m_bCompleted)
+	{
+		// End:0x78
+		if(bShowLog)
+		{
+			__NFUN_231__("** Game : the pilot was extracted");
+		}
+		BroadcastGameMsg("", m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.PlayerName, "HasWonTheRound", none, int(GetGameMsgLifeTime()));		
+	}
+	else
+	{
+		// End:0xDE
+		if(bShowLog)
+		{
+			__NFUN_231__("** Game : it's a draw");
+		}
+		BroadcastGameMsg("", "", "RoundIsADraw", none, int(GetGameMsgLifeTime()));
+	}
+	super.EndGame(Winner, Reason);
+	return;
+}
 
-        BroadcastGameMsg( "", "", "RoundIsADraw", none, GetGameMsgLifeTime() );
-    }
+auto state InBetweenRoundMenu
+{
+	function EndState()
+	{
+		local int iNbOfPlayer;
+		local Controller P;
 
-    Super.EndGame(Winner, Reason);
+		P = Level.ControllerList;
+		J0x14:
+
+		// End:0x87 [Loop If]
+		if(__NFUN_119__(P, none))
+		{
+			// End:0x70
+			if(__NFUN_130__(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_119__(P.PlayerReplicationInfo, none)), __NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2))))
+			{
+				__NFUN_163__(iNbOfPlayer);
+			}
+			P = P.nextController;
+			// [Loop Continue]
+			goto J0x14;
+		}
+		switch(iNbOfPlayer)
+		{
+			// End:0x9C
+			case 0:
+				m_iNbOfRainbowAIToSpawn = 0;
+				// End:0x141
+				break;
+			// End:0xAB
+			case 1:
+				m_iNbOfRainbowAIToSpawn = 4;
+				// End:0x141
+				break;
+			// End:0xBB
+			case 2:
+				m_iNbOfRainbowAIToSpawn = 3;
+				// End:0x141
+				break;
+			// End:0xCB
+			case 3:
+				m_iNbOfRainbowAIToSpawn = 3;
+				// End:0x141
+				break;
+			// End:0xDB
+			case 4:
+				m_iNbOfRainbowAIToSpawn = 3;
+				// End:0x141
+				break;
+			// End:0xEB
+			case 5:
+				m_iNbOfRainbowAIToSpawn = 2;
+				// End:0x141
+				break;
+			// End:0xFB
+			case 6:
+				m_iNbOfRainbowAIToSpawn = 2;
+				// End:0x141
+				break;
+			// End:0x10A
+			case 7:
+				m_iNbOfRainbowAIToSpawn = 1;
+				// End:0x141
+				break;
+			// End:0x119
+			case 8:
+				m_iNbOfRainbowAIToSpawn = 1;
+				// End:0x141
+				break;
+			// End:0x128
+			case 9:
+				m_iNbOfRainbowAIToSpawn = 1;
+				// End:0x141
+				break;
+			// End:0x137
+			case 10:
+				m_iNbOfRainbowAIToSpawn = 1;
+				// End:0x141
+				break;
+			// End:0xFFFF
+			default:
+				m_iNbOfRainbowAIToSpawn = 0;
+				break;
+		}
+		// End:0x192
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("NotifyMatchStart nb of player: ", string(iNbOfPlayer)), " AI in a team: "), string(m_iNbOfRainbowAIToSpawn)));
+		}
+		super.EndState();
+		return;
+	}
+	stop;
 }
 
 defaultproperties
 {
-     m_szGameTypeFlag="RGM_SquadDeathmatch"
+	m_szGameTypeFlag="RGM_SquadDeathmatch"
 }

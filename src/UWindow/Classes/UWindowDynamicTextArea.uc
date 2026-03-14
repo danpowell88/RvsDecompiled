@@ -1,259 +1,355 @@
-class UWindowDynamicTextArea extends UWindowDialogControl;
+//=============================================================================
+// UWindowDynamicTextArea - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class UWindowDynamicTextArea extends UWindowDialogControl
+ config;
 
 var config int MaxLines;
-
+var int Count;
+var int VisibleRows;
+var int Font;
 var bool bTopCentric;
-var float DefaultTextHeight;
 var bool bScrollOnResize;
 var bool bVCenter;
 var bool bHCenter;
 var bool bAutoScrollbar;
-var bool bVariableRowHeight;	// Assumes !bTopCentric, !bScrollOnResize
+var bool bVariableRowHeight;  // Assumes !bTopCentric, !bScrollOnResize
+var bool bDirty;
+var float DefaultTextHeight;
 var float WrapWidth;
-
+var float OldW;
+// NEW IN 1.60
+var float OldH;
 // private
 var UWindowDynamicTextRow List;
-var UWindowVScrollBar VertSB;
-var float OldW, OldH;
-var bool bDirty;
-var int Count;
-var int VisibleRows;
-var int Font;
+var UWindowVScrollbar VertSB;
 var Font AbsoluteFont;
-var color TextColor;
-var class<UWindowDynamicTextRow> RowClass;
+var Class<UWindowDynamicTextRow> RowClass;
+var Color TextColor;
 
 function Created()
 {
-	Super.Created();
-
-	VertSB = UWindowVScrollbar(CreateWindow(class'UWindowVScrollbar', WinWidth - LookAndFeel.Size_ScrollbarWidth, 0, LookAndFeel.Size_ScrollbarWidth, WinHeight));
-	VertSB.bAlwaysOnTop = True;
-
+	super.Created();
+	VertSB = UWindowVScrollbar(CreateWindow(Class'UWindow.UWindowVScrollbar', __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	VertSB.bAlwaysOnTop = true;
 	Clear();
+	return;
 }
 
 function Clear()
 {
-	bDirty = True;
-
-	if(List != None)
+	bDirty = true;
+	// End:0x38
+	if(__NFUN_119__(List, none))
 	{
-		if(List.Next == None)
+		// End:0x29
+		if(__NFUN_114__(List.Next, none))
+		{
 			return;
+		}
 		List.DestroyList();
 	}
-
 	List = new RowClass;
 	List.SetupSentinel();
+	return;
 }
 
-function SetAbsoluteFont(Font F)
+function SetAbsoluteFont(Font f)
 {
-	AbsoluteFont = F;
+	AbsoluteFont = f;
+	return;
 }
 
-function SetFont(int F)
+function SetFont(int f)
 {
-	Font = F;
+	Font = f;
+	return;
 }
 
 function SetTextColor(Color C)
 {
 	TextColor = C;
+	return;
 }
 
-function TextAreaClipText(Canvas C, float DrawX, float DrawY, coerce string S, optional bool bCheckHotkey)
+function TextAreaClipText(Canvas C, float DrawX, float DrawY, coerce string S, optional bool bCheckHotKey)
 {
-	ClipText(C, DrawX, DrawY, S, bCheckHotkey);	
+	ClipText(C, DrawX, DrawY, S, bCheckHotKey);
+	return;
 }
 
 function TextAreaTextSize(Canvas C, string Text, out float W, out float H)
 {
 	TextSize(C, Text, W, H);
+	return;
 }
 
-function BeforePaint( Canvas C, float X, float Y )
+function BeforePaint(Canvas C, float X, float Y)
 {
-	Super.BeforePaint(C, X, Y);
-
-	VertSB.WinTop = 0;
+	super.BeforePaint(C, X, Y);
+	VertSB.WinTop = 0.0000000;
 	VertSB.WinHeight = WinHeight;
 	VertSB.WinWidth = LookAndFeel.Size_ScrollbarWidth;
-	VertSB.WinLeft = WinWidth - LookAndFeel.Size_ScrollbarWidth;
+	VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+	return;
 }
 
-function Paint( Canvas C, float MouseX, float MouseY )
+function Paint(Canvas C, float MouseX, float MouseY)
 {
 	local UWindowDynamicTextRow L;
-	local int SkipCount, DrawCount;
-	local int i;
+	local int SkipCount, DrawCount, i;
 	local float Y, Junk;
 	local bool bWrapped;
 
-	C.SetDrawColor(TextColor.R,TextColor.G,TextColor.B);
-
-	if(AbsoluteFont != None)
-		C.Font = AbsoluteFont;
-	else
-		C.Font = Root.Fonts[Font];
-
-	if(OldW != WinWidth || OldH != WinHeight)
+	C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+	// End:0x4C
+	if(__NFUN_119__(AbsoluteFont, none))
 	{
-		WordWrap(C, True);
+		C.Font = AbsoluteFont;		
+	}
+	else
+	{
+		C.Font = Root.Fonts[Font];
+	}
+	// End:0xBC
+	if(__NFUN_132__(__NFUN_181__(OldW, WinWidth), __NFUN_181__(OldH, WinHeight)))
+	{
+		WordWrap(C, true);
 		OldW = WinWidth;
 		OldH = WinHeight;
-		bWrapped = True;
+		bWrapped = true;		
 	}
 	else
-	if(bDirty)
 	{
-		WordWrap(C, False);
-		bWrapped = True;
+		// End:0xD9
+		if(bDirty)
+		{
+			WordWrap(C, false);
+			bWrapped = true;
+		}
 	}
-
+	// End:0x1D1
 	if(bWrapped)
 	{
 		TextAreaTextSize(C, "A", Junk, DefaultTextHeight);
-		VisibleRows = WinHeight / DefaultTextHeight;
+		VisibleRows = int(__NFUN_172__(WinHeight, DefaultTextHeight));
 		Count = List.Count();
-		VertSB.SetRange(0, Count, VisibleRows);
-
+		VertSB.SetRange(0.0000000, float(Count), float(VisibleRows));
+		// End:0x18B
 		if(bScrollOnResize)
 		{
+			// End:0x16E
 			if(bTopCentric)
-				VertSB.Pos = 0;
+			{
+				VertSB.pos = 0.0000000;				
+			}
 			else
-				VertSB.Pos = VertSB.MaxPos;
+			{
+				VertSB.pos = VertSB.MaxPos;
+			}
 		}
-
-		if(bAutoScrollbar && !bVariableRowHeight)
+		// End:0x1D1
+		if(__NFUN_130__(bAutoScrollbar, __NFUN_129__(bVariableRowHeight)))
 		{
-			if(Count <= VisibleRows)
-				VertSB.HideWindow();
+			// End:0x1C2
+			if(__NFUN_152__(Count, VisibleRows))
+			{
+				VertSB.HideWindow();				
+			}
 			else
+			{
 				VertSB.ShowWindow();
+			}
 		}
 	}
-
+	// End:0x3AD
 	if(bTopCentric)
 	{
-		SkipCount = VertSB.Pos;
+		SkipCount = int(VertSB.pos);
 		L = UWindowDynamicTextRow(List.Next);
-		for(i=0; i < SkipCount && (L != None) ; i++)
-			L = UWindowDynamicTextRow(L.Next);
+		i = 0;
+		J0x210:
 
-		if(bVCenter && Count <= VisibleRows)
-			Y = int((WinHeight - (Count * DefaultTextHeight)) / 2);
-		else
-			Y = 1;
-
-		DrawCount = 0;
-		while(Y < WinHeight)
+		// End:0x24F [Loop If]
+		if(__NFUN_130__(__NFUN_150__(i, SkipCount), __NFUN_119__(L, none)))
 		{
-			DrawCount++;
-			if(L != None)
+			L = UWindowDynamicTextRow(L.Next);
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x210;
+		}
+		// End:0x291
+		if(__NFUN_130__(bVCenter, __NFUN_152__(Count, VisibleRows)))
+		{
+			Y = float(int(__NFUN_172__(__NFUN_175__(WinHeight, __NFUN_171__(float(Count), DefaultTextHeight)), float(2))));			
+		}
+		else
+		{
+			Y = 1.0000000;
+		}
+		DrawCount = 0;
+		J0x2A3:
+
+		// End:0x30B [Loop If]
+		if(__NFUN_176__(Y, WinHeight))
+		{
+			__NFUN_165__(DrawCount);
+			// End:0x2FC
+			if(__NFUN_119__(L, none))
 			{
-				Y += DrawTextLine(C, L, Y);
-				L = UWindowDynamicTextRow(L.Next);
+				__NFUN_184__(Y, DrawTextLine(C, L, Y));
+				L = UWindowDynamicTextRow(L.Next);				
 			}
 			else
-				Y += DefaultTextHeight;
+			{
+				__NFUN_184__(Y, DefaultTextHeight);
+			}
+			// [Loop Continue]
+			goto J0x2A3;
 		}
-
+		// End:0x3AA
 		if(bVariableRowHeight)
 		{
-			VisibleRows = DrawCount - 1;
+			VisibleRows = __NFUN_147__(DrawCount, 1);
+			J0x322:
 
-			while(VertSB.Pos + VisibleRows > Count)
-				VisibleRows--;
-
-			VertSB.SetRange(0, Count, VisibleRows);
-
+			// End:0x34F [Loop If]
+			if(__NFUN_177__(__NFUN_174__(VertSB.pos, float(VisibleRows)), float(Count)))
+			{
+				__NFUN_166__(VisibleRows);
+				// [Loop Continue]
+				goto J0x322;
+			}
+			VertSB.SetRange(0.0000000, float(Count), float(VisibleRows));
+			// End:0x3AA
 			if(bAutoScrollbar)
 			{
-				if(Count <= VisibleRows)
-					VertSB.HideWindow();
+				// End:0x39B
+				if(__NFUN_152__(Count, VisibleRows))
+				{
+					VertSB.HideWindow();					
+				}
 				else
+				{
 					VertSB.ShowWindow();
+				}
 			}
-		}
+		}		
 	}
 	else
 	{
-		SkipCount = Max(0, Count - (VisibleRows + VertSB.Pos));
+		SkipCount = __NFUN_250__(0, int(__NFUN_175__(float(Count), __NFUN_174__(float(VisibleRows), VertSB.pos))));
 		L = UWindowDynamicTextRow(List.Last);
-		for(i=0; i < SkipCount && (L != List) ; i++)
-			L = UWindowDynamicTextRow(L.Prev);
+		i = 0;
+		J0x3F8:
 
-		Y = WinHeight - DefaultTextHeight;
-		while(L != List && L != None && Y > -DefaultTextHeight)
+		// End:0x43B [Loop If]
+		if(__NFUN_130__(__NFUN_150__(i, SkipCount), __NFUN_119__(L, List)))
+		{
+			L = UWindowDynamicTextRow(L.Prev);
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x3F8;
+		}
+		Y = __NFUN_175__(WinHeight, DefaultTextHeight);
+		J0x44D:
+
+		// End:0x4BF [Loop If]
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(L, List), __NFUN_119__(L, none)), __NFUN_177__(Y, __NFUN_169__(DefaultTextHeight))))
 		{
 			DrawTextLine(C, L, Y);
-			Y = Y - DefaultTextHeight;
+			Y = __NFUN_175__(Y, DefaultTextHeight);
 			L = UWindowDynamicTextRow(L.Prev);
+			// [Loop Continue]
+			goto J0x44D;
 		}
 	}
+	return;
 }
 
 function UWindowDynamicTextRow AddText(string NewLine)
 {
 	local UWindowDynamicTextRow L;
-	local string Temp;
+	local string temp;
 	local int i;
 
-	bDirty = True;
-	
-	i = InStr(NewLine, "\\n");
-	if(i != -1)
+	bDirty = true;
+	i = __NFUN_126__(NewLine, "\\n");
+	// End:0x53
+	if(__NFUN_155__(i, -1))
 	{
-		Temp = Mid(NewLine, i+2);
-		NewLine = Left(NewLine, i);		
+		temp = __NFUN_127__(NewLine, __NFUN_146__(i, 2));
+		NewLine = __NFUN_128__(NewLine, i);		
 	}
 	else
-		Temp = "";
-	
-
-	// reuse a row if possible
+	{
+		temp = "";
+	}
 	L = CheckMaxRows();
-
-	if(L != None)
-		List.AppendItem(L);
+	// End:0x89
+	if(__NFUN_119__(L, none))
+	{
+		List.AppendItem(L);		
+	}
 	else
+	{
 		L = UWindowDynamicTextRow(List.Append(RowClass));
-
+	}
 	L.Text = NewLine;
-	L.WrapParent = None;
-	L.bRowDirty = True;
-
-	if(Temp != "")
-		AddText(Temp);
-
+	L.WrapParent = none;
+	L.bRowDirty = true;
+	// End:0xF4
+	if(__NFUN_123__(temp, ""))
+	{
+		AddText(temp);
+	}
 	return L;
+	return;
 }
 
 function UWindowDynamicTextRow CheckMaxRows()
 {
 	local UWindowDynamicTextRow L;
-	L = None;
-	while(MaxLines > 0 && List.Count() > MaxLines - 1 && List.Next != None)
+
+	L = none;
+	J0x07:
+
+	// End:0x7C [Loop If]
+	if(__NFUN_130__(__NFUN_130__(__NFUN_151__(MaxLines, 0), __NFUN_151__(List.Count(), __NFUN_147__(MaxLines, 1))), __NFUN_119__(List.Next, none)))
 	{
 		L = UWindowDynamicTextRow(List.Next);
 		RemoveWrap(L);
 		L.Remove();
+		// [Loop Continue]
+		goto J0x07;
 	}
 	return L;
+	return;
 }
 
 function WordWrap(Canvas C, bool bForce)
 {
 	local UWindowDynamicTextRow L;
 
-	for(L = UWindowDynamicTextRow(List.Next); L != None; L = UWindowDynamicTextRow(L.Next))
-		if(L.WrapParent == None && (L.bRowDirty || bForce))
-			WrapRow(C, L);
+	L = UWindowDynamicTextRow(List.Next);
+	J0x19:
 
-	bDirty = False;
+	// End:0x83 [Loop If]
+	if(__NFUN_119__(L, none))
+	{
+		// End:0x67
+		if(__NFUN_130__(__NFUN_114__(L.WrapParent, none), __NFUN_132__(L.bRowDirty, bForce)))
+		{
+			WrapRow(C, L);
+		}
+		L = UWindowDynamicTextRow(L.Next);
+		// [Loop Continue]
+		goto J0x19;
+	}
+	bDirty = false;
+	return;
 }
 
 function WrapRow(Canvas C, UWindowDynamicTextRow L)
@@ -262,62 +358,83 @@ function WrapRow(Canvas C, UWindowDynamicTextRow L)
 	local float MaxWidth;
 	local int WrapPos;
 
-	if(WrapWidth == 0)
+	// End:0x56
+	if(__NFUN_180__(WrapWidth, float(0)))
 	{
-		if(VertSB.bWindowVisible || bAutoScrollbar)
-			MaxWidth = WinWidth - VertSB.WinWidth;
+		// End:0x48
+		if(__NFUN_132__(VertSB.bWindowVisible, bAutoScrollbar))
+		{
+			MaxWidth = __NFUN_175__(WinWidth, VertSB.WinWidth);			
+		}
 		else
+		{
 			MaxWidth = WinWidth;
+		}		
 	}
 	else
-		MaxWidth = WrapWidth;
-
-	L.bRowDirty = False;
-
-	// fast check - single line?
-	N = UWindowDynamicTextRow(L.Next);
-	if(N == None || N.WrapParent != L)
 	{
-		if(GetWrapPos(C, L, MaxWidth) == -1)
-			return;
+		MaxWidth = WrapWidth;
 	}
-
+	L.bRowDirty = false;
+	N = UWindowDynamicTextRow(L.Next);
+	// End:0xD1
+	if(__NFUN_132__(__NFUN_114__(N, none), __NFUN_119__(N.WrapParent, L)))
+	{
+		// End:0xD1
+		if(__NFUN_154__(GetWrapPos(C, L, MaxWidth), -1))
+		{
+			return;
+		}
+	}
 	RemoveWrap(L);
 	CurrentRow = L;
+	J0xE7:
 
-	while(True)
+	// End:0x131 [Loop If]
+	if(true)
 	{
 		WrapPos = GetWrapPos(C, CurrentRow, MaxWidth);
-		if(WrapPos == -1)
-			break;
-
+		// End:0x118
+		if(__NFUN_154__(WrapPos, -1))
+		{
+			// [Explicit Break]
+			goto J0x131;
+		}
 		CurrentRow = SplitRowAt(CurrentRow, WrapPos);
+		// [Loop Continue]
+		goto J0xE7;
 	}
-}
+	J0x131:
 
-///////////////////////////////////////////////////////
-// Functions to override to change format/layout
-///////////////////////////////////////////////////////
+	return;
+}
 
 function float DrawTextLine(Canvas C, UWindowDynamicTextRow L, float Y)
 {
 	local float X, W, H;
 
+	// End:0x8C
 	if(bHCenter)
 	{
 		TextAreaTextSize(C, L.Text, W, H);
+		// End:0x6D
 		if(VertSB.bWindowVisible)
-			X = int(((WinWidth - VertSB.WinWidth) - W) / 2);
+		{
+			X = float(int(__NFUN_172__(__NFUN_175__(__NFUN_175__(WinWidth, VertSB.WinWidth), W), float(2))));			
+		}
 		else
-			X = int((WinWidth - W) / 2);
+		{
+			X = float(int(__NFUN_172__(__NFUN_175__(WinWidth, W), float(2))));
+		}		
 	}
 	else
-		X = 2;
+	{
+		X = 2.0000000;
+	}
 	TextAreaClipText(C, X, Y, L.Text);
-
 	return DefaultTextHeight;
+	return;
 }
-
 
 // find where to break the line
 function int GetWrapPos(Canvas C, UWindowDynamicTextRow L, float MaxWidth)
@@ -326,37 +443,45 @@ function int GetWrapPos(Canvas C, UWindowDynamicTextRow L, float MaxWidth)
 	local string Input, NextWord;
 	local int WordsThisRow, WrapPos;
 
-	// quick check
 	TextAreaTextSize(C, L.Text, W, H);
-	if(W <= MaxWidth)
+	// End:0x38
+	if(__NFUN_178__(W, MaxWidth))
+	{
 		return -1;
-
+	}
 	Input = L.Text;
 	WordsThisRow = 0;
-	LineWidth = 0;
+	LineWidth = 0.0000000;
 	WrapPos = 0;
 	NextWord = "";
+	J0x6D:
 
-	while(Input != "" || NextWord != "")
+	// End:0x115 [Loop If]
+	if(__NFUN_132__(__NFUN_123__(Input, ""), __NFUN_123__(NextWord, "")))
 	{
-		if(NextWord == "")
+		// End:0xBD
+		if(__NFUN_122__(NextWord, ""))
 		{
 			RemoveNextWord(Input, NextWord);
 			TextAreaTextSize(C, NextWord, NextWordWidth, H);
 		}
-		if(WordsThisRow > 0 && LineWidth + NextWordWidth > MaxWidth)
+		// End:0xE9
+		if(__NFUN_130__(__NFUN_151__(WordsThisRow, 0), __NFUN_177__(__NFUN_174__(LineWidth, NextWordWidth), MaxWidth)))
 		{
-			return WrapPos;
+			return WrapPos;			
 		}
 		else
 		{
-			WrapPos += Len(NextWord);
-			LineWidth += NextWordWidth;
+			__NFUN_161__(WrapPos, __NFUN_125__(NextWord));
+			__NFUN_184__(LineWidth, NextWordWidth);
 			NextWord = "";
-			WordsThisRow++;
+			__NFUN_165__(WordsThisRow);
 		}
+		// [Loop Continue]
+		goto J0x6D;
 	}
 	return -1;
+	return;
 }
 
 function UWindowDynamicTextRow SplitRowAt(UWindowDynamicTextRow L, int SplitPos)
@@ -364,55 +489,74 @@ function UWindowDynamicTextRow SplitRowAt(UWindowDynamicTextRow L, int SplitPos)
 	local UWindowDynamicTextRow N;
 
 	N = UWindowDynamicTextRow(L.InsertAfter(RowClass));
-
-	if(L.WrapParent == None)
-		N.WrapParent = L;
+	// End:0x4A
+	if(__NFUN_114__(L.WrapParent, none))
+	{
+		N.WrapParent = L;		
+	}
 	else
+	{
 		N.WrapParent = L.WrapParent;
-
-	N.Text = Mid(L.Text, SplitPos);
-	L.Text = Left(L.Text, SplitPos);
-
+	}
+	N.Text = __NFUN_127__(L.Text, SplitPos);
+	L.Text = __NFUN_128__(L.Text, SplitPos);
 	return N;
+	return;
 }
 
 function RemoveNextWord(out string Text, out string NextWord)
 {
 	local int i;
 
-	i = InStr(Text, " ");
-	if(i == -1)
+	i = __NFUN_126__(Text, " ");
+	// End:0x35
+	if(__NFUN_154__(i, -1))
 	{
 		NextWord = Text;
-		Text = "";
+		Text = "";		
 	}
 	else
 	{
-		while(Mid(Text, i, 1) == " ")
-			i++;
+		J0x35:
 
-		NextWord = Left(Text, i);
-		Text = Mid(Text, i);
+		// End:0x54 [Loop If]
+		if(__NFUN_122__(__NFUN_127__(Text, i, 1), " "))
+		{
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x35;
+		}
+		NextWord = __NFUN_128__(Text, i);
+		Text = __NFUN_127__(Text, i);
 	}
+	return;
 }
 
 function RemoveWrap(UWindowDynamicTextRow L)
 {
 	local UWindowDynamicTextRow N;
 
-	// Remove previous word-wrapping
 	N = UWindowDynamicTextRow(L.Next);
-	while(N != None && N.WrapParent == L)
+	J0x19:
+
+	// End:0x96 [Loop If]
+	if(__NFUN_130__(__NFUN_119__(N, none), __NFUN_114__(N.WrapParent, L)))
 	{
-		L.Text = L.Text $ N.Text;
+		L.Text = __NFUN_112__(L.Text, N.Text);
 		N.Remove();
 		N = UWindowDynamicTextRow(L.Next);
+		// [Loop Continue]
+		goto J0x19;
 	}
+	return;
 }
 
 defaultproperties
 {
-     bScrollOnResize=True
-     RowClass=Class'UWindow.UWindowDynamicTextRow'
-     TextColor=(B=255,G=255,R=255)
+	bScrollOnResize=true
+	RowClass=Class'UWindow.UWindowDynamicTextRow'
+	TextColor=(R=255,G=255,B=255,A=0)
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var H

@@ -1,37 +1,22 @@
 //=============================================================================
+// R6SnowEmitter - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Snow.
 //=============================================================================
-class R6SnowEmitter extends R6WeatherEmitter
-    placeable;
+class R6SnowEmitter extends R6WeatherEmitter;
 
 simulated function PostBeginPlay()
 {
-    Emitters[0].m_iUseFastZCollision = 1;
-    Emitters[0].m_iPaused = 1;
+	Emitters[0].m_iUseFastZCollision = 1;
+	Emitters[0].m_iPaused = 1;
+	return;
 }
 
 defaultproperties
 {
-     Begin Object Class=SpriteEmitter Name=SpriteEmitterSnowWeather
-         MaxParticles=300
-         UseCollision=True
-         FadeOut=True
-         FadeIn=True
-         RespawnDeadParticles=False
-         AutomaticInitialSpawning=False
-         FadeOutStartTime=1.000000
-         FadeInEndTime=1.000000
-         ParticlesPerSecond=100.000000
-         InitialParticlesPerSecond=100.000000
-         SecondsBeforeInactive=2678400.000000
-         WarmupTicksPerSecond=300.000000
-         Texture=Texture'R6SFX_T.Winter.Snow'
-         FadeOutFactor=(W=2.000000,X=2.000000,Y=2.000000,Z=2.000000)
-         StartLocationRange=(X=(Min=-512.000000,Max=512.000000),Y=(Min=-512.000000,Max=512.000000),Z=(Min=150.000000,Max=350.000000))
-         StartSizeRange=(X=(Min=0.500000,Max=1.500000),Y=(Min=0.500000,Max=1.500000),Z=(Min=0.500000,Max=1.500000))
-         LifetimeRange=(Min=5.000000,Max=5.000000)
-         StartVelocityRange=(X=(Min=-5.000000,Max=5.000000),Y=(Min=-5.000000,Max=5.000000),Z=(Min=-150.000000,Max=-200.000000))
-         Name="SpriteEmitterSnowWeather"
-     End Object
-     Emitters(0)=SpriteEmitter'R6SFX.SpriteEmitterSnowWeather'
+	Emitters=/* Array type was not detected. */
 }

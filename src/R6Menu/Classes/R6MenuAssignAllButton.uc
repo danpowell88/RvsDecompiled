@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuAssignAllButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuAssignAllButton.uc : This button should assign it's associated item
 //                              to all team members
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
@@ -6,118 +12,124 @@
 //  Revision history:
 //    2002/03/15 * Created by Alexandre Dionne
 //=============================================================================
-
 class R6MenuAssignAllButton extends R6WindowButton;
 
-var Color                       m_DisableColor;
-var Color						m_EnableColor;
-
-var BOOL						m_bDrawLeftBorder;			// draw the left broder
-var BOOL						m_bDrawRightBorder;
-var BOOL						m_bDrawTopBorder;
-var BOOL						m_bDrawDownBorder;
+var bool m_bDrawLeftBorder;  // draw the left broder
+var bool m_bDrawRightBorder;
+var bool m_bDrawTopBorder;
+var bool m_bDrawDownBorder;
+var Color m_DisableColor;
+var Color m_EnableColor;
 
 function Created()
 {
 	m_DisableColor = Root.Colors.GrayLight;
-	m_EnableColor  = Root.Colors.White;
-
+	m_EnableColor = Root.Colors.White;
 	m_vButtonColor = m_DisableColor;
-	m_BorderColor  = m_DisableColor;	
-
-	m_bDrawBorders  = true;
+	m_BorderColor = m_DisableColor;
+	m_bDrawBorders = true;
 	m_bDrawSimpleBorder = true;
+	return;
 }
 
-function RMouseDown(float X, float Y) 
+function RMouseDown(float X, float Y)
 {
-	bRMouseDown = True;
+	bRMouseDown = true;
+	return;
 }
 
-function MMouseDown(float X, float Y) 
-{	
-	bMMouseDown = True;
+function MMouseDown(float X, float Y)
+{
+	bMMouseDown = true;
+	return;
 }
 
 function LMouseDown(float X, float Y)
 {
-	bMouseDown = True;
-} 
-
+	bMouseDown = true;
+	return;
+}
 
 function DrawSimpleBorder(Canvas C)
 {
-    //Draw Buttons Contour
-    C.Style = m_BorderStyle;
-
-    C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
-
-    //Top
-	if (m_bDrawTopBorder)
-	    DrawStretchedTextureSegment(C, 0, 0, WinWidth, m_BorderTextureRegion.H , m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    //Bottom
-	if (m_bDrawDownBorder)
-		DrawStretchedTextureSegment(C, 0, WinHeight  - m_BorderTextureRegion.H, WinWidth, m_BorderTextureRegion.H , m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    //Left
-	if (m_bDrawLeftBorder)
-	    DrawStretchedTextureSegment(C, 0, m_BorderTextureRegion.H, m_BorderTextureRegion.W, WinHeight - (2* m_BorderTextureRegion.H), m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    //Right
-	if (m_bDrawRightBorder)
-		DrawStretchedTextureSegment(C, WinWidth - m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTextureRegion.W, WinHeight - (2* m_BorderTextureRegion.H), m_BorderTextureRegion.X, m_BorderTextureRegion.Y, m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
+	C.Style = byte(m_BorderStyle);
+	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	// End:0xA4
+	if(m_bDrawTopBorder)
+	{
+		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	}
+	// End:0x116
+	if(m_bDrawDownBorder)
+	{
+		DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(WinHeight, float(m_BorderTextureRegion.H)), WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	}
+	// End:0x193
+	if(m_bDrawLeftBorder)
+	{
+		DrawStretchedTextureSegment(C, 0.0000000, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), __NFUN_175__(WinHeight, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	}
+	// End:0x21E
+	if(m_bDrawRightBorder)
+	{
+		DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_BorderTextureRegion.W)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), __NFUN_175__(WinHeight, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	}
+	return;
 }
-
 
 //===========================================================
 // SetButtonStatus: set the status of all the buttons, colors maybe change here too
 //===========================================================
-function SetButtonStatus( BOOL _bDisable)
+function SetButtonStatus(bool _bDisable)
 {
 	bDisabled = _bDisable;
-
-    if (_bDisable)
-        m_vButtonColor = m_DisableColor;
-    else
-        m_vButtonColor = m_EnableColor;
+	// End:0x24
+	if(_bDisable)
+	{
+		m_vButtonColor = m_DisableColor;		
+	}
+	else
+	{
+		m_vButtonColor = m_EnableColor;
+	}
+	return;
 }
-
 
 //=================================================================
 // SetBorderColor: set the border color
 //=================================================================
-function SetBorderColor( Color _NewColor)
+function SetBorderColor(Color _NewColor)
 {
-    m_BorderColor = _NewColor;    
+	m_BorderColor = _NewColor;
+	return;
 }
-
 
 function SetCompleteAssignAllButton()
 {
-	// draw all the borders
-	m_bDrawLeftBorder  = true;	
+	m_bDrawLeftBorder = true;
 	m_bDrawRightBorder = true;
-	m_bDrawTopBorder   = true;
-	m_bDrawDownBorder  = true;
-
-    UpRegion		= NewRegion( 172, 0, 30, 13);
-    OverRegion		= NewRegion( 172, 13, 30, 13);
-    DownRegion		= NewRegion( 172, 26, 30, 13);
-    DisabledRegion	= NewRegion( 172, 0, 30, 13);
-
-    ImageX				= (WinWidth - UpRegion.W)/2;
-	ImageY				= 0;
+	m_bDrawTopBorder = true;
+	m_bDrawDownBorder = true;
+	UpRegion = NewRegion(172.0000000, 0.0000000, 30.0000000, 13.0000000);
+	OverRegion = NewRegion(172.0000000, 13.0000000, 30.0000000, 13.0000000);
+	DownRegion = NewRegion(172.0000000, 26.0000000, 30.0000000, 13.0000000);
+	DisabledRegion = NewRegion(172.0000000, 0.0000000, 30.0000000, 13.0000000);
+	ImageX = __NFUN_172__(__NFUN_175__(WinWidth, float(UpRegion.W)), float(2));
+	ImageY = 0.0000000;
+	return;
 }
 
 defaultproperties
 {
-     m_bDrawLeftBorder=True
-     m_iDrawStyle=5
-     bUseRegion=True
-     UpTexture=Texture'R6MenuTextures.Gui_BoxScroll'
-     DownTexture=Texture'R6MenuTextures.Gui_BoxScroll'
-     DisabledTexture=Texture'R6MenuTextures.Gui_BoxScroll'
-     OverTexture=Texture'R6MenuTextures.Gui_BoxScroll'
-     UpRegion=(X=172,W=10,H=13)
-     DownRegion=(X=172,Y=26,W=10,H=13)
-     DisabledRegion=(X=172,W=10,H=13)
-     OverRegion=(X=172,Y=13,W=10,H=13)
+	m_bDrawLeftBorder=true
+	m_iDrawStyle=5
+	bUseRegion=true
+	UpTexture=Texture'R6MenuTextures.Gui_BoxScroll'
+	DownTexture=Texture'R6MenuTextures.Gui_BoxScroll'
+	DisabledTexture=Texture'R6MenuTextures.Gui_BoxScroll'
+	OverTexture=Texture'R6MenuTextures.Gui_BoxScroll'
+	UpRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=44066,ZoneNumber=0)
+	DownRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=44066,ZoneNumber=0)
+	DisabledRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=44066,ZoneNumber=0)
+	OverRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=44066,ZoneNumber=0)
 }

@@ -1,32 +1,36 @@
+//=============================================================================
+// CMagAssaultAK47 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  CMagAssaultAK47.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class CMagAssaultAK47 extends AssaultAK47;
+class CMagAssaultAK47 extends AssaultAK47;
 
 defaultproperties
 {
-     m_iClipCapacity=100
-     m_iNbOfClips=2
-     m_iNbOfExtraClips=1
-     m_fMuzzleVelocity=42900.000000
-     m_MuzzleScale=0.756527
-     m_fFireSoundRadius=2860.000000
-     m_pReticuleClass=Class'R6Weapons.R6RifleReticule'
-     m_pBulletClass=Class'R6Weapons.ammo762mmM43NormalFMJ'
-     m_stAccuracyValues=(fBaseAccuracy=1.096060,fShuffleAccuracy=1.955122,fWalkingAccuracy=2.932684,fWalkingFastAccuracy=12.097320,fRunningAccuracy=12.097320,fReticuleTime=1.274312,fAccuracyChange=5.915761,fWeaponJump=9.431755)
-     m_fFPBlend=0.251568
-     m_EquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Equip'
-     m_UnEquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Unequip'
-     m_ReloadSnd=Sound'Assault_AK47_Reloads.Play_AK47_Reload'
-     m_ReloadEmptySnd=Sound'Assault_AK47_Reloads.Play_AK47_ReloadEmpty'
-     m_ChangeROFSnd=Sound'CommonAssaultRiffles.Play_Assault_ROF'
-     m_SingleFireStereoSnd=Sound'Assault_AK47.Play_AK47_SingleShots'
-     m_FullAutoStereoSnd=Sound'Assault_AK47.Play_AK47_AutoShots'
-     m_FullAutoEndStereoSnd=Sound'Assault_AK47.Stop_AK47_AutoShots_Go'
-     m_TriggerSnd=Sound'CommonAssaultRiffles.Play_Assault_Trigger'
-     m_szMagazineClass="R63rdWeapons.R63rdDrumMAGAK"
-     m_szMuzzleClass="R6WeaponGadgets.R63rdMuzzleAK47"
+	m_iClipCapacity=100
+	m_iNbOfClips=2
+	m_iNbOfExtraClips=1
+	m_fMuzzleVelocity=42900.0000000
+	m_MuzzleScale=0.7565270
+	m_fFireSoundRadius=2860.0000000
+	m_pBulletClass=Class'R6Weapons.ammo762mmM43NormalFMJ'
+	m_stAccuracyValues=(fBaseAccuracy=1.0960600,fShuffleAccuracy=1.9551220,fWalkingAccuracy=2.9326840,fWalkingFastAccuracy=12.0973200,fRunningAccuracy=12.0973200,fReticuleTime=1.2743120,fAccuracyChange=5.9157610,fWeaponJump=9.4317550)
+	m_szReticuleClass="RIFLE"
+	m_fFPBlend=0.2515680
+	m_EquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Equip'
+	m_UnEquipSnd=Sound'CommonAssaultRiffles.Play_Assault_Unequip'
+	m_ReloadSnd=Sound'Assault_AK47_Reloads.Play_AK47_Reload'
+	m_ReloadEmptySnd=Sound'Assault_AK47_Reloads.Play_AK47_ReloadEmpty'
+	m_ChangeROFSnd=Sound'CommonAssaultRiffles.Play_Assault_ROF'
+	m_SingleFireStereoSnd=Sound'Assault_AK47.Play_AK47_SingleShots'
+	m_FullAutoStereoSnd=Sound'Assault_AK47.Play_AK47_AutoShots'
+	m_FullAutoEndStereoSnd=Sound'Assault_AK47.Stop_AK47_AutoShots_Go'
+	m_TriggerSnd=Sound'CommonAssaultRiffles.Play_Assault_Trigger'
+	m_szMagazineClass="R63rdWeapons.R63rdDrumMAGAK"
+	m_szMuzzleClass="R6WeaponGadgets.R63rdMuzzleAK47"
 }

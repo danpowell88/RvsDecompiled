@@ -1,353 +1,359 @@
+//=============================================================================
+// R6HostageMgr - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6HostageMgr extends R6AbstractHostageMgr;
 
-//------------------------------------------------------------------
-// Threat & Reaction 
-//------------------------------------------------------------------
+const HSTSNDEvent_None = 0;
+const HSTSNDEvent_HearShooting = 1;
+const HSTSNDEvent_CivSurrender = 2;
+const HSTSNDEvent_RunForCover = 3;
+const HSTSNDEvent_CivRunTowardRainbow = 4;
+const HSTSNDEvent_HstRunTowardRainbow = 5;
+const HSTSNDEvent_SeeRainbowBaitOrGoFrozen = 6;
+const HSTSNDEvent_GoFoetal = 7;
+const HSTSNDEvent_FollowRainbow = 8;
+const HSTSNDEvent_AskedToStayPut = 9;
+const HSTSNDEvent_InjuredByRainbow = 10;
+const HSTSNDEvent_Max = 11;
 
 enum EThreatType
 {
-    THREAT_none,        // do nothing
-    THREAT_friend,      // is a friend and alive
-    THREAT_sound,
-    THREAT_surrender,
-    THREAT_enemy,
-    THREAT_underFire,
-    THREAT_neutral,
-    THREAT_misc
+	THREAT_none,                    // 0
+	THREAT_friend,                  // 1
+	THREAT_sound,                   // 2
+	THREAT_surrender,               // 3
+	THREAT_enemy,                   // 4
+	THREAT_underFire,               // 5
+	THREAT_neutral,                 // 6
+	THREAT_misc                     // 7
 };
-
-
-struct ThreatDefinition
-{
-    //todop: optimize loop search by using the groupname and exiting if no longer in the groupd
-    var name          m_groupName;          // Civ / Freed / Guarded 
-    var string        m_szName;             // "a rainbow"
-    var EThreatType   m_eThreatType;        // THREAT_rainbow
-    var ENoiseType    m_eNoiseType;         // NOISE_Grenade
-    var INT           m_iThreatLevel;       // 0: no level... 
-    var INT           m_iCaringDistance;    // distance to start to care about this threat
-    var name          m_considerThreat;     // extra check for this threat. handle exception for a threat, if == none, yes.
-};
-
-
-struct ThreatInfo
-{
-    // **** if modified, update this struct in r6engine.h ****
-    var INT           m_id;                 // index in m_aThreatDefinition
-    var INT           m_iThreatLevel;       // directly copied from ThreatDefinition for quick access
-    var Pawn          m_pawn;               // the actor
-    var Actor         m_actorExt;           // the actor extention; ie like his grenade
-    var INT           m_bornTime;           // born time
-    var vector        m_originalLocation;   // original location
-    var name          m_state;
-    // **** if modified, update this struct in r6engine.h ****
-};
-
-var const INT         c_iSurrenderRadius;          // the hostage should surrender when they are X meter from Pawn
-var const INT         c_iDetectUnderFireRadius;    // the hostage consider being under fire when in this radius
-var const INT         c_iDetectThreatSound;     // distance from a sound that he react...
-var const INT         c_iDetectGrenadeRadius;
-
-var const name        c_ThreatGroup_Civ;
-var const name        c_ThreatGroup_HstFreed;
-var const name        c_ThreatGroup_HstGuarded;
-var const name        c_ThreatGroup_HstBait;
-var const name        c_ThreatGroup_HstEscorted;
-
-var const INT         c_ThreatLevel_Surrender;
-
-struct ReactionInfo
-{
-    var name    m_groupName; // same one used for ThreatDefinition
-    var INT     m_iThreatLevel;
-    var INT     m_iChance;
-    var name    m_gotoState;
-};
-
-var  name                           m_noReactionName;
-
-
-//------------------------------------------------------------------
-//	Civilian / Hostage Sound Event
-//------------------------------------------------------------------
-const HSTSNDEvent_None                      = 0;
-const HSTSNDEvent_HearShooting              = 1;
-const HSTSNDEvent_CivSurrender              = 2;    // Civilian or Freed Hostage
-const HSTSNDEvent_RunForCover               = 3;    // civilian or hostage
-const HSTSNDEvent_CivRunTowardRainbow       = 4;    // Civilian or Freed Hostage
-const HSTSNDEvent_HstRunTowardRainbow       = 5;  // Guarded Hostage
-const HSTSNDEvent_SeeRainbowBaitOrGoFrozen  = 6;
-const HSTSNDEvent_GoFoetal                  = 7;
-const HSTSNDEvent_FollowRainbow             = 8;
-const HSTSNDEvent_AskedToStayPut            = 9;
-const HSTSNDEvent_InjuredByRainbow          = 10;
-const HSTSNDEvent_Max                       = 11;
-
-struct HstSndEventInfo 
-{
-    var int                          m_iHstSndEvent;
-    var R6Pawn.EHostagePersonality   m_ePerso;
-    var R6Pawn.EHostageVoices        m_eVoice;
-};
-
-
-var HstSndEventInfo         m_aHstSndEventInfo[24];
-
-//------------------------------------------------------------------
-//	Animation
-//------------------------------------------------------------------
-var INT ANIM_eBlinded;
-var INT ANIM_eCrouchToProne; 
-var INT ANIM_eCrouchToScaredStand;
-var INT ANIM_eCrouchWait01; 
-var INT ANIM_eCrouchWait02;     
-var INT ANIM_eCrouchWalkBack;
-var INT ANIM_eFoetusToCrouch;
-var INT ANIM_eFoetusToKneel;
-var INT ANIM_eFoetusToProne;
-var INT ANIM_eFoetusToStand;
-var INT ANIM_eFoetusWait01;
-var INT ANIM_eFoetusWait02;
-var INT ANIM_eFoetus_nt;
-var INT ANIM_eGazed;
-var INT ANIM_eKneelFreeze;
-var INT ANIM_eKneelReact01;
-var INT ANIM_eKneelReact02;
-var INT ANIM_eKneelReact03;
-var INT ANIM_eKneelToCrouch;
-var INT ANIM_eKneelToFoetus;
-var INT ANIM_eKneelToProne;
-var INT ANIM_eKneelToStand;
-var INT ANIM_eKneelWait01;	
-var INT ANIM_eKneelWait02;	
-var INT ANIM_eKneelWait03;	
-var INT ANIM_eKneel_nt;	
-var INT ANIM_eScaredStandWait01;
-var INT ANIM_eScaredStandWait02;
-var INT ANIM_eScaredStand_nt;
-var INT ANIM_eStandHandUpFreeze;
-var INT ANIM_eStandHandUpReact01;
-var INT ANIM_eStandHandUpReact02;
-var INT ANIM_eStandHandUpReact03;
-var INT ANIM_eStandHandUpToDown;
-var INT ANIM_eStandHandDownToUp;
-var INT ANIM_eStandHandUpWait01;
-var INT ANIM_eStandToFoetus;
-var INT ANIM_eStandToKneel;
-var INT ANIM_eStandWaitCough;
-var INT ANIM_eStandWaitShiftWeight;
-var INT ANIM_eProneToCrouch;
-var INT ANIM_eProneWaitBreathe;
-var INT ANIM_eMAX; // ** last one **
 
 enum EPlayAnimType
 {
-    ePlayType_Default,  // play the anim like specified by his rate
-    ePlayType_Random    // play the anim normal or in reverse
+	ePlayType_Default,              // 0
+	ePlayType_Random                // 1
 };
 
 enum EGroupAnimType
 {
-    eGroupAnim_none,
-    eGroupAnim_transition,
-    eGroupAnim_wait,
-    eGroupAnim_reaction
+	eGroupAnim_none,                // 0
+	eGroupAnim_transition,          // 1
+	eGroupAnim_wait,                // 2
+	eGroupAnim_reaction             // 3
+};
+
+enum EAnimTransType
+{
+	eAnimTrans_none,                // 0
+	eAnimTrans_animTransInfo,       // 1
+	eAnimTrans_groupTransition,     // 2
+	eAnimTrans_manual               // 3
+};
+
+struct ThreatDefinition
+{
+    //todop: optimize loop search by using the groupname and exiting if no longer in the groupd
+	var name m_groupName;  // Civ / Freed / Guarded
+	var string m_szName;  // "a rainbow"
+	var R6HostageMgr.EThreatType m_eThreatType;  // THREAT_rainbow
+	var Actor.ENoiseType m_eNoiseType;  // NOISE_Grenade
+	var int m_iThreatLevel;  // 0: no level...
+	var int m_iCaringDistance;  // distance to start to care about this threat
+	var name m_considerThreat;  // extra check for this threat. handle exception for a threat, if == none, yes.
+};
+
+struct ThreatInfo
+{
+    // **** if modified, update this struct in r6engine.h ****
+	var int m_id;  // index in m_aThreatDefinition
+	var int m_iThreatLevel;  // 0: no level...
+	var Pawn m_pawn;  // the actor
+	var Actor m_actorExt;  // the actor extention; ie like his grenade
+	var int m_bornTime;  // born time
+	var Vector m_originalLocation;  // original location
+	var name m_state;
+};
+
+struct ReactionInfo
+{
+    //todop: optimize loop search by using the groupname and exiting if no longer in the groupd
+	var name m_groupName;  // Civ / Freed / Guarded
+	var int m_iThreatLevel;  // 0: no level...
+	var int m_iChance;
+	var name m_gotoState;
+};
+
+struct HstSndEventInfo
+{
+	var int m_iHstSndEvent;
+	var R6Pawn.EHostagePersonality m_ePerso;
+	var Pawn.EHostageVoices m_eVoice;
 };
 
 struct AnimInfo
 {
-    var name            m_name;         // name of the anim
-    var INT             m_id;           // index in the array of m_aAnimInfo
-    var float           m_fRate;        // the rate to play the anim
-    var EPlayAnimType   m_ePlayType;    // play the anim normal or in reverse
-    var EGroupAnimType  m_eGroupAnim;
+	var name m_name;  // name of the anim
+    // **** if modified, update this struct in r6engine.h ****
+	var int m_id;  // index in m_aThreatDefinition
+	var float m_fRate;  // the rate to play the anim
+	var R6HostageMgr.EPlayAnimType m_ePlayType;  // play the anim normal or in reverse
+	var R6HostageMgr.EGroupAnimType m_eGroupAnim;
 };
-
-var AnimInfo                m_aAnimInfo[40];
-
-var bool                    bShowLog; 
-
-var       INT               m_iThreatDefinitionIndex;
-var       ThreatDefinition  m_aThreatDefinition[26];
-
-var INT                     m_iReactionIndex;
-var ReactionInfo            m_aReactions[24];
 
 struct AnimTransInfo
 {
     // **** if modified, update this struct in r6engine.h ****
-    var name  m_AIState;
-    var name  m_pawnState;
-    var name  m_sourceAnimName;
-    var INT   m_iSourceAnim;
-    var name  m_targetAnimName;
-    var INT   m_iTargetAnim;
-    var float m_fTime;
-    var float m_fTargetAnimRate;
-    // **** if modified, update this struct in r6engine.h ****
+	var name m_AIState;
+	var name m_pawnState;
+	var name m_sourceAnimName;
+	var int m_iSourceAnim;
+	var name m_targetAnimName;
+	var int m_iTargetAnim;
+	var float m_fTime;
+	var float m_fTargetAnimRate;
 };
 
-enum EAnimTransType 
-{
-    eAnimTrans_none,
-    eAnimTrans_animTransInfo,      // defined has a animation transition info
-    eAnimTrans_groupTransition,    // the animation is of group sequence 'Transition'
-    eAnimTrans_manual              // manually set to blend with what is playing right now
-};
-
-var INT                     m_iAnimTransIndex;
-var AnimTransInfo           m_aAnimTransInfo[32];
-
+var const int c_iSurrenderRadius;  // the hostage should surrender when they are X meter from Pawn
+var const int c_iDetectUnderFireRadius;  // the hostage consider being under fire when in this radius
+var const int c_iDetectThreatSound;  // distance from a sound that he react...
+var const int c_iDetectGrenadeRadius;
+var const int c_ThreatLevel_Surrender;
+//------------------------------------------------------------------
+//	Animation
+//------------------------------------------------------------------
+var int ANIM_eBlinded;
+var int ANIM_eCrouchToProne;
+var int ANIM_eCrouchToScaredStand;
+var int ANIM_eCrouchWait01;
+var int ANIM_eCrouchWait02;
+var int ANIM_eCrouchWalkBack;
+var int ANIM_eFoetusToCrouch;
+var int ANIM_eFoetusToKneel;
+var int ANIM_eFoetusToProne;
+var int ANIM_eFoetusToStand;
+var int ANIM_eFoetusWait01;
+var int ANIM_eFoetusWait02;
+var int ANIM_eFoetus_nt;
+var int ANIM_eGazed;
+var int ANIM_eKneelFreeze;
+var int ANIM_eKneelReact01;
+var int ANIM_eKneelReact02;
+var int ANIM_eKneelReact03;
+var int ANIM_eKneelToCrouch;
+var int ANIM_eKneelToFoetus;
+var int ANIM_eKneelToProne;
+var int ANIM_eKneelToStand;
+var int ANIM_eKneelWait01;
+var int ANIM_eKneelWait02;
+var int ANIM_eKneelWait03;
+var int ANIM_eKneel_nt;
+var int ANIM_eScaredStandWait01;
+var int ANIM_eScaredStandWait02;
+var int ANIM_eScaredStand_nt;
+var int ANIM_eStandHandUpFreeze;
+var int ANIM_eStandHandUpReact01;
+var int ANIM_eStandHandUpReact02;
+var int ANIM_eStandHandUpReact03;
+var int ANIM_eStandHandUpToDown;
+var int ANIM_eStandHandDownToUp;
+var int ANIM_eStandHandUpWait01;
+var int ANIM_eStandToFoetus;
+var int ANIM_eStandToKneel;
+var int ANIM_eStandWaitCough;
+var int ANIM_eStandWaitShiftWeight;
+var int ANIM_eProneToCrouch;
+var int ANIM_eProneWaitBreathe;
+var int ANIM_eMAX;  // ** last one **
+var int m_iThreatDefinitionIndex;
+var int m_iReactionIndex;
+var int m_iAnimTransIndex;
+var bool bShowLog;
+var const name c_ThreatGroup_Civ;
+var const name c_ThreatGroup_HstFreed;
+var const name c_ThreatGroup_HstGuarded;
+var const name c_ThreatGroup_HstBait;
+var const name c_ThreatGroup_HstEscorted;
+var name m_noReactionName;
+var HstSndEventInfo m_aHstSndEventInfo[24];
+var AnimInfo m_aAnimInfo[40];
+// NEW IN 1.60
+var ThreatDefinition m_aThreatDefinition[27];
+var ReactionInfo m_aReactions[24];
+var AnimTransInfo m_aAnimTransInfo[32];
 
 //============================================================================
 // logX - Log with more information for debugging.  Display:
 //          controller, source, controller state, pawn state and a string
 //============================================================================
-function logX( string szText, OPTIONAL int iSource )
+function logX(string szText, optional int iSource)
 {
-    local string szSource;
-	local string time;
+	local string szSource, Time;
 
-    time = string(Level.TimeSeconds);
-	time = Left(Time, InStr(Time, ".") + 3); // 2 digits after the dot
-    
-    szSource = "(" $time$ ":X) "; 
-
-    log( szSource $ name $ "" $ szText );
+	Time = string(Level.TimeSeconds);
+	Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
+	szSource = __NFUN_112__(__NFUN_112__("(", Time), ":X) ");
+	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szSource, string(Name)), ""), szText));
+	return;
 }
+
 //------------------------------------------------------------------
 // InsertAnimTransInfo
 //	
 //------------------------------------------------------------------
-function InsertAnimTransInfo( INT iSourceAnim, INT iTargetAnim, name pawnState, float fTime )
+function InsertAnimTransInfo(int iSourceAnim, int iTargetAnim, name pawnState, float fTime)
 {
-    if ( m_iAnimTransIndex >= ArrayCount(m_aAnimTransInfo) ) 
-    {
-        assert( false );
-    }
-    
-    m_aAnimTransInfo[ m_iAnimTransIndex ].m_fTime            = fTime;
-    m_aAnimTransInfo[ m_iAnimTransIndex ].m_pawnState        = pawnState;
-    m_aAnimTransInfo[ m_iAnimTransIndex ].m_iSourceAnim      = iSourceAnim;
-    m_aAnimTransInfo[ m_iAnimTransIndex ].m_sourceAnimName   = GetAnimInfo( iSourceAnim ).m_name;
-    m_aAnimTransInfo[ m_iAnimTransIndex ].m_iTargetAnim      = iTargetAnim;
-    m_aAnimTransInfo[ m_iAnimTransIndex ].m_targetAnimName   = GetAnimInfo( iTargetAnim ).m_name;
-    m_aAnimTransInfo[ m_iAnimTransIndex ].m_fTargetAnimRate  = GetAnimInfo( iTargetAnim ).m_fRate;
-    
-    m_iAnimTransIndex++;
+	// End:0x10
+	if(__NFUN_153__(m_iAnimTransIndex, 32))
+	{
+		assert(false);
+	}
+	m_aAnimTransInfo[m_iAnimTransIndex].m_fTime = fTime;
+	m_aAnimTransInfo[m_iAnimTransIndex].m_pawnState = pawnState;
+	m_aAnimTransInfo[m_iAnimTransIndex].m_iSourceAnim = iSourceAnim;
+	m_aAnimTransInfo[m_iAnimTransIndex].m_sourceAnimName = GetAnimInfo(iSourceAnim).m_name;
+	m_aAnimTransInfo[m_iAnimTransIndex].m_iTargetAnim = iTargetAnim;
+	m_aAnimTransInfo[m_iAnimTransIndex].m_targetAnimName = GetAnimInfo(iTargetAnim).m_name;
+	m_aAnimTransInfo[m_iAnimTransIndex].m_fTargetAnimRate = GetAnimInfo(iTargetAnim).m_fRate;
+	__NFUN_165__(m_iAnimTransIndex);
+	return;
 }
 
-function string GetAnimTransInfoLog( AnimTransInfo info, OPTIONAL EAnimTransType eType )
+function string GetAnimTransInfoLog(AnimTransInfo Info, optional R6HostageMgr.EAnimTransType eType)
 {
-    local string szLog;
-    local string szType;
+	local string szLog, szType;
 
-    
-    if ( eType == eAnimTrans_animTransInfo )
-    {
-        szType = "data";
-    }
-    else if ( eType == eAnimTrans_groupTransition )
-    {
-        szType = "group";
-    }
-    else if ( eType == eAnimTrans_manual )
-    {
-        szType = "manual";
-    }
-    else
-    {
-        szType = "none";
-    }
-
-    szLog = "AnimTransType: "$szType$" src: "$info.m_sourceAnimName$" target: "$info.m_targetAnimName$" time: "$info.m_fTime$" rate: "$info.m_fTargetAnimRate$" toAIstate: "$info.m_aiState$" toPawnState: "$info.m_pawnState;
-
-    return szLog;
+	// End:0x1F
+	if(__NFUN_154__(int(eType), int(1)))
+	{
+		szType = "data";		
+	}
+	else
+	{
+		// End:0x3F
+		if(__NFUN_154__(int(eType), int(2)))
+		{
+			szType = "group";			
+		}
+		else
+		{
+			// End:0x60
+			if(__NFUN_154__(int(eType), int(3)))
+			{
+				szType = "manual";				
+			}
+			else
+			{
+				szType = "none";
+			}
+		}
+	}
+	szLog = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("AnimTransType: ", szType), " src: "), string(Info.m_sourceAnimName)), " target: "), string(Info.m_targetAnimName)), " time: "), string(Info.m_fTime)), " rate: "), string(Info.m_fTargetAnimRate)), " toAIstate: "), string(Info.m_AIState)), " toPawnState: "), string(Info.m_pawnState));
+	return szLog;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetAnimTransInfo: get the animTransiitionInfo for this source
 //	and target, and it fills info. If not found return false
 //------------------------------------------------------------------
-function bool GetAnimTransInfo( name sourceAnimName, INT iTargetAnim, OUT AnimTransInfo info )
+function bool GetAnimTransInfo(name sourceAnimName, int iTargetAnim, out AnimTransInfo Info)
 {
-    local INT i;
+	local int i;
 
-    for ( i = 0; i < m_iAnimTransIndex; i++ )
-    {
-        if ( sourceAnimName == m_aAnimTransInfo[ i ].m_sourceAnimName &&
-             iTargetAnim    == m_aAnimTransInfo[ i ].m_iTargetAnim )
-        {
-            info = m_aAnimTransInfo[ i ];
-            return true;
-        }
-    }
+	i = 0;
+	J0x07:
 
-    return false;
+	// End:0x69 [Loop If]
+	if(__NFUN_150__(i, m_iAnimTransIndex))
+	{
+		// End:0x5F
+		if(__NFUN_130__(__NFUN_254__(sourceAnimName, m_aAnimTransInfo[i].m_sourceAnimName), __NFUN_154__(iTargetAnim, m_aAnimTransInfo[i].m_iTargetAnim)))
+		{
+			Info = m_aAnimTransInfo[i];
+			return true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetAnimInfo: workaround for "variable name is too long"
 //	
 //------------------------------------------------------------------
-function AnimInfo GetAnimInfo( INT id ) 
-{ 
-    return m_aAnimInfo[id];
+function AnimInfo GetAnimInfo(int ID)
+{
+	return m_aAnimInfo[ID];
+	return;
 }
 
 //------------------------------------------------------------------
 // GetAnimIndex
 //	
 //------------------------------------------------------------------
-function INT GetAnimIndex( name animName )
+function int GetAnimIndex(name animName)
 {
-    local INT i;
+	local int i;
 
-    for ( i = 0; i < ArrayCount( m_aAnimInfo ); i++ )
-    {
-        if ( m_aAnimInfo[i].m_name == animName )
-        {
-            return i;        
-        }
-    }
+	i = 0;
+	J0x07:
 
-    return 0;
+	// End:0x3D [Loop If]
+	if(__NFUN_150__(i, 40))
+	{
+		// End:0x33
+		if(__NFUN_254__(m_aAnimInfo[i].m_name, animName))
+		{
+			return i;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return 0;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetAnimInfoSize: workaround for "variable name is too long"
 //	
 //------------------------------------------------------------------
-function INT GetAnimInfoSize() 
-{ 
-    return ArrayCount(m_aAnimInfo);
+function int GetAnimInfoSize()
+{
+	return 40;
+	return;
 }
 
 //------------------------------------------------------------------
 // InsertAnimInfo: insert an anim in m_aAnimInfo and sets all his
 //	properties
 //------------------------------------------------------------------
-function InsertAnimInfo( name aName, OUT INT id, OPTIONAL EGroupAnimType eGroupAnim, OPTIONAL EPlayAnimType ePlayType, OPTIONAL float fRate )
+function InsertAnimInfo(name aName, out int ID, optional R6HostageMgr.EGroupAnimType eGroupAnim, optional R6HostageMgr.EPlayAnimType ePlayType, optional float fRate)
 {
-    id = ANIM_eMAX; 
-    ANIM_eMAX++;
-
-    if ( fRate == 0 )
-    {
-        frate = 1; // set default
-    }
-
-    if ( m_aAnimInfo[ id ].m_name != '' )
-    {
-        log("ScriptWarning: Hostage anim " @aName@ " was not inserted. Conflict with " @m_aAnimInfo[id].m_name@ " at index " $id );
-        return;
-    }
-
-    m_aAnimInfo[ id ].m_id          = id;
-    m_aAnimInfo[ id ].m_name        = aName;
-    m_aAnimInfo[ id ].m_fRate       = fRate;
-    m_aAnimInfo[ id ].m_ePlayType   = ePlayType;
-    m_aAnimInfo[ id ].m_eGroupAnim  = eGroupAnim;
+	ID = ANIM_eMAX;
+	__NFUN_165__(ANIM_eMAX);
+	// End:0x2A
+	if(__NFUN_180__(fRate, float(0)))
+	{
+		fRate = 1.0000000;
+	}
+	// End:0xBF
+	if(__NFUN_255__(m_aAnimInfo[ID].m_name, 'None'))
+	{
+		__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("ScriptWarning: Hostage anim ", string(aName)), " was not inserted. Conflict with "), string(m_aAnimInfo[ID].m_name)), " at index "), string(ID)));
+		return;
+	}
+	m_aAnimInfo[ID].m_id = ID;
+	m_aAnimInfo[ID].m_name = aName;
+	m_aAnimInfo[ID].m_fRate = fRate;
+	m_aAnimInfo[ID].m_ePlayType = ePlayType;
+	m_aAnimInfo[ID].m_eGroupAnim = eGroupAnim;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -356,61 +362,87 @@ function InsertAnimInfo( name aName, OUT INT id, OPTIONAL EGroupAnimType eGroupA
 //------------------------------------------------------------------
 function ValidAnimInfo()
 {
-    local INT       i;
-    local INT       j;
-    local string    playType;
-    if ( ArrayCount(m_aAnimInfo) != ANIM_eMAX )
-    {
-        log( "ScriptWarning: m_aAnimInfo wrong size. Array size is " @ArrayCount(m_aAnimInfo)@ " and ANIM_eMAX is " $ANIM_eMAX );
-    }
+	local int i, j;
+	local string playType;
 
-    for ( i = 0; i < ArrayCount( m_aAnimInfo ); i++ )
-    {
-        // if none, it's wrong
-        if ( m_aAnimInfo[i].m_name == '' )
-        {
-            log( "ScriptWarning: missing anim index: " $i );
-        }
-        else
-        {
-            if ( m_aAnimInfo[i].m_ePlayType == ePlayType_Random )
-            {
-                playType = "random";
-            }
-            else
-            {
-                playType = "default";
-            }
+	// End:0x6A
+	if(__NFUN_155__(40, ANIM_eMAX))
+	{
+		__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__("ScriptWarning: m_aAnimInfo wrong size. Array size is ", string(40)), " and ANIM_eMAX is "), string(ANIM_eMAX)));
+	}
+	i = 0;
+	J0x71:
 
-            // list all anim
-            #ifdefDEBUG if(bShowLog) log( "ANIM: " @m_aAnimInfo[i].m_name@ " index: "$m_aAnimInfo[i].m_id$ " playType: "$playType ); #endif
-        }
-    }
+	// End:0x10F [Loop If]
+	if(__NFUN_150__(i, 40))
+	{
+		// End:0xCA
+		if(__NFUN_254__(m_aAnimInfo[i].m_name, 'None'))
+		{
+			__NFUN_231__(__NFUN_112__("ScriptWarning: missing anim index: ", string(i)));
+			// [Explicit Continue]
+			goto J0x105;
+		}
+		// End:0xF6
+		if(__NFUN_154__(int(m_aAnimInfo[i].m_ePlayType), int(1)))
+		{
+			playType = "random";
+			// [Explicit Continue]
+			goto J0x105;
+		}
+		playType = "default";
+		J0x105:
 
-    // look for double
-    for ( i = 0; i < ArrayCount( m_aAnimInfo ); i++ )
-    {
-        // skip if nothing
-        if ( m_aAnimInfo[i].m_name == '' )
-            continue;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x71;
+	}
+	i = 0;
+	J0x116:
 
-        for ( j = 0; j < ArrayCount( m_aAnimInfo ); j++ )
-        {
-            // skip if the same index
-            if ( i == j )
-                continue;
+	// End:0x209 [Loop If]
+	if(__NFUN_150__(i, 40))
+	{
+		// End:0x13F
+		if(__NFUN_254__(m_aAnimInfo[i].m_name, 'None'))
+		{
+			// [Explicit Continue]
+			goto J0x1FF;
+		}
+		j = 0;
+		J0x146:
 
-            // same name
-            if ( m_aAnimInfo[i].m_name == m_aAnimInfo[j].m_name )
-            {
-                // same rate
-                if ( m_aAnimInfo[i].m_fRate == m_aAnimInfo[j].m_fRate )
-                {
-                    log ( "ScriptWarning: identical anim at index: " @i@ " and " $j );
-                }
-            }
-        }
-    }
+		// End:0x1FF [Loop If]
+		if(__NFUN_150__(j, 40))
+		{
+			// End:0x164
+			if(__NFUN_154__(i, j))
+			{
+				// [Explicit Continue]
+				goto J0x1F5;
+			}
+			// End:0x1F5
+			if(__NFUN_254__(m_aAnimInfo[i].m_name, m_aAnimInfo[j].m_name))
+			{
+				// End:0x1F5
+				if(__NFUN_180__(m_aAnimInfo[i].m_fRate, m_aAnimInfo[j].m_fRate))
+				{
+					__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__("ScriptWarning: identical anim at index: ", string(i)), " and "), string(j)));
+				}
+			}
+			J0x1F5:
+
+			__NFUN_165__(j);
+			// [Loop Continue]
+			goto J0x146;
+		}
+		J0x1FF:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x116;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -419,135 +451,131 @@ function ValidAnimInfo()
 //------------------------------------------------------------------
 function PostBeginPlay()
 {
-    m_noReactionName = 'HostageMgrNone';
-
-    InitSndEventInfo();
-    InitThreatDefinition();
-    InitReaction();
-
-    //------------------------------------------------------------------    
-    InsertAnimInfo( 'Blinded',                  ANIM_eBlinded );
-    InsertAnimInfo( 'CrouchToProne',            ANIM_eCrouchToProne,      eGroupAnim_transition );
-    InsertAnimInfo( 'CrouchToScaredStand',      ANIM_eCrouchToScaredStand,eGroupAnim_transition );
-    InsertAnimInfo( 'CrouchWait01',             ANIM_eCrouchWait01,       eGroupAnim_wait,      ePlayType_Random );
-    InsertAnimInfo( 'CrouchWait02',             ANIM_eCrouchWait02,       eGroupAnim_wait );
-    InsertAnimInfo( 'FoetusToCrouch',		    ANIM_eFoetusToCrouch,     eGroupAnim_transition );
-    InsertAnimInfo( 'FoetusToKneel',		    ANIM_eFoetusToKneel,      eGroupAnim_transition );
-    InsertAnimInfo( 'FoetusToProne',		    ANIM_eFoetusToProne,      eGroupAnim_transition );
-    InsertAnimInfo( 'FoetusToStand',		    ANIM_eFoetusToStand,      eGroupAnim_transition );
-    InsertAnimInfo( 'FoetusWait01',			    ANIM_eFoetusWait01,       eGroupAnim_wait, ePlayType_Random );
-    InsertAnimInfo( 'FoetusWait02',			    ANIM_eFoetusWait02,       eGroupAnim_wait, ePlayType_Random );
-    InsertAnimInfo( 'Foetus_nt',			    ANIM_eFoetus_nt );
-    InsertAnimInfo( 'Gazed',			        ANIM_eGazed );
-    InsertAnimInfo( 'KneelFreeze',			    ANIM_eKneelFreeze,,                          ePlayType_Random);
-    InsertAnimInfo( 'KneelReact01',			    ANIM_eKneelReact01,     eGroupAnim_reaction, ePlayType_Random );
-    InsertAnimInfo( 'KneelReact02',			    ANIM_eKneelReact02,     eGroupAnim_reaction, ePlayType_Random );
-    InsertAnimInfo( 'KneelReact03',			    ANIM_eKneelReact03,     eGroupAnim_reaction, ePlayType_Random );
-    InsertAnimInfo( 'KneelToCrouch',			ANIM_eKneelToCrouch,    eGroupAnim_transition );
-    InsertAnimInfo( 'KneelToFoetus',		    ANIM_eKneelToFoetus,    eGroupAnim_transition );
-    InsertAnimInfo( 'KneelToProne',			    ANIM_eKneelToProne,     eGroupAnim_transition );
-    InsertAnimInfo( 'KneelToStand',			    ANIM_eKneelToStand,     eGroupAnim_transition );
-    InsertAnimInfo( 'KneelWait01',			    ANIM_eKneelWait01,      eGroupAnim_wait, ePlayType_Random );
-    InsertAnimInfo( 'KneelWait02',			    ANIM_eKneelWait02,      eGroupAnim_wait, ePlayType_Random );
-    InsertAnimInfo( 'KneelWait03',			    ANIM_eKneelWait03,      eGroupAnim_wait, ePlayType_Random );
-    InsertAnimInfo( 'Kneel_nt',				    ANIM_eKneel_nt );
-    InsertAnimInfo( 'ScaredStandWait01',	    ANIM_eScaredStandWait01,    eGroupAnim_wait, ePlayType_Random);
-    InsertAnimInfo( 'ScaredStandWait02',	    ANIM_eScaredStandWait02,    eGroupAnim_wait, ePlayType_Random);      
-    InsertAnimInfo( 'StandHandUpFreeze',	    ANIM_eStandHandUpFreeze,                   , ePlayType_Random );
-    InsertAnimInfo( 'StandHandUpReact01',	    ANIM_eStandHandUpReact01,   eGroupAnim_reaction,    ePlayType_Random );
-    InsertAnimInfo( 'StandHandUpReact02',	    ANIM_eStandHandUpReact02,   eGroupAnim_reaction,    ePlayType_Random );
-    InsertAnimInfo( 'StandHandUpReact03',	    ANIM_eStandHandUpReact03,   eGroupAnim_reaction,    ePlayType_Random );
-    InsertAnimInfo( 'StandHandUpToDown',	    ANIM_eStandHandUpToDown,    eGroupAnim_transition );
-    InsertAnimInfo( 'StandHandDownToUp',	    ANIM_eStandHandDownToUp,    eGroupAnim_transition ); 
-    InsertAnimInfo( 'StandHandUpWait01',	    ANIM_eStandHandUpWait01,    eGroupAnim_wait,        ePlayType_Random );
-    InsertAnimInfo( 'StandToFoetus',		    ANIM_eStandToFoetus,        eGroupAnim_transition );
-    InsertAnimInfo( 'StandToKneel',			    ANIM_eStandToKneel,         eGroupAnim_transition  );
-    InsertAnimInfo( 'StandWaitCough',		    ANIM_eStandWaitCough,       eGroupAnim_wait );
-    InsertAnimInfo( 'StandWaitShiftWeight',	    ANIM_eStandWaitShiftWeight, eGroupAnim_wait,        ePlayType_Random );
-    InsertAnimInfo( 'ProneToCrouch',			ANIM_eProneToCrouch,        eGroupAnim_transition );
-    InsertAnimInfo( 'ProneWaitBreathe',			ANIM_eProneWaitBreathe,     eGroupAnim_wait  ); 
-        
-    ValidAnimInfo();
+	m_noReactionName = 'HostageMgrNone';
+	InitSndEventInfo();
+	InitThreatDefinition();
+	// End:0x32
+	if(Level.m_bIsClassicMission)
+	{
+		InitReactionForClassicMissionCivilian();		
+	}
+	else
+	{
+		InitReaction();
+	}
+	InsertAnimInfo('Blinded', ANIM_eBlinded);
+	InsertAnimInfo('CrouchToProne', ANIM_eCrouchToProne, 1);
+	InsertAnimInfo('CrouchToScaredStand', ANIM_eCrouchToScaredStand, 1);
+	InsertAnimInfo('CrouchWait01', ANIM_eCrouchWait01, 2, 1);
+	InsertAnimInfo('CrouchWait02', ANIM_eCrouchWait02, 2);
+	InsertAnimInfo('FoetusToCrouch', ANIM_eFoetusToCrouch, 1);
+	InsertAnimInfo('FoetusToKneel', ANIM_eFoetusToKneel, 1);
+	InsertAnimInfo('FoetusToProne', ANIM_eFoetusToProne, 1);
+	InsertAnimInfo('FoetusToStand', ANIM_eFoetusToStand, 1);
+	InsertAnimInfo('FoetusWait01', ANIM_eFoetusWait01, 2, 1);
+	InsertAnimInfo('FoetusWait02', ANIM_eFoetusWait02, 2, 1);
+	InsertAnimInfo('Foetus_nt', ANIM_eFoetus_nt);
+	InsertAnimInfo('Gazed', ANIM_eGazed);
+	InsertAnimInfo('KneelFreeze', ANIM_eKneelFreeze,, 1);
+	InsertAnimInfo('KneelReact01', ANIM_eKneelReact01, 3, 1);
+	InsertAnimInfo('KneelReact02', ANIM_eKneelReact02, 3, 1);
+	InsertAnimInfo('KneelReact03', ANIM_eKneelReact03, 3, 1);
+	InsertAnimInfo('KneelToCrouch', ANIM_eKneelToCrouch, 1);
+	InsertAnimInfo('KneelToFoetus', ANIM_eKneelToFoetus, 1);
+	InsertAnimInfo('KneelToProne', ANIM_eKneelToProne, 1);
+	InsertAnimInfo('KneelToStand', ANIM_eKneelToStand, 1);
+	InsertAnimInfo('KneelWait01', ANIM_eKneelWait01, 2, 1);
+	InsertAnimInfo('KneelWait02', ANIM_eKneelWait02, 2, 1);
+	InsertAnimInfo('KneelWait03', ANIM_eKneelWait03, 2, 1);
+	InsertAnimInfo('Kneel_nt', ANIM_eKneel_nt);
+	InsertAnimInfo('ScaredStandWait01', ANIM_eScaredStandWait01, 2, 1);
+	InsertAnimInfo('ScaredStandWait02', ANIM_eScaredStandWait02, 2, 1);
+	InsertAnimInfo('StandHandUpFreeze', ANIM_eStandHandUpFreeze,, 1);
+	InsertAnimInfo('StandHandUpReact01', ANIM_eStandHandUpReact01, 3, 1);
+	InsertAnimInfo('StandHandUpReact02', ANIM_eStandHandUpReact02, 3, 1);
+	InsertAnimInfo('StandHandUpReact03', ANIM_eStandHandUpReact03, 3, 1);
+	InsertAnimInfo('StandHandUpToDown', ANIM_eStandHandUpToDown, 1);
+	InsertAnimInfo('StandHandDownToUp', ANIM_eStandHandDownToUp, 1);
+	InsertAnimInfo('StandHandUpWait01', ANIM_eStandHandUpWait01, 2, 1);
+	InsertAnimInfo('StandToFoetus', ANIM_eStandToFoetus, 1);
+	InsertAnimInfo('StandToKneel', ANIM_eStandToKneel, 1);
+	InsertAnimInfo('StandWaitCough', ANIM_eStandWaitCough, 2);
+	InsertAnimInfo('StandWaitShiftWeight', ANIM_eStandWaitShiftWeight, 2, 1);
+	InsertAnimInfo('ProneToCrouch', ANIM_eProneToCrouch, 1);
+	InsertAnimInfo('ProneWaitBreathe', ANIM_eProneWaitBreathe, 2);
+	ValidAnimInfo();
+	return;
 }
 
 //------------------------------------------------------------------
 // InsertThreatDefinition
 //	
 //------------------------------------------------------------------
-function InsertThreatDefinition( name        groupName,
-                                 string      szName, 
-                                 EThreatType eThreatType, 
-                                 ENoiseType  eNoiseType,
-                                 INT         iThreatLevel,
-                                 INT         iCaringDistance,
-                                 OPTIONAL name considerThreat )
+function InsertThreatDefinition(name GroupName, string szName, R6HostageMgr.EThreatType EThreatType, Actor.ENoiseType ENoiseType, int iThreatLevel, int iCaringDistance, optional name considerThreat)
 {
-    assert( m_iThreatDefinitionIndex < ArrayCount(m_aThreatDefinition) );
-
-    // check that all level are inserted in the right order after the second element
-    if ( m_iThreatDefinitionIndex > 1 )
-    {
-        if ( m_aThreatDefinition[ m_iThreatDefinitionIndex-1 ].m_iThreatLevel < iThreatLevel
-             && m_aThreatDefinition[ m_iThreatDefinitionIndex-1 ].m_groupName == groupName )
-        {
-            log("ScriptWarning: InsertThreatDefinition wrong ThreatLevel for " $szName );
-        }
-    }
-
-    m_aThreatDefinition[ m_iThreatDefinitionIndex ].m_groupName       = groupName;
-    m_aThreatDefinition[ m_iThreatDefinitionIndex ].m_szName          = szName;
-    m_aThreatDefinition[ m_iThreatDefinitionIndex ].m_eThreatType     = eThreatType;
-    m_aThreatDefinition[ m_iThreatDefinitionIndex ].m_eNoiseType      = eNoiseType;
-    m_aThreatDefinition[ m_iThreatDefinitionIndex ].m_iThreatLevel    = iThreatLevel;
-    m_aThreatDefinition[ m_iThreatDefinitionIndex ].m_iCaringDistance = iCaringDistance;
-    m_aThreatDefinition[ m_iThreatDefinitionIndex ].m_considerThreat  = considerThreat;
-        
-    m_iThreatDefinitionIndex++; 
+	assert(__NFUN_150__(m_iThreatDefinitionIndex, 27));
+	// End:0x9A
+	if(__NFUN_151__(m_iThreatDefinitionIndex, 1))
+	{
+		// End:0x9A
+		if(__NFUN_130__(__NFUN_150__(m_aThreatDefinition[__NFUN_147__(m_iThreatDefinitionIndex, 1)].m_iThreatLevel, iThreatLevel), __NFUN_254__(m_aThreatDefinition[__NFUN_147__(m_iThreatDefinitionIndex, 1)].m_groupName, GroupName)))
+		{
+			__NFUN_231__(__NFUN_112__("ScriptWarning: InsertThreatDefinition wrong ThreatLevel for ", szName));
+		}
+	}
+	m_aThreatDefinition[m_iThreatDefinitionIndex].m_groupName = GroupName;
+	m_aThreatDefinition[m_iThreatDefinitionIndex].m_szName = szName;
+	m_aThreatDefinition[m_iThreatDefinitionIndex].m_eThreatType = EThreatType;
+	m_aThreatDefinition[m_iThreatDefinitionIndex].m_eNoiseType = ENoiseType;
+	m_aThreatDefinition[m_iThreatDefinitionIndex].m_iThreatLevel = iThreatLevel;
+	m_aThreatDefinition[m_iThreatDefinitionIndex].m_iCaringDistance = iCaringDistance;
+	m_aThreatDefinition[m_iThreatDefinitionIndex].m_considerThreat = considerThreat;
+	__NFUN_165__(m_iThreatDefinitionIndex);
+	return;
 }
 
 //------------------------------------------------------------------
 // GetThreatInfoLog: 
 //	
 //------------------------------------------------------------------
-function string GetThreatInfoLog( ThreatInfo info )
+function string GetThreatInfoLog(ThreatInfo Info)
 {
-    local string    szOutput;
-    local name      pawnName;
-    local name      actorName;
-    local int       index;
+	local string szOutput;
+	local name pawnName, ActorName;
+	local int Index;
 
-    index = Clamp( info.m_id, 0, info.m_id );
-
-    if ( info.m_pawn == none )
-    {
-        pawnName = ' ';
-    }
-    else
-    {
-        pawnName = info.m_pawn.name;
-    }
-
-    if ( info.m_actorExt == none )
-    {
-        actorName = ' ';
-    }
-    else
-    {
-        actorName = info.m_actorExt.name;
-    }
-
-    szOutput = "" $m_aThreatDefinition[index].m_groupName$ ": "$GetThreatName(index)$", a:"$actorName$" "$info.m_iThreatLevel$ "s:" $info.m_state$ " a2:"$actorName;
-
-    return szOutput;
+	Index = __NFUN_251__(Info.m_id, 0, Info.m_id);
+	// End:0x3B
+	if(__NFUN_114__(Info.m_pawn, none))
+	{
+		pawnName = ' ';		
+	}
+	else
+	{
+		pawnName = Info.m_pawn.Name;
+	}
+	// End:0x72
+	if(__NFUN_114__(Info.m_actorExt, none))
+	{
+		ActorName = ' ';		
+	}
+	else
+	{
+		ActorName = Info.m_actorExt.Name;
+	}
+	szOutput = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(m_aThreatDefinition[Index].m_groupName)), ": "), GetThreatName(Index)), ", a:"), string(ActorName)), " "), string(Info.m_iThreatLevel)), "s:"), string(Info.m_state)), " a2:"), string(ActorName));
+	return szOutput;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetThreatDefinition:  
 //	
 //------------------------------------------------------------------
-function GetThreatDefinition( INT index, OUT ThreatDefinition oDefinition )
+function GetThreatDefinition(int Index, out ThreatDefinition oDefinition)
 {
-    oDefinition = m_aThreatDefinition[index];
+	oDefinition = m_aThreatDefinition[Index];
+	return;
 }
 
 //------------------------------------------------------------------
@@ -556,184 +584,208 @@ function GetThreatDefinition( INT index, OUT ThreatDefinition oDefinition )
 //------------------------------------------------------------------
 function ThreatInfo getDefaulThreatInfo()
 {
-    local ThreatInfo info;
-    
-    info.m_bornTime         = 0;
-    info.m_id               = 0;
-    info.m_originalLocation = vect(0,0,0);
-    info.m_pawn             = none;
-    info.m_iThreatLevel     = 0;
-    info.m_state            = '';
-        
-    return info;
+	local ThreatInfo Info;
+
+	Info.m_bornTime = 0;
+	Info.m_id = 0;
+	Info.m_originalLocation = vect(0.0000000, 0.0000000, 0.0000000);
+	Info.m_pawn = none;
+	Info.m_iThreatLevel = 0;
+	Info.m_state = 'None';
+	return Info;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetThreatName
 //------------------------------------------------------------------
-function string GetThreatName( INT index )
+function string GetThreatName(int Index)
 {
-    return m_aThreatDefinition[index].m_szName;
+	return m_aThreatDefinition[Index].m_szName;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // GetThreatInfoFromThreat: return the ThreatInfo associated with
 //	the current info of threat based on the highest level of
 //  of the threat (ie: the more dangerous to the civilian)
 //------------------------------------------------------------------
-function bool GetThreatInfoFromThreat( name             threatGroupName, 
-                                       R6Hostage        hostage,           
-                                       Actor            threat, 
-                                       ENoiseType       eType, 
-                                       OUT ThreatInfo   oThreatInfo )
+function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, Actor threat, Actor.ENoiseType eType, out ThreatInfo oThreatInfo)
 {
-    local bool          bRealThreat;
-    local INT           i;
-    local vector        vDistance;
-    local name          threatClass;
-    local bool          bCheckDistance;
-    local R6Pawn        aPawn;
-    
-    #ifdefDEBUG  
-    if ( bShowLog )
-    {
-        if ( eType != NOISE_None ) 
-            hostage.logX( "THREAT: " $threat.name$ " sound: " $eType$ " source: " $threat.Instigator.name );
-        else
-            hostage.logX( "THREAT: " $threat.name );
-    }
-    #endif
+	local bool bRealThreat;
+	local int i;
+	local Vector vDistance;
+	local name threatClass;
+	local bool bCheckDistance;
+	local R6Pawn aPawn;
 
-    bRealThreat = false;    
+	bRealThreat = false;
+	// End:0x34
+	if(__NFUN_155__(int(eType), int(0)))
+	{
+		aPawn = R6Pawn(threat.Instigator);		
+	}
+	else
+	{
+		aPawn = R6Pawn(threat);
+	}
+	i = 1;
+	J0x4B:
 
-    if ( eType != NOISE_None )  // the threat is a noise, made by this pawn
-        aPawn = r6Pawn(threat.Instigator);
-    else
-        aPawn = r6Pawn(threat);
+	// End:0x297 [Loop If]
+	if(__NFUN_150__(i, 27))
+	{
+		bCheckDistance = false;
+		// End:0x7F
+		if(__NFUN_255__(m_aThreatDefinition[i].m_groupName, threatGroupName))
+		{
+			// [Explicit Continue]
+			goto J0x28D;			
+		}
+		else
+		{
+			// End:0xB8
+			if(__NFUN_155__(int(eType), int(0)))
+			{
+				// End:0xB5
+				if(__NFUN_154__(int(m_aThreatDefinition[i].m_eNoiseType), int(eType)))
+				{
+					bCheckDistance = true;
+				}				
+			}
+			else
+			{
+				// End:0x1C9
+				if(__NFUN_119__(aPawn, none))
+				{
+					// End:0x12A
+					if(__NFUN_154__(int(m_aThreatDefinition[i].m_eThreatType), int(4)))
+					{
+						// End:0x127
+						if(__NFUN_130__(__NFUN_130__(hostage.IsEnemy(aPawn), aPawn.IsAlive()), __NFUN_129__(aPawn.m_bIsKneeling)))
+						{
+							bCheckDistance = true;
+						}						
+					}
+					else
+					{
+						// End:0x17B
+						if(__NFUN_154__(int(m_aThreatDefinition[i].m_eThreatType), int(1)))
+						{
+							// End:0x178
+							if(__NFUN_130__(hostage.IsFriend(aPawn), aPawn.IsAlive()))
+							{
+								bCheckDistance = true;
+							}							
+						}
+						else
+						{
+							// End:0x1C9
+							if(__NFUN_154__(int(m_aThreatDefinition[i].m_eThreatType), int(6)))
+							{
+								// End:0x1C9
+								if(__NFUN_130__(hostage.IsNeutral(aPawn), aPawn.IsAlive()))
+								{
+									bCheckDistance = true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		// End:0x28D
+		if(bCheckDistance)
+		{
+			// End:0x28D
+			if(__NFUN_132__(__NFUN_154__(m_aThreatDefinition[i].m_iCaringDistance, 2147483647), __NFUN_178__(__NFUN_225__(__NFUN_216__(hostage.Location, threat.Location)), float(m_aThreatDefinition[i].m_iCaringDistance))))
+			{
+				// End:0x282
+				if(__NFUN_255__(m_aThreatDefinition[i].m_considerThreat, 'None'))
+				{
+					// End:0x27F
+					if(hostage.m_controller.CanConsiderThreat(aPawn, threat, m_aThreatDefinition[i].m_considerThreat))
+					{
+						bRealThreat = true;
+						// [Explicit Break]
+						goto J0x297;
+					}
+					// [Explicit Continue]
+					goto J0x28D;
+				}
+				bRealThreat = true;
+				// [Explicit Break]
+				goto J0x297;
+			}
+		}
+		J0x28D:
 
-    // always start at 1, 0 is the default NOTHREAT
-    for ( i = 1; i < ArrayCount( m_aThreatDefinition ); ++i )
-    {
-        bCheckDistance = false;
-        if ( m_aThreatDefinition[i].m_groupName != threatGroupName )
-        {
-            continue;
-        }
-        else if ( eType != NOISE_None ) // noise
-        {
-            if ( m_aThreatDefinition[i].m_eNoiseType == eType  )
-            {
-                bCheckDistance = true;
-            }
-        }
-        else if ( aPawn != none )    // pawn
-        {
-            if ( m_aThreatDefinition[i].m_eThreatType == THREAT_enemy )
-            {
-                if ( hostage.isEnemy( aPawn ) && aPawn.isAlive() && !aPawn.m_bIsKneeling )
-                    bCheckDistance = true;
-            }
-            else if ( m_aThreatDefinition[i].m_eThreatType == THREAT_friend )
-            {
-                if ( hostage.isFriend( aPawn ) && aPawn.isAlive() )
-                    bCheckDistance = true;
-            }
-            else if ( m_aThreatDefinition[i].m_eThreatType == THREAT_neutral )
-            {
-                if ( hostage.isNeutral( aPawn ) && aPawn.isAlive() )
-                    bCheckDistance = true;
-            }
-        }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x4B;
+	}
+	J0x297:
 
-        if ( bCheckDistance )
-        {
-            // check distance: MAX distance or in the range
-            if ( m_aThreatDefinition[i].m_iCaringDistance == MAXINT ||
-                 VSize( hostage.location - threat.location ) <= m_aThreatDefinition[i].m_iCaringDistance  )
-            {
-                // check if needs an extra check 
-                if ( m_aThreatDefinition[i].m_considerThreat != '' )
-                {
-                    if ( hostage.m_controller.CanConsiderThreat( aPawn, threat, m_aThreatDefinition[i].m_considerThreat ) )
-                    {
-                        bRealThreat = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    bRealThreat = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    // real threat, set the value of ThreatInfo
-    if ( bRealThreat )
-    {
-        oThreatInfo.m_id               = i;
-        oThreatInfo.m_bornTime         = Level.TimeSeconds;
-        oThreatInfo.m_originalLocation = threat.location;
-        oThreatInfo.m_iThreatLevel     = m_aThreatDefinition[i].m_iThreatLevel;
-        
-        if ( eType != NOISE_None )
-        {
-            oThreatInfo.m_pawn            = aPawn;
-            
-            // exception for grenade
-            if ( m_aThreatDefinition[i].m_eNoiseType == NOISE_Grenade )
-            {
-                oThreatInfo.m_actorExt    = threat;
-            }
-        }
-        else
-        {
-            oThreatInfo.m_pawn            = aPawn;
-        }
-
-        #ifdefDEBUG if(bShowLog) hostage.logX( "threatInfo: " $GetThreatInfoLog( oThreatInfo ) ); #endif
-    }
-    else
-    {
-        oThreatInfo.m_id = 0;
-    }
-
-    return bRealThreat;
+	// End:0x360
+	if(bRealThreat)
+	{
+		oThreatInfo.m_id = i;
+		oThreatInfo.m_bornTime = int(Level.TimeSeconds);
+		oThreatInfo.m_originalLocation = threat.Location;
+		oThreatInfo.m_iThreatLevel = m_aThreatDefinition[i].m_iThreatLevel;
+		// End:0x34D
+		if(__NFUN_155__(int(eType), int(0)))
+		{
+			oThreatInfo.m_pawn = aPawn;
+			// End:0x34A
+			if(__NFUN_154__(int(m_aThreatDefinition[i].m_eNoiseType), int(3)))
+			{
+				oThreatInfo.m_actorExt = threat;
+			}			
+		}
+		else
+		{
+			oThreatInfo.m_pawn = aPawn;
+		}		
+	}
+	else
+	{
+		oThreatInfo.m_id = 0;
+	}
+	return bRealThreat;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetThreatInfoFromThreatSurrender
 //	
 //------------------------------------------------------------------
-function GetThreatInfoFromThreatSurrender( Pawn threat, OUT ThreatInfo oThreatInfo )
+function GetThreatInfoFromThreatSurrender(Pawn threat, out ThreatInfo oThreatInfo)
 {
-    oThreatInfo.m_id               = -1; // not in the index should be 2
-    oThreatInfo.m_bornTime         = Level.TimeSeconds;
-    oThreatInfo.m_originalLocation = threat.location;
-    oThreatInfo.m_iThreatLevel     = c_ThreatLevel_Surrender;
-    oThreatInfo.m_pawn             = threat;
-    oThreatInfo.m_actorExt         = none;
-    oThreatInfo.m_state            = '';
+	oThreatInfo.m_id = -1;
+	oThreatInfo.m_bornTime = int(Level.TimeSeconds);
+	oThreatInfo.m_originalLocation = threat.Location;
+	oThreatInfo.m_iThreatLevel = c_ThreatLevel_Surrender;
+	oThreatInfo.m_pawn = threat;
+	oThreatInfo.m_actorExt = none;
+	oThreatInfo.m_state = 'None';
+	return;
 }
 
 //------------------------------------------------------------------
 // InsertReaction
 //	
 //------------------------------------------------------------------
-function InsertReaction( name groupName, INT iLevel, INT iRoll, name stateName )
+function InsertReaction(name GroupName, int iLevel, int iRoll, name stateName)
 {
-    assert( m_iReactionIndex < ArrayCount(m_aReactions) );
-
-    m_aReactions[ m_iReactionIndex ].m_groupName      = groupName;
-    m_aReactions[ m_iReactionIndex ].m_iThreatLevel   = iLevel;
-    m_aReactions[ m_iReactionIndex ].m_iChance        = iRoll;
-    m_aReactions[ m_iReactionIndex ].m_gotoState      = stateName;
-
-    m_iReactionIndex++;
+	assert(__NFUN_150__(m_iReactionIndex, 24));
+	m_aReactions[m_iReactionIndex].m_groupName = GroupName;
+	m_aReactions[m_iReactionIndex].m_iThreatLevel = iLevel;
+	m_aReactions[m_iReactionIndex].m_iChance = iRoll;
+	m_aReactions[m_iReactionIndex].m_gotoState = stateName;
+	__NFUN_165__(m_iReactionIndex);
+	return;
 }
-
 
 //------------------------------------------------------------------
 // InitThreatDefinition: insert all the threat definition in an array
@@ -741,70 +793,42 @@ function InsertReaction( name groupName, INT iLevel, INT iRoll, name stateName )
 //------------------------------------------------------------------
 function InitThreatDefinition()
 {
-    local string        szName;
-    local EThreatType   eThreatType;
-    local name          groupName;
-    local INT           i, iNoiseType, iCaringDistance, iThreatLevel;
+	local string szName;
+	local R6HostageMgr.EThreatType EThreatType;
+	local name GroupName;
+	local int i, iNoiseType, iCaringDistance, iThreatLevel;
 
-    // important: first element must be no threat
-    InsertThreatDefinition( c_ThreatGroup_Civ, "no threat",    THREAT_none,        NOISE_None,    0,                       0 );
-    
-    // sorted: highest importance  to lowest
-
-    InsertThreatDefinition( c_ThreatGroup_Civ, "2m of enemy",  THREAT_enemy,       NOISE_None,    6,                       c_iSurrenderRadius );
-    InsertThreatDefinition( c_ThreatGroup_Civ, "surrender",    THREAT_surrender,   NOISE_None,    c_ThreatLevel_Surrender, 0 );     
-    InsertThreatDefinition( c_ThreatGroup_Civ, "near grenade", THREAT_underFire,   NOISE_Grenade, 4,                       c_iDetectGrenadeRadius );
-    InsertThreatDefinition( c_ThreatGroup_Civ, "under fire",   THREAT_underFire,   NOISE_Threat,  4,                       c_iDetectUnderFireRadius ); 
-    InsertThreatDefinition( c_ThreatGroup_Civ, "see enemy",    THREAT_enemy,       NOISE_None,    3,                       MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_Civ, "see friend",   THREAT_friend,      NOISE_None,    2,                       MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_Civ, "hear sound",   THREAT_sound,       NOISE_Threat,  1,                       MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_Civ, "hear sound",   THREAT_sound,       NOISE_Grenade, 1,                       MAXINT );
-
-    InsertThreatDefinition( c_ThreatGroup_HstEscorted, "hear sound",    THREAT_sound,       NOISE_Threat,  1, MAXINT, 'IsEnemySound' );
-    InsertThreatDefinition( c_ThreatGroup_HstEscorted, "hear sound",    THREAT_sound,       NOISE_Grenade, 1, MAXINT, 'IsEnemySound' );
-    InsertThreatDefinition( c_ThreatGroup_HstEscorted, "hear sound",    THREAT_sound,       NOISE_Dead,    1, MAXINT, 'IsEnemySound' );
-
-    //InsertThreatDefinition( c_ThreatGroup_Civ, "surrender",    THREAT_surrender,   NOISE_None,    c_ThreatLevel_Surrender, 0 );     
-    InsertThreatDefinition( c_ThreatGroup_HstFreed, "near grenade",  THREAT_underFire,   NOISE_Grenade, 4, c_iDetectGrenadeRadius );
-    InsertThreatDefinition( c_ThreatGroup_HstFreed, "see enemy",     THREAT_enemy,       NOISE_None,    3, MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_HstFreed, "see friend",    THREAT_friend,      NOISE_None,    2, MAXINT,  'CanSeeFriend' );
-    InsertThreatDefinition( c_ThreatGroup_HstFreed, "hear sound",    THREAT_sound,       NOISE_Threat,  1, MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_HstFreed, "hear sound",    THREAT_sound,       NOISE_Grenade, 1, MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_HstFreed, "hear sound",    THREAT_sound,       NOISE_Dead,    1, MAXINT );
-
-    //InsertThreatDefinition( c_ThreatGroup_Civ, "surrender",    THREAT_surrender,   NOISE_None,    c_ThreatLevel_Surrender, 0 );     
-    InsertThreatDefinition( c_ThreatGroup_HstGuarded, "near grenade",  THREAT_underFire,   NOISE_Grenade, 3, c_iDetectGrenadeRadius );
-    InsertThreatDefinition( c_ThreatGroup_HstGuarded, "see friend",    THREAT_friend,      NOISE_None,    2, MAXINT, 'CanSeeFriend' );
-    InsertThreatDefinition( c_ThreatGroup_HstGuarded, "hear sound",    THREAT_sound,       NOISE_Dead,    1, MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_HstGuarded, "hear sound",    THREAT_sound,       NOISE_Threat,  1, MAXINT );
-
-    InsertThreatDefinition( c_ThreatGroup_HstBait, "near grenade", THREAT_underFire,   NOISE_Grenade, 2, c_iDetectGrenadeRadius );
-    InsertThreatDefinition( c_ThreatGroup_HstBait, "see friend",   THREAT_friend,      NOISE_None,    1, MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_HstBait, "hear sound",   THREAT_sound,       NOISE_Threat,  1, MAXINT );
-    InsertThreatDefinition( c_ThreatGroup_HstBait, "hear sound",   THREAT_sound,       NOISE_Dead,    1, MAXINT );
-
-    // always the first element
-    assert( m_aThreatDefinition[0].m_iThreatLevel == 0 ); 
-    assert( m_iThreatDefinitionIndex == ArrayCount(m_aThreatDefinition) );
-
-
-    #ifdefDEBUG if(bShowLog) 
-    {
-        log( "List of ThreatDefinition" );
-        log( "threatLevel | debug name | distanceToCare | treatType | noiseType" );
-
-        for ( i = 0; i < m_iThreatDefinitionIndex; ++i )
-        {
-            groupName       = m_aThreatDefinition[ i ].m_groupName;
-            szName          = m_aThreatDefinition[ i ].m_szName;
-            eThreatType     = m_aThreatDefinition[ i ].m_eThreatType;
-            iNoiseType      = m_aThreatDefinition[ i ].m_eNoiseType;
-            iThreatLevel    = m_aThreatDefinition[ i ].m_iThreatLevel; 
-            iCaringDistance = m_aThreatDefinition[ i ].m_iCaringDistance;
-            log( "  " @groupName$ ": " @iThreatLevel@ "|" @szName@ "|" @iCaringDistance@ "|" @eThreatType@ "|" $iNoiseType );
-        }
-    } #endif
-}                          
+	InsertThreatDefinition(c_ThreatGroup_Civ, "no threat", 0, 0, 0, 0);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "2m of enemy", 4, 0, 6, c_iSurrenderRadius);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "surrender", 3, 0, c_ThreatLevel_Surrender, 0);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "near grenade", 5, 3, 4, c_iDetectGrenadeRadius);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "under fire", 5, 2, 4, c_iDetectUnderFireRadius);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "see enemy", 4, 0, 3, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "see friend", 1, 0, 2, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "hear sound", 2, 2, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "hear sound", 2, 3, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_Civ, "hear sound", 5, 1, 4, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstEscorted, "hear sound", 2, 2, 1, 2147483647, 'IsEnemySound');
+	InsertThreatDefinition(c_ThreatGroup_HstEscorted, "hear sound", 2, 3, 1, 2147483647, 'IsEnemySound');
+	InsertThreatDefinition(c_ThreatGroup_HstEscorted, "hear sound", 2, 4, 1, 2147483647, 'IsEnemySound');
+	InsertThreatDefinition(c_ThreatGroup_HstFreed, "near grenade", 5, 3, 4, c_iDetectGrenadeRadius);
+	InsertThreatDefinition(c_ThreatGroup_HstFreed, "see enemy", 4, 0, 3, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstFreed, "see friend", 1, 0, 2, 2147483647, 'CanSeeFriend');
+	InsertThreatDefinition(c_ThreatGroup_HstFreed, "hear sound", 2, 2, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstFreed, "hear sound", 2, 3, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstFreed, "hear sound", 2, 4, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstGuarded, "near grenade", 5, 3, 3, c_iDetectGrenadeRadius);
+	InsertThreatDefinition(c_ThreatGroup_HstGuarded, "see friend", 1, 0, 2, 2147483647, 'CanSeeFriend');
+	InsertThreatDefinition(c_ThreatGroup_HstGuarded, "hear sound", 2, 4, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstGuarded, "hear sound", 2, 2, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstBait, "near grenade", 5, 3, 2, c_iDetectGrenadeRadius);
+	InsertThreatDefinition(c_ThreatGroup_HstBait, "see friend", 1, 0, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstBait, "hear sound", 2, 2, 1, 2147483647);
+	InsertThreatDefinition(c_ThreatGroup_HstBait, "hear sound", 2, 4, 1, 2147483647);
+	assert(__NFUN_154__(m_aThreatDefinition[0].m_iThreatLevel, 0));
+	assert(__NFUN_154__(m_iThreatDefinitionIndex, 27));
+	return;
+}
 
 //------------------------------------------------------------------
 // InitReaction
@@ -812,152 +836,147 @@ function InitThreatDefinition()
 //------------------------------------------------------------------
 function InitReaction()
 {
-    local R6Hostage     hostageDbg;
-    local R6HostageAI   hostageAIDbg;
-    local INT           i;
+	local R6Hostage hostageDbg;
+	local R6HostageAI hostageAIDbg;
+	local int i;
 
-    // *** there's no validation, so be carefull when inserting element ***
-    ///////////////////////////////////////////////////////////////////////////////////
-    InsertReaction( c_ThreatGroup_Civ, 1,  33,  'CivRunForCover'       );
-    InsertReaction( c_ThreatGroup_Civ, 1,  66,  'GoCivScareToDeath'    );
-    InsertReaction( c_ThreatGroup_Civ, 1,  100, m_noReactionName       ); 
-    InsertReaction( c_ThreatGroup_Civ, 2,  25,  'CivRunForCover'       );
-    InsertReaction( c_ThreatGroup_Civ, 2,  50,  'GoCivScareToDeath'    );
-    InsertReaction( c_ThreatGroup_Civ, 2,  100, 'CivRunTowardRainbow'  );
-    InsertReaction( c_ThreatGroup_Civ, 3,  50,  'GoCivScareToDeath'    );
-    InsertReaction( c_ThreatGroup_Civ, 3,  100, 'CivRunForCover'       );  
-    InsertReaction( c_ThreatGroup_Civ, 4,  100, 'CivRunForCover'       );    
-    InsertReaction( c_ThreatGroup_Civ, c_ThreatLevel_Surrender,  50,  'CivSurrender'   );    
-    InsertReaction( c_ThreatGroup_Civ, c_ThreatLevel_Surrender,  100, 'CivRunForCover' );    
-    InsertReaction( c_ThreatGroup_Civ, 6,  100, 'CivSurrender'         );    
+	InsertReaction(c_ThreatGroup_Civ, 1, 33, 'CivRunForCover');
+	InsertReaction(c_ThreatGroup_Civ, 1, 66, 'GoCivScareToDeath');
+	InsertReaction(c_ThreatGroup_Civ, 1, 100, m_noReactionName);
+	InsertReaction(c_ThreatGroup_Civ, 2, 25, 'CivRunForCover');
+	InsertReaction(c_ThreatGroup_Civ, 2, 50, 'GoCivScareToDeath');
+	InsertReaction(c_ThreatGroup_Civ, 2, 100, 'CivRunTowardRainbow');
+	InsertReaction(c_ThreatGroup_Civ, 3, 50, 'GoCivScareToDeath');
+	InsertReaction(c_ThreatGroup_Civ, 3, 100, 'CivRunForCover');
+	InsertReaction(c_ThreatGroup_Civ, 4, 100, 'CivRunForCover');
+	InsertReaction(c_ThreatGroup_Civ, c_ThreatLevel_Surrender, 50, 'CivSurrender');
+	InsertReaction(c_ThreatGroup_Civ, c_ThreatLevel_Surrender, 100, 'CivRunForCover');
+	InsertReaction(c_ThreatGroup_Civ, 6, 100, 'CivSurrender');
+	InsertReaction(c_ThreatGroup_HstGuarded, 1, 100, 'GuardedPlayReaction');
+	InsertReaction(c_ThreatGroup_HstGuarded, 2, 40, 'GoGuarded_Foetus');
+	InsertReaction(c_ThreatGroup_HstGuarded, 2, 60, 'GoGuarded_frozen');
+	InsertReaction(c_ThreatGroup_HstGuarded, 2, 100, 'GoHstRunTowardRainbow');
+	InsertReaction(c_ThreatGroup_HstGuarded, 3, 100, 'GoHstRunForCover');
+	InsertReaction(c_ThreatGroup_HstEscorted, 1, 100, 'HearShootingReaction');
+	InsertReaction(c_ThreatGroup_HstFreed, 1, 100, 'GoHstRunForCover');
+	InsertReaction(c_ThreatGroup_HstFreed, 2, 100, 'GoHstRunTowardRainbow');
+	InsertReaction(c_ThreatGroup_HstFreed, 3, 100, 'GoHstFreedButSeeEnemy');
+	InsertReaction(c_ThreatGroup_HstFreed, 4, 100, 'GoHstRunForCover');
+	InsertReaction(c_ThreatGroup_HstBait, 1, 100, 'BaitPlayReaction');
+	InsertReaction(c_ThreatGroup_HstBait, 2, 100, 'GoHstRunForCover');
+	assert(__NFUN_154__(m_iReactionIndex, 24));
+	return;
+}
 
-    ///////////////////////////////////////////////////////////////////////////////////
-    // hear noise
-    InsertReaction( c_ThreatGroup_HstGuarded, 1,  100, 'GuardedPlayReaction'); // fire a function: react + noise
-    // see a rainbow
-    InsertReaction( c_ThreatGroup_HstGuarded, 2,  40,  'GoGuarded_foetus'   );    
-    InsertReaction( c_ThreatGroup_HstGuarded, 2,  60,  'GoGuarded_frozen'   );    
-    InsertReaction( c_ThreatGroup_HstGuarded, 2,  100, 'GoHstRunTowardRainbow'   );    
-    // see grenade
-    InsertReaction( c_ThreatGroup_HstGuarded, 3,  100, 'GoHstRunForCover' );    
+// NEW IN 1.60
+function InitReactionForClassicMissionCivilian()
+{
+	local R6Hostage hostageDbg;
+	local R6HostageAI hostageAIDbg;
+	local int i;
 
-    ///////////////////////////////////////////////////////////////////////////////////
-    // Escorted
-    InsertReaction( c_ThreatGroup_HstEscorted, 1,  100, 'HearShootingReaction' );
-
-    ///////////////////////////////////////////////////////////////////////////////////
-    // Freed
-    InsertReaction( c_ThreatGroup_HstFreed, 1,  100, 'GoHstRunForCover' );        // hear threat sound
-    InsertReaction( c_ThreatGroup_HstFreed, 2,  100, 'GoHstRunTowardRainbow' );   // see a friend
-    InsertReaction( c_ThreatGroup_HstFreed, 3,  100, 'GoHstFreedButSeeEnemy' );      // see an enemy
-    InsertReaction( c_ThreatGroup_HstFreed, 4,  100, 'GoHstRunForCover' );        // a grenade
-    
-    ///////////////////////////////////////////////////////////////////////////////////
-    // hear / see friend
-    InsertReaction( c_ThreatGroup_HstBait, 1,  100, 'BaitPlayReaction' );
-    // see grenade
-    InsertReaction( c_ThreatGroup_HstBait, 2,  100, 'GoHstRunForCover' ); 
-    
-
-    // should be same size
-    assert( m_iReactionIndex == ArrayCount(m_aReactions) ); 
-    #ifdefDEBUG  
-    if(bShowLog) 
-    {
-        log( "** m_aReactions: " $m_iReactionIndex );
-        log( "List of Reaction: group | level | roll | gotoState" );
-        for ( i = 0; i < ArrayCount(m_aReactions); i++ )
-        {
-            log( "  " @m_aReactions[ i ].m_groupName@ "|" @m_aReactions[ i ].m_iThreatLevel@ "|" @m_aReactions[ i ].m_iChance@  "|" $m_aReactions[ i ].m_gotoState );
-        }
-    }
-    #endif
+	InsertReaction(c_ThreatGroup_Civ, 1, 33, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 1, 66, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 1, 100, m_noReactionName);
+	InsertReaction(c_ThreatGroup_Civ, 2, 25, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 2, 50, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 2, 100, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 3, 50, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 3, 100, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 4, 100, 'CivRunForCover');
+	InsertReaction(c_ThreatGroup_Civ, c_ThreatLevel_Surrender, 50, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, c_ThreatLevel_Surrender, 100, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_Civ, 6, 100, 'm_noReactionName');
+	InsertReaction(c_ThreatGroup_HstGuarded, 1, 100, 'GuardedPlayReaction');
+	InsertReaction(c_ThreatGroup_HstGuarded, 2, 40, 'GoGuarded_Foetus');
+	InsertReaction(c_ThreatGroup_HstGuarded, 2, 60, 'GoGuarded_frozen');
+	InsertReaction(c_ThreatGroup_HstGuarded, 2, 100, 'GoHstRunTowardRainbow');
+	InsertReaction(c_ThreatGroup_HstGuarded, 3, 100, 'GoHstRunForCover');
+	InsertReaction(c_ThreatGroup_HstEscorted, 1, 100, 'HearShootingReaction');
+	InsertReaction(c_ThreatGroup_HstFreed, 1, 100, 'GoHstRunForCover');
+	InsertReaction(c_ThreatGroup_HstFreed, 2, 100, 'GoHstRunTowardRainbow');
+	InsertReaction(c_ThreatGroup_HstFreed, 3, 100, 'GoHstFreedButSeeEnemy');
+	InsertReaction(c_ThreatGroup_HstFreed, 4, 100, 'GoHstRunForCover');
+	InsertReaction(c_ThreatGroup_HstBait, 1, 100, 'BaitPlayReaction');
+	InsertReaction(c_ThreatGroup_HstBait, 2, 100, 'GoHstRunForCover');
+	assert(__NFUN_154__(m_iReactionIndex, 24));
+	return;
 }
 
 //------------------------------------------------------------------
 // GetReaction: return the state to go
 //	if '' is return, do nothing
 //------------------------------------------------------------------
-function name GetReaction( name groupName, INT iLevel, INT iRoll )
+function name GetReaction(name GroupName, int iLevel, int iRoll)
 {
-    local INT   i;
-    local bool  bFound;
-    local name  stateName;
+	local int i;
+	local bool bFound;
+	local name stateName;
 
-    bFound = false;
-    for ( i = 0; i < ArrayCount(m_aReactions); i++ )
-    {
-        if ( m_aReactions[i].m_groupName == groupName )
-        {
-            if ( m_aReactions[i].m_iThreatLevel == iLevel )
-            {
-                if ( iRoll <= m_aReactions[ i ].m_iChance )
-                {
-                    bFound = true;
-                    break;
-                }
-            }
-            else if ( m_aReactions[i].m_iThreatLevel > iLevel )
-            {
-                break;
-            }
-        }
-    }
+	bFound = false;
+	i = 0;
+	J0x0F:
 
-    if ( bFound )
-    {
-        stateName = m_aReactions[ i ].m_gotoState;
-    }
-    else
-    {
-        stateName = m_noReactionName;
-    }
+	// End:0x9E [Loop If]
+	if(__NFUN_150__(i, 24))
+	{
+		// End:0x94
+		if(__NFUN_254__(m_aReactions[i].m_groupName, GroupName))
+		{
+			// End:0x77
+			if(__NFUN_154__(m_aReactions[i].m_iThreatLevel, iLevel))
+			{
+				// End:0x74
+				if(__NFUN_152__(iRoll, m_aReactions[i].m_iChance))
+				{
+					bFound = true;
+					// [Explicit Break]
+					goto J0x9E;
+				}
+				// [Explicit Continue]
+				goto J0x94;
+			}
+			// End:0x94
+			if(__NFUN_151__(m_aReactions[i].m_iThreatLevel, iLevel))
+			{
+				// [Explicit Break]
+				goto J0x9E;
+			}
+		}
+		J0x94:
 
-    #ifdefDEBUG if(bShowLog) log( "GetReaction state:" @stateName@  "level:" @iLevel@ "roll:" @iRoll ); #endif
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	J0x9E:
 
-    return stateName;
+	// End:0xC0
+	if(bFound)
+	{
+		stateName = m_aReactions[i].m_gotoState;		
+	}
+	else
+	{
+		stateName = m_noReactionName;
+	}
+	return stateName;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // ValidMgr: valid some data of manager. can be called only once
 //	
 //------------------------------------------------------------------
-function ValidMgr( R6HostageAI ai )
+function ValidMgr(R6HostageAI AI)
 {
-    /*
-    local name orgName;
-    local INT  i;
-
-    if ( !bDebug )
-        return;
-
-    orgName = ai.getStateName();
-
-    ai = Spawn( class'R6HostageAI');   
-
-    for ( i = 0; i < ArrayCount(m_aReactions); i++ )
-    {
-        ai.gotoState( m_aReactions[i].m_gotoState ); 
-        if ( ai.getStateName() != m_aReactions[i].m_gotoState )
-        {
-            log( "ScriptWarning: InsertReaction unknown state name " $m_aReactions[i].m_gotoState );
-        }
-    }
-
-    bDebug = false; // test only once
-    ai.gotoState( orgName );
-
-    */
+	return;
 }
 
-//------------------------------------------------------------------
-// GetHostageSndEventPlay
-//	
-//------------------------------------------------------------------
-function R6Pawn.EHostageVoices GetHostageVoices( INT index )
+function Pawn.EHostageVoices GetHostageVoices(int Index)
 {
-    return m_aHstSndEventInfo[index].m_eVoice;
+	return m_aHstSndEventInfo[Index].m_eVoice;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -965,49 +984,58 @@ function R6Pawn.EHostageVoices GetHostageVoices( INT index )
 // Exception when hostage sees Rainbow but is also close to Terrorist,
 // the personnality is not used
 //------------------------------------------------------------------
-function int GetHostageSndEvent( int iSndEvent, R6Hostage h )
+function int GetHostageSndEvent(int iSndEvent, R6Hostage H)
 {
-    local R6Pawn.EHostagePersonality ePerso;
-    local int   i;
-    local bool  bFound;
+	local R6Pawn.EHostagePersonality ePerso;
+	local int i;
+	local bool bFound;
 
-    ePerso = h.m_ePersonality;
-    
-    // if bait, act like a coward
-    if ( ePerso == HPERSO_Bait )
-    {
-        ePerso = HPERSO_Coward;
-    }
+	ePerso = H.m_ePersonality;
+	// End:0x2C
+	if(__NFUN_154__(int(ePerso), int(3)))
+	{
+		ePerso = 0;
+	}
+	i = 0;
+	J0x33:
 
-    // loop throu all event
-    for ( i = 0; i < ArrayCount(m_aHstSndEventInfo); i++ )
-    {
-        // find the snd event
-        if ( m_aHstSndEventInfo[i].m_iHstSndEvent == iSndEvent )
-        {
-            bFound = true;
-            break;
-        }
-    }
+	// End:0x6E [Loop If]
+	if(__NFUN_150__(i, 24))
+	{
+		// End:0x64
+		if(__NFUN_154__(m_aHstSndEventInfo[i].m_iHstSndEvent, iSndEvent))
+		{
+			bFound = true;
+			// [Explicit Break]
+			goto J0x6E;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x33;
+	}
+	J0x6E:
 
-    // failed... wrong
-    if ( !bFound )
-        return 0;
-    
-    return i;
+	// End:0x7B
+	if(__NFUN_129__(bFound))
+	{
+		return 0;
+	}
+	return i;
+	return;
 }
 
 //------------------------------------------------------------------
 // InsertSndEventInfo
 //	
 //------------------------------------------------------------------
-function InsertSndEventInfo( int index, int iSndEvent, R6Pawn.EHostagePersonality ePerso, R6Pawn.EHostageVoices eVoice )
+function InsertSndEventInfo(int Index, int iSndEvent, R6Pawn.EHostagePersonality ePerso, Pawn.EHostageVoices eVoice)
 {
-    local name a;
+	local name A;
 
-    m_aHstSndEventInfo[ index ].m_iHstSndEvent  = iSndEvent;
-    m_aHstSndEventInfo[ index ].m_ePerso        = ePerso;
-    m_aHstSndEventInfo[ index ].m_eVoice       = eVoice;
+	m_aHstSndEventInfo[Index].m_iHstSndEvent = iSndEvent;
+	m_aHstSndEventInfo[Index].m_ePerso = ePerso;
+	m_aHstSndEventInfo[Index].m_eVoice = eVoice;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1016,29 +1044,33 @@ function InsertSndEventInfo( int index, int iSndEvent, R6Pawn.EHostagePersonalit
 //------------------------------------------------------------------
 function InitSndEventInfo()
 {
-    local int index;
-    
-    InsertSndEventInfo( index++, HSTSNDEvent_HearShooting,              HPERSO_None,    HV_Hears_Shooting );  
-    InsertSndEventInfo( index++, HSTSNDEvent_SeeRainbowBaitOrGoFrozen,  HPERSO_None,    HV_Frozen ); 
-    InsertSndEventInfo( index++, HSTSNDEvent_HstRunTowardRainbow,       HPERSO_None,    HV_Run );
-    InsertSndEventInfo( index++, HSTSNDEvent_GoFoetal,                  HPERSO_None,    HV_Foetal );
-    InsertSndEventInfo( index++, HSTSNDEvent_FollowRainbow,             HPERSO_None,    HV_RnbFollow );
-    InsertSndEventInfo( index++, HSTSNDEvent_AskedToStayPut,            HPERSO_None,    HV_RndStayPut );
-    InsertSndEventInfo( index++, HSTSNDEvent_InjuredByRainbow,          HPERSO_Brave,   HV_RnbHurt );
+	local int Index;
+
+	InsertSndEventInfo(__NFUN_165__(Index), 1, 4, 3);
+	InsertSndEventInfo(__NFUN_165__(Index), 6, 4, 1);
+	InsertSndEventInfo(__NFUN_165__(Index), 5, 4, 0);
+	InsertSndEventInfo(__NFUN_165__(Index), 7, 4, 2);
+	InsertSndEventInfo(__NFUN_165__(Index), 8, 4, 4);
+	InsertSndEventInfo(__NFUN_165__(Index), 9, 4, 5);
+	InsertSndEventInfo(__NFUN_165__(Index), 10, 2, 6);
+	return;
 }
 
 defaultproperties
 {
-     c_iSurrenderRadius=200
-     c_iDetectUnderFireRadius=500
-     c_iDetectThreatSound=1000
-     c_iDetectGrenadeRadius=1000
-     c_ThreatLevel_Surrender=5
-     c_ThreatGroup_Civ="Civ"
-     c_ThreatGroup_HstFreed="Freed"
-     c_ThreatGroup_HstGuarded="Guarded"
-     c_ThreatGroup_HstBait="Bait"
-     c_ThreatGroup_HstEscorted="Escorted"
-     RemoteRole=ROLE_None
-     bHidden=True
+	c_iSurrenderRadius=200
+	c_iDetectUnderFireRadius=500
+	c_iDetectThreatSound=1000
+	c_iDetectGrenadeRadius=1000
+	c_ThreatLevel_Surrender=5
+	c_ThreatGroup_Civ="Civ"
+	c_ThreatGroup_HstFreed="Freed"
+	c_ThreatGroup_HstGuarded="Guarded"
+	c_ThreatGroup_HstBait="Bait"
+	c_ThreatGroup_HstEscorted="Escorted"
+	RemoteRole=0
+	bHidden=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_aThreatDefinition26

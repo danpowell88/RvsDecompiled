@@ -1,25 +1,32 @@
 //=============================================================================
+// Scout - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Scout used for path generation.
 //=============================================================================
 class Scout extends Pawn
 	native
-	notplaceable;
+ notplaceable;
 
 var const float MaxLandingVelocity;
 
 function PreBeginPlay()
 {
-	Destroy(); //scouts shouldn't exist during play
+	__NFUN_279__();
+	return;
 }
 
 defaultproperties
 {
-     AccelRate=1.000000
-     bCollideActors=False
-     bCollideWorld=False
-     bBlockActors=False
-     bBlockPlayers=False
-     bProjTarget=False
-     bPathColliding=True
-     CollisionRadius=52.000000
+	AccelRate=1.0000000
+	bCollideActors=false
+	bCollideWorld=false
+	bBlockActors=false
+	bBlockPlayers=false
+	bProjTarget=false
+	bPathColliding=true
+	CollisionRadius=52.0000000
 }

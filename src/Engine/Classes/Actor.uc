@@ -1,4 +1,10 @@
 //=============================================================================
+// Actor - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Actor: The base class of all actors.
 // Actor is the base class of all gameplay objects.  
 // A large number of properties, behaviors and interfaces are implemented in Actor, including:
@@ -18,1104 +24,1159 @@
 class Actor extends Object
 	abstract
 	native
-	nativereplication;
+ nativereplication;
 
-// Imported data (during full rebuild).
-#exec Texture Import File=Textures\S_Actor.pcx Name=S_Actor Mips=Off MASKED=1
-#exec Texture Import File=Textures\S_LockLocation.pcx Name=S_LockLocation Mips=Off
+const MAXSTEPHEIGHT = 33.0;
+const MINFLOORZ = 0.7;
+const TEAM_None = 0x00000;
+const TEAM_Orders = 0x00001;
+const TEAM_OpenDoor = 0x00010;
+const TEAM_CloseDoor = 0x00020;
+const TEAM_Grenade = 0x00040;
+const TEAM_ClearRoom = 0x00080;
+const TEAM_Move = 0x00100;
+const TEAM_ClimbLadder = 0x00200;
+const TEAM_SecureTerrorist = 0x00400;
+const TEAM_EscortHostage = 0x00800;
+const TEAM_DisarmBomb = 0x01000;
+const TEAM_InteractDevice = 0x02000;
+const TEAM_OpenAndClear = 0x00090;
+const TEAM_OpenAndGrenade = 0x00050;
+const TEAM_OpenGrenadeAndClear = 0x000d0;
+const TEAM_GrenadeAndClear = 0x000c0;
+const TEAM_MoveAndGrenade = 0x00140;
+const c_iTeamNumHostage = 0;
+const c_iTeamNumTerrorist = 1;
+const c_iTeamNumAlpha = 2;
+const c_iTeamNumBravo = 3;
+const c_iTeamNumUnknow = 4;
+const c_iTeamNumPrisonerAlpha = 5;
+const c_iTeamNumPrisonerBravo = 6;
+const c_iTeamNumFreeBackup = 7;
+const DEATHMSG_CONNECTIONLOST = 1;
+const DEATHMSG_PENALTY = 2;
+const DEATHMSG_KAMAKAZE = 3;
+const DEATHMSG_SWITCHTEAM = 4;
+const DEATHMSG_HOSTAGE_DIED = 5;
+const DEATHMSG_HOSTAGE_KILLEDBY = 6;
+const DEATHMSG_HOSTAGE_KILLEDBYTERRO = 7;
+const DEATHMSG_RAINBOW_KILLEDBYTERRO = 8;
+const DEATHMSG_KILLED_BY_BOMB = 9;
+const DEATHMSG_PRISONER_KILLEDBY = 10;
+const DEATHMSG_RAINBOW_SUFFOCATE = 11;
+const DEATHMSG_INTRUDER_KILLEDBY = 12;
+const TF_TraceActors = 0x0001;
+const TF_Visibility = 0x0002;
+const TF_LineOfFire = 0x0004;
+const TF_SkipVolume = 0x0008;
+const TF_ShadowCast = 0x0010;
+const TF_SkipPawn = 0x0020;
 
-//R6CODE
 enum eKillResult
 {
-    KR_None,
-    KR_Wound,
-    KR_Incapacitate,
-    KR_Killed,
+	KR_None,                        // 0
+	KR_Wound,                       // 1
+	KR_Incapacitate,                // 2
+	KR_Killed                       // 3
 };
 
 enum eStunResult
 {
-    SR_None,
-    SR_Stunned,
-    SR_Dazed,
-    SR_KnockedOut,
+	SR_None,                        // 0
+	SR_Stunned,                     // 1
+	SR_Dazed,                       // 2
+	SR_KnockedOut                   // 3
 };
 
 enum EStance
 {
-    STAN_None,
-    STAN_Standing,
-    STAN_Crouching,
-    STAN_Prone
+	STAN_None,                      // 0
+	STAN_Standing,                  // 1
+	STAN_Crouching,                 // 2
+	STAN_Prone                      // 3
 };
 
-// see GetRandomTweenNum
-struct RandomTweenNum
+enum EPhysics
 {
-    var()   float m_fMin;
-    var()   float m_fMax;
-    var     float m_fResult; // result of the last GetRandomTweenNum
-};  // if you modify this struct: update FRandomTweenNum in R6Engine.h
+	PHYS_None,                      // 0
+	PHYS_Walking,                   // 1
+	PHYS_Falling,                   // 2
+	PHYS_Swimming,                  // 3
+	PHYS_Flying,                    // 4
+	PHYS_Rotating,                  // 5
+	PHYS_Projectile,                // 6
+	PHYS_Interpolating,             // 7
+	PHYS_MovingBrush,               // 8
+	PHYS_Spider,                    // 9
+	PHYS_Trailer,                   // 10
+	PHYS_Ladder,                    // 11
+	PHYS_RootMotion,                // 12
+	PHYS_Karma,                     // 13
+	PHYS_KarmaRagDoll               // 14
+};
 
-
-// we are using chars instead of bools since bools inside structs can not be properly serialized yet :(
-
-//END R6CODE
-
-// Flags.
-var			  const bool	bStatic;			// Does not move or change over time. Don't let L.D.s change this - screws up net play
-var(Advanced)		bool	bHidden;			// Is hidden during gameplay.
-var(Advanced) const bool	bNoDelete;			// Cannot be deleted during play.
-//#ifdef R6CODE
-// Overrides bNoDelete, we need bNoDelete set to true for Interactive objects, but we want to be able to override 
-// this if it should not be available based on game mode.
-var           const BOOL    m_bR6Deletable;
-var(R6Availability) BOOL    m_bUseR6Availability;
-var                 BOOL    m_bSkipHitDetection;
-//#endif R6CODE
-var					bool	bAnimByOwner;		// Animation dictated by owner.
-var			  const	bool	bDeleteMe;			// About to be deleted.
-var transient const bool	bTicked;			// Actor has been updated.
-var(Lighting)		bool	bDynamicLight;		// This light is dynamic.
-var                 bool    m_bDynamicLightOnlyAffectPawns; // R6CODE
-var					bool	bTimerLoop;			// Timer loops (else is one-shot).
-var(Advanced)		bool	bCanTeleport;		// This actor can be teleported.
-var 				bool	bOwnerNoSee;		// Everything but the owner can see this actor.
-var					bool    bOnlyOwnerSee;		// Only owner can see this actor.
-var			  const	bool	bAlwaysTick;		// Update even when players-only.
-var(Advanced)		bool    bHighDetail;		// Only show up on high-detail.
-var(Advanced)		bool	bStasis;			// In StandAlone games, turn off if not in a recently rendered zone turned off if  bStasis  and physics = PHYS_None or PHYS_Rotating.
-var					bool	bTrailerSameRotation; // If PHYS_Trailer and true, have same rotation as owner.
-var					bool	bTrailerPrePivot;	// If PHYS_Trailer and true, offset from owner by PrePivot.
-var					bool	bClientAnim;		// Don't replicate any animations - animation done client-side
-var					bool	bWorldGeometry;		// Collision and Physics treats this actor as world geometry
-//R6CODE
-//var					bool    bAcceptsProjectors;	// Projectors can project onto this actor
-var(Display)		bool    bAcceptsProjectors;	// Projectors can project onto this actor
-var					bool    m_bHandleRelativeProjectors;	// Projectors can project onto this actor but are relative to it -jfd
-var					bool	bOrientOnSlope;		// when landing, orient base on slope of floor
-var					bool    bDisturbFluidSurface; // Cause ripples when in contact with FluidSurface.
-var			  const	bool	bOnlyAffectPawns;	// Optimisation - only test ovelap against pawns. Used for influences etc.
-var					bool    bShowOctreeNodes;
-var					bool    bWasSNFiltered;      // Mainly for debugging - the way this actor was inserted into Octree.
-
-// Networking flags
-var			  const	bool	bNetTemporary;				// Tear-off simulation in network play.
-var			  const	bool	bNetOptional;				// Actor should only be replicated if bandwidth available.
-var			  const	bool	bNetDirty;					// set when any attribute is assigned a value in unrealscript, reset when the actor is replicated
-var					bool	bAlwaysRelevant;			// Always relevant for network.
-var					bool	bReplicateInstigator;		// Replicate instigator to client (used by bNetTemporary projectiles).
-var					bool	bReplicateMovement;			// if true, replicate movement/location related properties
-var					bool	bSkipActorPropertyReplication; // if true, don't replicate actor class variables for this actor
-var					bool	bUpdateSimulatedPosition;	// if true, update velocity/location after initialization for simulated proxies
-var					bool	bTearOff;					// if true, this actor is no longer replicated to new clients, and 
-														// is "torn off" (becomes a ROLE_Authority) on clients to which it was being replicated.
-//#ifdef R6CODE
-var                 BOOL    m_bUseRagdoll;              // Wheter or not the ragdoll have control over the bone (used only for pawn)
-var                 BOOL    m_bForceBaseReplication;    // Force to replicate Base and AttachmentBone, mostly for weapon
-//#endif // #ifdef R6CODE
-var					bool	bOnlyDirtyReplication;		// if true, only replicate actor if bNetDirty is true - useful if no C++ changed attributes (such as physics) 
-														// bOnlyDirtyReplication only used with bAlwaysRelevant actors
-var					bool	bReplicateAnimations;		// Should replicate SimAnim
-
-//UT2K3
-var const           bool    bNetInitialRotation;        // Should replicate initial rotation
-var         	    bool    bCompressedPosition;	    // used by networking code to flag compressed position replication
-
-//R6CODE
-var           const bool    m_bReticuleInfo;            // if the true, eventGetReticuleInfo will get call
-var                 bool    m_bShowInHeatVision;
-var                 BOOL    m_bFirstTimeInZone;
-var(Lighting)       bool    m_bBypassAmbiant;
-var                 BOOL    m_bRenderOutOfWorld;
-var                 BOOL    m_bSpawnedInGame;       // when spawned in game, after the game is started, this is set to true
-var                 BOOL    m_bResetSystemLog;      // used to debug the reset system
-var                 BOOL    m_bDeleteOnReset;       // Actor who must be deleted when resetting the level
-
-#ifdefSPDEMO
-var                 int     m_vID;                  // version ID
-#endif
-
-// Priority Parameters
-// Actor's current physics mode.
-var(Movement) const enum EPhysics
-{
-	PHYS_None,
-	PHYS_Walking,
-	PHYS_Falling,
-	PHYS_Swimming,
-	PHYS_Flying,
-	PHYS_Rotating,
-	PHYS_Projectile,
-	PHYS_Interpolating,
-	PHYS_MovingBrush,
-	PHYS_Spider,
-	PHYS_Trailer,
-	PHYS_Ladder,
-	PHYS_RootMotion,
-    PHYS_Karma,
-    PHYS_KarmaRagDoll
-} Physics;
-
-// Net variables.
 enum ENetRole
 {
-	ROLE_None,              // No role at all.
-	ROLE_DumbProxy,			// Dumb proxy of this actor.
-	ROLE_SimulatedProxy,	// Locally simulated proxy of this actor.
-	ROLE_AutonomousProxy,	// Locally autonomous proxy of this actor.
-	ROLE_Authority,			// Authoritative control over the actor.
-};
-var ENetRole Role;
-var ENetRole RemoteRole;
-
-// Drawing effect.
-var(Display) const enum EDrawType
-{
-	DT_None,
-	DT_Sprite,
-	DT_Mesh,
-	DT_Brush,
-	DT_RopeSprite,
-	DT_VerticalSprite,
-	DT_Terraform,
-	DT_SpriteAnimOnce,
-	DT_StaticMesh,
-	DT_DrawType,
-	DT_Particle,
-	DT_AntiPortal,
-	DT_FluidSurface
-} DrawType;
-
-var const transient int		NetTag;
-var			float			LastRenderTime;	// last time this actor was rendered.
-var(Events) name			Tag;			// Actor's tag name.
-
-// Execution and timer variables.
-var				float       TimerRate;		// Timer event, 0=no timer.
-var		const	float       TimerCounter;	// Counts up until it reaches TimerRate.
-var(Advanced)	float		LifeSpan;		// How old the object lives before dying, 0=forever.
-
-var transient MeshInstance MeshInstance;	// Mesh instance.
-
-var(Display) float		  LODBias;
-
-// Owner.
-var         const Actor   Owner;			// Owner actor.
-var(Object) name InitialState;
-var(Object) name Group;
-
-//-----------------------------------------------------------------------------
-// Structures.
-
-// Identifies a unique convex volume in the world.
-struct PointRegion
-{
-	var zoneinfo Zone;       // Zone.
-	var int      iLeaf;      // Bsp leaf.
-	var byte     ZoneNumber; // Zone number.
+	ROLE_None,                      // 0
+	ROLE_DumbProxy,                 // 1
+	ROLE_SimulatedProxy,            // 2
+	ROLE_AutonomousProxy,           // 3
+	ROLE_Authority                  // 4
 };
 
-//-----------------------------------------------------------------------------
-// Major actor properties.
-
-// Scriptable.
-var       const LevelInfo Level;         // Level this actor is on.
-var transient const Level XLevel;        // Level object.
-var(Events) name          Event;         // The event this actor causes.
-var Pawn                  Instigator;    // Pawn responsible for damage caused by this actor.
-var(R6Sound) sound        AmbientSound;  // Ambient sound effect.
-var(R6Sound) sound        AmbientSoundStop;         // Stop the ambient sound effect.
-// ifdef R6Sound
-var(R6Sound) FLOAT        m_fAmbientSoundRadius;    // Ambient Sound Radius
-var(R6Sound) FLOAT        m_fSoundRadiusSaturation; // The distance where the sound will be at the maximum
-var(R6Sound) FLOAT        m_fSoundRadiusActivation; // The distance where the sound is activated
-var(R6Sound) FLOAT        m_fSoundRadiusLinearFadeDist; // Distance at which the sound starts to fade linearly
-var(R6Sound) FLOAT        m_fSoundRadiusLinearFadeEnd; //Distance from which the sound will be inaudible
-var          BOOL         m_bInAmbientRange; 
-// Play Conditions
-var(R6Sound) BOOL         m_bPlayIfSameZone;        // Play the ambient sound only if the object is in the same zone
-var(R6Sound) BOOL         m_bPlayOnlyOnce;          // Play a sound one time only.
-var(R6Sound) BOOL         m_bListOfZoneHearable;    // Play the sound only in the zone of the array m_ListOfZoneInfo
-var(R6Sound) BOOL         m_bIfDirectLineOfSight;   // Play the ambient sound only if we have a direct line of sight
-var(R6SOUND) array<ZoneInfo> m_ListOfZoneInfo;      // Play the ambient sound only if the object is NOT in one of those zone
-
-var          Actor        m_CurrentAmbianceObject;  // Object responsible if the current ambience that should be hear by this actor.  Use when we switch from player to player
-var          Actor        m_CurrentVolumeSound;    // Object responsible if the current ambience that should be hear by this actor.  Use when we switch from player to player
-var          BOOL         m_bUseExitSounds;         // Some objects, like ZoneInfo, contains Entry and Exit Sound.  This lag is to know which of the m_CurrentAmbianceSounds object to use
-var          BOOL         m_bSoundWasPlayed;         // When the we want play the sound only once. A check is made to know if the sound was already played.
-// endif
-
-//#ifndef R6CHANGEWEAPONSYSTEM
-//var Inventory             Inventory;     // Inventory chain.
-//#endif
-var const Actor           Base;          // Actor we're standing on.
-var       bool            m_bDrawFromBase;//R6CODE This actor is drawn by its parent
-var const PointRegion     Region;        // Region this actor is in.
-var transient array<int>  Leaves;		 // BSP leaves this actor is in.
-
-// Internal.
-var const float           LatentFloat;   // Internal latent function use.
-var const array<Actor>    Touching;		 // List of touching actors.
-var const transient array<int>  OctreeNodes;// Array of nodes of the octree Actor is currently in. Internal use only.
-var const transient Box	  OctreeBox;     // Actor bounding box cached when added to Octree. Internal use only.
-var const transient vector OctreeBoxCenter;
-var const transient vector OctreeBoxRadii;
-var const actor           Deleted;       // Next actor in just-deleted chain.
-
-// Internal tags.
-var const native int CollisionTag, LightingTag, ActorTag;
-var const transient int JoinedTag;
-
-// The actor's position and rotation.
-var const	PhysicsVolume	PhysicsVolume;	// physics volume this actor is currently in
-var(Movement) const vector	Location;		// Actor's location; use Move to set.
-var(Movement) const rotator Rotation;		// Rotation.
-var(Movement) vector		Velocity;		// Velocity.
-var			  vector        Acceleration;	// Acceleration.
-
-// Attachment related variables
-var(Movement)	name	AttachTag;
-var const array<Actor>  Attached;			// array of actors attached to this actor.
-var const vector		RelativeLocation;	// location relative to base/bone (valid if base exists)
-var const rotator		RelativeRotation;	// rotation relative to base/bone (valid if base exists)
-var const name			AttachmentBone;		// name of bone to which actor is attached (if attached to center of base, =='')
-
-//R6CODE from UT2003
-var(Movement) const bool bHardAttach;       // Uses 'hard' attachment code. bBlockActor and bBlockPlayer must also be false.
-											// This actor cannot then move relative to base (setlocation etc.).
-											// Dont set while currently based on something!
-											// 
-var const     Matrix    HardRelMatrix;		// Transform of actor in base's ref frame. Doesn't change after SetBase.
-//#endif 
-
-// Projectors
-struct ProjectorRenderInfoPtr { var int Ptr; };	// Hack to to fool C++ header generation...
-//R6CODE
-//var const transient array<ProjectorRenderInfoPtr> Projectors;// Projected textures on this actor
-struct ProjectorRelativeRenderInfo
+enum EDrawType
 {
-    var     ProjectorRenderInfoPtr  m_RenderInfoPtr;
-    var     vector                  m_RelativeLocation;
-    var     rotator                 m_RelativeRotation;
+	DT_None,                        // 0
+	DT_Sprite,                      // 1
+	DT_Mesh,                        // 2
+	DT_Brush,                       // 3
+	DT_RopeSprite,                  // 4
+	DT_VerticalSprite,              // 5
+	DT_Terraform,                   // 6
+	DT_SpriteAnimOnce,              // 7
+	DT_StaticMesh,                  // 8
+	DT_DrawType,                    // 9
+	DT_Particle,                    // 10
+	DT_AntiPortal,                  // 11
+	DT_FluidSurface                 // 12
 };
-var const transient array<ProjectorRelativeRenderInfo> Projectors;// Projected textures on this actor
 
-//-----------------------------------------------------------------------------
-// Display properties.
-
-var(Display) Material		Texture;			// Sprite texture.if DrawType=DT_Sprite
-var(Display) const mesh		Mesh;				// Mesh if DrawType=DT_Mesh.
-var(Display) const StaticMesh StaticMesh;		// StaticMesh if DrawType=DT_StaticMesh
-var StaticMeshInstance		StaticMeshInstance; // Contains per-instance static mesh data, like static lighting data.
-var const export model		Brush;				// Brush if DrawType=DT_Brush.
-//var(Display) const float	DrawScale;			// Scaling factor, 1.0=normal size.
-//R6
-var(Display) float	DrawScale;			// Scaling factor, 1.0=normal size.
-var(Display) const vector	DrawScale3D;		// Scaling vector, (1.0,1.0,1.0)=normal size.
-var			 vector			PrePivot;			// Offset from box center for drawing.
-var(Display) array<Material> Skins;				// Multiple skin support - not replicated.
-var(Display) byte			AmbientGlow;		// Ambient brightness, or 255=pulsing.
-var(Display) byte           MaxLights;          // Limit to hardware lights active on this primitive.
-var(Display) ConvexVolume	AntiPortal;			// Convex volume used for DT_AntiPortal
-
-//R6Code
-var(Display) array<Material> NightVisionSkins;
-var(Display) FLOAT          m_fLightingScaleFactor;
-var(Display) Color          m_fLightingAdditiveAmbiant;
-var          BOOL           m_bAllowLOD;
-
-// Style for rendering sprites, meshes.
-var(Display) enum ERenderStyle
+enum ERenderStyle
 {
-	STY_None,
-	STY_Normal,
-	STY_Masked,
-	STY_Translucent,
-	STY_Modulated,
-	STY_Alpha,
-	STY_Particle,
-    STY_Highlight
-} Style;
+	STY_None,                       // 0
+	STY_Normal,                     // 1
+	STY_Masked,                     // 2
+	STY_Translucent,                // 3
+	STY_Modulated,                  // 4
+	STY_Alpha,                      // 5
+	STY_Particle,                   // 6
+	STY_Highlight                   // 7
+};
 
-// Display.
-var(Display)  bool      bUnlit;					// Lights don't affect actor.
-var(Display)  bool      bShadowCast;			// Casts static shadows.
-var(Display)  bool		bStaticLighting;		// Uses raytraced lighting.
-var(Display)  bool		bUseLightingFromBase;	// Use Unlit/AmbientGlow from Base
-
-// Advanced.
-var			  bool		bHurtEntry;				// keep HurtRadius from being reentrant
-var(Advanced) bool		bGameRelevant;			// Always relevant for game
-var(Advanced) bool		bCollideWhenPlacing;	// This actor collides with the world when placing.
-var			  bool		bTravel;				// Actor is capable of travelling among servers.
-var(Advanced) bool		bMovable;				// Actor can be moved.
-var			  bool		bDestroyInPainVolume;	// destroy this actor if it enters a pain volume
-var(Advanced) bool		bShouldBaseAtStartup;	// if true, find base for this actor at level startup, if collides with world and PHYS_None or PHYS_Rotating
-var			  bool		bPendingDelete;			// set when actor is about to be deleted (since endstate and other functions called 
-												// during deletion process before bDeleteMe is set).
-
-//R6CODE    For collisions
-var(Advanced) BOOL      m_bUseDifferentVisibleCollide;  // to use a different point to collide with this actor (in foreach VisibleCollidingActors)
-var(Advanced) vector    m_vVisibleCenter;               // use this vector instead of location when m_bUseDifferentVisibleCollide is true
-//end R6CODE
-
-//-----------------------------------------------------------------------------
-// Sound.
-
-// Ambient sound.
-var(Sound) float        SoundRadius;			// Radius of ambient sound.
-var        bool         m_b3DSound;             // Does this actor emits sounds in 3D
-var(Sound) byte         SoundPitch;				// Sound pitch shift, 64.0=none.
-
-
-// Sound occlusion
 enum ESoundOcclusion
 {
-	OCCLUSION_Default,
-	OCCLUSION_None,
-	OCCLUSION_BSP,
-	OCCLUSION_StaticMeshes,
+	OCCLUSION_Default,              // 0
+	OCCLUSION_None,                 // 1
+	OCCLUSION_BSP,                  // 2
+	OCCLUSION_StaticMeshes          // 3
 };
 
-var(Sound) ESoundOcclusion SoundOcclusion;		// Sound occlusion approach.
-
-// Sound slots for actors.
-
-// R6CODE  *** Change the ESoundSlot for our proper USE ***
 enum ESoundSlot
 {
-	SLOT_None,
-	SLOT_Ambient,           
-    SLOT_Guns,
-    SLOT_SFX,               // All the special effect (Door, Explosion, Vitre, etc.)
-	SLOT_GrenadeEffect,     // Use for special effect on the flash bang grenade )
-	SLOT_Music,             // In game music
-	SLOT_Talk,              // Use for the terrorist
-    SLOT_Speak,             // Use in the menu briefing
-    SLOT_HeadSet,           // Use for the Rainbow, talk with the Head Phone the player talk 
-    SLOT_Menu,              // Use for all other sound in the menu
-    SLOT_Instruction,
-    SLOT_StartingSound
+	SLOT_None,                      // 0
+	SLOT_Ambient,                   // 1
+	SLOT_Guns,                      // 2
+	SLOT_SFX,                       // 3
+	SLOT_GrenadeEffect,             // 4
+	SLOT_Music,                     // 5
+	SLOT_Talk,                      // 6
+	SLOT_Speak,                     // 7
+	SLOT_HeadSet,                   // 8
+	SLOT_Menu,                      // 9
+	SLOT_Instruction,               // 10
+	SLOT_StartingSound              // 11
 };
 
 enum ESoundVolume
 {
-    VOLUME_Music,
-    VOLUME_Voices,
-    VOLUME_FX,
-    VOLUME_Grenade
+	VOLUME_Music,                   // 0
+	VOLUME_Voices,                  // 1
+	VOLUME_FX,                      // 2
+	VOLUME_Grenade                  // 3
 };
 
 enum ESendSoundStatus
 {
-    SSTATUS_SendToPlayer,
-    SSTATUS_SendToMPTeam,
-    SSTATUS_SendToAll
+	SSTATUS_SendToPlayer,           // 0
+	SSTATUS_SendToMPTeam,           // 1
+	SSTATUS_SendToAll               // 2
 };
 
 enum ELoadBankSound
 {
-	LBS_Fix,
-	LBS_UC,
-	LBS_Map,
-	LBS_Gun,
+	LBS_Fix,                        // 0
+	LBS_UC,                         // 1
+	LBS_Map,                        // 2
+	LBS_Gun                         // 3
 };
 
-var(R6Sound) name         m_szSoundBoneName;			// Bone use by the sound.
-
-//END R6CODE
-
-// Music transitions.
 enum EMusicTransition
 {
-	MTRAN_None,
-	MTRAN_Instant,
-	MTRAN_Segue,
-	MTRAN_Fade,
-	MTRAN_FastFade,
-	MTRAN_SlowFade,
+	MTRAN_None,                     // 0
+	MTRAN_Instant,                  // 1
+	MTRAN_Segue,                    // 2
+	MTRAN_Fade,                     // 3
+	MTRAN_FastFade,                 // 4
+	MTRAN_SlowFade                  // 5
 };
 
-// Regular sounds.
-var(Sound) float TransientSoundVolume;	// default sound volume for regular sounds (can be overridden in playsound)
-var(Sound) float TransientSoundRadius;	// default sound radius for regular sounds (can be overridden in playsound)
+enum ELightType
+{
+	LT_None,                        // 0
+	LT_Steady,                      // 1
+	LT_Pulse,                       // 2
+	LT_Blink,                       // 3
+	LT_Flicker,                     // 4
+	LT_Strobe,                      // 5
+	LT_BackdropLight,               // 6
+	LT_SubtlePulse,                 // 7
+	LT_TexturePaletteOnce,          // 8
+	LT_TexturePaletteLoop           // 9
+};
 
-//-----------------------------------------------------------------------------
-// Collision.
+enum ELightEffect
+{
+	LE_None,                        // 0
+	LE_TorchWaver,                  // 1
+	LE_FireWaver,                   // 2
+	LE_WateryShimmer,               // 3
+	LE_Searchlight,                 // 4
+	LE_SlowWave,                    // 5
+	LE_FastWave,                    // 6
+	LE_CloudCast,                   // 7
+	LE_StaticSpot,                  // 8
+	LE_Shock,                       // 9
+	LE_Disco,                       // 10
+	LE_Warp,                        // 11
+	LE_Spotlight,                   // 12
+	LE_NonIncidence,                // 13
+	LE_Shell,                       // 14
+	LE_OmniBumpMap,                 // 15
+	LE_Interference,                // 16
+	LE_Cylinder,                    // 17
+	LE_Rotor,                       // 18
+	LE_Unused,                      // 19
+	LE_Sunlight                     // 20
+};
 
-// Collision size.
-var(Collision) const float CollisionRadius;		// Radius of collision cyllinder.
-var(Collision) const float CollisionHeight;		// Half-height cyllinder.
+enum EForceType
+{
+	FT_None,                        // 0
+	FT_DragAlong                    // 1
+};
 
+enum ETravelType
+{
+	TRAVEL_Absolute,                // 0
+	TRAVEL_Partial,                 // 1
+	TRAVEL_Relative                 // 2
+};
+
+enum EDoubleClickDir
+{
+	DCLICK_None,                    // 0
+	DCLICK_Left,                    // 1
+	DCLICK_Right,                   // 2
+	DCLICK_Forward,                 // 3
+	DCLICK_Back,                    // 4
+	DCLICK_Active,                  // 5
+	DCLICK_Done                     // 6
+};
+
+enum EDisplayFlag
+{
+	DF_ShowOnlyInPlanning,          // 0
+	DF_ShowOnlyIn3DView,            // 1
+	DF_ShowInBoth                   // 2
+};
+
+enum ENoiseType
+{
+	NOISE_None,                     // 0
+	NOISE_Investigate,              // 1
+	NOISE_Threat,                   // 2
+	NOISE_Grenade,                  // 3
+	NOISE_Dead                      // 4
+};
+
+enum EPawnType
+{
+	PAWN_NotDefined,                // 0
+	PAWN_Rainbow,                   // 1
+	PAWN_Terrorist,                 // 2
+	PAWN_Hostage,                   // 3
+	PAWN_All                        // 4
+};
+
+enum ESoundType
+{
+	SNDTYPE_None,                   // 0
+	SNDTYPE_Gunshot,                // 1
+	SNDTYPE_BulletImpact,           // 2
+	SNDTYPE_GrenadeImpact,          // 3
+	SNDTYPE_GrenadeLike,            // 4
+	SNDTYPE_Explosion,              // 5
+	SNDTYPE_PawnMovement,           // 6
+	SNDTYPE_Choking,                // 7
+	SNDTYPE_Talking,                // 8
+	SNDTYPE_Screaming,              // 9
+	SNDTYPE_Reload,                 // 10
+	SNDTYPE_Equipping,              // 11
+	SNDTYPE_Dead,                   // 12
+	SNDTYPE_Door                    // 13
+};
+
+enum EGameModeInfo
+{
+	GMI_None,                       // 0
+	GMI_SinglePlayer,               // 1
+	GMI_Cooperative,                // 2
+	GMI_Adversarial,                // 3
+	GMI_Squad                       // 4
+};
+
+enum EModeFlagOption
+{
+	MFO_Available,                  // 0
+	MFO_NotAvailable                // 1
+};
+
+enum EHUDDisplayType
+{
+	HDT_Normal,                     // 0
+	HDT_Hidden,                     // 1
+	HDT_FadeIn,                     // 2
+	HDT_Blink                       // 3
+};
+
+enum EHUDElement
+{
+	HE_HealthAndName,               // 0
+	HE_Posture,                     // 1
+	HE_ActionIcon,                  // 2
+	HE_WeaponIconAndName,           // 3
+	HE_WeaponAttachment,            // 4
+	HE_Ammo,                        // 5
+	HE_Magazine,                    // 6
+	HE_ROF,                         // 7
+	HE_TeamHealth,                  // 8
+	HE_MovementMode,                // 9
+	HE_ROE,                         // 10
+	HE_WPAction,                    // 11
+	HE_Reticule,                    // 12
+	HE_WPIcon,                      // 13
+	HE_OtherTeam,                   // 14
+	HE_PressGoCodeKey               // 15
+};
+
+enum ETerroristNationality
+{
+	TN_Spanish1,                    // 0
+	TN_Spanish2,                    // 1
+	TN_German1,                     // 2
+	TN_German2,                     // 3
+	TN_Portuguese                   // 4
+};
+
+enum EHostageNationality
+{
+	HN_French,                      // 0
+	HN_British,                     // 1
+	HN_Spanish,                     // 2
+	HN_Portuguese,                  // 3
+	HN_Norwegian                    // 4
+};
+
+enum EVoicesPriority
+{
+	VP_Low,                         // 0
+	VP_Medium,                      // 1
+	VP_High                         // 2
+};
+
+struct RandomTweenNum
+{
+	var() float m_fMin;
+	var() float m_fMax;
+	var float m_fResult;  // result of the last GetRandomTweenNum
+};
+
+struct PointRegion
+{
+	var ZoneInfo Zone;  // Zone.
+	var int iLeaf;  // Bsp leaf.
+	var byte ZoneNumber;  // Zone number.
+};
+
+struct ProjectorRenderInfoPtr
+{
+// NEW IN 1.60
+	var int Ptr;
+};
+
+struct ProjectorRelativeRenderInfo
+{
+	var ProjectorRenderInfoPtr m_RenderInfoPtr;
+	var Vector m_RelativeLocation;
+	var Rotator m_RelativeRotation;
+};
+
+struct DbgVectorInfo
+{
+	var bool m_bDisplay;
+	var Vector m_vLocation;
+	var Vector m_vCylinder;
+	var Color m_color;
+	var string m_szDef;
+};
+
+struct KRBVec
+{
+	var float X;
+	var float Y;
+	var float Z;
+};
+
+struct AnimRep
+{
+	var name AnimSequence;
+	var bool bAnimLoop;
+	var byte AnimRate;  // note that with compression, max replicated animrate is 4.0
+	var byte AnimFrame;
+	var byte TweenRate;  // note that with compression, max replicated tweentime is 4 seconds
+};
+
+struct AnimStruct
+{
+	var() name AnimSequence;
+	var() name BoneName;
+	var() float AnimRate;  // note that with compression, max replicated animrate is 4.0
+	var() byte Alpha;
+	var() byte LeadIn;
+	var() byte LeadOut;
+	var() bool bLoopAnim;
+};
+
+struct R6HUDState
+{
+	var float fTimeStamp;
+	var Actor.EHUDDisplayType eDisplay;
+	var Color Color;
+};
+
+struct stCustomAvailability
+{
+// NEW IN 1.60
+	var() string szGameType;
+// NEW IN 1.60
+	var() Actor.EModeFlagOption eAvailabilityFlag;
+};
+
+struct IndexBufferPtr
+{
+// NEW IN 1.60
+	var int Ptr;
+};
+
+struct ResolutionInfo
+{
+	var int iWidth;
+	var int iHeigh;
+	var int iRefreshRate;
+};
+
+struct StaticMeshBatchRenderInfo
+{
+	var int m_iBatchIndex;
+	var int m_iFirstIndex;
+	var int m_iMinVertexIndex;
+	var int m_iMaxVertexIndex;
+};
+
+struct PlayerMenuInfo
+{
+	var string szPlayerName;
+	var string szKilledBy;  // name of the player who killed me
+	var int iKills;  // Number of kills
+	var int iEfficiency;  // Efficiency (hits/shot)
+	var int iRoundsFired;  // Rounds fired (Bullets shot by the player)
+	var int iRoundsHit;  // Bullets shot by the player and that hit somebody
+	var int iPingTime;  // ping (The delay between player and server communication)
+	var int iHealth;  // health of this player
+	var int iTeamSelection;
+	var int iRoundsPlayed;  // game rounds played
+	var int iRoundsWon;  // game rounds won
+	var int iDeathCount;  // number of rounds we died in this match
+	var bool bOwnPlayer;  // This player is the player on this computer
+	var bool bSpectator;  // treat as spectator?
+	var bool bPlayerReady;  // player ready icon
+	var bool bJoinedTeamLate;  // joined a team after game started
+};
+
+// NEW IN 1.60
+var(Movement) const Actor.EPhysics Physics;
+var Actor.ENetRole Role;
+var Actor.ENetRole RemoteRole;
+// NEW IN 1.60
+var(Display) const Actor.EDrawType DrawType;
+var(Display) byte AmbientGlow;  // Ambient brightness, or 255=pulsing.
+var(Display) byte MaxLights;  // Limit to hardware lights active on this primitive.
+// NEW IN 1.60
+var(Display) Actor.ERenderStyle Style;
+var(Sound) byte SoundPitch;  // Sound pitch shift, 64.0=none.
+var(Sound) Actor.ESoundOcclusion SoundOcclusion;  // Sound occlusion approach.
+var byte m_iTracedBone;
+// NEW IN 1.60
+var(Lighting) Actor.ELightType LightType;
+// NEW IN 1.60
+var(Lighting) Actor.ELightEffect LightEffect;
+// NEW IN 1.60
+var(LightColor) byte LightHue;
+// NEW IN 1.60
+var(LightColor) byte LightSaturation;
+// NEW IN 1.60
+var(Lighting) byte LightPeriod;
+// NEW IN 1.60
+var(Lighting) byte LightPhase;
+// NEW IN 1.60
+var(Lighting) byte LightCone;
+var(Force) Actor.EForceType ForceType;
+var(R6Planning) Actor.EDisplayFlag m_eDisplayFlag;
+var(R6Planning) byte m_u8SpritePlanningAngle;
+var(R6Availability) const Actor.EModeFlagOption m_eStoryMode;
+var(R6Availability) const Actor.EModeFlagOption m_eMissionMode;
+var(R6Availability) const Actor.EModeFlagOption m_eTerroristHunt;
+var(R6Availability) const Actor.EModeFlagOption m_eTerroristHuntCoop;
+var(R6Availability) const Actor.EModeFlagOption m_eHostageRescue;
+var(R6Availability) const Actor.EModeFlagOption m_eHostageRescueCoop;
+var(R6Availability) const Actor.EModeFlagOption m_eHostageRescueAdv;
+var(R6Availability) const Actor.EModeFlagOption m_eDefend;
+var(R6Availability) const Actor.EModeFlagOption m_eDefendCoop;
+var(R6Availability) const Actor.EModeFlagOption m_eRecon;
+var(R6Availability) const Actor.EModeFlagOption m_eReconCoop;
+var(R6Availability) const Actor.EModeFlagOption m_eDeathmatch;
+var(R6Availability) const Actor.EModeFlagOption m_eTeamDeathmatch;
+var(R6Availability) const Actor.EModeFlagOption m_eBomb;
+var(R6Availability) const Actor.EModeFlagOption m_eEscort;
+var(R6Availability) const Actor.EModeFlagOption m_eLoneWolf;
+var(R6Availability) const Actor.EModeFlagOption m_eSquadDeathmatch;
+var(R6Availability) const Actor.EModeFlagOption m_eSquadTeamDeathmatch;
+// MPF
+var(R6Availability) const Actor.EModeFlagOption m_eTerroristHuntAdv;  // MissionPack1
+var(R6Availability) const Actor.EModeFlagOption m_eScatteredHuntAdv;  // MissionPack1
+var(R6Availability) const Actor.EModeFlagOption m_eCaptureTheEnemyAdv;  // MissionPack1
+var(R6Availability) const Actor.EModeFlagOption m_eCountDown;  // MissionPack1 2
+var(R6Availability) const Actor.EModeFlagOption m_eKamikaze;  // MissionPack1 for MissionPack2
+// NEW IN 1.60
+var(R6Availability) const Actor.EModeFlagOption m_eFreeBackupAdv;
+// NEW IN 1.60
+var(R6Availability) const Actor.EModeFlagOption m_eGazAlertAdv;
+// NEW IN 1.60
+var(R6Availability) const Actor.EModeFlagOption m_eIntruderAdv;
+// NEW IN 1.60
+var(R6Availability) const Actor.EModeFlagOption m_eLimitSeatsAdv;
+// NEW IN 1.60
+var(R6Availability) const Actor.EModeFlagOption m_eVirusUploadAdv;
+var byte m_u8RenderDataLastUpdate;
+var(Display) byte m_HeatIntensity;
+var byte m_wTickFrequency;
+var byte m_wNbTickSkipped;
+// Internal tags.
+var native const int CollisionTag;
+// NEW IN 1.60
+var native const int LightingTag;
+// NEW IN 1.60
+var native const int ActorTag;
+var native const int KStepTag;
+var(R6Planning) int m_iPlanningFloor_0;
+var(R6Planning) int m_iPlanningFloor_1;
+var int m_bInWeatherVolume;
+var int m_iLastRenderCycles;
+var int m_iLastRenderTick;
+var int m_iTotalRenderCycles;
+var int m_iNbRenders;
+var int m_iTickCycles;
+var int m_iTraceCycles;
+var int m_iTraceLastTick;
+var int m_iTracedCycles;
+var int m_iTracedLastTick;
+// Flags.
+var const bool bStatic;  // Does not move or change over time. Don't let L.D.s change this - screws up net play
+var(Advanced) bool bHidden;  // Is hidden during gameplay.
+var(Advanced) const bool bNoDelete;  // Cannot be deleted during play.
+//#ifdef R6CODE
+// Overrides bNoDelete, we need bNoDelete set to true for Interactive objects, but we want to be able to override 
+// this if it should not be available based on game mode.
+var const bool m_bR6Deletable;
+var(R6Availability) bool m_bUseR6Availability;
+var bool m_bSkipHitDetection;
+//#endif R6CODE
+var bool bAnimByOwner;  // Animation dictated by owner.
+var const bool bDeleteMe;  // About to be deleted.
+var(Lighting) bool bDynamicLight;  // This light is dynamic.
+var bool m_bDynamicLightOnlyAffectPawns;  // R6CODE
+var bool bTimerLoop;  // Timer loops (else is one-shot).
+var(Advanced) bool bCanTeleport;  // This actor can be teleported.
+var bool bOwnerNoSee;  // Everything but the owner can see this actor.
+var bool bOnlyOwnerSee;  // Only owner can see this actor.
+var const bool bAlwaysTick;  // Update even when players-only.
+var(Advanced) bool bHighDetail;  // Only show up on high-detail.
+var(Advanced) bool bStasis;  // In StandAlone games, turn off if not in a recently rendered zone turned off if  bStasis  and physics = PHYS_None or PHYS_Rotating.
+var bool bTrailerSameRotation;  // If PHYS_Trailer and true, have same rotation as owner.
+var bool bTrailerPrePivot;  // If PHYS_Trailer and true, offset from owner by PrePivot.
+var bool bClientAnim;  // Don't replicate any animations - animation done client-side
+var bool bWorldGeometry;  // Collision and Physics treats this actor as world geometry
+//R6CODE
+//var					bool    bAcceptsProjectors;	// Projectors can project onto this actor
+var(Display) bool bAcceptsProjectors;  // Projectors can project onto this actor
+var bool m_bHandleRelativeProjectors;  // Projectors can project onto this actor but are relative to it -jfd
+var bool bOrientOnSlope;  // when landing, orient base on slope of floor
+var bool bDisturbFluidSurface;  // Cause ripples when in contact with FluidSurface.
+var const bool bOnlyAffectPawns;  // Optimisation - only test ovelap against pawns. Used for influences etc.
+var bool bShowOctreeNodes;
+var bool bWasSNFiltered;  // Mainly for debugging - the way this actor was inserted into Octree.
+// Networking flags
+var const bool bNetTemporary;  // Tear-off simulation in network play.
+var const bool bNetOptional;  // Actor should only be replicated if bandwidth available.
+var const bool bNetDirty;  // set when any attribute is assigned a value in unrealscript, reset when the actor is replicated
+var bool bAlwaysRelevant;  // Always relevant for network.
+var bool bReplicateInstigator;  // Replicate instigator to client (used by bNetTemporary projectiles).
+var bool bReplicateMovement;  // if true, replicate movement/location related properties
+var bool bSkipActorPropertyReplication;  // if true, don't replicate actor class variables for this actor
+var bool bUpdateSimulatedPosition;  // if true, update velocity/location after initialization for simulated proxies
+var bool bTearOff;  // if true, this actor is no longer replicated to new clients, and
+														// is "torn off" (becomes a ROLE_Authority) on clients to which it was being replicated.
+//#ifdef R6CODE
+var bool m_bUseRagdoll;  // Wheter or not the ragdoll have control over the bone (used only for pawn)
+var bool m_bForceBaseReplication;  // Force to replicate Base and AttachmentBone, mostly for weapon
+//#endif // #ifdef R6CODE
+var bool bOnlyDirtyReplication;  // if true, only replicate actor if bNetDirty is true - useful if no C++ changed attributes (such as physics)
+														// bOnlyDirtyReplication only used with bAlwaysRelevant actors
+var bool bReplicateAnimations;  // Should replicate SimAnim
+//UT2K3
+var const bool bNetInitialRotation;  // Should replicate initial rotation
+var bool bCompressedPosition;  // used by networking code to flag compressed position replication
+//R6CODE
+var const bool m_bReticuleInfo;  // if the true, eventGetReticuleInfo will get call
+var bool m_bShowInHeatVision;
+var bool m_bFirstTimeInZone;
+var(Lighting) bool m_bBypassAmbiant;
+var bool m_bRenderOutOfWorld;
+var bool m_bSpawnedInGame;  // when spawned in game, after the game is started, this is set to true
+var bool m_bResetSystemLog;  // used to debug the reset system
+var bool m_bDeleteOnReset;  // Actor who must be deleted when resetting the level
+var bool m_bInAmbientRange;
+// Play Conditions
+var(R6Sound) bool m_bPlayIfSameZone;  // Play the ambient sound only if the object is in the same zone
+var(R6Sound) bool m_bPlayOnlyOnce;  // Play a sound one time only.
+var(R6Sound) bool m_bListOfZoneHearable;  // Play the sound only in the zone of the array m_ListOfZoneInfo
+var(R6Sound) bool m_bIfDirectLineOfSight;  // Play the ambient sound only if we have a direct line of sight
+var bool m_bUseExitSounds;  // Some objects, like ZoneInfo, contains Entry and Exit Sound.  This lag is to know which of the m_CurrentAmbianceSounds object to use
+var bool m_bSoundWasPlayed;  // When the we want play the sound only once. A check is made to know if the sound was already played.
+var bool m_bDrawFromBase;  // R6CODE This actor is drawn by its parent
+//R6CODE from UT2003
+var(Movement) const bool bHardAttach;  // Uses 'hard' attachment code. bBlockActor and bBlockPlayer must also be false.
+var bool m_bAllowLOD;
+// Display.
+var(Display) bool bUnlit;  // Lights don't affect actor.
+var(Display) bool bShadowCast;  // Casts static shadows.
+var(Display) bool bStaticLighting;  // Uses raytraced lighting.
+var(Display) bool bUseLightingFromBase;  // Use Unlit/AmbientGlow from Base
+// Advanced.
+var bool bHurtEntry;  // keep HurtRadius from being reentrant
+var(Advanced) bool bGameRelevant;  // Always relevant for game
+var(Advanced) bool bCollideWhenPlacing;  // This actor collides with the world when placing.
+var bool bTravel;  // Actor is capable of travelling among servers.
+var(Advanced) bool bMovable;  // Actor can be moved.
+var bool bDestroyInPainVolume;  // destroy this actor if it enters a pain volume
+var(Advanced) bool bShouldBaseAtStartup;  // if true, find base for this actor at level startup, if collides with world and PHYS_None or PHYS_Rotating
+var bool bPendingDelete;  // set when actor is about to be deleted (since endstate and other functions called
+//R6CODE    For collisions
+var(Advanced) bool m_bUseDifferentVisibleCollide;  // to use a different point to collide with this actor (in foreach VisibleCollidingActors)
+var bool m_b3DSound;  // Does this actor emits sounds in 3D
 // Collision flags.
-var(Collision) const bool bCollideActors;		// Collides with other actors.
-var(Collision) bool       bCollideWorld;		// Collides with the world.
-var(Collision) bool       bBlockActors;			// Blocks other nonplayer actors.
-var(Collision) bool       bBlockPlayers;		// Blocks other player actors.
-var(Collision) bool       bProjTarget;			// Projectiles should potentially target this actor.
+var(Collision) const bool bCollideActors;  // Collides with other actors.
+var(Collision) bool bCollideWorld;  // Collides with the world.
+var(Collision) bool bBlockActors;  // Blocks other nonplayer actors.
+var(Collision) bool bBlockPlayers;  // Blocks other player actors.
+var(Collision) bool bProjTarget;  // Projectiles should potentially target this actor.
 //#ifndef R6CODE
-var(Collision) bool       m_bSeeThrough;        // Object that we don't want to see when checking for visibility (mainly for AI)
-var(Collision) bool       m_bPawnGoThrough;     // Object from geometry that don't block the player
-var(Collision) bool       m_bBulletGoThrough;   // Object from geometry that don't block the bullet
+var(Collision) bool m_bSeeThrough;  // Object that we don't want to see when checking for visibility (mainly for AI)
+var(Collision) bool m_bPawnGoThrough;  // Object from geometry that don't block the player
+var(Collision) bool m_bBulletGoThrough;  // Object from geometry that don't block the bullet
+// NEW IN 1.60
+var(Collision) bool m_bShotThrough;
 //#endif // #ifndef R6CODE
 // #ifdef R6PERBONECOLLISION
-var            bool       m_bDoPerBoneTrace; // Use per-bone collision
-var            byte       m_iTracedBone;
-// #endif R6PERBONECOLLISION
-
-// R6CIRCUMSTANTIALACTION
-var            FLOAT      m_fCircumstantialActionRange;
-// R6CIRCUMSTANTIALACTION
-
+var bool m_bDoPerBoneTrace;  // Use per-bone collision
 //#ifndef R6CODE
 //var(Collision) bool		  bBlockZeroExtentTraces; // block zero extent actors/traces
 //var(Collision) bool		  bBlockNonZeroExtentTraces;	// block non-zero extent actors/traces
 //#endif // #ifndef R6CODE
-var(Collision) bool       bAutoAlignToTerrain;  // Auto-align to terrain in the editor
-var(Collision) bool		  bUseCylinderCollision;// Force axis aligned cylinder collision (useful for static mesh pickups, etc.)
-var(Collision) const bool bBlockKarma;			// Block actors being simulated with Karma.
-
-//R6COLLISIONBOX
-var R6ColBox              m_collisionBox;  // Second CollisionBox of the pawn
-var R6ColBox              m_collisionBox2; // Second CollisionBox of the pawn
-//END R6COLLISIONBOX
-
+var(Collision) bool bAutoAlignToTerrain;  // Auto-align to terrain in the editor
+var(Collision) bool bUseCylinderCollision;  // Force axis aligned cylinder collision (useful for static mesh pickups, etc.)
+var(Collision) const bool bBlockKarma;  // Block actors being simulated with Karma.
 //R6CODE
-var(Debug) BOOL m_bLogNetTraffic;   // should we log net traffic for this actor?
-//End R6CODE
-
-//-----------------------------------------------------------------------------
+var(Debug) bool m_bLogNetTraffic;  // should we log net traffic for this actor?
 // Lighting.
-
-// Light modulation.
-var(Lighting) enum ELightType
-{
-	LT_None,
-	LT_Steady,
-	LT_Pulse,
-	LT_Blink,
-	LT_Flicker,
-	LT_Strobe,
-	LT_BackdropLight,
-	LT_SubtlePulse,
-	LT_TexturePaletteOnce,
-	LT_TexturePaletteLoop
-} LightType;
-
-// Spatial light effect to use.
-var(Lighting) enum ELightEffect
-{
-	LE_None,
-	LE_TorchWaver,
-	LE_FireWaver,
-	LE_WateryShimmer,
-	LE_Searchlight,
-	LE_SlowWave,
-	LE_FastWave,
-	LE_CloudCast,
-	LE_StaticSpot,
-	LE_Shock,
-	LE_Disco,
-	LE_Warp,
-	LE_Spotlight,
-	LE_NonIncidence,
-	LE_Shell,
-	LE_OmniBumpMap,
-	LE_Interference,
-	LE_Cylinder,
-	LE_Rotor,
-	LE_Unused,
-	LE_Sunlight
-} LightEffect;
-
-// Lighting info.
-var(LightColor) float
-	LightBrightness;
-var(LightColor) byte
-	LightHue,
-	LightSaturation;
-
-// Light properties.
-var(Lighting) float
-	LightRadius;
-var(Lighting) byte
-	LightPeriod,
-	LightPhase,
-	LightCone;
-
-// Lighting.
-var(Lighting) bool	     bSpecialLit;	// Only affects special-lit surfaces.
-var(Lighting) bool	     bActorShadows; // Light casts actor shadows.
-var(Lighting) bool	     bCorona;       // Light uses Skin as a corona.
-var bool				 bLightChanged;	// Recalculate this light's lighting now.
-var bool                 m_bLightingVisibility; // R6CODE
-
-//-----------------------------------------------------------------------------
-// Physics.
-
+var(Lighting) bool bSpecialLit;  // Only affects special-lit surfaces.
+var(Lighting) bool bActorShadows;  // Light casts actor shadows.
+var(Lighting) bool bCorona;  // Light uses Skin as a corona.
+var bool bLightChanged;  // Recalculate this light's lighting now.
+var bool m_bLightingVisibility;  // R6CODE
 // Options.
-var			  bool		  bIgnoreOutOfWorld; // Don't destroy if enters zone zero
-var(Movement) bool        bBounce;           // Bounces when hits ground fast.
-var(Movement) bool		  bFixedRotationDir; // Fixed direction of rotation.
-var(Movement) bool		  bRotateToDesired;  // Rotate to DesiredRotation.
-var           bool        bInterpolating;    // Performing interpolating.
-var			  const bool  bJustTeleported;   // Used by engine physics - not valid for scripts.
-
+var bool bIgnoreOutOfWorld;  // Don't destroy if enters zone zero
+var(Movement) bool bBounce;  // Bounces when hits ground fast.
+var(Movement) bool bFixedRotationDir;  // Fixed direction of rotation.
+var(Movement) bool bRotateToDesired;  // Rotate to DesiredRotation.
+var bool bInterpolating;  // Performing interpolating.
+var const bool bJustTeleported;  // Used by engine physics - not valid for scripts.
 // R6CODE
-var           bool        m_bUseOriginalRotationInPlanning;
-var           rotator     sm_Rotation;
-
+var bool m_bUseOriginalRotationInPlanning;
+// Symmetric network flags, valid during replication only.
+var const bool bNetInitial;  // Initial network update.
+var const bool bNetOwner;  // Player owns this actor.
+var const bool bNetRelevant;  // Actor is currently relevant. Only valid server side, only when replicating variables.
+var const bool bDemoRecording;  // True we are currently demo recording
+var const bool bClientDemoRecording;  // True we are currently recording a client-side demo
+var const bool bClientDemoNetFunc;  // True if we're client-side demo recording and this call originated from the remote.
+//Editing flags
+var(Advanced) bool bHiddenEd;  // Is hidden during editing.
+var(Advanced) bool bHiddenEdGroup;  // Is hidden by the group brower.
+var(Advanced) bool bDirectional;  // Actor shows direction arrow during editing.
+var const bool bSelected;  // Selected in UnrealEd.
+var(Advanced) bool bEdShouldSnap;  // Snap to grid in editor.
+var bool bObsolete;  // actor is obsolete - warn level designers to remove it
+var bool bPathColliding;  // this actor should collide (if bWorldGeometry && bBlockActors is true) during path building (ignored if bStatic is true, as actor will always collide during path building)
+var bool bScriptInitialized;  // set to prevent re-initializing of actors spawned during level startup
+var(Advanced) bool bLockLocation;  // Prevent the actor from being moved in the editor.
+//#ifdef R6EDITORLOCKACTOR
+var(Advanced) bool bEdLocked;  // Locked in editor (no movement or rotation).
+var(R6Planning) bool m_bPlanningAlwaysDisplay;
+var(R6Planning) bool m_bIsWalkable;
+var(R6Planning) bool m_bSpriteShowFlatInPlanning;
+var(R6Planning) bool m_bSpriteShownIn3DInPlanning;
+var bool m_bSpriteShowOver;
+// the following specify if this actor is (not) available for each mode
+// don't put this in an enum
+var(R6Availability) const bool m_bHideInLowGoreLevel;
+var(Lighting) bool m_bIsRealtime;
+var(Advanced) bool m_bShouldHidePortal;
+var bool m_bHidePortal;
+var(Display) bool m_bOutlinedInPlanning;
+var bool m_bNeedOutlineUpdate;  // Actor was modified in the editor
+var bool m_bBatchesStaticLightingUpdated;
+// R6CODE
+var(Lighting) bool m_bForceStaticLighting;
+// Variable for skipping certain tick for unimportant actor
+var bool m_bSkipTick;
+var bool m_bTickOnlyWhenVisible;
+var float LastRenderTime;  // last time this actor was rendered.
+// Execution and timer variables.
+var float TimerRate;  // Timer event, 0=no timer.
+var const float TimerCounter;  // Counts up until it reaches TimerRate.
+var(Advanced) float LifeSpan;  // How old the object lives before dying, 0=forever.
+var(Display) float LODBias;
+// ifdef R6Sound
+var(R6Sound) float m_fAmbientSoundRadius;  // Ambient Sound Radius
+var(R6Sound) float m_fSoundRadiusSaturation;  // The distance where the sound will be at the maximum
+var(R6Sound) float m_fSoundRadiusActivation;  // The distance where the sound is activated
+var(R6Sound) float m_fSoundRadiusLinearFadeDist;  // Distance at which the sound starts to fade linearly
+var(R6Sound) float m_fSoundRadiusLinearFadeEnd;  // Distance from which the sound will be inaudible
+// Internal.
+var const float LatentFloat;  // Internal latent function use.
+//var(Display) const float	DrawScale;			// Scaling factor, 1.0=normal size.
+//R6
+var(Display) float DrawScale;  // Scaling factor, 1.0=normal size.
+var(Display) float m_fLightingScaleFactor;
+// NEW IN 1.60
+var(Display) float CullDistance;
+// Ambient sound.
+var(Sound) float SoundRadius;  // Radius of ambient sound.
+// Regular sounds.
+var(Sound) float TransientSoundVolume;  // default sound volume for regular sounds (can be overridden in playsound)
+var(Sound) float TransientSoundRadius;  // default sound radius for regular sounds (can be overridden in playsound)
+// Collision size.
+var(Collision) const float CollisionRadius;  // Radius of collision cyllinder.
+var(Collision) const float CollisionHeight;  // Half-height cyllinder.
+// R6CIRCUMSTANTIALACTION
+var float m_fCircumstantialActionRange;
+// NEW IN 1.60
+var(LightColor) float LightBrightness;
+// NEW IN 1.60
+var(Lighting) float LightRadius;
 // Physics properties.
-var(Movement) float       Mass;				// Mass of this actor.
-var(Movement) float       Buoyancy;			// Water buoyancy.
-var(Movement) rotator	  RotationRate;		// Change in rotation per second.
-var(Movement) rotator     DesiredRotation;	// Physics will smoothly rotate actor to this rotation if bRotateToDesired.
-var			  Actor		  PendingTouch;		// Actor touched during move which wants to add an effect after the movement completes 
-var       const vector    ColLocation;		// Actor's old location one move ago. Only for debugging
-
-const MAXSTEPHEIGHT = 33.0; // Maximum step height walkable by pawns
-const MINFLOORZ = 0.7; // minimum z value for floor normal (if less, not a walkable floor)
-					   // 0.7 ~= 45 degree angle for floor
-
-// R6DBGVECTORINFO
-struct DbgVectorInfo
-{
-    var bool       m_bDisplay;  
-    var vector     m_vLocation;
-    var vector     m_vCylinder;
-    var color      m_color;
-    var string     m_szDef;
-}; // ******* defined in UnObj.h
-
-var array<DbgVectorInfo>   m_dbgVectorInfo;
-// #endif R6DBGVECTORINFO
-
+var(Movement) float Mass;  // Mass of this actor.
+var(Movement) float Buoyancy;  // Water buoyancy.
 //#ifdef R6CHARLIGHTVALUE
-var           float       fLightValue;      // Light value of the actor in the range 0..1
-//#endif R6CHARLIGHTVALUE
-
-// ifdef WITH_KARMA
-
-// Used to avoid compression
-struct KRBVec
-{
-	var float	X, Y, Z;
-};
-
-var(Karma) export editinline KarmaParamsCollision KParams; // Parameters for Karma Collision/Dynamics.
-var const native int KStepTag;
-
-// endif
-
-//-----------------------------------------------------------------------------
-// Animation replication (can be used to replicate channel 0 anims for dumb proxies)
-struct AnimRep
-{
-	var name AnimSequence; 
-	var bool bAnimLoop;	
-	var byte AnimRate;		// note that with compression, max replicated animrate is 4.0
-	var byte AnimFrame;
-	var byte TweenRate;		// note that with compression, max replicated tweentime is 4 seconds
-};
-var transient AnimRep		  SimAnim;		   // only replicated if bReplicateAnimations is true
-
+var float fLightValue;  // Light value of the actor in the range 0..1
 // #ifdef R6CODE
 // rbrek - 12 nov 2001
 //  used for bone rotation, represents the transition of a bone rotation
 //  if == 1, either no bone rotation has been done or a bone rotation has been applied but the transition is complete.
 //  if == 0, a bone rotation was requested and we are at the very start of the transition to the desired rotation.
-var				FLOAT			m_fBoneRotationTransition;		
-
-// AnimStruct used for scripted sequences
-struct AnimStruct
-{
-	var() name AnimSequence;
-	var() name BoneName;
-	var() float AnimRate;
-	var() byte alpha;
-	var() byte LeadIn;
-	var() byte LeadOut;
-	var() bool bLoopAnim; 	
-};
-
-
-//-----------------------------------------------------------------------------
-// Forces.
-
-enum EForceType
-{
-	FT_None,
-	FT_DragAlong,
-};
-
-var (Force) EForceType	ForceType;
-var (Force)	float		ForceRadius;
-var (Force) float		ForceScale;
-
-
-//-----------------------------------------------------------------------------
-// Networking.
-
+var float m_fBoneRotationTransition;
+var(Force) float ForceRadius;
+var(Force) float ForceScale;
 // Network control.
-var float NetPriority; // Higher priorities means update it more frequently.
-var float NetUpdateFrequency; // How many seconds between net updates.
-
-// Symmetric network flags, valid during replication only.
-var const bool bNetInitial;       // Initial network update.
-var const bool bNetOwner;         // Player owns this actor.
-var const bool bNetRelevant;      // Actor is currently relevant. Only valid server side, only when replicating variables.
-var const bool bDemoRecording;	  // True we are currently demo recording
-var const bool bClientDemoRecording;// True we are currently recording a client-side demo
-var const bool bClientDemoNetFunc;// True if we're client-side demo recording and this call originated from the remote.
-
-
-//Editing flags
-var(Advanced) bool        bHiddenEd;     // Is hidden during editing.
-var(Advanced) bool        bHiddenEdGroup;// Is hidden by the group brower.
-var(Advanced) bool        bDirectional;  // Actor shows direction arrow during editing.
-var const bool            bSelected;     // Selected in UnrealEd.
-var(Advanced) bool        bEdShouldSnap; // Snap to grid in editor.
-var transient bool        bEdSnap;       // Should snap to grid in UnrealEd.
-var transient const bool  bTempEditor;   // Internal UnrealEd.
-var	bool				  bObsolete;	 // actor is obsolete - warn level designers to remove it
-var bool				  bPathColliding;// this actor should collide (if bWorldGeometry && bBlockActors is true) during path building (ignored if bStatic is true, as actor will always collide during path building)
-var transient bool		  bPathTemp;	 // Internal/path building
-
-var	bool				  bScriptInitialized; // set to prevent re-initializing of actors spawned during level startup
-var(Advanced) bool        bLockLocation; // Prevent the actor from being moved in the editor.
-
-//#ifdef R6EDITORLOCKACTOR
-var(Advanced) bool        bEdLocked;     // Locked in editor (no movement or rotation).
-/*#elseif //R6EDITORLOCKACTOR
-var bool                  bEdLocked;     // Locked in editor (no movement or rotation).
-#endif //R6EDITORLOCKARCTOR */
-
-var class<LocalMessage> MessageClass;
-
+var float NetPriority;  // Higher priorities means update it more frequently.
+var float NetUpdateFrequency;  // How many seconds between net updates.
 //R6NEWRENDERERFEATURES
-var(Lighting) float	     bCoronaMUL2XFactor;
-var(Lighting) float	     m_fCoronaMinSize;
-var(Lighting) float	     m_fCoronaMaxSize;
-
-// #ifdef R6CODE - rbrek 12 june 2002
-// Rainbow AI
-
-const	TEAM_None					= 0x00000;
-const	TEAM_Orders					= 0x00001;		// actions were received as orders from player and not initiated by AI (therefore requiring acknowledgement)
-	
-const	TEAM_OpenDoor				= 0x00010;
-const	TEAM_CloseDoor				= 0x00020;
-const	TEAM_Grenade				= 0x00040;
-const	TEAM_ClearRoom				= 0x00080;
-const	TEAM_Move					= 0x00100;
-const	TEAM_ClimbLadder			= 0x00200;
-const	TEAM_SecureTerrorist		= 0x00400;
-const	TEAM_EscortHostage			= 0x00800;
-const	TEAM_DisarmBomb				= 0x01000;
-const	TEAM_InteractDevice			= 0x02000;
-
-const	TEAM_OpenAndClear			= 0x00090;		// TEAM_OpenDoor | TEAM_ClearRoom;
-const	TEAM_OpenAndGrenade			= 0x00050;		// TEAM_OpenDoor | TEAM_Grenade;
-const	TEAM_OpenGrenadeAndClear	= 0x000d0;		// TEAM_OpenDoor | TEAM_ClearRoom | TEAM_Grenade;
-const	TEAM_GrenadeAndClear		= 0x000c0;		// TEAM_Grenade | TEAM_ClearRoom;
-const	TEAM_MoveAndGrenade			= 0x00140;		// TEAM_Move | TEAM_Grenade;
-
-
-// MP Team Id Constants
-const c_iTeamNumHostage     = 0;
-const c_iTeamNumTerrorist   = 1;
-const c_iTeamNumAlpha       = 2;
-const c_iTeamNumBravo       = 3;
-const c_iTeamNumUnknow      = 4;
-
-
-const  DEATHMSG_CONNECTIONLOST=1;
-const  DEATHMSG_PENALTY=2;
-const  DEATHMSG_KAMAKAZE=3;
-const  DEATHMSG_SWITCHTEAM=4;
-const  DEATHMSG_HOSTAGE_DIED=5;
-const  DEATHMSG_HOSTAGE_KILLEDBY=6;
-const  DEATHMSG_HOSTAGE_KILLEDBYTERRO=7;
-const  DEATHMSG_RAINBOW_KILLEDBYTERRO=8;
-const  DEATHMSG_KILLED_BY_BOMB=9;
-
-// #endif R6CODE
-
-
-//-----------------------------------------------------------------------------
-// Enums.
-
-// Travelling from server to server.
-enum ETravelType
-{
-	TRAVEL_Absolute,	// Absolute URL.
-	TRAVEL_Partial,		// Partial (carry name, reset server).
-	TRAVEL_Relative,	// Relative URL.
-};
-
-
-// double click move direction.
-enum EDoubleClickDir
-{
-	DCLICK_None,
-	DCLICK_Left,
-	DCLICK_Right,
-	DCLICK_Forward,
-	DCLICK_Back,
-	DCLICK_Active,
-	DCLICK_Done
-};
-
-// #ifdef R6BUILDPLANNINGPHASE
-enum EDisplayFlag
-{
-    DF_ShowOnlyInPlanning,
-    DF_ShowOnlyIn3DView,
-    DF_ShowInBoth
-};
-var(R6Planning)   EDisplayFlag  m_eDisplayFlag;
-var(R6Planning)   color         m_PlanningColor;
-var(R6Planning)   INT           m_iPlanningFloor_0;
-var(R6Planning)   INT           m_iPlanningFloor_1;
-var(R6Planning)   BOOL          m_bPlanningAlwaysDisplay;
-var(R6Planning)   BOOL	        m_bIsWalkable;
-var(R6Planning)   BOOL          m_bSpriteShowFlatInPlanning;
-var(R6Planning)   BOOL          m_bSpriteShownIn3DInPlanning;
-var(R6Planning)   byte          m_u8SpritePlanningAngle;
-var               BOOL          m_bSpriteShowOver;
-//END R6PLANNINGRENDERING
-
-// #ifdef R6NOISE
-// Used by MakeNoise and HearNoise, for the controller to choose the type of reaction
-enum ENoiseType
-{
-    NOISE_None,             // no sound
-    NOISE_Investigate,      // Pawn go investigate
-    NOISE_Threat,           // Pawn feel threatened 
-    NOISE_Grenade,          // It's a grenade!!  Run!!
-	NOISE_Dead				// team mate has been killed
-};
-
-// Used by MakeNoise and HearNoise, to tell the type of instigator
-enum EPawnType
-{
-    PAWN_NotDefined,    // Not supposed to be used
-    PAWN_Rainbow,
-    PAWN_Terrorist,
-    PAWN_Hostage,       // Hostage AND civilian
-	PAWN_All
-};
-
-// Used by R6MakeNoise to tell wich loudness to pick
-enum ESoundType
-{
-    SNDTYPE_None,           // No sound
-    SNDTYPE_Gunshot,        // Check the gun for silenced or not
-    SNDTYPE_BulletImpact,   // Impact, ricochet
-    SNDTYPE_GrenadeImpact,  // Grenade bouncing
-    SNDTYPE_GrenadeLike,    // Grenade-like weapon bouncing (FalseHB, HeartBeatJammer,...)
-    SNDTYPE_Explosion,      // Various explosion (grenade, breach door)
-    SNDTYPE_PawnMovement,   // Check the pawn to know the stance and the speed
-    SNDTYPE_Choking,        // Choking from gas
-    SNDTYPE_Talking,        // Talking
-    SNDTYPE_Screaming,      // Talking louder :)
-    SNDTYPE_Reload,         // Reloading weapon
-    SNDTYPE_Equipping,      // Change in equipment (Weapon, gadget, ...)
-    SNDTYPE_Dead,           // When a pawn died
-    SNDTYPE_Door            // Opening and closing door
-//    SNDTYPE_Object        // Let the objects do their own noise
-};
-
-// #endif // #ifdef R6NOISE
-
-// #ifdef R6LOAD_IFGameType
-enum EGameModeInfo 
-{
-    GMI_None,          // no info or no rules game mode
-    GMI_SinglePlayer,  // if the GM can be played in single
-    GMI_Cooperative,   // if the GM can be played in Coop
-    GMI_Adversarial,   // if the GM can be played in adversarial
-    GMI_Squad          // if the GM can be played in Squad
-};
-
-enum EModeFlagOption
-{
-    MFO_Available,
-    MFO_NotAvailable
-};    
-// Training Stuff
-enum EHUDDisplayType
-{
-    HDT_Normal,
-    HDT_Hidden,
-    HDT_FadeIn,
-    HDT_Blink
-};
-
-enum EHUDElement
-{
-    HE_HealthAndName,
-    HE_Posture,
-    HE_ActionIcon,
-    HE_WeaponIconAndName,
-    HE_WeaponAttachment,
-    HE_Ammo,
-    HE_Magazine,
-    HE_ROF,
-    HE_TeamHealth,
-    HE_MovementMode,
-    HE_ROE,
-    HE_WPAction,
-    HE_Reticule,
-    HE_WPIcon,
-    HE_OtherTeam,
-    HE_PressGoCodeKey
-};
-
-struct R6HUDState
-{
-    var float           fTimeStamp;    
-    var EHUDDisplayType eDisplay;
-    var Color           color;
-};
-
-
-// the following specify if this actor is (not) available for each mode
-// don't put this in an enum
-var(R6Availability) const bool            m_bHideInLowGoreLevel;
-var(R6Availability) const EModeFlagOption m_eStoryMode;         
-var(R6Availability) const EModeFlagOption m_eMissionMode;         
-var(R6Availability) const EModeFlagOption m_eTerroristHunt;     
-var(R6Availability) const EModeFlagOption m_eTerroristHuntCoop;
-var(R6Availability) const EModeFlagOption m_eHostageRescue;     
-var(R6Availability) const EModeFlagOption m_eHostageRescueCoop;   
-var(R6Availability) const EModeFlagOption m_eHostageRescueAdv;    
-var(R6Availability) const EModeFlagOption m_eDefend;            
-var(R6Availability) const EModeFlagOption m_eDefendCoop;          
-var(R6Availability) const EModeFlagOption m_eRecon;             
-var(R6Availability) const EModeFlagOption m_eReconCoop;             
-var(R6Availability) const EModeFlagOption m_eDeathmatch;        
-var(R6Availability) const EModeFlagOption m_eTeamDeathmatch;        
-var(R6Availability) const EModeFlagOption m_eBomb;              
-var(R6Availability) const EModeFlagOption m_eEscort;            
-var(R6Availability) const EModeFlagOption m_eLoneWolf;          
-var(R6Availability) const EModeFlagOption m_eSquadDeathmatch;             
-var(R6Availability) const EModeFlagOption m_eSquadTeamDeathmatch;             
-// MPF
-var(R6Availability) const EModeFlagOption m_eTerroristHuntAdv; // MissionPack1
-var(R6Availability) const EModeFlagOption m_eScatteredHuntAdv; // MissionPack1
-var(R6Availability) const EModeFlagOption m_eCaptureTheEnemyAdv; // MissionPack1
-var(R6Availability) const EModeFlagOption m_eCountDown;//MissionPack1 2
-var(R6Availability) const EModeFlagOption m_eKamikaze; //MissionPack1 for MissionPack2
-
-// #endif R6LOAD_IFGameType 
-
+var(Lighting) float bCoronaMUL2XFactor;
+var(Lighting) float m_fCoronaMinSize;
+var(Lighting) float m_fCoronaMaxSize;
+var float m_fAttachFactor;  // Factor used by R6Tags.  if the scale changes (1.1 for rainbow character, 1 for Terrorists)
+var float m_fCummulativeTick;
+// Owner.
+var const Actor Owner;  // Owner actor.
+// Scriptable.
+var const LevelInfo Level;  // Level this actor is on.
+var Pawn Instigator;  // Pawn responsible for damage caused by this actor.
+var(R6Sound) Sound AmbientSound;  // Ambient sound effect.
+var(R6Sound) Sound AmbientSoundStop;  // Stop the ambient sound effect.
+var Actor m_CurrentAmbianceObject;  // Object responsible if the current ambience that should be hear by this actor.  Use when we switch from player to player
+var Actor m_CurrentVolumeSound;  // Object responsible if the current ambience that should be hear by this actor.  Use when we switch from player to player
+//#ifndef R6CHANGEWEAPONSYSTEM
+//var Inventory             Inventory;     // Inventory chain.
+//#endif
+var const Actor Base;  // Actor we're standing on.
+var const Actor Deleted;  // Next actor in just-deleted chain.
+// The actor's position and rotation.
+var const PhysicsVolume PhysicsVolume;  // physics volume this actor is currently in
+var(Display) Material Texture;  // Sprite texture.if DrawType=DT_Sprite
+var(Display) const Mesh Mesh;  // Mesh if DrawType=DT_Mesh.
+var(Display) const StaticMesh StaticMesh;  // StaticMesh if DrawType=DT_StaticMesh
+var StaticMeshInstance StaticMeshInstance;  // Contains per-instance static mesh data, like static lighting data.
+var const export Model Brush;  // Brush if DrawType=DT_Brush.
+var(Display) ConvexVolume AntiPortal;  // Convex volume used for DT_AntiPortal
+//R6COLLISIONBOX
+var R6ColBox m_collisionBox;  // Second CollisionBox of the pawn
+var R6ColBox m_collisionBox2;  // Second CollisionBox of the pawn
+var Actor PendingTouch;  // Actor touched during move which wants to add an effect after the movement completes
+var(Karma) export editinline KarmaParamsCollision KParams;  // Parameters for Karma Collision/Dynamics.
 var Actor m_AttachedTo;
-var FLOAT m_fAttachFactor; // Factor used by R6Tags.  if the scale changes (1.1 for rainbow character, 1 for Terrorists) 
-                           // The tags must be divided by this value.  Then value is already divided.  1/1.1 = 0.909091 for Rainbow
-
-var(Lighting) bool m_bIsRealtime;
-var(Advanced) bool m_bShouldHidePortal;
-var bool m_bHidePortal;
-
 //R6SHADOW
 var Projector Shadow;
+var StaticMesh m_OutlineStaticMesh;
+var(Events) name Tag;  // Actor's tag name.
+var(Object) name InitialState;
+var(Object) name Group;
+var(Events) name Event;  // The event this actor causes.
+// Attachment related variables
+var(Movement) name AttachTag;
+var const name AttachmentBone;  // name of bone to which actor is attached (if attached to center of base, =='')
+var(R6Sound) name m_szSoundBoneName;  // Bone use by the sound.
+var Class<LocalMessage> MessageClass;
+var(R6Sound) array<ZoneInfo> m_ListOfZoneInfo;  // Play the ambient sound only if the object is NOT in one of those zone
+var const array<Actor> Touching;  // List of touching actors.
+var const array<Actor> Attached;  // array of actors attached to this actor.
+var(Display) array<Material> Skins;  // Multiple skin support - not replicated.
+//R6Code
+var(Display) array<Material> NightVisionSkins;
+var array<DbgVectorInfo> m_dbgVectorInfo;
+// NEW IN 1.60
+var(R6Availability) array<stCustomAvailability> m_aCustomAvailability;
+var array<int> m_OutlineIndices;  // 2 16-bits indices each
+var array<StaticMeshBatchRenderInfo> m_Batches;
+var const PointRegion Region;  // Region this actor is in.
+var(Movement) const Vector Location;  // Actor's location; use Move to set.
+var(Movement) const Rotator Rotation;  // Rotation.
+var(Movement) Vector Velocity;  // Velocity.
+var Vector Acceleration;  // Acceleration.
+var const Vector RelativeLocation;  // location relative to base/bone (valid if base exists)
+var const Rotator RelativeRotation;  // rotation relative to base/bone (valid if base exists)
+											// This actor cannot then move relative to base (setlocation etc.).
+											// Dont set while currently based on something!
+											// 
+var const Matrix HardRelMatrix;  // Transform of actor in base's ref frame. Doesn't change after SetBase.
+var(Display) const Vector DrawScale3D;  // Scaling vector, (1.0,1.0,1.0)=normal size.
+var Vector PrePivot;  // Offset from box center for drawing.
+var(Display) Color m_fLightingAdditiveAmbiant;
+var(Advanced) Vector m_vVisibleCenter;  // use this vector instead of location when m_bUseDifferentVisibleCollide is true
+var Rotator sm_Rotation;
+var(Movement) Rotator RotationRate;  // Change in rotation per second.
+var(Movement) Rotator DesiredRotation;  // Physics will smoothly rotate actor to this rotation if bRotateToDesired.
+var const Vector ColLocation;  // Actor's old location one move ago. Only for debugging
+var(R6Planning) Color m_PlanningColor;
+var const transient int NetTag;
+var const transient int JoinedTag;
+var const transient bool bTicked;  // Actor has been updated.
+var transient bool bEdSnap;  // Should snap to grid in UnrealEd.
+var const transient bool bTempEditor;  // Internal UnrealEd.
+var transient bool bPathTemp;  // Internal/path building
+var transient MeshInstance MeshInstance;  // Mesh instance.
+var const transient Level XLevel;  // Level object.
+var transient array<int> Leaves;  // BSP leaves this actor is in.
+var const transient array<int> OctreeNodes;  // Array of nodes of the octree Actor is currently in. Internal use only.
+var const transient array<ProjectorRelativeRenderInfo> Projectors;  // Projected textures on this actor
+var const transient Box OctreeBox;  // Actor bounding box cached when added to Octree. Internal use only.
+var const transient Vector OctreeBoxCenter;
+var const transient Vector OctreeBoxRadii;
+var transient AnimRep SimAnim;  // only replicated if bReplicateAnimations is true
+var const transient IndexBufferPtr m_OutlineIndexBuffer;
 
-// Planning
-struct IndexBufferPtr { var int Ptr; }; // Hack to to fool C++ header generation...
-
-var(Display)        BOOL            m_bOutlinedInPlanning;
-var                 BOOL            m_bNeedOutlineUpdate;       // Actor was modified in the editor
-var                 array<INT>      m_OutlineIndices;           // 2 16-bits indices each
-var                 StaticMesh      m_OutlineStaticMesh;
-var transient const IndexBufferPtr  m_OutlineIndexBuffer;
-
-var             INT             m_bInWeatherVolume;
-
-var             BYTE            m_u8RenderDataLastUpdate;
-
-var(Display)    BYTE            m_HeatIntensity;
-
-var             INT             m_iLastRenderCycles;
-var             INT             m_iLastRenderTick;
-var             INT             m_iTotalRenderCycles;
-var             INT             m_iNbRenders;
-var             INT             m_iTickCycles;
-var             INT             m_iTraceCycles;
-var             INT             m_iTraceLastTick;
-var             INT             m_iTracedCycles;
-var             INT             m_iTracedLastTick;
-
-// R6CODE
-struct ResolutionInfo
+replication
 {
-    var INT iWidth;
-    var INT iHeigh;
-    var INT iRefreshRate;
-};
+	// Pos:0x6E6
+	unreliable if(bDemoRecording)
+		DemoPlaySound;
 
-//R6USESMBATCHOPT+
-struct StaticMeshBatchRenderInfo
-{
-    var INT m_iBatchIndex;
-    var INT m_iFirstIndex;
-    var INT m_iMinVertexIndex;
-    var INT m_iMaxVertexIndex;
-};
+	// Pos:0x000
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_132__(__NFUN_132__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_AutonomousProxy)), bNetInitial), __NFUN_130__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_SimulatedProxy)), __NFUN_132__(bNetInitial, bUpdateSimulatedPosition)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry))), __NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_DumbProxy)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry)))))
+		Location;
 
-var             array<StaticMeshBatchRenderInfo> m_Batches;
-var             bool                             m_bBatchesStaticLightingUpdated;
-//R6USESMBATCHOPT-
+	// Pos:0x0C4
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_132__(__NFUN_154__(int(DrawType), int(2)), __NFUN_154__(int(DrawType), int(8)))), __NFUN_132__(__NFUN_132__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_AutonomousProxy)), bNetInitial), __NFUN_130__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_SimulatedProxy)), __NFUN_132__(bNetInitial, bUpdateSimulatedPosition)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry))), __NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_DumbProxy)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry)))))
+		Rotation;
 
-// R6CODE
-var(Lighting) BOOL m_bForceStaticLighting;
+	// Pos:0x1AC
+	reliable if(__NFUN_132__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_152__(int(RemoteRole), int(ROLE_SimulatedProxy))), __NFUN_130__(__NFUN_130__(m_bForceBaseReplication, __NFUN_129__(bNetOwner)), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+		Base;
 
-// Variable for skipping certain tick for unimportant actor
-var     BOOL    m_bSkipTick;
-var     BOOL    m_bTickOnlyWhenVisible;
-var     BYTE    m_wTickFrequency;
-var     BYTE    m_wNbTickSkipped;
-var     FLOAT   m_fCummulativeTick;
+	// Pos:0x213
+	reliable if(__NFUN_132__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_152__(int(RemoteRole), int(ROLE_SimulatedProxy))), __NFUN_119__(Base, none)), __NFUN_129__(Base.bWorldGeometry)), __NFUN_130__(__NFUN_130__(m_bForceBaseReplication, __NFUN_129__(bNetOwner)), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+		AttachmentBone, RelativeLocation, 
+		RelativeRotation;
 
-struct PlayerMenuInfo
-{
-    var string szPlayerName;
-    var string szKilledBy;                 // name of the player who killed me
-    var INT    iKills;                     // Number of kills
-    var INT    iEfficiency;                // Efficiency (hits/shot)
-    var INT    iRoundsFired;               // Rounds fired (Bullets shot by the player)
-	var INT    iRoundsHit;				   // Bullets shot by the player and that hit somebody
-    var INT    iPingTime;                  // ping (The delay between player and server communication)
-    var INT    iHealth;                    // health of this player
-    var INT    iTeamSelection;
-    var INT    iRoundsPlayed;              // game rounds played
-    var INT    iRoundsWon;                 // game rounds won
-    var INT    iDeathCount;                // number of rounds we died in this match
-    var BOOL   bOwnPlayer;                 // This player is the player on this computer
-    var BOOL   bSpectator;                 // treat as spectator?
-    var BOOL   bPlayerReady;               // player ready icon
-    var BOOL   bJoinedTeamLate;            // joined a team after game started
-};
+	// Pos:0x29D
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_132__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_SimulatedProxy)), __NFUN_132__(bNetInitial, bUpdateSimulatedPosition)), __NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_DumbProxy)), __NFUN_154__(int(Physics), int(2))))))
+		Velocity;
 
-enum ETerroristNationality
-{
-    TN_Spanish1,
-    TN_Spanish2,
-    TN_German1,
-    TN_German2,
-    TN_Portuguese
-};
-enum EHostageNationality
-{
-    HN_French,
-    HN_British,
-    HN_Spanish,
-    HN_Portuguese,
-    HN_Norwegian
-};
+	// Pos:0x314
+	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_129__(bNetOwner)))
+		Physics;
 
-enum EVoicesPriority
-{
-    VP_Low,                                 // Can be interrupt at any time by another voices with superior priority
-    VP_Medium,                              // Can stop low priority and play the current voice
-    VP_High                                 // Stop and remove all sounds in low and medium alredy send and play new one
-};
+	// Pos:0x32E
+	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), bNetInitial))
+		bActorShadows;
 
-//-----------------------------------------------------------------------------
-// natives.
+	// Pos:0x346
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_bUseRagdoll, m_fAttachFactor;
 
+	// Pos:0x353
+	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		ServerForceKillResult, ServerForceStunResult, 
+		ServerSendBankToLoad;
+
+	// Pos:0x360
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		ClientAddSoundBank;
+
+	// Pos:0x36D
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_collisionBox, m_collisionBox2;
+
+	// Pos:0x37A
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_152__(int(RemoteRole), int(ROLE_SimulatedProxy))), __NFUN_154__(int(Physics), int(5))))
+		DesiredRotation, RotationRate, 
+		bFixedRotationDir, bRotateToDesired;
+
+	// Pos:0x3C9
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_132__(__NFUN_129__(bNetOwner), __NFUN_129__(bClientAnim))))
+		AmbientSound;
+
+	// Pos:0x415
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_132__(__NFUN_129__(bNetOwner), __NFUN_129__(bClientAnim))), __NFUN_119__(AmbientSound, none)))
+		SoundPitch, SoundRadius, 
+		m_szSoundBoneName;
+
+	// Pos:0x46E
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_154__(int(DrawType), int(2))), bReplicateAnimations))
+		SimAnim;
+
+	// Pos:0x4BD
+	reliable if(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))))
+		bHidden;
+
+	// Pos:0x4EF
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty))
+		DrawScale, DrawScale3D, 
+		DrawType, Owner, 
+		Style, Texture, 
+		bCollideActors, bCollideWorld, 
+		bOnlyOwnerSee, m_fLightingAdditiveAmbiant, 
+		m_fLightingScaleFactor;
+
+	// Pos:0x52C
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_132__(bCollideActors, bCollideWorld)))
+		CollisionHeight, CollisionRadius, 
+		bBlockActors, bBlockPlayers, 
+		bProjTarget;
+
+	// Pos:0x57F
+	reliable if(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))))
+		LightType, RemoteRole, 
+		Role, bNetOwner, 
+		bTearOff;
+
+	// Pos:0x5B1
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), bReplicateInstigator))
+		Instigator;
+
+	// Pos:0x5F9
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_154__(int(DrawType), int(2))))
+		AmbientGlow, Mesh, 
+		PrePivot, bUnlit;
+
+	// Pos:0x648
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_154__(int(DrawType), int(8))))
+		StaticMesh;
+
+	// Pos:0x697
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_155__(int(LightType), int(0))))
+		LightBrightness, LightEffect, 
+		LightHue, LightPeriod, 
+		LightPhase, LightRadius, 
+		LightSaturation, bSpecialLit;
+}
+
+// Export UActor::execConsoleCommand(FFrame&, void* const)
 // Execute a console command in the context of the current level and game engine.
-native function string ConsoleCommand( string Command );
+ native function string ConsoleCommand(string Command);
 
-
+// Export UActor::execGetTagInformations(FFrame&, void* const)
 //#ifdef R6TAGS
 //=========================================================================
 // Tags.
-native(2008) final function GetTagInformations( string TagName, out vector outVector, out rotator OutRotator, OPTIONAL FLOAT vOwnerScale);
-//#endif R6TAGS \
+ native(2008) final function GetTagInformations(string TagName, out Vector outVector, out Rotator OutRotator, optional float vOwnerScale);
 
+// Export UActor::execDbgVectorReset(FFrame&, void* const)
 // #ifdef R6DBGVECTORINFO
-native(1505) final function DbgVectorReset( INT vectorIndex );
-native(1506) final function DbgVectorAdd( vector vPoint, vector vCylinder, INT vectorIndex, OPTIONAL string szDef );
-native(1801) final function DbgAddLine( vector vStart, vector vEnd, color cColor );
-//#endif // #ifdef R6DBGVECTORINFO
+ native(1505) final function DbgVectorReset(int vectorIndex);
 
-native(1513) final function bool IsAvailableInGameType( string szGameType );
+// Export UActor::execDbgVectorAdd(FFrame&, void* const)
+ native(1506) final function DbgVectorAdd(Vector vPoint, Vector vCylinder, int vectorIndex, optional string szDef);
 
+// Export UActor::execDbgAddLine(FFrame&, void* const)
+ native(1801) final function DbgAddLine(Vector vStart, Vector vEnd, Color cColor);
+
+// Export UActor::execIsAvailableInGameType(FFrame&, void* const)
+ native(1513) final function bool IsAvailableInGameType(string szGameType);
+
+// Export UActor::execGetFPlayerMenuInfo(FFrame&, void* const)
 //#ifdef R6CODE
-native(1230) final function GetFPlayerMenuInfo(INT Index, out PlayerMenuInfo _iPlayerMenuInfo);
-native(1231) final function SetFPlayerMenuInfo(INT Index, PlayerMenuInfo _iPlayerMenuInfo);
+ native(1230) final function GetFPlayerMenuInfo(int Index, out PlayerMenuInfo _iPlayerMenuInfo);
 
+// Export UActor::execSetFPlayerMenuInfo(FFrame&, void* const)
+ native(1231) final function SetFPlayerMenuInfo(int Index, PlayerMenuInfo _iPlayerMenuInfo);
+
+// Export UActor::execGetPlayerSetupInfo(FFrame&, void* const)
 //#ifdef R6CODE
-native(1232) final function GetPlayerSetupInfo(out string m_CharacterName,
-                                               out string m_ArmorName,
-                                               out string m_WeaponNameOne,
-                                               out string m_WeaponGadgetNameOne,
-                                               out string m_BulletTypeOne,
-                                               out string m_WeaponNameTwo,
-                                               out string m_WeaponGadgetNameTwo,
-                                               out string m_BulletTypeTwo,
-                                               out string m_GadgetNameOne,
-                                               out string m_GadgetNameTwo);
+ native(1232) final function GetPlayerSetupInfo(out string m_CharacterName, out string m_ArmorName, out string m_WeaponNameOne, out string m_WeaponGadgetNameOne, out string m_BulletTypeOne, out string m_WeaponNameTwo, out string m_WeaponGadgetNameTwo, out string m_BulletTypeTwo, out string m_GadgetNameOne, out string m_GadgetNameTwo);
 
-native(1233) final function SetPlayerSetupInfo(string m_CharacterName,
-                                               string m_ArmorName,
-                                               string m_WeaponNameOne,
-                                               string m_WeaponGadgetNameOne,
-                                               string m_BulletTypeOne,
-                                               string m_WeaponNameTwo,
-                                               string m_WeaponGadgetNameTwo,
-                                               string m_BulletTypeTwo,
-                                               string m_GadgetNameOne,
-                                               string m_GadgetNameTwo);
+// Export UActor::execSetPlayerSetupInfo(FFrame&, void* const)
+ native(1233) final function SetPlayerSetupInfo(string m_CharacterName, string m_ArmorName, string m_WeaponNameOne, string m_WeaponGadgetNameOne, string m_BulletTypeOne, string m_WeaponNameTwo, string m_WeaponGadgetNameTwo, string m_BulletTypeTwo, string m_GadgetNameOne, string m_GadgetNameTwo);
 
-native(1279) final function SortFPlayerMenuInfo(INT LastIndex, string szGameType);
+// Export UActor::execSortFPlayerMenuInfo(FFrame&, void* const)
+ native(1279) final function SortFPlayerMenuInfo(int LastIndex, string szGameType);
 
+// Export UActor::execGetGameManager(FFrame&, void* const)
 //#ifdef R6CODE
-native(1551) static final function R6AbstractGameManager GetGameManager();
-native(1524) static final function R6ModMgr GetModMgr();
-native(1009) static final function R6GameOptions GetGameOptions();
-native(1012) static final function FLOAT GetTime();
-native(2614) static final function INT GetNbAvailableResolutions();
-native(2615) static final function GetAvailableResolution(INT Index, OUT INT Width, OUT INT Height, OUT INT RefreshRate);
-//#ifdef R6CODE
-native(1200) static final function BOOL  NativeStartedByGSClient();
-native(1316) static final function BOOL  NativeNonUbiMatchMakingHost();
-native(1303) static final function BOOL  NativeNonUbiMatchMaking();
-native(1304) static final function NativeNonUbiMatchMakingAddress(OUT string RemoteIpAddress);
-native(1305) static final function NativeNonUbiMatchMakingPassword(OUT string NonUbiPassword);
-native(1273) static final function R6ServerInfo GetServerOptions();
-native(1283) static final function R6ServerInfo SaveServerOptions(OPTIONAL string FileName);
-native(1302) static final function R6MissionDescription GetMissionDescription();
-native(1311) static final function SetServerBeacon(InternetInfo ServerBeacon);
-native(1312) static final function InternetInfo GetServerBeacon();
+ native(1551) static final function R6AbstractGameManager GetGameManager();
 
+// Export UActor::execGetModMgr(FFrame&, void* const)
+ native(1524) static final function R6ModMgr GetModMgr();
+
+// Export UActor::execGetGameOptions(FFrame&, void* const)
+ native(1009) static final function R6GameOptions GetGameOptions();
+
+// Export UActor::execGetTime(FFrame&, void* const)
+ native(1012) static final function float GetTime();
+
+// Export UActor::execGetNbAvailableResolutions(FFrame&, void* const)
+ native(2614) static final function int GetNbAvailableResolutions();
+
+// Export UActor::execGetAvailableResolution(FFrame&, void* const)
+ native(2615) static final function GetAvailableResolution(int Index, out int Width, out int Height, out int RefreshRate);
+
+// Export UActor::execNativeStartedByGSClient(FFrame&, void* const)
+//#ifdef R6CODE
+ native(1200) static final function bool NativeStartedByGSClient();
+
+// Export UActor::execNativeNonUbiMatchMakingHost(FFrame&, void* const)
+ native(1316) static final function bool NativeNonUbiMatchMakingHost();
+
+// Export UActor::execNativeNonUbiMatchMaking(FFrame&, void* const)
+ native(1303) static final function bool NativeNonUbiMatchMaking();
+
+// Export UActor::execNativeNonUbiMatchMakingAddress(FFrame&, void* const)
+ native(1304) static final function NativeNonUbiMatchMakingAddress(out string RemoteIpAddress);
+
+// Export UActor::execNativeNonUbiMatchMakingPassword(FFrame&, void* const)
+ native(1305) static final function NativeNonUbiMatchMakingPassword(out string NonUbiPassword);
+
+// Export UActor::execGetServerOptions(FFrame&, void* const)
+ native(1273) static final function R6ServerInfo GetServerOptions();
+
+// Export UActor::execGetServerOptionsRefreshed(FFrame&, void* const)
+// NEW IN 1.60
+ native(1274) static final function R6ServerInfo GetServerOptionsRefreshed();
+
+// Export UActor::execSaveServerOptions(FFrame&, void* const)
+ native(1283) static final function R6ServerInfo SaveServerOptions(optional string FileName);
+
+// Export UActor::execGetMissionDescription(FFrame&, void* const)
+ native(1302) static final function R6MissionDescription GetMissionDescription();
+
+// Export UActor::execSetServerBeacon(FFrame&, void* const)
+ native(1311) static final function SetServerBeacon(InternetInfo ServerBeacon);
+
+// Export UActor::execGetServerBeacon(FFrame&, void* const)
+ native(1312) static final function InternetInfo GetServerBeacon();
+
+// Export UActor::execIsPBClientEnabled(FFrame&, void* const)
 //#ifdefR6PUNBUSTER
-native(1400) static final function BOOL IsPBClientEnabled();
-native(1402) static final function BOOL IsPBServerEnabled();
-native(1401) static final function SetPBStatus( BOOL _bDisable, BOOL _bServerStatus);
-//#endif
+ native(1400) static final function bool IsPBClientEnabled();
 
+// Export UActor::execIsPBServerEnabled(FFrame&, void* const)
+ native(1402) static final function bool IsPBServerEnabled();
+
+// Export UActor::execSetPBStatus(FFrame&, void* const)
+ native(1401) static final function SetPBStatus(bool _bDisable, bool _bServerStatus);
+
+// Export UActor::execLoadLoadingScreen(FFrame&, void* const)
 //#endif R6CODE
-native(2613) static final function LoadLoadingScreen(String MapName, Texture pTex0, Texture pTex1);
-native(2616) static final function BOOL ReplaceTexture(String Filename, Texture pTex);
-native(1256) final function string ConvertGameTypeIntToString( INT iGameType );
-native(2015) final function INT ConvertGameTypeToInt( string szGameType );
-native(1419) static final function string GetGameVersion( OPTIONAL BOOL _bShortVersion);
-native(2617) static final function BOOL IsVideoHardwareAtLeast64M();
-native(2618) static final function Canvas GetCanvas();
-native(2619) static final function EnableLoadingScreen(BOOL _enable);
-native(2620) static final function AddMessageToConsole(string Msg, Color MsgColor);
-native(2621) static final function UpdateGraphicOptions();
-native(2622) static final function GarbageCollect();
-native(1519) static final function string GetMapNameExt();
-native(1520) static final function string ConvertIntTimeToString( INT iTimeToConvert, OPTIONAL BOOL bAlignMinOnTwoDigits );
-native(1522) static final function string GlobalIDToString(BYTE aBytes[16/*K_GlobalID_size*/]);
-native(1523) static final function        GlobalIDToBytes( string szIn, OUT byte aBytes[255] );
-native(2607) static final function object LoadRandomBackgroundImage(optional string _szBackGroundSubFolder);
+ native(2613) static final function LoadLoadingScreen(string MapName, Texture pTex0, Texture pTex1);
 
+// Export UActor::execReplaceTexture(FFrame&, void* const)
+ native(2616) static final function bool ReplaceTexture(string FileName, Texture pTex);
 
+// Export UActor::execConvertGameTypeIntToString(FFrame&, void* const)
+ native(1256) final function string ConvertGameTypeIntToString(int iGameType);
+
+// Export UActor::execConvertGameTypeToInt(FFrame&, void* const)
+ native(2015) final function int ConvertGameTypeToInt(string szGameType);
+
+// Export UActor::execGetGameVersion(FFrame&, void* const)
+ native(1419) static final function string GetGameVersion(optional bool _bShortVersion, optional bool _bModVersion);
+
+// Export UActor::execIsVideoHardwareAtLeast64M(FFrame&, void* const)
+ native(2617) static final function bool IsVideoHardwareAtLeast64M();
+
+// Export UActor::execGetCanvas(FFrame&, void* const)
+ native(2618) static final function Canvas GetCanvas();
+
+// Export UActor::execEnableLoadingScreen(FFrame&, void* const)
+ native(2619) static final function EnableLoadingScreen(bool _enable);
+
+// Export UActor::execAddMessageToConsole(FFrame&, void* const)
+ native(2620) static final function AddMessageToConsole(string Msg, Color MsgColor, optional byte bMessageUseBigFont);
+
+// Export UActor::execUpdateGraphicOptions(FFrame&, void* const)
+ native(2621) static final function UpdateGraphicOptions();
+
+// Export UActor::execGarbageCollect(FFrame&, void* const)
+ native(2622) static final function GarbageCollect();
+
+// Export UActor::execGetMapNameExt(FFrame&, void* const)
+ native(1519) static final function string GetMapNameExt();
+
+// Export UActor::execConvertIntTimeToString(FFrame&, void* const)
+ native(1520) static final function string ConvertIntTimeToString(int iTimeToConvert, optional bool bAlignMinOnTwoDigits);
+
+// Export UActor::execGlobalIDToString(FFrame&, void* const)
+ native(1522) static final function string GlobalIDToString(byte aBytes[16]);
+
+// Export UActor::execGlobalIDToBytes(FFrame&, void* const)
+ native(1523) static final function GlobalIDToBytes(string szIn, out byte aBytes[255]);
+
+// Export UActor::execLoadRandomBackgroundImage(FFrame&, void* const)
+ native(2607) static final function Object LoadRandomBackgroundImage(optional string _szBackGroundSubFolder);
+
+// Export UActor::execKMP2IOKarmaAllNativeFct(FFrame&, void* const)
+// NEW IN 1.60
+ native(4042) static final function KMP2IOKarmaAllNativeFct(int WhatIdo, Actor _owner, optional float _var_int, optional float _var_float, optional Vector _var_vect);
 
 //------------------------------------------------------------------
 // GetReticuleInfo: info displayed under the reticule. 
@@ -1123,371 +1184,351 @@ native(2607) static final function object LoadRandomBackgroundImage(optional str
 //	out: szName is the name identifying this Actor
 //       return true if it's a friend or a neutral actor, False if enemy
 //------------------------------------------------------------------
-simulated event BOOL GetReticuleInfo( Pawn ownerReticule, OUT string szName ) { return false; }
-
-
-//#endif
-
-//#endif R6CODE
-
-// #ifdef R6HEARTBEAT
-simulated event BOOL ProcessHeart(FLOAT DeltaSeconds, out FLOAT fMul1, out FLOAT fMul2);
-// #endif R6HEARTBEAT
-
-
-
-
-//-----------------------------------------------------------------------------
-// Network replication.
-
-replication
+simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
 {
-	// Location
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && bReplicateMovement
-					&& (((RemoteRole == ROLE_AutonomousProxy) && bNetInitial)
-						|| ((RemoteRole == ROLE_SimulatedProxy) && (bNetInitial || bUpdateSimulatedPosition) && ((Base == None) || Base.bWorldGeometry))
-						|| ((RemoteRole == ROLE_DumbProxy) && ((Base == None) || Base.bWorldGeometry))) )
-		Location;
-
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && bReplicateMovement 
-					&& ((DrawType == DT_Mesh) || (DrawType == DT_StaticMesh))
-					&& (((RemoteRole == ROLE_AutonomousProxy) && bNetInitial)
-						|| ((RemoteRole == ROLE_SimulatedProxy) && (bNetInitial || bUpdateSimulatedPosition) && ((Base == None) || Base.bWorldGeometry))
-						|| ((RemoteRole == ROLE_DumbProxy) && ((Base == None) || Base.bWorldGeometry))) )
-		Rotation;
-
-	unreliable if ( (((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && bReplicateMovement 
-					&& RemoteRole<=ROLE_SimulatedProxy) 
-//#ifdef R6CODE
-                    || (m_bForceBaseReplication && !bNetOwner && Role == ROLE_Authority)
-//#endif // #ifdef R6CODE
-                    )
-		Base;
-
-    unreliable if( (((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && bReplicateMovement 
-					&& RemoteRole<=ROLE_SimulatedProxy && (Base != None) && !Base.bWorldGeometry)
-//#ifdef R6CODE
-                    || (m_bForceBaseReplication && !bNetOwner && Role == ROLE_Authority)
-//#endif // #ifdef R6CODE
-                    )
-		RelativeRotation, RelativeLocation, AttachmentBone;
-
-	// Physics
-	unreliable if( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && bReplicateMovement 
-					&& (((RemoteRole == ROLE_SimulatedProxy) && (bNetInitial || bUpdateSimulatedPosition))
-						|| ((RemoteRole == ROLE_DumbProxy) && (Physics == PHYS_Falling))) )
-		Velocity;
-
-// #ifndef R6CODE // 17 feb 2002 rbrek
-//	unreliable if( (!bSkipActorPropertyReplication || bNetInitial) && bReplicateMovement 
-//					&& (((RemoteRole == ROLE_SimulatedProxy) && bNetInitial)
-//						|| (RemoteRole == ROLE_DumbProxy)) )
-//		Physics;
-// #else
-	unreliable if( Role == ROLE_Authority && !bNetOwner)
-		Physics;
-    
-	unreliable if( Role == ROLE_Authority && bNetInitial)
-        bActorShadows;
-
-	unreliable if( Role == ROLE_Authority)
-        m_bUseRagdoll, m_fAttachFactor;
-
-	reliable if( Role < ROLE_Authority)
-		ServerSendBankToLoad;
-
-    reliable if( Role == ROLE_Authority)
-        ClientAddSoundBank;
-
-    reliable if ( Role == ROLE_Authority )
-        m_collisionBox,m_collisionBox2;
-    
-// #endif //R6CODE
-
-	unreliable if( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && bReplicateMovement 
-					&& (RemoteRole <= ROLE_SimulatedProxy) && (Physics == PHYS_Rotating) )
-		bFixedRotationDir, bRotateToDesired, RotationRate, DesiredRotation;
-
-	// Ambient sound.
-	unreliable if( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) && (!bNetOwner || !bClientAnim) )
-		AmbientSound;
-
-	unreliable if( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) && (!bNetOwner || !bClientAnim) 
-					&& (AmbientSound!=None) )
-		SoundRadius, SoundPitch, m_szSoundBoneName;
-
-	// Animation. 
-	unreliable if( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) 
-				&& (Role==ROLE_Authority) && (DrawType==DT_Mesh) && bReplicateAnimations )
-		SimAnim;
-
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) )
-		bHidden;
-
-	// Properties changed using accessor functions (Owner, rendering, and collision)
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) && bNetDirty )
-		Owner, DrawScale, DrawScale3D, DrawType, bCollideActors,bCollideWorld,bOnlyOwnerSee,Texture,Style,
-        m_fLightingScaleFactor,m_fLightingAdditiveAmbiant;
-
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) && bNetDirty 
-					&& (bCollideActors || bCollideWorld) )
-		bProjTarget, bBlockActors, bBlockPlayers, CollisionRadius, CollisionHeight;
-
-	// Properties changed only when spawning or in script (relationships, rendering, lighting)
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) )
-		Role,RemoteRole,bNetOwner,LightType,bTearOff;
-
-//#ifndef R6CHANGEWEAPONSYSTEM	
-//    unreliable if ( (!bSkipActorPropertyReplication || bNetInitial) && (Role==ROLE_Authority) 
-//					&& bNetDirty && bNetOwner )
-//		Inventory;
-//#endif
-    
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) 
-					&& bNetDirty && bReplicateInstigator )
-		Instigator;
-
-	// Infrequently changed mesh properties
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) 
-					&& bNetDirty && (DrawType == DT_Mesh) )
-		AmbientGlow,bUnlit,PrePivot,Mesh;
-
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) 
-				&& bNetDirty && (DrawType == DT_StaticMesh) )
-		StaticMesh;
-
-	// Infrequently changed lighting properties.
-	unreliable if ( ((!m_bUseRagdoll && !bSkipActorPropertyReplication) || bNetInitial) && (Role==ROLE_Authority) 
-					&& bNetDirty && (LightType != LT_None) )
-		LightEffect, LightBrightness, LightHue, LightSaturation,
-		LightRadius, LightPeriod, LightPhase, bSpecialLit;
-
-	// replicated functions
-	unreliable if( bDemoRecording )
-		DemoPlaySound;
-
+	return false;
+	return;
 }
 
-//=============================================================================
-// Actor error handling.
+// #ifdef R6HEARTBEAT
+simulated event bool ProcessHeart(float DeltaSeconds, out float fMul1, out float fMul2)
+{
+	return;
+}
 
+// Export UActor::execError(FFrame&, void* const)
 // Handle an error and kill this one actor.
-native(233) final function Error( coerce string S );
+ native(233) final function Error(coerce string S);
 
-//=============================================================================
-// General functions.
-
+// Export UActor::execSleep(FFrame&, void* const)
 // Latent functions.
-native(256) final latent function Sleep( float Seconds );
+ native(256) final latent function Sleep(float Seconds);
 
+// Export UActor::execSetCollision(FFrame&, void* const)
 // Collision.
-native(262) final function SetCollision( optional bool NewColActors, optional bool NewBlockActors, optional bool NewBlockPlayers );
-native(283) final function bool SetCollisionSize( float NewRadius, float NewHeight );
-native final function SetDrawScale(float NewScale);
-native final function SetDrawScale3D(vector NewScale3D);
-native final function SetStaticMesh(StaticMesh NewStaticMesh);
-native final function SetDrawType(EDrawType NewDrawType);
+ native(262) final function SetCollision(optional bool NewColActors, optional bool NewBlockActors, optional bool NewBlockPlayers);
 
+// Export UActor::execSetCollisionSize(FFrame&, void* const)
+ native(283) final function bool SetCollisionSize(float NewRadius, float NewHeight);
+
+// Export UActor::execSetDrawScale(FFrame&, void* const)
+ native final function SetDrawScale(float NewScale);
+
+// Export UActor::execSetDrawScale3D(FFrame&, void* const)
+ native final function SetDrawScale3D(Vector NewScale3D);
+
+// Export UActor::execSetStaticMesh(FFrame&, void* const)
+ native final function SetStaticMesh(StaticMesh NewStaticMesh);
+
+// Export UActor::execSetDrawType(FFrame&, void* const)
+ native final function SetDrawType(Actor.EDrawType NewDrawType);
+
+// Export UActor::execMove(FFrame&, void* const)
 // Movement.
-native(266) final function bool Move( vector Delta );
+ native(266) final function bool Move(Vector Delta);
 
+// Export UActor::execSetLocation(FFrame&, void* const)
 //R6CODE native(267) final function bool SetLocation( vector NewLocation );
-native(267) final function bool SetLocation( vector NewLocation, optional bool bNoCheck );
-native(299) final function bool SetRotation( rotator NewRotation );
+ native(267) final function bool SetLocation(Vector NewLocation, optional bool bNoCheck);
 
+// Export UActor::execSetRotation(FFrame&, void* const)
+ native(299) final function bool SetRotation(Rotator NewRotation);
+
+// Export UActor::execSetRelativeRotation(FFrame&, void* const)
 // SetRelativeRotation() sets the rotation relative to the actor's base
-native final function bool SetRelativeRotation( rotator NewRotation );
-native final function bool SetRelativeLocation( vector NewLocation );
+ native final function bool SetRelativeRotation(Rotator NewRotation);
 
-native(3969) final function bool MoveSmooth( vector Delta );
-native(3971) final function AutonomousPhysics(float DeltaSeconds);
+// Export UActor::execSetRelativeLocation(FFrame&, void* const)
+ native final function bool SetRelativeLocation(Vector NewLocation);
 
+// Export UActor::execMoveSmooth(FFrame&, void* const)
+ native(3969) final function bool MoveSmooth(Vector Delta);
+
+// Export UActor::execAutonomousPhysics(FFrame&, void* const)
+ native(3971) final function AutonomousPhysics(float DeltaSeconds);
+
+// Export UActor::execSetBase(FFrame&, void* const)
 // Relations.
-native(298) final function SetBase( actor NewBase, optional vector NewFloor );
-native(272) final function SetOwner( actor NewOwner );
+ native(298) final function SetBase(Actor NewBase, optional Vector NewFloor);
 
-//=============================================================================
-// Animation.
+// Export UActor::execSetOwner(FFrame&, void* const)
+ native(272) final function SetOwner(Actor NewOwner);
 
+// Export UActor::execPlayAnim(FFrame&, void* const)
 // Animation functions.
 //#ifdef R6CODE -  
 // 14 jan 2002 rbrek - for playing animations backwards
 // 16 jan 2002 rbrek - added bForceAnimRate to force PlayAnim to use exactly the specified animation rate
-native(259) final function PlayAnim( name Sequence, optional float Rate, optional float TweenTime, optional int Channel, optional bool bBackward, optional bool bForceAnimRate );
-native(260) final function LoopAnim( name Sequence, optional float Rate, optional float TweenTime, optional int Channel, optional bool bBackward, optional bool bForceAnimRate );
-//#endif R6CODE
+ native(259) final function PlayAnim(name Sequence, optional float Rate, optional float TweenTime, optional int Channel, optional bool bBackward, optional bool bForceAnimRate);
 
-native(294) final function TweenAnim( name Sequence, float Time, optional int Channel );
-native(282) final function bool IsAnimating(optional int Channel);
-native(261) final latent function FinishAnim(optional int Channel);
-native(263) final function bool HasAnim( name Sequence );
-native final function StopAnimating( optional bool ClearAllButBase );
-native final function FreezeAnimAt( float Time, optional int Channel);
-native final function bool IsTweening(int Channel);
+// Export UActor::execLoopAnim(FFrame&, void* const)
+ native(260) final function LoopAnim(name Sequence, optional float Rate, optional float TweenTime, optional int Channel, optional bool bBackward, optional bool bForceAnimRate);
 
+// Export UActor::execTweenAnim(FFrame&, void* const)
+ native(294) final function TweenAnim(name Sequence, float Time, optional int Channel);
+
+// Export UActor::execIsAnimating(FFrame&, void* const)
+ native(282) final function bool IsAnimating(optional int Channel);
+
+// Export UActor::execFinishAnim(FFrame&, void* const)
+ native(261) final latent function FinishAnim(optional int Channel);
+
+// Export UActor::execHasAnim(FFrame&, void* const)
+ native(263) final function bool HasAnim(name Sequence);
+
+// Export UActor::execStopAnimating(FFrame&, void* const)
+ native final function StopAnimating(optional bool ClearAllButBase);
+
+// Export UActor::execFreezeAnimAt(FFrame&, void* const)
+ native final function FreezeAnimAt(float Time, optional int Channel);
+
+// Export UActor::execIsTweening(FFrame&, void* const)
+ native final function bool IsTweening(int Channel);
+
+// Export UActor::execClearChannel(FFrame&, void* const)
 //#ifdef R6CODE 
-native(1805) final function ClearChannel( int iChannel );
-native(1500) final function name GetAnimGroup( name Sequence ); // pgaron 4 jan 2002
-//#endif
+ native(1805) final function ClearChannel(int iChannel);
+
+// Export UActor::execGetAnimGroup(FFrame&, void* const)
+ native(1500) final function name GetAnimGroup(name Sequence);
 
 // Animation notifications.
-event AnimEnd( int Channel );
-native final function EnableChannelNotify ( int Channel, int Switch );
-native final function int GetNotifyChannel();
+event AnimEnd(int Channel)
+{
+	return;
+}
 
+// Export UActor::execEnableChannelNotify(FFrame&, void* const)
+ native final function EnableChannelNotify(int Channel, int Switch);
+
+// Export UActor::execGetNotifyChannel(FFrame&, void* const)
+ native final function int GetNotifyChannel();
+
+// Export UActor::execLinkSkelAnim(FFrame&, void* const)
 // Skeletal animation.
-simulated native final function LinkSkelAnim( MeshAnimation Anim, optional mesh NewMesh );
-simulated native final function LinkMesh( mesh NewMesh, optional bool bKeepAnim );
+ native final simulated function LinkSkelAnim(MeshAnimation Anim, optional Mesh NewMesh);
 
+// Export UActor::execLinkMesh(FFrame&, void* const)
+ native final simulated function LinkMesh(Mesh NewMesh, optional bool bKeepAnim);
+
+// Export UActor::execUnLinkSkelAnim(FFrame&, void* const)
 //#ifdef R6CODE - rbrek 4 april 2002
-native(2210) final function UnLinkSkelAnim();
-//#endif
+ native(2210) final function UnLinkSkelAnim();
 
-native final simulated function AnimBlendParams( int Stage, optional float BlendAlpha, optional float InTime, optional float OutTime, optional name BoneName );
-native final function AnimBlendToAlpha( int Stage, float TargetAlpha, float TimeInterval );
+// Export UActor::execAnimBlendParams(FFrame&, void* const)
+ native final simulated function AnimBlendParams(int Stage, optional float BlendAlpha, optional float InTime, optional float OutTime, optional name BoneName);
 
+// Export UActor::execAnimBlendToAlpha(FFrame&, void* const)
+ native final function AnimBlendToAlpha(int Stage, float TargetAlpha, float TimeInterval);
+
+// Export UActor::execGetAnimBlendAlpha(FFrame&, void* const)
 //#ifdef R6CODE - rbrek 05 jan 2002
-native(2208) final function float GetAnimBlendAlpha( int Stage );
-//#endif
+ native(2208) final function float GetAnimBlendAlpha(int Stage);
 
+// Export UActor::execWasSkeletonUpdated(FFrame&, void* const)
 //#ifdef R6CODE - pgaron 15 jan 2002
-native(1501) final function bool    WasSkeletonUpdated();
+ native(1501) final function bool WasSkeletonUpdated();
+
+// Export UActor::execGetBoneCoords(FFrame&, void* const)
 //#endif
-native final simulated function coords  GetBoneCoords( name BoneName, optional bool bDontCallGetFrame ); // r6code added bDontCallGetFrame  
-native final function rotator GetBoneRotation( name BoneName, optional int Space );
+ native final simulated function Coords GetBoneCoords(name BoneName, optional bool bDontCallGetFrame);
 
-native final function vector  GetRootLocation();
-native final function rotator GetRootRotation();
-native final function vector  GetRootLocationDelta();
-native final function rotator GetRootRotationDelta();
+// Export UActor::execGetBoneRotation(FFrame&, void* const)
+ native final function Rotator GetBoneRotation(name BoneName, optional int Space);
 
-native final function bool  AttachToBone( actor Attachment, name BoneName );
-native final function bool  DetachFromBone( actor Attachment );
+// Export UActor::execGetRootLocation(FFrame&, void* const)
+ native final function Vector GetRootLocation();
 
+// Export UActor::execGetRootRotation(FFrame&, void* const)
+ native final function Rotator GetRootRotation();
+
+// Export UActor::execGetRootLocationDelta(FFrame&, void* const)
+ native final function Vector GetRootLocationDelta();
+
+// Export UActor::execGetRootRotationDelta(FFrame&, void* const)
+ native final function Rotator GetRootRotationDelta();
+
+// Export UActor::execAttachToBone(FFrame&, void* const)
+ native final function bool AttachToBone(Actor Attachment, name BoneName);
+
+// Export UActor::execDetachFromBone(FFrame&, void* const)
+ native final function bool DetachFromBone(Actor Attachment);
+
+// Export UActor::execLockRootMotion(FFrame&, void* const)
 // rbrek - 22 nov 2001
 // added an argument to LockRootMotion() to allow using root motion with or without locking rotation of the root bone...
 //#ifdef R6CODE
-native final function LockRootMotion( int Lock, optional bool bUseRootRotation );
-//#elif
-//native final function LockRootMotion( int Lock );
-//#endif
+ native final function LockRootMotion(int Lock, optional bool bUseRootRotation);
 
-native final function SetBoneScale( int Slot, optional float BoneScale, optional name BoneName );
+// Export UActor::execSetBoneScale(FFrame&, void* const)
+ native final function SetBoneScale(int Slot, optional float BoneScale, optional name BoneName);
 
-native final function SetBoneDirection( name BoneName, rotator BoneTurn, optional vector BoneTrans, optional float Alpha );
-native final function SetBoneLocation( name BoneName, optional vector BoneTrans, optional float Alpha );
-native final function GetAnimParams( int Channel, out name OutSeqName, out float OutAnimFrame, out float OutAnimRate );
-native final function bool AnimIsInGroup( int Channel, name GroupName );  
+// Export UActor::execSetBoneDirection(FFrame&, void* const)
+ native final function SetBoneDirection(name BoneName, Rotator BoneTurn, optional Vector BoneTrans, optional float Alpha);
 
+// Export UActor::execSetBoneLocation(FFrame&, void* const)
+ native final function SetBoneLocation(name BoneName, optional Vector BoneTrans, optional float Alpha);
+
+// Export UActor::execGetAnimParams(FFrame&, void* const)
+ native final function GetAnimParams(int Channel, out name OutSeqName, out float OutAnimFrame, out float OutAnimRate);
+
+// Export UActor::execAnimIsInGroup(FFrame&, void* const)
+ native final function bool AnimIsInGroup(int Channel, name GroupName);
+
+// Export UActor::execSetBoneRotation(FFrame&, void* const)
 // #ifdif R6CODE - rbrek - 10 oct 2001  
-native final function SetBoneRotation( name BoneName, optional rotator BoneTurn, optional int Space, optional float Alpha, optional float InTime);
-// #endif R6CODE
-//native final function SetBoneRotation( name BoneName, optional rotator BoneTurn, optional int Space, optional float Alpha );
+ native final function SetBoneRotation(name BoneName, optional Rotator BoneTurn, optional int Space, optional float Alpha, optional float InTime);
 
-//=========================================================================
-// Rendering.
+// Export UActor::execGetRenderBoundingSphere(FFrame&, void* const)
+ native final function Plane GetRenderBoundingSphere();
 
-native final function plane GetRenderBoundingSphere();
-
-//=========================================================================
-// Physics.
-
+// Export UActor::execFinishInterpolation(FFrame&, void* const)
 // Physics control.
-native(301) final latent function FinishInterpolation();
-native(3970) final function SetPhysics( EPhysics newPhysics );
+ native(301) final latent function FinishInterpolation();
 
-native final function OnlyAffectPawns(bool B);
+// Export UActor::execSetPhysics(FFrame&, void* const)
+ native(3970) final function SetPhysics(Actor.EPhysics newPhysics);
 
+// Export UActor::execOnlyAffectPawns(FFrame&, void* const)
+ native final function OnlyAffectPawns(bool B);
+
+// Export UActor::execKSetMass(FFrame&, void* const)
 // ifdef WITH_KARMA
-native final function KSetMass( float mass );
-native final function float KGetMass();
+ native final function KSetMass(float Mass);
 
+// Export UActor::execKGetMass(FFrame&, void* const)
+ native final function float KGetMass();
+
+// Export UActor::execKSetInertiaTensor(FFrame&, void* const)
 // Set inertia tensor assuming a mass of 1. Scaled by mass internally to calculate actual inertia tensor.
-native final function KSetInertiaTensor( vector it1, vector it2 );
-native final function KGetInertiaTensor( out vector it1, out vector it2 );
+ native final function KSetInertiaTensor(Vector it1, Vector it2);
 
-native final function KSetDampingProps( float lindamp, float angdamp );
-native final function KGetDampingProps( out float lindamp, out float angdamp );
+// Export UActor::execKGetInertiaTensor(FFrame&, void* const)
+ native final function KGetInertiaTensor(out Vector it1, out Vector it2);
 
-native final function KSetFriction( float friction );
-native final function float KGetFriction();
+// Export UActor::execKSetDampingProps(FFrame&, void* const)
+ native final function KSetDampingProps(float lindamp, float angdamp);
 
-native final function KSetRestitution( float rest );
-native final function float KGetRestitution();
+// Export UActor::execKGetDampingProps(FFrame&, void* const)
+ native final function KGetDampingProps(out float lindamp, out float angdamp);
 
-native final function KSetCOMOffset( vector offset );
-native final function KGetCOMOffset( out vector offset );
-native final function KGetCOMPosition( out vector pos ); // get actual position of actors COM in world space
+// Export UActor::execKSetFriction(FFrame&, void* const)
+ native final function KSetFriction(float friction);
 
-native final function KSetImpactThreshold( float thresh );
-native final function float KGetImpactThreshold();
+// Export UActor::execKGetFriction(FFrame&, void* const)
+ native final function float KGetFriction();
 
-native final function KWake();
-native final function bool KIsAwake();
-native final function KAddImpulse( vector Impulse, vector Position, optional name BoneName );
+// Export UActor::execKSetRestitution(FFrame&, void* const)
+ native final function KSetRestitution(float rest);
 
-native final function KSetStayUpright( bool stayUpright, bool allowRotate );
+// Export UActor::execKGetRestitution(FFrame&, void* const)
+ native final function float KGetRestitution();
 
-native final function KSetBlockKarma( bool newBlock );
+// Export UActor::execKSetCOMOffset(FFrame&, void* const)
+ native final function KSetCOMOffset(Vector offset);
 
-native final function KSetActorGravScale( float ActorGravScale );
-native final function float KGetActorGravScale();
+// Export UActor::execKGetCOMOffset(FFrame&, void* const)
+ native final function KGetCOMOffset(out Vector offset);
 
+// Export UActor::execKGetCOMPosition(FFrame&, void* const)
+ native final function KGetCOMPosition(out Vector pos);
+
+// Export UActor::execKSetImpactThreshold(FFrame&, void* const)
+ native final function KSetImpactThreshold(float thresh);
+
+// Export UActor::execKGetImpactThreshold(FFrame&, void* const)
+ native final function float KGetImpactThreshold();
+
+// Export UActor::execKWake(FFrame&, void* const)
+ native final function KWake();
+
+// Export UActor::execKIsAwake(FFrame&, void* const)
+ native final function bool KIsAwake();
+
+// Export UActor::execKAddImpulse(FFrame&, void* const)
+ native final function KAddImpulse(Vector Impulse, Vector Position, optional name BoneName);
+
+// Export UActor::execKSetStayUpright(FFrame&, void* const)
+ native final function KSetStayUpright(bool stayUpright, bool allowRotate);
+
+// Export UActor::execKSetBlockKarma(FFrame&, void* const)
+ native final function KSetBlockKarma(bool newBlock);
+
+// Export UActor::execKSetActorGravScale(FFrame&, void* const)
+ native final function KSetActorGravScale(float ActorGravScale);
+
+// Export UActor::execKGetActorGravScale(FFrame&, void* const)
+ native final function float KGetActorGravScale();
+
+// Export UActor::execKDisableCollision(FFrame&, void* const)
 // Disable/Enable Karma contact generation between this actor, and another actor.
 // Collision is on by default.
-native final function KDisableCollision( actor Other );
-native final function KEnableCollision( actor Other );
+ native final function KDisableCollision(Actor Other);
 
+// Export UActor::execKEnableCollision(FFrame&, void* const)
+ native final function KEnableCollision(Actor Other);
+
+// Export UActor::execKSetSkelVel(FFrame&, void* const)
 // Ragdoll-specific functions
-native final function KSetSkelVel( vector Velocity, optional vector AngVelocity, optional bool AddToCurrent );
-native final function float KGetSkelMass();
-native final function KFreezeRagdoll();
+ native final function KSetSkelVel(Vector Velocity, optional Vector AngVelocity, optional bool AddToCurrent);
 
+// Export UActor::execKGetSkelMass(FFrame&, void* const)
+ native final function float KGetSkelMass();
+
+// Export UActor::execKFreezeRagdoll(FFrame&, void* const)
+ native final function KFreezeRagdoll();
+
+// Export UActor::execKAddBoneLifter(FFrame&, void* const)
 // You MUST turn collision off (KSetBlockKarma) before using bone lifters!
-native final function KAddBoneLifter( name BoneName, InterpCurve LiftVel, float LateralFriction, InterpCurve Softness ); 
-native final function KRemoveLifterFromBone( name BoneName ); 
-native final function KRemoveAllBoneLifters(); 
+ native final function KAddBoneLifter(name BoneName, InterpCurve LiftVel, float LateralFriction, InterpCurve Softness);
 
+// Export UActor::execKRemoveLifterFromBone(FFrame&, void* const)
+ native final function KRemoveLifterFromBone(name BoneName);
+
+// Export UActor::execKRemoveAllBoneLifters(FFrame&, void* const)
+ native final function KRemoveAllBoneLifters();
+
+// Export UActor::execKMakeRagdollAvailable(FFrame&, void* const)
 // Used for only allowing a fixed maximum number of ragdolls in action.
-native final function KMakeRagdollAvailable();
-native final function bool KIsRagdollAvailable();
+ native final function KMakeRagdollAvailable();
+
+// Export UActor::execKIsRagdollAvailable(FFrame&, void* const)
+ native final function bool KIsRagdollAvailable();
 
 // event called when Karmic actor hits with impact velocity over KImpactThreshold
-event KImpact(actor other, vector pos, vector impactVel, vector impactNorm); 
+event KImpact(Actor Other, Vector pos, Vector impactVel, Vector impactNorm)
+{
+	return;
+}
 
 // event called when karma actor's velocity drops below KVelDropBelowThreshold;
-event KVelDropBelow();
+event KVelDropBelow()
+{
+	return;
+}
 
 // event called when a ragdoll convulses (see KarmaParamsSkel)
-event KSkelConvulse();
+event KSkelConvulse()
+{
+	return;
+}
 
 // event called just before sim to allow user to 
 // NOTE: you should ONLY put numbers into Force and Torque during this event!!!!
-event KApplyForce(out vector Force, out vector Torque);
+event KApplyForce(out Vector Force, out Vector Torque)
+{
+	return;
+}
 
-// This is called from inside C++ physKarma at the appropriate time to update state of Karma rigid body.
-// If you return true, newState will be set into the rigid body. Return false and it will do nothing.
-//#ifndef R6KARMA
-//event bool KUpdateState(out KRigidBodyState newState);
-//#endif // #ifndef R6KARMA
-
-// endif
-
-//=========================================================================
-// Music
-
+// Export UActor::execPlayMusic(FFrame&, void* const)
 //R6SOUND
-native final function BOOL PlayMusic( Sound Music, optional BOOL bForcePlayMusic);
-native final function BOOL StopMusic( Sound StopMusic );
-native final function StopAllMusic();
-//ELSE
-//native final function int PlayMusic( string Song, float FadeInTime );
-//native final function StopMusic( int SongHandle, float FadeOutTime );
-//native final function StopAllMusic( float FadeOutTime );
-//END RSOUND
+ native final function bool PlayMusic(Sound Music, optional bool bForcePlayMusic);
 
-//=========================================================================
-// Engine notification functions.
+// Export UActor::execStopMusic(FFrame&, void* const)
+ native final function bool StopMusic(Sound StopMusic);
+
+// Export UActor::execStopAllMusic(FFrame&, void* const)
+ native final function StopAllMusic();
 
 //
 // Major notifications.
@@ -1496,364 +1537,419 @@ native final function StopAllMusic();
 //R6SHADOW
 event Destroyed()
 {
-   if (Shadow != none)
-       Shadow.Destroy();
+	// End:0x17
+	if(__NFUN_119__(Shadow, none))
+	{
+		Shadow.__NFUN_279__();
+	}
+	return;
 }
-event GainedChild( Actor Other );
-event LostChild( Actor Other );
-event Tick( float DeltaTime );
+
+event GainedChild(Actor Other)
+{
+	return;
+}
+
+event LostChild(Actor Other)
+{
+	return;
+}
+
+event Tick(float DeltaTime)
+{
+	return;
+}
 
 //
 // Triggers.
 //
-event Trigger( Actor Other, Pawn EventInstigator );
-event UnTrigger( Actor Other, Pawn EventInstigator );
-event BeginEvent();
-event EndEvent();
+event Trigger(Actor Other, Pawn EventInstigator)
+{
+	return;
+}
+
+event UnTrigger(Actor Other, Pawn EventInstigator)
+{
+	return;
+}
+
+event BeginEvent()
+{
+	return;
+}
+
+event EndEvent()
+{
+	return;
+}
 
 //
 // Physics & world interaction.
 //
-event Timer();
-event HitWall( vector HitNormal, actor HitWall );
-event Falling();
-event Landed( vector HitNormal );
-event ZoneChange( ZoneInfo NewZone );
-event PhysicsVolumeChange( PhysicsVolume NewVolume );
-event Touch( Actor Other );
-event PostTouch( Actor Other ); // called for PendingTouch actor after physics completes
-event UnTouch( Actor Other );
-event Bump( Actor Other );
-event BaseChange();
-event Attach( Actor Other );
-event Detach( Actor Other );
-event Actor SpecialHandling(Pawn Other);
-event bool EncroachingOn( actor Other );
-event EncroachedBy( actor Other );
+event Timer()
+{
+	return;
+}
+
+event HitWall(Vector HitNormal, Actor HitWall)
+{
+	return;
+}
+
+event Falling()
+{
+	return;
+}
+
+event Landed(Vector HitNormal)
+{
+	return;
+}
+
+event ZoneChange(ZoneInfo NewZone)
+{
+	return;
+}
+
+event PhysicsVolumeChange(PhysicsVolume NewVolume)
+{
+	return;
+}
+
+event Touch(Actor Other)
+{
+	return;
+}
+
+event PostTouch(Actor Other)
+{
+	return;
+}
+
+event UnTouch(Actor Other)
+{
+	return;
+}
+
+event Bump(Actor Other)
+{
+	return;
+}
+
+event BaseChange()
+{
+	return;
+}
+
+event Attach(Actor Other)
+{
+	return;
+}
+
+event Detach(Actor Other)
+{
+	return;
+}
+
+event Actor SpecialHandling(Pawn Other)
+{
+	return;
+}
+
+event bool EncroachingOn(Actor Other)
+{
+	return;
+}
+
+event EncroachedBy(Actor Other)
+{
+	return;
+}
+
 event FinishedInterpolation()
 {
 	bInterpolating = false;
+	return;
 }
 
-event EndedRotation();			// called when rotation completes
-event UsedBy( Pawn user ); // called if this Actor was touching a Pawn who pressed Use
+event EndedRotation()
+{
+	return;
+}
+
+event UsedBy(Pawn User)
+{
+	return;
+}
 
 //#ifdef R6CODE
-function SetAttachVar(Actor AttachActor, string StaticMeshTag, name PawnTag);
-function MatineeAttach();
-function MatineeDetach();
-//#endif
+function SetAttachVar(Actor AttachActor, string StaticMeshTag, name PawnTag)
+{
+	return;
+}
 
+function MatineeAttach()
+{
+	return;
+}
+
+function MatineeDetach()
+{
+	return;
+}
 
 event FellOutOfWorld()
 {
-	SetPhysics(PHYS_None);
-	Destroy();
-}	
+	__NFUN_3970__(0);
+	__NFUN_279__();
+	return;
+}
 
 //
 // Damage and kills.
 //
-event KilledBy( pawn EventInstigator );
-event TakeDamage( int Damage, Pawn EventInstigator, vector HitLocation, vector Momentum, class<DamageType> DamageType);
+event KilledBy(Pawn EventInstigator)
+{
+	return;
+}
 
-//
-// Trace a line and see what it collides with first.
-// Takes this actor's collision properties into account.
-// Returns first hit actor, Level if hit level, or None if hit nothing.
-//
-native(277) final function Actor Trace
-(
-	out vector      HitLocation,
-	out vector      HitNormal,
-	vector          TraceEnd,
-	optional vector TraceStart,
-	optional bool   bTraceActors,
-	optional vector Extent,
-    optional out material Material
-);
+// Export UActor::execTrace(FFrame&, void* const)
+// NEW IN 1.60
+ native(277) final function Actor Trace(out Vector HitLocation, out Vector HitNormal, Vector TraceEnd, optional Vector TraceStart, optional bool bTraceActors, optional Vector Extent, optional out Material Material);
 
-//ifdef R6CODE
-const TF_TraceActors = 0x0001;
-const TF_Visibility  = 0x0002;
-const TF_LineOfFire  = 0x0004;
-const TF_SkipVolume  = 0x0008;
-const TF_ShadowCast  = 0x0010;
-const TF_SkipPawn    = 0x0020;
+// Export UActor::execR6Trace(FFrame&, void* const)
+// NEW IN 1.60
+ native(1806) final function Actor R6Trace(out Vector HitLocation, out Vector HitNormal, Vector TraceEnd, optional Vector TraceStart, optional int iTraceFlags, optional Vector Extent, optional out Material Material);
 
-native(1806) final function Actor R6Trace
-(
-	out vector      HitLocation,
-	out vector      HitNormal,
-	vector          TraceEnd,
-	optional vector TraceStart,
-    optional INT    iTraceFlags,
-	optional vector Extent,
-    optional out material Material
-);
+// Export UActor::execFindSpot(FFrame&, void* const)
+ native(1800) final function bool FindSpot(out Vector vLocation, optional Vector vExtent);
 
-native(1800) final function bool FindSpot( out vector vLocation, optional vector vExtent );
-//endif R6CODE
+// Export UActor::execFastTrace(FFrame&, void* const)
+// NEW IN 1.60
+ native(548) final function bool FastTrace(Vector TraceEnd, optional Vector TraceStart);
 
-// returns true if did not hit world geometry
-native(548) final function bool FastTrace
-(
-	vector          TraceEnd,
-	optional vector TraceStart
-);
+// Export UActor::execSpawn(FFrame&, void* const)
+// NEW IN 1.60
+ native(278) final function Actor Spawn(Class<Actor> SpawnClass, optional Actor SpawnOwner, optional name SpawnTag, optional Vector SpawnLocation, optional Rotator SpawnRotation, optional bool bNoCollisionFail);
 
-//
-// Spawn an actor. Returns an actor of the specified class, not
-// of class Actor (this is hardcoded in the compiler). Returns None
-// if the actor could not be spawned (either the actor wouldn't fit in
-// the specified location, or the actor list is full).
-// Defaults to spawning at the spawner's location.
-//
-native(278) final function actor Spawn
-(
-	class<actor>      SpawnClass,
-	optional actor	  SpawnOwner,
-	optional name     SpawnTag,
-	optional vector   SpawnLocation,
-	optional rotator  SpawnRotation,
-//R6CODE+
-    optional bool     bNoCollisionFail
-//R6CODE-
-);
-
+// Export UActor::execDestroy(FFrame&, void* const)
 //
 // Destroy this actor. Returns true if destroyed, false if indestructable.
 // Destruction is latent. It occurs at the end of the tick.
 //
-native(279) final function bool Destroy();
+ native(279) final function bool Destroy();
 
 // Networking - called on client when actor is torn off (bTearOff==true)
-event TornOff();
+event TornOff()
+{
+	return;
+}
 
-//=============================================================================
-// Timing.
-
+// Export UActor::execSetTimer(FFrame&, void* const)
 // Causes Timer() events every NewTimerRate seconds.
-native(280) final function SetTimer( float NewTimerRate, bool bLoop );
+ native(280) final function SetTimer(float NewTimerRate, bool bLoop);
 
-//=============================================================================
-// Sound functions.
-
-/* Play a sound effect.
-*/
-
-//native(264) final function PlaySound
-//(
-//	sound				Sound,
-//	optional ESoundSlot Slot,
-//	optional float		Volume,
-//	optional bool		bNoOverride,
-//	optional float		Radius,
-//	optional float		Pitch,
-//	optional bool		Attenuate
-//);
-
+// Export UActor::execPlaySound(FFrame&, void* const)
 // R6CODE
-native(264)  final function PlaySound( Sound Sound, optional ESoundSlot Slot);
-native(2725) final function StopSound( Sound Sound);
-native(2703) final function BOOL IsPlayingSound(Actor aActor, sound Sound);
-native(2704) final function BOOL ResetVolume_AllTypeSound();
-native(2720) final function BOOL ResetVolume_TypeSound(ESoundSlot eSlot);
-native(2705) final function ChangeVolumeType(ESoundSlot eSlot, FLOAT fVolume);
-native(2712) final function StopAllSounds();
-native(2716) final function AddSoundBank(string szBank, ELoadBankSound eLBS);
-native(2717) final function AddAndFindBankInSound(Sound Sound, ELoadBankSound eLBS);
-native(2719) final function StopAllSoundsActor(Actor aActor);
-native(2721) final function FadeSound(FLOAT fTime, INT iFade, ESoundSlot eSlot);
-native(2722) final function SaveCurrentFadeValue();
-native(2723) final function ReturnSavedFadeValue(FLOAT fTime);
+ native(264) final function PlaySound(Sound Sound, optional Actor.ESoundSlot Slot);
 
+// Export UActor::execStopSound(FFrame&, void* const)
+ native(2725) final function StopSound(Sound Sound);
 
-// R6CODE END
+// Export UActor::execIsPlayingSound(FFrame&, void* const)
+ native(2703) final function bool IsPlayingSound(Actor aActor, Sound Sound);
 
-/* play a sound effect, but don't propagate to a remote owner
- (he is playing the sound clientside)
- */
-native simulated final function PlayOwnedSound
-(
-	sound				Sound,
-	optional ESoundSlot Slot,
-	optional float		Volume,
-	optional bool		bNoOverride,
-	optional float		Radius,
-	optional float		Pitch,
-	optional bool		Attenuate
-);
+// Export UActor::execResetVolume_AllTypeSound(FFrame&, void* const)
+ native(2704) final function bool ResetVolume_AllTypeSound();
 
-native simulated event DemoPlaySound
-(
-	sound				Sound,
-	optional ESoundSlot Slot,
-	optional float		Volume,
-	optional bool		bNoOverride,
-	optional float		Radius,
-	optional float		Pitch,
-	optional bool		Attenuate
-);
+// Export UActor::execResetVolume_TypeSound(FFrame&, void* const)
+ native(2720) final function bool ResetVolume_TypeSound(Actor.ESoundSlot eSlot);
 
-/* Get a sound duration.
-*/
-native final function float GetSoundDuration( sound Sound );
+// Export UActor::execChangeVolumeType(FFrame&, void* const)
+ native(2705) final function ChangeVolumeType(Actor.ESoundSlot eSlot, float fVolume);
 
-//=============================================================================
-// AI functions.    
+// Export UActor::execStopAllSounds(FFrame&, void* const)
+ native(2712) final function StopAllSounds();
 
-/* Inform other creatures that you've made a noise
- they might hear (they are sent a HearNoise message)
- Senders of MakeNoise should have an instigator if they are not pawns.
-*/
+// Export UActor::execAddSoundBank(FFrame&, void* const)
+ native(2716) final function AddSoundBank(string szBank, Actor.ELoadBankSound eLBS);
 
+// Export UActor::execAddAndFindBankInSound(FFrame&, void* const)
+ native(2717) final function AddAndFindBankInSound(Sound Sound, Actor.ELoadBankSound eLBS);
+
+// Export UActor::execStopAllSoundsActor(FFrame&, void* const)
+ native(2719) final function StopAllSoundsActor(Actor aActor);
+
+// Export UActor::execFadeSound(FFrame&, void* const)
+ native(2721) final function FadeSound(float fTime, int iFade, Actor.ESoundSlot eSlot);
+
+// Export UActor::execSaveCurrentFadeValue(FFrame&, void* const)
+ native(2722) final function SaveCurrentFadeValue();
+
+// Export UActor::execReturnSavedFadeValue(FFrame&, void* const)
+ native(2723) final function ReturnSavedFadeValue(float fTime);
+
+// Export UActor::execPlayOwnedSound(FFrame&, void* const)
+// NEW IN 1.60
+ native final simulated function PlayOwnedSound(Sound Sound, optional Actor.ESoundSlot Slot, optional float Volume, optional bool bNoOverride, optional float Radius, optional float Pitch, optional bool Attenuate);
+
+// Export UActor::execDemoPlaySound(FFrame&, void* const)
+// NEW IN 1.60
+ native simulated event DemoPlaySound(Sound Sound, optional Actor.ESoundSlot Slot, optional float Volume, optional bool bNoOverride, optional float Radius, optional float Pitch, optional bool Attenuate);
+
+// Export UActor::execGetSoundDuration(FFrame&, void* const)
+ native final function float GetSoundDuration(Sound Sound);
+
+// Export UActor::execMakeNoise(FFrame&, void* const)
 // #ifdef R6NOISE
-native(512) final function MakeNoise( float Loudness, optional ENoiseType eNoise, optional EPawnType ePawn );
-event R6MakeNoise( Actor.ESoundType eType )
-{
-    if(eType==SNDTYPE_None)
-        return;
+ native(512) final function MakeNoise(float Loudness, optional Actor.ENoiseType eNoise, optional Actor.EPawnType ePawn, optional Actor.ESoundType ESoundType);
 
-    // If we're a client, GameInfo doesn't exist (and we don't need to make the noise
-    if(Level.Game!=None)
-    {
-        Level.Game.R6GameInfoMakeNoise( eType, Self );
-    }
-    else
-    {
-        log("Warning: Call to R6MakeNoise when game is not the server" );
-        log("         From " $ name $ " in the state " $ GetStateName() );
-    }
+event R6MakeNoise(Actor.ESoundType eType)
+{
+	// End:0x12
+	if(__NFUN_154__(int(eType), int(0)))
+	{
+		return;
+	}
+	// End:0x47
+	if(__NFUN_119__(Level.Game, none))
+	{
+		Level.Game.R6GameInfoMakeNoise(eType, self);		
+	}
+	else
+	{
+		__NFUN_231__("Warning: Call to R6MakeNoise when game is not the server");
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("         From ", string(Name)), " in the state "), string(__NFUN_284__())));
+	}
+	return;
 }
 
-function R6MakeNoise2( FLOAT fLoudness, ENoiseType eNoise, EPawnType ePawn )
+function R6MakeNoise2(float fLoudness, Actor.ENoiseType eNoise, Actor.EPawnType ePawn)
 {
-    MakeNoise( fLoudness, eNoise, ePawn );
+	__NFUN_512__(fLoudness, eNoise, ePawn);
+	return;
 }
-// #else
-// native(512) final function MakeNoise( float Loudness );
-// #endif // #ifdef R6NOISE
 
-/* PlayerCanSeeMe returns true if any player (server) or the local player (standalone
-or client) has a line of sight to actor's location.
-*/
-native(532) final function bool PlayerCanSeeMe();
-
-//=============================================================================
-// Regular engine functions.
+// Export UActor::execPlayerCanSeeMe(FFrame&, void* const)
+ native(532) final function bool PlayerCanSeeMe();
 
 // Teleportation.
-event bool PreTeleport( Teleporter InTeleporter );
-event PostTeleport( Teleporter OutTeleporter );
+event bool PreTeleport(Teleporter InTeleporter)
+{
+	return;
+}
+
+event PostTeleport(Teleporter OutTeleporter)
+{
+	return;
+}
 
 // Level state.
-event BeginPlay();
+event BeginPlay()
+{
+	return;
+}
 
-//========================================================================
-// Disk access.
-
+// Export UActor::execGetMapName(FFrame&, void* const)
 // Find files.
-native(539) final function string GetMapName( string NameEnding, string MapName, int Dir );
-native(545) final function GetNextSkin( string Prefix, string CurrentSkin, int Dir, out string SkinName, out string SkinDesc );
-native(547) final function string GetURLMap();
-native final function string GetNextInt( string ClassName, int Num );
-native final function GetNextIntDesc( string ClassName, int Num, out string Entry, out string Description );
-native final function bool GetCacheEntry( int Num, out string GUID, out string Filename );
-native final function bool MoveCacheEntry( string GUID, optional string NewFilename );  
+ native(539) final function string GetMapName(string NameEnding, string MapName, int Dir);
 
-//=============================================================================
-// Iterator functions.
+// Export UActor::execGetNextSkin(FFrame&, void* const)
+ native(545) final function GetNextSkin(string Prefix, string CurrentSkin, int Dir, out string SkinName, out string SkinDesc);
 
-// Iterator functions for dealing with sets of actors.
+// Export UActor::execGetURLMap(FFrame&, void* const)
+ native(547) final function string GetURLMap();
 
-/* AllActors() - avoid using AllActors() too often as it iterates through the whole actor list and is therefore slow
-*/
-native(304) final iterator function AllActors     ( class<actor> BaseClass, out actor Actor, optional name MatchTag );
+// Export UActor::execGetNextInt(FFrame&, void* const)
+ native final function string GetNextInt(string ClassName, int Num);
 
-/* DynamicActors() only iterates through the non-static actors on the list (still relatively slow, bu
- much better than AllActors).  This should be used in most cases and replaces AllActors in most of 
- Epic's game code. 
-*/
-native(313) final iterator function DynamicActors     ( class<actor> BaseClass, out actor Actor, optional name MatchTag );
+// Export UActor::execGetNextIntDesc(FFrame&, void* const)
+ native final function GetNextIntDesc(string ClassName, int Num, out string Entry, out string Description);
 
-/* ChildActors() returns all actors owned by this actor.  Slow like AllActors()
-*/
-native(305) final iterator function ChildActors   ( class<actor> BaseClass, out actor Actor );
+// Export UActor::execGetCacheEntry(FFrame&, void* const)
+ native final function bool GetCacheEntry(int Num, out string Guid, out string FileName);
 
-/* BasedActors() returns all actors based on the current actor (slow, like AllActors)
-*/
-native(306) final iterator function BasedActors   ( class<actor> BaseClass, out actor Actor );
+// Export UActor::execMoveCacheEntry(FFrame&, void* const)
+ native final function bool MoveCacheEntry(string Guid, optional string NewFilename);
 
-/* TouchingActors() returns all actors touching the current actor (fast)
-*/
-native(307) final iterator function TouchingActors( class<actor> BaseClass, out actor Actor );
+// Export UActor::execAllActors(FFrame&, void* const)
+ native(304) final iterator function AllActors(Class<Actor> BaseClass, out Actor Actor, optional name MatchTag);
 
-/* TraceActors() return all actors along a traced line.  Reasonably fast (like any trace)
-*/
-native(309) final iterator function TraceActors   ( class<actor> BaseClass, out actor Actor, out vector HitLoc, out vector HitNorm, vector End, optional vector Start, optional vector Extent );
+// Export UActor::execDynamicActors(FFrame&, void* const)
+ native(313) final iterator function DynamicActors(Class<Actor> BaseClass, out Actor Actor, optional name MatchTag);
 
-/* RadiusActors() returns all actors within a give radius.  Slow like AllActors().  Use CollidingActors() or VisibleCollidingActors() instead if desired actor types are visible
-(not bHidden) and in the collision hash (bCollideActors is true)
-*/
-native(310) final iterator function RadiusActors  ( class<actor> BaseClass, out actor Actor, float Radius, optional vector Loc );
+// Export UActor::execChildActors(FFrame&, void* const)
+ native(305) final iterator function ChildActors(Class<Actor> BaseClass, out Actor Actor);
 
-/* VisibleActors() returns all visible actors within a radius.  Slow like AllActors().  Use VisibleCollidingActors() instead if desired actor types are 
-in the collision hash (bCollideActors is true)
-*/
-native(311) final iterator function VisibleActors ( class<actor> BaseClass, out actor Actor, optional float Radius, optional vector Loc );
+// Export UActor::execBasedActors(FFrame&, void* const)
+ native(306) final iterator function BasedActors(Class<Actor> BaseClass, out Actor Actor);
 
-/* VisibleCollidingActors() returns visible (not bHidden) colliding (bCollideActors==true) actors within a certain radius.
-Much faster than AllActors() since it uses the collision hash
-*/
-native(312) final iterator function VisibleCollidingActors ( class<actor> BaseClass, out actor Actor, float Radius, optional vector Loc, optional bool bIgnoreHidden );
+// Export UActor::execTouchingActors(FFrame&, void* const)
+ native(307) final iterator function TouchingActors(Class<Actor> BaseClass, out Actor Actor);
 
-/* CollidingActors() returns colliding (bCollideActors==true) actors within a certain radius.
-Much faster than AllActors() for reasonably small radii since it uses the collision hash
-*/
-native(321) final iterator function CollidingActors ( class<actor> BaseClass, out actor Actor, float Radius, optional vector Loc );
+// Export UActor::execTraceActors(FFrame&, void* const)
+ native(309) final iterator function TraceActors(Class<Actor> BaseClass, out Actor Actor, out Vector HitLoc, out Vector HitNorm, Vector End, optional Vector Start, optional Vector Extent);
 
-//=============================================================================
-// Color functions
-native(549) static final operator(20) color -     ( color A, color B );
-native(550) static final operator(16) color *     ( float A, color B );
-native(551) static final operator(20) color +     ( color A, color B );
-native(552) static final operator(16) color *     ( color A, float B );
+// Export UActor::execRadiusActors(FFrame&, void* const)
+ native(310) final iterator function RadiusActors(Class<Actor> BaseClass, out Actor Actor, float Radius, optional Vector Loc);
 
+// Export UActor::execVisibleActors(FFrame&, void* const)
+ native(311) final iterator function VisibleActors(Class<Actor> BaseClass, out Actor Actor, optional float Radius, optional Vector Loc);
+
+// Export UActor::execVisibleCollidingActors(FFrame&, void* const)
+ native(312) final iterator function VisibleCollidingActors(Class<Actor> BaseClass, out Actor Actor, float Radius, optional Vector Loc, optional bool bIgnoreHidden);
+
+// Export UActor::execCollidingActors(FFrame&, void* const)
+ native(321) final iterator function CollidingActors(Class<Actor> BaseClass, out Actor Actor, float Radius, optional Vector Loc);
+
+// Export UActor::execSubtract_ColorColor(FFrame&, void* const)
+ native(549) static final operator(20) Color -(Color A, Color B);
+
+// Export UActor::execMultiply_FloatColor(FFrame&, void* const)
+ native(550) static final operator(16) Color *(float A, Color B);
+
+// Export UActor::execAdd_ColorColor(FFrame&, void* const)
+ native(551) static final operator(20) Color +(Color A, Color B);
+
+// Export UActor::execMultiply_ColorFloat(FFrame&, void* const)
+ native(552) static final operator(16) Color *(Color A, float B);
+
+// Export UActor::execSetPlanningMode(FFrame&, void* const)
 //R6PLANNING
-native(2011) final function SetPlanningMode(BOOL bDraw);
-native(2014) final function BOOL InPlanningMode();
-native(2012) final function SetFloorToDraw(INT iFloor);
-native(2610) final function RenderLevelFromMe(INT iXMin, INT iYMin, INT iXSize, INT iYSize);
+ native(2011) final function SetPlanningMode(bool bDraw);
 
+// Export UActor::execInPlanningMode(FFrame&, void* const)
+ native(2014) final function bool InPlanningMode();
+
+// Export UActor::execSetFloorToDraw(FFrame&, void* const)
+ native(2012) final function SetFloorToDraw(int iFloor);
+
+// Export UActor::execRenderLevelFromMe(FFrame&, void* const)
+ native(2610) final function RenderLevelFromMe(int iXMin, int iYMin, int iXSize, int iYSize);
+
+// Export UActor::execDrawDashedLine(FFrame&, void* const)
 //R6CODE
-native(2608) final function DrawDashedLine(vector vStart, vector vEnd, color Col, float fDashSize);
-native(2609) final function DrawText3D(vector vPos, coerce string pString);
+ native(2608) final function DrawDashedLine(Vector vStart, Vector vEnd, Color Col, float fDashSize);
 
+// Export UActor::execDrawText3D(FFrame&, void* const)
+ native(2609) final function DrawText3D(Vector vPos, coerce string pString);
 
-//=============================================================================
-// Scripted Actor functions.
+function RenderOverlays(Canvas Canvas)
+{
+	return;
+}
 
-/* RenderOverlays()
-called by player's hud to request drawing of actor specific overlays onto canvas
-*/
-function RenderOverlays(Canvas Canvas);
-	
 //
 // Called immediately before gameplay begins.
 //
 event PreBeginPlay()
 {
-    if ( Level.Game != none && Level.Game.m_bGameStarted )
-    {
-        m_bSpawnedInGame = true;
-    }
-
-	// Handle autodestruction if desired.
-	if( !bGameRelevant && (Level.NetMode != NM_Client) && !Level.Game.BaseMutator.CheckRelevance(Self) )
-    {
-        Destroy();
-    }
+	// End:0x39
+	if(__NFUN_130__(__NFUN_119__(Level.Game, none), Level.Game.m_bGameStarted))
+	{
+		m_bSpawnedInGame = true;
+	}
+	return;
 }
 
 //
@@ -1861,482 +1957,687 @@ event PreBeginPlay()
 // Most message deal with 0 to 2 related PRIs.
 // The LocalMessage class defines how the PRI's and optional actor are used.
 //
-event BroadcastLocalizedMessage( class<LocalMessage> MessageClass, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject )
+event BroadcastLocalizedMessage(Class<LocalMessage> MessageClass, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
-	Level.Game.BroadcastLocalized( self, MessageClass, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject );
+	Level.Game.BroadcastLocalized(self, MessageClass, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject);
+	return;
 }
 
 // Called immediately after gameplay begins.
 //
-event PostBeginPlay();
+event PostBeginPlay()
+{
+	return;
+}
 
 // Called after PostBeginPlay.
 //
 simulated event SetInitialState()
 {
-    bScriptInitialized = true;
-	if( InitialState!='' )
-		GotoState( InitialState );
+	bScriptInitialized = true;
+	// End:0x21
+	if(__NFUN_255__(InitialState, 'None'))
+	{
+		__NFUN_113__(InitialState);		
+	}
 	else
-		GotoState( 'Auto' );
+	{
+		__NFUN_113__('Auto');
+	}
+	return;
 }
 
 //#ifdef R6CODE
-simulated function FirstPassReset();
-//#endif // #ifdef R6CODE
+simulated function FirstPassReset()
+{
+	return;
+}
 
 // called after PostBeginPlay.  On a net client, PostNetBeginPlay() is spawned after replicated variables have been initialized to
 // their replicated values
-event PostNetBeginPlay();
+event PostNetBeginPlay()
+{
+	return;
+}
 
 // R6CODE +
 simulated event SaveAndResetData()
 {
-    SaveOriginalData();     // backup all the needed data
-    ResetOriginalData();    // reset the data and initialized the actor (ie: call functions)
-}
-// R6CODE -
-
-/* HurtRadius()
- Hurt locally authoritative actors within the radius.
-*/
-simulated final function HurtRadius( float DamageAmount, float DamageRadius, class<DamageType> DamageType, float Momentum, vector HitLocation )
-{
-	local actor Victims;
-	local float damageScale, dist;
-	local vector dir;
-	
-	if( bHurtEntry )
-		return;
-
-	bHurtEntry = true;
-	foreach VisibleCollidingActors( class 'Actor', Victims, DamageRadius, HitLocation )
-	{
-		if( (Victims != self) && (Victims.Role == ROLE_Authority) )
-		{
-			dir = Victims.Location - HitLocation;
-			dist = FMax(1,VSize(dir));
-			dir = dir/dist; 
-			damageScale = 1 - FMax(0,(dist - Victims.CollisionRadius)/DamageRadius);
-			Victims.TakeDamage
-			(
-				damageScale * DamageAmount,
-				Instigator, 
-				Victims.Location - 0.5 * (Victims.CollisionHeight + Victims.CollisionRadius) * dir,
-				(damageScale * Momentum * dir),
-				DamageType
-			);
-		} 
-	}
-	bHurtEntry = false;
+	SaveOriginalData();
+	ResetOriginalData();
+	return;
 }
 
 // Called when carried onto a new level, before AcceptInventory.
 //
-event TravelPreAccept();
+event TravelPreAccept()
+{
+	return;
+}
 
 // Called when carried into a new level, after AcceptInventory.
 //
-event TravelPostAccept();
+event TravelPostAccept()
+{
+	return;
+}
 
 // Called by PlayerController when this actor becomes its ViewTarget.
 //
-function BecomeViewTarget();
+function BecomeViewTarget()
+{
+	return;
+}
 
 // Returns the string representation of the name of an object without the package
 // prefixes.
 //
-function String GetItemName( string FullName )
+function string GetItemName(string FullName)
 {
 	local int pos;
 
-	pos = InStr(FullName, ".");
-	While ( pos != -1 )
-	{
-		FullName = Right(FullName, Len(FullName) - pos - 1);
-		pos = InStr(FullName, ".");
-	}
+	pos = __NFUN_126__(FullName, ".");
+	J0x10:
 
+	// End:0x50 [Loop If]
+	if(__NFUN_155__(pos, -1))
+	{
+		FullName = __NFUN_234__(FullName, __NFUN_147__(__NFUN_147__(__NFUN_125__(FullName), pos), 1));
+		pos = __NFUN_126__(FullName, ".");
+		// [Loop Continue]
+		goto J0x10;
+	}
 	return FullName;
+	return;
 }
 
 // Returns the human readable string representation of an object.
 //
-function String GetHumanReadableName()
+function string GetHumanReadableName()
 {
-	return GetItemName(string(class));
+	return GetItemName(string(Class));
+	return;
 }
 
 final function ReplaceText(out string Text, string Replace, string With)
 {
 	local int i;
 	local string Input;
-		
+
 	Input = Text;
 	Text = "";
-	i = InStr(Input, Replace);
-	while(i != -1)
-	{	
-		Text = Text $ Left(Input, i) $ With;
-		Input = Mid(Input, i + Len(Replace));	
-		i = InStr(Input, Replace);
+	i = __NFUN_126__(Input, Replace);
+	J0x25:
+
+	// End:0x84 [Loop If]
+	if(__NFUN_155__(i, -1))
+	{
+		Text = __NFUN_112__(__NFUN_112__(Text, __NFUN_128__(Input, i)), With);
+		Input = __NFUN_127__(Input, __NFUN_146__(i, __NFUN_125__(Replace)));
+		i = __NFUN_126__(Input, Replace);
+		// [Loop Continue]
+		goto J0x25;
 	}
-	Text = Text $ Input;
+	Text = __NFUN_112__(Text, Input);
+	return;
 }
 
 // Set the display properties of an actor.  By setting them through this function, it allows
 // the actor to modify other components (such as a Pawn's weapon) or to adjust the result
 // based on other factors (such as a Pawn's other inventory wanting to affect the result)
-function SetDisplayProperties(ERenderStyle NewStyle, Material NewTexture, bool bLighting )
+function SetDisplayProperties(Actor.ERenderStyle NewStyle, Material NewTexture, bool bLighting)
 {
 	Style = NewStyle;
-	texture = NewTexture;
+	Texture = NewTexture;
 	bUnlit = bLighting;
+	return;
 }
 
 function SetDefaultDisplayProperties()
 {
-	Style = Default.Style;
-	texture = Default.Texture;
-	bUnlit = Default.bUnlit;
+	Style = default.Style;
+	Texture = default.Texture;
+	bUnlit = default.bUnlit;
+	return;
 }
 
 // Get localized message string associated with this actor
-static function string GetLocalString(
-	optional int Switch,
-	optional PlayerReplicationInfo RelatedPRI_1, 
-	optional PlayerReplicationInfo RelatedPRI_2
-	)
+static function string GetLocalString(optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2)
 {
 	return "";
+	return;
 }
 
-function MatchStarting(); // called when gameplay actually starts
+function MatchStarting()
+{
+	return;
+}
 
-function String GetDebugName()
+function string GetDebugName()
 {
 	return GetItemName(string(self));
+	return;
 }
 
-/* DisplayDebug()
-list important actor variable on canvas.  HUD will call DisplayDebug() on the current ViewTarget when
-the ShowDebug exec is used
-*/
 simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
-	local string T;
+	local string t;
 	local float XL;
 	local int i;
 	local Actor A;
-	local name anim;
-	local float frame,rate;
+	local name Anim;
+	local float frame, Rate;
 
-	Canvas.Style = ERenderStyle.STY_Normal;
-	Canvas.StrLen("TEST", XL, YL);
-	YPos = YPos + YL;
-	Canvas.SetPos(4,YPos);
-	Canvas.SetDrawColor(255,0,0);
-	T = GetDebugName();
-	if ( bDeleteMe )
-		T = T$" DELETED (bDeleteMe == true)";
-
-	Canvas.DrawText(T, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-	Canvas.SetDrawColor(255,255,255);
-
-	if ( Level.NetMode != NM_Standalone )
+	Canvas.Style = 1;
+	Canvas.__NFUN_464__("TEST", XL, YL);
+	YPos = __NFUN_174__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_2626__(byte(255), 0, 0);
+	t = GetDebugName();
+	// End:0xA9
+	if(bDeleteMe)
 	{
-		// networking attributes
-		T = "ROLE ";
-		Switch(Role)
-		{
-			case ROLE_None: T=T$"None"; break;
-			case ROLE_DumbProxy: T=T$"DumbProxy"; break;
-			case ROLE_SimulatedProxy: T=T$"SimulatedProxy"; break;
-			case ROLE_AutonomousProxy: T=T$"AutonomousProxy"; break;
-			case ROLE_Authority: T=T$"Authority"; break;
-		}
-		T = T$" REMOTE ROLE ";
-		Switch(RemoteRole)
-		{
-			case ROLE_None: T=T$"None"; break;
-			case ROLE_DumbProxy: T=T$"DumbProxy"; break;
-			case ROLE_SimulatedProxy: T=T$"SimulatedProxy"; break;
-			case ROLE_AutonomousProxy: T=T$"AutonomousProxy"; break;
-			case ROLE_Authority: T=T$"Authority"; break;
-		}
-		if ( bTearOff )
-			T = T$" Tear Off";
-		Canvas.DrawText(T, false);
-		YPos += YL;
-		Canvas.SetPos(4,YPos);
+		t = __NFUN_112__(t, " DELETED (bDeleteMe == true)");
 	}
-	T = "Physics ";
-	Switch(PHYSICS)
+	Canvas.__NFUN_465__(t, false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_2626__(byte(255), byte(255), byte(255));
+	// End:0x2EC
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
 	{
-		case PHYS_None: T=T$"None"; break;
-		case PHYS_Walking: T=T$"Walking"; break;
-		case PHYS_Falling: T=T$"Falling"; break;
-		case PHYS_Swimming: T=T$"Swimming"; break;
-		case PHYS_Flying: T=T$"Flying"; break;
-		case PHYS_Rotating: T=T$"Rotating"; break;
-		case PHYS_Projectile: T=T$"Projectile"; break;
-		case PHYS_Interpolating: T=T$"Interpolating"; break;
-		case PHYS_MovingBrush: T=T$"MovingBrush"; break;
-		case PHYS_Spider: T=T$"Spider"; break;
-		case PHYS_Trailer: T=T$"Trailer"; break;
-		case PHYS_Ladder: T=T$"Ladder"; break;
+		t = "ROLE ";
+		switch(Role)
+		{
+			// End:0x13D
+			case ROLE_None:
+				t = __NFUN_112__(t, "None");
+				// End:0x1CB
+				break;
+			// End:0x15D
+			case 1:
+				t = __NFUN_112__(t, "DumbProxy");
+				// End:0x1CB
+				break;
+			// End:0x182
+			case 2:
+				t = __NFUN_112__(t, "SimulatedProxy");
+				// End:0x1CB
+				break;
+			// End:0x1A8
+			case 3:
+				t = __NFUN_112__(t, "AutonomousProxy");
+				// End:0x1CB
+				break;
+			// End:0x1C8
+			case 4:
+				t = __NFUN_112__(t, "Authority");
+				// End:0x1CB
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+		t = __NFUN_112__(t, " REMOTE ROLE ");
+		switch(RemoteRole)
+		{
+			// End:0x209
+			case ROLE_None:
+				t = __NFUN_112__(t, "None");
+				// End:0x297
+				break;
+			// End:0x229
+			case 1:
+				t = __NFUN_112__(t, "DumbProxy");
+				// End:0x297
+				break;
+			// End:0x24E
+			case 2:
+				t = __NFUN_112__(t, "SimulatedProxy");
+				// End:0x297
+				break;
+			// End:0x274
+			case 3:
+				t = __NFUN_112__(t, "AutonomousProxy");
+				// End:0x297
+				break;
+			// End:0x294
+			case 4:
+				t = __NFUN_112__(t, "Authority");
+				// End:0x297
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+		// End:0x2B8
+		if(bTearOff)
+		{
+			t = __NFUN_112__(t, " Tear Off");
+		}
+		Canvas.__NFUN_465__(t, false);
+		__NFUN_184__(YPos, YL);
+		Canvas.__NFUN_2623__(4.0000000, YPos);
 	}
-	T = T$" in physicsvolume "$GetItemName(string(PhysicsVolume))$" on base "$GetItemName(string(Base));
-	if ( bBounce )
-		T = T$" - will bounce";
-	Canvas.DrawText(T, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawText("Location: "$Location$" Rotation "$Rotation, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-	Canvas.DrawText("Velocity: "$Velocity$" Speed "$VSize(Velocity), false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-	Canvas.DrawText("Acceleration: "$Acceleration, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-	
+	t = "Physics ";
+	switch(Physics)
+	{
+		// End:0x31E
+		case 0:
+			t = __NFUN_112__(t, "None");
+			// End:0x477
+			break;
+		// End:0x33C
+		case 1:
+			t = __NFUN_112__(t, "Walking");
+			// End:0x477
+			break;
+		// End:0x35A
+		case 2:
+			t = __NFUN_112__(t, "Falling");
+			// End:0x477
+			break;
+		// End:0x379
+		case 3:
+			t = __NFUN_112__(t, "Swimming");
+			// End:0x477
+			break;
+		// End:0x396
+		case 4:
+			t = __NFUN_112__(t, "Flying");
+			// End:0x477
+			break;
+		// End:0x3B5
+		case 5:
+			t = __NFUN_112__(t, "Rotating");
+			// End:0x477
+			break;
+		// End:0x3D6
+		case 6:
+			t = __NFUN_112__(t, "Projectile");
+			// End:0x477
+			break;
+		// End:0x3FA
+		case 7:
+			t = __NFUN_112__(t, "Interpolating");
+			// End:0x477
+			break;
+		// End:0x41C
+		case 8:
+			t = __NFUN_112__(t, "MovingBrush");
+			// End:0x477
+			break;
+		// End:0x439
+		case 9:
+			t = __NFUN_112__(t, "Spider");
+			// End:0x477
+			break;
+		// End:0x457
+		case 10:
+			t = __NFUN_112__(t, "Trailer");
+			// End:0x477
+			break;
+		// End:0x474
+		case 11:
+			t = __NFUN_112__(t, "Ladder");
+			// End:0x477
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	t = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(t, " in physicsvolume "), GetItemName(string(PhysicsVolume))), " on base "), GetItemName(string(Base)));
+	// End:0x4E9
+	if(bBounce)
+	{
+		t = __NFUN_112__(t, " - will bounce");
+	}
+	Canvas.__NFUN_465__(t, false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Location: ", string(Location)), " Rotation "), string(Rotation)), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Velocity: ", string(Velocity)), " Speed "), string(__NFUN_225__(Velocity))), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__("Acceleration: ", string(Acceleration)), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
 	Canvas.DrawColor.B = 0;
-	Canvas.DrawText("Collision Radius "$CollisionRadius$" Height "$CollisionHeight);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawText("Collides with Actors "$bCollideActors$", world "$bCollideWorld$", proj. target "$bProjTarget);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-	Canvas.DrawText("Blocks Actors "$bBlockActors$", players "$bBlockPlayers);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	T = "Touching ";
-	ForEach TouchingActors(class'Actor', A)
-		T = T$GetItemName(string(A))$" ";
-	if ( T == "Touching ")
-		T = "Touching nothing";
-	Canvas.DrawText(T, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawColor.R = 0;
-	T = "Rendered: ";
-	Switch(Style)
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Collision Radius ", string(CollisionRadius)), " Height "), string(CollisionHeight)));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Collides with Actors ", string(bCollideActors)), ", world "), string(bCollideWorld)), ", proj. target "), string(bProjTarget)));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Blocks Actors ", string(bBlockActors)), ", players "), string(bBlockPlayers)));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	t = "Touching ";
+	// End:0x7B2
+	foreach __NFUN_307__(Class'Engine.Actor', A)
 	{
-		case STY_None: T=T; break;
-		case STY_Normal: T=T$"Normal"; break;
-		case STY_Masked: T=T$"Masked"; break;
-		case STY_Translucent: T=T$"Translucent"; break;
-		case STY_Modulated: T=T$"Modulated"; break;
-		case STY_Alpha: T=T$"Alpha"; break;
-	}		
-
-	Switch(DrawType)
+		t = __NFUN_112__(__NFUN_112__(t, GetItemName(string(A))), " ");		
+	}	
+	// End:0x7E0
+	if(__NFUN_122__(t, "Touching "))
 	{
-		case DT_None: T=T$" None"; break;
-		case DT_Sprite: T=T$" Sprite "; break;
-		case DT_Mesh: T=T$" Mesh "; break;
-		case DT_Brush: T=T$" Brush "; break;
-		case DT_RopeSprite: T=T$" RopeSprite "; break;
-		case DT_VerticalSprite: T=T$" VerticalSprite "; break;
-		case DT_Terraform: T=T$" Terraform "; break;
-		case DT_SpriteAnimOnce: T=T$" SpriteAnimOnce "; break;
-		case DT_StaticMesh: T=T$" StaticMesh "; break;
+		t = "Touching nothing";
 	}
-
-	if ( DrawType == DT_Mesh )
+	Canvas.__NFUN_465__(t, false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawColor.R = 0;
+	t = "Rendered: ";
+	switch(Style)
 	{
-		T = T$Mesh;
-		if ( Skins.length > 0 )
+		// End:0x856
+		case 0:
+			t = t;
+			// End:0x8F1
+			break;
+		// End:0x873
+		case 1:
+			t = __NFUN_112__(t, "Normal");
+			// End:0x8F1
+			break;
+		// End:0x890
+		case 2:
+			t = __NFUN_112__(t, "Masked");
+			// End:0x8F1
+			break;
+		// End:0x8B2
+		case 3:
+			t = __NFUN_112__(t, "Translucent");
+			// End:0x8F1
+			break;
+		// End:0x8D2
+		case 4:
+			t = __NFUN_112__(t, "Modulated");
+			// End:0x8F1
+			break;
+		// End:0x8EE
+		case 5:
+			t = __NFUN_112__(t, "Alpha");
+			// End:0x8F1
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	switch(DrawType)
+	{
+		// End:0x914
+		case 0:
+			t = __NFUN_112__(t, " None");
+			// End:0xA27
+			break;
+		// End:0x933
+		case 1:
+			t = __NFUN_112__(t, " Sprite ");
+			// End:0xA27
+			break;
+		// End:0x950
+		case 2:
+			t = __NFUN_112__(t, " Mesh ");
+			// End:0xA27
+			break;
+		// End:0x96E
+		case 3:
+			t = __NFUN_112__(t, " Brush ");
+			// End:0xA27
+			break;
+		// End:0x991
+		case 4:
+			t = __NFUN_112__(t, " RopeSprite ");
+			// End:0xA27
+			break;
+		// End:0x9B8
+		case 5:
+			t = __NFUN_112__(t, " VerticalSprite ");
+			// End:0xA27
+			break;
+		// End:0x9DA
+		case 6:
+			t = __NFUN_112__(t, " Terraform ");
+			// End:0xA27
+			break;
+		// End:0xA01
+		case 7:
+			t = __NFUN_112__(t, " SpriteAnimOnce ");
+			// End:0xA27
+			break;
+		// End:0xA24
+		case 8:
+			t = __NFUN_112__(t, " StaticMesh ");
+			// End:0xA27
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	// End:0xB7E
+	if(__NFUN_154__(int(DrawType), int(2)))
+	{
+		t = __NFUN_112__(t, string(Mesh));
+		// End:0xAC6
+		if(__NFUN_151__(Skins.Length, 0))
 		{
-			T = T$" skins: ";
-			for ( i=0; i<Skins.length; i++ )
+			t = __NFUN_112__(t, " skins: ");
+			i = 0;
+			J0xA75:
+
+			// End:0xAC6 [Loop If]
+			if(__NFUN_150__(i, Skins.Length))
 			{
-				if ( skins[i] == None )
-					break;
-				else
-					T =T$skins[i]$", ";
+				// End:0xA9C
+				if(__NFUN_114__(Skins[i], none))
+				{
+					// [Explicit Break]
+					goto J0xAC6;
+					// [Explicit Continue]
+					goto J0xABC;
+				}
+				t = __NFUN_112__(__NFUN_112__(t, string(Skins[i])), ", ");
+				J0xABC:
+
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0xA75;
 			}
 		}
+		J0xAC6:
 
-		Canvas.DrawText(T, false);
-		YPos += YL;
-		Canvas.SetPos(4,YPos);
-		
-		// mesh animation
-		GetAnimParams(0,Anim,frame,rate);
-		T = "AnimSequence "$Anim$" Frame "$frame$" Rate "$rate;
-		if ( bAnimByOwner )
-			T= T$" Anim by Owner";
+		Canvas.__NFUN_465__(t, false);
+		__NFUN_184__(YPos, YL);
+		Canvas.__NFUN_2623__(4.0000000, YPos);
+		GetAnimParams(0, Anim, frame, Rate);
+		t = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("AnimSequence ", string(Anim)), " Frame "), string(frame)), " Rate "), string(Rate));
+		// End:0xB7B
+		if(bAnimByOwner)
+		{
+			t = __NFUN_112__(t, " Anim by Owner");
+		}		
 	}
-	else if ( (DrawType == DT_Sprite) || (DrawType == DT_SpriteAnimOnce) )
-		T = T$Texture;
-	else if ( DrawType == DT_Brush )
-		T = T$Brush;
-		
-	Canvas.DrawText(T, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-	
-	Canvas.DrawColor.B = 255;	
-	Canvas.DrawText("Tag: "$Tag$" Event: "$Event$" STATE: "$GetStateName(), false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawText("Instigator "$GetItemName(string(Instigator))$" Owner "$GetItemName(string(Owner)));
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawText("Timer: "$TimerCounter$" LifeSpan "$LifeSpan$" AmbientSound "$AmbientSound);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
+	else
+	{
+		// End:0xBB7
+		if(__NFUN_132__(__NFUN_154__(int(DrawType), int(1)), __NFUN_154__(int(DrawType), int(7))))
+		{
+			t = __NFUN_112__(t, string(Texture));			
+		}
+		else
+		{
+			// End:0xBDB
+			if(__NFUN_154__(int(DrawType), int(3)))
+			{
+				t = __NFUN_112__(t, string(Brush));
+			}
+		}
+	}
+	Canvas.__NFUN_465__(t, false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawColor.B = byte(255);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Tag: ", string(Tag)), " Event: "), string(Event)), " STATE: "), string(__NFUN_284__())), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Instigator ", GetItemName(string(Instigator))), " Owner "), GetItemName(string(Owner))));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Timer: ", string(TimerCounter)), " LifeSpan "), string(LifeSpan)), " AmbientSound "), string(AmbientSound)));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	return;
 }
 
 // NearSpot() returns true is spot is within collision cylinder
-simulated final function bool NearSpot(vector Spot)
+final simulated function bool NearSpot(Vector Spot)
 {
-	local vector Dir;
+	local Vector Dir;
 
-	Dir = Location - Spot;
-	
-	if ( abs(Dir.Z) > CollisionHeight )
+	Dir = __NFUN_216__(Location, Spot);
+	// End:0x2A
+	if(__NFUN_177__(__NFUN_186__(Dir.Z), CollisionHeight))
+	{
 		return false;
-
-	Dir.Z = 0;
-    return ( VSize(Dir) <= CollisionRadius );
+	}
+	Dir.Z = 0.0000000;
+	return __NFUN_178__(__NFUN_225__(Dir), CollisionRadius);
+	return;
 }
 
-simulated final function bool TouchingActor(Actor A)
+final simulated function bool TouchingActor(Actor A)
 {
-	local vector Dir;
+	local Vector Dir;
 
-	Dir = Location - A.Location;
-	
-	if ( abs(Dir.Z) > CollisionHeight + A.CollisionHeight )
+	Dir = __NFUN_216__(Location, A.Location);
+	// End:0x43
+	if(__NFUN_177__(__NFUN_186__(Dir.Z), __NFUN_174__(CollisionHeight, A.CollisionHeight)))
+	{
 		return false;
-
-	Dir.Z = 0;
-	return ( VSize(Dir) <= CollisionRadius + A.CollisionRadius );
+	}
+	Dir.Z = 0.0000000;
+	return __NFUN_178__(__NFUN_225__(Dir), __NFUN_174__(CollisionRadius, A.CollisionRadius));
+	return;
 }
 
-// MERGE NOTE PlusDir() replaced by int operator ClockwiseFrom()
-
-/* StartInterpolation()
-when this function is called, the actor will start moving along an interpolation path
-beginning at Dest
-*/	
 simulated function StartInterpolation()
 {
-	GotoState('');
-	SetCollision(True,false,false);
-	bCollideWorld = False;
+	__NFUN_113__('None');
+	__NFUN_262__(true, false, false);
+	bCollideWorld = false;
 	bInterpolating = true;
-	SetPhysics(PHYS_None);
+	__NFUN_3970__(0);
+	return;
 }
 
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
-function Reset();
+function Reset()
+{
+	return;
+}
 
-/* 
-Trigger an event
-*/
-event TriggerEvent( Name EventName, Actor Other, Pawn EventInstigator )
+event TriggerEvent(name EventName, Actor Other, Pawn EventInstigator)
 {
 	local Actor A;
 
-	if ( (EventName == '') || (EventName == 'None') )
+	// End:0x22
+	if(__NFUN_132__(__NFUN_254__(EventName, 'None'), __NFUN_254__(EventName, 'None')))
+	{
 		return;
-
-	ForEach DynamicActors( class 'Actor', A, EventName )
-		A.Trigger(Other, EventInstigator);
+	}
+	// End:0x51
+	foreach __NFUN_313__(Class'Engine.Actor', A, EventName)
+	{
+		A.Trigger(Other, EventInstigator);		
+	}	
+	return;
 }
 
-/*
-Untrigger an event
-*/
-function UntriggerEvent( Name EventName, Actor Other, Pawn EventInstigator )
+function UntriggerEvent(name EventName, Actor Other, Pawn EventInstigator)
 {
 	local Actor A;
 
-	if ( (EventName == '') || (EventName == 'None') )
+	// End:0x22
+	if(__NFUN_132__(__NFUN_254__(EventName, 'None'), __NFUN_254__(EventName, 'None')))
+	{
 		return;
-
-	ForEach DynamicActors( class 'Actor', A, EventName )
-		A.Untrigger(Other, EventInstigator);
+	}
+	// End:0x51
+	foreach __NFUN_313__(Class'Engine.Actor', A, EventName)
+	{
+		A.UnTrigger(Other, EventInstigator);		
+	}	
+	return;
 }
 
 function bool IsInVolume(Volume aVolume)
 {
 	local Volume V;
-	
-	ForEach TouchingActors(class'Volume',V)
-		if ( V == aVolume )
+
+	// End:0x23
+	foreach __NFUN_307__(Class'Engine.Volume', V)
+	{
+		// End:0x22
+		if(__NFUN_114__(V, aVolume))
+		{			
 			return true;
+		}		
+	}	
 	return false;
+	return;
 }
-	 
-function bool IsInPain()
+
+function PlayTeleportEffect(bool bOut, bool bSound)
 {
-	local PhysicsVolume V;
-
-	ForEach TouchingActors(class'PhysicsVolume',V)
-		if ( V.bPainCausing && (V.DamagePerSec > 0) )
-			return true;
-	return false;
+	return;
 }
-
-function PlayTeleportEffect(bool bOut, bool bSound);
 
 function bool CanSplash()
 {
 	return false;
+	return;
 }
 
-function vector GetCollisionExtent()
+function Vector GetCollisionExtent()
 {
-	local vector Extent;
+	local Vector Extent;
 
-	Extent = CollisionRadius * vect(1,1,0);
+	Extent = __NFUN_213__(CollisionRadius, vect(1.0000000, 1.0000000, 0.0000000));
 	Extent.Z = CollisionHeight;
 	return Extent;
+	return;
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// R6CIRCUMSTANTIALACTION
 
 //===========================================================================//
 // R6QueryCircumstantialAction()                                             //
 //  Get circumstantial action informations from an actor.                    //
 //===========================================================================//
-event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
+event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
 {
-    Query.iHasAction = 0;
+	Query.iHasAction = 0;
+	return;
 }
 
 //===========================================================================//
 // R6GetCircumstantialActionString()                                         //
 //  Translate an action ID to a string.                                      //
 //===========================================================================//
-simulated function string R6GetCircumstantialActionString( INT iAction )
-{ 
-    return "";
+simulated function string R6GetCircumstantialActionString(int iAction)
+{
+	return "";
+	return;
 }
 
 //===========================================================================//
 // R6CircumstantialActionProgressStart()                                     //
 //  Notify the actor that the player is starting to interact with it.        //
 //===========================================================================//
-function R6CircumstantialActionProgressStart( R6AbstractCircumstantialActionQuery Query );
+function R6CircumstantialActionProgressStart(R6AbstractCircumstantialActionQuery Query)
+{
+	return;
+}
 
 //===========================================================================//
 // R6GetCircumstantialActionProgress()                                       //
@@ -2344,25 +2645,30 @@ function R6CircumstantialActionProgressStart( R6AbstractCircumstantialActionQuer
 //  Progress should be updated using Level.TimeSeconds and the skill of the  //
 //  player acting on it. Should return a number between 0 and 100            //
 //===========================================================================//
-function INT  R6GetCircumstantialActionProgress( R6AbstractCircumstantialActionQuery Query, Pawn actingPawn )
+function int R6GetCircumstantialActionProgress(R6AbstractCircumstantialActionQuery Query, Pawn actingPawn)
 {
-    return 0;
+	return 0;
+	return;
 }
 
 //===========================================================================//
 // R6CircumstantialActionCancel()                                            //
 //  If the action it stop when the player is doing the action				 //
 //===========================================================================//
-function R6CircumstantialActionCancel();
+function R6CircumstantialActionCancel()
+{
+	return;
+}
 
 //===========================================================================//
 // R6ActionCanBeExecuted()                                                   //
 //  Can the action be executed at this time ?                                //
 //  If not, the action will be grayed out in the rose des vents.             //
 //===========================================================================//
-simulated function BOOL R6ActionCanBeExecuted( INT iAction )
+simulated function bool R6ActionCanBeExecuted(int iAction, PlayerController PlayerController)
 {
-    return true;
+	return true;
+	return;
 }
 
 //===========================================================================//
@@ -2370,156 +2676,225 @@ simulated function BOOL R6ActionCanBeExecuted( INT iAction )
 //  Small function used to fill a circumstantial action team submenu using   //
 //  an action ID.                                                            //
 //===========================================================================//
-function R6FillSubAction( Out R6AbstractCircumstantialActionQuery Query, INT iSubMenu, INT iAction )
+function R6FillSubAction(out R6AbstractCircumstantialActionQuery Query, int iSubMenu, int iAction)
 {
-	Query.iTeamSubActionsIDList[iSubMenu*4 + 0] = iAction;
-	Query.iTeamSubActionsIDList[iSubMenu*4 + 1] = iAction;
-	Query.iTeamSubActionsIDList[iSubMenu*4 + 2] = iAction;
-	Query.iTeamSubActionsIDList[iSubMenu*4 + 3] = iAction;
+	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 0)] = byte(iAction);
+	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 1)] = byte(iAction);
+	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 2)] = byte(iAction);
+	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 3)] = byte(iAction);
+	return;
 }
 
-// R6CIRCUMSTANTIALACTION
-///////////////////////////////////////////////////////////////////////////////
-
 //R6CODE
-function INT R6TakeDamage( INT iKillValue, INT iStunValue, Pawn instigatedBy, 
-						   vector vHitLocation, vector vMomentum, INT iBulletToArmorModifier, optional int iBulletGoup)
+function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
-    //If the function is not overloaded, call the original function
-    //TakeDamage( iKillValue, instigatedBy, vHitLocation, vMomentum, none);
-    if(m_bBulletGoThrough == true)
-        return iKillValue;
-    else
-        return 0;
+	// End:0x15
+	if(__NFUN_242__(m_bBulletGoThrough, true))
+	{
+		return iKillValue;		
+	}
+	else
+	{
+		return 0;
+	}
+	return;
+}
+
+// NEW IN 1.60
+function ServerForceKillResult(int iKillResult)
+{
+	return;
+}
+
+// NEW IN 1.60
+function ServerForceStunResult(int iStunResult)
+{
+	return;
 }
 
 //=============================================================================
 // get random number betweem a min and a max
 //=============================================================================
-static function float GetRandomTweenNum( OUT RandomTweenNum r )
+static function float GetRandomTweenNum(out RandomTweenNum R)
 {
-	// max should be max >= min
-    #ifdefDEBUG    assert( r.m_fMax >= r.m_fMin ); #endif
-
-    r.m_fResult = FRand() * (r.m_fMax - r.m_fMin);
-    r.m_fResult += r.m_fMin;
-
-    return r.m_fResult;
+	R.m_fResult = __NFUN_171__(__NFUN_195__(), __NFUN_175__(R.m_fMax, R.m_fMin));
+	__NFUN_184__(R.m_fResult, R.m_fMin);
+	return R.m_fResult;
+	return;
 }
 
 function Actor R6GetRootActor()
 {
-    if(m_AttachedTo != none)
-    {
-        return m_AttachedTo.R6GetRootActor();
-    }
-
-    return self;
+	// End:0x1B
+	if(__NFUN_119__(m_AttachedTo, none))
+	{
+		return m_AttachedTo.R6GetRootActor();
+	}
+	return self;
+	return;
 }
 
 function AddSoundBankName(string szBank)
 {
-    local BOOL bFind;
-    local INT i;
+	local bool bFind;
+	local int i;
 
-    for (i=0; i<Level.Game.m_BankListToLoad.Length; i++)
-    {
-        if (Level.Game.m_BankListToLoad[i] == szBank)
-        {
-            bFind = true;
-            break;
-        }
-    }
-        
-    if (!bFind)
-        Level.Game.m_BankListToLoad[Level.Game.m_BankListToLoad.Length] = szBank;
+	i = 0;
+	J0x07:
+
+	// End:0x65 [Loop If]
+	if(__NFUN_150__(i, Level.Game.m_BankListToLoad.Length))
+	{
+		// End:0x5B
+		if(__NFUN_122__(Level.Game.m_BankListToLoad[i], szBank))
+		{
+			bFind = true;
+			// [Explicit Break]
+			goto J0x65;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	J0x65:
+
+	// End:0xA6
+	if(__NFUN_129__(bFind))
+	{
+		Level.Game.m_BankListToLoad[Level.Game.m_BankListToLoad.Length] = szBank;
+	}
+	return;
 }
 
 function ServerSendBankToLoad()
 {
-    local Controller lpController;
-    local INT i;
+	local Controller lpController;
+	local int i;
 
-    for (i=0; i<Level.Game.m_BankListToLoad.Length; i++)
-    {
-		for ( lpController=Level.ControllerList; lpController!=None; lpController=lpController.NextController )
+	i = 0;
+	J0x07:
+
+	// End:0xA9 [Loop If]
+	if(__NFUN_150__(i, Level.Game.m_BankListToLoad.Length))
+	{
+		lpController = Level.ControllerList;
+		J0x3D:
+
+		// End:0x9F [Loop If]
+		if(__NFUN_119__(lpController, none))
 		{
-			if (lpController.IsA('PlayerController'))
-                lpController.ClientAddSoundBank(Level.Game.m_BankListToLoad[i]);
-        }
-    }
+			// End:0x88
+			if(lpController.__NFUN_303__('PlayerController'))
+			{
+				lpController.ClientAddSoundBank(Level.Game.m_BankListToLoad[i]);
+			}
+			lpController = lpController.nextController;
+			// [Loop Continue]
+			goto J0x3D;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
 function ClientAddSoundBank(string szBank)
 {
-    AddSoundBank(szBank, LBS_UC);
-    #ifdefDEBUG LogSnd("***** ClientAddSoundBank =" @ szBank @ "*****");    #endif
+	__NFUN_2716__(szBank, 1);
+	return;
 }
 
 //------------------------------------------------------------------
 // Save / Reset Original Data
 //	
 //------------------------------------------------------------------
-simulated function SaveOriginalData();
-simulated function ResetOriginalData();
-
-function LogResetSystem( bool bSaving )
+simulated function SaveOriginalData()
 {
-    if ( bSaving )
-        log( "SAVING: "    $name$ " in " $class.name );
-    else
-        log( "RESETTING: " $name$ " in " $class.name );
+	return;
+}
+
+simulated function ResetOriginalData()
+{
+	return;
+}
+
+function LogResetSystem(bool bSaving)
+{
+	// End:0x3B
+	if(bSaving)
+	{
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("SAVING: ", string(Name)), " in "), string(Class.Name)));		
+	}
+	else
+	{
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("RESETTING: ", string(Name)), " in "), string(Class.Name)));
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // dbgLogActor
 //	
 //------------------------------------------------------------------
-simulated function dbgLogActor( bool bVerbose )
+simulated function dbgLogActor(bool bVerbose)
 {
-    log("Name= " $name );
-
+	__NFUN_231__(__NFUN_112__("Name= ", string(Name)));
+	return;
 }
-    //END R6CODE
 
 defaultproperties
 {
-     Role=ROLE_Authority
-     RemoteRole=ROLE_DumbProxy
-     DrawType=DT_Sprite
-     MaxLights=4
-     Style=STY_Normal
-     SoundPitch=64
-     m_eDisplayFlag=DF_ShowInBoth
-     m_HeatIntensity=64
-     m_wNbTickSkipped=255
-     m_iPlanningFloor_0=-1
-     m_iPlanningFloor_1=-1
-     bReplicateMovement=True
-     m_bAllowLOD=True
-     bMovable=True
-     m_b3DSound=True
-     bJustTeleported=True
-     m_bIsRealtime=True
-     m_bOutlinedInPlanning=True
-     LODBias=1.000000
-     m_fSoundRadiusSaturation=300.000000
-     m_fSoundRadiusActivation=2000.000000
-     m_fSoundRadiusLinearFadeDist=1000.000000
-     m_fSoundRadiusLinearFadeEnd=2900.000000
-     DrawScale=1.000000
-     m_fLightingScaleFactor=1.000000
-     SoundRadius=64.000000
-     TransientSoundVolume=1.000000
-     m_fCircumstantialActionRange=175.000000
-     Mass=100.000000
-     NetPriority=1.000000
-     NetUpdateFrequency=100.000000
-     bCoronaMUL2XFactor=0.500000
-     m_fCoronaMaxSize=100000.000000
-     m_fAttachFactor=1.000000
-     Texture=Texture'Engine.S_Actor'
-     MessageClass=Class'Engine.LocalMessage'
-     DrawScale3D=(X=1.000000,Y=1.000000,Z=1.000000)
-     m_PlanningColor=(B=255,G=250,R=244,A=255)
+	Role=4
+	RemoteRole=1
+	DrawType=1
+	MaxLights=4
+	Style=1
+	SoundPitch=64
+	m_eDisplayFlag=2
+	m_HeatIntensity=64
+	m_wNbTickSkipped=255
+	m_iPlanningFloor_0=-1
+	m_iPlanningFloor_1=-1
+	bReplicateMovement=true
+	m_bAllowLOD=true
+	bMovable=true
+	m_b3DSound=true
+	bJustTeleported=true
+	m_bIsRealtime=true
+	m_bOutlinedInPlanning=true
+	LODBias=1.0000000
+	m_fSoundRadiusSaturation=300.0000000
+	m_fSoundRadiusActivation=2000.0000000
+	m_fSoundRadiusLinearFadeDist=1000.0000000
+	m_fSoundRadiusLinearFadeEnd=2900.0000000
+	DrawScale=1.0000000
+	m_fLightingScaleFactor=1.0000000
+	SoundRadius=64.0000000
+	TransientSoundVolume=1.0000000
+	m_fCircumstantialActionRange=175.0000000
+	Mass=100.0000000
+	NetPriority=1.0000000
+	NetUpdateFrequency=100.0000000
+	bCoronaMUL2XFactor=0.5000000
+	m_fCoronaMaxSize=100000.0000000
+	m_fAttachFactor=1.0000000
+	Texture=Texture'Engine.S_Actor'
+	MessageClass=Class'Engine.LocalMessage'
+	DrawScale3D=(X=1.0000000,Y=1.0000000,Z=1.0000000)
+	m_PlanningColor=(R=244,G=250,B=255,A=255)
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_vID
+// REMOVED IN 1.60: var EPhysics
+// REMOVED IN 1.60: var EDrawType
+// REMOVED IN 1.60: var g
+// REMOVED IN 1.60: var ERenderStyle
+// REMOVED IN 1.60: var ELightType
+// REMOVED IN 1.60: var ELightEffect
+// REMOVED IN 1.60: var float
+// REMOVED IN 1.60: var byte
+// REMOVED IN 1.60: function TakeDamage
+// REMOVED IN 1.60: function HurtRadius
+// REMOVED IN 1.60: function IsInPain

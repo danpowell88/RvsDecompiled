@@ -1,4 +1,10 @@
 //=============================================================================
+// R6ClaymoreUnit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6ClaymoreUnit.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,144 +15,138 @@ class R6ClaymoreUnit extends R6DemolitionsUnit;
 
 function HurtPawns()
 {
-    local R6InteractiveObject anObject;
-    local R6Pawn              aPawn;
-    local R6Pawn              aPawnInstigator;
-    local R6DemolitionsUnit   aDemoUnit;
+	local R6InteractiveObject anObject;
+	local R6Pawn aPawn, aPawnInstigator;
+	local R6DemolitionsUnit aDemoUnit;
+	local float fDistFromGrenade;
+	local Vector vExplosionMomentum, vActorDir, vFacingDir;
+	local int _iHealth, _PawnsHurtCount;
+	local bool _bCompilingStats;
+	local Controller aC;
+	local R6PlayerController aPC;
 
-    local FLOAT               fDistFromGrenade;
-    local vector              vExplosionMomentum;
-
-	local vector			  vActorDir;
-	local vector			  vFacingDir;
-    local INT                 _iHealth;
-    local INT                 _PawnsHurtCount;
-    local BOOL                _bCompilingStats;
-
-    local Controller          aC;
-    local R6PlayerController  aPC;
-
-    aPawnInstigator = R6Pawn(Instigator);
-    _bCompilingStats = R6AbstractGameInfo(Level.Game).m_bCompilingStats;
-    //Destroy demo units within range
-    foreach VisibleCollidingActors( class'R6DemolitionsUnit', aDemoUnit, m_fKillBlastRadius, Location )
-    {
-        if(aDemoUnit != self)
-            aDemoUnit.DestroyedByImpact();
-    }
-
-    vFacingDir = vector(rotation + rot(0,32768,0));
-	
-    foreach VisibleCollidingActors(class'R6InteractiveObject', anObject, m_fExplosionRadius, Location )
+	aPawnInstigator = R6Pawn(Instigator);
+	_bCompilingStats = R6AbstractGameInfo(Level.Game).m_bCompilingStats;
+	// End:0x69
+	foreach __NFUN_312__(Class'R6Weapons.R6DemolitionsUnit', aDemoUnit, m_fKillBlastRadius, Location)
 	{
-		// claymore explodes towards its frontal hemisphere...
-		vActorDir = anObject.Location - Location;
-		vActorDir.Z = 0;
-		vActorDir = Normal(vActorDir);
-
-        // Distance from grenade
-        fDistFromGrenade = VSize( anObject.Location - Location );
-
-        if((fDistFromGrenade > m_fKillBlastRadius * 0.5) && ((vActorDir dot vFacingDir) < 0.741181))
-			continue;	
-		
-		if( fDistFromGrenade <= m_fExplosionRadius )
+		// End:0x68
+		if(__NFUN_119__(aDemoUnit, self))
 		{
-    		DistributeDamage(anObject, Location);
+			aDemoUnit.DestroyedByImpact();
+		}		
+	}	
+	vFacingDir = Vector(__NFUN_316__(Rotation, rot(0, 32768, 0)));
+	// End:0x148
+	foreach __NFUN_312__(Class'R6Engine.R6InteractiveObject', anObject, m_fExplosionRadius, Location)
+	{
+		vActorDir = __NFUN_216__(anObject.Location, Location);
+		vActorDir.Z = 0.0000000;
+		vActorDir = __NFUN_226__(vActorDir);
+		fDistFromGrenade = __NFUN_225__(__NFUN_216__(anObject.Location, Location));
+		// End:0x128
+		if(__NFUN_130__(__NFUN_177__(fDistFromGrenade, __NFUN_171__(m_fKillBlastRadius, 0.5000000)), __NFUN_176__(__NFUN_219__(vActorDir, vFacingDir), 0.7411810)))
+		{
+			continue;			
 		}
+		// End:0x147
+		if(__NFUN_178__(fDistFromGrenade, m_fExplosionRadius))
+		{
+			DistributeDamage(anObject, Location);
+		}		
+	}	
+	// End:0x41A
+	foreach __NFUN_321__(Class'R6Engine.R6Pawn', aPawn, m_fExplosionRadius, Location)
+	{
+		// End:0x1DE
+		if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_132__(__NFUN_130__(__NFUN_129__(aPawnInstigator.m_bCanFireFriends), aPawnInstigator.IsFriend(aPawn)), __NFUN_130__(__NFUN_129__(aPawnInstigator.m_bCanFireNeutrals), aPawnInstigator.IsNeutral(aPawn)))))
+		{
+			continue;			
+		}
+		// End:0x419
+		if(__NFUN_155__(int(aPawn.m_eHealth), int(3)))
+		{
+			// End:0x419
+			if(aPawn.__NFUN_1845__(Location))
+			{
+				fDistFromGrenade = __NFUN_225__(__NFUN_216__(aPawn.Location, Location));
+				vActorDir = __NFUN_216__(aPawn.Location, Location);
+				vActorDir.Z = 0.0000000;
+				vActorDir = __NFUN_226__(vActorDir);
+				// End:0x36C
+				if(__NFUN_132__(__NFUN_178__(fDistFromGrenade, __NFUN_171__(m_fKillBlastRadius, 0.5000000)), __NFUN_130__(__NFUN_177__(__NFUN_219__(vActorDir, vFacingDir), 0.7411810), __NFUN_178__(fDistFromGrenade, m_fKillBlastRadius))))
+				{
+					vExplosionMomentum = __NFUN_212__(__NFUN_216__(aPawn.Location, Location), 0.2500000);
+					aPawn.ServerForceKillResult(4);
+					aPawn.R6TakeDamage(m_iEnergy, m_iEnergy, aPawnInstigator, aPawn.Location, vExplosionMomentum, 0);
+					aPawn.ServerForceKillResult(0);
+					// End:0x369
+					if(__NFUN_130__(__NFUN_119__(aPawnInstigator, none), __NFUN_129__(aPawnInstigator.IsFriend(aPawn))))
+					{
+						__NFUN_165__(_PawnsHurtCount);
+						R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
+					}
+					// End:0x419
+					continue;
+				}
+				// End:0x419
+				if(__NFUN_177__(__NFUN_219__(vActorDir, vFacingDir), 0.7411810))
+				{
+					_iHealth = int(aPawn.m_eHealth);
+					DistributeDamage(aPawn, Location);
+					// End:0x419
+					if(__NFUN_130__(__NFUN_130__(__NFUN_155__(_iHealth, int(aPawn.m_eHealth)), __NFUN_119__(aPawnInstigator, none)), __NFUN_129__(aPawnInstigator.IsFriend(aPawn))))
+					{
+						__NFUN_165__(_PawnsHurtCount);
+						R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
+					}
+				}
+			}
+		}		
+	}	
+	// End:0x44E
+	if(__NFUN_154__(_PawnsHurtCount, 0))
+	{
+		R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
 	}
+	aC = Level.ControllerList;
+	J0x462:
 
-    //log("Claymore Facing Dir: "$vFacingDir);
-    foreach CollidingActors( class'R6Pawn', aPawn, m_fExplosionRadius, Location )
-    {
-		// check for friendly fire if multiplayer		
-		if( (Level.NetMode != NM_Standalone) 
-		   && ( (!aPawnInstigator.m_bCanFireFriends  && aPawnInstigator.IsFriend(aPawn))  
-			   || (!aPawnInstigator.m_bCanFireNeutrals && aPawnInstigator.IsNeutral(aPawn)) )
-		  )
-		  	  continue;		
-		
-        // Don't affect dead pawns...
-        if( aPawn.m_eHealth != HEALTH_Dead )
-        {
-            if( aPawn.PawnCanBeHurtFrom(Location) )
-            {
-                // Distance from grenade
-                fDistFromGrenade = VSize( aPawn.Location - Location );
-	            // claymore explodes towards its frontal hemisphere...
-	            vActorDir = aPawn.location - location;
-	            vActorDir.Z = 0;
-	            vActorDir = Normal(vActorDir);
-         
-                // If the pawn is inside the kill radius... kill him    0.741181 = 25 degrees
-                if((fDistFromGrenade <= m_fKillBlastRadius * 0.5 ) || // too close to the mine, he dies
-                   (((vActorDir dot vFacingDir) > 0.741181) && (fDistFromGrenade <= m_fKillBlastRadius)))  //close and in front of the mine he dies too
-                {
-                    // Temporary momentum, quarter of distance from grenade...
-                    vExplosionMomentum = (aPawn.location - Location) * 0.25f;
-
-				    // Should damage a specific body part (eBoneTarget) - need to be implemented in R6Pawn
-				    aPawn.ServerForceKillResult(4);  //Force R6TakeDamage to kill the pawn
-				    aPawn.R6TakeDamage( m_iEnergy, m_iEnergy, aPawnInstigator, aPawn.Location , vExplosionMomentum, 0);
-				    aPawn.ServerForceKillResult(0);  //Reset Kill to Normal
-                    if((aPawnInstigator != none) && !aPawnInstigator.IsFriend(aPawn))
-                    {		
-                        _PawnsHurtCount++;
-                        R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
-                    }               
-                
-                    #ifdefDEBUG if( bShowLog ) log( "Pawn " $ aPawn $ " was killed by a grenade !" ); #endif
-                }
-                // If not killed, add it to a list of damaged pawns.  This has to 
-                // be done because we need to do a trace to the bone that will be
-                // hit, and Trace can't be used inside of a VisibleCollidingActors loop.
-                else if((vActorDir dot vFacingDir) > 0.741181)
-                {
-                    _iHealth = aPawn.m_eHealth;
-		            DistributeDamage(aPawn, location);
-                    if ((_iHealth != aPawn.m_eHealth) && 
-                          (aPawnInstigator != none) && !aPawnInstigator.IsFriend(aPawn))
-                    {
-                        _PawnsHurtCount++;
-                        R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
-                    }
-                }
-            }
-        }
-    }
-		
-    if (_PawnsHurtCount==0)
-    {
-        R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
-    }
-    // Controller shake
-    for( aC=Level.ControllerList; aC!=none; aC=aC.NextController )
-    {
-        if(aC.Pawn!=none && aC.Pawn.m_ePawnType==PAWN_Rainbow && aC.Pawn.IsAlive())
-        {
-            aPC = R6PlayerController(aC);
-            if( aPC != none )
-            {
-			    fDistFromGrenade = VSize( Location - aPC.Pawn.Location );
-                if(fDistFromGrenade<m_fShakeRadius)
-                {
-                    aPC.R6Shake( 1.0f, m_fShakeRadius-fDistFromGrenade, 0.05f );
-                    aPC.ClientPlaySound(m_sndEarthQuake, SLOT_SFX);
-                }
-            }
-        }
-    }
+	// End:0x564 [Loop If]
+	if(__NFUN_119__(aC, none))
+	{
+		// End:0x54D
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(aC.Pawn, none), __NFUN_154__(int(aC.Pawn.m_ePawnType), int(1))), aC.Pawn.IsAlive()))
+		{
+			aPC = R6PlayerController(aC);
+			// End:0x54D
+			if(__NFUN_119__(aPC, none))
+			{
+				fDistFromGrenade = __NFUN_225__(__NFUN_216__(Location, aPC.Pawn.Location));
+				// End:0x54D
+				if(__NFUN_176__(fDistFromGrenade, m_fShakeRadius))
+				{
+					aPC.R6Shake(1.0000000, __NFUN_175__(m_fShakeRadius, fDistFromGrenade), 0.0500000);
+					aPC.ClientPlaySound(m_sndEarthQuake, 3);
+				}
+			}
+		}
+		aC = aC.nextController;
+		// [Loop Continue]
+		goto J0x462;
+	}
+	return;
 }
 
 defaultproperties
 {
-     m_sndExplodeMetal=Sound'Gadget_Claymore.Play_Claymore_Expl_Metal'
-     m_sndExplodeDirt=Sound'Gadget_Claymore.Play_Claymore_Expl_Dirt'
-     m_pExplosionParticles=Class'R6SFX.R6ClaymoreMineEffect'
-     m_pExplosionLight=Class'R6SFX.R6GrenadeLight'
-     m_iEnergy=2000
-     m_fExplosionRadius=700.000000
-     m_fKillBlastRadius=400.000000
-     m_szAmmoName="Claymore Mine"
-     StaticMesh=StaticMesh'R63rdWeapons_SM.Items.R63rdClaymore'
+	m_sndExplodeMetal=Sound'Gadget_Claymore.Play_Claymore_Expl_Metal'
+	m_sndExplodeDirt=Sound'Gadget_Claymore.Play_Claymore_Expl_Dirt'
+	m_pExplosionParticles=Class'R6SFX.R6ClaymoreMineEffect'
+	m_pExplosionLight=Class'R6SFX.R6GrenadeLight'
+	m_iEnergy=2000
+	m_fExplosionRadius=700.0000000
+	m_fKillBlastRadius=400.0000000
+	m_szAmmoName="Claymore Mine"
+	StaticMesh=StaticMesh'R63rdWeapons_SM.Items.R63rdClaymore'
 }

@@ -1,4 +1,10 @@
 //=============================================================================
+// ClipMarker - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // ClipMarker.
 //
 // These are markers for the brush clip mode.  You place 2 or 3 of these in
@@ -9,16 +15,11 @@
 //
 //=============================================================================
 class ClipMarker extends Keypoint
-	placeable
-	native;
-
-#exec Texture Import File=Textures\S_ClipMarker.pcx Name=S_ClipMarker Mips=Off MASKED=1
-#exec Texture Import File=Textures\S_ClipMarker1.pcx Name=S_ClipMarker1 Mips=Off MASKED=1
-#exec Texture Import File=Textures\S_ClipMarker2.pcx Name=S_ClipMarker2 Mips=Off MASKED=1
-#exec Texture Import File=Textures\S_ClipMarker3.pcx Name=S_ClipMarker3 Mips=Off MASKED=1
+	native
+ placeable;
 
 defaultproperties
 {
-     bEdShouldSnap=True
-     Texture=Texture'Engine.S_ClipMarker'
+	bEdShouldSnap=true
+	Texture=Texture'Engine.S_ClipMarker'
 }

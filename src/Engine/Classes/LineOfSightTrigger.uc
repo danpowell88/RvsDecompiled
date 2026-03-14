@@ -1,4 +1,10 @@
 //=============================================================================
+// LineOfSightTrigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // LineOfSightTrigger
 // triggers its event when player looks at it from close enough
 // ONLY WORKS IN SINGLE PLAYER (or for the local client on a listen server)
@@ -6,42 +12,52 @@
 // but that would have more performance cost
 //=============================================================================
 class LineOfSightTrigger extends Triggers
-	native;
+	native
+ placeable;
 
-var() float MaxViewDist;	// maximum distance player can be from this trigger to trigger it
-var   float OldTickTime;
-var() bool  bEnabled;
-var	  bool  bTriggered;		
-var() name	SeenActorTag;	// tag of actor which triggers this trigger when seen
-var	  actor SeenActor;
-var() int MaxViewAngle;		// how directly a player must be looking at SeenActor center (in degrees)
-var float RequiredViewDir;	// how directly player must be looking at SeenActor - 1.0 = straight on, 0.75 = barely on screen
+var() int MaxViewAngle;  // how directly a player must be looking at SeenActor center (in degrees)
+var() bool bEnabled;
+var bool bTriggered;
+var() float MaxViewDist;  // maximum distance player can be from this trigger to trigger it
+var float OldTickTime;
+var float RequiredViewDir;  // how directly player must be looking at SeenActor - 1.0 = straight on, 0.75 = barely on screen
+var Actor SeenActor;
+var() name SeenActorTag;  // tag of actor which triggers this trigger when seen
 
 function PostBeginPlay()
 {
-	Super.PostBeginPlay();
-
-	RequiredViewDir = cos(MaxViewAngle * PI/180);
-	if ( (SeenActorTag != '') && (SeenActorTag != 'None') )
-		ForEach AllActors(class'Actor',SeenActor,SeenActorTag)
-			break;
+	super(Actor).PostBeginPlay();
+	RequiredViewDir = __NFUN_188__(__NFUN_172__(__NFUN_171__(float(MaxViewAngle), 3.1415930), float(180)));
+	// End:0x5C
+	if(__NFUN_130__(__NFUN_255__(SeenActorTag, 'None'), __NFUN_255__(SeenActorTag, 'None')))
+	{
+		// End:0x5B
+		foreach __NFUN_304__(Class'Engine.Actor', SeenActor, SeenActorTag)
+		{
+			// End:0x5B
+			break;			
+		}		
+	}
+	return;
 }
 
 event PlayerSeesMe(PlayerController P)
 {
-	TriggerEvent(Event,self,P.Pawn);
+	TriggerEvent(Event, self, P.Pawn);
 	bTriggered = true;
+	return;
 }
 
-function Trigger( actor Other, Pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
 	bEnabled = true;
+	return;
 }
 
 defaultproperties
 {
-     MaxViewAngle=15
-     bEnabled=True
-     MaxViewDist=3000.000000
-     bCollideActors=False
+	MaxViewAngle=15
+	bEnabled=true
+	MaxViewDist=3000.0000000
+	bCollideActors=false
 }

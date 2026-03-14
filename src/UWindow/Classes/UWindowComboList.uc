@@ -1,179 +1,229 @@
+//=============================================================================
+// UWindowComboList - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowComboList extends UWindowListControl;
 
-var UWindowComboControl		Owner;
-var UWindowVScrollBar		VertSB;
-var UWindowComboListItem	Selected;
 var int ItemHeight;
 var int VBorder;
 var int HBorder;
 var int TextBorder;
 var int MaxVisible;
+var UWindowComboControl Owner;
+var UWindowVScrollbar VertSB;
+var UWindowComboListItem Selected;
 
 function Sort()
 {
 	Items.Sort();
+	return;
 }
 
 function WindowShown()
 {
-	Super.WindowShown();
+	super(UWindowWindow).WindowShown();
 	FocusWindow();
+	return;
 }
 
 function Clear()
 {
 	Items.Clear();
+	return;
 }
 
 function Texture GetLookAndFeelTexture()
 {
 	return LookAndFeel.Active;
+	return;
 }
 
 function Setup()
 {
-	VertSB = UWindowVScrollBar(CreateWindow(class'UWindowVScrollBar', WinWidth - LookAndFeel.Size_ScrollbarWidth, 0, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	VertSB = UWindowVScrollbar(CreateWindow(Class'UWindow.UWindowVScrollbar', __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	return;
 }
-
-/*
-function SetupScrollBar( FLOAT _fX, FLOAT _fY, FLOAT _fW, FLOAT _fH)
-{
-	VertSB = UWindowVScrollBar(CreateWindow(class'UWindowVScrollBar', WinWidth - LookAndFeel.Size_ScrollbarWidth, _fY, LookAndFeel.Size_ScrollbarWidth, _fH));
-}
-*/
 
 function Created()
 {
-	ListClass = class'UWindowComboListItem';
-	bAlwaysOnTop = True;
-	bTransient = True;
-	Super.Created();
+	ListClass = Class'UWindow.UWindowComboListItem';
+	bAlwaysOnTop = true;
+	bTransient = true;
+	super.Created();
 	ItemHeight = 15;
 	VBorder = 3;
 	HBorder = 3;
 	TextBorder = 9;
-
-	Super.Created();
+	super.Created();
+	return;
 }
 
 function int FindItemIndex(string Value, optional bool bIgnoreCase)
 {
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 	local int Count;
 
-	I = UWindowComboListItem(Items.Next);
+	i = UWindowComboListItem(Items.Next);
 	Count = 0;
-		
-	while(I != None)
+	J0x20:
+
+	// End:0x95 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(bIgnoreCase && I.Value ~= Value) return Count;
-		if(I.Value == Value) return Count;
-
-		Count++;
-		I = UWindowComboListItem(I.Next);
+		// End:0x54
+		if(__NFUN_130__(bIgnoreCase, __NFUN_124__(i.Value, Value)))
+		{
+			return Count;
+		}
+		// End:0x72
+		if(__NFUN_122__(i.Value, Value))
+		{
+			return Count;
+		}
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x20;
 	}
-
 	return -1;
+	return;
 }
 
 function int FindItemIndex2(string Value2, optional bool bIgnoreCase)
 {
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 	local int Count;
 
-	I = UWindowComboListItem(Items.Next);
+	i = UWindowComboListItem(Items.Next);
 	Count = 0;
-		
-	while(I != None)
+	J0x20:
+
+	// End:0x95 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(bIgnoreCase && I.Value2 ~= Value2) return Count;
-		if(I.Value2 == Value2) return Count;
-
-		Count++;
-		I = UWindowComboListItem(I.Next);
+		// End:0x54
+		if(__NFUN_130__(bIgnoreCase, __NFUN_124__(i.Value2, Value2)))
+		{
+			return Count;
+		}
+		// End:0x72
+		if(__NFUN_122__(i.Value2, Value2))
+		{
+			return Count;
+		}
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x20;
 	}
-
 	return -1;
+	return;
 }
 
 function string GetItemValue(int Index)
 {
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 	local int Count;
 
-	I = UWindowComboListItem(Items.Next);
+	i = UWindowComboListItem(Items.Next);
 	Count = 0;
-		
-	while(I != None)
+	J0x20:
+
+	// End:0x6C [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(Count == Index) return I.Value;
-
-		Count++;
-		I = UWindowComboListItem(I.Next);
+		// End:0x49
+		if(__NFUN_154__(Count, Index))
+		{
+			return i.Value;
+		}
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x20;
 	}
-
 	return "";
+	return;
 }
 
 function RemoveItem(int Index)
 {
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 	local int Count;
 
-	if(Index == -1)
-		return;
-
-	I = UWindowComboListItem(Items.Next);
-	Count = 0;
-		
-	while(I != None)
+	// End:0x11
+	if(__NFUN_154__(Index, -1))
 	{
-		if(Count == Index)
+		return;
+	}
+	i = UWindowComboListItem(Items.Next);
+	Count = 0;
+	J0x31:
+
+	// End:0x7F [Loop If]
+	if(__NFUN_119__(i, none))
+	{
+		// End:0x5C
+		if(__NFUN_154__(Count, Index))
 		{
-			I.Remove();
+			i.Remove();
 			return;
 		}
-
-		Count++;
-		I = UWindowComboListItem(I.Next);
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x31;
 	}
+	return;
 }
 
 function string GetItemValue2(int Index)
 {
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 	local int Count;
 
-	I = UWindowComboListItem(Items.Next);
+	i = UWindowComboListItem(Items.Next);
 	Count = 0;
-		
-	while(I != None)
+	J0x20:
+
+	// End:0x6C [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(Count == Index) return I.Value2;
-
-		Count++;
-		I = UWindowComboListItem(I.Next);
+		// End:0x49
+		if(__NFUN_154__(Count, Index))
+		{
+			return i.Value2;
+		}
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x20;
 	}
-
 	return "";
+	return;
 }
 
 function AddItem(string Value, optional string Value2, optional int SortWeight)
 {
-	local UWindowComboListItem I;
-	I = UWindowComboListItem(Items.Append(class'UWindowComboListItem'));
-	I.Value = Value;
-	I.Value2 = Value2;
-	I.SortWeight = SortWeight;
+	local UWindowComboListItem i;
+
+	i = UWindowComboListItem(Items.Append(Class'UWindow.UWindowComboListItem'));
+	i.Value = Value;
+	i.Value2 = Value2;
+	i.SortWeight = SortWeight;
+	return;
 }
 
 function InsertItem(string Value, optional string Value2, optional int SortWeight)
 {
-	local UWindowComboListItem I;
-	I = UWindowComboListItem(Items.Insert(class'UWindowComboListItem'));
-	I.Value = Value;
-	I.Value2 = Value2;
-	I.SortWeight = SortWeight;
+	local UWindowComboListItem i;
+
+	i = UWindowComboListItem(Items.Insert(Class'UWindow.UWindowComboListItem'));
+	i.Value = Value;
+	i.Value2 = Value2;
+	i.SortWeight = SortWeight;
+	return;
 }
 
 function SetSelected(float X, float Y)
@@ -182,48 +232,76 @@ function SetSelected(float X, float Y)
 	local int i, Count;
 
 	Count = 0;
-	for( Item = UWindowComboListItem(Items.Next);Item != None; Item = UWindowComboListItem(Item.Next) )
-		Count++;
+	Item = UWindowComboListItem(Items.Next);
+	J0x20:
 
-	i = (Y - VBorder) / ItemHeight + VertSB.Pos;
-
-	if(i < 0)
-		i = 0;
-
-	if(i >= VertSB.Pos + Min(Count, MaxVisible))
-		i = VertSB.Pos + Min(Count, MaxVisible) - 1;
-
-	NewSelected = UWindowComboListItem(Items.FindEntry(i));
-
-	if(NewSelected != Selected)
+	// End:0x4E [Loop If]
+	if(__NFUN_119__(Item, none))
 	{
-		if(NewSelected == None) 
-			Selected = None;
-		else if (!NewSelected.bDisabled) // if the item is not a disable item
-			Selected = NewSelected;
-	}	
+		__NFUN_165__(Count);
+		Item = UWindowComboListItem(Item.Next);
+		// [Loop Continue]
+		goto J0x20;
+	}
+	i = int(__NFUN_174__(float(__NFUN_145__(int(__NFUN_175__(Y, float(VBorder))), ItemHeight)), VertSB.pos));
+	// End:0x91
+	if(__NFUN_150__(i, 0))
+	{
+		i = 0;
+	}
+	// End:0xE6
+	if(__NFUN_179__(float(i), __NFUN_174__(VertSB.pos, float(__NFUN_249__(Count, MaxVisible)))))
+	{
+		i = int(__NFUN_175__(__NFUN_174__(VertSB.pos, float(__NFUN_249__(Count, MaxVisible))), float(1)));
+	}
+	NewSelected = UWindowComboListItem(Items.FindEntry(i));
+	// End:0x148
+	if(__NFUN_119__(NewSelected, Selected))
+	{
+		// End:0x129
+		if(__NFUN_114__(NewSelected, none))
+		{
+			Selected = none;			
+		}
+		else
+		{
+			// End:0x148
+			if(__NFUN_129__(NewSelected.bDisabled))
+			{
+				Selected = NewSelected;
+			}
+		}
+	}
+	return;
 }
 
 //=================================================================================
 // GetItem: Get the item with is Value
 //=================================================================================
-function UWindowComboListItem GetItem( string Value)
+function UWindowComboListItem GetItem(string Value)
 {
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 	local int Count;
 
-	I = UWindowComboListItem(Items.Next);
+	i = UWindowComboListItem(Items.Next);
 	Count = 0;
-		
-	while(I != None)
+	J0x20:
+
+	// End:0x6C [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(I.Value == Value) return I;
-
-		Count++;
-		I = UWindowComboListItem(I.Next);
+		// End:0x49
+		if(__NFUN_122__(i.Value, Value))
+		{
+			return i;
+		}
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x20;
 	}
-
 	return none;
+	return;
 }
 
 //=================================================================================
@@ -231,184 +309,235 @@ function UWindowComboListItem GetItem( string Value)
 //=================================================================================
 function DisableAllItems()
 {
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 	local int Count;
 
-	I = UWindowComboListItem(Items.Next);
+	i = UWindowComboListItem(Items.Next);
 	Count = 0;
-		
-	while(I != None)
+	J0x20:
+
+	// End:0x58 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		I.bDisabled = true;
-		I = UWindowComboListItem(I.Next);
+		i.bDisabled = true;
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x20;
 	}
+	return;
 }
 
 function MouseMove(float X, float Y)
 {
-	Super.MouseMove(X, Y);
-	if(Y > WinHeight) VertSB.Scroll(1);
-	if(Y < 0) VertSB.Scroll(-1);
-
+	super(UWindowDialogControl).MouseMove(X, Y);
+	// End:0x33
+	if(__NFUN_177__(Y, WinHeight))
+	{
+		VertSB.Scroll(1.0000000);
+	}
+	// End:0x54
+	if(__NFUN_176__(Y, float(0)))
+	{
+		VertSB.Scroll(-1.0000000);
+	}
 	SetSelected(X, Y);
-
 	FocusWindow();
+	return;
 }
 
 function LMouseUp(float X, float Y)
 {
-	If(Y >= 0 && Y <= WinHeight && Selected != None)
+	// End:0x36
+	if(__NFUN_130__(__NFUN_130__(__NFUN_179__(Y, float(0)), __NFUN_178__(Y, WinHeight)), __NFUN_119__(Selected, none)))
 	{
 		ExecuteItem(Selected);
 	}
-	Super.LMouseUp(X, Y);
+	super(UWindowWindow).LMouseUp(X, Y);
+	return;
 }
 
 function LMouseDown(float X, float Y)
 {
 	Root.CaptureMouse();
+	return;
 }
 
 function BeforePaint(Canvas C, float X, float Y)
 {
 	local float W, H, MaxWidth;
 	local int Count;
-	local UWindowComboListItem I;
-	local float ListX, ListY;
-	local float ExtraWidth;
+	local UWindowComboListItem i;
+	local float ListX, ListY, ExtraWidth;
 
 	C.Font = Root.Fonts[Font];
-	C.SetPos(0, 0);
-
+	C.__NFUN_2623__(0.0000000, 0.0000000);
 	MaxWidth = Owner.EditBoxWidth;
-	ExtraWidth = ((HBorder + TextBorder) * 2);
-
+	ExtraWidth = __NFUN_171__(float(__NFUN_146__(HBorder, TextBorder)), float(2));
 	Count = Items.Count();
-	if(Count > MaxVisible)
+	// End:0xC4
+	if(__NFUN_151__(Count, MaxVisible))
 	{
-		ExtraWidth += LookAndFeel.Size_ScrollbarWidth;
-		WinHeight = (ItemHeight * MaxVisible) + (VBorder * 2);
+		__NFUN_184__(ExtraWidth, LookAndFeel.Size_ScrollbarWidth);
+		WinHeight = __NFUN_174__(float(__NFUN_144__(ItemHeight, MaxVisible)), float(__NFUN_144__(VBorder, 2)));		
 	}
 	else
 	{
-		VertSB.Pos = 0;
-		WinHeight = (ItemHeight * Count) + (VBorder * 2);
+		VertSB.pos = 0.0000000;
+		WinHeight = __NFUN_174__(float(__NFUN_144__(ItemHeight, Count)), float(__NFUN_144__(VBorder, 2)));
 	}
+	i = UWindowComboListItem(Items.Next);
+	J0x112:
 
-	for( I = UWindowComboListItem(Items.Next);I != None; I = UWindowComboListItem(I.Next) )
+	// End:0x18B [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		TextSize(C, RemoveAmpersand(I.Value), W, H);
-		if(W + ExtraWidth > MaxWidth)
-			MaxWidth = W + ExtraWidth;
+		TextSize(C, RemoveAmpersand(i.Value), W, H);
+		// End:0x16F
+		if(__NFUN_177__(__NFUN_174__(W, ExtraWidth), MaxWidth))
+		{
+			MaxWidth = __NFUN_174__(W, ExtraWidth);
+		}
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x112;
 	}
-
 	WinWidth = MaxWidth;
-
-	ListX = Owner.EditAreaDrawX + Owner.EditBoxWidth - WinWidth;
-	ListY = Owner.Button.WinTop + Owner.Button.WinHeight;
-
-	if(Count > MaxVisible)
+	ListX = __NFUN_175__(__NFUN_174__(Owner.EditAreaDrawX, Owner.EditBoxWidth), WinWidth);
+	ListY = __NFUN_174__(Owner.Button.WinTop, Owner.Button.WinHeight);
+	// End:0x294
+	if(__NFUN_151__(Count, MaxVisible))
 	{
 		VertSB.ShowWindow();
-		VertSB.SetRange(0, Count, MaxVisible);
-		VertSB.WinLeft = WinWidth - LookAndFeel.Size_ScrollbarWidth;
-		VertSB.WinTop = 0;
-		VertSB.SetSize(LookAndFeel.Size_ScrollbarWidth, WinHeight);
+		VertSB.SetRange(0.0000000, float(Count), float(MaxVisible));
+		VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+		VertSB.WinTop = 0.0000000;
+		VertSB.SetSize(LookAndFeel.Size_ScrollbarWidth, WinHeight);		
 	}
 	else
 	{
 		VertSB.HideWindow();
 	}
-
 	Owner.WindowToGlobal(ListX, ListY, WinLeft, WinTop);
+	return;
 }
 
 function Paint(Canvas C, float X, float Y)
 {
 	local int Count;
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 
 	DrawMenuBackground(C);
-	
 	Count = 0;
+	i = UWindowComboListItem(Items.Next);
+	J0x2B:
 
-	for( I = UWindowComboListItem(Items.Next);I != None; I = UWindowComboListItem(I.Next) )
+	// End:0x136 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
+		// End:0xCE
 		if(VertSB.bWindowVisible)
 		{
-			if(Count >= VertSB.Pos)
-				DrawItem(C, I, HBorder, VBorder + (ItemHeight * (Count - VertSB.Pos)), WinWidth - (2 * HBorder) - VertSB.WinWidth, ItemHeight);
+			// End:0xCB
+			if(__NFUN_179__(float(Count), VertSB.pos))
+			{
+				DrawItem(C, i, float(HBorder), __NFUN_174__(float(VBorder), __NFUN_171__(float(ItemHeight), __NFUN_175__(float(Count), VertSB.pos))), __NFUN_175__(__NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), VertSB.WinWidth), float(ItemHeight));
+			}			
 		}
 		else
-			DrawItem(C, I, HBorder, VBorder + (ItemHeight * Count), WinWidth - (2 * HBorder), ItemHeight);
-		Count++;
+		{
+			DrawItem(C, i, float(HBorder), float(__NFUN_146__(VBorder, __NFUN_144__(ItemHeight, Count))), __NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), float(ItemHeight));
+		}
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x2B;
 	}
+	return;
 }
 
 function DrawMenuBackground(Canvas C)
 {
-	LookAndFeel.ComboList_DrawBackground(Self, C);
+	LookAndFeel.ComboList_DrawBackground(self, C);
+	return;
 }
 
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
-	LookAndFeel.ComboList_DrawItem(Self, C, X, Y, W, H, UWindowComboListItem(Item).Value, Selected == Item);
+	LookAndFeel.ComboList_DrawItem(self, C, X, Y, W, H, UWindowComboListItem(Item).Value, __NFUN_114__(Selected, Item));
+	return;
 }
 
-function ExecuteItem(UWindowComboListItem I)
+function ExecuteItem(UWindowComboListItem i)
 {
 	Owner.m_bSelectedByUser = true;
-	Owner.SetValue(I.Value, I.Value2);
+	Owner.SetValue(i.Value, i.Value2);
 	Owner.m_bSelectedByUser = false;
 	CloseUp();
+	return;
 }
 
-function CloseUp() 
+function CloseUp()
 {
 	Owner.CloseUp();
+	return;
 }
 
 function FocusOtherWindow(UWindowWindow W)
 {
-	Super.FocusOtherWindow(W);
-
-	if(bWindowVisible && W.ParentWindow.ParentWindow != Self && W.ParentWindow != Self && W.ParentWindow != Owner)
+	super(UWindowWindow).FocusOtherWindow(W);
+	// End:0x69
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bWindowVisible, __NFUN_119__(W.ParentWindow.ParentWindow, self)), __NFUN_119__(W.ParentWindow, self)), __NFUN_119__(W.ParentWindow, Owner)))
+	{
 		CloseUp();
+	}
+	return;
 }
 
 function SetBorderColor(Color _NewColor)
 {
-    m_BorderColor = _NewColor;
-
-    if(VertSB != None)
-        VertSB.SetBorderColor(m_BorderColor);
+	m_BorderColor = _NewColor;
+	// End:0x2A
+	if(__NFUN_119__(VertSB, none))
+	{
+		VertSB.SetBorderColor(m_BorderColor);
+	}
+	return;
 }
 
-function MouseWheelDown(FLOAT X, FLOAT Y)
+function MouseWheelDown(float X, float Y)
 {
-	if (VertSB != None)
+	// End:0x24
+	if(__NFUN_119__(VertSB, none))
 	{
-		VertSB.MouseWheelDown( X, Y);
+		VertSB.MouseWheelDown(X, Y);
 	}
+	return;
 }
 
-function MouseWheelUp(FLOAT X, FLOAT Y)
+function MouseWheelUp(float X, float Y)
 {
-	if (VertSB != None)
+	// End:0x24
+	if(__NFUN_119__(VertSB, none))
 	{
-		VertSB.MouseWheelUp( X, Y);
+		VertSB.MouseWheelUp(X, Y);
 	}
+	return;
 }
 
 function KeyDown(int Key, float X, float Y)
 {
-	if (Key == Root.Console.EInputKey.IK_Escape)
+	// End:0x26
+	if(__NFUN_154__(Key, int(Root.Console.27)))
 	{
-		CloseUp();	
+		CloseUp();
 	}
+	return;
 }
 
 defaultproperties
 {
-     MaxVisible=10
+	MaxVisible=10
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function SetupScrollBar

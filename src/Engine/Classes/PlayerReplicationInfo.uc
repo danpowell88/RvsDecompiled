@@ -1,277 +1,287 @@
 //=============================================================================
+// PlayerReplicationInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // PlayerReplicationInfo.
 //=============================================================================
 class PlayerReplicationInfo extends ReplicationInfo
-	native nativereplication;
+	native
+	nativereplication
+	notplaceable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-// also replicate here player class and skins and any other seldom changed stuff
+const m_cKillStat = 0;
+const m_cDeathStat = 1;
+const m_cRatioStat = 2;
+const m_cMission = 3;
+const m_cPlayTime = 4;
 
-
-var float				Score;			// Player's current score.
-var Decoration			HasFlag;
-var int					Ping;
-var Volume				PlayerLocation;
-var int					NumLives;
-
-var string				PlayerName;		// Player name, or blank if none.
-var string				OldName, PreviousName;		// Temporary value.
-var int					PlayerID;		// Unique id number.
-var string              m_szUbiUserID;
-var TeamInfo			Team;			// Player Team
-var int					TeamID;			// Player position in team.
-var class<VoicePack>	VoiceType;
+var int Ping;
+var int NumLives;
+var int PlayerID;  // Unique id number.
+var int TeamID;  // Player position in team.
 //#ifdef R6CODE
-var int					iOperativeID;	// used to select which operative's face will be used
-//#endif
-var bool				bIsFemale;
-var bool				bFeigningDeath;
-var bool				bIsSpectator;
-var bool				bWaitingPlayer;
-var bool				bReadyToPlay;
-var bool				bOutOfLives;
-var bool				bBot;
-var Texture				TalkTexture;
-
+var int iOperativeID;  // used to select which operative's face will be used
 // Time elapsed.
-var int					StartTime;
-var int					TimeAcc;
+var int StartTime;
+var int TimeAcc;
+// values that are kept between rounds
+var int m_iKillCount;
+var int m_iKillCountForEvent;  // used to signal when kill count has changed
+var int m_iRoundFired;
+var int m_iRoundsHit;
+var int m_iRoundsPlayed;
+var int m_iRoundsWon;
+var int m_iDeathCountForEvent;  // used to signal when kill count has changed
+// backup of stats in case of Admin Restart Round
+var int m_iBackUpKillCount;
+var int m_iBackUpRoundFired;
+var int m_iBackUpRoundsHit;
+var int m_iBackUpRoundsPlayed;
+var int m_iBackUpRoundsWon;
+// values that are reset
+var int m_iHealth;
+var int m_iRoundKillCount;  // frag count
+var travel int m_iUniqueID;
+//#endif
+var bool bIsFemale;
+var bool bFeigningDeath;
+var bool bIsSpectator;
+var bool bWaitingPlayer;
+var bool bReadyToPlay;
+var bool bOutOfLives;
+var bool bBot;
 //#ifdef R6Code
 // -- statistics -- //
-var BOOL		        m_bPlayerReady; // the player ready status
-
-// values that are kept between rounds
-var         INT         m_iKillCount;
-var         INT         m_iKillCountForEvent;   // used to signal when kill count has changed
-var         INT	        m_iRoundFired;
-var         INT	        m_iRoundsHit;
-var         INT         m_iRoundsPlayed;
-var         BOOL        m_bJoinedTeamLate;
-var         INT         m_iRoundsWon;
-var float				Deaths;			// Number of player's deaths.
-var         INT         m_iDeathCountForEvent;   // used to signal when kill count has changed
-
-// backup of stats in case of Admin Restart Round
-var         INT         m_iBackUpKillCount;
-var         INT	        m_iBackUpRoundFired;
-var         INT	        m_iBackUpRoundsHit;
-var         INT         m_iBackUpRoundsPlayed;
-var         INT         m_iBackUpRoundsWon;
-var float				m_iBackUpDeaths;			// Number of player's deaths.
-
-// values that are reset
-var         INT         m_iHealth;
-var         INT         m_iRoundKillCount;      // frag count
-var         string      m_szKillersName;        // name of the player that killed me
-
-// we need the number of times I have died or suiceded
-// m_szFavWeapon is to be removed and replaced by the killer name
-//var         string      m_szFavWeapon;          // the server replicates the Fav Weapon to all clients
-
+var bool m_bPlayerReady;  // the player ready status
+var bool m_bJoinedTeamLate;
 // For General Escort Mode only
 // this is a temporary hack to tell the server that I should be the General
 // If m_bIsGeneral is false for all players then the server should pick
 // a general randomly
-var travel BOOL                 m_bIsEscortedPilot;
-
+var travel bool m_bIsEscortedPilot;
 // MPF1 // For Kamikaze Mode only (for MissionPack2)
-var travel BOOL                 m_bIsBombMan;
-
+var travel bool m_bIsBombMan;
 // Variables used for ubi.com game service
-var travel BOOL         m_bAlreadyLoggedIn;
-var travel INT          m_iUniqueID;
-var BOOL                m_bClientWillSubmitResult; // server side info on player
-
-
-// this is the mapping of the stats for GS ladder stats submission
-const m_cKillStat = 0;
-const m_cDeathStat=1;
-const m_cRatioStat=2;
-const m_cMission=3;
-const m_cPlayTime=4;
-
-//#endif R6CODE
+var travel bool m_bAlreadyLoggedIn;
+var bool m_bClientWillSubmitResult;  // server side info on player
+// NEW IN 1.60
+var bool m_bIsTheIntruder;
+// NEW IN 1.60
+var bool m_bHasTheFloppy;
+var float Score;  // Player's current score.
+var float Deaths;  // Number of player's deaths.
+var float m_iBackUpDeaths;  // Number of player's deaths.
+var Volume PlayerLocation;
+var Texture TalkTexture;
+var Class<VoicePack> VoiceType;
+var string PlayerName;  // Player name, or blank if none.
+var string OldName;  // Temporary value.
+// NEW IN 1.60
+var string PreviousName;
+var string m_szUbiUserID;
+var string m_szKillersName;  // name of the player that killed me
 
 replication
 {
-    // Things the server should send to the client.
-    reliable if ( bNetDirty && (Role == Role_Authority) )
-        PlayerName, Team, TeamID, PlayerID,VoiceType, iOperativeID, bIsFemale, bFeigningDeath, //#ifdef R6CODE iOperativeID
-        bIsSpectator, bWaitingPlayer, bReadyToPlay, TalkTexture,  bOutOfLives, 
-        m_bIsEscortedPilot,m_szKillersName,m_bPlayerReady,m_szUbiUserID
-		,m_bIsBombMan; // MPF1  //MissionPack1 (for MissionPack2)
+	// Pos:0x000
+	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		PlayerID, PlayerName, 
+		TalkTexture, TeamID, 
+		VoiceType, bFeigningDeath, 
+		bIsFemale, bIsSpectator, 
+		bOutOfLives, bReadyToPlay, 
+		bWaitingPlayer, iOperativeID, 
+		m_bIsBombMan, m_bIsEscortedPilot, 
+		m_bPlayerReady, m_szKillersName, 
+		m_szUbiUserID;
 
-    unreliable if ( bNetDirty && (Role == Role_Authority) )
-        Score, HasFlag, Ping, PlayerLocation,m_bJoinedTeamLate;
+	// Pos:0x018
+	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		Ping, PlayerLocation, 
+		Score, m_bJoinedTeamLate;
 
-    reliable if ( bNetInitial && (Role == Role_Authority) )
-        StartTime,bBot;
+	// Pos:0x030
+	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		StartTime, bBot;
 
-    reliable if (Role == Role_Authority)
-        m_bClientWillSubmitResult;
+	// Pos:0x048
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_bClientWillSubmitResult, m_bIsTheIntruder;
 
-    unreliable if (Role == Role_Authority)
-        m_iBackUpKillCount,m_iBackUpRoundFired,m_iBackUpRoundsHit,m_iBackUpRoundsPlayed,m_iBackUpRoundsWon,
-        m_iBackUpDeaths,Deaths, m_iRoundKillCount,m_iKillCount,m_iHealth,m_iRoundFired, m_iRoundsHit, m_iRoundsPlayed,
-        m_iRoundsWon;
+	// Pos:0x055
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		Deaths, m_iBackUpDeaths, 
+		m_iBackUpKillCount, m_iBackUpRoundFired, 
+		m_iBackUpRoundsHit, m_iBackUpRoundsPlayed, 
+		m_iBackUpRoundsWon, m_iHealth, 
+		m_iKillCount, m_iRoundFired, 
+		m_iRoundKillCount, m_iRoundsHit, 
+		m_iRoundsPlayed, m_iRoundsWon;
 }
 
 function PostBeginPlay()
 {
-    StartTime = Level.TimeSeconds;
-    Timer();
-    SetTimer(2.0, true);
+	StartTime = int(Level.TimeSeconds);
+	Timer();
+	__NFUN_280__(2.0000000, true);
+	return;
 }
 
 //#ifdef R6CODE
 function PostNetBeginPlay()
 {
-	Super.PostNetBeginPlay();
-	
-	// on server side only
-	if(Role == Role_Authority)
+	super(Actor).PostNetBeginPlay();
+	// End:0x35
+	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
 	{
-        // since this is Authority we have access to the GameInfo
-        PlayerID = Level.Game.CurrentID++;
+		PlayerID = __NFUN_165__(Level.Game.CurrentID);
 	}
+	return;
 }
-//#endif
 
 simulated function SaveOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( true );
-    Super.SaveOriginalData();	
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(true);
+	}
+	super(Actor).SaveOriginalData();
+	return;
 }
 
 //special rset for stats if an admin wants to reset the round 
 // thus reseting stats to what they were at the beginnning of last round.
 function AdminResetRound()
 {
-    m_iKillCount    = m_iBackUpKillCount;
-    m_iRoundFired   = m_iBackUpRoundFired;
-    m_iRoundsHit    = m_iBackUpRoundsHit;
-    m_iRoundsPlayed = m_iBackUpRoundsPlayed;
-    m_iRoundsWon    = m_iBackUpRoundsWon;
-    Deaths          = m_iBackUpDeaths;
+	m_iKillCount = m_iBackUpKillCount;
+	m_iRoundFired = m_iBackUpRoundFired;
+	m_iRoundsHit = m_iBackUpRoundsHit;
+	m_iRoundsPlayed = m_iBackUpRoundsPlayed;
+	m_iRoundsWon = m_iBackUpRoundsWon;
+	Deaths = m_iBackUpDeaths;
+	return;
 }
 
 simulated function ResetOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
-
-    m_iHealth = 0;
-    m_iRoundKillCount = 0;      // frag count
-// designers want to reset.......
-//  m_szKillersName = "";        // name of the player that killed me
-
-    m_iBackUpKillCount      = m_iKillCount;
-    m_iBackUpRoundFired     = m_iRoundFired;
-    m_iBackUpRoundsHit      = m_iRoundsHit;
-    m_iBackUpRoundsPlayed   = m_iRoundsPlayed;
-    m_iBackUpRoundsWon      = m_iRoundsWon;
-    m_iBackUpDeaths         = Deaths;
-    m_bPlayerReady          = false;
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super(Actor).ResetOriginalData();
+	m_iHealth = 0;
+	m_iRoundKillCount = 0;
+	m_iBackUpKillCount = m_iKillCount;
+	m_iBackUpRoundFired = m_iRoundFired;
+	m_iBackUpRoundsHit = m_iRoundsHit;
+	m_iBackUpRoundsPlayed = m_iRoundsPlayed;
+	m_iBackUpRoundsWon = m_iRoundsWon;
+	m_iBackUpDeaths = Deaths;
+	m_bPlayerReady = false;
+	return;
 }
 
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
 function Reset()
 {
-	Super.Reset();
-	Score = 0;
-//	Deaths = 0;
-	HasFlag = None;
+	super(Actor).Reset();
+	Score = 0.0000000;
 	bReadyToPlay = false;
 	NumLives = 0;
 	bOutOfLives = false;
-    m_bPlayerReady = false;
+	m_bPlayerReady = false;
+	return;
 }
 
 simulated function string GetLocationName()
 {
-	if ( PlayerLocation != None )
-		return PlayerLocation.LocationName;
+	// End:0x1D
+	if(__NFUN_119__(PlayerLocation, none))
+	{
+		return PlayerLocation.LocationName;		
+	}
 	else
-		return"";
+	{
+		return "";
+	}
+	return;
 }
 
 simulated function string GetHumanReadableName()
 {
 	return PlayerName;
+	return;
 }
 
 function UpdatePlayerLocation()
 {
 	local Volume V;
 
-	PlayerLocation = None;
-	ForEach TouchingActors(class'Volume',V)
-		if ( (V.LocationName != "") 
-			&& ((PlayerLocation == None) || (V.LocationPriority > PlayerLocation.LocationPriority))
-			&& V.Encompasses(self) )
+	PlayerLocation = none;
+	// End:0x7D
+	foreach __NFUN_307__(Class'Engine.Volume', V)
+	{
+		// End:0x7C
+		if(__NFUN_130__(__NFUN_130__(__NFUN_123__(V.LocationName, ""), __NFUN_132__(__NFUN_114__(PlayerLocation, none), __NFUN_151__(V.LocationPriority, PlayerLocation.LocationPriority))), V.Encompasses(self)))
 		{
 			PlayerLocation = V;
-		}
+		}		
+	}	
+	return;
 }
 
-/* DisplayDebug()
-list important controller attributes on canvas
-*/
 simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
-	if ( Team != None )
-		Canvas.DrawText("     PlayerName "$PlayerName$" Team "$Team.GetHumanReadableName());
-	else
-		Canvas.DrawText("     PlayerName "$PlayerName$" NO Team");
+	Canvas.__NFUN_465__(__NFUN_112__("     PlayerName ", PlayerName));
+	return;
 }
- 					
+
 function Timer()
 {
 	UpdatePlayerLocation();
-
-	if ( FRand() < 0.65 )
+	// End:0x14
+	if(__NFUN_176__(__NFUN_195__(), 0.6500000))
+	{
 		return;
-
-// #ifdef R6CODE  // if it's R6CODE we don't want to do this type of ping
-//	if (PlayerController(Owner) != None)
-//    {
-//        Ping = int(Controller(Owner).ConsoleCommand("GETPING"));
-//    }
-// #endif R6CODE
-
+	}
+	return;
 }
 
 function SetPlayerName(string S)
 {
 	OldName = PlayerName;
-    
-    // R6CODE
-    ReplaceText(S, " ", "_");
-    ReplaceText(S, "~", "_");
-    ReplaceText(S, "?", "_");
-    ReplaceText(S, ",", "_");
-    ReplaceText(S, "#", "_");
-    ReplaceText(S, "/", "_");
-    PlayerName = RemoveInvalidChars(S);
+	ReplaceText(S, " ", "_");
+	ReplaceText(S, "~", "_");
+	ReplaceText(S, "?", "_");
+	ReplaceText(S, ",", "_");
+	ReplaceText(S, "#", "_");
+	ReplaceText(S, "/", "_");
+	PlayerName = __NFUN_238__(S);
+	return;
 }
 
 function SetWaitingPlayer(bool B)
 {
-	bIsSpectator = B;	
+	bIsSpectator = B;
 	bWaitingPlayer = B;
+	return;
 }
-
-//function ServerNewFavWeapon(string szNewFavWeapon)
-//{
-//    m_szFavWeapon = szNewFavWeapon;
-//}
 
 defaultproperties
 {
-     iOperativeID=-1
-     bIsSpectator=True
-     RemoteRole=ROLE_SimulatedProxy
-     bTravel=True
-     NetUpdateFrequency=2.000000
+	iOperativeID=-1
+	bIsSpectator=true
+	RemoteRole=2
+	bTravel=true
+	NetUpdateFrequency=2.0000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var HasFlag
+// REMOVED IN 1.60: var e
+// REMOVED IN 1.60: var Team

@@ -1,288 +1,374 @@
 //=============================================================================
+// UWindowMenuBar - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // UWindowMenuBar - A menu bar
 //=============================================================================
 class UWindowMenuBar extends UWindowListControl;
 
-var UWindowMenuBarItem		Selected;
-var UWindowMenuBarItem		Over;
-var bool					bAltDown;
-var int						Spacing;
+var int Spacing;
+var bool bAltDown;
+var UWindowMenuBarItem Selected;
+var UWindowMenuBarItem Over;
 
 function Created()
 {
-	ListClass = class'UWindowMenuBarItem';
-	SetAcceptsHotKeys(True);
-	Super.Created();
+	ListClass = Class'UWindow.UWindowMenuBarItem';
+	SetAcceptsHotKeys(true);
+	super.Created();
 	Spacing = 10;
+	return;
 }
 
 function UWindowMenuBarItem AddHelpItem(string Caption)
 {
-	Local UWindowMenuBarItem I;
+	local UWindowMenuBarItem i;
 
-	I = AddItem(Caption);
-	I.SetHelp(True);
-
-	return I;
+	i = AddItem(Caption);
+	i.SetHelp(true);
+	return i;
+	return;
 }
 
 function UWindowMenuBarItem AddItem(string Caption)
 {
-	local UWindowMenuBarItem I;
+	local UWindowMenuBarItem i;
 
-	I = UWindowMenuBarItem(Items.Append(class'UWindowMenuBarItem'));
-	I.Owner = Self;
-	I.SetCaption(Caption);
-	
-	return I;
+	i = UWindowMenuBarItem(Items.Append(Class'UWindow.UWindowMenuBarItem'));
+	i.Owner = self;
+	i.SetCaption(Caption);
+	return i;
+	return;
 }
 
 function ResolutionChanged(float W, float H)
 {
-	local UWindowMenuBarItem I;
+	local UWindowMenuBarItem i;
 
-	for( I = UWindowMenuBarItem(Items.Next);I != None; I = UWindowMenuBarItem(I.Next) )
-		if(I.Menu != None)
-			I.Menu.ResolutionChanged(W, H);
+	i = UWindowMenuBarItem(Items.Next);
+	J0x19:
 
-	Super.ResolutionChanged(W, H);
+	// End:0x76 [Loop If]
+	if(__NFUN_119__(i, none))
+	{
+		// End:0x5A
+		if(__NFUN_119__(i.Menu, none))
+		{
+			i.Menu.ResolutionChanged(W, H);
+		}
+		i = UWindowMenuBarItem(i.Next);
+		// [Loop Continue]
+		goto J0x19;
+	}
+	super(UWindowWindow).ResolutionChanged(W, H);
+	return;
 }
 
 function Paint(Canvas C, float MouseX, float MouseY)
 {
-	local float X;
-	local float W, H;
-	local UWindowMenuBarItem I;
+	local float X, W, H;
+	local UWindowMenuBarItem i;
 
 	DrawMenuBar(C);
+	i = UWindowMenuBarItem(Items.Next);
+	J0x24:
 
-	for( I = UWindowMenuBarItem(Items.Next);I != None; I = UWindowMenuBarItem(I.Next) )
+	// End:0x12E [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		C.Font = Root.Fonts[F_Normal];
-		TextSize( C, RemoveAmpersand(I.Caption), W, H );
-
-		if(I.bHelp)
+		C.Font = Root.Fonts[0];
+		TextSize(C, RemoveAmpersand(i.Caption), W, H);
+		// End:0xCA
+		if(i.bHelp)
 		{
-			DrawItem(C, I, (WinWidth - (W + Spacing)), 1, W + Spacing, 14);
+			DrawItem(C, i, __NFUN_175__(WinWidth, __NFUN_174__(W, float(Spacing))), 1.0000000, __NFUN_174__(W, float(Spacing)), 14.0000000);			
 		}
 		else
 		{
-			DrawItem(C, I, X, 1, W + Spacing, 14);
-			X = X + W + Spacing;
-		}		
+			DrawItem(C, i, X, 1.0000000, __NFUN_174__(W, float(Spacing)), 14.0000000);
+			X = __NFUN_174__(__NFUN_174__(X, W), float(Spacing));
+		}
+		i = UWindowMenuBarItem(i.Next);
+		// [Loop Continue]
+		goto J0x24;
 	}
+	return;
 }
 
 function MouseMove(float X, float Y)
 {
-	local UWindowMenuBarItem I;
-	Super.MouseMove(X, Y);
+	local UWindowMenuBarItem i;
 
-	Over = None;
+	super(UWindowDialogControl).MouseMove(X, Y);
+	Over = none;
+	i = UWindowMenuBarItem(Items.Next);
+	J0x30:
 
-	for( I = UWindowMenuBarItem(Items.Next);I != None; I = UWindowMenuBarItem(I.Next) )
+	// End:0xF5 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(X >= I.ItemLeft && X <= I.ItemLeft + I.ItemWidth)
+		// End:0xD9
+		if(__NFUN_130__(__NFUN_179__(X, i.ItemLeft), __NFUN_178__(X, __NFUN_174__(i.ItemLeft, i.ItemWidth))))
 		{
-			if(Selected != None) {
-				if(Selected != I)
+			// End:0xCE
+			if(__NFUN_119__(Selected, none))
+			{
+				// End:0xCB
+				if(__NFUN_119__(Selected, i))
 				{
 					Selected.DeSelect();
-					Selected = I;
+					Selected = i;
 					Selected.Select();
 					Select(Selected);
-				}
-			} else {
-				Over = I;
+				}				
+			}
+			else
+			{
+				Over = i;
 			}
 		}
+		i = UWindowMenuBarItem(i.Next);
+		// [Loop Continue]
+		goto J0x30;
 	}
+	return;
 }
 
 function MouseLeave()
 {
-	Super.MouseLeave();
-	Over=None;
+	super(UWindowDialogControl).MouseLeave();
+	Over = none;
+	return;
 }
 
-function Select(UWindowMenuBarItem I)
+function Select(UWindowMenuBarItem i)
 {
+	return;
 }
 
 function LMouseDown(float X, float Y)
 {
-	local UWindowMenuBarItem I;
+	local UWindowMenuBarItem i;
 
-	for( I = UWindowMenuBarItem(Items.Next);I != None; I = UWindowMenuBarItem(I.Next) )
+	i = UWindowMenuBarItem(Items.Next);
+	J0x19:
+
+	// End:0xE7 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(X >= I.ItemLeft && X <= I.ItemLeft + I.ItemWidth)
+		// End:0xCB
+		if(__NFUN_130__(__NFUN_179__(X, i.ItemLeft), __NFUN_178__(X, __NFUN_174__(i.ItemLeft, i.ItemWidth))))
 		{
-			//Log("Click "$I.Caption);
-
-			if(Selected != None) {
+			// End:0x80
+			if(__NFUN_119__(Selected, none))
+			{
 				Selected.DeSelect();
 			}
-
-			if(Selected == I)
+			// End:0xA4
+			if(__NFUN_114__(Selected, i))
 			{
-				Selected = None;
-				Over = I;
+				Selected = none;
+				Over = i;				
 			}
 			else
 			{
-				Selected = I;
+				Selected = i;
 				Selected.Select();
 			}
-
 			Select(Selected);
 			return;
 		}
+		i = UWindowMenuBarItem(i.Next);
+		// [Loop Continue]
+		goto J0x19;
 	}
-
-	if(Selected != None)
+	// End:0x101
+	if(__NFUN_119__(Selected, none))
 	{
 		Selected.DeSelect();
 	}
-
-	Selected = None;
+	Selected = none;
 	Select(Selected);
+	return;
 }
 
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
-	local string Text;
-	local string Underline;
+	local string Text, Underline;
 	local UWindowMenuBarItem pMenuBarItem;
 
 	pMenuBarItem = UWindowMenuBarItem(Item);
-
-	C.SetDrawColor(255,255,255);
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
 	pMenuBarItem.ItemLeft = X;
 	pMenuBarItem.ItemWidth = W;
-
-	LookAndFeel.Menu_DrawMenuBarItem(Self, pMenuBarItem, X, Y, W, H, C);
+	LookAndFeel.Menu_DrawMenuBarItem(self, pMenuBarItem, X, Y, W, H, C);
+	return;
 }
 
 function DrawMenuBar(Canvas C)
 {
-	DrawStretchedTexture( C, 0, 0, WinWidth, 16, Texture'MenuBar' );
+	DrawStretchedTexture(C, 0.0000000, 0.0000000, WinWidth, 16.0000000, Texture'UWindow.Icons.MenuBar');
+	return;
 }
 
 function CloseUp()
 {
-	if(Selected != None) 
+	// End:0x21
+	if(__NFUN_119__(Selected, none))
 	{
 		Selected.DeSelect();
-		Selected = None;
+		Selected = none;
 	}
+	return;
 }
 
 function Close(optional bool bByParent)
 {
 	Root.Console.CloseUWindow();
+	return;
 }
 
 function UWindowMenuBar GetMenuBar()
 {
-	return Self;
+	return self;
+	return;
 }
-
 
 function bool HotKeyDown(int Key, float X, float Y)
 {
-	local UWindowMenuBarItem I;
+	local UWindowMenuBarItem i;
 
-	if(Key == 0x12)
-		bAltDown = True;
-
+	// End:0x14
+	if(__NFUN_154__(Key, 18))
+	{
+		bAltDown = true;
+	}
+	// End:0xC0
 	if(bAltDown)
 	{
-		// Check for hotkeys in each menu item
-		for( I = UWindowMenuBarItem(Items.Next);I != None; I = UWindowMenuBarItem(I.Next) )
+		i = UWindowMenuBarItem(Items.Next);
+		J0x36:
+
+		// End:0xC0 [Loop If]
+		if(__NFUN_119__(i, none))
 		{
-			if(Key == I.HotKey) 
+			// End:0xA4
+			if(__NFUN_154__(Key, int(i.HotKey)))
 			{
-				if(Selected != None)
+				// End:0x75
+				if(__NFUN_119__(Selected, none))
+				{
 					Selected.DeSelect();
-				Selected = I;
+				}
+				Selected = i;
 				Selected.Select();
 				Select(Selected);
-				bAltDown = False;
-				return True;
+				bAltDown = false;
+				return true;
 			}
+			i = UWindowMenuBarItem(i.Next);
+			// [Loop Continue]
+			goto J0x36;
 		}
-	}		
-	return False;
+	}
+	return false;
+	return;
 }
 
 function bool HotKeyUp(int Key, float X, float Y)
 {
-	if(Key == 0x12)
-		bAltDown = False;
-
-	return False;
+	// End:0x14
+	if(__NFUN_154__(Key, 18))
+	{
+		bAltDown = false;
+	}
+	return false;
+	return;
 }
 
 function KeyDown(int Key, float X, float Y)
 {
-	local UWindowMenuBarItem I;
+	local UWindowMenuBarItem i;
 
 	switch(Key)
 	{
-	case 0x25: // Left
-		I = UWindowMenuBarItem(Selected.Prev);
-		if(I==None || I==Items)
-			I = UWindowMenuBarItem(Items.Last);
-
-		if(Selected != None)
-			Selected.DeSelect();	
-
-		Selected = I;
-		Selected.Select();
-
-		Select(Selected);
-
-		break;
-	case 0x27: // Right
-		I = UWindowMenuBarItem(Selected.Next);
-		if(I==None)
-			I = UWindowMenuBarItem(Items.Next);
-
-		if(Selected != None)
-			Selected.DeSelect();
-		
-
-		Selected = I;
-		Selected.Select();
-
-		Select(Selected);
-		
-		break;
+		// End:0x9C
+		case 37:
+			i = UWindowMenuBarItem(Selected.Prev);
+			// End:0x5A
+			if(__NFUN_132__(__NFUN_114__(i, none), __NFUN_114__(i, Items)))
+			{
+				i = UWindowMenuBarItem(Items.Last);
+			}
+			// End:0x74
+			if(__NFUN_119__(Selected, none))
+			{
+				Selected.DeSelect();
+			}
+			Selected = i;
+			Selected.Select();
+			Select(Selected);
+			// End:0x123
+			break;
+		// End:0x120
+		case 39:
+			i = UWindowMenuBarItem(Selected.Next);
+			// End:0xDE
+			if(__NFUN_114__(i, none))
+			{
+				i = UWindowMenuBarItem(Items.Next);
+			}
+			// End:0xF8
+			if(__NFUN_119__(Selected, none))
+			{
+				Selected.DeSelect();
+			}
+			Selected = i;
+			Selected.Select();
+			Select(Selected);
+			// End:0x123
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
+	return;
 }
 
 function MenuCmd(int Menu, int Item)
 {
-	local UWindowMenuBarItem I;
+	local UWindowMenuBarItem i;
 	local int j;
 
-	j=0;
-	for(I = UWindowMenuBarItem(Items.Next); I != None; I = UWindowMenuBarItem(I.Next))
+	j = 0;
+	i = UWindowMenuBarItem(Items.Next);
+	J0x20:
+
+	// End:0xD1 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if(j == Menu && I.Menu != None)
+		// End:0xAE
+		if(__NFUN_130__(__NFUN_154__(j, Menu), __NFUN_119__(i.Menu, none)))
 		{
-			if(Selected != None)
+			// End:0x6A
+			if(__NFUN_119__(Selected, none))
+			{
 				Selected.DeSelect();
-			Selected = I;
+			}
+			Selected = i;
 			Selected.Select();
 			Select(Selected);
-			I.Menu.MenuCmd(Item);
+			i.Menu.MenuCmd(Item);
 			return;
 		}
-		j++;
-	}	
+		__NFUN_165__(j);
+		i = UWindowMenuBarItem(i.Next);
+		// [Loop Continue]
+		goto J0x20;
+	}
+	return;
 }
 
-defaultproperties
-{
-}

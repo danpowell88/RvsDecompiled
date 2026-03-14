@@ -1,753 +1,866 @@
 //=============================================================================
+// ClientBeaconReceiver - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // ClientBeaconReceiver: Receives LAN beacons from servers.
 //=============================================================================
 class ClientBeaconReceiver extends UdpBeacon
-	transient;
+	transient
+	config
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-var struct BeaconInfo
+struct BeaconInfo
 {
-	var IpAddr      Addr;
-	var float       Time;
-	var string      Text;
-
+	var IpAddr Addr;
+	var float Time;
+	var string Text;
 //#ifdef R6CODE // added by John Bennett - April 2002
-    var INT         iNumPlayers;
-    var INT         iMaxPlayers;
-    var string         szCurrGameType;
-    var string              szMapName;
-    var string              szSvrName;
-    var BOOL                bDedicated;
-    var BOOL                bLocked;
-    var string              mapList[32];
-    var string		        szGameType[32];
-    var string              szPlayerName[32];
-    var string              szPlayerTime[32];
-    var INT                 iPlayerPingTime[32];
-    var INT                 iPlayerKillCount[32];
+	var int iNumPlayers;
+	var int iMaxPlayers;
+	var string szCurrGameType;
+	var string szMapName;
+	var string szSvrName;
+	var bool bDedicated;
+	var bool bLocked;
+	var string MapList[32];
+	var string szGameType[32];
+	var string szPlayerName[32];
+	var string szPlayerTime[32];
+	var int iPlayerPingTime[32];
+	var int iPlayerKillCount[32];
 //    var string              szGameName[32];         //Actually an array of game types
 //    var FLOAT               fMapTime;
-    var INT                 iRoundsPerMap;
-    var FLOAT               fRndTime;
-    var FLOAT               fBetTime;
-    var FLOAT               fBombTime;
-    var BOOL                bShowNames;
-    var BOOL                bInternetServer;
-    var BOOL                bFriendlyFire;
-    var BOOL                bAutoBalTeam;
-    var BOOL                bTKPenalty;
-    var BOOL                bNewData;       // Flag indicating new data has been received
-    var BOOL                bRadar;
-    var INT                 iPort;
-    var string              szGameVersion;
-    var INT                 iLobbyID;
-    var INT                 iGroupID;
-    var INT                 iBeaconPort;
-    var INT                 iNumTerro;
-    var BOOL                bAIBkp;
-    var BOOL                bRotateMap;
-    var BOOL                bForceFPWpn;
-    var string              szModName; // MPF
+	var int iRoundsPerMap;
+	var float fRndTime;
+	var float fBetTime;
+	var float fBombTime;
+	var bool bShowNames;
+	var bool bInternetServer;
+	var bool bFriendlyFire;
+	var bool bAutoBalTeam;
+	var bool bTKPenalty;
+	var bool bNewData;  // Flag indicating new data has been received
+	var bool bRadar;
+	var int iPort;
+	var string szGameVersion;
+	var int iLobbyID;
+	var int iGroupID;
+	var int iBeaconPort;
+	var int iNumTerro;
+	var bool bAIBkp;
+	var bool bRotateMap;
+	var bool bForceFPWpn;
+	var string szModName;  // MPF
 //#ifdef R6PUNKBUSTER
-    var BOOL                bPunkBuster;
-//#endif //R6PUNKBUSTER
-//#endif R6CODE
+	var bool bPunkBuster;
+};
 
-} Beacons[32];
-
-//#ifdef R6CODE
-
-// Structure used to store information received from a response
-// from a PreJoinQuery
-
-var struct PreJoinResponseInfo
+struct PreJoinResponseInfo
 {
-    var BOOL        bResponseRcvd;
-    var INT         iLobbyID;
-    var INT         iGroupID;
-    var BOOL        bLocked;
-    var string      szGameVersion;
-    var BOOL        bInternetServer;
-    var INT         iNumPlayers;
-    var INT         iMaxPlayers;
-    var INT         iPunkBusterEnabled;
-} PreJoinInfo;
-//#endif R6CODE
+	var bool bResponseRcvd;
+	var int iLobbyID;
+	var int iGroupID;
+	var bool bLocked;
+	var string szGameVersion;
+// NEW IN 1.60
+	var string szPreJoinModName;
+	var bool bInternetServer;
+//#ifdef R6CODE // added by John Bennett - April 2002
+	var int iNumPlayers;
+	var int iMaxPlayers;
+	var int iPunkBusterEnabled;
+};
 
-function string GetBeaconAddress( int i )
+// NEW IN 1.60
+var BeaconInfo Beacons[32];
+// NEW IN 1.60
+var PreJoinResponseInfo PreJoinInfo;
+
+function string GetBeaconAddress(int i)
 {
 	return IpAddrToString(Beacons[i].Addr);
+	return;
 }
 
 function string GetBeaconText(int i)
 {
 	return Beacons[i].Text;
+	return;
 }
 
 function BeginPlay()
 {
 	local IpAddr Addr;
 
-//#ifdef R6CODE
-    InitBeaconProduct();
-//#endif R6CODE 
-//#ifndef R6CODE
-//	if( BindPort( BeaconPort, true ) > 0 )
-//else
-	if( BindPort( BeaconPort, true, LocalIpAddress ) > 0 )
-//#endif
+	InitBeaconProduct();
+	// End:0x4E
+	if(__NFUN_151__(BindPort(BeaconPort, true, LocalIpAddress), 0))
 	{
-		SetTimer( 1.0, true );
-		log( "ClientBeaconReceiver initialized." );
+		__NFUN_280__(1.0000000, true);
+		__NFUN_231__("ClientBeaconReceiver initialized.");		
 	}
 	else
 	{
-		log( "ClientBeaconReceiver failed: Beacon port in use." );
+		__NFUN_231__("ClientBeaconReceiver failed: Beacon port in use.");
 	}
-
 	Addr.Addr = BroadcastAddr;
 	Addr.Port = ServerBeaconPort;
-
 	BroadcastBeacon(Addr);
+	return;
 }
 
 function Destroyed()
 {
-	log( "ClientBeaconReceiver finished." );
+	__NFUN_231__("ClientBeaconReceiver finished.");
+	return;
 }
 
 function Timer()
 {
 	local int i, j;
-	for( i=0; i<arraycount(Beacons); i++ )
-		if
-		(	Beacons[i].Addr.Addr!=0
-		&&	Level.TimeSeconds-Beacons[i].Time<BeaconTimeout )
-			Beacons[j++] = Beacons[i];
-	for( j=j; j<arraycount(Beacons); j++ )
-    {
-//        ClearBeacon(j);
-		Beacons[j].Addr.Addr=0;
-    }
+
+	i = 0;
+	J0x07:
+
+	// End:0x7D [Loop If]
+	if(__NFUN_150__(i, 32))
+	{
+		// End:0x73
+		if(__NFUN_130__(__NFUN_155__(Beacons[i].Addr.Addr, 0), __NFUN_176__(__NFUN_175__(Level.TimeSeconds, Beacons[i].Time), BeaconTimeout)))
+		{
+			Beacons[__NFUN_165__(j)] = Beacons[i];
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	j = j;
+	J0x88:
+
+	// End:0xB5 [Loop If]
+	if(__NFUN_150__(j, 32))
+	{
+		Beacons[j].Addr.Addr = 0;
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x88;
+	}
+	return;
 }
 
 function BroadcastBeacon(IpAddr Addr)
 {
-    local INT i;
-    local IpAddr lAddr;
+	local int i;
+	local IpAddr lAddr;
 
-//#ifdef R6CODE
+	i = 0;
+	J0x07:
 
-    // Send a beacon to all possible port numbers,
-
-    for ( i = 0; i < GetMaxAvailPorts(); i++)
-    {
-        lAddr.Addr = Addr.Addr;
-        lAddr.Port = Addr.Port + i;
-	    SendText( lAddr, "REPORT" );
-    }
-
-//#endif R6CODE
+	// End:0x62 [Loop If]
+	if(__NFUN_150__(i, __NFUN_1221__()))
+	{
+		lAddr.Addr = Addr.Addr;
+		lAddr.Port = __NFUN_146__(Addr.Port, i);
+		SendText(lAddr, "REPORT");
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
-//#ifndef R6CODE
-// send a broadcast command to the serveronce we join
-// if the server receives this messages, then the server
-// will assume that the client is indeed on the same server
-//function BroadcastLanClient(IpAddr Addr)
-//{
-//    local IpAddr lAddr;
-//
-//    lAddr.Addr = -1;
-//    lAddr.Port = Addr.Port;
-//    SendText(lAddr , "PINGQUERY");
-//}
-//#endif
-
-//#ifdef R6CODE
-
-//=========================================================================
-// PreJoinQuery.  Used when joining a server using the Join IP button, 
-// since we know nothing about this server we will query the server for
-// some basic information (e.g. is a password required).
-// returns false if the ip string is an invalid format
-//=========================================================================
-
-function BOOL PreJoinQuery( string szIP, INT iBeaconPort )
+function bool PreJoinQuery(string szIP, int iBeaconPort)
 {
 	local IpAddr Addr;
 
-    // Reset server information
-    PreJoinInfo.bResponseRcvd = FALSE;
-    PreJoinInfo.iLobbyID      = 0;
-    PreJoinInfo.iGroupID      = 0;
-    PreJoinInfo.szGameVersion = "";
-
-    if (InStr( szIP,":" )!=-1)
-    {
-        szIP = Left( szIP, InStr( szIP,":" ) );
-    }
-
-    if ( !StringToIpAddr ( szIP, Addr ) )
-        return false;
-
-	if (Addr.Addr == 0)
-		return false;
-
-    if ( iBeaconPort != 0)
-        Addr.Port = iBeaconPort;
-    else
-        Addr.Port = ServerBeaconPort;
-
-
-	SendText( Addr, "PREJOIN" );
-//#ifndef R6CODE
-// BroadcastLanClient(Addr);
-//#endif
-
-    return true;
-}
-
-//#endif R6CODE
-
-
-
-event ReceivedText( IpAddr Addr, string Text )
-{
-	local int i, n;
-
-//#ifdef R6CODE // added by John Bennett - April 2002
-    local INT    pos;               // Position in the current string
-	local string szSecondWord;      // The second word in the message
-    local string szThirdWord;       // The third word in the message
-    local string szRemainingText;   // What remains to be decoded from the original string
-    local string szOneKWMessage;    // String containing just ine keyword and associated parameters
-    local string szPreJoinString;   // Used to store remainder of string
-    local BOOL   bBooleanValue;     // Boolean value extracted from data
-    local string szStringValue;     // String value extracted from data
-
-    //----------------------------------------------------------------
-    // Check if message is using a keyword to pass a specific value,
-    // These messages be of the form...
-    //    <BeaconProduct> <Port Number> <KeyWordMarker> <uniqueDataMarker> <data>
-    //
-    // For example...
-    //    unreal 7777 KEYWORD %MAXPLAYERS 16 %NUMPLAYERS 2 %MAPNAME rooms.unr
-    //
-    // Call the ReceivedKeyWordString to decode these type os messages.
-    //----------------------------------------------------------------
-    n = len(BeaconProduct);
-
-	if( left(Text,n+1) ~= (BeaconProduct$" ") )
+	PreJoinInfo.bResponseRcvd = false;
+	PreJoinInfo.iLobbyID = 0;
+	PreJoinInfo.iGroupID = 0;
+	PreJoinInfo.szGameVersion = "";
+	// End:0x5D
+	if(__NFUN_155__(__NFUN_126__(szIP, ":"), -1))
 	{
-
-        // Decode the second word to determine the port number of the server
-
-        szSecondWord = mid(Text,n+1);
-        Addr.Port = int(szSecondWord);
-
-        // Check for the string KEYWORD
-
-        szThirdWord = mid(szSecondWord,InStr(szSecondWord," ")+1);
-
-        n = len( KeyWordMarker );
-
-        if ( left( szThirdWord, n+1 ) ~= ( KeyWordMarker$" " ) )
-        {
-
-            for( i=0; i<arraycount(Beacons); i++ )
-                if( Beacons[i].Addr.Addr==Addr.Addr && Beacons[i].Addr.Port==Addr.Port)
-                    break;
-
-            if( i==arraycount(Beacons) )
-                for( i=0; i<arraycount(Beacons); i++ )
-                    if( Beacons[i].Addr.Addr==0 )
-                        break;
-
-            if ( i == arraycount(Beacons) )
-                return;
-
-		    Beacons[i].Addr      = Addr;
-		    Beacons[i].Time      = Level.TimeSeconds;
-		    Beacons[i].Text      = mid(Text,InStr(Text," ")+1);
-            Beacons[i].bNewData  = TRUE;
-            
-            DecodeKeyWordString( i, szThirdWord ); 
-            return;
-        }
-
-        // Check for the Pre Join Query marker, deocde the information
-        // received and store in the PreJoinInfo structure.
-
-        else if ( left( szThirdWord, len( PreJoinQueryMarker ) + 1 ) ~= ( PreJoinQueryMarker$" " ) )
-        {
-            // Find the first keyword
-            pos = InStr( mid(szThirdWord, 1), "¶" );
-            if ( pos != -1 )
-                szPreJoinString = mid( szThirdWord, pos );
-
-            // Clear any previous data
-            PreJoinInfo.bResponseRcvd = TRUE;
-            PreJoinInfo.iLobbyID = 0;
-            PreJoinInfo.iGroupID  = 0;
-
-            // Go through the string searching for keyword pairs
-
-            while ( pos > 0 )
-            {
-                pos = InStr( mid(szPreJoinString, 1), "¶" );
-
-                if ( pos != -1 )  // -1 is the return value when a string is not found
-                {
-                    pos += 1;
-                    szOneKWMessage = left( szPreJoinString, pos - 1 );  // -1 to eliminate space at end of string
-                    szPreJoinString = mid( szPreJoinString, pos );      // move to next key word marker
-                }
-                else
-                    szOneKWMessage = szPreJoinString;  // Last message in the string
-
-
-                // Check for the lobby server ID number
-                if ( left(szOneKWMessage,len(LobbyServerIDMarker)) ~= LobbyServerIDMarker ) 
-                {
-                    PreJoinInfo.iLobbyID = int(mid(szOneKWMessage,InStr(szOneKWMessage," ")+1));
-                    //log ("---> "$PreJoinInfo.iLobbyID);
-                }
-
-                // Check for the group ID number
-                else if ( left(szOneKWMessage,len(GroupIDMarker)) ~= GroupIDMarker ) 
-                {
-                    PreJoinInfo.iGroupID = int(mid(szOneKWMessage,InStr(szOneKWMessage," ")+1));
-                    //log ("---> "$PreJoinInfo.iGroupID);
-                }
-                // Server locked (requires a password)
-                else if ( left(szOneKWMessage,len(LockedMarker)) ~= LockedMarker )
-                {   // Decode value
-                    bBooleanValue = BOOL(int(mid(szOneKWMessage,InStr(szOneKWMessage," ")+1)));
-                    PreJoinInfo.bLocked = bBooleanValue;
-                }
-                // Game Version
-                else if ( left(szOneKWMessage,len(GameVersionMarker)) ~= GameVersionMarker)
-                {   // Decode value
-    	            szStringValue =  mid(szOneKWMessage,InStr(szOneKWMessage," ")+1);
-                    PreJoinInfo.szGameVersion = szStringValue;
-                }
-                // Internet server
-                else if ( left(szOneKWMessage,len(InternetServerMarker)) ~= InternetServerMarker)
-                {   // Decode value
-                    bBooleanValue = BOOL(int(mid(szOneKWMessage,InStr(szOneKWMessage," ")+1)));
-                    PreJoinInfo.bInternetServer = bBooleanValue;
-                }
-                // Check for the marker for the current number of players in the game
-                else if ( left(szOneKWMessage,len(NumPlayersMarker)) ~= NumPlayersMarker )
-                {   // Decode value
-                    PreJoinInfo.iNumPlayers = int(mid(szOneKWMessage,InStr(szOneKWMessage," ")+1));
-                }
-                // Max Players
-                else if ( left(szOneKWMessage,len(MaxPlayersMarker)) ~= MaxPlayersMarker )
-                {   // Decode value
-                    PreJoinInfo.iMaxPlayers = int(mid(szOneKWMessage,InStr(szOneKWMessage," ")+1));
-                }
-                // PB enabled server
-                else if ( left(szOneKWMessage,len(PunkBusterMarker)) ~= PunkBusterMarker )
-                {   // Decode value
-                    PreJoinInfo.iPunkBusterEnabled = int(mid(szOneKWMessage,InStr(szOneKWMessage," ")+1));
-                }
-
-            }
-        }
-    }
-
-//#endif R6CODE
-
-
-
-//#ifdef R6CODE // This section commented out, no longer used in RAVENSHIELD, replaced by code above
-/*
-//#endif R6CODE
-
-
-    n = len(BeaconProduct);
-	if( left(Text,n+1) ~= (BeaconProduct$" ") )
-	{
-		Text = mid(Text,n+1);
-		Addr.Port = int(Text);
-		for( i=0; i<arraycount(Beacons); i++ )
-			if( Beacons[i].Addr==Addr )
-				break;
-		if( i==arraycount(Beacons) )
-			for( i=0; i<arraycount(Beacons); i++ )
-				if( Beacons[i].Addr.Addr==0 )
-					break;
-		if( i==arraycount(Beacons) )
-			return;
-		Beacons[i].Addr      = Addr;
-		Beacons[i].Time      = Level.TimeSeconds;
-		Beacons[i].Text      = mid(Text,InStr(Text," ")+1);
-        Beacons[i].bNewData  = TRUE;
+		szIP = __NFUN_128__(szIP, __NFUN_126__(szIP, ":"));
 	}
-
-//#ifdef R6CODE 
-*/
-//#endif R6CODE
-
+	// End:0x74
+	if(__NFUN_129__(StringToIpAddr(szIP, Addr)))
+	{
+		return false;
+	}
+	// End:0x86
+	if(__NFUN_154__(Addr.Addr, 0))
+	{
+		return false;
+	}
+	// End:0xA4
+	if(__NFUN_155__(iBeaconPort, 0))
+	{
+		Addr.Port = iBeaconPort;		
+	}
+	else
+	{
+		Addr.Port = ServerBeaconPort;
+	}
+	SendText(Addr, "PREJOIN");
+	return true;
+	return;
 }
 
+event ReceivedText(IpAddr Addr, string Text)
+{
+	local int i, N, pos;
+	local string szSecondWord, szThirdWord, szRemainingText, szOneKWMessage, szPreJoinString;
 
+	local bool bBooleanValue;
+	local string szStringValue;
 
+	N = __NFUN_125__(BeaconProduct);
+	// End:0x59D
+	if(__NFUN_124__(__NFUN_128__(Text, __NFUN_146__(N, 1)), __NFUN_112__(BeaconProduct, " ")))
+	{
+		szSecondWord = __NFUN_127__(Text, __NFUN_146__(N, 1));
+		Addr.Port = int(szSecondWord);
+		szThirdWord = __NFUN_127__(szSecondWord, __NFUN_146__(__NFUN_126__(szSecondWord, " "), 1));
+		N = __NFUN_125__(KeyWordMarker);
+		// End:0x277
+		if(__NFUN_124__(__NFUN_128__(szThirdWord, __NFUN_146__(N, 1)), __NFUN_112__(KeyWordMarker, " ")))
+		{
+			i = 0;
+			J0x9E:
 
-//#ifdef R6CODE // added by John Bennett - April 2002
-       
+			// End:0x101 [Loop If]
+			if(__NFUN_150__(i, 32))
+			{
+				// End:0xF7
+				if(__NFUN_130__(__NFUN_154__(Beacons[i].Addr.Addr, Addr.Addr), __NFUN_154__(Beacons[i].Addr.Port, Addr.Port)))
+				{
+					// [Explicit Break]
+					goto J0x101;
+				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x9E;
+			}
+			J0x101:
+
+			// End:0x148
+			if(__NFUN_154__(i, 32))
+			{
+				i = 0;
+				J0x114:
+
+				// End:0x148 [Loop If]
+				if(__NFUN_150__(i, 32))
+				{
+					// End:0x13E
+					if(__NFUN_154__(Beacons[i].Addr.Addr, 0))
+					{
+						// [Explicit Break]
+						goto J0x148;
+					}
+					__NFUN_165__(i);
+					// [Loop Continue]
+					goto J0x114;
+				}
+			}
+			J0x148:
+
+			// End:0x156
+			if(__NFUN_154__(i, 32))
+			{
+				return;
+			}
+			pos = __NFUN_126__(szThirdWord, ModNameMarker);
+			// End:0x1F5
+			if(__NFUN_155__(pos, -1))
+			{
+				szStringValue = __NFUN_127__(szThirdWord, __NFUN_146__(__NFUN_146__(pos, __NFUN_125__(ModNameMarker)), 1));
+				pos = __NFUN_126__(szStringValue, "Â¶");
+				// End:0x1F5
+				if(__NFUN_155__(pos, -1))
+				{
+					szStringValue = __NFUN_128__(szStringValue, __NFUN_147__(pos, 1));
+					// End:0x1F5
+					if(__NFUN_129__(__NFUN_124__(Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord, szStringValue)))
+					{
+						return;
+					}
+				}
+			}
+			Beacons[i].Addr = Addr;
+			Beacons[i].Time = Level.TimeSeconds;
+			Beacons[i].Text = __NFUN_127__(Text, __NFUN_146__(__NFUN_126__(Text, " "), 1));
+			Beacons[i].bNewData = true;
+			DecodeKeyWordString(i, szThirdWord);
+			return;			
+		}
+		else
+		{
+			// End:0x59D
+			if(__NFUN_124__(__NFUN_128__(szThirdWord, __NFUN_146__(__NFUN_125__(PreJoinQueryMarker), 1)), __NFUN_112__(PreJoinQueryMarker, " ")))
+			{
+				pos = __NFUN_126__(__NFUN_127__(szThirdWord, 1), "Â¶");
+				// End:0x2CB
+				if(__NFUN_155__(pos, -1))
+				{
+					szPreJoinString = __NFUN_127__(szThirdWord, pos);
+				}
+				PreJoinInfo.bResponseRcvd = true;
+				PreJoinInfo.iLobbyID = 0;
+				PreJoinInfo.iGroupID = 0;
+				J0x2F0:
+
+				// End:0x59D [Loop If]
+				if(__NFUN_151__(pos, 0))
+				{
+					pos = __NFUN_126__(__NFUN_127__(szPreJoinString, 1), "Â¶");
+					// End:0x34F
+					if(__NFUN_155__(pos, -1))
+					{
+						__NFUN_161__(pos, 1);
+						szOneKWMessage = __NFUN_128__(szPreJoinString, __NFUN_147__(pos, 1));
+						szPreJoinString = __NFUN_127__(szPreJoinString, pos);						
+					}
+					else
+					{
+						szOneKWMessage = szPreJoinString;
+					}
+					// End:0x396
+					if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(LobbyServerIDMarker)), LobbyServerIDMarker))
+					{
+						PreJoinInfo.iLobbyID = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));						
+					}
+					else
+					{
+						// End:0x3D2
+						if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(GroupIDMarker)), GroupIDMarker))
+						{
+							PreJoinInfo.iGroupID = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));							
+						}
+						else
+						{
+							// End:0x41E
+							if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(LockedMarker)), LockedMarker))
+							{
+								bBooleanValue = bool(int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1))));
+								PreJoinInfo.bLocked = bBooleanValue;								
+							}
+							else
+							{
+								// End:0x463
+								if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(GameVersionMarker)), GameVersionMarker))
+								{
+									szStringValue = __NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1));
+									PreJoinInfo.szGameVersion = szStringValue;									
+								}
+								else
+								{
+									// End:0x4AF
+									if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(InternetServerMarker)), InternetServerMarker))
+									{
+										bBooleanValue = bool(int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1))));
+										PreJoinInfo.bInternetServer = bBooleanValue;										
+									}
+									else
+									{
+										// End:0x4EB
+										if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(NumPlayersMarker)), NumPlayersMarker))
+										{
+											PreJoinInfo.iNumPlayers = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));											
+										}
+										else
+										{
+											// End:0x527
+											if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(MaxPlayersMarker)), MaxPlayersMarker))
+											{
+												PreJoinInfo.iMaxPlayers = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));												
+											}
+											else
+											{
+												// End:0x563
+												if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(PunkBusterMarker)), PunkBusterMarker))
+												{
+													PreJoinInfo.iPunkBusterEnabled = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));													
+												}
+												else
+												{
+													// End:0x59A
+													if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(ModNameMarker)), ModNameMarker))
+													{
+														PreJoinInfo.szPreJoinModName = __NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1));
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					// [Loop Continue]
+					goto J0x2F0;
+				}
+			}
+		}
+	}
+	return;
+}
+
 //=========================================================================
 // Get functions.  The script compiler would not let me access the Beacon 
 // member variable from another class because it was too big.  Instead
 // I set up these get functions and a ClearBeacon function to clear values 
 // in the Beacon array.
 //=========================================================================
-function INT GetBeaconListSize()
+function int GetBeaconListSize()
 {
-	return arraycount(Beacons);
+	return 32;
+	return;
 }
 
-function INT GetBeaconIntAddress( INT i )
+function int GetBeaconIntAddress(int i)
 {
 	return Beacons[i].Addr.Addr;
+	return;
 }
 
-function INT GetMaxPlayers( INT i )
+function int GetMaxPlayers(int i)
 {
 	return Beacons[i].iMaxPlayers;
+	return;
 }
 
-function INT GetPortNumber( INT i )
+function int GetPortNumber(int i)
 {
 	return Beacons[i].iPort;
+	return;
 }
 
-function INT GetNumPlayers( INT i )
+function int GetNumPlayers(int i)
 {
 	return Beacons[i].iNumPlayers;
+	return;
 }
 
-function string GetFirstMapName( INT i )
+function string GetFirstMapName(int i)
 {
 	return Beacons[i].szMapName;
+	return;
 }
-function string GetSvrName( INT i )
+
+function string GetSvrName(int i)
 {
 	return Beacons[i].szSvrName;
+	return;
 }
 
 // MPF
-function string GetModName( INT i )
+function string GetModName(int i)
 {
 	return Beacons[i].szModName;
+	return;
 }
 
-function BOOL GetLocked( INT i )
+function bool GetLocked(int i)
 {
 	return Beacons[i].bLocked;
+	return;
 }
-function BOOL GetDedicated( INT i )
+
+function bool GetDedicated(int i)
 {
 	return Beacons[i].bDedicated;
+	return;
 }
 
-function FLOAT GetRoundsPerMap( INT i )
+function float GetRoundsPerMap(int i)
 {
-    return Beacons[i].iRoundsPerMap;
+	return float(Beacons[i].iRoundsPerMap);
+	return;
 }
-//function FLOAT GetMapTime( INT i )
-//{
-//	return Beacons[i].fMapTime;
-//}
 
-function FLOAT GetRoundTime( INT i )
+function float GetRoundTime(int i)
 {
 	return Beacons[i].fRndTime;
+	return;
 }
-function FLOAT GetBetTime( INT i )
+
+function float GetBetTime(int i)
 {
 	return Beacons[i].fBetTime;
+	return;
 }
-function FLOAT GetBombTime( INT i )
+
+function float GetBombTime(int i)
 {
 	return Beacons[i].fBombTime;
+	return;
 }
 
-
-function INT GetMapListSize( INT i )
+function int GetMapListSize(int i)
 {
-    local INT j;
-    for ( j = 0; j < arraycount(Beacons[i].mapList); j++)
-        if ( Beacons[i].mapList[j] == "" )
-            break;
-    return j;
+	local int j;
+
+	j = 0;
+	J0x07:
+
+	// End:0x3D [Loop If]
+	if(__NFUN_150__(j, 32))
+	{
+		// End:0x33
+		if(__NFUN_122__(Beacons[i].MapList[j], ""))
+		{
+			// [Explicit Break]
+			goto J0x3D;
+		}
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	J0x3D:
+
+	return j;
+	return;
 }
 
-function string GetOneMapName( INT iBeacon, INT i )
+function string GetOneMapName(int iBeacon, int i)
 {
-	return Beacons[iBeacon].mapList[i];
+	return Beacons[iBeacon].MapList[i];
+	return;
 }
 
-function INT GetPlayerListSize( INT i )
+function int GetPlayerListSize(int i)
 {
-    local INT j;
-    for ( j = 0; j < arraycount(Beacons[i].szPlayerName); j++)
-        if ( Beacons[i].szPlayerName[j] == "" )
-            break;
-    return j;
+	local int j;
+
+	j = 0;
+	J0x07:
+
+	// End:0x3D [Loop If]
+	if(__NFUN_150__(j, 32))
+	{
+		// End:0x33
+		if(__NFUN_122__(Beacons[i].szPlayerName[j], ""))
+		{
+			// [Explicit Break]
+			goto J0x3D;
+		}
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	J0x3D:
+
+	return j;
+	return;
 }
 
-function string GetPlayerName( INT iBeacon, INT i )
+function string GetPlayerName(int iBeacon, int i)
 {
 	return Beacons[iBeacon].szPlayerName[i];
+	return;
 }
 
-function string GetPlayerTime( INT iBeacon, INT i )
+function string GetPlayerTime(int iBeacon, int i)
 {
 	return Beacons[iBeacon].szPlayerTime[i];
+	return;
 }
 
-function INT GetPlayerPingTime( INT iBeacon, INT i )
+function int GetPlayerPingTime(int iBeacon, int i)
 {
 	return Beacons[iBeacon].iPlayerPingTime[i];
-}
-function INT GetPlayerKillCount( INT iBeacon, INT i )
-{
-	return Beacons[iBeacon].iPlayerKillCount[i];
+	return;
 }
 
-//function INT GetGameNameListSize( INT i )
-//{
-//    local INT j;
-//    for ( j = 0; j < arraycount(Beacons[i].szGameName); j++)
-//        if ( Beacons[i].szGameName[j] == "" )
-//            break;
-//    return j;
-//}
+function int GetPlayerKillCount(int iBeacon, int i)
+{
+	return Beacons[iBeacon].iPlayerKillCount[i];
+	return;
+}
 
 //function string GetGameName( INT iBeacon, INT i )
 //{
 //	return Beacons[iBeacon].szGameName[i];
 //}
-function string GetGameType( INT iBeacon, INT i )
+function string GetGameType(int iBeacon, int i)
 {
-    return Beacons[iBeacon].szGameType[i];
+	return Beacons[iBeacon].szGameType[i];
+	return;
 }
 
-function BOOL GetShowEnemyNames( INT i )
+function bool GetShowEnemyNames(int i)
 {
 	return Beacons[i].bShowNames;
+	return;
 }
-function BOOL GetInternetServer( INT i )
+
+function bool GetInternetServer(int i)
 {
 	return Beacons[i].bInternetServer;
+	return;
 }
-function BOOL GetFriendlyFire( INT i )
+
+function bool GetFriendlyFire(int i)
 {
 	return Beacons[i].bFriendlyFire;
+	return;
 }
-function BOOL GetAutoBalanceTeam( INT i )
+
+function bool GetAutoBalanceTeam(int i)
 {
 	return Beacons[i].bAutoBalTeam;
+	return;
 }
-function BOOL GetTKPenalty( INT i )
+
+function bool GetTKPenalty(int i)
 {
 	return Beacons[i].bTKPenalty;
+	return;
 }
-function BOOL GetRadar(INT i)
+
+function bool GetRadar(int i)
 {
 	return Beacons[i].bRadar;
+	return;
 }
-function string GetCurrGameType( INT i )
+
+function string GetCurrGameType(int i)
 {
-    return Beacons[i].szCurrGameType;
+	return Beacons[i].szCurrGameType;
+	return;
 }
-function BOOL GetNewDataFlag( INT i )
+
+function bool GetNewDataFlag(int i)
 {
-    return Beacons[i].bNewData;
+	return Beacons[i].bNewData;
+	return;
 }
-function string GetServerGameVersion( INT i )
+
+function string GetServerGameVersion(int i)
 {
-    return Beacons[i].szGameVersion;
+	return Beacons[i].szGameVersion;
+	return;
 }
-function SetNewDataFlag( INT i, BOOL bNewData )
+
+function SetNewDataFlag(int i, bool bNewData)
 {
-    Beacons[i].bNewData = bNewData;
+	Beacons[i].bNewData = bNewData;
+	return;
 }
-function INT GetLobbyID( INT i )
+
+function int GetLobbyID(int i)
 {
 	return Beacons[i].iLobbyID;
+	return;
 }
-function INT GetGroupID( INT i )
+
+function int GetGroupID(int i)
 {
 	return Beacons[i].iGroupID;
+	return;
 }
-function INT GetBeaconPort( INT i )
+
+function int GetBeaconPort(int i)
 {
 	return Beacons[i].iBeaconPort;
+	return;
 }
-function INT GetNumTerrorists( INT i )
+
+function int GetNumTerrorists(int i)
 {
 	return Beacons[i].iNumTerro;
+	return;
 }
-function BOOL GetAIBackup( INT i )
+
+function bool GetAIBackup(int i)
 {
-    return Beacons[i].bAIBkp;
+	return Beacons[i].bAIBkp;
+	return;
 }
-function BOOL GetRotateMap( INT i )
+
+function bool GetRotateMap(int i)
 {
-    return Beacons[i].bRotateMap;
+	return Beacons[i].bRotateMap;
+	return;
 }
-function BOOL GetForceFirstPersonWeapon( INT i )
+
+function bool GetForceFirstPersonWeapon(int i)
 {
-    return Beacons[i].bForceFPWpn;
+	return Beacons[i].bForceFPWpn;
+	return;
 }
 
 //#ifdef R6PUNKBUSTER
-function BOOL GetPunkBusterEnabled( INT i )
+function bool GetPunkBusterEnabled(int i)
 {
-    return Beacons[i].bPunkBuster;
+	return Beacons[i].bPunkBuster;
+	return;
 }
-//#endif R6PUNKBUSTER
 
 //-------------------------------------------------------------------------------
 // This functio will clear all the information in the beacon
 //-------------------------------------------------------------------------------
-function ClearBeacon( INT i )
+function ClearBeacon(int i)
 {
-    local int j;
-    
-    Beacons[i].Addr.Addr    = 0;
-    Beacons[i].iNumPlayers  = 0;
-    Beacons[i].iMaxPlayers  = 0;
-    Beacons[i].szMapName    = "";
-    Beacons[i].szCurrGameType = "RGM_AllMode";
-    Beacons[i].szSvrName    = "";
-    Beacons[i].bDedicated   = FALSE;
-    Beacons[i].bLocked      = FALSE;
+	local int j;
 
-    for ( j = 0; j < arraycount(Beacons[i].mapList); j++)
-        Beacons[i].mapList[j] = "";
+	Beacons[i].Addr.Addr = 0;
+	Beacons[i].iNumPlayers = 0;
+	Beacons[i].iMaxPlayers = 0;
+	Beacons[i].szMapName = "";
+	Beacons[i].szCurrGameType = "RGM_AllMode";
+	Beacons[i].szSvrName = "";
+	Beacons[i].bDedicated = false;
+	Beacons[i].bLocked = false;
+	j = 0;
+	J0xAC:
 
-    for ( j = 0; j < arraycount(Beacons[i].szPlayerName); j++)
-        Beacons[i].szPlayerName[j] = "";
+	// End:0xDB [Loop If]
+	if(__NFUN_150__(j, 32))
+	{
+		Beacons[i].MapList[j] = "";
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0xAC;
+	}
+	j = 0;
+	J0xE2:
 
-    for ( j = 0; j < arraycount(Beacons[i].szPlayerTime); j++)
-        Beacons[i].szPlayerTime[j] = "";
+	// End:0x111 [Loop If]
+	if(__NFUN_150__(j, 32))
+	{
+		Beacons[i].szPlayerName[j] = "";
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0xE2;
+	}
+	j = 0;
+	J0x118:
 
-//    for ( j = 0; j < arraycount(Beacons[i].szGameName); j++)
-//        Beacons[i].szGameName[j] = "";
-
-//    Beacons[i].fMapTime         = 0.0;
-    Beacons[i].iRoundsPerMap    = 0;
-    Beacons[i].fRndTime         = 0.0;
-    Beacons[i].fBetTime         = 0.0;
-    Beacons[i].fBombTime        = 0.0;
-    Beacons[i].bShowNames       = FALSE;
-    Beacons[i].bInternetServer  = FALSE;
-    Beacons[i].bFriendlyFire    = FALSE;
-    Beacons[i].bAutoBalTeam     = FALSE;
-    Beacons[i].bTKPenalty       = FALSE;
-    Beacons[i].bRadar           = FALSE;
-    Beacons[i].iPort            = 0;
-    Beacons[i].szGameVersion    = "";
-    Beacons[i].iLobbyID         = 0;
-    Beacons[i].iGroupID         = 0;
-
-//#ifdef R6PUNKBUSTER
-    Beacons[i].bPunkBuster		= FALSE;
-//#endif R6PUNKBUSTER
+	// End:0x147 [Loop If]
+	if(__NFUN_150__(j, 32))
+	{
+		Beacons[i].szPlayerTime[j] = "";
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x118;
+	}
+	Beacons[i].iRoundsPerMap = 0;
+	Beacons[i].fRndTime = 0.0000000;
+	Beacons[i].fBetTime = 0.0000000;
+	Beacons[i].fBombTime = 0.0000000;
+	Beacons[i].bShowNames = false;
+	Beacons[i].bInternetServer = false;
+	Beacons[i].bFriendlyFire = false;
+	Beacons[i].bAutoBalTeam = false;
+	Beacons[i].bTKPenalty = false;
+	Beacons[i].bRadar = false;
+	Beacons[i].iPort = 0;
+	Beacons[i].szGameVersion = "";
+	Beacons[i].iLobbyID = 0;
+	Beacons[i].iGroupID = 0;
+	Beacons[i].szModName = "";
+	Beacons[i].bPunkBuster = false;
+	return;
 }
-
-//=========================================================================
-// RefreshServers - Clears the list of beacons already received, then sends
-// out a broadcast message looking for servers. 
-//=========================================================================
 
 function RefreshServers()
 {
 	local IpAddr Addr;
-    local INT    i;
+	local int i;
 
-    // Clear list
+	i = 0;
+	J0x07:
 
-	for( i = 0; i<arraycount(Beacons); i++ )
-		Beacons[i].Addr.Addr=0;
-
-    // Send broadcast message requesting servers to answer back
-
+	// End:0x34 [Loop If]
+	if(__NFUN_150__(i, 32))
+	{
+		Beacons[i].Addr.Addr = 0;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
 	Addr.Addr = BroadcastAddr;
 	Addr.Port = ServerBeaconPort;
 	BroadcastBeacon(Addr);
+	return;
 }
-
-//=========================================================================
-// ReceivedKeyWordString - If the message received is using a keyword,
-// detect whick keyword it is and decode the value.  Messages will be 
-// of the type...
-//
-//  KEYWORD MAXPLAYERS 16
-//  KEYWORD NUMPLAYERS 2
-//  KEYWORD MAPNAME rooms.unr
-//
-//=========================================================================
 
 //
 // Grab the next option from a string.
 //
-function bool GrabOption( out string Options, out string Result )
+function bool GrabOption(out string Options, out string Result)
 {
-
-	if( Left(Options,1)=="¶" )
+	// End:0x8A
+	if(__NFUN_122__(__NFUN_128__(Options, 1), "Â¶"))
 	{
-		// Get result.
-		Result = Mid(Options,1);
-		if( InStr(Result,"¶")>=0 )
-			Result = Left( Result, InStr(Result,"¶") );
-
-		// Update options.
-		Options = Mid(Options,1);
-		if( InStr(Options,"¶")>=0 )
-			Options = Mid( Options, InStr(Options,"¶") );
+		Result = __NFUN_127__(Options, 1);
+		// End:0x45
+		if(__NFUN_153__(__NFUN_126__(Result, "Â¶"), 0))
+		{
+			Result = __NFUN_128__(Result, __NFUN_126__(Result, "Â¶"));
+		}
+		Options = __NFUN_127__(Options, 1);
+		// End:0x7D
+		if(__NFUN_153__(__NFUN_126__(Options, "Â¶"), 0))
+		{
+			Options = __NFUN_127__(Options, __NFUN_126__(Options, "Â¶"));			
+		}
 		else
+		{
 			Options = "";
-
-		return true;
+		}
+		return true;		
 	}
-	else return false;
+	else
+	{
+		return false;
+	}
+	return;
 }
 
 //
 // Break up a key=value pair into its key and value.
 //
-function GetKeyValue( string Pair, out string Key, out string Value )
+function GetKeyValue(string Pair, out string Key, out string Value)
 {
-	if( InStr(Pair,"=")>=0 )
+	// End:0x44
+	if(__NFUN_153__(__NFUN_126__(Pair, "="), 0))
 	{
-		Key   = Left(Pair,InStr(Pair,"="));
-		Value = Mid(Pair,InStr(Pair,"=")+1);
+		Key = __NFUN_128__(Pair, __NFUN_126__(Pair, "="));
+		Value = __NFUN_127__(Pair, __NFUN_146__(__NFUN_126__(Pair, "="), 1));		
 	}
 	else
 	{
-		Key   = Pair;
+		Key = Pair;
 		Value = "";
 	}
+	return;
 }
-/* ParseOption()
- Find an option in the options string and return it.
-*/
 
-function string ParseOption( string Options, string InKey )
+function string ParseOption(string Options, string InKey)
 {
 	local string Pair, Key, Value;
-	while( GrabOption( Options, Pair ) )
+
+	J0x00:
+	// End:0x40 [Loop If]
+	if(GrabOption(Options, Pair))
 	{
-		GetKeyValue( Pair, Key, Value );
-		if( Key ~= InKey )
+		GetKeyValue(Pair, Key, Value);
+		// End:0x3D
+		if(__NFUN_124__(Key, InKey))
+		{
 			return Value;
+		}
+		// [Loop Continue]
+		goto J0x00;
 	}
 	return "";
+	return;
 }
 
 //=========================================================================
@@ -755,42 +868,42 @@ function string ParseOption( string Options, string InKey )
 // key word pairs (keyword and associated value).  Call DecodeKeyWordPair
 // to decode each pair.
 //=========================================================================
-function DecodeKeyWordString( INT iBeaconIdx, string szKewWordString )
+function DecodeKeyWordString(int iBeaconIdx, string szKewWordString)
 {
-    local INT    pos;               // Position in the current string
-    local INT    counter;           // Counter
-    local INT    i;
-//	local string szSecondWord;      // The second word in the message
-//    local string szRemainingText;   // What remains to be decoded from the original string
-    local string szOneKWMessage;    // String containing just ine keyword and associated parameters
+	local int pos, counter, i;
+	local string szOneKWMessage;
 
-    // Find the first uniqueDataMarker 
-     
-    pos = ( InStr(szKewWordString, "¶") );
-    if ( pos != -1 )
-        szKewWordString = mid( szKewWordString, pos );
+	pos = __NFUN_126__(szKewWordString, "Â¶");
+	// End:0x31
+	if(__NFUN_155__(pos, -1))
+	{
+		szKewWordString = __NFUN_127__(szKewWordString, pos);
+	}
+	counter = 0;
+	J0x38:
 
-
-    // Decode each of the keyword messages until the last message is found
-    counter = 0;
-    while ( pos > 0 && counter < 255 ) // Counter used as protection against infinite loop
-    {
-        counter++;
-        pos = InStr( mid(szKewWordString, 1), "¶" );
-        if ( pos != -1 )  // -1 is the return value when a string is not found
-        {
-            pos += 1;
-            szOneKWMessage = left( szKewWordString, pos - 1 );  // -1 to eliminate space at end of string
-            szKewWordString = mid( szKewWordString, pos );      // move to next key word marker
-        }
-        else
-            szOneKWMessage = szKewWordString;  // Last message in the string
-
-        DecodeKeyWordPair( szOneKWMessage, iBeaconIdx );
-
-        Beacons[iBeaconIdx].bNewData = TRUE;
-
-    }
+	// End:0xDD [Loop If]
+	if(__NFUN_130__(__NFUN_151__(pos, 0), __NFUN_150__(counter, 255)))
+	{
+		__NFUN_165__(counter);
+		pos = __NFUN_126__(__NFUN_127__(szKewWordString, 1), "Â¶");
+		// End:0xAC
+		if(__NFUN_155__(pos, -1))
+		{
+			__NFUN_161__(pos, 1);
+			szOneKWMessage = __NFUN_128__(szKewWordString, __NFUN_147__(pos, 1));
+			szKewWordString = __NFUN_127__(szKewWordString, pos);			
+		}
+		else
+		{
+			szOneKWMessage = szKewWordString;
+		}
+		DecodeKeyWordPair(szOneKWMessage, iBeaconIdx);
+		Beacons[iBeaconIdx].bNewData = true;
+		// [Loop Continue]
+		goto J0x38;
+	}
+	return;
 }
 
 //=========================================================================
@@ -798,351 +911,502 @@ function DecodeKeyWordString( INT iBeaconIdx, string szKewWordString )
 // and associated value) determine which keyword is used, and extract
 // the associated value.  Place results in the Beacons array.
 //=========================================================================
-function DecodeKeyWordPair( string szKeyWord, int iIndex )
+function DecodeKeyWordPair(string szKeyWord, int iIndex)
 {
-    local INT    iIntegerValue;  // Integer value extracted from data
-    local BOOL   bBooleanValue;  // Boolean value extracted from data
-    local string szStringValue;  // String value extracted from data
-    local string szOptionName;   // Name of option in command line option string
-    local INT    j,n,pos;        // counters and position variables
+	local int iIntegerValue;
+	local bool bBooleanValue;
+	local string szStringValue, szOptionName;
+	local int j, N, pos;
 	local string InOpt, LeftOpt;
 
-    // Check for the game port number
-    if ( left(szKeyWord,len(GamePortMarker)) ~= GamePortMarker ) 
-    {
-        iIntegerValue = int(mid(szKeyWord,InStr(szKeyWord," ")+1));
-        Beacons[iIndex].iPort = iIntegerValue;
-    }
+	// End:0x4A
+	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GamePortMarker)), GamePortMarker))
+	{
+		iIntegerValue = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));
+		Beacons[iIndex].iPort = iIntegerValue;
+	}
+	// End:0x97
+	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(NumPlayersMarker)), NumPlayersMarker))
+	{
+		iIntegerValue = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));
+		Beacons[iIndex].iNumPlayers = iIntegerValue;		
+	}
+	else
+	{
+		// End:0xE4
+		if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MaxPlayersMarker)), MaxPlayersMarker))
+		{
+			iIntegerValue = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));
+			Beacons[iIndex].iMaxPlayers = iIntegerValue;			
+		}
+		else
+		{
+			// End:0x12F
+			if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MapNameMarker)), MapNameMarker))
+			{
+				szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+				Beacons[iIndex].szMapName = szStringValue;				
+			}
+			else
+			{
+				// End:0x17A
+				if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(SvrNameMarker)), SvrNameMarker))
+				{
+					szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+					Beacons[iIndex].szSvrName = szStringValue;					
+				}
+				else
+				{
+					// End:0x1C5
+					if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GameTypeMarker)), GameTypeMarker))
+					{
+						szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+						Beacons[iIndex].szCurrGameType = szStringValue;						
+					}
+					else
+					{
+						// End:0x217
+						if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(DecicatedMarker)), DecicatedMarker))
+						{
+							bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+							Beacons[iIndex].bDedicated = bBooleanValue;							
+						}
+						else
+						{
+							// End:0x269
+							if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(LockedMarker)), LockedMarker))
+							{
+								bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+								Beacons[iIndex].bLocked = bBooleanValue;								
+							}
+							else
+							{
+								// End:0x374
+								if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MapListMarker)), MapListMarker))
+								{
+									szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+									j = 0;
+									J0x2A2:
 
-    // Check for the marker for the current number of players in the game
-    if ( left(szKeyWord,len(NumPlayersMarker)) ~= NumPlayersMarker )
-    {   // Decode value
-        iIntegerValue = int(mid(szKeyWord,InStr(szKeyWord," ")+1));
-        Beacons[iIndex].iNumPlayers = iIntegerValue;
-    }
+									// End:0x2D1 [Loop If]
+									if(__NFUN_150__(j, 32))
+									{
+										Beacons[iIndex].MapList[j] = "";
+										__NFUN_165__(j);
+										// [Loop Continue]
+										goto J0x2A2;
+									}
+									j = 0;
+									J0x2D8:
 
-    // Max Players
-    else if ( left(szKeyWord,len(MaxPlayersMarker)) ~= MaxPlayersMarker )
-    {   // Decode value
-        iIntegerValue = int(mid(szKeyWord,InStr(szKeyWord," ")+1));
-        Beacons[iIndex].iMaxPlayers = iIntegerValue;
-    }
+									// End:0x371 [Loop If]
+									if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+									{
+										szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
+										pos = __NFUN_126__(szStringValue, "/");
+										// End:0x34B
+										if(__NFUN_155__(pos, -1))
+										{
+											Beacons[iIndex].MapList[j] = __NFUN_128__(szStringValue, pos);
+											// [Explicit Continue]
+											goto J0x367;
+										}
+										Beacons[iIndex].MapList[j] = szStringValue;
+										J0x367:
 
-    // Check for the marker for the map name
-    else if ( left(szKeyWord,len(MapNameMarker)) ~= MapNameMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-        Beacons[iIndex].szMapName = szStringValue;
-    }
+										__NFUN_165__(j);
+										// [Loop Continue]
+										goto J0x2D8;
+									}									
+								}
+								else
+								{
+									// End:0x48A
+									if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MenuGmNameMarker)), MenuGmNameMarker))
+									{
+										szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+										j = 0;
+										J0x3AD:
 
-    // Check for the marker for the server name
-    else if ( left(szKeyWord,len(SvrNameMarker)) ~= SvrNameMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-        Beacons[iIndex].szSvrName = szStringValue;
-    }
+										// End:0x3E7 [Loop If]
+										if(__NFUN_150__(j, 32))
+										{
+											Beacons[iIndex].szGameType[j] = "RGM_AllMode";
+											__NFUN_165__(j);
+											// [Loop Continue]
+											goto J0x3AD;
+										}
+										j = 0;
+										J0x3EE:
 
-    // Check for the marker for the Game mode
-    else if ( left(szKeyWord,len(GameTypeMarker)) ~= GameTypeMarker )
-    {   // Decode value
-		szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-		Beacons[iIndex].szCurrGameType = szStringValue;
-    }
+										// End:0x487 [Loop If]
+										if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+										{
+											szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
+											pos = __NFUN_126__(szStringValue, "/");
+											// End:0x461
+											if(__NFUN_155__(pos, -1))
+											{
+												Beacons[iIndex].szGameType[j] = __NFUN_128__(szStringValue, pos);
+												// [Explicit Continue]
+												goto J0x47D;
+											}
+											Beacons[iIndex].szGameType[j] = szStringValue;
+											J0x47D:
 
-    // Check for the marker for the dedicated server flag
-    else if ( left(szKeyWord,len(DecicatedMarker)) ~= DecicatedMarker )
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bDedicated = bBooleanValue;
-    }
+											__NFUN_165__(j);
+											// [Loop Continue]
+											goto J0x3EE;
+										}										
+									}
+									else
+									{
+										// End:0x595
+										if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerListMarker)), PlayerListMarker))
+										{
+											szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+											j = 0;
+											J0x4C3:
 
-    // Check for the marker for the password required flag
-    else if ( left(szKeyWord,len(LockedMarker)) ~= LockedMarker )
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bLocked = bBooleanValue;
-    }
+											// End:0x4F2 [Loop If]
+											if(__NFUN_150__(j, 32))
+											{
+												Beacons[iIndex].szPlayerName[j] = "";
+												__NFUN_165__(j);
+												// [Loop Continue]
+												goto J0x4C3;
+											}
+											j = 0;
+											J0x4F9:
 
-    // Check for the marker for the Map List
-    else if ( left(szKeyWord,len(MapListMarker)) ~= MapListMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
+											// End:0x592 [Loop If]
+											if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+											{
+												szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
+												pos = __NFUN_126__(szStringValue, "/");
+												// End:0x56C
+												if(__NFUN_155__(pos, -1))
+												{
+													Beacons[iIndex].szPlayerName[j] = __NFUN_128__(szStringValue, pos);
+													// [Explicit Continue]
+													goto J0x588;
+												}
+												Beacons[iIndex].szPlayerName[j] = szStringValue;
+												J0x588:
 
-        for ( j = 0; j < arraycount(Beacons[iIndex].mapList); j++)
-            Beacons[iIndex].mapList[j] = "";         // Clear entire list
+												__NFUN_165__(j);
+												// [Loop Continue]
+												goto J0x4F9;
+											}											
+										}
+										else
+										{
+											// End:0x6A0
+											if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerTimeMarker)), PlayerTimeMarker))
+											{
+												szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+												j = 0;
+												J0x5CE:
 
-        j = 0;
-        while ( InStr(szStringValue, "/") != -1 )  // -1 is the return value when a string is not found
-        {
-            szStringValue = mid( szStringValue, InStr( szStringValue, "/" ) + 1 );
-            pos = InStr( szStringValue, "/" );
-            if ( pos != -1 )
-                Beacons[iIndex].mapList[j] = left( szStringValue, pos );
-            else // last map in list
-                Beacons[iIndex].mapList[j] = szStringValue;
-            j++;
-        }
-    }
+												// End:0x5FD [Loop If]
+												if(__NFUN_150__(j, 32))
+												{
+													Beacons[iIndex].szPlayerTime[j] = "";
+													__NFUN_165__(j);
+													// [Loop Continue]
+													goto J0x5CE;
+												}
+												j = 0;
+												J0x604:
 
-    // Check for the marker for the Game mode type List
-    else if ( left(szKeyWord,len(MenuGmNameMarker)) ~= MenuGmNameMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
+												// End:0x69D [Loop If]
+												if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+												{
+													szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
+													pos = __NFUN_126__(szStringValue, "/");
+													// End:0x677
+													if(__NFUN_155__(pos, -1))
+													{
+														Beacons[iIndex].szPlayerTime[j] = __NFUN_128__(szStringValue, pos);
+														// [Explicit Continue]
+														goto J0x693;
+													}
+													Beacons[iIndex].szPlayerTime[j] = szStringValue;
+													J0x693:
 
-        for ( j = 0; j < arraycount(Beacons[iIndex].szGameType); j++)
-            Beacons[iIndex].szGameType[j] = "RGM_AllMode";         // Clear entire list
+													__NFUN_165__(j);
+													// [Loop Continue]
+													goto J0x604;
+												}												
+											}
+											else
+											{
+												// End:0x7AE
+												if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerPingMarker)), PlayerPingMarker))
+												{
+													szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+													j = 0;
+													J0x6D9:
 
-        j = 0;
-        while ( InStr(szStringValue, "/") != -1 )  // -1 is the return value when a string is not found
-        {
-            szStringValue = mid( szStringValue, InStr( szStringValue, "/" ) + 1 );
-            pos = InStr( szStringValue, "/" );
-            if ( pos != -1 )
-            {
-                Beacons[iIndex].szGameType[j] = left( szStringValue, pos );
-            }
-            else // last map in list
-            {
-                Beacons[iIndex].szGameType[j] = szStringValue;
-            }
-            j++;
-        }
-    }
+													// End:0x707 [Loop If]
+													if(__NFUN_150__(j, 32))
+													{
+														Beacons[iIndex].iPlayerPingTime[j] = 0;
+														__NFUN_165__(j);
+														// [Loop Continue]
+														goto J0x6D9;
+													}
+													j = 0;
+													J0x70E:
 
+													// End:0x7AB [Loop If]
+													if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+													{
+														szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
+														pos = __NFUN_126__(szStringValue, "/");
+														// End:0x783
+														if(__NFUN_155__(pos, -1))
+														{
+															Beacons[iIndex].iPlayerPingTime[j] = int(__NFUN_128__(szStringValue, pos));
+															// [Explicit Continue]
+															goto J0x7A1;
+														}
+														Beacons[iIndex].iPlayerPingTime[j] = int(szStringValue);
+														J0x7A1:
 
-    // Check for the marker for the Player List
-    else if ( left(szKeyWord,len(PlayerListMarker)) ~= PlayerListMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
+														__NFUN_165__(j);
+														// [Loop Continue]
+														goto J0x70E;
+													}													
+												}
+												else
+												{
+													// End:0x8BC
+													if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerKillMarker)), PlayerKillMarker))
+													{
+														szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+														j = 0;
+														J0x7E7:
 
-        for ( j = 0; j < arraycount(Beacons[iIndex].szPlayerName); j++)
-            Beacons[iIndex].szPlayerName[j] = "";         // Clear entire list
+														// End:0x815 [Loop If]
+														if(__NFUN_150__(j, 32))
+														{
+															Beacons[iIndex].iPlayerKillCount[j] = 0;
+															__NFUN_165__(j);
+															// [Loop Continue]
+															goto J0x7E7;
+														}
+														j = 0;
+														J0x81C:
 
-        j = 0;
-        while ( InStr(szStringValue, "/") != -1 )  // -1 is the return value when a string is not found
-        {
-            szStringValue = mid( szStringValue, InStr( szStringValue, "/" ) + 1 );
-            pos = InStr( szStringValue, "/" );
-            if ( pos != -1 )
-                Beacons[iIndex].szPlayerName[j] = left( szStringValue, pos );
-            else // last map in list
-                Beacons[iIndex].szPlayerName[j] = szStringValue;
-            j++;
-        }
-    }
+														// End:0x8B9 [Loop If]
+														if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+														{
+															szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
+															pos = __NFUN_126__(szStringValue, "/");
+															// End:0x891
+															if(__NFUN_155__(pos, -1))
+															{
+																Beacons[iIndex].iPlayerKillCount[j] = int(__NFUN_128__(szStringValue, pos));
+																// [Explicit Continue]
+																goto J0x8AF;
+															}
+															Beacons[iIndex].iPlayerKillCount[j] = int(szStringValue);
+															J0x8AF:
 
-    // Check for the marker for the Player time
-    else if ( left(szKeyWord,len(PlayerTimeMarker)) ~= PlayerTimeMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-
-        for ( j = 0; j < arraycount(Beacons[iIndex].szPlayerTime); j++)
-            Beacons[iIndex].szPlayerTime[j] = "";         // Clear entire list
-
-        j = 0;
-        while ( InStr(szStringValue, "/") != -1 )  // -1 is the return value when a string is not found
-        {
-            szStringValue = mid( szStringValue, InStr( szStringValue, "/" ) + 1 );
-            pos = InStr( szStringValue, "/" );
-            if ( pos != -1 )
-                Beacons[iIndex].szPlayerTime[j] = left( szStringValue, pos );
-            else // last map in list
-                Beacons[iIndex].szPlayerTime[j] = szStringValue;
-            j++;
-        }
-    }
-
-    // Check for the marker for the Player ping time
-    else if ( left(szKeyWord,len(PlayerPingMarker)) ~= PlayerPingMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-
-        for ( j = 0; j < arraycount(Beacons[iIndex].iPlayerPingTime); j++)
-            Beacons[iIndex].iPlayerPingTime[j] = 0;         // Clear entire list
-
-        j = 0;
-        while ( InStr(szStringValue, "/") != -1 )  // -1 is the return value when a string is not found
-        {
-            szStringValue = mid( szStringValue, InStr( szStringValue, "/" ) + 1 );
-            pos = InStr( szStringValue, "/" );
-            if ( pos != -1 )
-                Beacons[iIndex].iPlayerPingTime[j] = INT(left( szStringValue, pos ));
-            else // last map in list
-                Beacons[iIndex].iPlayerPingTime[j] = INT(szStringValue);
-            j++;
-        }
-    }
-
-    // Check for the marker for the player kill count
-    else if ( left(szKeyWord,len(PlayerKillMarker)) ~= PlayerKillMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-
-        for ( j = 0; j < arraycount(Beacons[iIndex].iPlayerKillCount); j++)
-            Beacons[iIndex].iPlayerKillCount[j] = 0;         // Clear entire list
-
-        j = 0;
-        while ( InStr(szStringValue, "/") != -1 )  // -1 is the return value when a string is not found
-        {
-            szStringValue = mid( szStringValue, InStr( szStringValue, "/" ) + 1 );
-            pos = InStr( szStringValue, "/" );
-            if ( pos != -1 )
-                Beacons[iIndex].iPlayerKillCount[j] = INT(left( szStringValue, pos ));
-            else // last map in list
-                Beacons[iIndex].iPlayerKillCount[j] = INT(szStringValue);
-            j++;
-        }
-    }
-
-    // Map time
-//    else if ( left(szKeyWord,len(MapTimeMarker)) ~= MapTimeMarker )
-//    {   // Decode value
-//        iIntegerValue = FLOAT(mid(szKeyWord,InStr(szKeyWord," ")+1));
-//        Beacons[iIndex].fMapTime = iIntegerValue;
-//    }
-
-    // Rounds per match (map)
-    else if ( left(szKeyWord,len(RoundsPerMatchMarker)) ~= RoundsPerMatchMarker )
-    {   // Decode value
-        iIntegerValue = FLOAT(mid(szKeyWord,InStr(szKeyWord," ")+1));
-        Beacons[iIndex].iRoundsPerMap = iIntegerValue;
-    }
-
-
-    // Round time
-    else if ( left(szKeyWord,len(RoundTimeMarker)) ~= RoundTimeMarker )
-    {   // Decode value
-        iIntegerValue = FLOAT(mid(szKeyWord,InStr(szKeyWord," ")+1));
-        Beacons[iIndex].fRndTime = iIntegerValue;
-    }
-
-    // Between Round time
-    else if ( left(szKeyWord,len(BetTimeMarker)) ~= BetTimeMarker )
-    {   // Decode value
-        iIntegerValue = FLOAT(mid(szKeyWord,InStr(szKeyWord," ")+1));
-        Beacons[iIndex].fBetTime = iIntegerValue;
-    }
-
-    // Bomb time
-    else if ( left(szKeyWord,len(BombTimeMarker)) ~= BombTimeMarker )
-    {   // Decode value
-        iIntegerValue = FLOAT(mid(szKeyWord,InStr(szKeyWord," ")+1));
-        Beacons[iIndex].fBombTime = iIntegerValue;
-    }
-
-    // Show Names 
-    else if ( left(szKeyWord,len(ShowNamesMarker)) ~= ShowNamesMarker)
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bShowNames = bBooleanValue;
-    }
-
-    // Public server
-    else if ( left(szKeyWord,len(InternetServerMarker)) ~= InternetServerMarker)
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bInternetServer = bBooleanValue;
-    }
-
-    // Allow friendly
-    else if ( left(szKeyWord,len(FriendlyFireMarker)) ~= FriendlyFireMarker)
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bFriendlyFire = bBooleanValue;
-    }
-
-
-    // AutoBalance Team
-    else if ( left(szKeyWord,len(AutoBalTeamMarker)) ~= AutoBalTeamMarker)
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bAutoBalTeam = bBooleanValue;
-    }
-
-    // Team mate killer penalty
-    else if ( left(szKeyWord,len(TKPenaltyMarker)) ~= TKPenaltyMarker)
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bTKPenalty = bBooleanValue;
-    }
-
-    // Allow Radar
-    else if ( left(szKeyWord,len(AllowRadarMarker)) ~= AllowRadarMarker)
-    {   // Decode value
-        bBooleanValue = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-        Beacons[iIndex].bRadar = bBooleanValue;
-    }
-
-    // Game Version
-    else if ( left(szKeyWord,len(GameVersionMarker)) ~= GameVersionMarker)
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-        Beacons[iIndex].szGameVersion = szStringValue;
-    }
-
-    // Check for the lobby server ID number
-    else if ( left(szKeyWord,len(LobbyServerIDMarker)) ~= LobbyServerIDMarker ) 
-    {
-        Beacons[iIndex].iLobbyID = int(mid(szKeyWord,InStr(szKeyWord," ")+1));
-    }
-
-    // Check for the group ID number
-    else if ( left(szKeyWord,len(GroupIDMarker)) ~= GroupIDMarker ) 
-    {
-        Beacons[iIndex].iGroupID = int(mid(szKeyWord,InStr(szKeyWord," ")+1));
-    }
-
-    // Check for the Beacon Port Number
-    else if ( left(szKeyWord,len(BeaconPortMarker)) ~= BeaconPortMarker ) 
-    {
-        Beacons[iIndex].iBeaconPort = int(mid(szKeyWord,InStr(szKeyWord," ")+1));
-    }
-
-    // Check for the Number of terrorists
-    else if ( left(szKeyWord,len(NumTerroMarker)) ~= NumTerroMarker ) 
-    {
-        Beacons[iIndex].iNumTerro = int(mid(szKeyWord,InStr(szKeyWord," ")+1));
-    }
-
-    // Check for AI Backup
-    else if ( left(szKeyWord,len(AIBkpMarker)) ~= AIBkpMarker ) 
-    {
-        Beacons[iIndex].bAIBkp = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-    }
-
-    // Check for Rotate Map
-    else if ( left(szKeyWord,len(RotateMapMarker)) ~= RotateMapMarker ) 
-    {
-        Beacons[iIndex].bRotateMap = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-    }
-
-    // Check for force first person weapons
-    else if ( left(szKeyWord,len(ForceFPWpnMarker)) ~= ForceFPWpnMarker ) 
-    {
-        Beacons[iIndex].bForceFPWpn = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-    }
-    
-    // MPF
-    // Check for the marker for the MOD name 
-    else if ( left(szKeyWord,len(ModNameMarker)) ~= ModNameMarker )
-    {   // Decode value
-    	szStringValue =  mid(szKeyWord,InStr(szKeyWord," ")+1);
-        Beacons[iIndex].szModName = szStringValue;
-    }
-
-//#ifdef R6PUNKBUSTER
-    // Check if PunkBuster is enabled
-    else if ( left(szKeyWord,len(PunkBusterMarker)) ~= PunkBusterMarker ) 
-    {
-        Beacons[iIndex].bPunkBuster = BOOL(int(mid(szKeyWord,InStr(szKeyWord," ")+1)));
-    }
-//#endif R6PUNKBUSTER
-
-
+															__NFUN_165__(j);
+															// [Loop Continue]
+															goto J0x81C;
+														}														
+													}
+													else
+													{
+														// End:0x90B
+														if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(RoundsPerMatchMarker)), RoundsPerMatchMarker))
+														{
+															iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+															Beacons[iIndex].iRoundsPerMap = iIntegerValue;															
+														}
+														else
+														{
+															// End:0x95C
+															if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(RoundTimeMarker)), RoundTimeMarker))
+															{
+																iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																Beacons[iIndex].fRndTime = float(iIntegerValue);																
+															}
+															else
+															{
+																// End:0x9AD
+																if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(BetTimeMarker)), BetTimeMarker))
+																{
+																	iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																	Beacons[iIndex].fBetTime = float(iIntegerValue);																	
+																}
+																else
+																{
+																	// End:0x9FE
+																	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(BombTimeMarker)), BombTimeMarker))
+																	{
+																		iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																		Beacons[iIndex].fBombTime = float(iIntegerValue);																		
+																	}
+																	else
+																	{
+																		// End:0xA50
+																		if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(ShowNamesMarker)), ShowNamesMarker))
+																		{
+																			bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																			Beacons[iIndex].bShowNames = bBooleanValue;																			
+																		}
+																		else
+																		{
+																			// End:0xAA2
+																			if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(InternetServerMarker)), InternetServerMarker))
+																			{
+																				bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																				Beacons[iIndex].bInternetServer = bBooleanValue;																				
+																			}
+																			else
+																			{
+																				// End:0xAF4
+																				if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(FriendlyFireMarker)), FriendlyFireMarker))
+																				{
+																					bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																					Beacons[iIndex].bFriendlyFire = bBooleanValue;																					
+																				}
+																				else
+																				{
+																					// End:0xB46
+																					if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(AutoBalTeamMarker)), AutoBalTeamMarker))
+																					{
+																						bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																						Beacons[iIndex].bAutoBalTeam = bBooleanValue;																						
+																					}
+																					else
+																					{
+																						// End:0xB98
+																						if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(TKPenaltyMarker)), TKPenaltyMarker))
+																						{
+																							bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																							Beacons[iIndex].bTKPenalty = bBooleanValue;																							
+																						}
+																						else
+																						{
+																							// End:0xBEA
+																							if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(AllowRadarMarker)), AllowRadarMarker))
+																							{
+																								bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																								Beacons[iIndex].bRadar = bBooleanValue;																								
+																							}
+																							else
+																							{
+																								// End:0xC35
+																								if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GameVersionMarker)), GameVersionMarker))
+																								{
+																									szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+																									Beacons[iIndex].szGameVersion = szStringValue;																									
+																								}
+																								else
+																								{
+																									// End:0xC77
+																									if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(LobbyServerIDMarker)), LobbyServerIDMarker))
+																									{
+																										Beacons[iIndex].iLobbyID = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																										
+																									}
+																									else
+																									{
+																										// End:0xCB9
+																										if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GroupIDMarker)), GroupIDMarker))
+																										{
+																											Beacons[iIndex].iGroupID = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																											
+																										}
+																										else
+																										{
+																											// End:0xCFB
+																											if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(BeaconPortMarker)), BeaconPortMarker))
+																											{
+																												Beacons[iIndex].iBeaconPort = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																												
+																											}
+																											else
+																											{
+																												// End:0xD3D
+																												if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(NumTerroMarker)), NumTerroMarker))
+																												{
+																													Beacons[iIndex].iNumTerro = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																													
+																												}
+																												else
+																												{
+																													// End:0xD82
+																													if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(AIBkpMarker)), AIBkpMarker))
+																													{
+																														Beacons[iIndex].bAIBkp = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));																														
+																													}
+																													else
+																													{
+																														// End:0xDC7
+																														if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(RotateMapMarker)), RotateMapMarker))
+																														{
+																															Beacons[iIndex].bRotateMap = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));																															
+																														}
+																														else
+																														{
+																															// End:0xE0C
+																															if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(ForceFPWpnMarker)), ForceFPWpnMarker))
+																															{
+																																Beacons[iIndex].bForceFPWpn = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));																																
+																															}
+																															else
+																															{
+																																// End:0xE57
+																																if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(ModNameMarker)), ModNameMarker))
+																																{
+																																	szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+																																	Beacons[iIndex].szModName = szStringValue;																																	
+																																}
+																																else
+																																{
+																																	// End:0xE99
+																																	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PunkBusterMarker)), PunkBusterMarker))
+																																	{
+																																		Beacons[iIndex].bPunkBuster = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																																	}
+																																}
+																															}
+																														}
+																													}
+																												}
+																											}
+																										}
+																									}
+																								}
+																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return;
 }
 
-//#endif//R6CODE
 
-defaultproperties
-{
-}
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var BeaconInfo
+// REMOVED IN 1.60: var PreJoinResponseInfo

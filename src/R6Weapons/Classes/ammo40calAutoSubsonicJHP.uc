@@ -1,16 +1,20 @@
+//=============================================================================
+// ammo40calAutoSubsonicJHP - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  ammo40calAutoSubsonicJHP.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class ammo40calAutoSubsonicJHP extends ammo40calAutoSubsonic;
+class ammo40calAutoSubsonicJHP extends ammo40calAutoSubsonic;
 
 defaultproperties
 {
-     m_iEnergy=475
-     m_iPenetrationFactor=4
-     m_fKillStunTransfer=0.500000
-     m_fRangeConversionConst=0.123115
-     m_fRange=58.196533
+	m_iEnergy=475
+	m_iPenetrationFactor=4
+	m_fKillStunTransfer=0.5000000
+	m_fRangeConversionConst=0.1231150
+	m_fRange=58.1965300
 }

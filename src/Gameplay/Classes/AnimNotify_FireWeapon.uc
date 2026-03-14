@@ -1,16 +1,16 @@
-class AnimNotify_FireWeapon extends AnimNotify_Scripted;
+//=============================================================================
+// AnimNotify_FireWeapon - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class AnimNotify_FireWeapon extends AnimNotify_Scripted
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
-event Notify( Actor Owner )
+event Notify(Actor Owner)
 {
-	// fake fire - play weapon effect, but no real shot
 	Pawn(Owner).bIgnorePlayFiring = true;
-/*@@@CODEDROP927
-    WeaponAttachment(Pawn(Owner).Weapon.ThirdPersonActor).ThirdPersonEffects();
-	if ( Pawn(Owner).Weapon.FireSound != None )
-		Pawn(Owner).Weapon.PlaySound(Pawn(Owner).Weapon.FireSound, SLOT_None, 1.0);
-*/
+	return;
 }
 
-defaultproperties
-{
-}

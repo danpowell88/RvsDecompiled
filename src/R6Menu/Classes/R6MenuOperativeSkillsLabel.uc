@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuOperativeSkillsLabel - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuOperativeSkillsLabel.uc : Set Default Properties for the labels on the 
 //                                  skills page
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
@@ -6,107 +12,89 @@
 //  Revision history:
 //    2002/03/19 * Created by Alexandre Dionne
 //=============================================================================
-
 class R6MenuOperativeSkillsLabel extends R6WindowTextLabel;
 
-var Color					m_NumericValueColor;					// the color of the numeric value
-
-var string					m_szNumericValue;						// the numeric value
-
-var FLOAT					m_fWidthOfFixArea;						// use a fix area width for the numeric value
+var float m_fWidthOfFixArea;  // use a fix area width for the numeric value
+var Color m_NumericValueColor;  // the color of the numeric value
+var string m_szNumericValue;  // the numeric value
 
 function Created()
 {
-    m_Font = Root.Fonts[F_VerySmallTitle];    
+	m_Font = Root.Fonts[6];
+	return;
 }
 
 function Paint(Canvas C, float X, float Y)
 {
-#ifdefDEBUG
-//	m_BorderColor = Root.Colors.Red;
-//	DrawSimpleBorder(C);
-#endif
-
-	if(Text != "")
+	// End:0x8F
+	if(__NFUN_123__(Text, ""))
 	{
 		C.Font = m_Font;
-		C.SpaceX = m_fFontSpacing;		
-		C.SetDrawColor(TextColor.R,TextColor.G,TextColor.B);		
-        C.Style =m_TextDrawstyle;
-
-		ClipText(C, TextX, TextY, Text, True);
+		C.SpaceX = m_fFontSpacing;
+		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.Style = byte(m_TextDrawstyle);
+		ClipText(C, TextX, TextY, Text, true);
 	}
-
-	if (m_szNumericValue != "")
+	// End:0xA6
+	if(__NFUN_123__(m_szNumericValue, ""))
 	{
 		DrawNumericValue(C);
 	}
+	return;
 }
 
-function DrawNumericValue( Canvas C)
+function DrawNumericValue(Canvas C)
 {
-	local FLOAT fX, fW, fH, fSizeOfBG;
+	local float fX, fW, fH, fSizeOfBG;
 
-	C.Font   = m_Font;
-	C.SpaceX = m_fFontSpacing;		
-    C.Style  = ERenderStyle.STY_Alpha;
-	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);		
-
+	C.Font = m_Font;
+	C.SpaceX = m_fFontSpacing;
+	C.Style = 5;
+	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	TextSize(C, m_szNumericValue, fW, fH);
-
-	if (m_fWidthOfFixArea == 0)
+	// End:0x153
+	if(__NFUN_180__(m_fWidthOfFixArea, float(0)))
 	{
-		fSizeOfBG = fW + 6; // 3 pixels left on each side
-
-		DrawStretchedTextureSegment( C, WinWidth - fSizeOfBG, 0, fSizeOfBG, WinHeight,  
-										m_BGTextureRegion.X, m_BGTextureRegion.Y, m_BGTextureRegion.W, m_BGTextureRegion.H, m_BGTexture );
-
-		C.SetPos( WinWidth - fSizeOfBG + 3, m_fHBorderHeight); // + 3 to put the text inside the texture area
+		fSizeOfBG = __NFUN_174__(fW, float(6));
+		DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, fSizeOfBG), 0.0000000, fSizeOfBG, WinHeight, float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
+		C.__NFUN_2623__(__NFUN_174__(__NFUN_175__(WinWidth, fSizeOfBG), float(3)), m_fHBorderHeight);		
 	}
 	else
 	{
-		DrawStretchedTextureSegment( C, WinWidth - m_fWidthOfFixArea, 0, m_fWidthOfFixArea, WinHeight,  
-										m_BGTextureRegion.X, m_BGTextureRegion.Y, m_BGTextureRegion.W, m_BGTextureRegion.H, m_BGTexture );
-
-		// center the text
-		fX = WinWidth - m_fWidthOfFixArea + ((m_fWidthOfFixArea - fW) / 2);
-
-		C.SetPos( fX, m_fHBorderHeight);
+		DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, m_fWidthOfFixArea), 0.0000000, m_fWidthOfFixArea, WinHeight, float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
+		fX = __NFUN_174__(__NFUN_175__(WinWidth, m_fWidthOfFixArea), __NFUN_172__(__NFUN_175__(m_fWidthOfFixArea, fW), float(2)));
+		C.__NFUN_2623__(fX, m_fHBorderHeight);
 	}
-
-	C.SetDrawColor(m_NumericValueColor.R, m_NumericValueColor.G, m_NumericValueColor.B);
-	C.DrawText( m_szNumericValue);
+	C.__NFUN_2626__(m_NumericValueColor.R, m_NumericValueColor.G, m_NumericValueColor.B);
+	C.__NFUN_465__(m_szNumericValue);
+	return;
 }
 
-function SetNumericValue( INT _iOriginalValue, INT _iLastValue)
+function SetNumericValue(int _iOriginalValue, int _iLastValue)
 {
-	local INT iTemp, iOriginalValue;
+	local int ITemp, iOriginalValue;
 
-	iOriginalValue = Min(_iOriginalValue, 100);
-	m_szNumericValue = string( Max(iOriginalValue, 0));
-
-	iTemp = Min(_iLastValue, 100) - iOriginalValue;
-
-	if ( iTemp != 0)
+	iOriginalValue = __NFUN_249__(_iOriginalValue, 100);
+	m_szNumericValue = string(__NFUN_250__(iOriginalValue, 0));
+	ITemp = __NFUN_147__(__NFUN_249__(_iLastValue, 100), iOriginalValue);
+	// End:0x9A
+	if(__NFUN_155__(ITemp, 0))
 	{
-		if (iTemp > 0)
+		// End:0x71
+		if(__NFUN_151__(ITemp, 0))
 		{
-			m_szNumericValue = m_szNumericValue $ "(+" $ string(Min(iTemp, 100)) $ ")";
+			m_szNumericValue = __NFUN_112__(__NFUN_112__(__NFUN_112__(m_szNumericValue, "(+"), string(__NFUN_249__(ITemp, 100))), ")");			
 		}
 		else
 		{
-			m_szNumericValue = m_szNumericValue $ "(-" $ string(Min(Abs(iTemp), 100)) $ ")";
+			m_szNumericValue = __NFUN_112__(__NFUN_112__(__NFUN_112__(m_szNumericValue, "(-"), string(__NFUN_249__(int(__NFUN_186__(float(ITemp))), 100))), ")");
 		}
 	}
+	return;
 }
-
-
-
-	
-		
 
 defaultproperties
 {
-     m_bDrawBorders=False
-     m_BGTextureRegion=(X=113,Y=47,W=2,H=13)
+	m_bDrawBorders=false
+	m_BGTextureRegion=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=28962,ZoneNumber=0)
 }

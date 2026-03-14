@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuMPRestKitMain - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuMPRestKitMain.uc : Display the server option depending if you are an admin or a client
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,54 +13,47 @@
 //=============================================================================
 class R6MenuMPRestKitMain extends UWindowDialogClientWindow;
 
-const K_HALFWINDOWWIDTH                 = 310;                    // the half size of window LAN SERVER INFO and GameMode see K_WINDOWWIDTH in MenuMultiplyerWidget
+const K_HALFWINDOWWIDTH = 310;
 
-var R6MenuButtonsDefines				m_pButtonsDef;
-
-var R6MenuSimpleWindow                  m_pRestKitOptFakeW;       // fake window to hide all access buttons
-
+var bool m_bUpdateInBetRound;
+var bool m_bUpdateGameProgress;
+var bool m_bImAnAdmin;  // if the client can change the settings
+var R6MenuButtonsDefines m_pButtonsDef;
+var R6MenuSimpleWindow m_pRestKitOptFakeW;  // fake window to hide all access buttons
 // RESTRICTION KIT
-var R6WindowTextLabelExt                m_pKitText; 
-
-var R6WindowButtonBox                   m_pKitSubMachinesGuns;
-var R6WindowButtonBox                   m_pKitShotGuns;
-var R6WindowButtonBox                   m_pKitAssaultRifles;
-var R6WindowButtonBox                   m_pKitMachinesGuns;
-var R6WindowButtonBox                   m_pKitSniperRifles;
-var R6WindowButtonBox                   m_pKitPistols;
-var R6WindowButtonBox                   m_pKitMachinePistols;
-var R6WindowButtonBox                   m_pKitPrimaryWeapon;
-var R6WindowButtonBox                   m_pKitSecWeapon;
-var R6WindowButtonBox                   m_pKitMisc;
-
-var R6MenuMPRestKitSub					m_pSubMachinesGunsTab;
-var R6MenuMPRestKitSub					m_pShotgunsTab;
-var R6MenuMPRestKitSub					m_pAssaultRifleTab;
-var R6MenuMPRestKitSub					m_pMachineGunsTab;
-var R6MenuMPRestKitSub					m_pSniperRifleTab;
-var R6MenuMPRestKitSub					m_pPistolTab;
-var R6MenuMPRestKitSub					m_pMachinePistolTab;
-var R6MenuMPRestKitSub					m_pPriWpnGadgetTab;
-var R6MenuMPRestKitSub					m_pSecWpnGadgetTab;
-var R6MenuMPRestKitSub					m_pMiscGadgetTab;
-var R6MenuMPRestKitSub					m_pCurrentSubKit;
-
-var Array<string>						m_SrvRestSubMachineGunsACopy;
-var Array<string>						m_SrvRestShotGunsACopy;
-var Array<string>						m_SrvRestAssultRiflesACopy;
-var Array<string>						m_SrvRestMachineGunsACopy;
-var Array<string>						m_SrvRestSniperRiflesACopy;
-var Array<string>						m_SrvRestPistolsACopy;
-var Array<string>						m_SrvRestMachinePistolsACopy;
-var Array<string>						m_SrvRestPrimaryACopy;
-var Array<string>						m_SrvRestSecondaryACopy;
-var Array<string>						m_SrvRestMiscGadgetsACopy;
-
-var string								m_ATextBoxLoc[2];
-
-var BOOL								m_bUpdateInBetRound;
-var BOOL								m_bUpdateGameProgress;
-var BOOL								m_bImAnAdmin;			// if the client can change the settings
+var R6WindowTextLabelExt m_pKitText;
+var R6WindowButtonBox m_pKitSubMachinesGuns;
+var R6WindowButtonBox m_pKitShotGuns;
+var R6WindowButtonBox m_pKitAssaultRifles;
+var R6WindowButtonBox m_pKitMachinesGuns;
+var R6WindowButtonBox m_pKitSniperRifles;
+var R6WindowButtonBox m_pKitPistols;
+var R6WindowButtonBox m_pKitMachinePistols;
+var R6WindowButtonBox m_pKitPrimaryWeapon;
+var R6WindowButtonBox m_pKitSecWeapon;
+var R6WindowButtonBox m_pKitMisc;
+var R6MenuMPRestKitSub m_pSubMachinesGunsTab;
+var R6MenuMPRestKitSub m_pShotgunsTab;
+var R6MenuMPRestKitSub m_pAssaultRifleTab;
+var R6MenuMPRestKitSub m_pMachineGunsTab;
+var R6MenuMPRestKitSub m_pSniperRifleTab;
+var R6MenuMPRestKitSub m_pPistolTab;
+var R6MenuMPRestKitSub m_pMachinePistolTab;
+var R6MenuMPRestKitSub m_pPriWpnGadgetTab;
+var R6MenuMPRestKitSub m_pSecWpnGadgetTab;
+var R6MenuMPRestKitSub m_pMiscGadgetTab;
+var R6MenuMPRestKitSub m_pCurrentSubKit;
+var array<string> m_SrvRestSubMachineGunsACopy;
+var array<string> m_SrvRestShotGunsACopy;
+var array<string> m_SrvRestAssultRiflesACopy;
+var array<string> m_SrvRestMachineGunsACopy;
+var array<string> m_SrvRestSniperRiflesACopy;
+var array<string> m_SrvRestPistolsACopy;
+var array<string> m_SrvRestMachinePistolsACopy;
+var array<string> m_SrvRestPrimaryACopy;
+var array<string> m_SrvRestSecondaryACopy;
+var array<string> m_SrvRestMiscGadgetsACopy;
+var string m_ATextBoxLoc[2];
 
 //=====================================================================================
 // KIT TAB
@@ -62,293 +61,278 @@ var BOOL								m_bImAnAdmin;			// if the client can change the settings
 function CreateKitRestriction()
 {
 	local string szTemp;
-    local FLOAT fXOffset, fYOffset, fYStep, fWidth, fHeight;
-    local Font ButtonFont;
-	local BOOL bInGame;
-    local R6GameReplicationInfo pGameRepInfo;
+	local float fXOffset, fYOffset, fYStep, fWidth, fHeight;
+
+	local Font ButtonFont;
+	local bool bInGame;
+	local R6GameReplicationInfo pGameRepInfo;
 
 	GetR6GameReplicationInfo(pGameRepInfo);
-
-    // it's a text label ext because you want to draw the line in the middle (small hack)
-    m_pKitText = R6WindowTextLabelExt( CreateWindow(class'R6WindowTextLabelExt', 0, 0, 2*K_HALFWINDOWWIDTH, WinHeight, self));
-    m_pKitText.bAlwaysBehind = true;
-    // draw middle line
-    m_pKitText.ActiveBorder( 0, false);                                         // Top border
-    m_pKitText.ActiveBorder( 1, false);                                         // Bottom border
-    m_pKitText.SetBorderParam( 2, K_HALFWINDOWWIDTH, 1, 1, Root.Colors.White);  // Left border
-    m_pKitText.ActiveBorder( 3, false);                                         // Rigth border
-
-    // text part
-    m_pKitText.m_Font = Root.Fonts[F_SmallTitle]; 
-    m_pKitText.m_vTextColor = Root.Colors.White;
-
-    fXOffset = 3;
-    fYOffset = 5;
-    fWidth = K_HALFWINDOWWIDTH;
-    m_pKitText.AddTextLabel( Localize("MPCreateGame","Kit_PrimaryWeapon","R6Menu"), fXOffset, fYOffset, fWidth, TA_Left, false);
-    fYOffset = 125;
-    m_pKitText.AddTextLabel( Localize("MPCreateGame","Kit_SecWeapon","R6Menu"), fXOffset, fYOffset, fWidth, TA_Left, false);
-    fYOffset = 200;
-    m_pKitText.AddTextLabel( Localize("MPCreateGame","Kit_Gadgets","R6Menu"), fXOffset, fYOffset, fWidth, TA_Left, false);
-
-    
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //create buttons -- check text label offset for concordance 
-    ButtonFont = Root.Fonts[F_SmallTitle];
-
-    fXOffset = 5;
-    fYOffset = 20; // fYOffset from Kit_PrimaryWeapon + is own initial fYOffset
-    fWidth = K_HALFWINDOWWIDTH - fXOffset - 10; //10 substract small value to distance the check box from middle line
-	fYStep = 15;
-    fHeight = 15;
-
-    m_ATextBoxLoc[0] = Localize("MultiPlayer","BoutonMsgBox","R6Menu");		  // EDIT
-    m_ATextBoxLoc[1] = Localize("MultiPlayer","BoutonMsgBoxInGame","R6Menu"); // VIEW
-
+	m_pKitText = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, __NFUN_171__(2.0000000, float(310)), WinHeight, self));
+	m_pKitText.bAlwaysBehind = true;
+	m_pKitText.ActiveBorder(0, false);
+	m_pKitText.ActiveBorder(1, false);
+	m_pKitText.SetBorderParam(2, 310.0000000, 1.0000000, 1.0000000, Root.Colors.White);
+	m_pKitText.ActiveBorder(3, false);
+	m_pKitText.m_Font = Root.Fonts[5];
+	m_pKitText.m_vTextColor = Root.Colors.White;
+	fXOffset = 3.0000000;
+	fYOffset = 5.0000000;
+	fWidth = 310.0000000;
+	m_pKitText.AddTextLabel(Localize("MPCreateGame", "Kit_PrimaryWeapon", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
+	fYOffset = 125.0000000;
+	m_pKitText.AddTextLabel(Localize("MPCreateGame", "Kit_SecWeapon", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
+	fYOffset = 200.0000000;
+	m_pKitText.AddTextLabel(Localize("MPCreateGame", "Kit_Gadgets", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
+	ButtonFont = Root.Fonts[5];
+	fXOffset = 5.0000000;
+	fYOffset = 20.0000000;
+	fWidth = __NFUN_175__(__NFUN_175__(310.0000000, fXOffset), float(10));
+	fYStep = 15.0000000;
+	fHeight = 15.0000000;
+	m_ATextBoxLoc[0] = Localize("MultiPlayer", "BoutonMsgBox", "R6Menu");
+	m_ATextBoxLoc[1] = Localize("MultiPlayer", "BoutonMsgBoxInGame", "R6Menu");
 	bInGame = false;
-	if (pGameRepInfo != None)
+	// End:0x2FC
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		bInGame = true;
-
-
-    // SUB MACHINES GUNS
-    m_pKitSubMachinesGuns = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitSubMachinesGuns.m_TextFont = ButtonFont;
-    m_pKitSubMachinesGuns.m_vTextColor = Root.Colors.White;
-    m_pKitSubMachinesGuns.m_vBorder = Root.Colors.White;
-    m_pKitSubMachinesGuns.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_SubMachGuns","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitSubMachinesGuns = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitSubMachinesGuns.m_TextFont = ButtonFont;
+	m_pKitSubMachinesGuns.m_vTextColor = Root.Colors.White;
+	m_pKitSubMachinesGuns.m_vBorder = Root.Colors.White;
+	m_pKitSubMachinesGuns.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_SubMachGuns", "R6Menu");
+	// End:0x3D5
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitSubMachinesGuns.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_SubMachGuns","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 0);
-
-    fYOffset += fYStep;
-    // SHOTGUNS
-    m_pKitShotGuns = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitShotGuns.m_TextFont = ButtonFont;
-    m_pKitShotGuns.m_vTextColor = Root.Colors.White;
-    m_pKitShotGuns.m_vBorder = Root.Colors.White;
-    m_pKitShotGuns.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_ShotGun","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitSubMachinesGuns.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_SubMachGuns", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 0);
+	__NFUN_184__(fYOffset, fYStep);
+	m_pKitShotGuns = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitShotGuns.m_TextFont = ButtonFont;
+	m_pKitShotGuns.m_vTextColor = Root.Colors.White;
+	m_pKitShotGuns.m_vBorder = Root.Colors.White;
+	m_pKitShotGuns.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_ShotGun", "R6Menu");
+	// End:0x504
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitShotGuns.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_ShotGun","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 1);
-
-#ifdefMPDEMO
-	m_pKitShotGuns.bDisabled = true;
-#endif
-
-    fYOffset += fYStep;
-    // ASSAULT RIFLES
-    m_pKitAssaultRifles = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitAssaultRifles.m_TextFont = ButtonFont;
-    m_pKitAssaultRifles.m_vTextColor = Root.Colors.White;
-    m_pKitAssaultRifles.m_vBorder = Root.Colors.White;
-    m_pKitAssaultRifles.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_Assault","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitShotGuns.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_ShotGun", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 1);
+	__NFUN_184__(fYOffset, fYStep);
+	m_pKitAssaultRifles = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitAssaultRifles.m_TextFont = ButtonFont;
+	m_pKitAssaultRifles.m_vTextColor = Root.Colors.White;
+	m_pKitAssaultRifles.m_vBorder = Root.Colors.White;
+	m_pKitAssaultRifles.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_Assault", "R6Menu");
+	// End:0x62F
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitAssaultRifles.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_Assault","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 2);
-
-    fYOffset += fYStep;
-    // MACHINES GUNS
-    m_pKitMachinesGuns = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitMachinesGuns.m_TextFont = ButtonFont;
-    m_pKitMachinesGuns.m_vTextColor = Root.Colors.White;
-    m_pKitMachinesGuns.m_vBorder = Root.Colors.White;
-    m_pKitMachinesGuns.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_MachGuns","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitAssaultRifles.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_Assault", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 2);
+	__NFUN_184__(fYOffset, fYStep);
+	m_pKitMachinesGuns = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitMachinesGuns.m_TextFont = ButtonFont;
+	m_pKitMachinesGuns.m_vTextColor = Root.Colors.White;
+	m_pKitMachinesGuns.m_vBorder = Root.Colors.White;
+	m_pKitMachinesGuns.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_MachGuns", "R6Menu");
+	// End:0x75C
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitMachinesGuns.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_MachGuns","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 3);
-
-    fYOffset += fYStep;
-    // SNIPER RIFLES
-    m_pKitSniperRifles = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitSniperRifles.m_TextFont = ButtonFont;
-    m_pKitSniperRifles.m_vTextColor = Root.Colors.White;
-    m_pKitSniperRifles.m_vBorder = Root.Colors.White;
-    m_pKitSniperRifles.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_Sniper","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitMachinesGuns.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_MachGuns", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 3);
+	__NFUN_184__(fYOffset, fYStep);
+	m_pKitSniperRifles = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitSniperRifles.m_TextFont = ButtonFont;
+	m_pKitSniperRifles.m_vTextColor = Root.Colors.White;
+	m_pKitSniperRifles.m_vBorder = Root.Colors.White;
+	m_pKitSniperRifles.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_Sniper", "R6Menu");
+	// End:0x888
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitSniperRifles.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_Sniper","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 4);
-
-    fYOffset = 140; // fYOffset from Kit_SecWeapon + is own initial fYOffset
-    // PISTOLS
-    m_pKitPistols = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitPistols.m_TextFont = ButtonFont;
-    m_pKitPistols.m_vTextColor = Root.Colors.White;
-    m_pKitPistols.m_vBorder = Root.Colors.White;
-    m_pKitPistols.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_Pistols","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitSniperRifles.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_Sniper", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 4);
+	fYOffset = 140.0000000;
+	m_pKitPistols = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitPistols.m_TextFont = ButtonFont;
+	m_pKitPistols.m_vTextColor = Root.Colors.White;
+	m_pKitPistols.m_vBorder = Root.Colors.White;
+	m_pKitPistols.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_Pistols", "R6Menu");
+	// End:0x9B2
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitPistols.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_Pistols","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 5);
-
-    fYOffset += fYStep;
-    // MACHINE PISTOLS
-    m_pKitMachinePistols = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitMachinePistols.m_TextFont = ButtonFont;
-    m_pKitMachinePistols.m_vTextColor = Root.Colors.White;
-    m_pKitMachinePistols.m_vBorder = Root.Colors.White;
-    m_pKitMachinePistols.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_MachPistols","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitPistols.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_Pistols", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 5);
+	__NFUN_184__(fYOffset, fYStep);
+	m_pKitMachinePistols = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitMachinePistols.m_TextFont = ButtonFont;
+	m_pKitMachinePistols.m_vTextColor = Root.Colors.White;
+	m_pKitMachinePistols.m_vBorder = Root.Colors.White;
+	m_pKitMachinePistols.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_MachPistols", "R6Menu");
+	// End:0xAE2
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitMachinePistols.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_MachPistols","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 6);
-
-    fYOffset = 215; // fYOffset from Kit_Gadgets + is own initial fYOffset
-    // PRIMARY WEAPON
-    m_pKitPrimaryWeapon = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitPrimaryWeapon.m_TextFont = ButtonFont;
-    m_pKitPrimaryWeapon.m_vTextColor = Root.Colors.White;
-    m_pKitPrimaryWeapon.m_vBorder = Root.Colors.White;
-    m_pKitPrimaryWeapon.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_PrimaryWeaponMin","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitMachinePistols.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_MachPistols", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 6);
+	fYOffset = 215.0000000;
+	m_pKitPrimaryWeapon = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitPrimaryWeapon.m_TextFont = ButtonFont;
+	m_pKitPrimaryWeapon.m_vTextColor = Root.Colors.White;
+	m_pKitPrimaryWeapon.m_vBorder = Root.Colors.White;
+	m_pKitPrimaryWeapon.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_PrimaryWeaponMin", "R6Menu");
+	// End:0xC1A
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitPrimaryWeapon.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_PrimaryWeaponMin","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 7);
-
-    fYOffset += fYStep;
-    // SECONDARY WEAPON
-    m_pKitSecWeapon = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitSecWeapon.m_TextFont = ButtonFont;
-    m_pKitSecWeapon.m_vTextColor = Root.Colors.White;
-    m_pKitSecWeapon.m_vBorder = Root.Colors.White;
-    m_pKitSecWeapon.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_SecWeaponMin","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitPrimaryWeapon.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_PrimaryWeaponMin", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 7);
+	__NFUN_184__(fYOffset, fYStep);
+	m_pKitSecWeapon = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitSecWeapon.m_TextFont = ButtonFont;
+	m_pKitSecWeapon.m_vTextColor = Root.Colors.White;
+	m_pKitSecWeapon.m_vBorder = Root.Colors.White;
+	m_pKitSecWeapon.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_SecWeaponMin", "R6Menu");
+	// End:0xD54
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitSecWeapon.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_SecWeaponMin","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 8);
-
-    fYOffset += fYStep;
-    // MISCELLANEOUS
-    m_pKitMisc = R6WindowButtonBox(CreateControl(class'R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pKitMisc.m_TextFont = ButtonFont;
-    m_pKitMisc.m_vTextColor = Root.Colors.White;
-    m_pKitMisc.m_vBorder = Root.Colors.White;
-    m_pKitMisc.m_eButtonType = BBT_ResKit;
-	szTemp = Localize("Tip","Kit_Misc","R6Menu");
-	if (pGameRepInfo != None)
+	}
+	m_pKitSecWeapon.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_SecWeaponMin", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 8);
+	__NFUN_184__(fYOffset, fYStep);
+	m_pKitMisc = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pKitMisc.m_TextFont = ButtonFont;
+	m_pKitMisc.m_vTextColor = Root.Colors.White;
+	m_pKitMisc.m_vBorder = Root.Colors.White;
+	m_pKitMisc.m_eButtonType = 2;
+	szTemp = Localize("Tip", "Kit_Misc", "R6Menu");
+	// End:0xE82
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		szTemp = "";
-    m_pKitMisc.CreateTextAndMsgBox( Localize("MPCreateGame","Kit_Misc","R6Menu"), szTemp, m_ATextBoxLoc[0], 0, 9);
-
+	}
+	m_pKitMisc.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_Misc", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 9);
 	InitRightPart();
+	return;
 }
-
 
 function InitRightPart()
 {
-    local R6GameReplicationInfo pGameRepInfo;
-    local float fXOffset, fYOffset, fWidth, fHeight;
-    local BOOL bInGame;
-    
-    fXOffset = K_HALFWINDOWWIDTH;
-    fYOffset = 0;
-    fWidth   = K_HALFWINDOWWIDTH;
-    fHeight  = WinHeight;
+	local R6GameReplicationInfo pGameRepInfo;
+	local float fXOffset, fYOffset, fWidth, fHeight;
+	local bool bInGame;
 
+	fXOffset = 310.0000000;
+	fYOffset = 0.0000000;
+	fWidth = 310.0000000;
+	fHeight = WinHeight;
 	GetR6GameReplicationInfo(pGameRepInfo);
-
 	bInGame = false;
-	if (pGameRepInfo != None)
+	// End:0x52
+	if(__NFUN_119__(pGameRepInfo, none))
+	{
 		bInGame = true;
-
-    m_pSubMachinesGunsTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pSubMachinesGunsTab.InitSelectButtons( bInGame );
-    m_pSubMachinesGunsTab.InitSubMachineGunsTab( pGameRepInfo);
-    m_pSubMachinesGunsTab.HideWindow();
-
-    m_pShotgunsTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pShotgunsTab.InitSelectButtons( bInGame);
-    m_pShotgunsTab.InitShotGunsTab( pGameRepInfo);
-    m_pShotgunsTab.HideWindow();
-
-    m_pAssaultRifleTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pAssaultRifleTab.InitSelectButtons( bInGame);
-    m_pAssaultRifleTab.InitAssaultRifleTab( pGameRepInfo);
-    m_pAssaultRifleTab.HideWindow();
-
-    m_pMachineGunsTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pMachineGunsTab.InitSelectButtons( bInGame);
-    m_pMachineGunsTab.InitMachineGunsTab( pGameRepInfo);
-    m_pMachineGunsTab.HideWindow();
-
-    m_pSniperRifleTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pSniperRifleTab.InitSelectButtons( bInGame);
-    m_pSniperRifleTab.InitSniperRifleTab( pGameRepInfo);
-    m_pSniperRifleTab.HideWindow();
-
-    m_pPistolTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pPistolTab.InitSelectButtons( bInGame);
-    m_pPistolTab.InitPistolTab( pGameRepInfo);
-    m_pPistolTab.HideWindow();
-
-    m_pMachinePistolTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pMachinePistolTab.InitSelectButtons( bInGame);
-    m_pMachinePistolTab.InitMachinePistolTab( pGameRepInfo);
-    m_pMachinePistolTab.HideWindow();
-
-    m_pPriWpnGadgetTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pPriWpnGadgetTab.InitSelectButtons( bInGame);
-    m_pPriWpnGadgetTab.InitPriWpnGadgetTab( pGameRepInfo);
-    m_pPriWpnGadgetTab.HideWindow();
-
-    m_pSecWpnGadgetTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pSecWpnGadgetTab.InitSelectButtons( bInGame);
-    m_pSecWpnGadgetTab.InitSecWpnGadgetTab( pGameRepInfo);
-    m_pSecWpnGadgetTab.HideWindow();
-
-    m_pMiscGadgetTab = R6MenuMPRestKitSub(CreateWindow(class'R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
-    m_pMiscGadgetTab.InitSelectButtons( bInGame);
-    m_pMiscGadgetTab.InitMiscGadgetTab( pGameRepInfo);
-    m_pMiscGadgetTab.HideWindow();
-
-	m_pRestKitOptFakeW = R6MenuSimpleWindow(CreateWindow( class'R6MenuSimpleWindow', WinWidth * 0.5, 0, WinWidth * 0.5, WinHeight, self));
+	}
+	m_pSubMachinesGunsTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pSubMachinesGunsTab.InitSelectButtons(bInGame);
+	m_pSubMachinesGunsTab.InitSubMachineGunsTab(pGameRepInfo);
+	m_pSubMachinesGunsTab.HideWindow();
+	m_pShotgunsTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pShotgunsTab.InitSelectButtons(bInGame);
+	m_pShotgunsTab.InitShotGunsTab(pGameRepInfo);
+	m_pShotgunsTab.HideWindow();
+	m_pAssaultRifleTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pAssaultRifleTab.InitSelectButtons(bInGame);
+	m_pAssaultRifleTab.InitAssaultRifleTab(pGameRepInfo);
+	m_pAssaultRifleTab.HideWindow();
+	m_pMachineGunsTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pMachineGunsTab.InitSelectButtons(bInGame);
+	m_pMachineGunsTab.InitMachineGunsTab(pGameRepInfo);
+	m_pMachineGunsTab.HideWindow();
+	m_pSniperRifleTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pSniperRifleTab.InitSelectButtons(bInGame);
+	m_pSniperRifleTab.InitSniperRifleTab(pGameRepInfo);
+	m_pSniperRifleTab.HideWindow();
+	m_pPistolTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pPistolTab.InitSelectButtons(bInGame);
+	m_pPistolTab.InitPistolTab(pGameRepInfo);
+	m_pPistolTab.HideWindow();
+	m_pMachinePistolTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pMachinePistolTab.InitSelectButtons(bInGame);
+	m_pMachinePistolTab.InitMachinePistolTab(pGameRepInfo);
+	m_pMachinePistolTab.HideWindow();
+	m_pPriWpnGadgetTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pPriWpnGadgetTab.InitSelectButtons(bInGame);
+	m_pPriWpnGadgetTab.InitPriWpnGadgetTab(pGameRepInfo);
+	m_pPriWpnGadgetTab.HideWindow();
+	m_pSecWpnGadgetTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pSecWpnGadgetTab.InitSelectButtons(bInGame);
+	m_pSecWpnGadgetTab.InitSecWpnGadgetTab(pGameRepInfo);
+	m_pSecWpnGadgetTab.HideWindow();
+	m_pMiscGadgetTab = R6MenuMPRestKitSub(CreateWindow(Class'R6Menu.R6MenuMPRestKitSub', fXOffset, fYOffset, fWidth, fHeight, self));
+	m_pMiscGadgetTab.InitSelectButtons(bInGame);
+	m_pMiscGadgetTab.InitMiscGadgetTab(pGameRepInfo);
+	m_pMiscGadgetTab.HideWindow();
+	m_pRestKitOptFakeW = R6MenuSimpleWindow(CreateWindow(Class'R6Menu.R6MenuSimpleWindow', __NFUN_171__(WinWidth, 0.5000000), 0.0000000, __NFUN_171__(WinWidth, 0.5000000), WinHeight, self));
 	m_pRestKitOptFakeW.bAlwaysOnTop = true;
 	m_pRestKitOptFakeW.m_bDrawSimpleBorder = false;
 	m_pRestKitOptFakeW.pAdviceParent = self;
-
-	if (bInGame)
+	// End:0x61F
+	if(bInGame)
 	{
 		Refresh();
-
-		// this is temp until we "polish" pop-up, for border standarization
-		m_pSubMachinesGunsTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pShotgunsTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pAssaultRifleTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pMachineGunsTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pSniperRifleTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pPistolTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pMachinePistolTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pPriWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pSecWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		m_pMiscGadgetTab.m_pRestKitButList.m_VertSB.WinLeft -= 1;
-		// end of temp
+		__NFUN_185__(m_pSubMachinesGunsTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pShotgunsTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pAssaultRifleTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pMachineGunsTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pSniperRifleTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pPistolTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pMachinePistolTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pPriWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pSecWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
+		__NFUN_185__(m_pMiscGadgetTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));		
 	}
 	else
 	{
 		m_pRestKitOptFakeW.HideWindow();
-        RefreshCreateGameKitRest();
-        
-        if ( m_pCurrentSubKit != none )
-            m_pCurrentSubKit.HideWindow();
+		RefreshCreateGameKitRest();
+		// End:0x64E
+		if(__NFUN_119__(m_pCurrentSubKit, none))
+		{
+			m_pCurrentSubKit.HideWindow();
+		}
 	}
+	return;
 }
 
 function RefreshCreateGameKitRest()
 {
-	m_pSubMachinesGunsTab.UpdateSubMachineGunsTab( None);
-	m_pShotgunsTab.UpdateShotGunsTab(None);
-	m_pAssaultRifleTab.UpdateAssaultRifleTab(None);
-	m_pMachineGunsTab.UpdateMachineGunsTab(None);
-	m_pSniperRifleTab.UpdateSniperRifleTab(None);
-	m_pPistolTab.UpdatePistolsTab(None);
-	m_pMachinePistolTab.UpdateMachinePistolTab(None);
-	m_pPriWpnGadgetTab.UpdatePriWpnGadgetTab(None);
-	m_pSecWpnGadgetTab.UpdateSecWpnGadgetTab(None);
-	m_pMiscGadgetTab.UpdateMiscGadgetTab(None);
+	m_pSubMachinesGunsTab.UpdateSubMachineGunsTab(none);
+	m_pShotgunsTab.UpdateShotGunsTab(none);
+	m_pAssaultRifleTab.UpdateAssaultRifleTab(none);
+	m_pMachineGunsTab.UpdateMachineGunsTab(none);
+	m_pSniperRifleTab.UpdateSniperRifleTab(none);
+	m_pPistolTab.UpdatePistolsTab(none);
+	m_pMachinePistolTab.UpdateMachinePistolTab(none);
+	m_pPriWpnGadgetTab.UpdatePriWpnGadgetTab(none);
+	m_pSecWpnGadgetTab.UpdateSecWpnGadgetTab(none);
+	m_pMiscGadgetTab.UpdateMiscGadgetTab(none);
+	return;
 }
 
 //=======================================================================================
@@ -358,32 +342,24 @@ function Refresh()
 {
 	local string szTextBox;
 
-	if ( R6PlayerController(GetPlayerOwner()).CheckAuthority(R6PlayerController(GetPlayerOwner()).Authority_Admin))
+	// End:0x70
+	if(R6PlayerController(GetPlayerOwner()).CheckAuthority(R6PlayerController(GetPlayerOwner()).1))
 	{
-#ifndefMPDEMO
-        // we just became an administrator
-        if (m_bImAnAdmin == false)
-        {
-		    m_bImAnAdmin = true;
-            R6PlayerController(GetPlayerOwner()).ServerPausePreGameRoundTime();
-        }
-#endif
+		// End:0x51
+		if(__NFUN_242__(m_bImAnAdmin, false))
+		{
+			m_bImAnAdmin = true;
+			R6PlayerController(GetPlayerOwner()).ServerPausePreGameRoundTime();
+		}
 		szTextBox = m_ATextBoxLoc[0];
-		m_pRestKitOptFakeW.HideWindow();
+		m_pRestKitOptFakeW.HideWindow();		
 	}
 	else
 	{
 		m_bImAnAdmin = false;
 		szTextBox = m_ATextBoxLoc[1];
 		m_pRestKitOptFakeW.ShowWindow();
-    }	
-
-#ifdefMPDemo
-	m_bImAnAdmin = false;
-	szTextBox = m_ATextBoxLoc[1];
-	m_pRestKitOptFakeW.ShowWindow();
-#endif
-
+	}
 	m_pKitSubMachinesGuns.ModifyMsgBox(szTextBox);
 	m_pKitShotGuns.ModifyMsgBox(szTextBox);
 	m_pKitAssaultRifles.ModifyMsgBox(szTextBox);
@@ -394,17 +370,17 @@ function Refresh()
 	m_pKitPrimaryWeapon.ModifyMsgBox(szTextBox);
 	m_pKitSecWeapon.ModifyMsgBox(szTextBox);
 	m_pKitMisc.ModifyMsgBox(szTextBox);
-
-	m_pSubMachinesGunsTab.RefreshSubKit( m_bImAnAdmin);
-	m_pShotgunsTab.RefreshSubKit( m_bImAnAdmin);
-	m_pAssaultRifleTab.RefreshSubKit( m_bImAnAdmin);
-	m_pMachineGunsTab.RefreshSubKit( m_bImAnAdmin);
-	m_pSniperRifleTab.RefreshSubKit( m_bImAnAdmin);
-	m_pPistolTab.RefreshSubKit( m_bImAnAdmin);
-	m_pMachinePistolTab.RefreshSubKit( m_bImAnAdmin);
-	m_pPriWpnGadgetTab.RefreshSubKit( m_bImAnAdmin);
-	m_pSecWpnGadgetTab.RefreshSubKit( m_bImAnAdmin);
-	m_pMiscGadgetTab.RefreshSubKit( m_bImAnAdmin);
+	m_pSubMachinesGunsTab.RefreshSubKit(m_bImAnAdmin);
+	m_pShotgunsTab.RefreshSubKit(m_bImAnAdmin);
+	m_pAssaultRifleTab.RefreshSubKit(m_bImAnAdmin);
+	m_pMachineGunsTab.RefreshSubKit(m_bImAnAdmin);
+	m_pSniperRifleTab.RefreshSubKit(m_bImAnAdmin);
+	m_pPistolTab.RefreshSubKit(m_bImAnAdmin);
+	m_pMachinePistolTab.RefreshSubKit(m_bImAnAdmin);
+	m_pPriWpnGadgetTab.RefreshSubKit(m_bImAnAdmin);
+	m_pSecWpnGadgetTab.RefreshSubKit(m_bImAnAdmin);
+	m_pMiscGadgetTab.RefreshSubKit(m_bImAnAdmin);
+	return;
 }
 
 //=================================================================================
@@ -417,25 +393,7 @@ function RefreshKitRest()
 
 	R6CurrentRoot = R6MenuInGameMultiPlayerRootWindow(Root);
 	pGameRepInfo = R6GameReplicationInfo(R6MenuInGameMultiPlayerRootWindow(Root).m_R6GameMenuCom.m_GameRepInfo);
-
-//	if (R6CurrentRoot.m_R6GameMenuCom.m_eStatMenuState == R6CurrentRoot.m_R6GameMenuCom.eClientMenuState.CMS_DisplayStat)
-//	{
-//		m_bUpdateInBetRound = false;
-//		if (m_bUpdateGameProgress)
-//			return;
-//		else
-//			m_bUpdateGameProgress = true;
-//	}
-//	else 
-//	{
-//		m_bUpdateGameProgress = false;
-//		if (m_bUpdateInBetRound)
-//			return;
-//		else
-//			m_bUpdateInBetRound = true;
-//	}
-
-	m_pSubMachinesGunsTab.UpdateSubMachineGunsTab( pGameRepInfo);
+	m_pSubMachinesGunsTab.UpdateSubMachineGunsTab(pGameRepInfo);
 	m_pShotgunsTab.UpdateShotGunsTab(pGameRepInfo);
 	m_pAssaultRifleTab.UpdateAssaultRifleTab(pGameRepInfo);
 	m_pMachineGunsTab.UpdateMachineGunsTab(pGameRepInfo);
@@ -445,269 +403,338 @@ function RefreshKitRest()
 	m_pPriWpnGadgetTab.UpdatePriWpnGadgetTab(pGameRepInfo);
 	m_pSecWpnGadgetTab.UpdateSecWpnGadgetTab(pGameRepInfo);
 	m_pMiscGadgetTab.UpdateMiscGadgetTab(pGameRepInfo);
-
-	CopyStaticAToDynA( pGameRepInfo.m_szSubMachineGunsRes, m_SrvRestSubMachineGunsACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szShotGunRes,		   m_SrvRestShotGunsACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szAssRifleRes,	   m_SrvRestAssultRiflesACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szMachGunRes,		   m_SrvRestMachineGunsACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szSnipRifleRes,	   m_SrvRestSniperRiflesACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szPistolRes,		   m_SrvRestPistolsACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szMachPistolRes,	   m_SrvRestMachinePistolsACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szGadgPrimaryRes,	   m_SrvRestPrimaryACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szGadgSecondayRes,   m_SrvRestSecondaryACopy);
-	CopyStaticAToDynA( pGameRepInfo.m_szGadgMiscRes,	   m_SrvRestMiscGadgetsACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szSubMachineGunsRes, m_SrvRestSubMachineGunsACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szShotGunRes, m_SrvRestShotGunsACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szAssRifleRes, m_SrvRestAssultRiflesACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szMachGunRes, m_SrvRestMachineGunsACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szSnipRifleRes, m_SrvRestSniperRiflesACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szPistolRes, m_SrvRestPistolsACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szMachPistolRes, m_SrvRestMachinePistolsACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szGadgPrimaryRes, m_SrvRestPrimaryACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szGadgSecondayRes, m_SrvRestSecondaryACopy);
+	CopyStaticAToDynA(pGameRepInfo.m_szGadgMiscRes, m_SrvRestMiscGadgetsACopy);
+	return;
 }
 
-function CopyStaticAToDynA( string _ASrvRest[32], out array<string> _ASrvRestCopy)
+function CopyStaticAToDynA(string _ASrvRest[32], out array<string> _ASrvRestCopy)
 {
-	local INT i;
+	local int i;
 
-	_ASrvRestCopy.remove( 0, _ASrvRestCopy.Length);
+	_ASrvRestCopy.Remove(0, _ASrvRestCopy.Length);
+	i = 0;
+	J0x14:
 
-	for ( i = 0; (_ASrvRest[i] != "") && (i < 32); i++ )
+	// End:0x55 [Loop If]
+	if(__NFUN_130__(__NFUN_123__(_ASrvRest[i], ""), __NFUN_150__(i, 32)))
 	{
 		_ASrvRestCopy[i] = _ASrvRest[i];
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x14;
 	}
+	return;
 }
 
 //=================================================================================
 // SendNewRestrictionsKit: Send the new restrictions kit settings to the server, only the change values. 
 //						   If no modification was made return false 
 //=================================================================================
-function BOOL SendNewRestrictionsKit()
+function bool SendNewRestrictionsKit()
 {
-	local R6GameReplicationInfo				R6GameRepInfo;
-	local BOOL bSettingsChange;
+	local R6GameReplicationInfo R6GameRepInfo;
+	local bool bSettingsChange;
 
 	R6GameRepInfo = R6GameReplicationInfo(R6MenuInGameMultiPlayerRootWindow(Root).m_R6GameMenuCom.m_GameRepInfo);
-
-	bSettingsChange = CompareARestKit( ERestKit_SubMachineGuns, m_SrvRestSubMachineGunsACopy, m_pSubMachinesGunsTab.m_ASubMachineGuns, m_pSubMachinesGunsTab.m_pSubMachineGuns);
-	bSettingsChange = (CompareARestKit( ERestKit_Shotguns,		m_SrvRestShotGunsACopy,		m_pShotgunsTab.m_AShotguns, m_pShotgunsTab.m_pShotguns) || bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_AssaultRifle,	m_SrvRestAssultRiflesACopy, 	m_pAssaultRifleTab.m_AAssaultRifle, m_pAssaultRifleTab.m_pAssaultRifle) || bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_MachineGuns,	m_SrvRestMachineGunsACopy,	m_pMachineGunsTab.m_AMachineGuns, m_pMachineGunsTab.m_pMachineGuns) || bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_SniperRifle,	m_SrvRestSniperRiflesACopy,	m_pSniperRifleTab.m_ASniperRifle, m_pSniperRifleTab.m_pSniperRifle)	|| bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_Pistol,		m_SrvRestPistolsACopy,		m_pPistolTab.m_APistol, m_pPistolTab.m_pPistol)	|| bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_MachinePistol, m_SrvRestMachinePistolsACopy, m_pMachinePistolTab.m_AMachinePistol, m_pMachinePistolTab.m_pMachinePistol) || bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_PriWpnGadget,  m_SrvRestPrimaryACopy,		m_pPriWpnGadgetTab.m_APriWpnGadget, m_pPriWpnGadgetTab.m_pPriWpnGadget, true) || bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_SecWpnGadget,  m_SrvRestSecondaryACopy,		m_pSecWpnGadgetTab.m_ASecWpnGadget, m_pSecWpnGadgetTab.m_pSecWpnGadget, true) || bSettingsChange);
-	bSettingsChange = (CompareARestKit( ERestKit_MiscGadget,    m_SrvRestMiscGadgetsACopy,	m_pMiscGadgetTab.m_AMiscGadget, m_pMiscGadgetTab.m_pMiscGadget, true) || bSettingsChange);
-	
-	log("SendNewRestrictionsKit --> bSettingsChange: "$bSettingsChange);
+	bSettingsChange = CompareARestKit(0, m_SrvRestSubMachineGunsACopy, m_pSubMachinesGunsTab.m_ASubMachineGuns, m_pSubMachinesGunsTab.m_pSubMachineGuns);
+	bSettingsChange = __NFUN_132__(CompareARestKit(1, m_SrvRestShotGunsACopy, m_pShotgunsTab.m_AShotguns, m_pShotgunsTab.m_pShotguns), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(2, m_SrvRestAssultRiflesACopy, m_pAssaultRifleTab.m_AAssaultRifle, m_pAssaultRifleTab.m_pAssaultRifle), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(3, m_SrvRestMachineGunsACopy, m_pMachineGunsTab.m_AMachineGuns, m_pMachineGunsTab.m_pMachineGuns), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(4, m_SrvRestSniperRiflesACopy, m_pSniperRifleTab.m_ASniperRifle, m_pSniperRifleTab.m_pSniperRifle), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(5, m_SrvRestPistolsACopy, m_pPistolTab.m_APistol, m_pPistolTab.m_pPistol), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(6, m_SrvRestMachinePistolsACopy, m_pMachinePistolTab.m_AMachinePistol, m_pMachinePistolTab.m_pMachinePistol), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(7, m_SrvRestPrimaryACopy, m_pPriWpnGadgetTab.m_APriWpnGadget, m_pPriWpnGadgetTab.m_pPriWpnGadget, true), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(8, m_SrvRestSecondaryACopy, m_pSecWpnGadgetTab.m_ASecWpnGadget, m_pSecWpnGadgetTab.m_pSecWpnGadget, true), bSettingsChange);
+	bSettingsChange = __NFUN_132__(CompareARestKit(9, m_SrvRestMiscGadgetsACopy, m_pMiscGadgetTab.m_AMiscGadget, m_pMiscGadgetTab.m_pMiscGadget, true), bSettingsChange);
+	__NFUN_231__(__NFUN_112__("SendNewRestrictionsKit --> bSettingsChange: ", string(bSettingsChange)));
 	return bSettingsChange;
+	return;
 }
 
-function BOOL CompareARestKit(ERestKitID _eRestKitID, out array<string> _ANextSrvRestriction, array<class> _ACurServerRestKit, R6WindowButtonBox _pAButtonBox[20], optional BOOL _bStringArray)
+function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<string> _ANextSrvRestriction, array< Class > _ACurServerRestKit, R6WindowButtonBox _pAButtonBox[20], optional bool _bStringArray)
 {
-	local Array<class> ARestToRemove, ARestToAdd;
-	local Array<string> szAOldCopyOfSrvRest;
-	local INT i, j, 
-			  iTotOldMenuRest, iRestToRemove, iRestToAdd;
-	local BOOL bSettingsChange, bFindRes;
+	local array< Class > ARestToRemove, ARestToAdd;
+	local array<string> szAOldCopyOfSrvRest;
+	local int i, j, iTotOldMenuRest, iRestToRemove, iRestToAdd;
 
-	// assign the total item find for server list
-	for ( i = 0; i < _ANextSrvRestriction.Length; i++ )
-		szAOldCopyOfSrvRest[i] = _ANextSrvRestriction[i];
+	local bool bSettingsChange, bFindRes;
 
-	iTotOldMenuRest = i;
+	i = 0;
+	J0x07:
 
-	// reset the menu array
-	_ANextSrvRestriction.remove( 0, _ANextSrvRestriction.Length);
-
-	iRestToRemove = 0;
-	iRestToAdd	  = 0;
-	// get the menu settings
-	for ( i = 0; i < 20; i++) // 20 is the max number of buttons
+	// End:0x38 [Loop If]
+	if(__NFUN_150__(i, _ANextSrvRestriction.Length))
 	{
-		if (_pAButtonBox[i] == None)
-			break;
+		szAOldCopyOfSrvRest[i] = _ANextSrvRestriction[i];
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	iTotOldMenuRest = i;
+	_ANextSrvRestriction.Remove(0, _ANextSrvRestriction.Length);
+	iRestToRemove = 0;
+	iRestToAdd = 0;
+	i = 0;
+	J0x65:
 
-		// if the rest kit button is selected
-		if (_pAButtonBox[i].m_bSelected)
+	// End:0x1CA [Loop If]
+	if(__NFUN_150__(i, 20))
+	{
+		// End:0x85
+		if(__NFUN_114__(_pAButtonBox[i], none))
 		{
-			// this add the rest kit for the menu
-			_ANextSrvRestriction[iRestToAdd] = (class<R6Description>(_ACurServerRestKit[i])).Default.m_NameID;
-
+			// [Explicit Break]
+			goto J0x1CA;
+		}
+		// End:0x1A2
+		if(_pAButtonBox[i].m_bSelected)
+		{
+			_ANextSrvRestriction[iRestToAdd] = Class<R6Description>(_ACurServerRestKit[i]).default.m_NameID;
 			bFindRes = false;
-			
-			// verify if the rest is already on the server side
-			for ( j = 0; j < iTotOldMenuRest; j++)
+			j = 0;
+			J0xD1:
+
+			// End:0x123 [Loop If]
+			if(__NFUN_150__(j, iTotOldMenuRest))
 			{
-				if ( _ANextSrvRestriction[iRestToAdd] == szAOldCopyOfSrvRest[j])
+				// End:0x119
+				if(__NFUN_122__(_ANextSrvRestriction[iRestToAdd], szAOldCopyOfSrvRest[j]))
 				{
-					szAOldCopyOfSrvRest.remove( j, 1); 
-					iTotOldMenuRest--;
+					szAOldCopyOfSrvRest.Remove(j, 1);
+					__NFUN_166__(iTotOldMenuRest);
 					bFindRes = true;
-					break;
+					// [Explicit Break]
+					goto J0x123;
 				}
+				__NFUN_165__(j);
+				// [Loop Continue]
+				goto J0xD1;
 			}
+			J0x123:
 
-			iRestToAdd++;
-
-			// it's a new rest for the server, add it
-			if (!bFindRes)
+			__NFUN_165__(iRestToAdd);
+			// End:0x19F
+			if(__NFUN_129__(bFindRes))
 			{
 				bSettingsChange = true;
-
-				if (_bStringArray)
-					R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings( _eRestKitID, false, , _pAButtonBox[i].m_szMiscText);
+				// End:0x179
+				if(_bStringArray)
+				{
+					R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings(_eRestKitID, false,, _pAButtonBox[i].m_szMiscText);					
+				}
 				else
-					R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings( _eRestKitID, false, _ACurServerRestKit[i]);
+				{
+					R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings(_eRestKitID, false, _ACurServerRestKit[i]);
+				}
 			}
+			// [Explicit Continue]
+			goto J0x1C0;
 		}
-		else // remove the rest kit
-		{
-			ARestToRemove[iRestToRemove] = _ACurServerRestKit[i];
-			iRestToRemove++;
-		}
-	}
+		ARestToRemove[iRestToRemove] = _ACurServerRestKit[i];
+		__NFUN_165__(iRestToRemove);
+		J0x1C0:
 
-	// we have to compare the rest on the srv and the menu for remove rest
-	if (iTotOldMenuRest > 0)
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x65;
+	}
+	J0x1CA:
+
+	// End:0x265
+	if(__NFUN_151__(iTotOldMenuRest, 0))
 	{
-		for (i= 0 ; i < ARestToRemove.Length; i++)
+		i = 0;
+		J0x1DC:
+
+		// End:0x265 [Loop If]
+		if(__NFUN_150__(i, ARestToRemove.Length))
 		{
 			bSettingsChange = true;
-			if (_bStringArray)
-				R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings( _eRestKitID, true, , (class<R6Description>(ARestToRemove[i])).Default.m_NameID);
-			else
-				R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings( _eRestKitID, true, ARestToRemove[i]);
+			// End:0x235
+			if(_bStringArray)
+			{
+				R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings(_eRestKitID, true,, Class<R6Description>(ARestToRemove[i]).default.m_NameID);
+				// [Explicit Continue]
+				goto J0x25B;
+			}
+			R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings(_eRestKitID, true, ARestToRemove[i]);
+			J0x25B:
+
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x1DC;
 		}
 	}
-
 	return bSettingsChange;
+	return;
 }
-
 
 /////////////////////////////////////////////////////////////////
 // notify the parent window by using the appropriate parent function
 /////////////////////////////////////////////////////////////////
 function Notify(UWindowDialogControl C, byte E)
 {
-//    log("Notify from class: "$C);
-//    log("Notify msg: "$E);
-
-	if(E == DE_Click)
+	// End:0x2D
+	if(__NFUN_154__(int(E), 2))
 	{
-        // Change Current Selected Button
-        if ( C.IsA('R6WindowButtonBox'))
-        {
-            ManageR6ButtonBoxNotify(C);
-        }
-    }
+		// End:0x2D
+		if(C.__NFUN_303__('R6WindowButtonBox'))
+		{
+			ManageR6ButtonBoxNotify(C);
+		}
+	}
+	return;
 }
-
 
 /////////////////////////////////////////////////////////////////
 // manage the R6WindowButtonBox notify message
 /////////////////////////////////////////////////////////////////
-function ManageR6ButtonBoxNotify( UWindowDialogControl C)
+function ManageR6ButtonBoxNotify(UWindowDialogControl C)
 {
-    local R6GameReplicationInfo pGameRepInfo;
+	local R6GameReplicationInfo pGameRepInfo;
 
-	if (m_pSubMachinesGunsTab != None)
-	{     
+	// End:0x11B
+	if(__NFUN_119__(m_pSubMachinesGunsTab, none))
+	{
 		GetR6GameReplicationInfo(pGameRepInfo);
-
-		if (m_pCurrentSubKit != None)
+		// End:0x30
+		if(__NFUN_119__(m_pCurrentSubKit, none))
 		{
 			m_pCurrentSubKit.HideWindow();
 		}
-
-		switch ( R6WindowButtonBox(C) )
+		switch(R6WindowButtonBox(C))
 		{
+			// End:0x52
 			case m_pKitSubMachinesGuns:
 				m_pCurrentSubKit = m_pSubMachinesGunsTab;
+				// End:0x11B
 				break;
+			// End:0x68
 			case m_pKitShotGuns:
 				m_pCurrentSubKit = m_pShotgunsTab;
+				// End:0x11B
 				break;
+			// End:0x7E
 			case m_pKitAssaultRifles:
 				m_pCurrentSubKit = m_pAssaultRifleTab;
+				// End:0x11B
 				break;
+			// End:0x94
 			case m_pKitMachinesGuns:
 				m_pCurrentSubKit = m_pMachineGunsTab;
+				// End:0x11B
 				break;
+			// End:0xAA
 			case m_pKitSniperRifles:
 				m_pCurrentSubKit = m_pSniperRifleTab;
+				// End:0x11B
 				break;
+			// End:0xC0
 			case m_pKitPistols:
 				m_pCurrentSubKit = m_pPistolTab;
+				// End:0x11B
 				break;
+			// End:0xD6
 			case m_pKitMachinePistols:
 				m_pCurrentSubKit = m_pMachinePistolTab;
+				// End:0x11B
 				break;
+			// End:0xEC
 			case m_pKitPrimaryWeapon:
 				m_pCurrentSubKit = m_pPriWpnGadgetTab;
+				// End:0x11B
 				break;
+			// End:0x102
 			case m_pKitSecWeapon:
 				m_pCurrentSubKit = m_pSecWpnGadgetTab;
+				// End:0x11B
 				break;
+			// End:0x118
 			case m_pKitMisc:
 				m_pCurrentSubKit = m_pMiscGadgetTab;
+				// End:0x11B
+				break;
+			// End:0xFFFF
+			default:
 				break;
 		}
-	}
-
-	if (m_pCurrentSubKit != None)
-	{
-		m_pCurrentSubKit.ShowWindow();
-	}
-}
-
-function GetR6GameReplicationInfo( out R6GameReplicationInfo pGameRepInfo)
-{
-    local R6MenuInGameMultiPlayerRootWindow R6Root;
-
-    R6Root = R6MenuInGameMultiPlayerRootWindow(Root);
-
-    if( R6Root != None && 
-        R6Root.m_R6GameMenuCom != None &&
-        R6GameReplicationInfo(R6Root.m_R6GameMenuCom.m_GameRepInfo) != None)
-    {
-		pGameRepInfo = R6GameReplicationInfo(R6Root.m_R6GameMenuCom.m_GameRepInfo);
 	}
 	else
 	{
-		pGameRepInfo = None;
+		// End:0x135
+		if(__NFUN_119__(m_pCurrentSubKit, none))
+		{
+			m_pCurrentSubKit.ShowWindow();
+		}
+		return;
 	}
 }
 
-function Tick( FLOAT _fDelta)
+function GetR6GameReplicationInfo(out R6GameReplicationInfo pGameRepInfo)
 {
-	if (m_pCurrentSubKit != None)
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
+
+	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
+	// End:0x7A
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(r6Root, none), __NFUN_119__(r6Root.m_R6GameMenuCom, none)), __NFUN_119__(R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo), none)))
 	{
-		if (m_pRestKitOptFakeW.bWindowVisible)
+		pGameRepInfo = R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo);		
+	}
+	else
+	{
+		pGameRepInfo = none;
+	}
+	return;
+}
+
+function Tick(float _fDelta)
+{
+	// End:0x8A
+	if(__NFUN_119__(m_pCurrentSubKit, none))
+	{
+		// End:0x8A
+		if(m_pRestKitOptFakeW.bWindowVisible)
 		{
-			if (m_pCurrentSubKit.m_pRestKitButList.m_VertSB.isHidden())
+			// End:0x5F
+			if(m_pCurrentSubKit.m_pRestKitButList.m_VertSB.isHidden())
 			{
-				// increase the size of the fake window
-				m_pRestKitOptFakeW.WinWidth = (WinWidth * 0.5);
+				m_pRestKitOptFakeW.WinWidth = __NFUN_171__(WinWidth, 0.5000000);				
 			}
 			else
 			{
-				// reduce the size of the fake window
-				m_pRestKitOptFakeW.WinWidth = ((WinWidth * 0.5) - LookAndFeel.Size_ScrollbarWidth);
+				m_pRestKitOptFakeW.WinWidth = __NFUN_175__(__NFUN_171__(WinWidth, 0.5000000), LookAndFeel.Size_ScrollbarWidth);
 			}
 		}
 	}
+	return;
 }
 
-function MouseWheelDown(FLOAT X, FLOAT Y)
+function MouseWheelDown(float X, float Y)
 {
-	if ( m_pCurrentSubKit != None)
+	// End:0x2D
+	if(__NFUN_119__(m_pCurrentSubKit, none))
 	{
-		m_pCurrentSubKit.m_pRestKitButList.MouseWheelDown( X, Y);
+		m_pCurrentSubKit.m_pRestKitButList.MouseWheelDown(X, Y);
 	}
+	return;
 }
 
-function MouseWheelUp(FLOAT X, FLOAT Y)
+function MouseWheelUp(float X, float Y)
 {
-	if ( m_pCurrentSubKit != None)
+	// End:0x2D
+	if(__NFUN_119__(m_pCurrentSubKit, none))
 	{
-		m_pCurrentSubKit.m_pRestKitButList.MouseWheelUp( X, Y);
+		m_pCurrentSubKit.m_pRestKitButList.MouseWheelUp(X, Y);
 	}
+	return;
 }
 
-defaultproperties
-{
-}

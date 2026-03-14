@@ -1,153 +1,130 @@
 //=============================================================================
+// R6HostageAI - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6HostageAI.uc : This is the AI Controller class for all hostages
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/04/03 * Created by Rima Brek
 //=============================================================================
-
 class R6HostageAI extends R6AIController
-    native;
+ native;
 
-import class R6HostageMgr;
-
-enum eHostageOrder 
-{
-    HOrder_None,
-    HOrder_ComeWithMe,
-    HOrder_StayHere,
-    HOrder_Surrender,
-    HOrder_GotoExtraction
-    // ** if you add a new order, don't forget to reset the threat in the prpcess function
-};
+const C_iKeepDistanceFromPawn = 105;
 
 struct OrderInfo
 {
     // **** if modified, update this struct in r6engine.h ****
-    var bool           m_bOrderedByRainbow;
-    var R6Pawn         m_pawn1;         // the pawn involved in the order
-    var eHostageOrder  m_eOrder;        // the order
-    var float          m_fTime;         // the game level time
-    var Actor          m_actor;
-    // **** if modified, update this struct in r6engine.h ****
+	var bool m_bOrderedByRainbow;
+	var R6Pawn m_pawn1;  // the pawn involved in the order
+	var R6Hostage.eHostageOrder m_eOrder;  // the order
+	var float m_fTime;  // the game level time
+	var Actor m_actor;
 };
-
-
-var       R6Hostage             m_pawn;                     // to get away from copyinh R6Hostage(pawn)
-var       R6HostageMgr          m_mgr;
-var       R6HostageVoices       m_VoicesManager;
-
-var       bool                  m_bForceToStayHere;         // true when the rainbow tell him to stay here 
-var       bool                  m_bRunningToward;           // true if running toward the group. used in FollowingPawn state
-var       bool                  m_bRunToRainbowSuccess;     // true when in succeeded (used in Guarded_runTowardRainbow)
-var       INT                   m_iNotGuardedSince;         // time since the hostage is no longer guarded
-var       INT                   m_iLastHearNoiseTime;       // last hear noise detected
-
-var       R6Pawn                m_pawnToFollow;             // run toward, follow this pawn
-var       bool                  m_bStopDoTransition;        // in follow mode, we may have to stop completly to do a transition
-
-var const INT                   c_iDistanceMax;             // distance max from someone before catching up 
-var const INT                   c_iDistanceCatchUp;         // when catching up, the hostage will stop at this min distance
-var const INT                   c_iDistanceToStartToRun;    // if far from the group, start to run to catch up
-var       bool                  m_bNeedToRunToCatchUp;      // set to true when c_iDistanceToStartToRun is reached
-var       bool                  m_bSlowedPace;              // true when following someone walking in reverse
-var       bool                  m_bFollowIncreaseDistance;  //
-var       bool                  m_bLatentFnStopped;     // used in state code: true when the we manually stop the latent function 
-
-var       RandomTweenNum        m_AITickTime;           // frequence to tick the AI Timer. m_fMin is used for quick AI update in the state code
-
-
-var       R6Pawn                m_lastSeenPawn;
-
-var       INT                   m_iPlayReaction1;       // play reaction: used to desynchronis hostage reaction to threat
-var       INT                   m_iPlayReaction2; 
-
-var       INT                   m_iWaitingTime;         // Used in patrol when waiting at a node or when freed
-var       INT                   m_iFacingTime;          // Used in patrol when waiting at a node
-var       INT                   m_lastUpdatePaceTime;   // Used in following pawn
-
-var       name                  m_threatGroupName;      // group name used for the processing threat
-var R6HostageMgr.ThreatInfo     m_threatInfo;           // info on the current threat of the civilian
-var R6Hostage.EStartingPosition m_eTransitionPosition;  // position to go when doing a transition
-var vector                      m_vReactionDirection;   // 3d point where the hostage looked/focused when reacted to SeePlayer in Guarded state
-
-var OrderInfo                   m_aOrderInfo[2];        // list of order queued (used by the order system
-var INT                         m_iNbOrder;             // number of order in the queue
-
-var const INT                   c_iCowardModifier;      // personnality modifier
-var const INT                   c_iNormalModifier;      // personnality modifier
-var const INT                   c_iBraveModifier;       // personnality modifier
-var const INT                   c_iWoundedModifier;     // personnality modifier
-var const INT                   c_iGasModifier;         // personnality modifier
-
-var const INT                   c_iEnemyNotVisibleTime;         // min time before stopping when running away from an enemy
-var const INT                   c_iCautiousLastHearNoiseTime;   // if no noise is hear, stay cautious for this length of time
-var       RandomTweenNum        m_RunForCoverMinTween;   // time allowed to run for cover before starting to be aware of what's going on
-var       RandomTweenNum        m_scareToDeathTween;   
-
-var       bool                  m_bDbgIgnoreThreat;     // debug: ignore threat
-var       bool                  m_bDbgIgnoreRainbow;
-
-var       name                  m_runForCoverStateToGoOnFailure;
-var       name                  m_runForCoverStateToGoOnSuccess;
-var       actor                 m_runAwayOfGrenade; // used when Enemy can't be used (ie: for grenade)
-var const INT                   c_iRunForCoverOfGrenadeMinDist;
-
-var       RandomTweenNum        m_stayBlindedTweenTime;
-var       name                  m_reactToGrenadeStateToReturn;
-
-var       R6Terrorist           m_terrorist;          // terroriste with who's interacting with
-var       R6Pawn                m_escort;             // pawn who escortedvar       
-
-var       vector                m_vMoveToDest;                  // destination
-
-var       Actor                 m_pGotoToExtractionZone;
-
-var       bool                  m_bDbgRoll;
-var       INT                   m_iDbgRoll; 
-
-// used in state code 
-var rotator     m_rotator;
-var bool        m_bool;
-var vector      m_vectorTemp;
-var float       m_float;
-var name        m_name;
-
-
-var bool bThreatShowLog;  
- 
-//MissionPack1 // MPF1
-var class<R6EngineWeapon> DefaultWeaponClass;
-var R6EngineWeapon DefaultWeapon;
 
 struct PlaySndInfo
 {
-    var INT     m_iLastTime;        // last time the sound was played
-    var INT     m_iInBetweenTime;   // time to wait before playing again the sound
+	var int m_iLastTime;  // last time the sound was played
+	var int m_iInBetweenTime;  // time to wait before playing again the sound
 };
 
+var R6Hostage.EStartingPosition m_eTransitionPosition;  // position to go when doing a transition
+var int m_iNotGuardedSince;  // time since the hostage is no longer guarded
+var int m_iLastHearNoiseTime;  // last hear noise detected
+var const int c_iDistanceMax;  // distance max from someone before catching up
+var const int c_iDistanceCatchUp;  // when catching up, the hostage will stop at this min distance
+var const int c_iDistanceToStartToRun;  // if far from the group, start to run to catch up
+var int m_iPlayReaction1;  // play reaction: used to desynchronis hostage reaction to threat
+var int m_iPlayReaction2;
+var int m_iWaitingTime;  // Used in patrol when waiting at a node or when freed
+var int m_iFacingTime;  // Used in patrol when waiting at a node
+var int m_lastUpdatePaceTime;  // Used in following pawn
+var int m_iNbOrder;  // number of order in the queue
+var const int c_iCowardModifier;  // personnality modifier
+var const int c_iNormalModifier;  // personnality modifier
+var const int c_iBraveModifier;  // personnality modifier
+var const int c_iWoundedModifier;  // personnality modifier
+var const int c_iGasModifier;  // personnality modifier
+var const int c_iEnemyNotVisibleTime;  // min time before stopping when running away from an enemy
+var const int c_iCautiousLastHearNoiseTime;  // if no noise is hear, stay cautious for this length of time
+var const int c_iRunForCoverOfGrenadeMinDist;
+var int m_iDbgRoll;
+// NEW IN 1.60
+var int m_iRandomNumber;
+var bool m_bForceToStayHere;  // true when the rainbow tell him to stay here
+var bool m_bRunningToward;  // true if running toward the group. used in FollowingPawn state
+var bool m_bRunToRainbowSuccess;  // true when in succeeded (used in Guarded_runTowardRainbow)
+var bool m_bStopDoTransition;  // in follow mode, we may have to stop completly to do a transition
+var bool m_bNeedToRunToCatchUp;  // set to true when c_iDistanceToStartToRun is reached
+var bool m_bSlowedPace;  // true when following someone walking in reverse
+var bool m_bFollowIncreaseDistance;
+var bool m_bLatentFnStopped;  // used in state code: true when the we manually stop the latent function
+var bool m_bDbgIgnoreThreat;  // debug: ignore threat
+var bool m_bDbgIgnoreRainbow;
+var bool m_bDbgRoll;
+var bool m_bool;
+var bool bThreatShowLog;
+var bool m_bFirstTimeClarkComment;
+var float m_float;
+var R6Hostage m_pawn;  // to get away from copyinh R6Hostage(pawn)
+var R6HostageMgr m_mgr;
+var R6HostageVoices m_VoicesManager;
+var R6Pawn m_pawnToFollow;  // run toward, follow this pawn
+var R6Pawn m_lastSeenPawn;
+var Actor m_runAwayOfGrenade;  // used when Enemy can't be used (ie: for grenade)
+var R6Terrorist m_terrorist;  // terroriste with who's interacting with
+var R6Pawn m_escort;  // pawn who escortedvar
+var Actor m_pGotoToExtractionZone;
+var R6EngineWeapon DefaultWeapon;
+// NEW IN 1.60
+var PathNode m_pCoverNode;
+var name m_threatGroupName;  // group name used for the processing threat
+var name m_runForCoverStateToGoOnFailure;
+var name m_runForCoverStateToGoOnSuccess;
+var name m_reactToGrenadeStateToReturn;
+var name m_name;
+//MissionPack1 // MPF1
+var Class<R6EngineWeapon> DefaultWeaponClass;
+// NEW IN 1.60
+var array<PathNode> m_pListOfCoverNodes;
+var RandomTweenNum m_AITickTime;  // frequence to tick the AI Timer. m_fMin is used for quick AI update in the state code
+var ThreatInfo m_threatInfo;  // info on the current threat of the civilian
+var Vector m_vReactionDirection;  // 3d point where the hostage looked/focused when reacted to SeePlayer in Guarded state
+var OrderInfo m_aOrderInfo[2];  // list of order queued (used by the order system
+var RandomTweenNum m_RunForCoverMinTween;  // time allowed to run for cover before starting to be aware of what's going on
+var RandomTweenNum m_scareToDeathTween;
+var RandomTweenNum m_stayBlindedTweenTime;
+var Vector m_vMoveToDest;  // destination
+// used in state code 
+var Rotator m_rotator;
+var Vector m_vectorTemp;
 var PlaySndInfo m_aPlaySndInfo[12];
-var BOOL        m_bFirstTimeClarkComment;
-
-const C_iKeepDistanceFromPawn = 105;
 
 event PostBeginPlay()
 {
-    local INT i; 
+	local int i;
 
-    Super.PostBeginPlay();
+	super(Controller).PostBeginPlay();
+	m_mgr = R6HostageMgr(Level.GetHostageMgr());
+	assert(__NFUN_153__(12, m_mgr.11));
+	i = 0;
+	J0x39:
 
-    m_mgr = R6HostageMgr( level.GetHostageMgr() );
-
-    assert( arrayCount(m_aPlaySndInfo) >= m_mgr.HSTSNDEvent_Max );
-
-    for ( i = 0; i < arraycount(m_aPlaySndInfo); i++ )
-    {
-        m_aPlaySndInfo[i].m_iInBetweenTime = 1;
-    }
-    m_aPlaySndInfo[ m_mgr.HSTSNDEvent_SeeRainbowBaitOrGoFrozen ].m_iInBetweenTime = 5;
-    m_aPlaySndInfo[ m_mgr.HSTSNDEvent_HearShooting             ].m_iInBetweenTime = 2;
-
+	// End:0x61 [Loop If]
+	if(__NFUN_150__(i, 12))
+	{
+		m_aPlaySndInfo[i].m_iInBetweenTime = 1;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x39;
+	}
+	m_aPlaySndInfo[m_mgr.6].m_iInBetweenTime = 5;
+	m_aPlaySndInfo[m_mgr.1].m_iInBetweenTime = 2;
+	return;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -155,319 +132,238 @@ event PostBeginPlay()
 // - inherited
 function Possess(Pawn aPawn)
 {
-    local INT i;
+	local int i;
 
-    Super.Possess(aPawn);
-
-    m_pawn = R6Hostage(pawn);
-
-    // Set the manager
-    m_VoicesManager = R6HostageVoices(R6AbstractGameInfo(level.game).GetHostageVoicesMgr(Level.m_eHostageVoices, m_pawn.bIsFemale));
-
-    if ( GetStateName() != 'Configuration' )
-        GotoState( 'Configuration' );
+	super.Possess(aPawn);
+	m_pawn = R6Hostage(Pawn);
+	m_VoicesManager = R6HostageVoices(R6AbstractGameInfo(Level.Game).GetHostageVoicesMgr(Level.m_eHostageVoices, m_pawn.bIsFemale));
+	// End:0x74
+	if(__NFUN_255__(__NFUN_284__(), 'Configuration'))
+	{
+		__NFUN_113__('Configuration');
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // Tick
 //	
 //------------------------------------------------------------------
-function Tick(FLOAT fDeltaTime)
+function Tick(float fDeltaTime)
 {
-    Super.Tick( fDeltaTime );
-
-    if ( m_iNbOrder > 0 )
-    {
-        Order_Process();
-    }
-}
-
-
-//------------------------------------------------------------------
-//	auto state Configuration
-//------------------------------------------------------------------
-auto state Configuration
-{
-    ignores SeePlayer, HearNoise;
-
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) log( name@ "[" @getStateName()@ "|None] : entered *STATE* Configuration"); #endif
-    }
-
-    function EndState()
-    {
-        m_threatGroupName = GetThreatGroupName();
-        m_iNotGuardedSince = 0;
-    }
-
-begin:
-    while( !(m_pawn.m_bInitFinished) )
-    {
-        #ifdefDEBUG if(bShowLog) logX( "waiting for initialization..."); #endif
-        Sleep(1);
-    }
-
-    GetRandomTweenNum( m_pawn.m_waitingGoCrouchTween );
-
-    GetRandomTweenNum( m_AITickTime );
-    #ifdefDEBUG if (bShowLog) logX( "ai tick time: " $m_AITickTime.m_fResult ); #endif
-
-	//Begin MissionPack1 // MPF1
-	if(m_pawn.m_bPoliceManMp1)
+	super.Tick(fDeltaTime);
+	// End:0x1C
+	if(__NFUN_151__(m_iNbOrder, 0))
 	{
-		m_pawn.m_sightRadiusTween.m_fMin=500;
-		m_pawn.m_sightRadiusTween.m_fMax=1000;
+		Order_Process();
 	}
-	//End MissionPack1
-
-    pawn.sightRadius = GetRandomTweenNum( m_pawn.m_sightRadiusTween );
-    #ifdefDEBUG if (bShowLog) logX( "sight radius: " $pawn.sightRadius ); #endif
-    
-    GetRandomTweenNum( m_pawn.m_updatePaceTween );
-    GetRandomTweenNum( m_RunForCoverMinTween );
-
-// debug  *********************************************************
-//m_pawn.m_ePosition = POS_Stand;
-//m_pawn.m_bStartAsCivilian = true;
-//m_bDbgIgnoreThreat = true;
-//m_bDbgIgnoreRainbow = true;
-// debug  end *********************************************************
-
-    focalPoint = m_pawn.location + vector(m_pawn.Rotation);
-
-    if ( m_pawn.m_bStartAsCivilian )
-    {
-        CivInit();
-    }
-    else
-    {
-        m_pawn.SetStandWalkingAnim( eStandWalkingAnim_scared, true );
-
-        if ( IsGuarded( true ) )
-        {
-            SetPawnPosition( m_pawn.m_ePosition );    // force to have the default position
-
-            while ( !Level.Game.m_bGameStarted )
-            {
-                Sleep( 0.5 );
-            }
-
-            SetStateGuarded( m_pawn.m_ePosition, m_mgr.HSTSNDEvent_None );
-        }
-        else
-        {
-            // set state and position, but no SetTransitionTo
-            setFreed( true );
-            SetPawnPosition( POS_Crouch );
-
-            while ( !Level.Game.m_bGameStarted )
-            {
-                Sleep( 0.5 );
-            }
-
-            GotoState( 'Freed' );
-        }
-    }
-    
+	return;
 }
-
-
 
 //------------------------------------------------------------------
 // Died: called when the pawn is declared dead 
 //------------------------------------------------------------------
 function PawnDied()
 {
-    // if he was following, he will be removed from the escorted list
-    StopFollowingPawn( false ); 
-
-    Super.PawnDied();
+	StopFollowingPawn(false);
+	// End:0x20
+	if(__NFUN_151__(m_pListOfCoverNodes.Length, 0))
+	{
+		m_pListOfCoverNodes.Remove(0, m_pListOfCoverNodes.Length);
+	}
+	super.PawnDied();
+	return;
 }
 
 //------------------------------------------------------------------
 // setFreed: freed an hostage. If he was a bait, he'll become a PERSO_Normal
 //	
 //------------------------------------------------------------------
-function SetFreed( bool bFreed )
+function SetFreed(bool bFreed)
 {
-    #ifdefDEBUG if (bShowLog) logX( "setFreed: " $bFreed ); #endif
-
-    m_pawn.m_bFreed = bFreed;
-
-    m_bIgnoreBackupBump = false; // reset it
-    if ( m_pawn.m_bFreed )
-    {
-        m_pawn.setFrozen( false );
-        m_iNotGuardedSince = 0;
-        m_iLastHearNoiseTime = 0;
-    }
-    else
-    {
-        //m_pawn.m_bCivilian = false;//MissionPack1 // MPF1
-    }
-
-    // if freed and a bait, the hostage will never be a bait for the rest of the game
-    if ( m_pawn.m_bFreed && m_pawn.m_ePersonality == HPERSO_Bait )
-    {
-         m_pawn.m_ePersonality = HPERSO_Normal;
-    }
+	m_pawn.m_bFreed = bFreed;
+	m_bIgnoreBackupBump = false;
+	// End:0x51
+	if(m_pawn.m_bFreed)
+	{
+		m_pawn.setFrozen(false);
+		m_iNotGuardedSince = 0;
+		m_iLastHearNoiseTime = 0;		
+	}
+	// End:0x8F
+	if(__NFUN_130__(m_pawn.m_bFreed, __NFUN_154__(int(m_pawn.m_ePersonality), int(3))))
+	{
+		m_pawn.m_ePersonality = 1;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SetPawnPosition
 //	
 //------------------------------------------------------------------
-function SetPawnPosition( R6Hostage.EStartingPosition ePos )
+function SetPawnPosition(R6Hostage.EStartingPosition ePos)
 {
-    // if the default is a random pos, choose one
-    if ( ePos == POS_Random )
-    {
-        if ( rand( 100 ) <= 50 )
-        {
-            ePos = POS_Kneel;
-        }
-        else
-        {
-            ePos = POS_Stand;
-        }
-    }
-
-    m_pawn.m_ePosition = ePos;
-
-    switch ( ePos )
-    {
-    case POS_Crouch:       m_pawn.gotoCrouch(); 
-        break;
-
-    case POS_Kneel:        m_pawn.gotoKneel();
-        break;
-    
-    case POS_Foetus:       m_pawn.gotoFoetus(); 
-        break;
-
-    case POS_Prone:        m_pawn.gotoProne(); 
-        break;
-
-    default:
-        m_pawn.gotoStand();
-    }
-
-    // logX( "SetPawnPosition: " $m_pawn.GetStateName()$ " ePos: " $ePos );
+	// End:0x2E
+	if(__NFUN_154__(int(ePos), int(5)))
+	{
+		// End:0x26
+		if(__NFUN_152__(__NFUN_167__(100), 50))
+		{
+			ePos = 1;			
+		}
+		else
+		{
+			ePos = 0;
+		}
+	}
+	m_pawn.m_ePosition = ePos;
+	switch(ePos)
+	{
+		// End:0x60
+		case 4:
+			m_pawn.GotoCrouch();
+			// End:0xB7
+			break;
+		// End:0x77
+		case 1:
+			m_pawn.GotoKneel();
+			// End:0xB7
+			break;
+		// End:0x8E
+		case 3:
+			m_pawn.GotoFoetus();
+			// End:0xB7
+			break;
+		// End:0xA5
+		case 2:
+			m_pawn.GotoProne();
+			// End:0xB7
+			break;
+		// End:0xFFFF
+		default:
+			m_pawn.GotoStand();
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SetPace: set the pace and adjust it if wounded
 //	
 //------------------------------------------------------------------
-function SetPace( R6Pawn.eMovementPace ePace )
+function SetPace(R6Pawn.eMovementPace ePace)
 {
-	// if forced to stay in position
-    if ( pawn.m_bTryToUnProne )
-    {
-		ePace = PACE_Prone;
-    }
-	else if ( pawn.bTryToUncrouch )
-    {
-        // if already running, 
-        if ( m_pawn.m_eMovementPace == PACE_CrouchRun || ePace == PACE_CrouchRun ) 
-        {
-            ePace = PACE_CrouchRun;
-        }
-        else
-        {
-            ePace = PACE_CrouchWalk;
-        }
-    }
-    
-    m_pawn.m_eMovementPace = ePace;
-
-    
-    CheckPaceForInjury( m_pawn.m_eMovementPace ); 
+	// End:0x1D
+	if(Pawn.m_bTryToUnProne)
+	{
+		ePace = 1;		
+	}
+	else
+	{
+		// End:0x6D
+		if(Pawn.bTryToUncrouch)
+		{
+			// End:0x65
+			if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(3)), __NFUN_154__(int(ePace), int(3))))
+			{
+				ePace = 3;				
+			}
+			else
+			{
+				ePace = 2;
+			}
+		}
+	}
+	m_pawn.m_eMovementPace = ePace;
+	CheckPaceForInjury(m_pawn.m_eMovementPace);
+	return;
 }
-
-
 
 //==============================================================
 // SetStateGuarded: set the default value, his starting position 
 //                  (kneel, foetus) of the pawn and set to Guarded
 //                  state
-function SetStateGuarded( R6Hostage.EStartingPosition ePos, int iHstSndEvent )
+function SetStateGuarded(R6Hostage.EStartingPosition ePos, int iHstSndEvent)
 {
-    if ( iHstSndEvent != m_mgr.HSTSNDEvent_None )
-    {
-        ProcessPlaySndInfo( iHstSndEvent );
-    }
-    
-    ResetThreatInfo( "SetStateGuarded" );
-    m_pawn.setFrozen( false );
-    m_eTransitionPosition = ePos;
-    gotoState( 'Guarded' );
+	// End:0x1F
+	if(__NFUN_155__(iHstSndEvent, m_mgr.0))
+	{
+		ProcessPlaySndInfo(iHstSndEvent);
+	}
+	ResetThreatInfo("SetStateGuarded");
+	m_pawn.setFrozen(false);
+	m_eTransitionPosition = ePos;
+	__NFUN_113__('Guarded');
+	return;
 }
-
 
 //------------------------------------------------------------------
 // SetStateFollowingPawn: set values for SetStateFollowingPawn and go
 //	to that state
 //------------------------------------------------------------------
-function SetStateFollowingPawn( R6Pawn runTo, bool bFreed, int iHstSndEvent )
+function SetStateFollowingPawn(R6Pawn runTo, bool bFreed, int iHstSndEvent)
 {
-    if ( iHstSndEvent != m_mgr.HSTSNDEvent_None )
-    {
-        ProcessPlaySndInfo( iHstSndEvent );
-    }
-
-    setFreed(bFreed);
-    m_pawnToFollow = R6Rainbow(runTo).Escort_GetPawnToFollow( true );
-    m_bRunningToward = true;
-
-    SetThreatState( 'FollowingPawn' );
-    gotoState( m_threatInfo.m_state );
+	// End:0x1F
+	if(__NFUN_155__(iHstSndEvent, m_mgr.0))
+	{
+		ProcessPlaySndInfo(iHstSndEvent);
+	}
+	SetFreed(bFreed);
+	m_pawnToFollow = R6Rainbow(runTo).Escort_GetPawnToFollow(true);
+	m_bRunningToward = true;
+	SetThreatState('FollowingPawn');
+	__NFUN_113__(m_threatInfo.m_state);
+	return;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////
 // Roll a random number adjusted by the personnality
-function INT Roll(INT iMax)
+function int Roll(int iMax)
 {
-    local INT iRoll;
+	local int iRoll;
 
-    iRoll = Rand(iMax)+1;
-
-    switch(m_pawn.m_ePersonality)
-    {
-        case HPERSO_Coward:
-            iRoll += c_iCowardModifier;
-            break;
-
-        case HPERSO_Normal:
-            iRoll += c_iNormalModifier;
-            break;
-        
-        case HPERSO_Brave:
-            iRoll += c_iBraveModifier;
-            break;
-    }
-
-    if ( m_pawn.m_eHealth == HEALTH_Wounded ) 
-    {   
-        iRoll -= c_iWoundedModifier;
-    }
-
-    if ( (m_pawn.m_eEffectiveGrenade == GTYPE_TearGas) || (m_pawn.m_eEffectiveGrenade == GTYPE_FlashBang) )
-    {
-        iRoll -= c_iGasModifier;
-    }
-
-    if ( m_bDbgRoll )
-    {
-        log( "m_bDbgRoll: " $m_iDbgRoll );
-        iRoll = m_iDbgRoll; 
-    }
-
-    iRoll = FClamp( iRoll, 0, 100 );
-
-    return iRoll;
+	iRoll = __NFUN_146__(__NFUN_167__(iMax), 1);
+	switch(m_pawn.m_ePersonality)
+	{
+		// End:0x34
+		case 0:
+			__NFUN_161__(iRoll, c_iCowardModifier);
+			// End:0x5F
+			break;
+		// End:0x48
+		case 1:
+			__NFUN_161__(iRoll, c_iNormalModifier);
+			// End:0x5F
+			break;
+		// End:0x5C
+		case 2:
+			__NFUN_161__(iRoll, c_iBraveModifier);
+			// End:0x5F
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	// End:0x84
+	if(__NFUN_154__(int(m_pawn.m_eHealth), int(1)))
+	{
+		__NFUN_162__(iRoll, c_iWoundedModifier);
+	}
+	// End:0xC4
+	if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(2)), __NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(3))))
+	{
+		__NFUN_162__(iRoll, c_iGasModifier);
+	}
+	// End:0xF1
+	if(m_bDbgRoll)
+	{
+		__NFUN_231__(__NFUN_112__("m_bDbgRoll: ", string(m_iDbgRoll)));
+		iRoll = m_iDbgRoll;
+	}
+	iRoll = int(__NFUN_246__(float(iRoll), 0.0000000, 100.0000000));
+	return iRoll;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -476,152 +372,154 @@ function INT Roll(INT iMax)
 //------------------------------------------------------------------
 function Rotator GetRandomTurn90()
 {
-    local Rotator rRot;
+	local Rotator rRot;
 
-    rRot = Pawn.Rotation;
- 
-    if ( rand(100) < 50 )
-    {
-        rRot.Yaw -= 16383;
-    }
-    else
-    {
-        rRot.Yaw += 16383;
-    }
-
-    return rRot;
+	rRot = Pawn.Rotation;
+	// End:0x33
+	if(__NFUN_150__(__NFUN_167__(100), 50))
+	{
+		__NFUN_162__(rRot.Yaw, 16383);		
+	}
+	else
+	{
+		__NFUN_161__(rRot.Yaw, 16383);
+	}
+	return rRot;
+	return;
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CanReturnToNormalState: return true if the hostage can return to a normal 
 //                         state. 
 function bool CanReturnToNormalState()
 {
-    local R6Rainbow     aR6Rainbow;
-    local R6Pawn        p;
-    local INT           numFriend;
-    local INT           numEnemy;
+	local R6Rainbow aR6Rainbow;
+	local R6Pawn P;
+	local int numFriend, numEnemy;
 
-    numFriend = 0;
-    numEnemy = 0;
-    
-    // visible actors from my location and based on my sight radius
-    foreach VisibleCollidingActors( class'R6Pawn', p, pawn.sightRadius, m_pawn.location )
-    {
-        if ( m_pawn.IsEnemy(p) && p.isAlive() )
-        {
-            if ( p.isFighting() || p.m_bIsKneeling )
-
-                return false;
-
-            numEnemy++;
-        }
-
-        if ( m_pawn.IsFriend(p) && p.isAlive() )
-        {
-            if ( p.isFighting() )
-                return false;
-
-            numFriend++;            
-        }
-    }
-
-    // check when the last time we heard a noise
-    if ( Level.TimeSeconds < m_iLastHearNoiseTime + c_iCautiousLastHearNoiseTime )
-    {
-        return false;
-    }
-
-    // no more rainbow are visible OR no more active terrorist, can return to a normal state
-    if ( numFriend == 0 || numEnemy == 0 )
-    {
-        return true;
-    }
- 
-    return false;
+	numFriend = 0;
+	numEnemy = 0;
+	// End:0xDD
+	foreach __NFUN_312__(Class'R6Engine.R6Pawn', P, Pawn.SightRadius, m_pawn.Location)
+	{
+		// End:0x95
+		if(__NFUN_130__(m_pawn.IsEnemy(P), P.IsAlive()))
+		{
+			// End:0x8E
+			if(__NFUN_132__(P.IsFighting(), P.m_bIsKneeling))
+			{				
+				return false;
+			}
+			__NFUN_165__(numEnemy);
+		}
+		// End:0xDC
+		if(__NFUN_130__(m_pawn.IsFriend(P), P.IsAlive()))
+		{
+			// End:0xD5
+			if(P.IsFighting())
+			{				
+				return false;
+			}
+			__NFUN_165__(numFriend);
+		}		
+	}	
+	// End:0x101
+	if(__NFUN_176__(Level.TimeSeconds, float(__NFUN_146__(m_iLastHearNoiseTime, c_iCautiousLastHearNoiseTime))))
+	{
+		return false;
+	}
+	// End:0x11B
+	if(__NFUN_132__(__NFUN_154__(numFriend, 0), __NFUN_154__(numEnemy, 0)))
+	{
+		return true;
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // ReturnToNormalState: when return to normal state he still could
 //	be guarded or not
 //------------------------------------------------------------------
-function ReturnToNormalState( OPTIONAL bool bNoTimer )
+function ReturnToNormalState(optional bool bNoTimer)
 {
-    if ( IsGuarded( bNoTimer ) )
-    {
-        // go to kneel, not standing because transition looks weird
-        // if in foetal, than standing and let's say the rainbow reappears,
-        // the hostage will go standing up in 1 frame, than go foetal... looks to weird.
-        SetStateGuarded( POS_Kneel, m_mgr.HSTSNDEvent_None );
-    }
-    else
-    {
-        GotoState( 'Freed' );
-    }
+	// End:0x24
+	if(IsGuarded(bNoTimer))
+	{
+		SetStateGuarded(1, m_mgr.0);		
+	}
+	else
+	{
+		__NFUN_113__('Freed');
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SeePlayer: 
 //	- inherited
 //------------------------------------------------------------------
-function SeePlayer( Pawn p )
+function SeePlayer(Pawn P)
 {
-    local R6Pawn seen;
+	local R6Pawn seen;
 
-    if ( m_bDbgIgnoreThreat )
-        return;
-
-    seen = R6Pawn(p);
-
-    if ( rand(2) == 0 )
-    {
-        return;
-    }
-
-    if ( seen == none )
-        return;
-
-    // ignore dead or inactive
-    if ( !seen.isAlive() || seen.m_bIsKneeling )
-        return;
-
-#ifdefDEBUG    
-    if ( m_pawn.IsFriend(seen) )
-    {
-        if ( m_bDbgIgnoreRainbow )
-            return;
-
-        if ( m_pawn.m_bDontSeePlayer && seen.m_bIsPlayer )
-            return;
-    }
-#endif
-
-    if ( m_pawn.m_bCivilian )
-    {   // MPF1
-		m_lastSeenPawn = none;//MissionPack1
+	// End:0x0B
+	if(m_bDbgIgnoreThreat)
+	{
 		return;
-
-    }
-    else if ( m_pawn.m_bFreed )
-    {
-        // if see a friend AND there's not already a pawn focused (gives priority to Terrorist)
-        if ( m_pawn.IsFriend(seen) && m_lastSeenPawn == none )
-        {
-            m_lastSeenPawn = seen;
-        }
-        else if ( m_pawn.IsEnemy(seen) )
-        {
-            m_lastSeenPawn = seen;   
-        }
-    }
-    else
-    {
-        if( m_lastSeenPawn != seen && m_pawn.IsFriend(seen) )
-            m_vReactionDirection = seen.Location;
-
-        m_lastSeenPawn = seen;
-    }
+	}
+	seen = R6Pawn(P);
+	// End:0x27
+	if(__NFUN_154__(__NFUN_167__(2), 0))
+	{
+		return;
+	}
+	// End:0x34
+	if(__NFUN_114__(seen, none))
+	{
+		return;
+	}
+	// End:0x5E
+	if(__NFUN_132__(__NFUN_129__(seen.IsAlive()), seen.m_bIsKneeling))
+	{
+		return;
+	}
+	// End:0x7C
+	if(m_pawn.m_bCivilian)
+	{
+		m_lastSeenPawn = none;
+		return;		
+	}
+	else
+	{
+		// End:0xE5
+		if(m_pawn.m_bFreed)
+		{
+			// End:0xC0
+			if(__NFUN_130__(m_pawn.IsFriend(seen), __NFUN_114__(m_lastSeenPawn, none)))
+			{
+				m_lastSeenPawn = seen;				
+			}
+			else
+			{
+				// End:0xE2
+				if(m_pawn.IsEnemy(seen))
+				{
+					m_lastSeenPawn = seen;
+				}
+			}			
+		}
+		else
+		{
+			// End:0x121
+			if(__NFUN_130__(__NFUN_119__(m_lastSeenPawn, seen), m_pawn.IsFriend(seen)))
+			{
+				m_vReactionDirection = seen.Location;
+			}
+			m_lastSeenPawn = seen;
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -631,12 +529,14 @@ function SeePlayer( Pawn p )
 //------------------------------------------------------------------
 function SeePlayerMgr()
 {
-    if ( !m_lastSeenPawn.isAlive() )
-        return;
-
-    ProcessThreat( m_lastSeenPawn, NOISE_None );
-
-    m_lastSeenPawn = none;
+	// End:0x16
+	if(__NFUN_129__(m_lastSeenPawn.IsAlive()))
+	{
+		return;
+	}
+	ProcessThreat(m_lastSeenPawn, 0);
+	m_lastSeenPawn = none;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -644,28 +544,45 @@ function SeePlayerMgr()
 //  guarded by terro.
 //	- inherited
 //------------------------------------------------------------------
-event HearNoise( float fLoudness, Actor noiseMaker, ENoiseType eType )
+event HearNoise(float fLoudness, Actor NoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
 {
-    local Actor aGrenade;
+	local Actor aGrenade;
 
-    if( m_pawn.m_bDontHearPlayer && R6Pawn(NoiseMaker.Instigator).m_bIsPlayer )
-        return;
-
-    if ( m_bDbgIgnoreThreat )
-        return;
-
-    // if sound IS NOT a threat or grenade
-    if ( !(eType == NOISE_Threat || eType == NOISE_Grenade || eType == NOISE_Dead ) )
-        return;
-
-    if ( IsInTemporaryState() )
-        return;
-
-    m_iLastHearNoiseTime = level.TimeSeconds;
-
-    //  shouldn't be like seeplayer that sometimes is not called / updated
-    //  like when we are in a transition state... 
-    ProcessThreat( noiseMaker, eType );
+	// End:0x36
+	if(__NFUN_130__(m_pawn.m_bDontHearPlayer, R6Pawn(NoiseMaker.Instigator).m_bIsPlayer))
+	{
+		return;
+	}
+	// End:0x41
+	if(m_bDbgIgnoreThreat)
+	{
+		return;
+	}
+	// End:0xB2
+	if(m_pawn.m_bClassicMissionCivilian)
+	{
+		// End:0xAF
+		if(__NFUN_129__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eType), int(2)), __NFUN_154__(int(eType), int(3))), __NFUN_154__(int(eType), int(4))), __NFUN_130__(__NFUN_154__(int(eType), int(1)), __NFUN_154__(int(ESoundType), int(1))))))
+		{
+			return;
+		}		
+	}
+	else
+	{
+		// End:0xEA
+		if(__NFUN_129__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eType), int(2)), __NFUN_154__(int(eType), int(3))), __NFUN_154__(int(eType), int(4)))))
+		{
+			return;
+		}
+	}
+	// End:0xF5
+	if(IsInTemporaryState())
+	{
+		return;
+	}
+	m_iLastHearNoiseTime = int(Level.TimeSeconds);
+	ProcessThreat(NoiseMaker, eType);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -673,57 +590,67 @@ event HearNoise( float fLoudness, Actor noiseMaker, ENoiseType eType )
 //	an exception, this is where we check if the threat can be
 //  consired by the R6hostageMgr::GetThreatInfoFromThreat
 //------------------------------------------------------------------
-function bool CanConsiderThreat( R6Pawn aPawn, Actor aThreat, name considerThreat )
+function bool CanConsiderThreat(R6Pawn aPawn, Actor aThreat, name considerThreat)
 {
-    if (        considerThreat == 'IsEnemySound' )
-    {
-        return m_pawn.IsEnemy( aPawn );
-    }
-    else if (   considerThreat == 'CanSeeFriend' )
-    {
-        return !m_bForceToStayHere; // if forces to stay here, you don't see friend
-    }
-
-    m_pawn.LogWarning( "CanConsiderThreat: failed to find the threat=" $considerThreat );
-    return false;
+	// End:0x27
+	if(__NFUN_254__(considerThreat, 'IsEnemySound'))
+	{
+		return m_pawn.IsEnemy(aPawn);		
+	}
+	else
+	{
+		// End:0x3F
+		if(__NFUN_254__(considerThreat, 'CanSeeFriend'))
+		{
+			return __NFUN_129__(m_bForceToStayHere);
+		}
+	}
+	m_pawn.logWarning(__NFUN_112__("CanConsiderThreat: failed to find the threat=", string(considerThreat)));
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetRainbowWhoEscortThisPawn: get the rainbow who will escort
 //------------------------------------------------------------------
-function R6Rainbow GetRainbowWhoEscortThisPawn( R6Pawn follow )
+function R6Rainbow GetRainbowWhoEscortThisPawn(R6Pawn follow)
 {
-    if ( follow.m_ePawnType == PAWN_Rainbow )
-    {
-        return R6Rainbow( follow ).Escort_GetPawnToFollow( false );
-    }
-    else if ( follow.m_ePawnType == PAWN_Hostage )
-    {
-        return R6Hostage(follow).m_escortedByRainbow;
-    }
-
-    m_pawn.logWarning( "GetRainbowTeamFromPawn unknow type of pawn" $follow );
-    return none;
+	// End:0x32
+	if(__NFUN_154__(int(follow.m_ePawnType), int(1)))
+	{
+		return R6Rainbow(follow).Escort_GetPawnToFollow(false);		
+	}
+	else
+	{
+		// End:0x5F
+		if(__NFUN_154__(int(follow.m_ePawnType), int(3)))
+		{
+			return R6Hostage(follow).m_escortedByRainbow;
+		}
+	}
+	m_pawn.logWarning(__NFUN_112__("GetRainbowTeamFromPawn unknow type of pawn", string(follow)));
+	return none;
+	return;
 }
 
 //------------------------------------------------------------------
 // Order_GotoExtraction
 //	
 //------------------------------------------------------------------
-function Order_ProcessGotoExtraction( Actor aZone )
+function Order_ProcessGotoExtraction(Actor aZone)
 {
-    #ifdefDEBUG if(bShowLog) logX( "Order_GotoExtraction: " $aZone.name ); #endif
-
-    if ( m_pawn.m_bExtracted || !m_pawn.IsAlive() )
-        return;
-    
-    ResetThreatInfo( "GotoExtraction" );
-    m_pGotoToExtractionZone = aZone;
-    m_vMoveToDest = aZone.Location;
-    setFreed( true );
-    m_bIgnoreBackupBump = true; // we don't want hostage to be disturbed by bump
-
-    GotoState( 'GotoExtraction' );
+	// End:0x2A
+	if(__NFUN_132__(m_pawn.m_bExtracted, __NFUN_129__(m_pawn.IsAlive())))
+	{
+		return;
+	}
+	ResetThreatInfo("GotoExtraction");
+	m_pGotoToExtractionZone = aZone;
+	m_vMoveToDest = aZone.Location;
+	SetFreed(true);
+	m_bIgnoreBackupBump = true;
+	__NFUN_113__('GotoExtraction');
+	return;
 }
 
 //------------------------------------------------------------------
@@ -731,183 +658,175 @@ function Order_ProcessGotoExtraction( Actor aZone )
 //  the rainbow team. The hostage is added in the escorted team
 //  which will set is m_pawnToFollow. 
 //------------------------------------------------------------------
-function Order_ProcessFollowMe( R6Pawn follow, bool bOrderedByRainbow )
+function Order_ProcessFollowMe(R6Pawn follow, bool bOrderedByRainbow)
 {
-    local R6Rainbow rainbowToFollow;
+	local R6Rainbow rainbowToFollow;
 
-    #ifdefDEBUG if(bShowLog) logX( "Order_ProcessFollowMe: " $follow.name ); #endif
-
-    ResetThreatInfo( "ProcessFollowMe" );
-    //m_pawn.m_bCivilian = false; MissionPack1  // MPF1
-
-    m_pawn.SetStandWalkingAnim( eStandWalkingAnim_scared, true );
-
-    if (  m_pawn.m_ePersonality == HPERSO_Bait )
-    {
-        setFreed( true );
-    }
-
-    rainbowToFollow = GetRainbowWhoEscortThisPawn( follow );
-    
-    // remove me from the old rainbow list
-    if ( m_pawn.m_escortedByRainbow != none && rainbowToFollow != m_pawn.m_escortedByRainbow )
-    {
-        m_pawn.m_escortedByRainbow.Escort_RemoveHostage( m_pawn, true );            
-    }
-    m_pawn.m_escortedByRainbow = rainbowToFollow;
-
-    // add me in the list and this will set m_pawnToFollow, if it's impossible I'll stay here
-    if ( m_pawn.m_escortedByRainbow.Escort_AddHostage( m_pawn, false, bOrderedByRainbow ) )
-    {
-        gotoState( 'FollowingPawn' );
-    }
-    else
-    {
-        Order_ProcessStayHere( false );
-    }
+	ResetThreatInfo("ProcessFollowMe");
+	m_pawn.SetStandWalkingAnim(1, true);
+	// End:0x49
+	if(__NFUN_154__(int(m_pawn.m_ePersonality), int(3)))
+	{
+		SetFreed(true);
+	}
+	rainbowToFollow = GetRainbowWhoEscortThisPawn(follow);
+	// End:0xA6
+	if(__NFUN_130__(__NFUN_119__(m_pawn.m_escortedByRainbow, none), __NFUN_119__(rainbowToFollow, m_pawn.m_escortedByRainbow)))
+	{
+		m_pawn.m_escortedByRainbow.Escort_RemoveHostage(m_pawn, true);
+	}
+	m_pawn.m_escortedByRainbow = rainbowToFollow;
+	// End:0xEB
+	if(m_pawn.m_escortedByRainbow.Escort_AddHostage(m_pawn, false, bOrderedByRainbow))
+	{
+		__NFUN_113__('FollowingPawn');		
+	}
+	else
+	{
+		Order_ProcessStayHere(false);
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // StopFollowingPawn: reset all info regarding following a pawn
 //	
 //------------------------------------------------------------------
-function StopFollowingPawn( bool bOrderedByRainbow )
+function StopFollowingPawn(bool bOrderedByRainbow)
 {
-    #ifdefDEBUG if(bShowLog) logX( "StopFollowingPawn bOrderedByRainbow=" $bOrderedByRainbow ); #endif
-
-    m_pawn.SetStandWalkingAnim( eStandWalkingAnim_default, false );
-
-    if ( m_pawn.m_escortedByRainbow == none )
-        return; 
-
-    m_pawn.m_escortedByRainbow.Escort_RemoveHostage( m_pawn, !m_pawn.isAlive(), bOrderedByRainbow ); // no feedback if i'm not alive
-    m_pawnToFollow = none;
-    m_bRunningToward = false;
+	m_pawn.SetStandWalkingAnim(0, false);
+	// End:0x28
+	if(__NFUN_114__(m_pawn.m_escortedByRainbow, none))
+	{
+		return;
+	}
+	m_pawn.m_escortedByRainbow.Escort_RemoveHostage(m_pawn, __NFUN_129__(m_pawn.IsAlive()), bOrderedByRainbow);
+	m_pawnToFollow = none;
+	m_bRunningToward = false;
+	return;
 }
 
 //------------------------------------------------------------------
 // Order_ProcessStayHere: the hostage received the order to stay
 //  here, or it informs the team that he'll stay here
 //------------------------------------------------------------------
-function Order_ProcessStayHere( bool bOrderedByRainbow )
+function Order_ProcessStayHere(bool bOrderedByRainbow)
 {
-    #ifdefDEBUG if(bShowLog) logX( "Order_ProcessStayHere bOrderedByRainbow=" $bOrderedByRainbow ); #endif
-
-    ResetThreatInfo( "ProcessStayHere" );
-    StopMoving();
-
-    m_bForceToStayHere = true;
-    StopFollowingPawn( bOrderedByRainbow );
-    
-    GotoState( 'Freed' );
+	ResetThreatInfo("ProcessStayHere");
+	StopMoving();
+	m_bForceToStayHere = true;
+	StopFollowingPawn(bOrderedByRainbow);
+	__NFUN_113__('Freed');
+	return;
 }
 
 //------------------------------------------------------------------
 // DispatchOrder: dispatch order for a eHostageCircumstantialAction
 //------------------------------------------------------------------
-function DispatchOrder( INT iOrder, OPTIONAL R6Pawn orderFrom )
+function DispatchOrder(int iOrder, optional R6Pawn orderFrom)
 {
-    switch( iOrder )
-    {
-        case eHostageOrder.HOrder_ComeWithMe:
-            Order_FollowMe( orderFrom, true );
-            break;
-
-        case eHostageOrder.HOrder_StayHere:  
-            Order_StayHere( true );
-            break;
-        
-        default:
-            m_pawn.logWarning( "unknow eHostageCircumstantialAction " $iOrder );
-    }
+	switch(iOrder)
+	{
+		// End:0x26
+		case int(m_pawn.1):
+			Order_FollowMe(orderFrom, true);
+			// End:0x81
+			break;
+		// End:0x40
+		case int(m_pawn.2):
+			Order_StayHere(true);
+			// End:0x81
+			break;
+		// End:0xFFFF
+		default:
+			m_pawn.logWarning(__NFUN_112__("unknow eHostageCircumstantialAction ", string(iOrder)));
+			break;
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // CanStopMoving: return true if I should stop moving. When moving
 //	the hostage will try to catch up the group 
 // bCheckIfShouldMove: when true, the pawn is asking if he needs to move
 //------------------------------------------------------------------
-function bool CanStopMoving( bool bCheckIfShouldMove )
+function bool CanStopMoving(bool bCheckIfShouldMove)
 {
-    local R6HostageAI hostageAI;
-    local INT iDistance;
+	local R6HostageAI hostageAI;
+	local int iDistance;
 
-    // the pawn might be dead
-    if ( m_pawnToFollow == none )
-        return true;
-
-    if ( bCheckIfShouldMove )
-    {
-        iDistance = c_iDistanceMax;
-    }
-    else
-    {
-        iDistance = c_iDistanceCatchUp;
-    }
-
-    if ( m_bFollowIncreaseDistance || m_bSlowedPace || m_pawnToFollow.m_bIsClimbingLadder )
-    {
-        iDistance += iDistance/2;
-    }
-
-    // distance maximum is reached
-    if ( VSize( m_pawnToFollow.location - pawn.Location ) < iDistance )
-    {
-        return true;
-    }
-    
-    if ( m_pawnToFollow.m_eMovementPace == PACE_Prone )
-    {
-        if ( VSize( m_pawnToFollow.m_collisionBox.location - pawn.Location ) < iDistance )
-        {
-            return true;
-        }
-    }
-
-    // if i'm the front guy
-    if ( m_pawn.m_escortedByRainbow != none && m_pawn.m_escortedByRainbow.m_aEscortedHostage[0] == m_pawn )
-    {
-        if ( bCheckIfShouldMove )    
-        {
-            // update the list in case i'm no longer the front guy
-            m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
-    
-            // if i'm still the closiest to front rainbow
-            if ( m_pawn.m_escortedByRainbow.m_aEscortedHostage[0] == m_pawn )
-            {
-                // if(bShowLog) logX( "ShouldMove: catch up front guy" );
-                return false; // catch up!
-            }
-            else
-            {
-                // if(bShowLog) logX( "ShouldMove: DON'T catch up front guy" );
-                return true; // don't have to move
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    
-    hostageAI = R6HostageAI(m_pawnToFollow.controller);
-    if ( (hostageAI != none && hostageAI.moveTarget != none)    // if my front Pawn is moving, I should not stop
-        || (bCheckIfShouldMove && !m_bRunningToward ) )         // OR (if checkShouldMove AND i'm running)
-    {
-        return false;
-    }
-    // if i'm close to someone
-    else if ( m_pawn.m_escortedByRainbow != none &&
-              m_pawn.m_escortedByRainbow.Escort_IsPawnCloseToMe( m_pawn, iDistance ) )
-    {
-        return true;
-    }
-
-    return false;
+	// End:0x0D
+	if(__NFUN_114__(m_pawnToFollow, none))
+	{
+		return true;
+	}
+	// End:0x24
+	if(bCheckIfShouldMove)
+	{
+		iDistance = c_iDistanceMax;		
+	}
+	else
+	{
+		iDistance = c_iDistanceCatchUp;
+	}
+	// End:0x67
+	if(__NFUN_132__(__NFUN_132__(m_bFollowIncreaseDistance, m_bSlowedPace), m_pawnToFollow.m_bIsClimbingLadder))
+	{
+		__NFUN_161__(iDistance, __NFUN_145__(iDistance, 2));
+	}
+	// End:0x95
+	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_pawnToFollow.Location, Pawn.Location)), float(iDistance)))
+	{
+		return true;
+	}
+	// End:0xE5
+	if(__NFUN_154__(int(m_pawnToFollow.m_eMovementPace), int(1)))
+	{
+		// End:0xE5
+		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_pawnToFollow.m_collisionBox.Location, Pawn.Location)), float(iDistance)))
+		{
+			return true;
+		}
+	}
+	// End:0x16E
+	if(__NFUN_130__(__NFUN_119__(m_pawn.m_escortedByRainbow, none), __NFUN_114__(m_pawn.m_escortedByRainbow.m_aEscortedHostage[0], m_pawn)))
+	{
+		// End:0x16C
+		if(bCheckIfShouldMove)
+		{
+			m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
+			// End:0x167
+			if(__NFUN_114__(m_pawn.m_escortedByRainbow.m_aEscortedHostage[0], m_pawn))
+			{
+				return false;				
+			}
+			else
+			{
+				return true;
+			}			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	hostageAI = R6HostageAI(m_pawnToFollow.Controller);
+	// End:0x1C5
+	if(__NFUN_132__(__NFUN_130__(__NFUN_119__(hostageAI, none), __NFUN_119__(hostageAI.MoveTarget, none)), __NFUN_130__(bCheckIfShouldMove, __NFUN_129__(m_bRunningToward))))
+	{
+		return false;		
+	}
+	else
+	{
+		// End:0x204
+		if(__NFUN_130__(__NFUN_119__(m_pawn.m_escortedByRainbow, none), m_pawn.m_escortedByRainbow.Escort_IsPawnCloseToMe(m_pawn, float(iDistance))))
+		{
+			return true;
+		}
+	}
+	return false;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // IsInCrouchedPosture: return truen so a crouchwalk anim will be played
@@ -915,10 +834,8 @@ function bool CanStopMoving( bool bCheckIfShouldMove )
 //------------------------------------------------------------------
 function bool IsInCrouchedPosture()
 {
-  return (    super.IsInCrouchedPosture() 
-             || m_pawn.m_ePosition == POS_Kneel
-             || m_pawn.m_ePosition == POS_Foetus 
-           );
+	return __NFUN_132__(__NFUN_132__(super.IsInCrouchedPosture(), __NFUN_154__(int(m_pawn.m_ePosition), int(1))), __NFUN_154__(int(m_pawn.m_ePosition), int(3)));
+	return;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -926,582 +843,269 @@ function bool IsInCrouchedPosture()
 //            Guarded here means that the hostage can see a terrorist. 
 //            
 //            *** costly function ***
-function bool IsGuarded( OPTIONAL bool bNoTimer, OPTIONAL bool bMustSeeMe )
+function bool IsGuarded(optional bool bNoTimer, optional bool bMustSeeMe)
 {
-    local R6Pawn p;
+	local R6Pawn P;
 
-    if ( m_pawn.m_ePersonality == HPERSO_Bait )
-        return true;
-
-    // logX( "IsGuarded: bNoTimer=" $bNoTimer$ " bMustSeeMe=" $bMustSeeMe );
-
-    // visible actors from my location and based on my sight radius
-    foreach VisibleCollidingActors( class'R6Pawn', p, pawn.sightRadius, m_pawn.location )
-    {
-        // if the pawn is still alive and active and not surrender
-        if ( m_pawn.IsEnemy(p) && p.isAlive() && !p.m_bIsKneeling )
-        {
-            if ( bMustSeeMe )
-            {
-                if ( R6AIController( p.controller ) != none )
-                {
-                    if ( R6AIController( p.controller ).CanSee( pawn ) )
-                    {
-                        m_iNotGuardedSince = 0; // reset timer
-                        return true;
-                    }
-                }
-                else if ( CanSee( p ) ) // for human player. If I can see them
-                {
-                    m_iNotGuardedSince = 0; // reset timer
-                    return true;
-                }
-            }
-            else
-            {
-                m_iNotGuardedSince = 0; // reset timer
-                return true;
-            }
-        }
-    }
-
-    // dont check the timer m_iNotGuardedSince
-    if ( bNoTimer )
-    {
-        return false;
-    }
-
-    // if timer not yet started
-    if ( m_iNotGuardedSince == 0 )
-    {
-        m_iNotGuardedSince = Level.TimeSeconds;
-        GetRandomTweenNum( m_pawn.m_stayCautiousGuardedStateTime );
-        #ifdefDEBUG if(bShowLog) logX( "guarded until " $(m_iNotGuardedSince + m_pawn.m_stayCautiousGuardedStateTime.m_fResult) ); #endif
-    }
-    // timer countdown... 
-    else if ( m_iNotGuardedSince + m_pawn.m_stayCautiousGuardedStateTime.m_fResult < Level.TimeSeconds )
-    {
-        return false;
-    }
-    
-    return true;
+	// End:0x1B
+	if(__NFUN_154__(int(m_pawn.m_ePersonality), int(3)))
+	{
+		return true;
+	}
+	// End:0xFC
+	foreach __NFUN_312__(Class'R6Engine.R6Pawn', P, Pawn.SightRadius, m_pawn.Location)
+	{
+		// End:0xFB
+		if(__NFUN_130__(__NFUN_130__(m_pawn.IsEnemy(P), P.IsAlive()), __NFUN_129__(P.m_bIsKneeling)))
+		{
+			// End:0xF1
+			if(bMustSeeMe)
+			{
+				// End:0xD9
+				if(__NFUN_119__(R6AIController(P.Controller), none))
+				{
+					// End:0xD6
+					if(R6AIController(P.Controller).__NFUN_533__(Pawn))
+					{
+						m_iNotGuardedSince = 0;						
+						return true;
+					}					
+				}
+				else
+				{
+					// End:0xEE
+					if(__NFUN_533__(P))
+					{
+						m_iNotGuardedSince = 0;						
+						return true;
+					}
+				}
+				// End:0xFB
+				continue;
+			}
+			m_iNotGuardedSince = 0;			
+			return true;
+		}		
+	}	
+	// End:0x108
+	if(bNoTimer)
+	{
+		return false;
+	}
+	// End:0x140
+	if(__NFUN_154__(m_iNotGuardedSince, 0))
+	{
+		m_iNotGuardedSince = int(Level.TimeSeconds);
+		GetRandomTweenNum(m_pawn.m_stayCautiousGuardedStateTime);		
+	}
+	else
+	{
+		// End:0x171
+		if(__NFUN_176__(__NFUN_174__(float(m_iNotGuardedSince), m_pawn.m_stayCautiousGuardedStateTime.m_fResult), Level.TimeSeconds))
+		{
+			return false;
+		}
+	}
+	return true;
+	return;
 }
-
-
-//------------------------------------------------------------------
-// Guarded: default and base state for freed, prone, foetus, in shock,
-//	frozen.
-//------------------------------------------------------------------
-state Guarded
-{
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX("beginState"); #endif
-
-        if ( m_pawn.m_escortedByRainbow != none ) // needed if debbuging
-            StopFollowingPawn( false );
-
-        // if he was running or following a pawn, it forces the hostage to stop
-        StopMoving();
-        Focus = none; 
-        
-        focalPoint = m_pawn.location + vector(m_pawn.Rotation); // if was turning, it forces to stop turning
-        
-        m_vReactionDirection = vect(0,0,0);
-        m_iNotGuardedSince = 0;
-        m_iWaitingTime = 0;
-
-        setFreed( false );
-        m_pawn.setFrozen( false );
-
-        // if not kneeling or not having hands raised up
-        if ( !(m_pawn.isKneeling() || m_pawn.isStandingHandUp()) )
-        {
-            SetPawnPosition( m_eTransitionPosition );   
-        }
-        
-        SetTimer( 0.1, true );
-        
-        // if standing and not isStandingHandUp, force to raise hands now
-        if ( m_pawn.m_ePosition == POS_Stand && !m_pawn.isStandingHandUp() )
-        {   
-            m_pawn.PlayWaiting();
-        }
-
-        m_iPlayReaction1 = 0; // used to play reaction
-        m_lastSeenPawn = none;
-        m_bForceToStayHere = false;
-    }
-
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) logX("EndState"); #endif
-        
-        SetTimer( 0, false );
-    }
-
-   
-    function Timer()
-    {
-        if ( m_iWaitingTime >= 20 ) // every 2 sec check if he's free
-        {
-            if ( !IsGuarded() ) 
-            {
-                GotoState( 'Freed' );
-            }
-            m_iWaitingTime = 0;
-        }
-        m_iWaitingTime++;
-
-        if ( m_lastSeenPawn != none )
-            SeePlayerMgr();
-
-        // play reaction animation
-        if ( m_iPlayReaction1 != 0 )
-        {
-            if ( m_iPlayReaction1 >= m_iPlayReaction2 )
-            {
-                ProcessPlaySndInfo( m_mgr.HSTSNDEvent_HearShooting );
-                m_pawn.PlayReaction();
-                m_iPlayReaction1 = 0;
-                m_iPlayReaction2 = 0;
-            }
-            else
-            {
-                m_iPlayReaction1++;
-            }
-        }
-    }
-}
-
-
-/////////////////////////////////////////////////////////////////////////
-//------------------------------------------------------------------
-// Guarded_foetus: the hostage is scared and go in the foetus pos
-//	
-//------------------------------------------------------------------
-state GoGuarded_Foetus
-{
-    ignores SeePlayer, HearNoise;
-
-    function BeginState()
-    {
-        SetThreatState( 'Guarded_foetus' );
-        ProcessPlaySndInfo(m_mgr.HSTSNDEvent_GoFoetal);
-        GotoState( m_threatInfo.m_state );
-    }
-}
-
-state Guarded_foetus extends Guarded
-{
-    ignores SeePlayer, HearNoise;
-    
-    /////////////////////////////////////////////////////////////////////////
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "beginState" ); #endif
-        
-        Focus = none; 
-        StopMoving();
-
-        // if not already in this pos
-        if ( m_pawn.getStateName() != 'Foetus' );
-            SetPawnPosition( POS_Foetus );    
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    function Timer()
-    {
-        if ( CanReturnToNormalState() )
-        {
-            GotoState( 'Guarded_foetus', 'end' );
-        }
-        else
-        {
-            GotoState( 'Guarded_foetus', 'begin' );
-        }
-    }
-
-end:
-    ResetThreatInfo( "foetus end" );
-    SetTimer( 0, false );    // reset timer 
-    
-    // it helps to force to go to FREED if not guarded
-    ReturnToNormalState( true );
-
-begin:
-    SetTimer( GetRandomTweenNum( m_pawn.m_stayInFoetusTime ), true );
-    #ifdefDEBUG if (bShowLog) logX( " keep position for " $m_pawn.m_stayInFoetusTime.m_fResult ); #endif
-}
-
-/////////////////////////////////////////////////////////////////////////
-//------------------------------------------------------------------
-// Guarded_frozen : the hostage is frozen after seeing a rainbow 
-//	
-//------------------------------------------------------------------
-state GoGuarded_frozen
-{
-    ignores SeePlayer, HearNoise;
-
-    function BeginState()
-    {
-        ProcessPlaySndInfo(m_mgr.HSTSNDEvent_SeeRainbowBaitOrGoFrozen );
-        
-        GotoState('Guarded_frozen');
-    }
-}
-
-state Guarded_frozen extends Guarded
-{
-    ignores SeePlayer, HearNoise;
-    
-    /////////////////////////////////////////////////////////////////////////
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "beginState" ); #endif
-        
-        StopMoving();
-        Focus = none; 
-
-        // if not yet frozen, do bleding of freeze anim
-        if ( !m_pawn.m_bFrozen )
-        {
-            m_pawn.GotoFrozen();  // react immediatly
-        }
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    function Timer()
-    {
-        m_pawn.setFrozen( false );
-        GotoState( 'Guarded_foetus' );
-    }
-
-end:
-    m_pawn.setFrozen( false );
-    SetTimer( 0, false );    // reset timer 
-    if ( CanReturnToNormalState() )
-    {
-        ReturnToNormalState();
-    }
-    else
-    {
-        gotoState( 'Guarded_foetus' );
-    }
-    
-begin:
-    SetTimer( GetRandomTweenNum( m_pawn.m_stayFrozenTime ), true );
-    #ifdefDEBUG if (bShowLog) logX( " keep position for: "$m_pawn.m_stayFrozenTime.m_fResult ); #endif
-}
-
-
-/////////////////////////////////////////////////////////////////////////
-//------------------------------------------------------------------
-// Freed: freed from terrorist, In this state the hostage will surrender 
-// when he will see a terrorist. When he will see a rainbow, he will
-// run toward them
-//------------------------------------------------------------------
-state Freed 
-{
-    /////////////////////////////////////////////////////////////////////////
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX( "beginState" ); #endif
-
-        // if he was running or following a pawn, it forces the hostage to stop
-        StopMoving();
-
-        setFreed( true );
-        m_lastSeenPawn = none;
-        m_pawn.m_bAvoidFacingWalls = true;
-        
-        SetPawnPosition( POS_Crouch );
-        m_iWaitingTime = GetRandomTweenNum( m_pawn.m_changeOrientationTween );
-        m_iFacingTime = Level.TimeSeconds;
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    function EndState()
-    {
-        SetTimer( 0, false );
-        m_lastSeenPawn = none;
-        m_iWaitingTime = 0;
-        m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    function Timer()
-    {
-        if( m_iFacingTime + m_iWaitingTime < Level.TimeSeconds && !m_pawn.m_bPostureTransition )
-        {
-            m_iFacingTime = Level.TimeSeconds;
-            m_iWaitingTime = GetRandomTweenNum( m_pawn.m_changeOrientationTween );
-            ChangeOrientationTo( GetRandomTurn90() );
-        }
-        
-        if ( m_lastSeenPawn != none )
-            SeePlayerMgr();
-    }
-       
-begin:
-    // wait to be in the position crouch before being to do something else...
-    while ( !(m_pawn.bWantsToCrouch && m_pawn.bIsCrouched) ) 
-    {
-        Sleep( 0.1 );
-    }
-    
-    SetTimer( m_AITickTime.m_fResult, true );
-}
-
 
 //------------------------------------------------------------------
 // SetStateFollowingPaceTransition: set the default value, his starting position 
 //	
 //------------------------------------------------------------------
-function SetStatePaceTransition( R6Hostage.EStartingPosition ePos )
+function SetStatePaceTransition(R6Hostage.EStartingPosition ePos)
 {
-    m_eTransitionPosition = ePos;
-    gotoState( 'FollowingPaceTransition' );
-}
-
-//------------------------------------------------------------------
-// FollowingPaceTransition: stated used to allow smooth transition
-//	from extrem posture (stand to prone, crouch to prone, prone to crouch
-//------------------------------------------------------------------
-state FollowingPaceTransition
-{
-    ignores NotifyBump, SeePlayer, HearNoise; 
-
-    function BeginState()
-    {
-        #ifdefDEBUG if ( bShowLog ) logX( "beginState goto " $m_eTransitionPosition ); #endif
-        StopMoving();
-    }
-
-begin:
-    if ( m_pawn.m_bIsProne )
-    {
-        SetPawnPosition( POS_Crouch );
-        Sleep(0.3);
-        
-        SetPace( PACE_CrouchWalk );
-
-        if ( m_eTransitionPosition == POS_Stand )
-        {
-            SetPawnPosition( POS_Stand );
-            Sleep( 0.3 );
-            SetPace( PACE_Walk );
-        }
-    }
-    else if ( m_eTransitionPosition == POS_Prone && !m_pawn.m_bIsProne )
-    {
-        if ( !m_pawn.bIsCrouched )
-        {
-            SetPawnPosition( POS_Crouch );
-            Sleep(0.3);
-        }
-
-        SetPawnPosition( POS_Prone );
-        Sleep(0.4);
-        SetPace( PACE_Prone );
-    }
-    else
-    {
-        SetPawnPosition( m_eTransitionPosition );
-    }
-
-    R6SetMovement( m_pawn.m_eMovementPace );
-    GotoState( 'FollowingPawn' );
+	m_eTransitionPosition = ePos;
+	__NFUN_113__('FollowingPaceTransition');
+	return;
 }
 
 //------------------------------------------------------------------
 // SetMovementPace: set the current pace to be when following someone
 // return true if are doing a transition thats requires to stop moving
 //------------------------------------------------------------------
-function bool SetMovementPace( bool bStartingToMove )
+function bool SetMovementPace(bool bStartingToMove)
 {
-    local R6Pawn.eMovementPace  eOldMovementPace;
-    local R6Pawn.eMovementPace  eNewMovementPace;
-    local R6Pawn                follow;
-    local bool                  bStopMoving;
+	local R6Pawn.eMovementPace eOldMovementPace, eNewMovementPace;
+	local R6Pawn follow;
+	local bool bStopMoving;
 
-    if ( m_pawnToFollow == none || m_pawn.m_bPostureTransition )
-    {
-        return false;
-    }
-
-    if ( m_bNeedToRunToCatchUp )
-    {
-
-        if ( m_pawn.m_eMovementPace == PACE_CrouchWalk || 
-             m_pawn.m_eMovementPace == PACE_CrouchRun )
-        {
-            // if pawn i follow is not crouched and not prone, stand up
-            if ( !m_pawnToFollow.bIsCrouched && !m_pawnToFollow.m_bIsProne  )
-            {
-                // we don't call SetStatePaceTransition( POS_Stand ) or SetPawnPosition( POS_Stand );
-                // we want to stand up fastly and use the blend from crouch to stand
-                m_pawn.m_ePosition = POS_Stand;
-                m_pawn.setCrouch( false );
-                SetPace( PACE_Run );
-            }
-            else if ( m_pawn.m_eMovementPace == PACE_CrouchWalk )
-                SetPace( PACE_CrouchRun );
-        }
-        else if ( m_pawn.m_eMovementPace == PACE_Walk )
-        {
-            SetPace( PACE_Run );
-        }
-            
-        return false;
-    }
-
-    if ( m_bRunningToward )
-    {
-        SetPace( PACE_Run );
-        return false;
-    }
-
-    eOldMovementPace = m_pawn.m_eMovementPace;
-    
-    // if moving
-    if ( moveTarget != none || bStartingToMove )
-    {
-        follow = m_pawnToFollow;
-        m_iWaitingTime = 0;
-
-        // make needed adjustments if leader is walking backwards or strafing... and i'm not prone
-	    if ( !m_pawnToFollow.IsMovingForward() && !m_pawn.m_bIsProne )
-	    {		
-            if ( m_pawnToFollow.bIsWalking )
-            {
-			    m_bSlowedPace = true;
-            }
-		    else 
-		    {
-                follow = none; // set it to none so we don't update again his pace
-			    if ( m_pawnToFollow.bIsCrouched )
-			    {
-				    m_bSlowedPace = true;	
-                    SetPace( PACE_CrouchWalk ); 
-   
-			    }
-			    else 
-			    {
-				    m_bSlowedPace = false;
-                    SetPace( PACE_Walk ); 
-			    }				
-                
-                return false; // don't stop and don't have to update anything else here
-		    }	
-	    }	
-	    else
-        {
-		    m_bSlowedPace = false;
-        }
-    }
-    // check the front hostage who leads to know what to do (ie: go prone, go crouch quicker)
-    else if ( m_pawn.m_escortedByRainbow != none && 
-              m_pawn.m_escortedByRainbow.m_aEscortedHostage[0] != none )
-    {
-        // i follow him, but can I see him?
-        follow = m_pawnToFollow;
-
-        m_iWaitingTime++;         
-        if ( m_iWaitingTime >= m_pawn.m_waitingGoCrouchTween.m_fResult )
-        {
-            follow = none;
-
-            // if not crouched and not prone (standing... go crouch)
-            if ( !m_pawn.bIsCrouched && !m_pawn.m_bIsProne )
-            {
-                SetPawnPosition( POS_Crouch );
-            }
-        }
-    }
-    else
-    {
-        return false; // not normal, problem
-    }
-
-    if ( follow != none )
-    {     // set the pace and adjust it if wounded
-        SetPace( follow.m_eMovementPace ); 
-    }
-
-    // there's pace change...
-    if ( eOldMovementPace != m_pawn.m_eMovementPace )
-    {
-        // 1- adjust extrem transition (ie: can't go prone if no crouched)
-        // 1a- if wants to go prone AND not prone 
-        if ( m_pawn.m_eMovementPace == PACE_Prone && !m_pawn.m_bIsProne )
-        {
-            SetPace( eOldMovementPace );
-            SetStatePaceTransition( POS_Prone );
-            return true;
-        }
-        // 1b- if he's prone AND wants to run, walk or go crouch
-        else if ( m_pawn.m_bIsProne && m_pawn.m_eMovementPace != PACE_Prone )
-        {
-            if ( m_pawn.m_eMovementPace == PACE_CrouchRun || m_pawn.m_eMovementPace  == PACE_CrouchWalk )
-            {
-                SetPace( eOldMovementPace );
-                SetStatePaceTransition( POS_Crouch );
-            }
-            else
-            {
-                SetPace( eOldMovementPace );
-                SetStatePaceTransition( POS_Stand );
-            }
-
-            return true;
-        }
-        
-        // 2- set the new pawn position
-        if ( m_pawn.m_eMovementPace == PACE_CrouchWalk || m_pawn.m_eMovementPace == PACE_CrouchRun  )
-        {
-            SetPawnPosition( POS_Crouch );
-            bStopMoving = true;
-        }
-        else if ( m_pawn.m_eMovementPace != PACE_Prone )
-        {
-            // we don't call SetPawnPosition( POS_Stand );
-            // we want to stand up fastly and use the blend from crouch to stand
-            m_pawn.m_ePosition = POS_Stand;
-            m_pawn.setCrouch( false );
-        }
-        
-        // 3- do I need to catch up 
-        if ( m_pawn.m_eMovementPace == PACE_CrouchWalk || m_pawn.m_eMovementPace == PACE_Walk )
-        {
-            // if distance to start to to run is reached
-            // AND not wounded (cannot run if wounded)
-            if ( VSize( m_pawnToFollow.location - pawn.Location ) > c_iDistanceToStartToRun
-                 && m_pawn.m_eHealth != HEALTH_Wounded )
-            {
-                m_bNeedToRunToCatchUp = true;
-
-                if ( m_pawn.m_eMovementPace == PACE_CrouchWalk )
-                {
-                    SetPace( PACE_CrouchRun );
-                }
-                else 
-                {
-                    SetPace( PACE_Run );
-                }
-            }
-        }
-
-        // must be set after SetPawnPosition
-        R6SetMovement( m_pawn.m_eMovementPace );
-
-        return bStopMoving;
-    }
-
-    return false;
+	// End:0x21
+	if(__NFUN_132__(__NFUN_114__(m_pawnToFollow, none), m_pawn.m_bPostureTransition))
+	{
+		return false;
+	}
+	// End:0xFB
+	if(m_bNeedToRunToCatchUp)
+	{
+		// End:0xD8
+		if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(2)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(3))))
+		{
+			// End:0xB4
+			if(__NFUN_130__(__NFUN_129__(m_pawnToFollow.bIsCrouched), __NFUN_129__(m_pawnToFollow.m_bIsProne)))
+			{
+				m_pawn.m_ePosition = 0;
+				m_pawn.setCrouch(false);
+				SetPace(5);				
+			}
+			else
+			{
+				// End:0xD5
+				if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(2)))
+				{
+					SetPace(3);
+				}
+			}			
+		}
+		else
+		{
+			// End:0xF9
+			if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)))
+			{
+				SetPace(5);
+			}
+		}
+		return false;
+	}
+	// End:0x10E
+	if(m_bRunningToward)
+	{
+		SetPace(5);
+		return false;
+	}
+	eOldMovementPace = m_pawn.m_eMovementPace;
+	// End:0x1DD
+	if(__NFUN_132__(__NFUN_119__(MoveTarget, none), bStartingToMove))
+	{
+		follow = m_pawnToFollow;
+		m_iWaitingTime = 0;
+		// End:0x1D2
+		if(__NFUN_130__(__NFUN_129__(m_pawnToFollow.IsMovingForward()), __NFUN_129__(m_pawn.m_bIsProne)))
+		{
+			// End:0x191
+			if(m_pawnToFollow.bIsWalking)
+			{
+				m_bSlowedPace = true;				
+			}
+			else
+			{
+				follow = none;
+				// End:0x1BD
+				if(m_pawnToFollow.bIsCrouched)
+				{
+					m_bSlowedPace = true;
+					SetPace(2);					
+				}
+				else
+				{
+					m_bSlowedPace = false;
+					SetPace(4);
+				}
+				return false;
+			}			
+		}
+		else
+		{
+			m_bSlowedPace = false;
+		}		
+	}
+	else
+	{
+		// End:0x27F
+		if(__NFUN_130__(__NFUN_119__(m_pawn.m_escortedByRainbow, none), __NFUN_119__(m_pawn.m_escortedByRainbow.m_aEscortedHostage[0], none)))
+		{
+			follow = m_pawnToFollow;
+			__NFUN_165__(m_iWaitingTime);
+			// End:0x27C
+			if(__NFUN_179__(float(m_iWaitingTime), m_pawn.m_waitingGoCrouchTween.m_fResult))
+			{
+				follow = none;
+				// End:0x27C
+				if(__NFUN_130__(__NFUN_129__(m_pawn.bIsCrouched), __NFUN_129__(m_pawn.m_bIsProne)))
+				{
+					SetPawnPosition(4);
+				}
+			}			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	// End:0x2A0
+	if(__NFUN_119__(follow, none))
+	{
+		SetPace(follow.m_eMovementPace);
+	}
+	// End:0x4DA
+	if(__NFUN_155__(int(eOldMovementPace), int(m_pawn.m_eMovementPace)))
+	{
+		// End:0x303
+		if(__NFUN_130__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(1)), __NFUN_129__(m_pawn.m_bIsProne)))
+		{
+			SetPace(eOldMovementPace);
+			SetStatePaceTransition(2);
+			return true;			
+		}
+		else
+		{
+			// End:0x38F
+			if(__NFUN_130__(m_pawn.m_bIsProne, __NFUN_155__(int(m_pawn.m_eMovementPace), int(1))))
+			{
+				// End:0x37A
+				if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(3)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(2))))
+				{
+					SetPace(eOldMovementPace);
+					SetStatePaceTransition(4);					
+				}
+				else
+				{
+					SetPace(eOldMovementPace);
+					SetStatePaceTransition(0);
+				}
+				return true;
+			}
+		}
+		// End:0x3D6
+		if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(2)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(3))))
+		{
+			SetPawnPosition(4);
+			bStopMoving = true;			
+		}
+		else
+		{
+			// End:0x410
+			if(__NFUN_155__(int(m_pawn.m_eMovementPace), int(1)))
+			{
+				m_pawn.m_ePosition = 0;
+				m_pawn.setCrouch(false);
+			}
+		}
+		// End:0x4BF
+		if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(2)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(4))))
+		{
+			// End:0x4BF
+			if(__NFUN_130__(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_pawnToFollow.Location, Pawn.Location)), float(c_iDistanceToStartToRun)), __NFUN_155__(int(m_pawn.m_eHealth), int(1))))
+			{
+				m_bNeedToRunToCatchUp = true;
+				// End:0x4B7
+				if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(2)))
+				{
+					SetPace(3);					
+				}
+				else
+				{
+					SetPace(5);
+				}
+			}
+		}
+		R6SetMovement(m_pawn.m_eMovementPace);
+		return bStopMoving;
+	}
+	return false;
+	return;
 }
-
-
 
 //------------------------------------------------------------------
 // FollowPawnFailed
@@ -1509,745 +1113,109 @@ function bool SetMovementPace( bool bStartingToMove )
 //------------------------------------------------------------------
 function FollowPawnFailed()
 {
-    ResetThreatInfo( "FollowPawnFailed" );
-    Order_StayHere( false );
-    ReturnToNormalState( true );
-}
-
-
-//------------------------------------------------------------------
-// FollowingPawn: follow a pawn OR run towards a pawn.
-//	if run: it will set the temporary escort team
-//  if follow: every was previously set in RainbowOrdersToFollow 
-//------------------------------------------------------------------
-state FollowingPawn
-{
-    /////////////////////////////////////////////////////////////////////////
-    function BeginState()
-    {
-		////////////////Begin MissionPack1  // MPF1
-		if(m_pawn.m_bCivilian || m_pawn.m_bPoliceManMp1)
-			CivInit();
-		else
-		{
-		////////////////End MissionPack1
-        #ifdefDEBUG if(bShowLog) logX( "begin. Following: " $m_pawnToFollow.name  ); #endif
-
-        moveTarget = none;
-        focus = none;
-        m_lastSeenPawn = none;        
-
-        setFreed( true );
-        m_bSlowedPace = false;
-        
-        // cause problem after coming back from bumpbackup
-        // m_pawn.m_eMovementPace = PACE_None; // force to update SetMovementPace
-		}////////////////End MissionPack1
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "endState" ); #endif
-        setTimer( 0, false );
-        focus = none; // his orientation won`t follow the FollowingPawn
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    event bool NotifyBump(Actor other)
-    {
-        m_lastUpdatePaceTime = 0; // forces to stop moving ASAP
-        m_bFollowIncreaseDistance = true;
-
-        return Super.NotifyBump( other ); // R6AIController.NotifyBump
-    }
-
-    /////////////////////////////////////////////////////////////////////////
-    // check if the AI must react differently when following of running toward a pawn
-    function Timer()
-    {
-        local bool          bUpdateMove;
-        local bool          bFound;
-        local R6Pawn        p;
-        local R6RainbowTeam team;
-        local FLOAT         fSleep;
-        local bool          bCanWalkTo;
-
-        if ( m_lastSeenPawn != none )
-            SeePlayerMgr();
-
-        if (   m_bStopDoTransition || m_pawn.m_bPostureTransition || m_r6pawn.m_bIsClimbingLadder
-            || (Physics == PHYS_Falling) || (Physics == PHYS_RootMotion) )
-            return;
-
-        // if it's time to update pace
-        if ( Level.TimeSeconds - m_lastUpdatePaceTime > m_pawn.m_updatePaceTween.m_fResult )
-        {
-            if ( SetMovementPace( false ) )
-            {
-                // needs to stop and do a transition without moving
-                m_bStopDoTransition = true;
-                StopMoving();
-                focus = none;
-                return;
-            }
-            else
-            {
-                m_lastUpdatePaceTime = Level.TimeSeconds;
-                GetRandomTweenNum( m_pawn.m_updatePaceTween );
-            }
-        }
-
-        if ( m_pawnToFollow == none || moveTarget == none )
-            return;
-
-        bUpdateMove = false;
-
-        // If running toward rainbow && if pawn to follow is no more 'active'
-        if ( m_bRunningToward && !m_pawnToFollow.IsAlive() )
-        {
-            // not escorted yet, but get someone else
-            m_pawnToFollow = R6Rainbow(m_pawnToFollow).Escort_FindRainbow(m_pawn);
-
-            // not found, so no pawn to follow, stop this state
-            if ( m_pawnToFollow == none )
-            {
-                m_bLatentFnStopped = true;
-            }
-            else
-            {
-                // fond a rainbow, but make sure who I have to follow
-                m_pawnToFollow = R6Rainbow(m_pawnToFollow).Escort_GetPawnToFollow( true );
-            }
-            
-            bUpdateMove = true;
-        } 
-        else
-        {
-            if ( CanStopMoving( false ) )
-            {
-                // if(bShowLog) log( "Moving::timer: STOP MOVING " $pawn.name  );
-                bUpdateMove = true;
-                m_bLatentFnStopped = true;
-                m_lastUpdatePaceTime = Level.TimeSeconds;
-                m_bNeedToRunToCatchUp = false;
-
-                // if running toward and stop moving, we succeeded to join the rainbow
-                if ( m_bRunningToward )
-                {
-                    m_bRunToRainbowSuccess = true;
-                }
-            }
-            else 
-            {
-                // my target was changed (ie: the escort list was updated)
-                if ( moveTarget.IsA('R6Pawn') && moveTarget != m_pawnToFollow )
-                {
-                    // if(bShowLog) log( "Moving::timer NEW pawn to follow " $pawn.name );
-                    bUpdateMove = true;
-                }
-            } // if CanStopMoving
-        } // if running toward rainbow
-        
-        if ( bUpdateMove )
-        {
-            moveTarget = none; // force to stop the moveToward and check what will be next thing 
-                               // to do (stop, find the best path, run toward succeeded, move toward directly...)
-        }
-    } 
-
-/////////////////////////////////////////////////////////////////
-Begin:
-
-    Sleep(RandRange(0.1,0.5)); // helps to desynchronized pawn
-
-    // wait for transition to end
-    while ( m_pawn.m_bPostureTransition ) 
-        Sleep( 0.1 );
-
-    if ( (m_bRunningToward && !m_pawn.isStanding()) 
-        || m_pawn.m_ePosition == POS_Foetus 
-        || m_pawn.m_ePosition == POS_Kneel
-        || m_pawn.isStandingHandUp() )
-    {
-        SetPawnPosition( POS_Stand ); 
-        
-        while ( !m_pawn.m_bPostureTransition ) // wait for the anim transition to kick in
-            Sleep( 0.1 );
-
-        while ( m_pawn.m_bPostureTransition )   // wait to be in the position to move
-            Sleep( 0.1 );
-    }
-    
-    if ( m_bRunningToward ) 
-    {
-        m_pawn.m_escortedByRainbow = GetRainbowWhoEscortThisPawn( m_pawnToFollow );
-    }
-
-    m_bRunToRainbowSuccess = false;
-    m_bNeedToRunToCatchUp = false;
-    m_bStopDoTransition = false;
-
-MovingSetDefault:
-    m_lastUpdatePaceTime = Level.TimeSeconds;
-    SetTimer( m_AITickTime.m_fMin, true );  
-    m_pawn.bCanWalkOffLedges = m_pawn.default.bCanWalkOffLedges;
-
-Moving:
-    if ( m_bStopDoTransition ) // if have to do a transition (not every m_bPostureTransition need to be stopped)
-    {
-        Focus = none; 
-        StopMoving();
-        m_bStopDoTransition = false;
-
-        while ( m_pawn.m_bPostureTransition ) 
-        {   
-            Sleep( 0.1 );
-        }
-    }
-
-/// climbing ladder /////////////////////////////////////////////
-WaitForClimbing:
-    if ( m_pawn.m_Ladder != none )
-    {
-        StopMoving();
-        disable('timer');
-
-        // if FollowPawn is on the same ground as me OR if he's climbing
-        if( (abs(m_pawnToFollow.location.z - pawn.Location.Z) < 80) || 
-            m_pawnToFollow.m_bIsClimbingLadder )
-        {        
-            Sleep(0.5);
-
-            // force to check if the rainbow leading the team has jumped off the ladder
-            if ( m_pawn.m_escortedByRainbow != none ) 
-                m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
-
-            // check if we really need to climb
-            if ( ActorReachable( m_pawnToFollow )  )
-            {
-                m_pawn.m_Ladder = none; // todop: to test: let the physic untouch remove the reference
-                enable('timer');
-                goto( 'EndClimbLadder' );
-            }
-            
-            goto('WaitForClimbing');
-        }
-        else
-        {
-            // clear and fill the route cache so next time R6Ladder touch is called it will work!
-            FindPathToward(m_pawnToFollow, true );
-
-            // check if we really need to climb
-            if ( !RouteCacheWithOtherLadder( m_pawn.m_Ladder  ) || 
-                 ActorReachable( m_pawnToFollow )  )
-            {
-                m_pawn.m_Ladder = none;
-                enable('timer');
-                goto( 'EndClimbLadder' );
-            }
-
-            // go toward the ladder
-            nextLabel = ''; // needed for R6Ladder.Touch: avoid to have a wrong label
-            moveTarget = m_pawn.m_ladder;
-            R6PreMoveToward(moveTarget, moveTarget, PACE_Walk);
-            MoveToward(moveTarget);
-
-            // we are on the spot
-            if ( m_eMoveToResult == eMoveTo_success  )
-            {
-                if ( m_pawn.m_ladder  != none && !R6LadderVolume(m_pawn.m_ladder.MyLadder).IsAvailable(Pawn) )
-                {
-                    // logX( "IsSomeoneClimbing : step back..." );
-                    FindNearbyWaitSpot(m_pawn.m_ladder, m_vTargetPosition); 
-                    m_pawn.m_Ladder = none;
-
-                    if ( m_pawn.bIsCrouched || m_pawn.m_bIsProne )
-                        R6PreMoveTo(m_vTargetPosition, location, PACE_CrouchWalk);    
-                    else
-		                R6PreMoveTo(m_vTargetPosition, location, PACE_Walk);    
-
-		            MoveToPosition(m_vTargetPosition, rotator(location - m_vTargetPosition));   
-            		StopMoving();
-                    Sleep(0.5);
-                    Goto('WaitForClimbing');
-                }
-
-                // check if we trying to climb the ladder
-                moveTarget = m_pawn.m_ladder;
-                if ( CanClimbLadders(m_pawn.m_ladder) )
-                {
-                    nextState = GetStateName();
-					GotoState('ApproachLadder');
-                }
-            }
-
-            Sleep( 0.5 );
-            goto( 'WaitForClimbing' );
-        }
-    } // if m_ladder != none
-EndClimbLadder:
-
-    if ( !CanStopMoving( true ) ) // check if should move
-    {
-        m_bFollowIncreaseDistance = false;
-        m_lastUpdatePaceTime = Level.TimeSeconds;     
-        if ( SetMovementPace( true ) )
-        {
-            // needs to stop and do a transition without moving
-            m_bStopDoTransition = true;
-            StopMoving();
-            focus = none;
-            goto('Moving');
-        }
-
-        //if(bShowLog) log ( "Catch up for " @pawn.name@ " of " @VSize(m_pawnToFollow.location - pawn.location)@ " max dist: " $m_iFollowPawnDistance );    
-        m_bLatentFnStopped = false;
-
-        // to prevent an npc from running into a wall
-        // if targetPosition is not viewable (cannot be attained) NPC may be lagging too far behind... 
-        //if ( !FastTrace(m_pawnToFollow.location, pawn.location) )  
-
-        if ( !ActorReachable( m_pawnToFollow ) )
-        {
-            goto('Blocked');
-        }
-        else
-            moveTarget = m_pawnToFollow;
-    }
-    else if ( m_bRunningToward ) // if I'm close to rainbow
-    {
-        m_bRunToRainbowSuccess = true;
-        goto( 'endRunning');
-    }
-
-    if ( moveTarget != none )
-    {
-        moveTarget = m_pawnToFollow;
-        destination = moveTarget.Location + normal(moveTarget.Location - pawn.Location) * -C_iKeepDistanceFromPawn;
-        focus = none;
-        focalPoint = moveTarget.Location;          
-		MoveTo(destination);   
-
-        // was forced to stop
-        if ( m_bLatentFnStopped )
-        {
-            // no more pawn to follow (happens when running toward rainbow) OR succeeded running toward R6
-            if ( m_pawnToFollow == none || m_bRunToRainbowSuccess )
-            {
-                goto('endRunning');
-            }
-
-            StopMoving();
-        }
-    }
-    else
-    {
-        if ( m_pawnToFollow.m_bIsClimbingLadder )
-        {
-            // force to check if the rainbow leading the team has jumped off the ladder
-            if ( m_pawn.m_escortedByRainbow != none ) 
-                m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
-            
-            Sleep( 0.5 );
-        }
-
-        if ( !m_pawn.IsStationary() )
-        {
-            pawn.acceleration = vect(0,0,0);
-            pawn.velocity = vect(0,0,0);
-        }
-
-        Sleep(m_AITickTime.m_fMin); // do nothing for 1/10th of a sec      
-    }
-    
-    Goto('Moving');
-
-/////////////////////////////////////////////////////////////////
-Blocked:
-/////////////////////////////////////////////////////////////////
-    // logX( "Blocked... ");
-    // if the pawn I'm following is below me or lower than me
-    if ( MAXSTEPHEIGHT < abs( (m_pawnToFollow.location.Z - m_pawnToFollow.CollisionHeight)
-                              - (m_pawn.location.Z - m_pawn.CollisionHeight)) )
-    {
-        // log( "bCanWalkOffLedges = true " );
-        m_pawn.bCanWalkOffLedges = true;
-    }
-
-    moveTarget = none;
-    if ( FindBestPathToward(m_pawnToFollow, true) )
-    {       
-        if ( moveTarget == m_pawnToFollow  )
-        {
-            destination = moveTarget.Location + normal(moveTarget.Location - pawn.Location) * -C_iKeepDistanceFromPawn;
-
-            if ( PointReachable(destination) )
-            {
-                focus = none;
-                focalPoint = moveTarget.Location;          
-                MoveTo(destination);   
-                StopMoving();
-                moveTarget = none;
-            }
-            else
-            {
-                goto('UseMoveToward');
-            }
-        }
-        else
-        {
-UseMoveToward:
-            // logX( "BLOCKED: FindBestPathToward: " $moveTarget.name );
-            SetTimer( 0, false ); 
-            R6PreMoveToward(moveTarget, moveTarget, m_pawn.m_eMovementPace );
-        
-            // if far, run to catch up
-            if ( VSize( m_pawnToFollow.location - pawn.Location ) > c_iDistanceToStartToRun
-                 && m_pawn.m_eHealth != HEALTH_Wounded )
-            {
-                if ( m_pawn.m_eMovementPace == PACE_Walk )
-                {
-                    SetPace( PACE_Run );
-                }
-                else if ( m_pawn.m_eMovementPace == PACE_CrouchWalk || m_pawn.m_eMovementPace == PACE_Prone )
-                {
-                    SetPace( PACE_CrouchRun );
-                }
-            }
-
-            MoveToward(moveTarget);             //moveTarget is set by FindBestPathToward()
-        }
-    }
-
-    if ( m_pawn.m_Ladder != none )
-        m_bool = actorReachable(  m_pawn.m_Ladder );
-    else
-        m_bool = actorReachable( m_pawnToFollow );
-
-    // if none: I've reach the destination or it was set to none in Timer()
-    if ( moveTarget == none && m_pawn.m_Ladder == none )
-    {
-        // give a try, move somewhere. 
-        destination = m_pawnToFollow.Location + normal(m_pawnToFollow.Location - pawn.Location) * -C_iKeepDistanceFromPawn;
-        MoveTo(destination);
-        StopMoving();
-		sleep(0.5);
-		
-        if ( !m_bool && FindPathTo( m_pawnToFollow.location, true ) == None )
-            goto('Blocked'); 
-        else
-            goto('MovingSetDefault');
-    }
-    // if pawn still cannot see leader's position, stay in this block...
-    else if ( !m_bool )
-    {
-        // manage the problem when an hostage is exactly on a r6ladder and try to reach
-        // the other floor.
-        if ( moveTarget != none && m_pawn.m_Ladder == none && moveTarget.IsA( 'R6Ladder' ) )
-        {
-            // todop: to test: let the physic untouch remove the reference
-            //        maybe the m_ladder = none in state EndClimbingLadder should be removed
-            // if the pawn is on the opposite r6ladder, move him away of this r6ladder so
-            // all the logic of touch will work again
-            if ( DistanceTo( moveTarget ) < 50 && 
-                abs( moveTarget.Location.Z - pawn.Location.Z ) > 40 )
-            {
-                // logX( "blocked and unable to reach r6ladder. force it" );
-                m_pawn.m_Ladder = R6Ladder(moveTarget).m_pOtherFloor;
-                FindNearbyWaitSpot(R6Ladder(moveTarget).m_pOtherFloor, m_vTargetPosition); 
-                m_pawn.m_Ladder = none;
-
-                R6PreMoveTo(m_vTargetPosition, location, PACE_Walk );    
-		        MoveToPosition(m_vTargetPosition, rotator(location - m_vTargetPosition));   
-            	StopMoving();
-
-                // force to check if the rainbow leading the team has jumped off the ladder
-                if ( m_pawn.m_escortedByRainbow != none ) 
-                    m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
-
-            }
-        }
-
-        // logX( "BLOCKED: still blocked. MoveTarget=" $moveTarget.name );
-        Goto('Blocked');
-    }
-    else 
-    {
-        // logX( "BLOCKED: pawn in view: move normal"  );
-        moveTarget = m_pawnToFollow;
-        Goto('MovingSetDefault');
-    }
-
-/////////////////////////////////////////////////////////////////
-endRunning:
-/////////////////////////////////////////////////////////////////
-    // logX( "** endRunning **");
-    if ( m_bRunningToward )
-    {
-        StopMoving();
-
-        m_bRunningToward = false;
-        if ( m_bRunToRainbowSuccess )
-        {
-            #ifdefDEBUG if(bShowLog) logX( "runningToward success"); #endif
-
-            // will set the new state
-            ResetThreatInfo( "runningToward success" );
-            Order_FollowMe( m_pawnToFollow, false );   
-        }
-        else
-        {
-            #ifdefDEBUG if(bShowLog) logX( "runningToward failed" ); #endif
-           
-            ResetThreatInfo( "runningToward failed" );
-            ReturnToNormalState( true );
-        }
-    }
+	ResetThreatInfo("FollowPawnFailed");
+	Order_StayHere(false);
+	ReturnToNormalState(true);
+	return;
 }
 
 //------------------------------------------------------------------
 // CanOpenDoor: check if the pawn has the ability to open the door
 //	ie: in case it's locked.
 //------------------------------------------------------------------
-event bool CanOpenDoor( R6IORotatingDoor door )
+event bool CanOpenDoor(R6IORotatingDoor Door)
 {
-    // if the door is not locked
-    return !door.m_bIsDoorLocked;
+	return __NFUN_129__(Door.m_bIsDoorLocked);
+	return;
 }
 
 event OpenDoorFailed()
 {
-    #ifdefDEBUG if ( bShowLog ) logX( "OpenDoorFailed" ); #endif
-    
-    // general cases for the hostage, but some state have overwritted this event
-    if ( m_pawn.m_bCivilian )              // if civilian
-    {
-        GotoState( 'CivStayHere' );    
-    }
-    else if ( m_pawn.m_bFreed )     // freed hostage
-    {
-        FollowPawnFailed();
-    }
-    else                            // guarded 
-    {
-        SetStateGuarded( POS_Kneel, m_mgr.HSTSNDEvent_None );
-    }
+	// End:0x1C
+	if(m_pawn.m_bCivilian)
+	{
+		__NFUN_113__('CivStayHere');		
+	}
+	else
+	{
+		// End:0x37
+		if(m_pawn.m_bFreed)
+		{
+			FollowPawnFailed();			
+		}
+		else
+		{
+			SetStateGuarded(1, m_mgr.0);
+		}
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // SetStateRunForCover
 //	
 //------------------------------------------------------------------
-function SetStateRunForCover( Pawn runAwayOfPawn, name successState, name failureState, Actor grenade )
+function SetStateRunForCover(Pawn runAwayOfPawn, name successState, name failureState, Actor Grenade)
 {
-    enemy = runAwayOfPawn;
-    m_runAwayOfGrenade = grenade;
-
-    m_runForCoverStateToGoOnSuccess = successState;
-    m_runForCoverStateToGoOnFailure = failureState;
-
-    if ( IsRunForCoverPossible( enemy )  )
-    {
-        // We play the same run for cover for hostage and civilian
-        ProcessPlaySndInfo(m_mgr.HSTSNDEvent_RunForCover);
-        SetThreatState( 'RunForCover' );
-        GotoState( m_threatInfo.m_state );
-    }
-    else
-    {
-        ResetThreatInfo( "run for cover failed " );
-        m_runAwayOfGrenade = none;
-        GotoState( m_runForCoverStateToGoOnFailure );
-    }
+	Enemy = runAwayOfPawn;
+	m_runAwayOfGrenade = Grenade;
+	m_runForCoverStateToGoOnSuccess = successState;
+	m_runForCoverStateToGoOnFailure = failureState;
+	// End:0x65
+	if(IsRunForCoverPossible(Enemy))
+	{
+		ProcessPlaySndInfo(m_mgr.3);
+		SetThreatState('RunForCover');
+		__NFUN_113__(m_threatInfo.m_state);		
+	}
+	else
+	{
+		ResetThreatInfo("run for cover failed ");
+		m_runAwayOfGrenade = none;
+		__NFUN_113__(m_runForCoverStateToGoOnFailure);
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // IsAwayOfGrenade: return true if away and approximatively safe of 
 //   the grenade.
 //------------------------------------------------------------------
-function bool IsAwayOfGrenade( Actor grenade )
+function bool IsAwayOfGrenade(Actor Grenade)
 {
-    // if far enough
-    if ( VSize( pawn.location - grenade.location ) > c_iRunForCoverOfGrenadeMinDist )
-    {
-        return true;
-    }
-
-    // if there a fast trace
-    if ( FastTrace( grenade.location) )
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
+	// End:0x2E
+	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(Pawn.Location, Grenade.Location)), float(c_iRunForCoverOfGrenadeMinDist)))
+	{
+		return true;
+	}
+	// End:0x47
+	if(__NFUN_548__(Grenade.Location))
+	{
+		return false;		
+	}
+	else
+	{
+		return true;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // IsRunForCoverPossible: return true if the hostage can run away and 
 //  generate a path to run away of this enemy
 //------------------------------------------------------------------
-function bool IsRunForCoverPossible( Pawn runAwayOf )
+function bool IsRunForCoverPossible(Pawn runAwayOf)
 {
-    local Pawn aPreviousEnemy;
-    local bool bResult;
+	local Pawn aPreviousEnemy;
+	local bool bResult;
 
-    aPreviousEnemy = enemy;
-    enemy = runAwayOf;
-    bResult = MakePathToRun();
-        
-    enemy = aPreviousEnemy;
-
-    return bResult;
+	aPreviousEnemy = Enemy;
+	Enemy = runAwayOf;
+	bResult = __NFUN_1810__();
+	Enemy = aPreviousEnemy;
+	return bResult;
+	return;
 }
-
-//------------------------------------------------------------------
-// RunForCover: 
-//  exception when running away of grenade
-//------------------------------------------------------------------
-state RunForCover
-{
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin. Eneny =" @Enemy.name ); #endif
-
-        if ( !m_pawn.isStanding() )
-            SetPawnPosition( POS_Stand );
-        
-        SetTimer( m_AITickTime.m_fResult, true );
-        m_lastSeenPawn = none;        
-        focus = none;
-    }
-
-    function EndState()
-    {
-        SetTimer( 0, false );
-        m_runAwayOfGrenade = none;
-    }
-
-    function Timer()
-    {
-        if ( m_lastSeenPawn != none )
-            SeePlayerMgr();
-    }
-
-    function StopRunForCover()
-    {
-        StopMoving();
-        Enemy = none;
-        m_runAwayOfGrenade = none;
-        ResetThreatInfo( "StopRunForCover" );
-    }
-    
-    function EnemyNotVisible()
-    {
-        // if (bShowLog) logX ( ": entered function EnemyNotVisible.  Time:" $ Level.TimeSeconds $ " Last seen: " $ LastSeenTime );
-
-        if ( m_runAwayOfGrenade != none )
-        {
-            if ( IsAwayOfGrenade( m_runAwayOfGrenade ) )
-            {   
-                #ifdefDEBUG if(bShowLog) logX( "IsAwayOfGrenade" ); #endif
-                StopRunForCover();
-                GotoState( m_runForCoverStateToGoOnSuccess );
-            }
-
-            return;
-        }
-
-        // Not seen for at least X seconds, reset
-       if ( Level.TimeSeconds - LastSeenTime > c_iEnemyNotVisibleTime )
-       {
-            // if my enemy can see me, continue to run
-            if ( R6Pawn( Enemy ) != none && 
-                 R6Pawn( Enemy ).controller != none &&
-                 R6Pawn( Enemy ).controller.CanSee( pawn ) )
-            {
-                LastSeenTime = Level.TimeSeconds;
-                return;
-            }
-
-            #ifdefDEBUG if(bShowLog) logX( "Not seen for at least " @c_iEnemyNotVisibleTime@ "seconds" ); #endif
-            StopRunForCover();
-            GotoState( m_runForCoverStateToGoOnSuccess );
-        }
-    }
-
-    function bool IsRunForCoverSuccessfull()
-    {
-        local bool bResult;
-
-        if ( m_runAwayOfGrenade != none )
-        {
-            // if i'm way of the grenade
-            bResult = IsAwayOfGrenade( m_runAwayOfGrenade );
-        }
-        else if ( Enemy != none )
-        {
-            // if he cannot sees me
-            bResult = !R6Pawn( Enemy ).controller.CanSee( pawn ); 
-        }
-        else
-        {
-            bResult = true;
-        }
-
-        return bResult;
-    }
-
-    event OpenDoorFailed()
-    {
-        StopRunForCover(); 
-        gotoState( m_runForCoverStateToGoOnFailure );
-    }
-
-Begin:
-    // wait to be in the position to move
-    while ( m_pawn.m_bPostureTransition )
-    {
-        Sleep( 0.1 );
-    }
-
-    SetPace( PACE_Run );
-    
-ChooseDestination:
-    if ( enemy == none )
-    {
-        StopRunForCover();
-        GotoState( m_runForCoverStateToGoOnSuccess );
-    }
-
-    // Find a destination
-    if( !IsRunForCoverPossible( enemy ) ) // if cannot run for cover
-    {
-        if ( IsRunForCoverSuccessfull() )
-        {
-            #ifdefDEBUG if(bShowLog) logX( "Nowhere to run... but i'm covered" ); #endif
-            StopRunForCover(); // should be placed after IsRunForCoverPossible
-            GotoState( m_runForCoverStateToGoOnSuccess );
-        }
-        else
-        {
-            #ifdefDEBUG if(bShowLog) logX( "Nowhere to run... failed" ); #endif
-            StopRunForCover(); // should be placed after IsRunForCoverPossible
-            gotoState( m_runForCoverStateToGoOnFailure );
-        }
-    }
-
-RunToDestination:
-    //  Move to it
-    #ifdefDEBUG if (bShowLog) logX ( "label RunToDestination.  Goal = " $ RouteGoal ); #endif
-    FollowPath( m_pawn.m_eMovementPace, 'ReturnToPath', false );
-    Goto('ChooseDestination');
-
-ReturnToPath:
-    FollowPath( m_pawn.m_eMovementPace, 'ReturnToPath', true );
-    Goto('ChooseDestination');
-}
-
 
 //------------------------------------------------------------------
 // IsBumpBackUpStateFinish: return true if the condition to end the
@@ -2256,27 +1224,32 @@ ReturnToPath:
 //------------------------------------------------------------------
 function bool IsBumpBackUpStateFinish()
 {
-    local R6Pawn aBumpPawn;
+	local R6Pawn aBumpPawn;
 
-    aBumpPawn = R6Pawn(m_BumpedBy);
-
-    // Check first if we are in this state from too long
-    if( m_fLastBump + 4.0f < Level.TimeSeconds ) 
-        return true;
-
-	focus = none;	// to prevent npc from constantly turning to maintain focus on pawn he was bumped by
-
-    if ( aBumpPawn.velocity == vect(0,0,0) )
-        return true;
-
-    if ( DistanceTo(m_BumpedBy) > c_iDistanceBumpBackUp )
-        return true;
-
-    if ( m_pawnToFollow != none &&
-         DistanceTo( m_pawnToFollow ) > c_iDistanceCatchUp )
-        return true;
-    
-    return false;
+	aBumpPawn = R6Pawn(m_BumpedBy);
+	// End:0x31
+	if(__NFUN_176__(__NFUN_174__(m_fLastBump, 4.0000000), Level.TimeSeconds))
+	{
+		return true;
+	}
+	Focus = none;
+	// End:0x5A
+	if(__NFUN_217__(aBumpPawn.Velocity, vect(0.0000000, 0.0000000, 0.0000000)))
+	{
+		return true;
+	}
+	// End:0x73
+	if(__NFUN_177__(DistanceTo(m_BumpedBy), float(c_iDistanceBumpBackUp)))
+	{
+		return true;
+	}
+	// End:0x99
+	if(__NFUN_130__(__NFUN_119__(m_pawnToFollow, none), __NFUN_177__(DistanceTo(m_pawnToFollow), float(c_iDistanceCatchUp))))
+	{
+		return true;
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -2286,75 +1259,77 @@ function bool IsBumpBackUpStateFinish()
 //------------------------------------------------------------------
 function BumpBackUpStateFinished()
 {
-    // default state if no state was specified in SetStateBumpBackUp
-    SetStateGuarded( POS_Kneel, m_mgr.HSTSNDEvent_None );
+	SetStateGuarded(1, m_mgr.0);
+	return;
 }
-
-
-//============================================================================
-//	 ####    ####   ##  #    ####   ##       ####    ###    #   #   
-//	##        ##    ##  #     ##    ##        ##    ##  #   ##  #   
-//	##        ##    ##  #     ##    ##        ##    #####   # # #   
-//	##        ##    ##  #     ##    ##        ##    ##  #   #  ##   
-//	 ####    ####     ##     ####   #####    ####   ##  #   #   #   
-//============================================================================
 
 //------------------------------------------------------------------
 // CivInit: initialization for the civilian
 //------------------------------------------------------------------
 function CivInit()
 {
-    #ifdefDEBUG if (bShowLog) logX( "initialization for civilian" ); #endif
+	local int i;
 
-    if ( m_pawn.m_escortedByRainbow != none ) // needed if debbuging
-        StopFollowingPawn( false );
+	// End:0x1B
+	if(__NFUN_119__(m_pawn.m_escortedByRainbow, none))
+	{
+		StopFollowingPawn(false);
+	}
+	m_pawn.SetStandWalkingAnim(0, true);
+	m_pawn.m_eHandsUpType = 0;
+	m_pawn.m_bCivilian = true;
+	m_pawn.m_bClassicMissionCivilian = m_pawn.m_DZone.m_bClassicMissionCivilian;
+	i = 0;
+	J0x7E:
 
-    m_pawn.SetStandWalkingAnim( eStandWalkingAnim_default, true );
-
-    m_pawn.m_eHandsUpType = HANDSUP_none; // needed if debbuging
-    m_pawn.m_bCivilian = true;
-    m_pawn.setFrozen( false );
-
- // MPF1
-    //setFreed( true );
-	
-	SetPawnPosition( m_pawn.m_ePosition );//MissionPack1
-
-    // set state depending of the DZone (patrolArea, patrolPathNode, GuardPoint 
-    switch ( m_pawn.m_eCivPatrol )
-    {
-	
-    case CIVPATROL_Path:
-        GotoState( 'CivPatrolPath' );
-        break;
-
-    case CIVPATROL_Area:
-        GotoState( 'CivPatrolArea' );
-        break;
-
-    default: 
-        GotoState( 'CivGuardPoint' ); 
-    }
+	// End:0xD3 [Loop If]
+	if(__NFUN_150__(i, m_pawn.m_DZone.m_pListOfCoverNodes.Length))
+	{
+		m_pListOfCoverNodes[i] = m_pawn.m_DZone.m_pListOfCoverNodes[i];
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x7E;
+	}
+	m_pawn.setFrozen(false);
+	SetPawnPosition(m_pawn.m_ePosition);
+	switch(m_pawn.m_eCivPatrol)
+	{
+		// End:0x116
+		case 1:
+			__NFUN_113__('CivPatrolPath');
+			// End:0x12F
+			break;
+		// End:0x125
+		case 2:
+			__NFUN_113__('CivPatrolArea');
+			// End:0x12F
+			break;
+		// End:0xFFFF
+		default:
+			__NFUN_113__('CivGuardPoint');
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // ResetThreatInfo
 //	
 //------------------------------------------------------------------
-function ResetThreatInfo( string sz )
+function ResetThreatInfo(string sz)
 {
-    #ifdefDEBUG if(bShowLog) logX( "ResetThreatInfo: " $sz ); #endif
-    m_threatInfo = m_mgr.getDefaulThreatInfo();
+	m_threatInfo = m_mgr.getDefaulThreatInfo();
+	return;
 }
 
 //------------------------------------------------------------------
 // SetThreatState:
 //	
 //------------------------------------------------------------------
-function SetThreatState( name threatState )
+function SetThreatState(name threatState)
 {
-    #ifdefDEBUG if(bShowLog) logX( "SetThreatState: " $threatState ); #endif
-    m_threatInfo.m_state = threatState;
+	m_threatInfo.m_state = threatState;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -2363,752 +1338,265 @@ function SetThreatState( name threatState )
 //------------------------------------------------------------------
 function name GetThreatGroupName()
 {
-    if ( m_pawn.m_bCivilian )
-    {    // MPF1
-        //return m_mgr.C_ThreatGroup_Civ;//MissionPack1
-		return m_mgr.C_ThreatGroup_HstBait;
-    }
-    else
-    {
-        if ( m_pawn.m_bFreed && m_pawn.m_escortedByRainbow != none )
-            return m_mgr.c_ThreatGroup_HstEscorted;
-        else if ( m_pawn.m_ePersonality == HPERSO_Bait )
-            return m_mgr.C_ThreatGroup_HstBait;
-        else if ( m_pawn.m_bFreed )
-            return m_mgr.c_ThreatGroup_HstFreed;
-        else
-            return m_mgr.c_ThreatGroup_HstGuarded;
-    }
-}
-
-//------------------------------------------------------------------
-// ProcessThreat: process the possible threat. 
-//------------------------------------------------------------------ 
-/*
-  When a new threat is detected, goto a state
-  How threat ends?
-    - when a state finish normaly       (ie: run for cover completed, play reaction)
-    - when a state failed to continue   (ie: run for cover failed)
-    - when interrupted:
-        - new order: follow me/stay here/surrender
-        - new threat: higher priority threat
-    - change the current threat group (threat_freed/threat_guarded/threat_civilian/threat_bait)
-
-  A threat can be suspended when a transition state is called:
-    - climb object, ladder (many possible state), bump, open door,
-    - ReactToGrenade, FollowingPaceTransition...
-    
-    To avoid any problem with those temp state, SeePlayer and 
-    hearnoise should not update SeePlayerMgr and HearNoiseMgr...
-*/
-function ProcessThreat( Actor p, ENoiseType eType )
-{
-    local R6Pawn                    r6Pawn;
-    local INT                       iDistanceFromThreat;
-    local R6HostageMgr.ThreatInfo   threatInfo;
-    local bool                      bNewThreat;
-    local name                      stateName;
-    local name                      groupName;
-
-    groupName = GetThreatGroupName();
-    if ( groupName  != m_threatGroupName )
-    {
-        ResetThreatInfo( "new threat group: " $groupName );
-        m_threatGroupName = groupName;
-    }
-    bNewThreat = false;
-
-    // todop: check the runtime cost for optimization...
-    if ( m_mgr.GetThreatInfoFromThreat( groupName, m_pawn, p, eType, threatInfo  ) )
-    {
-        // check if a new threat
-        if ( threatInfo.m_iThreatLevel > m_threatInfo.m_iThreatLevel  )
-        {
-            #ifdefDEBUG if ( bShowLog || bThreatShowLog ) logX( " NEW THREAT: " $m_mgr.GetThreatName(threatInfo.m_id) ); #endif
-            m_threatInfo = threatInfo;
-            bNewThreat = true;
-        }
-    }
-
-    if ( bNewThreat )
-    {
-        stateName = m_mgr.GetReaction( groupName, m_threatInfo.m_iThreatLevel, Roll( 100 ) );
-
-        // ignore if none
-        
-        if ( 'BaitPlayReaction' == stateName )
-        {
-            ProcessPlaySndInfo( m_mgr.HSTSNDEvent_SeeRainbowBaitOrGoFrozen );
-            ResetThreatInfo( "BaitPlayReaction" );
-        }
-        else if ( 'GuardedPlayReaction' == stateName )
-        {
-            if ( m_iPlayReaction1 == 0 )
-            {
-                m_iPlayReaction1 = 1;
-                m_iPlayReaction2 = RandRange(0,2);
-            }
-            ResetThreatInfo( "GuardedPlayReaction" );
-        }
-        else if ( 'HearShootingReaction' == stateName )
-        {
-            ProcessPlaySndInfo( m_mgr.HSTSNDEvent_HearShooting );
-            ResetThreatInfo( "HearShootingReaction" );
-        }
-        else if ( stateName != m_mgr.m_noReactionName ) 
-        {
-            gotoState( stateName );
-        }
-
-        
-    }
-}
-
-
-//------------------------------------------------------------------
-// Civilian: base state for civilian
-//	
-//------------------------------------------------------------------
-state Civilian
-{ // MPF1
-	ignores SeePlayer, HearNoise, SeePlayerMgr;//MissionPack1
-
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-    }
-
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "end" ); #endif
-        
-        StopMoving();
-    }
- // MPF1
-	/*//MissionPack1 to avoid civilian following a Rainbow
-    function SeePlayer( Pawn p )
-    {
-        Global.SeePlayer( p );
-        
-        if ( m_lastSeenPawn != none )
-        {
-            SeePlayerMgr();
-        }
-    }
-	*/
-}
-
-//------------------------------------------------------------------
-// CivPatrolArea: took from R6TerroristAI
-//	- inherited
-//------------------------------------------------------------------
-state CivPatrolArea extends Civilian
-{
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX ( "beginState"); #endif
-    }
-
-Begin:
-    SetPace( PACE_Walk );
-
-AtDestination:
-    m_vTargetPosition = m_pawn.m_DZone.FindRandomPointInArea();
-    #ifdefDEBUG if(bShowLog) logX ( " at " $ Pawn.Location $ ", choose to wander to " $ m_vTargetPosition ); #endif
-
-    MoveTarget = FindPathTo( m_vTargetPosition, true );
-    if(MoveTarget!=None)
-    {
-        FollowPathTo( m_vTargetPosition, m_pawn.m_eMovementPace );
-    }
-    #ifdefDEBUG if (MoveTarget== None && bShowLog) logX( " at " $ Pawn.Location $ ", cannot find a path to " $ m_vTargetPosition ); #endif
-    
-    
-    Sleep( GetRandomTweenNum( m_pawn.m_patrolAreaWaitTween ) );
-    FinishAnim(); // wait for the anim to end before moving
-
-    Goto('AtDestination');
-}
-
-//------------------------------------------------------------------
-// CivGuardPoint: 
-// - inherited	
-//------------------------------------------------------------------
-state CivGuardPoint extends Civilian
-{  // MPF1
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX ( "beginState"); #endif
-        
-
-        //SetPawnPosition( POS_Stand );
-
-		if( m_pawn.m_bPoliceManMp1 && m_pawn.m_bPoliceManHasWeapon)//MissionPack1
-		{
-			//TEST: attach weapon
-			m_pawn.ServerGivesWeaponToClient("R63rdWeapons.NormalSubMP5A4",1);
-			// Get the primary Weapon
-			m_pawn.SetToNormalWeapon();
-
-			if(m_pawn.EngineWeapon==none)
-				logX ( "No weapon!!!!");
-
-			m_pawn.engineWeapon.GotoState('BringWeaponUp');
-			m_pawn.PlayWeaponAnimation();
-		}
-    }
-
-	function SeePlayer( Pawn p )//MissionPack1
+	// End:0x48
+	if(m_pawn.m_bCivilian)
 	{
-		local R6Pawn seen;
-		if( m_pawn.m_bPoliceManMp1 && m_pawn.m_bPoliceManCanSeeRainbows)
+		// End:0x36
+		if(m_pawn.m_bClassicMissionCivilian)
 		{
-			seen = R6Pawn(p);
-			if(seen == none)
-				return;
-
-			if(p.m_ePawnType==PAWN_Rainbow)
+			return m_mgr.c_ThreatGroup_Civ;			
+		}
+		else
+		{
+			return m_mgr.c_ThreatGroup_HstBait;
+		}		
+	}
+	else
+	{
+		// End:0x82
+		if(__NFUN_130__(m_pawn.m_bFreed, __NFUN_119__(m_pawn.m_escortedByRainbow, none)))
+		{
+			return m_mgr.c_ThreatGroup_HstEscorted;			
+		}
+		else
+		{
+			// End:0xAD
+			if(__NFUN_154__(int(m_pawn.m_ePersonality), int(3)))
 			{
-				//m_pawn.PlayAnim('CrouchRainbow');
-				m_pawn.PlayAnim(m_pawn.m_NocsSeeRainbowsName);
-				GotoState('WaitForSomeTime');
+				return m_mgr.c_ThreatGroup_HstBait;				
+			}
+			else
+			{
+				// End:0xD1
+				if(m_pawn.m_bFreed)
+				{
+					return m_mgr.c_ThreatGroup_HstFreed;					
+				}
+				else
+				{
+					return m_mgr.c_ThreatGroup_HstGuarded;
+				}
 			}
 		}
-
-    }
-
-
-Begin:
-    // Set the rotation of the Pawn to the rotation of the DZone
-    ChangeOrientationTo( m_pawn.m_DZone.Rotation );
-    FinishRotation();
+	}
+	return;
 }
 
- // MPF1
-state WaitForSomeTime//MissionPack1
+function ProcessThreat(Actor P, Actor.ENoiseType eType)
 {
-Begin:
-	Sleep(RandRange(5,10));
-	GotoState( 'CivGuardPoint' );
+	local R6Pawn R6Pawn;
+	local int iDistanceFromThreat;
+	local ThreatInfo ThreatInfo;
+	local bool bNewThreat;
+	local name stateName, GroupName;
 
+	GroupName = GetThreatGroupName();
+	// End:0x49
+	if(__NFUN_255__(GroupName, m_threatGroupName))
+	{
+		ResetThreatInfo(__NFUN_112__("new threat group: ", string(GroupName)));
+		m_threatGroupName = GroupName;
+	}
+	// End:0x9C
+	if(m_pawn.m_bClassicMissionCivilian)
+	{
+		// End:0x99
+		if(m_mgr.GetThreatInfoFromThreat(GroupName, m_pawn, P, eType, ThreatInfo))
+		{
+			m_threatInfo = ThreatInfo;
+			bNewThreat = true;
+		}		
+	}
+	else
+	{
+		bNewThreat = false;
+		// End:0xFB
+		if(m_mgr.GetThreatInfoFromThreat(GroupName, m_pawn, P, eType, ThreatInfo))
+		{
+			// End:0xFB
+			if(__NFUN_151__(ThreatInfo.m_iThreatLevel, m_threatInfo.m_iThreatLevel))
+			{
+				m_threatInfo = ThreatInfo;
+				bNewThreat = true;
+			}
+		}
+	}
+	// End:0x21F
+	if(bNewThreat)
+	{
+		stateName = m_mgr.GetReaction(GroupName, m_threatInfo.m_iThreatLevel, Roll(100));
+		// End:0x16B
+		if(__NFUN_254__('BaitPlayReaction', stateName))
+		{
+			ProcessPlaySndInfo(m_mgr.6);
+			ResetThreatInfo("BaitPlayReaction");			
+		}
+		else
+		{
+			// End:0x1C2
+			if(__NFUN_254__('GuardedPlayReaction', stateName))
+			{
+				// End:0x1A4
+				if(__NFUN_154__(m_iPlayReaction1, 0))
+				{
+					m_iPlayReaction1 = 1;
+					m_iPlayReaction2 = int(RandRange(0.0000000, 2.0000000));
+				}
+				ResetThreatInfo("GuardedPlayReaction");				
+			}
+			else
+			{
+				// End:0x200
+				if(__NFUN_254__('HearShootingReaction', stateName))
+				{
+					ProcessPlaySndInfo(m_mgr.1);
+					ResetThreatInfo("HearShootingReaction");					
+				}
+				else
+				{
+					// End:0x21F
+					if(__NFUN_255__(stateName, m_mgr.m_noReactionName))
+					{
+						__NFUN_113__(stateName);
+					}
+				}
+			}
+		}
+	}
+	return;
 }
-
-//------------------------------------------------------------------
-// CivPatrolPath: took from R6TerroristAI
-//	- inherited 	
-//------------------------------------------------------------------
-state CivPatrolPath extends Civilian
-{
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX ( "beginState"); #endif
-
-        if( R6DZonePath(m_pawn.m_DZone) == None )
-        {
-            #ifdefDEBUG if(bShowLog) logX ( ": doesn't have a path zone" ); #endif
-            GotoState('CivGuardPoint');
-        }
-    }
-
-    function INT GetWaitingTime()
-    {
-        local INT iTemp;
-
-        iTemp = GetRandomTweenNum( m_pawn.m_patrolAreaWaitTween ); 
-
-        return Rand(iTemp+1) + iTemp; // 0 to iTemp + iTemp
-    }
-
-    function INT GetFacingTime()
-    {
-        local INT iTemp;
-
-        iTemp = GetRandomTweenNum( m_pawn.m_changeOrientationTween );
-
-        return Rand(iTemp+1) + iTemp; // 0 to iTemp + iTemp
-    }
-
-    function BOOL IsGoingBack()
-    {
-        return false;
-    }
-    
-
-    function PickDestination()
-    {
-        local rotator       r;
-        local INT           iDistance;
-
-        r.Yaw     = Rand(32767)*2;
-        iDistance = Rand(m_pawn.m_CurrentNode.m_fRadius);
-        m_vTargetPosition = m_pawn.m_CurrentNode.Location + vector(r)*iDistance;
-        #ifdefDEBUG if(bShowLog) logX( " goes to " $ m_pawn.m_CurrentNode $ " (" $ m_pawn.m_CurrentNode.Location $ ") but will go to " $ m_vTargetPosition ); #endif
-    }
-
-    event OpenDoorFailed()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "CivPatrolPath::OpenDoorFailed" ); #endif
-        
-        m_pawn.m_CurrentNode = None;
-        GotoState( 'CivPatrolPath' );   // restard this state
-    }
-
-    function SetToNextNode()
-    {
-        local R6DZonePathNode   firstnode;
-        local R6DZonePath       path;
-        local INT index;
-
-        MoveTarget = None;
-        firstnode = m_pawn.m_CurrentNode;
-        path = R6DZonePath(m_pawn.m_DZone);
-        while(MoveTarget==None)
-        {
-            // If path is not a cycling path and current node is the first or the last, reverse order
-            if( !path.m_bCycle )
-            {
-                index = path.GetNodeIndex( m_pawn.m_CurrentNode );
-                if( (index == 0) )
-                {
-                    m_pawn.m_bPatrolForward = true;
-                    #ifdefDEBUG if(bShowLog) logX( " is to the beginning of path. turn back" ); #endif
-                }
-                if( index == (path.m_aNode.Length-1) )
-                {
-                    m_pawn.m_bPatrolForward = false;
-                    #ifdefDEBUG if(bShowLog) logX( " is at the end of path. turn back" ); #endif
-                }
-            }
-
-            // Get the next node
-            if(m_pawn.m_bPatrolForward)
-            {
-                m_pawn.m_CurrentNode = path.GetNextNode(m_pawn.m_CurrentNode);
-                #ifdefDEBUG if(bShowLog) logX( " got next node " $ m_pawn.m_CurrentNode ); #endif
-            }
-            else
-            {
-                m_pawn.m_CurrentNode = path.GetPreviousNode(m_pawn.m_CurrentNode);
-                #ifdefDEBUG if(bShowLog) logX( " got previous node " $ m_pawn.m_CurrentNode ); #endif
-            }
-
-            // Check if it's the same as the fist one
-            if( firstnode == m_pawn.m_CurrentNode )
-            {
-                #ifdefDEBUG if(bShowLog) logX ( " have not find a reachable node in path " $ m_pawn.m_DZone $ ".  Going to GuardPoint state" ); #endif
-                GotoState('CivGuardPoint');
-                return;
-            }
-
-            // Find path to the new node
-            MoveTarget = FindPathToward( m_pawn.m_CurrentNode, true );
-            #ifdefDEBUG if(bShowLog && MoveTarget==None) logX ( " at " $ Pawn.Location $": cannot find a path to node " $ m_pawn.m_CurrentNode $ " at " $ m_pawn.m_CurrentNode.Location ); #endif
-        }
-    }
-
-Begin:
-    if( m_pawn.m_CurrentNode == None )
-    {
-        #ifdefDEBUG if (bShowLog) logX ( ": No Current Node"); #endif
-
-        m_pawn.m_CurrentNode = R6DZonePath(m_pawn.m_DZone).FindNearestNode( Pawn );
-        #ifdefDEBUG if (bShowLog) logX ( ": Nearest node found: " $ m_pawn.m_CurrentNode ); #endif
-
-        if (m_pawn.m_CurrentNode == None)
-        {
-            #ifdefDEBUG if(bShowLog) logX ( ": cannot find a nearest node for path " $ R6DZonePath(m_pawn.m_DZone) ); #endif
-            GotoState('CivGuardPoint');
-        }
-
-        MoveTarget = FindPathToward( m_pawn.m_CurrentNode, true );
-        if( MoveTarget==None )
-        {
-            #ifdefDEBUG if(bShowLog) logX ( " at " $ Pawn.Location $": cannot find a path to node " $ m_pawn.m_CurrentNode $ " at " $ m_pawn.m_CurrentNode.Location ); #endif
-            SetToNextNode();
-        }
-    }
-    SetPace( PACE_Walk );
-
-FindPathToNode:
-    PickDestination();
-
-    FollowPathTo( m_vTargetPosition, m_pawn.m_eMovementPace );
-
-ReachedTheNode:
-
-    #ifdefDEBUG if(bShowLog) 
-    {
-        logX( name   $ " reached the node " $ m_pawn.m_CurrentNode
-                    $ ".  Waiting:" $ m_pawn.m_CurrentNode.m_bWait
-                    $ " Directional:" $ m_pawn.m_CurrentNode.bDirectional );
-    } #endif
-
-    if(m_pawn.m_CurrentNode.bDirectional)
-    {
-        // Turn in the right direction
-        ChangeOrientationTo( GetRandomTurn90() );
-        FinishRotation();
-    }
-    
-    if(m_pawn.m_CurrentNode.m_bWait)
-    {
-        m_iWaitingTime = GetWaitingTime();
-        m_iFacingTime = GetFacingTime();
-
-        //if (bShowLog) logX ( " DefCon: " $ m_pawn.m_eDefCon $ " wait: " $ m_iWaitingTime $ " change: " $ m_iFacingTime );
-
-        if(m_iFacingTime<m_iWaitingTime)
-        {
-            Sleep(m_iFacingTime);
-            ChangeOrientationTo( GetRandomTurn90() );
-            Sleep(m_iWaitingTime-m_iFacingTime);
-            FinishRotation();
-        }
-        else
-        {
-            Sleep(m_iWaitingTime);
-        }
-
-        // Check chance of going back
-        if(IsGoingBack())
-        {
-            #ifdefDEBUG if(bShowLog) logX ( ": is going back.  I repeat " $ name $ " is going back!!!" ); #endif
-            m_pawn.m_bPatrolForward = !m_pawn.m_bPatrolForward;
-        }
-    }
-
-    // Change the current node
-    SetToNextNode();
-
-    Focus =  m_pawn.m_CurrentNode;
-    
-    FinishAnim(); // wait for the anim to end before moving
-//@@@rb    m_pawn.PlayTurning( IsFocusLeft() );
-    FinishRotation();
-
-    Goto('FindPathToNode');        
-}
-
 
 //------------------------------------------------------------------
 // Order_ProcessSurrender: process the surrender order. Should not
 //	be call externally of Order_Process
 //------------------------------------------------------------------
-function Order_ProcessSurrender( Pawn terro )
+function Order_ProcessSurrender(Pawn terro)
 {
-    local name stateName;
+	local name stateName;
 
-    m_terrorist = R6Terrorist(terro);
-
-    #ifdefDEBUG if(bShowLog) logX( "Order_ProcessSurrender: " $Terro.name ); #endif
-
-    if ( m_pawn.m_bCivilian || m_pawn.m_bPoliceManMp1)  // MPF1
-    {  // MPF1
-		/*//MissionPack1 to avoid a civilian to surrender
-        m_mgr.GetThreatInfoFromThreatSurrender( terro, m_threatInfo );
-        stateName = m_mgr.GetReaction( m_mgr.C_ThreatGroup_Civ, m_threatInfo.m_iThreatLevel, Roll( 100 ) );
-        
-        if ( stateName != m_mgr.m_noReactionName ) 
-            gotoState( stateName  ); 
-		*/ 
-    }
-    else
-    {
-        // if not following rainbow
-        if ( m_pawn.m_escortedByRainbow == none )
-        {
-            ProcessPlaySndInfo( m_mgr.HSTSNDEvent_CivSurrender );
-            R6TerroristAI(m_terrorist.controller).HostageSurrender( self );
-        }
-    }
+	m_terrorist = R6Terrorist(terro);
+	// End:0x39
+	if(__NFUN_132__(m_pawn.m_bCivilian, m_pawn.m_bPoliceManMp1))
+	{		
+	}
+	else
+	{
+		// End:0x7C
+		if(__NFUN_114__(m_pawn.m_escortedByRainbow, none))
+		{
+			ProcessPlaySndInfo(m_mgr.2);
+			R6TerroristAI(m_terrorist.Controller).HostageSurrender(self);
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SetStateEscorted
 //	
 //------------------------------------------------------------------
-function SetStateEscorted( R6Pawn escort, vector destination, bool bSurrender  )
+function SetStateEscorted(R6Pawn escort, Vector Destination, bool bSurrender)
 {
-    #ifdefDEBUG if(bShowLog) logX( "SetStateEscorted by " $escort.name ); #endif
-    
-    m_escort      = escort;
-    m_vMoveToDest = destination;
-    
-    m_pawn.setFrozen( false );
-    if ( bSurrender )
-    {
-        SetThreatState( 'EscortedByEnemy' );
-        setFreed( false );
-    }
-
-    m_bForceToStayHere = false; // allow hostage to run towards rainbow when no longer escorted
-    SetPace( PACE_Walk );
-
-    m_pawn.m_bEscorted = true;
-    gotoState( 'EscortedByEnemy' );
+	m_escort = escort;
+	m_vMoveToDest = Destination;
+	m_pawn.setFrozen(false);
+	// End:0x41
+	if(bSurrender)
+	{
+		SetThreatState('EscortedByEnemy');
+		SetFreed(false);
+	}
+	m_bForceToStayHere = false;
+	SetPace(4);
+	m_pawn.m_bEscorted = true;
+	__NFUN_113__('EscortedByEnemy');
+	return;
 }
 
-//------------------------------------------------------------------
-// EscortedByEnemy
-//
-//------------------------------------------------------------------
-state EscortedByEnemy
+// NEW IN 1.60
+function bool CivCheckCoverNode()
 {
-    ignores SeePlayer, HearNoise;
+	local int i;
 
-    function beginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-    }
-
-    function endState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "end" ); #endif
-        SetTimer( 0, false );
-
-        m_pawn.SetStandWalkingAnim( eStandWalkingAnim_scared, false );
-    }
-
-    function EscortIsOver( bool bSuccess )
-    {
-        #ifdefDEBUG if(bShowLog) logX( "EscortIsOver success= " $bSuccess ); #endif
-
-        m_pawn.m_bEscorted = false;
-        m_escort = none;
-
-        if ( m_terrorist != none )
-        {
-            R6TerroristAI( m_terrorist.controller ).EscortIsOver( self, bSuccess );
-            m_terrorist = none;
-        }
-
-        ResetThreatInfo( "EscortIsOver" );
-        if ( m_pawn.m_bFreed )
-        {
-            GotoState( 'Freed' );
-        }
-        else
-        {
-            // it's better to go kneel if in crouch posture 
-            if ( IsInCrouchedPosture() )
-                SetStateGuarded( POS_Kneel, m_mgr.HSTSNDEvent_None );
-            else
-                SetStateGuarded( POS_Stand, m_mgr.HSTSNDEvent_None );
-        }
-    }
-
-    // todop: if escort is over? killed?
-Begin:
-    // wait to finish transition
-    while ( m_pawn.m_bPostureTransition )
-    {
-        Sleep( 0.1 );
-    }
-
-    if ( m_pawn.isStandingHandUp() ) 
-    {
-        // when the hostage is standing & guarded and he's told to follow the terro
-        m_pawn.m_eHandsUpType = HANDSUP_none;
-        m_pawn.SetAnimTransition( m_mgr.ANIM_eStandHandUpToDown, '' );
-    }
-    else if ( !m_pawn.isStanding() )
-    {
-        SetPawnPosition( POS_Stand );
-    }
-
-    while ( m_pawn.m_bPostureTransition )
-    {
-        Sleep( 0.1 );
-    }
-
-    if ( m_vMoveToDest == Pawn.Location)
-    {
-        Goto('StartWaiting');
-    }
-
-    if ( m_escort.m_ePawnType == PAWN_Terrorist )
-        m_pawn.SetStandWalkingAnim( eStandWalkingAnim_default, true );
-    else
-        m_pawn.SetStandWalkingAnim( eStandWalkingAnim_scared , true );
-
-    MoveTarget = FindPathTo(m_vMoveToDest, true );
-    if(MoveTarget==None)
-    {
-        #ifdefDEBUG if (bShowLog) logX ( ": cannot find a path to " $m_vMoveToDest$", wait here." ); #endif
-        EscortIsOver( false );
-    }
-
-    FollowPathTo( m_vMoveToDest, m_pawn.m_eMovementPace );
-
-StartWaiting:
-    StopMoving();
-    EscortIsOver( true );
-}   
-
-
-//------------------------------------------------------------------
-// CivStayHere: the civilian as run away 
-//	- inherited 
-//------------------------------------------------------------------
-state CivStayHere extends Civilian
-{
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-        StopMoving();
-        ResetThreatInfo( "CivStayHere" );
-    }
+	// End:0x46
+	if(__NFUN_155__(m_pListOfCoverNodes.Length, 0))
+	{
+		i = __NFUN_167__(m_pListOfCoverNodes.Length);
+		m_pCoverNode = m_pListOfCoverNodes[i];
+		m_pListOfCoverNodes.Remove(i, 1);
+		CivGotoStateMovingTo(5, m_pCoverNode);
+		return true;
+	}
+	__NFUN_113__('CMCivStayKneel');
+	return false;
+	return;
 }
 
-//------------------------------------------------------------------
-// GoCivScareToDeath
-//	- inherited 
-//------------------------------------------------------------------
-state GoCivScareToDeath
+// NEW IN 1.60
+function CivGotoStateMovingTo(R6Pawn.eMovementPace ePace, optional Actor aMoveTarget)
 {
-    ignores SeePlayer, HearNoise;
-        
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
+	local Vector vHitNormal;
 
-        StopMoving();
-        SetPawnPosition( POS_Foetus );
-        m_bForceToStayHere = true;
-
-        ProcessPlaySndInfo( m_mgr.HSTSNDEvent_GoFoetal );
-        SetThreatState( 'CivScareToDeath' );
-        GotoState( m_threatInfo.m_state );
-		
-    }
-}
-
-//------------------------------------------------------------------
-// CivScareToDeath: Initialized by GoCivScareToDeath
-//	
-//------------------------------------------------------------------
-state CivScareToDeath extends Civilian
-{
-    ignores SeePlayer, HearNoise;
-        
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-    }
-Begin:
-    Sleep( GetRandomTweenNum( m_scareToDeathTween ) );
-    ResetThreatInfo( "CivScareToDeath is over" );
-
-    m_bForceToStayHere = false;
-    SetPawnPosition( POS_Kneel );
-    gotoState('CivStayHere');
-	
-}
-
-//------------------------------------------------------------------
-// CivRunForCover
-//------------------------------------------------------------------
-state CivRunForCover
-{
-    function BeginState()
-    {
-    // MPF1		
-        #ifdefDEBUG if(bShowLog) logX( "CivRunForCover" ); #endif
- 
-		//MissionPack1
-        //SetStateRunForCover( m_threatInfo.m_pawn, 'CivStayHere', 'GoCivScareToDeath', m_threatInfo.m_actorExt  );
-		if(m_pawn.m_bPoliceManMp1)
-			gotoState('CivGuardPoint');//MissionPack1
-		else
-			gotoState('GoCivScareToDeath');//MissionPack1
-    }
-}
-
-//------------------------------------------------------------------
-// CivRunTowardRainbow
-//------------------------------------------------------------------
-state CivRunTowardRainbow
-{   
-    function BeginState()
-    { // MPF1
-		////////////////Begin MissionPack1
-		if(m_pawn.m_bCivilian || m_pawn.m_bPoliceManMp1)
-			CivInit();
-		else
-		{
-		////////////////End MissionPack1
-
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-
-        SetStateFollowingPawn( R6Pawn(m_threatInfo.m_pawn), true, m_mgr.HSTSNDEvent_CivRunTowardRainbow );
-		}////////////////End MissionPack1
-    }
-}
-
-//------------------------------------------------------------------
-// CivSurrender: surrender to terrorist
-//------------------------------------------------------------------
-state CivSurrender 
-{
-    function BeginState()
-    {
-        // MPF1
-		////////////////Begin MissionPack1
-		if(m_pawn.m_bCivilian || m_pawn.m_bPoliceManMp1)
-			CivInit();
-		else
-		{
-		////////////////End MissionPack1
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-
-        // look at my threat
-        // focalPoint = m_threatInfo.m_pawn.location;
-        if ( m_terrorist != none ) // was not ordered 
-        {
-            ProcessPlaySndInfo( m_mgr.HSTSNDEvent_CivSurrender );
-            R6TerroristAI(m_terrorist.controller).HostageSurrender( self );
-            // will call SetStateEscorted 
-        }
-        else
-        {
-            SetStateGuarded( POS_Random, m_mgr.HSTSNDEvent_CivSurrender );
-        }
-		}////////////////End MissionPack1
-
-    }
+	// End:0x12
+	if(__NFUN_114__(aMoveTarget, none))
+	{
+		__NFUN_113__('CMCivStayHere');
+	}
+	m_vMoveToDest = aMoveTarget.Location;
+	m_pawn.m_eMovementPace = ePace;
+	__NFUN_113__('CivMovingTo');
+	return;
 }
 
 //------------------------------------------------------------------
 // Order_GetLog
 //	
 //------------------------------------------------------------------
-function string Order_GetLog( OrderInfo info )
+function string Order_GetLog(OrderInfo Info)
 {
-    local string szOutput;
-    local string szOrder;
-    local string szPawn;
+	local string szOutput, szOrder, szPawn;
 
-    switch ( info.m_eOrder )
-    {
-        case HOrder_ComeWithMe:     szOrder = "follow";     break;
-        case HOrder_StayHere:       szOrder = "stay";       break;
-        case HOrder_Surrender:      szOrder = "surrender";  break;
-        case HOrder_GotoExtraction: szOrder = "extraction"; break;
-        default:                szOrder = "none";       break;
-    }
-
-    if ( info.m_pawn1 != none )
-    {
-        szPawn = ""$info.m_pawn1.name;
-    }
-    else
-    {
-        szPawn = "none";
-    }
-
-    szOutput = "Order: "$szOrder$" pawn: "$szPawn$" time: "$info.m_fTime;
-    
-    return szOutput;
+	switch(Info.m_eOrder)
+	{
+		// End:0x22
+		case 1:
+			szOrder = "follow";
+			// End:0x7B
+			break;
+		// End:0x36
+		case 2:
+			szOrder = "stay";
+			// End:0x7B
+			break;
+		// End:0x4F
+		case 3:
+			szOrder = "surrender";
+			// End:0x7B
+			break;
+		// End:0x69
+		case 4:
+			szOrder = "extraction";
+			// End:0x7B
+			break;
+		// End:0xFFFF
+		default:
+			szOrder = "none";
+			// End:0x7B
+			break;
+			break;
+	}
+	// End:0xAD
+	if(__NFUN_119__(Info.m_pawn1, none))
+	{
+		szPawn = __NFUN_112__("", string(Info.m_pawn1.Name));		
+	}
+	else
+	{
+		szPawn = "none";
+	}
+	szOutput = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Order: ", szOrder), " pawn: "), szPawn), " time: "), string(Info.m_fTime));
+	return szOutput;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3117,33 +1605,33 @@ function string Order_GetLog( OrderInfo info )
 //------------------------------------------------------------------
 function OrderInfo Order_Pop()
 {
-    local INT       i; 
-    local INT       lastIndex; 
-    local OrderInfo orderInfo;
-    
-    if ( m_iNbOrder == 0 )
-    {
-        return orderInfo;
-        }
+	local int i, LastIndex;
+	local OrderInfo OrderInfo;
 
-    // backup the first one
-    orderInfo = m_aOrderInfo[0]; 
+	// End:0x11
+	if(__NFUN_154__(m_iNbOrder, 0))
+	{
+		return OrderInfo;
+	}
+	OrderInfo = m_aOrderInfo[0];
+	LastIndex = __NFUN_147__(2, 1);
+	i = 0;
+	J0x30:
 
-    // shift all info to the left
-    lastIndex = ArrayCount(m_aOrderInfo) - 1;
-    for ( i = 0; i < lastIndex; i++ )
-    {
-        m_aOrderInfo[i] = m_aOrderInfo[i+1];
-    }
-
-    // reset last one
-    m_aOrderInfo[lastIndex].m_eOrder = eHostageOrder.HOrder_None;
-    m_aOrderInfo[lastIndex].m_fTime  = 0;
-    m_aOrderInfo[lastIndex].m_pawn1  = none;
-
-    m_iNbOrder--;
-            
-    return orderInfo;
+	// End:0x63 [Loop If]
+	if(__NFUN_150__(i, LastIndex))
+	{
+		m_aOrderInfo[i] = m_aOrderInfo[__NFUN_146__(i, 1)];
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x30;
+	}
+	m_aOrderInfo[LastIndex].m_eOrder = m_pawn.0;
+	m_aOrderInfo[LastIndex].m_fTime = 0.0000000;
+	m_aOrderInfo[LastIndex].m_pawn1 = none;
+	__NFUN_166__(m_iNbOrder);
+	return OrderInfo;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3151,29 +1639,30 @@ function OrderInfo Order_Pop()
 //  If there's one only
 //	        
 //------------------------------------------------------------------
-function Order_Add( eHostageOrder eOrder, R6Pawn aPawn, OPTIONAL bool bOrderedByRainbow, OPTIONAL actor anActor )
+function Order_Add(R6Hostage.eHostageOrder eOrder, R6Pawn aPawn, optional bool bOrderedByRainbow, optional Actor anActor)
 {
-    local OrderInfo orderInfo;
+	local OrderInfo OrderInfo;
 
-    while ( m_iNbOrder >= ArrayCount(m_aOrderInfo) )
-    {
-        orderInfo = Order_Pop(); // pop the first element and keep the remaining ones
-        #ifdefDEBUG if ( bShowLog ) logX( "skipped "$Order_GetLog( orderInfo ) ); #endif
-    }
-
-    m_aOrderInfo[ m_iNbOrder ].m_eOrder  = eOrder;
-    m_aOrderInfo[ m_iNbOrder ].m_pawn1   = aPawn;
-    m_aOrderInfo[ m_iNbOrder ].m_fTime   = Level.TimeSeconds;
-    m_aOrderInfo[ m_iNbOrder ].m_bOrderedByRainbow = bOrderedByRainbow;
-    m_aOrderInfo[ m_iNbOrder ].m_actor   = anActor;
-
-    #ifdefDEBUG if ( bShowLog ) logX( "add "$Order_GetLog( m_aOrderInfo[ m_iNbOrder ] ) ); #endif
-    m_iNbOrder++;
-
-    if ( !m_pawn.m_bPostureTransition )
-    {
-        Order_Process();
-    }
+	J0x00:
+	// End:0x1B [Loop If]
+	if(__NFUN_153__(m_iNbOrder, 2))
+	{
+		OrderInfo = Order_Pop();
+		// [Loop Continue]
+		goto J0x00;
+	}
+	m_aOrderInfo[m_iNbOrder].m_eOrder = eOrder;
+	m_aOrderInfo[m_iNbOrder].m_pawn1 = aPawn;
+	m_aOrderInfo[m_iNbOrder].m_fTime = Level.TimeSeconds;
+	m_aOrderInfo[m_iNbOrder].m_bOrderedByRainbow = bOrderedByRainbow;
+	m_aOrderInfo[m_iNbOrder].m_actor = anActor;
+	__NFUN_165__(m_iNbOrder);
+	// End:0xB5
+	if(__NFUN_129__(m_pawn.m_bPostureTransition))
+	{
+		Order_Process();
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3182,14 +1671,8 @@ function Order_Add( eHostageOrder eOrder, R6Pawn aPawn, OPTIONAL bool bOrderedBy
 //------------------------------------------------------------------
 function bool IsInTemporaryState()
 {
-    return (   m_pawn.m_bPostureTransition 
-            || m_r6pawn.m_bIsClimbingLadder
-            || (Physics == PHYS_Falling) 
-            || (Physics == PHYS_RootMotion)
-            || isInState( 'BumpBackup')
-            || isInState( 'OpenDoor')
-            // || isInState( 'ClimbObject') // R6CLIMBABLEOBJECT
-           );
+	return __NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_pawn.m_bPostureTransition, m_r6pawn.m_bIsClimbingLadder), __NFUN_154__(int(Physics), int(2))), __NFUN_154__(int(Physics), int(12))), __NFUN_281__('BumpBackUp')), __NFUN_281__('OpenDoor'));
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3198,56 +1681,61 @@ function bool IsInTemporaryState()
 //------------------------------------------------------------------
 function Order_Process()
 {
-    local OrderInfo orderInfo;
+	local OrderInfo OrderInfo;
 
-    // don't process order if one of the condition below is true
-    // MPF1
-    //if ( m_iNbOrder == 0 || IsInTemporaryState() || m_pawn.m_bExtracted )
-	if ( m_iNbOrder == 0 || IsInTemporaryState() || m_pawn.m_bExtracted || m_pawn.m_bCivilian)
-    {
-        return;
-    }
-
-    orderInfo = Order_Pop();
-
-    #ifdefDEBUG if ( bShowLog ) logX( "process "$Order_GetLog( orderInfo ) ); #endif
-    
-    switch ( orderInfo.m_eOrder )
-    {
-        case HOrder_ComeWithMe:
-            Order_ProcessFollowMe( orderInfo.m_pawn1, orderInfo.m_bOrderedByRainbow );
-            break;
-
-        case HOrder_StayHere:
-            Order_ProcessStayHere( orderInfo.m_bOrderedByRainbow );
-            break;
-    
-        case HOrder_Surrender:
-            Order_ProcessSurrender( R6Terrorist(orderInfo.m_pawn1) );
-            break;
-
-        case HOrder_GotoExtraction:
-            Order_ProcessGotoExtraction( orderInfo.m_actor );
-            break;
-    }
+	// End:0x40
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(m_iNbOrder, 0), IsInTemporaryState()), m_pawn.m_bExtracted), m_pawn.m_bCivilian))
+	{
+		return;
+	}
+	OrderInfo = Order_Pop();
+	switch(OrderInfo.m_eOrder)
+	{
+		// End:0x7B
+		case 1:
+			Order_ProcessFollowMe(OrderInfo.m_pawn1, OrderInfo.m_bOrderedByRainbow);
+			// End:0xCC
+			break;
+		// End:0x94
+		case 2:
+			Order_ProcessStayHere(OrderInfo.m_bOrderedByRainbow);
+			// End:0xCC
+			break;
+		// End:0xB1
+		case 3:
+			Order_ProcessSurrender(R6Terrorist(OrderInfo.m_pawn1));
+			// End:0xCC
+			break;
+		// End:0xC9
+		case 4:
+			Order_ProcessGotoExtraction(OrderInfo.m_actor);
+			// End:0xCC
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // Order_GotoExtraction: order hostage to go to the extraction Zone
 //	
 //------------------------------------------------------------------
-function Order_GotoExtraction( Actor aZone )
+function Order_GotoExtraction(Actor aZone)
 {
-    Order_Add( HOrder_GotoExtraction, none, false, aZone );
+	Order_Add(4, none, false, aZone);
+	return;
 }
 
 //------------------------------------------------------------------
 // Order_StayHere: Rainbow orders the hostage to stay here
 //	
 //------------------------------------------------------------------
-function Order_StayHere( bool bOrderedByRainbow )
+function Order_StayHere(bool bOrderedByRainbow)
 {
-    Order_Add( HOrder_StayHere, none, bOrderedByRainbow );
+	Order_Add(2, none, bOrderedByRainbow);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3256,107 +1744,55 @@ function Order_StayHere( bool bOrderedByRainbow )
 //------------------------------------------------------------------
 function bool Order_canFollowMe()
 {
-    return m_pawn.m_escortedByRainbow == none;
+	return __NFUN_114__(m_pawn.m_escortedByRainbow, none);
+	return;
 }
 
 //------------------------------------------------------------------
 // Order_FollowMe: Rainbows order to follow this pawn
 //	
 //------------------------------------------------------------------
-function Order_FollowMe( R6Pawn aPawn, bool bOrderedByRainbow )
+function Order_FollowMe(R6Pawn aPawn, bool bOrderedByRainbow)
 {
-    Order_Add( HOrder_ComeWithMe, aPawn, bOrderedByRainbow );
+	Order_Add(1, aPawn, bOrderedByRainbow);
+	return;
 }
 
 //------------------------------------------------------------------
 // Order_Surrender: Terrorist orders to surrender
 //	
 //------------------------------------------------------------------
-function Order_Surrender( R6Pawn aPawn )
+function Order_Surrender(R6Pawn aPawn)
 {
-    Order_Add( HOrder_Surrender, aPawn );
+	Order_Add(3, aPawn);
+	return;
 }
-
-
-state OpenDoor
-{
-    function SeePlayerMgr();
-    function SeePlayer( Pawn p );
-    event HearNoise( float fLoudness, Actor noiseMaker, ENoiseType eType );
-}
-
-/* // R6CLIMBABLEOBJECT
-state ClimbObject
-{
-    function SeePlayerMgr();
-    function SeePlayer( Pawn p );
-    event HearNoise( float fLoudness, Actor noiseMaker, ENoiseType eType );
-}
-*/
-
-//------------------------------------------------------------------
-// CanClimbObject: look if the pawn can climb r6climbableObject
-//	
-//------------------------------------------------------------------
-// R6CLIMBABLEOBJECT
-/*
-function bool CanClimbObject()
-{
-    local float fFollowZ;
-    local float fPawnZ;
-
-    // not freed, cannot climb 
-    if ( !m_pawn.m_bFreed )
-    {
-        // todop: (what if escorted by terro?)
-        return false;
-    }
-
-    if ( moveTarget != none )
-    {
-        // log( "CanClimbObject: moveTarget " $moveTarget );
-
-        if ( moveTarget.IsA( 'R6ClimbablePoint' ) )
-        {
-            return true;
-        }
-    }
-    else if ( m_pawnToFollow != none )
-    {
-        fFollowZ = m_pawnToFollow.Location.Z - m_pawnToFollow.CollisionHeight;
-        fPawnZ = m_pawn.Location.Z - m_pawn.CollisionHeight;
-
-        // log( "fFollowZ: " $fFollowZ$ " fPawnZ: " $fPawnZ );
-        if ( fFollowZ - fPawnZ >= MAXSTEPHEIGHT )
-        {
-            return true;
-        }
-    }
-
-    return Super.CanClimbObject();
-}*/
 
 //------------------------------------------------------------------
 // RouteCacheWithOtherLadder
 //	return true if the route cache has a the other r6ladder nav point
 //------------------------------------------------------------------
-function bool RouteCacheWithOtherLadder( r6ladder ladder )
+function bool RouteCacheWithOtherLadder(R6Ladder Ladder)
 {
-    local INT i;
-    local r6ladder testLadder;
+	local int i;
+	local R6Ladder testLadder;
 
-    while ( i < 16 && RouteCache[i] != none )
-    {
-        testLadder = r6ladder( RouteCache[i] );
-        if( testLadder != none && ladder.m_pOtherFloor == testLadder )
-        {
-            return true;
-        }
-
-        i++;
-    }        
-
-    return false;
+	J0x00:
+	// End:0x66 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, 16), __NFUN_119__(RouteCache[i], none)))
+	{
+		testLadder = R6Ladder(RouteCache[i]);
+		// End:0x5C
+		if(__NFUN_130__(__NFUN_119__(testLadder, none), __NFUN_114__(Ladder.m_pOtherFloor, testLadder)))
+		{
+			return true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3365,87 +1801,103 @@ function bool RouteCacheWithOtherLadder( r6ladder ladder )
 //------------------------------------------------------------------
 function CheckNeedToClimbLadder()
 {
-    if ( m_pawnToFollow == none )
-        return;
-
-    // clear and fill the route cache so next time R6Ladder touch is called it will work!
-    FindPathToward(m_pawnToFollow, true );
-
-    // check if we really need to climb
-    if ( (m_pawn.m_Ladder != none && !RouteCacheWithOtherLadder( m_pawn.m_Ladder )) ||
-         ActorReachable( m_pawnToFollow )  )
-    {
-        m_pawn.m_Ladder = none;
-        GotoState( nextState, nextLabel );   
-    }
+	// End:0x0D
+	if(__NFUN_114__(m_pawnToFollow, none))
+	{
+		return;
+	}
+	__NFUN_517__(m_pawnToFollow, true);
+	// End:0x6E
+	if(__NFUN_132__(__NFUN_130__(__NFUN_119__(m_pawn.m_Ladder, none), __NFUN_129__(RouteCacheWithOtherLadder(m_pawn.m_Ladder))), __NFUN_520__(m_pawnToFollow)))
+	{
+		m_pawn.m_Ladder = none;
+		__NFUN_113__(NextState, NextLabel);
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // CanClimbLadder
 //	
 //------------------------------------------------------------------
-function bool CanClimbLadders( R6Ladder ladder )
+function bool CanClimbLadders(R6Ladder Ladder)
 {
-    local INT i;
+	local int i;
 
-    if ( !R6LadderVolume(ladder.MyLadder).IsAvailable(Pawn) )
-    {
-        return false;
-    }
+	// End:0x29
+	if(__NFUN_129__(R6LadderVolume(Ladder.MyLadder).IsAvailable(Pawn)))
+	{
+		return false;
+	}
+	// End:0x95
+	if(__NFUN_130__(m_pawn.m_bAutoClimbLadders, __NFUN_114__(MoveTarget, Ladder)))
+	{
+		J0x4C:
 
-    // Check auto climbing flag and that it's our move target
-    if ( m_pawn.m_bAutoClimbLadders  && MoveTarget == ladder  )
-    {
-        // Check if we want to go to the other end of that ladder
-        while ( i < 16 && RouteCache[i] != none )
-        {
-            if ( RouteCache[i] == ladder.m_pOtherFloor )
-            {
-                
-                return true;
-            }
-            i++;
-        }        
-    }
-
-    // log( "CanClimbLadders: false MoveTarget=" $MoveTarget.name$ " ladder=" $ladder.name );
-    return false;
+		// End:0x95 [Loop If]
+		if(__NFUN_130__(__NFUN_150__(i, 16), __NFUN_119__(RouteCache[i], none)))
+		{
+			// End:0x8B
+			if(__NFUN_114__(RouteCache[i], Ladder.m_pOtherFloor))
+			{
+				return true;
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x4C;
+		}
+	}
+	return false;
+	return;
 }
 
-function PlaySoundAffectedByGrenade(R6Pawn.EGrenadeType eType)
+function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 {
-    switch(eType)
-    {
-        case GTYPE_TearGas:
-            m_VoicesManager.PlayHostageVoices(m_pawn, HV_EntersGas);
-            break;
-        case GTYPE_Smoke:
-            m_VoicesManager.PlayHostageVoices(m_pawn, HV_EntersSmoke);
-            break;
-    }
+	switch(eType)
+	{
+		// End:0x25
+		case 2:
+			m_VoicesManager.PlayHostageVoices(m_pawn, 8);
+			// End:0x46
+			break;
+		// End:0x43
+		case 1:
+			m_VoicesManager.PlayHostageVoices(m_pawn, 7);
+			// End:0x46
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // AIAffectedByGrenade()                                       
 //------------------------------------------------------------------
-function AIAffectedByGrenade(Actor aGrenade, R6Pawn.EGrenadeType eType)
+function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 {
-    #ifdefDEBUG if(bShowLog) logX( " AIAffectedByGrenade from "$aGrenade); #endif
-
-	if(eType == GTYPE_Smoke)
+	// End:0x13
+	if(__NFUN_154__(int(eType), int(1)))
+	{		
+	}
+	else
 	{
-		#ifdefDEBUG if(bShowLog) logX(" AIAffectedByGrenade() : eType == GTYPE_Smoke (no effect except visibility) "); #endif
+		// End:0x37
+		if(__NFUN_154__(int(eType), int(2)))
+		{
+			m_pawn.SetNextPendingAction(1);			
+		}
+		else
+		{
+			// End:0x62
+			if(__NFUN_132__(__NFUN_154__(int(eType), int(3)), __NFUN_154__(int(eType), int(4))))
+			{
+				SetStateReactToGrenade(__NFUN_284__());
+			}
+		}
 	}
-	else if(eType == GTYPE_TearGas)
-    {
-		#ifdefDEBUG if(bShowLog) logX(" AIAffectedByGrenade() : eType == GTYPE_TearGas "); #endif
-        m_pawn.SetNextPendingAction( PENDING_Coughing );
-	}
-	else if(eType == GTYPE_FlashBang || eType == GTYPE_BreachingCharge)
-	{
-        #ifdefDEBUG if(bShowLog) logX(" AIAffectedByGrenade() : eType == GTYPE_FlashBang : aGrenade.Instigator = "$aGrenade.Instigator); #endif
-        SetStateReactToGrenade( GetStateName() );
-	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3453,129 +1905,45 @@ function AIAffectedByGrenade(Actor aGrenade, R6Pawn.EGrenadeType eType)
 //------------------------------------------------------------------
 function PlaySoundDamage(Pawn instigatedBy)
 {
-    if (m_pawn.m_eHealth <= HEALTH_Wounded /*AS_MILAN*/&& !m_pawn.m_bPoliceManMp1 /*AS_MILAN*/)
-    {
-        ProcessPlaySndInfo( m_mgr.HSTSNDEvent_InjuredByRainbow );
-    }
-    
-    if (m_pawn.IsFriend(instigatedBy) && m_bFirstTimeClarkComment)
-    {
-        if (m_pawn.m_eHealth <= HEALTH_Wounded)
-        {
-            m_bFirstTimeClarkComment = false;
-            m_VoicesManager.PlayHostageVoices(R6Pawn(instigatedBy), HV_ClarkReprimand);
-        }
-    }
-    else if (instigatedBy.Controller != none)
-    {
-        instigatedBy.Controller.PlaySoundInflictedDamage(m_pawn);
-    }
+	// End:0x40
+	if(__NFUN_130__(__NFUN_152__(int(m_pawn.m_eHealth), int(1)), __NFUN_129__(m_pawn.m_bPoliceManMp1)))
+	{
+		ProcessPlaySndInfo(m_mgr.10);
+	}
+	// End:0xA1
+	if(__NFUN_130__(m_pawn.IsFriend(instigatedBy), m_bFirstTimeClarkComment))
+	{
+		// End:0x9E
+		if(__NFUN_152__(int(m_pawn.m_eHealth), int(1)))
+		{
+			m_bFirstTimeClarkComment = false;
+			m_VoicesManager.PlayHostageVoices(R6Pawn(instigatedBy), 9);
+		}		
+	}
+	else
+	{
+		// End:0xD2
+		if(__NFUN_119__(instigatedBy.Controller, none))
+		{
+			instigatedBy.Controller.PlaySoundInflictedDamage(m_pawn);
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SetStateReactToGrenade: set the default value
 //	
 //------------------------------------------------------------------
-function SetStateReactToGrenade( name stateToReturn )
+function SetStateReactToGrenade(name stateToReturn)
 {
-    if ( stateToReturn != 'ReactToGrenade' )
-        m_reactToGrenadeStateToReturn = stateToReturn;
-    
-    gotoState( 'ReactToGrenade' );
-}
-
-//------------------------------------------------------------------
-// ReactToGrenade
-//------------------------------------------------------------------
-state ReactToGrenade
-{
-    ignores SeePlayer, HearNoise;
-
-    function BeginState()
-    {
-        #ifdefDEBUG if ( bShowLog ) logX( "beginState" ); #endif
-    }
-
-begin:
-    Sleep(RandRange(0.1,0.3)); // helps to desynchronized pawn
-
-    if ( m_pawn.m_eEffectiveGrenade == GTYPE_FlashBang || m_pawn.m_eEffectiveGrenade == GTYPE_BreachingCharge )
-    {
-        StopMoving();
-        m_pawn.SetNextPendingAction( PENDING_Blinded );
-        GetRandomTweenNum( m_stayBlindedTweenTime );
-        Sleep( m_stayBlindedTweenTime.m_fResult );
-        goto('end');
-    }
-
-end:
-    GotoState( m_reactToGrenadeStateToReturn );
-}
-
-
-//------------------------------------------------------------------
-// GoHstFreedButSeeEnemy
-//------------------------------------------------------------------
-state GoHstFreedButSeeEnemy
-{
-    function BeginState()
-    {
-        // it's better to go kneel if in crouch posture 
-        if ( IsInCrouchedPosture() )
-            SetStateGuarded( POS_Kneel, m_mgr.HSTSNDEvent_CivSurrender );
-        else
-            SetStateGuarded( POS_Stand, m_mgr.HSTSNDEvent_CivSurrender );
-
-        ResetThreatInfo( "GoHstFreedButSeeEnemy" );
-    }
-}
-
-//------------------------------------------------------------------
-// GoHstRunTowardRainbow
-//------------------------------------------------------------------
-state GoHstRunTowardRainbow
-{   
-    function BeginState()
-    {
-        SetStateFollowingPawn( R6Pawn(m_threatInfo.m_pawn), true, m_mgr.HSTSNDEvent_HstRunTowardRainbow );
-    }
-}
-
-//------------------------------------------------------------------
-// GoHstRunForCover
-//------------------------------------------------------------------
-state GoHstRunForCover
-{
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-                // MPF1
-		////////////////Begin MissionPack1
-		if(m_pawn.m_bPoliceManMp1)
-			CivInit();
-		else
-		{
-		////////////////End MissionPack1
-
-        SetFreed( true ); 
-        SetStateRunForCover( m_threatInfo.m_pawn, 'Freed', 'Guarded_foetus', m_threatInfo.m_actorExt); 
-		}////////////////End MissionPack1
-    }
-}
-
-//------------------------------------------------------------------
-// DbgHostage: state used to debug
-//------------------------------------------------------------------
-state DbgHostage
-{
-    ignores SeePlayer, HearNoise;
-
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
-        
-        StopMoving();
-    }
+	// End:0x1A
+	if(__NFUN_255__(stateToReturn, 'ReactToGrenade'))
+	{
+		m_reactToGrenadeStateToReturn = stateToReturn;
+	}
+	__NFUN_113__('ReactToGrenade');
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3584,204 +1952,1879 @@ state DbgHostage
 //------------------------------------------------------------------
 function SetStateExtracted()
 {
-    m_pawn.m_bExtracted = true;
-    m_iNbOrder = 0;
-    ResetThreatInfo( "extracted" );
-
-    if ( rand(2) == 1 || m_pawn.m_bCivilian )
-        SetPawnPosition( POS_Stand );
-    else
-        SetPawnPosition( POS_Crouch );
-
-    gotoState( 'Extracted' );
+	m_pawn.m_bExtracted = true;
+	m_iNbOrder = 0;
+	ResetThreatInfo("extracted");
+	// End:0x52
+	if(__NFUN_132__(__NFUN_154__(__NFUN_167__(2), 1), m_pawn.m_bCivilian))
+	{
+		SetPawnPosition(0);		
+	}
+	else
+	{
+		SetPawnPosition(4);
+	}
+	__NFUN_113__('Extracted');
+	return;
 }
-
-
-
 
 //------------------------------------------------------------------
 // ProcessPlaySndInfo
 //	
 //------------------------------------------------------------------
-function BOOL ProcessPlaySndInfo( int iSndEvent )
+function bool ProcessPlaySndInfo(int iSndEvent)
 {
-    local int  i, iSndIndex;
-    local bool bPlay;
-    
-        // MPF1
-	if ( m_pawn.m_bCivilian && (iSndEvent==6)) //MissionPack1
+	local int i, iSndIndex;
+	local bool bPlay;
+
+	// End:0x3B
+	if(__NFUN_130__(m_pawn.m_bCivilian, __NFUN_154__(iSndEvent, 6)))
 	{
+		// End:0x34
 		if(m_pawn.m_bPoliceManMp1)
+		{
 			return true;
-		iSndEvent=1;//	return false;
+		}
+		iSndEvent = 1;
+	}
+	i = iSndEvent;
+	// End:0x67
+	if(__NFUN_154__(m_aPlaySndInfo[i].m_iLastTime, 0))
+	{
+		bPlay = true;		
+	}
+	else
+	{
+		// End:0xA8
+		if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, float(m_aPlaySndInfo[i].m_iLastTime)), float(m_aPlaySndInfo[i].m_iInBetweenTime)))
+		{
+			bPlay = true;
+		}
+	}
+	// End:0x11C
+	if(bPlay)
+	{
+		m_aPlaySndInfo[i].m_iLastTime = int(Level.TimeSeconds);
+		iSndIndex = m_mgr.GetHostageSndEvent(iSndEvent, m_pawn);
+		m_VoicesManager.PlayHostageVoices(m_pawn, m_mgr.GetHostageVoices(iSndIndex));		
+	}
+	return bPlay;
+	return;
+}
+
+auto state Configuration
+{
+	function BeginState()
+	{
+		return;
 	}
 
-    i = iSndEvent ;
-    
-    if ( m_aPlaySndInfo[i].m_iLastTime == 0 ) // never started
-    {
-        bPlay = true;
-    }
-    else if (  Level.TimeSeconds - m_aPlaySndInfo[i].m_iLastTime > m_aPlaySndInfo[i].m_iInBetweenTime  ) // never started
-    {
-        bPlay = true;
-    }
+	function EndState()
+	{
+		m_threatGroupName = GetThreatGroupName();
+		m_iNotGuardedSince = 0;
+		return;
+	}
+	J0x00:
+	// End:0x1F [Loop If]
+	if(__NFUN_129__(m_pawn.m_bInitFinished))
+	{
+		__NFUN_256__(1.0000000);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	GetRandomTweenNum(m_pawn.m_waitingGoCrouchTween);
+	GetRandomTweenNum(m_AITickTime);
+	// End:0x82
+	if(m_pawn.m_bPoliceManMp1)
+	{
+		m_pawn.m_sightRadiusTween.m_fMin = 500.0000000;
+		m_pawn.m_sightRadiusTween.m_fMax = 1000.0000000;
+	}
+	Pawn.SightRadius = GetRandomTweenNum(m_pawn.m_sightRadiusTween);
+	GetRandomTweenNum(m_pawn.m_updatePaceTween);
+	GetRandomTweenNum(m_RunForCoverMinTween);
+	FocalPoint = __NFUN_215__(m_pawn.Location, Vector(m_pawn.Rotation));
+	// End:0x105
+	if(m_pawn.m_bStartAsCivilian)
+	{
+		CivInit();		
+	}
+	else
+	{
+		m_pawn.SetStandWalkingAnim(1, true);
+		// End:0x17E
+		if(IsGuarded(true))
+		{
+			SetPawnPosition(m_pawn.m_ePosition);
+			J0x135:
 
-    if ( bPlay )
-    {
-        m_aPlaySndInfo[i].m_iLastTime = Level.TimeSeconds;
-        iSndIndex = m_mgr.GetHostageSndEvent( iSndEvent , m_pawn );
-        m_VoicesManager.PlayHostageVoices( m_pawn, m_mgr.GetHostageVoices( iSndIndex ));
-        #ifdefDEBUG if ( bShowLog ) logX( "PLAY VOICE:" $m_mgr.GetHostageVoices( iSndIndex ) ); #endif
-    }
-    else
-    {
-        #ifdefDEBUG if ( bShowLog ) logX( "SOUND IGNORED:" $m_mgr.GetHostageVoices( iSndIndex ) ); #endif
-    }
+			// End:0x15D [Loop If]
+			if(__NFUN_129__(Level.Game.m_bGameStarted))
+			{
+				__NFUN_256__(0.5000000);
+				// [Loop Continue]
+				goto J0x135;
+			}
+			SetStateGuarded(m_pawn.m_ePosition, m_mgr.0);			
+		}
+		else
+		{
+			SetFreed(true);
+			SetPawnPosition(4);
+			J0x18D:
 
-    return bPlay;
+			// End:0x1B5 [Loop If]
+			if(__NFUN_129__(Level.Game.m_bGameStarted))
+			{
+				__NFUN_256__(0.5000000);
+				// [Loop Continue]
+				goto J0x18D;
+			}
+			__NFUN_113__('Freed');
+		}
+	}
+	stop;			
 }
 
-//------------------------------------------------------------------
-// GotoExtraction
-//	run toward m_escort and ignore threats
-//------------------------------------------------------------------
-state GotoExtraction
+state Guarded
 {
-    ignores SeePlayer, HearNoise /*, NotifyBump*/; // ignore threats and bump
+	function BeginState()
+	{
+		// End:0x1B
+		if(__NFUN_119__(m_pawn.m_escortedByRainbow, none))
+		{
+			StopFollowingPawn(false);
+		}
+		StopMoving();
+		Focus = none;
+		FocalPoint = __NFUN_215__(m_pawn.Location, Vector(m_pawn.Rotation));
+		m_vReactionDirection = vect(0.0000000, 0.0000000, 0.0000000);
+		m_iNotGuardedSince = 0;
+		m_iWaitingTime = 0;
+		SetFreed(false);
+		m_pawn.setFrozen(false);
+		// End:0xB9
+		if(__NFUN_129__(__NFUN_132__(m_pawn.isKneeling(), m_pawn.isStandingHandUp())))
+		{
+			SetPawnPosition(m_eTransitionPosition);
+		}
+		__NFUN_280__(0.1000000, true);
+		// End:0x100
+		if(__NFUN_130__(__NFUN_154__(int(m_pawn.m_ePosition), int(0)), __NFUN_129__(m_pawn.isStandingHandUp())))
+		{
+			m_pawn.PlayWaiting();
+		}
+		m_iPlayReaction1 = 0;
+		m_lastSeenPawn = none;
+		m_bForceToStayHere = false;
+		return;
+	}
 
-    function BeginState()
-    {
-        #ifdefDEBUG if ( bShowLog ) logX( "begin" ); #endif
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		return;
+	}
 
-        if ( !m_pawn.isStanding() )
-            SetPawnPosition( POS_Stand );
+	function Timer()
+	{
+		// End:0x25
+		if(__NFUN_153__(m_iWaitingTime, 20))
+		{
+			// End:0x1E
+			if(__NFUN_129__(IsGuarded()))
+			{
+				__NFUN_113__('Freed');
+			}
+			m_iWaitingTime = 0;
+		}
+		__NFUN_165__(m_iWaitingTime);
+		// End:0x3D
+		if(__NFUN_119__(m_lastSeenPawn, none))
+		{
+			SeePlayerMgr();
+		}
+		// End:0x8E
+		if(__NFUN_155__(m_iPlayReaction1, 0))
+		{
+			// End:0x87
+			if(__NFUN_153__(m_iPlayReaction1, m_iPlayReaction2))
+			{
+				ProcessPlaySndInfo(m_mgr.1);
+				m_pawn.PlayReaction();
+				m_iPlayReaction1 = 0;
+				m_iPlayReaction2 = 0;				
+			}
+			else
+			{
+				__NFUN_165__(m_iPlayReaction1);
+			}
+		}
+		return;
+	}
+	stop;
+}
 
-        focus = none;
-    }
+state GoGuarded_Foetus
+{
+	function BeginState()
+	{
+		SetThreatState('Guarded_foetus');
+		ProcessPlaySndInfo(m_mgr.7);
+		__NFUN_113__(m_threatInfo.m_state);
+		return;
+	}
+	stop;
+}
 
+state Guarded_foetus extends Guarded
+{
+	function BeginState()
+	{
+		Focus = none;
+		StopMoving();
+		// End:0x23
+		if(__NFUN_255__(m_pawn.__NFUN_284__(), 'Foetus'))
+		{
+		}
+		SetPawnPosition(3);
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x18
+		if(CanReturnToNormalState())
+		{
+			__NFUN_113__('Guarded_foetus', 'End');			
+		}
+		else
+		{
+			__NFUN_113__('Guarded_foetus', 'Begin');
+		}
+		return;
+	}
+End:
+
+	ResetThreatInfo("foetus end");
+	__NFUN_280__(0.0000000, false);
+	ReturnToNormalState(true);
 Begin:
-    // wait to be in the position to move
-    while ( m_pawn.m_bPostureTransition )
-        Sleep( 0.1 );
 
-    // give some time to be removed from the rainbow escort list
-    if ( m_pawn.m_escortedByRainbow != none )
-    {
-        Sleep(0.3);
-        StopFollowingPawn( false );
-        m_pawn.SetStandWalkingAnim( eStandWalkingAnim_scared, true );
-    }
-    
-RunToDestination:
-    // logX( " RunToDestination: dist=" $VSize( Pawn.Location - m_vMoveToDest ) );
-    // should be in the extraction zone...
 
-    focus = none;
-    if ( m_vMoveToDest != m_pGotoToExtractionZone.location )
-        m_vMoveToDest = m_pGotoToExtractionZone.location;
-
-    if ( VSize( Pawn.Location - m_vMoveToDest ) < 100 )
-    {
-        StopMoving();
-        GotoState( 'Freed' );
-    }
-
-    SetPace( PACE_Run );
-    m_vTargetPosition = m_vMoveToDest; 
-
-    if ( PointReachable(m_vTargetPosition) )
-    {
-        //  Move to it
-        #ifdefDEBUG  if (bShowLog) logX ( "PointReachable distance=" $VSize( Pawn.Location - m_vTargetPosition ) ); #endif
-
-        focus = none;
-        focalPoint = m_vTargetPosition;    
-        MoveTo(m_vTargetPosition);   
-        StopMoving();
-        moveTarget = none;
-    }
-    else
-    {
-        MoveTarget = FindPathTo( m_vTargetPosition, true );
-        if ( MoveTarget!=None )
-        {
-            //  Move to it
-            #ifdefDEBUG  if (bShowLog) logX ( "label RunToDestination.  Goal = " $ RouteGoal$ " distance=" $VSize( Pawn.Location - m_vTargetPosition ) ); #endif
-            FollowPath( m_pawn.m_eMovementPace, 'ReturnToPath', false );
-        }
-        else
-        {
-            #ifdefDEBUG if(bShowLog)  logX ( " at " $ Pawn.Location $ ", was unable to find a path to. distance=" $VSize( Pawn.Location - m_vMoveToDest )); #endif
-		    R6PreMoveToward(m_pGotoToExtractionZone, m_pGotoToExtractionZone,  m_pawn.m_eMovementPace );
-		    MoveToward(m_pGotoToExtractionZone);
-		    Sleep(1.0);
-        }
-    }
-
-    Goto('RunToDestination');
-
-ReturnToPath:
-    #ifdefDEBUG if(bShowLog) logX ( " ReturnToPath:" $ Pawn.Location $ "" ); #endif
-    FollowPath( m_pawn.m_eMovementPace, 'ReturnToPath', true );
-    Goto('RunToDestination');
+	__NFUN_280__(GetRandomTweenNum(m_pawn.m_stayInFoetusTime), true);
+	stop;	
 }
 
-//------------------------------------------------------------------
-// Extracted
-//	
-//------------------------------------------------------------------
-state Extracted
+state GoGuarded_frozen
 {
-    ignores SeePlayer, R6DamageAttitudeTo, HearNoise, EnemyNotVisible;
+	function BeginState()
+	{
+		ProcessPlaySndInfo(m_mgr.6);
+		__NFUN_113__('Guarded_frozen');
+		return;
+	}
+	stop;
+}
 
-    function BeginState()
-    {
-        #ifdefDEBUG if ( bShowLog ) logX( "begin" ); #endif
-        m_pawn.m_bAvoidFacingWalls = true;
-        focus = none;
-        m_bIgnoreBackupBump = false;
-    }
+state Guarded_frozen extends Guarded
+{
+	function BeginState()
+	{
+		StopMoving();
+		Focus = none;
+		// End:0x30
+		if(__NFUN_129__(m_pawn.m_bFrozen))
+		{
+			m_pawn.GotoFrozen();
+		}
+		return;
+	}
 
-    function AIAffectedByGrenade(Actor aGrenade, R6Pawn.EGrenadeType eType)
-    {
-        // no effect
-    }
+	function Timer()
+	{
+		m_pawn.setFrozen(false);
+		__NFUN_113__('Guarded_foetus');
+		return;
+	}
+End:
+
+	m_pawn.setFrozen(false);
+	__NFUN_280__(0.0000000, false);
+	// End:0x2B
+	if(CanReturnToNormalState())
+	{
+		ReturnToNormalState();		
+	}
+	else
+	{
+		__NFUN_113__('Guarded_foetus');
+	}
+	J0x32:
+
+	__NFUN_280__(GetRandomTweenNum(m_pawn.m_stayFrozenTime), true);
+	stop;	
+}
+
+state Freed
+{
+	function BeginState()
+	{
+		StopMoving();
+		SetFreed(true);
+		m_lastSeenPawn = none;
+		m_pawn.m_bAvoidFacingWalls = true;
+		SetPawnPosition(4);
+		m_iWaitingTime = int(GetRandomTweenNum(m_pawn.m_changeOrientationTween));
+		m_iFacingTime = int(Level.TimeSeconds);
+		return;
+	}
+
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		m_lastSeenPawn = none;
+		m_iWaitingTime = 0;
+		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x75
+		if(__NFUN_130__(__NFUN_176__(float(__NFUN_146__(m_iFacingTime, m_iWaitingTime)), Level.TimeSeconds), __NFUN_129__(m_pawn.m_bPostureTransition)))
+		{
+			m_iFacingTime = int(Level.TimeSeconds);
+			m_iWaitingTime = int(GetRandomTweenNum(m_pawn.m_changeOrientationTween));
+			ChangeOrientationTo(GetRandomTurn90());
+		}
+		// End:0x86
+		if(__NFUN_119__(m_lastSeenPawn, none))
+		{
+			SeePlayerMgr();
+		}
+		return;
+	}
+	J0x00:
+	// End:0x33 [Loop If]
+	if(__NFUN_129__(__NFUN_130__(m_pawn.bWantsToCrouch, m_pawn.bIsCrouched)))
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	__NFUN_280__(m_AITickTime.m_fResult, true);
+	stop;		
+}
+
+state FollowingPaceTransition
+{
+	function BeginState()
+	{
+		StopMoving();
+		return;
+	}
+Begin:
+
+	// End:0x55
+	if(m_pawn.m_bIsProne)
+	{
+		SetPawnPosition(4);
+		__NFUN_256__(0.3000000);
+		SetPace(2);
+		// End:0x52
+		if(__NFUN_154__(int(m_eTransitionPosition), int(0)))
+		{
+			SetPawnPosition(0);
+			__NFUN_256__(0.3000000);
+			SetPace(4);
+		}		
+	}
+	else
+	{
+		// End:0xBA
+		if(__NFUN_130__(__NFUN_154__(int(m_eTransitionPosition), int(2)), __NFUN_129__(m_pawn.m_bIsProne)))
+		{
+			// End:0x9F
+			if(__NFUN_129__(m_pawn.bIsCrouched))
+			{
+				SetPawnPosition(4);
+				__NFUN_256__(0.3000000);
+			}
+			SetPawnPosition(2);
+			__NFUN_256__(0.4000000);
+			SetPace(1);			
+		}
+		else
+		{
+			SetPawnPosition(m_eTransitionPosition);
+		}
+	}
+	R6SetMovement(m_pawn.m_eMovementPace);
+	__NFUN_113__('FollowingPawn');
+	stop;			
+}
+
+state FollowingPawn
+{
+	function BeginState()
+	{
+		// End:0x2F
+		if(__NFUN_132__(m_pawn.m_bCivilian, m_pawn.m_bPoliceManMp1))
+		{
+			CivInit();			
+		}
+		else
+		{
+			MoveTarget = none;
+			Focus = none;
+			m_lastSeenPawn = none;
+			SetFreed(true);
+			m_bSlowedPace = false;
+		}
+		return;
+	}
+
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		Focus = none;
+		return;
+	}
 
     /////////////////////////////////////////////////////////////////////////
-    function Timer()
-    {
-        m_iWaitingTime = GetRandomTweenNum( m_pawn.m_changeOrientationTween );
-        SetTimer( m_iWaitingTime, false );
-        ChangeOrientationTo( GetRandomTurn90() );
-    }
-    
-begin:
-    Sleep( rand( 2 ) ); // give some time before stopping
-    StopMoving();
-    m_bForceToStayHere = true;
-    StopFollowingPawn( false );
-    m_iWaitingTime = GetRandomTweenNum( m_pawn.m_changeOrientationTween );
-    SetTimer( m_iWaitingTime, false );
+	event bool NotifyBump(Actor Other)
+	{
+		m_lastUpdatePaceTime = 0;
+		m_bFollowIncreaseDistance = true;
+		return super(R6AIController).NotifyBump(Other);
+		return;
+	}
+
+	function Timer()
+	{
+		local bool bUpdateMove, bFound;
+		local R6Pawn P;
+		local R6RainbowTeam Team;
+		local float fSleep;
+		local bool bCanWalkTo;
+
+		// End:0x11
+		if(__NFUN_119__(m_lastSeenPawn, none))
+		{
+			SeePlayerMgr();
+		}
+		// End:0x68
+		if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_bStopDoTransition, m_pawn.m_bPostureTransition), m_r6pawn.m_bIsClimbingLadder), __NFUN_154__(int(Physics), int(2))), __NFUN_154__(int(Physics), int(12))))
+		{
+			return;
+		}
+		// End:0xE5
+		if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, float(m_lastUpdatePaceTime)), m_pawn.m_updatePaceTween.m_fResult))
+		{
+			// End:0xBB
+			if(SetMovementPace(false))
+			{
+				m_bStopDoTransition = true;
+				StopMoving();
+				Focus = none;
+				return;				
+			}
+			else
+			{
+				m_lastUpdatePaceTime = int(Level.TimeSeconds);
+				GetRandomTweenNum(m_pawn.m_updatePaceTween);
+			}
+		}
+		// End:0xFF
+		if(__NFUN_132__(__NFUN_114__(m_pawnToFollow, none), __NFUN_114__(MoveTarget, none)))
+		{
+			return;
+		}
+		bUpdateMove = false;
+		// End:0x181
+		if(__NFUN_130__(m_bRunningToward, __NFUN_129__(m_pawnToFollow.IsAlive())))
+		{
+			m_pawnToFollow = R6Rainbow(m_pawnToFollow).Escort_FindRainbow(m_pawn);
+			// End:0x15B
+			if(__NFUN_114__(m_pawnToFollow, none))
+			{
+				m_bLatentFnStopped = true;				
+			}
+			else
+			{
+				m_pawnToFollow = R6Rainbow(m_pawnToFollow).Escort_GetPawnToFollow(true);
+			}
+			bUpdateMove = true;			
+		}
+		else
+		{
+			// End:0x1CD
+			if(CanStopMoving(false))
+			{
+				bUpdateMove = true;
+				m_bLatentFnStopped = true;
+				m_lastUpdatePaceTime = int(Level.TimeSeconds);
+				m_bNeedToRunToCatchUp = false;
+				// End:0x1CA
+				if(m_bRunningToward)
+				{
+					m_bRunToRainbowSuccess = true;
+				}				
+			}
+			else
+			{
+				// End:0x1FA
+				if(__NFUN_130__(MoveTarget.__NFUN_303__('R6Pawn'), __NFUN_119__(MoveTarget, m_pawnToFollow)))
+				{
+					bUpdateMove = true;
+				}
+			}
+		}
+		// End:0x20A
+		if(bUpdateMove)
+		{
+			MoveTarget = none;
+		}
+		return;
+	}
+Begin:
+
+	__NFUN_256__(RandRange(0.1000000, 0.5000000));
+	J0x13:
+
+	// End:0x30 [Loop If]
+	if(m_pawn.m_bPostureTransition)
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x13;
+	}
+	// End:0xDD
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_130__(m_bRunningToward, __NFUN_129__(m_pawn.isStanding())), __NFUN_154__(int(m_pawn.m_ePosition), int(3))), __NFUN_154__(int(m_pawn.m_ePosition), int(1))), m_pawn.isStandingHandUp()))
+	{
+		SetPawnPosition(0);
+		J0xA1:
+
+		// End:0xC0 [Loop If]
+		if(__NFUN_129__(m_pawn.m_bPostureTransition))
+		{
+			__NFUN_256__(0.1000000);
+			// [Loop Continue]
+			goto J0xA1;
+		}
+		J0xC0:
+
+		// End:0xDD [Loop If]
+		if(m_pawn.m_bPostureTransition)
+		{
+			__NFUN_256__(0.1000000);
+			// [Loop Continue]
+			goto J0xC0;
+		}
+	}
+	// End:0x100
+	if(m_bRunningToward)
+	{
+		m_pawn.m_escortedByRainbow = GetRainbowWhoEscortThisPawn(m_pawnToFollow);
+	}
+	m_bRunToRainbowSuccess = false;
+	m_bNeedToRunToCatchUp = false;
+	m_bStopDoTransition = false;
+MovingSetDefault:
+
+
+	m_lastUpdatePaceTime = int(Level.TimeSeconds);
+	__NFUN_280__(m_AITickTime.m_fMin, true);
+	m_pawn.bCanWalkOffLedges = m_pawn.default.bCanWalkOffLedges;
+Moving:
+
+
+	// End:0x196
+	if(m_bStopDoTransition)
+	{
+		Focus = none;
+		StopMoving();
+		m_bStopDoTransition = false;
+		J0x179:
+
+		// End:0x196 [Loop If]
+		if(m_pawn.m_bPostureTransition)
+		{
+			__NFUN_256__(0.1000000);
+			// [Loop Continue]
+			goto J0x179;
+		}
+	}
+WaitForClimbing:
+
+
+	// End:0x424
+	if(__NFUN_119__(m_pawn.m_Ladder, none))
+	{
+		StopMoving();
+		__NFUN_118__('Timer');
+		// End:0x263
+		if(__NFUN_132__(__NFUN_176__(__NFUN_186__(__NFUN_175__(m_pawnToFollow.Location.Z, Pawn.Location.Z)), float(80)), m_pawnToFollow.m_bIsClimbingLadder))
+		{
+			__NFUN_256__(0.5000000);
+			// End:0x232
+			if(__NFUN_119__(m_pawn.m_escortedByRainbow, none))
+			{
+				m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
+			}
+			// End:0x25A
+			if(__NFUN_520__(m_pawnToFollow))
+			{
+				m_pawn.m_Ladder = none;
+				__NFUN_117__('Timer');
+				goto 'EndClimbLadder';
+			}
+			goto 'WaitForClimbing';			
+		}
+		else
+		{
+			__NFUN_517__(m_pawnToFollow, true);
+			// End:0x2AF
+			if(__NFUN_132__(__NFUN_129__(RouteCacheWithOtherLadder(m_pawn.m_Ladder)), __NFUN_520__(m_pawnToFollow)))
+			{
+				m_pawn.m_Ladder = none;
+				__NFUN_117__('Timer');
+				goto 'EndClimbLadder';
+			}
+			NextLabel = 'None';
+			MoveTarget = m_pawn.m_Ladder;
+			R6PreMoveToward(MoveTarget, MoveTarget, 4);
+			__NFUN_502__(MoveTarget);
+			// End:0x416
+			if(__NFUN_154__(int(m_eMoveToResult), int(1)))
+			{
+				// End:0x3DB
+				if(__NFUN_130__(__NFUN_119__(m_pawn.m_Ladder, none), __NFUN_129__(R6LadderVolume(m_pawn.m_Ladder.MyLadder).IsAvailable(Pawn))))
+				{
+					__NFUN_2209__(m_pawn.m_Ladder, m_vTargetPosition);
+					m_pawn.m_Ladder = none;
+					// End:0x39F
+					if(__NFUN_132__(m_pawn.bIsCrouched, m_pawn.m_bIsProne))
+					{
+						R6PreMoveTo(m_vTargetPosition, Location, 2);						
+					}
+					else
+					{
+						R6PreMoveTo(m_vTargetPosition, Location, 4);
+					}
+					__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(Location, m_vTargetPosition)));
+					StopMoving();
+					__NFUN_256__(0.5000000);
+					goto 'WaitForClimbing';
+				}
+				MoveTarget = m_pawn.m_Ladder;
+				// End:0x416
+				if(CanClimbLadders(m_pawn.m_Ladder))
+				{
+					NextState = __NFUN_284__();
+					__NFUN_113__('ApproachLadder');
+				}
+			}
+			__NFUN_256__(0.5000000);
+			goto 'WaitForClimbing';
+		}
+	}
+	J0x424:
+
+	// End:0x49F
+	if(__NFUN_129__(CanStopMoving(true)))
+	{
+		m_bFollowIncreaseDistance = false;
+		m_lastUpdatePaceTime = int(Level.TimeSeconds);
+		// End:0x473
+		if(SetMovementPace(true))
+		{
+			m_bStopDoTransition = true;
+			StopMoving();
+			Focus = none;
+			goto 'Moving';
+		}
+		m_bLatentFnStopped = false;
+		// End:0x491
+		if(__NFUN_129__(__NFUN_520__(m_pawnToFollow)))
+		{
+			goto 'bLocked';			
+		}
+		else
+		{
+			MoveTarget = m_pawnToFollow;
+		}		
+	}
+	else
+	{
+		// End:0x4B6
+		if(m_bRunningToward)
+		{
+			m_bRunToRainbowSuccess = true;
+			goto 'endRunning';
+		}
+	}
+	// End:0x55B
+	if(__NFUN_119__(MoveTarget, none))
+	{
+		MoveTarget = m_pawnToFollow;
+		Destination = __NFUN_215__(MoveTarget.Location, __NFUN_212__(__NFUN_226__(__NFUN_216__(MoveTarget.Location, Pawn.Location)), float(__NFUN_143__(105))));
+		Focus = none;
+		FocalPoint = MoveTarget.Location;
+		__NFUN_500__(Destination);
+		// End:0x558
+		if(m_bLatentFnStopped)
+		{
+			// End:0x552
+			if(__NFUN_132__(__NFUN_114__(m_pawnToFollow, none), m_bRunToRainbowSuccess))
+			{
+				goto 'endRunning';
+			}
+			StopMoving();
+		}		
+	}
+	else
+	{
+		// End:0x5A1
+		if(m_pawnToFollow.m_bIsClimbingLadder)
+		{
+			// End:0x599
+			if(__NFUN_119__(m_pawn.m_escortedByRainbow, none))
+			{
+				m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
+			}
+			__NFUN_256__(0.5000000);
+		}
+		// End:0x5ED
+		if(__NFUN_129__(m_pawn.IsStationary()))
+		{
+			Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+			Pawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+		}
+		__NFUN_256__(m_AITickTime.m_fMin);
+	}
+	goto 'Moving';
+bLocked:
+
+
+	// End:0x665
+	if(__NFUN_176__(33.0000000, __NFUN_186__(__NFUN_175__(__NFUN_175__(m_pawnToFollow.Location.Z, m_pawnToFollow.CollisionHeight), __NFUN_175__(m_pawn.Location.Z, m_pawn.CollisionHeight)))))
+	{
+		m_pawn.bCanWalkOffLedges = true;
+	}
+	MoveTarget = none;
+	// End:0x7E5
+	if(FindBestPathToward(m_pawnToFollow, true))
+	{
+		// End:0x70F
+		if(__NFUN_114__(MoveTarget, m_pawnToFollow))
+		{
+			Destination = __NFUN_215__(MoveTarget.Location, __NFUN_212__(__NFUN_226__(__NFUN_216__(MoveTarget.Location, Pawn.Location)), float(__NFUN_143__(105))));
+			// End:0x706
+			if(__NFUN_521__(Destination))
+			{
+				Focus = none;
+				FocalPoint = MoveTarget.Location;
+				__NFUN_500__(Destination);
+				StopMoving();
+				MoveTarget = none;				
+			}
+			else
+			{
+				goto 'UseMoveToward';
+			}			
+		}
+		else
+		{
+UseMoveToward:
+
+
+			__NFUN_280__(0.0000000, false);
+			R6PreMoveToward(MoveTarget, MoveTarget, m_pawn.m_eMovementPace);
+			// End:0x7DD
+			if(__NFUN_130__(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_pawnToFollow.Location, Pawn.Location)), float(c_iDistanceToStartToRun)), __NFUN_155__(int(m_pawn.m_eHealth), int(1))))
+			{
+				// End:0x7A1
+				if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)))
+				{
+					SetPace(5);					
+				}
+				else
+				{
+					// End:0x7DD
+					if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(2)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(1))))
+					{
+						SetPace(3);
+					}
+				}
+			}
+			__NFUN_502__(MoveTarget);
+		}
+	}
+	// End:0x814
+	if(__NFUN_119__(m_pawn.m_Ladder, none))
+	{
+		m_bool = __NFUN_520__(m_pawn.m_Ladder);		
+	}
+	else
+	{
+		m_bool = __NFUN_520__(m_pawnToFollow);
+	}
+	// End:0x8CF
+	if(__NFUN_130__(__NFUN_114__(MoveTarget, none), __NFUN_114__(m_pawn.m_Ladder, none)))
+	{
+		Destination = __NFUN_215__(m_pawnToFollow.Location, __NFUN_212__(__NFUN_226__(__NFUN_216__(m_pawnToFollow.Location, Pawn.Location)), float(__NFUN_143__(105))));
+		__NFUN_500__(Destination);
+		StopMoving();
+		__NFUN_256__(0.5000000);
+		// End:0x8C6
+		if(__NFUN_130__(__NFUN_129__(m_bool), __NFUN_114__(__NFUN_518__(m_pawnToFollow.Location, true), none)))
+		{
+			goto 'bLocked';			
+		}
+		else
+		{
+			goto 'MovingSetDefault';
+		}		
+	}
+	else
+	{
+		// End:0xA0A
+		if(__NFUN_129__(m_bool))
+		{
+			// End:0xA01
+			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(MoveTarget, none), __NFUN_114__(m_pawn.m_Ladder, none)), MoveTarget.__NFUN_303__('R6Ladder')))
+			{
+				// End:0xA01
+				if(__NFUN_130__(__NFUN_176__(DistanceTo(MoveTarget), float(50)), __NFUN_177__(__NFUN_186__(__NFUN_175__(MoveTarget.Location.Z, Pawn.Location.Z)), float(40))))
+				{
+					m_pawn.m_Ladder = R6Ladder(MoveTarget).m_pOtherFloor;
+					__NFUN_2209__(R6Ladder(MoveTarget).m_pOtherFloor, m_vTargetPosition);
+					m_pawn.m_Ladder = none;
+					R6PreMoveTo(m_vTargetPosition, Location, 4);
+					__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(Location, m_vTargetPosition)));
+					StopMoving();
+					// End:0xA01
+					if(__NFUN_119__(m_pawn.m_escortedByRainbow, none))
+					{
+						m_pawn.m_escortedByRainbow.Escort_UpdateCloserToLead();
+					}
+				}
+			}
+			goto 'bLocked';			
+		}
+		else
+		{
+			MoveTarget = m_pawnToFollow;
+			goto 'MovingSetDefault';
+		}
+	}
+	J0xA1B:
+
+	// End:0xA8A
+	if(m_bRunningToward)
+	{
+		StopMoving();
+		m_bRunningToward = false;
+		// End:0xA67
+		if(m_bRunToRainbowSuccess)
+		{
+			ResetThreatInfo("runningToward success");
+			Order_FollowMe(m_pawnToFollow, false);			
+		}
+		else
+		{
+			ResetThreatInfo("runningToward failed");
+			ReturnToNormalState(true);
+		}
+	}
+	stop;	
+}
+
+state RunForCover
+{
+	function BeginState()
+	{
+		// End:0x1C
+		if(__NFUN_129__(m_pawn.isStanding()))
+		{
+			SetPawnPosition(0);
+		}
+		__NFUN_280__(m_AITickTime.m_fResult, true);
+		m_lastSeenPawn = none;
+		Focus = none;
+		return;
+	}
+
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		m_runAwayOfGrenade = none;
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x11
+		if(__NFUN_119__(m_lastSeenPawn, none))
+		{
+			SeePlayerMgr();
+		}
+		return;
+	}
+
+	function StopRunForCover()
+	{
+		StopMoving();
+		Enemy = none;
+		m_runAwayOfGrenade = none;
+		ResetThreatInfo("StopRunForCover");
+		return;
+	}
+
+	function EnemyNotVisible()
+	{
+		// End:0x28
+		if(__NFUN_119__(m_runAwayOfGrenade, none))
+		{
+			// End:0x26
+			if(IsAwayOfGrenade(m_runAwayOfGrenade))
+			{
+				StopRunForCover();
+				__NFUN_113__(m_runForCoverStateToGoOnSuccess);
+			}
+			return;
+		}
+		// End:0xBB
+		if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, LastSeenTime), float(c_iEnemyNotVisibleTime)))
+		{
+			// End:0xAE
+			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(R6Pawn(Enemy), none), __NFUN_119__(R6Pawn(Enemy).Controller, none)), R6Pawn(Enemy).Controller.__NFUN_533__(Pawn)))
+			{
+				LastSeenTime = Level.TimeSeconds;
+				return;
+			}
+			StopRunForCover();
+			__NFUN_113__(m_runForCoverStateToGoOnSuccess);
+		}
+		return;
+	}
+
+	function bool IsRunForCoverSuccessfull()
+	{
+		local bool bResult;
+
+		// End:0x20
+		if(__NFUN_119__(m_runAwayOfGrenade, none))
+		{
+			bResult = IsAwayOfGrenade(m_runAwayOfGrenade);			
+		}
+		else
+		{
+			// End:0x56
+			if(__NFUN_119__(Enemy, none))
+			{
+				bResult = __NFUN_129__(R6Pawn(Enemy).Controller.__NFUN_533__(Pawn));				
+			}
+			else
+			{
+				bResult = true;
+			}
+		}
+		return bResult;
+		return;
+	}
+
+	event OpenDoorFailed()
+	{
+		StopRunForCover();
+		__NFUN_113__(m_runForCoverStateToGoOnFailure);
+		return;
+	}
+	J0x00:
+	// End:0x1D [Loop If]
+	if(m_pawn.m_bPostureTransition)
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	SetPace(5);
+ChooseDestination:
+
+
+	// End:0x3D
+	if(__NFUN_114__(Enemy, none))
+	{
+		StopRunForCover();
+		__NFUN_113__(m_runForCoverStateToGoOnSuccess);
+	}
+	// End:0x73
+	if(__NFUN_129__(IsRunForCoverPossible(Enemy)))
+	{
+		// End:0x66
+		if(IsRunForCoverSuccessfull())
+		{
+			StopRunForCover();
+			__NFUN_113__(m_runForCoverStateToGoOnSuccess);			
+		}
+		else
+		{
+			StopRunForCover();
+			__NFUN_113__(m_runForCoverStateToGoOnFailure);
+		}
+	}
+	J0x73:
+
+	__NFUN_1812__(m_pawn.m_eMovementPace, 'ReturnToPath', false);
+	goto 'ChooseDestination';
+ReturnToPath:
+
+
+	__NFUN_1812__(m_pawn.m_eMovementPace, 'ReturnToPath', true);
+	goto 'ChooseDestination';
+	stop;		
+}
+
+state Civilian
+{
+	ignores SeePlayerMgr;
+
+	function BeginState()
+	{
+		// End:0x19
+		if(m_pawn.m_bClassicMissionCivilian)
+		{
+			__NFUN_117__('HearNoise');
+		}
+		return;
+	}
+
+	function EndState()
+	{
+		StopMoving();
+		return;
+	}
+	stop;
+}
+
+state CivPatrolArea extends Civilian
+{
+	function BeginState()
+	{
+		return;
+	}
+Begin:
+
+	SetPace(4);
+AtDestination:
+
+
+	m_vTargetPosition = m_pawn.m_DZone.__NFUN_1831__();
+	MoveTarget = __NFUN_518__(m_vTargetPosition, true);
+	// End:0x53
+	if(__NFUN_119__(MoveTarget, none))
+	{
+		__NFUN_1814__(m_vTargetPosition, m_pawn.m_eMovementPace);
+	}
+	__NFUN_256__(GetRandomTweenNum(m_pawn.m_patrolAreaWaitTween));
+	__NFUN_261__();
+	goto 'AtDestination';
+	stop;				
+}
+
+state CivGuardPoint extends Civilian
+{
+	function BeginState()
+	{
+		// End:0xB3
+		if(__NFUN_130__(m_pawn.m_bPoliceManMp1, m_pawn.m_bPoliceManHasWeapon))
+		{
+			m_pawn.ServerGivesWeaponToClient("R63rdWeapons.NormalSubMP5A4", 1);
+			m_pawn.SetToNormalWeapon();
+			// End:0x8B
+			if(__NFUN_114__(m_pawn.EngineWeapon, none))
+			{
+				logX("No weapon!!!!");
+			}
+			m_pawn.EngineWeapon.__NFUN_113__('BringWeaponUp');
+			m_pawn.PlayWeaponAnimation();
+		}
+		return;
+	}
+
+//------------------------------------------------------------------
+// SeePlayer: 
+//	- inherited
+//------------------------------------------------------------------
+	function SeePlayer(Pawn P)
+	{
+		local R6Pawn seen;
+
+		// End:0x7D
+		if(__NFUN_130__(m_pawn.m_bPoliceManMp1, m_pawn.m_bPoliceManCanSeeRainbows))
+		{
+			seen = R6Pawn(P);
+			// End:0x43
+			if(__NFUN_114__(seen, none))
+			{
+				return;
+			}
+			// End:0x7D
+			if(__NFUN_154__(int(P.m_ePawnType), int(1)))
+			{
+				m_pawn.__NFUN_259__(m_pawn.m_NocsSeeRainbowsName);
+				__NFUN_113__('WaitForSomeTime');
+			}
+		}
+		return;
+	}
+Begin:
+
+	ChangeOrientationTo(m_pawn.m_DZone.Rotation);
+	__NFUN_508__();
+	stop;			
+}
+
+state WaitForSomeTime
+{Begin:
+
+	__NFUN_256__(RandRange(5.0000000, 10.0000000));
+	__NFUN_113__('CivGuardPoint');
+	stop;	
+}
+
+state CivPatrolPath extends Civilian
+{
+	function BeginState()
+	{
+		// End:0x20
+		if(__NFUN_114__(R6DZonePath(m_pawn.m_DZone), none))
+		{
+			__NFUN_113__('CivGuardPoint');
+		}
+		return;
+	}
+
+	function int GetWaitingTime()
+	{
+		local int ITemp;
+
+		ITemp = int(GetRandomTweenNum(m_pawn.m_patrolAreaWaitTween));
+		return __NFUN_146__(__NFUN_167__(__NFUN_146__(ITemp, 1)), ITemp);
+		return;
+	}
+
+	function int GetFacingTime()
+	{
+		local int ITemp;
+
+		ITemp = int(GetRandomTweenNum(m_pawn.m_changeOrientationTween));
+		return __NFUN_146__(__NFUN_167__(__NFUN_146__(ITemp, 1)), ITemp);
+		return;
+	}
+
+	function bool IsGoingBack()
+	{
+		return false;
+		return;
+	}
+
+	function PickDestination()
+	{
+		local Rotator R;
+		local int iDistance;
+
+		R.Yaw = __NFUN_144__(__NFUN_167__(32767), 2);
+		iDistance = __NFUN_167__(int(m_pawn.m_currentNode.m_fRadius));
+		m_vTargetPosition = __NFUN_215__(m_pawn.m_currentNode.Location, __NFUN_212__(Vector(R), float(iDistance)));
+		return;
+	}
+
+	event OpenDoorFailed()
+	{
+		m_pawn.m_currentNode = none;
+		__NFUN_113__('CivPatrolPath');
+		return;
+	}
+
+	function SetToNextNode()
+	{
+		local R6DZonePathNode firstnode;
+		local R6DZonePath Path;
+		local int Index;
+
+		MoveTarget = none;
+		firstnode = m_pawn.m_currentNode;
+		Path = R6DZonePath(m_pawn.m_DZone);
+		J0x34:
+
+		// End:0x168 [Loop If]
+		if(__NFUN_114__(MoveTarget, none))
+		{
+			// End:0xBF
+			if(__NFUN_129__(Path.m_bCycle))
+			{
+				Index = Path.GetNodeIndex(m_pawn.m_currentNode);
+				// End:0x92
+				if(__NFUN_154__(Index, 0))
+				{
+					m_pawn.m_bPatrolForward = true;
+				}
+				// End:0xBF
+				if(__NFUN_154__(Index, __NFUN_147__(Path.m_aNode.Length, 1)))
+				{
+					m_pawn.m_bPatrolForward = false;
+				}
+			}
+			// End:0x100
+			if(m_pawn.m_bPatrolForward)
+			{
+				m_pawn.m_currentNode = Path.GetNextNode(m_pawn.m_currentNode);				
+			}
+			else
+			{
+				m_pawn.m_currentNode = Path.GetPreviousNode(m_pawn.m_currentNode);
+			}
+			// End:0x14D
+			if(__NFUN_114__(firstnode, m_pawn.m_currentNode))
+			{
+				__NFUN_113__('CivGuardPoint');
+				return;
+			}
+			MoveTarget = __NFUN_517__(m_pawn.m_currentNode, true);
+			// [Loop Continue]
+			goto J0x34;
+		}
+		return;
+	}
+Begin:
+
+	// End:0x89
+	if(__NFUN_114__(m_pawn.m_currentNode, none))
+	{
+		m_pawn.m_currentNode = R6DZonePath(m_pawn.m_DZone).FindNearestNode(Pawn);
+		// End:0x60
+		if(__NFUN_114__(m_pawn.m_currentNode, none))
+		{
+			__NFUN_113__('CivGuardPoint');
+		}
+		MoveTarget = __NFUN_517__(m_pawn.m_currentNode, true);
+		// End:0x89
+		if(__NFUN_114__(MoveTarget, none))
+		{
+			SetToNextNode();
+		}
+	}
+	SetPace(4);
+FindPathToNode:
+
+
+	PickDestination();
+	__NFUN_1814__(m_vTargetPosition, m_pawn.m_eMovementPace);
+ReachedTheNode:
+
+
+	// End:0xD7
+	if(m_pawn.m_currentNode.bDirectional)
+	{
+		ChangeOrientationTo(GetRandomTurn90());
+		__NFUN_508__();
+	}
+	// End:0x17A
+	if(m_pawn.m_currentNode.m_bWait)
+	{
+		m_iWaitingTime = GetWaitingTime();
+		m_iFacingTime = GetFacingTime();
+		// End:0x146
+		if(__NFUN_150__(m_iFacingTime, m_iWaitingTime))
+		{
+			__NFUN_256__(float(m_iFacingTime));
+			ChangeOrientationTo(GetRandomTurn90());
+			__NFUN_256__(float(__NFUN_147__(m_iWaitingTime, m_iFacingTime)));
+			__NFUN_508__();			
+		}
+		else
+		{
+			__NFUN_256__(float(m_iWaitingTime));
+		}
+		// End:0x17A
+		if(IsGoingBack())
+		{
+			m_pawn.m_bPatrolForward = __NFUN_129__(m_pawn.m_bPatrolForward);
+		}
+	}
+	SetToNextNode();
+	Focus = m_pawn.m_currentNode;
+	__NFUN_261__();
+	__NFUN_508__();
+	goto 'FindPathToNode';
+	stop;			
+}
+
+state EscortedByEnemy
+{
+	function BeginState()
+	{
+		return;
+	}
+
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		m_pawn.SetStandWalkingAnim(1, false);
+		return;
+	}
+
+	function EscortIsOver(bool bSuccess)
+	{
+		m_pawn.m_bEscorted = false;
+		m_escort = none;
+		// End:0x4E
+		if(__NFUN_119__(m_terrorist, none))
+		{
+			R6TerroristAI(m_terrorist.Controller).EscortIsOver(self, bSuccess);
+			m_terrorist = none;
+		}
+		ResetThreatInfo("EscortIsOver");
+		// End:0x7E
+		if(m_pawn.m_bFreed)
+		{
+			__NFUN_113__('Freed');			
+		}
+		else
+		{
+			// End:0x9C
+			if(IsInCrouchedPosture())
+			{
+				SetStateGuarded(1, m_mgr.0);				
+			}
+			else
+			{
+				SetStateGuarded(0, m_mgr.0);
+			}
+		}
+		return;
+	}
+	J0x00:
+	// End:0x1D [Loop If]
+	if(m_pawn.m_bPostureTransition)
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	// End:0x65
+	if(m_pawn.isStandingHandUp())
+	{
+		m_pawn.m_eHandsUpType = 0;
+		m_pawn.SetAnimTransition(m_mgr.ANIM_eStandHandUpToDown, 'None');		
+	}
+	else
+	{
+		// End:0x81
+		if(__NFUN_129__(m_pawn.isStanding()))
+		{
+			SetPawnPosition(0);
+		}
+	}
+	J0x81:
+
+	// End:0x9E [Loop If]
+	if(m_pawn.m_bPostureTransition)
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x81;
+	}
+	// End:0xBC
+	if(__NFUN_217__(m_vMoveToDest, Pawn.Location))
+	{
+		goto 'StartWaiting';
+	}
+	// End:0xEA
+	if(__NFUN_154__(int(m_escort.m_ePawnType), int(2)))
+	{
+		m_pawn.SetStandWalkingAnim(0, true);		
+	}
+	else
+	{
+		m_pawn.SetStandWalkingAnim(1, true);
+	}
+	MoveTarget = __NFUN_518__(m_vMoveToDest, true);
+	// End:0x11D
+	if(__NFUN_114__(MoveTarget, none))
+	{
+		EscortIsOver(false);
+	}
+	__NFUN_1814__(m_vMoveToDest, m_pawn.m_eMovementPace);
+StartWaiting:
+
+
+	StopMoving();
+	EscortIsOver(true);
+	stop;			
+}
+
+state CivStayHere extends Civilian
+{
+	function BeginState()
+	{
+		StopMoving();
+		ResetThreatInfo("CivStayHere");
+		return;
+	}
+	stop;
+}
+
+state GoCivScareToDeath
+{
+	function BeginState()
+	{
+		StopMoving();
+		SetPawnPosition(3);
+		m_bForceToStayHere = true;
+		ProcessPlaySndInfo(m_mgr.7);
+		SetThreatState('CivScareToDeath');
+		__NFUN_113__(m_threatInfo.m_state);
+		return;
+	}
+	stop;
+}
+
+state CivScareToDeath extends Civilian
+{
+	function BeginState()
+	{
+		return;
+	}
+Begin:
+
+	__NFUN_256__(GetRandomTweenNum(m_scareToDeathTween));
+	ResetThreatInfo("CivScareToDeath is over");
+	m_bForceToStayHere = false;
+	SetPawnPosition(1);
+	__NFUN_113__('CivStayHere');
+	stop;			
+}
+
+state CivRunForCover
+{
+	function BeginState()
+	{
+		// End:0x1C
+		if(m_pawn.m_bPoliceManMp1)
+		{
+			__NFUN_113__('CivGuardPoint');			
+		}
+		else
+		{
+			// End:0x37
+			if(m_pawn.m_bClassicMissionCivilian)
+			{
+				CivCheckCoverNode();				
+			}
+			else
+			{
+				__NFUN_113__('GoCivScareToDeath');
+			}
+		}
+		return;
+	}
+	stop;
+}
+
+state CivMovingTo
+{
+	function BeginState()
+	{
+		return;
+	}
+Begin:
+
+	m_iRandomNumber = 0;
+	// End:0x2E
+	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_vMoveToDest, Pawn.Location)), 10.0000000))
+	{
+		goto 'Exit';
+	}
+	Focus = none;
+	// End:0x51
+	if(__NFUN_129__(m_pawn.isStanding()))
+	{
+		SetPawnPosition(0);
+	}
+	J0x51:
+
+	// End:0x6E [Loop If]
+	if(m_pawn.m_bPostureTransition)
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x51;
+	}
+PathFinding:
+
+
+	// End:0x99
+	if(__NFUN_132__(__NFUN_130__(__NFUN_119__(m_pCoverNode, none), __NFUN_520__(m_pCoverNode)), __NFUN_521__(m_vMoveToDest)))
+	{
+		goto 'EndPath';
+	}
+	// End:0xB5
+	if(__NFUN_119__(m_pCoverNode, none))
+	{
+		MoveTarget = __NFUN_517__(m_pCoverNode);		
+	}
+	else
+	{
+		MoveTarget = __NFUN_518__(m_vMoveToDest, true);
+	}
+	// End:0xDD
+	if(__NFUN_114__(MoveTarget, none))
+	{
+		__NFUN_256__(0.5000000);
+		goto 'Exit';
+	}
+	// End:0x106
+	if(__NFUN_154__(m_iRandomNumber, 0))
+	{
+		m_iRandomNumber = 1;
+		FocalPoint = MoveTarget.Location;
+		__NFUN_508__();
+	}
+	Focus = none;
+	R6PreMoveTo(MoveTarget.Location, MoveTarget.Location, m_pawn.m_eMovementPace);
+	__NFUN_502__(MoveTarget);
+	// End:0x15B
+	if(__NFUN_154__(int(m_eMoveToResult), int(2)))
+	{
+		goto 'Exit';
+	}
+	goto 'PathFinding';
+EndPath:
+
+
+	// End:0x181
+	if(__NFUN_154__(m_iRandomNumber, 0))
+	{
+		m_iRandomNumber = 1;
+		FocalPoint = m_vMoveToDest;
+		__NFUN_508__();
+	}
+	Focus = none;
+	R6PreMoveTo(m_vMoveToDest, m_vMoveToDest, m_pawn.m_eMovementPace);
+	// End:0x1BC
+	if(__NFUN_119__(m_pCoverNode, none))
+	{
+		__NFUN_502__(m_pCoverNode);		
+	}
+	else
+	{
+		__NFUN_500__(m_vMoveToDest);
+	}
+	J0x1C4:
+
+	StopMoving();
+	__NFUN_113__('CMCivStayHere');
+	stop;		
+}
+
+state CMCivStayKneel extends Civilian
+{
+	function BeginState()
+	{
+		StopMoving();
+		m_pawn.m_bAvoidFacingWalls = true;
+		SetPawnPosition(1);
+		ResetThreatInfo("CivStayHere");
+		return;
+	}
+	stop;
+}
+
+state CMCivStayHere extends Civilian
+{
+	function BeginState()
+	{
+		StopMoving();
+		m_pawn.m_bAvoidFacingWalls = true;
+		SetPawnPosition(4);
+		ResetThreatInfo("CivStayHere");
+		return;
+	}
+	stop;
+}
+
+state CivRunTowardRainbow
+{
+	function BeginState()
+	{
+		// End:0x2F
+		if(__NFUN_132__(m_pawn.m_bCivilian, m_pawn.m_bPoliceManMp1))
+		{
+			CivInit();			
+		}
+		else
+		{
+			SetStateFollowingPawn(R6Pawn(m_threatInfo.m_pawn), true, m_mgr.4);
+		}
+		return;
+	}
+	stop;
+}
+
+state CivSurrender
+{
+	function BeginState()
+	{
+		// End:0x2F
+		if(__NFUN_132__(m_pawn.m_bCivilian, m_pawn.m_bPoliceManMp1))
+		{
+			CivInit();			
+		}
+		else
+		{
+			// End:0x6C
+			if(__NFUN_119__(m_terrorist, none))
+			{
+				ProcessPlaySndInfo(m_mgr.2);
+				R6TerroristAI(m_terrorist.Controller).HostageSurrender(self);				
+			}
+			else
+			{
+				SetStateGuarded(5, m_mgr.2);
+			}
+		}
+		return;
+	}
+	stop;
+}
+
+state OpenDoor
+{	stop;
+}
+
+state ReactToGrenade
+{
+	function BeginState()
+	{
+		return;
+	}
+Begin:
+
+	__NFUN_256__(RandRange(0.1000000, 0.3000000));
+	// End:0x7C
+	if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(3)), __NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(4))))
+	{
+		StopMoving();
+		m_pawn.SetNextPendingAction(3);
+		GetRandomTweenNum(m_stayBlindedTweenTime);
+		__NFUN_256__(m_stayBlindedTweenTime.m_fResult);
+		goto 'End';
+	}
+End:
+
+
+	__NFUN_113__(m_reactToGrenadeStateToReturn);
+	stop;				
+}
+
+state GoHstFreedButSeeEnemy
+{
+	function BeginState()
+	{
+		// End:0x1F
+		if(IsInCrouchedPosture())
+		{
+			SetStateGuarded(1, m_mgr.2);			
+		}
+		else
+		{
+			SetStateGuarded(0, m_mgr.2);
+		}
+		ResetThreatInfo("GoHstFreedButSeeEnemy");
+		return;
+	}
+	stop;
+}
+
+state GoHstRunTowardRainbow
+{
+	function BeginState()
+	{
+		SetStateFollowingPawn(R6Pawn(m_threatInfo.m_pawn), true, m_mgr.5);
+		return;
+	}
+	stop;
+}
+
+state GoHstRunForCover
+{
+	function BeginState()
+	{
+		// End:0x1B
+		if(m_pawn.m_bPoliceManMp1)
+		{
+			CivInit();			
+		}
+		else
+		{
+			SetFreed(true);
+			SetStateRunForCover(m_threatInfo.m_pawn, 'Freed', 'Guarded_foetus', m_threatInfo.m_actorExt);
+		}
+		return;
+	}
+	stop;
+}
+
+state DbgHostage
+{
+	function BeginState()
+	{
+		StopMoving();
+		return;
+	}
+	stop;
+}
+
+state GotoExtraction
+{
+	function BeginState()
+	{
+		// End:0x1C
+		if(__NFUN_129__(m_pawn.isStanding()))
+		{
+			SetPawnPosition(0);
+		}
+		Focus = none;
+		return;
+	}
+	J0x00:
+	// End:0x1D [Loop If]
+	if(m_pawn.m_bPostureTransition)
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x00;
+	}
+	// End:0x52
+	if(__NFUN_119__(m_pawn.m_escortedByRainbow, none))
+	{
+		__NFUN_256__(0.3000000);
+		StopFollowingPawn(false);
+		m_pawn.SetStandWalkingAnim(1, true);
+	}
+RunToDestination:
+
+
+	Focus = none;
+	// End:0x85
+	if(__NFUN_218__(m_vMoveToDest, m_pGotoToExtractionZone.Location))
+	{
+		m_vMoveToDest = m_pGotoToExtractionZone.Location;
+	}
+	// End:0xB2
+	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, m_vMoveToDest)), float(100)))
+	{
+		StopMoving();
+		__NFUN_113__('Freed');
+	}
+	SetPace(5);
+	m_vTargetPosition = m_vMoveToDest;
+	// End:0xFA
+	if(__NFUN_521__(m_vTargetPosition))
+	{
+		Focus = none;
+		FocalPoint = m_vTargetPosition;
+		__NFUN_500__(m_vTargetPosition);
+		StopMoving();
+		MoveTarget = none;		
+	}
+	else
+	{
+		MoveTarget = __NFUN_518__(m_vTargetPosition, true);
+		// End:0x12E
+		if(__NFUN_119__(MoveTarget, none))
+		{
+			__NFUN_1812__(m_pawn.m_eMovementPace, 'ReturnToPath', false);			
+		}
+		else
+		{
+			R6PreMoveToward(m_pGotoToExtractionZone, m_pGotoToExtractionZone, m_pawn.m_eMovementPace);
+			__NFUN_502__(m_pGotoToExtractionZone);
+			__NFUN_256__(1.0000000);
+		}
+	}
+	goto 'RunToDestination';
+ReturnToPath:
+
+
+	__NFUN_1812__(m_pawn.m_eMovementPace, 'ReturnToPath', true);
+	goto 'RunToDestination';
+	stop;				
+}
+
+state Extracted
+{
+	ignores R6DamageAttitudeTo;
+
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = true;
+		Focus = none;
+		m_bIgnoreBackupBump = false;
+		return;
+	}
+
+//------------------------------------------------------------------
+// AIAffectedByGrenade()                                       
+//------------------------------------------------------------------
+	function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
+	{
+		return;
+	}
+
+	function Timer()
+	{
+		m_iWaitingTime = int(GetRandomTweenNum(m_pawn.m_changeOrientationTween));
+		__NFUN_280__(float(m_iWaitingTime), false);
+		ChangeOrientationTo(GetRandomTurn90());
+		return;
+	}
+Begin:
+
+	__NFUN_256__(float(__NFUN_167__(2)));
+	StopMoving();
+	m_bForceToStayHere = true;
+	StopFollowingPawn(false);
+	m_iWaitingTime = int(GetRandomTweenNum(m_pawn.m_changeOrientationTween));
+	__NFUN_280__(float(m_iWaitingTime), false);
+	stop;		
 }
 
 defaultproperties
 {
-     c_iDistanceMax=190
-     c_iDistanceCatchUp=160
-     c_iDistanceToStartToRun=350
-     c_iCowardModifier=-40
-     c_iBraveModifier=40
-     c_iWoundedModifier=20
-     c_iGasModifier=20
-     c_iEnemyNotVisibleTime=5
-     c_iCautiousLastHearNoiseTime=5
-     c_iRunForCoverOfGrenadeMinDist=500
-     m_bFirstTimeClarkComment=True
-     m_AITickTime=(m_fMin=0.100000,m_fMax=0.500000)
-     m_RunForCoverMinTween=(m_fMin=4.000000,m_fMax=6.000000)
-     m_scareToDeathTween=(m_fMin=10.000000,m_fMax=14.000000)
-     m_stayBlindedTweenTime=(m_fMin=2.800000,m_fMax=3.300000)
-     c_iDistanceBumpBackUp=90
-     bIsPlayer=True
+	c_iDistanceMax=190
+	c_iDistanceCatchUp=160
+	c_iDistanceToStartToRun=350
+	c_iCowardModifier=-40
+	c_iBraveModifier=40
+	c_iWoundedModifier=20
+	c_iGasModifier=20
+	c_iEnemyNotVisibleTime=5
+	c_iCautiousLastHearNoiseTime=5
+	c_iRunForCoverOfGrenadeMinDist=500
+	m_bFirstTimeClarkComment=true
+	m_AITickTime=(m_fMin=0.1000000,m_fMax=0.5000000)
+	m_RunForCoverMinTween=(m_fMin=4.0000000,m_fMax=6.0000000)
+	m_scareToDeathTween=(m_fMin=10.0000000,m_fMax=14.0000000)
+	m_stayBlindedTweenTime=(m_fMin=2.8000000,m_fMax=3.3000000)
+	c_iDistanceBumpBackUp=90
+	bIsPlayer=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function CanClimbObject

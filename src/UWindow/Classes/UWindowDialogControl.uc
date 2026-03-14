@@ -1,111 +1,133 @@
 //=============================================================================
+// UWindowDialogControl - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // UWindowDialogControl - a control which notifies a dialog control group
 //=============================================================================
 class UWindowDialogControl extends UWindowWindow;
 
-var UWindowDialogClientWindow	NotifyWindow;
-var string Text;
+var UWindowBase.TextAlign Align;
 var int Font;
-var color TextColor;
-var TextAlign Align;
-var float TextX, TextY;		// changed by BeforePaint functions
 var bool bHasKeyboardFocus;
 var bool bNoKeyboard;
 var bool bAcceptExternalDragDrop;
+var float TextX;  // changed by BeforePaint functions
+// NEW IN 1.60
+var float TextY;
+var float MinWidth;  // minimum heights for layout control
+// NEW IN 1.60
+var float MinHeight;
+var UWindowDialogClientWindow NotifyWindow;
+var UWindowDialogControl TabNext;
+var UWindowDialogControl TabPrev;
+var Color TextColor;
+var string Text;
 var string HelpText;
-var float MinWidth, MinHeight;	// minimum heights for layout control
-
-var UWindowDialogControl	TabNext;
-var UWindowDialogControl	TabPrev;
-
 
 function Created()
 {
-	if(!bNoKeyboard)
+	// End:0x11
+	if(__NFUN_129__(bNoKeyboard))
 	{
 		SetAcceptsFocus();
 	}
+	return;
 }
 
 function KeyFocusEnter()
 {
-	bHasKeyboardFocus = True;
+	bHasKeyboardFocus = true;
+	return;
 }
 
 function KeyFocusExit()
-{	
-	bHasKeyboardFocus = False;
+{
+	bHasKeyboardFocus = false;
+	return;
 }
 
 function SetHelpText(string NewHelpText)
 {
 	HelpText = NewHelpText;
+	return;
 }
 
 function SetText(string NewText)
 {
 	Text = NewText;
+	return;
 }
 
 function BeforePaint(Canvas C, float X, float Y)
 {
-  	C.Font = Root.Fonts[Font];
-    if (C.Font == None)    
-    {
-//        log("Problem here, no Font select, use SetFont");
-        C.Font = Root.Fonts[F_SmallTitle];
-    }
+	C.Font = Root.Fonts[Font];
+	// End:0x57
+	if(__NFUN_114__(C.Font, none))
+	{
+		C.Font = Root.Fonts[5];
+	}
+	return;
 }
 
 function SetFont(int NewFont)
 {
 	Font = NewFont;
+	return;
 }
 
-function SetTextColor(color NewColor)
+function SetTextColor(Color NewColor)
 {
 	TextColor = NewColor;
+	return;
 }
 
-
-function Register(UWindowDialogClientWindow	W)
+function Register(UWindowDialogClientWindow W)
 {
 	NotifyWindow = W;
-	Notify(DE_Created);
+	Notify(0);
+	return;
 }
 
 function Notify(byte E)
 {
-	if(NotifyWindow != None)
+	// End:0x20
+	if(__NFUN_119__(NotifyWindow, none))
 	{
-		NotifyWindow.Notify(Self, E);
+		NotifyWindow.Notify(self, E);
 	}
+	return;
 }
 
 function bool ExternalDragOver(UWindowDialogControl ExternalControl, float X, float Y)
 {
-	return False;
+	return false;
+	return;
 }
 
 function UWindowDialogControl CheckExternalDrag(float X, float Y)
 {
-	local float RootX, RootY;
-	local float ExtX, ExtY;
+	local float RootX, RootY, ExtX, ExtY;
 	local UWindowWindow W;
 	local UWindowDialogControl C;
 
 	WindowToGlobal(X, Y, RootX, RootY);
 	W = Root.FindWindowUnder(RootX, RootY);
 	C = UWindowDialogControl(W);
-
-	if(W != Self && C != None && C.bAcceptExternalDragDrop)
+	// End:0xBB
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(W, self), __NFUN_119__(C, none)), C.bAcceptExternalDragDrop))
 	{
 		W.GlobalToWindow(RootX, RootY, ExtX, ExtY);
-		if(C.ExternalDragOver(Self, ExtX, ExtY))
+		// End:0xBB
+		if(C.ExternalDragOver(self, ExtX, ExtY))
+		{
 			return C;
+		}
 	}
-
-	return None;
+	return none;
+	return;
 }
 
 function KeyDown(int Key, float X, float Y)
@@ -114,47 +136,63 @@ function KeyDown(int Key, float X, float Y)
 	local UWindowDialogControl N;
 
 	P = Root.GetPlayerOwner();
-
-	switch (Key)
+	switch(Key)
 	{
-	case P.Player.Console.EInputKey.IK_Tab:
-		
-		if(TabNext != None)
-		{
-			N = TabNext;
+		// End:0xA0
+		case int(P.Player.Console.9):
+			// End:0x9D
+			if(__NFUN_119__(TabNext, none))
+			{
+				N = TabNext;
+				J0x54:
 
-			while(N != Self && !N.bWindowVisible)
-				N = N.TabNext;
-
-			N.ActivateWindow(0, False);
-		}
-		break;
-	default:
-		Super.KeyDown(Key, X, Y);
-		break;
+				// End:0x8C [Loop If]
+				if(__NFUN_130__(__NFUN_119__(N, self), __NFUN_129__(N.bWindowVisible)))
+				{
+					N = N.TabNext;
+					// [Loop Continue]
+					goto J0x54;
+				}
+				N.ActivateWindow(0, false);
+			}
+			// End:0xBB
+			break;
+		// End:0xFFFF
+		default:
+			super.KeyDown(Key, X, Y);
+			// End:0xBB
+			break;
+			break;
 	}
-
+	return;
 }
 
 function MouseMove(float X, float Y)
 {
-	Super.MouseMove(X, Y);
-	Notify(DE_MouseMove);
+	super.MouseMove(X, Y);
+	Notify(8);
+	return;
 }
 
 function MouseEnter()
 {
-	Super.MouseEnter();
-	Notify(DE_MouseEnter);
+	super.MouseEnter();
+	Notify(12);
+	return;
 }
 
 function MouseLeave()
 {
-	Super.MouseLeave();
-	Notify(DE_MouseLeave);
+	super.MouseLeave();
+	Notify(9);
+	return;
 }
 
 defaultproperties
 {
-     bNoKeyboard=True
+	bNoKeyboard=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var Y
+// REMOVED IN 1.60: var t

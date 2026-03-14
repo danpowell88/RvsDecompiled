@@ -1,62 +1,86 @@
-class FadeViewTrigger extends Triggers
-	notplaceable;
+//=============================================================================
+// FadeViewTrigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class FadeViewTrigger extends Triggers;
 
-var(ZoneLight) vector ViewFlash, ViewFog;
-
-
-var() vector TargetFlash;
-var() bool bTriggerOnceOnly; 
-var() float FadeSeconds;
-
-
-var vector OldViewFlash;
+var() bool bTriggerOnceOnly;
 var bool bTriggered;
+var() float FadeSeconds;
+var(ZoneLight) Vector ViewFlash;
+// NEW IN 1.60
+var(ZoneLight) Vector ViewFog;
+var() Vector TargetFlash;
+var Vector OldViewFlash;
 
-event Trigger( Actor Other, Pawn EventInstigator )
+event Trigger(Actor Other, Pawn EventInstigator)
 {
-	if(bTriggered && !bTriggerOnceOnly)
+	// End:0x35
+	if(__NFUN_130__(bTriggered, __NFUN_129__(bTriggerOnceOnly)))
 	{
-		bTriggered = False;
-		PhysicsVolume.ViewFlash = OldViewFlash;
+		bTriggered = false;
+		PhysicsVolume.ViewFlash = OldViewFlash;		
 	}
 	else
 	{
-		bTriggered = True;
+		bTriggered = true;
 		OldViewFlash = PhysicsVolume.ViewFlash;
-		GotoState('IsTriggered');
+		__NFUN_113__('IsTriggered');
 	}
+	return;
 }
 
-State IsTriggered
+state IsTriggered
 {
 	event Tick(float DeltaTime)
 	{
-		local vector V;
+		local Vector V;
 		local bool bXDone, bYDone, bZDone;
 
+		// End:0x12D
 		if(bTriggered)
 		{
-			bXDone = False;
-			bYDone = False;
-			bZDone = False;
-
-			V = PhysicsVolume.ViewFlash - (OldViewFlash - TargetFlash) * (DeltaTime/FadeSeconds);
-
-			if( V.X < TargetFlash.X ) { V.X = TargetFlash.X; bXDone = True; }
-			if( V.Y < TargetFlash.Y ) { V.Y = TargetFlash.Y; bYDone = True; }
-			if( V.Z < TargetFlash.Z ) { V.Z = TargetFlash.Z; bZDone = True; }
-
+			bXDone = false;
+			bYDone = false;
+			bZDone = false;
+			V = __NFUN_216__(PhysicsVolume.ViewFlash, __NFUN_212__(__NFUN_216__(OldViewFlash, TargetFlash), __NFUN_172__(DeltaTime, FadeSeconds)));
+			// End:0x87
+			if(__NFUN_176__(V.X, TargetFlash.X))
+			{
+				V.X = TargetFlash.X;
+				bXDone = true;
+			}
+			// End:0xBD
+			if(__NFUN_176__(V.Y, TargetFlash.Y))
+			{
+				V.Y = TargetFlash.Y;
+				bYDone = true;
+			}
+			// End:0xF3
+			if(__NFUN_176__(V.Z, TargetFlash.Z))
+			{
+				V.Z = TargetFlash.Z;
+				bZDone = true;
+			}
 			PhysicsVolume.ViewFlash = V;
-
-			if(bXDone && bYDone && bZDone)
-				GotoState('');;
+			// End:0x12D
+			if(__NFUN_130__(__NFUN_130__(bXDone, bYDone), bZDone))
+			{
+				__NFUN_113__('None');
+			}
 		}
+		return;
 	}
+	stop;
 }
 
 defaultproperties
 {
-     FadeSeconds=5.000000
-     TargetFlash=(X=-2.000000,Y=-2.000000,Z=-2.000000)
-     bObsolete=True
+	FadeSeconds=5.0000000
+	TargetFlash=(X=-2.0000000,Y=-2.0000000,Z=-2.0000000)
+	bObsolete=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var g

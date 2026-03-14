@@ -1,200 +1,61 @@
 //=============================================================================
+// R6GameManager - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // R6GameManager.uc: game manager object.
 //
 // Revision history:
 //      * 22-04-2003 : Created by Jean-Francois Dube
 //=============================================================================
 class R6GameManager extends R6AbstractGameManager
-    native;
+ native;
 
-var BOOL    bShowLog;
-var R6GSServers m_GameService;
+// NEW IN 1.60
+var R6GSServers m_GameMgrGameService;
+// NEW IN 1.60
+var R6Console m_GameMgrConsole;
 
-native(1550) final function BOOL    InitGSClient();				// 
-native(1288) final function BOOL    NativeInitGSClient();
-
-/*
-event InitGameManager()
+// NEW IN 1.60
+function SetConsoleInGameMgr(Console _pConsole)
 {
-
-}
-*/
-
-//=============================================================================
-// InitializeGSClient: Initialize the GS Client SDK, connect to the ubi.com
-// client application.
-//=============================================================================
-function InitializeGSClient()
-{
-    local BOOL bInitialized;
-    m_bGSClientInitialized = m_GameService.NativeInitGSClient();
-    m_bStartedByGSClient = class'Actor'.static.NativeStartedByGSClient();
-    
-    if (m_bStartedByGSClient==true)
-    {
-        bInitialized = m_GameService.SetGSClientComInterface();
-        if (bInitialized==false)
-        {
-            log("ERROR: GS Client Com interface not initialized!!!");
-        }
-    }
+	m_GameMgrConsole = R6Console(_pConsole);
+	return;
 }
 
-///////////////////////////////////////////////////////////////
-// This function manages the ubi.com GSClient SDK integration
-///////////////////////////////////////////////////////////////
-
-function GSClientManager(Console LocalConsole)
+// NEW IN 1.60
+function Object GetGameMgrGameService()
 {
-#ifndefSPDEMO
+	return m_GameMgrGameService;
+	return;
+}
 
-    local R6Console _LocalConsole;    
-    
-    _LocalConsole = R6Console(LocalConsole);
-    m_GameService = _LocalConsole.m_GameService;
-//    _GService = R6GSServers(_GameService);
-    
-	if (!m_bGSClientAlreadyInit && !m_bGSClientInitialized )
+// NEW IN 1.60
+function SetLocalPlayerCtrl(PlayerController _localPlayer)
+{
+	m_GameMgrGameService.m_LocalPlayerController = _localPlayer;
+	return;
+}
+
+// NEW IN 1.60
+event GMProcessMsg(string _szMsg)
+{
+	// End:0x28
+	if(__NFUN_119__(m_GameMgrConsole, none))
 	{
-	    InitializeGSClient();
-		m_bGSClientAlreadyInit = m_bGSClientInitialized;
+		m_GameMgrConsole.Root.ProcessGSMsg(_szMsg);
 	}
-
-    // TODO, add something to try initializing a few times, if 
-    // continues to fail, quit game
-
-    _LocalConsole.m_GameService.GameServiceManager( TRUE, TRUE, FALSE, TRUE );
-
-    // -----------------------------------------------------
-    // Process game state when controlled by GS client
-    // -----------------------------------------------------
-
-    switch ( _LocalConsole.m_GameService.m_eGSGameState )
-    {
-        // Waiting for ubi.com to tell us if we are a server or a client
-
-        case EGS_WAITING_FOR_GS_INIT:
-            // If the ubi.com client is not responding, exit the application
-            if ( _LocalConsole.m_GameService.m_bUbiComClientDied )
-            {
-                _LocalConsole.ConsoleCommand("quit");
-                log ("Game exited because ubi.com client application died");
-            }
-        
-            // Minimize the game
-            if ( m_bReturnToGSClient )
-            {
-                m_bReturnToGSClient = FALSE;
-                _LocalConsole.MinimizeAndPauseMusic();
-            }
-            break;
-
-        // State machine for client
-
-        case EGS_CLIENT_INIT_RCVD:
-            if ( bShowLog ) log ( "*** EGS_GS_CLIENT_INIT_RCVD");
-            _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_INITCLIENTSESSION_AK );
-            _LocalConsole.m_GameService.SetGSGameState(EGS_CLIENT_WAITING_CHSTA);
-            break;
-
-        case EGS_CLIENT_WAITING_CHSTA:
-            // If the ubi.com client is not responding, exit the application
-            if ( _LocalConsole.m_GameService.m_bUbiComClientDied )
-            {
-                _LocalConsole.ConsoleCommand("quit");
-                log ("Game exited because ubi.com client application died");
-            }
-            // If the room has been destroyed, return to initial state
-            if ( _LocalConsole.m_GameService.m_bUbiComRoomDestroyed )
-            {
-                _LocalConsole.m_GameService.m_bUbiComRoomDestroyed = FALSE;
-                _LocalConsole.m_GameService.SetGSGameState(EGS_WAITING_FOR_GS_INIT);
-            }
-
-            break;
-
-        case EGS_CLIENT_CHSTA_RCVD:
-            if ( bShowLog ) log ( "*** EGS_CLIENT_CHSTA_RCVD");
-            _LocalConsole.ConsoleCommand("MAXIMIZEAPP");
-            _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_CLIENTSESSION_AK );
-            _LocalConsole.m_GameService.SetGSGameState(EGS_CLIENT_IN_GAME);
-            _LocalConsole.m_bJoinUbiServer = TRUE;
-            break;
-
-        case EGS_CLIENT_IN_GAME:
-            if ( m_bReturnToGSClient )
-            {
-                if ( bShowLog ) log ( "*** EGS_WAITING_FOR_GS_INIT");
-                m_bReturnToGSClient = FALSE;
-                _LocalConsole.MinimizeAndPauseMusic();
-                _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_SWITCHTOGS );
-                _LocalConsole.m_GameService.SetGSGameState(EGS_WAITING_FOR_GS_INIT);
-            }
-            break;
-
-        // State machine for server
-
-        case EGS_SERVER_INIT_RCVD:
-
-            if ( bShowLog ) log ( "*** EGS_SERVER_INIT_RCVD");
-            _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_INITMASTERSESSION_AK );
-            _LocalConsole.m_GameService.SetGSGameState(EGS_SERVER_WAITING_CHSTA);
-            break;
-
-        case EGS_SERVER_WAITING_CHSTA:
-            // If the ubi.com client is not responding, exit the application
-            if ( _LocalConsole.m_GameService.m_bUbiComClientDied )
-            {
-                _LocalConsole.ConsoleCommand("quit");
-                log ("Game exited because ubi.com client application died");
-            }
-            break;
-
-        case EGS_SERVER_CHSTA_RCVD:
-            if ( bShowLog ) log ( "*** EGS_SERVER_CHSTA_RCVD");
-	        _LocalConsole.ViewportOwner.Actor.PlaySound(Sound'Music.Play_Theme_MusicSilence', SLOT_Music);
-            _LocalConsole.ConsoleCommand("MAXIMIZEAPP");
-            _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_MASTERSESSION_AK );
-            _LocalConsole.m_GameService.SetGSGameState(EGS_SERVER_SETTING_UP_GAME);
-            _LocalConsole.m_bCreateUbiServer = TRUE;
-            break;
-
-        case EGS_SERVER_SETTING_UP_GAME:
-            if ( m_bReturnToGSClient )
-            {
-                if ( bShowLog ) log ( "*** EGS_WAITING_FOR_GS_INIT");       
-                m_bReturnToGSClient = FALSE;
-                _LocalConsole.MinimizeAndPauseMusic();
-                _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_SWITCHTOGS );
-                _LocalConsole.m_GameService.SetGSGameState(EGS_WAITING_FOR_GS_INIT);
-            }
-            else if ( _LocalConsole.bMultiPlayerGameActive )
-            {
-                if ( bShowLog ) log ( "*** EGS_SERVER_READY");
-                _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_READYTORECEIVECONNECTIONS );
-                _LocalConsole.m_GameService.SetGSGameState(EGS_SERVER_READY);            
-            }
-            break;
-
-        case EGS_SERVER_READY:
-            if ( m_bReturnToGSClient )
-            {
-                if ( bShowLog ) log ( "*** EGS_WAITING_FOR_GS_INIT");
-                m_bReturnToGSClient = FALSE;
-                _LocalConsole.MinimizeAndPauseMusic();
-                _LocalConsole.m_GameService.NativeGSClientPostMessage( EGSMESSAGE_SWITCHTOGS );
-                _LocalConsole.m_GameService.SetGSGameState(EGS_WAITING_FOR_GS_INIT);
-            }
-            break;
-
-        case EGS_TERMINATE_RCVD:
-            _LocalConsole.ConsoleCommand("quit");
-            break;
-    }
-
-#endif //SPDEMO
+	return;
 }
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var bShowLog
+// REMOVED IN 1.60: var m_GameService
+// REMOVED IN 1.60: function InitGSClient
+// REMOVED IN 1.60: function NativeInitGSClient
+// REMOVED IN 1.60: function InitGameManager
+// REMOVED IN 1.60: function InitializeGSClient
+// REMOVED IN 1.60: function GSClientManager

@@ -1,4 +1,10 @@
 //=============================================================================
+// R6TBusiness03 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6TBusiness03.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,22 +15,8 @@ class R6TBusiness03 extends R6TMilitant01;
 
 defaultproperties
 {
-     m_eTerroType=TTYPE_B1T3
-     Mesh=SkeletalMesh'R6Terrorist_UKX.Business01Mesh'
-     Begin Object Class=KarmaParamsSkel Name=KarmaParamsSkel252
-         KConvulseSpacing=(Max=2.200000)
-         KSkeleton="terroskel"
-         KStartEnabled=True
-         bHighDetailOnly=False
-         KLinearDamping=0.500000
-         KAngularDamping=0.500000
-         KBuoyancy=1.000000
-         KVelDropBelowThreshold=50.000000
-         KFriction=0.600000
-         KRestitution=0.300000
-         KImpactThreshold=150.000000
-         Name="KarmaParamsSkel252"
-     End Object
-     KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel252'
-     Skins(0)=Texture'R6Characters_T.terrorist.R6TBusiness3'
+	m_eTerroType=1
+	Mesh=SkeletalMesh'R6Terrorist_UKX.Business01Mesh'
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel252'
+	Skins=/* Array type was not detected. */
 }

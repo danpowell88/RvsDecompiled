@@ -1,124 +1,184 @@
 //=============================================================================
+// TerrainBuilder - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // TerrainBuilder: Builds a 3D cube brush, with a tessellated bottom.
 //=============================================================================
-class TerrainBuilder
-	extends BrushBuilder;
+class TerrainBuilder extends BrushBuilder;
 
-var() float Height, Width, Breadth;
-var() int WidthSegments, DepthSegments;		// How many breaks to have in each direction
+var() int WidthSegments;  // How many breaks to have in each direction
+// NEW IN 1.60
+var() int DepthSegments;
+var() float Height;
+// NEW IN 1.60
+var() float Width;
+// NEW IN 1.60
+var() float Breadth;
 var() name GroupName;
 
-function BuildTerrain( int Direction, float dx, float dy, float dz, int WidthSeg, int DepthSeg )
+function BuildTerrain(int direction, float dx, float dy, float dz, int WidthSeg, int DepthSeg)
 {
-	local int n,nbottom,ntop,i,j,k,x,y,idx;
+	local int N, nbottom, ntop, i, j, k,
+		X, Y, idx;
+
 	local float WidthStep, DepthStep;
 
-	//
-	// TOP
-	//
+	N = GetVertexCount();
+	i = -1;
+	J0x17:
 
-	n = GetVertexCount();
+	// End:0xB7 [Loop If]
+	if(__NFUN_150__(i, 2))
+	{
+		j = -1;
+		J0x2E:
 
-	// Create vertices
-	for( i=-1; i<2; i+=2 )
-		for( j=-1; j<2; j+=2 )
-			for( k=-1; k<2; k+=2 )
-				Vertex3f( i*dx/2, j*dy/2, k*dz/2 );
-
-	// Create the top
-	Poly4i(Direction,n+3,n+1,n+5,n+7, 'sky');
-
-	//
-	// BOTTOM
-	//
-
-	nbottom = GetVertexCount();
-
-	// Create vertices
-	WidthStep = dx / WidthSeg;
-	DepthStep = dy / DepthSeg;
-
-	for( x = 0 ; x < WidthSeg + 1 ; x++ )
-		for( y = 0 ; y < DepthSeg + 1 ; y++ )
-			Vertex3f( (WidthStep * x) - dx/2, (DepthStep * y) - dy/2, -(dz/2) );
-
-	ntop = GetVertexCount();
-
-	for( x = 0 ; x < WidthSeg + 1 ; x++ )
-		for( y = 0 ; y < DepthSeg + 1 ; y++ )
-			Vertex3f( (WidthStep * x) - dx/2, (DepthStep * y) - dy/2, dz/2 );
-
-	// Create the bottom as a mesh of triangles
-	for( x = 0 ; x < WidthSeg ; x++ )
-		for( y = 0 ; y < DepthSeg ; y++ )
+		// End:0xAB [Loop If]
+		if(__NFUN_150__(j, 2))
 		{
-			Poly3i(-Direction,
-				(nbottom+y)		+ ((DepthSeg+1) * x),
-				(nbottom+y)		+ ((DepthSeg+1) * (x+1)),
-				((nbottom+1)+y)	+ ((DepthSeg+1) * (x+1)),
-				'ground');
-			Poly3i(-Direction,
-				(nbottom+y)		+ ((DepthSeg+1) * x),
-				((nbottom+1)+y) + ((DepthSeg+1) * (x+1)),
-				((nbottom+1)+y) + ((DepthSeg+1) * x),
-				'ground');
-		}
+			k = -1;
+			J0x45:
 
-	//
-	// SIDES
-	//
-	// The bottom poly of each side is basically a triangle fan.
-	//
-	for( x = 0 ; x < WidthSeg ; x++ )
-	{
-		Poly4i(-Direction,
-			nbottom + DepthSeg + ((DepthSeg+1) * x),
-			nbottom + DepthSeg + ((DepthSeg+1) * (x + 1)),
-			ntop + DepthSeg + ((DepthSeg+1) * (x + 1)),
-			ntop + DepthSeg + ((DepthSeg+1) * x),
-			'sky' );
-		Poly4i(-Direction,
-			nbottom + ((DepthSeg+1) * (x + 1)),
-			nbottom + ((DepthSeg+1) * x),
-			ntop + ((DepthSeg+1) * x),
-			ntop + ((DepthSeg+1) * (x + 1)),
-			'sky' );
+			// End:0x9F [Loop If]
+			if(__NFUN_150__(k, 2))
+			{
+				Vertex3f(__NFUN_172__(__NFUN_171__(float(i), dx), float(2)), __NFUN_172__(__NFUN_171__(float(j), dy), float(2)), __NFUN_172__(__NFUN_171__(float(k), dz), float(2)));
+				__NFUN_161__(k, 2);
+				// [Loop Continue]
+				goto J0x45;
+			}
+			__NFUN_161__(j, 2);
+			// [Loop Continue]
+			goto J0x2E;
+		}
+		__NFUN_161__(i, 2);
+		// [Loop Continue]
+		goto J0x17;
 	}
-	for( y = 0 ; y < DepthSeg ; y++ )
+	Poly4i(direction, __NFUN_146__(N, 3), __NFUN_146__(N, 1), __NFUN_146__(N, 5), __NFUN_146__(N, 7), 'sky');
+	nbottom = GetVertexCount();
+	WidthStep = __NFUN_172__(dx, float(WidthSeg));
+	DepthStep = __NFUN_172__(dy, float(DepthSeg));
+	X = 0;
+	J0x125:
+
+	// End:0x1AD [Loop If]
+	if(__NFUN_150__(X, __NFUN_146__(WidthSeg, 1)))
 	{
-		Poly4i(-Direction,
-			nbottom + y,
-			nbottom + (y + 1),
-			ntop + (y + 1),
-			ntop + y,
-			'sky' );
-		Poly4i(-Direction,
-			nbottom + ((DepthSeg+1) * WidthSeg) + (y + 1),
-			nbottom + ((DepthSeg+1) * WidthSeg) + y,
-			ntop + ((DepthSeg+1) * WidthSeg) + y,
-			ntop + ((DepthSeg+1) * WidthSeg) + (y + 1),
-			'sky' );
+		Y = 0;
+		J0x13E:
+
+		// End:0x1A3 [Loop If]
+		if(__NFUN_150__(Y, __NFUN_146__(DepthSeg, 1)))
+		{
+			Vertex3f(__NFUN_175__(__NFUN_171__(WidthStep, float(X)), __NFUN_172__(dx, float(2))), __NFUN_175__(__NFUN_171__(DepthStep, float(Y)), __NFUN_172__(dy, float(2))), __NFUN_169__(__NFUN_172__(dz, float(2))));
+			__NFUN_165__(Y);
+			// [Loop Continue]
+			goto J0x13E;
+		}
+		__NFUN_165__(X);
+		// [Loop Continue]
+		goto J0x125;
 	}
+	ntop = GetVertexCount();
+	X = 0;
+	J0x1C0:
+
+	// End:0x246 [Loop If]
+	if(__NFUN_150__(X, __NFUN_146__(WidthSeg, 1)))
+	{
+		Y = 0;
+		J0x1D9:
+
+		// End:0x23C [Loop If]
+		if(__NFUN_150__(Y, __NFUN_146__(DepthSeg, 1)))
+		{
+			Vertex3f(__NFUN_175__(__NFUN_171__(WidthStep, float(X)), __NFUN_172__(dx, float(2))), __NFUN_175__(__NFUN_171__(DepthStep, float(Y)), __NFUN_172__(dy, float(2))), __NFUN_172__(dz, float(2)));
+			__NFUN_165__(Y);
+			// [Loop Continue]
+			goto J0x1D9;
+		}
+		__NFUN_165__(X);
+		// [Loop Continue]
+		goto J0x1C0;
+	}
+	X = 0;
+	J0x24D:
+
+	// End:0x36A [Loop If]
+	if(__NFUN_150__(X, WidthSeg))
+	{
+		Y = 0;
+		J0x263:
+
+		// End:0x360 [Loop If]
+		if(__NFUN_150__(Y, DepthSeg))
+		{
+			Poly3i(__NFUN_143__(direction), __NFUN_146__(__NFUN_146__(nbottom, Y), __NFUN_144__(__NFUN_146__(DepthSeg, 1), X)), __NFUN_146__(__NFUN_146__(nbottom, Y), __NFUN_144__(__NFUN_146__(DepthSeg, 1), __NFUN_146__(X, 1))), __NFUN_146__(__NFUN_146__(__NFUN_146__(nbottom, 1), Y), __NFUN_144__(__NFUN_146__(DepthSeg, 1), __NFUN_146__(X, 1))), 'ground');
+			Poly3i(__NFUN_143__(direction), __NFUN_146__(__NFUN_146__(nbottom, Y), __NFUN_144__(__NFUN_146__(DepthSeg, 1), X)), __NFUN_146__(__NFUN_146__(__NFUN_146__(nbottom, 1), Y), __NFUN_144__(__NFUN_146__(DepthSeg, 1), __NFUN_146__(X, 1))), __NFUN_146__(__NFUN_146__(__NFUN_146__(nbottom, 1), Y), __NFUN_144__(__NFUN_146__(DepthSeg, 1), X)), 'ground');
+			__NFUN_165__(Y);
+			// [Loop Continue]
+			goto J0x263;
+		}
+		__NFUN_165__(X);
+		// [Loop Continue]
+		goto J0x24D;
+	}
+	X = 0;
+	J0x371:
+
+	// End:0x486 [Loop If]
+	if(__NFUN_150__(X, WidthSeg))
+	{
+		Poly4i(__NFUN_143__(direction), __NFUN_146__(__NFUN_146__(nbottom, DepthSeg), __NFUN_144__(__NFUN_146__(DepthSeg, 1), X)), __NFUN_146__(__NFUN_146__(nbottom, DepthSeg), __NFUN_144__(__NFUN_146__(DepthSeg, 1), __NFUN_146__(X, 1))), __NFUN_146__(__NFUN_146__(ntop, DepthSeg), __NFUN_144__(__NFUN_146__(DepthSeg, 1), __NFUN_146__(X, 1))), __NFUN_146__(__NFUN_146__(ntop, DepthSeg), __NFUN_144__(__NFUN_146__(DepthSeg, 1), X)), 'sky');
+		Poly4i(__NFUN_143__(direction), __NFUN_146__(nbottom, __NFUN_144__(__NFUN_146__(DepthSeg, 1), __NFUN_146__(X, 1))), __NFUN_146__(nbottom, __NFUN_144__(__NFUN_146__(DepthSeg, 1), X)), __NFUN_146__(ntop, __NFUN_144__(__NFUN_146__(DepthSeg, 1), X)), __NFUN_146__(ntop, __NFUN_144__(__NFUN_146__(DepthSeg, 1), __NFUN_146__(X, 1))), 'sky');
+		__NFUN_165__(X);
+		// [Loop Continue]
+		goto J0x371;
+	}
+	Y = 0;
+	J0x48D:
+
+	// End:0x57A [Loop If]
+	if(__NFUN_150__(Y, DepthSeg))
+	{
+		Poly4i(__NFUN_143__(direction), __NFUN_146__(nbottom, Y), __NFUN_146__(nbottom, __NFUN_146__(Y, 1)), __NFUN_146__(ntop, __NFUN_146__(Y, 1)), __NFUN_146__(ntop, Y), 'sky');
+		Poly4i(__NFUN_143__(direction), __NFUN_146__(__NFUN_146__(nbottom, __NFUN_144__(__NFUN_146__(DepthSeg, 1), WidthSeg)), __NFUN_146__(Y, 1)), __NFUN_146__(__NFUN_146__(nbottom, __NFUN_144__(__NFUN_146__(DepthSeg, 1), WidthSeg)), Y), __NFUN_146__(__NFUN_146__(ntop, __NFUN_144__(__NFUN_146__(DepthSeg, 1), WidthSeg)), Y), __NFUN_146__(__NFUN_146__(ntop, __NFUN_144__(__NFUN_146__(DepthSeg, 1), WidthSeg)), __NFUN_146__(Y, 1)), 'sky');
+		__NFUN_165__(Y);
+		// [Loop Continue]
+		goto J0x48D;
+	}
+	return;
 }
 
 event bool Build()
 {
-	if( Height<=0 || Width<=0 || Breadth<=0 || WidthSegments<=0 || DepthSegments<=0 )
+	// End:0x4C
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_178__(Height, float(0)), __NFUN_178__(Width, float(0))), __NFUN_178__(Breadth, float(0))), __NFUN_152__(WidthSegments, 0)), __NFUN_152__(DepthSegments, 0)))
+	{
 		return BadParameters();
-
-	BeginBrush( false, GroupName );
-	BuildTerrain( +1, Breadth, Width, Height, WidthSegments, DepthSegments );
+	}
+	BeginBrush(false, GroupName);
+	BuildTerrain(1, Breadth, Width, Height, WidthSegments, DepthSegments);
 	return EndBrush();
+	return;
 }
 
 defaultproperties
 {
-     WidthSegments=4
-     DepthSegments=2
-     Height=256.000000
-     Width=256.000000
-     Breadth=512.000000
-     GroupName="Terrain"
-     BitmapFilename="BBTerrain"
-     ToolTip="BSP Based Terrain"
+	WidthSegments=4
+	DepthSegments=2
+	Height=256.0000000
+	Width=256.0000000
+	Breadth=512.0000000
+	GroupName="Terrain"
+	BitmapFilename="BBTerrain"
+	ToolTip="BSP Based Terrain"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var h
+// REMOVED IN 1.60: var s

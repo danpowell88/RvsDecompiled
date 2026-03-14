@@ -1,59 +1,74 @@
+//=============================================================================
+// UWindowConsoleWindow - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowConsoleWindow extends UWindowFramedWindow;
 
-var float OldParentWidth, OldParentHeight;
+var float OldParentWidth;
+// NEW IN 1.60
+var float OldParentHeight;
 
-function Created() 
+function Created()
 {
-	Super.Created();
-	bSizable = True;
-	bStatusBar = True;
-	bLeaveOnScreen = True;
-
+	super.Created();
+	bSizable = true;
+	bStatusBar = true;
+	bLeaveOnscreen = true;
 	OldParentWidth = ParentWindow.WinWidth;
 	OldParentHeight = ParentWindow.WinHeight;
-
 	SetDimensions();
-
 	SetAcceptsFocus();
+	return;
 }
 
 function ShowWindow()
 {
-	Super.ShowWindow();
-
-	if(ParentWindow.WinWidth != OldParentWidth || ParentWindow.WinHeight != OldParentHeight)
+	super(UWindowWindow).ShowWindow();
+	// End:0x66
+	if(__NFUN_132__(__NFUN_181__(ParentWindow.WinWidth, OldParentWidth), __NFUN_181__(ParentWindow.WinHeight, OldParentHeight)))
 	{
 		SetDimensions();
 		OldParentWidth = ParentWindow.WinWidth;
 		OldParentHeight = ParentWindow.WinHeight;
 	}
+	return;
 }
 
 function ResolutionChanged(float W, float H)
 {
 	SetDimensions();
+	return;
 }
 
 function SetDimensions()
 {
-	if (ParentWindow.WinWidth < 500)
+	// End:0x2D
+	if(__NFUN_176__(ParentWindow.WinWidth, float(500)))
 	{
-		SetSize(200, 150);
-	} else {
-		SetSize(410, 310);
+		SetSize(200.0000000, 150.0000000);		
 	}
-	WinLeft = ParentWindow.WinWidth/2 - WinWidth/2;
-	WinTop = ParentWindow.WinHeight/2 - WinHeight/2;
+	else
+	{
+		SetSize(410.0000000, 310.0000000);
+	}
+	WinLeft = __NFUN_175__(__NFUN_172__(ParentWindow.WinWidth, float(2)), __NFUN_172__(WinWidth, float(2)));
+	WinTop = __NFUN_175__(__NFUN_172__(ParentWindow.WinHeight, float(2)), __NFUN_172__(WinHeight, float(2)));
+	return;
 }
 
 function Close(optional bool bByParent)
 {
-	ClientArea.Close(True);
+	ClientArea.Close(true);
 	Root.Console.HideConsole();
+	return;
 }
 
 defaultproperties
 {
-     ClientClass=Class'UWindow.UWindowConsoleClientWindow'
-     WindowTitle="System Console"
+	ClientClass=Class'UWindow.UWindowConsoleClientWindow'
+	WindowTitle="System Console"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var t

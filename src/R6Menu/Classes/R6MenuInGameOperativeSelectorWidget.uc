@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuInGameOperativeSelectorWidget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuInGameWritableMapWidget.uc : Game Main Menu
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //	Main Menu
@@ -8,223 +14,246 @@
 //=============================================================================
 class R6MenuInGameOperativeSelectorWidget extends R6MenuWidget;
 
-var const INT c_OutsideMarginX;
-var const INT c_OutsideMarginY;
-var const INT c_InsideMarginX;
-var const INT c_InsideMarginY;
-var const INT c_ColumnWidth;
-var const INT c_RowHeight;
-
-var BOOL m_bInitalized;
-var BOOL m_bIsSinglePlayer;
-
+var const int c_OutsideMarginX;
+var const int c_OutsideMarginY;
+var const int c_InsideMarginX;
+var const int c_InsideMarginY;
+var const int c_ColumnWidth;
+var const int c_RowHeight;
+var bool m_bInitalized;
+var bool m_bIsSinglePlayer;
 var Sound m_OperativeOpenSnd;
-
-var array<R6OperativeSelectorItem> aItems;
 var R6GameOptions m_pGameOptions;
+var array<R6OperativeSelectorItem> aItems;
 
 function UpdateOperativeItems()
 {
-    local R6GameReplicationInfo GameRepInfo;
-    
-    local INT iOperative;
-    local INT iOperativeCount;
-    local INT iOperativePos;
-    local INT iPosX;
-    local INT iPosY;
-    
-    local INT iTeam;
+	local R6GameReplicationInfo gameRepInfo;
+	local int iOperative, iOperativeCount, iOperativePos, iPosX, iPosY, iTeam;
 
-    // For multiplayer purpose
-    local R6RainbowTeam MPTeam;
-    local R6TeamMemberReplicationInfo pTeamMemberRepInfo;
-    local R6Rainbow P;
+	local R6RainbowTeam MPTeam;
+	local R6TeamMemberReplicationInfo pTeamMemberRepInfo;
+	local R6Rainbow P;
 
-    GameRepInfo = R6GameReplicationInfo(GetPlayerOwner().GameReplicationInfo);
+	gameRepInfo = R6GameReplicationInfo(GetPlayerOwner().GameReplicationInfo);
+	iOperativePos = 0;
+	m_bIsSinglePlayer = __NFUN_154__(int(gameRepInfo.Level.NetMode), int(NM_Standalone));
+	// End:0x220
+	if(m_bIsSinglePlayer)
+	{
+		iTeam = 0;
+		J0x57:
 
-    iOperativePos = 0;
+		// End:0x21D [Loop If]
+		if(__NFUN_150__(iTeam, 3))
+		{
+			iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_144__(iTeam, __NFUN_146__(c_InsideMarginX, c_ColumnWidth)));
+			// End:0x213
+			if(__NFUN_119__(gameRepInfo.m_RainbowTeam[iTeam], none))
+			{
+				iOperativeCount = __NFUN_146__(gameRepInfo.m_RainbowTeam[iTeam].m_iMembersLost, gameRepInfo.m_RainbowTeam[iTeam].m_iMemberCount);
+				iOperative = 0;
+				J0xED:
 
-    m_bIsSinglePlayer = GameRepInfo.Level.NetMode == NM_Standalone;
+				// End:0x213 [Loop If]
+				if(__NFUN_150__(iOperative, iOperativeCount))
+				{
+					iPosY = __NFUN_146__(__NFUN_146__(c_OutsideMarginY, c_InsideMarginY), __NFUN_144__(iOperative, __NFUN_146__(c_InsideMarginY, c_RowHeight)));
+					// End:0x166
+					if(__NFUN_129__(m_bInitalized))
+					{
+						aItems[iOperativePos] = R6OperativeSelectorItem(CreateWindow(Class'R6Menu.R6OperativeSelectorItem', float(iPosX), float(iPosY), float(c_ColumnWidth), float(c_RowHeight)));
+					}
+					aItems[iOperativePos].SetCharacterInfo(gameRepInfo.m_RainbowTeam[iTeam].m_Team[iOperative]);
+					aItems[iOperativePos].m_DarkColor = Root.Colors.TeamColorDark[iTeam];
+					aItems[iOperativePos].m_NormalColor = Root.Colors.TeamColor[iTeam];
+					__NFUN_165__(iOperativePos);
+					__NFUN_165__(iOperative);
+					// [Loop Continue]
+					goto J0xED;
+				}
+			}
+			__NFUN_165__(iTeam);
+			// [Loop Continue]
+			goto J0x57;
+		}		
+	}
+	else
+	{
+		m_pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+		P = R6Rainbow(GetPlayerOwner().Pawn);
+		iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_146__(c_InsideMarginX, c_ColumnWidth));
+		iOperative = 0;
+		J0x273:
 
-    // Fill the Operatives Info
-    if (m_bIsSinglePlayer)
-    {
-        for (iTeam = 0; iTeam < 3; iTeam++)
-        {
-            iPosX = c_OutsideMarginX + c_InsideMarginX + (iTeam * (c_InsideMarginX + c_ColumnWidth));
-
-            if (GameRepInfo.m_RainbowTeam[iTeam] != None)
-            {
-                iOperativeCount = GameRepInfo.m_RainbowTeam[iTeam].m_iMembersLost + GameRepInfo.m_RainbowTeam[iTeam].m_iMemberCount;
-                for (iOperative = 0; iOperative <  iOperativeCount; iOperative++)
-                {
-                    iPosY = c_OutsideMarginY + c_InsideMarginY + (iOperative * (c_InsideMarginY + c_RowHeight));
-                    if (!m_bInitalized)
-                        aItems[iOperativePos] = R6OperativeSelectorItem(CreateWindow(class'R6OperativeSelectorItem', iPosX, iPosY, c_ColumnWidth, c_RowHeight)); 
-                    aItems[iOperativePos].SetCharacterInfo(GameRepInfo.m_RainbowTeam[iTeam].m_Team[iOperative]);
-                    aItems[iOperativePos].m_DarkColor = Root.Colors.TeamColorDark[iTeam];
-                    aItems[iOperativePos].m_NormalColor = Root.Colors.TeamColor[iTeam];
-                    
-                    iOperativePos++;
-                }
-            }
-        }
-    }
-    else
-    {
-        m_pGameOptions = class'Actor'.static.GetGameOptions();
-
-        P = R6Rainbow(GetPlayerOwner().Pawn);
-
-        iPosX = c_OutsideMarginX + c_InsideMarginX + (c_InsideMarginX + c_ColumnWidth);
-        // Create all 4 windows and hide them
-        for (iOperative = 0; iOperative < 4; iOperative++)
-        {
-            if (!m_bInitalized)
-            {
-                iPosY = c_OutsideMarginY + c_InsideMarginY + (iOperative * (c_InsideMarginY + c_RowHeight));
-
-                aItems[iOperative] = R6OperativeSelectorItem(CreateWindow(class'R6OperativeSelectorItem', iPosX, iPosY, c_ColumnWidth, c_RowHeight)); 
-            }
-
-            aItems[iOperative].HideWindow();
-        }
-
-        ForEach P.AllActors(class'R6TeamMemberReplicationInfo', pTeamMemberRepInfo)
-        {
-            if (P.m_TeamMemberRepInfo.m_iTeamId == pTeamMemberRepInfo.m_iTeamId)
-            {
-                aItems[pTeamMemberRepInfo.m_iTeamPosition].SetCharacterInfoMP(pTeamMemberRepInfo);
-                aItems[pTeamMemberRepInfo.m_iTeamPosition].m_DarkColor = m_pGameOptions.HUDMPDarkColor;
-                aItems[pTeamMemberRepInfo.m_iTeamPosition].m_NormalColor = m_pGameOptions.HUDMPColor;
-                aItems[pTeamMemberRepInfo.m_iTeamPosition].ShowWindow();
-            }
-        }
-    }
-
-    m_bInitalized = true;
+		// End:0x308 [Loop If]
+		if(__NFUN_150__(iOperative, 4))
+		{
+			// End:0x2E9
+			if(__NFUN_129__(m_bInitalized))
+			{
+				iPosY = __NFUN_146__(__NFUN_146__(c_OutsideMarginY, c_InsideMarginY), __NFUN_144__(iOperative, __NFUN_146__(c_InsideMarginY, c_RowHeight)));
+				aItems[iOperative] = R6OperativeSelectorItem(CreateWindow(Class'R6Menu.R6OperativeSelectorItem', float(iPosX), float(iPosY), float(c_ColumnWidth), float(c_RowHeight)));
+			}
+			aItems[iOperative].HideWindow();
+			__NFUN_165__(iOperative);
+			// [Loop Continue]
+			goto J0x273;
+		}
+		// End:0x3ED
+		foreach P.__NFUN_304__(Class'R6Engine.R6TeamMemberReplicationInfo', pTeamMemberRepInfo)
+		{
+			// End:0x3EC
+			if(__NFUN_154__(P.m_TeamMemberRepInfo.m_iTeamId, pTeamMemberRepInfo.m_iTeamId))
+			{
+				aItems[int(pTeamMemberRepInfo.m_iTeamPosition)].SetCharacterInfoMP(pTeamMemberRepInfo);
+				aItems[int(pTeamMemberRepInfo.m_iTeamPosition)].m_DarkColor = m_pGameOptions.HUDMPDarkColor;
+				aItems[int(pTeamMemberRepInfo.m_iTeamPosition)].m_NormalColor = m_pGameOptions.HUDMPColor;
+				aItems[int(pTeamMemberRepInfo.m_iTeamPosition)].ShowWindow();
+			}			
+		}		
+	}
+	m_bInitalized = true;
+	return;
 }
 
 function ShowWindow()
 {
-    Super.ShowWindow();
-    UpdateOperativeItems();
-    GetPlayerOwner().PlaySound(m_OperativeOpenSnd, SLOT_Menu);
+	super(UWindowWindow).ShowWindow();
+	UpdateOperativeItems();
+	GetPlayerOwner().__NFUN_264__(m_OperativeOpenSnd, 9);
+	return;
 }
 
 function HideWindow()
 {
-    local INT iOperativePos;
+	local int iOperativePos;
 
-    Super.HideWindow();
+	super(UWindowWindow).HideWindow();
+	iOperativePos = 0;
+	J0x0D:
 
-    for (iOperativePos = 0; iOperativePos < aItems.Length; iOperativePos++)
-    {
-        aItems[iOperativePos].m_Operative = none;
-        aItems[iOperativePos].m_MemberRepInfo = none;
-    }
+	// End:0x53 [Loop If]
+	if(__NFUN_150__(iOperativePos, aItems.Length))
+	{
+		aItems[iOperativePos].m_Operative = none;
+		aItems[iOperativePos].m_MemberRepInfo = none;
+		__NFUN_165__(iOperativePos);
+		// [Loop Continue]
+		goto J0x0D;
+	}
+	return;
 }
 
-
-
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-    local INT iOperative;
-    local INT iTeam;
-    local INT iPosX;
-    local INT iPosY;
-    local String szTeam;
-    local FLOAT fTeamPosX;
-    local FLOAT fTeamPosY;
+	local int iOperative, iTeam, iPosX, iPosY;
+	local string szTeam;
+	local float fTeamPosX, fTeamPosY;
+	local R6Rainbow P;
+	local R6TeamMemberReplicationInfo pTeamMemberRepInfo;
 
-    local R6Rainbow P;
+	// End:0x36D
+	if(m_bIsSinglePlayer)
+	{
+		iTeam = 0;
+		J0x10:
 
-    local R6TeamMemberReplicationInfo pTeamMemberRepInfo;
-	
-    // Draw Team Headers
-    if (m_bIsSinglePlayer)
-    {
-        for (iTeam = 0; iTeam < 3; iTeam++)
-        {
-            C.Style = ERenderStyle.STY_Alpha;
-            iPosX = c_OutsideMarginX + c_InsideMarginX + (iTeam * (c_InsideMarginX + c_ColumnWidth));
-            iPosY = 63 + c_InsideMarginY;
-            C.DrawColor = Root.Colors.TeamColor[iTeam];
-            C.DrawColor.A = 51;
-            
-            DrawStretchedTextureSegment(C, iPosX + 1, iPosY + 1, c_ColumnWidth - 2, 18, 0, 0, 1, 1, Texture'Color.Color.White');
-            C.DrawColor.A = 255;
-            C.SetPos(iPosX + (c_ColumnWidth / 2), iPosY + 2);
-            
-            switch(iTeam)
-            {
-            case 0:
-                szTeam = Caps(Localize("COLOR", "ID_RED", "R6COMMON"));
-                break;
-                
-            case 1:
-                szTeam = Caps(Localize("COLOR", "ID_GREEN", "R6COMMON"));
-                break;
-                
-            case 2:
-                szTeam = Caps(Localize("COLOR", "ID_GOLD", "R6COMMON"));
-                break;
-            }
-            
-            TextSize(C, szTeam, fTeamPosX, fTeamPosY);
-            
-            C.SetPos(iPosX + (c_ColumnWidth - fTeamPosX) / 2, iPosY + 1);
-            C.DrawText(szTeam);
-            
-            DrawStretchedTextureSegment(C, iPosX, iPosY, c_ColumnWidth, 1, 0, 0, 1, 1, Texture'Color.Color.White');
-            DrawStretchedTextureSegment(C, iPosX, iPosY + 17 - 1, c_ColumnWidth, 1, 0, 0, 1, 1, Texture'Color.Color.White');
-            DrawStretchedTextureSegment(C, iPosX, iPosY, 1, 17, 0, 0, 1, 1, Texture'Color.Color.White');
-            DrawStretchedTextureSegment(C, iPosX + c_ColumnWidth - 1, iPosY, 1, 17, 0, 0, 1, 1, Texture'Color.Color.White');
-            
-            for (iOperative = 0; iOperative < aItems.Length; iOperative++)
-            {
-                aItems[iOperative].UpdatePosition();
-            }
-        }
-    }
-    else
-    {
-        C.Style = ERenderStyle.STY_Alpha;
-        iPosX = c_OutsideMarginX + c_InsideMarginX + (c_InsideMarginX + c_ColumnWidth);
-        iPosY = 63 + c_InsideMarginY;
-        C.DrawColor = m_pGameOptions.HUDMPColor;
-        C.DrawColor.A = 51;
-        
-        DrawStretchedTextureSegment(C, iPosX + 1, iPosY + 1, c_ColumnWidth - 2, 18, 0, 0, 1, 1, Texture'Color.Color.White');
-        C.DrawColor.A = 255;
-        C.SetPos(iPosX + (c_ColumnWidth / 2), iPosY + 2);
-        
-        szTeam = Caps(Localize("MISC", "Team", "R6Menu"));
-        
-        TextSize(C, szTeam, fTeamPosX, fTeamPosY);
-        
-        C.SetPos(iPosX + (c_ColumnWidth - fTeamPosX) / 2, iPosY + 1);
-        C.DrawText(szTeam);
-        
-        DrawStretchedTextureSegment(C, iPosX, iPosY, c_ColumnWidth, 1, 0, 0, 1, 1, Texture'Color.Color.White');
-        DrawStretchedTextureSegment(C, iPosX, iPosY + 17 - 1, c_ColumnWidth, 1, 0, 0, 1, 1, Texture'Color.Color.White');
-        DrawStretchedTextureSegment(C, iPosX, iPosY, 1, 17, 0, 0, 1, 1, Texture'Color.Color.White');
-        DrawStretchedTextureSegment(C, iPosX + c_ColumnWidth - 1, iPosY, 1, 17, 0, 0, 1, 1, Texture'Color.Color.White');
-        
-        for (iOperative = 0; iOperative < aItems.Length; iOperative++)
-        {
-            aItems[iOperative].UpdatePositionMP();
-        }
-    }
+		// End:0x36A [Loop If]
+		if(__NFUN_150__(iTeam, 3))
+		{
+			C.Style = 5;
+			iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_144__(iTeam, __NFUN_146__(c_InsideMarginX, c_ColumnWidth)));
+			iPosY = __NFUN_146__(63, c_InsideMarginY);
+			C.DrawColor = Root.Colors.TeamColor[iTeam];
+			C.DrawColor.A = 51;
+			DrawStretchedTextureSegment(C, float(__NFUN_146__(iPosX, 1)), float(__NFUN_146__(iPosY, 1)), float(__NFUN_147__(c_ColumnWidth, 2)), 18.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			C.DrawColor.A = byte(255);
+			C.__NFUN_2623__(float(__NFUN_146__(iPosX, __NFUN_145__(c_ColumnWidth, 2))), float(__NFUN_146__(iPosY, 2)));
+			switch(iTeam)
+			{
+				// End:0x163
+				case 0:
+					szTeam = __NFUN_235__(Localize("COLOR", "ID_RED", "R6COMMON"));
+					// End:0x1C6
+					break;
+				// End:0x193
+				case 1:
+					szTeam = __NFUN_235__(Localize("COLOR", "ID_GREEN", "R6COMMON"));
+					// End:0x1C6
+					break;
+				// End:0x1C3
+				case 2:
+					szTeam = __NFUN_235__(Localize("COLOR", "ID_GOLD", "R6COMMON"));
+					// End:0x1C6
+					break;
+				// End:0xFFFF
+				default:
+					break;
+			}
+			TextSize(C, szTeam, fTeamPosX, fTeamPosY);
+			C.__NFUN_2623__(__NFUN_174__(float(iPosX), __NFUN_172__(__NFUN_175__(float(c_ColumnWidth), fTeamPosX), float(2))), float(__NFUN_146__(iPosY, 1)));
+			C.__NFUN_465__(szTeam);
+			DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			DrawStretchedTextureSegment(C, float(iPosX), float(__NFUN_147__(__NFUN_146__(iPosY, 17), 1)), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			DrawStretchedTextureSegment(C, float(__NFUN_147__(__NFUN_146__(iPosX, c_ColumnWidth), 1)), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			iOperative = 0;
+			J0x331:
+
+			// End:0x360 [Loop If]
+			if(__NFUN_150__(iOperative, aItems.Length))
+			{
+				aItems[iOperative].UpdatePosition();
+				__NFUN_165__(iOperative);
+				// [Loop Continue]
+				goto J0x331;
+			}
+			__NFUN_165__(iTeam);
+			// [Loop Continue]
+			goto J0x10;
+		}		
+	}
+	else
+	{
+		C.Style = 5;
+		iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_146__(c_InsideMarginX, c_ColumnWidth));
+		iPosY = __NFUN_146__(63, c_InsideMarginY);
+		C.DrawColor = m_pGameOptions.HUDMPColor;
+		C.DrawColor.A = 51;
+		DrawStretchedTextureSegment(C, float(__NFUN_146__(iPosX, 1)), float(__NFUN_146__(iPosY, 1)), float(__NFUN_147__(c_ColumnWidth, 2)), 18.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		C.DrawColor.A = byte(255);
+		C.__NFUN_2623__(float(__NFUN_146__(iPosX, __NFUN_145__(c_ColumnWidth, 2))), float(__NFUN_146__(iPosY, 2)));
+		szTeam = __NFUN_235__(Localize("MISC", "Team", "R6Menu"));
+		TextSize(C, szTeam, fTeamPosX, fTeamPosY);
+		C.__NFUN_2623__(__NFUN_174__(float(iPosX), __NFUN_172__(__NFUN_175__(float(c_ColumnWidth), fTeamPosX), float(2))), float(__NFUN_146__(iPosY, 1)));
+		C.__NFUN_465__(szTeam);
+		DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		DrawStretchedTextureSegment(C, float(iPosX), float(__NFUN_147__(__NFUN_146__(iPosY, 17), 1)), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		DrawStretchedTextureSegment(C, float(__NFUN_147__(__NFUN_146__(iPosX, c_ColumnWidth), 1)), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		iOperative = 0;
+		J0x5F6:
+
+		// End:0x625 [Loop If]
+		if(__NFUN_150__(iOperative, aItems.Length))
+		{
+			aItems[iOperative].UpdatePositionMP();
+			__NFUN_165__(iOperative);
+			// [Loop Continue]
+			goto J0x5F6;
+		}
+	}
+	return;
 }
 
 defaultproperties
 {
-     c_OutsideMarginX=19
-     c_OutsideMarginY=83
-     c_InsideMarginX=2
-     c_InsideMarginY=3
-     c_ColumnWidth=198
-     c_RowHeight=89
-     m_OperativeOpenSnd=Sound'SFX_Menus.Play_Rose_Open'
+	c_OutsideMarginX=19
+	c_OutsideMarginY=83
+	c_InsideMarginX=2
+	c_InsideMarginY=3
+	c_ColumnWidth=198
+	c_RowHeight=89
+	m_OperativeOpenSnd=Sound'SFX_Menus.Play_Rose_Open'
 }

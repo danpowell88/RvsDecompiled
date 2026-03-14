@@ -1,13 +1,18 @@
+//=============================================================================
+// CameraOverlay - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class CameraOverlay extends CameraEffect
 	native
-	noexport
 	editinlinenew
-	collapsecategories;
+	collapsecategories
+ noexport;
 
-var() color		OverlayColor;
-var() Material	OverlayMaterial;
+var() Color OverlayColor;
+var() Material OverlayMaterial;
 
 defaultproperties
 {
-     OverlayColor=(B=255,G=255,R=255,A=255)
+	OverlayColor=(R=255,G=255,B=255,A=255)
 }

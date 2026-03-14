@@ -1,69 +1,35 @@
+//=============================================================================
+// FractalTextureFactory - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class FractalTextureFactory extends MaterialFactory;
 
 enum EResolution
 {
-	Pixels_1,
-	Pixels_2,
-	Pixels_4,
-	Pixels_8,
-	Pixels_16,
-	Pixels_32,
-	Pixels_64,
-	Pixels_128,
-	Pixels_256,
+	Pixels_1,                       // 0
+	Pixels_2,                       // 1
+	Pixels_4,                       // 2
+	Pixels_8,                       // 3
+	Pixels_16,                      // 4
+	Pixels_32,                      // 5
+	Pixels_64,                      // 6
+	Pixels_128,                     // 7
+	Pixels_256                      // 8
 };
-var() EResolution Width, Height;
 
-/*
-// R6Code: commented out so we don't need to compile the package Fire
-
-var() Class<FractalTexture> Class;
-
-
-function Material CreateMaterial( Object InOuter, string InPackage, string InGroup, string InName )
-{		
-	local int w, h;
-
-	switch(Width)
-	{
-	case Pixels_1: w=1; break;
-	case Pixels_2: w=2; break;
-	case Pixels_4: w=4; break;
-	case Pixels_8: w=8; break;
-	case Pixels_16: w=16; break;
-	case Pixels_32: w=32; break;
-	case Pixels_64: w=64; break;
-	case Pixels_128: w=128; break;
-	case Pixels_256: w=256; break;
-	}
-
-	switch(Height)
-	{
-	case Pixels_1: h=1; break;
-	case Pixels_2: h=2; break;
-	case Pixels_4: h=4; break;
-	case Pixels_8: h=8; break;
-	case Pixels_16: h=16; break;
-	case Pixels_32: h=32; break;
-	case Pixels_64: h=64; break;
-	case Pixels_128: h=128; break;
-	case Pixels_256: h=256; break;
-	}
-
-	ConsoleCommand( "TEXTURE NEW NAME=\""$InName$"\" CLASS=\""$String(Class)$"\" GROUP=\""$InGroup$"\" PACKAGE=\""$InPackage$"\" USIZE="$string(w)$" VSIZE="$string(h) );
-
-	if( InGroup == "" )
-		return Material( FindObject( InPackage$"."$InName, class'Material') );
-	else
-		return Material( FindObject( InPackage$"."$InGroup$"."$InName, class'Material') );
-
-}
-
-*/
+var() FractalTextureFactory.EResolution Width;
+// NEW IN 1.60
+var() FractalTextureFactory.EResolution Height;
 
 defaultproperties
 {
-     Width=Pixels_256
-     Height=Pixels_256
-     Description="Real-time Procedural Texture"
+	Width=8
+	Height=8
+	Description="Real-time Procedural Texture"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var t
+// REMOVED IN 1.60: var Class
+// REMOVED IN 1.60: function CreateMaterial

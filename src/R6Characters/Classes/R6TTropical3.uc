@@ -1,4 +1,10 @@
 //=============================================================================
+// R6TTropical3 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6TTropical3.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,21 +15,7 @@ class R6TTropical3 extends R6TTropical1;
 
 defaultproperties
 {
-     m_eTerroType=TTYPE_T1T3
-     Begin Object Class=KarmaParamsSkel Name=KarmaParamsSkel278
-         KConvulseSpacing=(Max=2.200000)
-         KSkeleton="terroskel"
-         KStartEnabled=True
-         bHighDetailOnly=False
-         KLinearDamping=0.500000
-         KAngularDamping=0.500000
-         KBuoyancy=1.000000
-         KVelDropBelowThreshold=50.000000
-         KFriction=0.600000
-         KRestitution=0.300000
-         KImpactThreshold=150.000000
-         Name="KarmaParamsSkel278"
-     End Object
-     KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel278'
-     Skins(0)=Texture'R6Characters_T.terrorist.R6TTropical3'
+	m_eTerroType=30
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel278'
+	Skins=/* Array type was not detected. */
 }

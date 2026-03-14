@@ -1,16 +1,20 @@
+//=============================================================================
+// R6DescHeavyEuroCamo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  R6DescHeavyEuroCamo.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class R6DescHeavyEuroCamo extends R6ArmorDescription;
+class R6DescHeavyEuroCamo extends R6ArmorDescription;
 
 defaultproperties
 {
-     m_2DMenuTexture=Texture'R6TextureMenuEquipment.Armor03'
-     m_2dMenuRegion=(X=238,Y=245,W=119,H=245)
-     m_NameID="HEAVYEUROCAMO"
-     m_NameTag="3"
-     m_ClassName="R6Characters.R6RainbowHeavyEuro"
+	m_2DMenuTexture=Texture'R6TextureMenuEquipment.Armor03'
+	m_2dMenuRegion=(Zone=Class'R6Description.R6PistolsDescription',iLeaf=60962,ZoneNumber=0)
+	m_NameID="HEAVYEUROCAMO"
+	m_NameTag="3"
+	m_ClassName="R6Characters.R6RainbowHeavyEuro"
 }

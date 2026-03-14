@@ -1,4 +1,10 @@
 //=============================================================================
+// R6LadderVolume - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6LadderVolume.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,495 +12,679 @@
 //    2001/07/11 * Created by Rima Brek
 //=============================================================================
 class R6LadderVolume extends LadderVolume
-	native;
+ native;
 
-#exec OBJ LOAD FILE=..\Textures\R6Engine_T.utx PACKAGE=R6Engine_T
-// R6CIRCUMSTANTIALACTION
-#exec OBJ LOAD FILE=..\Textures\R6ActionIcons.utx PACKAGE=R6ActionIcons
-// R6CIRCUMSTANTIALACTION
+const C_iMaxClimbers = 6;
 
-var			 R6Ladder		m_TopLadder;
-var			 R6Ladder		m_BottomLadder;
-
-var			 R6LadderCollision	m_TopCollision;
-var			 R6LadderCollision	m_BottomCollision;
-
-const		 C_iMaxClimbers = 6;
-var			 R6Pawn			m_Climber[C_iMaxClimbers];		// support up to 6 pawn on a ladder at once...
-
-var(R6Sound) Sound          m_SlideSound;
-var(R6Sound) Sound          m_SlideSoundStop;
-var(R6Sound) Sound          m_HandSound;
-var(R6Sound) Sound          m_FootSound;
-
-var			 FLOAT			m_fBottomLadderActionRange;
-
-var(Debug)   bool			bShowLog;
-
-var() enum  eLadderEndDirection   // only for getting off at top of ladder...
+enum eLadderEndDirection
 {
-    LDR_Forward,
-    LDR_Right,
-    LDR_Left
-} m_eLadderEndDirection;
+	LDR_Forward,                    // 0
+	LDR_Right,                      // 1
+	LDR_Left                        // 2
+};
 
 enum eLadderCircumstantialAction
 {
-    CAL_None,
-    CAL_Climb,
+	CAL_None,                       // 0
+	CAL_Climb                       // 1
 };
+
+// NEW IN 1.60
+var() R6LadderVolume.eLadderEndDirection m_eLadderEndDirection;
+var(Debug) bool bShowLog;
+var float m_fBottomLadderActionRange;
+var R6Ladder m_TopLadder;
+var R6Ladder m_BottomLadder;
+var R6LadderCollision m_TopCollision;
+var R6LadderCollision m_BottomCollision;
+// NEW IN 1.60
+var R6Pawn m_Climber[6];
+var(R6Sound) Sound m_SlideSound;
+var(R6Sound) Sound m_SlideSoundStop;
+var(R6Sound) Sound m_HandSound;
+var(R6Sound) Sound m_FootSound;
 
 // redefined PostBeginPlay() so that it is simulated 
 // (will be executed on the client as well during a multiplayer game)
 simulated function PostBeginPlay()
 {
-	Super.PostBeginPlay();
+	super.PostBeginPlay();
 	PostNetBeginPlay();
+	return;
 }
- 
+
 simulated function PostNetBeginPlay()
 {
 	local Ladder L, M;
-	local vector vDir;
+	local Vector vDir;
 
-	if(LadderList == None)
+	// End:0x41
+	if(__NFUN_114__(LadderList, none))
 	{
-		log("WARNING - no Ladder actors in LadderVolume "$self);
+		__NFUN_231__(__NFUN_112__("WARNING - no Ladder actors in LadderVolume ", string(self)));
 		return;
 	}
-
-	LookDir = vector(LadderList.Rotation);
-    WallDir = rotator(LookDir);
-
-	if(!bAutoPath)
+	LookDir = Vector(LadderList.Rotation);
+	WallDir = Rotator(LookDir);
+	// End:0x1E4
+	if(__NFUN_129__(bAutoPath))
 	{
-		ClimbDir = vect(0,0,0);
-		for(L=LadderList; L!=None; L=L.LadderList)
-        {
-            for(M=LadderList; M!=None; M=M.LadderList)
-            {
-                if(M!=L)
+		ClimbDir = vect(0.0000000, 0.0000000, 0.0000000);
+		L = LadderList;
+		J0x8D:
+
+		// End:0x1AD [Loop If]
+		if(__NFUN_119__(L, none))
+		{
+			M = LadderList;
+			J0xA3:
+
+			// End:0x196 [Loop If]
+			if(__NFUN_119__(M, none))
+			{
+				// End:0x17F
+				if(__NFUN_119__(M, L))
 				{
-					vDir = Normal(M.Location - L.Location);
-					if((vDir dot ClimbDir) < 0)
-                    {
-                        vDir *= -1;
-                    }
-					ClimbDir += vDir;
-
-                    if(M.location.z > L.location.z)
-                    {
-                        m_TopLadder = R6Ladder(M);
-                        m_BottomLadder = R6Ladder(L);
-                    }
-                    else
-                    {
-                        m_TopLadder = R6Ladder(L);
-                        m_BottomLadder = R6Ladder(M);
-                    }
+					vDir = __NFUN_226__(__NFUN_216__(M.Location, L.Location));
+					// End:0x105
+					if(__NFUN_176__(__NFUN_219__(vDir, ClimbDir), float(0)))
+					{
+						__NFUN_221__(vDir, float(-1));
+					}
+					__NFUN_223__(ClimbDir, vDir);
+					// End:0x15F
+					if(__NFUN_177__(M.Location.Z, L.Location.Z))
+					{
+						m_TopLadder = R6Ladder(M);
+						m_BottomLadder = R6Ladder(L);						
+					}
+					else
+					{
+						m_TopLadder = R6Ladder(L);
+						m_BottomLadder = R6Ladder(M);
+					}
 				}
-            }
-        }
-
-		ClimbDir = Normal(ClimbDir);
-		if((ClimbDir Dot vect(0,0,1)) < 0)
-        {
-            ClimbDir *= -1;
-        }
+				M = M.LadderList;
+				// [Loop Continue]
+				goto J0xA3;
+			}
+			L = L.LadderList;
+			// [Loop Continue]
+			goto J0x8D;
+		}
+		ClimbDir = __NFUN_226__(ClimbDir);
+		// End:0x1E4
+		if(__NFUN_176__(__NFUN_219__(ClimbDir, vect(0.0000000, 0.0000000, 1.0000000)), float(0)))
+		{
+			__NFUN_221__(ClimbDir, float(-1));
+		}
 	}
-    climbDir.x = 0;
-    climbDir.y = 0;
-
-	// rbrek 7 sept 2002
-	// Spawn ladder collision actors to be used for controlling access to ladders.  While Player A is getting on a ladder
-	// the appropriate R6LadderCollision actor will become blocking and therefore ensure that Player B can't get in the 
-	// way of Player A while in the process of getting on the ladder.
-	if(Level.NetMode != NM_Client)
+	ClimbDir.X = 0.0000000;
+	ClimbDir.Y = 0.0000000;
+	// End:0x2C5
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
 	{
-		if(m_TopCollision == none)
+		// End:0x271
+		if(__NFUN_114__(m_TopCollision, none))
 		{
-			m_TopCollision = Spawn(class'R6LadderCollision', self,, m_TopLadder.location - vect(0,0,239), rot(0,0,0));
-			m_TopCollision.SetCollision(false,false,false);
+			m_TopCollision = __NFUN_278__(Class'R6Engine.R6LadderCollision', self,, __NFUN_216__(m_TopLadder.Location, vect(0.0000000, 0.0000000, 239.0000000)), rot(0, 0, 0));
+			m_TopCollision.__NFUN_262__(false, false, false);
 		}
-
-		if(m_BottomCollision == none)
+		// End:0x2C5
+		if(__NFUN_114__(m_BottomCollision, none))
 		{
-			m_BottomCollision = Spawn(class'R6LadderCollision', self,, m_BottomLadder.location + vect(0,0,199), rot(0,0,0));
-			m_BottomCollision.SetCollision(false,false,false);
+			m_BottomCollision = __NFUN_278__(Class'R6Engine.R6LadderCollision', self,, __NFUN_215__(m_BottomLadder.Location, vect(0.0000000, 0.0000000, 199.0000000)), rot(0, 0, 0));
+			m_BottomCollision.__NFUN_262__(false, false, false);
 		}
 	}
+	return;
 }
 
 function Destroyed()
 {
-	if(m_TopCollision != none)
+	// End:0x1E
+	if(__NFUN_119__(m_TopCollision, none))
 	{
-		m_TopCollision.Destroy();
+		m_TopCollision.__NFUN_279__();
 		m_TopCollision = none;
 	}
-
-	if(m_BottomCollision != none)
+	// End:0x3C
+	if(__NFUN_119__(m_BottomCollision, none))
 	{
-		m_BottomCollision.Destroy();
+		m_BottomCollision.__NFUN_279__();
 		m_BottomCollision = none;
 	}
+	return;
 }
 
 simulated function ResetOriginalData()
 {
-	local INT i;
+	local int i;
 
-	if(m_TopCollision != none)
-		m_TopCollision.SetCollision(false,false,false);
-	if(m_BottomCollision != none)
-		m_BottomCollision.SetCollision(false,false,false);
+	// End:0x1A
+	if(__NFUN_119__(m_TopCollision, none))
+	{
+		m_TopCollision.__NFUN_262__(false, false, false);
+	}
+	// End:0x34
+	if(__NFUN_119__(m_BottomCollision, none))
+	{
+		m_BottomCollision.__NFUN_262__(false, false, false);
+	}
+	i = 0;
+	J0x3B:
 
-	for(i=0; i<C_iMaxClimbers; i++)
+	// End:0x5E [Loop If]
+	if(__NFUN_150__(i, 6))
+	{
 		m_Climber[i] = none;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x3B;
+	}
+	return;
 }
 
-function EnableCollisions(R6Ladder ladder)
+function EnableCollisions(R6Ladder Ladder)
 {
-	if(ladder == m_TopLadder)
-		m_TopCollision.SetCollision(true,true,true);
+	// End:0x21
+	if(__NFUN_114__(Ladder, m_TopLadder))
+	{
+		m_TopCollision.__NFUN_262__(true, true, true);		
+	}
 	else
-		m_BottomCollision.SetCollision(true,true,true);
+	{
+		m_BottomCollision.__NFUN_262__(true, true, true);
+	}
+	return;
 }
 
-function DisableCollisions(R6Ladder ladder)
+function DisableCollisions(R6Ladder Ladder)
 {
-	if(ladder == m_TopLadder)
-		m_TopCollision.SetCollision(false,false,false);
+	// End:0x21
+	if(__NFUN_114__(Ladder, m_TopLadder))
+	{
+		m_TopCollision.__NFUN_262__(false, false, false);		
+	}
 	else
-		m_BottomCollision.SetCollision(false,false,false);
+	{
+		m_BottomCollision.__NFUN_262__(false, false, false);
+	}
+	return;
 }
 
-simulated event PawnEnteredVolume(Pawn p)
+simulated event PawnEnteredVolume(Pawn P)
 {
-	local R6Pawn pawn;
-	local rotator rPawnRot;
+	local R6Pawn Pawn;
+	local Rotator rPawnRot;
 
-	pawn = R6Pawn(p);
-
-	if ((pawn == none) || !pawn.bCanClimbLadders || (pawn.controller == None))
+	Pawn = R6Pawn(P);
+	// End:0x49
+	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(Pawn, none), __NFUN_129__(Pawn.bCanClimbLadders)), __NFUN_114__(Pawn.Controller, none)))
+	{
 		return;
-
-	if (p.IsPlayerPawn())                 // call to super.pawnenteredvolume()
-		TriggerEvent(Event, p, p);
-
-	rPawnRot = pawn.rotation;
-	rPawnRot.pitch = 0;
-
-	if(vector(rPawnRot) dot lookDir > 0.9)
-    {
-		if(pawn.m_bIsClimbingLadder)
+	}
+	// End:0x70
+	if(P.IsPlayerPawn())
+	{
+		TriggerEvent(Event, P, P);
+	}
+	rPawnRot = Pawn.Rotation;
+	rPawnRot.Pitch = 0;
+	// End:0xCF
+	if(__NFUN_177__(__NFUN_219__(Vector(rPawnRot), LookDir), 0.9000000))
+	{
+		// End:0xBC
+		if(Pawn.m_bIsClimbingLadder)
+		{
 			return;
-        pawn.PotentialClimbLadder(self);
-    }
-    else
-    {
-        SetPotentialClimber();  // so that pawn can enter the volume without having the right orientation, and can then turn to face ladder...        
-    }
+		}
+		Pawn.PotentialClimbLadder(self);		
+	}
+	else
+	{
+		SetPotentialClimber();
+	}
+	return;
 }
 
-simulated event PawnLeavingVolume(Pawn p)
+simulated event PawnLeavingVolume(Pawn P)
 {
-	if (p.IsPlayerPawn())
-		UntriggerEvent(Event, p, p);
-
-    if(p.physics == PHYS_Ladder)
-    {
-        p.EndClimbLadder(self);
-    }
-    else
-    {
-        R6Pawn(p).RemovePotentialClimbLadder(self);
-    }
+	// End:0x27
+	if(P.IsPlayerPawn())
+	{
+		UntriggerEvent(Event, P, P);
+	}
+	// End:0x53
+	if(__NFUN_154__(int(P.Physics), int(11)))
+	{
+		P.EndClimbLadder(self);		
+	}
+	else
+	{
+		R6Pawn(P).RemovePotentialClimbLadder(self);
+	}
+	return;
 }
 
 simulated event SetPotentialClimber()
 {
-	GotoState('PotentialClimb');
+	__NFUN_113__('PotentialClimb');
+	return;
 }
 
-state PotentialClimb
-{  
-	simulated function Tick(float fDeltaTime)
-	{
-		local rotator rPawnRot;
-		local R6Pawn pawn;
-		local bool bFound;
-
-		ForEach TouchingActors(class'R6Pawn', pawn)
-			if ( (pawn.controller != None) && (pawn.physics != PHYS_Ladder) )				
-			{
-                if(Encompasses(pawn))
-                {
-				    rPawnRot = pawn.rotation;
-				    rPawnRot.pitch = 0;
-				    if ( (vector(rPawnRot) Dot lookDir) > 0.9 )
-                    {
-						if(!pawn.m_bIsClimbingLadder)
-						{
-							pawn.PotentialClimbLadder(self);
-						}
-                    }
-				    else
-                        bFound = true;
-                }
-			}
-
-		if ( !bFound )
-			GotoState('');
-	}
-}
-
-simulated function AddClimber(R6Pawn p)
+simulated function AddClimber(R6Pawn P)
 {
-	local INT i;
+	local int i;
 
-	if(bShowLog) log(self$" AddClimber : "$p);	
-	for(i=0; i<C_iMaxClimbers; i++)
+	// End:0x29
+	if(bShowLog)
 	{
-		if(m_Climber[i] == p)
-			break;
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " AddClimber : "), string(P)));
+	}
+	i = 0;
+	J0x30:
 
-		if(m_Climber[i] == none)
+	// End:0x83 [Loop If]
+	if(__NFUN_150__(i, 6))
+	{
+		// End:0x54
+		if(__NFUN_114__(m_Climber[i], P))
 		{
-			m_Climber[i] = p;
-			break;
+			// [Explicit Break]
+			goto J0x83;
 		}
+		// End:0x79
+		if(__NFUN_114__(m_Climber[i], none))
+		{
+			m_Climber[i] = P;
+			// [Explicit Break]
+			goto J0x83;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x30;
 	}
+	J0x83:
+
+	return;
 }
 
-simulated function RemoveClimber(R6Pawn p)
+simulated function RemoveClimber(R6Pawn P)
 {
-	local INT i;
+	local int i;
 
-	if(bShowLog) log(self$" Remove Climber : "$p);
-	for(i=0; i<C_iMaxClimbers; i++)
+	// End:0x2D
+	if(bShowLog)
 	{
-		if(m_Climber[i] == p)
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " Remove Climber : "), string(P)));
+	}
+	i = 0;
+	J0x34:
+
+	// End:0x6F [Loop If]
+	if(__NFUN_150__(i, 6))
+	{
+		// End:0x65
+		if(__NFUN_114__(m_Climber[i], P))
 		{
 			m_Climber[i] = none;
-			break;
+			// [Explicit Break]
+			goto J0x6F;
 		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x34;
 	}
+	J0x6F:
+
+	return;
 }
 
-function bool IsAvailable( Pawn p )
+function bool IsAvailable(Pawn P)
 {
-	local INT i;
-	
-	for(i=0; i<C_iMaxClimbers; i++)
+	local int i;
+
+	i = 0;
+	J0x07:
+
+	// End:0x6F [Loop If]
+	if(__NFUN_150__(i, 6))
 	{
-		if(m_Climber[i] != none)
+		// End:0x65
+		if(__NFUN_119__(m_Climber[i], none))
 		{
-			if(!m_Climber[i].IsValidClimber())
+			// End:0x4E
+			if(__NFUN_129__(m_Climber[i].IsValidClimber()))
 			{
 				m_Climber[i] = none;
-				continue;
+				// [Explicit Continue]
+				goto J0x65;
 			}
-
-			if(m_Climber[i] != p)
+			// End:0x65
+			if(__NFUN_119__(m_Climber[i], P))
+			{
 				return false;
+			}
 		}
+		J0x65:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
 	}
 	return true;
+	return;
 }
 
 function bool TopOfLadderIsAccessible()
 {
-	local FLOAT		fTopZLimit;
-	local INT		i;
+	local float fTopZLimit;
+	local int i;
 
-	fTopZLimit = m_TopLadder.location.z - 240.f;
-	for(i=0; i<C_iMaxClimbers; i++)
+	fTopZLimit = __NFUN_175__(m_TopLadder.Location.Z, 240.0000000);
+	i = 0;
+	J0x27:
+
+	// End:0xB6 [Loop If]
+	if(__NFUN_150__(i, 6))
 	{
-		if(m_Climber[i] == none)
-			continue;
-
-		if(!m_Climber[i].IsValidClimber())
+		// End:0x47
+		if(__NFUN_114__(m_Climber[i], none))
+		{
+			// [Explicit Continue]
+			goto J0xAC;
+		}
+		// End:0x71
+		if(__NFUN_129__(m_Climber[i].IsValidClimber()))
 		{
 			m_Climber[i] = none;
-			continue;
+			// [Explicit Continue]
+			goto J0xAC;
 		}
-
-		if(m_Climber[i].location.z + m_Climber[i].CollisionHeight > fTopZLimit)
+		// End:0xAC
+		if(__NFUN_177__(__NFUN_174__(m_Climber[i].Location.Z, m_Climber[i].CollisionHeight), fTopZLimit))
+		{
 			return false;
-	}	
+		}
+		J0xAC:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x27;
+	}
 	return true;
+	return;
 }
 
 function bool BottomOfLadderIsAccessible()
 {
-	local FLOAT		fBottomZLimit;
-	local INT		i;
+	local float fBottomZLimit;
+	local int i;
 
-	fBottomZLimit = m_BottomLadder.location.z + 200.f;
-	for(i=0; i<C_iMaxClimbers; i++)
+	fBottomZLimit = __NFUN_174__(m_BottomLadder.Location.Z, 200.0000000);
+	i = 0;
+	J0x27:
+
+	// End:0xB6 [Loop If]
+	if(__NFUN_150__(i, 6))
 	{
-		if(m_Climber[i] == none)
-			continue;
-
-		if(!m_Climber[i].IsValidClimber())
+		// End:0x47
+		if(__NFUN_114__(m_Climber[i], none))
+		{
+			// [Explicit Continue]
+			goto J0xAC;
+		}
+		// End:0x71
+		if(__NFUN_129__(m_Climber[i].IsValidClimber()))
 		{
 			m_Climber[i] = none;
-			continue;
+			// [Explicit Continue]
+			goto J0xAC;
 		}
-
-		if(m_Climber[i].location.z - m_Climber[i].CollisionHeight < fBottomZLimit)
+		// End:0xAC
+		if(__NFUN_176__(__NFUN_175__(m_Climber[i].Location.Z, m_Climber[i].CollisionHeight), fBottomZLimit))
+		{
 			return false;
-	}	
+		}
+		J0xAC:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x27;
+	}
 	return true;
+	return;
 }
 
 function bool SpaceIsAvailableAtBottomOfLadder(optional bool bAvoidPlayerOnly)
 {
-	local R6Pawn pawn;
-	local vector vDist;	
-	
-	ForEach TouchingActors(class'R6Pawn', pawn)
+	local R6Pawn Pawn;
+	local Vector vDist;
+
+	// End:0xCA
+	foreach __NFUN_307__(Class'R6Engine.R6Pawn', Pawn)
 	{
-		if(!pawn.IsAlive())
-			continue;
-
-		if(bAvoidPlayerOnly && !pawn.m_bIsPlayer)
-			continue;
-		
-		if(abs(pawn.location.z - m_BottomLadder.location.z) > 100)
-			continue;
-
-		vDist = pawn.location - m_BottomLadder.location;
-		vDist.z = 0;
-		if(VSize(vDist) < 90)
+		// End:0x28
+		if(__NFUN_129__(Pawn.IsAlive()))
+		{
+			continue;			
+		}
+		// End:0x4B
+		if(__NFUN_130__(bAvoidPlayerOnly, __NFUN_129__(Pawn.m_bIsPlayer)))
+		{
+			continue;			
+		}
+		// End:0x82
+		if(__NFUN_177__(__NFUN_186__(__NFUN_175__(Pawn.Location.Z, m_BottomLadder.Location.Z)), float(100)))
+		{
+			continue;			
+		}
+		vDist = __NFUN_216__(Pawn.Location, m_BottomLadder.Location);
+		vDist.Z = 0.0000000;
+		// End:0xC9
+		if(__NFUN_176__(__NFUN_225__(vDist), float(90)))
+		{			
 			return false;
-	}
+		}		
+	}	
 	return true;
+	return;
 }
 
 function bool IsAShortLadder()
 {
-	if((m_TopLadder.location.z - m_BottomLadder.location.z) < 340)
+	// End:0x36
+	if(__NFUN_176__(__NFUN_175__(m_TopLadder.Location.Z, m_BottomLadder.Location.Z), float(340)))
+	{
 		return true;
-
+	}
 	return false;
+	return;
 }
 
 simulated event PhysicsChangedFor(Actor Other)
 {
+	return;
 }
 
-simulated event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
-{ 
-	local  FLOAT	fXYDistance;
-	local  vector	vLocation, vPawnLocation;
-	local  FLOAT	fResult;
-	local  FLOAT	fPawnFootZ;
+simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
+{
+	local float fXYDistance;
+	local Vector vLocation, vPawnLocation;
+	local float fResult, fPawnFootZ;
 
-	if(R6Pawn(playerController.pawn).m_bIsClimbingLadder || (IsAShortLadder() && !IsAvailable(playerController.pawn)))
+	// End:0x59
+	if(__NFUN_132__(R6Pawn(PlayerController.Pawn).m_bIsClimbingLadder, __NFUN_130__(IsAShortLadder(), __NFUN_129__(IsAvailable(PlayerController.Pawn)))))
 	{
 		Query.iHasAction = 0;
 		return;
 	}
-
 	vLocation = Location;
-	vLocation.z = 0;
-	vPawnLocation = playerController.pawn.location;
-	vPawnLocation.z = 0;
-
-	fXYDistance = VSize(vLocation - vPawnLocation);
-    Query.iHasAction = 1;
-	
-	fPawnFootZ = playerController.pawn.location.z - playerController.pawn.collisionHeight;
-	if(playerController.pawn.location.z < location.z)
+	vLocation.Z = 0.0000000;
+	vPawnLocation = PlayerController.Pawn.Location;
+	vPawnLocation.Z = 0.0000000;
+	fXYDistance = __NFUN_225__(__NFUN_216__(vLocation, vPawnLocation));
+	Query.iHasAction = 1;
+	fPawnFootZ = __NFUN_175__(PlayerController.Pawn.Location.Z, PlayerController.Pawn.CollisionHeight);
+	// End:0x206
+	if(__NFUN_176__(PlayerController.Pawn.Location.Z, Location.Z))
 	{
-		// player is at the bottom of the ladder
-		if(fPawnFootZ > m_BottomLadder.location.z)
-			Query.iInRange = 0;
+		// End:0x15D
+		if(__NFUN_177__(fPawnFootZ, m_BottomLadder.Location.Z))
+		{
+			Query.iInRange = 0;			
+		}
 		else
 		{
-			fResult = vector(playerController.pawn.rotation) dot vector(m_BottomLadder.rotation);
-			if(fResult < 0.8)
-				Query.iInRange = 0;
+			fResult = __NFUN_219__(Vector(PlayerController.Pawn.Rotation), Vector(m_BottomLadder.Rotation));
+			// End:0x1B1
+			if(__NFUN_176__(fResult, 0.8000000))
+			{
+				Query.iInRange = 0;				
+			}
 			else
 			{
-				if(fXYDistance < m_fBottomLadderActionRange)
+				// End:0x1F2
+				if(__NFUN_176__(fXYDistance, m_fBottomLadderActionRange))
 				{
 					Query.iInRange = 1;
-					if(!BottomOfLadderIsAccessible())
+					// End:0x1EF
+					if(__NFUN_129__(BottomOfLadderIsAccessible()))
 					{
 						Query.iHasAction = 0;
 						return;
-					}
-				}	
+					}					
+				}
 				else
+				{
 					Query.iInRange = 0;
+				}
 			}
-		}
+		}		
 	}
 	else
-	{	
-		// player is at the top of the ladder
-		if(fPawnFootZ > m_TopLadder.location.z)
-			Query.iInRange = 0;
+	{
+		// End:0x237
+		if(__NFUN_177__(fPawnFootZ, m_TopLadder.Location.Z))
+		{
+			Query.iInRange = 0;			
+		}
 		else
 		{
-			fResult = vector(playerController.pawn.rotation) dot -vector(m_TopLadder.rotation);
-			if(fResult < 0.9)
-				Query.iInRange = 0;
+			fResult = __NFUN_219__(Vector(PlayerController.Pawn.Rotation), __NFUN_211__(Vector(m_TopLadder.Rotation)));
+			// End:0x28D
+			if(__NFUN_176__(fResult, 0.9000000))
+			{
+				Query.iInRange = 0;				
+			}
 			else
 			{
-				if(fXYDistance < m_fCircumstantialActionRange)
+				// End:0x2F5
+				if(__NFUN_176__(fXYDistance, m_fCircumstantialActionRange))
 				{
 					Query.iInRange = 1;
-					if(!TopOfLadderIsAccessible())
+					// End:0x2CB
+					if(__NFUN_129__(TopOfLadderIsAccessible()))
 					{
 						Query.iHasAction = 0;
 						return;
 					}
-					
+					// End:0x2F2
 					if(IsAShortLadder())
 					{
-						// check if some one is standing too close to the ladder (even if they are not climbing)
-						if(!SpaceIsAvailableAtBottomOfLadder())
+						// End:0x2F2
+						if(__NFUN_129__(SpaceIsAvailableAtBottomOfLadder()))
 						{
 							Query.iHasAction = 0;
 							return;
 						}
-					}
+					}					
 				}
 				else
+				{
 					Query.iInRange = 0;
+				}
 			}
 		}
 	}
-	Query.textureIcon = Texture'R6ActionIcons.Climb';		
-    
-    Query.iPlayerActionID      = eLadderCircumstantialAction.CAL_Climb;
-    Query.iTeamActionID        = eLadderCircumstantialAction.CAL_Climb;
-    
-    Query.iTeamActionIDList[0] = eLadderCircumstantialAction.CAL_Climb;
-    Query.iTeamActionIDList[1] = eLadderCircumstantialAction.CAL_None;
-    Query.iTeamActionIDList[2] = eLadderCircumstantialAction.CAL_None;
-    Query.iTeamActionIDList[3] = eLadderCircumstantialAction.CAL_None;
+	Query.textureIcon = Texture'R6ActionIcons.Climb';
+	Query.iPlayerActionID = 1;
+	Query.iTeamActionID = 1;
+	Query.iTeamActionIDList[0] = 1;
+	Query.iTeamActionIDList[1] = 0;
+	Query.iTeamActionIDList[2] = 0;
+	Query.iTeamActionIDList[3] = 0;
+	return;
 }
 
-simulated function string R6GetCircumstantialActionString( INT iAction )
+simulated function string R6GetCircumstantialActionString(int iAction)
 {
-    switch( iAction )
-    {
-        case eLadderCircumstantialAction.CAL_Climb:          
-            return Localize("RDVOrder", "Order_Climb", "R6Menu");
-    }
-    
-    return "";
+	switch(iAction)
+	{
+		// End:0x34
+		case int(1):
+			return Localize("RDVOrder", "Order_Climb", "R6Menu");
+		// End:0xFFFF
+		default:
+			return "";
+			break;
+	}
+	return;
+}
+
+state PotentialClimb
+{
+	simulated function Tick(float fDeltaTime)
+	{
+		local Rotator rPawnRot;
+		local R6Pawn Pawn;
+		local bool bFound;
+
+		// End:0xB5
+		foreach __NFUN_307__(Class'R6Engine.R6Pawn', Pawn)
+		{
+			// End:0xB4
+			if(__NFUN_130__(__NFUN_119__(Pawn.Controller, none), __NFUN_155__(int(Pawn.Physics), int(11))))
+			{
+				// End:0xB4
+				if(Encompasses(Pawn))
+				{
+					rPawnRot = Pawn.Rotation;
+					rPawnRot.Pitch = 0;
+					// End:0xAC
+					if(__NFUN_177__(__NFUN_219__(Vector(rPawnRot), LookDir), 0.9000000))
+					{
+						// End:0xA9
+						if(__NFUN_129__(Pawn.m_bIsClimbingLadder))
+						{
+							Pawn.PotentialClimbLadder(self);
+						}
+						// End:0xB4
+						continue;
+					}
+					bFound = true;
+				}
+			}			
+		}		
+		// End:0xC8
+		if(__NFUN_129__(bFound))
+		{
+			__NFUN_113__('None');
+		}
+		return;
+	}
+	stop;
 }
 
 defaultproperties
 {
-     m_fBottomLadderActionRange=30.000000
-     bStatic=False
-     m_fCircumstantialActionRange=110.000000
-     NetPriority=2.700000
+	m_fBottomLadderActionRange=30.0000000
+	bStatic=false
+	m_fCircumstantialActionRange=110.0000000
+	NetPriority=2.7000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_ClimberC_iMaxClimbers
+// REMOVED IN 1.60: var eLadderEndDirection

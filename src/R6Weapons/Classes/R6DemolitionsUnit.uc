@@ -1,4 +1,10 @@
 //=============================================================================
+// R6DemolitionsUnit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6DemolitionsUnit.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,139 +15,175 @@ class R6DemolitionsUnit extends R6Grenade;
 
 var bool m_bExploding;
 
-function Activate();
-simulated function HitWall( vector HitNormal, actor Wall );
-simulated function Landed( vector HitNormal );
-simulated singular function Touch(Actor Other);
-simulated function ProcessTouch(Actor Other, vector vHitLocation);
+function Activate()
+{
+	return;
+}
+
+simulated function HitWall(Vector HitNormal, Actor Wall)
+{
+	return;
+}
+
+simulated function Landed(Vector HitNormal)
+{
+	return;
+}
+
+singular simulated function Touch(Actor Other)
+{
+	return;
+}
+
+simulated function ProcessTouch(Actor Other, Vector vHitLocation)
+{
+	return;
+}
 
 function Explode()
 {
-    m_bExploding = true;
-	Super.Explode();
+	m_bExploding = true;
+	super.Explode();
 	SelfDestroy();
+	return;
 }
 
 //a bullet hit the demolition charge
-function BOOL DestroyedByImpact()
+function bool DestroyedByImpact()
 {
-    Spawn(Class'R6SFX.R6BreakablePhone', none,, Location);
-    m_Weapon.MyUnitIsDestroyed();
-    m_bDestroyedByImpact=true;
-    SelfDestroy();
-    //Tell the player controller that he can't blow this thing anymore
-    return true;
+	__NFUN_278__(Class'R6SFX.R6BreakablePhone', none,, Location);
+	m_Weapon.MyUnitIsDestroyed();
+	m_bDestroyedByImpact = true;
+	SelfDestroy();
+	return true;
+	return;
 }
 
 function DoorExploded()
 {
-    if(!m_bExploding)
-        DestroyedByImpact();
+	// End:0x11
+	if(__NFUN_129__(m_bExploding))
+	{
+		DestroyedByImpact();
+	}
+	return;
 }
 
-function DistributeDamage(Actor anActor, vector vLocationOfExplosion)
+function DistributeDamage(Actor anActor, Vector vLocationOfExplosion)
 {
-    local INT                 iCurrentFragment;
-    local FLOAT               fCurrentNumberOfFragments;
+	local int iCurrentFragment;
+	local float fCurrentNumberOfFragments;
+	local Vector vHit, vHitNormal, vExplosionMomentum, vDamageLocation;
+	local float fDistFromGrenade;
+	local R6Grenade.eGrenadeBoneTarget eBoneTarget;
+	local float fDamagePercent, fEffectiveKillValue, fEffectiveStunValue;
+	local R6IORotatingDoor pImADoor;
 
-    local vector              vHit;
-    local vector              vHitNormal;
-    local vector              vExplosionMomentum;
-	local vector			  vDamageLocation;
-	
-    local FLOAT               fDistFromGrenade;
-	local eGrenadeBoneTarget  eBoneTarget;
-	
-    local FLOAT               fDamagePercent;
-    local FLOAT               fEffectiveKillValue;
-    local FLOAT               fEffectiveStunValue;
-
-    local R6IORotatingDoor    pImADoor;
-
-    fDistFromGrenade = VSize(anActor.Location - Location);
-    fDamagePercent = 1.0 - ((fDistFromGrenade - m_fKillBlastRadius) / m_fEffectiveOutsideKillRadius);
-
-    if(bShowLog) log( "Actor " $ anActor $ " was hit by a grenade.  Distance : " $ (fDistFromGrenade*0.01f));
-
-	if (anActor.isA('R6Pawn'))
+	fDistFromGrenade = __NFUN_225__(__NFUN_216__(anActor.Location, Location));
+	fDamagePercent = __NFUN_175__(1.0000000, __NFUN_172__(__NFUN_175__(fDistFromGrenade, m_fKillBlastRadius), m_fEffectiveOutsideKillRadius));
+	// End:0x90
+	if(bShowLog)
 	{
-        fCurrentNumberOfFragments = m_iNumberOfFragments * fDamagePercent;
+		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Actor ", string(anActor)), " was hit by a grenade.  Distance : "), string(__NFUN_171__(fDistFromGrenade, 0.0100000))));
+	}
+	// End:0x281
+	if(anActor.__NFUN_303__('R6Pawn'))
+	{
+		fCurrentNumberOfFragments = __NFUN_171__(float(m_iNumberOfFragments), fDamagePercent);
+		iCurrentFragment = 0;
+		J0xBF:
 
-        for(iCurrentFragment = 0; iCurrentFragment < fCurrentNumberOfFragments; iCurrentFragment++)
-        {
-			// If there is a line traceable between the grenade and the bone representing the hit location 
-			//    The player gets damage using the following formula
-			//    Effective Damage = Damage * (KillRadius - Distance) / (ZeroRadius - KillRadius)
-			//    Apply the effective damage to the bone - Need to be implemented in R6Pawn
-			eBoneTarget = HitRandomBodyPart( GetPawnPose(R6Pawn(anActor)) );
-            
-			switch( eBoneTarget )
+		// End:0x27E [Loop If]
+		if(__NFUN_176__(float(iCurrentFragment), fCurrentNumberOfFragments))
+		{
+			eBoneTarget = HitRandomBodyPart(GetPawnPose(R6Pawn(anActor)));
+			switch(eBoneTarget)
 			{
-			case GBT_Head:      vDamageLocation = anActor.GetBoneCoords( 'R6 Head' ).Origin;       break;
-			case GBT_Body:      vDamageLocation = anActor.GetBoneCoords( 'R6 Spine' ).Origin;      break;
-			case GBT_LeftArm:   vDamageLocation = anActor.GetBoneCoords( 'R6 L ForeArm' ).Origin;  break;
-			case GBT_RightArm:  vDamageLocation = anActor.GetBoneCoords( 'R6 R ForeArm' ).Origin;  break;
-			case GBT_LeftLeg:   vDamageLocation = anActor.GetBoneCoords( 'R6 L Thigh' ).Origin;    break;
-			case GBT_RightLeg:  vDamageLocation = anActor.GetBoneCoords( 'R6 R Thigh' ).Origin;    break;
+				// End:0x11A
+				case 0:
+					vDamageLocation = anActor.GetBoneCoords('R6 Head').Origin;
+					// End:0x1E0
+					break;
+				// End:0x141
+				case 1:
+					vDamageLocation = anActor.GetBoneCoords('R6 Spine').Origin;
+					// End:0x1E0
+					break;
+				// End:0x168
+				case 2:
+					vDamageLocation = anActor.GetBoneCoords('R6 L ForeArm').Origin;
+					// End:0x1E0
+					break;
+				// End:0x18F
+				case 3:
+					vDamageLocation = anActor.GetBoneCoords('R6 R ForeArm').Origin;
+					// End:0x1E0
+					break;
+				// End:0x1B6
+				case 4:
+					vDamageLocation = anActor.GetBoneCoords('R6 L Thigh').Origin;
+					// End:0x1E0
+					break;
+				// End:0x1DD
+				case 5:
+					vDamageLocation = anActor.GetBoneCoords('R6 R Thigh').Origin;
+					// End:0x1E0
+					break;
+				// End:0xFFFF
+				default:
+					break;
 			}
-
-			// Distance from grenade
-			fDistFromGrenade = VSize( vDamageLocation - vLocationOfExplosion );
-			
-			// Kill value
-			fEffectiveKillValue = max(m_iEnergy * fDamagePercent, 0);
-
-            if(fEffectiveKillValue != 0) 
-            {
-                // Stun value
-			    fEffectiveStunValue = fEffectiveKillValue + (fEffectiveKillValue * m_fKillStunTransfer);
-
-			    // Temporary momentum, quarter of distance from grenade...
-			    vExplosionMomentum = vDamageLocation - vLocationOfExplosion;
-
-			    // Should damage a specific body part (eBoneTarget) - need to be implemented in R6Pawn
-			    anActor.R6TakeDamage( fEffectiveKillValue, fEffectiveStunValue, Instigator, vDamageLocation, vExplosionMomentum, 0);
-            }
-		}
-    }
+			fDistFromGrenade = __NFUN_225__(__NFUN_216__(vDamageLocation, vLocationOfExplosion));
+			fEffectiveKillValue = float(__NFUN_250__(int(__NFUN_171__(float(m_iEnergy), fDamagePercent)), 0));
+			// End:0x274
+			if(__NFUN_181__(fEffectiveKillValue, float(0)))
+			{
+				fEffectiveStunValue = __NFUN_174__(fEffectiveKillValue, __NFUN_171__(fEffectiveKillValue, m_fKillStunTransfer));
+				vExplosionMomentum = __NFUN_216__(vDamageLocation, vLocationOfExplosion);
+				anActor.R6TakeDamage(int(fEffectiveKillValue), int(fEffectiveStunValue), Instigator, vDamageLocation, vExplosionMomentum, 0);
+			}
+			__NFUN_165__(iCurrentFragment);
+			// [Loop Continue]
+			goto J0xBF;
+		}		
+	}
 	else
 	{
-        pImADoor = R6IORotatingDoor(anActor);
-        if(pImADoor != none)
-        {
-            vDamageLocation = pImADoor.m_vVisibleCenter;
-        }
-        else
-        {
-            vDamageLocation = anActor.Location;
-        }
-
-		// Kill value
-        if(fDistFromGrenade < m_fKillBlastRadius)
-        {
-			fEffectiveKillValue = max(m_iEnergy, 0);
-        }
-        else
-        {
-            fEffectiveKillValue = max(m_iEnergy * fDamagePercent, 0);
-        }
-
-        if(fEffectiveKillValue != 0)
-        {
-		    vExplosionMomentum = vDamageLocation - vLocationOfExplosion;
-
-            //if door was not destroyed, return 0.
-		    anActor.R6TakeDamage( fEffectiveKillValue, 0, Instigator, vDamageLocation, vExplosionMomentum, 0);
-        }
+		pImADoor = R6IORotatingDoor(anActor);
+		// End:0x2B3
+		if(__NFUN_119__(pImADoor, none))
+		{
+			vDamageLocation = pImADoor.m_vVisibleCenter;			
+		}
+		else
+		{
+			vDamageLocation = anActor.Location;
+		}
+		// End:0x2E9
+		if(__NFUN_176__(fDistFromGrenade, m_fKillBlastRadius))
+		{
+			fEffectiveKillValue = float(__NFUN_250__(m_iEnergy, 0));			
+		}
+		else
+		{
+			fEffectiveKillValue = float(__NFUN_250__(int(__NFUN_171__(float(m_iEnergy), fDamagePercent)), 0));
+		}
+		// End:0x34A
+		if(__NFUN_181__(fEffectiveKillValue, float(0)))
+		{
+			vExplosionMomentum = __NFUN_216__(vDamageLocation, vLocationOfExplosion);
+			anActor.R6TakeDamage(int(fEffectiveKillValue), 0, Instigator, vDamageLocation, vExplosionMomentum, 0);
+		}
 	}
+	return;
 }
 
 defaultproperties
 {
-     m_DmgPercentStand=(fHead=0.080000,fBody=0.500000,fArms=0.200000,fLegs=0.260000)
-     m_DmgPercentCrouch=(fHead=0.120000,fBody=0.250000,fArms=0.320000,fLegs=0.500000)
-     m_DmgPercentProne=(fHead=0.760000,fBody=0.020000,fArms=0.200000,fLegs=0.020000)
-     m_fKillStunTransfer=0.350000
-     m_fExplosionDelay=0.000000
-     m_szBulletType="DEMOLITIONS"
+	m_DmgPercentStand=(fHead=0.0800000,fBody=0.5000000,fArms=0.2000000,fLegs=0.2600000)
+	m_DmgPercentCrouch=(fHead=0.1200000,fBody=0.2500000,fArms=0.3200000,fLegs=0.5000000)
+	m_DmgPercentProne=(fHead=0.7600000,fBody=0.0200000,fArms=0.2000000,fLegs=0.0200000)
+	m_fKillStunTransfer=0.3500000
+	m_fExplosionDelay=0.0000000
+	m_szBulletType="DEMOLITIONS"
 }

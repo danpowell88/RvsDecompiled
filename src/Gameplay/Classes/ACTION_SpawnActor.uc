@@ -1,40 +1,54 @@
-class ACTION_SpawnActor extends ScriptedAction;
+//=============================================================================
+// ACTION_SpawnActor - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_SpawnActor extends ScriptedAction
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
-var(Action)		class<Actor>	ActorClass;
-var(Action)		vector			LocationOffset;
-var(Action)		rotator			RotationOffset;
-var(Action)		bool			bOffsetFromScriptedPawn;
-var(Action)		name			ActorTag;
+var(Action) bool bOffsetFromScriptedPawn;
+var(Action) name ActorTag;
+var(Action) Class<Actor> ActorClass;
+var(Action) Vector LocationOffset;
+var(Action) Rotator RotationOffset;
 
 function bool InitActionFor(ScriptedController C)
 {
-	local vector loc;
-	local rotator rot;
-	local actor a;
+	local Vector Loc;
+	local Rotator Rot;
+	local Actor A;
 
-	if ( bOffsetFromScriptedPawn )
+	// End:0x55
+	if(bOffsetFromScriptedPawn)
 	{
-		loc = C.Pawn.Location + LocationOffset;
-		rot = C.Pawn.Rotation + RotationOffset;
+		Loc = __NFUN_215__(C.Pawn.Location, LocationOffset);
+		Rot = __NFUN_316__(C.Pawn.Rotation, RotationOffset);		
 	}
 	else
 	{
-		loc = C.SequenceScript.Location + LocationOffset;
-		rot = C.SequenceScript.Rotation + RotationOffset;
+		Loc = __NFUN_215__(C.SequenceScript.Location, LocationOffset);
+		Rot = __NFUN_316__(C.SequenceScript.Rotation, RotationOffset);
 	}
-	a = C.Spawn(ActorClass,,,loc,rot);
-	a.Instigator = C.Pawn;
-	if ( ActorTag != 'None' )
-		a.Tag = ActorTag;
-	return false;	
+	A = C.__NFUN_278__(ActorClass,,, Loc, Rot);
+	A.Instigator = C.Pawn;
+	// End:0x101
+	if(__NFUN_255__(ActorTag, 'None'))
+	{
+		A.Tag = ActorTag;
+	}
+	return false;
+	return;
 }
 
 function string GetActionString()
 {
-	return ActionString@ActorClass;
+	return __NFUN_168__(ActionString, string(ActorClass));
+	return;
 }
 
 defaultproperties
 {
-     ActionString="Spawn actor"
+	ActionString="Spawn actor"
 }

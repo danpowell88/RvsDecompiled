@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuMPManageTab - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuMPManageTab.uc : Manage Tab for multiplayer menu
 //                                         
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
@@ -8,85 +14,78 @@
 //=============================================================================
 class R6MenuMPManageTab extends UWindowDialogClientWindow;
 
-var R6WindowTabControl                m_pMainTabControl;
+var R6WindowTabControl m_pMainTabControl;
 
 function Created()
 {
-    m_pMainTabControl = R6WindowTabControl(CreateControl(class'R6WindowTabControl', 0, 0, WinWidth, WinHeight));
-    m_pMainTabControl.SetFont( F_TabMainTitle);
-
-    LookAndFeel.Size_TabXOffset = 0;
-    LookAndFeel.Size_TabAreaHeight = WinHeight - LookAndFeel.Size_TabAreaOverhangHeight;
+	m_pMainTabControl = R6WindowTabControl(CreateControl(Class'R6Window.R6WindowTabControl', 0.0000000, 0.0000000, WinWidth, WinHeight));
+	m_pMainTabControl.SetFont(7);
+	LookAndFeel.Size_TabXOffset = 0.0000000;
+	LookAndFeel.Size_TabAreaHeight = __NFUN_175__(WinHeight, LookAndFeel.Size_TabAreaOverhangHeight);
+	return;
 }
 
 /////////////////////////////////////////////////////////////////
 // this method add tab in a list use by UWindowTabControlTabArea
 /////////////////////////////////////////////////////////////////
-function AddTabInControl( string _Caption, string _TabToolTip, INT _ItemID)
+function AddTabInControl(string _Caption, string _TabToolTip, int _ItemID)
 {
-    local UWindowTabControlItem pItem;
+	local UWindowTabControlItem pItem;
 
-    if (m_pMainTabControl != NONE)
-    {
-        // the return item is not use for now...
-        pItem = m_pMainTabControl.AddTab(_Caption, _ItemID);
-        pItem.HelpText = _TabToolTip;
-//        pItem.SetFixTabSize( 160);
-        pItem.SetItemColor( Root.Colors.White, Root.Colors.GrayLight);
-    }
+	// End:0x7B
+	if(__NFUN_119__(m_pMainTabControl, none))
+	{
+		pItem = m_pMainTabControl.AddTab(_Caption, _ItemID);
+		pItem.HelpText = _TabToolTip;
+		pItem.SetItemColor(Root.Colors.White, Root.Colors.GrayLight);
+	}
+	return;
 }
-
 
 /////////////////////////////////////////////////////////////////
 // this method receive a "msg" sent by ? dialogclientwindow or uwindowwindow
 /////////////////////////////////////////////////////////////////
 function Notify(UWindowDialogControl C, byte E)
 {
-    local R6LanServers          pLanServers;
-    local R6GSServers           pGameService;
+	local R6LanServers pLanServers;
+	local R6GSServers pGameService;
 
-	if(E == DE_Click)
+	// End:0x67
+	if(__NFUN_154__(int(E), 2))
 	{
-        // Advise Parent window
-        if( R6MenuMultiPlayerWidget(OwnerWindow) != None)
-        {
-//            log("R6MenuMultiPlayerWidget");
-            R6MenuMultiPlayerWidget(OwnerWindow).ManageTabSelection( m_pMainTabControl.GetSelectedTabID());
-        }
-        else // R6MenuMPCreateGameWidget
-        {
-//            log("R6MenuMPCreateGameWidget");
-            R6MenuMPCreateGameWidget(OwnerWindow).ManageTabSelection( m_pMainTabControl.GetSelectedTabID());
-        }
+		// End:0x44
+		if(__NFUN_119__(R6MenuMultiPlayerWidget(OwnerWindow), none))
+		{
+			R6MenuMultiPlayerWidget(OwnerWindow).ManageTabSelection(m_pMainTabControl.GetSelectedTabID());			
+		}
+		else
+		{
+			R6MenuMPCreateGameWidget(OwnerWindow).ManageTabSelection(m_pMainTabControl.GetSelectedTabID());
+		}
 	}
-
-    // If the user right clicks on a server, the right click menu
-    // will appear, used to add or delete a favorite server
-
-    if ( E == DE_RClick && C.IsA('R6WindowServerListBox') )
-    {
-        if( R6MenuMultiPlayerWidget(OwnerWindow) != None)
-            R6MenuMultiPlayerWidget(OwnerWindow).DisplayRightClickMenu();
-    }
-
-    // Double click on server -> Join that server
-
-    if ( E == DE_DoubleClick && C.IsA('R6WindowServerListBox') )
-    {
-         R6MenuMultiPlayerWidget(OwnerWindow).JoinSelectedServerRequested();
-    }
-
-    // If the user add or delete a favorites, call the 
-    // UpdateFavorites function to perform the operation
-
-    if ( E == DE_Enter && C.IsA('R6WindowRightClickMenu') )
-    {
-        if( R6MenuMultiPlayerWidget(OwnerWindow) != None)
-            R6MenuMultiPlayerWidget(OwnerWindow).UpdateFavorites();
-    }
-
+	// End:0xAF
+	if(__NFUN_130__(__NFUN_154__(int(E), 6), C.__NFUN_303__('R6WindowServerListBox')))
+	{
+		// End:0xAF
+		if(__NFUN_119__(R6MenuMultiPlayerWidget(OwnerWindow), none))
+		{
+			R6MenuMultiPlayerWidget(OwnerWindow).DisplayRightClickMenu();
+		}
+	}
+	// End:0xE7
+	if(__NFUN_130__(__NFUN_154__(int(E), 11), C.__NFUN_303__('R6WindowServerListBox')))
+	{
+		R6MenuMultiPlayerWidget(OwnerWindow).JoinSelectedServerRequested();
+	}
+	// End:0x12F
+	if(__NFUN_130__(__NFUN_154__(int(E), 3), C.__NFUN_303__('R6WindowRightClickMenu')))
+	{
+		// End:0x12F
+		if(__NFUN_119__(R6MenuMultiPlayerWidget(OwnerWindow), none))
+		{
+			R6MenuMultiPlayerWidget(OwnerWindow).UpdateFavorites();
+		}
+	}
+	return;
 }
 
-defaultproperties
-{
-}

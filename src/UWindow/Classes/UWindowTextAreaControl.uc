@@ -1,399 +1,410 @@
+//=============================================================================
+// UWindowTextAreaControl - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowTextAreaControl extends UWindowDialogControl;
 
 const szTextArraySize = 80;
 
-var Font   TextFontArea[szTextArraySize];
-var color  TextColorArea[szTextArraySize];
-var string TextArea[szTextArraySize]; //array of string? 
-
-var string Prompt;
-var Font   AbsoluteFont;
-
-var FLOAT  m_fXOffSet;
-var FLOAT  m_fYOffSet;
-
-var INT    Font;
-var INT    BufSize;
-var INT    Head, Tail, Lines, VisibleRows;
-
-var bool   bCursor;
-var bool   bScrollable;
-var bool   bShowCaret;
-var bool   bScrollOnResize;
-var bool   m_bWrapClipText;                   // to know in before paint when the wrap clip the text is need
-
-var UWindowVScrollBar VertSB;
+var int Font;
+var int BufSize;
+var int Head;
+// NEW IN 1.60
+var int Tail;
+// NEW IN 1.60
+var int Lines;
+// NEW IN 1.60
+var int VisibleRows;
+var bool bCursor;
+var bool bScrollable;
+var bool bShowCaret;
+var bool bScrollOnResize;
+var bool m_bWrapClipText;  // to know in before paint when the wrap clip the text is need
+var float m_fXOffSet;
+var float m_fYOffSet;
 var float LastDrawTime;
+// NEW IN 1.60
+var Font TextFontArea[80];
+var Font AbsoluteFont;
+var UWindowVScrollbar VertSB;
+// NEW IN 1.60
+var Color TextColorArea[80];
+// NEW IN 1.60
+var string TextArea[80];
+var string Prompt;
 
 function Created()
 {
 	LastDrawTime = GetTime();
+	return;
 }
 
 function SetScrollable(bool newScrollable)
 {
 	bScrollable = newScrollable;
+	// End:0x6D
 	if(newScrollable)
 	{
-		VertSB = UWindowVScrollbar(CreateWindow(class'UWindowVScrollbar', WinWidth-LookAndFeel.Size_ScrollbarWidth, 0, LookAndFeel.Size_ScrollbarWidth, WinHeight));
-		VertSB.bAlwaysOnTop = True;
+		VertSB = UWindowVScrollbar(CreateWindow(Class'UWindow.UWindowVScrollbar', __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+		VertSB.bAlwaysOnTop = true;		
 	}
 	else
 	{
-		if (VertSB != None)
+		// End:0x8E
+		if(__NFUN_119__(VertSB, none))
 		{
 			VertSB.Close();
-			VertSB = None;
+			VertSB = none;
 		}
 	}
+	return;
 }
 
-function BeforePaint( Canvas C, float X, float Y )
+function BeforePaint(Canvas C, float X, float Y)
 {
-	Super.BeforePaint(C, X, Y);
-
-	if(VertSB != None)
+	super.BeforePaint(C, X, Y);
+	// End:0x89
+	if(__NFUN_119__(VertSB, none))
 	{
-		VertSB.WinTop = 0;
+		VertSB.WinTop = 0.0000000;
 		VertSB.WinHeight = WinHeight;
 		VertSB.WinWidth = LookAndFeel.Size_ScrollbarWidth;
-		VertSB.WinLeft = WinWidth - LookAndFeel.Size_ScrollbarWidth;
+		VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
 	}
+	return;
 }
 
-function SetAbsoluteFont(Font F)
+function SetAbsoluteFont(Font f)
 {
-	AbsoluteFont = F;
+	AbsoluteFont = f;
+	return;
 }
 
-function Paint( Canvas C, float X, float Y )
+function Paint(Canvas C, float X, float Y)
 {
-	local int i, j, Line;
-	local int TempHead, TempTail;
-	local float XL, YL;
-	local float W, H;
+	local int i, j, Line, TempHead, TempTail;
 
-	if(AbsoluteFont != None)
-		C.Font = AbsoluteFont;
+	local float XL, YL, W, H;
+
+	// End:0x22
+	if(__NFUN_119__(AbsoluteFont, none))
+	{
+		C.Font = AbsoluteFont;		
+	}
 	else
+	{
 		C.Font = Root.Fonts[Font];
-
-
-	C.SetDrawColor(255,255,255);
-
+	}
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
 	TextSize(C, "TEST", XL, YL);
-	VisibleRows = WinHeight / YL;
-
+	VisibleRows = int(__NFUN_172__(WinHeight, YL));
 	TempHead = Head;
 	TempTail = Tail;
 	Line = TempHead;
-//	TextArea[Line] = Prompt;
-
-	if(Prompt == "")
+	// End:0xD8
+	if(__NFUN_122__(Prompt, ""))
 	{
-		Line--;
-		if(Line < 0)
-			Line += BufSize;
-	}
-
-	if(bScrollable)
-	{
-		if (VertSB.MaxPos - VertSB.Pos >= 0)
+		__NFUN_166__(Line);
+		// End:0xD8
+		if(__NFUN_150__(Line, 0))
 		{
-			Line -= VertSB.MaxPos - VertSB.Pos;
-			TempTail -= VertSB.MaxPos - VertSB.Pos;
-
-			if(Line < 0)
-				Line += BufSize;
-			if(TempTail < 0)
-				TempTail += BufSize;
+			__NFUN_161__(Line, BufSize);
 		}
 	}
-
-	if(!bCursor)
+	// End:0x183
+	if(bScrollable)
 	{
-		bShowCaret = False;
+		// End:0x183
+		if(__NFUN_179__(__NFUN_175__(VertSB.MaxPos, VertSB.pos), float(0)))
+		{
+			__NFUN_162__(Line, int(__NFUN_175__(VertSB.MaxPos, VertSB.pos)));
+			__NFUN_162__(TempTail, int(__NFUN_175__(VertSB.MaxPos, VertSB.pos)));
+			// End:0x16C
+			if(__NFUN_150__(Line, 0))
+			{
+				__NFUN_161__(Line, BufSize);
+			}
+			// End:0x183
+			if(__NFUN_150__(TempTail, 0))
+			{
+				__NFUN_161__(TempTail, BufSize);
+			}
+		}
+	}
+	// End:0x199
+	if(__NFUN_129__(bCursor))
+	{
+		bShowCaret = false;		
 	}
 	else
 	{
-		if((GetTime() > LastDrawTime + 0.3) || (GetTime() < LastDrawTime))
+		// End:0x1DD
+		if(__NFUN_132__(__NFUN_177__(GetTime(), __NFUN_174__(LastDrawTime, 0.3000000)), __NFUN_176__(GetTime(), LastDrawTime)))
 		{
 			LastDrawTime = GetTime();
-			bShowCaret = !bShowCaret;
+			bShowCaret = __NFUN_129__(bShowCaret);
 		}
 	}
+	i = 0;
+	J0x1E4:
 
-	for(i=0; i<VisibleRows+1; i++)
+	// End:0x2C9 [Loop If]
+	if(__NFUN_150__(i, __NFUN_146__(VisibleRows, 1)))
 	{
-		ClipText(C, 2, WinHeight-YL*(i+1), TextArea[Line]);
-		if(Line == Head && bShowCaret)
+		ClipText(C, 2.0000000, __NFUN_175__(WinHeight, __NFUN_171__(YL, float(__NFUN_146__(i, 1)))), TextArea[Line]);
+		// End:0x28F
+		if(__NFUN_130__(__NFUN_154__(Line, Head), bShowCaret))
 		{
-			// Draw cursor..
 			TextSize(C, TextArea[Line], W, H);
-			ClipText(C, W, WinHeight-YL*(i+1), "|");
+			ClipText(C, W, __NFUN_175__(WinHeight, __NFUN_171__(YL, float(__NFUN_146__(i, 1)))), "|");
 		}
-
-		if(TempTail == Line)
-			break;
-
-		Line--;
-		if(Line < 0)
-			Line += BufSize;
+		// End:0x2A1
+		if(__NFUN_154__(TempTail, Line))
+		{
+			// [Explicit Break]
+			goto J0x2C9;
+		}
+		__NFUN_166__(Line);
+		// End:0x2BF
+		if(__NFUN_150__(Line, 0))
+		{
+			__NFUN_161__(Line, BufSize);
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x1E4;
 	}
-}
+	J0x2C9:
 
+	return;
+}
 
 function AddText(string _szNewLine, Color _TextColor, Font _Font)
 {
-
-    TextColorArea[Lines] = _TextColor;
-    TextFontArea[Lines] = _Font;
-    TextArea[Lines] = _szNewLine;
-    Lines += 1;
-    /*
-	local int i;
-
-	TextArea[Head] = NewLine;
-	Head = (Head + 1)%BufSize;
-
-	if(Head == Tail)
-		Tail = (Tail + 1)%BufSize;
-
-	// Calculate lines for scrollbar.
-	Lines = Head - Tail;
-
-	if(Lines < 0)
-		Lines += BufSize;
-
-
-	if(bScrollable)
-	{
-		VertSB.SetRange(0, Lines, VisibleRows);
-		VertSB.Pos = VertSB.MaxPos;
-	}
-    */
+	TextColorArea[Lines] = _TextColor;
+	TextFontArea[Lines] = _Font;
+	TextArea[Lines] = _szNewLine;
+	__NFUN_161__(Lines, 1);
+	return;
 }
 
-
-function AddTextWithCanvas( Canvas C, FLOAT _fXOffSet, FLOAT _fYOffset, string NewLine, Font _Font, Color FontColor)
+function AddTextWithCanvas(Canvas C, float _fXOffSet, float _fYOffset, string NewLine, Font _Font, Color FontColor)
 {
-    // the reason to fill an array of string, it's because you don't want to clip the text every frame, do it the 
-    // first time and use the array after that
+	local string szTempTextArea[80], Out, temp, szTSResult;
+	local float XWordPos, fWidthToReduce, fTotalWToReduce, WordWidth, WordHeight;
 
-    local string szTempTextArea[szTextArraySize];
-	local string Out, Temp, szTSResult;
-    local FLOAT XWordPos, fWidthToReduce, fTotalWToReduce;
-	local FLOAT WordWidth, WordHeight;
-	local INT WordPos, TotalPos, PrevPos, TotalLinePos;
-	local INT NumLines, PrevNumLines;
-	local INT i, iRealSizeOfWord;
-    local INT iNbLineTemp, iNbLineTempTotal;
-	local BOOL bSentry;
+	local int WordPos, TotalPos, PrevPos, TotalLinePos, numLines, PrevNumLines,
+		i, iRealSizeOfWord, iNbLineTemp, iNbLineTempTotal;
 
-    m_fXOffSet = _fXOffSet;
-    m_fYOffSet = _fYOffset;
+	local bool bSentry;
 
-	fWidthToReduce  = _fXOffSet + 11; // 10 is the size of the scroll bar + 1 pixel -- should be a param
-	fTotalWToReduce = (2 * _fXOffSet) + 11;
-
-	//========================================================================
-	// for each string verify if you not find \N  (indicate a carriage return)
-	//========================================================================
+	m_fXOffSet = _fXOffSet;
+	m_fYOffSet = _fYOffset;
+	fWidthToReduce = __NFUN_174__(_fXOffSet, float(11));
+	fTotalWToReduce = __NFUN_174__(__NFUN_171__(2.0000000, _fXOffSet), float(11));
 	iNbLineTemp = 0;
+	temp = __NFUN_235__(NewLine);
+	szTempTextArea[iNbLineTemp] = NewLine;
+	i = __NFUN_126__(temp, "\\N");
+	J0x75:
 
-    Temp = Caps(NewLine); // convert all caracter in capital, only for the special search (\N)
-    szTempTextArea[iNbLineTemp] = NewLine;
-
-    i = InStr(Temp, "\\N"); // \N means carriage return 
-
-	while (i != -1)
+	// End:0xF8 [Loop If]
+	if(__NFUN_155__(i, -1))
 	{
-        // take the right part of the string (after the \N)
-        Temp = Mid(szTempTextArea[iNbLineTemp], i + 2); //2 number of space that \N take
-        // replace the test string by the left part
-        szTempTextArea[iNbLineTemp] = Left(szTempTextArea[iNbLineTemp], i);
-
-        iNbLineTemp+=1; // increase to next string to check
-        szTempTextArea[iNbLineTemp] = Temp;
-
-        Temp = Caps(Temp);
-
-        i = InStr(Temp, "\\N"); // another \N find?
+		temp = __NFUN_127__(szTempTextArea[iNbLineTemp], __NFUN_146__(i, 2));
+		szTempTextArea[iNbLineTemp] = __NFUN_128__(szTempTextArea[iNbLineTemp], i);
+		__NFUN_161__(iNbLineTemp, 1);
+		szTempTextArea[iNbLineTemp] = temp;
+		temp = __NFUN_235__(temp);
+		i = __NFUN_126__(temp, "\\N");
+		// [Loop Continue]
+		goto J0x75;
 	}
-
-    iNbLineTempTotal = iNbLineTemp;
-
-	//========================================================================
-	// parse all the temp array and wrap the text
-	//========================================================================
-
+	iNbLineTempTotal = iNbLineTemp;
 	Out = "";
-   	bSentry = True;
-    iNbLineTemp = 0;
-    XWordPos= _fXOffSet;		// at the beginning of the window + X
+	bSentry = true;
+	iNbLineTemp = 0;
+	XWordPos = _fXOffSet;
+	J0x125:
 
-	while( bSentry )
+	// End:0x439 [Loop If]
+	if(bSentry)
 	{
-		// Get the line to be drawn.
-		if(Out == "")
+		// End:0x17C
+		if(__NFUN_122__(Out, ""))
 		{
-            // Initialization
-        	i = 0;
-            PrevPos = 0;
-            TotalLinePos = 0;
-            TotalPos = 0;
-        	NumLines = 1;
-            PrevNumLines = 1;
-
-			i++;
+			i = 0;
+			PrevPos = 0;
+			TotalLinePos = 0;
+			TotalPos = 0;
+			numLines = 1;
+			PrevNumLines = 1;
+			__NFUN_165__(i);
 			Out = szTempTextArea[iNbLineTemp];
-//            log("Out: "$Out);
 		}
-
-		// Find the word boundary.
-		WordPos = InStr(Out, " ");
-		
-		// Get the current word.
-		if(WordPos == -1)
-        {
- 			Temp = Out;
-            WordPos = Len(Temp);
-        }
-		else
-			Temp = Left(Out, WordPos)$" ";
-   
-        // specify this font for this word (in fact, the same font is keep for all the line)
-        // if we need to add different font in the same line, a new design is need in this fct
-        C.Font = _Font;
-		szTSResult = TextSize(C, Temp, WordWidth, WordHeight, WinWidth - fTotalWToReduce);
-
-        // the word is too big for the allow space? line is complete go to the next one
-        if (WordWidth + XWordPos + fTotalWToReduce > WinWidth - _fXOffSet) // 10 is the size of the scroll bar + 1 pixel
+		WordPos = __NFUN_126__(Out, " ");
+		// End:0x1B6
+		if(__NFUN_154__(WordPos, -1))
 		{
-			if (XWordPos == _fXOffSet) // this happen if the word is too big for the width of the window
-			{
-				Temp = szTSResult;			// textsize already cut the word for available space
-				WordPos = Len(Temp);		
-				Out = Mid( Out, WordPos);	// remove the word from current sentence
-	    		TotalPos += WordPos;
-	            TotalLinePos += WordPos;
-			}
-
-			XWordPos = _fXOffSet;
-			NumLines++;
+			temp = Out;
+			WordPos = __NFUN_125__(temp);			
 		}
-        else // go to next word
-        {
-            XWordPos += WordWidth;
-    		TotalPos += (WordPos + 1);
-            TotalLinePos += (WordPos + 1);
-    		Out = Mid(Out, Len(Temp));
-        }
-
-		if ((Out == "") && (i > 0))
-        {
-   			bSentry = False;
-        }
-
-
-        if ((NumLines != PrevNumLines) || (!bSentry))
-        {
-            if (Lines >= szTextArraySize)
-            {
-                log("Small problem over here, string array overloaded in UWindowTextAreaControl.uc");
-                break;
-            }
-            else
-            {
-                PrevNumLines = NumLines;
-
-//                log("Prev Pos: "$PrevPos);
-//                log("Total line pos: "$TotalLinePos);
-                Temp = Mid(szTempTextArea[iNbLineTemp], PrevPos);//Mid(NewLine, PrevPos);
-                TextArea[Lines] = left(Temp, TotalLinePos);
-
-//                log("TextArea[] : "$TextArea[Lines]);
-                TextColorArea[Lines] = FontColor;
-                TextFontArea[Lines] = C.Font;
-                PrevPos = TotalPos;
-                TotalLinePos = 0;
-                Lines += 1;
-//                log("Lines: "$Lines);
-
-                if ( (iNbLineTemp < iNbLineTempTotal) && (!bSentry) )
-                {
-                    iNbLineTemp+=1;
-            	    Out = "";
-                	bSentry = True;
-                    XWordPos = _fXOffSet;
-                }
-            }
-        }
-
-//         log("===========================================");
+		else
+		{
+			temp = __NFUN_112__(__NFUN_128__(Out, WordPos), " ");
+		}
+		C.Font = _Font;
+		szTSResult = TextSize(C, temp, WordWidth, WordHeight, int(__NFUN_175__(WinWidth, fTotalWToReduce)));
+		// End:0x299
+		if(__NFUN_177__(__NFUN_174__(__NFUN_174__(WordWidth, XWordPos), fTotalWToReduce), __NFUN_175__(WinWidth, _fXOffSet)))
+		{
+			// End:0x284
+			if(__NFUN_180__(XWordPos, _fXOffSet))
+			{
+				temp = szTSResult;
+				WordPos = __NFUN_125__(temp);
+				Out = __NFUN_127__(Out, WordPos);
+				__NFUN_161__(TotalPos, WordPos);
+				__NFUN_161__(TotalLinePos, WordPos);
+			}
+			XWordPos = _fXOffSet;
+			__NFUN_165__(numLines);			
+		}
+		else
+		{
+			__NFUN_184__(XWordPos, WordWidth);
+			__NFUN_161__(TotalPos, __NFUN_146__(WordPos, 1));
+			__NFUN_161__(TotalLinePos, __NFUN_146__(WordPos, 1));
+			Out = __NFUN_127__(Out, __NFUN_125__(temp));
+		}
+		// End:0x2F8
+		if(__NFUN_130__(__NFUN_122__(Out, ""), __NFUN_151__(i, 0)))
+		{
+			bSentry = false;
+		}
+		// End:0x436
+		if(__NFUN_132__(__NFUN_155__(numLines, PrevNumLines), __NFUN_129__(bSentry)))
+		{
+			// End:0x377
+			if(__NFUN_153__(Lines, 80))
+			{
+				__NFUN_231__("Small problem over here, string array overloaded in UWindowTextAreaControl.uc");
+				// [Explicit Break]
+				goto J0x439;				
+			}
+			else
+			{
+				PrevNumLines = numLines;
+				temp = __NFUN_127__(szTempTextArea[iNbLineTemp], PrevPos);
+				TextArea[Lines] = __NFUN_128__(temp, TotalLinePos);
+				TextColorArea[Lines] = FontColor;
+				TextFontArea[Lines] = C.Font;
+				PrevPos = TotalPos;
+				TotalLinePos = 0;
+				__NFUN_161__(Lines, 1);
+				// End:0x436
+				if(__NFUN_130__(__NFUN_150__(iNbLineTemp, iNbLineTempTotal), __NFUN_129__(bSentry)))
+				{
+					__NFUN_161__(iNbLineTemp, 1);
+					Out = "";
+					bSentry = true;
+					XWordPos = _fXOffSet;
+				}
+			}
+		}
+		// [Loop Continue]
+		goto J0x125;
 	}
+	J0x439:
+
+	return;
 }
 
 function Resized()
 {
+	// End:0x51
 	if(bScrollable)
 	{
-		VertSB.SetRange(0, Lines, VisibleRows);
+		VertSB.SetRange(0.0000000, float(Lines), float(VisibleRows));
+		// End:0x51
 		if(bScrollOnResize)
-			VertSB.Pos = VertSB.MaxPos;
+		{
+			VertSB.pos = VertSB.MaxPos;
+		}
 	}
+	return;
 }
 
 function SetPrompt(string NewPrompt)
 {
 	Prompt = NewPrompt;
+	return;
 }
 
-function Clear( optional bool _bClearArrayOnly, optional bool _bWrapText)
+function Clear(optional bool _bClearArrayOnly, optional bool _bWrapText)
 {
-    local INT i;
+	local int i;
 
-    if (Lines != 0)
-    {
-        for (i = 0; i < szTextArraySize; i++)
-        {
-            TextArea[i] = "";
-            TextFontArea[i] = None;
+	// End:0x59
+	if(__NFUN_155__(Lines, 0))
+	{
+		i = 0;
+		J0x12:
 
-            // substrack nb of lines
-            Lines -= 1;
-
-            if (Lines == 0) // if we have empty the array
-                break;
-        }
-    }
+		// End:0x59 [Loop If]
+		if(__NFUN_150__(i, 80))
+		{
+			TextArea[i] = "";
+			TextFontArea[i] = none;
+			__NFUN_162__(Lines, 1);
+			// End:0x4F
+			if(__NFUN_154__(Lines, 0))
+			{
+				// [Explicit Break]
+				goto J0x59;
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x12;
+		}
+	}
+	J0x59:
 
 	TextArea[0] = "";
-    TextFontArea[0] = None;
-
-    if (bScrollable) // if a scroll bar exist
-        VertSB.Pos = 0; // if you change the text, the scroll bar need to be place at top at beginning
-    
-    if (_bWrapText)
-    {
-        m_bWrapClipText = true;
-    }
-
-    if (!_bClearArrayOnly)
-    {
-    	Head = 0;
-    	Tail = 0;
-
-        m_fXOffSet = 0;
-        m_fYOffSet = 0;
-
-        m_bWrapClipText = true;
-    }
+	TextFontArea[0] = none;
+	// End:0x89
+	if(bScrollable)
+	{
+		VertSB.pos = 0.0000000;
+	}
+	// End:0x9A
+	if(_bWrapText)
+	{
+		m_bWrapClipText = true;
+	}
+	// End:0xD1
+	if(__NFUN_129__(_bClearArrayOnly))
+	{
+		Head = 0;
+		Tail = 0;
+		m_fXOffSet = 0.0000000;
+		m_fYOffSet = 0.0000000;
+		m_bWrapClipText = true;
+	}
+	return;
 }
 
 defaultproperties
 {
-     BufSize=200
-     bScrollOnResize=True
-     m_bWrapClipText=True
+	BufSize=200
+	bScrollOnResize=true
+	m_bWrapClipText=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var TextFontAreaszTextArraySize
+// REMOVED IN 1.60: var TextColorAreaszTextArraySize
+// REMOVED IN 1.60: var TextAreaszTextArraySize
+// REMOVED IN 1.60: var l
+// REMOVED IN 1.60: var s

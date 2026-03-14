@@ -1,45 +1,57 @@
+//=============================================================================
+// UWindowComboButton - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowComboButton extends UWindowButton;
 
 var UWindowComboControl Owner;
 
 function Created()
-{	
-	Super.Created();
-    LookAndFeel.Combo_SetupButton(Self);
+{
+	super.Created();
+	LookAndFeel.Combo_SetupButton(self);
+	return;
 }
-
 
 function BeforePaint(Canvas C, float X, float Y)
 {
 	bMouseDown = Owner.bListVisible;
+	return;
 }
 
 function LMouseDown(float X, float Y)
 {
-	if(!bDisabled)
+	// End:0x5B
+	if(__NFUN_129__(bDisabled))
 	{
+		// End:0x2F
 		if(Owner.bListVisible)
-			Owner.CloseUp();
+		{
+			Owner.CloseUp();			
+		}
 		else
 		{
 			Owner.DropDown();
 			Root.CaptureMouse(Owner.List);
 		}
 	}
+	return;
 }
 
 function Click(float X, float Y)
 {
+	return;
 }
 
 function FocusOtherWindow(UWindowWindow W)
 {
-	Super.FocusOtherWindow(W);
-
-	if(Owner.bListVisible && W.ParentWindow != Owner && W.ParentWindow != Owner.List && W.ParentWindow.ParentWindow != Owner.List)
+	super(UWindowWindow).FocusOtherWindow(W);
+	// End:0x95
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(Owner.bListVisible, __NFUN_119__(W.ParentWindow, Owner)), __NFUN_119__(W.ParentWindow, Owner.List)), __NFUN_119__(W.ParentWindow.ParentWindow, Owner.List)))
+	{
 		Owner.CloseUp();
+	}
+	return;
 }
 
-defaultproperties
-{
-}

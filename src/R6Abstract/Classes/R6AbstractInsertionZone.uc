@@ -1,20 +1,25 @@
 //=============================================================================
+// R6AbstractInsertionZone - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6AbstractInsertionZone.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/12/06 * Created by Aristomenis Kolokathis
 //=============================================================================
-
 class R6AbstractInsertionZone extends PlayerStart
-    native
-    notplaceable;
+	native
+ hidecategories(Lighting,LightColor,Karma,Force);
 
-var(Rainbow) INT m_iInsertionNumber;
+var(Rainbow) int m_iInsertionNumber;
 
 defaultproperties
 {
-     m_eDisplayFlag=DF_ShowOnlyInPlanning
-     m_b3DSound=False
-     DrawScale=3.000000
+	m_eDisplayFlag=0
+	m_b3DSound=false
+	DrawScale=3.0000000
 }

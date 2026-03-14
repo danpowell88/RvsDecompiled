@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuUbiComWidget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuUbiComWidget.uc : Game Main Menu when the game is start by Ubi.com
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //	Main Menu
@@ -8,84 +14,105 @@
 //=============================================================================
 class R6MenuUbiComWidget extends R6MenuWidget;
 
-var R6WindowUbiCDKeyCheck             m_pCDKeyCheckWindow;       // Windows and logic for cdkey validation
-var R6GSServers                       m_GameService;             // Manages servers from game service
-var BOOL                              m_bPreJoinInProgress;
-var string							  m_szIPAddress;
-var BOOL							  m_bChangeMap;
-
-var R6WindowButtonMainMenu            m_ButtonQuit;
-var R6WindowButtonMainMenu            m_ButtonReturn;
+// NEW IN 1.60
+var bool m_bQueryServerInfoInProgress;
+// NEW IN 1.60
+var bool m_bIsACustomMod;
+// NEW IN 1.60
+var bool m_bIsAnOfficialMod;
+var R6GSServers m_GameService;  // Manages servers from game service
+var R6WindowButtonMainMenu m_ButtonQuit;
+var R6WindowButtonMainMenu m_ButtonReturn;
+// NEW IN 1.60
+var R6MenuUbiComModsWidget m_UbiComModsWidget;
+// NEW IN 1.60
+var R6WindowQueryServerInfo m_pQueryServerInfo;
+var string m_szIPAddress;
 
 function Created()
 {
-    local FLOAT fButtonXpos, fButtonWidth, fButtonHeight, fFirstButtonYpos, fButtonOffset;
+	local float fButtonXpos, fButtonWidth, fButtonHeight, fFirstButtonYpos, fButtonOffset;
 
-    fButtonXpos      = 350;
-    fButtonWidth     = 250;
-    fFirstButtonYpos = 225;
-    fButtonOffset    = 35;
-    fButtonHeight    = 35;
-
-    // randomly update the background texture
-    Root.SetLoadRandomBackgroundImage("");
-
-    m_GameService = R6Console(Root.console).m_GameService;
-
-	m_pCDKeyCheckWindow = R6WindowUbiCDKeyCheck(CreateWindow(Root.MenuClassDefines.ClassUbiCDKeyCheck, 0, 0, 640, 480, self, TRUE));
-    m_pCDKeyCheckWindow.m_GameService = m_GameService;
-    m_pCDKeyCheckWindow.PopUpBoxCreate();
-    m_pCDKeyCheckWindow.HideWindow();
-
-    // create buttons
-	m_ButtonQuit = R6WindowButtonMainMenu(CreateControl( class'R6WindowButtonMainMenu', fButtonXpos, fFirstButtonYpos, fButtonWidth, fButtonHeight, self));
-    m_ButtonQuit.ToolTipString = Localize("UbiCom","ButtonQuit","R6Menu");
-	m_ButtonQuit.Text = Localize("UbiCom","ButtonQuit","R6Menu");
-	m_ButtonQuit.Align = TA_Right;
-    m_ButtonQuit.m_buttonFont  = Root.Fonts[F_FirstMenuButton];
-    m_ButtonQuit.m_eButton_Action = Button_UbiComQuit;
+	fButtonXpos = 350.0000000;
+	fButtonWidth = 250.0000000;
+	fFirstButtonYpos = 225.0000000;
+	fButtonOffset = 35.0000000;
+	fButtonHeight = 35.0000000;
+	Root.SetLoadRandomBackgroundImage("");
+	m_GameService = R6Console(Root.Console).m_GameService;
+	m_ButtonQuit = R6WindowButtonMainMenu(CreateControl(Class'R6Menu.R6WindowButtonMainMenu', fButtonXpos, fFirstButtonYpos, fButtonWidth, fButtonHeight, self));
+	m_ButtonQuit.ToolTipString = Localize("UbiCom", "ButtonQuit", "R6Menu");
+	m_ButtonQuit.Text = Localize("UbiCom", "ButtonQuit", "R6Menu");
+	m_ButtonQuit.Align = 1;
+	m_ButtonQuit.m_buttonFont = Root.Fonts[14];
+	m_ButtonQuit.m_eButton_Action = 8;
 	m_ButtonQuit.ResizeToText();
-	
-
-	m_ButtonReturn = R6WindowButtonMainMenu(CreateControl( class'R6WindowButtonMainMenu', fButtonXpos, fFirstButtonYpos + fButtonOffset, fButtonWidth, fButtonHeight, self));
-	m_ButtonReturn.ToolTipString = Localize("UbiCom","ButtonReturn","R6Menu");
-	m_ButtonReturn.Text = Localize("UbiCom","ButtonReturn","R6Menu");
-	m_ButtonReturn.Align = TA_Right;
-    m_ButtonReturn.m_buttonFont  = Root.Fonts[F_FirstMenuButton];
-    m_ButtonReturn.m_eButton_Action = Button_UbiComReturn;
-    m_ButtonReturn.ResizeToText();
+	m_ButtonReturn = R6WindowButtonMainMenu(CreateControl(Class'R6Menu.R6WindowButtonMainMenu', fButtonXpos, __NFUN_174__(fFirstButtonYpos, fButtonOffset), fButtonWidth, fButtonHeight, self));
+	m_ButtonReturn.ToolTipString = Localize("UbiCom", "ButtonReturn", "R6Menu");
+	m_ButtonReturn.Text = Localize("UbiCom", "ButtonReturn", "R6Menu");
+	m_ButtonReturn.Align = 1;
+	m_ButtonReturn.m_buttonFont = Root.Fonts[14];
+	m_ButtonReturn.m_eButton_Action = 9;
+	m_ButtonReturn.ResizeToText();
+	m_pQueryServerInfo = R6WindowQueryServerInfo(CreateWindow(Root.MenuClassDefines.ClassQueryServerInfo, 0.0000000, 0.0000000, 640.0000000, 480.0000000, self, true));
+	m_pQueryServerInfo.m_GameService = m_GameService;
+	m_pQueryServerInfo.PopUpBoxCreate();
+	m_pQueryServerInfo.HideWindow();
+	return;
 }
 
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-	Root.PaintBackground( C, self);
-
-    // Only display the Quit/Return buttons if the game has been
-    // maximized manually by the player, that is if we are in the
-    // EGS_WAITING_FOR_GS_INIT state.
-
-    if ( m_GameService.m_eGSGameState == EGS_WAITING_FOR_GS_INIT )
-    {
-        if ( !m_ButtonQuit.bWindowVisible )
-            m_ButtonQuit.ShowWindow();
-        if ( !m_ButtonReturn.bWindowVisible )
-            m_ButtonReturn.ShowWindow();
-    }
-    else
-    {
-        if ( m_ButtonQuit.bWindowVisible )
-            m_ButtonQuit.HideWindow();
-        if ( m_ButtonReturn.bWindowVisible )
-            m_ButtonReturn.HideWindow();
-    }
+	Root.PaintBackground(C, self);
+	// End:0x6D
+	if(m_GameService.__NFUN_3551__())
+	{
+		// End:0x47
+		if(__NFUN_129__(m_ButtonQuit.bWindowVisible))
+		{
+			m_ButtonQuit.ShowWindow();
+		}
+		// End:0x6A
+		if(__NFUN_129__(m_ButtonReturn.bWindowVisible))
+		{
+			m_ButtonReturn.ShowWindow();
+		}		
+	}
+	else
+	{
+		// End:0x8E
+		if(m_ButtonQuit.bWindowVisible)
+		{
+			m_ButtonQuit.HideWindow();
+		}
+		// End:0xAF
+		if(m_ButtonReturn.bWindowVisible)
+		{
+			m_ButtonReturn.HideWindow();
+		}
+	}
+	return;
 }
 
 function ShowWindow()
 {
-	// randomly update the background texture
-    Root.SetLoadRandomBackgroundImage("");
+	// End:0x42
+	if(__NFUN_119__(R6MenuRootWindow(Root).m_pMenuCDKeyManager, none))
+	{
+		R6MenuRootWindow(Root).m_pMenuCDKeyManager.SetWindowUser(Root.20, self);
+	}
+	Root.SetLoadRandomBackgroundImage("");
+	Root.RegisterMsgWindow(self);
+	super(UWindowWindow).ShowWindow();
+	return;
+}
 
-	Super.ShowWindow();
+// NEW IN 1.60
+function HideWindow()
+{
+	Root.UnRegisterMsgWindow();
+	super(UWindowWindow).HideWindow();
+	return;
 }
 
 //===============================================================
@@ -93,218 +120,212 @@ function ShowWindow()
 //===============================================================
 function Tick(float Delta)
 {
-	if (CheckForGSClientStart())
-		return;
-
-    // Join a server!
-
-	if ( R6Console(Root.Console).m_bJoinUbiServer )
-	{
-        R6Console(Root.Console).m_bJoinUbiServer = FALSE;
-
-        m_szIPAddress = m_GameService.m_szGSClientIP;
-        m_pCDKeyCheckWindow.StartPreJoinProcedure( self );
-        m_bPreJoinInProgress = TRUE;
-
-		//R6Console(Root.Console).ConsoleCommand("MAXIMIZEAPP");
-        //JoinServer( m_szIPAddress, FALSE);
-    }
-
-    // Create a server!
-
-
-    else if ( R6Console(Root.Console).m_bCreateUbiServer )
-    {
-        R6Console(Root.Console).m_bCreateUbiServer = FALSE;
-        Root.ChangeCurrentWidget( MPCreateGameWidgetID);
-
-        R6MenuRootWindow(Root).InitBeaconService();
-    }
-
-   
-    // Need to call ubi login manager when pre-join is in progress
-    if ( m_bPreJoinInProgress )
-        m_pCDKeyCheckWindow.Manager( self );
-}
-
-function SendMessage( eR6MenuWidgetMessage eMessage )
-{
-
-    switch ( eMessage )
-    {
-        case MWM_CDKEYVAL_SKIPPED:
-        case MWM_CDKEYVAL_SUCCESS:
-            m_bPreJoinInProgress = FALSE;
-            JoinServer(m_szIPAddress);
-            break;
-        case MWM_CDKEYVAL_FAIL:
-            class'Actor'.static.GetGameManager().m_bReturnToGSClient = TRUE;
-            m_bPreJoinInProgress = FALSE;
-            break;
-    }
-
-}
-
-
-//==============================================================================
-// JoinSelectedServer -  Join the IP address passed as a function argument.
-//==============================================================================
-function JoinServer( string szIPAddress)
-{
-
-	local INT    iPlayerSpawnNumber;
-    local string szOptions;
-    local string m_CharacterName;
-    local string szUbiUserID;
-    local string m_ArmorName;
-    local string m_WeaponNameOne;
-    local string m_WeaponGadgetNameOne;
-    local string m_BulletTypeOne;
-    local string m_WeaponNameTwo;
-    local string m_WeaponGadgetNameTwo;
-    local string m_BulletTypeTwo;
-    local string m_GadgetNameOne;
-    local string m_GadgetNameTwo;
-    local PlayerController aPlayerController;
-
-#ifdefMPDEMO
-    GetPlayerOwner().StopAllMusic();
-#endif
-
-    iPlayerSpawnNumber = R6Console(Root.console).GetSpawnNumber();    
-
-    // Build the command line options, options use keywords and
-    // are spearated by question marks.  
-
-    // Start with empty string
-
-    szOptions = "";
-
-    // Password
-
-    if ( m_GameService.m_szGSPassword != "" )
-        szOptions = szOptions$"?Password="$m_GameService.m_szGSPassword;
-
-    // Player Name
-
-    Root.Console.ViewportOwner.Actor.GetPlayerSetupInfo( m_CharacterName,
-                                                         m_ArmorName,
-                                                         m_WeaponNameOne,
-                                                         m_WeaponGadgetNameOne,
-                                                         m_BulletTypeOne,
-                                                         m_WeaponNameTwo,
-                                                         m_WeaponGadgetNameTwo,
-                                                         m_BulletTypeTwo,
-                                                         m_GadgetNameOne,
-                                                         m_GadgetNameTwo);
-
-    // Some symbols cannot be included in the name since they will 
-    // be misinterpreted by the engine.  This includes ?,#/ and spaces.
-    // To get around this problem we will replace all these symbols with ~'s
-    // and then replace the ~'s with spaces when the name is interpreted
-    // on the server side.
-
-    ReplaceText(m_CharacterName, "?", "~");
-    ReplaceText(m_CharacterName, ",", "~");
-    ReplaceText(m_CharacterName, "#", "~");
-    ReplaceText(m_CharacterName, "/", "~");
-
-    szOptions = szOptions$"?Name="$m_CharacterName;    
-
-    // Spaces are replaced by the "~" symbol, the "~"'s are removed in gameinfo.uc
-
-    ReplaceText(szOptions, " ", "~");
-
-    // Ubi.com uder ID
-
-    szUbiUserID = m_GameService.m_szUserID;
-
-    szOptions = szOptions$"?UbiUserID="$m_GameService.m_szUserID;    
-
-	// Gender
-//	szOptions = szOptions$"?Gender="$class'Actor'.static.GetGameOptions().Gender;
-
-    // Update ubi.com that we have joined the server
-
-//    m_GameService.NativeMSCLientJoinServer( m_GameService.m_GameServerList[m_GameService.m_iSelSrvIndex].iID, m_szGamePwd );
-//    m_GameService.GameServiceManager();
-
-
-    m_GameService.SaveConfig();
-    
-//#ifdef R6PUNKBUSTER
-    szOptions = szOptions$"?iPB="$class'PlayerController'.static.IsPBEnabled();
-//#endif R6PUNKBUSTER	
-
-
-    // Launch command
-    Root.Console.ConsoleCommand("Open "$szIPAddress$"?SpawnNum="$iPlayerSpawnNumber$szOptions$"?AuthID1="$m_GameService.m_szRSAuthorizationID);
-
-    //Root = None;        // Will be cleaned on garbage collection
-
-    Self.HideWindow();
-    //Root.Console.CloseUWindow();
-
-    // Save values to be used in the in-game menus
-    R6Console(Root.console).szStoreIP = szIPAddress;
-    R6Console(Root.console).szStoreGamePassWd = m_GameService.m_szGSPassword;
-
-    //m_GameService.NativeLogout();
-}
-
-//===========================================================================================
-// CheckForGSClientStart: a engine start from Ubi.com
-//===========================================================================================
-function BOOL CheckForGSClientStart()
-{
 	local R6ModMgr pModManager;
-#ifdefDEBUG
-	local BOOL bShowLogCheckForGSClientStart;
-#endif
+	local R6GameManager pGameMgr;
+	local bool bRequestSrvInfo;
 
-	// When the server is created via the GSClient, the game is start with RS. So now check if you're in the appropriate mod.
-	// We receive the info from GSClient about the room/mod you start
-
-	if (R6Console(Root.console).m_bStartedByGSClient)
+	pGameMgr = R6GameManager(Class'Engine.Actor'.static.__NFUN_1551__());
+	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	// End:0x46
+	if(Root.Console.m_bChangeModInProgress)
 	{
-		pModManager = class'Actor'.static.GetModMgr();
-
-#ifdefDEBUG
-		if (bShowLogCheckForGSClientStart)
+		return;
+	}
+	// End:0x353
+	if(__NFUN_123__(pModManager.m_szPendingModName, ""))
+	{
+		// End:0x2A2
+		if(pGameMgr.m_bGSJoinUbiServer)
 		{
-			log("--> we start the game with GSClient");
-			log("--> ModManager.m_szPendingModName = "$pModManager.m_szPendingModName);
-			log("m_pRVS.m_szGameServiceGameName = "$pModManager.m_pRVS.m_szGameServiceGameName);
-		}
-#endif
-
-		if ( !(pModManager.m_szPendingModName ~= pModManager.m_pRVS.m_szGameServiceGameName) && (pModManager.m_szPendingModName != ""))
-		{  
-#ifdefDEBUG
-			if (bShowLogCheckForGSClientStart)
-				log("--> SetCurrentMod to "@pModManager.m_szPendingModName);
-#endif
-			if ( (R6Console(Root.console).m_GameService.m_eGSGameState == EGS_SERVER_SETTING_UP_GAME) ||
-			     (R6Console(Root.console).m_GameService.m_eGSGameState == EGS_CLIENT_WAITING_CHSTA) )
+			// End:0x180
+			if(__NFUN_132__(m_bIsAnOfficialMod, __NFUN_130__(__NFUN_129__(pModManager.IsRavenShield()), pModManager.__NFUN_2023__(pModManager.m_pCurrentMod.m_szKeyWord))))
 			{
-				pModManager.SetCurrentMod(pModManager.m_szPendingModName, GetLevel(), true);
-                R6Console(Root.console).CleanAndChangeMod();				
-				R6Console(Root.console).m_eLastPreviousWID = UbiComWidgetID;
-				R6Console(Root.console).LeaveR6Game(R6Console(Root.console).eLeaveGame.LG_InitMod);
+				// End:0x175
+				if(__NFUN_124__(pModManager.m_szPendingModName, pModManager.m_pCurrentMod.m_szKeyWord))
+				{
+					// End:0x172
+					if(pGameMgr.m_bQueryServerInfoDone)
+					{
+						pGameMgr.m_bGSJoinUbiServer = false;
+						__NFUN_231__("UbiComWidget Ready to Join server");
+						m_szIPAddress = m_GameService.m_szGSClientIP;
+						R6MenuRootWindow(Root).m_pMenuCDKeyManager.StartCDKeyProcess(0, m_GameService.m_ClientBeacon.PreJoinInfo);
+						return;
+					}					
+				}
+				else
+				{
+					SwitchToAppropriateMod();
+					return;
+				}				
 			}
-#ifdefDEBUG
 			else
 			{
-			    if (bShowLogCheckForGSClientStart)
-				    log("--> SetCurrentMod to "@pModManager.m_szPendingModName@" didn't happen");
+				// End:0x222
+				if(pGameMgr.m_bQueryServerInfoDone)
+				{
+					// End:0x21A
+					if(__NFUN_124__(pModManager.m_szPendingModName, pModManager.m_pCurrentMod.m_szKeyWord))
+					{
+						pGameMgr.m_bGSJoinUbiServer = false;
+						m_szIPAddress = m_GameService.m_szGSClientIP;
+						R6MenuRootWindow(Root).m_pMenuCDKeyManager.StartCDKeyProcess(0, m_GameService.m_ClientBeacon.PreJoinInfo);						
+					}
+					else
+					{
+						SwitchToAppropriateMod();
+					}
+					return;
+				}
 			}
-#endif
-
-			return true;
+			// End:0x23E
+			if(m_bQueryServerInfoInProgress)
+			{
+				m_pQueryServerInfo.Manager(self);				
+			}
+			else
+			{
+				__NFUN_231__("UbiComWidget Join a srv query info");
+				m_bQueryServerInfoInProgress = true;
+				R6MenuRootWindow(Root).InitBeaconService();
+				m_pQueryServerInfo.StartQueryServerInfoProcedure(self, m_GameService.m_szGSClientIP, 0);
+			}			
+		}
+		else
+		{
+			// End:0x353
+			if(pGameMgr.__NFUN_1201__())
+			{
+				// End:0x330
+				if(__NFUN_124__(pModManager.m_szPendingModName, pModManager.m_pCurrentMod.m_szKeyWord))
+				{
+					Root.Console.ViewportOwner.Actor.__NFUN_264__(Sound'Music.Play_theme_Musicsilence', 5);
+					Root.ChangeCurrentWidget(19);
+					R6MenuRootWindow(Root).InitBeaconService();
+					return;
+				}
+				// End:0x34D
+				if(m_bIsACustomMod)
+				{
+					Root.ChangeCurrentWidget(21);					
+				}
+				else
+				{
+					SwitchToAppropriateMod();
+				}
+			}
 		}
 	}
+	return;
+}
 
-	return false;
+// NEW IN 1.60
+function bool SwitchToAppropriateMod()
+{
+	local array<UWindowRootWindow.eGameWidgetID> AWIDList;
+	local R6ModMgr pModManager;
+	local string szTemp;
+	local int i;
+	local bool bModExist;
+
+	// End:0x1B9
+	if(__NFUN_132__(m_bIsAnOfficialMod, m_bIsACustomMod))
+	{
+		pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+		bModExist = false;
+		i = 0;
+		J0x35:
+
+		// End:0x90 [Loop If]
+		if(__NFUN_150__(i, pModManager.m_aMods.Length))
+		{
+			// End:0x86
+			if(__NFUN_124__(pModManager.m_aMods[i].m_szKeyWord, pModManager.m_szPendingModName))
+			{
+				bModExist = true;
+			}
+			__NFUN_163__(i);
+			// [Loop Continue]
+			goto J0x35;
+		}
+		// End:0x10E
+		if(bModExist)
+		{
+			pModManager.SetCurrentMod(pModManager.m_szPendingModName, GetLevel(), true, Root.Console, GetPlayerOwner().XLevel);
+			AWIDList[AWIDList.Length] = 20;
+			R6Console(Root.Console).CleanAndChangeMod(AWIDList);			
+		}
+		else
+		{
+			szTemp = Localize("MultiPlayer", "PopUp_Error_InvalidMod", "R6Menu");
+			R6MenuRootWindow(Root).SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), __NFUN_168__(pModManager.m_szPendingModName, szTemp), 36, int(2), false, self);
+			m_bIsAnOfficialMod = false;
+			m_bIsACustomMod = false;
+		}		
+	}
+	else
+	{
+		bModExist = true;
+	}
+	return bModExist;
+	return;
+}
+
+// NEW IN 1.60
+function ProcessGSMsg(string _szMsg)
+{
+	switch(_szMsg)
+	{
+		// End:0x23
+		case "IsACustomMod":
+			m_bIsACustomMod = true;
+			// End:0x5A
+			break;
+		// End:0x42
+		case "IsAnOfficialMod":
+			m_bIsAnOfficialMod = true;
+			// End:0x5A
+			break;
+		// End:0x54
+		case "IsRavenShield":
+		// End:0xFFFF
+		default:
+			// End:0x5A
+			break;
+			break;
+	}
+	return;
+}
+
+function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
+{
+	local R6WindowUbiCDKeyCheck.eJoinRoomChoice eJoinRoom;
+	local bool bRoomValid;
+	local string _szIPAddress;
+
+	switch(eMessage)
+	{
+		// End:0x61
+		case 8:
+			m_bQueryServerInfoInProgress = false;
+			Class'Engine.Actor'.static.__NFUN_1524__().m_szPendingModName = m_GameService.m_ClientBeacon.PreJoinInfo.szPreJoinModName;
+			Class'Engine.Actor'.static.__NFUN_1551__().m_bQueryServerInfoDone = true;
+			// End:0x9F
+			break;
+		// End:0x84
+		case 9:
+			m_bQueryServerInfoInProgress = false;
+			Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();
+			// End:0x9F
+			break;
+		// End:0xFFFF
+		default:
+			__NFUN_231__("Msg not supported");
+			// End:0x9F
+			break;
+			break;
+	}
+	return;
 }
 
 //==============================================================================
@@ -313,52 +334,46 @@ function BOOL CheckForGSClientStart()
 //==============================================================================
 function PromptConnectionError()
 {
-	local R6MenuRootWindow R6Root;
+	local R6MenuRootWindow r6Root;
 	local string szTemp;
 
-    // A connection error to the server has occured, display the pop up menu
-    // with the appropriate message.
-
-	R6Root = R6MenuRootWindow(Root);
-
-	R6Root.m_RSimplePopUp.X = 140;
-	R6Root.m_RSimplePopUp.Y = 170;
-	R6Root.m_RSimplePopUp.W = 360;
-	R6Root.m_RSimplePopUp.H = 77;
-
-    if(R6Console(Root.console).m_szLastError!="")
-    {
-		szTemp = Localize("Multiplayer",  R6Console(Root.console).m_szLastError, "R6Menu", true);
-
-        if (szTemp == "")
-            szTemp = Localize("Errors",  R6Console(Root.console).m_szLastError, "R6Engine", true);
-
-		if (szTemp == "")
-			szTemp = R6Console(Root.console).m_szLastError;
-
-	    R6Root.SimplePopUp( Localize("MultiPlayer","Popup_Error_Title","R6Menu"),
-							szTemp, EPopUpID_ErrorConnect, MessageBoxButtons.MB_OK, false, self);
-
-        R6Console(Root.console).m_szLastError = "";
-    }
-    else
+	r6Root = R6MenuRootWindow(Root);
+	r6Root.m_RSimplePopUp.X = 140;
+	r6Root.m_RSimplePopUp.Y = 170;
+	r6Root.m_RSimplePopUp.W = 360;
+	r6Root.m_RSimplePopUp.H = 77;
+	// End:0x1AD
+	if(__NFUN_123__(R6Console(Root.Console).m_szLastError, ""))
 	{
-	    R6Root.SimplePopUp( Localize("MultiPlayer","Popup_Error_Title","R6Menu"),
-							Localize("MultiPlayer","Popup_ConnectionError","R6Menu"), 
-							EPopUpID_ErrorConnect, MessageBoxButtons.MB_OK, false, self);
+		szTemp = Localize("Multiplayer", R6Console(Root.Console).m_szLastError, "R6Menu", true);
+		// End:0x113
+		if(__NFUN_122__(szTemp, ""))
+		{
+			szTemp = Localize("Errors", R6Console(Root.Console).m_szLastError, "R6Engine", true);
+		}
+		// End:0x141
+		if(__NFUN_122__(szTemp, ""))
+		{
+			szTemp = R6Console(Root.Console).m_szLastError;
+		}
+		r6Root.SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), szTemp, 24, int(2), false, self);
+		R6Console(Root.Console).m_szLastError = "";		
 	}
+	else
+	{
+		r6Root.SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), Localize("MultiPlayer", "Popup_ConnectionError", "R6Menu"), 24, int(2), false, self);
+	}
+	return;
 }
 
 //==============================================================================
 // PopUpBoxDone -  receive the result of the popup box  
 //==============================================================================
-function PopUpBoxDone( MessageBoxResult Result, ePopUpID _ePopUpID)
+function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
-	// don't forget to resize popup to original value
-	R6WindowRootWindow(Root).m_RSimplePopUp = R6WindowRootWindow(Root).Default.m_RSimplePopUp;
-	
-    // Minimize game and return to ubi.com client.
-    class'Actor'.static.GetGameManager().m_bReturnToGSClient = TRUE;
+	R6WindowRootWindow(Root).m_RSimplePopUp = R6WindowRootWindow(Root).default.m_RSimplePopUp;
+	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();
+	return;
 }
 
 //==============================================================================
@@ -366,21 +381,34 @@ function PopUpBoxDone( MessageBoxResult Result, ePopUpID _ePopUpID)
 //==============================================================================
 function Notify(UWindowDialogControl C, byte E)
 {
-	if (C.IsA('R6WindowButtonMainMenu'))
-    {
-        if(E == DE_Click)
-        {
-            // Quit button, quit the game.
-            if (C == m_ButtonQuit)
-                Root.DoQuitGame();
-
-            // Return to ubi.com button, Minimize the game.
-            else if (C == m_ButtonReturn)
-                class'Actor'.static.GetGameManager().m_bReturnToGSClient = TRUE;
-        }
-    }
+	// End:0x6A
+	if(C.__NFUN_303__('R6WindowButtonMainMenu'))
+	{
+		// End:0x6A
+		if(__NFUN_154__(int(E), 2))
+		{
+			// End:0x43
+			if(__NFUN_114__(C, m_ButtonQuit))
+			{
+				Root.DoQuitGame();				
+			}
+			else
+			{
+				// End:0x6A
+				if(__NFUN_114__(C, m_ButtonReturn))
+				{
+					Class'Engine.Actor'.static.__NFUN_1551__().m_bReturnToGSClient = true;
+				}
+			}
+		}
+	}
+	return;
 }
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_pCDKeyCheckWindow
+// REMOVED IN 1.60: var m_bPreJoinInProgress
+// REMOVED IN 1.60: var m_bChangeMap
+// REMOVED IN 1.60: function JoinServer
+// REMOVED IN 1.60: function CheckForGSClientStart

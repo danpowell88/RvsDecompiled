@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuActionButtonItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuActionButtonItem.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,8 +13,5 @@
 //=============================================================================
 class R6MenuActionButtonItem extends R6WindowListButtonItem;
 
-var EPlanAction m_eAction;
+var Object.EPlanAction m_eAction;
 
-defaultproperties
-{
-}

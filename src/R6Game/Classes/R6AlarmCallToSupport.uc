@@ -1,27 +1,31 @@
+//=============================================================================
+// R6AlarmCallToSupport - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 /********************************************************************
 	created:	2001/11/06
 	filename: 	R6AlarmCallToSupport.uc
 	author:		Jean-Francois Dube
 *********************************************************************/
+class R6AlarmCallToSupport extends R6Alarm;
 
-class R6AlarmCallToSupport extends R6Alarm
-    placeable;
-
-var(R6AlarmSettings) enum ETerroristTarget
+enum ETerroristTarget
 {
-	TT_AlarmPosition,                       // terrorists will go to the alarm position
-	TT_GivenPosition                        // terrorists will go to the given position received in parameters
-} m_eTerroristTarget;
+	TT_AlarmPosition,               // 0
+	TT_GivenPosition                // 1
+};
 
-var(R6AlarmSettings)    INT                  m_iTerroristGroup;
-var(R6AlarmSettings)    R6Pawn.eMovementPace m_ePace;
-var(R6AlarmSettings)    Array<R6IOSound>     m_IOSoundList;
-var(R6AlarmSettings)    Sound                m_sndAlarmSound;
-var(R6AlarmSettings)    Sound                m_sndAlarmSoundStop;
-var(R6AlarmSettings)    FLOAT                m_fActivationTime;
-
-var                     FLOAT                m_fTimeStart;
-
+// NEW IN 1.60
+var(R6AlarmSettings) R6AlarmCallToSupport.ETerroristTarget m_eTerroristTarget;
+var(R6AlarmSettings) R6Pawn.eMovementPace m_ePace;
+var(R6AlarmSettings) int m_iTerroristGroup;
+var(R6AlarmSettings) float m_fActivationTime;
+var float m_fTimeStart;
+var(R6AlarmSettings) Sound m_sndAlarmSound;
+var(R6AlarmSettings) Sound m_sndAlarmSoundStop;
+var(R6AlarmSettings) array<R6IOSound> m_IOSoundList;
 
 //------------------------------------------------------------------
 // ResetOriginalData
@@ -29,89 +33,117 @@ var                     FLOAT                m_fTimeStart;
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-    local INT i;
+	local int i;
 
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super(Actor).ResetOriginalData();
+	__NFUN_118__('Tick');
+	i = 0;
+	J0x24:
 
-    Disable('Tick');
-
-    for (i=0;i<m_IOSoundList.Length; i++)
-    {
-        m_IOSoundList[i].AmbientSound = none;
-        m_IOSoundList[i].AmbientSoundStop = none;
-    }
-    m_fTimeStart = 0;
-    Disable('Tick');
+	// End:0x6A [Loop If]
+	if(__NFUN_150__(i, m_IOSoundList.Length))
+	{
+		m_IOSoundList[i].AmbientSound = none;
+		m_IOSoundList[i].AmbientSoundStop = none;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x24;
+	}
+	m_fTimeStart = 0.0000000;
+	__NFUN_118__('Tick');
+	return;
 }
 
-
-function SetAlarm(vector vLocation)
+function SetAlarm(Vector vLocation)
 {
-    local R6TerroristAI C;
-    local BOOL bStartAlarm;
-    local INT i;
+	local R6TerroristAI C;
+	local bool bStartAlarm;
+	local int i;
 
-    bStartAlarm = false;
+	bStartAlarm = false;
+	// End:0xB6
+	foreach __NFUN_304__(Class'R6Engine.R6TerroristAI', C)
+	{
+		// End:0xB5
+		if(__NFUN_130__(C.m_pawn.IsAlive(), __NFUN_154__(C.m_pawn.m_iGroupID, m_iTerroristGroup)))
+		{
+			bStartAlarm = true;
+			// End:0x8B
+			if(__NFUN_154__(int(m_eTerroristTarget), int(0)))
+			{
+				C.GotoPointAndSearch(Location, m_ePace, true);
+				// End:0xB5
+				continue;
+			}
+			// End:0xB5
+			if(__NFUN_154__(int(m_eTerroristTarget), int(1)))
+			{
+				C.GotoPointAndSearch(vLocation, m_ePace, true);
+			}
+		}		
+	}	
+	// End:0x127
+	if(bStartAlarm)
+	{
+		i = 0;
+		J0xC7:
 
-    ForEach AllActors(class'R6TerroristAI', C)
-    {
-        
-        if(C.m_pawn.IsAlive() && C.m_pawn.m_iGroupID == m_iTerroristGroup)
-        {
-            bStartAlarm = true;
-            // log("================= SetAlarm called!");
-            if(m_eTerroristTarget == TT_AlarmPosition)
-            {
-                C.GotoPointAndSearch(Location, m_ePace, true);
-            }
-            else if(m_eTerroristTarget == TT_GivenPosition)
-            {
-                C.GotoPointAndSearch(vLocation, m_ePace, true);
-            }
-        }
-    }
-    
-    // Check if the arlarm is activated and play the the sound
-    if (bStartAlarm)
-    {
-        for (i=0;i<m_IOSoundList.Length; i++)
-        {
-            m_IOSoundList[i].AmbientSound = m_sndAlarmSound;
-            m_IOSoundList[i].AmbientSoundStop = m_sndAlarmSoundStop;
-        }
-
-        m_fTimeStart = 0;
-        Enable('Tick');
-    }
+		// End:0x115 [Loop If]
+		if(__NFUN_150__(i, m_IOSoundList.Length))
+		{
+			m_IOSoundList[i].AmbientSound = m_sndAlarmSound;
+			m_IOSoundList[i].AmbientSoundStop = m_sndAlarmSoundStop;
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0xC7;
+		}
+		m_fTimeStart = 0.0000000;
+		__NFUN_117__('Tick');
+	}
+	return;
 }
 
-
-function Tick(FLOAT fDeltaTime)
+function Tick(float fDeltaTime)
 {
-    local INT i;
+	local int i;
 
-    m_fTimeStart += fDeltaTime;
+	__NFUN_184__(m_fTimeStart, fDeltaTime);
+	// End:0x59
+	if(__NFUN_177__(m_fTimeStart, m_fActivationTime))
+	{
+		i = 0;
+		J0x22:
 
-    if ( m_fTimeStart > m_fActivationTime)
-    {
-        // Stop the arlarm after a certain time
-        for (i=0;i<m_IOSoundList.Length; i++)
-        {
-            m_IOSoundList[i].AmbientSound = none;
-        }
-        Disable('Tick');
-    }
+		// End:0x52 [Loop If]
+		if(__NFUN_150__(i, m_IOSoundList.Length))
+		{
+			m_IOSoundList[i].AmbientSound = none;
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x22;
+		}
+		__NFUN_118__('Tick');
+	}
+	return;
 }
 
-Auto State StartUp
-{
-Begin:
-    Disable('Tick');
+auto state StartUp
+{Begin:
+
+	__NFUN_118__('Tick');
+	stop;				
 }
 
 defaultproperties
 {
-     m_eTerroristTarget=TT_GivenPosition
-     m_ePace=PACE_Run
+	m_eTerroristTarget=1
+	m_ePace=5
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var ETerroristTarget

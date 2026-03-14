@@ -1,4 +1,10 @@
 //=============================================================================
+// R6EnvironmentNode - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6EnvironmentNode.uc : nodes that contain information about the environment,
 //                          location of walls, corners, etc...
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -8,27 +14,30 @@
 //=============================================================================
 class R6EnvironmentNode extends Actor
 	native
-    placeable;
+ placeable;
 
-var         vector          m_vLookDir;
+var Vector m_vLookDir;
 
 function PostBeginPlay()
 {
-	Super.PostBeginPlay();
-    m_vLookDir = vector(Rotation);
-    m_vLookDir = normal(m_vLookDir);
+	super.PostBeginPlay();
+	m_vLookDir = Vector(Rotation);
+	m_vLookDir = __NFUN_226__(m_vLookDir);
+	return;
 }
 
-function Touch(Actor other)
+function Touch(Actor Other)
 {
+	return;
 }
 
-function UnTouch(Actor other)
+function UnTouch(Actor Other)
 {
+	return;
 }
 
 defaultproperties
 {
-     bCollideActors=True
-     bDirectional=True
+	bCollideActors=true
+	bDirectional=true
 }

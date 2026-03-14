@@ -1,4 +1,10 @@
 //=============================================================================
+// R6HCasualWoman02 - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6HCasualWoman02.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,20 +15,7 @@ class R6HCasualWoman02 extends R6HCasualWoman01;
 
 defaultproperties
 {
-     Mesh=SkeletalMesh'R6Hostage_UKX.Woman2Mesh'
-     Begin Object Class=KarmaParamsSkel Name=KarmaParamsSkel200
-         KConvulseSpacing=(Max=2.200000)
-         KSkeleton="terroskel"
-         KStartEnabled=True
-         bHighDetailOnly=False
-         KLinearDamping=0.500000
-         KAngularDamping=0.500000
-         KBuoyancy=1.000000
-         KVelDropBelowThreshold=50.000000
-         KFriction=0.600000
-         KRestitution=0.300000
-         KImpactThreshold=150.000000
-         Name="KarmaParamsSkel200"
-     End Object
-     KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel200'
+	Mesh=SkeletalMesh'R6Hostage_UKX.Woman2Mesh'
+	KParams=KarmaParamsSkel'R6Characters.KarmaParamsSkel200'
+	Skins=/* Array type was not detected. */
 }

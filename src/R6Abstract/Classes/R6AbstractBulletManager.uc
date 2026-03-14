@@ -1,3 +1,9 @@
+//=============================================================================
+// R6AbstractBulletManager - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //========================================================================================
 //  R6AbstractBulletManager.uc :   Abstract class for bullet manager.
 //
@@ -6,13 +12,26 @@
 //  Revision history:
 //    10/07/2002 * Created by Joel Tremblay
 //=============================================================================
-class R6AbstractBulletManager extends actor;
+class R6AbstractBulletManager extends Actor
+ notplaceable;
 
-function SetBulletParameter( R6EngineWeapon aWeapon );
-function InitBulletMgr( Pawn TheInstigator );
-function bool AffectActor(INT BulletGroup, actor ActorAffected);
-function SpawnBullet(vector vPosition, Rotator rRotation, float fBulletSpeed, BOOL bFirstInShell);
-
-defaultproperties
+function SetBulletParameter(R6EngineWeapon AWeapon)
 {
+	return;
 }
+
+function InitBulletMgr(Pawn TheInstigator)
+{
+	return;
+}
+
+function bool AffectActor(int BulletGroup, Actor ActorAffected)
+{
+	return;
+}
+
+function SpawnBullet(Vector VPosition, Rotator rRotation, float fBulletSpeed, bool bFirstInShell)
+{
+	return;
+}
+

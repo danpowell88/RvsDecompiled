@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowOperativePlanningSummary - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowOperativePlanningSummary.uc : Small window summerizing an operative
 //                                        planning result for the execute screen
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
@@ -6,182 +12,192 @@
 //  Revision history:
 //    2002/06/13 * Created by Alexandre Dionne
 //=============================================================================
-
-
 class R6WindowOperativePlanningSummary extends UWindowWindow;
 
-var R6WindowBitMap      m_OperativeFace;
-
-var R6WindowBitMap      m_BMPSpeciality;
-var R6WindowBitMap      m_BMPHealth;
-
-var R6WindowTextLabel   m_PrimaryWeapon, m_Armor, m_OperativeName;
-
-var FLOAT               m_fFaceWidth, m_FaceHeight, m_fNameLabelHeight;
-var INT                 m_IXSpecialityOffset, m_IXHealthOffset, m_IYIconPos, m_IHealthWidth, m_IHealthHeight, m_ISpecialityWidth, m_ISpecialityHeight;
-
-var Texture             m_TBottomLabelBG;
-var Region              m_RBottomLabelBG;
-
-var Color               m_LabelColor;
-
-var BYTE                m_BAlphaOpNameBg;
-var BYTE                m_BSelectedAlphaOpNameBg;
-var BYTE                m_BCurrentAlpha;
-
-var Color               m_CDarkColor;
-
-var BYTE                m_BAlphaBg;
-
-
-var BOOL                m_bIsSelected;
+var byte m_BAlphaOpNameBg;
+var byte m_BSelectedAlphaOpNameBg;
+var byte m_BCurrentAlpha;
+var byte m_BAlphaBg;
+var int m_IXSpecialityOffset;
+// NEW IN 1.60
+var int m_IXHealthOffset;
+// NEW IN 1.60
+var int m_IYIconPos;
+// NEW IN 1.60
+var int m_IHealthWidth;
+// NEW IN 1.60
+var int m_IHealthHeight;
+// NEW IN 1.60
+var int m_ISpecialityWidth;
+// NEW IN 1.60
+var int m_ISpecialityHeight;
+var bool m_bIsSelected;
+var float m_fFaceWidth;
+// NEW IN 1.60
+var float m_FaceHeight;
+// NEW IN 1.60
+var float m_fNameLabelHeight;
+var R6WindowBitMap m_OperativeFace;
+var R6WindowBitMap m_BMPSpeciality;
+var R6WindowBitMap m_BMPHealth;
+var R6WindowTextLabel m_PrimaryWeapon;
+// NEW IN 1.60
+var R6WindowTextLabel m_Armor;
+// NEW IN 1.60
+var R6WindowTextLabel m_OperativeName;
+var Texture m_TBottomLabelBG;
+var Region m_RBottomLabelBG;
+var Color m_LabelColor;
+var Color m_CDarkColor;
 
 function Created()
 {
- 
-    local FLOAT fLabelHeight;
+	local float fLabelHeight;
 
-    m_OperativeFace = R6WindowBitMap(CreateWindow(class'R6WindowBitMap',m_BorderTextureRegion.H,m_BorderTextureRegion.W,m_fFaceWidth,m_FaceHeight,self));
-    m_BMPSpeciality = R6WindowBitMap(CreateWindow(class'R6WindowBitMap',m_FaceHeight + m_IXSpecialityOffset,m_IYIconPos,m_ISpecialityWidth,m_ISpecialityHeight,self));
-    m_BMPSpeciality.m_iDrawStyle = ERenderStyle.STY_Alpha;
-    m_BMPHealth     = R6WindowBitMap(CreateWindow(class'R6WindowBitMap',m_BMPSpeciality.WinLeft + m_BMPSpeciality.WinWidth + m_IXHealthOffset, m_IYIconPos,m_IHealthWidth,m_IHealthHeight,self));
-    m_BMPHealth.m_iDrawStyle = ERenderStyle.STY_Alpha;
-
-    m_OperativeName                = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', m_BMPHealth.WinLeft + m_BMPHealth.WinWidth, 0, WinWidth - m_BMPHealth.WinLeft - m_BMPHealth.WinWidth, m_fNameLabelHeight, self));
-    m_OperativeName.m_bDrawBorders = false;
-    m_OperativeName.Align          = TA_CENTER;    
-    m_OperativeName.TextColor      = Root.Colors.White;
-    m_OperativeName.m_Font         = Root.Fonts[F_SmallTitle];
-    m_OperativeName.m_BGTexture    = None;    
-
-    fLabelHeight = (WinHeight - m_OperativeName.WinHeight) / 2;
-
-    m_PrimaryWeapon                = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', m_OperativeFace.WinLeft + m_fFaceWidth, m_OperativeName.WinTop + m_OperativeName.WinHeight,  m_OperativeName.WinWidth, fLabelHeight, self));
-    m_PrimaryWeapon.m_bDrawBorders = false;
-    m_PrimaryWeapon.Align          = TA_LEFT;    
-    m_PrimaryWeapon.TextColor      = Root.Colors.White;
-    m_PrimaryWeapon.m_Font         = Root.Fonts[F_VerySmallTitle];
-    m_PrimaryWeapon.m_BGTexture    = None;
-    m_PrimaryWeapon.m_fLMarge      = 4;
-    m_PrimaryWeapon.m_bFixedYPos   = true;
-    m_PrimaryWeapon.TextY          = 1;
-
-    m_Armor                        = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', m_PrimaryWeapon.WinLeft, m_PrimaryWeapon.WinTop + m_PrimaryWeapon.WinHeight, m_OperativeName.WinWidth, fLabelHeight, self));
-    m_Armor.m_bDrawBorders         = false;
-    m_Armor.Align                  = TA_LEFT;    
-    m_Armor.TextColor              = Root.Colors.White;
-    m_Armor.m_Font                 = Root.Fonts[F_VerySmallTitle];
-    m_Armor.m_BGTexture            = None; 
-    m_Armor.m_fLMarge              = m_PrimaryWeapon.m_fLMarge;
-    m_Armor.m_bFixedYPos           = true; 
-
-    m_BCurrentAlpha                = m_BAlphaOpNameBg;
-    
+	m_OperativeFace = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), m_fFaceWidth, m_FaceHeight, self));
+	m_BMPSpeciality = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', __NFUN_174__(m_FaceHeight, float(m_IXSpecialityOffset)), float(m_IYIconPos), float(m_ISpecialityWidth), float(m_ISpecialityHeight), self));
+	m_BMPSpeciality.m_iDrawStyle = int(5);
+	m_BMPHealth = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', __NFUN_174__(__NFUN_174__(m_BMPSpeciality.WinLeft, m_BMPSpeciality.WinWidth), float(m_IXHealthOffset)), float(m_IYIconPos), float(m_IHealthWidth), float(m_IHealthHeight), self));
+	m_BMPHealth.m_iDrawStyle = int(5);
+	m_OperativeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_BMPHealth.WinLeft, m_BMPHealth.WinWidth), 0.0000000, __NFUN_175__(__NFUN_175__(WinWidth, m_BMPHealth.WinLeft), m_BMPHealth.WinWidth), m_fNameLabelHeight, self));
+	m_OperativeName.m_bDrawBorders = false;
+	m_OperativeName.Align = 2;
+	m_OperativeName.TextColor = Root.Colors.White;
+	m_OperativeName.m_Font = Root.Fonts[5];
+	m_OperativeName.m_BGTexture = none;
+	fLabelHeight = __NFUN_172__(__NFUN_175__(WinHeight, m_OperativeName.WinHeight), float(2));
+	m_PrimaryWeapon = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), __NFUN_174__(m_OperativeName.WinTop, m_OperativeName.WinHeight), m_OperativeName.WinWidth, fLabelHeight, self));
+	m_PrimaryWeapon.m_bDrawBorders = false;
+	m_PrimaryWeapon.Align = 0;
+	m_PrimaryWeapon.TextColor = Root.Colors.White;
+	m_PrimaryWeapon.m_Font = Root.Fonts[6];
+	m_PrimaryWeapon.m_BGTexture = none;
+	m_PrimaryWeapon.m_fLMarge = 4.0000000;
+	m_PrimaryWeapon.m_bFixedYPos = true;
+	m_PrimaryWeapon.TextY = 1.0000000;
+	m_Armor = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_PrimaryWeapon.WinLeft, __NFUN_174__(m_PrimaryWeapon.WinTop, m_PrimaryWeapon.WinHeight), m_OperativeName.WinWidth, fLabelHeight, self));
+	m_Armor.m_bDrawBorders = false;
+	m_Armor.Align = 0;
+	m_Armor.TextColor = Root.Colors.White;
+	m_Armor.m_Font = Root.Fonts[6];
+	m_Armor.m_BGTexture = none;
+	m_Armor.m_fLMarge = m_PrimaryWeapon.m_fLMarge;
+	m_Armor.m_bFixedYPos = true;
+	m_BCurrentAlpha = m_BAlphaOpNameBg;
+	return;
 }
 
 function setHealth(TexRegion _T)
 {
-    m_BMPHealth.T = _T.T;
-    m_BMPHealth.R.X = _T.X;
-    m_BMPHealth.R.Y = _T.Y;
-    m_BMPHealth.R.W = _T.H;
-    m_BMPHealth.R.H = _T.W;
+	m_BMPHealth.t = _T.t;
+	m_BMPHealth.R.X = _T.X;
+	m_BMPHealth.R.Y = _T.Y;
+	m_BMPHealth.R.W = _T.H;
+	m_BMPHealth.R.H = _T.W;
+	return;
 }
 
 function setSpeciality(TexRegion _T)
 {
-    m_BMPSpeciality.T = _T.T;
-    m_BMPSpeciality.R.X = _T.X;
-    m_BMPSpeciality.R.Y = _T.Y;
-    m_BMPSpeciality.R.W = _T.H;
-    m_BMPSpeciality.R.H = _T.W;
+	m_BMPSpeciality.t = _T.t;
+	m_BMPSpeciality.R.X = _T.X;
+	m_BMPSpeciality.R.Y = _T.Y;
+	m_BMPSpeciality.R.W = _T.H;
+	m_BMPSpeciality.R.H = _T.W;
+	return;
 }
 
 function setFace(Texture _T, Region _R)
 {
-    m_OperativeFace.T   = _T;
-    m_OperativeFace.R   = _R;
+	m_OperativeFace.t = _T;
+	m_OperativeFace.R = _R;
+	return;
 }
 
 function setLabels(string szPrimaryWeapon, string szArmor, string szOperativeName)
 {
-    m_PrimaryWeapon.SetNewText(szPrimaryWeapon, true);
-    m_Armor.SetNewText(szArmor, true);
-    m_OperativeName.SetNewText(szOperativeName, true);
+	m_PrimaryWeapon.SetNewText(szPrimaryWeapon, true);
+	m_Armor.SetNewText(szArmor, true);
+	m_OperativeName.SetNewText(szOperativeName, true);
+	return;
 }
 
 function SetColor(Color _LabelColor, Color _DarkColor)
 {
-    m_BorderColor = _LabelColor;
-    m_LabelColor  = _LabelColor;
-    m_CDarkColor  = _DarkColor;
-    
-    m_BMPSpeciality.m_TextureColor  = _LabelColor;
-    m_BMPHealth.m_TextureColor      = _LabelColor;
-
-    SetSelected(m_bIsSelected);
+	m_BorderColor = _LabelColor;
+	m_LabelColor = _LabelColor;
+	m_CDarkColor = _DarkColor;
+	m_BMPSpeciality.m_TextureColor = _LabelColor;
+	m_BMPHealth.m_TextureColor = _LabelColor;
+	SetSelected(m_bIsSelected);
+	return;
 }
 
 function SetSelected(bool _IsSelected)
 {
-    if(_IsSelected)
-    {   
-        m_OperativeName.TextColor      = Root.Colors.White;
-        m_PrimaryWeapon.TextColor      = Root.Colors.White;
-        m_Armor.TextColor              = Root.Colors.White;        
-        m_BCurrentAlpha                = m_BSelectedAlphaOpNameBg;
-    }        
-    else
-    {
-        m_OperativeName.TextColor      = m_LabelColor;
-        m_PrimaryWeapon.TextColor      = m_LabelColor;
-        m_Armor.TextColor              = m_LabelColor;        
-        m_BCurrentAlpha                = m_BAlphaOpNameBg;
-    }
-    
-    m_BMPSpeciality.m_bUseColor        = !_IsSelected;
-    m_BMPHealth.m_bUseColor            = !_IsSelected;
-    
-    m_bIsSelected = _IsSelected;
+	// End:0x89
+	if(_IsSelected)
+	{
+		m_OperativeName.TextColor = Root.Colors.White;
+		m_PrimaryWeapon.TextColor = Root.Colors.White;
+		m_Armor.TextColor = Root.Colors.White;
+		m_BCurrentAlpha = m_BSelectedAlphaOpNameBg;		
+	}
+	else
+	{
+		m_OperativeName.TextColor = m_LabelColor;
+		m_PrimaryWeapon.TextColor = m_LabelColor;
+		m_Armor.TextColor = m_LabelColor;
+		m_BCurrentAlpha = m_BAlphaOpNameBg;
+	}
+	m_BMPSpeciality.m_bUseColor = __NFUN_129__(_IsSelected);
+	m_BMPHealth.m_bUseColor = __NFUN_129__(_IsSelected);
+	m_bIsSelected = _IsSelected;
+	return;
 }
 
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-    //Draw Bottom Label background
-    C.Style = ERenderStyle.STY_Alpha;
-    C.SetDrawColor(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_BCurrentAlpha);
-    DrawStretchedTexture( C, m_OperativeFace.WinLeft + m_fFaceWidth, 0, WinWidth - m_fFaceWidth - m_OperativeFace.WinLeft, m_OperativeName.WinHeight, m_TBottomLabelBG );
-
-    C.SetDrawColor(m_CDarkColor.R, m_CDarkColor.G, m_CDarkColor.B, m_BAlphaBg);
-    DrawStretchedTexture( C, m_OperativeFace.WinLeft + m_fFaceWidth, m_OperativeName.WinHeight, WinWidth - m_fFaceWidth - m_OperativeFace.WinLeft, WinHeight - m_OperativeName.WinHeight, m_TBottomLabelBG );
+	C.Style = 5;
+	C.__NFUN_2626__(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_BCurrentAlpha);
+	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), 0.0000000, __NFUN_175__(__NFUN_175__(WinWidth, m_fFaceWidth), m_OperativeFace.WinLeft), m_OperativeName.WinHeight, m_TBottomLabelBG);
+	C.__NFUN_2626__(m_CDarkColor.R, m_CDarkColor.G, m_CDarkColor.B, m_BAlphaBg);
+	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), m_OperativeName.WinHeight, __NFUN_175__(__NFUN_175__(WinWidth, m_fFaceWidth), m_OperativeFace.WinLeft), __NFUN_175__(WinHeight, m_OperativeName.WinHeight), m_TBottomLabelBG);
+	return;
 }
 
-function AfterPaint(Canvas C, FLOAT X, FLOAT Y)
+function AfterPaint(Canvas C, float X, float Y)
 {
-    //Draw Lines
-    C.Style = ERenderStyle.STY_Normal;
-    C.SetDrawColor(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_LabelColor.A);    
-    DrawStretchedTexture( C, m_OperativeFace.WinLeft + m_fFaceWidth, 0, 1, WinHeight, m_TBottomLabelBG );
-    DrawStretchedTexture( C, m_OperativeFace.WinLeft + m_fFaceWidth, m_fNameLabelHeight, WinWidth - m_fFaceWidth - m_OperativeFace.WinLeft, 1, m_TBottomLabelBG );
- 
-    DrawSimpleBorder(C);
+	C.Style = 1;
+	C.__NFUN_2626__(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_LabelColor.A);
+	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), 0.0000000, 1.0000000, WinHeight, m_TBottomLabelBG);
+	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), m_fNameLabelHeight, __NFUN_175__(__NFUN_175__(WinWidth, m_fFaceWidth), m_OperativeFace.WinLeft), 1.0000000, m_TBottomLabelBG);
+	DrawSimpleBorder(C);
+	return;
 }
 
 defaultproperties
 {
-     m_BAlphaOpNameBg=77
-     m_BSelectedAlphaOpNameBg=128
-     m_BAlphaBg=128
-     m_IXSpecialityOffset=1
-     m_IXHealthOffset=3
-     m_IYIconPos=4
-     m_IHealthWidth=10
-     m_IHealthHeight=10
-     m_ISpecialityWidth=9
-     m_ISpecialityHeight=9
-     m_fFaceWidth=38.000000
-     m_FaceHeight=42.000000
-     m_fNameLabelHeight=17.000000
-     m_TBottomLabelBG=Texture'UWindow.WhiteTexture'
-     m_RBottomLabelBG=(W=10,H=10)
+	m_BAlphaOpNameBg=77
+	m_BSelectedAlphaOpNameBg=128
+	m_BAlphaBg=128
+	m_IXSpecialityOffset=1
+	m_IXHealthOffset=3
+	m_IYIconPos=4
+	m_IHealthWidth=10
+	m_IHealthHeight=10
+	m_ISpecialityWidth=9
+	m_ISpecialityHeight=9
+	m_fFaceWidth=38.0000000
+	m_FaceHeight=42.0000000
+	m_fNameLabelHeight=17.0000000
+	m_TBottomLabelBG=Texture'UWindow.WhiteTexture'
+	m_RBottomLabelBG=(Zone=StructProperty'R6Window.R6WindowSimpleFramedWindow.m_topLeftCornerR',iLeaf=2594,ZoneNumber=0)
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var r
+// REMOVED IN 1.60: var e
+// REMOVED IN 1.60: var t
+// REMOVED IN 1.60: var s
+// REMOVED IN 1.60: var h

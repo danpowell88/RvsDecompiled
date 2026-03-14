@@ -1,4 +1,10 @@
 //=============================================================================
+// R6RainbowTeam - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6RainbowTeam.uc : The R6RainbowTeam class is where the AI for the Rainbow
 //					   team will be implemented.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -7,280 +13,259 @@
 //    2001/04/03 * Created by Rima Brek
 //=============================================================================
 class R6RainbowTeam extends Actor
-    native;
-
+	native
+ notplaceable;
 
 const c_iMaxTeam = 4;
 
-var         INT						m_iMemberCount;
-var         R6Rainbow               m_Team[c_iMaxTeam];
-var         COLOR                   m_TeamColour;
-var         R6GameColors            Colors;
+enum ePlayerRoomEntry
+{
+	PRE_Center,                     // 0
+	PRE_Left,                       // 1
+	PRE_Right                       // 2
+};
 
-var         R6RainbowPlayerVoices       m_PlayerVoicesMgr;
-var         R6RainbowMemberVoices       m_MemberVoicesMgr;
-var         R6RainbowOtherTeamVoices    m_OtherTeamVoicesMgr;
-var         R6MultiCommonVoices         m_MultiCommonVoicesMgr;
-var         R6MultiCoopVoices           m_MultiCoopPlayerVoicesMgr;
-var         R6MultiCoopVoices           m_MultiCoopMemberVoicesMgr;
-var         R6PreRecordedMsgVoices      m_PreRecMsgVoicesMgr;
-
-var         INT                         m_iIDVoicesMgr;
+enum eTeamState
+{
+	TS_None,                        // 0
+	TS_Waiting,                     // 1
+	TS_Holding,                     // 2
+	TS_Moving,                      // 3
+	TS_Following,                   // 4
+	TS_Regrouping,                  // 5
+	TS_Engaging,                    // 6
+	TS_Sniping,                     // 7
+	TS_LockPicking,                 // 8
+	TS_OpeningDoor,                 // 9
+	TS_ClosingDoor,                 // 10
+	TS_Opening,                     // 11
+	TS_Closing,                     // 12
+	TS_ClearingRoom,                // 13
+	TS_Grenading,                   // 14
+	TS_DisarmingBomb,               // 15
+	TS_InteractWithDevice,          // 16
+	TS_SecuringTerrorist,           // 17
+	TS_ClimbingLadder,              // 18
+	TS_WaitingForOrders,            // 19
+	TS_SettingBreach,               // 20
+	TS_Retired                      // 21
+};
 
 // each bit is used by the client for the RoseDesVents. 
 // and is examined to see if we have a team member with
 // a specific grenade type, this is more effecient than 
 // replicate all the info for all weapons
-var         BYTE                    m_bHasGrenade;
-var         R6Rainbow               m_TeamLeader;
-var         R6AbstractPlanningInfo  m_TeamPlanning;       
-
-// status flags
-var         bool                    m_bLeaderIsAPlayer;                 // the leader of this team is not an NPC (is a player)
-var         bool                    m_bPlayerHasFocus;                  // When the player is in observer mode on the current team
-var         bool                    m_bPlayerInGhostMode;       
-var         bool                    m_bTeamIsClimbingLadder;            // team is in the process of climbing a ladder
-var         bool                    m_bTeamIsSeparatedFromLeader;       // team was either told to hold position or to perform an action (e.g. climb ladder)
-var			bool					m_bGrenadeInProximity;				// frag grenade
-var			bool					m_bGasGrenadeInProximity;			// tear gas grenade
-
-// doors & room entry
-var         bool                    m_bEntryInProgress;                 // a room entry is in progress
-var         bool                    m_bDoorOpensTowardTeam;
-var         bool                    m_bDoorOpensClockWise;
-var			bool					m_bRainbowIsInFrontOfDoor;
-
-var         bool                    m_bWoundedHostage;                  // true if an escorted hostage is wounded
-
-var         R6Pawn                  m_PawnControllingDoor;
-
-// team info to maintain for members
-var         rotator                 m_rTeamDirection;                   // rotator that maintains the direction of movement of the team leader 
-var         R6RainbowAI.eFormation  m_eFormation;                       // team formation
-var         R6RainbowAI.eFormation  m_eRequestedFormation;
-var         INT                     m_iFormationDistance;               // standard distance between members when in a movement formation
-var         INT                     m_iDiagonalDistance;        
-var         INT                     m_iTeamHealth[c_iMaxTeam];                   // information for HUD... (information stays even if a member is dead)
-var         INT                     m_iMembersLost;
-var         INT                     m_iGrenadeThrower;                  // index of the last member who throwed a grenade
-
-var			INT						m_iIntermLeader;					// used for temporary reorganisation of team; to keep track of who original lead was
-var         INT                     m_iSpawnDistance;                   // distance used to spawn characters next to the start point
-var         INT                     m_iSpawnDiagDist;                   // distance used to spawn characters diagonaly to the start point
-var         INT                     m_iSpawnDiagOther;                  // distance used to spawn characters around the start point(not diagonaly or next to)
-
-// ladder climbing
-var         R6Ladder                m_TeamLadder;
-
+var byte m_bHasGrenade;
+var R6RainbowAI.eFormation m_eFormation;  // team formation
+var R6RainbowAI.eFormation m_eRequestedFormation;
+// NEW IN 1.60
+var R6RainbowTeam.ePlayerRoomEntry m_ePlayerRoomEntry;
+var R6EngineWeapon.eWeaponGrenadeType m_eEntryGrenadeType;
+// Rules Of Engagement determines speed and hostility of unit
+var Object.EMovementMode m_eMovementMode;  // Rules Of Engagement
+var Object.EMovementSpeed m_eMovementSpeed;
+var Object.EPlanAction m_ePlanAction;
+var Object.EPlanAction m_eNextAPAction;
+var Object.EPlanAction m_ePlayerAPAction;
+// NEW IN 1.60
+var R6RainbowTeam.eTeamState m_eTeamState;
+// NEW IN 1.60
+var R6RainbowTeam.eTeamState m_eBackupTeamState;
+// GOCODE_Alpha, GOCODE_Bravo, GOCODE_Charlie, GOCODE_Delta, GOCODE_None
+var Object.EGoCode m_eGoCode;
+var Object.EGoCode m_eBackupGoCode;
+var int m_iMemberCount;
+var int m_iIDVoicesMgr;
+var int m_iFormationDistance;  // standard distance between members when in a movement formation
+var int m_iDiagonalDistance;
+// NEW IN 1.60
+var int m_iTeamHealth[4];
+var int m_iMembersLost;
+var int m_iGrenadeThrower;  // index of the last member who throwed a grenade
+var int m_iIntermLeader;  // used for temporary reorganisation of team; to keep track of who original lead was
+var int m_iSpawnDistance;  // distance used to spawn characters next to the start point
+var int m_iSpawnDiagDist;  // distance used to spawn characters diagonaly to the start point
+var int m_iSpawnDiagOther;  // distance used to spawn characters around the start point(not diagonaly or next to)
 // door control, room entry
 //var         INT                     m_iAction;                          // contains the desired action to take... (door: OPEN/CLOSE)
-var         INT                     m_iSubAction;                       // contains the desired sub action to take...
-var         R6Door                  m_Door;                             // reference to a door actor involved in a room entry
-
-var	enum ePlayerRoomEntry
-{
-	PRE_Center,
-	PRE_Left,
-	PRE_Right
-} m_ePlayerRoomEntry;
-
-var         INT                     m_iRainbowTeamName; 
-
-var			R6CircumstantialActionQuery		m_actionRequested;
-var			vector							m_vActionLocation;
-var         BOOL							m_bCAWaitingForZuluGoCode;	
-
+var int m_iSubAction;  // contains the desired sub action to take...
+var int m_iRainbowTeamName;
+var int m_iTeamAction;
+// status flags
+var bool m_bLeaderIsAPlayer;  // the leader of this team is not an NPC (is a player)
+var bool m_bPlayerHasFocus;  // When the player is in observer mode on the current team
+var bool m_bPlayerInGhostMode;
+var bool m_bTeamIsClimbingLadder;  // team is in the process of climbing a ladder
+var bool m_bTeamIsSeparatedFromLeader;  // team was either told to hold position or to perform an action (e.g. climb ladder)
+var bool m_bGrenadeInProximity;  // frag grenade
+var bool m_bGasGrenadeInProximity;  // tear gas grenade
+// doors & room entry
+var bool m_bEntryInProgress;  // a room entry is in progress
+var bool m_bDoorOpensTowardTeam;
+var bool m_bDoorOpensClockWise;
+var bool m_bRainbowIsInFrontOfDoor;
+var bool m_bWoundedHostage;  // true if an escorted hostage is wounded
+var bool m_bCAWaitingForZuluGoCode;
 // Prevent using team for training
-var         BOOL                            m_bPreventUsingTeam;
-/*
-//
-// Bitflags.
-const	TEAM_None					= 0x00000;
-const	TEAM_Orders					= 0x00001;		// actions were received as orders from player and not initiated by AI (therefore requiring acknowledgement)
-	
-const	TEAM_OpenDoor				= 0x00010;
-const	TEAM_CloseDoor				= 0x00020;
-const	TEAM_Grenade				= 0x00040;
-const	TEAM_ClearRoom				= 0x00080;
-const	TEAM_Move					= 0x00100;
-const	TEAM_ClimbLadder			= 0x00200;
-const	TEAM_SecureTerrorist		= 0x00400;
-const	TEAM_EscortHostage			= 0x00800;
-const	TEAM_DisarmBomb				= 0x01000;
-const	TEAM_InteractDevice			= 0x02000;
-
-const	TEAM_OpenAndClear			= 0x00090;		// TEAM_OpenDoor | TEAM_ClearRoom;
-const	TEAM_OpenAndGrenade			= 0x00050;		// TEAM_OpenDoor | TEAM_Grenade;
-const	TEAM_OpenGrenadeAndClear	= 0x000d0;		// TEAM_OpenDoor | TEAM_ClearRoom | TEAM_Grenade;
-const	TEAM_GrenadeAndClear		= 0x000c0;		// TEAM_Grenade | TEAM_ClearRoom;
-const	TEAM_MoveAndGrenade			= 0x00140;		// TEAM_Move | TEAM_Grenade;
-//
-*/
-
-var		INT		m_iTeamAction;
-			
-var R6AbstractWeapon.eWeaponGrenadeType   m_eEntryGrenadeType;
-
-// Rules Of Engagement determines speed and hostility of unit
-var         eMovementMode					m_eMovementMode;                    // Rules Of Engagement
-var         eMovementSpeed					m_eMovementSpeed;
-var         ePlanAction						m_ePlanAction;
-var         actor       					m_PlanActionPoint;
-var         vector							m_vPlanActionLocation;
-var			array<R6InteractiveObject>		m_InteractiveObjectList;
-
-var			R6IORotatingDoor				m_BreachingDoor;
-var			EPlanAction						m_eNextAPAction;
-var			rotator							m_rSnipingDir;
-var			actor							m_LastActionPoint;
-var			R6Pawn							m_SurrenderedTerrorist;
-var			R6Pawn							m_HostageToRescue;
-var			bool							m_bSniperReady;
-var			bool							m_bSkipAction;
-var			bool							m_bWasSeparatedFromLeader;
-var			bool							m_bAllTeamsHold;
-var			bool							m_bTeamIsHoldingPosition;
-var			bool 							m_bSniperHold;
-var			bool							m_bTeamIsRegrouping;
-var			bool							m_bPlayerRequestedTeamReform;
-var			bool							m_bPendingSnipeUntilGoCode;
-
-var			vector							m_vPreviousPosition;
-
-var			EPlanAction						m_ePlayerAPAction;
-var			actor							m_PlayerLastActionPoint;
-
-var enum eTeamState
-{
-	TS_None,
-    TS_Waiting,		// + gocode
-    TS_Holding,
-    TS_Moving,
-	TS_Following,
-	TS_Regrouping,
-    TS_Engaging,
-	TS_Sniping,		// + gocode
-	TS_LockPicking,
-	TS_OpeningDoor,
-	TS_ClosingDoor,
-	TS_Opening,
-	TS_Closing,
-	TS_ClearingRoom,
-	TS_Grenading,
-	TS_DisarmingBomb,
-	TS_InteractWithDevice,	
-	TS_SecuringTerrorist,
-	TS_ClimbingLadder,
-	TS_WaitingForOrders,
-	TS_SettingBreach,
-	TS_Retired
-} m_eTeamState, m_eBackupTeamState;
-
-var			FLOAT					m_fEngagingTimer;
-var			bool					m_bTeamIsEngagingEnemy;
-var			vector					m_vNoiseSource;
-
-// GOCODE_Alpha, GOCODE_Bravo, GOCODE_Charlie, GOCODE_Delta, GOCODE_None
-var         eGoCode                 m_eGoCode;
-var			eGoCode					m_eBackupGoCode;
-
+var bool m_bPreventUsingTeam;
+var bool m_bSniperReady;
+var bool m_bSkipAction;
+var bool m_bWasSeparatedFromLeader;
+var bool m_bAllTeamsHold;
+var bool m_bTeamIsHoldingPosition;
+var bool m_bSniperHold;
+var bool m_bTeamIsRegrouping;
+var bool m_bPlayerRequestedTeamReform;
+var bool m_bPendingSnipeUntilGoCode;
+var bool m_bTeamIsEngagingEnemy;
 //#ifdefDEBUG	
-var         bool					bShowLog;
-var         BOOL                    bPlanningLog;
-//#endif
-
-var         BOOL                    m_bFirstTimeInGas;
+var bool bShowLog;
+var bool bPlanningLog;
+var bool m_bFirstTimeInGas;
+var float m_fEngagingTimer;
+// NEW IN 1.60
+var R6Rainbow m_Team[4];
+var R6GameColors Colors;
+var R6RainbowPlayerVoices m_PlayerVoicesMgr;
+var R6RainbowMemberVoices m_MemberVoicesMgr;
+var R6RainbowOtherTeamVoices m_OtherTeamVoicesMgr;
+var R6MultiCommonVoices m_MultiCommonVoicesMgr;
+var R6MultiCoopVoices m_MultiCoopPlayerVoicesMgr;
+var R6MultiCoopVoices m_MultiCoopMemberVoicesMgr;
+var R6PreRecordedMsgVoices m_PreRecMsgVoicesMgr;
+var R6Rainbow m_TeamLeader;
+var R6AbstractPlanningInfo m_TeamPlanning;
+var R6Pawn m_PawnControllingDoor;
+// ladder climbing
+var R6Ladder m_TeamLadder;
+var R6Door m_Door;  // reference to a door actor involved in a room entry
+var R6CircumstantialActionQuery m_actionRequested;
+var Actor m_PlanActionPoint;
+var R6IORotatingDoor m_BreachingDoor;
+var Actor m_LastActionPoint;
+var R6Pawn m_SurrenderedTerrorist;
+var R6Pawn m_HostageToRescue;
+var Actor m_PlayerLastActionPoint;
+var array<R6InteractiveObject> m_InteractiveObjectList;
+var Color m_TeamColour;
+// team info to maintain for members
+var Rotator m_rTeamDirection;  // rotator that maintains the direction of movement of the team leader
+var Vector m_vActionLocation;
+var Vector m_vPlanActionLocation;
+var Rotator m_rSnipingDir;
+var Vector m_vPreviousPosition;
+var Vector m_vNoiseSource;
 
 replication
 {
-    reliable if (Role == ROLE_Authority)
-        m_iMemberCount,m_TeamColour,m_iMembersLost,m_Team,m_bHasGrenade,m_eTeamState,m_eGoCode;
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_Team, m_TeamColour, 
+		m_bHasGrenade, m_eGoCode, 
+		m_eTeamState, m_iMemberCount, 
+		m_iMembersLost;
 
-	unreliable if (Role == ROLE_Authority)
+	// Pos:0x00D
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
 		m_bTeamIsClimbingLadder;
 
-    reliable if (Role == ROLE_Authority)
-        ClientUpdateFirstPersonWpnAndPeeking;
+	// Pos:0x01A
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		ClientUpdateFirstPersonWpnAndPeeking;
 
-    reliable if (Role < ROLE_Authority)
-        TeamActionRequest,TeamActionRequestFromRoseDesVents,TeamActionRequestWaitForZuluGoCode;
+	// Pos:0x027
+	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		TeamActionRequest, TeamActionRequestFromRoseDesVents, 
+		TeamActionRequestWaitForZuluGoCode;
 }
 
-function SetTeamState(eTeamState eNewState)
+function SetTeamState(R6RainbowTeam.eTeamState eNewState)
 {
-	//#ifdefDEBUG if(bShowLog) log(self$" New Team STate is : "$eNewState);	#endif
-    if((m_bLeaderIsAPlayer && m_iMemberCount == 1) || (!m_bLeaderIsAPlayer && m_iMemberCount == 0))
-        m_eTeamState = TS_Retired;
-    else
-    {
-		if(m_eTeamState != TS_Engaging)
-			m_eTeamState = eNewState;
-		else
-			m_eBackupTeamState = eNewState;
+	// End:0x3B
+	if(__NFUN_132__(__NFUN_130__(m_bLeaderIsAPlayer, __NFUN_154__(m_iMemberCount, 1)), __NFUN_130__(__NFUN_129__(m_bLeaderIsAPlayer), __NFUN_154__(m_iMemberCount, 0))))
+	{
+		m_eTeamState = 21;		
 	}
+	else
+	{
+		// End:0x59
+		if(__NFUN_155__(int(m_eTeamState), int(6)))
+		{
+			m_eTeamState = eNewState;			
+		}
+		else
+		{
+			m_eBackupTeamState = eNewState;
+		}
+	}
+	return;
 }
 
 function TeamIsSeparatedFromLead(bool bSeparated)
 {
-	if(m_iMemberCount <= 1)
+	// End:0x0D
+	if(__NFUN_152__(m_iMemberCount, 1))
+	{
 		return;
-
+	}
 	m_bTeamIsSeparatedFromLeader = bSeparated;
+	return;
 }
 
 function TeamIsRegroupingOnLead(bool bIsRegrouping)
 {
-    local bool bPreviousTeamIsRegrouping;
+	local bool bPreviousTeamIsRegrouping;
 
-    bPreviousTeamIsRegrouping = m_bTeamIsRegrouping;
-
-	if(m_bLeaderIsAPlayer && m_bPlayerRequestedTeamReform && m_bTeamIsRegrouping && !bIsRegrouping)
+	bPreviousTeamIsRegrouping = m_bTeamIsRegrouping;
+	// End:0x59
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_bLeaderIsAPlayer, m_bPlayerRequestedTeamReform), m_bTeamIsRegrouping), __NFUN_129__(bIsRegrouping)))
 	{
 		m_bPlayerRequestedTeamReform = false;
-		m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReformOnLead);
+		m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 5);
 	}
-
-	m_bTeamIsRegrouping	= bIsRegrouping;
+	m_bTeamIsRegrouping = bIsRegrouping;
 	TeamIsSeparatedFromLead(bIsRegrouping);
+	// End:0x83
 	if(bIsRegrouping)
-		SetTeamState(TS_Regrouping);
-
-	// if the team has regrouped
-    if ( !bIsRegrouping && bPreviousTeamIsRegrouping )
-    {
-        // update list of escorted hostage
-        Escort_ManageList();
-    }
+	{
+		SetTeamState(5);
+	}
+	// End:0x9F
+	if(__NFUN_130__(__NFUN_129__(bIsRegrouping), bPreviousTeamIsRegrouping))
+	{
+		Escort_ManageList();
+	}
+	return;
 }
 
 simulated event Destroyed()
 {
-    if ( m_ActionRequested != none )
-    {
-        m_ActionRequested.destroy();
-        m_ActionRequested = none;
-    }
-    
-    Super.Destroyed();
-} 
+	// End:0x1E
+	if(__NFUN_119__(m_actionRequested, none))
+	{
+		m_actionRequested.__NFUN_279__();
+		m_actionRequested = none;
+	}
+	super.Destroyed();
+	return;
+}
 
 event PostBeginPlay()
 {
-	local R6InteractiveObject  IntObject;
-	
-	Super.PostBeginPlay();
+	local R6InteractiveObject IntObject;
 
-	// prepare a list of InteractiveObjects in this map, AI team leader will check these actors periodically 
-	// to determine whether they are close enough to interact with them. (ignore doors)
-	foreach AllActors( class'R6InteractiveObject', IntObject )
+	super.PostBeginPlay();
+	// End:0x3B
+	foreach __NFUN_304__(Class'R6Engine.R6InteractiveObject', IntObject)
 	{
-		if( IntObject.m_bRainbowCanInteract )
+		// End:0x3A
+		if(IntObject.m_bRainbowCanInteract)
 		{
-			#ifdefDEBUG if(bShowLog) log(self$" add IntObject="$IntObject$" to list of interactive objects ");	#endif
-			m_InteractiveObjectList[m_InteractiveObjectList.length] = IntObject;
-		}
-	}
-	m_ActionRequested = Spawn(class'R6CircumstantialActionQuery');
+			m_InteractiveObjectList[m_InteractiveObjectList.Length] = IntObject;
+		}		
+	}	
+	m_actionRequested = __NFUN_278__(Class'R6Engine.R6CircumstantialActionQuery');
+	return;
 }
 
 //------------------------------------------------------------------
@@ -289,7 +274,8 @@ event PostBeginPlay()
 //------------------------------------------------------------------
 simulated event PostNetBeginPlay()
 {
-    Colors = new(None) class'R6GameColors';
+	Colors = new (none) Class'Engine.R6GameColors';
+	return;
 }
 
 //------------------------------------------------------------------
@@ -297,130 +283,151 @@ simulated event PostNetBeginPlay()
 //  used in multiplayer
 //	create the team member base on the player controller
 //------------------------------------------------------------------
-function CreateMPPlayerTeam(PlayerController myPlayer, R6RainbowStartInfo info, INT iMemberCount, PlayerStart start)
+function CreateMPPlayerTeam(PlayerController MyPlayer, R6RainbowStartInfo Info, int iMemberCount, PlayerStart Start)
 {
-    local INT i;
-	local INT iMembersToSpawn;
+	local int i, iMembersToSpawn;
 
-    if(m_iMemberCount > 0)
-        return;   // team already exists...
-
-	#ifdefDEBUG if(bShowLog) log(self$" CreateMPPlayerTeam() for " $myPlayer$ " with iMemberCount ="$iMemberCount);	#endif
-    m_bLeaderIsAPlayer = true;
-	m_Team[0] = R6Rainbow(myPlayer.pawn);
-    m_TeamLeader = m_Team[0];
-	m_iTeamHealth[0] = 0;
-    m_iMemberCount=1;
-    m_Team[0].m_FaceTexture = info.m_FaceTexture;
-    m_Team[0].m_FaceCoords = info.m_FaceCoords;
-
-	#ifdefDEBUG
-	if(bShowLog) log(self$"CreateMPPlayerTeam: m_CharacterName=" $info.m_CharacterName$ " m_ArmorName=" $info.m_ArmorName$ " m_WeaponName" $info.m_WeaponName[0] );
-	if(bShowLog) log(self$"CreateMPPlayerTeam: -- WGadget0="$info.m_WeaponGadgetName[0]$" WGadget1="$info.m_WeaponGadgetName[1]);
-	if(bShowLog) log(self$"CreateMPPlayerTeam: -- Gadget0="$info.m_GadgetName[0]$" Gadget1="$info.m_GadgetName[1]);
-	#endif
-	for(i=1; i < iMemberCount; i++)
+	// End:0x0D
+	if(__NFUN_151__(m_iMemberCount, 0))
 	{
-		CreateTeamMember(info, start, false);
-		m_iTeamHealth[i] = 0;
+		return;
 	}
-    UpdateTeamGrenadeStatus();
-    info.destroy();
+	m_bLeaderIsAPlayer = true;
+	m_Team[0] = R6Rainbow(MyPlayer.Pawn);
+	m_TeamLeader = m_Team[0];
+	m_iTeamHealth[0] = 0;
+	m_iMemberCount = 1;
+	m_Team[0].m_FaceTexture = Info.m_FaceTexture;
+	m_Team[0].m_FaceCoords = Info.m_FaceCoords;
+	i = 1;
+	J0x92:
+
+	// End:0xC9 [Loop If]
+	if(__NFUN_150__(i, iMemberCount))
+	{
+		CreateTeamMember(Info, Start, false);
+		m_iTeamHealth[i] = 0;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x92;
+	}
+	UpdateTeamGrenadeStatus();
+	Info.__NFUN_279__();
+	return;
 }
 
-function SetMultiVoicesMgr(R6AbstractGameInfo aGameInfo, INT iTeamNumber, INT iMemberCount)
+function SetMultiVoicesMgr(R6AbstractGameInfo aGameInfo, int iTeamNumber, int iMemberCount)
 {
-    local BOOL bCoopGameType;
+	local bool bCoopGameType;
 
-    m_MultiCommonVoicesMgr = none;
-    m_MultiCoopPlayerVoicesMgr = none;
-    m_MultiCoopMemberVoicesMgr = none;
-    m_PreRecMsgVoicesMgr = none;
-
-    bCoopGameType = Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag);
-
-    if (bCoopGameType || Level.IsGameTypeTeamAdversarial(Level.Game.m_szGameTypeFlag))
-    {
-        m_MultiCommonVoicesMgr = R6MultiCommonVoices(aGameInfo.GetMultiCommonVoicesMgr());
-        m_PreRecMsgVoicesMgr = R6PreRecordedMsgVoices(aGameInfo.GetPreRecordedMsgVoicesMgr());
-    }
-    
-
-    if (bCoopGameType || (Level.IsGameTypePlayWithNonRainbowNPCs(Level.Game.m_szGameTypeFlag)))
-        SetVoicesMgr(aGameInfo, true, true);
-
-    if (bCoopGameType)
-    {
-        //log("**** SetMultiVoicesMgr Level.Game.CurrentID =" @ Level.Game.CurrentID @ Level.Game.Default.CurrentID);
-        m_MultiCoopPlayerVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopPlayerVoicesMgr(Level.Game.CurrentID - Level.Game.Default.CurrentID));
-        if (iMemberCount > 1)
-            m_MultiCoopMemberVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopMemberVoicesMgr());
-    }
+	m_MultiCommonVoicesMgr = none;
+	m_MultiCoopPlayerVoicesMgr = none;
+	m_MultiCoopMemberVoicesMgr = none;
+	m_PreRecMsgVoicesMgr = none;
+	bCoopGameType = Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag);
+	// End:0xB1
+	if(__NFUN_132__(bCoopGameType, Level.IsGameTypeTeamAdversarial(Level.Game.m_szGameTypeFlag)))
+	{
+		m_MultiCommonVoicesMgr = R6MultiCommonVoices(aGameInfo.GetMultiCommonVoicesMgr());
+		m_PreRecMsgVoicesMgr = R6PreRecordedMsgVoices(aGameInfo.GetPreRecordedMsgVoicesMgr());
+	}
+	// End:0xF2
+	if(__NFUN_132__(bCoopGameType, Level.IsGameTypePlayWithNonRainbowNPCs(Level.Game.m_szGameTypeFlag)))
+	{
+		SetVoicesMgr(aGameInfo, true, true);
+	}
+	// End:0x16A
+	if(bCoopGameType)
+	{
+		m_MultiCoopPlayerVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopPlayerVoicesMgr(__NFUN_147__(Level.Game.CurrentID, Level.Game.default.CurrentID)));
+		// End:0x16A
+		if(__NFUN_151__(iMemberCount, 1))
+		{
+			m_MultiCoopMemberVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopMemberVoicesMgr());
+		}
+	}
+	return;
 }
+
 //------------------------------------------------------------------//
 // SetVoicesMgr()												    //
 //------------------------------------------------------------------//
-function SetVoicesMgr(R6AbstractGameInfo aGameInfo, BOOL bPlayerTeamStart, BOOL bPlayerInTeam, optional INT iIDVoicesMgr, optional BOOL bInGhostMode)
+function SetVoicesMgr(R6AbstractGameInfo aGameInfo, bool bPlayerTeamStart, bool bPlayerInTeam, optional int iIDVoicesMgr, optional bool bInGhostMode)
 {
-    m_PlayerVoicesMgr=none;
-    m_MemberVoicesMgr=none;
-    m_OtherTeamVoicesMgr=none;
-
-    m_bPlayerInGhostMode = bInGhostMode;
-    if (!bPlayerTeamStart && bPlayerInTeam)
-        m_bPlayerHasFocus = true;
-    else
-        m_bPlayerHasFocus = false;
-
-    m_PlayerVoicesMgr = R6RainbowPlayerVoices( aGameInfo.GetRainbowPlayerVoicesMgr() );
-
-    if (bPlayerTeamStart)
-    {
-        if (m_iMemberCount > 1)
-        {
-            // Create the 3rd person voice
-            m_MemberVoicesMgr = R6RainbowMemberVoices( aGameInfo.GetRainbowMemberVoicesMgr() );
-        }
-    }
-    else if (m_bPlayerHasFocus && !m_bPlayerInGhostMode)
-    {
-        m_MemberVoicesMgr = R6RainbowMemberVoices( aGameInfo.GetRainbowMemberVoicesMgr() );
-        m_MultiCoopMemberVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopMemberVoicesMgr());
-    }
-    else
-    {
-        if (m_iMemberCount > 1)
-        {
-            // Create the Member voices manager if is not created but not associate it
-            aGameInfo.GetRainbowMemberVoicesMgr();
-            aGameInfo.GetCommonRainbowMemberVoicesMgr();
-        }
-        m_iIDVoicesMgr = iIDVoicesMgr;
-        m_OtherTeamVoicesMgr = R6RainbowOtherTeamVoices( aGameInfo.GetRainbowOtherTeamVoicesMgr(iIDVoicesMgr) );
-    }
-
+	m_PlayerVoicesMgr = none;
+	m_MemberVoicesMgr = none;
+	m_OtherTeamVoicesMgr = none;
+	m_bPlayerInGhostMode = bInGhostMode;
+	// End:0x43
+	if(__NFUN_130__(__NFUN_129__(bPlayerTeamStart), bPlayerInTeam))
+	{
+		m_bPlayerHasFocus = true;		
+	}
+	else
+	{
+		m_bPlayerHasFocus = false;
+	}
+	m_PlayerVoicesMgr = R6RainbowPlayerVoices(aGameInfo.GetRainbowPlayerVoicesMgr());
+	// End:0x96
+	if(bPlayerTeamStart)
+	{
+		// End:0x93
+		if(__NFUN_151__(m_iMemberCount, 1))
+		{
+			m_MemberVoicesMgr = R6RainbowMemberVoices(aGameInfo.GetRainbowMemberVoicesMgr());
+		}		
+	}
+	else
+	{
+		// End:0xE3
+		if(__NFUN_130__(m_bPlayerHasFocus, __NFUN_129__(m_bPlayerInGhostMode)))
+		{
+			m_MemberVoicesMgr = R6RainbowMemberVoices(aGameInfo.GetRainbowMemberVoicesMgr());
+			m_MultiCoopMemberVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopMemberVoicesMgr());			
+		}
+		else
+		{
+			// End:0x10C
+			if(__NFUN_151__(m_iMemberCount, 1))
+			{
+				aGameInfo.GetRainbowMemberVoicesMgr();
+				aGameInfo.GetCommonRainbowMemberVoicesMgr();
+			}
+			m_iIDVoicesMgr = iIDVoicesMgr;
+			m_OtherTeamVoicesMgr = R6RainbowOtherTeamVoices(aGameInfo.GetRainbowOtherTeamVoicesMgr(iIDVoicesMgr));
+		}
+	}
+	return;
 }
+
 //------------------------------------------------------------------//
 // CreatePlayerTeam()												//
 //------------------------------------------------------------------//
 function CreatePlayerTeam(R6TeamStartInfo TeamInfo, NavigationPoint StartingPoint, PlayerController aRainbowPC)
 {
-    local INT i;
+	local int i;
 
-    if(m_iMemberCount > 0)
-        return;   // team already exists...
-
-    m_bLeaderIsAPlayer = true;
-    m_iMemberCount=0;
-
-	#ifdefDEBUG if(bShowLog) log(self$"  CREATEPLAYERTEAM() : iMembersToSpawn="$TeamInfo.m_iNumberOfMembers);	#endif
-
-	for(i=0; i < TeamInfo.m_iNumberOfMembers; i++)
+	// End:0x0D
+	if(__NFUN_151__(m_iMemberCount, 0))
 	{
-		CreateTeamMember(TeamInfo.m_CharacterInTeam[i], StartingPoint, m_iMemberCount == 0, R6PlayerController(aRainbowPC));
+		return;
+	}
+	m_bLeaderIsAPlayer = true;
+	m_iMemberCount = 0;
+	i = 0;
+	J0x23:
+
+	// End:0x9F [Loop If]
+	if(__NFUN_150__(i, TeamInfo.m_iNumberOfMembers))
+	{
+		CreateTeamMember(TeamInfo.m_CharacterInTeam[i], StartingPoint, __NFUN_154__(m_iMemberCount, 0), R6PlayerController(aRainbowPC));
 		m_iTeamHealth[i] = TeamInfo.m_CharacterInTeam[i].m_iHealth;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x23;
 	}
 	UpdateTeamGrenadeStatus();
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -428,258 +435,285 @@ function CreatePlayerTeam(R6TeamStartInfo TeamInfo, NavigationPoint StartingPoin
 //------------------------------------------------------------------//
 function CreateAITeam(R6TeamStartInfo TeamInfo, NavigationPoint StartingPoint)
 {
-    local INT i;
+	local int i;
 
-    if(m_iMemberCount > 0)
-        return;   // team already exists...
+	// End:0x0D
+	if(__NFUN_151__(m_iMemberCount, 0))
+	{
+		return;
+	}
+	m_bLeaderIsAPlayer = false;
+	m_TeamLeader = none;
+	m_iMemberCount = 0;
+	i = 0;
+	J0x2A:
 
-    m_bLeaderIsAPlayer = false;
-    m_TeamLeader = none;
-    m_iMemberCount=0;
-
-	for(i=0; i<TeamInfo.m_iNumberOfMembers; i++)
-    {
+	// End:0x95 [Loop If]
+	if(__NFUN_150__(i, TeamInfo.m_iNumberOfMembers))
+	{
 		CreateTeamMember(TeamInfo.m_CharacterInTeam[i], StartingPoint, false);
-        m_iTeamHealth[i] = TeamInfo.m_CharacterInTeam[i].m_iHealth;
-    }
+		m_iTeamHealth[i] = TeamInfo.m_CharacterInTeam[i].m_iHealth;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x2A;
+	}
 	UpdateTeamGrenadeStatus();
+	return;
 }
 
 //------------------------------------------------------------------//
 // CreateTeamMember()												//
 //------------------------------------------------------------------//
-function CreateTeamMember(R6RainbowStartInfo RainbowToCreate, NavigationPoint StartingPoint, optional BOOL bPlayer, optional R6PlayerController RainbowPC)
+function CreateTeamMember(R6RainbowStartInfo RainbowToCreate, NavigationPoint StartingPoint, optional bool bPlayer, optional R6PlayerController RainbowPC)
 {
-    local R6RainbowAI           rainbowAI;
-    local vector                vOriginStart;
-    local vector                vStart;
-    local class<R6Rainbow>      rainbowPawnClass;
-    local R6Rainbow             rainbow;
-    local INT                   iSpawnTry;
-    local rotator               rPosOrientation;
-    local rotator               rStartingPointRot;
-			
-    if (Level.NetMode == NM_Client)     // should only be called by server
-        return;
+	local R6RainbowAI rainbowAI;
+	local Vector vOriginStart, vStart;
+	local Class<R6Rainbow> rainbowPawnClass, armorClass;
+	local R6Rainbow Rainbow;
+	local int iSpawnTry;
+	local Rotator rPosOrientation, rStartingPointRot;
 
-    // spawn team in a diamond formation (to save space) using the spawn point's orientation...
-// how are we doing m_TeamPlanning in MP
-// For now accessing none
-    if( Level.NetMode == NM_Standalone &&
-        m_TeamPlanning.m_NodeList.length != 0)
-    {
+	// End:0x1B
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	{
+		return;
+	}
+	// End:0x8C
+	if(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_155__(m_TeamPlanning.m_NodeList.Length, 0)))
+	{
 		vOriginStart = m_TeamPlanning.m_NodeList[0].Location;
-        rStartingPointRot = m_TeamPlanning.m_NodeList[0].rotation;
-    }
-    else
-    {
-        vOriginStart = StartingPoint.Location;
-        rStartingPointRot = StartingPoint.rotation;
-    }
-    rStartingPointRot.Roll = 0;
+		rStartingPointRot = m_TeamPlanning.m_NodeList[0].Rotation;		
+	}
+	else
+	{
+		vOriginStart = StartingPoint.Location;
+		rStartingPointRot = StartingPoint.Rotation;
+	}
+	rStartingPointRot.Roll = 0;
+	iSpawnTry = 0;
+	J0xC7:
 
-/*
-    spawning position based on spawn try value
-    ---------------------
-    | 19| 20| 21| 22| 23|
-    ---------------------
-    ! 18| 6 | 7 | 8 | 24|
-    ---------------------  / \
-    ! 17| 5 | 0 | 1 | 9 |   |
-    ---------------------   |  Zone orientation
-    ! 16| 4 | 3 | 2 | 10|
-    ---------------------   
-    | 15| 14| 13| 12| 11|
-    ---------------------
-*/
-    iSpawnTry=0;
-    while( iSpawnTry != -1)
-    {
-        if(iSpawnTry == 0)
-        {
-            vStart = vOriginStart;
-        }
-        else if(iSpawnTry < 8)
-        {
-            rPosOrientation = rStartingPointRot;
-            rPosOrientation.Yaw += 32768 + 8192*(iSpawnTry + 1);
-            if( (iSpawnTry == 1) || (iSpawnTry == 3) || (iSpawnTry == 5) || (iSpawnTry == 7))
-            {
-	            vStart = vOriginStart - (m_iSpawnDistance * vector(rPosOrientation));
-            }
-            else
-            {
-	            vStart = vOriginStart - (m_iSpawnDiagDist * vector(rPosOrientation));
-            }
-        }
-        else if(iSpawnTry < 24)
-        {
-            rPosOrientation = rStartingPointRot;
-            rPosOrientation.Yaw += 32768 + 16384 + 4096 * (iSpawnTry-9);
-            if( (iSpawnTry == 9) || (iSpawnTry == 13) || (iSpawnTry == 17) || (iSpawnTry == 21))
-            {
-	            vStart = vOriginStart - (m_iSpawnDistance * 2 * vector(rPosOrientation));
-            }
-            else if( (iSpawnTry == 11) || (iSpawnTry == 15) || (iSpawnTry == 19) || (iSpawnTry == 23))
-            {
-	            vStart = vOriginStart - (m_iSpawnDiagDist * 2 * vector(rPosOrientation));
-            }
-            else
-            {
-	            vStart = vOriginStart - (m_iSpawnDiagOther * vector(rPosOrientation));
-            }
-        }
-        else
-        {
-            log("    Rainbow6    <R6GameInfo::CreateTeamMember> attempt to create a rainbow member failed!!");
-            return;
-        }
-
-        if(iSpawnTry ==0) // go in this section only once
-        {
-         
-			if(RainbowToCreate == none)
+	// End:0x7B9 [Loop If]
+	if(__NFUN_155__(iSpawnTry, -1))
+	{
+		// End:0xEF
+		if(__NFUN_154__(iSpawnTry, 0))
+		{
+			vStart = vOriginStart;			
+		}
+		else
+		{
+			// End:0x19D
+			if(__NFUN_150__(iSpawnTry, 8))
 			{
-				#ifdefDEBUG if(bShowLog) log(self$" CreateTeamMember() : RainbowToCreate is none ... ");	#endif
+				rPosOrientation = rStartingPointRot;
+				__NFUN_161__(rPosOrientation.Yaw, __NFUN_146__(32768, __NFUN_144__(8192, __NFUN_146__(iSpawnTry, 1))));
+				// End:0x17D
+				if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(iSpawnTry, 1), __NFUN_154__(iSpawnTry, 3)), __NFUN_154__(iSpawnTry, 5)), __NFUN_154__(iSpawnTry, 7)))
+				{
+					vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(m_iSpawnDistance), Vector(rPosOrientation)));					
+				}
+				else
+				{
+					vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(m_iSpawnDiagDist), Vector(rPosOrientation)));
+				}				
+			}
+			else
+			{
+				// End:0x2B2
+				if(__NFUN_150__(iSpawnTry, 24))
+				{
+					rPosOrientation = rStartingPointRot;
+					__NFUN_161__(rPosOrientation.Yaw, __NFUN_146__(__NFUN_146__(32768, 16384), __NFUN_144__(4096, __NFUN_147__(iSpawnTry, 9))));
+					// End:0x238
+					if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(iSpawnTry, 9), __NFUN_154__(iSpawnTry, 13)), __NFUN_154__(iSpawnTry, 17)), __NFUN_154__(iSpawnTry, 21)))
+					{
+						vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(__NFUN_144__(m_iSpawnDistance, 2)), Vector(rPosOrientation)));						
+					}
+					else
+					{
+						// End:0x292
+						if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(iSpawnTry, 11), __NFUN_154__(iSpawnTry, 15)), __NFUN_154__(iSpawnTry, 19)), __NFUN_154__(iSpawnTry, 23)))
+						{
+							vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(__NFUN_144__(m_iSpawnDiagDist, 2)), Vector(rPosOrientation)));							
+						}
+						else
+						{
+							vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(m_iSpawnDiagOther), Vector(rPosOrientation)));
+						}
+					}					
+				}
+				else
+				{
+					__NFUN_231__("    Rainbow6    <R6GameInfo::CreateTeamMember> attempt to create a rainbow member failed!!");
+					return;
+				}
+			}
+		}
+		// End:0x4A5
+		if(__NFUN_154__(iSpawnTry, 0))
+		{
+			// End:0x32A
+			if(__NFUN_114__(RainbowToCreate, none))
+			{
 				return;
 			}
-
-	        if(RainbowToCreate.m_ArmorName == "")
-	        {
-		        #ifdefDEBUG if(bShowLog) log(self$" Rainbow Armor Class name is none ... ");	#endif
-		        return;
-	        }
-
-	        #ifdefDEBUG if(bShowLog) log(self$" Rainbow Class name is now...  RainbowToCreate.m_ArmorName="$RainbowToCreate.m_ArmorName);	#endif
-            rainbowPawnClass = class<R6Rainbow>(DynamicLoadObject(RainbowToCreate.m_ArmorName, class'Class'));
-			rainbowPawnClass.Default.m_iOperativeID = RainbowToCreate.m_iOperativeID;
-			rainbowPawnClass.Default.bIsFemale = !RainbowToCreate.m_bIsMale;
-        }
-
-        #ifdefDEBUG if(bShowLog) log(self$"CreateTeamMember: " $rainbowPawnClass$ " m_iSpawnDistance=" $m_iSpawnDistance$ " vStart=" $vStart$ " rotation=" $StartingPoint.rotation );	#endif
-        rainbow = Spawn(rainbowPawnClass,,, vStart, rStartingPointRot,false);
-        if(rainbow == none)
-        {
-            iSpawnTry++;
-	    }
-        else
-        {
-            rainbow.m_szPrimaryWeapon = RainbowToCreate.m_WeaponName[0];
-            rainbow.m_szPrimaryGadget = RainbowToCreate.m_WeaponGadgetName[0];
-            rainbow.m_szPrimaryBulletType = RainbowToCreate.m_BulletType[0];
-            rainbow.m_szSecondaryWeapon = RainbowToCreate.m_WeaponName[1];
-            rainbow.m_szSecondaryGadget = RainbowToCreate.m_WeaponGadgetName[1];
-            rainbow.m_szSecondaryBulletType = RainbowToCreate.m_BulletType[1];
-
-            rainbow.m_szPrimaryItem  = RainbowToCreate.m_GadgetName[0];
-            rainbow.m_szSecondaryItem = RainbowToCreate.m_GadgetName[1];
-			rainbow.m_szSpecialityID = RainbowToCreate.m_szSpecialityID;
-
-            rainbow.m_FaceTexture = RainbowToCreate.m_FaceTexture;
-            rainbow.m_FaceCoords = RainbowToCreate.m_FaceCoords;
-	
-			if(Level.NetMode == NM_Standalone)
+			// End:0x341
+			if(__NFUN_122__(RainbowToCreate.m_ArmorName, ""))
 			{
-				rainbow.m_fSkillAssault	 = RainbowToCreate.m_fSkillAssault;
-				rainbow.m_fSkillDemolitions = RainbowToCreate.m_fSkillDemolitions;
-				rainbow.m_fSkillElectronics = RainbowToCreate.m_fSkillElectronics;
-				rainbow.m_fSkillSniper		 = RainbowToCreate.m_fSkillSniper;
-				rainbow.m_fSkillStealth	 = RainbowToCreate.m_fSkillStealth;
-				rainbow.m_fSkillSelfControl = RainbowToCreate.m_fSkillSelfControl;
-				rainbow.m_fSkillLeadership	 = RainbowToCreate.m_fSkillLeadership;
-				rainbow.m_fSkillObservation = RainbowToCreate.m_fSkillObservation;
+				return;
 			}
-
-            switch(RainbowToCreate.m_iHealth)
-            {
-		        case 0:
-			        rainbow.m_eHealth = HEALTH_Healthy;
-			        break;
-		        case 1:
-			        rainbow.m_eHealth = HEALTH_Wounded;
-			        break;
-		        case 2: //Should not happen
-			        rainbow.m_eHealth = HEALTH_Incapacitated;
-			        break;
-		        case 3: //Should not happen
-			        rainbow.m_eHealth = HEALTH_Dead;
-			        break;
-		        default :
-			        rainbow.m_eHealth = HEALTH_Healthy;        
-            }
-			
-            #ifdefDEBUG if(bShowLog) log(self$"  Team member spawned on try :"$iSpawnTry);		#endif
-            iSpawnTry=-1; // minus 1 is to get out of the loop
-        }
-    }
-
-	rainbow.m_vStartLocation = vStart;
-	rainbow.m_CharacterName = RainbowToCreate.m_CharacterName;
- 
-    if (bPlayer)
-    {
-        if (Level.NetMode == NM_Standalone)
-        {
-            RainbowPC.SetLocation(vStart);
-            R6AbstractGameInfo(level.game).m_Player = rainbowPC;
-            RainbowPC.m_CurrentVolumeSound = rainbow.m_CurrentVolumeSound;
-            rainbowPC.Possess(rainbow);
-            rainbowPC.GameReplicationInfo = Level.Game.GameReplicationInfo;
-            rainbow.controller = rainbowPC;
-            rainbowPC.focus = none;
-            
-            //Set the starting point info for the sound (To know which ambience hsould be play if we switch to this player)
-            RainbowPC.m_CurrentAmbianceObject = rainbow.Region.Zone;
-        }
-    }
-    else
-    {
-		if(Level.NetMode == NM_Standalone)
-			rainbowAI = spawn(class'R6RainbowAI',,, vStart, StartingPoint.rotation);
+			armorClass = Class<R6Rainbow>(DynamicLoadObject(RainbowToCreate.m_ArmorName, Class'Core.Class'));
+			// End:0x436
+			if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+			{
+				Level.GreenTeamSkin = armorClass.default.Skins[0];
+				Level.GreenHeadSkin = armorClass.default.Skins[1];
+				Level.GreenGogglesSkin = armorClass.default.Skins[2];
+				Level.GreenHandSkin = armorClass.default.Skins[5];
+				Level.GreenMesh = armorClass.default.Mesh;
+				Level.GreenHelmet = armorClass.default.m_HelmetClass;
+			}
+			rainbowPawnClass = Class<R6Rainbow>(Class'Engine.Actor'.static.__NFUN_1524__().GetDefaultRainbowPawn(int(armorClass.default.m_eArmorType)));
+			rainbowPawnClass.default.m_iOperativeID = RainbowToCreate.m_iOperativeID;
+			rainbowPawnClass.default.bIsFemale = __NFUN_129__(RainbowToCreate.m_bIsMale);
+		}
+		Rainbow = __NFUN_278__(rainbowPawnClass,,, vStart, rStartingPointRot, false);
+		// End:0x4D5
+		if(__NFUN_114__(Rainbow, none))
+		{
+			__NFUN_165__(iSpawnTry);			
+		}
 		else
+		{
+			Rainbow.m_szPrimaryWeapon = RainbowToCreate.m_WeaponName[0];
+			Rainbow.m_szPrimaryGadget = RainbowToCreate.m_WeaponGadgetName[0];
+			Rainbow.m_szPrimaryBulletType = RainbowToCreate.m_BulletType[0];
+			Rainbow.m_szSecondaryWeapon = RainbowToCreate.m_WeaponName[1];
+			Rainbow.m_szSecondaryGadget = RainbowToCreate.m_WeaponGadgetName[1];
+			Rainbow.m_szSecondaryBulletType = RainbowToCreate.m_BulletType[1];
+			Rainbow.m_szPrimaryItem = RainbowToCreate.m_GadgetName[0];
+			Rainbow.m_szSecondaryItem = RainbowToCreate.m_GadgetName[1];
+			Rainbow.m_szSpecialityID = RainbowToCreate.m_szSpecialityID;
+			Rainbow.m_FaceTexture = RainbowToCreate.m_FaceTexture;
+			Rainbow.m_FaceCoords = RainbowToCreate.m_FaceCoords;
+			// End:0x725
+			if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+			{
+				Rainbow.m_fSkillAssault = RainbowToCreate.m_fSkillAssault;
+				Rainbow.m_fSkillDemolitions = RainbowToCreate.m_fSkillDemolitions;
+				Rainbow.m_fSkillElectronics = RainbowToCreate.m_fSkillElectronics;
+				Rainbow.m_fSkillSniper = RainbowToCreate.m_fSkillSniper;
+				Rainbow.m_fSkillStealth = RainbowToCreate.m_fSkillStealth;
+				Rainbow.m_fSkillSelfControl = RainbowToCreate.m_fSkillSelfControl;
+				Rainbow.m_fSkillLeadership = RainbowToCreate.m_fSkillLeadership;
+				Rainbow.m_fSkillObservation = RainbowToCreate.m_fSkillObservation;
+			}
+			switch(RainbowToCreate.m_iHealth)
+			{
+				// End:0x74D
+				case 0:
+					Rainbow.m_eHealth = 0;
+					// End:0x7AB
+					break;
+				// End:0x765
+				case 1:
+					Rainbow.m_eHealth = 1;
+					// End:0x7AB
+					break;
+				// End:0x77E
+				case 2:
+					Rainbow.m_eHealth = 2;
+					// End:0x7AB
+					break;
+				// End:0x797
+				case 3:
+					Rainbow.m_eHealth = 3;
+					// End:0x7AB
+					break;
+				// End:0xFFFF
+				default:
+					Rainbow.m_eHealth = 0;
+					break;
+			}
+			iSpawnTry = -1;
+		}
+		// [Loop Continue]
+		goto J0xC7;
+	}
+	Rainbow.m_vStartLocation = vStart;
+	Rainbow.m_CharacterName = RainbowToCreate.m_CharacterName;
+	// End:0x8DF
+	if(bPlayer)
+	{
+		// End:0x8DC
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		{
+			RainbowPC.__NFUN_267__(vStart);
+			R6AbstractGameInfo(Level.Game).m_Player = RainbowPC;
+			RainbowPC.m_CurrentVolumeSound = Rainbow.m_CurrentVolumeSound;
+			RainbowPC.Possess(Rainbow);
+			RainbowPC.GameReplicationInfo = Level.Game.GameReplicationInfo;
+			Rainbow.Controller = RainbowPC;
+			RainbowPC.Focus = none;
+			RainbowPC.m_CurrentAmbianceObject = Rainbow.Region.Zone;
+		}		
+	}
+	else
+	{
+		// End:0x934
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		{
+			rainbowAI = R6RainbowAI(__NFUN_278__(Class'Engine.Actor'.static.__NFUN_1524__().GetDefaultRainbowAI(),,, vStart, StartingPoint.Rotation));			
+		}
+		else
+		{
 			rainbowAI = R6RainbowAI(R6AbstractGameInfo(Level.Game).GetRainbowAIFromTable());
-		rainbowAI.Possess(rainbow);		
-        rainbow.controller = rainbowAI;
-        rainbowAI.focus = none;
-    }
-
-    m_Team[m_iMemberCount] = rainbow; 
-
-    if(m_TeamLeader == none)
-    {          
-        m_TeamLeader = rainbow;
-        if(!bPlayer)
-        {
-            rainbowAI.m_TeamLeader = none;	
-			rainbowAI.nextState = 'Patrol';	
-            rainbowAI.GotoState('WaitForGameToStart');		
-        }
-		GetFirstActionPoint();
-    }
-    else
-    {                
-        rainbowAI.m_TeamLeader = m_TeamLeader;		
-		rainbowAI.nextState = 'FollowLeader';
-        rainbowAI.GotoState('WaitForGameToStart');
-    }
-
-    if(bPlayer)
-    {
-        if (Level.NetMode == NM_Standalone)
-        {
-            rainbowPC.SetRotation(StartingPoint.rotation);
-            rainbowPC.m_TeamManager = self;
-        }
-    }
-    else
-    {
-        rainbowAI.SetRotation(StartingPoint.rotation);
-        rainbowAI.m_TeamManager = self;
-    }
-    rainbow.m_iID = m_iMemberCount;
-    rainbow.m_iPermanentID = rainbow.m_iID;
-    m_iMemberCount++;
-	rainbow.GiveDefaultWeapon();
+		}
+		rainbowAI.Possess(Rainbow);
+		Rainbow.Controller = rainbowAI;
+		rainbowAI.Focus = none;
+	}
+	m_Team[m_iMemberCount] = Rainbow;
+	// End:0xA03
+	if(__NFUN_114__(m_TeamLeader, none))
+	{
+		m_TeamLeader = Rainbow;
+		// End:0x9FA
+		if(__NFUN_129__(bPlayer))
+		{
+			rainbowAI.m_TeamLeader = none;
+			rainbowAI.NextState = 'Patrol';
+			rainbowAI.__NFUN_113__('WaitForGameToStart');
+		}
+		GetFirstActionPoint();		
+	}
+	else
+	{
+		rainbowAI.m_TeamLeader = m_TeamLeader;
+		rainbowAI.NextState = 'FollowLeader';
+		rainbowAI.__NFUN_113__('WaitForGameToStart');
+	}
+	// End:0xA8A
+	if(bPlayer)
+	{
+		// End:0xA87
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		{
+			RainbowPC.__NFUN_299__(StartingPoint.Rotation);
+			RainbowPC.m_TeamManager = self;
+		}		
+	}
+	else
+	{
+		rainbowAI.__NFUN_299__(StartingPoint.Rotation);
+		rainbowAI.m_TeamManager = self;
+	}
+	Rainbow.m_iID = m_iMemberCount;
+	Rainbow.m_iPermanentID = Rainbow.m_iID;
+	__NFUN_165__(m_iMemberCount);
+	Rainbow.GiveDefaultWeapon();
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -689,17 +723,28 @@ function CreateTeamMember(R6RainbowStartInfo RainbowToCreate, NavigationPoint St
 //------------------------------------------------------------------//
 function ResetRainbowTeam()
 {
-	local INT i;
+	local int i;
 
-	m_bTeamIsClimbingLadder = false;            
+	m_bTeamIsClimbingLadder = false;
 	m_bEntryInProgress = false;
 	m_bRainbowIsInFrontOfDoor = false;
-
-	if(m_iMemberCount <= 1)
+	// End:0x25
+	if(__NFUN_152__(m_iMemberCount, 1))
+	{
 		return;
+	}
+	i = 1;
+	J0x2C:
 
-	for(i=1; i<m_iMemberCount; i++)
-		m_Team[i].controller.GotoState('FollowLeader');
+	// End:0x64 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		m_Team[i].Controller.__NFUN_113__('FollowLeader');
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x2C;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -707,10 +752,13 @@ function ResetRainbowTeam()
 //------------------------------------------------------------------//
 function bool LastMemberIsStationary()
 {
-	if(m_Team[m_iMemberCount-1].IsStationary())
+	// End:0x1D
+	if(m_Team[__NFUN_147__(m_iMemberCount, 1)].IsStationary())
+	{
 		return true;
-
+	}
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -718,8 +766,8 @@ function bool LastMemberIsStationary()
 //------------------------------------------------------------------//
 function ResetGrenadeAction()
 {
-	#ifdefDEBUG if(bShowLog) log(self$" ResetGrenadeAction() : m_iTeamAction="$m_iTeamAction);	#endif
-	m_iTeamAction = m_iTeamAction & 0xffffffbf;	
+	m_iTeamAction = __NFUN_156__(m_iTeamAction, -65);
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -727,34 +775,55 @@ function ResetGrenadeAction()
 //------------------------------------------------------------------//
 function UpdateTeamGrenadeStatus()
 {
-    m_bHasGrenade=0;
-    if (FindRainbowWithGrenadeType(GT_GrenadeFrag, false) != none)     //R6Weapons.R6FragGrenade
-		m_bHasGrenade += 0x1;
-    if (FindRainbowWithGrenadeType(GT_GrenadeGas, false) != none)      //R6Weapons.R6TearGasGrenade
-		m_bHasGrenade += 0x2;
-    if (FindRainbowWithGrenadeType(GT_GrenadeFlash, false) != none)    //R6Weapons.R6FlashBang
-		m_bHasGrenade += 0x4;
-	if (FindRainbowWithGrenadeType(GT_GrenadeSmoke, false) != none)    //R6Weapons.R6SmokeGrenade
-		m_bHasGrenade += 0x8;
+	m_bHasGrenade = 0;
+	// End:0x21
+	if(__NFUN_119__(FindRainbowWithGrenadeType(1, false), none))
+	{
+		__NFUN_135__(m_bHasGrenade, byte(1));
+	}
+	// End:0x3B
+	if(__NFUN_119__(FindRainbowWithGrenadeType(2, false), none))
+	{
+		__NFUN_135__(m_bHasGrenade, byte(2));
+	}
+	// End:0x55
+	if(__NFUN_119__(FindRainbowWithGrenadeType(3, false), none))
+	{
+		__NFUN_135__(m_bHasGrenade, byte(4));
+	}
+	// End:0x6F
+	if(__NFUN_119__(FindRainbowWithGrenadeType(4, false), none))
+	{
+		__NFUN_135__(m_bHasGrenade, byte(8));
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 // HaveRainbowWithGrenadeType()										//
 //------------------------------------------------------------------//
-simulated function BOOL HaveRainbowWithGrenadeType( R6AbstractWeapon.eWeaponGrenadeType grenadeType )
+simulated function bool HaveRainbowWithGrenadeType(R6EngineWeapon.eWeaponGrenadeType grenadeType)
 {
-    switch( grenadeType )
-    {
-    case GT_GrenadeFrag:
-        return ((m_bHasGrenade & 0x1)!=0);
-    case GT_GrenadeGas:
-        return ((m_bHasGrenade & 0x2)!=0);
-    case GT_GrenadeFlash:
-        return ((m_bHasGrenade & 0x4)!=0);
-    case GT_GrenadeSmoke:
-        return ((m_bHasGrenade & 0x8)!=0);
-    }
-    return false;
+	switch(grenadeType)
+	{
+		// End:0x1A
+		case 1:
+			return __NFUN_155__(__NFUN_156__(int(m_bHasGrenade), 1), 0);
+		// End:0x2E
+		case 2:
+			return __NFUN_155__(__NFUN_156__(int(m_bHasGrenade), 2), 0);
+		// End:0x42
+		case 3:
+			return __NFUN_155__(__NFUN_156__(int(m_bHasGrenade), 4), 0);
+		// End:0x56
+		case 4:
+			return __NFUN_155__(__NFUN_156__(int(m_bHasGrenade), 8), 0);
+		// End:0xFFFF
+		default:
+			return false;
+			break;
+	}
+	return;
 }
 
 function UpdateLocalActionRequest(R6CircumstantialActionQuery actionRequested)
@@ -763,6 +832,7 @@ function UpdateLocalActionRequest(R6CircumstantialActionQuery actionRequested)
 	m_actionRequested.aQueryTarget = actionRequested.aQueryTarget;
 	m_actionRequested.iMenuChoice = actionRequested.iMenuChoice;
 	m_actionRequested.iSubMenuChoice = actionRequested.iSubMenuChoice;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -773,74 +843,97 @@ function UpdateLocalActionRequest(R6CircumstantialActionQuery actionRequested)
 //------------------------------------------------------------------//
 function TeamActionRequest(R6CircumstantialActionQuery actionRequested)
 {
-    local INT       iHostage;
-	local vector	vActorDir;
+	local int iHostage;
+	local Vector vActorDir;
 
-    if(!m_bLeaderIsAPlayer || (m_iMemberCount <= 1) || m_bTeamIsClimbingLadder || Level.m_bInGamePlanningActive) 
-        return;
-
-	#ifdefDEBUG if(bShowLog) log(self$" TeamActionRequest() was called with actionRequested.aQueryTarget="$actionRequested.aQueryTarget);	#endif
-	
-	// reorganize team based on their original order
+	// End:0x39
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_bLeaderIsAPlayer), __NFUN_152__(m_iMemberCount, 1)), m_bTeamIsClimbingLadder), Level.m_bInGamePlanningActive))
+	{
+		return;
+	}
 	RestoreTeamOrder();
-
-	// reset ZULU gocode
+	// End:0x4E
 	if(m_bCAWaitingForZuluGoCode)
+	{
 		ResetZuluGoCode();
-
+	}
 	UpdateLocalActionRequest(actionRequested);
 	m_bTeamIsHoldingPosition = false;
-
-	if(actionRequested.aQueryTarget.IsA('R6Terrorist'))
+	// End:0xA5
+	if(actionRequested.aQueryTarget.__NFUN_303__('R6Terrorist'))
 	{
-		m_iTeamAction = TEAM_SecureTerrorist;
-		InstructTeamToArrestTerrorist(R6Terrorist(actionRequested.aQueryTarget));
+		m_iTeamAction = 1024;
+		InstructTeamToArrestTerrorist(R6Terrorist(actionRequested.aQueryTarget));		
 	}
-	else if(actionRequested.aQueryTarget.IsA('R6Hostage'))
+	else
 	{
-		m_iTeamAction = TEAM_EscortHostage;
-		MoveTeamTo(actionRequested.aQueryTarget.Location);		
+		// End:0xED
+		if(actionRequested.aQueryTarget.__NFUN_303__('R6Hostage'))
+		{
+			m_iTeamAction = 2048;
+			MoveTeamTo(actionRequested.aQueryTarget.Location);			
+		}
+		else
+		{
+			// End:0x131
+			if(actionRequested.aQueryTarget.__NFUN_303__('R6LadderVolume'))
+			{
+				m_iTeamAction = 512;
+				InstructTeamToClimbLadder(R6LadderVolume(actionRequested.aQueryTarget));				
+			}
+			else
+			{
+				// End:0x1AD
+				if(actionRequested.aQueryTarget.__NFUN_303__('R6IORotatingDoor'))
+				{
+					// End:0x179
+					if(R6IORotatingDoor(actionRequested.aQueryTarget).m_bIsDoorClosed)
+					{
+						m_iTeamAction = 16;						
+					}
+					else
+					{
+						m_iTeamAction = 32;
+					}
+					ChooseOpenSound(actionRequested);
+					AssignAction(R6IORotatingDoor(actionRequested.aQueryTarget), -1);					
+				}
+				else
+				{
+					// End:0x239
+					if(actionRequested.aQueryTarget.__NFUN_303__('R6IOBomb'))
+					{
+						m_iTeamAction = 4096;
+						vActorDir = __NFUN_212__(Vector(R6IOBomb(actionRequested.aQueryTarget).Rotation), float(-80));
+						vActorDir.Z = 0.0000000;
+						MoveTeamTo(__NFUN_215__(actionRequested.aQueryTarget.Location, vActorDir));						
+					}
+					else
+					{
+						// End:0x2C5
+						if(actionRequested.aQueryTarget.__NFUN_303__('R6IODevice'))
+						{
+							m_iTeamAction = 8192;
+							vActorDir = __NFUN_212__(Vector(R6IODevice(actionRequested.aQueryTarget).Rotation), float(-80));
+							vActorDir.Z = 0.0000000;
+							MoveTeamTo(__NFUN_215__(actionRequested.aQueryTarget.Location, vActorDir));							
+						}
+						else
+						{
+							// End:0x328
+							if(actionRequested.aQueryTarget.__NFUN_303__('R6PlayerController'))
+							{
+								m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 1);
+								m_iTeamAction = 256;
+								MoveTeamTo(R6PlayerController(m_TeamLeader.Controller).m_vRequestedLocation);								
+							}
+						}
+					}
+				}
+			}
+		}
 	}
-    else if(actionRequested.aQueryTarget.IsA('R6LadderVolume'))
-    {
-		m_iTeamAction = TEAM_ClimbLadder;
-        InstructTeamToClimbLadder(R6LadderVolume(actionRequested.aQueryTarget));
-    }
-    else if(actionRequested.aQueryTarget.IsA('R6IORotatingDoor'))
-    {
-        if(R6IORotatingDoor(actionRequested.aQueryTarget).m_bIsDoorClosed)
-            m_iTeamAction = TEAM_OpenDoor;		
-        else
-            m_iTeamAction = TEAM_CloseDoor;
-
-        ChooseOpenSound(actionRequested);
-		AssignAction(R6IORotatingDoor(actionRequested.aQueryTarget), -1);
-    }
-    else if(actionRequested.aQueryTarget.IsA('R6IOBomb'))
-    {
-        m_iTeamAction = TEAM_DisarmBomb;
-        vActorDir = vector(R6IOBomb(actionRequested.aQueryTarget).Rotation) * -80;
-        vActorDir.z = 0;
-		MoveTeamTo(actionRequested.aQueryTarget.Location + vActorDir);
-    }
-    else if(actionRequested.aQueryTarget.IsA('R6IODevice'))
-    {
-        m_iTeamAction = TEAM_InteractDevice;
-        vActorDir = vector(R6IODevice(actionRequested.aQueryTarget).Rotation) * -80;
-		vActorDir.z = 0;
-        MoveTeamTo(actionRequested.aQueryTarget.Location + vActorDir);
-    }
-    else if(actionRequested.aQueryTarget.IsA('R6PlayerController'))
-    {
-        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamMove);
-        #ifdefDEBUG if(bShowLog) log(self$" ...default action... Team Move To...");	#endif
-        m_iTeamAction = TEAM_Move;
-        MoveTeamTo(R6PlayerController(m_TeamLeader.controller).m_vRequestedLocation);
-    }
-    else
-    {
-		#ifdefDEBUG if(bShowLog) log(self$" unknown action requested of team...");	#endif
-    }
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -849,137 +942,156 @@ function TeamActionRequest(R6CircumstantialActionQuery actionRequested)
 //   this is the function that dispatches a action request to a     //
 //   rainbow team that comes from the rose des vents                //
 //------------------------------------------------------------------//
-function TeamActionRequestFromRoseDesVents(R6CircumstantialActionQuery actionRequested, INT iMenuChoice, INT iSubMenuChoice, optional BOOL bOrderOnZulu)
+function TeamActionRequestFromRoseDesVents(R6CircumstantialActionQuery actionRequested, int iMenuChoice, int iSubMenuChoice, optional bool bOrderOnZulu)
 {
-    local R6IORotatingDoor    door;
-	local vector	vActorDir;
-	
-    actionRequested.iMenuChoice=iMenuChoice;
-    actionRequested.iSubMenuChoice=iSubMenuChoice;
-    if((m_iMemberCount <= 1) || m_bTeamIsClimbingLadder || Level.m_bInGamePlanningActive)
+	local R6IORotatingDoor Door;
+	local Vector vActorDir;
+
+	actionRequested.iMenuChoice = iMenuChoice;
+	actionRequested.iSubMenuChoice = iSubMenuChoice;
+	// End:0x54
+	if(__NFUN_132__(__NFUN_132__(__NFUN_152__(m_iMemberCount, 1), m_bTeamIsClimbingLadder), Level.m_bInGamePlanningActive))
+	{
 		return;
-
-	#ifdefDEBUG if(bShowLog) log(self$" TeamActionRequestFromRoseDesVents() was called with actionRequested.aQueryTarget="$actionRequested.aQueryTarget$" iMenuChoice="$iMenuChoice$" iSubMenuChoice="$iSubMenuChoice);	#endif
-
-	// reorganize team based on their original order
+	}
 	RestoreTeamOrder();
-
-	// reset ZULU gocode
-	if(!bOrderOnZulu && m_bCAWaitingForZuluGoCode)
+	// End:0x76
+	if(__NFUN_130__(__NFUN_129__(bOrderOnZulu), m_bCAWaitingForZuluGoCode))
+	{
 		ResetZuluGoCode();
-	
+	}
 	m_bTeamIsHoldingPosition = false;
-
-	// store a copy of the actionRequested
 	UpdateLocalActionRequest(actionRequested);
-	
-	if(actionRequested.aQueryTarget.IsA('R6IORotatingDoor'))
-    {
-	    #ifdefDEBUG if(bShowLog) log(self$" TeamActionRequestFromRoseDesVents Target is a Rotating door");	#endif
-        #ifdefDEBUG if(bShowLog) log(self$" Action ID: " $actionRequested.iMenuChoice);	#endif
-        door = R6IORotatingDoor(actionRequested.aQueryTarget);
-        switch(actionRequested.iMenuChoice)        
-        {
-            case door.eDoorCircumstantialAction.CA_Close:   // this should be actionMenuChoice == 0
-                m_iTeamAction = TEAM_CloseDoor;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_Close");	#endif
-                ChooseOpenSound(actionRequested);
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;
-            case door.eDoorCircumstantialAction.CA_Open:    // this should be actionMenuChoice == 0
-	            m_iTeamAction = TEAM_OpenDoor;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_Open");		#endif
-                ChooseOpenSound(actionRequested);
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;
-            case door.eDoorCircumstantialAction.CA_OpenAndClear:         
-                m_iTeamAction = TEAM_OpenAndClear;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_OpenAndClear");		#endif
-                m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenAndClear);
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;                
-            case door.eDoorCircumstantialAction.CA_OpenAndGrenade:       
-                m_iTeamAction = TEAM_OpenAndGrenade;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_OpenAndGrenade");	#endif
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;
-            case door.eDoorCircumstantialAction.CA_OpenGrenadeAndClear: 
-                m_iTeamAction = TEAM_OpenGrenadeAndClear;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_OpenGrenadeAndClear");	#endif
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;
-            case door.eDoorCircumstantialAction.CA_Clear:
-                m_iTeamAction = TEAM_ClearRoom;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_Clear");	#endif
-                //PlayVoices(m_TeamLeader, Sound'Voices_1rstPersonRainbow.Play_Clear', Sound'Voices_1rstPersonRainbow.Stop_Clear', SLOT_HeadSet, 10);
-                //MISSING SOUND SD
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;
-            case door.eDoorCircumstantialAction.CA_Grenade:    
-                m_iTeamAction = TEAM_Grenade;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_Grenade");	#endif
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;
-            case door.eDoorCircumstantialAction.CA_GrenadeAndClear:                  
-                m_iTeamAction = TEAM_GrenadeAndClear;
-                #ifdefDEBUG if(bShowLog) log(self$" door.eDoorCircumstantialAction.CA_Close");	#endif
-                AssignAction(door, actionRequested.iSubMenuChoice);
-                break;
-            default:
-                #ifdefDEBUG if(bShowLog) log(self$" an unknown eDoorCircumstantialAction was requested...");	#endif
-        }
-    }
-    else if(actionRequested.aQueryTarget.IsA('R6PlayerController'))
-    {
-        // default actions
-        if(actionRequested.iMenuChoice 
-            == R6PlayerController(actionRequested.aQueryTarget).eDefaultCircumstantialAction.PCA_MoveAndGrenade)
-        {
-			m_iTeamAction = TEAM_MoveAndGrenade;
-			#ifdefDEBUG if(bShowLog) log(self$" ... Team Move To And Grenade...");	#endif
-            // The sound is play in the MoveTeamTo like the OpenGranadeClear etc.
-            MoveTeamTo(R6PlayerController(m_TeamLeader.controller).m_vRequestedLocation, actionRequested.iSubMenuChoice);
-        }
-		else
+	// End:0x2A1
+	if(actionRequested.aQueryTarget.__NFUN_303__('R6IORotatingDoor'))
+	{
+		Door = R6IORotatingDoor(actionRequested.aQueryTarget);
+		switch(actionRequested.iMenuChoice)
 		{
-			m_iTeamAction = TEAM_Move;
-			#ifdefDEBUG if(bShowLog) log(self$" ...default action... Team Move To...");	#endif
-			MoveTeamTo(R6PlayerController(m_TeamLeader.controller).m_vRequestedLocation);
-		}
-    }
-    else if(actionRequested.aQueryTarget.IsA('R6LadderVolume'))
-    {
-        m_iTeamAction = TEAM_ClimbLadder;
-		InstructTeamToClimbLadder(R6LadderVolume(actionRequested.aQueryTarget));
-    } 
-    else if(actionRequested.aQueryTarget.IsA('R6IOBomb'))
-    {
-        m_iTeamAction = TEAM_DisarmBomb;
-        vActorDir = vector(R6IOBomb(actionRequested.aQueryTarget).Rotation) * -80;
-        vActorDir.z = 0;
-		MoveTeamTo(R6IOBomb(actionRequested.aQueryTarget).Location + vActorDir);
-    } 
-    else if(actionRequested.aQueryTarget.IsA('R6IODevice'))	
-	{
-        m_iTeamAction = TEAM_InteractDevice;
-        vActorDir = vector(R6IODevice(actionRequested.aQueryTarget).Rotation) * -80;
-		vActorDir.z = 0;
-        MoveTeamTo(actionRequested.aQueryTarget.Location + vActorDir);
-	}
-    else if(actionRequested.aQueryTarget.IsA('R6Terrorist'))
-	{
-		m_iTeamAction = TEAM_SecureTerrorist;
-		InstructTeamToArrestTerrorist(R6Terrorist(actionRequested.aQueryTarget));
-	}
-	else if(actionRequested.aQueryTarget.IsA('R6Hostage'))
-	{
-		m_iTeamAction = TEAM_EscortHostage;
-		MoveTeamTo(actionRequested.aQueryTarget.Location);		
+			// End:0x10E
+			case int(Door.5):
+				m_iTeamAction = 32;
+				ChooseOpenSound(actionRequested);
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0x14D
+			case int(Door.1):
+				m_iTeamAction = 16;
+				ChooseOpenSound(actionRequested);
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0x197
+			case int(Door.2):
+				m_iTeamAction = 144;
+				m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 13);
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0x1CB
+			case int(Door.3):
+				m_iTeamAction = 80;
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0x1FF
+			case int(Door.4):
+				m_iTeamAction = 208;
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0x233
+			case int(Door.6):
+				m_iTeamAction = 128;
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0x267
+			case int(Door.7):
+				m_iTeamAction = 64;
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0x29B
+			case int(Door.8):
+				m_iTeamAction = 192;
+				AssignAction(Door, actionRequested.iSubMenuChoice);
+				// End:0x29E
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}		
 	}
 	else
-    {
-		#ifdefDEBUG if(bShowLog) log(self$" unrecognized rose des vents action requested of team...actionRequested.aQueryTarget="$actionRequested.aQueryTarget);	#endif
-    }
+	{
+		// End:0x35A
+		if(actionRequested.aQueryTarget.__NFUN_303__('R6PlayerController'))
+		{
+			// End:0x32A
+			if(__NFUN_154__(actionRequested.iMenuChoice, int(R6PlayerController(actionRequested.aQueryTarget).3)))
+			{
+				m_iTeamAction = 320;
+				MoveTeamTo(R6PlayerController(m_TeamLeader.Controller).m_vRequestedLocation, actionRequested.iSubMenuChoice);				
+			}
+			else
+			{
+				m_iTeamAction = 256;
+				MoveTeamTo(R6PlayerController(m_TeamLeader.Controller).m_vRequestedLocation);
+			}			
+		}
+		else
+		{
+			// End:0x39E
+			if(actionRequested.aQueryTarget.__NFUN_303__('R6LadderVolume'))
+			{
+				m_iTeamAction = 512;
+				InstructTeamToClimbLadder(R6LadderVolume(actionRequested.aQueryTarget));				
+			}
+			else
+			{
+				// End:0x42F
+				if(actionRequested.aQueryTarget.__NFUN_303__('R6IOBomb'))
+				{
+					m_iTeamAction = 4096;
+					vActorDir = __NFUN_212__(Vector(R6IOBomb(actionRequested.aQueryTarget).Rotation), float(-80));
+					vActorDir.Z = 0.0000000;
+					MoveTeamTo(__NFUN_215__(R6IOBomb(actionRequested.aQueryTarget).Location, vActorDir));					
+				}
+				else
+				{
+					// End:0x4BB
+					if(actionRequested.aQueryTarget.__NFUN_303__('R6IODevice'))
+					{
+						m_iTeamAction = 8192;
+						vActorDir = __NFUN_212__(Vector(R6IODevice(actionRequested.aQueryTarget).Rotation), float(-80));
+						vActorDir.Z = 0.0000000;
+						MoveTeamTo(__NFUN_215__(actionRequested.aQueryTarget.Location, vActorDir));						
+					}
+					else
+					{
+						// End:0x4FF
+						if(actionRequested.aQueryTarget.__NFUN_303__('R6Terrorist'))
+						{
+							m_iTeamAction = 1024;
+							InstructTeamToArrestTerrorist(R6Terrorist(actionRequested.aQueryTarget));							
+						}
+						else
+						{
+							// End:0x547
+							if(actionRequested.aQueryTarget.__NFUN_303__('R6Hostage'))
+							{
+								m_iTeamAction = 2048;
+								MoveTeamTo(actionRequested.aQueryTarget.Location);								
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -988,42 +1100,52 @@ function TeamActionRequestFromRoseDesVents(R6CircumstantialActionQuery actionReq
 //------------------------------------------------------------------
 function ChooseOpenSound(R6CircumstantialActionQuery actionRequested)
 {
-    if(R6IORotatingDoor(actionRequested.aQueryTarget).m_bIsDoorClosed)
-    {
+	// End:0x72
+	if(R6IORotatingDoor(actionRequested.aQueryTarget).m_bIsDoorClosed)
+	{
+		// End:0x59
 		if(R6IORotatingDoor(actionRequested.aQueryTarget).m_bTreatDoorAsWindow)
-			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenShudder);
+		{
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 11);			
+		}
 		else
-			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenDoor);
-    }
-    else
-    {
+		{
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 9);
+		}		
+	}
+	else
+	{
+		// End:0xAB
 		if(R6IORotatingDoor(actionRequested.aQueryTarget).m_bTreatDoorAsWindow)
-			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamCloseShudder);
+		{
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 12);			
+		}
 		else
-	        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamCloseDoor);
-    }		
+		{
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 10);
+		}
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // TeamActionRequestWaitForZuluGoCode()
 //	Action will be executed at Zulu GoCode
 //------------------------------------------------------------------
-function TeamActionRequestWaitForZuluGoCode( R6CircumstantialActionQuery actionRequested, INT iMenuChoice, INT iSubMenuChoice )
+function TeamActionRequestWaitForZuluGoCode(R6CircumstantialActionQuery actionRequested, int iMenuChoice, int iSubMenuChoice)
 {
-    actionRequested.iMenuChoice=iMenuChoice;
-    actionRequested.iSubMenuChoice=iSubMenuChoice;
-
-	#ifdefDEBUG if(bShowLog) log(self$" Team will wait for Zulu Go Code : actionRequested="$actionRequested$" actionRequested.iMenuChoice="$actionRequested.iMenuChoice );	#endif    
+	actionRequested.iMenuChoice = iMenuChoice;
+	actionRequested.iSubMenuChoice = iSubMenuChoice;
 	UpdateLocalActionRequest(actionRequested);
-
-	if(!m_bCAWaitingForZuluGoCode)
+	// End:0x59
+	if(__NFUN_129__(m_bCAWaitingForZuluGoCode))
 	{
-		m_bCAWaitingForZuluGoCode = true;	
+		m_bCAWaitingForZuluGoCode = true;
 		m_eBackupGoCode = m_eGoCode;
-		m_eGoCode = GOCODE_Zulu;
+		m_eGoCode = 3;
 	}
-    TeamActionRequestFromRoseDesVents( m_actionRequested, m_actionRequested.iMenuChoice,m_actionRequested.iSubMenuChoice, true);
+	TeamActionRequestFromRoseDesVents(m_actionRequested, m_actionRequested.iMenuChoice, m_actionRequested.iSubMenuChoice, true);
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1031,56 +1153,79 @@ function TeamActionRequestWaitForZuluGoCode( R6CircumstantialActionQuery actionR
 //------------------------------------------------------------------//
 function ReceivedZuluGoCode()
 {
-    #ifdefDEBUG if(bShowLog) log(self$" Received Zulu Go Code" );	#endif
-    
-    if( m_bCAWaitingForZuluGoCode  )
+	// End:0x0F
+	if(m_bCAWaitingForZuluGoCode)
+	{
 		ResetZuluGoCode();
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 // PlaySniperOrder()                                                //
 //------------------------------------------------------------------//
-function PlaySniperOrder() 
+function PlaySniperOrder()
 {
-    if (m_bSniperHold)
-        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_SniperHold);
-    else        
-        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_SniperFree);
+	// End:0x22
+	if(m_bSniperHold)
+	{
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 44);		
+	}
+	else
+	{
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 43);
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 // PlayGoCode()	               									    //
 //------------------------------------------------------------------//
-function PlayGoCode(EGoCode eGo) 
+function PlayGoCode(Object.EGoCode eGo)
 {
-    switch(eGo)
-    {
-        case GOCODE_Alpha:
-            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_AlphaGoCode);
-            break;
-        case GOCODE_Bravo:
-            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_BravoGoCode);
-            break;
-        case GOCODE_Charlie:
-            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_CharlieGoCode);
-            break;
-        case GOCODE_Zulu:
-            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_ZuluGoCode);
-            if (m_bCAWaitingForZuluGoCode && (m_iMemberCount > 1))
-                m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
-            break;
-    }
+	switch(eGo)
+	{
+		// End:0x25
+		case 0:
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 33);
+			// End:0xB0
+			break;
+		// End:0x43
+		case 1:
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 34);
+			// End:0xB0
+			break;
+		// End:0x61
+		case 2:
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 35);
+			// End:0xB0
+			break;
+		// End:0xAD
+		case 3:
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 36);
+			// End:0xAA
+			if(__NFUN_130__(m_bCAWaitingForZuluGoCode, __NFUN_151__(m_iMemberCount, 1)))
+			{
+				m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
+			}
+			// End:0xB0
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SetTeamIsClimbingLadder: set the bool and inform the escorted team
 //	to climb the ladder.
 //------------------------------------------------------------------
-function SetTeamIsClimbingLadder( bool bClimbing )
+function SetTeamIsClimbingLadder(bool bClimbing)
 {
-    m_bTeamIsClimbingLadder = bClimbing;
+	m_bTeamIsClimbingLadder = bClimbing;
+	return;
 }
-
 
 //------------------------------------------------------------------//
 // rbrek - 30 aug 2001                                              //
@@ -1090,37 +1235,40 @@ function SetTeamIsClimbingLadder( bool bClimbing )
 //------------------------------------------------------------------//
 function TeamLeaderIsClimbingLadder()
 {
-    local INT i;
-  
-	// if team is separated from leader, this should not affect their behavior; team should not follow
-	if((m_bTeamIsSeparatedFromLeader && m_bLeaderIsAPlayer) || (m_iMemberCount == 1))  
-    {
-		#ifdefDEBUG if(bShowLog) log(self$" TeamLeaderIsClimbingLadder() was called.... team is separated from leader, or there is only one member in this team, so exit...");	#endif
+	local int i;
+
+	// End:0x23
+	if(__NFUN_132__(__NFUN_130__(m_bTeamIsSeparatedFromLeader, m_bLeaderIsAPlayer), __NFUN_154__(m_iMemberCount, 1)))
+	{
 		return;
 	}
-
-	// if team is already using a ladder, do nothing...
+	// End:0x2E
 	if(m_bTeamIsClimbingLadder)
 	{
-		#ifdefDEBUG if(bShowLog) log(self$" TeamLeaderIsClimbingLadder() was called.... but m_bTeamIsClimbingLadder==true so exit...");	#endif
 		return;
 	}
-
-	#ifdefDEBUG if(bShowLog) log(self$" TeamLeaderIsClimbingLadder() was called.... ");	#endif
-    SetTeamIsClimbingLadder( true );
-    UpdateTeamFormation(FORM_SingleFile); 
+	SetTeamIsClimbingLadder(true);
+	UpdateTeamFormation(0);
 	m_TeamLadder = m_TeamLeader.m_Ladder;
-	if(m_iMemberCount > 1)
-    {
-		for(i=1; i<m_iMemberCount; i++)
+	// End:0x10D
+	if(__NFUN_151__(m_iMemberCount, 1))
+	{
+		i = 1;
+		J0x63:
+
+		// End:0x10D [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
 		{
-			// set the ladder as the moveTarget so that this pawn can position himself near it...
-			m_Team[i].controller.moveTarget = m_TeamLeader.m_Ladder;     
+			m_Team[i].Controller.MoveTarget = m_TeamLeader.m_Ladder;
 			m_Team[i].m_Ladder = m_TeamLeader.m_Ladder;
-			R6RainbowAI(m_Team[i].controller).ResetStateProgress();
-			m_Team[i].controller.GotoState('TeamClimbLadder');
+			R6RainbowAI(m_Team[i].Controller).ResetStateProgress();
+			m_Team[i].Controller.__NFUN_113__('TeamClimbLadder');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x63;
 		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1130,44 +1278,63 @@ function TeamLeaderIsClimbingLadder()
 //------------------------------------------------------------------//
 function TeamFinishedClimbingLadder()
 {
-	#ifdefDEBUG if(bShowLog) log(self$"  TeamFinishedClimbingLadder() was called...m_iTeamAction="$m_iTeamAction);	#endif
-	if((m_iTeamAction & TEAM_ClimbLadder) > 0)
+	// End:0x19
+	if(__NFUN_151__(__NFUN_156__(m_iTeamAction, 512), 0))
+	{
 		ActionCompleted(true);
-    UpdateTeamFormation(FORM_SingleFileWallBothSides);
-    SetTeamIsClimbingLadder( false );
+	}
+	UpdateTeamFormation(1);
+	SetTeamIsClimbingLadder(false);
+	return;
 }
 
 //------------------------------------------------------------------
 // rbrek 
 // 17 sept 2002
 //------------------------------------------------------------------
-function bool AllMembersAreOnTheSameSideOfTheLadder(R6LadderVolume ladder)
+function bool AllMembersAreOnTheSameSideOfTheLadder(R6LadderVolume Ladder)
 {
 	local bool bLeaderIsAtTopOfLadder;
-	local INT iLeader;
-	local INT i;
+	local int iLeader, i;
 
+	// End:0x52
 	if(m_bTeamIsSeparatedFromLeader)
 	{
-		if(m_iMemberCount == 2)
+		// End:0x17
+		if(__NFUN_154__(m_iMemberCount, 2))
+		{
 			return true;
+		}
 		iLeader = 1;
-		bLeaderIsAtTopOfLadder = (m_Team[1].location.z > ladder.location.z);
+		bLeaderIsAtTopOfLadder = __NFUN_177__(m_Team[1].Location.Z, Ladder.Location.Z);		
 	}
 	else
 	{
-		if(m_iMemberCount == 1)
+		// End:0x5F
+		if(__NFUN_154__(m_iMemberCount, 1))
+		{
 			return true;
+		}
 		iLeader = 0;
-		bLeaderIsAtTopOfLadder = (m_TeamLeader.location.z > ladder.location.z);
+		bLeaderIsAtTopOfLadder = __NFUN_177__(m_TeamLeader.Location.Z, Ladder.Location.Z);
 	}
+	i = __NFUN_146__(iLeader, 1);
+	J0xA3:
 
-	for(i=iLeader+1;i<m_iMemberCount;i++)
+	// End:0xF7 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
 	{
-		if(bLeaderIsAtTopOfLadder != (m_Team[i].location.z > ladder.location.z))
+		// End:0xED
+		if(__NFUN_243__(bLeaderIsAtTopOfLadder, __NFUN_177__(m_Team[i].Location.Z, Ladder.Location.Z)))
+		{
 			return false;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0xA3;
 	}
 	return true;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1178,29 +1345,45 @@ function bool AllMembersAreOnTheSameSideOfTheLadder(R6LadderVolume ladder)
 //------------------------------------------------------------------//
 function MemberFinishedClimbingLadder(R6Pawn member)
 {
-    local INT i;
-    local INT iTotalMember;
-	local INT iLeader;
+	local int i, iTotalMember, iLeader;
 
-	#ifdefDEBUG if(bShowLog) log(self$" MemberFinishedClimbingLadder() was called... for member :"$member);	#endif
-	if((R6Rainbow(member) == m_TeamLeader) && member.m_bIsPlayer && (m_bTeamIsSeparatedFromLeader || (m_iMemberCount == 1)))
-		return;		// do nothing, leader is climbing ladder alone...
-
-	if(!member.IsAlive())
-		return;
-
-	if(AllMembersAreOnTheSameSideOfTheLadder(R6LadderVolume(m_TeamLadder.myLadder)))
+	// End:0x42
+	if(__NFUN_130__(__NFUN_130__(__NFUN_114__(R6Rainbow(member), m_TeamLeader), member.m_bIsPlayer), __NFUN_132__(m_bTeamIsSeparatedFromLeader, __NFUN_154__(m_iMemberCount, 1))))
 	{
-		TeamFinishedClimbingLadder();			
-		if(m_bTeamIsSeparatedFromLeader)
-			iLeader = 1;
-		else
-			iLeader = 0;
-
-        for(i=iLeader+1; i<m_iMemberCount; i++)
-			m_Team[i].controller.GotoState('FollowLeader');
+		return;
 	}
-} 
+	// End:0x58
+	if(__NFUN_129__(member.IsAlive()))
+	{
+		return;
+	}
+	// End:0xDA
+	if(AllMembersAreOnTheSameSideOfTheLadder(R6LadderVolume(m_TeamLadder.MyLadder)))
+	{
+		TeamFinishedClimbingLadder();
+		// End:0x8D
+		if(m_bTeamIsSeparatedFromLeader)
+		{
+			iLeader = 1;			
+		}
+		else
+		{
+			iLeader = 0;
+		}
+		i = __NFUN_146__(iLeader, 1);
+		J0xA2:
+
+		// End:0xDA [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0xA2;
+		}
+	}
+	return;
+}
 
 //------------------------------------------------------------------//
 // rbrek - 30 aug 2001                                              //
@@ -1210,10 +1393,16 @@ function MemberFinishedClimbingLadder(R6Pawn member)
 //------------------------------------------------------------------//
 function bool TeamHasFinishedClimbingLadder()
 {
-    if(m_bTeamIsClimbingLadder)
-        return false;
-    else
-        return true;
+	// End:0x0E
+	if(m_bTeamIsClimbingLadder)
+	{
+		return false;		
+	}
+	else
+	{
+		return true;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1222,10 +1411,13 @@ function bool TeamHasFinishedClimbingLadder()
 //------------------------------------------------------------------//
 function bool MembersAreOnSameEndOfLadder(R6Pawn p1, R6Pawn p2)
 {
-	if(abs(p1.location.z - p2.location.z) < 30)
+	// End:0x35
+	if(__NFUN_176__(__NFUN_186__(__NFUN_175__(p1.Location.Z, p2.Location.Z)), float(30)))
+	{
 		return true;
-	
+	}
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1235,170 +1427,243 @@ function bool MembersAreOnSameEndOfLadder(R6Pawn p1, R6Pawn p2)
 //   move to the closest ladder actor, climb to the other end, find //
 //   a spot and wait for the leader to call a team regroup          //
 //------------------------------------------------------------------//
-function InstructTeamToClimbLadder(R6LadderVolume ladderVolume, optional bool bPathFinding, optional int iMemberId)
+function InstructTeamToClimbLadder(R6LadderVolume LadderVolume, optional bool bPathFinding, optional int iMemberId)
 {
-    local FLOAT     fDistanceToTop;
-    local FLOAT     fDistanceToBottom;
-    local INT       i;    
-	local INT		iMemberLeading;
+	local float fDistanceToTop, fDistanceToBottom;
+	local int i, iMemberLeading;
 
-	#ifdefDEBUG if(bShowLog) log(self$"  InstructTeamToClimbLadder() was called for ladderVolume="$ladderVolume);	#endif
-    if(m_iMemberCount < 2)
-        return;
-
+	// End:0x0E
+	if(__NFUN_150__(m_iMemberCount, 2))
+	{
+		return;
+	}
+	// End:0x25
 	if(bPathFinding)
-		iMemberLeading = iMemberId;
+	{
+		iMemberLeading = iMemberId;		
+	}
 	else
 	{
-		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamUseLadder);
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 26);
 		PlayOrderTeamOnZulu();
-	    m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
+		m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
 		iMemberLeading = 1;
 	}
-	
-    // determine whether team is at the top or bottom of the ladder
-    fDistanceToTop = abs(m_Team[iMemberLeading].location.z - ladderVolume.m_TopLadder.location.z);
-    fDistanceToBottom = abs(m_Team[iMemberLeading].location.z - ladderVolume.m_BottomLadder.location.z);
-    if(fDistanceToTop < fDistanceToBottom)
-    { 
-        m_TeamLadder = ladderVolume.m_TopLadder;
-    }
-    else
-    {
-        m_TeamLadder = ladderVolume.m_BottomLadder;
-    }    
-
-	// instruct team to climb the ladder and wait for leader at the other end...    
-	m_Team[iMemberLeading].controller.moveTarget = m_TeamLadder;   
-
-	if(bPathFinding) 
+	fDistanceToTop = __NFUN_186__(__NFUN_175__(m_Team[iMemberLeading].Location.Z, LadderVolume.m_TopLadder.Location.Z));
+	fDistanceToBottom = __NFUN_186__(__NFUN_175__(m_Team[iMemberLeading].Location.Z, LadderVolume.m_BottomLadder.Location.Z));
+	// End:0x104
+	if(__NFUN_176__(fDistanceToTop, fDistanceToBottom))
 	{
-		#ifdefDEBUG if(bShowLog) log(self$" InstructTeamToClimbLadder() : Team is trying to find path back to leader.... ");		#endif
-		SetTeamState(TS_ClimbingLadder);
-		if(iMemberLeading == 0 && !m_bLeaderIsAPlayer)
-			m_Team[iMemberLeading].controller.nextState = 'WaitForTeam';	
-		else if(m_bLeaderIsAPlayer && (iMemberLeading == 1))
-			m_Team[iMemberLeading].controller.nextState = 'TeamClimbEndNoLeader';
-		else
-			m_Team[iMemberLeading].controller.nextState = m_Team[iMemberLeading].controller.GetStateName(); 
-		m_Team[iMemberLeading].controller.GotoState('ApproachLadder');	
+		m_TeamLadder = LadderVolume.m_TopLadder;		
 	}
 	else
 	{
-		#ifdefDEBUG if(bShowLog) log(self$" InstructTeamToClimbLadder() : Team is not already separated, will separate now...");		#endif
-		if(m_Team[iMemberLeading].m_bIsClimbingLadder)
+		m_TeamLadder = LadderVolume.m_BottomLadder;
+	}
+	m_Team[iMemberLeading].Controller.MoveTarget = m_TeamLadder;
+	// End:0x221
+	if(bPathFinding)
+	{
+		SetTeamState(18);
+		// End:0x18A
+		if(__NFUN_130__(__NFUN_154__(iMemberLeading, 0), __NFUN_129__(m_bLeaderIsAPlayer)))
 		{
-			SetTeamState(TS_ClimbingLadder);
-			m_Team[iMemberLeading].controller.nextState = 'TeamClimbEndNoLeader';
+			m_Team[iMemberLeading].Controller.NextState = 'WaitForTeam';			
 		}
 		else
-			m_Team[iMemberLeading].controller.GotoState('TeamClimbStartNoLeader');
-		TeamIsSeparatedFromLead(true);
-	}
-  
-    UpdateTeamFormation(FORM_SingleFile); 
-	if(m_iMemberCount > iMemberLeading + 1)
-    {
-		for(i=iMemberLeading + 1; i<m_iMemberCount; i++)
-		{        
-			if(MembersAreOnSameEndOfLadder(m_Team[iMemberLeading], m_Team[i])) 
+		{
+			// End:0x1C6
+			if(__NFUN_130__(m_bLeaderIsAPlayer, __NFUN_154__(iMemberLeading, 1)))
 			{
-				m_Team[i].m_Ladder = m_TeamLadder; 
-				R6RainbowAI(m_Team[i].controller).ResetStateProgress();
-				m_Team[i].controller.GotoState('TeamClimbLadder');
+				m_Team[iMemberLeading].Controller.NextState = 'TeamClimbEndNoLeader';				
+			}
+			else
+			{
+				m_Team[iMemberLeading].Controller.NextState = m_Team[iMemberLeading].Controller.__NFUN_284__();
 			}
 		}
+		m_Team[iMemberLeading].Controller.__NFUN_113__('ApproachLadder');		
 	}
+	else
+	{
+		// End:0x267
+		if(m_Team[iMemberLeading].m_bIsClimbingLadder)
+		{
+			SetTeamState(18);
+			m_Team[iMemberLeading].Controller.NextState = 'TeamClimbEndNoLeader';			
+		}
+		else
+		{
+			m_Team[iMemberLeading].Controller.__NFUN_113__('TeamClimbStartNoLeader');
+		}
+		TeamIsSeparatedFromLead(true);
+	}
+	UpdateTeamFormation(0);
+	// End:0x349
+	if(__NFUN_151__(m_iMemberCount, __NFUN_146__(iMemberLeading, 1)))
+	{
+		i = __NFUN_146__(iMemberLeading, 1);
+		J0x2B5:
+
+		// End:0x349 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			// End:0x33F
+			if(MembersAreOnSameEndOfLadder(m_Team[iMemberLeading], m_Team[i]))
+			{
+				m_Team[i].m_Ladder = m_TeamLadder;
+				R6RainbowAI(m_Team[i].Controller).ResetStateProgress();
+				m_Team[i].Controller.__NFUN_113__('TeamClimbLadder');
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x2B5;
+		}
+	}
+	return;
 }
 
 function PlaySoundTeamStatusReport()
 {
-    if (m_TeamLeader.m_bIsPlayer || m_bPlayerHasFocus || m_bPlayerInGhostMode)
-    {
-        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamStatusReport);
-    }
-
-    if (!m_TeamLeader.m_bIsPlayer && !m_bPlayerHasFocus && (m_OtherTeamVoicesMgr != none) && (m_iMemberCount > 0))
-    {
-        switch(m_eTeamState)
-        {
-            case TS_Waiting:
-                switch(m_eGoCode)
-                {
-                    case GOCODE_Alpha:  
-                        m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusWaitAlpha);
-                        break;
-                    case GOCODE_Bravo:  
-                        m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusWaitBravo);
-                        break;
-                    case GOCODE_Charlie:  
-                        m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusWaitCharlie);
-                        break;
-                    case GOCODE_Zulu:  
-                        m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusWaitZulu);
-                        break;
-                }
-                break;
-
-            case TS_Grenading:
-            case TS_DisarmingBomb:
-            case TS_WaitingForOrders:
-            case TS_Holding:
-                m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusWaiting);
-                break;
-
-            case TS_Engaging:
-                m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusEngaging);
-                break;
-
-            case TS_Sniping:
-                switch(m_eGoCode)
-                {
-                    case GOCODE_Alpha:  
-                        m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusSniperWaitAlpha);
-                        break;
-                    case GOCODE_Bravo:  
-                        m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusSniperWaitBravo);
-                        break;
-                    case GOCODE_Charlie:  
-                        m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusSniperWaitCharlie);
-                        break;
-                }
-                break;
-
-            case TS_InteractWithDevice:
-                switch(m_TeamLeader.m_eDeviceAnim)
-                {
-                    case BA_Keypad:
-                            m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, RTV_DesactivatingSecurity);
-
-                    case BA_PlantDevice:
-                            m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, RTV_PlacingBug);
-                            break;
-                    case BA_Keyboard:
-                            m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, RTV_AccessingComputer);
-                }
-                break;
-            case TS_SettingBreach:
-                m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, RTV_PlacingExplosives);
-                break;
-            
-            case TS_Retired:
-            case TS_SecuringTerrorist:
-            case TS_ClimbingLadder:
-            case TS_ClearingRoom:
-            case TS_Following:
-            case TS_Moving:
-            case TS_LockPicking:
-            case TS_OpeningDoor:
-            case TS_ClosingDoor:
-            case TS_Regrouping:
-                m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusMoving);
-                break;
-
-        }
-
-    }
+	// End:0x3E
+	if(__NFUN_132__(__NFUN_132__(m_TeamLeader.m_bIsPlayer, m_bPlayerHasFocus), m_bPlayerInGhostMode))
+	{
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 30);
+	}
+	// End:0x29C
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_TeamLeader.m_bIsPlayer), __NFUN_129__(m_bPlayerHasFocus)), __NFUN_119__(m_OtherTeamVoicesMgr, none)), __NFUN_151__(m_iMemberCount, 0)))
+	{
+		switch(m_eTeamState)
+		{
+			// End:0x10A
+			case 1:
+				switch(m_eGoCode)
+				{
+					// End:0xAA
+					case 0:
+						m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 24);
+						// End:0x107
+						break;
+					// End:0xC8
+					case 1:
+						m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 25);
+						// End:0x107
+						break;
+					// End:0xE6
+					case 2:
+						m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 26);
+						// End:0x107
+						break;
+					// End:0x104
+					case 3:
+						m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 27);
+						// End:0x107
+						break;
+					// End:0xFFFF
+					default:
+						break;
+				}
+				// End:0x29C
+				break;
+			// End:0x10F
+			case 14:
+			// End:0x114
+			case 15:
+			// End:0x119
+			case 19:
+			// End:0x137
+			case 2:
+				m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 23);
+				// End:0x29C
+				break;
+			// End:0x155
+			case 6:
+				m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 21);
+				// End:0x29C
+				break;
+			// End:0x1C1
+			case 7:
+				switch(m_eGoCode)
+				{
+					// End:0x17F
+					case 0:
+						m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 28);
+						// End:0x1BE
+						break;
+					// End:0x19D
+					case 1:
+						m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 29);
+						// End:0x1BE
+						break;
+					// End:0x1BB
+					case 2:
+						m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 30);
+						// End:0x1BE
+						break;
+					// End:0xFFFF
+					default:
+						break;
+				}
+				// End:0x29C
+				break;
+			// End:0x230
+			case 16:
+				switch(m_TeamLeader.m_eDeviceAnim)
+				{
+					// End:0x1F1
+					case 2:
+						m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, 8);
+					// End:0x20F
+					case 3:
+						m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, 0);
+						// End:0x22D
+						break;
+					// End:0x22A
+					case 4:
+						m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, 2);
+					// End:0xFFFF
+					default:
+						break;
+				}
+				// End:0x29C
+				break;
+			// End:0x24E
+			case 20:
+				m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_TeamLeader, 6);
+				// End:0x29C
+				break;
+			// End:0x253
+			case 21:
+			// End:0x258
+			case 17:
+			// End:0x25D
+			case 18:
+			// End:0x262
+			case 13:
+			// End:0x267
+			case 4:
+			// End:0x26C
+			case 3:
+			// End:0x271
+			case 8:
+			// End:0x276
+			case 9:
+			// End:0x27B
+			case 10:
+			// End:0x299
+			case 5:
+				m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 22);
+				// End:0x29C
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	else
+	{
+		return;
+	}
 }
 
 //------------------------------------------------------------------//
@@ -1406,51 +1671,60 @@ function PlaySoundTeamStatusReport()
 // InstructPlayerTeamToHoldPosition()								//
 //   team holds position, and waits for leader's instruction        //
 //------------------------------------------------------------------//  
-function InstructPlayerTeamToHoldPosition(optional BOOL bOtherTeam)
+function InstructPlayerTeamToHoldPosition(optional bool bOtherTeam)
 {
-    local INT i;
-    local INT iMember;
+	local int i, iMember;
 
+	// End:0x12
 	if(m_bTeamIsClimbingLadder)
 	{
-		#ifdefDEBUG if(bShowLog) log(self$" InstructPlayerTeamToHoldPosition() : just cancel any order that was already issued....");	#endif
-		m_iTeamAction = TEAM_None;
+		m_iTeamAction = 0;
 		return;
 	}
-
-	#ifdefDEBUG if(bShowLog) log(self$" ...InstructPlayerTeamToHoldPosition()...");	#endif
-    TeamIsSeparatedFromLead(true);		
+	TeamIsSeparatedFromLead(true);
 	m_bTeamIsHoldingPosition = true;
 	m_bPlayerRequestedTeamReform = false;
-
-	// reset any Zulu order
+	// End:0x38
 	if(m_bCAWaitingForZuluGoCode)
+	{
 		ResetZuluGoCode();
-
-    // Play Sound Hold Position
-    if (m_TeamLeader.m_bIsPlayer)
-    {
-        if (bOtherTeam)
-            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_AllTeamsHold);
-
-        if(m_iMemberCount > 1)
-        {
-            if (!bOtherTeam)
-                m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamHold);
-            m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamHoldUp);
-        }
-    }
-
-    if(m_iMemberCount > 1)
-    {
-		for(iMember=1; iMember<m_iMemberCount; iMember++)
-        {
-			m_Team[iMember].controller.nextState = '';
-			m_Team[iMember].controller.GotoState('HoldPosition');        
+	}
+	// End:0xAD
+	if(m_TeamLeader.m_bIsPlayer)
+	{
+		// End:0x69
+		if(bOtherTeam)
+		{
+			m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 3);
 		}
-    }
-	// we do not want to instruct the entire team to go into the state HoldPosition, 
-	// so that we ensure that the rest of the team catches up/stays together
+		// End:0xAD
+		if(__NFUN_151__(m_iMemberCount, 1))
+		{
+			// End:0x95
+			if(__NFUN_129__(bOtherTeam))
+			{
+				m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 2);
+			}
+			m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 18);
+		}
+	}
+	// End:0x11A
+	if(__NFUN_151__(m_iMemberCount, 1))
+	{
+		iMember = 1;
+		J0xBF:
+
+		// End:0x11A [Loop If]
+		if(__NFUN_150__(iMember, m_iMemberCount))
+		{
+			m_Team[iMember].Controller.NextState = 'None';
+			m_Team[iMember].Controller.__NFUN_113__('HoldPosition');
+			__NFUN_165__(iMember);
+			// [Loop Continue]
+			goto J0xBF;
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1459,97 +1733,127 @@ function InstructPlayerTeamToHoldPosition(optional BOOL bOtherTeam)
 //   if team is holding position, calling this function will bring  //
 //   them out of hold and will resume following leader              //
 //------------------------------------------------------------------//        
-function InstructPlayerTeamToFollowLead(optional BOOL bOtherTeam)
+function InstructPlayerTeamToFollowLead(optional bool bOtherTeam)
 {
-    local INT i;
-	
+	local int i;
+
+	// End:0x0B
 	if(m_bTeamIsClimbingLadder)
+	{
 		return;
-	
-	#ifdefDEBUG if(bShowLog) log(self$" ...InstructPlayerTeamToFollowLead()...m_bLeaderIsAPlayer="$m_bLeaderIsAPlayer);	#endif
-	m_iTeamAction = TEAM_None;
+	}
+	m_iTeamAction = 0;
 	m_bTeamIsHoldingPosition = false;
 	m_bEntryInProgress = false;
 	m_bPlayerRequestedTeamReform = false;
-
+	// End:0x39
 	if(m_bCAWaitingForZuluGoCode)
+	{
 		ResetZuluGoCode();
-	
-	// reorganize team based on their original order
+	}
 	RestoreTeamOrder();
-
-    if (m_TeamLeader.m_bIsPlayer && bOtherTeam)
-        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_AllTeamsMove);
-
-    if(m_iMemberCount > 1)
-    {                
-        // Play Sound Regroup
-        if (m_TeamLeader.m_bIsPlayer)
-        {
-            if (!bOtherTeam)
-				m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamRegroup);	
-
-			if(VSize(m_Team[1].location - m_TeamLeader.location) > 600)
+	// End:0x72
+	if(__NFUN_130__(m_TeamLeader.m_bIsPlayer, bOtherTeam))
+	{
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 4);
+	}
+	// End:0x198
+	if(__NFUN_151__(m_iMemberCount, 1))
+	{
+		// End:0x12F
+		if(m_TeamLeader.m_bIsPlayer)
+		{
+			// End:0xB0
+			if(__NFUN_129__(bOtherTeam))
 			{
-				// if team is far from player
-				if(m_MemberVoicesMgr != none)
-					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamRegroupOnLead);
-				m_bPlayerRequestedTeamReform = true;
+				m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 0);
+			}
+			// End:0x10C
+			if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_Team[1].Location, m_TeamLeader.Location)), float(600)))
+			{
+				// End:0x101
+				if(__NFUN_119__(m_MemberVoicesMgr, none))
+				{
+					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 4);
+				}
+				m_bPlayerRequestedTeamReform = true;				
 			}
 			else
 			{
-				// team is already closeby
-				if(m_MemberVoicesMgr != none)
-					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReformOnLead);
+				// End:0x12F
+				if(__NFUN_119__(m_MemberVoicesMgr, none))
+				{
+					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 5);
+				}
 			}
-        }
-		// it is actually only necessary to reassign the state for member m_Team[1], but i reassign 
-		// the state for all the members as a failsafe; as a last resort, this can help to reinit 
-		// the state for all team members.
-		for(i=1; i<m_iMemberCount; i++)
-		{
-			m_Team[i].controller.GotoState('FollowLeader');
-			R6RainbowAI(m_Team[i].controller).ResetStateProgress();
 		}
+		i = 1;
+		J0x136:
 
-        TeamIsRegroupingOnLead( true );
-    }
+		// End:0x191 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			R6RainbowAI(m_Team[i].Controller).ResetStateProgress();
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x136;
+		}
+		TeamIsRegroupingOnLead(true);
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 // GrenadeInProximity()												//
 // todo : modify this to handle more than one grenade at a time??	//
 //------------------------------------------------------------------//
-function GrenadeInProximity(R6Rainbow spotter, vector vGrenadeLocation, FLOAT fTimeLeft, FLOAT fGrenadeDangerRadius)
+function GrenadeInProximity(R6Rainbow spotter, Vector vGrenadeLocation, float fTimeLeft, float fGrenadeDangerRadius)
 {
-	local INT	i;
+	local int i;
 
-	if(m_bGrenadeInProximity)	
+	// End:0x0B
+	if(m_bGrenadeInProximity)
+	{
 		return;
-
-	m_bGrenadeInProximity = true;	
+	}
+	m_bGrenadeInProximity = true;
 	m_bWasSeparatedFromLeader = m_bTeamIsSeparatedFromLeader;
-	
+	// End:0x49
 	if(m_bLeaderIsAPlayer)
 	{
 		TeamIsSeparatedFromLead(true);
-		m_vPreviousPosition = m_Team[1].location;
+		m_vPreviousPosition = m_Team[1].Location;		
 	}
 	else
-		m_vPreviousPosition = m_Team[0].location;
-	
-	// rbrek todo : YELL GRENADE (voice)
-	// add special case for RainbowAI lead?
-    if (m_bPlayerHasFocus || Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag))
-        m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(spotter, RTV_GrenadeThreat);
-    else
-        m_MemberVoicesMgr.PlayRainbowMemberVoices(spotter, RMV_FragNear);
-
-    for(i=0; i<m_iMemberCount; i++)
 	{
-		if(!m_Team[i].m_bIsPlayer)
-			R6RainbowAI(m_Team[i].controller).ReactToFragGrenade(vGrenadeLocation, fTimeLeft, fGrenadeDangerRadius);
+		m_vPreviousPosition = m_Team[0].Location;
 	}
+	// End:0xAC
+	if(__NFUN_132__(m_bPlayerHasFocus, Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
+	{
+		m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(spotter, 11);		
+	}
+	else
+	{
+		m_MemberVoicesMgr.PlayRainbowMemberVoices(spotter, 15);
+	}
+	i = 0;
+	J0xC9:
+
+	// End:0x12E [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0x124
+		if(__NFUN_129__(m_Team[i].m_bIsPlayer))
+		{
+			R6RainbowAI(m_Team[i].Controller).ReactToFragGrenade(vGrenadeLocation, fTimeLeft, fGrenadeDangerRadius);
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0xC9;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1557,12 +1861,14 @@ function GrenadeInProximity(R6Rainbow spotter, vector vGrenadeLocation, FLOAT fT
 //------------------------------------------------------------------//
 function GasGrenadeInProximity(R6Rainbow spotter)
 {
+	// End:0x0B
 	if(m_bGasGrenadeInProximity)
+	{
 		return;
+	}
 	m_bGasGrenadeInProximity = true;
-    
-    m_MemberVoicesMgr.PlayRainbowMemberVoices(spotter, RMV_EntersGasCloud);
-
+	m_MemberVoicesMgr.PlayRainbowMemberVoices(spotter, 16);
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1570,15 +1876,25 @@ function GasGrenadeInProximity(R6Rainbow spotter)
 //------------------------------------------------------------------//
 function GasGrenadeCleared(R6Pawn aPawn)
 {
-    local INT i;
+	local int i;
 
-    for(i=0; i<m_iMemberCount; i++)
-    {
-        if(!m_Team[i].m_bIsPlayer && m_Team[i] != aPawn && m_Team[i].m_eEffectiveGrenade == GTYPE_TearGas)
-            return;
-    }
-            
-    m_bGasGrenadeInProximity = false;
+	i = 0;
+	J0x07:
+
+	// End:0x74 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0x6A
+		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_Team[i].m_bIsPlayer), __NFUN_119__(m_Team[i], aPawn)), __NFUN_154__(int(m_Team[i].m_eEffectiveGrenade), int(2))))
+		{
+			return;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	m_bGasGrenadeInProximity = false;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1586,92 +1902,130 @@ function GasGrenadeCleared(R6Pawn aPawn)
 //------------------------------------------------------------------//
 function GrenadeThreatIsOver()
 {
-	local INT	i;
-	local BOOL  bTeamIsClimbingLadder;
+	local int i;
+	local bool bTeamIsClimbingLadder;
 
-	if(!m_bGrenadeInProximity)
+	// End:0x0D
+	if(__NFUN_129__(m_bGrenadeInProximity))
+	{
 		return;
-
+	}
 	m_bGrenadeInProximity = false;
 	RestoreTeamOrder();
-
-    TeamIsSeparatedFromLead(m_bWasSeparatedFromLeader);
-	if(!m_bLeaderIsAPlayer)
+	TeamIsSeparatedFromLead(m_bWasSeparatedFromLeader);
+	// End:0x13F
+	if(__NFUN_129__(m_bLeaderIsAPlayer))
 	{
-		for(i=0; i<m_iMemberCount; i++)
+		i = 0;
+		J0x39:
+
+		// End:0x13C [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
 		{
-			if(m_Team[i].m_bIsClimbingLadder || m_Team[i].physics == PHYS_Ladder)
+			// End:0x8C
+			if(__NFUN_132__(m_Team[i].m_bIsClimbingLadder, __NFUN_154__(int(m_Team[i].Physics), int(11))))
 			{
 				bTeamIsClimbingLadder = true;
-				continue;
+				// [Explicit Continue]
+				goto J0x132;
 			}
-
-			if(i==0)
+			// End:0x10E
+			if(__NFUN_154__(i, 0))
 			{
+				// End:0xEB
 				if(m_bTeamIsHoldingPosition)
 				{
-					R6RainbowAI(m_Team[0].controller).FindPathToTargetLocation(m_vPreviousPosition);
-					R6RainbowAI(m_Team[0].controller).m_PostFindPathToState = 'HoldPosition';
+					R6RainbowAI(m_Team[0].Controller).FindPathToTargetLocation(m_vPreviousPosition);
+					R6RainbowAI(m_Team[0].Controller).m_PostFindPathToState = 'HoldPosition';					
 				}
 				else
-					R6RainbowAI(m_Team[0].controller).GotoState('Patrol');				
+				{
+					R6RainbowAI(m_Team[0].Controller).__NFUN_113__('Patrol');
+				}
+				// [Explicit Continue]
+				goto J0x132;
 			}
-			else
-				R6RainbowAI(m_Team[i].controller).GotoState('FollowLeader');
-		}
+			R6RainbowAI(m_Team[i].Controller).__NFUN_113__('FollowLeader');
+			J0x132:
+
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x39;
+		}		
 	}
 	else
 	{
-		// player team
-		if(m_iMemberCount == 1)
-			return;
-
-		// remain separated from leader but go back to previous location
-		for(i=1; i<m_iMemberCount; i++)
+		// End:0x14C
+		if(__NFUN_154__(m_iMemberCount, 1))
 		{
-			if(m_Team[i].m_bIsClimbingLadder || m_Team[i].physics == PHYS_Ladder)
-			{				
-				bTeamIsClimbingLadder = true;
-				continue;
-			}
+			return;
+		}
+		i = 1;
+		J0x153:
 
+		// End:0x24C [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			// End:0x1A6
+			if(__NFUN_132__(m_Team[i].m_bIsClimbingLadder, __NFUN_154__(int(m_Team[i].Physics), int(11))))
+			{
+				bTeamIsClimbingLadder = true;
+				// [Explicit Continue]
+				goto J0x242;
+			}
+			// End:0x21E
 			if(m_bTeamIsSeparatedFromLeader)
 			{
-				#ifdefDEBUG if(bShowLog) log(self$"  m_Team[i]="$m_Team[i]$" i="$i$" R6RainbowAI(m_Team[i].controller).m_PaceMember="$R6RainbowAI(m_Team[i].controller).m_PaceMember);	#endif
-				if(i==1)
+				// End:0x1F7
+				if(__NFUN_154__(i, 1))
 				{
-					m_iTeamAction = TEAM_Move;
+					m_iTeamAction = 256;
 					m_vActionLocation = m_vPreviousPosition;
-					R6RainbowAI(m_Team[i].controller).GotoState('TeamMoveTo');
+					R6RainbowAI(m_Team[i].Controller).__NFUN_113__('TeamMoveTo');					
 				}
 				else
-					R6RainbowAI(m_Team[i].controller).GotoState('FollowLeader');
-			}			
-			else
-			{
-				#ifdefDEBUG if(bShowLog) log(self$"  m_Team[i]="$m_Team[i]$" i="$i$" R6RainbowAI(m_Team[i].controller).m_PaceMember="$R6RainbowAI(m_Team[i].controller).m_PaceMember);	#endif
-				R6RainbowAI(m_Team[i].controller).GotoState('FollowLeader');
-			}		
+				{
+					R6RainbowAI(m_Team[i].Controller).__NFUN_113__('FollowLeader');
+				}
+				// [Explicit Continue]
+				goto J0x242;
+			}
+			R6RainbowAI(m_Team[i].Controller).__NFUN_113__('FollowLeader');
+			J0x242:
+
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x153;
 		}
 	}
-
 	m_bTeamIsClimbingLadder = bTeamIsClimbingLadder;
+	return;
 }
 
 //------------------------------------------------------------------//
 // FriendlyFlashBang()												//
 //------------------------------------------------------------------//
-function bool FriendlyFlashBang(actor aGrenade)
+function bool FriendlyFlashBang(Actor aGrenade)
 {
-	local INT i;
+	local int i;
 
-	for(i=0; i<m_iMemberCount; i++)
+	i = 0;
+	J0x07:
+
+	// End:0x40 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
 	{
-		if(aGrenade.Instigator == m_Team[i])
+		// End:0x36
+		if(__NFUN_114__(aGrenade.Instigator, m_Team[i]))
+		{
 			return true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
 	}
-
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1680,26 +2034,34 @@ function bool FriendlyFlashBang(actor aGrenade)
 //------------------------------------------------------------------//
 function InstructTeamToArrestTerrorist(R6Terrorist terrorist)
 {
-	local  INT	i;
+	local int i;
 
-	#ifdefDEBUG if(bShowLog) log(self$" InstructTeamToArrestTerrorist() was called.... for terrorist :"$terrorist);	#endif
-    m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamSecureTerrorist);
-    TeamIsSeparatedFromLead(true);
-    if(m_iMemberCount > 1)
-    {
-        PlayOrderTeamOnZulu();
-
-        m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
- 
-        R6RainbowAI(m_Team[1].controller).m_ActionTarget = terrorist;
-        m_Team[1].controller.GotoState('TeamSecureTerrorist');
-    }
-
-	if(m_iMemberCount > 2)
+	m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 27);
+	TeamIsSeparatedFromLead(true);
+	// End:0x85
+	if(__NFUN_151__(m_iMemberCount, 1))
 	{
-		for(i=2; i<m_iMemberCount; i++)
-			m_Team[i].controller.GotoState('FollowLeader');
+		PlayOrderTeamOnZulu();
+		m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
+		R6RainbowAI(m_Team[1].Controller).m_ActionTarget = terrorist;
+		m_Team[1].Controller.__NFUN_113__('TeamSecureTerrorist');
 	}
+	// End:0xD1
+	if(__NFUN_151__(m_iMemberCount, 2))
+	{
+		i = 2;
+		J0x99:
+
+		// End:0xD1 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x99;
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1708,125 +2070,155 @@ function InstructTeamToArrestTerrorist(R6Terrorist terrorist)
 // TODO: add action to the MoveTeamTo...                            //
 // TODO: if team does not see the target, do nothing...             //
 //------------------------------------------------------------------//
-function MoveTeamTo(vector vLocation, optional INT iSubAction)
+function MoveTeamTo(Vector vLocation, optional int iSubAction)
 {
-	local  INT	i;
-    local   R6Pawn  actionMember;
-    local   R6RainbowAI rainbowAI;
-	#ifdefDEBUG if(bShowLog) log(self$" MoveTeamTo() was called.... with location :"$vLocation$" and iSubAction="$iSubAction);	#endif
+	local int i;
+	local R6Pawn actionMember;
+	local R6RainbowAI rainbowAI;
 
-    TeamIsSeparatedFromLead(true);  
+	TeamIsSeparatedFromLead(true);
 	m_iSubAction = iSubAction;
-	
-    if(m_iMemberCount > 1)
-    {
-        switch(m_iTeamAction)
-        {
-            case TEAM_MoveAndGrenade:
-			    // look for a member with that type of grenade				
-			    actionMember = SelectMemberWithFrag(m_iSubAction, m_TeamLeader.controller);
-			    // todo : handle situation where no one in team has a frag  - feedback to player if(actionMember == none)
-
-			    // do not execute order if no one in team has frag
-			    if(actionMember == none)
-			    {
-				    #ifdefDEBUG if(bShowLog) log(self$" no one in team is equipped with that grenade (cannot perform action)... m_eEntryGrenadeType="$m_eEntryGrenadeType);	#endif
-					//rbsound
+	// End:0x43A
+	if(__NFUN_151__(m_iMemberCount, 1))
+	{
+		switch(m_iTeamAction)
+		{
+			// End:0x10E
+			case 320:
+				actionMember = SelectMemberWithFrag(m_iSubAction, m_TeamLeader.Controller);
+				// End:0xED
+				if(__NFUN_114__(actionMember, none))
+				{
 					switch(m_eEntryGrenadeType)
 					{
-						case GT_GrenadeFrag:
-							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_NoMoreFrag);
+						// End:0x7D
+						case 1:
+							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 8);
+							// End:0xDD
 							break;
-						case GT_GrenadeGas:
-							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_NoMoreGas);
+						// End:0x9D
+						case 2:
+							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 10);
+							// End:0xDD
 							break;
-						case GT_GrenadeFlash:
-							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_NoMoreFlash);
+						// End:0xBD
+						case 3:
+							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 11);
+							// End:0xDD
 							break;
-						case GT_GrenadeSmoke:
-							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_NoMoreSmoke);
-					}		
-                    ActionCompleted(false);
-
-					// instruct team to hold position
+						// End:0xDA
+						case 4:
+							m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 9);
+						// End:0xFFFF
+						default:
+							break;
+					}
+					ActionCompleted(false);
 					InstructPlayerTeamToHoldPosition(false);
-
-				    return;
-			    }
-                PlayOrderTeamOnZulu();
-
-                m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
-                break;
-            
-            case TEAM_DisarmBomb:
-                m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamUseDemolition);
-                PlayOrderTeamOnZulu();
-		        ReorganizeTeamToInteractWithDevice(TEAM_DisarmBomb, m_actionRequested.aQueryTarget);	        
-		        R6RainbowAI(m_Team[1].controller).m_ActionTarget = m_actionRequested.aQueryTarget;
-                m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
-                
-                break;
-			
-			case TEAM_InteractDevice:
-                m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamUseElectronic);
-                PlayOrderTeamOnZulu();
-				ReorganizeTeamToInteractWithDevice(TEAM_InteractDevice, m_actionRequested.aQueryTarget);
-				R6RainbowAI(m_Team[1].controller).m_ActionTarget = m_actionRequested.aQueryTarget;
-                m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
+					return;
+				}
+				PlayOrderTeamOnZulu();
+				m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
+				// End:0x333
 				break;
-				
-			case TEAM_EscortHostage:
-				// check if hostage is already following team, then no need for team to move, simply tell hostage to stay
-				if(R6Hostage(m_actionRequested.aQueryTarget).m_escortedByRainbow != none)
-                    m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamHostageStayPut);
-				else
-				    m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamGoGetHostage);
-				
-                PlayOrderTeamOnZulu();
-				R6RainbowAI(m_Team[1].controller).m_ActionTarget = m_actionRequested.aQueryTarget;
-                m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
+			// End:0x193
+			case 4096:
+				m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 32);
+				PlayOrderTeamOnZulu();
+				ReorganizeTeamToInteractWithDevice(4096, m_actionRequested.aQueryTarget);
+				R6RainbowAI(m_Team[1].Controller).m_ActionTarget = m_actionRequested.aQueryTarget;
+				m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
+				// End:0x333
 				break;
-
-            case TEAM_Move:
-                m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamMove);
-                PlayOrderTeamOnZulu();
-
-                if (m_iMemberCount == 2 || m_bCAWaitingForZuluGoCode)
-					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
+			// End:0x218
+			case 8192:
+				m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 31);
+				PlayOrderTeamOnZulu();
+				ReorganizeTeamToInteractWithDevice(8192, m_actionRequested.aQueryTarget);
+				R6RainbowAI(m_Team[1].Controller).m_ActionTarget = m_actionRequested.aQueryTarget;
+				m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
+				// End:0x333
+				break;
+			// End:0x2BF
+			case 2048:
+				// End:0x25B
+				if(__NFUN_119__(R6Hostage(m_actionRequested.aQueryTarget).m_escortedByRainbow, none))
+				{
+					m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 29);					
+				}
 				else
-					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamMoveOut);
-                break;
-		} 
-
-        m_iGrenadeThrower = 1; 
-        rainbowAI = R6RainbowAI(m_Team[m_iGrenadeThrower].controller);
-        
-        // if move and grenade 
-        if ( m_iTeamAction == TEAM_MoveAndGrenade)
-        {
-            rainbowAI.m_iStateProgress = 0;                          // reset
-            rainbowAI.m_vLocationOnTarget = vLocation;               // where we want to throw the grenade
-            m_vActionLocation   = rainbowAI.pawn.location; // start from his current location
-        }
-        else if ( m_iTeamAction == TEAM_Move )
-        {
-			m_vActionLocation = vLocation + vect(0,0,80);
-			m_Team[m_iGrenadeThrower].FindSpot(m_vActionLocation, vect(38,38,80));			    
-			//m_Team[m_iGrenadeThrower].dbgVectorAdd( m_vActionLocation, vect(38,38,75), 0, "WALK" );
-        }
+				{
+					m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 28);
+				}
+				PlayOrderTeamOnZulu();
+				R6RainbowAI(m_Team[1].Controller).m_ActionTarget = m_actionRequested.aQueryTarget;
+				m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
+				// End:0x333
+				break;
+			// End:0x330
+			case 256:
+				m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 1);
+				PlayOrderTeamOnZulu();
+				// End:0x315
+				if(__NFUN_132__(__NFUN_154__(m_iMemberCount, 2), m_bCAWaitingForZuluGoCode))
+				{
+					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);					
+				}
+				else
+				{
+					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 19);
+				}
+				// End:0x333
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+		m_iGrenadeThrower = 1;
+		rainbowAI = R6RainbowAI(m_Team[m_iGrenadeThrower].Controller);
+		// End:0x3AC
+		if(__NFUN_154__(m_iTeamAction, 320))
+		{
+			rainbowAI.m_iStateProgress = 0;
+			rainbowAI.m_vLocationOnTarget = vLocation;
+			m_vActionLocation = rainbowAI.Pawn.Location;			
+		}
 		else
-			m_vActionLocation = vLocation;
-
-		if(rainbowAI.IsInState('TeamMoveTo'))
+		{
+			// End:0x3FC
+			if(__NFUN_154__(m_iTeamAction, 256))
+			{
+				m_vActionLocation = __NFUN_215__(vLocation, vect(0.0000000, 0.0000000, 80.0000000));
+				m_Team[m_iGrenadeThrower].__NFUN_1800__(m_vActionLocation, vect(38.0000000, 38.0000000, 80.0000000));				
+			}
+			else
+			{
+				m_vActionLocation = vLocation;
+			}
+		}
+		// End:0x42A
+		if(rainbowAI.__NFUN_281__('TeamMoveTo'))
+		{
 			rainbowAI.ResetTeamMoveTo();
-        rainbowAI.GotoState('TeamMoveTo');
-    }
-
-	if(m_iMemberCount > 2)
-	{
-		for(i=2; i<m_iMemberCount; i++)
-			m_Team[i].controller.GotoState('FollowLeader');
+		}
+		rainbowAI.__NFUN_113__('TeamMoveTo');
 	}
+	// End:0x486
+	if(__NFUN_151__(m_iMemberCount, 2))
+	{
+		i = 2;
+		J0x44E:
+
+		// End:0x486 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x44E;
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -1835,10 +2227,13 @@ function MoveTeamTo(vector vLocation, optional INT iSubAction)
 //------------------------------------------------------------------//
 function PlayOrderTeamOnZulu()
 {
-    if (m_bCAWaitingForZuluGoCode)
-	    m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_OrderTeamWithGoCode);
+	// End:0x1F
+	if(m_bCAWaitingForZuluGoCode)
+	{
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 37);
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------//
 // rbrek - 5 sept 2001                                              //
@@ -1846,13 +2241,14 @@ function PlayOrderTeamOnZulu()
 //------------------------------------------------------------------//
 function MoveTeamToCompleted(bool bStatus)
 {
-	#ifdefDEBUG if(bShowLog) log(self$" MoveTeamToCompleted() bStatus="$bStatus);	#endif
-	if(m_iMemberCount > 1)
+	// End:0x45
+	if(__NFUN_151__(m_iMemberCount, 1))
 	{
-		m_Team[1].controller.nextState= '';
-		m_Team[1].controller.GotoState('HoldPosition');
+		m_Team[1].Controller.NextState = 'None';
+		m_Team[1].Controller.__NFUN_113__('HoldPosition');
 	}
-    ActionCompleted(bStatus);
+	ActionCompleted(bStatus);
+	return;
 }
 
 //TEAM_InteractDevice
@@ -1862,230 +2258,343 @@ function MoveTeamToCompleted(bool bStatus)
 // todo : need to do the same for interacting with an electronics   //
 //        device (computer/keypad).									//
 //------------------------------------------------------------------//
-function ReorganizeTeamToInteractWithDevice(INT iTeamAction, actor actionObject)
+function ReorganizeTeamToInteractWithDevice(int iTeamAction, Actor actionObject)
 {
-    local   R6Rainbow   actionMember;
-	local   INT			iMember;
-	local   FLOAT       fMemberSkill, fBestSkill;
+	local R6Rainbow actionMember;
+	local int iMember;
+	local float fMemberSkill, fBestSkill;
 
-	#ifdefDEBUG if(bShowLog) log(self$" ReorganizeTeamToInteractWithDevice() was called...");	#endif
+	iMember = 0;
+	J0x07:
 
-	// choose member with highest skill and/or diffuse kit
-	for( iMember = 0; iMember < m_iMemberCount; iMember++ )
+	// End:0x111 [Loop If]
+	if(__NFUN_150__(iMember, m_iMemberCount))
 	{
+		// End:0x31
 		if(m_Team[iMember].m_bIsPlayer)
-			continue;
-
-		// get the member's skill level for the action
-		if(iTeamAction == TEAM_DisarmBomb)
-			fMemberSkill = m_Team[iMember].GetSkill( SKILL_Demolitions );
+		{
+			// [Explicit Continue]
+			goto J0x107;
+		}
+		// End:0x60
+		if(__NFUN_154__(iTeamAction, 4096))
+		{
+			fMemberSkill = m_Team[iMember].GetSkill(1);			
+		}
 		else
-			fMemberSkill = m_Team[iMember].GetSkill( SKILL_Electronics );
-
-		// if a member has the appropriate kit for the action, add +20 to the skill
-		if(  (iTeamAction == TEAM_DisarmBomb     &&  m_Team[iMember].m_bHasDiffuseKit)
-		  || (iTeamAction == TEAM_InteractDevice &&  m_Team[iMember].m_bHasElectronicsKit) )
-			fMemberSkill += 20;
-
-		if(fMemberSkill > fBestSkill)
+		{
+			fMemberSkill = m_Team[iMember].GetSkill(2);
+		}
+		// End:0xDC
+		if(__NFUN_132__(__NFUN_130__(__NFUN_154__(iTeamAction, 4096), m_Team[iMember].m_bHasDiffuseKit), __NFUN_130__(__NFUN_154__(iTeamAction, 8192), m_Team[iMember].m_bHasElectronicsKit)))
+		{
+			__NFUN_184__(fMemberSkill, float(20));
+		}
+		// End:0x107
+		if(__NFUN_177__(fMemberSkill, fBestSkill))
 		{
 			actionMember = m_Team[iMember];
 			fBestSkill = fMemberSkill;
-		}	
+		}
+		J0x107:
+
+		__NFUN_165__(iMember);
+		// [Loop Continue]
+		goto J0x07;
 	}
-		
-	#ifdefDEBUG	if(bShowLog) log(self$" member chosen to interact with device : actionMember="$actionMember$" actionMember.m_iId="$actionMember.m_iId);	#endif
+	// End:0x145
 	if(m_bLeaderIsAPlayer)
 	{
-		if(actionMember.m_iId != 1)
-			ReOrganizeTeam(actionMember.m_iId);
+		// End:0x142
+		if(__NFUN_155__(actionMember.m_iID, 1))
+		{
+			ReOrganizeTeam(actionMember.m_iID);
+		}		
 	}
 	else
 	{
-		// reorganize team if member chosen is not in position 1 (second to lead)
-		if(actionMember.m_iId != 0)
-			ReOrganizeTeam(actionMember.m_iId);
-
-		// set members in appropriate states to diffuse the bomb / or interact with device
+		// End:0x16D
+		if(__NFUN_155__(actionMember.m_iID, 0))
+		{
+			ReOrganizeTeam(actionMember.m_iID);
+		}
 		m_iTeamAction = iTeamAction;
-		R6RainbowAI(m_Team[0].controller).m_ActionTarget = actionObject;
-		m_vActionLocation = actionObject.location - 80*vector(actionObject.rotation);		
-		m_Team[0].controller.GotoState('TeamMoveTo');
+		R6RainbowAI(m_Team[0].Controller).m_ActionTarget = actionObject;
+		m_vActionLocation = __NFUN_216__(actionObject.Location, __NFUN_213__(float(80), Vector(actionObject.Rotation)));
+		m_Team[0].Controller.__NFUN_113__('TeamMoveTo');
 	}
+	return;
 }
 
 //------------------------------------------------------------------//
 // ReOrganizeTeamForGrenade											//
 //   for AI led team only									        //
 //------------------------------------------------------------------//
-function ReOrganizeTeamForGrenade(EPlanAction ePAction)
+function ReOrganizeTeamForGrenade(Object.EPlanAction ePAction)
 {
-    local   R6Rainbow   actionMember;
-	local	INT			i;
+	local R6Rainbow actionMember;
+	local int i;
 
-	#ifdefDEBUG if(bShowLog) log(self$" ReOrganizeTeamForGrenade() : if team lead does not have desired grenade type, reorganize team... eAction="$ePAction);	#endif
 	switch(ePAction)
 	{
-		case PACT_Frag:		m_eEntryGrenadeType = GT_GrenadeFrag;		break;
-		case PACT_Gas:		m_eEntryGrenadeType = GT_GrenadeGas;		break;
-		case PACT_Flash:	m_eEntryGrenadeType = GT_GrenadeFlash;		break;
-		case PACT_Smoke:	m_eEntryGrenadeType = GT_GrenadeSmoke;		break;
-		default:			m_eEntryGrenadeType = GT_GrenadeNone;
-	}	
-	// reorganize team only if necessary... (if lead does not have the desired grenade type)
-	actionMember = FindRainbowWithGrenadeType(m_eEntryGrenadeType, true);	
-	if(actionMember == none)
+		// End:0x17
+		case 1:
+			m_eEntryGrenadeType = 1;
+			// End:0x52
+			break;
+		// End:0x27
+		case 3:
+			m_eEntryGrenadeType = 2;
+			// End:0x52
+			break;
+		// End:0x37
+		case 2:
+			m_eEntryGrenadeType = 3;
+			// End:0x52
+			break;
+		// End:0x47
+		case 4:
+			m_eEntryGrenadeType = 4;
+			// End:0x52
+			break;
+		// End:0xFFFF
+		default:
+			m_eEntryGrenadeType = 0;
+			break;
+	}
+	actionMember = FindRainbowWithGrenadeType(m_eEntryGrenadeType, true);
+	// End:0x79
+	if(__NFUN_114__(actionMember, none))
 	{
-		#ifdefDEBUG if(bShowLog) log(self$" no one in team has the desired "$m_eEntryGrenadeType$" grenade, continue...");	#endif
 		m_bSkipAction = true;
 		return;
 	}
-	#ifdefDEBUG if(bShowLog) log(self$" - "$actionMember$" was chosen to throw the grenade, reorganize! m_eEntryGrenadeType="$m_eEntryGrenadeType);	#endif
-	if(actionMember.m_iId != 0)
-		ReOrganizeTeam(actionMember.m_iId);
+	// End:0xA1
+	if(__NFUN_155__(actionMember.m_iID, 0))
+	{
+		ReOrganizeTeam(actionMember.m_iID);
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 // SelectMemberWithFrag()											//
 //------------------------------------------------------------------//
-function R6Pawn SelectMemberWithFrag(INT iSubAction, Actor target)
+function R6Pawn SelectMemberWithFrag(int iSubAction, Actor Target)
 {
-    local   R6Pawn  actionMember;
+	local R6Pawn actionMember;
 
-	if(target.IsA('R6IORotatingDoor'))
+	// End:0xA9
+	if(Target.__NFUN_303__('R6IORotatingDoor'))
 	{
-		switch( iSubAction )
+		switch(iSubAction)
 		{
-			case R6IORotatingDoor(target).eDoorCircumstantialAction.CA_GrenadeFrag:
-				m_eEntryGrenadeType = GT_GrenadeFrag;
+			// End:0x3B
+			case int(R6IORotatingDoor(Target).9):
+				m_eEntryGrenadeType = 1;
+				// End:0xA6
 				break;
-			case R6IORotatingDoor(target).eDoorCircumstantialAction.CA_GrenadeGas:
-				m_eEntryGrenadeType = GT_GrenadeGas;
+			// End:0x5B
+			case int(R6IORotatingDoor(Target).10):
+				m_eEntryGrenadeType = 2;
+				// End:0xA6
 				break;
-			case R6IORotatingDoor(target).eDoorCircumstantialAction.CA_GrenadeFlash:
-				m_eEntryGrenadeType = GT_GrenadeFlash;
+			// End:0x7B
+			case int(R6IORotatingDoor(Target).11):
+				m_eEntryGrenadeType = 3;
+				// End:0xA6
 				break;
-			case R6IORotatingDoor(target).eDoorCircumstantialAction.CA_GrenadeSmoke:
-				m_eEntryGrenadeType = GT_GrenadeSmoke;
+			// End:0x9B
+			case int(R6IORotatingDoor(Target).12):
+				m_eEntryGrenadeType = 4;
+				// End:0xA6
 				break;
+			// End:0xFFFF
 			default:
-				m_eEntryGrenadeType = GT_GrenadeNone;
-		}
+				m_eEntryGrenadeType = 0;
+				break;
+		}		
 	}
 	else
 	{
-        if(R6PlayerController(target) == none)
+		// End:0xBB
+		if(__NFUN_114__(R6PlayerController(Target), none))
 		{
-			#ifdefDEBUG if(bShowLog) log("  PROBLEM : SelectMemberWithFrag was called with an invalid target ");	#endif
 			return none;
 		}
-
-		switch( iSubAction )
+		switch(iSubAction)
 		{
-			case R6PlayerController(target).eDefaultCircumstantialAction.PCA_GrenadeFrag:
-				m_eEntryGrenadeType = GT_GrenadeFrag;
+			// End:0xE2
+			case int(R6PlayerController(Target).4):
+				m_eEntryGrenadeType = 1;
+				// End:0x14D
 				break;
-			case R6PlayerController(target).eDefaultCircumstantialAction.PCA_GrenadeGas:
-				m_eEntryGrenadeType = GT_GrenadeGas;
+			// End:0x102
+			case int(R6PlayerController(Target).5):
+				m_eEntryGrenadeType = 2;
+				// End:0x14D
 				break;
-			case R6PlayerController(target).eDefaultCircumstantialAction.PCA_GrenadeFlash:
-				m_eEntryGrenadeType = GT_GrenadeFlash;
+			// End:0x122
+			case int(R6PlayerController(Target).6):
+				m_eEntryGrenadeType = 3;
+				// End:0x14D
 				break;
-			case R6PlayerController(target).eDefaultCircumstantialAction.PCA_GrenadeSmoke:
-				m_eEntryGrenadeType = GT_GrenadeSmoke;
+			// End:0x142
+			case int(R6PlayerController(Target).7):
+				m_eEntryGrenadeType = 4;
+				// End:0x14D
 				break;
+			// End:0xFFFF
 			default:
-				m_eEntryGrenadeType = GT_GrenadeNone;
+				m_eEntryGrenadeType = 0;
+				break;
 		}
 	}
-
-	if( m_eEntryGrenadeType != GT_GrenadeNone )
+	// End:0x3BF
+	if(__NFUN_155__(int(m_eEntryGrenadeType), int(0)))
 	{
-        if (m_TeamLeader.m_bIsPlayer)   
-        {
-            switch(m_eEntryGrenadeType)
-            {
-                case GT_GrenadeFrag:
-                    switch(m_iTeamAction)
-                    {
-                        case TEAM_MoveAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamMoveAndFrag);
-                            break;
-                        case TEAM_GrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamFragAndClear);
-                            break;
-                        case TEAM_OpenAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenAndFrag);
-                            break;
-                        case TEAM_OpenGrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenFragAndClear);
-                            break;
-                    }
-                    break;
-                case GT_GrenadeGas:
-                    switch(m_iTeamAction)
-                    {
-                        case TEAM_MoveAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamMoveAndGas);
-                            break;
-                        case TEAM_GrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamGasAndClear);
-                            break;
-                        case TEAM_OpenAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenAndGas);
-                            break;
-                        case TEAM_OpenGrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenGasAndClear);
-                            break;
-                    }
-                    break;
-                case GT_GrenadeFlash:
-                    switch(m_iTeamAction)
-                    {
-                        case TEAM_MoveAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamMoveAndFlash);
-                            break;
-                        case TEAM_GrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamFlashAndClear);
-                            break;
-                        case TEAM_OpenAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenAndFlash);
-                            break;
-                        case TEAM_OpenGrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenFlashAndClear);
-                            break;
-                    }
-                    break;
-                case GT_GrenadeSmoke:
-                    switch(m_iTeamAction)
-                    {
-                        case TEAM_MoveAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamMoveAndSmoke);
-                            break;
-                        case TEAM_GrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamSmokeAndClear);
-                            break;
-                        case TEAM_OpenAndGrenade:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenAndSmoke);
-                            break;
-                        case TEAM_OpenGrenadeAndClear:
-                            m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_TeamOpenSmokeAndClear);
-                            break;
-                    }
-                    break;
-            }
-        }
-        actionMember = FindRainbowWithGrenadeType( m_eEntryGrenadeType, true );
-	}
-
-	// No member with requested grenade type.
-	if( actionMember != none )
-	{
-		// reorder team based on who the actionMember is
-		ReOrganizeTeam(actionMember.m_iId);
-	}		
-
-	return(actionMember);
+		// End:0x3AD
+		if(m_TeamLeader.m_bIsPlayer)
+		{
+			switch(m_eEntryGrenadeType)
+			{
+				// End:0x203
+				case 1:
+					switch(m_iTeamAction)
+					{
+						// End:0x1A3
+						case 320:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 5);
+							// End:0x200
+							break;
+						// End:0x1C1
+						case 192:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 22);
+							// End:0x200
+							break;
+						// End:0x1DF
+						case 80:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 14);
+							// End:0x200
+							break;
+						// End:0x1FD
+						case 208:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 18);
+							// End:0x200
+							break;
+						// End:0xFFFF
+						default:
+							break;
+					}
+					// End:0x3AD
+					break;
+				// End:0x290
+				case 2:
+					switch(m_iTeamAction)
+					{
+						// End:0x230
+						case 320:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 6);
+							// End:0x28D
+							break;
+						// End:0x24E
+						case 192:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 23);
+							// End:0x28D
+							break;
+						// End:0x26C
+						case 80:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 15);
+							// End:0x28D
+							break;
+						// End:0x28A
+						case 208:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 19);
+							// End:0x28D
+							break;
+						// End:0xFFFF
+						default:
+							break;
+					}
+					// End:0x3AD
+					break;
+				// End:0x31D
+				case 3:
+					switch(m_iTeamAction)
+					{
+						// End:0x2BD
+						case 320:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 8);
+							// End:0x31A
+							break;
+						// End:0x2DB
+						case 192:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 25);
+							// End:0x31A
+							break;
+						// End:0x2F9
+						case 80:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 17);
+							// End:0x31A
+							break;
+						// End:0x317
+						case 208:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 21);
+							// End:0x31A
+							break;
+						// End:0xFFFF
+						default:
+							break;
+					}
+					// End:0x3AD
+					break;
+				// End:0x3AA
+				case 4:
+					switch(m_iTeamAction)
+					{
+						// End:0x34A
+						case 320:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 7);
+							// End:0x3A7
+							break;
+						// End:0x368
+						case 192:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 24);
+							// End:0x3A7
+							break;
+						// End:0x386
+						case 80:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 16);
+							// End:0x3A7
+							break;
+						// End:0x3A4
+						case 208:
+							m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 20);
+							// End:0x3A7
+							break;
+						// End:0xFFFF
+						default:
+							break;
+					}
+					// End:0x3AD
+					break;
+				// End:0xFFFF
+				default:
+					break;
+			}
+		}
+		else
+		{
+			actionMember = FindRainbowWithGrenadeType(m_eEntryGrenadeType, true);
+		}/* !MISMATCHING REMOVE, tried If got Type:Else Position:0x3AD! */
+		// End:0x3DE
+		if(__NFUN_119__(actionMember, none))
+		{
+			ReOrganizeTeam(actionMember.m_iID);
+		}
+		return actionMember;
+		return;
+	}/* !MISMATCHING REMOVE, tried Else got Type:If Position:0x14D! */
 }
 
 //------------------------------------------------------------------//
@@ -2093,137 +2602,199 @@ function R6Pawn SelectMemberWithFrag(INT iSubAction, Actor target)
 // function AssignAction()                                          //
 //    ( target is a R6IORotatingDoor )                              //
 //------------------------------------------------------------------//
-function AssignAction(Actor target, INT iSubAction)
+function AssignAction(Actor Target, int iSubAction)
 {
-    local   R6Pawn			actionMember;
-    local   R6Door			closestDoor;    
-    local   FLOAT			fDistA, fDistB;
-	local   R6RainbowAI		actionMemberController;
-	local	INT				i;
+	local R6Pawn actionMember;
+	local R6Door closestDoor;
+	local float fDistA, fDistB;
+	local R6RainbowAI actionMemberController;
+	local int i;
 
-	if((m_iMemberCount == 1) || (!target.IsA('R6IORotatingDoor')))
-         return;
-
-	#ifdefDEBUG if(bShowLog) log(self$" AssignAction: target = "$target$" iSubAction="$iSubAction);	#endif
-
-	TeamIsSeparatedFromLead(true); 
-	m_iSubAction = iSubAction;
-
-	// target is a door. if the action requested required a grenade,
-	// look for a member with that type of grenade.
-	if( iSubAction != -1 )
+	// End:0x25
+	if(__NFUN_132__(__NFUN_154__(m_iMemberCount, 1), __NFUN_129__(Target.__NFUN_303__('R6IORotatingDoor'))))
 	{
-		actionMember = SelectMemberWithFrag(m_iSubAction, target);
-		if(actionMember == none)
+		return;
+	}
+	TeamIsSeparatedFromLead(true);
+	m_iSubAction = iSubAction;
+	// End:0x73
+	if(__NFUN_155__(iSubAction, -1))
+	{
+		actionMember = SelectMemberWithFrag(m_iSubAction, Target);
+		// End:0x70
+		if(__NFUN_114__(actionMember, none))
 		{
-			#ifdefDEBUG if(bShowLog) log(self$" AssignAction() : no member with requested grenade type");	#endif
+			ActionCompleted(false);
+			return;
+		}		
+	}
+	else
+	{
+		// End:0x8B
+		if(__NFUN_151__(__NFUN_156__(m_iTeamAction, 64), 0))
+		{
 			ActionCompleted(false);
 			return;
 		}
 	}
-	else if((m_iTeamAction & TEAM_Grenade) > 0)		// the action include a grenade action, and grenade type is invalid
+	// End:0xA3
+	if(__NFUN_114__(actionMember, none))
 	{
-		#ifdefDEBUG if(bShowLog) log(self$" AssignAction() : invalid grenade type");	#endif	
-		ActionCompleted(false);
-		return;
+		actionMember = m_Team[1];
 	}
-
-	if( actionMember == none )
-		actionMember = m_Team[1];  		// assign member to perform the action (for now, member 1)
-
-    PlayOrderTeamOnZulu();
-
-    m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamReceiveOrder);
-
-    // find target R6Door
-	#ifdefDEBUG if(bShowLog) log(self$" Target Rotating Door :"$R6IORotatingDoor(target));	#endif
-	#ifdefDEBUG if(bShowLog) log(self$" m_DoorActorA = "$R6IORotatingDoor(target).m_DoorActorA$" m_DoorActorB = "$R6IORotatingDoor(target).m_DoorActorB);	#endif
-    if(R6IORotatingDoor(target).m_DoorActorA != none)
-		fdistA = VSize(R6IORotatingDoor(target).m_DoorActorA.location - actionMember.location);
+	PlayOrderTeamOnZulu();
+	m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 6);
+	// End:0x111
+	if(__NFUN_119__(R6IORotatingDoor(Target).m_DoorActorA, none))
+	{
+		fDistA = __NFUN_225__(__NFUN_216__(R6IORotatingDoor(Target).m_DoorActorA.Location, actionMember.Location));		
+	}
 	else
-		fdistA = 99999;
-
-	if(R6IORotatingDoor(target).m_DoorActorB != none)
-		fdistB = VSize(R6IORotatingDoor(target).m_DoorActorB.location - actionMember.location);
+	{
+		fDistA = 99999.0000000;
+	}
+	// End:0x16C
+	if(__NFUN_119__(R6IORotatingDoor(Target).m_DoorActorB, none))
+	{
+		fDistB = __NFUN_225__(__NFUN_216__(R6IORotatingDoor(Target).m_DoorActorB.Location, actionMember.Location));		
+	}
 	else
-		fdistB = 99999;
-
-	actionMemberController = R6RainbowAI(actionMember.controller);
-    if(fdistA < fdistB)
-        actionMemberController.m_ActionTarget = R6IORotatingDoor(target).m_DoorActorA;
-    else
-        actionMemberController.m_ActionTarget = R6IORotatingDoor(target).m_DoorActorB;
-	
+	{
+		fDistB = 99999.0000000;
+	}
+	actionMemberController = R6RainbowAI(actionMember.Controller);
+	// End:0x1C4
+	if(__NFUN_176__(fDistA, fDistB))
+	{
+		actionMemberController.m_ActionTarget = R6IORotatingDoor(Target).m_DoorActorA;		
+	}
+	else
+	{
+		actionMemberController.m_ActionTarget = R6IORotatingDoor(Target).m_DoorActorB;
+	}
 	actionMemberController.ResetStateProgress();
-	actionMemberController.nextState = 'HoldPosition';
-    actionMemberController.GotoState('PerformAction');
-	if(m_iMemberCount > 2)
+	actionMemberController.NextState = 'HoldPosition';
+	actionMemberController.__NFUN_113__('PerformAction');
+	// End:0x265
+	if(__NFUN_151__(m_iMemberCount, 2))
 	{
-		for(i=2; i<m_iMemberCount; i++)
-			m_Team[i].controller.GotoState('FollowLeader');
-	}
-}
+		i = 2;
+		J0x22D:
 
+		// End:0x265 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x22D;
+		}
+	}
+	return;
+}
 
 //------------------------------------------------------------------//
 // FindRainbowWithGrenadeType()			                            //
 //	Look for a rainbow (other than the player) with a grenade of a  //
 //	given type.														//
 //------------------------------------------------------------------//
-simulated function R6Rainbow FindRainbowWithGrenadeType( R6AbstractWeapon.eWeaponGrenadeType grenadeType, bool bSetGadgetGroup )
+simulated function R6Rainbow FindRainbowWithGrenadeType(R6EngineWeapon.eWeaponGrenadeType grenadeType, bool bSetGadgetGroup)
 {
-	local INT				iMember;
-	local INT				iWeaponGroup;
-	local R6EngineWeapon    grenadeWeapon;
-	local BOOL				bHasGrenade;
+	local int iMember, iWeaponGroup;
+	local R6EngineWeapon grenadeWeapon;
+	local bool bHasGrenade;
 
-	// For each team member
-	for( iMember = 0; iMember < m_iMemberCount; iMember++ )
+	iMember = 0;
+	J0x07:
+
+	// End:0x20E [Loop If]
+	if(__NFUN_150__(iMember, m_iMemberCount))
 	{
-        if (m_Team[iMember] == none || m_Team[iMember].m_bIsPlayer || !m_Team[iMember].IsAlive())
-            continue;
+		// End:0x60
+		if(__NFUN_132__(__NFUN_132__(__NFUN_114__(m_Team[iMember], none), m_Team[iMember].m_bIsPlayer), __NFUN_129__(m_Team[iMember].IsAlive())))
+		{
+			// [Explicit Continue]
+			goto J0x204;
+		}
+		iWeaponGroup = 3;
+		J0x68:
 
-		// For each gadget group
-		for( iWeaponGroup = 3; iWeaponGroup <= 4; iWeaponGroup++ )
+		// End:0x204 [Loop If]
+		if(__NFUN_152__(iWeaponGroup, 4))
 		{
 			bHasGrenade = false;
 			grenadeWeapon = m_Team[iMember].GetWeaponInGroup(iWeaponGroup);
-			// if the weapon in this group is a grenade and that there is grenades left
-			// see if it's the type we're looking for
-			if( grenadeWeapon != None && grenadeWeapon.m_eWeaponType == WT_Grenade && grenadeWeapon.HasAmmo() )
-			{ 
-				switch( grenadeType )
-				{
-				case GT_GrenadeFrag:
-					if( grenadeWeapon.HasBulletType('R6FragGrenade') )
-						bHasGrenade = true;
-					break;
-				case GT_GrenadeGas:
-					if( grenadeWeapon.HasBulletType('R6TearGasGrenade') )
-						bHasGrenade = true;
-					break;
-				case GT_GrenadeFlash:
-					if( grenadeWeapon.HasBulletType('R6FlashBang') )
-						bHasGrenade = true;
-					break;
-				case GT_GrenadeSmoke:
-					if( grenadeWeapon.HasBulletType('R6SmokeGrenade') )
-						bHasGrenade = true;
-					break;
-				}
-			}		
-
-			// We've found a rainbow with a grenade, make sure it's not the player
-			if( bHasGrenade && !m_Team[iMember].m_bIsPlayer)
+			// End:0x17C
+			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(grenadeWeapon, none), __NFUN_154__(int(grenadeWeapon.m_eWeaponType), int(6))), grenadeWeapon.HasAmmo()))
 			{
-				if(bSetGadgetGroup && (m_Team[iMember].controller != none))
-					R6RainbowAI(m_Team[iMember].controller).m_iActionUseGadgetGroup = iWeaponGroup;
-				return m_Team[iMember];
+				switch(grenadeType)
+				{
+					// End:0x104
+					case 1:
+						// End:0x101
+						if(grenadeWeapon.HasBulletType('R6FragGrenade'))
+						{
+							bHasGrenade = true;
+						}
+						// End:0x17C
+						break;
+					// End:0x12B
+					case 2:
+						// End:0x128
+						if(grenadeWeapon.HasBulletType('R6TearGasGrenade'))
+						{
+							bHasGrenade = true;
+						}
+						// End:0x17C
+						break;
+					// End:0x152
+					case 3:
+						// End:0x14F
+						if(grenadeWeapon.HasBulletType('R6FlashBang'))
+						{
+							bHasGrenade = true;
+						}
+						// End:0x17C
+						break;
+					// End:0x179
+					case 4:
+						// End:0x176
+						if(grenadeWeapon.HasBulletType('R6SmokeGrenade'))
+						{
+							bHasGrenade = true;
+						}
+						// End:0x17C
+						break;
+					// End:0xFFFF
+					default:
+						break;
+				}
 			}
-		}
-	}   
+			else
+			{
+				// End:0x1FA
+				if(__NFUN_130__(bHasGrenade, __NFUN_129__(m_Team[iMember].m_bIsPlayer)))
+				{
+					// End:0x1EE
+					if(__NFUN_130__(bSetGadgetGroup, __NFUN_119__(m_Team[iMember].Controller, none)))
+					{
+						R6RainbowAI(m_Team[iMember].Controller).m_iActionUseGadgetGroup = iWeaponGroup;
+					}
+					return m_Team[iMember];
+				}
+				__NFUN_165__(iWeaponGroup);
+				// [Loop Continue]
+				goto J0x68;
+			}/* !MISMATCHING REMOVE, tried Loop got Type:Else Position:0x17C! */
+			J0x204:
 
-	return none;
+			__NFUN_165__(iMember);
+			// [Loop Continue]
+			goto J0x07;
+		}
+		return none;
+		return;
+	}/* !MISMATCHING REMOVE, tried Else got Type:Loop Position:0x007! */
 }
 
 //------------------------------------------------------------------//
@@ -2234,51 +2805,78 @@ simulated function R6Rainbow FindRainbowWithGrenadeType( R6AbstractWeapon.eWeapo
 //------------------------------------------------------------------//
 function ActionCompleted(bool bSuccess)
 {
-    local		INT		i;
-	local		INT		iMember;
+	local int i, iMember;
 
-    #ifdefDEBUG if(bShowLog) log(self$" ActionCompleted() was called with bSuccess="$bSuccess);	#endif
-	if(!bSuccess)
+	// End:0x11
+	if(__NFUN_129__(bSuccess))
+	{
 		ResetZuluGoCode();
-	
-    if (m_TeamLeader.m_bIsPlayer)
-    {
-		if (m_iMemberCount > 1)
+	}
+	// End:0x84
+	if(m_TeamLeader.m_bIsPlayer)
+	{
+		// End:0x81
+		if(__NFUN_151__(m_iMemberCount, 1))
 		{
 			m_bTeamIsHoldingPosition = true;
+			// End:0x69
 			if(bSuccess)
 			{
-				if((m_iTeamAction & TEAM_ClearRoom) > 0)
-					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_DoorReform);
+				// End:0x66
+				if(__NFUN_151__(__NFUN_156__(m_iTeamAction, 128), 0))
+				{
+					m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 26);
+				}				
 			}
 			else
-                m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], RMV_TeamOrderFromLeadNil);
-		}
-    }
+			{
+				m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 7);
+			}
+		}		
+	}
 	else
 	{
-		// team is led by a Rainbow AI; make sure team regroups on leader
-		if(m_iMemberCount > 1)
+		// End:0xCE
+		if(__NFUN_151__(m_iMemberCount, 1))
 		{
-			for(iMember=1; iMember<m_iMemberCount; iMember++)
-				m_Team[iMember].controller.GotoState('FollowLeader');		
-		}
-        TeamIsSeparatedFromLead(false);
-	}
+			iMember = 1;
+			J0x96:
 
-    m_iTeamAction = TEAM_None;
+			// End:0xCE [Loop If]
+			if(__NFUN_150__(iMember, m_iMemberCount))
+			{
+				m_Team[iMember].Controller.__NFUN_113__('FollowLeader');
+				__NFUN_165__(iMember);
+				// [Loop Continue]
+				goto J0x96;
+			}
+		}
+		TeamIsSeparatedFromLead(false);
+	}
+	m_iTeamAction = 0;
+	return;
 }
 
 function ReIssueTeamOrders()
 {
-	#ifdefDEBUG if(bShowLog) log(self$" ReIssueTeamOrders() called.... m_iTeamAction = "$m_iTeamAction$" m_actionRequested.iMenuChoice="$m_actionRequested.iMenuChoice);		#endif
-
-	if(m_actionRequested.iMenuChoice == -1)
-		TeamActionRequest(m_actionRequested);
-	else if(m_bCAWaitingForZuluGoCode)
-		TeamActionRequestWaitForZuluGoCode(m_actionRequested, m_actionRequested.iMenuChoice,m_actionRequested.iSubMenuChoice);
+	// End:0x26
+	if(__NFUN_154__(m_actionRequested.iMenuChoice, -1))
+	{
+		TeamActionRequest(m_actionRequested);		
+	}
 	else
-		TeamActionRequestFromRoseDesVents(m_actionRequested, m_actionRequested.iMenuChoice,m_actionRequested.iSubMenuChoice);
+	{
+		// End:0x59
+		if(m_bCAWaitingForZuluGoCode)
+		{
+			TeamActionRequestWaitForZuluGoCode(m_actionRequested, m_actionRequested.iMenuChoice, m_actionRequested.iSubMenuChoice);			
+		}
+		else
+		{
+			TeamActionRequestFromRoseDesVents(m_actionRequested, m_actionRequested.iMenuChoice, m_actionRequested.iSubMenuChoice);
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2290,48 +2888,62 @@ function ReIssueTeamOrders()
 // the 2nd team member in a team that is separated from its leader) //
 // comes into contact with a closed door							//
 //------------------------------------------------------------------//
-function RainbowIsInFrontOfAClosedDoor(R6Pawn rainbow, R6Door door)
+function RainbowIsInFrontOfAClosedDoor(R6Pawn Rainbow, R6Door Door)
 {
-    local   INT     i;
-    local   INT     iOpensClockwise;
-    local   INT     iStart;
-    
-#ifdefDEBUG		
-	if(bShowLog) log(self$" XXX : RainbowIsInFrontOfAClosedDoor() : rainbow="$rainbow$" door="$door$" m_bTeamIsSeparatedFromLeader="$m_bTeamIsSeparatedFromLeader);
-	if(bShowLog) log(self$" XXX : door.m_RotatingDoor="$door.m_RotatingDoor$" m_bEntryInProgress="$m_bEntryInProgress$" door.m_CoorespondingDoor="$door.m_CorrespondingDoor);
-#endif
-    if(rainbow.m_bIsPlayer && (m_bTeamIsSeparatedFromLeader || m_bTeamIsClimbingLadder))
-        return; 
-	
-    m_Door = door;
-    m_PawnControllingDoor = rainbow;
+	local int i, iOpensClockwise, iStart;
 
-	if(m_Door.m_RotatingDoor.m_bTreatDoorAsWindow)
+	// End:0x2A
+	if(__NFUN_130__(Rainbow.m_bIsPlayer, __NFUN_132__(m_bTeamIsSeparatedFromLeader, m_bTeamIsClimbingLadder)))
+	{
 		return;
-
+	}
+	m_Door = Door;
+	m_PawnControllingDoor = Rainbow;
+	// End:0x5D
+	if(m_Door.m_RotatingDoor.m_bTreatDoorAsWindow)
+	{
+		return;
+	}
 	m_bRainbowIsInFrontOfDoor = true;
 	m_bEntryInProgress = true;
+	m_bDoorOpensTowardTeam = Door.m_RotatingDoor.DoorOpenTowardsActor(Rainbow);
+	m_bDoorOpensClockWise = Door.m_RotatingDoor.m_bIsOpeningClockWise;
+	// End:0xC9
+	if(__NFUN_114__(Rainbow, m_TeamLeader))
+	{
+		iStart = 1;		
+	}
+	else
+	{
+		iStart = __NFUN_146__(Rainbow.m_iID, 1);
+	}
+	// End:0x113
+	if(__NFUN_129__(Rainbow.m_bIsPlayer))
+	{
+		R6RainbowAI(Rainbow.Controller).m_bEnteredRoom = false;
+	}
+	i = iStart;
+	J0x11E:
 
-    #ifdefDEBUG	if(bShowLog) log(self$" - "$rainbow$" is in front of a closed door... m_Door="$m_Door);	#endif
-    m_bDoorOpensTowardTeam = door.m_RotatingDoor.DoorOpenTowardsActor(rainbow);
-    m_bDoorOpensClockWise = door.m_RotatingDoor.m_bIsOpeningClockWise;
-    
-    if(rainbow == m_TeamLeader)
-		iStart=1;
-    else
-		iStart=rainbow.m_iId + 1;  
+	// End:0x1B7 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		R6RainbowAI(m_Team[i].Controller).ResetStateProgress();
+		// End:0x18E
+		if(m_Team[i].m_bIsClimbingLadder)
+		{
+			m_Team[i].Controller.NextState = 'RoomEntry';
+			// [Explicit Continue]
+			goto J0x1AD;
+		}
+		m_Team[i].Controller.__NFUN_113__('RoomEntry');
+		J0x1AD:
 
-	if(!rainbow.m_bIsPlayer)
-		R6RainbowAI(rainbow.controller).m_bEnteredRoom = false;
-
-    for(i=iStart; i<m_iMemberCount; i++)
-    {
-		R6RainbowAI(m_Team[i].controller).ResetStateProgress();
-        if(m_Team[i].m_bIsClimbingLadder)
-			m_Team[i].controller.nextState = 'RoomEntry';
-		else
-			m_Team[i].controller.GotoState('RoomEntry');
-    }    
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x11E;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2342,21 +2954,24 @@ function RainbowIsInFrontOfAClosedDoor(R6Pawn rainbow, R6Door door)
 //------------------------------------------------------------------//
 function EnteredRoom(R6Pawn member)
 {
-    local   INT     i;
+	local int i;
 
-	#ifdefDEBUG	if(bShowLog) log(self$" - "$member$" has EnteredRoom()");	#endif
-    if(!m_bEntryInProgress)
-        return;     // log this later, is not normal that a member still be in state Room Entry...
-
-	if(!member.m_bIsPlayer)
-		R6RainbowAI(member.controller).m_bEnteredRoom = true;
-
-    // TODO: check position of team leader(player), and send other members in accordingly...
-	if((member.m_iId == (m_iMemberCount - 1)) || (m_bTeamIsSeparatedFromLeader && m_PawnControllingDoor.m_bIsPlayer))
+	// End:0x0D
+	if(__NFUN_129__(m_bEntryInProgress))
 	{
-        #ifdefDEBUG	if(bShowLog) log(self$" - "$member$" the last member has entered the room....");	#endif
-        m_bEntryInProgress = false;
+		return;
 	}
+	// End:0x40
+	if(__NFUN_129__(member.m_bIsPlayer))
+	{
+		R6RainbowAI(member.Controller).m_bEnteredRoom = true;
+	}
+	// End:0x82
+	if(__NFUN_132__(__NFUN_154__(member.m_iID, __NFUN_147__(m_iMemberCount, 1)), __NFUN_130__(m_bTeamIsSeparatedFromLeader, m_PawnControllingDoor.m_bIsPlayer)))
+	{
+		m_bEntryInProgress = false;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2364,10 +2979,16 @@ function EnteredRoom(R6Pawn member)
 //------------------------------------------------------------------//
 function bool HasGoneThroughDoor()
 {
-	if( (normal(m_PawnControllingDoor.location - m_Door.location) dot m_Door.m_vLookDir) < 0)
-		return false;
+	// End:0x3D
+	if(__NFUN_176__(__NFUN_219__(__NFUN_226__(__NFUN_216__(m_PawnControllingDoor.Location, m_Door.Location)), m_Door.m_vLookDir), float(0)))
+	{
+		return false;		
+	}
 	else
+	{
 		return true;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2375,25 +2996,37 @@ function bool HasGoneThroughDoor()
 //   Room entry has been cancelled									//
 //------------------------------------------------------------------//
 function EndRoomEntry()
-{    
-	local	INT		iStart, i;
-	
+{
+	local int iStart, i;
+
 	m_PawnControllingDoor = none;
-    m_bEntryInProgress = false;
-
-	#ifdefDEBUG	if(bShowLog) log(self$" EndRoomEntry() : make sure all team members are following leader...m_bTeamIsSeparatedFromLeader="$m_bTeamIsSeparatedFromLeader);	#endif
-    if(m_iMemberCount == 1)
+	m_bEntryInProgress = false;
+	// End:0x1C
+	if(__NFUN_154__(m_iMemberCount, 1))
+	{
 		return;
-
+	}
+	// End:0x30
 	if(m_bTeamIsSeparatedFromLeader)
-		iStart = 2;
+	{
+		iStart = 2;		
+	}
 	else
+	{
 		iStart = 1;
- 
-	for(i=iStart; i<m_iMemberCount; i++)
-    {
-        m_Team[i].controller.GotoState('FollowLeader');
-    } 
+	}
+	i = iStart;
+	J0x42:
+
+	// End:0x7A [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		m_Team[i].Controller.__NFUN_113__('FollowLeader');
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x42;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2403,71 +3036,68 @@ function EndRoomEntry()
 //   . door opens and m_PawnControllingDoor leaves door area		//
 //   . door is not opened, m_PawnControllingDoor leaves area		//
 //------------------------------------------------------------------//
-function RainbowHasLeftDoor(R6Pawn rainbow)
+function RainbowHasLeftDoor(R6Pawn Rainbow)
 {
-    local   INT     i;
-    local   INT     iStart;
-    local   vector  vDist; 
-	local   FLOAT   fDir;
-	local   vector	vDir;
+	local int i, iStart;
+	local Vector vDist;
+	local float fDir;
+	local Vector vDir;
 
-	if(m_Door == none || m_Door.m_RotatingDoor == none)
+	// End:0x23
+	if(__NFUN_132__(__NFUN_114__(m_Door, none), __NFUN_114__(m_Door.m_RotatingDoor, none)))
+	{
 		return;
-
-#ifdefDEBUG	
-	if(bShowLog) log(self$"  RainbowHasLeftDoor() rainbow="$rainbow$" m_bEntryInProgress="$m_bEntryInProgress$" m_bRainbowIsInFrontOfDoor="$m_bRainbowIsInFrontOfDoor);
-	if(bShowLog) log(self$" m_PawnControllingDoor="$m_PawnControllingDoor$" m_PawnControllingDoor.m_bIsPlayer="$m_PawnControllingDoor.m_bIsPlayer);	
-	if(bShowLog) log(self$" m_bTeamIsSeparatedFromLeader="$m_bTeamIsSeparatedFromLeader);	
-#endif
-
+	}
+	// End:0x4E
 	if(m_Door.m_RotatingDoor.m_bTreatDoorAsWindow)
 	{
 		m_Door = none;
 		m_PawnControllingDoor = none;
 		return;
 	}
-	
-    if((m_iMemberCount <= 1) || !m_bEntryInProgress || !m_bRainbowIsInFrontOfDoor)
+	// End:0x75
+	if(__NFUN_132__(__NFUN_132__(__NFUN_152__(m_iMemberCount, 1), __NFUN_129__(m_bEntryInProgress)), __NFUN_129__(m_bRainbowIsInFrontOfDoor)))
+	{
 		return;
-
-	if(rainbow != none && rainbow.m_bIsPlayer && m_bTeamIsSeparatedFromLeader)
+	}
+	// End:0xA1
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Rainbow, none), Rainbow.m_bIsPlayer), m_bTeamIsSeparatedFromLeader))
+	{
 		return;
-
+	}
 	m_bRainbowIsInFrontOfDoor = false;
+	// End:0x103
+	if(__NFUN_130__(__NFUN_132__(__NFUN_129__(m_Door.m_RotatingDoor.m_bIsDoorClosed), m_Door.m_RotatingDoor.m_bInProcessOfOpening), HasGoneThroughDoor()))
+	{
+		EnteredRoom(m_PawnControllingDoor);
+		m_PawnControllingDoor = none;		
+	}
+	else
+	{
+		m_Door = none;
+		// End:0x123
+		if(__NFUN_114__(m_PawnControllingDoor, m_TeamLeader))
+		{
+			iStart = 1;			
+		}
+		else
+		{
+			iStart = 2;
+		}
+		i = iStart;
+		J0x136:
 
-#ifdefDEBUG	
-	if(bShowLog) log(self$" RainbowHasLeftDoor() : m_Door.m_RotatingDoor.m_bIsDoorClosed="$m_Door.m_RotatingDoor.m_bIsDoorClosed);
-	if(bShowLog) log(self$" m_PawnControllingDoor.velocity="$m_PawnControllingDoor.velocity);
-#endif
-
-    // check to see if player has entered room, or just left the area...
-    // TODO : when player decides not to storm a room after having opened the door, the team tries to enter anyway...
-    if((!m_Door.m_RotatingDoor.m_bIsDoorClosed || m_Door.m_RotatingDoor.m_bInProcessOfOpening) && HasGoneThroughDoor())
-    {
-        // the door is open so the player has entered the room...   
-		#ifdefDEBUG	if(bShowLog) log(self$" - "$m_PawnControllingDoor$" pawn has entered room....");	#endif
-
-        EnteredRoom(m_PawnControllingDoor); 
-		m_PawnControllingDoor = none; 
-
-    }
-    else
-    {
-		#ifdefDEBUG	if(bShowLog) log(self$" - "$m_PawnControllingDoor$" pawn did not enter room....");	#endif
-        m_Door = none;
-
-        if(m_PawnControllingDoor == m_TeamLeader)
-            iStart = 1;
-        else
-            iStart = 2;
-
-        for(i=iStart; i<m_iMemberCount; i++)
-        {
-            m_Team[i].controller.GotoState('FollowLeader');
-        } 
-
+		// End:0x16E [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x136;
+		}
 		EndRoomEntry();
-    }
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2475,93 +3105,122 @@ function RainbowHasLeftDoor(R6Pawn rainbow)
 //------------------------------------------------------------------//
 function GetPlayerDirection()
 {
-	local   FLOAT   fDirResult;
-	local   vector	vCrossDir;
-	local   vector  vPlayerMove;
-	
-	if(!m_TeamLeader.m_bIsPlayer)
+	local float fDirResult;
+	local Vector vCrossDir, vPlayerMove;
+
+	// End:0x16
+	if(__NFUN_129__(m_TeamLeader.m_bIsPlayer))
+	{
 		return;
-
-	// get the player's movement direction...
-	vPlayerMove = normal(m_TeamLeader.location - m_Door.location);
-	fDirResult = vPlayerMove dot m_Door.m_vLookDir;
-	vCrossDir = vPlayerMove cross m_Door.m_vLookDir;
-
-	if(m_Door.m_eRoomLayout == ROOM_OpensLeft)
-	{
-		if((fDirResult > 0.9) || (vCrossDir.z > 0)) 
-			m_ePlayerRoomEntry = PRE_Right;
-		else if(fDirResult > 0.4)
-			m_ePlayerRoomEntry = PRE_Center;
-		else
-			m_ePlayerRoomEntry = PRE_Left;
 	}
-	else if(m_Door.m_eRoomLayout == ROOM_OpensRight)
+	vPlayerMove = __NFUN_226__(__NFUN_216__(m_TeamLeader.Location, m_Door.Location));
+	fDirResult = __NFUN_219__(vPlayerMove, m_Door.m_vLookDir);
+	vCrossDir = __NFUN_220__(vPlayerMove, m_Door.m_vLookDir);
+	// End:0xDE
+	if(__NFUN_154__(int(m_Door.m_eRoomLayout), int(1)))
 	{
-		if((fDirResult > 0.9) || (vCrossDir.z < 0)) 
-			m_ePlayerRoomEntry = PRE_Left;
-		else if(fDirResult > 0.4)
-			m_ePlayerRoomEntry = PRE_Center;
+		// End:0xB9
+		if(__NFUN_132__(__NFUN_177__(fDirResult, 0.9000000), __NFUN_177__(vCrossDir.Z, float(0))))
+		{
+			m_ePlayerRoomEntry = 2;			
+		}
 		else
-			m_ePlayerRoomEntry = PRE_Right;
+		{
+			// End:0xD3
+			if(__NFUN_177__(fDirResult, 0.4000000))
+			{
+				m_ePlayerRoomEntry = 0;				
+			}
+			else
+			{
+				m_ePlayerRoomEntry = 1;
+			}
+		}		
 	}
 	else
 	{
-		if(fDirResult > 0.9)
-			m_ePlayerRoomEntry = PRE_Center; 
-		else
-		{			
-			if(vCrossDir.z > 0)
-				m_ePlayerRoomEntry = PRE_Left;  
+		// End:0x14A
+		if(__NFUN_154__(int(m_Door.m_eRoomLayout), int(2)))
+		{
+			// End:0x125
+			if(__NFUN_132__(__NFUN_177__(fDirResult, 0.9000000), __NFUN_176__(vCrossDir.Z, float(0))))
+			{
+				m_ePlayerRoomEntry = 1;				
+			}
 			else
-				m_ePlayerRoomEntry = PRE_Right; 
+			{
+				// End:0x13F
+				if(__NFUN_177__(fDirResult, 0.4000000))
+				{
+					m_ePlayerRoomEntry = 0;					
+				}
+				else
+				{
+					m_ePlayerRoomEntry = 2;
+				}
+			}			
+		}
+		else
+		{
+			// End:0x164
+			if(__NFUN_177__(fDirResult, 0.9000000))
+			{
+				m_ePlayerRoomEntry = 0;				
+			}
+			else
+			{
+				// End:0x181
+				if(__NFUN_177__(vCrossDir.Z, float(0)))
+				{
+					m_ePlayerRoomEntry = 1;					
+				}
+				else
+				{
+					m_ePlayerRoomEntry = 2;
+				}
+			}
 		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------//
 //  UpdatePlayerWeapon()											//
 //------------------------------------------------------------------//
-function UpdatePlayerWeapon(R6Rainbow rainbow)
+function UpdatePlayerWeapon(R6Rainbow Rainbow)
 {
-    //Reset the Weapons Attachments
-    rainbow.AttachWeapon(rainbow.EngineWeapon, rainbow.EngineWeapon.m_AttachPoint);
-
-    //Weapon Update when changing characters
-    if((rainbow.EngineWeapon != rainbow.GetWeaponInGroup(1)) && (rainbow.GetWeaponInGroup(1) != none))
-    {
-        //Reset Main Weapon's draw properties and location since they're not updated in first person
-        rainbow.AttachWeapon(rainbow.GetWeaponInGroup(1), rainbow.GetWeaponInGroup(1).m_HoldAttachPoint);
-    }
-    if((rainbow.EngineWeapon != rainbow.GetWeaponInGroup(2)) && (rainbow.GetWeaponInGroup(2) != none))
-    {
-        //Reset secondary Weapon's draw properties and location since they're not updated in first person
-        rainbow.AttachWeapon(rainbow.GetWeaponInGroup(2), rainbow.GetWeaponInGroup(2).m_HoldAttachPoint);
-    }
-    if((rainbow.EngineWeapon != rainbow.GetWeaponInGroup(3)) && (rainbow.GetWeaponInGroup(3) != none))
-    {
-        //Reset secondary Weapon's draw properties and location since they're not updated in first person
-        rainbow.AttachWeapon(rainbow.GetWeaponInGroup(3), rainbow.GetWeaponInGroup(3).m_HoldAttachPoint);
-    }
-    if((rainbow.EngineWeapon != rainbow.GetWeaponInGroup(4)) && (rainbow.GetWeaponInGroup(4) != none))
-    {
-        //Reset secondary Weapon's draw properties and location since they're not updated in first person
-        rainbow.AttachWeapon(rainbow.GetWeaponInGroup(4), rainbow.GetWeaponInGroup(4).m_HoldAttachPoint);
-    }
-   
-    //set the weapon's gadget if it was activated.
-    if(rainbow.m_bWeaponGadgetActivated == true)
-    {
-        //Reactivate the gadget, it should attach it to the 3rd person character.
-        R6AbstractWeapon(rainbow.EngineWeapon).m_SelectedWeaponGadget.ActivateGadget(TRUE, TRUE);
-    }
-    
-    //Turn Off the Night vision  TODO: check with design about night vision.
-    if(rainbow.m_bActivateNightVision == true)
-    {
-        rainbow.ToggleNightVision();
-    }
-    
+	Rainbow.AttachWeapon(Rainbow.EngineWeapon, Rainbow.EngineWeapon.m_AttachPoint);
+	// End:0xA7
+	if(__NFUN_130__(__NFUN_119__(Rainbow.EngineWeapon, Rainbow.GetWeaponInGroup(1)), __NFUN_119__(Rainbow.GetWeaponInGroup(1), none)))
+	{
+		Rainbow.AttachWeapon(Rainbow.GetWeaponInGroup(1), Rainbow.GetWeaponInGroup(1).m_HoldAttachPoint);
+	}
+	// End:0x11E
+	if(__NFUN_130__(__NFUN_119__(Rainbow.EngineWeapon, Rainbow.GetWeaponInGroup(2)), __NFUN_119__(Rainbow.GetWeaponInGroup(2), none)))
+	{
+		Rainbow.AttachWeapon(Rainbow.GetWeaponInGroup(2), Rainbow.GetWeaponInGroup(2).m_HoldAttachPoint);
+	}
+	// End:0x195
+	if(__NFUN_130__(__NFUN_119__(Rainbow.EngineWeapon, Rainbow.GetWeaponInGroup(3)), __NFUN_119__(Rainbow.GetWeaponInGroup(3), none)))
+	{
+		Rainbow.AttachWeapon(Rainbow.GetWeaponInGroup(3), Rainbow.GetWeaponInGroup(3).m_HoldAttachPoint);
+	}
+	// End:0x20C
+	if(__NFUN_130__(__NFUN_119__(Rainbow.EngineWeapon, Rainbow.GetWeaponInGroup(4)), __NFUN_119__(Rainbow.GetWeaponInGroup(4), none)))
+	{
+		Rainbow.AttachWeapon(Rainbow.GetWeaponInGroup(4), Rainbow.GetWeaponInGroup(4).m_HoldAttachPoint);
+	}
+	// End:0x249
+	if(__NFUN_242__(Rainbow.m_bWeaponGadgetActivated, true))
+	{
+		R6AbstractWeapon(Rainbow.EngineWeapon).m_SelectedWeaponGadget.ActivateGadget(true, true);
+	}
+	// End:0x26D
+	if(__NFUN_242__(Rainbow.m_bActivateNightVision, true))
+	{
+		Rainbow.ToggleNightVision();
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2569,149 +3228,186 @@ function UpdatePlayerWeapon(R6Rainbow rainbow)
 //------------------------------------------------------------------//
 function UpdateFirstPersonWeaponMemory(R6Rainbow npc, R6Rainbow teamLeader)
 {
-    local INT i;
-    local R6AbstractWeapon LeaderWeapon;
-    local R6AbstractWeapon NPCWeapon;
+	local int i;
+	local R6AbstractWeapon LeaderWeapon, NPCWeapon;
 
-	if(Level.NetMode == NM_Standalone)
+	// End:0x1D8
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
 	{
-        for(i=1; i<=4; i++)
-        {
-	        if(npc.GetWeaponInGroup(i) != none)
-                npc.GetWeaponInGroup(i).RemoveFirstPersonWeapon(); //Free memory taken by First Person Weapon meshes
+		i = 1;
+		J0x20:
 
-	        if(teamLeader.GetWeaponInGroup(i) != none)
-		        teamLeader.GetWeaponInGroup(i).LoadFirstPersonWeapon(); // load FP weapons of the new pawn controlled by the character
-        }
-        if(teamLeader.m_bChangingWeapon == true)
-        {
-            //Hide Engine Weapon before it's replaced by the pending weapon
-            R6AbstractWeapon(teamLeader.EngineWeapon).m_FPHands.SetDrawType(DT_None);
-            teamLeader.EngineWeapon.GotoState('DiscardWeapon');
-
-            teamLeader.PendingWeapon.m_bPawnIsWalking = teamLeader.EngineWeapon.m_bPawnIsWalking;
-            teamLeader.EngineWeapon = teamLeader.PendingWeapon;
-            
-            if(teamLeader.EngineWeapon.IsInState('RaiseWeapon'))
-                teamLeader.EngineWeapon.BeginState();
-            else
-                teamLeader.EngineWeapon.GotoState('RaiseWeapon');
-        }
-        else
-        {
-            teamLeader.EngineWeapon.StartLoopingAnims();
-        }
+		// End:0xC5 [Loop If]
+		if(__NFUN_152__(i, 4))
+		{
+			// End:0x83
+			if(__NFUN_119__(npc.GetWeaponInGroup(i), none))
+			{
+				npc.GetWeaponInGroup(i).StopFire(true);
+				npc.GetWeaponInGroup(i).RemoveFirstPersonWeapon();
+			}
+			// End:0xBB
+			if(__NFUN_119__(teamLeader.GetWeaponInGroup(i), none))
+			{
+				teamLeader.GetWeaponInGroup(i).LoadFirstPersonWeapon();
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x20;
+		}
+		// End:0x1BD
+		if(__NFUN_242__(teamLeader.m_bChangingWeapon, true))
+		{
+			R6AbstractWeapon(teamLeader.EngineWeapon).m_FPHands.SetDrawType(0);
+			teamLeader.EngineWeapon.__NFUN_113__('DiscardWeapon');
+			teamLeader.PendingWeapon.m_bPawnIsWalking = teamLeader.EngineWeapon.m_bPawnIsWalking;
+			teamLeader.EngineWeapon = teamLeader.PendingWeapon;
+			// End:0x1A1
+			if(teamLeader.EngineWeapon.__NFUN_281__('RaiseWeapon'))
+			{
+				teamLeader.EngineWeapon.BeginState();				
+			}
+			else
+			{
+				teamLeader.EngineWeapon.__NFUN_113__('RaiseWeapon');
+			}			
+		}
+		else
+		{
+			teamLeader.EngineWeapon.StartLoopingAnims();
+		}		
 	}
 	else
 	{
-        teamLeader.m_bReloadingWeapon = false;
-        teamLeader.m_bPawnIsReloading = false;
-        teamLeader.m_bWeaponTransition = false;
-        npc.m_bReloadingWeapon = false;
-        npc.m_bPawnIsReloading = false;
-        npc.m_bWeaponTransition = false;
+		teamLeader.m_bReloadingWeapon = false;
+		teamLeader.m_bPawnIsReloading = false;
+		teamLeader.m_bWeaponTransition = false;
+		npc.m_bReloadingWeapon = false;
+		npc.m_bPawnIsReloading = false;
+		npc.m_bWeaponTransition = false;
+		// End:0x27F
+		if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)), teamLeader.IsLocallyControlled()))
+		{
+			teamLeader.RemoteRole = ROLE_SimulatedProxy;			
+		}
+		else
+		{
+			teamLeader.RemoteRole = ROLE_AutonomousProxy;
+		}
+		npc.RemoteRole = ROLE_SimulatedProxy;
+		i = 1;
+		J0x2A8:
 
-        //log("Just changed to character   :"$teamLeader.Role$" : "$teamLeader.RemoteRole$" : "$teamLeader.Controller);
-        //log("Just changed from character :"$npc.Role$" : "$npc.RemoteRole$" : "$npc.Controller);
-
-        if((Level.NetMode != NM_DedicatedServer) && teamLeader.IsLocallyControlled())
-            teamLeader.RemoteRole = ROLE_SimulatedProxy;
-        else
-            teamLeader.RemoteRole = ROLE_AutonomousProxy;
-        npc.RemoteRole = ROLE_SimulatedProxy;
-
-        for(i=1; i<=4; i++)
-        {
-            LeaderWeapon = R6AbstractWeapon(teamLeader.GetWeaponInGroup(i));
-            NPCWeapon = R6AbstractWeapon(npc.GetWeaponInGroup(i));
-            if(LeaderWeapon != none)
-            {
-                if((Level.NetMode != NM_DedicatedServer) && teamLeader.IsLocallyControlled())
-                    LeaderWeapon.RemoteRole = ROLE_SimulatedProxy;
-                else
-                    LeaderWeapon.RemoteRole = ROLE_AutonomousProxy;
-                NPCWeapon.RemoteRole = ROLE_SimulatedProxy;
-            }
-        }
+		// End:0x36A [Loop If]
+		if(__NFUN_152__(i, 4))
+		{
+			LeaderWeapon = R6AbstractWeapon(teamLeader.GetWeaponInGroup(i));
+			NPCWeapon = R6AbstractWeapon(npc.GetWeaponInGroup(i));
+			// End:0x360
+			if(__NFUN_119__(LeaderWeapon, none))
+			{
+				// End:0x33E
+				if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)), teamLeader.IsLocallyControlled()))
+				{
+					LeaderWeapon.RemoteRole = ROLE_SimulatedProxy;					
+				}
+				else
+				{
+					LeaderWeapon.RemoteRole = ROLE_AutonomousProxy;
+				}
+				NPCWeapon.RemoteRole = ROLE_SimulatedProxy;
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x2A8;
+		}
 		ClientUpdateFirstPersonWpnAndPeeking(npc, teamLeader);
 	}
+	return;
 }
 
 //Transfer the FPhands and FPweapons to an other pawn.  On client  only
 simulated function ClientUpdateFirstPersonWpnAndPeeking(R6Rainbow npc, R6Rainbow teamLeader)
 {
-    local INT i;
-    local BOOL bLoadWorked;
-    local R6AbstractWeapon LeaderWeapon;
-    local R6AbstractWeapon NPCWeapon;
+	local int i;
+	local bool bLoadWorked;
+	local R6AbstractWeapon LeaderWeapon, NPCWeapon;
 	local Texture scopeTexture;
-    local R6PlayerController LocalController;
+	local R6PlayerController LocalController;
 
-    //One of the two pawn has the player controller, Maybe the NPC, it's just not replicated yet.
-    LocalController = R6PlayerController(npc.controller);
-    if(LocalController == none)
-        LocalController = R6PlayerController(teamLeader.controller);
+	LocalController = R6PlayerController(npc.Controller);
+	// End:0x3D
+	if(__NFUN_114__(LocalController, none))
+	{
+		LocalController = R6PlayerController(teamLeader.Controller);
+	}
+	// End:0x78
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	{
+		teamLeader.Role = ROLE_AutonomousProxy;
+		npc.Role = ROLE_SimulatedProxy;
+	}
+	teamLeader.bRotateToDesired = false;
+	i = 1;
+	J0x90:
 
-    if(Level.NetMode == NM_Client)
-    {
-        teamLeader.Role = ROLE_AutonomousProxy;
-        npc.Role = ROLE_SimulatedProxy;
-    }
-    //log("Just changed to character   :"$teamLeader.RemoteRole$" : "$teamLeader.Role$" : "$teamLeader.Controller);
-    //log("Just changed from character :"$npc.RemoteRole$" : "$npc.Role$" : "$npc.Controller);
-
-    //reset the flag locally.
-    teamLeader.bRotateToDesired = false;
-
-    for(i=1; i<=4; i++)
-    {
-        LeaderWeapon = R6AbstractWeapon(teamLeader.GetWeaponInGroup(i));
-        NPCWeapon = R6AbstractWeapon(npc.GetWeaponInGroup(i));
-        if(LeaderWeapon != none)
-        {
-            if(Level.NetMode == NM_Client)
-            {
-                LeaderWeapon.Role = ROLE_AutonomousProxy;
-                NPCWeapon.Role = ROLE_SimulatedProxy;
-            }
-
-            npc.GetWeaponInGroup(i).RemoveFirstPersonWeapon(); //Free memory taken by First Person Weapon meshes
-		    bLoadWorked = teamLeader.GetWeaponInGroup(i).LoadFirstPersonWeapon( ,LocalController); // load FP weapons of the new pawn controlled by the character
-        }
-    }
-
-    if(bLoadWorked == true)
-    {
-        if(teamLeader.m_bChangingWeapon == true)
-        {
-            //Hide Engine Weapon before it's replaced by the pending weapon
-            if(teamLeader.EngineWeapon != teamLeader.PendingWeapon)
-            {
-                R6AbstractWeapon(teamLeader.EngineWeapon).m_FPHands.SetDrawType(DT_None);
-                teamLeader.EngineWeapon.GotoState('');
-                
-                teamLeader.PendingWeapon.m_bPawnIsWalking = teamLeader.EngineWeapon.m_bPawnIsWalking;
-                teamLeader.EngineWeapon = teamLeader.PendingWeapon;
-            }
-        
-            LocalController.m_bLockWeaponActions = true;
-            if(teamLeader.EngineWeapon.IsInState('RaiseWeapon'))
-            {
-                teamLeader.EngineWeapon.BeginState();
-            }
-            else
-            {
-                teamLeader.EngineWeapon.GotoState('RaiseWeapon');
-            }
-        }
-        else 
-        {
-            if(teamLeader.EngineWeapon != none)
-		        teamLeader.EngineWeapon.StartLoopingAnims();
-        }
-    }
-
-    LocalController.SetPeekingInfo( PEEK_none, npc.C_fPeekMiddleMax ); 
+	// End:0x173 [Loop If]
+	if(__NFUN_152__(i, 4))
+	{
+		LeaderWeapon = R6AbstractWeapon(teamLeader.GetWeaponInGroup(i));
+		NPCWeapon = R6AbstractWeapon(npc.GetWeaponInGroup(i));
+		// End:0x169
+		if(__NFUN_119__(LeaderWeapon, none))
+		{
+			// End:0x120
+			if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+			{
+				LeaderWeapon.Role = ROLE_AutonomousProxy;
+				NPCWeapon.Role = ROLE_SimulatedProxy;
+			}
+			npc.GetWeaponInGroup(i).RemoveFirstPersonWeapon();
+			bLoadWorked = teamLeader.GetWeaponInGroup(i).LoadFirstPersonWeapon(, LocalController);
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x90;
+	}
+	// End:0x2D5
+	if(__NFUN_242__(bLoadWorked, true))
+	{
+		// End:0x2A9
+		if(__NFUN_242__(teamLeader.m_bChangingWeapon, true))
+		{
+			// End:0x244
+			if(__NFUN_119__(teamLeader.EngineWeapon, teamLeader.PendingWeapon))
+			{
+				R6AbstractWeapon(teamLeader.EngineWeapon).m_FPHands.SetDrawType(0);
+				teamLeader.EngineWeapon.__NFUN_113__('None');
+				teamLeader.PendingWeapon.m_bPawnIsWalking = teamLeader.EngineWeapon.m_bPawnIsWalking;
+				teamLeader.EngineWeapon = teamLeader.PendingWeapon;
+			}
+			LocalController.m_bLockWeaponActions = true;
+			// End:0x28D
+			if(teamLeader.EngineWeapon.__NFUN_281__('RaiseWeapon'))
+			{
+				teamLeader.EngineWeapon.BeginState();				
+			}
+			else
+			{
+				teamLeader.EngineWeapon.__NFUN_113__('RaiseWeapon');
+			}			
+		}
+		else
+		{
+			// End:0x2D5
+			if(__NFUN_119__(teamLeader.EngineWeapon, none))
+			{
+				teamLeader.EngineWeapon.StartLoopingAnims();
+			}
+		}
+	}
+	LocalController.SetPeekingInfo(0, npc.1000.0000000);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -2719,13 +3415,15 @@ simulated function ClientUpdateFirstPersonWpnAndPeeking(R6Rainbow npc, R6Rainbow
 //------------------------------------------------------------------
 function ResetWeaponReloading()
 {
-    if(m_Team[0].m_bPawnIsReloading == true)
-    {
-        m_Team[0].ServerSwitchReloadingWeapon(false);
-        m_Team[0].m_bPawnIsReloading=false;
-        m_Team[0].GotoState('');
-        m_Team[0].PlayWeaponAnimation();
-    }
+	// End:0x5F
+	if(__NFUN_242__(m_Team[0].m_bPawnIsReloading, true))
+	{
+		m_Team[0].ServerSwitchReloadingWeapon(false);
+		m_Team[0].m_bPawnIsReloading = false;
+		m_Team[0].__NFUN_113__('None');
+		m_Team[0].PlayWeaponAnimation();
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -2733,48 +3431,53 @@ function ResetWeaponReloading()
 //------------------------------------------------------------------
 function SetPlayerControllerState(R6PlayerController aPlayerController)
 {
+	// End:0xC9
 	if(m_Team[0].m_bIsClimbingLadder)
 	{
 		aPlayerController.ClientHideReticule(true);
-		m_Team[0].EngineWeapon.GotoState('PutWeaponDown');
-		if(m_Team[0].Physics == PHYS_RootMotion)
+		m_Team[0].EngineWeapon.__NFUN_113__('PutWeaponDown');
+		// End:0xA5
+		if(__NFUN_154__(int(m_Team[0].Physics), int(12)))
 		{
-			// Physics is ROOT MOTION
 			aPlayerController.m_bSkipBeginState = true;
+			// End:0x92
 			if(m_Team[0].m_bGettingOnLadder)
-				aPlayerController.GotoState('PlayerBeginClimbingLadder');
+			{
+				aPlayerController.__NFUN_113__('PlayerBeginClimbingLadder');				
+			}
 			else
-				aPlayerController.GotoState('PlayerEndClimbingLadder');
+			{
+				aPlayerController.__NFUN_113__('PlayerEndClimbingLadder');
+			}			
 		}
-		else 
+		else
 		{
-			// PHYS_Ladder
-			aPlayerController.m_bSkipBeginState = false;			
-			aPlayerController.GotoState('PlayerClimbing');
-		}
+			aPlayerController.m_bSkipBeginState = false;
+			aPlayerController.__NFUN_113__('PlayerClimbing');
+		}		
 	}
 	else
-	{		
-		if(m_Team[0].physics == PHYS_Ladder && m_Team[0].onLadder != none)
-		{
-			// pawn was right about to get on a ladder (weapon secured)
-			R6LadderVolume(m_Team[0].onLadder).RemoveClimber(m_Team[0]);
-			MemberFinishedClimbingLadder(m_Team[0]);
-			m_Team[0].RainbowEquipWeapon(); 
-			m_Team[0].m_ePlayerIsUsingHands = HANDS_None;
-			m_Team[0].m_bWeaponTransition = false;
-		}		
-
-		aPlayerController.ClientHideReticule(false);
-		aPlayerController.GotoState('PlayerWalking');
-		m_Team[0].SetPhysics(PHYS_Walking);
-	}
-
-	if(Level.NetMode != NM_Standalone)
 	{
-		aPlayerController.ClientGotoState(aPlayerController.GetStateName(),'');
-		aPlayerController.ClientDisableFirstPersonViewEffects(TRUE);
+		// End:0x166
+		if(__NFUN_130__(__NFUN_154__(int(m_Team[0].Physics), int(11)), __NFUN_119__(m_Team[0].OnLadder, none)))
+		{
+			R6LadderVolume(m_Team[0].OnLadder).RemoveClimber(m_Team[0]);
+			MemberFinishedClimbingLadder(m_Team[0]);
+			m_Team[0].RainbowEquipWeapon();
+			m_Team[0].m_ePlayerIsUsingHands = 0;
+			m_Team[0].m_bWeaponTransition = false;
+		}
+		aPlayerController.ClientHideReticule(false);
+		aPlayerController.__NFUN_113__('PlayerWalking');
+		m_Team[0].__NFUN_3970__(1);
 	}
+	// End:0x1DF
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		aPlayerController.ClientGotoState(aPlayerController.__NFUN_284__(), 'None');
+		aPlayerController.ClientDisableFirstPersonViewEffects(true);
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -2784,117 +3487,142 @@ function SetAILeadControllerState()
 {
 	local R6Ladder topLadder, bottomLadder;
 
+	// End:0x14
 	if(m_TeamLeader.m_bIsPlayer)
+	{
 		return;
-
+	}
+	// End:0x1D7
 	if(m_TeamLeader.m_bIsClimbingLadder)
 	{
 		topLadder = R6LadderVolume(m_TeamLeader.OnLadder).m_TopLadder;
 		bottomLadder = R6LadderVolume(m_TeamLeader.OnLadder).m_BottomLadder;
-
-		m_TeamLeader.controller.nextState = 'WaitForTeam';
-
-		// set the rainbow AI state
-		if(m_TeamLeader.physics == PHYS_RootMotion)
+		m_TeamLeader.Controller.NextState = 'WaitForTeam';
+		// End:0x113
+		if(__NFUN_154__(int(m_TeamLeader.Physics), int(12)))
 		{
-			R6RainbowAI(m_TeamLeader.controller).m_bMoveTargetAlreadySet = true;
+			R6RainbowAI(m_TeamLeader.Controller).m_bMoveTargetAlreadySet = true;
+			// End:0xF2
 			if(m_TeamLeader.m_bGettingOnLadder)
-				m_TeamLeader.controller.GotoState('BeginClimbingLadder','WaitForStartClimbingAnimToEnd');
+			{
+				m_TeamLeader.Controller.__NFUN_113__('BeginClimbingLadder', 'WaitForStartClimbingAnimToEnd');				
+			}
 			else
-				m_TeamLeader.controller.GotoState('EndClimbingLadder', 'WaitForEndClimbingAnimToEnd');
+			{
+				m_TeamLeader.Controller.__NFUN_113__('EndClimbingLadder', 'WaitForEndClimbingAnimToEnd');
+			}			
 		}
 		else
 		{
-			// Rainbow AI is not in Root Motion...
-			m_TeamLeader.controller.GotoState('BeginClimbingLadder','MoveTowardEndOfLadder');
+			m_TeamLeader.Controller.__NFUN_113__('BeginClimbingLadder', 'MoveTowardEndOfLadder');
 		}
-
-		// pick an appropriate direction to move
-		if( (m_PlanActionPoint != none)	&& (abs(m_PlanActionPoint.location.z - topLadder.location.z) < abs(m_PlanActionPoint.location.z - bottomLadder.location.z)) )
-			m_TeamLeader.controller.moveTarget = topLadder;
+		// End:0x1B7
+		if(__NFUN_130__(__NFUN_119__(m_PlanActionPoint, none), __NFUN_176__(__NFUN_186__(__NFUN_175__(m_PlanActionPoint.Location.Z, topLadder.Location.Z)), __NFUN_186__(__NFUN_175__(m_PlanActionPoint.Location.Z, bottomLadder.Location.Z)))))
+		{
+			m_TeamLeader.Controller.MoveTarget = topLadder;			
+		}
 		else
-			m_TeamLeader.controller.moveTarget = bottomLadder;
+		{
+			m_TeamLeader.Controller.MoveTarget = bottomLadder;
+		}		
 	}
 	else
 	{
-		m_TeamLeader.controller.GotoState('Patrol');
-		m_TeamLeader.SetPhysics(PHYS_Walking);
-
-		if(m_TeamLeader.m_eEquipWeapon != EQUIP_Armed)
+		m_TeamLeader.Controller.__NFUN_113__('Patrol');
+		m_TeamLeader.__NFUN_3970__(1);
+		// End:0x248
+		if(__NFUN_155__(int(m_TeamLeader.m_eEquipWeapon), int(3)))
 		{
-			m_TeamLeader.RainbowEquipWeapon(); 
-			m_TeamLeader.m_ePlayerIsUsingHands = HANDS_None;
-			m_TeamLeader.m_bWeaponTransition = false;							
-		}		
+			m_TeamLeader.RainbowEquipWeapon();
+			m_TeamLeader.m_ePlayerIsUsingHands = 0;
+			m_TeamLeader.m_bWeaponTransition = false;
+		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------
 // ResetRainbowControllerStates()							
 //------------------------------------------------------------------
-function ResetRainbowControllerStates(R6PlayerController aPlayerController, INT iMember)
+function ResetRainbowControllerStates(R6PlayerController aPlayerController, int iMember)
 {
-	local	INT		i;
-	local   bool	bAtLeastOneMemberIsOnLadder;
+	local int i;
+	local bool bAtLeastOneMemberIsOnLadder;
 
-	//////////////////////////////////////////////////////////
-	// set the playerController's state appropriately
-	//////////////////////////////////////////////////////////
 	SetPlayerControllerState(aPlayerController);
+	i = 1;
+	J0x12:
 
-	//////////////////////////////////////////////////////////
-	// set the rest of the team's state appropriately
-	//////////////////////////////////////////////////////////
-	for(i=1; i<m_iMemberCount; i++)
-    {
-        R6RainbowAI(m_Team[i].controller).m_TeamLeader = m_TeamLeader;
-		if(i == iMember && m_Team[i].m_bIsClimbingLadder)
+	// End:0x339 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		R6RainbowAI(m_Team[i].Controller).m_TeamLeader = m_TeamLeader;
+		// End:0x261
+		if(__NFUN_130__(__NFUN_154__(i, iMember), m_Team[i].m_bIsClimbingLadder))
 		{
-			m_Team[i].controller.nextState = 'FollowLeader';
-
-			R6LadderVolume(m_Team[i].onLadder).DisableCollisions(m_Team[i].m_Ladder);
-			if(m_Team[i].physics == PHYS_RootMotion)
+			m_Team[i].Controller.NextState = 'FollowLeader';
+			R6LadderVolume(m_Team[i].OnLadder).DisableCollisions(m_Team[i].m_Ladder);
+			// End:0x176
+			if(__NFUN_154__(int(m_Team[i].Physics), int(12)))
 			{
-				R6RainbowAI(m_Team[i].controller).m_bMoveTargetAlreadySet = true;
+				R6RainbowAI(m_Team[i].Controller).m_bMoveTargetAlreadySet = true;
+				// End:0x14F
 				if(m_Team[i].m_bGettingOnLadder)
-					m_Team[i].controller.GotoState('BeginClimbingLadder','WaitForStartClimbingAnimToEnd');
+				{
+					m_Team[i].Controller.__NFUN_113__('BeginClimbingLadder', 'WaitForStartClimbingAnimToEnd');					
+				}
 				else
-					m_Team[i].controller.GotoState('EndClimbingLadder', 'WaitForEndClimbingAnimToEnd');
+				{
+					m_Team[i].Controller.__NFUN_113__('EndClimbingLadder', 'WaitForEndClimbingAnimToEnd');
+				}				
 			}
 			else
 			{
-				// Rainbow AI is not in Root Motion...
-				m_Team[i].controller.GotoState('BeginClimbingLadder','MoveTowardEndOfLadder');
-			}			
-
-			// pick an appropriate moveTarget near player
-			if(m_Team[0].location.z > (m_Team[i].location.z + 100))
-				m_Team[i].controller.moveTarget = R6LadderVolume(m_Team[i].OnLadder).m_TopLadder;
+				m_Team[i].Controller.__NFUN_113__('BeginClimbingLadder', 'MoveTowardEndOfLadder');
+			}
+			// End:0x216
+			if(__NFUN_177__(m_Team[0].Location.Z, __NFUN_174__(m_Team[i].Location.Z, float(100))))
+			{
+				m_Team[i].Controller.MoveTarget = R6LadderVolume(m_Team[i].OnLadder).m_TopLadder;				
+			}
 			else
-				m_Team[i].controller.moveTarget = R6LadderVolume(m_Team[i].OnLadder).m_BottomLadder;			
-
+			{
+				m_Team[i].Controller.MoveTarget = R6LadderVolume(m_Team[i].OnLadder).m_BottomLadder;
+			}
 			bAtLeastOneMemberIsOnLadder = true;
+			// [Explicit Continue]
+			goto J0x32F;
 		}
-        else if(!m_Team[i].m_bIsClimbingLadder)
+		// End:0x32F
+		if(__NFUN_129__(m_Team[i].m_bIsClimbingLadder))
 		{
-			m_Team[i].controller.GotoState('FollowLeader');
-			
-			if(m_Team[i].physics != PHYS_Falling)
-				m_Team[i].SetPhysics(PHYS_Walking);
-			
-			if(m_Team[i].m_eEquipWeapon != EQUIP_Armed)
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			// End:0x2CD
+			if(__NFUN_155__(int(m_Team[i].Physics), int(2)))
 			{
-				m_Team[i].RainbowEquipWeapon(); 
-				m_Team[i].m_ePlayerIsUsingHands = HANDS_None;
-				m_Team[i].m_bWeaponTransition = false;							
+				m_Team[i].__NFUN_3970__(1);
+			}
+			// End:0x32F
+			if(__NFUN_155__(int(m_Team[i].m_eEquipWeapon), int(3)))
+			{
+				m_Team[i].RainbowEquipWeapon();
+				m_Team[i].m_ePlayerIsUsingHands = 0;
+				m_Team[i].m_bWeaponTransition = false;
 			}
 		}
-		//log("  AI CONTROLLER STATES : m_Team[i]="$m_Team[i]$" m_Team[i].m_bIsClimbingLadder="$m_Team[i].m_bIsClimbingLadder);		
-    }
+		J0x32F:
 
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x12;
+	}
 	SetTeamIsClimbingLadder(bAtLeastOneMemberIsOnLadder);
+	// End:0x354
 	if(m_bCAWaitingForZuluGoCode)
+	{
 		ResetZuluGoCode();
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2903,86 +3631,91 @@ function ResetRainbowControllerStates(R6PlayerController aPlayerController, INT 
 //------------------------------------------------------------------//
 function SwitchPlayerControlToPreviousMember()
 {
-    local   R6Rainbow           tempPawn;
-    local   R6RainbowAI         tempRainbowAI;
-    local   R6PlayerController  tempPlayerController;
-    local   INT                 iLastMember;
-    local   INT                 i;
+	local R6Rainbow tempPawn;
+	local R6RainbowAI tempRainbowAI;
+	local R6PlayerController tempPlayerController;
+	local int iLastMember, i;
 
-    if(level.Game!=none && !R6AbstractGameInfo(level.Game).CanSwitchTeamMember())
-        return;
-
-    if( !m_Team[0].IsAlive() )
-    {
-        #ifdefDEBUG	if(bShowLog) log(self$" SwitchPlayerControlToPreviousMember() : leader is dead or incapacitated....");	#endif
-        SwitchPlayerControlToNextMember();
-        return;
-    }
- 
+	// End:0x3A
+	if(__NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_129__(R6AbstractGameInfo(Level.Game).CanSwitchTeamMember())))
+	{
+		return;
+	}
+	// End:0x58
+	if(__NFUN_129__(m_Team[0].IsAlive()))
+	{
+		SwitchPlayerControlToNextMember();
+		return;
+	}
 	TeamIsSeparatedFromLead(false);
-    if(m_iMemberCount <= 1)
-        return;
+	// End:0x6C
+	if(__NFUN_152__(m_iMemberCount, 1))
+	{
+		return;
+	}
+	iLastMember = __NFUN_147__(m_iMemberCount, 1);
+	tempPawn = m_Team[iLastMember];
+	i = __NFUN_147__(m_iMemberCount, 1);
+	J0x99:
 
-    iLastMember = m_iMemberCount-1;  
-
-    // shift members down in rank : 0 1 2 3 --> 3 0 1 2 
-    tempPawn = m_Team[iLastMember];
-    for(i=m_iMemberCount-1; i>0; i--)
-    {
-        m_Team[i] = m_Team[i-1];        
-        m_Team[i].m_iId = i;
-    }   
-    m_Team[0] = tempPawn;
-    m_TeamLeader = m_Team[0];
-    m_TeamLeader.m_iId = 0;    
-
-    m_Team[1].ClientQuickResetPeeking();
-    m_Team[1].m_bIsPlayer = false;
-    m_TeamLeader.m_bIsPlayer = true;
-
-    tempPawn = m_Team[1];
-	if (tempPawn.m_bIsClimbingLadder == false)
-		UpdatePlayerWeapon(tempPawn);
+	// End:0xE2 [Loop If]
+	if(__NFUN_151__(i, 0))
+	{
+		m_Team[i] = m_Team[__NFUN_147__(i, 1)];
+		m_Team[i].m_iID = i;
+		__NFUN_166__(i);
+		// [Loop Continue]
+		goto J0x99;
+	}
+	m_Team[0] = tempPawn;
+	m_TeamLeader = m_Team[0];
+	m_TeamLeader.m_iID = 0;
+	m_Team[1].ClientQuickResetPeeking();
+	m_Team[1].m_bIsPlayer = false;
+	m_TeamLeader.m_bIsPlayer = true;
+	tempPawn = m_Team[1];
+	// End:0x171
+	if(__NFUN_242__(tempPawn.m_bIsClimbingLadder, false))
+	{
+		UpdatePlayerWeapon(tempPawn);		
+	}
+	else
+	{
+		// End:0x195
+		if(__NFUN_242__(tempPawn.m_bActivateNightVision, true))
+		{
+			tempPawn.MandatoryToggleNightVision();
+		}
+	}
 	ResetWeaponReloading();
-    
-    // switch the controllers 
-    tempRainbowAI = R6RainbowAI(m_Team[0].controller);
-    tempPlayerController = R6PlayerController(m_Team[1].controller);
-
-    //Switch the Controller Rep info
-    SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
-
-	tempPlayerController.ToggleHelmetCameraZoom(TRUE);      
+	tempRainbowAI = R6RainbowAI(m_Team[0].Controller);
+	tempPlayerController = R6PlayerController(m_Team[1].Controller);
+	SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
+	tempPlayerController.ToggleHelmetCameraZoom(true);
 	tempPlayerController.CancelShake();
-    tempPlayerController.ClientForceUnlockWeapon();
-    //tempPlayerController.m_bLockWeaponActions = false;
-	
-	// associate Rainbow AI with its pawn
+	tempPlayerController.ClientForceUnlockWeapon();
+	tempPlayerController.m_iPlayerCAProgress = 0;
 	m_Team[1].UnPossessed();
-    tempRainbowAI.Possess(m_Team[1]);
-	
-	// associate playercontroller with its pawn
+	tempRainbowAI.Possess(m_Team[1]);
 	AssociatePlayerAndPawn(tempPlayerController, m_Team[0]);
-	
-	// reset position of head
-	m_Team[1].PawnLook(rot(0,0,0),,);		
-    m_Team[1].ResetBoneRotation();
-
-    // reset any bone rotation this pawn may have had with its previous controller...
-    m_TeamLeader.ResetBoneRotation();
-    m_TeamLeader.ClientQuickResetPeeking();
-
-    UpdateFirstPersonWeaponMemory(tempPawn, m_TeamLeader);
+	m_Team[1].__NFUN_2214__(rot(0, 0, 0));
+	m_Team[1].ResetBoneRotation();
+	m_Team[1].m_bPostureTransition = false;
+	m_TeamLeader.ResetBoneRotation();
+	m_TeamLeader.ClientQuickResetPeeking();
+	m_TeamLeader.m_bPostureTransition = false;
+	UpdateFirstPersonWeaponMemory(tempPawn, m_TeamLeader);
 	ResetRainbowControllerStates(tempPlayerController, 1);
-
-    m_iIntermLeader = 0;
+	m_iIntermLeader = 0;
 	tempPlayerController.UpdatePlayerPostureAfterSwitch();
-    
-    UpdateEscortList();
+	UpdateEscortList();
 	UpdateTeamGrenadeStatus();
-
-	if ((m_iTeamAction & TEAM_OpenDoor) > 0 && m_bTeamIsHoldingPosition)
-		m_iTeamAction = TEAM_None;
+	// End:0x326
+	if(__NFUN_130__(__NFUN_151__(__NFUN_156__(m_iTeamAction, 16), 0), m_bTeamIsHoldingPosition))
+	{
+		m_iTeamAction = 0;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -2993,148 +3726,158 @@ function SwitchPlayerControlToPreviousMember()
 //------------------------------------------------------------------//
 function SwitchPlayerControlToNextMember()
 {
-    local   R6Rainbow           tempPawn;
-    local   R6RainbowAI         tempRainbowAI;
-    local   R6PlayerController  tempPlayerController;
-    local   INT                 iLastMember;
-    local   INT                 i;
-    local   bool                bLeaderIsDead;
-	local   bool				bBackupIsClimbing;
+	local R6Rainbow tempPawn;
+	local R6RainbowAI tempRainbowAI;
+	local R6PlayerController tempPlayerController;
+	local int iLastMember, i;
+	local bool bLeaderIsDead, bBackupIsClimbing;
 
-    if(level.Game!=none && !R6AbstractGameInfo(level.Game).CanSwitchTeamMember())
-        return;
-
-    bLeaderIsDead = !m_Team[0].IsAlive();
+	// End:0x3A
+	if(__NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_129__(R6AbstractGameInfo(Level.Game).CanSwitchTeamMember())))
+	{
+		return;
+	}
+	bLeaderIsDead = __NFUN_129__(m_Team[0].IsAlive());
 	TeamIsSeparatedFromLead(false);
+	// End:0x9D
+	if(bLeaderIsDead)
+	{
+		// End:0x74
+		if(__NFUN_154__(m_iMemberCount, 0))
+		{
+			return;			
+		}
+		else
+		{
+			R6PlayerController(m_Team[0].Controller).ClientFadeCommonSound(0.5000000, 100);
+		}		
+	}
+	else
+	{
+		// End:0xAA
+		if(__NFUN_154__(m_iMemberCount, 1))
+		{
+			return;
+		}
+	}
+	iLastMember = __NFUN_147__(m_iMemberCount, 1);
+	tempPlayerController = R6PlayerController(m_Team[0].Controller);
+	// End:0x2AD
+	if(bLeaderIsDead)
+	{
+		tempPawn = m_Team[0];
+		i = 0;
+		J0xF0:
 
-    if (bLeaderIsDead)
-    {
-        #ifdefDEBUG	if(bShowLog) log(self$" SwitchPlayerControlToNextMember() : leader is dead or incapacitated....");	#endif
-        if(m_iMemberCount == 0)
-            return;
-        else
-            R6PlayerController(m_Team[0].controller).ClientFadeCommonSound(0.5, 100);
-    }
-    else
-    {
-        if(m_iMemberCount == 1)
-            return;
-    }
-
-    iLastMember = m_iMemberCount-1;
-    tempPlayerController = R6PlayerController(m_Team[0].controller);	
-    if(bLeaderIsDead) 
-    {
-        tempPawn = m_Team[0];		
-        for(i=0; i<m_iMemberCount;i++)
-        { 
-            m_Team[i] = m_Team[i+1];
-            m_Team[i].m_iId = i;
-        } 
-        
-        m_TeamLeader = m_Team[0];
-        m_Team[iLastMember+1] = tempPawn;
-        m_Team[iLastMember+1].m_iId = iLastMember+1;
+		// End:0x13D [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i] = m_Team[__NFUN_146__(i, 1)];
+			m_Team[i].m_iID = i;
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0xF0;
+		}
+		m_TeamLeader = m_Team[0];
+		m_Team[__NFUN_146__(iLastMember, 1)] = tempPawn;
+		m_Team[__NFUN_146__(iLastMember, 1)].m_iID = __NFUN_146__(iLastMember, 1);
 		tempPawn.m_bIsPlayer = false;
-        m_TeamLeader.m_bIsPlayer = true;
-
-        // The player control the new leader and the ancient controller control the dead pawn
-		tempRainbowAI = R6RainbowAI(m_TeamLeader.controller);	
-    	tempPlayerController.ToggleHelmetCameraZoom(TRUE);      
-	    tempPlayerController.CancelShake();
-        tempPlayerController.ClientForceUnlockWeapon();
-        //tempPlayerController.m_bLockWeaponActions = false;
-
-        //Switch the Controller Rep info
-        SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
-
-		// store m_bIsClimbingLadder as backup: when we call ResetRainbowControllerStates() we check the value of m_bIsClimbingLadder to 
-		// determine what the pawn the player is taking control of was doing (on/off ladder)
-		// switching to the dead state out of EndClimbingLadder causes m_bIsClimbingLadder to be reset to false.
+		m_TeamLeader.m_bIsPlayer = true;
+		tempRainbowAI = R6RainbowAI(m_TeamLeader.Controller);
+		tempPlayerController.ToggleHelmetCameraZoom(true);
+		tempPlayerController.CancelShake();
+		tempPlayerController.ClientForceUnlockWeapon();
+		tempPlayerController.m_iPlayerCAProgress = 0;
+		SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
 		bBackupIsClimbing = tempRainbowAI.m_pawn.m_bIsClimbingLadder;
-		tempRainbowAI.GotoState('Dead');
+		tempRainbowAI.__NFUN_113__('Dead');
 		tempRainbowAI.m_pawn.m_bIsClimbingLadder = bBackupIsClimbing;
+		m_Team[__NFUN_146__(iLastMember, 1)].UnPossessed();
+		tempRainbowAI.Possess(m_Team[__NFUN_146__(iLastMember, 1)]);
+		AssociatePlayerAndPawn(tempPlayerController, m_TeamLeader);
+		// End:0x2AA
+		if(bBackupIsClimbing)
+		{
+			SetTeamIsClimbingLadder(true);
+		}		
+	}
+	else
+	{
+		tempPawn = m_TeamLeader;
+		i = 0;
+		J0x2BF:
 
-		m_Team[iLastMember+1].UnPossessed();
-		tempRainbowAI.Possess(m_Team[iLastMember+1]);
-
-		// associate playercontroller with its pawn
-		AssociatePlayerAndPawn(tempPlayerController, m_TeamLeader);		
-    }
-    else
-    { 
-        // shift members up in rank : 0 1 2 3 --> 1 2 3 0
-        tempPawn = m_TeamLeader;
-        for(i=0; i<m_iMemberCount-1;i++)
-        {
-            m_Team[i] = m_Team[i+1];
-            m_Team[i].m_iId = i;
-        } 
-
-        m_TeamLeader = m_Team[0];
-        m_Team[iLastMember] = tempPawn;
-        m_Team[iLastMember].m_iId = iLastMember;
-
-        tempPawn.ClientQuickResetPeeking();
-        tempPawn.m_bIsPlayer = false;
-        m_TeamLeader.m_bIsPlayer = true;
-
-		if (tempPawn.m_bIsClimbingLadder == false)
-			UpdatePlayerWeapon(tempPawn);
-        ResetWeaponReloading();	
-
-        // switch the controllers 
-        tempRainbowAI = R6RainbowAI(m_TeamLeader.controller);
-        tempPlayerController = R6PlayerController(m_Team[iLastMember].controller);
-        
-    	tempPlayerController.ToggleHelmetCameraZoom(TRUE);      
-	    tempPlayerController.CancelShake();
-        tempPlayerController.ClientForceUnlockWeapon();
-        //tempPlayerController.m_bLockWeaponActions = false;
-
-        //Switch the Controller Rep info
-        SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
-        
-		// associate Rainbow AI with its pawn
-        m_Team[iLastMember].UnPossessed();        
+		// End:0x30F [Loop If]
+		if(__NFUN_150__(i, __NFUN_147__(m_iMemberCount, 1)))
+		{
+			m_Team[i] = m_Team[__NFUN_146__(i, 1)];
+			m_Team[i].m_iID = i;
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x2BF;
+		}
+		m_TeamLeader = m_Team[0];
+		m_Team[iLastMember] = tempPawn;
+		m_Team[iLastMember].m_iID = iLastMember;
+		tempPawn.ClientQuickResetPeeking();
+		tempPawn.m_bIsPlayer = false;
+		m_TeamLeader.m_bIsPlayer = true;
+		// End:0x39B
+		if(__NFUN_242__(tempPawn.m_bIsClimbingLadder, false))
+		{
+			UpdatePlayerWeapon(tempPawn);			
+		}
+		else
+		{
+			// End:0x3BF
+			if(__NFUN_242__(tempPawn.m_bActivateNightVision, true))
+			{
+				tempPawn.MandatoryToggleNightVision();
+			}
+		}
+		ResetWeaponReloading();
+		tempRainbowAI = R6RainbowAI(m_TeamLeader.Controller);
+		tempPlayerController = R6PlayerController(m_Team[iLastMember].Controller);
+		tempPlayerController.ToggleHelmetCameraZoom(true);
+		tempPlayerController.CancelShake();
+		tempPlayerController.ClientForceUnlockWeapon();
+		tempPlayerController.m_iPlayerCAProgress = 0;
+		SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
+		m_Team[iLastMember].UnPossessed();
 		tempRainbowAI.Possess(m_Team[iLastMember]);
-
-		// associate player controller with its pawn
-		AssociatePlayerAndPawn(tempPlayerController, m_TeamLeader);		
-	
-		// reset position of head
-		m_Team[iLastMember].PawnLook(rot(0,0,0),,);	
-        m_Team[iLastMember].ResetBoneRotation();
-    }
-
-    // reset any bone rotation this pawn may have had with its previous controller...
-    m_TeamLeader.ResetBoneRotation();
+		AssociatePlayerAndPawn(tempPlayerController, m_TeamLeader);
+		m_Team[iLastMember].__NFUN_2214__(rot(0, 0, 0));
+		m_Team[iLastMember].ResetBoneRotation();
+		m_Team[iLastMember].m_bPostureTransition = false;
+	}
+	m_TeamLeader.ResetBoneRotation();
 	m_TeamLeader.ClientQuickResetPeeking();
-
-	UpdateFirstPersonWeaponMemory(tempPawn, m_TeamLeader);	
+	m_TeamLeader.m_bPostureTransition = false;
+	UpdateFirstPersonWeaponMemory(tempPawn, m_TeamLeader);
 	ResetRainbowControllerStates(tempPlayerController, iLastMember);
-
 	m_iIntermLeader = 0;
 	tempPlayerController.UpdatePlayerPostureAfterSwitch();
-    UpdateEscortList();
+	UpdateEscortList();
 	UpdateTeamGrenadeStatus();
-
-	if ((m_iTeamAction & TEAM_OpenDoor) > 0 && m_bTeamIsHoldingPosition)
-		m_iTeamAction = TEAM_None;
+	// End:0x568
+	if(__NFUN_130__(__NFUN_151__(__NFUN_156__(m_iTeamAction, 16), 0), m_bTeamIsHoldingPosition))
+	{
+		m_iTeamAction = 0;
+	}
+	return;
 }
 
 function SwitchControllerRepInfo(R6RainbowAI tempRainbowAI, R6PlayerController tempPlayerController)
 {
-    local R6PawnReplicationInfo aPawnRepInfo;
+	local R6PawnReplicationInfo aPawnRepInfo;
 
-    //R6Pawn(tempPlayerController.Pawn).PlayWeaponSound(WSOUND_StopFireFullAuto);//Now, we call stopfire on pawn before call this function, cleaner & safer.
-
-    aPawnRepInfo = tempRainbowAI.m_PawnRepInfo;
-    tempRainbowAI.m_PawnRepInfo = tempPlayerController.m_PawnRepInfo;
-    tempRainbowAI.m_PawnRepInfo.m_ControllerOwner = tempRainbowAI;
-    tempPlayerController.m_PawnRepInfo = aPawnRepInfo;
-    tempPlayerController.m_PawnRepInfo.m_ControllerOwner = tempPlayerController;
-    tempPlayerController.m_CurrentAmbianceObject = tempRainbowAI.Pawn.Region.Zone;
+	aPawnRepInfo = tempRainbowAI.m_PawnRepInfo;
+	tempRainbowAI.m_PawnRepInfo = tempPlayerController.m_PawnRepInfo;
+	tempRainbowAI.m_PawnRepInfo.m_ControllerOwner = tempRainbowAI;
+	tempPlayerController.m_PawnRepInfo = aPawnRepInfo;
+	tempPlayerController.m_PawnRepInfo.m_ControllerOwner = tempPlayerController;
+	tempPlayerController.m_CurrentAmbianceObject = tempRainbowAI.Pawn.Region.Zone;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3142,118 +3885,131 @@ function SwitchControllerRepInfo(R6RainbowAI tempRainbowAI, R6PlayerController t
 //  we don't want to use Possess/Unpossess, because that would reset 
 //  the physics (root motion)
 //------------------------------------------------------------------
-function AssociatePlayerAndPawn(R6PlayerController player, R6Rainbow pawn)
+function AssociatePlayerAndPawn(R6PlayerController Player, R6Rainbow Pawn)
 {
-	player.PossessInit(pawn);
-	player.SetViewTarget(pawn);
-	pawn.PlayerReplicationInfo = player.PlayerReplicationInfo;
-    player.bBehindView = false; // the server must have this set to false
-
-    // Switch PRI Health
-    switch(pawn.m_eHealth)
-    {
-        case HEALTH_Healthy:
-            player.PlayerReplicationInfo.m_iHealth = 0;//ePlayerStatus_Alive;
-            break;
-        case HEALTH_Wounded:
-            player.PlayerReplicationInfo.m_iHealth = 1;//ePlayerStatus_Wounded;
-            break;
-        case HEALTH_Incapacitated:
-        case HEALTH_Dead:
-            player.PlayerReplicationInfo.m_iHealth = 2;//ePlayerStatus_Dead;
-            break;
-    }
+	Player.PossessInit(Pawn);
+	Player.SetViewTarget(Pawn);
+	Pawn.PlayerReplicationInfo = Player.PlayerReplicationInfo;
+	Player.bBehindView = false;
+	switch(Pawn.m_eHealth)
+	{
+		// End:0x87
+		case 0:
+			Player.PlayerReplicationInfo.m_iHealth = 0;
+			// End:0xD2
+			break;
+		// End:0xA8
+		case 1:
+			Player.PlayerReplicationInfo.m_iHealth = 1;
+			// End:0xD2
+			break;
+		// End:0xAD
+		case 2:
+		// End:0xCF
+		case 3:
+			Player.PlayerReplicationInfo.m_iHealth = 2;
+			// End:0xD2
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 // SwapPlayerControlWithTeamMate()							
 //------------------------------------------------------------------//
-function SwapPlayerControlWithTeamMate(INT iMember)
+function SwapPlayerControlWithTeamMate(int iMember)
 {
-    local   R6Rainbow           tempPawn;
-    local   R6RainbowAI         tempRainbowAI;
-    local   R6PlayerController  tempPlayerController;
-	local   INT                 i, iPermanentRequestID;
+	local R6Rainbow tempPawn;
+	local R6RainbowAI tempRainbowAI;
+	local R6PlayerController tempPlayerController;
+	local int i, iPermanentRequestID;
 
-    if(level.Game!=none && !R6AbstractGameInfo(level.Game).CanSwitchTeamMember())
-        return;
-
-    if( (iMember == 0) || !m_Team[iMember].IsAlive())
-		return;
-
-	// The leader is dead!!!
-	if (!m_Team[0].IsAlive())
+	// End:0x3A
+	if(__NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_129__(R6AbstractGameInfo(Level.Game).CanSwitchTeamMember())))
 	{
-		// PATCH15 small hack to avoid problem when leader is dead. 
-		// The SwitchPlayerControlToNextMember() already manage everything
-		// use PermanentID to find the good member to switch
+		return;
+	}
+	// End:0x63
+	if(__NFUN_132__(__NFUN_154__(iMember, 0), __NFUN_129__(m_Team[iMember].IsAlive())))
+	{
+		return;
+	}
+	// End:0xD8
+	if(__NFUN_129__(m_Team[0].IsAlive()))
+	{
 		iPermanentRequestID = m_Team[iMember].m_iPermanentID;
+		i = 0;
+		J0x9A:
 
-		for (i = 0; i < m_iMemberCount; i++)
+		// End:0xD6 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
 		{
 			SwitchPlayerControlToNextMember();
-			if (m_Team[0].m_iPermanentID == iPermanentRequestID)
-				break;
+			// End:0xCC
+			if(__NFUN_154__(m_Team[0].m_iPermanentID, iPermanentRequestID))
+			{
+				// [Explicit Break]
+				goto J0xD6;
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x9A;
 		}
+		J0xD6:
 
 		return;
 	}
-
 	TeamIsSeparatedFromLead(false);
-	
-	// swap pawns
 	tempPawn = m_Team[0];
 	m_Team[0] = m_Team[iMember];
-	m_Team[0].m_iId = 0;
+	m_Team[0].m_iID = 0;
 	m_TeamLeader = m_Team[0];
-
 	m_Team[iMember] = tempPawn;
-	m_Team[iMember].m_iId = iMember;
-
+	m_Team[iMember].m_iID = iMember;
 	m_TeamLeader.m_bIsPlayer = true;
 	m_Team[iMember].m_bIsPlayer = false;
-    m_Team[iMember].ClientQuickResetPeeking();
-
+	m_Team[iMember].ClientQuickResetPeeking();
 	tempPawn = m_Team[iMember];
-	if (tempPawn.m_bIsClimbingLadder == false)
-		UpdatePlayerWeapon(tempPawn);
+	// End:0x1BA
+	if(__NFUN_242__(tempPawn.m_bIsClimbingLadder, false))
+	{
+		UpdatePlayerWeapon(tempPawn);		
+	}
+	else
+	{
+		// End:0x1DE
+		if(__NFUN_242__(tempPawn.m_bActivateNightVision, true))
+		{
+			tempPawn.ToggleNightVision();
+		}
+	}
 	ResetWeaponReloading();
-	
-	// switch the controllers
-	tempRainbowAI = R6RainbowAI(m_Team[0].controller);
-    tempPlayerController = R6PlayerController(m_Team[iMember].controller);
-
-	tempPlayerController.ToggleHelmetCameraZoom(TRUE);      
+	tempRainbowAI = R6RainbowAI(m_Team[0].Controller);
+	tempPlayerController = R6PlayerController(m_Team[iMember].Controller);
+	tempPlayerController.ToggleHelmetCameraZoom(true);
 	tempPlayerController.CancelShake();
-    tempPlayerController.ClientForceUnlockWeapon();
-    //tempPlayerController.m_bLockWeaponActions = false;
-
-    //Switch the Controller Rep info
-    SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
-	
-	// associate Rainbow AI to its pawn
+	tempPlayerController.ClientForceUnlockWeapon();
+	tempPlayerController.m_iPlayerCAProgress = 0;
+	SwitchControllerRepInfo(tempRainbowAI, tempPlayerController);
 	m_Team[iMember].UnPossessed();
-    tempRainbowAI.Possess(m_Team[iMember]);
-
-	// associate playercontroller to its pawn ( instead of calling possess() )
+	tempRainbowAI.Possess(m_Team[iMember]);
 	AssociatePlayerAndPawn(tempPlayerController, m_Team[0]);
-
-	// reset position of head
-	m_Team[iMember].PawnLook(rot(0,0,0),,);
-    m_Team[iMember].ResetBoneRotation();
-
-    // reset any bone rotation this pawn may have had with its previous controller...
-    m_TeamLeader.ResetBoneRotation();
+	m_Team[iMember].__NFUN_2214__(rot(0, 0, 0));
+	m_Team[iMember].ResetBoneRotation();
+	m_Team[iMember].m_bPostureTransition = false;
+	m_TeamLeader.ResetBoneRotation();
 	m_TeamLeader.ClientQuickResetPeeking();
-
+	m_TeamLeader.m_bPostureTransition = false;
 	UpdateFirstPersonWeaponMemory(tempPawn, m_TeamLeader);
 	ResetRainbowControllerStates(tempPlayerController, iMember);
-
 	m_iIntermLeader = 0;
 	tempPlayerController.UpdatePlayerPostureAfterSwitch();
-    
-    UpdateEscortList();
-	UpdateTeamGrenadeStatus();	
+	UpdateEscortList();
+	UpdateTeamGrenadeStatus();
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3263,58 +4019,85 @@ function SwapPlayerControlWithTeamMate(INT iMember)
 //------------------------------------------------------------------//
 function UpdateTeamStatus(R6Pawn member)
 {
-    local R6PlayerController _PlayerController;
-    #ifdefDEBUG	if(bShowLog) log(self$" UpdateTeamStatus() : member="$member$" member.m_eHealth="$member.m_eHealth);		#endif
-    if((m_iTeamHealth[member.m_iPermanentID] == member.eHealth.HEALTH_Incapacitated)
-        && (member.m_eHealth == HEALTH_Dead))
-    {
-        #ifdefDEBUG	if(bShowLog) log(self$" member "$member$" has gone from incapacitated to dead!!!!!!!!");		#endif
-        m_iTeamHealth[member.m_iPermanentID] = member.m_eHealth;
-        return;
-    }
+	local R6PlayerController _playerController;
 
-    if( !member.IsAlive() )
-    {
-        _PlayerController = R6PlayerController(m_TeamLeader.Controller);
-        TeamMemberDead(member);
-        if ((m_iMemberCount == 0) && (m_bLeaderIsAPlayer) && (Level.NetMode!=NM_Standalone))
-        {
-            _PlayerController.ClientTeamIsDead();
-        }
-		if((m_bLeaderIsAPlayer && m_iMemberCount == 1) || (!m_bLeaderIsAPlayer && m_iMemberCount == 0))
-			SetTeamState(TS_Retired);
-    }
-	
-	// when a member is wounded, move to end of formation (if next member in formation is healthy) except if member wounded is player
-	if( !member.m_bIsPlayer 
-		&& m_iTeamAction != TEAM_ClimbLadder 
-		&& (m_iTeamHealth[member.m_iPermanentId] == member.eHealth.HEALTH_Healthy) 
-		&& (member.m_eHealth == HEALTH_Wounded))
+	// End:0x9D
+	if(__NFUN_129__(__NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_FreeBackupAdvMode")))
 	{
-		if((m_iMemberCount > (member.m_iId+1)) && (m_Team[member.m_iId+1].m_eHealth == HEALTH_Healthy))
-		{	
-			if(SendMemberToEnd(member.m_iId, true))
+		// End:0x9D
+		if(__NFUN_130__(__NFUN_154__(m_iTeamHealth[member.m_iPermanentID], int(member.2)), __NFUN_154__(int(member.m_eHealth), int(3))))
+		{
+			m_iTeamHealth[member.m_iPermanentID] = int(member.m_eHealth);
+			return;
+		}
+	}
+	// End:0x190
+	if(__NFUN_129__(member.IsAlive()))
+	{
+		_playerController = R6PlayerController(m_TeamLeader.Controller);
+		// End:0x10D
+		if(__NFUN_129__(__NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_FreeBackupAdvMode")))
+		{
+			TeamMemberDead(member);			
+		}
+		else
+		{
+			TeamMemberDeadInFreeBackup(member);
+		}
+		// End:0x158
+		if(__NFUN_130__(__NFUN_130__(__NFUN_154__(m_iMemberCount, 0), m_bLeaderIsAPlayer), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+		{
+			_playerController.ClientTeamIsDead();
+		}
+		// End:0x190
+		if(__NFUN_132__(__NFUN_130__(m_bLeaderIsAPlayer, __NFUN_154__(m_iMemberCount, 1)), __NFUN_130__(__NFUN_129__(m_bLeaderIsAPlayer), __NFUN_154__(m_iMemberCount, 0))))
+		{
+			SetTeamState(21);
+		}
+	}
+	// End:0x29A
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(member.m_bIsPlayer), __NFUN_155__(m_iTeamAction, 512)), __NFUN_154__(m_iTeamHealth[member.m_iPermanentID], int(member.0))), __NFUN_154__(int(member.m_eHealth), int(1))))
+	{
+		// End:0x29A
+		if(__NFUN_130__(__NFUN_151__(m_iMemberCount, __NFUN_146__(member.m_iID, 1)), __NFUN_154__(int(m_Team[__NFUN_146__(member.m_iID, 1)].m_eHealth), int(0))))
+		{
+			// End:0x29A
+			if(SendMemberToEnd(member.m_iID, true))
 			{
 				ResetTeamMemberStates();
-				if(m_bTeamIsHoldingPosition && !m_Team[0].m_bIsPlayer)
-					m_Team[0].controller.GotoState('HoldPosition');
+				// End:0x29A
+				if(__NFUN_130__(m_bTeamIsHoldingPosition, __NFUN_129__(m_Team[0].m_bIsPlayer)))
+				{
+					m_Team[0].Controller.__NFUN_113__('HoldPosition');
+				}
 			}
 		}
 	}
-    m_iTeamHealth[member.m_iPermanentID] = member.m_eHealth;
+	m_iTeamHealth[member.m_iPermanentID] = int(member.m_eHealth);
+	return;
 }
 
 function bool RainbowAIAreStillClimbingLadder()
 {
-	local INT i;
+	local int i;
 
-	for(i=1; i<m_iMemberCount; i++)
+	i = 1;
+	J0x07:
+
+	// End:0x54 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
 	{
-		if(m_Team[i].IsAlive() && m_Team[i].m_bIsClimbingLadder)
+		// End:0x4A
+		if(__NFUN_130__(m_Team[i].IsAlive(), m_Team[i].m_bIsClimbingLadder))
+		{
 			return true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
 	}
-
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3322,112 +4105,331 @@ function bool RainbowAIAreStillClimbingLadder()
 //   called when a member of the team is killed                     //
 //  note: this is called even when a member is only incapacitated...//
 //------------------------------------------------------------------//
-function TeamMemberDead(R6Pawn deadPawn)
+function TeamMemberDead(R6Pawn DeadPawn)
 {
-    local INT   i;
-    local INT   iMemberId;
-	local bool  bReIssueTeamOrder;
-	local bool  bReassignNextMemberToLeadRoomEntry;
-	local INT	iIdxDeadPawn;
+	local int i, iMemberId;
+	local bool bReIssueTeamOrder, bReassignNextMemberToLeadRoomEntry;
+	local int iIdxDeadPawn;
 
-    UpdateEscortList(); // call before removing the pawn
+	UpdateEscortList();
 	UpdateTeamGrenadeStatus();
-
-    iMemberId = deadPawn.m_iId;	
-	deadPawn.controller.enemy = none;	
-	#ifdefDEBUG	if(bShowLog) log(self$"  TeamMemberDead() deadPawn="$deadPawn$" iMemberId="$iMemberId);	#endif
-
-    // promote other members of lower rank...
-    if(iMemberId == 0) //leader was killed
-    {
-        #ifdefDEBUG	if(bShowLog) log(self$" TeamMemberDead() : the leader was killed...the new leader is="$m_Team[1]);	#endif
-        m_TeamLeader = m_Team[1];
-        
-        if(m_bLeaderIsAPlayer)
-        {
-			// todo: reset some status flags
-			#ifdefDEBUG	if(bShowLog) log(self$" leader of this team is a player, so wait until player changes members");		#endif
-            // do not promote, wait until player takes control...
-            m_iMemberCount--;
-            m_iMembersLost++;
-            return;
-        }
-    }
-
-	//------------------------------------------------------------------//
-	// check if this member was killed while leading a team order
-	if(m_iTeamAction != TEAM_None) 
-	{		
-		if(iMemberId==1)
+	iMemberId = DeadPawn.m_iID;
+	DeadPawn.Controller.Enemy = none;
+	// End:0x6A
+	if(__NFUN_154__(iMemberId, 0))
+	{
+		m_TeamLeader = m_Team[1];
+		// End:0x6A
+		if(m_bLeaderIsAPlayer)
 		{
-			bReIssueTeamOrder = true;		
-			if(m_PawnControllingDoor == deadPawn)
-				bReassignNextMemberToLeadRoomEntry = true;
-		}
-
-		if(m_iTeamAction == TEAM_ClimbLadder)
-		{
-			if(iMemberId == m_iMemberCount-1)	
-				TeamFinishedClimbingLadder();
+			__NFUN_166__(m_iMemberCount);
+			__NFUN_165__(m_iMembersLost);
+			return;
 		}
 	}
-	//------------------------------------------------------------------//
-	
-	// check to see if any of the member of the team is climbing a ladder
-	if(!RainbowAIAreStillClimbingLadder())
+	// End:0xC6
+	if(__NFUN_155__(m_iTeamAction, 0))
+	{
+		// End:0x9F
+		if(__NFUN_154__(iMemberId, 1))
+		{
+			bReIssueTeamOrder = true;
+			// End:0x9F
+			if(__NFUN_114__(m_PawnControllingDoor, DeadPawn))
+			{
+				bReassignNextMemberToLeadRoomEntry = true;
+			}
+		}
+		// End:0xC6
+		if(__NFUN_154__(m_iTeamAction, 512))
+		{
+			// End:0xC6
+			if(__NFUN_154__(iMemberId, __NFUN_147__(m_iMemberCount, 1)))
+			{
+				TeamFinishedClimbingLadder();
+			}
+		}
+	}
+	// End:0xD9
+	if(__NFUN_129__(RainbowAIAreStillClimbingLadder()))
+	{
 		m_bTeamIsClimbingLadder = false;
-	
-    #ifdefDEBUG	if(bShowLog) log(self$" TeamMemberDead() : member "$deadPawn$" was killed...m_iId="$iMemberId$" m_iTeamAction="$m_iTeamAction$" bReIssueTeamOrder="$bReIssueTeamOrder);		#endif	 	
-    for(i=iMemberId+1; i<(m_iMemberCount + m_iMembersLost); i++)
-    {
+	}
+	i = __NFUN_146__(iMemberId, 1);
+	J0xE7:
+
+	// End:0x176 [Loop If]
+	if(__NFUN_150__(i, __NFUN_146__(m_iMemberCount, m_iMembersLost)))
+	{
+		// End:0x16C
 		if(m_Team[i].IsAlive())
 		{
-			m_Team[i-1] = m_Team[i];
-			if(m_Team[i].Controller != none)
+			m_Team[__NFUN_147__(i, 1)] = m_Team[i];
+			// End:0x16C
+			if(__NFUN_119__(m_Team[i].Controller, none))
+			{
 				R6RainbowAI(m_Team[i].Controller).Promote();
+			}
 		}
-    }
-
-	// move the dead/incapacitate member at the end of m_Team[]	
-	if(m_bLeaderIsAPlayer && m_Team[0].m_bIsPlayer && !m_Team[0].IsAlive())
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0xE7;
+	}
+	// End:0x1BB
+	if(__NFUN_130__(__NFUN_130__(m_bLeaderIsAPlayer, m_Team[0].m_bIsPlayer), __NFUN_129__(m_Team[0].IsAlive())))
 	{
-		// player/leader is dead and still attached to pawn
-		// member count does not include first spot (index 0), start at 1 instead
-		iIdxDeadPawn = m_iMemberCount;	
+		iIdxDeadPawn = m_iMemberCount;		
 	}
 	else
-		iIdxDeadPawn = m_iMemberCount - 1;
-
-	m_Team[iIdxDeadPawn] = R6Rainbow(deadPawn);
-	deadPawn.m_iId = iIdxDeadPawn;
-	
-    // if this is an AI controlled team, inform leader that a member has been lost...
-    if(!m_bLeaderIsAPlayer && (m_TeamLeader != none) && (m_TeamLeader.Controller != none))
-        R6RainbowAI(m_TeamLeader.Controller).m_bTeamMateHasBeenKilled = true;
-
-#ifdefDEBUG	
-	if(bShowLog)
 	{
-		for(i=0;i<(m_iMemberCount+m_iMembersLost);i++)
-			log(" team list: i="$i$" : "$m_Team[i]$" and m_iID="$m_Team[i].m_iId);
+		iIdxDeadPawn = __NFUN_147__(m_iMemberCount, 1);
 	}
-#endif
-    m_iMemberCount--;
-    m_iMembersLost++;
-
-	//------------------------------------------------------------------//
-	// reissue team order team order
-	if(bReIssueTeamOrder && (m_iMemberCount >1))
+	m_Team[iIdxDeadPawn] = R6Rainbow(DeadPawn);
+	DeadPawn.m_iID = iIdxDeadPawn;
+	// End:0x240
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bLeaderIsAPlayer), __NFUN_119__(m_TeamLeader, none)), __NFUN_119__(m_TeamLeader.Controller, none)))
 	{
+		R6RainbowAI(m_TeamLeader.Controller).m_bTeamMateHasBeenKilled = true;
+	}
+	__NFUN_166__(m_iMemberCount);
+	__NFUN_165__(m_iMembersLost);
+	// End:0x2AB
+	if(__NFUN_130__(bReIssueTeamOrder, __NFUN_151__(m_iMemberCount, 1)))
+	{
+		// End:0x28F
 		if(m_bTeamIsClimbingLadder)
-			m_Team[1].controller.nextState = 'TeamClimbEndNoLeader';
+		{
+			m_Team[1].Controller.NextState = 'TeamClimbEndNoLeader';			
+		}
 		else
+		{
 			ReIssueTeamOrders();
-
+		}
+		// End:0x2AB
 		if(bReassignNextMemberToLeadRoomEntry)
+		{
 			m_PawnControllingDoor = m_Team[1];
+		}
 	}
-	//------------------------------------------------------------------//
+	return;
+}
+
+// NEW IN 1.60
+function TeamMemberDeadInFreeBackup(R6Pawn DeadPawn)
+{
+	local int i, iMemberId;
+
+	iMemberId = DeadPawn.m_iID;
+	DeadPawn.Controller.Enemy = none;
+	// End:0xD5
+	if(__NFUN_154__(iMemberId, 0))
+	{
+		m_TeamLeader = none;
+		i = 1;
+		J0x46:
+
+		// End:0xCC [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			// End:0xC2
+			if(__NFUN_119__(m_Team[i], none))
+			{
+				// End:0xC2
+				if(__NFUN_119__(m_Team[i].Controller, none))
+				{
+					m_Team[i].Controller.Enemy = none;
+					R6RainbowAI(m_Team[i].Controller).FreeBackupPromote();
+				}
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x46;
+		}
+		m_iMemberCount = 0;
+		return;
+	}
+	// End:0xE8
+	if(__NFUN_129__(RainbowAIAreStillClimbingLadder()))
+	{
+		m_bTeamIsClimbingLadder = false;
+	}
+	switch(m_Team[iMemberId].m_iID)
+	{
+		// End:0x1BE
+		case 1:
+			// End:0x1BB
+			if(__NFUN_119__(m_Team[2], none))
+			{
+				m_Team[1] = m_Team[2];
+				m_Team[1].m_iID = 1;
+				R6RainbowAI(m_Team[1].Controller).FreeBackupPromote();
+				// End:0x1B1
+				if(__NFUN_119__(m_Team[3], none))
+				{
+					m_Team[2] = m_Team[3];
+					m_Team[2].m_iID = 2;
+					R6RainbowAI(m_Team[2].Controller).FreeBackupPromote();
+					m_Team[3] = none;					
+				}
+				else
+				{
+					m_Team[2] = none;
+				}
+			}
+			// End:0x238
+			break;
+		// End:0x223
+		case 2:
+			// End:0x220
+			if(__NFUN_119__(m_Team[3], none))
+			{
+				m_Team[2] = m_Team[3];
+				m_Team[2].m_iID = 2;
+				R6RainbowAI(m_Team[2].Controller).FreeBackupPromote();
+				m_Team[3] = none;
+			}
+			// End:0x238
+			break;
+		// End:0x235
+		case 3:
+			m_Team[3] = none;
+			// End:0x238
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	__NFUN_166__(m_iMemberCount);
+	ResetNeutralFighterTeam();
+	return;
+}
+
+// NEW IN 1.60
+function ResetNeutralFighterTeam()
+{
+	// End:0x0D
+	if(__NFUN_152__(m_iMemberCount, 1))
+	{
+		return;
+	}
+	switch(m_iMemberCount)
+	{
+		// End:0x51
+		case 2:
+			// End:0x4E
+			if(__NFUN_130__(__NFUN_119__(m_Team[1], none), __NFUN_129__(m_Team[1].IsAlive())))
+			{
+				m_Team[1] = none;
+				m_iMemberCount = 1;
+			}
+			// End:0x358
+			break;
+		// End:0x130
+		case 3:
+			// End:0xF4
+			if(__NFUN_130__(__NFUN_119__(m_Team[1], none), __NFUN_129__(m_Team[1].IsAlive())))
+			{
+				// End:0xD7
+				if(__NFUN_130__(__NFUN_119__(m_Team[2], none), m_Team[2].IsAlive()))
+				{
+					m_Team[1] = m_Team[2];
+					m_Team[1].m_iID = 1;
+					m_Team[2] = none;
+					m_iMemberCount = 2;					
+				}
+				else
+				{
+					m_Team[1] = none;
+					m_Team[2] = none;
+					m_iMemberCount = 1;
+				}				
+			}
+			else
+			{
+				// End:0x12D
+				if(__NFUN_130__(__NFUN_119__(m_Team[2], none), __NFUN_129__(m_Team[2].IsAlive())))
+				{
+					m_Team[2] = none;
+					m_iMemberCount = 2;
+				}
+			}
+			// End:0x358
+			break;
+		// End:0x355
+		case 4:
+			// End:0x239
+			if(__NFUN_130__(__NFUN_119__(m_Team[1], none), m_Team[1].IsAlive()))
+			{
+				// End:0x1FD
+				if(__NFUN_130__(__NFUN_119__(m_Team[2], none), __NFUN_129__(m_Team[2].IsAlive())))
+				{
+					// End:0x1DE
+					if(__NFUN_130__(__NFUN_119__(m_Team[3], none), m_Team[3].IsAlive()))
+					{
+						m_Team[2] = m_Team[3];
+						m_Team[2].m_iID = 2;
+						m_Team[3] = none;
+						m_iMemberCount = 3;						
+					}
+					else
+					{
+						m_Team[2] = none;
+						m_Team[3] = none;
+						m_iMemberCount = 2;
+					}					
+				}
+				else
+				{
+					// End:0x236
+					if(__NFUN_130__(__NFUN_119__(m_Team[3], none), __NFUN_129__(m_Team[3].IsAlive())))
+					{
+						m_Team[3] = none;
+						m_iMemberCount = 3;
+					}
+				}				
+			}
+			else
+			{
+				// End:0x2ED
+				if(__NFUN_130__(__NFUN_119__(m_Team[2], none), __NFUN_129__(m_Team[2].IsAlive())))
+				{
+					// End:0x2C6
+					if(__NFUN_130__(__NFUN_119__(m_Team[3], none), m_Team[3].IsAlive()))
+					{
+						m_Team[1] = m_Team[3];
+						m_Team[1].m_iID = 1;
+						m_Team[2] = none;
+						m_Team[3] = none;
+						m_iMemberCount = 2;						
+					}
+					else
+					{
+						m_Team[1] = none;
+						m_Team[2] = none;
+						m_Team[3] = none;
+						m_iMemberCount = 1;
+					}					
+				}
+				else
+				{
+					// End:0x352
+					if(__NFUN_130__(__NFUN_119__(m_Team[3], none), __NFUN_129__(m_Team[3].IsAlive())))
+					{
+						m_Team[1] = m_Team[2];
+						m_Team[1].m_iID = 1;
+						m_Team[2] = none;
+						m_Team[3] = none;
+						m_iMemberCount = 2;
+					}
+				}
+			}
+			// End:0x358
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3438,30 +4440,40 @@ function TeamMemberDead(R6Pawn deadPawn)
 //------------------------------------------------------------------//
 function bool AtLeastOneMemberIsWounded()
 {
-	local INT	i;
-	
+	local int i;
+
+	// End:0x0B
 	if(m_bWoundedHostage)
-		return true;
-	
-	for(i=0; i<m_iMemberCount; i++)
 	{
-		if(m_Team[i].m_eHealth == HEALTH_Wounded)
+		return true;
+	}
+	i = 0;
+	J0x12:
+
+	// End:0x4C [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0x42
+		if(__NFUN_154__(int(m_Team[i].m_eHealth), int(1)))
+		{
 			return true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x12;
 	}
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------//
 // SetFormation()													//
 //   TODO : this function may have become unnecessary               //
 //------------------------------------------------------------------//
-function SetFormation(R6RainbowAI memberAI) 
+function SetFormation(R6RainbowAI memberAI)
 {
-#ifdefDEBUG	
-    if(m_TeamLeader == none)
-        if(bShowLog) log(self$" <R6RainbowTeam::SetFormation()>  TeamAI does not know who the team leader is... (m_TeamLeader == none"); 
-#endif    
-    memberAI.m_eFormation = m_eFormation;
+	memberAI.m_eFormation = m_eFormation;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3469,18 +4481,27 @@ function SetFormation(R6RainbowAI memberAI)
 //   inform all the team members of the change in formation         //
 //------------------------------------------------------------------//
 event UpdateTeamFormation(R6RainbowAI.eFormation eFormation)
-{     
-    local   INT     i;
-    local   INT     iStart;
+{
+	local int i, iStart;
 
-    m_eFormation = eFormation;    
-    if(m_bLeaderIsAPlayer)
-        iStart = 1;
+	m_eFormation = eFormation;
+	// End:0x1B
+	if(m_bLeaderIsAPlayer)
+	{
+		iStart = 1;
+	}
+	i = iStart;
+	J0x26:
 
-    for(i=iStart; i<m_iMemberCount; i++)
-    {
-        SetFormation(R6RainbowAI(m_Team[i].controller));
-    }
+	// End:0x5E [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		SetFormation(R6RainbowAI(m_Team[i].Controller));
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x26;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3489,16 +4510,17 @@ event UpdateTeamFormation(R6RainbowAI.eFormation eFormation)
 //   current formation will be changed...                           //
 //------------------------------------------------------------------//
 event RequestFormationChange(R6RainbowAI.eFormation eFormation)
-{     
-    if(m_eRequestedFormation == eFormation)
-    {        
-        // this is the second request for the change in formation
-        UpdateTeamFormation(eFormation);
-    }
-    else
-    {
-        m_eRequestedFormation = eFormation;
-    }
+{
+	// End:0x21
+	if(__NFUN_154__(int(m_eRequestedFormation), int(eFormation)))
+	{
+		UpdateTeamFormation(eFormation);		
+	}
+	else
+	{
+		m_eRequestedFormation = eFormation;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3506,136 +4528,168 @@ event RequestFormationChange(R6RainbowAI.eFormation eFormation)
 //   keep this function's content to an absolute minimun since it   //
 //   called so frequently...                                        //
 //------------------------------------------------------------------//
-function Tick(FLOAT fDelta)
-{ 
-    local   INT     i;
+function Tick(float fDelta)
+{
+	local int i;
 
-	if(!m_bTeamIsEngagingEnemy && m_eTeamState == TS_Engaging)
+	// End:0x47
+	if(__NFUN_130__(__NFUN_129__(m_bTeamIsEngagingEnemy), __NFUN_154__(int(m_eTeamState), int(6))))
 	{
-		if(Level.TimeSeconds - m_fEngagingTimer > 1.0)
+		// End:0x47
+		if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, m_fEngagingTimer), 1.0000000))
+		{
 			m_eTeamState = m_eBackupTeamState;
+		}
 	}
-
-    // if m_TeamLeader is none, then there is no team. (no members)
-    if(m_TeamLeader != none)
-    {     
-        //update the team's orientation only if the teamLeader is moving...
-        if(VSize(m_TeamLeader.velocity) > 5)
-        {
-            // team orientation should indicate movement direction not the teamleader's orientation...
-            m_rTeamDirection = rotator(m_TeamLeader.velocity);  
-        }
-
-        // update info about leader's pace (for player lead)
-        if(m_bLeaderIsAPlayer)
-        {
-			if(Level.NetMode == NM_Standalone)
+	// End:0x260
+	if(__NFUN_119__(m_TeamLeader, none))
+	{
+		// End:0x81
+		if(__NFUN_177__(__NFUN_225__(m_TeamLeader.Velocity), float(5)))
+		{
+			m_rTeamDirection = Rotator(m_TeamLeader.Velocity);
+		}
+		// End:0x255
+		if(m_bLeaderIsAPlayer)
+		{
+			// End:0x1A9
+			if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
 			{
-				if(m_PlanActionPoint != none)
+				// End:0x177
+				if(__NFUN_119__(m_PlanActionPoint, none))
 				{
-					if(VSize(m_TeamLeader.location - m_PlanActionPoint.location) < 250)
+					// End:0x131
+					if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_TeamLeader.Location, m_PlanActionPoint.Location)), float(250)))
 					{
-						#ifdefDEBUG	if(bShowLog) log(self$" reached action point : m_PlanActionPoint="$m_PlanActionPoint$" m_PlanActionPoint.location="$m_PlanActionPoint.location);		#endif
-						m_PlayerLastActionPoint = m_PlanActionPoint;					
-						ActionPointReached();					
-
-						// make a backup of the Planning Action associated with this node, so that we can display this action until the player
-						// moves far enough away from this Action Point.
+						m_PlayerLastActionPoint = m_PlanActionPoint;
+						ActionPointReached();
 						m_ePlayerAPAction = m_ePlanAction;
-						if(m_eGoCode == GOCODE_None)
+						// End:0x11C
+						if(__NFUN_154__(int(m_eGoCode), int(4)))
 						{
-							if(m_ePlanAction != PACT_None)
-								ActionNodeCompleted();	
+							// End:0x119
+							if(__NFUN_155__(int(m_ePlanAction), int(0)))
+							{
+								ActionNodeCompleted();
+							}							
 						}
 						else
 						{
-							// Player must launch a GoCode, find out what action was planned for this action point to display in the HUD.
 							m_ePlayerAPAction = m_TeamPlanning.GetAction();
 						}
 					}
-
-					// when the player has moved far enough away from the CurrentActionPoint, 
-					// any suggested actions associated with the CurrentActionPoint.
-					if((m_ePlayerAPAction != PACT_None) && (VSize(m_TeamLeader.location - m_PlayerLastActionPoint.location) > 250))
+					// End:0x174
+					if(__NFUN_130__(__NFUN_155__(int(m_ePlayerAPAction), int(0)), __NFUN_177__(__NFUN_225__(__NFUN_216__(m_TeamLeader.Location, m_PlayerLastActionPoint.Location)), float(250))))
 					{
-						// Player has moved far away enough from the previous ActionPoint, so we can stop displaying the previous planned action.
-						m_ePlayerAPAction = PACT_None;
-					}
+						m_ePlayerAPAction = 0;
+					}					
 				}
 				else
 				{
-					if(m_eGoCode == GOCODE_None)
+					// End:0x1A9
+					if(__NFUN_154__(int(m_eGoCode), int(4)))
 					{
-						// rbrek todo : maybe this should be checked less frequently.... 
-						GetNextActionPoint();					
-						if(m_PlanActionPoint != none)
+						GetNextActionPoint();
+						// End:0x1A9
+						if(__NFUN_119__(m_PlanActionPoint, none))
 						{
-							// GoCode was received and player now has the next ActionPoint in the planning.  log("  GOCODE WAS RECEIVED : New Action Point ="$m_PlanActionPoint);
 							m_ePlayerAPAction = m_ePlanAction;
 							ActionNodeCompleted();
 						}
 					}
 				}
 			}
-
-            if(m_TeamLeader.m_bIsProne) // before bIsCrouched
-                m_TeamLeader.m_eMovementPace = PACE_Prone;
-            else if(m_TeamLeader.bIsCrouched)
-            {
-                if(m_TeamLeader.bIsWalking)
-                    m_TeamLeader.m_eMovementPace = PACE_CrouchWalk;
-                else
-                    m_TeamLeader.m_eMovementPace = PACE_CrouchRun;
-            }
-            else
-            {
-                if(m_TeamLeader.bIsWalking)
-                    m_TeamLeader.m_eMovementPace = PACE_Walk;
-                else
-                    m_TeamLeader.m_eMovementPace = PACE_Run;
-            }       
-        }
+			// End:0x1CF
+			if(m_TeamLeader.m_bIsProne)
+			{
+				m_TeamLeader.m_eMovementPace = 1;				
+			}
+			else
+			{
+				// End:0x21B
+				if(m_TeamLeader.bIsCrouched)
+				{
+					// End:0x207
+					if(m_TeamLeader.bIsWalking)
+					{
+						m_TeamLeader.m_eMovementPace = 2;						
+					}
+					else
+					{
+						m_TeamLeader.m_eMovementPace = 3;
+					}					
+				}
+				else
+				{
+					// End:0x241
+					if(m_TeamLeader.bIsWalking)
+					{
+						m_TeamLeader.m_eMovementPace = 4;						
+					}
+					else
+					{
+						m_TeamLeader.m_eMovementPace = 5;
+					}
+				}
+			}			
+		}
 		else
+		{
 			m_ePlayerAPAction = m_ePlanAction;
-    } 
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 //  PickMemberClosestTo()											//
 //------------------------------------------------------------------//
-function INT PickMemberClosestTo(actor aNoiseSource)
+function int PickMemberClosestTo(Actor aNoiseSource)
 {
-	local	INT		i;
-	local	INT		iMemberClosest;
-	local	INT		fDist, fClosestDist;
+	local int i, iMemberClosest, fDist, fClosestDist;
 
 	iMemberClosest = -1;
-	fClosestDist = 10000f;	
-	
-	// if there is only one member, return
-	if(m_iMemberCount == 1)
+	fClosestDist = 10000;
+	// End:0x35
+	if(__NFUN_154__(m_iMemberCount, 1))
 	{
+		// End:0x33
 		if(m_bLeaderIsAPlayer)
-			return iMemberClosest;
+		{
+			return iMemberClosest;			
+		}
 		else
+		{
 			return 0;
+		}
 	}
+	i = 1;
+	J0x3C:
 
-	for(i=1; i<m_iMemberCount; i++)
+	// End:0xC3 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
 	{
+		// End:0x66
 		if(m_Team[i].m_bIsPlayer)
-			continue;
-		
-		fDist = VSize(m_Team[i].location - aNoiseSource.location);
-		if(fDist < fClosestDist)
+		{
+			// [Explicit Continue]
+			goto J0xB9;
+		}
+		fDist = int(__NFUN_225__(__NFUN_216__(m_Team[i].Location, aNoiseSource.Location)));
+		// End:0xB9
+		if(__NFUN_150__(fDist, fClosestDist))
 		{
 			iMemberClosest = i;
 			fClosestDist = fDist;
 		}
-	}
+		J0xB9:
 
-	#ifdefDEBUG	if(bShowLog) log(self$" PickMemberClosestTo() aNoiseSource="$aNoiseSource$" closest member is = "$iMemberClosest);	#endif
-	return iMemberClosest;	
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x3C;
+	}
+	return iMemberClosest;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3643,41 +4697,39 @@ function INT PickMemberClosestTo(actor aNoiseSource)
 //------------------------------------------------------------------//
 function TeamHearNoise(Actor aNoiseMaker)
 {
-	local INT	iMember;
+	local int iMember;
 
-	#ifdefDEBUG	if(bShowLog) log(self$"  TeamHearNoise() : aNoiseMaker.location="$aNoiseMaker.location$" m_vNoiseSource="$m_vNoiseSource);	#endif
-
-	m_vNoiseSource = aNoiseMaker.location;	
+	m_vNoiseSource = aNoiseMaker.Location;
+	// End:0x2D
 	if(m_bLeaderIsAPlayer)
 	{
-		// player led team will not stop to react to sounds, 
-		// one member will set his focus to the source of the noise instead
-		// pick member who is closest to the source of the noise
-		if(m_iMemberCount == 1)
+		// End:0x2A
+		if(__NFUN_154__(m_iMemberCount, 1))
+		{
 			return;
+		}		
 	}
 	else
 	{
-		// team never stops to react to sound
-		if(m_iMemberCount == 1)
+		// End:0x7D
+		if(__NFUN_154__(m_iMemberCount, 1))
 		{
-			#ifdefDEBUG	if(bShowLog) log(self$"  member count == 1....  m_Team[0].controller state="$m_Team[0].controller.GetStateName());	#endif
-			// if there is only one member in the team and this member is sniping
-			if(m_Team[0].controller.IsInState('SnipeUntilGoCode')) 
+			// End:0x7D
+			if(m_Team[0].Controller.__NFUN_281__('SnipeUntilGoCode'))
 			{
-				#ifdefDEBUG	if(bShowLog) log(self$" only one member in team and they are sniping.... call SetNoiseFocus()");		#endif
-				// sniper should stop sniping and get up to look around...
-				R6RainbowAI(m_Team[0].controller).SetNoiseFocus(m_vNoiseSource);
+				R6RainbowAI(m_Team[0].Controller).SetNoiseFocus(m_vNoiseSource);
 				return;
 			}
 		}
-	}	
-	
-	iMember = PickMemberClosestTo(aNoiseMaker);		
-	if(iMember < 0)
+	}
+	iMember = PickMemberClosestTo(aNoiseMaker);
+	// End:0x9B
+	if(__NFUN_150__(iMember, 0))
+	{
 		return;
-	R6RainbowAI(m_Team[iMember].controller).SetNoiseFocus(m_vNoiseSource);
-	#ifdefDEBUG	if(bShowLog) log(self$"  TeamHearNoise() :  Member="$iMember$" will investigate noise...");	#endif
+	}
+	R6RainbowAI(m_Team[iMember].Controller).SetNoiseFocus(m_vNoiseSource);
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3685,11 +4737,17 @@ function TeamHearNoise(Actor aNoiseMaker)
 //------------------------------------------------------------------//
 function TeamSpottedSurrenderedTerrorist(R6Pawn terrorist)
 {
+	// End:0x14
 	if(m_TeamLeader.m_bIsPlayer)
+	{
 		return;
-
-	if(!R6Terrorist(terrorist).m_bIsUnderArrest)
+	}
+	// End:0x38
+	if(__NFUN_129__(R6Terrorist(terrorist).m_bIsUnderArrest))
+	{
 		m_SurrenderedTerrorist = terrorist;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3697,89 +4755,138 @@ function TeamSpottedSurrenderedTerrorist(R6Pawn terrorist)
 //------------------------------------------------------------------//
 function bool RainbowIsEngaging()
 {
-	local INT i;
-	
-	for(i=1; i<m_iMemberCount; i++)
+	local int i;
+
+	i = 1;
+	J0x07:
+
+	// End:0x45 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
 	{
-		if(m_Team[i].controller.enemy != none)
+		// End:0x3B
+		if(__NFUN_119__(m_Team[i].Controller.Enemy, none))
+		{
 			return true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
 	}
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------//
 //  EngageEnemyIfNotAlreadyEngaged()								//
 //------------------------------------------------------------------//
-function bool EngageEnemyIfNotAlreadyEngaged(R6Pawn rainbow, R6Pawn enemy)
+function bool EngageEnemyIfNotAlreadyEngaged(R6Pawn Rainbow, R6Pawn Enemy)
 {
-    local bool  bFound;
-    local INT   i;
+	local bool bFound;
+	local int i;
 
-	if(enemy == none || m_iMemberCount == 0)
+	// End:0x1A
+	if(__NFUN_132__(__NFUN_114__(Enemy, none), __NFUN_154__(m_iMemberCount, 0)))
+	{
 		return false;
+	}
+	i = 0;
+	J0x21:
 
-    for(i=0; i<m_iMemberCount; i++)
-    {
-		if(m_Team[i].m_bIsPlayer || m_Team[i] == rainbow)
-			continue;
+	// End:0x9A [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0x62
+		if(__NFUN_132__(m_Team[i].m_bIsPlayer, __NFUN_114__(m_Team[i], Rainbow)))
+		{
+			// [Explicit Continue]
+			goto J0x90;
+		}
+		// End:0x90
+		if(__NFUN_114__(R6RainbowAI(m_Team[i].Controller).Enemy, Enemy))
+		{
+			return false;
+		}
+		J0x90:
 
-        if(R6RainbowAI(m_Team[i].controller).enemy == enemy)
-			return false;	// enemy is already engaged by another rainbow
-    }
-
-    if ((m_TeamLeader.m_bIsPlayer || m_bPlayerHasFocus ) && !R6Terrorist(enemy).m_bEnteringView)
-    {
-		R6Terrorist(enemy).m_bEnteringView = true;
-		if ((m_Team[m_iMemberCount-1] == rainbow) && (R6RainbowAI(rainbow.controller).m_bIsMovingBackwards))
-            m_MemberVoicesMgr.PlayRainbowMemberVoices(rainbow, RMV_ContactRearAndEngages);
-        else
-            m_MemberVoicesMgr.PlayRainbowMemberVoices(rainbow, RMV_ContactAndEngages);
-    }
-
-    return true;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x21;
+	}
+	// End:0x151
+	if(__NFUN_130__(__NFUN_132__(m_TeamLeader.m_bIsPlayer, m_bPlayerHasFocus), __NFUN_129__(R6Terrorist(Enemy).m_bEnteringView)))
+	{
+		R6Terrorist(Enemy).m_bEnteringView = true;
+		// End:0x13B
+		if(__NFUN_130__(__NFUN_114__(m_Team[__NFUN_147__(m_iMemberCount, 1)], Rainbow), R6RainbowAI(Rainbow.Controller).m_bIsMovingBackwards))
+		{
+			m_MemberVoicesMgr.PlayRainbowMemberVoices(Rainbow, 3);			
+		}
+		else
+		{
+			m_MemberVoicesMgr.PlayRainbowMemberVoices(Rainbow, 2);
+		}
+	}
+	return true;
+	return;
 }
 
 //------------------------------------------------------------------//
 //  DisEngaged()													//
 //------------------------------------------------------------------//
-function DisEngageEnemy(Pawn rainbow, Pawn enemy)
+function DisEngageEnemy(Pawn Rainbow, Pawn Enemy)
 {
-	CheckTeamEngagingStatus(rainbow);
+	CheckTeamEngagingStatus(Rainbow);
+	return;
 }
 
 function RainbowIsEngagingEnemy()
 {
 	m_bTeamIsEngagingEnemy = true;
-	if(m_eTeamState != TS_Engaging)
+	// End:0x2B
+	if(__NFUN_155__(int(m_eTeamState), int(6)))
 	{
 		m_eBackupTeamState = m_eTeamState;
-		SetTeamState(TS_Engaging);	
+		SetTeamState(6);
 	}
+	return;
 }
 
 function CheckTeamEngagingStatus(optional Pawn rainbowToIgnore)
 {
-	local bool	bRainbowAreStillEngaging;
-	local INT	i;
-	
-	// check if there are any rainbow left still engaging
-	for(i=0; i<m_iMemberCount; i++)
-	{
-		if(m_Team[i].m_bIsPlayer || m_Team[i] == rainbowToIgnore)
-			continue;
+	local bool bRainbowAreStillEngaging;
+	local int i;
 
-		if(m_Team[i].controller.enemy != none && !(m_Team[i].m_bIsSniping && m_bSniperHold))
+	i = 0;
+	J0x07:
+
+	// End:0xA6 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0x48
+		if(__NFUN_132__(m_Team[i].m_bIsPlayer, __NFUN_114__(m_Team[i], rainbowToIgnore)))
+		{
+			// [Explicit Continue]
+			goto J0x9C;
+		}
+		// End:0x9C
+		if(__NFUN_130__(__NFUN_119__(m_Team[i].Controller.Enemy, none), __NFUN_129__(__NFUN_130__(m_Team[i].m_bIsSniping, m_bSniperHold))))
 		{
 			m_bTeamIsEngagingEnemy = true;
 			return;
 		}
-	}
+		J0x9C:
 
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	// End:0xCB
 	if(m_bTeamIsEngagingEnemy)
 	{
 		m_bTeamIsEngagingEnemy = false;
 		m_fEngagingTimer = Level.TimeSeconds;
 	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3787,28 +4894,42 @@ function CheckTeamEngagingStatus(optional Pawn rainbowToIgnore)
 //------------------------------------------------------------------//
 function AITeamHoldPosition()
 {
-	local INT	iMember;
+	local int iMember;
 
-    if (m_bPlayerHasFocus || m_bPlayerInGhostMode)
-        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_AllTeamsHold);
-
-    if((m_bLeaderIsAPlayer) || (m_iMemberCount == 0) || m_bTeamIsClimbingLadder)
-        return;
-
-	// reset any Zulu Gocode that was previously issued
-	if(m_bCAWaitingForZuluGoCode)
-		ResetZuluGoCode();
-
-    m_bTeamIsHoldingPosition = true;	
-
-	if(m_TeamLeader.m_bIsSniping || m_TeamLeader.controller.IsInState('PlaceBreachingCharge') || m_TeamLeader.controller.IsInState('DetonateBreachingCharge'))
-		return;
-
-	for(iMember=0; iMember<m_iMemberCount; iMember++)
-    {
-		m_Team[iMember].controller.nextState = '';
-		m_Team[iMember].controller.GotoState('HoldPosition');        
+	// End:0x2A
+	if(__NFUN_132__(m_bPlayerHasFocus, m_bPlayerInGhostMode))
+	{
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 3);
 	}
+	// End:0x4D
+	if(__NFUN_132__(__NFUN_132__(m_bLeaderIsAPlayer, __NFUN_154__(m_iMemberCount, 0)), m_bTeamIsClimbingLadder))
+	{
+		return;
+	}
+	// End:0x5C
+	if(m_bCAWaitingForZuluGoCode)
+	{
+		ResetZuluGoCode();
+	}
+	m_bTeamIsHoldingPosition = true;
+	// End:0xB6
+	if(__NFUN_132__(__NFUN_132__(m_TeamLeader.m_bIsSniping, m_TeamLeader.Controller.__NFUN_281__('PlaceBreachingCharge')), m_TeamLeader.Controller.__NFUN_281__('DetonateBreachingCharge')))
+	{
+		return;
+	}
+	iMember = 0;
+	J0xBD:
+
+	// End:0x118 [Loop If]
+	if(__NFUN_150__(iMember, m_iMemberCount))
+	{
+		m_Team[iMember].Controller.NextState = 'None';
+		m_Team[iMember].Controller.__NFUN_113__('HoldPosition');
+		__NFUN_165__(iMember);
+		// [Loop Continue]
+		goto J0xBD;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -3816,111 +4937,148 @@ function AITeamHoldPosition()
 //------------------------------------------------------------------//
 function AITeamFollowPlanning()
 {
-	local INT	iMember;
+	local int iMember;
 
-    if (m_bPlayerHasFocus || m_bPlayerInGhostMode)
-        m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, RPV_AllTeamsMove);
-
-    if((m_bLeaderIsAPlayer) || (m_iMemberCount == 0) || m_bTeamIsClimbingLadder)
-        return;
-
-	m_bTeamIsHoldingPosition = false;
-
-	if(m_TeamLeader.m_bIsSniping || m_TeamLeader.controller.IsInState('PlaceBreachingCharge') || m_TeamLeader.controller.IsInState('DetonateBreachingCharge'))
-		return;
-    
-	m_TeamLeader.controller.GotoState('Patrol');
-	for(iMember=1; iMember<m_iMemberCount; iMember++)
+	// End:0x2A
+	if(__NFUN_132__(m_bPlayerHasFocus, m_bPlayerInGhostMode))
 	{
-		m_Team[iMember].controller.GotoState('FollowLeader');
-		R6RainbowAI(m_Team[iMember].controller).ResetStateProgress();
+		m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamLeader, 4);
 	}
+	// End:0x4D
+	if(__NFUN_132__(__NFUN_132__(m_bLeaderIsAPlayer, __NFUN_154__(m_iMemberCount, 0)), m_bTeamIsClimbingLadder))
+	{
+		return;
+	}
+	m_bTeamIsHoldingPosition = false;
+	// End:0xA7
+	if(__NFUN_132__(__NFUN_132__(m_TeamLeader.m_bIsSniping, m_TeamLeader.Controller.__NFUN_281__('PlaceBreachingCharge')), m_TeamLeader.Controller.__NFUN_281__('DetonateBreachingCharge')))
+	{
+		return;
+	}
+	m_TeamLeader.Controller.__NFUN_113__('Patrol');
+	iMember = 1;
+	J0xC7:
+
+	// End:0x122 [Loop If]
+	if(__NFUN_150__(iMember, m_iMemberCount))
+	{
+		m_Team[iMember].Controller.__NFUN_113__('FollowLeader');
+		R6RainbowAI(m_Team[iMember].Controller).ResetStateProgress();
+		__NFUN_165__(iMember);
+		// [Loop Continue]
+		goto J0xC7;
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
 //  SendMemberToEnd()												//
 //------------------------------------------------------------------//
-function bool SendMemberToEnd(INT iMember, optional bool bReorganizeWounded)
+function bool SendMemberToEnd(int iMember, optional bool bReorganizeWounded)
 {
-	local	INT			i;
-	local	R6Rainbow	rainbow;
-	local   R6RainbowAI rainbowAI;
+	local int i;
+	local R6Rainbow Rainbow;
+	local R6RainbowAI rainbowAI;
 
-	#ifdefDEBUG if(bShowLog) log(self$" SendMemberToEnd() iMember="$iMember$" m_iTeamAction="$m_iTeamAction$" m_iTeamAction="$m_iTeamAction);	#endif
-
-	rainbow = m_Team[iMember];
-	rainbowAI = R6RainbowAI(rainbow.controller);
-
-	// do not send member to end if they are in the middle of performing an action
+	Rainbow = m_Team[iMember];
+	rainbowAI = R6RainbowAI(Rainbow.Controller);
+	// End:0xD0
 	if(bReorganizeWounded)
 	{
-		if( ( m_iTeamAction != TEAM_None 
-				|| m_bTeamIsClimbingLadder 
-				|| rainbow.m_bIsSniping 
-				|| rainbow.m_bInteractingWithDevice 
-				|| m_bEntryInProgress 
-				|| m_eTeamState == TS_Engaging)
-			&& rainbow.m_eHealth == HEALTH_Wounded )
+		// End:0xBF
+		if(__NFUN_130__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_155__(m_iTeamAction, 0), m_bTeamIsClimbingLadder), Rainbow.m_bIsSniping), Rainbow.m_bInteractingWithDevice), m_bEntryInProgress), __NFUN_154__(int(m_eTeamState), int(6))), __NFUN_154__(int(Rainbow.m_eHealth), int(1))))
 		{
 			rainbowAI.m_bReorganizationPending = true;
-			return false;
+			return false;			
 		}
 		else
+		{
 			rainbowAI.m_bReorganizationPending = false;
+		}
 	}
+	i = iMember;
+	J0xDB:
 
-	// move member to end of formation, and move up other members	
-	for(i=iMember; i<m_iMemberCount-1; i++)
+	// End:0x12B [Loop If]
+	if(__NFUN_150__(i, __NFUN_147__(m_iMemberCount, 1)))
 	{
-		m_Team[i] = m_Team[i+1];
-		m_Team[i].m_iId = i;
+		m_Team[i] = m_Team[__NFUN_146__(i, 1)];
+		m_Team[i].m_iID = i;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0xDB;
 	}
-	m_Team[i] = rainbow;
-	m_Team[i].m_iId = i;
-
+	m_Team[i] = Rainbow;
+	m_Team[i].m_iID = i;
 	return true;
+	return;
 }
 
 //------------------------------------------------------------------//
 //  AssignNewTeamLeader()			
 //------------------------------------------------------------------//
-function AssignNewTeamLeader(INT iNewLeader)
+function AssignNewTeamLeader(int iNewLeader)
 {
 	ReOrganizeTeam(iNewLeader);
 	m_iIntermLeader = 0;
+	return;
 }
 
 //------------------------------------------------------------------//
 //  ReOrganizeTeam()												//
 //------------------------------------------------------------------//
-function ReOrganizeTeam(INT iNewLeader)
+function ReOrganizeTeam(int iNewLeader)
 {
-	local	INT			i;
+	local int i;
 
-	// if there is only one member, there is nothing to reorganize 
-	if(m_iMemberCount == 1)
+	// End:0x0D
+	if(__NFUN_154__(m_iMemberCount, 1))
+	{
 		return;
-
+	}
+	// End:0x4E
 	if(m_bLeaderIsAPlayer)
 	{
-		if(m_iMemberCount == 2)
+		// End:0x24
+		if(__NFUN_154__(m_iMemberCount, 2))
+		{
 			return;
+		}
+		i = 1;
+		J0x2B:
 
-		for(i=1; i<iNewLeader; i++)
+		// End:0x4B [Loop If]
+		if(__NFUN_150__(i, iNewLeader))
+		{
 			SendMemberToEnd(1);
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x2B;
+		}		
 	}
 	else
-	{	
-		if(m_iMemberCount == 1)
+	{
+		// End:0x5B
+		if(__NFUN_154__(m_iMemberCount, 1))
+		{
 			return;
-		
-		for(i=0; i<iNewLeader; i++)
-			SendMemberToEnd(0);
+		}
+		i = 0;
+		J0x62:
 
+		// End:0x82 [Loop If]
+		if(__NFUN_150__(i, iNewLeader))
+		{
+			SendMemberToEnd(0);
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x62;
+		}
 		ResetTeamMemberStates();
 	}
 	m_iIntermLeader = iNewLeader;
 	Escort_ManageList();
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3928,29 +5086,42 @@ function ReOrganizeTeam(INT iNewLeader)
 //------------------------------------------------------------------
 function ResetTeamMemberStates()
 {
-	local INT i;
+	local int i;
 
+	// End:0x0B
 	if(m_bLeaderIsAPlayer)
-		return;
-
-	m_TeamLeader = m_Team[0];
-	if(m_TeamLeader == none)
-		return;
-	
-	for(i=0; i<m_iMemberCount; i++)
 	{
-		if(i == 0)
-		{
-			R6RainbowAI(m_Team[0].controller).m_TeamLeader = none;
-			//	if(!m_Team[i].controller.IsInState('Patrol'))
-				m_Team[i].controller.GotoState('Patrol');
-		}
-		else
-		{
-			R6RainbowAI(m_Team[i].controller).m_TeamLeader = m_TeamLeader;
-			m_Team[i].controller.GotoState('FollowLeader');
-		}
+		return;
 	}
+	m_TeamLeader = m_Team[0];
+	// End:0x25
+	if(__NFUN_114__(m_TeamLeader, none))
+	{
+		return;
+	}
+	i = 0;
+	J0x2C:
+
+	// End:0xD9 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0x88
+		if(__NFUN_154__(i, 0))
+		{
+			R6RainbowAI(m_Team[0].Controller).m_TeamLeader = none;
+			m_Team[i].Controller.__NFUN_113__('Patrol');
+			// [Explicit Continue]
+			goto J0xCF;
+		}
+		R6RainbowAI(m_Team[i].Controller).m_TeamLeader = m_TeamLeader;
+		m_Team[i].Controller.__NFUN_113__('FollowLeader');
+		J0xCF:
+
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x2C;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -3958,63 +5129,105 @@ function ResetTeamMemberStates()
 //------------------------------------------------------------------
 function RestoreTeamOrder()
 {
-	local	INT			i;
+	local int i;
 
+	// End:0x0B
 	if(m_bCAWaitingForZuluGoCode)
+	{
 		return;
-
-	if(m_iIntermLeader == 0)
+	}
+	// End:0x18
+	if(__NFUN_154__(m_iIntermLeader, 0))
+	{
 		return;
-
+	}
+	// End:0x6D
 	if(m_bLeaderIsAPlayer)
 	{
-		if((m_iMemberCount == 2) || (m_iIntermLeader == 1))
+		// End:0x3C
+		if(__NFUN_132__(__NFUN_154__(m_iMemberCount, 2), __NFUN_154__(m_iIntermLeader, 1)))
+		{
 			return;
+		}
+		i = 1;
+		J0x43:
 
-		for(i=1; i<=(m_iMemberCount - m_iIntermLeader); i++)
-			SendMemberToEnd(1);		
+		// End:0x6A [Loop If]
+		if(__NFUN_152__(i, __NFUN_147__(m_iMemberCount, m_iIntermLeader)))
+		{
+			SendMemberToEnd(1);
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x43;
+		}		
 	}
 	else
 	{
-		// if there is only one member, there is nothing to reorganize 
-		if(m_iMemberCount == 1)
+		// End:0x7A
+		if(__NFUN_154__(m_iMemberCount, 1))
+		{
 			return;
+		}
+		i = 0;
+		J0x81:
 
-		for(i=0; i<(m_iMemberCount - m_iIntermLeader); i++)
+		// End:0xA8 [Loop If]
+		if(__NFUN_150__(i, __NFUN_147__(m_iMemberCount, m_iIntermLeader)))
+		{
 			SendMemberToEnd(0);
-
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x81;
+		}
 		ReOrganizeWoundedMembers();
 		ResetTeamMemberStates();
 	}
 	m_iIntermLeader = 0;
-
-	// update list of escorted hostage
-    Escort_ManageList();
+	Escort_ManageList();
+	return;
 }
 
 function ReOrganizeWoundedMembers()
 {
-	local INT i;
-	local bool  bReOrganized;
+	local int i;
+	local bool bReOrganized;
 
-	// move any injured members to the end
-	for(i=0; i<m_iMemberCount; i++)
+	i = 0;
+	J0x07:
+
+	// End:0xD1 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
 	{
+		// End:0x31
 		if(m_Team[i].m_bIsPlayer)
-			continue;
-
-		if((i < m_iMemberCount-1) && m_Team[i].m_eHealth == HEALTH_Wounded && m_Team[i+1].m_eHealth == HEALTH_Healthy)
 		{
-			if(SendMemberToEnd(i, true))
-				bReOrganized = true;
+			// [Explicit Continue]
+			goto J0xC7;
 		}
-		else
-			R6RainbowAI(m_Team[i].controller).m_bReorganizationPending = false;
-	}
+		// End:0xA2
+		if(__NFUN_130__(__NFUN_130__(__NFUN_150__(i, __NFUN_147__(m_iMemberCount, 1)), __NFUN_154__(int(m_Team[i].m_eHealth), int(1))), __NFUN_154__(int(m_Team[__NFUN_146__(i, 1)].m_eHealth), int(0))))
+		{
+			// End:0x9F
+			if(SendMemberToEnd(i, true))
+			{
+				bReOrganized = true;
+			}
+			// [Explicit Continue]
+			goto J0xC7;
+		}
+		R6RainbowAI(m_Team[i].Controller).m_bReorganizationPending = false;
+		J0xC7:
 
-	// if at least one member was reorganized, reset the controller states
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	// End:0xE0
 	if(bReOrganized)
+	{
 		ResetTeamMemberStates();
+	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4022,44 +5235,63 @@ function ReOrganizeWoundedMembers()
 //------------------------------------------------------------------//
 function R6Rainbow FindRainbowWithBreachingCharge()
 {
-	local INT				iMember;
-	local INT				iWeaponGroup;
-	local R6AbstractWeapon	demolitionsWeapon;
-	
-	// for each team member
-	for( iMember = 0; iMember < m_iMemberCount; iMember++ )
-	{
-        if(m_Team[iMember].m_bIsPlayer)
-            continue;
+	local int iMember, iWeaponGroup;
+	local R6AbstractWeapon demolitionsWeapon;
 
+	iMember = 0;
+	J0x07:
+
+	// End:0x5B [Loop If]
+	if(__NFUN_150__(iMember, m_iMemberCount))
+	{
+		// End:0x31
+		if(m_Team[iMember].m_bIsPlayer)
+		{
+			// [Explicit Continue]
+			goto J0x51;
+		}
+		// End:0x51
 		if(HasBreachingCharge(m_Team[iMember]))
+		{
 			return m_Team[iMember];
-	}   	
+		}
+		J0x51:
+
+		__NFUN_165__(iMember);
+		// [Loop Continue]
+		goto J0x07;
+	}
 	return none;
+	return;
 }
 
 //------------------------------------------------------------------//
 //  HasBreachingCharge												//
 //------------------------------------------------------------------//
-function bool HasBreachingCharge(R6Rainbow rainbow)
+function bool HasBreachingCharge(R6Rainbow Rainbow)
 {
-	local INT				iWeaponGroup;
-	local R6EngineWeapon    demolitionsWeapon;
-	
-	// check both gadget groups
-	for( iWeaponGroup = 3; iWeaponGroup <= 4; iWeaponGroup++ )
+	local int iWeaponGroup;
+	local R6EngineWeapon demolitionsWeapon;
+
+	iWeaponGroup = 3;
+	J0x08:
+
+	// End:0x91 [Loop If]
+	if(__NFUN_152__(iWeaponGroup, 4))
 	{
-		demolitionsWeapon = rainbow.GetWeaponInGroup(iWeaponGroup);
-		if((demolitionsWeapon != none) 
-			&& demolitionsWeapon.IsA('R6BreachingChargeGadget') && demolitionsWeapon.HasAmmo())
+		demolitionsWeapon = Rainbow.GetWeaponInGroup(iWeaponGroup);
+		// End:0x87
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(demolitionsWeapon, none), demolitionsWeapon.__NFUN_303__('R6BreachingChargeGadget')), demolitionsWeapon.HasAmmo()))
 		{
-			// this rainbow has a breaching charge				
-			R6RainbowAI(rainbow.controller).m_iActionUseGadgetGroup = iWeaponGroup;
+			R6RainbowAI(Rainbow.Controller).m_iActionUseGadgetGroup = iWeaponGroup;
 			return true;
 		}
+		__NFUN_165__(iWeaponGroup);
+		// [Loop Continue]
+		goto J0x08;
 	}
-
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4068,28 +5300,23 @@ function bool HasBreachingCharge(R6Rainbow rainbow)
 //------------------------------------------------------------------//
 function ReOrganizeTeamForBreachDoor()
 {
-    local   R6Rainbow   actionMember;
-	local	INT			i;
-	
-	#ifdefDEBUG	if(bShowLog) log(self$" ReOrganizeTeamForBreachDoor() was called...m_BreachingDoor="$m_BreachingDoor$" m_eGoCode="$m_eGoCode);	#endif	
+	local R6Rainbow actionMember;
+	local int i;
+
 	m_BreachingDoor = R6IORotatingDoor(m_TeamPlanning.GetNextDoorToBreach(m_PlanActionPoint));
-
-	// if team lead has a breaching charge, no changes are required, exit now...
-	// or if the door is already open or is already destroyed, do not reorganize
-	if(HasBreachingCharge(m_Team[0]) || !m_BreachingDoor.ShouldBeBreached())
-		return;
-
-	#ifdefDEBUG	if(bShowLog) log(self$" team lead did not have a breaching charge so reorganize team... ");	#endif
-	// reorganize team only if necessary... (if lead has no breaching charge)
-	actionMember = FindRainbowWithBreachingCharge();	
-	if(actionMember == none)
+	// End:0x47
+	if(__NFUN_132__(HasBreachingCharge(m_Team[0]), __NFUN_129__(m_BreachingDoor.ShouldBeBreached())))
 	{
-		#ifdefDEBUG	if(bShowLog) log(self$" no one in team has a breaching charge, continue...");	#endif
 		return;
 	}
-	#ifdefDEBUG	if(bShowLog) log(self$" - "$actionMember$" was chosen to breach the door, reorganize!");	#endif
-	
-	ReOrganizeTeam(actionMember.m_iId);
+	actionMember = FindRainbowWithBreachingCharge();
+	// End:0x60
+	if(__NFUN_114__(actionMember, none))
+	{
+		return;
+	}
+	ReOrganizeTeam(actionMember.m_iID);
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4097,35 +5324,42 @@ function ReOrganizeTeamForBreachDoor()
 //------------------------------------------------------------------//
 function PlaceBreachCharge()
 {
-    #ifdefDEBUG	if(bShowLog) log(self$" Instruct team to place breaching change on door : "$m_BreachingDoor);		#endif
+	// End:0x0B
 	if(m_bLeaderIsAPlayer)
-		return;
-
-	if(m_BreachingDoor == none)
 	{
-		#ifdefDEBUG	if(bShowLog) log(self$" m_BreachingDoor is invalid!... cannot perform place breach charge...");	#endif
+		return;
+	}
+	// End:0x1E
+	if(__NFUN_114__(m_BreachingDoor, none))
+	{
 		ActionNodeCompleted();
 		return;
 	}
-
-	// double check!!!
-	if(m_BreachingDoor.ShouldBeBreached() && !HasBreachingCharge(m_Team[0]))
-		ReOrganizeTeamForBreachDoor();
-
-	if(!HasBreachingCharge(m_Team[0]) || !m_BreachingDoor.ShouldBeBreached())
+	// End:0x4A
+	if(__NFUN_130__(m_BreachingDoor.ShouldBeBreached(), __NFUN_129__(HasBreachingCharge(m_Team[0]))))
 	{
-		#ifdefDEBUG	if(bShowLog) log(self$"  m_eGoCode="$m_eGoCode$" CAN DO NOTHING, NO ONE HAS BREACH - Play voice/sound? ");	#endif
-		if(m_eGoCode == GOCODE_None)
-			ActionNodeCompleted();
+		ReOrganizeTeamForBreachDoor();
+	}
+	// End:0x9D
+	if(__NFUN_132__(__NFUN_129__(HasBreachingCharge(m_Team[0])), __NFUN_129__(m_BreachingDoor.ShouldBeBreached())))
+	{
+		// End:0x8B
+		if(__NFUN_154__(int(m_eGoCode), int(4)))
+		{
+			ActionNodeCompleted();			
+		}
 		else
+		{
 			m_bSkipAction = true;
-		m_BreachingDoor = none;	
+		}
+		m_BreachingDoor = none;		
 	}
 	else
 	{
-		R6RainbowAI(m_Team[0].controller).ResetStateProgress();
-		m_Team[0].controller.GotoState('PlaceBreachingCharge');
+		R6RainbowAI(m_Team[0].Controller).ResetStateProgress();
+		m_Team[0].Controller.__NFUN_113__('PlaceBreachingCharge');
 	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4133,28 +5367,43 @@ function PlaceBreachCharge()
 //------------------------------------------------------------------//
 function BreachDoor()
 {
-    #ifdefDEBUG	if(bShowLog) log(self$" BreachDoor() was called... BOOM no more door!");		#endif
+	// End:0x12
 	if(m_bLeaderIsAPlayer)
-		ResetTeamGoCode();
-	else if(m_bSkipAction)
-		ActionNodeCompleted();
+	{
+		ResetTeamGoCode();		
+	}
 	else
-		R6RainbowAI(m_Team[0].controller).DetonateBreach();
+	{
+		// End:0x24
+		if(m_bSkipAction)
+		{
+			ActionNodeCompleted();			
+		}
+		else
+		{
+			R6RainbowAI(m_Team[0].Controller).DetonateBreach();
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 //  SetTeamGoCode()
 //    set Alpha, Bravo, or Charlie gocodes
 //------------------------------------------------------------------
-function SetTeamGoCode(eGoCode eCode)
+function SetTeamGoCode(Object.EGoCode eCode)
 {
+	// End:0x17
 	if(m_bCAWaitingForZuluGoCode)
-		m_eBackupGoCode = eCode;
+	{
+		m_eBackupGoCode = eCode;		
+	}
 	else
 	{
-		m_eBackupGoCode = GOCODE_None;
+		m_eBackupGoCode = 4;
 		m_eGoCode = eCode;
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4163,11 +5412,14 @@ function SetTeamGoCode(eGoCode eCode)
 //------------------------------------------------------------------
 function ResetTeamGoCode()
 {
+	// End:0x0B
 	if(m_bCAWaitingForZuluGoCode)
+	{
 		return;
-
-	m_eGoCode = GOCODE_None;
-	m_eBackupGoCode = GOCODE_None;
+	}
+	m_eGoCode = 4;
+	m_eBackupGoCode = 4;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4175,13 +5427,15 @@ function ResetTeamGoCode()
 //------------------------------------------------------------------
 function ResetZuluGoCode()
 {
-	if(!m_bCAWaitingForZuluGoCode)
+	// End:0x0D
+	if(__NFUN_129__(m_bCAWaitingForZuluGoCode))
+	{
 		return;
-
-	#ifdefDEBUG	if(bShowLog) log(self$" ResetZuluGoCode() .... m_eBackupGoCode="$m_eBackupGoCode); 	#endif
-	m_bCAWaitingForZuluGoCode = false;	
+	}
+	m_bCAWaitingForZuluGoCode = false;
 	m_eGoCode = m_eBackupGoCode;
-	m_eBackupGoCode = GOCODE_None;
+	m_eBackupGoCode = 4;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4190,57 +5444,74 @@ function ResetZuluGoCode()
 //------------------------------------------------------------------//
 function ReOrganizeTeamForSniping()
 {
-    local   R6Rainbow   actionMember;
-	local	INT			i;
-	local	INT			iBestSniper;
-	local	FLOAT		fBestRange;
-	local	FLOAT		fCurrentRange;
-	
-	// check if team has already been reorganized for sniping...
-	if(m_bSniperReady)
-		return;
+	local R6Rainbow actionMember;
+	local int i, iBestSniper;
+	local float fBestRange, fCurrentRange;
 
-	#ifdefDEBUG	if(bShowLog) log(self$" ReOrganizeTeamForSniping() was called...");	#endif
-	// choose which member of the team will snipe 
-	// (find the member with a sniper rifle as their primary weapon and the highest sniper skill)	
-	iBestSniper = -1;
-	for(i=0; i<m_iMemberCount; i++)
+	// End:0x0B
+	if(m_bSniperReady)
 	{
-		if(m_Team[i].m_WeaponsCarried[0].m_eWeaponType == WT_Sniper)
+		return;
+	}
+	iBestSniper = -1;
+	i = 0;
+	J0x1D:
+
+	// End:0xBB [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0xB1
+		if(__NFUN_154__(int(m_Team[i].m_WeaponsCarried[0].m_eWeaponType), int(4)))
 		{
-			if(iBestSniper == -1)
-				iBestSniper = i;
-			else // pick the better sniper of the two
+			// End:0x73
+			if(__NFUN_154__(iBestSniper, -1))
 			{
-				if(m_Team[i].GetSkill(SKILL_Sniper) > m_Team[iBestSniper].GetSkill(SKILL_Sniper))
-					iBestSniper = i;
+				iBestSniper = i;
+				// [Explicit Continue]
+				goto J0xB1;
+			}
+			// End:0xB1
+			if(__NFUN_177__(m_Team[i].GetSkill(3), m_Team[iBestSniper].GetSkill(3)))
+			{
+				iBestSniper = i;
 			}
 		}
-	}	
+		J0xB1:
 
-	// if no one in the team is equipped with a sniper rifle, choose the 
-	// member equipped with the weapon with the longest range
-	if(iBestSniper == -1)
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x1D;
+	}
+	// End:0x15E
+	if(__NFUN_154__(iBestSniper, -1))
 	{
 		iBestSniper = 0;
 		fBestRange = m_Team[0].m_WeaponsCarried[0].GetWeaponRange();
-		for(i=0; i<m_iMemberCount; i++)
+		i = 0;
+		J0xFA:
+
+		// End:0x15E [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
 		{
 			fCurrentRange = m_Team[i].m_WeaponsCarried[0].GetWeaponRange();
-			if(fCurrentRange > fBestRange)
+			// End:0x154
+			if(__NFUN_177__(fCurrentRange, fBestRange))
 			{
 				iBestSniper = i;
 				fBestRange = fCurrentRange;
 			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0xFA;
 		}
 	}
-
-	// change team order to place sniper in front
-	if(iBestSniper != 0)
+	// End:0x174
+	if(__NFUN_155__(iBestSniper, 0))
+	{
 		ReOrganizeTeam(iBestSniper);
-
+	}
 	m_bSniperReady = true;
-	#ifdefDEBUG	if(bShowLog) log(self$"  SnipeUntilGoCode() : bestSniper="$iBestSniper$" (now new temp leader) pawn="$m_Team[iBestSniper]$" fBestRange="$fBestRange);	#endif
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4249,38 +5520,49 @@ function ReOrganizeTeamForSniping()
 //   is close enough to the sniping location; it may be necessary 	//
 //   to temporarily reorganise the order of the team members.		//
 //------------------------------------------------------------------//
-function SnipeUntilGoCode() 
+function SnipeUntilGoCode()
 {
-	local	INT			i;
-	local	vector		vLocation;
-	local	rotator		rRotation;
+	local int i;
+	local Vector vLocation;
+	local Rotator rRotation;
 
-    if(m_bLeaderIsAPlayer)
-        return;
-
+	// End:0x0B
+	if(m_bLeaderIsAPlayer)
+	{
+		return;
+	}
+	// End:0x1E
 	if(m_bTeamIsClimbingLadder)
 	{
 		m_bPendingSnipeUntilGoCode = true;
 		return;
 	}
-
 	m_bPendingSnipeUntilGoCode = false;
 	m_TeamPlanning.GetSnipingCoordinates(vLocation, rRotation);
-	#ifdefDEBUG	if(bShowLog) log(self$" SnipeUntilGoCode() was called...vLocation="$vLocation$" rRotation="$rRotation);	#endif
-
-	// set state for sniper who now is temporary leader
-	SetTeamState(TS_Sniping);
-	R6RainbowAI(m_Team[0].controller).m_ActionTarget = m_LastActionPoint; 
+	SetTeamState(7);
+	R6RainbowAI(m_Team[0].Controller).m_ActionTarget = m_LastActionPoint;
 	m_rSnipingDir = rRotation;
-	m_Team[0].controller.GotoState('SnipeUntilGoCode');
-	
+	m_Team[0].Controller.__NFUN_113__('SnipeUntilGoCode');
+	// End:0xA5
 	if(m_bCAWaitingForZuluGoCode)
-		SetTeamState(TS_Waiting);
+	{
+		SetTeamState(1);		
+	}
 	else
 	{
-		for(i=1; i<m_iMemberCount; i++)
-			m_Team[i].controller.GotoState('FollowLeader');
+		i = 1;
+		J0xAC:
+
+		// End:0xE4 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0xAC;
+		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4289,144 +5571,180 @@ function SnipeUntilGoCode()
 //------------------------------------------------------------------//
 function TeamSnipingOver()
 {
-	local INT	i;
+	local int i;
 
+	// End:0x11
 	if(m_bLeaderIsAPlayer)
-    {
+	{
 		ResetTeamGoCode();
 		return;
 	}
-
-	#ifdefDEBUG if(bShowLog) log(self$" teamSnipingOver() was called...");	#endif
-	// reorganize team based on their original order
 	RestoreTeamOrder();
-
-	// set the appropriate new AI states for each member
+	// End:0x3E
 	if(m_bTeamIsHoldingPosition)
-		m_Team[0].controller.GotoState('HoldPosition');
+	{
+		m_Team[0].Controller.__NFUN_113__('HoldPosition');		
+	}
 	else
-		m_Team[0].controller.GotoState('Patrol');
-		
-	for(i=1; i<m_iMemberCount; i++)
-		m_Team[i].controller.GotoState('FollowLeader');
+	{
+		m_Team[0].Controller.__NFUN_113__('Patrol');
+	}
+	i = 1;
+	J0x60:
 
+	// End:0x98 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		m_Team[i].Controller.__NFUN_113__('FollowLeader');
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x60;
+	}
 	ActionNodeCompleted();
+	return;
 }
 
 //------------------------------------------------------------------//
 //  NotifyActionPoint()												//
 //------------------------------------------------------------------//
-function TeamNotifyActionPoint(ENodeNotify eMsg, EGoCode eCode)
+function TeamNotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 {
-    switch(eMsg) 
-    {
-        case NODEMSG_NewAction:            
-            m_ePlanAction = m_TeamPlanning.GetAction();
-            m_vPlanActionLocation = m_TeamPlanning.GetActionLocation();
+	switch(eMsg)
+	{
+		// End:0x6E
+		case 0:
+			m_ePlanAction = m_TeamPlanning.GetAction();
+			m_vPlanActionLocation = m_TeamPlanning.GetActionLocation();
 			ResetTeamGoCode();
-			#ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_NewAction received : m_ePlanAction="$m_ePlanAction);		#endif
-			if(m_ePlanAction == PACT_Breach)
-			{				
-				m_BreachingDoor = R6IORotatingDoor(m_TeamPlanning.GetDoorToBreach());			
+			// End:0x6C
+			if(__NFUN_154__(int(m_ePlanAction), int(6)))
+			{
+				m_BreachingDoor = R6IORotatingDoor(m_TeamPlanning.GetDoorToBreach());
 				PlaceBreachCharge();
 			}
-            return;
-    
-        case NODEMSG_NewMode:       
-            m_eMovementMode = m_TeamPlanning.GetMovementMode();
-            #ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_NewMode received : m_eMovementMode="$m_eMovementMode);	#endif
-            return;
-    
-        case NODEMSG_NewSpeed:        
+			return;
+		// End:0x8A
+		case 1:
+			m_eMovementMode = m_TeamPlanning.GetMovementMode();
+			return;
+		// End:0xA6
+		case 2:
 			m_eMovementSpeed = m_TeamPlanning.GetMovementSpeed();
-            #ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_NewSpeed received : m_eMovementSpeed="$m_eMovementSpeed);	#endif
-            return;
-    
-        case NODEMSG_NewNode:
-            ResetTeamGoCode();
+			return;
+		// End:0xB9
+		case 3:
+			ResetTeamGoCode();
 			GetNextActionPoint();
-            #ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_NewNode received : m_PlanActionPoint="$m_PlanActionPoint$" m_TeamPlanning="$m_TeamPlanning);	#endif
-            return;
-
-        case NODEMSG_WaitingGoCode:  
+			return;
+		// End:0xD6
+		case 6:
 			SetTeamGoCode(eCode);
 			PlayWaitingGoCode(m_eGoCode);
-            #ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_WaitingGoCode received...eCode="$eCode);		#endif
-            return;
-
-        case NODEMSG_SnipeUntilGoCode:
-            #ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_SnipeUntilGoCode received...");	#endif            			
-			SetTeamGoCode(eCode);
-			m_ePlanAction = PACT_SnipeGoCode;    
-			SnipeUntilGoCode();
-            return;
-
-        case NODEMSG_BreachDoorAtGoCode:
-            SetTeamGoCode(eCode);
-			m_ePlanAction = PACT_Breach;
-			m_BreachingDoor = R6IORotatingDoor(m_TeamPlanning.GetDoorToBreach());			
-            #ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_BreachDoorAtGoCode received...m_BreachingDoor="$m_BreachingDoor$" eCode="$eCode);	#endif
-			PlaceBreachCharge();
-            return;
-
-        // do nothing...
-        case NODEMSG_GoCodeLaunched:
-            #ifdefDEBUG	if(bPlanningLog) log(" Team  : NODEMSG_GoCodeLaunched received...");	#endif
-			GetNextActionPoint();  
 			return;
-
-        case NODEMSG_ActionNodeCompleted:        
-            return;
-    }
+		// End:0xF6
+		case 9:
+			SetTeamGoCode(eCode);
+			m_ePlanAction = 5;
+			SnipeUntilGoCode();
+			return;
+		// End:0x130
+		case 10:
+			SetTeamGoCode(eCode);
+			m_ePlanAction = 6;
+			m_BreachingDoor = R6IORotatingDoor(m_TeamPlanning.GetDoorToBreach());
+			PlaceBreachCharge();
+			return;
+		// End:0x13D
+		case 4:
+			GetNextActionPoint();
+			return;
+		// End:0x144
+		case 5:
+			return;
+		// End:0xFFFF
+		default:
+			return;
+			break;
+	}
 }
 
-function PlayWaitingGoCode(EGoCode eCode, optional BOOL bSnipeUntilGoCode)
+function PlayWaitingGoCode(Object.EGoCode eCode, optional bool bSnipeUntilGoCode)
 {
-	if(m_OtherTeamVoicesMgr == none)
+	// End:0x0D
+	if(__NFUN_114__(m_OtherTeamVoicesMgr, none))
+	{
 		return;
-
-    if (!m_bLeaderIsAPlayer)
-    {
-        switch(eCode)
-        {
-            case GOCODE_Alpha:
-                if (bSnipeUntilGoCode)
-                    m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusSniperUntilAlpha);
-                else
-                    m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_WaitAlpha);
-                break;
-            case GOCODE_Bravo:
-                if (bSnipeUntilGoCode)
-                    m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusSniperUntilBravo);
-                else
-                    m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_WaitBravo);
-                break;
-            case GOCODE_Charlie:
-                if (bSnipeUntilGoCode)
-                    m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_StatusSniperUntilCharlie);
-                else
-                    m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_WaitCharlie);
-                break;
-            case GOCODE_Zulu:
-                m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, ROTV_WaitZulu);
-                break;
-        }
-    }
+	}
+	// End:0x100
+	if(__NFUN_129__(m_bLeaderIsAPlayer))
+	{
+		switch(eCode)
+		{
+			// End:0x5F
+			case 0:
+				// End:0x46
+				if(bSnipeUntilGoCode)
+				{
+					m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 31);					
+				}
+				else
+				{
+					m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 15);
+				}
+				// End:0x100
+				break;
+			// End:0x9F
+			case 1:
+				// End:0x86
+				if(bSnipeUntilGoCode)
+				{
+					m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 32);					
+				}
+				else
+				{
+					m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 16);
+				}
+				// End:0x100
+				break;
+			// End:0xDF
+			case 2:
+				// End:0xC6
+				if(bSnipeUntilGoCode)
+				{
+					m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 33);					
+				}
+				else
+				{
+					m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 17);
+				}
+				// End:0x100
+				break;
+			// End:0xFD
+			case 3:
+				m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamLeader, 18);
+				// End:0x100
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	else
+	{
+		return;
+	}
 }
-
 
 //------------------------------------------------------------------//
 //  GetFirstActionPoint()											//
 //------------------------------------------------------------------//
 function GetFirstActionPoint()
 {
-    m_PlanActionPoint = m_TeamPlanning.GetFirstActionPoint();
+	m_PlanActionPoint = m_TeamPlanning.GetFirstActionPoint();
 	m_LastActionPoint = m_PlanActionPoint;
-    #ifdefDEBUG	if(bPlanningLog) log(" Team Get first action point!!! m_PlanActionPoint="$m_PlanActionPoint);	#endif
-
-    //check if the first action point is a gocode?
-    TeamNotifyActionPoint(NODEMSG_NewSpeed, GOCODE_None);
-    TeamNotifyActionPoint(NODEMSG_NewMode, GOCODE_None);
+	TeamNotifyActionPoint(2, 4);
+	TeamNotifyActionPoint(1, 4);
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4434,24 +5752,28 @@ function GetFirstActionPoint()
 //------------------------------------------------------------------//
 function GetNextActionPoint()
 {
-	m_PlanActionPoint = m_TeamPlanning.GetNextActionPoint();	
-	if(m_PlanActionPoint != none)
+	m_PlanActionPoint = m_TeamPlanning.GetNextActionPoint();
+	// End:0x64
+	if(__NFUN_119__(m_PlanActionPoint, none))
 	{
 		m_eNextAPAction = m_TeamPlanning.NextActionPointHasAction(m_PlanActionPoint);
-		
-		// may need to know in advance which door we will be breaching (in order to check if it is already open/destroyed)
-		if(m_BreachingDoor == none)
+		// End:0x64
+		if(__NFUN_114__(m_BreachingDoor, none))
+		{
 			m_BreachingDoor = R6IORotatingDoor(m_TeamPlanning.GetNextDoorToBreach(m_PlanActionPoint));
-	}			
-	m_LastActionPoint = m_PlanActionPoint;	
+		}
+	}
+	m_LastActionPoint = m_PlanActionPoint;
+	return;
 }
 
 //------------------------------------------------------------------//
 //  PreviewNextActionPoint()										//
 //------------------------------------------------------------------//
-function actor PreviewNextActionPoint()
+function Actor PreviewNextActionPoint()
 {
 	return m_TeamPlanning.PreviewNextActionPoint();
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4459,9 +5781,9 @@ function actor PreviewNextActionPoint()
 //------------------------------------------------------------------//
 function ActionPointReached()
 {
-    #ifdefDEBUG	if(bPlanningLog) log(" Team ActionPointReached() : "$m_PlanActionPoint$" call NotifyActionPoint(NODEMSG_NodeReached)");		#endif
-    m_PlanActionPoint = none;  
-    m_TeamPlanning.NotifyActionPoint(NODEMSG_NodeReached,GOCODE_None);
+	m_PlanActionPoint = none;
+	m_TeamPlanning.NotifyActionPoint(7, 4);
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4469,13 +5791,11 @@ function ActionPointReached()
 //------------------------------------------------------------------//
 function ActionNodeCompleted()
 {
-    #ifdefDEBUG	if(bPlanningLog) log(" Team ActionCompleted() : "$m_ePlanAction$" call NotifyActionPoint(NODEMSG_ActionNodeCompleted) m_eGoCode="$m_eGoCode);	#endif
-	m_ePlanAction = PACT_None;
+	m_ePlanAction = 0;
 	m_bSkipAction = false;
-    m_TeamPlanning.NotifyActionPoint(NODEMSG_ActionNodeCompleted,GOCODE_None);
-
-	// reset necessary flags
+	m_TeamPlanning.NotifyActionPoint(5, 4);
 	m_bSniperReady = false;
+	return;
 }
 
 //------------------------------------------------------------------//
@@ -4483,38 +5803,52 @@ function ActionNodeCompleted()
 //------------------------------------------------------------------//
 function PlayerHasAbandonedTeam()
 {
-	local R6Rainbow		tempPawn;
-	local INT			iLastMember, i;
+	local R6Rainbow tempPawn;
+	local int iLastMember, i;
 
-    #ifdefDEBUG	if(bPlanningLog) log(" Team PlayerHasAbandonedTeam() : call NotifyActionPoint(NODEMSG_PlayerLeft) m_TeamLeader="$m_TeamLeader);		#endif
-    m_TeamPlanning.NotifyActionPoint(NODEMSG_PlayerLeft,GOCODE_None);
-	
-	if(m_Team[0].m_bIsPlayer && !m_Team[0].IsAlive())
+	m_TeamPlanning.NotifyActionPoint(8, 4);
+	// End:0x141
+	if(__NFUN_130__(m_Team[0].m_bIsPlayer, __NFUN_129__(m_Team[0].IsAlive())))
 	{
 		m_Team[0].UnPossessed();
-	    iLastMember = m_iMemberCount-1;
-		// player died and left team, so reorganize
-		tempPawn = m_Team[0];  		
-        for(i=0; i<m_iMemberCount;i++)
-        { 
-            m_Team[i] = m_Team[i+1];
-            m_Team[i].m_iId = i;
-			m_Team[i].m_bIsPlayer = false;
-        }         
-        m_TeamLeader = m_Team[0];
-        m_Team[iLastMember+1] = tempPawn;
-		tempPawn.m_bIsPlayer = false;
-        m_Team[iLastMember+1].m_iId = iLastMember+1;
-		m_TeamLeader.controller.GotoState('Patrol');	
-	}
+		iLastMember = __NFUN_147__(m_iMemberCount, 1);
+		tempPawn = m_Team[0];
+		i = 0;
+		J0x72:
 
-	if(m_iTeamAction == TEAM_None)
+		// End:0xD6 [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i] = m_Team[__NFUN_146__(i, 1)];
+			m_Team[i].m_iID = i;
+			m_Team[i].m_bIsPlayer = false;
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x72;
+		}
+		m_TeamLeader = m_Team[0];
+		m_Team[__NFUN_146__(iLastMember, 1)] = tempPawn;
+		tempPawn.m_bIsPlayer = false;
+		m_Team[__NFUN_146__(iLastMember, 1)].m_iID = __NFUN_146__(iLastMember, 1);
+		m_TeamLeader.Controller.__NFUN_113__('Patrol');
+	}
+	// End:0x192
+	if(__NFUN_154__(m_iTeamAction, 0))
 	{
-		// reset team members AI state
-		for(i=1; i<m_iMemberCount; i++)
-			m_Team[i].controller.GotoState('FollowLeader');
+		i = 1;
+		J0x153:
+
+		// End:0x18B [Loop If]
+		if(__NFUN_150__(i, m_iMemberCount))
+		{
+			m_Team[i].Controller.__NFUN_113__('FollowLeader');
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x153;
+		}
 		TeamIsSeparatedFromLead(false);
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4523,20 +5857,29 @@ function PlayerHasAbandonedTeam()
 //------------------------------------------------------------------
 function R6Rainbow Escort_GetLastRainbow()
 {
-    local int i;
-    
-    if ( m_iMemberCount > 0 )
-    {
-        i = m_iMemberCount - 1;
-        while ( i >= 0 && m_Team[i] != none  )
-        {
-            if ( m_Team[i].isAlive() )
-                return m_Team[i];
-            --i;
-        }    
-    }
+	local int i;
 
-    return none;
+	// End:0x65
+	if(__NFUN_151__(m_iMemberCount, 0))
+	{
+		i = __NFUN_147__(m_iMemberCount, 1);
+		J0x19:
+
+		// End:0x65 [Loop If]
+		if(__NFUN_130__(__NFUN_153__(i, 0), __NFUN_119__(m_Team[i], none)))
+		{
+			// End:0x5B
+			if(m_Team[i].IsAlive())
+			{
+				return m_Team[i];
+			}
+			__NFUN_164__(i);
+			// [Loop Continue]
+			goto J0x19;
+		}
+	}
+	return none;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4545,26 +5888,40 @@ function R6Rainbow Escort_GetLastRainbow()
 //------------------------------------------------------------------
 function Escort_UpdateTeamSpeed()
 {
-    local INT i;
-    local INT iRainbow;
-    local R6Rainbow r;
-    
-    m_bWoundedHostage = false;
+	local int i, iRainbow;
+	local R6Rainbow R;
 
-    for ( iRainbow = 0; iRainbow < m_iMemberCount; iRainbow++ )
-    {
-        r = m_Team[iRainbow];
+	m_bWoundedHostage = false;
+	iRainbow = 0;
+	J0x0F:
 
-        while ( r != none && i < ArrayCount(r.m_aEscortedHostage) && r.m_aEscortedHostage[i] != none ) 
-        {
-            if ( r.m_aEscortedHostage[i].m_eHealth == HEALTH_Wounded )
-            {
-                m_bWoundedHostage = true;
-                break;
-            }
-            ++i;
-        }
-    }
+	// End:0xAB [Loop If]
+	if(__NFUN_150__(iRainbow, m_iMemberCount))
+	{
+		R = m_Team[iRainbow];
+		J0x2F:
+
+		// End:0xA1 [Loop If]
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(R, none), __NFUN_150__(i, 4)), __NFUN_119__(R.m_aEscortedHostage[i], none)))
+		{
+			// End:0x97
+			if(__NFUN_154__(int(R.m_aEscortedHostage[i].m_eHealth), int(1)))
+			{
+				m_bWoundedHostage = true;
+				// [Explicit Break]
+				goto J0xA1;
+			}
+			__NFUN_163__(i);
+			// [Loop Continue]
+			goto J0x2F;
+		}
+		J0xA1:
+
+		__NFUN_165__(iRainbow);
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4573,75 +5930,102 @@ function Escort_UpdateTeamSpeed()
 //------------------------------------------------------------------
 function UpdateEscortList()
 {
-    local INT   i;
-    
-    if ( m_Team[0] == none ) // on a reset, it avoid to get an accessed none
-        return;
+	local int i;
 
-	for(i=0; i<m_iMemberCount; i++)
-    {
-        m_Team[i].Escort_UpdateList();
-    }
+	// End:0x0F
+	if(__NFUN_114__(m_Team[0], none))
+	{
+		return;
+	}
+	i = 0;
+	J0x16:
+
+	// End:0x44 [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		m_Team[i].Escort_UpdateList();
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x16;
+	}
+	return;
 }
-
 
 // A SERVER SIDE FUNCTION
 function SetTeamColor(int iTeamNum)
 {
-    if ((iTeamNum<0)|| (iTeamNum>2))
-        iTeamNum = 0;
-
-    m_TeamColour=Colors.TeamHUDColor[iTeamNum];
+	// End:0x20
+	if(__NFUN_132__(__NFUN_150__(iTeamNum, 0), __NFUN_151__(iTeamNum, 2)))
+	{
+		iTeamNum = 0;
+	}
+	m_TeamColour = Colors.TeamHUDColor[iTeamNum];
+	return;
 }
 
 simulated function Color GetTeamColor()
 {
-    if (Level.NetMode == NM_Standalone)
-    {
-        SetTeamColor(m_iRainbowTeamName);
-    }
-    return m_TeamColour;
+	// End:0x24
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		SetTeamColor(m_iRainbowTeamName);
+	}
+	return m_TeamColour;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // SetMemberTeamID: set the team ID used for the friendship system.
 //	in single player, by default it's c_iTeamNumAlpha.
 //------------------------------------------------------------------
-function SetMemberTeamID( int iTeamID )
+function SetMemberTeamID(int iTeamId)
 {
-    local int i;
+	local int i;
 
-    #ifdefDEBUG	if(bShowLog) log(self$" RainbowTeam SetMemberTeamID of " $self$ " iTeamID=" $iTeamID );	#endif
+	i = 0;
+	J0x07:
 
-    for(i=0; i<m_iMemberCount; i++)
-    {
-        m_Team[i].m_iTeam = iTeamID;
-        
-        if ( m_Team[i].PlayerReplicationInfo != none )
-        {
-            m_Team[i].PlayerReplicationInfo.TeamID = iTeamID;
-        }
-        
-        R6AbstractGameInfo(level.game).SetPawnTeamFriendlies( m_Team[i] );
-    }
+	// End:0x9F [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		m_Team[i].m_iTeam = iTeamId;
+		// End:0x6D
+		if(__NFUN_119__(m_Team[i].PlayerReplicationInfo, none))
+		{
+			m_Team[i].PlayerReplicationInfo.TeamID = iTeamId;
+		}
+		R6AbstractGameInfo(Level.Game).SetPawnTeamFriendlies(m_Team[i]);
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
 simulated function ResetTeam()
 {
-    local INT i;
+	local int i;
 
-    for(i=0; i<c_iMaxTeam; i++)
-        m_Team[i] = none;
+	i = 0;
+	J0x07:
 
-    m_TeamLeader = none;
+	// End:0x2A [Loop If]
+	if(__NFUN_150__(i, 4))
+	{
+		m_Team[i] = none;
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	m_TeamLeader = none;
+	return;
 }
 
 simulated function FirstPassReset()
 {
-    ResetTeam();
+	ResetTeam();
+	return;
 }
-
 
 //------------------------------------------------------------------
 // Escort_ManageList
@@ -4649,40 +6033,61 @@ simulated function FirstPassReset()
 //------------------------------------------------------------------
 function Escort_ManageList()
 {
-    local INT i,iHostage;
-    local R6Rainbow lastRainbow;
-    local R6Hostage hostage;
+	local int i, iHostage;
+	local R6Rainbow lastRainbow;
+	local R6Hostage hostage;
 
-    // update only if not separated from the team
-    if ( m_bTeamIsSeparatedFromLeader )
-        return;
+	// End:0x0B
+	if(m_bTeamIsSeparatedFromLeader)
+	{
+		return;
+	}
+	lastRainbow = Escort_GetLastRainbow();
+	// End:0x24
+	if(__NFUN_114__(lastRainbow, none))
+	{
+		return;
+	}
+	i = 0;
+	J0x2B:
 
-    lastRainbow = Escort_GetLastRainbow();
-    if ( lastRainbow == none )
-        return;
-   
-    for( i = 0; i < m_iMemberCount; i++)
-    {
-        if ( lastRainbow == m_Team[i] )
-            continue;
+	// End:0x11E [Loop If]
+	if(__NFUN_150__(i, m_iMemberCount))
+	{
+		// End:0x52
+		if(__NFUN_114__(lastRainbow, m_Team[i]))
+		{
+			// [Explicit Continue]
+			goto J0x114;
+		}
+		// End:0x114
+		if(__NFUN_119__(m_Team[i].m_aEscortedHostage[0], none))
+		{
+			iHostage = 0;
+			J0x75:
 
-        // there's at least one hostage
-        if ( m_Team[i].m_aEscortedHostage[0] != none )
-        {
-            iHostage = 0;
-            while ( iHostage < ArrayCount( m_Team[i].m_aEscortedHostage ) && m_Team[i].m_aEscortedHostage[iHostage] != none )
-            {
-                hostage = m_Team[i].m_aEscortedHostage[iHostage];
+			// End:0x114 [Loop If]
+			if(__NFUN_130__(__NFUN_150__(iHostage, 4), __NFUN_119__(m_Team[i].m_aEscortedHostage[iHostage], none)))
+			{
+				hostage = m_Team[i].m_aEscortedHostage[iHostage];
+				// End:0xF5
+				if(__NFUN_119__(hostage.m_escortedByRainbow, none))
+				{
+					hostage.m_escortedByRainbow.Escort_RemoveHostage(hostage, true);
+				}
+				lastRainbow.Escort_AddHostage(hostage, true);
+				__NFUN_165__(iHostage);
+				// [Loop Continue]
+				goto J0x75;
+			}
+		}
+		J0x114:
 
-                if ( hostage.m_escortedByRainbow != none  )
-                {
-                    hostage.m_escortedByRainbow.Escort_RemoveHostage( hostage, true );
-                }
-                lastRainbow.Escort_AddHostage( hostage, true );
-                iHostage++;
-            }
-        }
-    }
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x2B;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4691,46 +6096,52 @@ function Escort_ManageList()
 //  the rainbow needs to be in the team (not separated) otherwise
 //  the rainbow who ordered to follow will be the lead.
 //------------------------------------------------------------------
-function R6Rainbow Escort_GetPawnToFollow( R6Rainbow rainbow, bool bRunningTowardMe )
+function R6Rainbow Escort_GetPawnToFollow(R6Rainbow Rainbow, bool bRunningTowardMe)
 {
-    local R6Rainbow lastRainbow;
+	local R6Rainbow lastRainbow;
 
-    // if not separated, check if the last rainbow can be followed
-    if ( !m_bTeamIsSeparatedFromLeader || !rainbow.isAlive() )
-    {
-        lastRainbow = Escort_GetLastRainbow();
-
-        // if the last rainbow is not separated from the team
-        if ( lastRainbow != none && lastRainbow.isAlive() )
-        {
-            rainbow = lastRainbow;
-        }
-    }
-
-    return rainbow;
+	// End:0x57
+	if(__NFUN_132__(__NFUN_129__(m_bTeamIsSeparatedFromLeader), __NFUN_129__(Rainbow.IsAlive())))
+	{
+		lastRainbow = Escort_GetLastRainbow();
+		// End:0x57
+		if(__NFUN_130__(__NFUN_119__(lastRainbow, none), lastRainbow.IsAlive()))
+		{
+			Rainbow = lastRainbow;
+		}
+	}
+	return Rainbow;
+	return;
 }
 
 // Reset the gas grenade variable
 event Timer()
 {
-    m_bFirstTimeInGas = false;
+	m_bFirstTimeInGas = false;
+	return;
 }
 
 defaultproperties
 {
-     m_eFormation=FORM_SingleFileWallBothSides
-     m_eMovementSpeed=SPEED_Normal
-     m_eGoCode=GOCODE_None
-     m_eBackupGoCode=GOCODE_None
-     m_iFormationDistance=100
-     m_iDiagonalDistance=80
-     m_iSpawnDistance=81
-     m_iSpawnDiagDist=115
-     m_iSpawnDiagOther=180
-     m_bSniperHold=True
-     m_bFirstTimeInGas=True
-     RemoteRole=ROLE_SimulatedProxy
-     bHidden=True
-     m_bDeleteOnReset=True
-     NetUpdateFrequency=4.000000
+	m_eFormation=1
+	m_eMovementSpeed=1
+	m_eGoCode=4
+	m_eBackupGoCode=4
+	m_iFormationDistance=100
+	m_iDiagonalDistance=80
+	m_iSpawnDistance=81
+	m_iSpawnDiagDist=115
+	m_iSpawnDiagOther=180
+	m_bSniperHold=true
+	m_bFirstTimeInGas=true
+	RemoteRole=2
+	bHidden=true
+	m_bDeleteOnReset=true
+	NetUpdateFrequency=4.0000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_Teamc_iMaxTeam
+// REMOVED IN 1.60: var m_iTeamHealthc_iMaxTeam
+// REMOVED IN 1.60: var ePlayerRoomEntry
+// REMOVED IN 1.60: var eTeamState

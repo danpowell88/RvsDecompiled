@@ -1,63 +1,70 @@
 //=============================================================================
+// R6MissionObjectiveMgr - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MissionObjectiveMgr.uc : 
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================
 
 // to put in game info
-class R6MissionObjectiveMgr extends Actor;
+class R6MissionObjectiveMgr extends Actor
+ notplaceable;
 
 enum EMissionObjectiveStatus
 {
-    eMissionObjStatus_none,
-    eMissionObjStatus_success,
-    eMissionObjStatus_failed
+	eMissionObjStatus_none,         // 0
+	eMissionObjStatus_success,      // 1
+	eMissionObjStatus_failed        // 2
 };
 
-var Array<R6MissionObjectiveBase>   m_aMissionObjectives;
-var EMissionObjectiveStatus         m_eMissionObjectiveStatus;
-var bool                            m_bShowLog;
-var bool                            m_bDontUpdateMgr;
-var bool                            m_bOnSuccessAllObjectivesAreCompleted;
-var bool                            m_bEnableCheckForErrors;
-var R6AbstractGameInfo              m_gameInfo;
+var R6MissionObjectiveMgr.EMissionObjectiveStatus m_eMissionObjectiveStatus;
+var bool m_bShowLog;
+var bool m_bDontUpdateMgr;
+var bool m_bOnSuccessAllObjectivesAreCompleted;
+var bool m_bEnableCheckForErrors;
+var R6AbstractGameInfo m_GameInfo;
+var array<R6MissionObjectiveBase> m_aMissionObjectives;
 
-//------------------------------------------------------------------
-//                          *** IMPORTANT ***
-//	if you add a new function, add it in the R6MObjGroupMission and
-//  follow the same logic: dispatch the function to all sub mission.
-//                          *** IMPORTANT ***
-//------------------------------------------------------------------
-
-
-function SetMissionObjStatus( EMissionObjectiveStatus eStatus )
+function SetMissionObjStatus(R6MissionObjectiveMgr.EMissionObjectiveStatus eStatus)
 {
-    m_eMissionObjectiveStatus = eStatus;
-    m_gameInfo.UpdateRepMissionObjectivesStatus();
+	m_eMissionObjectiveStatus = eStatus;
+	m_GameInfo.UpdateRepMissionObjectivesStatus();
+	return;
 }
 
-function Init( R6AbstractGameInfo gameInfo )
+function Init(R6AbstractGameInfo GameInfo)
 {
-    local int   i;
-    local int   index;
-    local int   iTimer;
-    
-    if( m_bShowLog ) log( "*** Mission Objectives ***" );
+	local int i, Index, iTimer;
 
-    m_gameInfo = gameInfo;
+	// End:0x27
+	if(m_bShowLog)
+	{
+		__NFUN_231__("*** Mission Objectives ***");
+	}
+	m_GameInfo = GameInfo;
+	SetMissionObjStatus(0);
+	i = 0;
+	J0x41:
 
-    SetMissionObjStatus( eMissionObjStatus_none );
-
-    // IMPORTANT: any special init code should also go in R6MObjGroupMission::Init()
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        m_aMissionObjectives[i].m_mgr = self;
-        if( m_bShowLog ) log( "  " $i$ ": " $m_aMissionObjectives[i].GetDescription() );
-        m_aMissionObjectives[i].Init();
-    }
-    // IMPORTANT: any special init code should also go in R6MObjGroupMission::Init()
-
-    
+	// End:0xBB [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		m_aMissionObjectives[i].m_mgr = self;
+		// End:0x9C
+		if(m_bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("  ", string(i)), ": "), m_aMissionObjectives[i].getDescription()));
+		}
+		m_aMissionObjectives[i].Init();
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x41;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -66,310 +73,432 @@ function Init( R6AbstractGameInfo gameInfo )
 //------------------------------------------------------------------
 function RemoveObjectives()
 {
-    if( m_bShowLog ) log( "Mission objective: removed" );
-
-    if ( m_aMissionObjectives.Length > 0 )
-        m_aMissionObjectives.Remove( 0, m_aMissionObjectives.Length );
-
-    m_gameInfo.ResetRepMissionObjectives();
+	// End:0x27
+	if(m_bShowLog)
+	{
+		__NFUN_231__("Mission objective: removed");
+	}
+	// End:0x40
+	if(__NFUN_151__(m_aMissionObjectives.Length, 0))
+	{
+		m_aMissionObjectives.Remove(0, m_aMissionObjectives.Length);
+	}
+	m_GameInfo.ResetRepMissionObjectives();
+	return;
 }
-
-
-//------------------------------------------------------------------
-// Timer
-//	
-//------------------------------------------------------------------
-/*
-function Timer()
-{
-    // find the timer that have this value
-    // start next timer by taking in account the time already spend
-    local int i;
-
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        m_aMissionObjectives[i].TimerCallback(0);
-    }
-}*/
 
 //------------------------------------------------------------------
 // TimerCallback
 //	
 //------------------------------------------------------------------
-function TimerCallback( float fTime );
-
+function TimerCallback(float fTime)
+{
+	return;
+}
 
 //------------------------------------------------------------------
 // PawnKilled
 //	
 //------------------------------------------------------------------
-function PawnKilled( Pawn killedPawn )
+function PawnKilled(Pawn killedPawn)
 {
-    local int i;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none || killedPawn == none )
-        return;
+	// End:0x1F
+	if(__NFUN_132__(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)), __NFUN_114__(killedPawn, none)))
+	{
+		return;
+	}
+	// End:0xE3
+	if(m_bShowLog)
+	{
+		// End:0xB0
+		if(__NFUN_130__(__NFUN_119__(PlayerController(killedPawn.Controller), none), __NFUN_119__(PlayerController(killedPawn.Controller).PlayerReplicationInfo, none)))
+		{
+			__NFUN_231__(__NFUN_112__("MissionObjective: PawnKilled ", PlayerController(killedPawn.Controller).PlayerReplicationInfo.PlayerName));			
+		}
+		else
+		{
+			__NFUN_231__(__NFUN_112__("MissionObjective: PawnKilled ", string(killedPawn.Name)));
+		}
+	}
+	i = 0;
+	J0xEA:
 
-    if( m_bShowLog )
-    {
-        if ( PlayerController(killedPawn.Controller) != none && 
-             PlayerController(killedPawn.Controller).PlayerReplicationInfo != none)
-        {
-            log( "MissionObjective: PawnKilled " $PlayerController(killedPawn.Controller).PlayerReplicationInfo.PlayerName );
-        }
-        else
-        {
-            log( "MissionObjective: PawnKilled " $killedPawn.name );
-        }
-    }
+	// End:0x153 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x12F
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x149;
+		}
+		m_aMissionObjectives[i].PawnKilled(killedPawn);
+		J0x149:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
-
-        m_aMissionObjectives[i].PawnKilled( killedPawn );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0xEA;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // IObjectInteract
 //	
 //------------------------------------------------------------------
-function IObjectInteract( Pawn aPawn, Actor anInteractiveObject )
+function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 {
-    local int i;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return;
+	// End:0x12
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return;
+	}
+	i = 0;
+	J0x19:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
+	// End:0x87 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x5E
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x7D;
+		}
+		m_aMissionObjectives[i].IObjectInteract(aPawn, anInteractiveObject);
+		J0x7D:
 
-        m_aMissionObjectives[i].IObjectInteract( aPawn, anInteractiveObject );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x19;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // IObjectDestroyed
 //	
 //------------------------------------------------------------------
-function IObjectDestroyed( Pawn aPawn, Actor anInteractiveObject )
+function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 {
-    local int i;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return;
+	// End:0x12
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return;
+	}
+	i = 0;
+	J0x19:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
+	// End:0x87 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x5E
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x7D;
+		}
+		m_aMissionObjectives[i].IObjectDestroyed(aPawn, anInteractiveObject);
+		J0x7D:
 
-        m_aMissionObjectives[i].IObjectDestroyed( aPawn, anInteractiveObject );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x19;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // PawnSeen
 //	
 //------------------------------------------------------------------
-function PawnSeen( Pawn seen, Pawn witness )
+function PawnSeen(Pawn seen, Pawn witness)
 {
-    local int i;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return;
+	// End:0x12
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return;
+	}
+	i = 0;
+	J0x19:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
+	// End:0x87 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x5E
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x7D;
+		}
+		m_aMissionObjectives[i].PawnSeen(seen, witness);
+		J0x7D:
 
-        m_aMissionObjectives[i].PawnSeen( seen, witness );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x19;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // PawnHeard
 //	
 //------------------------------------------------------------------
-function PawnHeard( Pawn heard, Pawn witness )
+function PawnHeard(Pawn heard, Pawn witness)
 {
-    local int i;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return;
+	// End:0x12
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return;
+	}
+	i = 0;
+	J0x19:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
+	// End:0x87 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x5E
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x7D;
+		}
+		m_aMissionObjectives[i].PawnHeard(heard, witness);
+		J0x7D:
 
-        m_aMissionObjectives[i].PawnHeard( heard, witness );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x19;
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // PawnSecure
 //	
 //------------------------------------------------------------------
-function PawnSecure( Pawn securedPawn )
+function PawnSecure(Pawn securedPawn)
 {
-    local int i;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return;
+	// End:0x12
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return;
+	}
+	i = 0;
+	J0x19:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
+	// End:0x82 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x5E
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x78;
+		}
+		m_aMissionObjectives[i].PawnSecure(securedPawn);
+		J0x78:
 
-        m_aMissionObjectives[i].PawnSecure( securedPawn );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x19;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // EnteredExtractionZone
 //	
 //------------------------------------------------------------------
-function EnteredExtractionZone( Pawn aPawn )
+function EnteredExtractionZone(Pawn aPawn)
 {
-    local int i;
-    
-    if ( aPawn == none )
-        return;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return;
+	// End:0x0D
+	if(__NFUN_114__(aPawn, none))
+	{
+		return;
+	}
+	// End:0x1F
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return;
+	}
+	i = 0;
+	J0x26:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
+	// End:0x8F [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x6B
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x85;
+		}
+		m_aMissionObjectives[i].EnteredExtractionZone(aPawn);
+		J0x85:
 
-        m_aMissionObjectives[i].EnteredExtractionZone( aPawn );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x26;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // ExitExtractionZone
 //	
 //------------------------------------------------------------------
-function ExitExtractionZone( Pawn aPawn )
+function ExitExtractionZone(Pawn aPawn)
 {
-    local int i;
-    
-    if ( aPawn == none )
-        return;
+	local int i;
 
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return;
+	// End:0x0D
+	if(__NFUN_114__(aPawn, none))
+	{
+		return;
+	}
+	// End:0x1F
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return;
+	}
+	i = 0;
+	J0x26:
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted )
-            continue;
+	// End:0x8F [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x6B
+		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		{
+			// [Explicit Continue]
+			goto J0x85;
+		}
+		m_aMissionObjectives[i].ExitExtractionZone(aPawn);
+		J0x85:
 
-        m_aMissionObjectives[i].ExitExtractionZone( aPawn );
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x26;
+	}
+	return;
 }
 
-
-//------------------------------------------------------------------
-// Update: update the mission objective manager. check if mission
-//	have failed or has been completed
-//------------------------------------------------------------------
-function EMissionObjectiveStatus Update()
+function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 {
-    local int i;
-    local int iTotalMissionToComplete;
-    local int iCompleted;
-    local int iTotalMissionFailed;
+	local int i, iTotalMissionToComplete, iCompleted, iTotalMissionFailed;
 
-    if ( m_bDontUpdateMgr || (InPlanningMode() && !Level.m_bInGamePlanningActive ) )
-        return eMissionObjStatus_none;
+	// End:0x2A
+	if(__NFUN_132__(m_bDontUpdateMgr, __NFUN_130__(__NFUN_2014__(), __NFUN_129__(Level.m_bInGamePlanningActive))))
+	{
+		return 0;
+	}
+	// End:0x40
+	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	{
+		return m_eMissionObjectiveStatus;
+	}
+	i = 0;
+	J0x47:
 
-    // it's over?
-    if ( m_eMissionObjectiveStatus != eMissionObjStatus_none )
-        return m_eMissionObjectiveStatus;
+	// End:0xBA [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0xB0
+		if(m_aMissionObjectives[i].isFailed())
+		{
+			// End:0x90
+			if(__NFUN_129__(m_aMissionObjectives[i].m_bMoralityObjective))
+			{
+				__NFUN_163__(iTotalMissionFailed);
+			}
+			// End:0xB0
+			if(m_aMissionObjectives[i].isMissionAbortedOnFailure())
+			{
+				SetMissionObjStatus(2);
+			}
+		}
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x47;
+	}
+	// End:0xD0
+	if(__NFUN_154__(int(m_eMissionObjectiveStatus), int(2)))
+	{
+		return m_eMissionObjectiveStatus;
+	}
+	i = 0;
+	J0xD7:
 
-    // look for morality OR failed objective
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( m_aMissionObjectives[i].isFailed() )
-        {
-            if ( !m_aMissionObjectives[i].m_bMoralityObjective )         
-                ++iTotalMissionFailed;
+	// End:0x16E [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x102
+		if(m_aMissionObjectives[i].m_bMoralityObjective)
+		{
+			// [Explicit Continue]
+			goto J0x164;
+		}
+		__NFUN_163__(iTotalMissionToComplete);
+		// End:0x164
+		if(__NFUN_130__(__NFUN_129__(m_aMissionObjectives[i].isFailed()), m_aMissionObjectives[i].isCompleted()))
+		{
+			__NFUN_163__(iCompleted);
+			// End:0x164
+			if(m_aMissionObjectives[i].isMissionCompletedOnSuccess())
+			{
+				SetMissionObjStatus(1);
+			}
+		}
+		J0x164:
 
-            // a mission has failed and force the failure of the whole mission
-            if ( m_aMissionObjectives[i].IsMissionAbortedOnFailure() )
-            {
-                SetMissionObjStatus( eMissionObjStatus_failed );
-            }
-        }
-    }
-
-    // check if the mission was aborted
-    if ( m_eMissionObjectiveStatus == eMissionObjStatus_failed )
-        return m_eMissionObjectiveStatus;
-
-    // look if mission objective are completed
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        // skip morality rules
-        if ( m_aMissionObjectives[i].m_bMoralityObjective )
-            continue;
-        
-        ++iTotalMissionToComplete;
-            
-        // if not failed AND completed
-        if ( !m_aMissionObjectives[i].isFailed() &&
-             m_aMissionObjectives[i].isCompleted() )
-        {
-            ++iCompleted;
-            
-            // a mission was completed and force the success of the whole mission
-            if ( m_aMissionObjectives[i].isMissionCompletedOnSuccess() )
-            {
-                SetMissionObjStatus( eMissionObjStatus_success );
-            }
-        }
-    }    
-    
-    // check if the mission was completed with success
-    if ( m_eMissionObjectiveStatus == eMissionObjStatus_success )
-    {
-        // set all in progress objective to completed
-        CompleteMission();
-        
-        return m_eMissionObjectiveStatus;
-    }
-
-    if ( iTotalMissionToComplete > 0 )
-    {
-        // all mission to complete have failed
-        if ( iTotalMissionFailed == iTotalMissionToComplete )
-        {
-            SetMissionObjStatus( eMissionObjStatus_failed );
-            return m_eMissionObjectiveStatus;
-        }
-        // all mission to complete have been completed
-        else if ( iCompleted == iTotalMissionToComplete )
-        {
-            CompleteMission();
-
-            return m_eMissionObjectiveStatus;
-        }
-    }
-    
-    return eMissionObjStatus_none;
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0xD7;
+	}
+	// End:0x18A
+	if(__NFUN_154__(int(m_eMissionObjectiveStatus), int(1)))
+	{
+		CompleteMission();
+		return m_eMissionObjectiveStatus;
+	}
+	// End:0x1D0
+	if(__NFUN_151__(iTotalMissionToComplete, 0))
+	{
+		// End:0x1B5
+		if(__NFUN_154__(iTotalMissionFailed, iTotalMissionToComplete))
+		{
+			SetMissionObjStatus(2);
+			return m_eMissionObjectiveStatus;			
+		}
+		else
+		{
+			// End:0x1D0
+			if(__NFUN_154__(iCompleted, iTotalMissionToComplete))
+			{
+				CompleteMission();
+				return m_eMissionObjectiveStatus;
+			}
+		}
+	}
+	return 0;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // AbortMission: Force to abord the mission
@@ -377,19 +506,30 @@ function EMissionObjectiveStatus Update()
 //------------------------------------------------------------------
 function AbortMission()
 {
-    local int i;
+	local int i;
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        // skip morality rules
-        if ( m_aMissionObjectives[i].m_bMoralityObjective )
-            continue;
+	i = 0;
+	J0x07:
 
-        SetMissionObjCompleted( m_aMissionObjectives[i], false, false );
-    }
+	// End:0x4F [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x32
+		if(m_aMissionObjectives[i].m_bMoralityObjective)
+		{
+			// [Explicit Continue]
+			goto J0x45;
+		}
+		SetMissionObjCompleted(m_aMissionObjectives[i], false, false);
+		J0x45:
 
-    SetMissionObjStatus( eMissionObjStatus_failed );
-    m_gameInfo.UpdateRepMissionObjectives();
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	SetMissionObjStatus(2);
+	m_GameInfo.UpdateRepMissionObjectives();
+	return;
 }
 
 //------------------------------------------------------------------
@@ -398,34 +538,53 @@ function AbortMission()
 //------------------------------------------------------------------
 function CompleteMission()
 {
-    local int i;
-    
-    if ( m_bOnSuccessAllObjectivesAreCompleted )
-    {
-        for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-        {
-            if ( !m_aMissionObjectives[i].m_bFailed  )
-                SetMissionObjCompleted( m_aMissionObjectives[i], true, false );
-        }
-    }
-    
-    SetMissionObjStatus( eMissionObjStatus_success );
-    m_gameInfo.UpdateRepMissionObjectives();
+	local int i;
+
+	// End:0x57
+	if(m_bOnSuccessAllObjectivesAreCompleted)
+	{
+		i = 0;
+		J0x10:
+
+		// End:0x57 [Loop If]
+		if(__NFUN_150__(i, m_aMissionObjectives.Length))
+		{
+			// End:0x4D
+			if(__NFUN_129__(m_aMissionObjectives[i].m_bFailed))
+			{
+				SetMissionObjCompleted(m_aMissionObjectives[i], true, false);
+			}
+			__NFUN_163__(i);
+			// [Loop Continue]
+			goto J0x10;
+		}
+	}
+	SetMissionObjStatus(1);
+	m_GameInfo.UpdateRepMissionObjectives();
+	return;
 }
 
 //------------------------------------------------------------------
 // ToggleLog
 //	
 //------------------------------------------------------------------
-function ToggleLog( bool bToggle )
+function ToggleLog(bool bToggle)
 {
-    local int i;
-    m_bShowLog = bToggle;
+	local int i;
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        m_aMissionObjectives[i].ToggleLog( bToggle );
-    }
+	m_bShowLog = bToggle;
+	i = 0;
+	J0x14:
+
+	// End:0x49 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		m_aMissionObjectives[i].ToggleLog(bToggle);
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x14;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -435,92 +594,143 @@ function ToggleLog( bool bToggle )
 //------------------------------------------------------------------
 function R6MissionObjectiveBase GetMObjFailed()
 {
-    local int i;
-    local string szFailure;
+	local int i;
+	local string szFailure;
 
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( !m_aMissionObjectives[i].isFailed() )
-            continue;
+	i = 0;
+	J0x07:
 
-        if ( m_aMissionObjectives[i].m_bMoralityObjective )
-            continue;
+	// End:0x81 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0x34
+		if(__NFUN_129__(m_aMissionObjectives[i].isFailed()))
+		{
+			// [Explicit Continue]
+			goto J0x77;
+		}
+		// End:0x4F
+		if(m_aMissionObjectives[i].m_bMoralityObjective)
+		{
+			// [Explicit Continue]
+			goto J0x77;
+		}
+		// End:0x77
+		if(__NFUN_123__(m_aMissionObjectives[i].GetDescriptionFailure(), ""))
+		{
+			return m_aMissionObjectives[i];
+		}
+		J0x77:
 
-        if ( m_aMissionObjectives[i].GetDescriptionFailure() != "" )
-        {
-            return m_aMissionObjectives[i];
-        }
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	i = 0;
+	J0x88:
 
-    // check moralities rules
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        if ( !m_aMissionObjectives[i].isFailed() )
-            continue;
+	// End:0x104 [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		// End:0xB5
+		if(__NFUN_129__(m_aMissionObjectives[i].isFailed()))
+		{
+			// [Explicit Continue]
+			goto J0xFA;
+		}
+		// End:0xD2
+		if(__NFUN_129__(m_aMissionObjectives[i].m_bMoralityObjective))
+		{
+			// [Explicit Continue]
+			goto J0xFA;
+		}
+		// End:0xFA
+		if(__NFUN_123__(m_aMissionObjectives[i].GetDescriptionFailure(), ""))
+		{
+			return m_aMissionObjectives[i];
+		}
+		J0xFA:
 
-        if ( !m_aMissionObjectives[i].m_bMoralityObjective )
-            continue;
-
-        if ( m_aMissionObjectives[i].GetDescriptionFailure() != "" )
-        {
-            return m_aMissionObjectives[i];
-        }
-    }
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x88;
+	}
+	return;
 }
-
 
 simulated event Destroyed()
 {
-    local int i;
+	local int i;
 
-    Super.Destroyed();
-    for ( i = 0; i < m_aMissionObjectives.Length; ++i )
-    {
-        m_aMissionObjectives[i].SetMObjMgr( none );
-    }
+	super.Destroyed();
+	i = 0;
+	J0x0D:
 
-    m_gameInfo = none;
+	// End:0x3D [Loop If]
+	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	{
+		m_aMissionObjectives[i].SetMObjMgr(none);
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x0D;
+	}
+	m_GameInfo = none;
+	return;
 }
 
 //------------------------------------------------------------------
 // SetMissionObjCompleted
 //	set completed or failed and check he need to send a feedback
 //------------------------------------------------------------------
-function SetMissionObjCompleted( R6MissionObjectiveBase mobj, bool bCompleted, bool bFeedback )
+function SetMissionObjCompleted(R6MissionObjectiveBase mobj, bool bCompleted, bool bFeedback)
 {
-    if ( (InPlanningMode() && !Level.m_bInGamePlanningActive) )
-        return;
-
-    if ( bCompleted )
-        mobj.m_bCompleted = true;
-    else
-        mobj.m_bFailed = true;
-
-    // if no feedback or already sent, return
-    if ( !bFeedback || mobj.m_bFeedbackOnCompletionSend || mobj.m_bFeedbackOnFailureSend )
-        return;
-
-    // check if needs to send a game event feedback
-    if (  mobj.m_bCompleted  )
-    {
-        if (  mobj.m_szFeedbackOnCompletion != "" )
-        {
-            m_gameInfo.BroadcastMissionObjMsg( Level.GetMissionObjLocFile(mobj), "", mobj.m_szFeedbackOnCompletion );
-            mobj.m_bFeedbackOnCompletionSend = true;
-        }
-    }
-    else
-    {
-        if (  mobj.m_szFeedbackOnFailure != "" )
-        {
-            m_gameInfo.BroadcastMissionObjMsg( Level.GetMissionObjLocFile(mobj), "", mobj.m_szFeedbackOnFailure );
-            mobj.m_bFeedbackOnFailureSend = true;
-        }
-    }
+	// End:0x1E
+	if(__NFUN_130__(__NFUN_2014__(), __NFUN_129__(Level.m_bInGamePlanningActive)))
+	{
+		return;
+	}
+	// End:0x3B
+	if(bCompleted)
+	{
+		mobj.m_bCompleted = true;		
+	}
+	else
+	{
+		mobj.m_bFailed = true;
+	}
+	// End:0x81
+	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(bFeedback), mobj.m_bFeedbackOnCompletionSend), mobj.m_bFeedbackOnFailureSend))
+	{
+		return;
+	}
+	// End:0xEF
+	if(mobj.m_bCompleted)
+	{
+		// End:0xEC
+		if(__NFUN_123__(mobj.m_szFeedbackOnCompletion, ""))
+		{
+			m_GameInfo.BroadcastMissionObjMsg(Level.GetMissionObjLocFile(mobj), "", mobj.m_szFeedbackOnCompletion);
+			mobj.m_bFeedbackOnCompletionSend = true;
+		}		
+	}
+	else
+	{
+		// End:0x148
+		if(__NFUN_123__(mobj.m_szFeedbackOnFailure, ""))
+		{
+			m_GameInfo.BroadcastMissionObjMsg(Level.GetMissionObjLocFile(mobj), "", mobj.m_szFeedbackOnFailure);
+			mobj.m_bFeedbackOnFailureSend = true;
+		}
+	}
+	return;
 }
 
 defaultproperties
 {
-     m_bOnSuccessAllObjectivesAreCompleted=True
-     bHidden=True
+	m_bOnSuccessAllObjectivesAreCompleted=true
+	bHidden=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function Timer
+// REMOVED IN 1.60: function Update

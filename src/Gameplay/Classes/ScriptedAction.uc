@@ -1,35 +1,45 @@
+//=============================================================================
+// ScriptedAction - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class ScriptedAction extends Object
-		abstract
-		hidecategories(Object)
-		collapsecategories
-		editinlinenew;
+	abstract
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
-var localized string ActionString;
 var bool bValidForTrigger;
+var localized string ActionString;
 
 function bool InitActionFor(ScriptedController C)
 {
 	return false;
+	return;
 }
 
 function bool EndsSection()
 {
 	return false;
+	return;
 }
 
 function bool StartsSection()
 {
 	return false;
+	return;
 }
 
 function ScriptedSequence GetScript(ScriptedSequence S)
 {
 	return S;
+	return;
 }
 
 function ProceedToNextAction(ScriptedController C)
 {
-	C.ActionNum += 1;
+	__NFUN_161__(C.ActionNum, 1);
+	return;
 }
 
 function ProceedToSectionEnd(ScriptedController C)
@@ -37,28 +47,44 @@ function ProceedToSectionEnd(ScriptedController C)
 	local int Nesting;
 	local ScriptedAction A;
 
-	While ( C.ActionNum < C.SequenceScript.Actions.Length )
+	J0x00:
+	// End:0xAD [Loop If]
+	if(__NFUN_150__(C.ActionNum, C.SequenceScript.Actions.Length))
 	{
 		A = C.SequenceScript.Actions[C.ActionNum];
-		if ( A.StartsSection() )
-			Nesting++;
-		else if ( A.EndsSection() )
+		// End:0x73
+		if(A.StartsSection())
 		{
-			Nesting--;
-			if ( Nesting < 0 )
-				return;
+			__NFUN_165__(Nesting);			
 		}
-		C.ActionNum += 1;
+		else
+		{
+			// End:0x99
+			if(A.EndsSection())
+			{
+				__NFUN_166__(Nesting);
+				// End:0x99
+				if(__NFUN_150__(Nesting, 0))
+				{
+					return;
+				}
+			}
+		}
+		__NFUN_161__(C.ActionNum, 1);
+		// [Loop Continue]
+		goto J0x00;
 	}
+	return;
 }
 
 function string GetActionString()
 {
 	return ActionString;
+	return;
 }
 
 defaultproperties
 {
-     bValidForTrigger=True
-     ActionString="unspecified action"
+	bValidForTrigger=true
+	ActionString="unspecified action"
 }

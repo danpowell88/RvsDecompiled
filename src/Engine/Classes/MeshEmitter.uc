@@ -1,19 +1,24 @@
 //=============================================================================
+// MeshEmitter - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Emitter: An Unreal Mesh Particle Emitter.
 //=============================================================================
 class MeshEmitter extends ParticleEmitter
-	native;
+	native
+	editinlinenew;
 
-
-var (Mesh)		staticmesh		StaticMesh;
-var (Mesh)		bool			UseMeshBlendMode;
-var (Mesh)		bool			RenderTwoSided;
-var (Mesh)		bool			UseParticleColor;
-
-var	transient	vector			MeshExtent;
+var(Mesh) bool UseMeshBlendMode;
+var(Mesh) bool RenderTwoSided;
+var(Mesh) bool UseParticleColor;
+var(Mesh) StaticMesh StaticMesh;
+var transient Vector MeshExtent;
 
 defaultproperties
 {
-     UseMeshBlendMode=True
-     StartSizeRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=1.000000,Max=1.000000),Z=(Min=1.000000,Max=1.000000))
+	UseMeshBlendMode=true
+	StartSizeRange=(X=(Min=1.0000000,Max=1.0000000),Y=(Min=1.0000000,Max=1.0000000),Z=(Min=1.0000000,Max=1.0000000))
 }

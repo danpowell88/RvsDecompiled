@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowListInfoOptionsItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowListServerInfoItem.uc : Class used to hold the values for 
 //  the entries in the list of options in the ServerInfo tab in the multi player menu.
 //
@@ -7,23 +13,12 @@
 //  Revision history:
 //    2002/05/03 * Created by John Bennett
 //=============================================================================
-
-
 class R6WindowListInfoOptionsItem extends UWindowListBoxItem;
 
-// Variables holding infomation on servers
-
-
-var string  szOptions;      // ServerOptions
-
-
-// Variables used to define X position of the fields in the
-// server list menu.
-
-
-var FLOAT   fOptionsXOff;
+var float fOptionsXOff;
+var string szOptions;  // ServerOptions
 
 defaultproperties
 {
-     fOptionsXOff=5.000000
+	fOptionsXOff=5.0000000
 }

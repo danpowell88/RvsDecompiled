@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuWidget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuWidget.uc : Base class for our game menus
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -14,62 +20,83 @@ var float m_fRightMouseYClipping;
 
 function Reset()
 {
-    //Implemented in child
+	return;
 }
 
-//-----------------------------------------------------------//
-//                      Mouse functions                      //
-//-----------------------------------------------------------//
-
-function SetMousePos(FLOAT X, FLOAT Y)
+function SetMousePos(float X, float Y)
 {
-    Root.Console.MouseX = X;
-    Root.Console.MouseY = Y;
+	Root.Console.MouseX = X;
+	Root.Console.MouseY = Y;
+	return;
 }
 
 function KeyDown(int Key, float X, float Y)
 {
-	if (Key == Root.Console.EInputKey.IK_Escape)
+	// End:0x1A8
+	if(__NFUN_154__(Key, int(Root.Console.27)))
 	{
 		switch(Root.m_eCurWidgetInUse)
 		{
-			case Root.eGameWidgetID.SinglePlayerWidgetID:
-			case Root.eGameWidgetID.CustomMissionWidgetID:
-			case Root.eGameWidgetID.TrainingWidgetID:
-			case Root.eGameWidgetID.MultiPlayerWidgetID:
-				Root.ChangeCurrentWidget(MainMenuWidgetID);
+			// End:0x3E
+			case Root.5:
+			// End:0x4C
+			case Root.14:
+			// End:0x5A
+			case Root.4:
+			// End:0x7C
+			case Root.15:
+				Root.ChangeCurrentWidget(7);
+				// End:0x1A8
 				break;
-
-			case Root.eGameWidgetID.MPCreateGameWidgetID:
-				Root.ChangeCurrentWidget(MultiPlayerWidgetID);
+			// End:0xE5
+			case Root.19:
+				// End:0xD1
+				if(R6Console(Root.Console).m_bStartedByGSClient)
+				{
+					Root.ChangeCurrentWidget(20);
+					Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();					
+				}
+				else
+				{
+					Root.ChangeCurrentWidget(15);
+				}
+				// End:0x1A8
 				break;
-
-			case Root.eGameWidgetID.OptionsWidgetID:
-				R6MenuOptionsWidget(self).m_ButtonReturn.Click( 0, 0);
-				// the Root.ChangeCurrentWidget(PreviousWidgetID) is does by the button itself!!!
+			// End:0x119
+			case Root.16:
+				R6MenuOptionsWidget(self).m_ButtonReturn.Click(0.0000000, 0.0000000);
+				// End:0x1A8
 				break;
-
-			case Root.eGameWidgetID.ExecuteWidgetID:
-				Root.ChangeCurrentWidget(PreviousWidgetID);
+			// End:0x13B
+			case Root.13:
+				Root.ChangeCurrentWidget(17);
+				// End:0x1A8
 				break;
-
-			case Root.eGameWidgetID.IntelWidgetID:    
-			case Root.eGameWidgetID.GearRoomWidgetID:
-			case Root.eGameWidgetID.PlanningWidgetID:
-				R6MenuLaptopWidget(self).m_NavBar.m_MainMenuButton.Click( 0, 0);
+			// End:0x149
+			case Root.8:
+			// End:0x157
+			case Root.12:
+			// End:0x194
+			case Root.9:
+				R6MenuLaptopWidget(self).m_NavBar.m_MainMenuButton.Click(0.0000000, 0.0000000);
+				// End:0x1A8
 				break;
-
-			case Root.eGameWidgetID.MainMenuWidgetID:
+			// End:0x1A2
+			case Root.7:
+			// End:0xFFFF
 			default:
+				// End:0x1A8
+				break;
 				break;
 		}
 	}
+	return;
 }
 
 defaultproperties
 {
-     m_fRightMouseXClipping=640.000000
-     m_fRightMouseYClipping=480.000000
-     bAcceptsFocus=True
-     bAlwaysAcceptsFocus=True
+	m_fRightMouseXClipping=640.0000000
+	m_fRightMouseYClipping=480.0000000
+	bAcceptsFocus=true
+	bAlwaysAcceptsFocus=true
 }

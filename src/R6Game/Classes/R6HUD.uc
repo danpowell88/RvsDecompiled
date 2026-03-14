@@ -1,3 +1,9 @@
+//=============================================================================
+// R6HUD - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // R6HUD.uc : Rainbow 6 HUD Base Class
 // Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -5,165 +11,137 @@
 //    2001/09/11 * Modified by Lysanne Martin
 //    2002/01/07 * Modified by Sebastien Lussier			
 //============================================================================//
-class R6Hud extends R6AbstractHUD
-    Config(User)
-	native;
+class R6HUD extends R6AbstractHUD
+ native;
 
-#exec OBJ LOAD FILE=..\Textures\Inventory_t.utx
-#exec OBJ LOAD FILE=..\Textures\R6HUD.utx PACKAGE=R6HUD
-
-var     R6GameReplicationInfo	m_GameRepInfo;
-var     R6PlayerController      m_PlayerOwner;
-
-var     Texture                 m_FlashbangFlash;
-var     Texture                 m_TexNightVision;
-var     Texture                 m_TexHeatVision;
-var     Material                m_TexHeatVisionActor;
-var     Material                m_TexHUDElements;
-var     Material				m_pCurrentMaterial;
-var     Texture                 m_HeartBeatMaskMul;
-var     Texture                 m_HeartBeatMaskAdd;
-var     Texture                 m_Waypoint;
-var     Texture                 m_WaypointArrow;
-
-var     Texture                 m_InGamePlanningPawnIcon;
-
-var     Texture                 m_LoadingScreen;
-
-var     Texture                 m_TexNoise;
-
-var     Material                m_TexProneTrail;
-
-var     Color                   m_iCurrentTeamColor;
- 
-var		FLOAT			        m_fPosX;
-var		FLOAT			        m_fPosY;
-var     FLOAT                   m_fScaleX;
-var     FLOAT                   m_fScaleY;
-
+var Object.EMovementMode m_eLastMovementMode;
+var R6RainbowTeam.eTeamState m_eLastTeamState;
+var R6RainbowTeam.eTeamState m_eLastOtherTeamState[2];
+var Object.EPlanAction m_eLastPlayerAPAction;
+var Object.EGoCode m_eLastGoCode;
 // Current Weapon Info
-var     INT                     m_iBulletCount;
-var     INT                     m_iMaxBulletCount;
-var     INT                     m_iMagCount;
-var     INT                     m_iCurrentMag;
-
+var int m_iBulletCount;
+var int m_iMaxBulletCount;
+var int m_iMagCount;
+var int m_iCurrentMag;
 // game stats
-var(Debug) bool                 m_bDrawHUDinScript;
-
+var(Debug) bool m_bDrawHUDinScript;
 // Game Mode HUD Filters
-var     bool                    m_bGMIsSinglePlayer;
-var     bool                    m_bGMIsCoop;
-var     bool                    m_bGMIsTeamAdverserial;
-
+var bool m_bGMIsSinglePlayer;
+var bool m_bGMIsCoop;
+var bool m_bGMIsTeamAdverserial;
 // User HUD Filters  
-var     bool                    m_bShowCharacterInfo;
-var     bool                    m_bShowCurrentTeamInfo;
-var     bool                    m_bShowOtherTeamInfo;
-var     bool                    m_bShowWeaponInfo;
-var     bool                    m_bShowFPWeapon;
-var     bool                    m_bShowWaypointInfo;
-var     bool                    m_bShowActionIcon;
-var     bool                    m_bShowMPRadar;
-var     bool                    m_bShowTeamMatesNames;
-
-var     bool                    m_bUpdateHUDInTraining; // For training, update only once
-
-var FinalBlend					m_pAlphaBlend;
-var FLOAT						m_fScale;
-
-var Actor                       m_pNextWayPoint;
-
+var bool m_bShowCharacterInfo;
+var bool m_bShowCurrentTeamInfo;
+var bool m_bShowOtherTeamInfo;
+var bool m_bShowWeaponInfo;
+var bool m_bShowFPWeapon;
+var bool m_bShowWaypointInfo;
+var bool m_bShowActionIcon;
+var bool m_bShowMPRadar;
+var bool m_bShowTeamMatesNames;
+var bool m_bUpdateHUDInTraining;  // For training, update only once
+var bool m_bDisplayTimeBomb;
+var bool m_bDisplayRemainingTime;
+var bool m_bNoDeathCamera;
+var bool m_bLastSniperHold;
+var bool m_bShowPressGoCode;
+var bool m_bPressGoCodeCanBlink;
+var float m_fPosX;
+var float m_fPosY;
+var float m_fScaleX;
+var float m_fScaleY;
+var float m_fScale;
+var R6GameReplicationInfo m_GameRepInfo;
+var R6PlayerController m_PlayerOwner;
+var Texture m_FlashbangFlash;
+var Texture m_TexNightVision;
+var Texture m_TexHeatVision;
+var Material m_TexHeatVisionActor;
+var Material m_TexHUDElements;
+var Material m_pCurrentMaterial;
+var Texture m_HeartBeatMaskMul;
+var Texture m_HeartBeatMaskAdd;
+var Texture m_Waypoint;
+var Texture m_WaypointArrow;
+var Texture m_InGamePlanningPawnIcon;
+var Texture m_LoadingScreen;
+var Texture m_TexNoise;
+var Material m_TexProneTrail;
+var FinalBlend m_pAlphaBlend;
+var Actor m_pNextWayPoint;
 //R6RADAR
-var     Material                m_TexRadarTextures[10];
-
-// Training Box Color
-
+var Material m_TexRadarTextures[10];
+var R6RainbowTeam m_pLastRainbowTeam;
+var array<R6IOBomb> m_aIOBombs;
+var Color m_iCurrentTeamColor;
 // Upper Left
 var Color m_CharacterInfoBoxColor;
 var Color m_CharacterInfoOutlineColor;
-                    
-
 // Lower Left
 var Color m_WeaponBoxColor;
 var Color m_WeaponOutlineColor;
-
 // Upper Right
 var Color m_TeamBoxColor;
 var Color m_TeamBoxOutlineColor;
-
 // Lower Right;
 var Color m_OtherTeamBoxColor;
 var Color m_OtherTeamOutlineColor;
-
 // Other
 var Color m_WPIconBox;
 var Color m_WPIconOutlineColor;
-
-
 var R6HUDState m_HUDElements[16];
+var string m_szMovementMode;
+var string m_szTeamState;
+var string m_szOtherTeamState[2];
+var string m_aszOtherTeamName[2];
+var string m_szLastPlayerAPAction;
+var string m_szPressGoCode;
+var string m_szTeam;
 
-var Array<R6IOBomb> m_aIOBombs;
-var bool            m_bDisplayTimeBomb;
-var bool            m_bDisplayRemainingTime;
-var bool            m_bNoDeathCamera;
+// Export UR6HUD::execDrawNativeHUD(FFrame&, void* const)
+ native(1605) final function DrawNativeHUD(Canvas C);
 
-var R6RainbowTeam               m_pLastRainbowTeam;
-var BOOL                        m_bLastSniperHold;
-var EMovementMode               m_eLastMovementMode;
-var string                      m_szMovementMode;
-var R6RainbowTeam.eTeamState    m_eLastTeamState;
-var string                      m_szTeamState;
-
-var R6RainbowTeam.eTeamState    m_eLastOtherTeamState[2];
-var string                      m_szOtherTeamState[2];
-var string                      m_aszOtherTeamName[2];
-var EPlanAction                 m_eLastPlayerAPAction;
-var string                      m_szLastPlayerAPAction;
-var string                      m_szPressGoCode; 
-var EGoCode                     m_eLastGoCode;
-var     bool                    m_bShowPressGoCode;
-var     bool                    m_bPressGoCodeCanBlink;
-var string                      m_szTeam;
-
-native(1605) final function DrawNativeHUD(Canvas C);
-native(1609) final function HudStep(INT iBox, INT iIDStep, optional BOOL bFlash);
-
+// Export UR6HUD::execHudStep(FFrame&, void* const)
+ native(1609) final function HudStep(int iBox, int iIDStep, optional bool bFlash);
 
 //===========================================================================//
 // PostBeginPlay()                                                           //
 //===========================================================================//
 function PostBeginPlay()
 {
-    Super.PostBeginPlay();
-    
-    if( Owner == None )
-       return;
-
-    m_PlayerOwner = R6PlayerController(Owner);
-    
-    if ( Level.NetMode == NM_Standalone )
-        m_bDisplayRemainingTime = false;
-
-    m_bUpdateHUDInTraining = true;
-    SetTimer(0.25, true);
-    
-    StopFadeToBlack();
+	super(HUD).PostBeginPlay();
+	// End:0x13
+	if(__NFUN_114__(Owner, none))
+	{
+		return;
+	}
+	m_PlayerOwner = R6PlayerController(Owner);
+	// End:0x44
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		m_bDisplayRemainingTime = false;
+	}
+	m_bUpdateHUDInTraining = true;
+	__NFUN_280__(0.2500000, true);
+	StopFadeToBlack();
+	return;
 }
 
 simulated function ResetOriginalData()
 {
-    Super.ResetOriginalData();
-
-    m_iCycleHUDLayer = default.m_iCycleHUDLayer;
-    m_bToggleHelmet = default.m_bToggleHelmet;
-
-    m_bNoDeathCamera = false;
-    m_pLastRainbowTeam = none;
-
-    if ( m_bDisplayTimeBomb )
-        InitBombTimer( m_bDisplayTimeBomb );
-
-    StopFadeToBlack();
+	super(Actor).ResetOriginalData();
+	m_iCycleHUDLayer = default.m_iCycleHUDLayer;
+	m_bToggleHelmet = default.m_bToggleHelmet;
+	m_bNoDeathCamera = false;
+	m_pLastRainbowTeam = none;
+	// End:0x42
+	if(m_bDisplayTimeBomb)
+	{
+		InitBombTimer(m_bDisplayTimeBomb);
+	}
+	StopFadeToBlack();
+	return;
 }
 
 //------------------------------------------------------------------
@@ -172,411 +150,441 @@ simulated function ResetOriginalData()
 //------------------------------------------------------------------
 function Timer()
 {
-    if (Level != none &&
-        m_PlayerOwner != none &&
-        m_PlayerOwner.GameReplicationInfo != none &&
-        m_PlayerOwner.GameReplicationInfo.m_bReceivedGameType == 1 )
-    {
-        m_GameRepInfo = R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo);
-        m_PlayerOwner.HidePlanningActors( );
-        UpdateHudFilter();
-
-        SetTimer(0, false);
-    }
+	// End:0x86
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(Level, none), __NFUN_119__(m_PlayerOwner, none)), __NFUN_119__(m_PlayerOwner.GameReplicationInfo, none)), __NFUN_154__(int(m_PlayerOwner.GameReplicationInfo.m_bReceivedGameType), 1)))
+	{
+		m_GameRepInfo = R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo);
+		m_PlayerOwner.HidePlanningActors();
+		UpdateHudFilter();
+		__NFUN_280__(0.0000000, false);
+	}
+	return;
 }
 
-
-simulated function InitBombTimer( bool bDisplayTimeBomb )
+simulated function InitBombTimer(bool bDisplayTimeBomb)
 {
-    local R6IOBomb ioBomb;
+	local R6IOBomb ioBomb;
 
-    m_bDisplayTimeBomb = bDisplayTimeBomb;
-    m_aIOBombs.Remove( 0, m_aIOBombs.length );
-
-    // use for disarm bomb
-    if ( m_bDisplayTimeBomb )
-    {
-        foreach AllActors( class'R6IOBomb', ioBomb )
-        {
-            m_aIOBombs[m_aIOBombs.length] = ioBomb;
-        }
-    }
+	m_bDisplayTimeBomb = bDisplayTimeBomb;
+	m_aIOBombs.Remove(0, m_aIOBombs.Length);
+	// End:0x47
+	if(m_bDisplayTimeBomb)
+	{
+		// End:0x46
+		foreach __NFUN_304__(Class'R6Engine.R6IOBomb', ioBomb)
+		{
+			m_aIOBombs[m_aIOBombs.Length] = ioBomb;			
+		}		
+	}
+	return;
 }
 
 function UpdateHudFilter()
-{ 
-    local R6GameOptions GameOptions;
-    local INT           iStepCount;
-    local BOOL          bDisplayFPWeapon;
+{
+	local R6GameOptions GameOptions;
+	local int iStepCount;
+	local bool bDisplayFPWeapon;
 
-    GameOptions = GetGameOptions();	
-    m_bGMIsSinglePlayer = true;
-
-    bDisplayFPWeapon = GameOptions.HUDShowFPWeapon;
-
-    if (Level.IsGameTypeMultiplayer(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep))
-    {
-        m_bGMIsSinglePlayer = false;
-        bDisplayFPWeapon = bDisplayFPWeapon || R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo).m_bFFPWeapon;
-    }
-
-    m_bGMIsCoop = Level.IsGameTypeCooperative(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep);
-    m_bGMIsTeamAdverserial = Level.IsGameTypeTeamAdversarial(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep);
-
-    if ( Level.Game == none || // client
-        (Level.Game != none && R6GameInfo(Level.Game).GetTrainingMgr(R6Pawn(m_PlayerOwner.Pawn)) == None)) // Training?
-    {
-        // Priority goes to the Game Mode restrictions
-        m_bShowCharacterInfo = GameOptions.HUDShowCharacterInfo;
-        m_bShowCurrentTeamInfo = (m_bGMIsSinglePlayer || m_bGMIsCoop) && GameOptions.HUDShowCurrentTeamInfo;
-        m_bShowOtherTeamInfo = m_bGMIsSinglePlayer && GameOptions.HUDShowOtherTeamInfo;
-        m_bShowWeaponInfo = GameOptions.HUDShowWeaponInfo;
-        m_bShowWaypointInfo = m_bGMIsSinglePlayer && GameOptions.HUDShowWaypointInfo;
-        m_PlayerOwner.Set1stWeaponDisplay(bDisplayFPWeapon);
-        m_bShowActionIcon = GameOptions.HUDShowActionIcon;
-
-        if ( m_GameRepInfo.m_iDiffLevel == 1 && Level.Game != none ) // rookie / recruit
-        {
-            // special hard coded case: we only want to have this feature in story mode / practice mode
-            // and when in recruit 
-            if ( Level.Game.m_szGameTypeFlag == "RGM_PracticeMode" || Level.Game.m_szGameTypeFlag == "RGM_StoryMode" )
-            {
-                m_bShowPressGoCode     = true;
-                m_bPressGoCodeCanBlink = false;
-            }
-        }
-    }
-    else
-    {
-        m_bShowPressGoCode     = true;
-        m_bPressGoCodeCanBlink = true;
-
-        if (m_bUpdateHUDInTraining)
-        {
-            // force the training element
-            m_bShowCharacterInfo = true;
-            m_bShowCurrentTeamInfo = true;
-            m_bShowOtherTeamInfo = true;
-            m_bShowWeaponInfo = true;
-            m_bShowWaypointInfo = true;
-            m_PlayerOwner.Set1stWeaponDisplay(true);    
-            m_PlayerOwner.m_bHideReticule = false;
-            m_bShowActionIcon = true;
-            m_bUpdateHUDInTraining = true;
-        }
-    }
-    
-    // Set autoaim
-    if( Level.NetMode == NM_Standalone )
-        m_PlayerOwner.m_wAutoAim = GameOptions.AutoTargetSlider;
-    else
-        m_PlayerOwner.m_wAutoAim = 0;
-
-    if ( Level.IsGameTypeDisplayBombTimer(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep) )
-    {
-        InitBombTimer( true );
-    }
+	GameOptions = __NFUN_1009__();
+	m_bGMIsSinglePlayer = true;
+	bDisplayFPWeapon = GameOptions.HUDShowFPWeapon;
+	// End:0x87
+	if(Level.IsGameTypeMultiplayer(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep))
+	{
+		m_bGMIsSinglePlayer = false;
+		bDisplayFPWeapon = __NFUN_132__(bDisplayFPWeapon, R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo).m_bFFPWeapon);
+	}
+	m_bGMIsCoop = Level.IsGameTypeCooperative(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep);
+	m_bGMIsTeamAdverserial = Level.IsGameTypeTeamAdversarial(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep);
+	// End:0x2A0
+	if(__NFUN_132__(__NFUN_114__(Level.Game, none), __NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_114__(R6GameInfo(Level.Game).GetTrainingMgr(R6Pawn(m_PlayerOwner.Pawn)), none))))
+	{
+		m_bShowCharacterInfo = GameOptions.HUDShowCharacterInfo;
+		m_bShowCurrentTeamInfo = __NFUN_130__(__NFUN_132__(m_bGMIsSinglePlayer, m_bGMIsCoop), GameOptions.HUDShowCurrentTeamInfo);
+		m_bShowOtherTeamInfo = __NFUN_130__(m_bGMIsSinglePlayer, GameOptions.HUDShowOtherTeamInfo);
+		m_bShowWeaponInfo = GameOptions.HUDShowWeaponInfo;
+		m_bShowWaypointInfo = __NFUN_130__(m_bGMIsSinglePlayer, GameOptions.HUDShowWaypointInfo);
+		m_PlayerOwner.Set1stWeaponDisplay(bDisplayFPWeapon);
+		m_bShowActionIcon = GameOptions.HUDShowActionIcon;
+		// End:0x29D
+		if(__NFUN_130__(__NFUN_154__(m_GameRepInfo.m_iDiffLevel, 1), __NFUN_119__(Level.Game, none)))
+		{
+			// End:0x29D
+			if(__NFUN_132__(__NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_PracticeMode"), __NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_StoryMode")))
+			{
+				m_bShowPressGoCode = true;
+				m_bPressGoCodeCanBlink = false;
+			}
+		}		
+	}
+	else
+	{
+		m_bShowPressGoCode = true;
+		m_bPressGoCodeCanBlink = true;
+		// End:0x312
+		if(m_bUpdateHUDInTraining)
+		{
+			m_bShowCharacterInfo = true;
+			m_bShowCurrentTeamInfo = true;
+			m_bShowOtherTeamInfo = true;
+			m_bShowWeaponInfo = true;
+			m_bShowWaypointInfo = true;
+			m_PlayerOwner.Set1stWeaponDisplay(true);
+			m_PlayerOwner.m_bHideReticule = false;
+			m_bShowActionIcon = true;
+			m_bUpdateHUDInTraining = true;
+		}
+	}
+	// End:0x34D
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		m_PlayerOwner.m_wAutoAim = byte(GameOptions.AutoTargetSlider);		
+	}
+	else
+	{
+		m_PlayerOwner.m_wAutoAim = 0;
+	}
+	// End:0x38E
+	if(Level.IsGameTypeDisplayBombTimer(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep))
+	{
+		InitBombTimer(true);
+	}
+	return;
 }
 
 //===========================================================================//
 // Tick()                                                                    //
 //===========================================================================//
-simulated function Tick( float fDelta )
+simulated function Tick(float fDelta)
 {
-    Super.Tick(fDelta);
-    
-    m_PlayerOwner = R6PlayerController(Owner);	
-	if( m_PlayerOwner == none || m_PlayerOwner.GameReplicationInfo == none )
-        return;
-
-    // spectator need the gameRepInfo
-    m_GameRepInfo = R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo);
-
+	super(Actor).Tick(fDelta);
+	m_PlayerOwner = R6PlayerController(Owner);
+	// End:0x3E
+	if(__NFUN_132__(__NFUN_114__(m_PlayerOwner, none), __NFUN_114__(m_PlayerOwner.GameReplicationInfo, none)))
+	{
+		return;
+	}
+	m_GameRepInfo = R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo);
+	return;
 }
-
 
 //===========================================================================//
 // PostRender()                                                              //
 //  Render HUD and call post render on the player controller                 //
 //===========================================================================//
-simulated event PostRender( Canvas C )
+simulated event PostRender(Canvas C)
 {
-	if (m_bDrawHUDinScript)
+	// End:0x50
+	if(m_bDrawHUDinScript)
 	{
-        C.UseVirtualSize(true);
-    
-        Super.PostRender( C );
-
-        if( m_PlayerOwner!= none )
-            m_PlayerOwner.PostRender( C );
-
-        C.UseVirtualSize(false);
-    }
-    else
-    {
-        Super.PostRender( C );
-        if( m_PlayerOwner!= none )
-            m_PlayerOwner.PostRender( C );
-    }
+		C.__NFUN_1606__(true);
+		super.PostRender(C);
+		// End:0x40
+		if(__NFUN_119__(m_PlayerOwner, none))
+		{
+			m_PlayerOwner.PostRender(C);
+		}
+		C.__NFUN_1606__(false);		
+	}
+	else
+	{
+		super.PostRender(C);
+		// End:0x7A
+		if(__NFUN_119__(m_PlayerOwner, none))
+		{
+			m_PlayerOwner.PostRender(C);
+		}
+	}
+	return;
 }
 
 //===========================================================================//
 // DrawHUD()                                                                 //
 //===========================================================================//
-function DrawHUD( Canvas C )
+function DrawHUD(Canvas C)
 {
-	local vector viewLocation;	
-	local rotator viewRotation;	
-	local INT flashBangCoefficient;
-    local R6Pawn aPlayerPawn;
- 
-    if(Level.m_bInGamePlanningActive == true)
-        return;
+	local Vector viewLocation;
+	local Rotator ViewRotation;
+	local int flashBangCoefficient;
+	local R6Pawn aPlayerPawn;
 
-    if( m_PlayerOwner != none)
-        aPlayerPawn = R6Pawn(m_PlayerOwner.Pawn);
-
-    // Set the next Waypoint and Milestone.  This is needed to display it in the native code.
-    if( m_PlayerOwner != none && m_PlayerOwner.m_TeamManager != none )
-    {
-        if (R6PlanningInfo( m_PlayerOwner.m_TeamManager.m_TeamPlanning ) != none)
-        {
-            m_pNextWayPoint = R6PlanningInfo( m_PlayerOwner.m_TeamManager.m_TeamPlanning).GetNextActionPoint();
-        }
-    }
-
-    DrawNativeHUD(C);
-
-    if (m_PlayerOwner!=none)
-    {   
-        if (m_PlayerOwner.m_InteractionCA != None)
-            m_PlayerOwner.m_InteractionCA.m_Color = m_iCurrentTeamColor;
-
-        if (m_PlayerOwner.m_InteractionInventory != None)
-            m_PlayerOwner.m_InteractionInventory.m_Color = m_iCurrentTeamColor;
-    }
-
-
-    if ( m_bDisplayTimeBomb )
-    {
-        DisplayBombTimer( C );
-    }
+	// End:0x17
+	if(__NFUN_242__(Level.m_bInGamePlanningActive, true))
+	{
+		return;
+	}
+	// End:0x3B
+	if(__NFUN_119__(m_PlayerOwner, none))
+	{
+		aPlayerPawn = R6Pawn(m_PlayerOwner.Pawn);
+	}
+	// End:0xAA
+	if(__NFUN_130__(__NFUN_119__(m_PlayerOwner, none), __NFUN_119__(m_PlayerOwner.m_TeamManager, none)))
+	{
+		// End:0xAA
+		if(__NFUN_119__(R6PlanningInfo(m_PlayerOwner.m_TeamManager.m_TeamPlanning), none))
+		{
+			m_pNextWayPoint = R6PlanningInfo(m_PlayerOwner.m_TeamManager.m_TeamPlanning).GetNextActionPoint();
+		}
+	}
+	__NFUN_1605__(C);
+	// End:0x11F
+	if(__NFUN_119__(m_PlayerOwner, none))
+	{
+		// End:0xEE
+		if(__NFUN_119__(m_PlayerOwner.m_InteractionCA, none))
+		{
+			m_PlayerOwner.m_InteractionCA.m_color = m_iCurrentTeamColor;
+		}
+		// End:0x11F
+		if(__NFUN_119__(m_PlayerOwner.m_InteractionInventory, none))
+		{
+			m_PlayerOwner.m_InteractionInventory.m_color = m_iCurrentTeamColor;
+		}
+	}
+	// End:0x133
+	if(m_bDisplayTimeBomb)
+	{
+		DisplayBombTimer(C);
+	}
+	return;
 }
 
-simulated event PostFadeRender( canvas Canvas )
+simulated event PostFadeRender(Canvas Canvas)
 {
-    if ( m_bDisplayRemainingTime )
-    {
-        DisplayRemainingTime( Canvas );
-    }
-
-    if ( m_bNoDeathCamera )
-    {
-        DisplayNoDeathCamera( Canvas );
-    }
+	// End:0x14
+	if(m_bDisplayRemainingTime)
+	{
+		DisplayRemainingTime(Canvas);
+	}
+	// End:0x28
+	if(m_bNoDeathCamera)
+	{
+		DisplayNoDeathCamera(Canvas);
+	}
+	return;
 }
 
-
-function ActivateNoDeathCameraMsg( bool bToggleOn  )
+function ActivateNoDeathCameraMsg(bool bToggleOn)
 {
-    m_bNoDeathCamera = bToggleOn;
+	m_bNoDeathCamera = bToggleOn;
+	return;
 }
 
-function DisplayNoDeathCamera( Canvas C  )
+function DisplayNoDeathCamera(Canvas C)
 {
-    local string    szText;
-    local float     w, h, f;
- 
-    if ( Level.NetMode == NM_Standalone )
-        return;
+	local string szText;
+	local float W, H, f;
 
-    if ( m_GameRepInfo == none || m_PlayerOwner == none  )
-        return;
-
-    if ( m_GameRepInfo.m_eCurrectServerState != m_GameRepInfo.RSS_InGameState )
-        return;
-    
-    // another menu is shown
-    if ( m_GameRepInfo.m_menuCommunication != none && !m_GameRepInfo.m_menuCommunication.isInGame() )
-        return;
-
-    C.UseVirtualSize(true, 640, 480);
-
-    C.Style = ERenderStyle.STY_Alpha;
-    C.Font = m_FontRainbow6_17pt;    
-    C.SetDrawColor(255,255,255);    // white
-    
-    szText = Localize("Game", "NoDeathCamera", "R6GameInfo" );
-    C.TextSize( szText, w, h  );
-
-    f = (640 - w)/2;
-    if ( f < 0 )
-        f = 0;
-
-    C.SetClip(640, 480);
-    C.SetOrigin(0, 0);
-    C.SetPos( f, 220 );
-    C.DrawText( szText );
-
-    C.UseVirtualSize( false );
+	// End:0x1B
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		return;
+	}
+	// End:0x35
+	if(__NFUN_132__(__NFUN_114__(m_GameRepInfo, none), __NFUN_114__(m_PlayerOwner, none)))
+	{
+		return;
+	}
+	// End:0x57
+	if(__NFUN_155__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.3))
+	{
+		return;
+	}
+	// End:0x8C
+	if(__NFUN_130__(__NFUN_119__(m_GameRepInfo.m_MenuCommunication, none), __NFUN_129__(m_GameRepInfo.m_MenuCommunication.IsInGame())))
+	{
+		return;
+	}
+	C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+	C.Style = 5;
+	C.Font = m_FontRainbow6_17pt;
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	szText = Localize("Game", "NoDeathCamera", "R6GameInfo");
+	C.__NFUN_470__(szText, W, H);
+	f = __NFUN_172__(__NFUN_175__(640.0000000, W), float(2));
+	// End:0x159
+	if(__NFUN_176__(f, float(0)))
+	{
+		f = 0.0000000;
+	}
+	C.__NFUN_2625__(640.0000000, 480.0000000);
+	C.__NFUN_2624__(0.0000000, 0.0000000);
+	C.__NFUN_2623__(f, 220.0000000);
+	C.__NFUN_465__(szText);
+	C.__NFUN_1606__(false);
+	return;
 }
 
 //------------------------------------------------------------------
 // DisplayRemainingTime
 //	
 //------------------------------------------------------------------
-function DisplayRemainingTime( Canvas C )
+function DisplayRemainingTime(Canvas C)
 {
-	local FLOAT fBkpOrigX, fBkpOrigY;
-    local float fPosX, fPosY, w, h;
-    local float fDefaultNamePosX;
-    local string szTime;
+	local float fBkpOrigX, fBkpOrigY, fPosX, fPosY, W, H,
+		fDefaultNamePosX;
 
-    if ( m_GameRepInfo == none || m_PlayerOwner == none  )
-        return;
+	local string szTime;
 
-    // not in game, not in spectator 
-    if ( !m_PlayerOwner.bOnlySpectator || 
-          m_GameRepInfo.m_eCurrectServerState != m_GameRepInfo.RSS_InGameState ||
-          m_GameRepInfo.m_bInPostBetweenRoundTime )
-        return;
-
-    // another menu is shown
-    if ( m_GameRepInfo.m_menuCommunication != none && !m_GameRepInfo.m_menuCommunication.isInGame() )
-        return;
-
+	// End:0x1A
+	if(__NFUN_132__(__NFUN_114__(m_GameRepInfo, none), __NFUN_114__(m_PlayerOwner, none)))
+	{
+		return;
+	}
+	// End:0x66
+	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_PlayerOwner.bOnlySpectator), __NFUN_155__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.3)), m_GameRepInfo.m_bInPostBetweenRoundTime))
+	{
+		return;
+	}
+	// End:0x9B
+	if(__NFUN_130__(__NFUN_119__(m_GameRepInfo.m_MenuCommunication, none), __NFUN_129__(m_GameRepInfo.m_MenuCommunication.IsInGame())))
+	{
+		return;
+	}
 	fBkpOrigX = C.OrgX;
 	fBkpOrigY = C.OrgY;
-
-	C.OrgX = 0;
-	C.OrgY = 0;
-
-	C.UseVirtualSize(true, 640, 480);
-
-    fDefaultNamePosX = 600;
-    fPosY = 394;
-
-    C.Style = ERenderStyle.STY_Alpha;
-    C.Font = m_FontRainbow6_14pt;    
-    C.SetDrawColor(255,255,255);    // white
-    
-    szTime = Localize("MPInGame","Round","R6Menu")$ " "; 
-    C.TextSize( szTime, w, h  );
-    C.SetPos( fDefaultNamePosX - w, fPosY );
-    C.DrawText( szTime );
-    
-    
-    C.SetPos( fDefaultNamePosX, fPosY );
-    C.DrawText( ConvertIntTimeToString( int(m_GameRepInfo.GetRoundTime()), true ) );
-
-    C.UseVirtualSize(false);
-
-	C.SetOrigin( fBkpOrigX, fBkpOrigY);
+	C.OrgX = 0.0000000;
+	C.OrgY = 0.0000000;
+	C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+	fDefaultNamePosX = 600.0000000;
+	fPosY = 394.0000000;
+	C.Style = 5;
+	C.Font = m_FontRainbow6_14pt;
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	szTime = __NFUN_112__(Localize("MPInGame", "Round", "R6Menu"), " ");
+	C.__NFUN_470__(szTime, W, H);
+	C.__NFUN_2623__(__NFUN_175__(fDefaultNamePosX, W), fPosY);
+	C.__NFUN_465__(szTime);
+	C.__NFUN_2623__(fDefaultNamePosX, fPosY);
+	C.__NFUN_465__(__NFUN_1520__(int(m_GameRepInfo.GetRoundTime()), true));
+	C.__NFUN_1606__(false);
+	C.__NFUN_2624__(fBkpOrigX, fBkpOrigY);
+	return;
 }
 
 //------------------------------------------------------------------
 // 
 //	
 //------------------------------------------------------------------
-function DisplayBombTimer( Canvas C )
+function DisplayBombTimer(Canvas C)
 {
-    local int   i, j;
-    local float fPosX, fPosY, fPosYDelta, w, h;
-    local float fDefaultNamePosX;
-    local string szTime, szBomb;
-    local R6IOBomb pBomb;
-    
-	C.UseVirtualSize(true, 640, 480);
+	local int i, j;
+	local float fPosX, fPosY, fPosYDelta, W, H, fDefaultNamePosX;
 
-    fDefaultNamePosX = 600;
-    fPosYDelta = 16;
-    fPosY = 380;
+	local string szTime, szBomb;
+	local R6IOBomb pBomb;
 
-    C.Style = ERenderStyle.STY_Alpha;
-    C.Font = m_FontRainbow6_14pt;    
+	C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+	fDefaultNamePosX = 600.0000000;
+	fPosYDelta = 16.0000000;
+	fPosY = 380.0000000;
+	C.Style = 5;
+	C.Font = m_FontRainbow6_14pt;
+	i = 0;
+	J0x64:
 
-    // sort the bomb in order of time left (if more than 1 element)
-    i = 0;
-    while ( i < m_aIOBombs.length - 1 )
-    {
-        if ( m_aIOBombs[i].m_bIsActivated )
-        {
-            j = 0;
-            while ( j < m_aIOBombs.length )
-            {
-                if ( m_aIOBombs[j].m_bIsActivated && 
-                     m_aIOBombs[j].GetTimeLeft() < m_aIOBombs[i].GetTimeLeft() )
-                {
-                    // swap element
-                    pBomb         = m_aIOBombs[i];
-                    m_aIOBombs[i] = m_aIOBombs[j];
-                    m_aIOBombs[j] = pBomb;
-                }
-                ++j;
-            }
-        }
-        ++i;
-    }   
+	// End:0x13C [Loop If]
+	if(__NFUN_150__(i, __NFUN_147__(m_aIOBombs.Length, 1)))
+	{
+		// End:0x132
+		if(m_aIOBombs[i].m_bIsActivated)
+		{
+			j = 0;
+			J0x96:
 
-    // draw fromt bottom of the screen to top
-    i = m_aIOBombs.length - 1;
-    while ( i >= 0  )
-    {
-        if ( m_aIOBombs[i].m_bIsActivated )
-        {
-            if ( m_aIOBombs[i].GetTimeLeft() > 20 )
-                C.SetDrawColor(255,255,255);    // white
-            else if ( m_aIOBombs[i].GetTimeLeft() > 10 )
-                C.SetDrawColor(255,255,0);      // yellow
-            else
-                C.SetDrawColor(255,0,0);        // red
+			// End:0x132 [Loop If]
+			if(__NFUN_150__(j, m_aIOBombs.Length))
+			{
+				// End:0x128
+				if(__NFUN_130__(m_aIOBombs[j].m_bIsActivated, __NFUN_176__(m_aIOBombs[j].GetTimeLeft(), m_aIOBombs[i].GetTimeLeft())))
+				{
+					pBomb = m_aIOBombs[i];
+					m_aIOBombs[i] = m_aIOBombs[j];
+					m_aIOBombs[j] = pBomb;
+				}
+				__NFUN_163__(j);
+				// [Loop Continue]
+				goto J0x96;
+			}
+		}
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x64;
+	}
+	i = __NFUN_147__(m_aIOBombs.Length, 1);
+	J0x14B:
 
-            szBomb = m_aIOBombs[i].m_szIdentity$ " ";
-            C.TextSize( szBomb, w, h  );
-            C.SetPos( fDefaultNamePosX - w, fPosY );
-            C.DrawText( szBomb );
-            C.SetPos( fDefaultNamePosX, fPosY );
-            
-            C.DrawText( ConvertIntTimeToString( m_aIOBombs[i].GetTimeLeft(), true ) );
-            fPosY -= fPosYDelta;
-        }
-
-        --i;
-    }
-    C.UseVirtualSize(false);
+	// End:0x2AE [Loop If]
+	if(__NFUN_153__(i, 0))
+	{
+		// End:0x2A4
+		if(m_aIOBombs[i].m_bIsActivated)
+		{
+			// End:0x1A7
+			if(__NFUN_177__(m_aIOBombs[i].GetTimeLeft(), float(20)))
+			{
+				C.__NFUN_2626__(byte(255), byte(255), byte(255));				
+			}
+			else
+			{
+				// End:0x1DE
+				if(__NFUN_177__(m_aIOBombs[i].GetTimeLeft(), float(10)))
+				{
+					C.__NFUN_2626__(byte(255), byte(255), 0);					
+				}
+				else
+				{
+					C.__NFUN_2626__(byte(255), 0, 0);
+				}
+			}
+			szBomb = __NFUN_112__(m_aIOBombs[i].m_szIdentity, " ");
+			C.__NFUN_470__(szBomb, W, H);
+			C.__NFUN_2623__(__NFUN_175__(fDefaultNamePosX, W), fPosY);
+			C.__NFUN_465__(szBomb);
+			C.__NFUN_2623__(fDefaultNamePosX, fPosY);
+			C.__NFUN_465__(__NFUN_1520__(int(m_aIOBombs[i].GetTimeLeft()), true));
+			__NFUN_185__(fPosY, fPosYDelta);
+		}
+		__NFUN_164__(i);
+		// [Loop Continue]
+		goto J0x14B;
+	}
+	C.__NFUN_1606__(false);
+	return;
 }
 
 //------------------------------------------------------------------
 // StartFadeToBlack
 //	
 //------------------------------------------------------------------
-function StartFadeToBlack( int iSec, int iPercentageOfBlack )
+function StartFadeToBlack(int iSec, int iPercentageOfBlack)
 {
-    local Canvas C;
-    local int iBlack;
-    local float fAlpha;
+	local Canvas C;
+	local int iBlack;
+	local float fAlpha;
 
-    C = class'Actor'.static.GetCanvas();
-
-    if(C.m_bFading)
-    {
-        fAlpha = C.m_fFadeCurrentTime / C.m_fFadeTotalTime;
-        fAlpha = Clamp(fAlpha, 0.0f, 1.0f);
-        C.m_FadeStartColor.R = C.m_FadeEndColor.R * fAlpha + C.m_FadeStartColor.R * (1.0f - fAlpha);
-        C.m_FadeStartColor.G = C.m_FadeEndColor.G * fAlpha + C.m_FadeStartColor.G * (1.0f - fAlpha);
-        C.m_FadeStartColor.B = C.m_FadeEndColor.B * fAlpha + C.m_FadeStartColor.B * (1.0f - fAlpha);
-    }
-    else
-    {
-        C.m_FadeStartColor = C.MakeColor(255,255,255);
-    }
-
-    iBlack               = 255 * (100-iPercentageOfBlack) / 100;
-    C.m_bFading          = true;
-    C.m_fFadeCurrentTime = 0.0f;
-    C.m_fFadeTotalTime   = iSec;
-    C.m_FadeEndColor     = C.MakeColor(iBlack,iBlack,iBlack);
-    C.m_bFadeAutoStop    = false;
+	C = Class'Engine.Actor'.static.__NFUN_2618__();
+	// End:0x163
+	if(C.m_bFading)
+	{
+		fAlpha = __NFUN_172__(C.m_fFadeCurrentTime, C.m_fFadeTotalTime);
+		fAlpha = float(__NFUN_251__(int(fAlpha), 0, 1));
+		C.m_FadeStartColor.R = byte(__NFUN_174__(__NFUN_171__(float(C.m_FadeEndColor.R), fAlpha), __NFUN_171__(float(C.m_FadeStartColor.R), __NFUN_175__(1.0000000, fAlpha))));
+		C.m_FadeStartColor.G = byte(__NFUN_174__(__NFUN_171__(float(C.m_FadeEndColor.G), fAlpha), __NFUN_171__(float(C.m_FadeStartColor.G), __NFUN_175__(1.0000000, fAlpha))));
+		C.m_FadeStartColor.B = byte(__NFUN_174__(__NFUN_171__(float(C.m_FadeEndColor.B), fAlpha), __NFUN_171__(float(C.m_FadeStartColor.B), __NFUN_175__(1.0000000, fAlpha))));		
+	}
+	else
+	{
+		C.m_FadeStartColor = C.MakeColor(byte(255), byte(255), byte(255));
+	}
+	iBlack = __NFUN_145__(__NFUN_144__(255, __NFUN_147__(100, iPercentageOfBlack)), 100);
+	C.m_bFading = true;
+	C.m_fFadeCurrentTime = 0.0000000;
+	C.m_fFadeTotalTime = float(iSec);
+	C.m_FadeEndColor = C.MakeColor(byte(iBlack), byte(iBlack), byte(iBlack));
+	C.m_bFadeAutoStop = false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -585,84 +593,81 @@ function StartFadeToBlack( int iSec, int iPercentageOfBlack )
 //------------------------------------------------------------------
 function StopFadeToBlack()
 {
-    local Canvas C;
+	local Canvas C;
 
-    C = class'Actor'.static.GetCanvas();
+	C = Class'Engine.Actor'.static.__NFUN_2618__();
 	C.m_bFading = true;
-    C.m_fFadeCurrentTime = 0.0f;
-    C.m_fFadeTotalTime = 0;
-    C.m_FadeStartColor = C.MakeColor(0,0,0);
-    C.m_FadeEndColor = C.MakeColor(255,255,255);
-    C.m_bFadeAutoStop = true;
+	C.m_fFadeCurrentTime = 0.0000000;
+	C.m_fFadeTotalTime = 0.0000000;
+	C.m_FadeStartColor = C.MakeColor(0, 0, 0);
+	C.m_FadeEndColor = C.MakeColor(byte(255), byte(255), byte(255));
+	C.m_bFadeAutoStop = true;
+	return;
 }
-
-
 
 //===========================================================================//
 // Message()                                                                 //
 //  Parse recieved msg - inherited                                           //
 //===========================================================================//
-simulated function Message( PlayerReplicationInfo PRI, coerce string Msg, name MsgType )
+simulated function Message(PlayerReplicationInfo PRI, coerce string Msg, name MsgType)
 {
-    // exception for console say and console teamsay, remove temp
-    if ( MsgType == 'Console' &&
-         ("SAY"     == caps(left(Msg, Len("Say"))) ||
-          "TEAMSAY" == caps(left(Msg, Len("TeamSay"))) ))
-    {
-        return;
-    }
-
-    super.Message( PRI, Msg, MsgType );
+	// End:0x51
+	if(__NFUN_130__(__NFUN_254__(MsgType, 'Console'), __NFUN_132__(__NFUN_122__("SAY", __NFUN_235__(__NFUN_128__(Msg, __NFUN_125__("Say")))), __NFUN_122__("TEAMSAY", __NFUN_235__(__NFUN_128__(Msg, __NFUN_125__("TeamSay")))))))
+	{
+		return;
+	}
+	super(HUD).Message(PRI, Msg, MsgType);
+	return;
 }
-
 
 //===========================================================================//
 // DisplayMessages()                                                         //
 //  Inherited                                                                //
 //===========================================================================//
-simulated function DisplayMessages( Canvas C )
+simulated function DisplayMessages(Canvas C)
 {
-    C.SetDrawColor(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
-    C.Style = ERenderStyle.STY_Alpha;
-    C.Font = m_FontRainbow6_14pt;    
-    Super.DisplayMessages( C );
+	C.__NFUN_2626__(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
+	C.Style = 5;
+	C.Font = m_FontRainbow6_14pt;
+	super(HUD).DisplayMessages(C);
+	return;
 }
-
 
 //===========================================================================//
 // SetDefaultFontSettings()                                                  //
 //===========================================================================//
-function SetDefaultFontSettings( Canvas C )
+function SetDefaultFontSettings(Canvas C)
 {
-    C.SetDrawColor(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
-    C.Style = ERenderStyle.STY_Alpha;
-    C.Font = m_FontRainbow6_22pt;
+	C.__NFUN_2626__(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
+	C.Style = 5;
+	C.Font = m_FontRainbow6_22pt;
+	return;
 }
 
 defaultproperties
 {
-     m_bDisplayRemainingTime=True
-     m_FlashbangFlash=Texture'Inventory_t.Flash.Flash'
-     m_TexNightVision=Texture'Inventory_t.NightVision.NightVisionTex'
-     m_TexHeatVision=Texture'Inventory_t.HeatVision.HeatVision'
-     m_TexHeatVisionActor=FinalBlend'Inventory_t.HeatVision.HeatVisionActorMat'
-     m_TexHUDElements=Texture'R6HUD.HUDElements'
-     m_HeartBeatMaskMul=Texture'Inventory_t.HeartBeat.HeartBeatMaskMul'
-     m_HeartBeatMaskAdd=Texture'Inventory_t.HeartBeat.HeartBeatMaskAdd'
-     m_Waypoint=Texture'R6HUD.WayPoint'
-     m_WaypointArrow=Texture'R6HUD.WayPointArrow'
-     m_InGamePlanningPawnIcon=Texture'R6Planning.InGamePlanning.PawnIcon'
-     m_TexNoise=Texture'Inventory_t.Misc.Noise'
-     m_TexRadarTextures(0)=Texture'Inventory_t.Radar.RadarBack'
-     m_TexRadarTextures(1)=Texture'Inventory_t.Radar.RadarTop'
-     m_TexRadarTextures(2)=Texture'Inventory_t.Radar.RadarOutline'
-     m_TexRadarTextures(3)=Texture'Inventory_t.Radar.RadarDead'
-     m_TexRadarTextures(4)=Texture'Inventory_t.Radar.RadarSameFloor'
-     m_TexRadarTextures(5)=Texture'Inventory_t.Radar.RadarHigherFloor'
-     m_TexRadarTextures(6)=Texture'Inventory_t.Radar.RadarLowerFloor'
-     m_TexRadarTextures(7)=Texture'Inventory_t.Radar.RadarPilotSameFloor'
-     m_TexRadarTextures(8)=Texture'Inventory_t.Radar.RadarPilotHigherFloor'
-     m_TexRadarTextures(9)=Texture'Inventory_t.Radar.RadarPilotLowerFloor'
-     m_bToggleHelmet=True
-     m_ConsoleBackground=Texture'Inventory_t.Console.ConsoleBack'
+	m_bDisplayRemainingTime=true
+	m_FlashbangFlash=Texture'Inventory_t.Flash.Flash'
+	m_TexNightVision=Texture'Inventory_t.NightVision.NightVisionTex'
+	m_TexHeatVision=Texture'Inventory_t.HeatVision.HeatVision'
+	m_TexHeatVisionActor=FinalBlend'Inventory_t.HeatVision.HeatVisionActorMat'
+	m_TexHUDElements=Texture'R6HUD.HUDElements'
+	m_HeartBeatMaskMul=Texture'Inventory_t.HeartBeat.HeartBeatMaskMul'
+	m_HeartBeatMaskAdd=Texture'Inventory_t.HeartBeat.HeartBeatMaskAdd'
+	m_Waypoint=Texture'R6HUD.WayPoint'
+	m_WaypointArrow=Texture'R6HUD.WayPointArrow'
+	m_InGamePlanningPawnIcon=Texture'R6Planning.InGamePlanning.PawnIcon'
+	m_TexNoise=Texture'Inventory_t.Misc.Noise'
+	m_TexRadarTextures[0]=Texture'Inventory_t.Radar.RadarBack'
+	m_TexRadarTextures[1]=Texture'Inventory_t.Radar.RadarTop'
+	m_TexRadarTextures[2]=Texture'Inventory_t.Radar.RadarOutline'
+	m_TexRadarTextures[3]=Texture'Inventory_t.Radar.RadarDead'
+	m_TexRadarTextures[4]=Texture'Inventory_t.Radar.RadarSameFloor'
+	m_TexRadarTextures[5]=Texture'Inventory_t.Radar.RadarHigherFloor'
+	m_TexRadarTextures[6]=Texture'Inventory_t.Radar.RadarLowerFloor'
+	m_TexRadarTextures[7]=Texture'Inventory_t.Radar.RadarPilotSameFloor'
+	m_TexRadarTextures[8]=Texture'Inventory_t.Radar.RadarPilotHigherFloor'
+	m_TexRadarTextures[9]=Texture'Inventory_t.Radar.RadarPilotLowerFloor'
+	m_bToggleHelmet=true
+	m_ConsoleBackground=Texture'Inventory_t.Console.ConsoleBack'
 }

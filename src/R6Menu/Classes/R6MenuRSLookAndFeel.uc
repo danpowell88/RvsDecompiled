@@ -1,618 +1,513 @@
 //=============================================================================
+// R6MenuRSLookAndFeel - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuRSLookAndFeel.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/09 * Created by Chaouky Garram
 //=============================================================================
-
 class R6MenuRSLookAndFeel extends R6WindowLookAndFeel;
+
+const SIZEBORDER = 3;
+const BRSIZEBORDER = 15;
+const RadioButtonHeight = 17;
+const RadioButtonWidth = 16;
 
 enum ERSBLButton
 {
-    ERSBL_BLActive,
-    ERSBL_BLLeft,
-    ERSBL_BLRight
+	ERSBL_BLActive,                 // 0
+	ERSBL_BLLeft,                   // 1
+	ERSBL_BLRight                   // 2
 };
 
 enum ENavBarButton
 {
-    NBB_Home,
-    NBB_Option,
-    NBB_Archive,
-    NBB_TeleCom,
-    NBB_Roster,
-    NBB_Gear,
-    NBB_Planning,
-    NBB_Play,
-    NBB_Load,
-    NBB_Save
+	NBB_Home,                       // 0
+	NBB_Option,                     // 1
+	NBB_Archive,                    // 2
+	NBB_TeleCom,                    // 3
+	NBB_Roster,                     // 4
+	NBB_Gear,                       // 5
+	NBB_Planning,                   // 6
+	NBB_Play,                       // 7
+	NBB_Load,                       // 8
+	NBB_Save                        // 9
 };
 
-// enum for accept and cancel sign button
 enum eSignChoiceButton
 {
-    eSCB_Accept,
-    eSCB_Cancel
+	eSCB_Accept,                    // 0
+	eSCB_Cancel                     // 1
 };
-
 
 struct STWindowFrame
 {
-    var Region	TL;
-    var Region	T;
-    var Region	TR;
-    var Region	L;
-    var Region	R;
-    var Region	BL;
-    var Region	B;
-    var Region	BR;
+	var Region TL;
+	var Region t;
+	var Region TR;
+	var Region L;
+	var Region R;
+	var Region BL;
+	var Region B;
+	var Region BR;
 };
 
 struct STFrameColor
 {
-    var Color TextColor;
-    var Color SelTextColor;
-    var Color DisableColor;
-    var Color TitleColor;
-    var Color TitleBack;
-    var Color ButtonBack;
-    var Color SelButtonBack;
-    var Color ButtonLine;
+	var Color TextColor;
+	var Color SelTextColor;
+	var Color DisableColor;
+	var Color TitleColor;
+	var Color TitleBack;
+	var Color ButtonBack;
+	var Color SelButtonBack;
+	var Color ButtonLine;
 };
 
-struct STLapTopFrame// extends STWindowFrame
+struct STLapTopFrame
 {
-    var Region TL;
-    var Region T;
-    var Region TR;
-    var Region L;
-    var Region R;
-    var Region BL;
-    var Region B;
-    var Region BR;
-    var Region L2;
-    var Region R2;
+	var Region TL;
+	var Region t;
+	var Region TR;
+	var Region L;
+	var Region R;
+	var Region BL;
+	var Region B;
+	var Region BR;
+	var Region L2;
+	var Region R2;
 	var Region L3;
-    var Region R3;
+	var Region R3;
 	var Region L4;
 	var Region R4;
-	
 };
 
-struct STLapTopFramePlus// addon to LaptopFrame
+struct STLapTopFramePlus
 {
 	var Region T1;
 	var Region T2;
-    var Region T3;
-    var Region T4On;    
-	var Region T4Off;    
+	var Region T3;
+	var Region T4On;
+	var Region T4Off;
 };
 
-var Region	            m_FrameSBL;
-var Region	            m_FrameSB;
-var Region	            m_FrameSBR;
-
-// ****** R6 Add-On ******
-
-var RegionButton        m_BLTitleL;
-var RegionButton        m_BLTitleC;
-var RegionButton        m_BLTitleR;
-
-
-//***********************************
-//        + MacArthur Menu +
-//***********************************
-
-// Menu Texture
-var Texture             m_NavBarTex;
-
-// Popup ActionPoint menu
-var Region              m_PopupArrowUp;
-var Region              m_PopupArrowDown;
-
-//-----------------------------------------------
-// Laptop frame
-var STLapTopFrame       m_stLapTopFrame;
-var STLapTopFramePlus   m_stLapTopFramePlus;
-//-----------------------------------------------
-// Navigation Bar
-var Region              m_NavBarBack[12];
-
-//-----------------------------------------------
-//R6WindowButtonMainMenu
-var float               m_fCurrentPct, m_fScrollRate;
-var int                 m_iMultiplyer;
-
-//-----------------------------------------------
-//ListBox
-var Region              m_topLeftCornerR;
-
-//-----------------------------------------------
-// Simple Pop-up Window (ex. JoinIp window with an edit box)
-var RegionButton        m_RBAcceptCancel[2];            // accept button, cancel button 
-
-//-----------------------------------------------
-// In-Game Menu
-var Texture             m_TIcon;
-var FLOAT               m_fTextHeaderHeight;            // the in-game menu intermission text header
-
-//-----------------------------------------------
-// Create game menu
-var RegionButton        m_RArrow[2];                    // the region of the arrow button for map list
-
-//-----------------------------------------------
-
-const SIZEBORDER = 3;       // only used by HitTest
-const BRSIZEBORDER = 15;    // only used by HitTest
-
-const RadioButtonHeight		= 17;
-const RadioButtonWidth		= 16;
-
+var int m_iMultiplyer;
 //-----------------------------------------------
 //Scroll Bar
-var INT                     m_fVSBButtonImageX, m_fHSBButtonImageX;
-var INT                     m_fVSBButtonImageY, m_fHSBButtonImageY;
-var Region                  m_SBScrollerActive;
-var Region                  m_SBUpGear;
-var Region                  m_SBDownGear;
-
+var int m_fVSBButtonImageX;
+// NEW IN 1.60
+var int m_fHSBButtonImageX;
+var int m_fVSBButtonImageY;
+// NEW IN 1.60
+var int m_fHSBButtonImageY;
 //-----------------------------------------------
 //Combo
-var INT                     m_fComboImageX, m_fComboImageY;
-
-
+var int m_fComboImageX;
+// NEW IN 1.60
+var int m_fComboImageY;
+//-----------------------------------------------
+//R6WindowButtonMainMenu
+var float m_fCurrentPct;
+// NEW IN 1.60
+var float m_fScrollRate;
+var float m_fTextHeaderHeight;  // the in-game menu intermission text header
+// Menu Texture
+var Texture m_NavBarTex;
+//-----------------------------------------------
+// In-Game Menu
+var Texture m_TIcon;
+var Texture m_TSquareBg;
+var Region m_FrameSBL;
+var Region m_FrameSB;
+var Region m_FrameSBR;
+var RegionButton m_BLTitleL;
+var RegionButton m_BLTitleC;
+var RegionButton m_BLTitleR;
+// Popup ActionPoint menu
+var Region m_PopupArrowUp;
+var Region m_PopupArrowDown;
+//-----------------------------------------------
+// Laptop frame
+var STLapTopFrame m_stLapTopFrame;
+var STLapTopFramePlus m_stLapTopFramePlus;
+//-----------------------------------------------
+// Navigation Bar
+var Region m_NavBarBack[12];
+//-----------------------------------------------
+//ListBox
+var Region m_topLeftCornerR;
+//-----------------------------------------------
+// Simple Pop-up Window (ex. JoinIp window with an edit box)
+var RegionButton m_RBAcceptCancel[2];  // accept button, cancel button
+//-----------------------------------------------
+// Create game menu
+var RegionButton m_RArrow[2];  // the region of the arrow button for map list
+var Region m_SBScrollerActive;
+var Region m_SBUpGear;
+var Region m_SBDownGear;
 //-----------------------------------------------
 //Square Border
-var Region              m_RSquareBgLeft;
-var Region              m_RSquareBgMid;
-var Region              m_RSquareBgRight;
-var Texture             m_TSquareBg;
+var Region m_RSquareBgLeft;
+var Region m_RSquareBgMid;
+var Region m_RSquareBgRight;
 
 function Setup()
 {
-    Super.Setup();
-
-    // setup texture reference    
-    m_NavBarTex     = Texture(DynamicLoadObject("R6MenuTextures.GUI_01", class'Texture'));
-    
-	m_R6ScrollTexture   = Texture(DynamicLoadObject("R6MenuTextures.Gui_BoxScroll", class'Texture'));
-    
-    m_TIcon = Texture(DynamicLoadObject("R6MenuTextures.TeamBarIcon", class'Texture'));
+	super(UWindowLookAndFeel).Setup();
+	m_NavBarTex = Texture(DynamicLoadObject("R6MenuTextures.GUI_01", Class'Engine.Texture'));
+	m_R6ScrollTexture = Texture(DynamicLoadObject("R6MenuTextures.Gui_BoxScroll", Class'Engine.Texture'));
+	m_TIcon = Texture(DynamicLoadObject("R6MenuTextures.TeamBarIcon", Class'Engine.Texture'));
+	return;
 }
 
 //===================================================================
 // Set the region for the accept and cancel(X) button
 //===================================================================
-function Button_SetupEnumSignChoice(UWindowButton W, INT eRegionId)
+function Button_SetupEnumSignChoice(UWindowButton W, int eRegionId)
 {
 	W.bUseRegion = true;
-
-	W.UpTexture       = m_R6ScrollTexture;
-	W.DownTexture     = m_R6ScrollTexture;
-	W.OverTexture     = m_R6ScrollTexture;
+	W.UpTexture = m_R6ScrollTexture;
+	W.DownTexture = m_R6ScrollTexture;
+	W.OverTexture = m_R6ScrollTexture;
 	W.DisabledTexture = m_R6ScrollTexture;
-
-    W.UpRegion        = m_RBAcceptCancel[eRegionId].Up;
-    W.DownRegion      = m_RBAcceptCancel[eRegionId].Down;
-    W.OverRegion      = m_RBAcceptCancel[eRegionId].Over;
-    W.DisabledRegion  = m_RBAcceptCancel[eRegionId].Disabled;
+	W.UpRegion = m_RBAcceptCancel[eRegionId].Up;
+	W.DownRegion = m_RBAcceptCancel[eRegionId].Down;
+	W.OverRegion = m_RBAcceptCancel[eRegionId].Over;
+	W.DisabledRegion = m_RBAcceptCancel[eRegionId].Disabled;
+	return;
 }
 
 function Button_SetupMapList(UWindowButton W, bool _bInverseTex)
 {
-    local RegionButton RTemp;
+	local RegionButton RTemp;
+
 	W.bUseRegion = true;
-
-	W.UpTexture       = m_R6ScrollTexture;
-	W.DownTexture     = m_R6ScrollTexture;
-	W.OverTexture     = m_R6ScrollTexture;
+	W.UpTexture = m_R6ScrollTexture;
+	W.DownTexture = m_R6ScrollTexture;
+	W.OverTexture = m_R6ScrollTexture;
 	W.DisabledTexture = m_R6ScrollTexture;
-
-    if (_bInverseTex)
-    {
-        W.RegionScale     = -1; // why -1 because the width of the region to display the button become < 0 when is displaying
-        W.UpRegion        = m_RArrow[1].Up;
-        W.DownRegion      = m_RArrow[1].Down;
-        W.OverRegion      = m_RArrow[1].Over;
-        W.DisabledRegion  = m_RArrow[1].Disabled;
-    }
-    else
-    {
-        W.RegionScale     = 1;
-        W.UpRegion        = m_RArrow[0].Up;
-        W.DownRegion      = m_RArrow[0].Down;
-        W.OverRegion      = m_RArrow[0].Over;
-        W.DisabledRegion  = m_RArrow[0].Disabled;
-    }
+	// End:0xED
+	if(_bInverseTex)
+	{
+		W.RegionScale = -1.0000000;
+		W.UpRegion = m_RArrow[1].Up;
+		W.DownRegion = m_RArrow[1].Down;
+		W.OverRegion = m_RArrow[1].Over;
+		W.DisabledRegion = m_RArrow[1].Disabled;		
+	}
+	else
+	{
+		W.RegionScale = 1.0000000;
+		W.UpRegion = m_RArrow[0].Up;
+		W.DownRegion = m_RArrow[0].Down;
+		W.OverRegion = m_RArrow[0].Over;
+		W.DisabledRegion = m_RArrow[0].Disabled;
+	}
+	return;
 }
 
-// ****** Framed Window Drawing Functions ******
-
-/* Rainbow Six version */
 function Texture R6GetTexture(R6WindowFramedWindow W)
 {
+	// End:0x1B
 	if(W.IsActive())
-		return Active;
+	{
+		return Active;		
+	}
 	else
+	{
 		return Inactive;
+	}
+	return;
 }
 
 function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 {
-	local Texture T;
-	local Region R, Temp;
+	local Texture t;
+	local Region R, temp;
 
-	C.SetDrawColor(255,255,255); 	
-
-	T = W.GetLookAndFeelTexture();
-
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	t = W.GetLookAndFeelTexture();
 	R = FrameTL;
-	W.DrawStretchedTextureSegment( C, 0, 0, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameT;
-	W.DrawStretchedTextureSegment( C, FrameTL.W, 0, 
-									W.WinWidth - FrameTL.W
-									- FrameTR.W,
-									R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, float(FrameTL.W), 0.0000000, __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameTL.W)), float(FrameTR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameTR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, 0, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-	
-
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0x1EB
 	if(W.bStatusBar)
-    {
-		Temp = m_FrameSBL;
-    }
+	{
+		temp = m_FrameSBL;		
+	}
 	else
-    {
-		Temp = FrameBL;
-    }
-	
+	{
+		temp = FrameBL;
+	}
 	R = FrameL;
-	W.DrawStretchedTextureSegment( C, 0, FrameTL.H,
-									R.W,  
-									W.WinHeight - FrameTL.H
-									- Temp.H,
-									R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, 0.0000000, float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, FrameTL.H,
-									R.W,  
-									W.WinHeight - FrameTL.H
-									- Temp.H,
-									R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0x363
 	if(W.bStatusBar)
-    {
-		R = m_FrameSBL;
-    }
+	{
+		R = m_FrameSBL;		
+	}
 	else
-    {
+	{
 		R = FrameBL;
-    }
-	W.DrawStretchedTextureSegment( C, 0, W.WinHeight - R.H, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+	}
+	W.DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0x4B7
 	if(W.bStatusBar)
 	{
 		R = m_FrameSB;
-		W.DrawStretchedTextureSegment( C, FrameBL.W, W.WinHeight - R.H, 
-										W.WinWidth - m_FrameSBL.W
-										- m_FrameSBR.W,
-										R.H, R.X, R.Y, R.W, R.H, T );
+		W.DrawStretchedTextureSegment(C, float(FrameBL.W), __NFUN_175__(W.WinHeight, float(R.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(m_FrameSBL.W)), float(m_FrameSBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);		
 	}
 	else
 	{
 		R = FrameB;
-		W.DrawStretchedTextureSegment( C, FrameBL.W, W.WinHeight - R.H, 
-										W.WinWidth - FrameBL.W
-										- FrameBR.W,
-										R.H, R.X, R.Y, R.W, R.H, T );
+		W.DrawStretchedTextureSegment(C, float(FrameBL.W), __NFUN_175__(W.WinHeight, float(R.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameBL.W)), float(FrameBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	}
-
+	// End:0x589
 	if(W.bStatusBar)
-    {
-		R = m_FrameSBR;
-    }
-	else
-    {
-		R = FrameBR;
-    }
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, W.WinHeight - R.H, R.W, R.H, R.X, R.Y, 
-									R.W, R.H, T );
-
-
-	C.Font = W.Root.Fonts[W.F_Normal];
-	if(W.ParentWindow.ActiveWindow == W)
-    {		
-		C.SetDrawColor(FrameActiveTitleColor.R,FrameActiveTitleColor.G,FrameActiveTitleColor.B); 	
-    }
-	else
-    {		
-		C.SetDrawColor(FrameInactiveTitleColor.R,FrameInactiveTitleColor.G,FrameInactiveTitleColor.B); 	
-    }
-
-
-	W.ClipTextWidth(C, FrameTitleX, FrameTitleY, 
-					W.WindowTitle, W.WinWidth);
-
-	if(W.bStatusBar) 
 	{
-		C.SetDrawColor(0,0,0); 			
-
-		W.ClipTextWidth(C, 6, W.WinHeight - 13, W.StatusBarText, W.WinWidth);
-
-		C.SetDrawColor(255,255,255); 	
-
+		R = m_FrameSBR;		
 	}
+	else
+	{
+		R = FrameBR;
+	}
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	C.Font = W.Root.Fonts[W.0];
+	// End:0x6AC
+	if(__NFUN_114__(W.ParentWindow.ActiveWindow, W))
+	{
+		C.__NFUN_2626__(FrameActiveTitleColor.R, FrameActiveTitleColor.G, FrameActiveTitleColor.B);		
+	}
+	else
+	{
+		C.__NFUN_2626__(FrameInactiveTitleColor.R, FrameInactiveTitleColor.G, FrameInactiveTitleColor.B);
+	}
+	W.ClipTextWidth(C, float(FrameTitleX), float(FrameTitleY), W.WindowTitle, W.WinWidth);
+	// End:0x799
+	if(W.bStatusBar)
+	{
+		C.__NFUN_2626__(0, 0, 0);
+		W.ClipTextWidth(C, 6.0000000, __NFUN_175__(W.WinHeight, float(13)), W.StatusBarText, W.WinWidth);
+		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	}
+	return;
 }
 
-/* Rainbow Six version */
 function R6FW_DrawWindowFrame(R6WindowFramedWindow W, Canvas C)
 {
-	local Texture T;
+	local Texture t;
 	local Region R;
 
-	C.SetDrawColor(255,255,255); 	
-
-	T = W.GetLookAndFeelTexture();
-
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	t = W.GetLookAndFeelTexture();
 	R = FrameTL;
-	W.DrawStretchedTextureSegment( C, 0, 0, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameT;
-	W.DrawStretchedTextureSegment( C, FrameTL.W, 0, 
-									W.WinWidth - FrameTL.W
-									- FrameTR.W,
-									R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, float(FrameTL.W), 0.0000000, __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameTL.W)), float(FrameTR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameTR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, 0, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-	
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameL;
-	W.DrawStretchedTextureSegment( C, 0, FrameTL.H,
-									R.W,  
-									W.WinHeight - FrameTL.H
-									- FrameBL.H,
-									R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, 0.0000000, float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(FrameBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, FrameTL.H,
-									R.W,  
-									W.WinHeight - FrameTL.H
-									- FrameBL.H,
-									R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(FrameBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameBL;
-	W.DrawStretchedTextureSegment( C, 0, W.WinHeight - R.H, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameB;
-	W.DrawStretchedTextureSegment( C, FrameBL.W, W.WinHeight - R.H, 
-									W.WinWidth - FrameBL.W
-									- FrameBR.W,
-									R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, float(FrameBL.W), __NFUN_175__(W.WinHeight, float(R.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameBL.W)), float(FrameBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameBR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, W.WinHeight - R.H, R.W, R.H, R.X, R.Y, 
-									R.W, R.H, T );
-
-
-	C.Font = W.Root.Fonts[W.F_Normal];
-	if(W.ParentWindow.ActiveWindow == W)
-    {		
-		C.SetDrawColor(FrameActiveTitleColor.R,FrameActiveTitleColor.G,FrameActiveTitleColor.B); 	
-    }
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	C.Font = W.Root.Fonts[W.0];
+	// End:0x57A
+	if(__NFUN_114__(W.ParentWindow.ActiveWindow, W))
+	{
+		C.__NFUN_2626__(FrameActiveTitleColor.R, FrameActiveTitleColor.G, FrameActiveTitleColor.B);		
+	}
 	else
-    {		
-		C.SetDrawColor(FrameInactiveTitleColor.R,FrameInactiveTitleColor.G,FrameInactiveTitleColor.B); 	
-    }
-
-
-	W.ClipTextWidth(C, W.m_fTitleOffSet, FrameTitleY, 
-					W.m_szWindowTitle, W.WinWidth);
+	{
+		C.__NFUN_2626__(FrameInactiveTitleColor.R, FrameInactiveTitleColor.G, FrameInactiveTitleColor.B);
+	}
+	W.ClipTextWidth(C, W.m_fTitleOffSet, float(FrameTitleY), W.m_szWindowTitle, W.WinWidth);
+	return;
 }
-
 
 //======================================================================================
 // Draw the pop-up frame
 // IMPORTANT: the parameters for the window are set in R6WindowPopUpBox
 //======================================================================================
-function DrawPopUpFrameWindow( R6WindowPopUpBox W, Canvas C)
+function DrawPopUpFrameWindow(R6WindowPopUpBox W, Canvas C)
 {
- 	local Texture TBackGround;
-    local Color vBorderColor, vCornerColor;
+	local Texture TBackGround;
+	local Color vBorderColor, vCornerColor;
 
-    TBackGround = Texture'UWindow.WhiteTexture';
-
-    C.Style = ERenderStyle.STY_Alpha;
-
-    // draw a gray background over all the window to hide (transparence) the map IN GAME MENU
-    if (W.m_bBGFullScreen)
-    {        
-		W.Root.DrawBackGroundEffect( C, W.m_vFullBGColor);
-    }
-    
-    if (W.m_bBGClientArea)
-    {
-        C.SetDrawColor( W.m_vClientAreaColor.R, W.m_vClientAreaColor.G, W.m_vClientAreaColor.B, W.m_vClientAreaColor.A);
-        // the additionnal offset is for border size.
-        W.DrawStretchedTextureSegment( C, W.m_RWindowBorder.X + 2, W.m_pTextLabel.WinTop + 1, 
-                                          W.m_RWindowBorder.W - 4, W.m_pTextLabel.WinHeight + W.m_RWindowBorder.H - 2, 
-                                          0, 0, 10, 10, TBackGround );
-    }
-
-    if (!W.m_bNoBorderToDraw)
-    {
-        
-        // TOP BORDER
-        if (W.m_sBorderForm[W.eBorderType.Border_Top].bActive)
-        {
-            if (W.m_sBorderForm[W.eBorderType.Border_Top].vColor != vBorderColor)
-            {
-                vBorderColor = W.m_sBorderForm[W.eBorderType.Border_Top].vColor;
-                C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
-            }
-            
-            W.DrawStretchedTextureSegment( C, W.m_sBorderForm[W.eBorderType.Border_Top].fXPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Top].fYPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Top].fWidth, 
-                W.m_sBorderForm[W.eBorderType.Border_Top].fHeight, 
-                W.m_HBorderTextureRegion.X, W.m_HBorderTextureRegion.Y, W.m_HBorderTextureRegion.W, W.m_HBorderTextureRegion.H, W.m_HBorderTexture );
-        }
-        
-        // BOTTOM BORDER
-        if (W.m_sBorderForm[W.eBorderType.Border_Bottom].bActive)
-        {
-            if (W.m_sBorderForm[W.eBorderType.Border_Bottom].vColor != vBorderColor)
-            {
-                vBorderColor = W.m_sBorderForm[W.eBorderType.Border_Bottom].vColor;
-                C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
-            }
-            
-            W.DrawStretchedTextureSegment( C, W.m_sBorderForm[W.eBorderType.Border_Bottom].fXPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Bottom].fYPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Bottom].fWidth, 
-                W.m_sBorderForm[W.eBorderType.Border_Bottom].fHeight, 
-                W.m_HBorderTextureRegion.X, W.m_HBorderTextureRegion.Y, W.m_HBorderTextureRegion.W, W.m_HBorderTextureRegion.H, W.m_HBorderTexture );
-        }
-        
-        // LEFT BORDER
-        if (W.m_sBorderForm[W.eBorderType.Border_Left].bActive)
-        {
-            if (W.m_sBorderForm[W.eBorderType.Border_Left].vColor != vBorderColor)
-            {
-                vBorderColor = W.m_sBorderForm[W.eBorderType.Border_Left].vColor;
-                C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
-            }
-            
-            W.DrawStretchedTextureSegment( C, W.m_sBorderForm[W.eBorderType.Border_Left].fXPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Left].fYPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Left].fWidth, 
-                W.m_sBorderForm[W.eBorderType.Border_Left].fHeight, 
-                W.m_VBorderTextureRegion.X, W.m_VBorderTextureRegion.Y, W.m_VBorderTextureRegion.W, W.m_VBorderTextureRegion.H, W.m_VBorderTexture );
-        }
-        
-        // RIGHT BORDER
-        if (W.m_sBorderForm[W.eBorderType.Border_Right].bActive)
-        {
-            if (W.m_sBorderForm[W.eBorderType.Border_Right].vColor != vBorderColor)
-            {
-                vBorderColor = W.m_sBorderForm[W.eBorderType.Border_Right].vColor;
-                C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
-            }
-            
-            W.DrawStretchedTextureSegment( C, W.m_sBorderForm[W.eBorderType.Border_Right].fXPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Right].fYPos, 
-                W.m_sBorderForm[W.eBorderType.Border_Right].fWidth, 
-                W.m_sBorderForm[W.eBorderType.Border_Right].fHeight, 
-                W.m_VBorderTextureRegion.X, W.m_VBorderTextureRegion.Y, W.m_VBorderTextureRegion.W, W.m_VBorderTextureRegion.H, W.m_VBorderTexture );
-        }
-    }
-    
-    vCornerColor.R =0;
-    vCornerColor.G =0;
-    vCornerColor.B =0;
-    // set the corner the same color than the border ???
-    if (W.m_eCornerType != No_Corners)
-    {
-	    switch(W.m_eCornerType)
-	    {
-            case All_Corners:
-                if (W.m_eCornerColor[W.eCornerType.All_Corners] != vCornerColor)
-                {
-                    vCornerColor = W.m_eCornerColor[W.eCornerType.All_Corners];
-                    C.SetDrawColor(vCornerColor.R, vCornerColor.G, vCornerColor.B);
-                }
-		    case Top_Corners:
-			    //Corners
-                if (W.m_eCornerColor[W.eCornerType.Top_Corners] != vCornerColor)
-                {
-                    vCornerColor = W.m_eCornerColor[W.eCornerType.Top_Corners];
-                    C.SetDrawColor(vCornerColor.R, vCornerColor.G, vCornerColor.B);
-                }
-
-			    if(W.m_topLeftCornerT != None)
-			    {
-				    W.DrawStretchedTextureSegment(C, W.m_RWindowBorder.X,
-                                                     W.m_RWindowBorder.Y, 
-                                                     W.m_topLeftCornerR.W, W.m_topLeftCornerR.H, 
-                                                     W.m_topLeftCornerR.X, W.m_topLeftCornerR.Y, W.m_topLeftCornerR.W, W.m_topLeftCornerR.H, W.m_topLeftCornerT);		
-				    W.DrawStretchedTextureSegment(C, W.m_RWindowBorder.X + W.m_RWindowBorder.W - m_topLeftCornerR.W, 
-                                                     W.m_RWindowBorder.Y, 
-                                                     W.m_topLeftCornerR.W, W.m_topLeftCornerR.H, 
-                                                     W.m_topLeftCornerR.X + W.m_topLeftCornerR.W, W.m_topLeftCornerR.Y, - W.m_topLeftCornerR.W, W.m_topLeftCornerR.H, W.m_topLeftCornerT);
-			    }
-
-                if (W.m_eCornerType!=All_Corners) break;
-		    case Bottom_Corners:
-			    //Corners
-                if (W.m_eCornerColor[W.eCornerType.Bottom_Corners] != vCornerColor)
-                {
-                    vCornerColor = W.m_eCornerColor[W.eCornerType.Bottom_Corners];
-                    C.SetDrawColor(vCornerColor.R, vCornerColor.G, vCornerColor.B);
-                }
-
-			    if(W.m_topLeftCornerT != None)
-			    {
-				    W.DrawStretchedTextureSegment(C, W.m_RWindowBorder.X,
-                                                     W.m_RWindowBorder.Y + W.m_RWindowBorder.H -  m_topLeftCornerR.H, 
-                                                     W.m_topLeftCornerR.W, W.m_topLeftCornerR.H, W.m_topLeftCornerR.X, 
-  											         W.m_topLeftCornerR.Y + W.m_topLeftCornerR.H, W.m_topLeftCornerR.W, -W.m_topLeftCornerR.H, W.m_topLeftCornerT);		
-				    W.DrawStretchedTextureSegment(C, W.m_RWindowBorder.X + W.m_RWindowBorder.W - W.m_topLeftCornerR.W, 
-                                                     W.m_RWindowBorder.Y + W.m_RWindowBorder.H -  W.m_topLeftCornerR.H, 
-                                                     W.m_topLeftCornerR.W, W.m_topLeftCornerR.H, 
-                                                     W.m_topLeftCornerR.X + W.m_topLeftCornerR.W, W.m_topLeftCornerR.Y + W.m_topLeftCornerR.H, -W.m_topLeftCornerR.W, -W.m_topLeftCornerR.H, W.m_topLeftCornerT);
-			    }
-			    break;
-            default:
-                break;
-	    }
-    }
+	TBackGround = Texture'UWindow.WhiteTexture';
+	C.Style = 5;
+	// End:0x59
+	if(W.m_bBGFullScreen)
+	{
+		W.Root.DrawBackGroundEffect(C, W.m_vFullBGColor);
+	}
+	// End:0x172
+	if(W.m_bBGClientArea)
+	{
+		C.__NFUN_2626__(W.m_vClientAreaColor.R, W.m_vClientAreaColor.G, W.m_vClientAreaColor.B, W.m_vClientAreaColor.A);
+		W.DrawStretchedTextureSegment(C, float(__NFUN_146__(W.m_RWindowBorder.X, 2)), __NFUN_174__(W.m_pTextLabel.WinTop, float(1)), float(__NFUN_147__(W.m_RWindowBorder.W, 4)), __NFUN_175__(__NFUN_174__(W.m_pTextLabel.WinHeight, float(W.m_RWindowBorder.H)), float(2)), 0.0000000, 0.0000000, 10.0000000, 10.0000000, TBackGround);
+	}
+	// End:0x7FE
+	if(__NFUN_129__(W.m_bNoBorderToDraw))
+	{
+		// End:0x324
+		if(W.m_sBorderForm[int(W.0)].bActive)
+		{
+			// End:0x22A
+			if(W.m_sBorderForm[int(W.0)].vColor != vBorderColor)
+			{
+				vBorderColor = W.m_sBorderForm[int(W.0)].vColor;
+				C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			}
+			W.DrawStretchedTextureSegment(C, W.m_sBorderForm[int(W.0)].fXPos, W.m_sBorderForm[int(W.0)].fYPos, W.m_sBorderForm[int(W.0)].fWidth, W.m_sBorderForm[int(W.0)].fHeight, float(W.m_HBorderTextureRegion.X), float(W.m_HBorderTextureRegion.Y), float(W.m_HBorderTextureRegion.W), float(W.m_HBorderTextureRegion.H), W.m_HBorderTexture);
+		}
+		// End:0x4C2
+		if(W.m_sBorderForm[int(W.1)].bActive)
+		{
+			// End:0x3C8
+			if(W.m_sBorderForm[int(W.1)].vColor != vBorderColor)
+			{
+				vBorderColor = W.m_sBorderForm[int(W.1)].vColor;
+				C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			}
+			W.DrawStretchedTextureSegment(C, W.m_sBorderForm[int(W.1)].fXPos, W.m_sBorderForm[int(W.1)].fYPos, W.m_sBorderForm[int(W.1)].fWidth, W.m_sBorderForm[int(W.1)].fHeight, float(W.m_HBorderTextureRegion.X), float(W.m_HBorderTextureRegion.Y), float(W.m_HBorderTextureRegion.W), float(W.m_HBorderTextureRegion.H), W.m_HBorderTexture);
+		}
+		// End:0x660
+		if(W.m_sBorderForm[int(W.2)].bActive)
+		{
+			// End:0x566
+			if(W.m_sBorderForm[int(W.2)].vColor != vBorderColor)
+			{
+				vBorderColor = W.m_sBorderForm[int(W.2)].vColor;
+				C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			}
+			W.DrawStretchedTextureSegment(C, W.m_sBorderForm[int(W.2)].fXPos, W.m_sBorderForm[int(W.2)].fYPos, W.m_sBorderForm[int(W.2)].fWidth, W.m_sBorderForm[int(W.2)].fHeight, float(W.m_VBorderTextureRegion.X), float(W.m_VBorderTextureRegion.Y), float(W.m_VBorderTextureRegion.W), float(W.m_VBorderTextureRegion.H), W.m_VBorderTexture);
+		}
+		// End:0x7FE
+		if(W.m_sBorderForm[int(W.3)].bActive)
+		{
+			// End:0x704
+			if(W.m_sBorderForm[int(W.3)].vColor != vBorderColor)
+			{
+				vBorderColor = W.m_sBorderForm[int(W.3)].vColor;
+				C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			}
+			W.DrawStretchedTextureSegment(C, W.m_sBorderForm[int(W.3)].fXPos, W.m_sBorderForm[int(W.3)].fYPos, W.m_sBorderForm[int(W.3)].fWidth, W.m_sBorderForm[int(W.3)].fHeight, float(W.m_VBorderTextureRegion.X), float(W.m_VBorderTextureRegion.Y), float(W.m_VBorderTextureRegion.W), float(W.m_VBorderTextureRegion.H), W.m_VBorderTexture);
+		}
+	}
+	vCornerColor.R = 0;
+	vCornerColor.G = 0;
+	vCornerColor.B = 0;
+	// End:0xE23
+	if(__NFUN_155__(int(W.m_eCornerType), int(0)))
+	{
+		switch(W.m_eCornerType)
+		{
+			// End:0x8C8
+			case 3:
+				// End:0x8C8
+				if(W.m_eCornerColor[int(W.3)] != vCornerColor)
+				{
+					vCornerColor = W.m_eCornerColor[int(W.3)];
+					C.__NFUN_2626__(vCornerColor.R, vCornerColor.G, vCornerColor.B);
+				}
+			// End:0xB3E
+			case 1:
+				// End:0x942
+				if(W.m_eCornerColor[int(W.1)] != vCornerColor)
+				{
+					vCornerColor = W.m_eCornerColor[int(W.1)];
+					C.__NFUN_2626__(vCornerColor.R, vCornerColor.G, vCornerColor.B);
+				}
+				// End:0xB22
+				if(__NFUN_119__(W.m_topLeftCornerT, none))
+				{
+					W.DrawStretchedTextureSegment(C, float(W.m_RWindowBorder.X), float(W.m_RWindowBorder.Y), float(W.m_topLeftCornerR.W), float(W.m_topLeftCornerR.H), float(W.m_topLeftCornerR.X), float(W.m_topLeftCornerR.Y), float(W.m_topLeftCornerR.W), float(W.m_topLeftCornerR.H), W.m_topLeftCornerT);
+					W.DrawStretchedTextureSegment(C, float(__NFUN_147__(__NFUN_146__(W.m_RWindowBorder.X, W.m_RWindowBorder.W), m_topLeftCornerR.W)), float(W.m_RWindowBorder.Y), float(W.m_topLeftCornerR.W), float(W.m_topLeftCornerR.H), float(__NFUN_146__(W.m_topLeftCornerR.X, W.m_topLeftCornerR.W)), float(W.m_topLeftCornerR.Y), float(__NFUN_143__(W.m_topLeftCornerR.W)), float(W.m_topLeftCornerR.H), W.m_topLeftCornerT);
+				}
+				// End:0xB3E
+				if(__NFUN_155__(int(W.m_eCornerType), int(3)))
+				{
+					// End:0xE23
+					break;
+				}
+			// End:0xE1D
+			case 2:
+				// End:0xBB8
+				if(W.m_eCornerColor[int(W.2)] != vCornerColor)
+				{
+					vCornerColor = W.m_eCornerColor[int(W.2)];
+					C.__NFUN_2626__(vCornerColor.R, vCornerColor.G, vCornerColor.B);
+				}
+				// End:0xE1A
+				if(__NFUN_119__(W.m_topLeftCornerT, none))
+				{
+					W.DrawStretchedTextureSegment(C, float(W.m_RWindowBorder.X), float(__NFUN_147__(__NFUN_146__(W.m_RWindowBorder.Y, W.m_RWindowBorder.H), m_topLeftCornerR.H)), float(W.m_topLeftCornerR.W), float(W.m_topLeftCornerR.H), float(W.m_topLeftCornerR.X), float(__NFUN_146__(W.m_topLeftCornerR.Y, W.m_topLeftCornerR.H)), float(W.m_topLeftCornerR.W), float(__NFUN_143__(W.m_topLeftCornerR.H)), W.m_topLeftCornerT);
+					W.DrawStretchedTextureSegment(C, float(__NFUN_147__(__NFUN_146__(W.m_RWindowBorder.X, W.m_RWindowBorder.W), W.m_topLeftCornerR.W)), float(__NFUN_147__(__NFUN_146__(W.m_RWindowBorder.Y, W.m_RWindowBorder.H), W.m_topLeftCornerR.H)), float(W.m_topLeftCornerR.W), float(W.m_topLeftCornerR.H), float(__NFUN_146__(W.m_topLeftCornerR.X, W.m_topLeftCornerR.W)), float(__NFUN_146__(W.m_topLeftCornerR.Y, W.m_topLeftCornerR.H)), float(__NFUN_143__(W.m_topLeftCornerR.W)), float(__NFUN_143__(W.m_topLeftCornerR.H)), W.m_topLeftCornerT);
+				}
+				// End:0xE23
+				break;
+			// End:0xFFFF
+			default:
+				// End:0xE23
+				break;
+				break;
+		}
+	}
+	return;
 }
-
 
 function FW_SetupFrameButtons(UWindowFramedWindow W, Canvas C)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-	W.CloseBox.WinLeft = W.WinWidth - m_iCloseBoxOffsetX - m_CloseBoxUp.W;
-	W.CloseBox.WinTop = m_iCloseBoxOffsetY;
-
-	W.CloseBox.SetSize(m_CloseBoxUp.W, m_CloseBoxUp.H);
-	W.CloseBox.bUseRegion = True;
-
-	W.CloseBox.UpTexture = T;
-	W.CloseBox.DownTexture = T;
-	W.CloseBox.OverTexture = T;
-	W.CloseBox.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.CloseBox.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(m_iCloseBoxOffsetX)), float(m_CloseBoxUp.W));
+	W.CloseBox.WinTop = float(m_iCloseBoxOffsetY);
+	W.CloseBox.SetSize(float(m_CloseBoxUp.W), float(m_CloseBoxUp.H));
+	W.CloseBox.bUseRegion = true;
+	W.CloseBox.UpTexture = t;
+	W.CloseBox.DownTexture = t;
+	W.CloseBox.OverTexture = t;
+	W.CloseBox.DisabledTexture = t;
 	W.CloseBox.UpRegion = m_CloseBoxUp;
 	W.CloseBox.DownRegion = m_CloseBoxDown;
 	W.CloseBox.OverRegion = m_CloseBoxUp;
 	W.CloseBox.DisabledRegion = m_CloseBoxUp;
+	return;
 }
 
-/* Rainbow Six version */
 function R6FW_SetupFrameButtons(R6WindowFramedWindow W, Canvas C)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-	W.m_CloseBoxButton.SetSize(m_CloseBoxUp.W, m_CloseBoxUp.H);
-	W.m_CloseBoxButton.bUseRegion = True;
-
-	W.m_CloseBoxButton.UpTexture = T;
-	W.m_CloseBoxButton.DownTexture = T;
-	W.m_CloseBoxButton.OverTexture = T;
-	W.m_CloseBoxButton.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.m_CloseBoxButton.SetSize(float(m_CloseBoxUp.W), float(m_CloseBoxUp.H));
+	W.m_CloseBoxButton.bUseRegion = true;
+	W.m_CloseBoxButton.UpTexture = t;
+	W.m_CloseBoxButton.DownTexture = t;
+	W.m_CloseBoxButton.OverTexture = t;
+	W.m_CloseBoxButton.DisabledTexture = t;
 	W.m_CloseBoxButton.UpRegion = m_CloseBoxUp;
 	W.m_CloseBoxButton.DownRegion = m_CloseBoxDown;
 	W.m_CloseBoxButton.OverRegion = m_CloseBoxUp;
 	W.m_CloseBoxButton.DisabledRegion = m_CloseBoxUp;
+	return;
 }
 
 function Region FW_GetClientArea(UWindowFramedWindow W)
@@ -620,1267 +515,1179 @@ function Region FW_GetClientArea(UWindowFramedWindow W)
 	local Region R;
 
 	R.X = FrameL.W;
-	R.Y	= FrameT.H;
-	R.W = W.WinWidth - (FrameL.W + FrameR.W);
-	if(W.bStatusBar) 
-    {
-		R.H = W.WinHeight - (FrameT.H + m_FrameSB.H);
-    }
+	R.Y = FrameT.H;
+	R.W = int(__NFUN_175__(W.WinWidth, float(__NFUN_146__(FrameL.W, FrameR.W))));
+	// End:0xA9
+	if(W.bStatusBar)
+	{
+		R.H = int(__NFUN_175__(W.WinHeight, float(__NFUN_146__(FrameT.H, m_FrameSB.H))));		
+	}
 	else
-    {
-		R.H = W.WinHeight - (FrameT.H + FrameB.H);
-    }
-
+	{
+		R.H = int(__NFUN_175__(W.WinHeight, float(__NFUN_146__(FrameT.H, FrameB.H))));
+	}
 	return R;
+	return;
 }
 
-/* Rainbow Six version */
 function Region R6FW_GetClientArea(R6WindowFramedWindow W)
 {
 	local Region R;
 
 	R.X = FrameL.W;
-	R.Y	= FrameT.H;
-	R.W = W.WinWidth - (FrameL.W + FrameR.W);
-	R.H = W.WinHeight - (FrameT.H + FrameB.H);
-
+	R.Y = FrameT.H;
+	R.W = int(__NFUN_175__(W.WinWidth, float(__NFUN_146__(FrameL.W, FrameR.W))));
+	R.H = int(__NFUN_175__(W.WinHeight, float(__NFUN_146__(FrameT.H, FrameB.H))));
 	return R;
+	return;
 }
 
-
-function FrameHitTest FW_HitTest(UWindowFramedWindow W, FLOAT X, FLOAT Y)
+function UWindowBase.FrameHitTest FW_HitTest(UWindowFramedWindow W, float X, float Y)
 {
-	if((X >= 3) && (X <= W.WinWidth-3) && (Y >= 3) && (Y <= 14))
-		return HT_TitleBar;
-	if((X < BRSIZEBORDER && Y < SIZEBORDER) || (X < SIZEBORDER && Y < BRSIZEBORDER)) 
-		return HT_NW;
-	if((X > W.WinWidth - SIZEBORDER && Y < BRSIZEBORDER) || (X > W.WinWidth - BRSIZEBORDER && Y < SIZEBORDER))
-		return HT_NE;
-	if((X < BRSIZEBORDER && Y > W.WinHeight - SIZEBORDER)|| (X < SIZEBORDER && Y > W.WinHeight - BRSIZEBORDER)) 
-		return HT_SW;
-	if((X > W.WinWidth - BRSIZEBORDER) && (Y > W.WinHeight - BRSIZEBORDER))
-		return HT_SE;
-	if(Y < SIZEBORDER)
-		return HT_N;
-	if(Y > W.WinHeight - SIZEBORDER)
-		return HT_S;
-	if(X < SIZEBORDER)
-		return HT_W;
-	if(X > W.WinWidth - SIZEBORDER)	
-		return HT_E;
-
-	return HT_None;	
+	// End:0x51
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, float(3)), __NFUN_178__(X, __NFUN_175__(W.WinWidth, float(3)))), __NFUN_179__(Y, float(3))), __NFUN_178__(Y, float(14))))
+	{
+		return 8;
+	}
+	// End:0x92
+	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_176__(Y, float(3))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_176__(Y, float(15)))))
+	{
+		return 0;
+	}
+	// End:0xF3
+	if(__NFUN_132__(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))), __NFUN_176__(Y, float(15))), __NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_176__(Y, float(3)))))
+	{
+		return 2;
+	}
+	// End:0x154
+	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3)))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15))))))
+	{
+		return 5;
+	}
+	// End:0x195
+	if(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15)))))
+	{
+		return 7;
+	}
+	// End:0x1A6
+	if(__NFUN_176__(Y, float(3)))
+	{
+		return 1;
+	}
+	// End:0x1C7
+	if(__NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3))))
+	{
+		return 6;
+	}
+	// End:0x1D8
+	if(__NFUN_176__(X, float(3)))
+	{
+		return 3;
+	}
+	// End:0x1F9
+	if(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))))
+	{
+		return 4;
+	}
+	return 10;
+	return;
 }
 
-/* Rainbow Six version */
-function FrameHitTest R6FW_HitTest(R6WindowFramedWindow W, FLOAT X, FLOAT Y)
+function UWindowBase.FrameHitTest R6FW_HitTest(R6WindowFramedWindow W, float X, float Y)
 {
-	if((X >= 3) && (X <= W.WinWidth-3) && (Y >= 3) && (Y <= 14))
-		return HT_TitleBar;
-	if((X < BRSIZEBORDER && Y < SIZEBORDER) || (X < SIZEBORDER && Y < BRSIZEBORDER)) 
-		return HT_NW;
-	if((X > W.WinWidth - SIZEBORDER && Y < BRSIZEBORDER) || (X > W.WinWidth - BRSIZEBORDER && Y < SIZEBORDER))
-		return HT_NE;
-	if((X < BRSIZEBORDER && Y > W.WinHeight - SIZEBORDER)|| (X < SIZEBORDER && Y > W.WinHeight - BRSIZEBORDER)) 
-		return HT_SW;
-	if((X > W.WinWidth - BRSIZEBORDER) && (Y > W.WinHeight - BRSIZEBORDER))
-		return HT_SE;
-	if(Y < SIZEBORDER)
-		return HT_N;
-	if(Y > W.WinHeight - SIZEBORDER)
-		return HT_S;
-	if(X < SIZEBORDER)
-		return HT_W;
-	if(X > W.WinWidth - SIZEBORDER)	
-		return HT_E;
-
-	return HT_None;	
+	// End:0x51
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, float(3)), __NFUN_178__(X, __NFUN_175__(W.WinWidth, float(3)))), __NFUN_179__(Y, float(3))), __NFUN_178__(Y, float(14))))
+	{
+		return 8;
+	}
+	// End:0x92
+	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_176__(Y, float(3))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_176__(Y, float(15)))))
+	{
+		return 0;
+	}
+	// End:0xF3
+	if(__NFUN_132__(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))), __NFUN_176__(Y, float(15))), __NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_176__(Y, float(3)))))
+	{
+		return 2;
+	}
+	// End:0x154
+	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3)))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15))))))
+	{
+		return 5;
+	}
+	// End:0x195
+	if(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15)))))
+	{
+		return 7;
+	}
+	// End:0x1A6
+	if(__NFUN_176__(Y, float(3)))
+	{
+		return 1;
+	}
+	// End:0x1C7
+	if(__NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3))))
+	{
+		return 6;
+	}
+	// End:0x1D8
+	if(__NFUN_176__(X, float(3)))
+	{
+		return 3;
+	}
+	// End:0x1F9
+	if(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))))
+	{
+		return 4;
+	}
+	return 10;
+	return;
 }
 
 // ****** Client Area Drawing Functions *******
 function DrawClientArea(UWindowClientWindow W, Canvas C)
 {
-	W.DrawStretchedTexture(C, 0, 0, W.WinWidth, W.WinHeight, Texture'BlackTexture');
+	W.DrawStretchedTexture(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, Texture'UWindow.BlackTexture');
+	return;
 }
-
 
 // ****** Combo Drawing Functions ******
 function Combo_SetupSizes(UWindowComboControl W, Canvas C)
 {
-	local FLOAT fTW, fTH;
+	local float fTW, fTH;
 
 	C.Font = W.Root.Fonts[W.Font];
 	W.TextSize(C, W.Text, fTW, fTH);
-	
-//	W.WinHeight = 12 + MiscBevelT[2].H + MiscBevelB[2].H;
-	
 	switch(W.Align)
 	{
-	case TA_Left:
-		W.EditAreaDrawX = W.WinWidth - W.EditBoxWidth;
-		W.TextX = 0;
-		break;
-	case TA_Right:
-		W.EditAreaDrawX = 0;	
-		W.TextX = W.WinWidth - fTW;
-		break;
-	case TA_Center:
-		W.EditAreaDrawX = (W.WinWidth - W.EditBoxWidth) / 2;
-		W.TextX = (W.WinWidth - fTW) / 2;
-		break;
+		// End:0xBB
+		case 0:
+			W.EditAreaDrawX = __NFUN_175__(W.WinWidth, W.EditBoxWidth);
+			W.TextX = 0.0000000;
+			// End:0x163
+			break;
+		// End:0xFB
+		case 1:
+			W.EditAreaDrawX = 0.0000000;
+			W.TextX = __NFUN_175__(W.WinWidth, fTW);
+			// End:0x163
+			break;
+		// End:0x160
+		case 2:
+			W.EditAreaDrawX = __NFUN_172__(__NFUN_175__(W.WinWidth, W.EditBoxWidth), float(2));
+			W.TextX = __NFUN_172__(__NFUN_175__(W.WinWidth, fTW), float(2));
+			// End:0x163
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
-
-	W.EditAreaDrawY = (W.WinHeight - 2) / 2;
-	W.TextY = (W.WinHeight - fTH) / 2;
-
-	W.EditBox.WinLeft = W.EditAreaDrawX + MiscBevelL[2].W;
-	W.EditBox.WinTop = MiscBevelT[2].H;
-	W.Button.WinWidth = ComboBtnUp.W;
-
+	W.EditAreaDrawY = __NFUN_172__(__NFUN_175__(W.WinHeight, float(2)), float(2));
+	W.TextY = __NFUN_172__(__NFUN_175__(W.WinHeight, fTH), float(2));
+	W.EditBox.WinLeft = __NFUN_174__(W.EditAreaDrawX, float(MiscBevelL[2].W));
+	W.EditBox.WinTop = float(MiscBevelT[2].H);
+	W.Button.WinWidth = float(ComboBtnUp.W);
+	// End:0x554
 	if(W.bButtons)
 	{
-		W.EditBox.WinWidth = W.EditBoxWidth - MiscBevelL[2].W - MiscBevelR[2].W - ComboBtnUp.W - m_SBLeft.Up.W - m_SBRight.Up.W;
-		W.EditBox.WinHeight = W.WinHeight - MiscBevelT[2].H - MiscBevelB[2].H;
-		W.Button.WinLeft = W.WinWidth - ComboBtnUp.W - MiscBevelR[2].W - m_SBLeft.Up.W - m_SBRight.Up.W;
+		W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[2].W)), float(MiscBevelR[2].W)), float(ComboBtnUp.W)), float(m_SBLeft.Up.W)), float(m_SBRight.Up.W));
+		W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
+		W.Button.WinLeft = __NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(W.WinWidth, float(ComboBtnUp.W)), float(MiscBevelR[2].W)), float(m_SBLeft.Up.W)), float(m_SBRight.Up.W));
 		W.Button.WinTop = W.EditBox.WinTop;
-
-		W.LeftButton.WinLeft = W.WinWidth - MiscBevelR[2].W - m_SBLeft.Up.W - m_SBRight.Up.W;
+		W.LeftButton.WinLeft = __NFUN_175__(__NFUN_175__(__NFUN_175__(W.WinWidth, float(MiscBevelR[2].W)), float(m_SBLeft.Up.W)), float(m_SBRight.Up.W));
 		W.LeftButton.WinTop = W.EditBox.WinTop;
-		W.RightButton.WinLeft = W.WinWidth - MiscBevelR[2].W - m_SBRight.Up.W;
+		W.RightButton.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(MiscBevelR[2].W)), float(m_SBRight.Up.W));
 		W.RightButton.WinTop = W.EditBox.WinTop;
-
-		W.LeftButton.WinWidth = m_SBLeft.Up.W;
-		W.LeftButton.WinHeight = m_SBLeft.Up.H;
-		W.RightButton.WinWidth = m_SBRight.Up.W;
-		W.RightButton.WinHeight = m_SBRight.Up.H;
+		W.LeftButton.WinWidth = float(m_SBLeft.Up.W);
+		W.LeftButton.WinHeight = float(m_SBLeft.Up.H);
+		W.RightButton.WinWidth = float(m_SBRight.Up.W);
+		W.RightButton.WinHeight = float(m_SBRight.Up.H);		
 	}
 	else
 	{
-		W.EditBox.WinWidth = W.EditBoxWidth - MiscBevelL[2].W - MiscBevelR[2].W - ComboBtnUp.W;
-		W.EditBox.WinHeight = W.WinHeight - MiscBevelT[2].H - MiscBevelB[2].H;
-		W.Button.WinLeft = W.WinWidth - ComboBtnUp.W - MiscBevelR[2].W;
+		W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[2].W)), float(MiscBevelR[2].W)), float(ComboBtnUp.W));
+		W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
+		W.Button.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(ComboBtnUp.W)), float(MiscBevelR[2].W));
 		W.Button.WinTop = W.EditBox.WinTop;
 	}
 	W.Button.WinHeight = W.EditBox.WinHeight;
+	return;
 }
 
 function Combo_Draw(UWindowComboControl W, Canvas C)
 {
-	local Texture T;
-    
-	T = W.GetLookAndFeelTexture();
-    
-    // this is draw the border of the combo control
-    C.Style = ERenderStyle.STY_Alpha;
+	local Texture t;
 
-    C.SetDrawColor(120,120,120);  //GrayLight = (R=120,G=120,B=120)
-
-    //Top
-    W.DrawStretchedTextureSegment(C, 0, 0, W.WinWidth, W.m_BorderTextureRegion.H , W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    //Bottom
-    W.DrawStretchedTextureSegment(C, 0, W.WinHeight  - W.m_BorderTextureRegion.H, W.WinWidth, W.m_BorderTextureRegion.H , W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    //Left
-    W.DrawStretchedTextureSegment(C, 0, W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.W, W.WinHeight - (2* W.m_BorderTextureRegion.H), W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    //Right
-    W.DrawStretchedTextureSegment(C, W.WinWidth - W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.W, W.WinHeight - (2* W.m_BorderTextureRegion.H), W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    // end of border combo control
-
-	if(W.Text != "")
-	{		
-		C.SetDrawColor(W.TextColor.R,W.TextColor.G,W.TextColor.B);
-        W.ClipText(C, W.TextX, W.TextY, W.Text);
+	t = W.GetLookAndFeelTexture();
+	C.Style = 5;
+	C.__NFUN_2626__(120, 120, 120);
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(W.WinHeight, float(W.m_BorderTextureRegion.H)), W.WinWidth, float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, 0.0000000, float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(__NFUN_144__(2, W.m_BorderTextureRegion.H))), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(W.m_BorderTextureRegion.W)), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(__NFUN_144__(2, W.m_BorderTextureRegion.H))), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	// End:0x3F2
+	if(__NFUN_123__(W.Text, ""))
+	{
+		C.__NFUN_2626__(W.TextColor.R, W.TextColor.G, W.TextColor.B);
+		W.ClipText(C, W.TextX, W.TextY, W.Text);
 	}
+	return;
 }
+
 function R6List_DrawBackground(R6WindowListBox W, Canvas C)
 {
-	local Texture T;    
-    
-	T = m_R6ScrollTexture;
-   
-    C.SetDrawColor(W.m_BorderColor.R,W.m_BorderColor.G,W.m_BorderColor.B);    
-	
-	C.Style = ERenderStyle.STY_Alpha;	
+	local Texture t;
 
+	t = m_R6ScrollTexture;
+	C.__NFUN_2626__(W.m_BorderColor.R, W.m_BorderColor.G, W.m_BorderColor.B);
+	C.Style = 5;
 	switch(W.m_eCornerType)
 	{
-		case No_Corners:
-            W.DrawSimpleBorder(C);
+		// End:0x8D
+		case 0:
+			W.DrawSimpleBorder(C);
+			// End:0xEFF
 			break;
-		case Top_Corners:
-			//Corners
-			W.DrawStretchedTextureSegment(C, 0, 0, m_topLeftCornerR.W, m_topLeftCornerR.H, m_topLeftCornerR.X, m_topLeftCornerR.Y, 
-													m_topLeftCornerR.W, m_topLeftCornerR.H, m_R6ScrollTexture);		
-			W.DrawStretchedTextureSegment(C, W.WinWidth - m_topLeftCornerR.W, 0, m_topLeftCornerR.W, m_topLeftCornerR.H, 
-													m_topLeftCornerR.X + m_topLeftCornerR.W, m_topLeftCornerR.Y, 
-													-m_topLeftCornerR.W, m_topLeftCornerR.H, m_R6ScrollTexture);
-            //top countour
-			W.DrawStretchedTextureSegment(C, m_topLeftCornerR.W + m_iListHPadding, 0, W.WinWidth - (2 * m_iListHPadding) - (2 * m_topLeftCornerR.W), W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//bottom countour
-			W.DrawStretchedTextureSegment(C, m_iListVPadding, W.WinHeight - W.m_BorderTextureRegion.H, W.WinWidth - (2 * m_iListVPadding), W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//Left countour
-			W.DrawStretchedTextureSegment(C, m_iListVPadding, m_topLeftCornerR.H, W.m_BorderTextureRegion.W, W.WinHeight - m_topLeftCornerR.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//Right countour
-			W.DrawStretchedTextureSegment(C, W.WinWidth - W.m_BorderTextureRegion.W - m_iListVPadding, m_topLeftCornerR.H, W.m_BorderTextureRegion.W, W.WinHeight - m_topLeftCornerR.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			
-
+		// End:0x4CD
+		case 2:
+			W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(m_topLeftCornerR.Y), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float(__NFUN_143__(m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, float(__NFUN_146__(m_topLeftCornerR.W, m_iListHPadding)), 0.0000000, __NFUN_175__(__NFUN_175__(W.WinWidth, float(__NFUN_144__(2, m_iListHPadding))), float(__NFUN_144__(2, m_topLeftCornerR.W))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, float(m_iListVPadding), __NFUN_175__(W.WinHeight, float(W.m_BorderTextureRegion.H)), __NFUN_175__(W.WinWidth, float(__NFUN_144__(2, m_iListVPadding))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, float(m_iListVPadding), float(m_topLeftCornerR.H), float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(W.WinWidth, float(W.m_BorderTextureRegion.W)), float(m_iListVPadding)), float(m_topLeftCornerR.H), float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			// End:0xEFF
 			break;
-		case Bottom_Corners:
-			//Corners
-			W.DrawStretchedTextureSegment(C, 0, W.WinHeight -  m_topLeftCornerR.H, m_topLeftCornerR.W, m_topLeftCornerR.H, m_topLeftCornerR.X, 
-													m_topLeftCornerR.Y + m_topLeftCornerR.H, 
-													m_topLeftCornerR.W, -m_topLeftCornerR.H, m_R6ScrollTexture);		
-			W.DrawStretchedTextureSegment(C, W.WinWidth - m_topLeftCornerR.W, W.WinHeight -  m_topLeftCornerR.H, m_topLeftCornerR.W, m_topLeftCornerR.H, 
-													m_topLeftCornerR.X + m_topLeftCornerR.W, m_topLeftCornerR.Y + m_topLeftCornerR.H, 
-													-m_topLeftCornerR.W, -m_topLeftCornerR.H, m_R6ScrollTexture);			
-            //top countour
-			W.DrawStretchedTextureSegment(C, m_iListVPadding, 0, W.WinWidth - (2 * m_iListVPadding) , W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//bottom countour
-			W.DrawStretchedTextureSegment(C, m_topLeftCornerR.W + m_iListHPadding, W.WinHeight - W.m_BorderTextureRegion.H, W.WinWidth - (2 * m_iListHPadding) - (2 * m_topLeftCornerR.W), W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//Left countour
-			W.DrawStretchedTextureSegment(C, m_iListVPadding, 0, W.m_BorderTextureRegion.W, W.WinHeight - m_topLeftCornerR.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//Right countour
-			W.DrawStretchedTextureSegment(C, W.WinWidth - W.m_BorderTextureRegion.W - m_iListVPadding, 0, W.m_BorderTextureRegion.W, W.WinHeight - m_topLeftCornerR.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			
-			
+		// End:0x949
+		case 3:
+			W.DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(__NFUN_143__(m_topLeftCornerR.H)), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(m_topLeftCornerR.W)), __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(__NFUN_143__(m_topLeftCornerR.W)), float(__NFUN_143__(m_topLeftCornerR.H)), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, float(m_iListVPadding), 0.0000000, __NFUN_175__(W.WinWidth, float(__NFUN_144__(2, m_iListVPadding))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, float(__NFUN_146__(m_topLeftCornerR.W, m_iListHPadding)), __NFUN_175__(W.WinHeight, float(W.m_BorderTextureRegion.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(__NFUN_144__(2, m_iListHPadding))), float(__NFUN_144__(2, m_topLeftCornerR.W))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, float(m_iListVPadding), 0.0000000, float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(W.WinWidth, float(W.m_BorderTextureRegion.W)), float(m_iListVPadding)), 0.0000000, float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			// End:0xEFF
 			break;
-		case All_Corners:
-			//Corners
-			W.DrawStretchedTextureSegment(C, 0, 0, m_topLeftCornerR.W, m_topLeftCornerR.H, m_topLeftCornerR.X, m_topLeftCornerR.Y, 
-													m_topLeftCornerR.W, m_topLeftCornerR.H, m_R6ScrollTexture);		
-			W.DrawStretchedTextureSegment(C, W.WinWidth - m_topLeftCornerR.W, 0, m_topLeftCornerR.W, m_topLeftCornerR.H, 
-													m_topLeftCornerR.X + m_topLeftCornerR.W, m_topLeftCornerR.Y, 
-													-m_topLeftCornerR.W, m_topLeftCornerR.H, m_R6ScrollTexture);
-			W.DrawStretchedTextureSegment(C, 0, W.WinHeight -  m_topLeftCornerR.H, m_topLeftCornerR.W, m_topLeftCornerR.H, m_topLeftCornerR.X, 
-													m_topLeftCornerR.Y + m_topLeftCornerR.H, 
-													m_topLeftCornerR.W, -m_topLeftCornerR.H, m_R6ScrollTexture);		
-			W.DrawStretchedTextureSegment(C, W.WinWidth - m_topLeftCornerR.W, W.WinHeight -  m_topLeftCornerR.H, m_topLeftCornerR.W, m_topLeftCornerR.H, 
-													m_topLeftCornerR.X + m_topLeftCornerR.W, m_topLeftCornerR.Y + m_topLeftCornerR.H, 
-													-m_topLeftCornerR.W, -m_topLeftCornerR.H, m_R6ScrollTexture);
-			
-            //top countour
-			W.DrawStretchedTextureSegment(C, m_topLeftCornerR.W + m_iListHPadding, 0, W.WinWidth - (2 * m_iListHPadding) - (2 * m_topLeftCornerR.W), W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//bottom countour
-			W.DrawStretchedTextureSegment(C, m_topLeftCornerR.W + m_iListHPadding, W.WinHeight - W.m_BorderTextureRegion.H, W.WinWidth - (2 * m_iListHPadding) - (2 * m_topLeftCornerR.W), W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//Left countour
-			W.DrawStretchedTextureSegment(C, m_iListVPadding, m_topLeftCornerR.H, W.m_BorderTextureRegion.W, W.WinHeight - (2 * m_topLeftCornerR.H), W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			//Right countour
-			W.DrawStretchedTextureSegment(C, W.WinWidth - W.m_BorderTextureRegion.W - m_iListVPadding, m_topLeftCornerR.H, W.m_BorderTextureRegion.W, W.WinHeight - (2 * m_topLeftCornerR.H), W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-			
-			
-			
+		// End:0xEF4
+		case 4:
+			W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(m_topLeftCornerR.Y), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float(__NFUN_143__(m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(__NFUN_143__(m_topLeftCornerR.H)), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(m_topLeftCornerR.W)), __NFUN_175__(W.WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(__NFUN_143__(m_topLeftCornerR.W)), float(__NFUN_143__(m_topLeftCornerR.H)), m_R6ScrollTexture);
+			W.DrawStretchedTextureSegment(C, float(__NFUN_146__(m_topLeftCornerR.W, m_iListHPadding)), 0.0000000, __NFUN_175__(__NFUN_175__(W.WinWidth, float(__NFUN_144__(2, m_iListHPadding))), float(__NFUN_144__(2, m_topLeftCornerR.W))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, float(__NFUN_146__(m_topLeftCornerR.W, m_iListHPadding)), __NFUN_175__(W.WinHeight, float(W.m_BorderTextureRegion.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(__NFUN_144__(2, m_iListHPadding))), float(__NFUN_144__(2, m_topLeftCornerR.W))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, float(m_iListVPadding), float(m_topLeftCornerR.H), float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(__NFUN_144__(2, m_topLeftCornerR.H))), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			W.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(W.WinWidth, float(W.m_BorderTextureRegion.W)), float(m_iListVPadding)), float(m_topLeftCornerR.H), float(W.m_BorderTextureRegion.W), __NFUN_175__(W.WinHeight, float(__NFUN_144__(2, m_topLeftCornerR.H))), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+			// End:0xEFF
 			break;
-        case No_Borders:
-            break;
+		// End:0xEFC
+		case 1:
+			// End:0xEFF
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
-	
+	return;
 }
 
 function List_DrawBackground(UWindowListControl W, Canvas C)
 {
-	local Texture T;
-    
-	T = W.GetLookAndFeelTexture();
+	local Texture t;
 
-    W.DrawUpBevel( C, 0, 0, W.WinWidth, W.WinHeight, Active);
-
+	t = W.GetLookAndFeelTexture();
+	W.DrawUpBevel(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, Active);
+	return;
 }
-
 
 //=================================================================================
 // This is draw the border of a combo list item
 //=================================================================================
 function ComboList_DrawBackground(UWindowComboList W, Canvas C)
 {
-    W.DrawSimpleBorder(C);      
+	W.DrawSimpleBorder(C);
+	return;
 }
 
 //=================================================================================
 // This is draw a combo list item
 //=================================================================================
-function ComboList_DrawItem(UWindowComboList Combo, Canvas C, FLOAT X, FLOAT Y, FLOAT W, FLOAT H, string Text, bool bSelected)
+function ComboList_DrawItem(UWindowComboList Combo, Canvas C, float X, float Y, float W, float H, string Text, bool bSelected)
 {
-	local Texture T;
-    
-	T = Combo.GetLookAndFeelTexture();
+	local Texture t;
 
-//	C.SetDrawColor(22,22,22);
-
+	t = Combo.GetLookAndFeelTexture();
+	// End:0x8C
 	if(bSelected)
 	{
-    	C.SetDrawColor(0,0,0);
-		Combo.DrawStretchedTextureSegment(C, X, Y, W, H, 4, 16, 1, 1, T);
-//		C.SetDrawColor(0,0,0);
-        C.SetDrawColor(255,255,255); // white
+		C.__NFUN_2626__(0, 0, 0);
+		Combo.DrawStretchedTextureSegment(C, X, Y, W, H, 4.0000000, 16.0000000, 1.0000000, 1.0000000, t);
+		C.__NFUN_2626__(byte(255), byte(255), byte(255));		
 	}
 	else
 	{
-		C.SetDrawColor(22,22,22);
-		Combo.DrawStretchedTextureSegment(C, X, Y, W, H, 4, 16, 1, 1, T);
-        C.SetDrawColor(15,136,176);
+		C.__NFUN_2626__(22, 22, 22);
+		Combo.DrawStretchedTextureSegment(C, X, Y, W, H, 4.0000000, 16.0000000, 1.0000000, 1.0000000, t);
+		C.__NFUN_2626__(15, 136, 176);
 	}
-
-//    C.SetDrawColor(255,255,255); // white
-
-	Combo.ClipText(C, X + Combo.TextBorder + 2, Y + 3, Text);
+	Combo.ClipText(C, __NFUN_174__(__NFUN_174__(X, float(Combo.TextBorder)), float(2)), __NFUN_174__(Y, float(3)), Text);
+	return;
 }
-
 
 function Combo_SetupButton(UWindowComboButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-	
-	W.bUseRegion = True;
-
-	W.UpTexture =  Texture'R6MenuTextures.Gui_BoxScroll';
-	W.DownTexture =  Texture'R6MenuTextures.Gui_BoxScroll';
-	W.OverTexture =  Texture'R6MenuTextures.Gui_BoxScroll';
-	W.DisabledTexture =  Texture'R6MenuTextures.Gui_BoxScroll';
-
+	t = W.GetLookAndFeelTexture();
+	W.bUseRegion = true;
+	W.UpTexture = Texture'R6MenuTextures.Gui_BoxScroll';
+	W.DownTexture = Texture'R6MenuTextures.Gui_BoxScroll';
+	W.OverTexture = Texture'R6MenuTextures.Gui_BoxScroll';
+	W.DisabledTexture = Texture'R6MenuTextures.Gui_BoxScroll';
 	W.UpRegion = ComboBtnUp;
 	W.DownRegion = ComboBtnDown;
 	W.OverRegion = ComboBtnOver;
-	W.DisabledRegion = ComboBtnDisabled;	
-
-    W.ImageX = m_fComboImageX;
-    W.ImageY = m_fComboImageY;
+	W.DisabledRegion = ComboBtnDisabled;
+	W.ImageX = float(m_fComboImageX);
+	W.ImageY = float(m_fComboImageY);
+	return;
 }
 
 function Editbox_SetupSizes(UWindowEditControl W, Canvas C)
 {
-	local FLOAT fTW, fTH;
-	local INT B;
+	local float fTW, fTH;
+	local int B;
 
 	B = EditBoxBevel;
-		
 	C.Font = W.Root.Fonts[W.Font];
 	W.TextSize(C, W.Text, fTW, fTH);
-	
-	W.WinHeight = 12 + MiscBevelT[B].H + MiscBevelB[B].H;
-		
+	W.WinHeight = __NFUN_174__(__NFUN_174__(12.0000000, float(MiscBevelT[B].H)), float(MiscBevelB[B].H));
 	switch(W.Align)
 	{
-	case TA_Left:
-		W.EditAreaDrawX = W.WinWidth - W.EditBoxWidth;
-		W.TextX = 0;
-		break;
-	case TA_Right:
-		W.EditAreaDrawX = 0;	
-		W.TextX = W.WinWidth - fTW;
-		break;
-	case TA_Center:
-		W.EditAreaDrawX = W.WinWidth - W.EditBoxWidth;
-		W.TextX = (W.WinWidth - fTW);
-		break;
+		// End:0x102
+		case 0:
+			W.EditAreaDrawX = __NFUN_175__(W.WinWidth, W.EditBoxWidth);
+			W.TextX = 0.0000000;
+			// End:0x19E
+			break;
+		// End:0x142
+		case 1:
+			W.EditAreaDrawX = 0.0000000;
+			W.TextX = __NFUN_175__(W.WinWidth, fTW);
+			// End:0x19E
+			break;
+		// End:0x19B
+		case 2:
+			W.EditAreaDrawX = __NFUN_175__(W.WinWidth, W.EditBoxWidth);
+			W.TextX = __NFUN_175__(W.WinWidth, fTW);
+			// End:0x19E
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
-
-	W.EditAreaDrawY = (W.WinHeight - 2);
-	W.TextY = (W.WinHeight - fTH);
-
-	W.EditBox.WinLeft = W.EditAreaDrawX + MiscBevelL[B].W;
-	W.EditBox.WinTop = MiscBevelT[B].H;
-	W.EditBox.WinWidth = W.EditBoxWidth - MiscBevelL[B].W - MiscBevelR[B].W;
-	W.EditBox.WinHeight = W.WinHeight - MiscBevelT[B].H - MiscBevelB[B].H;
+	W.EditAreaDrawY = __NFUN_175__(W.WinHeight, float(2));
+	W.TextY = __NFUN_175__(W.WinHeight, fTH);
+	W.EditBox.WinLeft = __NFUN_174__(W.EditAreaDrawX, float(MiscBevelL[B].W));
+	W.EditBox.WinTop = float(MiscBevelT[B].H);
+	W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[B].W)), float(MiscBevelR[B].W));
+	W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[B].H)), float(MiscBevelB[B].H));
+	return;
 }
 
 function Editbox_Draw(UWindowEditControl W, Canvas C)
 {
-	W.DrawMiscBevel(C, W.EditAreaDrawX, 0, W.EditBoxWidth, W.WinHeight, Active, EditBoxBevel);
-
-    /*
-	if(W.Text != "")
-	{		
-		C.SetDrawColor(W.TextColor.R,W.TextColor.G,W.TextColor.B);
-		W.ClipText(C, W.TextX, W.TextY, W.Text);
-//		C.SetDrawColor(255,255,255);		
-	}
-    */
+	W.DrawMiscBevel(C, W.EditAreaDrawX, 0.0000000, W.EditBoxWidth, W.WinHeight, Active, EditBoxBevel);
+	return;
 }
 
-function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bool bLeftmostTab, FLOAT X, FLOAT Y, FLOAT W, FLOAT H, string Text, bool bShowText)
+function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bool bLeftmostTab, float X, float Y, float W, float H, string Text, bool bShowText)
 {
-	local Region R, 
-                 Temp_RTabLeft,
-                 Temp_RTabRight;
+	local Region R, Temp_RTabLeft, Temp_RTabRight;
 	local string szText;
-	local FLOAT fTW, fTH, fXOffset;
+	local float fTW, fTH, fXOffset;
 
-    fXOffset = Size_TabTextOffset;  // this value is the offset from the beginning of the tab -- for text -- (just under the small curve)
-
-    C.Style = ERenderStyle.STY_Alpha;
+	fXOffset = Size_TabTextOffset;
+	C.Style = 5;
 	szText = Text;
-
+	// End:0x39D
 	if(bActiveTab)
 	{
-        // draw a border under the tab 
-//        C.SetDrawColor( 120, 120, 120); //graylight
-//        Tab.DrawStretchedTextureSegment(C, X, Y + Tab.WinHeight - 1, W, Tab.m_BorderTextureRegion.H , Tab.m_BorderTextureRegion.X, Tab.m_BorderTextureRegion.Y, Tab.m_BorderTextureRegion.W, Tab.m_BorderTextureRegion.H, Tab.m_BorderTexture);
-
-
-        C.SetDrawColor( Tab.m_vEffectColor.R, Tab.m_vEffectColor.G, Tab.m_vEffectColor.B);
-        if (Tab.m_bDisplayToolTip)
-            C.SetDrawColor( Tab.Root.Colors.BlueLight.R, Tab.Root.Colors.BlueLight.G, Tab.Root.Colors.BlueLight.B);
-
-        
-        R = TabSelectedL;
-        Tab.DrawStretchedTextureSegment( C, X, Y, R.W, R.H, R.X, R.Y, R.W, R.H, m_R6ScrollTexture);
+		C.__NFUN_2626__(Tab.m_vEffectColor.R, Tab.m_vEffectColor.G, Tab.m_vEffectColor.B);
+		// End:0x102
+		if(Tab.m_bDisplayToolTip)
+		{
+			C.__NFUN_2626__(Tab.Root.Colors.BlueLight.R, Tab.Root.Colors.BlueLight.G, Tab.Root.Colors.BlueLight.B);
+		}
+		R = TabSelectedL;
+		Tab.DrawStretchedTextureSegment(C, X, Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), m_R6ScrollTexture);
 		R = TabSelectedM;
-		Tab.DrawStretchedTextureSegment( C, X+TabSelectedL.W, Y, W - TabSelectedL.W	- TabSelectedR.W,
-  										 R.H, R.X, R.Y, R.W, R.H, m_R6ScrollTexture );
-        R = TabSelectedR;
-        Tab.DrawStretchedTextureSegment( C, X + W - R.W, Y, R.W, R.H, R.X, R.Y, R.W, R.H, m_R6ScrollTexture);
-
+		Tab.DrawStretchedTextureSegment(C, __NFUN_174__(X, float(TabSelectedL.W)), Y, __NFUN_175__(__NFUN_175__(W, float(TabSelectedL.W)), float(TabSelectedR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), m_R6ScrollTexture);
+		R = TabSelectedR;
+		Tab.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, W), float(R.W)), Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), m_R6ScrollTexture);
+		// End:0x39A
 		if(bShowText)
 		{
-            C.Style  = ERenderStyle.STY_Normal;
-    		C.Font   = Tab.Root.Fonts[F_TabMainTitle];
-            C.SpaceX = 0;
-
-			szText = Tab.TextSize(C, szText, fTW, fTH, W - fXOffset - TabSelectedR.W);
-
-            // center the text in the tab
-		    Y = (Tab.WinHeight - fTH) / 2;
-		    Y = FLOAT(INT(Y+0.5));
-
-//			Tab.ClipText(C, X + (W-fTW-6)/2, Y, Text, True);
-            Tab.ClipText(C, X + fXOffset, Y, szText, True);
-		}
+			C.Style = 1;
+			C.Font = Tab.Root.Fonts[7];
+			C.SpaceX = 0.0000000;
+			szText = Tab.TextSize(C, szText, fTW, fTH, int(__NFUN_175__(__NFUN_175__(W, fXOffset), float(TabSelectedR.W))));
+			Y = __NFUN_172__(__NFUN_175__(Tab.WinHeight, fTH), float(2));
+			Y = float(int(__NFUN_174__(Y, 0.5000000)));
+			Tab.ClipText(C, __NFUN_174__(X, fXOffset), Y, szText, true);
+		}		
 	}
 	else
 	{
-        switch(Tab.m_eTabCase)
-        {
-            case Tab.eTabCase.eTab_Left:
-                Temp_RTabLeft = TabSelectedL;
-                Temp_RTabRight = TabSelectedR;
-                break;
-            case Tab.eTabCase.eTab_Left_RightCut: 
-                Temp_RTabLeft = TabSelectedL;
-                Temp_RTabRight = TabUnselectedR;
-                break;
-            case Tab.eTabCase.eTab_Middle:
-                Temp_RTabLeft = TabUnselectedL;
-                Temp_RTabRight = TabSelectedR;
-                break;
-            case Tab.eTabCase.eTab_Middle_RightCut:
-                Temp_RTabLeft = TabUnselectedL;
-                Temp_RTabRight = TabUnselectedR;
-                break;
-            default:
-                Temp_RTabLeft = TabUnselectedL;
-                Temp_RTabRight = TabSelectedR;
-                break;
-        }
-
-        // draw a border under the tab 
-//        C.SetDrawColor( 255, 255, 255); //white
-//        Tab.DrawStretchedTextureSegment(C, X, Y + Tab.WinHeight - 1, W, W.m_BorderTextureRegion.H , W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-
-        C.SetDrawColor(Tab.m_vEffectColor.R, Tab.m_vEffectColor.G, Tab.m_vEffectColor.B);
-		if (Tab.m_bDisplayToolTip)
-			C.SetDrawColor( Tab.Root.Colors.BlueLight.R, Tab.Root.Colors.BlueLight.G, Tab.Root.Colors.BlueLight.B);
-
-        // 2 part to 
-        R = Temp_RTabLeft;
-        Tab.DrawStretchedTextureSegment( C, X, Y, R.W, R.H, R.X, R.Y, R.W, R.H, m_R6ScrollTexture);
+		switch(Tab.m_eTabCase)
+		{
+			// End:0x3D4
+			case Tab.0:
+				Temp_RTabLeft = TabSelectedL;
+				Temp_RTabRight = TabSelectedR;
+				// End:0x465
+				break;
+			// End:0x3FB
+			case Tab.3:
+				Temp_RTabLeft = TabSelectedL;
+				Temp_RTabRight = TabUnselectedR;
+				// End:0x465
+				break;
+			// End:0x422
+			case Tab.1:
+				Temp_RTabLeft = TabUnselectedL;
+				Temp_RTabRight = TabSelectedR;
+				// End:0x465
+				break;
+			// End:0x449
+			case Tab.4:
+				Temp_RTabLeft = TabUnselectedL;
+				Temp_RTabRight = TabUnselectedR;
+				// End:0x465
+				break;
+			// End:0xFFFF
+			default:
+				Temp_RTabLeft = TabUnselectedL;
+				Temp_RTabRight = TabSelectedR;
+				// End:0x465
+				break;
+				break;
+		}
+		C.__NFUN_2626__(Tab.m_vEffectColor.R, Tab.m_vEffectColor.G, Tab.m_vEffectColor.B);
+		// End:0x537
+		if(Tab.m_bDisplayToolTip)
+		{
+			C.__NFUN_2626__(Tab.Root.Colors.BlueLight.R, Tab.Root.Colors.BlueLight.G, Tab.Root.Colors.BlueLight.B);
+		}
+		R = Temp_RTabLeft;
+		Tab.DrawStretchedTextureSegment(C, X, Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), m_R6ScrollTexture);
 		R = TabSelectedM;
-		Tab.DrawStretchedTextureSegment( C, X+TabSelectedL.W, Y, W - TabSelectedL.W	- TabSelectedR.W,
-  										 R.H, R.X, R.Y, R.W, R.H, m_R6ScrollTexture );
-        R = Temp_RTabRight;
-        Tab.DrawStretchedTextureSegment( C, X + W - R.W, Y, R.W, R.H, R.X, R.Y, R.W, R.H, m_R6ScrollTexture);
-
+		Tab.DrawStretchedTextureSegment(C, __NFUN_174__(X, float(TabSelectedL.W)), Y, __NFUN_175__(__NFUN_175__(W, float(TabSelectedL.W)), float(TabSelectedR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), m_R6ScrollTexture);
+		R = Temp_RTabRight;
+		Tab.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, W), float(R.W)), Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), m_R6ScrollTexture);
+		// End:0x7CF
 		if(bShowText)
 		{
-            C.Style  = ERenderStyle.STY_Normal;
-    		C.Font   = Tab.Root.Fonts[F_TabMainTitle];
-            C.SpaceX = 0;
-            
-			szText = Tab.TextSize(C, szText, fTW, fTH, W - fXOffset - TabSelectedR.W);
-            
-            // center the text in the tab
-		    Y = (Tab.WinHeight - fTH) / 2;
-		    Y = FLOAT(INT(Y+0.5));
-
-//			Tab.ClipText(C, X + (W-fTW-6)/2, Y, Text, True);
-            Tab.ClipText(C, X + fXOffset, Y, szText, True);
+			C.Style = 1;
+			C.Font = Tab.Root.Fonts[7];
+			C.SpaceX = 0.0000000;
+			szText = Tab.TextSize(C, szText, fTW, fTH, int(__NFUN_175__(__NFUN_175__(W, fXOffset), float(TabSelectedR.W))));
+			Y = __NFUN_172__(__NFUN_175__(Tab.WinHeight, fTH), float(2));
+			Y = float(int(__NFUN_174__(Y, 0.5000000)));
+			Tab.ClipText(C, __NFUN_174__(X, fXOffset), Y, szText, true);
 		}
 	}
+	return;
 }
-
 
 // ****** Scroll Bar ******
 function SB_SetupUpButton(UWindowSBUpButton W)
 {
-	local Texture T;
-	
-	T = m_R6ScrollTexture;
+	local Texture t;
 
+	t = m_R6ScrollTexture;
 	W.bUseRegion = true;
-
-	W.UpTexture         = T;
-	W.DownTexture       = T;
-	W.OverTexture       = T;
-	W.DisabledTexture   = T;
-
-    if( UWindowVScrollBar(W.OwnerWindow).m_bUseSpecialEffect == true)
-    {
-        W.UpRegion          = m_SBUpGear;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
+	// End:0xA6
+	if(__NFUN_242__(UWindowVScrollbar(W.OwnerWindow).m_bUseSpecialEffect, true))
+	{
+		W.UpRegion = m_SBUpGear;		
 	}
-    else
-    {
-        W.UpRegion          = m_SBUp.Up;	    
-    }
-
-    W.DownRegion        = m_SBUp.Down;
-	W.OverRegion        = m_SBUp.Over;
-	W.DisabledRegion    = m_SBUp.Disabled;
-	
-    W.m_bDrawButtonBorders = true;
-
-    W.ImageX = m_fVSBButtonImageX;
-    W.ImageY = m_fVSBButtonImageY;
-
+	else
+	{
+		W.UpRegion = m_SBUp.Up;
+	}
+	W.DownRegion = m_SBUp.Down;
+	W.OverRegion = m_SBUp.Over;
+	W.DisabledRegion = m_SBUp.Disabled;
+	W.m_bDrawButtonBorders = true;
+	W.ImageX = float(m_fVSBButtonImageX);
+	W.ImageY = float(m_fVSBButtonImageY);
+	return;
 }
 
 function SB_SetupDownButton(UWindowSBDownButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = m_R6ScrollTexture;
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
-    if( UWindowVScrollBar(W.OwnerWindow).m_bUseSpecialEffect == true)
-    {
-        W.UpRegion          = m_SBDownGear;	    
-    }
-    else
-    {        
-	    W.UpRegion          = m_SBDown.Up;	    
-    }
-
-    W.DownRegion        = m_SBDown.Down;
-	W.OverRegion        = m_SBDown.Over;
-	W.DisabledRegion    = m_SBDown.Disabled;
-
-    W.m_bDrawButtonBorders = true;    
-
-    
-    W.ImageX = m_fVSBButtonImageX;
-    W.ImageY = m_fVSBButtonImageY;
+	t = m_R6ScrollTexture;
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
+	// End:0xA6
+	if(__NFUN_242__(UWindowVScrollbar(W.OwnerWindow).m_bUseSpecialEffect, true))
+	{
+		W.UpRegion = m_SBDownGear;		
+	}
+	else
+	{
+		W.UpRegion = m_SBDown.Up;
+	}
+	W.DownRegion = m_SBDown.Down;
+	W.OverRegion = m_SBDown.Over;
+	W.DisabledRegion = m_SBDown.Disabled;
+	W.m_bDrawButtonBorders = true;
+	W.ImageX = float(m_fVSBButtonImageX);
+	W.ImageY = float(m_fVSBButtonImageY);
+	return;
 }
 
 function SB_SetupLeftButton(UWindowSBLeftButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = m_R6ScrollTexture;
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	t = m_R6ScrollTexture;
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = m_SBLeft.Up;
 	W.DownRegion = m_SBLeft.Down;
 	W.OverRegion = m_SBLeft.Up;
 	W.DisabledRegion = m_SBLeft.Disabled;
-    W.m_bDrawButtonBorders = true;
-    
-    W.ImageX = m_fHSBButtonImageX;
-    W.ImageY = m_fHSBButtonImageY;
+	W.m_bDrawButtonBorders = true;
+	W.ImageX = float(m_fHSBButtonImageX);
+	W.ImageY = float(m_fHSBButtonImageY);
+	return;
 }
 
 function SB_SetupRightButton(UWindowSBRightButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = m_R6ScrollTexture;
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	t = m_R6ScrollTexture;
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = m_SBRight.Up;
 	W.DownRegion = m_SBRight.Down;
 	W.OverRegion = m_SBRight.Up;
 	W.DisabledRegion = m_SBRight.Disabled;
-    W.m_bDrawButtonBorders = true;
-
-    //W.m_fRotAngleWidth=m_SBRight.Up.W;
-    //W.m_fRotAngleHeight=m_SBRight.Up.H;
-
-    W.ImageX = m_fHSBButtonImageX;
-    W.ImageY = m_fHSBButtonImageY;
+	W.m_bDrawButtonBorders = true;
+	W.ImageX = float(m_fHSBButtonImageX);
+	W.ImageY = float(m_fHSBButtonImageY);
+	return;
 }
 
 function SB_VDraw(UWindowVScrollbar W, Canvas C)
-{		
-    local int BoxHeight;
+{
+	local int BoxHeight;
 
-    BoxHeight = W.WinHeight - W.UpButton.WinHeight - W.DownButton.WinHeight + W.UpButton.m_BorderTextureRegion.H + W.DownButton.m_BorderTextureRegion.H;         
-
-    C.SetDrawColor(W.m_BorderColor.R,W.m_BorderColor.G,W.m_BorderColor.B);	
-
-    DrawBox(W, C, 0, W.UpButton.WinHeight - W.UpButton.m_BorderTextureRegion.H, W.WinWidth, BoxHeight);
-
-    C.Style=5;//ERenderStyle.STY_Alpha
-    C.SetDrawColor(W.Root.Colors.White.R,W.Root.Colors.White.G,W.Root.Colors.White.B, W.Root.Colors.White.A);	
-
-//    if(W.bMouseDown == true)
-//    {                
-//	    //Scroller
-//	    W.DrawStretchedTextureSegment(C, m_iSize_ScrollBarFrameW + m_iScrollerOffset, W.ThumbStart, m_iVScrollerWidth , W.ThumbHeight, 
-//									 m_SBScrollerActive.X, m_SBScrollerActive.Y, m_SBScrollerActive.W, m_SBScrollerActive.H, m_R6ScrollTexture);	        
-//    }
-//    else
-//    {
-
-        if(W.m_bUseSpecialEffect)
-            C.SetDrawColor(W.Root.Colors.GrayLight.R,W.Root.Colors.GrayLight.G,W.Root.Colors.GrayLight.B, W.Root.Colors.GrayLight.A);	
-
-        //traditional stylez
-	    W.DrawStretchedTextureSegment(C, m_iSize_ScrollBarFrameW + m_iScrollerOffset, W.ThumbStart, m_iVScrollerWidth , W.ThumbHeight, 
-									 m_SBScroller.X, m_SBScroller.Y, m_SBScroller.W, m_SBScroller.H, m_R6ScrollTexture);	
-//     }
-    
+	BoxHeight = int(__NFUN_174__(__NFUN_174__(__NFUN_175__(__NFUN_175__(W.WinHeight, W.UpButton.WinHeight), W.DownButton.WinHeight), float(W.UpButton.m_BorderTextureRegion.H)), float(W.DownButton.m_BorderTextureRegion.H)));
+	C.__NFUN_2626__(W.m_BorderColor.R, W.m_BorderColor.G, W.m_BorderColor.B);
+	DrawBox(W, C, 0.0000000, __NFUN_175__(W.UpButton.WinHeight, float(W.UpButton.m_BorderTextureRegion.H)), W.WinWidth, float(BoxHeight));
+	C.Style = 5;
+	C.__NFUN_2626__(W.Root.Colors.White.R, W.Root.Colors.White.G, W.Root.Colors.White.B, W.Root.Colors.White.A);
+	// End:0x291
+	if(W.m_bUseSpecialEffect)
+	{
+		C.__NFUN_2626__(W.Root.Colors.GrayLight.R, W.Root.Colors.GrayLight.G, W.Root.Colors.GrayLight.B, W.Root.Colors.GrayLight.A);
+	}
+	W.DrawStretchedTextureSegment(C, float(__NFUN_146__(m_iSize_ScrollBarFrameW, m_iScrollerOffset)), W.ThumbStart, float(m_iVScrollerWidth), W.ThumbHeight, float(m_SBScroller.X), float(m_SBScroller.Y), float(m_SBScroller.W), float(m_SBScroller.H), m_R6ScrollTexture);
+	return;
 }
 
 function SB_HDraw(UWindowHScrollbar W, Canvas C)
 {
-    local int BoxWidth;
-	
-    C.SetDrawColor(W.m_BorderColor.R,W.m_BorderColor.G,W.m_BorderColor.B);	
+	local int BoxWidth;
 
-    BoxWidth = W.WinWidth - W.LeftButton.WinWidth - W.RightButton.WinWidth + W.LeftButton.m_BorderTextureRegion.W + W.RightButton.m_BorderTextureRegion.W;
-
-    DrawBox(W, C, W.LeftButton.WinWidth - W.LeftButton.m_BorderTextureRegion.W, 0, BoxWidth, W.WinHeight);
-	
-	// Scroller
-	W.DrawStretchedTextureSegment(C, W.ThumbStart, m_iSize_ScrollBarFrameW + m_iScrollerOffset, W.ThumbWidth, m_iVScrollerWidth, 
-									 m_SBScroller.X, m_SBScroller.Y, m_SBScroller.W, m_SBScroller.H, m_R6ScrollTexture);	
+	C.__NFUN_2626__(W.m_BorderColor.R, W.m_BorderColor.G, W.m_BorderColor.B);
+	BoxWidth = int(__NFUN_174__(__NFUN_174__(__NFUN_175__(__NFUN_175__(W.WinWidth, W.LeftButton.WinWidth), W.RightButton.WinWidth), float(W.LeftButton.m_BorderTextureRegion.W)), float(W.RightButton.m_BorderTextureRegion.W)));
+	DrawBox(W, C, __NFUN_175__(W.LeftButton.WinWidth, float(W.LeftButton.m_BorderTextureRegion.W)), 0.0000000, float(BoxWidth), W.WinHeight);
+	W.DrawStretchedTextureSegment(C, W.ThumbStart, float(__NFUN_146__(m_iSize_ScrollBarFrameW, m_iScrollerOffset)), W.ThumbWidth, float(m_iVScrollerWidth), float(m_SBScroller.X), float(m_SBScroller.Y), float(m_SBScroller.W), float(m_SBScroller.H), m_R6ScrollTexture);
+	return;
 }
 
 function Tab_SetupLeftButton(UWindowTabControlLeftButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-
+	t = W.GetLookAndFeelTexture();
 	W.WinWidth = Size_ScrollbarButtonHeight;
 	W.WinHeight = Size_ScrollbarWidth;
-	W.WinTop = Size_TabAreaHeight - W.WinHeight;
-	W.WinLeft = W.ParentWindow.WinWidth - 2*W.WinWidth;
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	W.WinTop = __NFUN_175__(Size_TabAreaHeight, W.WinHeight);
+	W.WinLeft = __NFUN_175__(W.ParentWindow.WinWidth, __NFUN_171__(float(2), W.WinWidth));
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = m_SBLeft.Up;
 	W.DownRegion = m_SBLeft.Down;
 	W.OverRegion = m_SBLeft.Up;
 	W.DisabledRegion = m_SBLeft.Disabled;
+	return;
 }
 
 function Tab_SetupRightButton(UWindowTabControlRightButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
+	t = W.GetLookAndFeelTexture();
 	W.WinWidth = Size_ScrollbarButtonHeight;
 	W.WinHeight = Size_ScrollbarWidth;
-	W.WinTop = Size_TabAreaHeight - W.WinHeight;
-	W.WinLeft = W.ParentWindow.WinWidth - W.WinWidth;
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	W.WinTop = __NFUN_175__(Size_TabAreaHeight, W.WinHeight);
+	W.WinLeft = __NFUN_175__(W.ParentWindow.WinWidth, W.WinWidth);
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = m_SBRight.Up;
 	W.DownRegion = m_SBRight.Down;
 	W.OverRegion = m_SBRight.Up;
 	W.DisabledRegion = m_SBRight.Disabled;
+	return;
 }
 
 function Tab_SetTabPageSize(UWindowPageControl W, UWindowPageWindow P)
 {
-	P.WinLeft = 2;
-	P.WinTop = W.TabArea.WinHeight-(TabSelectedM.H-TabUnselectedM.H) + 3;
-	P.SetSize(W.WinWidth - 4, W.WinHeight-(W.TabArea.WinHeight-(TabSelectedM.H-TabUnselectedM.H)) - 6);
+	P.WinLeft = 2.0000000;
+	P.WinTop = __NFUN_174__(__NFUN_175__(W.TabArea.WinHeight, float(__NFUN_147__(TabSelectedM.H, TabUnselectedM.H))), float(3));
+	P.SetSize(__NFUN_175__(W.WinWidth, float(4)), __NFUN_175__(__NFUN_175__(W.WinHeight, __NFUN_175__(W.TabArea.WinHeight, float(__NFUN_147__(TabSelectedM.H, TabUnselectedM.H)))), float(6)));
+	return;
 }
 
 function Tab_DrawTabPageArea(UWindowPageControl W, Canvas C, UWindowPageWindow P)
 {
-	W.DrawUpBevel( C, 0, Size_TabAreaHeight, W.WinWidth, W.WinHeight-Size_TabAreaHeight, Active);
+	W.DrawUpBevel(C, 0.0000000, Size_TabAreaHeight, W.WinWidth, __NFUN_175__(W.WinHeight, Size_TabAreaHeight), Active);
+	return;
 }
 
-function Tab_GetTabSize(UWindowTabControlTabArea Tab, Canvas C, string Text, out FLOAT W, out FLOAT H)
+function Tab_GetTabSize(UWindowTabControlTabArea Tab, Canvas C, string Text, out float W, out float H)
 {
-	local FLOAT fTW, fTH;
+	local float fTW, fTH;
 
-	C.Font = Tab.Root.Fonts[Tab.F_TabMainTitle];
-
-	Tab.TextSize( C, Text, fTW, fTH );
-
-	W = fTW + Size_TabSpacing + Size_TabTextOffset + TabSelectedR.W;
+	C.Font = Tab.Root.Fonts[Tab.7];
+	Tab.TextSize(C, Text, fTW, fTH);
+	W = __NFUN_174__(__NFUN_174__(__NFUN_174__(fTW, Size_TabSpacing), Size_TabTextOffset), float(TabSelectedR.W));
 	H = fTH;
+	return;
 }
 
 function Menu_DrawMenuBar(UWindowMenuBar W, Canvas C)
 {
-    W.DrawStretchedTextureSegment(C, 0, 0, W.WinWidth, 16, 11, 0, 106, 16, Active);
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, 16.0000000, 11.0000000, 0.0000000, 106.0000000, 16.0000000, Active);
+	return;
 }
 
-function Menu_DrawMenuBarItem(UWindowMenuBar B, UWindowMenuBarItem I, FLOAT X, FLOAT Y, FLOAT W, FLOAT H, Canvas C)
+function Menu_DrawMenuBarItem(UWindowMenuBar B, UWindowMenuBarItem i, float X, float Y, float W, float H, Canvas C)
 {
-	if(B.Selected == I)
+	// End:0xA2
+	if(__NFUN_114__(B.Selected, i))
 	{
-		B.DrawClippedTexture(C, X, 1, Texture'BlackTexture');
-		B.DrawClippedTexture(C, X+W-1, 1, Texture'BlackTexture');
-		B.DrawStretchedTexture(C, X+1, 1, W-2, 16, Texture'BlackTexture');
+		B.DrawClippedTexture(C, X, 1.0000000, Texture'UWindow.BlackTexture');
+		B.DrawClippedTexture(C, __NFUN_175__(__NFUN_174__(X, W), float(1)), 1.0000000, Texture'UWindow.BlackTexture');
+		B.DrawStretchedTexture(C, __NFUN_174__(X, float(1)), 1.0000000, __NFUN_175__(W, float(2)), 16.0000000, Texture'UWindow.BlackTexture');
 	}
-
-	C.Font = B.Root.Fonts[F_Normal];
-	C.SetDrawColor(0,0,0);	
-
-	B.ClipText(C, X + B.Spacing / 2, 2, I.Caption, True);
+	C.Font = B.Root.Fonts[0];
+	C.__NFUN_2626__(0, 0, 0);
+	B.ClipText(C, __NFUN_174__(X, float(__NFUN_145__(B.Spacing, 2))), 2.0000000, i.Caption, true);
+	return;
 }
 
 function Menu_DrawPulldownMenuBackground(UWindowPulldownMenu W, Canvas C)
 {
+	return;
 }
 
-function Menu_DrawPulldownMenuItem(UWindowPulldownMenu M, UWindowPulldownMenuItem Item, Canvas C, FLOAT X, FLOAT Y, FLOAT W, FLOAT H, bool bSelected)
+function Menu_DrawPulldownMenuItem(UWindowPulldownMenu M, UWindowPulldownMenuItem Item, Canvas C, float X, float Y, float W, float H, bool bSelected)
 {
+	return;
 }
 
 // ****** R6 Add-On ******
 function DrawWinTop(R6WindowHSplitter W, Canvas C)
 {
-    W.DrawStretchedTextureSegment(C, 0,0,FrameTL.W,W.WinHeight, FrameTL.X,FrameTL.Y,FrameTL.W,FrameTL.H, Active);
-    W.DrawStretchedTextureSegment(C, FrameTL.W,0,W.WinWidth-FrameTL.W-FrameTR.W,W.WinHeight, FrameT.X,FrameT.Y,FrameT.W,FrameT.H, Active);
-    W.DrawStretchedTextureSegment(C, W.WinWidth-FrameTR.W,0,FrameTR.W,W.WinHeight, FrameTR.X,FrameTR.Y,FrameTR.W,FrameTR.H, Active);
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(FrameTL.W), W.WinHeight, float(FrameTL.X), float(FrameTL.Y), float(FrameTL.W), float(FrameTL.H), Active);
+	W.DrawStretchedTextureSegment(C, float(FrameTL.W), 0.0000000, __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameTL.W)), float(FrameTR.W)), W.WinHeight, float(FrameT.X), float(FrameT.Y), float(FrameT.W), float(FrameT.H), Active);
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(FrameTR.W)), 0.0000000, float(FrameTR.W), W.WinHeight, float(FrameTR.X), float(FrameTR.Y), float(FrameTR.W), float(FrameTR.H), Active);
+	return;
 }
 
 function DrawHSplitterT(R6WindowHSplitter W, Canvas C)
 {
-    W.DrawStretchedTextureSegment(C, 0,0,12,W.WinHeight, 30,5,12,6, Active);
-    W.DrawStretchedTextureSegment(C, 12,0,W.WinWidth-24,W.WinHeight, 42,5, 2,6, Active);
-    W.DrawStretchedTextureSegment(C, W.WinWidth-12,0,12,W.WinHeight, 49,5,12,6, Active);
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, 12.0000000, W.WinHeight, 30.0000000, 5.0000000, 12.0000000, 6.0000000, Active);
+	W.DrawStretchedTextureSegment(C, 12.0000000, 0.0000000, __NFUN_175__(W.WinWidth, float(24)), W.WinHeight, 42.0000000, 5.0000000, 2.0000000, 6.0000000, Active);
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(12)), 0.0000000, 12.0000000, W.WinHeight, 49.0000000, 5.0000000, 12.0000000, 6.0000000, Active);
+	return;
 }
 
 function DrawHSplitterB(R6WindowHSplitter W, Canvas C)
 {
-    W.DrawStretchedTextureSegment(C, 0,0,12,W.WinHeight, 61,5,12,6, Active);
-    W.DrawStretchedTextureSegment(C, 12,0,W.WinWidth-24,W.WinHeight, 73,5, 2,6, Active);
-    W.DrawStretchedTextureSegment(C, W.WinWidth-12,0,12,W.WinHeight, 80,5,12,6, Active);
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, 12.0000000, W.WinHeight, 61.0000000, 5.0000000, 12.0000000, 6.0000000, Active);
+	W.DrawStretchedTextureSegment(C, 12.0000000, 0.0000000, __NFUN_175__(W.WinWidth, float(24)), W.WinHeight, 73.0000000, 5.0000000, 2.0000000, 6.0000000, Active);
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(12)), 0.0000000, 12.0000000, W.WinHeight, 80.0000000, 5.0000000, 12.0000000, 6.0000000, Active);
+	return;
 }
 
 function DrawPopupButtonDown(R6MenuPopUpStayDownButton W, Canvas C)
 {
-    local INT iColor;
-	local color MenuColor;
+	local int iColor;
+	local Color MenuColor;
 
-    iColor = R6PlanningCtrl(W.GetPlayerOwner()).m_iCurrentTeam;
-    C.Style=1;//ERenderStyle.STY_Normal
-
-    //Draw backtround
-    MenuColor = W.Root.Colors.TeamColorLight[iColor];
-    MenuColor.R /= 2;
-    MenuColor.G /= 2;
-    MenuColor.B /= 2;
-	C.SetDrawColor(MenuColor.R,MenuColor.G,MenuColor.B);
-    W.DrawStretchedTexture( C, 0, 0, W.WinWidth, W.WinHeight, Texture'UWindow.WhiteTexture');
-
-    //Text and sub menu icon are now white, not transparent
-    MenuColor = W.Root.Colors.White;
-	C.SetDrawColor(MenuColor.R,MenuColor.G,MenuColor.B);
-
-	//Button text
-    if(W.Text != "")
+	iColor = R6PlanningCtrl(W.GetPlayerOwner()).m_iCurrentTeam;
+	C.Style = 1;
+	MenuColor = W.Root.Colors.TeamColorLight[iColor];
+	__NFUN_134__(MenuColor.R, byte(2));
+	__NFUN_134__(MenuColor.G, byte(2));
+	__NFUN_134__(MenuColor.B, byte(2));
+	C.__NFUN_2626__(MenuColor.R, MenuColor.G, MenuColor.B);
+	W.DrawStretchedTexture(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, Texture'UWindow.WhiteTexture');
+	MenuColor = W.Root.Colors.White;
+	C.__NFUN_2626__(MenuColor.R, MenuColor.G, MenuColor.B);
+	// End:0x19D
+	if(__NFUN_123__(W.Text, ""))
 	{
-        W.ClipText(C, W.TextX, W.TextY, W.Text, true);
+		W.ClipText(C, W.TextX, W.TextY, W.Text, true);
 	}
-    C.Style=5;
-    //Submenu icon
-    if(W.m_bSubMenu)
-    {
-        W.DrawStretchedTextureSegment( C, W.WinWidth - (2 + m_PopupArrowDown.H), (W.WinHeight - m_PopupArrowDown.H)*0.5, m_PopupArrowDown.W, m_PopupArrowDown.H, m_PopupArrowDown.X, m_PopupArrowDown.Y, m_PopupArrowDown.W, m_PopupArrowDown.H, m_R6ScrollTexture);
-    }
-
-	C.SetDrawColor(255,255,255);	
+	C.Style = 5;
+	// End:0x264
+	if(W.m_bSubMenu)
+	{
+		W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(__NFUN_146__(2, m_PopupArrowDown.H))), __NFUN_171__(__NFUN_175__(W.WinHeight, float(m_PopupArrowDown.H)), 0.5000000), float(m_PopupArrowDown.W), float(m_PopupArrowDown.H), float(m_PopupArrowDown.X), float(m_PopupArrowDown.Y), float(m_PopupArrowDown.W), float(m_PopupArrowDown.H), m_R6ScrollTexture);
+	}
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	return;
 }
 
 function DrawPopupButtonUp(R6MenuPopUpStayDownButton W, Canvas C)
 {
-	local color MenuColor;
+	local Color MenuColor;
 
 	MenuColor = W.Root.Colors.White;
-	C.SetDrawColor(MenuColor.R,MenuColor.G,MenuColor.B,W.Root.Colors.PopUpAlphaFactor);
-
-    C.Style=5;//ERenderStyle.STY_Alpha
-	if(W.Text != "")
+	C.__NFUN_2626__(MenuColor.R, MenuColor.G, MenuColor.B, byte(W.Root.Colors.PopUpAlphaFactor));
+	C.Style = 5;
+	// End:0xD7
+	if(__NFUN_123__(W.Text, ""))
 	{
-        W.ClipText(C, W.TextX, W.TextY, W.Text, true);
+		W.ClipText(C, W.TextX, W.TextY, W.Text, true);
 	}
-    if(W.m_bSubMenu)
-    {
-        W.DrawStretchedTextureSegment( C, W.WinWidth - (2 + m_PopupArrowDown.H), (W.WinHeight - m_PopupArrowUp.H)*0.5, m_PopupArrowUp.W, m_PopupArrowUp.H, m_PopupArrowUp.X, m_PopupArrowUp.Y, m_PopupArrowUp.W, m_PopupArrowUp.H, m_R6ScrollTexture);
-    }
-
-    C.Style=1;//ERenderStyle.STY_Normal
-
-	C.SetDrawColor(255,255,255);
+	// End:0x18D
+	if(W.m_bSubMenu)
+	{
+		W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(__NFUN_146__(2, m_PopupArrowDown.H))), __NFUN_171__(__NFUN_175__(W.WinHeight, float(m_PopupArrowUp.H)), 0.5000000), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), float(m_PopupArrowUp.X), float(m_PopupArrowUp.Y), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), m_R6ScrollTexture);
+	}
+	C.Style = 1;
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	return;
 }
 
 function DrawPopupButtonOver(R6MenuPopUpStayDownButton W, Canvas C)
 {
-	local color MenuColor;
+	local Color MenuColor;
 
 	MenuColor = W.Root.Colors.White;
-	C.SetDrawColor(MenuColor.R,MenuColor.G,MenuColor.B);
-
-    C.Style=1;//ERenderStyle.STY_Normal
-	if(W.Text != "")
+	C.__NFUN_2626__(MenuColor.R, MenuColor.G, MenuColor.B);
+	C.Style = 1;
+	// End:0xB5
+	if(__NFUN_123__(W.Text, ""))
 	{
-        W.ClipText(C, W.TextX, W.TextY, W.Text, true);
+		W.ClipText(C, W.TextX, W.TextY, W.Text, true);
 	}
-    C.Style=5;
-    if(W.m_bSubMenu)
-    {
-        W.DrawStretchedTextureSegment( C, W.WinWidth - (2 + m_PopupArrowDown.H), (W.WinHeight - m_PopupArrowUp.H)*0.5, m_PopupArrowUp.W, m_PopupArrowUp.H, m_PopupArrowUp.X, m_PopupArrowUp.Y, m_PopupArrowUp.W, m_PopupArrowUp.H, m_R6ScrollTexture);
-    }
-
-	C.SetDrawColor(255,255,255);
+	C.Style = 5;
+	// End:0x17C
+	if(W.m_bSubMenu)
+	{
+		W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(__NFUN_146__(2, m_PopupArrowDown.H))), __NFUN_171__(__NFUN_175__(W.WinHeight, float(m_PopupArrowUp.H)), 0.5000000), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), float(m_PopupArrowUp.X), float(m_PopupArrowUp.Y), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), m_R6ScrollTexture);
+	}
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	return;
 }
 
 function DrawPopupButtonDisable(R6MenuPopUpStayDownButton W, Canvas C)
 {
-	local color MenuColor; 
+	local Color MenuColor;
 
-    MenuColor = W.Root.Colors.White;
-	C.SetDrawColor(MenuColor.R,MenuColor.G,MenuColor.B,50);
-
-    C.Style=5;//ERenderStyle.STY_Alpha
-	if(W.Text != "")
+	MenuColor = W.Root.Colors.White;
+	C.__NFUN_2626__(MenuColor.R, MenuColor.G, MenuColor.B, 50);
+	C.Style = 5;
+	// End:0xB7
+	if(__NFUN_123__(W.Text, ""))
 	{
-        W.ClipText(C, W.TextX, W.TextY, W.Text, true);
+		W.ClipText(C, W.TextX, W.TextY, W.Text, true);
 	}
-    if(W.m_bSubMenu)
-    {
-        W.DrawStretchedTextureSegment( C, W.WinWidth - (2 + m_PopupArrowDown.H), (W.WinHeight - m_PopupArrowUp.H)*0.5, m_PopupArrowUp.W, m_PopupArrowUp.H, m_PopupArrowUp.X, m_PopupArrowUp.Y, m_PopupArrowUp.W, m_PopupArrowUp.H, m_R6ScrollTexture);
-    }
-
-    C.Style=1;//ERenderStyle.STY_Normal
-
-	C.SetDrawColor(255,255,255);
-	
+	// End:0x16D
+	if(W.m_bSubMenu)
+	{
+		W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(__NFUN_146__(2, m_PopupArrowDown.H))), __NFUN_171__(__NFUN_175__(W.WinHeight, float(m_PopupArrowUp.H)), 0.5000000), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), float(m_PopupArrowUp.X), float(m_PopupArrowUp.Y), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), m_R6ScrollTexture);
+	}
+	C.Style = 1;
+	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	return;
 }
-
 
 //===================================================================================================
 // Draw the navigation bar (ex.: in briefing menu, at the bottom of the page
 //===================================================================================================
 function DrawNavigationBar(R6MenuNavigationBar W, Canvas C)
 {
-    local INT iXStart, iXTexSize, iXWidth;
-    local INT iYTexSize;
-    local Region R;
-    local color cTemp;  
+	local int iXStart, iXTexSize, iXWidth, iYTexSize;
+	local Region R;
+	local Color cTemp;
 
-    // Draw frame box
-    cTemp = W.m_BorderColor;
-    W.m_BorderColor = W.Root.Colors.BlueLight; 
-    W.DrawSimpleBorder(C);
-    W.m_BorderColor = cTemp;
-
-    C.Style = ERenderStyle.STY_Alpha;
-
-    // draw a line between option and briefing
-    C.SetDrawColor( W.Root.Colors.BlueLight.R, W.Root.Colors.BlueLight.G, W.Root.Colors.BlueLight.B);
-    W.DrawStretchedTextureSegment(C, 120, 0, 1, 33, 
-                                     W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-
-    // draw a line before play
-    W.DrawStretchedTextureSegment(C, 414, 0, 1, 33, 
-                                     W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-
-    // draw a line after play
-    W.DrawStretchedTextureSegment(C, 450, 0, 1, 33, 
-                                     W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-
-    // draw a line after load
-    W.DrawStretchedTextureSegment(C, 554, 0, 1, 33, 
-                                     W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    
-    // Draw background effect
-    iXStart = 120;      // the start position of the background effect (what appear on the button in the middle)
-    iXTexSize = 12;     // the width size of the start tex
-    iXWidth = 318;      // the width of the background effect
-    iYTexSize = 34;     // the height size of the tex - 2 ->2 pixel for the border line
-    
-    //this is the part of the background between the two extremities (NAV BAR)
-    R = m_NavBarBack[0];
-    W.DrawStretchedTextureSegment( C, iXStart + iXTexSize, -1, iXWidth - iXTexSize, iYTexSize,R.X,R.Y,R.W,R.H, m_NavBarTex); 
-
-    R = m_NavBarBack[1];
-    //the left part of the background (NAV BAR)
-    W.DrawStretchedTextureSegment( C, iXStart, -1, iXTexSize, iYTexSize,R.X,R.Y,R.W,R.H, m_NavBarTex);
-
-    //the right part of the background (NAV BAR) inverse the texture
-    W.DrawStretchedTextureSegment( C, iXStart + iXWidth, -1, iXTexSize, iYTexSize, R.X+iXTexSize, R.Y, -R.W,R.H, m_NavBarTex);
-
-    C.Style = ERenderStyle.STY_Normal;
+	cTemp = W.m_BorderColor;
+	W.m_BorderColor = W.Root.Colors.BlueLight;
+	W.DrawSimpleBorder(C);
+	W.m_BorderColor = cTemp;
+	C.Style = 5;
+	C.__NFUN_2626__(W.Root.Colors.BlueLight.R, W.Root.Colors.BlueLight.G, W.Root.Colors.BlueLight.B);
+	W.DrawStretchedTextureSegment(C, 120.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, 414.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, 450.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, 554.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	iXStart = 120;
+	iXTexSize = 12;
+	iXWidth = 318;
+	iYTexSize = 34;
+	R = m_NavBarBack[0];
+	W.DrawStretchedTextureSegment(C, float(__NFUN_146__(iXStart, iXTexSize)), -1.0000000, float(__NFUN_147__(iXWidth, iXTexSize)), float(iYTexSize), float(R.X), float(R.Y), float(R.W), float(R.H), m_NavBarTex);
+	R = m_NavBarBack[1];
+	W.DrawStretchedTextureSegment(C, float(iXStart), -1.0000000, float(iXTexSize), float(iYTexSize), float(R.X), float(R.Y), float(R.W), float(R.H), m_NavBarTex);
+	W.DrawStretchedTextureSegment(C, float(__NFUN_146__(iXStart, iXWidth)), -1.0000000, float(iXTexSize), float(iYTexSize), float(__NFUN_146__(R.X, iXTexSize)), float(R.Y), float(__NFUN_143__(R.W)), float(R.H), m_NavBarTex);
+	C.Style = 1;
+	return;
 }
-
 
 function DrawButtonBorder(UWindowWindow W, Canvas C, optional bool _bDefineBorderColor)
-{	
-	if( (m_TButtonBackGround != None))
+{
+	// End:0x106
+	if(__NFUN_119__(m_TButtonBackGround, none))
 	{
-		C.Style = ERenderStyle.STY_Alpha;
-	
-        if ( _bDefineBorderColor)
-            C.SetDrawColor( W.m_BorderColor.R, W.m_BorderColor.G, W.m_BorderColor.B);
-        else
-    		C.SetDrawColor(m_CBorder.R,m_CBorder.G,m_CBorder.B);
-		
-		//BackGround and Border        
-		W.DrawStretchedTextureSegment( C, 0 , 0, W.WinWidth , W.WinHeight, 
-											m_RButtonBackGround.X, m_RButtonBackGround.Y, 
-											m_RButtonBackGround.W, m_RButtonBackGround.H, m_TButtonBackGround );
-
-//		C.SetDrawColor(255,255,255);
-//		C.Style =1;
+		C.Style = 5;
+		// End:0x6D
+		if(_bDefineBorderColor)
+		{
+			C.__NFUN_2626__(W.m_BorderColor.R, W.m_BorderColor.G, W.m_BorderColor.B);			
+		}
+		else
+		{
+			C.__NFUN_2626__(m_CBorder.R, m_CBorder.G, m_CBorder.B);
+		}
+		W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, float(m_RButtonBackGround.X), float(m_RButtonBackGround.Y), float(m_RButtonBackGround.W), float(m_RButtonBackGround.H), m_TButtonBackGround);
 	}
+	return;
 }
 
-
 //Function to draw a different background then the basic SimpleBorder
-function DrawSpecialButtonBorder(R6WindowButton Button, Canvas C, FLOAT X, FLOAT Y)
+function DrawSpecialButtonBorder(R6WindowButton Button, Canvas C, float X, float Y)
 {
-    local INT Xpos;
-    local INT MidWidth;
+	local int XPos, MidWidth;
 
-    //Draw Buttons Contour
-    C.Style = ERenderStyle.STY_Alpha;
-    
-    C.SetDrawColor(Button.m_BorderColor.R,Button.m_BorderColor.G,Button.m_BorderColor.B);
-
-    Xpos = 0;
-
-    //Left Part
-    Button.DrawStretchedTextureSegment(C, Xpos, 0, m_RSquareBgLeft.W, m_RSquareBgLeft.H, m_RSquareBgLeft.X, m_RSquareBgLeft.Y, m_RSquareBgLeft.W, m_RSquareBgLeft.H, m_TSquareBg);
-
-    Xpos += m_RSquareBgLeft.W;
-    MidWidth = Button.WinWidth - m_RSquareBgLeft.W - m_RSquareBgRight.W;
-    //Mid Part
-    Button.DrawStretchedTextureSegment(C, Xpos, 0, MidWidth, m_RSquareBgMid.H, m_RSquareBgMid.X, m_RSquareBgMid.Y, m_RSquareBgMid.W, m_RSquareBgMid.H, m_TSquareBg);
-
-    Xpos = Button.WinWidth - m_RSquareBgRight.W;
-    //Right Part
-    Button.DrawStretchedTextureSegment(C, Xpos, 0, m_RSquareBgRight.W, m_RSquareBgRight.H, m_RSquareBgRight.X, m_RSquareBgRight.Y, m_RSquareBgRight.W, m_RSquareBgRight.H, m_TSquareBg);
+	C.Style = 5;
+	C.__NFUN_2626__(Button.m_BorderColor.R, Button.m_BorderColor.G, Button.m_BorderColor.B);
+	XPos = 0;
+	Button.DrawStretchedTextureSegment(C, float(XPos), 0.0000000, float(m_RSquareBgLeft.W), float(m_RSquareBgLeft.H), float(m_RSquareBgLeft.X), float(m_RSquareBgLeft.Y), float(m_RSquareBgLeft.W), float(m_RSquareBgLeft.H), m_TSquareBg);
+	__NFUN_161__(XPos, m_RSquareBgLeft.W);
+	MidWidth = int(__NFUN_175__(__NFUN_175__(Button.WinWidth, float(m_RSquareBgLeft.W)), float(m_RSquareBgRight.W)));
+	Button.DrawStretchedTextureSegment(C, float(XPos), 0.0000000, float(MidWidth), float(m_RSquareBgMid.H), float(m_RSquareBgMid.X), float(m_RSquareBgMid.Y), float(m_RSquareBgMid.W), float(m_RSquareBgMid.H), m_TSquareBg);
+	XPos = int(__NFUN_175__(Button.WinWidth, float(m_RSquareBgRight.W)));
+	Button.DrawStretchedTextureSegment(C, float(XPos), 0.0000000, float(m_RSquareBgRight.W), float(m_RSquareBgRight.H), float(m_RSquareBgRight.X), float(m_RSquareBgRight.Y), float(m_RSquareBgRight.W), float(m_RSquareBgRight.H), m_TSquareBg);
+	return;
 }
 
 function DrawBox(UWindowWindow W, Canvas C, float X, float Y, float Width, float Height)
 {
-    //Draw Buttons Contour
-    C.Style = ERenderStyle.STY_Alpha;
-
-    C.SetDrawColor(W.m_BorderColor.R,W.m_BorderColor.G,W.m_BorderColor.B);
-
-    //Top
-    W.DrawStretchedTextureSegment(C, x, Y, Width, W.m_BorderTextureRegion.H , W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    //Bottom
-    W.DrawStretchedTextureSegment(C, x, Y + Height - W.m_BorderTextureRegion.H, Width, W.m_BorderTextureRegion.H , W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    //Left
-    W.DrawStretchedTextureSegment(C, x, Y + W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.W, Height - (2* W.m_BorderTextureRegion.H), W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-    //Right
-    W.DrawStretchedTextureSegment(C, X + Width - W.m_BorderTextureRegion.W, Y + W.m_BorderTextureRegion.H, W.m_BorderTextureRegion.W, Height - (2* W.m_BorderTextureRegion.H), W.m_BorderTextureRegion.X, W.m_BorderTextureRegion.Y, W.m_BorderTextureRegion.W, W.m_BorderTextureRegion.H, W.m_BorderTexture);
-
-//    C.Style = ERenderStyle.STY_Normal;
-    
+	C.Style = 5;
+	C.__NFUN_2626__(W.m_BorderColor.R, W.m_BorderColor.G, W.m_BorderColor.B);
+	W.DrawStretchedTextureSegment(C, X, Y, Width, float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, X, __NFUN_175__(__NFUN_174__(Y, Height), float(W.m_BorderTextureRegion.H)), Width, float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, X, __NFUN_174__(Y, float(W.m_BorderTextureRegion.H)), float(W.m_BorderTextureRegion.W), __NFUN_175__(Height, float(__NFUN_144__(2, W.m_BorderTextureRegion.H))), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, Width), float(W.m_BorderTextureRegion.W)), __NFUN_174__(Y, float(W.m_BorderTextureRegion.H)), float(W.m_BorderTextureRegion.W), __NFUN_175__(Height, float(__NFUN_144__(2, W.m_BorderTextureRegion.H))), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	return;
 }
 
-function DrawBGShading( UWindowWindow Window, Canvas C, FLOAT X, FLOAT Y, FLOAT W, FLOAT H)
+function DrawBGShading(UWindowWindow Window, Canvas C, float X, float Y, float W, float H)
 {
-     //Draw Buttons Contour
-    C.Style = ERenderStyle.STY_Alpha;
-
-    //ListBox bg shading
-    C.SetDrawColor( Window.Root.Colors.Black.R, Window.Root.Colors.Black.G, Window.Root.Colors.Black.B, Window.Root.Colors.DarkBGAlpha);
-    Window.DrawStretchedTexture( C, X, Y, W, H, Texture'UWindow.WhiteTexture');
+	C.Style = 5;
+	C.__NFUN_2626__(Window.Root.Colors.Black.R, Window.Root.Colors.Black.G, Window.Root.Colors.Black.B, byte(Window.Root.Colors.DarkBGAlpha));
+	Window.DrawStretchedTexture(C, X, Y, W, H, Texture'UWindow.WhiteTexture');
+	return;
 }
 
-
-function DrawPopUpTextBackGround( UWindowWindow W, Canvas C, FLOAT _fHeight )
+function DrawPopUpTextBackGround(UWindowWindow W, Canvas C, float _fHeight)
 {
+	local Region RTexture;
+	local float fY, fHeight;
 
-    local Region RTexture;
-    local FLOAT  fY, fHeight;
-    // draw the eye icon
-    RTexture.X = 114;
-    RTexture.Y = 47;
-    RTexture.W = 2;
-    RTexture.H = 13;
-
-	C.Style = ERenderStyle.STY_Alpha;
-
+	RTexture.X = 114;
+	RTexture.Y = 47;
+	RTexture.W = 2;
+	RTexture.H = 13;
+	C.Style = 5;
 	fHeight = _fHeight;
-
-    if ( fHeight < W.WinHeight )
-        fY = ( W.WinHeight - fHeight ) / 2;
-    else
-        fY = 0;
-
-	if (fHeight < RTexture.H) // don't stretch the tex before the min value
-		fHeight = RTexture.H;
-
-    W.DrawStretchedTextureSegment( C, 0, 0, W.WinWidth, 13, 
-                                      RTexture.X, RTexture.Y, RTexture.W, RTexture.H, m_R6ScrollTexture);
+	// End:0x8C
+	if(__NFUN_176__(fHeight, W.WinHeight))
+	{
+		fY = __NFUN_172__(__NFUN_175__(W.WinHeight, fHeight), float(2));		
+	}
+	else
+	{
+		fY = 0.0000000;
+	}
+	// End:0xBF
+	if(__NFUN_176__(fHeight, float(RTexture.H)))
+	{
+		fHeight = float(RTexture.H);
+	}
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, 13.0000000, float(RTexture.X), float(RTexture.Y), float(RTexture.W), float(RTexture.H), m_R6ScrollTexture);
+	return;
 }
 
-
-function DrawInGamePlayerStats( UWindowWindow W, Canvas C, INT _iPlayerStats, FLOAT _fX, FLOAT _fY, FLOAT _fHeight, FLOAT _fWidth)
+function DrawInGamePlayerStats(UWindowWindow W, Canvas C, int _iPlayerStats, float _fX, float _fY, float _fHeight, float _fWidth)
 {
-    local FLOAT fXOffset;
-    local Region RIconRegion, RIconToDraw;
+	local float fXOffset;
+	local Region RIconRegion, RIconToDraw;
 
-    // draw the health icon
-    RIconToDraw.Y = 29;
-    RIconToDraw.W = 10;
-    RIconToDraw.H = 10;
-    fXOffset      = _fX;    
-
-    switch( _iPlayerStats)
-    {
-        case 1:
-            // draw the full health icon
-            RIconToDraw.X = 31;
-            RIconRegion = CenterIconInBox( fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
-            break;
-        case 2:
-            // draw the half health icon
-            RIconToDraw.X = 42;
-            RIconRegion = CenterIconInBox( fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
-            break;
-        case 3:
-            // draw the empty health icon
-            RIconToDraw.X = 53;
-            RIconRegion = CenterIconInBox( fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
-            break;
-        case 4:
-            // draw the team icon
-            RIconToDraw.X = 53;
-            RIconToDraw.Y = 40;
-            RIconToDraw.W = 10;
-            RIconToDraw.H = 10;            
-            RIconRegion = CenterIconInBox( fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
-            break;
-        default:
-            // draw the ? icon Kill by
-            RIconToDraw.X = 49;
-            RIconToDraw.Y = 14;
-            RIconToDraw.W = 10;
-            RIconToDraw.H = 10;           
-
-            RIconRegion = CenterIconInBox( fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
-            break;
-    }
-
-    W.DrawStretchedTextureSegment( C, RIconRegion.X, RIconRegion.Y, RIconToDraw.W, RIconToDraw.H, 
-                                      RIconToDraw.X, RIconToDraw.Y, RIconToDraw.W, RIconToDraw.H, m_TIcon);
+	RIconToDraw.Y = 29;
+	RIconToDraw.W = 10;
+	RIconToDraw.H = 10;
+	fXOffset = _fX;
+	switch(_iPlayerStats)
+	{
+		// End:0x72
+		case 1:
+			RIconToDraw.X = 31;
+			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
+			// End:0x1A6
+			break;
+		// End:0xAC
+		case 2:
+			RIconToDraw.X = 42;
+			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
+			// End:0x1A6
+			break;
+		// End:0xE6
+		case 3:
+			RIconToDraw.X = 53;
+			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
+			// End:0x1A6
+			break;
+		// End:0x147
+		case 4:
+			RIconToDraw.X = 53;
+			RIconToDraw.Y = 40;
+			RIconToDraw.W = 10;
+			RIconToDraw.H = 10;
+			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
+			// End:0x1A6
+			break;
+		// End:0xFFFF
+		default:
+			RIconToDraw.X = 49;
+			RIconToDraw.Y = 14;
+			RIconToDraw.W = 10;
+			RIconToDraw.H = 10;
+			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
+			// End:0x1A6
+			break;
+			break;
+	}
+	W.DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
+	return;
 }
 
 //=======================================================================================================
 // This function return the region where to draw the icon X and Y depending of window region
 // (W and H are 0)
 //=======================================================================================================
-function Region CenterIconInBox( FLOAT _fX, FLOAT _fY, FLOAT _fWidth, FLOAT _fHeight, Region _RIconRegion)
+function Region CenterIconInBox(float _fX, float _fY, float _fWidth, float _fHeight, Region _RIconRegion)
 {
-    local Region RTemp;
-	local FLOAT fTemp;
+	local Region RTemp;
+	local float fTemp;
 
-	fTemp = (_fWidth - _RIconRegion.W) / 2;
-    RTemp.X = _fX + INT(fTemp + 0.5);
-
-    fTemp = (_fHeight - _RIconRegion.H) / 2;
-    RTemp.Y = FLOAT(INT(fTemp + 0.5));    
-    RTemp.Y += _fY;
-
-    return RTemp;
+	fTemp = __NFUN_172__(__NFUN_175__(_fWidth, float(_RIconRegion.W)), float(2));
+	RTemp.X = int(__NFUN_174__(_fX, float(int(__NFUN_174__(fTemp, 0.5000000)))));
+	fTemp = __NFUN_172__(__NFUN_175__(_fHeight, float(_RIconRegion.H)), float(2));
+	RTemp.Y = int(float(int(__NFUN_174__(fTemp, 0.5000000))));
+	__NFUN_161__(RTemp.Y, int(_fY));
+	return RTemp;
+	return;
 }
 
 //=================================================================================================
 // Get the size (height) of the header window (interwidget menu)
 //=================================================================================================
-function FLOAT GetTextHeaderSize()
+function float GetTextHeaderSize()
 {
-    return m_fTextHeaderHeight;
+	return m_fTextHeaderHeight;
+	return;
 }
-
-// --------------------------------------- 
-// ---------- defaultproperties ---------- 
-// ---------------------------------------
 
 defaultproperties
 {
-     m_iMultiplyer=-1
-     m_fVSBButtonImageX=1
-     m_fHSBButtonImageX=2
-     m_fVSBButtonImageY=2
-     m_fHSBButtonImageY=2
-     m_fComboImageX=1
-     m_fComboImageY=2
-     m_fScrollRate=200.000000
-     m_fTextHeaderHeight=30.000000
-     m_TSquareBg=Texture'R6MenuTextures.Gui_BoxScroll'
-     m_FrameSBL=(W=1,H=1)
-     m_FrameSB=(X=107,Y=17,W=16,H=17)
-     m_FrameSBR=(W=1,H=1)
-     m_BLTitleL=(Up=(W=3,H=22),Down=(Y=22,W=3,H=22),Over=(Y=44,W=3,H=22),Disabled=(Y=66,W=3,H=22))
-     m_BLTitleC=(Up=(X=3,W=2,H=22),Down=(X=3,Y=22,W=2,H=22),Over=(X=3,Y=44,W=2,H=22),Disabled=(X=3,Y=66,W=2,H=22))
-     m_BLTitleR=(Up=(X=18,W=3,H=22),Down=(X=18,Y=22,W=3,H=22),Over=(X=18,Y=44,W=3,H=22),Disabled=(X=18,Y=66,W=3,H=22))
-     m_PopupArrowUp=(X=87,Y=53,W=6,H=7)
-     m_PopupArrowDown=(X=80,Y=53,W=6,H=7)
-     m_stLapTopFrame=(TL=(W=256,H=32),t=(X=45,Y=32,W=211,H=32),TR=(X=167,Y=172,W=87,H=32),L=(X=63,Y=136,W=20,H=120),R=(Y=136,W=20,H=120),BL=(Y=64,W=256,H=36),B=(Y=100,W=256,H=36),BR=(X=126,Y=136,W=128,H=36),L2=(X=84,Y=136,W=20,H=120),R2=(X=21,Y=136,W=20,H=120),L3=(X=105,Y=136,W=20,H=120),R3=(X=42,Y=136,W=20,H=120),L4=(X=147,Y=172,W=20,H=52),R4=(X=126,Y=172,W=20,H=52))
-     m_stLapTopFramePlus=(T1=(Y=32,W=38,H=32),T2=(W=24,H=32),T3=(X=39,Y=32,W=5,H=32),T4On=(X=45,W=19,H=32),T4Off=(X=25,W=19,H=32))
-     m_NavBarBack(0)=(X=246,Y=157,W=4,H=37)
-     m_NavBarBack(1)=(X=244,Y=120,W=12,H=37)
-     m_NavBarBack(2)=(X=220,Y=41,W=8,H=41)
-     m_NavBarBack(3)=(X=229,Y=41,W=10,H=41)
-     m_NavBarBack(4)=(X=240,Y=41,W=15,H=41)
-     m_NavBarBack(5)=(X=220,Y=82,W=14,H=41)
-     m_NavBarBack(6)=(X=235,Y=82,W=12,H=41)
-     m_NavBarBack(7)=(X=248,Y=82,W=6,H=41)
-     m_NavBarBack(8)=(X=220,Y=123,W=9,H=41)
-     m_NavBarBack(9)=(X=230,Y=123,W=10,H=41)
-     m_NavBarBack(10)=(X=226,W=16,H=41)
-     m_NavBarBack(11)=(X=226,Y=41,W=19,H=41)
-     m_topLeftCornerR=(X=12,Y=56,W=6,H=8)
-     m_RBAcceptCancel(0)=(Up=(X=11,W=19,H=13),Down=(X=11,Y=26,W=19,H=13),Over=(X=11,Y=13,W=19,H=13))
-     m_RBAcceptCancel(1)=(Up=(X=30,W=19,H=13),Down=(X=30,Y=26,W=19,H=13),Over=(X=30,Y=13,W=19,H=13))
-     m_RArrow(0)=(Up=(X=94,Y=47,W=10,H=7),Down=(X=94,Y=54,W=10,H=7),Over=(X=94,Y=47,W=10,H=7),Disabled=(X=94,Y=47,W=10,H=7))
-     m_RArrow(1)=(Up=(X=104,Y=47,W=-10,H=7),Down=(X=104,Y=54,W=-10,H=7),Over=(X=104,Y=47,W=-10,H=7),Disabled=(X=104,Y=47,W=-10,H=7))
-     m_SBScrollerActive=(X=64,Y=1,W=10,H=16)
-     m_SBUpGear=(X=87,Y=30,W=11,H=8)
-     m_SBDownGear=(X=87,Y=38,W=11,H=-8)
-     m_RSquareBgLeft=(X=26,Y=40,W=4,H=17)
-     m_RSquareBgMid=(X=30,Y=40,W=1,H=17)
-     m_RSquareBgRight=(X=45,Y=40,W=4,H=17)
-     m_iCloseBoxOffsetX=3
-     m_iCloseBoxOffsetY=5
-     m_iListHPadding=1
-     m_iListVPadding=1
-     m_iSize_ScrollBarFrameW=1
-     m_iVScrollerWidth=9
-     m_iScrollerOffset=1
-     m_TButtonBackGround=Texture'R6MenuTextures.Gui_BoxScroll'
-     m_SBUp=(Up=(W=11,H=8),Down=(Y=16,W=11,H=8),Over=(Y=8,W=11,H=8),Disabled=(Y=16,W=11,H=8))
-     m_SBDown=(Up=(Y=8,W=11,H=-8),Down=(Y=24,W=11,H=-8),Over=(Y=16,W=11,H=-8),Disabled=(Y=24,W=11,H=-8))
-     m_SBRight=(Up=(X=9,Y=25,W=-8,H=9),Down=(X=9,Y=43,W=-8,H=9),Over=(X=9,Y=34,W=-8,H=9),Disabled=(X=9,Y=34,W=-8,H=9))
-     m_SBLeft=(Up=(X=1,Y=25,W=8,H=9),Down=(X=1,Y=43,W=8,H=9),Over=(X=1,Y=34,W=8,H=9),Disabled=(X=1,Y=34,W=8,H=9))
-     m_SBBackground=(X=15,Y=28,W=14,H=4)
-     m_SBVBorder=(X=64,Y=56,W=1,H=1)
-     m_SBHBorder=(X=64,Y=56,W=1,H=1)
-     m_SBScroller=(X=51,Y=1,W=10,H=16)
-     m_CloseBoxUp=(X=82,Y=29,W=13,H=13)
-     m_CloseBoxDown=(X=82,Y=16,W=13,H=13)
-     m_RButtonBackGround=(X=12,Y=40,W=14,H=14)
-     m_CBorder=(B=176,G=136,R=15)
-     FrameTitleX=6
-     FrameTitleY=4
-     ColumnHeadingHeight=13
-     EditBoxBevel=2
-     Size_ComboHeight=12.000000
-     Size_ComboButtonWidth=13.000000
-     Size_ScrollbarWidth=13.000000
-     Size_ScrollbarButtonHeight=12.000000
-     Size_MinScrollbarHeight=6.000000
-     Size_TabAreaHeight=15.000000
-     Size_TabAreaOverhangHeight=2.000000
-     Size_TabXOffset=1.000000
-     Size_TabTextOffset=12.000000
-     Pulldown_ItemHeight=15.000000
-     Pulldown_VBorder=3.000000
-     Pulldown_HBorder=3.000000
-     Pulldown_TextBorder=9.000000
-     FrameTL=(W=12,H=16)
-     FrameT=(X=12,W=1,H=16)
-     FrameTR=(X=116,W=12,H=16)
-     FrameL=(Y=17,W=4,H=18)
-     FrameR=(Y=17,W=4,H=18)
-     FrameBL=(Y=126,W=4,H=2)
-     FrameB=(X=2,Y=126,W=1,H=2)
-     FrameBR=(X=124,Y=125,W=4,H=2)
-     FrameActiveTitleColor=(B=255,G=255,R=255)
-     FrameInactiveTitleColor=(B=255,G=255,R=255)
-     BevelUpTL=(X=4,Y=16,W=2,H=2)
-     BevelUpT=(X=10,Y=16,W=1,H=2)
-     BevelUpTR=(X=18,Y=16,W=2,H=2)
-     BevelUpL=(X=4,Y=20,W=2,H=1)
-     BevelUpR=(X=18,Y=20,W=2,H=1)
-     BevelUpBL=(X=4,Y=30,W=2,H=2)
-     BevelUpB=(X=10,Y=30,W=1,H=2)
-     BevelUpBR=(X=18,Y=30,W=2,H=2)
-     BevelUpArea=(X=8,Y=20,W=1,H=1)
-     MiscBevelTL(0)=(X=11,W=1,H=1)
-     MiscBevelTL(1)=(X=11,W=1,H=1)
-     MiscBevelTL(2)=(X=11,W=1,H=1)
-     MiscBevelT(0)=(X=11,W=1,H=1)
-     MiscBevelT(1)=(X=11,W=1,H=1)
-     MiscBevelT(2)=(X=11,W=1,H=1)
-     MiscBevelTR(0)=(X=11,W=1,H=1)
-     MiscBevelTR(1)=(X=11,W=1,H=1)
-     MiscBevelTR(2)=(X=11,W=1,H=1)
-     MiscBevelL(0)=(X=11,W=1,H=1)
-     MiscBevelL(1)=(X=11,W=1,H=1)
-     MiscBevelL(2)=(X=11,W=1,H=1)
-     MiscBevelR(0)=(X=11,W=1,H=1)
-     MiscBevelR(1)=(X=11,W=1,H=1)
-     MiscBevelR(2)=(X=11,W=1,H=1)
-     MiscBevelBL(0)=(X=11,W=1,H=1)
-     MiscBevelBL(1)=(X=11,W=1,H=1)
-     MiscBevelBL(2)=(X=11,W=1,H=1)
-     MiscBevelB(0)=(X=11,W=1,H=1)
-     MiscBevelB(1)=(X=11,W=1,H=1)
-     MiscBevelB(2)=(X=11,W=1,H=1)
-     MiscBevelBR(0)=(X=11,W=1,H=1)
-     MiscBevelBR(1)=(X=11,W=1,H=1)
-     MiscBevelBR(2)=(X=11,W=1,H=1)
-     MiscBevelArea(0)=(X=12,Y=1,W=1,H=1)
-     MiscBevelArea(1)=(X=20,Y=16,W=1,H=1)
-     MiscBevelArea(2)=(X=20,Y=16,W=1,H=1)
-     ComboBtnUp=(Y=8,W=11,H=-8)
-     ComboBtnDown=(Y=24,W=11,H=-8)
-     ComboBtnDisabled=(Y=24,W=11,H=-8)
-     ComboBtnOver=(Y=16,W=11,H=-8)
-     HLine=(X=5,Y=78,W=1,H=2)
-     EditBoxTextColor=(B=255,G=255,R=255)
-     TabSelectedL=(Y=64,W=54,H=25)
-     TabSelectedM=(X=41,Y=57,W=2,H=3)
-     TabSelectedR=(X=54,Y=64,W=32,H=25)
-     TabUnselectedL=(X=86,Y=64,W=54,H=25)
-     TabUnselectedM=(X=60,Y=80,W=1,H=15)
-     TabUnselectedR=(X=140,Y=64,W=32,H=25)
-     TabBackground=(X=4,Y=7,W=1,H=1)
+	m_iMultiplyer=-1
+	m_fVSBButtonImageX=1
+	m_fHSBButtonImageX=2
+	m_fVSBButtonImageY=2
+	m_fHSBButtonImageY=2
+	m_fComboImageX=1
+	m_fComboImageY=2
+	m_fScrollRate=200.0000000
+	m_fTextHeaderHeight=30.0000000
+	m_TSquareBg=Texture'R6MenuTextures.Gui_BoxScroll'
+	m_FrameSBL=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=290,ZoneNumber=0)
+	m_FrameSB=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=27426,ZoneNumber=0)
+	m_FrameSBR=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=290,ZoneNumber=0)
+	m_BLTitleL=(Up=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=802,ZoneNumber=0),H=22)
+	m_BLTitleC=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=802,ZoneNumber=0),W=2,H=22)
+	m_BLTitleR=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=4642,ZoneNumber=0),W=3,H=22)
+	m_PopupArrowUp=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=22306,ZoneNumber=0)
+	m_PopupArrowDown=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=20514,ZoneNumber=0)
+	m_stLapTopFrame=(TL=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=65570,ZoneNumber=0),H=32)
+	m_stLapTopFramePlus=(T1=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=8226,ZoneNumber=0),W=38,H=32)
+	m_NavBarBack[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=63010,ZoneNumber=0)
+	m_NavBarBack[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=62498,ZoneNumber=0)
+	m_NavBarBack[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=56354,ZoneNumber=0)
+	m_NavBarBack[3]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=58658,ZoneNumber=0)
+	m_NavBarBack[4]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=61474,ZoneNumber=0)
+	m_NavBarBack[5]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=56354,ZoneNumber=0)
+	m_NavBarBack[6]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=60194,ZoneNumber=0)
+	m_NavBarBack[7]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=63522,ZoneNumber=0)
+	m_NavBarBack[8]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=56354,ZoneNumber=0)
+	m_NavBarBack[9]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=58914,ZoneNumber=0)
+	m_NavBarBack[10]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=57890,ZoneNumber=0)
+	m_NavBarBack[11]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=57890,ZoneNumber=0)
+	m_topLeftCornerR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3106,ZoneNumber=0)
+	m_RBAcceptCancel[0]=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0),W=19,H=13)
+	m_RBAcceptCancel[1]=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=7714,ZoneNumber=0),W=19,H=13)
+	m_RArrow[0]=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=24098,ZoneNumber=0),Y=47,W=10,H=7)
+	m_RArrow[1]=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=26658,ZoneNumber=0),Y=47,W=-10,H=7)
+	m_SBScrollerActive=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=16418,ZoneNumber=0)
+	m_SBUpGear=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=22306,ZoneNumber=0)
+	m_SBDownGear=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=22306,ZoneNumber=0)
+	m_RSquareBgLeft=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=6690,ZoneNumber=0)
+	m_RSquareBgMid=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=7714,ZoneNumber=0)
+	m_RSquareBgRight=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=11554,ZoneNumber=0)
+	m_iCloseBoxOffsetX=3
+	m_iCloseBoxOffsetY=5
+	m_iListHPadding=1
+	m_iListVPadding=1
+	m_iSize_ScrollBarFrameW=1
+	m_iVScrollerWidth=9
+	m_iScrollerOffset=1
+	m_TButtonBackGround=Texture'R6MenuTextures.Gui_BoxScroll'
+	m_SBUp=(Up=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=2850,ZoneNumber=0),H=8)
+	m_SBDown=(Up=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=2082,ZoneNumber=0),W=11,H=-8)
+	m_SBRight=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2338,ZoneNumber=0),Y=25,W=-8,H=9)
+	m_SBLeft=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=290,ZoneNumber=0),Y=25,W=8,H=9)
+	m_SBBackground=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3874,ZoneNumber=0)
+	m_SBVBorder=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=16418,ZoneNumber=0)
+	m_SBHBorder=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=16418,ZoneNumber=0)
+	m_SBScroller=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=13090,ZoneNumber=0)
+	m_CloseBoxUp=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=21026,ZoneNumber=0)
+	m_CloseBoxDown=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=21026,ZoneNumber=0)
+	m_RButtonBackGround=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3106,ZoneNumber=0)
+	m_CBorder=(R=15,G=136,B=176,A=0)
+	FrameTitleX=6
+	FrameTitleY=4
+	ColumnHeadingHeight=13
+	EditBoxBevel=2
+	Size_ComboHeight=12.0000000
+	Size_ComboButtonWidth=13.0000000
+	Size_ScrollbarWidth=13.0000000
+	Size_ScrollbarButtonHeight=12.0000000
+	Size_MinScrollbarHeight=6.0000000
+	Size_TabAreaHeight=15.0000000
+	Size_TabAreaOverhangHeight=2.0000000
+	Size_TabXOffset=1.0000000
+	Size_TabTextOffset=12.0000000
+	Pulldown_ItemHeight=15.0000000
+	Pulldown_VBorder=3.0000000
+	Pulldown_HBorder=3.0000000
+	Pulldown_TextBorder=9.0000000
+	FrameTL=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=3106,ZoneNumber=0)
+	FrameT=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3106,ZoneNumber=0)
+	FrameTR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=29730,ZoneNumber=0)
+	FrameL=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=4386,ZoneNumber=0)
+	FrameR=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=4386,ZoneNumber=0)
+	FrameBL=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=32290,ZoneNumber=0)
+	FrameB=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=546,ZoneNumber=0)
+	FrameBR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=31778,ZoneNumber=0)
+	FrameActiveTitleColor=(R=255,G=255,B=255,A=0)
+	FrameInactiveTitleColor=(R=255,G=255,B=255,A=0)
+	BevelUpTL=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=1058,ZoneNumber=0)
+	BevelUpT=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2594,ZoneNumber=0)
+	BevelUpTR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=4642,ZoneNumber=0)
+	BevelUpL=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=1058,ZoneNumber=0)
+	BevelUpR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=4642,ZoneNumber=0)
+	BevelUpBL=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=1058,ZoneNumber=0)
+	BevelUpB=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2594,ZoneNumber=0)
+	BevelUpBR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=4642,ZoneNumber=0)
+	BevelUpArea=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2082,ZoneNumber=0)
+	MiscBevelTL[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelTL[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelTL[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelT[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelT[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelT[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelTR[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelTR[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelTR[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelL[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelL[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelL[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelR[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelR[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelR[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelBL[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelBL[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelBL[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelB[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelB[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelB[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelBR[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelBR[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelBR[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelArea[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3106,ZoneNumber=0)
+	MiscBevelArea[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=5154,ZoneNumber=0)
+	MiscBevelArea[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=5154,ZoneNumber=0)
+	ComboBtnUp=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=2082,ZoneNumber=0)
+	ComboBtnDown=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=6178,ZoneNumber=0)
+	ComboBtnDisabled=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=6178,ZoneNumber=0)
+	ComboBtnOver=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=4130,ZoneNumber=0)
+	HLine=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=1314,ZoneNumber=0)
+	EditBoxTextColor=(R=255,G=255,B=255,A=0)
+	TabSelectedL=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=16418,ZoneNumber=0)
+	TabSelectedM=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=10530,ZoneNumber=0)
+	TabSelectedR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=13858,ZoneNumber=0)
+	TabUnselectedL=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=22050,ZoneNumber=0)
+	TabUnselectedM=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=15394,ZoneNumber=0)
+	TabUnselectedR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=35874,ZoneNumber=0)
+	TabBackground=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=1058,ZoneNumber=0)
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var e
+// REMOVED IN 1.60: var X
+// REMOVED IN 1.60: var Y
+// REMOVED IN 1.60: function FW_HitTest
+// REMOVED IN 1.60: function R6FW_HitTest

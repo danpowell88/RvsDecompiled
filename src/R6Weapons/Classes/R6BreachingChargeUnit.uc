@@ -1,4 +1,10 @@
 //=============================================================================
+// R6BreachingChargeUnit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6BreachingChargeUnit.uc : (add small description)
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,170 +13,169 @@
 //=============================================================================
 class R6BreachingChargeUnit extends R6DemolitionsUnit;
 
-
 //a bullet hit the demolition charge
-function BOOL DestroyedByImpact()
+function bool DestroyedByImpact()
 {
-    R6IORotatingDoor(owner).RemoveBreach(self);
-
-    return Super.DestroyedByImpact();
+	R6IORotatingDoor(Owner).__NFUN_2019__(self);
+	return super.DestroyedByImpact();
+	return;
 }
-
 
 function HurtPawns()
 {
-    local R6InteractiveObject anObject;
-    local R6Pawn              aPawn;
-    local R6Pawn              aPawnInstigator;
-    local R6DemolitionsUnit   aDemoUnit;
+	local R6InteractiveObject anObject;
+	local R6Pawn aPawn, aPawnInstigator;
+	local R6DemolitionsUnit aDemoUnit;
+	local float fDistFromCharge;
+	local Vector vExplosionMomentum, vDoorCenter, vActorDir, vFacingDir;
+	local Rotator rDoorInit;
+	local int _iHealth, _PawnsHurtCount;
+	local bool _bCompilingStats;
+	local Controller aC;
+	local R6PlayerController aPC;
+	local float fDistFromGrenade;
+	local Actor HitActor;
+	local Vector vHitLocation, vHitNormal;
 
-    local FLOAT               fDistFromCharge;
-    local vector              vExplosionMomentum;
-    
-    local vector              vDoorCenter;
-    local vector              vActorDir;
-    local vector              vFacingDir;
-    local rotator             rDoorInit;
-    local INT                 _iHealth;
-    local INT                 _PawnsHurtCount;
-    local BOOL                _bCompilingStats;
-    
-    local Controller          aC;
-    local R6PlayerController  aPC;
-    local FLOAT               fDistFromGrenade;
-    local Actor               HitActor;
-    local vector              vHitLocation;
-    local vector              vHitNormal;
+	aPawnInstigator = R6Pawn(Instigator);
+	vDoorCenter = R6IORotatingDoor(Owner).m_vVisibleCenter;
+	_PawnsHurtCount = 0;
+	_bCompilingStats = R6AbstractGameInfo(Level.Game).m_bCompilingStats;
+	// End:0x85
+	if(__NFUN_177__(DrawScale3D.Y, float(0)))
+	{
+		vFacingDir = __NFUN_220__(Vector(Rotation), vect(0.0000000, 0.0000000, -1.0000000));		
+	}
+	else
+	{
+		vFacingDir = __NFUN_220__(Vector(Rotation), vect(0.0000000, 0.0000000, 1.0000000));
+	}
+	// End:0xD6
+	foreach __NFUN_312__(Class'R6Weapons.R6DemolitionsUnit', aDemoUnit, m_fKillBlastRadius, Location)
+	{
+		// End:0xD5
+		if(__NFUN_119__(aDemoUnit, self))
+		{
+			aDemoUnit.DestroyedByImpact();
+		}		
+	}	
+	R6IORotatingDoor(Owner).R6TakeDamage(m_iEnergy, 0, Instigator, vect(0.0000000, 0.0000000, 0.0000000), vFacingDir, 0);
+	// End:0x4D4
+	foreach __NFUN_321__(Class'R6Engine.R6Pawn', aPawn, __NFUN_174__(m_fExplosionRadius, 800.0000000), vDoorCenter)
+	{
+		// End:0x1A5
+		if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_132__(__NFUN_130__(__NFUN_129__(aPawnInstigator.m_bCanFireFriends), aPawnInstigator.IsFriend(aPawn)), __NFUN_130__(__NFUN_129__(aPawnInstigator.m_bCanFireNeutrals), aPawnInstigator.IsNeutral(aPawn)))))
+		{
+			continue;			
+		}
+		// End:0x4D3
+		if(__NFUN_155__(int(aPawn.m_eHealth), int(3)))
+		{
+			HitActor = aPawn.__NFUN_1806__(vHitLocation, vHitNormal, vDoorCenter, aPawn.Location, __NFUN_158__(__NFUN_158__(2, 4), 32));
+			// End:0x24C
+			if(__NFUN_119__(HitActor, none))
+			{
+				HitActor = aPawn.__NFUN_1806__(vHitLocation, vHitNormal, vDoorCenter, __NFUN_215__(aPawn.Location, aPawn.EyePosition()), __NFUN_158__(__NFUN_158__(2, 4), 32));
+			}
+			// End:0x25B
+			if(__NFUN_119__(HitActor, none))
+			{
+				continue;				
+			}
+			fDistFromCharge = __NFUN_225__(__NFUN_216__(aPawn.Location, vDoorCenter));
+			vActorDir = __NFUN_226__(__NFUN_216__(aPawn.Location, vDoorCenter));
+			vExplosionMomentum = __NFUN_212__(__NFUN_216__(aPawn.Location, vDoorCenter), 0.2500000);
+			// End:0x368
+			if(__NFUN_176__(__NFUN_219__(vActorDir, vFacingDir), float(0)))
+			{
+				// End:0x364
+				if(__NFUN_176__(fDistFromCharge, __NFUN_171__(m_fExplosionRadius, 0.5000000)))
+				{
+					// End:0x336
+					if(__NFUN_130__(__NFUN_119__(aPawnInstigator, none), __NFUN_129__(aPawnInstigator.IsFriend(aPawn))))
+					{
+						__NFUN_165__(_PawnsHurtCount);
+						R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
+					}
+					aPawn.R6TakeDamage(0, m_iEnergy, Instigator, aPawn.Location, vExplosionMomentum, 0);
+				}
+				continue;				
+			}
+			// End:0x422
+			if(__NFUN_176__(fDistFromCharge, m_fKillBlastRadius))
+			{
+				aPawn.ServerForceKillResult(4);
+				aPawn.R6TakeDamage(m_iEnergy, m_iEnergy, Instigator, aPawn.Location, vExplosionMomentum, 0);
+				aPawn.ServerForceKillResult(0);
+				// End:0x41F
+				if(__NFUN_130__(__NFUN_119__(aPawnInstigator, none), __NFUN_129__(aPawnInstigator.IsFriend(aPawn))))
+				{
+					__NFUN_165__(_PawnsHurtCount);
+					R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
+				}
+				// End:0x4D3
+				continue;
+			}
+			// End:0x4C1
+			if(__NFUN_178__(fDistFromCharge, m_fExplosionRadius))
+			{
+				_iHealth = int(aPawn.m_eHealth);
+				DistributeDamage(aPawn, Location);
+				// End:0x4C1
+				if(__NFUN_130__(__NFUN_130__(__NFUN_155__(_iHealth, int(aPawn.m_eHealth)), __NFUN_119__(aPawnInstigator, none)), __NFUN_129__(aPawnInstigator.IsFriend(aPawn))))
+				{
+					R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
+				}
+			}
+			aPawn.AffectedByGrenade(self, 4);
+		}		
+	}	
+	// End:0x508
+	if(__NFUN_154__(_PawnsHurtCount, 0))
+	{
+		R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
+	}
+	aC = Level.ControllerList;
+	J0x51C:
 
-    aPawnInstigator = R6Pawn(Instigator);
-    vDoorCenter = R6IORotatingDoor(owner).m_vVisibleCenter;
-    _PawnsHurtCount = 0;
-    _bCompilingStats = R6AbstractGameInfo(Level.Game).m_bCompilingStats;
-    if(DrawScale3D.Y > 0)
-        vFacingDir = vector(rotation) cross vect(0,0,-1);
-    else
-        vFacingDir = vector(rotation) cross vect(0,0,1);
-
-    //Destroy demo units within range
-    foreach VisibleCollidingActors( class'R6DemolitionsUnit', aDemoUnit, m_fKillBlastRadius, Location )
-    {
-        if(aDemoUnit != self)
-            aDemoUnit.DestroyedByImpact();
-    }
-
-    R6IORotatingDoor(Owner).R6TakeDamage(m_iEnergy, 0, Instigator, vect(0,0,0), vFacingDir, 0);
-
-    foreach CollidingActors( class'R6Pawn', aPawn, m_fExplosionRadius + 800.f, vDoorCenter )
-    {   
-        // check for friendly fire if multiplayer
-        if( (Level.NetMode != NM_Standalone) 
-            && ( (!aPawnInstigator.m_bCanFireFriends  && aPawnInstigator.IsFriend(aPawn))  
-              || (!aPawnInstigator.m_bCanFireNeutrals && aPawnInstigator.IsNeutral(aPawn)) )
-          )
-              continue;
-
-        // Don't affect dead pawns...
-        if( aPawn.m_eHealth != HEALTH_Dead )
-        {
-            // Check with center and if not visible, check with eyes
-            HitActor = aPawn.R6Trace(vHitLocation, vHitNormal, vDoorCenter, aPawn.Location, TF_Visibility|TF_LineOfFire|TF_SkipPawn);
-            if(HitActor!=none)
-                HitActor = aPawn.R6Trace(vHitLocation, vHitNormal, vDoorCenter, aPawn.Location + aPawn.EyePosition(), TF_Visibility|TF_LineOfFire|TF_SkipPawn);
-            if(HitActor!=none)
-                continue;
-
-            // Distance from door
-            fDistFromCharge = VSize( aPawn.Location - vDoorCenter );
-            
-            // todo : use center of door as the location of the blast
-            // breaching charge explodes mainly towards its frontal hemisphere...
-            vActorDir = Normal(aPawn.location - vDoorCenter);
-
-            // Temporary momentum, quarter of distance from grenade...
-            vExplosionMomentum = (aPawn.location - vDoorCenter) * 0.25f;
-
-            if((vActorDir dot vFacingDir) < 0)
-            {
-                // for a pawn standing behind the explosion, there is no kill zone for the breaching charge only a hurt zone of .5m
-                if(fDistFromCharge < m_fExplosionRadius * 0.5)
-                {
-                    if((aPawnInstigator != none) && !aPawnInstigator.IsFriend(aPawn))
-                    {
-                        _PawnsHurtCount++;
-                        R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
-                    }               
-                    aPawn.R6TakeDamage( 0, m_iEnergy, Instigator, aPawn.Location, vExplosionMomentum, 0);
-                }
-                continue;           
-            } 
-
-            if(fDistFromCharge < m_fKillBlastRadius)
-            {            
-                // If a pawn is hit by a breach charge he dies.             
-                // Should damage a specific body part (eBoneTarget) - need to be implemented in R6Pawn
-                aPawn.ServerForceKillResult(4);  //Force R6TakeDamage to kill the pawn
-                aPawn.R6TakeDamage( m_iEnergy, m_iEnergy, Instigator, aPawn.Location, vExplosionMomentum, 0);
-                aPawn.ServerForceKillResult(0);  //Reset Kill to Normal
-                if((aPawnInstigator != none) && !aPawnInstigator.IsFriend(aPawn))
-                {       
-                    _PawnsHurtCount++;
-                    R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
-                }
-            
-                #ifdefDEBUG if( bShowLog ) log( "Pawn " $ aPawn $ " was killed by a breaching charge !" ); #endif
-            }
-            else
-            {
-                if(fDistFromCharge <= m_fExplosionRadius)
-                {
-                    _iHealth = aPawn.m_eHealth;
-                    DistributeDamage(aPawn, location);
-                    if ((_iHealth != aPawn.m_eHealth) && (aPawnInstigator != none) && !aPawnInstigator.IsFriend(aPawn))
-                    {
-                        R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
-                    }               
-                }
-                // The pawn is affected by the grenade, tell the pawn to do something about it.
-                aPawn.AffectedByGrenade( Self, GTYPE_BreachingCharge );
-            }
-        }
-    }
-
-    if (_PawnsHurtCount==0)
-    {
-        R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
-    }
-    // Controller shake
-    for( aC=Level.ControllerList; aC!=none; aC=aC.NextController )
-    {
-        if(aC.Pawn!=none && aC.Pawn.m_ePawnType==PAWN_Rainbow && aC.Pawn.IsAlive())
-        {
-            aPC = R6PlayerController(aC);
-            if( aPC != none )
-            {
-                fDistFromGrenade = VSize( Location - aPC.Pawn.Location );
-                if(fDistFromGrenade<m_fShakeRadius)
-                {
-                    aPC.R6Shake( 1.0f, m_fShakeRadius-fDistFromGrenade, 0.05f );
-                    aPC.ClientPlaySound(m_sndEarthQuake, SLOT_SFX);
-                }
-            }
-        }
-    }
+	// End:0x61E [Loop If]
+	if(__NFUN_119__(aC, none))
+	{
+		// End:0x607
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(aC.Pawn, none), __NFUN_154__(int(aC.Pawn.m_ePawnType), int(1))), aC.Pawn.IsAlive()))
+		{
+			aPC = R6PlayerController(aC);
+			// End:0x607
+			if(__NFUN_119__(aPC, none))
+			{
+				fDistFromGrenade = __NFUN_225__(__NFUN_216__(Location, aPC.Pawn.Location));
+				// End:0x607
+				if(__NFUN_176__(fDistFromGrenade, m_fShakeRadius))
+				{
+					aPC.R6Shake(1.0000000, __NFUN_175__(m_fShakeRadius, fDistFromGrenade), 0.0500000);
+					aPC.ClientPlaySound(m_sndEarthQuake, 3);
+				}
+			}
+		}
+		aC = aC.nextController;
+		// [Loop Continue]
+		goto J0x51C;
+	}
+	return;
 }
 
 defaultproperties
 {
-     m_iNumberOfFragments=1
-     m_sndExplosionSound=Sound'Gadget_BreachingCharge.Play_random_Breaching_Expl'
-     m_pExplosionParticles=Class'R6SFX.R6BreachingChargeEffect'
-     m_pExplosionLight=Class'R6SFX.R6GrenadeLight'
-     m_iEnergy=8000
-     m_fExplosionRadius=200.000000
-     m_fKillBlastRadius=100.000000
-     m_szAmmoName="Breaching Charge"
-     Physics=PHYS_None
-     m_bDrawFromBase=True
-     bCollideWorld=False
-     StaticMesh=StaticMesh'R63rdWeapons_SM.Items.R63rdBreachingCharge'
+	m_iNumberOfFragments=1
+	m_sndExplosionSound=Sound'Gadget_BreachingCharge.Play_random_Breaching_Expl'
+	m_pExplosionParticles=Class'R6SFX.R6BreachingChargeEffect'
+	m_pExplosionLight=Class'R6SFX.R6GrenadeLight'
+	m_iEnergy=8000
+	m_fExplosionRadius=200.0000000
+	m_fKillBlastRadius=100.0000000
+	m_szAmmoName="Breaching Charge"
+	Physics=0
+	m_bDrawFromBase=true
+	bCollideWorld=false
+	StaticMesh=StaticMesh'R63rdWeapons_SM.Items.R63rdBreachingCharge'
 }

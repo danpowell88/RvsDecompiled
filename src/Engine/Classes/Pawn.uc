@@ -1,4 +1,10 @@
 //=============================================================================
+// Pawn - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Pawn, the base class of all actors that can be controlled by players or AI.
 //
 // Pawns are the physical representations of players and creatures in a level.  
@@ -8,172 +14,541 @@
 //
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
-class Pawn extends Actor 
+class Pawn extends Actor
 	abstract
 	native
-	placeable
-	nativereplication;
+	nativereplication
+ placeable;
 
-#exec Texture Import File=Textures\Pawn.pcx Name=S_Pawn Mips=Off MASKED=1
+enum ePeekingMode
+{
+	PEEK_none,                      // 0
+	PEEK_full,                      // 1
+	PEEK_fluid                      // 2
+};
 
-//-----------------------------------------------------------------------------
-// Pawn variables.
+enum EGrenadeType
+{
+	GTYPE_None,                     // 0
+	GTYPE_Smoke,                    // 1
+	GTYPE_TearGas,                  // 2
+	GTYPE_FlashBang,                // 3
+	GTYPE_BreachingCharge           // 4
+};
 
-var Controller Controller;
+enum eGrenadeThrow
+{
+	GRENADE_None,                   // 0
+	GRENADE_Throw,                  // 1
+	GRENADE_Roll,                   // 2
+	GRENADE_RemovePin,              // 3
+	GRENADE_PeekLeft,               // 4
+	GRENADE_PeekRight,              // 5
+	GRENADE_PeekLeftThrow,          // 6
+	GRENADE_PeekRightThrow          // 7
+};
 
+enum EAnimStateType
+{
+	SA_Generic,                     // 0
+	SA_Walk,                        // 1
+	SA_Run,                         // 2
+	SA_Turn,                        // 3
+	SA_CrouchToProne,               // 4
+	SA_ProneToCrouch,               // 5
+	SA_ProneWalk,                   // 6
+	SA_ProneSideWalk,               // 7
+	SA_StairUp,                     // 8
+	SA_StairDown,                   // 9
+	SA_LadderHands,                 // 10
+	SA_LadderFoot,                  // 11
+	SA_LameWalkSlide,               // 12
+	SA_Land,                        // 13
+	SA_DeadFall,                    // 14
+	SA_LameWalkLegOK                // 15
+};
+
+enum EGunSoundType
+{
+	GS_ExteriorStereo,              // 0
+	GS_InteriorStereo,              // 1
+	GS_ExteriorMono,                // 2
+	GS_InteriorMono                 // 3
+};
+
+enum ETerroristVoices
+{
+	TV_Wounded,                     // 0
+	TV_Taunt,                       // 1
+	TV_Surrender,                   // 2
+	TV_SeesTearGas,                 // 3
+	TV_RunAway,                     // 4
+	TV_Grenade,                     // 5
+	TV_CoughsSmoke,                 // 6
+	TV_CoughsGas,                   // 7
+	TV_Backup,                      // 8
+	TV_SeesSurrenderedHostage,      // 9
+	TV_SeesRainbow_LowAlert,        // 10
+	TV_SeesRainbow_HighAlert,       // 11
+	TV_SeesFreeHostage,             // 12
+	TV_HearsNoize                   // 13
+};
+
+enum EHostageVoices
+{
+	HV_Run,                         // 0
+	HV_Frozen,                      // 1
+	HV_Foetal,                      // 2
+	HV_Hears_Shooting,              // 3
+	HV_RnbFollow,                   // 4
+	HV_RndStayPut,                  // 5
+	HV_RnbHurt,                     // 6
+	HV_EntersSmoke,                 // 7
+	HV_EntersGas,                   // 8
+	HV_ClarkReprimand               // 9
+};
+
+enum ECommonRainbowVoices
+{
+	CRV_TerroristDown,              // 0
+	CRV_TakeWound,                  // 1
+	CRV_GoesDown,                   // 2
+	CRV_EntersSmoke,                // 3
+	CRV_EntersGas,                  // 4
+	CRV_Cough,                      // 5
+	CRV_Suffocation                 // 6
+};
+
+enum ERainbowPlayerVoices
+{
+	RPV_TeamRegroup,                // 0
+	RPV_TeamMove,                   // 1
+	RPV_TeamHold,                   // 2
+	RPV_AllTeamsHold,               // 3
+	RPV_AllTeamsMove,               // 4
+	RPV_TeamMoveAndFrag,            // 5
+	RPV_TeamMoveAndGas,             // 6
+	RPV_TeamMoveAndSmoke,           // 7
+	RPV_TeamMoveAndFlash,           // 8
+	RPV_TeamOpenDoor,               // 9
+	RPV_TeamCloseDoor,              // 10
+	RPV_TeamOpenShudder,            // 11
+	RPV_TeamCloseShudder,           // 12
+	RPV_TeamOpenAndClear,           // 13
+	RPV_TeamOpenAndFrag,            // 14
+	RPV_TeamOpenAndGas,             // 15
+	RPV_TeamOpenAndSmoke,           // 16
+	RPV_TeamOpenAndFlash,           // 17
+	RPV_TeamOpenFragAndClear,       // 18
+	RPV_TeamOpenGasAndClear,        // 19
+	RPV_TeamOpenSmokeAndClear,      // 20
+	RPV_TeamOpenFlashAndClear,      // 21
+	RPV_TeamFragAndClear,           // 22
+	RPV_TeamGasAndClear,            // 23
+	RPV_TeamSmokeAndClear,          // 24
+	RPV_TeamFlashAndClear,          // 25
+	RPV_TeamUseLadder,              // 26
+	RPV_TeamSecureTerrorist,        // 27
+	RPV_TeamGoGetHostage,           // 28
+	RPV_TeamHostageStayPut,         // 29
+	RPV_TeamStatusReport,           // 30
+	RPV_TeamUseElectronic,          // 31
+	RPV_TeamUseDemolition,          // 32
+	RPV_AlphaGoCode,                // 33
+	RPV_BravoGoCode,                // 34
+	RPV_CharlieGoCode,              // 35
+	RPV_ZuluGoCode,                 // 36
+	RPV_OrderTeamWithGoCode,        // 37
+	RPV_HostageFollow,              // 38
+	RPV_HostageStay,                // 39
+	RPV_HostageSafe,                // 40
+	RPV_HostageSecured,             // 41
+	RPV_MemberDown,                 // 42
+	RPV_SniperFree,                 // 43
+	RPV_SniperHold                  // 44
+};
+
+enum ERainbowMembersVoices
+{
+	RMV_Contact,                    // 0
+	RMV_ContactRear,                // 1
+	RMV_ContactAndEngages,          // 2
+	RMV_ContactRearAndEngages,      // 3
+	RMV_TeamRegroupOnLead,          // 4
+	RMV_TeamReformOnLead,           // 5
+	RMV_TeamReceiveOrder,           // 6
+	RMV_TeamOrderFromLeadNil,       // 7
+	RMV_NoMoreFrag,                 // 8
+	RMV_NoMoreSmoke,                // 9
+	RMV_NoMoreGas,                  // 10
+	RMV_NoMoreFlash,                // 11
+	RMV_OnLadder,                   // 12
+	RMV_MemberDown,                 // 13
+	RMV_AmmoOut,                    // 14
+	RMV_FragNear,                   // 15
+	RMV_EntersGasCloud,             // 16
+	RMV_TakingFire,                 // 17
+	RMV_TeamHoldUp,                 // 18
+	RMV_TeamMoveOut,                // 19
+	RMV_HostageFollow,              // 20
+	RMV_HostageStay,                // 21
+	RMV_HostageSafe,                // 22
+	RMV_HostageSecured,             // 23
+	RMV_RainbowHitRainbow,          // 24
+	RMV_RainbowHitHostage,          // 25
+	RMV_DoorReform                  // 26
+};
+
+enum ERainbowOtherTeamVoices
+{
+	ROTV_SniperHasTarget,           // 0
+	ROTV_SniperLooseTarget,         // 1
+	ROTV_SniperTangoDown,           // 2
+	ROTV_MemberDown,                // 3
+	ROTV_RainbowHitRainbow,         // 4
+	ROTV_Objective1,                // 5
+	ROTV_Objective2,                // 6
+	ROTV_Objective3,                // 7
+	ROTV_Objective4,                // 8
+	ROTV_Objective5,                // 9
+	ROTV_Objective6,                // 10
+	ROTV_Objective7,                // 11
+	ROTV_Objective8,                // 12
+	ROTV_Objective9,                // 13
+	ROTV_Objective10,               // 14
+	ROTV_WaitAlpha,                 // 15
+	ROTV_WaitBravo,                 // 16
+	ROTV_WaitCharlie,               // 17
+	ROTV_WaitZulu,                  // 18
+	ROTV_EntersSmoke,               // 19
+	ROTV_EntersGas,                 // 20
+	ROTV_StatusEngaging,            // 21
+	ROTV_StatusMoving,              // 22
+	ROTV_StatusWaiting,             // 23
+	ROTV_StatusWaitAlpha,           // 24
+	ROTV_StatusWaitBravo,           // 25
+	ROTV_StatusWaitCharlie,         // 26
+	ROTV_StatusWaitZulu,            // 27
+	ROTV_StatusSniperWaitAlpha,     // 28
+	ROTV_StatusSniperWaitBravo,     // 29
+	ROTV_StatusSniperWaitCharlie,   // 30
+	ROTV_StatusSniperUntilAlpha,    // 31
+	ROTV_StatusSniperUntilBravo,    // 32
+	ROTV_StatusSniperUntilCharlie   // 33
+};
+
+enum EPreRecordedMsgVoices
+{
+	PRMV_NeedBackup,                // 0
+	PRMV_FollowMe,                  // 1
+	PRMV_CoverArea,                 // 2
+	PRMV_MoveOut,                   // 3
+	PRMV_CoverMe,                   // 4
+	PRMV_Retreat,                   // 5
+	PRMV_ReformOnMe,                // 6
+	PRMV_Charge,                    // 7
+	PRMV_HoldPosition,              // 8
+	PRMV_SecureArea,                // 9
+	PRMV_WaitingOrders,             // 10
+	PRMV_Assauting,                 // 11
+	PRMV_Defending,                 // 12
+	PRMV_EscortingCargo,            // 13
+	PRMV_ObjectiveComplete,         // 14
+	PRMV_ObjectiveReached,          // 15
+	PRMV_Covering,                  // 16
+	PRMV_WeaponDry,                 // 17
+	PRMV_Move,                      // 18
+	PRMV_Roger,                     // 19
+	PRMV_Negative,                  // 20
+	PRMV_TakingFire,                // 21
+	PRMV_PinnedDown,                // 22
+	PRMV_TangoSpotted,              // 23
+	PRMV_TangoDown,                 // 24
+	PRMV_StatusReport,              // 25
+	PRMV_Clear                      // 26
+};
+
+enum EMultiCommonVoices
+{
+	MCV_FragThrow,                  // 0
+	MCV_FlashThrow,                 // 1
+	MCV_GasThrow,                   // 2
+	MCV_SmokeThrow,                 // 3
+	MCV_ActivatingBomb,             // 4
+	MCV_BombActivated,              // 5
+	MCV_DeactivatingBomb,           // 6
+	MCV_BombDeactivated             // 7
+};
+
+enum ERainbowTeamVoices
+{
+	RTV_PlacingBug,                 // 0
+	RTV_BugActivated,               // 1
+	RTV_AccessingComputer,          // 2
+	RTV_ComputerHacked,             // 3
+	RTV_EscortingHostage,           // 4
+	RTV_HostageSecured,             // 5
+	RTV_PlacingExplosives,          // 6
+	RTV_ExplosivesReady,            // 7
+	RTV_DesactivatingSecurity,      // 8
+	RTV_SecurityDeactivated,        // 9
+	RTV_GasThreat,                  // 10
+	RTV_GrenadeThreat               // 11
+};
+
+enum eHealth
+{
+	HEALTH_Healthy,                 // 0
+	HEALTH_Wounded,                 // 1
+	HEALTH_Incapacitated,           // 2
+	HEALTH_Dead                     // 3
+};
+
+var byte FlashCount;  // used for third person weapon anims/effects
+// AI basics.
+var byte Visibility;  // How visible is the pawn? 0=invisible, 128=normal, 255=highly visible
+var const Actor.ENoiseType noiseType;
+//R6CODE-
+var Actor.EPhysics OldPhysics;
+//#ifdef R6CODE	// rbrek 18 april 2002 - this is to replace the old MovementAnimRate[]; need something to indicate that anim must be played backward
+var byte AnimPlayBackward[4];
+// NEW IN 1.60
+var Pawn.ePeekingMode m_ePeekingMode;
+var byte m_bIsFiringWeapon;
+//R6HEARTBEAT
+//var                 R6BasicHBLocation m_BasicHBLocation;
+var Actor.EPawnType m_ePawnType;  // Type of pawn.  Possibility are PAWN_Rainbow, PAWN_Terrorist
+// Grenade effect
+var Pawn.EGrenadeType m_eEffectiveGrenade;
+var Pawn.eGrenadeThrow m_eGrenadeThrow;  // Throw or roll the grenade (anims)
+var Pawn.eGrenadeThrow m_eRepGrenadeThrow;  // SPECIAL replication purposes see Aristo or Serge for info
+// NEW IN 1.60
+var Pawn.eHealth m_eHealth;
+var travel int Health;  // Health: 100 = normal maximum
+var int m_iIsInStairVolume;
+var int m_iNoCircleBeat;  // Current circle to be start display
+var int m_iTeam;  // In which team the R6Pawn is
+// NEW IN 1.60
+var int m_iDefaultTeam;
+// these bitflags is for the isfriendly mechanism, all other teams are neutral
+var int m_iFriendlyTeams;  // all teams we are friendly towards
+var int m_iEnemyTeams;  // all teams we are hostile towards
+//#ifdef R6CODE
+var int m_iExtentX0;  // Extend of last Add to the hash, for debug
+var int m_iExtentY0;
+var int m_iExtentZ0;
+var int m_iExtentX1;
+var int m_iExtentY1;
+var int m_iExtentZ1;
+// Prone trail
+var int m_iProneTrailPtr;
+//R6CODE
+var int m_iCurrentFloor;
 // Physics related flags.
-var bool		bJustLanded;		// used by eyeheight adjustment
-var bool		bUpAndOut;			// used by swimming 
-var bool		bIsWalking;			// currently walking (can't jump, affects animations)
-var bool		bWarping;			// Set when travelling through warpzone (so shouldn't telefrag)
-var bool		bWantsToCrouch;		// if true crouched (physics will automatically reduce collision height to CrouchHeight)
-var const bool  bIsCrouched;		// set by physics to specify that pawn is currently crouched
-var const bool  bTryToUncrouch;		// when auto-crouch during movement, continually try to uncrouch
-var() bool		bCanCrouch;			// if true, this pawn is capable of crouching
-
+var bool bJustLanded;  // used by eyeheight adjustment
+var bool bUpAndOut;  // used by swimming
+var bool bIsWalking;  // currently walking (can't jump, affects animations)
+var bool bWarping;  // Set when travelling through warpzone (so shouldn't telefrag)
+var bool bWantsToCrouch;  // if true crouched (physics will automatically reduce collision height to CrouchHeight)
+var const bool bIsCrouched;  // set by physics to specify that pawn is currently crouched
+var const bool bTryToUncrouch;  // when auto-crouch during movement, continually try to uncrouch
+var() bool bCanCrouch;  // if true, this pawn is capable of crouching
 // #ifdef R6CODE  - 24 jan 2002 rbrek - moved here for pathfinding
-var	bool		m_bWantsToProne;
-var const bool  m_bIsProne;     
-var const bool  m_bTryToUnProne;
-var() bool		m_bCanProne;
-// #endif
-      
-var bool		bCrawler;			// crawling - pitch and roll based on surface pawn is on
-var const bool	bReducedSpeed;		// used by movement natives
-var	bool		bCanJump;			// movement capabilities - used by AI
-var	bool 		bCanWalk;
-var	bool		bCanSwim;
-var	bool		bCanFly;
-var	bool		bCanClimbLadders;
-var	bool		bCanStrafe;
-var	bool		bAvoidLedges;		// don't get too close to ledges
-var	bool		bStopAtLedges;		// if bAvoidLedges and bStopAtLedges, Pawn doesn't try to walk along the edge at all
-var	bool		bNoJumpAdjust;		// set to tell controller not to modify velocity of a jump/fall	
-var	bool		bCountJumps;		// if true, inventory wants message whenever this pawn jumps
-var const bool	bSimulateGravity;	// simulate gravity for this pawn on network clients when predicting position (true if pawn is walking or falling)
+var bool m_bWantsToProne;
+var const bool m_bIsProne;
+var const bool m_bTryToUnProne;
+var() bool m_bCanProne;
+var bool bCrawler;  // crawling - pitch and roll based on surface pawn is on
+var const bool bReducedSpeed;  // used by movement natives
+var bool bCanJump;  // movement capabilities - used by AI
+var bool bCanWalk;
+var bool bCanSwim;
+var bool bCanFly;
+var bool bCanClimbLadders;
+var bool bCanStrafe;
+var bool bAvoidLedges;  // don't get too close to ledges
+var bool bStopAtLedges;  // if bAvoidLedges and bStopAtLedges, Pawn doesn't try to walk along the edge at all
+var bool bNoJumpAdjust;  // set to tell controller not to modify velocity of a jump/fall
+var bool bCountJumps;  // if true, inventory wants message whenever this pawn jumps
+var const bool bSimulateGravity;  // simulate gravity for this pawn on network clients when predicting position (true if pawn is walking or falling)
 //R6CODE var	bool		bUpdateEyeheight;	// if true, UpdateEyeheight will get called every tick
-var	bool		bIgnoreForces;		// if true, not affected by external forces
-var const bool	bNoVelocityUpdate;	// used by C++ physics
-var	bool		bCanWalkOffLedges;	// Can still fall off ledges, even when walking (for Player Controlled pawns)
-var bool		bSteadyFiring;		// used for third person weapon anims/effects
-var bool		bCanBeBaseForPawns;	// all your 'base', are belong to us
-
+var bool bIgnoreForces;  // if true, not affected by external forces
+var const bool bNoVelocityUpdate;  // used by C++ physics
+var bool bCanWalkOffLedges;  // Can still fall off ledges, even when walking (for Player Controlled pawns)
+var bool bSteadyFiring;  // used for third person weapon anims/effects
+var bool bCanBeBaseForPawns;  // all your 'base', are belong to us
 // used by dead pawns (for bodies landing and changing collision box)
-var		bool	bThumped;		
-var		bool	bInvulnerableBody;
-
+var bool bThumped;
+var bool bInvulnerableBody;
 // AI related flags
-var		bool	bIsFemale;
-var		bool	bAutoActivate;			// if true, automatically activate Powerups which have their bAutoActivate==true
-/*R6CHANGEWEAPONSYSTEM
-var		bool	bCanPickupInventory;	// if true, will pickup inventory when touching pickup actors
-*/
-var		bool	bUpdatingDisplay;		// to avoid infinite recursion through inventory setdisplay
-var		bool	bAmbientCreature;		// AIs will ignore me
-var(AI) bool	bLOSHearing;			// can hear sounds from line-of-sight sources (which are close enough to hear)
+var bool bIsFemale;
+var bool bAutoActivate;  // if true, automatically activate Powerups which have their bAutoActivate==true
+var bool bUpdatingDisplay;  // to avoid infinite recursion through inventory setdisplay
+var bool bAmbientCreature;  // AIs will ignore me
+var(AI) bool bLOSHearing;  // can hear sounds from line-of-sight sources (which are close enough to hear)
 										// bLOSHearing=true is like UT/Unreal hearing
-var(AI) bool	bSameZoneHearing;		// can hear any sound in same zone (if close enough to hear)
-var(AI) bool	bAdjacentZoneHearing;	// can hear any sound in adjacent zone (if close enough to hear)
-var(AI) bool	bMuffledHearing;		// can hear sounds through walls (but muffled - sound distance increased to double plus 4x the distance through walls
-var(AI) bool	bAroundCornerHearing;	// Hear sounds around one corner (slightly more expensive, and bLOSHearing must also be true)
-var(AI) bool	bDontPossess;			// if true, Pawn won't be possessed at game start
-var		bool	bAutoFire;				// used for third person weapon anims/effects
-var		bool	bRollToDesired;			// Update roll when turning to desired rotation (normally false)
-var		bool	bIgnorePlayFiring;		// if true, ignore the next PlayFiring() call (used by AnimNotify_FireWeapon)
+var(AI) bool bSameZoneHearing;  // can hear any sound in same zone (if close enough to hear)
+var(AI) bool bAdjacentZoneHearing;  // can hear any sound in adjacent zone (if close enough to hear)
+var(AI) bool bMuffledHearing;  // can hear sounds through walls (but muffled - sound distance increased to double plus 4x the distance through walls
+var(AI) bool bAroundCornerHearing;  // Hear sounds around one corner (slightly more expensive, and bLOSHearing must also be true)
+var(AI) bool bDontPossess;  // if true, Pawn won't be possessed at game start
+var bool bAutoFire;  // used for third person weapon anims/effects
+var bool bRollToDesired;  // Update roll when turning to desired rotation (normally false)
+var bool bIgnorePlayFiring;  // if true, ignore the next PlayFiring() call (used by AnimNotify_FireWeapon)
 //R6ARMPATCHES
-var     bool    m_bArmPatchSet;         // if false, ArmPatch is the default one
-
+var bool m_bArmPatchSet;  // if false, ArmPatch is the default one
 //UT2K3
 // cache net relevancy test
-var		bool	bCachedRelevant;		// network relevancy caching flag
-var     float   NetRelevancyTime;
-var     PlayerController LastRealViewer;
-var     actor   LastViewer;
-var		bool	bUseCompressedPosition;	// use compressed position in networking - true unless want to replicate roll, or very high velocities
-
-var		byte	FlashCount;				// used for third person weapon anims/effects
-// AI basics.
-var 	byte	Visibility;			//How visible is the pawn? 0=invisible, 128=normal, 255=highly visible 
-var		float	DesiredSpeed;
-var		float	MaxDesiredSpeed;
-var(AI) name	AIScriptTag;		// tag of AIScript which should be associated with this pawn
+var bool bCachedRelevant;  // network relevancy caching flag
+var bool bUseCompressedPosition;  // use compressed position in networking - true unless want to replicate roll, or very high velocities
+var bool m_bDroppedWeapon;
+var bool m_bHaveGasMask;
+var bool m_bUseHighStance;  // Character is using high stance when holding his weapon.
+var bool m_bWantsHighStance;  // Character want to use HighStance
+var bool m_bTurnRight;  // When the player turn left
+var bool m_bTurnLeft;  // When the player turn right
+var bool bPhysicsAnimUpdate;
+var bool bWasProne;  // r6code - rbrek 9 jan 2002
+var bool bWasCrouched;
+var bool bWasWalking;
+var bool bWasOnGround;
+var bool bInitializeAnimation;
+var bool bPlayedDeath;
+var bool m_bIsLanding;  // r6code - rbrek 23 jan 2002
+//R6CODE+
+var bool m_bMakesTrailsWhenProning;
+var bool m_bPeekingLeft;
+                                                            //           and PAWN_Hostage (hostage include civilian)
+var bool m_bHBJammerOn;  // Only for the Heart Beat Jammer. Because it a gun and not a object spwan i use that in the basic location
+// NEW IN 1.60
+var bool m_bUseSpecialSkin;
+var bool m_bIsDeadBody;
+var bool m_bAnimStopedForRG;  // Stop animation on a ragdoll, but after the first frame
+var bool m_bIsPlayer;  // this will accurately indicate whether this pawn is a player or not
+// Flashbang visual effect
+var bool m_bFlashBangVisualEffectRequested;
+var bool m_bRepFinishShotgun;
+// NEW IN 1.60
+var float m_fFallingHeight;
+var float NetRelevancyTime;
+var float DesiredSpeed;
+var float MaxDesiredSpeed;
 //#ifndef R6NOISE
 //var(AI) float	HearingThreshold;	// max distance at which a makenoise(1.0) loudness sound can be heard
 //#endif // #ifndef R6NOISE
-var(AI)	float	Alertness;			// -1 to 1 ->Used within specific states for varying reaction to stimuli 
-var(AI)	float	SightRadius;		// Maximum seeing distance.
-var(AI)	float	PeripheralVision;	// Cosine of limits of peripheral vision.
-var()	float	SkillModifier;			// skill modifier (same scale as game difficulty)	
-var const float	AvgPhysicsTime;		// Physics updating time monitoring (for AI monitoring reaching destinations)
-var		float	MeleeRange;			// Max range for melee attack (not including collision radii)
-var NavigationPoint Anchor;			// current nearest path;
-var		float	DestinationOffset;	// used to vary destination over NavigationPoints
-var		float	NextPathRadius;		// radius of next path in route
-var		vector	SerpentineDir;		// serpentine direction
-var		float	SerpentineDist;
-var		float	SerpentineTime;		// how long to stay straight before strafing again
-var const float	UncrouchTime;		// when auto-crouch during movement, continually try to uncrouch once this decrements to zero
-
+var(AI) float Alertness;  // -1 to 1 ->Used within specific states for varying reaction to stimuli
+var(AI) float SightRadius;  // Maximum seeing distance.
+var(AI) float PeripheralVision;  // Cosine of limits of peripheral vision.
+var() float SkillModifier;  // skill modifier (same scale as game difficulty)
+var const float AvgPhysicsTime;  // Physics updating time monitoring (for AI monitoring reaching destinations)
+var float MeleeRange;  // Max range for melee attack (not including collision radii)
+var float DestinationOffset;  // used to vary destination over NavigationPoints
+var float NextPathRadius;  // radius of next path in route
+var float SerpentineDist;
+var float SerpentineTime;  // how long to stay straight before strafing again
+var const float UncrouchTime;  // when auto-crouch during movement, continually try to uncrouch once this decrements to zero
 // Movement.
-var float   GroundSpeed;    // The maximum ground speed.
-var float   WaterSpeed;     // The maximum swimming speed.
-var float   AirSpeed;		// The maximum flying speed.
-var float	LadderSpeed;	// Ladder climbing speed
-var float	AccelRate;		// max acceleration rate
-var float	JumpZ;      	// vertical acceleration w/ jump
-var float   AirControl;		// amount of AirControl available to the pawn
-var float	WalkingPct;		// pct. of running speed that walking speed is
-var float	CrouchedPct;	// pct. of running speed that crouched walking speed is
-var float	MaxFallSpeed;	// max speed pawn can land without taking damage (also limits what paths AI can use)
-var vector	ConstantAcceleration;	// acceleration added to pawn when falling
-
-// Player info.
-var	string			OwnerName;		// Name of owning player (for save games, coop)
-/*R6CHANGEWEAPONSYSTEM
-var travel Weapon       Weapon;        // The pawn's current weapon.
-//var Weapon				PendingWeapon;	// Will become weapon once current weapon is put down
-*/
+var float GroundSpeed;  // The maximum ground speed.
+var float WaterSpeed;  // The maximum swimming speed.
+var float AirSpeed;  // The maximum flying speed.
+var float LadderSpeed;  // Ladder climbing speed
+var float AccelRate;  // max acceleration rate
+var float JumpZ;  // vertical acceleration w/ jump
+var float AirControl;  // amount of AirControl available to the pawn
+var float WalkingPct;  // pct. of running speed that walking speed is
+var float CrouchedPct;  // pct. of running speed that crouched walking speed is
+var float MaxFallSpeed;  // max speed pawn can land without taking damage (also limits what paths AI can use)
+var float SplashTime;  // time of last splash
+var float CrouchHeight;  // CollisionHeight when crouching
+var float CrouchRadius;  // CollisionRadius when crouching
+var float BreathTime;  // used for getting BreathTimer() messages (for no air, etc.)
+var float UnderWaterTime;  // how much time pawn can go without air (in seconds)
+// #ifdef R6CODE  - 24 jan 2002 rbrek - moved here for pathfinding
+var float m_fProneHeight;  // height of collision cylinder when prone
+var float m_fProneRadius;  // radius of collision cylinder when prone
+var const float noiseTime;
+var const float noiseLoudness;
+var float m_NextBulletImpact;
+var float m_NextFireSound;
+//#endif // #ifdef R6NOISE
+var float LastPainSound;
+// view bob
+//#ifndef R6CODE
+//var				globalconfig float Bob;
+//#else
+var float Bob;
+//#endif // #ifndef R6CODE
+var float LandBob;
+// NEW IN 1.60
+var float AppliedBob;
+var float bobtime;
+var float SoundDampening;
+var float DamageScaling;
+var float CarcassCollisionHeight;  // collision height of dead body lying on the ground
+var float OldRotYaw;  // used for determining if pawn is turning
+var float BaseMovementRate;  // FIXME - temp - used for scaling movement
+var(AnimTweaks) float BlendChangeTime;  // time to blend between movement animations
+var float MovementBlendStartTime;  // used for delaying the start of run blending
+var float ForwardStrafeBias;  // bias of strafe blending in forward direction
+var float BackwardStrafeBias;  // bias of strafe blending in backward direction
+// peeking
+var float m_fCrouchBlendRate;
+//var             R6BasicRadarLocation m_BasicRadarLocation;
+var float m_fHeartBeatTime[2];  // Heart Beat time in ms, one for each cicle
+var float m_fHeartBeatFrequency;  // Number of heart beat by minutes.
+var float m_fBlurValue;
+var float m_fDecrementalBlurValue;
+var float m_fRepDecrementalBlurValue;
+var float m_fRemainingGrenadeTime;
+var float m_fFlashBangVisualEffectTime;
+var float m_fXFlashBang;
+var float m_fYFlashBang;
+var float m_fDistanceFlashBang;
+var float m_fLastCommunicationTime;  // last time player sent a voice message for in-game map
+//#ifdef R6CODE
+var float m_fPrePivotPawnInitialOffset;
+var Controller Controller;
+var PlayerController LastRealViewer;
+var Actor LastViewer;
+var NavigationPoint Anchor;  // current nearest path;
 //#ifdef R6CHANGEWEAPONSYSTEM
-var     R6EngineWeapon EngineWeapon;    //Current weapon the character is using
-var     R6EngineWeapon PendingWeapon;	// Will become weapon once current weapon is put down
-var     R6EngineWeapon m_WeaponsCarried[4]; // Weapons carried by the character, max 4 (primary, handgun, 2 types of grenades)
-var     BOOL           m_bDroppedWeapon;
-
-var     BOOL           m_bHaveGasMask;        
-var     BOOL           m_bUseHighStance;// Character is using high stance when holding his weapon.
-var     BOOL           m_bWantsHighStance;  // Character want to use HighStance
-//#endif R6CHANGEWEAPONSYSTEM
-
-/*R6CHANGEWEAPONSYSTEM
-var travel Powerups	SelectedItem;	// currently selected inventory item
-*/
+var R6EngineWeapon EngineWeapon;  // Current weapon the character is using
+var R6EngineWeapon PendingWeapon;  // Will become weapon once current weapon is put down
+var R6EngineWeapon m_WeaponsCarried[4];  // Weapons carried by the character, max 4 (primary, handgun, 2 types of grenades)
+//R6CODE var float			OldZ;			// Old Z Location - used for eyeheight smoothing
+var PhysicsVolume HeadVolume;  // physics volume of head
+var PlayerReplicationInfo PlayerReplicationInfo;
+var LadderVolume OnLadder;  // ladder currently being climbed
+// #ifdef R6CODE
+var Material m_HitMaterial;  // Use when we do a line check for the footstep. Use also for the sound.
+var Texture m_pHeartBeatTexture;  // Texture use for the heart beat sensor
+var Sound m_sndHBSSound;
+var Sound m_sndHearToneSound;
+var Sound m_sndHearToneSoundStop;
+var Texture m_ArmPatchTexture;
+var(AI) name AIScriptTag;  // tag of AIScript which should be associated with this pawn
+var name LandMovementState;  // PlayerControllerState to use when moving on land or air
+var name WaterMovementState;  // PlayerControllerState to use when moving in water
+// Animation status
+var name AnimStatus;
+var name AnimAction;  // use for replicating anims
+var name MovementAnims[4];  // Forward, Back, Left, Right
+//#endif
+var name TurnLeftAnim;
+var name TurnRightAnim;  // turning anims when standing in place (scaled by turn speed)
+// blood effect
+var Class<Effects> BloodEffect;
+var Class<Effects> LowDetailBlood;
+var Class<Effects> LowGoreBlood;
+var Class<AIController> ControllerClass;  // default class to use when pawn is controlled by AI (can be modified by an AIScript)
+var Class<StaticMeshActor> m_HelmetClass;
+var Vector SerpentineDir;  // serpentine direction
+var Vector ConstantAcceleration;  // acceleration added to pawn when falling
 //R6CODE var float      	BaseEyeHeight; 	// Base eye height above collision center.
 //R6CODE var float        	EyeHeight;     	// Current eye height, adjusted for bobbing and stairs.
-var	const vector	Floor;			// Normal of floor pawn is standing on (only used by PHYS_Spider and PHYS_Walking)
-var float			SplashTime;		// time of last splash
-var float			CrouchHeight;	// CollisionHeight when crouching
-var float			CrouchRadius;	// CollisionRadius when crouching
-//R6CODE var float			OldZ;			// Old Z Location - used for eyeheight smoothing
-var PhysicsVolume	HeadVolume;		// physics volume of head
-var travel int      Health;         // Health: 100 = normal maximum
-var	float			BreathTime;		// used for getting BreathTimer() messages (for no air, etc.)
-var float			UnderWaterTime; // how much time pawn can go without air (in seconds)
-var	float			LastPainTime;	// last time pawn played a takehit animation (updated in PlayHit())
-var class<DamageType> ReducedDamageType; // which damagetype this creature is protected from (used by AI)
-
-// #ifdef R6CODE  - 24 jan 2002 rbrek - moved here for pathfinding
-var float           m_fProneHeight; // height of collision cylinder when prone
-var float           m_fProneRadius; // radius of collision cylinder when prone
-var BOOL            m_bTurnRight;   // When the player turn left
-var BOOL            m_bTurnLeft;    // When the player turn right
+var const Vector Floor;  // Normal of floor pawn is standing on (only used by PHYS_Spider and PHYS_Walking)
 //#ifdef R6CODE
-var const vector	m_vLastNetLocation;	// Last location received by the network.  Used to set the correct location of a pawn when he stop (Velocity=0)
-//#endif // #ifdef R6CODE
-
-// #endif
-
-
-
+var const Vector m_vLastNetLocation;  // Last location received by the network.  Used to set the correct location of a pawn when he stop (Velocity=0)
 // Sound and noise management
 // remember location and position of last noises propagated
 //#ifndef R6NOISE
@@ -186,1465 +561,856 @@ var const vector	m_vLastNetLocation;	// Last location received by the network.  
 //var const	pawn		noise2other;
 //var const	float		noise2loudness;
 //#else  // #ifdef R6NOISE
-var const   vector      noiseSpot;
-var const   float       noiseTime;
-var const   float       noiseLoudness;
-var const   ENoiseType  noiseType;
-var         FLOAT       m_NextBulletImpact;
-var         FLOAT       m_NextFireSound;
-//#endif // #ifdef R6NOISE
-var			float		LastPainSound;
-
-// view bob
-//#ifndef R6CODE
-//var				globalconfig float Bob;
-//#else
-var				float Bob;
-//#endif // #ifndef R6CODE
-var				float				LandBob, AppliedBob;
-var				float bobtime;
-var				vector			WalkBob;
-
-var float SoundDampening;
-var float DamageScaling;
-
-var localized  string MenuName; // Name used for this pawn type in menus (e.g. player selection) 
-
-// shadow decal
-//R6SHADOW var Projector Shadow;
-
-// blood effect
-var class<Effects> BloodEffect;
-var class<Effects> LowDetailBlood;
-var class<Effects> LowGoreBlood;
-
-var class<AIController> ControllerClass;	// default class to use when pawn is controlled by AI (can be modified by an AIScript)
-
-var float CarcassCollisionHeight;	// collision height of dead body lying on the ground
-var PlayerReplicationInfo PlayerReplicationInfo;
-
-var LadderVolume OnLadder;		// ladder currently being climbed
-
-var name LandMovementState;		// PlayerControllerState to use when moving on land or air
-var name WaterMovementState;	// PlayerControllerState to use when moving in water
-
-// Animation status
-var name AnimStatus;
-var name AnimAction;			// use for replicating anims 
-
+var const Vector noiseSpot;
+var Vector WalkBob;
 // Animation updating by physics FIXME - this should be handled as an animation object
 // Note that animation channels 2 through 11 are used for animation updating
-var vector TakeHitLocation;		// location of last hit (for playing hit/death anims)
-var class<DamageType> HitDamageType;	// damage type of last hit (for playing hit/death anims)
-var vector TearOffMomentum;		// momentum to apply when torn off (bTearOff == true)
-var bool bPhysicsAnimUpdate;	
-var bool bWasProne;				// r6code - rbrek 9 jan 2002
-var bool bWasCrouched;
-var bool bWasWalking;
-var bool bWasOnGround;
-var bool bInitializeAnimation;
-var bool bPlayedDeath;
-var	bool m_bIsLanding;			// r6code - rbrek 23 jan 2002 
-//R6CODE+
-var Bool m_bMakesTrailsWhenProning;
-//R6CODE-
-var EPhysics OldPhysics;
-var float OldRotYaw;			// used for determining if pawn is turning
-var vector OldAcceleration;
-var float BaseMovementRate;		// FIXME - temp - used for scaling movement
-var name MovementAnims[4];		// Forward, Back, Left, Right
-//#ifdef R6CODE	// rbrek 18 april 2002 - this is to replace the old MovementAnimRate[]; need something to indicate that anim must be played backward
-var byte AnimPlayBackward[4];	
-//#endif
-var name TurnLeftAnim;
-var name TurnRightAnim;			// turning anims when standing in place (scaled by turn speed)
-var(AnimTweaks) float BlendChangeTime;	// time to blend between movement animations
-var float MovementBlendStartTime;	// used for delaying the start of run blending
-var float ForwardStrafeBias;	// bias of strafe blending in forward direction
-var float BackwardStrafeBias;	// bias of strafe blending in backward direction
-
-
-// #ifdef R6CODE
-var material m_HitMaterial;     // Use when we do a line check for the footstep. Use also for the sound.
-
-var					vector			m_vEyeLocation;
-var					rotator			m_rRotationOffset;		// rotation offset (with respect to pawn.rotation)
-//var					rotator			m_rRepRotationOffset;
-
-var                 INT             m_iIsInStairVolume;
-// peeking
-var                 FLOAT           m_fCrouchBlendRate;
-var                 BOOL            m_bPeekingLeft;
-var enum ePeekingMode
-{
-    PEEK_none,
-    PEEK_full,
-    PEEK_fluid
-} m_ePeekingMode;
-
-
-var					BYTE			m_bIsFiringWeapon;
-// #endif
-
-//R6HEARTBEAT
-//var                 R6BasicHBLocation m_BasicHBLocation;
-var                 EPawnType       m_ePawnType;            // Type of pawn.  Possibility are PAWN_Rainbow, PAWN_Terrorist
-                                                            //           and PAWN_Hostage (hostage include civilian)
-var BOOL		m_bHBJammerOn;			    // Only for the Heart Beat Jammer. Because it a gun and not a object spwan i use that in the basic location
-//var             R6BasicRadarLocation m_BasicRadarLocation;
-var float       m_fHeartBeatTime[2];        // Heart Beat time in ms, one for each cicle
-var float       m_fHeartBeatFrequency;      // Number of heart beat by minutes.
-var int         m_iNoCircleBeat;            // Current circle to be start display
-
-var texture m_pHeartBeatTexture;    // Texture use for the heart beat sensor
-var                 INT m_iTeam;	 // In which team the R6Pawn is
-
-// these bitflags is for the isfriendly mechanism, all other teams are neutral
-var                 INT m_iFriendlyTeams;   // all teams we are friendly towards
-var                 INT m_iEnemyTeams;      // all teams we are hostile towards
-
-//#ifdef R6CODE
-var INT m_iExtentX0;    // Extend of last Add to the hash, for debug
-var INT m_iExtentY0;
-var INT m_iExtentZ0;
-var INT m_iExtentX1;
-var INT m_iExtentY1;
-var INT m_iExtentZ1;
-//#endif // #ifdef R6CODE
-
+var Vector TakeHitLocation;  // location of last hit (for playing hit/death anims)
+var Vector TearOffMomentum;  // momentum to apply when torn off (bTearOff == true)
+var Vector OldAcceleration;
+var Vector m_vEyeLocation;
+var Rotator m_rRotationOffset;  // rotation offset (with respect to pawn.rotation)
+var Vector m_vGrenadeLocation;
+//R6ARMPATCHES
+var Guid m_ArmPatchGUID;
+// Player info.
+var string OwnerName;  // Name of owning player (for save games, coop)
+var localized string MenuName;  // Name used for this pawn type in menus (e.g. player selection)
 //R6CODE
-var string m_CharacterName;        //Name of the character
-var BOOL m_bIsDeadBody;
-var BOOL m_bAnimStopedForRG;       // Stop animation on a ragdoll, but after the first frame
-var BOOL m_bIsPlayer;              // this will accurately indicate whether this pawn is a player or not
-
-var class<StaticMeshActor>			m_HelmetClass;
-
-var FLOAT m_fBlurValue;
-var FLOAT m_fDecrementalBlurValue;
-var FLOAT m_fRepDecrementalBlurValue;
-
-//R6CODE
-enum EGrenadeType
-{
-    GTYPE_None,
-    GTYPE_Smoke,
-    GTYPE_TearGas,
-    GTYPE_FlashBang,
-	GTYPE_BreachingCharge
-};
-
-enum eGrenadeThrow
-{
-    GRENADE_None,
-    GRENADE_Throw,
-    GRENADE_Roll,
-    GRENADE_RemovePin,
-    GRENADE_PeekLeft,
-    GRENADE_PeekRight,
-	GRENADE_PeekLeftThrow,
-	GRENADE_PeekRightThrow
-};
-
-enum EAnimStateType
-{
-    SA_Generic,
-    SA_Walk,
-    SA_Run,
-    SA_Turn,
-    SA_CrouchToProne,
-    SA_ProneToCrouch,
-    SA_ProneWalk,
-    SA_ProneSideWalk,
-    SA_StairUp,
-    SA_StairDown,
-    SA_LadderHands,
-    SA_LadderFoot,
-    SA_LameWalkSlide,
-    SA_Land,
-    SA_DeadFall,
-    SA_LameWalkLegOK
-};
-
-enum EGunSoundType
-{
-    GS_ExteriorStereo,
-    GS_InteriorStereo,
-    GS_ExteriorMono,
-    GS_InteriorMono
-};
-
-enum ETerroristVoices
-{
-    TV_Wounded,
-    TV_Taunt,
-    TV_Surrender,
-    TV_SeesTearGas,
-    TV_RunAway,
-    TV_Grenade,
-    TV_CoughsSmoke,
-    TV_CoughsGas,
-    TV_Backup,
-    TV_SeesSurrenderedHostage,
-    TV_SeesRainbow_LowAlert,
-    TV_SeesRainbow_HighAlert,
-    TV_SeesFreeHostage,
-    TV_HearsNoize
-};
-
-enum EHostageVoices
-{
-    HV_Run,
-    HV_Frozen,
-    HV_Foetal,
-    HV_Hears_Shooting,
-    HV_RnbFollow,
-    HV_RndStayPut,
-    HV_RnbHurt,
-    HV_EntersSmoke,
-    HV_EntersGas,
-    HV_ClarkReprimand
-};
-
-enum ECommonRainbowVoices
-{
-    CRV_TerroristDown,
-    CRV_TakeWound,
-    CRV_GoesDown,
-    CRV_EntersSmoke,
-    CRV_EntersGas
-};
-
-enum ERainbowPlayerVoices
-{
-    RPV_TeamRegroup,
-    RPV_TeamMove,
-    RPV_TeamHold,
-    RPV_AllTeamsHold,
-    RPV_AllTeamsMove,
-    RPV_TeamMoveAndFrag,
-    RPV_TeamMoveAndGas,
-    RPV_TeamMoveAndSmoke,
-    RPV_TeamMoveAndFlash,
-    RPV_TeamOpenDoor,
-    RPV_TeamCloseDoor,
-	RPV_TeamOpenShudder,
-	RPV_TeamCloseShudder,
-    RPV_TeamOpenAndClear,
-    RPV_TeamOpenAndFrag,
-    RPV_TeamOpenAndGas,
-    RPV_TeamOpenAndSmoke,
-    RPV_TeamOpenAndFlash,
-    RPV_TeamOpenFragAndClear,
-    RPV_TeamOpenGasAndClear,
-    RPV_TeamOpenSmokeAndClear,
-    RPV_TeamOpenFlashAndClear,
-    RPV_TeamFragAndClear,
-    RPV_TeamGasAndClear,
-    RPV_TeamSmokeAndClear,
-    RPV_TeamFlashAndClear,
-    RPV_TeamUseLadder,
-    RPV_TeamSecureTerrorist,
-    RPV_TeamGoGetHostage,
-    RPV_TeamHostageStayPut,
-    RPV_TeamStatusReport,
-    RPV_TeamUseElectronic,
-    RPV_TeamUseDemolition,
-    RPV_AlphaGoCode,
-    RPV_BravoGoCode,
-    RPV_CharlieGoCode,
-    RPV_ZuluGoCode,
-    RPV_OrderTeamWithGoCode,
-    RPV_HostageFollow,
-    RPV_HostageStay,
-    RPV_HostageSafe,
-    RPV_HostageSecured,
-    RPV_MemberDown,
-    RPV_SniperFree,
-    RPV_SniperHold
-};
-
-enum ERainbowMembersVoices
-{
-    RMV_Contact,
-    RMV_ContactRear,
-    RMV_ContactAndEngages,
-    RMV_ContactRearAndEngages,
-    RMV_TeamRegroupOnLead,
-    RMV_TeamReformOnLead,
-    RMV_TeamReceiveOrder,
-    RMV_TeamOrderFromLeadNil,
-    RMV_NoMoreFrag,
-    RMV_NoMoreSmoke,
-    RMV_NoMoreGas,
-    RMV_NoMoreFlash,
-    RMV_OnLadder,
-    RMV_MemberDown,
-    RMV_AmmoOut,
-    RMV_FragNear,
-    RMV_EntersGasCloud,
-    RMV_TakingFire,
-    RMV_TeamHoldUp,
-    RMV_TeamMoveOut,
-    RMV_HostageFollow,
-    RMV_HostageStay,
-    RMV_HostageSafe,
-    RMV_HostageSecured,
-    RMV_RainbowHitRainbow,
-    RMV_RainbowHitHostage,
-    RMV_DoorReform
-};
-
-enum ERainbowOtherTeamVoices
-{
-    ROTV_SniperHasTarget,
-    ROTV_SniperLooseTarget,
-    ROTV_SniperTangoDown,
-    ROTV_MemberDown,
-    ROTV_RainbowHitRainbow,
-    ROTV_Objective1,
-    ROTV_Objective2,
-    ROTV_Objective3,
-    ROTV_Objective4,
-    ROTV_Objective5,
-    ROTV_Objective6,
-    ROTV_Objective7,
-    ROTV_Objective8,
-    ROTV_Objective9,
-    ROTV_Objective10,
-    ROTV_WaitAlpha,
-    ROTV_WaitBravo,
-    ROTV_WaitCharlie,
-    ROTV_WaitZulu,
-    ROTV_EntersSmoke,
-    ROTV_EntersGas,
-    ROTV_StatusEngaging,
-    ROTV_StatusMoving,
-    ROTV_StatusWaiting,
-    ROTV_StatusWaitAlpha,
-    ROTV_StatusWaitBravo,
-    ROTV_StatusWaitCharlie,
-    ROTV_StatusWaitZulu,
-    ROTV_StatusSniperWaitAlpha,
-    ROTV_StatusSniperWaitBravo,
-    ROTV_StatusSniperWaitCharlie,
-    ROTV_StatusSniperUntilAlpha,
-    ROTV_StatusSniperUntilBravo,
-    ROTV_StatusSniperUntilCharlie
-};
-
-enum EPreRecordedMsgVoices
-{
-    PRMV_NeedBackup,
-    PRMV_FollowMe,
-    PRMV_CoverArea,
-    PRMV_MoveOut,
-    PRMV_CoverMe,
-    PRMV_Retreat,
-    PRMV_ReformOnMe,
-    PRMV_Charge,
-    PRMV_HoldPosition,
-    PRMV_SecureArea,
-    PRMV_WaitingOrders,
-    PRMV_Assauting,
-    PRMV_Defending,
-    PRMV_EscortingCargo,
-    PRMV_ObjectiveComplete,
-    PRMV_ObjectiveReached,
-    PRMV_Covering,
-    PRMV_WeaponDry,
-    PRMV_Move,
-    PRMV_Roger,
-    PRMV_Negative,
-    PRMV_TakingFire,
-    PRMV_PinnedDown,
-    PRMV_TangoSpotted,
-    PRMV_TangoDown,
-    PRMV_StatusReport,
-    PRMV_Clear
-};
-
-enum EMultiCommonVoices
-{
-    MCV_FragThrow,
-    MCV_FlashThrow,
-    MCV_GasThrow,
-    MCV_SmokeThrow,
-    MCV_ActivatingBomb,
-    MCV_BombActivated,
-    MCV_DeactivatingBomb,
-    MCV_BombDeactivated
-};
-
-enum ERainbowTeamVoices
-{
-    RTV_PlacingBug,
-    RTV_BugActivated,
-    RTV_AccessingComputer,
-    RTV_ComputerHacked,
-    RTV_EscortingHostage,
-    RTV_HostageSecured,
-    RTV_PlacingExplosives,
-    RTV_ExplosivesReady,
-    RTV_DesactivatingSecurity,
-    RTV_SecurityDeactivated,
-    RTV_GasThreat,
-    RTV_GrenadeThreat
-
-};
-
+var string m_CharacterName;  // Name of the character
 //UT2K3
 var transient CompressedPosition PawnPosition;
 
-// Grenade effect
-var         EGrenadeType        m_eEffectiveGrenade;
-var         FLOAT               m_fRemainingGrenadeTime;
-var			vector				m_vGrenadeLocation;
-// Flashbang visual effect
-var         BOOL                m_bFlashBangVisualEffectRequested;
-var         FLOAT               m_fFlashBangVisualEffectTime;
-var			FLOAT				m_fXFlashBang;
-var			FLOAT				m_fYFlashBang;
-var			FLOAT				m_fDistanceFlashBang;
-
-var         Sound               m_sndHBSSound;
-var         Sound               m_sndHearToneSound;
-var         Sound               m_sndHearToneSoundStop;
-
-var         eGrenadeThrow       m_eGrenadeThrow;        // Throw or roll the grenade (anims)
-var         eGrenadeThrow       m_eRepGrenadeThrow;     // SPECIAL replication purposes see Aristo or Serge for info
-var         BOOL                m_bRepFinishShotgun;
-
-// END R6CODE
-
-// Prone trail
-var         INT                 m_iProneTrailPtr;
-
-var enum eHealth
-{
-    HEALTH_Healthy,
-    HEALTH_Wounded,
-    HEALTH_Incapacitated,
-    HEALTH_Dead
-} m_eHealth;
-
-//R6ARMPATCHES
-var                 Guid                    m_ArmPatchGUID;
-var                 Texture                 m_ArmPatchTexture;
-
-//R6CODE
-var                 INT                     m_iCurrentFloor;
-var                 FLOAT                   m_fLastCommunicationTime;   // last time player sent a voice message for in-game map
-
-//#ifdef R6CODE
-var					FLOAT					m_fPrePivotPawnInitialOffset;
-//#endif
-
 replication
 {
-	// Variables the server should send to the client.
-	reliable if( bNetDirty && (Role==ROLE_Authority) )
-		m_iTeam,m_iFriendlyTeams,m_iEnemyTeams,OnLadder,
-        m_WeaponsCarried,bSimulateGravity, bIsCrouched, m_bIsProne, bIsWalking, 
-        PlayerReplicationInfo, Controller, AnimStatus, AnimAction, HitDamageType, 
-        TakeHitLocation, m_bWantsHighStance, m_eHealth, m_eRepGrenadeThrow,
-        m_ArmPatchGUID, m_bHaveGasMask, m_bHBJammerOn;
+	// Pos:0x000
+	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		AnimAction, AnimStatus, 
+		Controller, OnLadder, 
+		PlayerReplicationInfo, TakeHitLocation, 
+		bIsCrouched, bIsWalking, 
+		bSimulateGravity, m_ArmPatchGUID, 
+		m_WeaponsCarried, m_bHBJammerOn, 
+		m_bHaveGasMask, m_bIsProne, 
+		m_bWantsHighStance, m_eHealth, 
+		m_eRepGrenadeThrow, m_iEnemyTeams, 
+		m_iFriendlyTeams, m_iTeam;
 
-    unreliable if( bNetDirty && bNetOwner && Role==ROLE_Authority )
-		 GroundSpeed, WaterSpeed, AirSpeed, AccelRate, JumpZ, AirControl, Health;
+	// Pos:0x018
+	reliable if(__NFUN_130__(__NFUN_130__(bNetDirty, bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+		AccelRate, AirControl, 
+		AirSpeed, GroundSpeed, 
+		Health, JumpZ, 
+		WaterSpeed;
 
-    unreliable if (bNetDirty && (!bNetOwner && (Role==ROLE_Authority)))
-        EngineWeapon,PendingWeapon,bSteadyFiring;
+	// Pos:0x03B
+	reliable if(__NFUN_130__(bNetDirty, __NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+		EngineWeapon, PendingWeapon, 
+		bSteadyFiring;
 
-    unreliable if (Role==ROLE_Authority)
-        m_bIsPlayer;
+	// Pos:0x060
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_bIsPlayer, m_fFallingHeight;
 
-    unreliable if (!bNetOwner && (Role==ROLE_Authority))
-        m_bPeekingLeft, m_ePeekingMode, m_fCrouchBlendRate;
-    
-    unreliable if (!bNetOwner && (Role==ROLE_Authority) && m_bIsPlayer)
-        m_bRepFinishShotgun, m_rRotationOffset;
-       
-    // insure that data is rep from owner of this pawn to the server || server sends the data to the non owners of this pawn
-    unreliable if ((bNetOwner && (Role<ROLE_Authority)) || (!bNetOwner && (Role==ROLE_Authority)))
-		m_bIsFiringWeapon, m_bTurnRight, m_bTurnLeft;
+	// Pos:0x06D
+	reliable if(__NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+		m_bPeekingLeft, m_ePeekingMode, 
+		m_fCrouchBlendRate;
 
-	reliable if( (bTearOff||m_bUseRagdoll) && bNetDirty && (Role==ROLE_Authority) )
+	// Pos:0x087
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))), m_bIsPlayer))
+		m_bRepFinishShotgun, m_rRotationOffset;
+
+	// Pos:0x0AC
+	reliable if(__NFUN_132__(__NFUN_130__(bNetOwner, __NFUN_150__(int(Role), int(ROLE_Authority))), __NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+		m_bIsFiringWeapon, m_bTurnLeft, 
+		m_bTurnRight;
+
+	// Pos:0x0E3
+	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(bTearOff, m_bUseRagdoll), bNetDirty), __NFUN_154__(int(Role), int(ROLE_Authority))))
 		TearOffMomentum;
-    
-	// replicated functions sent to server by owning client
-	reliable if( Role<ROLE_Authority )
-		ServerChangedWeapon,ServerFinishShotgunAnimation;
 
-    // R6CODE
-	reliable if( Role == ROLE_Authority )
-        m_fRepDecrementalBlurValue;
+	// Pos:0x111
+	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		ServerChangedWeapon, ServerFinishShotgunAnimation;
 
-    // UT2K3
-    unreliable if ( !bNetOwner && Role==ROLE_Authority )
+	// Pos:0x11E
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_fRepDecrementalBlurValue;
+
+	// Pos:0x12B
+	reliable if(__NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
 		PawnPosition;
 }
 
 //R6BLOOD
-simulated event R6DeadEndedMoving();
-simulated event StopAnimForRG();
+simulated event R6DeadEndedMoving()
+{
+	return;
+}
 
-native function bool ReachedDestination(Actor Goal);
+simulated event StopAnimForRG()
+{
+	return;
+}
 
+// Export UPawn::execReachedDestination(FFrame&, void* const)
+ native function bool ReachedDestination(Actor Goal);
+
+// Export UPawn::execIsFriend(FFrame&, void* const)
 //R6IsFriend
-native function bool IsFriend(  Pawn aPawn );
-native function bool IsEnemy(   Pawn aPawn );
-native function bool IsNeutral( Pawn aPawn );
-native function bool IsAlive();
+ native function bool IsFriend(Pawn aPawn);
+
+// Export UPawn::execIsEnemy(FFrame&, void* const)
+ native function bool IsEnemy(Pawn aPawn);
+
+// Export UPawn::execIsNeutral(FFrame&, void* const)
+ native function bool IsNeutral(Pawn aPawn);
+
+// Export UPawn::execIsAlive(FFrame&, void* const)
+ native function bool IsAlive();
 
 //#ifdef R6CHANGEWEAPONSYSTEM
-simulated event ReceivedWeapons();
-simulated event ReceivedEngineWeapon();
-//#endif R6CHANGEWEAPONSYSTEM
+simulated event ReceivedWeapons()
+{
+	return;
+}
+
+simulated event ReceivedEngineWeapon()
+{
+	return;
+}
 
 //#ifdef R6CODE
-function FLOAT GetPeekingRate();
+function float GetPeekingRate()
+{
+	return;
+}
 
-simulated event PlayWeaponAnimation();
+simulated event PlayWeaponAnimation()
+{
+	return;
+}
 
 //For shotguns anims in MP
 function ServerFinishShotgunAnimation()
 {
-    m_bRepFinishShotgun = !m_bRepFinishShotgun;
+	m_bRepFinishShotgun = __NFUN_129__(m_bRepFinishShotgun);
+	return;
 }
 
-
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
 function Reset()
 {
-	if ( (Controller == None) || Controller.bIsPlayer )
-		Destroy();
+	// End:0x25
+	if(__NFUN_132__(__NFUN_114__(Controller, none), Controller.bIsPlayer))
+	{
+		__NFUN_279__();		
+	}
 	else
-		Super.Reset();
+	{
+		super.Reset();
+	}
+	return;
 }
 
-function String GetHumanReadableName()
+function string GetHumanReadableName()
 {
-	if ( PlayerReplicationInfo != None )
+	// End:0x1A
+	if(__NFUN_119__(PlayerReplicationInfo, none))
+	{
 		return PlayerReplicationInfo.PlayerName;
+	}
 	return MenuName;
+	return;
 }
 
 function PlayTeleportEffect(bool bOut, bool bSound)
 {
-	MakeNoise(1.0);
+	__NFUN_512__(1.0000000);
+	return;
 }
 
-/* PossessedBy()
- Pawn is possessed by Controller
-*/
 function PossessedBy(Controller C)
 {
 	Controller = C;
-	NetPriority = 3;
-
-	if ( C.PlayerReplicationInfo != None )
+	NetPriority = 3.0000000;
+	// End:0x52
+	if(__NFUN_119__(C.PlayerReplicationInfo, none))
 	{
 		PlayerReplicationInfo = C.PlayerReplicationInfo;
 		OwnerName = PlayerReplicationInfo.PlayerName;
 	}
-	if ( C.IsA('PlayerController') )
+	// End:0xD3
+	if(C.__NFUN_303__('PlayerController'))
 	{
-		if ( Level.NetMode != NM_Standalone )
+		// End:0x87
+		if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+		{
 			RemoteRole = ROLE_AutonomousProxy;
+		}
 		BecomeViewTarget();
-
-        //R6ARMPATCHES
-        if(PlayerController(C).Player != none)
-        {
-            m_ArmPatchGUID = PlayerController(C).Player.m_ArmPatchGUID;
-            m_bArmPatchSet = false;
-        }
+		// End:0xD0
+		if(__NFUN_119__(PlayerController(C).Player, none))
+		{
+			m_ArmPatchGUID = PlayerController(C).Player.m_ArmPatchGUID;
+			m_bArmPatchSet = false;
+		}		
 	}
 	else
-		RemoteRole = Default.RemoteRole;
-
-	SetOwner(Controller);	// for network replication
-//R6CODE	Eyeheight = BaseEyeHeight;
+	{
+		RemoteRole = default.RemoteRole;
+	}
+	__NFUN_272__(Controller);
 	ChangeAnimation();
+	return;
 }
 
 function UnPossessed()
 {
-    //R6CODE+
-    if(Level.NetMode != NM_Standalone && PlayerReplicationInfo != none)
-        m_CharacterName = PlayerReplicationInfo.PlayerName;
-    
-	//PlayerReplicationInfo = None;
-    //R6CODE-
-	SetOwner(None);
-	Controller = None;
+	// End:0x3A
+	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_119__(PlayerReplicationInfo, none)))
+	{
+		m_CharacterName = PlayerReplicationInfo.PlayerName;
+	}
+	__NFUN_272__(none);
+	Controller = none;
+	return;
 }
 
-/* PointOfView()
-called by controller when possessing this pawn
-false = 1st person, true = 3rd person
-*/
 simulated function bool PointOfView()
 {
 	return false;
+	return;
 }
 
 function BecomeViewTarget()
 {
-// R6CODE	bUpdateEyeHeight = true;
+	return;
 }
 
 function DropToGround()
 {
-	bCollideWorld = True;
+	bCollideWorld = true;
 	bInterpolating = false;
-	if ( Health > 0 )
+	// End:0x46
+	if(__NFUN_151__(Health, 0))
 	{
-		SetCollision(true,true,true);
-		SetPhysics(PHYS_Falling);
-		AmbientSound = None;
-		if ( IsHumanControlled() )
-			Controller.GotoState(LandMovementState);
+		__NFUN_262__(true, true, true);
+		__NFUN_3970__(2);
+		AmbientSound = none;
+		// End:0x46
+		if(IsHumanControlled())
+		{
+			Controller.__NFUN_113__(LandMovementState);
+		}
 	}
+	return;
 }
 
 function bool CanGrabLadder()
 {
-	return ( bCanClimbLadders 
-			&& (Controller != None)
-			&& (Physics != PHYS_Ladder)
-			&& ((Physics != Phys_Falling) || (abs(Velocity.Z) <= JumpZ)) );
+	return __NFUN_130__(__NFUN_130__(__NFUN_130__(bCanClimbLadders, __NFUN_119__(Controller, none)), __NFUN_155__(int(Physics), int(11))), __NFUN_132__(__NFUN_155__(int(Physics), int(2)), __NFUN_178__(__NFUN_186__(Velocity.Z), JumpZ)));
+	return;
 }
 
 event SetWalking(bool bNewIsWalking)
 {
-	if ( bNewIsWalking != bIsWalking )
+	// End:0x24
+	if(__NFUN_243__(bNewIsWalking, bIsWalking))
 	{
 		bIsWalking = bNewIsWalking;
 		ChangeAnimation();
 	}
+	return;
 }
 
 function bool CanSplash()
 {
-	if ( (Level.TimeSeconds - SplashTime > 0.25)
-		&& ((Physics == PHYS_Falling) || (Physics == PHYS_Flying))
-		&& (Abs(Velocity.Z) > 100) )
+	// End:0x70
+	if(__NFUN_130__(__NFUN_130__(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, SplashTime), 0.2500000), __NFUN_132__(__NFUN_154__(int(Physics), int(2)), __NFUN_154__(int(Physics), int(4)))), __NFUN_177__(__NFUN_186__(Velocity.Z), float(100))))
 	{
 		SplashTime = Level.TimeSeconds;
 		return true;
 	}
 	return false;
+	return;
 }
 
 //#ifdef R6CODE
 event EndClimbLadder(LadderVolume OldLadder)
-//#else
-//function EndClimbLadder(LadderVolume OldLadder)
-//#endif // #ifdef R6CODE
 {
-	if ( Controller != None )
+	// End:0x1A
+	if(__NFUN_119__(Controller, none))
+	{
 		Controller.EndClimbLadder();
-	if ( Physics == PHYS_Ladder )
-		SetPhysics(PHYS_Falling);
+	}
+	// End:0x2F
+	if(__NFUN_154__(int(Physics), int(11)))
+	{
+		__NFUN_3970__(2);
+	}
+	return;
 }
 
 function ClimbLadder(LadderVolume L)
 {
 	OnLadder = L;
-	SetRotation(OnLadder.WallDir);
-	SetPhysics(PHYS_Ladder);
-	if ( IsHumanControlled() )
-		Controller.GotoState('PlayerClimbing');
+	__NFUN_299__(OnLadder.WallDir);
+	__NFUN_3970__(11);
+	// End:0x3A
+	if(IsHumanControlled())
+	{
+		Controller.__NFUN_113__('PlayerClimbing');
+	}
+	return;
 }
 
-/* DisplayDebug()
-list important actor variable on canvas.  Also show the pawn's controller and weapon info
-*/
 simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
-	local string T;
-	Super.DisplayDebug(Canvas, YL, YPos);
+	local string t;
 
-	Canvas.SetDrawColor(255,255,255);
-
-	Canvas.DrawText("Animation Action "$AnimAction$" Status "$AnimStatus);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-	Canvas.DrawText("Anchor "$Anchor$" Serpentine Dist "$SerpentineDist$" Time "$SerpentineTime);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	T = "Floor "$Floor$" DesiredSpeed "$DesiredSpeed$" Crouched "$bIsCrouched$" Try to uncrouch "$UncrouchTime;
-	if ( (OnLadder != None) || (Physics == PHYS_Ladder) )
-		T=T$" on ladder "$OnLadder;
-	Canvas.DrawText(T);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-//R6CODE	Canvas.DrawText("EyeHeight "$Eyeheight$" BaseEyeHeight "$BaseEyeHeight$" Physics Anim "$bPhysicsAnimUpdate);
-//R6CODE	YPos += YL;
-//R6CODE	Canvas.SetPos(4,YPos);
-
-	if ( Controller == None )
+	super.DisplayDebug(Canvas, YL, YPos);
+	Canvas.__NFUN_2626__(byte(255), byte(255), byte(255));
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Animation Action ", string(AnimAction)), " Status "), string(AnimStatus)));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Anchor ", string(Anchor)), " Serpentine Dist "), string(SerpentineDist)), " Time "), string(SerpentineTime)));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	t = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Floor ", string(Floor)), " DesiredSpeed "), string(DesiredSpeed)), " Crouched "), string(bIsCrouched)), " Try to uncrouch "), string(UncrouchTime));
+	// End:0x1A5
+	if(__NFUN_132__(__NFUN_119__(OnLadder, none), __NFUN_154__(int(Physics), int(11))))
 	{
-		Canvas.SetDrawColor(255,0,0);
-		Canvas.DrawText("NO CONTROLLER");
-		YPos += YL;
-		Canvas.SetPos(4,YPos);
+		t = __NFUN_112__(__NFUN_112__(t, " on ladder "), string(OnLadder));
+	}
+	Canvas.__NFUN_465__(t);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	// End:0x237
+	if(__NFUN_114__(Controller, none))
+	{
+		Canvas.__NFUN_2626__(byte(255), 0, 0);
+		Canvas.__NFUN_465__("NO CONTROLLER");
+		__NFUN_184__(YPos, YL);
+		Canvas.__NFUN_2623__(4.0000000, YPos);		
 	}
 	else
-		Controller.DisplayDebug(Canvas,YL,YPos);
-
-/*R6CHANGEWEAPONSYSTEM
-	if ( Weapon == None )
 	{
-		Canvas.SetDrawColor(0,255,0);
-		Canvas.DrawText("NO WEAPON");
-		YPos += YL;
-		Canvas.SetPos(4,YPos);
+		Controller.DisplayDebug(Canvas, YL, YPos);
 	}
-	else
-		Weapon.DisplayDebug(Canvas,YL,YPos);
-R6CHANGEWEAPONSYSTEM*/
+	return;
 }
-		 		
-//
-// Compute offset for drawing an inventory item.
-//
-/*R6CHANGEWEAPONSYSTEM
-//simulated function vector CalcDrawOffset(inventory Inv)
-//{
-//    local vector DrawOffset;
-//
-//	if ( Controller == None )
-//		return (Inv.PlayerViewOffset >> Rotation) + BaseEyeHeight * vect(0,0,1);
-//
-//	DrawOffset = ((0.9/Controller.FOVAngle * 100 * ModifiedPlayerViewOffset(Inv)) >> GetViewRotation() );
-//	if ( !IsLocallyControlled() )
-//		DrawOffset.Z += BaseEyeHeight;
-//	else
-//	{	
-//		DrawOffset.Z += EyeHeight;
-//		DrawOffset += WeaponBob(Inv.BobDamping);
-//	}
-//	return DrawOffset;
-//}
-//
-//function vector ModifiedPlayerViewOffset(inventory Inv)
-//{
-//	return Inv.PlayerViewOffset;
-//}
-*/
-function vector WeaponBob(float BobDamping)
+
+function Vector WeaponBob(float BobDamping)
 {
-	Local Vector WBob;
+	local Vector WBob;
 
-	WBob = BobDamping * WalkBob;
-	WBob.Z = (0.45 + 0.55 * BobDamping) * WalkBob.Z;
-	if ( PlayerController(Controller) != None )
-		WBob += 0.9 * PlayerController(Controller).ShakeOffset;
+	WBob = __NFUN_213__(BobDamping, WalkBob);
+	WBob.Z = __NFUN_171__(__NFUN_174__(0.4500000, __NFUN_171__(0.5500000, BobDamping)), WalkBob.Z);
+	// End:0x6D
+	if(__NFUN_119__(PlayerController(Controller), none))
+	{
+		__NFUN_223__(WBob, __NFUN_213__(0.9000000, PlayerController(Controller).ShakeOffset));
+	}
 	return WBob;
+	return;
 }
 
-function CheckBob(float DeltaTime, vector Y)
+function CheckBob(float DeltaTime, Vector Y)
 {
 	local float Speed2D;
 
-	if (Physics == PHYS_Walking )
+	// End:0x159
+	if(__NFUN_154__(int(Physics), int(1)))
 	{
-		Speed2D = VSize(Velocity);
-		if ( Speed2D < 10 )
-			BobTime += 0.2 * DeltaTime;
-		else
-			BobTime += DeltaTime * (0.3 + 0.7 * Speed2D/GroundSpeed);
-		WalkBob = Y * Bob * Speed2D * sin(8 * BobTime);
-		AppliedBob = AppliedBob * (1 - FMin(1, 16 * deltatime));
-		WalkBob.Z = AppliedBob;
-		if ( Speed2D > 10 )
-			WalkBob.Z = WalkBob.Z + 0.75 * Bob * Speed2D * sin(16 * BobTime);
-		if ( LandBob > 0.01 )
+		Speed2D = __NFUN_225__(Velocity);
+		// End:0x41
+		if(__NFUN_176__(Speed2D, float(10)))
 		{
-			AppliedBob += FMin(1, 16 * deltatime) * LandBob;
-			LandBob *= (1 - 8*Deltatime);
+			__NFUN_184__(bobtime, __NFUN_171__(0.2000000, DeltaTime));			
 		}
-	}
-	else if ( Physics == PHYS_Swimming )
-	{
-		Speed2D = Sqrt(Velocity.X * Velocity.X + Velocity.Y * Velocity.Y);
-		WalkBob = Y * Bob *  0.5 * Speed2D * sin(4.0 * Level.TimeSeconds);
-		WalkBob.Z = Bob * 1.5 * Speed2D * sin(8.0 * Level.TimeSeconds);
+		else
+		{
+			__NFUN_184__(bobtime, __NFUN_171__(DeltaTime, __NFUN_174__(0.3000000, __NFUN_172__(__NFUN_171__(0.7000000, Speed2D), GroundSpeed))));
+		}
+		WalkBob = __NFUN_212__(__NFUN_212__(__NFUN_212__(Y, Bob), Speed2D), __NFUN_187__(__NFUN_171__(8.0000000, bobtime)));
+		AppliedBob = __NFUN_171__(AppliedBob, __NFUN_175__(float(1), __NFUN_244__(1.0000000, __NFUN_171__(16.0000000, DeltaTime))));
+		WalkBob.Z = AppliedBob;
+		// End:0x10F
+		if(__NFUN_177__(Speed2D, float(10)))
+		{
+			WalkBob.Z = __NFUN_174__(WalkBob.Z, __NFUN_171__(__NFUN_171__(__NFUN_171__(0.7500000, Bob), Speed2D), __NFUN_187__(__NFUN_171__(16.0000000, bobtime))));
+		}
+		// End:0x156
+		if(__NFUN_177__(LandBob, 0.0100000))
+		{
+			__NFUN_184__(AppliedBob, __NFUN_171__(__NFUN_244__(1.0000000, __NFUN_171__(16.0000000, DeltaTime)), LandBob));
+			__NFUN_182__(LandBob, __NFUN_175__(float(1), __NFUN_171__(float(8), DeltaTime)));
+		}		
 	}
 	else
 	{
-		BobTime = 0;
-		WalkBob = WalkBob * (1 - FMin(1, 8 * deltatime));
+		// End:0x212
+		if(__NFUN_154__(int(Physics), int(3)))
+		{
+			Speed2D = __NFUN_193__(__NFUN_174__(__NFUN_171__(Velocity.X, Velocity.X), __NFUN_171__(Velocity.Y, Velocity.Y)));
+			WalkBob = __NFUN_212__(__NFUN_212__(__NFUN_212__(__NFUN_212__(Y, Bob), 0.5000000), Speed2D), __NFUN_187__(__NFUN_171__(4.0000000, Level.TimeSeconds)));
+			WalkBob.Z = __NFUN_171__(__NFUN_171__(__NFUN_171__(Bob, 1.5000000), Speed2D), __NFUN_187__(__NFUN_171__(8.0000000, Level.TimeSeconds)));			
+		}
+		else
+		{
+			bobtime = 0.0000000;
+			WalkBob = __NFUN_212__(WalkBob, __NFUN_175__(float(1), __NFUN_244__(1.0000000, __NFUN_171__(8.0000000, DeltaTime))));
+		}
 	}
+	return;
 }
-
-//***************************************
-// Interface to Pawn's Controller
 
 // return true if controlled by a Player (AI or human)
 simulated function bool IsPlayerPawn()
 {
-	return ( (Controller != None) && Controller.bIsPlayer );
+	return __NFUN_130__(__NFUN_119__(Controller, none), Controller.bIsPlayer);
+	return;
 }
 
 // return true if controlled by a real live human
 simulated function bool IsHumanControlled()
 {
-	return ( PlayerController(Controller) != None );
+	return __NFUN_119__(PlayerController(Controller), none);
+	return;
 }
 
 // return true if controlled by local (not network) player
 simulated function bool IsLocallyControlled()
 {
-	if ( Level.NetMode == NM_Standalone )
+	// End:0x1B
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
 		return true;
-	if ( Controller == None )
+	}
+	// End:0x28
+	if(__NFUN_114__(Controller, none))
+	{
 		return false;
-	if ( PlayerController(Controller) == None )
+	}
+	// End:0x3A
+	if(__NFUN_114__(PlayerController(Controller), none))
+	{
 		return true;
-
-	return ( Viewport(PlayerController(Controller).Player) != None );
+	}
+	return __NFUN_119__(Viewport(PlayerController(Controller).Player), none);
+	return;
 }
 
 // rbrek 26 oct 2001
 // #ifdef R6CODE - this function was converted to an event so that it can be called from the native 
 //					code for SeePawn(), LineOfSightTo()...
 // simulated function rotator GetViewRotation()
-simulated event rotator GetViewRotation() 
+simulated event Rotator GetViewRotation()
 {
-	if ( Controller == None )
-		return Rotation;
-    else
+	// End:0x14
+	if(__NFUN_114__(Controller, none))
+	{
+		return Rotation;		
+	}
+	else
+	{
 		return Controller.GetViewRotation();
+	}
+	return;
 }
 
-simulated function SetViewRotation(rotator NewRotation )
+simulated function SetViewRotation(Rotator NewRotation)
 {
-	if ( Controller != None )
-		Controller.SetRotation(NewRotation);
+	// End:0x1C
+	if(__NFUN_119__(Controller, none))
+	{
+		Controller.__NFUN_299__(NewRotation);
+	}
+	return;
 }
 
 final function bool InGodMode()
 {
-	return ( (Controller != None) && Controller.bGodMode );
+	return __NFUN_130__(__NFUN_119__(Controller, none), Controller.bGodMode);
+	return;
 }
 
 function bool NearMoveTarget()
 {
-	if ( (Controller == None) || (Controller.MoveTarget == None) )
+	// End:0x23
+	if(__NFUN_132__(__NFUN_114__(Controller, none), __NFUN_114__(Controller.MoveTarget, none)))
+	{
 		return false;
-
+	}
 	return ReachedDestination(Controller.MoveTarget);
+	return;
 }
 
-simulated final function bool PressingFire()
+final simulated function bool PressingFire()
 {
-	return ( (Controller != None) && (Controller.bFire != 0) );
+	return __NFUN_130__(__NFUN_119__(Controller, none), __NFUN_155__(int(Controller.bFire), 0));
+	return;
 }
 
-simulated final function bool PressingAltFire()
+final simulated function bool PressingAltFire()
 {
-	return ( (Controller != None) && (Controller.bAltFire != 0) );
+	return __NFUN_130__(__NFUN_119__(Controller, none), __NFUN_155__(int(Controller.bAltFire), 0));
+	return;
 }
 
 function Actor GetMoveTarget()
-{	
-	if ( Controller == None )
-		return None;
-
+{
+	// End:0x0D
+	if(__NFUN_114__(Controller, none))
+	{
+		return none;
+	}
 	return Controller.MoveTarget;
+	return;
 }
 
-function SetMoveTarget(Actor NewTarget )
+function SetMoveTarget(Actor NewTarget)
 {
-	if ( Controller != None )
+	// End:0x1F
+	if(__NFUN_119__(Controller, none))
+	{
 		Controller.MoveTarget = NewTarget;
+	}
+	return;
 }
 
-function bool LineOfSightTo(actor Other)
+function bool LineOfSightTo(Actor Other)
 {
-	return ( (Controller != None) && Controller.LineOfSightTo(Other) );
-} 
-
-/* CHANGENOTE: Changes in this function related to the Weapon code updates
-*/
-/*R6CHANGEWEAPONSYSTEM
-simulated final function rotator AdjustAim(Ammunition FiredAmmunition, vector projStart, int aimerror)
-{
-	if ( Controller == None )
-		return Rotation;
-
-	return Controller.AdjustAim(FiredAmmunition, projStart, aimerror);
-}
-*/
-
-/* CHANGENOTE: Changes in this function related to the Weapon code updates
-*/
-function Actor ShootSpecial(Actor A)
-{
-/*    R6CHANGEWEAPONSYSTEM
-	if ( !Controller.bCanDoSpecial || (Weapon == None) )
-*/
-		return None;
-
-	Controller.FireWeaponAt(A);
-	Controller.bFire = 0;
-	return A;
+	return __NFUN_130__(__NFUN_119__(Controller, none), Controller.__NFUN_514__(Other));
+	return;
 }
 
-/*R6CHANGEWEAPONSYSTEM
-function HandlePickup(Pickup pick)
+function ReceiveLocalizedMessage(Class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
-	MakeNoise(0.2);
-	if ( Controller != None )
-		Controller.HandlePickup(pick);
-}
-*/
-function ReceiveLocalizedMessage( class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject )
-{
-	if ( PlayerController(Controller) != None )
-		PlayerController(Controller).ReceiveLocalizedMessage( Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject );
+	// End:0x3D
+	if(__NFUN_119__(PlayerController(Controller), none))
+	{
+		PlayerController(Controller).ReceiveLocalizedMessage(Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject);
+	}
+	return;
 }
 
-event ClientMessage( coerce string S, optional Name Type )
+event ClientMessage(coerce string S, optional name type)
 {
-	if ( PlayerController(Controller) != None )
-		PlayerController(Controller).ClientMessage( S, Type );
+	// End:0x2E
+	if(__NFUN_119__(PlayerController(Controller), none))
+	{
+		PlayerController(Controller).ClientMessage(S, type);
+	}
+	return;
 }
 
-function Trigger( actor Other, pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
-	if ( Controller != None )
+	// End:0x24
+	if(__NFUN_119__(Controller, none))
+	{
 		Controller.Trigger(Other, EventInstigator);
+	}
+	return;
 }
 
-//***************************************
-
-function bool CanTrigger(Trigger T)
+function bool CanTrigger(Trigger t)
 {
 	return true;
+	return;
 }
 
-function GiveWeapon(string aClassName )
-{
-/*R6CHANGEWEAPONSYSTEM
-	local class<Weapon> WeaponClass;
-	local Weapon NewWeapon;
-
-	WeaponClass = class<Weapon>(DynamicLoadObject(aClassName, class'Class'));
-
-	if( FindInventoryType(WeaponClass) != None )
-		return;
-	newWeapon = Spawn(WeaponClass);
-	if( newWeapon != None )
-		newWeapon.GiveTo(self);
-*/
-}
-
-function SetDisplayProperties(ERenderStyle NewStyle, Material NewTexture, bool bLighting )
+function SetDisplayProperties(Actor.ERenderStyle NewStyle, Material NewTexture, bool bLighting)
 {
 	Style = NewStyle;
 	Texture = NewTexture;
 	bUnlit = bLighting;
-/*R6CHANGEWEAPONSYSTEM
-	if ( Weapon != None )
-		Weapon.SetDisplayProperties(Style, Texture, bUnlit);
-
-	if ( !bUpdatingDisplay && (Inventory != None) )
-	{
-		bUpdatingDisplay = true;
-		Inventory.SetOwnerDisplay();
-	}
-*/
 	bUpdatingDisplay = false;
+	return;
 }
 
 function SetDefaultDisplayProperties()
 {
-	Style = Default.Style;
-	texture = Default.Texture;
-	bUnlit = Default.bUnlit;
-/*R6CHANGEWEAPONSYSTEM
-	if ( Weapon != None )
-		Weapon.SetDefaultDisplayProperties();
-
-	if ( !bUpdatingDisplay && (Inventory != None) )
-	{
-		bUpdatingDisplay = true;
-		Inventory.SetOwnerDisplay();
-	}
-*/
-    bUpdatingDisplay = false;
+	Style = default.Style;
+	Texture = default.Texture;
+	bUnlit = default.bUnlit;
+	bUpdatingDisplay = false;
+	return;
 }
 
 function FinishedInterpolation()
 {
 	DropToGround();
+	return;
 }
 
-function JumpOutOfWater(vector jumpDir)
+function JumpOutOfWater(Vector jumpDir)
 {
 	Falling();
-	Velocity = jumpDir * WaterSpeed;
-	Acceleration = jumpDir * AccelRate;
-	velocity.Z = FMax(380,JumpZ); //set here so physics uses this for remainder of tick
+	Velocity = __NFUN_212__(jumpDir, WaterSpeed);
+	Acceleration = __NFUN_212__(jumpDir, AccelRate);
+	Velocity.Z = __NFUN_245__(380.0000000, JumpZ);
 	bUpAndOut = true;
+	return;
 }
 
 event FellOutOfWorld()
 {
-	if ( Role < ROLE_Authority )
+	// End:0x12
+	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	{
 		return;
+	}
 	Health = -1;
-	SetPhysics(PHYS_None);
-/*R6CHANGEWEAPONSYSTEM
-	Weapon = None;
-*/
-	Died(None, class'Gibbed', Location);
+	__NFUN_3970__(0);
+	return;
 }
 
-/* ShouldCrouch()
-Controller is requesting that pawn crouch
-*/
 function ShouldCrouch(bool Crouch)
 {
 	bWantsToCrouch = Crouch;
+	return;
 }
 
 // Stub events called when physics actually allows crouch to begin or end
 // use these for changing the animation (if script controlled)
 event EndCrouch(float HeightAdjust)
 {
-//R6CODE	EyeHeight -= HeightAdjust;
-//R6CODE	OldZ += HeightAdjust;
-//R6CODE	BaseEyeHeight = Default.BaseEyeHeight;
+	return;
 }
 
 event StartCrouch(float HeightAdjust)
 {
-//R6CODE    EyeHeight += HeightAdjust;
-//R6CODE    OldZ -= HeightAdjust;
-//R6CODE    BaseEyeHeight = 0.8 * CrouchHeight;
+	return;
 }
 
-function RestartPlayer();
-function AddVelocity( vector NewVelocity)
+function RestartPlayer()
 {
-	if ( bIgnoreForces )
-		return;
-	if ( (Physics == PHYS_Walking)
-		|| (((Physics == PHYS_Ladder) || (Physics == PHYS_Spider)) && (NewVelocity.Z > Default.JumpZ)) )
-		SetPhysics(PHYS_Falling);
-	if ( (Velocity.Z > 380) && (NewVelocity.Z > 0) )
-		NewVelocity.Z *= 0.5;
-	Velocity += NewVelocity;
+	return;
 }
 
-function KilledBy( pawn EventInstigator )
+function AddVelocity(Vector NewVelocity)
+{
+	// End:0x0B
+	if(bIgnoreForces)
+	{
+		return;
+	}
+	// End:0x5A
+	if(__NFUN_132__(__NFUN_154__(int(Physics), int(1)), __NFUN_130__(__NFUN_132__(__NFUN_154__(int(Physics), int(11)), __NFUN_154__(int(Physics), int(9))), __NFUN_177__(NewVelocity.Z, default.JumpZ))))
+	{
+		__NFUN_3970__(2);
+	}
+	// End:0x95
+	if(__NFUN_130__(__NFUN_177__(Velocity.Z, float(380)), __NFUN_177__(NewVelocity.Z, float(0))))
+	{
+		__NFUN_182__(NewVelocity.Z, 0.5000000);
+	}
+	__NFUN_223__(Velocity, NewVelocity);
+	return;
+}
+
+function KilledBy(Pawn EventInstigator)
 {
 	local Controller Killer;
 
 	Health = 0;
-	if ( EventInstigator != None )
+	// End:0x26
+	if(__NFUN_119__(EventInstigator, none))
+	{
 		Killer = EventInstigator.Controller;
-	Died( Killer, class'Suicided', Location );
+	}
+	return;
 }
 
 function TakeFallingDamage()
 {
 	local float Shake;
 
-	if (Velocity.Z < -0.5 * MaxFallSpeed)
+	// End:0xCD
+	if(__NFUN_176__(Velocity.Z, __NFUN_171__(-0.5000000, MaxFallSpeed)))
 	{
-		MakeNoise(FMin(2.0,-0.5 * Velocity.Z/(FMax(JumpZ, 150.0))));
-		if (Velocity.Z < -1 * MaxFallSpeed)
+		__NFUN_512__(__NFUN_244__(2.0000000, __NFUN_172__(__NFUN_171__(-0.5000000, Velocity.Z), __NFUN_245__(JumpZ, 150.0000000))));
+		// End:0xCD
+		if(__NFUN_119__(Controller, none))
 		{
-			if ( Role == ROLE_Authority )
-				TakeDamage(-100 * (Velocity.Z + MaxFallSpeed)/MaxFallSpeed, None, Location, vect(0,0,0), class'Fell');
-		}
-		if ( Controller != None )
-		{
-			Shake = FMin(1, -1 * Velocity.Z/MaxFallSpeed);
-			Controller.ShakeView(0.175 + 0.1 * Shake, 850 * Shake, Shake * vect(0,0,1.5), 120000, vect(0,0,10), 1);
+			Shake = __NFUN_244__(1.0000000, __NFUN_172__(__NFUN_171__(-1.0000000, Velocity.Z), MaxFallSpeed));
+			Controller.ShakeView(__NFUN_174__(0.1750000, __NFUN_171__(0.1000000, Shake)), __NFUN_171__(850.0000000, Shake), __NFUN_213__(Shake, vect(0.0000000, 0.0000000, 1.5000000)), 120000.0000000, vect(0.0000000, 0.0000000, 10.0000000), 1.0000000);
 		}
 	}
+	return;
 }
 
 function ClientReStart()
 {
-	Velocity = vect(0,0,0);
-	Acceleration = vect(0,0,0);
-//R6CODE	BaseEyeHeight = Default.BaseEyeHeight;
-//R6CODE	EyeHeight = BaseEyeHeight;
+	Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+	Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
 	PlayWaiting();
+	return;
 }
 
-function ClientSetLocation( vector NewLocation, rotator NewRotation )
+function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 {
-	if ( Controller != None )
+	// End:0x24
+	if(__NFUN_119__(Controller, none))
+	{
 		Controller.ClientSetLocation(NewLocation, NewRotation);
+	}
+	return;
 }
 
-function ClientSetRotation( rotator NewRotation )
+function ClientSetRotation(Rotator NewRotation)
 {
-	if ( Controller != None )
+	// End:0x1F
+	if(__NFUN_119__(Controller, none))
+	{
 		Controller.ClientSetRotation(NewRotation);
+	}
+	return;
 }
 
-simulated function FaceRotation( rotator NewRotation, float DeltaTime )
+simulated function FaceRotation(Rotator NewRotation, float DeltaTime)
 {
-	if ( Physics == PHYS_Ladder )
-		SetRotation(OnLadder.Walldir);
+	// End:0x24
+	if(__NFUN_154__(int(Physics), int(11)))
+	{
+		__NFUN_299__(OnLadder.WallDir);		
+	}
 	else
 	{
-		if ( (Physics == PHYS_Walking) || (Physics == PHYS_Falling) )
+		// End:0x52
+		if(__NFUN_132__(__NFUN_154__(int(Physics), int(1)), __NFUN_154__(int(Physics), int(2))))
+		{
 			NewRotation.Pitch = 0;
-		SetRotation(NewRotation);
-	}
-}
-
-function ClientDying(class<DamageType> DamageType, vector HitLocation)
-{
-	if ( Controller != None )
-		Controller.ClientDying(DamageType, HitLocation);
-}
-
-//=============================================================================
-// Inventory related functions.
-
-// toss out the weapon currently held
-function TossWeapon(vector TossVel)
-{
-/*R6CHANGEWEAPONSYSTEM
-	local vector X,Y,Z;
-
-	Weapon.velocity = TossVel;
-	GetAxes(Rotation,X,Y,Z);
-	Weapon.DropFrom(Location + 0.8 * CollisionRadius * X + - 0.5 * CollisionRadius * Y); 
-*/
-}	
-
-// The player/bot wants to select next item
-#ifdefDEBUG
-exec function NextItem()
-{
-/*R6CHANGEWEAPONSYSTEM
-	if (SelectedItem==None) {
-		SelectedItem = Inventory.SelectNext();
-		Return;
-	}
-	if (SelectedItem.Inventory!=None)
-		SelectedItem = SelectedItem.Inventory.SelectNext(); 
-	else
-		SelectedItem = Inventory.SelectNext();
-
-	if ( SelectedItem == None )
-		SelectedItem = Inventory.SelectNext();
-*/
-}
-#endif
-
-// FindInventoryType()
-// returns the inventory item of the requested class
-// if it exists in this pawn's inventory 
-
-/*R6CHANGEWEAPONSYSTEM
-function Inventory FindInventoryType( class DesiredClass )
-{
-	local Inventory Inv;
-
-	for( Inv=Inventory; Inv!=None; Inv=Inv.Inventory )   
-		if ( Inv.class == DesiredClass )
-			return Inv;
-    return None;
-} 
-*/
-
-// Add Item to this pawn's inventory. 
-// Returns true if successfully added, false if not.
-/*R6CHANGEWEAPONSYSTEM
-function bool AddInventory( inventory NewItem )
-{
-	// Skip if already in the inventory.
-	local inventory Inv;
-	local actor Last;
-
-	Last = self;
-	
-	// The item should not have been destroyed if we get here.
-	if (NewItem ==None )
-		log("tried to add none inventory to "$self);
-
-	for( Inv=Inventory; Inv!=None; Inv=Inv.Inventory )
-	{
-		if( Inv == NewItem )
-			return false;
-		Last = Inv;
-	}
-
-	// Add to back of inventory chain (so minimizes net replication effect).
-	NewItem.SetOwner(Self);
-	NewItem.Inventory = None;
-	Last.Inventory = NewItem;
-
-	if ( Controller != None )
-		Controller.NotifyAddInventory(NewItem);
-	return true;
-}
-
-// Remove Item from this pawn's inventory, if it exists.
-function DeleteInventory( inventory Item )
-{
-	// If this item is in our inventory chain, unlink it.
-	local actor Link;
-
-	if ( Item == Weapon )
-		Weapon = None;
-	if ( Item == SelectedItem )
-		SelectedItem = None;
-	for( Link = Self; Link!=None; Link=Link.Inventory )
-	{
-		if( Link.Inventory == Item )
-		{
-			Link.Inventory = Item.Inventory;
-			break;
 		}
+		__NFUN_299__(NewRotation);
 	}
-	Item.SetOwner(None);
+	return;
 }
-*/
 
-// Just changed to pendingWeapon
-function ChangedWeapon()
+function ClientDying(Vector HitLocation)
 {
-/*R6CHANGEWEAPONSYSTEM
-	local Weapon OldWeapon;
-
-	OldWeapon = Weapon;
-
-	if (Weapon == PendingWeapon)
+	// End:0x1F
+	if(__NFUN_119__(Controller, none))
 	{
-		if ( Weapon == None )
-		{
-			Controller.SwitchToBestWeapon();
-			return;
-		}
-		else if ( Weapon.IsInState('DownWeapon') ) 
-			Weapon.GotoState('Idle');
-		PendingWeapon = None;
-		ServerChangedWeapon(OldWeapon, Weapon);
-		return;
+		Controller.ClientDying(HitLocation);
 	}
-	if ( PendingWeapon == None )
-		PendingWeapon = Weapon;
-		
-	Weapon = PendingWeapon;
-	if ( (Weapon != None) && (Level.NetMode == NM_Client) )
-		Weapon.BringUp();
-	PendingWeapon = None;
-	Weapon.Instigator = self;
-	ServerChangedWeapon(OldWeapon, Weapon);
-	if ( Controller != None )
-		Controller.ChangedWeapon();
-*/
+	return;
 }
-
-/*R6CHANGEWEAPONSYSTEM
-function name GetWeaponBoneFor(Inventory I)
-{
-	return 'righthand';
-}
-*/
 
 function ServerChangedWeapon(R6EngineWeapon OldWeapon, R6EngineWeapon W)
 {
-/*R6CHANGEWEAPONSYSTEM
-	if ( OldWeapon != None )
-	{
-		OldWeapon.SetDefaultDisplayProperties();
-		OldWeapon.DetachFromPawn(self);		
-	}
-	Weapon = W;
-	if ( Weapon == None )
-		return;
-
-	if ( Weapon != None )
-	{
-		//log("ServerChangedWeapon: Attaching Weapon to actor bone.");
-		Weapon.AttachToPawn(self);
-	}
-
-	Weapon.SetRelativeLocation(Weapon.Default.RelativeLocation);
-	Weapon.SetRelativeRotation(Weapon.Default.RelativeRotation);
-	if ( OldWeapon == Weapon )
-	{
-		if ( Weapon.IsInState('DownWeapon') ) 
-			Weapon.BringUp();
-		Inventory.OwnerEvent('ChangedWeapon'); // tell inventory that weapon changed (in case any effect was being applied)
-		return;
-	}
-	else if ( Level.Game != None )
-		MakeNoise(0.1 * Level.Game.Difficulty);		
-	Inventory.OwnerEvent('ChangedWeapon'); // tell inventory that weapon changed (in case any effect was being applied)
-
-	PlayWeaponSwitch(W);
-	Weapon.BringUp();
-*/
+	return;
 }
 
 //==============
 // Encroachment
-event bool EncroachingOn( actor Other )
+event bool EncroachingOn(Actor Other)
 {
-	if ( Other.bWorldGeometry )
+	// End:0x14
+	if(Other.bWorldGeometry)
+	{
 		return true;
-		
-	if ( ((Controller == None) || !Controller.bIsPlayer || bWarping) && (Pawn(Other) != None) )
+	}
+	// End:0x54
+	if(__NFUN_130__(__NFUN_132__(__NFUN_132__(__NFUN_114__(Controller, none), __NFUN_129__(Controller.bIsPlayer)), bWarping), __NFUN_119__(Pawn(Other), none)))
+	{
 		return true;
-		
+	}
 	return false;
+	return;
 }
 
-event EncroachedBy( actor Other )
+event EncroachedBy(Actor Other)
 {
-	if ( Pawn(Other) != None )
-		gibbedBy(Other);
-}
-
-function gibbedBy(actor Other)
-{
-	local Controller Killer;
-
-	if ( Role < ROLE_Authority )
-		return;
-	if ( Pawn(Other) != None )
-		Killer = Pawn(Other).Controller;
-	Died(Killer, class'Gibbed', Location);
+	return;
 }
 
 //Base change - if new base is pawn or decoration, damage based on relative mass and old velocity
 // Also, non-players will jump off pawns immediately
 function JumpOffPawn()
 {
-	Velocity += (100 + CollisionRadius) * VRand();
-	Velocity.Z = 200 + CollisionHeight;
-	SetPhysics(PHYS_Falling);
+	__NFUN_223__(Velocity, __NFUN_213__(__NFUN_174__(float(100), CollisionRadius), __NFUN_252__()));
+	Velocity.Z = __NFUN_174__(200.0000000, CollisionHeight);
+	__NFUN_3970__(2);
 	bNoJumpAdjust = true;
 	Controller.SetFall();
+	return;
 }
 
 singular event BaseChange()
 {
 	local float decorMass;
 
-	if ( bInterpolating )
-		return;
-	if ( (base == None) && (Physics == PHYS_None) )
-		SetPhysics(PHYS_Falling);
-	// Pawns can only set base to non-pawns, or pawns which specifically allow it.
-	// Otherwise we do some damage and jump off.
-	else if ( Pawn(Base) != None )
+	// End:0x0B
+	if(bInterpolating)
 	{
-		if ( !Pawn(Base).bCanBeBaseForPawns )
+		return;
+	}
+	// End:0x30
+	if(__NFUN_130__(__NFUN_114__(Base, none), __NFUN_154__(int(Physics), int(0))))
+	{
+		__NFUN_3970__(2);		
+	}
+	else
+	{
+		// End:0x5F
+		if(__NFUN_119__(Pawn(Base), none))
 		{
-			Base.TakeDamage( (1-Velocity.Z/400)* Mass/Base.Mass, Self,Location,0.5 * Velocity , class'Crushed');
-			JumpOffPawn();
+			// End:0x5F
+			if(__NFUN_129__(Pawn(Base).bCanBeBaseForPawns))
+			{
+				JumpOffPawn();
+			}
 		}
 	}
-	else if ( (Decoration(Base) != None) && (Velocity.Z < -400) )
-	{
-		decorMass = FMax(Decoration(Base).Mass, 1);
-		Base.TakeDamage((-2* Mass/decorMass * Velocity.Z/400), Self, Location, 0.5 * Velocity, class'Crushed');
-	}
+	return;
 }
 
-//R6CODE
-//event UpdateEyeHeight( float DeltaTime )
-//{
-//	local float smooth;
-//	local float OldEyeHeight;
-//
-//	if (Controller == None )
-//	{
-//		EyeHeight = 0;
-//		return;
-//	}
-//
-//	// smooth up/down stairs
-//	smooth = FMin(1.0, 10.0 * DeltaTime/Level.TimeDilation);
-//	If( Controller.WantsSmoothedView() )
-//	{
-//		OldEyeHeight = EyeHeight;
-//		EyeHeight = FClamp((EyeHeight - Location.Z + OldZ) * (1 - smooth) + BaseEyeHeight * smooth,
-//							-0.5 * CollisionHeight,
-//							CollisionHeight + FClamp((OldZ - Location.Z), 0.0, MAXSTEPHEIGHT)); 
-//	}
-//	else
-//	{
-//		bJustLanded = false;
-//		EyeHeight = EyeHeight * ( 1 - smooth) + BaseEyeHeight * smooth;
-//	}
-//	Controller.AdjustView(DeltaTime);
-//}
-//R6CODE
-
-/* EyePosition()
-Called by PlayerController to determine camera position in first person view.  Returns
-the offset from the Pawn's location at which to place the camera
-*/
 // rbrek 26 oct 2001
 // #ifdef R6CODE - this function was converted to an event so that it can be called from the native 
 //					code for SeePawn(), LineOfSightTo()...
 // function vector EyePosition()
-event vector EyePosition()
+event Vector EyePosition()
 {
-//R6CODE	return EyeHeight * vect(0,0,1) + WalkBob;
 	return WalkBob;
+	return;
 }
-
-//=============================================================================
 
 simulated event Destroyed()
 {
-//	local Inventory Inv,Next;
-
-	if ( Shadow != None )
-    {
-		Shadow.Destroy();
-        Shadow = none;
-    }
-	if ( Controller != None )
+	// End:0x1E
+	if(__NFUN_119__(Shadow, none))
+	{
+		Shadow.__NFUN_279__();
+		Shadow = none;
+	}
+	// End:0x38
+	if(__NFUN_119__(Controller, none))
+	{
 		Controller.PawnDied();
-	if ( Role < ROLE_Authority )
+	}
+	// End:0x4A
+	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	{
 		return;
-
-/*R6CHANGEWEAPONSYSTEM
-	for( Inv=Inventory; Inv!=None; Inv=Inv.Inventory )   
-		Inv.Destroy();
-*/
-//R6CHANGEWEAPONSYSTEM
-    if (EngineWeapon!= none)
-    {
-        EngineWeapon.destroy();
-	}	
-
-    if (PendingWeapon!= none)
-    {
-        PendingWeapon.destroy();
-    }
-
-    EngineWeapon = None;
-    PendingWeapon = None;
-/*R6CHANGEWEAPONSYSTEM
-	Inventory = None;
-*/
-	Super.Destroyed();
+	}
+	// End:0x61
+	if(__NFUN_119__(EngineWeapon, none))
+	{
+		EngineWeapon.__NFUN_279__();
+	}
+	// End:0x78
+	if(__NFUN_119__(PendingWeapon, none))
+	{
+		PendingWeapon.__NFUN_279__();
+	}
+	EngineWeapon = none;
+	PendingWeapon = none;
+	super.Destroyed();
+	return;
 }
 
 //=============================================================================
@@ -1653,681 +1419,744 @@ simulated event Destroyed()
 //
 event PreBeginPlay()
 {
-	Super.PreBeginPlay();
+	super.PreBeginPlay();
 	Instigator = self;
 	DesiredRotation = Rotation;
-	if ( bDeleteMe )
+	// End:0x23
+	if(bDeleteMe)
+	{
 		return;
-
-//R6CODE	if ( BaseEyeHeight == 0 )
-//R6CODE		BaseEyeHeight = 0.8 * CollisionHeight;
-//R6CODE	EyeHeight = BaseEyeHeight;
-
-	if ( menuname == "" )
-		menuname = GetItemName(string(class));
+	}
+	// End:0x42
+	if(__NFUN_122__(MenuName, ""))
+	{
+		MenuName = GetItemName(string(Class));
+	}
+	return;
 }
 
 event PostBeginPlay()
 {
 	local AIScript A;
 
-
-	Super.PostBeginPlay();
-	SplashTime = 0;
-//R6CODE	EyeHeight = BaseEyeHeight;
-	OldRotYaw = Rotation.Yaw;
-
-	// automatically add controller to pawns which were placed in level
-	// NOTE: pawns spawned during gameplay are not automatically possessed by a controller
-	if ( Level.bStartup && (Health > 0) && !bDontPossess )
+	super.PostBeginPlay();
+	SplashTime = 0.0000000;
+	OldRotYaw = float(Rotation.Yaw);
+	// End:0x10C
+	if(__NFUN_130__(__NFUN_130__(Level.bStartup, __NFUN_151__(Health, 0)), __NFUN_129__(bDontPossess)))
 	{
-		// check if I have an AI Script
-		if ( (AIScriptTag != 'None') && (AIScriptTag != '') )
+		// End:0xB1
+		if(__NFUN_130__(__NFUN_255__(AIScriptTag, 'None'), __NFUN_255__(AIScriptTag, 'None')))
 		{
-			ForEach AllActors(class'AIScript',A,AIScriptTag)
-				break;
-			// let the AIScript spawn and init my controller
-			if ( A != None )
+			// End:0x88
+			foreach __NFUN_304__(Class'Engine.AIScript', A, AIScriptTag)
+			{
+				// End:0x88
+				break;				
+			}			
+			// End:0xB1
+			if(__NFUN_119__(A, none))
 			{
 				A.SpawnControllerFor(self);
-				if ( Controller != None )
+				// End:0xB1
+				if(__NFUN_119__(Controller, none))
+				{
 					return;
+				}
 			}
 		}
-		if ( (ControllerClass != None) && (Controller == None) )
-			Controller = spawn(ControllerClass);
-		if ( Controller != None )
+		// End:0xD7
+		if(__NFUN_130__(__NFUN_119__(ControllerClass, none), __NFUN_114__(Controller, none)))
+		{
+			Controller = __NFUN_278__(ControllerClass);
+		}
+		// End:0x10C
+		if(__NFUN_119__(Controller, none))
 		{
 			Controller.Possess(self);
-			AIController(Controller).Skill += SkillModifier;
+			__NFUN_184__(AIController(Controller).Skill, SkillModifier);
 		}
 	}
+	return;
 }
 
 // called after PostBeginPlay on net client
 simulated event PostNetBeginPlay()
 {
-	if ( Role == ROLE_Authority )
+	// End:0x12
+	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	{
 		return;
-	if ( Controller != None )
+	}
+	// End:0x2D
+	if(__NFUN_119__(Controller, none))
 	{
 		Controller.Pawn = self;
-// R6CODE		bUpdateEyeHeight = true;
-	} 
-
-	if ( (PlayerReplicationInfo != None) 
-		&& (PlayerReplicationInfo.Owner == None) )
-		PlayerReplicationInfo.SetOwner(Controller);
+	}
+	// End:0x5F
+	if(__NFUN_130__(__NFUN_119__(PlayerReplicationInfo, none), __NFUN_114__(PlayerReplicationInfo.Owner, none)))
+	{
+		PlayerReplicationInfo.__NFUN_272__(Controller);
+	}
 	PlayWaiting();
+	return;
 }
-	
+
 simulated function SetMesh()
 {
-	LinkMesh( default.mesh );
+	LinkMesh(default.Mesh);
+	return;
 }
 
-function Gasp();
-function SetMovementPhysics();
-
-function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation, 
-						Vector momentum, class<DamageType> damageType)
+function Gasp()
 {
-/*
-	local int actualDamage;
-	local bool bAlreadyDead;
-	local Controller Killer;
+	return;
+}
 
-	if ( damagetype == None )
-		warn("No damagetype for damage by "$instigatedby$" with weapon "$InstigatedBy.Weapon);
-	if ( Role < ROLE_Authority )
+function SetMovementPhysics()
+{
+	return;
+}
+
+function Died(Controller Killer, Vector HitLocation)
+{
+	// End:0x0B
+	if(bDeleteMe)
 	{
-		log(self$" client damage type "$damageType$" by "$instigatedBy);
 		return;
 	}
-
-	bAlreadyDead = (Health <= 0);
-
-	if (Physics == PHYS_None)
-		SetMovementPhysics();
-	if (Physics == PHYS_Walking)
-		momentum.Z = FMax(momentum.Z, 0.4 * VSize(momentum));
-	if ( instigatedBy == self )
-		momentum *= 0.6;
-	momentum = momentum/Mass;
-
-	actualDamage = Level.Game.ReduceDamage(Damage, self, instigatedBy, HitLocation, Momentum, DamageType);
-
-	Health -= actualDamage;
-	if ( HitLocation == vect(0,0,0) )
-		HitLocation = Location;
-	if ( bAlreadyDead )
+	// End:0x33
+	if(__NFUN_119__(Killer, none))
 	{
-		Warn(self$" took regular damage "$damagetype$" from "$instigatedby$" while already dead at "$Level.TimeSeconds);
-		ChunkUp(-1 * Health);
-		return;
-	}
-
-	PlayHit(actualDamage, hitLocation, damageType, Momentum);
-	if ( Health <= 0 )
-	{
-		// pawn died
-		if ( instigatedBy != None )
-			Killer = instigatedBy.Controller; //FIXME what if killer died before killing you
-		if ( bPhysicsAnimUpdate )
-			TearOffMomentum = momentum;
-		Died(Killer, damageType, HitLocation);
+		TriggerEvent(Event, self, Killer.Pawn);		
 	}
 	else
 	{
-		AddVelocity( momentum ); 
-		if ( Controller != None )
-			Controller.NotifyTakeHit(instigatedBy, HitLocation, actualDamage, DamageType, Momentum);
+		TriggerEvent(Event, self, none);
 	}
-	MakeNoise(1.0); 
-*/
-}
-
-function Died(Controller Killer, class<DamageType> damageType, vector HitLocation)
-{
-	if ( bDeleteMe )
-		return; //already destroyed
-
-	// mutator hook to prevent deaths
-	// WARNING - don't prevent bot suicides - they suicide when really needed
-	if ( Level.Game.PreventDeath(self, Killer, damageType, HitLocation) )
+	__NFUN_182__(Velocity.Z, 1.3000000);
+	// End:0x6E
+	if(IsHumanControlled())
 	{
-		Health = max(Health, 1); //mutator should set this higher
-		return;
-	}
-	Health = Min(0, Health);
-	Level.Game.Killed(Killer, Controller, self, damageType);
-
-	if ( Killer != None )
-		TriggerEvent(Event, self, Killer.Pawn);
-	else
-		TriggerEvent(Event, self, None);
-
-	Velocity.Z *= 1.3;
-	if ( IsHumanControlled() )
 		PlayerController(Controller).ForceDeathUpdate();
-	if ( (DamageType != None) && (DamageType.default.GibModifier >= 100) )
-		ChunkUp(-1 * Health);
-	else
-	{
-		PlayDying(DamageType, HitLocation);
-		if ( Level.Game.bGameEnded )
-			return;
-		if ( !bPhysicsAnimUpdate && !IsLocallyControlled() )
-			ClientDying(DamageType, HitLocation);
 	}
-}
-
-function bool Gibbed(class<DamageType> damageType)
-{
-	if ( damageType.default.GibModifier == 0 )
-		return false; 
-	if ( damageType.default.GibModifier >= 100 )
-		return true;	
-	if ( (Health < -80) || ((Health < -40) && (FRand() < 0.6)) )
-		return true;
-	return false;
+	PlayDying(HitLocation);
+	// End:0x96
+	if(Level.Game.bGameEnded)
+	{
+		return;
+	}
+	// End:0xB9
+	if(__NFUN_130__(__NFUN_129__(bPhysicsAnimUpdate), __NFUN_129__(IsLocallyControlled())))
+	{
+		ClientDying(HitLocation);
+	}
+	return;
 }
 
 event Falling()
 {
-	//SetPhysics(PHYS_Falling); //Note - physics changes type to PHYS_Falling by default
-	if ( Controller != None )
+	// End:0x1A
+	if(__NFUN_119__(Controller, none))
+	{
 		Controller.SetFall();
+	}
+	return;
 }
 
-event HitWall(vector HitNormal, actor Wall);
-
-event Landed(vector HitNormal)
+event HitWall(Vector HitNormal, Actor Wall)
 {
-	LandBob = FMin(50, 0.055 * Velocity.Z); 
+	return;
+}
+
+event Landed(Vector HitNormal)
+{
+	LandBob = __NFUN_244__(50.0000000, __NFUN_171__(0.0550000, Velocity.Z));
 	TakeFallingDamage();
-	if ( Health > 0 )
+	// End:0x3F
+	if(__NFUN_151__(Health, 0))
+	{
 		PlayLanded(Velocity.Z);
-	if (Velocity.Z < -1.4 * JumpZ)
-		MakeNoise(-0.5 * Velocity.Z/(FMax(JumpZ, 150.0)));
+	}
+	// End:0x7C
+	if(__NFUN_176__(Velocity.Z, __NFUN_171__(-1.4000000, JumpZ)))
+	{
+		__NFUN_512__(__NFUN_172__(__NFUN_171__(-0.5000000, Velocity.Z), __NFUN_245__(JumpZ, 150.0000000)));
+	}
 	bJustLanded = true;
+	return;
 }
 
 event HeadVolumeChange(PhysicsVolume newHeadVolume)
 {
-	if ( (Level.NetMode == NM_Client) || (Controller == None) )
-		return;
-	if ( HeadVolume.bWaterVolume )
+	// End:0x28
+	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_114__(Controller, none)))
 	{
-		if (!newHeadVolume.bWaterVolume)
+		return;
+	}
+	// End:0x93
+	if(HeadVolume.bWaterVolume)
+	{
+		// End:0x90
+		if(__NFUN_129__(newHeadVolume.bWaterVolume))
 		{
-			if ( Controller.bIsPlayer && (BreathTime > 0) && (BreathTime < 8) )
+			// End:0x85
+			if(__NFUN_130__(__NFUN_130__(Controller.bIsPlayer, __NFUN_177__(BreathTime, float(0))), __NFUN_176__(BreathTime, float(8))))
+			{
 				Gasp();
-			BreathTime = -1.0;
+			}
+			BreathTime = -1.0000000;
+		}		
+	}
+	else
+	{
+		// End:0xB0
+		if(newHeadVolume.bWaterVolume)
+		{
+			BreathTime = UnderWaterTime;
 		}
 	}
-	else if ( newHeadVolume.bWaterVolume )
-		BreathTime = UnderWaterTime;
+	return;
 }
 
 function bool TouchingWaterVolume()
 {
 	local PhysicsVolume V;
 
-	ForEach TouchingActors(class'PhysicsVolume',V)
-		if ( V.bWaterVolume )
+	// End:0x26
+	foreach __NFUN_307__(Class'Engine.PhysicsVolume', V)
+	{
+		// End:0x25
+		if(V.bWaterVolume)
+		{			
 			return true;
-			
+		}		
+	}	
 	return false;
+	return;
 }
 
-//Pain timer just expired.
-//Check what zone I'm in (and which parts are)
-//based on that cause damage, and reset BreathTime
-
-function bool IsInPain()
-{
-	local PhysicsVolume V;
-
-	ForEach TouchingActors(class'PhysicsVolume',V)
-		if ( V.bPainCausing && (V.DamageType != ReducedDamageType) 
-			&& (V.DamagePerSec > 0) )
-			return true;
-	return false;
-}
-	
 event BreathTimer()
 {
-	if ( (Health < 0) || (Level.NetMode == NM_Client) )
+	// End:0x28
+	if(__NFUN_132__(__NFUN_150__(Health, 0), __NFUN_154__(int(Level.NetMode), int(NM_Client))))
+	{
 		return;
+	}
 	TakeDrowningDamage();
-	if ( Health > 0 )
-		BreathTime = 2.0;
+	// End:0x44
+	if(__NFUN_151__(Health, 0))
+	{
+		BreathTime = 2.0000000;
+	}
+	return;
 }
 
-function TakeDrowningDamage();		
-
-function bool CheckWaterJump(out vector WallNormal)
+function TakeDrowningDamage()
 {
-	local actor HitActor;
-	local vector HitLocation, HitNormal, checkpoint, start, checkNorm, Extent;
+	return;
+}
 
-	checkpoint = vector(Rotation);
-	checkpoint.Z = 0.0;
-	checkNorm = Normal(checkpoint);
-	checkPoint = Location + CollisionRadius * checkNorm;
-	Extent = CollisionRadius * vect(1,1,0);
+function bool CheckWaterJump(out Vector WallNormal)
+{
+	local Actor HitActor;
+	local Vector HitLocation, HitNormal, checkpoint, Start, checkNorm, Extent;
+
+	checkpoint = Vector(Rotation);
+	checkpoint.Z = 0.0000000;
+	checkNorm = __NFUN_226__(checkpoint);
+	checkpoint = __NFUN_215__(Location, __NFUN_213__(CollisionRadius, checkNorm));
+	Extent = __NFUN_213__(CollisionRadius, vect(1.0000000, 1.0000000, 0.0000000));
 	Extent.Z = CollisionHeight;
-	HitActor = Trace(HitLocation, HitNormal, checkpoint, Location, true, Extent);
-	if ( (HitActor != None) && (Pawn(HitActor) == None) )
+	HitActor = __NFUN_277__(HitLocation, HitNormal, checkpoint, Location, true, Extent);
+	// End:0x12E
+	if(__NFUN_130__(__NFUN_119__(HitActor, none), __NFUN_114__(Pawn(HitActor), none)))
 	{
-		WallNormal = -1 * HitNormal;
-		start = Location;
-		start.Z += 1.1 * MAXSTEPHEIGHT;
-		checkPoint = start + 2 * CollisionRadius * checkNorm;
-		HitActor = Trace(HitLocation, HitNormal, checkpoint, start, true);
-		if (HitActor == None)
+		WallNormal = __NFUN_213__(float(-1), HitNormal);
+		Start = Location;
+		__NFUN_184__(Start.Z, __NFUN_171__(1.1000000, 33.0000000));
+		checkpoint = __NFUN_215__(Start, __NFUN_213__(__NFUN_171__(float(2), CollisionRadius), checkNorm));
+		HitActor = __NFUN_277__(HitLocation, HitNormal, checkpoint, Start, true);
+		// End:0x12E
+		if(__NFUN_114__(HitActor, none))
+		{
 			return true;
+		}
 	}
-
 	return false;
+	return;
 }
 
 //Player Jumped
-function DoJump( bool bUpdating )
+function DoJump(bool bUpdating)
 {
-	if ( !bIsCrouched && !bWantsToCrouch && ((Physics == PHYS_Walking) || (Physics == PHYS_Ladder) || (Physics == PHYS_Spider)) )
+	// End:0x16F
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bIsCrouched), __NFUN_129__(bWantsToCrouch)), __NFUN_132__(__NFUN_132__(__NFUN_154__(int(Physics), int(1)), __NFUN_154__(int(Physics), int(11))), __NFUN_154__(int(Physics), int(9)))))
 	{
-		if ( Role == ROLE_Authority )
+		// End:0xB6
+		if(__NFUN_154__(int(Role), int(ROLE_Authority)))
 		{
-			if ( (Level.Game != None) && (Level.Game.Difficulty > 0) )
-				MakeNoise(0.1 * Level.Game.Difficulty);
-/*R6CHANGEWEAPONSYSTEM
-			if ( bCountJumps && (Inventory != None) )
-				Inventory.OwnerEvent('Jumped');
-*/
+			// End:0xB6
+			if(__NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_151__(int(Level.Game.Difficulty), 0)))
+			{
+				__NFUN_512__(__NFUN_171__(0.1000000, float(Level.Game.Difficulty)));
+			}
 		}
-		if ( Physics == PHYS_Spider )
-			Velocity = JumpZ * Floor;
-		else if ( Physics == PHYS_Ladder )
-			Velocity.Z = 0;
-		else if ( bIsWalking )
-			Velocity.Z = Default.JumpZ;
+		// End:0xDB
+		if(__NFUN_154__(int(Physics), int(9)))
+		{
+			Velocity = __NFUN_213__(JumpZ, Floor);			
+		}
 		else
-			Velocity.Z = JumpZ;
-		if ( (Base != None) && !Base.bWorldGeometry )
-			Velocity.Z += Base.Velocity.Z; 
-		SetPhysics(PHYS_Falling);
-	}
-}
-
-/* PlayMoverHitSound()
-Mover Hit me, play appropriate sound if any
-*/
-function PlayMoverHitSound();
-
-function PlayDyingSound();
-
-function PlayHit(float Damage, vector HitLocation, class<DamageType> damageType, vector Momentum)
-{
-	local vector BloodOffset, Mo, HitNormal;
-	local class<Effects> DesiredEffect;
-	local class<Emitter> DesiredEmitter;
-
-	if ( (Damage <= 0) && !Controller.bGodMode )
-		return;
-		
-	if (Damage > DamageType.Default.DamageThreshold) //spawn some blood
-	{
-
-		HitNormal = Normal(HitLocation - Location);
-	
-		// Play any set effect
-	
-		DesiredEffect = DamageType.static.GetPawnDamageEffect(HitLocation, Damage, Momentum, self, (Level.bDropDetail || !Level.bHighDetailMode));
-
-		if ( DesiredEffect != None )
 		{
-			BloodOffset = 0.2 * CollisionRadius * HitNormal;
-			BloodOffset.Z = BloodOffset.Z * 0.5;
-
-			Mo = Momentum;
-			if ( Mo.Z > 0 )
-				Mo.Z *= 0.5;
-
-			spawn(DesiredEffect,self,,HitLocation + BloodOffset, rotator(Mo));
+			// End:0xFE
+			if(__NFUN_154__(int(Physics), int(11)))
+			{
+				Velocity.Z = 0.0000000;				
+			}
+			else
+			{
+				// End:0x11A
+				if(bIsWalking)
+				{
+					Velocity.Z = default.JumpZ;					
+				}
+				else
+				{
+					Velocity.Z = JumpZ;
+				}
+			}
 		}
-
-		// Spawn any preset emitter
-		
-		DesiredEmitter = DamageType.Static.GetPawnDamageEmitter(HitLocation, Damage, Momentum, self, (Level.bDropDetail || !Level.bHighDetailMode)); 		
-		if (DesiredEmitter != None)
-			spawn(DesiredEmitter,,,HitLocation+HitNormal, Rotator(HitNormal)); 
-		
+		// End:0x16A
+		if(__NFUN_130__(__NFUN_119__(Base, none), __NFUN_129__(Base.bWorldGeometry)))
+		{
+			__NFUN_184__(Velocity.Z, Base.Velocity.Z);
+		}
+		__NFUN_3970__(2);
 	}
-	if ( Health <= 0 )
-	{
-		if ( PhysicsVolume.bDestructive && (PhysicsVolume.ExitActor != None) )
-			Spawn(PhysicsVolume.ExitActor);
-		return;
-	}
-	
-	if ( Level.TimeSeconds - LastPainTime > 0.1 )
-	{
-		PlayTakeHit(HitLocation,Damage,damageType);
-		LastPainTime = Level.TimeSeconds;
-	}
+	return;
 }
 
-/* 
-Pawn was killed - detach any controller, and die
-*/
+function PlayMoverHitSound()
+{
+	return;
+}
 
 // blow up into little pieces (implemented in subclass)		
-simulated function ChunkUp(int Damage)
+simulated function ChunkUp()
 {
-	if ( (Level.NetMode != NM_Client) && (Controller != None) )
+	// End:0x56
+	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Client)), __NFUN_119__(Controller, none)))
 	{
-		if ( Controller.bIsPlayer )
-			Controller.PawnDied();
+		// End:0x4A
+		if(Controller.bIsPlayer)
+		{
+			Controller.PawnDied();			
+		}
 		else
-			Controller.Destroy();
+		{
+			Controller.__NFUN_279__();
+		}
 	}
-	destroy();
+	__NFUN_279__();
+	return;
 }
 
-State Dying
+simulated event SetAnimAction(name NewAction)
 {
-ignores Trigger, Bump, HitWall, HeadVolumeChange, PhysicsVolumeChange, Falling, BreathTimer;
+	return;
+}
 
-	event ChangeAnimation() {}
-	event StopPlayFiring() {}
-	function PlayFiring(float Rate, name FiringMode) {}
-	//function PlayWeaponSwitch(Weapon NewWeapon) {}
-	function PlayTakeHit(vector HitLoc, int Damage, class<DamageType> damageType) {}
-	simulated function PlayNextAnimation() {}
-
-	function Died(Controller Killer, class<DamageType> damageType, vector HitLocation)
+simulated function SetAnimStatus(name NewStatus)
+{
+	// End:0x20
+	if(__NFUN_255__(NewStatus, AnimStatus))
 	{
+		AnimStatus = NewStatus;
+		ChangeAnimation();
+	}
+	return;
+}
+
+simulated event PlayDying(Vector HitLoc)
+{
+	__NFUN_113__('Dying');
+	// End:0x31
+	if(bPhysicsAnimUpdate)
+	{
+		bReplicateMovement = false;
+		bTearOff = true;
+		__NFUN_223__(Velocity, TearOffMomentum);
+		__NFUN_3970__(2);
+	}
+	bPlayedDeath = true;
+	return;
+}
+
+simulated function PlayFiring(float Rate, name FiringMode)
+{
+	return;
+}
+
+simulated event StopPlayFiring()
+{
+	bSteadyFiring = false;
+	return;
+}
+
+simulated event ChangeAnimation()
+{
+	// End:0x21
+	if(__NFUN_130__(__NFUN_119__(Controller, none), Controller.bControlAnimations))
+	{
+		return;
+	}
+	PlayWaiting();
+	PlayMoving();
+	return;
+}
+
+simulated event AnimEnd(int Channel)
+{
+	// End:0x11
+	if(__NFUN_154__(Channel, 0))
+	{
+		PlayWaiting();
+	}
+	return;
+}
+
+function bool CannotJumpNow()
+{
+	return false;
+	return;
+}
+
+simulated event PlayJump()
+{
+	return;
+}
+
+simulated event PlayFalling()
+{
+	return;
+}
+
+simulated function PlayMoving()
+{
+	return;
+}
+
+simulated function PlayWaiting()
+{
+	return;
+}
+
+function PlayLanded(float impactVel)
+{
+	// End:0x16
+	if(__NFUN_129__(bPhysicsAnimUpdate))
+	{
+		PlayLandingAnimation(impactVel);
+	}
+	return;
+}
+
+simulated event PlayLandingAnimation(float impactVel)
+{
+	return;
+}
+
+state Dying
+{
+	ignores BreathTimer;
+
+	event ChangeAnimation()
+	{
+		return;
+	}
+
+	event StopPlayFiring()
+	{
+		return;
+	}
+
+	function PlayFiring(float Rate, name FiringMode)
+	{
+		return;
+	}
+
+	simulated function PlayNextAnimation()
+	{
+		return;
+	}
+
+	function Died(Controller Killer, Vector HitLocation)
+	{
+		return;
 	}
 
 	function Timer()
 	{
-		if ( !PlayerCanSeeMe() )
-			Destroy();
+		// End:0x0E
+		if(__NFUN_129__(__NFUN_532__()))
+		{
+			__NFUN_279__();			
+		}
 		else
-			SetTimer(2.0, false);	
+		{
+			__NFUN_280__(2.0000000, false);
+		}
+		return;
 	}
 
-	function Landed(vector HitNormal)
+	function Landed(Vector HitNormal)
 	{
-		local rotator finalRot;
+		local Rotator finalRot;
 
-		LandBob = FMin(50, 0.055 * Velocity.Z); 
-		if( Velocity.Z < -500 )
-			TakeDamage( (1-Velocity.Z/30),Instigator,Location,vect(0,0,0) , class'Crushed');
-
+		LandBob = __NFUN_244__(50.0000000, __NFUN_171__(0.0550000, Velocity.Z));
 		finalRot = Rotation;
 		finalRot.Roll = 0;
 		finalRot.Pitch = 0;
-		setRotation(finalRot);
-		SetPhysics(PHYS_None);
-		SetCollision(true, false, false);
-
-		if ( !IsAnimating(0) )
+		__NFUN_299__(finalRot);
+		__NFUN_3970__(0);
+		__NFUN_262__(true, false, false);
+		// End:0x63
+		if(__NFUN_129__(__NFUN_282__(0)))
+		{
 			LieStill();
+		}
+		return;
 	}
 
 	// prone body should have low height, wider radius
 	function ReduceCylinder()
 	{
 		local float OldHeight, OldRadius;
-		local vector OldLocation;
+		local Vector OldLocation;
 
-		SetCollision(True,False,False);
+		__NFUN_262__(true, false, false);
 		OldHeight = CollisionHeight;
 		OldRadius = CollisionRadius;
-		SetCollisionSize(1.5 * Default.CollisionRadius, CarcassCollisionHeight);
-		PrePivot = vect(0,0,1) * (OldHeight - CollisionHeight); // FIXME - changing prepivot isn't safe w/ static meshes
+		__NFUN_283__(__NFUN_171__(1.5000000, default.CollisionRadius), CarcassCollisionHeight);
+		PrePivot = __NFUN_212__(vect(0.0000000, 0.0000000, 1.0000000), __NFUN_175__(OldHeight, CollisionHeight));
 		OldLocation = Location;
-		if ( !SetLocation(OldLocation - PrePivot) )
+		// End:0xCA
+		if(__NFUN_129__(__NFUN_267__(__NFUN_216__(OldLocation, PrePivot))))
 		{
-			SetCollisionSize(OldRadius, CollisionHeight);
-			if ( !SetLocation(OldLocation - PrePivot) )
+			__NFUN_283__(OldRadius, CollisionHeight);
+			// End:0xCA
+			if(__NFUN_129__(__NFUN_267__(__NFUN_216__(OldLocation, PrePivot))))
 			{
-				SetCollisionSize(CollisionRadius, OldHeight);
-				SetCollision(false, false, false);
-				PrePivot = vect(0,0,0);
-				if ( !SetLocation(OldLocation) )
-					ChunkUp(200);
+				__NFUN_283__(CollisionRadius, OldHeight);
+				__NFUN_262__(false, false, false);
+				PrePivot = vect(0.0000000, 0.0000000, 0.0000000);
+				// End:0xCA
+				if(__NFUN_129__(__NFUN_267__(OldLocation)))
+				{
+					ChunkUp();
+				}
 			}
 		}
-		PrePivot = PrePivot + vect(0,0,3);
+		PrePivot = __NFUN_215__(PrePivot, vect(0.0000000, 0.0000000, 3.0000000));
+		return;
 	}
 
 	function LandThump()
 	{
-		// animation notify - play sound if actually landed, and animation also shows it
-		if ( Physics == PHYS_None)
+		// End:0x18
+		if(__NFUN_154__(int(Physics), int(0)))
+		{
 			bThumped = true;
+		}
+		return;
 	}
 
 	event AnimEnd(int Channel)
 	{
-		if ( Channel != 0 )
-			return;
-		if ( Physics == PHYS_None )
-			LieStill();
-		else if ( PhysicsVolume.bWaterVolume )
+		// End:0x0D
+		if(__NFUN_155__(Channel, 0))
 		{
-			bThumped = true;
-			LieStill();
+			return;
 		}
+		// End:0x26
+		if(__NFUN_154__(int(Physics), int(0)))
+		{
+			LieStill();			
+		}
+		else
+		{
+			// End:0x46
+			if(PhysicsVolume.bWaterVolume)
+			{
+				bThumped = true;
+				LieStill();
+			}
+		}
+		return;
 	}
 
 	function LieStill()
 	{
-		if ( !bThumped )
+		// End:0x11
+		if(__NFUN_129__(bThumped))
+		{
 			LandThump();
-		if ( CollisionHeight != CarcassCollisionHeight )
+		}
+		// End:0x26
+		if(__NFUN_181__(CollisionHeight, CarcassCollisionHeight))
+		{
 			ReduceCylinder();
+		}
+		return;
 	}
 
 	singular function BaseChange()
 	{
-		if( base == None )
-			SetPhysics(PHYS_Falling);
-		else if ( Pawn(base) != None )
-			ChunkUp(200); // don't let corpse ride around on someone's head
+		// End:0x13
+		if(__NFUN_114__(Base, none))
+		{
+			__NFUN_3970__(2);			
+		}
+		else
+		{
+			// End:0x29
+			if(__NFUN_119__(Pawn(Base), none))
+			{
+				ChunkUp();
+			}
+		}
+		return;
 	}
 
-	function TakeDamage( int Damage, Pawn instigatedBy, Vector hitlocation, 
-							Vector momentum, class<DamageType> damageType)
+// NEW IN 1.60
+	function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 	{
-		SetPhysics(PHYS_Falling);
-		if ( (Physics == PHYS_None) && (Momentum.Z < 0) )
-			Momentum.Z *= -1;
-		Velocity += 3 * momentum/(Mass + 200);
-		if ( bInvulnerableBody )
-			return;
-		Damage *= DamageType.Default.GibModifier;
-		Health -=Damage;
-		if ( ((Damage > 30) || !IsAnimating()) && (Health < -80) )
-			ChunkUp(Damage);
+		return 0;
+		return;
 	}
 
 	function BeginState()
-	{		
-		if ( bTearOff && (Level.NetMode == NM_DedicatedServer) )
-			LifeSpan = 1.0;
-		else
-			SetTimer(12.0, false);
-		SetPhysics(PHYS_Falling);
-		bInvulnerableBody = true;
-		if ( Controller != None )
+	{
+		// End:0x32
+		if(__NFUN_130__(bTearOff, __NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer))))
 		{
-			if ( Controller.bIsPlayer )
-				Controller.PawnDied();
-			else
-				Controller.Destroy();
+			LifeSpan = 1.0000000;			
 		}
+		else
+		{
+			__NFUN_280__(12.0000000, false);
+		}
+		__NFUN_3970__(2);
+		bInvulnerableBody = true;
+		// End:0x83
+		if(__NFUN_119__(Controller, none))
+		{
+			// End:0x77
+			if(Controller.bIsPlayer)
+			{
+				Controller.PawnDied();				
+			}
+			else
+			{
+				Controller.__NFUN_279__();
+			}
+		}
+		return;
 	}
-
 Begin:
-	Sleep(0.2);
+
+	__NFUN_256__(0.2000000);
 	bInvulnerableBody = false;
+	stop;			
 }
-
-//=============================================================================
-// Animation interface for controllers
-
-simulated event SetAnimAction(name NewAction);
-
-/* SetAnimStatus()
-Called by controller to set animation status (e.g. relaxed, alert, combat, etc.
-*/
-simulated function SetAnimStatus(name NewStatus)
-{
-	if ( NewStatus != AnimStatus )
-	{
-		// anim status change
-		AnimStatus = NewStatus;
-		ChangeAnimation();
-	}
-}
-
-/* PlayXXX() function called by controller to play transient animation actions 
-*/
-simulated event PlayDying(class<DamageType> DamageType, vector HitLoc)
-{
-	GotoState('Dying');
-	if ( bPhysicsAnimUpdate )
-	{
-		bReplicateMovement = false;
-		bTearOff = true;
-		Velocity += TearOffMomentum;
-		SetPhysics(PHYS_Falling);
-	}
-	bPlayedDeath = true;
-}
-
-simulated function PlayFiring(float Rate, name FiringMode);
-/*R6CHANGEWEAPONSYSTEM
-function PlayWeaponSwitch(Weapon NewWeapon);
-*/
-simulated event StopPlayFiring()
-{
-	bSteadyFiring = false;
-}
-
-function PlayTakeHit(vector HitLoc, int Damage, class<DamageType> damageType)
-{
-	local Sound DesiredSound;
-
-	if (Damage==0)
-		return;
-	// 		
-	// Play a hit sound according to the DamageType
-
- 	DesiredSound = DamageType.Static.GetPawnDamageSound();
-	if (DesiredSound != None)
-		PlayOwnedSound(DesiredSound,SLOT_SFX,1.0);
-}
-
-//=============================================================================
-// Pawn internal animation functions
-
-simulated event ChangeAnimation()
-{
-	if ( (Controller != None) && Controller.bControlAnimations )
-		return;
-	// player animation - set up new idle and moving animations
-	PlayWaiting();
-	PlayMoving();
-}
-
-simulated event AnimEnd(int Channel)
-{
-	if ( Channel == 0 )
-		PlayWaiting();
-}
-
-// Animation group checks (usually implemented in subclass)
-
-function bool CannotJumpNow()
-{
-	return false;
-}
-
-simulated event PlayJump();
-simulated event PlayFalling();
-simulated function PlayMoving();
-simulated function PlayWaiting();
-
-function PlayLanded(float impactVel)
-{
-	if ( !bPhysicsAnimUpdate )
-		PlayLandingAnimation(impactvel);
-}
-
-simulated event PlayLandingAnimation(float ImpactVel);
 
 defaultproperties
 {
-     Visibility=128
-     Health=100
-     bCanJump=True
-     bCanWalk=True
-     bLOSHearing=True
-     bUseCompressedPosition=True
-     m_bUseHighStance=True
-     DesiredSpeed=1.000000
-     MaxDesiredSpeed=1.000000
-     SightRadius=5000.000000
-     AvgPhysicsTime=0.100000
-     GroundSpeed=600.000000
-     WaterSpeed=300.000000
-     AirSpeed=600.000000
-     LadderSpeed=200.000000
-     AccelRate=2048.000000
-     JumpZ=420.000000
-     AirControl=0.050000
-     WalkingPct=0.500000
-     CrouchedPct=0.500000
-     MaxFallSpeed=1200.000000
-     CrouchHeight=40.000000
-     CrouchRadius=34.000000
-     Bob=0.016000
-     SoundDampening=1.000000
-     DamageScaling=1.000000
-     CarcassCollisionHeight=23.000000
-     BaseMovementRate=525.000000
-     BlendChangeTime=0.250000
-     LandMovementState="PlayerWalking"
-     WaterMovementState="PlayerSwimming"
-     ControllerClass=Class'Engine.AIController'
-     RemoteRole=ROLE_SimulatedProxy
-     DrawType=DT_Mesh
-     bCanTeleport=True
-     bOwnerNoSee=True
-     bStasis=True
-     bAcceptsProjectors=True
-     bDisturbFluidSurface=True
-     bUpdateSimulatedPosition=True
-     bTravel=True
-     bShouldBaseAtStartup=True
-     bCollideActors=True
-     bCollideWorld=True
-     bBlockActors=True
-     bBlockPlayers=True
-     bProjTarget=True
-     bRotateToDesired=True
-     bDirectional=True
-     SoundRadius=9.000000
-     TransientSoundVolume=2.000000
-     CollisionRadius=34.000000
-     CollisionHeight=78.000000
-     NetPriority=2.000000
-     Texture=Texture'Engine.S_Pawn'
-     RotationRate=(Pitch=4096,Yaw=20000,Roll=3072)
+	Visibility=128
+	Health=100
+	bCanJump=true
+	bCanWalk=true
+	bLOSHearing=true
+	bUseCompressedPosition=true
+	m_bUseHighStance=true
+	DesiredSpeed=1.0000000
+	MaxDesiredSpeed=1.0000000
+	SightRadius=5000.0000000
+	AvgPhysicsTime=0.1000000
+	GroundSpeed=600.0000000
+	WaterSpeed=300.0000000
+	AirSpeed=600.0000000
+	LadderSpeed=200.0000000
+	AccelRate=2048.0000000
+	JumpZ=420.0000000
+	AirControl=0.0500000
+	WalkingPct=0.5000000
+	CrouchedPct=0.5000000
+	MaxFallSpeed=1200.0000000
+	CrouchHeight=40.0000000
+	CrouchRadius=34.0000000
+	Bob=0.0160000
+	SoundDampening=1.0000000
+	DamageScaling=1.0000000
+	CarcassCollisionHeight=23.0000000
+	BaseMovementRate=525.0000000
+	BlendChangeTime=0.2500000
+	LandMovementState="PlayerWalking"
+	WaterMovementState="PlayerSwimming"
+	ControllerClass=Class'Engine.AIController'
+	RemoteRole=2
+	DrawType=2
+	bCanTeleport=true
+	bOwnerNoSee=true
+	bStasis=true
+	bAcceptsProjectors=true
+	bDisturbFluidSurface=true
+	bUpdateSimulatedPosition=true
+	bTravel=true
+	bShouldBaseAtStartup=true
+	bCollideActors=true
+	bCollideWorld=true
+	bBlockActors=true
+	bBlockPlayers=true
+	bProjTarget=true
+	bRotateToDesired=true
+	bDirectional=true
+	SoundRadius=9.0000000
+	TransientSoundVolume=2.0000000
+	CollisionRadius=34.0000000
+	CollisionHeight=78.0000000
+	NetPriority=2.0000000
+	Texture=Texture'Engine.S_Pawn'
+	RotationRate=(Pitch=4096,Yaw=20000,Roll=3072)
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var bCanPickupInventory
+// REMOVED IN 1.60: var Weapon
+// REMOVED IN 1.60: var SelectedItem
+// REMOVED IN 1.60: var LastPainTime
+// REMOVED IN 1.60: var ReducedDamageType
+// REMOVED IN 1.60: var b
+// REMOVED IN 1.60: var HitDamageType
+// REMOVED IN 1.60: var ePeekingMode
+// REMOVED IN 1.60: var eHealth
+// REMOVED IN 1.60: function AdjustAim
+// REMOVED IN 1.60: function ShootSpecial
+// REMOVED IN 1.60: function HandlePickup
+// REMOVED IN 1.60: function GiveWeapon
+// REMOVED IN 1.60: function TossWeapon
+// REMOVED IN 1.60: function NextItem
+// REMOVED IN 1.60: function FindInventoryType
+// REMOVED IN 1.60: function AddInventory
+// REMOVED IN 1.60: function DeleteInventory
+// REMOVED IN 1.60: function ChangedWeapon
+// REMOVED IN 1.60: function GetWeaponBoneFor
+// REMOVED IN 1.60: function gibbedBy
+// REMOVED IN 1.60: function TakeDamage
+// REMOVED IN 1.60: function Gibbed
+// REMOVED IN 1.60: function IsInPain
+// REMOVED IN 1.60: function PlayDyingSound
+// REMOVED IN 1.60: function PlayHit
+// REMOVED IN 1.60: function PlayTakeHit
+// REMOVED IN 1.60: function PlayWeaponSwitch

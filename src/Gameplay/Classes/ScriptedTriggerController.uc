@@ -1,62 +1,83 @@
 //=============================================================================
+// ScriptedTriggerController - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // ScriptedTriggerController
 // used for playing ScriptedTrigger scripts
 // A ScriptedTriggerController never has a pawn
 //=============================================================================
 class ScriptedTriggerController extends ScriptedController;
 
-function InitializeFor(ScriptedTrigger T)
+function InitializeFor(ScriptedTrigger t)
 {
-	SequenceScript = T;
+	SequenceScript = t;
 	ActionNum = 0;
 	SequenceScript.SetActions(self);
-	GotoState('Scripting');
+	__NFUN_113__('Scripting');
+	return;
 }
 
 function DestroyPawn()
 {
-	if ( Instigator != None )
-		Instigator.Destroy();
+	// End:0x17
+	if(__NFUN_119__(Instigator, none))
+	{
+		Instigator.__NFUN_279__();
+	}
+	return;
 }
 
-function ClearAnimation() {}
+function ClearAnimation()
+{
+	return;
+}
 
 function SetNewScript(ScriptedSequence NewScript)
 {
 	SequenceScript = NewScript;
 	ActionNum = 0;
-	Focus = None;
+	Focus = none;
 	SequenceScript.SetActions(self);
+	return;
 }
 
 state Scripting
 {
-	function Trigger( actor Other, pawn EventInstigator )
+	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		Instigator = EventInstigator;
-		Super.Trigger(Other,EventInstigator);
+		super.Trigger(Other, EventInstigator);
+		return;
 	}
 
 	function LeaveScripting()
 	{
-		Destroy();
+		__NFUN_279__();
+		return;
 	}
-
 Begin:
-	InitforNextAction();
-	if ( bBroken )
-		GotoState('Broken');
-	if ( CurrentAction.TickedAction() )
-		enable('Tick');
+
+	InitForNextAction();
+	// End:0x16
+	if(bBroken)
+	{
+		__NFUN_113__('Broken');
+	}
+	// End:0x2F
+	if(CurrentAction.TickedAction())
+	{
+		__NFUN_117__('Tick');
+	}
+	stop;				
 }
 
-// Broken scripted sequence - for debugging
-State Broken
-{
-Begin:
-	warn(" Trigger Scripted Sequence BROKEN "$SequenceScript$" ACTION "$CurrentAction);
+state Broken
+{Begin:
+
+	__NFUN_232__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" Trigger Scripted Sequence BROKEN ", string(SequenceScript)), " ACTION "), string(CurrentAction)));
+	stop;			
 }
 
-defaultproperties
-{
-}

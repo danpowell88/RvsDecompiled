@@ -1,4 +1,10 @@
 //=============================================================================
+// R6RHeavyWinterCamoHelmet - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6RHeavyWinterCamoHelmet.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -9,5 +15,5 @@ class R6RHeavyWinterCamoHelmet extends R6RHeavyWinterHelmet;
 
 defaultproperties
 {
-     Skins(0)=Texture'R6Characters_T.Rainbow.R6RWinterHelm'
+	Skins=/* Array type was not detected. */
 }

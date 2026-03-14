@@ -1,54 +1,50 @@
 //=============================================================================
+// R6IOObject - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6IOObject : This should allow action moves on the door
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================
-
 class R6IOObject extends R6IActionObject
-    native;
-
-#exec OBJ LOAD FILE=..\StaticMeshes\R6ActionObjects.usx PACKAGE=R6ActionObjects
-
-// R6CIRCUMSTANTIALACTION
-#exec OBJ LOAD FILE=..\Textures\R6ActionIcons.utx PACKAGE=R6ActionIcons
-// R6CIRCUMSTANTIALACTION
-
-var(R6ActionObject) FLOAT m_fGainTimeWithElectronicsKit;  // 2 sec by default
-var(R6ActionObject) BOOL  m_bToggleType;    //can this object be toggled on/off, or set only once while in-round?
-var                 BOOL sm_bToggleType;    
-var(R6ActionObject) BOOL  m_bIsActivated;   //state of the object
-var                 BOOL sm_bIsActivated;   
-var(R6ActionObject) R6Pawn.eDeviceAnimToPlay m_eAnimToPlay;
-var                 FLOAT m_fLockObjectTime; // time the object started to be used. Only one pawn can interact with this object
-
-var Sound			m_StartSnd;
-var Sound			m_InterruptedSnd;
-var Sound			m_CompletedSnd;
-
-
+	native
+ placeable;
 
 enum eDeviceCircumstantialAction
 {
-    DCA_None,
-    DCA_DisarmBomb,
-    DCA_ArmBomb,
-	DCA_Device
+	DCA_None,                       // 0
+	DCA_DisarmBomb,                 // 1
+	DCA_ArmBomb,                    // 2
+	DCA_Device                      // 3
 };
 
 enum eStateIOObejct
 {
-    SIO_Start,
-    SIO_Interrupt,
-    SIO_Complete
+	SIO_Start,                      // 0
+	SIO_Interrupt,                  // 1
+	SIO_Complete                    // 2
 };
 
-var eStateIOObejct  m_ObjectState;
+var(R6ActionObject) R6Pawn.eDeviceAnimToPlay m_eAnimToPlay;
+var R6IOObject.eStateIOObejct m_ObjectState;
+var(R6ActionObject) bool m_bToggleType;  // can this object be toggled on/off, or set only once while in-round?
+var bool sm_bToggleType;
+var(R6ActionObject) bool m_bIsActivated;  // state of the object
+var bool sm_bIsActivated;
+var(R6ActionObject) float m_fGainTimeWithElectronicsKit;  // 2 sec by default
+var float m_fLockObjectTime;  // time the object started to be used. Only one pawn can interact with this object
+var Sound m_StartSnd;
+var Sound m_InterruptedSnd;
+var Sound m_CompletedSnd;
 
 replication
 {
-    reliable if (Role==ROLE_Authority)
-        sm_bIsActivated, m_bIsActivated;
-
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_bIsActivated, sm_bIsActivated;
 }
 
 //------------------------------------------------------------------
@@ -57,11 +53,15 @@ replication
 //------------------------------------------------------------------
 simulated function SaveOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( true );
-    Super.SaveOriginalData();
-
-    sm_bIsActivated = m_bIsActivated;     
-    sm_bToggleType  = m_bToggleType;
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(true);
+	}
+	super(R6InteractiveObject).SaveOriginalData();
+	sm_bIsActivated = m_bIsActivated;
+	sm_bToggleType = m_bToggleType;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -70,34 +70,45 @@ simulated function SaveOriginalData()
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
-
-    m_bIsActivated = sm_bIsActivated;     
-    m_bToggleType  = sm_bToggleType;
-    m_fLockObjectTime = 0;
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super(R6InteractiveObject).ResetOriginalData();
+	m_bIsActivated = sm_bIsActivated;
+	m_bToggleType = sm_bToggleType;
+	m_fLockObjectTime = 0.0000000;
+	return;
 }
 
 //------------------------------------------------------------------
 // LockObjectUse
 //	
 //------------------------------------------------------------------
-simulated function LockObjectUse( bool bIsInUse )
+simulated function LockObjectUse(bool bIsInUse)
 {
-    if ( bIsInUse )
-        m_fLockObjectTime = Level.TimeSeconds;        
-    else
-        m_fLockObjectTime = 0;
+	// End:0x20
+	if(bIsInUse)
+	{
+		m_fLockObjectTime = Level.TimeSeconds;		
+	}
+	else
+	{
+		m_fLockObjectTime = 0.0000000;
+	}
+	return;
 }
 
 //===========================================================================//
 // R6CircumstantialActionProgressStart()                                     //
 //===========================================================================//
-simulated function R6CircumstantialActionProgressStart( R6AbstractCircumstantialActionQuery Query )
+simulated function R6CircumstantialActionProgressStart(R6AbstractCircumstantialActionQuery Query)
 {
-    m_fPlayerCAStartTime = Level.TimeSeconds;
-	PerformSoundAction(SIO_Start);
-    LockObjectUse( true );
+	m_fPlayerCAStartTime = Level.TimeSeconds;
+	PerformSoundAction(0);
+	LockObjectUse(true);
+	return;
 }
 
 //===========================================================================//
@@ -105,119 +116,153 @@ simulated function R6CircumstantialActionProgressStart( R6AbstractCircumstantial
 //   Update the device planting progress                                     //
 //   Should be affected by the skills of the pawn planting it                //
 //===========================================================================//
-simulated function INT  R6GetCircumstantialActionProgress( R6AbstractCircumstantialActionQuery Query, Pawn actingPawn )
+simulated function int R6GetCircumstantialActionProgress(R6AbstractCircumstantialActionQuery Query, Pawn actingPawn)
 {
-    local FLOAT fPercentage;
+	local float fPercentage;
 
-    fPercentage = (Level.TimeSeconds - m_fPlayerCAStartTime) / (Query.fPlayerActionTimeRequired * (2.0 - R6Pawn(actingPawn).ArmorSkillEffect()));
-	fPercentage *= 100;
-	
-    if ( fPercentage >= 100 )
-        LockObjectUse( false );
-
-	if ((fPercentage >= 100) && (m_ObjectState != SIO_Complete))
-        PerformSoundAction(SIO_Complete);
-	
-
-    return fPercentage;
+	fPercentage = __NFUN_172__(__NFUN_175__(Level.TimeSeconds, m_fPlayerCAStartTime), __NFUN_171__(Query.fPlayerActionTimeRequired, __NFUN_175__(2.0000000, R6Pawn(actingPawn).ArmorSkillEffect())));
+	__NFUN_182__(fPercentage, float(100));
+	// End:0x68
+	if(__NFUN_179__(fPercentage, float(100)))
+	{
+		LockObjectUse(false);
+	}
+	// End:0x90
+	if(__NFUN_130__(__NFUN_179__(fPercentage, float(100)), __NFUN_155__(int(m_ObjectState), int(2))))
+	{
+		PerformSoundAction(2);
+	}
+	return int(fPercentage);
+	return;
 }
 
 simulated function R6CircumstantialActionCancel()
 {
-    LockObjectUse( false );
-    PerformSoundAction(SIO_Interrupt);
+	LockObjectUse(false);
+	PerformSoundAction(1);
+	return;
 }
 
-
-simulated function BOOL HasKit(R6Pawn aPawn)
+simulated function bool HasKit(R6Pawn aPawn)
 {
-    return false;
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetMaxTimeRequired
 //	used to unlock an IOObject that was locked
 //------------------------------------------------------------------
-simulated function FLOAT GetMaxTimeRequired()
+simulated function float GetMaxTimeRequired()
 {
-    return 0;
+	return 0.0000000;
+	return;
 }
 
-simulated function FLOAT GetTimeRequired(R6Pawn aPawn)
+simulated function float GetTimeRequired(R6Pawn aPawn)
 {
-    return 0;
+	return 0.0000000;
+	return;
 }
 
 simulated function ToggleDevice(R6Pawn aPawn)
 {
-    local float fBackup;
+	local float fBackup;
 
-    fBackup = m_fLockObjectTime;
-
-    // for AI, removed the lock
-    if ( !aPawn.m_bIsPlayer )  
-        m_fLockObjectTime = 0;
-
-	if ( CanToggle() )
-    {
-        LockObjectUse( false );
-    }
-    else
-        fBackup = m_fLockObjectTime;
-}
-
-simulated function BOOL CanToggle()
-{
-
-    local bool bCanToggle;
-    bCanToggle = ( (sm_bIsActivated == m_bIsActivated) || (m_bToggleType == true));
-
-    // can toggle, but check if locked
-    if ( bCanToggle && m_fLockObjectTime != 0 )
-    {
-        // backup situtation to remove the lock if the max time is expired
-        if ( GetMaxTimeRequired() < Level.TimeSeconds - m_fLockObjectTime   )
-            LockObjectUse( false );
-        else
-            return false; // is locked
-    }
-
-    return bCanToggle;
-}
-
-function PerformSoundAction(eStateIOObejct eState)
-{
-    m_ObjectState = eState;
-
-	switch (eState)
+	fBackup = m_fLockObjectTime;
+	// End:0x2A
+	if(__NFUN_129__(aPawn.m_bIsPlayer))
 	{
-		case SIO_Start:
-            if (bShowLog) log("****** PerformSoundAction SIO_Start");
-			PlaySound(m_StartSnd, SLOT_SFX);
+		m_fLockObjectTime = 0.0000000;
+	}
+	// End:0x3D
+	if(CanToggle())
+	{
+		LockObjectUse(false);		
+	}
+	else
+	{
+		fBackup = m_fLockObjectTime;
+	}
+	return;
+}
+
+simulated function bool CanToggle()
+{
+	local bool bCanToggle;
+
+	bCanToggle = __NFUN_132__(__NFUN_242__(sm_bIsActivated, m_bIsActivated), __NFUN_242__(m_bToggleType, true));
+	// End:0x67
+	if(__NFUN_130__(bCanToggle, __NFUN_181__(m_fLockObjectTime, float(0))))
+	{
+		// End:0x65
+		if(__NFUN_176__(GetMaxTimeRequired(), __NFUN_175__(Level.TimeSeconds, m_fLockObjectTime)))
+		{
+			LockObjectUse(false);			
+		}
+		else
+		{
+			return false;
+		}
+	}
+	return bCanToggle;
+	return;
+}
+
+function PerformSoundAction(R6IOObject.eStateIOObejct eState)
+{
+	m_ObjectState = eState;
+	switch(eState)
+	{
+		// End:0x54
+		case 0:
+			// End:0x47
+			if(bShowLog)
+			{
+				__NFUN_231__("****** PerformSoundAction SIO_Start");
+			}
+			__NFUN_264__(m_StartSnd, 3);
+			// End:0xE2
 			break;
-		case SIO_Interrupt:
-            if (bShowLog) log("****** PerformSoundAction SIO_Interrupt");
-			PlaySound(m_InterruptedSnd, SLOT_SFX);
+		// End:0x9A
+		case 1:
+			// End:0x8D
+			if(bShowLog)
+			{
+				__NFUN_231__("****** PerformSoundAction SIO_Interrupt");
+			}
+			__NFUN_264__(m_InterruptedSnd, 3);
+			// End:0xE2
 			break;
-		case SIO_Complete:
-            if (bShowLog) log("****** PerformSoundAction SIO_Complete");
-			PlaySound(m_CompletedSnd, SLOT_SFX);
+		// End:0xDF
+		case 2:
+			// End:0xD2
+			if(bShowLog)
+			{
+				__NFUN_231__("****** PerformSoundAction SIO_Complete");
+			}
+			__NFUN_264__(m_CompletedSnd, 3);
+			// End:0xE2
+			break;
+		// End:0xFFFF
+		default:
 			break;
 	}
+	return;
 }
 
 defaultproperties
 {
-     m_eAnimToPlay=BA_Keypad
-     m_bToggleType=True
-     m_fGainTimeWithElectronicsKit=2.000000
-     RemoteRole=ROLE_SimulatedProxy
-     DrawType=DT_StaticMesh
-     bUseCylinderCollision=True
-     bDirectional=True
-     CollisionRadius=32.000000
-     CollisionHeight=55.000000
-     m_fCircumstantialActionRange=105.000000
-     NetPriority=2.700000
-     StaticMesh=StaticMesh'R6ActionObjects.MpBomb.MpBomb'
+	m_eAnimToPlay=2
+	m_bToggleType=true
+	m_fGainTimeWithElectronicsKit=2.0000000
+	RemoteRole=2
+	DrawType=8
+	bUseCylinderCollision=true
+	bDirectional=true
+	CollisionRadius=32.0000000
+	CollisionHeight=55.0000000
+	m_fCircumstantialActionRange=105.0000000
+	NetPriority=2.7000000
+	StaticMesh=StaticMesh'R6ActionObjects.MpBomb.MpBomb'
 }

@@ -1,13 +1,17 @@
+//=============================================================================
+// R63rdCMAG762mm - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  R63rdCMAG762mm.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class R63rdCMAG762mm extends R6MagazineGadget;
+class R63rdCMAG762mm extends R6MagazineGadget;
 
 defaultproperties
 {
-     DrawType=DT_StaticMesh
-     StaticMesh=StaticMesh'R63rdWeapons_SM.Gadgets.R63rdCMAG762mm'
+	DrawType=8
+	StaticMesh=StaticMesh'R63rdWeapons_SM.Gadgets.R63rdCMAG762mm'
 }

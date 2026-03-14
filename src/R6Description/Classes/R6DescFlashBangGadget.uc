@@ -1,15 +1,19 @@
+//=============================================================================
+// R6DescFlashBangGadget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  R6DescFlashBangGadget.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class R6DescFlashBangGadget extends R6GrenadeDescription;
+class R6DescFlashBangGadget extends R6GrenadeDescription;
 
 defaultproperties
 {
-     m_2DMenuTexture=Texture'R6TextureMenuEquipment.Weapons_02'
-     m_2dMenuRegion=(X=448,Y=284)
-     m_NameID="FLASHBANGGADGET"
-     m_ClassName="R6Weapons.R6FlashBangGadget"
+	m_2DMenuTexture=Texture'R6TextureMenuEquipment.Weapons_02'
+	m_2dMenuRegion=(Zone=Class'R6Description.R6PistolsDescription',iLeaf=114722,ZoneNumber=0)
+	m_NameID="FLASHBANGGADGET"
+	m_ClassName="R6Weapons.R6FlashBangGadget"
 }

@@ -1,32 +1,37 @@
+//=============================================================================
+// R6Shotgun - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  R6Shotgun.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
+class R6Shotgun extends R6Weapons
+ abstract;
 
-
-Class R6Shotgun extends R6Weapons
-    Abstract;
-
-function INT NbBulletToShot()
+function int NbBulletToShot()
 {
-    if((m_pBulletClass != none) && (m_pBulletClass.Default.m_szBulletType == "BUCK"))
-    {
-        // 9  bullets are shot with buckshoot ammo
-        return 9;
-    }
-    return 1;
+	// End:0x29
+	if(__NFUN_130__(__NFUN_119__(m_pBulletClass, none), __NFUN_122__(m_pBulletClass.default.m_szBulletType, "BUCK")))
+	{
+		return 9;
+	}
+	return 1;
+	return;
 }
 
 defaultproperties
 {
-     m_eWeaponType=WT_ShotGun
-     m_eGripType=GRIP_ShotGun
-     m_ShellSingleFireSnd=Sound'CommonShotguns.Play_Shotgun_SingleShell'
-     m_ShellEndFullAutoSnd=Sound'CommonShotguns.Play_Shotgun_EndShell'
-     m_PawnWaitAnimLow="StandShotGunLow_nt"
-     m_PawnWaitAnimHigh="StandShotGunHigh_nt"
-     m_PawnWaitAnimProne="ProneShotGun_nt"
-     m_PawnFiringAnim="StandFireShotGun"
-     m_AttachPoint="TagRightHand"
-     m_HoldAttachPoint="TagBack"
+	m_eWeaponType=3
+	m_eGripType=5
+	m_ShellSingleFireSnd=Sound'CommonShotguns.Play_Shotgun_SingleShell'
+	m_ShellEndFullAutoSnd=Sound'CommonShotguns.Play_Shotgun_EndShell'
+	m_PawnWaitAnimLow="StandShotGunLow_nt"
+	m_PawnWaitAnimHigh="StandShotGunHigh_nt"
+	m_PawnWaitAnimProne="ProneShotGun_nt"
+	m_PawnFiringAnim="StandFireShotGun"
+	m_AttachPoint="TagRightHand"
+	m_HoldAttachPoint="TagBack"
 }

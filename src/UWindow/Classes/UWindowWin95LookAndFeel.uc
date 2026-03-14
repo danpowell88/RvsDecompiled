@@ -1,184 +1,136 @@
+//=============================================================================
+// UWindowWin95LookAndFeel - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class UWindowWin95LookAndFeel extends UWindowLookAndFeel;
-
-#exec TEXTURE IMPORT NAME=ActiveFrame FILE=Textures\ActiveFrame.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-#exec TEXTURE IMPORT NAME=InactiveFrame FILE=Textures\InactiveFrame.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-#exec TEXTURE IMPORT NAME=ActiveFrameS FILE=Textures\ActiveFrameS.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-#exec TEXTURE IMPORT NAME=InactiveFrameS FILE=Textures\InactiveFrameS.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-
-#exec TEXTURE IMPORT NAME=Misc FILE=Textures\Misc.bmp GROUP="Icons" MIPS=OFF
-
-#exec TEXTURE IMPORT NAME=ChkChecked FILE=Textures\ChkChecked.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-#exec TEXTURE IMPORT NAME=ChkUnchecked FILE=Textures\ChkUnchecked.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-#exec TEXTURE IMPORT NAME=ChkCheckedDisabled FILE=Textures\ChkCheckedDisabled.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-#exec TEXTURE IMPORT NAME=ChkUncheckedDisabled FILE=Textures\ChkUncheckedDisabled.bmp GROUP="Icons" FLAGS=2 MIPS=OFF
-
-#exec TEXTURE IMPORT NAME=MenuBar FILE=Textures\MenuBar.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuHighlightL FILE=Textures\MenuHighlightL.bmp FLAGS=2 GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuHighlightM FILE=Textures\MenuHighlightM.bmp FLAGS=2 GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuHighlightR FILE=Textures\MenuHighlightR.bmp FLAGS=2 GROUP="Icons" MIPS=OFF
-
-#exec TEXTURE IMPORT NAME=MenuArea FILE=Textures\MenuArea.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuTL FILE=Textures\MenuTL.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuT FILE=Textures\MenuT.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuTR FILE=Textures\MenuTR.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuL FILE=Textures\MenuL.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuR FILE=Textures\MenuR.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuBL FILE=Textures\MenuBL.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuB FILE=Textures\MenuB.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuBR FILE=Textures\MenuBR.bmp GROUP="Icons" MIPS=OFF
-#exec TEXTURE IMPORT NAME=MenuHighlight FILE=Textures\MenuHighlight.bmp GROUP="Icons" MIPS=OFF
-
-var() Region	SBUpUp;
-var() Region	SBUpDown;
-var() Region	SBUpDisabled;
-
-var() Region	SBDownUp;
-var() Region	SBDownDown;
-var() Region	SBDownDisabled;
-
-var() Region	SBLeftUp;
-var() Region	SBLeftDown;
-var() Region	SBLeftDisabled;
-
-var() Region	SBRightUp;
-var() Region	SBRightDown;
-var() Region	SBRightDisabled;
-
-var() Region	SBBackground;
-
-var() Region	FrameSBL;
-var() Region	FrameSB;
-var() Region	FrameSBR;
-
-var() Region	CloseBoxUp;
-var() Region	CloseBoxDown;
-var() int		CloseBoxOffsetX;
-var() int		CloseBoxOffsetY;
-
 
 const SIZEBORDER = 3;
 const BRSIZEBORDER = 15;
 
-/* Framed Window Drawing Functions */
+var() int CloseBoxOffsetX;
+var() int CloseBoxOffsetY;
+var() Region SBUpUp;
+var() Region SBUpDown;
+var() Region SBUpDisabled;
+var() Region SBDownUp;
+var() Region SBDownDown;
+var() Region SBDownDisabled;
+var() Region SBLeftUp;
+var() Region SBLeftDown;
+var() Region SBLeftDisabled;
+var() Region SBRightUp;
+var() Region SBRightDown;
+var() Region SBRightDisabled;
+var() Region SBBackground;
+var() Region FrameSBL;
+var() Region FrameSB;
+var() Region FrameSBR;
+var() Region CloseBoxUp;
+var() Region CloseBoxDown;
+
 function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 {
-	local Texture T;
-	local Region R, Temp;
+	local Texture t;
+	local Region R, temp;
 
-	C.DrawColor.r = 255;
-	C.DrawColor.g = 255;
-	C.DrawColor.b = 255;
-
-	T = W.GetLookAndFeelTexture();
-
+	C.DrawColor.R = byte(255);
+	C.DrawColor.G = byte(255);
+	C.DrawColor.B = byte(255);
+	t = W.GetLookAndFeelTexture();
 	R = FrameTL;
-	W.DrawStretchedTextureSegment( C, 0, 0, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameT;
-	W.DrawStretchedTextureSegment( C, FrameTL.W, 0, 
-									W.WinWidth - FrameTL.W
-									- FrameTR.W,
-									R.H, R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, float(FrameTL.W), 0.0000000, __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameTL.W)), float(FrameTR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameTR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, 0, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-	
-
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0x21B
 	if(W.bStatusBar)
-		Temp = FrameSBL;
+	{
+		temp = FrameSBL;		
+	}
 	else
-		Temp = FrameBL;
-	
+	{
+		temp = FrameBL;
+	}
 	R = FrameL;
-	W.DrawStretchedTextureSegment( C, 0, FrameTL.H,
-									R.W,  
-									W.WinHeight - FrameTL.H
-									- Temp.H,
-									R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, 0.0000000, float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, FrameTL.H,
-									R.W,  
-									W.WinHeight - FrameTL.H
-									- Temp.H,
-									R.X, R.Y, R.W, R.H, T );
-
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0x393
 	if(W.bStatusBar)
-		R = FrameSBL;
+	{
+		R = FrameSBL;		
+	}
 	else
+	{
 		R = FrameBL;
-	W.DrawStretchedTextureSegment( C, 0, W.WinHeight - R.H, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+	}
+	W.DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0x4E7
 	if(W.bStatusBar)
 	{
 		R = FrameSB;
-		W.DrawStretchedTextureSegment( C, FrameBL.W, W.WinHeight - R.H, 
-										W.WinWidth - FrameSBL.W
-										- FrameSBR.W,
-										R.H, R.X, R.Y, R.W, R.H, T );
+		W.DrawStretchedTextureSegment(C, float(FrameBL.W), __NFUN_175__(W.WinHeight, float(R.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameSBL.W)), float(FrameSBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);		
 	}
 	else
 	{
 		R = FrameB;
-		W.DrawStretchedTextureSegment( C, FrameBL.W, W.WinHeight - R.H, 
-										W.WinWidth - FrameBL.W
-										- FrameBR.W,
-										R.H, R.X, R.Y, R.W, R.H, T );
+		W.DrawStretchedTextureSegment(C, float(FrameBL.W), __NFUN_175__(W.WinHeight, float(R.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameBL.W)), float(FrameBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	}
-
+	// End:0x5B9
 	if(W.bStatusBar)
-		R = FrameSBR;
-	else
-		R = FrameBR;
-	W.DrawStretchedTextureSegment( C, W.WinWidth - R.W, W.WinHeight - R.H, R.W, R.H, R.X, R.Y, 
-									R.W, R.H, T );
-
-
-	C.Font = W.Root.Fonts[W.F_Normal];
-	if(W.ParentWindow.ActiveWindow == W)
-		C.DrawColor = FrameActiveTitleColor;
-	else
-		C.DrawColor = FrameInactiveTitleColor;
-
-
-	W.ClipTextWidth(C, FrameTitleX, FrameTitleY, 
-					W.WindowTitle, W.WinWidth - 22);
-
-	if(W.bStatusBar) 
 	{
-		C.DrawColor.r = 0;
-		C.DrawColor.g = 0;
-		C.DrawColor.b = 0;
-
-		W.ClipTextWidth(C, 6, W.WinHeight - 13, W.StatusBarText, W.WinWidth - 22);
-
-		C.DrawColor.r = 255;
-		C.DrawColor.g = 255;
-		C.DrawColor.b = 255;
+		R = FrameSBR;		
 	}
+	else
+	{
+		R = FrameBR;
+	}
+	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	C.Font = W.Root.Fonts[W.0];
+	// End:0x6C6
+	if(__NFUN_114__(W.ParentWindow.ActiveWindow, W))
+	{
+		C.DrawColor = FrameActiveTitleColor;		
+	}
+	else
+	{
+		C.DrawColor = FrameInactiveTitleColor;
+	}
+	W.ClipTextWidth(C, float(FrameTitleX), float(FrameTitleY), W.WindowTitle, __NFUN_175__(W.WinWidth, float(22)));
+	// End:0x809
+	if(W.bStatusBar)
+	{
+		C.DrawColor.R = 0;
+		C.DrawColor.G = 0;
+		C.DrawColor.B = 0;
+		W.ClipTextWidth(C, 6.0000000, __NFUN_175__(W.WinHeight, float(13)), W.StatusBarText, __NFUN_175__(W.WinWidth, float(22)));
+		C.DrawColor.R = byte(255);
+		C.DrawColor.G = byte(255);
+		C.DrawColor.B = byte(255);
+	}
+	return;
 }
 
 function FW_SetupFrameButtons(UWindowFramedWindow W, Canvas C)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-	W.CloseBox.WinLeft = W.WinWidth - CloseBoxOffsetX - CloseBoxUp.W;
-	W.CloseBox.WinTop = CloseBoxOffsetY;
-
-	W.CloseBox.SetSize(CloseBoxUp.W, CloseBoxUp.H);
-	W.CloseBox.bUseRegion = True;
-
-	W.CloseBox.UpTexture = T;
-	W.CloseBox.DownTexture = T;
-	W.CloseBox.OverTexture = T;
-	W.CloseBox.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.CloseBox.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(CloseBoxOffsetX)), float(CloseBoxUp.W));
+	W.CloseBox.WinTop = float(CloseBoxOffsetY);
+	W.CloseBox.SetSize(float(CloseBoxUp.W), float(CloseBoxUp.H));
+	W.CloseBox.bUseRegion = true;
+	W.CloseBox.UpTexture = t;
+	W.CloseBox.DownTexture = t;
+	W.CloseBox.OverTexture = t;
+	W.CloseBox.DisabledTexture = t;
 	W.CloseBox.UpRegion = CloseBoxUp;
 	W.CloseBox.DownRegion = CloseBoxDown;
 	W.CloseBox.OverRegion = CloseBoxUp;
 	W.CloseBox.DisabledRegion = CloseBoxUp;
+	return;
 }
 
 function Region FW_GetClientArea(UWindowFramedWindow W)
@@ -186,150 +138,182 @@ function Region FW_GetClientArea(UWindowFramedWindow W)
 	local Region R;
 
 	R.X = FrameL.W;
-	R.Y	= FrameT.H;
-	R.W = W.WinWidth - (FrameL.W + FrameR.W);
-	if(W.bStatusBar) 
-		R.H = W.WinHeight - (FrameT.H + FrameSB.H);
+	R.Y = FrameT.H;
+	R.W = int(__NFUN_175__(W.WinWidth, float(__NFUN_146__(FrameL.W, FrameR.W))));
+	// End:0xA9
+	if(W.bStatusBar)
+	{
+		R.H = int(__NFUN_175__(W.WinHeight, float(__NFUN_146__(FrameT.H, FrameSB.H))));		
+	}
 	else
-		R.H = W.WinHeight - (FrameT.H + FrameB.H);
-
+	{
+		R.H = int(__NFUN_175__(W.WinHeight, float(__NFUN_146__(FrameT.H, FrameB.H))));
+	}
 	return R;
+	return;
 }
 
-
-function FrameHitTest FW_HitTest(UWindowFramedWindow W, float X, float Y)
+function UWindowBase.FrameHitTest FW_HitTest(UWindowFramedWindow W, float X, float Y)
 {
-	if((X >= 3) && (X <= W.WinWidth-3) && (Y >= 3) && (Y <= 14))
-		return HT_TitleBar;
-	if((X < BRSIZEBORDER && Y < SIZEBORDER) || (X < SIZEBORDER && Y < BRSIZEBORDER)) 
-		return HT_NW;
-	if((X > W.WinWidth - SIZEBORDER && Y < BRSIZEBORDER) || (X > W.WinWidth - BRSIZEBORDER && Y < SIZEBORDER))
-		return HT_NE;
-	if((X < BRSIZEBORDER && Y > W.WinHeight - SIZEBORDER)|| (X < SIZEBORDER && Y > W.WinHeight - BRSIZEBORDER)) 
-		return HT_SW;
-	if((X > W.WinWidth - BRSIZEBORDER) && (Y > W.WinHeight - BRSIZEBORDER))
-		return HT_SE;
-	if(Y < SIZEBORDER)
-		return HT_N;
-	if(Y > W.WinHeight - SIZEBORDER)
-		return HT_S;
-	if(X < SIZEBORDER)
-		return HT_W;
-	if(X > W.WinWidth - SIZEBORDER)	
-		return HT_E;
-
-	return HT_None;	
+	// End:0x51
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, float(3)), __NFUN_178__(X, __NFUN_175__(W.WinWidth, float(3)))), __NFUN_179__(Y, float(3))), __NFUN_178__(Y, float(14))))
+	{
+		return 8;
+	}
+	// End:0x92
+	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_176__(Y, float(3))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_176__(Y, float(15)))))
+	{
+		return 0;
+	}
+	// End:0xF3
+	if(__NFUN_132__(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))), __NFUN_176__(Y, float(15))), __NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_176__(Y, float(3)))))
+	{
+		return 2;
+	}
+	// End:0x154
+	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3)))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15))))))
+	{
+		return 5;
+	}
+	// End:0x195
+	if(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15)))))
+	{
+		return 7;
+	}
+	// End:0x1A6
+	if(__NFUN_176__(Y, float(3)))
+	{
+		return 1;
+	}
+	// End:0x1C7
+	if(__NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3))))
+	{
+		return 6;
+	}
+	// End:0x1D8
+	if(__NFUN_176__(X, float(3)))
+	{
+		return 3;
+	}
+	// End:0x1F9
+	if(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))))
+	{
+		return 4;
+	}
+	return 10;
+	return;
 }
 
-/* Client Area Drawing Functions */
 function DrawClientArea(UWindowClientWindow W, Canvas C)
 {
-	W.DrawStretchedTexture(C, 0, 0, W.WinWidth, W.WinHeight, Texture'BlackTexture');
+	W.DrawStretchedTexture(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, Texture'UWindow.BlackTexture');
+	return;
 }
 
-
-/* Combo Drawing Functions */
 function Combo_SetupSizes(UWindowComboControl W, Canvas C)
 {
-	local float TW, TH;
+	local float tW, tH;
 
 	C.Font = W.Root.Fonts[W.Font];
-	W.TextSize(C, W.Text, TW, TH);
-	
-	W.WinHeight = 12 + MiscBevelT[2].H + MiscBevelB[2].H;
-	
+	W.TextSize(C, W.Text, tW, tH);
+	W.WinHeight = __NFUN_174__(__NFUN_174__(12.0000000, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
 	switch(W.Align)
 	{
-	case TA_Left:
-		W.EditAreaDrawX = W.WinWidth - W.EditBoxWidth;
-		W.TextX = 0;
-		break;
-	case TA_Right:
-		W.EditAreaDrawX = 0;	
-		W.TextX = W.WinWidth - TW;
-		break;
-	case TA_Center:
-		W.EditAreaDrawX = (W.WinWidth - W.EditBoxWidth) / 2;
-		W.TextX = (W.WinWidth - TW) / 2;
-		break;
+		// End:0xF1
+		case 0:
+			W.EditAreaDrawX = __NFUN_175__(W.WinWidth, W.EditBoxWidth);
+			W.TextX = 0.0000000;
+			// End:0x199
+			break;
+		// End:0x131
+		case 1:
+			W.EditAreaDrawX = 0.0000000;
+			W.TextX = __NFUN_175__(W.WinWidth, tW);
+			// End:0x199
+			break;
+		// End:0x196
+		case 2:
+			W.EditAreaDrawX = __NFUN_172__(__NFUN_175__(W.WinWidth, W.EditBoxWidth), float(2));
+			W.TextX = __NFUN_172__(__NFUN_175__(W.WinWidth, tW), float(2));
+			// End:0x199
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
-
-	W.EditAreaDrawY = (W.WinHeight - 2) / 2;
-	W.TextY = (W.WinHeight - TH) / 2;
-
-	W.EditBox.WinLeft = W.EditAreaDrawX + MiscBevelL[2].W;
-	W.EditBox.WinTop = MiscBevelT[2].H;
-	W.Button.WinWidth = ComboBtnUp.W;
-
+	W.EditAreaDrawY = __NFUN_172__(__NFUN_175__(W.WinHeight, float(2)), float(2));
+	W.TextY = __NFUN_172__(__NFUN_175__(W.WinHeight, tH), float(2));
+	W.EditBox.WinLeft = __NFUN_174__(W.EditAreaDrawX, float(MiscBevelL[2].W));
+	W.EditBox.WinTop = float(MiscBevelT[2].H);
+	W.Button.WinWidth = float(ComboBtnUp.W);
+	// End:0x553
 	if(W.bButtons)
 	{
-		W.EditBox.WinWidth = W.EditBoxWidth - MiscBevelL[2].W - MiscBevelR[2].W - ComboBtnUp.W - SBLeftUp.W - SBRightUp.W;
-		W.EditBox.WinHeight = W.WinHeight - MiscBevelT[2].H - MiscBevelB[2].H;
-		W.Button.WinLeft = W.WinWidth - ComboBtnUp.W - MiscBevelR[2].W - SBLeftUp.W - SBRightUp.W;
+		W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[2].W)), float(MiscBevelR[2].W)), float(ComboBtnUp.W)), float(SBLeftUp.W)), float(SBRightUp.W));
+		W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
+		W.Button.WinLeft = __NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(W.WinWidth, float(ComboBtnUp.W)), float(MiscBevelR[2].W)), float(SBLeftUp.W)), float(SBRightUp.W));
 		W.Button.WinTop = W.EditBox.WinTop;
-
-		W.LeftButton.WinLeft = W.WinWidth - MiscBevelR[2].W - SBLeftUp.W - SBRightUp.W;
+		W.LeftButton.WinLeft = __NFUN_175__(__NFUN_175__(__NFUN_175__(W.WinWidth, float(MiscBevelR[2].W)), float(SBLeftUp.W)), float(SBRightUp.W));
 		W.LeftButton.WinTop = W.EditBox.WinTop;
-		W.RightButton.WinLeft = W.WinWidth - MiscBevelR[2].W - SBRightUp.W;
+		W.RightButton.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(MiscBevelR[2].W)), float(SBRightUp.W));
 		W.RightButton.WinTop = W.EditBox.WinTop;
-
-		W.LeftButton.WinWidth = SBLeftUp.W;
-		W.LeftButton.WinHeight = SBLeftUp.H;
-		W.RightButton.WinWidth = SBRightUp.W;
-		W.RightButton.WinHeight = SBRightUp.H;
+		W.LeftButton.WinWidth = float(SBLeftUp.W);
+		W.LeftButton.WinHeight = float(SBLeftUp.H);
+		W.RightButton.WinWidth = float(SBRightUp.W);
+		W.RightButton.WinHeight = float(SBRightUp.H);		
 	}
 	else
 	{
-		W.EditBox.WinWidth = W.EditBoxWidth - MiscBevelL[2].W - MiscBevelR[2].W - ComboBtnUp.W;
-		W.EditBox.WinHeight = W.WinHeight - MiscBevelT[2].H - MiscBevelB[2].H;
-		W.Button.WinLeft = W.WinWidth - ComboBtnUp.W - MiscBevelR[2].W;
+		W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[2].W)), float(MiscBevelR[2].W)), float(ComboBtnUp.W));
+		W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
+		W.Button.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(ComboBtnUp.W)), float(MiscBevelR[2].W));
 		W.Button.WinTop = W.EditBox.WinTop;
 	}
 	W.Button.WinHeight = W.EditBox.WinHeight;
+	return;
 }
 
 function Combo_Draw(UWindowComboControl W, Canvas C)
 {
-	W.DrawMiscBevel(C, W.EditAreaDrawX, 0, W.EditBoxWidth, W.WinHeight, Misc, 2);
-
-	if(W.Text != "")
+	W.DrawMiscBevel(C, W.EditAreaDrawX, 0.0000000, W.EditBoxWidth, W.WinHeight, Misc, 2);
+	// End:0x102
+	if(__NFUN_123__(W.Text, ""))
 	{
 		C.DrawColor = W.TextColor;
 		W.ClipText(C, W.TextX, W.TextY, W.Text);
-		C.DrawColor.R = 255;
-		C.DrawColor.G = 255;
-		C.DrawColor.B = 255;
+		C.DrawColor.R = byte(255);
+		C.DrawColor.G = byte(255);
+		C.DrawColor.B = byte(255);
 	}
+	return;
 }
 
 function ComboList_DrawBackground(UWindowComboList W, Canvas C)
 {
-	W.DrawClippedTexture(C, 0, 0, Texture'UWindow.MenuTL');
-	W.DrawStretchedTexture(C, 4, 0, W.WinWidth-8, 4, Texture'UWindow.MenuT');
-	W.DrawClippedTexture(C, W.WinWidth-4, 0, Texture'UWindow.MenuTR');
-
-	W.DrawClippedTexture(C, 0, W.WinHeight-4, Texture'UWindow.MenuBL');
-	W.DrawStretchedTexture(C, 4, W.WinHeight-4, W.WinWidth-8, 4, Texture'UWindow.MenuB');
-	W.DrawClippedTexture(C, W.WinWidth-4, W.WinHeight-4, Texture'UWindow.MenuBR');
-
-	W.DrawStretchedTexture(C, 0, 4, 4, W.WinHeight-8, Texture'UWindow.MenuL');
-	W.DrawStretchedTexture(C, W.WinWidth-4, 4, 4, W.WinHeight-8, Texture'UWindow.MenuR');
-
-	W.DrawStretchedTexture(C, 4, 4, W.WinWidth-8, W.WinHeight-8, Texture'UWindow.MenuArea');
+	W.DrawClippedTexture(C, 0.0000000, 0.0000000, Texture'UWindow.Icons.MenuTL');
+	W.DrawStretchedTexture(C, 4.0000000, 0.0000000, __NFUN_175__(W.WinWidth, float(8)), 4.0000000, Texture'UWindow.Icons.MenuT');
+	W.DrawClippedTexture(C, __NFUN_175__(W.WinWidth, float(4)), 0.0000000, Texture'UWindow.Icons.MenuTR');
+	W.DrawClippedTexture(C, 0.0000000, __NFUN_175__(W.WinHeight, float(4)), Texture'UWindow.Icons.MenuBL');
+	W.DrawStretchedTexture(C, 4.0000000, __NFUN_175__(W.WinHeight, float(4)), __NFUN_175__(W.WinWidth, float(8)), 4.0000000, Texture'UWindow.Icons.MenuB');
+	W.DrawClippedTexture(C, __NFUN_175__(W.WinWidth, float(4)), __NFUN_175__(W.WinHeight, float(4)), Texture'UWindow.Icons.MenuBR');
+	W.DrawStretchedTexture(C, 0.0000000, 4.0000000, 4.0000000, __NFUN_175__(W.WinHeight, float(8)), Texture'UWindow.Icons.MenuL');
+	W.DrawStretchedTexture(C, __NFUN_175__(W.WinWidth, float(4)), 4.0000000, 4.0000000, __NFUN_175__(W.WinHeight, float(8)), Texture'UWindow.Icons.MenuR');
+	W.DrawStretchedTexture(C, 4.0000000, 4.0000000, __NFUN_175__(W.WinWidth, float(8)), __NFUN_175__(W.WinHeight, float(8)), Texture'UWindow.Icons.MenuArea');
+	return;
 }
 
 function ComboList_DrawItem(UWindowComboList Combo, Canvas C, float X, float Y, float W, float H, string Text, bool bSelected)
 {
-	C.DrawColor.R = 255;
-	C.DrawColor.G = 255;
-	C.DrawColor.B = 255;
-
+	C.DrawColor.R = byte(255);
+	C.DrawColor.G = byte(255);
+	C.DrawColor.B = byte(255);
+	// End:0xC3
 	if(bSelected)
 	{
-		Combo.DrawStretchedTexture(C, X, Y, W, H, Texture'UWindow.MenuHighlight');
+		Combo.DrawStretchedTexture(C, X, Y, W, H, Texture'UWindow.Icons.MenuHighlight');
 		C.DrawColor.R = 0;
 		C.DrawColor.G = 0;
-		C.DrawColor.B = 0;
+		C.DrawColor.B = 0;		
 	}
 	else
 	{
@@ -337,392 +321,367 @@ function ComboList_DrawItem(UWindowComboList Combo, Canvas C, float X, float Y, 
 		C.DrawColor.G = 0;
 		C.DrawColor.B = 0;
 	}
-
-	Combo.ClipText(C, X + Combo.TextBorder + 2, Y + 3, Text);
+	Combo.ClipText(C, __NFUN_174__(__NFUN_174__(X, float(Combo.TextBorder)), float(2)), __NFUN_174__(Y, float(3)), Text);
+	return;
 }
-
 
 function Combo_SetupButton(UWindowComboButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-	
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = ComboBtnUp;
 	W.DownRegion = ComboBtnDown;
 	W.OverRegion = ComboBtnUp;
 	W.DisabledRegion = ComboBtnDisabled;
+	return;
 }
 
 function Editbox_SetupSizes(UWindowEditControl W, Canvas C)
 {
-	local float TW, TH;
+	local float tW, tH;
 	local int B;
 
 	B = EditBoxBevel;
-		
 	C.Font = W.Root.Fonts[W.Font];
-	W.TextSize(C, W.Text, TW, TH);
-	
-	W.WinHeight = 12 + MiscBevelT[B].H + MiscBevelB[B].H;
-	
+	W.TextSize(C, W.Text, tW, tH);
+	W.WinHeight = __NFUN_174__(__NFUN_174__(12.0000000, float(MiscBevelT[B].H)), float(MiscBevelB[B].H));
 	switch(W.Align)
 	{
-	case TA_Left:
-		W.EditAreaDrawX = W.WinWidth - W.EditBoxWidth;
-		W.TextX = 0;
-		break;
-	case TA_Right:
-		W.EditAreaDrawX = 0;	
-		W.TextX = W.WinWidth - TW;
-		break;
-	case TA_Center:
-		W.EditAreaDrawX = (W.WinWidth - W.EditBoxWidth) / 2;
-		W.TextX = (W.WinWidth - TW) / 2;
-		break;
+		// End:0x102
+		case 0:
+			W.EditAreaDrawX = __NFUN_175__(W.WinWidth, W.EditBoxWidth);
+			W.TextX = 0.0000000;
+			// End:0x1AA
+			break;
+		// End:0x142
+		case 1:
+			W.EditAreaDrawX = 0.0000000;
+			W.TextX = __NFUN_175__(W.WinWidth, tW);
+			// End:0x1AA
+			break;
+		// End:0x1A7
+		case 2:
+			W.EditAreaDrawX = __NFUN_172__(__NFUN_175__(W.WinWidth, W.EditBoxWidth), float(2));
+			W.TextX = __NFUN_172__(__NFUN_175__(W.WinWidth, tW), float(2));
+			// End:0x1AA
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
-
-	W.EditAreaDrawY = (W.WinHeight - 2) / 2;
-	W.TextY = (W.WinHeight - TH) / 2;
-
-	W.EditBox.WinLeft = W.EditAreaDrawX + MiscBevelL[B].W;
-	W.EditBox.WinTop = MiscBevelT[B].H;
-	W.EditBox.WinWidth = W.EditBoxWidth - MiscBevelL[B].W - MiscBevelR[B].W;
-	W.EditBox.WinHeight = W.WinHeight - MiscBevelT[B].H - MiscBevelB[B].H;
+	W.EditAreaDrawY = __NFUN_172__(__NFUN_175__(W.WinHeight, float(2)), float(2));
+	W.TextY = __NFUN_172__(__NFUN_175__(W.WinHeight, tH), float(2));
+	W.EditBox.WinLeft = __NFUN_174__(W.EditAreaDrawX, float(MiscBevelL[B].W));
+	W.EditBox.WinTop = float(MiscBevelT[B].H);
+	W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[B].W)), float(MiscBevelR[B].W));
+	W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[B].H)), float(MiscBevelB[B].H));
+	return;
 }
 
 function Editbox_Draw(UWindowEditControl W, Canvas C)
 {
-	W.DrawMiscBevel(C, W.EditAreaDrawX, 0, W.EditBoxWidth, W.WinHeight, Misc, EditBoxBevel);
-
-	if(W.Text != "")
+	W.DrawMiscBevel(C, W.EditAreaDrawX, 0.0000000, W.EditBoxWidth, W.WinHeight, Misc, EditBoxBevel);
+	// End:0x105
+	if(__NFUN_123__(W.Text, ""))
 	{
 		C.DrawColor = W.TextColor;
 		W.ClipText(C, W.TextX, W.TextY, W.Text);
-		C.DrawColor.R = 255;
-		C.DrawColor.G = 255;
-		C.DrawColor.B = 255;
+		C.DrawColor.R = byte(255);
+		C.DrawColor.G = byte(255);
+		C.DrawColor.B = byte(255);
 	}
+	return;
 }
 
 function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bool bLeftmostTab, float X, float Y, float W, float H, string Text, bool bShowText)
 {
 	local Region R;
-	local Texture T;
-	local float TW, TH;
+	local Texture t;
+	local float tW, tH;
 
-	C.DrawColor.R = 255;
-	C.DrawColor.G = 255;
-	C.DrawColor.B = 255;
-
-	T = Tab.GetLookAndFeelTexture();
-	
+	C.DrawColor.R = byte(255);
+	C.DrawColor.G = byte(255);
+	C.DrawColor.B = byte(255);
+	t = Tab.GetLookAndFeelTexture();
+	// End:0x2E1
 	if(bActiveTab)
 	{
 		R = TabSelectedL;
-		Tab.DrawStretchedTextureSegment( C, X, Y, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+		Tab.DrawStretchedTextureSegment(C, X, Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 		R = TabSelectedM;
-		Tab.DrawStretchedTextureSegment( C, X+TabSelectedL.W, Y, 
-										W - TabSelectedL.W
-										- TabSelectedR.W,
-										R.H, R.X, R.Y, R.W, R.H, T );
-
+		Tab.DrawStretchedTextureSegment(C, __NFUN_174__(X, float(TabSelectedL.W)), Y, __NFUN_175__(__NFUN_175__(W, float(TabSelectedL.W)), float(TabSelectedR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 		R = TabSelectedR;
-		Tab.DrawStretchedTextureSegment( C, X + W - R.W, Y, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
-		C.Font = Tab.Root.Fonts[Tab.F_Bold];
+		Tab.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, W), float(R.W)), Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+		C.Font = Tab.Root.Fonts[Tab.1];
 		C.DrawColor.R = 0;
 		C.DrawColor.G = 0;
 		C.DrawColor.B = 0;
-
+		// End:0x2DE
 		if(bShowText)
 		{
-			Tab.TextSize(C, Text, TW, TH);
-			Tab.ClipText(C, X + (W-TW)/2, Y + 3, Text, True);
-		}
+			Tab.TextSize(C, Text, tW, tH);
+			Tab.ClipText(C, __NFUN_174__(X, __NFUN_172__(__NFUN_175__(W, tW), float(2))), __NFUN_174__(Y, float(3)), Text, true);
+		}		
 	}
 	else
 	{
 		R = TabUnselectedL;
-		Tab.DrawStretchedTextureSegment( C, X, Y, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
+		Tab.DrawStretchedTextureSegment(C, X, Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 		R = TabUnselectedM;
-		Tab.DrawStretchedTextureSegment( C, X+TabUnselectedL.W, Y, 
-										W - TabUnselectedL.W
-										- TabUnselectedR.W,
-										R.H, R.X, R.Y, R.W, R.H, T );
-
+		Tab.DrawStretchedTextureSegment(C, __NFUN_174__(X, float(TabUnselectedL.W)), Y, __NFUN_175__(__NFUN_175__(W, float(TabUnselectedL.W)), float(TabUnselectedR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 		R = TabUnselectedR;
-		Tab.DrawStretchedTextureSegment( C, X + W - R.W, Y, R.W, R.H, R.X, R.Y, R.W, R.H, T );
-
-		C.Font = Tab.Root.Fonts[Tab.F_Normal];
+		Tab.DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, W), float(R.W)), Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+		C.Font = Tab.Root.Fonts[Tab.0];
 		C.DrawColor.R = 0;
 		C.DrawColor.G = 0;
 		C.DrawColor.B = 0;
-
+		// End:0x559
 		if(bShowText)
 		{
-			Tab.TextSize(C, Text, TW, TH);
-			Tab.ClipText(C, X + (W-TW)/2, Y + 4, Text, True);
+			Tab.TextSize(C, Text, tW, tH);
+			Tab.ClipText(C, __NFUN_174__(X, __NFUN_172__(__NFUN_175__(W, tW), float(2))), __NFUN_174__(Y, float(4)), Text, true);
 		}
 	}
+	return;
 }
 
 function SB_SetupUpButton(UWindowSBUpButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = SBUpUp;
 	W.DownRegion = SBUpDown;
 	W.OverRegion = SBUpUp;
 	W.DisabledRegion = SBUpDisabled;
+	return;
 }
 
 function SB_SetupDownButton(UWindowSBDownButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = SBDownUp;
 	W.DownRegion = SBDownDown;
 	W.OverRegion = SBDownUp;
 	W.DisabledRegion = SBDownDisabled;
+	return;
 }
-
-
 
 function SB_SetupLeftButton(UWindowSBLeftButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = SBLeftUp;
 	W.DownRegion = SBLeftDown;
 	W.OverRegion = SBLeftUp;
 	W.DisabledRegion = SBLeftDisabled;
+	return;
 }
 
 function SB_SetupRightButton(UWindowSBRightButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	t = W.GetLookAndFeelTexture();
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = SBRightUp;
 	W.DownRegion = SBRightDown;
 	W.OverRegion = SBRightUp;
 	W.DisabledRegion = SBRightDisabled;
+	return;
 }
 
 function SB_VDraw(UWindowVScrollbar W, Canvas C)
 {
 	local Region R;
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
+	t = W.GetLookAndFeelTexture();
 	R = SBBackground;
-	W.DrawStretchedTextureSegment( C, 0, 0, W.WinWidth, W.WinHeight, R.X, R.Y, R.W, R.H, T);
-	
-	if(!W.bDisabled)
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0xE2
+	if(__NFUN_129__(W.bDisabled))
 	{
-		W.DrawUpBevel( C, 0, W.ThumbStart, Size_ScrollbarWidth,	W.ThumbHeight, T);
+		W.DrawUpBevel(C, 0.0000000, W.ThumbStart, Size_ScrollbarWidth, W.ThumbHeight, t);
 	}
+	return;
 }
 
 function SB_HDraw(UWindowHScrollbar W, Canvas C)
 {
 	local Region R;
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
+	t = W.GetLookAndFeelTexture();
 	R = SBBackground;
-	W.DrawStretchedTextureSegment( C, 0, 0, W.WinWidth, W.WinHeight, R.X, R.Y, R.W, R.H, T);
-	
-	if(!W.bDisabled) 
+	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	// End:0xE2
+	if(__NFUN_129__(W.bDisabled))
 	{
-		W.DrawUpBevel( C, W.ThumbStart, 0, W.ThumbWidth, Size_ScrollbarWidth, T);
+		W.DrawUpBevel(C, W.ThumbStart, 0.0000000, W.ThumbWidth, Size_ScrollbarWidth, t);
 	}
+	return;
 }
 
 function Tab_SetupLeftButton(UWindowTabControlLeftButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
-
+	t = W.GetLookAndFeelTexture();
 	W.WinWidth = Size_ScrollbarButtonHeight;
 	W.WinHeight = Size_ScrollbarWidth;
-	W.WinTop = Size_TabAreaHeight - W.WinHeight;
-	W.WinLeft = W.ParentWindow.WinWidth - 2*W.WinWidth;
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	W.WinTop = __NFUN_175__(Size_TabAreaHeight, W.WinHeight);
+	W.WinLeft = __NFUN_175__(W.ParentWindow.WinWidth, __NFUN_171__(float(2), W.WinWidth));
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = SBLeftUp;
 	W.DownRegion = SBLeftDown;
 	W.OverRegion = SBLeftUp;
 	W.DisabledRegion = SBLeftDisabled;
+	return;
 }
 
 function Tab_SetupRightButton(UWindowTabControlRightButton W)
 {
-	local Texture T;
+	local Texture t;
 
-	T = W.GetLookAndFeelTexture();
-
+	t = W.GetLookAndFeelTexture();
 	W.WinWidth = Size_ScrollbarButtonHeight;
 	W.WinHeight = Size_ScrollbarWidth;
-	W.WinTop = Size_TabAreaHeight - W.WinHeight;
-	W.WinLeft = W.ParentWindow.WinWidth - W.WinWidth;
-
-	W.bUseRegion = True;
-
-	W.UpTexture = T;
-	W.DownTexture = T;
-	W.OverTexture = T;
-	W.DisabledTexture = T;
-
+	W.WinTop = __NFUN_175__(Size_TabAreaHeight, W.WinHeight);
+	W.WinLeft = __NFUN_175__(W.ParentWindow.WinWidth, W.WinWidth);
+	W.bUseRegion = true;
+	W.UpTexture = t;
+	W.DownTexture = t;
+	W.OverTexture = t;
+	W.DisabledTexture = t;
 	W.UpRegion = SBRightUp;
 	W.DownRegion = SBRightDown;
 	W.OverRegion = SBRightUp;
 	W.DisabledRegion = SBRightDisabled;
+	return;
 }
 
 function Tab_SetTabPageSize(UWindowPageControl W, UWindowPageWindow P)
 {
-	P.WinLeft = 2;
-	P.WinTop = W.TabArea.WinHeight-(TabSelectedM.H-TabUnselectedM.H) + 3;
-	P.SetSize(W.WinWidth - 4, W.WinHeight-(W.TabArea.WinHeight-(TabSelectedM.H-TabUnselectedM.H)) - 6);
+	P.WinLeft = 2.0000000;
+	P.WinTop = __NFUN_174__(__NFUN_175__(W.TabArea.WinHeight, float(__NFUN_147__(TabSelectedM.H, TabUnselectedM.H))), float(3));
+	P.SetSize(__NFUN_175__(W.WinWidth, float(4)), __NFUN_175__(__NFUN_175__(W.WinHeight, __NFUN_175__(W.TabArea.WinHeight, float(__NFUN_147__(TabSelectedM.H, TabUnselectedM.H)))), float(6)));
+	return;
 }
 
 function Tab_DrawTabPageArea(UWindowPageControl W, Canvas C, UWindowPageWindow P)
 {
-	W.DrawUpBevel( C, 0, Size_TabAreaHeight, W.WinWidth, W.WinHeight-Size_TabAreaHeight, W.GetLookAndFeelTexture());
+	W.DrawUpBevel(C, 0.0000000, Size_TabAreaHeight, W.WinWidth, __NFUN_175__(W.WinHeight, Size_TabAreaHeight), W.GetLookAndFeelTexture());
+	return;
 }
 
 function Tab_GetTabSize(UWindowTabControlTabArea Tab, Canvas C, string Text, out float W, out float H)
 {
-	local float TW, TH;
+	local float tW, tH;
 
-	C.Font = Tab.Root.Fonts[Tab.F_Normal];
-
-	Tab.TextSize( C, Text, TW, TH );
-	W = TW + Size_TabSpacing;
-	H = TH;
+	C.Font = Tab.Root.Fonts[Tab.0];
+	Tab.TextSize(C, Text, tW, tH);
+	W = __NFUN_174__(tW, Size_TabSpacing);
+	H = tH;
+	return;
 }
 
 function Menu_DrawMenuBar(UWindowMenuBar W, Canvas C)
 {
-	W.DrawStretchedTexture( C, 16, 0, W.WinWidth - 32, 16, Texture'UWindow.MenuBar');
+	W.DrawStretchedTexture(C, 16.0000000, 0.0000000, __NFUN_175__(W.WinWidth, float(32)), 16.0000000, Texture'UWindow.Icons.MenuBar');
+	return;
 }
 
-function Menu_DrawMenuBarItem(UWindowMenuBar B, UWindowMenuBarItem I, float X, float Y, float W, float H, Canvas C)
+function Menu_DrawMenuBarItem(UWindowMenuBar B, UWindowMenuBarItem i, float X, float Y, float W, float H, Canvas C)
 {
-	if(B.Selected == I)
+	// End:0xA2
+	if(__NFUN_114__(B.Selected, i))
 	{
-		B.DrawClippedTexture(C, X, 1, Texture'MenuHighlightL');
-		B.DrawClippedTexture(C, X+W-1, 1, Texture'MenuHighlightR');
-		B.DrawStretchedTexture(C, X+1, 1, W-2, 16, Texture'MenuHighlightM');
+		B.DrawClippedTexture(C, X, 1.0000000, Texture'UWindow.Icons.MenuHighlightL');
+		B.DrawClippedTexture(C, __NFUN_175__(__NFUN_174__(X, W), float(1)), 1.0000000, Texture'UWindow.Icons.MenuHighlightR');
+		B.DrawStretchedTexture(C, __NFUN_174__(X, float(1)), 1.0000000, __NFUN_175__(W, float(2)), 16.0000000, Texture'UWindow.Icons.MenuHighlightM');
 	}
-
-	C.Font = B.Root.Fonts[F_Normal];
+	C.Font = B.Root.Fonts[0];
 	C.DrawColor.R = 0;
 	C.DrawColor.G = 0;
 	C.DrawColor.B = 0;
-
-	B.ClipText(C, X + B.Spacing / 2, 2, I.Caption, True);
+	B.ClipText(C, __NFUN_174__(X, float(__NFUN_145__(B.Spacing, 2))), 2.0000000, i.Caption, true);
+	return;
 }
 
 function Menu_DrawPulldownMenuBackground(UWindowPulldownMenu W, Canvas C)
 {
-	W.DrawClippedTexture(C, 0, 0, Texture'UWindow.MenuTL');
-	W.DrawStretchedTexture(C, 2, 0, W.WinWidth-4, 2, Texture'UWindow.MenuT');
-	W.DrawClippedTexture(C, W.WinWidth-2, 0, Texture'UWindow.MenuTR');
-
-	W.DrawClippedTexture(C, 0, W.WinHeight-2, Texture'UWindow.MenuBL');
-	W.DrawStretchedTexture(C, 2, W.WinHeight-2, W.WinWidth-4, 2, Texture'UWindow.MenuB');
-	W.DrawClippedTexture(C, W.WinWidth-2, W.WinHeight-2, Texture'UWindow.MenuBR');
-
-	W.DrawStretchedTexture(C, 0, 2, 2, W.WinHeight-4, Texture'UWindow.MenuL');
-	W.DrawStretchedTexture(C, W.WinWidth-2, 2, 2, W.WinHeight-4, Texture'UWindow.MenuR');
-	W.DrawStretchedTexture(C, 2, 2, W.WinWidth-4, W.WinHeight-4, Texture'UWindow.MenuArea');
+	W.DrawClippedTexture(C, 0.0000000, 0.0000000, Texture'UWindow.Icons.MenuTL');
+	W.DrawStretchedTexture(C, 2.0000000, 0.0000000, __NFUN_175__(W.WinWidth, float(4)), 2.0000000, Texture'UWindow.Icons.MenuT');
+	W.DrawClippedTexture(C, __NFUN_175__(W.WinWidth, float(2)), 0.0000000, Texture'UWindow.Icons.MenuTR');
+	W.DrawClippedTexture(C, 0.0000000, __NFUN_175__(W.WinHeight, float(2)), Texture'UWindow.Icons.MenuBL');
+	W.DrawStretchedTexture(C, 2.0000000, __NFUN_175__(W.WinHeight, float(2)), __NFUN_175__(W.WinWidth, float(4)), 2.0000000, Texture'UWindow.Icons.MenuB');
+	W.DrawClippedTexture(C, __NFUN_175__(W.WinWidth, float(2)), __NFUN_175__(W.WinHeight, float(2)), Texture'UWindow.Icons.MenuBR');
+	W.DrawStretchedTexture(C, 0.0000000, 2.0000000, 2.0000000, __NFUN_175__(W.WinHeight, float(4)), Texture'UWindow.Icons.MenuL');
+	W.DrawStretchedTexture(C, __NFUN_175__(W.WinWidth, float(2)), 2.0000000, 2.0000000, __NFUN_175__(W.WinHeight, float(4)), Texture'UWindow.Icons.MenuR');
+	W.DrawStretchedTexture(C, 2.0000000, 2.0000000, __NFUN_175__(W.WinWidth, float(4)), __NFUN_175__(W.WinHeight, float(4)), Texture'UWindow.Icons.MenuArea');
+	return;
 }
 
 function Menu_DrawPulldownMenuItem(UWindowPulldownMenu M, UWindowPulldownMenuItem Item, Canvas C, float X, float Y, float W, float H, bool bSelected)
 {
-	C.DrawColor.R = 255;
-	C.DrawColor.G = 255;
-	C.DrawColor.B = 255;
-
-	Item.ItemTop = Y + M.WinTop;
-
-	if(Item.Caption == "-")
+	C.DrawColor.R = byte(255);
+	C.DrawColor.G = byte(255);
+	C.DrawColor.B = byte(255);
+	Item.ItemTop = __NFUN_174__(Y, M.WinTop);
+	// End:0xFF
+	if(__NFUN_122__(Item.Caption, "-"))
 	{
-		C.DrawColor.R = 255;
-		C.DrawColor.G = 255;
-		C.DrawColor.B = 255;
-		M.DrawStretchedTexture(C, X, Y+5, W, 2, Texture'UWindow.MenuDivider');
+		C.DrawColor.R = byte(255);
+		C.DrawColor.G = byte(255);
+		C.DrawColor.B = byte(255);
+		M.DrawStretchedTexture(C, X, __NFUN_174__(Y, float(5)), W, 2.0000000, Texture'UWindow.Icons.MenuDivider');
 		return;
 	}
-
-	C.Font = M.Root.Fonts[F_Normal];
-
+	C.Font = M.Root.Fonts[0];
+	// End:0x15D
 	if(bSelected)
-		M.DrawStretchedTexture(C, X, Y, W, H, Texture'UWindow.MenuHighlight');
-
-	if(Item.bDisabled) 
 	{
-		// Black Shadow
+		M.DrawStretchedTexture(C, X, Y, W, H, Texture'UWindow.Icons.MenuHighlight');
+	}
+	// End:0x1B4
+	if(Item.bDisabled)
+	{
 		C.DrawColor.R = 96;
 		C.DrawColor.G = 96;
-		C.DrawColor.B = 96;
+		C.DrawColor.B = 96;		
 	}
 	else
 	{
@@ -730,114 +689,120 @@ function Menu_DrawPulldownMenuItem(UWindowPulldownMenu M, UWindowPulldownMenuIte
 		C.DrawColor.G = 0;
 		C.DrawColor.B = 0;
 	}
-
-	// DrawColor will render the tick black white or gray.
+	// End:0x236
 	if(Item.bChecked)
-		M.DrawClippedTexture(C, X + 1, Y + 3, Texture'MenuTick');
-
-	if(Item.SubMenu != None)
-		M.DrawClippedTexture(C, X + W - 9, Y + 3, Texture'MenuSubArrow');
-
-	M.ClipText(C, X + M.TextBorder + 2, Y + 3, Item.Caption, True);	
+	{
+		M.DrawClippedTexture(C, __NFUN_174__(X, float(1)), __NFUN_174__(Y, float(3)), Texture'UWindow.Icons.MenuTick');
+	}
+	// End:0x280
+	if(__NFUN_119__(Item.SubMenu, none))
+	{
+		M.DrawClippedTexture(C, __NFUN_175__(__NFUN_174__(X, W), float(9)), __NFUN_174__(Y, float(3)), Texture'UWindow.Icons.MenuSubArrow');
+	}
+	M.ClipText(C, __NFUN_174__(__NFUN_174__(X, float(M.TextBorder)), float(2)), __NFUN_174__(Y, float(3)), Item.Caption, true);
+	return;
 }
 
 defaultproperties
 {
-     CloseBoxOffsetX=3
-     CloseBoxOffsetY=5
-     SBUpUp=(X=20,Y=16,W=12,H=10)
-     SBUpDown=(X=32,Y=16,W=12,H=10)
-     SBUpDisabled=(X=44,Y=16,W=12,H=10)
-     SBDownUp=(X=20,Y=26,W=12,H=10)
-     SBDownDown=(X=32,Y=26,W=12,H=10)
-     SBDownDisabled=(X=44,Y=26,W=12,H=10)
-     SBLeftUp=(X=20,Y=48,W=10,H=12)
-     SBLeftDown=(X=30,Y=48,W=10,H=12)
-     SBLeftDisabled=(X=40,Y=48,W=10,H=12)
-     SBRightUp=(X=20,Y=36,W=10,H=12)
-     SBRightDown=(X=30,Y=36,W=10,H=12)
-     SBRightDisabled=(X=40,Y=36,W=10,H=12)
-     SBBackground=(X=4,Y=79,W=1,H=1)
-     FrameSBL=(Y=112,W=2,H=16)
-     FrameSB=(X=32,Y=112,W=1,H=16)
-     FrameSBR=(X=112,Y=112,W=16,H=16)
-     CloseBoxUp=(X=4,Y=32,W=11,H=11)
-     CloseBoxDown=(X=4,Y=43,W=11,H=11)
-     FrameTitleX=6
-     FrameTitleY=4
-     ColumnHeadingHeight=13
-     EditBoxBevel=2
-     Size_ScrollbarWidth=12.000000
-     Size_ScrollbarButtonHeight=10.000000
-     Size_MinScrollbarHeight=6.000000
-     Size_TabAreaHeight=15.000000
-     Size_TabAreaOverhangHeight=2.000000
-     Size_TabSpacing=20.000000
-     Size_TabXOffset=1.000000
-     Pulldown_ItemHeight=15.000000
-     Pulldown_VBorder=3.000000
-     Pulldown_HBorder=3.000000
-     Pulldown_TextBorder=9.000000
-     Active=Texture'UWindow.Icons.ActiveFrame'
-     Inactive=Texture'UWindow.Icons.InactiveFrame'
-     ActiveS=Texture'UWindow.Icons.ActiveFrameS'
-     InactiveS=Texture'UWindow.Icons.InactiveFrameS'
-     Misc=Texture'UWindow.Icons.Misc'
-     FrameTL=(W=2,H=16)
-     FrameT=(X=32,W=1,H=16)
-     FrameTR=(X=126,W=2,H=16)
-     FrameL=(Y=32,W=2,H=1)
-     FrameR=(X=126,Y=32,W=2,H=1)
-     FrameBL=(Y=125,W=2,H=3)
-     FrameB=(X=32,Y=125,W=1,H=3)
-     FrameBR=(X=126,Y=125,W=2,H=3)
-     FrameActiveTitleColor=(B=255,G=255,R=255)
-     FrameInactiveTitleColor=(B=255,G=255,R=255)
-     BevelUpTL=(X=4,Y=16,W=2,H=2)
-     BevelUpT=(X=10,Y=16,W=1,H=2)
-     BevelUpTR=(X=18,Y=16,W=2,H=2)
-     BevelUpL=(X=4,Y=20,W=2,H=1)
-     BevelUpR=(X=18,Y=20,W=2,H=1)
-     BevelUpBL=(X=4,Y=30,W=2,H=2)
-     BevelUpB=(X=10,Y=30,W=1,H=2)
-     BevelUpBR=(X=18,Y=30,W=2,H=2)
-     BevelUpArea=(X=8,Y=20,W=1,H=1)
-     MiscBevelTL(0)=(Y=17,W=3,H=3)
-     MiscBevelTL(1)=(W=3,H=3)
-     MiscBevelTL(2)=(Y=33,W=2,H=2)
-     MiscBevelT(0)=(X=3,Y=17,W=116,H=3)
-     MiscBevelT(1)=(X=3,W=116,H=3)
-     MiscBevelT(2)=(X=2,Y=33,W=1,H=2)
-     MiscBevelTR(0)=(X=119,Y=17,W=3,H=3)
-     MiscBevelTR(1)=(X=119,W=3,H=3)
-     MiscBevelTR(2)=(X=11,Y=33,W=2,H=2)
-     MiscBevelL(0)=(Y=20,W=3,H=10)
-     MiscBevelL(1)=(Y=3,W=3,H=10)
-     MiscBevelL(2)=(Y=36,W=2,H=1)
-     MiscBevelR(0)=(X=119,Y=20,W=3,H=10)
-     MiscBevelR(1)=(X=119,Y=3,W=3,H=10)
-     MiscBevelR(2)=(X=11,Y=36,W=2,H=1)
-     MiscBevelBL(0)=(Y=30,W=3,H=3)
-     MiscBevelBL(1)=(Y=14,W=3,H=3)
-     MiscBevelBL(2)=(Y=44,W=2,H=2)
-     MiscBevelB(0)=(X=3,Y=30,W=116,H=3)
-     MiscBevelB(1)=(X=3,Y=14,W=116,H=3)
-     MiscBevelB(2)=(X=2,Y=44,W=1,H=2)
-     MiscBevelBR(0)=(X=119,Y=30,W=3,H=3)
-     MiscBevelBR(1)=(X=119,Y=14,W=3,H=3)
-     MiscBevelBR(2)=(X=11,Y=44,W=2,H=2)
-     MiscBevelArea(0)=(X=3,Y=20,W=116,H=10)
-     MiscBevelArea(1)=(X=3,Y=3,W=116,H=10)
-     MiscBevelArea(2)=(X=2,Y=35,W=9,H=9)
-     ComboBtnUp=(X=20,Y=60,W=12,H=12)
-     ComboBtnDown=(X=32,Y=60,W=12,H=12)
-     ComboBtnDisabled=(X=44,Y=60,W=12,H=12)
-     HLine=(X=5,Y=78,W=1,H=2)
-     TabSelectedL=(X=4,Y=80,W=3,H=17)
-     TabSelectedM=(X=7,Y=80,W=1,H=17)
-     TabSelectedR=(X=55,Y=80,W=2,H=17)
-     TabUnselectedL=(X=57,Y=80,W=3,H=15)
-     TabUnselectedM=(X=60,Y=80,W=1,H=15)
-     TabUnselectedR=(X=109,Y=80,W=2,H=15)
-     TabBackground=(X=4,Y=79,W=1,H=1)
+	CloseBoxOffsetX=3
+	CloseBoxOffsetY=5
+	SBUpUp=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=5154,ZoneNumber=0)
+	SBUpDown=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=8226,ZoneNumber=0)
+	SBUpDisabled=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=11298,ZoneNumber=0)
+	SBDownUp=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=5154,ZoneNumber=0)
+	SBDownDown=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=8226,ZoneNumber=0)
+	SBDownDisabled=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=11298,ZoneNumber=0)
+	SBLeftUp=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=5154,ZoneNumber=0)
+	SBLeftDown=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=7714,ZoneNumber=0)
+	SBLeftDisabled=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=10274,ZoneNumber=0)
+	SBRightUp=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=5154,ZoneNumber=0)
+	SBRightDown=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=7714,ZoneNumber=0)
+	SBRightDisabled=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=10274,ZoneNumber=0)
+	SBBackground=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
+	FrameSBL=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=28706,ZoneNumber=0)
+	FrameSB=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=8226,ZoneNumber=0)
+	FrameSBR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=28706,ZoneNumber=0)
+	CloseBoxUp=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
+	CloseBoxDown=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
+	FrameTitleX=6
+	FrameTitleY=4
+	ColumnHeadingHeight=13
+	EditBoxBevel=2
+	Size_ScrollbarWidth=12.0000000
+	Size_ScrollbarButtonHeight=10.0000000
+	Size_MinScrollbarHeight=6.0000000
+	Size_TabAreaHeight=15.0000000
+	Size_TabAreaOverhangHeight=2.0000000
+	Size_TabSpacing=20.0000000
+	Size_TabXOffset=1.0000000
+	Pulldown_ItemHeight=15.0000000
+	Pulldown_VBorder=3.0000000
+	Pulldown_HBorder=3.0000000
+	Pulldown_TextBorder=9.0000000
+	Active=Texture'UWindow.Icons.ActiveFrame'
+	Inactive=Texture'UWindow.Icons.InactiveFrame'
+	ActiveS=Texture'UWindow.Icons.ActiveFrameS'
+	InactiveS=Texture'UWindow.Icons.InactiveFrameS'
+	Misc=Texture'UWindow.Icons.Misc'
+	FrameTL=(Zone=FloatProperty'UWindow.UWindowWindow.WinWidth',iLeaf=546,ZoneNumber=0)
+	FrameT=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=8226,ZoneNumber=0)
+	FrameTR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=32290,ZoneNumber=0)
+	FrameL=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=8226,ZoneNumber=0)
+	FrameR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=32290,ZoneNumber=0)
+	FrameBL=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=32034,ZoneNumber=0)
+	FrameB=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=8226,ZoneNumber=0)
+	FrameBR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=32290,ZoneNumber=0)
+	FrameActiveTitleColor=(R=255,G=255,B=255,A=0)
+	FrameInactiveTitleColor=(R=255,G=255,B=255,A=0)
+	BevelUpTL=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
+	BevelUpT=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=2594,ZoneNumber=0)
+	BevelUpTR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=4642,ZoneNumber=0)
+	BevelUpL=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
+	BevelUpR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=4642,ZoneNumber=0)
+	BevelUpBL=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
+	BevelUpB=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=2594,ZoneNumber=0)
+	BevelUpBR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=4642,ZoneNumber=0)
+	BevelUpArea=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=2082,ZoneNumber=0)
+	MiscBevelTL[0]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=4386,ZoneNumber=0)
+	MiscBevelTL[1]=(Zone=FloatProperty'UWindow.UWindowWindow.WinWidth',iLeaf=802,ZoneNumber=0)
+	MiscBevelTL[2]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=8482,ZoneNumber=0)
+	MiscBevelT[0]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=802,ZoneNumber=0)
+	MiscBevelT[1]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=802,ZoneNumber=0)
+	MiscBevelT[2]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=546,ZoneNumber=0)
+	MiscBevelTR[0]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=30498,ZoneNumber=0)
+	MiscBevelTR[1]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=30498,ZoneNumber=0)
+	MiscBevelTR[2]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelL[0]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=5154,ZoneNumber=0)
+	MiscBevelL[1]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=802,ZoneNumber=0)
+	MiscBevelL[2]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=9250,ZoneNumber=0)
+	MiscBevelR[0]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=30498,ZoneNumber=0)
+	MiscBevelR[1]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=30498,ZoneNumber=0)
+	MiscBevelR[2]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelBL[0]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=7714,ZoneNumber=0)
+	MiscBevelBL[1]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=3618,ZoneNumber=0)
+	MiscBevelBL[2]=(Zone=ObjectProperty'UWindow.UWindowList.Next',iLeaf=11298,ZoneNumber=0)
+	MiscBevelB[0]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=802,ZoneNumber=0)
+	MiscBevelB[1]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=802,ZoneNumber=0)
+	MiscBevelB[2]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=546,ZoneNumber=0)
+	MiscBevelBR[0]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=30498,ZoneNumber=0)
+	MiscBevelBR[1]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=30498,ZoneNumber=0)
+	MiscBevelBR[2]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=2850,ZoneNumber=0)
+	MiscBevelArea[0]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=802,ZoneNumber=0)
+	MiscBevelArea[1]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=802,ZoneNumber=0)
+	MiscBevelArea[2]=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=546,ZoneNumber=0)
+	ComboBtnUp=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=5154,ZoneNumber=0)
+	ComboBtnDown=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=8226,ZoneNumber=0)
+	ComboBtnDisabled=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=11298,ZoneNumber=0)
+	HLine=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1314,ZoneNumber=0)
+	TabSelectedL=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
+	TabSelectedM=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1826,ZoneNumber=0)
+	TabSelectedR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=14114,ZoneNumber=0)
+	TabUnselectedL=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=14626,ZoneNumber=0)
+	TabUnselectedM=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=15394,ZoneNumber=0)
+	TabUnselectedR=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=27938,ZoneNumber=0)
+	TabBackground=(Zone=ObjectProperty'UWindow.UWindowWindow.LookAndFeel',iLeaf=1058,ZoneNumber=0)
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function FW_HitTest

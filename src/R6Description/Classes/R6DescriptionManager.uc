@@ -1,168 +1,258 @@
 //=============================================================================
+// R6DescriptionManager - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6DescriptionManager.uc : Class providing manipulation tools
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/09/10 * Created by Alexandre Dionne
 //=============================================================================
+class R6DescriptionManager extends Object;
 
-
-class R6DescriptionManager extends object;
-
-
-static final function  class<R6Description> findPrimaryDefaultAmmo(class<R6PrimaryWeaponDescription> WeaponDescriptionClass )
+static final function Class<R6Description> findPrimaryDefaultAmmo(Class<R6PrimaryWeaponDescription> WeaponDescriptionClass)
 {
-    local int i;
-    local bool found;
-    
-    found = false;
-    i =0;   
-    
-    //Look for FMJ
-    while((i < WeaponDescriptionClass.Default.m_Bullets.Length ) && (found == false))
-    {       
-        if( class<R6BulletDescription>(WeaponDescriptionClass.Default.m_Bullets[i]).Default.m_NameTag == "FMJ")
-            found = true;
-        else
-            i++;
-    }
-    if(found) 
-        return class<R6Description>(WeaponDescriptionClass.Default.m_Bullets[i]);
+	local int i;
+	local bool Found;
 
-    i=0;
-    //Look for Buck
-    while((i < WeaponDescriptionClass.Default.m_Bullets.Length ) && (found == false))
-    {
-        if( class<R6BulletDescription>(WeaponDescriptionClass.Default.m_Bullets[i]).Default.m_NameTag == "BUCK")
-            found = true;
-        else
-            i++;
-    }
-    if(found) 
-        return class<R6Description>(WeaponDescriptionClass.Default.m_Bullets[i]);
-    
-    //Return first ammo in the weapon ammo list should not happen
-    return class<R6Description>(WeaponDescriptionClass.Default.m_Bullets[0]);    
+	Found = false;
+	i = 0;
+	J0x0F:
+
+	// End:0x77 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, WeaponDescriptionClass.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	{
+		// End:0x6D
+		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag, "FMJ"))
+		{
+			Found = true;			
+		}
+		else
+		{
+			__NFUN_165__(i);
+		}
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	// End:0x9A
+	if(Found)
+	{
+		return Class<R6Description>(WeaponDescriptionClass.default.m_Bullets[i]);
+	}
+	i = 0;
+	J0xA1:
+
+	// End:0x10A [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, WeaponDescriptionClass.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	{
+		// End:0x100
+		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag, "BUCK"))
+		{
+			Found = true;			
+		}
+		else
+		{
+			__NFUN_165__(i);
+		}
+		// [Loop Continue]
+		goto J0xA1;
+	}
+	// End:0x12D
+	if(Found)
+	{
+		return Class<R6Description>(WeaponDescriptionClass.default.m_Bullets[i]);
+	}
+	return Class<R6Description>(WeaponDescriptionClass.default.m_Bullets[0]);
+	return;
 }
 
-static final function  class<R6Description> findSecondaryDefaultAmmo(class<R6SecondaryWeaponDescription> WeaponDescriptionClass )
+static final function Class<R6Description> findSecondaryDefaultAmmo(Class<R6SecondaryWeaponDescription> WeaponDescriptionClass)
 {
-    local int i;
-    local bool found;
-    
-    found = false;   
-    i=0;
-    //Look for FMJ
-    while((i < WeaponDescriptionClass.Default.m_Bullets.Length ) && (found == false))
-    {
-        if( class<R6BulletDescription>(WeaponDescriptionClass.Default.m_Bullets[i]).Default.m_NameTag == "FMJ")
-            found = true;
-        else
-            i++;
-    }
-    if(found) 
-        return class<R6Description>(WeaponDescriptionClass.Default.m_Bullets[i]);
-    
-    //Return first ammo in the weapon ammo list should not happen
-    return class<R6Description>(WeaponDescriptionClass.Default.m_Bullets[0]);    
+	local int i;
+	local bool Found;
+
+	Found = false;
+	i = 0;
+	J0x0F:
+
+	// End:0x77 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, WeaponDescriptionClass.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	{
+		// End:0x6D
+		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag, "FMJ"))
+		{
+			Found = true;			
+		}
+		else
+		{
+			__NFUN_165__(i);
+		}
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	// End:0x9A
+	if(Found)
+	{
+		return Class<R6Description>(WeaponDescriptionClass.default.m_Bullets[i]);
+	}
+	return Class<R6Description>(WeaponDescriptionClass.default.m_Bullets[0]);
+	return;
 }
 
-static final function class<R6BulletDescription> GetPrimaryBulletDesc(class<R6PrimaryWeaponDescription> WeaponDescription, string token)
+static final function Class<R6BulletDescription> GetPrimaryBulletDesc(Class<R6PrimaryWeaponDescription> WeaponDescription, string token)
 {
-    local int   i;
-    local bool  found;
-    local string caps_Token;
-    
-    caps_Token = caps(token);
+	local int i;
+	local bool Found;
+	local string caps_Token;
 
-    while((i < WeaponDescription.Default.m_Bullets.Length ) && (found == false))
-    {        
-        if(  class<R6BulletDescription>(WeaponDescription.Default.m_Bullets[i]).Default.m_NameTag == caps_Token)
-            found = true;
-        else
-            i++;
-    }
-    
-   
-    if(found)
-           return class<R6BulletDescription>(WeaponDescription.Default.m_Bullets[i]);
-    else return class'R6DescBulletNone';     //Should not happen if the default classes are filled correctly with the none classes values
+	caps_Token = __NFUN_235__(token);
+	J0x0D:
 
+	// End:0x75 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	{
+		// End:0x6B
+		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]).default.m_NameTag, caps_Token))
+		{
+			Found = true;			
+		}
+		else
+		{
+			__NFUN_165__(i);
+		}
+		// [Loop Continue]
+		goto J0x0D;
+	}
+	// End:0x9B
+	if(Found)
+	{
+		return Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]);		
+	}
+	else
+	{
+		return Class'R6Description.R6DescBulletNone';
+	}
+	return;
 }
 
-static final function class<R6WeaponGadgetDescription> GetPrimaryWeaponGadgetDesc(class<R6PrimaryWeaponDescription> WeaponDescription, string token)
+static final function Class<R6WeaponGadgetDescription> GetPrimaryWeaponGadgetDesc(Class<R6PrimaryWeaponDescription> WeaponDescription, string token)
 {
-    local int   i;
-    local bool  found;
-    local string caps_Token;
-    
-    caps_Token = caps(token);
+	local int i;
+	local bool Found;
+	local string caps_Token;
 
-    if(caps_Token == "NONE")
-        return class'R6DescWeaponGadgetNone';
-    
-    while((i < WeaponDescription.Default.m_MyGadgets.Length ) && (found == false))
-    {
-        if ( (WeaponDescription.Default.m_MyGadgets[i] != none) && 
-             (class<R6WeaponGadgetDescription>(WeaponDescription.Default.m_MyGadgets[i]).Default.m_NameID == caps_Token))
-            found = true;
-        else
-            i++;
-    }
-    
-    if(found)
-        return class<R6WeaponGadgetDescription>(WeaponDescription.Default.m_MyGadgets[i]);
-    else 
-        return class'R6DescWeaponGadgetNone';     //Should not happen if the default classes are filled correctly with the none classes values
-    
+	caps_Token = __NFUN_235__(token);
+	// End:0x23
+	if(__NFUN_122__(caps_Token, "NONE"))
+	{
+		return Class'R6Description.R6DescWeaponGadgetNone';
+	}
+	J0x23:
+
+	// End:0xA7 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_MyGadgets.Length), __NFUN_242__(Found, false)))
+	{
+		// End:0x9D
+		if(__NFUN_130__(__NFUN_119__(WeaponDescription.default.m_MyGadgets[i], none), __NFUN_122__(Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]).default.m_NameID, caps_Token)))
+		{
+			Found = true;			
+		}
+		else
+		{
+			__NFUN_165__(i);
+		}
+		// [Loop Continue]
+		goto J0x23;
+	}
+	// End:0xCD
+	if(Found)
+	{
+		return Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]);		
+	}
+	else
+	{
+		return Class'R6Description.R6DescWeaponGadgetNone';
+	}
+	return;
 }
 
-static final function class<R6BulletDescription> GetSecondaryBulletDesc(class<R6SecondaryWeaponDescription> WeaponDescription, string token)
+static final function Class<R6BulletDescription> GetSecondaryBulletDesc(Class<R6SecondaryWeaponDescription> WeaponDescription, string token)
 {
-    local int   i;
-    local bool  found;
-    local string caps_Token;
+	local int i;
+	local bool Found;
+	local string caps_Token;
 
-    caps_Token = caps(token);
-    while((i < WeaponDescription.Default.m_Bullets.Length ) && (found == false))
-    {        
-        if(  class<R6BulletDescription>(WeaponDescription.Default.m_Bullets[i]).Default.m_NameTag == caps_Token)
-            found = true;
-        else
-            i++;
-    }
-    
-   
-    if(found)
-           return class<R6BulletDescription>(WeaponDescription.Default.m_Bullets[i]);
-    else return class'R6DescBulletNone';     //Should not happen if the default classes are filled correctly with the none classes values
+	caps_Token = __NFUN_235__(token);
+	J0x0D:
 
+	// End:0x75 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	{
+		// End:0x6B
+		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]).default.m_NameTag, caps_Token))
+		{
+			Found = true;			
+		}
+		else
+		{
+			__NFUN_165__(i);
+		}
+		// [Loop Continue]
+		goto J0x0D;
+	}
+	// End:0x9B
+	if(Found)
+	{
+		return Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]);		
+	}
+	else
+	{
+		return Class'R6Description.R6DescBulletNone';
+	}
+	return;
 }
 
-static final function class<R6WeaponGadgetDescription> GetSecondaryWeaponGadgetDesc(class<R6SecondaryWeaponDescription> WeaponDescription, string token)
+static final function Class<R6WeaponGadgetDescription> GetSecondaryWeaponGadgetDesc(Class<R6SecondaryWeaponDescription> WeaponDescription, string token)
 {
-    local int   i;
-    local bool  found;
-    local string caps_Token;
-    
-    caps_Token = caps(token);
-    if(caps_Token == "NONE")
-        return class'R6DescWeaponGadgetNone';
-    
-    while((i < WeaponDescription.Default.m_MyGadgets.Length ) && (found == false))
-    {       
-        if(  class<R6WeaponGadgetDescription>(WeaponDescription.Default.m_MyGadgets[i]).Default.m_NameID == caps_Token)
-            found = true;
-        else
-            i++;
-    }
-    
-    if(found)
-           return class<R6WeaponGadgetDescription>(WeaponDescription.Default.m_MyGadgets[i]);
-    else return class'R6DescWeaponGadgetNone';     //Should not happen if the default classes are filled correctly with the none classes values
+	local int i;
+	local bool Found;
+	local string caps_Token;
 
+	caps_Token = __NFUN_235__(token);
+	// End:0x23
+	if(__NFUN_122__(caps_Token, "NONE"))
+	{
+		return Class'R6Description.R6DescWeaponGadgetNone';
+	}
+	J0x23:
+
+	// End:0x8B [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_MyGadgets.Length), __NFUN_242__(Found, false)))
+	{
+		// End:0x81
+		if(__NFUN_122__(Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]).default.m_NameID, caps_Token))
+		{
+			Found = true;			
+		}
+		else
+		{
+			__NFUN_165__(i);
+		}
+		// [Loop Continue]
+		goto J0x23;
+	}
+	// End:0xB1
+	if(Found)
+	{
+		return Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]);		
+	}
+	else
+	{
+		return Class'R6Description.R6DescWeaponGadgetNone';
+	}
+	return;
 }
 
-defaultproperties
-{
-}

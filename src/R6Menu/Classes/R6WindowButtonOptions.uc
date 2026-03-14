@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowButtonOptions - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowButtonOptions.uc : This is button for options menu
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -7,88 +13,102 @@
 //=============================================================================
 class R6WindowButtonOptions extends R6WindowButton;
 
-var Texture                 m_TOverButton;
+enum eButtonActionType
+{
+	Button_Game,                    // 0
+	Button_Sound,                   // 1
+	Button_Graphic,                 // 2
+	Button_Hud,                     // 3
+	Button_Multiplayer,             // 4
+	Button_Controls,                // 5
+	Button_MODS,                    // 6
+	Button_PatchService,            // 7
+	Button_Return                   // 8
+};
 
-var Region                  m_ROverButtonFade;   
-var Region                  m_ROverButton;
+// NEW IN 1.60
+var R6WindowButtonOptions.eButtonActionType m_eButton_Action;
+var Texture m_TOverButton;
+var Region m_ROverButtonFade;
+var Region m_ROverButton;
 
-var enum eButtonActionType
-{    
-	Button_Game,
-    Button_Sound,
-    Button_Graphic,
-    Button_Hud,
-    Button_Multiplayer,
-    Button_Controls,
-// MPF - Yannick
-    Button_MODS,
-	Button_PatchService,
-    Button_Return
-} m_eButton_Action;
-
-simulated function Click(float X, float Y) 
+simulated function Click(float X, float Y)
 {
 	local R6MenuRootWindow r6Root;
 
-	if (bDisabled)
+	// End:0x0B
+	if(bDisabled)
+	{
 		return;
-
-	Super.Click(X,Y);
+	}
+	super(UWindowButton).Click(X, Y);
 	r6Root = R6MenuRootWindow(Root);
-
-
 	switch(m_eButton_Action)
-	{	
-	    case Button_Game :
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_Game);
-   		    break;
-	    case Button_Sound:
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_Sound);
-   		    break;
-        case Button_Graphic :
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_Graphic);
-            break;
-        case Button_Hud :
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_Hud);
-            break;
-#ifndefSPDEMO
-        case Button_Multiplayer:
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_Multiplayer);
-            break;
-#endif
-        case Button_Controls:
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_Controls);
-            break;
-        // MPF - Yannick
-        case Button_MODS:
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_MOD);
-            break;
-        case Button_PatchService:
-            // change window options to 
-            R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection( R6MenuOptionsWidget(OwnerWindow).eOptionsWindow.OW_PatchService);
-            break;
-        case Button_Return:
+	{
+		// End:0x60
+		case 0:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).0));
+			// End:0x1ED
+			break;
+		// End:0x8E
+		case 1:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).1));
+			// End:0x1ED
+			break;
+		// End:0xBC
+		case 2:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).2));
+			// End:0x1ED
+			break;
+		// End:0xEA
+		case 3:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).3));
+			// End:0x1ED
+			break;
+		// End:0x118
+		case 4:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).4));
+			// End:0x1ED
+			break;
+		// End:0x146
+		case 5:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).5));
+			// End:0x1ED
+			break;
+		// End:0x174
+		case 6:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).6));
+			// End:0x1ED
+			break;
+		// End:0x1A2
+		case 7:
+			R6MenuOptionsWidget(OwnerWindow).ManageOptionsSelection(int(R6MenuOptionsWidget(OwnerWindow).7));
+			// End:0x1ED
+			break;
+		// End:0x1CF
+		case 8:
 			R6MenuOptionsWidget(OwnerWindow).UpdateOptions();
-            Root.ChangeCurrentWidget(PreviousWidgetID);
-            break;
-        default:
-            log("Button not supported");
-            break;
-    }
+			Root.ChangeCurrentWidget(17);
+			// End:0x1ED
+			break;
+		// End:0xFFFF
+		default:
+			__NFUN_231__("Button not supported");
+			// End:0x1ED
+			break;
+			break;
+	}
+	return;
 }
 
 defaultproperties
 {
-     m_TOverButton=Texture'R6MenuTextures.Gui_BoxScroll'
-     m_ROverButtonFade=(X=248,W=6,H=13)
-     m_ROverButton=(X=253,W=2,H=13)
-     m_fFontSpacing=1.000000
-     bStretched=True
+	m_TOverButton=Texture'R6MenuTextures.Gui_BoxScroll'
+	m_ROverButtonFade=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=63522,ZoneNumber=0)
+	m_ROverButton=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=64802,ZoneNumber=0)
+	m_fFontSpacing=1.0000000
+	bStretched=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var eButtonActionType

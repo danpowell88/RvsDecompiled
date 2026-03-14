@@ -1,4 +1,10 @@
 //=============================================================================
+// R6WindowListRestKit - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowListRestKit.uc : The list for restriction kit. This list is for the same type of button. Same
 //							 width, same height, etc.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -6,141 +12,151 @@
 //  Revision history:
 //    2002/11/18 * Created by Yannick Joly
 //=============================================================================
-
 class R6WindowListRestKit extends UWindowListControl;
 
-var R6WindowVScrollbar	        m_VertSB;
-var class<R6WindowVScrollBar>	m_SBClass;
-
-var FLOAT				        m_fItemHeight;       // the size of each item
-var FLOAT                       m_fSpaceBetItem;     // the space in between item
-var FLOAT						m_fXItemOffset;		 // the item X offset pos
-var FLOAT						m_fYOffset;			 // the first item start in m_fYOffset pos
+var float m_fItemHeight;  // the size of each item
+var float m_fSpaceBetItem;  // the space in between item
+var float m_fXItemOffset;  // the item X offset pos
+var float m_fYOffSet;  // the first item start in m_fYOffset pos
+var R6WindowVScrollbar m_VertSB;
+var Class<R6WindowVScrollbar> m_SBClass;
 
 function Created()
 {
-	Super.Created();
-	m_VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, WinWidth-LookAndFeel.Size_ScrollbarWidth, 0, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	super.Created();
+	m_VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
 	m_VertSB.SetHideWhenDisable(true);
+	return;
 }
 
-function Paint(Canvas C, FLOAT fMouseX, FLOAT fMouseY)
+function Paint(Canvas C, float fMouseX, float fMouseY)
 {
 	local UWindowList CurItem;
 	local R6WindowLookAndFeel LAF;
-	local FLOAT fItemHeight, fListHeight,fdrawWidth, y;
-	local INT i;
+	local float fItemHeight, fListHeight, fdrawWidth, Y;
+	local int i;
 
 	LAF = R6WindowLookAndFeel(LookAndFeel);
-	CurItem = Items.Next; // Get first item
-
-	if (CurItem == None)
-		return; // no item to display
-
-	fItemHeight = GetSizeOfAnItem(); // THIS SUPPOSE THAT ALL YOUR ITEM HAVE THE SAME HEIGHT IN THE LIST
-	fListHeight = WinHeight - (2*LAF.m_SBHBorder.H) - m_fYOffset;
-
-	// check the width of the list box
-    fdrawWidth = WinWidth - (2 * m_fXItemOffset);
-
-    if(m_VertSB != None)
-    {
-		m_VertSB.SetRange(0, Items.CountShown(), INT(fListHeight/fItemHeight)); 
-
-		// check the width of the list box if the scroll bar is not hide
-		if (!m_VertSB.isHidden())
+	CurItem = Items.Next;
+	// End:0x31
+	if(__NFUN_114__(CurItem, none))
+	{
+		return;
+	}
+	fItemHeight = GetSizeOfAnItem();
+	fListHeight = __NFUN_175__(__NFUN_175__(WinHeight, float(__NFUN_144__(2, LAF.m_SBHBorder.H))), m_fYOffSet);
+	fdrawWidth = __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fXItemOffset));
+	// End:0x15F
+	if(__NFUN_119__(m_VertSB, none))
+	{
+		m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(fListHeight, fItemHeight))));
+		// End:0xEB
+		if(__NFUN_129__(m_VertSB.isHidden()))
 		{
-			fdrawWidth -= m_VertSB.WinWidth;
+			__NFUN_185__(fdrawWidth, m_VertSB.WinWidth);
 		}
+		J0xEB:
 
-        while ((CurItem != None) && (i < m_VertSB.Pos))
-	    {
-			// hide all the previous element in the list
+		// End:0x15F [Loop If]
+		if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), m_VertSB.pos)))
+		{
 			R6WindowListGeneralItem(CurItem).m_pR6WindowButtonBox.HideWindow();
-
+			// End:0x148
 			if(CurItem.ShowThisItem())
 			{
-				i++;
+				__NFUN_165__(i);
 			}
-
-		    CurItem = CurItem.Next;
-	    }
-    }
-
-    for(y = LAF.m_SBHBorder.H + m_fYOffset; (y + fItemHeight <= fListHeight) && (CurItem != None); CurItem = CurItem.Next)
-	{
-		if(CurItem.ShowThisItem())
-		{	
-            DrawItem(C, CurItem, m_fXItemOffset, y, fdrawWidth, fItemHeight);
-			
-			y = y + fItemHeight;
+			CurItem = CurItem.Next;
+			// [Loop Continue]
+			goto J0xEB;
 		}
 	}
+	Y = __NFUN_174__(float(LAF.m_SBHBorder.H), m_fYOffSet);
+	J0x181:
 
-	while (CurItem != None)
+	// End:0x203 [Loop If]
+	if(__NFUN_130__(__NFUN_178__(__NFUN_174__(Y, fItemHeight), fListHeight), __NFUN_119__(CurItem, none)))
 	{
-		// hide all the next element in the list
+		// End:0x1EC
+		if(CurItem.ShowThisItem())
+		{
+			DrawItem(C, CurItem, m_fXItemOffset, Y, fdrawWidth, fItemHeight);
+			Y = __NFUN_174__(Y, fItemHeight);
+		}
+		CurItem = CurItem.Next;
+		// [Loop Continue]
+		goto J0x181;
+	}
+	J0x203:
+
+	// End:0x242 [Loop If]
+	if(__NFUN_119__(CurItem, none))
+	{
 		R6WindowListGeneralItem(CurItem).m_pR6WindowButtonBox.HideWindow();
 		CurItem = CurItem.Next;
+		// [Loop Continue]
+		goto J0x203;
 	}
+	return;
 }
 
-function DrawItem(Canvas C, UWindowList Item, FLOAT X, FLOAT Y, FLOAT W, FLOAT H)
+function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
 	local R6WindowListGeneralItem pListGenItem;
 
 	pListGenItem = R6WindowListGeneralItem(Item);
-
-    // Set the item location
-    pListGenItem.m_pR6WindowButtonBox.WinTop = WinTop + Y;
-
-	if (pListGenItem.m_pR6WindowButtonBox.WinWidth != W)
+	pListGenItem.m_pR6WindowButtonBox.WinTop = __NFUN_174__(WinTop, Y);
+	// End:0xB3
+	if(__NFUN_181__(pListGenItem.m_pR6WindowButtonBox.WinWidth, W))
 	{
-		pListGenItem.m_pR6WindowButtonBox.WinLeft = WinLeft + X;
+		pListGenItem.m_pR6WindowButtonBox.WinLeft = __NFUN_174__(WinLeft, X);
 		pListGenItem.m_pR6WindowButtonBox.WinHeight = H;
-
 		pListGenItem.m_pR6WindowButtonBox.SetNewWidth(W);
 	}
-
 	pListGenItem.m_pR6WindowButtonBox.ShowWindow();
+	return;
 }
 
-function FLOAT GetSizeOfAnItem() // UWindowList _pItem)
+function float GetSizeOfAnItem()
 {
-	local FLOAT fTotalItemHeigth;
+	local float fTotalItemHeigth;
 
-	fTotalItemHeigth = m_fItemHeight + m_fSpaceBetItem;
-
+	fTotalItemHeigth = __NFUN_174__(m_fItemHeight, m_fSpaceBetItem);
 	return fTotalItemHeigth;
+	return;
 }
 
 //=======================================================================================
 // MouseWheelDown: advice scroll bar for mouse wheel down
 //=======================================================================================
-function MouseWheelDown(FLOAT X, FLOAT Y)
+function MouseWheelDown(float X, float Y)
 {
-	if (m_VertSB != None)
+	// End:0x24
+	if(__NFUN_119__(m_VertSB, none))
 	{
-		m_VertSB.MouseWheelDown( X, Y);
+		m_VertSB.MouseWheelDown(X, Y);
 	}
+	return;
 }
 
 //=======================================================================================
 // MouseWheelUp: advice scroll bar for mouse wheel up
 //=======================================================================================
-function MouseWheelUp(FLOAT X, FLOAT Y)
+function MouseWheelUp(float X, float Y)
 {
-	if (m_VertSB != None)
+	// End:0x24
+	if(__NFUN_119__(m_VertSB, none))
 	{
-		m_VertSB.MouseWheelUp( X, Y);
+		m_VertSB.MouseWheelUp(X, Y);
 	}
+	return;
 }
 
 defaultproperties
 {
-     m_fItemHeight=16.000000
-     m_fSpaceBetItem=2.000000
-     m_fYOffSet=2.000000
-     m_SBClass=Class'R6Window.R6WindowVScrollbar'
-     ListClass=Class'R6Window.R6WindowListGeneralItem'
+	m_fItemHeight=16.0000000
+	m_fSpaceBetItem=2.0000000
+	m_fYOffSet=2.0000000
+	m_SBClass=Class'R6Window.R6WindowVScrollbar'
+	ListClass=Class'R6Window.R6WindowListGeneralItem'
 }

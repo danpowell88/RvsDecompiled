@@ -1,48 +1,61 @@
 //=============================================================================
+// AIScript - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // AIScript - used by Level Designers to specify special AI scripts for pawns 
 // placed in a level, and to change which type of AI controller to use for a pawn.
 // AIScripts can be shared by one or many pawns. 
 // Game specific subclasses of AIScript will have editable properties defining game specific behavior and AI
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
-class AIScript extends Keypoint 
+class AIScript extends Keypoint
 	native
-	placeable;
+ placeable;
 
-var() class<AIController> ControllerClass;
-var		bool		bNavigate;				// if true, put an associated path in the navigation network
-var		bool		bLoggingEnabled;	
-var		AIMarker	myMarker;
+var bool bNavigate;  // if true, put an associated path in the navigation network
+var bool bLoggingEnabled;
+var AIMarker myMarker;
+var() Class<AIController> ControllerClass;
 
-
-/* SpawnController()
-Spawn and initialize an AI Controller (called by a non-player controlled Pawn at level startup)
-*/
 function SpawnControllerFor(Pawn P)
 {
 	local AIController C;
 
-	if ( ControllerClass == None )
+	// End:0x3B
+	if(__NFUN_114__(ControllerClass, none))
 	{
-		if ( P.ControllerClass == None )
+		// End:0x21
+		if(__NFUN_114__(P.ControllerClass, none))
+		{
 			return;
-		C = Spawn(P.ControllerClass);
+		}
+		C = __NFUN_278__(P.ControllerClass);		
 	}
 	else
-		C = Spawn(ControllerClass);
+	{
+		C = __NFUN_278__(ControllerClass);
+	}
 	C.MyScript = self;
 	C.Possess(P);
+	return;
 }
 
 function Actor GetMoveTarget()
 {
-	if ( MyMarker != None )
-		return MyMarker;
+	// End:0x11
+	if(__NFUN_119__(myMarker, none))
+	{
+		return myMarker;
+	}
 	return self;
+	return;
 }
 
-function TakeOver(Pawn P);
-
-defaultproperties
+function TakeOver(Pawn P)
 {
+	return;
 }
+

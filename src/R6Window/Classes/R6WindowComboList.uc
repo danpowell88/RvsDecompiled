@@ -1,100 +1,83 @@
 //=============================================================================
+// R6WindowComboList - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowComboList.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/09 * Created by Chaouky Garram
 //=============================================================================
-
 class R6WindowComboList extends UWindowComboList;
 
-var Color   m_BGColor;          // BackGround color 
-var Color   m_BGSelColor;       // BackGround color when selected
-
-var Texture m_BGSelTexture;     // BackGround texture under item when selected
-var Region  m_BGSelRegion;      // BackGround texture Region under item when selected
-
-var ERenderStyle m_BGRenderStyle;
-var ERenderStyle m_BGSelRenderStyle;
-
+var UWindowBase.ERenderStyle m_BGRenderStyle;
+var UWindowBase.ERenderStyle m_BGSelRenderStyle;
+var Texture m_BGSelTexture;  // BackGround texture under item when selected
+var Class<UWindowVScrollbar> m_SBClass;
+var Color m_BGColor;  // BackGround color
+var Color m_BGSelColor;  // BackGround color when selected
+var Region m_BGSelRegion;  // BackGround texture Region under item when selected
 //var color   TextColor;			// color for text            N.B. var already define in class UWindowDialogControl
-var Color   m_SelTextColor;			// color for selected text (item)
-var Color   m_DisableTextColor;		// color for disable text (item)
-
-var class<UWindowVScrollBar>	m_SBClass;
+var Color m_SelTextColor;  // color for selected text (item)
+var Color m_DisableTextColor;  // color for disable text (item)
 
 function Created()
 {
-    Super.Created();
-
-    TextColor           = Root.Colors.m_LisBoxNormalTextColor;
-    m_SelTextColor      = Root.Colors.m_LisBoxSelectedTextColor;
-	m_DisableTextColor  = Root.Colors.m_LisBoxDisabledTextColor;
-    m_BGSelColor        = Root.Colors.m_LisBoxSelectionColor;        
-    m_BGRenderStyle     = ERenderStyle.STY_Normal;
-    m_BGSelRenderStyle  = ERenderStyle.STY_Alpha;
-    m_BGColor           = Root.Colors.m_ComboBGColor;
+	super.Created();
+	TextColor = Root.Colors.m_LisBoxNormalTextColor;
+	m_SelTextColor = Root.Colors.m_LisBoxSelectedTextColor;
+	m_DisableTextColor = Root.Colors.m_LisBoxDisabledTextColor;
+	m_BGSelColor = Root.Colors.m_LisBoxSelectionColor;
+	m_BGRenderStyle = 1;
+	m_BGSelRenderStyle = 5;
+	m_BGColor = Root.Colors.m_ComboBGColor;
+	return;
 }
 
 function Setup()
 {
-	VertSB = UWindowVScrollBar(CreateWindow(m_SBClass, WinWidth - LookAndFeel.Size_ScrollbarWidth, 0, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	VertSB = UWindowVScrollbar(CreateWindow(m_SBClass, __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	return;
 }
 
 function BeforePaint(Canvas C, float X, float Y)
 {
-	local FLOAT W, H; //, MaxWidth;
-	local INT Count;
-	local UWindowComboListItem I;
-	local FLOAT ListX, ListY;
-	//local FLOAT ExtraWidth;
-
-//	C.Font = Root.Fonts[F_Normal];
-//	C.SetPos(0, 0);
-
-	//MaxWidth = Owner.EditBoxWidth;
-	//ExtraWidth = ((HBorder + TextBorder) * 2);
+	local float W, H;
+	local int Count;
+	local UWindowComboListItem i;
+	local float ListX, ListY;
 
 	Count = Items.Count();
-	if(Count > MaxVisible)
+	// End:0x48
+	if(__NFUN_151__(Count, MaxVisible))
 	{
-		//ExtraWidth += LookAndFeel.Size_ScrollbarWidth;
-		WinHeight = (ItemHeight * MaxVisible) + (VBorder * 2);
+		WinHeight = __NFUN_174__(float(__NFUN_144__(ItemHeight, MaxVisible)), float(__NFUN_144__(VBorder, 2)));		
 	}
 	else
 	{
-		VertSB.Pos = 0;
-		WinHeight = (ItemHeight * Count) + (VBorder * 2);
+		VertSB.pos = 0.0000000;
+		WinHeight = __NFUN_174__(float(__NFUN_144__(ItemHeight, Count)), float(__NFUN_144__(VBorder, 2)));
 	}
-
-    /*
-	for( I = UWindowComboListItem(Items.Next);I != None; I = UWindowComboListItem(I.Next) )
-	{
-		TextSize(C, RemoveAmpersand(I.Value), W, H);
-		if(W + ExtraWidth > MaxWidth)
-			MaxWidth = W + ExtraWidth;
-	}
-    */
-	//WinWidth = MaxWidth;
-
-//	ListX = Owner.EditAreaDrawX + Owner.EditBoxWidth - WinWidth;
 	ListX = Owner.EditBox.WinLeft;
-	ListY = Owner.Button.WinTop + Owner.Button.WinHeight -1;
-
-	if(Count > MaxVisible)
+	ListY = __NFUN_175__(__NFUN_174__(Owner.Button.WinTop, Owner.Button.WinHeight), float(1));
+	// End:0x172
+	if(__NFUN_151__(Count, MaxVisible))
 	{
 		VertSB.ShowWindow();
-		VertSB.SetRange(0, Count, MaxVisible);
-		VertSB.WinLeft = WinWidth - LookAndFeel.Size_ScrollbarWidth;
-		VertSB.WinTop = 0;
-		VertSB.SetSize(LookAndFeel.Size_ScrollbarWidth, WinHeight);
-    }
+		VertSB.SetRange(0.0000000, float(Count), float(MaxVisible));
+		VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+		VertSB.WinTop = 0.0000000;
+		VertSB.SetSize(LookAndFeel.Size_ScrollbarWidth, WinHeight);		
+	}
 	else
 	{
 		VertSB.HideWindow();
 	}
-
 	Owner.WindowToGlobal(ListX, ListY, WinLeft, WinTop);
+	return;
 }
 
 //-----------------------------------------------------------------------------
@@ -104,73 +87,79 @@ function BeforePaint(Canvas C, float X, float Y)
 function Paint(Canvas C, float X, float Y)
 {
 	local int Count;
-	local UWindowComboListItem I;
+	local UWindowComboListItem i;
 
 	DrawMenuBackground(C);
-	
 	Count = 0;
-    C.Font = Root.Fonts[Font];
+	C.Font = Root.Fonts[Font];
+	i = UWindowComboListItem(Items.Next);
+	J0x4E:
 
-	for( I = UWindowComboListItem(Items.Next);I != None; I = UWindowComboListItem(I.Next) )
+	// End:0x17C [Loop If]
+	if(__NFUN_119__(i, none))
 	{
+		// End:0x114
 		if(VertSB.bWindowVisible)
 		{
-			if(Count >= VertSB.Pos && ( Count - INT(VertSB.Pos) < MaxVisible ) )
-				DrawItem(C, I, HBorder, VBorder + (ItemHeight * (Count - VertSB.Pos)), WinWidth - (2 * HBorder) - VertSB.WinWidth, ItemHeight);
+			// End:0x111
+			if(__NFUN_130__(__NFUN_179__(float(Count), VertSB.pos), __NFUN_150__(__NFUN_147__(Count, int(VertSB.pos)), MaxVisible)))
+			{
+				DrawItem(C, i, float(HBorder), __NFUN_174__(float(VBorder), __NFUN_171__(float(ItemHeight), __NFUN_175__(float(Count), VertSB.pos))), __NFUN_175__(__NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), VertSB.WinWidth), float(ItemHeight));
+			}			
 		}
 		else
-			DrawItem(C, I, HBorder, VBorder + (ItemHeight * Count), WinWidth - (2 * HBorder), ItemHeight);
-		Count++;
+		{
+			DrawItem(C, i, float(HBorder), float(__NFUN_146__(VBorder, __NFUN_144__(ItemHeight, Count))), __NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), float(ItemHeight));
+		}
+		__NFUN_165__(Count);
+		i = UWindowComboListItem(i.Next);
+		// [Loop Continue]
+		goto J0x4E;
 	}
+	return;
 }
 
 function DrawMenuBackground(Canvas C)
-{    
-    C.Style = m_BGRenderStyle;
-
-    C.SetDrawColor(m_BGColor.R,m_BGColor.G,m_BGColor.B);
-    
-    DrawStretchedTextureSegment(C, 0, 0, WinWidth, WinHeight, m_BorderTextureRegion.X, m_BorderTextureRegion.Y, 
-													m_BorderTextureRegion.W, m_BorderTextureRegion.H, m_BorderTexture);
-    
-    DrawSimpleBorder(C);
+{
+	C.Style = m_BGRenderStyle;
+	C.__NFUN_2626__(m_BGColor.R, m_BGColor.G, m_BGColor.B);
+	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawSimpleBorder(C);
+	return;
 }
 
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
-{	 
+{
 	local UWindowComboListItem pComboListItem;
 
-	pComboListItem = UWindowComboListItem(item);
-
-    if(Selected == Item)
-	{   
-        C.Style = m_BGSelRenderStyle;            
-        
-		// We draw the extremities then we tile			
-		C.SetDrawColor(m_BGSelColor.R,m_BGSelColor.G,m_BGSelColor.B);
-		
-
-		DrawStretchedTextureSegment( C, X, Y, W, H, m_BGSelRegion.X, m_BGSelRegion.Y, 
-					m_BGSelRegion.W, m_BGSelRegion.H,	m_BGSelTexture );
-		    
-        C.SetDrawColor(m_SelTextColor.r,m_SelTextColor.g,m_SelTextColor.b);
-	}
-	else if ( pComboListItem.bDisabled)
+	pComboListItem = UWindowComboListItem(Item);
+	// End:0xDE
+	if(__NFUN_114__(Selected, Item))
 	{
-		C.SetDrawColor(m_DisableTextColor.r,m_DisableTextColor.g,m_DisableTextColor.b);
+		C.Style = m_BGSelRenderStyle;
+		C.__NFUN_2626__(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
+		DrawStretchedTextureSegment(C, X, Y, W, H, float(m_BGSelRegion.X), float(m_BGSelRegion.Y), float(m_BGSelRegion.W), float(m_BGSelRegion.H), m_BGSelTexture);
+		C.__NFUN_2626__(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
 	}
 	else
-    {
-        C.SetDrawColor(TextColor.r,TextColor.g,TextColor.b);
+	{
+		// End:0x11D
+		if(pComboListItem.bDisabled)
+		{
+			C.__NFUN_2626__(m_DisableTextColor.R, m_DisableTextColor.G, m_DisableTextColor.B);			
+		}
+		else
+		{
+			C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		}
 	}
-    
-    
-    ClipText(C, X + TextBorder + 2, Y + 3, pComboListItem.Value);
+	ClipText(C, __NFUN_174__(__NFUN_174__(X, float(TextBorder)), float(2)), __NFUN_174__(Y, float(3)), pComboListItem.Value);
+	return;
 }
 
 defaultproperties
 {
-     m_BGSelTexture=Texture'R6MenuTextures.Gui_BoxScroll'
-     m_SBClass=Class'R6Window.R6WindowVScrollbar'
-     m_BGSelRegion=(X=253,W=2,H=13)
+	m_BGSelTexture=Texture'R6MenuTextures.Gui_BoxScroll'
+	m_SBClass=Class'R6Window.R6WindowVScrollbar'
+	m_BGSelRegion=(Zone=Class'R6Window.R6WindowListServerItem',iLeaf=64802,ZoneNumber=0)
 }

@@ -1,34 +1,37 @@
 //=============================================================================
+// R6WindowListAreaItem - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowListAreaItem.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/09 * Created by Chaouky Garram
 //=============================================================================
-
 class R6WindowListAreaItem extends UWindowListBoxItem;
 
-var R6WindowArea        m_Area;
-
-
+var R6WindowArea m_Area;
 
 function SetFront()
 {
-    if(m_Area!=NONE)
-    {
-        m_Area.BringToFront();
-    }
+	// End:0x1A
+	if(__NFUN_119__(m_Area, none))
+	{
+		m_Area.BringToFront();
+	}
+	return;
 }
-
 
 function SetBack()
 {
-    if(m_Area!=NONE)
-    {
-        m_Area.SendToBack();
-    }
+	// End:0x1A
+	if(__NFUN_119__(m_Area, none))
+	{
+		m_Area.SendToBack();
+	}
+	return;
 }
 
-defaultproperties
-{
-}

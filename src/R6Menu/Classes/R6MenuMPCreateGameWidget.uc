@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuMPCreateGameWidget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuMultiPlayerWidget.uc : The first multi player menu window
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -8,251 +14,207 @@
 //=============================================================================
 class R6MenuMPCreateGameWidget extends R6MenuWidget;
 
+const K_XSTARTPOS = 10;
+const K_WINDOWWIDTH = 620;
+const K_XTABOFFSET = 5;
+const K_TABWINDOW_WIDTH = 550;
+const K_YPOS_TABWINDOW_CURVED = 87;
+const K_YPOS_TABWINDOW = 92;
+const K_YPOS_HELPTEXT_WINDOW = 430;
+const K_HSIZE_TABWINDOWCURVED = 30;
+const K_HSIZE_TABWINDOW = 25;
+const K_HSIZE_UNDER_TABWINDOW = 300;
+
 enum eCreateGameTabID
 {
-    TAB_Options,
-	TAB_AdvancedOptions,
-    TAB_Kit
+	TAB_Options,                    // 0
+	TAB_AdvancedOptions,            // 1
+	TAB_Kit                         // 2
 };
 
-// This enum is for Restriction Kit menu buttons
 enum eRestrictionKit
 {
-    KIT_SubMachineGuns,
-    KIT_Shotguns
+	KIT_SubMachineGuns,             // 0
+	KIT_Shotguns                    // 1
 };
 
-const K_XSTARTPOS                     = 10;                      // the start pos of window LAN SERVER INFO and GameMode
-const K_WINDOWWIDTH                   = 620;                     // the size of window LAN SERVER INFO and GameMode
-const K_XTABOFFSET                    = 5;                       // the first tab offset in X
-const K_TABWINDOW_WIDTH               = 550;                     // in relation with K_WINDOWWIDTH and K_XTABOFFSET
-const K_YPOS_TABWINDOW_CURVED         = 87;                      // the R6WindowTextLabelCurved window
-const K_YPOS_TABWINDOW                = 92;                      // the tab inside the R6WindowTextLabelCurved window
-const K_YPOS_HELPTEXT_WINDOW          = 430;                     // the y pos of help text window
-
-const K_HSIZE_TABWINDOWCURVED         = 30;                      // height of tab windowcurved
-const K_HSIZE_TABWINDOW               = 25;                      // height of a tab (in relation with K_HSIZE_TABWINDOWCURVED)
-const K_HSIZE_UNDER_TABWINDOW         = 300;                     // heigth of the window under the tab
-
-var R6WindowTextLabel			      m_LMenuTitle; 
-
-var R6WindowButton	                  m_ButtonMainMenu;
-var R6WindowButton	                  m_ButtonOptions;
-
-var R6WindowButtonMultiMenu           m_ButtonCancel;
-var R6WindowButtonMultiMenu           m_ButtonLaunch;
-
-var R6WindowTextLabelCurved           m_FirstTabWindow;          // First tab window (on a simple curved frame)
-
-var R6MenuMPManageTab                 m_pFirstTabManager;        // creation of the tab manager for the first tab window
-
-var R6MenuMPCreateGameTab             m_pCreateTabWindow;
-var R6MenuMPCreateGameTabOptions      m_pCreateTabOptions;
-var R6MenuMPCreateGameTabKitRest      m_pCreateTabKit;
-var R6MenuMPCreateGameTabAdvOptions   m_pCreateTabAdvOptions;
-
-var R6MenuHelpWindow                  m_pHelpTextWindow;
-var R6WindowSimpleFramedWindowExt     m_pWindowBorder;
-
-var R6WindowUbiLogIn                  m_pLoginWindow;
-var R6WindowUbiCDKeyCheck             m_pCDKeyCheckWindow;       // Windows and logic for cdkey validation
-var BOOL                              m_bLoginInProgress;        // procedure to login to ubi.com in progress
-var BOOL                              m_bPreJoinInProgress;      // procedure to validate cd key in progress
+var bool m_bLoginInProgress;  // procedure to login to ubi.com in progress
+var R6WindowTextLabel m_LMenuTitle;
+var R6WindowButton m_ButtonMainMenu;
+var R6WindowButton m_ButtonOptions;
+var R6WindowButtonMultiMenu m_ButtonCancel;
+var R6WindowButtonMultiMenu m_ButtonLaunch;
+var R6WindowTextLabelCurved m_FirstTabWindow;  // First tab window (on a simple curved frame)
+var R6MenuMPManageTab m_pFirstTabManager;  // creation of the tab manager for the first tab window
+var R6MenuMPCreateGameTab m_pCreateTabWindow;
+var R6MenuMPCreateGameTabOptions m_pCreateTabOptions;
+var R6MenuMPCreateGameTabKitRest m_pCreateTabKit;
+var R6MenuMPCreateGameTabAdvOptions m_pCreateTabAdvOptions;
+var R6MenuHelpWindow m_pHelpTextWindow;
+var R6WindowSimpleFramedWindowExt m_pWindowBorder;
+var R6WindowUbiLogIn m_pLoginWindow;
 
 function Created()
 {
-
-//    m_SvrManager = new class'R6ServerList'; //New(None) class<R6ServerList>(DynamicLoadObject("R6GameService.R6ServerList", class'Class'));
-
-    InitText();   // init the text
-    InitButton(); // init the necessary buttons
-
-	m_FirstTabWindow = R6WindowTextLabelCurved(CreateWindow(class'R6WindowTextLabelCurved', K_XSTARTPOS, K_YPOS_TABWINDOW_CURVED, K_WINDOWWIDTH, K_HSIZE_TABWINDOWCURVED, self));
-    m_FirstTabWindow.bAlwaysBehind = true;
-	m_FirstTabWindow.Text = "";    
-    m_FirstTabWindow.m_BGTexture = None; // no background
-
-    m_pFirstTabManager = R6MenuMPManageTab(CreateWindow(class'R6MenuMPManageTab', K_XSTARTPOS + K_XTABOFFSET, K_YPOS_TABWINDOW, K_TABWINDOW_WIDTH , K_HSIZE_TABWINDOW, self));
-    m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame","Tab_Options","R6Menu"), Localize("Tip","Tab_Options","R6Menu"),
-                                       eCreateGameTabID.TAB_Options);
-    m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame","Tab_AdvOptions","R6Menu"), Localize("Tip","Tab_AdvOptions","R6Menu"),
-                                       eCreateGameTabID.TAB_AdvancedOptions);
-    m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame","Tab_Kit","R6Menu"), Localize("Tip","Tab_Kit","R6Menu"),
-                                       eCreateGameTabID.TAB_Kit);
-
-	m_pLoginWindow = R6WindowUbiLogIn(CreateWindow(Root.MenuClassDefines.ClassUbiLogIn, 0, 0, 640, 480, self, TRUE));
-    m_pLoginWindow.m_GameService = R6Console(Root.console).m_GameService;
-    m_pLoginWindow.PopUpBoxCreate();
-    m_pLoginWindow.HideWindow();
-
-	m_pCDKeyCheckWindow = R6WindowUbiCDKeyCheck(CreateWindow(Root.MenuClassDefines.ClassUbiCDKeyCheck, 0, 0, 640, 480, self, TRUE));
-    m_pCDKeyCheckWindow.m_GameService = R6Console(Root.console).m_GameService;
-    m_pCDKeyCheckWindow.PopUpBoxCreate();
-    m_pCDKeyCheckWindow.HideWindow();
-
-    // create the help window
-    m_pHelpTextWindow = R6MenuHelpWindow(CreateWindow(class'R6MenuHelpWindow', 150, 429, 340, 42, self)); //std param is set in help window    
-
-    InitTabWindow();
+	InitText();
+	InitButton();
+	m_FirstTabWindow = R6WindowTextLabelCurved(CreateWindow(Class'R6Window.R6WindowTextLabelCurved', 10.0000000, 87.0000000, 620.0000000, 30.0000000, self));
+	m_FirstTabWindow.bAlwaysBehind = true;
+	m_FirstTabWindow.Text = "";
+	m_FirstTabWindow.m_BGTexture = none;
+	m_pFirstTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', __NFUN_174__(10.0000000, float(5)), 92.0000000, 550.0000000, 25.0000000, self));
+	m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame", "Tab_Options", "R6Menu"), Localize("Tip", "Tab_Options", "R6Menu"), int(0));
+	m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame", "Tab_AdvOptions", "R6Menu"), Localize("Tip", "Tab_AdvOptions", "R6Menu"), int(1));
+	m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame", "Tab_Kit", "R6Menu"), Localize("Tip", "Tab_Kit", "R6Menu"), int(2));
+	m_pLoginWindow = R6WindowUbiLogIn(CreateWindow(Root.MenuClassDefines.ClassUbiLogIn, 0.0000000, 0.0000000, 640.0000000, 480.0000000, self, true));
+	m_pLoginWindow.m_GameService = R6Console(Root.Console).m_GameService;
+	m_pLoginWindow.PopUpBoxCreate();
+	m_pLoginWindow.HideWindow();
+	m_pHelpTextWindow = R6MenuHelpWindow(CreateWindow(Class'R6Menu.R6MenuHelpWindow', 150.0000000, 429.0000000, 340.0000000, 42.0000000, self));
+	InitTabWindow();
+	return;
 }
-
 
 /////////////////////////////////////////////////////////////////
 // display the background
 /////////////////////////////////////////////////////////////////
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-	Root.PaintBackground( C, self);	
-
-    if ( m_bLoginInProgress )
-        m_pLoginWindow.Manager( self );
-
-    if ( m_bPreJoinInProgress )
-        m_pCDKeyCheckWindow.Manager( self );
+	Root.PaintBackground(C, self);
+	// End:0x2E
+	if(m_bLoginInProgress)
+	{
+		m_pLoginWindow.Manager(self);
+	}
+	return;
 }
 
 function ShowWindow()
 {
-	// randomly update the background texture
-    Root.SetLoadRandomBackgroundImage("CreateGame");
-
-    if (!R6Console(Root.console).m_bStartedByGSClient &&
-        (R6Console(Root.console).m_bNonUbiMatchMakingHost ||
-        R6Console(Root.Console).m_bAutoLoginFirstPass))
-    {
-        R6Console(Root.Console).m_bAutoLoginFirstPass = FALSE;
-        
-        R6MenuRootWindow(Root).InitBeaconService();
-
-        R6Console(Root.console).m_GameService.StartAutoLogin();
-        
-        if (!R6Console(Root.console).m_GameService.m_bAutoLoginInProgress)
-        {
-			R6Console(Root.console).szStoreGamePassWd = m_pCreateTabOptions.GetCreateGamePassword();
-            m_pLoginWindow.StartLogInProcedure(OwnerWindow);
-            m_bLoginInProgress = TRUE;                
-        }
-        else
-        {
-            // autologin in progress, m_pLoginWindow trap the result of autologin
-            m_pLoginWindow.m_pSendMessageDest = self;
-            m_bLoginInProgress = TRUE; 
-        }
-    }
-    
-	Super.ShowWindow();
+	R6MenuRootWindow(Root).m_pMenuCDKeyManager.SetWindowUser(Root.19, self);
+	Root.SetLoadRandomBackgroundImage("CreateGame");
+	// End:0x191
+	if(__NFUN_130__(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient), __NFUN_132__(R6Console(Root.Console).m_bNonUbiMatchMakingHost, R6Console(Root.Console).m_bAutoLoginFirstPass)))
+	{
+		R6Console(Root.Console).m_bAutoLoginFirstPass = false;
+		R6MenuRootWindow(Root).InitBeaconService();
+		R6Console(Root.Console).m_GameService.StartAutoLogin();
+		// End:0x179
+		if(__NFUN_129__(R6Console(Root.Console).m_GameService.m_bAutoLoginInProgress))
+		{
+			R6Console(Root.Console).szStoreGamePassWd = m_pCreateTabOptions.GetCreateGamePassword();
+			m_pLoginWindow.StartLogInProcedure(OwnerWindow);
+			m_bLoginInProgress = true;			
+		}
+		else
+		{
+			m_pLoginWindow.m_pSendMessageDest = self;
+			m_bLoginInProgress = true;
+		}
+	}
+	super(UWindowWindow).ShowWindow();
+	return;
 }
 
-function SendMessage( eR6MenuWidgetMessage eMessage )
+function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 {
-    switch ( eMessage )
-    {
-        case MWM_UBI_LOGIN_SUCCESS:
-        case MWM_UBI_LOGIN_SKIPPED:
-            m_bLoginInProgress = FALSE;
-            m_bPreJoinInProgress = TRUE;
-            if (!R6Console(Root.console).m_bNonUbiMatchMakingHost)
-            m_pCDKeyCheckWindow.StartPreJoinProcedure( self );
-            break;
-        case MWM_CDKEYVAL_SKIPPED:
-        case MWM_CDKEYVAL_SUCCESS:
-            m_bPreJoinInProgress = FALSE;
-            LaunchServer();
-            break;
-        case MWM_CDKEYVAL_FAIL:
-            m_bPreJoinInProgress = FALSE;
-            break;
-        case MWM_UBI_LOGIN_FAIL:
-            if (R6Console(Root.console).m_bNonUbiMatchMakingHost)
-                m_bLoginInProgress = FALSE;
-            break;
-    }
-
+	switch(eMessage)
+	{
+		// End:0x0C
+		case 0:
+		// End:0x81
+		case 2:
+			m_bLoginInProgress = false;
+			// End:0x61
+			if(R6Console(Root.Console).m_bNonUbiMatchMakingHost)
+			{
+				Root.ChangeCurrentWidget(19);
+				R6MenuRootWindow(Root).InitBeaconService();				
+			}
+			else
+			{
+				R6MenuRootWindow(Root).m_pMenuCDKeyManager.StartCDKeyProcess();
+			}
+			// End:0xB7
+			break;
+		// End:0xB1
+		case 1:
+			// End:0xAE
+			if(R6Console(Root.Console).m_bNonUbiMatchMakingHost)
+			{
+				m_bLoginInProgress = false;
+			}
+			// End:0xB7
+			break;
+		// End:0xFFFF
+		default:
+			// End:0xB7
+			break;
+			break;
+	}
+	return;
 }
 
 /////////////////////////////////////////////////////////////////
 // display the help text in the m_pHelpTextWindow (derivate for uwindowwindow
 /////////////////////////////////////////////////////////////////
-function ToolTip(string strTip) 
+function ToolTip(string strTip)
 {
-    m_pHelpTextWindow.ToolTip(strTip);
+	m_pHelpTextWindow.ToolTip(strTip);
+	return;
 }
 
 /////////////////////////////////////////////////////////////////
 // manage the tab selection (the call of the fct come from R6MenuMPManageTab
 /////////////////////////////////////////////////////////////////
-function ManageTabSelection( INT _MPTabChoiceID)
+function ManageTabSelection(int _MPTabChoiceID)
 {
-    switch(_MPTabChoiceID)
-    {
-        case eCreateGameTabID.TAB_Options:
-            m_pCreateTabWindow.HideWindow();
-            m_pCreateTabOptions.ShowWindow();
-            m_pCreateTabWindow = m_pCreateTabOptions;
-            break;
-        case eCreateGameTabID.TAB_Kit:
-            m_pCreateTabWindow.HideWindow();
-            m_pCreateTabKit.ShowWindow();
-            m_pCreateTabWindow = m_pCreateTabKit;
-            break;
-        case eCreateGameTabID.TAB_AdvancedOptions:
-            m_pCreateTabWindow.HideWindow();
-            m_pCreateTabAdvOptions.ShowWindow();
-            m_pCreateTabWindow = m_pCreateTabAdvOptions;
-            break;
-        default:
-            log("This tab was not supported (R6MenuMPCreateGameWidget)");
-            break;
-    }
-}
-
-/////////////////////////////////////////////////////////////////
-// Launch a server based on menu selections
-/////////////////////////////////////////////////////////////////
-function LaunchServer()
-{
-//    local R6ServerInfo _ServerSettings;
-    local InternetLink.IpAddr _localAddr;
-
-#ifdefMPDEMO
-    GetPlayerOwner().StopAllMusic();
-#endif
-//	_ServerSettings = class'Actor'.static.GetServerOptions();
-    m_pCreateTabOptions.SetServerOptions();
-    class'Actor'.static.SaveServerOptions();
-//    _ServerSettings.SaveConfig();
-//    _ServerSettings.m_ServerMapList.SaveConfig();
-    if ( !R6Console(Root.console).m_bStartedByGSClient &&  
-        !R6Console(Root.console).m_bNonUbiMatchMakingHost &&
-		(m_pCreateTabOptions.m_pButtonsDef.GetButtonBoxValue( EButtonName.EBN_DedicatedServer, R6WindowListGeneral(m_pCreateTabOptions.GetList( m_pCreateTabOptions.GetCurrentGameMode(), m_pCreateTabOptions.eCreateGameWindow_ID.eCGW_Opt)))) )
-        Root.Console.ConsoleCommand("SERVER mod=" $class'Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord );
-	else 
-    {
-        // enable client PunkBuster if it needs to be
-        if (!class'Actor'.static.IsPBClientEnabled() && (GetLevel().iPBEnabled !=0))
-            class'Actor'.static.SetPBStatus( false, false);
-
-        Root.Console.ConsoleCommand( "Open "$m_pCreateTabOptions.m_SelectedMapList[0]$
-            "?listen?"$GetLevel().GetGameTypeClassName(m_pCreateTabOptions.m_SelectedModeList[0])$
-            "?AuthID1="$R6Console(Root.console).m_GameService.m_szRSAuthorizationID);//szGameMode);
-        R6Console(Root.console).m_LanServers.m_ClientBeacon.GetLocalIP(_localAddr);
-        R6Console(Root.console).szStoreIP = R6Console(Root.console).m_LanServers.m_ClientBeacon.IpAddrToString(_localAddr);
-        R6Console(Root.console).LaunchR6MultiPlayerGame();     
-    }
+	switch(_MPTabChoiceID)
+	{
+		// End:0x3A
+		case int(0):
+			m_pCreateTabWindow.HideWindow();
+			m_pCreateTabOptions.ShowWindow();
+			m_pCreateTabWindow = m_pCreateTabOptions;
+			// End:0xDF
+			break;
+		// End:0x6D
+		case int(2):
+			m_pCreateTabWindow.HideWindow();
+			m_pCreateTabKit.ShowWindow();
+			m_pCreateTabWindow = m_pCreateTabKit;
+			// End:0xDF
+			break;
+		// End:0xA0
+		case int(1):
+			m_pCreateTabWindow.HideWindow();
+			m_pCreateTabAdvOptions.ShowWindow();
+			m_pCreateTabWindow = m_pCreateTabAdvOptions;
+			// End:0xDF
+			break;
+		// End:0xFFFF
+		default:
+			__NFUN_231__("This tab was not supported (R6MenuMPCreateGameWidget)");
+			// End:0xDF
+			break;
+			break;
+	}
+	return;
 }
 
 function RefreshCreateGameMenu()
 {
-    m_pCreateTabOptions.RefreshServerOpt();
-	m_pCreateTabAdvOptions.RefreshServerOpt(); 
+	m_pCreateTabOptions.RefreshServerOpt();
+	m_pCreateTabAdvOptions.RefreshServerOpt();
+	return;
 }
-
 
 function MenuServerLoadProfile()
 {
-	m_pCreateTabOptions.RefreshServerOpt( true);
-	m_pCreateTabAdvOptions.RefreshServerOpt(); 
+	m_pCreateTabOptions.RefreshServerOpt(true);
+	m_pCreateTabAdvOptions.RefreshServerOpt();
 	m_pCreateTabKit.m_pMainRestriction.RefreshCreateGameKitRest();
+	return;
 }
 
 //*********************************
@@ -260,142 +222,126 @@ function MenuServerLoadProfile()
 //*********************************
 function InitText()
 {
-    // define Title
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', 0, 18, WinWidth - 8, 25, self));
-	m_LMenuTitle.Text = Localize("MPCreateGame","Title","R6Menu");
-	m_LMenuTitle.Align = TA_Right;
-	m_LMenuTitle.m_Font = Root.Fonts[F_MenuMainTitle];
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle.Text = Localize("MPCreateGame", "Title", "R6Menu");
+	m_LMenuTitle.Align = 1;
+	m_LMenuTitle.m_Font = Root.Fonts[4];
 	m_LMenuTitle.TextColor = Root.Colors.White;
-	m_LMenuTitle.m_BGTexture = None;
-	m_LMenuTitle.m_HBorderTexture = None;
-	m_LMenuTitle.m_VBorderTexture = None;
+	m_LMenuTitle.m_BGTexture = none;
+	m_LMenuTitle.m_HBorderTexture = none;
+	m_LMenuTitle.m_VBorderTexture = none;
+	return;
 }
-
 
 function InitButton()
 {
-	local Font  buttonFont;
-    local FLOAT fYOffset;
+	local Font ButtonFont;
+	local float fYOffset;
 
-    fYOffset = 50;
-
-	buttonFont		= Root.Fonts[F_MainButton];
-	
-    // define Main Menu Button
-    m_ButtonMainMenu = R6WindowButton(CreateControl( class'R6WindowButton', K_XSTARTPOS, 425, 250, 25, self));
-    m_ButtonMainMenu.ToolTipString      = Localize("Tip","ButtonMainMenu","R6Menu");
-	m_ButtonMainMenu.Text               = Localize("SinglePlayer","ButtonMainMenu","R6Menu");	
-	m_ButtonMainMenu.Align              = TA_LEFT;
-	m_ButtonMainMenu.m_fFontSpacing     = 0;
-	m_ButtonMainMenu.m_buttonFont       = Root.Fonts[F_MainButton];
+	fYOffset = 50.0000000;
+	ButtonFont = Root.Fonts[15];
+	m_ButtonMainMenu = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', 10.0000000, 425.0000000, 250.0000000, 25.0000000, self));
+	m_ButtonMainMenu.ToolTipString = Localize("Tip", "ButtonMainMenu", "R6Menu");
+	m_ButtonMainMenu.Text = Localize("SinglePlayer", "ButtonMainMenu", "R6Menu");
+	m_ButtonMainMenu.Align = 0;
+	m_ButtonMainMenu.m_fFontSpacing = 0.0000000;
+	m_ButtonMainMenu.m_buttonFont = Root.Fonts[15];
 	m_ButtonMainMenu.ResizeToText();
-    m_ButtonMainMenu.bDisabled = R6Console(Root.console).m_bStartedByGSClient || R6Console(Root.console).m_bNonUbiMatchMakingHost;
-
-    // define option Button
-	m_ButtonOptions = R6WindowButton(CreateControl( class'R6WindowButton', K_XSTARTPOS, 447, 250, 25, self));
-    m_ButtonOptions.ToolTipString       = Localize("Tip","ButtonOptions","R6Menu");
-	m_ButtonOptions.Text                = Localize("SinglePlayer","ButtonOptions","R6Menu");	
-	m_ButtonOptions.Align               = TA_LEFT;	
-	m_ButtonOptions.m_fFontSpacing      = 0;
-	m_ButtonOptions.m_buttonFont        = Root.Fonts[F_MainButton];
-	m_ButtonOptions.ResizeToText();	
-    
-    // define CANCEL button
-	m_ButtonCancel = R6WindowButtonMultiMenu(CreateWindow( class'R6WindowButtonMultiMenu', 10, fYOffset, 200, 25, self));
-    m_ButtonCancel.Text = Localize("MPCreateGame","ButtonCancel","R6Menu");
-    m_ButtonCancel.ToolTipString = Localize("Tip","ButtonCancel","R6Menu");
-	m_ButtonCancel.m_eButton_Action = EButtonName.EBN_Cancel;
-	m_ButtonCancel.Align = TA_Left;
-	m_ButtonCancel.m_fFontSpacing =2;
-	m_ButtonCancel.m_buttonFont = buttonFont;
+	m_ButtonMainMenu.bDisabled = __NFUN_132__(R6Console(Root.Console).m_bStartedByGSClient, R6Console(Root.Console).m_bNonUbiMatchMakingHost);
+	m_ButtonOptions = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', 10.0000000, 447.0000000, 250.0000000, 25.0000000, self));
+	m_ButtonOptions.ToolTipString = Localize("Tip", "ButtonOptions", "R6Menu");
+	m_ButtonOptions.Text = Localize("SinglePlayer", "ButtonOptions", "R6Menu");
+	m_ButtonOptions.Align = 0;
+	m_ButtonOptions.m_fFontSpacing = 0.0000000;
+	m_ButtonOptions.m_buttonFont = Root.Fonts[15];
+	m_ButtonOptions.ResizeToText();
+	m_ButtonCancel = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', 10.0000000, fYOffset, 200.0000000, 25.0000000, self));
+	m_ButtonCancel.Text = Localize("MPCreateGame", "ButtonCancel", "R6Menu");
+	m_ButtonCancel.ToolTipString = Localize("Tip", "ButtonCancel", "R6Menu");
+	m_ButtonCancel.m_eButton_Action = 36;
+	m_ButtonCancel.Align = 0;
+	m_ButtonCancel.m_fFontSpacing = 2.0000000;
+	m_ButtonCancel.m_buttonFont = ButtonFont;
 	m_ButtonCancel.ResizeToText();
-	
-    // If started by ubi.com, cancel button returns user to gs client
-    if ( R6Console(Root.console).m_bStartedByGSClient )
-	    m_ButtonCancel.m_eButton_Action = EButtonName.EBN_CancelUbiCom;
-
-    // define LAUNCH button
-	m_ButtonLaunch = R6WindowButtonMultiMenu(CreateWindow( class'R6WindowButtonMultiMenu', 200, fYOffset, 106, 25, self));
-    m_ButtonLaunch.Text = Localize("MPCreateGame","ButtonLaunch","R6Menu");
-    m_ButtonLaunch.ToolTipString = Localize("Tip","ButtonLaunch","R6Menu");
-	m_ButtonLaunch.m_eButton_Action = EButtonName.EBN_Launch;
-	m_ButtonLaunch.Align = TA_Center;
-	m_ButtonLaunch.m_fFontSpacing =2;
-	m_ButtonLaunch.m_buttonFont = buttonFont;
+	// End:0x365
+	if(R6Console(Root.Console).m_bStartedByGSClient)
+	{
+		m_ButtonCancel.m_eButton_Action = 39;
+	}
+	m_ButtonLaunch = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', 200.0000000, fYOffset, 106.0000000, 25.0000000, self));
+	m_ButtonLaunch.Text = Localize("MPCreateGame", "ButtonLaunch", "R6Menu");
+	m_ButtonLaunch.ToolTipString = Localize("Tip", "ButtonLaunch", "R6Menu");
+	m_ButtonLaunch.m_eButton_Action = 37;
+	m_ButtonLaunch.Align = 2;
+	m_ButtonLaunch.m_fFontSpacing = 2.0000000;
+	m_ButtonLaunch.m_buttonFont = ButtonFont;
 	m_ButtonLaunch.ResizeToText();
+	return;
 }
-
 
 function InitTabWindow()
 {
-    local FLOAT fWidth;
-    local FLOAT fYPos;
-    fWidth = 1;
-    fYPos = K_YPOS_TABWINDOW_CURVED + K_HSIZE_TABWINDOWCURVED - 1; //why -1, because is the border offset from Labelcurved
+	local float fWidth, fYPos;
 
-    // create the border window under the tab
-    m_pWindowBorder = R6WindowSimpleFramedWindowExt(CreateWindow(class'R6WindowSimpleFramedWindowExt', K_XSTARTPOS, fYPos, K_WINDOWWIDTH, K_HSIZE_UNDER_TABWINDOW, self));
-    m_pWindowBorder.bAlwaysBehind = true;
-    m_pWindowBorder.ActiveBorder( 0, false);                         // Top border
-    m_pWindowBorder.SetBorderParam( 1, 7, 0, fWidth, Root.Colors.White);         // Bottom border
-    m_pWindowBorder.SetBorderParam( 2, 1, 1, fWidth, Root.Colors.White);		 // Left border
-    m_pWindowBorder.SetBorderParam( 3, 1, 1, fWidth, Root.Colors.White);		 // Rigth border
-    
-    m_pWindowBorder.m_eCornerType = Bottom_Corners;
-    m_pWindowBorder.SetCornerColor( 2, Root.Colors.White);
-
-	m_pWindowBorder.ActiveBackGround( true, Root.Colors.Black);                  // draw background
-////////////////////
-    // create one window under the second tab window
-	m_pCreateTabOptions = R6MenuMPCreateGameTabOptions(CreateWindow(Root.MenuClassDefines.ClassMPCreateGameTabOpt, K_XSTARTPOS, fYPos, K_WINDOWWIDTH, K_HSIZE_UNDER_TABWINDOW, self));
-    m_pCreateTabOptions.InitOptionsTab();
-
-///////////////////    
-    m_pCreateTabKit = R6MenuMPCreateGameTabKitRest(CreateWindow(class'R6MenuMPCreateGameTabKitRest', K_XSTARTPOS, fYPos, K_WINDOWWIDTH, K_HSIZE_UNDER_TABWINDOW, self));
-    m_pCreateTabKit.InitKitTab();
-    m_pCreateTabKit.HideWindow();
-
-///////////////////    
-	m_pCreateTabAdvOptions = R6MenuMPCreateGameTabAdvOptions(CreateWindow(Root.MenuClassDefines.ClassMPCreateGameTabAdvOpt, K_XSTARTPOS, fYPos, K_WINDOWWIDTH, K_HSIZE_UNDER_TABWINDOW, self));
-    m_pCreateTabAdvOptions.InitAdvOptionsTab();
-    m_pCreateTabAdvOptions.HideWindow();
-    
-///////////////////    
-
+	fWidth = 1.0000000;
+	fYPos = __NFUN_175__(__NFUN_174__(87.0000000, float(30)), float(1));
+	m_pWindowBorder = R6WindowSimpleFramedWindowExt(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindowExt', 10.0000000, fYPos, 620.0000000, 300.0000000, self));
+	m_pWindowBorder.bAlwaysBehind = true;
+	m_pWindowBorder.ActiveBorder(0, false);
+	m_pWindowBorder.SetBorderParam(1, 7.0000000, 0.0000000, fWidth, Root.Colors.White);
+	m_pWindowBorder.SetBorderParam(2, 1.0000000, 1.0000000, fWidth, Root.Colors.White);
+	m_pWindowBorder.SetBorderParam(3, 1.0000000, 1.0000000, fWidth, Root.Colors.White);
+	m_pWindowBorder.m_eCornerType = 2;
+	m_pWindowBorder.SetCornerColor(2, Root.Colors.White);
+	m_pWindowBorder.ActiveBackGround(true, Root.Colors.Black);
+	m_pCreateTabOptions = R6MenuMPCreateGameTabOptions(CreateWindow(Root.MenuClassDefines.ClassMPCreateGameTabOpt, 10.0000000, fYPos, 620.0000000, 300.0000000, self));
+	m_pCreateTabOptions.InitOptionsTab();
+	m_pCreateTabKit = R6MenuMPCreateGameTabKitRest(CreateWindow(Class'R6Menu.R6MenuMPCreateGameTabKitRest', 10.0000000, fYPos, 620.0000000, 300.0000000, self));
+	m_pCreateTabKit.InitKitTab();
+	m_pCreateTabKit.HideWindow();
+	m_pCreateTabAdvOptions = R6MenuMPCreateGameTabAdvOptions(CreateWindow(Root.MenuClassDefines.ClassMPCreateGameTabAdvOpt, 10.0000000, fYPos, 620.0000000, 300.0000000, self));
+	m_pCreateTabAdvOptions.InitAdvOptionsTab();
+	m_pCreateTabAdvOptions.HideWindow();
 	m_pCreateTabOptions.AddLinkWindow(m_pCreateTabKit);
 	m_pCreateTabOptions.AddLinkWindow(m_pCreateTabAdvOptions);
-
 	m_pCreateTabKit.AddLinkWindow(m_pCreateTabOptions);
 	m_pCreateTabKit.AddLinkWindow(m_pCreateTabAdvOptions);
-
 	m_pCreateTabAdvOptions.AddLinkWindow(m_pCreateTabKit);
 	m_pCreateTabAdvOptions.AddLinkWindow(m_pCreateTabOptions);
-
-    // choose the one to display
-    m_pCreateTabWindow = m_pCreateTabOptions;
+	m_pCreateTabWindow = m_pCreateTabOptions;
+	return;
 }
-
-
-//*********************************
-//    END OF INIT CREATE FUNCTION
-//*********************************
 
 function Notify(UWindowDialogControl C, byte E)
-{ 
-    if( E == DE_Click )
-    {
-        switch(C)
-        {
-        case m_ButtonMainMenu:
-            Root.ChangeCurrentWidget(MainMenuWidgetID);
-            break;
-        case m_ButtonOptions:
-            Root.ChangeCurrentWidget(OptionsWidgetID);
-            break;    
-        }
-    }    
+{
+	// End:0x50
+	if(__NFUN_154__(int(E), 2))
+	{
+		switch(C)
+		{
+			// End:0x31
+			case m_ButtonMainMenu:
+				Root.ChangeCurrentWidget(7);
+				// End:0x50
+				break;
+			// End:0x4D
+			case m_ButtonOptions:
+				Root.ChangeCurrentWidget(16);
+				// End:0x50
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	else
+	{
+		return;
+	}
 }
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_pCDKeyCheckWindow
+// REMOVED IN 1.60: var m_bPreJoinInProgress
+// REMOVED IN 1.60: function LaunchServer

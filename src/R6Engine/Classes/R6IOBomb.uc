@@ -1,35 +1,40 @@
 //=============================================================================
+// R6IOBomb - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6IOBomb : This should allow action moves on the door
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //=============================================================================
-
 class R6IOBomb extends R6IOObject
-    native
-	placeable;
+	native
+ placeable;
 
-var(Debug)  bool		bShowLog;
+const C_fBombTimerInterval = 0.1;
 
-var vector  m_vOffset;
-var FLOAT   m_fTimeOfExplosion;
-var FLOAT   m_fTimeLeft;    // if 0, the bomb has unlimited time
-var FLOAT   m_fRepTimeLeft; // time replicated and computed on the client. send by server every X sec.
-var FLOAT   m_fLastLevelTime;
-var BOOL    m_bExploded;   
+enum ESoundBeepBomb
+{
+	SBB_Normal,                     // 0
+	SBB_Fast,                       // 1
+	SBB_Faster                      // 2
+};
 
-var(R6ActionObject) string m_szIdentityID;          // msg shown:                 Bomb A 
-var                 string m_szIdentity;          // msg shown:                 Bomb A 
-var(R6ActionObject) string m_szMsgArmedID;          // msg shown when armed:      Bomb A was armed
-var(R6ActionObject) string m_szMsgDisarmedID;       // msg shown when disarmed:   Bomb A was disarmed
-var(R6ActionObject) string m_szMissionObjLocalization;  // set the loc file. if none, use the default one
-var(R6ActionObject) FLOAT m_fDisarmBombTimeMin;   // Base time required to disarmed the bomb if they have 100%, will be affected by the kit later (Must be higher then 2 seconds)
-var(R6ActionObject) FLOAT m_fDisarmBombTimeMax;   // Base time required to disarmed the bomb if they have 0%
+var R6IOBomb.ESoundBeepBomb m_eBeepState;
+var(R6ActionObject) int m_iEnergy;
+var(Debug) bool bShowLog;
+var bool m_bExploded;
+var float m_fTimeOfExplosion;
+var float m_fTimeLeft;  // if 0, the bomb has unlimited time
+var float m_fRepTimeLeft;  // time replicated and computed on the client. send by server every X sec.
+var float m_fLastLevelTime;
+var(R6ActionObject) float m_fDisarmBombTimeMin;  // Base time required to disarmed the bomb if they have 100%, will be affected by the kit later (Must be higher then 2 seconds)
+var(R6ActionObject) float m_fDisarmBombTimeMax;  // Base time required to disarmed the bomb if they have 0%
+var(R6ActionObject) float m_fExplosionRadius;  // feel the sake
+var(R6ActionObject) float m_fKillBlastRadius;  // killed by the bomb
 var(R6ActionObject) Material m_ArmedTexture;
-
-var(R6ActionObject) float m_fExplosionRadius; // feel the sake
-var(R6ActionObject) float m_fKillBlastRadius; // killed by the bomb
-var(R6ActionObject) int   m_iEnergy;
-
 var Sound m_sndActivationBomb;
 var Sound m_sndPlayBeepNormal;
 var Sound m_sndStopBeepNormal;
@@ -37,55 +42,54 @@ var Sound m_sndPlayBeepFast;
 var Sound m_sndStopBeepFast;
 var Sound m_sndPlayBeepFaster;
 var Sound m_sndStopBeepFaster;
-
 var Sound m_sndExplosion;
 var Sound m_sndEarthQuake;
-
-
-const C_fBombTimerInterval = 0.1;
-
-enum ESoundBeepBomb
-{
-    SBB_Normal,
-    SBB_Fast,
-    SBB_Faster
-};
-
-var ESoundBeepBomb m_eBeepState;
-var emitter m_pEmmiter;
-var class<light>   m_pExplosionLight;
+var Emitter m_pEmmiter;
+var Class<Light> m_pExplosionLight;
+var Vector m_vOffset;
+var(R6ActionObject) string m_szIdentityID;  // msg shown:                 Bomb A
+var string m_szIdentity;  // msg shown:                 Bomb A
+var(R6ActionObject) string m_szMsgArmedID;  // msg shown when armed:      Bomb A was armed
+var(R6ActionObject) string m_szMsgDisarmedID;  // msg shown when disarmed:   Bomb A was disarmed
+var(R6ActionObject) string m_szMissionObjLocalization;  // set the loc file. if none, use the default one
 
 replication
 {
-    reliable if (Role<ROLE_Authority)
-        ArmBomb, DisarmBomb;
+	// Pos:0x000
+	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		ArmBomb, DisarmBomb;
 
-    reliable if (Role==ROLE_Authority)
-        m_bExploded, m_fRepTimeLeft;
+	// Pos:0x00D
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_bExploded, m_fRepTimeLeft;
 }
 
 simulated function PostBeginPlay()
 {
-        
-    Super.PostBeginPlay();
-
-    if(Role == ROLE_Authority)
-    {
-        AddSoundBankName("Foley_Bomb");
-    }
-    StartBombSound();
-    
-    m_szIdentity = Localize("Game", m_szIdentityID, GetMissionObjLocFile() );
+	super(R6InteractiveObject).PostBeginPlay();
+	// End:0x28
+	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	{
+		AddSoundBankName("Foley_Bomb");
+	}
+	StartBombSound();
+	m_szIdentity = Localize("Game", m_szIdentityID, GetMissionObjLocFile());
+	return;
 }
 
 simulated function string GetMissionObjLocFile()
 {
-    if ( m_szMissionObjLocalization != "" )
-        return m_szMissionObjLocalization;
-    else
-        return Level.m_szMissionObjLocalization;
+	// End:0x15
+	if(__NFUN_123__(m_szMissionObjLocalization, ""))
+	{
+		return m_szMissionObjLocalization;		
+	}
+	else
+	{
+		return Level.m_szMissionObjLocalization;
+	}
+	return;
 }
-
 
 //------------------------------------------------------------------
 // ResetOriginalData
@@ -93,503 +97,583 @@ simulated function string GetMissionObjLocFile()
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
-
-    // default settings
-    if ( m_bExploded ) // if it has previously exploded
-        bHidden      = false;
-
-    m_bExploded      = false;
-    
-    m_fTimeLeft      = 0;
-    m_fRepTimeLeft   = 0;
-    m_fLastLevelTime = 0;
-
-    StopSoundBomb();
-
-    if ( Level.NetMode != NM_Client )
-    {
-        if ( m_bIsActivated ) // if activated start bomb
-        {
-            ArmBomb( none );
-        }
-        else
-            SetSkin( none, 0 );
-    }
-
-    // so client can update the time left localy
-    if ( Level.NetMode == NM_Client )
-    {
-        SetTimer( C_fBombTimerInterval, true);
-    }
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super.ResetOriginalData();
+	// End:0x27
+	if(m_bExploded)
+	{
+		bHidden = false;
+	}
+	m_bExploded = false;
+	m_fTimeLeft = 0.0000000;
+	m_fRepTimeLeft = 0.0000000;
+	m_fLastLevelTime = 0.0000000;
+	StopSoundBomb();
+	// End:0x8A
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	{
+		// End:0x82
+		if(m_bIsActivated)
+		{
+			ArmBomb(none);			
+		}
+		else
+		{
+			SetSkin(none, 0);
+		}
+	}
+	// End:0xAC
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	{
+		__NFUN_280__(0.1000000, true);
+	}
+	return;
 }
 
-
-simulated function BOOL CanToggle()
+simulated function bool CanToggle()
 {
-    if ( m_bExploded )
-        return false;
-
-    return Super.CanToggle();
+	// End:0x0B
+	if(m_bExploded)
+	{
+		return false;
+	}
+	return super.CanToggle();
+	return;
 }
 
-simulated function FLOAT GetTimeLeft()
+simulated function float GetTimeLeft()
 {
-    if ( Level.NetMode == NM_Client )
-        return m_fRepTimeLeft;
-    else
-        return m_fTimeLeft;
+	// End:0x22
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	{
+		return m_fRepTimeLeft;		
+	}
+	else
+	{
+		return m_fTimeLeft;
+	}
+	return;
 }
 
 simulated function Timer()
 {
-    local int iRemaining;
-    Super.Timer();
+	local int iRemaining;
 
-    // on the client
-    if ( Level.NetMode == NM_Client )
-    {
-        if ( m_bIsActivated )
-        {
-            m_fRepTimeLeft -= C_fBombTimerInterval;
-           
-            if ( m_fRepTimeLeft < 0 ) // cap
-                m_fRepTimeLeft = 0;
-        }
-    }
-    else  // on the server
-    {
-        // the bomb was activated and had time left (ie: not unlimited time)
-        if ( m_bIsActivated && m_fTimeLeft > 0 )
-        {
-            m_fTimeLeft -= Level.TimeSeconds - m_fLastLevelTime;
-
-            iRemaining = m_fTimeLeft;
-
-            ChangeSoundBomb();
-            if ( iRemaining % 5 == 0) // every 5 sec, update m_fRepTimeLeft
-                m_fRepTimeLeft = m_fTimeLeft;
-            
-            if (m_fTimeLeft <= 0)
-            {
-                DetonateBomb();
-            }
-        
-            m_fLastLevelTime = Level.TimeSeconds;
-        }
-    }
+	super(R6InteractiveObject).Timer();
+	// End:0x4F
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	{
+		// End:0x4C
+		if(m_bIsActivated)
+		{
+			__NFUN_185__(m_fRepTimeLeft, 0.1000000);
+			// End:0x4C
+			if(__NFUN_176__(m_fRepTimeLeft, float(0)))
+			{
+				m_fRepTimeLeft = 0.0000000;
+			}
+		}		
+	}
+	else
+	{
+		// End:0xDD
+		if(__NFUN_130__(m_bIsActivated, __NFUN_177__(m_fTimeLeft, float(0))))
+		{
+			__NFUN_185__(m_fTimeLeft, __NFUN_175__(Level.TimeSeconds, m_fLastLevelTime));
+			iRemaining = int(m_fTimeLeft);
+			ChangeSoundBomb();
+			// End:0xB6
+			if(__NFUN_180__(__NFUN_173__(float(iRemaining), float(5)), float(0)))
+			{
+				m_fRepTimeLeft = m_fTimeLeft;
+			}
+			// End:0xC9
+			if(__NFUN_178__(m_fTimeLeft, float(0)))
+			{
+				DetonateBomb();
+			}
+			m_fLastLevelTime = Level.TimeSeconds;
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // ForceTimeLeft
 //	
 //------------------------------------------------------------------
-function ForceTimeLeft( float fTime )
+function ForceTimeLeft(float fTime)
 {
-    m_fTimeLeft      = fTime;
-    m_fRepTimeLeft   = fTime;
-    m_fLastLevelTime = Level.TimeSeconds;
+	m_fTimeLeft = fTime;
+	m_fRepTimeLeft = fTime;
+	m_fLastLevelTime = Level.TimeSeconds;
+	return;
 }
 
 function ChangeSoundBomb()
 {
-    switch(m_eBeepState)
-    {
-        case SBB_Normal:
-            if (m_fTimeLeft <= 20)
-            {
-                AmbientSound = m_sndPlayBeepFast;
-                AmbientSoundStop = m_sndStopBeepFast;
-                PlaySound(m_sndPlayBeepFast, SLOT_Ambient);
-                m_eBeepState = SBB_Fast;
-            }
-            break;
-        
-        case SBB_Fast:
-            if (m_fTimeLeft <= 10)
-            {
-                AmbientSound = m_sndPlayBeepFaster;
-                AmbientSoundStop = m_sndStopBeepFaster;
-                PlaySound(m_sndPlayBeepFaster, SLOT_Ambient);
-                m_eBeepState = SBB_Faster;
-            }
-            break;
-    }
+	switch(m_eBeepState)
+	{
+		// End:0x45
+		case 0:
+			// End:0x42
+			if(__NFUN_178__(m_fTimeLeft, float(20)))
+			{
+				AmbientSound = m_sndPlayBeepFast;
+				AmbientSoundStop = m_sndStopBeepFast;
+				__NFUN_264__(m_sndPlayBeepFast, 1);
+				m_eBeepState = 1;
+			}
+			// End:0x86
+			break;
+		// End:0x83
+		case 1:
+			// End:0x80
+			if(__NFUN_178__(m_fTimeLeft, float(10)))
+			{
+				AmbientSound = m_sndPlayBeepFaster;
+				AmbientSoundStop = m_sndStopBeepFaster;
+				__NFUN_264__(m_sndPlayBeepFaster, 1);
+				m_eBeepState = 2;
+			}
+			// End:0x86
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // DetonateBomb
 //	will explode only if the bomb was activated
 //------------------------------------------------------------------
-simulated function DetonateBomb( OPTIONAL R6Pawn p )
+simulated function DetonateBomb(optional R6Pawn P)
 {
-    local R6GrenadeDecal    GrenadeDecal;
-    local rotator           GrenadeDecalRotation;
-    local Light             pEffectLight;
-    local vector            vDecalLoc;
-    local float             fKillBlastHalfRadius;
-    local float             fDistFromBomb;
-    local Actor             aActor;
-    local R6Pawn            pPawn;
-    local R6PlayerController pPC;
-    local R6ActorSound      pBombSound;
-   
-    if ( !m_bIsActivated )
-        return;
+	local R6GrenadeDecal GrenadeDecal;
+	local Rotator GrenadeDecalRotation;
+	local Light pEffectLight;
+	local Vector vDecalLoc;
+	local float fKillBlastHalfRadius, fDistFromBomb;
+	local Actor aActor;
+	local R6Pawn pPawn;
+	local R6PlayerController pPC;
+	local R6ActorSound pBombSound;
 
-    if (bShowLog) log(" DetonateBomb: " $self );
-
-    StopSoundBomb();
-    m_bExploded  = true;
-    bHidden      = true;
-    
-    vDecalLoc = Location;
-    vDecalLoc.Z -= CollisionHeight - 2; // lower the Z on the floor
-    GrenadeDecal = Spawn(class'Engine.R6GrenadeDecal',,, vDecalLoc, GrenadeDecalRotation);
-
-    m_pEmmiter = Spawn(class'R6SFX.R6BombFX');
-    m_pEmmiter.RemoteRole = ROLE_AutonomousProxy; // replicate this actor on all client
-    m_pEmmiter.Role = ROLE_Authority;
-    
-    pEffectLight = Spawn(m_pExplosionLight);
-
-    R6AbstractGameInfo(Level.Game).IObjectDestroyed(p, self);    
-    
-    // Exception for the io bomb, we want it to exlode and kill players
-    R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath = true;
-    
-    pBombSound = Spawn(class'Engine.R6ActorSound',,, Location);
-    if (pBombSound != none)
-    {
-        pBombSound.m_eTypeSound = SLOT_HeadSet;
-        pBombSound.m_ImpactSound = m_sndExplosion;
-    }
-
-    fKillBlastHalfRadius = m_fKillBlastRadius/2.f;
-    foreach CollidingActors( class'Actor', aActor, m_fExplosionRadius, Location )
-    {
-        fDistFromBomb = VSize( aActor.Location - Location);
-
-        // - all actor in half the radius are killed
-        if ( fDistFromBomb <= fKillBlastHalfRadius ) 
-        {
-            HurtActor( aActor );
-        }
-        // - all visible actor are damaged by the bomb
-        else if ( fDistFromBomb <= m_fKillBlastRadius ) 
-        {
-            if ( FastTrace( Location, aActor.location ) )
-                HurtActor( aActor );
-        }
-
-        if (fDistFromBomb > 3000)
-           fDistFromBomb = 3000;  
-    
-        // - all pawn alive in the explosion radius are affected by the shake effect
-        pPawn = R6Pawn(aActor);
-        if( pPawn != none && pPawn.IsAlive() )
-        {
-            pPC = R6PlayerController(pPawn.Controller);
-            if( pPC != none )
-            {
-                pPC.R6Shake( 1.5f, 3000.f - fDistFromBomb, 0.1f );
-                pPC.ClientPlaySound(m_sndEarthQuake, SLOT_SFX);
-            }
-        }
-    }
-
-    R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath = false;
+	// End:0x0D
+	if(__NFUN_129__(m_bIsActivated))
+	{
+		return;
+	}
+	// End:0x2E
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_112__(" DetonateBomb: ", string(self)));
+	}
+	StopSoundBomb();
+	m_bExploded = true;
+	bHidden = true;
+	vDecalLoc = Location;
+	__NFUN_185__(vDecalLoc.Z, __NFUN_175__(CollisionHeight, float(2)));
+	GrenadeDecal = __NFUN_278__(Class'R6Engine.R6GrenadeDecal',,, vDecalLoc, GrenadeDecalRotation);
+	m_pEmmiter = __NFUN_278__(Class'R6SFX.R6BombFX');
+	m_pEmmiter.RemoteRole = ROLE_AutonomousProxy;
+	m_pEmmiter.Role = ROLE_Authority;
+	pEffectLight = __NFUN_278__(m_pExplosionLight);
+	R6AbstractGameInfo(Level.Game).IObjectDestroyed(P, self);
+	R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath = true;
+	pBombSound = __NFUN_278__(Class'Engine.R6ActorSound',,, Location);
+	// End:0x145
+	if(__NFUN_119__(pBombSound, none))
+	{
+		pBombSound.m_eTypeSound = 8;
+		pBombSound.m_ImpactSound = m_sndExplosion;
+	}
+	fKillBlastHalfRadius = __NFUN_172__(m_fKillBlastRadius, 2.0000000);
+	// End:0x289
+	foreach __NFUN_321__(Class'Engine.Actor', aActor, m_fExplosionRadius, Location)
+	{
+		fDistFromBomb = __NFUN_225__(__NFUN_216__(aActor.Location, Location));
+		// End:0x1AB
+		if(__NFUN_178__(fDistFromBomb, fKillBlastHalfRadius))
+		{
+			HurtActor(aActor);			
+		}
+		else
+		{
+			// End:0x1DE
+			if(__NFUN_178__(fDistFromBomb, m_fKillBlastRadius))
+			{
+				// End:0x1DE
+				if(__NFUN_548__(Location, aActor.Location))
+				{
+					HurtActor(aActor);
+				}
+			}
+		}
+		// End:0x1FA
+		if(__NFUN_177__(fDistFromBomb, float(3000)))
+		{
+			fDistFromBomb = 3000.0000000;
+		}
+		pPawn = R6Pawn(aActor);
+		// End:0x288
+		if(__NFUN_130__(__NFUN_119__(pPawn, none), pPawn.IsAlive()))
+		{
+			pPC = R6PlayerController(pPawn.Controller);
+			// End:0x288
+			if(__NFUN_119__(pPC, none))
+			{
+				pPC.R6Shake(1.5000000, __NFUN_175__(3000.0000000, fDistFromBomb), 0.1000000);
+				pPC.ClientPlaySound(m_sndEarthQuake, 3);
+			}
+		}		
+	}	
+	R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath = false;
+	return;
 }
-
-
 
 //------------------------------------------------------------------
 // HurtActor
 //	
 //------------------------------------------------------------------
-function HurtActor( Actor aActor )
+function HurtActor(Actor aActor)
 {
-    local vector vExplosionMomentum;
-    local R6Pawn aPawn;
+	local Vector vExplosionMomentum;
+	local R6Pawn aPawn;
 
-    if ( R6InteractiveObject( aActor ) != none && aActor != self )
-    {
-        vExplosionMomentum = (aActor.Location - Location) * 0.25f;
-        R6InteractiveObject(aActor).R6TakeDamage( m_iEnergy, m_iEnergy, none, aActor.Location , vExplosionMomentum, 0);
-        return;
-    }
-
-    aPawn = R6Pawn(aActor);
-
-    if ( aPawn == none )
-        return;
-
-    // Don't affect dead pawns...
-    if( aPawn.m_eHealth >= HEALTH_Incapacitated )
-        return;
-
-    // Temporary momentum, quarter of distance from grenade...
-    vExplosionMomentum = (aPawn.Location - Location) * 0.25f;
-	aPawn.ServerForceKillResult(4);  //Force R6TakeDamage to kill the pawn
-    aPawn.m_bSuicideType = DEATHMSG_KILLED_BY_BOMB;
-	aPawn.R6TakeDamage( m_iEnergy, m_iEnergy, aPawn, aPawn.Location , vExplosionMomentum, 0);
-	aPawn.ServerForceKillResult(0);  //Reset Kill to Normal
+	// End:0x74
+	if(__NFUN_130__(__NFUN_119__(R6InteractiveObject(aActor), none), __NFUN_119__(aActor, self)))
+	{
+		vExplosionMomentum = __NFUN_212__(__NFUN_216__(aActor.Location, Location), 0.2500000);
+		R6InteractiveObject(aActor).R6TakeDamage(m_iEnergy, m_iEnergy, none, aActor.Location, vExplosionMomentum, 0);
+		return;
+	}
+	aPawn = R6Pawn(aActor);
+	// End:0x91
+	if(__NFUN_114__(aPawn, none))
+	{
+		return;
+	}
+	// End:0xAC
+	if(__NFUN_153__(int(aPawn.m_eHealth), int(2)))
+	{
+		return;
+	}
+	vExplosionMomentum = __NFUN_212__(__NFUN_216__(aPawn.Location, Location), 0.2500000);
+	aPawn.ServerForceKillResult(4);
+	aPawn.m_bSuicideType = 9;
+	aPawn.R6TakeDamage(m_iEnergy, m_iEnergy, aPawn, aPawn.Location, vExplosionMomentum, 0);
+	aPawn.ServerForceKillResult(0);
+	return;
 }
 
-simulated event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
+simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
 {
-    local BOOL      bDisplayBombIcon;
-	local vector	vActorDir;
-	local vector    vFacingDir;
-    local R6Pawn    aPawn;
+	local bool bDisplayBombIcon;
+	local Vector vActorDir, vFacingDir;
+	local R6Pawn aPawn;
 
-    if (CanToggle() == false || !m_bRainbowCanInteract )
-        return;
-
-    Query.iHasAction = 0;
-    aPawn = R6Pawn(playerController.pawn);
-
-    if ( m_bIsActivated )
-    {
-        if ( aPawn.m_bCanDisarmBomb )
-        {
-            Query.iHasAction = 1;
-            Query.textureIcon = Texture'R6ActionIcons.Disarm';
-            Query.iPlayerActionID      = eDeviceCircumstantialAction.DCA_DisarmBomb;
-            Query.iTeamActionID        = eDeviceCircumstantialAction.DCA_DisarmBomb;
-            Query.iTeamActionIDList[0] = eDeviceCircumstantialAction.DCA_DisarmBomb;
-        }
-    }   
-    else
-    {
-        if ( aPawn.m_bCanArmBomb )
-        {
-            Query.iHasAction = 1;
-            Query.textureIcon = Texture'R6ActionIcons.ArmingBomb';
-            Query.iPlayerActionID      = eDeviceCircumstantialAction.DCA_ArmBomb;
-            Query.iTeamActionID        = eDeviceCircumstantialAction.DCA_ArmBomb;
-            Query.iTeamActionIDList[0] = eDeviceCircumstantialAction.DCA_ArmBomb;
-        }
-    }
-    Query.iTeamActionIDList[1] = eDeviceCircumstantialAction.DCA_None;
-    Query.iTeamActionIDList[2] = eDeviceCircumstantialAction.DCA_None;
-    Query.iTeamActionIDList[3] = eDeviceCircumstantialAction.DCA_None;
-
-    // check if player is within interaction range
-    if( fDistance < m_fCircumstantialActionRange )
-    {
-    	vFacingDir = vector(rotation);
-        vFacingDir.Z = 0;
-		vActorDir = Normal(location - playerController.Pawn.Location);
-        vActorDir.Z = 0;
-		if((vActorDir dot vFacingDir) > 0.4)
-            Query.iInRange = 1;
-        else
-            Query.iInRange = 0;
-
-    }
-    else
-    {
-        Query.iInRange = 0;
-    }
-
-    Query.bCanBeInterrupted = true;
-    Query.fPlayerActionTimeRequired = GetTimeRequired(R6PlayerController(playerController).m_pawn);
-   
+	// End:0x1B
+	if(__NFUN_132__(__NFUN_242__(CanToggle(), false), __NFUN_129__(m_bRainbowCanInteract)))
+	{
+		return;
+	}
+	Query.iHasAction = 0;
+	aPawn = R6Pawn(PlayerController.Pawn);
+	// End:0xBD
+	if(m_bIsActivated)
+	{
+		// End:0xBA
+		if(aPawn.m_bCanDisarmBomb)
+		{
+			Query.iHasAction = 1;
+			Query.textureIcon = Texture'R6ActionIcons.Disarm';
+			Query.iPlayerActionID = 1;
+			Query.iTeamActionID = 1;
+			Query.iTeamActionIDList[0] = 1;
+		}		
+	}
+	else
+	{
+		// End:0x129
+		if(aPawn.m_bCanArmBomb)
+		{
+			Query.iHasAction = 1;
+			Query.textureIcon = Texture'R6ActionIcons.ArmingBomb';
+			Query.iPlayerActionID = 2;
+			Query.iTeamActionID = 2;
+			Query.iTeamActionIDList[0] = 2;
+		}
+	}
+	Query.iTeamActionIDList[1] = 0;
+	Query.iTeamActionIDList[2] = 0;
+	Query.iTeamActionIDList[3] = 0;
+	// End:0x204
+	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	{
+		vFacingDir = Vector(Rotation);
+		vFacingDir.Z = 0.0000000;
+		vActorDir = __NFUN_226__(__NFUN_216__(Location, PlayerController.Pawn.Location));
+		vActorDir.Z = 0.0000000;
+		// End:0x1F0
+		if(__NFUN_177__(__NFUN_219__(vActorDir, vFacingDir), 0.4000000))
+		{
+			Query.iInRange = 1;			
+		}
+		else
+		{
+			Query.iInRange = 0;
+		}		
+	}
+	else
+	{
+		Query.iInRange = 0;
+	}
+	Query.bCanBeInterrupted = true;
+	Query.fPlayerActionTimeRequired = GetTimeRequired(R6PlayerController(PlayerController).m_pawn);
+	return;
 }
 
-simulated function string R6GetCircumstantialActionString( INT iAction )
+simulated function string R6GetCircumstantialActionString(int iAction)
 {
-    switch( iAction )
-    {
-        case eDeviceCircumstantialAction.DCA_DisarmBomb:    return Localize("RDVOrder", "Order_DisarmBomb", "R6Menu");
-        case eDeviceCircumstantialAction.DCA_ArmBomb:       return Localize("RDVOrder", "Order_ArmBomb", "R6Menu");
-    }
-	
-    return "";
+	switch(iAction)
+	{
+		// End:0x39
+		case int(1):
+			return Localize("RDVOrder", "Order_DisarmBomb", "R6Menu");
+		// End:0x68
+		case int(2):
+			return Localize("RDVOrder", "Order_ArmBomb", "R6Menu");
+		// End:0xFFFF
+		default:
+			return "";
+			break;
+	}
+	return;
 }
-
 
 simulated function ToggleDevice(R6Pawn aPawn)
 {
-    if (CanToggle() == false)
-        return;
-
-    Super.ToggleDevice( aPawn );
-
-    if ( m_bIsActivated )
-    {
-        if ( aPawn.m_bCanDisarmBomb )
-        {
-            m_eAnimToPlay=BA_DisarmBomb;
-            DisarmBomb(aPawn);
+	// End:0x0E
+	if(__NFUN_242__(CanToggle(), false))
+	{
+		return;
+	}
+	super.ToggleDevice(aPawn);
+	// End:0x7E
+	if(m_bIsActivated)
+	{
+		// End:0x7B
+		if(aPawn.m_bCanDisarmBomb)
+		{
+			m_eAnimToPlay = 1;
+			DisarmBomb(aPawn);
+			// End:0x7B
 			if(aPawn.m_bIsPlayer)
+			{
 				R6PlayerController(aPawn.Controller).PlaySoundActionCompleted(m_eAnimToPlay);
-        }
-    }
-    else
-    {
-        if ( aPawn.m_bCanArmBomb )
-        {
-            m_eAnimToPlay=BA_ArmBomb;
-            ArmBomb( aPawn );
-            R6PlayerController(aPawn.Controller).PlaySoundActionCompleted(m_eAnimToPlay);
-        }
-    }
+			}
+		}		
+	}
+	else
+	{
+		// End:0xC5
+		if(aPawn.m_bCanArmBomb)
+		{
+			m_eAnimToPlay = 0;
+			ArmBomb(aPawn);
+			R6PlayerController(aPawn.Controller).PlaySoundActionCompleted(m_eAnimToPlay);
+		}
+	}
+	return;
 }
 
-
-simulated function ArmBomb( R6Pawn aPawn )
+simulated function bool ArmBomb(R6Pawn aPawn)
 {
-    // already exploded
-    if ( m_bExploded )
-         return;
-
-    // if activated by a pawn
-    if ( m_bIsActivated && aPawn != none )
-        return;
-
-    PlaySound(m_sndActivationBomb, SLOT_SFX);
-    
-    if (bShowLog) log("Arm BOMB " @Self);
-    // Change the mesh o
-    // Play Sound of the bomb
-    m_bIsActivated   = true;
-
-    StartBombSound();
-    m_fLastLevelTime = Level.TimeSeconds;
-    SetTimer(C_fBombTimerInterval, true);
-    m_fRepTimeLeft = m_fTimeOfExplosion;
-    m_fTimeLeft = m_fTimeOfExplosion;
-
-    SetSkin( m_ArmedTexture, 0 );
-    
-    R6AbstractGameInfo(Level.Game).IObjectInteract(aPawn, Self);    
+	// End:0x0B
+	if(m_bExploded)
+	{
+		return false;
+	}
+	// End:0x23
+	if(__NFUN_130__(m_bIsActivated, __NFUN_119__(aPawn, none)))
+	{
+		return false;
+	}
+	__NFUN_264__(m_sndActivationBomb, 3);
+	// End:0x48
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__("Arm BOMB ", string(self)));
+	}
+	m_bIsActivated = true;
+	StartBombSound();
+	m_fLastLevelTime = Level.TimeSeconds;
+	__NFUN_280__(0.1000000, true);
+	m_fRepTimeLeft = m_fTimeOfExplosion;
+	m_fTimeLeft = m_fTimeOfExplosion;
+	SetSkin(m_ArmedTexture, 0);
+	R6AbstractGameInfo(Level.Game).IObjectInteract(aPawn, self);
+	return true;
+	return;
 }
 
-
-simulated function DisarmBomb(R6Pawn aPawn)
+simulated function bool DisarmBomb(R6Pawn aPawn)
 {
-    if ( m_bIsActivated == false || m_bExploded)
-    {
-        return;
-    }
-
-    if (bShowLog) log("Disarm BOMB"@Self@"by pawn"@aPawn@"and his controller"@aPawn.controller);
-    
-    StopSoundBomb();
-
-    // Change StaticMesh or other
-    m_bIsActivated = false;
-    SetSkin( none, 0 );
-    SetTimer(0, false);
-    m_fRepTimeLeft = 0;
-
-    R6AbstractGameInfo(Level.Game).IObjectInteract(aPawn, Self);
+	// End:0x19
+	if(__NFUN_132__(__NFUN_242__(m_bIsActivated, false), m_bExploded))
+	{
+		return false;
+	}
+	// End:0x72
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Disarm BOMB", string(self)), "by pawn"), string(aPawn)), "and his controller"), string(aPawn.Controller)));
+	}
+	StopSoundBomb();
+	m_bIsActivated = false;
+	SetSkin(none, 0);
+	__NFUN_280__(0.0000000, false);
+	m_fRepTimeLeft = 0.0000000;
+	R6AbstractGameInfo(Level.Game).IObjectInteract(aPawn, self);
+	return true;
+	return;
 }
 
 function StartBombSound()
 {
-    if (m_bIsActivated)
-    {
-        switch(m_eBeepState)
-        {
-            case SBB_Normal:
-                AmbientSound = m_sndPlayBeepNormal;
-                AmbientSoundStop = m_sndStopBeepNormal;
-                PlaySound(m_sndPlayBeepNormal, SLOT_Ambient);
-                break;
-            case SBB_Fast:
-                AmbientSound = m_sndPlayBeepFast;
-                AmbientSoundStop = m_sndStopBeepFast;
-                PlaySound(m_sndPlayBeepFast, SLOT_Ambient);
-                break;
-            case SBB_Faster:
-                AmbientSound = m_sndPlayBeepFaster;
-                AmbientSoundStop = m_sndStopBeepFaster;
-                PlaySound(m_sndPlayBeepFaster, SLOT_Ambient);
-                break;
-        }
-    }
-    else
-    {
-        AmbientSound = none;
-    }
+	// End:0x8E
+	if(m_bIsActivated)
+	{
+		switch(m_eBeepState)
+		{
+			// End:0x38
+			case 0:
+				AmbientSound = m_sndPlayBeepNormal;
+				AmbientSoundStop = m_sndStopBeepNormal;
+				__NFUN_264__(m_sndPlayBeepNormal, 1);
+				// End:0x8B
+				break;
+			// End:0x60
+			case 1:
+				AmbientSound = m_sndPlayBeepFast;
+				AmbientSoundStop = m_sndStopBeepFast;
+				__NFUN_264__(m_sndPlayBeepFast, 1);
+				// End:0x8B
+				break;
+			// End:0x88
+			case 2:
+				AmbientSound = m_sndPlayBeepFaster;
+				AmbientSoundStop = m_sndStopBeepFaster;
+				__NFUN_264__(m_sndPlayBeepFaster, 1);
+				// End:0x8B
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}		
+	}
+	else
+	{
+		AmbientSound = none;
+	}
+	return;
 }
 
 function StopSoundBomb()
 {
-    if (m_bIsActivated)
-    {
-        switch(m_eBeepState)
-        {
-            case SBB_Normal:
-                PlaySound(m_sndStopBeepNormal, SLOT_Ambient);
-                break;
-            case SBB_Fast:
-                PlaySound(m_sndStopBeepFast, SLOT_Ambient);
-                break;
-            case SBB_Faster:
-                PlaySound(m_sndStopBeepFaster, SLOT_Ambient);
-                break;
-        }
-    }
-
-    m_eBeepState = SBB_Normal;
-    AmbientSound = none;
-    AmbientSoundStop = none;
+	// End:0x49
+	if(m_bIsActivated)
+	{
+		switch(m_eBeepState)
+		{
+			// End:0x22
+			case 0:
+				__NFUN_264__(m_sndStopBeepNormal, 1);
+				// End:0x49
+				break;
+			// End:0x34
+			case 1:
+				__NFUN_264__(m_sndStopBeepFast, 1);
+				// End:0x49
+				break;
+			// End:0x46
+			case 2:
+				__NFUN_264__(m_sndStopBeepFaster, 1);
+				// End:0x49
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	else
+	{
+		m_eBeepState = 0;
+		AmbientSound = none;
+		AmbientSoundStop = none;
+		return;
+	}
 }
 
-simulated function BOOL HasKit(R6Pawn aPawn)
+simulated function bool HasKit(R6Pawn aPawn)
 {
-    return R6Rainbow(aPawn).m_bHasDiffuseKit;       
+	return R6Rainbow(aPawn).m_bHasDiffuseKit;
+	return;
 }
 
-simulated function FLOAT GetMaxTimeRequired()
+simulated function float GetMaxTimeRequired()
 {
-    return m_fDisarmBombTimeMax;
+	return m_fDisarmBombTimeMax;
+	return;
 }
 
-simulated function FLOAT GetTimeRequired(R6Pawn aPawn)
+simulated function float GetTimeRequired(R6Pawn aPawn)
 {
-    local FLOAT fDisarmingBombTime;
+	local float fDisarmingBombTime;
 
-//    if (bShowLog) log("GetTimeRequired"@ m_fDisarmBombTimeMin @ aPawn @ aPawn.GetSkill(SKILL_Electronics));
-    fDisarmingBombTime = m_fDisarmBombTimeMin + ((1 - aPawn.GetSkill(SKILL_Electronics)) * (m_fDisarmBombTimeMax-m_fDisarmBombTimeMin));
-
-    if ( HasKit(aPawn) && ( fDisarmingBombTime - m_fGainTimeWithElectronicsKit > 0))
-        fDisarmingBombTime -= m_fGainTimeWithElectronicsKit;
-
-    return fDisarmingBombTime;
+	fDisarmingBombTime = __NFUN_174__(m_fDisarmBombTimeMin, __NFUN_171__(__NFUN_175__(float(1), aPawn.GetSkill(2)), __NFUN_175__(m_fDisarmBombTimeMax, m_fDisarmBombTimeMin)));
+	// End:0x61
+	if(__NFUN_130__(HasKit(aPawn), __NFUN_177__(__NFUN_175__(fDisarmingBombTime, m_fGainTimeWithElectronicsKit), float(0))))
+	{
+		__NFUN_185__(fDisarmingBombTime, m_fGainTimeWithElectronicsKit);
+	}
+	return fDisarmingBombTime;
+	return;
 }
 
 defaultproperties
 {
-     m_iEnergy=3000
-     m_fDisarmBombTimeMin=4.000000
-     m_fDisarmBombTimeMax=12.000000
-     m_fExplosionRadius=10000.000000
-     m_fKillBlastRadius=2000.000000
-     m_sndActivationBomb=Sound'Foley_Bomb.Play_BombActivationBeep'
-     m_sndPlayBeepNormal=Sound'Foley_Bomb.Play_Seq_BombBeep'
-     m_sndStopBeepNormal=Sound'Foley_Bomb.Stop_Seq_BombBeep'
-     m_sndPlayBeepFast=Sound'Foley_Bomb.Stop_Seq_BombBeep_Go'
-     m_sndStopBeepFast=Sound'Foley_Bomb.Stop_Seq_BombBeepFast'
-     m_sndPlayBeepFaster=Sound'Foley_Bomb.Stop_Seq_BombBeepFast_Go'
-     m_sndStopBeepFaster=Sound'Foley_Bomb.Stop_SeqBombBeepFinal'
-     m_sndExplosion=Sound'Foley_Bomb.Bomb_Explosion'
-     m_sndEarthQuake=Sound'Foley_Bomb.Play_EarthQuake'
-     m_pExplosionLight=Class'R6SFX.R6GrenadeLight'
-     m_vOffset=(Y=-70.000000)
-     m_szIdentityID="BombA"
-     m_szMsgArmedID="BombAArmed"
-     m_szMsgDisarmedID="BombADisarmed"
-     m_eAnimToPlay=BA_DisarmBomb
-     m_StartSnd=Sound'Foley_Bomb.Play_Bomb_Defusing'
-     m_InterruptedSnd=Sound'Foley_Bomb.Stop_Go_Bomb_Defusing'
-     m_CompletedSnd=Sound'Foley_Bomb.Stop_Go_Bomb_Defused'
-     m_bRainbowCanInteract=True
-     m_fSoundRadiusActivation=5600.000000
-     m_fCircumstantialActionRange=110.000000
+	m_iEnergy=3000
+	m_fDisarmBombTimeMin=4.0000000
+	m_fDisarmBombTimeMax=12.0000000
+	m_fExplosionRadius=10000.0000000
+	m_fKillBlastRadius=2000.0000000
+	m_sndActivationBomb=Sound'Foley_Bomb.Play_BombActivationBeep'
+	m_sndPlayBeepNormal=Sound'Foley_Bomb.Play_Seq_BombBeep'
+	m_sndStopBeepNormal=Sound'Foley_Bomb.Stop_Seq_BombBeep'
+	m_sndPlayBeepFast=Sound'Foley_Bomb.Stop_Seq_BombBeep_Go'
+	m_sndStopBeepFast=Sound'Foley_Bomb.Stop_Seq_BombBeepFast'
+	m_sndPlayBeepFaster=Sound'Foley_Bomb.Stop_Seq_BombBeepFast_Go'
+	m_sndStopBeepFaster=Sound'Foley_Bomb.Stop_SeqBombBeepFinal'
+	m_sndExplosion=Sound'Foley_Bomb.Bomb_Explosion'
+	m_sndEarthQuake=Sound'Foley_Bomb.Play_EarthQuake'
+	m_pExplosionLight=Class'R6SFX.R6GrenadeLight'
+	m_vOffset=(X=0.0000000,Y=-70.0000000,Z=0.0000000)
+	m_szIdentityID="BombA"
+	m_szMsgArmedID="BombAArmed"
+	m_szMsgDisarmedID="BombADisarmed"
+	m_eAnimToPlay=1
+	m_StartSnd=Sound'Foley_Bomb.Play_Bomb_Defusing'
+	m_InterruptedSnd=Sound'Foley_Bomb.Stop_Go_Bomb_Defusing'
+	m_CompletedSnd=Sound'Foley_Bomb.Stop_Go_Bomb_Defused'
+	m_bRainbowCanInteract=true
+	m_fSoundRadiusActivation=5600.0000000
+	m_fCircumstantialActionRange=110.0000000
 }

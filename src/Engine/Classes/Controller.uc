@@ -1,4 +1,10 @@
 //=============================================================================
+// Controller - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Controller, the base class of players or AI.
 //
 // Controllers are non-physical actors that can be attached to a pawn to control 
@@ -15,263 +21,266 @@
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class Controller extends Actor
+	abstract
 	native
 	nativereplication
-	abstract;
+ notplaceable;
 
-var Pawn Pawn;
+const LATENT_MOVETOWARD = 503;
 
-var		float		SightCounter;		// Used to keep track of when to check player visibility
-var		float		FovAngle;			// X field of view angle in degrees, usually 90.
-var		float		Handedness;
-var		bool        bIsPlayer;			// Pawn is a player or a player-bot.
-var		bool		bGodMode;			// cheat - when true, can't be killed or hurt
-
-//AI flags
-var const bool		bLOSflag;			// used for alternating LineOfSight traces
-var		bool		bAdvancedTactics;	// serpentine movement between pathnodes
-var		bool		bCanOpenDoors;
-var		bool		bCanDoSpecial;
-var		bool		bAdjusting;			// adjusting around obstacle
-var		bool		bPreparingMove;		// set true while pawn sets up for a latent move
-var		bool		bControlAnimations;	// take control of animations from pawn (don't let pawn play animations based on notifications)
-var		bool		bEnemyInfoValid;	// false when change enemy, true when LastSeenPos etc updated
-
-var(AI) enum EAttitude  // order in decreasing importance
+enum EAttitude
 {
-	ATTITUDE_Fear,		// will try to run away
-	ATTITUDE_Hate,		// will attack enemy
-	ATTITUDE_Frenzy,	// will attack anything, indiscriminately
-	ATTITUDE_Threaten,	// animations, but no attack
-	ATTITUDE_Ignore,
-	ATTITUDE_Friendly,
-	ATTITUDE_Follow 	// accepts player as leader
-} AttitudeToPlayer;		// determines how creature will react on seeing player (if in human form)
-
-
-// #ifdef R6PlayerMovements
-var                 BOOL            m_bCrawl;               // equivalent of bDuck
-// #endif R6PlayerMovements
-
-// Input buttons.
-var input byte
-	bRun, /* r6code bDuck,*/ bFire, bAltFire;
-
-// r6code
-
-// Camera movement with the keyboard for the PlaningController
-var input BYTE		m_bMoveUp;
-var input BYTE		m_bMoveDown;
-var input BYTE		m_bMoveLeft;
-var input BYTE		m_bMoveRight;
-var input BYTE		m_bRotateCW;
-var input BYTE		m_bRotateCCW;
-var input BYTE		m_bZoomIn;
-var input BYTE		m_bZoomOut;
-var input BYTE      m_bAngleUp;
-var input BYTE      m_bAngleDown;
-var input BYTE    	m_bLevelUp;
-var input BYTE      m_bLevelDown;
-var input BYTE      m_bGoLevelUp; //to change the level once.
-var input BYTE      m_bGoLevelDown;
-
-// end
-
-var		byte		bDuck;			// 17 jan 2002 rbrek - modified the declaration of bDuck so that it is no longer mapped directly to an input button
-                 					// especially since we use it as a regular variable.  Input variables are all reset when the game loses focus (switch tasks).
-
-var		vector		AdjustLoc;			// location to move to while adjusting around obstacle
-
-var const	Controller		nextController; // chained Controller list
-
-var		float 		Stimulus;			// Strength of stimulus - Set when stimulus happens
-
-// Navigation AI
-var 	float		MoveTimer;
-var 	Actor		MoveTarget;		// actor being moved toward
-var		vector	 	Destination;	// location being moved toward
-var	 	vector		FocalPoint;		// location being looked at
-var		Actor		Focus;			// actor being looked at
-var		Mover		PendingMover;	// mover pawn is waiting for to complete its move
-var		Actor		GoalList[4];	// used by navigation AI - list of intermediate goals
-var NavigationPoint home;			// set when begin play, used for retreating and attitude checks
-var	 	float		MinHitWall;		// Minimum HitNormal dot Velocity.Normal to get a HitWall event from the physics
-
-// Enemy information
-var	 	Pawn    	Enemy;
-var		Actor		Target;
-var		vector		LastSeenPos; 	// enemy position when I last saw enemy (auto updated if EnemyNotVisible() enabled)
-var		vector		LastSeeingPos;	// position where I last saw enemy (auto updated if EnemyNotVisible enabled)
-var		float		LastSeenTime;
- 
-var string VoiceType; //for speech
-var float OldMessageTime; //to limit frequency of voice messages
-
-// Route Cache for Navigation
-var Actor RouteCache[16];
-var ReachSpec	CurrentPath;
-var Actor	RouteGoal; //final destination for current route
-var float	RouteDist;	// total distance for current route
-
-// Replication Info
-var() class<PlayerReplicationInfo> PlayerReplicationInfoClass;
-var PlayerReplicationInfo PlayerReplicationInfo;
-
-var class<Pawn> PawnClass;	// class of pawn to spawn (for players)
-var class<Pawn> PreviousPawnClass;	// Holds the player's previous class
-
-var float GroundPitchTime;
-var vector ViewX, ViewY, ViewZ;	// Viewrotation encoding for PHYS_Spider
-
-var NavigationPoint StartSpot;  // where player started the match
-
-//#ifdef R6CODE
-var         name                NextState; //for queueing states
-var         name                NextLabel; //for queueing states
-var R6PawnReplicationInfo m_PawnRepInfo;
-
-//Put here to save cast and checks
-var         BOOL                m_bLockWeaponActions;      //Local Flag to limit the actions on weapon while doing something else.
-var         BOOL                m_bHideReticule;
-
-//#endif // #ifdef R6CODE
-
-// R6MOVETO
-enum EMoveToResult {
-    eMoveTo_none,
-    eMoveTo_success,
-    eMoveTo_failed
+	ATTITUDE_Fear,                  // 0
+	ATTITUDE_Hate,                  // 1
+	ATTITUDE_Frenzy,                // 2
+	ATTITUDE_Threaten,              // 3
+	ATTITUDE_Ignore,                // 4
+	ATTITUDE_Friendly,              // 5
+	ATTITUDE_Follow                 // 6
 };
-var         EMoveToResult       m_eMoveToResult;
 
-// for monitoring the position of a pawn
-var		vector		MonitorStartLoc;	// used by latent function MonitorPawn()
-var		Pawn		MonitoredPawn;		// used by latent function MonitorPawn()
-var		float		MonitorMaxDistSq;
+enum EMoveToResult
+{
+	eMoveTo_none,                   // 0
+	eMoveTo_success,                // 1
+	eMoveTo_failed                  // 2
+};
 
-const LATENT_MOVETOWARD = 503; // LatentAction number for Movetoward() latent function
-
-//R6CODE Begin
 enum ECDKEY_VALID_REQ
 {
-    ECDKEY_NONE,
-    ECDKEY_FIRSTPASS,
-    ECDKEY_WAITING_FOR_RESPONSE,
-    ECDKEY_NOT_VALID,
-    ECDKEY_VALID,
-    ECDKEY_TIMEOUT
+	ECDKEY_NONE,                    // 0
+	ECDKEY_FIRSTPASS,               // 1
+	ECDKEY_WAITING_FOR_RESPONSE,    // 2
+	ECDKEY_NOT_VALID,               // 3
+	ECDKEY_VALID,                   // 4
+	ECDKEY_TIMEOUT                  // 5
 };
 
 enum ECDKEYST_STATUS
 {
-    ECDKEYST_PLAYER_UNKNOWN,
-    ECDKEYST_PLAYER_INVALID,
-    ECDKEYST_PLAYER_VALID,
-    ECDKEYST_PLAYER_BANNED,
-    ECDKEYST_PLAYER_PB_KICKED
-};
-struct PlayerVerCDKeyStatus
-{
-    var ECDKEY_VALID_REQ m_eCDKeyRequest;       // State of cdkey request state machine
-    var string           m_szAuthorizationID;   // Player authorization ID
-    var INT              m_iCDKeyReqID;         // CD key request ID
-    var BOOL             m_bCDKeyValSecondTry;  // This is the second attempt at validating this user (only try twice)
-    var ECDKEYST_STATUS  m_eCDKeyStatus;        // Player status set by validation server (valid, not valid, unknown)
+	ECDKEYST_PLAYER_UNKNOWN,        // 0
+	ECDKEYST_PLAYER_INVALID,        // 1
+	ECDKEYST_PLAYER_VALID,          // 2
+	ECDKEYST_PLAYER_BANNED,         // 3
+	ECDKEYST_PLAYER_PB_KICKED       // 4
 };
 
-//R6CODE End
+struct PlayerVerCDKeyStatus
+{
+	var Controller.ECDKEY_VALID_REQ m_eCDKeyRequest;  // State of cdkey request state machine
+	var string m_szAuthorizationID;  // Player authorization ID
+	var int m_iCDKeyReqID;  // CD key request ID
+	var bool m_bCDKeyValSecondTry;  // This is the second attempt at validating this user (only try twice)
+	var Controller.ECDKEYST_STATUS m_eCDKeyStatus;  // Player status set by validation server (valid, not valid, unknown)
+};
+
+// NEW IN 1.60
+var(AI) Controller.EAttitude AttitudeToPlayer;
+// NEW IN 1.60
+var input byte bRun;
+// NEW IN 1.60
+var input byte bFire;
+// NEW IN 1.60
+var input byte bAltFire;
+// Camera movement with the keyboard for the PlaningController
+var input byte m_bMoveUp;
+var input byte m_bMoveDown;
+var input byte m_bMoveLeft;
+var input byte m_bMoveRight;
+var input byte m_bRotateCW;
+var input byte m_bRotateCCW;
+var input byte m_bZoomIn;
+var input byte m_bZoomOut;
+var input byte m_bAngleUp;
+var input byte m_bAngleDown;
+var input byte m_bLevelUp;
+var input byte m_bLevelDown;
+var input byte m_bGoLevelUp;  // to change the level once.
+var input byte m_bGoLevelDown;
+var byte bDuck;  // 17 jan 2002 rbrek - modified the declaration of bDuck so that it is no longer mapped directly to an input button
+var Controller.EMoveToResult m_eMoveToResult;
+var bool bIsPlayer;  // Pawn is a player or a player-bot.
+var bool bGodMode;  // cheat - when true, can't be killed or hurt
+//AI flags
+var const bool bLOSflag;  // used for alternating LineOfSight traces
+var bool bAdvancedTactics;  // serpentine movement between pathnodes
+var bool bCanOpenDoors;
+var bool bCanDoSpecial;
+var bool bAdjusting;  // adjusting around obstacle
+var bool bPreparingMove;  // set true while pawn sets up for a latent move
+var bool bControlAnimations;  // take control of animations from pawn (don't let pawn play animations based on notifications)
+var bool bEnemyInfoValid;  // false when change enemy, true when LastSeenPos etc updated
+// #ifdef R6PlayerMovements
+var bool m_bCrawl;  // equivalent of bDuck
+//Put here to save cast and checks
+var bool m_bLockWeaponActions;  // Local Flag to limit the actions on weapon while doing something else.
+var bool m_bHideReticule;
+var float SightCounter;  // Used to keep track of when to check player visibility
+var float FovAngle;  // X field of view angle in degrees, usually 90.
+var float Handedness;
+var float Stimulus;  // Strength of stimulus - Set when stimulus happens
+// Navigation AI
+var float MoveTimer;
+var float MinHitWall;  // Minimum HitNormal dot Velocity.Normal to get a HitWall event from the physics
+var float LastSeenTime;
+var float OldMessageTime;  // to limit frequency of voice messages
+var float RouteDist;  // total distance for current route
+var float GroundPitchTime;
+var float MonitorMaxDistSq;
+var Pawn Pawn;
+var const Controller nextController;  // chained Controller list
+var Actor MoveTarget;  // actor being moved toward
+var Actor Focus;  // actor being looked at
+var Mover PendingMover;  // mover pawn is waiting for to complete its move
+var Actor GoalList[4];  // used by navigation AI - list of intermediate goals
+var NavigationPoint home;  // set when begin play, used for retreating and attitude checks
+// Enemy information
+var Pawn Enemy;
+var Actor Target;
+// Route Cache for Navigation
+var Actor RouteCache[16];
+var ReachSpec CurrentPath;
+var Actor RouteGoal;  // final destination for current route
+var PlayerReplicationInfo PlayerReplicationInfo;
+var NavigationPoint StartSpot;  // where player started the match
+var R6PawnReplicationInfo m_PawnRepInfo;
+var Pawn MonitoredPawn;  // used by latent function MonitorPawn()
+//#ifdef R6CODE
+var name NextState;  // for queueing states
+var name NextLabel;  // for queueing states
+// Replication Info
+var() Class<PlayerReplicationInfo> PlayerReplicationInfoClass;
+var Class<Pawn> PawnClass;  // class of pawn to spawn (for players)
+var Class<Pawn> PreviousPawnClass;  // Holds the player's previous class
+var Vector AdjustLoc;  // location to move to while adjusting around obstacle
+var Vector Destination;  // location being moved toward
+var Vector FocalPoint;  // location being looked at
+var Vector LastSeenPos;  // enemy position when I last saw enemy (auto updated if EnemyNotVisible() enabled)
+var Vector LastSeeingPos;  // position where I last saw enemy (auto updated if EnemyNotVisible enabled)
+var Vector ViewX;  // Viewrotation encoding for PHYS_Spider
+// NEW IN 1.60
+var Vector ViewY;
+// NEW IN 1.60
+var Vector ViewZ;
+// for monitoring the position of a pawn
+var Vector MonitorStartLoc;  // used by latent function MonitorPawn()
+var string VoiceType;  // for speech
 
 replication
 {
-	reliable if( Role==ROLE_Authority )
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
 		R6DamageAttitudeTo;
-	reliable if( bNetDirty && (Role==ROLE_Authority) )
-		PlayerReplicationInfo, m_PawnRepInfo, Pawn;
-	reliable if( bNetDirty && (Role== ROLE_Authority) && bNetOwner )
+
+	// Pos:0x00D
+	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		Pawn, PlayerReplicationInfo, 
+		m_PawnRepInfo;
+
+	// Pos:0x025
+	reliable if(__NFUN_130__(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))), bNetOwner))
 		PawnClass;
 
-	// Functions the server calls on the client side.
-	reliable if( RemoteRole==ROLE_AutonomousProxy ) 
-		ClientGameEnded, ClientDying, ClientSetRotation, ClientSetLocation;
-	reliable if ( (!bDemoRecording || (bClientDemoRecording && bClientDemoNetFunc)) && Role == ROLE_Authority )
-		ClientVoiceMessage;
+	// Pos:0x048
+	reliable if(__NFUN_154__(int(RemoteRole), int(ROLE_AutonomousProxy)))
+		ClientDying, ClientGameEnded, 
+		ClientSetLocation, ClientSetRotation;
 
-	// Functions the client calls on the server.
-	unreliable if( Role<ROLE_Authority )
-		SendVoiceMessage;
-	reliable if ( Role < ROLE_Authority )
-		ServerRestartPlayer;
+	// Pos:0x055
+	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		ServerReStartPlayer;
 }
 
-// Latent Movement.
-//Note that MoveTo sets the actor's Destination, and MoveToward sets the
-//actor's MoveTarget.  Actor will rotate towards destination unless the optional ViewFocus is specified.
+// Export UController::execMoveTo(FFrame&, void* const)
+ native(500) final latent function MoveTo(Vector NewDestination, optional Actor ViewFocus, optional float speed, optional bool bShouldWalk);
 
-native(500) final latent function MoveTo( vector NewDestination, optional Actor ViewFocus, optional float speed, optional bool bShouldWalk);
-native(502) final latent function MoveToward(actor NewTarget, optional Actor ViewFocus, optional float speed, optional float DestinationOffset, optional bool bUseStrafing, optional bool bShouldWalk);
-native(508) final latent function FinishRotation();
+// Export UController::execMoveToward(FFrame&, void* const)
+ native(502) final latent function MoveToward(Actor NewTarget, optional Actor ViewFocus, optional float speed, optional float DestinationOffset, optional bool bUseStrafing, optional bool bShouldWalk);
 
-// native AI functions
-/* LineOfSightTo() returns true if any of several points of Other is visible 
-  (origin, top, bottom)
-*/
-native(514) final function bool LineOfSightTo(actor Other); 
+// Export UController::execFinishRotation(FFrame&, void* const)
+ native(508) final latent function FinishRotation();
 
-/* CanSee() similar to line of sight, but also takes into account Pawn's peripheral vision
-*/
-native(533) final function bool CanSee(Pawn Other); 
+// Export UController::execLineOfSightTo(FFrame&, void* const)
+ native(514) final function bool LineOfSightTo(Actor Other);
 
+// Export UController::execCanSee(FFrame&, void* const)
+ native(533) final function bool CanSee(Pawn Other);
+
+// Export UController::execFindPathTo(FFrame&, void* const)
 //Navigation functions - return the next path toward the goal
-native(518) final function Actor FindPathTo(vector aPoint, optional bool bClearPaths);
-native(517) final function Actor FindPathToward(actor anActor, optional bool bClearPaths);
-native final function Actor FindPathTowardNearest(class<NavigationPoint> GoalClass);
-native(525) final function NavigationPoint FindRandomDest(optional bool bClearPaths);
+ native(518) final function Actor FindPathTo(Vector aPoint, optional bool bClearPaths);
 
-native(522) final function ClearPaths();
-native(523) final function vector EAdjustJump(float BaseZ, float XYSpeed);
+// Export UController::execFindPathToward(FFrame&, void* const)
+ native(517) final function Actor FindPathToward(Actor anActor, optional bool bClearPaths);
 
+// Export UController::execFindPathTowardNearest(FFrame&, void* const)
+ native final function Actor FindPathTowardNearest(Class<NavigationPoint> GoalClass);
+
+// Export UController::execFindRandomDest(FFrame&, void* const)
+ native(525) final function NavigationPoint FindRandomDest(optional bool bClearPaths);
+
+// Export UController::execClearPaths(FFrame&, void* const)
+ native(522) final function ClearPaths();
+
+// Export UController::execEAdjustJump(FFrame&, void* const)
+ native(523) final function Vector EAdjustJump(float BaseZ, float XYSpeed);
+
+// Export UController::execpointReachable(FFrame&, void* const)
 //Reachable returns whether direct path from Actor to aPoint is traversable
 //using the current locomotion method
-native(521) final function bool pointReachable(vector aPoint);
-native(520) final function bool actorReachable(actor anActor);
+ native(521) final function bool pointReachable(Vector aPoint);
 
-/* PickWallAdjust()
-Check if could jump up over obstruction (only if there is a knee height obstruction)
-If so, start jump, and return current destination
-Else, try to step around - return a destination 90 degrees right or left depending on traces
-out and floor checks
-*/
-native(526) final function bool PickWallAdjust(vector HitNormal);
+// Export UController::execactorReachable(FFrame&, void* const)
+ native(520) final function bool actorReachable(Actor anActor);
 
-/* WaitForLanding()
-latent function returns when pawn is on ground (no longer falling)
-*/
-native(527) final latent function WaitForLanding();
+// Export UController::execPickWallAdjust(FFrame&, void* const)
+ native(526) final function bool PickWallAdjust(Vector HitNormal);
 
-native(540) final function actor FindBestInventoryPath(out float MinWeight, bool bPredictRespawns);
+// Export UController::execWaitForLanding(FFrame&, void* const)
+ native(527) final latent function WaitForLanding();
 
-native(529) final function AddController();
-native(530) final function RemoveController();
+// Export UController::execFindBestInventoryPath(FFrame&, void* const)
+ native(540) final function Actor FindBestInventoryPath(out float MinWeight, bool bPredictRespawns);
 
+// Export UController::execAddController(FFrame&, void* const)
+ native(529) final function AddController();
+
+// Export UController::execRemoveController(FFrame&, void* const)
+ native(530) final function RemoveController();
+
+// Export UController::execPickTarget(FFrame&, void* const)
 // Pick best pawn target
-native(531) final function pawn PickTarget(out float bestAim, out float bestDist, vector FireDir, vector projStart);
-native(534) final function actor PickAnyTarget(out float bestAim, out float bestDist, vector FireDir, vector projStart);
+ native(531) final function Pawn PickTarget(out float bestAim, out float bestDist, Vector FireDir, Vector projStart);
 
-native final function bool InLatentExecution(int LatentActionNumber); //returns true if controller currently performing latent action specified by LatentActionNumber
+// Export UController::execPickAnyTarget(FFrame&, void* const)
+ native(534) final function Actor PickAnyTarget(out float bestAim, out float bestDist, Vector FireDir, Vector projStart);
+
+// Export UController::execInLatentExecution(FFrame&, void* const)
+ native final function bool InLatentExecution(int LatentActionNumber);
+
+// Export UController::execStopWaiting(FFrame&, void* const)
 // Force end to sleep
-native function StopWaiting();
-native function EndClimbLadder();
+ native function StopWaiting();
 
-event MayFall(); //return true if allowed to fall - called by engine when pawn is about to fall
+// Export UController::execEndClimbLadder(FFrame&, void* const)
+ native function EndClimbLadder();
+
+event MayFall()
+{
+	return;
+}
 
 //#ifdef R6CODE
-exec function Map(int iGotoMapId, string explanation);
-//#endif R6CODE
+exec function Map(int iGotoMapId, string explanation)
+{
+	return;
+}
 
 function PendingStasis()
 {
 	bStasis = true;
-	Pawn = None;
+	Pawn = none;
+	return;
 }
 
 // #ifdef R6CODE
@@ -279,548 +288,550 @@ function PendingStasis()
 // logX - Log with more information for debugging.  Display:
 //          controller, source, controller state, pawn state and a string
 //============================================================================
-function logX( string szText, OPTIONAL int iSource )
+function logX(string szText, optional int iSource)
 {
-    local string szSource;
-	local string time;
+	local string szSource, Time;
 
-    time = string(Level.TimeSeconds);
-	time = Left(Time, InStr(Time, ".") + 3); // 2 digits after the dot
-    
-    if ( iSource == 1 )   // from pawn
-    {
-        szSource = "(" $time$ ":P) ";    // pawn
-    }
-    else
-    {
-        szSource = "(" $time$ ":C) ";    // controller
-    }
-
-    log( szSource $ name $ " [" $ GetStateName() $ "|" $ Pawn.GetStateName() $ "] " $ szText );
+	Time = string(Level.TimeSeconds);
+	Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
+	// End:0x57
+	if(__NFUN_154__(iSource, 1))
+	{
+		szSource = __NFUN_112__(__NFUN_112__("(", Time), ":P) ");		
+	}
+	else
+	{
+		szSource = __NFUN_112__(__NFUN_112__("(", Time), ":C) ");
+	}
+	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szSource, string(Name)), " ["), string(__NFUN_284__())), "|"), string(Pawn.__NFUN_284__())), "] "), szText));
+	return;
 }
-// #endif // #ifdef R6CODE
 
-/* DisplayDebug()
-list important controller attributes on canvas
-*/
 function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
-	if ( Pawn == None )
+	// End:0x22
+	if(__NFUN_114__(Pawn, none))
 	{
-		Super.DisplayDebug(Canvas,YL,YPos);
+		super.DisplayDebug(Canvas, YL, YPos);
 		return;
 	}
-	
-	Canvas.SetDrawColor(255,0,0);
-	Canvas.DrawText("CONTROLLER "$GetItemName(string(self))$" Pawn "$Pawn);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawText("     STATE: "$GetStateName()$" Timer: "$TimerCounter$" Enemy "$Enemy, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	if ( PlayerReplicationInfo == None )
-		Canvas.DrawText("     NO PLAYERREPLICATIONINFO", false);
+	Canvas.__NFUN_2626__(byte(255), 0, 0);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("CONTROLLER ", GetItemName(string(self))), " Pawn "), string(Pawn)));
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("     STATE: ", string(__NFUN_284__())), " Timer: "), string(TimerCounter)), " Enemy "), string(Enemy)), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	// End:0x136
+	if(__NFUN_114__(PlayerReplicationInfo, none))
+	{
+		Canvas.__NFUN_465__("     NO PLAYERREPLICATIONINFO", false);		
+	}
 	else
-		PlayerReplicationInfo.DisplayDebug(Canvas,YL,YPos);
-
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
+	{
+		PlayerReplicationInfo.DisplayDebug(Canvas, YL, YPos);
+	}
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	return;
 }
 
-function rotator GetViewRotation()
+function Rotator GetViewRotation()
 {
 	return Rotation;
+	return;
 }
 
-/* Reset() 
-reset actor to initial state
-*/
 function Reset()
 {
-	Super.Reset();
-	Enemy = None;
-	LastSeenTime = 0;
-	StartSpot = None;
+	super.Reset();
+	Enemy = none;
+	LastSeenTime = 0.0000000;
+	StartSpot = none;
+	return;
 }
 
-/* ClientSetLocation()
-replicated function to set location and rotation.  Allows server to force new location for
-teleports, etc.
-*/
-function ClientSetLocation( vector NewLocation, rotator NewRotation )
+function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 {
-	SetRotation(NewRotation);
-	If ( (Rotation.Pitch > RotationRate.Pitch) 
-		&& (Rotation.Pitch < 65536 - RotationRate.Pitch) )
+	__NFUN_299__(NewRotation);
+	// End:0x8B
+	if(__NFUN_130__(__NFUN_151__(Rotation.Pitch, RotationRate.Pitch), __NFUN_150__(Rotation.Pitch, __NFUN_147__(65536, RotationRate.Pitch))))
 	{
-		If (Rotation.Pitch < 32768) 
-			NewRotation.Pitch = RotationRate.Pitch;
+		// End:0x6F
+		if(__NFUN_150__(Rotation.Pitch, 32768))
+		{
+			NewRotation.Pitch = RotationRate.Pitch;			
+		}
 		else
-			NewRotation.Pitch = 65536 - RotationRate.Pitch;
+		{
+			NewRotation.Pitch = __NFUN_147__(65536, RotationRate.Pitch);
+		}
 	}
-	if ( Pawn != None )
+	// End:0xC4
+	if(__NFUN_119__(Pawn, none))
 	{
-		NewRotation.Roll  = 0;
-		Pawn.SetRotation( NewRotation );
-		Pawn.SetLocation( NewLocation );
+		NewRotation.Roll = 0;
+		Pawn.__NFUN_299__(NewRotation);
+		Pawn.__NFUN_267__(NewLocation);
 	}
+	return;
 }
 
-/* ClientSetRotation()
-replicated function to set rotation.  Allows server to force new rotation.
-*/
-function ClientSetRotation( rotator NewRotation )
+function ClientSetRotation(Rotator NewRotation)
 {
-	SetRotation(NewRotation);
-	if ( Pawn != None )
+	__NFUN_299__(NewRotation);
+	// End:0x3C
+	if(__NFUN_119__(Pawn, none))
 	{
 		NewRotation.Pitch = 0;
-		NewRotation.Roll  = 0;
-		Pawn.SetRotation( NewRotation );
+		NewRotation.Roll = 0;
+		Pawn.__NFUN_299__(NewRotation);
 	}
+	return;
 }
 
-function ClientDying(class<DamageType> DamageType, vector HitLocation)
+function ClientDying(Vector HitLocation)
 {
-	if ( Pawn != None )
+	// End:0x2F
+	if(__NFUN_119__(Pawn, none))
 	{
-		Pawn.PlayDying(DamageType, HitLocation);
-		Pawn.GotoState('Dying');
+		Pawn.PlayDying(HitLocation);
+		Pawn.__NFUN_113__('Dying');
 	}
+	return;
 }
 
-/* AIHearSound()
-Called when AI controlled pawn would hear a sound.  Default AI implementation uses MakeNoise() 
-interface for hearing appropriate sounds instead
-*/
-event AIHearSound ( 
-	actor Actor, 
-	int Id, 
-	sound S, 
-	vector SoundLocation, 
-	vector Parameters,
-	bool Attenuate 
-);
+event AIHearSound(Actor Actor, int ID, Sound S, Vector SoundLocation, Vector Parameters, bool Attenuate)
+{
+	return;
+}
 
 function Possess(Pawn aPawn)
 {
 	aPawn.PossessedBy(self);
 	Pawn = aPawn;
-	if ( PlayerReplicationInfo != None )
+	// End:0x45
+	if(__NFUN_119__(PlayerReplicationInfo, none))
+	{
 		PlayerReplicationInfo.bIsFemale = Pawn.bIsFemale;
-	// preserve Pawn's rotation initially for placed Pawns
-	FocalPoint = Pawn.Location + 512*vector(Pawn.Rotation);
+	}
+	FocalPoint = __NFUN_215__(Pawn.Location, __NFUN_213__(float(512), Vector(Pawn.Rotation)));
 	Restart();
+	return;
 }
 
-/* PawnDied()
- unpossess a pawn (because pawn was killed)
- */
 function PawnDied()
 {
-	if ( Pawn != None )
+	// End:0x2B
+	if(__NFUN_119__(Pawn, none))
 	{
-		SetLocation(Pawn.Location);
+		__NFUN_267__(Pawn.Location);
 		Pawn.UnPossessed();
 	}
-	Pawn = None;
-	PendingMover = None;
-	if ( bIsPlayer )
-		GotoState('Dead'); // can respawn
+	Pawn = none;
+	PendingMover = none;
+	// End:0x4C
+	if(bIsPlayer)
+	{
+		__NFUN_113__('Dead');		
+	}
 	else
-		Destroy();
+	{
+		__NFUN_279__();
+	}
+	return;
 }
 
 function Restart()
 {
-	Enemy = None;
+	Enemy = none;
+	return;
 }
 
-event LongFall(); // called when latent function WaitForLanding() doesn't return after 4 seconds
+event LongFall()
+{
+	return;
+}
 
 // notifications of pawn events (from C++)
 // if return true, then pawn won't get notified 
-event bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume);
-event bool NotifyHeadVolumeChange(PhysicsVolume NewVolume);
-event bool NotifyLanded(vector HitNormal);
-event bool NotifyHitWall(vector HitNormal, actor Wall);
-event bool NotifyBump(Actor Other);
-event NotifyHitMover(vector HitNormal, mover Wall);
-
-// notifications called by pawn in script
-/*R6CHANGEWEAPONSYSTEM
-function NotifyAddInventory(inventory NewItem);
-*/
-function NotifyTakeHit(pawn InstigatedBy, vector HitLocation, int Damage, class<DamageType> damageType, vector Momentum)
+event bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
 {
-	if ( (instigatedBy != None) && (instigatedBy != pawn) )
-		damageAttitudeTo(instigatedBy, Damage);
-} 
+	return;
+}
 
-function SetFall();	//about to fall
-function PawnIsInPain(PhysicsVolume PainVolume);	// called when pawn is taking pain volume damage
+event bool NotifyHeadVolumeChange(PhysicsVolume NewVolume)
+{
+	return;
+}
+
+event bool NotifyLanded(Vector HitNormal)
+{
+	return;
+}
+
+event bool NotifyHitWall(Vector HitNormal, Actor Wall)
+{
+	return;
+}
+
+event bool NotifyBump(Actor Other)
+{
+	return;
+}
+
+event NotifyHitMover(Vector HitNormal, Mover Wall)
+{
+	return;
+}
+
+function SetFall()
+{
+	return;
+}
 
 event PreBeginPlay()
 {
-	AddController();
-    m_PawnRepInfo = Spawn(class'R6PawnReplicationInfo');
-    m_PawnRepInfo.m_ControllerOwner = Self;
-
-    Super.PreBeginPlay();
-	if ( bDeleteMe )
+	__NFUN_529__();
+	m_PawnRepInfo = __NFUN_278__(Class'Engine.R6PawnReplicationInfo');
+	m_PawnRepInfo.m_ControllerOwner = self;
+	super.PreBeginPlay();
+	// End:0x32
+	if(bDeleteMe)
+	{
 		return;
-
-	SightCounter = 0.2 * FRand();  //offset randomly 
+	}
+	SightCounter = __NFUN_171__(0.2000000, __NFUN_195__());
+	return;
 }
 
 event PostBeginPlay()
 {
-	Super.PostBeginPlay();
-
-//	if ( bIsPlayer && (Role == ROLE_Authority) )
-//	{
-//		PlayerReplicationInfo = Spawn(PlayerReplicationInfoClass, Self,,vect(0,0,0),rot(0,0,0));
-//		InitPlayerReplicationInfo();
-//	}
+	super.PostBeginPlay();
+	return;
 }
 
 function InitPlayerReplicationInfo()
 {
-	if (PlayerReplicationInfo.PlayerName == "")
-		PlayerReplicationInfo.SetPlayerName(class'GameInfo'.Default.DefaultPlayerName);
+	// End:0x32
+	if(__NFUN_122__(PlayerReplicationInfo.PlayerName, ""))
+	{
+		PlayerReplicationInfo.SetPlayerName(Class'Engine.GameInfo'.default.DefaultPlayerName);
+	}
+	return;
 }
-
-function bool SameTeamAs(Controller C)
-{
-	if ( (PlayerReplicationInfo == None) || (C.PlayerReplicationInfo == None)
-		|| (PlayerReplicationInfo.Team == None) )
-		return false;
-	return Level.Game.IsOnTeam(C,PlayerReplicationInfo.Team.TeamIndex);
-}
-
-//#ifndef R6CODE
-//function HandlePickup(Pickup pick)
-//{
-//	if ( MoveTarget == pick )
-//		MoveTimer = -1.0;
-//}
-//#endif // #ifndef R6CODE
 
 simulated event Destroyed()
 {
-	if ( Role < ROLE_Authority )
+	// End:0x12
+	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	{
 		return;
-
-	RemoveController();
-
-	if ( bIsPlayer && (Level.Game != None) )
-		Level.Game.logout(self);
-	if ( PlayerReplicationInfo != None )
-		PlayerReplicationInfo.Destroy();
-
-	if ( m_PawnRepInfo != None )
-    {
-        m_PawnRepInfo.Destroy();
-        m_PawnRepInfo = none;
-    }
-
-	Super.Destroyed();
+	}
+	__NFUN_530__();
+	// End:0x4D
+	if(__NFUN_130__(bIsPlayer, __NFUN_119__(Level.Game, none)))
+	{
+		Level.Game.Logout(self);
+	}
+	// End:0x64
+	if(__NFUN_119__(PlayerReplicationInfo, none))
+	{
+		PlayerReplicationInfo.__NFUN_279__();
+	}
+	// End:0x82
+	if(__NFUN_119__(m_PawnRepInfo, none))
+	{
+		m_PawnRepInfo.__NFUN_279__();
+		m_PawnRepInfo = none;
+	}
+	super.Destroyed();
+	return;
 }
 
-/* AdjustView() 
-by default, check and see if pawn still needs to update eye height
-(only if some playercontroller still has pawn as its viewtarget)
-Overridden in playercontroller
-*/
-function AdjustView( float DeltaTime )
+function AdjustView(float DeltaTime)
 {
 	local Controller C;
 
-	for ( C=Level.ControllerList; C!=None; C=C.NextController )
-		if ( C.IsA('PlayerController') && (PlayerController(C).ViewTarget == Pawn) )
-			return;
+	C = Level.ControllerList;
+	J0x14:
 
-//R6CODE	Pawn.bUpdateEyeHeight =false;
-//R6CODE	Pawn.Eyeheight = Pawn.BaseEyeheight; 
+	// End:0x6B [Loop If]
+	if(__NFUN_119__(C, none))
+	{
+		// End:0x54
+		if(__NFUN_130__(C.__NFUN_303__('PlayerController'), __NFUN_114__(PlayerController(C).ViewTarget, Pawn)))
+		{
+			return;
+		}
+		C = C.nextController;
+		// [Loop Continue]
+		goto J0x14;
+	}
+	return;
 }
-			
+
 function bool WantsSmoothedView()
 {
-	return ( ((Pawn.Physics==PHYS_Walking) || (Pawn.Physics==PHYS_Spider)) && !Pawn.bJustLanded );
+	return __NFUN_130__(__NFUN_132__(__NFUN_154__(int(Pawn.Physics), int(1)), __NFUN_154__(int(Pawn.Physics), int(9))), __NFUN_129__(Pawn.bJustLanded));
+	return;
 }
 
 function ClientGameEnded()
 {
-	GotoState('GameEnded');
+	__NFUN_113__('GameEnded');
+	return;
 }
 
-simulated event RenderOverlays( canvas Canvas )
+simulated event RenderOverlays(Canvas Canvas)
 {
-/*R6CHANGEWEAPONSYSTEM
-	if ( Pawn.Weapon != None )
-		Pawn.Weapon.RenderOverlays(Canvas);
-*/
-//R6Code+
-    if ( Pawn.EngineWeapon != None )
-    {
+	// End:0x31
+	if(__NFUN_119__(Pawn.EngineWeapon, none))
+	{
 		Pawn.EngineWeapon.RenderOverlays(Canvas);
-    }
-//R6Code-
+	}
+	return;
 }
 
-/* GetFacingDirection()
-returns direction faced relative to movement dir
-
-0 = forward
-16384 = right
-32768 = back
-49152 = left
-*/
 function int GetFacingDirection()
 {
 	return 0;
+	return;
 }
-
-//------------------------------------------------------------------------------
-// Speech related
 
 function byte GetMessageIndex(name PhraseName)
 {
 	return 0;
+	return;
 }
 
-function SendMessage(PlayerReplicationInfo Recipient, name MessageType, byte MessageID, float Wait, name BroadcastType)
-{
-	SendVoiceMessage(PlayerReplicationInfo, Recipient, MessageType, MessageID, BroadcastType);
-}
-
-function SendVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID, name broadcasttype)
-{
-	local Controller P;
-	local bool bNoSpeak;
-
-	if ( Level.TimeSeconds - OldMessageTime < 2.5 )
-		bNoSpeak = true;
-	else
-		OldMessageTime = Level.TimeSeconds;
-
-	for ( P=Level.ControllerList; P!=None; P=P.NextController )
-	{
-		if ( PlayerController(P) != None )
-		{  
-			if ( !bNoSpeak )
-			{
-				if ( (broadcasttype == 'GLOBAL') || !Level.Game.bTeamGame )
-					P.ClientVoiceMessage(Sender, Recipient, messagetype, messageID);
-				else if ( Sender.Team == P.PlayerReplicationInfo.Team )
-					P.ClientVoiceMessage(Sender, Recipient, messagetype, messageID);
-			}
-		}
-		else if ( (P.PlayerReplicationInfo == Recipient) || ((messagetype == 'ORDER') && (Recipient == None)) )
-			P.BotVoiceMessage(messagetype, messageID, self);
-	}
-}
-
-function ClientVoiceMessage(PlayerReplicationInfo Sender, PlayerReplicationInfo Recipient, name messagetype, byte messageID);
-function BotVoiceMessage(name messagetype, byte MessageID, Controller Sender);
-
-//***************************************************************
-// interface used by ScriptedControllers to query pending controllers
-
-function bool WouldReactToNoise( float Loudness, Actor NoiseMaker)
+function bool WouldReactToNoise(float Loudness, Actor NoiseMaker)
 {
 	return false;
+	return;
 }
 
-function bool WouldReactToSeeing(Pawn Seen)
+function bool WouldReactToSeeing(Pawn seen)
 {
 	return false;
+	return;
 }
 
-//***************************************************************
-// AI related
+function FearThisSpot(Actor ASpot)
+{
+	return;
+}
 
-function FearThisSpot(Actor ASpot);
-event PrepareForMove(NavigationPoint Goal, ReachSpec Path);
-function WaitForMover(Mover M);
-function MoverFinished();
-function UnderLift(Mover M);
+event PrepareForMove(NavigationPoint Goal, ReachSpec Path)
+{
+	return;
+}
 
+function WaitForMover(Mover M)
+{
+	return;
+}
 
-//#ifndef R6CODE
-//event float Desireability(Pickup P)
-//{
-//	return P.BotDesireability(Pawn);
-//}
-//#endif // #ifndef R6CODE
+function MoverFinished()
+{
+	return;
+}
+
+function UnderLift(Mover M)
+{
+	return;
+}
 
 // #ifdef R6NOISE
-event HearNoise( float Loudness, Actor NoiseMaker, ENoiseType eType);
-// #else
-// event HearNoise( float Loudness, Actor NoiseMaker );
-// #endif // #ifdef R6NOISE
-
-event SeePlayer( Pawn Seen );	// called when a player (bIsPlayer==true) pawn is seen
-event SeeMonster( Pawn Seen );	// called when a non-player (bIsPlayer==false) pawn is seen
-event EnemyNotVisible();
-
-function ShakeView( float shaketime, float RollMag, vector OffsetMag, float RollRate, vector OffsetRate, float OffsetTime);
-
-function NotifyKilled(Controller Killer, Controller Killed, pawn Other)
+event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
 {
-	if ( Enemy == Other )
-		Enemy = None;
+	return;
 }
 
-function damageAttitudeTo(pawn Other, float Damage);
-
-function eAttitude AttitudeTo(Pawn Other)
+event SeePlayer(Pawn seen)
 {
-	if ( Other.IsPlayerPawn() )
-		return AttitudeToPlayer;
+	return;
+}
+
+event SeeMonster(Pawn seen)
+{
+	return;
+}
+
+event EnemyNotVisible()
+{
+	return;
+}
+
+function ShakeView(float shaketime, float RollMag, Vector OffsetMag, float RollRate, Vector OffsetRate, float OffsetTime)
+{
+	return;
+}
+
+function Controller.EAttitude AttitudeTo(Pawn Other)
+{
+	// End:0x1B
+	if(Other.IsPlayerPawn())
+	{
+		return AttitudeToPlayer;		
+	}
 	else
-		return ATTITUDE_Ignore;
+	{
+		return 4;
+	}
+	return;
 }
 
-/*R6CHANGEWEAPONSYSTEM
-function float AdjustDesireFor(Pickup P);
-*/
-function bool FireWeaponAt(Actor A);
- 
+function bool FireWeaponAt(Actor A)
+{
+	return;
+}
+
 function StopFiring()
 {
 	bFire = 0;
 	bAltFire = 0;
+	return;
 }
 
-/*R6CHANGEWEAPONSYSTEM
-function float WeaponPreference(Weapon W);
-*/
-
-/* AdjustAim()
-AIController version does adjustment for non-controlled pawns. 
-PlayerController version does the adjustment for player aiming help.
-Only adjusts aiming at pawns
-allows more error in Z direction (full as defined by AutoAim - only half that difference for XY)
-CHANGENOTE: This function change is related to the Weapon code updates
-*/
-/*R6CHANGEWEAPONSYSTEM
-function rotator AdjustAim(Ammunition FiredAmmunition, vector projStart, int aimerror)
+function ReceiveWarning(Pawn shooter, float projSpeed, Vector FireDir)
 {
-	return Rotation;
-}
-*/
-/* ReceiveWarning()  *** CHANGENOTE: RENAMED (WAS WARNTARGET())***
- AI controlled creatures may duck
- if not falling, and projectile time is long enough
- often pick opposite to current direction (relative to shooter axis)
-*/
-function ReceiveWarning(Pawn shooter, float projSpeed, vector FireDir)
-{
-}
-
-/* CHANGENOTE: Changes in this function related to the Weapon code updates
-*/
-exec function SwitchToBestWeapon()
-{
-/*R6CHANGEWEAPONSYSTEM
-	local float rating;
-
-	if ( Pawn.Inventory == None )
-		return;
-
-	StopFiring();
-	Pawn.PendingWeapon = Pawn.Inventory.RecommendWeapon(rating);
-	if ( Pawn.PendingWeapon == Pawn.Weapon )
-		Pawn.PendingWeapon = None;
-	if ( Pawn.PendingWeapon == None )
-		return;
-
-	if ( Pawn.Weapon == None )
-		Pawn.ChangedWeapon();
-
-	if ( Pawn.Weapon != Pawn.PendingWeapon )
-		Pawn.Weapon.PutDown();
-*/
+	return;
 }
 
 function bool CheckFutureSight(float DeltaTime)
 {
 	return true;
+	return;
 }
 
-function ChangedWeapon();
 function ServerReStartPlayer()
 {
+	return;
 }
 
-event MonitoredPawnAlert();
+event MonitoredPawnAlert()
+{
+	return;
+}
 
 function StartMonitoring(Pawn P, float MaxDist)
 {
 	MonitoredPawn = P;
 	MonitorStartLoc = P.Location;
-	MonitorMaxDistSq = MaxDist * MaxDist;
+	MonitorMaxDistSq = __NFUN_171__(MaxDist, MaxDist);
+	return;
 }
 
-// **********************************************
-// Controller States
-
-State Dead
+//R6CODE
+simulated function R6DamageAttitudeTo(Pawn Other, Actor.eKillResult eKillFromTable, Actor.eStunResult eStunFromTable, Vector vBulletMomentum)
 {
-ignores SeePlayer, HearNoise, KilledBy;
+	return;
+}
 
-	function PawnDied() {}
+function PlaySoundDamage(Pawn instigatedBy)
+{
+	return;
+}
+
+function PlaySoundInflictedDamage(Pawn DeadPawn)
+{
+	return;
+}
+
+function PlaySoundCurrentAction(Pawn.ERainbowTeamVoices eVoices)
+{
+	return;
+}
+
+function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
+{
+	return;
+}
+
+function SetWeaponSound(R6PawnReplicationInfo PawnRepInfo, string szCurrentWeaponTxt, byte u8CurrentWepon)
+{
+	return;
+}
+
+state Dead
+{
+	ignores KilledBy;
+
+	function PawnDied()
+	{
+		return;
+	}
 
 	function ServerReStartPlayer()
 	{
-		//log("calling restartplayer in dying with netmode "$Level.NetMode);
-		if ( Level.NetMode == NM_Client )
+		// End:0x1B
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		{
 			return;
+		}
 		Level.Game.RestartPlayer(self);
+		return;
 	}
+	stop;
 }
 
 state GameEnded
 {
-ignores SeePlayer, HearNoise, KilledBy, NotifyBump, HitWall, NotifyPhysicsVolumeChange, NotifyHeadVolumeChange, Falling, TakeDamage, ReceiveWarning;
+	ignores ReceiveWarning, KilledBy;
 
 	function BeginState()
 	{
-		if ( Pawn != None )
+		// End:0x89
+		if(__NFUN_119__(Pawn, none))
 		{
 			Pawn.bPhysicsAnimUpdate = false;
 			Pawn.StopAnimating();
 			Pawn.SimAnim.AnimRate = 0;
-			Pawn.SetCollision(false,false,false);
-			Pawn.Velocity = vect(0,0,0);
-			Pawn.SetPhysics(PHYS_None);
+			Pawn.__NFUN_262__(false, false, false);
+			Pawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+			Pawn.__NFUN_3970__(0);
 			Pawn.UnPossessed();
 		}
-		if ( !bIsPlayer )
-			Destroy();
+		// End:0x97
+		if(__NFUN_129__(bIsPlayer))
+		{
+			__NFUN_279__();
+		}
+		return;
 	}
+	stop;
 }
-
-//R6CODE
-simulated function R6DamageAttitudeTo(Pawn other, eKillResult eKillFromTable, eStunResult eStunFromTable, vector vBulletMomentum);
-function PlaySoundDamage(Pawn instigatedBy);
-function PlaySoundInflictedDamage(Pawn DeadPawn);
-function PlaySoundCurrentAction(Pawn.ERainbowTeamVoices eVoices);
-function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType);
-function SetWeaponSound(R6PawnReplicationInfo PawnRepInfo, string szCurrentWeaponTxt, BYTE u8CurrentWepon);
-
-//End R6CODE
 
 defaultproperties
 {
-     AttitudeToPlayer=ATTITUDE_Hate
-     m_bHideReticule=True
-     FovAngle=90.000000
-     MinHitWall=-1.000000
-     PlayerReplicationInfoClass=Class'Engine.PlayerReplicationInfo'
-     bHidden=True
-     bHiddenEd=True
+	AttitudeToPlayer=1
+	m_bHideReticule=true
+	FovAngle=90.0000000
+	MinHitWall=-1.0000000
+	PlayerReplicationInfoClass=Class'Engine.PlayerReplicationInfo'
+	bHidden=true
+	bHiddenEd=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var EAttitude
+// REMOVED IN 1.60: var byte
+// REMOVED IN 1.60: var Y
+// REMOVED IN 1.60: var Z
+// REMOVED IN 1.60: function NotifyAddInventory
+// REMOVED IN 1.60: function NotifyTakeHit
+// REMOVED IN 1.60: function PawnIsInPain
+// REMOVED IN 1.60: function SameTeamAs
+// REMOVED IN 1.60: function SendMessage
+// REMOVED IN 1.60: function SendVoiceMessage
+// REMOVED IN 1.60: function ClientVoiceMessage
+// REMOVED IN 1.60: function BotVoiceMessage
+// REMOVED IN 1.60: function NotifyKilled
+// REMOVED IN 1.60: function damageAttitudeTo
+// REMOVED IN 1.60: function AttitudeTo
+// REMOVED IN 1.60: function AdjustDesireFor
+// REMOVED IN 1.60: function WeaponPreference
+// REMOVED IN 1.60: function AdjustAim
+// REMOVED IN 1.60: function SwitchToBestWeapon
+// REMOVED IN 1.60: function ChangedWeapon

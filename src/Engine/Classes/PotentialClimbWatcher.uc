@@ -1,37 +1,50 @@
+//=============================================================================
+// PotentialClimbWatcher - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class PotentialClimbWatcher extends Info
-	native;
+	native
+	notplaceable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
 simulated function Tick(float DeltaTime)
 {
-	local rotator PawnRot;
+	local Rotator PawnRot;
 	local LadderVolume L;
 	local bool bFound;
 
-	if ( (Owner == None) || Owner.bDeleteMe || !Pawn(Owner).CanGrabLadder() )
+	// End:0x3F
+	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(Owner, none), Owner.bDeleteMe), __NFUN_129__(Pawn(Owner).CanGrabLadder())))
 	{
-		destroy();
+		__NFUN_279__();
 		return;
 	}
-
 	PawnRot = Owner.Rotation;
 	PawnRot.Pitch = 0;
-	ForEach Owner.TouchingActors(class'LadderVolume', L)
-		if ( L.Encompasses(Owner) )
+	// End:0xDB
+	foreach Owner.__NFUN_307__(Class'Engine.LadderVolume', L)
+	{
+		// End:0xDA
+		if(L.Encompasses(Owner))
 		{
-			if ( (vector(PawnRot) Dot L.LookDir) > 0.9 )
+			// End:0xD2
+			if(__NFUN_177__(__NFUN_219__(Vector(PawnRot), L.LookDir), 0.9000000))
 			{
 				Pawn(Owner).ClimbLadder(L);
-				destroy();
+				__NFUN_279__();				
 				return;
+				// End:0xDA
+				continue;
 			}
-			else
-				bFound = true;
-		}
-
-	if ( !bFound )
-		destroy();
+			bFound = true;
+		}		
+	}	
+	// End:0xEA
+	if(__NFUN_129__(bFound))
+	{
+		__NFUN_279__();
+	}
+	return;
 }
 
-defaultproperties
-{
-}

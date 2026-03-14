@@ -1,13 +1,17 @@
+//=============================================================================
+// R6Dummy - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //===============================================================================
 //  [R6Dummy] 
 //===============================================================================
-
-class R6Dummy extends actor;
-
-#exec NEW StaticMesh File="models\R6LHDummy.Ase" Name="R6DummyMesh"
+class R6Dummy extends Actor
+ notplaceable;
 
 defaultproperties
 {
-     DrawType=DT_StaticMesh
-     StaticMesh=StaticMesh'R6Engine.R6DummyMesh'
+	DrawType=8
+	StaticMesh=StaticMesh'R6Engine.R6DummyMesh'
 }

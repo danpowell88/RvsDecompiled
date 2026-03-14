@@ -1,30 +1,34 @@
-class ACTION_PlaySound extends ScriptedAction;
+//=============================================================================
+// ACTION_PlaySound - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_PlaySound extends ScriptedAction
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
-var(Action)		sound	Sound;
-var(Action)		float	Volume;
-var(Action)		float	Pitch;
-var(Action)		bool	bAttenuate;
+var(Action) bool bAttenuate;
+var(Action) float Volume;
+var(Action) float Pitch;
+var(Action) Sound Sound;
 
 function bool InitActionFor(ScriptedController C)
 {
-	// play appropriate sound
-
-//R6CODE        
-//    if ( Sound != None )
-//		C.GetSoundSource().PlaySound(Sound,SLOT_Interact,Volume,true,,Pitch,bAttenuate);
-//END R6CODE        
-	return false;	
+	return false;
+	return;
 }
 
 function string GetActionString()
 {
-	return ActionString@Sound;
+	return __NFUN_168__(ActionString, string(Sound));
+	return;
 }
 
 defaultproperties
 {
-     bAttenuate=True
-     Volume=1.000000
-     Pitch=1.000000
-     ActionString="play sound"
+	bAttenuate=true
+	Volume=1.0000000
+	Pitch=1.0000000
+	ActionString="play sound"
 }

@@ -1,387 +1,501 @@
-class UWindowTabControlTabArea extends UWindowWindow;
+//=============================================================================
+// UWindowTabControlTabArea - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class UWindowTabControlTabArea extends UWindowWindow
+ config;
 
 enum eTabCase
 {
-    eTab_Left,
-    eTab_Middle,
-    eTab_Right,
-    eTab_Left_RightCut,
-    eTab_Middle_RightCut
+	eTab_Left,                      // 0
+	eTab_Middle,                    // 1
+	eTab_Right,                     // 2
+	eTab_Left_RightCut,             // 3
+	eTab_Middle_RightCut            // 4
 };
 
-var UWindowTabControlItem   FirstShown;
-var UWindowTabControlItem   DragTab;
-var globalconfig bool       bArrangeRowsLikeTimHates;
-
-var Color                   m_vEffectColor;
-
-var FLOAT                   UnFlashTime;
-
-var INT                     TabOffset;
-var INT                     TabRows;
-var INT                     m_iTotalTab;
-var eTabCase                m_eTabCase;
-
-var bool                    bShowSelected;
-var bool                    bDragging;
-var bool                    bFlashShown;
-var bool                    m_bDisplayToolTip;                  // display a tool tip for a item
+var UWindowTabControlTabArea.eTabCase m_eTabCase;
+var int TabOffset;
+var int TabRows;
+var int m_iTotalTab;
+var globalconfig bool bArrangeRowsLikeTimHates;
+var bool bShowSelected;
+var bool bDragging;
+var bool bFlashShown;
+var bool m_bDisplayToolTip;  // display a tool tip for a item
+var float UnFlashTime;
+var UWindowTabControlItem FirstShown;
+var UWindowTabControlItem DragTab;
+var Color m_vEffectColor;
 
 function Created()
 {
 	TabOffset = 0;
-//	Super.Created();
+	return;
 }
 
 function SizeTabsSingleLine(Canvas C)
 {
-	local UWindowTabControlItem I, Selected, LastHidden;
+	local UWindowTabControlItem i, Selected, LastHidden;
 	local int Count, TabCount;
 	local float ItemX, W, H, fTotalTabsWidth;
 	local bool bHaveMore;
 
-
 	ItemX = LookAndFeel.Size_TabXOffset;
-	TabCount=0;
-	for( 
-			I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-			I != None; 
-			I = UWindowTabControlItem(I.Next) 
-		)
+	TabCount = 0;
+	i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+	J0x42:
+
+	// End:0x172 [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		LookAndFeel.Tab_GetTabSize(Self, C, RemoveAmpersand(I.Caption), W, H);
-		I.TabWidth = W;
-		
-        if (I.m_fFixWidth != 0)
-            I.TabWidth = I.m_fFixWidth;
-
-		fTotalTabsWidth += I.TabWidth;
-
-		// check if the total tab window is not > than the winwidth (UWindowTabControl(ParentWindow).m_bTabButton == None)
-		if (fTotalTabsWidth > WinWidth)
+		LookAndFeel.Tab_GetTabSize(self, C, RemoveAmpersand(i.Caption), W, H);
+		i.TabWidth = W;
+		// End:0xC7
+		if(__NFUN_181__(i.m_fFixWidth, float(0)))
 		{
-			I.TabWidth -= fTotalTabsWidth - WinWidth;
+			i.TabWidth = i.m_fFixWidth;
+		}
+		__NFUN_184__(fTotalTabsWidth, i.TabWidth);
+		// End:0x112
+		if(__NFUN_177__(fTotalTabsWidth, WinWidth))
+		{
+			__NFUN_185__(i.TabWidth, __NFUN_175__(fTotalTabsWidth, WinWidth));
 			fTotalTabsWidth = WinWidth;
 		}
-
-		I.TabHeight = H + 1;
-		I.TabTop = 0;
-		I.RowNumber = 0;
-		TabCount++;
+		i.TabHeight = __NFUN_174__(H, float(1));
+		i.TabTop = 0.0000000;
+		i.RowNumber = 0;
+		__NFUN_165__(TabCount);
+		i = UWindowTabControlItem(i.Next);
+		// [Loop Continue]
+		goto J0x42;
 	}
-
-    m_iTotalTab = TabCount;
+	m_iTotalTab = TabCount;
 	Selected = UWindowTabControl(ParentWindow).SelectedTab;
+	J0x196:
 
-	while(True)
+	// End:0x38D [Loop If]
+	if(true)
 	{
-		ItemX = LookAndFeel.Size_TabXOffset;  // seems the first X offset
-
+		ItemX = LookAndFeel.Size_TabXOffset;
 		Count = 0;
-		LastHidden = None;
-		FirstShown = None;
-		for( 
-				I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-				I != None; 
-				I = UWindowTabControlItem(I.Next) 
-			)
+		LastHidden = none;
+		FirstShown = none;
+		i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+		J0x1EA:
+
+		// End:0x2C9 [Loop If]
+		if(__NFUN_119__(i, none))
 		{
-			if( Count < TabOffset)
+			// End:0x226
+			if(__NFUN_150__(Count, TabOffset))
 			{
-				I.TabLeft = -1;
-				LastHidden = I;
+				i.TabLeft = -1.0000000;
+				LastHidden = i;				
 			}
 			else
 			{
-				if(FirstShown == None) FirstShown = I;
-				I.TabLeft = ItemX;
-
-				if(I.TabLeft + I.TabWidth >= WinWidth + 5) bHaveMore = True;
-				
-				ItemX += I.TabWidth;
-//                if () // overload the tab
-				ItemX -= 15; // this value back the tab on the previous one
+				// End:0x23C
+				if(__NFUN_114__(FirstShown, none))
+				{
+					FirstShown = i;
+				}
+				i.TabLeft = ItemX;
+				// End:0x286
+				if(__NFUN_179__(__NFUN_174__(i.TabLeft, i.TabWidth), __NFUN_174__(WinWidth, float(5))))
+				{
+					bHaveMore = true;
+				}
+				__NFUN_184__(ItemX, i.TabWidth);
+				__NFUN_185__(ItemX, float(15));
 			}
-			Count++;
+			__NFUN_165__(Count);
+			i = UWindowTabControlItem(i.Next);
+			// [Loop Continue]
+			goto J0x1EA;
 		}
-
-		if( TabOffset > 0 && LastHidden != None && LastHidden.TabWidth + 5 < WinWidth - ItemX)
-			TabOffset--;
-		else 
-		if(	bShowSelected && TabOffset < TabCount - 1 
-			&&	Selected != None &&	Selected != FirstShown 
-			&& Selected.TabLeft + Selected.TabWidth > WinWidth - 5
-		  ) 
-			TabOffset++;
-		else				
-			break;
+		// End:0x312
+		if(__NFUN_130__(__NFUN_130__(__NFUN_151__(TabOffset, 0), __NFUN_119__(LastHidden, none)), __NFUN_176__(__NFUN_174__(LastHidden.TabWidth, float(5)), __NFUN_175__(WinWidth, ItemX))))
+		{
+			__NFUN_166__(TabOffset);			
+		}
+		else
+		{
+			// End:0x387
+			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(bShowSelected, __NFUN_150__(TabOffset, __NFUN_147__(TabCount, 1))), __NFUN_119__(Selected, none)), __NFUN_119__(Selected, FirstShown)), __NFUN_177__(__NFUN_174__(Selected.TabLeft, Selected.TabWidth), __NFUN_175__(WinWidth, float(5)))))
+			{
+				__NFUN_165__(TabOffset);				
+			}
+			else
+			{
+				// [Explicit Break]
+				goto J0x38D;
+			}
+		}
+		// [Loop Continue]
+		goto J0x196;
 	}
-	bShowSelected = False;
+	J0x38D:
 
-    if (UWindowTabControl(ParentWindow).m_bTabButton)
-    {
-    	UWindowTabControl(ParentWindow).LeftButton.bDisabled = TabOffset <= 0;
-	    UWindowTabControl(ParentWindow).RightButton.bDisabled = !bHaveMore;
-    }
-
+	bShowSelected = false;
+	// End:0x3F8
+	if(UWindowTabControl(ParentWindow).m_bTabButton)
+	{
+		UWindowTabControl(ParentWindow).LeftButton.bDisabled = __NFUN_152__(TabOffset, 0);
+		UWindowTabControl(ParentWindow).RightButton.bDisabled = __NFUN_129__(bHaveMore);
+	}
 	TabRows = 1;
+	return;
 }
 
 function SizeTabsMultiLine(Canvas C)
 {
-	local UWindowTabControlItem I, Selected;
+	local UWindowTabControlItem i, Selected;
 	local float W, H;
 	local int MinRow;
 	local float RowWidths[10];
-	local int TabCounts[10];
-	local int j;
+	local int TabCounts[10], j;
 	local bool bTryAnotherRow;
-		
+
 	TabOffset = 0;
-	FirstShown = None;
-
+	FirstShown = none;
 	TabRows = 1;
-	bTryAnotherRow = True;
+	bTryAnotherRow = true;
+	J0x1D:
 
-	while(bTryAnotherRow && TabRows <= 10)
-	{	
-		bTryAnotherRow = False;
-		for(j=0;j<TabRows;j++)
+	// End:0x1D7 [Loop If]
+	if(__NFUN_130__(bTryAnotherRow, __NFUN_152__(TabRows, 10)))
+	{
+		bTryAnotherRow = false;
+		j = 0;
+		J0x43:
+
+		// End:0x7A [Loop If]
+		if(__NFUN_150__(j, TabRows))
 		{
-			RowWidths[j] = 0;
-			TabCounts[j] = 0;		
+			RowWidths[j] = 0.0000000;
+			TabCounts[j] = 0;
+			__NFUN_165__(j);
+			// [Loop Continue]
+			goto J0x43;
 		}
+		i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+		J0xA1:
 
-		for( 
-				I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-				I != None; 
-				I = UWindowTabControlItem(I.Next) 
-			)
+		// End:0x1D4 [Loop If]
+		if(__NFUN_119__(i, none))
 		{
-			LookAndFeel.Tab_GetTabSize(Self, C, RemoveAmpersand(I.Caption), W, H);
-			I.TabWidth = W;
-			I.TabHeight = H;
-
-			// find the best row for this tab
+			LookAndFeel.Tab_GetTabSize(self, C, RemoveAmpersand(i.Caption), W, H);
+			i.TabWidth = W;
+			i.TabHeight = H;
 			MinRow = 0;
-			for(j=1;j<TabRows;j++)
-				if(RowWidths[j] < RowWidths[MinRow])
-					MinRow = j;
+			j = 1;
+			J0x115:
 
-			if(RowWidths[MinRow] + W > WinWidth)
+			// End:0x154 [Loop If]
+			if(__NFUN_150__(j, TabRows))
 			{
-				TabRows ++;
-				bTryAnotherRow = True;
-				break;
+				// End:0x14A
+				if(__NFUN_176__(RowWidths[j], RowWidths[MinRow]))
+				{
+					MinRow = j;
+				}
+				__NFUN_165__(j);
+				// [Loop Continue]
+				goto J0x115;
+			}
+			// End:0x185
+			if(__NFUN_177__(__NFUN_174__(RowWidths[MinRow], W), WinWidth))
+			{
+				__NFUN_165__(TabRows);
+				bTryAnotherRow = true;
+				// [Explicit Break]
+				goto J0x1D4;				
 			}
 			else
 			{
-				RowWidths[MinRow] += W;
-				TabCounts[MinRow]++;
-				I.RowNumber = MinRow;
+				__NFUN_184__(RowWidths[MinRow], W);
+				__NFUN_165__(TabCounts[MinRow]);
+				i.RowNumber = MinRow;
 			}
+			i = UWindowTabControlItem(i.Next);
+			// [Loop Continue]
+			goto J0xA1;
 		}
-	}
+		J0x1D4:
 
+		// [Loop Continue]
+		goto J0x1D;
+	}
 	Selected = UWindowTabControl(ParentWindow).SelectedTab;
-
-	if(TabRows > 1)
+	// End:0x28C
+	if(__NFUN_151__(TabRows, 1))
 	{
-		for( 
-				I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-				I != None; 
-				I = UWindowTabControlItem(I.Next) 
-			)
+		i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+		J0x222:
+
+		// End:0x28C [Loop If]
+		if(__NFUN_119__(i, none))
 		{
-			I.TabWidth += (WinWidth - RowWidths[I.RowNumber]) / TabCounts[I.RowNumber];
+			__NFUN_184__(i.TabWidth, __NFUN_172__(__NFUN_175__(WinWidth, RowWidths[i.RowNumber]), float(TabCounts[i.RowNumber])));
+			i = UWindowTabControlItem(i.Next);
+			// [Loop Continue]
+			goto J0x222;
 		}
 	}
+	j = 0;
+	J0x293:
 
-	for(j=0;j<TabRows;j++)
-		RowWidths[j] = 0;
-
-	for( 
-			I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-			I != None; 
-			I = UWindowTabControlItem(I.Next) 
-		)
+	// End:0x2BD [Loop If]
+	if(__NFUN_150__(j, TabRows))
 	{
-		I.TabLeft = RowWidths[I.RowNumber];
-
-		if(bArrangeRowsLikeTimHates)
-			I.TabTop = ((I.RowNumber + ((TabRows - 1) - Selected.RowNumber)) % TabRows) * I.TabHeight;
-		else
-			I.TabTop = I.RowNumber * I.TabHeight;
-
-		RowWidths[I.RowNumber] += I.TabWidth;
+		RowWidths[j] = 0.0000000;
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x293;
 	}
+	i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+	J0x2E4:
+
+	// End:0x3DF [Loop If]
+	if(__NFUN_119__(i, none))
+	{
+		i.TabLeft = RowWidths[i.RowNumber];
+		// End:0x370
+		if(bArrangeRowsLikeTimHates)
+		{
+			i.TabTop = __NFUN_171__(__NFUN_173__(float(__NFUN_146__(i.RowNumber, __NFUN_147__(__NFUN_147__(TabRows, 1), Selected.RowNumber))), float(TabRows)), i.TabHeight);			
+		}
+		else
+		{
+			i.TabTop = __NFUN_171__(float(i.RowNumber), i.TabHeight);
+		}
+		__NFUN_184__(RowWidths[i.RowNumber], i.TabWidth);
+		i = UWindowTabControlItem(i.Next);
+		// [Loop Continue]
+		goto J0x2E4;
+	}
+	return;
 }
 
 function LayoutTabs(Canvas C)
 {
+	// End:0x25
 	if(UWindowTabControl(ParentWindow).bMultiLine)
-		SizeTabsMultiLine(C);
+	{
+		SizeTabsMultiLine(C);		
+	}
 	else
+	{
 		SizeTabsSingleLine(C);
+	}
+	return;
 }
 
 function Paint(Canvas C, float X, float Y)
 {
-	local UWindowTabControlItem I, ITemp;
-	local int Count;
-	local int Row;
-    local INT iTabNumber;
-	local float T;
-    local bool bNextTabSelected, bPrevTabSelected;
-	
-	T = GetEntryLevel().TimeSeconds;
+	local UWindowTabControlItem i, ITemp;
+	local int Count, Row, iTabNumber;
+	local float t;
+	local bool bNextTabSelected, bPrevTabSelected;
 
-	if(UnFlashTime < T)
+	t = GetEntryLevel().TimeSeconds;
+	// End:0x63
+	if(__NFUN_176__(UnFlashTime, t))
 	{
-		bFlashShown = !bFlashShown;
-
+		bFlashShown = __NFUN_129__(bFlashShown);
+		// End:0x51
 		if(bFlashShown)
-			UnFlashTime = T + 0.5;
-		else
-			UnFlashTime = T + 0.3;
-	}
-	
-	for(Row=0;Row<TabRows;Row++)
-	{
-		Count = 0;
-        iTabNumber = 0;
-        m_eTabCase = eTabCase.eTab_Left;
-		for( 
-				I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-				I != None; 
-				I = UWindowTabControlItem(I.Next) 
-			)
 		{
-			if( Count < TabOffset)
-			{
-				Count++;
-				continue;
-			}
-			if(I.RowNumber == Row)
-            {
-                bNextTabSelected = false;
-
-                if (UWindowTabControlItem(I.Next) == UWindowTabControl(ParentWindow).SelectedTab)
-                    bNextTabSelected = true;
-                if (UWindowTabControlItem(I.Prev) == UWindowTabControl(ParentWindow).SelectedTab)
-                    bPrevTabSelected = true;
-
-                if ( iTabNumber > 0)
-                {
-                    if ( iTabNumber == m_iTotalTab - 1)
-                    {
-                        m_eTabCase = eTabCase.eTab_Right;
-//                        if (bPrevTabSelected)
-//                            m_eTabCase = eTabCase.eTab_Right_LeftCut;
-                    }
-                    else
-                    {
-                        m_eTabCase = eTabCase.eTab_Middle;
-                        if (bNextTabSelected)
-                            m_eTabCase = eTabCase.eTab_Middle_RightCut;
-                    }
-                }
-                else if (bNextTabSelected) // 
-                {
-                    m_eTabCase = eTabCase.eTab_Left_RightCut;
-                }
-
-				DrawItem(C, I, I.TabLeft, I.TabTop, I.TabWidth, I.TabHeight, (!I.bFlash) || bFlashShown);
-                iTabNumber++;
-            }
+			UnFlashTime = __NFUN_174__(t, 0.5000000);			
+		}
+		else
+		{
+			UnFlashTime = __NFUN_174__(t, 0.3000000);
 		}
 	}
+	Row = 0;
+	J0x6A:
+
+	// End:0x246 [Loop If]
+	if(__NFUN_150__(Row, TabRows))
+	{
+		Count = 0;
+		iTabNumber = 0;
+		m_eTabCase = 0;
+		i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+		J0xB6:
+
+		// End:0x23C [Loop If]
+		if(__NFUN_119__(i, none))
+		{
+			// End:0xDA
+			if(__NFUN_150__(Count, TabOffset))
+			{
+				__NFUN_165__(Count);				
+			}
+			else
+			{
+				// End:0x220
+				if(__NFUN_154__(i.RowNumber, Row))
+				{
+					bNextTabSelected = false;
+					// End:0x12D
+					if(__NFUN_114__(UWindowTabControlItem(i.Next), UWindowTabControl(ParentWindow).SelectedTab))
+					{
+						bNextTabSelected = true;
+					}
+					// End:0x160
+					if(__NFUN_114__(UWindowTabControlItem(i.Prev), UWindowTabControl(ParentWindow).SelectedTab))
+					{
+						bPrevTabSelected = true;
+					}
+					// End:0x1A4
+					if(__NFUN_151__(iTabNumber, 0))
+					{
+						// End:0x188
+						if(__NFUN_154__(iTabNumber, __NFUN_147__(m_iTotalTab, 1)))
+						{
+							m_eTabCase = 2;							
+						}
+						else
+						{
+							m_eTabCase = 1;
+							// End:0x1A1
+							if(bNextTabSelected)
+							{
+								m_eTabCase = 4;
+							}
+						}						
+					}
+					else
+					{
+						// End:0x1B5
+						if(bNextTabSelected)
+						{
+							m_eTabCase = 3;
+						}
+					}
+					DrawItem(C, i, i.TabLeft, i.TabTop, i.TabWidth, i.TabHeight, __NFUN_132__(__NFUN_129__(i.bFlash), bFlashShown));
+					__NFUN_165__(iTabNumber);
+				}
+			}
+			i = UWindowTabControlItem(i.Next);
+			// [Loop Continue]
+			goto J0xB6;
+		}
+		__NFUN_165__(Row);
+		// [Loop Continue]
+		goto J0x6A;
+	}
+	return;
 }
 
 function LMouseDown(float X, float Y)
 {
-	local UWindowTabControlItem I;
+	local UWindowTabControlItem i;
 	local int Count;
 
-	Super.LMouseDown(X, Y);
-
+	super.LMouseDown(X, Y);
 	Count = 0;
-	for( 
-			I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-			I != None; 
-			I = UWindowTabControlItem(I.Next) 
-		)
-	{
-		if( Count < TabOffset)
-		{
-			Count++;
-			continue;
-		}
-		if( X >= I.TabLeft && X <= I.TabLeft + I.TabWidth && (TabRows==1 || (Y >= I.TabTop && Y <= I.TabTop + I.TabHeight)) )
-		{
-			if(!UWindowTabControl(ParentWindow).bMultiLine)
-			{
-				bDragging = True;
-				DragTab = I;
-				Root.CaptureMouse();
-			}
-			UWindowTabControl(ParentWindow).GotoTab(I, True);
-		}
-	}
-}
+	i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+	J0x3E:
 
+	// End:0x166 [Loop If]
+	if(__NFUN_119__(i, none))
+	{
+		// End:0x62
+		if(__NFUN_150__(Count, TabOffset))
+		{
+			__NFUN_165__(Count);			
+		}
+		else
+		{
+			// End:0x14A
+			if(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, i.TabLeft), __NFUN_178__(X, __NFUN_174__(i.TabLeft, i.TabWidth))), __NFUN_132__(__NFUN_154__(TabRows, 1), __NFUN_130__(__NFUN_179__(Y, i.TabTop), __NFUN_178__(Y, __NFUN_174__(i.TabTop, i.TabHeight))))))
+			{
+				// End:0x130
+				if(__NFUN_129__(UWindowTabControl(ParentWindow).bMultiLine))
+				{
+					bDragging = true;
+					DragTab = i;
+					Root.CaptureMouse();
+				}
+				UWindowTabControl(ParentWindow).GotoTab(i, true);
+			}
+		}
+		i = UWindowTabControlItem(i.Next);
+		// [Loop Continue]
+		goto J0x3E;
+	}
+	return;
+}
 
 function MouseLeave()
 {
-    Super.MouseLeave();
-
-    ResetMouseOverOnItem();
+	super.MouseLeave();
+	ResetMouseOverOnItem();
+	return;
 }
-
 
 function MouseMove(float X, float Y)
 {
-    CheckToolTip( X, Y);
-
-	if(bDragging && bMouseDown)
+	CheckToolTip(X, Y);
+	// End:0x82
+	if(__NFUN_130__(bDragging, bMouseDown))
 	{
-		if(X < DragTab.TabLeft)
-			TabOffset++;
-
-		if(X > DragTab.TabLeft + DragTab.TabWidth && TabOffset > 0)
-			TabOffset--;	
+		// End:0x43
+		if(__NFUN_176__(X, DragTab.TabLeft))
+		{
+			__NFUN_165__(TabOffset);
+		}
+		// End:0x7F
+		if(__NFUN_130__(__NFUN_177__(X, __NFUN_174__(DragTab.TabLeft, DragTab.TabWidth)), __NFUN_151__(TabOffset, 0)))
+		{
+			__NFUN_166__(TabOffset);
+		}		
 	}
 	else
-		bDragging = False;
+	{
+		bDragging = false;
+	}
+	return;
 }
-
 
 function RMouseDown(float X, float Y)
 {
-	local UWindowTabControlItem I;
+	local UWindowTabControlItem i;
 	local int Count;
 
-	Super.LMouseDown(X, Y);
-
+	LMouseDown(X, Y);
 	Count = 0;
-	for( 
-			I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-			I != None; 
-			I = UWindowTabControlItem(I.Next) 
-		)
-	{
-		if( Count < TabOffset)
-		{
-			Count++;
-			continue;
-		}
-		if( X >= I.TabLeft && X <= I.TabLeft + I.TabWidth )
-		{
-			I.RightClickTab();
-		}
-	}
-}
+	i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+	J0x3E:
 
+	// End:0xCF [Loop If]
+	if(__NFUN_119__(i, none))
+	{
+		// End:0x62
+		if(__NFUN_150__(Count, TabOffset))
+		{
+			__NFUN_165__(Count);			
+		}
+		else
+		{
+			// End:0xB3
+			if(__NFUN_130__(__NFUN_179__(X, i.TabLeft), __NFUN_178__(X, __NFUN_174__(i.TabLeft, i.TabWidth))))
+			{
+				i.RightClickTab();
+			}
+		}
+		i = UWindowTabControlItem(i.Next);
+		// [Loop Continue]
+		goto J0x3E;
+	}
+	return;
+}
 
 //===================================================================
 // draw the tab-item
@@ -391,121 +505,125 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	local UWindowTabControlItem pTabControlItem;
 
 	pTabControlItem = UWindowTabControlItem(Item);
-
-    m_bDisplayToolTip = pTabControlItem.m_bMouseOverItem;
-
-	if(Item == UWindowTabControl(ParentWindow).SelectedTab)
-    {
-        m_vEffectColor = pTabControlItem.m_vSelectedColor;
-		LookAndFeel.Tab_DrawTab(Self, C, True, FirstShown==Item, X, Y, W, H, pTabControlItem.Caption, bShowText);
-    }
+	m_bDisplayToolTip = pTabControlItem.m_bMouseOverItem;
+	// End:0xA4
+	if(__NFUN_114__(Item, UWindowTabControl(ParentWindow).SelectedTab))
+	{
+		m_vEffectColor = pTabControlItem.m_vSelectedColor;
+		LookAndFeel.Tab_DrawTab(self, C, true, __NFUN_114__(FirstShown, Item), X, Y, W, H, pTabControlItem.Caption, bShowText);		
+	}
 	else
-    {
-        m_vEffectColor = pTabControlItem.m_vNormalColor;
-		LookAndFeel.Tab_DrawTab(Self, C, False, FirstShown==Item, X, Y, W, H, pTabControlItem.Caption, bShowText);
-    }
+	{
+		m_vEffectColor = pTabControlItem.m_vNormalColor;
+		LookAndFeel.Tab_DrawTab(self, C, false, __NFUN_114__(FirstShown, Item), X, Y, W, H, pTabControlItem.Caption, bShowText);
+	}
+	return;
 }
 
 function bool CheckMousePassThrough(float X, float Y)
 {
-	return Y >= LookAndFeel.Size_TabAreaHeight*TabRows;
+	return __NFUN_179__(Y, __NFUN_171__(LookAndFeel.Size_TabAreaHeight, float(TabRows)));
+	return;
 }
-
 
 //===================================================================
 // check if the mouse is over an item
 //===================================================================
-function UWindowTabControlItem CheckMouseOverOnItem( FLOAT _fX, FLOAT _fY)
+function UWindowTabControlItem CheckMouseOverOnItem(float _fX, float _fY)
 {
-	local UWindowTabControlItem I, ItemTemp;
+	local UWindowTabControlItem i, ItemTemp;
 	local int Count;
-    local FLOAT fXMin, fXMax;
+	local float fXMin, fXMax;
 
-
-    ItemTemp = None;
+	ItemTemp = none;
 	Count = 0;
-    
-    for( 
-			I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-			I != None; 
-			I = UWindowTabControlItem(I.Next) 
-		)
+	i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+	J0x35:
+
+	// End:0x15A [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if( Count < TabOffset)
+		// End:0x59
+		if(__NFUN_150__(Count, TabOffset))
 		{
-			Count++;
-			continue;
+			__NFUN_165__(Count);			
 		}
-
-        // we need to take count of the left-right overlap-border 
-        // (to avoid that the left and/or the right tab have a mouseover on it)
-        fXMin = I.TabLeft + 10;
-        fXMax = I.TabLeft + I.TabWidth - 18;
-
-		if( _fX >= fXMin && _fX <= fXMax && (TabRows==1 || (_fY >= I.TabTop && _fY <= I.TabTop + I.TabHeight)) )
+		else
 		{
-            ItemTemp = I;
-            I.m_bMouseOverItem = true;
-            continue;
-//            return I;
+			fXMin = __NFUN_174__(i.TabLeft, float(10));
+			fXMax = __NFUN_175__(__NFUN_174__(i.TabLeft, i.TabWidth), float(18));
+			// End:0x12D
+			if(__NFUN_130__(__NFUN_130__(__NFUN_179__(_fX, fXMin), __NFUN_178__(_fX, fXMax)), __NFUN_132__(__NFUN_154__(TabRows, 1), __NFUN_130__(__NFUN_179__(_fY, i.TabTop), __NFUN_178__(_fY, __NFUN_174__(i.TabTop, i.TabHeight))))))
+			{
+				ItemTemp = i;
+				i.m_bMouseOverItem = true;				
+			}
+			else
+			{
+				i.m_bMouseOverItem = false;
+			}
 		}
-        I.m_bMouseOverItem = false;
+		i = UWindowTabControlItem(i.Next);
+		// [Loop Continue]
+		goto J0x35;
 	}
-
-    return ItemTemp;
-//    return None;
+	return ItemTemp;
+	return;
 }
-
 
 //===================================================================
 // put all the mouseoveritem bool at false
 //===================================================================
 function ResetMouseOverOnItem()
 {
-	local UWindowTabControlItem I;
+	local UWindowTabControlItem i;
 	local int Count;
 
 	Count = 0;
-	for( 
-			I = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
-			I != None; 
-			I = UWindowTabControlItem(I.Next) 
-		)
+	i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
+	J0x2E:
+
+	// End:0x7F [Loop If]
+	if(__NFUN_119__(i, none))
 	{
-		if( Count < TabOffset)
+		// End:0x52
+		if(__NFUN_150__(Count, TabOffset))
 		{
-			Count++;
-			continue;
+			__NFUN_165__(Count);			
 		}
-
-        I.m_bMouseOverItem = false;
+		else
+		{
+			i.m_bMouseOverItem = false;
+		}
+		i = UWindowTabControlItem(i.Next);
+		// [Loop Continue]
+		goto J0x2E;
 	}
-
-    ParentWindow.ToolTip("");
+	ParentWindow.ToolTip("");
+	return;
 }
-
 
 //===================================================================
 // check if the mouse is over an item and display a tool tip when is required
 //===================================================================
-function CheckToolTip( FLOAT _fX, FLOAT _fY)
+function CheckToolTip(float _fX, float _fY)
 {
-    local UWindowTabControlItem Item;
+	local UWindowTabControlItem Item;
 
-    Item = CheckMouseOverOnItem( _fX, _fY);
-
-    if (Item != None)
-    {
-        // provide the appropriate tooltip == HelpText
-        if (Item.m_bMouseOverItem && Item.HelpText != "")
-        {
-            ParentWindow.ToolTip(Item.HelpText);
-        }
-    }
-    else
-        ParentWindow.ToolTip("");
+	Item = CheckMouseOverOnItem(_fX, _fY);
+	// End:0x6A
+	if(__NFUN_119__(Item, none))
+	{
+		// End:0x67
+		if(__NFUN_130__(Item.m_bMouseOverItem, __NFUN_123__(Item.HelpText, "")))
+		{
+			ParentWindow.ToolTip(Item.HelpText);
+		}		
+	}
+	else
+	{
+		ParentWindow.ToolTip("");
+	}
+	return;
 }
 
-defaultproperties
-{
-}

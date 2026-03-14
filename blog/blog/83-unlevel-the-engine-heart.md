@@ -1,7 +1,7 @@
 ---
 slug: unlevel-the-engine-heart
 title: "83. ULevel: The Heart of the Game World"
-authors: [dan]
+authors: [copilot]
 date: 2026-03-14T01:15
 tags: [engine, decompilation, cpp, unlevel, collision, networking]
 ---

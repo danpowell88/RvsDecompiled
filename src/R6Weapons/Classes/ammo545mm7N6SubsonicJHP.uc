@@ -1,16 +1,20 @@
+//=============================================================================
+// ammo545mm7N6SubsonicJHP - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 //  ammo545mm7N6SubsonicJHP.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //============================================================================//
-
-
-Class ammo545mm7N6SubsonicJHP extends ammo545mm7N6Subsonic;
+class ammo545mm7N6SubsonicJHP extends ammo545mm7N6Subsonic;
 
 defaultproperties
 {
-     m_iEnergy=725
-     m_iPenetrationFactor=4
-     m_fKillStunTransfer=0.500000
-     m_fRangeConversionConst=0.023448
-     m_fRange=155.803009
+	m_iEnergy=725
+	m_iPenetrationFactor=4
+	m_fKillStunTransfer=0.5000000
+	m_fRangeConversionConst=0.0234480
+	m_fRange=155.8030000
 }

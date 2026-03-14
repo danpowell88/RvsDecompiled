@@ -1,3 +1,8 @@
+//=============================================================================
+// R6HostageVoices - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class R6HostageVoices extends R6Voices;
 
 var Sound m_sndRun;
@@ -13,52 +18,79 @@ var Sound m_sndClarkReprimand;
 
 function Init(Actor aActor)
 {
-    Super.Init(aActor);
+	super.Init(aActor);
 	aActor.AddSoundBankName("Voices_Clark_Common");
+	return;
 }
 
-
-function PlayHostageVoices(R6Pawn aPawn, Pawn.EHostageVoices eHostageVoices)
+function PlayHostageVoices(R6Pawn aPawn, Pawn.EHostageVoices EHostageVoices)
 {
-    if (aPawn != none)
-    {
-        switch(eHostageVoices)
-        {
-            case HV_Run:
-                aPawn.PlayVoices(m_sndRun, SLOT_Talk, 15);
-                break;
-            case HV_Frozen:
-                aPawn.PlayVoices(m_sndFrozen, SLOT_Talk, 15);
-                break;
-            case HV_Foetal:
-                aPawn.PlayVoices(m_sndFoetal, SLOT_Talk, 15);
-                break;
-            case HV_Hears_Shooting:
-                aPawn.PlayVoices(m_sndHears_Shooting, SLOT_Talk, 15);
-                break;
-            case HV_RnbFollow:
-                aPawn.PlayVoices(m_sndRnbFollow, SLOT_Talk, 15);
-                break;
-            case HV_RndStayPut:
-                aPawn.PlayVoices(m_sndRndStayPut, SLOT_Talk, 15);
-                break;
-            case HV_RnbHurt:
-                aPawn.PlayVoices(m_sndRnbHurt, SLOT_Talk, 15);
-                break;
-            case HV_EntersGas:
-                aPawn.PlayVoices(m_sndEntersGas, SLOT_Talk, 15, SSTATUS_SendToAll);
-                break;
-            case HV_EntersSmoke:
-//                aPawn.PlayVoices(m_sndEntersSmoke, SLOT_Talk, 15, SSTATUS_SendToAll);
-                break;
-            case HV_ClarkReprimand:
-                aPawn.PlayVoices(m_sndClarkReprimand, SLOT_HeadSet, 15);
-                break;
-        }
-    }
+	// End:0x124
+	if(__NFUN_119__(aPawn, none))
+	{
+		switch(EHostageVoices)
+		{
+			// End:0x2F
+			case 0:
+				aPawn.__NFUN_2730__(m_sndRun, 6, 15);
+				// End:0x124
+				break;
+			// End:0x4C
+			case 1:
+				aPawn.__NFUN_2730__(m_sndFrozen, 6, 15);
+				// End:0x124
+				break;
+			// End:0x69
+			case 2:
+				aPawn.__NFUN_2730__(m_sndFoetal, 6, 15);
+				// End:0x124
+				break;
+			// End:0x86
+			case 3:
+				aPawn.__NFUN_2730__(m_sndHears_Shooting, 6, 15);
+				// End:0x124
+				break;
+			// End:0xA3
+			case 4:
+				aPawn.__NFUN_2730__(m_sndRnbFollow, 6, 15);
+				// End:0x124
+				break;
+			// End:0xC0
+			case 5:
+				aPawn.__NFUN_2730__(m_sndRndStayPut, 6, 15);
+				// End:0x124
+				break;
+			// End:0xDD
+			case 6:
+				aPawn.__NFUN_2730__(m_sndRnbHurt, 6, 15);
+				// End:0x124
+				break;
+			// End:0xFC
+			case 8:
+				aPawn.__NFUN_2730__(m_sndEntersGas, 6, 15, 2);
+				// End:0x124
+				break;
+			// End:0x104
+			case 7:
+				// End:0x124
+				break;
+			// End:0x121
+			case 9:
+				aPawn.__NFUN_2730__(m_sndClarkReprimand, 8, 15);
+				// End:0x124
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+	}
+	else
+	{
+		return;
+	}
 }
 
 defaultproperties
 {
-     m_sndClarkReprimand=Sound'Voices_Clark_Common.Play_Hostage_Reprimand'
+	m_sndClarkReprimand=Sound'Voices_Clark_Common.Play_Hostage_Reprimand'
 }

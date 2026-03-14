@@ -1,41 +1,48 @@
-class SimpleCommandlet extends Commandlet;
+//=============================================================================
+// SimpleCommandlet - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class SimpleCommandlet extends Commandlet
+ transient;
 
 var int intparm;
 
 function int TestFunction()
 {
 	return 666;
+	return;
 }
 
-function int Main( string Parms )
+function int Main(string Parms)
 {
 	local int temp;
 	local float floattemp;
-	local string textstring;
-	local string otherstring;
+	local string textstring, otherstring;
 
-	log("Simple commandlet says hi.");
-	log("Testing function calling.");
+	__NFUN_231__("Simple commandlet says hi.");
+	__NFUN_231__("Testing function calling.");
 	temp = TestFunction();
-	log("Function call returned" @ temp);
-	log("Testing cast to int.");
-	floattemp = 3.0;
+	__NFUN_231__(__NFUN_168__("Function call returned", string(temp)));
+	__NFUN_231__("Testing cast to int.");
+	floattemp = 3.0000000;
 	temp = int(floattemp);
-	log("Temp is cast from "$floattemp$" to "$temp);
-	log("Testing min()");
-	temp = Min(32, TestFunction());
-	log("Temp is min(32, 666): "$Temp);
+	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Temp is cast from ", string(floattemp)), " to "), string(temp)));
+	__NFUN_231__("Testing min()");
+	temp = __NFUN_249__(32, TestFunction());
+	__NFUN_231__(__NFUN_112__("Temp is min(32, 666): ", string(temp)));
 	textstring = "wookie";
-	log("3 is a "$Left(textstring, 3));
+	__NFUN_231__(__NFUN_112__("3 is a ", __NFUN_128__(textstring, 3)));
 	otherstring = "skywalker";
-	otherstring = Mid( otherstring, InStr( otherstring, "a" ) );
-	log("otherstring:" @ otherstring);
+	otherstring = __NFUN_127__(otherstring, __NFUN_126__(otherstring, "a"));
+	__NFUN_231__(__NFUN_168__("otherstring:", otherstring));
 	return 0;
+	return;
 }
 
 defaultproperties
 {
-     HelpCmd="Simple"
-     HelpOneLiner="Simple test commandlet"
-     HelpUsage="Simple (no parameters)"
+	HelpCmd="Simple"
+	HelpOneLiner="Simple test commandlet"
+	HelpUsage="Simple (no parameters)"
 }

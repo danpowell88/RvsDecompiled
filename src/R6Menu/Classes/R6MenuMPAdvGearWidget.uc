@@ -1,634 +1,766 @@
 //=============================================================================
+// R6MenuMPAdvGearWidget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuMPAdvGearWidget.uc : GearRoomMenu for multi-player adverserial
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/04/24 * Created by Alexandre Dionne
 //=============================================================================
-
 class R6MenuMPAdvGearWidget extends R6MenuWidget;
-
 
 enum e2DEquipment
 {
-    Primary_Weapon,
-    Primary_WeaponGadget,
-    Primary_Bullet,
-    Primary_Gadget,
-    Secondary_Weapon,
-    Secondary_WeaponGadget,
-    Secondary_Bullet,
-    Secondary_Gadget
+	Primary_Weapon,                 // 0
+	Primary_WeaponGadget,           // 1
+	Primary_Bullet,                 // 2
+	Primary_Gadget,                 // 3
+	Secondary_Weapon,               // 4
+	Secondary_WeaponGadget,         // 5
+	Secondary_Bullet,               // 6
+	Secondary_Gadget                // 7
 };
 
-var R6MenuMPAdvEquipmentSelectControl	m_Equipment2dSelect; //Left part where we can take a look a selected equipment 
-var R6MenuMPAdvEquipmentDetailControl   m_EquipmentDetails;  //Right side when looking at an equipment item
-
-var R6Operative                         m_currentOperative;
-
-var class<R6PrimaryWeaponDescription>   m_OpFirstWeaponDesc;    //Equipment of the selected Operative          
-var class<R6SecondaryWeaponDescription> m_OpSecondaryWeaponDesc;
-var class<R6WeaponGadgetDescription>    m_OpFirstWeaponGadgetDesc,  m_OpSecondWeaponGadgetDesc;
-var class<R6BulletDescription>          m_OpFirstWeaponBulletDesc,  m_OpSecondWeaponBulletDesc;
-var class<R6GadgetDescription>          m_OpFirstGadgetDesc,        m_OpSecondGadgetDesc;
-
-var e2DEquipment						m_e2DCurEquipmentSel;
-
+var R6MenuMPAdvGearWidget.e2DEquipment m_e2DCurEquipmentSel;
 //debug
-var INT	m_iCounter;
-var bool        bshowlog;
-
-var string PrimaryGadgetDesc; //MissionPack1   // MPF1
-var R6DescPrimaryMags	m_PrimaryMagsGadget;
+var int m_iCounter;
+var bool bShowLog;
+var R6MenuMPAdvEquipmentSelectControl m_Equipment2dSelect;  // Left part where we can take a look a selected equipment
+var R6MenuMPAdvEquipmentDetailControl m_EquipmentDetails;  // Right side when looking at an equipment item
+var R6Operative m_currentOperative;
+// NEW IN 1.60
+var R6Operative m_BkpOperative;
+var R6DescPrimaryMags m_PrimaryMagsGadget;
+var Class<R6PrimaryWeaponDescription> m_OpFirstWeaponDesc;  // Equipment of the selected Operative
+var Class<R6SecondaryWeaponDescription> m_OpSecondaryWeaponDesc;
+var Class<R6WeaponGadgetDescription> m_OpFirstWeaponGadgetDesc;
+// NEW IN 1.60
+var Class<R6WeaponGadgetDescription> m_OpSecondWeaponGadgetDesc;
+var Class<R6BulletDescription> m_OpFirstWeaponBulletDesc;
+// NEW IN 1.60
+var Class<R6BulletDescription> m_OpSecondWeaponBulletDesc;
+var Class<R6GadgetDescription> m_OpFirstGadgetDesc;
+// NEW IN 1.60
+var Class<R6GadgetDescription> m_OpSecondGadgetDesc;
+var string PrimaryGadgetDesc;  // MissionPack1   // MPF1
 
 function Created()
 {
-	local int LabelWidth;
-    local Region R;    
+	local int labelWidth;
+	local Region R;
+	local int i, j;
+	local R6Mod pCurrentMod;
+	local Class<R6DescPrimaryMags> ExtraMags;
 
-	local INT i,j;
-	local R6Mod	pCurrentMod;
-	local class<R6DescPrimaryMags> ExtraMags;
+	m_currentOperative = new (none) Class'R6Game.R6Operative';
+	m_BkpOperative = new (none) Class'R6Game.R6Operative';
+	m_Equipment2dSelect = R6MenuMPAdvEquipmentSelectControl(CreateWindow(Class'R6Menu.R6MenuMPAdvEquipmentSelectControl', 0.0000000, 0.0000000, 241.0000000, WinHeight, self));
+	m_EquipmentDetails = R6MenuMPAdvEquipmentDetailControl(CreateWindow(Class'R6Menu.R6MenuMPAdvEquipmentDetailControl', __NFUN_175__(m_Equipment2dSelect.WinWidth, float(1)), 0.0000000, __NFUN_174__(__NFUN_175__(WinWidth, m_Equipment2dSelect.WinWidth), float(1)), WinHeight, self));
+	GetMenuComEquipment(true);
+	m_Equipment2dSelect.Init();
+	m_PrimaryMagsGadget = new (none) Class'R6Description.R6DescPrimaryMags';
+	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	i = 0;
+	J0xDE:
 
-    m_currentOperative = new(None) class'R6Operative'; 
-    
-    m_Equipment2dSelect = R6MenuMPAdvEquipmentSelectControl(CreateWindow(class'R6MenuMPAdvEquipmentSelectControl', 0, 0, 241, WinHeight, self));
-    m_EquipmentDetails  = R6MenuMPAdvEquipmentDetailControl(CreateWindow(class'R6MenuMPAdvEquipmentDetailControl', m_Equipment2dSelect.WinWidth -1, 0, WinWidth - m_Equipment2dSelect.WinWidth +1, WinHeight, self));
-    GetMenuComEquipment( true);
-    m_Equipment2dSelect.Init();
-	m_PrimaryMagsGadget = new(none) class'R6Description.R6DescPrimaryMags';
-
-	pCurrentMod = class'Actor'.static.GetModMgr().m_pCurrentMod; 
-	for (i = 0; i < pCurrentMod.m_aDescriptionPackage.Length; i++)
+	// End:0x201 [Loop If]
+	if(__NFUN_150__(i, pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		if(pCurrentMod.m_aDescriptionPackage[i] != "R6Description")
+		// End:0x1F7
+		if(__NFUN_123__(pCurrentMod.m_aDescriptionPackage[i], "R6Description"))
 		{
-			ExtraMags = class<R6DescPrimaryMags>(GetFirstPackageClass(pCurrentMod.m_aDescriptionPackage[i]$".u", class'R6DescPrimaryMags'));
-			while((ExtraMags != None))
+			ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6DescPrimaryMags'));
+			J0x14C:
+
+			// End:0x1F7 [Loop If]
+			if(__NFUN_119__(ExtraMags, none))
 			{
-				for(j = 0; j < ExtraMags.Default.m_iNewTagsToAdd; j++)
+				j = 0;
+				J0x15E:
+
+				// End:0x1E6 [Loop If]
+				if(__NFUN_150__(j, ExtraMags.default.m_iNewTagsToAdd))
 				{
-					m_PrimaryMagsGadget.m_Mags[m_PrimaryMagsGadget.m_Mags.Length] = ExtraMags.Default.m_Mags[j];
-					m_PrimaryMagsGadget.m_MagTags[m_PrimaryMagsGadget.m_MagTags.Length] = ExtraMags.Default.m_MagTags[j];
+					m_PrimaryMagsGadget.m_Mags[m_PrimaryMagsGadget.m_Mags.Length] = ExtraMags.default.m_Mags[j];
+					m_PrimaryMagsGadget.m_MagTags[m_PrimaryMagsGadget.m_MagTags.Length] = ExtraMags.default.m_MagTags[j];
+					__NFUN_165__(j);
+					// [Loop Continue]
+					goto J0x15E;
 				}
-				ExtraMags = class<R6DescPrimaryMags>(GetNextClass());
+				ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1006__());
+				// [Loop Continue]
+				goto J0x14C;
 			}
-		}  
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0xDE;
 	}
+	return;
 }
 
 function ShowWindow()
-{  
-    Super.ShowWindow();
-   
-    GetMenuComEquipment( false);        
-    m_Equipment2dSelect.UpdateDetails();    
+{
+	super(UWindowWindow).ShowWindow();
+	GetMenuComEquipment(false);
+	m_Equipment2dSelect.UpdateDetails();
+	return;
 }
 
-function GetMenuComEquipment( BOOL _bCkeckEquipment)
+function GetMenuComEquipment(bool _bCkeckEquipment)
 {
-    //Get last player equipment choice from the server or an ini file
-    local R6MenuInGameMultiPlayerRootWindow r6Root;
-        
-    r6Root = R6MenuInGameMultiPlayerRootWindow(Root);    
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
-	if (_bCkeckEquipment)
+	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
+	// End:0x11B
+	if(_bCkeckEquipment)
 	{
-
-		r6Root.m_R6GameMenuCom.m_szPrimaryWeapon		 = VerifyEquipment( e2DEquipment.Primary_Weapon, r6Root.m_R6GameMenuCom.m_szPrimaryWeapon);
-		r6Root.m_R6GameMenuCom.m_szPrimaryWeaponGadget   = VerifyEquipment( e2DEquipment.Primary_WeaponGadget, r6Root.m_R6GameMenuCom.m_szPrimaryWeaponGadget);
-//		r6Root.m_R6GameMenuCom.m_szPrimaryWeaponBullet;
-		r6Root.m_R6GameMenuCom.m_szPrimaryGadget		 = VerifyEquipment( e2DEquipment.Primary_Gadget, r6Root.m_R6GameMenuCom.m_szPrimaryGadget);
-		r6Root.m_R6GameMenuCom.m_szSecondaryWeapon		 = VerifyEquipment( e2DEquipment.Secondary_Weapon, r6Root.m_R6GameMenuCom.m_szSecondaryWeapon);
-		r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget = VerifyEquipment( e2DEquipment.Secondary_WeaponGadget, r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget);
-//		r6Root.m_R6GameMenuCom.m_szSecondaryWeaponBullet;
-		r6Root.m_R6GameMenuCom.m_szSecondaryGadget		 = VerifyEquipment( e2DEquipment.Secondary_Gadget, r6Root.m_R6GameMenuCom.m_szSecondaryGadget);
-//		r6Root.m_R6GameMenuCom.m_szArmor;
+		m_currentOperative.m_szPrimaryWeaponBullet = r6Root.m_R6GameMenuCom.m_szPrimaryWeaponBullet;
+		m_currentOperative.m_szSecondaryWeaponBullet = r6Root.m_R6GameMenuCom.m_szSecondaryWeaponBullet;
+		m_currentOperative.m_szArmor = r6Root.m_R6GameMenuCom.m_szArmor;
+		VerifyAllEquipment(r6Root.m_R6GameMenuCom.m_szPrimaryWeapon, r6Root.m_R6GameMenuCom.m_szPrimaryWeaponGadget, r6Root.m_R6GameMenuCom.m_szPrimaryGadget, r6Root.m_R6GameMenuCom.m_szSecondaryWeapon, r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget, r6Root.m_R6GameMenuCom.m_szSecondaryGadget);
 	}
-
-	m_currentOperative.m_szPrimaryWeapon		 = r6Root.m_R6GameMenuCom.m_szPrimaryWeapon;
-	m_currentOperative.m_szPrimaryWeaponGadget	 = r6Root.m_R6GameMenuCom.m_szPrimaryWeaponGadget;
-	m_currentOperative.m_szPrimaryWeaponBullet   = r6Root.m_R6GameMenuCom.m_szPrimaryWeaponBullet;
-	m_currentOperative.m_szPrimaryGadget		 = r6Root.m_R6GameMenuCom.m_szPrimaryGadget;
-	m_currentOperative.m_szSecondaryWeapon		 = r6Root.m_R6GameMenuCom.m_szSecondaryWeapon;
-	m_currentOperative.m_szSecondaryWeaponGadget = r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget;
-	m_currentOperative.m_szSecondaryWeaponBullet = r6Root.m_R6GameMenuCom.m_szSecondaryWeaponBullet;
-	m_currentOperative.m_szSecondaryGadget		 = r6Root.m_R6GameMenuCom.m_szSecondaryGadget;
-	m_currentOperative.m_szArmor				 = r6Root.m_R6GameMenuCom.m_szArmor;
-	
-    
-    m_OpFirstWeaponDesc         =  class<R6PrimaryWeaponDescription>( DynamicLoadObject( m_currentOperative.m_szPrimaryWeapon, class'Class' ) );   
-    m_OpFirstWeaponGadgetDesc   =  class'R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponGadget);
-    m_OpFirstWeaponBulletDesc   =  class'R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponBullet);
-    
-    m_OpSecondaryWeaponDesc     =  class<R6SecondaryWeaponDescription>( DynamicLoadObject( m_currentOperative.m_szSecondaryWeapon, class'Class' ) );
-    m_OpSecondWeaponGadgetDesc  =  class'R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponGadget);
-    m_OpSecondWeaponBulletDesc  =  class'R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponBullet);
-
-    m_OpFirstGadgetDesc         =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.m_szPrimaryGadget, class'Class' ) );
-    m_OpSecondGadgetDesc        =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.m_szSecondaryGadget, class'Class' ) );
-    
-
+	r6Root.m_R6GameMenuCom.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
+	r6Root.m_R6GameMenuCom.m_szPrimaryWeaponGadget = m_currentOperative.m_szPrimaryWeaponGadget;
+	r6Root.m_R6GameMenuCom.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;
+	r6Root.m_R6GameMenuCom.m_szSecondaryWeapon = m_currentOperative.m_szSecondaryWeapon;
+	r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget = m_currentOperative.m_szSecondaryWeaponGadget;
+	r6Root.m_R6GameMenuCom.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;
+	SetOperativeEquipment(false);
+	SetClassEquipment();
+	return;
 }
 
-function string VerifyEquipment( INT _equipmentType, string _szEquipmentToValid) // this could be done in BuildAvailableEquipment
+// NEW IN 1.60
+function VerifyAllEquipment(string _szPrimaryWeapon, string _szPrimaryWeaponGadget, string _szPrimaryGadget, string _szSecondaryWeapon, string _szSecondaryWeaponGadget, string _szSecondaryGadget)
 {
-    local R6MenuInGameMultiPlayerRootWindow r6Root;
+	m_currentOperative.m_szPrimaryWeapon = VerifyEquipment(int(0), _szPrimaryWeapon);
+	m_currentOperative.m_szPrimaryWeaponGadget = VerifyEquipment(int(1), _szPrimaryWeaponGadget);
+	m_currentOperative.m_szPrimaryGadget = VerifyEquipment(int(3), _szPrimaryGadget);
+	m_currentOperative.m_szSecondaryWeapon = VerifyEquipment(int(4), _szSecondaryWeapon);
+	m_currentOperative.m_szSecondaryWeaponGadget = VerifyEquipment(int(5), _szSecondaryWeaponGadget);
+	m_currentOperative.m_szSecondaryGadget = VerifyEquipment(int(7), _szSecondaryGadget);
+	return;
+}
+
+function string VerifyEquipment(int _equipmentType, string _szEquipmentToValid)
+{
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
 	local string szEquipmentFind;
-	local INT i;
-    local class<R6PrimaryWeaponDescription>            PriWpnClass;
+	local int i;
+	local Class<R6PrimaryWeaponDescription> PriWpnClass;
 	local string szClassName;
-	local BOOL   bFound;
-	local class<R6GadgetDescription> replacedGadgetClass; // MissionPack1 // MPF1
+	local bool bFound;
+	local Class<R6GadgetDescription> replacedGadgetClass;
 
-    r6Root = R6MenuInGameMultiPlayerRootWindow(Root);    
-
-	switch( _equipmentType)
+	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
+	switch(_equipmentType)
 	{
-		case e2DEquipment.Primary_Weapon:
+		// End:0xDA
+		case int(0):
 			szEquipmentFind = _szEquipmentToValid;
+			bFound = false;
+			i = 0;
+			J0x38:
 
-			bFound = FALSE;
-			for ( i = 0; i < m_EquipmentDetails.m_APrimaryWeapons.Length && !bFound; i++ )
+			// End:0x9F [Loop If]
+			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_APrimaryWeapons.Length), __NFUN_129__(bFound)))
 			{
-				szClassName = ""$m_EquipmentDetails.m_APrimaryWeapons[i];
-
-				if ( szClassName ~= _szEquipmentToValid )
+				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_APrimaryWeapons[i]));
+				// End:0x95
+				if(__NFUN_124__(szClassName, _szEquipmentToValid))
 				{
-					bFound = TRUE;
+					bFound = true;
 				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x38;
 			}
-			if ( !bFound )
+			// End:0xD7
+			if(__NFUN_129__(bFound))
+			{
 				szEquipmentFind = "R6Description.R6DescPrimaryWeaponNone";
-			break;
-		case e2DEquipment.Primary_WeaponGadget:
-			szEquipmentFind = _szEquipmentToValid;
-
-			bFound = FALSE;
-			for ( i = 0; i < m_EquipmentDetails.m_APriWpnGadget.Length && !bFound; i++ )
-			{
-				szClassName = ""$m_EquipmentDetails.m_APriWpnGadget[i];
-				
-				if ( szClassName ~= _szEquipmentToValid )
-				{
-					bFound = TRUE;
-				}
 			}
-			
-			if ( !bFound )
+			// End:0x520
+			break;
+		// End:0x19A
+		case int(1):
+			szEquipmentFind = _szEquipmentToValid;
+			bFound = false;
+			i = 0;
+			J0xFB:
+
+			// End:0x160 [Loop If]
+			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_APriWpnGadget.Length), __NFUN_129__(bFound)))
+			{
+				szClassName = __NFUN_112__("", m_EquipmentDetails.m_APriWpnGadget[i]);
+				// End:0x156
+				if(__NFUN_124__(szClassName, _szEquipmentToValid))
+				{
+					bFound = true;
+				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0xFB;
+			}
+			// End:0x197
+			if(__NFUN_129__(bFound))
+			{
 				szEquipmentFind = "R6Description.R6DescWeaponGadgetNone";
+			}
+			// End:0x520
 			break;
-		case e2DEquipment.Primary_Gadget:
+		// End:0x283
+		case int(3):
 			szEquipmentFind = _szEquipmentToValid;
-
-                        // MPF1
-			// If the gametype doesn't allow some gadget, replace it with something else
-			if(CheckGadget(szEquipmentFind,self, false,replacedGadgetClass))// MissionPack1
+			// End:0x1CE
+			if(CheckGadget(szEquipmentFind, self, false, replacedGadgetClass))
+			{
 				szEquipmentFind = string(replacedGadgetClass);
-			PrimaryGadgetDesc = szEquipmentFind; 
-		    //End MissionPack1	
-
-			bFound = FALSE;
-			for ( i = 0; i < m_EquipmentDetails.m_AGadgets.Length && !bFound; i++ )
-			{
-				szClassName = ""$m_EquipmentDetails.m_AGadgets[i];
-
-                                // MPF1
-				if ( szClassName ~= szEquipmentFind /*MissionPack1 _szEquipmentToValid*/) 		
-				{
-					bFound = TRUE;
-				}
 			}
-			if ( !bFound )
+			PrimaryGadgetDesc = szEquipmentFind;
+			bFound = false;
+			i = 0;
+			J0x1E8:
+
+			// End:0x24F [Loop If]
+			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_AGadgets.Length), __NFUN_129__(bFound)))
+			{
+				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_AGadgets[i]));
+				// End:0x245
+				if(__NFUN_124__(szClassName, szEquipmentFind))
+				{
+					bFound = true;
+				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x1E8;
+			}
+			// End:0x280
+			if(__NFUN_129__(bFound))
+			{
 				szEquipmentFind = "R6Description.R6DescGadgetNone";
-			break;
-		case e2DEquipment.Secondary_Weapon:
-			szEquipmentFind = _szEquipmentToValid;
-
-			bFound = FALSE;
-			for ( i = 0; i < m_EquipmentDetails.m_ASecondaryWeapons.Length && !bFound; i++ )
-			{
-				szClassName = ""$m_EquipmentDetails.m_ASecondaryWeapons[i];
-
-				if ( szClassName ~= _szEquipmentToValid )
-				{
-					bFound = TRUE;
-				}
 			}
-			if ( !bFound )
+			// End:0x520
+			break;
+		// End:0x377
+		case int(4):
+			szEquipmentFind = _szEquipmentToValid;
+			bFound = false;
+			i = 0;
+			J0x2A4:
+
+			// End:0x30B [Loop If]
+			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_ASecondaryWeapons.Length), __NFUN_129__(bFound)))
+			{
+				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_ASecondaryWeapons[i]));
+				// End:0x301
+				if(__NFUN_124__(szClassName, _szEquipmentToValid))
+				{
+					bFound = true;
+				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x2A4;
+			}
+			// End:0x374
+			if(__NFUN_129__(bFound))
 			{
 				szEquipmentFind = "R6Description.R6DescPistol92FS";
 				r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget = "R6Description.R6DescGadgetNone";
 			}
+			// End:0x520
 			break;
-		case e2DEquipment.Secondary_WeaponGadget:
+		// End:0x437
+		case int(5):
 			szEquipmentFind = _szEquipmentToValid;
+			bFound = false;
+			i = 0;
+			J0x398:
 
-			bFound = FALSE;
-			for ( i = 0; i < m_EquipmentDetails.m_ASecWpnGadget.Length && !bFound; i++ )
+			// End:0x3FD [Loop If]
+			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_ASecWpnGadget.Length), __NFUN_129__(bFound)))
 			{
-				szClassName = ""$m_EquipmentDetails.m_ASecWpnGadget[i];
-
-				if ( szClassName ~= _szEquipmentToValid )
+				szClassName = __NFUN_112__("", m_EquipmentDetails.m_ASecWpnGadget[i]);
+				// End:0x3F3
+				if(__NFUN_124__(szClassName, _szEquipmentToValid))
 				{
-					bFound = TRUE;
+					bFound = true;
 				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x398;
 			}
-			if ( !bFound )
+			// End:0x434
+			if(__NFUN_129__(bFound))
+			{
 				szEquipmentFind = "R6Description.R6DescWeaponGadgetNone";
-			break;
-		case e2DEquipment.Secondary_Gadget:
-			szEquipmentFind = _szEquipmentToValid;
-
-		        // MPF1
-			// If the gametype doesn't allow some gadget, replace it with something else
-			if(CheckGadget(szEquipmentFind,self, false,replacedGadgetClass,PrimaryGadgetDesc))// MissionPack1
-				szEquipmentFind = string(replacedGadgetClass);
-
-			bFound = FALSE;
-			for ( i = 0; i < m_EquipmentDetails.m_AGadgets.Length && !bFound; i++ )
-			{
-				szClassName = ""$m_EquipmentDetails.m_AGadgets[i];
-				// MPF1
-				if ( szClassName ~= szEquipmentFind /*MissionPack1 _szEquipmentToValid*/) 		
-				{
-					bFound = TRUE;
-				}
 			}
-			if ( !bFound )
-				szEquipmentFind = "R6Description.R6DescGadgetNone"; 
+			// End:0x520
 			break;
+		// End:0x51A
+		case int(7):
+			szEquipmentFind = _szEquipmentToValid;
+			// End:0x470
+			if(CheckGadget(szEquipmentFind, self, false, replacedGadgetClass, PrimaryGadgetDesc))
+			{
+				szEquipmentFind = string(replacedGadgetClass);
+			}
+			bFound = false;
+			i = 0;
+			J0x47F:
+
+			// End:0x4E6 [Loop If]
+			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_AGadgets.Length), __NFUN_129__(bFound)))
+			{
+				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_AGadgets[i]));
+				// End:0x4DC
+				if(__NFUN_124__(szClassName, szEquipmentFind))
+				{
+					bFound = true;
+				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x47F;
+			}
+			// End:0x517
+			if(__NFUN_129__(bFound))
+			{
+				szEquipmentFind = "R6Description.R6DescGadgetNone";
+			}
+			// End:0x520
+			break;
+		// End:0xFFFF
 		default:
+			// End:0x520
+			break;
 			break;
 	}
-
 	return szEquipmentFind;
+	return;
 }
 
 function setMenuComEquipment()
 {
-    //Save player choose of equipment on server and in ini file
-    local R6MenuInGameMultiPlayerRootWindow r6Root;
-  
-    r6Root = R6MenuInGameMultiPlayerRootWindow(Root);    
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
-	// force a refresh on gear -- update in the same time .ini
-	RefreshGearInfo( true);
-
-    r6Root.m_R6GameMenuCom.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
-    r6Root.m_R6GameMenuCom.m_szPrimaryWeaponGadget = m_currentOperative.m_szPrimaryWeaponGadget;
-    r6Root.m_R6GameMenuCom.m_szPrimaryWeaponBullet = m_currentOperative.m_szPrimaryWeaponBullet;
-    r6Root.m_R6GameMenuCom.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;
-    r6Root.m_R6GameMenuCom.m_szSecondaryWeapon = m_currentOperative.m_szSecondaryWeapon;
-    r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget = m_currentOperative.m_szSecondaryWeaponGadget;
-    r6Root.m_R6GameMenuCom.m_szSecondaryWeaponBullet = m_currentOperative.m_szSecondaryWeaponBullet;
-    r6Root.m_R6GameMenuCom.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;
-    r6Root.m_R6GameMenuCom.m_szArmor = m_currentOperative.m_szArmor;
-
-#ifdefDEBUG
-	if (bShowLog)
+	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
+	// End:0x65
+	if(__NFUN_114__(r6Root.m_R6GameMenuCom, none))
 	{
-		log("setMenuComEquipment");
-		log("m_currentOperative.m_szPrimaryWeapon"@m_currentOperative.m_szPrimaryWeapon);
-		log("m_currentOperative.m_szPrimaryWeaponGadget		"@m_currentOperative.m_szPrimaryWeaponGadget);
-		log("m_currentOperative.m_szPrimaryWeaponBullet		"@m_currentOperative.m_szPrimaryWeaponBullet);
-		log("m_currentOperative.m_szPrimaryGadget			"@m_currentOperative.m_szPrimaryGadget);
-		log("m_currentOperative.m_szSecondaryWeapon			"@m_currentOperative.m_szSecondaryWeapon);
-		log("m_currentOperative.m_szSecondaryWeaponGadget	"@m_currentOperative.m_szSecondaryWeaponGadget);
-		log("m_currentOperative.m_szSecondaryWeaponBullet	"@m_currentOperative.m_szSecondaryWeaponBullet);
-		log("m_currentOperative.m_szSecondaryGadget			"@m_currentOperative.m_szSecondaryGadget);
-		log("m_currentOperative.m_szArmor					"@m_currentOperative.m_szArmor);
+		// End:0x63
+		if(bShowLog)
+		{
+			__NFUN_231__("setMenuComEquipment() GameMenuCom is no more valid");
+		}
+		return;
 	}
-#endif
-
-
-    r6Root.m_R6GameMenuCom.SavePlayerSetupInfo();
-    
+	r6Root.m_R6GameMenuCom.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
+	r6Root.m_R6GameMenuCom.m_szPrimaryWeaponGadget = m_currentOperative.m_szPrimaryWeaponGadget;
+	r6Root.m_R6GameMenuCom.m_szPrimaryWeaponBullet = m_currentOperative.m_szPrimaryWeaponBullet;
+	r6Root.m_R6GameMenuCom.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;
+	r6Root.m_R6GameMenuCom.m_szSecondaryWeapon = m_currentOperative.m_szSecondaryWeapon;
+	r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget = m_currentOperative.m_szSecondaryWeaponGadget;
+	r6Root.m_R6GameMenuCom.m_szSecondaryWeaponBullet = m_currentOperative.m_szSecondaryWeaponBullet;
+	r6Root.m_R6GameMenuCom.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;
+	r6Root.m_R6GameMenuCom.m_szArmor = m_currentOperative.m_szArmor;
+	r6Root.m_R6GameMenuCom.SavePlayerSetupInfo();
+	return;
 }
 
-function PopUpBoxDone( MessageBoxResult Result, ePopUpID _ePopUpID)
+// NEW IN 1.60
+function SetOperativeEquipment(bool _bCopyBkpToCurrent)
 {
-    
-    if (Result == MR_OK)
-    {
-        setMenuComEquipment();        
-    }    
+	// End:0x111
+	if(_bCopyBkpToCurrent)
+	{
+		m_currentOperative.m_szPrimaryWeapon = m_BkpOperative.m_szPrimaryWeapon;
+		m_currentOperative.m_szPrimaryWeaponGadget = m_BkpOperative.m_szPrimaryWeaponGadget;
+		m_currentOperative.m_szPrimaryWeaponBullet = m_BkpOperative.m_szPrimaryWeaponBullet;
+		m_currentOperative.m_szPrimaryGadget = m_BkpOperative.m_szPrimaryGadget;
+		m_currentOperative.m_szSecondaryWeapon = m_BkpOperative.m_szSecondaryWeapon;
+		m_currentOperative.m_szSecondaryWeaponGadget = m_BkpOperative.m_szSecondaryWeaponGadget;
+		m_currentOperative.m_szSecondaryWeaponBullet = m_BkpOperative.m_szSecondaryWeaponBullet;
+		m_currentOperative.m_szSecondaryGadget = m_BkpOperative.m_szSecondaryGadget;
+		m_currentOperative.m_szArmor = m_BkpOperative.m_szArmor;		
+	}
+	else
+	{
+		m_BkpOperative.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
+		m_BkpOperative.m_szPrimaryWeaponGadget = m_currentOperative.m_szPrimaryWeaponGadget;
+		m_BkpOperative.m_szPrimaryWeaponBullet = m_currentOperative.m_szPrimaryWeaponBullet;
+		m_BkpOperative.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;
+		m_BkpOperative.m_szSecondaryWeapon = m_currentOperative.m_szSecondaryWeapon;
+		m_BkpOperative.m_szSecondaryWeaponGadget = m_currentOperative.m_szSecondaryWeaponGadget;
+		m_BkpOperative.m_szSecondaryWeaponBullet = m_currentOperative.m_szSecondaryWeaponBullet;
+		m_BkpOperative.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;
+		m_BkpOperative.m_szArmor = m_currentOperative.m_szArmor;
+	}
+	return;
 }
 
-
-function EquipmentSelected(e2DEquipment equipmentSelected)
-{   
-    local   R6WindowListBoxItem         TempItem;
-
-    //This occurs when a 2d equipment is clicked
-	m_e2DCurEquipmentSel = equipmentSelected;
-    m_EquipmentDetails.ShowWindow();
-    m_EquipmentDetails.FillListBox(equipmentSelected);
-
-    // Sort the list.
-    // #ifdef R6PATCH_FOR_E3
-    // NB (gborgia) The sort algorythm is broken.  The result looks fine except that the last items of the
-    // list is placed in front of the list rather than at its correct place.  For now, add a temp at the end
-    // end remove it after the sort.  After E3, we will need to fix the sort algorythm.
-    /*
-    TempItem = R6WindowListBoxItem( m_EquipmentDetails.m_ListBox.Items.Append( class'R6WindowListBoxItem' ) );
-    m_EquipmentDetails.m_ListBox.Sort();
-    TempItem.Remove();
-    m_EquipmentDetails.m_ListBox.MakeSelectedVisible();
-    */
+// NEW IN 1.60
+function SetClassEquipment()
+{
+	m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DynamicLoadObject(m_currentOperative.m_szPrimaryWeapon, Class'Core.Class'));
+	m_OpFirstWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponGadget);
+	m_OpFirstWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponBullet);
+	m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DynamicLoadObject(m_currentOperative.m_szSecondaryWeapon, Class'Core.Class'));
+	m_OpSecondWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponGadget);
+	m_OpSecondWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponBullet);
+	m_OpFirstGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.m_szPrimaryGadget, Class'Core.Class'));
+	m_OpSecondGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.m_szSecondaryGadget, Class'Core.Class'));
+	return;
 }
 
-function EquipmentChanged(INT equipmentSelected, class<R6Description> DecriptionClass )
-{   
-    local class<R6Description> inDescriptionClass;
-    //This occurs when a new Item has been selected from the list
-    
-    //TODO : Change current Roster equipment and make sure 2d image change
-    
-        switch(equipmentSelected)
-        {
-        case 0 :
-
-            inDescriptionClass = DecriptionClass;
-            if( m_OpFirstWeaponDesc != class<R6PrimaryWeaponDescription>(DecriptionClass))
-            {
-                //Primary Weapon Changed
-                m_currentOperative.m_szPrimaryWeapon = string(DecriptionClass);
-                m_OpFirstWeaponDesc = class<R6PrimaryWeaponDescription>(DecriptionClass);
-                if(bshowlog)log("Changing Primary Weapon for "@m_currentOperative.m_szPrimaryWeapon);           
-            
-                //Primary Weapon Gadget Changed
-                DecriptionClass = class'R6DescWeaponGadgetNone';
-                m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.Default.m_NameID;
-                m_OpFirstWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-                if(bshowlog)log("Changing Primary Weapon Gadget for "@m_currentOperative.m_szPrimaryWeaponGadget);
-            
-                //Primary Weapon Bullets Changed
-                DecriptionClass = class'R6DescriptionManager'.static.findPrimaryDefaultAmmo(class<R6PrimaryWeaponDescription>(inDescriptionClass));
-                m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-                m_OpFirstWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-                if(bshowlog)log("Changing Primary Weapon Bullets for "@m_currentOperative.m_szPrimaryWeaponBullet);
-            }
-            break;
-        case 1 :
-            //Primary Weapon Gadget Changed
-            m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.Default.m_NameID;
-            m_OpFirstWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-            if(bshowlog)log("Changing Primary Weapon Gadget for "@m_currentOperative.m_szPrimaryWeaponGadget);
-            break;
-        case 2 :            
-            //Primary Weapon Bullets Changed
-            m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-            m_OpFirstWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-            if(bshowlog)log("Changing Primary Weapon Bullets for "@m_currentOperative.m_szPrimaryWeaponBullet);
-            break;
-        case 3 :
-            //Primary Gadget
-            m_currentOperative.m_szPrimaryGadget = string(DecriptionClass);
-            m_OpFirstGadgetDesc = class<R6GadgetDescription>(DecriptionClass);
-            if(bshowlog)log("Changing Primary Gadget for "@m_currentOperative.m_szPrimaryWeapon);
-            break;
-        case 4 :
-
-            inDescriptionClass = DecriptionClass;             
-
-            if(m_OpSecondaryWeaponDesc != class<R6SecondaryWeaponDescription>(DecriptionClass))
-            {
-                //Secondary Weapon Changed    
-                m_currentOperative.m_szSecondaryWeapon = string(DecriptionClass);
-                m_OpSecondaryWeaponDesc = class<R6SecondaryWeaponDescription>(DecriptionClass);
-                if(bshowlog)log("Changing Secondary Weapon for "@m_currentOperative.m_szSecondaryWeapon);
-
-                 //Secondary Weapon Gadget Changed
-                DecriptionClass = class'R6DescWeaponGadgetNone';
-                m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.Default.m_NameID;
-                m_OpSecondWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-                if(bshowlog)log("Changing Secondary Weapon Gadget for "@m_currentOperative.m_szSecondaryWeaponGadget);
-
-                //Secondary Weapon Bullets Changed
-                DecriptionClass = class'R6DescriptionManager'.static.findSecondaryDefaultAmmo(class<R6SecondaryWeaponDescription>(inDescriptionClass));
-                m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-                m_OpSecondWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-                if(bshowlog)log("Changing Secondary Weapon Bullets for "@m_currentOperative.m_szSecondaryWeaponBullet);
-            }            
-            break;
-        case 5 :
-            //Secondary Weapon Gadget Changed
-            m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.Default.m_NameID;
-            m_OpSecondWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-            if(bshowlog)log("Changing Secondary Weapon Gadget for "@m_currentOperative.m_szSecondaryWeaponGadget);
-            break;
-        case 6 :
-            //Secondary Weapon Bullets Changed
-            m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-            m_OpSecondWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-            if(bshowlog)log("Changing Secondary Weapon Bullets for "@m_currentOperative.m_szSecondaryWeaponBullet);
-            break;
-        case 7 :
-            //Secondary Gadget
-            m_currentOperative.m_szSecondaryGadget = string(DecriptionClass);
-            m_OpSecondGadgetDesc = class<R6GadgetDescription>(DecriptionClass);
-            if(bshowlog)log("Changing Secondary Gadget for "@m_currentOperative.m_szSecondaryGadget);
-            break;       
-        }           
-        m_Equipment2dSelect.UpdateDetails();
+// NEW IN 1.60
+function AcceptSelection()
+{
+	// End:0x2B
+	if(bShowLog)
+	{
+		__NFUN_231__("MPGearWidget AcceptSelection()");
+	}
+	RefreshGearInfo(true);
+	setMenuComEquipment();
+	SetOperativeEquipment(false);
+	return;
 }
 
+// NEW IN 1.60
+function CancelSelection()
+{
+	// End:0x2B
+	if(bShowLog)
+	{
+		__NFUN_231__("MPGearWidget CancelSelection()");
+	}
+	SetOperativeEquipment(true);
+	SetClassEquipment();
+	m_EquipmentDetails.m_listBox.DropSelection();
+	return;
+}
+
+function EquipmentSelected(R6MenuMPAdvGearWidget.e2DEquipment EquipmentSelected)
+{
+	local R6WindowListBoxItem TempItem;
+
+	m_e2DCurEquipmentSel = EquipmentSelected;
+	m_EquipmentDetails.ShowWindow();
+	m_EquipmentDetails.FillListBox(int(EquipmentSelected));
+	return;
+}
+
+function EquipmentChanged(int EquipmentSelected, Class<R6Description> DecriptionClass)
+{
+	local Class<R6Description> inDescriptionClass;
+
+	switch(EquipmentSelected)
+	{
+		// End:0x191
+		case 0:
+			inDescriptionClass = DecriptionClass;
+			// End:0x18E
+			if(__NFUN_119__(m_OpFirstWeaponDesc, Class<R6PrimaryWeaponDescription>(DecriptionClass)))
+			{
+				m_currentOperative.m_szPrimaryWeapon = string(DecriptionClass);
+				m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DecriptionClass);
+				// End:0x89
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Changing Primary Weapon for ", m_currentOperative.m_szPrimaryWeapon));
+				}
+				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
+				m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.default.m_NameID;
+				m_OpFirstWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+				// End:0x101
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Changing Primary Weapon Gadget for ", m_currentOperative.m_szPrimaryWeaponGadget));
+				}
+				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findPrimaryDefaultAmmo(Class<R6PrimaryWeaponDescription>(inDescriptionClass));
+				m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.default.m_NameTag;
+				m_OpFirstWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+				// End:0x18E
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Changing Primary Weapon Bullets for ", m_currentOperative.m_szPrimaryWeaponBullet));
+				}
+			}
+			// End:0x5CE
+			break;
+		// End:0x205
+		case 1:
+			m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.default.m_NameID;
+			m_OpFirstWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+			// End:0x202
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__("Changing Primary Weapon Gadget for ", m_currentOperative.m_szPrimaryWeaponGadget));
+			}
+			// End:0x5CE
+			break;
+		// End:0x27B
+		case 2:
+			m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.default.m_NameTag;
+			m_OpFirstWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+			// End:0x278
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__("Changing Primary Weapon Bullets for ", m_currentOperative.m_szPrimaryWeaponBullet));
+			}
+			// End:0x5CE
+			break;
+		// End:0x2E2
+		case 3:
+			m_currentOperative.m_szPrimaryGadget = string(DecriptionClass);
+			m_OpFirstGadgetDesc = Class<R6GadgetDescription>(DecriptionClass);
+			// End:0x2DF
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__("Changing Primary Gadget for ", m_currentOperative.m_szPrimaryWeapon));
+			}
+			// End:0x5CE
+			break;
+		// End:0x473
+		case 4:
+			inDescriptionClass = DecriptionClass;
+			// End:0x470
+			if(__NFUN_119__(m_OpSecondaryWeaponDesc, Class<R6SecondaryWeaponDescription>(DecriptionClass)))
+			{
+				m_currentOperative.m_szSecondaryWeapon = string(DecriptionClass);
+				m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DecriptionClass);
+				// End:0x367
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Changing Secondary Weapon for ", m_currentOperative.m_szSecondaryWeapon));
+				}
+				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
+				m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.default.m_NameID;
+				m_OpSecondWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+				// End:0x3E1
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Gadget for ", m_currentOperative.m_szSecondaryWeaponGadget));
+				}
+				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findSecondaryDefaultAmmo(Class<R6SecondaryWeaponDescription>(inDescriptionClass));
+				m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.default.m_NameTag;
+				m_OpSecondWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+				// End:0x470
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Bullets for ", m_currentOperative.m_szSecondaryWeaponBullet));
+				}
+			}
+			// End:0x5CE
+			break;
+		// End:0x4EA
+		case 5:
+			m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.default.m_NameID;
+			m_OpSecondWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+			// End:0x4E7
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Gadget for ", m_currentOperative.m_szSecondaryWeaponGadget));
+			}
+			// End:0x5CE
+			break;
+		// End:0x562
+		case 6:
+			m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.default.m_NameTag;
+			m_OpSecondWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+			// End:0x55F
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Bullets for ", m_currentOperative.m_szSecondaryWeaponBullet));
+			}
+			// End:0x5CE
+			break;
+		// End:0x5CB
+		case 7:
+			m_currentOperative.m_szSecondaryGadget = string(DecriptionClass);
+			m_OpSecondGadgetDesc = Class<R6GadgetDescription>(DecriptionClass);
+			// End:0x5C8
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__("Changing Secondary Gadget for ", m_currentOperative.m_szSecondaryGadget));
+			}
+			// End:0x5CE
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	m_Equipment2dSelect.UpdateDetails();
+	return;
+}
 
 //MAKE SURE THIS FUNCTION IS THE SAME AS THE ONE IN THE SINGLEPLAYER GEAR ROOM
-function TexRegion GetGadgetTexture(class<R6GadgetDescription> _CurrentGadget)
+function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 {
-    local bool bfound;
-    local String Tag;
-    local int i;
-    local TexRegion TR;
+	local bool bFound;
+	local string Tag;
+	local int i;
+	local TexRegion TR;
 
-    if( class'R6DescPrimaryMags' == _CurrentGadget )
-    {
-        if(m_OpFirstWeaponGadgetDesc.Default.m_NameTag == "CMAG")
-        {
-            bfound = true;  
-            TR.T = m_OpFirstWeaponGadgetDesc.Default.m_2DMenuTexture;
-            TR.X = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.X;
-            TR.Y = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.Y;
-            TR.W = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.W;
-            TR.H = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.H;
-        }
-        else
-            Tag = m_OpFirstWeaponDesc.Default.m_MagTag;
-    }
-        
-	
-    else if(class'R6DescSecondaryMags' == _CurrentGadget )
-    {
-        if(m_OpSecondWeaponGadgetDesc.Default.m_NameTag == "CMAG")
-        {
-            bfound = true;  
-            TR.T = m_OpSecondWeaponGadgetDesc.Default.m_2DMenuTexture;
-            TR.X = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.X;
-            TR.Y = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.Y;
-            TR.W = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.W;
-            TR.H = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.H;
+	// End:0xDB
+	if(__NFUN_114__(Class'R6Description.R6DescPrimaryMags', _CurrentGadget))
+	{
+		// End:0xC4
+		if(__NFUN_122__(m_OpFirstWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+		{
+			bFound = true;
+			TR.t = m_OpFirstWeaponGadgetDesc.default.m_2DMenuTexture;
+			TR.X = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.X;
+			TR.Y = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.Y;
+			TR.W = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.W;
+			TR.H = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.H;			
+		}
+		else
+		{
+			Tag = m_OpFirstWeaponDesc.default.m_MagTag;
+		}		
+	}
+	else
+	{
+		// End:0x1B3
+		if(__NFUN_114__(Class'R6Description.R6DescSecondaryMags', _CurrentGadget))
+		{
+			// End:0x19F
+			if(__NFUN_122__(m_OpSecondWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+			{
+				bFound = true;
+				TR.t = m_OpSecondWeaponGadgetDesc.default.m_2DMenuTexture;
+				TR.X = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.X;
+				TR.Y = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.Y;
+				TR.W = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.W;
+				TR.H = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.H;				
+			}
+			else
+			{
+				Tag = m_OpSecondaryWeaponDesc.default.m_MagTag;
+			}
+		}
+	}
+	// End:0x23A
+	if(__NFUN_123__(Tag, ""))
+	{
+		i = 0;
+		J0x1C6:
 
-        }
-        else
-            Tag = m_OpSecondaryWeaponDesc.Default.m_MagTag;
-    }
-        
-
-	
-    //Let's start searching for the right mag Texture
-    if( Tag != "")
-    {
-        i= 0;
-		while( (i < m_PrimaryMagsGadget.m_MagTags.Length) && (bfound == false))
-        {
-			if( m_PrimaryMagsGadget.m_MagTags[i] == Tag)
-            {
-                bfound = true;
-				TR = m_PrimaryMagsGadget.m_Mags[i];      
-            }                
-            else
-                i++;
-        }
-    } 
-   
-    //No mag found or the gadget is not an extra mag
-    if(bfound == false)
-    {
-        TR.T = _CurrentGadget.Default.m_2DMenuTexture;
-        TR.X = _CurrentGadget.Default.m_2dMenuRegion.X;
-        TR.Y = _CurrentGadget.Default.m_2dMenuRegion.Y;
-        TR.W = _CurrentGadget.Default.m_2dMenuRegion.W;
-        TR.H = _CurrentGadget.Default.m_2dMenuRegion.H;
-
-    }
-    
-
-    return TR;
+		// End:0x23A [Loop If]
+		if(__NFUN_130__(__NFUN_150__(i, m_PrimaryMagsGadget.m_MagTags.Length), __NFUN_242__(bFound, false)))
+		{
+			// End:0x230
+			if(__NFUN_122__(m_PrimaryMagsGadget.m_MagTags[i], Tag))
+			{
+				bFound = true;
+				TR = m_PrimaryMagsGadget.m_Mags[i];				
+			}
+			else
+			{
+				__NFUN_165__(i);
+			}
+			// [Loop Continue]
+			goto J0x1C6;
+		}
+	}
+	// End:0x2D7
+	if(__NFUN_242__(bFound, false))
+	{
+		TR.t = _CurrentGadget.default.m_2DMenuTexture;
+		TR.X = _CurrentGadget.default.m_2dMenuRegion.X;
+		TR.Y = _CurrentGadget.default.m_2dMenuRegion.Y;
+		TR.W = _CurrentGadget.default.m_2dMenuRegion.W;
+		TR.H = _CurrentGadget.default.m_2dMenuRegion.H;
+	}
+	return TR;
+	return;
 }
 
 //=========================================================================================
 // RefreshGearInfo: Refresh all the gear according the new restriction kit
 //=========================================================================================
-function RefreshGearInfo( BOOL _bForceUpdate)
+function RefreshGearInfo(bool _bForceUpdate)
 {
-	if ((m_iCounter > 10) || (_bForceUpdate))
+	// End:0xB2
+	if(__NFUN_132__(__NFUN_151__(m_iCounter, 10), _bForceUpdate))
 	{
-#ifdefDEBUG
-		if (bShowLog)
-			log("RefreshGearInfo refresh gear");
-#endif
 		m_iCounter = 0;
-
-		// update the lists with the current restriction
 		m_EquipmentDetails.BuildAvailableEquipment();
-
-		// check if current selection in the list is valid now 
-		m_EquipmentDetails.FillListBox(m_e2DCurEquipmentSel);  // fill the list of equipment again
-
-		// check for all the current equipment
-		m_currentOperative.m_szPrimaryWeapon		 = VerifyEquipment( e2DEquipment.Primary_Weapon, m_currentOperative.m_szPrimaryWeapon);
-		m_currentOperative.m_szPrimaryWeaponGadget	 = VerifyEquipment( e2DEquipment.Primary_WeaponGadget, m_currentOperative.m_szPrimaryWeaponGadget);
-		m_currentOperative.m_szPrimaryGadget		 = VerifyEquipment( e2DEquipment.Primary_Gadget, m_currentOperative.m_szPrimaryGadget);
-		m_currentOperative.m_szSecondaryWeapon		 = VerifyEquipment( e2DEquipment.Secondary_Weapon, m_currentOperative.m_szSecondaryWeapon);
-		m_currentOperative.m_szSecondaryWeaponGadget = VerifyEquipment( e2DEquipment.Secondary_WeaponGadget, m_currentOperative.m_szSecondaryWeaponGadget);
-		m_currentOperative.m_szSecondaryGadget		 = VerifyEquipment( e2DEquipment.Secondary_Gadget, m_currentOperative.m_szSecondaryGadget);
-
-		m_OpFirstWeaponDesc         =  class<R6PrimaryWeaponDescription>( DynamicLoadObject( m_currentOperative.m_szPrimaryWeapon, class'Class' ) );   
-		m_OpFirstWeaponGadgetDesc   =  class'R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponGadget);
-		m_OpFirstWeaponBulletDesc   =  class'R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponBullet);
-    
-		m_OpSecondaryWeaponDesc     =  class<R6SecondaryWeaponDescription>( DynamicLoadObject( m_currentOperative.m_szSecondaryWeapon, class'Class' ) );
-		m_OpSecondWeaponGadgetDesc  =  class'R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponGadget);
-		m_OpSecondWeaponBulletDesc  =  class'R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponBullet);
-
-		m_OpFirstGadgetDesc         =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.m_szPrimaryGadget, class'Class' ) );
-		m_OpSecondGadgetDesc        =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.m_szSecondaryGadget, class'Class' ) );
-
+		m_EquipmentDetails.FillListBox(int(m_e2DCurEquipmentSel));
+		VerifyAllEquipment(m_currentOperative.m_szPrimaryWeapon, m_currentOperative.m_szPrimaryWeaponGadget, m_currentOperative.m_szPrimaryGadget, m_currentOperative.m_szSecondaryWeapon, m_currentOperative.m_szSecondaryWeaponGadget, m_currentOperative.m_szSecondaryGadget);
+		SetClassEquipment();
 		m_Equipment2dSelect.UpdateDetails();
-
-#ifdefDEBUG
-		if (bShowLog)
-		{
-			log("RefreshGearInfo");
-			log("m_currentOperative.m_szPrimaryWeapon			"@m_currentOperative.m_szPrimaryWeapon);
-			log("m_currentOperative.m_szPrimaryWeaponGadget		"@m_currentOperative.m_szPrimaryWeaponGadget);
-			log("m_currentOperative.m_szPrimaryWeaponBullet		"@m_currentOperative.m_szPrimaryWeaponBullet);
-			log("m_currentOperative.m_szPrimaryGadget			"@m_currentOperative.m_szPrimaryGadget);
-			log("m_currentOperative.m_szSecondaryWeapon			"@m_currentOperative.m_szSecondaryWeapon);
-			log("m_currentOperative.m_szSecondaryWeaponGadget	"@m_currentOperative.m_szSecondaryWeaponGadget);
-			log("m_currentOperative.m_szSecondaryWeaponBullet	"@m_currentOperative.m_szSecondaryWeaponBullet);
-			log("m_currentOperative.m_szSecondaryGadget			"@m_currentOperative.m_szSecondaryGadget);
-			log("m_currentOperative.m_szArmor					"@m_currentOperative.m_szArmor);
-		}
-#endif
-
 	}
-
-	m_iCounter++;
+	__NFUN_165__(m_iCounter);
+	return;
 }
 
-
-//MissionPack1
-/* parameters:
-	_gadgetDesc = name of the gadget to check
-	_caller = a UWindowWindow object (necessary only to call instanced methods inside a static method)
-	_isSecondGadget = true if the gadget is the secondary one
-	(optional OUT) _replaceGadgetClass = the class description of the gadget to be used instead
-	(optional) _otherGadget = name of the other gadget (the Secondary if the gadget to check is primary and viceversa)
-
-   return: true if the gadget must be replaced
-*/
-
-static function bool CheckGadget(string _gadgetDesc, UWindowWindow _caller , bool _isSecondGadget, optional out class<R6GadgetDescription> _replaceGadgetClass, optional string _otherGadget)
+static function bool CheckGadget(string _gadgetDesc, UWindowWindow _caller, bool _isSecondGadget, optional out Class<R6GadgetDescription> _replaceGadgetClass, optional string _otherGadget)
 {
-	local R6MenuInGameMultiPlayerRootWindow R6Root;
+	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
-	R6Root = R6MenuInGameMultiPlayerRootWindow(_caller.Root);
-	if(R6Root != none)
+	r6Root = R6MenuInGameMultiPlayerRootWindow(_caller.Root);
+	// End:0x2A6
+	if(__NFUN_119__(r6Root, none))
 	{
-	    if (R6Root.m_szCurrentGameType == "RGM_CaptureTheEnemyAdvMode")
+		// End:0x1C3
+		if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_CaptureTheEnemyAdvMode"))
 		{
-			if(_gadgetDesc == "R6Description.R6DescFragGrenadeGadget" ||
-			 	_gadgetDesc == "R6Description.R6DescBreachingChargeGadget" ||
-			 	_gadgetDesc == "R6Description.R6DescClaymoreGadget" ||
-			 	_gadgetDesc == "R6Description.R6DescRemoteChargeGadget"
-			 	)
-	    	{
-		        if(_isSecondGadget)
-	        	{
-	                if(_otherGadget == "R6Description.R6DescSmokeGrenadeGadget")
-                    	_replaceGadgetClass = class'R6Description.R6DescFlashBangGadget';
-                	else
-	                    _replaceGadgetClass = class'R6Description.R6DescSmokeGrenadeGadget';
-            	}
-            	else
-	        	{
-	                if(_otherGadget == "R6Description.R6DescFlashBangGadget")
-                    	_replaceGadgetClass = class'R6Description.R6DescSmokeGrenadeGadget';
-                	else
-	                    _replaceGadgetClass = class'R6Description.R6DescFlashBangGadget';
-            	}
-            	return true;
+			// End:0x1C0
+			if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_122__(_gadgetDesc, "R6Description.R6DescFragGrenadeGadget"), __NFUN_122__(_gadgetDesc, "R6Description.R6DescBreachingChargeGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescClaymoreGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescRemoteChargeGadget")))
+			{
+				// End:0x176
+				if(_isSecondGadget)
+				{
+					// End:0x168
+					if(__NFUN_122__(_otherGadget, "R6Description.R6DescSmokeGrenadeGadget"))
+					{
+						_replaceGadgetClass = Class'R6Description.R6DescFlashBangGadget';						
+					}
+					else
+					{
+						_replaceGadgetClass = Class'R6Description.R6DescSmokeGrenadeGadget';
+					}					
+				}
+				else
+				{
+					// End:0x1B3
+					if(__NFUN_122__(_otherGadget, "R6Description.R6DescFlashBangGadget"))
+					{
+						_replaceGadgetClass = Class'R6Description.R6DescSmokeGrenadeGadget';						
+					}
+					else
+					{
+						_replaceGadgetClass = Class'R6Description.R6DescFlashBangGadget';
+					}
+				}
+				return true;
+			}			
+		}
+		else
+		{
+			// End:0x2A6
+			if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_KamikazeMode"))
+			{
+				// End:0x2A6
+				if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_122__(_gadgetDesc, "R6Description.R6DescHBSGadget"), __NFUN_122__(_gadgetDesc, "R6Description.R6DescHBSJammerGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescHBSSAJammerGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescFalseHBGadget")))
+				{
+					return true;
+				}
 			}
-        }
-        // MPF_Milan_8_25_2003 - No HB Sensor in Kamikaze
-        else if (R6Root.m_szCurrentGameType == "RGM_KamikazeMode")
-	    {
-    		if(_gadgetDesc == "R6Description.R6DescHBSGadget" ||
-		    _gadgetDesc == "R6Description.R6DescHBSJammerGadget" ||
-	    	_gadgetDesc == "R6Description.R6DescHBSSAJammerGadget" ||
-    		_gadgetDesc == "R6Description.R6DescFalseHBGadget" 
-		    )
-	    		return true;
-        }
-    }
-	// End MPF_Milan_8_25_2003
-    return false;
+		}
+	}
+	return false;
+	return;
 }
-// End MissionPack1
 
-defaultproperties
-{
-}
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var c
+// REMOVED IN 1.60: function PopUpBoxDone

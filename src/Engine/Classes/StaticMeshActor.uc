@@ -1,52 +1,54 @@
 //=============================================================================
+// StaticMeshActor - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // StaticMeshActor.
 // An actor that is drawn using a static mesh(a mesh that never changes, and
 // can be cached in video memory, resulting in a speed boost).
 //=============================================================================
-
 class StaticMeshActor extends Actor
 	native
-	placeable;
-
+ placeable;
 
 // JFDUBE: I didn't use the m_i prefix because I wanted it to appear just after Skins in the editor.
-var(Display)    INT     SkinsIndex;
-// JFDUBE: Approved by Eric, so I don't have to go to jail and pay 25 cents.
-
-//R6MODIFIERS
-var(Modifier)	FLOAT	m_fScale;
-var(Modifier)	FLOAT	m_fFrequency;
-var(Modifier)	FLOAT	m_fNormalScale;
-var(Modifier)   FLOAT   m_fMinZero;
-var(Modifier)	vector	m_vScalePerAxis;
-var(Modifier)   BOOL    m_bWave;
-//END R6MODIFIERS
-
+var(Display) int SkinsIndex;
+var(Modifier) bool m_bWave;
 //R6CNEWRENDERERFEATURES
-var()           BOOL    m_bBlockCoronas;
-
-var(Tessellation) BOOL  m_bUseTesselletation;
-var(Tessellation) FLOAT m_fTesseletationLevel;
+var() bool m_bBlockCoronas;
+var(Tessellation) bool m_bUseTesselletation;
+//R6MODIFIERS
+var(Modifier) float m_fScale;
+var(Modifier) float m_fFrequency;
+var(Modifier) float m_fNormalScale;
+var(Modifier) float m_fMinZero;
+// NEW IN 1.60
+var(Modifier) float CullDistanceWave;
+var(Tessellation) float m_fTesseletationLevel;
+var(Modifier) Vector m_vScalePerAxis;
 
 defaultproperties
 {
-     SkinsIndex=255
-     m_bBlockCoronas=True
-     m_fScale=1.000000
-     m_fFrequency=1.000000
-     m_fNormalScale=0.100000
-     m_fTesseletationLevel=4.000000
-     m_vScalePerAxis=(X=1.000000,Y=1.000000,Z=1.000000)
-     DrawType=DT_StaticMesh
-     bStatic=True
-     bWorldGeometry=True
-     bAcceptsProjectors=True
-     bShadowCast=True
-     bStaticLighting=True
-     bCollideActors=True
-     bBlockActors=True
-     bBlockPlayers=True
-     bEdShouldSnap=True
-     CollisionRadius=1.000000
-     CollisionHeight=1.000000
+	SkinsIndex=255
+	m_bBlockCoronas=true
+	m_fScale=1.0000000
+	m_fFrequency=1.0000000
+	m_fNormalScale=0.1000000
+	CullDistanceWave=1000.0000000
+	m_fTesseletationLevel=4.0000000
+	m_vScalePerAxis=(X=1.0000000,Y=1.0000000,Z=1.0000000)
+	DrawType=8
+	bStatic=true
+	bWorldGeometry=true
+	bAcceptsProjectors=true
+	bShadowCast=true
+	bStaticLighting=true
+	bCollideActors=true
+	bBlockActors=true
+	bBlockPlayers=true
+	bEdShouldSnap=true
+	CollisionRadius=1.0000000
+	CollisionHeight=1.0000000
 }

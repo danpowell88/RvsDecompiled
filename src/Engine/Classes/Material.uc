@@ -1,69 +1,71 @@
 //=============================================================================
+// Material - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Material: Abstract material class
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class Material extends Object
 	native
-	hidecategories(Object)
 	collapsecategories
-	noexport;
+	noexport
+ hidecategories(Object);
 
-//R6MATERIAL
 enum ESurfaceType
 {
-    SURF_Generic,
-    SURF_GenericHardSurface,
-    SURF_DustyConcrete,
-    SURF_CompactSnow,
-    SURF_DeepSnow,
-    SURF_Dirt,
-    SURF_HardWood,
-    SURF_BoomyWood,
-    SURF_Carpet,
-    SURF_Grate,
-    SURF_HardMetal,
-    SURF_SheetMetal,
-    SURF_WaterPuddle,
-    SURF_DeepWater,
-    SURF_OilPuddle,
-    SURF_DirtyGrass,
-    SURF_CleanGrass,
-    SURF_Gravel
-}; 
-
-#exec Texture Import File=Textures\DefaultTexture.pcx
+	SURF_Generic,                   // 0
+	SURF_GenericHardSurface,        // 1
+	SURF_DustyConcrete,             // 2
+	SURF_CompactSnow,               // 3
+	SURF_DeepSnow,                  // 4
+	SURF_Dirt,                      // 5
+	SURF_HardWood,                  // 6
+	SURF_BoomyWood,                 // 7
+	SURF_Carpet,                    // 8
+	SURF_Grate,                     // 9
+	SURF_HardMetal,                 // 10
+	SURF_SheetMetal,                // 11
+	SURF_WaterPuddle,               // 12
+	SURF_DeepWater,                 // 13
+	SURF_OilPuddle,                 // 14
+	SURF_DirtyGrass,                // 15
+	SURF_CleanGrass,                // 16
+	SURF_Gravel                     // 17
+};
 
 var() Material FallbackMaterial;
-
 var Material DefaultMaterial;
-var const transient bool UseFallback;	// Render device should use the fallback.
-var const transient bool Validated;		// Material has been validated as renderable.
-
+var const transient bool UseFallback;  // Render device should use the fallback.
+var const transient bool Validated;  // Material has been validated as renderable.
 //#ifdef R6CODE
-var(Rainbow)    bool                m_bForceNoSort;
-var(Rainbow)    bool                m_bDynamicMaterial;
-var(Rainbow)    bool                m_bProneTrail;
-var             INT                 m_SpecificRenderData;
-//#endif R6CODE
-
+var(Rainbow) bool m_bForceNoSort;
+var(Rainbow) bool m_bDynamicMaterial;
+var(Rainbow) bool m_bProneTrail;
+var int m_SpecificRenderData;
 //#ifdef R6MATERIAL
-var (Rainbow)   INT                 m_iPenetration;
-var (Rainbow)   INT                 m_iResistanceFactor;
-var (Rainbow)   class<R6WallHit>    m_pHitEffect;
-var (Rainbow)   class<R6FootStep>   m_pFootStep;
-var (Rainbow)   ESurfaceType        m_eSurfIdForSnd;
-var             Material            m_pUnused;  // not able to remove it
-var (Rainbow)   BYTE                m_iNightVisionFactor;
-//#endif R6MATERIAL
+var(Rainbow) int m_iPenetration;
+var(Rainbow) int m_iResistanceFactor;
+var(Rainbow) Class<R6WallHit> m_pHitEffect;
+var(Rainbow) Class<R6FootStep> m_pFootStep;
+var(Rainbow) Material.ESurfaceType m_eSurfIdForSnd;
+var Material m_pUnused;  // not able to remove it
+var(Rainbow) byte m_iNightVisionFactor;
 
-function Trigger( Actor Other, Actor EventInstigator )
+function Trigger(Actor Other, Actor EventInstigator)
 {
-	if( FallbackMaterial != None )
-		FallbackMaterial.Trigger( Other, EventInstigator );
+	// End:0x24
+	if(__NFUN_119__(FallbackMaterial, none))
+	{
+		FallbackMaterial.Trigger(Other, EventInstigator);
+	}
+	return;
 }
 
 defaultproperties
 {
-     DefaultMaterial=Texture'Engine.DefaultTexture'
-     m_iNightVisionFactor=128
+	DefaultMaterial=Texture'Engine.DefaultTexture'
+	m_iNightVisionFactor=128
 }

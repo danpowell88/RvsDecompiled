@@ -1,4 +1,10 @@
 //=============================================================================
+// R6AIController - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6AIController.uc : This is the AI Controller class for all Rainbow6 characters.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -10,174 +16,209 @@
 //    2001/11/19 - Jean-Francois Dube : Added interactive actions
 //=============================================================================
 class R6AIController extends AIController
-    native 
-    abstract;
+	abstract
+ native;
 
-var         R6Pawn              m_r6pawn;               // remove r6pawn() cast
-var         vector              m_vTargetPosition;
-var         vector              m_vPreviousPosition;
-var         R6Ladder            m_TargetLadder;
+const C_fMaxBumpTime = 1.f;
 
-CONST       C_fMaxBumpTime = 1.f;                       // Max time to be in bumpbackup state 
-var         Actor               m_BumpedBy;
-var         name                m_bumpBackUpNextState;  // return state when BumpBackUp state is over
-var         name                m_openDoorNextState;    // return state when OpenDoor state is over
-var const   int                 c_iDistanceBumpBackUp;  // distance to backup
-var         FLOAT               m_fLastBump;            // the time where the pawn was bumped
-var         vector              m_vBumpedByLocation;    // used in state code 
-var         vector              m_vBumpedByVelocity;    // used in state code 
-
-var         bool                m_bStateBackupAvoidFacingWalls; // backup of the bool when entering a state
-var         bool                m_bIgnoreBackupBump;    // this flag should be set to true during states that should not be interrupted by a notifyBump to backup...
-var         bool                m_bGetOffLadder;
-
-// climb object
-
-var         R6ClimbableObject   m_climbingObject;
-var         name                m_climbingObjectNextState;  // return state when BumpBackUp state is over
-
-var         INT                 m_iCurrentRouteCache;
-
+var const int c_iDistanceBumpBackUp;  // distance to backup
+var int m_iCurrentRouteCache;
+var bool m_bStateBackupAvoidFacingWalls;  // backup of the bool when entering a state
+var bool m_bIgnoreBackupBump;  // this flag should be set to true during states that should not be interrupted by a notifyBump to backup...
+var bool m_bGetOffLadder;
 // For debug purpose
-var(Debug)  BOOL                bShowLog;
-var(Debug)  BOOL                bShowInteractionLog;
-
+var(Debug) bool bShowLog;
+var(Debug) bool bShowInteractionLog;
+var bool m_bChangingState;
+var bool m_bCantInterruptIO;
+var bool m_bMoveTargetAlreadySet;
+var float m_fLastBump;  // the time where the pawn was bumped
+var float m_fLoopAnimTime;
+var R6Pawn m_r6pawn;  // remove r6pawn() cast
+var R6Ladder m_TargetLadder;
+var Actor m_BumpedBy;
+var R6ClimbableObject m_climbingObject;
 //InteractiveObjects
-var         R6InteractiveObject m_InteractionObject;
-var         Actor               m_ActorTarget;
-var         name                m_AnimName;
-var         FLOAT               m_fLoopAnimTime;
-var         name                m_StateAfterInteraction;
-var         BOOL                m_bChangingState;
-var         BOOL                m_bCantInterruptIO;
-var			BOOL				m_bMoveTargetAlreadySet;
+var R6InteractiveObject m_InteractionObject;
+var Actor m_ActorTarget;
+var R6IORotatingDoor m_closeDoor;  // the door too close after opening one
+var name m_bumpBackUpNextState;  // return state when BumpBackUp state is over
+var name m_openDoorNextState;  // return state when OpenDoor state is over
+var name m_climbingObjectNextState;  // return state when BumpBackUp state is over
+var name m_AnimName;
+var name m_StateAfterInteraction;
+var Vector m_vTargetPosition;
+var Vector m_vPreviousPosition;
+var Vector m_vBumpedByLocation;  // used in state code
+var Vector m_vBumpedByVelocity;  // used in state code
 
-var         R6IORotatingDoor    m_closeDoor; // the door too close after opening one
-
-//Matinee SubActions: clauzon 03/04/2001
-/*MATINEE_AI_MODE see R6Engine/classes/backup/R6ActionExecuteAI.uc
-var         R6SubActionGoto             m_SubActionGoto;
-var         vector                      m_AttachPos;
-var         rotator                     m_AttachRot;
-*/
-
+// Export UR6AIController::execMakePathToRun(FFrame&, void* const)
 // Find the best path to run away from an enemy (you must set Enemy before calling this)
-native(1810) final function BOOL MakePathToRun();
+ native(1810) final function bool MakePathToRun();
+
+// Export UR6AIController::execFindPlaceToTakeCover(FFrame&, void* const)
 // Find the closest available spot
-native(1811) final function R6ActionSpot FindPlaceToTakeCover( vector vThreatLocation, FLOAT fMaxDistance );
-native(1817) final function R6ActionSpot FindPlaceToFire( actor pTarget, vector vDestination, FLOAT fMaxDistance );
-native(1818) final function R6ActionSpot FindInvestigationPoint( INT iSearchIndex, FLOAT fMaxDistance, optional BOOL bFromThreat, optional vector vThreatLocation );
+ native(1811) final function R6ActionSpot FindPlaceToTakeCover(Vector vThreatLocation, float fMaxDistance);
 
-native(1813) final function BOOL PickActorAdjust(Actor pActor);
+// Export UR6AIController::execFindPlaceToFire(FFrame&, void* const)
+ native(1817) final function R6ActionSpot FindPlaceToFire(Actor PTarget, Vector vDestination, float fMaxDistance);
 
+// Export UR6AIController::execFindInvestigationPoint(FFrame&, void* const)
+ native(1818) final function R6ActionSpot FindInvestigationPoint(int iSearchIndex, float fMaxDistance, optional bool bFromThreat, optional Vector vThreatLocation);
+
+// Export UR6AIController::execPickActorAdjust(FFrame&, void* const)
+ native(1813) final function bool PickActorAdjust(Actor pActor);
+
+// Export UR6AIController::execMoveToPosition(FFrame&, void* const)
 // RBrek 13 Aug 2001 - Latent move function that will gradually move pawn to a certain location and orientation/rotation in
 //                      a certain amount of time...
-native(2201) final function MoveToPosition(vector vPosition, rotator rOrientation); 
+ native(2201) final function MoveToPosition(Vector VPosition, Rotator rOrientation);
 
+// Export UR6AIController::execFollowPath(FFrame&, void* const)
 // Latent function to follow a path already calculated with function like FindPathTo and FindPathToward
-native(1812) final function FollowPath( optional R6Pawn.eMovementPace ePace, optional name returnLabel, optional BOOL bContinuePath );
-native(1814) final function FollowPathTo( vector vDestination, optional R6Pawn.eMovementPace ePace, optional actor aTarget );
+ native(1812) final function FollowPath(optional R6Pawn.eMovementPace ePace, optional name returnLabel, optional bool bContinuePath);
 
+// Export UR6AIController::execFollowPathTo(FFrame&, void* const)
+ native(1814) final function FollowPathTo(Vector vDestination, optional R6Pawn.eMovementPace ePace, optional Actor aTarget);
+
+// Export UR6AIController::execCanWalkTo(FFrame&, void* const)
 // Check if the pawn can go to the destination with a MoveTo
-native(1815) final function bool CanWalkTo( vector vDestination, OPTIONAL BOOL bDebug );
-native(1816) final function rotator FindGrenadeDirectionToHitActor( Actor aTarget, vector vTargetLoc, FLOAT fGrenadeSpeed );
-native(1509) final function bool NeedToOpenDoor(Actor target);
-native(1510) final function GotoOpenDoorState( R6Door navPointToOpenFrom );
-native(2209) final function FindNearbyWaitSpot(Actor node, out vector vWaitLocation);
-native(2220) final function bool ActorReachableFromLocation(Actor target, vector vLocation);
+ native(1815) final function bool CanWalkTo(Vector vDestination, optional bool bDebug);
+
+// Export UR6AIController::execFindGrenadeDirectionToHitActor(FFrame&, void* const)
+ native(1816) final function Rotator FindGrenadeDirectionToHitActor(Actor aTarget, Vector vTargetLoc, float fGrenadeSpeed);
+
+// Export UR6AIController::execNeedToOpenDoor(FFrame&, void* const)
+ native(1509) final function bool NeedToOpenDoor(Actor Target);
+
+// Export UR6AIController::execGotoOpenDoorState(FFrame&, void* const)
+ native(1510) final function GotoOpenDoorState(R6Door navPointToOpenFrom);
+
+// Export UR6AIController::execFindNearbyWaitSpot(FFrame&, void* const)
+ native(2209) final function FindNearbyWaitSpot(Actor Node, out Vector vWaitLocation);
+
+// Export UR6AIController::execActorReachableFromLocation(FFrame&, void* const)
+ native(2220) final function bool ActorReachableFromLocation(Actor Target, Vector vLocation);
 
 function Possess(Pawn aPawn)
 {
-    super.Possess( aPawn );
-
-    m_r6pawn = R6Pawn( aPawn );
-    m_r6pawn.SetFriendlyFire();
+	super(Controller).Possess(aPawn);
+	m_r6pawn = R6Pawn(aPawn);
+	m_r6pawn.SetFriendlyFire();
+	return;
 }
 
-function Tick(FLOAT fDeltaTime)
+function Tick(float fDeltaTime)
 {
-    Super.Tick(fDeltaTime);
-
-    if (pawn != None)
-    {
-        pawn.m_bIsFiringWeapon = bFire; //(bFire > 0);
-#ifdefDEBUG
-        m_r6pawn.UpdateBones();
-#endif
-        if(m_r6pawn.m_TrackActor != none)
-        {
-            // IMPORTANT!! EnemyNotVisible() should be used to disable the TrackActor feature when the target actor is no longer visible
-            if(IsActorInView(m_r6pawn.m_TrackActor))
-            {
-                m_r6pawn.UpdatePawnTrackActor();
-            }
-            else
-            {
-                m_r6pawn.TurnToFaceActor(m_r6pawn.m_TrackActor);
-            }
-        }
-    }
+	super(Actor).Tick(fDeltaTime);
+	// End:0x81
+	if(__NFUN_119__(Pawn, none))
+	{
+		Pawn.m_bIsFiringWeapon = bFire;
+		// End:0x81
+		if(__NFUN_119__(m_r6pawn.m_TrackActor, none))
+		{
+			// End:0x64
+			if(IsActorInView(m_r6pawn.m_TrackActor))
+			{
+				m_r6pawn.__NFUN_2218__();				
+			}
+			else
+			{
+				m_r6pawn.TurnToFaceActor(m_r6pawn.m_TrackActor);
+			}
+		}
+	}
+	return;
 }
 
-function bool IsActorInView(Actor actor)
+function bool IsActorInView(Actor Actor)
 {
-    if((actor.location - pawn.location) dot vector(pawn.rotation) < 0)
-        return false;
-    else
-        return true;
+	// End:0x3D
+	if(__NFUN_176__(__NFUN_219__(__NFUN_216__(Actor.Location, Pawn.Location), Vector(Pawn.Rotation)), float(0)))
+	{
+		return false;		
+	}
+	else
+	{
+		return true;
+	}
+	return;
 }
 
-function bool IsActorRightOfView(Actor actor)
+function bool IsActorRightOfView(Actor Actor)
 {
-    if((actor.location - pawn.location) dot vector(pawn.rotation) < 0)
-        return false;
-    else
-        return true;
+	// End:0x3D
+	if(__NFUN_176__(__NFUN_219__(__NFUN_216__(Actor.Location, Pawn.Location), Vector(Pawn.Rotation)), float(0)))
+	{
+		return false;		
+	}
+	else
+	{
+		return true;
+	}
+	return;
 }
 
 event R6SetMovement(R6Pawn.eMovementPace ePace)
 {
-    //if(bShowLog) log( name $ " playing animation for pace: " $ ePace $ " bIsCrouched: " $ pawn.bIsCrouched $ " bWantsToCrouch: " $ pawn.bWantsToCrouch $ " bIsWalking: " $ pawn.bIsWalking );  
-    if ( !pawn.m_bIsProne && (ePace == PACE_Prone) )
-    {
-        pawn.m_bWantsToProne = true;
-    }
-    else if ( pawn.m_bIsProne && (ePace != PACE_Prone) )
-    {
-        pawn.m_bWantsToProne = false;
-        pawn.bWantsToCrouch = true;
-    }
-    else if(pawn.bIsCrouched)
-    {
-        if((ePace == PACE_Walk) || (ePace == PACE_Run))
-        {
-            pawn.bWantsToCrouch = false;
-        }
-    }
-    else
-    {
-        if((ePace == PACE_CrouchWalk) || (ePace == PACE_CrouchRun))
-        {
-            pawn.bWantsToCrouch = true;
-        }
-    } 
-
-    if((ePace == PACE_Walk) || (ePace == PACE_CrouchWalk) || (ePace == PACE_Prone))
-    {
-        if(!pawn.bIsWalking)
-        {
-            pawn.SetWalking(true);  
-        }
-    }
-    else if((ePace == PACE_Run) || (ePace == PACE_CrouchRun))
-    {
-        if(pawn.bIsWalking)
-        {
-            pawn.SetWalking(false);  
-        }
-    }
-
-    m_r6pawn.m_eMovementPace = ePace;
+	// End:0x3A
+	if(__NFUN_130__(__NFUN_129__(Pawn.m_bIsProne), __NFUN_154__(int(ePace), int(1))))
+	{
+		Pawn.m_bWantsToProne = true;		
+	}
+	else
+	{
+		// End:0x83
+		if(__NFUN_130__(Pawn.m_bIsProne, __NFUN_155__(int(ePace), int(1))))
+		{
+			Pawn.m_bWantsToProne = false;
+			Pawn.bWantsToCrouch = true;			
+		}
+		else
+		{
+			// End:0xCB
+			if(Pawn.bIsCrouched)
+			{
+				// End:0xC8
+				if(__NFUN_132__(__NFUN_154__(int(ePace), int(4)), __NFUN_154__(int(ePace), int(5))))
+				{
+					Pawn.bWantsToCrouch = false;
+				}				
+			}
+			else
+			{
+				// End:0xFE
+				if(__NFUN_132__(__NFUN_154__(int(ePace), int(2)), __NFUN_154__(int(ePace), int(3))))
+				{
+					Pawn.bWantsToCrouch = true;
+				}
+			}
+		}
+	}
+	// End:0x159
+	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(ePace), int(4)), __NFUN_154__(int(ePace), int(2))), __NFUN_154__(int(ePace), int(1))))
+	{
+		// End:0x156
+		if(__NFUN_129__(Pawn.bIsWalking))
+		{
+			Pawn.SetWalking(true);
+		}		
+	}
+	else
+	{
+		// End:0x19D
+		if(__NFUN_132__(__NFUN_154__(int(ePace), int(5)), __NFUN_154__(int(ePace), int(3))))
+		{
+			// End:0x19D
+			if(Pawn.bIsWalking)
+			{
+				Pawn.SetWalking(false);
+			}
+		}
+	}
+	m_r6pawn.m_eMovementPace = ePace;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -187,104 +228,103 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 //------------------------------------------------------------------
 function CheckPaceForInjury(out R6Pawn.eMovementPace ePace)
 {
-    if( m_r6pawn.m_eHealth == HEALTH_Wounded)
-    {
-        if(ePace == PACE_CrouchRun)
-            ePace = PACE_CrouchWalk;
-        else if(ePace == PACE_Run)
-            ePace = PACE_Walk;
-    }   
-    /*
-    if (bShowlog){
-        switch( m_eMovementPace)
-        {
-            case PACE_None:         logX( "None" );      break;
-            case PACE_Prone:        logX( "Prone" );     break;
-            case PACE_CrouchWalk:   logX( "CrouchWalk"); break;
-            case PACE_CrouchRun:    logX( "CrouchRun");  break;
-            case PACE_Walk:         logX( "Walk");       break;
-            case PACE_Run:          logX( "Run");        break;
-            default:                logX( "Unknown");    break;
-    }}*/
+	// End:0x4C
+	if(__NFUN_154__(int(m_r6pawn.m_eHealth), int(1)))
+	{
+		// End:0x34
+		if(__NFUN_154__(int(ePace), int(3)))
+		{
+			ePace = 2;			
+		}
+		else
+		{
+			// End:0x4C
+			if(__NFUN_154__(int(ePace), int(5)))
+			{
+				ePace = 4;
+			}
+		}
+	}
+	return;
 }
 
 // the following movement functions will handle moving the pawn in the right direction
 // with a desired orientation, and at the right speed/velocity.
 // if a focus is not specified, 
-function R6PreMoveTo(vector vTargetPosition, vector vFocus, R6Pawn.eMovementPace ePace)
+function R6PreMoveTo(Vector vTargetPosition, Vector vFocus, R6Pawn.eMovementPace ePace)
 {
-    CheckPaceForInjury(ePace);
-    R6SetMovement(ePace);
-
-    // these are set for GetFacingDirection()...
-    focus = none;
-    focalPoint = vFocus;
-    destination = vTargetPosition;
+	CheckPaceForInjury(ePace);
+	R6SetMovement(ePace);
+	Focus = none;
+	FocalPoint = vFocus;
+	Destination = vTargetPosition;
+	return;
 }
 
-function R6PreMoveToward(actor target, actor pFocus, R6Pawn.eMovementPace ePace)
+function R6PreMoveToward(Actor Target, Actor pFocus, R6Pawn.eMovementPace ePace)
 {
-    CheckPaceForInjury(ePace);
-    R6SetMovement(ePace);
-
-    // these are set for GetFacingDirection()...
-    focus = none;
-    focalPoint = pFocus.location;
-    destination = target.location;
+	CheckPaceForInjury(ePace);
+	R6SetMovement(ePace);
+	Focus = none;
+	FocalPoint = pFocus.Location;
+	Destination = Target.Location;
+	return;
 }
 
-/* GetFacingDirection()
-returns direction faced relative to movement dir
-
-0 = forward
-16384 = right
-32768 = back
-49152 = left
-*/
 // override the version in AIController.uc so that only depend on focalpoint and destination...
 function int GetFacingDirection()
 {
-    local float fStrafeMag;
-    local vector vFocus2D, vLoc2D, vDest2D, vDir, vLookDir, vY;
+	local float fStrafeMag;
+	local Vector vFocus2D, vLoc2D, vDest2D, vDir, vLookDir, vY;
 
-    if(focalPoint == destination)
-        return 0;
-
-    // check for strafe or backup
-    vFocus2D = focalPoint;
-    vFocus2D.Z = 0;
-    vLoc2D = pawn.location;
-    vLoc2D.Z = 0;
-    vDest2D = destination;
-    vDest2D.Z = 0;
-    vLookDir = Normal(vFocus2D - vLoc2D);
-    vDir = Normal(vDest2D - vLoc2D);
-    fStrafeMag = vLookDir dot vDir;
-    if ( fStrafeMag < 0.75 )
-    {
-        if ( fStrafeMag < -0.75 )
-            return 32768;
-        else
-        {
-            vY = (vLookDir cross vect(0,0,1));
-            if ((vY Dot (vDest2D - vLoc2D)) > 0)
-                return 49152;
-            else
-                return 16384;
-        }
-    }
-
-    return 0;
+	// End:0x11
+	if(__NFUN_217__(FocalPoint, Destination))
+	{
+		return 0;
+	}
+	vFocus2D = FocalPoint;
+	vFocus2D.Z = 0.0000000;
+	vLoc2D = Pawn.Location;
+	vLoc2D.Z = 0.0000000;
+	vDest2D = Destination;
+	vDest2D.Z = 0.0000000;
+	vLookDir = __NFUN_226__(__NFUN_216__(vFocus2D, vLoc2D));
+	vDir = __NFUN_226__(__NFUN_216__(vDest2D, vLoc2D));
+	fStrafeMag = __NFUN_219__(vLookDir, vDir);
+	// End:0x110
+	if(__NFUN_176__(fStrafeMag, 0.7500000))
+	{
+		// End:0xCC
+		if(__NFUN_176__(fStrafeMag, -0.7500000))
+		{
+			return 32768;			
+		}
+		else
+		{
+			vY = __NFUN_220__(vLookDir, vect(0.0000000, 0.0000000, 1.0000000));
+			// End:0x10A
+			if(__NFUN_177__(__NFUN_219__(vY, __NFUN_216__(vDest2D, vLoc2D)), float(0)))
+			{
+				return 49152;				
+			}
+			else
+			{
+				return 16384;
+			}
+		}
+	}
+	return 0;
+	return;
 }
-
 
 //------------------------------------------------------------------
 // CanClimbLadders
 //  
 //------------------------------------------------------------------
-function bool CanClimbLadders( R6Ladder ladder )
+function bool CanClimbLadders(R6Ladder Ladder)
 {
-    return m_r6pawn.m_bAutoClimbLadders;
+	return m_r6pawn.m_bAutoClimbLadders;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -293,509 +333,59 @@ function bool CanClimbLadders( R6Ladder ladder )
 //------------------------------------------------------------------
 function bool CanClimbObject()
 {
-    return m_r6pawn.m_bCanClimbObject;
+	return m_r6pawn.m_bCanClimbObject;
+	return;
 }
 
-function CheckNeedToClimbLadder();
-
-//----------------------------//
-// -- state WAITFORLADDER  -- //
-//----------------------------//
-state WaitToClimbLadder
+function CheckNeedToClimbLadder()
 {
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...entered WaitToClimbLadder state..."); #endif
-        //m_TargetLadder must be valid...
-    }
-
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...exited WaitToClimbLadder state..."); #endif
-    }
-
-	function vector GetWaitPosition()
-	{
-		if(m_TargetLadder.m_bIsTopOfLadder)
-			return(m_TargetLadder.location + 200*vector(m_TargetLadder.rotation + rot(0,8192,0)));
-		else
-			return(m_TargetLadder.location - 200*vector(m_TargetLadder.rotation + rot(0,8192,0)));
-	}
-
-Begin:
-    // move to an appropriate position to wait...
-	destination = GetWaitPosition();
-    R6PreMoveTo(destination, m_TargetLadder.location, PACE_Walk); 
-    MoveTo(destination, m_TargetLadder);    
-    StopMoving();
-    #ifdefDEBUG if(bShowLog) log(pawn$" has reached a position to wait to climb ladder..."); #endif
-
-Wait:
-    Sleep(1.0);
-    // wait for ladder to become free...
-    if(LadderIsAvailable())
-    {
-        #ifdefDEBUG if(bShowLog) log(m_TargetLadder.myLadder$" is now available!! for "$pawn$" to climb..."); #endif
-		
-		moveTarget = m_TargetLadder; 
-		Sleep(2.0);  // allow for an additional small delay to ensure that ladder has been cleared...
-		GotoState('ApproachLadder');
-    }
-    else
-        Goto('Wait');
+	return;
 }
 
-function ConfirmLadderActionPointWasReached(R6Ladder ladder);
+function ConfirmLadderActionPointWasReached(R6Ladder Ladder)
+{
+	return;
+}
 
 function bool LadderIsAvailable()
 {
 	local R6LadderVolume ladderVol;
 
-	ladderVol = R6LadderVolume(m_TargetLadder.myLadder);
-
-	if(!ladderVol.IsAvailable(Pawn))
-		return false;
-
-	if(m_TargetLadder.m_bIsTopOfLadder && ladderVol.IsAShortLadder() && !ladderVol.SpaceIsAvailableAtBottomOfLadder(true))
-		return false;
-
-	return true;
-}
-
-//----------------------------//
-// -- state APPROACHLADDER -- //
-//----------------------------// 
-// * this state assumes that controller.moveTarget has been set to the R6Ladder actor at the start 
-// of the ladder that the pawn is supposed to climb 
-// * when pawn finishes climbing the ladder, will enter state Dispatcher... will only exit state 
-// Dispatcher if/when nextState != '' 
-state ApproachLadder
-{
-ignores SeePlayer, HearNoise;
-
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...entered ApproachLadder state...moveTarget="$moveTarget); #endif
-		m_TargetLadder = R6Ladder(moveTarget);
-        m_bStateBackupAvoidFacingWalls = m_r6pawn.m_bAvoidFacingWalls;
-        m_r6pawn.m_bAvoidFacingWalls = false;
-		pawn.m_bCanProne = false;
-    }
-
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...exited ApproachLadder state..."); #endif
-		pawn.m_bCanProne = true;
-		if(pawn.physics != PHYS_Ladder)
-			R6LadderVolume(m_TargetLadder.myLadder).RemoveClimber(m_r6pawn);
-    }
-
-	function bool ReadyToClimbLadder()
+	ladderVol = R6LadderVolume(m_TargetLadder.MyLadder);
+	// End:0x34
+	if(__NFUN_129__(ladderVol.IsAvailable(Pawn)))
 	{
-		local R6RainbowAI  rainbowAI;
-
-		rainbowAI = R6RainbowAI(m_r6pawn.controller);
-		rainbowAI.m_TeamManager.SetTeamIsClimbingLadder(true);
-
-		if( ((rainbowAI.m_TeamManager.m_iTeamAction & TEAM_ClimbLadder) > 0) && rainbowAI.m_TeamManager.m_bCAWaitingForZuluGoCode)
-			return false;
-
-		return true;
+		return false;
 	}
-
-Begin:    
-    pawn.SetBoneRotation('R6 Spine1', rot(0,0,0),, 1.0);
-
-    //TODO:  check if pawn is already at the R6Ladder actor (check distance between pawn and moveTarget ***...    
-    // assume that moveTarget was set to the R6Ladder actor at the beginning of the ladder we wish to climb
-    if(m_TargetLadder == none) 
-        GotoState('Dispatcher');
-
-    // check to make sure that no pawn is already on the ladder...
-    if(!LadderIsAvailable())
-        GotoState('WaitToClimbLadder'); 
-
-    R6LadderVolume(m_TargetLadder.myLadder).AddClimber(m_r6pawn);
-
-MoveToStartOfLadder:
-    #ifdefDEBUG if(bShowLog) log(pawn$" approaches beginning of ladder...m_TargetLadder="$m_TargetLadder);  #endif
-	// WAIT : check if it is still necessary to climb the ladder.... where is pacemember?)
-	CheckNeedToClimbLadder();
-
-    // move to ladder
-    R6PreMoveToward(m_TargetLadder, m_TargetLadder, PACE_Walk);
-    MoveToward(m_TargetLadder); 
-	if(DistanceTo(m_TargetLadder) >= 40)
-    {
-        StopMoving();
-        Sleep(1.0);
-        Goto('MoveToStartOfLadder');
-    }
-    
-	ConfirmLadderActionPointWasReached(m_TargetLadder);
-
-WaitForZuluGoCode:
-    if( m_r6pawn.m_ePawnType == PAWN_Rainbow )
-    {
-		if(!ReadyToClimbLadder())
-        {
-            Sleep(0.5);
-            goto('WaitForZuluGoCode');
-        }
-    }
-        
-Wait:
-    Sleep(0.5); 
-
-    //TODO : FIXTHIS!!! only do this if we are a potential climber...state PotentialClimb
-    //  *** we should not even be here if the laddervolume has not detected this pawn....*****
-    if(!m_TargetLadder.m_bIsTopOfLadder)  // if we are at the top, play the animation that includes turning...
-    {
-        destination = m_TargetLadder.location;
-        destination.z = pawn.location.z;  
-        MoveToPosition(destination, m_TargetLadder.rotation);
-    }       
-    else
-    { 
-        destination = m_TargetLadder.location + 50*vector(m_TargetLadder.rotation);
-        destination.z = pawn.location.z;  
-        MoveToPosition(destination, m_TargetLadder.rotation + rot(0,32768,0));
-    }
-
-    // pawn should get into (almost exactly) the right position, and keep trying until pawn does.
-    if((VSize(pawn.location - destination) >= 10))
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$" did not get into exactly the right position, so try again.... "); #endif
-        Sleep(1.0);
-        Goto('Wait');
-    }
-
-    #ifdefDEBUG if(bShowLog) log(pawn$" in state ApproachLadder : m_TargetLadder ="$m_TargetLadder$" m_r6pawn.m_potentialActionActor="$m_r6pawn.m_potentialActionActor); #endif
-    // note: MoveToPosition() and MoveTo() both reset moveTarget to none...
-    if((m_r6pawn.m_potentialActionActor == none) || (!m_r6pawn.m_potentialActionActor.IsA('R6LadderVolume')))
-    {
-        moveTarget = m_TargetLadder;  // moveTarget has been reset to none by MoveToPosition()
-        goto('Wait');
-    }
-
-    // we need to make sure that pawn has succeeded in reaching beginning of ladder... otherwise they should keep trying... 
-    // make sure pawn is not already climbing a ladder
-    if(!m_r6pawn.m_bIsClimbingLadder)
-    {       
-        // check to make sure that no pawn is already on the ladder...
-        if(!R6LadderVolume(m_TargetLadder.myLadder).IsAvailable(Pawn))
-        {
-            GotoState('WaitToClimbLadder'); 
-        }
-
-		m_r6pawn.ClimbLadder(LadderVolume(m_r6pawn.m_potentialActionActor));  
-    }
+	// End:0x73
+	if(__NFUN_130__(__NFUN_130__(m_TargetLadder.m_bIsTopOfLadder, ladderVol.IsAShortLadder()), __NFUN_129__(ladderVol.SpaceIsAvailableAtBottomOfLadder(true))))
+	{
+		return false;
+	}
+	return true;
+	return;
 }
 
-function bool AreClimbingInSameDirection(R6Pawn npcPawn, R6Pawn playerPawn)
+function bool AreClimbingInSameDirection(R6Pawn npcPawn, R6Pawn PlayerPawn)
 {
-    if(playerPawn.velocity.z != 0.0)
-    {
-        if(npcPawn.IsMovingUpLadder() == playerPawn.IsMovingUpLadder())
-            return true;
-    }
-
-    return false;
-}
-
-//---------------------------------//
-// -- state BEGINCLIMBINGLADDER -- //
-//---------------------------------//
-state BeginClimbingLadder
-{
-ignores SeePlayer, HearNoise;
- 
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...entered BeginClimbingLadder state..."); #endif
-		pawn.m_bCanProne = false;
-        disable('NotifyBump');
-    }
-
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...exited BeginClimbingLadder state..."); #endif
-		pawn.m_bCanProne = true;
-		m_bMoveTargetAlreadySet = false;
-		pawn.LadderSpeed = pawn.default.LadderSpeed;
-    }
-
-    event bool NotifyBump(Actor other)
-    {
-        local R6Pawn bumpingPawn;
-
-        if(!other.IsA('R6Pawn'))
-            return false;           // 13 jan 2002 rbrek - ignore notifyBump events for non pawns
-
-        m_BumpedBy = other;
-        bumpingPawn = R6Pawn(other);
-
-        if(bumpingPawn.m_bIsClimbingLadder && !AreClimbingInSameDirection(m_r6pawn, bumpingPawn)) 
-        {           
-            if(!bumpingPawn.m_bIsPlayer)
-            {
-                #ifdefDEBUG if(bShowLog) log(pawn$" has bumped into another NPC on the ladder!!! "$bumpingPawn$" whose velocity is "$bumpingPawn.velocity$" and state="$bumpingPawn.controller.GetStateName()); #endif
-                if(R6AIController(bumpingPawn.controller).DistanceTo(bumpingPawn.m_Ladder) < DistanceTo(m_r6pawn.m_Ladder))
-                    return false;
-            }
-
-            #ifdefDEBUG if(bShowLog) log(pawn$" has been bumped by player!! so change direction and get off!! ");            #endif
-            pawn.ladderSpeed = 200;			
-			if(pawn.velocity.z > 0)
-				moveTarget = R6LadderVolume(pawn.OnLadder).m_BottomLadder;
-            else
-                moveTarget = R6LadderVolume(pawn.OnLadder).m_TopLadder;
-                       
-			pawn.bIsWalking = false;
-            m_bGetOffLadder = true;
-            return true;
-        }   
-		
-		if(!bumpingPawn.m_bIsClimbingLadder)
+	// End:0x42
+	if(__NFUN_181__(PlayerPawn.Velocity.Z, 0.0000000))
+	{
+		// End:0x42
+		if(__NFUN_242__(npcPawn.IsMovingUpLadder(), PlayerPawn.IsMovingUpLadder()))
 		{
-			Gotostate('BeginClimbingLadder', 'BlockedAtTop');
 			return true;
 		}
-    }
-
-Begin:
-    if(pawn.bIsCrouched)
-        pawn.bWantsToCrouch = false;
-	Sleep(0.5);
-
-	if(pawn.m_ePawnType == PAWN_Rainbow)
-	{
-		m_r6pawn.SetNextPendingAction(PENDING_SecureWeapon); 
-		FinishAnim(m_r6pawn.C_iWeaponRightAnimChannel); 
-
-		if(!LadderIsAvailable())
-		{
-			m_r6pawn.m_bIsClimbingLadder = false;
-			R6LadderVolume(m_TargetLadder.myLadder).RemoveClimber(m_r6pawn);
-			pawn.SetPhysics(PHYS_Walking);
-			m_r6pawn.SetNextPendingAction(PENDING_EquipWeapon); 			    
-			GotoState('WaitToClimbLadder'); 	
-		}
 	}
-
-    m_r6pawn.m_bIsClimbingLadder = true;    
-    pawn.LockRootMotion(1, true);
-    m_r6pawn.SetNextPendingAction(PENDING_StartClimbingLadder);
-
-WaitForStartClimbingAnimToEnd:	
-    FinishAnim();
-
-StartLadder:
-    m_r6pawn.SetNextPendingAction(PENDING_PostStartClimbingLadder); 
-    FinishAnim(m_r6pawn.C_iBaseBlendAnimChannel);
-    pawn.SetRotation(pawn.OnLadder.LadderList.Rotation);
-    SetRotation(pawn.OnLadder.LadderList.Rotation);
-    focus = none;
-
-	if(m_bMoveTargetAlreadySet && moveTarget != none)
-		Goto('MoveTowardEndOfLadder');
-
-    if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)
-    {
-        pawn.SetLocation(pawn.location + 15*vector(pawn.rotation));  
-        m_TargetLadder = R6LadderVolume(pawn.OnLadder).m_BottomLadder;   
-    }
-    else
-    { 
-        // need this otherwise pawn will end up in wall/geometry  (root bone is not centered)
-        if ( m_r6pawn.m_ePawnType != PAWN_Hostage )
-            pawn.SetLocation(pawn.location - 20*vector(pawn.rotation));
-        m_TargetLadder = R6LadderVolume(pawn.OnLadder).m_TopLadder; 
-    }
-    moveTarget = m_TargetLadder;
-
-MoveTowardEndOfLadder:
-    Enable('NotifyBump');
-    Pawn.Anchor = NavigationPoint(moveTarget);      // For follow path to know where the pawn is now
-    
-    // rainbow members always climb ladder fast...
-    if(m_r6pawn.m_ePawnType == PAWN_Rainbow && m_r6pawn.m_eHealth == HEALTH_Healthy)
-        pawn.bIsWalking = false;
-    
-    MoveToward(moveTarget);  
-    
-    if(m_r6pawn.m_ePawnType == PAWN_Rainbow)
-        pawn.bIsWalking = true;
-
-    Sleep(2);
-    Goto('MoveTowardEndOfLadder');
-
-BlockedAtTop:
-	StopMoving();
-	Sleep(1.5);
-	moveTarget = m_TargetLadder;
-	goto('MoveTowardEndOfLadder');
-}
-
-//-------------------------------//
-// -- state ENDCLIMBINGLADDER -- //
-//-------------------------------//
-state EndClimbingLadder
-{
-ignores SeePlayer, HearNoise;
-
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...entered EndClimbingLadder state...pawn.location="$pawn.location); #endif
-        pawn.acceleration = vect(0,0,0);
-		Disable('NotifyBump');
-    }
-
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) log(pawn$"...exited EndClimbingLadder state...pawn.location="$pawn.location); #endif
-        pawn.onLadder = None; 
-		m_r6pawn.m_bIsClimbingLadder = false; 		
-		// fixes bug : player dies, and switches to an AI that is getting off ladder, AI is switched to state DEAD, 
-		// and bCollideWorld is never set back to true, player falls through map.
-		pawn.bCollideWorld = true;	
-        m_r6pawn.m_bAvoidFacingWalls = m_bStateBackupAvoidFacingWalls;
-    }
-
-    function bool NotifyHitWall(vector HitNormal, actor Wall)
-    {
-        return true; //pawn won't get notified...
-    }
-
-    function ClimbLadderIsOver()
-    {
-        local INT i;
-        
-        m_r6pawn.m_Ladder = none;
-        pawn.OnLadder = none;
-
-        // Check if we want to go to the other end of that ladder
-        while(i<16)
-        {
-            RouteCache[i] = none;
-            ++i;
-        }        
-    }
-
-Begin:
-	if(!m_r6pawn.m_bIsClimbingLadder)
-		goto('End');
-
-    if(m_r6pawn.m_Ladder.m_bIsTopOfLadder || pawn.bIsWalking || (m_r6pawn.m_ePawnType != PAWN_Rainbow))
-        pawn.LockRootMotion(1, true);
-
-    m_r6pawn.SetNextPendingAction(PENDING_EndClimbingLadder); 	
-	
-WaitForEndClimbingAnimToEnd:
-    FinishAnim(0);   
-	m_r6pawn.m_bSlideEnd = false;
-
-	ConfirmLadderActionPointWasReached(m_r6pawn.m_Ladder);
-
-EndClimb:
-    m_r6pawn.m_ePlayerIsUsingHands=HANDS_Both;
-    pawn.SetPhysics(PHYS_Walking);
-    m_TargetLadder = m_r6pawn.m_Ladder;
-    if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)
-    {
-        m_r6pawn.SetNextPendingAction(PENDING_PostEndClimbingLadder); 
-        //  pawn.SetLocation(pawn.location + 10*vector(pawn.rotation));    // todo rbrek
-        FinishAnim(m_r6pawn.C_iBaseBlendAnimChannel);
-    }
-    else if(pawn.bIsWalking || (m_r6pawn.m_ePawnType != PAWN_Rainbow))
-    {
-        m_r6pawn.SetNextPendingAction(PENDING_PostEndClimbingLadder); // todo : need to have a more exact animation so that zero tweening will look good.
-        //  pawn.SetLocation(pawn.location + 25*vector(pawn.rotation));     // todo rbrek : adjustments to make later...
-        FinishAnim(m_r6pawn.C_iBaseBlendAnimChannel);
-    }
-    focus = pawn.onLadder;
-    focalPoint = pawn.onLadder.location;
-    moveTarget = none;
-	m_r6pawn.m_bIsClimbingLadder = false; 
-
-	if(pawn.m_ePawnType == PAWN_Rainbow)
-		m_r6pawn.SetNextPendingAction(PENDING_EquipWeapon); 		
-	Enable('NotifyBump');
-
-End:
-    if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)   
-    {
-        Destination = pawn.location + 120*pawn.onLadder.lookDir;         
-        #ifdefDEBUG if(bShowLog) log("we are at the top of the ladder (pawn.location="$pawn.location$") so move forward to Destination="$Destination); #endif
-        R6PreMoveTo(Destination, Destination, PACE_Walk);  
-        MoveTo(Destination);        
-    }
-    else
-    {
-        Destination = pawn.location - 120*pawn.onLadder.lookDir;         
-        #ifdefDEBUG if(bShowLog) log("we are at the bottom of the ladder (pawn.location="$pawn.location$") so move back and play walking"); #endif
-        R6PreMoveTo(Destination, pawn.onLadder.location, PACE_Walk);  
-        MoveTo(Destination, pawn.onLadder);     
-    }
-	StopMoving();
-
-    //==TEAM AI==================================================//
-    if( m_r6pawn.m_ePawnType == PAWN_Rainbow )
-    {        
-        if(!m_bGetOffLadder)
-            R6RainbowAI(pawn.controller).m_TeamManager.MemberFinishedClimbingLadder(m_r6pawn);  
-    }
-    else if ( m_r6pawn.m_ePawnType == PAWN_Hostage )
-    {
-        ClimbLadderIsOver();
-    }
-    //===========================================================//
-    
-    if(m_bGetOffLadder)
-    {
-        m_bGetOffLadder = false;
-        GotoState('WaitToClimbLadder');
-    }
-    else if(nextState != '')
-        GotoState( nextState, nextLabel );   // should we reset nextState to ''?? TODO??
-    else
-        GotoState('Dispatcher');  
-}
-
-//------------------------//
-// -- state DISPATCHER -- //
-//------------------------//
-state Dispatcher
-{
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) log(" ... entered state Dispatcher..."); #endif
-    }
-
-Begin:
-    Sleep(3); 
-    if(nextState != '')
-        GotoState(nextState);
-
-    Goto('Begin');
-}
-
-state Dead
-{
-ignores SeePlayer, NotifyBump, R6DamageAttitudeTo, HearNoise, EnemyNotVisible;
-    function BeginState()
-    {
-        #ifdefDEBUG if (bShowLog) logX( Pawn.Name $" has died...."); #endif
-                
-        StopMoving();
-        SetLocation(Pawn.Location);
-    }
+	return false;
+	return;
 }
 
 // Called when killed
 function PawnDied()
 {
-    GotoState('Dead');
+	__NFUN_113__('Dead');
+	return;
 }
 
 //------------------------------------------------------------------
@@ -804,190 +394,76 @@ function PawnDied()
 //------------------------------------------------------------------
 function StopMoving()
 {
-    if ( pawn == none ) // if dead, return
-        return;
-        
-    pawn.acceleration = vect(0,0,0);
-    pawn.velocity = vect(0,0,0);
-    moveTarget = none;
-    Pawn.SetWalking(true);
+	// End:0x0D
+	if(__NFUN_114__(Pawn, none))
+	{
+		return;
+	}
+	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	Pawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
+	MoveTarget = none;
+	Pawn.SetWalking(true);
+	return;
 }
 
-//------------------------------------------------------------------//
-// function NotifyBump()                                            //
-//------------------------------------------------------------------//
-event bool NotifyBump(Actor other)
+event bool NotifyBump(Actor Other)
 {
-    if(!other.IsA('R6Pawn'))    // 13 jan 2002 rbrek - ignore notifyBump events for non pawns
-        return false;
-
-    // if i'm stationary OR the other pawn has priority to pass, bump
-    if( m_r6pawn.IsStationary() || !m_r6pawn.HasBumpPriority( r6pawn(other) ) ) 
-    {              
-        if( !m_bIgnoreBackupBump && !IsInState( 'ApproachLadder' ))      
-        {           
-            // this pawn is stationary...  so backup...
+	// End:0x18
+	if(__NFUN_129__(Other.__NFUN_303__('R6Pawn')))
+	{
+		return false;
+	}
+	// End:0xA3
+	if(__NFUN_132__(m_r6pawn.IsStationary(), __NFUN_129__(m_r6pawn.HasBumpPriority(R6Pawn(Other)))))
+	{
+		// End:0x9E
+		if(__NFUN_130__(__NFUN_129__(m_bIgnoreBackupBump), __NFUN_129__(__NFUN_281__('ApproachLadder'))))
+		{
 			StopMoving();
-            m_BumpedBy = other;            
-            if ( GetStateName() != 'BumpBackUp' )
-                GotoBumpBackUpState( GetStateName() );
-            else
-                GotoBumpBackUpState( m_bumpBackUpNextState );
-            return true;
-        }  
-        else
-            return false;
-    }        
-    else        
-		return PickActorAdjust(other);   
+			m_BumpedBy = Other;
+			// End:0x8E
+			if(__NFUN_255__(__NFUN_284__(), 'BumpBackUp'))
+			{
+				GotoBumpBackUpState(__NFUN_284__());				
+			}
+			else
+			{
+				GotoBumpBackUpState(m_bumpBackUpNextState);
+			}
+			return true;			
+		}
+		else
+		{
+			return false;
+		}		
+	}
+	else
+	{
+		return __NFUN_1813__(Other);
+	}
+	return;
 }
-
-//==========================================================//
-//                  -- state ClimbObject --                  //
-//==========================================================//
-
-/* // R6CLIMBABLEOBJECT
-//------------------------------------------------------------------
-// GotoClimbObjectState: initialize and sets the current state to 
-//  ClimbObject.
-//------------------------------------------------------------------
-function GotoClimbObjectState( R6ClimbableObject climbingObject, name returnState )
-{
-    m_climbingObject = climbingObject;
-    m_climbingObjectNextState = returnState;
-    GotoState( 'ClimbObject' );
-}
-
-//------------------------------------------------------------------
-// state: ClimbObject
-//  
-//------------------------------------------------------------------
-state ClimbObject
-{
-    ignores SeePlayer, HearNoise, NotifyBump; 
-    
-    function BeginState()
-    {
-        #ifdefDEBUG if ( bShowLog ) logX( "begin state" );       #endif
-
-        StopMoving();
-        m_bStateBackupAvoidFacingWalls = m_r6pawn.m_bAvoidFacingWalls;
-        m_r6pawn.SetAvoidFacingWalls( false );
-    }
-
-    function EndState()
-    {
-        m_r6pawn.SetAvoidFacingWalls( m_bStateBackupAvoidFacingWalls );
-    }   
-
-    function FixLocationAfterClimbing( INT iNewZ )
-    {
-        local vector vLoc;
-
-        vLoc = pawn.location;
-        vLoc.Z = iNewZ;
-
-        pawn.SetLocation( vLoc );
-    }
-
-Begin:
-    StopMoving();
-    // set pace and orientation
-    if ( R6Rainbow( pawn ) != none )
-        R6RainbowAI( pawn.controller ).R6PreMoveToward( m_climbingObject, m_climbingObject );
-    else
-        R6PreMoveToward( m_climbingObject, m_climbingObject, m_r6pawn.m_eMovementPace );
-        
-    Sleep(0.5);
-
-    m_fLastBump = Level.TimeSeconds;
-    while ( !m_climbingObject.IsClimbableBy( m_r6pawn, true, true ) )
-    {
-         // log ( "wait can't climb object now" );
-        Sleep( 0.3 );
-
-        if ( Level.TimeSeconds > m_fLastBump + 3 )
-        {
-            goto( 'EndClimbing' );
-            break;
-        }
-    }
-    
-    if (pawn.bIsCrouched && R6Rainbow(pawn) != none )
-    {
-        R6Rainbow(pawn).EndKneeDown();
-        FinishAnim(m_r6pawn.C_iBaseBlendAnimChannel);
-    }
-
-    m_r6pawn.m_climbObject = m_climbingObject;
- 
-    // begin climbing anim
-    pawn.LockRootMotion(1, false);
-    m_r6pawn.StopAnimating();
-    m_r6pawn.SetNextPendingAction(PENDING_StartClimbingObject);
-    
-    // end climbing anim
-    FinishAnim();
-    m_r6pawn.SetNextPendingAction(PENDING_PostStartClimbingObject);
-
-    if ( pawn.bIsCrouched )
-        pawn.SetLocation(pawn.location + vect(0,0,20));                 
-    
-    FinishAnim( m_r6pawn.C_iBaseBlendAnimChannel );
-    m_r6pawn.m_bPostureTransition = false;
-    m_r6pawn.PlayWaiting();
-
-    //log("current z: " $pawn.location.Z );
-
-    if ( pawn.bIsCrouched && R6Rainbow(pawn) != none )
-        R6Rainbow(pawn).BlendKneeOnGround();
-
-EndClimbing:
-    Focus = none;
-    m_climbingObject = none;
-
-    if ( m_climbingObjectNextState != '' )   
-    {
-        GotoState( m_climbingObjectNextState );
-    }       
-    else
-    {
-        ClimbObjectStateFinished();
-    }
-}
-
-
-//------------------------------------------------------------------
-// ClimbObjectStateFinished: function fired if there is not a 
-//  return state (in m_climbingObjectNextState)
-//------------------------------------------------------------------
-function ClimbObjectStateFinished()
-{
-    log( "ScriptWarning: ClimbObjectStateFinished was not inherited" );
-}*/
-
-
-//==========================================================//
-//                  -- state BUMPBACKUP --                  //
-//==========================================================//
 
 function bool IsInCrouchedPosture()
 {
-    return pawn.bIsCrouched;
+	return Pawn.bIsCrouched;
+	return;
 }
 
 //------------------------------------------------------------------
 // GotoBumpBackUpState: initialize and sets the current state to 
 //  BumpBackUp.
 //------------------------------------------------------------------
-function GotoBumpBackUpState( name returnState )
+function GotoBumpBackUpState(name returnState)
 {
-    if(returnState == 'BumpBackUp')
-    {
-        return;
-    }
-    m_bumpBackUpNextState = returnState;
-    GotoState( 'BumpBackUp' );
+	// End:0x11
+	if(__NFUN_254__(returnState, 'BumpBackUp'))
+	{
+		return;
+	}
+	m_bumpBackUpNextState = returnState;
+	__NFUN_113__('BumpBackUp');
+	return;
 }
 
 //------------------------------------------------------------------
@@ -996,11 +472,13 @@ function GotoBumpBackUpState( name returnState )
 //------------------------------------------------------------------
 function bool IsBumpBackUpStateFinish()
 {
-    // Check first if we are in this state from too long
-    if(m_fLastBump + C_fMaxBumpTime < Level.TimeSeconds)
-        return true;
-
-    return (DistanceTo(m_BumpedBy) >= c_iDistanceBumpBackUp);
+	// End:0x21
+	if(__NFUN_176__(__NFUN_174__(m_fLastBump, 1.0000000), Level.TimeSeconds))
+	{
+		return true;
+	}
+	return __NFUN_179__(DistanceTo(m_BumpedBy), float(c_iDistanceBumpBackUp));
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1009,67 +487,851 @@ function bool IsBumpBackUpStateFinish()
 //------------------------------------------------------------------
 function BumpBackUpStateFinished()
 {
-    log( "ScriptWarning: BumpBackUpStateFinished was not inherited" );
+	__NFUN_231__("ScriptWarning: BumpBackUpStateFinished was not inherited");
+	return;
 }
 
 //------------------------------------------------------------------
 // DistanceTo: distance to a pawn without considering the Z axis
 //  
 //------------------------------------------------------------------
-function FLOAT DistanceTo(Actor member, optional bool bIncludeZ)
+function float DistanceTo(Actor member, optional bool bIncludeZ)
 {
-    local   vector  vDistance;
-	
-	if(member == none)
-		return 0.f;
+	local Vector vDistance;
 
-    vDistance = pawn.location - member.location;
-    if(!bIncludeZ)
-		vDistance.z = 0.f;
-    return (VSize(vDistance));
+	// End:0x11
+	if(__NFUN_114__(member, none))
+	{
+		return 0.0000000;
+	}
+	vDistance = __NFUN_216__(Pawn.Location, member.Location);
+	// End:0x50
+	if(__NFUN_129__(bIncludeZ))
+	{
+		vDistance.Z = 0.0000000;
+	}
+	return __NFUN_225__(vDistance);
+	return;
 }
 
 //------------------------------------------------------------------
-// state: BumpBackUp
+// CanOpenDoor: check if the pawn has the ability to open the door
+//  ie: in case it's locked.
+//------------------------------------------------------------------
+event bool CanOpenDoor(R6IORotatingDoor Door)
+{
+	return true;
+	return;
+}
+
+//------------------------------------------------------------------
+// OpenDoorFailed: triggered when the pawn try to go in the state 
+//  OpenDoor. Usually should go in another state
+//------------------------------------------------------------------
+event OpenDoorFailed()
+{
+	m_r6pawn.logWarning("should be overwritted. ie: gotostate('doSomethingIfDoorIsLocked')");
+	return;
+}
+
+//------------------------------------------------------------------
+// TestMakePath
+//------------------------------------------------------------------
+function SetStateTestMakePath(Pawn anEnemy, R6Pawn.eMovementPace ePace)
+{
+	Enemy = anEnemy;
+	m_r6pawn.m_eMovementPace = ePace;
+	LastSeenTime = Level.TimeSeconds;
+	__NFUN_113__('TestMakePath');
+	return;
+}
+
+//============================================================================
+// FLOAT GetCurrentChanceToHit - 
+//============================================================================
+function float GetCurrentChanceToHit(Actor aTarget)
+{
+	local float fAngle, fDistance, fError;
+
+	// End:0x1A
+	if(__NFUN_114__(Pawn.EngineWeapon, none))
+	{
+		return 0.0000000;
+	}
+	fAngle = __NFUN_171__(Pawn.EngineWeapon.GetCurrentMaxAngle(), 0.0174533);
+	fAngle = __NFUN_189__(fAngle);
+	fDistance = __NFUN_225__(__NFUN_216__(Pawn.Location, aTarget.Location));
+	fError = __NFUN_171__(fAngle, fDistance);
+	return __NFUN_172__(aTarget.CollisionRadius, fError);
+	return;
+}
+
+//============================================================================
+// BOOL IsReadyToFire - 
+//============================================================================
+function bool IsReadyToFire(Actor aTarget)
+{
+	local float fNeededChanceToHit, fSelfControl;
+
+	// End:0x1D
+	if(Pawn.EngineWeapon.IsAtBestAccuracy())
+	{
+		return true;
+	}
+	fSelfControl = m_r6pawn.GetSkill(5);
+	fNeededChanceToHit = __NFUN_171__(fSelfControl, fSelfControl);
+	// End:0x60
+	if(__NFUN_177__(fNeededChanceToHit, 1.0000000))
+	{
+		fNeededChanceToHit = 1.0000000;
+	}
+	return __NFUN_177__(GetCurrentChanceToHit(aTarget), fNeededChanceToHit);
+	return;
+}
+
+//============================================================================
+// BOOL IsFocusLeft - 
+//============================================================================
+function bool IsFocusLeft()
+{
+	local int iLeft, iRight;
+	local Rotator rFocus;
+
+	// End:0x0D
+	if(__NFUN_114__(Focus, none))
+	{
+		return true;
+	}
+	rFocus = Rotator(__NFUN_216__(Focus.Location, Pawn.Location));
+	iLeft = __NFUN_251__(__NFUN_147__(rFocus.Yaw, Pawn.Rotation.Yaw), 0, 65535);
+	iRight = __NFUN_251__(__NFUN_146__(rFocus.Yaw, Pawn.Rotation.Yaw), 0, 65535);
+	return __NFUN_150__(iLeft, iRight);
+	return;
+}
+
+//============================================================================
+// ChangeOrientationTo - 
+//============================================================================
+function ChangeOrientationTo(Rotator NewRotation)
+{
+	Focus = none;
+	FocalPoint = __NFUN_215__(Pawn.Location, __NFUN_212__(Vector(NewRotation), float(50)));
+	Pawn.DesiredRotation = NewRotation;
+	return;
+}
+
+//------------------------------------------------------------------
+// ChooseRandomDirection
 //  
 //------------------------------------------------------------------
+function Rotator ChooseRandomDirection(int iLookBackChance)
+{
+	local bool bLookBack, bTurnLeft;
+	local int ITemp;
+	local Rotator rRot;
+
+	bLookBack = __NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), iLookBackChance);
+	bTurnLeft = __NFUN_154__(__NFUN_167__(2), 1);
+	// End:0x43
+	if(bLookBack)
+	{
+		ITemp = __NFUN_146__(__NFUN_167__(16383), 16383);		
+	}
+	else
+	{
+		ITemp = __NFUN_146__(__NFUN_167__(8192), 8192);
+	}
+	rRot = Pawn.Rotation;
+	// End:0x88
+	if(bTurnLeft)
+	{
+		__NFUN_162__(rRot.Yaw, ITemp);		
+	}
+	else
+	{
+		__NFUN_161__(rRot.Yaw, ITemp);
+	}
+	return rRot;
+	return;
+}
+
+// The following function was taken from Bot.uc
+// FindBestPathToward() assumes the desired destination is not directly reachable. 
+// It tries to set Destination to the location of the best waypoint, and returns true if successful
+function bool FindBestPathToward(Actor desired, bool bClearPaths)
+{
+	local Actor Path;
+	local bool bSuccess;
+
+	Path = __NFUN_517__(desired, bClearPaths);
+	bSuccess = __NFUN_119__(Path, none);
+	// End:0x4B
+	if(bSuccess)
+	{
+		MoveTarget = Path;
+		Destination = Path.Location;
+	}
+	return bSuccess;
+	return;
+}
+
+//============================================================================
+// IsFacing - 
+//============================================================================
+function bool IsFacing(Actor aGrenade)
+{
+	local Vector vDir;
+
+	vDir = __NFUN_216__(aGrenade.Location, Pawn.Location);
+	// End:0x47
+	if(__NFUN_177__(__NFUN_219__(__NFUN_226__(vDir), Vector(Pawn.Rotation)), float(0)))
+	{
+		return true;
+	}
+	return false;
+	return;
+}
+
+//============================================================================
+// AIAffectedByGrenade - 
+//============================================================================
+function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
+{
+	return;
+}
+
+//============================================================================
+// GetGrenadeDirection - 
+//============================================================================
+function Rotator GetGrenadeDirection(Actor aTarget, optional Vector vTargetLoc)
+{
+	local Rotator rFiringRotation;
+
+	rFiringRotation = __NFUN_1816__(aTarget, vTargetLoc, Pawn.EngineWeapon.GetMuzzleVelocity());
+	return rFiringRotation;
+	return;
+}
+
+//===================================================================================================
+//   ####              #                                       #      ##                            
+//    ##              ##                                      ##                                    
+//    ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####  
+//    ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##      
+//    ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####   
+//    ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
+//   ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
+//===================================================================================================
+function bool CanInteractWithObjects(R6InteractiveObject o)
+{
+	return false;
+	return;
+}
+
+function PerformAction_StartInteraction()
+{
+	m_StateAfterInteraction = __NFUN_284__();
+	m_InteractionObject.m_SeePlayerPawn = none;
+	m_InteractionObject.m_HearNoiseNoiseMaker = none;
+	m_InteractionObject.m_bPawnDied = false;
+	m_bChangingState = true;
+	__NFUN_113__('PA_StartInteraction');
+	return;
+}
+
+function PerformAction_LookAt(Actor Target)
+{
+	m_ActorTarget = Target;
+	m_bChangingState = true;
+	__NFUN_113__('PA_LookAt');
+	return;
+}
+
+function PerformAction_Goto(Actor Target)
+{
+	m_ActorTarget = Target;
+	m_bChangingState = true;
+	__NFUN_113__('PA_Goto');
+	return;
+}
+
+function PerformAction_PlayAnim(name animName)
+{
+	m_AnimName = animName;
+	m_bChangingState = true;
+	__NFUN_113__('PA_PlayAnim');
+	return;
+}
+
+function PerformAction_LoopAnim(name animName, float fLoopAnimTime)
+{
+	m_AnimName = animName;
+	m_fLoopAnimTime = fLoopAnimTime;
+	m_bChangingState = true;
+	__NFUN_113__('PA_LoopAnim');
+	return;
+}
+
+function PerformAction_StopInteraction()
+{
+	m_bChangingState = true;
+	__NFUN_113__(m_StateAfterInteraction);
+	// End:0x2D
+	if(__NFUN_242__(m_InteractionObject.m_bPawnDied, true))
+	{
+		PawnDied();		
+	}
+	else
+	{
+		// End:0x55
+		if(__NFUN_119__(m_InteractionObject.m_SeePlayerPawn, none))
+		{
+			SeePlayer(m_InteractionObject.m_SeePlayerPawn);
+		}
+	}
+	// End:0x99
+	if(__NFUN_119__(m_InteractionObject.m_HearNoiseNoiseMaker, none))
+	{
+		HearNoise(m_InteractionObject.m_HearNoiseLoudness, m_InteractionObject.m_HearNoiseNoiseMaker, m_InteractionObject.m_HearNoiseType);
+	}
+	return;
+}
+
+state WaitToClimbLadder
+{
+	function BeginState()
+	{
+		return;
+	}
+
+	function EndState()
+	{
+		return;
+	}
+
+	function Vector GetWaitPosition()
+	{
+		// End:0x4C
+		if(m_TargetLadder.m_bIsTopOfLadder)
+		{
+			return __NFUN_215__(m_TargetLadder.Location, __NFUN_213__(float(200), Vector(__NFUN_316__(m_TargetLadder.Rotation, rot(0, 8192, 0)))));			
+		}
+		else
+		{
+			return __NFUN_216__(m_TargetLadder.Location, __NFUN_213__(float(200), Vector(__NFUN_316__(m_TargetLadder.Rotation, rot(0, 8192, 0)))));
+		}
+		return;
+	}
+Begin:
+
+	Destination = GetWaitPosition();
+	R6PreMoveTo(Destination, m_TargetLadder.Location, 4);
+	__NFUN_500__(Destination, m_TargetLadder);
+	StopMoving();
+Wait:
+
+
+	__NFUN_256__(1.0000000);
+	// End:0x68
+	if(LadderIsAvailable())
+	{
+		MoveTarget = m_TargetLadder;
+		__NFUN_256__(2.0000000);
+		__NFUN_113__('ApproachLadder');		
+	}
+	else
+	{
+		goto 'Wait';
+	}
+	stop;	
+}
+
+state ApproachLadder
+{
+	function BeginState()
+	{
+		m_TargetLadder = R6Ladder(MoveTarget);
+		m_bStateBackupAvoidFacingWalls = m_r6pawn.m_bAvoidFacingWalls;
+		m_r6pawn.m_bAvoidFacingWalls = false;
+		Pawn.m_bCanProne = false;
+		return;
+	}
+
+	function EndState()
+	{
+		Pawn.m_bCanProne = true;
+		// End:0x4C
+		if(__NFUN_155__(int(Pawn.Physics), int(11)))
+		{
+			R6LadderVolume(m_TargetLadder.MyLadder).RemoveClimber(m_r6pawn);
+		}
+		return;
+	}
+
+	function bool ReadyToClimbLadder()
+	{
+		local R6RainbowAI rainbowAI;
+
+		rainbowAI = R6RainbowAI(m_r6pawn.Controller);
+		rainbowAI.m_TeamManager.SetTeamIsClimbingLadder(true);
+		// End:0x75
+		if(__NFUN_130__(__NFUN_151__(__NFUN_156__(rainbowAI.m_TeamManager.m_iTeamAction, 512), 0), rainbowAI.m_TeamManager.m_bCAWaitingForZuluGoCode))
+		{
+			return false;
+		}
+		return true;
+		return;
+	}
+Begin:
+
+	Pawn.SetBoneRotation('R6 Spine1', rot(0, 0, 0),, 1.0000000);
+	// End:0x39
+	if(__NFUN_114__(m_TargetLadder, none))
+	{
+		__NFUN_113__('Dispatcher');
+	}
+	// End:0x4B
+	if(__NFUN_129__(LadderIsAvailable()))
+	{
+		__NFUN_113__('WaitToClimbLadder');
+	}
+	R6LadderVolume(m_TargetLadder.MyLadder).AddClimber(m_r6pawn);
+MoveToStartOfLadder:
+
+
+	CheckNeedToClimbLadder();
+	R6PreMoveToward(m_TargetLadder, m_TargetLadder, 4);
+	__NFUN_502__(m_TargetLadder);
+	// End:0xB5
+	if(__NFUN_179__(DistanceTo(m_TargetLadder), float(40)))
+	{
+		StopMoving();
+		__NFUN_256__(1.0000000);
+		goto 'MoveToStartOfLadder';
+	}
+	ConfirmLadderActionPointWasReached(m_TargetLadder);
+WaitForZuluGoCode:
+
+
+	// End:0xF2
+	if(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(1)))
+	{
+		// End:0xF2
+		if(__NFUN_129__(ReadyToClimbLadder()))
+		{
+			__NFUN_256__(0.5000000);
+			goto 'WaitForZuluGoCode';
+		}
+	}
+Wait:
+
+
+	__NFUN_256__(0.5000000);
+	// End:0x159
+	if(__NFUN_129__(m_TargetLadder.m_bIsTopOfLadder))
+	{
+		Destination = m_TargetLadder.Location;
+		Destination.Z = Pawn.Location.Z;
+		__NFUN_2201__(Destination, m_TargetLadder.Rotation);		
+	}
+	else
+	{
+		Destination = __NFUN_215__(m_TargetLadder.Location, __NFUN_213__(float(50), Vector(m_TargetLadder.Rotation)));
+		Destination.Z = Pawn.Location.Z;
+		__NFUN_2201__(Destination, __NFUN_316__(m_TargetLadder.Rotation, rot(0, 32768, 0)));
+	}
+	// End:0x1F7
+	if(__NFUN_179__(__NFUN_225__(__NFUN_216__(Pawn.Location, Destination)), float(10)))
+	{
+		__NFUN_256__(1.0000000);
+		goto 'Wait';
+	}
+	// End:0x23D
+	if(__NFUN_132__(__NFUN_114__(m_r6pawn.m_potentialActionActor, none), __NFUN_129__(m_r6pawn.m_potentialActionActor.__NFUN_303__('R6LadderVolume'))))
+	{
+		MoveTarget = m_TargetLadder;
+		goto 'Wait';
+	}
+	// End:0x2A1
+	if(__NFUN_129__(m_r6pawn.m_bIsClimbingLadder))
+	{
+		// End:0x27F
+		if(__NFUN_129__(R6LadderVolume(m_TargetLadder.MyLadder).IsAvailable(Pawn)))
+		{
+			__NFUN_113__('WaitToClimbLadder');
+		}
+		m_r6pawn.ClimbLadder(LadderVolume(m_r6pawn.m_potentialActionActor));
+	}
+	stop;		
+}
+
+state BeginClimbingLadder
+{
+	function BeginState()
+	{
+		Pawn.m_bCanProne = false;
+		__NFUN_118__('NotifyBump');
+		return;
+	}
+
+	function EndState()
+	{
+		Pawn.m_bCanProne = true;
+		m_bMoveTargetAlreadySet = false;
+		Pawn.LadderSpeed = Pawn.default.LadderSpeed;
+		return;
+	}
+
+	event bool NotifyBump(Actor Other)
+	{
+		local R6Pawn bumpingPawn;
+
+		// End:0x18
+		if(__NFUN_129__(Other.__NFUN_303__('R6Pawn')))
+		{
+			return false;
+		}
+		m_BumpedBy = Other;
+		bumpingPawn = R6Pawn(Other);
+		// End:0x147
+		if(__NFUN_130__(bumpingPawn.m_bIsClimbingLadder, __NFUN_129__(AreClimbingInSameDirection(m_r6pawn, bumpingPawn))))
+		{
+			// End:0xB6
+			if(__NFUN_129__(bumpingPawn.m_bIsPlayer))
+			{
+				// End:0xB6
+				if(__NFUN_176__(R6AIController(bumpingPawn.Controller).DistanceTo(bumpingPawn.m_Ladder), DistanceTo(m_r6pawn.m_Ladder)))
+				{
+					return false;
+				}
+			}
+			Pawn.LadderSpeed = 200.0000000;
+			// End:0x10A
+			if(__NFUN_177__(Pawn.Velocity.Z, float(0)))
+			{
+				MoveTarget = R6LadderVolume(Pawn.OnLadder).m_BottomLadder;				
+			}
+			else
+			{
+				MoveTarget = R6LadderVolume(Pawn.OnLadder).m_TopLadder;
+			}
+			Pawn.bIsWalking = false;
+			m_bGetOffLadder = true;
+			return true;
+		}
+		// End:0x169
+		if(__NFUN_129__(bumpingPawn.m_bIsClimbingLadder))
+		{
+			__NFUN_113__('BeginClimbingLadder', 'BlockedAtTop');
+			return true;
+		}
+		return;
+	}
+Begin:
+
+	// End:0x23
+	if(Pawn.bIsCrouched)
+	{
+		Pawn.bWantsToCrouch = false;
+	}
+	__NFUN_256__(0.5000000);
+	// End:0xC7
+	if(__NFUN_154__(int(Pawn.m_ePawnType), int(1)))
+	{
+		m_r6pawn.SetNextPendingAction(27);
+		__NFUN_261__(m_r6pawn.14);
+		// End:0xC7
+		if(__NFUN_129__(LadderIsAvailable()))
+		{
+			m_r6pawn.m_bIsClimbingLadder = false;
+			R6LadderVolume(m_TargetLadder.MyLadder).RemoveClimber(m_r6pawn);
+			Pawn.__NFUN_3970__(1);
+			m_r6pawn.SetNextPendingAction(28);
+			__NFUN_113__('WaitToClimbLadder');
+		}
+	}
+	m_r6pawn.m_bIsClimbingLadder = true;
+	Pawn.LockRootMotion(1, true);
+	m_r6pawn.SetNextPendingAction(5);
+WaitForStartClimbingAnimToEnd:
+
+
+	__NFUN_261__();
+StartLadder:
+
+
+	m_r6pawn.SetNextPendingAction(6);
+	__NFUN_261__(m_r6pawn.1);
+	Pawn.__NFUN_299__(Pawn.OnLadder.LadderList.Rotation);
+	__NFUN_299__(Pawn.OnLadder.LadderList.Rotation);
+	Focus = none;
+	// End:0x18D
+	if(__NFUN_130__(m_bMoveTargetAlreadySet, __NFUN_119__(MoveTarget, none)))
+	{
+		goto 'MoveTowardEndOfLadder';
+	}
+	// End:0x1FF
+	if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)
+	{
+		Pawn.__NFUN_267__(__NFUN_215__(Pawn.Location, __NFUN_213__(float(15), Vector(Pawn.Rotation))));
+		m_TargetLadder = R6LadderVolume(Pawn.OnLadder).m_BottomLadder;		
+	}
+	else
+	{
+		// End:0x24A
+		if(__NFUN_155__(int(m_r6pawn.m_ePawnType), int(3)))
+		{
+			Pawn.__NFUN_267__(__NFUN_216__(Pawn.Location, __NFUN_213__(float(20), Vector(Pawn.Rotation))));
+		}
+		m_TargetLadder = R6LadderVolume(Pawn.OnLadder).m_TopLadder;
+	}
+	MoveTarget = m_TargetLadder;
+MoveTowardEndOfLadder:
+
+
+	__NFUN_117__('NotifyBump');
+	Pawn.Anchor = NavigationPoint(MoveTarget);
+	// End:0x2DC
+	if(__NFUN_130__(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(1)), __NFUN_154__(int(m_r6pawn.m_eHealth), int(0))))
+	{
+		Pawn.bIsWalking = false;
+	}
+	__NFUN_502__(MoveTarget);
+	// End:0x30E
+	if(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(1)))
+	{
+		Pawn.bIsWalking = true;
+	}
+	__NFUN_256__(2.0000000);
+	goto 'MoveTowardEndOfLadder';
+BlockedAtTop:
+
+
+	StopMoving();
+	__NFUN_256__(1.5000000);
+	MoveTarget = m_TargetLadder;
+	goto 'MoveTowardEndOfLadder';
+	stop;				
+}
+
+state EndClimbingLadder
+{
+	function BeginState()
+	{
+		Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+		__NFUN_118__('NotifyBump');
+		return;
+	}
+
+	function EndState()
+	{
+		Pawn.OnLadder = none;
+		m_r6pawn.m_bIsClimbingLadder = false;
+		Pawn.bCollideWorld = true;
+		m_r6pawn.m_bAvoidFacingWalls = m_bStateBackupAvoidFacingWalls;
+		return;
+	}
+
+	function bool NotifyHitWall(Vector HitNormal, Actor Wall)
+	{
+		return true;
+		return;
+	}
+
+	function ClimbLadderIsOver()
+	{
+		local int i;
+
+		m_r6pawn.m_Ladder = none;
+		Pawn.OnLadder = none;
+		J0x20:
+
+		// End:0x43 [Loop If]
+		if(__NFUN_150__(i, 16))
+		{
+			RouteCache[i] = none;
+			__NFUN_163__(i);
+			// [Loop Continue]
+			goto J0x20;
+		}
+		return;
+	}
+Begin:
+
+	// End:0x1A
+	if(__NFUN_129__(m_r6pawn.m_bIsClimbingLadder))
+	{
+		goto 'End';
+	}
+	// End:0x75
+	if(__NFUN_132__(__NFUN_132__(m_r6pawn.m_Ladder.m_bIsTopOfLadder, Pawn.bIsWalking), __NFUN_155__(int(m_r6pawn.m_ePawnType), int(1))))
+	{
+		Pawn.LockRootMotion(1, true);
+	}
+	m_r6pawn.SetNextPendingAction(7);
+WaitForEndClimbingAnimToEnd:
+
+
+	__NFUN_261__(0);
+	m_r6pawn.m_bSlideEnd = false;
+	ConfirmLadderActionPointWasReached(m_r6pawn.m_Ladder);
+EndClimb:
+
+
+	m_r6pawn.m_ePlayerIsUsingHands = 3;
+	Pawn.__NFUN_3970__(1);
+	m_TargetLadder = m_r6pawn.m_Ladder;
+	// End:0x11E
+	if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)
+	{
+		m_r6pawn.SetNextPendingAction(8);
+		__NFUN_261__(m_r6pawn.1);		
+	}
+	else
+	{
+		// End:0x169
+		if(__NFUN_132__(Pawn.bIsWalking, __NFUN_155__(int(m_r6pawn.m_ePawnType), int(1))))
+		{
+			m_r6pawn.SetNextPendingAction(8);
+			__NFUN_261__(m_r6pawn.1);
+		}
+	}
+	Focus = Pawn.OnLadder;
+	FocalPoint = Pawn.OnLadder.Location;
+	MoveTarget = none;
+	m_r6pawn.m_bIsClimbingLadder = false;
+	// End:0x1DC
+	if(__NFUN_154__(int(Pawn.m_ePawnType), int(1)))
+	{
+		m_r6pawn.SetNextPendingAction(28);
+	}
+	__NFUN_117__('NotifyBump');
+End:
+
+
+	// End:0x24E
+	if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)
+	{
+		Destination = __NFUN_215__(Pawn.Location, __NFUN_213__(float(120), Pawn.OnLadder.LookDir));
+		R6PreMoveTo(Destination, Destination, 4);
+		__NFUN_500__(Destination);		
+	}
+	else
+	{
+		Destination = __NFUN_216__(Pawn.Location, __NFUN_213__(float(120), Pawn.OnLadder.LookDir));
+		R6PreMoveTo(Destination, Pawn.OnLadder.Location, 4);
+		__NFUN_500__(Destination, Pawn.OnLadder);
+	}
+	StopMoving();
+	// End:0x313
+	if(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(1)))
+	{
+		// End:0x310
+		if(__NFUN_129__(m_bGetOffLadder))
+		{
+			R6RainbowAI(Pawn.Controller).m_TeamManager.MemberFinishedClimbingLadder(m_r6pawn);
+		}		
+	}
+	else
+	{
+		// End:0x332
+		if(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(3)))
+		{
+			ClimbLadderIsOver();
+		}
+	}
+	// End:0x34D
+	if(m_bGetOffLadder)
+	{
+		m_bGetOffLadder = false;
+		__NFUN_113__('WaitToClimbLadder');		
+	}
+	else
+	{
+		// End:0x36B
+		if(__NFUN_255__(NextState, 'None'))
+		{
+			__NFUN_113__(NextState, NextLabel);			
+		}
+		else
+		{
+			__NFUN_113__('Dispatcher');
+		}
+	}
+	stop;	
+}
+
+state Dispatcher
+{
+	function BeginState()
+	{
+		return;
+	}
+Begin:
+
+	__NFUN_256__(3.0000000);
+	// End:0x1E
+	if(__NFUN_255__(NextState, 'None'))
+	{
+		__NFUN_113__(NextState);
+	}
+	goto 'Begin';
+	stop;			
+}
+
+state Dead
+{
+	ignores R6DamageAttitudeTo;
+
+	function BeginState()
+	{
+		StopMoving();
+		__NFUN_267__(Pawn.Location);
+		return;
+	}
+	stop;
+}
+
 state BumpBackUp
 {
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin state   m_BumpedBy="$m_BumpedBy );      #endif
-    }
+	function BeginState()
+	{
+		return;
+	}
 
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "end state" );         #endif
+	function EndState()
+	{
 		StopMoving();
-    }   
+		return;
+	}
 
-    function bool MoveRight()
-    {
-        local vector vProduct;
+	function bool MoveRight()
+	{
+		local Vector vProduct;
 
-        m_vBumpedByLocation = m_BumpedBy.location;
-        m_vBumpedByLocation.z = pawn.location.z;
+		m_vBumpedByLocation = m_BumpedBy.Location;
+		m_vBumpedByLocation.Z = Pawn.Location.Z;
+		vProduct = __NFUN_220__(__NFUN_226__(m_BumpedBy.Velocity), __NFUN_226__(__NFUN_216__(Pawn.Location, m_vBumpedByLocation)));
+		// End:0x75
+		if(__NFUN_177__(vProduct.Z, float(0)))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
 
-        vProduct = normal(m_BumpedBy.velocity) cross normal(pawn.location - m_vBumpedByLocation);
-        if(vProduct.z > 0)
-            return true;
-        return false;
-    }
-
-    event bool NotifyBump(Actor other)
-    {  
-        if( other == m_BumpedBy || 
-           (R6Pawn(other) != none) && R6Pawn(other).m_bIsPlayer)
-        {
-            m_BumpedBy = other;
-            GotoState('BumpBackUp');
-            return true;
-        }           
-        return false;
-    }
+	event bool NotifyBump(Actor Other)
+	{
+		// End:0x4E
+		if(__NFUN_132__(__NFUN_114__(Other, m_BumpedBy), __NFUN_130__(__NFUN_119__(R6Pawn(Other), none), R6Pawn(Other).m_bIsPlayer)))
+		{
+			m_BumpedBy = Other;
+			__NFUN_113__('BumpBackUp');
+			return true;
+		}
+		return false;
+		return;
+	}
 
     //------------------------------------------------------------------
     // GetReacheablePoint: get a reacheable pont behind the pawn.
@@ -1081,795 +1343,544 @@ state BumpBackUp
     //   |
     //   180
     //------------------------------------------------------------------
-    function bool GetReacheablePoint( OUT vector vTarget, bool bNoFail )
-    {
-        local rotator   rRotation;
-        local int       iYawIncrement;
-        local int       iStartingYaw;
-        local int       iTry;
-        local int       iTryMax;
-        local int       iTryOnAQuadrantMax;
-        local vector    vDest;
+	function bool GetReacheablePoint(out Vector vTarget, bool bNoFail)
+	{
+		local Rotator rRotation;
+		local int iYawIncrement, iStartingYaw, iTry, iTryMax, iTryOnAQuadrantMax;
 
-        // the hostage gives more try
-        if ( m_r6pawn.m_ePawnType == PAWN_Hostage ) 
-            iTryMax = 7;
-        else
-            iTryMax = 1;
-        
-        iStartingYaw  = 16384;   // 90 degree
-        iYawIncrement = 16384/3;
-        iTryOnAQuadrantMax = 16384/iYawIncrement + 1; // maximum try on a quadrant.
+		local Vector vDest;
 
-        if ( !MoveRight() )
-        {
-            iStartingYaw  *= -1;
-            iYawIncrement *= -1;
-        }
-        
-        while ( iTry < iTryMax )
-        {
-            if ( iTry < iTryOnAQuadrantMax )  // try moving away: 90 to 180.
-                rRotation.yaw = iStartingYaw + iYawIncrement*iTry;
-            else                             // try moving 90 to 0
-                rRotation.yaw = iStartingYaw + iYawIncrement*(iTry+1-iTryOnAQuadrantMax)*-1;            
-
-            vDest = pawn.location + (c_iDistanceBumpBackUp)*vector(rotator(m_vBumpedByVelocity) + rRotation);
-
-            if ( CanWalkTo( vDest ) || bNoFail )
-            {
-                vTarget = vDest;
-                return true;
-            }
-
-            ++iTry;
-        }
-        
-        // failed
-        return false;
-    }
-
-Begin:
-    if(m_BumpedBy.IsA('R6IORotatingDoor'))
-    {
-        Disable('NotifyBump');
-        Goto('BackupFromDoor');
-    }
-    else if(!m_BumpedBy.IsA('R6Pawn'))
-    {
-        Disable('NotifyBump');
-        Goto('BackupFromActor');
-    }
-
-    // force to stay on the same plane!
-    m_vBumpedByLocation = m_BumpedBy.location;
-    m_vBumpedByLocation.z = pawn.location.z;
-    m_vBumpedByVelocity = m_BumpedBy.velocity;
-    m_vBumpedByVelocity.z = pawn.velocity.z;
-
-    //if(bShowLog) logX( " backing up... m_BumpedBy="$m_BumpedBy);
-    
-    // get a reacheable point
-    if ( !GetReacheablePoint( m_vTargetPosition, false ) )
-    {
-        // failed, but try to move anyway
-        GetReacheablePoint( m_vTargetPosition, true );
-    }
-
-    if ( pawn.m_bIsProne )
-    {
-        R6PreMoveTo(m_vTargetPosition, m_BumpedBy.location, PACE_Prone);
-    }
-    // special case for hostage, 
-    else if( m_r6pawn.m_ePawnType == PAWN_Hostage  )
-    {
-        if ( IsInCrouchedPosture() ) // we don't have crouch run back / left / right anim, so crouch walk!
-            R6PreMoveTo(m_vTargetPosition, m_BumpedBy.location, PACE_CrouchWalk); 
-        else
-            R6PreMoveTo(m_vTargetPosition, m_BumpedBy.location, PACE_Walk);
-    }
-    else if( m_r6pawn.m_ePawnType != PAWN_Rainbow && IsInCrouchedPosture() )
-    {
-        R6PreMoveTo(m_vTargetPosition, m_BumpedBy.location, PACE_CrouchRun ); 
-    }
-    else
-    {
-		if(m_r6pawn.m_ePawnType == PAWN_Rainbow)
-			R6PreMoveTo(m_vTargetPosition, m_BumpedBy.location, PACE_Run); 
+		// End:0x24
+		if(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(3)))
+		{
+			iTryMax = 7;			
+		}
 		else
-			R6PreMoveTo(m_vTargetPosition, m_BumpedBy.location, PACE_Walk);
-    }
-    MoveTo(m_vTargetPosition, m_BumpedBy); 
+		{
+			iTryMax = 1;
+		}
+		iStartingYaw = 16384;
+		iYawIncrement = __NFUN_145__(16384, 3);
+		iTryOnAQuadrantMax = __NFUN_146__(__NFUN_145__(16384, iYawIncrement), 1);
+		// End:0x81
+		if(__NFUN_129__(MoveRight()))
+		{
+			__NFUN_159__(iStartingYaw, float(-1));
+			__NFUN_159__(iYawIncrement, float(-1));
+		}
+		J0x81:
 
-    pawn.acceleration = vect(0,0,0);
+		// End:0x14C [Loop If]
+		if(__NFUN_150__(iTry, iTryMax))
+		{
+			// End:0xC0
+			if(__NFUN_150__(iTry, iTryOnAQuadrantMax))
+			{
+				rRotation.Yaw = __NFUN_146__(iStartingYaw, __NFUN_144__(iYawIncrement, iTry));				
+			}
+			else
+			{
+				rRotation.Yaw = __NFUN_146__(iStartingYaw, __NFUN_144__(__NFUN_144__(iYawIncrement, __NFUN_147__(__NFUN_146__(iTry, 1), iTryOnAQuadrantMax)), -1));
+			}
+			vDest = __NFUN_215__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(__NFUN_316__(Rotator(m_vBumpedByVelocity), rRotation))));
+			// End:0x142
+			if(__NFUN_132__(__NFUN_1815__(vDest), bNoFail))
+			{
+				vTarget = vDest;
+				return true;
+			}
+			__NFUN_163__(iTry);
+			// [Loop Continue]
+			goto J0x81;
+		}
+		return false;
+		return;
+	}
+Begin:
 
-    m_fLastBump = Level.TimeSeconds;
+	// End:0x24
+	if(m_BumpedBy.__NFUN_303__('R6IORotatingDoor'))
+	{
+		__NFUN_118__('NotifyBump');
+		goto 'BackupFromDoor';		
+	}
+	else
+	{
+		// End:0x47
+		if(__NFUN_129__(m_BumpedBy.__NFUN_303__('R6Pawn')))
+		{
+			__NFUN_118__('NotifyBump');
+			goto 'BackupFromActor';
+		}
+	}
+	m_vBumpedByLocation = m_BumpedBy.Location;
+	m_vBumpedByLocation.Z = Pawn.Location.Z;
+	m_vBumpedByVelocity = m_BumpedBy.Velocity;
+	m_vBumpedByVelocity.Z = Pawn.Velocity.Z;
+	// End:0xC8
+	if(__NFUN_129__(GetReacheablePoint(m_vTargetPosition, false)))
+	{
+		GetReacheablePoint(m_vTargetPosition, true);
+	}
+	// End:0xF8
+	if(Pawn.m_bIsProne)
+	{
+		R6PreMoveTo(m_vTargetPosition, m_BumpedBy.Location, 1);		
+	}
+	else
+	{
+		// End:0x156
+		if(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(3)))
+		{
+			// End:0x138
+			if(IsInCrouchedPosture())
+			{
+				R6PreMoveTo(m_vTargetPosition, m_BumpedBy.Location, 2);				
+			}
+			else
+			{
+				R6PreMoveTo(m_vTargetPosition, m_BumpedBy.Location, 4);
+			}			
+		}
+		else
+		{
+			// End:0x198
+			if(__NFUN_130__(__NFUN_155__(int(m_r6pawn.m_ePawnType), int(1)), IsInCrouchedPosture()))
+			{
+				R6PreMoveTo(m_vTargetPosition, m_BumpedBy.Location, 3);				
+			}
+			else
+			{
+				// End:0x1CF
+				if(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(1)))
+				{
+					R6PreMoveTo(m_vTargetPosition, m_BumpedBy.Location, 5);					
+				}
+				else
+				{
+					R6PreMoveTo(m_vTargetPosition, m_BumpedBy.Location, 4);
+				}
+			}
+		}
+	}
+	__NFUN_500__(m_vTargetPosition, m_BumpedBy);
+	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	m_fLastBump = Level.TimeSeconds;
 Wait:
-    sleep(0.2);
-    if( IsBumpBackUpStateFinish() )
-        Goto('Finish');
-    else
-        Goto('Wait');
 
-Finish:
-    if( m_bumpBackUpNextState != '')   // to prevent a pawn from getting stuck in this state...
-    {
-        if(m_bumpBackUpNextState == 'ApproachLadder')
-            moveTarget = m_TargetLadder;     
-        GotoState( m_bumpBackUpNextState );
-    }       
-    else
-        BumpBackUpStateFinished();
 
-BackupFromDoor:
-    #ifdefDEBUG if(bShowLog) log(pawn$" backup from door.... "); #endif
-    m_r6pawn.m_bAvoidFacingWalls = false;
-    SetLocation(Pawn.Location);
-    m_vTargetPosition = R6IORotatingDoor(m_BumpedBy).GetTarget( Pawn, 225, true ); // 225 unit behind the door
-    R6PreMoveTo(m_vTargetPosition, location, m_r6pawn.m_eMovementPace);
-    MoveTo(m_vTargetPosition, self); 
-    pawn.acceleration = vect(0,0,0);
-    if ( m_bumpBackUpNextState == 'OpenDoor' )
-        sleep(0.2); // little sleep if was trying to open the door
-    else
-        sleep(1.0);
-    Goto('Finish');
+	__NFUN_256__(0.2000000);
+	// End:0x241
+	if(IsBumpBackUpStateFinish())
+	{
+		goto 'Finish';		
+	}
+	else
+	{
+		goto 'Wait';
+	}
+	J0x247:
 
+	// End:0x27A
+	if(__NFUN_255__(m_bumpBackUpNextState, 'None'))
+	{
+		// End:0x270
+		if(__NFUN_254__(m_bumpBackUpNextState, 'ApproachLadder'))
+		{
+			MoveTarget = m_TargetLadder;
+		}
+		__NFUN_113__(m_bumpBackUpNextState);		
+	}
+	else
+	{
+		BumpBackUpStateFinished();
+	}
+	J0x280:
+
+	m_r6pawn.m_bAvoidFacingWalls = false;
+	__NFUN_267__(Pawn.Location);
+	m_vTargetPosition = R6IORotatingDoor(m_BumpedBy).GetTarget(Pawn, 225.0000000, true);
+	R6PreMoveTo(m_vTargetPosition, Location, m_r6pawn.m_eMovementPace);
+	__NFUN_500__(m_vTargetPosition, self);
+	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	// End:0x324
+	if(__NFUN_254__(m_bumpBackUpNextState, 'OpenDoor'))
+	{
+		__NFUN_256__(0.2000000);		
+	}
+	else
+	{
+		__NFUN_256__(1.0000000);
+	}
+	goto 'Finish';
 BackupFromActor:
-    #ifdefDEBUG if(bShowLog) log(pawn$" backup from actor.... "); #endif
-    m_r6pawn.m_bAvoidFacingWalls = false;
-    SetLocation(pawn.location);
-    m_vTargetPosition = pawn.location - 120*normal(m_BumpedBy.location - pawn.location);
-    m_vTargetPosition.z = pawn.location.z;
-    R6PreMoveTo(m_vTargetPosition, location, m_r6pawn.m_eMovementPace);
-    MoveTo(m_vTargetPosition, self); 
-    pawn.acceleration = vect(0,0,0);
-    sleep(1.0);
-    Goto('Finish');
+
+
+	m_r6pawn.m_bAvoidFacingWalls = false;
+	__NFUN_267__(Pawn.Location);
+	m_vTargetPosition = __NFUN_216__(Pawn.Location, __NFUN_213__(float(120), __NFUN_226__(__NFUN_216__(m_BumpedBy.Location, Pawn.Location))));
+	m_vTargetPosition.Z = Pawn.Location.Z;
+	R6PreMoveTo(m_vTargetPosition, Location, m_r6pawn.m_eMovementPace);
+	__NFUN_500__(m_vTargetPosition, self);
+	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	__NFUN_256__(1.0000000);
+	goto 'Finish';
+	stop;				
 }
 
-//------------------------------------------------------------------
-// CanOpenDoor: check if the pawn has the ability to open the door
-//  ie: in case it's locked.
-//------------------------------------------------------------------
-event bool CanOpenDoor( R6IORotatingDoor door )
-{
-    return true;
-}
-
-//------------------------------------------------------------------
-// OpenDoorFailed: triggered when the pawn try to go in the state 
-//  OpenDoor. Usually should go in another state
-//------------------------------------------------------------------
-event OpenDoorFailed()
-{
-    m_r6pawn.logWarning( "should be overwritted. ie: gotostate('doSomethingIfDoorIsLocked')" );
-    
-}
-
-//------------------------------------------------------------------
-// State to open a door: call GotoOpenDoorState to go in this state
-//------------------------------------------------------------------ 
 state OpenDoor
 {
-    function BeginState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "begin" ); #endif
+	function BeginState()
+	{
+		return;
+	}
 
-        // the check canOpenDoor and the event OpenDoorFailed 
-        // are done in the nativecode (see GotoOpenDoorState)
-    }
-
-    function EndState()
-    {
-        #ifdefDEBUG if(bShowLog) logX( "end" ); #endif
-    }
+	function EndState()
+	{
+		return;
+	}
 
     //------------------------------------------------------------------
     // NeedToMove: return true if the pawn need to move at the best spot 
     //  to open the rotatingDoor. the destination is passed in vDest.
     //------------------------------------------------------------------
-    function bool NeedToMove( OUT vector vDest )
-    {
-        local   vector  vDoorLoc;
-        local   vector  vSpotToGo;
+	function bool NeedToMove(out Vector vDest)
+	{
+		local Vector vDoorLoc, vSpotToGo;
 
-        if ( m_r6pawn.m_Door == none )
-            return false;
-
-        vDoorLoc  = m_r6pawn.m_Door.m_RotatingDoor.GetTarget( pawn, 0, true ); 
-        // approx distance to be to open a door
-        vSpotToGo = m_r6pawn.m_Door.m_RotatingDoor.GetTarget( pawn, 75, true ); 
-        vDest = vSpotToGo;
-
-        return true;
-    }
+		// End:0x16
+		if(__NFUN_114__(m_r6pawn.m_Door, none))
+		{
+			return false;
+		}
+		vDoorLoc = m_r6pawn.m_Door.m_RotatingDoor.GetTarget(Pawn, 0.0000000, true);
+		vSpotToGo = m_r6pawn.m_Door.m_RotatingDoor.GetTarget(Pawn, 75.0000000, true);
+		vDest = vSpotToGo;
+		return true;
+		return;
+	}
 
     // so the pawn won't collide with door
-    function INT GetFurthestOffsetFromDoor( Actor actor )
-    {
-        // door width = 128 + 10 for a little offset
-        return 128 + actor.CollisionRadius+10; 
-    }
+	function int GetFurthestOffsetFromDoor(Actor Actor)
+	{
+		return int(__NFUN_174__(__NFUN_174__(float(128), Actor.CollisionRadius), float(10)));
+		return;
+	}
+Begin:
 
-begin:
-    if ( m_r6pawn.m_Door == none )     
-        goto('end'); // no more door to open
-
-    if ( m_r6pawn.m_door.m_RotatingDoor.m_bIsDoorClosed == false || 
-         m_r6pawn.m_door.m_RotatingDoor.m_bInProcessOfOpening)
-        goto('end'); // the door was opened
-    
-    if ( NeedToMove( m_vTargetPosition ) )
-    {
-        //logX( "need to move close" );
-        SetLocation(Pawn.Location);
-        R6PreMoveTo(m_vTargetPosition, location, m_r6pawn.m_eMovementPace);
-        MoveToPosition( m_vTargetPosition, m_r6pawn.m_Door.Rotation ); 
-    }
-
-    ChangeOrientationTo( m_r6pawn.m_Door.Rotation );
-    FinishRotation();
-
-    if ( m_r6pawn.m_door.m_RotatingDoor.m_bIsDoorClosed == false || 
-         m_r6pawn.m_door.m_RotatingDoor.m_bInProcessOfOpening )
-        goto('end'); // the door was opened
-
-    //logX( "open door" );
-    // Unlock the door if locked
-    if( m_r6pawn.m_door.m_RotatingDoor.m_bIsDoorLocked )
-    {
-        m_r6pawn.SetNextPendingAction(PENDING_OpenDoor, 1 );
-        FinishAnim(m_r6pawn.C_iPawnSpecificChannel);
-    }
-
-    m_r6pawn.SetNextPendingAction(PENDING_OpenDoor, 0 );
-    // sleep while the hand reach the door
-    Sleep( 0.5 ); 
-    
-    if ( m_r6pawn.m_Door == none )
-        goto('CloseDoor');
-        
-    // if the door will open on us
-    if ( !m_r6pawn.m_door.m_RotatingDoor.ActorIsOnSideA( pawn ) )
-    {
-        // logX("move back" );
-        m_vTargetPosition = m_r6pawn.m_Door.m_RotatingDoor.GetTarget( pawn, GetFurthestOffsetFromDoor(pawn), true ); 
-        SetLocation(Pawn.Location);
-        R6PreMoveTo(m_vTargetPosition, location, m_r6pawn.m_eMovementPace);
-        m_r6pawn.m_Door.m_RotatingDoor.openDoor(m_r6pawn, 10000 );
-        MoveToPosition( m_vTargetPosition, m_r6pawn.m_Door.Rotation ); 
-    }
-    else
-    {
-        m_r6pawn.m_Door.m_RotatingDoor.openDoor(m_r6pawn);
-    }
-
-    // check how long it should sleep depending where the door opens
-    if ( m_r6pawn.m_door.m_RotatingDoor.ActorIsOnSideA( pawn ) )
-    {
-        if ( m_r6pawn.m_ePawnType == PAWN_Hostage && m_r6pawn.m_eMovementPace == PACE_Run )
-            Sleep( 0.5 );
-        else            
-            Sleep( 0.3 ); // sleep while the anim play and the door opens
-    }
-    else
-    {
-        if ( m_r6pawn.m_ePawnType == PAWN_Hostage && m_r6pawn.m_eMovementPace == PACE_Run )
-            Sleep( 1.5 );
-        else
-            Sleep( 1.0 ); // sleep while the anim play and the door opens
-    }
-
-    // give a try to close the door. if the actor is bumped, it will try to open/close again
-    // the same door because he already succeeded to open the door
-    if ( m_r6pawn.m_Door != none )
-    {
-        // set the door to close. needed if the pawn is bumped, he will knows that he has 
-        // too close this door (and not to open it)
-        m_closeDoor = m_r6pawn.m_Door.m_RotatingDoor;
-        m_r6pawn.RemovePotentialOpenDoor( m_r6pawn.m_Door );
-    }
-
+	// End:0x1A
+	if(__NFUN_114__(m_r6pawn.m_Door, none))
+	{
+		goto 'End';
+	}
+	// End:0x6D
+	if(__NFUN_132__(__NFUN_242__(m_r6pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed, false), m_r6pawn.m_Door.m_RotatingDoor.m_bInProcessOfOpening))
+	{
+		goto 'End';
+	}
+	// End:0xC9
+	if(NeedToMove(m_vTargetPosition))
+	{
+		__NFUN_267__(Pawn.Location);
+		R6PreMoveTo(m_vTargetPosition, Location, m_r6pawn.m_eMovementPace);
+		__NFUN_2201__(m_vTargetPosition, m_r6pawn.m_Door.Rotation);
+	}
+	ChangeOrientationTo(m_r6pawn.m_Door.Rotation);
+	__NFUN_508__();
+	// End:0x13C
+	if(__NFUN_132__(__NFUN_242__(m_r6pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed, false), m_r6pawn.m_Door.m_RotatingDoor.m_bInProcessOfOpening))
+	{
+		goto 'End';
+	}
+	// End:0x180
+	if(m_r6pawn.m_Door.m_RotatingDoor.m_bIsDoorLocked)
+	{
+		m_r6pawn.SetNextPendingAction(4, 1);
+		__NFUN_261__(m_r6pawn.16);
+	}
+	m_r6pawn.SetNextPendingAction(4, 0);
+	__NFUN_256__(0.5000000);
+	// End:0x1B4
+	if(__NFUN_114__(m_r6pawn.m_Door, none))
+	{
+		goto 'CloseDoor';
+	}
+	// End:0x295
+	if(__NFUN_129__(m_r6pawn.m_Door.m_RotatingDoor.ActorIsOnSideA(Pawn)))
+	{
+		m_vTargetPosition = m_r6pawn.m_Door.m_RotatingDoor.GetTarget(Pawn, float(GetFurthestOffsetFromDoor(Pawn)), true);
+		__NFUN_267__(Pawn.Location);
+		R6PreMoveTo(m_vTargetPosition, Location, m_r6pawn.m_eMovementPace);
+		m_r6pawn.m_Door.m_RotatingDoor.OpenDoor(m_r6pawn, 10000);
+		__NFUN_2201__(m_vTargetPosition, m_r6pawn.m_Door.Rotation);		
+	}
+	else
+	{
+		m_r6pawn.m_Door.m_RotatingDoor.OpenDoor(m_r6pawn);
+	}
+	// End:0x32E
+	if(m_r6pawn.m_Door.m_RotatingDoor.ActorIsOnSideA(Pawn))
+	{
+		// End:0x323
+		if(__NFUN_130__(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(3)), __NFUN_154__(int(m_r6pawn.m_eMovementPace), int(5))))
+		{
+			__NFUN_256__(0.5000000);			
+		}
+		else
+		{
+			__NFUN_256__(0.3000000);
+		}		
+	}
+	else
+	{
+		// End:0x36D
+		if(__NFUN_130__(__NFUN_154__(int(m_r6pawn.m_ePawnType), int(3)), __NFUN_154__(int(m_r6pawn.m_eMovementPace), int(5))))
+		{
+			__NFUN_256__(1.5000000);			
+		}
+		else
+		{
+			__NFUN_256__(1.0000000);
+		}
+	}
+	// End:0x3C3
+	if(__NFUN_119__(m_r6pawn.m_Door, none))
+	{
+		m_closeDoor = m_r6pawn.m_Door.m_RotatingDoor;
+		m_r6pawn.RemovePotentialOpenDoor(m_r6pawn.m_Door);
+	}
 CloseDoor:
-    // close the door if not alrealdy close
-    if ( m_closeDoor != none && 
-         m_r6pawn.m_ePawnType == PAWN_Terrorist && 
-         R6Terrorist(m_r6Pawn).m_eDefCon != DEFCON_1 &&
-         (!m_closeDoor.m_bIsDoorClosed || m_closeDoor.m_bInProcessOfOpening ) )
-    {
-        // from here if bumped, forget about closing the door
-        if ( !m_closeDoor.ActorIsOnSideA( pawn ) )
-        {
-            m_vTargetPosition = m_closeDoor.GetTarget( pawn, 0 );
-        }
-        else
-        {
-            m_vTargetPosition = m_closeDoor.GetTarget( pawn, GetFurthestOffsetFromDoor(pawn) );
-        }
-
-        SetLocation(Pawn.Location);
-        R6PreMoveTo(m_vTargetPosition, location, m_r6pawn.m_eMovementPace);
-        MoveToPosition( m_vTargetPosition, m_r6pawn.Rotation ); 
-        m_closeDoor.closeDoor( m_r6pawn );
-    }
-    m_closeDoor = none;
-
-end:
-    GotoState( m_openDoorNextState );
-}
 
 
-//------------------------------------------------------------------
-// TestMakePath
-//------------------------------------------------------------------
-function SetStateTestMakePath( Pawn anEnemy, R6Pawn.eMovementPace ePace )
-{
-    Enemy = anEnemy;
-    m_r6pawn.m_eMovementPace = ePace;
-    LastSeenTime = Level.TimeSeconds;
-    GotoState( 'TestMakePath' );
+	// End:0x4EE
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_closeDoor, none), __NFUN_154__(int(m_r6pawn.m_ePawnType), int(2))), __NFUN_155__(int(R6Terrorist(m_r6pawn).m_eDefCon), int(1))), __NFUN_132__(__NFUN_129__(m_closeDoor.m_bIsDoorClosed), m_closeDoor.m_bInProcessOfOpening)))
+	{
+		// End:0x46E
+		if(__NFUN_129__(m_closeDoor.ActorIsOnSideA(Pawn)))
+		{
+			m_vTargetPosition = m_closeDoor.GetTarget(Pawn, 0.0000000);			
+		}
+		else
+		{
+			m_vTargetPosition = m_closeDoor.GetTarget(Pawn, float(GetFurthestOffsetFromDoor(Pawn)));
+		}
+		__NFUN_267__(Pawn.Location);
+		R6PreMoveTo(m_vTargetPosition, Location, m_r6pawn.m_eMovementPace);
+		__NFUN_2201__(m_vTargetPosition, m_r6pawn.Rotation);
+		m_closeDoor.CloseDoor(m_r6pawn);
+	}
+	m_closeDoor = none;
+End:
+
+
+	__NFUN_113__(m_openDoorNextState);
+	stop;			
 }
 
 state TestMakePathEnd
 {
-    function BeginState()
-    {
-        logX( "begin: TestMakePathEnd" );
-        StopMoving();
-        Enemy = none;
-    }
+	function BeginState()
+	{
+		logX("begin: TestMakePathEnd");
+		StopMoving();
+		Enemy = none;
+		return;
+	}
+	stop;
 }
 
-//------------------------------------------------------------------
-// TestMakePath: initialized by SetStateTestMakePath
-//------------------------------------------------------------------
 state TestMakePath
 {
-    ignores SeePlayer, HearNoise;
+	function BeginState()
+	{
+		logX(__NFUN_168__("begin. Eneny =", string(Enemy.Name)));
+		return;
+	}
 
-    function BeginState()
-    {
-        logX( "begin. Eneny =" @Enemy.name );
-    }
-
-    function EnemyNotVisible()
-    {
-        // if (bShowLog) logX ( ": entered function EnemyNotVisible.  Time:" $ Level.TimeSeconds $ " Last seen: " $ LastSeenTime );
-
-        // Not seen for at least X seconds, reset
-       if ( Level.TimeSeconds - LastSeenTime > 20 )
-       {
-            logX( "Not seen for at least 20 seconds. GotoState('')" );
-            GotoState( 'TestMakePathEnd' );
-        }
-    }
-
-Begin:
+	function EnemyNotVisible()
+	{
+		// End:0x5C
+		if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, LastSeenTime), float(20)))
+		{
+			logX("Not seen for at least 20 seconds. GotoState('')");
+			__NFUN_113__('TestMakePathEnd');
+		}
+		return;
+	}
 ChooseDestination:
-    // Find a destination
-    if( !MakePathToRun() )
-    {
-        logX( "Nowhere to run..., gotostate '' " );
-        gotoState( 'TestMakePathEnd' );
-    }
 
+	// End:0x37
+	if(__NFUN_129__(__NFUN_1810__()))
+	{
+		logX("Nowhere to run..., gotostate '' ");
+		__NFUN_113__('TestMakePathEnd');
+	}
 RunToDestination:
-    //  Move to it
-    logX( "label RunToDestination.  Goal = " $RouteGoal );
-    FollowPath( m_r6pawn.m_eMovementPace, 'ReturnToPath', false );
-    Goto('ChooseDestination');
 
+
+	logX(__NFUN_112__("label RunToDestination.  Goal = ", string(RouteGoal)));
+	__NFUN_1812__(m_r6pawn.m_eMovementPace, 'ReturnToPath', false);
+	goto 'ChooseDestination';
 ReturnToPath:
-    FollowPath( m_r6pawn.m_eMovementPace, 'ReturnToPath', true );
-    Goto('ChooseDestination');
-}
-
-//============================================================================
-// FLOAT GetCurrentChanceToHit - 
-//============================================================================
-function FLOAT GetCurrentChanceToHit( actor aTarget )
-{
-    local FLOAT fAngle;
-    local FLOAT fDistance;
-    local FLOAT fError;
-
-    if(pawn.engineWeapon == none)
-        return 0.f;
-
-    // Get angle in radian (for use with Tan)
-    fAngle = Pawn.EngineWeapon.GetCurrentMaxAngle() * 0.0174532925; // 2*PI / 360
-    fAngle = Tan( fAngle );
-    fDistance = VSize(Pawn.Location - aTarget.Location);
-    fError = fAngle * fDistance;
-
-    //logX( " current CTH: " $ ((Target.CollisionRadius)/fError)
-    //          $ " MaxAngle:" $ Pawn.EngineWeapon.GetCurrentMaxAngle()
-    //          $ " Tan Angle:" $ fAngle
-    //          $ " Distance:" $ fDistance
-    //          $ " Error:" $ fError
-    //          );
-
-    return (aTarget.CollisionRadius)/fError;
-}
-
-//============================================================================
-// BOOL IsReadyToFire - 
-//============================================================================
-function BOOL IsReadyToFire( actor aTarget )
-{
-    local FLOAT fNeededChanceToHit;
-    local FLOAT fSelfControl;
-    
-    // If weapon is already at the best it can be, we're ready
-    if(Pawn.EngineWeapon.IsAtBestAccuracy())
-    {
-        return true;
-    }
-
-    // Needed chance to hit, Exponentialy calculated from Self Control skill
-    // 100 = 100
-    //  90 =  81
-    //    ...
-    //  50 =  25
-    //    ...
-    //  20 =   4
-    //  10 =   1
-    fSelfControl = m_r6pawn.GetSkill(SKILL_SelfControl);
-    fNeededChanceToHit = fSelfControl * fSelfControl;
-    if(fNeededChanceToHit>1.f)
-        fNeededChanceToHit = 1.f;
-
-    return GetCurrentChanceToHit(aTarget)>fNeededChanceToHit;
-}
-
-//============================================================================
-// BOOL IsFocusLeft - 
-//============================================================================
-function BOOL IsFocusLeft()
-{
-    local INT iLeft;
-    local INT iRight;
-    local Rotator rFocus;
-
-    if(focus==None)
-    {
-        #ifdefDEBUG if(bShowLog) logX( "Called IsFocusLeft with no focus" ); #endif
-        return true;
-    }
-    
-    rFocus = Rotator(focus.Location - Pawn.Location);
-
-    iLeft  = Clamp( rFocus.Yaw - Pawn.Rotation.Yaw, 0, 65535 );
-    iRight = Clamp( rFocus.Yaw + Pawn.Rotation.Yaw, 0, 65535 );
-
-    return (iLeft<iRight);
-}
-
-//============================================================================
-// ChangeOrientationTo - 
-//============================================================================
-function ChangeOrientationTo( Rotator newRotation )
-{
-    Focus = None;
-    FocalPoint = Pawn.Location + vector(newRotation) * 50;
-    Pawn.DesiredRotation = newRotation;
-}
-
-//------------------------------------------------------------------
-// ChooseRandomDirection
-//  
-//------------------------------------------------------------------
-function Rotator ChooseRandomDirection( int iLookBackChance )
-{
-    local BOOL bLookBack;
-    local BOOL bTurnLeft;
-    local INT iTemp;
-    local Rotator rRot;
-
-    // Check if we look back and if we turn left (or right)
-    bLookBack = Rand(100)+1 < iLookBackChance; // 1 to 100
-    bTurnLeft = Rand(2) == 1;        // 0 to 1
-
-    if(bLookBack)
-    {
-        iTemp = Rand(16383) + 16383; // Between 90d and 180d
-    }
-    else
-    {
-        iTemp = Rand(8192) + 8192;   // Between 45d and 90d
-    }
-    rRot = Pawn.Rotation;
-    if(bTurnLeft)
-    {
-        rRot.Yaw -= iTemp;
-    }
-    else
-    {
-        rRot.Yaw += iTemp;
-    }
-
-    //if (bShowLog) logX ( " change direction. Was: " $ Pawn.Rotation $ " WillBe: " $ rRot );
-    //if (bShowLog) logX ( " location: " $ Pawn.Location $ " focalPt: " $ FocalPoint );
-
-    return rRot;
-}
-
-// The following function was taken from Bot.uc
-// FindBestPathToward() assumes the desired destination is not directly reachable. 
-// It tries to set Destination to the location of the best waypoint, and returns true if successful
-function bool FindBestPathToward(Actor desired, bool bClearPaths)
-{
-    local Actor path;
-    local bool bSuccess;
-    
-    path = FindPathToward(desired, bClearPaths); 
-        
-    bSuccess = (path != None);  
-    if (bSuccess)
-    {
-        moveTarget = path; 
-        destination = path.location;
-    }   
-    return bSuccess;
-}
 
 
-//============================================================================
-// IsFacing - 
-//============================================================================
-function bool IsFacing(Actor aGrenade)
-{
-    local vector vDir;
-
-    vDir = aGrenade.location - pawn.location; 
-    if(normal(vDir) dot vector(pawn.rotation) > 0)
-        return true;
-
-    return false;
-}
-
-//============================================================================
-// AIAffectedByGrenade - 
-//============================================================================
-function AIAffectedByGrenade( Actor aGrenade, R6Pawn.EGrenadeType eType )
-{
-}
-
-
-//============================================================================
-// GetGrenadeDirection - 
-//============================================================================
-function Rotator GetGrenadeDirection( Actor aTarget, OPTIONAL vector vTargetLoc )
-{
-    local Rotator rFiringRotation;
-    
-    rFiringRotation = FindGrenadeDirectionToHitActor( aTarget, vTargetLoc, Pawn.EngineWeapon.GetMuzzleVelocity() );
-    
-    #ifdefDEBUG if(bShowLog) logX( "Grenade firing direction: " $rFiringRotation ); #endif
-
-    return rFiringRotation;
-}
-
-
-//===================================================================================================
-//   ####              #                                       #      ##                            
-//    ##              ##                                      ##                                    
-//    ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####  
-//    ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##      
-//    ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####   
-//    ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
-//   ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
-//===================================================================================================
-function BOOL CanInteractWithObjects(R6InteractiveObject O)
-{
-    return false;
-}
-
-function PerformAction_StartInteraction()
-{
-    #ifdefDEBUG if (bShowInteractionLog) logX(m_r6pawn$"::PerformAction_StartInteraction"); #endif
-    m_StateAfterInteraction = GetStateName();
-    m_InteractionObject.m_SeePlayerPawn = none;
-    m_InteractionObject.m_HearNoiseNoiseMaker = none;
-
-    m_InteractionObject.m_bPawnDied = false;
-    m_bChangingState = true;
-    GotoState('PA_StartInteraction');
-}
-
-function PerformAction_LookAt(Actor Target)
-{
-    #ifdefDEBUG if (bShowInteractionLog) logX(m_r6pawn$"::PerformAction_LookAt"); #endif
-    m_ActorTarget = Target;
-    m_bChangingState = true;
-    GotoState('PA_LookAt');
-}
-
-function PerformAction_Goto(Actor Target)
-{
-    #ifdefDEBUG if (bShowInteractionLog) logX(m_r6pawn$"::PerformAction_Goto"); #endif
-    m_ActorTarget = Target;
-    m_bChangingState = true;
-    GotoState('PA_Goto');
-}
-
-function PerformAction_PlayAnim(name AnimName)
-{
-    #ifdefDEBUG if (bShowInteractionLog) logX(m_r6pawn$"::PerformAction_PlayAnim"); #endif
-    m_AnimName = AnimName;
-    m_bChangingState = true;
-    GotoState('PA_PlayAnim');
-}
-
-function PerformAction_LoopAnim(name AnimName, FLOAT fLoopAnimTime)
-{
-    #ifdefDEBUG if (bShowInteractionLog) logX(m_r6pawn$"::PerformAction_LoopAnim"); #endif
-    m_AnimName = AnimName;
-    m_fLoopAnimTime = fLoopAnimTime;
-    m_bChangingState = true;
-    GotoState('PA_LoopAnim');
-}
-
-function PerformAction_StopInteraction()
-{
-    #ifdefDEBUG if (bShowInteractionLog) logX(m_r6pawn$"::PerformAction_StopInteraction"); #endif
-    m_bChangingState = true;
-    GotoState(m_StateAfterInteraction);
-
-    if(m_InteractionObject.m_bPawnDied == true)
-    {
-        PawnDied();
-    }
-    else if(m_InteractionObject.m_SeePlayerPawn != none)
-    {
-        SeePlayer(m_InteractionObject.m_SeePlayerPawn);
-    }
-
-    if(m_InteractionObject.m_HearNoiseNoiseMaker != none)
-    {
-        HearNoise(m_InteractionObject.m_HearNoiseLoudness, m_InteractionObject.m_HearNoiseNoiseMaker, m_InteractionObject.m_HearNoiseType);
-    }
+	__NFUN_1812__(m_r6pawn.m_eMovementPace, 'ReturnToPath', true);
+	goto 'ChooseDestination';
+	stop;	
 }
 
 state PA_Interaction
 {
-    event SeePlayer(Pawn seen)
-    {
-        if(m_r6pawn.m_bDontSeePlayer && R6Pawn(seen).m_bIsPlayer)
-            return;
+	event SeePlayer(Pawn seen)
+	{
+		// End:0x2D
+		if(__NFUN_130__(m_r6pawn.m_bDontSeePlayer, R6Pawn(seen).m_bIsPlayer))
+		{
+			return;
+		}
+		// End:0x6F
+		if(__NFUN_114__(m_InteractionObject.m_SeePlayerPawn, none))
+		{
+			m_InteractionObject.m_SeePlayerPawn = seen;
+			// End:0x6F
+			if(__NFUN_129__(m_bCantInterruptIO))
+			{
+				m_InteractionObject.StopInteractionWithEndingActions();
+			}
+		}
+		return;
+	}
 
-        if(m_InteractionObject.m_SeePlayerPawn == none)
-        {
-            #ifdefDEBUG if(bShowInteractionLog) logX("PA_Interaction::SeePlayer("$seen$")"); #endif
+	event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
+	{
+		// End:0x2D
+		if(__NFUN_130__(m_r6pawn.m_bDontHearPlayer, R6Pawn(NoiseMaker).m_bIsPlayer))
+		{
+			return;
+		}
+		// End:0x97
+		if(__NFUN_114__(m_InteractionObject.m_HearNoiseNoiseMaker, none))
+		{
+			m_InteractionObject.m_HearNoiseLoudness = Loudness;
+			m_InteractionObject.m_HearNoiseNoiseMaker = NoiseMaker;
+			m_InteractionObject.m_HearNoiseType = eType;
+			// End:0x97
+			if(__NFUN_129__(m_bCantInterruptIO))
+			{
+				m_InteractionObject.StopInteractionWithEndingActions();
+			}
+		}
+		return;
+	}
 
-            m_InteractionObject.m_SeePlayerPawn = seen;
+// Called when killed
+	function PawnDied()
+	{
+		// End:0x46
+		if(__NFUN_242__(m_InteractionObject.m_bPawnDied, false))
+		{
+			m_InteractionObject.m_bPawnDied = true;
+			m_r6pawn.m_iTracedBone = 0;
+			m_InteractionObject.StopInteraction();
+		}
+		return;
+	}
 
-            if(!m_bCantInterruptIO)
-            {
-                // Stop interacting with object with ending actions.
-                m_InteractionObject.StopInteractionWithEndingActions();
-            }
-        }
-    }
+	event AnimEnd(int Channel)
+	{
+		return;
+	}
 
-    event HearNoise(float Loudness, Actor NoiseMaker, ENoiseType eType)
-    {
-        if(m_r6pawn.m_bDontHearPlayer && R6Pawn(NoiseMaker).m_bIsPlayer)
-            return;
+	event bool NotifyBump(Actor Other)
+	{
+		return true;
+		return;
+	}
 
-        if(m_InteractionObject.m_HearNoiseNoiseMaker == none)
-        {
-            #ifdefDEBUG if(bShowInteractionLog) logX("PA_Interaction::HearNoise("$NoiseMaker$","$eType$")"); #endif
-
-            m_InteractionObject.m_HearNoiseLoudness = Loudness;
-            m_InteractionObject.m_HearNoiseNoiseMaker = NoiseMaker;
-            m_InteractionObject.m_HearNoiseType = eType;
-
-            if(!m_bCantInterruptIO)
-            {
-                // Stop interacting with object with ending actions.
-                m_InteractionObject.StopInteractionWithEndingActions();
-            }
-        }
-    }
-
-    function PawnDied()
-    {
-        #ifdefDEBUG if(bShowInteractionLog) logX("PA_Interaction::PawnDied"); #endif
-
-        if(m_InteractionObject.m_bPawnDied == false)
-        {
-            m_InteractionObject.m_bPawnDied = true;
-
-            // Force shot in the head, to prevent death animation before karma physic.
-            m_r6pawn.m_iTracedBone = 0;
-            // Stop interacting with object without ending actions.
-            m_InteractionObject.StopInteraction();
-        }
-    }
-
-    event AnimEnd(int Channel)
-    {
-    }
-
-    event bool NotifyBump(Actor other)
-    {
-        //m_InteractionObject.StopInteraction();
-        return true;
-    }
-
-    event EndState()
-    {
-        if(m_bChangingState == true)
-        {// We're changing states normally.
-            m_bChangingState = false;
-        }
-        else
-        {// State was changed by AI, so stop interaction.
-            #ifdefDEBUG if(bShowInteractionLog) log(m_r6pawn$"::Interaction was stopped by AI!"); #endif
-            // Stop interacting with object with ending actions.
-            m_InteractionObject.StopInteractionWithEndingActions();
-        }
-    }
+	event EndState()
+	{
+		// End:0x17
+		if(__NFUN_242__(m_bChangingState, true))
+		{
+			m_bChangingState = false;			
+		}
+		else
+		{
+			m_InteractionObject.StopInteractionWithEndingActions();
+		}
+		return;
+	}
+	stop;
 }
 
 state PA_StartInteraction extends PA_Interaction
-{
-Begin:
-    m_InteractionObject.FinishAction();
+{Begin:
+
+	m_InteractionObject.FinishAction();
+	stop;				
 }
 
 state PA_LookAt extends PA_Interaction
-{
-Begin:
-    m_r6pawn.PawnLookAt(m_ActorTarget.Location);
-    m_InteractionObject.FinishAction();
+{Begin:
+
+	m_r6pawn.__NFUN_2216__(m_ActorTarget.Location);
+	m_InteractionObject.FinishAction();
+	stop;		
 }
 
 state PA_Goto extends PA_Interaction
 {
-    event EndState()
-    {
-        StopMoving();
-        Super.EndState();
-    }
+	event EndState()
+	{
+		StopMoving();
+		super.EndState();
+		return;
+	}
 Begin:
-    MoveTo(m_ActorTarget.Location);
-    MoveToPosition(m_ActorTarget.Location, m_ActorTarget.Rotation);
-    m_InteractionObject.FinishAction();
+
+	__NFUN_500__(m_ActorTarget.Location);
+	__NFUN_2201__(m_ActorTarget.Location, m_ActorTarget.Rotation);
+	m_InteractionObject.FinishAction();
+	stop;				
 }
 
 state PA_PlayAnim extends PA_Interaction
-{
-Begin:
-    m_r6pawn.R6PlayAnim(m_AnimName, 1.0);
-    FinishAnim();
-    m_InteractionObject.FinishAction();
+{Begin:
+
+	m_r6pawn.R6PlayAnim(m_AnimName, 1.0000000);
+	__NFUN_261__();
+	m_InteractionObject.FinishAction();
+	stop;				
 }
 
 state PA_LoopAnim extends PA_Interaction
-{
-Begin:
-    m_r6pawn.R6LoopAnim(m_AnimName, 1.0);
-    if(m_fLoopAnimTime == 0.0f)
-    {
-        Stop;
-    }
-    else
-    {
-        Sleep(m_fLoopAnimTime);
-    }
+{Begin:
 
-    m_InteractionObject.FinishAction();
+	m_r6pawn.R6LoopAnim(m_AnimName, 1.0000000);
+	// End:0x2C
+	if(__NFUN_180__(m_fLoopAnimTime, 0.0000000))
+	{
+		stop;		
+	}
+	else
+	{
+		__NFUN_256__(m_fLoopAnimTime);
+	}
+	m_InteractionObject.FinishAction();
+	stop;				
 }
-
-
-//===================================================================================================
 
 defaultproperties
 {
-     c_iDistanceBumpBackUp=80
-     MinHitWall=-0.400000
-     bRotateToDesired=True
+	c_iDistanceBumpBackUp=80
+	MinHitWall=-0.4000000
+	bRotateToDesired=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_SubActionGoto
+// REMOVED IN 1.60: var m_AttachPos
+// REMOVED IN 1.60: var m_AttachRot
+// REMOVED IN 1.60: function GotoClimbObjectState
+// REMOVED IN 1.60: function FixLocationAfterClimbing
+// REMOVED IN 1.60: function ClimbObjectStateFinished

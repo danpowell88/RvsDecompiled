@@ -1,4 +1,10 @@
 //=============================================================================
+// R6IOSlidingWindow - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6SlidingWindow : This should allow action moves a window
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 // 
@@ -8,54 +14,41 @@
 //  Note: if you make R6IOSlidingWindow native then you will need to take care so
 //  that the names in eWindowCircumstantialAction do not conflict with other enums
 //=============================================================================
-
 class R6IOSlidingWindow extends R6IActionObject
-	placeable;
+ placeable;
 
-
-
-// R6CIRCUMSTANTIALACTION
-#exec OBJ LOAD FILE=..\Textures\R6ActionIcons.utx PACKAGE=R6ActionIcons
-// R6CIRCUMSTANTIALACTION
-
-enum EOpeningSide{ Top,Bottom, Left, Right};
+enum EOpeningSide
+{
+	Top,                            // 0
+	Bottom,                         // 1
+	Left,                           // 2
+	Right                           // 3
+};
 
 enum eWindowCircumstantialAction
 {
-    CA_None,
-    CA_Open,
-    CA_Close,
-	CA_Climb,
-	CA_Grenade,
-	CA_OpenAndGrenade,
-
-	// Grenade sub menu
-	CA_GrenadeFrag,
-	CA_GrenadeGas,
-	CA_GrenadeFlash,
-	CA_GrenadeSmoke
+	CA_None,                        // 0
+	CA_Open,                        // 1
+	CA_Close,                       // 2
+	CA_Climb,                       // 3
+	CA_Grenade,                     // 4
+	CA_OpenAndGrenade,              // 5
+	CA_GrenadeFrag,                 // 6
+	CA_GrenadeGas,                  // 7
+	CA_GrenadeFlash,                // 8
+	CA_GrenadeSmoke                 // 9
 };
-var     FLOAT       C_fWindowOpen;
 
-
-//-----------------------------------------------------------------------------
-// Editables.
-
-var(R6WindowProperties) bool		m_bIsWindowLocked;	//Is the window Locked
-var                     bool		sm_bIsWindowLocked;	//Is the window Locked
-var(R6WindowProperties) EOpeningSide eOpening;			//The direction of the window opening
-var(R6WindowProperties) INT			m_iInitialOpening;		//The percentage of initial window opening
-var                     INT			sm_iInitialOpening;		
-var(R6WindowProperties) FLOAT		m_iMaxOpening;			//The maximum value for the window to open
-
-
-//-----------------------------------------------------------------------------
-// Internal
-
-var bool    m_bIsWindowClosed;		//Is the door open or not
-var vector  sm_Location;
-var FLOAT   m_TotalMovement;
-
+var(R6WindowProperties) R6IOSlidingWindow.EOpeningSide eOpening;  // The direction of the window opening
+var(R6WindowProperties) int m_iInitialOpening;  // The percentage of initial window opening
+var int sm_iInitialOpening;
+var(R6WindowProperties) bool m_bIsWindowLocked;  // Is the window Locked
+var bool sm_bIsWindowLocked;  // Is the window Locked
+var bool m_bIsWindowClosed;  // Is the door open or not
+var float C_fWindowOpen;
+var(R6WindowProperties) float m_iMaxOpening;  // The maximum value for the window to open
+var float m_TotalMovement;
+var Vector sm_Location;
 
 //------------------------------------------------------------------
 // SaveOriginalData
@@ -63,257 +56,269 @@ var FLOAT   m_TotalMovement;
 //------------------------------------------------------------------
 simulated function SaveOriginalData()
 {
-    if ( m_bResetSystemLog ) LogResetSystem( true );
-    Super.SaveOriginalData();
-
-    sm_Location        = Location;
-    sm_iInitialOpening = m_iInitialOpening;
-    sm_bIsWindowLocked = m_bIsWindowLocked;
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(true);
+	}
+	super(R6InteractiveObject).SaveOriginalData();
+	sm_Location = Location;
+	sm_iInitialOpening = m_iInitialOpening;
+	sm_bIsWindowLocked = m_bIsWindowLocked;
+	return;
 }
+
 //------------------------------------------------------------------
 // ResetOriginalData
 //	
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-    local vector vNewLocation, vX,vY,vZ;
+	local Vector vNewLocation, vX, vY, vZ;
 
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
-
-    m_ActionInstigator = none;
-
-    SetLocation( sm_Location );
-    m_iInitialOpening = sm_iInitialOpening;
-    m_bIsWindowLocked = sm_bIsWindowLocked;
-    
-	if( m_iInitialOpening > 0)
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super(R6InteractiveObject).ResetOriginalData();
+	m_ActionInstigator = none;
+	__NFUN_267__(sm_Location);
+	m_iInitialOpening = sm_iInitialOpening;
+	m_bIsWindowLocked = sm_bIsWindowLocked;
+	// End:0x14F
+	if(__NFUN_151__(m_iInitialOpening, 0))
 	{
 		vNewLocation = Location;
-		GetAxes(Rotation, vX,vY, vZ);
-	
+		__NFUN_229__(Rotation, vX, vY, vZ);
 		switch(eOpening)
 		{
-			case Top:
-				m_TotalMovement = m_iInitialOpening;
-				vNewLocation.z = Location.z + m_iInitialOpening;
+			// End:0xA3
+			case 0:
+				m_TotalMovement = float(m_iInitialOpening);
+				vNewLocation.Z = __NFUN_174__(Location.Z, float(m_iInitialOpening));
+				// End:0x147
 				break;
-			case Bottom:
-				m_TotalMovement = m_iMaxOpening -  m_iInitialOpening;
-				vNewLocation.z = Location.z - m_iInitialOpening;
+			// End:0xDD
+			case 1:
+				m_TotalMovement = __NFUN_175__(m_iMaxOpening, float(m_iInitialOpening));
+				vNewLocation.Z = __NFUN_175__(Location.Z, float(m_iInitialOpening));
+				// End:0x147
 				break;
-			case Left:
-				m_TotalMovement = m_iMaxOpening -  m_iInitialOpening;
-				vNewLocation = Location - (m_iInitialOpening * vX);
+			// End:0x114
+			case 2:
+				m_TotalMovement = __NFUN_175__(m_iMaxOpening, float(m_iInitialOpening));
+				vNewLocation = __NFUN_216__(Location, __NFUN_213__(float(m_iInitialOpening), vX));
+				// End:0x147
 				break;
-			case Right:
-				m_TotalMovement = m_iInitialOpening;
-				vNewLocation = Location + (m_iInitialOpening * vX);
+			// End:0x144
+			case 3:
+				m_TotalMovement = float(m_iInitialOpening);
+				vNewLocation = __NFUN_215__(Location, __NFUN_213__(float(m_iInitialOpening), vX));
+				// End:0x147
+				break;
+			// End:0xFFFF
+			default:
 				break;
 		}
-
-		SetLocation(vNewLocation);
+		__NFUN_267__(vNewLocation);
 	}
-
-    m_bIsWindowClosed = (m_iInitialOpening > 0); 
+	m_bIsWindowClosed = __NFUN_151__(m_iInitialOpening, 0);
+	return;
 }
 
-function bool startAction(FLOAT fdeltaMouse, Actor actionInstigator)
+function bool startAction(float fDeltaMouse, Actor actionInstigator)
 {
-	
-	if(m_ActionInstigator != NONE)
+	// End:0x0D
+	if(__NFUN_119__(m_ActionInstigator, none))
 	{
 		return false;
 	}
 	m_ActionInstigator = actionInstigator;
-
-	return updateAction(fDeltaMouse, actionInstigator);	
-	
+	return updateAction(fDeltaMouse, actionInstigator);
+	return;
 }
 
-function bool updateAction(FLOAT fdeltaMouse, Actor actionInstigator)
+function bool updateAction(float fDeltaMouse, Actor actionInstigator)
 {
-	local vector vNewLocation, vX,vY,vZ;
-	local FLOAT  fWindowMovement;
+	local Vector vNewLocation, vX, vY, vZ;
+	local float fWindowMovement;
 
-	if(actionInstigator != m_ActionInstigator)
+	// End:0x11
+	if(__NFUN_119__(actionInstigator, m_ActionInstigator))
 	{
 		return false;
 	}
-	
-	//We scale the mouse movement
-	fWindowMovement = FClamp( Abs(fDeltaMouse), m_fMinMouseMove, m_fMaxMouseMove);
-	
-	
-	//Determine how much to open the door based on
-	//the mouse movement scaled
-	//fWindowMovement = fWindowMovement / m_fMaxMouseMove;
-	fWindowMovement = fWindowMovement * m_iMaxOpening / m_fMaxMouseMove;
-	
-	//Scale the door movement depending of it's mass
-	if(Default.Mass != 0 && Mass != 0)
+	fWindowMovement = __NFUN_246__(__NFUN_186__(fDeltaMouse), m_fMinMouseMove, m_fMaxMouseMove);
+	fWindowMovement = __NFUN_172__(__NFUN_171__(fWindowMovement, m_iMaxOpening), m_fMaxMouseMove);
+	// End:0x78
+	if(__NFUN_130__(__NFUN_181__(default.Mass, float(0)), __NFUN_181__(Mass, float(0))))
 	{
-		fWindowMovement = fWindowMovement * Default.Mass / Mass;
+		fWindowMovement = __NFUN_172__(__NFUN_171__(fWindowMovement, default.Mass), Mass);
 	}
-	
-	if( fdeltaMouse < 0)
-	{	
-		fWindowMovement = fWindowMovement * -1.0f;		
-	}
-
-	m_TotalMovement = m_TotalMovement + fWindowMovement;
-
-	if( m_TotalMovement < 0)
+	// End:0x97
+	if(__NFUN_176__(fDeltaMouse, float(0)))
 	{
-		fWindowMovement = fWindowMovement - m_TotalMovement;
-		m_TotalMovement = 0;
+		fWindowMovement = __NFUN_171__(fWindowMovement, -1.0000000);
+	}
+	m_TotalMovement = __NFUN_174__(m_TotalMovement, fWindowMovement);
+	// End:0xD6
+	if(__NFUN_176__(m_TotalMovement, float(0)))
+	{
+		fWindowMovement = __NFUN_175__(fWindowMovement, m_TotalMovement);
+		m_TotalMovement = 0.0000000;		
 	}
 	else
-		if(m_TotalMovement > m_iMaxOpening)
+	{
+		// End:0x109
+		if(__NFUN_177__(m_TotalMovement, m_iMaxOpening))
 		{
-			fWindowMovement = fWindowMovement - (m_TotalMovement - m_iMaxOpening);
+			fWindowMovement = __NFUN_175__(fWindowMovement, __NFUN_175__(m_TotalMovement, m_iMaxOpening));
 			m_TotalMovement = m_iMaxOpening;
 		}
-
-	GetAxes(Rotation, vX,vY, vZ);
-	
+	}
+	__NFUN_229__(Rotation, vX, vY, vZ);
 	vNewLocation = Location;
-
 	switch(eOpening)
 	{
-		
-	case Top:		
-		vNewLocation.z = Location.z + fWindowMovement;
-		break;	
-	case Bottom:		
-		vNewLocation.z = Location.z + fWindowMovement;
-		break;	
-	case Left:				
-	case Right:
-		vNewLocation = Location + (fWindowMovement * vX);
-		break;
-		
+		// End:0x155
+		case 0:
+			vNewLocation.Z = __NFUN_174__(Location.Z, fWindowMovement);
+			// End:0x1A2
+			break;
+		// End:0x179
+		case 1:
+			vNewLocation.Z = __NFUN_174__(Location.Z, fWindowMovement);
+			// End:0x1A2
+			break;
+		// End:0x17E
+		case 2:
+		// End:0x19F
+		case 3:
+			vNewLocation = __NFUN_215__(Location, __NFUN_213__(fWindowMovement, vX));
+			// End:0x1A2
+			break;
+		// End:0xFFFF
+		default:
+			break;
 	}
-
-	SetLocation(vNewLocation);
-
+	__NFUN_267__(vNewLocation);
 	return true;
+	return;
 }
 
 function endAction()
 {
-	m_ActionInstigator = NONE;	
+	m_ActionInstigator = none;
+	return;
 }
 
-event R6QueryCircumstantialAction( FLOAT fDistance, Out R6AbstractCircumstantialActionQuery Query, PlayerController playerController )
+event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
 {
-    local BOOL bIsOpen;
+	local bool bIsOpen;
 
-    // If opened at more than 90%, consider the window open
-    if( m_TotalMovement > m_iMaxOpening * C_fWindowOpen )
-    {
-        Query.iHasAction = 1;
-        bIsOpen = true;
-    }
-    else
-    {
-        Query.iHasAction = 0;
-        bIsOpen = false;
-        //return;
-    }
-	
-    if( fDistance < m_fCircumstantialActionRange )
-    {
-        Query.iInRange = 1;
-    }
-    else
-    {
-        Query.iInRange = 0;
-    }
-	
-    Query.textureIcon = Texture'R6ActionIcons.Climb';
-        
-    if( bIsOpen )
-    {
-        //Query.textureIcon = Texture'R6ActionIcons.CloseWindow';
-        
-        Query.iPlayerActionID      = eWindowCircumstantialAction.CA_Close;
-        Query.iTeamActionID        = eWindowCircumstantialAction.CA_Close;
-
-        Query.iTeamActionIDList[0] = eWindowCircumstantialAction.CA_Close;     
-        Query.iTeamActionIDList[1] = eWindowCircumstantialAction.CA_Grenade;
-        Query.iTeamActionIDList[2] = eWindowCircumstantialAction.CA_None;
-        Query.iTeamActionIDList[3] = eWindowCircumstantialAction.CA_None;
-
-		R6FillSubAction( Query, 0, eWindowCircumstantialAction.CA_None );
-		R6FillGrenadeSubAction( Query, 1 );
-		R6FillSubAction( Query, 2, eWindowCircumstantialAction.CA_None );
-		R6FillSubAction( Query, 3, eWindowCircumstantialAction.CA_None );
-    }
-    else
-    {
-        //Query.textureIcon = Texture'R6ActionIcons.OpenWindow';
-        
-        Query.iPlayerActionID      = eWindowCircumstantialAction.CA_Open;
-        Query.iTeamActionID        = eWindowCircumstantialAction.CA_Open;
-
-        Query.iTeamActionIDList[0] = eWindowCircumstantialAction.CA_Open;     
-        Query.iTeamActionIDList[1] = eWindowCircumstantialAction.CA_OpenAndGrenade;
-        Query.iTeamActionIDList[2] = eWindowCircumstantialAction.CA_None;
-        Query.iTeamActionIDList[3] = eWindowCircumstantialAction.CA_None;
-
-		R6FillSubAction( Query, 0, eWindowCircumstantialAction.CA_None );
-		R6FillGrenadeSubAction( Query, 1 );
-		R6FillSubAction( Query, 2, eWindowCircumstantialAction.CA_None );
-		R6FillSubAction( Query, 3, eWindowCircumstantialAction.CA_None );
-    }
+	// End:0x32
+	if(__NFUN_177__(m_TotalMovement, __NFUN_171__(m_iMaxOpening, C_fWindowOpen)))
+	{
+		Query.iHasAction = 1;
+		bIsOpen = true;		
+	}
+	else
+	{
+		Query.iHasAction = 0;
+		bIsOpen = false;
+	}
+	// End:0x6E
+	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	{
+		Query.iInRange = 1;		
+	}
+	else
+	{
+		Query.iInRange = 0;
+	}
+	Query.textureIcon = Texture'R6ActionIcons.Climb';
+	// End:0x152
+	if(bIsOpen)
+	{
+		Query.iPlayerActionID = 2;
+		Query.iTeamActionID = 2;
+		Query.iTeamActionIDList[0] = 2;
+		Query.iTeamActionIDList[1] = 4;
+		Query.iTeamActionIDList[2] = 0;
+		Query.iTeamActionIDList[3] = 0;
+		R6FillSubAction(Query, 0, int(0));
+		R6FillGrenadeSubAction(Query, 1, PlayerController);
+		R6FillSubAction(Query, 2, int(0));
+		R6FillSubAction(Query, 3, int(0));		
+	}
+	else
+	{
+		Query.iPlayerActionID = 1;
+		Query.iTeamActionID = 1;
+		Query.iTeamActionIDList[0] = 1;
+		Query.iTeamActionIDList[1] = 5;
+		Query.iTeamActionIDList[2] = 0;
+		Query.iTeamActionIDList[3] = 0;
+		R6FillSubAction(Query, 0, int(0));
+		R6FillGrenadeSubAction(Query, 1, PlayerController);
+		R6FillSubAction(Query, 2, int(0));
+		R6FillSubAction(Query, 3, int(0));
+	}
+	return;
 }
 
-function R6FillGrenadeSubAction( Out R6AbstractCircumstantialActionQuery Query, INT iSubMenu )
+function R6FillGrenadeSubAction(out R6AbstractCircumstantialActionQuery Query, int iSubMenu, PlayerController PlayerController)
 {
-    local INT i;
-    local INT j;
+	local int i, j;
 
-    if (R6ActionCanBeExecuted(eWindowCircumstantialAction.CA_GrenadeFrag))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eWindowCircumstantialAction.CA_GrenadeFrag;
-        i++;
-    }
+	// End:0x3B
+	if(R6ActionCanBeExecuted(int(6), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 6;
+		__NFUN_165__(i);
+	}
+	// End:0x76
+	if(R6ActionCanBeExecuted(int(7), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 7;
+		__NFUN_165__(i);
+	}
+	// End:0xB1
+	if(R6ActionCanBeExecuted(int(8), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 8;
+		__NFUN_165__(i);
+	}
+	// End:0xEC
+	if(R6ActionCanBeExecuted(int(9), PlayerController))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 9;
+		__NFUN_165__(i);
+	}
+	j = i;
+	J0xF7:
 
-    if (R6ActionCanBeExecuted(eWindowCircumstantialAction.CA_GrenadeGas))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eWindowCircumstantialAction.CA_GrenadeGas;
-        i++;
-    }
-
-    if (R6ActionCanBeExecuted(eWindowCircumstantialAction.CA_GrenadeFlash))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eWindowCircumstantialAction.CA_GrenadeFlash;
-        i++;
-    }
-
-    if (R6ActionCanBeExecuted(eWindowCircumstantialAction.CA_GrenadeSmoke))
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + i] = eWindowCircumstantialAction.CA_GrenadeSmoke;
-		i++;
-    }
-
-    for(j = i ; j < 4; j++)
-    {
-        Query.iTeamSubActionsIDList[iSubMenu*4 + j] = eWindowCircumstantialAction.CA_None;
-    }
+	// End:0x12F [Loop If]
+	if(__NFUN_150__(j, 4))
+	{
+		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), j)] = 0;
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0xF7;
+	}
+	return;
 }
-	
 
 defaultproperties
 {
-     m_bIsWindowClosed=True
-     C_fWindowOpen=0.900000
-     m_iMaxOpening=50.000000
-     RemoteRole=ROLE_SimulatedProxy
-     DrawType=DT_StaticMesh
-     m_eDisplayFlag=DF_ShowOnlyIn3DView
-     bObsolete=True
-     CollisionRadius=10.000000
-     CollisionHeight=10.000000
+	m_bIsWindowClosed=true
+	C_fWindowOpen=0.9000000
+	m_iMaxOpening=50.0000000
+	RemoteRole=2
+	DrawType=8
+	m_eDisplayFlag=1
+	bObsolete=true
+	CollisionRadius=10.0000000
+	CollisionHeight=10.0000000
 }

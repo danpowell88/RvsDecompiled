@@ -1,1153 +1,1140 @@
 //=============================================================================
+// R6MenuGearWidget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuGearWidget.uc : GearRoomMenu
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/02/21 * Created by Alexandre Dionne
 //=============================================================================
-
 class R6MenuGearWidget extends R6MenuLaptopWidget;
-
-var R6WindowTextLabel			m_CodeName, m_DateTime, m_Location;
-
-var float       m_fPaddingBetweenElements;
-var INT         m_IRosterListLeftPad;
-var Font        m_labelFont;
-var bool        bshowlog;           //debug
-
-
-var R6MenuDynTeamListsControl       m_RosterListCtrl;    //Lists on the left of the menu
-var R6MenuOperativeDetailControl    m_OperativeDetails;  //Right side when looking at an operative details
-var R6MenuEquipmentSelectControl    m_Equipment2dSelect; //Middle part where we can take a look a selected equipment 
-var R6MenuEquipmentDetailControl    m_EquipmentDetails;  //Right side when looking at an equipment item
-
-#ifdefDEBUG
-var BOOL m_bRebuildAllPlan;
-#endif
 
 enum e2DEquipment
 {
-    Primary_Weapon,
-    Primary_WeaponGadget,
-    Primary_Bullet,
-    Primary_Gadget,
-    Secondary_Weapon,
-    Secondary_WeaponGadget,
-    Secondary_Bullet,
-    Secondary_Gadget,
-    Armor,
-    All_Primary,
-    All_Secondary,
-    All_PrimaryGadget,
-    All_SecondaryGadget,
-    All_Armor,
-    All_ToAll
+	Primary_Weapon,                 // 0
+	Primary_WeaponGadget,           // 1
+	Primary_Bullet,                 // 2
+	Primary_Gadget,                 // 3
+	Secondary_Weapon,               // 4
+	Secondary_WeaponGadget,         // 5
+	Secondary_Bullet,               // 6
+	Secondary_Gadget,               // 7
+	Armor,                          // 8
+	All_Primary,                    // 9
+	All_Secondary,                  // 10
+	All_PrimaryGadget,              // 11
+	All_SecondaryGadget,            // 12
+	All_Armor,                      // 13
+	All_ToAll                       // 14
 };
 
 enum eOperativeTeam
-{    
-    Red_Team,
-    Green_Team,
-    Gold_Team,    
-    No_Team
+{
+	Red_Team,                       // 0
+	Green_Team,                     // 1
+	Gold_Team,                      // 2
+	No_Team                         // 3
 };
 
-var R6Operative                             m_currentOperative;     //Current Selected Operative
-var eOperativeTeam                          m_currentOperativeTeam; //list in witch the current operative has been added
-
-var class<R6PrimaryWeaponDescription>       m_OpFirstWeaponDesc;    //Equipment of the selected Operative          
-var class<R6SecondaryWeaponDescription>     m_OpSecondaryWeaponDesc;
-var class<R6WeaponGadgetDescription>        m_OpFirstWeaponGadgetDesc,  m_OpSecondWeaponGadgetDesc;
-var class<R6BulletDescription>              m_OpFirstWeaponBulletDesc,  m_OpSecondWeaponBulletDesc;
-var class<R6GadgetDescription>              m_OpFirstGadgetDesc,        m_OpSecondGadgetDesc;
-var class<R6ArmorDescription>               m_OpArmorDesc;
-
-var R6DescPrimaryMags						m_PrimaryMagsGadget;
+var R6MenuGearWidget.eOperativeTeam m_currentOperativeTeam;  // list in witch the current operative has been added
+var int m_IRosterListLeftPad;
+var bool bShowLog;  // debug
+var float m_fPaddingBetweenElements;
+var R6WindowTextLabel m_CodeName;
+// NEW IN 1.60
+var R6WindowTextLabel m_DateTime;
+// NEW IN 1.60
+var R6WindowTextLabel m_Location;
+var Font m_labelFont;
+var R6MenuDynTeamListsControl m_RosterListCtrl;  // Lists on the left of the menu
+var R6MenuOperativeDetailControl m_OperativeDetails;  // Right side when looking at an operative details
+var R6MenuEquipmentSelectControl m_Equipment2dSelect;  // Middle part where we can take a look a selected equipment
+var R6MenuEquipmentDetailControl m_EquipmentDetails;  // Right side when looking at an equipment item
+var R6Operative m_currentOperative;  // Current Selected Operative
+var R6DescPrimaryMags m_PrimaryMagsGadget;
+var Class<R6PrimaryWeaponDescription> m_OpFirstWeaponDesc;  // Equipment of the selected Operative
+var Class<R6SecondaryWeaponDescription> m_OpSecondaryWeaponDesc;
+var Class<R6WeaponGadgetDescription> m_OpFirstWeaponGadgetDesc;
+// NEW IN 1.60
+var Class<R6WeaponGadgetDescription> m_OpSecondWeaponGadgetDesc;
+var Class<R6BulletDescription> m_OpFirstWeaponBulletDesc;
+// NEW IN 1.60
+var Class<R6BulletDescription> m_OpSecondWeaponBulletDesc;
+var Class<R6GadgetDescription> m_OpFirstGadgetDesc;
+// NEW IN 1.60
+var Class<R6GadgetDescription> m_OpSecondGadgetDesc;
+var Class<R6ArmorDescription> m_OpArmorDesc;
 
 function Created()
 {
-	local int LabelWidth;
-    local Region R;
-	local INT i,j;
-	local R6Mod	pCurrentMod;
-	local class<R6DescPrimaryMags> ExtraMags;
-        
-    Super.Created();
-	
-	m_labelFont = Root.Fonts[F_IntelTitle];
-			
-	//Title Labels
-	LabelWidth = int(m_Right.WinLeft - m_left.WinWidth )/3;
+	local int labelWidth;
+	local Region R;
+	local int i, j;
+	local R6Mod pCurrentMod;
+	local Class<R6DescPrimaryMags> ExtraMags;
 
-    //*******************************************************************************************
-    //                                 Title Labels
-    //*******************************************************************************************
-	LabelWidth = int(m_Right.WinLeft - m_left.WinWidth )/3;
-    // CODE NAME
-	m_CodeName = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', 
-                                                m_left.WinWidth, 
-                                                m_Top.WinHeight, 
-		                                        LabelWidth, 
-                                                18,
-                                                self));
-    
+	super.Created();
+	m_labelFont = Root.Fonts[9];
+	labelWidth = __NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3);
+	labelWidth = __NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3);
+	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_Left.WinWidth, m_Top.WinHeight, float(labelWidth), 18.0000000, self));
+	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_CodeName.WinLeft, m_CodeName.WinWidth), m_Top.WinHeight, float(labelWidth), 18.0000000, self));
+	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_DateTime.WinLeft, m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, 18.0000000, self));
+	m_RosterListCtrl = R6MenuDynTeamListsControl(CreateWindow(Class'R6Menu.R6MenuDynTeamListsControl', __NFUN_174__(m_Left.WinWidth, float(m_IRosterListLeftPad)), __NFUN_174__(m_CodeName.WinTop, m_CodeName.WinHeight), 199.0000000, __NFUN_175__(__NFUN_175__(m_HelpTextBar.WinTop, __NFUN_174__(m_CodeName.WinTop, m_CodeName.WinHeight)), float(2)), self));
+	m_OperativeDetails = R6MenuOperativeDetailControl(CreateWindow(Class'R6Menu.R6MenuOperativeDetailControl', 430.0000000, m_RosterListCtrl.WinTop, 189.0000000, 339.0000000, self));
+	m_OperativeDetails.HideWindow();
+	m_EquipmentDetails = R6MenuEquipmentDetailControl(CreateWindow(Class'R6Menu.R6MenuEquipmentDetailControl', 430.0000000, m_RosterListCtrl.WinTop, 189.0000000, 339.0000000, self));
+	m_EquipmentDetails.HideWindow();
+	m_Equipment2dSelect = R6MenuEquipmentSelectControl(CreateWindow(Class'R6Menu.R6MenuEquipmentSelectControl', 222.0000000, m_RosterListCtrl.WinTop, 206.0000000, 339.0000000, self));
+	m_NavBar.m_GearButton.bDisabled = true;
+	m_PrimaryMagsGadget = new (none) Class'R6Description.R6DescPrimaryMags';
+	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	i = 0;
+	J0x2DF:
 
-    // DATE TIME
-	m_DateTime = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', 
-                                                m_CodeName.WinLeft + m_CodeName.WinWidth,
-                                                m_Top.WinHeight, 
-                                                LabelWidth,
-                                                18,
-                                                self));
-    
-
-    // LOCATION
-	m_Location = R6WindowTextLabel(CreateWindow(class'R6WindowTextLabel', 
-                                                m_DateTime.WinLeft + m_DateTime.WinWidth, 
-                                                m_Top.WinHeight, 
-                                        		m_DateTime.WinWidth, 
-                                                18,
-                                                self));
-
-    //Left Part of the three part screen
-    m_RosterListCtrl = R6MenuDynTeamListsControl(CreateWindow(class'R6MenuDynTeamListsControl', m_left.WinWidth + m_IRosterListLeftPad, m_CodeName.WinTop + m_CodeName.WinHeight, 199, m_HelpTextBar.WinTop - (m_CodeName.WinTop + m_CodeName.WinHeight) - 2, self));
-    
-    m_OperativeDetails  = R6MenuOperativeDetailControl(CreateWindow(class'R6MenuOperativeDetailControl', 430, m_RosterListCtrl.WinTop, 189, 339, self));
-    m_OperativeDetails.HideWindow();
-
-    m_EquipmentDetails  = R6MenuEquipmentDetailControl(CreateWindow(class'R6MenuEquipmentDetailControl', 430, m_RosterListCtrl.WinTop, 189, 339, self));
-    m_EquipmentDetails.HideWindow();
-
-    m_Equipment2dSelect = R6MenuEquipmentSelectControl(CreateWindow(class'R6MenuEquipmentSelectControl', 222, m_RosterListCtrl.WinTop, 206, 339, self));
-    
-    m_NavBar.m_GearButton.bDisabled = true;
-
-	m_PrimaryMagsGadget = new(none) class'R6Description.R6DescPrimaryMags';
-
-	pCurrentMod = class'Actor'.static.GetModMgr().m_pCurrentMod; 
-	for (i = 0; i < pCurrentMod.m_aDescriptionPackage.Length; i++)
+	// End:0x402 [Loop If]
+	if(__NFUN_150__(i, pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		if(pCurrentMod.m_aDescriptionPackage[i] != "R6Description")
+		// End:0x3F8
+		if(__NFUN_123__(pCurrentMod.m_aDescriptionPackage[i], "R6Description"))
 		{
-			ExtraMags = class<R6DescPrimaryMags>(GetFirstPackageClass(pCurrentMod.m_aDescriptionPackage[i]$".u", class'R6DescPrimaryMags'));
-			while((ExtraMags != None))
+			ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6DescPrimaryMags'));
+			J0x34D:
+
+			// End:0x3F8 [Loop If]
+			if(__NFUN_119__(ExtraMags, none))
 			{
-				for(j = 0; j < ExtraMags.Default.m_iNewTagsToAdd; j++)
+				j = 0;
+				J0x35F:
+
+				// End:0x3E7 [Loop If]
+				if(__NFUN_150__(j, ExtraMags.default.m_iNewTagsToAdd))
 				{
-					m_PrimaryMagsGadget.m_Mags[m_PrimaryMagsGadget.m_Mags.Length] = ExtraMags.Default.m_Mags[j];
-					m_PrimaryMagsGadget.m_MagTags[m_PrimaryMagsGadget.m_MagTags.Length] = ExtraMags.Default.m_MagTags[j];
+					m_PrimaryMagsGadget.m_Mags[m_PrimaryMagsGadget.m_Mags.Length] = ExtraMags.default.m_Mags[j];
+					m_PrimaryMagsGadget.m_MagTags[m_PrimaryMagsGadget.m_MagTags.Length] = ExtraMags.default.m_MagTags[j];
+					__NFUN_165__(j);
+					// [Loop Continue]
+					goto J0x35F;
 				}
-				ExtraMags = class<R6DescPrimaryMags>(GetNextClass());
+				ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1006__());
+				// [Loop Continue]
+				goto J0x34D;
 			}
-		}  
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x2DF;
 	}
+	return;
 }
 
 function ShowWindow()
 {
-    local R6GameOptions pGameOptions;
-    
-    Super.ShowWindow();
+	local R6GameOptions pGameOptions;
 
-   if(R6MenuRootWindow(Root).m_bPlayerPlanInitialized == false)
-   {
-        pGameOptions = class'Actor'.static.GetGameOptions();
-        if( pGameOptions.PopUpLoadPlan == true)
-        {
-            R6MenuRootWindow(Root).m_ePopUpID = EPopUpID_LoadPlanning;
-            R6MenuRootWindow(Root).PopUpMenu(true);      
-        }   
-   }  
- 
-
-}
-function Reset()
-{   
- 
-    local R6MissionDescription  CurrentMission;        
-    
-    CurrentMission = R6MissionDescription(R6Console(Root.console).master.m_StartGameInfo.m_CurrentMission);
-
- 
-    m_CodeName.SetProperties( Localize(CurrentMission.m_MapName,"ID_CODENAME",CurrentMission.LocalizationFile),
-                              TA_Center, m_labelFont, Root.Colors.White, false);
-
-    m_DateTime.SetProperties( Localize(CurrentMission.m_MapName,"ID_DATETIME",CurrentMission.LocalizationFile),
-                              TA_Center, m_labelFont, Root.Colors.White, false);
-    
-    m_Location.SetProperties( Localize(CurrentMission.m_MapName,"ID_LOCATION",CurrentMission.LocalizationFile),
-                              TA_Center, m_labelFont, Root.Colors.White, false);
-    
-    m_EquipmentDetails.BuildAvailableMissionArmors();
-    m_RosterListCtrl.FillRosterList();
-}
-
-
-function OperativeSelected( R6Operative selectedOperative, eOperativeTeam _selectedTeam, optional UWindowWindow _pActiveWindow)
-{
-    //This occurs when an operative has been selected in a list
-    m_EquipmentDetails.HideWindow();
-    m_currentOperative = selectedOperative;
-
-    m_OpFirstWeaponDesc         =  class<R6PrimaryWeaponDescription>( DynamicLoadObject( m_currentOperative.m_szPrimaryWeapon, class'Class' ) );   
-	if(m_OpFirstWeaponDesc == none)
+	super(UWindowWindow).ShowWindow();
+	// End:0x72
+	if(__NFUN_242__(R6MenuRootWindow(Root).m_bPlayerPlanInitialized, false))
 	{
-		m_OpFirstWeaponDesc		=  class<R6PrimaryWeaponDescription>( DynamicLoadObject( m_currentOperative.default.m_szPrimaryWeapon, class'Class' ) );   
+		pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+		// End:0x72
+		if(__NFUN_242__(pGameOptions.PopUpLoadPlan, true))
+		{
+			R6MenuRootWindow(Root).m_ePopUpID = 48;
+			R6MenuRootWindow(Root).PopUpMenu(true);
+		}
+	}
+	return;
+}
+
+function Reset()
+{
+	local R6MissionDescription CurrentMission;
+
+	CurrentMission = R6MissionDescription(R6Console(Root.Console).Master.m_StartGameInfo.m_CurrentMission);
+	m_CodeName.SetProperties(Localize(CurrentMission.m_MapName, "ID_CODENAME", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
+	m_DateTime.SetProperties(Localize(CurrentMission.m_MapName, "ID_DATETIME", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
+	m_Location.SetProperties(Localize(CurrentMission.m_MapName, "ID_LOCATION", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
+	m_EquipmentDetails.BuildAvailableMissionArmors();
+	m_RosterListCtrl.FillRosterList();
+	return;
+}
+
+function OperativeSelected(R6Operative selectedOperative, R6MenuGearWidget.eOperativeTeam _selectedTeam, optional UWindowWindow _pActiveWindow)
+{
+	m_EquipmentDetails.HideWindow();
+	m_currentOperative = selectedOperative;
+	m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DynamicLoadObject(m_currentOperative.m_szPrimaryWeapon, Class'Core.Class'));
+	// End:0x8A
+	if(__NFUN_114__(m_OpFirstWeaponDesc, none))
+	{
+		m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DynamicLoadObject(m_currentOperative.default.m_szPrimaryWeapon, Class'Core.Class'));
 		m_currentOperative.m_szPrimaryWeapon = m_currentOperative.default.m_szPrimaryWeapon;
 	}
-	m_OpFirstWeaponGadgetDesc   =  class'R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponGadget);
-	if(m_OpFirstWeaponGadgetDesc == none)
+	m_OpFirstWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponGadget);
+	// End:0x102
+	if(__NFUN_114__(m_OpFirstWeaponGadgetDesc, none))
 	{
-		m_OpFirstWeaponGadgetDesc   =  class'R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.default.m_szPrimaryWeaponGadget);
+		m_OpFirstWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.default.m_szPrimaryWeaponGadget);
 		m_currentOperative.m_szPrimaryWeaponGadget = m_currentOperative.default.m_szPrimaryWeaponGadget;
 	}
-	m_OpFirstWeaponBulletDesc   =  class'R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponBullet);
-	if(m_OpFirstWeaponBulletDesc == none)
+	m_OpFirstWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponBullet);
+	// End:0x17A
+	if(__NFUN_114__(m_OpFirstWeaponBulletDesc, none))
 	{
-		m_OpFirstWeaponBulletDesc   =  class'R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.default.m_szPrimaryWeaponBullet);
+		m_OpFirstWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.default.m_szPrimaryWeaponBullet);
 		m_currentOperative.m_szPrimaryWeaponBullet = m_currentOperative.default.m_szPrimaryWeaponBullet;
 	}
-    
-    m_OpSecondaryWeaponDesc     =  class<R6SecondaryWeaponDescription>( DynamicLoadObject( m_currentOperative.m_szSecondaryWeapon, class'Class' ) );
-	if(m_OpSecondaryWeaponDesc == none)
+	m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DynamicLoadObject(m_currentOperative.m_szSecondaryWeapon, Class'Core.Class'));
+	// End:0x1EA
+	if(__NFUN_114__(m_OpSecondaryWeaponDesc, none))
 	{
-		m_OpSecondaryWeaponDesc =  class<R6SecondaryWeaponDescription>( DynamicLoadObject( m_currentOperative.default.m_szSecondaryWeapon, class'Class' ) );
+		m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DynamicLoadObject(m_currentOperative.default.m_szSecondaryWeapon, Class'Core.Class'));
 		m_currentOperative.m_szSecondaryWeapon = m_currentOperative.default.m_szSecondaryWeapon;
 	}
-    m_OpSecondWeaponGadgetDesc  =  class'R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponGadget);
-	if(m_OpSecondWeaponGadgetDesc == none)
+	m_OpSecondWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponGadget);
+	// End:0x262
+	if(__NFUN_114__(m_OpSecondWeaponGadgetDesc, none))
 	{
-		m_OpSecondWeaponGadgetDesc  =  class'R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.default.m_szSecondaryWeaponGadget);
+		m_OpSecondWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.default.m_szSecondaryWeaponGadget);
 		m_currentOperative.m_szSecondaryWeaponGadget = m_currentOperative.default.m_szSecondaryWeaponGadget;
 	}
-	m_OpSecondWeaponBulletDesc  =  class'R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponBullet);
-	if(m_OpSecondWeaponBulletDesc == none)
+	m_OpSecondWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponBullet);
+	// End:0x2DA
+	if(__NFUN_114__(m_OpSecondWeaponBulletDesc, none))
 	{
-		m_OpSecondWeaponBulletDesc  =  class'R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.default.m_szSecondaryWeaponBullet);
+		m_OpSecondWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.default.m_szSecondaryWeaponBullet);
 		m_currentOperative.m_szSecondaryWeaponBullet = m_currentOperative.default.m_szSecondaryWeaponBullet;
 	}
-
-    m_OpFirstGadgetDesc         =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.m_szPrimaryGadget, class'Class' ) );
-	if(m_OpFirstGadgetDesc == none)
+	m_OpFirstGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.m_szPrimaryGadget, Class'Core.Class'));
+	// End:0x34A
+	if(__NFUN_114__(m_OpFirstGadgetDesc, none))
 	{
-		m_OpFirstGadgetDesc     =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.default.m_szPrimaryGadget, class'Class' ) );
+		m_OpFirstGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.default.m_szPrimaryGadget, Class'Core.Class'));
 		m_currentOperative.m_szPrimaryGadget = m_currentOperative.default.m_szPrimaryGadget;
 	}
-    m_OpSecondGadgetDesc        =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.m_szSecondaryGadget, class'Class' ) );
-	if(m_OpSecondGadgetDesc == none)
+	m_OpSecondGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.m_szSecondaryGadget, Class'Core.Class'));
+	// End:0x3BA
+	if(__NFUN_114__(m_OpSecondGadgetDesc, none))
 	{
-		m_OpSecondGadgetDesc    =  class<R6GadgetDescription>( DynamicLoadObject( m_currentOperative.default.m_szSecondaryGadget, class'Class' ) );
+		m_OpSecondGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.default.m_szSecondaryGadget, Class'Core.Class'));
 		m_currentOperative.m_szSecondaryGadget = m_currentOperative.default.m_szSecondaryGadget;
 	}
-#ifndefSPDEMO
-    m_OpArmorDesc               =  class<R6ArmorDescription>( DynamicLoadObject( m_currentOperative.m_szArmor, class'Class' ) );
-	if(m_OpArmorDesc == none)
+	m_OpArmorDesc = Class<R6ArmorDescription>(DynamicLoadObject(m_currentOperative.m_szArmor, Class'Core.Class'));
+	// End:0x42A
+	if(__NFUN_114__(m_OpArmorDesc, none))
 	{
-		m_OpArmorDesc           =  class<R6ArmorDescription>( DynamicLoadObject( m_currentOperative.default.m_szArmor, class'Class' ) );
+		m_OpArmorDesc = Class<R6ArmorDescription>(DynamicLoadObject(m_currentOperative.default.m_szArmor, Class'Core.Class'));
 		m_currentOperative.m_szArmor = m_currentOperative.default.m_szArmor;
 	}
-#endif
-#ifdefSPDEMO    
-    m_OpArmorDesc               =  class<R6ArmorDescription>( DynamicLoadObject( "R6Description.R6DescHeavy", class'Class' ) );
-#endif
-
-    m_OperativeDetails.ShowWindow();
-    m_OperativeDetails.UpdateDetails();
-    m_Equipment2dSelect.UpdateDetails();
-    m_currentOperativeTeam = _selectedTeam;
-
-    m_Equipment2dSelect.DisableControls(m_currentOperativeTeam == No_Team);
-
-    if ( (bWindowVisible) && (_pActiveWindow != None) )
+	m_OperativeDetails.ShowWindow();
+	m_OperativeDetails.UpdateDetails();
+	m_Equipment2dSelect.UpdateDetails();
+	m_currentOperativeTeam = _selectedTeam;
+	m_Equipment2dSelect.DisableControls(__NFUN_154__(int(m_currentOperativeTeam), int(3)));
+	// End:0x4A5
+	if(__NFUN_130__(bWindowVisible, __NFUN_119__(_pActiveWindow, none)))
 	{
-		_pActiveWindow.ActivateWindow( 0, false); // activatewindow to re-build acceptsfocus chain destroy by m_OperativeDetails.ShowWindow(); in this fct
+		_pActiveWindow.ActivateWindow(0, false);
 	}
+	return;
 }
 
-function SetupOperative( OUT R6Operative OpToChek)
+function SetupOperative(out R6Operative OpToChek)
 {
-    //This functions Makes sure an operative has a valid equipment
-    local class<R6ArmorDescription> currentArmor;
+	local Class<R6ArmorDescription> currentArmor;
 
-    currentArmor = class<R6ArmorDescription>( DynamicLoadObject( OpToChek.m_szArmor, class'Class' ) );
-        
-    if( m_EquipmentDetails.IsAmorAvailable(currentArmor, OpToChek) == false )
-        OpToChek.m_szArmor = string(m_EquipmentDetails.GetDefaultArmor());
-
+	currentArmor = Class<R6ArmorDescription>(DynamicLoadObject(OpToChek.m_szArmor, Class'Core.Class'));
+	// End:0x63
+	if(__NFUN_242__(m_EquipmentDetails.IsAmorAvailable(currentArmor, OpToChek), false))
+	{
+		OpToChek.m_szArmor = string(m_EquipmentDetails.GetDefaultArmor());
+	}
+	return;
 }
 
-function EquipmentSelected(e2DEquipment equipmentSelected)
-{   
-    local R6WindowTextIconsListBox listboxes[3];
-    local R6Operative               tmpOperative;
-    local R6WindowListBoxItem       tmpItem;
-    local INT                       i;
+function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
+{
+	local R6WindowTextIconsListBox listboxes[3];
+	local R6Operative tmpOperative;
+	local R6WindowListBoxItem tmpItem;
+	local int i;
 
-    //Ordering of the list box is important
-    listboxes[0]   = m_RosterListCtrl.m_RedListBox.m_listBox;
-    listboxes[1]   = m_RosterListCtrl.m_GreenListBox.m_listBox;
-    listboxes[2]   = m_RosterListCtrl.m_GoldListBox.m_listBox;
+	listboxes[0] = m_RosterListCtrl.m_RedListBox.m_listBox;
+	listboxes[1] = m_RosterListCtrl.m_GreenListBox.m_listBox;
+	listboxes[2] = m_RosterListCtrl.m_GoldListBox.m_listBox;
+	switch(EquipmentSelected)
+	{
+		// End:0x139
+		case 9:
+			tmpItem = R6WindowListBoxItem(listboxes[int(m_currentOperativeTeam)].Items.Next);
+			J0x94:
 
+			// End:0x136 [Loop If]
+			if(__NFUN_119__(tmpItem, none))
+			{
+				tmpOperative = R6Operative(tmpItem.m_Object);
+				// End:0x11A
+				if(__NFUN_119__(tmpOperative, none))
+				{
+					tmpOperative.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
+					tmpOperative.m_szPrimaryWeaponBullet = m_currentOperative.m_szPrimaryWeaponBullet;
+					tmpOperative.m_szPrimaryWeaponGadget = m_currentOperative.m_szPrimaryWeaponGadget;
+				}
+				tmpItem = R6WindowListBoxItem(tmpItem.Next);
+				// [Loop Continue]
+				goto J0x94;
+			}
+			// End:0x5B2
+			break;
+		// End:0x20D
+		case 10:
+			tmpItem = R6WindowListBoxItem(listboxes[int(m_currentOperativeTeam)].Items.Next);
+			J0x168:
 
-    switch(equipmentSelected)    
-    {
-    case All_Primary:         
-        //Affect all primary equipment to all team members 
-       tmpItem = R6WindowListBoxItem(listboxes[m_currentOperativeTeam].Items.Next);
-       
-       while( tmpItem != None)
-       {
-            tmpOperative = R6Operative(tmpItem.m_Object);
-            if(tmpOperative != None)
-            {                            
-                tmpOperative.m_szPrimaryWeapon          = m_currentOperative.m_szPrimaryWeapon;                 
-                tmpOperative.m_szPrimaryWeaponBullet    = m_currentOperative.m_szPrimaryWeaponBullet;                 
-                tmpOperative.m_szPrimaryWeaponGadget    = m_currentOperative.m_szPrimaryWeaponGadget;                 
-            }              
+			// End:0x20A [Loop If]
+			if(__NFUN_119__(tmpItem, none))
+			{
+				tmpOperative = R6Operative(tmpItem.m_Object);
+				// End:0x1EE
+				if(__NFUN_119__(tmpOperative, none))
+				{
+					tmpOperative.m_szSecondaryWeapon = m_currentOperative.m_szSecondaryWeapon;
+					tmpOperative.m_szSecondaryWeaponBullet = m_currentOperative.m_szSecondaryWeaponBullet;
+					tmpOperative.m_szSecondaryWeaponGadget = m_currentOperative.m_szSecondaryWeaponGadget;
+				}
+				tmpItem = R6WindowListBoxItem(tmpItem.Next);
+				// [Loop Continue]
+				goto J0x168;
+			}
+			// End:0x5B2
+			break;
+		// End:0x2A7
+		case 11:
+			tmpItem = R6WindowListBoxItem(listboxes[int(m_currentOperativeTeam)].Items.Next);
+			J0x23C:
 
-            tmpItem = R6WindowListBoxItem(tmpItem.Next);
-        }
-        break;
-    case All_Secondary:
-       //Affect all secondary equipment to all team members 
-       tmpItem = R6WindowListBoxItem(listboxes[m_currentOperativeTeam].Items.Next);
-       
-       while( tmpItem != None)
-       {
-            tmpOperative = R6Operative(tmpItem.m_Object);
-            if(tmpOperative != None)
-            {                            
-                tmpOperative.m_szSecondaryWeapon          = m_currentOperative.m_szSecondaryWeapon;                 
-                tmpOperative.m_szSecondaryWeaponBullet    = m_currentOperative.m_szSecondaryWeaponBullet;                 
-                tmpOperative.m_szSecondaryWeaponGadget    = m_currentOperative.m_szSecondaryWeaponGadget;                 
-            }              
+			// End:0x2A4 [Loop If]
+			if(__NFUN_119__(tmpItem, none))
+			{
+				tmpOperative = R6Operative(tmpItem.m_Object);
+				// End:0x288
+				if(__NFUN_119__(tmpOperative, none))
+				{
+					tmpOperative.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;
+				}
+				tmpItem = R6WindowListBoxItem(tmpItem.Next);
+				// [Loop Continue]
+				goto J0x23C;
+			}
+			// End:0x5B2
+			break;
+		// End:0x341
+		case 12:
+			tmpItem = R6WindowListBoxItem(listboxes[int(m_currentOperativeTeam)].Items.Next);
+			J0x2D6:
 
-            tmpItem = R6WindowListBoxItem(tmpItem.Next);
-        }
-        break;
-    case All_PrimaryGadget:
-       //Affect primary gadget to all team members 
-       tmpItem = R6WindowListBoxItem(listboxes[m_currentOperativeTeam].Items.Next);
-       
-       while( tmpItem != None)
-       {
-            tmpOperative = R6Operative(tmpItem.m_Object);
-            if(tmpOperative != None)
-            {                            
-                tmpOperative.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;                 
-            }              
+			// End:0x33E [Loop If]
+			if(__NFUN_119__(tmpItem, none))
+			{
+				tmpOperative = R6Operative(tmpItem.m_Object);
+				// End:0x322
+				if(__NFUN_119__(tmpOperative, none))
+				{
+					tmpOperative.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;
+				}
+				tmpItem = R6WindowListBoxItem(tmpItem.Next);
+				// [Loop Continue]
+				goto J0x2D6;
+			}
+			// End:0x5B2
+			break;
+		// End:0x3DB
+		case 13:
+			tmpItem = R6WindowListBoxItem(listboxes[int(m_currentOperativeTeam)].Items.Next);
+			J0x370:
 
-            tmpItem = R6WindowListBoxItem(tmpItem.Next);
-       }      
-       break;
-        
-    case All_SecondaryGadget:
-             //Affect secondary gadget to all team members 
-       tmpItem = R6WindowListBoxItem(listboxes[m_currentOperativeTeam].Items.Next);
-       
-       while( tmpItem != None)
-       {
-            tmpOperative = R6Operative(tmpItem.m_Object);
-            if(tmpOperative != None)
-            {                            
-                tmpOperative.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;                 
-            }              
+			// End:0x3D8 [Loop If]
+			if(__NFUN_119__(tmpItem, none))
+			{
+				tmpOperative = R6Operative(tmpItem.m_Object);
+				// End:0x3BC
+				if(__NFUN_119__(tmpOperative, none))
+				{
+					tmpOperative.m_szArmor = m_currentOperative.m_szArmor;
+				}
+				tmpItem = R6WindowListBoxItem(tmpItem.Next);
+				// [Loop Continue]
+				goto J0x370;
+			}
+			// End:0x5B2
+			break;
+		// End:0x578
+		case 14:
+			i = 0;
+			J0x3E7:
 
-            tmpItem = R6WindowListBoxItem(tmpItem.Next);
-       }      
-       
+			// End:0x575 [Loop If]
+			if(__NFUN_150__(i, 3))
+			{
+				tmpItem = R6WindowListBoxItem(listboxes[i].Items.Next);
+				J0x41B:
 
-        break;
-    case All_Armor:
-
-       //Affect Armor to all team members 
-       tmpItem = R6WindowListBoxItem(listboxes[m_currentOperativeTeam].Items.Next);
-       
-       while( tmpItem != None)
-       {
-            tmpOperative = R6Operative(tmpItem.m_Object);
-            if(tmpOperative != None)
-            {                            
-                tmpOperative.m_szArmor = m_currentOperative.m_szArmor;                 
-            }              
-
-            tmpItem = R6WindowListBoxItem(tmpItem.Next);
-       }      
-       break;    
-    case All_ToAll:
-        for(i=0; i<3; i++) 
-        {
-          tmpItem = R6WindowListBoxItem(listboxes[i].Items.Next);
-       
-           while( tmpItem != None)
-           {
-                tmpOperative = R6Operative(tmpItem.m_Object);
-                if(tmpOperative != None)
-                { 
-                    tmpOperative.m_szPrimaryWeapon          = m_currentOperative.m_szPrimaryWeapon;                 
-                    tmpOperative.m_szPrimaryWeaponBullet    = m_currentOperative.m_szPrimaryWeaponBullet;                 
-                    tmpOperative.m_szPrimaryWeaponGadget    = m_currentOperative.m_szPrimaryWeaponGadget;  
-                    tmpOperative.m_szSecondaryWeapon        = m_currentOperative.m_szSecondaryWeapon;                 
-                    tmpOperative.m_szSecondaryWeaponBullet  = m_currentOperative.m_szSecondaryWeaponBullet;                 
-                    tmpOperative.m_szSecondaryWeaponGadget  = m_currentOperative.m_szSecondaryWeaponGadget;   
-                    tmpOperative.m_szPrimaryGadget          = m_currentOperative.m_szPrimaryGadget;                 
-                    tmpOperative.m_szSecondaryGadget        = m_currentOperative.m_szSecondaryGadget;               
-                    tmpOperative.m_szArmor                  = m_currentOperative.m_szArmor;                 
-                }              
-
-                tmpItem = R6WindowListBoxItem(tmpItem.Next);
-           }  
-            
-        }
-        break;
-    default:
-            //This occurs when a 2d equipment is clicked
-        m_OperativeDetails.HideWindow();    
-        m_EquipmentDetails.ShowWindow();
-        m_EquipmentDetails.FillListBox(equipmentSelected);
-        break;
-
-    }   
-       
+				// End:0x56B [Loop If]
+				if(__NFUN_119__(tmpItem, none))
+				{
+					tmpOperative = R6Operative(tmpItem.m_Object);
+					// End:0x54F
+					if(__NFUN_119__(tmpOperative, none))
+					{
+						tmpOperative.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
+						tmpOperative.m_szPrimaryWeaponBullet = m_currentOperative.m_szPrimaryWeaponBullet;
+						tmpOperative.m_szPrimaryWeaponGadget = m_currentOperative.m_szPrimaryWeaponGadget;
+						tmpOperative.m_szSecondaryWeapon = m_currentOperative.m_szSecondaryWeapon;
+						tmpOperative.m_szSecondaryWeaponBullet = m_currentOperative.m_szSecondaryWeaponBullet;
+						tmpOperative.m_szSecondaryWeaponGadget = m_currentOperative.m_szSecondaryWeaponGadget;
+						tmpOperative.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;
+						tmpOperative.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;
+						tmpOperative.m_szArmor = m_currentOperative.m_szArmor;
+					}
+					tmpItem = R6WindowListBoxItem(tmpItem.Next);
+					// [Loop Continue]
+					goto J0x41B;
+				}
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x3E7;
+			}
+			// End:0x5B2
+			break;
+		// End:0xFFFF
+		default:
+			m_OperativeDetails.HideWindow();
+			m_EquipmentDetails.ShowWindow();
+			m_EquipmentDetails.FillListBox(int(EquipmentSelected));
+			// End:0x5B2
+			break;
+			break;
+	}
+	return;
 }
 
-function EquipmentChanged(INT equipmentSelected, class<R6Description> DecriptionClass )
-{   
-    local class<R6Description> inDescriptionClass;
-    //This occurs when a new Item has been selected from the list
-    
-    //TODO : Change current Roster equipment and make sure 2d image change
-    
-        switch(equipmentSelected)
-        {
-        case 0 :
+function EquipmentChanged(int EquipmentSelected, Class<R6Description> DecriptionClass)
+{
+	local Class<R6Description> inDescriptionClass;
 
-            inDescriptionClass = DecriptionClass;
-    
-            if(m_OpFirstWeaponDesc != class<R6PrimaryWeaponDescription>(DecriptionClass))
-            {                
-                //Primary Weapon Changed
-                m_currentOperative.m_szPrimaryWeapon = string(DecriptionClass);
-                m_OpFirstWeaponDesc = class<R6PrimaryWeaponDescription>(DecriptionClass);
-                if(bshowlog)log("Changing"@m_currentOperative.class@" Primary Weapon for "@m_currentOperative.m_szPrimaryWeapon);           
-            
-                //Primary Weapon Gadget Changed
-                DecriptionClass = class'R6DescWeaponGadgetNone';
-                m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.Default.m_NameID;
-                m_OpFirstWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-                if(bshowlog)log("Changing"@m_currentOperative.class@" Primary Weapon Gadget for "@m_currentOperative.m_szPrimaryWeaponGadget);
-            
-                //Primary Weapon Bullets Changed
-                DecriptionClass = class'R6DescriptionManager'.static.findPrimaryDefaultAmmo(class<R6PrimaryWeaponDescription>(inDescriptionClass));
-                m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-                m_OpFirstWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-                if(bshowlog)log("Changing"@m_currentOperative.class@" Primary Weapon Bullets for "@m_currentOperative.m_szPrimaryWeaponBullet);
-            }
-            break;
-        case 1 :
-            //Primary Weapon Gadget Changed
-            m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.Default.m_NameID;
-            m_OpFirstWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-            if(bshowlog)log("Changing"@m_currentOperative.class@" Primary Weapon Gadget for "@m_currentOperative.m_szPrimaryWeaponGadget);
-            break;
-        case 2 :            
-            //Primary Weapon Bullets Changed
-            m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-            m_OpFirstWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-            if(bshowlog)log("Changing"@m_currentOperative.class@" Primary Weapon Bullets for "@m_currentOperative.m_szPrimaryWeaponBullet);
-            break;
-        case 3 :
-            //Primary Gadget
-            m_currentOperative.m_szPrimaryGadget = string(DecriptionClass);
-            m_OpFirstGadgetDesc = class<R6GadgetDescription>(DecriptionClass);              
-            if(bshowlog)log("Changing"@m_currentOperative.class@" Primary Gadget for "@m_currentOperative.m_szPrimaryWeapon);
-            break;
-        case 4 :
-
-            inDescriptionClass = DecriptionClass;
-
-            if(m_OpSecondaryWeaponDesc != class<R6SecondaryWeaponDescription>(DecriptionClass))
-            {
-                //Secondary Weapon Changed
-                m_currentOperative.m_szSecondaryWeapon = string(DecriptionClass);
-                m_OpSecondaryWeaponDesc = class<R6SecondaryWeaponDescription>(DecriptionClass);
-                if(bshowlog)log("Changing"@m_currentOperative.class@" Secondary Weapon for "@m_currentOperative.m_szSecondaryWeapon);
-
-                 //Secondary Weapon Gadget Changed
-                DecriptionClass = class'R6DescWeaponGadgetNone';
-                m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.Default.m_NameID;
-                m_OpSecondWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-                if(bshowlog)log("Changing"@m_currentOperative.class@" Secondary Weapon Gadget for "@m_currentOperative.m_szSecondaryWeaponGadget);
-
-                //Secondary Weapon Bullets Changed
-                DecriptionClass = class'R6DescriptionManager'.static.findSecondaryDefaultAmmo(class<R6SecondaryWeaponDescription>(inDescriptionClass));
-                m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-                m_OpSecondWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-                if(bshowlog)log("Changing"@m_currentOperative.class@" Secondary Weapon Bullets for "@m_currentOperative.m_szSecondaryWeaponBullet);
-            }            
-            break;
-        case 5 :
-            //Secondary Weapon Gadget Changed
-            m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.Default.m_NameID;
-            m_OpSecondWeaponGadgetDesc = class<R6WeaponGadgetDescription>(DecriptionClass);
-            if(bshowlog)log("Changing"@m_currentOperative.class@" Secondary Weapon Gadget for "@m_currentOperative.m_szSecondaryWeaponGadget);
-            break;
-        case 6 :
-            //Secondary Weapon Bullets Changed
-            m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.Default.m_NameTag;
-            m_OpSecondWeaponBulletDesc = class<R6BulletDescription>(DecriptionClass);
-            if(bshowlog)log("Changing"@m_currentOperative.class@" Secondary Weapon Bullets for "@m_currentOperative.m_szSecondaryWeaponBullet);
-            break;
-        case 7 :
-            //Secondary Gadget
-            m_currentOperative.m_szSecondaryGadget = string(DecriptionClass);
-            m_OpSecondGadgetDesc = class<R6GadgetDescription>(DecriptionClass);              
-            if(bshowlog)log("Changing"@m_currentOperative.class@" Secondary Gadget for "@m_currentOperative.m_szSecondaryGadget);
-            break;
-        case 8 :
-            //Armor
-            m_currentOperative.m_szArmor = string(DecriptionClass);
-            m_OpArmorDesc = class<R6ArmorDescription>(DecriptionClass);
-            if(bshowlog)log("Changing"@m_currentOperative.class@" Armor for "@m_currentOperative.m_szArmor);
-            break;
-        }           
-        m_Equipment2dSelect.UpdateDetails();
+	switch(EquipmentSelected)
+	{
+		// End:0x1D3
+		case 0:
+			inDescriptionClass = DecriptionClass;
+			// End:0x1D0
+			if(__NFUN_119__(m_OpFirstWeaponDesc, Class<R6PrimaryWeaponDescription>(DecriptionClass)))
+			{
+				m_currentOperative.m_szPrimaryWeapon = string(DecriptionClass);
+				m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DecriptionClass);
+				// End:0x9F
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon for "), m_currentOperative.m_szPrimaryWeapon));
+				}
+				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
+				m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.default.m_NameID;
+				m_OpFirstWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+				// End:0x12D
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Gadget for "), m_currentOperative.m_szPrimaryWeaponGadget));
+				}
+				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findPrimaryDefaultAmmo(Class<R6PrimaryWeaponDescription>(inDescriptionClass));
+				m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.default.m_NameTag;
+				m_OpFirstWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+				// End:0x1D0
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Bullets for "), m_currentOperative.m_szPrimaryWeaponBullet));
+				}
+			}
+			// End:0x74A
+			break;
+		// End:0x25D
+		case 1:
+			m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.default.m_NameID;
+			m_OpFirstWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+			// End:0x25A
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Gadget for "), m_currentOperative.m_szPrimaryWeaponGadget));
+			}
+			// End:0x74A
+			break;
+		// End:0x2E9
+		case 2:
+			m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.default.m_NameTag;
+			m_OpFirstWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+			// End:0x2E6
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Bullets for "), m_currentOperative.m_szPrimaryWeaponBullet));
+			}
+			// End:0x74A
+			break;
+		// End:0x366
+		case 3:
+			m_currentOperative.m_szPrimaryGadget = string(DecriptionClass);
+			m_OpFirstGadgetDesc = Class<R6GadgetDescription>(DecriptionClass);
+			// End:0x363
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Gadget for "), m_currentOperative.m_szPrimaryWeapon));
+			}
+			// End:0x74A
+			break;
+		// End:0x539
+		case 4:
+			inDescriptionClass = DecriptionClass;
+			// End:0x536
+			if(__NFUN_119__(m_OpSecondaryWeaponDesc, Class<R6SecondaryWeaponDescription>(DecriptionClass)))
+			{
+				m_currentOperative.m_szSecondaryWeapon = string(DecriptionClass);
+				m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DecriptionClass);
+				// End:0x401
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon for "), m_currentOperative.m_szSecondaryWeapon));
+				}
+				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
+				m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.default.m_NameID;
+				m_OpSecondWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+				// End:0x491
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Gadget for "), m_currentOperative.m_szSecondaryWeaponGadget));
+				}
+				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findSecondaryDefaultAmmo(Class<R6SecondaryWeaponDescription>(inDescriptionClass));
+				m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.default.m_NameTag;
+				m_OpSecondWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+				// End:0x536
+				if(bShowLog)
+				{
+					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Bullets for "), m_currentOperative.m_szSecondaryWeaponBullet));
+				}
+			}
+			// End:0x74A
+			break;
+		// End:0x5C6
+		case 5:
+			m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.default.m_NameID;
+			m_OpSecondWeaponGadgetDesc = Class<R6WeaponGadgetDescription>(DecriptionClass);
+			// End:0x5C3
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Gadget for "), m_currentOperative.m_szSecondaryWeaponGadget));
+			}
+			// End:0x74A
+			break;
+		// End:0x654
+		case 6:
+			m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.default.m_NameTag;
+			m_OpSecondWeaponBulletDesc = Class<R6BulletDescription>(DecriptionClass);
+			// End:0x651
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Bullets for "), m_currentOperative.m_szSecondaryWeaponBullet));
+			}
+			// End:0x74A
+			break;
+		// End:0x6D3
+		case 7:
+			m_currentOperative.m_szSecondaryGadget = string(DecriptionClass);
+			m_OpSecondGadgetDesc = Class<R6GadgetDescription>(DecriptionClass);
+			// End:0x6D0
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Gadget for "), m_currentOperative.m_szSecondaryGadget));
+			}
+			// End:0x74A
+			break;
+		// End:0x747
+		case 8:
+			m_currentOperative.m_szArmor = string(DecriptionClass);
+			m_OpArmorDesc = Class<R6ArmorDescription>(DecriptionClass);
+			// End:0x744
+			if(bShowLog)
+			{
+				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Armor for "), m_currentOperative.m_szArmor));
+			}
+			// End:0x74A
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	m_Equipment2dSelect.UpdateDetails();
+	return;
 }
 
 //MAKE SURE THIS FUNCTION IS THE SAME AS THE ONE IN THE MULTIPLAYER GEAR ROOM
-function TexRegion GetGadgetTexture(class<R6GadgetDescription> _CurrentGadget)
+function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 {
-    local bool bfound;
-    local String Tag;
-    local int i;
-    local TexRegion TR;
+	local bool bFound;
+	local string Tag;
+	local int i;
+	local TexRegion TR;
 
-    if( class'R6DescPrimaryMags' == _CurrentGadget )
-    {
-        if(m_OpFirstWeaponGadgetDesc.Default.m_NameTag == "CMAG")
-        {
-            bfound = true;  
-            TR.T = m_OpFirstWeaponGadgetDesc.Default.m_2DMenuTexture;
-            TR.X = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.X;
-            TR.Y = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.Y;
-            TR.W = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.W;
-            TR.H = m_OpFirstWeaponGadgetDesc.Default.m_2dMenuRegion.H;
-        }
-        else
-            Tag = m_OpFirstWeaponDesc.Default.m_MagTag;
-    }
-        
-	
-    else if(class'R6DescSecondaryMags' == _CurrentGadget )
-    {
-        if(m_OpSecondWeaponGadgetDesc.Default.m_NameTag == "CMAG")
-        {
-            bfound = true;  
-            TR.T = m_OpSecondWeaponGadgetDesc.Default.m_2DMenuTexture;
-            TR.X = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.X;
-            TR.Y = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.Y;
-            TR.W = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.W;
-            TR.H = m_OpSecondWeaponGadgetDesc.Default.m_2dMenuRegion.H;
-
-        }
-        else
-            Tag = m_OpSecondaryWeaponDesc.Default.m_MagTag;
-    }
-        
-
-	
-    //Let's start searching for the right mag Texture
-    if( Tag != "")
-    {
-        i= 0;
-        while( (i < m_PrimaryMagsGadget.m_MagTags.Length) && (bfound == false))
-        {
-            if( m_PrimaryMagsGadget.m_MagTags[i] == Tag)
-            {
-                bfound = true;
-                TR = m_PrimaryMagsGadget.m_Mags[i];      
-            }                
-            else
-                i++;
-        }
-    } 
-   
-    //No mag found or the gadget is not an extra mag
-    if(bfound == false)
-    {
-        TR.T = _CurrentGadget.Default.m_2DMenuTexture;
-        TR.X = _CurrentGadget.Default.m_2dMenuRegion.X;
-        TR.Y = _CurrentGadget.Default.m_2dMenuRegion.Y;
-        TR.W = _CurrentGadget.Default.m_2dMenuRegion.W;
-        TR.H = _CurrentGadget.Default.m_2dMenuRegion.H;
-
-    }
-    
-
-    return TR;
-}
-
-
-function SetStartTeamInfo()
-{
-    //This function fills the startTeamInfo struct need to spawn the player and the AI
-    local R6StartGameInfo           StartGameInfo;
-    local INT                       i, j, k, rainbowAdded;
-    local R6WindowTextIconsListBox  tmpListBox[3], currentListBox;
-    //local BOOL                      PlayerTeamSet;
-    local R6Operative               tmpOperative;
-    local R6WindowListBoxItem       tmpItem;
-    local string                    Tag;
-
-    local   class<R6PrimaryWeaponDescription>   PrimaryWeaponClass;
-    local   class<R6SecondaryWeaponDescription> SecondaryWeaponClass;
-    local   class<R6BulletDescription>          PrimaryWeaponBulletClass,   SecondaryWeaponBulletClass;
-    local   class<R6GadgetDescription>          PrimaryGadgetClass,         SecondaryGadgetClass;
-    local   class<R6WeaponGadgetDescription>    PrimaryWeaponGadgetClass,   SecondaryWeaponGadgetClass;
-    local   class<R6ArmorDescription>           ArmorDescriptionClass;
-    local   BOOL                                Found;  
-    
-     
-    StartGameInfo = R6Console(Root.console).master.m_StartGameInfo;
-    
-    tmpListBox[0] = m_RosterListCtrl.m_RedListBox.m_listBox;
-    tmpListBox[1] = m_RosterListCtrl.m_GreenListBox.m_listBox;
-    tmpListBox[2] = m_RosterListCtrl.m_GoldListBox.m_listBox;
-    //PlayerTeamSet = false;
-
-    //Parse Lists Boxes and fill teamsInfo
-    for(j=0; j<3; j++)
-    {
-        currentListBox = tmpListBox[j];
-        tmpItem = R6WindowListBoxItem(currentListBox.Items.Next);
-        rainbowAdded =0;
-
-        for(i=0; i< currentListBox.Items.Count(); i++)
-        {
-            
-            tmpOperative = R6Operative(tmpItem.m_Object);
-        
-            if(tmpOperative != None)    
-            {
-                //Fill R6RainbowStartInfo structure
-                PrimaryWeaponClass          = class<R6PrimaryWeaponDescription>( DynamicLoadObject( tmpOperative.m_szPrimaryWeapon, class'Class' ) );
-                PrimaryWeaponBulletClass    = class'R6DescriptionManager'.static.GetPrimaryBulletDesc(PrimaryWeaponClass, tmpOperative.m_szPrimaryWeaponBullet);
-                PrimaryWeaponGadgetClass    = class'R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(PrimaryWeaponClass, tmpOperative.m_szPrimaryWeaponGadget);
-
-                SecondaryWeaponClass        = class<R6SecondaryWeaponDescription>( DynamicLoadObject( tmpOperative.m_szSecondaryWeapon, class'Class' ) );            
-                SecondaryWeaponBulletClass  = class'R6DescriptionManager'.static.GetSecondaryBulletDesc(SecondaryWeaponClass, tmpOperative.m_szSecondaryWeaponBullet);
-                SecondaryWeaponGadgetClass  = class'R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(SecondaryWeaponClass, tmpOperative.m_szSecondaryWeaponGadget);
-
-                PrimaryGadgetClass          = class<R6GadgetDescription>( DynamicLoadObject( tmpOperative.m_szPrimaryGadget, class'Class' ) );
-                SecondaryGadgetClass        = class<R6GadgetDescription>( DynamicLoadObject( tmpOperative.m_szSecondaryGadget, class'Class' ) );
-
-#ifndefSPDEMO
-                ArmorDescriptionClass       = class<R6ArmorDescription>( DynamicLoadObject( tmpOperative.m_szArmor, class'Class' ) );
-#endif
-#ifdefSPDEMO
-                ArmorDescriptionClass       = class<R6ArmorDescription>( DynamicLoadObject( "R6Description.R6DescHeavy", class'Class' ) );
-#endif
-
-                
-                //Character name is needed to load plans
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_CharacterName        =  tmpOperative.GetShortName();
-
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_ArmorName            =  ArmorDescriptionClass.Default.m_ClassName;               
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[0]  =  PrimaryWeaponGadgetClass.Default.m_ClassName;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[1]  =  SecondaryWeaponGadgetClass.Default.m_ClassName;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[0]        =  PrimaryGadgetClass.Default.m_ClassName;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[1]        =  SecondaryGadgetClass.Default.m_ClassName;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iHealth              =  tmpOperative.m_iHealth;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID         =  tmpOperative.m_iUniqueID;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceTexture          =  tmpOperative.m_TMenuFaceSmall;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.X         =  tmpOperative.m_RMenuFaceSmallX;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.Y         =  tmpOperative.m_RMenuFaceSmallY;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.Z         =  tmpOperative.m_RMenuFaceSmallW;
-                StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.W         =  tmpOperative.m_RMenuFaceSmallH;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID		=  tmpOperative.m_szSpecialityID;
-
-				// skills of each operative
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillAssault		= tmpOperative.m_fAssault * 0.01;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillDemolitions	= tmpOperative.m_fDemolitions * 0.01;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillElectronics	= tmpOperative.m_fElectronics * 0.01;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSniper			= tmpOperative.m_fSniper * 0.01;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillStealth		= tmpOperative.m_fStealth * 0.01;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSelfControl	= tmpOperative.m_fSelfControl * 0.01;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillLeadership		= tmpOperative.m_fLeadership * 0.01;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillObservation	= tmpOperative.m_fObservation * 0.01;				
-
-                if(tmpOperative.m_szGender == "M")
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_bIsMale = true;
-                else
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_bIsMale = false;
-                
-                //Search for the right PrimaryWeaponClass to spawn depending on the type of gadget and bullet
-                Found = false;
-                for(k=0; (k < PrimaryWeaponClass.Default.m_WeaponTags.Length) && (Found == False); k++)
-                {
-                    if(PrimaryWeaponClass.Default.m_WeaponTags[k] == PrimaryWeaponGadgetClass.Default.m_NameTag)
-                    {
-                        Found = true;
-                        StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0]    =  PrimaryWeaponClass.Default.m_WeaponClasses[k];
-                        Tag = PrimaryWeaponClass.Default.m_WeaponTags[k];
-                    }                                           
-                    else if(PrimaryWeaponClass.Default.m_WeaponTags[k] == PrimaryWeaponBulletClass.Default.m_NameTag )
-                    {
-                        //This is a special case for shotguns where bullets determine the weapon to spawn
-                        Found = true;
-                        StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0]    =  PrimaryWeaponClass.Default.m_WeaponClasses[k];
-                        Tag = PrimaryWeaponClass.Default.m_WeaponTags[k];
-                    }                    
-                        
-                }
-
-				if(Found == false)
-                {
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0]    =  PrimaryWeaponClass.Default.m_WeaponClasses[0];
-                    Tag = PrimaryWeaponClass.Default.m_WeaponTags[0];
-                }
-                //If necessary spawn subsonic bullets
-                if(Tag == "SILENCED")
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0]        =  PrimaryWeaponBulletClass.Default.m_SubsonicClassName;                
-                else
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0]        =  PrimaryWeaponBulletClass.Default.m_ClassName;                
-                
-                //Search for the right SecondaryWeaponClass to spawn depending on the type of gadget and bullet
-                Found = false;
-                for(k=0; (k < SecondaryWeaponClass.Default.m_WeaponTags.Length) && (Found == False); k++)
-                {
-                    if(SecondaryWeaponClass.Default.m_WeaponTags[k] == SecondaryWeaponGadgetClass.Default.m_NameTag)
-                    {
-                        Found = true;
-                        StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1]    =  SecondaryWeaponClass.Default.m_WeaponClasses[k];
-                        Tag = SecondaryWeaponClass.Default.m_WeaponTags[k];
-                    }                                           
-                    else if(SecondaryWeaponClass.Default.m_WeaponTags[k] == SecondaryWeaponBulletClass.Default.m_NameTag )
-                    {
-                        //Don't think this could occur for a secondary weapon
-
-                        Found = true;
-                        StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1]    =  SecondaryWeaponClass.Default.m_WeaponClasses[k];
-                        Tag = SecondaryWeaponClass.Default.m_WeaponTags[k];
-                    }   
-
-                } 
-                if(Found == false)
-                {
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1]    =  SecondaryWeaponClass.Default.m_WeaponClasses[0];
-                    Tag = SecondaryWeaponClass.Default.m_WeaponTags[0];
-                }                    
-
-                //If necessary spawn subsonic bullets
-                if(Tag == "SILENCED")
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1]        =  SecondaryWeaponBulletClass.Default.m_SubsonicClassName;                
-                else
-                    StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1]        =  SecondaryWeaponBulletClass.Default.m_ClassName;                                
-                
-               
-                tmpItem = R6WindowListBoxItem(tmpItem.Next);
-                rainbowAdded++;
-            }          
-        
-        }
-        StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers=rainbowAdded;
-
-    }          
-
-}
-
-#ifdefDEBUG
-function RebuildAllPlanningFile()
-{
-    local R6Console             r6console;
-	local R6MissionDescription  mission;
-	local LevelInfo				pLevel;
-    local string                szGameTypeDirName, szMapName, szFileName;
-    local string                szEnglishGTDirectory;
-    local string				szLoadErrorMsgMapName;
-    local string				szLoadErrorMsgGameType;
-	local string				szFileNameExt[2];
-	local INT                   i, j;
-
-	pLevel = GetLevel();
-    r6console = R6Console( Root.Console );
-
-	m_bRebuildAllPlan = true;
-
-	GetLevel().GetGameTypeSaveDirectories( szGameTypeDirName, szEnglishGTDirectory );
-
-	switch(szGameTypeDirName)
+	// End:0xDB
+	if(__NFUN_114__(Class'R6Description.R6DescPrimaryMags', _CurrentGadget))
 	{
-		case "Mission":	szFileNameExt[0] = "_MISSION"; break;
-		case "Lone Wolf":	szFileNameExt[0] = "_LONE"; break;
-		case "Terrorist Hunt":	szFileNameExt[0] = "_TERRORIST"; break;
-		case "Hostage Rescue":	szFileNameExt[0] = "_HOSTAGE"; break;
-		default: 
-			log("NameExt not valid");
-			return;
-	}
-
-	szFileNameExt[1] = szFileNameExt[0] $ "_ACTION";
-
-	for ( j = 0; j < 2; j++)
-	{
-		// from the main list, get all mission who can be played
-		for ( i = 0; i < r6console.m_aMissionDescriptions.Length; i++ )
+		// End:0xC4
+		if(__NFUN_122__(m_OpFirstWeaponGadgetDesc.default.m_NameTag, "CMAG"))
 		{
-			mission = r6console.m_aMissionDescriptions[i];
-
-			szMapName = Localize( mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true );
-
-			if (szMapName != "")
+			bFound = true;
+			TR.t = m_OpFirstWeaponGadgetDesc.default.m_2DMenuTexture;
+			TR.X = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.X;
+			TR.Y = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.Y;
+			TR.W = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.W;
+			TR.H = m_OpFirstWeaponGadgetDesc.default.m_2dMenuRegion.H;			
+		}
+		else
+		{
+			Tag = m_OpFirstWeaponDesc.default.m_MagTag;
+		}		
+	}
+	else
+	{
+		// End:0x1B3
+		if(__NFUN_114__(Class'R6Description.R6DescSecondaryMags', _CurrentGadget))
+		{
+			// End:0x19F
+			if(__NFUN_122__(m_OpSecondWeaponGadgetDesc.default.m_NameTag, "CMAG"))
 			{
-
-				//Empty the list before loading a new one.
-				R6PlanningCtrl(GetPlayerOwner()).DeleteEverySingleNode();
-
-				szFileName = mission.m_ShortName $ szFileNameExt[j]; 
-
-				if(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.LoadPlanning(
-									mission.m_MapName,
-									szMapName,
-									szEnglishGTDirectory,
-									szGameTypeDirName,
-									szFileName,
-									Root.console.Master.m_StartGameInfo,
-									szLoadErrorMsgMapName,
-									szLoadErrorMsgGameType) == true)
-				{
-					log("LOAD SUCCESS"@szFileName);
-					LoadRosterFromStartInfo();
-
-					// save the file
-					R6PlanningCtrl(GetPlayerOwner()).ResetAllID(); 
-    
-					SetStartTeamInfoForSaving();          
-
-					R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.m_iCurrentTeam = R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam;
-
-					if( R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.SavePlanning(
-						mission.m_MapName,
-						szMapName,
-						szEnglishGTDirectory,
-						szGameTypeDirName,
-						szFileName,
-						Root.console.Master.m_StartGameInfo) == true )
-					{
-						log("SAVE SUCCESS"@szFileName);
-					}
-				}
-
+				bFound = true;
+				TR.t = m_OpSecondWeaponGadgetDesc.default.m_2DMenuTexture;
+				TR.X = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.X;
+				TR.Y = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.Y;
+				TR.W = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.W;
+				TR.H = m_OpSecondWeaponGadgetDesc.default.m_2dMenuRegion.H;				
+			}
+			else
+			{
+				Tag = m_OpSecondaryWeaponDesc.default.m_MagTag;
 			}
 		}
 	}
+	// End:0x23A
+	if(__NFUN_123__(Tag, ""))
+	{
+		i = 0;
+		J0x1C6:
 
-	m_bRebuildAllPlan = false;
+		// End:0x23A [Loop If]
+		if(__NFUN_130__(__NFUN_150__(i, m_PrimaryMagsGadget.m_MagTags.Length), __NFUN_242__(bFound, false)))
+		{
+			// End:0x230
+			if(__NFUN_122__(m_PrimaryMagsGadget.m_MagTags[i], Tag))
+			{
+				bFound = true;
+				TR = m_PrimaryMagsGadget.m_Mags[i];				
+			}
+			else
+			{
+				__NFUN_165__(i);
+			}
+			// [Loop Continue]
+			goto J0x1C6;
+		}
+	}
+	// End:0x2D7
+	if(__NFUN_242__(bFound, false))
+	{
+		TR.t = _CurrentGadget.default.m_2DMenuTexture;
+		TR.X = _CurrentGadget.default.m_2dMenuRegion.X;
+		TR.Y = _CurrentGadget.default.m_2dMenuRegion.Y;
+		TR.W = _CurrentGadget.default.m_2dMenuRegion.W;
+		TR.H = _CurrentGadget.default.m_2dMenuRegion.H;
+	}
+	return TR;
+	return;
 }
-#endif
+
+function SetStartTeamInfo()
+{
+	local R6StartGameInfo StartGameInfo;
+	local int i, j, k, rainbowAdded;
+	local R6WindowTextIconsListBox tmpListBox[3], currentListBox;
+	local R6Operative tmpOperative;
+	local R6WindowListBoxItem tmpItem;
+	local string Tag;
+	local Class<R6PrimaryWeaponDescription> PrimaryWeaponClass;
+	local Class<R6SecondaryWeaponDescription> SecondaryWeaponClass;
+	local Class<R6BulletDescription> PrimaryWeaponBulletClass, SecondaryWeaponBulletClass;
+	local Class<R6GadgetDescription> PrimaryGadgetClass, SecondaryGadgetClass;
+	local Class<R6WeaponGadgetDescription> PrimaryWeaponGadgetClass, SecondaryWeaponGadgetClass;
+	local Class<R6ArmorDescription> ArmorDescriptionClass;
+	local bool Found;
+
+	StartGameInfo = R6Console(Root.Console).Master.m_StartGameInfo;
+	tmpListBox[0] = m_RosterListCtrl.m_RedListBox.m_listBox;
+	tmpListBox[1] = m_RosterListCtrl.m_GreenListBox.m_listBox;
+	tmpListBox[2] = m_RosterListCtrl.m_GoldListBox.m_listBox;
+	j = 0;
+	J0x90:
+
+	// End:0xD4E [Loop If]
+	if(__NFUN_150__(j, 3))
+	{
+		currentListBox = tmpListBox[j];
+		tmpItem = R6WindowListBoxItem(currentListBox.Items.Next);
+		rainbowAdded = 0;
+		i = 0;
+		J0xDD:
+
+		// End:0xD21 [Loop If]
+		if(__NFUN_150__(i, currentListBox.Items.Count()))
+		{
+			tmpOperative = R6Operative(tmpItem.m_Object);
+			// End:0xD17
+			if(__NFUN_119__(tmpOperative, none))
+			{
+				PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(DynamicLoadObject(tmpOperative.m_szPrimaryWeapon, Class'Core.Class'));
+				PrimaryWeaponBulletClass = Class'R6Description.R6DescriptionManager'.static.GetPrimaryBulletDesc(PrimaryWeaponClass, tmpOperative.m_szPrimaryWeaponBullet);
+				PrimaryWeaponGadgetClass = Class'R6Description.R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(PrimaryWeaponClass, tmpOperative.m_szPrimaryWeaponGadget);
+				SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(DynamicLoadObject(tmpOperative.m_szSecondaryWeapon, Class'Core.Class'));
+				SecondaryWeaponBulletClass = Class'R6Description.R6DescriptionManager'.static.GetSecondaryBulletDesc(SecondaryWeaponClass, tmpOperative.m_szSecondaryWeaponBullet);
+				SecondaryWeaponGadgetClass = Class'R6Description.R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(SecondaryWeaponClass, tmpOperative.m_szSecondaryWeaponGadget);
+				PrimaryGadgetClass = Class<R6GadgetDescription>(DynamicLoadObject(tmpOperative.m_szPrimaryGadget, Class'Core.Class'));
+				SecondaryGadgetClass = Class<R6GadgetDescription>(DynamicLoadObject(tmpOperative.m_szSecondaryGadget, Class'Core.Class'));
+				ArmorDescriptionClass = Class<R6ArmorDescription>(DynamicLoadObject(tmpOperative.m_szArmor, Class'Core.Class'));
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_CharacterName = tmpOperative.GetShortName();
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_ArmorName = ArmorDescriptionClass.default.m_ClassName;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[0] = PrimaryWeaponGadgetClass.default.m_ClassName;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[1] = SecondaryWeaponGadgetClass.default.m_ClassName;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[0] = PrimaryGadgetClass.default.m_ClassName;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[1] = SecondaryGadgetClass.default.m_ClassName;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iHealth = tmpOperative.m_iHealth;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID = tmpOperative.m_iUniqueID;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceTexture = tmpOperative.m_TMenuFaceSmall;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.X = float(tmpOperative.m_RMenuFaceSmallX);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.Y = float(tmpOperative.m_RMenuFaceSmallY);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.Z = float(tmpOperative.m_RMenuFaceSmallW);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.W = float(tmpOperative.m_RMenuFaceSmallH);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID = tmpOperative.m_szSpecialityID;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillAssault = __NFUN_171__(tmpOperative.m_fAssault, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillDemolitions = __NFUN_171__(tmpOperative.m_fDemolitions, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillElectronics = __NFUN_171__(tmpOperative.m_fElectronics, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSniper = __NFUN_171__(tmpOperative.m_fSniper, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillStealth = __NFUN_171__(tmpOperative.m_fStealth, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSelfControl = __NFUN_171__(tmpOperative.m_fSelfControl, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillLeadership = __NFUN_171__(tmpOperative.m_fLeadership, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillObservation = __NFUN_171__(tmpOperative.m_fObservation, 0.0100000);
+				// End:0x82E
+				if(__NFUN_122__(tmpOperative.m_szGender, "M"))
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_bIsMale = true;					
+				}
+				else
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_bIsMale = false;
+				}
+				Found = false;
+				k = 0;
+				J0x86C:
+
+				// End:0x9B8 [Loop If]
+				if(__NFUN_130__(__NFUN_150__(k, PrimaryWeaponClass.default.m_WeaponTags.Length), __NFUN_242__(Found, false)))
+				{
+					// End:0x922
+					if(__NFUN_122__(PrimaryWeaponClass.default.m_WeaponTags[k], PrimaryWeaponGadgetClass.default.m_NameTag))
+					{
+						Found = true;
+						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[k];
+						Tag = PrimaryWeaponClass.default.m_WeaponTags[k];
+						// [Explicit Continue]
+						goto J0x9AE;
+					}
+					// End:0x9AE
+					if(__NFUN_122__(PrimaryWeaponClass.default.m_WeaponTags[k], PrimaryWeaponBulletClass.default.m_NameTag))
+					{
+						Found = true;
+						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[k];
+						Tag = PrimaryWeaponClass.default.m_WeaponTags[k];
+					}
+					J0x9AE:
+
+					__NFUN_165__(k);
+					// [Loop Continue]
+					goto J0x86C;
+				}
+				// End:0xA19
+				if(__NFUN_242__(Found, false))
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[0];
+					Tag = PrimaryWeaponClass.default.m_WeaponTags[0];
+				}
+				// End:0xA6D
+				if(__NFUN_122__(Tag, "SILENCED"))
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0] = PrimaryWeaponBulletClass.default.m_SubsonicClassName;					
+				}
+				else
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0] = PrimaryWeaponBulletClass.default.m_ClassName;
+				}
+				Found = false;
+				k = 0;
+				J0xAB9:
+
+				// End:0xC05 [Loop If]
+				if(__NFUN_130__(__NFUN_150__(k, SecondaryWeaponClass.default.m_WeaponTags.Length), __NFUN_242__(Found, false)))
+				{
+					// End:0xB6F
+					if(__NFUN_122__(SecondaryWeaponClass.default.m_WeaponTags[k], SecondaryWeaponGadgetClass.default.m_NameTag))
+					{
+						Found = true;
+						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[k];
+						Tag = SecondaryWeaponClass.default.m_WeaponTags[k];
+						// [Explicit Continue]
+						goto J0xBFB;
+					}
+					// End:0xBFB
+					if(__NFUN_122__(SecondaryWeaponClass.default.m_WeaponTags[k], SecondaryWeaponBulletClass.default.m_NameTag))
+					{
+						Found = true;
+						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[k];
+						Tag = SecondaryWeaponClass.default.m_WeaponTags[k];
+					}
+					J0xBFB:
+
+					__NFUN_165__(k);
+					// [Loop Continue]
+					goto J0xAB9;
+				}
+				// End:0xC66
+				if(__NFUN_242__(Found, false))
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[0];
+					Tag = SecondaryWeaponClass.default.m_WeaponTags[0];
+				}
+				// End:0xCBA
+				if(__NFUN_122__(Tag, "SILENCED"))
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1] = SecondaryWeaponBulletClass.default.m_SubsonicClassName;					
+				}
+				else
+				{
+					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1] = SecondaryWeaponBulletClass.default.m_ClassName;
+				}
+				tmpItem = R6WindowListBoxItem(tmpItem.Next);
+				__NFUN_165__(rainbowAdded);
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0xDD;
+		}
+		StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers = rainbowAdded;
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x90;
+	}
+	return;
+}
 
 function SetStartTeamInfoForSaving()
-{    
-    local R6StartGameInfo           StartGameInfo;
-    local INT                       i, j, k;
-    local R6WindowTextIconsListBox  tmpListBox[3], currentListBox;    
-    local R6Operative               tmpOperative;
-    local R6WindowListBoxItem       tmpItem;
-    
+{
+	local R6StartGameInfo StartGameInfo;
+	local int i, j, k;
+	local R6WindowTextIconsListBox tmpListBox[3], currentListBox;
+	local R6Operative tmpOperative;
+	local R6WindowListBoxItem tmpItem;
+	local bool Found;
 
-    local   BOOL                                Found;
-    
-    
-    StartGameInfo = R6Console(Root.console).master.m_StartGameInfo;
-    
-    tmpListBox[0] = m_RosterListCtrl.m_RedListBox.m_listBox;
-    tmpListBox[1] = m_RosterListCtrl.m_GreenListBox.m_listBox;
-    tmpListBox[2] = m_RosterListCtrl.m_GoldListBox.m_listBox;
-    
+	StartGameInfo = R6Console(Root.Console).Master.m_StartGameInfo;
+	tmpListBox[0] = m_RosterListCtrl.m_RedListBox.m_listBox;
+	tmpListBox[1] = m_RosterListCtrl.m_GreenListBox.m_listBox;
+	tmpListBox[2] = m_RosterListCtrl.m_GoldListBox.m_listBox;
+	j = 0;
+	J0x90:
 
-     for(j=0; j<3; j++)
-        {
-            currentListBox = tmpListBox[j];
-            tmpItem = R6WindowListBoxItem(currentListBox.Items.Next);
-            StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers = 0;
-            
-            for(i=0; i< currentListBox.Items.Count(); i++)
-            {    
-                tmpOperative = R6Operative(tmpItem.m_Object);
+	// End:0x420 [Loop If]
+	if(__NFUN_150__(j, 3))
+	{
+		currentListBox = tmpListBox[j];
+		tmpItem = R6WindowListBoxItem(currentListBox.Items.Next);
+		StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers = 0;
+		i = 0;
+		J0xF5:
 
-                 if(tmpOperative != None)
-                 {
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_ArmorName       = tmpOperative.m_szArmor;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0]   = tmpOperative.m_szPrimaryWeapon;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1]   = tmpOperative.m_szSecondaryWeapon;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0]   = tmpOperative.m_szPrimaryWeaponBullet;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1]   = tmpOperative.m_szSecondaryWeaponBullet;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[0] = tmpOperative.m_szPrimaryWeaponGadget;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[1] = tmpOperative.m_szSecondaryWeaponGadget;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[0]   = tmpOperative.m_szPrimaryGadget;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[1]   = tmpOperative.m_szSecondaryGadget;
-                     StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID    = tmpOperative.m_iUniqueID;
-					 StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID	= tmpOperative.m_szSpecialityID;
-                     StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers++;
-                 }              
-
-                  tmpItem = R6WindowListBoxItem(tmpItem.Next);
-            }            
-
-        }        
-
+		// End:0x416 [Loop If]
+		if(__NFUN_150__(i, currentListBox.Items.Count()))
+		{
+			tmpOperative = R6Operative(tmpItem.m_Object);
+			// End:0x3F3
+			if(__NFUN_119__(tmpOperative, none))
+			{
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_ArmorName = tmpOperative.m_szArmor;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = tmpOperative.m_szPrimaryWeapon;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1] = tmpOperative.m_szSecondaryWeapon;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0] = tmpOperative.m_szPrimaryWeaponBullet;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1] = tmpOperative.m_szSecondaryWeaponBullet;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[0] = tmpOperative.m_szPrimaryWeaponGadget;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[1] = tmpOperative.m_szSecondaryWeaponGadget;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[0] = tmpOperative.m_szPrimaryGadget;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[1] = tmpOperative.m_szSecondaryGadget;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID = tmpOperative.m_iUniqueID;
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID = tmpOperative.m_szSpecialityID;
+				__NFUN_165__(StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers);
+			}
+			tmpItem = R6WindowListBoxItem(tmpItem.Next);
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0xF5;
+		}
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x90;
+	}
+	return;
 }
 
 function LoadRosterFromStartInfo()
 {
-    local R6StartGameInfo               StartGameInfo;
-    local int                           i,j,k,l;
-	local INT							TeamIDs[8];
-    local R6WindowTextIconsSubListBox   tmpListBox[3], currentListBox;
-    local bool                          found, bOperativeIsNotReady, bRookieCase, bIDMatch;
-    local R6WindowListBoxItem           TempItem , SelectedItem, bkpValidItem;
-    local R6Operative                   tmpOperative;
+	local R6StartGameInfo StartGameInfo;
+	local int i, j, k, L, TeamIDs;
 
-    //Making the correct Selection after a reload
-    local R6WindowListBoxItem           selectedOperativeItem;
-    local int                           selectedOperativeTeamId;
+	local R6WindowTextIconsSubListBox tmpListBox[3], currentListBox;
+	local bool Found, bOperativeIsNotReady, bRookieCase, bIDMatch;
+	local R6WindowListBoxItem TempItem, SelectedItem, bkpValidItem;
+	local R6Operative tmpOperative;
+	local R6WindowListBoxItem selectedOperativeItem;
+	local int selectedOperativeTeamId;
 
-    //this is usefull when we load a roster from a plan
-    //it fills the operative lists trying to recreate the
-    //teams as they were when the player saved it's planning
-
-    StartGameInfo = R6Console(Root.console).master.m_StartGameInfo;    
-    tmpListBox[0] = m_RosterListCtrl.m_RedListBox;
-    tmpListBox[1] = m_RosterListCtrl.m_GreenListBox;
-    tmpListBox[2] = m_RosterListCtrl.m_GoldListBox;
-
-    //Reset lists box
-    //m_RosterListCtrl.FillRosterList();
-    Reset();
-
-	// fill all the exact team with the info in StartGameInfo, this will be use to do a difference with available operative
+	StartGameInfo = R6Console(Root.Console).Master.m_StartGameInfo;
+	tmpListBox[0] = m_RosterListCtrl.m_RedListBox;
+	tmpListBox[1] = m_RosterListCtrl.m_GreenListBox;
+	tmpListBox[2] = m_RosterListCtrl.m_GoldListBox;
+	Reset();
 	k = 0;
-    for(j=0; j<3; j++)
-    {
-        //Go through each team
-        for(i=0; i< StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers ; i++)
-        {
+	j = 0;
+	J0x82:
+
+	// End:0x10F [Loop If]
+	if(__NFUN_150__(j, 3))
+	{
+		i = 0;
+		J0x95:
+
+		// End:0x105 [Loop If]
+		if(__NFUN_150__(i, StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers))
+		{
 			TeamIDs[k] = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID;
-			k++;
+			__NFUN_165__(k);
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x95;
 		}
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x82;
 	}
+	j = 0;
+	J0x116:
 
-    //Parse startinfo team struct and try to fill the team listbox with the operatives
+	// End:0x809 [Loop If]
+	if(__NFUN_150__(j, 3))
+	{
+		currentListBox = tmpListBox[j];
+		i = 0;
+		J0x13A:
 
-    for(j=0; j<3; j++)
-    {
-        
-        currentListBox = tmpListBox[j];       
-
-        //Go through each team
-        for(i=0; i< StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers ; i++)
-        {
-
-            k=0;
-            found = false;   
+		// End:0x7FF [Loop If]
+		if(__NFUN_150__(i, StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers))
+		{
+			k = 0;
+			Found = false;
 			bOperativeIsNotReady = false;
-			bRookieCase  = false;
-			bIDMatch	 = false;
-			bkpValidItem = None;
-            SelectedItem = R6WindowListBoxItem(m_RosterListCtrl.m_ListBox.Items.next);
-            
-			//if we get some rookie operative the last mission (-5 : 5 type of rookies) 
-			if ( StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID > m_RosterListCtrl.m_ListBox.Items.Count() - 5)
+			bRookieCase = false;
+			bIDMatch = false;
+			bkpValidItem = none;
+			SelectedItem = R6WindowListBoxItem(m_RosterListCtrl.m_listBox.Items.Next);
+			// End:0x218
+			if(__NFUN_151__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID, __NFUN_147__(m_RosterListCtrl.m_listBox.Items.Count(), 5)))
 			{
-				bRookieCase  = true;
+				bRookieCase = true;
 			}
+			J0x218:
 
-            //Parse the main listbox to find the operatives we want to update
-            while( found == false && k < m_RosterListCtrl.m_ListBox.Items.Count())
-            {                
-                tmpOperative = R6Operative(SelectedItem.m_Object);
-#ifdefDEBUG
-				if (bShowLog) log("tmpOperative: "@tmpOperative);
-#endif
-
-				if (tmpOperative != None)
+			// End:0x7F5 [Loop If]
+			if(__NFUN_130__(__NFUN_242__(Found, false), __NFUN_150__(k, m_RosterListCtrl.m_listBox.Items.Count())))
+			{
+				tmpOperative = R6Operative(SelectedItem.m_Object);
+				// End:0x485
+				if(__NFUN_119__(tmpOperative, none))
 				{
-					//let's see if we have a match
-					bIDMatch = (StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID == tmpOperative.m_iUniqueID);
-
-					if (bIDMatch)
+					bIDMatch = __NFUN_154__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID, tmpOperative.m_iUniqueID);
+					// End:0x322
+					if(bIDMatch)
 					{
-#ifdefDEBUG	
-						if(bShowLog)
+						// End:0x322
+						if(__NFUN_155__(tmpOperative.m_iRookieID, -1))
 						{
-							log("--> from pln: "@StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID);
-							log("--> from list: "@tmpOperative.m_szSpecialityID);
-						}
-#endif
-
-						// if it's a rookie, check if the specialty is the same. because the unique ID differ depending the creation of rookies
-						if (tmpOperative.m_iRookieID != -1)
-						{
-							if (!(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID ~= tmpOperative.m_szSpecialityID))
+							// End:0x322
+							if(__NFUN_129__(__NFUN_124__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID, tmpOperative.m_szSpecialityID)))
 							{
-#ifdefDEBUG	
-								if(bShowLog)log("IDMatch, it's a rookie case!!!");
-#endif
 								bRookieCase = true;
 							}
 						}
 					}
-
-					if ((bIDMatch) && (!bRookieCase))
+					// End:0x376
+					if(__NFUN_130__(bIDMatch, __NFUN_129__(bRookieCase)))
 					{
-						// if the operative is not ready, mean that is Wounded, Incapacitated or Dead --> see R6OperativeClass
-						// or if it's already in the list, take a new one by using bOperativeIsNotReady
-						if ((!tmpOperative.IsOperativeReady()) || (SelectedItem.m_addedToSubList))
+						// End:0x36B
+						if(__NFUN_132__(__NFUN_129__(tmpOperative.IsOperativeReady()), SelectedItem.m_addedToSubList))
 						{
-#ifdefDEBUG	
-						if(bShowLog)log("IDMatch, operative is not ready"@SelectedItem.HelpText);
-#endif
-							bOperativeIsNotReady = true;
+							bOperativeIsNotReady = true;							
 						}
 						else
 						{
-							found = true;
-						}
+							Found = true;
+						}						
 					}
-					else if (StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID ~= tmpOperative.m_szSpecialityID)
+					else
 					{
-						if ((bkpValidItem == None) && (tmpOperative.IsOperativeReady() && (!SelectedItem.m_addedToSubList)))
+						// End:0x43A
+						if(__NFUN_124__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID, tmpOperative.m_szSpecialityID))
 						{
-							bkpValidItem = SelectedItem; // get a valid operative in bkp
-#ifdefDEBUG	
-							if(bShowLog)log("bkpValidItem is now: "$SelectedItem.HelpText);
-#endif
-							// check if this operative is not already assign in an another team by the planning
-							for (l =0; l < 8; l++)
+							// End:0x43A
+							if(__NFUN_130__(__NFUN_114__(bkpValidItem, none), __NFUN_130__(tmpOperative.IsOperativeReady(), __NFUN_129__(SelectedItem.m_addedToSubList))))
 							{
-								if (TeamIDs[l] == tmpOperative.m_iUniqueID)
+								bkpValidItem = SelectedItem;
+								L = 0;
+								J0x3FC:
+
+								// End:0x43A [Loop If]
+								if(__NFUN_150__(L, 8))
 								{
-#ifdefDEBUG
-									if (bShowLog) log("This operative is already in a team, select a new one");
-#endif
-									bkpValidItem = None;
-									break;
+									// End:0x430
+									if(__NFUN_154__(TeamIDs[L], tmpOperative.m_iUniqueID))
+									{
+										bkpValidItem = none;
+										// [Explicit Break]
+										goto J0x43A;
+									}
+									__NFUN_165__(L);
+									// [Loop Continue]
+									goto J0x3FC;
 								}
 							}
 						}
 					}
+					J0x43A:
 
-					if ((bOperativeIsNotReady) || (bRookieCase))
+					// End:0x485
+					if(__NFUN_132__(bOperativeIsNotReady, bRookieCase))
 					{
-						if ( bkpValidItem != None)
+						// End:0x485
+						if(__NFUN_119__(bkpValidItem, none))
 						{
-							//this operative replace the dead operative
 							SelectedItem = bkpValidItem;
 							tmpOperative = R6Operative(SelectedItem.m_Object);
-							found = true;
-#ifdefDEBUG	
-						if(bShowLog)log("bOperativeIsNotReady is"@bOperativeIsNotReady@"bRookieCase is"@bRookieCase@"tmpOperative is "@SelectedItem.HelpText);
-#endif
+							Found = true;
 						}
 					}
 				}
-
-				if (found)
+				// End:0x7D2
+				if(Found)
 				{
-#ifdefDEBUG	
-						if(bShowLog)log("Found is true and operative = "@tmpOperative.getName());
-#endif
-					tmpOperative.m_szArmor                 = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_ArmorName;
-					tmpOperative.m_szPrimaryWeapon         = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0];
-					tmpOperative.m_szSecondaryWeapon       = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1];
-					tmpOperative.m_szPrimaryWeaponBullet   = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0];
+					tmpOperative.m_szArmor = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_ArmorName;
+					tmpOperative.m_szPrimaryWeapon = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0];
+					tmpOperative.m_szSecondaryWeapon = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1];
+					tmpOperative.m_szPrimaryWeaponBullet = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0];
 					tmpOperative.m_szSecondaryWeaponBullet = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1];
-					tmpOperative.m_szPrimaryWeaponGadget   = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[0];
+					tmpOperative.m_szPrimaryWeaponGadget = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[0];
 					tmpOperative.m_szSecondaryWeaponGadget = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponGadgetName[1];
-					tmpOperative.m_szPrimaryGadget         = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[0];
-					tmpOperative.m_szSecondaryGadget       = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[1];
-#ifdefDEBUG
-					if (!m_bRebuildAllPlan)
-#endif
+					tmpOperative.m_szPrimaryGadget = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[0];
+					tmpOperative.m_szSecondaryGadget = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[1];
 					SetupOperative(tmpOperative);
-
-					TempItem = R6WindowListBoxItem(currentListBox.m_listBox.Items.Append( class'R6WindowListBoxItem'));
-					if( (TempItem != None))
+					TempItem = R6WindowListBoxItem(currentListBox.m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
+					// End:0x7AE
+					if(__NFUN_119__(TempItem, none))
 					{
-						TempItem.m_Icon                 = SelectedItem.m_Icon;
-						TempItem.m_IconRegion           = SelectedItem.m_IconRegion;
-						TempItem.m_IconSelectedRegion   = SelectedItem.m_IconSelectedRegion;
-						TempItem.HelpText               = SelectedItem.HelpText;
-						TempItem.m_ParentListItem       = SelectedItem;
-						TempItem.m_Object               = SelectedItem.m_Object;
-						SelectedItem.m_addedToSubList   = true;
+						TempItem.m_Icon = SelectedItem.m_Icon;
+						TempItem.m_IconRegion = SelectedItem.m_IconRegion;
+						TempItem.m_IconSelectedRegion = SelectedItem.m_IconSelectedRegion;
+						TempItem.HelpText = SelectedItem.HelpText;
+						TempItem.m_ParentListItem = SelectedItem;
+						TempItem.m_Object = SelectedItem.m_Object;
+						SelectedItem.m_addedToSubList = true;
 					}
-
-                    if(selectedOperativeItem == None)
-                    {
-                        //recall the good item to select
-                        selectedOperativeItem = TempItem;
-                        selectedOperativeTeamId = j;
-                    }
+					// End:0x7CF
+					if(__NFUN_114__(selectedOperativeItem, none))
+					{
+						selectedOperativeItem = TempItem;
+						selectedOperativeTeamId = j;
+					}					
 				}
 				else
 				{
-					k++;
-#ifdefDEBUG
-					if ((bShowLog) && (SelectedItem.m_Object != None))
-					{
-						log("No match"@StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_CharacterName@"!="@string( SelectedItem.m_Object.class)@SelectedItem.HelpText);
-						log("=========================================================");
-					}
-#endif
-
-					SelectedItem = R6WindowListBoxItem(SelectedItem.next);
+					__NFUN_165__(k);
+					SelectedItem = R6WindowListBoxItem(SelectedItem.Next);
 				}
-            }          
-
-        }
-    }
-
-#ifdefDEBUG
-	if (!m_bRebuildAllPlan)
-	{
-#endif
-		m_RosterListCtrl.RefreshButtons();
-		m_RosterListCtrl.ResizeSubLists();
-
-		//Make the sub list selection
-		if(selectedOperativeItem != None)
-			tmpListBox[selectedOperativeTeamId].m_listBox.SetSelectedItem(selectedOperativeItem);
-		else 
-			OperativeSelected(m_currentOperative, m_currentOperativeTeam, m_RosterListCtrl.m_ListBox);
-
-#ifdefDEBUG
+				// [Loop Continue]
+				goto J0x218;
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x13A;
+		}
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x116;
 	}
-#endif
+	m_RosterListCtrl.RefreshButtons();
+	m_RosterListCtrl.ResizeSubLists();
+	// End:0x858
+	if(__NFUN_119__(selectedOperativeItem, none))
+	{
+		tmpListBox[selectedOperativeTeamId].m_listBox.SetSelectedItem(selectedOperativeItem);		
+	}
+	else
+	{
+		OperativeSelected(m_currentOperative, m_currentOperativeTeam, m_RosterListCtrl.m_listBox);
+	}
+	return;
 }
-
 
 function bool IsTeamConfigValid()
 {
-    //This is called for single player
-    
-    if( (m_RosterListCtrl == None))
-        return false;
-    
-    if(
-    (m_RosterListCtrl.m_RedListBox.m_listBox.Items.Count() +
-    m_RosterListCtrl.m_GreenListBox.m_listBox.Items.Count() +
-    m_RosterListCtrl.m_GoldListBox.m_listBox.Items.Count()) 
-    <= 0 )
-        return false; //No operative Has been added to a team
-    else
-        return true;
-    
+	// End:0x0D
+	if(__NFUN_114__(m_RosterListCtrl, none))
+	{
+		return false;
+	}
+	// End:0x9A
+	if(__NFUN_152__(__NFUN_146__(__NFUN_146__(m_RosterListCtrl.m_RedListBox.m_listBox.Items.Count(), m_RosterListCtrl.m_GreenListBox.m_listBox.Items.Count()), m_RosterListCtrl.m_GoldListBox.m_listBox.Items.Count()), 0))
+	{
+		return false;		
+	}
+	else
+	{
+		return true;
+	}
+	return;
 }
 
 defaultproperties
 {
-     m_currentOperativeTeam=No_Team
-     m_IRosterListLeftPad=1
-     m_fPaddingBetweenElements=3.000000
+	m_currentOperativeTeam=3
+	m_IRosterListLeftPad=1
+	m_fPaddingBetweenElements=3.0000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var e
+// REMOVED IN 1.60: var n
+// REMOVED IN 1.60: var m_bRebuildAllPlan
+// REMOVED IN 1.60: var c
+// REMOVED IN 1.60: function RebuildAllPlanningFile

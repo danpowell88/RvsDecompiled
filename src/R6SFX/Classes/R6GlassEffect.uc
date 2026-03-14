@@ -1,3 +1,9 @@
+//=============================================================================
+// R6GlassEffect - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //============================================================================//
 // Class            R6GlassEffect 
 // Description      Effects spawned when a bullet hit a Glass surface
@@ -7,11 +13,10 @@ class R6GlassEffect extends R6SFXWallHit;
 
 defaultproperties
 {
-     m_ImpactSound=Sound'Bullet_Impacts.Play_Impact_Glass'
-     m_RicochetSound=Sound'Bullet_Impacts.Play_Impact_Glass'
-     m_pSparksIn=Class'R6SFX.R6GlassImpact'
-     m_DecalTexture(0)=Texture'R6SFX_T.GlassHit.GlassHole001'
-     m_DecalTexture(1)=Texture'R6SFX_T.GlassHit.GlassHole002'
-     m_DecalTexture(2)=Texture'R6SFX_T.GlassHit.GlassHole003'
-     m_DecalTexture(3)=Texture'R6SFX_T.GlassHit.GlassHole004'
+	bProjectOnlyFirst=true
+	m_ImpactSound=Sound'Bullet_Impacts.Play_Impact_Glass'
+	m_RicochetSound=Sound'Bullet_Impacts.Play_Impact_Glass'
+	m_pSparksIn=Class'R6SFX.R6GlassImpact'
+	m_DecalTexture=/* Array type was not detected. */
+	CullDistance=2000.0000000
 }

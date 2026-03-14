@@ -1,25 +1,30 @@
 //=============================================================================
+// PlayerStart - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Player start location.
 //=============================================================================
-class PlayerStart extends SmallNavigationPoint 
+class PlayerStart extends SmallNavigationPoint
+	native
 	placeable
-	native;
-
-#exec Texture Import File=Textures\S_Player.pcx Name=S_Player Mips=Off MASKED=1
+ hidecategories(Lighting,LightColor,Karma,Force);
 
 // Players on different teams are not spawned in areas with the
 // same TeamNumber unless there are more teams in the level than
 // team numbers.
-var() byte TeamNumber;			// what team can spawn at this start
-var() bool bSinglePlayerStart;	// use first start encountered with this true for single player
-var() bool bCoopStart;			// start can be used in coop games	
+var() byte TeamNumber;  // what team can spawn at this start
+var() bool bSinglePlayerStart;  // use first start encountered with this true for single player
+var() bool bCoopStart;  // start can be used in coop games
 var() bool bEnabled;
 
 defaultproperties
 {
-     bSinglePlayerStart=True
-     bCoopStart=True
-     bEnabled=True
-     bDirectional=True
-     Texture=Texture'Engine.S_Player'
+	bSinglePlayerStart=true
+	bCoopStart=true
+	bEnabled=true
+	bDirectional=true
+	Texture=Texture'Engine.S_Player'
 }

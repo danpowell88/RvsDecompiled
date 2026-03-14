@@ -1,194 +1,169 @@
 //=============================================================================
+// R6WindowEditBox - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6WindowEditBox.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/08/09 * Created by Chaouky Garram
 //=============================================================================
-
 class R6WindowEditBox extends UWindowEditBox;
 
-var string		m_szCurValue;				// the current value equal to value of the edit box
-var string		m_szValueToDisplay;			// what's displaying
-
-var FLOAT		m_fYTextPos;					// the position of the text in y
-var FLOAT		m_fTextHeight;
-
-var bool		bCaps;
-
-#ifdefDEBUG
-var BOOL		m_bDisplayEditBoxProperties;
-var bool		m_bOldShowCaret;
-var bool	    m_bOldCanEdit;
-var bool		m_bOldAllSelected;
-var BOOL        m_bOldCurrentlyEditing;
-var bool		m_bOldHasKeyboardFocus;
-#endif
-
-var Region  m_RBGEditTexture;       // BackGround texture Region
+var bool bCaps;
+var float m_fYTextPos;  // the position of the text in y
+var float m_fTextHeight;
+var float m_fYBGPos;
 var Texture m_TBGEditTexture;
-var FLOAT   m_fYBGPos;
+var Region m_RBGEditTexture;  // BackGround texture Region
+var string m_szCurValue;  // the current value equal to value of the edit box
+var string m_szValueToDisplay;  // what's displaying
 
-
-
-
-function BeforePaint( Canvas C, FLOAT X, FLOAT Y)
+function BeforePaint(Canvas C, float X, float Y)
 {
-	local FLOAT W, H;
-	local INT i;
+	local float W, H;
+	local int i;
 
 	C.Font = Root.Fonts[Font];
-
-	if (m_szCurValue != Value)
+	// End:0x10E
+	if(__NFUN_123__(m_szCurValue, Value))
 	{
 		m_szCurValue = Value;
-
-		Super.BeforePaint(C, X, Y); // only assign font
-
-		// If this is a password, replace the text by "*"'s
-		if ( bPassword )
+		super(UWindowDialogControl).BeforePaint(C, X, Y);
+		// End:0x98
+		if(bPassword)
 		{
 			m_szValueToDisplay = "";
-			for ( i = 0; i < len(Value); i++ )
-				m_szValueToDisplay = m_szValueToDisplay $ "*";
+			i = 0;
+			J0x6A:
+
+			// End:0x95 [Loop If]
+			if(__NFUN_150__(i, __NFUN_125__(Value)))
+			{
+				m_szValueToDisplay = __NFUN_112__(m_szValueToDisplay, "*");
+				__NFUN_165__(i);
+				// [Loop Continue]
+				goto J0x6A;
+			}			
 		}
 		else
 		{
-			if (bCaps)
-				m_szValueToDisplay = Caps(Value);
+			// End:0xB1
+			if(bCaps)
+			{
+				m_szValueToDisplay = __NFUN_235__(Value);				
+			}
 			else
+			{
 				m_szValueToDisplay = Value;
+			}
 		}
-
 		TextSize(C, "W", W, H);
 		m_fTextHeight = H;
-		m_fYTextPos = (WinHeight - H) / 2;
-		m_fYTextPos = FLOAT(INT(m_fYTextPos + 0.5));
+		m_fYTextPos = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
+		m_fYTextPos = float(int(__NFUN_174__(m_fYTextPos, 0.5000000)));
 	}
+	return;
 }
 
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Paint(Canvas C, float X, float Y)
 {
-	local FLOAT fStringLeftOfCaretW, H;
+	local float fStringLeftOfCaretW, H;
 
-#ifdefDEBUG
-	if (m_bDisplayEditBoxProperties)
+	TextSize(C, __NFUN_128__(m_szValueToDisplay, CaretOffset), fStringLeftOfCaretW, H);
+	// End:0x36
+	if(m_bDrawEditBoxBG)
 	{
-		if ( (m_bOldShowCaret != bShowCaret) ||
-			 (m_bOldCanEdit != bCanEdit) ||
-			 (m_bOldAllSelected != bAllSelected) ||
-			 (m_bOldCurrentlyEditing != m_CurrentlyEditing) ||
-			 (m_bOldHasKeyboardFocus != bHasKeyboardFocus) )
+		PaintEditBoxBG(C);
+	}
+	// End:0x57
+	if(__NFUN_176__(__NFUN_174__(fStringLeftOfCaretW, offset), float(0)))
+	{
+		offset = __NFUN_169__(fStringLeftOfCaretW);
+	}
+	// End:0xA3
+	if(__NFUN_177__(__NFUN_174__(fStringLeftOfCaretW, offset), __NFUN_175__(WinWidth, float(2))))
+	{
+		offset = __NFUN_175__(__NFUN_175__(WinWidth, float(2)), fStringLeftOfCaretW);
+		// End:0xA3
+		if(__NFUN_177__(offset, float(0)))
 		{
-			log("===================================================");
-			log("m_CurrentlyEditing"@m_CurrentlyEditing);
-			log("bHasKeyboardFocus"@bHasKeyboardFocus);
-			log("bShowCaret"@bShowCaret);
-			log("bCanEdit"@bCanEdit);
-			log("bAllSelected"@bAllSelected);
-			m_bOldShowCaret			= bShowCaret;
-			m_bOldCanEdit			= bCanEdit;
-			m_bOldAllSelected		= bAllSelected;
-			m_bOldCurrentlyEditing	= m_CurrentlyEditing;
-			m_bOldHasKeyboardFocus	= bHasKeyboardFocus;
+			offset = 0.0000000;
 		}
 	}
-#endif
-
-    TextSize(C, Left(m_szValueToDisplay, CaretOffset), fStringLeftOfCaretW, H);
-
-	if (m_bDrawEditBoxBG)
+	// End:0xCD
+	if(bShowLog)
 	{
-		PaintEditBoxBG( C);
+		__NFUN_231__(__NFUN_168__("Offset After", string(offset)));
+		bShowLog = false;
 	}
-
-	if(fStringLeftOfCaretW + Offset < 0)
-    {
-		Offset = -fStringLeftOfCaretW;
-    }
-
-    if(fStringLeftOfCaretW + Offset > (WinWidth - 2))
+	C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+	// End:0x236
+	if(__NFUN_130__(m_CurrentlyEditing, bAllSelected))
 	{
-		Offset = (WinWidth - 2) - fStringLeftOfCaretW;
-		if(Offset > 0)
-        {
-            Offset = 0;
-        }
+		C.Style = 5;
+		C.__NFUN_2626__(Root.Colors.m_LisBoxSelectionColor.R, Root.Colors.m_LisBoxSelectionColor.G, Root.Colors.m_LisBoxSelectionColor.B, byte(Root.Colors.EditBoxSelectAllAlpha));
+		DrawStretchedTexture(C, __NFUN_174__(offset, float(1)), m_fYBGPos, fStringLeftOfCaretW, float(m_RBGEditTexture.H), Texture'UWindow.WhiteTexture');
+		C.Style = 5;
+		C.__NFUN_2626__(Root.Colors.m_LisBoxSelectedTextColor.R, Root.Colors.m_LisBoxSelectedTextColor.G, Root.Colors.m_LisBoxSelectedTextColor.B);
 	}
-
-        
-    if(bShowLog)
-    {
-        log("Offset After"@Offset);
-        bShowLog = false;
-    }
-    
-
-	C.SetDrawColor(TextColor.R,TextColor.G,TextColor.B);
-	
-
-	if(m_CurrentlyEditing && bAllSelected)
+	ClipText(C, __NFUN_174__(offset, float(1)), m_fYTextPos, m_szValueToDisplay);
+	// End:0x285
+	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_CurrentlyEditing), __NFUN_129__(bHasKeyboardFocus)), __NFUN_129__(bCanEdit)))
 	{
-    
-        C.Style = ERenderStyle.STY_Alpha;
-        C.SetDrawColor(Root.Colors.m_LisBoxSelectionColor.R, Root.Colors.m_LisBoxSelectionColor.G, Root.Colors.m_LisBoxSelectionColor.B,Root.Colors.EditBoxSelectAllAlpha);
-		
-        DrawStretchedTexture(C, Offset + 1, m_fYBGPos, fStringLeftOfCaretW, m_RBGEditTexture.H, Texture'UWindow.WhiteTexture');
-
-        // Invert Colors
-		//C.SetDrawColor(255 ^ C.DrawColor.R, 255 ^ C.DrawColor.G, 255 ^ C.DrawColor.B);
-        
-        C.Style = ERenderStyle.STY_Alpha;        
-        C.SetDrawColor(Root.Colors.m_LisBoxSelectedTextColor.R, Root.Colors.m_LisBoxSelectedTextColor.G, Root.Colors.m_LisBoxSelectedTextColor.B);
-
+		bShowCaret = false;		
 	}
-
-	ClipText(C, Offset + 1, m_fYTextPos,  m_szValueToDisplay);
-
-	if( (!m_CurrentlyEditing) || (!bHasKeyboardFocus) || (!bCanEdit) )
-    {
-		bShowCaret = False;
-    }
 	else
 	{
-		if((GetTime() > LastDrawTime + 0.3) || (GetTime() < LastDrawTime))
+		// End:0x2D0
+		if(__NFUN_132__(__NFUN_177__(GetTime(), __NFUN_174__(LastDrawTime, 0.3000000)), __NFUN_176__(GetTime(), LastDrawTime)))
 		{
-			LastDrawTime = GetLevel().GetTime();
-			bShowCaret = !bShowCaret;
+			LastDrawTime = GetLevel().__NFUN_1012__();
+			bShowCaret = __NFUN_129__(bShowCaret);
 		}
 	}
-    
-
+	// End:0x2FD
 	if(bShowCaret)
-	    ClipText(C, Offset + fStringLeftOfCaretW - 1, m_fYTextPos, "|");
+	{
+		ClipText(C, __NFUN_175__(__NFUN_174__(offset, fStringLeftOfCaretW), float(1)), m_fYTextPos, "|");
+	}
+	return;
 }
 
-function PaintEditBoxBG( Canvas C)
+function PaintEditBoxBG(Canvas C)
 {
-	C.Style = ERenderStyle.STY_Alpha;
-
-	if (m_fTextHeight > m_RBGEditTexture.H)
+	C.Style = 5;
+	// End:0x35
+	if(__NFUN_177__(m_fTextHeight, float(m_RBGEditTexture.H)))
 	{
-//		log("Your font for BG of editbox is too big"@m_fTextHeight@"suppose to be less than 13"@m_szValueToDisplay);
-		m_fYBGPos = m_fYTextPos;
+		m_fYBGPos = m_fYTextPos;		
 	}
 	else
 	{
-		m_fYBGPos = (m_RBGEditTexture.H - m_fTextHeight) * 0.5;
-		m_fYBGPos = INT(m_fYBGPos + 0.5);
-
-		m_fYBGPos = m_fYTextPos - m_fYBGPos;
+		m_fYBGPos = __NFUN_171__(__NFUN_175__(float(m_RBGEditTexture.H), m_fTextHeight), 0.5000000);
+		m_fYBGPos = float(int(__NFUN_174__(m_fYBGPos, 0.5000000)));
+		m_fYBGPos = __NFUN_175__(m_fYTextPos, m_fYBGPos);
 	}
-
-    DrawStretchedTextureSegment( C, 0, m_fYBGPos, WinWidth, m_RBGEditTexture.H, // this part of texture should not be stretched in H
-                                    m_RBGEditTexture.X, m_RBGEditTexture.Y, m_RBGEditTexture.W, m_RBGEditTexture.H, m_TBGEditTexture);
+	DrawStretchedTextureSegment(C, 0.0000000, m_fYBGPos, WinWidth, float(m_RBGEditTexture.H), float(m_RBGEditTexture.X), float(m_RBGEditTexture.Y), float(m_RBGEditTexture.W), float(m_RBGEditTexture.H), m_TBGEditTexture);
+	return;
 }
 
 defaultproperties
 {
-     m_TBGEditTexture=Texture'R6MenuTextures.Gui_BoxScroll'
-     m_RBGEditTexture=(X=114,Y=47,W=2,H=13)
-     m_szCurValue="//N"
-     bSelectOnFocus=True
-     m_bDrawEditBoxBG=True
+	m_TBGEditTexture=Texture'R6MenuTextures.Gui_BoxScroll'
+	m_RBGEditTexture=(Zone=Class'R6Window.R6WindowListServerItem',iLeaf=29218,ZoneNumber=0)
+	m_szCurValue="//N"
+	bSelectOnFocus=true
+	m_bDrawEditBoxBG=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_bDisplayEditBoxProperties
+// REMOVED IN 1.60: var m_bOldShowCaret
+// REMOVED IN 1.60: var m_bOldCanEdit
+// REMOVED IN 1.60: var m_bOldAllSelected
+// REMOVED IN 1.60: var m_bOldCurrentlyEditing
+// REMOVED IN 1.60: var m_bOldHasKeyboardFocus

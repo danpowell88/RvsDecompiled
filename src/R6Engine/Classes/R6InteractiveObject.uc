@@ -1,4 +1,10 @@
 //=============================================================================
+// R6InteractiveObject - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6InteractiveObject.uc
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,9 +12,63 @@
 //    2001/11/15 * Creation - Jean-Francois Dube
 //=============================================================================
 class R6InteractiveObject extends Actor
-    native
-    placeable;
+	native
+ placeable;
 
+const c_iIObjectSkinMax = 4;
+
+enum EInteractiveAction
+{
+	IA_PlayAnim,                    // 0
+	IA_LookAt                       // 1
+};
+
+struct stRandomMesh
+{
+	var() float fPercentage;
+	var() StaticMesh Mesh;
+};
+
+struct stRandomSkin
+{
+	var() float fPercentage;
+	var() array<Material> Skin;
+};
+
+struct stSpawnedActor
+{
+	var() Class<Actor> ActorToSpawn;
+	var() string HelperName;
+};
+
+struct stDamageState
+{
+	var() float fDamagePercentage;
+	var() array<stRandomMesh> RandomMeshes;
+	var() array<stRandomSkin> RandomSkins;
+	var() array<stSpawnedActor> ActorList;
+	var() array<Sound> SoundList;
+	var() Sound NewAmbientSound;
+	var() Sound NewAmbientSoundStop;
+};
+
+var Actor.ENoiseType m_HearNoiseType;
+var int m_iActionNumber;
+var int m_iActionIndex;
+var(R6Damage) int m_iHitPoints;  // Original Hit Points
+var int m_iCurrentHitPoints;  // Current Hit Points
+var int m_iCurrentState;
+var bool m_bCollisionRemovedFromActor;
+var bool m_bOriginalCollideActors;
+var bool m_bOriginalBlockActors;
+var bool m_bOriginalBlockPlayers;
+var bool m_bPawnDied;
+var(Debug) bool bShowLog;
+var bool m_bBroken;
+var(R6ActionObject) bool m_bRainbowCanInteract;  // true when AI and player can interact with the object
+var bool m_bEndAction;
+var(Display) bool m_bBlockCoronas;
+var(R6Damage) bool m_bBreakableByFlashBang;
 //===========================================================================================================
 //	 ####              #                                       #      ##                            
 //	  ##              ##                                      ##                                    
@@ -18,135 +78,59 @@ class R6InteractiveObject extends Actor
 //	  ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
 //	 ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
 //===========================================================================================================
-var(R6Action)           FLOAT               m_fRadius;
-var(R6Action)           FLOAT               m_fProbability;
-var(R6Action)           FLOAT               m_fActionInterval;
-var                     FLOAT               m_fTimeSinceAction;
-var                     FLOAT               m_fTimeForNextSound;
-var                     FLOAT               m_fTimerInterval;
-var                     R6AIController      m_InteractionOwner;
-
-var(R6Action)           Actor               m_RemoveCollisionFromActor;
-var(R6Action)           NavigationPoint     m_Anchor;
-var                     BOOL                m_bCollisionRemovedFromActor;
-
-var                       BOOL              m_bOriginalCollideActors;
-var                       BOOL              m_bOriginalBlockActors;
-var                       BOOL              m_bOriginalBlockPlayers;
-var                       BOOL              m_bPawnDied;
-var (Debug)               BOOL              bShowLog;
-
-var                       BOOL              m_bBroken;
-var (R6ActionObject)      BOOL              m_bRainbowCanInteract; // true when AI and player can interact with the object
-
-// ending actions
-var(R6Action)           Name                m_vEndActionAnimName;
-var(R6Action)           Actor               m_vEndActionGoto;
-
-var                     INT                 m_iActionNumber;
-var                     INT                 m_iActionIndex;
-var(R6Action) editinline array<R6InteractiveObjectAction>   m_ActionList;
-var                     R6InteractiveObjectAction           m_CurrentInteractiveObject;
-
-var                     FLOAT               m_fPlayerCAStartTime;
-
-// SeePlayer buffering
-var                     Pawn                m_SeePlayerPawn;
+var(R6Action) float m_fRadius;
+var(R6Action) float m_fProbability;
+var(R6Action) float m_fActionInterval;
+var float m_fTimeSinceAction;
+var float m_fTimeForNextSound;
+var float m_fTimerInterval;
+var float m_fPlayerCAStartTime;
 // HearNoise buffering
-var                     float               m_HearNoiseLoudness;
-var                     Actor               m_HearNoiseNoiseMaker;
-var                     ENoiseType          m_HearNoiseType;
-var                     BOOL                m_bEndAction;
-
-// save/reset
-const                   c_iIObjectSkinMax = 4;
-var                     Material            m_aOldSkins[c_iIObjectSkinMax];    // compared with the rep one
-var                     Material            m_aRepSkins[c_iIObjectSkinMax];    // replicated skin
-var                     array<Material>     sm_aSkins;      // save original skin
-var                     StaticMesh          sm_staticMesh;
-
-var(Display)            BOOL                m_bBlockCoronas;
-
+var float m_HearNoiseLoudness;
 // Replication specific
-var                     FLOAT               m_fNetDamagePercentage;
-
-
-//===========================================================================================================
-//	#####                                           
-//	 ## ##                                          
-//	 ##  ##  ####   ##  ##   ####    ### ##  ####   
-//	 ##  ##     ##  #######     ##  ##  ##  ##  ##  
-//	 ##  ##  #####  #######  #####  ##  ##  ######  
-//	 ## ##  ##  ##  ## # ## ##  ##   #####  ##      
-//	#####    ### ## ##   ##  ### ##     ##   ####   
-//	                                #####           
-//===========================================================================================================
-enum EInteractiveAction
-{
-    IA_PlayAnim,
-    IA_LookAt
-};
-
-struct stRandomMesh
-{
-    var () FLOAT fPercentage;
-    var () StaticMesh Mesh;
-};
-
-struct stRandomSkin
-{
-    var () FLOAT fPercentage;
-    var () array<Material> Skin;
-};
-
-struct stSpawnedActor
-{
-    var () class<Actor> ActorToSpawn;
-    var () string HelperName;
-};
-
-struct stDamageState
-{
-    var () FLOAT fDamagePercentage;
-    var () array<stRandomMesh> RandomMeshes;
-    var () array<stRandomSkin> RandomSkins;
-    var () array<stSpawnedActor> ActorList;
-    var () array<Sound> SoundList;
-    var () Sound NewAmbientSound;
-    var () Sound NewAmbientSoundStop;
-};
-
-var (R6Damage)  BOOL    m_bBreakableByFlashBang;
-var (R6Damage)  FLOAT   m_fAIBreakNoiseRadius;
-var (R6Damage)  INT     m_iHitPoints;               // Original Hit Points
-var             INT     m_iCurrentHitPoints;        // Current Hit Points
-var (R6Damage) array<stDamageState> m_StateList;
-var             INT     m_iCurrentState;
-var             R6Pawn  m_User;
-
-
-var             Sound   sm_AmbientSound;
-var             Sound   sm_AmbientSoundStop;
-
-var(R6Attachments)      array<Actor>        m_AttachedActors;
-
+var float m_fNetDamagePercentage;
+var(R6Damage) float m_fAIBreakNoiseRadius;
+var R6AIController m_InteractionOwner;
+var(R6Action) Actor m_RemoveCollisionFromActor;
+var(R6Action) NavigationPoint m_Anchor;
+var(R6Action) Actor m_vEndActionGoto;
+var R6InteractiveObjectAction m_CurrentInteractiveObject;
+// SeePlayer buffering
+var Pawn m_SeePlayerPawn;
+var Actor m_HearNoiseNoiseMaker;
+// NEW IN 1.60
+var Material m_aOldSkins[4];
+// NEW IN 1.60
+var Material m_aRepSkins[4];
+var StaticMesh sm_staticMesh;
+var R6Pawn m_User;
+var Sound sm_AmbientSound;
+var Sound sm_AmbientSoundStop;
+// ending actions
+var(R6Action) name m_vEndActionAnimName;
+var(R6Action) editinline array<editinline R6InteractiveObjectAction> m_ActionList;
+var array<Material> sm_aSkins;  // save original skin
+var(R6Damage) array<stDamageState> m_StateList;
+var(R6Attachments) array<Actor> m_AttachedActors;
 
 replication
 {
-    unreliable if (Role == ROLE_Authority)
-        m_aRepSkins, m_fNetDamagePercentage;
-} 
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_aRepSkins, m_fNetDamagePercentage;
+}
 
 //============================================================================
 // function FirstPassReset - 
 //============================================================================
 simulated function FirstPassReset()
 {
-    m_User = none;
-    m_InteractionOwner = none;
-    m_SeePlayerPawn = none;
-    m_HearNoiseNoiseMaker = none;
-    m_bEndAction = false;
+	m_User = none;
+	m_InteractionOwner = none;
+	m_SeePlayerPawn = none;
+	m_HearNoiseNoiseMaker = none;
+	m_bEndAction = false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -155,30 +139,45 @@ simulated function FirstPassReset()
 //------------------------------------------------------------------
 simulated function SaveOriginalData()
 {
-    local int iSkin;
+	local int iSkin;
 
-    if ( m_bResetSystemLog ) LogResetSystem( true );
-    Super.SaveOriginalData();
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(true);
+	}
+	super.SaveOriginalData();
+	sm_staticMesh = StaticMesh;
+	// End:0x5A
+	if(__NFUN_150__(4, Skins.Length))
+	{
+		__NFUN_231__("WARNING c_iIObjectSkinMax < Skins.Length");
+	}
+	iSkin = 0;
+	J0x61:
 
-    sm_staticMesh       = StaticMesh;
+	// End:0xCF [Loop If]
+	if(__NFUN_150__(iSkin, Skins.Length))
+	{
+		// End:0x80
+		if(__NFUN_151__(iSkin, 4))
+		{
+			// [Explicit Break]
+			goto J0xCF;
+		}
+		sm_aSkins[iSkin] = Skins[iSkin];
+		m_aOldSkins[iSkin] = Skins[iSkin];
+		m_aRepSkins[iSkin] = Skins[iSkin];
+		__NFUN_165__(iSkin);
+		// [Loop Continue]
+		goto J0x61;
+	}
+	J0xCF:
 
-    if ( c_iIObjectSkinMax < Skins.Length  )
-        log("WARNING c_iIObjectSkinMax < Skins.Length");
-
-    for (iSkin = 0; iSkin < Skins.Length; iSkin++)
-    {
-        if ( iSkin > c_iIObjectSkinMax )
-            break; 
-
-        sm_aSkins[iSkin]   = Skins[iSkin];
-        m_aOldSkins[iSkin] = Skins[iSkin];
-        m_aRepSkins[iSkin] = Skins[iSkin];
-    }
-
-    sm_AmbientSound = AmbientSound;
-    sm_AmbientSoundStop = AmbientSoundStop;
-
-    m_fNetDamagePercentage = 100.0f;
+	sm_AmbientSound = AmbientSound;
+	sm_AmbientSoundStop = AmbientSoundStop;
+	m_fNetDamagePercentage = 100.0000000;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -187,98 +186,118 @@ simulated function SaveOriginalData()
 //------------------------------------------------------------------
 simulated function ResetOriginalData()
 {
-    local INT i;
+	local int i;
 
-    if ( m_bResetSystemLog ) LogResetSystem( false );
-    Super.ResetOriginalData();
+	// End:0x10
+	if(m_bResetSystemLog)
+	{
+		LogResetSystem(false);
+	}
+	super.ResetOriginalData();
+	AmbientSound = sm_AmbientSound;
+	AmbientSoundStop = sm_AmbientSoundStop;
+	// End:0x7C
+	if(__NFUN_132__(__NFUN_130__(__NFUN_181__(m_fProbability, 0.0000000), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	{
+		__NFUN_280__(m_fTimerInterval, true);
+		m_iCurrentHitPoints = m_iHitPoints;
+	}
+	m_fNetDamagePercentage = 100.0000000;
+	m_iCurrentState = -1;
+	m_fTimeSinceAction = 0.0000000;
+	m_fTimeForNextSound = 9999999.0000000;
+	m_InteractionOwner = none;
+	m_bBroken = false;
+	// End:0xE6
+	if(m_bCollisionRemovedFromActor)
+	{
+		m_RemoveCollisionFromActor.__NFUN_262__(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
+		m_bCollisionRemovedFromActor = false;
+	}
+	Skins.Remove(0, Skins.Length);
+	i = 0;
+	J0xFA:
 
-    AmbientSound = sm_AmbientSound;
-    AmbientSoundStop = sm_AmbientSoundStop;
-    
-    if(m_fProbability!=0.0 && (Level.NetMode == NM_Standalone) || (Role == ROLE_Authority))
-    {
-        // interactions
-        SetTimer(m_fTimerInterval, true);
-        
-        // damage
-        m_iCurrentHitPoints = m_iHitPoints;
-    }
-   
-    m_fNetDamagePercentage = 100.0f;
-    m_iCurrentState = -1;
-    m_fTimeSinceAction = 0.0;
-    m_fTimeForNextSound = 9999999.0;
-    m_InteractionOwner = none;
-    m_bBroken = false;
-
-    // if was interacting, reset his collision setting
-    if(m_bCollisionRemovedFromActor)
-    {
-        //log("====="$m_RemoveCollisionFromActor$" gained back collisions (2) "$m_bOriginalCollideActors@m_bOriginalBlockActors@m_bOriginalBlockPlayers);
-        m_RemoveCollisionFromActor.SetCollision(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
-        m_bCollisionRemovedFromActor = false;
-    }
-
-    Skins.Remove( 0, Skins.Length ); // reset the skin
-    for (i = 0; i < sm_aSkins.Length; i++)
-    {
-        Skins[i]       = sm_aSkins[i];
-        m_aOldSkins[i] = Skins[i];
-        m_aRepSkins[i] = Skins[i];
-    }
-
-    if ( StaticMesh != sm_staticMesh )
-        ChangeStaticMesh( sm_staticMesh );
-    
+	// End:0x159 [Loop If]
+	if(__NFUN_150__(i, sm_aSkins.Length))
+	{
+		Skins[i] = sm_aSkins[i];
+		m_aOldSkins[i] = Skins[i];
+		m_aRepSkins[i] = Skins[i];
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0xFA;
+	}
+	// End:0x173
+	if(__NFUN_119__(StaticMesh, sm_staticMesh))
+	{
+		ChangeStaticMesh(sm_staticMesh);
+	}
+	return;
 }
 
 function PostBeginPlay()
 {
-    local int i;
-    Super.PostBeginPlay();
-    
-    m_OutlineStaticMesh = StaticMesh;
-    
-    // attachments
-    for(i=0; i<m_AttachedActors.Length; i++)
-    {
-        if(m_AttachedActors[i] != none)
-        {
-            m_AttachedActors[i].SetBase(self);
-            m_AttachedActors[i].m_AttachedTo = self;
-        }
-    }
+	local int i;
+
+	super.PostBeginPlay();
+	m_OutlineStaticMesh = StaticMesh;
+	i = 0;
+	J0x18:
+
+	// End:0x6C [Loop If]
+	if(__NFUN_150__(i, m_AttachedActors.Length))
+	{
+		// End:0x62
+		if(__NFUN_119__(m_AttachedActors[i], none))
+		{
+			m_AttachedActors[i].__NFUN_298__(self);
+			m_AttachedActors[i].m_AttachedTo = self;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x18;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SetSkin: set the skin for local player and for replication
 //	
 //------------------------------------------------------------------
-simulated function SetSkin( Material aSkin, INT iIndex )
+simulated function SetSkin(Material aSkin, int iIndex)
 {
-    if ( iIndex > c_iIObjectSkinMax )
-        return;
-
-    Skins[iIndex]       = aSkin;
-    m_aRepSkins[iIndex] = aSkin;
-
-    // log( "SetSkin: " $self.name$" index=" $iIndex$ " aSkin=" $aSkin );
+	// End:0x0E
+	if(__NFUN_151__(iIndex, 4))
+	{
+		return;
+	}
+	Skins[iIndex] = aSkin;
+	m_aRepSkins[iIndex] = aSkin;
+	return;
 }
 
 //------------------------------------------------------------------
 // ChangeStaticMesh: set the StaticMesh
 //	
 //------------------------------------------------------------------
-simulated function ChangeStaticMesh(StaticMesh SM)
+simulated function ChangeStaticMesh(StaticMesh sm)
 {
-    // change collision settings if necessary
-    if(SM == none && StaticMesh != none)
-        SetCollision(false, false, false);
-    else if(SM != none && StaticMesh == none)
-        SetCollision(default.bCollideActors, default.bBlockActors, default.bBlockPlayers);
-
-    // set new StaticMesh
-    SetStaticMesh(SM);
+	// End:0x21
+	if(__NFUN_130__(__NFUN_114__(sm, none), __NFUN_119__(StaticMesh, none)))
+	{
+		__NFUN_262__(false, false, false);		
+	}
+	else
+	{
+		// End:0x4E
+		if(__NFUN_130__(__NFUN_119__(sm, none), __NFUN_114__(StaticMesh, none)))
+		{
+			__NFUN_262__(default.bCollideActors, default.bBlockActors, default.bBlockPlayers);
+		}
+	}
+	SetStaticMesh(sm);
+	return;
 }
 
 //===========================================================================================================
@@ -290,50 +309,61 @@ simulated function ChangeStaticMesh(StaticMesh SM)
 //	  ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
 //	 ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
 //===========================================================================================================
-function FinishAction();
+function FinishAction()
+{
+	return;
+}
 
 simulated function Timer()
 {
-    local R6Pawn P;
+	local R6Pawn P;
 
-    m_fTimeSinceAction += m_fTimerInterval;
-
-    if((Level.NetMode != NM_Standalone) && (Role != ROLE_Authority))
-    {// just to be sure, but should not happen.
-        return;
-    }
-
-    if(m_InteractionOwner != none)
-    {// object is already interacted with.
-        if(m_CurrentInteractiveObject.IsA('R6InteractiveObjectActionLoopAnim') ||
-           m_CurrentInteractiveObject.IsA('R6InteractiveObjectActionLoopRandomAnim'))
-        {
-            if((m_CurrentInteractiveObject.m_eSoundToPlay != none) && (m_CurrentInteractiveObject.m_eSoundToPlayStop != none))
-            {
-                if(m_fTimeSinceAction > m_fTimeForNextSound)
-                {
-                    R6Pawn(m_InteractionOwner.Pawn).PlayVoices(m_CurrentInteractiveObject.m_eSoundToPlay, SLOT_Talk, 15);
-                    m_fTimeForNextSound += RandRange(m_CurrentInteractiveObject.m_SoundRange.Min, m_CurrentInteractiveObject.m_SoundRange.Max);
-                }
-            }
-        }
-
-        return;
-    }
-    
-    if((FRand() < m_fProbability) && (m_fTimeSinceAction >= m_fActionInterval))
-    {
-        foreach VisibleCollidingActors(class'R6Pawn', P, m_fRadius, Location)
-        {
-            if( R6AIController(P.Controller) != none &&
-                R6AIController(P.Controller).CanInteractWithObjects(self))
-            {
-                m_fTimeSinceAction = 0.0;
-                PerformAction(P);
-                break;
-            }
-        }
-    }
+	__NFUN_184__(m_fTimeSinceAction, m_fTimerInterval);
+	// End:0x39
+	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_155__(int(Role), int(ROLE_Authority))))
+	{
+		return;
+	}
+	// End:0x12E
+	if(__NFUN_119__(m_InteractionOwner, none))
+	{
+		// End:0x12C
+		if(__NFUN_130__(__NFUN_119__(m_CurrentInteractiveObject, none), __NFUN_132__(m_CurrentInteractiveObject.__NFUN_303__('R6InteractiveObjectActionLoopAnim'), m_CurrentInteractiveObject.__NFUN_303__('R6InteractiveObjectActionLoopRandomAnim'))))
+		{
+			// End:0x12C
+			if(__NFUN_130__(__NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlay, none), __NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlayStop, none)))
+			{
+				// End:0x12C
+				if(__NFUN_177__(m_fTimeSinceAction, m_fTimeForNextSound))
+				{
+					// End:0xF9
+					if(__NFUN_119__(R6Pawn(m_InteractionOwner.Pawn), none))
+					{
+						R6Pawn(m_InteractionOwner.Pawn).__NFUN_2730__(m_CurrentInteractiveObject.m_eSoundToPlay, 6, 15);
+					}
+					__NFUN_184__(m_fTimeForNextSound, RandRange(m_CurrentInteractiveObject.m_SoundRange.Min, m_CurrentInteractiveObject.m_SoundRange.Max));
+				}
+			}
+		}
+		return;
+	}
+	// End:0x1BC
+	if(__NFUN_130__(__NFUN_176__(__NFUN_195__(), m_fProbability), __NFUN_179__(m_fTimeSinceAction, m_fActionInterval)))
+	{
+		// End:0x1BB
+		foreach __NFUN_312__(Class'R6Engine.R6Pawn', P, m_fRadius, Location)
+		{
+			// End:0x1BA
+			if(__NFUN_130__(__NFUN_119__(R6AIController(P.Controller), none), R6AIController(P.Controller).CanInteractWithObjects(self)))
+			{
+				m_fTimeSinceAction = 0.0000000;
+				PerformAction(P);
+				// End:0x1BB
+				break;
+			}			
+		}		
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -342,237 +372,131 @@ simulated function Timer()
 //------------------------------------------------------------------
 simulated function SetBroken()
 {
-    m_bBroken = true;
-    StopInteraction();
-    SetTimer(0.0, false);
+	m_bBroken = true;
+	StopInteraction();
+	__NFUN_280__(0.0000000, false);
+	return;
 }
 
 function StopInteraction()
 {
-    if(Level.m_bIsResettingLevel)
-        return;
-
-    if(m_InteractionOwner != none)
-    {
-        m_InteractionOwner.PerformAction_StopInteraction();
-        m_InteractionOwner.m_bCantInterruptIO = false;
-        m_InteractionOwner.m_InteractionObject = none;
-        m_InteractionOwner = none;
-        m_bEndAction = false;
-
-        if(m_bCollisionRemovedFromActor)
-        {
-            //log("====="$m_RemoveCollisionFromActor$" gained back collisions (1) "$m_bOriginalCollideActors@m_bOriginalBlockActors@m_bOriginalBlockPlayers);
-            m_RemoveCollisionFromActor.SetCollision(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
-            m_bCollisionRemovedFromActor = false;
-        }
-    }
+	// End:0x14
+	if(Level.m_bIsResettingLevel)
+	{
+		return;
+	}
+	// End:0x8D
+	if(__NFUN_119__(m_InteractionOwner, none))
+	{
+		m_InteractionOwner.PerformAction_StopInteraction();
+		m_InteractionOwner.m_bCantInterruptIO = false;
+		m_InteractionOwner.m_InteractionObject = none;
+		m_InteractionOwner = none;
+		m_bEndAction = false;
+		// End:0x8D
+		if(m_bCollisionRemovedFromActor)
+		{
+			m_RemoveCollisionFromActor.__NFUN_262__(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
+			m_bCollisionRemovedFromActor = false;
+		}
+	}
+	return;
 }
 
 function StopInteractionWithEndingActions()
 {
-    if(Level.m_bIsResettingLevel)
-        return;
-
-    // Prevent EndingActions to be called 2 times in a row
-    if(!m_bEndAction)
-    {
-        m_bEndAction = true;
-        m_iActionIndex = m_iActionNumber;
-        FinishAction();
-    }
+	// End:0x14
+	if(Level.m_bIsResettingLevel)
+	{
+		return;
+	}
+	// End:0x38
+	if(__NFUN_129__(m_bEndAction))
+	{
+		m_bEndAction = true;
+		m_iActionIndex = m_iActionNumber;
+		FinishAction();
+	}
+	return;
 }
 
 function PerformAction(R6Pawn P)
 {
-    m_InteractionOwner = R6AIController(P.Controller);
-    m_InteractionOwner.m_InteractionObject = self;
-
-    m_iActionIndex = -1;
-    m_iActionNumber = m_ActionList.Length;
-
-    if(m_RemoveCollisionFromActor != none)
-    {
-        m_bOriginalCollideActors = m_RemoveCollisionFromActor.bCollideActors;
-        m_bOriginalBlockActors = m_RemoveCollisionFromActor.bBlockActors;
-        m_bOriginalBlockPlayers = m_RemoveCollisionFromActor.bBlockPlayers;
-        //log("====="$m_RemoveCollisionFromActor$" lost collisions");
-        m_RemoveCollisionFromActor.SetCollision(false, false, false);
-        m_bCollisionRemovedFromActor = true;
-    }
-
-    GotoState('PA_ExecuteStartInteraction');
+	m_InteractionOwner = R6AIController(P.Controller);
+	m_InteractionOwner.m_InteractionObject = self;
+	m_iActionIndex = -1;
+	m_iActionNumber = m_ActionList.Length;
+	// End:0xA4
+	if(__NFUN_119__(m_RemoveCollisionFromActor, none))
+	{
+		m_bOriginalCollideActors = m_RemoveCollisionFromActor.bCollideActors;
+		m_bOriginalBlockActors = m_RemoveCollisionFromActor.bBlockActors;
+		m_bOriginalBlockPlayers = m_RemoveCollisionFromActor.bBlockPlayers;
+		m_RemoveCollisionFromActor.__NFUN_262__(false, false, false);
+		m_bCollisionRemovedFromActor = true;
+	}
+	__NFUN_113__('PA_ExecuteStartInteraction');
+	return;
 }
 
 function SwitchToNextAction()
 {
-    m_iActionIndex++;
-
-    if(m_iActionIndex >= m_iActionNumber)
-    {
-        GotoState('PA_ExecutePlayEnding');
-        return;
-    }
-
-    m_CurrentInteractiveObject = m_ActionList[m_iActionIndex];
-
-    if((m_CurrentInteractiveObject.m_eSoundToPlay != none) && (m_CurrentInteractiveObject.m_eSoundToPlayStop != none))
-    {
-        R6Pawn(m_InteractionOwner.Pawn).PlayVoices(m_CurrentInteractiveObject.m_eSoundToPlay, SLOT_Talk, 15);
-
-        if(m_iActionIndex == 0)
-            m_fTimeForNextSound = RandRange(m_CurrentInteractiveObject.m_SoundRange.Min, m_CurrentInteractiveObject.m_SoundRange.Max);
-    }
-
-    switch(m_CurrentInteractiveObject.m_eType)
-    {
-    case ET_LookAt:
-        GotoState('PA_ExecuteLookAt');
-        break;
-    case ET_Goto:
-        GotoState('PA_ExecuteGoto');
-        break;
-    case ET_PlayAnim:
-        GotoState('PA_ExecutePlayAnim');
-        break;
-    case ET_LoopAnim:
-        GotoState('PA_ExecuteLoopAnim');
-        break;
-    case ET_LoopRandomAnim:
-        GotoState('PA_ExecuteLoopRandomAnim');
-        break;
-    case ET_ToggleDevice:
-        GotoState('PA_ExecuteToggleDevice');
-        break;
-    }
+	__NFUN_165__(m_iActionIndex);
+	// End:0x1F
+	if(__NFUN_153__(m_iActionIndex, m_iActionNumber))
+	{
+		__NFUN_113__('PA_ExecutePlayEnding');
+		return;
+	}
+	m_CurrentInteractiveObject = m_ActionList[m_iActionIndex];
+	// End:0xC3
+	if(__NFUN_130__(__NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlay, none), __NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlayStop, none)))
+	{
+		R6Pawn(m_InteractionOwner.Pawn).__NFUN_2730__(m_CurrentInteractiveObject.m_eSoundToPlay, 6, 15);
+		// End:0xC3
+		if(__NFUN_154__(m_iActionIndex, 0))
+		{
+			m_fTimeForNextSound = RandRange(m_CurrentInteractiveObject.m_SoundRange.Min, m_CurrentInteractiveObject.m_SoundRange.Max);
+		}
+	}
+	switch(m_CurrentInteractiveObject.m_eType)
+	{
+		// End:0xE2
+		case 2:
+			__NFUN_113__('PA_ExecuteLookAt');
+			// End:0x130
+			break;
+		// End:0xF1
+		case 0:
+			__NFUN_113__('PA_ExecuteGoto');
+			// End:0x130
+			break;
+		// End:0x100
+		case 1:
+			__NFUN_113__('PA_ExecutePlayAnim');
+			// End:0x130
+			break;
+		// End:0x10F
+		case 3:
+			__NFUN_113__('PA_ExecuteLoopAnim');
+			// End:0x130
+			break;
+		// End:0x11E
+		case 4:
+			__NFUN_113__('PA_ExecuteLoopRandomAnim');
+			// End:0x130
+			break;
+		// End:0x12D
+		case 5:
+			__NFUN_113__('PA_ExecuteToggleDevice');
+			// End:0x130
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
-
-state PA_Execute
-{
-    function FinishAction()
-    {
-        SwitchToNextAction();
-    }
-}
-
-state PA_ExecuteStartInteraction extends PA_Execute
-{
-Begin:
-    m_InteractionOwner.PerformAction_StartInteraction();
-}
-
-state PA_ExecuteLookAt extends PA_Execute
-{
-Begin:
-    m_InteractionOwner.PerformAction_LookAt(R6InteractiveObjectActionLookAt(m_CurrentInteractiveObject).m_Target);
-}
-
-state PA_ExecuteGoto extends PA_Execute
-{
-Begin:
-    m_InteractionOwner.PerformAction_Goto(R6InteractiveObjectActionGoto(m_CurrentInteractiveObject).m_Target);
-}
-
-state PA_ExecuteToggleDevice extends PA_Execute
-{
-    function ActionDetonateAllBombs()
-    {
-        local int i;
-        local R6InteractiveObjectActionToggleDevice ioAction;
-        
-        ioAction = R6InteractiveObjectActionToggleDevice( m_CurrentInteractiveObject );
-
-        while ( i < ioAction.m_aIOBombs.length )
-        {
-            ioAction.m_aIOBombs[i].DetonateBomb( R6Pawn(m_InteractionOwner.pawn) );
-            ++i;
-        }
-    }
-
-    function ActionToggleDevice()
-    {
-        local R6InteractiveObjectActionToggleDevice ioAction;
-
-        ioAction = R6InteractiveObjectActionToggleDevice( m_CurrentInteractiveObject );
-
-        if ( ioAction.m_iodevice != none )
-            ioAction.m_iodevice.toggleDevice( R6Pawn(m_InteractionOwner.pawn) );
-    }
-
-Begin:
-    ActionToggleDevice();
-    ActionDetonateAllBombs();
-    
-    FinishAction();
-}
-
-state PA_ExecutePlayAnim extends PA_Execute
-{
-Begin:
-    m_InteractionOwner.PerformAction_PlayAnim(R6InteractiveObjectActionPlayAnim(m_CurrentInteractiveObject).m_vAnimName);
-}
-
-state PA_ExecuteLoopAnim extends PA_Execute
-{
-Begin:
-    m_InteractionOwner.PerformAction_LoopAnim(
-        R6InteractiveObjectActionLoopAnim(m_CurrentInteractiveObject).m_vAnimName,
-        RandRange(
-            R6InteractiveObjectActionLoopAnim(m_CurrentInteractiveObject).m_LoopTime.Min,
-            R6InteractiveObjectActionLoopAnim(m_CurrentInteractiveObject).m_LoopTime.Max
-        )
-    );
-}
-
-state PA_ExecuteLoopRandomAnim extends PA_Execute
-{
-    function FinishAction()
-    {
-        if(m_iActionIndex>=m_iActionNumber)
-            SwitchToNextAction();
-        else
-            GotoState('PA_ExecuteLoopRandomAnim');
-    }
-
-Begin:
-    m_InteractionOwner.PerformAction_PlayAnim( R6InteractiveObjectActionLoopRandomAnim(m_CurrentInteractiveObject).GetNextAnim() );
-}
-
-state PA_ExecutePlayEnding extends PA_Execute
-{
-    function FinishAction()
-    {
-        GotoState('PA_ExecuteGotoEnding');
-    }
-
-Begin:
-    if(m_vEndActionAnimName != '')
-    {
-        m_InteractionOwner.PerformAction_PlayAnim(m_vEndActionAnimName);
-    }
-    else
-    {
-        FinishAction();
-    }
-}
-
-state PA_ExecuteGotoEnding extends PA_Execute
-{
-    function FinishAction()
-    {
-        StopInteraction();
-    }
-    
-Begin:
-    if(m_vEndActionGoto != none)
-    {
-        m_InteractionOwner.R6SetMovement(PACE_Run);
-        m_InteractionOwner.PerformAction_Goto(m_vEndActionGoto);
-    }
-    else
-        FinishAction();
-}
-
 
 //===========================================================================================================
 //	#####                                           
@@ -584,174 +508,448 @@ Begin:
 //	#####    ### ## ##   ##  ### ##     ##   ####   
 //	                                #####           
 //===========================================================================================================
-function INT R6TakeDamage(INT iKillValue, INT iStunValue, Pawn instigatedBy, vector vHitLocation, 
-                           vector vMomentum, INT iBulletToArmorModifier, optional int iBulletGroup)
+function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGroup)
 {
-    local FLOAT fPercentage;
-    
-    if (m_bBroken)
-        return 0;
+	local float fPercentage;
 
-    if((Level.NetMode == NM_Standalone) || (Role == ROLE_Authority))
-    {
-        if (bShowLog) log("m_iCurrentHitPoints = "$m_iCurrentHitPoints$" Damage: " $ iKillValue);
-        m_iCurrentHitPoints = max(m_iCurrentHitPoints - iKillValue, 0);
-        
-        // Compute the percentage
-        fPercentage = m_iCurrentHitPoints * 100 / m_iHitPoints;  
-        
-        if (bShowLog) log("New Hit Point = " $ m_iCurrentHitPoints $" Percentage: " $ fPercentage);
-        SetNewDamageState(fPercentage);
-
-        if( m_bBroken )
-        {
-            // Notify the game that the interactive object was destroyed
-            R6AbstractGameInfo(Level.Game).IObjectDestroyed(instigatedBy, Self);
-
-            // Make noise for AI
-            Instigator = instigatedBy;
-            R6MakeNoise2( m_fAIBreakNoiseRadius, NOISE_Threat, PAWN_All );
-        }
-    }
-    
-    if(m_bBulletGoThrough == true)
-        return iKillValue;
-    else
-        return 0;
+	// End:0x0B
+	if(m_bBroken)
+	{
+		return 0;
+	}
+	// End:0x136
+	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	{
+		// End:0x78
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("m_iCurrentHitPoints = ", string(m_iCurrentHitPoints)), " Damage: "), string(iKillValue)));
+		}
+		m_iCurrentHitPoints = __NFUN_250__(__NFUN_147__(m_iCurrentHitPoints, iKillValue), 0);
+		fPercentage = float(__NFUN_145__(__NFUN_144__(m_iCurrentHitPoints, 100), m_iHitPoints));
+		// End:0xE5
+		if(bShowLog)
+		{
+			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("New Hit Point = ", string(m_iCurrentHitPoints)), " Percentage: "), string(fPercentage)));
+		}
+		SetNewDamageState(fPercentage);
+		// End:0x136
+		if(m_bBroken)
+		{
+			R6AbstractGameInfo(Level.Game).IObjectDestroyed(instigatedBy, self);
+			Instigator = instigatedBy;
+			R6MakeNoise2(m_fAIBreakNoiseRadius, 2, 4);
+		}
+	}
+	// End:0x14B
+	if(__NFUN_242__(m_bBulletGoThrough, true))
+	{
+		return iKillValue;		
+	}
+	else
+	{
+		return 0;
+	}
+	return;
 }
 
-simulated event SetNewDamageState(FLOAT fPercentage)
+simulated event SetNewDamageState(float fPercentage)
 {
-    local INT iState;
-    local INT iRandomMesh;
-    local INT iRandomSkin;
-    local INT iStateToUse;
-    local FLOAT fRandValue;
-    local INT iActor;
-    local INT iSkin;
-    local stDamageState stState;
-    local vector vTagLocation;
-    local rotator rTagRotator;
-    local Actor SpawnedActor;
+	local int iState, iRandomMesh, iRandomSkin, iStateToUse;
+	local float fRandValue;
+	local int iActor, iSkin;
+	local stDamageState stState;
+	local Vector vTagLocation;
+	local Rotator rTagRotator;
+	local Actor SpawnedActor;
 
-    // notify clients
-    if(Level.NetMode == NM_ListenServer || Level.NetMode == NM_DedicatedServer)
-        m_fNetDamagePercentage = fPercentage;
+	// End:0x3F
+	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer))))
+	{
+		m_fNetDamagePercentage = fPercentage;
+	}
+	iStateToUse = -1;
+	iState = 0;
+	J0x51:
 
-    iStateToUse = -1;
-    for(iState = 0; iState < m_StateList.Length; iState++)
-    {
-        stState = m_StateList[iState];
-        
-        if((fPercentage <= stState.fDamagePercentage) && (stState.fDamagePercentage <= m_StateList[iState].fDamagePercentage))
-        {
-            iStateToUse = iState;
-        }
-    } 
-    
-    if (bShowLog) log("New State = " $ iState);
-    
-    if (iStateToUse == m_iCurrentState)
-        return;
+	// End:0xBC [Loop If]
+	if(__NFUN_150__(iState, m_StateList.Length))
+	{
+		stState = m_StateList[iState];
+		// End:0xB2
+		if(__NFUN_130__(__NFUN_178__(fPercentage, stState.fDamagePercentage), __NFUN_178__(stState.fDamagePercentage, m_StateList[iState].fDamagePercentage)))
+		{
+			iStateToUse = iState;
+		}
+		__NFUN_165__(iState);
+		// [Loop Continue]
+		goto J0x51;
+	}
+	// End:0xDE
+	if(bShowLog)
+	{
+		__NFUN_231__(__NFUN_112__("New State = ", string(iState)));
+	}
+	// End:0xEF
+	if(__NFUN_154__(iStateToUse, m_iCurrentState))
+	{
+		return;
+	}
+	// End:0x108
+	if(__NFUN_154__(iStateToUse, __NFUN_147__(m_StateList.Length, 1)))
+	{
+		SetBroken();
+	}
+	// End:0x133
+	if(__NFUN_155__(iStateToUse, -1))
+	{
+		stState = m_StateList[iStateToUse];
+		m_iCurrentState = iStateToUse;
+	}
+	fRandValue = __NFUN_171__(__NFUN_195__(), 100.0000000);
+	// End:0x1F1
+	if(__NFUN_155__(stState.RandomMeshes.Length, 0))
+	{
+		iRandomMesh = 0;
+		J0x15A:
 
-    // If it the last state, the object is broken
-    if(iStateToUse==m_StateList.Length-1)
-        SetBroken();
-    
-    if (iStateToUse != -1)
-    {
-        stState = m_StateList[iStateToUse];
-        m_iCurrentState = iStateToUse;
-    }
-    
-    // Pick a Random Number
+		// End:0x1C0 [Loop If]
+		if(__NFUN_150__(iRandomMesh, stState.RandomMeshes.Length))
+		{
+			__NFUN_185__(fRandValue, stState.RandomMeshes[iRandomMesh].fPercentage);
+			// End:0x1B6
+			if(__NFUN_176__(fRandValue, float(0)))
+			{
+				ChangeStaticMesh(stState.RandomMeshes[iRandomMesh].Mesh);
+				// [Explicit Break]
+				goto J0x1C0;
+			}
+			__NFUN_165__(iRandomMesh);
+			// [Loop Continue]
+			goto J0x15A;
+		}
+		J0x1C0:
 
-    // Set the new Static Mesh
-    fRandValue = FRand() * 100.0;
-    if(stState.RandomMeshes.Length != 0)
-    {
-        for(iRandomMesh=0; iRandomMesh<stState.RandomMeshes.Length; iRandomMesh++)
-        {
-            fRandValue -= stState.RandomMeshes[iRandomMesh].fPercentage;
-            if(fRandValue < 0)
-            {
-                ChangeStaticMesh(stState.RandomMeshes[iRandomMesh].Mesh);
-                break;
-            }
-        }
+		// End:0x1F1
+		if(__NFUN_177__(fRandValue, float(0)))
+		{
+			ChangeStaticMesh(stState.RandomMeshes[__NFUN_147__(stState.RandomMeshes.Length, 1)].Mesh);
+		}
+	}
+	// End:0x321
+	if(__NFUN_155__(stState.RandomSkins.Length, 0))
+	{
+		iRandomSkin = 0;
+		J0x209:
 
-        if(fRandValue > 0)
-            ChangeStaticMesh(stState.RandomMeshes[stState.RandomMeshes.Length-1].Mesh);
-    }
+		// End:0x2AB [Loop If]
+		if(__NFUN_150__(iRandomSkin, stState.RandomSkins.Length))
+		{
+			__NFUN_185__(fRandValue, stState.RandomSkins[iRandomSkin].fPercentage);
+			// End:0x2A1
+			if(__NFUN_176__(fRandValue, float(0)))
+			{
+				iSkin = 0;
+				J0x24E:
 
-    if(stState.RandomSkins.Length != 0)
-    {
-        for(iRandomSkin=0; iRandomSkin<stState.RandomSkins.Length; iRandomSkin++)
-        {
-            fRandValue -= stState.RandomSkins[iRandomSkin].fPercentage;
-            if(fRandValue < 0)
-            {
-                for(iSkin=0; iSkin<stState.RandomSkins[iRandomSkin].Skin.Length; iSkin++)
-                    SetSkin(stState.RandomSkins[iRandomSkin].Skin[iSkin], iSkin);
-                break;
-            }
-        }
+				// End:0x29E [Loop If]
+				if(__NFUN_150__(iSkin, stState.RandomSkins[iRandomSkin].Skin.Length))
+				{
+					SetSkin(stState.RandomSkins[iRandomSkin].Skin[iSkin], iSkin);
+					__NFUN_165__(iSkin);
+					// [Loop Continue]
+					goto J0x24E;
+				}
+				// [Explicit Break]
+				goto J0x2AB;
+			}
+			__NFUN_165__(iRandomSkin);
+			// [Loop Continue]
+			goto J0x209;
+		}
+		J0x2AB:
 
-        if(fRandValue > 0)
-            for(iSkin=0; iSkin<stState.RandomSkins[stState.RandomSkins.Length-1].Skin.Length; iSkin++)
-                SetSkin(stState.RandomSkins[stState.RandomSkins.Length-1].Skin[iSkin], iSkin);
-    }
+		// End:0x321
+		if(__NFUN_177__(fRandValue, float(0)))
+		{
+			iSkin = 0;
+			J0x2BF:
 
-    if(Level.NetMode != NM_DedicatedServer)
-    {
-        // Spawn the actors
-        for(iActor = 0; iActor < stState.ActorList.Length; iActor++)
-        {
-            if(stState.ActorList[iActor].ActorToSpawn == none)
-                continue;
+			// End:0x321 [Loop If]
+			if(__NFUN_150__(iSkin, stState.RandomSkins[__NFUN_147__(stState.RandomSkins.Length, 1)].Skin.Length))
+			{
+				SetSkin(stState.RandomSkins[__NFUN_147__(stState.RandomSkins.Length, 1)].Skin[iSkin], iSkin);
+				__NFUN_165__(iSkin);
+				// [Loop Continue]
+				goto J0x2BF;
+			}
+		}
+	}
+	// End:0x411
+	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	{
+		iActor = 0;
+		J0x341:
 
-            if(stState.ActorList[iActor].HelperName != "")
-                GetTagInformations( stState.ActorList[iActor].HelperName, vTagLocation, rTagRotator);
+		// End:0x411 [Loop If]
+		if(__NFUN_150__(iActor, stState.ActorList.Length))
+		{
+			// End:0x374
+			if(__NFUN_114__(stState.ActorList[iActor].ActorToSpawn, none))
+			{
+				// [Explicit Continue]
+				goto J0x407;
+			}
+			// End:0x3B2
+			if(__NFUN_123__(stState.ActorList[iActor].HelperName, ""))
+			{
+				__NFUN_2008__(stState.ActorList[iActor].HelperName, vTagLocation, rTagRotator);
+			}
+			SpawnedActor = __NFUN_278__(stState.ActorList[iActor].ActorToSpawn,,, __NFUN_215__(Location, vTagLocation), __NFUN_316__(Rotation, rTagRotator));
+			// End:0x407
+			if(__NFUN_119__(SpawnedActor, none))
+			{
+				SpawnedActor.RemoteRole = ROLE_None;
+			}
+			J0x407:
 
-            SpawnedActor = Spawn(stState.ActorList[iActor].ActorToSpawn,,,Location + vTagLocation, Rotation + rTagRotator);
-
-            if(SpawnedActor != none)
-                SpawnedActor.RemoteRole = ROLE_None;
-        }
-    }
-
-    if(Role == ROLE_Authority)
-    {
-        PlayInteractiveObjectSound(stState);
-    }
+			__NFUN_165__(iActor);
+			// [Loop Continue]
+			goto J0x341;
+		}
+	}
+	// End:0x42C
+	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	{
+		PlayInteractiveObjectSound(stState);
+	}
+	return;
 }
 
 function PlayInteractiveObjectSound(stDamageState stState)
 {
-    local INT iSound;
+	local int iSound;
 
-    for(iSound = 0; iSound < stState.SoundList.Length; iSound++)
-    {
-        PlaySound(stState.SoundList[iSound], SLOT_SFX);
-    }
+	iSound = 0;
+	J0x07:
+
+	// End:0x3B [Loop If]
+	if(__NFUN_150__(iSound, stState.SoundList.Length))
+	{
+		__NFUN_264__(stState.SoundList[iSound], 3);
+		__NFUN_165__(iSound);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
+}
+
+state PA_Execute
+{
+//===========================================================================================================
+//	 ####              #                                       #      ##                            
+//	  ##              ##                                      ##                                    
+//	  ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####  
+//	  ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##      
+//	  ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####   
+//	  ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
+//	 ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
+//===========================================================================================================
+	function FinishAction()
+	{
+		SwitchToNextAction();
+		return;
+	}
+	stop;
+}
+
+state PA_ExecuteStartInteraction extends PA_Execute
+{Begin:
+
+	m_InteractionOwner.PerformAction_StartInteraction();
+	stop;				
+}
+
+state PA_ExecuteLookAt extends PA_Execute
+{Begin:
+
+	m_InteractionOwner.PerformAction_LookAt(R6InteractiveObjectActionLookAt(m_CurrentInteractiveObject).m_Target);
+	stop;	
+}
+
+state PA_ExecuteGoto extends PA_Execute
+{Begin:
+
+	m_InteractionOwner.PerformAction_Goto(R6InteractiveObjectActionGoto(m_CurrentInteractiveObject).m_Target);
+	stop;	
+}
+
+state PA_ExecuteToggleDevice extends PA_Execute
+{
+	function ActionDetonateAllBombs()
+	{
+		local int i;
+		local R6InteractiveObjectActionToggleDevice ioAction;
+
+		ioAction = R6InteractiveObjectActionToggleDevice(m_CurrentInteractiveObject);
+		J0x10:
+
+		// End:0x64 [Loop If]
+		if(__NFUN_150__(i, ioAction.m_aIOBombs.Length))
+		{
+			ioAction.m_aIOBombs[i].DetonateBomb(R6Pawn(m_InteractionOwner.Pawn));
+			__NFUN_163__(i);
+			// [Loop Continue]
+			goto J0x10;
+		}
+		return;
+	}
+
+	function ActionToggleDevice()
+	{
+		local R6InteractiveObjectActionToggleDevice ioAction;
+
+		ioAction = R6InteractiveObjectActionToggleDevice(m_CurrentInteractiveObject);
+		// End:0x4F
+		if(__NFUN_119__(ioAction.m_iodevice, none))
+		{
+			ioAction.m_iodevice.ToggleDevice(R6Pawn(m_InteractionOwner.Pawn));
+		}
+		return;
+	}
+Begin:
+
+	ActionToggleDevice();
+	ActionDetonateAllBombs();
+	FinishAction();
+	stop;	
+}
+
+state PA_ExecutePlayAnim extends PA_Execute
+{Begin:
+
+	m_InteractionOwner.PerformAction_PlayAnim(R6InteractiveObjectActionPlayAnim(m_CurrentInteractiveObject).m_vAnimName);
+	stop;	
+}
+
+state PA_ExecuteLoopAnim extends PA_Execute
+{Begin:
+
+	m_InteractionOwner.PerformAction_LoopAnim(R6InteractiveObjectActionLoopAnim(m_CurrentInteractiveObject).m_vAnimName, RandRange(R6InteractiveObjectActionLoopAnim(m_CurrentInteractiveObject).m_LoopTime.Min, R6InteractiveObjectActionLoopAnim(m_CurrentInteractiveObject).m_LoopTime.Max));
+	stop;			
+}
+
+state PA_ExecuteLoopRandomAnim extends PA_Execute
+{
+//===========================================================================================================
+//	 ####              #                                       #      ##                            
+//	  ##              ##                                      ##                                    
+//	  ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####  
+//	  ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##      
+//	  ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####   
+//	  ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
+//	 ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
+//===========================================================================================================
+	function FinishAction()
+	{
+		// End:0x18
+		if(__NFUN_153__(m_iActionIndex, m_iActionNumber))
+		{
+			SwitchToNextAction();			
+		}
+		else
+		{
+			__NFUN_113__('PA_ExecuteLoopRandomAnim');
+		}
+		return;
+	}
+Begin:
+
+	m_InteractionOwner.PerformAction_PlayAnim(R6InteractiveObjectActionLoopRandomAnim(m_CurrentInteractiveObject).GetNextAnim());
+	stop;				
+}
+
+state PA_ExecutePlayEnding extends PA_Execute
+{
+//===========================================================================================================
+//	 ####              #                                       #      ##                            
+//	  ##              ##                                      ##                                    
+//	  ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####  
+//	  ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##      
+//	  ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####   
+//	  ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
+//	 ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
+//===========================================================================================================
+	function FinishAction()
+	{
+		__NFUN_113__('PA_ExecuteGotoEnding');
+		return;
+	}
+Begin:
+
+	// End:0x26
+	if(__NFUN_255__(m_vEndActionAnimName, 'None'))
+	{
+		m_InteractionOwner.PerformAction_PlayAnim(m_vEndActionAnimName);		
+	}
+	else
+	{
+		FinishAction();
+	}
+	stop;			
+}
+
+state PA_ExecuteGotoEnding extends PA_Execute
+{
+//===========================================================================================================
+//	 ####              #                                       #      ##                            
+//	  ##              ##                                      ##                                    
+//	  ##    #####    #####   ####   ## ###   ####    ####    #####   ###     ####   #####    #####  
+//	  ##    ##  ##    ##    ##  ##   ### ##     ##  ##  ##    ##      ##    ##  ##  ##  ##  ##      
+//	  ##    ##  ##    ##    ######   ##  ##  #####  ##        ##      ##    ##  ##  ##  ##   ####   
+//	  ##    ##  ##    ## #  ##       ##     ##  ##  ##  ##    ## #    ##    ##  ##  ##  ##      ##  
+//	 ####   ##  ##     ##    ####   ####     ### ##  ####      ##    ####    ####   ##  ##  #####   
+//===========================================================================================================
+	function FinishAction()
+	{
+		StopInteraction();
+		return;
+	}
+Begin:
+
+	// End:0x33
+	if(__NFUN_119__(m_vEndActionGoto, none))
+	{
+		m_InteractionOwner.R6SetMovement(5);
+		m_InteractionOwner.PerformAction_Goto(m_vEndActionGoto);		
+	}
+	else
+	{
+		FinishAction();
+	}
+	stop;		
 }
 
 defaultproperties
 {
-     m_fRadius=128.000000
-     m_fActionInterval=10.000000
-     m_fTimerInterval=1.000000
-     m_fAIBreakNoiseRadius=500.000000
-     bNoDelete=True
-     m_bUseR6Availability=True
-     bAcceptsProjectors=True
-     bAlwaysRelevant=True
-     bSkipActorPropertyReplication=True
-     bShadowCast=True
-     bStaticLighting=True
-     bCollideActors=True
-     bBlockActors=True
-     bBlockPlayers=True
-     bPathColliding=True
-     m_bForceStaticLighting=True
+	m_fRadius=128.0000000
+	m_fActionInterval=10.0000000
+	m_fTimerInterval=1.0000000
+	m_fAIBreakNoiseRadius=500.0000000
+	bNoDelete=true
+	m_bUseR6Availability=true
+	bAcceptsProjectors=true
+	bAlwaysRelevant=true
+	bSkipActorPropertyReplication=true
+	bShadowCast=true
+	bStaticLighting=true
+	bCollideActors=true
+	bBlockActors=true
+	bBlockPlayers=true
+	bPathColliding=true
+	m_bForceStaticLighting=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_aOldSkinsc_iIObjectSkinMax
+// REMOVED IN 1.60: var m_aRepSkinsc_iIObjectSkinMax

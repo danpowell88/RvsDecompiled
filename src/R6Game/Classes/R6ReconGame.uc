@@ -1,45 +1,46 @@
 //=============================================================================
+// R6ReconGame - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6ReconGame.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2001/12/14 * Created by Aristomenis Kolokathis
 //=============================================================================
-
-class R6ReconGame extends R6CoOpMode;
-
+class R6ReconGame extends R6CoOpMode
+	config
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
 function InitObjectives()
 {
-    local int index;
-    local R6MObjNeutralizeTerrorist missionObjTerro;
-    local R6MObjGroupMission        groupMission;
-    local R6MObjRecon               reconObj;
+	local int Index;
+	local R6MObjNeutralizeTerrorist missionObjTerro;
+	local R6MObjGroupMission groupMission;
+	local R6MObjRecon reconObj;
 
-    // Group Mission
-    m_missionMgr.m_aMissionObjectives[index] = new(none) class'R6Game.R6MObjGroupMission';
-    groupMission = R6MObjGroupMission(m_missionMgr.m_aMissionObjectives[index]);
-    groupMission.m_bIfCompletedMissionIsSuccessfull = true;
-    groupMission.m_szDescription = "Go to extraction zone and don't get caugh";
-    groupMission.m_szDescriptionInMenu = "GotoExtractionInReconMode";
-
-    // recon
-    groupMission.m_aSubMissionObjectives[index] = new(none) class'R6Game.R6MObjRecon';
-    groupMission.m_aSubMissionObjectives[index].m_bIfCompletedMissionIsSuccessfull = true;
-    reconObj = R6MObjRecon(groupMission.m_aSubMissionObjectives[index]);
-    reconObj.m_bVisibleInMenu = false;
-    index++;
-
-    // get from the insertion zone to the extraction zone
-    groupMission.m_aSubMissionObjectives[index] = new(none) class'R6Game.R6MObjCompleteAllAndGoToExtraction';
-    groupMission.m_aSubMissionObjectives[index].m_bIfCompletedMissionIsSuccessfull = true;
-    missionObjTerro.m_bVisibleInMenu = false;
-    index++;
-
-    Super.InitObjectives();
+	m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjGroupMission';
+	groupMission = R6MObjGroupMission(m_missionMgr.m_aMissionObjectives[Index]);
+	groupMission.m_bIfCompletedMissionIsSuccessfull = true;
+	groupMission.m_szDescription = "Go to extraction zone and don't get caugh";
+	groupMission.m_szDescriptionInMenu = "GotoExtractionInReconMode";
+	groupMission.m_aSubMissionObjectives[Index] = new (none) Class'R6Game.R6MObjRecon';
+	groupMission.m_aSubMissionObjectives[Index].m_bIfCompletedMissionIsSuccessfull = true;
+	reconObj = R6MObjRecon(groupMission.m_aSubMissionObjectives[Index]);
+	reconObj.m_bVisibleInMenu = false;
+	__NFUN_165__(Index);
+	groupMission.m_aSubMissionObjectives[Index] = new (none) Class'R6Game.R6MObjCompleteAllAndGoToExtraction';
+	groupMission.m_aSubMissionObjectives[Index].m_bIfCompletedMissionIsSuccessfull = true;
+	missionObjTerro.m_bVisibleInMenu = false;
+	__NFUN_165__(Index);
+	super(R6MultiPlayerGameInfo).InitObjectives();
+	return;
 }
 
 defaultproperties
 {
-     m_szGameTypeFlag="RGM_ReconMode"
+	m_szGameTypeFlag="RGM_ReconMode"
 }

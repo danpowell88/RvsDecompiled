@@ -1,4 +1,10 @@
 //=============================================================================
+// R6RainbowAI - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6RainbowAI.uc : (Rainbow 6 Base Class) This is the AI Controller class for 
 //                   all non player members of the Rainbow team.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
@@ -7,100 +13,116 @@
 //    2001/05/01 * Created by Rima Brek
 //=============================================================================
 class R6RainbowAI extends R6AIController
-    native;
+ native;
 
-var			R6Rainbow					m_pawn;
-var         R6RainbowTeam               m_TeamManager;
-var         R6Rainbow                   m_TeamLeader;       // it might be sufficient to hold this info in the teamManager
-var         R6Rainbow                   m_PaceMember;       // this is the member that is directly ahead of this controller's pawn.
-
-var			name						m_PostFindPathToState;
-var			name						m_PostLockPickState;
-
-var			vector						m_vLocationOnTarget;	// location on target to aim at
-var			INT							m_iStateProgress;
-var			actor						m_NextMoveTarget;
-var			R6IORotatingDoor			m_RotatingDoor;
-
-var enum eFormation
+enum eFormation
 {
-    FORM_SingleFile,
-    FORM_SingleFileWallBothSides,
-    FORM_SingleFileWallRight,
-    FORM_SingleFileWallLeft,
-    FORM_SingleFileNoWalls,
-    FORM_OrientedSingleFile,
-    FORM_Diamond
-} m_eFormation;
+	FORM_SingleFile,                // 0
+	FORM_SingleFileWallBothSides,   // 1
+	FORM_SingleFileWallRight,       // 2
+	FORM_SingleFileWallLeft,        // 3
+	FORM_SingleFileNoWalls,         // 4
+	FORM_OrientedSingleFile,        // 5
+	FORM_Diamond                    // 6
+};
 
-var enum ePawnOrientation
+enum ePawnOrientation
 {
-	PO_Front,
-    PO_FrontRight,
-    PO_Right,
-    PO_Left,
-    PO_FrontLeft,
-    PO_Back,
-    PO_PeekLeft,
-    PO_PeekRight,    
-} m_ePawnOrientation;
+	PO_Front,                       // 0
+	PO_FrontRight,                  // 1
+	PO_Right,                       // 2
+	PO_Left,                        // 3
+	PO_FrontLeft,                   // 4
+	PO_Back,                        // 5
+	PO_PeekLeft,                    // 6
+	PO_PeekRight                    // 7
+};
 
+enum eCoverDirection
+{
+	COVER_Left,                     // 0
+	COVER_Center,                   // 1
+	COVER_Right,                    // 2
+	COVER_None                      // 3
+};
+
+// NEW IN 1.60
+var R6RainbowAI.eFormation m_eFormation;
+// NEW IN 1.60
+var R6RainbowAI.ePawnOrientation m_ePawnOrientation;
+var R6Door.eRoomLayout m_eCurrentRoomLayout;
+// NEW IN 1.60
+var R6RainbowAI.eCoverDirection m_eCoverDirection;
+var int m_iStateProgress;
 // -- MOVEMENT attributes -- //
-var         INT                         m_iTurn;				// used to allow a member walking backwards to turn around periodically
-var         INT                         m_iWaitCounter;
-
+var int m_iTurn;  // used to allow a member walking backwards to turn around periodically
+var int m_iWaitCounter;
+var int m_iActionUseGadgetGroup;
+var bool m_bTeamMateHasBeenKilled;
+var bool m_bIsCatchingUp;
+var bool m_bIsMovingBackwards;
+var bool m_bSlowedPace;
+var bool m_bAlreadyWaiting;
+var bool m_bReactToNoise;
+var bool m_bUseStaggeredFormation;
+var bool m_bWeaponsDry;
+var bool m_bAimingWeaponAtEnemy;
+var bool m_bEnteredRoom;
+var bool m_bIndividualAttacks;
+var bool m_bStateFlag;  // for miscellaneous usage
+var bool m_bReorganizationPending;
+var float m_fLastReactionToGas;
+var float m_fGrenadeDangerRadius;
+var float m_fAttackTimerRate;  // Timer event, 0=no timer.
+var float m_fAttackTimerCounter;  // Counts up until it reaches m_fAttackTimerRate.
+var float m_fFiringAttackTimer;
+var R6Rainbow m_pawn;
+var R6RainbowTeam m_TeamManager;
+var R6Rainbow m_TeamLeader;  // it might be sufficient to hold this info in the teamManager
+var R6Rainbow m_PaceMember;  // this is the member that is directly ahead of this controller's pawn.
+var Actor m_NextMoveTarget;
+var R6IORotatingDoor m_RotatingDoor;
 // -- INTERACTION attributes -- //
-var         Actor                       m_ActionTarget;
-var         INT							m_iActionUseGadgetGroup;
-var         bool                        m_bTeamMateHasBeenKilled;
-var			bool						m_bIsCatchingUp;
-var			bool						m_bIsMovingBackwards;
-var			bool						m_bSlowedPace;
-var			bool						m_bAlreadyWaiting;
-var			bool						m_bReactToNoise;
-var			bool						m_bUseStaggeredFormation;
-var			bool						m_bWeaponsDry;
-var			bool						m_bAimingWeaponAtEnemy;
+var Actor m_ActionTarget;
+var Actor m_DesiredTarget;
+var R6CommonRainbowVoices m_CommonMemberVoicesMgr;
+var name m_PostFindPathToState;
+var name m_PostLockPickState;
+var Vector m_vLocationOnTarget;  // location on target to aim at
+var Vector m_vGrenadeLocation;
+var Vector m_vDesiredLocation;
+var Vector m_vNoiseFocalPoint;
+var Vector m_vPreEntryPositions[2];
 
-var			bool						m_bEnteredRoom;
-var			bool						m_bIndividualAttacks;
-var			bool						m_bStateFlag;				// for miscellaneous usage
-var			bool						m_bReorganizationPending;
-var			FLOAT						m_fLastReactionToGas;
+// Export UR6RainbowAI::execGetTargetPosition(FFrame&, void* const)
+ native(2202) final function Vector GetTargetPosition();
 
-var			vector						m_vGrenadeLocation;
-var			FLOAT						m_fGrenadeDangerRadius;
+// Export UR6RainbowAI::execGetLadderPosition(FFrame&, void* const)
+ native(2203) final function Vector GetLadderPosition();
 
-var			actor						m_DesiredTarget;
-var			vector						m_vDesiredLocation;
-var			vector						m_vNoiseFocalPoint;
+// Export UR6RainbowAI::execGetGuardPosition(FFrame&, void* const)
+ native(2204) final function Vector GetGuardPosition();
 
-var			vector						m_vPreEntryPositions[2];
-var			FLOAT						m_fAttackTimerRate;		// Timer event, 0=no timer.
-var			FLOAT						m_fAttackTimerCounter;	// Counts up until it reaches m_fAttackTimerRate.
-var			FLOAT						m_fFiringAttackTimer;
+// Export UR6RainbowAI::execGetEntryPosition(FFrame&, void* const)
+ native(2205) final function Vector GetEntryPosition(bool bInsideRoom);
 
-var         R6CommonRainbowVoices       m_CommonMemberVoicesMgr;
-var			R6Door.eRoomLayout			m_eCurrentRoomLayout;
+// Export UR6RainbowAI::execCheckEnvironment(FFrame&, void* const)
+ native(2206) final function Vector CheckEnvironment();
 
-var	enum eCoverDirection
-{
-	COVER_Left,
-	COVER_Center,
-	COVER_Right,
-	COVER_None
-} m_eCoverDirection;
+// Export UR6RainbowAI::execSetOrientation(FFrame&, void* const)
+ native(2207) final function SetOrientation(optional R6RainbowAI.ePawnOrientation eOverrideOrientation);
 
-native(2202) final function vector GetTargetPosition();  
-native(2203) final function vector GetLadderPosition();
-native(2204) final function vector GetGuardPosition();
-native(2205) final function vector GetEntryPosition(bool bInsideRoom);
-native(2206) final function vector CheckEnvironment();
-native(2207) final function SetOrientation(optional ePawnOrientation eOverrideOrientation);
-native(2219) final function LookAroundRoom(bool bIsLeadingRoomEntry);
-native(2221) final function actor FindSafeSpot();
-native(2222) final function bool AClearShotIsAvailable(Pawn pTarget, vector vStart);
-native(2223) final function bool ClearToSnipe(vector vStart, rotator rSnipingDir);
+// Export UR6RainbowAI::execLookAroundRoom(FFrame&, void* const)
+ native(2219) final function LookAroundRoom(bool bIsLeadingRoomEntry);
+
+// Export UR6RainbowAI::execFindSafeSpot(FFrame&, void* const)
+ native(2221) final function Actor FindSafeSpot();
+
+// Export UR6RainbowAI::execAClearShotIsAvailable(FFrame&, void* const)
+ native(2222) final function bool AClearShotIsAvailable(Pawn PTarget, Vector vStart);
+
+// Export UR6RainbowAI::execClearToSnipe(FFrame&, void* const)
+ native(2223) final function bool ClearToSnipe(Vector vStart, Rotator rSnipingDir);
 
 //------------------------------------------------------------------
 // Possess()
@@ -108,45 +130,54 @@ native(2223) final function bool ClearToSnipe(vector vStart, rotator rSnipingDir
 //------------------------------------------------------------------
 function Possess(Pawn aPawn)
 {
-    Super.Possess(aPawn);
+	super.Possess(aPawn);
 	m_pawn = R6Rainbow(aPawn);
-	m_pawn.bRotateToDesired = true;		// rbrek 19 dec 2001 : bugfix (caused problems)
-    PlayerReplicationInfo = none;
-    aPawn.PlayerReplicationInfo = none;
-	#ifdefDEBUG	if(bShowLog) log(self$"   m_Pawn = "$m_pawn);	#endif
+	m_pawn.bRotateToDesired = true;
+	PlayerReplicationInfo = none;
+	aPawn.PlayerReplicationInfo = none;
+	return;
 }
 
 event PostBeginPlay()
 {
-    Super.PostBeginPlay();
-
-    if (Role==ROLE_Authority)
-    {		
-        m_CommonMemberVoicesMgr = R6CommonRainbowVoices( R6AbstractGameInfo(level.game).GetCommonRainbowMemberVoicesMgr() );
-    }
+	super(Controller).PostBeginPlay();
+	// End:0x3E
+	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	{
+		m_CommonMemberVoicesMgr = R6CommonRainbowVoices(R6AbstractGameInfo(Level.Game).GetCommonRainbowMemberVoicesMgr());
+	}
+	return;
 }
- 
+
 //------------------------------------------------------------------
 // UpdatePosture()                                         
 //------------------------------------------------------------------
 function UpdatePosture()
 {
-	if(!m_PaceMember.m_bPostureTransition && 
-		((m_PaceMember.m_bIsProne != pawn.m_bIsProne) || (m_PaceMember.bIsCrouched != pawn.bIsCrouched)))
+	// End:0xF3
+	if(__NFUN_130__(__NFUN_129__(m_PaceMember.m_bPostureTransition), __NFUN_132__(__NFUN_243__(m_PaceMember.m_bIsProne, Pawn.m_bIsProne), __NFUN_243__(m_PaceMember.bIsCrouched, Pawn.bIsCrouched))))
 	{
-		if(m_PaceMember.m_bIsProne && !m_PaceMember.m_bIsSniping)
-			pawn.m_bWantsToProne = true;
-		else if(m_PaceMember.bIsCrouched)
+		// End:0x9A
+		if(__NFUN_130__(m_PaceMember.m_bIsProne, __NFUN_129__(m_PaceMember.m_bIsSniping)))
 		{
-			pawn.bWantsToCrouch = true;
-			pawn.m_bWantsToProne = false;
+			Pawn.m_bWantsToProne = true;			
 		}
 		else
 		{
-			pawn.bWantsToCrouch = false;
-			pawn.m_bWantsToProne = false;
-		}		
+			// End:0xD1
+			if(m_PaceMember.bIsCrouched)
+			{
+				Pawn.bWantsToCrouch = true;
+				Pawn.m_bWantsToProne = false;				
+			}
+			else
+			{
+				Pawn.bWantsToCrouch = false;
+				Pawn.m_bWantsToProne = false;
+			}
+		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -154,16 +185,29 @@ function UpdatePosture()
 //------------------------------------------------------------------
 function bool PostureHasChanged()
 {
-	if(pawn.m_bIsProne != pawn.m_bWantsToProne)
+	// End:0x25
+	if(__NFUN_243__(Pawn.m_bIsProne, Pawn.m_bWantsToProne))
+	{
 		return true;
-
-	if(pawn.m_bIsProne)
+	}
+	// End:0x39
+	if(Pawn.m_bIsProne)
+	{
 		return false;
-
-	if(pawn.bIsCrouched != pawn.bWantsToCrouch)
+	}
+	// End:0x5E
+	if(__NFUN_243__(Pawn.bIsCrouched, Pawn.bWantsToCrouch))
+	{
 		return true;
-
+	}
 	return false;
+	return;
+}
+
+// NEW IN 1.60
+function FreeBackupPromote()
+{
+	return;
 }
 
 //------------------------------------------------------------------
@@ -173,90 +217,132 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 {
 	local bool bIndependantPace;
 
-	// check posture
-	if(ePace == 0)
+	// End:0x55
+	if(__NFUN_154__(int(ePace), 0))
 	{
 		bIndependantPace = false;
-		if(m_PaceMember == none || m_TeamLeader == none)
+		// End:0x2F
+		if(__NFUN_132__(__NFUN_114__(m_PaceMember, none), __NFUN_114__(m_TeamLeader, none)))
+		{
 			return;
+		}
 		UpdatePosture();
-		m_Pawn.m_eMovementPace = m_PaceMember.m_eMovementPace;
+		m_pawn.m_eMovementPace = m_PaceMember.m_eMovementPace;		
 	}
 	else
 	{
 		bIndependantPace = true;
-		if ( !pawn.m_bIsProne && (ePace == PACE_Prone) )
+		// End:0x97
+		if(__NFUN_130__(__NFUN_129__(Pawn.m_bIsProne), __NFUN_154__(int(ePace), int(1))))
 		{
-			pawn.m_bWantsToProne = true;
-		}
-		else if ( pawn.m_bIsProne && (ePace != PACE_Prone) )
-		{
-			pawn.m_bWantsToProne = false;
-			pawn.bWantsToCrouch = true;
-		}
-		else if(pawn.bIsCrouched)
-		{
-			if((ePace == PACE_Walk) || (ePace == PACE_Run))
-				pawn.bWantsToCrouch = false;
+			Pawn.m_bWantsToProne = true;			
 		}
 		else
 		{
-			if((ePace == PACE_CrouchWalk) || (ePace == PACE_CrouchRun))
-				pawn.bWantsToCrouch = true;
-		} 
-		m_Pawn.m_eMovementPace = ePace;
-	}
-
-	// if this is a team leader or a member with a pace independant of leader
-	if(m_TeamLeader == none || bIndependantPace)
-	{
-		// this pawn is the team leader
-		if((m_Pawn.m_eMovementPace == PACE_Walk) || (m_Pawn.m_eMovementPace == PACE_CrouchWalk))
-			pawn.SetWalking(true);  
-		else if((m_Pawn.m_eMovementPace == PACE_Run) || (m_Pawn.m_eMovementPace == PACE_CrouchRun))
-			pawn.SetWalking(false); 	
-		return;		
-	}
-
-    // make needed adjustments if leader is walking backwards or strafing...
-	if(!m_PaceMember.IsMovingForward() && !pawn.m_bIsProne)
-	{		
-		if(m_PaceMember.bIsWalking)
-			m_bSlowedPace=true;
-		else
-		{
-			// pacemember is not walking, but this pawn should be
-			if(m_PaceMember.bIsCrouched)
+			// End:0xE0
+			if(__NFUN_130__(Pawn.m_bIsProne, __NFUN_155__(int(ePace), int(1))))
 			{
-				m_bSlowedPace=true;	
-				m_Pawn.m_eMovementPace = PACE_CrouchWalk;  
+				Pawn.m_bWantsToProne = false;
+				Pawn.bWantsToCrouch = true;				
 			}
 			else
 			{
-				m_bSlowedPace=false;
-				m_Pawn.m_eMovementPace = PACE_Walk;
-			}				
-		}	
-	}	
-	else
-		m_bSlowedPace=false;
-
-	if((m_Pawn.m_eHealth == HEALTH_Wounded) && !m_bIsMovingBackwards)
-	{	
-		// if this pawn is wounded, they can only walk except for the last member while moving backwards they can (cheat) run.
-		pawn.SetWalking(true);
-		
+				// End:0x128
+				if(Pawn.bIsCrouched)
+				{
+					// End:0x125
+					if(__NFUN_132__(__NFUN_154__(int(ePace), int(4)), __NFUN_154__(int(ePace), int(5))))
+					{
+						Pawn.bWantsToCrouch = false;
+					}					
+				}
+				else
+				{
+					// End:0x15B
+					if(__NFUN_132__(__NFUN_154__(int(ePace), int(2)), __NFUN_154__(int(ePace), int(3))))
+					{
+						Pawn.bWantsToCrouch = true;
+					}
+				}
+			}
+		}
+		m_pawn.m_eMovementPace = ePace;
 	}
-    else if((m_Pawn.m_eMovementPace == PACE_Walk) || (m_Pawn.m_eMovementPace == PACE_CrouchWalk))
+	// End:0x212
+	if(__NFUN_132__(__NFUN_114__(m_TeamLeader, none), bIndependantPace))
 	{
-		// if too far away from pacemember run to catch up!
-		if(!m_bSlowedPace && (DistanceTo(m_PaceMember) > 2*GetFormationDistance()) && !m_TeamManager.m_bTeamIsSeparatedFromLeader)
-			pawn.SetWalking(false);
+		// End:0x1CC
+		if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(2))))
+		{
+			Pawn.SetWalking(true);			
+		}
 		else
-			pawn.SetWalking(true);  
+		{
+			// End:0x210
+			if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(3))))
+			{
+				Pawn.SetWalking(false);
+			}
+		}
+		return;
 	}
-    else if((m_Pawn.m_eMovementPace == PACE_Run) || (m_Pawn.m_eMovementPace == PACE_CrouchRun))
-		pawn.SetWalking(false);  
+	// End:0x2A3
+	if(__NFUN_130__(__NFUN_129__(m_PaceMember.IsMovingForward()), __NFUN_129__(Pawn.m_bIsProne)))
+	{
+		// End:0x259
+		if(m_PaceMember.bIsWalking)
+		{
+			m_bSlowedPace = true;			
+		}
+		else
+		{
+			// End:0x287
+			if(m_PaceMember.bIsCrouched)
+			{
+				m_bSlowedPace = true;
+				m_pawn.m_eMovementPace = 2;				
+			}
+			else
+			{
+				m_bSlowedPace = false;
+				m_pawn.m_eMovementPace = 4;
+			}
+		}		
+	}
+	else
+	{
+		m_bSlowedPace = false;
+	}
+	// End:0x2E4
+	if(__NFUN_130__(__NFUN_154__(int(m_pawn.m_eHealth), int(1)), __NFUN_129__(m_bIsMovingBackwards)))
+	{
+		Pawn.SetWalking(true);		
+	}
+	else
+	{
+		// End:0x37D
+		if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(2))))
+		{
+			// End:0x36A
+			if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bSlowedPace), __NFUN_177__(DistanceTo(m_PaceMember), __NFUN_171__(float(2), GetFormationDistance()))), __NFUN_129__(m_TeamManager.m_bTeamIsSeparatedFromLeader)))
+			{
+				Pawn.SetWalking(false);				
+			}
+			else
+			{
+				Pawn.SetWalking(true);
+			}			
+		}
+		else
+		{
+			// End:0x3C1
+			if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(3))))
+			{
+				Pawn.SetWalking(false);
+			}
+		}
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -264,19 +350,26 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 //   ePace is optional so for NPC members who's pace should be set  
 //   according to team leader...                                    
 //------------------------------------------------------------------
-function R6PreMoveTo(vector vTargetPosition, vector vFocus, optional R6Pawn.eMovementPace ePace)
+function R6PreMoveTo(Vector vTargetPosition, Vector vFocus, optional R6Pawn.eMovementPace ePace)
 {
-	if(pawn.m_bTryToUnProne)
-		ePace = PACE_Prone;
-	else if(pawn.bTryToUncrouch)
-		ePace = PACE_CrouchWalk; 	
-
+	// End:0x1D
+	if(Pawn.m_bTryToUnProne)
+	{
+		ePace = 1;		
+	}
+	else
+	{
+		// End:0x37
+		if(Pawn.bTryToUncrouch)
+		{
+			ePace = 2;
+		}
+	}
 	R6SetMovement(ePace);
-
-    // these are set for GetFacingDirection()...
-    focus = none;
-    focalPoint = vFocus;          
-    destination = vTargetPosition;
+	Focus = none;
+	FocalPoint = vFocus;
+	Destination = vTargetPosition;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -284,19 +377,26 @@ function R6PreMoveTo(vector vTargetPosition, vector vFocus, optional R6Pawn.eMov
 //   ePace is optional so for NPC members who's pace should be set  
 //   according to team leader...                                    
 //------------------------------------------------------------------
-function R6PreMoveToward(actor target, actor pfocus, optional R6Pawn.eMovementPace ePace)
+function R6PreMoveToward(Actor Target, Actor pFocus, optional R6Pawn.eMovementPace ePace)
 {
-	if(pawn.m_bTryToUnProne)
-		ePace = PACE_Prone;
-	else if(pawn.bTryToUncrouch)
-		ePace = PACE_CrouchWalk;  
-
+	// End:0x1D
+	if(Pawn.m_bTryToUnProne)
+	{
+		ePace = 1;		
+	}
+	else
+	{
+		// End:0x37
+		if(Pawn.bTryToUncrouch)
+		{
+			ePace = 2;
+		}
+	}
 	R6SetMovement(ePace);
-
-    // these are set for GetFacingDirection()...
-    focus = none;
-    focalPoint = pFocus.location;          
-    destination = target.location;
+	Focus = none;
+	FocalPoint = pFocus.Location;
+	Destination = Target.Location;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -305,161 +405,177 @@ function R6PreMoveToward(actor target, actor pfocus, optional R6Pawn.eMovementPa
 function ResetStateProgress()
 {
 	m_iStateProgress = 0;
+	return;
 }
 
 //------------------------------------------------------------------
 // CanClimbLadders()                                       
 //------------------------------------------------------------------
-function bool CanClimbLadders( R6Ladder ladder )
+function bool CanClimbLadders(R6Ladder Ladder)
 {
+	// End:0x17
 	if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
-		return true;
+	{
+		return true;		
+	}
 	else
-		return R6Pawn(pawn).m_bAutoClimbLadders;
+	{
+		return R6Pawn(Pawn).m_bAutoClimbLadders;
+	}
+	return;
 }
-
-//------------------------------------------------------------------
-// CanClimbObject: look if the pawn can climb r6climbableObject
-//	
-//------------------------------------------------------------------
-/* // R6CLIMBABLEOBJECT
-function bool CanClimbObject()
-{
-	if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
-		return true;
-
-    return Super.CanClimbObject();
-} */
 
 //------------------------------------------------------------------
 // CanSeeGrenade()                                       
 //------------------------------------------------------------------
-function bool CanSeeGrenade(vector vGrenadeLocation)
+function bool CanSeeGrenade(Vector vGrenadeLocation)
 {
-	local vector vDir;
-	
-	vDir = vGrenadeLocation - pawn.location; 
-	vDir.z = 0;
-	if(VSize(vDir) < 100)
+	local Vector vDir;
+
+	vDir = __NFUN_216__(vGrenadeLocation, Pawn.Location);
+	vDir.Z = 0.0000000;
+	// End:0x3D
+	if(__NFUN_176__(__NFUN_225__(vDir), float(100)))
 	{
-		#ifdefDEBUG 	if(bShowLog) log(" the grenade is within 1m... don't bother checking..... assume this rainbow can see it...");	#endif
 		return true;
 	}
-
-	vDir = vGrenadeLocation - pawn.location; 
-	if(((normal(vDir) dot vector(pawn.rotation)) - pawn.peripheralVision) > 0)
+	vDir = __NFUN_216__(vGrenadeLocation, Pawn.Location);
+	// End:0xA4
+	if(__NFUN_177__(__NFUN_175__(__NFUN_219__(__NFUN_226__(vDir), Vector(Pawn.Rotation)), Pawn.PeripheralVision), float(0)))
 	{
-		if(FastTrace(pawn.location, vGrenadeLocation))
+		// End:0xA4
+		if(__NFUN_548__(Pawn.Location, vGrenadeLocation))
+		{
 			return true;
+		}
 	}
-	
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // FragGrenadeInProximity()                                       
 //------------------------------------------------------------------
-function FragGrenadeInProximity(vector vGrenadeLocation, FLOAT fTimeLeft, FLOAT fGrenadeDangerRadius)
+function FragGrenadeInProximity(Vector vGrenadeLocation, float fTimeLeft, float fGrenadeDangerRadius)
 {
-	// check is grenade is visible to this rainbow
-	if(m_pawn.m_bIsClimbingLadder || IsInState('RunAwayFromGrenade'))
-		return;
-
-	#ifdefDEBUG	if(bShowLog) log("FragGrenadeInProximity() ::  vGrenadeLocation="$vGrenadeLocation$" fTimeLeft="$fTimeLeft);	#endif
-	// first member to see/hear the grenade should inform the team manager so that all the members run 
-	if(CanSeeGrenade(vGrenadeLocation))
+	// End:0x21
+	if(__NFUN_132__(m_pawn.m_bIsClimbingLadder, __NFUN_281__('RunAwayFromGrenade')))
 	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" can see a grenade!!! run away!!! from location="$vGrenadeLocation);		#endif
+		return;
+	}
+	// End:0x66
+	if(__NFUN_130__(m_pawn.IsAlive(), CanSeeGrenade(vGrenadeLocation)))
+	{
 		m_TeamManager.GrenadeInProximity(m_pawn, vGrenadeLocation, fTimeLeft, fGrenadeDangerRadius);
 	}
+	return;
 }
 
 //------------------------------------------------------------------
 // ReactToFragGrenade()                                       
 //------------------------------------------------------------------
-function ReactToFragGrenade(vector vGrenadeLocation, FLOAT fTimeLeft, FLOAT fGrenadeDangerRadius)
+function ReactToFragGrenade(Vector vGrenadeLocation, float fTimeLeft, float fGrenadeDangerRadius)
 {
-	#ifdefDEBUG	if(bShowLog) log(pawn$" ReactToFragGrenade() was called ");		#endif
-
-	if(m_pawn.m_bIsClimbingLadder || pawn.physics == PHYS_Ladder || VSize(vGrenadeLocation - pawn.location) > fGrenadeDangerRadius)
+	// End:0x52
+	if(__NFUN_132__(__NFUN_132__(m_pawn.m_bIsClimbingLadder, __NFUN_154__(int(Pawn.Physics), int(11))), __NFUN_177__(__NFUN_225__(__NFUN_216__(vGrenadeLocation, Pawn.Location)), fGrenadeDangerRadius)))
 	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" no real threat, my current location is safe...");	#endif
-		return;		// current location is safe
+		return;
 	}
-
 	m_vGrenadeLocation = vGrenadeLocation;
 	m_fGrenadeDangerRadius = fGrenadeDangerRadius;
-
-	GotoState('RunAwayFromGrenade');
-	SetTimer(fTimeLeft, false);
+	__NFUN_113__('RunAwayFromGrenade');
+	__NFUN_280__(fTimeLeft, false);
+	return;
 }
 
 //------------------------------------------------------------------
 // PlaySoundAffectedByGrenade()                                       
 //------------------------------------------------------------------
-function PlaySoundAffectedByGrenade(R6Pawn.EGrenadeType eType)
+function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 {
-    switch(eType)
-    {
-        case GTYPE_Smoke:
-            if (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus)
-                m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, CRV_EntersSmoke);
-            else
-                m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, ROTV_EntersSmoke);
-            break;
-        case GTYPE_TearGas:
-            if (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus)
-                m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, CRV_EntersGas);
-            else
-            {
-                m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, ROTV_EntersGas);
-
-                if (m_TeamManager.m_bPlayerHasFocus || Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag))
-                {
-                    if (m_TeamManager.m_bFirstTimeInGas)
-                    {
-                        m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_GasThreat);
-                        m_TeamManager.m_bFirstTimeInGas = false;
-                        m_TeamManager.SetTimer(60, false);
-                    }
-                }
-            }
-            break;
-    }
+	switch(eType)
+	{
+		// End:0x6D
+		case 1:
+			// End:0x4B
+			if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+			{
+				m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 3);				
+			}
+			else
+			{
+				m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 19);
+			}
+			// End:0x167
+			break;
+		// End:0x164
+		case 2:
+			// End:0xB1
+			if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+			{
+				m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 4);				
+			}
+			else
+			{
+				m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 20);
+				// End:0x161
+				if(__NFUN_132__(m_TeamManager.m_bPlayerHasFocus, Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
+				{
+					// End:0x161
+					if(m_TeamManager.m_bFirstTimeInGas)
+					{
+						m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, 10);
+						m_TeamManager.m_bFirstTimeInGas = false;
+						m_TeamManager.__NFUN_280__(60.0000000, false);
+					}
+				}
+			}
+			// End:0x167
+			break;
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // AIAffectedByGrenade()                                       
 //------------------------------------------------------------------
-function AIAffectedByGrenade(Actor aGrenade, R6Pawn.EGrenadeType eType)
+function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 {
-//	#ifdefDEBUG	if(bShowLog) log(pawn$" AIAffectedByGrenade() from "$aGrenade$" pawn.m_bHaveGasMask="$m_pawn.m_bHaveGasMask);	#endif
-
-	if(eType == GTYPE_TearGas)
-    {
-		// make sure RainbowAI is not already playing Coughing animation
+	// End:0x94
+	if(__NFUN_154__(int(eType), int(2)))
+	{
+		// End:0x39
 		if(m_pawn.m_bPawnSpecificAnimInProgress)
-			m_fLastReactionToGas = Level.TimeSeconds;
+		{
+			m_fLastReactionToGas = Level.TimeSeconds;			
+		}
 		else
 		{
-			#ifdefDEBUG	if(bShowLog) log(" AIAffectedByGrenade() : eType == GTYPE_TearGas ... play coughing m_fLastReactionToGas="$m_fLastReactionToGas);	#endif
 			m_TeamManager.GasGrenadeInProximity(m_pawn);
-
-			if(m_fLastReactionToGas < Level.TimeSeconds - 2.0)
+			// End:0x91
+			if(__NFUN_176__(m_fLastReactionToGas, __NFUN_175__(Level.TimeSeconds, 2.0000000)))
 			{
 				m_fLastReactionToGas = Level.TimeSeconds;
-				m_pawn.SetNextPendingAction(PENDING_Coughing);			
+				m_pawn.SetNextPendingAction(1);
+			}
+		}		
+	}
+	else
+	{
+		// End:0xD7
+		if(__NFUN_154__(int(eType), int(3)))
+		{
+			// End:0xD7
+			if(__NFUN_130__(IsFacing(aGrenade), m_pawn.IsStationary()))
+			{
+				m_pawn.SetNextPendingAction(3);
 			}
 		}
-    }
-	else if(eType == GTYPE_FlashBang)
-	{
-		// todo : check who threw the grenade, need not react to our own flashbang
-		#ifdefDEBUG	if(bShowLog) log(" AIAffectedByGrenade() : eType == GTYPE_FlashBang : aGrenade.Instigator = "$aGrenade.Instigator);		#endif
-		// check if grenade came from this rainbow's team
-		if(IsFacing(aGrenade) && m_pawn.IsStationary()) 
-			m_pawn.SetNextPendingAction(PENDING_Blinded);
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -467,15 +583,30 @@ function AIAffectedByGrenade(Actor aGrenade, R6Pawn.EGrenadeType eType)
 //------------------------------------------------------------------
 function PlaySoundInflictedDamage(Pawn DeadPawn)
 {
-    switch(R6Pawn(DeadPawn).m_ePawnType)
-    {
-        case PAWN_Terrorist:
-            if (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus)
-                m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, CRV_TerroristDown);            
-            else if ((m_TeamManager.m_OtherTeamVoicesMgr != none) && (m_pawn.m_bIsSniping))
-				m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, ROTV_SniperTangoDown);			
+	switch(R6Pawn(DeadPawn).m_ePawnType)
+	{
+		// End:0xA3
+		case 2:
+			// End:0x59
+			if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+			{
+				m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 0);				
+			}
+			else
+			{
+				// End:0xA0
+				if(__NFUN_130__(__NFUN_119__(m_TeamManager.m_OtherTeamVoicesMgr, none), m_pawn.m_bIsSniping))
+				{
+					m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 2);
+				}
+			}
+			// End:0xA6
 			break;
-    }
+		// End:0xFFFF
+		default:
+			break;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -483,42 +614,67 @@ function PlaySoundInflictedDamage(Pawn DeadPawn)
 //------------------------------------------------------------------
 function PlaySoundActionCompleted(R6Pawn.eDeviceAnimToPlay eAnimToPlay)
 {
-    if (Level.NetMode == NM_Standalone)
-    {
-        if (!m_TeamManager.m_bLeaderIsAPlayer && !m_TeamManager.m_bPlayerHasFocus)
-        {
-            switch(eAnimToPlay)
-            {
-                case BA_Keypad:
-                    m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_SecurityDeactivated);
-                    break;
-                case BA_PlantDevice:
-                    m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_BugActivated);
-                    break;
-                case BA_Keyboard:
-                    m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_ComputerHacked);
-                    break;
-            }
-        }
-
-    }
-
-
-    if ((Level.NetMode != NM_Standalone) || m_TeamManager.m_bPlayerHasFocus)
-    {
-        switch(eAnimToPlay)
-        {
-            case BA_Keypad:
-                m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_SecurityDeactivated);
-                break;
-            case BA_PlantDevice:
-                m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_BugActivated);
-                break;
-            case BA_Keyboard:
-                m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_ComputerHacked);
-                break;
-        }
-    }
+	// End:0xC2
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	{
+		// End:0xC2
+		if(__NFUN_130__(__NFUN_129__(m_TeamManager.m_bLeaderIsAPlayer), __NFUN_129__(m_TeamManager.m_bPlayerHasFocus)))
+		{
+			switch(eAnimToPlay)
+			{
+				// End:0x71
+				case 2:
+					m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, 9);
+					// End:0xC2
+					break;
+				// End:0x98
+				case 3:
+					m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, 1);
+					// End:0xC2
+					break;
+				// End:0xBF
+				case 4:
+					m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, 3);
+					// End:0xC2
+					break;
+				// End:0xFFFF
+				default:
+					break;
+			}
+		}
+		else
+		{
+		}/* !MISMATCHING REMOVE, tried If got Type:Else Position:0x0C2! */
+		// End:0x16E
+		if(__NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), m_TeamManager.m_bPlayerHasFocus))
+		{
+			switch(eAnimToPlay)
+			{
+				// End:0x11D
+				case 2:
+					m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, 9);
+					// End:0x16E
+					break;
+				// End:0x144
+				case 3:
+					m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, 1);
+					// End:0x16E
+					break;
+				// End:0x16B
+				case 4:
+					m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, 3);
+					// End:0x16E
+					break;
+				// End:0xFFFF
+				default:
+					break;
+			}
+		}
+		else
+		{
+			return;
+		}
+	}/* !MISMATCHING REMOVE, tried Else got Type:If Position:0x000! */
 }
 
 //------------------------------------------------------------------
@@ -526,18 +682,28 @@ function PlaySoundActionCompleted(R6Pawn.eDeviceAnimToPlay eAnimToPlay)
 //------------------------------------------------------------------
 function PlaySoundCurrentAction(Pawn.ERainbowTeamVoices eVoices)
 {
-    if (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus)
-    {
-        if (m_TeamManager.m_bPlayerHasFocus || Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag))
-        {
-            m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, eVoices);
-        }
-        else if (eVoices == RTV_HostageSecured)
-            m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, RMV_HostageSecured);
-    }
-    else
-        m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, eVoices);
-
+	// End:0xBA
+	if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+	{
+		// End:0x88
+		if(__NFUN_132__(m_TeamManager.m_bPlayerHasFocus, Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
+		{
+			m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, eVoices);			
+		}
+		else
+		{
+			// End:0xB7
+			if(__NFUN_154__(int(eVoices), int(5)))
+			{
+				m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 23);
+			}
+		}		
+	}
+	else
+	{
+		m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, eVoices);
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -545,246 +711,94 @@ function PlaySoundCurrentAction(Pawn.ERainbowTeamVoices eVoices)
 //------------------------------------------------------------------
 function PlaySoundDamage(Pawn instigatedBy)
 {
-    m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, CRV_TakeWound);
-
-    if (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus)
-    {
-        switch(m_pawn.m_eHealth)
-        {
-            case HEALTH_Incapacitated:
-            case HEALTH_Dead:
-                if (m_TeamManager.m_iMemberCount > 1)
-                {
-                    m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, CRV_GoesDown);
-                    if (m_TeamManager.m_bLeaderIsAPlayer)
-                        m_TeamManager.m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamManager.m_Team[0], RPV_MemberDown);
-                    else
-                        m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_TeamManager.m_Team[0], RMV_MemberDown);
-
-                }
-                break;
-            case HEALTH_Wounded: 
-                if (instigatedBy != none)
-                {
-                    switch(R6Pawn(instigatedBy).m_ePawnType) 
-                    {
-                        case PAWN_Rainbow:
-                            m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, RMV_RainbowHitRainbow);
-                            break;
-                        case PAWN_Terrorist:
-                            m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, RMV_TakingFire);
-                            break;
-                    }
-                }
-                break;
-        }
-    }
-    else
-    {
-        switch(m_pawn.m_eHealth)
-        {
-            case HEALTH_Incapacitated:
-            case HEALTH_Dead:
-                if ((m_TeamManager.m_OtherTeamVoicesMgr != none) && (m_TeamManager.m_iMemberCount > 0))
-                    m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamManager.m_Team[0], ROTV_MemberDown);
-                break;
-            case HEALTH_Wounded: 
-                if ((instigatedBy != none) && (R6Pawn(instigatedBy).m_ePawnType == PAWN_Rainbow))
-                    m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, ROTV_RainbowHitRainbow);
-                break;
-        }
-    }
-}
-
-//==========================================================
-//            -- state RUNAWAYFROMGRENADE --                
-//==========================================================
-state RunAwayFromGrenade
-{
-	function BeginState()	
-	{	
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has entered state RunAwayFromGrenade...");		#endif
-		m_bIgnoreBackupBump = true;
-	}
-
-	function EndState()		
+	m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 1);
+	// End:0x16B
+	if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
 	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has exited state RunAwayFromGrenade...");	#endif
-		m_TeamManager.m_bGrenadeInProximity = false;
-		SetTimer(0, false);
-		StopMoving();
-		m_bIgnoreBackupBump = false;
-	}
-
-	event Timer()
-	{
-		#ifdefDEBUG	if(bShowLog) log("  Timer() was called.... grenade has exploded, threat is over...");	#endif
-		m_TeamManager.GrenadeThreatIsOver();
-	}
-
-	function vector SafeLocation()
-	{
-		local vector vDir;
-		local vector vLocation;
-
-		vDir = normal(pawn.location - m_vGrenadeLocation);
-		vLocation = m_vGrenadeLocation + (m_fGrenadeDangerRadius+600)*vDir; 
-		vLocation.z = pawn.location.z;
-		if(PointReachable(vLocation))
-			return vLocation;
-		
-		vLocation = m_vGrenadeLocation - (m_fGrenadeDangerRadius+600)*vDir;
-		vLocation.z = pawn.location.z;
-		if(PointReachable(vLocation))
-			return vLocation;
-
-		// find a path away from grenade
-		return vect(0,0,0);
-	}
-
-Begin:
-	m_TeamManager.SetTeamState(TS_Moving);
-
-	// try to run directly away from the grenade
-	m_vTargetPosition = SafeLocation();
-	EnsureRainbowIsArmed();
-
-	if(m_vTargetPosition != vect(0,0,0))
-		goto('RunToDirectly');
-
-FindPathAway:
-	// it is not possible to find a direct path away...	
-	moveTarget = FindSafeSpot();   
-	#ifdefDEBUG	if(bShowLog) log(pawn$" cannot find a direct safe location to move to... moveTarget="$moveTarget);	#endif
-	if(moveTarget != none)
-	{
-		// handle doors ... ( no room entry )
-		if(NeedToOpenDoor(moveTarget))
+		switch(m_pawn.m_eHealth)
 		{
-			m_pawn.PlayDoorAnim(m_pawn.m_Door.m_RotatingDoor);
-			Sleep(0.5);
-			m_pawn.ServerPerformDoorAction(m_pawn.m_Door.m_RotatingDoor, m_pawn.m_Door.m_RotatingDoor.eDoorCircumstantialAction.CA_Open);			
-		}
-		R6PreMoveToward(moveTarget, moveTarget, PACE_Run);
-		MoveToward(moveTarget);	
-		if(m_eMoveToResult == eMoveTo_failed)
-			Sleep(0.5);
-		
-		if(VSize(m_vGrenadeLocation - pawn.location) > (m_fGrenadeDangerRadius+300))
-			Goto('Wait');
-		
-		Goto('FindPathAway');
-	}
-	Goto('Wait');
-
-RunToDirectly:
-	#ifdefDEBUG	if(bShowLog) log(pawn$" will run away to location "$m_vTargetPosition);		#endif
-	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Run);
-	MoveTo(m_vTargetPosition);
-	
-Wait:
-	StopMoving();
-	m_TeamManager.SetTeamState(TS_Holding);
-	#ifdefDEBUG	if(bShowLog) log(pawn$" ran away from grenade.... pawn.location="$pawn.location$" m_vGrenadeLocation="$m_vGrenadeLocation);		#endif
-	Sleep(2);
-	Goto('Wait');
-}
-
-//==========================================================
-//              -- state BUMPBACKUP --		                
-//==========================================================
-state BumpBackUp
-{	
-	event bool NotifyBump(Actor other)
-	{  
-		local R6Pawn thisPawn;
-
-		thisPawn = R6Pawn(other);
-		if(thisPawn == none)
-			return false;
-			
-		if(thisPawn.m_iId <= R6Pawn(m_BumpedBy).m_iId)
-		{			
-			m_BumpedBy = thisPawn;
-			GotoState('BumpBackUp');
-			return true;
-		}
-		return false;
-	}
-	
-	function vector GetTargetLocation(bool bRight, optional INT iTry)
-	{
-		local rotator	rOffset;
-		local R6Pawn	bumpedBy;
-
-		bumpedBy = R6Pawn(m_BumpedBy);
-		if(bumpedBy.m_bIsClimbingLadder && ((bumpedBy.location.z - pawn.location.z) > 100))
-			return(pawn.location - c_iDistanceBumpBackUp*bumpedBy.onLadder.LookDir);			
-
-		switch(iTry)
-		{
-			case 0:		rOffset = rot(0,16384,0);	break;
-			case 1:		rOffset = rot(0,8192,0);	break;
-			case 2:		rOffset = rot(0,4096,0);	break;
-			case 3:		rOffset = rot(0,0,0);		break;
-			case 4:		rOffset = rot(0,-4096,0);	break;
-			case 5:		rOffset = rot(0,-8192,0);	break;
-			case 6:		rOffset = rot(0,-16384,0);	break;
-		}
-		
-		if(bRight)
-			return pawn.location + (c_iDistanceBumpBackUp)*vector(rotator(m_vBumpedByVelocity) + rOffset);
+			// End:0x51
+			case 2:
+			// End:0xEC
+			case 3:
+				// End:0xE9
+				if(__NFUN_151__(m_TeamManager.m_iMemberCount, 1))
+				{
+					m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 2);
+					// End:0xBF
+					if(m_TeamManager.m_bLeaderIsAPlayer)
+					{
+						m_TeamManager.m_PlayerVoicesMgr.PlayRainbowPlayerVoices(m_TeamManager.m_Team[0], 42);						
+					}
+					else
+					{
+						m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_TeamManager.m_Team[0], 13);
+					}
+				}
+				// End:0x168
+				break;
+			// End:0x165
+			case 1:
+				// End:0x162
+				if(__NFUN_119__(instigatedBy, none))
+				{
+					switch(R6Pawn(instigatedBy).m_ePawnType)
+					{
+						// End:0x138
+						case 1:
+							m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 24);
+							// End:0x162
+							break;
+						// End:0x15F
+						case 2:
+							m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 17);
+							// End:0x162
+							break;
+						// End:0xFFFF
+						default:
+							break;
+					}
+				}
+				else
+				{
+					// End:0x168
+					break;/* !MISMATCHING REMOVE, tried Case got Type:Else Position:0x162! */
+				// End:0xFFFF
+				default:
+					break;
+			}/* !MISMATCHING REMOVE, tried Switch got Type:Case Position:0x0EC! */			
+		}/* !MISMATCHING REMOVE, tried If got Type:Switch Position:0x03C! */
 		else
-			return pawn.location + (c_iDistanceBumpBackUp)*vector(rotator(m_vBumpedByVelocity) - rOffset);
-	}
-
-    function bool GetReacheablePoint( OUT vector vTarget, bool bNoFail )
-    {
-		local actor hitActor;
-		local vector vHitLocation, vHitNormal;
-		local vector vExtent;
-		local bool	bMoveRight;
-		local INT i;
-
-		bMoveRight = MoveRight();
-		vTarget = GetTargetLocation(bMoveRight);
-	
-		vExtent.x = pawn.collisionRadius;
-		vExtent.y = vExtent.x;
-		vExtent.z = pawn.collisionHeight;
-		hitActor = R6Trace(vHitLocation, vHitNormal, vTarget, pawn.location, TF_TraceActors, vExtent);
-		
-		if(hitActor != none)
-			vTarget = vHitLocation + (c_iDistanceBumpBackUp)*vector(rotator(m_vBumpedByVelocity));
-
-		// check to make sure the location is not floating off a ledge
-		while(R6Trace(vHitLocation, vHitNormal, vTarget - vect(0,0,200), vTarget, TF_TraceActors) == none && i < 6)
 		{
-			i++;
-			// don't back up off ledge, pick another direction...
-			vTarget = GetTargetLocation(bMoveRight, i);
+			switch(m_pawn.m_eHealth)
+			{
+				// End:0x180
+				case 2:
+				// End:0x1DC
+				case 3:
+					// End:0x1D9
+					if(__NFUN_130__(__NFUN_119__(m_TeamManager.m_OtherTeamVoicesMgr, none), __NFUN_151__(m_TeamManager.m_iMemberCount, 0)))
+					{
+						m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamManager.m_Team[0], 3);
+					}
+					// End:0x231
+					break;
+				// End:0x22E
+				case 1:
+					// End:0x22B
+					if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_154__(int(R6Pawn(instigatedBy).m_ePawnType), int(1))))
+					{
+						m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 4);
+					}
+					// End:0x231
+					break;
+				// End:0xFFFF
+				default:
+					break;
+			}
 		}
-
-		return true;
-	}
-}
-
-//==========================================================
-//              -- state WAITFORPACEMEMBER --               
-//==========================================================
-state WaitForPaceMember
-{
-#ifdefDEBUG
-	function BeginState()	{	if(bShowLog) log(pawn$" has entered state WaitForPaceMember...");	}
-	function EndState()		{	if(bShowLog) log(pawn$" has exited state WaitForPaceMember...");	}
-#endif
-
-Begin:
-	Sleep(1);
-	if(abs(m_PaceMember.location.z - pawn.location.z) < 30)
-		GotoState('FollowLeader');
-	else
-		Goto('Begin');
+		return;
+	}/* !MISMATCHING REMOVE, tried Else got Type:If Position:0x016! */
 }
 
 //------------------------------------------------------------------
@@ -792,26 +806,36 @@ Begin:
 //------------------------------------------------------------------
 function bool CanBeSeen(Pawn seen)
 {
-	local vector vSightDir;
+	local Vector vSightDir;
 
-	vSightDir = normal(pawn.location - seen.location);
-	if((vector(seen.GetViewRotation()) dot vSightDir) < pawn.peripheralVision)
+	vSightDir = __NFUN_226__(__NFUN_216__(Pawn.Location, seen.Location));
+	// End:0x53
+	if(__NFUN_176__(__NFUN_219__(Vector(seen.GetViewRotation()), vSightDir), Pawn.PeripheralVision))
+	{
 		return false;
-	
+	}
 	return true;
+	return;
 }
 
 //------------------------------------------------------------------
 // SetEnemy()                                         
 //------------------------------------------------------------------
-function SetEnemy( Pawn newEnemy )
+function SetEnemy(Pawn newEnemy)
 {
-	if(!m_pawn.m_bIsSniping)
+	// End:0x23
+	if(__NFUN_129__(m_pawn.m_bIsSniping))
+	{
 		m_TeamManager.RainbowIsEngagingEnemy();
-    Enemy = newEnemy;
-    LastSeenTime = Level.TimeSeconds;
-    if(Enemy!=none)
+	}
+	Enemy = newEnemy;
+	LastSeenTime = Level.TimeSeconds;
+	// End:0x61
+	if(__NFUN_119__(Enemy, none))
+	{
 		LastSeenPos = Enemy.Location;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -819,14 +843,21 @@ function SetEnemy( Pawn newEnemy )
 //------------------------------------------------------------------
 function PlayVoiceTerroristSpotted(R6Terrorist aTerro)
 {
-	if(!aTerro.m_bEnteringView && (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
+	// End:0x97
+	if(__NFUN_130__(__NFUN_129__(aTerro.m_bEnteringView), __NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus)))
 	{
+		// End:0x67
 		if(m_bIsMovingBackwards)
-			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, RMV_ContactRear);
+		{
+			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 1);			
+		}
 		else
-			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, RMV_Contact);
+		{
+			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 0);
+		}
 		aTerro.m_bEnteringView = true;
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -836,77 +867,94 @@ event SeePlayer(Pawn seen)
 {
 	local R6Pawn aPawn;
 
-    aPawn = R6Pawn(seen);	
-	if(m_pawn.IsEnemy( seen ) && (aPawn.engineWeapon != none))
-	{		
-		if(m_TeamManager == none)
-			return;
-
-		// do not fire at a surrendered/incapacitated/dead terrorist
-		if(aPawn.m_bIsKneeling || !aPawn.IsAlive())
+	aPawn = R6Pawn(seen);
+	// End:0x21E
+	if(__NFUN_130__(m_pawn.IsEnemy(seen), __NFUN_119__(aPawn.EngineWeapon, none)))
+	{
+		// End:0x4A
+		if(__NFUN_114__(m_TeamManager, none))
 		{
-			if(!R6Terrorist(aPawn).m_bIsUnderArrest)
-				m_TeamManager.TeamSpottedSurrenderedTerrorist(aPawn);
 			return;
 		}
-
-        if(aPawn.m_bDontKill)
-            return;
-				
-		if(m_TeamManager.m_eMovementMode == MOVE_Recon)
+		// End:0xA1
+		if(__NFUN_132__(aPawn.m_bIsKneeling, __NFUN_129__(aPawn.IsAlive())))
 		{
-			// Rules of Engagement : RECON 
-			if(!CanBeSeen(seen))	
+			// End:0x9F
+			if(__NFUN_129__(R6Terrorist(aPawn).m_bIsUnderArrest))
+			{
+				m_TeamManager.TeamSpottedSurrenderedTerrorist(aPawn);
+			}
+			return;
+		}
+		// End:0xB5
+		if(aPawn.m_bDontKill)
+		{
+			return;
+		}
+		// End:0x104
+		if(__NFUN_154__(int(m_TeamManager.m_eMovementMode), int(2)))
+		{
+			// End:0xF0
+			if(__NFUN_129__(CanBeSeen(seen)))
 			{
 				PlayVoiceTerroristSpotted(R6Terrorist(aPawn));
 				return;
 			}
-
-			// terrorist can see us, change Rules of Engagement to ASSAULT
-			#ifdefDEBUG	if(bShowLog) log("  *****  "$pawn$" can seen by terrorist:"$seen$" change ROE from RECON to ASSAULT!");		#endif
-			m_TeamManager.m_eMovementMode = MOVE_Assault;			
+			m_TeamManager.m_eMovementMode = 0;			
 		}
-		else if(m_TeamManager.m_eMovementMode == MOVE_Infiltrate)
+		else
 		{
-			// Rules of Engagement : INFILTRATE, fire at will with silenced weapons
-			// check if terrorist has spotted us
-			if(CanBeSeen(seen))
+			// End:0x16E
+			if(__NFUN_154__(int(m_TeamManager.m_eMovementMode), int(1)))
 			{
-				// terrorist can see us, change Rules of Engagement to ASSAULT
-				#ifdefDEBUG	if(bShowLog) log("  *****  "$pawn$" can seen by terrorist:"$seen$" change ROE from INFILTRATE to ASSAULT!");	#endif
-				m_TeamManager.m_eMovementMode = MOVE_Assault;	
-			}
-			else if(!Pawn.EngineWeapon.m_bIsSilenced)
-			{
-				PlayVoiceTerroristSpotted(R6Terrorist(aPawn));			
-				return;
+				// End:0x13F
+				if(CanBeSeen(seen))
+				{
+					m_TeamManager.m_eMovementMode = 0;					
+				}
+				else
+				{
+					// End:0x16E
+					if(__NFUN_129__(Pawn.EngineWeapon.m_bIsSilenced))
+					{
+						PlayVoiceTerroristSpotted(R6Terrorist(aPawn));
+						return;
+					}
+				}
 			}
 		}
-		
-		// do not engage if already engaging another terrorist
-		if(enemy != none)
+		// End:0x17B
+		if(__NFUN_119__(Enemy, none))
+		{
 			return;
-
+		}
+		// End:0x186
 		if(m_bWeaponsDry)
-			return;
-
-		if(AClearShotIsAvailable(seen, m_pawn.GetFiringStartPoint()) && (Pawn.EngineWeapon.m_eWeaponType != WT_Grenade))
 		{
-			#ifdefDEBUG	if(bShowLog) log(pawn$" : SeePlayer() enemy="$enemy$" new enemy="$seen$" has been spotted...m_bIndividualAttacks="$m_bIndividualAttacks);	#endif
-			if(!m_bIndividualAttacks || m_TeamManager.EngageEnemyIfNotAlreadyEngaged(m_pawn, aPawn))
-			{
-				m_pawn.m_bEngaged = true; 
-				SetEnemy(seen);
-				target = enemy;	
-				Enable('EnemyNotVisible');
-			}
+			return;
 		}
+		// End:0x21B
+		if(__NFUN_130__(__NFUN_2222__(seen, m_pawn.GetFiringStartPoint()), __NFUN_155__(int(Pawn.EngineWeapon.m_eWeaponType), int(6))))
+		{
+			// End:0x21B
+			if(__NFUN_132__(__NFUN_129__(m_bIndividualAttacks), m_TeamManager.EngageEnemyIfNotAlreadyEngaged(m_pawn, aPawn)))
+			{
+				m_pawn.m_bEngaged = true;
+				SetEnemy(seen);
+				Target = Enemy;
+				__NFUN_117__('EnemyNotVisible');
+			}
+		}		
 	}
 	else
 	{
-		if((aPawn.m_ePawnType == PAWN_Hostage) && aPawn.IsAlive() && !R6Hostage(aPawn).m_bExtracted && (R6Hostage(aPawn).m_escortedByRainbow == none))
+		// End:0x295
+		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(aPawn.m_ePawnType), int(3)), aPawn.IsAlive()), __NFUN_129__(R6Hostage(aPawn).m_bExtracted)), __NFUN_114__(R6Hostage(aPawn).m_escortedByRainbow, none)))
+		{
 			m_TeamManager.m_HostageToRescue = aPawn;
+		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -916,49 +964,52 @@ function bool IsANeutralPawnNoise(Actor aNoiseMaker)
 {
 	local Pawn aPawn;
 
-    aPawn = Pawn( aNoiseMaker );
-
-    if ( aPawn == none )
-        aPawn = aNoiseMaker.Instigator;
-
-    if ( aPawn == none )
-    {
-        return false;
-    }
-
-    return m_pawn.IsNeutral( aPawn );
+	aPawn = Pawn(aNoiseMaker);
+	// End:0x2F
+	if(__NFUN_114__(aPawn, none))
+	{
+		aPawn = aNoiseMaker.Instigator;
+	}
+	// End:0x3C
+	if(__NFUN_114__(aPawn, none))
+	{
+		return false;
+	}
+	return m_pawn.IsNeutral(aPawn);
+	return;
 }
 
 //------------------------------------------------------------------
 // HearNoise()                                             
 //------------------------------------------------------------------
-event HearNoise( float Loudness, Actor aNoiseMaker, ENoiseType eType )
+event HearNoise(float Loudness, Actor aNoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
 {
-	if(m_TeamManager==none)
-		return;
-	
-//rb	if(bShowLog) log(pawn$" heard sound from "$aNoiseMaker.name$" of type "$eType$" and loudness "$Loudness$" aNoiseMaker.Instigator="$aNoiseMaker.Instigator);
-
-	// ignore sounds from neutral pawn
-	if( IsANeutralPawnNoise(aNoiseMaker))
-		return;
-
-	// rainbow react to noises that originate from terrorists
-	m_TeamManager.TeamHearNoise(aNoiseMaker);
-
-	if(m_TeamManager.m_eMovementMode == MOVE_Assault)
-		return; 
-
-	// NOISE_Investigate
-    // if sound is from a bullet, change rules of engagement
-    if((eType==NOISE_Threat) || (eType==NOISE_Grenade))
+	// End:0x0D
+	if(__NFUN_114__(m_TeamManager, none))
 	{
-		if(R6Pawn(aNoiseMaker.owner).m_ePawnType != PAWN_Rainbow)
+		return;
+	}
+	// End:0x1D
+	if(IsANeutralPawnNoise(aNoiseMaker))
+	{
+		return;
+	}
+	m_TeamManager.TeamHearNoise(aNoiseMaker);
+	// End:0x4C
+	if(__NFUN_154__(int(m_TeamManager.m_eMovementMode), int(0)))
+	{
+		return;
+	}
+	// End:0xA6
+	if(__NFUN_132__(__NFUN_154__(int(eType), int(2)), __NFUN_154__(int(eType), int(3))))
+	{
+		// End:0xA6
+		if(__NFUN_155__(int(R6Pawn(aNoiseMaker.Owner).m_ePawnType), int(1)))
 		{
-			#ifdefDEBUG	if(bShowLog) log(pawn$" heard bullet/grenade, change ROE to ASSAULT!! aNoiseMaker="$aNoiseMaker$" aNoiseMaker.owner="$aNoiseMaker.owner);	#endif
-			m_TeamManager.m_eMovementMode = MOVE_Assault;
+			m_TeamManager.m_eMovementMode = 0;
 		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -966,13 +1017,15 @@ event HearNoise( float Loudness, Actor aNoiseMaker, ENoiseType eType )
 //------------------------------------------------------------------
 event EnemyNotVisible()
 {
-	#ifdefDEBUG if(bShowLog) log(pawn$" EnemyNotVisible() !!!! enemy="$enemy$" enemy.IsAlive()="$enemy.IsAlive());	#endif
-	if(Level.TimeSeconds - LastSeenTime < 0.5)
+	// End:0x21
+	if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, LastSeenTime), 0.5000000))
+	{
 		return;
-
+	}
 	StopFiring();
 	EndAttack();
-    Disable('EnemyNotVisible');
+	__NFUN_118__('EnemyNotVisible');
+	return;
 }
 
 //------------------------------------------------------------------
@@ -980,18 +1033,19 @@ event EnemyNotVisible()
 //------------------------------------------------------------------
 function IsBeingAttacked(Pawn attacker)
 {
-	if( m_pawn.IsEnemy(attacker) )
-	{			
-		// turn towards this enemy if not already engaging another enemy
-		if(enemy == none)
+	// End:0x76
+	if(m_pawn.IsEnemy(attacker))
+	{
+		// End:0x76
+		if(__NFUN_114__(Enemy, none))
 		{
-			#ifdefDEBUG	if(bShowlog) log(pawn$" IN DANGER!!!!!   has been wounded by enemy: "$attacker$"  will try to turn to face them...");	#endif
 			m_pawn.ResetBoneRotation();
-			pawn.desiredRotation = rotator(attacker.location - pawn.location);
-			focus = attacker;
-			enemy = attacker;
+			Pawn.DesiredRotation = Rotator(__NFUN_216__(attacker.Location, Pawn.Location));
+			Focus = attacker;
+			Enemy = attacker;
 		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -999,13 +1053,18 @@ function IsBeingAttacked(Pawn attacker)
 //------------------------------------------------------------------
 function bool EnemyIsAThreat()
 {
-    if(enemy == none)
-        return false;
-
-    if(R6Pawn(enemy).m_bIsKneeling || !R6Pawn(enemy).IsAlive())
-        return false;
-  
+	// End:0x0D
+	if(__NFUN_114__(Enemy, none))
+	{
+		return false;
+	}
+	// End:0x41
+	if(__NFUN_132__(R6Pawn(Enemy).m_bIsKneeling, __NFUN_129__(R6Pawn(Enemy).IsAlive())))
+	{
+		return false;
+	}
 	return true;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1013,51 +1072,63 @@ function bool EnemyIsAThreat()
 //------------------------------------------------------------------
 function SetGunDirection(Actor aTarget)
 {
-    local rotator rDirection;
-    local vector  vDirection;
-    local Coords  cTarget;
-    local vector  vTarget;
+	local Rotator rDirection;
+	local Vector vDirection;
+	local Coords cTarget;
+	local Vector vTarget;
 
-    if(aTarget != none)
-    {
-		// target can be set to self/controller for throwing grenades
-		if(aTarget == self) 	
-			vTarget = aTarget.location;
-        else if(aTarget == enemy)
-        {
-			vTarget = LastSeenPos;
-			m_bAimingWeaponAtEnemy = true;
-		}
-        else
-        {
-            cTarget = aTarget.GetBoneCoords('R6 Spine');
-            vTarget = cTarget.Origin;
-        }
-
-		if(aTarget == self)
-			rDirection = aTarget.rotation;
-        else
+	// End:0x174
+	if(__NFUN_119__(aTarget, none))
+	{
+		// End:0x2D
+		if(__NFUN_114__(aTarget, self))
 		{
-			// Find the pitch between the gun and the target
-			vDirection = vTarget - m_pawn.GetFiringStartPoint();
-			rDirection = rotator(vDirection);
+			vTarget = aTarget.Location;			
 		}
-
-        m_pawn.m_u8DesiredPitch = (rDirection.Pitch&0xFFFF)/256;
-		// only set the desiredYaw if this is not 
-		if(aTarget == enemy)
-			m_pawn.m_u8DesiredYaw = ((rDirection.Yaw - pawn.rotation.yaw)&0xFFFF)/256;
 		else
+		{
+			// End:0x52
+			if(__NFUN_114__(aTarget, Enemy))
+			{
+				vTarget = LastSeenPos;
+				m_bAimingWeaponAtEnemy = true;				
+			}
+			else
+			{
+				cTarget = aTarget.GetBoneCoords('R6 Spine');
+				vTarget = cTarget.Origin;
+			}
+		}
+		// End:0x9E
+		if(__NFUN_114__(aTarget, self))
+		{
+			rDirection = aTarget.Rotation;			
+		}
+		else
+		{
+			vDirection = __NFUN_216__(vTarget, m_pawn.GetFiringStartPoint());
+			rDirection = Rotator(vDirection);
+		}
+		m_pawn.m_u8DesiredPitch = byte(__NFUN_145__(int(byte(__NFUN_156__(rDirection.Pitch, 65535))), 256));
+		// End:0x14C
+		if(__NFUN_114__(aTarget, Enemy))
+		{
+			m_pawn.m_u8DesiredYaw = byte(__NFUN_145__(int(byte(__NFUN_156__(int(byte(__NFUN_147__(rDirection.Yaw, Pawn.Rotation.Yaw))), 65535))), 256));			
+		}
+		else
+		{
 			m_pawn.m_u8DesiredYaw = 0;
-        m_pawn.m_rFiringRotation = rDirection;
-    }
-    else
-    {		
+		}
+		m_pawn.m_rFiringRotation = rDirection;		
+	}
+	else
+	{
 		m_bAimingWeaponAtEnemy = false;
-        m_pawn.m_u8DesiredPitch = 0;
+		m_pawn.m_u8DesiredPitch = 0;
 		m_pawn.m_u8DesiredYaw = 0;
-        m_pawn.m_rFiringRotation = m_pawn.Rotation;
-    }
+		m_pawn.m_rFiringRotation = m_pawn.Rotation;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1065,16 +1136,20 @@ function SetGunDirection(Actor aTarget)
 //------------------------------------------------------------------
 function EndAttack()
 {
-	#ifdefDEBUG	if(bShowLog) logX(" EndAttack() was called....enemy="$enemy);	#endif
-    m_pawn.m_bEngaged = false; // for the heartbeat
-    m_TeamManager.DisEngageEnemy(pawn, enemy);
-    enemy = none;
-	target = none;
-	if(IsMoving(pawn))
+	m_pawn.m_bEngaged = false;
+	m_TeamManager.DisEngageEnemy(Pawn, Enemy);
+	Enemy = none;
+	Target = none;
+	// End:0x5C
+	if(IsMoving(Pawn))
 	{
-		if(moveTarget != none)
-			focus = moveTarget;
+		// End:0x5C
+		if(__NFUN_119__(MoveTarget, none))
+		{
+			Focus = MoveTarget;
+		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1082,14 +1157,19 @@ function EndAttack()
 //------------------------------------------------------------------
 function StartFiring()
 {
-    if(pawn.EngineWeapon != none)
-    {            
- 	    if(Enemy != none)
+	// End:0x5C
+	if(__NFUN_119__(Pawn.EngineWeapon, none))
+	{
+		// End:0x2A
+		if(__NFUN_119__(Enemy, none))
+		{
 			Target = Enemy;
-        SetRotation(pawn.rotation);
-        bFire = 1;
-        pawn.EngineWeapon.GotoState('NormalFire');
-    }
+		}
+		__NFUN_299__(Pawn.Rotation);
+		bFire = 1;
+		Pawn.EngineWeapon.__NFUN_113__('NormalFire');
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1097,7 +1177,8 @@ function StartFiring()
 //------------------------------------------------------------------
 function StopFiring()
 {
-    bFire = 0;  
+	bFire = 0;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1105,25 +1186,28 @@ function StopFiring()
 //------------------------------------------------------------------
 function bool PreEntryRoomIsAcceptablyLarge()
 {
-	if(m_TeamManager.m_eMovementMode == MOVE_Recon)
-		return false;
-
-	if(m_TeamManager.m_Door == none)
+	// End:0x1B
+	if(__NFUN_154__(int(m_TeamManager.m_eMovementMode), int(2)))
 	{
-		#ifdefDEBUG	if(bShowLog) log("  PROBLEM : PreEntryRoomIsAcceptablyLarge() LAST RESORT!! m_pawn.m_Door="$m_pawn.m_Door);		#endif
+		return false;
+	}
+	// End:0x4C
+	if(__NFUN_114__(m_TeamManager.m_Door, none))
+	{
 		m_TeamManager.m_Door = m_pawn.m_Door;
 	}
-	
-	if((m_TeamManager.m_Door == none) || (m_TeamManager.m_Door.m_CorrespondingDoor == none))
+	// End:0x81
+	if(__NFUN_132__(__NFUN_114__(m_TeamManager.m_Door, none), __NFUN_114__(m_TeamManager.m_Door.m_CorrespondingDoor, none)))
 	{
-		#ifdefDEBUG	if(bShowLog) log(" PROBLEM : PreEntryRoomIsAcceptablyLarge() m_TeamManager.m_Door="$m_TeamManager.m_Door);		#endif
 		return false;
 	}
-
-	if(m_TeamManager.m_Door.m_CorrespondingDoor.m_eRoomLayout == ROOM_None)
+	// End:0xAE
+	if(__NFUN_154__(int(m_TeamManager.m_Door.m_CorrespondingDoor.m_eRoomLayout), int(3)))
+	{
 		return false;
-
+	}
 	return true;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1131,56 +1215,67 @@ function bool PreEntryRoomIsAcceptablyLarge()
 //------------------------------------------------------------------
 function bool PostEntryRoomIsAcceptablyLarge()
 {
-	if(m_TeamManager.m_eMovementMode == MOVE_Recon)
-		return false;
-
-	if(m_TeamManager.m_Door == none)
+	// End:0x1B
+	if(__NFUN_154__(int(m_TeamManager.m_eMovementMode), int(2)))
 	{
-		#ifdefDEBUG	if(bShowLog) log("  PROBLEM : PostEntryRoomIsAcceptablyLarge() LAST RESORT!! m_pawn.m_Door="$m_pawn.m_Door);	#endif
+		return false;
+	}
+	// End:0x4C
+	if(__NFUN_114__(m_TeamManager.m_Door, none))
+	{
 		m_TeamManager.m_Door = m_pawn.m_Door;
 	}
-
-	if(m_TeamManager.m_Door == none)
+	// End:0x62
+	if(__NFUN_114__(m_TeamManager.m_Door, none))
 	{
-		#ifdefDEBUG	if(bShowLog) log(" PROBLEM : PostEntryRoomIsAcceptablyLarge() m_TeamManager.m_Door==none");		#endif
 		return false;
 	}
-
-	if(m_TeamManager.m_Door.m_eRoomLayout == ROOM_None)
+	// End:0x86
+	if(__NFUN_154__(int(m_TeamManager.m_Door.m_eRoomLayout), int(3)))
+	{
 		return false;
-
+	}
 	return true;
+	return;
 }
 
 //------------------------------------------------------------------
 // GetLeadershipReactionTime()                                         
 //------------------------------------------------------------------
-function FLOAT GetLeadershipReactionTime()
+function float GetLeadershipReactionTime()
 {
-	local FLOAT fDelay;
-	
-	fDelay = 2.f - m_pawn.GetSkill(SKILL_Leadership)*2.f;
-	fDelay = FClamp(fDelay, 0f, 2.0f);
-	#ifdefDEBUG	if(bShowLog) log(pawn$" : GetLeadershipReactionTime() leadershipskill="$m_pawn.GetSkill(SKILL_Leadership)$" reaction time="$fDelay);	#endif
+	local float fDelay;
+
+	fDelay = __NFUN_175__(2.0000000, __NFUN_171__(m_pawn.GetSkill(6), 2.0000000));
+	fDelay = __NFUN_246__(fDelay, 0.0000000, 2.0000000);
 	return fDelay;
+	return;
 }
 
 //------------------------------------------------------------------
 // OnRightSideOfDoor()                                         
 //------------------------------------------------------------------
-function bool OnRightSideOfDoor(actor aTarget)
+function bool OnRightSideOfDoor(Actor aTarget)
 {
-	local vector vDir, vResult;
+	local Vector vDir, vResult;
 
-	if(aTarget == none)
+	// End:0x0D
+	if(__NFUN_114__(aTarget, none))
+	{
 		return false;
-
-	vDir = normal(pawn.location - aTarget.location);
-	vResult = vDir cross vector(aTarget.rotation);
-	if(vResult.z < 0)
-		return true;
+	}
+	vDir = __NFUN_226__(__NFUN_216__(Pawn.Location, aTarget.Location));
+	vResult = __NFUN_220__(vDir, Vector(aTarget.Rotation));
+	// End:0x67
+	if(__NFUN_176__(vResult.Z, float(0)))
+	{
+		return true;		
+	}
 	else
+	{
 		return false;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1189,97 +1284,103 @@ function bool OnRightSideOfDoor(actor aTarget)
 function ResetGadgetGroup()
 {
 	m_iActionUseGadgetGroup = 0;
+	return;
 }
 
 //------------------------------------------------------------------
 // AimingAt()                                         
 //------------------------------------------------------------------
-function bool AimingAt(Pawn enemy)
+function bool AimingAt(Pawn Enemy)
 {
-	local vector  vDir;
-/*
-	local FLOAT   fAccuracy;	
-	fAccuracy = R6AbstractWeapon(Pawn.EngineWeapon).GetWorstAccuracy();
-	logX(" AimingAT() : worst accuracy="$fAccuracy);
-	if(fAccuracy > 5.f)
+	local Vector vDir;
+
+	vDir = __NFUN_226__(__NFUN_216__(Enemy.Location, Pawn.Location));
+	// End:0x5D
+	if(__NFUN_177__(__NFUN_219__(vDir, Vector(__NFUN_316__(Pawn.Rotation, m_pawn.m_rRotationOffset))), 0.5000000))
 	{
-		log("  Exit AimingAI() : Accuracy is too low....");
+		return true;		
+	}
+	else
+	{
 		return false;
 	}
-*/	
-	vDir = normal(enemy.location - pawn.location);
-	if(vDir dot vector(pawn.rotation + m_pawn.m_rRotationOffset) > 0.5)
-		return true;
-	else
-		return false;
+	return;
 }
 
 //------------------------------------------------------------------
 // AttackTimer()                                         
 //------------------------------------------------------------------
 event AttackTimer()
-{	
-	// check is rainbow is armed with primary or secondary
-	if(m_pawn.m_iCurrentWeapon > 2)
+{
+	// End:0x17
+	if(__NFUN_151__(m_pawn.m_iCurrentWeapon, 2))
+	{
 		return;
-
+	}
 	m_pawn.m_bReloadToFullAmmo = false;
+	// End:0x4A
 	if(m_bWeaponsDry)
 	{
-		if(enemy != none)
+		// End:0x48
+		if(__NFUN_119__(Enemy, none))
 		{
 			StopFiring();
 			EndAttack();
 		}
 		return;
 	}
-
-	// check for necessary reload
-	if(!m_pawn.m_bChangingWeapon && (Pawn.EngineWeapon.NumberOfBulletsLeftInClip() == 0))
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" (attackTimer) has no ammo left, must reload...clips="$Pawn.EngineWeapon.GetNbOfClips());	#endif
-		RainbowReloadWeapon();
-		if(bFire == 1)
-		{
-			StopFiring();
-			EndAttack();
-		}
-	}
-
-	// cannot attack until finished reloading weapon
-	if(m_pawn.m_bReloadingWeapon || m_pawn.m_bChangingWeapon)
-		return;
-
-	// check if enemy is dead or surrendered
-	if((enemy != none) && (R6Pawn(enemy).m_bIsKneeling || !R6Pawn(enemy).IsAlive()))
-		EndAttack();
-
-	if(bFire == 0) 
+	// End:0x9D
+	if(__NFUN_130__(__NFUN_129__(m_pawn.m_bChangingWeapon), __NFUN_154__(Pawn.EngineWeapon.NumberOfBulletsLeftInClip(), 0)))
 	{
-		if(enemy != none)
+		RainbowReloadWeapon();
+		// End:0x9D
+		if(__NFUN_154__(int(bFire), 1))
 		{
-			focus = enemy;
-			target = enemy;
-			
-			if(AimingAt(enemy))
+			StopFiring();
+			EndAttack();
+		}
+	}
+	// End:0xC5
+	if(__NFUN_132__(m_pawn.m_bReloadingWeapon, m_pawn.m_bChangingWeapon))
+	{
+		return;
+	}
+	// End:0x10A
+	if(__NFUN_130__(__NFUN_119__(Enemy, none), __NFUN_132__(R6Pawn(Enemy).m_bIsKneeling, __NFUN_129__(R6Pawn(Enemy).IsAlive()))))
+	{
+		EndAttack();
+	}
+	// End:0x18F
+	if(__NFUN_154__(int(bFire), 0))
+	{
+		// End:0x18C
+		if(__NFUN_119__(Enemy, none))
+		{
+			Focus = Enemy;
+			Target = Enemy;
+			// End:0x18C
+			if(AimingAt(Enemy))
 			{
-				//logX(" I Am AIMINGAT : So start firing!!! ");
-				// if this rainbow AI is stationary, they should wait until their accuracy improves before firing
-				if(m_pawn.IsStationary() && !IsReadyToFire(enemy))
+				// End:0x16C
+				if(__NFUN_130__(m_pawn.IsStationary(), __NFUN_129__(IsReadyToFire(Enemy))))
+				{
 					return;
-
-				Pawn.EngineWeapon.SetRateOfFire(ROF_FullAuto); 
+				}
+				Pawn.EngineWeapon.SetRateOfFire(2);
 				StartFiring();
 			}
-		}
+		}		
 	}
 	else
 	{
-		//log("  ENDATTACK() : 1 bFire="$bFire);
 		StopFiring();
-		if(!EnemyIsAThreat())
+		// End:0x1A6
+		if(__NFUN_129__(EnemyIsAThreat()))
+		{
 			EndAttack();
+		}
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1287,10 +1388,13 @@ event AttackTimer()
 //------------------------------------------------------------------
 event StopAttack()
 {
-	//logX(" **** StopAttack() : enemy=="$enemy);
 	StopFiring();
-	if(!EnemyIsAThreat())
+	// End:0x17
+	if(__NFUN_129__(EnemyIsAThreat()))
+	{
 		EndAttack();
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1298,112 +1402,39 @@ event StopAttack()
 //------------------------------------------------------------------
 function SetFocusToDoorKnob(R6IORotatingDoor aDoor)
 {
-	if(aDoor == none)
+	// End:0x0D
+	if(__NFUN_114__(aDoor, none))
+	{
 		return;
-
+	}
+	// End:0x4B
 	if(aDoor.m_bTreatDoorAsWindow)
-		SetLocation(aDoor.Location - 30*vector(aDoor.Rotation));
-	else
-		SetLocation(aDoor.Location - 128*vector(aDoor.Rotation));
-	focus = self;
-}
-
-//==========================================================
-//                  -- state LOCKPICKDOOR --                
-//==========================================================
-state LockPickDoor
-{
-ignores SeePlayer;
-
-	function BeginState()
 	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has entered state LockPickDoor...");	#endif
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_bIgnoreBackupBump = true;		
+		__NFUN_267__(__NFUN_216__(aDoor.Location, __NFUN_213__(float(30), Vector(aDoor.Rotation))));		
 	}
-    
-	function EndState()
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has exited state LockPickDoor...");		#endif
-		m_pawn.m_bAvoidFacingWalls = true;
-		m_bIgnoreBackupBump = false;
-		
-		if(m_pawn.m_bIsLockPicking)
-		{
-			#ifdefDEBUG	if(bShowLog) log(" Exit lockPick state prematurely... ");	#endif
-			m_pawn.m_bIsLockPicking = false;
-			m_pawn.m_bPostureTransition = false;	
-			m_pawn.AnimBlendToAlpha(m_pawn.C_iBaseBlendAnimChannel, 0.0, 0.5); //R6ResetAnimBlendParams
-			m_pawn.m_ePlayerIsUsingHands = HANDS_None;			
-		}
-
-		// make sure rainbow gets weapon back before leaving this state
-		if(m_pawn.m_bWeaponIsSecured && !m_pawn.m_bWeaponTransition)
-		{
-			m_pawn.m_eEquipWeapon = EQUIP_EquipWeapon;
-			m_pawn.PlayWeaponAnimation();
-		}
-
-		if (m_RotatingDoor.m_bIsDoorLocked)
-    		m_pawn.ServerPerformDoorAction(m_RotatingDoor, m_RotatingDoor.eDoorCircumstantialAction.CA_LockPickStop);
-	}
-
-Begin:
-	// get very close to door & look at door knob
-	m_vTargetPosition = m_pawn.m_Door.location + 20*vector(m_pawn.m_Door.rotation);
-	SetLocation(m_RotatingDoor.location - 128*vector(m_RotatingDoor.rotation));
-	MoveToPosition(m_vTargetPosition, rotator(location - pawn.location));
-	focus = self;
-	FinishRotation();
-
-	// secure weapon
-	m_pawn.SetNextPendingAction(PENDING_SecureWeapon);
-    FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-
-	// play lockpicking animation 
-	m_pawn.SetNextPendingAction(PENDING_LockPickDoor);
-	m_pawn.m_bIsLockPicking = true;
-	Sleep(0.1);
-
-	// play lockpicking sound
-	m_RotatingDoor.PlayLockPickSound();
-
-	// wait until necessary time has elapsed
-	if(m_pawn.m_bHasLockPickKit)
-		Sleep((m_RotatingDoor.m_fUnlockBaseTime - 2.0) * (2.0 - m_pawn.ArmorSkillEffect()) );
 	else
-		Sleep(m_RotatingDoor.m_fUnlockBaseTime * (2.0 - m_pawn.ArmorSkillEffect()));		
-
-	// set the door's state to unlocked
-	m_pawn.ServerPerformDoorAction(m_RotatingDoor, m_RotatingDoor.eDoorCircumstantialAction.CA_UnLock);
-	
-	// reset cycling lockpicking animation
-	m_pawn.m_bIsLockPicking = false;
-	m_pawn.AnimBlendToAlpha(m_pawn.C_iBaseBlendAnimChannel, 0.0, 0.5);
-	m_pawn.m_ePlayerIsUsingHands = HANDS_None;
-	Sleep(1.0);
-
-	// get weapon
-	m_pawn.SetNextPendingAction(PENDING_EquipWeapon);
-    FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-
-End:
-	// return to previous state
-	GotoState(m_PostLockPickState);
+	{
+		__NFUN_267__(__NFUN_216__(aDoor.Location, __NFUN_213__(float(128), Vector(aDoor.Rotation))));
+	}
+	Focus = self;
+	return;
 }
 
 //------------------------------------------------------------------
 // GotoLockPickState()                                         
 //------------------------------------------------------------------
-function GotoLockPickState(R6IORotatingDoor door)
+function GotoLockPickState(R6IORotatingDoor Door)
 {
-	m_RotatingDoor = door;
-	if(m_RotatingDoor == none)
+	m_RotatingDoor = Door;
+	// End:0x18
+	if(__NFUN_114__(m_RotatingDoor, none))
+	{
 		return;
-	
-	m_PostLockPickState = GetStateName();
-	m_TeamManager.SetTeamState(TS_LockPicking);
-	GotoState('LockPickDoor');
+	}
+	m_PostLockPickState = __NFUN_284__();
+	m_TeamManager.SetTeamState(8);
+	__NFUN_113__('LockPickDoor');
+	return;
 }
 
 //------------------------------------------------------------------
@@ -1411,1075 +1442,116 @@ function GotoLockPickState(R6IORotatingDoor door)
 //------------------------------------------------------------------
 function RainbowCannotCompleteOrders()
 {
-	#ifdefDEBUG	if(bShowLog) log(pawn$" : RainbowCannotCompleteOrders(), Play Sound, reset state... ");		#endif
 	m_TeamManager.ActionCompleted(false);
 	m_iStateProgress = 0;
-	nextState = '';
-	GotoState('HoldPosition');
+	NextState = 'None';
+	__NFUN_113__('HoldPosition');
+	return;
 }
 
 //------------------------------------------------------------------
 // CanThrowGrenadeIntoRoom()                                         
 //------------------------------------------------------------------
-function bool CanThrowGrenadeIntoRoom(R6Door aDoor, optional vector vTestTarget)
+function bool CanThrowGrenadeIntoRoom(R6Door aDoor, optional Vector vTestTarget)
 {
-	local vector vTarget, vHitLocation, vHitNormal;
-	local actor  hitActor;
+	local Vector vTarget, vHitLocation, vHitNormal;
+	local Actor HitActor;
 
-	// if grenade is not a frag, then return true immediately (safe)
-	if(!m_pawn.engineWeapon.HasBulletType('R6FragGrenade'))
+	// End:0x24
+	if(__NFUN_129__(m_pawn.EngineWeapon.HasBulletType('R6FragGrenade')))
+	{
 		return true;
-
-	if(vTestTarget == vect(0,0,0))
-		vTarget = aDoor.location - 400*vector(aDoor.rotation);
+	}
+	// End:0x6D
+	if(__NFUN_217__(vTestTarget, vect(0.0000000, 0.0000000, 0.0000000)))
+	{
+		vTarget = __NFUN_216__(aDoor.Location, __NFUN_213__(float(400), Vector(aDoor.Rotation)));		
+	}
 	else
+	{
 		vTarget = vTestTarget;
-	HitActor = Trace(vHitLocation, vHitNormal, vTarget, aDoor.location - 96*vector(aDoor.rotation), false, vect(20,20,40));
-	if(HitActor == none)
+	}
+	HitActor = __NFUN_277__(vHitLocation, vHitNormal, vTarget, __NFUN_216__(aDoor.Location, __NFUN_213__(float(96), Vector(aDoor.Rotation))), false, vect(20.0000000, 20.0000000, 40.0000000));
+	// End:0xD1
+	if(__NFUN_114__(HitActor, none))
+	{
 		return true;
-
+	}
 	return false;
-}	
-
-//==========================================================//
-//                  -- state PERFORMACTION --               //
-// This state is used by the second member in a player's    //
-// team when instructed by Team Manager to carry out an		//
-// action.  This action normally comes the Rose des Vents,  //
-// and mainly involves door related actions.				//
-// TODO : consider using anim NOTIFY functions instead of   //
-//        sleep()											//
-//==========================================================//
-state PerformAction
-{
-    function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has entered state PerformAction...m_ActionTarget="$m_ActionTarget$" m_iStateProgress="$m_iStateProgress);		#endif
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_bIndividualAttacks = false;
-		m_iTurn = 0;
-		m_bEnteredRoom = false;
-
-		if(m_ActionTarget != none && m_ActionTarget.IsA('R6Door'))
-		{
-			m_TeamManager.m_Door = R6Door(m_ActionTarget);
-			m_RotatingDoor = m_TeamManager.m_Door.m_RotatingDoor;
-		}
-		else
-			m_RotatingDoor = none;
-    }
-
-    function EndState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has exited state PerformAction... m_iStateProgress="$m_iStateProgress);		#endif
-		if(m_iStateProgress == 14)			
-			m_iStateProgress = 0;	
-		SetTimer(0,false);
-		m_pawn.m_u8DesiredYaw = 0;	
-		m_pawn.m_bThrowGrenadeWithLeftHand = false;
-		m_pawn.m_bAvoidFacingWalls = true;
-		m_bIgnoreBackupBump=false;
-		m_bIndividualAttacks = true;
-    }
-
-	function Timer()
-	{
-		m_iTurn++;
-		LookAroundRoom(true);
-	}
-
-	function vector FindFloorBelowActor(actor target)
-	{
-		local vector vHitLocation, vHitNormal;
-
-		Trace(vHitLocation, vHitNormal, target.location - vect(0,0,200), target.location, false);
-		vHitLocation.z += pawn.collisionHeight; 
-		return (vHitLocation);
-	}
-	
-Begin:
-	StopMoving();
-    m_pawn.ResetBoneRotation();
-
-	// apply a delay based on leadership skill before team starts performing order
-	Sleep(GetLeadershipReactionTime());
-
-    // if no target actor is provided, goto('End') and inform TeamAI
-    if(m_ActionTarget == none)
-        goto('ReinitAction');
-
-	// check if this state was interrupted by a bump or attack
-	switch(m_iStateProgress)
-	{
-		case 0:		goto('PrepareForAction');		break;
-		case 1:		goto('FindActionTarget');		break;
-		case 2:		goto('MoveToActionTarget');		break;
-		case 3:     goto('PreEntry');				break;
-        case 4:     goto('WaitForZuluGoCode');      break;
-    	case 5:		
-		case 6:		goto('PerformDoorAction');		break;
-		case 7:		
-		case 8:		goto('PerformGrenadeAction');	break;
-		case 9:		
-		case 10:	goto('PerformClearAction');		break;
-		case 11:	goto('UpdateStatus');			break;
-		case 12:	goto('ReinitAction');			break;
-		default:	goto('WaitForTeamAI');			
-	}
-	
-PrepareForAction:
-	m_TeamManager.SetTeamState(TS_Moving);
-	if(CanWalkTo(m_ActionTarget.location) || ActorReachable(m_ActionTarget)) 
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" XXX : can see the actionTarget directly, so move directly towards it...");	#endif
-		goto('MoveToActionTarget');
-	}
-	m_iStateProgress = 1;
-
-FindActionTarget:
-	#ifdefDEBUG	if(bShowLog) log(" XXX : cannot see the actionTarget directly so, find a path towards it...m_ActionTarget="$m_ActionTarget);	#endif	
-	if(!CanWalkTo(m_ActionTarget.location) && !ActorReachable(m_ActionTarget)) 
-	{
-		if(m_RotatingDoor != none && m_RotatingDoor.m_bTreatDoorAsWindow)	
-			FindPathToTargetLocation(FindFloorBelowActor(m_ActionTarget));
-		else
-			FindPathToTargetLocation(m_ActionTarget.location, m_ActionTarget);
-	}
-	m_iStateProgress = 2;
-	
-MoveToActionTarget:
-    // if orders include grenade, and door is not locked, switch to grenade in advance...
-	if(!m_RotatingDoor.m_bIsDoorLocked && (m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0)
-        SwitchWeapon(m_iActionUseGadgetGroup);
-
-	#ifdefDEBUG	if(bShowLog) log(pawn$" XXX : move to action target = "$m_ActionTarget$" m_RotatingDoor="$m_RotatingDoor );	#endif
-	m_bIgnoreBackupBump=true;
-	if(m_RotatingDoor != none 
-		&& m_TeamManager.m_iTeamAction == TEAM_CloseDoor 
-		&& m_RotatingDoor.DoorOpenTowardsActor(m_ActionTarget) 
-		&& !PreEntryRoomIsAcceptablyLarge())
-	{		
-		if(m_RotatingDoor.m_bIsOpeningClockWise)
-			m_vTargetPosition = m_ActionTarget.location - 85*vector(m_ActionTarget.rotation) + 85*vector(m_ActionTarget.rotation + rot(0,16384,0));
-		else
-			m_vTargetPosition = m_ActionTarget.location - 85*vector(m_ActionTarget.rotation) - 85*vector(m_ActionTarget.rotation + rot(0,16384,0));
-
-		R6PreMoveTo(m_vTargetPosition, m_RotatingDoor.location, PACE_Walk); 
-		MoveTo(m_vTargetPosition, m_RotatingDoor);   
-		MoveToPosition(m_vTargetPosition, rotator(m_RotatingDoor.location - pawn.location));
-	}
-	else
-	{
-		R6PreMoveToward(m_ActionTarget, m_ActionTarget, PACE_Walk);
-		MoveToward(m_ActionTarget);   
-		MoveToPosition(m_ActionTarget.location, m_ActionTarget.rotation);
-	}
-	StopMoving();
-    Sleep(0.5);
-
-UnLockDoor:
-	// check if door is locked...
-	if(m_RotatingDoor.m_bIsDoorLocked)
-		GotoLockPickState(m_RotatingDoor);
-
-	m_TeamManager.SetTeamState(TS_Moving);
-
-	// make sure we are equiped with grenade, if not already
-	if((m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0)
-        SwitchWeapon(m_iActionUseGadgetGroup);
-	else // if there is no grenade action, make sure we are equipped with primary/secondary
-		EnsureRainbowIsArmed();
-
-	// wait for team to arrive
-	while(!m_TeamManager.LastMemberIsStationary())
-		Sleep(0.5);
-
-	m_bIgnoreBackupBump=false;
-	m_iStateProgress = 3;
-
-PreEntry:
-	if((m_pawn.m_Door == m_ActionTarget) && m_RotatingDoor.m_bTreatDoorAsWindow)
-	{
-		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door); 
-		m_iStateProgress = 4;
-		goto('WaitForZuluGoCode');
-	}
-	
-	if(m_RotatingDoor != none)
-	{
-		ForceCurrentDoor(R6Door(m_ActionTarget));
-		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
-	}
-	
-	// get into position before waiting for Zulu
-	if(PreEntryRoomIsAcceptablyLarge())
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" PreEntryRoomIsAcceptablyLarge() is true...m_TeamManager.m_Door="$m_TeamManager.m_Door);		#endif
-		// move into the proper position for a room entry (not directly in front of door)				
-		m_vTargetPosition = getEntryPosition(false);    
-		#ifdefDEBUG	if(bShowLog) log(pawn$" move into the proper position for a room entry...m_vTargetPosition="$m_vTargetPosition);	#endif
-		if(m_vTargetPosition != vect(0,0,0))
-		{
-			R6PreMoveTo(m_vTargetPosition, m_RotatingDoor.location, PACE_Walk); 
-			MoveTo(m_vTargetPosition);   
-			MoveToPosition(m_vTargetPosition, rotator(m_TeamManager.m_Door.m_CorrespondingDoor.location - m_vTargetPosition));
-			StopMoving();
-		}
-	}
-	m_iStateProgress = 4;
-
-WaitForZuluGoCode:	
-    if( m_TeamManager.m_bCAWaitingForZuluGoCode )
-    {
-		m_TeamManager.SetTeamState(TS_Waiting);
-        Sleep(0.5);
-        goto('WaitForZuluGoCode');
-    }
-    m_iStateProgress = 5;
-	
-PerformDoorAction:
-	#ifdefDEBUG	if(bShowLog) log(pawn$" XXX : label PerformDoorAction :: m_ActionTarget="$m_ActionTarget$" m_iTeamAction="$m_TeamManager.m_iTeamAction);	#endif
-    if(((m_TeamManager.m_iTeamAction & TEAM_OpenDoor) > 0) || ((m_TeamManager.m_iTeamAction & TEAM_CloseDoor) > 0))
-    {        
-		if(m_RotatingDoor != none)
-        {
-			#ifdefDEBUG	if(bShowLog) log(pawn$" XXX : m_ActionTarget="$m_ActionTarget);	#endif
-			if(m_RotatingDoor.m_bIsDoorClosed)
-            {				
-				focus = m_RotatingDoor;
-				if(m_TeamManager.m_Door == none)
-				{
-					#ifdefDEBUG	if(bShowLog) log(" m_TeamManager.m_Door == none, so get it from ActionTarget...");	#endif
-					m_TeamManager.m_Door = R6Door(m_ActionTarget);
-				}
-								
-				// focus should be the door knob, not the pivot/hinges
-				SetFocusToDoorKnob(m_RotatingDoor);
-				Sleep(1.5);
-            }
-
-			// make sure everyone is ready before continuing
-			while(!m_TeamManager.LastMemberIsStationary())
-				Sleep(0.5);
-
-			// check to see if door is already in the desired state		
-			if(((m_TeamManager.m_iTeamAction & TEAM_OpenDoor) > 0) && m_RotatingDoor.m_bIsDoorClosed)
-			{
-				m_iStateProgress = 6;
-				if(m_RotatingDoor.m_bTreatDoorAsWindow)
-					m_TeamManager.SetTeamState(TS_Opening);
-				else
-					m_TeamManager.SetTeamState(TS_OpeningDoor);
-				m_pawn.PlayDoorAnim(m_RotatingDoor);
-				Sleep(0.5);
-				m_pawn.ServerPerformDoorAction(m_RotatingDoor, m_RotatingDoor.eDoorCircumstantialAction.CA_Open);		
-				
-				// wait for door to open
-				while(m_RotatingDoor.m_bIsDoorClosed)
-				{
-					if(!m_RotatingDoor.m_bInProcessOfOpening)
-					{
-						Sleep(1.0);
-						goto('PerformDoorAction');
-					}
-					else
-						Sleep(0.2);
-				}
-			}
-			else if(((m_TeamManager.m_iTeamAction & TEAM_CloseDoor) > 0) && !m_RotatingDoor.m_bIsDoorClosed)
-			{
-				m_iStateProgress = 6;
-				if(m_RotatingDoor.m_bTreatDoorAsWindow)
-					m_TeamManager.SetTeamState(TS_Closing);
-				else
-					m_TeamManager.SetTeamState(TS_ClosingDoor);
-
-				m_pawn.PlayDoorAnim(m_RotatingDoor);
-				Sleep(0.5);
-				m_pawn.ServerPerformDoorAction(m_RotatingDoor, m_RotatingDoor.eDoorCircumstantialAction.CA_Close);
-
-				// wait for door to close
-				while(m_RotatingDoor.m_iCurrentOpening != 0)
-					Sleep(0.5);
-			}
-			else if(m_iStateProgress < 6)  // then this is the first attempt to open the door
-			{
-				// door was not found in the appropriate state, so cancel the order...
-				RainbowCannotCompleteOrders();
-			}
-        }
-        else
-        {
-            m_TeamManager.ActionCompleted(false);  
-            goto('ReinitAction');
-        }
-    }
-	m_iStateProgress = 7;
-	
-PerformGrenadeAction:
-	// check if grenade has already been thrown
-	if(m_iStateProgress == 8)
-	{
-		Sleep(1.0);
-		m_iStateProgress = 9;
-		goto('PerformClearAction');
-	}
- 
-    // throw grenade into room 
-    if((m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0) 
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" throw grenade into room...");	#endif
-		m_TeamManager.SetTeamState(TS_Grenading);
-		disable('notifyBump');
-
-		// set the grenade target...
-		m_vLocationOnTarget = m_ActionTarget.location + 450*vector(m_ActionTarget.rotation);
-		SetLocation(m_vLocationOnTarget);
-		
-		// check if it is possible to throw a grenade into this room
-		if(!CanThrowGrenadeIntoRoom(R6Door(m_ActionTarget).m_CorrespondingDoor))
-		{
-			#ifdefDEBUG	if(bShowLog) log(" there isn't enough clear space inside room, so skip grenade action...");		#endif
-			m_TeamManager.ResetGrenadeAction();
-			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, RMV_TeamOrderFromLeadNil);
-
-			// return to primary weapon  
-			SwitchWeapon(1);
-			Sleep(1.0);
-			m_iStateProgress = 9;
-			goto('PerformClearAction');
-		}
-
-		focus = self;
-        target = self;	
-		FinishRotation(); 
-
-		// todo : add check to made sure that we are armed with grenade
-        SetRotation(m_ActionTarget.rotation);   
-		SetGunDirection(target);		
-		SetGrenadeParameters(PreEntryRoomIsAcceptablyLarge());
-        m_pawn.PlayWeaponAnimation(); 
-        FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-		m_pawn.m_eRepGrenadeThrow = GRENADE_None;
-
-		SetGunDirection(none);
-		enable('notifybump');
-		m_iStateProgress = 8;
-		
-		// return to primary weapon  
-        SwitchWeapon(1);	
-
-		// wait for grenade to explode
-        Sleep(m_pawn.EngineWeapon.GetExplosionDelay());	
-    } 
-    m_iStateProgress = 9;
-
-PerformClearAction:
-    // enter and clear room (team will follow)
-    if((m_TeamManager.m_iTeamAction & TEAM_ClearRoom) > 0) 
-    {
-		#ifdefDEBUG	if(bShowlog) log(pawn$" : enter and clear room...");	#endif
-		m_TeamManager.SetTeamState(TS_ClearingRoom);
-
-		// safety precaution
-		if(m_TeamManager.m_Door == none)
-		{
-			#ifdefDEBUG	if(bShowLog) log(pawn$"  IRREGULAR!! m_TeamManager.m_Door==none!!");	#endif
-			m_TeamManager.m_Door = R6Door(m_ActionTarget);			
-		}
-		m_eCurrentRoomLayout = m_TeamManager.m_Door.m_eRoomLayout;
-
-		if(m_iStateProgress == 9)
-		{
-			// initial move in order to get through the doorway (use R6Door actors)...
-			m_vTargetPosition = m_TeamManager.m_Door.location;
-			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Run);    
-			MoveToPosition(m_vTargetPosition, m_TeamManager.m_Door.rotation);   
-
-			m_TeamManager.EnteredRoom(m_pawn);
-			m_vTargetPosition = m_TeamManager.m_Door.m_CorrespondingDoor.location;
-			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Run);    
-			MoveToPosition(m_vTargetPosition, m_TeamManager.m_Door.rotation);   
-			StopMoving();
-
-			m_iStateProgress = 10;
-		}
-
-		if(m_pawn.m_iId == (m_TeamManager.m_iMemberCount - 1))
-		{
-			m_iStateProgress = 11;
-			SetTimer(1.0,true);
-			LookAroundRoom(true);
-			Sleep(1.5);			
-			goto('UpdateStatus');
-		}
-
-		// get target position inside room, if there is enough room...
-		// area on other side of door may be too constricted, move to corresponding door actor, and rest of team should just follow...
-		if(PostEntryRoomIsAcceptablyLarge())
-		{
-			m_vTargetPosition = getEntryPosition(true);     			
-			SetLocation(focalPoint);  
-		}
-		else
-		{
-			#ifdefDEBUG	if(bShowLog) log(pawn$" Enter Room : there is not enough room inside...so go in as far as possible");	#endif
-			FindNearbyWaitSpot(m_TeamManager.m_Door.m_CorrespondingDoor, m_vTargetPosition); 
-			SetLocation(m_vTargetPosition + 60*(m_vTargetPosition - pawn.location));
-		}
-
-		R6PreMoveTo(m_vTargetPosition, location, PACE_Run);    
-		MoveToPosition(m_vTargetPosition, rotator(location - m_vTargetPosition));   
-		StopMoving();
-
-		SetTimer(1.0,true);
-		LookAroundRoom(true);
-
-		m_iStateProgress = 11;
-        Sleep(3);
-    }
-	else
-		m_iStateProgress = 11;
-
-UpdateStatus:
-    // inform TeamAI that the action has been completed - include a success status
-	// TODO : check that the entire team has entered the room....
-	// make sure that we are no longer engaging any terrorists
-	if(m_TeamManager.RainbowIsEngaging())
-	{
-		Sleep(0.5);
-		goto('UpdateStatus');
-	}
-
-	#ifdefDEBUG	if(bShowLog) log(pawn$" inform TeamAI that action is completed...");	#endif
-	if((m_TeamManager.m_iTeamAction & TEAM_ClearRoom) > 0) 
-    {
-		m_TeamManager.ActionCompleted(true);
-		m_iStateProgress = 12;
-
-		if( (m_TeamManager.m_Door != none) && (m_pawn.m_iId == (m_TeamManager.m_iMemberCount - 1)) )
-		{
-			// take a few steps forward to get out of the way...
-			m_vTargetPosition = m_TeamManager.m_Door.m_CorrespondingDoor.location - 96*vector(m_TeamManager.m_Door.m_CorrespondingDoor.rotation);
-			SetLocation(m_TeamManager.m_Door.location + 200*vector(m_TeamManager.m_Door.rotation));
-			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk);
-			MoveTo(m_vTargetPosition, self);
-		}
-	}
-	else
-	{
-		m_TeamManager.ActionCompleted(true);
-		m_iStateProgress = 12;
-	}
-
-ReinitAction:
-    m_ActionTarget = none;
-	m_iStateProgress = 13;
-
-WaitForTeamAI:
-    // wait for furthur instructions
-    Sleep(1); 	
-    if(nextState != '')
-    {
-		m_iStateProgress = 14;
-		GotoState(nextState);
-	}
-    GotoState('HoldPosition');
+	return;
 }
 
-//==========================================================//
-//              -- state FINDPATHTOTARGET --                //
-//==========================================================//
-state FindPathToTarget
+function FindPathToTargetLocation(Vector vTarget, optional Actor aTarget)
 {
-	#ifdefDEBUG function BeginState() {	if(bShowLog) log(pawn$" entered state FindPathToTarget...m_DesiredTarget="$m_DesiredTarget$" m_vDesiredLocation="$m_vDesiredLocation);	}	#endif
-	function EndState()		
-	{	
-		#ifdefDEBUG if(bShowLog) log(pawn$" exited state FindPathToTarget...");	#endif
-		SetTimer(0, false);
-	}
-
-	function Timer()
-    {
-		if(CanThrowGrenade(pawn.location, true, false))
-		{
-			SetTimer(0, false);
-			StopMoving();
-			GotoState('TeamMoveTo', 'Action');
-		}
-	}
-
-Begin:
-	if(m_TeamManager.m_iTeamAction == TEAM_MoveAndGrenade)
-		SetTimer(0.3, true);
-
-	// find path to target
-	if(m_DesiredTarget != none)
-		moveTarget = FindPathToward(m_DesiredTarget, true);
-	else
-		moveTarget = FindPathTo(m_vDesiredLocation, true);     
-	
-	if(moveTarget != none)
-	{
-		// if this member is in front of a door and their moveTarget is the R6Door actor on the other side of the door, do a room entry
-		if(NeedToOpenDoor(moveTarget))
-		{
-			m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door); 
-			MoveToPosition(m_pawn.m_Door.location, m_pawn.m_Door.rotation); 
-			pawn.acceleration = vect(0,0,0);
-
-			// prepare for a room entry...
-			SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
-			Sleep(1);
-			GotoStateLeadRoomEntry();
-		}
-
-		m_TargetLadder = R6Ladder(moveTarget);
-		if((m_pawn.m_Ladder != none) && (m_TargetLadder != none) && (m_pawn.m_Ladder != m_TargetLadder))
-			m_TeamManager.InstructTeamToClimbLadder(R6LadderVolume(m_pawn.m_Ladder.myLadder), true, m_pawn.m_iId);
-
-		#ifdefDEBUG	if(bShowLog) log(self$" FindPathToTarget : move to the movetarget=["$moveTarget$"] on the way to the m_vDesiredLocation...");	#endif
-		R6PreMoveToward(moveTarget, moveTarget, PACE_Walk);
-		MoveToward(moveTarget);
-
-		if(m_DesiredTarget != none)
-		{		
-			if(ActorReachable(m_DesiredTarget))
-				Goto('End');
-		}
-		else if(PointReachable(m_vDesiredLocation)) 
-			Goto('End');
-
-		goto('Begin');
-	}
-	else
-	{
-		#ifdefDEBUG logX(" state FindPathToTarget : cannot find a path to m_vDesiredLocation="$m_vDesiredLocation);	#endif
-		if(m_TeamManager.m_iTeamAction != 0)
-		{
-			if(!m_TeamManager.m_bGrenadeInProximity)
-				RainbowCannotCompleteOrders();		
-		}
-	}
-
-End:
-	// move directly to target location
-	R6PreMoveTo(m_vDesiredLocation, m_vDesiredLocation, PACE_Walk);
-	MoveTo(m_vDesiredLocation);	
-	GotoState(m_PostFindPathToState);
-}
-
-function FindPathToTargetLocation(vector vTarget, optional actor aTarget)
-{
-	#ifdefDEBUG	if(bShowLog) log(" FindPathToTargetLocation was called for location vTarget="$vTarget$" aTarget="$aTarget);		#endif
-	m_TeamManager.SetTeamState(TS_Moving);
+	m_TeamManager.SetTeamState(3);
 	m_DesiredTarget = aTarget;
 	m_vDesiredLocation = vTarget;
-	m_PostFindPathToState = GetStateName();
-	GotoState('FindPathToTarget');
+	m_PostFindPathToState = __NFUN_284__();
+	__NFUN_113__('FindPathToTarget');
+	return;
 }
 
 function ReInitEntryPositions()
 {
-	m_vPreEntryPositions[0] = vect(0,0,0);
-	m_vPreEntryPositions[1] = vect(0,0,0);
+	m_vPreEntryPositions[0] = vect(0.0000000, 0.0000000, 0.0000000);
+	m_vPreEntryPositions[1] = vect(0.0000000, 0.0000000, 0.0000000);
+	return;
 }
 
-//==========================================================//
-//              -- state ROOMENTRY --                       //
-// This state is used by team members during a room entry.  //
-// (includes all members except the one that is leading	the //
-// room entry).												//
-//==========================================================//
-state RoomEntry
+function SwitchWeapon(int f)
 {
-    function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" entered state RoomEntry...m_iStateProgress="$m_iStateProgress);		#endif
-        m_pawn.ResetBoneRotation();        
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_bReactToNoise = true;
-		m_bEnteredRoom = false;
-		m_bIndividualAttacks = false;
-		m_iTurn = 0;
-		ReInitEntryPositions();
-    }
+	local R6AbstractWeapon NewWeapon;
 
-    function EndState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" exited state RoomEntry... m_iStateProgress="$m_iStateProgress);		#endif
-		m_pawn.m_bAvoidFacingWalls = true;
-		m_bReactToNoise = false;
-		if(m_iStateProgress == 5)
-			m_iStateProgress = 0;		// normal exit, so reinit this variable...
-		m_bIndividualAttacks = true;
-		SetTimer(0,false);
-		m_pawn.m_u8DesiredYaw = 0;
-    }
-
-	function Timer()
+	// End:0x1A
+	if(__NFUN_154__(f, m_pawn.m_iCurrentWeapon))
 	{
-		m_iTurn++;
-		LookAroundRoom(false);
-	}
-
-	function bool HasEnteredRoom(R6Pawn member)
-	{
-		if(VSize(member.location - m_TeamManager.m_Door.location) < VSize(member.location - m_TeamManager.m_Door.m_CorrespondingDoor.location))
-			return false;
-		else
-			return true;
-	}
-
-	function SetMemberFocus()
-	{
-		if(PreEntryRoomIsAcceptablyLarge())
-		{
-			if(m_pawn.m_iId == 3)
-			{
-				if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
-					SetLocation(pawn.location - 300*vector(m_TeamManager.m_Door.rotation));
-				else
-					SetLocation(m_TeamManager.m_Door.location - 300*vector(m_TeamManager.m_Door.rotation));	 // last member should be looking back to cover team
-				focus = self;
-			}
-			else if((m_pawn.m_iId == 2) && (!m_TeamLeader.m_bIsPlayer || (m_TeamLeader.m_bIsPlayer && !m_TeamManager.m_bTeamIsSeparatedFromLeader)) )
-			{
-				SetLocation(pawn.location - 300*normal(m_TeamManager.m_Door.location - pawn.location) - 200*vector(m_TeamManager.m_Door.rotation));
-				focus = self;
-			}
-			else
-				SetFocusToDoorKnob(m_TeamManager.m_Door.m_RotatingDoor);
-		}
-		else
-		{
-			if(m_pawn.m_iId == (m_TeamManager.m_iMemberCount - 1))
-			{
-				SetLocation(pawn.location - 200*normal(m_TeamManager.m_Door.location - pawn.location));
-				focus = self;
-			}
-			else
-				SetFocusToDoorKnob(m_TeamManager.m_Door.m_RotatingDoor);
-		}
-	}
-
-	function vector GetSingleFilePosition()
-	{
-		local	vector   vDir;
-
-		vDir = m_PaceMember.location - pawn.location;
-		return(m_PaceMember.location - GetFormationDistance()*normal(vDir));
-	}
-
-	function CoverRear()
-	{
-		if(m_TeamManager.m_iTeamAction == TEAM_None)
-		{
-			SetLocation(pawn.location + (pawn.location - focalPoint)); 
-			focus = self;
-		}		
-	}
-
-	function FLOAT DistanceToLocation(vector vTarget)
-	{
-		return VSize(pawn.location - vTarget);	
-	}
-
-	function R6Pawn.eMovementPace GetRoomEntryPace(bool bRun)
-	{
-		local R6Pawn.eMovementPace      ePace;
-		local bool						bCrouchedEntry;
-		
-		if(m_TeamLeader.m_bIsPlayer)
-		{
-			if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
-				bCrouchedEntry = m_PaceMember.bIsCrouched;
-			else
-				bCrouchedEntry = m_TeamLeader.bIsCrouched;
-		}
-		else
-			bCrouchedEntry = (m_TeamManager.m_eMovementSpeed == SPEED_Cautious);
-
-		if(bCrouchedEntry)
-		{
-			if(bRun)
-				ePace = PACE_CrouchRun;
-			else
-				ePace = PACE_CrouchWalk;
-		}
-		else
-		{
-			if(bRun)
-				ePace = PACE_Run;
-			else
-				ePace = PACE_Walk;
-		}
-
-		return ePace;
-	}
-
-Begin:
-	// check if this state was interrupted by a bump or attack
-	switch(m_iStateProgress)
-	{
-		case 0:		goto('GetIntoPosition');		break;
-		case 1:		goto('WaitForGo');				break;
-		case 2:		goto('PassDoor');				break;
-		case 3:		goto('EnterRoom');				break;
-		default:	goto('WaitOnLeader');
-	}
-
-GetIntoPosition:
-    // get target position in front of closed door...
-	#ifdefDEBUG	if(bShowLog) log(pawn$" [GetIntoPosition] get target position in front of closed door... m_TeamManager.m_Door="$m_TeamManager.m_Door);	#endif
-	// do some checks to make sure door actors are valid
-	if(m_TeamManager.m_Door.m_RotatingDoor == none)
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" PROBLEM!!  m_TeamManager.m_Door.m_RotatingDoor==none");		#endif
-		GotoState('FollowLeader');
-	}
-	if(m_TeamManager.m_Door.m_CorrespondingDoor == none)
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" PROBLEM!!  m_TeamManager.m_Door.m_CorrespondingDoor==none");	#endif
-		GotoState('FollowLeader');
-	}
-
-	// check if there is enough room to form around door, if not stay in single file...
-	if(PreEntryRoomIsAcceptablyLarge())
-	{
-		m_vTargetPosition = getEntryPosition(false);    
-		if(m_vTargetPosition != pawn.location)
-		{
-			if(!CanWalkTo(m_vTargetPosition) && !PointReachable(m_vTargetPosition)) 
-			{
-				FindPathToTargetLocation(m_vTargetPosition);
-			}
-			else 
-			{	
-				// intermediate moves...
-				if((m_vPreEntryPositions[0] != vect(0,0,0)) && (DistanceToLocation(m_vPreEntryPositions[0]) < DistanceToLocation(m_vTargetPosition)) )			
-				{
-					if((m_vPreEntryPositions[1] == vect(0,0,0)) || (DistanceToLocation(m_vPreEntryPositions[0]) < DistanceToLocation(m_vPreEntryPositions[1])) )
-					R6PreMoveTo(m_vPreEntryPositions[0], m_vPreEntryPositions[0], GetRoomEntryPace(false));
-					MoveTo(m_vPreEntryPositions[0]);   
-
-					if(m_vPreEntryPositions[1] != vect(0,0,0))
-					{
-						R6PreMoveTo(m_vPreEntryPositions[1], m_vPreEntryPositions[1], GetRoomEntryPace(false));
-						MoveTo(m_vPreEntryPositions[1]); 
-					}
-				}
-				else if((m_vPreEntryPositions[1] != vect(0,0,0)) && (DistanceToLocation(m_vPreEntryPositions[1]) < DistanceToLocation(m_vTargetPosition)) )		
-				{
-					R6PreMoveTo(m_vPreEntryPositions[1], m_vPreEntryPositions[1], GetRoomEntryPace(false));
-					MoveTo(m_vPreEntryPositions[1]); 
-				}
-				R6PreMoveTo(m_vTargetPosition, m_TeamManager.m_Door.m_RotatingDoor.location, GetRoomEntryPace(false));
-				MoveTo(m_vTargetPosition);   
-				MoveToPosition(m_vTargetPosition, rotator(m_TeamManager.m_Door.m_CorrespondingDoor.location - m_vTargetPosition));
-			}
-		}
-	}
-	pawn.acceleration = vect(0,0,0);
-	m_iStateProgress = 1;
-	#ifdefDEBUG	if(bShowLog) log(pawn$" [WaitForGo] wait for Go to enter room... m_TeamLeader="$m_TeamLeader$" m_TeamLeader.m_bIsPlayer="$m_TeamLeader.m_bIsPlayer);	#endif
-
-WaitForGo: 
-	SetMemberFocus();
-	StopMoving();	
-	if( (m_TeamLeader.m_bIsPlayer && !HasEnteredRoom(m_PaceMember)) 
-		 || (!m_TeamLeader.m_bIsPlayer && !R6RainbowAI(m_PaceMember.controller).m_bEnteredRoom) )
-    {
-		if(!PreEntryRoomIsAcceptablyLarge() && (DistanceTo(m_PaceMember) > GetFormationDistance()))
-		{
-			// keep up with leader (follow)
-			// #ifdefDEBUG	if(bShowLog) log(pawn$" Pre Entry Room is not large enough...");	#endif
-			m_vTargetPosition = GetSingleFilePosition();
-			if(!PointReachable(m_vTargetPosition)) 
-				FindPathToTargetLocation(m_PaceMember.location, m_PaceMember);
-			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(false));
-			MoveTo(m_vTargetPosition);
-		}
-		else
-		{
-			if((m_pawn.m_iId == 2) && HasEnteredRoom(m_TeamLeader))
-				focus = m_TeamManager.m_Door;
-			Sleep(0.5);
-		}
-        Goto('WaitForGo');
-    }
-	m_iStateProgress = 2;
-
-PassDoor:
-	Sleep(0.2);
-
-	// if there is not enough room to do a real room entry, go back to following leader
-	if(!PostEntryRoomIsAcceptablyLarge())
-	{
-		#ifdefDEBUG	if(bShowlog) log(pawn$" PostEntryRoom is not large enough goto state FollowLeader ");	#endif
-		m_TeamManager.EndRoomEntry();
-		GotoState('FollowLeader');
-	}
-
-	m_eCurrentRoomLayout = m_TeamManager.m_Door.m_eRoomLayout;
-
-    // initial move in order to get through the doorway (use R6Door actors)...
-	#ifdefDEBUG	if(bShowLog) log(pawn$" [PassDoor] initial move in order to get through the doorway ... ");		#endif
-	m_vTargetPosition = m_TeamManager.m_Door.location;
-	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));    
-	MoveToPosition(m_vTargetPosition, rotator(m_vTargetPosition - pawn.location)); 
-
-    // inform TeamAI - early in order to overlap movement of members...
-    m_TeamManager.EnteredRoom(m_pawn); 
-	m_vTargetPosition = m_TeamManager.m_Door.m_CorrespondingDoor.location;
-	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));    
-	MoveToPosition(m_vTargetPosition, rotator(m_vTargetPosition - pawn.location));  
-	m_iStateProgress = 3;
-
-	if(m_PaceMember.m_bIsPlayer)
-		m_TeamManager.GetPlayerDirection();
-
-EnterRoom:
-	// get target position inside room...
-	#ifdefDEBUG	if(bShowLog) log(pawn$" [EnterRoom] get target position inside room ... ");		#endif
-    m_vTargetPosition = getEntryPosition(true);     
-	SetLocation(focalPoint);	    // focal point was set by getEntryPosition()    
-
-    // move inside room...  TODO: make sure there is enough room to enter.... 
-	R6PreMoveTo(m_vTargetPosition, location, GetRoomEntryPace(true));    
-	MoveToPosition(m_vTargetPosition, rotator(location - m_vTargetPosition));   
-	
-	SetTimer(1.0, true);
-	LookAroundRoom(false);
-
-	m_iStateProgress = 4;   
-    Sleep(0.5);
-       	
-	#ifdefDEBUG	if(bShowLog) log(pawn$" [WaitOnLeader] wait for pacemember to start moving ... ");	#endif
-
-WaitOnLeader:	
-	StopMoving();
-    Sleep(0.5);
-
-	// when room is clear or player starts moving, look back
-	if(m_eCoverDirection == COVER_None)
-		CoverRear();
-
-	// wait for pacemember to start moving and to be far enough away (so that not all members try to move at the same time)
-	if((IsMoving(m_PaceMember) && (DistanceTo(m_PaceMember) > 200)) || (DistanceTo(m_PaceMember) > 300))
-	{
-		if(m_eCoverDirection == COVER_None)
-			CoverRear();
-
-		m_iStateProgress = 5;
-		GotoState('FollowLeader');
-	}
-	else		
-		Goto('WaitOnLeader');
-}
-
-//==========================================================//
-//              -- state HOLDPOSITION --                    //
-//==========================================================//
-state HoldPosition
-{
-    function BeginState()   
-	{       
-		#ifdefDEBUG	if(bShowLog) log(pawn$" entered state holdposition...");	#endif
-		m_bReactToNoise = true;
-	}
-    
-	function EndState()		
-	{		
-		#ifdefDEBUG	if(bShowLog) log(pawn$" exited state holdPosition...");		#endif
-		m_bReactToNoise = false;
-		SetTimer(0, false);   
-	}
-
-    function Timer()
-    {        
-		// when timer goes off, team should continue waiting in crouched position / cover formation  
-        m_iWaitCounter++;           
-    }
-
-Begin:    
-	m_TeamManager.SetTeamState(TS_Holding);
-    focus = none; 
-    m_iWaitCounter = 0;
-    pawn.acceleration = vect(0,0,0);
-    SetTimer(1.0, true);   
-	Sleep(1.0);
-	
-Hold:
-	VerifyWeaponInventory();
-	EnsureRainbowIsArmed();
-    if(!pawn.bIsCrouched && !pawn.m_bIsProne && (m_iWaitCounter > 8.0)) 
-    {    
-        pawn.bWantsToCrouch = true;
-        Sleep(0.5); // to give enough time for the startCrouch to take event (performPhysics)       
-    }
-
-	// check if we need to reload
-	if(NeedToReload())
-		RainbowReloadWeapon();
-
-    Sleep(1.0);
-
-    if(nextState != '')
-        GotoState(nextState);
-    goto('Hold');
-}
-
-function SwitchWeapon(INT F)
-{
-    local R6AbstractWeapon newWeapon;
-
-	// check if Rainbow is already equipped with the desired weapon
-	if(F == m_pawn.m_iCurrentWeapon)
 		return;
-
-    Pawn.R6MakeNoise( SNDTYPE_Equipping );
-
-    newWeapon = R6AbstractWeapon(m_pawn.GetWeaponInGroup(F));
-
-    if (newWeapon != none)
-    {		
-        if(Level.NetMode == NM_Standalone)
-            m_pawn.EngineWeapon.GotoState('');
-		m_pawn.m_iCurrentWeapon = F;
-        m_pawn.GetWeapon(newWeapon);
-        m_pawn.m_bChangingWeapon = true;
-        if (m_pawn.m_SoundRepInfo != none)
-            m_pawn.m_SoundRepInfo.m_CurrentWeapon = F - 1; // -1 because the index start to zero not to one
+	}
+	Pawn.R6MakeNoise(11);
+	NewWeapon = R6AbstractWeapon(m_pawn.GetWeaponInGroup(f));
+	// End:0x105
+	if(__NFUN_119__(NewWeapon, none))
+	{
+		// End:0x87
+		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		{
+			m_pawn.EngineWeapon.__NFUN_113__('None');
+		}
+		m_pawn.m_iCurrentWeapon = f;
+		m_pawn.GetWeapon(NewWeapon);
+		m_pawn.m_bChangingWeapon = true;
+		// End:0xF6
+		if(__NFUN_119__(m_pawn.m_SoundRepInfo, none))
+		{
+			m_pawn.m_SoundRepInfo.m_CurrentWeapon = byte(__NFUN_147__(f, 1));
+		}
 		m_pawn.PlayWeaponAnimation();
 	}
-}       
-
-//==========================================================//
-//           -- state TeamSecureTerrorist --                //
-//==========================================================//
-state TeamSecureTerrorist
-{
-	function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" entered state TeamSecureTerrorist...m_ActionTarget="$m_ActionTarget);	#endif
-		m_pawn.ResetBoneRotation();
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_bIgnoreBackupBump=true;
-		m_bStateFlag = false;
-    }
-
-    function EndState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" exited state TeamSecureTerrorist...");	#endif
-		m_bIgnoreBackupBump=false;
-
-		// reset arrest action if it was not completed
-		if(!m_bStateFlag)
-		{			
-			m_pawn.m_bPostureTransition = false;
-			m_pawn.AnimBlendToAlpha(m_pawn.C_iBaseBlendAnimChannel, 0.0, 0.5);
-			m_pawn.m_ePlayerIsUsingHands = HANDS_None;
-			m_pawn.PlayWeaponAnimation();			
-			R6Terrorist(m_ActionTarget).ResetArrest();
-		}
-
-		// get weapon back
-		if(m_pawn.m_bWeaponIsSecured && !m_pawn.m_bWeaponTransition)
-			m_pawn.SetNextPendingAction(PENDING_EquipWeapon);
-    }
-    
-Begin:
-	if(!R6Pawn(m_ActionTarget).IsAlive())
-		Goto('End');
-
-	// if this NPC is carrying out a player order, add a delay based on the leadership skill
-	if(m_pawn.m_iId == 1)
-		Sleep(GetLeadershipReactionTime());
-
-	m_TeamManager.SetTeamState(TS_Moving);
-	if(!CanWalkTo(m_ActionTarget.location) && !ActorReachable(m_ActionTarget)) 
-		FindPathToTargetLocation(m_ActionTarget.location, m_ActionTarget);
-	
-DirectMove:
-	#ifdefDEBUG	if(bShowLog) log(pawn$" TeamSecureTerrorist : move directly to the terrorist, m_ActionTarget="$m_ActionTarget);		#endif
-	
-	R6PreMoveToward(m_ActionTarget, m_ActionTarget, PACE_Walk);
-	MoveToward(m_ActionTarget);	
-
-	// check to make sure we have reached the terrorist
-	if(DistanceTo(m_ActionTarget) > 100)
-		goto('Begin');
-	focus = m_ActionTarget;
-	StopMoving();
-	Sleep(0.5);
-	
-	while(m_TeamManager.m_bCAWaitingForZuluGoCode)
-	{
-		m_TeamManager.SetTeamState(TS_Waiting);
-		Sleep(0.5);
-	}
-
-Secure:
-	// assure no interruption
-	Disable('SeePlayer');
-
-	// check if terrorist is already secured
-	if(R6Terrorist(m_ActionTarget).m_bIsUnderArrest)
-	{
-		// cancel orders, terrorist is already secured...
-		RainbowCannotCompleteOrders();
-	}
-	m_TeamManager.SetTeamState(TS_SecuringTerrorist);
-
-	// secure weapon
-	m_pawn.SetNextPendingAction(PENDING_SecureWeapon);
-    FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-
-	// todo : check if terrorist is already secured - MoveTeamToCompleted(false)
-	R6Terrorist(m_ActionTarget).m_controller.DispatchOrder(R6Terrorist(m_ActionTarget).eTerroristCircumstantialAction.CAT_Secure, m_pawn);
-    while( !R6Terrorist(m_ActionTarget).PawnHaveFinishedRotation() )
-        Sleep(0.1);
-
-	m_pawn.SetNextPendingAction(PENDING_SecureTerrorist);
-	FinishAnim( m_pawn.C_iBaseBlendAnimChannel );
-	m_bStateFlag = true;
-
-	// Equip weapon
-	m_pawn.SetNextPendingAction(PENDING_EquipWeapon);
-    FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-
-End:
-	if(m_pawn.m_iId == 0)
-	{
-		// AI team leader
-		m_TeamManager.m_SurrenderedTerrorist = none;
-		GotoState('Patrol');
-	}
-	else
-	{
-		m_TeamManager.MoveTeamToCompleted(true);
-	}
+	return;
 }
 
 //------------------------------------------------------------------
 // TooCloseToThrowGrenade: check if we are too close to throw the grenade
 //	the distance decrease when it's taking too much time
 //------------------------------------------------------------------
-function bool TooCloseToThrowGrenade( vector vPawnLocation  )
+function bool TooCloseToThrowGrenade(Vector vPawnLocation)
 {
-    local R6EngineWeapon weapon;
-    local FLOAT fKillRadius;
-    local FLOAT fExplosionRadius;
+	local R6EngineWeapon weapon;
+	local float fKillRadius, fExplosionRadius;
 
-    weapon = m_pawn.GetWeaponInGroup(m_iActionUseGadgetGroup);
-    if ( weapon == none )
-        return false;
-
-    if ( VSize( vPawnLocation - m_vLocationOnTarget ) < weapon.GetSaveDistanceToThrow() )
-        return true;   
-    
-    return false;
+	weapon = m_pawn.GetWeaponInGroup(m_iActionUseGadgetGroup);
+	// End:0x27
+	if(__NFUN_114__(weapon, none))
+	{
+		return false;
+	}
+	// End:0x4B
+	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(vPawnLocation, m_vLocationOnTarget)), weapon.GetSaveDistanceToThrow()))
+	{
+		return true;
+	}
+	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -2488,64 +1560,65 @@ function bool TooCloseToThrowGrenade( vector vPawnLocation  )
 // bTest: used to evaluate if the rainbow is gonna be damaged 
 //                 by the grenade
 //------------------------------------------------------------------
-function bool CanThrowGrenade( vector vPawnLocation, bool bTraceActors, bool bCheckTooClose )
+function bool CanThrowGrenade(Vector vPawnLocation, bool bTraceActors, bool bCheckTooClose)
 {
-    local vector vDir;
-    local vector vTargetLoc;
-    local FLOAT fDist;
-	local actor  hitActor;
-	local vector vHitLocation;
-	local vector vHitNormal;
-    local INT iTraceFlags;
+	local Vector vDir, vTargetLoc;
+	local float fDist;
+	local Actor HitActor;
+	local Vector vHitLocation, vHitNormal;
+	local int iTraceFlags;
 
-    vDir = m_vLocationOnTarget - vPawnLocation;
-    
-    // If farther than 1500 units
-    fDist = VSize(vDir);
-    if( fDist > 1500 )
-        return false;	// logX( "CanThrowGrenade: FALSE > 1500 units" );
-    
-    // if i'm going to hurt my self
-    if ( bCheckTooClose && TooCloseToThrowGrenade( vPawnLocation ) )        
-        return false;	// logX( "CanThrowGrenade: FALSE too close" );
-
-    // approx check: are we gonna hit something if we throw the grenade
-    vTargetLoc = m_vLocationOnTarget;
-    vTargetLoc.Z += 15; // above the ground
-    if(bTraceActors)
-        iTraceFlags = TF_TraceActors;
-    iTraceFlags = iTraceFlags|TF_LineOfFire;
-    hitActor = R6Trace(	vHitLocation, vHitNormal, vTargetLoc, vPawnLocation, iTraceFlags, vect(20,20,10) );
-
-    // m_pawn.dbgVectorAdd( vTargetLoc,    vect(10,10,10), 0, "target" );
-    // m_pawn.dbgVectorAdd( vHitLocation,  vect(10,10,10), 1, "hit" );
-    
-    // if hit something and it's too far from target
-    if ( hitActor != none && VSize( vHitLocation  - vTargetLoc ) > 30 ) // 30: flexible value. gives good result if not exactly on target.
-        return false;	// logX( "CanThrowGrenade: FALSE  hit > 30 units. hitActor=" $hitActor.name$ " vSize:" $VSize( vHitLocation  - vTargetLoc ) );
-
-	// logX( "CanThrowGrenade: TRUE " );
-	return true;	
+	vDir = __NFUN_216__(m_vLocationOnTarget, vPawnLocation);
+	fDist = __NFUN_225__(vDir);
+	// End:0x32
+	if(__NFUN_177__(fDist, float(1500)))
+	{
+		return false;
+	}
+	// End:0x4D
+	if(__NFUN_130__(bCheckTooClose, TooCloseToThrowGrenade(vPawnLocation)))
+	{
+		return false;
+	}
+	vTargetLoc = m_vLocationOnTarget;
+	__NFUN_184__(vTargetLoc.Z, float(15));
+	// End:0x78
+	if(bTraceActors)
+	{
+		iTraceFlags = 1;
+	}
+	iTraceFlags = __NFUN_158__(iTraceFlags, 4);
+	HitActor = __NFUN_1806__(vHitLocation, vHitNormal, vTargetLoc, vPawnLocation, iTraceFlags, vect(20.0000000, 20.0000000, 10.0000000));
+	// End:0xDC
+	if(__NFUN_130__(__NFUN_119__(HitActor, none), __NFUN_177__(__NFUN_225__(__NFUN_216__(vHitLocation, vTargetLoc)), float(30))))
+	{
+		return false;
+	}
+	return true;
+	return;
 }
 
 //------------------------------------------------------------------
 // ClearThrowIsAvailable()
 //------------------------------------------------------------------
-function bool ClearThrowIsAvailable(vector vTarget)
+function bool ClearThrowIsAvailable(Vector vTarget)
 {
-	local	actor	hitActor;
-	local   vector	vHitLocation, vHitNormal;		
+	local Actor HitActor;
+	local Vector vHitLocation, vHitNormal;
 
-	hitActor = pawn.R6Trace( vHitLocation, vHitNormal, vTarget + vect(0,0,40), pawn.location, TF_TraceActors|TF_LineOfFire, vect(30,30,15) );
-	#ifdefDEBUG  if(bShowLog)	log(" ClearThrowIsAvailable() : pawn.location="$pawn.location$"  vTarget="$vTarget$" hitActor="$hitActor);	#endif
-
-	if(hitActor == none)
+	HitActor = Pawn.__NFUN_1806__(vHitLocation, vHitNormal, __NFUN_215__(vTarget, vect(0.0000000, 0.0000000, 40.0000000)), Pawn.Location, __NFUN_158__(1, 4), vect(30.0000000, 30.0000000, 15.0000000));
+	// End:0x5D
+	if(__NFUN_114__(HitActor, none))
+	{
 		return true;
-
-	if(hitActor.IsA('R6Pawn'))
+	}
+	// End:0x73
+	if(HitActor.__NFUN_303__('R6Pawn'))
+	{
 		return false;
-
+	}
 	return true;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -2553,1713 +1626,206 @@ function bool ClearThrowIsAvailable(vector vTarget)
 //------------------------------------------------------------------
 function ResetTeamMoveTo()
 {
-	local INT iWeapon;
+	local int iWeapon;
 
 	m_iStateProgress = 0;
-	SetTimer( 0, false );
+	__NFUN_280__(0.0000000, false);
+	// End:0x9E
 	if(m_pawn.m_bInteractingWithDevice)
 	{
-		#ifdefDEBUG	if(bShowLog) log(" Quit Interacting With Device prematurely... ");	#endif
 		m_pawn.m_bInteractingWithDevice = false;
-		m_pawn.m_bPostureTransition = false;	
-		m_pawn.AnimBlendToAlpha(m_pawn.C_iBaseBlendAnimChannel, 0.0, 0.5);
-		m_pawn.m_ePlayerIsUsingHands = HANDS_None;	
-		
-        if(R6IOObject(m_ActionTarget) != none)
-			R6IOObject(m_ActionTarget).PerformSoundAction(SIO_Interrupt);
+		m_pawn.m_bPostureTransition = false;
+		m_pawn.AnimBlendToAlpha(m_pawn.1, 0.0000000, 0.5000000);
+		m_pawn.m_ePlayerIsUsingHands = 0;
+		// End:0x9E
+		if(__NFUN_119__(R6IOObject(m_ActionTarget), none))
+		{
+			R6IOObject(m_ActionTarget).PerformSoundAction(1);
+		}
 	}
-
-	// make sure rainbow gets weapon back
-	if(m_pawn.m_bWeaponIsSecured && !m_pawn.m_bWeaponTransition)
+	// End:0xE6
+	if(__NFUN_130__(m_pawn.m_bWeaponIsSecured, __NFUN_129__(m_pawn.m_bWeaponTransition)))
 	{
-		m_pawn.SetNextPendingAction(PENDING_EquipWeapon);
+		m_pawn.SetNextPendingAction(28);
 		m_pawn.PlayWeaponAnimation();
 	}
-	
-	// make sure m_iCurrentWeapon is valid
-	m_pawn.m_iCurrentWeapon = FClamp(m_pawn.m_iCurrentWeapon, 1, 4);
+	m_pawn.m_iCurrentWeapon = int(__NFUN_246__(float(m_pawn.m_iCurrentWeapon), 1.0000000, 4.0000000));
 	VerifyWeaponInventory();
 	EnsureRainbowIsArmed();
+	return;
 }
 
-//==========================================================//
-//              -- state TeamMoveTo --                      //
-//==========================================================//
-state TeamMoveTo
-{
-    function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) logX( " begin state");		#endif
-		m_pawn.ResetBoneRotation();
-	    m_pawn.m_bAvoidFacingWalls = false;	
-		m_iStateProgress = 0;
-    }
-
-	// this code was moved into a function because the BeginState() is not called again when a GotoState() is done on the current state.
-	function SetUpTeamMoveTo()
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" :: SetUpTeamMoveTo() was called...m_iStateProgress="$m_iStateProgress);	#endif
-        #ifdefDEBUG	if(bShowLog) log(pawn$" :: m_vLocationOnTarget="$m_vLocationOnTarget$" m_vActionLocation="$m_TeamManager.m_vActionLocation);	#endif
-		SetTimer( 0, false );
-		
-		m_vTargetPosition = m_TeamManager.m_vActionLocation;
-
-		// if it's a move and grenade action and it's the first time, check
-        // if we can throw the grenade from here, if fails, check if we
-        // are too close, if so, get a nav point to go, otherwise walk in 
-        // the direction of the point.
-        if (( (m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0 ) && ( m_iStateProgress == 0 ))
-        {
-            m_iStateProgress = 1; // first try
-            // check if can throw grenade from here and if i'm not to close
-            if ( !CanThrowGrenade( pawn.Location, false, true ) )
-            {
-                // try to be further from the location
-                if ( TooCloseToThrowGrenade( pawn.Location ) &&
-                     FindRandomNavPointToThrowGrenade() ) 
-                {
-                    // m_vTargetPosition is set in FindRandomNavPointToThrowGrenade
-                    // logX( "beginstate: FindRandomNavPointToThrowGrenade ok" );
-                    m_iStateProgress = 2; // try to reach a nav point
-                }
-                else
-                {
-                    // walk toward 
-                    m_vTargetPosition = m_vLocationOnTarget;
-                    m_vTargetPosition.Z += pawn.collisionHeight;
-
-                    // as we walk toward, try to find the moment we can stop
-                    SetTimer( 0.3, true );
-                }
-            }
-            else
-            {
-                // don't move, we are okay here
-                m_vTargetPosition = pawn.Location;
-            }
-        }
-	}
-
-    function EndState()
-    {
-		#ifdefDEBUG	if(bShowLog) logX( " end state");	#endif
-		SetTimer( 0, false );
-		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
-
-		ResetTeamMoveTo();
-    }	
-    
-    //------------------------------------------------------------------
-    // FindRandomNavPointToThrowGrenade:
-    //	try to find a spot to throw a grenade. Not too far from where he's
-    //  standing.
-    //------------------------------------------------------------------
-    function bool FindRandomNavPointToThrowGrenade()
-    {
-        local Actor actor;
-        local INT i;
-        local INT iSize;
-        local vector vLocationList[10]; // 10 tries
-        local INT iLocationListIndex;
-        local INT iDistance;
-        
-        while ( i < ArrayCount( vLocationList ) ) 
-        {
-            actor = FindRandomDest( true );
-            //m_pawn.dbgVectorAdd( actor.location,  vect(10,10,10), i+10, "nav" );
-            if ( !actor.isA( 'r6Ladder') &&                        // not a ladder (i don't want to climb)
-                abs( actor.location.Z - Pawn.Location.Z ) < 400 )  // don't want to climb a ladder to reach this point
-            {
-                if (CanThrowGrenade( actor.location, false, true )) // would it be possible to throw the grenade
-                {
-                    m_vTargetPosition = actor.location;
-                    return true;
-                }
-                else
-                {
-                    if ( TooCloseToThrowGrenade( actor.location ) )
-                    {
-                        vLocationList[iLocationListIndex] = actor.location;
-                        iLocationListIndex++;
-                    }
-                }
-            }
-            i++;
-        }
-
-        // even if it all fails, get the furthes distance from all location that were too close from the target
-        if ( iLocationListIndex > 0 )
-        {
-            i = 0;
-            for ( i = 0; i < iLocationListIndex; ++i )
-            {
-                // logX( "FindRandomNavPointToThrowGrenade second check: " $i$ " distance: " $VSize(vLocationList[i] - Pawn.Location) );
-                if ( VSize(vLocationList[i] - Pawn.Location) > iDistance  )
-                {
-                    // check if can throw without the location
-                    if  ( CanThrowGrenade( vLocationList[i], false, false ) )       
-                    {
-                        // logX( "FindRandomNavPointToThrowGrenade second check: Okay " );
-                        iDistance = VSize(vLocationList[i] - Pawn.Location);
-                        m_vTargetPosition = vLocationList[i];
-                    }
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
-    function Timer()
-    {
-        // check if we can throw the grenade from here
-        if ( (m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0 )
-        {
-            if ( CanThrowGrenade(pawn.location, true, false ) )
-            {
-                SetTimer( 0, false );
-                StopMoving();
-                GotoState( 'TeamMoveTo', 'Action' );
-            }
-        }
-    }
-
-Begin:
-	if( ((m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0)  && m_vLocationOnTarget == vect(0,0,0))
-		goto('End');
-
-	StopMoving();
-	while(m_TeamManager.m_bCAWaitingForZuluGoCode)
-	{
-		m_TeamManager.SetTeamState(TS_Waiting);
-		Sleep(0.5);
-	}
-
-	SetUpTeamMoveTo();
-	
-	// apply a delay based on leadership skill before team starts performing order
-	Sleep(GetLeadershipReactionTime());
-
-MoveTowardTarget:
-	m_TeamManager.SetTeamState(TS_Moving);
-
-	if((m_TeamManager.m_iTeamAction & TEAM_EscortHostage) > 0) 
-	{
-		if(!ActorReachable(m_ActionTarget)) 
-			FindPathToTargetLocation(m_ActionTarget.location, m_ActionTarget);
-	}
-	else
-	{
-		if(!PointReachable(m_vTargetPosition)) 
-			FindPathToTargetLocation(m_vTargetPosition);
-	}
-
-FinalMove:
-	#ifdefDEBUG	if(bShowlog) logX(" move directly from current location="$pawn.location$" to m_ActionTarget="$m_ActionTarget$" m_vTargetPosition="$m_vTargetPosition);	#endif	
-	if ( (m_TeamManager.m_iTeamAction & TEAM_EscortHostage) > 0 )
-	{
-		while (DistanceTo(m_ActionTarget) > 100)
-		{
-			R6PreMoveToward(m_ActionTarget, m_ActionTarget, PACE_Walk);  
-			MoveToward(m_ActionTarget);    
-		}
-	}
-	else
-	{
-		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk);  
-		MoveTo(m_vTargetPosition);    
-	
-		if(m_TeamManager.m_iTeamAction != TEAM_None && m_eMoveToResult == eMoveTo_failed)
-		{		
-			m_TeamManager.MoveTeamToCompleted(false);
-			RainbowCannotCompleteOrders();
-		}
-	}
-	
-Action:
-	#ifdefDEBUG	if(bShowLog) logX(" State TeamMoveTo : Ready to perform action... ");  #endif
-    if( (m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0 )
-    {
-		m_TeamManager.SetTeamState(TS_Grenading);
-        if ( CanThrowGrenade(pawn.Location, false, false) )
-        {
-			#ifdefDEBUG	if(bShowLog) logX( "CanThrowGrenade: fire in the house! m_vTargetPosition="$m_vTargetPosition );	#endif   
-			
-			// check if someone is in the way before throwing the grenade
-			if( !ClearThrowIsAvailable(m_vLocationOnTarget) )
-			{
-				m_vTargetPosition = pawn.location + 300*normal(m_vLocationOnTarget - pawn.location);
-
-				// move towards target - team should back out of way
-				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk);  
-				MoveTo(m_vTargetPosition); 
-			}
-
-            SetTimer( 0, false );       // stop timer, we don't need it anymore
-            disable( 'notifyBump' );    // avoid bumping when throwing
-            StopMoving();               // make sure we are stopeed
-            Sleep( 0.2 );
-            
-            // set the grenade target...
-            SetLocation( m_vLocationOnTarget );
-            focus = self;
-            target = self;
-
-            // change weapon to grenade... 
-            SwitchWeapon(m_iActionUseGadgetGroup);	
-            FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-			SetRotation(pawn.rotation);            
-            
-			// throw grenade 
-			SetGunDirection(target);
-			m_pawn.m_bThrowGrenadeWithLeftHand = false;
-            m_pawn.m_eGrenadeThrow = GRENADE_Throw;
-            m_pawn.m_eRepGrenadeThrow = GRENADE_Throw;
-            m_pawn.PlayWeaponAnimation(); 
-			FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-			m_pawn.m_eRepGrenadeThrow = GRENADE_None;
-		
-            // reset values
-            m_vLocationOnTarget = vect(0,0,0); 
-            m_iStateProgress=0;
-            
-            enable( 'notifyBump' );
-
-            // return to original weapon
-            SwitchWeapon(1);
-            FinishAnim(m_pawn.C_iWeaponRightAnimChannel);
-        }
-        else
-        {
-			#ifdefDEBUG	if(bShowLog) logX( "CanThrowGrenade: find a spot to throw the grenade" );	#endif
-            SetTimer( 0.3, true );
-            m_vTargetPosition = m_vLocationOnTarget;
-            m_vTargetPosition.Z += pawn.collisionHeight;
-
-            Sleep( 0.2 );
-            goto('begin');
-        }
-		Sleep(1);
-    }
-    else if ( ((m_TeamManager.m_iTeamAction & TEAM_DisarmBomb) > 0) || ((m_TeamManager.m_iTeamAction & TEAM_InteractDevice) > 0) )
-    {
-        if ( m_eMoveToResult == eMoveTo_success  )
-        {
-			if((m_TeamManager.m_iTeamAction & TEAM_DisarmBomb) > 0)
-			{
-				if(!R6IOObject(m_ActionTarget).m_bIsActivated)
-					RainbowCannotCompleteOrders();	// bomb has already been disarmed, cancel the orders
-				m_TeamManager.SetTeamState(TS_DisarmingBomb);
-			}
-			else
-				m_TeamManager.SetTeamState(TS_InteractWithDevice);
-
-			// move as close as possible to the object
-			m_vTargetPosition = m_ActionTarget.location - (pawn.collisionRadius + m_ActionTarget.collisionRadius + 10)*vector(m_ActionTarget.rotation);
-			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk);
-			MoveToPosition(m_vTargetPosition, rotator(m_ActionTarget.location - m_vTargetPosition));
-			
-            Focus = m_ActionTarget;
-            FinishRotation();
-			#ifdefDEBUG	if(bShowLog) log("PlayInteractWithDeviceAnimation for "$m_pawn @ R6IOObject(m_ActionTarget).GetTimeRequired(m_pawn));	#endif
-			// secure weapon
-			m_pawn.SetNextPendingAction(PENDING_SecureWeapon);
-		    FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-
-            m_pawn.m_eDeviceAnim = R6IOObject(m_ActionTarget).m_eAnimToPlay;
-            m_pawn.SetNextPendingAction(PENDING_InteractWithDevice);
-            
-            R6IOObject(m_ActionTarget).PerformSoundAction(SIO_Start);
-            m_pawn.m_bInteractingWithDevice = true;
-            Sleep(R6IOObject(m_ActionTarget).GetTimeRequired(m_pawn));
-            R6IOObject(m_ActionTarget).ToggleDevice(m_pawn);
-            R6IOObject(m_ActionTarget).PerformSoundAction(SIO_Complete);
-            PlaySoundActionCompleted(R6IOObject(m_ActionTarget).m_eAnimToPlay);
-			#ifdefDEBUG	if(bShowLog) log("PlayInteractWithDeviceAnimation() is finished for "$m_pawn);	#endif
-			m_pawn.AnimBlendToAlpha(m_pawn.C_iBaseBlendAnimChannel, 0.0, 0.5);
-            m_pawn.m_bInteractingWithDevice = false;
-            m_pawn.m_ePlayerIsUsingHands = HANDS_None;
-            m_pawn.PlayWeaponAnimation();
-			Sleep(1.0);
-			            
-			// equip weapon
-			m_pawn.SetNextPendingAction(PENDING_EquipWeapon);
-			FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-        }
-        else
-        {
-			// could not reach the ActionTarget (bomb or device)
-			RainbowCannotCompleteOrders();
-
-			// todo FAILED : Play sound not able to reach the bomb	
-			#ifdefDEBUG	if(bShowLog) log(pawn$" could not reach interactive device : "$m_ActionTarget);		#endif
-		}
-    }
-    else
-	{ 
-		if ( (m_TeamManager.m_iTeamAction & TEAM_EscortHostage) > 0 )
-		{
-			// instruct hostage to follow or stay here		
-			if(R6Hostage(m_ActionTarget).m_escortedByRainbow != none)
-        		R6Hostage(m_ActionTarget).m_controller.DispatchOrder( R6Hostage(m_ActionTarget).m_Controller.eHostageOrder.HOrder_StayHere );
-			else
-				R6Hostage(m_ActionTarget).m_controller.DispatchOrder( R6Hostage(m_ActionTarget).m_Controller.eHostageOrder.HOrder_ComeWithMe, m_pawn );
-		}
-		Sleep(1);
-	}
-	
-	if(m_pawn.m_iId == 0)
-		m_TeamManager.ActionCompleted(true);
-	m_TeamManager.RestoreTeamOrder();
-
-End:
-	if(m_pawn.m_iId == 0)
-		GotoState('Patrol');
-	else
-	{
-		m_TeamManager.MoveTeamToCompleted(true);
-		nextState = '';
-		GotoState('HoldPosition');
-	}
-}
-
-//==========================================================//
-//                  -- state WAITFORTEAM --                 //
-// this state is for an AI team leader that is waiting for  //
-// his team to regroup (after climbing a ladder)            //
-//==========================================================//
-state WaitForTeam
-{
-	function BeginState()	
-	{	
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has entered state WaitForTeam...");		#endif
-		m_bReactToNoise = true;
-	}
-	
-	function EndState()		
-	{	
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has exited state WaitForTeam...");		#endif
-		m_bReactToNoise = false;
-	}
-
-Begin:
-	if(m_TeamManager.m_iMemberCount == 1)
-	{
-		#ifdefDEBUG	if(bShowLog) log("  If this is the only member in the team, no need to find a wait spot, continue following planning...");	#endif
-		goto('Wait');
-	}
-	
-    //make room for team to arrive at end of ladder
-	#ifdefDEBUG	if(bShowLog) log(" WaitForTeam : m_pawn.m_Ladder="$m_pawn.m_Ladder$" m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);	#endif
-	if(m_TeamManager.m_PlanActionPoint != none)
-	{
-		m_vTargetPosition = m_pawn.m_Ladder.Location;
-		if(m_TeamManager.m_PlanActionPoint == m_pawn.m_Ladder)
-			m_TeamManager.ActionPointReached();
-
-		while(VSize(m_vTargetPosition - pawn.location) < 300)
-		{
-			if(m_TeamManager.m_PlanActionPoint == none)
-				break;
-			
-			#ifdefDEBUG	if(bShowLog) log(pawn$" now go to :m_pawn.m_door="$m_pawn.m_door$" m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);		#endif
-			if(m_pawn.m_door != none && m_pawn.m_door.m_RotatingDoor.m_bIsDoorClosed && NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint))
-				break;
-
-			// if planning leads this AI back through the ladder they just took, then find a better wait spot until team finishes climbing...
-			if(m_TeamManager.m_PlanActionPoint == m_pawn.m_Ladder || !ActorReachable(m_TeamManager.m_PlanActionPoint) || m_TeamManager.m_eNextAPAction != PACT_None)
-			{
-				#ifdefDEBUG if(bShowLog) log(self$" State WaitForTeam : "$m_TeamManager.m_PlanActionPoint$" is not reachable so goto FindNearbySpot..."); #endif
-				goto('FindNearbySpot');
-			}
-
-			R6PreMoveToward(m_TeamManager.m_PlanActionPoint, m_TeamManager.m_PlanActionPoint, GetTeamPace());
-			MoveToward(m_TeamManager.m_PlanActionPoint);			
-			m_TeamManager.ActionPointReached();
-		}
-	}
-	else
-	{
-FindNearbySpot:
-		FindNearbyWaitSpot(m_pawn.m_Ladder, m_vTargetPosition);
-		if(m_vTargetPosition != vect(0,0,0))
-		{
-			#ifdefDEBUG	if(bShowLog) log(pawn$" obtained a Wait Spot from FindNearbyWaitSpot() : m_vTargetPosition="$m_vTargetPosition);	#endif
-			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetTeamPace());
-			MoveTo(m_vTargetPosition);
-		}
-	}
-
-	#ifdefDEBUG if(bShowLog) log(" wait for team to catch up here....");	#endif
-
-Wait:
-    Sleep(1.0);
-	if(m_TeamManager.TeamHasFinishedClimbingLadder())
-	{
-		m_pawn.m_Ladder = none;
-
-		// check if team is supposed to be holding position
-		if(m_TeamManager.m_bAllTeamsHold)
-			m_TeamManager.AITeamHoldPosition();
-		else
-			GotoState('Patrol');   
-	}
-	else
-		Goto('Wait');
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//                          RAINBOW AI TEAM LEADER                                      //
-//////////////////////////////////////////////////////////////////////////////////////////
 function R6Pawn.eMovementPace GetTeamPace()
 {
-    local R6Pawn.eMovementPace      ePace;
+	local R6Pawn.eMovementPace ePace;
 
-    // find out what pace this team should be moving at...
-	// if any rainbow members/escorted hostages are wounded, walk instead of run
 	switch(m_TeamManager.m_eMovementSpeed)
 	{
-		case SPEED_Blitz :	
+		// End:0x3D
+		case 0:
+			// End:0x32
 			if(m_TeamManager.AtLeastOneMemberIsWounded())
-				ePace = PACE_Walk;
+			{
+				ePace = 4;				
+			}
 			else
-				ePace = PACE_Run;
+			{
+				ePace = 5;
+			}
+			// End:0x68
 			break;
-
-		case SPEED_Normal :
-			ePace = PACE_Walk;
+		// End:0x4D
+		case 1:
+			ePace = 4;
+			// End:0x68
 			break;
-
-		case SPEED_Cautious :
-			ePace = PACE_CrouchWalk;
+		// End:0x5D
+		case 2:
+			ePace = 2;
+			// End:0x68
 			break;
-
+		// End:0xFFFF
 		default:
-			ePace = PACE_Walk;
+			ePace = 4;
+			break;
 	}
-
-    m_pawn.m_eMovementPace =  ePace;           
-    return(ePace);
+	m_pawn.m_eMovementPace = ePace;
+	return ePace;
+	return;
 }
 
-function bool NextActionPointIsThroughDoor(actor nextActionPoint)
+function bool NextActionPointIsThroughDoor(Actor nextActionPoint)
 {
-	local vector	vDir;
-	local FLOAT		fResult;
-	
-	if(nextActionPoint == none)
-		return false;
+	local Vector vDir;
+	local float fResult;
 
-	if(m_pawn.m_Door == none)
+	// End:0x0D
+	if(__NFUN_114__(nextActionPoint, none))
+	{
 		return false;
-
+	}
+	// End:0x23
+	if(__NFUN_114__(m_pawn.m_Door, none))
+	{
+		return false;
+	}
+	// End:0x49
 	if(m_pawn.m_Door.m_RotatingDoor.m_bTreatDoorAsWindow)
+	{
 		return false;
-
-	if(VSize(nextActionPoint.location - m_pawn.m_Door.location) > VSize(nextActionPoint.location - m_pawn.m_Door.m_CorrespondingDoor.location) )
+	}
+	// End:0xAB
+	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(nextActionPoint.Location, m_pawn.m_Door.Location)), __NFUN_225__(__NFUN_216__(nextActionPoint.Location, m_pawn.m_Door.m_CorrespondingDoor.Location))))
+	{
 		return true;
-
+	}
 	return false;
+	return;
 }
 
 function SetGrenadeParameters(bool bPeeking, optional bool bThrowOverhand)
 {
+	// End:0x83
 	if(bPeeking)
 	{
-		// check which side of the door we are on
+		// End:0x4D
 		if(OnRightSideOfDoor(m_ActionTarget))
 		{
 			m_pawn.m_bThrowGrenadeWithLeftHand = true;
-			m_pawn.m_eGrenadeThrow = GRENADE_PeekLeft;
-			m_pawn.m_eRepGrenadeThrow = GRENADE_PeekLeft;
+			m_pawn.m_eGrenadeThrow = 4;
+			m_pawn.m_eRepGrenadeThrow = 4;			
 		}
 		else
 		{
 			m_pawn.m_bThrowGrenadeWithLeftHand = false;
-			m_pawn.m_eGrenadeThrow = GRENADE_PeekRight; 
-			m_pawn.m_eRepGrenadeThrow = GRENADE_PeekRight;
-		}
-	}
-	else if(bThrowOverhand)
-	{
-		m_pawn.m_bThrowGrenadeWithLeftHand = false;
-		m_pawn.m_eGrenadeThrow = GRENADE_Throw; 
-		m_pawn.m_eRepGrenadeThrow = GRENADE_Throw;
+			m_pawn.m_eGrenadeThrow = 5;
+			m_pawn.m_eRepGrenadeThrow = 5;
+		}		
 	}
 	else
 	{
-		m_pawn.m_bThrowGrenadeWithLeftHand = false;
-		m_pawn.m_eGrenadeThrow = GRENADE_Roll; 
-		m_pawn.m_eRepGrenadeThrow = GRENADE_Roll;
-	}
-}
-
-function ConfirmLadderActionPointWasReached(R6Ladder ladder)
-{
-	if(m_pawn.m_ePawnType == PAWN_Rainbow && m_pawn.m_iId == 0)
-	{
-		if(ladder == m_TeamManager.m_PlanActionPoint)
+		// End:0xC2
+		if(bThrowOverhand)
 		{
-			#ifdefDEBUG	if(bShowLog) log("  Rainbow Team Leader reached the end of the ladder : m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);		#endif
-			m_TeamManager.ActionPointReached();	
-		}
-	}
-}
-
-function bool TargetIsLadderToClimb(R6Ladder target)
-{
-	if(target == none || m_pawn.m_Ladder == none)
-		return false;
-
-	if(m_pawn.m_Ladder == target)
-		return false;
-	
-	if(target.myLadder != m_pawn.m_Ladder.myLadder)
-		return false;
-
-	return true;
-}
-
-//==========================================================//
-//                  -- state PATROL --                      //
-// This is the main state for an AI team leader.            //
-// TODO:    need to add bone rotation for AI team leader    //
-//          on stairs, to look up/down...                   //
-// todo : AI team lead should automatically secure a		//
-//			surrendered terrorist							//
-//	      AI team lead should automatically interact with   //
-//          objects that are mission objectives				//
-//		  AI led team should reorganize for Open Frag &     //
-//			clear if the lead is not the one with the frag	//	  
-//==========================================================//
-state Patrol
-{
-    function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$"... entered state Patrol...");	#endif
-		m_pawn.m_bAvoidFacingWalls = false; 
-		m_iWaitCounter = 0;
-		m_pawn.m_bCanProne = false;
-		m_bReactToNoise = true;
-		m_bStateFlag = false;
-    }
-
-    function EndState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$"... exited state Patrol...");	#endif
-		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;	
-		SetTimer(0, false);
-		m_pawn.m_bThrowGrenadeWithLeftHand = false;
-		m_bIgnoreBackupBump = false;
-		m_pawn.m_bCanProne = m_pawn.default.m_bCanProne;
-		m_bReactToNoise = false;
-
-		if(m_bStateFlag)
-			m_TeamManager.ActionNodeCompleted();
-    }
-
-	function bool CornerMovement()
-	{
-		local vector PathA, PathB;
-
-		PathA = normal(moveTarget.location - pawn.location);
-		PathB = normal(m_NextMoveTarget.location - moveTarget.location);
-
-		// strafe around corners when angle is >= 45 degrees
-		if(PathA dot PathB < 0.707)  
-			return true;
-
-		return false;
-	}
-
-	function DispatchInteractions()
-	{
-		local actor actionTarget;
-
-		// check surroundings for possible actors to interact with...
-		actionTarget = CheckForPossibleInteractions();
-
-		// dispatch action
-		if(actionTarget != none)
-		{
-			#ifdefDEBUG	if(bShowLog) logX(" a nearby object was found that corresponds to a mission objective - DO SOMETHING! actionTarget="$actionTarget);	#endif
-			// check if next waypoint is closer to actionTarget, and that the actionTarget is reachable from the next moveTarget
-			if( (moveTarget != none) 
-				&& (VSize(moveTarget.location - actionTarget.location) < VSize(pawn.location - actionTarget.location))
-				&& ActorReachableFromLocation(actionTarget, moveTarget.location) )
-				return;
-			
-			if(actionTarget.IsA('R6IOBomb'))
-			{			
-				#ifdefDEBUG	if(bShowLog) logX(" Reorganize team and go disarm bomb ");	#endif
-				m_TeamManager.ReorganizeTeamToInteractWithDevice(TEAM_DisarmBomb, actionTarget);
-			}	
-			else if(actionTarget.IsA('R6IODevice'))
-			{
-				#ifdefDEBUG	if(bShowLog) logX(" Reorganize team and go interact with device ");		#endif
-				m_TeamManager.ReorganizeTeamToInteractWithDevice(TEAM_InteractDevice, actionTarget);
-			}
-			else if(actionTarget.IsA('R6Terrorist'))
-			{      
-				#ifdefDEBUG	if(bShowLog) logX(" Arrest surrendered terrorist ");	#endif
-				m_ActionTarget = actionTarget;
-				GotoState('TeamSecureTerrorist');	
-			}					
-			else if(actionTarget.IsA('R6Hostage'))
-			{
-                //if (R6Hostage(actionTarget).IsAlive()) 
-                // MPF1
-                if (R6Hostage(actionTarget).IsAlive() && (!R6Hostage(actionTarget).m_bCivilian))//MissionPack1
-                {
-			        #ifdefDEBUG	if(bShowLog) logX(" Rescue Hostage ");	#endif
-			        if (!m_TeamManager.m_bLeaderIsAPlayer)
-                    {
-                        m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, RTV_EscortingHostage);
-                    }
-                    R6Hostage(actionTarget).m_controller.DispatchOrder( R6Hostage(actionTarget).m_Controller.eHostageOrder.HOrder_ComeWithMe, m_pawn );
-                }
-				m_TeamManager.m_HostageToRescue = none;
-			}
-		}
-	}
-
-    function Timer()
-    {		
-		m_iWaitCounter++;
-		// check for next waypoint...
-		if((moveTarget != none) && (m_NextMoveTarget != none) && !ActionIsGrenade(m_TeamManager.m_ePlanAction))
-		{
-			if(enemy == none && DistanceTo(moveTarget) < 200)
-			{
-				if(CornerMovement() && m_NextMoveTarget != none)
-				{	
-					focus = m_NextMoveTarget;
-					focalPoint = m_NextMoveTarget.location;
-				}
-			}
-		}
-
-        if(m_bTeamMateHasBeenKilled)  // <-- this boolean is set by teamAI, as a means of informing leader 
-        {
-			#ifdefDEBUG	if(bShowLog) log(" m_bTeamMateHasBeenKilled==true, member of the team has been killed...");	#endif
-            m_bTeamMateHasBeenKilled = false;
-            pawn.acceleration = vect(0,0,0);    
-            nextState = 'Patrol';
-            GotoState('HoldPosition');
-			return;
-        }
-
-		// interact with nearby objects, check every 1 second
-		if((m_iWaitCounter % 10) == 0)
-			DispatchInteractions();
-    }
-  
-    function bool ConfirmActionPointReached()
-    {
-        if(VSize(moveTarget.location - pawn.location) < 100)
-            return true;
-
-        return false;
-    } 
- 
-	function bool IsCloseEnoughToInteractWith(actor actionTarget)
-	{
-		if(actionTarget == none)
-			return false;
-
-		if((DistanceTo(actionTarget) < 500) && (abs(pawn.location.z - actionTarget.location.z) < 100))
-			return true;
-
-		return false;
-	}
-
-	function actor CheckForPossibleInteractions()
-	{
-		local INT i;
-		local R6InteractiveObject aIntActor;
-		local R6Terrorist   terro;
-
-		// check for nearby interactive objects
-		for(i=0; i<m_TeamManager.m_InteractiveObjectList.length; i++)
-		{
-			aIntActor = m_TeamManager.m_InteractiveObjectList[i];
-			if(aIntActor != none)
-			{
-				// check if this actor is close (within 5m)
-				if(R6IOObject(aIntActor).m_bIsActivated && IsCloseEnoughToInteractWith(aIntActor))  // && ActorReachable(aIntActor) )
-					return aIntActor;						
-			}
-		}
-
-		if(m_TeamManager.m_HostageToRescue != none)
-		{
-			if(IsCloseEnoughToInteractWith(m_TeamManager.m_HostageToRescue))
-				return m_TeamManager.m_HostageToRescue;
-		}
-
-		// check for possible terrorist that needs to be secured...		 
-		if(m_TeamManager.m_SurrenderedTerrorist != none)
-		{
-			terro = R6Terrorist(m_TeamManager.m_SurrenderedTerrorist);
-			if(IsCloseEnoughToInteractWith(terro) && !terro.m_bIsUnderArrest)	//ActorReachable(terro)
-				return terro;
-		}
-		return none;
-	}
-
-	function bool ActionIsGrenade(EPlanAction eAPAction)
-	{
-		if(eAPAction == PACT_Frag || eAPAction == PACT_Flash || eAPAction == PACT_Gas || eAPAction == PACT_Smoke)
-			return true;
-		return false;
-	}
-
-	function actor GetFocus()
-	{
-		if(enemy == none)
-			return moveTarget;
-		
-		return enemy;
-	}
-
-Begin:
-	// set timer to check on teammates & status
-    SetTimer(0.1, true);     
-
-	moveTarget = m_TeamManager.m_PlanActionPoint; 
-    if(moveTarget != none && ConfirmActionPointReached())
-		m_TeamManager.ActionPointReached();
-	
-	if(m_TeamManager.m_bPendingSnipeUntilGoCode)
-	{
-		m_TeamManager.ReOrganizeTeamForSniping();
-		m_TeamManager.SnipeUntilGoCode();
-	}
-
-	if(m_bReorganizationPending)
-		ReorganizeTeamAsNeeded();
-
-	if(pawn.m_bIsProne)
-	{
-		pawn.m_bWantsToProne = false;
-		Sleep(1.0);
-	}
-	
-	if(!m_pawn.IsStationary() && SniperChangeToSecondaryWeapon())
-		Sleep(0.5);		
-
-PickActionPoint: 
-	VerifyWeaponInventory();
-	EnsureRainbowIsArmed();
-	
-	if(m_TeamManager.m_iMemberCount > 1)
-	{
-		// leader should wait for team to catch up if they fall behind...
-		while(DistanceTo(m_TeamManager.m_Team[m_TeamManager.m_iMemberCount-1]) > 800)
-			Sleep(0.5);
-	}
-	
-	#ifdefDEBUG	if(bShowLog) log("  PickActionPoint : m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);	#endif
-    moveTarget = m_TeamManager.m_PlanActionPoint; 
-	if((moveTarget != none) || (m_TeamManager.m_ePlanAction != PACT_None))
-	{
-		DispatchInteractions();
-		m_iWaitCounter = 0;
-		if(m_TeamManager.m_ePlanAction != PACT_SnipeGoCode)
-		{
-			if(SniperChangeToSecondaryWeapon())
-				Sleep(0.5);	
-		}
-	}
-	else
-	{
-		if(m_iWaitCounter > 30)
-		{
-			SniperChangeToPrimaryWeapon();
-			if(!pawn.bIsCrouched && m_TeamManager.m_eGoCode == GOCODE_None)
-			{
-				pawn.bWantsToCrouch = true;
-				sleep(0.5);
-			}
-		}
-	}
-
-	// check ammo if not in the process of changing weapons
-    if(NeedToReload())
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" (patrol) has no ammo left, must reload...clips="$Pawn.EngineWeapon.GetNbOfClips());		#endif
-		if(!pawn.bIsCrouched)
-			pawn.bWantsToCrouch = true;		
-		RainbowReloadWeapon();
-		// todo : check one of the two weapons may be completely out of ammo
-		StopMoving();
-		while(m_pawn.m_bReloadingWeapon)
-			Sleep(0.2);
-	}
-	
-	if(moveTarget == none)
-	{		
-		// this is needed in case this rainbow got interrupted while sniping until gocode and got sent back to patrol state...
-		if(m_TeamManager.m_ePlanAction == PACT_SnipeGoCode)
-			m_TeamManager.SnipeUntilGoCode();
-		//if(bShowLog) log(self$" moveTarget was none so skip ahead to PerformPlanningAction...");		
-		Sleep(0.1);
-		Goto('FormationAroundDoor');
-	}
-
-	
-	if(m_TeamManager.m_eNextAPAction == PACT_None)
-		m_NextMoveTarget = m_TeamManager.PreviewNextActionPoint();
-	else 
-	{
-		m_NextMoveTarget = none;		
-
-		// check if next action point has a breach door order, may need to reorganize team...
-		if(m_TeamManager.m_eNextAPAction == PACT_Breach)
-			m_TeamManager.ReOrganizeTeamForBreachDoor(); // reorganize the team to put the member with a breaching charge in front
-		else if(m_TeamManager.m_eNextAPAction == PACT_SnipeGoCode)
-			m_TeamManager.ReOrganizeTeamForSniping();
-		else if(ActionIsGrenade(m_TeamManager.m_eNextAPAction))
-			m_TeamManager.ReOrganizeTeamForGrenade(m_TeamManager.m_eNextAPAction);
-		// log if no one is equipped with the desired type of grenade // cannot comply skip to next order
-	}		
-	#ifdefDEBUG	if(bShowLog) logX(" PATROL : PickAction  moveTarget="$moveTarget$" m_NextMoveTarget="$m_NextMoveTarget);		#endif
-
-MoveToActionPoint: 
-	#ifdefDEBUG	if(bShowLog) log(pawn$" PATROL : MoveToActionPoint="$m_TeamManager.m_PlanActionPoint);	#endif
-    moveTarget = m_TeamManager.m_PlanActionPoint; 	
-	if(moveTarget == m_pawn.m_door)
-	{
-		m_TeamManager.ActionPointReached();
-		goto('DoorsAndLadders');
-	}
-
-    m_TeamManager.SetTeamState(TS_Moving);
-
-	// check if we are in front of a closed door, if so, skip ahead...
-	if(m_pawn.m_Door != none && m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed && NextActionPointIsThroughDoor(moveTarget))
-		goto('DoorsAndLadders');
-
-	// check if we are at a ladder we need to climb, if so, skip ahead...
-	if(TargetIsLadderToClimb(R6Ladder(moveTarget)))
-		goto('DoorsAndLadders');
-
-	// if cannot reach the moveTarget directly, use pathfinding
-	if(!CanWalkTo(moveTarget.location) && !ActorReachable(moveTarget)) 
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" (location="$pawn.location$") did not reach "$moveTarget$", find a path to it instead... ");		#endif
-		goto('BlockedFindPath');
-	}
-
-    // move to action point...
-	R6PreMoveToward(moveTarget, GetFocus(), GetTeamPace());		
-	MoveToward(moveTarget, GetFocus());  
-
-    // inform TeamAI that Action Point has been reached...
-    if(ConfirmActionPointReached())
-    {
-		if(moveTarget.IsA('R6Door'))
-			ForceCurrentDoor(R6Door(moveTarget));
-		#ifdefDEBUG	if(bShowLog) log(pawn$" action point "$moveTarget$" has been reached...");	#endif        
-		m_TeamManager.ActionPointReached();
-		goto('DoorsAndLadders');
-    }
-	else 
-	{		
-		#ifdefDEBUG	if(bShowLog) log(pawn$" did not reach moveTarget="$moveTarget$" actionpoint="$m_TeamManager.m_PlanActionPoint$", try again.... ");	#endif
-		goto('MoveToActionPoint');
-	}
-
-BlockedFindPath:
-	#ifdefDEBUG	if(bShowLog) log(self$" BlockedFindPath : findPathToward m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);	#endif
-	moveTarget = FindPathToward(m_TeamManager.m_PlanActionPoint, true);     
-	if(moveTarget != none)
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" in Patrol state (BlockedFindPath) : move to the movetarget=["$moveTarget$"] ...m_pawn.m_Door="$m_pawn.m_Door);	#endif
-		
-		R6PreMoveToward(moveTarget, GetFocus(), GetTeamPace());
-		MoveToward(moveTarget, GetFocus());
-
-		if(ConfirmActionPointReached() && moveTarget.IsA('R6Door'))
-			ForceCurrentDoor(R6Door(moveTarget));
-		Goto('DoorsAndLadders');  
-	}
-	else
-	{
-		#ifdefDEBUG	if(bShowLog) log(" this is bad... cannot find a path to the next actionpoint... try to move directly...");	#endif
-		R6PreMoveToward(m_TeamManager.m_PlanActionPoint, m_TeamManager.m_PlanActionPoint, GetTeamPace());
-		MoveToward(m_TeamManager.m_PlanActionPoint);
-		Sleep(1.0);
-	}
-
-DoorsAndLadders:
-	m_NextMoveTarget = m_TeamManager.PreviewNextActionPoint();
-	//logX(" *********************************** moveTarget="$moveTarget$" m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);
-	#ifdefDEBUG	if(bShowLog) logX(" *********** DOORSANDLADDERS : m_eGoCode="$m_TeamManager.m_eGoCode$" m_NextMoveTarget="$m_NextMoveTarget);	#endif
-	#ifdefDEBUG	if(bShowLog) logX("  LABEL : DoorsAndLadders : m_ePlanAction="$m_TeamManager.m_ePlanAction$" m_eNextAPAction="$m_TeamManager.m_eNextAPAction$" m_pawn.m_Door="$m_pawn.m_Door);	#endif
-	// todo : if(NeedToOpenDoor(moveTarget)) + move contents of this if into the function... (to be called from anywhere...)
-    if((m_TeamManager.m_ePlanAction == PACT_None) && (m_pawn.m_Door != none) 
-		&& (NextActionPointIsThroughDoor(m_NextMoveTarget) || NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint))
-		&& m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed)
-    {
-		// prepare for a room entry...
-		if(m_TeamManager.m_PlanActionPoint == m_pawn.m_Door || m_NextMoveTarget == m_pawn.m_Door)
-		{
-			R6PreMoveToward(m_pawn.m_Door, m_pawn.m_Door, GetTeamPace());		
-			MoveToward(m_pawn.m_Door);  
-			m_TeamManager.ActionPointReached();
-		}
-		#ifdefDEBUG	if(bShowLog) log(pawn$" we are in front of a door now... ");	#endif
-        if(!m_TeamManager.m_bEntryInProgress || (m_TeamManager.m_Door != m_pawn.m_Door))
-			m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door); 
-		SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
-		GotoStateLeadRoomEntry();
-    }
-
-	m_TargetLadder = R6Ladder(moveTarget);
-	if(TargetIsLadderToClimb(m_TargetLadder))
-    {
-		moveTarget = m_pawn.m_Ladder;  
-        nextState = 'WaitForTeam';
-        //inform TEAM AI that player has started climbing a ladder...
-        m_TeamManager.TeamLeaderIsClimbingLadder();
-        GotoState('ApproachLadder');
-	}
-      
-FormationAroundDoor:
-	if(m_TeamManager.m_ePlanAction == PACT_None && m_TeamManager.m_eGoCode == GOCODE_None)
-	{
-		#ifdefDEBUG	if(bShowLog) log(self$" there is no Plan Action and No Gocode... so continue ahead...");	#endif
-		goto('PerformPlanningAction');
-	}
-
-	// if we are in front of a door, open the door before throwing the grenade
-	if(!m_TeamManager.m_bEntryInProgress && (m_pawn.m_Door != none) && m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed)
-	{			
-		if(m_pawn.m_Door.m_RotatingDoor.m_bIsDoorLocked)
-			GotoLockPickState(m_pawn.m_Door.m_RotatingDoor);
-
-		Sleep(1.0);
-
-		// team should only form around door if the lead is intending to do a room entry...
-		m_NextMoveTarget = m_TeamManager.PreviewNextActionPoint();
-		#ifdefDEBUG if(bShowLog) log(self$" inform teammanager that we want to enter the room...m_NextMoveTarget="$m_NextMoveTarget);	#endif
-		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
-
-		#ifdefDEBUG	if(bShowLog) log(self$" (FORMATION) there is some kind of action at this door...m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);	#endif		
-		if(PreEntryRoomIsAcceptablyLarge())
-		{
-			#ifdefDEBUG if(bShowLog) log(" ***** Pre Entry Room Is Large enough, so move to the side of door...RoomLayout="$m_TeamManager.m_Door.m_CorrespondingDoor.m_eRoomLayout);	#endif
-			// pick appropriate position before opening door			
-			m_vTargetPosition = getEntryPosition(false);    
-			if(m_vTargetPosition != vect(0,0,0))
-			{
-				R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.location, GetTeamPace()); 
-				MoveTo(m_vTargetPosition);   
-				MoveToPosition(m_vTargetPosition, rotator(m_pawn.m_Door.m_CorrespondingDoor.location - m_vTargetPosition));
-			}
-		}
-
-		// focus should be the door knob, not the pivot/hinges
-		StopMoving();
-		SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
-		FinishRotation();
-	}
-
-PerformPlanningAction:
-	if(ActionIsGrenade(m_TeamManager.m_ePlanAction))
-    {
-        // set the grenade target...        
-#ifdefDEBUG
-        if(bShowLog) log("==============================GOCODE="$m_TeamManager.m_eGoCode$" ===============================================");
-        if(bShowLog) log(" pawn.rotation="$pawn.rotation$",  focus ="$focus$" m_iActionUseGadgetGroup="$m_iActionUseGadgetGroup);     
-        if(bShowLog) log(" grenade direction (rotator) : "$rotator(m_TeamManager.m_vPlanActionLocation));
-#endif
-		if(m_TeamManager.m_bSkipAction)
-		{
-			#ifdefDEBUG	if(bShowLog) log(" CANNOT COMPLY; not equipped with desired grenade ");		#endif
-			m_TeamManager.ActionNodeCompleted();
-
-			if((m_pawn.m_Door != none) && (m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed) 
-				&& NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint))
-			{
-				#ifdefDEBUG	if(bShowLog) log(" could not throw grenade but MUST GET IN ROOM!!");	#endif
-				m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door); 
-				SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
-				GotoStateLeadRoomEntry();
-			}	
-			
-			goto('PickActionPoint');
-		}	  
-		
-		// if this is the first action point then the team did not have an opportunity to prepare for this action in advance,
-		// prepare now.
-		if(m_iActionUseGadgetGroup == 0) 
-			m_TeamManager.ReOrganizeTeamForGrenade(m_TeamManager.m_ePlanAction);
-
-        // change weapon to grenade... 
-		if(m_pawn.m_iCurrentWeapon != m_iActionUseGadgetGroup)
-		{			
-			SwitchWeapon(m_iActionUseGadgetGroup);
-			FinishAnim(m_pawn.C_iWeaponRightAnimChannel);
-		}
-
-		m_bIgnoreBackupBump=true;
-
-		// if we are in front of a door, open the door before throwing the grenade
-		#ifdefDEBUG if(bShowLog) log("  state PATROL : Before opening door... m_pawn.m_Door="$m_pawn.m_Door$" m_ActionTarget="$m_ActionTarget);	#endif	
-		m_ActionTarget = m_pawn.m_Door;
-		if((m_pawn.m_Door != none) && (m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed))
-		{
-			m_RotatingDoor = m_pawn.m_Door.m_RotatingDoor;
-			
-			// focus should be the door knob, not the pivot/hinges
-			SetFocusToDoorKnob(m_RotatingDoor);
-			FinishRotation();
-
-			// open door			
-			m_pawn.PlayDoorAnim(m_RotatingDoor);
-			Sleep(0.5);
-			m_pawn.ServerPerformDoorAction(m_RotatingDoor, m_RotatingDoor.eDoorCircumstantialAction.CA_Open);
-    
-			// wait for Door to open completely
-			while(m_RotatingDoor.m_bIsDoorClosed)
-			{
-				if(!m_RotatingDoor.m_bInProcessOfOpening)
-				{
-					Sleep(1.0);
-					goto('PerformPlanningAction');
-				}
-				else
-					Sleep(0.1);
-			}
-		}
-			
-		if(m_ActionTarget != none)
-		{			
-			// Rainbow may have been bumped back by door, so reposition
-			if(!PreEntryRoomIsAcceptablyLarge())
-			{
-				R6PreMoveToward(m_ActionTarget, m_pawn.m_Door.m_CorrespondingDoor, GetTeamPace());
-				MoveToward(m_ActionTarget, m_pawn.m_Door.m_CorrespondingDoor);
-				StopMoving();
-			}
-
-			if(!CanThrowGrenadeIntoRoom(m_pawn.m_Door.m_CorrespondingDoor, m_TeamManager.m_vPlanActionLocation))
-			{
-				#ifdefDEBUG	if(bShowLog) log("*** there isn't enough clear space inside room, so skip grenade action...");	#endif
-				m_TeamManager.ActionNodeCompleted();
-				goto('PostThrowGrenade');
-			}
+			m_pawn.m_bThrowGrenadeWithLeftHand = false;
+			m_pawn.m_eGrenadeThrow = 1;
+			m_pawn.m_eRepGrenadeThrow = 1;			
 		}
 		else
 		{
-			// check if someone is in the way before throwing the grenade
-			if( !ClearThrowIsAvailable(m_TeamManager.m_vPlanActionLocation) )
-			{
-				m_vTargetPosition = pawn.location + 300*normal(m_TeamManager.m_vPlanActionLocation - pawn.location);
-				
-				// move towards target - team should back out of way
-				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk);  
-				MoveTo(m_vTargetPosition); 
-				StopMoving();
-				Sleep(1.0);
-			}
+			m_pawn.m_bThrowGrenadeWithLeftHand = false;
+			m_pawn.m_eGrenadeThrow = 2;
+			m_pawn.m_eRepGrenadeThrow = 2;
 		}
+	}
+	return;
+}
 
-		// set the target for the grenade
-		#ifdefDEBUG if(bShowLog) log(" set target for the grenade ="$m_TeamManager.m_vPlanActionLocation);	#endif
-        if(m_TeamManager.m_vPlanActionLocation != vect(0,0,0))
-        {
-			m_vLocationOnTarget = m_TeamManager.m_vPlanActionLocation;
-			SetLocation(m_vLocationOnTarget);
-		}
-        else
-			SetLocation(pawn.location + 100*vector(pawn.rotation));
-        
-		//m_pawn.dbgVectorAdd( location,  vect(10,10,10), 0, "grenade" );
-		target = self;
-        focus = self;  	
-		FinishRotation();
-
-		SetRotation(pawn.rotation);
-		SetGunDirection(target);
-		
-		// check which side of the door we are on and throw grenade
-		#ifdefDEBUG	if(bShowLog) log(" **** check which side of the door we are on.... m_pawn.m_Door="$m_pawn.m_Door$" m_ActionTarget="$m_ActionTarget);	#endif
-		SetGrenadeParameters(m_ActionTarget!=none && PreEntryRoomIsAcceptablyLarge(), true);
-        
-		m_bStateFlag = true;
-		m_pawn.PlayWeaponAnimation(); 
-        FinishAnim( m_pawn.C_iWeaponRightAnimChannel );         
-		m_pawn.m_eRepGrenadeThrow = GRENADE_None;
-        ResetGadgetGroup();
-		m_TeamManager.ActionNodeCompleted();	// inform Team AI that action was completed...
-		m_bStateFlag = false;
-
-		SetGunDirection(none);
-
-PostThrowGrenade:
-		m_bIgnoreBackupBump=false;
-		
-        // return to original weapon
-        SwitchWeapon(1);
-        FinishAnim(m_pawn.C_iWeaponRightAnimChannel); 
-
-		#ifdefDEBUG	if(bShowLog) log(" m_TeamManager.m_ePlanAction="$m_TeamManager.m_ePlanAction$" m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);	 #endif
-        // wait for grenade to explode...        
-        Sleep(m_pawn.EngineWeapon.GetExplosionDelay());        
-
-		#ifdefDEBUG if(bShowLog) log(self$" m_pawn.m_Door="$m_pawn.m_Door$" check m_NextMoveTarget="$m_NextMoveTarget$" m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);	#endif
-		if( m_pawn.m_Door != none
-			&& ( NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint)
-				|| (m_TeamManager.m_PlanActionPoint == m_pawn.m_Door && NextActionPointIsThroughDoor(m_TeamManager.PreviewNextActionPoint())) ) )
+function ConfirmLadderActionPointWasReached(R6Ladder Ladder)
+{
+	// End:0x56
+	if(__NFUN_130__(__NFUN_154__(int(m_pawn.m_ePawnType), int(1)), __NFUN_154__(m_pawn.m_iID, 0)))
+	{
+		// End:0x56
+		if(__NFUN_114__(Ladder, m_TeamManager.m_PlanActionPoint))
 		{
-			#ifdefDEBUG	if(bShowLog) log(" after throwing grenade, need to do room entry ");	#endif
-			m_iStateProgress = 3;			
-			GotoState('LeadRoomEntry', 'EnterRoomBegin');
+			m_TeamManager.ActionPointReached();
 		}
-    }
-    else 
-    {
-		if(moveTarget == none)
-		{
-			//if(bShowLog) log(" movetarget == none, hold position until furthur instructions...m_TeamManager.m_eGoCode="$m_TeamManager.m_eGoCode);
-			if(m_TeamManager.m_eGoCode == GOCODE_None)
-				m_TeamManager.SetTeamState(TS_Holding);
-			else
-				m_TeamManager.SetTeamState(TS_Waiting);
-			StopMoving();
-			Sleep(1.0);        
-		}
-    }	
+	}
+	return;
+}
 
-	if(m_TeamManager.m_bEntryInProgress && m_TeamManager.m_eGoCode == GOCODE_None && m_TeamManager.m_PlanActionPoint != none)
-		m_TeamManager.RainbowHasLeftDoor(m_pawn);
-
-	if(m_TeamManager.m_eNextAPAction == PACT_None)
-		m_TeamManager.RestoreTeamOrder();
-
-    goto('PickActionPoint');
+function bool TargetIsLadderToClimb(R6Ladder Target)
+{
+	// End:0x23
+	if(__NFUN_132__(__NFUN_114__(Target, none), __NFUN_114__(m_pawn.m_Ladder, none)))
+	{
+		return false;
+	}
+	// End:0x3D
+	if(__NFUN_114__(m_pawn.m_Ladder, Target))
+	{
+		return false;
+	}
+	// End:0x69
+	if(__NFUN_119__(Target.MyLadder, m_pawn.m_Ladder.MyLadder))
+	{
+		return false;
+	}
+	return true;
+	return;
 }
 
 function DetonateBreach()
 {
 	m_iStateProgress = 3;
-	GotoState('DetonateBreachingCharge');
-}
-
-//==========================================================//
-//             -- state PLACEBREACHINGCHARGE --             //
-//==========================================================//
-state PlaceBreachingCharge
-{
-    function BeginState()    
-	{	
-		#ifdefDEBUG	if(bShowLog) log(pawn$" entered state PlaceBreachingCharge...m_TeamManager.m_BreachingDoor="$m_TeamManager.m_BreachingDoor);  	#endif
-		m_pawn.m_bAvoidFacingWalls = false;	
-		focus = m_TeamManager.m_BreachingDoor;
-    }
-    
-    function EndState()
-    {
-		#ifdefDEBUG if(bShowLog) log(pawn$" exited state PlaceBreachingCharge...m_iStateProgress="$m_iStateProgress);		#endif
-		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
-		m_bIgnoreBackupBump = false;
-		
-		// make sure the action was actually completed and not just interrupted, like by a bumpback
-		if(m_iStateProgress == 3)
-		{
-			m_TeamManager.ActionNodeCompleted();
-			m_iStateProgress = 0;
-		}
-    }
-
-	function R6Door GetDoorPathNode()
-	{
-		local FLOAT fDistA, fDistB;
-
-		fDistA = VSize(m_TeamManager.m_BreachingDoor.m_DoorActorA.location - pawn.location);
-		fDistB = VSize(m_TeamManager.m_BreachingDoor.m_DoorActorB.location - pawn.location);
-
-		if(fDistA < fDistB)
-			return m_TeamManager.m_BreachingDoor.m_DoorActorA;
-		else
-			return m_TeamManager.m_BreachingDoor.m_DoorActorB;
-	}
-
-	function DetonateBreach()
-	{
-		if(m_iStateProgress < 1)
-			return;
-
-		global.DetonateBreach();
-	}
-
-Begin:
-	if(m_TeamManager.m_BreachingDoor == none)
-		goto('WaitToDetonate');
-	m_ActionTarget = GetDoorPathNode();
-	
-	switch(m_iStateProgress)
-	{
-		case 0:		goto('GetIntoPosition');	break;
-		case 1:		goto('MoveAwayFromDoor');	break;
-		default:	goto('WaitToDetonate');
-	}
-
-GetIntoPosition:
-	// move to door
-	m_TeamManager.SetTeamState(TS_Moving);
-	#ifdefDEBUG	if(bShowLog) log(pawn$" get into position in front of door...m_ActionTarget="$m_ActionTarget$" m_TeamManager.m_BreachingDoor="$m_TeamManager.m_BreachingDoor);	#endif
-    R6PreMoveToward(m_ActionTarget, m_TeamManager.m_BreachingDoor, GetTeamPace());		
-    MoveToward(m_ActionTarget, m_TeamManager.m_BreachingDoor);  
-	ForceCurrentDoor(R6Door(m_ActionTarget));
-
-	StopMoving();
-	focus = m_pawn.m_Door.m_CorrespondingDoor; 
-	Sleep(0.5);	
-	
-	//make sure we are close enough
-	if(DistanceTo(m_ActionTarget) > 30)
-	{
-		m_vTargetPosition = pawn.location - 60*vector(pawn.rotation);
-		R6PreMoveTo(m_vTargetPosition, m_TeamManager.m_BreachingDoor.location, PACE_Walk);
-		MoveTo(m_vTargetPosition, m_TeamManager.m_BreachingDoor);
-		Sleep(0.5);
-		Goto('GetIntoPosition');
-	}
-
-	m_bIgnoreBackupBump = true;
-	m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
-	
-	// switch to breaching charge gadget	
-	m_TeamManager.SetTeamState(TS_SettingBreach);
-    SwitchWeapon(m_iActionUseGadgetGroup);
-	Sleep(0.2);
-    FinishAnim(m_pawn.C_iWeaponRightAnimChannel); 
-    
-	// place breaching charge
-    m_pawn.PlayBreachDoorAnimation(); 
-	FinishAnim(m_pawn.C_iBaseBlendAnimChannel);
-	Pawn.EngineWeapon.NPCPlaceCharge(m_TeamManager.m_BreachingDoor);
-	m_iStateProgress = 1;
-
-	#ifdefDEBUG	if(bShowLog) log(pawn$" finished placing breaching charge... ");  #endif
-    PlaySoundCurrentAction(RTV_ExplosivesReady);
-
-    Sleep(2.5);
-
-	#ifdefDEBUG	if(bShowLog) log(" charge has been placed, detonate when ready... m_TeamManager.m_eGoCode="$m_TeamManager.m_eGoCode);	#endif
-	m_bIgnoreBackupBump = false;
-
-MoveAwayFromDoor:
-	// pick appropriate position before opening door			
-	m_vTargetPosition = getEntryPosition(false);   
-	if(m_vTargetPosition != m_pawn.m_Door.location)
-	{
-		if(m_pawn.bIsCrouched)
-			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.location, PACE_CrouchWalk);
-		else
-			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.location, PACE_Walk); 
-		MoveTo(m_vTargetPosition);   
-		MoveToPosition(m_vTargetPosition, rotator(m_pawn.m_Door.m_CorrespondingDoor.location - m_vTargetPosition));
-	}
-	else
-	{
-		m_vTargetPosition = m_pawn.m_Door.location - 100*vector(m_pawn.m_Door.rotation);
-		if(m_pawn.bIsCrouched)
-			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.location, PACE_CrouchWalk); 
-		else
-			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.location, PACE_Walk); 
-		MoveTo(m_vTargetPosition); 
-	}	
-	StopMoving();
-
-	// focus should be the door knob, not the pivot/hinges
-	SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
-	FinishRotation();
-
-	// if there is no gocode associated to this action, detonate immediately
-	if(m_TeamManager.m_eGoCode == GOCODE_None)
-	{
-		Sleep(1.0);	
-		DetonateBreach();
-	}
-
-	m_TeamManager.PlayWaitingGoCode(m_TeamManager.m_eGoCode);
-
-	m_iStateProgress = 2;
-
-WaitToDetonate:		
-	m_TeamManager.SetTeamState(TS_Waiting);
-	Sleep(0.2);	
-	goto('WaitToDetonate');
-}
-
-//==========================================================//
-//          -- state DETONATEBREACHINGCHARGE --             //
-//==========================================================//
-state DetonateBreachingCharge
-{
-#ifdefDEBUG
-    function BeginState()    {	if(bShowLog) log(pawn$" entered state DetonateBreachingCharge...");	}
-    function EndState()      {	if(bShowLog) log(pawn$" exited state DetonateBreachingCharge...");	}
-#endif
-
-Begin:	
-	#ifdefDEBUG if(bShowLog) logX(" DetonateBreachingCharge : m_TeamManager.m_BreachingDoor="$m_TeamManager.m_BreachingDoor$" broken="$m_TeamManager.m_BreachingDoor.m_bBroken);	#endif
-	ResetStateProgress();
-	if(m_TeamManager.m_BreachingDoor == none || !m_TeamManager.m_BreachingDoor.ShouldBeBreached())
-		goto('End');
-
-	while(m_TeamManager.m_bTeamIsHoldingPosition)
-		Sleep(0.5);
-	
-	Pawn.EngineWeapon.NPCDetonateCharge();
-	#ifdefDEBUG	if(bShowLog) log(" charge has been detonated...");	#endif
-
-End:
-	// switch back to primary weapon
-    SwitchWeapon(1);
-	Sleep(0.5);
-    FinishAnim(m_pawn.C_iWeaponRightAnimChannel); 
-
-	if(m_TeamManager.m_PlanActionPoint == m_ActionTarget)
-		m_TeamManager.ActionPointReached();
-
-	m_TeamManager.m_BreachingDoor = none;
-	ResetGadgetGroup();
-
-	if(m_TeamManager.m_bTeamIsHoldingPosition)
-		GotoState('HoldPosition');
-
-	// check if a room entry is next before returning to the patrol state
-	moveTarget = m_TeamManager.m_PlanActionPoint;
-	if(NextActionPointIsThroughDoor(moveTarget))
-	{
-		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_door);
-		GotoStateLeadRoomEntry();
-	}
-	else
-	{
-		m_TeamManager.EndRoomEntry();
-		GotoState('Patrol'); 
-	}
+	__NFUN_113__('DetonateBreachingCharge');
+	return;
 }
 
 function GotoStateLeadRoomEntry()
-{	
+{
 	ResetStateProgress();
-	GotoState('LeadRoomEntry');
+	__NFUN_113__('LeadRoomEntry');
+	return;
 }
 
 function ForceCurrentDoor(R6Door aDoor)
 {
-	if(aDoor == none)
+	// End:0x0D
+	if(__NFUN_114__(aDoor, none))
+	{
 		return;
-
+	}
 	m_pawn.m_Door = aDoor;
-	m_pawn.m_PotentialActionActor = aDoor.m_RotatingDoor;
+	m_pawn.m_potentialActionActor = aDoor.m_RotatingDoor;
+	return;
 }
 
-//==========================================================//
-//              -- state LEADROOMENTRY --                   //
-// this state is for an AI team leader (or AI team member   //
-// that is temporarily lead) that is leading a room entry	//
-//==========================================================//
-state LeadRoomEntry
+// NEW IN 1.60
+function DispatchOrder(int iOrder, optional R6RainbowTeam teamManager)
 {
-    function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" entered state LeadRoomEntry... m_iStateProgress="$m_iStateProgress);	#endif
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_bIgnoreBackupBump = true;
-		m_bEnteredRoom = false;
-		m_bIndividualAttacks = false;
-		m_iTurn = 0;
-		m_bStateFlag = false;
-    }
-    
-    function EndState()
-    {
-		#ifdefDEBUG if(bShowLog) log(pawn$" exited state LeadRoomEntry...m_iStateProgress="$m_iStateProgress);	#endif
-		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
-		m_bIgnoreBackupBump = false;
-		m_pawn.m_u8DesiredYaw = 0;	
-		SetTimer(0, false);
-		if(m_iStateProgress == 7)
-			m_iStateProgress = 0;
-		m_bIndividualAttacks = true;
-    }
-
-	function Timer()
-	{
-		if(m_iStateProgress >= 5)
-		{
-			m_iTurn++;
-			LookAroundRoom(true);
-		}
-		else if(m_pawn.m_iId == 0)
-		{
-			// if this is an AI team leader, check for nearby Action Points while entering room to avoid backtracking...
-			if(DistanceTo(m_TeamManager.m_PlanActionPoint) < 150)
-				m_TeamManager.ActionPointReached();	
-		}
-	}
-
-	function R6Pawn.eMovementPace GetRoomEntryPace(bool bRun)
-	{
-		local R6Pawn.eMovementPace      ePace;
-		local bool						bCrouchedEntry;
-		
-		if(m_TeamLeader != none && m_TeamLeader.m_bIsPlayer)
-			bCrouchedEntry = false;
-		else
-			bCrouchedEntry = (m_TeamManager.m_eMovementSpeed == SPEED_Cautious);
-
-		if(bCrouchedEntry)
-		{
-			if(bRun)
-				ePace = PACE_CrouchRun;
-			else
-				ePace = PACE_CrouchWalk;
-		}
-		else
-		{
-			if(bRun)
-				ePace = PACE_Run;
-			else
-				ePace = PACE_Walk;
-		}
-
-		return ePace;
-	}
-
-Begin:
-    // Pause in front of door (preparation) : check to see that team has caught up (+ if alone, don't wait)
-	StopMoving();  
-    
-	if(m_TeamManager.m_Door == none)
-	{
-	    m_TeamManager.RainbowHasLeftDoor(m_pawn);
-		goto('Completed');
-	}
-
-	if(!m_TeamManager.m_Door.m_RotatingDoor.m_bIsDoorClosed)
-		goto('EnterRoomBegin');
-
-	switch(m_iStateProgress)
-	{
-		case 0:		goto('PrepareForRoomEntry');	break;
-		case 1:		goto('OpenDoor');				break;
-		case 2:		goto('PreEnterRoom');			break;
-		case 3:		goto('EnterRoomBegin');			break;
-		case 4:		goto('InsideRoom');				break;
-		case 5:		goto('EntryFinished');			break;
-		default:	goto('Completed');
-	}
-
-PrepareForRoomEntry:
-	#ifdefDEBUG	if(bShowLog) log(self$" LeadRoomEntry::PrepareForRoomEntry - m_TeamManager.m_Door="$m_TeamManager.m_Door);	#endif
-    if(m_TeamManager.m_Door == none)
-		goto('EntryFinished');
-
-	if(!PreEntryRoomIsAcceptablyLarge())
-	{
-		R6PreMoveToward(m_TeamManager.m_Door, m_TeamManager.m_Door, GetRoomEntryPace(false));				
-		MoveToward(m_TeamManager.m_Door);
-	}
-
-	// check if door is locked...
-	if(m_TeamManager.m_Door.m_RotatingDoor.m_bIsDoorLocked)
-		GotoLockPickState(m_TeamManager.m_Door.m_RotatingDoor);
-
-	// wait for team to arrive
-	#ifdefDEBUG if(bShowLog) log(self$" LeadRoomEntry:: wait for team to catch up...");		#endif
-	StopMoving();
-	while(!m_TeamManager.LastMemberIsStationary())
-		Sleep(0.5);
-
-	if(PreEntryRoomIsAcceptablyLarge())
-	{
-		// move into the proper position for a room entry (not directly in front of door)
-		m_vTargetPosition = getEntryPosition(false);    
-		if((VSize(m_vTargetPosition - pawn.location) > 30) && (m_vTargetPosition != vect(0,0,0)))
-		{
-			R6PreMoveTo(m_vTargetPosition, m_TeamManager.m_Door.m_RotatingDoor.location, GetRoomEntryPace(false)); 
-			MoveTo(m_vTargetPosition);   
-			MoveToPosition(m_vTargetPosition, rotator(m_TeamManager.m_Door.m_CorrespondingDoor.location - m_vTargetPosition));
-			StopMoving();
-		}
-	}
-	m_iStateProgress = 1;
-
-OpenDoor:
-	#ifdefDEBUG if(bShowLog) log(self$" LeadRoomEntry::OpenDoor - m_TeamManager.m_Door="$m_TeamManager.m_Door);		#endif
-	if(!m_TeamManager.m_bLeaderIsAPlayer)
-	{
-		while(m_TeamManager.m_eGoCode != GOCODE_None)
-		{
-			m_TeamManager.SetTeamState(TS_Waiting);
-			if(NeedToReload())
-			{
-				RainbowReloadWeapon();
-				while(m_pawn.m_bReloadingWeapon)
-					Sleep(0.2);
-			}
-			else
-				Sleep(0.5);
-		}
-	}
-	m_TeamManager.SetTeamState(TS_OpeningDoor);
-	
-	// focus should be the door knob, not the pivot/hinges
-	SetFocusToDoorKnob(m_TeamManager.m_Door.m_RotatingDoor);
-	Sleep(0.5);	
-
-    // Open Door
-    m_pawn.PlayDoorAnim(m_TeamManager.m_Door.m_RotatingDoor);
-	Sleep(0.5);
-	m_pawn.ServerPerformDoorAction(m_TeamManager.m_Door.m_RotatingDoor, m_TeamManager.m_Door.m_RotatingDoor.eDoorCircumstantialAction.CA_Open);
-    
-	m_iStateProgress = 2;
-
-PreEnterRoom:
-	#ifdefDEBUG	if(bShowLog) log(self$" LeadRoomEntry : wait for door to open....m_TeamManager.m_Door="$m_TeamManager.m_Door);	#endif
-	while(m_TeamManager.m_Door.m_RotatingDoor.m_bIsDoorClosed)
-	{
-		if(!m_TeamManager.m_Door.m_RotatingDoor.m_bInProcessOfOpening)
-		{
-			Sleep(1.0);
-			Goto('OpenDoor');
-		}
-		else
-			Sleep(0.1);
-	}
-
-	// safety precaution
-	if(m_TeamManager.m_Door == none)
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$"  IRREGULAR!! m_TeamManager.m_Door==none!!");	#endif
-		m_TeamManager.m_Door = R6Door(m_ActionTarget);			
-	}
-	m_iStateProgress = 3;
-
-EnterRoomBegin:
-	#ifdefDEBUG if(bShowLog) log(pawn$" Enter Room : initial move to get through doorway...m_TeamManager.m_Door="$m_TeamManager.m_Door);	#endif
-	SetTimer(0.2, true);
-	m_TeamManager.SetTeamState(TS_ClearingRoom);
-	m_eCurrentRoomLayout = m_TeamManager.m_Door.m_eRoomLayout;
-
-	// initial move in order to get through the doorway (use R6Door actors)...
-	m_vTargetPosition = m_TeamManager.m_Door.location;
-	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));    
-	MoveToPosition(m_vTargetPosition, m_TeamManager.m_Door.rotation);   
-
-	m_TeamManager.EnteredRoom(m_pawn); 
-	m_vTargetPosition = m_TeamManager.m_Door.m_CorrespondingDoor.location;
-	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));    
-	MoveToPosition(m_vTargetPosition, m_TeamManager.m_Door.rotation);   
-
-	m_iStateProgress = 4;
-
-InsideRoom:
-	// if this member is performing the room entry alone, they should not enter the room too far...
-	if(m_pawn.m_iId == (m_TeamManager.m_iMemberCount - 1))
-	{
-		m_iStateProgress = 5;
-		goto('EntryFinished');
-	}
-
-	// get target position inside room, if there is enough room...	
-	// area on other side of door may be too constricted, move to corresponding door actor, and rest of team should just follow...
-	if(PostEntryRoomIsAcceptablyLarge())
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" Enter Room : get target position inside room...");	#endif
-		m_vTargetPosition = getEntryPosition(true);  
-		SetLocation(focalPoint);
-
-		R6PreMoveTo(m_vTargetPosition, location, GetRoomEntryPace(true));
-		MoveToPosition(m_vTargetPosition, rotator(location - m_vTargetPosition));
-	}
-	else
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" Enter Room : there is not enough room inside...so go in as far as possible, m_bInProcessOfOpening="$m_TeamManager.m_Door.m_RotatingDoor.m_bInProcessOfOpening);	#endif
-		m_bStateFlag = true;
-		if(m_pawn.m_iId == 0 && m_TeamManager.m_PlanActionPoint != none)
-		{
-			SetTimer(0, false);	
-
-			if(!m_TeamManager.m_Door.m_RotatingDoor.m_bBroken)
-			{
-				while(m_TeamManager.m_Door.m_RotatingDoor.m_bInProcessOfOpening)
-					Sleep(0.1);
-			}
-
-			// move to the next Action Point to make room for the rest of the team
-			while( (m_TeamManager.m_PlanActionPoint != none) 
-				  && (DistanceTo(m_TeamManager.m_Door) < 400) 
-				  && (m_pawn.m_Door == none || !m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed)
-				  && (m_TeamManager.m_ePlanAction == PACT_None) )
-			{	
-				#ifdefDEBUG	if(bShowLog) log(" INSTEAD OF finding a nearby waiting spot, move to m_TeamManager.m_PlanActionPoint="$m_TeamManager.m_PlanActionPoint);	#endif
-				if(!ActorReachable(m_TeamManager.m_PlanActionPoint))
-				{
-					#ifdefDEBUG if(bShowLog) log(" XXX : Next Planning Action Point is not reachable.... ");	#endif
-					break;
-				}
-				R6PreMoveToward(m_TeamManager.m_PlanActionPoint, m_TeamManager.m_PlanActionPoint, GetRoomEntryPace(false));				
-				MoveToward(m_TeamManager.m_PlanActionPoint);
-				if(DistanceTo(m_TeamManager.m_PlanActionPoint) > 100)
-					break;	// MoveToward failed
-				
-				m_TeamManager.ActionPointReached();
-				focus = m_TeamManager.m_PlanActionPoint;
-			}
-		}
-		else
-		{
-			#ifdefDEBUG	if(bShowLog) log(self$" find an appropriate waiting spot nearby that leaves enough room for other rainbow ... ");	#endif
-			FindNearbyWaitSpot(m_TeamManager.m_Door.m_CorrespondingDoor, m_vTargetPosition); 
-			SetLocation(m_vTargetPosition + 60*(m_vTargetPosition - pawn.location));
-
-			R6PreMoveTo(m_vTargetPosition, location, GetRoomEntryPace(true));
-			MoveToPosition(m_vTargetPosition, rotator(location - m_vTargetPosition));
-		}
-	}
-
-	m_iStateProgress = 5;
-
-EntryFinished:	
-	SetTimer(1.0, true);
-	LookAroundRoom(true);
-
-    m_TeamManager.RainbowHasLeftDoor(m_pawn);   
-	#ifdefDEBUG	if(bShowLog) log(pawn$" now allow time for others to come in and ensure room is clear ");	#endif
-    
-	m_iStateProgress = 6;
-	
-	if(m_pawn.m_iId == (m_TeamManager.m_iMemberCount - 1))
-		Sleep(1.5);
-	else
-		Sleep(3.0);	
-
-Completed:
-	m_iStateProgress = 7;
-	if(m_pawn.m_iId == 0)
-	{
-		if(!m_bStateFlag)
-			m_TeamManager.RestoreTeamOrder();
-		GotoState('Patrol');
-	}
-	else
-	{
-		if(m_TeamManager.m_iTeamAction != TEAM_None)
-			GotoState(GetNextTeamActionState());
-		else
-			GotoState('FollowLeader');		
-	}		
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4267,27 +1833,33 @@ Completed:
 //------------------------------------------------------------------
 function name GetNextTeamActionState()
 {
-	if(m_pawn.m_iId > 1)
-		return('FollowLeader');
-
-	if((m_TeamManager.m_iTeamAction & TEAM_ClimbLadder) > 0)
-		return('TeamClimbStartNoLeader');
-
-	if((m_TeamManager.m_iTeamAction & TEAM_SecureTerrorist) > 0)
-		return('TeamSecureTerrorist');
-
-	if( ((m_TeamManager.m_iTeamAction & TEAM_DisarmBomb) > 0)
-	    || ((m_TeamManager.m_iTeamAction & TEAM_InteractDevice) > 0)
-		|| ((m_TeamManager.m_iTeamAction & TEAM_Move) > 0) )
-		return('TeamMoveTo');
-
-	if( ((m_TeamManager.m_iTeamAction & TEAM_OpenDoor) > 0)
-		|| ((m_TeamManager.m_iTeamAction & TEAM_CloseDoor) > 0)
-		|| ((m_TeamManager.m_iTeamAction & TEAM_ClearRoom) > 0)
-		|| ((m_TeamManager.m_iTeamAction & TEAM_Grenade) > 0) )
-		return('PerformAction');
-
-	return('FollowLeader');
+	// End:0x1A
+	if(__NFUN_151__(m_pawn.m_iID, 1))
+	{
+		return 'FollowLeader';
+	}
+	// End:0x3B
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 512), 0))
+	{
+		return 'TeamClimbStartNoLeader';
+	}
+	// End:0x5C
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 1024), 0))
+	{
+		return 'TeamSecureTerrorist';
+	}
+	// End:0xB7
+	if(__NFUN_132__(__NFUN_132__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 4096), 0), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 8192), 0)), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 256), 0)))
+	{
+		return 'TeamMoveTo';
+	}
+	// End:0x123
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 16), 0), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 32), 0)), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 128), 0)), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0)))
+	{
+		return 'PerformAction';
+	}
+	return 'FollowLeader';
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4295,19 +1867,30 @@ function name GetNextTeamActionState()
 //------------------------------------------------------------------
 function VerifyWeaponInventory()
 {
-	local INT iWeapon;
+	local int iWeapon;
 
-	if(m_pawn.engineWeapon == pawn.m_WeaponsCarried[m_pawn.m_iCurrentWeapon-1])
-		return;
-
-	for(iWeapon=0; iWeapon<4; iWeapon++)
+	// End:0x35
+	if(__NFUN_114__(m_pawn.EngineWeapon, Pawn.m_WeaponsCarried[__NFUN_147__(m_pawn.m_iCurrentWeapon, 1)]))
 	{
-		if(m_pawn.engineWeapon == pawn.m_WeaponsCarried[iWeapon])
+		return;
+	}
+	iWeapon = 0;
+	J0x3C:
+
+	// End:0x92 [Loop If]
+	if(__NFUN_150__(iWeapon, 4))
+	{
+		// End:0x88
+		if(__NFUN_114__(m_pawn.EngineWeapon, Pawn.m_WeaponsCarried[iWeapon]))
 		{
-			m_pawn.m_iCurrentWeapon = iWeapon+1;
+			m_pawn.m_iCurrentWeapon = __NFUN_146__(iWeapon, 1);
 			return;
 		}
+		__NFUN_165__(iWeapon);
+		// [Loop Continue]
+		goto J0x3C;
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4315,33 +1898,42 @@ function VerifyWeaponInventory()
 //------------------------------------------------------------------
 function bool EnsureRainbowIsArmed()
 {
-	// check if weapon is secured....
-	if(m_pawn.m_bWeaponIsSecured && !m_pawn.m_bWeaponTransition)
+	// End:0x4A
+	if(__NFUN_130__(m_pawn.m_bWeaponIsSecured, __NFUN_129__(m_pawn.m_bWeaponTransition)))
 	{
-		m_pawn.SetNextPendingAction(PENDING_EquipWeapon);
+		m_pawn.SetNextPendingAction(28);
 		m_pawn.PlayWeaponAnimation();
 		return true;
 	}
-
-	if(m_pawn.m_iCurrentWeapon > 2)
+	// End:0xAB
+	if(__NFUN_151__(m_pawn.m_iCurrentWeapon, 2))
 	{
-		#ifdefDEBUG	if(bShowLog) log(" Rainbow is not properly ARMED!!! switch to primary!!!");		#endif
-		if(Pawn.m_WeaponsCarried[0].HasAmmo())
-			SwitchWeapon(1);
-		else
-			SwitchWeapon(2);
-		return true;
-	}
-	else if(m_pawn.m_iCurrentWeapon == 2)
-	{
-		if((Pawn.m_WeaponsCarried[0].m_eWeaponType != WT_Sniper) && Pawn.m_WeaponsCarried[0].HasAmmo())
+		// End:0x9E
+		if(__NFUN_130__(__NFUN_119__(Pawn.m_WeaponsCarried[0], none), Pawn.m_WeaponsCarried[0].HasAmmo()))
 		{
-			SwitchWeapon(1);
-			return true;
+			SwitchWeapon(1);			
+		}
+		else
+		{
+			SwitchWeapon(2);
+		}
+		return true;		
+	}
+	else
+	{
+		// End:0x124
+		if(__NFUN_154__(m_pawn.m_iCurrentWeapon, 2))
+		{
+			// End:0x124
+			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Pawn.m_WeaponsCarried[0], none), __NFUN_155__(int(Pawn.m_WeaponsCarried[0].m_eWeaponType), int(4))), Pawn.m_WeaponsCarried[0].HasAmmo()))
+			{
+				SwitchWeapon(1);
+				return true;
+			}
 		}
 	}
-
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4349,19 +1941,19 @@ function bool EnsureRainbowIsArmed()
 //------------------------------------------------------------------
 function bool SniperChangeToPrimaryWeapon()
 {
-	if(Pawn.m_WeaponsCarried[0] == none)
-		return false;
-
-	if((pawn.engineWeapon != none) 
-		&& !m_pawn.m_bChangingWeapon 
-		&& (pawn.engineWeapon == m_pawn.m_WeaponsCarried[1]) 
-		&& Pawn.m_WeaponsCarried[0].HasAmmo()
-		&& (Pawn.m_WeaponsCarried[0].m_eWeaponType == WT_Sniper))
+	// End:0x18
+	if(__NFUN_114__(Pawn.m_WeaponsCarried[0], none))
 	{
-		SwitchWeapon(1);	
+		return false;
+	}
+	// End:0xB5
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(Pawn.EngineWeapon, none), __NFUN_129__(m_pawn.m_bChangingWeapon)), __NFUN_114__(Pawn.EngineWeapon, m_pawn.m_WeaponsCarried[1])), Pawn.m_WeaponsCarried[0].HasAmmo()), __NFUN_154__(int(Pawn.m_WeaponsCarried[0].m_eWeaponType), int(4))))
+	{
+		SwitchWeapon(1);
 		return true;
 	}
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -4369,663 +1961,61 @@ function bool SniperChangeToPrimaryWeapon()
 //------------------------------------------------------------------
 function bool SniperChangeToSecondaryWeapon()
 {
-	if((pawn.engineWeapon != none) 
-		&& !m_pawn.m_bChangingWeapon 
-		&& (pawn.engineWeapon == m_pawn.m_WeaponsCarried[0]) 
-		&& Pawn.m_WeaponsCarried[1].HasAmmo()
-		&& (Pawn.EngineWeapon.m_eWeaponType == WT_Sniper))
+	// End:0x9C
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(Pawn.EngineWeapon, none), __NFUN_129__(m_pawn.m_bChangingWeapon)), __NFUN_114__(Pawn.EngineWeapon, m_pawn.m_WeaponsCarried[0])), Pawn.m_WeaponsCarried[1].HasAmmo()), __NFUN_154__(int(Pawn.EngineWeapon.m_eWeaponType), int(4))))
 	{
 		SwitchWeapon(2);
 		return true;
 	}
-	return false;	
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//                          RAINBOW AI TEAM LEADER                                      //
-//////////////////////////////////////////////////////////////////////////////////////////
-//==========================================================//
-//              -- state SNIPEUNTILGOCODE --                //
-//==========================================================//
-state SnipeUntilGoCode
-{
-	function BeginState()	
-	{	
-		#ifdefDEBUG if(bShowLog) log(pawn$" has entered state SnipeUntilGoCode...m_TeamManager="$m_TeamManager);	#endif
-		m_pawn.m_bIsSniping = true; 
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_bStateFlag = false;		
-	}
-
-	function EndState()		
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has exited state SnipeUntilGoCode...");		#endif
-		//pawn.m_bWantsToProne = false;
-		m_bIgnoreBackupBump = false;
-		m_pawn.m_bIsSniping = false;
-		m_pawn.m_bAvoidFacingWalls = true;
-		// this call will only change to secondary weapon if carrying a true sniper rifle (Except when reacting to a noise)
-		m_TeamManager.CheckTeamEngagingStatus();
-	}
-
-	event SeePlayer(Pawn seen)
-	{
-		local R6Pawn aPawn;
-
-		if(!m_bStateFlag)
-		{
-			global.SeePlayer(seen);
-			return;
-		}
-
-		if( m_pawn.IsEnemy( seen ) )
-		{
-            aPawn = R6Pawn(seen);    
-
-			// do not fire at a surrendered/incapacitated/dead terrorist
-			if(aPawn.m_bIsKneeling || !aPawn.IsAlive() || (m_TeamManager==none) || (enemy!=none))
-				return;
-
-			if(AClearShotIsAvailable(seen, m_pawn.GetFiringStartPoint()))
-			{
-				#ifdefDEBUG	if(bShowLog) logX(pawn$" : state SnipeUntilGoCode - SeePlayer() enemy="$enemy$" has been spotted..m_TeamManager.m_bSniperHold="$m_TeamManager.m_bSniperHold$" m_TeamManager.m_OtherTeamVoicesMgr="$m_TeamManager.m_OtherTeamVoicesMgr);	#endif
-				if(m_TeamManager.m_bSniperHold && m_TeamManager.m_OtherTeamVoicesMgr != none)
-					m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, ROTV_SniperHasTarget);
-				m_pawn.m_bEngaged = true;
-				SetEnemy(seen);
-				target = enemy;	
-				Enable('EnemyNotVisible');
-			}
-		}
-	}
-
-	event EnemyNotVisible()
-	{
-		if(Level.TimeSeconds - LastSeenTime < 0.5)
-			return;
-
-		#ifdefDEBUG	if(bShowLog) logX(pawn$" (SNIPER) EnemyNotVisible() !!!! enemy="$enemy$" enemy.IsAlive()="$enemy.IsAlive());		#endif
-		if(m_TeamManager.m_bSniperHold && m_TeamManager.m_OtherTeamVoicesMgr != none)
-			m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, ROTV_SniperLooseTarget);
-
-		StopFiring();
-		EndAttack();
-		Disable('EnemyNotVisible');
-	}
-
-	event AttackTimer();
-
-	function bool NoiseSourceIsVisible()
-	{
-		if(VSize(m_vNoiseFocalPoint - pawn.location) < 200)
-			return false;
-
-		if(normal(m_vNoiseFocalPoint - pawn.location) dot vector(pawn.rotation) > 0.3)
-			return true;
-
-		return false;
-	}
-
-	event Timer()
-	{
-		if(enemy != none)
-			return;
-
-		if(m_vNoiseFocalPoint != vect(0,0,0))
-		{
-			if((m_TeamManager.m_iMemberCount == 1) && !NoiseSourceIsVisible() && FastTrace(pawn.location, m_vNoiseFocalPoint))
-			{
-				#ifdefDEBUG	if(bShowLog) log(" sniper heard a noise, and is alone in his team , so get up! m_vNoiseFocalPoint="$m_vNoiseFocalPoint);	#endif
-				GotoState('PauseSniping');
-			}
-			else
-				m_vNoiseFocalPoint = vect(0,0,0);	
-		}
-	}
-
-Begin:	
-	SetTimer(0.5, true);
-	enemy = none;
-	target = enemy;
-	m_TeamManager.CheckTeamEngagingStatus();
-
-	#ifdefDEBUG	if(bShowLog) log(" SnipeUntilGoCode m_ActionTarget="$m_ActionTarget);	#endif
-	// change to secondary if carrying a sniper rifle (if target is far)
-	if(DistanceTo(m_ActionTarget) > 300)
-	{
-		if(SniperChangeToSecondaryWeapon())
-			FinishAnim( m_pawn.C_iWeaponRightAnimChannel ); 
-	}
-
-GetIntoPosition:
-	while(DistanceTo(m_ActionTarget) > 40)
-	{
-		// move to the sniping location
-		#ifdefDEBUG	if(bShowLog) log(" move to the sniping location : m_ActionTarget="$m_ActionTarget$" location="$m_ActionTarget.location$" pawn.location="$pawn.location$" rotation="$m_ActionTarget.rotation);	#endif
-		R6PreMoveToward(m_ActionTarget, m_ActionTarget, PACE_Walk);
-		MoveToward(m_ActionTarget);
-		StopMoving();
-	}
-	
-	// assume the correct orientation
-	ChangeOrientationTo(m_TeamManager.m_rSnipingDir);
-	FinishRotation();
-
-TakePosition:
-	// switch to primary if currently carrying secondary
-	if(SniperChangeToPrimaryWeapon())
-		FinishAnim( m_pawn.C_iWeaponRightAnimChannel );
-		
-	if(pawn.m_bIsProne)
-	{
-		m_bIgnoreBackupBump = true;
-		goto('LocateEnemy');
-	}
-	
-	// check if we can go prone
-	m_vTargetPosition = pawn.location - vect(0,0,60);
-	if(ClearToSnipe(m_vTargetPosition, m_TeamManager.m_rSnipingDir))
-	{
-		pawn.bWantsToCrouch = true;
-		Sleep(0.5);
-		pawn.m_bWantsToProne = true;
-		Sleep(1.5);
-	}
-	else if(ClearToSnipe(pawn.location, m_TeamManager.m_rSnipingDir))
-	{
-		pawn.bWantsToCrouch = true;
-		Sleep(1.0);
-	}			
-	else
-	{
-		pawn.bWantsToCrouch = false;	
-		pawn.m_bWantsToProne = false;
-		Sleep(0.5);
-	}
-
-	m_pawn.ResetBoneRotation();
-	ChangeOrientationTo(m_TeamManager.m_rSnipingDir);
-	m_bIgnoreBackupBump = true;
-	m_bStateFlag = true;
-	enemy = none;
-    m_TeamManager.PlayWaitingGoCode(m_TeamManager.m_eGoCode, true);
-
-LocateEnemy:
-	#ifdefDEBUG	if(bShowLog) logX(" (LocateEnemy) this pawn is now sniping... ");	#endif
-	if(!m_TeamManager.m_bCAWaitingForZuluGoCode)
-		m_TeamManager.SetTeamState(TS_Sniping);
-
-	if(enemy == none)
-	{		
-		ChangeOrientationTo(m_TeamManager.m_rSnipingDir);
-		Sleep(0.1);
-		Goto('LocateEnemy');
-	}
-
-EngageEnemy:
-	m_TeamManager.CheckTeamEngagingStatus();
-	#ifdefDEBUG	if(bShowLog) log(" (EngageEnemy) an enemy has been spotted : terrorist="$enemy$" ammo : "$Pawn.EngineWeapon.NumberOfBulletsLeftInClip());	#endif
-	if(!m_TeamManager.m_bSniperHold && enemy != none)
-	{
-		Pawn.EngineWeapon.SetRateOfFire(ROF_Single); 
-		
-		focus = enemy;
-		target = enemy;
-		FinishRotation(); 	
-
-		// wait for accuracy....
-		while(!IsReadyToFire(enemy))
-			Sleep(0.2);
-
-		// fire at enemy
-		m_TeamManager.RainbowIsEngagingEnemy();
-		StartFiring();
-		Sleep(0.2);
-		StopFiring();
-	}
-	
-	// check if we need to reload
-	if(NeedToReload())
-		RainbowReloadWeapon();
-
-	// if is no longer visible, go back to locating a new target
-	if(enemy == none ) 
-		Goto('LocateEnemy');
-
-	// if enemy is dead, go back to locating a new target
-	if(!R6Pawn(enemy).IsAlive())
-	{
-		#ifdefDEBUG	if(bShowLog) log(" enemy is dead ="$ enemy);	#endif
-		if(m_TeamManager.m_bSniperHold && m_TeamManager.m_OtherTeamVoicesMgr != none)
-			m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, ROTV_SniperLooseTarget);
-		
-		m_TeamManager.DisEngageEnemy(pawn, enemy);
-		enemy = none;
-		m_pawn.ResetBoneRotation();
-		Goto('LocateEnemy');
-	}
-
-	Sleep(1.0);
-	Goto('EngageEnemy');
-
-EndSniping:	
-	m_pawn.ResetBoneRotation();
-	m_bIgnoreBackupBump = false;	
-	if(pawn.m_bWantsToProne)
-	{
-		pawn.m_bWantsToProne = false;
-		Sleep(1.0);
-	}
-	pawn.bWantsToCrouch = false;	
-
-WaitForGoCode:
-	Sleep(1.0);
-	Goto('WaitForGoCode');
-
-Finish:
-	// if this pawn is not the team lead, then go to FollowLeader state, otherwise go to Patrol
-	if(m_pawn.m_iId == 0)
-		GotoState('Patrol');
-	else
-		GotoState('FollowLeader');	
-}
-
-//==========================================================//
-//              -- state PAUSESNIPING --                    //
-//==========================================================//
-state PauseSniping
-{
-#ifdefDEBUG
-    function BeginState()   {		if(bShowLog) log("... entered state PauseSniping...");	}
-	function EndState()		{		if(bShowLog) log("... exited state PauseSniping...");	}
-#endif
-
-Begin:	
-	StopMoving();
-	m_vTargetPosition = m_vNoiseFocalPoint;
-	m_vNoiseFocalPoint = vect(0,0,0);
-
-	// should he stay crouched?
-	if(pawn.m_bWantsToProne)
-	{
-		pawn.m_bWantsToProne = false;
-		Sleep(1.0);
-	}
-	pawn.bWantsToCrouch = false;	
-
-LookAround:
-	SetLocation(m_vTargetPosition);
-	focus = self;
-	FinishRotation();
-
-Wait:
-	// if an enemy is spotted, rainbow will enter the attacking state
-	Sleep(2.5);
-
-	if(enemy != none)
-		goto('Wait');
-
-	// if 2.5 seconds have passed with no action/interruption, then go back to sniping
-	GotoState('SnipeUntilGoCode');
+	return false;
+	return;
 }
 
 function CheckNeedToClimbLadder()
 {
-	// check if this is a rainbow carrying out a teamorder
-	if((m_pawn.m_iId == 1) && m_TeamManager.m_bTeamIsSeparatedFromLeader)
-		return;  
-
-	// AI team leader
-	if(m_pawn.m_iId == 0)
-		return;
-
-	if(m_TargetLadder == none)
-		return;
-
-	// check if pace member is on the same end of the ladder as this pawn
-	if(PawnIsOnTheSameEndOfLadderAsMember(m_PaceMember, R6LadderVolume(m_TargetLadder.myLadder)))
+	// End:0x2A
+	if(__NFUN_130__(__NFUN_154__(m_pawn.m_iID, 1), m_TeamManager.m_bTeamIsSeparatedFromLeader))
 	{
-		// members are already on the same side....no need to climb
+		return;
+	}
+	// End:0x40
+	if(__NFUN_154__(m_pawn.m_iID, 0))
+	{
+		return;
+	}
+	// End:0x4D
+	if(__NFUN_114__(m_TargetLadder, none))
+	{
+		return;
+	}
+	// End:0x82
+	if(PawnIsOnTheSameEndOfLadderAsMember(m_PaceMember, R6LadderVolume(m_TargetLadder.MyLadder)))
+	{
 		m_TeamManager.MemberFinishedClimbingLadder(m_pawn);
-	}	
+	}
+	return;
 }
 
-function bool PawnIsOnTheSameEndOfLadderAsMember(R6Rainbow aRainbow, R6LadderVolume ladderVolume)
+function bool PawnIsOnTheSameEndOfLadderAsMember(R6Rainbow aRainbow, R6LadderVolume LadderVolume)
 {
-	local  bool		bPaceMemberIsAtTopOfLadder;
+	local bool bPaceMemberIsAtTopOfLadder;
 
-	if(ladderVolume == none)
+	// End:0x0D
+	if(__NFUN_114__(LadderVolume, none))
+	{
 		return true;
-
-	bPaceMemberIsAtTopOfLadder = aRainbow.location.z > ladderVolume.location.z;
-	if(bPaceMemberIsAtTopOfLadder == (m_pawn.location.z > ladderVolume.location.z))
-		return true;
+	}
+	bPaceMemberIsAtTopOfLadder = __NFUN_177__(aRainbow.Location.Z, LadderVolume.Location.Z);
+	// End:0x74
+	if(__NFUN_242__(bPaceMemberIsAtTopOfLadder, __NFUN_177__(m_pawn.Location.Z, LadderVolume.Location.Z)))
+	{
+		return true;		
+	}
 	else
+	{
 		return false;
-}
-
-//==========================================================//
-//             -- state TEAMCLIMBSTARTNOLEADER --           //
-// 2nd member leads team to climbs ladder without the       //
-// team leader...                                           //
-//==========================================================//
-state TeamClimbStartNoLeader
-{
-    function BeginState()
-    {
-		#ifdefDEBUG if(bShowLog) log(pawn$" has entered state TeamClimbStartNoLeader...");   #endif
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_pawn.m_bCanProne = false;
-    }
-
-    function EndState()
-    {
-		#ifdefDEBUG if(bShowLog) log(pawn$" has exited state TeamClimbStartNoLeader...");	#endif
-		m_pawn.m_bCanProne = m_pawn.default.m_bCanProne;
-    }
-
-Begin:	
-    // assume moveTarget has been set by TeamAI    
-	m_TeamManager.SetTeamState(TS_Moving);
-	moveTarget = m_TeamManager.m_TeamLadder;
-    if((moveTarget==none) || !moveTarget.IsA('R6Ladder'))  
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" TeamClimbStartNoLeader : moveTarget="$moveTarget$" m_TeamManager.m_TeamLadder="$m_TeamManager.m_TeamLadder);	#endif
-		GotoState('HoldPosition');
 	}
-
-	m_TargetLadder = R6Ladder(moveTarget);
-
-	// if ladder is not reachable, find a path to it
-	if(!CanWalkTo(m_TargetLadder.location) && !ActorReachable(m_TargetLadder)) 
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" this pawn can't reach the ladder directly so use pathfinding to get to it...");		#endif
-		FindPathToTargetLocation(m_TargetLadder.location, m_TargetLadder);
-	}
-
-	// move directly towards ladder
-	if(m_TargetLadder.m_bIsTopOfLadder)
-	{
-		m_vTargetPosition = m_TargetLadder.location + 70*vector(m_TargetLadder.rotation);
-		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk); 
-		MoveTo(m_vTargetPosition);
-	}
-	else
-	{		
-		moveTarget = m_TargetLadder;
-		R6PreMoveToward(moveTarget, moveTarget, PACE_Walk); 
-		MoveToward(moveTarget);
-	}
-
-	// wait for Zulu gocode if there is one
-    while( m_TeamManager.m_bCAWaitingForZuluGoCode )
-    {
-		m_TeamManager.SetTeamState(TS_Waiting);
-        Sleep(0.5);     
-    }
-	
-	moveTarget = m_TargetLadder;
-
-WaitAtEndForLeader:
-	m_TeamManager.SetTeamState(TS_ClimbingLadder);
-	nextState = 'TeamClimbEndNoLeader';
-    GotoState('ApproachLadder');
-}
-
-//==========================================================//
-//             -- state TEAMCLIMBENDNOLEADER --             //
-// 2nd in command waits for team to finish climbing ladder  //
-//==========================================================//
-state TeamClimbEndNoLeader
-{
-#ifdefDEBUG 
-	function BeginState()	{	if(bShowLog) log(pawn$" has entered state TeamClimbEndNoLeader...");	}	
-    function EndState()		{	if(bShowLog) log(pawn$" has exited state TeamClimbEndNoLeader...");		}
-#endif
-
-Begin:
-	// if this NPC is carrying out a player order, add a delay based on the leadership skill
-	if(m_pawn.m_iId == 1)
-		Sleep(GetLeadershipReactionTime());
-
-PickDest:
-    //make room for team to arrive at end of ladder
-    FindNearbyWaitSpot(m_pawn.m_Ladder, m_vTargetPosition); 
-	#ifdefDEBUG	if(bShowLog) log(" destination to wait for team is: m_vTargetPosition="$m_vTargetPosition);		#endif
-	if(m_vTargetPosition == vect(0,0,0))
-	{
-		#ifdefDEBUG	if(bShowLog) log(" PROBLEM : "$pawn$" could not obtain an appropriate Wait Spot from FindNearbyWaitSpot()");	#endif
-		Goto('WaitAtEndForTeam');
-	}
-	else
-	{
-		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk);
-		MoveTo(m_vTargetPosition);  
-	}
-	StopMoving();
-
-WaitAtEndForTeam:
-	m_pawn.m_Ladder = none;
-    Sleep(1.0);
-    nextState = '';
-	if(!m_TeamManager.m_bTeamIsClimbingLadder)
-	{
-		if(m_TeamManager.m_iTeamAction != TEAM_None)
-		{
-			// the team climbed the ladder for pathfinding and will proceed to perform previous action
-			GotoState(GetNextTeamActionState());
-		}
-		else
-		{
-			if(m_TeamManager.m_bTeamIsRegrouping)
-				GotoState('FollowLeader');
-			else
-				GotoState('HoldPosition');
-		}
-	}
-	else
-		goto('WaitAtEndForTeam');
-}
-
-//==========================================================//
-//             -- state TEAMCLIMBLADDER --                  //
-// team climbs ladder following another member... this      //
-// member may be the team leader or in the case where the   //
-// team is separated from leader may be the second member.  //
-//==========================================================//
-state TeamClimbLadder
-{
-    function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" ... entered state TeamClimbLadder...m_pawn.m_Ladder="$m_pawn.m_Ladder$" , m_iStateProgress="$m_iStateProgress);		#endif
-		m_pawn.m_bAvoidFacingWalls = false;
-		m_pawn.ResetBoneRotation();
-		m_pawn.m_bCanProne = false;
-    }
-
-    function EndState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" ... exited state TeamClimbLadder... m_iStateProgress="$m_iStateProgress);	#endif
-		if(m_iStateProgress == 5)
-			m_iStateProgress = 0;
-		m_pawn.ResetBoneRotation();
-		m_pawn.m_bCanProne = m_pawn.default.m_bCanProne;
-    }
-
-	function SetPawnFocus()
-	{
-		local INT iMember;
-		local rotator rOffset;
-
-		if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
-			iMember = m_pawn.m_iId - 1;
-		else
-			iMember = m_pawn.m_iId;
-
-		switch(iMember)
-		{
-			case 1:		// in this case the team is not separated from leader				
-				if(m_pawn.m_Ladder.m_bIsTopOfLadder)
-					m_pawn.AimDown();     
-				else
-					m_pawn.AimUp();       
-				focus = m_pawn.m_Ladder; 
-				break;
-			case 2:
-				SetLocation(m_vTargetPosition + 100*(m_vTargetPosition - m_pawn.m_Ladder.location));
-				focus = self;
-				break;
-			case 3:
-				rOffset = rotator(m_vTargetPosition - m_pawn.m_Ladder.location);
-				rOffset += rot(0,8192,0);
-				SetLocation(m_vTargetPosition + 100*vector(rOffset));
-				focus = self;
-				break;
-			default:
-				SetLocation(m_pawn.m_Ladder.location);
-		}
-	}
-
-	function bool LeadHasStartedClimbing()
-	{
-		if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
-			return m_TeamManager.m_Team[1].m_bIsClimbingLadder;
-		else
-			return m_TeamLeader.m_bIsClimbingLadder;
-	}
-	
-	function bool NeedToFollowTeam()
-	{
-		local R6Rainbow aRainbow;
-
-		if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
-			aRainbow = m_TeamManager.m_Team[1];
-		else
-			aRainbow = m_TeamLeader;
-			
-		if(m_TeamManager.m_TeamLadder != none && !PawnIsOnTheSameEndOfLadderAsMember(aRainbow, R6LadderVolume(m_TeamManager.m_TeamLadder.myLadder)))
-			return false;
-
-		return (IsMoving(aRainbow) && !aRainbow.m_bIsClimbingLadder);
-	}
-
-	function R6Ladder GetLadderMoveTarget()
-	{
-		if(pawn.location.z > m_TeamManager.m_TeamLadder.myLadder.location.z)
-			return R6LadderVolume(m_TeamManager.m_TeamLadder.myLadder).m_TopLadder;
-		else
-			return R6LadderVolume(m_TeamManager.m_TeamLadder.myLadder).m_BottomLadder;
-	}
-
-Begin:
-	switch(m_iStateProgress)
-	{
-		case 0:		goto('FollowTeam');					break;
-		case 1:		goto('WaitForLeadToStartClimbing');	break;
-		case 2:		goto('FormationAroundLadder');		break;
-		case 3:		goto('WaitForTurnToClimb');			break;
-		default:	goto('ClimbLadder');
-	}
-
-FollowTeam:  
-	#ifdefDEBUG	if(bShowLog) log(pawn$" is following team towards ladder ");	#endif
-	if(DistanceTo(m_PaceMember) > (GetFormationDistance() + 35))
-	{ 
-		m_vTargetPosition = m_PaceMember.location + (GetFormationDistance() * normal(pawn.location - m_PaceMember.location));
-		if(!ActorReachable(m_PaceMember)) 
-			FindPathToTargetLocation(m_PaceMember.location, m_PaceMember);
-		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk);
-		MoveTo(m_vTargetPosition);
-	}
-	else
-		Sleep(0.5);
-	StopMoving();
-
-	if(NeedToFollowTeam())  	
-	    Goto('FollowTeam');
-   
-	m_iStateProgress = 1;
-
-WaitForLeadToStartClimbing:	
-	#ifdefDEBUG	if(bShowLog) log(self$" WaitForLeadToStartClimbing... ");	#endif
-	// check if pacemember is already on the other side of the ladder
-	if((abs(m_PaceMember.location.z - pawn.location.z) < 80))
-	{
-		m_iStateProgress = 2;
-		goto('FormationAroundLadder');
-	}
-
-	// wait for team lead to get on ladder before taking formation... 
-	if(!LeadHasStartedClimbing())
-	{
-		Sleep(1.0);
-		goto('WaitForLeadToStartClimbing');
-	}
-
-	m_iStateProgress = 2;
-
-FormationAroundLadder:
-	// check if there is insufficient room to form around ladder
-	if(m_pawn.m_Ladder.m_bSingleFileFormationOnly)
-	{
-		#ifdefDEBUG	if(bShowLog) log(self$" There is not enough room for a formation around ladder, move ahead to WaitForTurnToClimb");	#endif
-		StopMoving();
-		goto('WaitForTurnToClimb');
-	}
-
-	if(!m_TeamManager.m_bTeamIsSeparatedFromLeader)
-	{
-	    if(m_pawn.m_Ladder == none)
-	       m_pawn.m_Ladder = m_TeamLeader.m_Ladder;	// pawn's m_Ladder is none, try to get it from teamleader
-	}
-
-	// take a formation around ladder
-    if(m_pawn.m_Ladder != none)
-    {
-        m_vTargetPosition = getLadderPosition();  
-		
-		// check to make sure there is ground under the location
-		if(PointReachable(m_vTargetPosition))
-		{
-			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_Walk); 
-			MoveTo(m_vTargetPosition);  
-			StopMoving();
-		}
-    }
-	
-	SetPawnFocus();  	
-   	m_iStateProgress = 3;
-	#ifdefDEBUG	if(bShowLog) log(self$" : wait for member ahead of me to finish climbing...");	#endif
-
-WaitForTurnToClimb:            
-	#ifdefDEBUG	if(bShowLog) log(self$" wait for turn to climb...m_PaceMember="$m_PaceMember);	#endif
-    // if pacemember is close by and is not climbing ladder, wait... 
-    if( (abs(m_PaceMember.location.z - pawn.location.z) < 80) || m_PaceMember.m_bIsClimbingLadder )
-    {              
-        Sleep(1.0);
-        Goto('WaitForTurnToClimb');
-    }
-	m_iStateProgress = 4;
-
-ClimbLadder:
-	#ifdefDEBUG	if(bShowLog) log(self$" member ahead of me has finished climbing ladder...");	#endif
-    Sleep(0.5);
-	m_pawn.ResetBoneRotation();
-
-	// consider that m_TeamManager.m_TeamLadder may have changed	
-    moveTarget = GetLadderMoveTarget(); 
-	if(!CanWalkTo(moveTarget.location) && !ActorReachable(moveTarget)) 
-		FindPathToTargetLocation(moveTarget.location, moveTarget);
-
-    R6PreMoveToward(moveTarget, moveTarget, PACE_Walk);
-    MoveToward(moveTarget);  
-    m_iStateProgress = 5;
-	if(moveTarget.IsA('R6Ladder'))
-    {     
-        nextState = 'FollowLeader';
-        nextLabel = 'Begin';
-        GotoState('ApproachLadder');
-    }
+	return;
 }
 
 //------------------------------------------------------------------
@@ -5033,13 +2023,17 @@ ClimbLadder:
 //------------------------------------------------------------------
 function float GetFormationDistance()
 {
-	if(m_PaceMember != none)
+	// End:0x67
+	if(__NFUN_119__(m_PaceMember, none))
 	{
-		if(m_PaceMember.m_bIsProne || ((m_PaceMember.controller != none) && (m_PaceMember.controller.IsInState('SnipeUntilGoCode'))) )
-			return m_TeamManager.m_iFormationDistance * 2;
+		// End:0x67
+		if(__NFUN_132__(m_PaceMember.m_bIsProne, __NFUN_130__(__NFUN_119__(m_PaceMember.Controller, none), m_PaceMember.Controller.__NFUN_281__('SnipeUntilGoCode'))))
+		{
+			return float(__NFUN_144__(m_TeamManager.m_iFormationDistance, 2));
+		}
 	}
-
-	return m_TeamManager.m_iFormationDistance;
+	return float(m_TeamManager.m_iFormationDistance);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -5050,20 +2044,25 @@ function float GetFormationDistance()
 //------------------------------------------------------------------
 function bool IsBumpBackUpStateFinish()
 {
-	local  R6Pawn aBumpPawn;
+	local R6Pawn aBumpPawn;
 
-    // Check first if we are in this state from too long
-    if(m_fLastBump + 4.0f < Level.TimeSeconds)
-        return true;
-
+	// End:0x21
+	if(__NFUN_176__(__NFUN_174__(m_fLastBump, 4.0000000), Level.TimeSeconds))
+	{
+		return true;
+	}
 	aBumpPawn = R6Pawn(m_BumpedBy);
-
-	focus = none;	// to prevent npc from constantly turning to maintain focus on pawn he was bumped by
-    if(m_TeamLeader == none)
-		return ((DistanceTo(m_BumpedBy) > (c_iDistanceBumpBackUp + 60)) || !IsMoving(aBumpPawn));
+	Focus = none;
+	// End:0x71
+	if(__NFUN_114__(m_TeamLeader, none))
+	{
+		return __NFUN_132__(__NFUN_177__(DistanceTo(m_BumpedBy), float(__NFUN_146__(c_iDistanceBumpBackUp, 60))), __NFUN_129__(IsMoving(aBumpPawn)));		
+	}
 	else
-		return( (DistanceTo(m_BumpedBy) > c_iDistanceBumpBackUp + 60)) || 
-				((DistanceTo(m_PaceMember) > c_iDistanceBumpBackUp + 60) && (IsMoving(m_PaceMember) && !m_PaceMember.IsInState('BumpBackUp')) );
+	{
+		return __NFUN_132__(__NFUN_177__(DistanceTo(m_BumpedBy), float(__NFUN_146__(c_iDistanceBumpBackUp, 60))), __NFUN_130__(__NFUN_177__(DistanceTo(m_PaceMember), float(__NFUN_146__(c_iDistanceBumpBackUp, 60))), __NFUN_130__(IsMoving(m_PaceMember), __NFUN_129__(m_PaceMember.__NFUN_281__('BumpBackUp')))));
+	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -5073,33 +2072,40 @@ function bool IsBumpBackUpStateFinish()
 //------------------------------------------------------------------
 function BumpBackUpStateFinished()
 {
-    gotoState( 'HoldPosition' );
+	__NFUN_113__('HoldPosition');
+	return;
 }
 
 //------------------------------------------------------------------
 // IsMoving()
 //------------------------------------------------------------------
-function bool IsMoving(Pawn p)
+function bool IsMoving(Pawn P)
 {
-	if(p == none || p.velocity == vect(0,0,0))
-        return false;
-    else
-        return true;
+	// End:0x32
+	if(__NFUN_132__(__NFUN_114__(P, none), __NFUN_217__(P.Velocity, vect(0.0000000, 0.0000000, 0.0000000))))
+	{
+		return false;		
+	}
+	else
+	{
+		return true;
+	}
+	return;
 }
 
 //------------------------------------------------------------------
 // SetNoiseFocus()
 //------------------------------------------------------------------
-function SetNoiseFocus(vector vSource)
+function SetNoiseFocus(Vector vSource)
 {
-//rb	if(bShowLog) log(pawn$" SetNoiseFocus() was called... m_vNoiseFocalPoint="$m_vNoiseFocalPoint$" m_bReactToNoise="$m_bReactToNoise);
-	// check if rainbow is in a state that permits this...
 	m_vNoiseFocalPoint = vSource;
+	// End:0x23
 	if(m_bReactToNoise)
-	{		
-		SetLocation(m_vNoiseFocalPoint);
-		focus = self;
+	{
+		__NFUN_267__(m_vNoiseFocalPoint);
+		Focus = self;
 	}
+	return;
 }
 
 //------------------------------------------------------------------
@@ -5107,7 +2113,8 @@ function SetNoiseFocus(vector vSource)
 //------------------------------------------------------------------
 function ResetNoiseFocus()
 {
-	m_vNoiseFocalPoint = vect(0,0,0);
+	m_vNoiseFocalPoint = vect(0.0000000, 0.0000000, 0.0000000);
+	return;
 }
 
 //------------------------------------------------------------------
@@ -5115,44 +2122,59 @@ function ResetNoiseFocus()
 //------------------------------------------------------------------
 function bool NeedToReload()
 {
-	local FLOAT  fCutOff;
+	local float fCutOff;
 
-	if(m_pawn.m_iCurrentWeapon > 2)
-		return false;
-	
-	if(m_TeamManager.m_eGoCode == GOCODE_None)
-		fCutOff = 0.5;
-	else
-		fCutOff = 0.75;
-
-	if(pawn.EngineWeapon == none || m_bWeaponsDry || m_pawn.m_bChangingWeapon || m_pawn.m_bReloadingWeapon)
-		return false;
-
-	if(pawn.EngineWeapon.NumberOfBulletsLeftInClip() == 0)
+	// End:0x17
+	if(__NFUN_151__(m_pawn.m_iCurrentWeapon, 2))
 	{
-		if(enemy == none && pawn.EngineWeapon.IsPumpShotGun())
+		return false;
+	}
+	// End:0x3E
+	if(__NFUN_154__(int(m_TeamManager.m_eGoCode), int(4)))
+	{
+		fCutOff = 0.5000000;		
+	}
+	else
+	{
+		fCutOff = 0.7500000;
+	}
+	// End:0x92
+	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_114__(Pawn.EngineWeapon, none), m_bWeaponsDry), m_pawn.m_bChangingWeapon), m_pawn.m_bReloadingWeapon))
+	{
+		return false;
+	}
+	// End:0xEB
+	if(__NFUN_154__(Pawn.EngineWeapon.NumberOfBulletsLeftInClip(), 0))
+	{
+		// End:0xE9
+		if(__NFUN_130__(__NFUN_114__(Enemy, none), Pawn.EngineWeapon.IsPumpShotGun()))
+		{
 			m_pawn.m_bReloadToFullAmmo = true;
+		}
 		return true;
 	}
-
-	if(enemy != none)
+	// End:0xF8
+	if(__NFUN_119__(Enemy, none))
+	{
 		return false;
-
-	if(pawn.EngineWeapon.NumberOfBulletsLeftInClip() <= fCutOff*pawn.EngineWeapon.GetClipCapacity())
-	{				
-		// check if next clip is more than 50% full (except for pump shotguns)
-		if(pawn.EngineWeapon.IsPumpShotGun() && (pawn.engineWeapon.GetNbOfClips() > 0))
-		{			
+	}
+	// End:0x1A3
+	if(__NFUN_178__(float(Pawn.EngineWeapon.NumberOfBulletsLeftInClip()), __NFUN_171__(fCutOff, float(Pawn.EngineWeapon.GetClipCapacity()))))
+	{
+		// End:0x186
+		if(__NFUN_130__(Pawn.EngineWeapon.IsPumpShotGun(), __NFUN_151__(Pawn.EngineWeapon.GetNbOfClips(), 0)))
+		{
 			m_pawn.m_bReloadToFullAmmo = true;
 			return true;
 		}
-
-		// for all other weapons, check if we have at least one full clip before reloading
-		if(pawn.EngineWeapon.HasAtLeastOneFullClip())		
+		// End:0x1A3
+		if(Pawn.EngineWeapon.HasAtLeastOneFullClip())
+		{
 			return true;
+		}
 	}
-
 	return false;
+	return;
 }
 
 //------------------------------------------------------------------
@@ -5160,576 +2182,4537 @@ function bool NeedToReload()
 //------------------------------------------------------------------
 function RainbowReloadWeapon()
 {
+	// End:0x0B
 	if(m_bWeaponsDry)
-		return;
-
-	if(m_pawn.m_bReloadingWeapon)
-		return;
-
-	if(Pawn.EngineWeapon.GetNbOfClips() > 0) 
 	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" needs to reload weapon");	#endif
-		if(enemy != none)
+		return;
+	}
+	// End:0x1F
+	if(m_pawn.m_bReloadingWeapon)
+	{
+		return;
+	}
+	// End:0xA9
+	if(__NFUN_151__(Pawn.EngineWeapon.GetNbOfClips(), 0))
+	{
+		// End:0x54
+		if(__NFUN_119__(Enemy, none))
 		{
 			StopFiring();
 			EndAttack();
 		}
 		m_pawn.m_u8DesiredYaw = 0;
 		m_pawn.m_u8DesiredPitch = 0;
-		m_pawn.m_ePlayerIsUsingHands = HANDS_None;
-		m_pawn.ServerSwitchReloadingWeapon(TRUE);
-		m_pawn.ReloadWeapon();	
-	}
-	else if(m_pawn.m_iCurrentWeapon == 1 && Pawn.m_WeaponsCarried[1].HasAmmo())
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" needs to switch to secondary weapon");	#endif
-		SwitchWeapon(2);
-	}
-	else if(m_pawn.m_iCurrentWeapon == 2 && Pawn.m_WeaponsCarried[0].HasAmmo())
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" needs to switch to primary weapon");	#endif
-		SwitchWeapon(1);
-	}
-	else if(!m_bWeaponsDry)
-	{
-		#ifdefDEBUG	if(bShowLog) log("  BOTH WEAPONS ARE DRY?????!!!!! ");	#endif
-		// NO AMMO LEFT AT ALL!! do nothing...
-		m_bWeaponsDry = true;
-		//rbsound 
-		if (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus)
-            m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, RMV_AmmoOut);
-	}
-}
-
-//------------------------------------------------------------------
-// GetTeamLeaderPace()
-//------------------------------------------------------------------
-function R6Pawn.eMovementPace GetPace(bool bRun)
-{
-	if(m_PaceMember.m_bIsProne && !m_PaceMember.m_bIsSniping)
-		return PACE_Prone;    
-	else if(m_PaceMember.bIsCrouched)
-	{
-		if(bRun)
-			return PACE_CrouchRun;    
-		else
-			return PACE_CrouchWalk;
+		m_pawn.m_ePlayerIsUsingHands = 0;
+		m_pawn.ServerSwitchReloadingWeapon(true);
+		m_pawn.ReloadWeapon();		
 	}
 	else
 	{
-		if(bRun)
-			return PACE_Run;   
+		// End:0xE7
+		if(__NFUN_130__(__NFUN_154__(m_pawn.m_iCurrentWeapon, 1), Pawn.m_WeaponsCarried[1].HasAmmo()))
+		{
+			SwitchWeapon(2);			
+		}
 		else
-			return PACE_Walk;
+		{
+			// End:0x125
+			if(__NFUN_130__(__NFUN_154__(m_pawn.m_iCurrentWeapon, 2), Pawn.m_WeaponsCarried[0].HasAmmo()))
+			{
+				SwitchWeapon(1);				
+			}
+			else
+			{
+				// End:0x17D
+				if(__NFUN_129__(m_bWeaponsDry))
+				{
+					m_bWeaponsDry = true;
+					// End:0x17D
+					if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+					{
+						m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 14);
+					}
+				}
+			}
+		}
 	}
+	return;
+}
+
+function R6Pawn.eMovementPace GetPace(bool bRun)
+{
+	// End:0x2E
+	if(__NFUN_130__(m_PaceMember.m_bIsProne, __NFUN_129__(m_PaceMember.m_bIsSniping)))
+	{
+		return 1;		
+	}
+	else
+	{
+		// End:0x55
+		if(m_PaceMember.bIsCrouched)
+		{
+			// End:0x4F
+			if(bRun)
+			{
+				return 3;				
+			}
+			else
+			{
+				return 2;
+			}			
+		}
+		else
+		{
+			// End:0x64
+			if(bRun)
+			{
+				return 5;				
+			}
+			else
+			{
+				return 4;
+			}
+		}
+	}
+	return;
 }
 
 function SetRainbowOrientation()
 {
-	if(m_ePawnOrientation != PO_Back)
-		SetOrientation();
+	// End:0x16
+	if(__NFUN_155__(int(m_ePawnOrientation), int(5)))
+	{
+		__NFUN_2207__();		
+	}
 	else
 	{
+		// End:0x25
 		if(m_bIsMovingBackwards)
-			SetOrientation();
+		{
+			__NFUN_2207__();			
+		}
 		else
-			SetOrientation(PO_Front);
+		{
+			__NFUN_2207__(0);
+		}
 	}
+	return;
 }
 
 function ReorganizeTeamAsNeeded()
 {
-	if(m_pawn.m_eHealth != HEALTH_Wounded)
+	// End:0x23
+	if(__NFUN_155__(int(m_pawn.m_eHealth), int(1)))
 	{
 		m_bReorganizationPending = false;
 		return;
 	}
-
-	#ifdefDEBUG if(bShowLog) log(pawn$" "$self$" ReorganizeTeamAsNeeded() was called...... ");		#endif
 	m_TeamManager.ReOrganizeWoundedMembers();
-}
-
-//==========================================================//
-//                  -- state FOLLOWLEADER --                //
-// this is the state for NPC Rainbow team members that      //
-// follow their team leader (player or NPC)                 //
-//==========================================================//
-state FollowLeader
-{
-    function BeginState()
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" entered state followleader, pawn.physics="$pawn.physics );	#endif
-        m_iWaitCounter = 0;
-		m_bIsMovingBackwards = false;
-		m_ePawnOrientation = PO_Front;
-		m_bAlreadyWaiting = false;
-		m_vPreviousPosition = vect(0,0,0);
-		m_bIgnoreBackupBump = false;
-		
-		m_iStateProgress = 0;
-		m_bReactToNoise = true;
-		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
-    }
-
-    function EndState()
-    {
-		#ifdefDEBUG if(bShowLog) log(pawn$" exited state followleader" );	#endif
-		m_bIgnoreBackupBump = false;
-		m_bReactToNoise = false;
-		
-		// if there is a grenade nearby, do not reset the Timer
-		if(!m_TeamManager.m_bGrenadeInProximity)
-			SetTimer(0, false);
-
-		m_pawn.StopPeeking();
-		m_pawn.m_u8DesiredYaw = 0;
-
-		if(!m_TeamManager.m_bLeaderIsAPlayer && m_TeamManager.m_bTeamIsRegrouping && (m_PaceMember == m_TeamLeader))
-			m_TeamManager.TeamIsRegroupingOnLead(false);
-    }
-
-    function Timer()
-	{
-        m_iWaitCounter++; 
-        m_iTurn++;
-        if(m_iTurn == 6)
-            m_iTurn = 0;
-        
-		// middle members only should check environment for formation (not last member)
-		// do not check environment unless moving -> avoid facing walls with adversly affect results otherwise
-        if(((m_pawn.m_iId == 1) || (m_pawn.m_iId == 2)) && IsMoving(pawn) && (m_ePawnOrientation != PO_Back))
-			CheckEnvironment();             
-        
-		if(m_bIsCatchingUp)
-			m_pawn.ResetBoneRotation();
-		else
-			SetRainbowOrientation();
-    }
-    
-	function bool RainbowShouldWait()
-	{ 
-		local FLOAT fDistance;
-
-		// only use this check when standing, caused studdering in movement of NPCs when crouched
-		if(!m_bSlowedPace && IsMoving(m_PaceMember) && !pawn.m_bIsProne && !pawn.bIsCrouched)
-			return false;
-
-		if(m_vTargetPosition == m_vPreviousPosition)
-			return true;
-
-		// if m_bSlowedPace is true, then waiting distance should be twice the formation distance, allow a bigger gap to form 
-		// so that movement doesn't studder...
-		fDistance = GetFormationDistance();
-		if(m_bSlowedPace)
-			fDistance*=2; 
-	
-		if(m_pawn.m_bIsProne)
-			fDistance += 60;
-		else if(!m_pawn.m_bIsClimbingStairs)
-			fDistance += 35;
-		
-		if(DistanceTo(m_PaceMember, true) < fDistance)
-			return true;
-
-		return false;
-	}
- 
-	function vector GetNextTargetPosition()
-	{
-		local vector vDir;
-		local rotator rDir;
-		local rotator rOffset;
-
-		if(m_PaceMember == none)
-			return pawn.location;
-
-		if(m_bUseStaggeredFormation && (m_TeamManager.m_eFormation == m_eFormation) && (m_ePawnOrientation != PO_Back) && !pawn.m_bIsProne && !m_bSlowedPace)
-		{
-			rDir = rotator(m_PaceMember.location - pawn.location);
-			rOffset = rot(0,2000,0);
-			if((m_eFormation == FORM_SingleFileNoWalls) || (m_eFormation == FORM_SingleFileWallRight))
-			{				
-				if(m_pawn.m_iId == 1)
-					rDir += rOffset;
-				else 
-					rDir -= rOffset;
-				return(m_PaceMember.location - GetFormationDistance()*vector(rDir));
-			}
-
-			if(m_eFormation == FORM_SingleFileWallLeft)
-			{				
-				if(m_pawn.m_iId == 1)
-					rDir -= rOffset;
-				else 
-					rDir += rOffset;
-				return(m_PaceMember.location - GetFormationDistance()*vector(rDir));
-			}
-		}		
-		return(m_PaceMember.location + (GetFormationDistance() * normal(pawn.location - m_PaceMember.location)));
-	}
-
-	function EngageLadderIfNeeded(R6LadderVolume aVolume)
-	{
-		if(m_TargetLadder == none)
-			return;
-
-		// engage ladder only if pace member is on the other side of the ladder
-		if(!PawnIsOnTheSameEndOfLadderAsMember(m_PaceMember, aVolume))
-			m_TeamManager.InstructTeamToClimbLadder(aVolume, true, m_pawn.m_iId);		
-	}
-
-Begin:   
-	if(m_PaceMember == none)
-	{
-		#ifdefDEBUG	if(bShowLog) log("		PROBLEM : m_PaceMember == none, m_TeamLeader="$m_TeamLeader$" m_TeamManager="$m_TeamManager);	#endif
-		if((m_TeamLeader != none) && (m_TeamManager != none))
-			m_PaceMember = m_TeamManager.m_Team[m_pawn.m_iId-1];
-	}
-
-    m_TeamManager.SetFormation(self); 
-    SetTimer(1.0, true);  // add check to determine whether this member will actually be facing backward    
-
-	// make sure rainbow is not moving around with a gadget in his hands...
-	VerifyWeaponInventory();
-	EnsureRainbowIsArmed();
-
-	// change to secondary if carrying a sniper rifle
-	if(!m_pawn.IsStationary() && SniperChangeToSecondaryWeapon())
-			Sleep(0.5);	
-
-Moving:  
-	// check if we need to reload
-	if(NeedToReload())
-		RainbowReloadWeapon();
-	
-    if (m_bIsCatchingUp)
-        m_bIsCatchingUp = false;  
-
-	if((m_PaceMember == m_TeamLeader) && m_TeamLeader.m_bIsPlayer)
-		m_TeamManager.SetTeamState(TS_Following);
-
-	// check if we need to reorganize (i.e. if this pawn is wounded...)
-	if(m_bReorganizationPending)
-		ReorganizeTeamAsNeeded();
-
-	m_vTargetPosition = GetNextTargetPosition();
-	//  the new last condition was added to handle the crouch <--> uncrouch problem...  
-	//  use an adjustment of 35 units because MoveToward() may be imprecise, usually up to the size of the collision radius of the pawn.
-    if(RainbowShouldWait())
-	{
-		pawn.acceleration = vect(0,0,0);		
-        if(!m_bAlreadyWaiting) 
-        {
-			// reset the wait counter...        
-            m_iWaitCounter=0;   
-			m_pawn.ResetBoneRotation();
-			m_pawn.StopPeeking();	
-			EnsureRainbowIsArmed();
-
-            // last member should be looking backwards when in wait... (except if team is prone)
-			if((m_ePawnOrientation == PO_Back) && !m_bIsMovingBackwards && !pawn.m_bIsProne)
-            {
-				// if last member needs to turn around, play turning animation...	
-				sleep(0.2);
-				m_bIsMovingBackwards = true;
-				SetLocation(pawn.location - 2*(m_PaceMember.location - pawn.location));
-                focus = self;
-            }
-
-			m_bAlreadyWaiting = true;
-        }
-
-        if(VSize(m_TeamLeader.velocity) == 0) 
-        {			
-            if((m_iWaitCounter > 6) && !m_TeamManager.m_bTeamIsClimbingLadder) 
-            {
-				if(SniperChangeToPrimaryWeapon())
-					FinishAnim(m_pawn.C_iWeaponRightAnimChannel);
-
-				if(!pawn.bIsCrouched && !pawn.m_bIsProne)
-				{
-					// wait crouching... 
-					m_pawn.StopPeeking();
-					pawn.bWantsToCrouch = true;
-					Sleep(0.2); // to give enough time for the startCrouch to take place (performPhysics)
-				}
-            }            
-        }	            
-        Sleep(0.2);       
-        goto('Moving');
-    } 
-
-	// TODO : if this member was previously waiting (and the separation is large enough), speed up to catch up...
-    m_vPreviousPosition = m_vTargetPosition; 
-
-	// - wait animation is now always playing in channel 0
-    if(m_bAlreadyWaiting) 
-	{
-		m_pawn.StopPeeking();
-		sleep(0.2);
-
-		// change to secondary if carrying a sniper rifle
-		if(SniperChangeToSecondaryWeapon())
-			Sleep(0.5);			//FinishAnim(m_pawn.C_iWeaponRightAnimChannel ); 
-	}
-	m_bAlreadyWaiting = false;
-
-    // to prevent an npc from running into a wall....
-    // if targetPosition is not viewable (cannot be attained) NPC may be lagging too far behind...     
-	if(!CanWalkTo(m_vTargetPosition) && !PointReachable(m_vTargetPosition))	     
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" Cannot reach PaceMember, so goto Blocked: m_PaceMember="$m_PaceMember);		#endif
-		goto('Blocked');
-	}
-	if(m_PaceMember == m_TeamLeader)
-    {
-        m_TeamManager.TeamIsSeparatedFromLead(false);		
-		m_TeamManager.TeamIsRegroupingOnLead(false);
-    }
-    
-    if((m_ePawnOrientation != PO_Back) || pawn.m_bIsProne || m_PaceMember.m_bIsProne) 
-    {         
-		m_bIsMovingBackwards = false;
-        R6PreMoveTo(m_vTargetPosition, m_vTargetPosition);
-		SetLocation(m_vTargetPosition);
-    }
-    else
-    {
-        if(m_PaceMember.IsWalking() && (m_iTurn > 2) && (DistanceTo(m_PaceMember) < (GetFormationDistance()+120)))   
-        {			
-			m_bIsMovingBackwards = true;
-            SetLocation(pawn.location - 2*(m_PaceMember.location - pawn.location));					
-
-			// last member should run when moving backwards... (in order to keep up)			
-			R6PreMoveTo(m_vTargetPosition, location, GetPace(true));
-        }
-        else 
-        {   
-			m_bIsMovingBackwards = false;
-			SetLocation(m_vTargetPosition);
-			if(m_PaceMember.bIsCrouched && (DistanceTo(m_PaceMember) > (GetFormationDistance()+40))) 
-				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, PACE_CrouchRun);	
-			else
-				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition);			
-        }
-    }    
-
-	// check for a posture change before moving...  (TOFIX : UpdatePosture is being called twice....)
-	if(PostureHasChanged())
-	{
-		sleep(0.5);
-		while(m_pawn.m_bPostureTransition)
-			sleep(0.5);
-	}
-
-	MoveTo(m_vTargetPosition, self);
-	if(m_eMoveToResult == eMoveTo_failed)
-	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" eMoveTo_Failed so goto Blocked ");	#endif
-		goto('Blocked');
-	}
-	else
-		goto('Moving');
-
-Blocked:
-	m_bIsCatchingUp = true;
-	if(m_PaceMember == m_TeamLeader)
-	{ 
-		m_TeamManager.TeamIsRegroupingOnLead(true);
-		// wait for others to catch up before continuing
-		while(DistanceTo(m_TeamManager.m_Team[m_TeamManager.m_iMemberCount-1]) > 600)
-			Sleep(0.5);
-	}
-	m_pawn.StopPeeking();
-	#ifdefDEBUG	if(bShowLog) log(" pawn "$pawn$" is BLOCKED!!!!! ");	#endif	
-    m_ePawnOrientation = PO_Front; 
-    
-	// check if we need to reload
-	if(NeedToReload())
-		RainbowReloadWeapon();   
-	
-    // if leader is very close by, do not do a findBestPathToward(), the problem may just be limited space...    
-	moveTarget = FindPathToward(m_PaceMember, true); 
-    if(moveTarget == none)
-    {
-		m_pawn.logWarning( "is at location "$pawn.location$" and there appear to be insufficient pathnodes..." );
-
-		// try to step off...
-		MoveTo(pawn.location + normal(m_PaceMember.location - pawn.location)*100);
-		sleep(1.0);
-		goto('Blocked'); 
-    }
-
-	if(moveTarget == m_PaceMember)
-	{
-		// wait for m_PaceMember to get off ladder
-		while(m_PaceMember.m_bIsClimbingLadder)
-			Sleep(1.0);
-		EngageLadderIfNeeded(R6LadderVolume(m_TargetLadder.myLadder)); 
-	}
-
-	// check if we need to climb ladder
-	m_TargetLadder = R6Ladder(moveTarget);
-	if(TargetIsLadderToClimb(m_TargetLadder))
-	{
-		m_pawn.m_potentialActionActor = m_TargetLadder.myLadder;
-		m_TeamManager.InstructTeamToClimbLadder(R6LadderVolume(m_TargetLadder.myLadder), true, m_pawn.m_iId);
-	}
-	else
-	{
-		// if this member is in front of a door and their moveTarget is the R6Door actor on the other side of the door, do a room entry
-		if(NeedToOpenDoor(moveTarget))
-		{  
-			#ifdefDEBUG	if(bShowLog) log(self$" In front of a closed door m_pawn.m_Door="$m_pawn.m_Door$", call RainbowIsInFrontOfAClosedDoor and enter state LeadRoomEntry");	#endif
-			m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door); 
-			MoveToPosition(m_pawn.m_Door.location, m_pawn.m_Door.rotation);
-			pawn.acceleration = vect(0,0,0);
-
-			// prepare for a room entry...
-			SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
-			Sleep(1);
-			GotoStateLeadRoomEntry();
-		}
-	}
-
-	// if this member is using pathfinding, then they are probably trying to catch up...
-	if(m_PaceMember.bIsCrouched)
-		R6PreMoveToward(moveTarget, moveTarget, PACE_CrouchRun);    
-	else if(m_pawn.m_eHealth==HEALTH_Wounded)
-		R6PreMoveToward(moveTarget, moveTarget, PACE_Walk);    
-	else
-		R6PreMoveToward(moveTarget, moveTarget, PACE_Run);    
-
-	if(moveTarget.IsA('R6Ladder'))
-		pawn.bIsWalking = true;
-
-	//moveTarget is set by FindBestPathToward()
-	#ifdefDEBUG	if(bShowLog) log(pawn$" is blocked... move to m_pawn.m_Door="$m_pawn.m_Door$" m_pawn.m_Ladder="$m_pawn.m_Ladder$" MoveTarget="$moveTarget$" m_potentialActionActor="$R6Pawn(pawn).m_potentialActionActor);		#endif
-    MoveToward(moveTarget);             	
-
-    // if pawn still cannot see leader's position, stay in this block...    
-    if(!CanWalkTo(m_PaceMember.location) && !ActorReachable(m_PaceMember)) 
-        goto('Blocked');
-    else
-        goto('Moving');
+	return;
 }
 
 // Right now this is being used when the player decides to relinquish control of the squad 
 // to his number 2...also used when the current leader of the squad has been killed...
 function Promote()
 {
-    m_TeamLeader = m_TeamManager.m_TeamLeader;    
-    m_pawn.m_iID--;
-    if(m_TeamLeader == pawn)
-    {
-		#ifdefDEBUG	if(bShowLog) log(pawn$" is now leading the team... PROMOTE()");		#endif
-        m_pawn.ResetBoneRotation();
-		m_TeamLeader = none;		
-		if(m_pawn.m_bIsClimbingLadder)
-			return;
-
-		if(m_TeamManager.m_bTeamIsHoldingPosition)
-			GotoState('HoldPosition');
-		else
-			GotoState('Patrol');
-    }        
-    else
-    {
-		#ifdefDEBUG if(bShowLog) log(pawn$" is now following in position ="$m_pawn.m_iId);	#endif
-        if(!m_pawn.m_bIsClimbingLadder && !IsInState('RoomEntry'))
-		{
-			if(m_TeamManager.m_bTeamIsHoldingPosition)
-				GotoState('HoldPosition');
-			else
-				GotoState('FollowLeader');
-		}
-    }        
-}
-
-function Tick(FLOAT fDeltaTime)
-{
-	local  vector	vDirection;
-	local  rotator	rDirection;
-	
-    Super.Tick(fDeltaTime);
-
-    if(pawn == none)
-        return;
-
-	if(enemy != none)
-		SetGunDirection(enemy);	
-	else if(m_bAimingWeaponAtEnemy && m_pawn.m_fFiringTimer == 0)	// use m_fFiringTimer (1.5sec) to reduce weapon snapping
-		SetGunDirection(none);
-
-	if((m_TeamLeader != none) && (m_TeamManager != none) && m_pawn.m_iId != 0)
-		m_PaceMember = m_TeamManager.m_Team[m_pawn.m_iId-1];
-}
-
-//==================================================================================================//
-//                                 DEBUG STATES & FUNCTIONS                                         //
-//==================================================================================================//
-
-//==========================================================//
-//				   -- state WAITFORGAMETOSTART --		    //
-//==========================================================//
-auto state WaitForGameToStart
-{ 
-ignores SeePlayer, HearNoise, NotifyBump;
-
-#ifdefDEBUG
-    function BeginState()   {	if(bShowLog) log(self$" entered state WaitForGameToStart...");   }
-    function EndState()		{	if(bShowLog) log(self$" exited state WaitForGameToStart...");	}
-#endif
-
-Begin:
-    Sleep(0.5);
-	if(Level.Game.m_bGameStarted && nextState != '')
+	m_TeamLeader = m_TeamManager.m_TeamLeader;
+	__NFUN_166__(m_pawn.m_iID);
+	// End:0x83
+	if(__NFUN_114__(m_TeamLeader, Pawn))
 	{
-		if(m_pawn.m_iId == 0)
-			Sleep(1.0);
-		GotoState(nextState);
+		m_pawn.ResetBoneRotation();
+		m_TeamLeader = none;
+		// End:0x5D
+		if(m_pawn.m_bIsClimbingLadder)
+		{
+			return;
+		}
+		// End:0x79
+		if(m_TeamManager.m_bTeamIsHoldingPosition)
+		{
+			__NFUN_113__('HoldPosition');			
+		}
+		else
+		{
+			__NFUN_113__('Patrol');
+		}		
 	}
-    else
-		Goto('Begin');
-} 
+	else
+	{
+		// End:0xC9
+		if(__NFUN_130__(__NFUN_129__(m_pawn.m_bIsClimbingLadder), __NFUN_129__(__NFUN_281__('RoomEntry'))))
+		{
+			// End:0xC2
+			if(m_TeamManager.m_bTeamIsHoldingPosition)
+			{
+				__NFUN_113__('HoldPosition');				
+			}
+			else
+			{
+				__NFUN_113__('FollowLeader');
+			}
+		}
+	}
+	return;
+}
 
-//==============================//
-// -- state TESTBONEROTATION -- //
-//==============================//
-state TestBoneRotation
-{ 
+function Tick(float fDeltaTime)
+{
+	local Vector vDirection;
+	local Rotator rDirection;
+
+	super.Tick(fDeltaTime);
+	// End:0x18
+	if(__NFUN_114__(Pawn, none))
+	{
+		return;
+	}
+	// End:0x31
+	if(__NFUN_119__(Enemy, none))
+	{
+		SetGunDirection(Enemy);		
+	}
+	else
+	{
+		// End:0x59
+		if(__NFUN_130__(m_bAimingWeaponAtEnemy, __NFUN_180__(m_pawn.m_fFiringTimer, float(0))))
+		{
+			SetGunDirection(none);
+		}
+	}
+	// End:0xAD
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_TeamLeader, none), __NFUN_119__(m_TeamManager, none)), __NFUN_155__(m_pawn.m_iID, 0)))
+	{
+		m_PaceMember = m_TeamManager.m_Team[__NFUN_147__(m_pawn.m_iID, 1)];
+	}
+	return;
+}
+
+state RunAwayFromGrenade
+{
+	function BeginState()
+	{
+		m_bIgnoreBackupBump = true;
+		return;
+	}
+
+	function EndState()
+	{
+		m_TeamManager.m_bGrenadeInProximity = false;
+		__NFUN_280__(0.0000000, false);
+		StopMoving();
+		m_bIgnoreBackupBump = false;
+		return;
+	}
+
+	event Timer()
+	{
+		m_TeamManager.GrenadeThreatIsOver();
+		return;
+	}
+
+	function Vector SafeLocation()
+	{
+		local Vector vDir, vLocation;
+
+		vDir = __NFUN_226__(__NFUN_216__(Pawn.Location, m_vGrenadeLocation));
+		vLocation = __NFUN_215__(m_vGrenadeLocation, __NFUN_213__(__NFUN_174__(m_fGrenadeDangerRadius, float(600)), vDir));
+		vLocation.Z = Pawn.Location.Z;
+		// End:0x6E
+		if(__NFUN_521__(vLocation))
+		{
+			return vLocation;
+		}
+		vLocation = __NFUN_216__(m_vGrenadeLocation, __NFUN_213__(__NFUN_174__(m_fGrenadeDangerRadius, float(600)), vDir));
+		vLocation.Z = Pawn.Location.Z;
+		// End:0xBF
+		if(__NFUN_521__(vLocation))
+		{
+			return vLocation;
+		}
+		return vect(0.0000000, 0.0000000, 0.0000000);
+		return;
+	}
 Begin:
-    Sleep(3); 
-    Goto('Begin');
+
+	m_TeamManager.SetTeamState(3);
+	m_vTargetPosition = SafeLocation();
+	EnsureRainbowIsArmed();
+	// End:0x40
+	if(__NFUN_218__(m_vTargetPosition, vect(0.0000000, 0.0000000, 0.0000000)))
+	{
+		goto 'RunToDirectly';
+	}
+FindPathAway:
+
+
+	MoveTarget = __NFUN_2221__();
+	// End:0x13A
+	if(__NFUN_119__(MoveTarget, none))
+	{
+		// End:0xD2
+		if(__NFUN_1509__(MoveTarget))
+		{
+			m_pawn.PlayDoorAnim(m_pawn.m_Door.m_RotatingDoor);
+			__NFUN_256__(0.5000000);
+			m_pawn.ServerPerformDoorAction(m_pawn.m_Door.m_RotatingDoor, int(m_pawn.m_Door.m_RotatingDoor.1));
+		}
+		R6PreMoveToward(MoveTarget, MoveTarget, 5);
+		__NFUN_502__(MoveTarget);
+		// End:0x104
+		if(__NFUN_154__(int(m_eMoveToResult), int(2)))
+		{
+			__NFUN_256__(0.5000000);
+		}
+		// End:0x134
+		if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vGrenadeLocation, Pawn.Location)), __NFUN_174__(m_fGrenadeDangerRadius, float(300))))
+		{
+			goto 'Wait';
+		}
+		goto 'FindPathAway';
+	}
+	goto 'Wait';
+RunToDirectly:
+
+
+	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 5);
+	__NFUN_500__(m_vTargetPosition);
+Wait:
+
+
+	StopMoving();
+	m_TeamManager.SetTeamState(2);
+	__NFUN_256__(2.0000000);
+	goto 'Wait';
+	stop;				
+}
+
+state BumpBackUp
+{
+	event bool NotifyBump(Actor Other)
+	{
+		local R6Pawn thisPawn;
+
+		thisPawn = R6Pawn(Other);
+		// End:0x1D
+		if(__NFUN_114__(thisPawn, none))
+		{
+			return false;
+		}
+		// End:0x57
+		if(__NFUN_152__(thisPawn.m_iID, R6Pawn(m_BumpedBy).m_iID))
+		{
+			m_BumpedBy = thisPawn;
+			__NFUN_113__('BumpBackUp');
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function Vector GetTargetLocation(bool bRight, optional int iTry)
+	{
+		local Rotator rOffset;
+		local R6Pawn bumpedBy;
+
+		bumpedBy = R6Pawn(m_BumpedBy);
+		// End:0x86
+		if(__NFUN_130__(bumpedBy.m_bIsClimbingLadder, __NFUN_177__(__NFUN_175__(bumpedBy.Location.Z, Pawn.Location.Z), float(100))))
+		{
+			return __NFUN_216__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), bumpedBy.OnLadder.LookDir));
+		}
+		switch(iTry)
+		{
+			// End:0xA7
+			case 0:
+				rOffset = rot(0, 16384, 0);
+				// End:0x14B
+				break;
+			// End:0xC1
+			case 1:
+				rOffset = rot(0, 8192, 0);
+				// End:0x14B
+				break;
+			// End:0xDC
+			case 2:
+				rOffset = rot(0, 4096, 0);
+				// End:0x14B
+				break;
+			// End:0xF7
+			case 3:
+				rOffset = rot(0, 0, 0);
+				// End:0x14B
+				break;
+			// End:0x112
+			case 4:
+				rOffset = rot(0, -4096, 0);
+				// End:0x14B
+				break;
+			// End:0x12D
+			case 5:
+				rOffset = rot(0, -8192, 0);
+				// End:0x14B
+				break;
+			// End:0x148
+			case 6:
+				rOffset = rot(0, -16384, 0);
+				// End:0x14B
+				break;
+			// End:0xFFFF
+			default:
+				break;
+		}
+		// End:0x182
+		if(bRight)
+		{
+			return __NFUN_215__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(__NFUN_316__(Rotator(m_vBumpedByVelocity), rOffset))));			
+		}
+		else
+		{
+			return __NFUN_215__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(__NFUN_317__(Rotator(m_vBumpedByVelocity), rOffset))));
+		}
+		return;
+	}
+
+	function bool GetReacheablePoint(out Vector vTarget, bool bNoFail)
+	{
+		local Actor HitActor;
+		local Vector vHitLocation, vHitNormal, vExtent;
+		local bool bMoveRight;
+		local int i;
+
+		bMoveRight = MoveRight();
+		vTarget = GetTargetLocation(bMoveRight);
+		vExtent.X = Pawn.CollisionRadius;
+		vExtent.Y = vExtent.X;
+		vExtent.Z = Pawn.CollisionHeight;
+		HitActor = __NFUN_1806__(vHitLocation, vHitNormal, vTarget, Pawn.Location, 1, vExtent);
+		// End:0xBC
+		if(__NFUN_119__(HitActor, none))
+		{
+			vTarget = __NFUN_215__(vHitLocation, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(Rotator(m_vBumpedByVelocity))));
+		}
+		J0xBC:
+
+		// End:0x118 [Loop If]
+		if(__NFUN_130__(__NFUN_114__(__NFUN_1806__(vHitLocation, vHitNormal, __NFUN_216__(vTarget, vect(0.0000000, 0.0000000, 200.0000000)), vTarget, 1), none), __NFUN_150__(i, 6)))
+		{
+			__NFUN_165__(i);
+			vTarget = GetTargetLocation(bMoveRight, i);
+			// [Loop Continue]
+			goto J0xBC;
+		}
+		return true;
+		return;
+	}
+	stop;
+}
+
+state WaitForPaceMember
+{Begin:
+
+	__NFUN_256__(1.0000000);
+	// End:0x45
+	if(__NFUN_176__(__NFUN_186__(__NFUN_175__(m_PaceMember.Location.Z, Pawn.Location.Z)), float(30)))
+	{
+		__NFUN_113__('FollowLeader');		
+	}
+	else
+	{
+		goto 'Begin';
+	}
+	stop;				
+}
+
+state LockPickDoor
+{
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_bIgnoreBackupBump = true;
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bAvoidFacingWalls = true;
+		m_bIgnoreBackupBump = false;
+		// End:0x81
+		if(m_pawn.m_bIsLockPicking)
+		{
+			m_pawn.m_bIsLockPicking = false;
+			m_pawn.m_bPostureTransition = false;
+			m_pawn.AnimBlendToAlpha(m_pawn.1, 0.0000000, 0.5000000);
+			m_pawn.m_ePlayerIsUsingHands = 0;
+		}
+		// End:0xC9
+		if(__NFUN_130__(m_pawn.m_bWeaponIsSecured, __NFUN_129__(m_pawn.m_bWeaponTransition)))
+		{
+			m_pawn.m_eEquipWeapon = 1;
+			m_pawn.PlayWeaponAnimation();
+		}
+		// End:0xFC
+		if(m_RotatingDoor.m_bIsDoorLocked)
+		{
+			m_pawn.ServerPerformDoorAction(m_RotatingDoor, int(m_RotatingDoor.15));
+		}
+		return;
+	}
+Begin:
+
+	m_vTargetPosition = __NFUN_215__(m_pawn.m_Door.Location, __NFUN_213__(float(20), Vector(m_pawn.m_Door.Rotation)));
+	__NFUN_267__(__NFUN_216__(m_RotatingDoor.Location, __NFUN_213__(float(128), Vector(m_RotatingDoor.Rotation))));
+	__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(Location, Pawn.Location)));
+	Focus = self;
+	__NFUN_508__();
+	m_pawn.SetNextPendingAction(27);
+	__NFUN_261__(m_pawn.14);
+	m_pawn.SetNextPendingAction(19);
+	m_pawn.m_bIsLockPicking = true;
+	__NFUN_256__(0.1000000);
+	m_RotatingDoor.PlayLockPickSound();
+	// End:0x12D
+	if(m_pawn.m_bHasLockPickKit)
+	{
+		__NFUN_256__(__NFUN_171__(__NFUN_175__(m_RotatingDoor.m_fUnlockBaseTime, 2.0000000), __NFUN_175__(2.0000000, m_pawn.ArmorSkillEffect())));		
+	}
+	else
+	{
+		__NFUN_256__(__NFUN_171__(m_RotatingDoor.m_fUnlockBaseTime, __NFUN_175__(2.0000000, m_pawn.ArmorSkillEffect())));
+	}
+	m_pawn.ServerPerformDoorAction(m_RotatingDoor, int(m_RotatingDoor.13));
+	m_pawn.m_bIsLockPicking = false;
+	m_pawn.AnimBlendToAlpha(m_pawn.1, 0.0000000, 0.5000000);
+	m_pawn.m_ePlayerIsUsingHands = 0;
+	__NFUN_256__(1.0000000);
+	m_pawn.SetNextPendingAction(28);
+	__NFUN_261__(m_pawn.14);
+End:
+
+
+	__NFUN_113__(m_PostLockPickState);
+	stop;	
+}
+
+state PerformAction
+{
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_bIndividualAttacks = false;
+		m_iTurn = 0;
+		m_bEnteredRoom = false;
+		// End:0x82
+		if(__NFUN_130__(__NFUN_119__(m_ActionTarget, none), m_ActionTarget.__NFUN_303__('R6Door')))
+		{
+			m_TeamManager.m_Door = R6Door(m_ActionTarget);
+			m_RotatingDoor = m_TeamManager.m_Door.m_RotatingDoor;			
+		}
+		else
+		{
+			m_RotatingDoor = none;
+		}
+		return;
+	}
+
+	function EndState()
+	{
+		// End:0x13
+		if(__NFUN_154__(m_iStateProgress, 14))
+		{
+			m_iStateProgress = 0;
+		}
+		__NFUN_280__(0.0000000, false);
+		m_pawn.m_u8DesiredYaw = 0;
+		m_pawn.m_bThrowGrenadeWithLeftHand = false;
+		m_pawn.m_bAvoidFacingWalls = true;
+		m_bIgnoreBackupBump = false;
+		m_bIndividualAttacks = true;
+		return;
+	}
+
+	function Timer()
+	{
+		__NFUN_165__(m_iTurn);
+		__NFUN_2219__(true);
+		return;
+	}
+
+	function Vector FindFloorBelowActor(Actor Target)
+	{
+		local Vector vHitLocation, vHitNormal;
+
+		__NFUN_277__(vHitLocation, vHitNormal, __NFUN_216__(Target.Location, vect(0.0000000, 0.0000000, 200.0000000)), Target.Location, false);
+		__NFUN_184__(vHitLocation.Z, Pawn.CollisionHeight);
+		return vHitLocation;
+		return;
+	}
+Begin:
+
+	StopMoving();
+	m_pawn.ResetBoneRotation();
+	__NFUN_256__(GetLeadershipReactionTime());
+	// End:0x2F
+	if(__NFUN_114__(m_ActionTarget, none))
+	{
+		goto 'ReinitAction';
+	}
+	switch(m_iStateProgress)
+	{
+		// End:0x43
+		case 0:
+			goto 'PrepareForAction';
+			// End:0xD8
+			break;
+		// End:0x50
+		case 1:
+			goto 'FindActionTarget';
+			// End:0xD8
+			break;
+		// End:0x5E
+		case 2:
+			goto 'MoveToActionTarget';
+			// End:0xD8
+			break;
+		// End:0x6C
+		case 3:
+			goto 'PreEntry';
+			// End:0xD8
+			break;
+		// End:0x7A
+		case 4:
+			goto 'WaitForZuluGoCode';
+			// End:0xD8
+			break;
+		// End:0x7F
+		case 5:
+		// End:0x8D
+		case 6:
+			goto 'performDoorAction';
+			// End:0xD8
+			break;
+		// End:0x92
+		case 7:
+		// End:0xA0
+		case 8:
+			goto 'PerformGrenadeAction';
+			// End:0xD8
+			break;
+		// End:0xA5
+		case 9:
+		// End:0xB3
+		case 10:
+			goto 'PerformClearAction';
+			// End:0xD8
+			break;
+		// End:0xC1
+		case 11:
+			goto 'UpdateStatus';
+			// End:0xD8
+			break;
+		// End:0xCF
+		case 12:
+			goto 'ReinitAction';
+			// End:0xD8
+			break;
+		// End:0xFFFF
+		default:
+			goto 'WaitForTeamAI';
+			break;
+	}
+	J0xD8:
+
+	m_TeamManager.SetTeamState(3);
+	// End:0x110
+	if(__NFUN_132__(__NFUN_1815__(m_ActionTarget.Location), __NFUN_520__(m_ActionTarget)))
+	{
+		goto 'MoveToActionTarget';
+	}
+	m_iStateProgress = 1;
+FindActionTarget:
+
+
+	// End:0x188
+	if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(m_ActionTarget.Location)), __NFUN_129__(__NFUN_520__(m_ActionTarget))))
+	{
+		// End:0x16F
+		if(__NFUN_130__(__NFUN_119__(m_RotatingDoor, none), m_RotatingDoor.m_bTreatDoorAsWindow))
+		{
+			FindPathToTargetLocation(FindFloorBelowActor(m_ActionTarget));			
+		}
+		else
+		{
+			FindPathToTargetLocation(m_ActionTarget.Location, m_ActionTarget);
+		}
+	}
+	m_iStateProgress = 2;
+MoveToActionTarget:
+
+
+	// End:0x1C9
+	if(__NFUN_130__(__NFUN_129__(m_RotatingDoor.m_bIsDoorLocked), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0)))
+	{
+		SwitchWeapon(m_iActionUseGadgetGroup);
+	}
+	m_bIgnoreBackupBump = true;
+	// End:0x329
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_RotatingDoor, none), __NFUN_154__(m_TeamManager.m_iTeamAction, 32)), m_RotatingDoor.DoorOpenTowardsActor(m_ActionTarget)), __NFUN_129__(PreEntryRoomIsAcceptablyLarge())))
+	{
+		// End:0x282
+		if(m_RotatingDoor.m_bIsOpeningClockWise)
+		{
+			m_vTargetPosition = __NFUN_215__(__NFUN_216__(m_ActionTarget.Location, __NFUN_213__(float(85), Vector(m_ActionTarget.Rotation))), __NFUN_213__(float(85), Vector(__NFUN_316__(m_ActionTarget.Rotation, rot(0, 16384, 0)))));			
+		}
+		else
+		{
+			m_vTargetPosition = __NFUN_216__(__NFUN_216__(m_ActionTarget.Location, __NFUN_213__(float(85), Vector(m_ActionTarget.Rotation))), __NFUN_213__(float(85), Vector(__NFUN_316__(m_ActionTarget.Rotation, rot(0, 16384, 0)))));
+		}
+		R6PreMoveTo(m_vTargetPosition, m_RotatingDoor.Location, 4);
+		__NFUN_500__(m_vTargetPosition, m_RotatingDoor);
+		__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_RotatingDoor.Location, Pawn.Location)));		
+	}
+	else
+	{
+		R6PreMoveToward(m_ActionTarget, m_ActionTarget, 4);
+		__NFUN_502__(m_ActionTarget);
+		__NFUN_2201__(m_ActionTarget.Location, m_ActionTarget.Rotation);
+	}
+	StopMoving();
+	__NFUN_256__(0.5000000);
+UnlockDoor:
+
+
+	// End:0x38D
+	if(m_RotatingDoor.m_bIsDoorLocked)
+	{
+		GotoLockPickState(m_RotatingDoor);
+	}
+	m_TeamManager.SetTeamState(3);
+	// End:0x3C4
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0))
+	{
+		SwitchWeapon(m_iActionUseGadgetGroup);		
+	}
+	else
+	{
+		EnsureRainbowIsArmed();
+	}
+	J0x3CA:
+
+	// End:0x3E9 [Loop If]
+	if(__NFUN_129__(m_TeamManager.LastMemberIsStationary()))
+	{
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0x3CA;
+	}
+	m_bIgnoreBackupBump = false;
+	m_iStateProgress = 3;
+PreEntry:
+
+
+	// End:0x455
+	if(__NFUN_130__(__NFUN_114__(m_pawn.m_Door, m_ActionTarget), m_RotatingDoor.m_bTreatDoorAsWindow))
+	{
+		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+		m_iStateProgress = 4;
+		goto 'WaitForZuluGoCode';
+	}
+	// End:0x492
+	if(__NFUN_119__(m_RotatingDoor, none))
+	{
+		ForceCurrentDoor(R6Door(m_ActionTarget));
+		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+	}
+	// End:0x516
+	if(PreEntryRoomIsAcceptablyLarge())
+	{
+		m_vTargetPosition = __NFUN_2205__(false);
+		// End:0x516
+		if(__NFUN_218__(m_vTargetPosition, vect(0.0000000, 0.0000000, 0.0000000)))
+		{
+			R6PreMoveTo(m_vTargetPosition, m_RotatingDoor.Location, 4);
+			__NFUN_500__(m_vTargetPosition);
+			__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_TeamManager.m_Door.m_CorrespondingDoor.Location, m_vTargetPosition)));
+			StopMoving();
+		}
+	}
+	m_iStateProgress = 4;
+WaitForZuluGoCode:
+
+
+	// End:0x54F
+	if(m_TeamManager.m_bCAWaitingForZuluGoCode)
+	{
+		m_TeamManager.SetTeamState(1);
+		__NFUN_256__(0.5000000);
+		goto 'WaitForZuluGoCode';
+	}
+	m_iStateProgress = 5;
+performDoorAction:
+
+
+	// End:0x7F4
+	if(__NFUN_132__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 16), 0), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 32), 0)))
+	{
+		// End:0x7DE
+		if(__NFUN_119__(m_RotatingDoor, none))
+		{
+			// End:0x5F1
+			if(m_RotatingDoor.m_bIsDoorClosed)
+			{
+				Focus = m_RotatingDoor;
+				// End:0x5DE
+				if(__NFUN_114__(m_TeamManager.m_Door, none))
+				{
+					m_TeamManager.m_Door = R6Door(m_ActionTarget);
+				}
+				SetFocusToDoorKnob(m_RotatingDoor);
+				__NFUN_256__(1.5000000);
+			}
+			J0x5F1:
+
+			// End:0x610 [Loop If]
+			if(__NFUN_129__(m_TeamManager.LastMemberIsStationary()))
+			{
+				__NFUN_256__(0.5000000);
+				// [Loop Continue]
+				goto J0x5F1;
+			}
+			// End:0x6FD
+			if(__NFUN_130__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 16), 0), m_RotatingDoor.m_bIsDoorClosed))
+			{
+				m_iStateProgress = 6;
+				// End:0x66A
+				if(m_RotatingDoor.m_bTreatDoorAsWindow)
+				{
+					m_TeamManager.SetTeamState(11);					
+				}
+				else
+				{
+					m_TeamManager.SetTeamState(9);
+				}
+				m_pawn.PlayDoorAnim(m_RotatingDoor);
+				__NFUN_256__(0.5000000);
+				m_pawn.ServerPerformDoorAction(m_RotatingDoor, int(m_RotatingDoor.1));
+				J0x6B8:
+
+				// End:0x6FA [Loop If]
+				if(m_RotatingDoor.m_bIsDoorClosed)
+				{
+					// End:0x6EF
+					if(__NFUN_129__(m_RotatingDoor.m_bInProcessOfOpening))
+					{
+						__NFUN_256__(1.0000000);
+						goto 'performDoorAction';						
+					}
+					else
+					{
+						__NFUN_256__(0.2000000);
+					}
+					// [Loop Continue]
+					goto J0x6B8;
+				}				
+			}
+			else
+			{
+				// End:0x7C9
+				if(__NFUN_130__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 32), 0), __NFUN_129__(m_RotatingDoor.m_bIsDoorClosed)))
+				{
+					m_iStateProgress = 6;
+					// End:0x759
+					if(m_RotatingDoor.m_bTreatDoorAsWindow)
+					{
+						m_TeamManager.SetTeamState(12);						
+					}
+					else
+					{
+						m_TeamManager.SetTeamState(10);
+					}
+					m_pawn.PlayDoorAnim(m_RotatingDoor);
+					__NFUN_256__(0.5000000);
+					m_pawn.ServerPerformDoorAction(m_RotatingDoor, int(m_RotatingDoor.5));
+					J0x7A7:
+
+					// End:0x7C6 [Loop If]
+					if(__NFUN_155__(m_RotatingDoor.m_iCurrentOpening, 0))
+					{
+						__NFUN_256__(0.5000000);
+						// [Loop Continue]
+						goto J0x7A7;
+					}					
+				}
+				else
+				{
+					// End:0x7DB
+					if(__NFUN_150__(m_iStateProgress, 6))
+					{
+						RainbowCannotCompleteOrders();
+					}
+				}
+			}			
+		}
+		else
+		{
+			m_TeamManager.ActionCompleted(false);
+			goto 'ReinitAction';
+		}
+	}
+	m_iStateProgress = 7;
+PerformGrenadeAction:
+
+
+	// End:0x81E
+	if(__NFUN_154__(m_iStateProgress, 8))
+	{
+		__NFUN_256__(1.0000000);
+		m_iStateProgress = 9;
+		goto 'PerformClearAction';
+	}
+	// End:0x98D
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0))
+	{
+		m_TeamManager.SetTeamState(14);
+		__NFUN_118__('NotifyBump');
+		m_vLocationOnTarget = __NFUN_215__(m_ActionTarget.Location, __NFUN_213__(float(450), Vector(m_ActionTarget.Rotation)));
+		__NFUN_267__(m_vLocationOnTarget);
+		// End:0x8EE
+		if(__NFUN_129__(CanThrowGrenadeIntoRoom(R6Door(m_ActionTarget).m_CorrespondingDoor)))
+		{
+			m_TeamManager.ResetGrenadeAction();
+			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 7);
+			SwitchWeapon(1);
+			__NFUN_256__(1.0000000);
+			m_iStateProgress = 9;
+			goto 'PerformClearAction';
+		}
+		Focus = self;
+		Target = self;
+		__NFUN_508__();
+		__NFUN_299__(m_ActionTarget.Rotation);
+		SetGunDirection(Target);
+		SetGrenadeParameters(PreEntryRoomIsAcceptablyLarge());
+		m_pawn.PlayWeaponAnimation();
+		__NFUN_261__(m_pawn.14);
+		m_pawn.m_eRepGrenadeThrow = 0;
+		SetGunDirection(none);
+		__NFUN_117__('NotifyBump');
+		m_iStateProgress = 8;
+		SwitchWeapon(1);
+		__NFUN_256__(m_pawn.EngineWeapon.GetExplosionDelay());
+	}
+	m_iStateProgress = 9;
+PerformClearAction:
+
+
+	// End:0xBD2
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 128), 0))
+	{
+		m_TeamManager.SetTeamState(13);
+		// End:0x9EB
+		if(__NFUN_114__(m_TeamManager.m_Door, none))
+		{
+			m_TeamManager.m_Door = R6Door(m_ActionTarget);
+		}
+		m_eCurrentRoomLayout = m_TeamManager.m_Door.m_eRoomLayout;
+		// End:0xADB
+		if(__NFUN_154__(m_iStateProgress, 9))
+		{
+			m_vTargetPosition = m_TeamManager.m_Door.Location;
+			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 5);
+			__NFUN_2201__(m_vTargetPosition, m_TeamManager.m_Door.Rotation);
+			m_TeamManager.EnteredRoom(m_pawn);
+			m_vTargetPosition = m_TeamManager.m_Door.m_CorrespondingDoor.Location;
+			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 5);
+			__NFUN_2201__(m_vTargetPosition, m_TeamManager.m_Door.Rotation);
+			StopMoving();
+			m_iStateProgress = 10;
+		}
+		// End:0xB22
+		if(__NFUN_154__(m_pawn.m_iID, __NFUN_147__(m_TeamManager.m_iMemberCount, 1)))
+		{
+			m_iStateProgress = 11;
+			__NFUN_280__(1.0000000, true);
+			__NFUN_2219__(true);
+			__NFUN_256__(1.5000000);
+			goto 'UpdateStatus';
+		}
+		// End:0xB40
+		if(PostEntryRoomIsAcceptablyLarge())
+		{
+			m_vTargetPosition = __NFUN_2205__(true);
+			__NFUN_267__(FocalPoint);			
+		}
+		else
+		{
+			__NFUN_2209__(m_TeamManager.m_Door.m_CorrespondingDoor, m_vTargetPosition);
+			__NFUN_267__(__NFUN_215__(m_vTargetPosition, __NFUN_213__(float(60), __NFUN_216__(m_vTargetPosition, Pawn.Location))));
+		}
+		R6PreMoveTo(m_vTargetPosition, Location, 5);
+		__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(Location, m_vTargetPosition)));
+		StopMoving();
+		__NFUN_280__(1.0000000, true);
+		__NFUN_2219__(true);
+		m_iStateProgress = 11;
+		__NFUN_256__(3.0000000);		
+	}
+	else
+	{
+		m_iStateProgress = 11;
+	}
+	J0xBDA:
+
+	// End:0xBFA
+	if(m_TeamManager.RainbowIsEngaging())
+	{
+		__NFUN_256__(0.5000000);
+		goto 'UpdateStatus';
+	}
+	// End:0xD0D
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 128), 0))
+	{
+		m_TeamManager.ActionCompleted(true);
+		m_iStateProgress = 12;
+		// End:0xD0A
+		if(__NFUN_130__(__NFUN_119__(m_TeamManager.m_Door, none), __NFUN_154__(m_pawn.m_iID, __NFUN_147__(m_TeamManager.m_iMemberCount, 1))))
+		{
+			m_vTargetPosition = __NFUN_216__(m_TeamManager.m_Door.m_CorrespondingDoor.Location, __NFUN_213__(float(96), Vector(m_TeamManager.m_Door.m_CorrespondingDoor.Rotation)));
+			__NFUN_267__(__NFUN_215__(m_TeamManager.m_Door.Location, __NFUN_213__(float(200), Vector(m_TeamManager.m_Door.Rotation))));
+			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+			__NFUN_500__(m_vTargetPosition, self);
+		}		
+	}
+	else
+	{
+		m_TeamManager.ActionCompleted(true);
+		m_iStateProgress = 12;
+	}
+	J0xD25:
+
+	m_ActionTarget = none;
+	m_iStateProgress = 13;
+WaitForTeamAI:
+
+
+	__NFUN_256__(1.0000000);
+	// End:0xD5A
+	if(__NFUN_255__(NextState, 'None'))
+	{
+		m_iStateProgress = 14;
+		__NFUN_113__(NextState);
+	}
+	__NFUN_113__('HoldPosition');
+	stop;		
+}
+
+state FindPathToTarget
+{
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x34
+		if(CanThrowGrenade(Pawn.Location, true, false))
+		{
+			__NFUN_280__(0.0000000, false);
+			StopMoving();
+			__NFUN_113__('TeamMoveTo', 'Action');
+		}
+		return;
+	}
+Begin:
+
+	// End:0x21
+	if(__NFUN_154__(m_TeamManager.m_iTeamAction, 320))
+	{
+		__NFUN_280__(0.3000000, true);
+	}
+	// End:0x3E
+	if(__NFUN_119__(m_DesiredTarget, none))
+	{
+		MoveTarget = __NFUN_517__(m_DesiredTarget, true);		
+	}
+	else
+	{
+		MoveTarget = __NFUN_518__(m_vDesiredLocation, true);
+	}
+	// End:0x1D5
+	if(__NFUN_119__(MoveTarget, none))
+	{
+		// End:0xFD
+		if(__NFUN_1509__(MoveTarget))
+		{
+			m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+			__NFUN_2201__(m_pawn.m_Door.Location, m_pawn.m_Door.Rotation);
+			Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+			SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
+			__NFUN_256__(1.0000000);
+			GotoStateLeadRoomEntry();
+		}
+		m_TargetLadder = R6Ladder(MoveTarget);
+		// End:0x182
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_pawn.m_Ladder, none), __NFUN_119__(m_TargetLadder, none)), __NFUN_119__(m_pawn.m_Ladder, m_TargetLadder)))
+		{
+			m_TeamManager.InstructTeamToClimbLadder(R6LadderVolume(m_pawn.m_Ladder.MyLadder), true, m_pawn.m_iID);
+		}
+		R6PreMoveToward(MoveTarget, MoveTarget, 4);
+		__NFUN_502__(MoveTarget);
+		// End:0x1BB
+		if(__NFUN_119__(m_DesiredTarget, none))
+		{
+			// End:0x1B8
+			if(__NFUN_520__(m_DesiredTarget))
+			{
+				goto 'End';
+			}			
+		}
+		else
+		{
+			// End:0x1CC
+			if(__NFUN_521__(m_vDesiredLocation))
+			{
+				goto 'End';
+			}
+		}
+		goto 'Begin';		
+	}
+	else
+	{
+		// End:0x203
+		if(__NFUN_155__(m_TeamManager.m_iTeamAction, 0))
+		{
+			// End:0x203
+			if(__NFUN_129__(m_TeamManager.m_bGrenadeInProximity))
+			{
+				RainbowCannotCompleteOrders();
+			}
+		}
+	}
+	J0x203:
+
+	R6PreMoveTo(m_vDesiredLocation, m_vDesiredLocation, 4);
+	__NFUN_500__(m_vDesiredLocation);
+	__NFUN_113__(m_PostFindPathToState);
+	stop;			
+}
+
+state RoomEntry
+{
+	function BeginState()
+	{
+		m_pawn.ResetBoneRotation();
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_bReactToNoise = true;
+		m_bEnteredRoom = false;
+		m_bIndividualAttacks = false;
+		m_iTurn = 0;
+		ReInitEntryPositions();
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bAvoidFacingWalls = true;
+		m_bReactToNoise = false;
+		// End:0x2C
+		if(__NFUN_154__(m_iStateProgress, 5))
+		{
+			m_iStateProgress = 0;
+		}
+		m_bIndividualAttacks = true;
+		__NFUN_280__(0.0000000, false);
+		m_pawn.m_u8DesiredYaw = 0;
+		return;
+	}
+
+	function Timer()
+	{
+		__NFUN_165__(m_iTurn);
+		__NFUN_2219__(false);
+		return;
+	}
+
+	function bool HasEnteredRoom(R6Pawn member)
+	{
+		// End:0x65
+		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(member.Location, m_TeamManager.m_Door.Location)), __NFUN_225__(__NFUN_216__(member.Location, m_TeamManager.m_Door.m_CorrespondingDoor.Location))))
+		{
+			return false;			
+		}
+		else
+		{
+			return true;
+		}
+		return;
+	}
+
+	function SetMemberFocus()
+	{
+		// End:0x195
+		if(PreEntryRoomIsAcceptablyLarge())
+		{
+			// End:0xB0
+			if(__NFUN_154__(m_pawn.m_iID, 3))
+			{
+				// End:0x68
+				if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
+				{
+					__NFUN_267__(__NFUN_216__(Pawn.Location, __NFUN_213__(float(300), Vector(m_TeamManager.m_Door.Rotation))));					
+				}
+				else
+				{
+					__NFUN_267__(__NFUN_216__(m_TeamManager.m_Door.Location, __NFUN_213__(float(300), Vector(m_TeamManager.m_Door.Rotation))));
+				}
+				Focus = self;				
+			}
+			else
+			{
+				// End:0x175
+				if(__NFUN_130__(__NFUN_154__(m_pawn.m_iID, 2), __NFUN_132__(__NFUN_129__(m_TeamLeader.m_bIsPlayer), __NFUN_130__(m_TeamLeader.m_bIsPlayer, __NFUN_129__(m_TeamManager.m_bTeamIsSeparatedFromLeader)))))
+				{
+					__NFUN_267__(__NFUN_216__(__NFUN_216__(Pawn.Location, __NFUN_213__(float(300), __NFUN_226__(__NFUN_216__(m_TeamManager.m_Door.Location, Pawn.Location)))), __NFUN_213__(float(200), Vector(m_TeamManager.m_Door.Rotation))));
+					Focus = self;					
+				}
+				else
+				{
+					SetFocusToDoorKnob(m_TeamManager.m_Door.m_RotatingDoor);
+				}
+			}			
+		}
+		else
+		{
+			// End:0x205
+			if(__NFUN_154__(m_pawn.m_iID, __NFUN_147__(m_TeamManager.m_iMemberCount, 1)))
+			{
+				__NFUN_267__(__NFUN_216__(Pawn.Location, __NFUN_213__(float(200), __NFUN_226__(__NFUN_216__(m_TeamManager.m_Door.Location, Pawn.Location)))));
+				Focus = self;				
+			}
+			else
+			{
+				SetFocusToDoorKnob(m_TeamManager.m_Door.m_RotatingDoor);
+			}
+		}
+		return;
+	}
+
+	function Vector GetSingleFilePosition()
+	{
+		local Vector vDir;
+
+		vDir = __NFUN_216__(m_PaceMember.Location, Pawn.Location);
+		return __NFUN_216__(m_PaceMember.Location, __NFUN_213__(GetFormationDistance(), __NFUN_226__(vDir)));
+		return;
+	}
+
+	function CoverRear()
+	{
+		// End:0x43
+		if(__NFUN_154__(m_TeamManager.m_iTeamAction, 0))
+		{
+			__NFUN_267__(__NFUN_215__(Pawn.Location, __NFUN_216__(Pawn.Location, FocalPoint)));
+			Focus = self;
+		}
+		return;
+	}
+
+	function float DistanceToLocation(Vector vTarget)
+	{
+		return __NFUN_225__(__NFUN_216__(Pawn.Location, vTarget));
+		return;
+	}
+
+	function R6Pawn.eMovementPace GetRoomEntryPace(bool bRun)
+	{
+		local R6Pawn.eMovementPace ePace;
+		local bool bCrouchedEntry;
+
+		// End:0x56
+		if(m_TeamLeader.m_bIsPlayer)
+		{
+			// End:0x3D
+			if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
+			{
+				bCrouchedEntry = m_PaceMember.bIsCrouched;				
+			}
+			else
+			{
+				bCrouchedEntry = m_TeamLeader.bIsCrouched;
+			}			
+		}
+		else
+		{
+			bCrouchedEntry = __NFUN_154__(int(m_TeamManager.m_eMovementSpeed), int(2));
+		}
+		// End:0x9B
+		if(bCrouchedEntry)
+		{
+			// End:0x90
+			if(bRun)
+			{
+				ePace = 3;				
+			}
+			else
+			{
+				ePace = 2;
+			}			
+		}
+		else
+		{
+			// End:0xAF
+			if(bRun)
+			{
+				ePace = 5;				
+			}
+			else
+			{
+				ePace = 4;
+			}
+		}
+		return ePace;
+		return;
+	}
+Begin:
+
+	switch(m_iStateProgress)
+	{
+		// End:0x14
+		case 0:
+			goto 'GetIntoPosition';
+			// End:0x46
+			break;
+		// End:0x21
+		case 1:
+			goto 'WaitForGo';
+			// End:0x46
+			break;
+		// End:0x2F
+		case 2:
+			goto 'PassDoor';
+			// End:0x46
+			break;
+		// End:0x3D
+		case 3:
+			goto 'EnterRoom';
+			// End:0x46
+			break;
+		// End:0xFFFF
+		default:
+			goto 'WaitOnLeader';
+			break;
+	}
+	J0x46:
+
+	// End:0x6A
+	if(__NFUN_114__(m_TeamManager.m_Door.m_RotatingDoor, none))
+	{
+		__NFUN_113__('FollowLeader');
+	}
+	// End:0x8E
+	if(__NFUN_114__(m_TeamManager.m_Door.m_CorrespondingDoor, none))
+	{
+		__NFUN_113__('FollowLeader');
+	}
+	// End:0x283
+	if(PreEntryRoomIsAcceptablyLarge())
+	{
+		m_vTargetPosition = __NFUN_2205__(false);
+		// End:0x283
+		if(__NFUN_218__(m_vTargetPosition, Pawn.Location))
+		{
+			// End:0xE3
+			if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(m_vTargetPosition)), __NFUN_129__(__NFUN_521__(m_vTargetPosition))))
+			{
+				FindPathToTargetLocation(m_vTargetPosition);				
+			}
+			else
+			{
+				// End:0x1BB
+				if(__NFUN_130__(__NFUN_218__(m_vPreEntryPositions[0], vect(0.0000000, 0.0000000, 0.0000000)), __NFUN_176__(DistanceToLocation(m_vPreEntryPositions[0]), DistanceToLocation(m_vTargetPosition))))
+				{
+					// End:0x170
+					if(__NFUN_132__(__NFUN_217__(m_vPreEntryPositions[1], vect(0.0000000, 0.0000000, 0.0000000)), __NFUN_176__(DistanceToLocation(m_vPreEntryPositions[0]), DistanceToLocation(m_vPreEntryPositions[1]))))
+					{
+						R6PreMoveTo(m_vPreEntryPositions[0], m_vPreEntryPositions[0], GetRoomEntryPace(false));
+					}
+					__NFUN_500__(m_vPreEntryPositions[0]);
+					// End:0x1B8
+					if(__NFUN_218__(m_vPreEntryPositions[1], vect(0.0000000, 0.0000000, 0.0000000)))
+					{
+						R6PreMoveTo(m_vPreEntryPositions[1], m_vPreEntryPositions[1], GetRoomEntryPace(false));
+						__NFUN_500__(m_vPreEntryPositions[1]);
+					}					
+				}
+				else
+				{
+					// End:0x218
+					if(__NFUN_130__(__NFUN_218__(m_vPreEntryPositions[1], vect(0.0000000, 0.0000000, 0.0000000)), __NFUN_176__(DistanceToLocation(m_vPreEntryPositions[1]), DistanceToLocation(m_vTargetPosition))))
+					{
+						R6PreMoveTo(m_vPreEntryPositions[1], m_vPreEntryPositions[1], GetRoomEntryPace(false));
+						__NFUN_500__(m_vPreEntryPositions[1]);
+					}
+				}
+				R6PreMoveTo(m_vTargetPosition, m_TeamManager.m_Door.m_RotatingDoor.Location, GetRoomEntryPace(false));
+				__NFUN_500__(m_vTargetPosition);
+				__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_TeamManager.m_Door.m_CorrespondingDoor.Location, m_vTargetPosition)));
+			}
+		}
+	}
+	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	m_iStateProgress = 1;
+WaitForGo:
+
+
+	SetMemberFocus();
+	StopMoving();
+	// End:0x3CE
+	if(__NFUN_132__(__NFUN_130__(m_TeamLeader.m_bIsPlayer, __NFUN_129__(HasEnteredRoom(m_PaceMember))), __NFUN_130__(__NFUN_129__(m_TeamLeader.m_bIsPlayer), __NFUN_129__(R6RainbowAI(m_PaceMember.Controller).m_bEnteredRoom))))
+	{
+		// End:0x387
+		if(__NFUN_130__(__NFUN_129__(PreEntryRoomIsAcceptablyLarge()), __NFUN_177__(DistanceTo(m_PaceMember), GetFormationDistance())))
+		{
+			m_vTargetPosition = GetSingleFilePosition();
+			// End:0x365
+			if(__NFUN_129__(__NFUN_521__(m_vTargetPosition)))
+			{
+				FindPathToTargetLocation(m_PaceMember.Location, m_PaceMember);
+			}
+			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(false));
+			__NFUN_500__(m_vTargetPosition);			
+		}
+		else
+		{
+			// End:0x3C0
+			if(__NFUN_130__(__NFUN_154__(m_pawn.m_iID, 2), HasEnteredRoom(m_TeamLeader)))
+			{
+				Focus = m_TeamManager.m_Door;
+			}
+			__NFUN_256__(0.5000000);
+		}
+		goto 'WaitForGo';
+	}
+	m_iStateProgress = 2;
+PassDoor:
+
+
+	__NFUN_256__(0.2000000);
+	// End:0x3FF
+	if(__NFUN_129__(PostEntryRoomIsAcceptablyLarge()))
+	{
+		m_TeamManager.EndRoomEntry();
+		__NFUN_113__('FollowLeader');
+	}
+	m_eCurrentRoomLayout = m_TeamManager.m_Door.m_eRoomLayout;
+	m_vTargetPosition = m_TeamManager.m_Door.Location;
+	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));
+	__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_vTargetPosition, Pawn.Location)));
+	m_TeamManager.EnteredRoom(m_pawn);
+	m_vTargetPosition = m_TeamManager.m_Door.m_CorrespondingDoor.Location;
+	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));
+	__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_vTargetPosition, Pawn.Location)));
+	m_iStateProgress = 3;
+	// End:0x508
+	if(m_PaceMember.m_bIsPlayer)
+	{
+		m_TeamManager.GetPlayerDirection();
+	}
+EnterRoom:
+
+
+	m_vTargetPosition = __NFUN_2205__(true);
+	__NFUN_267__(FocalPoint);
+	R6PreMoveTo(m_vTargetPosition, Location, GetRoomEntryPace(true));
+	__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(Location, m_vTargetPosition)));
+	__NFUN_280__(1.0000000, true);
+	__NFUN_2219__(false);
+	m_iStateProgress = 4;
+	__NFUN_256__(0.5000000);
+WaitOnLeader:
+
+
+	StopMoving();
+	__NFUN_256__(0.5000000);
+	// End:0x588
+	if(__NFUN_154__(int(m_eCoverDirection), int(3)))
+	{
+		CoverRear();
+	}
+	// End:0x5ED
+	if(__NFUN_132__(__NFUN_130__(IsMoving(m_PaceMember), __NFUN_177__(DistanceTo(m_PaceMember), float(200))), __NFUN_177__(DistanceTo(m_PaceMember), float(300))))
+	{
+		// End:0x5DB
+		if(__NFUN_154__(int(m_eCoverDirection), int(3)))
+		{
+			CoverRear();
+		}
+		m_iStateProgress = 5;
+		__NFUN_113__('FollowLeader');		
+	}
+	else
+	{
+		goto 'WaitOnLeader';
+	}
+	stop;				
+}
+
+state HoldPosition
+{
+	function BeginState()
+	{
+		m_bReactToNoise = true;
+		return;
+	}
+
+	function EndState()
+	{
+		m_bReactToNoise = false;
+		__NFUN_280__(0.0000000, false);
+		return;
+	}
+
+	function Timer()
+	{
+		__NFUN_165__(m_iWaitCounter);
+		return;
+	}
+Begin:
+
+	m_TeamManager.SetTeamState(2);
+	Focus = none;
+	m_iWaitCounter = 0;
+	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	__NFUN_280__(1.0000000, true);
+	__NFUN_256__(1.0000000);
+Hold:
+
+
+	VerifyWeaponInventory();
+	EnsureRainbowIsArmed();
+	// End:0xAE
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(Pawn.bIsCrouched), __NFUN_129__(Pawn.m_bIsProne)), __NFUN_177__(float(m_iWaitCounter), 8.0000000)))
+	{
+		Pawn.bWantsToCrouch = true;
+		__NFUN_256__(0.5000000);
+	}
+	// End:0xBD
+	if(NeedToReload())
+	{
+		RainbowReloadWeapon();
+	}
+	__NFUN_256__(1.0000000);
+	// End:0xDB
+	if(__NFUN_255__(NextState, 'None'))
+	{
+		__NFUN_113__(NextState);
+	}
+	goto 'Hold';
+	stop;		
+}
+
+state TeamSecureTerrorist
+{
+	function BeginState()
+	{
+		m_pawn.ResetBoneRotation();
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_bIgnoreBackupBump = true;
+		m_bStateFlag = false;
+		return;
+	}
+
+	function EndState()
+	{
+		m_bIgnoreBackupBump = false;
+		// End:0x7B
+		if(__NFUN_129__(m_bStateFlag))
+		{
+			m_pawn.m_bPostureTransition = false;
+			m_pawn.AnimBlendToAlpha(m_pawn.1, 0.0000000, 0.5000000);
+			m_pawn.m_ePlayerIsUsingHands = 0;
+			m_pawn.PlayWeaponAnimation();
+			R6Terrorist(m_ActionTarget).ResetArrest();
+		}
+		// End:0xB4
+		if(__NFUN_130__(m_pawn.m_bWeaponIsSecured, __NFUN_129__(m_pawn.m_bWeaponTransition)))
+		{
+			m_pawn.SetNextPendingAction(28);
+		}
+		return;
+	}
+Begin:
+
+	// End:0x1F
+	if(__NFUN_129__(R6Pawn(m_ActionTarget).IsAlive()))
+	{
+		goto 'End';
+	}
+	// End:0x3C
+	if(__NFUN_154__(m_pawn.m_iID, 1))
+	{
+		__NFUN_256__(GetLeadershipReactionTime());
+	}
+	m_TeamManager.SetTeamState(3);
+	// End:0x8B
+	if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(m_ActionTarget.Location)), __NFUN_129__(__NFUN_520__(m_ActionTarget))))
+	{
+		FindPathToTargetLocation(m_ActionTarget.Location, m_ActionTarget);
+	}
+DirectMove:
+
+
+	R6PreMoveToward(m_ActionTarget, m_ActionTarget, 4);
+	__NFUN_502__(m_ActionTarget);
+	// End:0xBF
+	if(__NFUN_177__(DistanceTo(m_ActionTarget), float(100)))
+	{
+		goto 'Begin';
+	}
+	Focus = m_ActionTarget;
+	StopMoving();
+	__NFUN_256__(0.5000000);
+	J0xD8:
+
+	// End:0x106 [Loop If]
+	if(m_TeamManager.m_bCAWaitingForZuluGoCode)
+	{
+		m_TeamManager.SetTeamState(1);
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0xD8;
+	}
+Secure:
+
+
+	__NFUN_118__('SeePlayer');
+	// End:0x12A
+	if(R6Terrorist(m_ActionTarget).m_bIsUnderArrest)
+	{
+		RainbowCannotCompleteOrders();
+	}
+	m_TeamManager.SetTeamState(17);
+	m_pawn.SetNextPendingAction(27);
+	__NFUN_261__(m_pawn.14);
+	R6Terrorist(m_ActionTarget).m_controller.DispatchOrder(int(R6Terrorist(m_ActionTarget).1), m_pawn);
+	J0x18E:
+
+	// End:0x1B2 [Loop If]
+	if(__NFUN_129__(R6Terrorist(m_ActionTarget).PawnHaveFinishedRotation()))
+	{
+		__NFUN_256__(0.1000000);
+		// [Loop Continue]
+		goto J0x18E;
+	}
+	m_pawn.SetNextPendingAction(29);
+	__NFUN_261__(m_pawn.1);
+	m_bStateFlag = true;
+	m_pawn.SetNextPendingAction(28);
+	__NFUN_261__(m_pawn.14);
+End:
+
+
+	// End:0x225
+	if(__NFUN_154__(m_pawn.m_iID, 0))
+	{
+		m_TeamManager.m_SurrenderedTerrorist = none;
+		__NFUN_113__('Patrol');		
+	}
+	else
+	{
+		m_TeamManager.MoveTeamToCompleted(true);
+	}
+	stop;		
+}
+
+state TeamMoveTo
+{
+	function BeginState()
+	{
+		m_pawn.ResetBoneRotation();
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_iStateProgress = 0;
+		return;
+	}
+
+	// this code was moved into a function because the BeginState() is not called again when a GotoState() is done on the current state.
+	function SetUpTeamMoveTo()
+	{
+		__NFUN_280__(0.0000000, false);
+		m_vTargetPosition = m_TeamManager.m_vActionLocation;
+		// End:0xD6
+		if(__NFUN_130__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0), __NFUN_154__(m_iStateProgress, 0)))
+		{
+			m_iStateProgress = 1;
+			// End:0xC2
+			if(__NFUN_129__(CanThrowGrenade(Pawn.Location, false, true)))
+			{
+				// End:0x91
+				if(__NFUN_130__(TooCloseToThrowGrenade(Pawn.Location), FindRandomNavPointToThrowGrenade()))
+				{
+					m_iStateProgress = 2;					
+				}
+				else
+				{
+					m_vTargetPosition = m_vLocationOnTarget;
+					__NFUN_184__(m_vTargetPosition.Z, Pawn.CollisionHeight);
+					__NFUN_280__(0.3000000, true);
+				}				
+			}
+			else
+			{
+				m_vTargetPosition = Pawn.Location;
+			}
+		}
+		return;
+	}
+
+	function EndState()
+	{
+		__NFUN_280__(0.0000000, false);
+		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
+		ResetTeamMoveTo();
+		return;
+	}
+
+    //------------------------------------------------------------------
+    // FindRandomNavPointToThrowGrenade:
+    //	try to find a spot to throw a grenade. Not too far from where he's
+    //  standing.
+    //------------------------------------------------------------------
+	function bool FindRandomNavPointToThrowGrenade()
+	{
+		local Actor Actor;
+		local int i, iSize;
+		local Vector vLocationList[10];
+		local int iLocationListIndex, iDistance;
+
+		J0x00:
+		// End:0xD8 [Loop If]
+		if(__NFUN_150__(i, 10))
+		{
+			Actor = __NFUN_525__(true);
+			// End:0xCE
+			if(__NFUN_130__(__NFUN_129__(Actor.__NFUN_303__('R6Ladder')), __NFUN_176__(__NFUN_186__(__NFUN_175__(Actor.Location.Z, Pawn.Location.Z)), float(400))))
+			{
+				// End:0x96
+				if(CanThrowGrenade(Actor.Location, false, true))
+				{
+					m_vTargetPosition = Actor.Location;
+					return true;
+					// [Explicit Continue]
+					goto J0xCE;
+				}
+				// End:0xCE
+				if(TooCloseToThrowGrenade(Actor.Location))
+				{
+					vLocationList[iLocationListIndex] = Actor.Location;
+					__NFUN_165__(iLocationListIndex);
+				}
+			}
+			J0xCE:
+
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x00;
+		}
+		// End:0x181
+		if(__NFUN_151__(iLocationListIndex, 0))
+		{
+			i = 0;
+			i = 0;
+			J0xF1:
+
+			// End:0x17F [Loop If]
+			if(__NFUN_150__(i, iLocationListIndex))
+			{
+				// End:0x175
+				if(__NFUN_177__(__NFUN_225__(__NFUN_216__(vLocationList[i], Pawn.Location)), float(iDistance)))
+				{
+					// End:0x175
+					if(CanThrowGrenade(vLocationList[i], false, false))
+					{
+						iDistance = int(__NFUN_225__(__NFUN_216__(vLocationList[i], Pawn.Location)));
+						m_vTargetPosition = vLocationList[i];
+					}
+				}
+				__NFUN_163__(i);
+				// [Loop Continue]
+				goto J0xF1;
+			}
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x4C
+		if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0))
+		{
+			// End:0x4C
+			if(CanThrowGrenade(Pawn.Location, true, false))
+			{
+				__NFUN_280__(0.0000000, false);
+				StopMoving();
+				__NFUN_113__('TeamMoveTo', 'Action');
+			}
+		}
+		return;
+	}
+Begin:
+
+	// End:0x37
+	if(__NFUN_130__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0), __NFUN_217__(m_vLocationOnTarget, vect(0.0000000, 0.0000000, 0.0000000))))
+	{
+		goto 'End';
+	}
+	StopMoving();
+	J0x3D:
+
+	// End:0x6B [Loop If]
+	if(m_TeamManager.m_bCAWaitingForZuluGoCode)
+	{
+		m_TeamManager.SetTeamState(1);
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0x3D;
+	}
+	SetUpTeamMoveTo();
+	__NFUN_256__(GetLeadershipReactionTime());
+MoveTowardTarget:
+
+
+	m_TeamManager.SetTeamState(3);
+	// End:0xCF
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 2048), 0))
+	{
+		// End:0xCC
+		if(__NFUN_129__(__NFUN_520__(m_ActionTarget)))
+		{
+			FindPathToTargetLocation(m_ActionTarget.Location, m_ActionTarget);
+		}		
+	}
+	else
+	{
+		// End:0xE7
+		if(__NFUN_129__(__NFUN_521__(m_vTargetPosition)))
+		{
+			FindPathToTargetLocation(m_vTargetPosition);
+		}
+	}
+	J0xE7:
+
+	// End:0x136
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 2048), 0))
+	{
+		J0x102:
+
+		// End:0x133 [Loop If]
+		if(__NFUN_177__(DistanceTo(m_ActionTarget), float(100)))
+		{
+			R6PreMoveToward(m_ActionTarget, m_ActionTarget, 4);
+			__NFUN_502__(m_ActionTarget);
+			// [Loop Continue]
+			goto J0x102;
+		}		
+	}
+	else
+	{
+		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+		__NFUN_500__(m_vTargetPosition);
+		// End:0x18C
+		if(__NFUN_130__(__NFUN_155__(m_TeamManager.m_iTeamAction, 0), __NFUN_154__(int(m_eMoveToResult), int(2))))
+		{
+			m_TeamManager.MoveTeamToCompleted(false);
+			RainbowCannotCompleteOrders();
+		}
+	}
+	J0x18C:
+
+	// End:0x378
+	if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 64), 0))
+	{
+		m_TeamManager.SetTeamState(14);
+		// End:0x331
+		if(CanThrowGrenade(Pawn.Location, false, false))
+		{
+			// End:0x22E
+			if(__NFUN_129__(ClearThrowIsAvailable(m_vLocationOnTarget)))
+			{
+				m_vTargetPosition = __NFUN_215__(Pawn.Location, __NFUN_213__(float(300), __NFUN_226__(__NFUN_216__(m_vLocationOnTarget, Pawn.Location))));
+				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+				__NFUN_500__(m_vTargetPosition);
+			}
+			__NFUN_280__(0.0000000, false);
+			__NFUN_118__('NotifyBump');
+			StopMoving();
+			__NFUN_256__(0.2000000);
+			__NFUN_267__(m_vLocationOnTarget);
+			Focus = self;
+			Target = self;
+			SwitchWeapon(m_iActionUseGadgetGroup);
+			__NFUN_261__(m_pawn.14);
+			__NFUN_299__(Pawn.Rotation);
+			SetGunDirection(Target);
+			m_pawn.m_bThrowGrenadeWithLeftHand = false;
+			m_pawn.m_eGrenadeThrow = 1;
+			m_pawn.m_eRepGrenadeThrow = 1;
+			m_pawn.PlayWeaponAnimation();
+			__NFUN_261__(m_pawn.14);
+			m_pawn.m_eRepGrenadeThrow = 0;
+			m_vLocationOnTarget = vect(0.0000000, 0.0000000, 0.0000000);
+			m_iStateProgress = 0;
+			__NFUN_117__('NotifyBump');
+			SwitchWeapon(1);
+			__NFUN_261__(m_pawn.14);			
+		}
+		else
+		{
+			__NFUN_280__(0.3000000, true);
+			m_vTargetPosition = m_vLocationOnTarget;
+			__NFUN_184__(m_vTargetPosition.Z, Pawn.CollisionHeight);
+			__NFUN_256__(0.2000000);
+			goto 'Begin';
+		}
+		__NFUN_256__(1.0000000);		
+	}
+	else
+	{
+		// End:0x60E
+		if(__NFUN_132__(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 4096), 0), __NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 8192), 0)))
+		{
+			// End:0x605
+			if(__NFUN_154__(int(m_eMoveToResult), int(1)))
+			{
+				// End:0x40E
+				if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 4096), 0))
+				{
+					// End:0x3FA
+					if(__NFUN_129__(R6IOObject(m_ActionTarget).m_bIsActivated))
+					{
+						RainbowCannotCompleteOrders();
+					}
+					m_TeamManager.SetTeamState(15);					
+				}
+				else
+				{
+					m_TeamManager.SetTeamState(16);
+				}
+				m_vTargetPosition = __NFUN_216__(m_ActionTarget.Location, __NFUN_213__(__NFUN_174__(__NFUN_174__(Pawn.CollisionRadius, m_ActionTarget.CollisionRadius), float(10)), Vector(m_ActionTarget.Rotation)));
+				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+				__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_ActionTarget.Location, m_vTargetPosition)));
+				Focus = m_ActionTarget;
+				__NFUN_508__();
+				m_pawn.SetNextPendingAction(27);
+				__NFUN_261__(m_pawn.14);
+				m_pawn.m_eDeviceAnim = R6IOObject(m_ActionTarget).m_eAnimToPlay;
+				m_pawn.SetNextPendingAction(18);
+				R6IOObject(m_ActionTarget).PerformSoundAction(0);
+				m_pawn.m_bInteractingWithDevice = true;
+				__NFUN_256__(R6IOObject(m_ActionTarget).GetTimeRequired(m_pawn));
+				R6IOObject(m_ActionTarget).ToggleDevice(m_pawn);
+				R6IOObject(m_ActionTarget).PerformSoundAction(2);
+				PlaySoundActionCompleted(R6IOObject(m_ActionTarget).m_eAnimToPlay);
+				m_pawn.AnimBlendToAlpha(m_pawn.1, 0.0000000, 0.5000000);
+				m_pawn.m_bInteractingWithDevice = false;
+				m_pawn.m_ePlayerIsUsingHands = 0;
+				m_pawn.PlayWeaponAnimation();
+				__NFUN_256__(1.0000000);
+				m_pawn.SetNextPendingAction(28);
+				__NFUN_261__(m_pawn.14);				
+			}
+			else
+			{
+				RainbowCannotCompleteOrders();
+			}			
+		}
+		else
+		{
+			// End:0x6A8
+			if(__NFUN_151__(__NFUN_156__(m_TeamManager.m_iTeamAction, 2048), 0))
+			{
+				// End:0x674
+				if(__NFUN_119__(R6Hostage(m_ActionTarget).m_escortedByRainbow, none))
+				{
+					R6Hostage(m_ActionTarget).m_controller.DispatchOrder(int(R6Hostage(m_ActionTarget).2));					
+				}
+				else
+				{
+					R6Hostage(m_ActionTarget).m_controller.DispatchOrder(int(R6Hostage(m_ActionTarget).1), m_pawn);
+				}
+			}
+			__NFUN_256__(1.0000000);
+		}
+	}
+	// End:0x6D4
+	if(__NFUN_154__(m_pawn.m_iID, 0))
+	{
+		m_TeamManager.ActionCompleted(true);
+	}
+	m_TeamManager.RestoreTeamOrder();
+End:
+
+
+	// End:0x701
+	if(__NFUN_154__(m_pawn.m_iID, 0))
+	{
+		__NFUN_113__('Patrol');		
+	}
+	else
+	{
+		m_TeamManager.MoveTeamToCompleted(true);
+		NextState = 'None';
+		__NFUN_113__('HoldPosition');
+	}
+	stop;				
+}
+
+state WaitForTeam
+{
+	function BeginState()
+	{
+		m_bReactToNoise = true;
+		return;
+	}
+
+	function EndState()
+	{
+		m_bReactToNoise = false;
+		return;
+	}
+Begin:
+
+	// End:0x1A
+	if(__NFUN_154__(m_TeamManager.m_iMemberCount, 1))
+	{
+		goto 'Wait';
+	}
+	// End:0x1B3
+	if(__NFUN_119__(m_TeamManager.m_PlanActionPoint, none))
+	{
+		m_vTargetPosition = m_pawn.m_Ladder.Location;
+		// End:0x7B
+		if(__NFUN_114__(m_TeamManager.m_PlanActionPoint, m_pawn.m_Ladder))
+		{
+			m_TeamManager.ActionPointReached();
+		}
+		J0x7B:
+
+		// End:0x1B0 [Loop If]
+		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_vTargetPosition, Pawn.Location)), float(300)))
+		{
+			// End:0xB5
+			if(__NFUN_114__(m_TeamManager.m_PlanActionPoint, none))
+			{
+				// [Explicit Break]
+				goto J0x1B0;
+			}
+			// End:0x10B
+			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_pawn.m_Door, none), m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed), NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint)))
+			{
+				// [Explicit Break]
+				goto J0x1B0;
+			}
+			// End:0x165
+			if(__NFUN_132__(__NFUN_132__(__NFUN_114__(m_TeamManager.m_PlanActionPoint, m_pawn.m_Ladder), __NFUN_129__(__NFUN_520__(m_TeamManager.m_PlanActionPoint))), __NFUN_155__(int(m_TeamManager.m_eNextAPAction), int(0))))
+			{
+				goto 'FindNearbySpot';
+			}
+			R6PreMoveToward(m_TeamManager.m_PlanActionPoint, m_TeamManager.m_PlanActionPoint, GetTeamPace());
+			__NFUN_502__(m_TeamManager.m_PlanActionPoint);
+			m_TeamManager.ActionPointReached();
+			// [Loop Continue]
+			goto J0x7B;
+		}
+		J0x1B0:
+		
+	}
+	else
+	{
+FindNearbySpot:
+
+
+		__NFUN_2209__(m_pawn.m_Ladder, m_vTargetPosition);
+		// End:0x1FE
+		if(__NFUN_218__(m_vTargetPosition, vect(0.0000000, 0.0000000, 0.0000000)))
+		{
+			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetTeamPace());
+			__NFUN_500__(m_vTargetPosition);
+		}
+	}
+	J0x1FE:
+
+	__NFUN_256__(1.0000000);
+	// End:0x256
+	if(m_TeamManager.TeamHasFinishedClimbingLadder())
+	{
+		m_pawn.m_Ladder = none;
+		// End:0x24C
+		if(m_TeamManager.m_bAllTeamsHold)
+		{
+			m_TeamManager.AITeamHoldPosition();			
+		}
+		else
+		{
+			__NFUN_113__('Patrol');
+		}		
+	}
+	else
+	{
+		goto 'Wait';
+	}
+	stop;			
+}
+
+state Patrol
+{
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_iWaitCounter = 0;
+		m_pawn.m_bCanProne = false;
+		m_bReactToNoise = true;
+		m_bStateFlag = false;
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
+		__NFUN_280__(0.0000000, false);
+		m_pawn.m_bThrowGrenadeWithLeftHand = false;
+		m_bIgnoreBackupBump = false;
+		m_pawn.m_bCanProne = m_pawn.default.m_bCanProne;
+		m_bReactToNoise = false;
+		// End:0x80
+		if(m_bStateFlag)
+		{
+			m_TeamManager.ActionNodeCompleted();
+		}
+		return;
+	}
+
+	function bool CornerMovement()
+	{
+		local Vector PathA, PathB;
+
+		PathA = __NFUN_226__(__NFUN_216__(MoveTarget.Location, Pawn.Location));
+		PathB = __NFUN_226__(__NFUN_216__(m_NextMoveTarget.Location, MoveTarget.Location));
+		// End:0x64
+		if(__NFUN_176__(__NFUN_219__(PathA, PathB), 0.7070000))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function DispatchInteractions()
+	{
+		local Actor actionTarget;
+
+		actionTarget = CheckForPossibleInteractions();
+		// End:0x1CC
+		if(__NFUN_119__(actionTarget, none))
+		{
+			// End:0x86
+			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(MoveTarget, none), __NFUN_176__(__NFUN_225__(__NFUN_216__(MoveTarget.Location, actionTarget.Location)), __NFUN_225__(__NFUN_216__(Pawn.Location, actionTarget.Location)))), __NFUN_2220__(actionTarget, MoveTarget.Location)))
+			{
+				return;
+			}
+			// End:0xB6
+			if(actionTarget.__NFUN_303__('R6IOBomb'))
+			{
+				m_TeamManager.ReorganizeTeamToInteractWithDevice(4096, actionTarget);				
+			}
+			else
+			{
+				// End:0xE6
+				if(actionTarget.__NFUN_303__('R6IODevice'))
+				{
+					m_TeamManager.ReorganizeTeamToInteractWithDevice(8192, actionTarget);					
+				}
+				else
+				{
+					// End:0x10F
+					if(actionTarget.__NFUN_303__('R6Terrorist'))
+					{
+						m_ActionTarget = actionTarget;
+						__NFUN_113__('TeamSecureTerrorist');						
+					}
+					else
+					{
+						// End:0x1CC
+						if(actionTarget.__NFUN_303__('R6Hostage'))
+						{
+							// End:0x1BC
+							if(__NFUN_130__(R6Hostage(actionTarget).IsAlive(), __NFUN_129__(R6Hostage(actionTarget).m_bCivilian)))
+							{
+								// End:0x188
+								if(__NFUN_129__(m_TeamManager.m_bLeaderIsAPlayer))
+								{
+									m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowTeamVoices(m_pawn, 4);
+								}
+								R6Hostage(actionTarget).m_controller.DispatchOrder(int(R6Hostage(actionTarget).1), m_pawn);
+							}
+							m_TeamManager.m_HostageToRescue = none;
+						}
+					}
+				}
+			}
+		}
+		return;
+	}
+
+	function Timer()
+	{
+		__NFUN_165__(m_iWaitCounter);
+		// End:0x90
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(MoveTarget, none), __NFUN_119__(m_NextMoveTarget, none)), __NFUN_129__(ActionIsGrenade(m_TeamManager.m_ePlanAction))))
+		{
+			// End:0x90
+			if(__NFUN_130__(__NFUN_114__(Enemy, none), __NFUN_176__(DistanceTo(MoveTarget), float(200))))
+			{
+				// End:0x90
+				if(__NFUN_130__(CornerMovement(), __NFUN_119__(m_NextMoveTarget, none)))
+				{
+					Focus = m_NextMoveTarget;
+					FocalPoint = m_NextMoveTarget.Location;
+				}
+			}
+		}
+		// End:0xD1
+		if(m_bTeamMateHasBeenKilled)
+		{
+			m_bTeamMateHasBeenKilled = false;
+			Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+			NextState = 'Patrol';
+			__NFUN_113__('HoldPosition');
+			return;
+		}
+		// End:0xEC
+		if(__NFUN_180__(__NFUN_173__(float(m_iWaitCounter), float(10)), float(0)))
+		{
+			DispatchInteractions();
+		}
+		return;
+	}
+
+	function bool ConfirmActionPointReached()
+	{
+		// End:0x2B
+		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(MoveTarget.Location, Pawn.Location)), float(100)))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function bool IsCloseEnoughToInteractWith(Actor actionTarget)
+	{
+		// End:0x0D
+		if(__NFUN_114__(actionTarget, none))
+		{
+			return false;
+		}
+		// End:0x5B
+		if(__NFUN_130__(__NFUN_176__(DistanceTo(actionTarget), float(500)), __NFUN_176__(__NFUN_186__(__NFUN_175__(Pawn.Location.Z, actionTarget.Location.Z)), float(100))))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function Actor CheckForPossibleInteractions()
+	{
+		local int i;
+		local R6InteractiveObject aIntActor;
+		local R6Terrorist terro;
+
+		i = 0;
+		J0x07:
+
+		// End:0x7C [Loop If]
+		if(__NFUN_150__(i, m_TeamManager.m_InteractiveObjectList.Length))
+		{
+			aIntActor = m_TeamManager.m_InteractiveObjectList[i];
+			// End:0x72
+			if(__NFUN_119__(aIntActor, none))
+			{
+				// End:0x72
+				if(__NFUN_130__(R6IOObject(aIntActor).m_bIsActivated, IsCloseEnoughToInteractWith(aIntActor)))
+				{
+					return aIntActor;
+				}
+			}
+			__NFUN_165__(i);
+			// [Loop Continue]
+			goto J0x07;
+		}
+		// End:0xB6
+		if(__NFUN_119__(m_TeamManager.m_HostageToRescue, none))
+		{
+			// End:0xB6
+			if(IsCloseEnoughToInteractWith(m_TeamManager.m_HostageToRescue))
+			{
+				return m_TeamManager.m_HostageToRescue;
+			}
+		}
+		// End:0x10D
+		if(__NFUN_119__(m_TeamManager.m_SurrenderedTerrorist, none))
+		{
+			terro = R6Terrorist(m_TeamManager.m_SurrenderedTerrorist);
+			// End:0x10D
+			if(__NFUN_130__(IsCloseEnoughToInteractWith(terro), __NFUN_129__(terro.m_bIsUnderArrest)))
+			{
+				return terro;
+			}
+		}
+		return none;
+		return;
+	}
+
+	function bool ActionIsGrenade(Object.EPlanAction eAPAction)
+	{
+		// End:0x48
+		if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eAPAction), int(1)), __NFUN_154__(int(eAPAction), int(2))), __NFUN_154__(int(eAPAction), int(3))), __NFUN_154__(int(eAPAction), int(4))))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function Actor GetFocus()
+	{
+		// End:0x11
+		if(__NFUN_114__(Enemy, none))
+		{
+			return MoveTarget;
+		}
+		return Enemy;
+		return;
+	}
+Begin:
+
+	__NFUN_280__(0.1000000, true);
+	MoveTarget = m_TeamManager.m_PlanActionPoint;
+	// End:0x42
+	if(__NFUN_130__(__NFUN_119__(MoveTarget, none), ConfirmActionPointReached()))
+	{
+		m_TeamManager.ActionPointReached();
+	}
+	// End:0x72
+	if(m_TeamManager.m_bPendingSnipeUntilGoCode)
+	{
+		m_TeamManager.ReOrganizeTeamForSniping();
+		m_TeamManager.SnipeUntilGoCode();
+	}
+	// End:0x81
+	if(m_bReorganizationPending)
+	{
+		ReorganizeTeamAsNeeded();
+	}
+	// End:0xAC
+	if(Pawn.m_bIsProne)
+	{
+		Pawn.m_bWantsToProne = false;
+		__NFUN_256__(1.0000000);
+	}
+	// End:0xD3
+	if(__NFUN_130__(__NFUN_129__(m_pawn.IsStationary()), SniperChangeToSecondaryWeapon()))
+	{
+		__NFUN_256__(0.5000000);
+	}
+PickActionPoint:
+
+
+	VerifyWeaponInventory();
+	EnsureRainbowIsArmed();
+	// End:0x130
+	if(__NFUN_151__(m_TeamManager.m_iMemberCount, 1))
+	{
+		J0xF3:
+
+		// End:0x130 [Loop If]
+		if(__NFUN_177__(DistanceTo(m_TeamManager.m_Team[__NFUN_147__(m_TeamManager.m_iMemberCount, 1)]), float(800)))
+		{
+			__NFUN_256__(0.5000000);
+			// [Loop Continue]
+			goto J0xF3;
+		}
+	}
+	MoveTarget = m_TeamManager.m_PlanActionPoint;
+	// End:0x1A4
+	if(__NFUN_132__(__NFUN_119__(MoveTarget, none), __NFUN_155__(int(m_TeamManager.m_ePlanAction), int(0))))
+	{
+		DispatchInteractions();
+		m_iWaitCounter = 0;
+		// End:0x1A1
+		if(__NFUN_155__(int(m_TeamManager.m_ePlanAction), int(5)))
+		{
+			// End:0x1A1
+			if(SniperChangeToSecondaryWeapon())
+			{
+				__NFUN_256__(0.5000000);
+			}
+		}		
+	}
+	else
+	{
+		// End:0x1FE
+		if(__NFUN_151__(m_iWaitCounter, 30))
+		{
+			SniperChangeToPrimaryWeapon();
+			// End:0x1FE
+			if(__NFUN_130__(__NFUN_129__(Pawn.bIsCrouched), __NFUN_154__(int(m_TeamManager.m_eGoCode), int(4))))
+			{
+				Pawn.bWantsToCrouch = true;
+				__NFUN_256__(0.5000000);
+			}
+		}
+	}
+	// End:0x255
+	if(NeedToReload())
+	{
+		// End:0x22C
+		if(__NFUN_129__(Pawn.bIsCrouched))
+		{
+			Pawn.bWantsToCrouch = true;
+		}
+		RainbowReloadWeapon();
+		StopMoving();
+		J0x238:
+
+		// End:0x255 [Loop If]
+		if(m_pawn.m_bReloadingWeapon)
+		{
+			__NFUN_256__(0.2000000);
+			// [Loop Continue]
+			goto J0x238;
+		}
+	}
+	// End:0x296
+	if(__NFUN_114__(MoveTarget, none))
+	{
+		// End:0x288
+		if(__NFUN_154__(int(m_TeamManager.m_ePlanAction), int(5)))
+		{
+			m_TeamManager.SnipeUntilGoCode();
+		}
+		__NFUN_256__(0.1000000);
+		goto 'FormationAroundDoor';
+	}
+	// End:0x2C7
+	if(__NFUN_154__(int(m_TeamManager.m_eNextAPAction), int(0)))
+	{
+		m_NextMoveTarget = m_TeamManager.PreviewNextActionPoint();		
+	}
+	else
+	{
+		m_NextMoveTarget = none;
+		// End:0x2F9
+		if(__NFUN_154__(int(m_TeamManager.m_eNextAPAction), int(6)))
+		{
+			m_TeamManager.ReOrganizeTeamForBreachDoor();			
+		}
+		else
+		{
+			// End:0x324
+			if(__NFUN_154__(int(m_TeamManager.m_eNextAPAction), int(5)))
+			{
+				m_TeamManager.ReOrganizeTeamForSniping();				
+			}
+			else
+			{
+				// End:0x358
+				if(ActionIsGrenade(m_TeamManager.m_eNextAPAction))
+				{
+					m_TeamManager.ReOrganizeTeamForGrenade(m_TeamManager.m_eNextAPAction);
+				}
+			}
+		}
+	}
+	J0x358:
+
+	MoveTarget = m_TeamManager.m_PlanActionPoint;
+	// End:0x399
+	if(__NFUN_114__(MoveTarget, m_pawn.m_Door))
+	{
+		m_TeamManager.ActionPointReached();
+		goto 'DoorsAndLadders';
+	}
+	m_TeamManager.SetTeamState(3);
+	// End:0x3FA
+	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_pawn.m_Door, none), m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed), NextActionPointIsThroughDoor(MoveTarget)))
+	{
+		goto 'DoorsAndLadders';
+	}
+	// End:0x413
+	if(TargetIsLadderToClimb(R6Ladder(MoveTarget)))
+	{
+		goto 'DoorsAndLadders';
+	}
+	// End:0x43E
+	if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(MoveTarget.Location)), __NFUN_129__(__NFUN_520__(MoveTarget))))
+	{
+		goto 'BlockedFindPath';
+	}
+	R6PreMoveToward(MoveTarget, GetFocus(), GetTeamPace());
+	__NFUN_502__(MoveTarget, GetFocus());
+	// End:0x4A8
+	if(ConfirmActionPointReached())
+	{
+		// End:0x490
+		if(MoveTarget.__NFUN_303__('R6Door'))
+		{
+			ForceCurrentDoor(R6Door(MoveTarget));
+		}
+		m_TeamManager.ActionPointReached();
+		goto 'DoorsAndLadders';		
+	}
+	else
+	{
+		goto 'MoveToActionPoint';
+	}
+	J0x4AE:
+
+	MoveTarget = __NFUN_517__(m_TeamManager.m_PlanActionPoint, true);
+	// End:0x52E
+	if(__NFUN_119__(MoveTarget, none))
+	{
+		R6PreMoveToward(MoveTarget, GetFocus(), GetTeamPace());
+		__NFUN_502__(MoveTarget, GetFocus());
+		// End:0x525
+		if(__NFUN_130__(ConfirmActionPointReached(), MoveTarget.__NFUN_303__('R6Door')))
+		{
+			ForceCurrentDoor(R6Door(MoveTarget));
+		}
+		goto 'DoorsAndLadders';		
+	}
+	else
+	{
+		R6PreMoveToward(m_TeamManager.m_PlanActionPoint, m_TeamManager.m_PlanActionPoint, GetTeamPace());
+		__NFUN_502__(m_TeamManager.m_PlanActionPoint);
+		__NFUN_256__(1.0000000);
+	}
+	J0x56F:
+
+	m_NextMoveTarget = m_TeamManager.PreviewNextActionPoint();
+	// End:0x701
+	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(m_TeamManager.m_ePlanAction), int(0)), __NFUN_119__(m_pawn.m_Door, none)), __NFUN_132__(NextActionPointIsThroughDoor(m_NextMoveTarget), NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint))), m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed))
+	{
+		// End:0x685
+		if(__NFUN_132__(__NFUN_114__(m_TeamManager.m_PlanActionPoint, m_pawn.m_Door), __NFUN_114__(m_NextMoveTarget, m_pawn.m_Door)))
+		{
+			R6PreMoveToward(m_pawn.m_Door, m_pawn.m_Door, GetTeamPace());
+			__NFUN_502__(m_pawn.m_Door);
+			m_TeamManager.ActionPointReached();
+		}
+		// End:0x6DE
+		if(__NFUN_132__(__NFUN_129__(m_TeamManager.m_bEntryInProgress), __NFUN_119__(m_TeamManager.m_Door, m_pawn.m_Door)))
+		{
+			m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+		}
+		SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
+		GotoStateLeadRoomEntry();
+	}
+	m_TargetLadder = R6Ladder(MoveTarget);
+	// End:0x754
+	if(TargetIsLadderToClimb(m_TargetLadder))
+	{
+		MoveTarget = m_pawn.m_Ladder;
+		NextState = 'WaitForTeam';
+		m_TeamManager.TeamLeaderIsClimbingLadder();
+		__NFUN_113__('ApproachLadder');
+	}
+FormationAroundDoor:
+
+
+	// End:0x78E
+	if(__NFUN_130__(__NFUN_154__(int(m_TeamManager.m_ePlanAction), int(0)), __NFUN_154__(int(m_TeamManager.m_eGoCode), int(4))))
+	{
+		goto 'PerformPlanningAction';
+	}
+	// End:0x918
+	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_TeamManager.m_bEntryInProgress), __NFUN_119__(m_pawn.m_Door, none)), m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed))
+	{
+		// End:0x81F
+		if(m_pawn.m_Door.m_RotatingDoor.m_bIsDoorLocked)
+		{
+			GotoLockPickState(m_pawn.m_Door.m_RotatingDoor);
+		}
+		__NFUN_256__(1.0000000);
+		m_NextMoveTarget = m_TeamManager.PreviewNextActionPoint();
+		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+		// End:0x8F2
+		if(PreEntryRoomIsAcceptablyLarge())
+		{
+			m_vTargetPosition = __NFUN_2205__(false);
+			// End:0x8F2
+			if(__NFUN_218__(m_vTargetPosition, vect(0.0000000, 0.0000000, 0.0000000)))
+			{
+				R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.Location, GetTeamPace());
+				__NFUN_500__(m_vTargetPosition);
+				__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_pawn.m_Door.m_CorrespondingDoor.Location, m_vTargetPosition)));
+			}
+		}
+		StopMoving();
+		SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
+		__NFUN_508__();
+	}
+PerformPlanningAction:
+
+
+	// End:0xE34
+	if(ActionIsGrenade(m_TeamManager.m_ePlanAction))
+	{
+		// End:0x9EE
+		if(m_TeamManager.m_bSkipAction)
+		{
+			m_TeamManager.ActionNodeCompleted();
+			// End:0x9E8
+			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_pawn.m_Door, none), m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed), NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint)))
+			{
+				m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+				SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
+				GotoStateLeadRoomEntry();
+			}
+			goto 'PickActionPoint';
+		}
+		// End:0xA16
+		if(__NFUN_154__(m_iActionUseGadgetGroup, 0))
+		{
+			m_TeamManager.ReOrganizeTeamForGrenade(m_TeamManager.m_ePlanAction);
+		}
+		// End:0xA47
+		if(__NFUN_155__(m_pawn.m_iCurrentWeapon, m_iActionUseGadgetGroup))
+		{
+			SwitchWeapon(m_iActionUseGadgetGroup);
+			__NFUN_261__(m_pawn.14);
+		}
+		m_bIgnoreBackupBump = true;
+		m_ActionTarget = m_pawn.m_Door;
+		// End:0xB47
+		if(__NFUN_130__(__NFUN_119__(m_pawn.m_Door, none), m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed))
+		{
+			m_RotatingDoor = m_pawn.m_Door.m_RotatingDoor;
+			SetFocusToDoorKnob(m_RotatingDoor);
+			__NFUN_508__();
+			m_pawn.PlayDoorAnim(m_RotatingDoor);
+			__NFUN_256__(0.5000000);
+			m_pawn.ServerPerformDoorAction(m_RotatingDoor, int(m_RotatingDoor.1));
+			J0xB05:
+
+			// End:0xB47 [Loop If]
+			if(m_RotatingDoor.m_bIsDoorClosed)
+			{
+				// End:0xB3C
+				if(__NFUN_129__(m_RotatingDoor.m_bInProcessOfOpening))
+				{
+					__NFUN_256__(1.0000000);
+					goto 'PerformPlanningAction';					
+				}
+				else
+				{
+					__NFUN_256__(0.1000000);
+				}
+				// [Loop Continue]
+				goto J0xB05;
+			}
+		}
+		// End:0xBF2
+		if(__NFUN_119__(m_ActionTarget, none))
+		{
+			// End:0xBAA
+			if(__NFUN_129__(PreEntryRoomIsAcceptablyLarge()))
+			{
+				R6PreMoveToward(m_ActionTarget, m_pawn.m_Door.m_CorrespondingDoor, GetTeamPace());
+				__NFUN_502__(m_ActionTarget, m_pawn.m_Door.m_CorrespondingDoor);
+				StopMoving();
+			}
+			// End:0xBEF
+			if(__NFUN_129__(CanThrowGrenadeIntoRoom(m_pawn.m_Door.m_CorrespondingDoor, m_TeamManager.m_vPlanActionLocation)))
+			{
+				m_TeamManager.ActionNodeCompleted();
+				goto 'PostThrowGrenade';
+			}			
+		}
+		else
+		{
+			// End:0xC72
+			if(__NFUN_129__(ClearThrowIsAvailable(m_TeamManager.m_vPlanActionLocation)))
+			{
+				m_vTargetPosition = __NFUN_215__(Pawn.Location, __NFUN_213__(float(300), __NFUN_226__(__NFUN_216__(m_TeamManager.m_vPlanActionLocation, Pawn.Location))));
+				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+				__NFUN_500__(m_vTargetPosition);
+				StopMoving();
+				__NFUN_256__(1.0000000);
+			}
+		}
+		// End:0xCB1
+		if(__NFUN_218__(m_TeamManager.m_vPlanActionLocation, vect(0.0000000, 0.0000000, 0.0000000)))
+		{
+			m_vLocationOnTarget = m_TeamManager.m_vPlanActionLocation;
+			__NFUN_267__(m_vLocationOnTarget);			
+		}
+		else
+		{
+			__NFUN_267__(__NFUN_215__(Pawn.Location, __NFUN_213__(float(100), Vector(Pawn.Rotation))));
+		}
+		Target = self;
+		Focus = self;
+		__NFUN_508__();
+		__NFUN_299__(Pawn.Rotation);
+		SetGunDirection(Target);
+		SetGrenadeParameters(__NFUN_130__(__NFUN_119__(m_ActionTarget, none), PreEntryRoomIsAcceptablyLarge()), true);
+		m_bStateFlag = true;
+		m_pawn.PlayWeaponAnimation();
+		__NFUN_261__(m_pawn.14);
+		m_pawn.m_eRepGrenadeThrow = 0;
+		ResetGadgetGroup();
+		m_TeamManager.ActionNodeCompleted();
+		m_bStateFlag = false;
+		SetGunDirection(none);
+PostThrowGrenade:
+
+
+		m_bIgnoreBackupBump = false;
+		SwitchWeapon(1);
+		__NFUN_261__(m_pawn.14);
+		__NFUN_256__(m_pawn.EngineWeapon.GetExplosionDelay());
+		// End:0xE31
+		if(__NFUN_130__(__NFUN_119__(m_pawn.m_Door, none), __NFUN_132__(NextActionPointIsThroughDoor(m_TeamManager.m_PlanActionPoint), __NFUN_130__(__NFUN_114__(m_TeamManager.m_PlanActionPoint, m_pawn.m_Door), NextActionPointIsThroughDoor(m_TeamManager.PreviewNextActionPoint())))))
+		{
+			m_iStateProgress = 3;
+			__NFUN_113__('LeadRoomEntry', 'EnterRoomBegin');
+		}		
+	}
+	else
+	{
+		// End:0xE8B
+		if(__NFUN_114__(MoveTarget, none))
+		{
+			// End:0xE6C
+			if(__NFUN_154__(int(m_TeamManager.m_eGoCode), int(4)))
+			{
+				m_TeamManager.SetTeamState(2);				
+			}
+			else
+			{
+				m_TeamManager.SetTeamState(1);
+			}
+			StopMoving();
+			__NFUN_256__(1.0000000);
+		}
+	}
+	// End:0xEE2
+	if(__NFUN_130__(__NFUN_130__(m_TeamManager.m_bEntryInProgress, __NFUN_154__(int(m_TeamManager.m_eGoCode), int(4))), __NFUN_119__(m_TeamManager.m_PlanActionPoint, none)))
+	{
+		m_TeamManager.RainbowHasLeftDoor(m_pawn);
+	}
+	// End:0xF0A
+	if(__NFUN_154__(int(m_TeamManager.m_eNextAPAction), int(0)))
+	{
+		m_TeamManager.RestoreTeamOrder();
+	}
+	goto 'PickActionPoint';
+	stop;			
+}
+
+state PlaceBreachingCharge
+{
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		Focus = m_TeamManager.m_BreachingDoor;
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
+		m_bIgnoreBackupBump = false;
+		// End:0x49
+		if(__NFUN_154__(m_iStateProgress, 3))
+		{
+			m_TeamManager.ActionNodeCompleted();
+			m_iStateProgress = 0;
+		}
+		return;
+	}
+
+	function R6Door GetDoorPathNode()
+	{
+		local float fDistA, fDistB;
+
+		fDistA = __NFUN_225__(__NFUN_216__(m_TeamManager.m_BreachingDoor.m_DoorActorA.Location, Pawn.Location));
+		fDistB = __NFUN_225__(__NFUN_216__(m_TeamManager.m_BreachingDoor.m_DoorActorB.Location, Pawn.Location));
+		// End:0x9A
+		if(__NFUN_176__(fDistA, fDistB))
+		{
+			return m_TeamManager.m_BreachingDoor.m_DoorActorA;			
+		}
+		else
+		{
+			return m_TeamManager.m_BreachingDoor.m_DoorActorB;
+		}
+		return;
+	}
+
+	function DetonateBreach()
+	{
+		// End:0x0D
+		if(__NFUN_150__(m_iStateProgress, 1))
+		{
+			return;
+		}
+		global.DetonateBreach();
+		return;
+	}
+Begin:
+
+	// End:0x1A
+	if(__NFUN_114__(m_TeamManager.m_BreachingDoor, none))
+	{
+		goto 'WaitToDetonate';
+	}
+	m_ActionTarget = GetDoorPathNode();
+	switch(m_iStateProgress)
+	{
+		// End:0x3A
+		case 0:
+			goto 'GetIntoPosition';
+			// End:0x50
+			break;
+		// End:0x47
+		case 1:
+			goto 'MoveAwayFromDoor';
+			// End:0x50
+			break;
+		// End:0xFFFF
+		default:
+			goto 'WaitToDetonate';
+			break;
+	}
+	J0x50:
+
+	m_TeamManager.SetTeamState(3);
+	R6PreMoveToward(m_ActionTarget, m_TeamManager.m_BreachingDoor, GetTeamPace());
+	__NFUN_502__(m_ActionTarget, m_TeamManager.m_BreachingDoor);
+	ForceCurrentDoor(R6Door(m_ActionTarget));
+	StopMoving();
+	Focus = m_pawn.m_Door.m_CorrespondingDoor;
+	__NFUN_256__(0.5000000);
+	// End:0x159
+	if(__NFUN_177__(DistanceTo(m_ActionTarget), float(30)))
+	{
+		m_vTargetPosition = __NFUN_216__(Pawn.Location, __NFUN_213__(float(60), Vector(Pawn.Rotation)));
+		R6PreMoveTo(m_vTargetPosition, m_TeamManager.m_BreachingDoor.Location, 4);
+		__NFUN_500__(m_vTargetPosition, m_TeamManager.m_BreachingDoor);
+		__NFUN_256__(0.5000000);
+		goto 'GetIntoPosition';
+	}
+	m_bIgnoreBackupBump = true;
+	m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+	m_TeamManager.SetTeamState(20);
+	SwitchWeapon(m_iActionUseGadgetGroup);
+	__NFUN_256__(0.2000000);
+	__NFUN_261__(m_pawn.14);
+	m_pawn.PlayBreachDoorAnimation();
+	__NFUN_261__(m_pawn.1);
+	Pawn.EngineWeapon.NPCPlaceCharge(m_TeamManager.m_BreachingDoor);
+	m_iStateProgress = 1;
+	PlaySoundCurrentAction(7);
+	__NFUN_256__(2.5000000);
+	m_bIgnoreBackupBump = false;
+MoveAwayFromDoor:
+
+
+	m_vTargetPosition = __NFUN_2205__(false);
+	// End:0x2EC
+	if(__NFUN_218__(m_vTargetPosition, m_pawn.m_Door.Location))
+	{
+		// End:0x283
+		if(m_pawn.bIsCrouched)
+		{
+			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.Location, 2);			
+		}
+		else
+		{
+			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.Location, 4);
+		}
+		__NFUN_500__(m_vTargetPosition);
+		__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_pawn.m_Door.m_CorrespondingDoor.Location, m_vTargetPosition)));		
+	}
+	else
+	{
+		m_vTargetPosition = __NFUN_216__(m_pawn.m_Door.Location, __NFUN_213__(float(100), Vector(m_pawn.m_Door.Rotation)));
+		// End:0x36C
+		if(m_pawn.bIsCrouched)
+		{
+			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.Location, 2);			
+		}
+		else
+		{
+			R6PreMoveTo(m_vTargetPosition, m_pawn.m_Door.m_RotatingDoor.Location, 4);
+		}
+		__NFUN_500__(m_vTargetPosition);
+	}
+	StopMoving();
+	SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
+	__NFUN_508__();
+	// End:0x3EE
+	if(__NFUN_154__(int(m_TeamManager.m_eGoCode), int(4)))
+	{
+		__NFUN_256__(1.0000000);
+		DetonateBreach();
+	}
+	m_TeamManager.PlayWaitingGoCode(m_TeamManager.m_eGoCode);
+	m_iStateProgress = 2;
+WaitToDetonate:
+
+
+	m_TeamManager.SetTeamState(1);
+	__NFUN_256__(0.2000000);
+	goto 'WaitToDetonate';
+	stop;	
+}
+
+state DetonateBreachingCharge
+{Begin:
+
+	ResetStateProgress();
+	// End:0x3F
+	if(__NFUN_132__(__NFUN_114__(m_TeamManager.m_BreachingDoor, none), __NFUN_129__(m_TeamManager.m_BreachingDoor.ShouldBeBreached())))
+	{
+		goto 'End';
+	}
+	J0x3F:
+
+	// End:0x5C [Loop If]
+	if(m_TeamManager.m_bTeamIsHoldingPosition)
+	{
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0x3F;
+	}
+	Pawn.EngineWeapon.NPCDetonateCharge();
+End:
+
+
+	SwitchWeapon(1);
+	__NFUN_256__(0.5000000);
+	__NFUN_261__(m_pawn.14);
+	// End:0xB8
+	if(__NFUN_114__(m_TeamManager.m_PlanActionPoint, m_ActionTarget))
+	{
+		m_TeamManager.ActionPointReached();
+	}
+	m_TeamManager.m_BreachingDoor = none;
+	ResetGadgetGroup();
+	// End:0xE7
+	if(m_TeamManager.m_bTeamIsHoldingPosition)
+	{
+		__NFUN_113__('HoldPosition');
+	}
+	MoveTarget = m_TeamManager.m_PlanActionPoint;
+	// End:0x134
+	if(NextActionPointIsThroughDoor(MoveTarget))
+	{
+		m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+		GotoStateLeadRoomEntry();		
+	}
+	else
+	{
+		m_TeamManager.EndRoomEntry();
+		__NFUN_113__('Patrol');
+	}
+	stop;	
+}
+
+state LeadRoomEntry
+{
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_bIgnoreBackupBump = true;
+		m_bEnteredRoom = false;
+		m_bIndividualAttacks = false;
+		m_iTurn = 0;
+		m_bStateFlag = false;
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
+		m_bIgnoreBackupBump = false;
+		m_pawn.m_u8DesiredYaw = 0;
+		__NFUN_280__(0.0000000, false);
+		// End:0x54
+		if(__NFUN_154__(m_iStateProgress, 7))
+		{
+			m_iStateProgress = 0;
+		}
+		m_bIndividualAttacks = true;
+		return;
+	}
+
+	function Timer()
+	{
+		// End:0x1A
+		if(__NFUN_153__(m_iStateProgress, 5))
+		{
+			__NFUN_165__(m_iTurn);
+			__NFUN_2219__(true);			
+		}
+		else
+		{
+			// End:0x5A
+			if(__NFUN_154__(m_pawn.m_iID, 0))
+			{
+				// End:0x5A
+				if(__NFUN_176__(DistanceTo(m_TeamManager.m_PlanActionPoint), float(150)))
+				{
+					m_TeamManager.ActionPointReached();
+				}
+			}
+		}
+		return;
+	}
+
+	function R6Pawn.eMovementPace GetRoomEntryPace(bool bRun)
+	{
+		local R6Pawn.eMovementPace ePace;
+		local bool bCrouchedEntry;
+
+		// End:0x2A
+		if(__NFUN_130__(__NFUN_119__(m_TeamLeader, none), m_TeamLeader.m_bIsPlayer))
+		{
+			bCrouchedEntry = false;			
+		}
+		else
+		{
+			bCrouchedEntry = __NFUN_154__(int(m_TeamManager.m_eMovementSpeed), int(2));
+		}
+		// End:0x6F
+		if(bCrouchedEntry)
+		{
+			// End:0x64
+			if(bRun)
+			{
+				ePace = 3;				
+			}
+			else
+			{
+				ePace = 2;
+			}			
+		}
+		else
+		{
+			// End:0x83
+			if(bRun)
+			{
+				ePace = 5;				
+			}
+			else
+			{
+				ePace = 4;
+			}
+		}
+		return ePace;
+		return;
+	}
+Begin:
+
+	StopMoving();
+	// End:0x34
+	if(__NFUN_114__(m_TeamManager.m_Door, none))
+	{
+		m_TeamManager.RainbowHasLeftDoor(m_pawn);
+		goto 'Completed';
+	}
+	// End:0x60
+	if(__NFUN_129__(m_TeamManager.m_Door.m_RotatingDoor.m_bIsDoorClosed))
+	{
+		goto 'EnterRoomBegin';
+	}
+	switch(m_iStateProgress)
+	{
+		// End:0x74
+		case 0:
+			goto 'PrepareForRoomEntry';
+			// End:0xC2
+			break;
+		// End:0x81
+		case 1:
+			goto 'OpenDoor';
+			// End:0xC2
+			break;
+		// End:0x8F
+		case 2:
+			goto 'PreEnterRoom';
+			// End:0xC2
+			break;
+		// End:0x9D
+		case 3:
+			goto 'EnterRoomBegin';
+			// End:0xC2
+			break;
+		// End:0xAB
+		case 4:
+			goto 'InsideRoom';
+			// End:0xC2
+			break;
+		// End:0xB9
+		case 5:
+			goto 'EntryFinished';
+			// End:0xC2
+			break;
+		// End:0xFFFF
+		default:
+			goto 'Completed';
+			break;
+	}
+	J0xC2:
+
+	// End:0xDC
+	if(__NFUN_114__(m_TeamManager.m_Door, none))
+	{
+		goto 'EntryFinished';
+	}
+	// End:0x121
+	if(__NFUN_129__(PreEntryRoomIsAcceptablyLarge()))
+	{
+		R6PreMoveToward(m_TeamManager.m_Door, m_TeamManager.m_Door, GetRoomEntryPace(false));
+		__NFUN_502__(m_TeamManager.m_Door);
+	}
+	// End:0x162
+	if(m_TeamManager.m_Door.m_RotatingDoor.m_bIsDoorLocked)
+	{
+		GotoLockPickState(m_TeamManager.m_Door.m_RotatingDoor);
+	}
+	StopMoving();
+	J0x168:
+
+	// End:0x187 [Loop If]
+	if(__NFUN_129__(m_TeamManager.LastMemberIsStationary()))
+	{
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0x168;
+	}
+	// End:0x244
+	if(PreEntryRoomIsAcceptablyLarge())
+	{
+		m_vTargetPosition = __NFUN_2205__(false);
+		// End:0x244
+		if(__NFUN_130__(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vTargetPosition, Pawn.Location)), float(30)), __NFUN_218__(m_vTargetPosition, vect(0.0000000, 0.0000000, 0.0000000))))
+		{
+			R6PreMoveTo(m_vTargetPosition, m_TeamManager.m_Door.m_RotatingDoor.Location, GetRoomEntryPace(false));
+			__NFUN_500__(m_vTargetPosition);
+			__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(m_TeamManager.m_Door.m_CorrespondingDoor.Location, m_vTargetPosition)));
+			StopMoving();
+		}
+	}
+	m_iStateProgress = 1;
+OpenDoor:
+
+
+	// End:0x2C3
+	if(__NFUN_129__(m_TeamManager.m_bLeaderIsAPlayer))
+	{
+		J0x25F:
+
+		// End:0x2C3 [Loop If]
+		if(__NFUN_155__(int(m_TeamManager.m_eGoCode), int(4)))
+		{
+			m_TeamManager.SetTeamState(1);
+			// End:0x2B8
+			if(NeedToReload())
+			{
+				RainbowReloadWeapon();
+				J0x298:
+
+				// End:0x2B5 [Loop If]
+				if(m_pawn.m_bReloadingWeapon)
+				{
+					__NFUN_256__(0.2000000);
+					// [Loop Continue]
+					goto J0x298;
+				}				
+			}
+			else
+			{
+				__NFUN_256__(0.5000000);
+			}
+			// [Loop Continue]
+			goto J0x25F;
+		}
+	}
+	m_TeamManager.SetTeamState(9);
+	SetFocusToDoorKnob(m_TeamManager.m_Door.m_RotatingDoor);
+	__NFUN_256__(0.5000000);
+	m_pawn.PlayDoorAnim(m_TeamManager.m_Door.m_RotatingDoor);
+	__NFUN_256__(0.5000000);
+	m_pawn.ServerPerformDoorAction(m_TeamManager.m_Door.m_RotatingDoor, int(m_TeamManager.m_Door.m_RotatingDoor.1));
+	m_iStateProgress = 2;
+	J0x374:
+
+	// End:0x3DA [Loop If]
+	if(m_TeamManager.m_Door.m_RotatingDoor.m_bIsDoorClosed)
+	{
+		// End:0x3CF
+		if(__NFUN_129__(m_TeamManager.m_Door.m_RotatingDoor.m_bInProcessOfOpening))
+		{
+			__NFUN_256__(1.0000000);
+			goto 'OpenDoor';			
+		}
+		else
+		{
+			__NFUN_256__(0.1000000);
+		}
+		// [Loop Continue]
+		goto J0x374;
+	}
+	// End:0x407
+	if(__NFUN_114__(m_TeamManager.m_Door, none))
+	{
+		m_TeamManager.m_Door = R6Door(m_ActionTarget);
+	}
+	m_iStateProgress = 3;
+EnterRoomBegin:
+
+
+	__NFUN_280__(0.2000000, true);
+	m_TeamManager.SetTeamState(13);
+	m_eCurrentRoomLayout = m_TeamManager.m_Door.m_eRoomLayout;
+	m_vTargetPosition = m_TeamManager.m_Door.Location;
+	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));
+	__NFUN_2201__(m_vTargetPosition, m_TeamManager.m_Door.Rotation);
+	m_TeamManager.EnteredRoom(m_pawn);
+	m_vTargetPosition = m_TeamManager.m_Door.m_CorrespondingDoor.Location;
+	R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, GetRoomEntryPace(true));
+	__NFUN_2201__(m_vTargetPosition, m_TeamManager.m_Door.Rotation);
+	m_iStateProgress = 4;
+InsideRoom:
+
+
+	// End:0x543
+	if(__NFUN_154__(m_pawn.m_iID, __NFUN_147__(m_TeamManager.m_iMemberCount, 1)))
+	{
+		m_iStateProgress = 5;
+		goto 'EntryFinished';
+	}
+	// End:0x58E
+	if(PostEntryRoomIsAcceptablyLarge())
+	{
+		m_vTargetPosition = __NFUN_2205__(true);
+		__NFUN_267__(FocalPoint);
+		R6PreMoveTo(m_vTargetPosition, Location, GetRoomEntryPace(true));
+		__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(Location, m_vTargetPosition)));		
+	}
+	else
+	{
+		m_bStateFlag = true;
+		// End:0x749
+		if(__NFUN_130__(__NFUN_154__(m_pawn.m_iID, 0), __NFUN_119__(m_TeamManager.m_PlanActionPoint, none)))
+		{
+			__NFUN_280__(0.0000000, false);
+			// End:0x61E
+			if(__NFUN_129__(m_TeamManager.m_Door.m_RotatingDoor.m_bBroken))
+			{
+				J0x5EF:
+
+				// End:0x61E [Loop If]
+				if(m_TeamManager.m_Door.m_RotatingDoor.m_bInProcessOfOpening)
+				{
+					__NFUN_256__(0.1000000);
+					// [Loop Continue]
+					goto J0x5EF;
+				}
+			}
+			J0x61E:
+
+			// End:0x746 [Loop If]
+			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_TeamManager.m_PlanActionPoint, none), __NFUN_176__(DistanceTo(m_TeamManager.m_Door), float(400))), __NFUN_132__(__NFUN_114__(m_pawn.m_Door, none), __NFUN_129__(m_pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed))), __NFUN_154__(int(m_TeamManager.m_ePlanAction), int(0))))
+			{
+				// End:0x6C6
+				if(__NFUN_129__(__NFUN_520__(m_TeamManager.m_PlanActionPoint)))
+				{
+					// [Explicit Break]
+					goto J0x746;
+				}
+				R6PreMoveToward(m_TeamManager.m_PlanActionPoint, m_TeamManager.m_PlanActionPoint, GetRoomEntryPace(false));
+				__NFUN_502__(m_TeamManager.m_PlanActionPoint);
+				// End:0x720
+				if(__NFUN_177__(DistanceTo(m_TeamManager.m_PlanActionPoint), float(100)))
+				{
+					// [Explicit Break]
+					goto J0x746;
+				}
+				m_TeamManager.ActionPointReached();
+				Focus = m_TeamManager.m_PlanActionPoint;
+				// [Loop Continue]
+				goto J0x61E;
+			}
+			J0x746:
+			
+		}
+		else
+		{
+			__NFUN_2209__(m_TeamManager.m_Door.m_CorrespondingDoor, m_vTargetPosition);
+			__NFUN_267__(__NFUN_215__(m_vTargetPosition, __NFUN_213__(float(60), __NFUN_216__(m_vTargetPosition, Pawn.Location))));
+			R6PreMoveTo(m_vTargetPosition, Location, GetRoomEntryPace(true));
+			__NFUN_2201__(m_vTargetPosition, Rotator(__NFUN_216__(Location, m_vTargetPosition)));
+		}
+	}
+	m_iStateProgress = 5;
+EntryFinished:
+
+
+	__NFUN_280__(1.0000000, true);
+	__NFUN_2219__(true);
+	m_TeamManager.RainbowHasLeftDoor(m_pawn);
+	m_iStateProgress = 6;
+	// End:0x81A
+	if(__NFUN_154__(m_pawn.m_iID, __NFUN_147__(m_TeamManager.m_iMemberCount, 1)))
+	{
+		__NFUN_256__(1.5000000);		
+	}
+	else
+	{
+		__NFUN_256__(3.0000000);
+	}
+	J0x822:
+
+	m_iStateProgress = 7;
+	// End:0x862
+	if(__NFUN_154__(m_pawn.m_iID, 0))
+	{
+		// End:0x858
+		if(__NFUN_129__(m_bStateFlag))
+		{
+			m_TeamManager.RestoreTeamOrder();
+		}
+		__NFUN_113__('Patrol');		
+	}
+	else
+	{
+		// End:0x881
+		if(__NFUN_155__(m_TeamManager.m_iTeamAction, 0))
+		{
+			__NFUN_113__(GetNextTeamActionState());			
+		}
+		else
+		{
+			__NFUN_113__('FollowLeader');
+		}
+	}
+	stop;			
+}
+
+state SnipeUntilGoCode
+{
+	function BeginState()
+	{
+		m_pawn.m_bIsSniping = true;
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_bStateFlag = false;
+		return;
+	}
+
+	function EndState()
+	{
+		m_bIgnoreBackupBump = false;
+		m_pawn.m_bIsSniping = false;
+		m_pawn.m_bAvoidFacingWalls = true;
+		m_TeamManager.CheckTeamEngagingStatus();
+		return;
+	}
+
+//------------------------------------------------------------------
+// SeePlayer()                                             
+//------------------------------------------------------------------
+	event SeePlayer(Pawn seen)
+	{
+		local R6Pawn aPawn;
+
+		// End:0x18
+		if(__NFUN_129__(m_bStateFlag))
+		{
+			global.SeePlayer(seen);
+			return;
+		}
+		// End:0x112
+		if(m_pawn.IsEnemy(seen))
+		{
+			aPawn = R6Pawn(seen);
+			// End:0x83
+			if(__NFUN_132__(__NFUN_132__(__NFUN_132__(aPawn.m_bIsKneeling, __NFUN_129__(aPawn.IsAlive())), __NFUN_114__(m_TeamManager, none)), __NFUN_119__(Enemy, none)))
+			{
+				return;
+			}
+			// End:0x112
+			if(__NFUN_2222__(seen, m_pawn.GetFiringStartPoint()))
+			{
+				// End:0xE4
+				if(__NFUN_130__(m_TeamManager.m_bSniperHold, __NFUN_119__(m_TeamManager.m_OtherTeamVoicesMgr, none)))
+				{
+					m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 0);
+				}
+				m_pawn.m_bEngaged = true;
+				SetEnemy(seen);
+				Target = Enemy;
+				__NFUN_117__('EnemyNotVisible');
+			}
+		}
+		return;
+	}
+
+//------------------------------------------------------------------
+// EnemyNotVisible()                                       
+//------------------------------------------------------------------
+	event EnemyNotVisible()
+	{
+		// End:0x21
+		if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, LastSeenTime), 0.5000000))
+		{
+			return;
+		}
+		// End:0x68
+		if(__NFUN_130__(m_TeamManager.m_bSniperHold, __NFUN_119__(m_TeamManager.m_OtherTeamVoicesMgr, none)))
+		{
+			m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 1);
+		}
+		StopFiring();
+		EndAttack();
+		__NFUN_118__('EnemyNotVisible');
+		return;
+	}
+
+	function bool NoiseSourceIsVisible()
+	{
+		// End:0x22
+		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_vNoiseFocalPoint, Pawn.Location)), float(200)))
+		{
+			return false;
+		}
+		// End:0x57
+		if(__NFUN_177__(__NFUN_219__(__NFUN_226__(__NFUN_216__(m_vNoiseFocalPoint, Pawn.Location)), Vector(Pawn.Rotation)), 0.3000000))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	event Timer()
+	{
+		// End:0x0D
+		if(__NFUN_119__(Enemy, none))
+		{
+			return;
+		}
+		// End:0x7D
+		if(__NFUN_218__(m_vNoiseFocalPoint, vect(0.0000000, 0.0000000, 0.0000000)))
+		{
+			// End:0x6A
+			if(__NFUN_130__(__NFUN_130__(__NFUN_154__(m_TeamManager.m_iMemberCount, 1), __NFUN_129__(NoiseSourceIsVisible())), __NFUN_548__(Pawn.Location, m_vNoiseFocalPoint)))
+			{
+				__NFUN_113__('PauseSniping');				
+			}
+			else
+			{
+				m_vNoiseFocalPoint = vect(0.0000000, 0.0000000, 0.0000000);
+			}
+		}
+		return;
+	}
+Begin:
+
+	__NFUN_280__(0.5000000, true);
+	Enemy = none;
+	Target = Enemy;
+	m_TeamManager.CheckTeamEngagingStatus();
+	// End:0x58
+	if(__NFUN_177__(DistanceTo(m_ActionTarget), float(300)))
+	{
+		// End:0x58
+		if(SniperChangeToSecondaryWeapon())
+		{
+			__NFUN_261__(m_pawn.14);
+		}
+	}
+	J0x58:
+
+	// End:0x8F [Loop If]
+	if(__NFUN_177__(DistanceTo(m_ActionTarget), float(40)))
+	{
+		R6PreMoveToward(m_ActionTarget, m_ActionTarget, 4);
+		__NFUN_502__(m_ActionTarget);
+		StopMoving();
+		// [Loop Continue]
+		goto J0x58;
+	}
+	ChangeOrientationTo(m_TeamManager.m_rSnipingDir);
+	__NFUN_508__();
+TakePosition:
+
+
+	// End:0xBD
+	if(SniperChangeToPrimaryWeapon())
+	{
+		__NFUN_261__(m_pawn.14);
+	}
+	// End:0xDD
+	if(Pawn.m_bIsProne)
+	{
+		m_bIgnoreBackupBump = true;
+		goto 'LocateEnemy';
+	}
+	m_vTargetPosition = __NFUN_216__(Pawn.Location, vect(0.0000000, 0.0000000, 60.0000000));
+	// End:0x14E
+	if(__NFUN_2223__(m_vTargetPosition, m_TeamManager.m_rSnipingDir))
+	{
+		Pawn.bWantsToCrouch = true;
+		__NFUN_256__(0.5000000);
+		Pawn.m_bWantsToProne = true;
+		__NFUN_256__(1.5000000);		
+	}
+	else
+	{
+		// End:0x18C
+		if(__NFUN_2223__(Pawn.Location, m_TeamManager.m_rSnipingDir))
+		{
+			Pawn.bWantsToCrouch = true;
+			__NFUN_256__(1.0000000);			
+		}
+		else
+		{
+			Pawn.bWantsToCrouch = false;
+			Pawn.m_bWantsToProne = false;
+			__NFUN_256__(0.5000000);
+		}
+	}
+	m_pawn.ResetBoneRotation();
+	ChangeOrientationTo(m_TeamManager.m_rSnipingDir);
+	m_bIgnoreBackupBump = true;
+	m_bStateFlag = true;
+	Enemy = none;
+	m_TeamManager.PlayWaitingGoCode(m_TeamManager.m_eGoCode, true);
+LocateEnemy:
+
+
+	// End:0x233
+	if(__NFUN_129__(m_TeamManager.m_bCAWaitingForZuluGoCode))
+	{
+		m_TeamManager.SetTeamState(7);
+	}
+	// End:0x260
+	if(__NFUN_114__(Enemy, none))
+	{
+		ChangeOrientationTo(m_TeamManager.m_rSnipingDir);
+		__NFUN_256__(0.1000000);
+		goto 'LocateEnemy';
+	}
+EngageEnemy:
+
+
+	m_TeamManager.CheckTeamEngagingStatus();
+	// End:0x301
+	if(__NFUN_130__(__NFUN_129__(m_TeamManager.m_bSniperHold), __NFUN_119__(Enemy, none)))
+	{
+		Pawn.EngineWeapon.SetRateOfFire(0);
+		Focus = Enemy;
+		Target = Enemy;
+		__NFUN_508__();
+		J0x2C3:
+
+		// End:0x2DE [Loop If]
+		if(__NFUN_129__(IsReadyToFire(Enemy)))
+		{
+			__NFUN_256__(0.2000000);
+			// [Loop Continue]
+			goto J0x2C3;
+		}
+		m_TeamManager.RainbowIsEngagingEnemy();
+		StartFiring();
+		__NFUN_256__(0.2000000);
+		StopFiring();
+	}
+	// End:0x310
+	if(NeedToReload())
+	{
+		RainbowReloadWeapon();
+	}
+	// End:0x321
+	if(__NFUN_114__(Enemy, none))
+	{
+		goto 'LocateEnemy';
+	}
+	// End:0x3B6
+	if(__NFUN_129__(R6Pawn(Enemy).IsAlive()))
+	{
+		// End:0x381
+		if(__NFUN_130__(m_TeamManager.m_bSniperHold, __NFUN_119__(m_TeamManager.m_OtherTeamVoicesMgr, none)))
+		{
+			m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 1);
+		}
+		m_TeamManager.DisEngageEnemy(Pawn, Enemy);
+		Enemy = none;
+		m_pawn.ResetBoneRotation();
+		goto 'LocateEnemy';
+	}
+	__NFUN_256__(1.0000000);
+	goto 'EngageEnemy';
+EndSniping:
+
+
+	m_pawn.ResetBoneRotation();
+	m_bIgnoreBackupBump = false;
+	// End:0x406
+	if(Pawn.m_bWantsToProne)
+	{
+		Pawn.m_bWantsToProne = false;
+		__NFUN_256__(1.0000000);
+	}
+	Pawn.bWantsToCrouch = false;
+WaitForGoCode:
+
+
+	__NFUN_256__(1.0000000);
+	goto 'WaitForGoCode';
+Finish:
+
+
+	// End:0x443
+	if(__NFUN_154__(m_pawn.m_iID, 0))
+	{
+		__NFUN_113__('Patrol');		
+	}
+	else
+	{
+		__NFUN_113__('FollowLeader');
+	}
+	stop;	
+}
+
+state PauseSniping
+{Begin:
+
+	StopMoving();
+	m_vTargetPosition = m_vNoiseFocalPoint;
+	m_vNoiseFocalPoint = vect(0.0000000, 0.0000000, 0.0000000);
+	// End:0x4F
+	if(Pawn.m_bWantsToProne)
+	{
+		Pawn.m_bWantsToProne = false;
+		__NFUN_256__(1.0000000);
+	}
+	Pawn.bWantsToCrouch = false;
+LookAround:
+
+
+	__NFUN_267__(m_vTargetPosition);
+	Focus = self;
+	__NFUN_508__();
+Wait:
+
+
+	__NFUN_256__(2.5000000);
+	// End:0x8B
+	if(__NFUN_119__(Enemy, none))
+	{
+		goto 'Wait';
+	}
+	__NFUN_113__('SnipeUntilGoCode');
+	stop;	
+}
+
+state TeamClimbStartNoLeader
+{
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_pawn.m_bCanProne = false;
+		return;
+	}
+
+	function EndState()
+	{
+		m_pawn.m_bCanProne = m_pawn.default.m_bCanProne;
+		return;
+	}
+Begin:
+
+	m_TeamManager.SetTeamState(3);
+	MoveTarget = m_TeamManager.m_TeamLadder;
+	// End:0x4F
+	if(__NFUN_132__(__NFUN_114__(MoveTarget, none), __NFUN_129__(MoveTarget.__NFUN_303__('R6Ladder'))))
+	{
+		__NFUN_113__('HoldPosition');
+	}
+	m_TargetLadder = R6Ladder(MoveTarget);
+	// End:0x9D
+	if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(m_TargetLadder.Location)), __NFUN_129__(__NFUN_520__(m_TargetLadder))))
+	{
+		FindPathToTargetLocation(m_TargetLadder.Location, m_TargetLadder);
+	}
+	// End:0xF8
+	if(m_TargetLadder.m_bIsTopOfLadder)
+	{
+		m_vTargetPosition = __NFUN_215__(m_TargetLadder.Location, __NFUN_213__(float(70), Vector(m_TargetLadder.Rotation)));
+		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+		__NFUN_500__(m_vTargetPosition);		
+	}
+	else
+	{
+		MoveTarget = m_TargetLadder;
+		R6PreMoveToward(MoveTarget, MoveTarget, 4);
+		__NFUN_502__(MoveTarget);
+	}
+	J0x11D:
+
+	// End:0x14B [Loop If]
+	if(m_TeamManager.m_bCAWaitingForZuluGoCode)
+	{
+		m_TeamManager.SetTeamState(1);
+		__NFUN_256__(0.5000000);
+		// [Loop Continue]
+		goto J0x11D;
+	}
+	MoveTarget = m_TargetLadder;
+WaitAtEndForLeader:
+
+
+	m_TeamManager.SetTeamState(18);
+	NextState = 'TeamClimbEndNoLeader';
+	__NFUN_113__('ApproachLadder');
+	stop;		
+}
+
+state TeamClimbEndNoLeader
+{Begin:
+
+	// End:0x1D
+	if(__NFUN_154__(m_pawn.m_iID, 1))
+	{
+		__NFUN_256__(GetLeadershipReactionTime());
+	}
+PickDest:
+
+
+	__NFUN_2209__(m_pawn.m_Ladder, m_vTargetPosition);
+	// End:0x53
+	if(__NFUN_217__(m_vTargetPosition, vect(0.0000000, 0.0000000, 0.0000000)))
+	{
+		goto 'WaitAtEndForTeam';		
+	}
+	else
+	{
+		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+		__NFUN_500__(m_vTargetPosition);
+	}
+	StopMoving();
+WaitAtEndForTeam:
+
+
+	m_pawn.m_Ladder = none;
+	__NFUN_256__(1.0000000);
+	NextState = 'None';
+	// End:0xEF
+	if(__NFUN_129__(m_TeamManager.m_bTeamIsClimbingLadder))
+	{
+		// End:0xC9
+		if(__NFUN_155__(m_TeamManager.m_iTeamAction, 0))
+		{
+			__NFUN_113__(GetNextTeamActionState());			
+		}
+		else
+		{
+			// End:0xE5
+			if(m_TeamManager.m_bTeamIsRegrouping)
+			{
+				__NFUN_113__('FollowLeader');				
+			}
+			else
+			{
+				__NFUN_113__('HoldPosition');
+			}
+		}		
+	}
+	else
+	{
+		goto 'WaitAtEndForTeam';
+	}
+	stop;		
+}
+
+state TeamClimbLadder
+{
+	function BeginState()
+	{
+		m_pawn.m_bAvoidFacingWalls = false;
+		m_pawn.ResetBoneRotation();
+		m_pawn.m_bCanProne = false;
+		return;
+	}
+
+	function EndState()
+	{
+		// End:0x13
+		if(__NFUN_154__(m_iStateProgress, 5))
+		{
+			m_iStateProgress = 0;
+		}
+		m_pawn.ResetBoneRotation();
+		m_pawn.m_bCanProne = m_pawn.default.m_bCanProne;
+		return;
+	}
+
+	function SetPawnFocus()
+	{
+		local int iMember;
+		local Rotator rOffset;
+
+		// End:0x2C
+		if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
+		{
+			iMember = __NFUN_147__(m_pawn.m_iID, 1);			
+		}
+		else
+		{
+			iMember = m_pawn.m_iID;
+		}
+		switch(iMember)
+		{
+			// End:0x9E
+			case 1:
+				// End:0x78
+				if(m_pawn.m_Ladder.m_bIsTopOfLadder)
+				{
+					m_pawn.AimDown();					
+				}
+				else
+				{
+					m_pawn.AimUp();
+				}
+				Focus = m_pawn.m_Ladder;
+				// End:0x159
+				break;
+			// End:0xDB
+			case 2:
+				__NFUN_267__(__NFUN_215__(m_vTargetPosition, __NFUN_213__(float(100), __NFUN_216__(m_vTargetPosition, m_pawn.m_Ladder.Location))));
+				Focus = self;
+				// End:0x159
+				break;
+			// End:0x13C
+			case 3:
+				rOffset = Rotator(__NFUN_216__(m_vTargetPosition, m_pawn.m_Ladder.Location));
+				__NFUN_318__(rOffset, rot(0, 8192, 0));
+				__NFUN_267__(__NFUN_215__(m_vTargetPosition, __NFUN_213__(float(100), Vector(rOffset))));
+				Focus = self;
+				// End:0x159
+				break;
+			// End:0xFFFF
+			default:
+				__NFUN_267__(m_pawn.m_Ladder.Location);
+				break;
+		}
+		return;
+	}
+
+	function bool LeadHasStartedClimbing()
+	{
+		// End:0x30
+		if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
+		{
+			return m_TeamManager.m_Team[1].m_bIsClimbingLadder;			
+		}
+		else
+		{
+			return m_TeamLeader.m_bIsClimbingLadder;
+		}
+		return;
+	}
+
+	function bool NeedToFollowTeam()
+	{
+		local R6Rainbow aRainbow;
+
+		// End:0x2B
+		if(m_TeamManager.m_bTeamIsSeparatedFromLeader)
+		{
+			aRainbow = m_TeamManager.m_Team[1];			
+		}
+		else
+		{
+			aRainbow = m_TeamLeader;
+		}
+		// End:0x7A
+		if(__NFUN_130__(__NFUN_119__(m_TeamManager.m_TeamLadder, none), __NFUN_129__(PawnIsOnTheSameEndOfLadderAsMember(aRainbow, R6LadderVolume(m_TeamManager.m_TeamLadder.MyLadder)))))
+		{
+			return false;
+		}
+		return __NFUN_130__(IsMoving(aRainbow), __NFUN_129__(aRainbow.m_bIsClimbingLadder));
+		return;
+	}
+
+	function R6Ladder GetLadderMoveTarget()
+	{
+		// End:0x66
+		if(__NFUN_177__(Pawn.Location.Z, m_TeamManager.m_TeamLadder.MyLadder.Location.Z))
+		{
+			return R6LadderVolume(m_TeamManager.m_TeamLadder.MyLadder).m_TopLadder;			
+		}
+		else
+		{
+			return R6LadderVolume(m_TeamManager.m_TeamLadder.MyLadder).m_BottomLadder;
+		}
+		return;
+	}
+Begin:
+
+	switch(m_iStateProgress)
+	{
+		// End:0x14
+		case 0:
+			goto 'FollowTeam';
+			// End:0x46
+			break;
+		// End:0x21
+		case 1:
+			goto 'WaitForLeadToStartClimbing';
+			// End:0x46
+			break;
+		// End:0x2F
+		case 2:
+			goto 'FormationAroundLadder';
+			// End:0x46
+			break;
+		// End:0x3D
+		case 3:
+			goto 'WaitForTurnToClimb';
+			// End:0x46
+			break;
+		// End:0xFFFF
+		default:
+			goto 'ClimbLadder';
+			break;
+	}
+	J0x46:
+
+	// End:0xE3
+	if(__NFUN_177__(DistanceTo(m_PaceMember), __NFUN_174__(GetFormationDistance(), float(35))))
+	{
+		m_vTargetPosition = __NFUN_215__(m_PaceMember.Location, __NFUN_213__(GetFormationDistance(), __NFUN_226__(__NFUN_216__(Pawn.Location, m_PaceMember.Location))));
+		// End:0xC6
+		if(__NFUN_129__(__NFUN_520__(m_PaceMember)))
+		{
+			FindPathToTargetLocation(m_PaceMember.Location, m_PaceMember);
+		}
+		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+		__NFUN_500__(m_vTargetPosition);		
+	}
+	else
+	{
+		__NFUN_256__(0.5000000);
+	}
+	StopMoving();
+	// End:0x100
+	if(NeedToFollowTeam())
+	{
+		goto 'FollowTeam';
+	}
+	m_iStateProgress = 1;
+WaitForLeadToStartClimbing:
+
+
+	// End:0x148
+	if(__NFUN_176__(__NFUN_186__(__NFUN_175__(m_PaceMember.Location.Z, Pawn.Location.Z)), float(80)))
+	{
+		m_iStateProgress = 2;
+		goto 'FormationAroundLadder';
+	}
+	// End:0x161
+	if(__NFUN_129__(LeadHasStartedClimbing()))
+	{
+		__NFUN_256__(1.0000000);
+		goto 'WaitForLeadToStartClimbing';
+	}
+	m_iStateProgress = 2;
+FormationAroundLadder:
+
+
+	// End:0x190
+	if(m_pawn.m_Ladder.m_bSingleFileFormationOnly)
+	{
+		StopMoving();
+		goto 'WaitForTurnToClimb';
+	}
+	// End:0x1D5
+	if(__NFUN_129__(m_TeamManager.m_bTeamIsSeparatedFromLeader))
+	{
+		// End:0x1D5
+		if(__NFUN_114__(m_pawn.m_Ladder, none))
+		{
+			m_pawn.m_Ladder = m_TeamLeader.m_Ladder;
+		}
+	}
+	// End:0x21D
+	if(__NFUN_119__(m_pawn.m_Ladder, none))
+	{
+		m_vTargetPosition = __NFUN_2203__();
+		// End:0x21D
+		if(__NFUN_521__(m_vTargetPosition))
+		{
+			R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 4);
+			__NFUN_500__(m_vTargetPosition);
+			StopMoving();
+		}
+	}
+	SetPawnFocus();
+	m_iStateProgress = 3;
+WaitForTurnToClimb:
+
+
+	// End:0x280
+	if(__NFUN_132__(__NFUN_176__(__NFUN_186__(__NFUN_175__(m_PaceMember.Location.Z, Pawn.Location.Z)), float(80)), m_PaceMember.m_bIsClimbingLadder))
+	{
+		__NFUN_256__(1.0000000);
+		goto 'WaitForTurnToClimb';
+	}
+	m_iStateProgress = 4;
+ClimbLadder:
+
+
+	__NFUN_256__(0.5000000);
+	m_pawn.ResetBoneRotation();
+	MoveTarget = GetLadderMoveTarget();
+	// End:0x2E9
+	if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(MoveTarget.Location)), __NFUN_129__(__NFUN_520__(MoveTarget))))
+	{
+		FindPathToTargetLocation(MoveTarget.Location, MoveTarget);
+	}
+	R6PreMoveToward(MoveTarget, MoveTarget, 4);
+	__NFUN_502__(MoveTarget);
+	m_iStateProgress = 5;
+	// End:0x33C
+	if(MoveTarget.__NFUN_303__('R6Ladder'))
+	{
+		NextState = 'FollowLeader';
+		NextLabel = 'Begin';
+		__NFUN_113__('ApproachLadder');
+	}
+	stop;			
+}
+
+state FollowLeader
+{
+	function BeginState()
+	{
+		m_iWaitCounter = 0;
+		m_bIsMovingBackwards = false;
+		m_ePawnOrientation = 0;
+		m_bAlreadyWaiting = false;
+		m_vPreviousPosition = vect(0.0000000, 0.0000000, 0.0000000);
+		m_bIgnoreBackupBump = false;
+		m_iStateProgress = 0;
+		m_bReactToNoise = true;
+		m_pawn.m_bAvoidFacingWalls = m_pawn.default.m_bAvoidFacingWalls;
+		return;
+	}
+
+	function EndState()
+	{
+		m_bIgnoreBackupBump = false;
+		m_bReactToNoise = false;
+		// End:0x2D
+		if(__NFUN_129__(m_TeamManager.m_bGrenadeInProximity))
+		{
+			__NFUN_280__(0.0000000, false);
+		}
+		m_pawn.StopPeeking();
+		m_pawn.m_u8DesiredYaw = 0;
+		// End:0x96
+		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_TeamManager.m_bLeaderIsAPlayer), m_TeamManager.m_bTeamIsRegrouping), __NFUN_114__(m_PaceMember, m_TeamLeader)))
+		{
+			m_TeamManager.TeamIsRegroupingOnLead(false);
+		}
+		return;
+	}
+
+	function Timer()
+	{
+		__NFUN_165__(m_iWaitCounter);
+		__NFUN_165__(m_iTurn);
+		// End:0x21
+		if(__NFUN_154__(m_iTurn, 6))
+		{
+			m_iTurn = 0;
+		}
+		// End:0x71
+		if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_154__(m_pawn.m_iID, 1), __NFUN_154__(m_pawn.m_iID, 2)), IsMoving(Pawn)), __NFUN_155__(int(m_ePawnOrientation), int(5))))
+		{
+			__NFUN_2206__();
+		}
+		// End:0x8C
+		if(m_bIsCatchingUp)
+		{
+			m_pawn.ResetBoneRotation();			
+		}
+		else
+		{
+			SetRainbowOrientation();
+		}
+		return;
+	}
+
+	function bool RainbowShouldWait()
+	{
+		local float fDistance;
+
+		// End:0x49
+		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bSlowedPace), IsMoving(m_PaceMember)), __NFUN_129__(Pawn.m_bIsProne)), __NFUN_129__(Pawn.bIsCrouched)))
+		{
+			return false;
+		}
+		// End:0x5A
+		if(__NFUN_217__(m_vTargetPosition, m_vPreviousPosition))
+		{
+			return true;
+		}
+		fDistance = GetFormationDistance();
+		// End:0x7A
+		if(m_bSlowedPace)
+		{
+			__NFUN_182__(fDistance, float(2));
+		}
+		// End:0x9A
+		if(m_pawn.m_bIsProne)
+		{
+			__NFUN_184__(fDistance, float(60));			
+		}
+		else
+		{
+			// End:0xB9
+			if(__NFUN_129__(m_pawn.m_bIsClimbingStairs))
+			{
+				__NFUN_184__(fDistance, float(35));
+			}
+		}
+		// End:0xD1
+		if(__NFUN_176__(DistanceTo(m_PaceMember, true), fDistance))
+		{
+			return true;
+		}
+		return false;
+		return;
+	}
+
+	function Vector GetNextTargetPosition()
+	{
+		local Vector vDir;
+		local Rotator rDir, rOffset;
+
+		// End:0x1A
+		if(__NFUN_114__(m_PaceMember, none))
+		{
+			return Pawn.Location;
+		}
+		// End:0x183
+		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_bUseStaggeredFormation, __NFUN_154__(int(m_TeamManager.m_eFormation), int(m_eFormation))), __NFUN_155__(int(m_ePawnOrientation), int(5))), __NFUN_129__(Pawn.m_bIsProne)), __NFUN_129__(m_bSlowedPace)))
+		{
+			rDir = Rotator(__NFUN_216__(m_PaceMember.Location, Pawn.Location));
+			rOffset = rot(0, 2000, 0);
+			// End:0x122
+			if(__NFUN_132__(__NFUN_154__(int(m_eFormation), int(4)), __NFUN_154__(int(m_eFormation), int(2))))
+			{
+				// End:0xF5
+				if(__NFUN_154__(m_pawn.m_iID, 1))
+				{
+					__NFUN_318__(rDir, rOffset);					
+				}
+				else
+				{
+					__NFUN_319__(rDir, rOffset);
+				}
+				return __NFUN_216__(m_PaceMember.Location, __NFUN_213__(GetFormationDistance(), Vector(rDir)));
+			}
+			// End:0x183
+			if(__NFUN_154__(int(m_eFormation), int(3)))
+			{
+				// End:0x156
+				if(__NFUN_154__(m_pawn.m_iID, 1))
+				{
+					__NFUN_319__(rDir, rOffset);					
+				}
+				else
+				{
+					__NFUN_318__(rDir, rOffset);
+				}
+				return __NFUN_216__(m_PaceMember.Location, __NFUN_213__(GetFormationDistance(), Vector(rDir)));
+			}
+		}
+		return __NFUN_215__(m_PaceMember.Location, __NFUN_213__(GetFormationDistance(), __NFUN_226__(__NFUN_216__(Pawn.Location, m_PaceMember.Location))));
+		return;
+	}
+
+	function EngageLadderIfNeeded(R6LadderVolume aVolume)
+	{
+		// End:0x0D
+		if(__NFUN_114__(m_TargetLadder, none))
+		{
+			return;
+		}
+		// End:0x45
+		if(__NFUN_129__(PawnIsOnTheSameEndOfLadderAsMember(m_PaceMember, aVolume)))
+		{
+			m_TeamManager.InstructTeamToClimbLadder(aVolume, true, m_pawn.m_iID);
+		}
+		return;
+	}
+Begin:
+
+	// End:0x49
+	if(__NFUN_114__(m_PaceMember, none))
+	{
+		// End:0x49
+		if(__NFUN_130__(__NFUN_119__(m_TeamLeader, none), __NFUN_119__(m_TeamManager, none)))
+		{
+			m_PaceMember = m_TeamManager.m_Team[__NFUN_147__(m_pawn.m_iID, 1)];
+		}
+	}
+	m_TeamManager.SetFormation(self);
+	__NFUN_280__(1.0000000, true);
+	VerifyWeaponInventory();
+	EnsureRainbowIsArmed();
+	// End:0x95
+	if(__NFUN_130__(__NFUN_129__(m_pawn.IsStationary()), SniperChangeToSecondaryWeapon()))
+	{
+		__NFUN_256__(0.5000000);
+	}
+Moving:
+
+
+	// End:0xA4
+	if(NeedToReload())
+	{
+		RainbowReloadWeapon();
+	}
+	// End:0xB5
+	if(m_bIsCatchingUp)
+	{
+		m_bIsCatchingUp = false;
+	}
+	// End:0xE9
+	if(__NFUN_130__(__NFUN_114__(m_PaceMember, m_TeamLeader), m_TeamLeader.m_bIsPlayer))
+	{
+		m_TeamManager.SetTeamState(4);
+	}
+	// End:0xF8
+	if(m_bReorganizationPending)
+	{
+		ReorganizeTeamAsNeeded();
+	}
+	m_vTargetPosition = GetNextTargetPosition();
+	// End:0x299
+	if(RainbowShouldWait())
+	{
+		Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+		// End:0x1E8
+		if(__NFUN_129__(m_bAlreadyWaiting))
+		{
+			m_iWaitCounter = 0;
+			m_pawn.ResetBoneRotation();
+			m_pawn.StopPeeking();
+			EnsureRainbowIsArmed();
+			// End:0x1E0
+			if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(m_ePawnOrientation), int(5)), __NFUN_129__(m_bIsMovingBackwards)), __NFUN_129__(Pawn.m_bIsProne)))
+			{
+				__NFUN_256__(0.2000000);
+				m_bIsMovingBackwards = true;
+				__NFUN_267__(__NFUN_216__(Pawn.Location, __NFUN_213__(float(2), __NFUN_216__(m_PaceMember.Location, Pawn.Location))));
+				Focus = self;
+			}
+			m_bAlreadyWaiting = true;
+		}
+		// End:0x28B
+		if(__NFUN_180__(__NFUN_225__(m_TeamLeader.Velocity), float(0)))
+		{
+			// End:0x28B
+			if(__NFUN_130__(__NFUN_151__(m_iWaitCounter, 6), __NFUN_129__(m_TeamManager.m_bTeamIsClimbingLadder)))
+			{
+				// End:0x239
+				if(SniperChangeToPrimaryWeapon())
+				{
+					__NFUN_261__(m_pawn.14);
+				}
+				// End:0x28B
+				if(__NFUN_130__(__NFUN_129__(Pawn.bIsCrouched), __NFUN_129__(Pawn.m_bIsProne)))
+				{
+					m_pawn.StopPeeking();
+					Pawn.bWantsToCrouch = true;
+					__NFUN_256__(0.2000000);
+				}
+			}
+		}
+		__NFUN_256__(0.2000000);
+		goto 'Moving';
+	}
+	m_vPreviousPosition = m_vTargetPosition;
+	// End:0x2D5
+	if(m_bAlreadyWaiting)
+	{
+		m_pawn.StopPeeking();
+		__NFUN_256__(0.2000000);
+		// End:0x2D5
+		if(SniperChangeToSecondaryWeapon())
+		{
+			__NFUN_256__(0.5000000);
+		}
+	}
+	m_bAlreadyWaiting = false;
+	// End:0x2FF
+	if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(m_vTargetPosition)), __NFUN_129__(__NFUN_521__(m_vTargetPosition))))
+	{
+		goto 'bLocked';
+	}
+	// End:0x32E
+	if(__NFUN_114__(m_PaceMember, m_TeamLeader))
+	{
+		m_TeamManager.TeamIsSeparatedFromLead(false);
+		m_TeamManager.TeamIsRegroupingOnLead(false);
+	}
+	// End:0x389
+	if(__NFUN_132__(__NFUN_132__(__NFUN_155__(int(m_ePawnOrientation), int(5)), Pawn.m_bIsProne), m_PaceMember.m_bIsProne))
+	{
+		m_bIsMovingBackwards = false;
+		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition);
+		__NFUN_267__(m_vTargetPosition);		
+	}
+	else
+	{
+		// End:0x420
+		if(__NFUN_130__(__NFUN_130__(m_PaceMember.IsWalking(), __NFUN_151__(m_iTurn, 2)), __NFUN_176__(DistanceTo(m_PaceMember), __NFUN_174__(GetFormationDistance(), float(120)))))
+		{
+			m_bIsMovingBackwards = true;
+			__NFUN_267__(__NFUN_216__(Pawn.Location, __NFUN_213__(float(2), __NFUN_216__(m_PaceMember.Location, Pawn.Location))));
+			R6PreMoveTo(m_vTargetPosition, Location, GetPace(true));			
+		}
+		else
+		{
+			m_bIsMovingBackwards = false;
+			__NFUN_267__(m_vTargetPosition);
+			// End:0x475
+			if(__NFUN_130__(m_PaceMember.bIsCrouched, __NFUN_177__(DistanceTo(m_PaceMember), __NFUN_174__(GetFormationDistance(), float(40)))))
+			{
+				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, 3);				
+			}
+			else
+			{
+				R6PreMoveTo(m_vTargetPosition, m_vTargetPosition);
+			}
+		}
+	}
+	// End:0x4B3
+	if(PostureHasChanged())
+	{
+		__NFUN_256__(0.5000000);
+		J0x496:
+
+		// End:0x4B3 [Loop If]
+		if(m_pawn.m_bPostureTransition)
+		{
+			__NFUN_256__(0.5000000);
+			// [Loop Continue]
+			goto J0x496;
+		}
+	}
+	__NFUN_500__(m_vTargetPosition, self);
+	// End:0x4D5
+	if(__NFUN_154__(int(m_eMoveToResult), int(2)))
+	{
+		goto 'bLocked';		
+	}
+	else
+	{
+		goto 'Moving';
+	}
+	J0x4DB:
+
+	m_bIsCatchingUp = true;
+	// End:0x53F
+	if(__NFUN_114__(m_PaceMember, m_TeamLeader))
+	{
+		m_TeamManager.TeamIsRegroupingOnLead(true);
+		J0x502:
+
+		// End:0x53F [Loop If]
+		if(__NFUN_177__(DistanceTo(m_TeamManager.m_Team[__NFUN_147__(m_TeamManager.m_iMemberCount, 1)]), float(600)))
+		{
+			__NFUN_256__(0.5000000);
+			// [Loop Continue]
+			goto J0x502;
+		}
+	}
+	m_pawn.StopPeeking();
+	m_ePawnOrientation = 0;
+	// End:0x565
+	if(NeedToReload())
+	{
+		RainbowReloadWeapon();
+	}
+	MoveTarget = __NFUN_517__(m_PaceMember, true);
+	// End:0x62D
+	if(__NFUN_114__(MoveTarget, none))
+	{
+		m_pawn.logWarning(__NFUN_112__(__NFUN_112__("is at location ", string(Pawn.Location)), " and there appear to be insufficient pathnodes..."));
+		__NFUN_500__(__NFUN_215__(Pawn.Location, __NFUN_212__(__NFUN_226__(__NFUN_216__(m_PaceMember.Location, Pawn.Location)), float(100))));
+		__NFUN_256__(1.0000000);
+		goto 'bLocked';
+	}
+	// End:0x672
+	if(__NFUN_114__(MoveTarget, m_PaceMember))
+	{
+		J0x63C:
+
+		// End:0x659 [Loop If]
+		if(m_PaceMember.m_bIsClimbingLadder)
+		{
+			__NFUN_256__(1.0000000);
+			// [Loop Continue]
+			goto J0x63C;
+		}
+		EngageLadderIfNeeded(R6LadderVolume(m_TargetLadder.MyLadder));
+	}
+	m_TargetLadder = R6Ladder(MoveTarget);
+	// End:0x6E1
+	if(TargetIsLadderToClimb(m_TargetLadder))
+	{
+		m_pawn.m_potentialActionActor = m_TargetLadder.MyLadder;
+		m_TeamManager.InstructTeamToClimbLadder(R6LadderVolume(m_TargetLadder.MyLadder), true, m_pawn.m_iID);		
+	}
+	else
+	{
+		// End:0x786
+		if(__NFUN_1509__(MoveTarget))
+		{
+			m_TeamManager.RainbowIsInFrontOfAClosedDoor(m_pawn, m_pawn.m_Door);
+			__NFUN_2201__(m_pawn.m_Door.Location, m_pawn.m_Door.Rotation);
+			Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+			SetFocusToDoorKnob(m_pawn.m_Door.m_RotatingDoor);
+			__NFUN_256__(1.0000000);
+			GotoStateLeadRoomEntry();
+		}
+	}
+	// End:0x7AD
+	if(m_PaceMember.bIsCrouched)
+	{
+		R6PreMoveToward(MoveTarget, MoveTarget, 3);		
+	}
+	else
+	{
+		// End:0x7DB
+		if(__NFUN_154__(int(m_pawn.m_eHealth), int(1)))
+		{
+			R6PreMoveToward(MoveTarget, MoveTarget, 4);			
+		}
+		else
+		{
+			R6PreMoveToward(MoveTarget, MoveTarget, 5);
+		}
+	}
+	// End:0x812
+	if(MoveTarget.__NFUN_303__('R6Ladder'))
+	{
+		Pawn.bIsWalking = true;
+	}
+	__NFUN_502__(MoveTarget);
+	// End:0x848
+	if(__NFUN_130__(__NFUN_129__(__NFUN_1815__(m_PaceMember.Location)), __NFUN_129__(__NFUN_520__(m_PaceMember))))
+	{
+		goto 'bLocked';		
+	}
+	else
+	{
+		goto 'Moving';
+	}
+	stop;	
+}
+
+auto state WaitForGameToStart
+{Begin:
+
+	__NFUN_256__(0.5000000);
+	// End:0x5A
+	if(__NFUN_130__(Level.Game.m_bGameStarted, __NFUN_255__(NextState, 'None')))
+	{
+		// End:0x50
+		if(__NFUN_154__(m_pawn.m_iID, 0))
+		{
+			__NFUN_256__(1.0000000);
+		}
+		__NFUN_113__(NextState);		
+	}
+	else
+	{
+		goto 'Begin';
+	}
+	stop;			
+}
+
+state TestBoneRotation
+{Begin:
+
+	__NFUN_256__(3.0000000);
+	goto 'Begin';
+	stop;	
 }
 
 state WatchPlayer
 {
 	function BeginState()
 	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has entered state WatchPlayer....");	#endif
-		focus = none;
+		Focus = none;
+		return;
 	}
 
 	function EndState()
 	{
-		#ifdefDEBUG	if(bShowLog) log(pawn$" has exited state WatchPlayer....");		#endif
 		m_pawn.R6ResetLookDirection();
-		Enable('SeePlayer');
+		__NFUN_117__('SeePlayer');
+		return;
 	}
- 
 Begin:
-	m_pawn.r6LoopAnim( 'StandSubGunHigh_nt' );
+
+	m_pawn.R6LoopAnim('StandSubGunHigh_nt');
 Wait:
-	Sleep(1);
-	Goto('Wait');
+
+
+	__NFUN_256__(1.0000000);
+	goto 'Wait';
+	stop;	
 }
 
 defaultproperties
 {
-     m_bUseStaggeredFormation=True
-     m_bIndividualAttacks=True
-     m_fAttackTimerRate=0.500000
-     m_fFiringAttackTimer=0.200000
-     bIsPlayer=True
+	m_bUseStaggeredFormation=true
+	m_bIndividualAttacks=true
+	m_fAttackTimerRate=0.5000000
+	m_fFiringAttackTimer=0.2000000
+	bIsPlayer=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var eFormation
+// REMOVED IN 1.60: var ePawnOrientation
+// REMOVED IN 1.60: var eCoverDirection
+// REMOVED IN 1.60: function CanClimbObject

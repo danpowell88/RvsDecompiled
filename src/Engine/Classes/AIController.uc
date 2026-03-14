@@ -1,4 +1,10 @@
 //=============================================================================
+// AIController - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // AIController, the base class of AI.
 //
 // Controllers are non-physical actors that can be attached to a pawn to control 
@@ -7,302 +13,281 @@
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class AIController extends Controller
-	native;
+	native
+ notplaceable;
 
-var		bool		bHunting;			// tells navigation code that pawn is hunting another pawn,
+var bool bHunting;  // tells navigation code that pawn is hunting another pawn,
 										//	so fall back to finding a path to a visible pathnode if none
 										//	are reachable
-var		bool		bAdjustFromWalls;	// auto-adjust around corners, with no hitwall notification for controller or pawn
-										// if wall is hit during a MoveTo() or MoveToward() latent execution.
+var bool bAdjustFromWalls;  // auto-adjust around corners, with no hitwall notification for controller or pawn
+var float Skill;  // skill, scaled by game difficulty (add difficulty to this value)
+var AIScript MyScript;
 
-var		AIScript MyScript;
-var     float		Skill;				// skill, scaled by game difficulty (add difficulty to this value)	
-
-native(510) final latent function WaitToSeeEnemy(); // return when looking directly at visible enemy
+// Export UAIController::execWaitToSeeEnemy(FFrame&, void* const)
+ native(510) final latent function WaitToSeeEnemy();
 
 event PreBeginPlay()
 {
-	Super.PreBeginPlay();
-	if ( bDeleteMe )
+	super.PreBeginPlay();
+	// End:0x11
+	if(bDeleteMe)
+	{
 		return;
-
-	if ( Level.Game != None )
-		Skill += Level.Game.Difficulty; 
-	Skill = FClamp(Skill, 0, 3);
+	}
+	// End:0x45
+	if(__NFUN_119__(Level.Game, none))
+	{
+		__NFUN_184__(Skill, float(Level.Game.Difficulty));
+	}
+	Skill = __NFUN_246__(Skill, 0.0000000, 3.0000000);
+	return;
 }
 
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
 function Reset()
 {
-	Super.Reset();
-
-	// by default destroy bots (let game re-create)
-	if ( bIsPlayer )
-		Destroy();
-}
-
-function Trigger( actor Other, pawn EventInstigator )
-{
-	TriggerScript(Other,EventInstigator);
-}
-
-/* R6CHANGEWEAPONSYSTEM
-// WeaponFireAgain()
-//Notification from weapon when it is ready to fire (either just finished firing,
-//or just finished coming up/reloading).
-//Returns true if weapon should fire.
-//If it returns false, can optionally set up a weapon change
-function bool WeaponFireAgain(float RefireRate, bool bFinishedFire)
-{
-	if ( Pawn.PressingFire() && (FRand() < RefireRate) )
+	super.Reset();
+	// End:0x12
+	if(bIsPlayer)
 	{
-		Pawn.Weapon.BotFire(bFinishedFire);
-		return true;
+		__NFUN_279__();
 	}
-	StopFiring();
-	return false;
+	return;
 }
-*/
 
-/* R6CHANGEWEAPONSYSTEM
-// AdjustToss()
-//return adjustment to Z component of aiming vector to compensate for arc given the target
-//distance
-function float AdjustToss(Ammunition TossedAmmunition, vector Start, vector End)
+function Trigger(Actor Other, Pawn EventInstigator)
 {
-	local vector RecommendedVector,Dir2D;
-	local float ReachTime, Dist2D, StartVelZ, EndZ;
-
-	// check for negative gravity
-	if ( Pawn.PhysicsVolume.Gravity.Z >= 0 ) 
-		return 0;
-
-	RecommendedVector = TossedAmmunition.ProjectileClass.Static.GetTossVelocity(Pawn, rot(0,0,0));
-
-	//determine how long I might be in the air 
-	StartVelZ = RecommendedVector.Z;
-	RecommendedVector.Z = 0;
-	Dir2D = End - Start;
-	Dir2D.Z = 0;
-	Dist2D = VSize(Dir2D);
-	ReachTime = Dist2D/VSize(RecommendedVector); 	
-	EndZ = StartVelZ/ReachTime - 0.25f * Pawn.PhysicsVolume.Gravity.Z * ReachTime;	
-	return FMin(-1 * EndZ,Dist2D);
+	TriggerScript(Other, EventInstigator);
+	return;
 }
-*/
 
-/* TriggerScript()
-trigger AI script (this may enable it)
-*/
-function bool TriggerScript( actor Other, pawn EventInstigator )
+function bool TriggerScript(Actor Other, Pawn EventInstigator)
 {
-	if ( MyScript != None )
+	// End:0x26
+	if(__NFUN_119__(MyScript, none))
 	{
-		MyScript.Trigger(EventInstigator,pawn);
+		MyScript.Trigger(EventInstigator, Pawn);
 		return true;
 	}
 	return false;
+	return;
 }
-	
-/* DisplayDebug()
-list important controller attributes on canvas
-*/
+
 function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
 	local int i;
-	local string T;
+	local string t;
 
-	Super.DisplayDebug(Canvas,YL, YPos);
+	super.DisplayDebug(Canvas, YL, YPos);
+	Canvas.DrawColor.B = byte(255);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("     Skill ", string(Skill)), " NAVIGATION MoveTarget "), GetItemName(string(MoveTarget))), " PendingMover "), string(PendingMover)), " MoveTimer "), string(MoveTimer)), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("      Destination ", string(Destination)), " Focus "), GetItemName(string(Focus))), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("      RouteGoal ", GetItemName(string(RouteGoal))), " RouteDist "), string(RouteDist)), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	i = 0;
+	J0x1A4:
 
-	Canvas.DrawColor.B = 255;	
-	Canvas.DrawText("     Skill "$Skill$" NAVIGATION MoveTarget "$GetItemName(String(MoveTarget))$" PendingMover "$PendingMover$" MoveTimer "$MoveTimer, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawText("      Destination "$Destination$" Focus "$GetItemName(string(Focus)), false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	Canvas.DrawText("      RouteGoal "$GetItemName(string(RouteGoal))$" RouteDist "$RouteDist, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
-
-	for ( i=0; i<16; i++ )
+	// End:0x237 [Loop If]
+	if(__NFUN_150__(i, 16))
 	{
-		if ( RouteCache[i] == None )
+		// End:0x1FC
+		if(__NFUN_114__(RouteCache[i], none))
 		{
-			if ( i > 5 )
-				T = T$"--"$GetItemName(string(RouteCache[i-1]));
-			break;
+			// End:0x1F6
+			if(__NFUN_151__(i, 5))
+			{
+				t = __NFUN_112__(__NFUN_112__(t, "--"), GetItemName(string(RouteCache[__NFUN_147__(i, 1)])));
+			}
+			// [Explicit Break]
+			goto J0x237;
+			// [Explicit Continue]
+			goto J0x22D;
 		}
-		else if ( i < 5 )
-			T = T$GetItemName(string(RouteCache[i]))$"-";
-	}
+		// End:0x22D
+		if(__NFUN_150__(i, 5))
+		{
+			t = __NFUN_112__(__NFUN_112__(t, GetItemName(string(RouteCache[i]))), "-");
+		}
+		J0x22D:
 
-	Canvas.DrawText("RouteCache: "$T, false);
-	YPos += YL;
-	Canvas.SetPos(4,YPos);
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x1A4;
+	}
+	J0x237:
+
+	Canvas.__NFUN_465__(__NFUN_112__("RouteCache: ", t), false);
+	__NFUN_184__(YPos, YL);
+	Canvas.__NFUN_2623__(4.0000000, YPos);
+	return;
 }
 
-function HearPickup(Pawn Other);
-
-//#ifndef R6CODE
-//function float AdjustDesireFor(Pickup P)
-//{
-//	return 0;
-//}
-//#endif // #ifndef R6CODE
-
-/* GetFacingDirection()
-returns direction faced relative to movement dir
-
-0 = forward
-16384 = right
-32768 = back
-49152 = left
-*/
 function int GetFacingDirection()
 {
 	local float strafeMag;
-	local vector Focus2D, Loc2D, Dest2D, Dir, LookDir, Y;
+	local Vector Focus2D, Loc2D, Dest2D, Dir, LookDir, Y;
 
-	// check for strafe or backup
 	Focus2D = FocalPoint;
-	Focus2D.Z = 0;
+	Focus2D.Z = 0.0000000;
 	Loc2D = Pawn.Location;
-	Loc2D.Z = 0;
+	Loc2D.Z = 0.0000000;
 	Dest2D = Destination;
-	Dest2D.Z = 0;
-	lookDir = Normal(Focus2D - Loc2D);
-	Dir = Normal(Dest2D - Loc2D);
-	strafeMag = lookDir dot Dir;
-	Y = (lookDir Cross vect(0,0,1));
-	if ((Y Dot (Dest2D - Loc2D)) < 0)
-		return ( 49152 + 16384 * strafeMag );	
+	Dest2D.Z = 0.0000000;
+	LookDir = __NFUN_226__(__NFUN_216__(Focus2D, Loc2D));
+	Dir = __NFUN_226__(__NFUN_216__(Dest2D, Loc2D));
+	strafeMag = __NFUN_219__(LookDir, Dir);
+	Y = __NFUN_220__(LookDir, vect(0.0000000, 0.0000000, 1.0000000));
+	// End:0xE6
+	if(__NFUN_176__(__NFUN_219__(Y, __NFUN_216__(Dest2D, Loc2D)), float(0)))
+	{
+		return int(__NFUN_174__(float(49152), __NFUN_171__(float(16384), strafeMag)));		
+	}
 	else
-		return ( 16384 - 16384 * strafeMag );
+	{
+		return int(__NFUN_175__(float(16384), __NFUN_171__(float(16384), strafeMag)));
+	}
+	return;
 }
 
 // AdjustView() called if Controller's pawn is viewtarget of a player
 function AdjustView(float DeltaTime)
 {
 	local float TargetYaw, TargetPitch;
-	local rotator OldViewRotation,ViewRotation;
+	local Rotator OldViewRotation, ViewRotation;
 
-	Super.AdjustView(DeltaTime);
-//R6CODE	if( !Pawn.bUpdateEyeHeight )
-//R6CODE		return;
-
-	// update viewrotation
+	super.AdjustView(DeltaTime);
 	ViewRotation = Rotation;
-	OldViewRotation = Rotation;			
-
-	if ( Enemy == None )
+	OldViewRotation = Rotation;
+	// End:0x1F9
+	if(__NFUN_114__(Enemy, none))
 	{
 		ViewRotation.Roll = 0;
-		if ( DeltaTime < 0.2 )
+		// End:0x1F9
+		if(__NFUN_176__(DeltaTime, 0.2000000))
 		{
-			OldViewRotation.Yaw = OldViewRotation.Yaw & 65535;
-			OldViewRotation.Pitch = OldViewRotation.Pitch & 65535;
-			TargetYaw = float(Rotation.Yaw & 65535);
-			if ( Abs(TargetYaw - OldViewRotation.Yaw) > 32768 )
+			OldViewRotation.Yaw = __NFUN_156__(OldViewRotation.Yaw, 65535);
+			OldViewRotation.Pitch = __NFUN_156__(OldViewRotation.Pitch, 65535);
+			TargetYaw = float(__NFUN_156__(Rotation.Yaw, 65535));
+			// End:0xEE
+			if(__NFUN_177__(__NFUN_186__(__NFUN_175__(TargetYaw, float(OldViewRotation.Yaw))), float(32768)))
 			{
-				if ( TargetYaw < OldViewRotation.Yaw )
-					TargetYaw += 65536;
+				// End:0xE0
+				if(__NFUN_176__(TargetYaw, float(OldViewRotation.Yaw)))
+				{
+					__NFUN_184__(TargetYaw, float(65536));					
+				}
 				else
-					TargetYaw -= 65536;
+				{
+					__NFUN_185__(TargetYaw, float(65536));
+				}
 			}
-			TargetYaw = float(OldViewRotation.Yaw) * (1 - 5 * DeltaTime) + TargetYaw * 5 * DeltaTime;
+			TargetYaw = __NFUN_174__(__NFUN_171__(float(OldViewRotation.Yaw), __NFUN_175__(float(1), __NFUN_171__(float(5), DeltaTime))), __NFUN_171__(__NFUN_171__(TargetYaw, float(5)), DeltaTime));
 			ViewRotation.Yaw = int(TargetYaw);
-
-			TargetPitch = float(Rotation.Pitch & 65535);
-			if ( Abs(TargetPitch - OldViewRotation.Pitch) > 32768 )
+			TargetPitch = float(__NFUN_156__(Rotation.Pitch, 65535));
+			// End:0x1A7
+			if(__NFUN_177__(__NFUN_186__(__NFUN_175__(TargetPitch, float(OldViewRotation.Pitch))), float(32768)))
 			{
-				if ( TargetPitch < OldViewRotation.Pitch )
-					TargetPitch += 65536;
+				// End:0x199
+				if(__NFUN_176__(TargetPitch, float(OldViewRotation.Pitch)))
+				{
+					__NFUN_184__(TargetPitch, float(65536));					
+				}
 				else
-					TargetPitch -= 65536;
+				{
+					__NFUN_185__(TargetPitch, float(65536));
+				}
 			}
-			TargetPitch = float(OldViewRotation.Pitch) * (1 - 5 * DeltaTime) + TargetPitch * 5 * DeltaTime;
+			TargetPitch = __NFUN_174__(__NFUN_171__(float(OldViewRotation.Pitch), __NFUN_175__(float(1), __NFUN_171__(float(5), DeltaTime))), __NFUN_171__(__NFUN_171__(TargetPitch, float(5)), DeltaTime));
 			ViewRotation.Pitch = int(TargetPitch);
-			SetRotation(ViewRotation);
+			__NFUN_299__(ViewRotation);
 		}
 	}
+	return;
 }
 
-function SetOrders(name NewOrders, Controller OrderGiver);
-
-function actor GetOrderObject()
+function SetOrders(name NewOrders, Controller OrderGiver)
 {
-	return None;
-} 
+	return;
+}
+
+function Actor GetOrderObject()
+{
+	return none;
+	return;
+}
 
 function name GetOrders()
 {
 	return 'None';
+	return;
 }
 
-/* PrepareForMove()
-Give controller a chance to prepare for a move along the navigation network, from
-Anchor (current node) to Goal, given the reachspec for that movement.
+event PrepareForMove(NavigationPoint Goal, ReachSpec Path)
+{
+	return;
+}
 
-Called if the reachspec doesn't support the pawn's current configuration.
-By default, the pawn will crouch when it hits an actual obstruction. However,
-Pawns with complex behaviors for setting up their smaller collision may want
-to call that behavior from here
-*/
-event PrepareForMove(NavigationPoint Goal, ReachSpec Path);
-
-/* WaitForMover()
-Wait for Mover M to tell me it has completed its move
-*/
 function WaitForMover(Mover M)
 {
-    PendingMover = M;
+	PendingMover = M;
 	bPreparingMove = true;
-	Pawn.Acceleration = vect(0,0,0);
+	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	return;
 }
 
-/* MoverFinished()
-Called by Mover when it finishes a move, and this pawn has the mover
-set as its PendingMover
-*/
 function MoverFinished()
 {
-	if ( PendingMover.MyMarker.ProceedWithMove(Pawn) )
+	// End:0x2F
+	if(PendingMover.myMarker.ProceedWithMove(Pawn))
 	{
-		PendingMover = None;
+		PendingMover = none;
 		bPreparingMove = false;
 	}
+	return;
 }
 
-/* UnderLift()
-called by mover when it hits a pawn with that mover as its pendingmover while moving to its destination
-*/
 function UnderLift(Mover M)
 {
 	local NavigationPoint N;
 
 	bPreparingMove = false;
-	PendingMover = None;
+	PendingMover = none;
+	// End:0xBC
+	if(__NFUN_130__(__NFUN_119__(MoveTarget, none), MoveTarget.__NFUN_303__('LiftCenter')))
+	{
+		N = Level.NavigationPointList;
+		J0x44:
 
-	// find nearest lift exit and go for that
-	if ( (MoveTarget != None) && MoveTarget.IsA('LiftCenter') )
-		for ( N=Level.NavigationPointList; N!=None; N=N.NextNavigationPoint )
-			if ( N.IsA('LiftExit') && (LiftExit(N).LiftTag == M.Tag)
-				&& ActorReachable(N) )
+		// End:0xBC [Loop If]
+		if(__NFUN_119__(N, none))
+		{
+			// End:0xA5
+			if(__NFUN_130__(__NFUN_130__(N.__NFUN_303__('LiftExit'), __NFUN_254__(LiftExit(N).LiftTag, M.Tag)), __NFUN_520__(N)))
 			{
 				MoveTarget = N;
 				return;
 			}
+			N = N.nextNavigationPoint;
+			// [Loop Continue]
+			goto J0x44;
+		}
+	}
+	return;
 }
 
 defaultproperties
 {
-     bAdjustFromWalls=True
-     bCanOpenDoors=True
-     bCanDoSpecial=True
-     MinHitWall=-0.500000
+	bAdjustFromWalls=true
+	bCanOpenDoors=true
+	bCanDoSpecial=true
+	MinHitWall=-0.5000000
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function WeaponFireAgain
+// REMOVED IN 1.60: function AdjustToss
+// REMOVED IN 1.60: function HearPickup

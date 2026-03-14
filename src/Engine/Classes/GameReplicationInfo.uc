@@ -1,137 +1,125 @@
 //=============================================================================
+// GameReplicationInfo - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // GameReplicationInfo.
 //=============================================================================
 class GameReplicationInfo extends ReplicationInfo
-	native nativereplication;
+	native
+	nativereplication
+	config
+	notplaceable
+ hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-var string GameName;						// Assigned by GameInfo.
-var string GameClass;						// Assigned by GameInfo.
-var bool bTeamGame;							// Assigned by GameInfo.
-//#ifndef R6CODE
-//var bool bStopCountDown;
-//var int  ElapsedTime;
-//var int  RemainingTime, RemainingMinute;
-//var float SecondCount;
-//#endif
-var int GoalScore;
-var int TimeLimit;
+const RSS_PlayersConnectingStage = 0;
+const RSS_CountDownStage = 1;
+const RSS_InPreGameState = 2;
+const RSS_InGameState = 3;
+const RSS_EndOfMatch = 4;
 
-var TeamInfo Teams[2];
-
-var() globalconfig string ServerName;		// Name of the server, i.e.: Bob's Server.
-var() globalconfig string ShortName;		// Abbreviated name of server, i.e.: B's Serv (stupid example)
-var() globalconfig string AdminName;		// Name of the server admin.
-var() globalconfig string AdminEmail;		// Email address of the server admin.
-var() globalconfig int	  ServerRegion;		// Region of the game server.
-
-var() globalconfig string MOTDLine1;		// Message
-var() globalconfig string MOTDLine2;		// Of
-var() globalconfig string MOTDLine3;		// The
-var() globalconfig string MOTDLine4;		// Day
-
-var Actor Winner;			// set by gameinfo when game ends
-
-var string m_szGameTypeFlagRep;
-var byte m_bReceivedGameType; 
-var int m_iMapIndex;       // assigned by game info and used by the clients to determine if map changed between rounds
-var bool m_bShowPlayerStates;
-
-//enum ER6ServerState
-//{
-//    RSS_WaitingPlayers,     // we are waiting for players
-//    RSS_BetweenRoundTime,   // 
-//             // game has already commenced
-//};
-
-//0 -> we are waiting for players, 1-> this is the count down to game state, 2->RSS_InGameState, 3->end of round
-const RSS_PlayersConnectingStage=0;  // this is the stage when players first join the game before count-down stage
-const RSS_CountDownStage=1;          // we are in count down
-const RSS_InPreGameState=2;			 // 
-const RSS_InGameState=3;
-const RSS_EndOfMatch=4;
-
-var byte m_eOldServerState; 
+var byte m_bReceivedGameType;
+var byte m_eOldServerState;
 var byte m_eCurrectServerState;
-
+var byte m_iNbWeaponsTerro;
+var byte m_aRepMObjCompleted[16];
+var byte m_aRepMObjFailed[16];
+var byte m_bRepMObjInProgress;
+var byte m_bRepMObjSuccess;
+var byte m_bRepLastRoundSuccess;  // 0 = none, 1 = success, 2 = failed
+var int TimeLimit;
+var() globalconfig int ServerRegion;  // Region of the game server.
+var int m_iMapIndex;  // assigned by game info and used by the clients to determine if map changed between rounds
+// Variables used for connection to ubi.com
+var int m_iGameSvrGroupID;  // ubi.com group ID
+var int m_iGameSvrLobbyID;  // ubi.com lobby ID
+var bool m_bShowPlayerStates;
 //R6CODE
-var BOOL   m_bInPostBetweenRoundTime;       // are we in the PostBetweenRoundTime state
-
-var BYTE   m_iNbWeaponsTerro;
-var BOOL   m_bServerAllowRadar;            // if the server allow the radar (a game type CAN restrict this EVEN IF the option is checked by the player) 
-var BOOL   m_bRepAllowRadarOption;
-var BOOL   m_bGameOverRep;
-var BOOL   m_bRestartableByJoin;
+var bool m_bInPostBetweenRoundTime;  // are we in the PostBetweenRoundTime state
+var bool m_bServerAllowRadar;  // if the server allow the radar (a game type CAN restrict this EVEN IF the option is checked by the player)
+var bool m_bRepAllowRadarOption;
+var bool m_bGameOverRep;
+var bool m_bRestartableByJoin;
+//#ifdefR6PUNKBUSTER
+var bool m_bPunkBuster;  // server is a PunkBuster server
+var string GameName;  // Assigned by GameInfo.
+var string GameClass;  // Assigned by GameInfo.
+var() globalconfig string ServerName;  // Name of the server, i.e.: Bob's Server.
+var() globalconfig string ShortName;  // Abbreviated name of server, i.e.: B's Serv (stupid example)
+var() globalconfig string AdminName;  // Name of the server admin.
+var() globalconfig string AdminEmail;  // Email address of the server admin.
+var() globalconfig string MOTDLine1;  // Message
+var() globalconfig string MOTDLine2;  // Of
+var() globalconfig string MOTDLine3;  // The
+var() globalconfig string MOTDLine4;  // Day
+var string m_szGameTypeFlagRep;
 // struct did not replicated well...
 var string m_aRepMObjDescription[16];
 var string m_aRepMObjDescriptionLocFile[16];
-var BYTE   m_aRepMObjCompleted[16];
-var BYTE   m_aRepMObjFailed[16];
-var BYTE   m_bRepMObjInProgress;
-var BYTE   m_bRepMObjSuccess;
-var BYTE   m_bRepLastRoundSuccess; // 0 = none, 1 = success, 2 = failed
-
-// Variables used for connection to ubi.com
-var INT           m_iGameSvrGroupID;    // ubi.com group ID
-var INT           m_iGameSvrLobbyID;    // ubi.com lobby ID
-//#ifdefR6PUNKBUSTER
-var BOOL		  m_bPunkBuster;			  // server is a PunkBuster server
-//#endif
-
-//END R6CODE
 
 replication
 {
-    reliable if (Role == ROLE_Authority)
-        m_eCurrectServerState, m_iNbWeaponsTerro, m_bServerAllowRadar,m_bRepAllowRadarOption, m_bGameOverRep, 
-        m_aRepMObjDescription, m_aRepMObjDescriptionLocFile, 
-        m_aRepMObjCompleted, m_aRepMObjFailed, m_bRepMObjInProgress, m_bRepMObjSuccess, m_bRepLastRoundSuccess,
-//#ifdefR6PUNKBUSTER
-		m_bPunkBuster,
-//#endif
-        m_iGameSvrGroupID,m_iGameSvrLobbyID,m_bInPostBetweenRoundTime,m_bRestartableByJoin;
+	// Pos:0x000
+	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		m_aRepMObjCompleted, m_aRepMObjDescription, 
+		m_aRepMObjDescriptionLocFile, m_aRepMObjFailed, 
+		m_bGameOverRep, m_bInPostBetweenRoundTime, 
+		m_bPunkBuster, m_bRepAllowRadarOption, 
+		m_bRepLastRoundSuccess, m_bRepMObjInProgress, 
+		m_bRepMObjSuccess, m_bRestartableByJoin, 
+		m_bServerAllowRadar, m_eCurrectServerState, 
+		m_iGameSvrGroupID, m_iGameSvrLobbyID, 
+		m_iNbWeaponsTerro;
 
-        
-
-	reliable if ( bNetDirty && (Role == ROLE_Authority) )
-        Winner,Teams;
-//#ifndef R6CODE
-//        		bStopCountDown, RemainingMinute,
-//#endif
-
-
-	reliable if ( bNetInitial && (Role==ROLE_Authority) )
-		m_iMapIndex,m_szGameTypeFlagRep, GameName, GameClass, bTeamGame, 
+	// Pos:0x00D
+	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+		AdminEmail, AdminName, 
+		GameClass, GameName, 
 		MOTDLine1, MOTDLine2, 
-		MOTDLine3, MOTDLine4, ServerName, ShortName, AdminName,
-		AdminEmail, ServerRegion, GoalScore, TimeLimit;
-//#ifndef R6CODE
-//    ElapsedTime,RemainingTime, 
-//#endif
+		MOTDLine3, MOTDLine4, 
+		ServerName, ServerRegion, 
+		ShortName, TimeLimit, 
+		m_iMapIndex, m_szGameTypeFlagRep;
 }
 
 //#ifdef R6CODE
-simulated function ControllerStarted(R6GameMenuCom NewMenuCom);
-simulated event NewServerState();
-simulated event SaveRemoteServerSettings(string NewServerFile);
-//#endif R6CODE
-
-function SetServerState(byte newState)
+simulated function ControllerStarted(R6GameMenuCom NewMenuCom)
 {
-    if (newState!=m_eCurrectServerState)
-    {
-        m_eCurrectServerState = newState;
-        if (Level.NetMode == NM_ListenServer)
-        {
-            NewServerState();
-        }
-    }
+	return;
+}
+
+simulated event NewServerState()
+{
+	return;
+}
+
+simulated event SaveRemoteServerSettings(string NewServerFile)
+{
+	return;
+}
+
+function SetServerState(byte NewState)
+{
+	// End:0x3D
+	if(__NFUN_155__(int(NewState), int(m_eCurrectServerState)))
+	{
+		m_eCurrectServerState = NewState;
+		// End:0x3D
+		if(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))
+		{
+			NewServerState();
+		}
+	}
+	return;
 }
 
 simulated function PostBeginPlay()
 {
-	if( Level.NetMode == NM_Client )
+	// End:0x51
+	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
 	{
-		// clear variables so we don't display our own values if the server has them left blank 
 		ServerName = "";
 		AdminName = "";
 		AdminEmail = "";
@@ -140,150 +128,163 @@ simulated function PostBeginPlay()
 		MOTDLine3 = "";
 		MOTDLine4 = "";
 	}
-
-//#ifndef R6CODE
-//	SecondCount = Level.TimeSeconds;
-//	SetTimer(1, true);
-//#endif
+	return;
 }
 
-/* Reset() 
-reset actor to initial state - used when restarting level without reloading.
-*/
 function Reset()
 {
-	Super.Reset();
-	Winner = None;
+	super(Actor).Reset();
+	return;
 }
 
 //#ifdef R6CODE
 simulated function ResetOriginalData()
 {
-    Super.ResetOriginalData();
-    m_bInPostBetweenRoundTime=false;
-    m_bGameOverRep=false;
+	super(Actor).ResetOriginalData();
+	m_bInPostBetweenRoundTime = false;
+	m_bGameOverRep = false;
+	return;
 }
-//#endif R6CODE
-
-//#ifndef R6CODE
-//simulated function Timer()
-//{
-//	if ( Level.NetMode == NM_Client )
-//	{
-//		if (Level.TimeSeconds - SecondCount >= Level.TimeDilation)
-//		{
-//			ElapsedTime++;
-//			if ( RemainingMinute != 0 )
-//			{
-//				RemainingTime = RemainingMinute;
-//				RemainingMinute = 0;
-//			}
-//			if ( (RemainingTime > 0) && !bStopCountDown )
-//				RemainingTime--;
-//			SecondCount += Level.TimeDilation;
-//		}
-//	}
-//}
-//#endif
 
 //#ifdef R6CODE
-function RefreshMPlayerInfo();
-
-function SetRepMObjInfo( int index, bool bFailed, bool bCompleted )
+function RefreshMPlayerInfo()
 {
-    if ( bFailed )
-        m_aRepMObjFailed[index] =  1;
-    else
-        m_aRepMObjFailed[index] =  0;
-
-    if ( bCompleted )
-        m_aRepMObjCompleted[index] =  1;
-    else
-        m_aRepMObjCompleted[index] =  0;
+	return;
 }
 
-function SetRepMObjString( int index, string szDesc, string szLocFile )
+function SetRepMObjInfo(int Index, bool bFailed, bool bCompleted)
 {
-    m_aRepMObjDescription[index] = szDesc;
-    m_aRepMObjDescriptionLocFile[index] = szLocFile;
+	// End:0x1A
+	if(bFailed)
+	{
+		m_aRepMObjFailed[Index] = 1;		
+	}
+	else
+	{
+		m_aRepMObjFailed[Index] = 0;
+	}
+	// End:0x42
+	if(bCompleted)
+	{
+		m_aRepMObjCompleted[Index] = 1;		
+	}
+	else
+	{
+		m_aRepMObjCompleted[Index] = 0;
+	}
+	return;
 }
 
-
-simulated function string GetRepMObjStringLocFile( int index )
+function SetRepMObjString(int Index, string szDesc, string szLocFile)
 {
-    return m_aRepMObjDescriptionLocFile[index];
+	m_aRepMObjDescription[Index] = szDesc;
+	m_aRepMObjDescriptionLocFile[Index] = szLocFile;
+	return;
 }
 
-simulated function string GetRepMObjString( int index )
+simulated function string GetRepMObjStringLocFile(int Index)
 {
-    return m_aRepMObjDescription[index];
+	return m_aRepMObjDescriptionLocFile[Index];
+	return;
 }
 
-simulated function bool IsRepMObjCompleted( int index )
+simulated function string GetRepMObjString(int Index)
 {
-    return m_aRepMObjCompleted[index] == 1;
+	return m_aRepMObjDescription[Index];
+	return;
 }
 
-simulated function bool IsRepMObjFailed( int index )
+simulated function bool IsRepMObjCompleted(int Index)
 {
-    return m_aRepMObjFailed[index] == 1;
+	return __NFUN_154__(int(m_aRepMObjCompleted[Index]), 1);
+	return;
+}
+
+simulated function bool IsRepMObjFailed(int Index)
+{
+	return __NFUN_154__(int(m_aRepMObjFailed[Index]), 1);
+	return;
 }
 
 simulated function ResetRepMObjInfo()
 {
-    local int i;
-    
-    for ( i = 0; i < ArrayCount( m_aRepMObjDescription ); ++i )
-    {
-        m_aRepMObjDescription[i] = "";
-        m_aRepMObjDescriptionLocFile[i] = "";
-        SetRepMObjInfo( i, false, false );
-    }
+	local int i;
 
-    m_bRepMObjSuccess    = 0;
-    m_bRepMObjInProgress = 1;
+	i = 0;
+	J0x07:
+
+	// End:0x46 [Loop If]
+	if(__NFUN_150__(i, 16))
+	{
+		m_aRepMObjDescription[i] = "";
+		m_aRepMObjDescriptionLocFile[i] = "";
+		SetRepMObjInfo(i, false, false);
+		__NFUN_163__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	m_bRepMObjSuccess = 0;
+	m_bRepMObjInProgress = 1;
+	return;
 }
 
 simulated function int GetRepMObjInfoArraySize()
 {
-    return ArrayCount( m_aRepMObjDescription );
+	return 16;
+	return;
 }
 
-simulated function SetRepMObjInProgress( bool bInProgress )
+simulated function SetRepMObjInProgress(bool bInProgress)
 {
-    if ( bInProgress )
-        m_bRepMObjInProgress = 1;
-    else
-        m_bRepMObjInProgress = 0;
+	// End:0x14
+	if(bInProgress)
+	{
+		m_bRepMObjInProgress = 1;		
+	}
+	else
+	{
+		m_bRepMObjInProgress = 0;
+	}
+	return;
 }
 
-simulated function SetRepMObjSuccess( bool bSuccess )
+simulated function SetRepMObjSuccess(bool bSuccess)
 {
-    if ( bSuccess )
-        m_bRepMObjSuccess = 1;
-    else
-        m_bRepMObjSuccess = 0;
+	// End:0x14
+	if(bSuccess)
+	{
+		m_bRepMObjSuccess = 1;		
+	}
+	else
+	{
+		m_bRepMObjSuccess = 0;
+	}
+	return;
 }
 
-
-simulated function SetRepLastRoundSuccess( BYTE bLastRoundSuccess )
+simulated function SetRepLastRoundSuccess(byte bLastRoundSuccess)
 {
-    m_bRepLastRoundSuccess = bLastRoundSuccess;
+	m_bRepLastRoundSuccess = bLastRoundSuccess;
+	return;
 }
-
 
 simulated function bool IsInAGameState()
 {
-    return ((m_eCurrectServerState == RSS_InPreGameState) || 
-            (m_eCurrectServerState == RSS_InGameState));
+	return __NFUN_132__(__NFUN_154__(int(m_eCurrectServerState), 2), __NFUN_154__(int(m_eCurrectServerState), 3));
+	return;
 }
-//#endif
 
 defaultproperties
 {
-     m_bRestartableByJoin=True
-     ServerName="Another Server"
-     ShortName="Server"
-     m_szGameTypeFlagRep="RGM_AllMode"
-     RemoteRole=ROLE_SimulatedProxy
+	m_bRestartableByJoin=true
+	ServerName="Another Server"
+	ShortName="Server"
+	m_szGameTypeFlagRep="RGM_AllMode"
+	RemoteRole=2
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var bTeamGame
+// REMOVED IN 1.60: var GoalScore
+// REMOVED IN 1.60: var Teams2
+// REMOVED IN 1.60: var Winner

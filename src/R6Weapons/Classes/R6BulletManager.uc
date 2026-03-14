@@ -1,3 +1,9 @@
+//=============================================================================
+// R6BulletManager - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
 //========================================================================================
 //  R6BulletManager.uc :   Manage all bullets for one character.
 //                         Bullets are spawned and managed here.
@@ -10,120 +16,162 @@
 //=============================================================================
 class R6BulletManager extends R6AbstractBulletManager;
 
-var INT     m_iCurrentBullet;
-var INT     m_iBulletSpeed;
-var INT     m_iBulletEnergy;
+const m_iNbBullets = 20;
 
-const           m_iNbBullets = 20;    // use this value instead of a hardcoded 20.
-var R6Bullet    m_BulletArray[m_iNbBullets]; 
-var INT     m_iNextBulletGroupID;
+var int m_iCurrentBullet;
+var int m_iBulletSpeed;
+var int m_iBulletEnergy;
+var int m_iNextBulletGroupID;
+// NEW IN 1.60
+var R6Bullet m_BulletArray[20];
 
 function InitBulletMgr(Pawn TheInstigator)
 {
-    //Init the bullet table.
-    for(m_iCurrentBullet = 0; m_iCurrentBullet < m_iNbBullets; m_iCurrentBullet++)
-    {
-        m_BulletArray[m_iCurrentBullet] = Spawn(class'R6Bullet',,,,, true );
-        m_BulletArray[m_iCurrentBullet].SetCollision(false, false, false);
-        m_BulletArray[m_iCurrentBullet].Instigator = TheInstigator;
-        m_BulletArray[m_iCurrentBullet].m_BulletManager = self;
-    }
-    m_iCurrentBullet = 0;
+	m_iCurrentBullet = 0;
+	J0x07:
+
+	// End:0x7B [Loop If]
+	if(__NFUN_150__(m_iCurrentBullet, 20))
+	{
+		m_BulletArray[m_iCurrentBullet] = __NFUN_278__(Class'R6Weapons.R6Bullet',,,,, true);
+		m_BulletArray[m_iCurrentBullet].__NFUN_262__(false, false, false);
+		m_BulletArray[m_iCurrentBullet].Instigator = TheInstigator;
+		m_BulletArray[m_iCurrentBullet].m_BulletManager = self;
+		__NFUN_165__(m_iCurrentBullet);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	m_iCurrentBullet = 0;
+	return;
 }
 
 // bullet parameters are changed when changing weapon.  All bullets in the array will get the new parameters.
-function SetBulletParameter( R6EngineWeapon aWeapon )
+function SetBulletParameter(R6EngineWeapon AWeapon)
 {
-    local R6Weapons aR6Weapon;
+	local R6Weapons aR6Weapon;
 
-    aR6Weapon = R6Weapons(aWeapon);
+	aR6Weapon = R6Weapons(AWeapon);
+	// End:0x33
+	if(__NFUN_132__(__NFUN_114__(aR6Weapon, none), __NFUN_114__(aR6Weapon.m_pBulletClass, none)))
+	{
+		return;
+	}
+	m_iBulletEnergy = aR6Weapon.m_pBulletClass.default.m_iEnergy;
+	m_iCurrentBullet = 0;
+	J0x57:
 
-    if(aR6Weapon==none || aR6Weapon.m_pBulletClass==none)
-        return;
-
-    m_iBulletEnergy = aR6Weapon.m_pBulletClass.default.m_iEnergy;
-    for(m_iCurrentBullet = 0; m_iCurrentBullet < m_iNbBullets; m_iCurrentBullet++)
-    {
-        m_BulletArray[m_iCurrentBullet].m_szBulletType          = aR6Weapon.m_pBulletClass.default.m_szBulletType;
-        m_BulletArray[m_iCurrentBullet].m_iEnergy               = aR6Weapon.m_pBulletClass.default.m_iEnergy;
-        m_BulletArray[m_iCurrentBullet].m_fKillStunTransfer     = aR6Weapon.m_pBulletClass.default.m_fKillStunTransfer;
-        m_BulletArray[m_iCurrentBullet].m_fRangeConversionConst = aR6Weapon.m_pBulletClass.default.m_fRangeConversionConst;
-        m_BulletArray[m_iCurrentBullet].m_fRange                = aR6Weapon.m_pBulletClass.default.m_fRange;
-        m_BulletArray[m_iCurrentBullet].m_iPenetrationFactor    = aR6Weapon.m_pBulletClass.default.m_iPenetrationFactor;
-    }
-    m_iCurrentBullet = 0;
+	// End:0x175 [Loop If]
+	if(__NFUN_150__(m_iCurrentBullet, 20))
+	{
+		m_BulletArray[m_iCurrentBullet].m_szBulletType = aR6Weapon.m_pBulletClass.default.m_szBulletType;
+		m_BulletArray[m_iCurrentBullet].m_iEnergy = aR6Weapon.m_pBulletClass.default.m_iEnergy;
+		m_BulletArray[m_iCurrentBullet].m_fKillStunTransfer = aR6Weapon.m_pBulletClass.default.m_fKillStunTransfer;
+		m_BulletArray[m_iCurrentBullet].m_fRangeConversionConst = aR6Weapon.m_pBulletClass.default.m_fRangeConversionConst;
+		m_BulletArray[m_iCurrentBullet].m_fRange = aR6Weapon.m_pBulletClass.default.m_fRange;
+		m_BulletArray[m_iCurrentBullet].m_iPenetrationFactor = aR6Weapon.m_pBulletClass.default.m_iPenetrationFactor;
+		__NFUN_165__(m_iCurrentBullet);
+		// [Loop Continue]
+		goto J0x57;
+	}
+	m_iCurrentBullet = 0;
+	return;
 }
 
-//TODO  Make a huge table and remove all AMMO* classes.
-
-function SpawnBullet(vector vPosition, Rotator rRotation, float fBulletSpeed, BOOL bFirstInShell)
+function SpawnBullet(Vector VPosition, Rotator rRotation, float fBulletSpeed, bool bFirstInShell)
 {
-    //Reactivate the current bullet and give a direction
-    if (bFirstInShell==true)
-    {
-        m_iNextBulletGroupID++;
-    }
-
-    m_BulletArray[m_iCurrentBullet].SetLocation(vPosition, true);
-    m_BulletArray[m_iCurrentBullet].SetRotation(rRotation);
-    m_BulletArray[m_iCurrentBullet].m_vSpawnedPosition = vPosition;
-    m_BulletArray[m_iCurrentBullet].m_bBulletIsGone = TRUE;
-
-    m_BulletArray[m_iCurrentBullet].SetSpeed(fBulletSpeed);
-    m_BulletArray[m_iCurrentBullet].SetCollision(true, true, false);
-    m_BulletArray[m_iCurrentBullet].SetPhysics(PHYS_Projectile);
-    m_BulletArray[m_iCurrentBullet].bStasis = FALSE;
-    m_BulletArray[m_iCurrentBullet].m_bBulletDeactivated = FALSE;
-
-//    m_BulletArray[m_iCurrentBullet].m_bPlayBulletSound = bFirstInShell;
-    m_BulletArray[m_iCurrentBullet].m_iBulletGroupID = m_iNextBulletGroupID;
-    m_BulletArray[m_iCurrentBullet].m_AffectedActor = none;
-    m_BulletArray[m_iCurrentBullet].m_iEnergy = m_iBulletEnergy;
-
-    //Cycle through the list.
-    m_iCurrentBullet++;
-    if (m_iCurrentBullet == m_iNbBullets)
-    {
-        m_iCurrentBullet = 0;
-    }
-
+	// End:0x13
+	if(__NFUN_242__(bFirstInShell, true))
+	{
+		__NFUN_165__(m_iNextBulletGroupID);
+	}
+	m_BulletArray[m_iCurrentBullet].__NFUN_267__(VPosition, true);
+	m_BulletArray[m_iCurrentBullet].__NFUN_299__(rRotation);
+	m_BulletArray[m_iCurrentBullet].m_vSpawnedPosition = VPosition;
+	m_BulletArray[m_iCurrentBullet].m_bBulletIsGone = true;
+	m_BulletArray[m_iCurrentBullet].SetSpeed(fBulletSpeed);
+	m_BulletArray[m_iCurrentBullet].__NFUN_262__(true, true, false);
+	m_BulletArray[m_iCurrentBullet].__NFUN_3970__(6);
+	m_BulletArray[m_iCurrentBullet].bStasis = false;
+	m_BulletArray[m_iCurrentBullet].m_bBulletDeactivated = false;
+	m_BulletArray[m_iCurrentBullet].m_iBulletGroupID = m_iNextBulletGroupID;
+	m_BulletArray[m_iCurrentBullet].m_AffectedActor = none;
+	m_BulletArray[m_iCurrentBullet].m_iEnergy = m_iBulletEnergy;
+	__NFUN_165__(m_iCurrentBullet);
+	// End:0x148
+	if(__NFUN_154__(m_iCurrentBullet, 20))
+	{
+		m_iCurrentBullet = 0;
+	}
+	return;
 }
 
 // returns true if actor has not been affected by the same bullet group
 // also sets the bullet to the affected actor
-function bool AffectActor(int BulletGroup, actor ActorAffected)
+function bool AffectActor(int BulletGroup, Actor ActorAffected)
 {
-    local int iBulletIndex;
-    local int iSaveBulletIndex;
+	local int iBulletIndex, iSaveBulletIndex;
 
-    for (iBulletIndex = 0; iBulletIndex < m_iNbBullets; iBulletIndex++)
-    {
-        if (m_BulletArray[iBulletIndex].m_iBulletGroupID==BulletGroup)
-        {
-            if (m_BulletArray[iBulletIndex].m_AffectedActor == ActorAffected)
-                return false;
-            else if (m_BulletArray[iBulletIndex].m_AffectedActor == none)
-                iSaveBulletIndex = iBulletIndex;
-        }   
-    }
-    m_BulletArray[iSaveBulletIndex].m_AffectedActor = ActorAffected;
-    return true;
+	iBulletIndex = 0;
+	J0x07:
+
+	// End:0x83 [Loop If]
+	if(__NFUN_150__(iBulletIndex, 20))
+	{
+		// End:0x79
+		if(__NFUN_154__(m_BulletArray[iBulletIndex].m_iBulletGroupID, BulletGroup))
+		{
+			// End:0x54
+			if(__NFUN_114__(m_BulletArray[iBulletIndex].m_AffectedActor, ActorAffected))
+			{
+				return false;
+				// [Explicit Continue]
+				goto J0x79;
+			}
+			// End:0x79
+			if(__NFUN_114__(m_BulletArray[iBulletIndex].m_AffectedActor, none))
+			{
+				iSaveBulletIndex = iBulletIndex;
+			}
+		}
+		J0x79:
+
+		__NFUN_165__(iBulletIndex);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	m_BulletArray[iSaveBulletIndex].m_AffectedActor = ActorAffected;
+	return true;
+	return;
 }
 
 simulated event Destroyed()
 {
-    local int i;
-    local int iSaveBulletIndex;
+	local int i, iSaveBulletIndex;
 
-    for (i = 0; i < m_iNbBullets; i++)
-    {
-        m_BulletArray[i].m_BulletManager = none;
-        m_BulletArray[i].Destroy();
-    }            
+	i = 0;
+	J0x07:
+
+	// End:0x56 [Loop If]
+	if(__NFUN_150__(i, 20))
+	{
+		// End:0x4C
+		if(__NFUN_119__(m_BulletArray[i], none))
+		{
+			m_BulletArray[i].m_BulletManager = none;
+			m_BulletArray[i].__NFUN_279__();
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x07;
+	}
+	return;
 }
 
 defaultproperties
 {
-     RemoteRole=ROLE_None
-     bHidden=True
+	RemoteRole=0
+	bHidden=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var m_BulletArraym_iNbBullets

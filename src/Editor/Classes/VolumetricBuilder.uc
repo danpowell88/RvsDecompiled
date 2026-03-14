@@ -1,59 +1,90 @@
 //=============================================================================
+// VolumetricBuilder - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // VolumetricBuilder: Builds a volumetric brush (criss-crossed sheets).
 //=============================================================================
-class VolumetricBuilder
-	extends BrushBuilder;
+class VolumetricBuilder extends BrushBuilder;
 
-var() float Height, Radius;
 var() int NumSheets;
+var() float Height;
+// NEW IN 1.60
+var() float Radius;
 var() name GroupName;
 
-function BuildVolumetric( int Direction, int NumSheets, float Height, float Radius )
+function BuildVolumetric(int direction, int NumSheets, float Height, float Radius)
 {
-	local int n,x,y;
-	local rotator RotStep;
-	local vector vtx, NewVtx;
+	local int N, X, Y;
+	local Rotator RotStep;
+	local Vector vtx, NewVtx;
 
-	n = GetVertexCount();
-	RotStep.Yaw = 65536.0f / (NumSheets * 2);
+	N = GetVertexCount();
+	RotStep.Yaw = __NFUN_145__(65536, __NFUN_144__(NumSheets, 2));
+	vtx.X = Radius;
+	vtx.Z = __NFUN_172__(Height, float(2));
+	X = 0;
+	J0x54:
 
-	// Vertices.
-	vtx.x = Radius;
-	vtx.z = Height / 2;
-	for( x = 0 ; x < (NumSheets * 2) ; x++ )
+	// End:0xDD [Loop If]
+	if(__NFUN_150__(X, __NFUN_144__(NumSheets, 2)))
 	{
-		NewVtx = vtx >> (RotStep * x);
-		Vertex3f( NewVtx.x, NewVtx.y, NewVtx.z );
-		Vertex3f( NewVtx.x, NewVtx.y, NewVtx.z - Height );
+		NewVtx = __NFUN_276__(vtx, __NFUN_287__(RotStep, float(X)));
+		Vertex3f(NewVtx.X, NewVtx.Y, NewVtx.Z);
+		Vertex3f(NewVtx.X, NewVtx.Y, __NFUN_175__(NewVtx.Z, Height));
+		__NFUN_165__(X);
+		// [Loop Continue]
+		goto J0x54;
 	}
+	X = 0;
+	J0xE4:
 
-	// Polys.
-	for( x = 0 ; x < NumSheets ; x++ )
+	// End:0x195 [Loop If]
+	if(__NFUN_150__(X, NumSheets))
 	{
-		y = (x*2) + 1;
-		if( y >= (NumSheets * 2) ) y -= (NumSheets * 2);
-		Poly4i( Direction, n+(x*2), n+y, n+y+(NumSheets*2), n+(x*2)+(NumSheets*2), 'Sheets', 0x00000108); // PF_TwoSided|PF_NotSolid.
+		Y = __NFUN_146__(__NFUN_144__(X, 2), 1);
+		// End:0x128
+		if(__NFUN_153__(Y, __NFUN_144__(NumSheets, 2)))
+		{
+			__NFUN_162__(Y, __NFUN_144__(NumSheets, 2));
+		}
+		Poly4i(direction, __NFUN_146__(N, __NFUN_144__(X, 2)), __NFUN_146__(N, Y), __NFUN_146__(__NFUN_146__(N, Y), __NFUN_144__(NumSheets, 2)), __NFUN_146__(__NFUN_146__(N, __NFUN_144__(X, 2)), __NFUN_144__(NumSheets, 2)), 'Sheets', 264);
+		__NFUN_165__(X);
+		// [Loop Continue]
+		goto J0xE4;
 	}
+	return;
 }
 
 function bool Build()
 {
-	if( NumSheets<2 )
+	// End:0x13
+	if(__NFUN_150__(NumSheets, 2))
+	{
 		return BadParameters();
-	if( Height<=0 || Radius<=0 )
+	}
+	// End:0x36
+	if(__NFUN_132__(__NFUN_178__(Height, float(0)), __NFUN_178__(Radius, float(0))))
+	{
 		return BadParameters();
-
-	BeginBrush( true, GroupName );
-	BuildVolumetric( +1, NumSheets, Height, Radius );
+	}
+	BeginBrush(true, GroupName);
+	BuildVolumetric(1, NumSheets, Height, Radius);
 	return EndBrush();
+	return;
 }
 
 defaultproperties
 {
-     NumSheets=2
-     Height=128.000000
-     Radius=64.000000
-     GroupName="Volumetric"
-     BitmapFilename="BBVolumetric"
-     ToolTip="Volumetric (Torches, Chains, etc)"
+	NumSheets=2
+	Height=128.0000000
+	Radius=64.0000000
+	GroupName="Volumetric"
+	BitmapFilename="BBVolumetric"
+	ToolTip="Volumetric (Torches, Chains, etc)"
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var s

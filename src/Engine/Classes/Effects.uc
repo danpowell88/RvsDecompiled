@@ -1,15 +1,22 @@
 //=============================================================================
+// Effects - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // Effects, the base class of all gratuitous special effects.
 // 
 //=============================================================================
-class Effects extends Actor;
+class Effects extends Actor
+ notplaceable;
 
-var() sound 	EffectSound1;
+var() Sound EffectSound1;
 
 defaultproperties
 {
-     RemoteRole=ROLE_None
-     bNetTemporary=True
-     bUnlit=True
-     bGameRelevant=True
+	RemoteRole=0
+	bNetTemporary=true
+	bUnlit=true
+	bGameRelevant=true
 }

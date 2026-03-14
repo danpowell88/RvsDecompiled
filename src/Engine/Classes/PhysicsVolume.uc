@@ -1,214 +1,251 @@
 //=============================================================================
+// PhysicsVolume - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // PhysicsVolume:  a bounding volume which affects actor physics
 // Each Actor is affected at any time by one PhysicsVolume
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
 class PhysicsVolume extends Volume
 	native
-	nativereplication;
+	nativereplication
+ notplaceable;
 
-var()		bool		bPainCausing;	 // Zone causes pain.
-var()		vector		ZoneVelocity;
-var()		vector		Gravity;
-var()		float		GroundFriction;
-var()		float		TerminalVelocity;
-var()		float		DamagePerSec;
-var() class<DamageType>	DamageType;
-var()		int			Priority;	// determines which PhysicsVolume takes precedence if they overlap
-var() sound  EntrySound;	//only if waterzone
-var() sound  ExitSound;		// only if waterzone
-var() class<actor> EntryActor;	// e.g. a splash (only if water zone)
-var() class<actor> ExitActor;	// e.g. a splash (only if water zone)
-var() float  FluidFriction;
-var() vector ViewFlash, ViewFog;
-
-var()		bool	bDestructive; // Destroys most actors which enter it.
-var()		bool	bNoInventory;
-var()		bool	bMoveProjectiles;// this velocity zone should impart velocity to projectiles and effects
-var()		bool	bBounceVelocity;	// this velocity zone should bounce actors that land in it
-var()		bool	bNeutralZone; // Players can't take damage in this zone.
-var			bool	bWaterVolume;
-var	Info PainTimer;
-
+var() int Priority;  // determines which PhysicsVolume takes precedence if they overlap
+var() bool bPainCausing;  // Zone causes pain.
+var() bool bDestructive;  // Destroys most actors which enter it.
+var() bool bNoInventory;
+var() bool bMoveProjectiles;  // this velocity zone should impart velocity to projectiles and effects
+var() bool bBounceVelocity;  // this velocity zone should bounce actors that land in it
+var() bool bNeutralZone;  // Players can't take damage in this zone.
+var bool bWaterVolume;
 // Distance Fog
-var(VolumeFog) bool   bDistanceFog;	// There is distance fog in this physicsvolume.
-var(VolumeFog) color DistanceFogColor;
+var(VolumeFog) bool bDistanceFog;  // There is distance fog in this physicsvolume.
+var() float GroundFriction;
+var() float TerminalVelocity;
+var() float DamagePerSec;
+var() float FluidFriction;
 var(VolumeFog) float DistanceFogStart;
 var(VolumeFog) float DistanceFogEnd;
-
+var() Sound EntrySound;  // only if waterzone
+var() Sound ExitSound;  // only if waterzone
+var Info PainTimer;
 var PhysicsVolume NextPhysicsVolume;
+var() Class<Actor> EntryActor;  // e.g. a splash (only if water zone)
+var() Class<Actor> ExitActor;  // e.g. a splash (only if water zone)
+var() Vector ZoneVelocity;
+var() Vector Gravity;
+var() Vector ViewFlash;
+// NEW IN 1.60
+var() Vector ViewFog;
+var(VolumeFog) Color DistanceFogColor;
 
 simulated function Destroyed()
 {
-	Super.Destroyed();
+	super(Actor).Destroyed();
 	Level.RemovePhysicsVolume(self);
+	return;
 }
 
 simulated function PostBeginPlay()
 {
-	Super.PostBeginPlay();
+	super.PostBeginPlay();
 	Level.AddPhysicsVolume(self);
-
-	if ( Role < ROLE_Authority )
+	// End:0x28
+	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	{
 		return;
-	if ( bPainCausing )
-		PainTimer = Spawn(class'VolumeTimer', self);
+	}
+	// End:0x40
+	if(bPainCausing)
+	{
+		PainTimer = __NFUN_278__(Class'Engine.VolumeTimer', self);
+	}
+	return;
 }
 
-/* Called when an actor in this PhysicsVolume changes its physics mode
-*/
-event PhysicsChangedFor(Actor Other);
+event PhysicsChangedFor(Actor Other)
+{
+	return;
+}
 
-event ActorEnteredVolume(Actor Other);
-event ActorLeavingVolume(Actor Other);
+event ActorEnteredVolume(Actor Other)
+{
+	return;
+}
+
+event ActorLeavingVolume(Actor Other)
+{
+	return;
+}
 
 event PawnEnteredVolume(Pawn Other)
 {
-	if ( Other.IsPlayerPawn() )
-		TriggerEvent(Event,self, Other);
+	// End:0x23
+	if(Other.IsPlayerPawn())
+	{
+		TriggerEvent(Event, self, Other);
+	}
+	return;
 }
 
 event PawnLeavingVolume(Pawn Other)
 {
-	if ( Other.IsPlayerPawn() )
-		UntriggerEvent(Event,self, Other);
+	// End:0x23
+	if(Other.IsPlayerPawn())
+	{
+		UntriggerEvent(Event, self, Other);
+	}
+	return;
 }
 
-/*
-TimerPop
-damage touched actors if pain causing.
-since PhysicsVolume is static, this function is actually called by a volumetimer
-*/
-function TimerPop(VolumeTimer T)
+function TimerPop(VolumeTimer t)
 {
-	local actor A;
+	local Actor A;
 
-	if ( T == PainTimer )
+	// End:0x1C
+	if(__NFUN_114__(t, PainTimer))
 	{
-		if ( !bPainCausing )
+		// End:0x1C
+		if(__NFUN_129__(bPainCausing))
+		{
 			return;
-
-		ForEach TouchingActors(class'Actor', A)
-			CausePainTo(A);
+		}
 	}
+	return;
 }
 
-function Trigger( actor Other, pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
-	// turn zone damage on and off
-	if (DamagePerSec != 0)
+	// End:0x41
+	if(__NFUN_181__(DamagePerSec, float(0)))
 	{
-		bPainCausing = !bPainCausing;
-		if ( bPainCausing && (PainTimer == None) )
-			PainTimer = spawn(class'VolumeTimer', self);
+		bPainCausing = __NFUN_129__(bPainCausing);
+		// End:0x41
+		if(__NFUN_130__(bPainCausing, __NFUN_114__(PainTimer, none)))
+		{
+			PainTimer = __NFUN_278__(Class'Engine.VolumeTimer', self);
+		}
 	}
+	return;
 }
 
-event touch(Actor Other)
+event Touch(Actor Other)
 {
-	Super.Touch(Other);
-	if ( bNoInventory && Other.IsA('Inventory') && (Other.Owner == None) )
+	super(Actor).Touch(Other);
+	// End:0x56
+	if(__NFUN_130__(__NFUN_130__(bNoInventory, Other.__NFUN_303__('Inventory')), __NFUN_114__(Other.Owner, none)))
 	{
-		Other.LifeSpan = 1.5;
+		Other.LifeSpan = 1.5000000;
 		return;
 	}
-	if ( bMoveProjectiles && (ZoneVelocity != vect(0,0,0)) )
+	// End:0xFB
+	if(__NFUN_130__(bMoveProjectiles, __NFUN_218__(ZoneVelocity, vect(0.0000000, 0.0000000, 0.0000000))))
 	{
-		if ( Other.Physics == PHYS_Projectile )
-			Other.Velocity += ZoneVelocity;
-		else if ( Other.IsA('Effects') && (Other.Physics == PHYS_None) )
+		// End:0xA9
+		if(__NFUN_154__(int(Other.Physics), int(6)))
 		{
-			Other.SetPhysics(PHYS_Projectile);
-			Other.Velocity += ZoneVelocity;
+			__NFUN_223__(Other.Velocity, ZoneVelocity);			
+		}
+		else
+		{
+			// End:0xFB
+			if(__NFUN_130__(Other.__NFUN_303__('Effects'), __NFUN_154__(int(Other.Physics), int(0))))
+			{
+				Other.__NFUN_3970__(6);
+				__NFUN_223__(Other.Velocity, ZoneVelocity);
+			}
 		}
 	}
-	if ( bPainCausing )
+	// End:0x124
+	if(bPainCausing)
 	{
-		if ( Other.bDestroyInPainVolume )
+		// End:0x124
+		if(Other.bDestroyInPainVolume)
 		{
-			Other.Destroy();
+			Other.__NFUN_279__();
 			return;
 		}
-		CausePainTo(Other);
 	}
-	if ( bWaterVolume && Other.CanSplash() )
+	// End:0x14C
+	if(__NFUN_130__(bWaterVolume, Other.CanSplash()))
+	{
 		PlayEntrySplash(Other);
+	}
+	return;
 }
 
 function PlayEntrySplash(Actor Other)
 {
 	local float SplashSize;
-	local actor splash;
+	local Actor splash;
 
-	splashSize = FClamp(0.00003 * Other.Mass * (250 - 0.5 * FMax(-600,Other.Velocity.Z)), 0.1, 1.0 );
-	if( EntrySound != None )
+	SplashSize = __NFUN_246__(__NFUN_171__(__NFUN_171__(0.0000300, Other.Mass), __NFUN_175__(float(250), __NFUN_171__(0.5000000, __NFUN_245__(-600.0000000, Other.Velocity.Z)))), 0.1000000, 1.0000000);
+	// End:0x77
+	if(__NFUN_119__(EntrySound, none))
 	{
-        //R6CODE        
-//		PlaySound(EntrySound, SLOT_Interact, splashSize);
-        //END R6CODE        
-		if ( Other.Instigator != None )
-			MakeNoise(SplashSize);
+		// End:0x77
+		if(__NFUN_119__(Other.Instigator, none))
+		{
+			__NFUN_512__(SplashSize);
+		}
 	}
-	if( EntryActor != None )
+	// End:0xAF
+	if(__NFUN_119__(EntryActor, none))
 	{
-		splash = Spawn(EntryActor); 
-		if ( splash != None )
-			splash.SetDrawScale(splashSize);
+		splash = __NFUN_278__(EntryActor);
+		// End:0xAF
+		if(__NFUN_119__(splash, none))
+		{
+			splash.SetDrawScale(SplashSize);
+		}
 	}
+	return;
 }
 
-event untouch(Actor Other)
+event UnTouch(Actor Other)
 {
-	if ( bWaterVolume && Other.CanSplash() )
+	// End:0x28
+	if(__NFUN_130__(bWaterVolume, Other.CanSplash()))
+	{
 		PlayExitSplash(Other);
+	}
+	return;
 }
 
 function PlayExitSplash(Actor Other)
 {
 	local float SplashSize;
-	local actor splash;
+	local Actor splash;
 
-	splashSize = FClamp(0.003 * Other.Mass, 0.1, 1.0 );
-//R6CODE        
-//    if( ExitSound != None )
-//		PlaySound(ExitSound, SLOT_Interact, splashSize); 
-//END R6CODE        
-	if( ExitActor != None )
+	SplashSize = __NFUN_246__(__NFUN_171__(0.0030000, Other.Mass), 0.1000000, 1.0000000);
+	// End:0x5F
+	if(__NFUN_119__(ExitActor, none))
 	{
-		splash = Spawn(ExitActor); 
-		if ( splash != None )
-			splash.SetDrawScale(splashSize);
+		splash = __NFUN_278__(ExitActor);
+		// End:0x5F
+		if(__NFUN_119__(splash, none))
+		{
+			splash.SetDrawScale(SplashSize);
+		}
 	}
-}
-
-function CausePainTo(Actor Other)
-{
-	local float depth;
-	local Pawn P;
-
-	// FIXMEZONE figure out depth of actor, and base pain on that!!!
-	depth = 1;
-	P = Pawn(Other);
-
-	if ( DamagePerSec > 0 )
-	{
-		Other.TakeDamage(int(DamagePerSec * depth), None, Location, vect(0,0,0), DamageType); 
-		if ( (P != None) && (P.Controller != None) )
-			P.Controller.PawnIsInPain(self);
-	}	
-	else
-	{
-		if ( (P != None) && (P.Health < P.Default.Health) )
-		P.Health = Min(P.Default.Health, P.Health - depth * DamagePerSec);
-	}
+	return;
 }
 
 defaultproperties
 {
-     GroundFriction=8.000000
-     TerminalVelocity=2500.000000
-     FluidFriction=0.300000
-     Gravity=(Z=-1500.000000)
-     bAlwaysRelevant=True
-     m_bSeeThrough=True
+	GroundFriction=8.0000000
+	TerminalVelocity=2500.0000000
+	FluidFriction=0.3000000
+	Gravity=(X=0.0000000,Y=0.0000000,Z=-1500.0000000)
+	bAlwaysRelevant=true
+	m_bSeeThrough=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var DamageType
+// REMOVED IN 1.60: var g
+// REMOVED IN 1.60: function CausePainTo

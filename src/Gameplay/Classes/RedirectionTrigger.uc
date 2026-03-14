@@ -1,18 +1,25 @@
+//=============================================================================
+// RedirectionTrigger - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class RedirectionTrigger extends Triggers;
 
 var() name RedirectionEvent;
 
-function Trigger( actor Other, pawn EventInstigator )
+function Trigger(Actor Other, Pawn EventInstigator)
 {
 	local Pawn P;
 
-	ForEach DynamicActors(class'Pawn',P,Event)
+	// End:0x44
+	foreach __NFUN_313__(Class'Engine.Pawn', P, Event)
 	{
-		if ( P.Health > 0 )
-			P.TriggerEvent(RedirectionEvent,self,P);
-	}
+		// End:0x43
+		if(__NFUN_151__(P.Health, 0))
+		{
+			P.TriggerEvent(RedirectionEvent, self, P);
+		}		
+	}	
+	return;
 }
 
-defaultproperties
-{
-}

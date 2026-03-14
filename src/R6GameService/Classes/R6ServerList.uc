@@ -1,56 +1,45 @@
 //=============================================================================
+// R6ServerList - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6GameServices.uc : This class is used to manage server lists.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
 //    2002/02/20 * Created by John Bennett
 //============================================================================//
-
 class R6ServerList extends R6AbstractGameService
-	native;
-
-//enum ECDKEY_PLAYER_STATUS
-//{
-//	ECDKEY_PLAYER_UNKNOWN,
-//	ECDKEY_PLAYER_INVALID,
-//	ECDKEY_PLAYER_VALID
-//};
-
-enum eSortCategory
-{
-    eSG_Favorite,
-    eSG_Locked,
-    eSG_Dedicated,
-//#ifdefR6PUNKBUSTER
-	eSG_PunkBuster,
-//#endif
-    eSG_PingTime,
-    eSG_Name,
-    eSG_GameType,
-    eSG_GameMode,
-    eSG_Map,
-    eSG_NumPlayers
-};
-
-//--------------------------------------------------------------
-// Structures - If any of the fields of these structures are
-// changed (or if fields are added), the structure definitions 
-// in R6GameService.h must also be changed.
-//--------------------------------------------------------------
+	native
+ config;
 
 const K_GlobalID_size = 16;
 
-struct stValidationResponse
+enum eSortCategory
 {
-    var INT     iReqID;
-    var PlayerController.ECDKEYST_STATUS eStatus;
-    var BOOL    bSuceeded;
-    var BOOL    bTimeout;
-    var BYTE    ucGlobalID[K_GlobalID_size];
+	eSG_Favorite,                   // 0
+	eSG_Locked,                     // 1
+	eSG_Dedicated,                  // 2
+	eSG_PunkBuster,                 // 3
+	eSG_PingTime,                   // 4
+	eSG_Name,                       // 5
+	eSG_GameType,                   // 6
+	eSG_GameMode,                   // 7
+	eSG_Map,                        // 8
+	eSG_NumPlayers                  // 9
 };
 
-// An IP address. TODO - structure definition copied from IpDrv
-// need to find a way to access the original definition.
+struct stValidationResponse
+{
+	var int iReqID;
+	var Controller.ECDKEYST_STATUS eStatus;
+	var bool bSuceeded;
+	var bool bTimeout;
+// NEW IN 1.60
+	var byte ucGlobalID[16];
+};
 
 struct IpAddr
 {
@@ -58,407 +47,179 @@ struct IpAddr
 	var int Port;
 };
 
-
 struct stRemotePlayers
 {
-    var string szAlias;
-    var INT    iPing;
-    var INT    iGroupID;
-    var INT    iLobbySrvID;
-    var INT    iSkills;
-    var INT    iRank;
-    var string szTime;
+	var string szAlias;
+	var int iPing;
+	var int iGroupID;
+	var int iLobbySrvID;
+	var int iSkills;
+	var int iRank;
+	var string szTime;
 };
 
 struct stGameTypeAndMap
 {
-    var string szMap;
+	var string szMap;
 //    var string szGameLoc;
-    var string szGameType;
+	var string szGameType;
 };
 
 struct stGameData
 {
-    var BOOL        bUsePassword;
-    var BOOL        bDedicatedServer;
+	var bool bUsePassword;
+	var bool bDedicatedServer;
 //    var INT         iTimeMap;
-    var INT         iRoundsPerMatch;
-    var INT         iRoundTime;
-    var INT         iBetTime;
-    var INT         iBombTime;
-    var BOOL        bShowNames;
-    var BOOL        bInternetServer;
-    var BOOL        bFriendlyFire;
-    var BOOL        bAutoBalTeam;
-    var BOOL        bTKPenalty;
-    var BOOL        bRadar;
-    var BOOL        bAdversarial;
-    var BOOL        bRotateMap;
-    var BOOL        bAIBkp;
-    var BOOL        bForceFPWeapon;
+	var int iRoundsPerMatch;
+	var int iRoundTime;
+	var int iBetTime;
+	var int iBombTime;
+	var bool bShowNames;
+	var bool bInternetServer;
+	var bool bFriendlyFire;
+	var bool bAutoBalTeam;
+	var bool bTKPenalty;
+	var bool bRadar;
+	var bool bAdversarial;
+	var bool bRotateMap;
+	var bool bAIBkp;
+	var bool bForceFPWeapon;
 //#ifdef R6PUNKBUSTER
-    var BOOL        bPunkBuster;
+	var bool bPunkBuster;
 //#endif R6PUNKBUSTER
-    var INT         iNumMaps;
-    var INT         iNumTerro;
-    var INT         iPort;
-
-    var string      szName;
-    var string      szModName; // MPF
-    var INT         iMaxPlayer; 
-    var INT         iNbrPlayer;
-	var string      szGameDataGameType;
-    var string      szGameType;
-    var string      szCurrentMap;
-    var string      szMessageOfDay;
-    var string      szGameVersion;
+	var int iNumMaps;
+	var int iNumTerro;
+	var int iPort;
+	var string szName;
+	var string szModName;  // MPF
+	var int iMaxPlayer;
+	var int iNbrPlayer;
+	var string szGameDataGameType;
+//    var string szGameLoc;
+	var string szGameType;
+	var string szCurrentMap;
+	var string szMessageOfDay;
+	var string szGameVersion;
     // Variable portion of game data buffer
 //    var array<string> mapList;
-    var array<stGameTypeAndMap> gameMapList;
+	var array<stGameTypeAndMap> gameMapList;
     // List of remote players, filled only for selected server
-    var array<stRemotePlayers> playerList;
+	var array<stRemotePlayers> PlayerList;
     // Data used only if setting self up as a server
-    var string      szPassword;
-
+	var string szPassword;
 };
 
 struct stGameServer
 {
-    // Basic information on server
-    var INT         iGroupID;
-    var INT         iLobbySrvID;
-    var INT         iBeaconPort;
-//    var INT         iID;
-    var INT         iPing;
-    var string      szIPAddress;
-    var string      szAltIPAddress;
-    var BOOL        bUseAltIP;
-
+	var int iGroupID;
+	var int iLobbySrvID;
+	var int iBeaconPort;
+	var int iPing;
+	var string szIPAddress;
+	var string szAltIPAddress;
+	var bool bUseAltIP;
     // flags - used mostly for menus
-    var BOOL        bDisplay;    // Display to user in server list
-    var BOOL        bFavorite;
-    var BOOL        bSameVersion;
-    var string      szOptions;
-
+	var bool bDisplay;  // Display to user in server list
+	var bool bFavorite;
+	var bool bSameVersion;
+	var string szOptions;
     // Fixed portion of game data buffer
-    var stGameData  sGameData;
+	var stGameData sGameData;
 };
 
-struct stFilterSettings
-{
-    var BOOL    bDeathMatch;
-    var BOOL    bTeamDeathMatch;
-    var BOOL    bDisarmBomb;
-    var BOOL    bHostageRescueAdv;
-    var BOOL    bEscortPilot;
-    var BOOL    bMission;
-    var BOOL    bTerroristHunt;
-    var BOOL    bTerroristHuntAdv;//MissionPack1    // MPF
-    var BOOL    bScatteredHuntAdv;//MissionPack1
-    var BOOL    bCaptureTheEnemyAdv;//MissionPack1
-    var BOOL    bKamikaze;//MissionPack1 for MissionPack2
-    var BOOL    bHostageRescueCoop;
-    var BOOL    bDefend;
-    var BOOL    bRecon;
-    var BOOL    bSquadDeathMatch;
-    var BOOL    bSquadTeamDeathMatch;
-    var BOOL    bDebugGameMode;
-    var BOOL    bUnlockedOnly;
-    var BOOL    bFavoritesOnly;
-    var BOOL    bDedicatedServersOnly;
-    var BOOL    bServersNotEmpty;
-    var BOOL    bServersNotFull;
-    var BOOL    bResponding;
-    var BOOL    bSameVersion;
-//#ifdef R6PUNKBUSTER
-    var BOOL    bPunkBusterServerOnly;
-//#endif R6PUNKBUSTER    
-    var string  szHasPlayer;
-    var INT     iFasterThan;
-
-};
-//------------------
-// Member Lists
-//------------------
-
-var array<string>           m_favoriteServersList;
-var array<stGameServer>     m_GameServerList;
+var int m_iSelSrvIndex;
+var int m_iIndRefrIndex;  // Index of server on which we are doing an individual refresh
+var bool m_bDedicatedServer;
+var bool m_bServerListChanged;  // Flag to indicate that a change in the server list was detected
+var bool m_bServerInfoChanged;  // Flag to indicate that a change in the server info was detected
+var config bool m_bSavePWSave;  // Save password saved value
+var config bool m_bAutoLISave;  // Auto login saved value
+var ClientBeaconReceiver m_ClientBeacon;
+var array<string> m_favoriteServersList;
+var array<stGameServer> m_GameServerList;
 var array<stValidationResponse> m_ValidResponseList;
 var array<stValidationResponse> m_ModValidResponseList;
-var array<int>              m_GSLSortIdx;
+var array<int> m_GSLSortIdx;
+var stGameServer m_CrGameSrvInfo;
+var string m_szGameVersion;  // Game version as indicated in R6RSVersion.h
 
-//------------------
-// Member Variables
-//------------------
+// Export UR6ServerList::execNativeInitFavorites(FFrame&, void* const)
+ native(1222) final function NativeInitFavorites();
 
-// Detailed information on the selected server
+// Export UR6ServerList::execNativeUpdateFavorites(FFrame&, void* const)
+ native(1223) final function NativeUpdateFavorites();
 
-var INT              m_iSelSrvIndex;
+// Export UR6ServerList::execNativeGetPingTime(FFrame&, void* const)
+ native(1225) final function int NativeGetPingTime(coerce string IpAddr);
 
-// Filter Settings
+// Export UR6ServerList::execNativeGetPingTimeOut(FFrame&, void* const)
+ native(1202) final function int NativeGetPingTimeOut();
 
-var config stFilterSettings m_Filters;
+// Export UR6ServerList::execNativeGetMilliSeconds(FFrame&, void* const)
+ native(1278) final function int NativeGetMilliSeconds();
 
-// Beacon receiver
+// Export UR6ServerList::execSortServers(FFrame&, void* const)
+ native(1206) final function SortServers(int _iSortType, bool _bAscending);
 
-var ClientBeaconReceiver    m_ClientBeacon;
+// Export UR6ServerList::execNativeGetOwnSvrPort(FFrame&, void* const)
+ native(1292) final function int NativeGetOwnSvrPort();
 
-// Information on server
+// Export UR6ServerList::execNativeGetMaxPlayers(FFrame&, void* const)
+ native(1355) final function int NativeGetMaxPlayers();
 
-var BOOL m_bDedicatedServer;
-
-var BOOL m_bServerListChanged;       // Flag to indicate that a change in the server list was detected
-var BOOL m_bServerInfoChanged;       // Flag to indicate that a change in the server info was detected
-
-// Detailed information on a game the user wishes to create
-
-var stGameServer    m_CrGameSrvInfo;
-
-var string m_szGameVersion;          // Game version as indicated in R6RSVersion.h
-
-var BOOL m_bIndRefrInProgress;       // Individual refresh in progress
-var INT  m_iIndRefrIndex;            // Index of server on which we are doing an individual refresh
-
-var config BOOL m_bSavePWSave;              // Save password saved value
-var config BOOL m_bAutoLISave;              // Auto login saved value
-
-//-----------------------------
-// Native Function definitions
-// ----------------------------
-
-native(1222) final function       NativeInitFavorites();
-native(1223) final function       NativeUpdateFavorites();
-native(1225) final function   INT NativeGetPingTime( coerce string IpAddr );
-native(1202) final function   INT NativeGetPingTimeOut();
-native(1278) final function   INT NativeGetMilliSeconds ();
-native(1206) final function	  SortServers( INT _iSortType, BOOL _bAscending);
-native(1236) final function       NativeResetSvrContainer();
-native(1229) final function       NativeFillSvrContainer();
-native(1291) final function       NativeSetOwnSvrPort( INT iPort );
-native(1292) final function   INT NativeGetOwnSvrPort();
-native(1351) final function   INT NativeGetLobbyID();
-native(1352) final function   INT NativeGetGroupID();
-native(1355) final function   INT NativeGetMaxPlayers();
-native(1314) final function   INT GetDisplayListSize();
+// Export UR6ServerList::execGetDisplayListSize(FFrame&, void* const)
+ native(1314) final function int GetDisplayListSize();
 
 //=============================================================================
 // Returns the values that will be displayed in the server list
 //=============================================================================
-function getServerListItem( INT iSortIdx, OUT stGameServer _stGameServer)
+function getServerListItem(int iSortIdx, out stGameServer _stGameServer)
 {
-    Local INT index;
+	local int Index;
 
-    index = m_GSLSortIdx[iSortIdx];
-
-	_stGameServer.bFavorite					= m_GameServerList[index].bFavorite;
-	_stGameServer.bSameVersion				= m_GameServerList[index].bSameVersion;
-    _stGameServer.szIPAddress				= m_GameServerList[index].szIPAddress;
-    _stGameServer.iPing						= m_GameServerList[index].iPing;
-
-    _stGameServer.sGameData.szName			= m_GameServerList[index].sGameData.szName;
-    _stGameServer.sGameData.szCurrentMap	= m_GameServerList[index].sGameData.szCurrentMap;
-    _stGameServer.sGameData.iMaxPlayer		= m_GameServerList[index].sGameData.iMaxPlayer;
-    _stGameServer.sGameData.iNbrPlayer		= m_GameServerList[index].sGameData.iNbrPlayer;
-    _stGameServer.sGameData.szGameDataGameType= m_GameServerList[index].sGameData.szGameDataGameType;
-	_stGameServer.sGameData.bUsePassword	= m_GameServerList[index].sGameData.bUsePassword;
-	_stGameServer.sGameData.bDedicatedServer = m_GameServerList[index].sGameData.bDedicatedServer;
-//#ifdefR6PUNKBUSTER
-	_stGameServer.sGameData.bPunkBuster		= m_GameServerList[index].sGameData.bPunkBuster;
-//#endif
+	Index = m_GSLSortIdx[iSortIdx];
+	_stGameServer.bFavorite = m_GameServerList[Index].bFavorite;
+	_stGameServer.bSameVersion = m_GameServerList[Index].bSameVersion;
+	_stGameServer.szIPAddress = m_GameServerList[Index].szIPAddress;
+	_stGameServer.iPing = m_GameServerList[Index].iPing;
+	_stGameServer.sGameData.szName = m_GameServerList[Index].sGameData.szName;
+	_stGameServer.sGameData.szCurrentMap = m_GameServerList[Index].sGameData.szCurrentMap;
+	_stGameServer.sGameData.iMaxPlayer = m_GameServerList[Index].sGameData.iMaxPlayer;
+	_stGameServer.sGameData.iNbrPlayer = m_GameServerList[Index].sGameData.iNbrPlayer;
+	_stGameServer.sGameData.szGameDataGameType = m_GameServerList[Index].sGameData.szGameDataGameType;
+	_stGameServer.sGameData.bUsePassword = m_GameServerList[Index].sGameData.bUsePassword;
+	_stGameServer.sGameData.bDedicatedServer = m_GameServerList[Index].sGameData.bDedicatedServer;
+	_stGameServer.sGameData.bPunkBuster = m_GameServerList[Index].sGameData.bPunkBuster;
+	return;
 }
-
-
-
-//=============================================================================
-// Set the "display" flag for each of the servers based on the current filter
-// settings.
-//=============================================================================
-
-function UpdateFilters()
-{
-	local R6ModMgr pModMgr;
-    local INT i,j;
-    local BOOL bFound, bIsRavenShield;
-    local string szCurrentMod;
-
-	pModMgr = class'Actor'.static.GetModMgr();
-	szCurrentMod = pModMgr.m_pCurrentMod.m_szKeyWord;
-	bIsRavenShield = pModMgr.IsRavenShield();
-
-    for ( i = 0; i < m_GameServerList.length; i++)
-    {
-
-        // By default, we display the server, then look for resaons to omit it from the list
-
-        m_GameServerList[i].bDisplay = TRUE;
-
-        // First check game mode filters
-
-        if ( !m_Filters.bDeathMatch && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_DeathmatchMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-            
-        if ( !m_Filters.bTeamDeathMatch && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_TeamDeathmatchMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bDisarmBomb && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_BombAdvMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bHostageRescueAdv && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_HostageRescueAdvMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bEscortPilot && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_EscortAdvMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bMission && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_MissionMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bTerroristHunt && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_TerroristHuntCoopMode")
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bHostageRescueCoop && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_HostageRescueCoopMode" )   // TODO
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bDefend && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_DefendCoopMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bRecon && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_ReconCoopMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bSquadDeathMatch && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_SquadDeathmatch" )    // TODO
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bSquadTeamDeathMatch && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_SquadTeamDeathmatch" )  // TODO
-            m_GameServerList[i].bDisplay = FALSE;
-
-        if ( !m_Filters.bDebugGameMode && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_NoRulesMode" )
-            m_GameServerList[i].bDisplay = FALSE;
-
-		if ( !bIsRavenShield ) // This is suppose to be derivate in a class like the menu stuff... for the sdk
-        {
-			// Thoses 2 conditions not supposed to happen there
-			// if is a Ravenshield server or the ModName is different than the current mod name
-			if ( (m_GameServerList[i].sGameData.szModName == "") ||
-				!(m_GameServerList[i].sGameData.szModName ~= szCurrentMod) )
-        {
-				m_GameServerList[i].bDisplay = FALSE;
-				continue;
-			}
-
-            if ( !m_Filters.bTerroristHuntAdv && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_TerroristHuntAdvMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( !m_Filters.bScatteredHuntAdv && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_ScatteredHuntAdvMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( !m_Filters.bCaptureTheEnemyAdv && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_CaptureTheEnemyAdvMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( !m_Filters.bKamikaze && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_KamikazeMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( !m_Filters.bDebugGameMode && m_GameServerList[i].sGameData.szGameDataGameType == "RGM_NoRulesMode" )
-                m_GameServerList[i].bDisplay = FALSE;
-        }
-        else
-        {
-			if ( (m_GameServerList[i].sGameData.szModName != "") &&	!(m_GameServerList[i].sGameData.szModName ~= szCurrentMod) )
-			{
-				m_GameServerList[i].bDisplay = FALSE;
-				continue;
-			}
-
-            if ( m_GameServerList[i].sGameData.szGameDataGameType == "RGM_TerroristHuntAdvMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( m_GameServerList[i].sGameData.szGameDataGameType == "RGM_ScatteredHuntAdvMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( m_GameServerList[i].sGameData.szGameDataGameType == "RGM_CaptureTheEnemyAdvMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( m_GameServerList[i].sGameData.szGameDataGameType == "RGM_KamikazeMode" )  
-                m_GameServerList[i].bDisplay = FALSE;
-
-            if ( m_GameServerList[i].sGameData.szGameDataGameType == "RGM_NoRulesMode" )
-                m_GameServerList[i].bDisplay = FALSE;
-        }
-        
-        // Has Player 
-        if ( m_Filters.szHasPlayer != "" )
-        {
-            bFound = FALSE;
-            for ( j = 0; j < m_GameServerList[i].sGameData.playerList.length; j++)
-            {
-                if ( InStr( Caps( m_GameServerList[i].sGameData.playerList[j].szAlias ), Caps( m_Filters.szHasPlayer ) ) != -1 )
-                    bFound = TRUE;
-            }
-            if ( !bFound )
-                m_GameServerList[i].bDisplay = FALSE;
-        }
-
-        // unlockedOnly
-        if ( m_Filters.bUnlockedOnly &&  m_GameServerList[i].sGameData.bUsePassword )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        // Favorites only
-        if( m_Filters.bFavoritesOnly && !m_GameServerList[i].bFavorite)
-            m_GameServerList[i].bDisplay = FALSE;
-
-        // Dedicated servers only
-
-        if ( m_Filters.bDedicatedServersOnly && !m_GameServerList[i].sGameData.bDedicatedServer )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        // Server Not Empty
-        if ( m_Filters.bServersNotEmpty  && ( m_GameServerList[i].sGameData.iNbrPlayer == 0 ) )
-            m_GameServerList[i].bDisplay = FALSE;
-
-        // Server Not Full
-        if ( m_Filters.bServersNotFull && ( m_GameServerList[i].sGameData.iNbrPlayer >= m_GameServerList[i].sGameData.iMaxPlayer ) )
-            m_GameServerList[i].bDisplay = FALSE;
-
-//#ifdef R6PUNKBUSTER
-        if ( m_Filters.bPunkBusterServerOnly && !m_GameServerList[i].sGameData.bPunkBuster )
-            m_GameServerList[i].bDisplay = FALSE;
-//#endif R6PUNKBUSTER    
-
-        // Responding
-
-        if ( m_Filters.bResponding && m_GameServerList[i].iPing >= 1000 )   // 1000 = ping time when server does not respond
-            m_GameServerList[i].bDisplay = FALSE;
-
-        // Faster Than
-
-        if ( m_Filters.iFasterThan > 0 && m_GameServerList[i].iPing > m_Filters.iFasterThan)
-            m_GameServerList[i].bDisplay = FALSE;
-
-        // Same Version
-        if ( m_Filters.bSameVersion &&  !m_GameServerList[i].bSameVersion )
-            m_GameServerList[i].bDisplay = FALSE;
-    }
-}
-
 
 //=============================================================================
 // IsAFavorite - Checks if the passed server is a member of the 
 // favorite server list.
 //=============================================================================
-function BOOL IsAFavorite( string szIPAddress )
+function bool IsAFavorite(string szIPAddress)
 {
-    local INT  i;
-    local BOOL bFound;
+	local int i;
+	local bool bFound;
 
-    bFound = FALSE;
+	bFound = false;
+	i = 0;
+	J0x0F:
 
-    for ( i = 0; i < m_favoriteServersList.length && !bFound; i++ )
-    {
-        if ( szIPAddress == m_favoriteServersList[i] )
-        {
-            bFound = TRUE;
-        }
-    }
-    
-    return bFound;
+	// End:0x53 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, m_favoriteServersList.Length), __NFUN_129__(bFound)))
+	{
+		// End:0x49
+		if(__NFUN_122__(szIPAddress, m_favoriteServersList[i]))
+		{
+			bFound = true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x0F;
+	}
+	return bFound;
+	return;
 }
 
 //=============================================================================
@@ -466,79 +227,90 @@ function BOOL IsAFavorite( string szIPAddress )
 // list is kept in an ini file (r6gameservice.ini).  The function argument is
 // the index of the server in the list of servers: m_GameServerList.
 //=============================================================================
-function AddToFavorites( INT sortedListIdx )
+function AddToFavorites(int sortedListIdx)
 {
-    local INT  i;
-    local BOOL found;
-    local INT  serverListIndex;
+	local int i;
+	local bool Found;
+	local int serverListIndex;
 
-    serverListIndex = m_GSLSortIdx[sortedListIdx];
+	serverListIndex = m_GSLSortIdx[sortedListIdx];
+	m_GameServerList[serverListIndex].bFavorite = true;
+	Found = false;
+	i = 0;
+	J0x33:
 
-    m_GameServerList[serverListIndex].bFavorite = TRUE;
-
-    // Just check to make sure the server is not already in the list
-
-    found = FALSE;
-    for ( i = 0; i < m_favoriteServersList.length && !found; i++ )
-    {
-        if (  m_GameServerList[serverListIndex].szIPAddress == m_favoriteServersList[i])
-            found = TRUE;
-    }
-    
-    // If not found, add to list and update ini file.
-
-    if ( !found )
-    {
-        m_favoriteServersList[m_favoriteServersList.length] = m_GameServerList[serverListIndex].szIPAddress;
-        NativeUpdateFavorites();
-    }
+	// End:0x82 [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, m_favoriteServersList.Length), __NFUN_129__(Found)))
+	{
+		// End:0x78
+		if(__NFUN_122__(m_GameServerList[serverListIndex].szIPAddress, m_favoriteServersList[i]))
+		{
+			Found = true;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x33;
+	}
+	// End:0xAD
+	if(__NFUN_129__(Found))
+	{
+		m_favoriteServersList[m_favoriteServersList.Length] = m_GameServerList[serverListIndex].szIPAddress;
+		__NFUN_1223__();
+	}
+	return;
 }
-
 
 //=============================================================================
 // DelFromFavorites - Remove the server from the list of favorite servers.  This
 // list is kept in an ini file (r6gameservice.ini).  The function argument is
 // the index of the server in the list of servers: m_GameServerList.
 //=============================================================================
-function DelFromFavorites( INT sortedListIdx )
+function DelFromFavorites(int sortedListIdx)
 {
-    local INT  i;
-    local INT  favoritesListIndex;
-    local BOOL found;
-    local INT  serverListIndex;
+	local int i, favoritesListIndex;
+	local bool Found;
+	local int serverListIndex;
 
-    serverListIndex = m_GSLSortIdx[sortedListIdx];
+	serverListIndex = m_GSLSortIdx[sortedListIdx];
+	m_GameServerList[serverListIndex].bFavorite = false;
+	Found = false;
+	i = 0;
+	J0x33:
 
-    m_GameServerList[serverListIndex].bFavorite = FALSE;
-
-    // Go through the list to find the correct server to remove
-
-    found = FALSE;
-    for ( i = 0; i < m_favoriteServersList.length && !found; i++ )
-    {
-        if (  m_GameServerList[serverListIndex].szIPAddress == m_favoriteServersList[i])
-        {
-            found = TRUE;
-            favoritesListIndex = i;
-        }
-    }
-    if ( found )
-    {
-        m_favoriteServersList.Remove(favoritesListIndex, 1); // Remove this server from list
-        NativeUpdateFavorites();                        // Update the ini file
-    }
-
+	// End:0x8D [Loop If]
+	if(__NFUN_130__(__NFUN_150__(i, m_favoriteServersList.Length), __NFUN_129__(Found)))
+	{
+		// End:0x83
+		if(__NFUN_122__(m_GameServerList[serverListIndex].szIPAddress, m_favoriteServersList[i]))
+		{
+			Found = true;
+			favoritesListIndex = i;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x33;
+	}
+	// End:0xA5
+	if(Found)
+	{
+		m_favoriteServersList.Remove(favoritesListIndex, 1);
+		__NFUN_1223__();
+	}
+	return;
 }
 
 //=============================================================================
 // SetSelectedServer: Set the selcted server to the passed value
 //=============================================================================
-function SetSelectedServer( INT iServerListIndex)
+function SetSelectedServer(int iServerListIndex)
 {
-    if ( iServerListIndex > m_GameServerList.length || m_GameServerList.length == 0 )  // Check index is valid
-        return;
-
-    m_iSelSrvIndex = m_GSLSortIdx[iServerListIndex];
+	// End:0x20
+	if(__NFUN_132__(__NFUN_151__(iServerListIndex, m_GameServerList.Length), __NFUN_154__(m_GameServerList.Length, 0)))
+	{
+		return;
+	}
+	m_iSelSrvIndex = m_GSLSortIdx[iServerListIndex];
+	return;
 }
 
 //=============================================================================
@@ -547,141 +319,202 @@ function SetSelectedServer( INT iServerListIndex)
 //=============================================================================
 function Created()
 {
-    m_szGameVersion = class'Actor'.static.GetGameVersion();
+	m_szGameVersion = Class'Engine.Actor'.static.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield()));
+	return;
 }
+
 //=============================================================================
 // getSvrData: Get the gamedata of a server from the ClientBeaconReceiver class
 //=============================================================================
-function stGameData getSvrData( INT iBeaconIdx )
+function stGameData getSvrData(int iBeaconIdx)
 {
-    local stGameData    sGameData;
-    local stGameTypeAndMap sMapAndGame;
-    local stRemotePlayers remPlayer;
-    local INT             j;
+	local stGameData sGameData;
+	local stGameTypeAndMap sMapAndGame;
+	local stRemotePlayers remPlayer;
+	local int j;
 
-    sGameData.bUsePassword      = m_ClientBeacon.GetLocked(iBeaconIdx);
-    sGameData.bDedicatedServer  = m_ClientBeacon.GetDedicated(iBeaconIdx);
-    sGameData.iRoundsPerMatch    = m_ClientBeacon.GetRoundsPerMap(iBeaconIdx);    
-//    sGameData.iTimeMap          = m_ClientBeacon.GetMapTime(iBeaconIdx)/60.0;
-    sGameData.iRoundTime        = m_ClientBeacon.GetRoundTime(iBeaconIdx);
-    sGameData.iBetTime          = m_ClientBeacon.GetBetTime(iBeaconIdx);
-    sGameData.iBombTime         = m_ClientBeacon.GetBombTime(iBeaconIdx);
-    sGameData.bShowNames        = m_ClientBeacon.GetShowEnemyNames(iBeaconIdx);
-    sGameData.bInternetServer   = m_ClientBeacon.GetInternetServer(iBeaconIdx);
-    sGameData.bFriendlyFire     = m_ClientBeacon.GetFriendlyFire(iBeaconIdx);
-    sGameData.bAutoBalTeam      = m_ClientBeacon.GetAutoBalanceTeam(iBeaconIdx);
-    sGameData.bRadar            = m_ClientBeacon.GetRadar(iBeaconIdx);
-    sGameData.bTKPenalty        = m_ClientBeacon.GetTKPenalty(iBeaconIdx);
-    sGameData.iPort             = m_ClientBeacon.GetPortNumber(iBeaconIdx);
-    sGameData.szGameDataGameType= m_ClientBeacon.GetCurrGameType(iBeaconIdx);
-    sGameData.szName            = m_ClientBeacon.GetSvrName(iBeaconIdx);
-    sGameData.szModName         = m_ClientBeacon.GetModName(iBeaconIdx); // MPF 
-    sGameData.iNumTerro         = m_ClientBeacon.GetNumTerrorists(iBeaconIdx);
-    sGameData.bAIBkp            = m_ClientBeacon.GetAIBackup(iBeaconIdx);
-    sGameData.bRotateMap        = m_ClientBeacon.GetRotateMap(iBeaconIdx);
-    sGameData.bForceFPWeapon    = m_ClientBeacon.GetForceFirstPersonWeapon(iBeaconIdx);
-//#ifdef R6PUNKBUSTER
-    sGameData.bPunkBuster       = m_ClientBeacon.GetPunkBusterEnabled(iBeaconIdx);
-//#endif R6PUNKBUSTER
+	sGameData.bUsePassword = m_ClientBeacon.GetLocked(iBeaconIdx);
+	sGameData.bDedicatedServer = m_ClientBeacon.GetDedicated(iBeaconIdx);
+	sGameData.iRoundsPerMatch = int(m_ClientBeacon.GetRoundsPerMap(iBeaconIdx));
+	sGameData.iRoundTime = int(m_ClientBeacon.GetRoundTime(iBeaconIdx));
+	sGameData.iBetTime = int(m_ClientBeacon.GetBetTime(iBeaconIdx));
+	sGameData.iBombTime = int(m_ClientBeacon.GetBombTime(iBeaconIdx));
+	sGameData.bShowNames = m_ClientBeacon.GetShowEnemyNames(iBeaconIdx);
+	sGameData.bInternetServer = m_ClientBeacon.GetInternetServer(iBeaconIdx);
+	sGameData.bFriendlyFire = m_ClientBeacon.GetFriendlyFire(iBeaconIdx);
+	sGameData.bAutoBalTeam = m_ClientBeacon.GetAutoBalanceTeam(iBeaconIdx);
+	sGameData.bRadar = m_ClientBeacon.GetRadar(iBeaconIdx);
+	sGameData.bTKPenalty = m_ClientBeacon.GetTKPenalty(iBeaconIdx);
+	sGameData.iPort = m_ClientBeacon.GetPortNumber(iBeaconIdx);
+	sGameData.szGameDataGameType = m_ClientBeacon.GetCurrGameType(iBeaconIdx);
+	sGameData.szName = m_ClientBeacon.GetSvrName(iBeaconIdx);
+	sGameData.szModName = m_ClientBeacon.GetModName(iBeaconIdx);
+	sGameData.iNumTerro = m_ClientBeacon.GetNumTerrorists(iBeaconIdx);
+	sGameData.bAIBkp = m_ClientBeacon.GetAIBackup(iBeaconIdx);
+	sGameData.bRotateMap = m_ClientBeacon.GetRotateMap(iBeaconIdx);
+	sGameData.bForceFPWeapon = m_ClientBeacon.GetForceFirstPersonWeapon(iBeaconIdx);
+	sGameData.bPunkBuster = m_ClientBeacon.GetPunkBusterEnabled(iBeaconIdx);
+	sGameData.szGameVersion = m_ClientBeacon.GetServerGameVersion(iBeaconIdx);
+	sGameData.iMaxPlayer = m_ClientBeacon.GetMaxPlayers(iBeaconIdx);
+	sGameData.iNbrPlayer = m_ClientBeacon.GetNumPlayers(iBeaconIdx);
+	sGameData.szCurrentMap = m_ClientBeacon.GetFirstMapName(iBeaconIdx);
+	sGameData.gameMapList.Remove(0, sGameData.gameMapList.Length);
+	j = 0;
+	J0x339:
 
-    sGameData.szGameVersion     = m_ClientBeacon.GetServerGameVersion(iBeaconIdx);
+	// End:0x3BF [Loop If]
+	if(__NFUN_150__(j, m_ClientBeacon.GetMapListSize(iBeaconIdx)))
+	{
+		sMapAndGame.szMap = m_ClientBeacon.GetOneMapName(iBeaconIdx, j);
+		sMapAndGame.szGameType = m_ClientBeacon.GetGameType(iBeaconIdx, j);
+		sGameData.gameMapList[j] = sMapAndGame;
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x339;
+	}
+	sGameData.PlayerList.Remove(0, sGameData.PlayerList.Length);
+	j = 0;
+	J0x3DD:
 
-//    if ( sGameData.szName == "" )  // If no name, use computer name
-//    {
-//        sGameData.szName      = m_ClientBeacon.GetBeaconText(iBeaconIdx);
-//        sGameData.szName      = left(sGameData.szName, InStr(sGameData.szName, " "));  // TODO Replace this with
-//                                                                 // server name entered in menus
-//    }
+	// End:0x4AB [Loop If]
+	if(__NFUN_150__(j, m_ClientBeacon.GetPlayerListSize(iBeaconIdx)))
+	{
+		remPlayer.szAlias = m_ClientBeacon.GetPlayerName(iBeaconIdx, j);
+		remPlayer.szTime = m_ClientBeacon.GetPlayerTime(iBeaconIdx, j);
+		remPlayer.iPing = m_ClientBeacon.GetPlayerPingTime(iBeaconIdx, j);
+		remPlayer.iSkills = m_ClientBeacon.GetPlayerKillCount(iBeaconIdx, j);
+		sGameData.PlayerList[j] = remPlayer;
+		__NFUN_165__(j);
+		// [Loop Continue]
+		goto J0x3DD;
+	}
+	return sGameData;
+	return;
+}
 
-    sGameData.iMaxPlayer   = m_ClientBeacon.GetMaxPlayers(iBeaconIdx);
-    sGameData.iNbrPlayer   = m_ClientBeacon.GetNumPlayers(iBeaconIdx);
-    sGameData.szCurrentMap = m_ClientBeacon.GetFirstMapName(iBeaconIdx);
+function SortPlayersByKills(bool _bAscending, int _iIdx)
+{
+	local int i, j;
+	local bool bSwap;
+	local int iListSize;
+	local stRemotePlayers tempPlayer;
 
-    sGameData.gameMapList.Remove(0, sGameData.gameMapList.length);
-    for ( j = 0; j < m_ClientBeacon.GetMapListSize(iBeaconIdx); j++ ) 
-    {
-        sMapAndGame.szMap        = m_ClientBeacon.GetOneMapName(iBeaconIdx,j);
-        sMapAndGame.szGameType   = m_ClientBeacon.GetGameType(iBeaconIdx,j);
-//        sMapAndGame.szGameLoc    = m_ClientBeacon.GetGameName(iBeaconIdx,j);
-        sGameData.gameMapList[j] = sMapAndGame;
-//        sGameData.mapList[j] = m_ClientBeacon.GetOneMapName(iBeaconIdx,j);
-    }
+	iListSize = m_GameServerList[_iIdx].sGameData.PlayerList.Length;
+	i = 0;
+	J0x23:
 
-    sGameData.playerList.Remove(0, sGameData.playerList.length);
-    for ( j = 0; j < m_ClientBeacon.GetPlayerListSize(iBeaconIdx); j++ ) 
-    {
-        remPlayer.szAlias = m_ClientBeacon.GetPlayerName(iBeaconIdx,j);
-        remPlayer.szTime  = m_ClientBeacon.GetPlayerTime(iBeaconIdx,j);
-        remPlayer.iPing   = m_ClientBeacon.GetPlayerPingTime(iBeaconIdx,j);
-        remPlayer.iSkills  = m_ClientBeacon.GetPlayerKillCount(iBeaconIdx,j);
-        sGameData.playerList[j] = remPlayer;
-    }
+	// End:0x195 [Loop If]
+	if(__NFUN_150__(i, __NFUN_147__(iListSize, 1)))
+	{
+		j = 0;
+		J0x3C:
 
-//    sGameData.gameNameList.Remove(0, sGameData.gameNameList.length);
-//    for ( j = 0; j < m_ClientBeacon.GetGameNameListSize(iBeaconIdx); j++ ) 
-//    {
-//        sGameData.gameNameList[j] = m_ClientBeacon.GetGameName(iBeaconIdx,j);
-//    }
+		// End:0x18B [Loop If]
+		if(__NFUN_150__(j, __NFUN_147__(__NFUN_147__(iListSize, 1), i)))
+		{
+			// End:0xAD
+			if(_bAscending)
+			{
+				bSwap = __NFUN_151__(m_GameServerList[_iIdx].sGameData.PlayerList[j].iSkills, m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)].iSkills);				
+			}
+			else
+			{
+				bSwap = __NFUN_150__(m_GameServerList[_iIdx].sGameData.PlayerList[j].iSkills, m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)].iSkills);
+			}
+			// End:0x181
+			if(bSwap)
+			{
+				tempPlayer = m_GameServerList[_iIdx].sGameData.PlayerList[j];
+				m_GameServerList[_iIdx].sGameData.PlayerList[j] = m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)];
+				m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)] = tempPlayer;
+			}
+			__NFUN_165__(j);
+			// [Loop Continue]
+			goto J0x3C;
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x23;
+	}
+	return;
+}
 
+function int GetTotalPlayers()
+{
+	local int i, iTotal, iMaxPlayers;
 
-    return sGameData;
+	iTotal = 0;
+	iMaxPlayers = __NFUN_1355__();
+	i = 0;
+	J0x17:
+
+	// End:0x89 [Loop If]
+	if(__NFUN_150__(i, m_GameServerList.Length))
+	{
+		// End:0x7F
+		if(__NFUN_130__(__NFUN_152__(m_GameServerList[i].sGameData.iNbrPlayer, iMaxPlayers), __NFUN_151__(m_GameServerList[i].sGameData.iNbrPlayer, 0)))
+		{
+			__NFUN_161__(iTotal, m_GameServerList[i].sGameData.iNbrPlayer);
+		}
+		__NFUN_165__(i);
+		// [Loop Continue]
+		goto J0x17;
+	}
+	return iTotal;
+	return;
+}
+
+// NEW IN 1.60
+event GetLobbyAndGroupID(out int _iLobbyID, out int _iGroupID)
+{
+	// End:0x40
+	if(__NFUN_119__(m_ClientBeacon, none))
+	{
+		_iLobbyID = m_ClientBeacon.PreJoinInfo.iLobbyID;
+		_iGroupID = m_ClientBeacon.PreJoinInfo.iGroupID;		
+	}
+	else
+	{
+		_iLobbyID = 0;
+		_iGroupID = 0;
+	}
+	return;
 }
 
 
-//=============================================================================
-// Simple bubble sort to list servers in order of ping time
-//=============================================================================
-
-function SortPlayersByKills( BOOL _bAscending, INT _iIdx )
-{
-
-    local INT     i;
-    local INT     j;
-    local BOOL   bSwap;
-    local INT     iListSize;
-    local stRemotePlayers tempPlayer;
-
-    iListSize = m_GameServerList[_iIdx].sGameData.playerList.length;
-
-    for ( i = 0; i < iListSize - 1; i++)
-    {
-        for ( j = 0; j < iListSize - 1 - i; j++ )
-        {
-            if ( _bAscending )
-                bSwap =  m_GameServerList[_iIdx].sGameData.playerList[j].iSkills > 
-                         m_GameServerList[_iIdx].sGameData.playerList[j + 1].iSkills;
-            else
-                bSwap =  m_GameServerList[_iIdx].sGameData.playerList[j].iSkills <
-                         m_GameServerList[_iIdx].sGameData.playerList[j + 1].iSkills;
-
-            if ( bSwap )
-            {
-                tempPlayer = m_GameServerList[_iIdx].sGameData.playerList[j];
-                m_GameServerList[_iIdx].sGameData.playerList[j] = m_GameServerList[_iIdx].sGameData.playerList[j + 1];
-                m_GameServerList[_iIdx].sGameData.playerList[j + 1] = tempPlayer;
-            }
-        }
-    }
-
-}
-function INT GetTotalPlayers()
-{
-    local INT i;
-    local INT iTotal;
-    local INT iMaxPlayers;
-
-    iTotal = 0;
-    iMaxPlayers = NativeGetMaxPlayers();
-
-    for ( i = 0; i < m_GameServerList.Length; i++ )
-    {
-        if ( m_GameServerList[i].sGameData.iNbrPlayer <= iMaxPlayers && m_GameServerList[i].sGameData.iNbrPlayer > 0 )
-            iTotal += m_GameServerList[i].sGameData.iNbrPlayer;
-    }
-
-    return iTotal;
-}
-
-defaultproperties
-{
-}
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: var ucGlobalIDK_GlobalID_size
+// REMOVED IN 1.60: var bDeathMatch
+// REMOVED IN 1.60: var bTeamDeathMatch
+// REMOVED IN 1.60: var bDisarmBomb
+// REMOVED IN 1.60: var bHostageRescueAdv
+// REMOVED IN 1.60: var bEscortPilot
+// REMOVED IN 1.60: var bMission
+// REMOVED IN 1.60: var bTerroristHunt
+// REMOVED IN 1.60: var bTerroristHuntAdv
+// REMOVED IN 1.60: var bScatteredHuntAdv
+// REMOVED IN 1.60: var bCaptureTheEnemyAdv
+// REMOVED IN 1.60: var bKamikaze
+// REMOVED IN 1.60: var bHostageRescueCoop
+// REMOVED IN 1.60: var bDefend
+// REMOVED IN 1.60: var bRecon
+// REMOVED IN 1.60: var bSquadDeathMatch
+// REMOVED IN 1.60: var bSquadTeamDeathMatch
+// REMOVED IN 1.60: var bDebugGameMode
+// REMOVED IN 1.60: var bUnlockedOnly
+// REMOVED IN 1.60: var bFavoritesOnly
+// REMOVED IN 1.60: var bDedicatedServersOnly
+// REMOVED IN 1.60: var bServersNotEmpty
+// REMOVED IN 1.60: var bServersNotFull
+// REMOVED IN 1.60: var bResponding
+// REMOVED IN 1.60: var bPunkBusterServerOnly
+// REMOVED IN 1.60: var szHasPlayer
+// REMOVED IN 1.60: var iFasterThan
+// REMOVED IN 1.60: var m_Filters
+// REMOVED IN 1.60: var m_bIndRefrInProgress
+// REMOVED IN 1.60: function NativeResetSvrContainer
+// REMOVED IN 1.60: function NativeFillSvrContainer
+// REMOVED IN 1.60: function NativeSetOwnSvrPort
+// REMOVED IN 1.60: function NativeGetLobbyID
+// REMOVED IN 1.60: function NativeGetGroupID
+// REMOVED IN 1.60: function UpdateFilters

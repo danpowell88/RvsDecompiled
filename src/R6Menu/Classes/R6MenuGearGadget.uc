@@ -1,4 +1,10 @@
 //=============================================================================
+// R6MenuGearGadget - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6MenuGearGadget.uc : This will display the current 2D model
 //                        of one of the 2 gadgets selected for the current 
 //                        operative
@@ -7,107 +13,105 @@
 //  Revision history:
 //    2002/03/14 * Created by Alexandre Dionne
 //=============================================================================
-
-
 class R6MenuGearGadget extends UWindowDialogControl;
 
-var     R6MenuAssignAllButton		m_AssignAll;
-var     R6WindowButtonGear			m_2DGadget; 
-
-var		FLOAT						m_2DGadgetWidth;
-
-var     BOOL						m_bAssignAllButton;
-var     BOOL                        m_bCenterTexture;
+var bool m_bAssignAllButton;
+var bool m_bCenterTexture;
+var float m_2DGadgetWidth;
+var R6MenuAssignAllButton m_AssignAll;
+var R6WindowButtonGear m_2DGadget;
 
 function Created()
 {
 	m_BorderColor = Root.Colors.GrayLight;
-
-    if(m_bAssignAllButton == true)
-    {
-		m_AssignAll = R6MenuAssignAllButton(CreateWindow(class'R6MenuAssignAllButton',WinWidth - class'R6MenuAssignAllButton'.Default.UpRegion.W -1, 0, class'R6MenuAssignAllButton'.Default.UpRegion.W, WinHeight, self));       
-		m_AssignAll.ToolTipString	= Localize("Tip","GearRoomItemAll","R6Menu");		
-		m_AssignAll.ImageX			= 0;
-		//m_AssignAll.ImageY			= 25;
-        m_AssignAll.ImageY = (WinHeight - class'R6MenuAssignAllButton'.Default.UpRegion.H) /2;
-    }
-    
-    m_2DGadget = R6WindowButtonGear(CreateWindow(class'R6WindowButtonGear', 0, 0, m_2DGadgetWidth, WinHeight ,self));
-	m_2DGadget.ToolTipString		= Localize("Tip","GearRoomItem","R6Menu");
-    m_2DGadget.bUseRegion           = true;
-    m_2DGadget.m_iDrawStyle         = 5;  
-    
+	// End:0xF8
+	if(__NFUN_242__(m_bAssignAllButton, true))
+	{
+		m_AssignAll = R6MenuAssignAllButton(CreateWindow(Class'R6Menu.R6MenuAssignAllButton', __NFUN_175__(__NFUN_175__(WinWidth, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W)), float(1)), 0.0000000, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W), WinHeight, self));
+		m_AssignAll.ToolTipString = Localize("Tip", "GearRoomItemAll", "R6Menu");
+		m_AssignAll.ImageX = 0.0000000;
+		m_AssignAll.ImageY = __NFUN_172__(__NFUN_175__(WinHeight, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.H)), float(2));
+	}
+	m_2DGadget = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', 0.0000000, 0.0000000, m_2DGadgetWidth, WinHeight, self));
+	m_2DGadget.ToolTipString = Localize("Tip", "GearRoomItem", "R6Menu");
+	m_2DGadget.bUseRegion = true;
+	m_2DGadget.m_iDrawStyle = 5;
+	return;
 }
 
-
-function Register(UWindowDialogClientWindow	W)
-{    
-    Super.Register(W);
-    if(m_bAssignAllButton == true)
-        m_AssignAll.Register(W);   
-    m_2DGadget.Register(W);   
-}
-
-function SetGadgetTexture(Texture T, Region R)
-{    
-    m_2DGadget.DisabledTexture  = T;
-    m_2DGadget.DisabledRegion   = R;
-    m_2DGadget.DownTexture      = T;
-    m_2DGadget.DownRegion       = R;
-    m_2DGadget.OverTexture      = T;
-    m_2DGadget.OverRegion       = R;
-    m_2DGadget.UpTexture        = T;
-    m_2DGadget.UpRegion         = R;
-    
-    if(m_bCenterTexture)
-    {
-        m_2DGadget.ImageX           = (m_2DGadget.WinWidth - m_2DGadget.UpRegion.W)/2;
-        m_2DGadget.ImageY           = (m_2DGadget.WinHeight - m_2DGadget.UpRegion.H)/2;
-    }
-    else
-    {
-        m_2DGadget.ImageX           = m_2DGadget.Default.ImageX;
-        m_2DGadget.ImageY           = m_2DGadget.Default.ImageY;
-    }
-}
-
-
-function Paint(Canvas C, FLOAT X, FLOAT Y)
+function Register(UWindowDialogClientWindow W)
 {
-   DrawSimpleBorder( C);   
+	super.Register(W);
+	// End:0x2B
+	if(__NFUN_242__(m_bAssignAllButton, true))
+	{
+		m_AssignAll.Register(W);
+	}
+	m_2DGadget.Register(W);
+	return;
+}
+
+function SetGadgetTexture(Texture t, Region R)
+{
+	m_2DGadget.DisabledTexture = t;
+	m_2DGadget.DisabledRegion = R;
+	m_2DGadget.DownTexture = t;
+	m_2DGadget.DownRegion = R;
+	m_2DGadget.OverTexture = t;
+	m_2DGadget.OverRegion = R;
+	m_2DGadget.UpTexture = t;
+	m_2DGadget.UpRegion = R;
+	// End:0x120
+	if(m_bCenterTexture)
+	{
+		m_2DGadget.ImageX = __NFUN_172__(__NFUN_175__(m_2DGadget.WinWidth, float(m_2DGadget.UpRegion.W)), float(2));
+		m_2DGadget.ImageY = __NFUN_172__(__NFUN_175__(m_2DGadget.WinHeight, float(m_2DGadget.UpRegion.H)), float(2));		
+	}
+	else
+	{
+		m_2DGadget.ImageX = m_2DGadget.default.ImageX;
+		m_2DGadget.ImageY = m_2DGadget.default.ImageY;
+	}
+	return;
+}
+
+function Paint(Canvas C, float X, float Y)
+{
+	DrawSimpleBorder(C);
+	return;
 }
 
 //===========================================================
 // SetButtonStatus: set the status of all the buttons, colors maybe change here too
 //===========================================================
-function SetButtonsStatus( BOOL _bDisable)
+function SetButtonsStatus(bool _bDisable)
 {
-	m_AssignAll.SetButtonStatus( _bDisable);
-	
-	m_2DGadget.bDisabled  = _bDisable;
-
+	m_AssignAll.SetButtonStatus(_bDisable);
+	m_2DGadget.bDisabled = _bDisable;
+	return;
 }
 
 //=================================================================
 // SetBorderColor: set the border color
 //=================================================================
-function SetBorderColor( Color _NewColor)
+function SetBorderColor(Color _NewColor)
 {
-	m_AssignAll.SetBorderColor( _NewColor);
-
+	m_AssignAll.SetBorderColor(_NewColor);
 	m_BorderColor = _NewColor;
+	return;
 }
 
 //=================================================================
 // ForceMouseOver: Force mouse over on all the window on this page
 //=================================================================
-function ForceMouseOver( BOOL _bForceMouseOver)
+function ForceMouseOver(bool _bForceMouseOver)
 {
-	m_2DGadget.ForceMouseOver( _bForceMouseOver);
+	m_2DGadget.ForceMouseOver(_bForceMouseOver);
+	return;
 }
 
 defaultproperties
 {
-     m_bAssignAllButton=True
-     m_2DGadgetWidth=66.000000
+	m_bAssignAllButton=true
+	m_2DGadgetWidth=66.0000000
 }

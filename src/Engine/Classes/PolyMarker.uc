@@ -1,4 +1,10 @@
 //=============================================================================
+// PolyMarker - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // PolyMarker.
 //
 // These are markers for the polygon drawing mode.
@@ -8,13 +14,11 @@
 //
 //=============================================================================
 class PolyMarker extends Keypoint
-	placeable
-	native;
-
-#exec Texture Import File=Textures\S_PolyMarker.pcx Name=S_PolyMarker Mips=Off MASKED=1
+	native
+ placeable;
 
 defaultproperties
 {
-     bEdShouldSnap=True
-     Texture=Texture'Engine.S_PolyMarker'
+	bEdShouldSnap=true
+	Texture=Texture'Engine.S_PolyMarker'
 }

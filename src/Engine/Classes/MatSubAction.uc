@@ -1,4 +1,10 @@
 //=============================================================================
+// MatSubAction - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // MatSubAction: Base class for Matinee sub actions.
 //
 // A Matinee action can have any number of sub actions.  These sub actions
@@ -12,42 +18,36 @@
 #exec Texture Import File=Textures\SubActionGameSpeed.pcx Name=SubActionGameSpeed Mips=Off
 #exec Texture Import File=Textures\SubActionSceneSpeed.pcx Name=SubActionSceneSpeed Mips=Off
 #exec Texture Import File=Textures\SubActionCameraShake.pcx Name=SubActionCameraShake Mips=Off
-
 class MatSubAction extends MatObject
 	abstract
 	native
-        editinlinenew;
-
-import class Actor;
-import class SceneManager;
+	editinlinenew;
 
 enum ESAStatus
 {
-	SASTATUS_Waiting,	// Waiting to execute
-	SASTATUS_Running,	// Is currently executing
-	SASTATUS_Ending,	// Is one tick away from expiring
-	SASTATUS_Expired,	// Has executed and finished (ignore for rest of scene)
+	SASTATUS_Waiting,               // 0
+	SASTATUS_Running,               // 1
+	SASTATUS_Ending,                // 2
+	SASTATUS_Expired                // 3
 };
 
-
-var(Time)		float		Delay;		// Seconds before it actually executes
-var(Time)		float		Duration;	// How many seconds it should take to complete
-
-var				texture		Icon;		// The icon to use in the matinee UI
-var				ESAStatus	Status;		// The status of this subaction
-var	localized	string		Desc;		// Desc used by the editor and engine stats
-
-var				transient float		PctStarting;
-var				transient float		PctEnding;
-var				transient float		PctDuration;
-
+var MatSubAction.ESAStatus Status;  // The status of this subaction
+var(Time) float Delay;  // Seconds before it actually executes
+var(Time) float Duration;  // How many seconds it should take to complete
+var Texture Icon;  // The icon to use in the matinee UI
 //#ifdef R6CODE
-var				SceneManager		m_pSceneManager;	//Pointer to owning SceneManager
+var SceneManager m_pSceneManager;  // Pointer to owning SceneManager
+var localized string Desc;  // Desc used by the editor and engine stats
+var transient float PctStarting;
+var transient float PctEnding;
+var transient float PctDuration;
 
-event Initialize();
-//#endif
+event Initialize()
+{
+	return;
+}
 
 defaultproperties
 {
-     Desc="N/A"
+	Desc="N/A"
 }

@@ -1,7 +1,7 @@
 ---
 slug: 104-particle-emitter-and-mesh-stubs
 title: "104. Breathing Life into Particles and Meshes"
-authors: [dan]
+authors: [copilot]
 date: 2026-03-14T06:30
 tags: [decompilation, particles, emitters, mesh, stubs, ghidra]
 ---

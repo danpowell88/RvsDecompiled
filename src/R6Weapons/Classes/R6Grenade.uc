@@ -1,4 +1,10 @@
 //=============================================================================
+// R6Grenade - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 //  R6Grenade.uc : Base class for all grenades types
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -6,508 +12,539 @@
 //    2001/17/09 * Created by Sebastien Lussier
 //=============================================================================
 class R6Grenade extends R6Bullet
-    abstract
-    native;
+	abstract
+ native;
 
-#exec OBJ LOAD FILE="..\StaticMeshes\R63rdWeapons_SM.usx"  Package="R63rdWeapons_SM"
-
-var (R6GrenadeSound) sound m_sndExplosionSound;
-var (R6GrenadeSound) sound m_sndExplosionSoundStop;
-var (R6GrenadeSound) sound m_sndExplodeMetal;
-var (R6GrenadeSound) sound m_sndExplodeWater;
-var (R6GrenadeSound) sound m_sndExplodeAir;
-var (R6GrenadeSound) sound m_sndExplodeDirt;
-var (R6GrenadeSound) sound m_ImpactSound;		// Sound made when projectile hits something.
-var (R6GrenadeSound) sound m_ImpactGroundSound;
-var (R6GrenadeSound) sound m_ImpactWaterSound;
-var (R6GrenadeSound) Sound m_sndEarthQuake;
-
-
-var Actor.EPhysics          m_eOldPhysic; //When physic changes in MP.
-var R6DemolitionsGadget     m_Weapon;     // weapon who place or throw the grenade.  only use on demo gadgets.
-
-
-var BOOL m_bFirstImpact;
-var ESoundType m_eExplosionSoundType;
-var Pawn.EGrenadeType m_eGrenadeType;
-
-var BOOL    m_bDestroyedByImpact;
-var FLOAT   m_fDuration;            // Time before all is stoped
-var FLOAT   m_fShakeRadius;
-
-// Pawn pose 
 enum eGrenadePawnPose
 {
-    GPP_Stand,          // Stand & Prone Siding
-    GPP_Crouch,         // Crouch
-    GPP_ProneFacing     // Prone, facing the grenade
+	GPP_Stand,                      // 0
+	GPP_Crouch,                     // 1
+	GPP_ProneFacing                 // 2
 };
 
-// Body part that can be affected by a grenade blast
 enum eGrenadeBoneTarget
 {
-    GBT_Head,
-    GBT_Body,
-    GBT_LeftArm,
-    GBT_RightArm,
-    GBT_LeftLeg,
-    GBT_RightLeg        
+	GBT_Head,                       // 0
+	GBT_Body,                       // 1
+	GBT_LeftArm,                    // 2
+	GBT_RightArm,                   // 3
+	GBT_LeftLeg,                    // 4
+	GBT_RightLeg                    // 5
 };
 
-// Localized damage depending on the pawn position
 struct sDamagePercentage
 {
-    var() FLOAT fHead;
-    var() FLOAT fBody;
-    var() FLOAT fArms;
-    var() FLOAT fLegs;
+	var() float fHead;
+	var() float fBody;
+	var() float fArms;
+	var() float fLegs;
 };
-var(R6Grenade) sDamagePercentage m_DmgPercentStand;
-var(R6Grenade) sDamagePercentage m_DmgPercentCrouch;
-var(R6Grenade) sDamagePercentage m_DmgPercentProne;
 
+var Actor.EPhysics m_eOldPhysic;  // When physic changes in MP.
+var Actor.ESoundType m_eExplosionSoundType;
+var Pawn.EGrenadeType m_eGrenadeType;
+var() int m_iNumberOfFragments;
+var bool m_bFirstImpact;
+var bool m_bDestroyedByImpact;
+var float m_fDuration;  // Time before all is stoped
+var float m_fShakeRadius;
 //
 // Grenade Properties
 //
-var FLOAT   m_fEffectiveOutsideKillRadius;
-
-var(R6Grenade) INT     m_iNumberOfFragments;
-
-var(R6Grenade) class<emitter> m_pExplosionParticles;
-var(R6Grenade) class<emitter> m_pExplosionParticlesLOW;
-var(R6Grenade) emitter m_pEmmiter;
-var(R6Grenade) class<light>   m_pExplosionLight;
-
-
+var float m_fEffectiveOutsideKillRadius;
+var(R6GrenadeSound) Sound m_sndExplosionSound;
+var(R6GrenadeSound) Sound m_sndExplosionSoundStop;
+var(R6GrenadeSound) Sound m_sndExplodeMetal;
+var(R6GrenadeSound) Sound m_sndExplodeWater;
+var(R6GrenadeSound) Sound m_sndExplodeAir;
+var(R6GrenadeSound) Sound m_sndExplodeDirt;
+var(R6GrenadeSound) Sound m_ImpactSound;  // Sound made when projectile hits something.
+var(R6GrenadeSound) Sound m_ImpactGroundSound;
+var(R6GrenadeSound) Sound m_ImpactWaterSound;
+var(R6GrenadeSound) Sound m_sndEarthQuake;
+var R6DemolitionsGadget m_Weapon;  // weapon who place or throw the grenade.  only use on demo gadgets.
+var() Emitter m_pEmmiter;
+var() Class<Emitter> m_pExplosionParticles;
+var() Class<Emitter> m_pExplosionParticlesLOW;
+var() Class<Light> m_pExplosionLight;
 //decals
-var class<R6GrenadeDecal> m_GrenadeDecalClass;
+var Class<R6GrenadeDecal> m_GrenadeDecalClass;
+var() sDamagePercentage m_DmgPercentStand;
+var() sDamagePercentage m_DmgPercentCrouch;
+var() sDamagePercentage m_DmgPercentProne;
 
-simulated function class<emitter> GetGrenadeEmitter()
+simulated function Class<Emitter> GetGrenadeEmitter()
 {
 	local R6GameOptions pGameOptions;
-	pGameOptions = class'Actor'.static.GetGameOptions();
-    
-    // Set the smoke emitter depending on the options
-    if(pGameOptions.LowDetailSmoke == true && m_pExplosionParticlesLOW != none)
-        return m_pExplosionParticlesLOW;
-    else
-        return m_pExplosionParticles;
+
+	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	// End:0x3D
+	if(__NFUN_130__(__NFUN_242__(pGameOptions.LowDetailSmoke, true), __NFUN_119__(m_pExplosionParticlesLOW, none)))
+	{
+		return m_pExplosionParticlesLOW;		
+	}
+	else
+	{
+		return m_pExplosionParticles;
+	}
+	return;
 }
 
 function SelfDestroy()
 {
-    if(Level.NetMode != NM_Client)
-        Destroy();
+	// End:0x1C
+	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	{
+		__NFUN_279__();
+	}
+	return;
 }
 
 function PostBeginPlay()
 {
-    LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsGripGrenadeA');
-    super.PostBeginPlay();
-
-    Activate();
-    m_fEffectiveOutsideKillRadius = m_fExplosionRadius-m_fKillBlastRadius;
+	LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsGripGrenadeA');
+	super.PostBeginPlay();
+	Activate();
+	m_fEffectiveOutsideKillRadius = __NFUN_175__(m_fExplosionRadius, m_fKillBlastRadius);
+	return;
 }
 
 function Activate()
 {
-    if(m_fExplosionDelay != 0)
-    {
-        SetTimer(m_fExplosionDelay, false);
-    }
+	// End:0x16
+	if(__NFUN_181__(m_fExplosionDelay, float(0)))
+	{
+		__NFUN_280__(m_fExplosionDelay, false);
+	}
+	return;
 }
-
 
 event Timer()
 {
-    Explode();
-    SelfDestroy();
+	Explode();
+	SelfDestroy();
+	return;
 }
 
 simulated event Destroyed()
 {
-    local Light pEffectLight;
-    local class<emitter> pExplosionParticles;
-    
-    super.Destroyed();
+	local Light pEffectLight;
+	local Class<Emitter> pExplosionParticles;
 
-    pExplosionParticles = GetGrenadeEmitter();
-
-    if(m_bDestroyedByImpact == false)
-    {
-        if(default.m_fDuration == 0) //instant grenades
-        {
-            if(pExplosionParticles != none)
-            {
-                m_pEmmiter = Spawn(pExplosionParticles);
-                m_pEmmiter.RemoteRole = ROLE_None;
-                m_pEmmiter.Role = ROLE_Authority;
-            }
-            if(m_pExplosionLight != none)
-            {
-                pEffectLight = Spawn(m_pExplosionLight);
-            }
-        }
-        else
-        {
-            if (m_pEmmiter != None)
-            {
-                m_pEmmiter.Destroy();
-            }
-        }
-    }
+	super(Actor).Destroyed();
+	pExplosionParticles = GetGrenadeEmitter();
+	// End:0x99
+	if(__NFUN_242__(m_bDestroyedByImpact, false))
+	{
+		// End:0x82
+		if(__NFUN_180__(default.m_fDuration, float(0)))
+		{
+			// End:0x66
+			if(__NFUN_119__(pExplosionParticles, none))
+			{
+				m_pEmmiter = __NFUN_278__(pExplosionParticles);
+				m_pEmmiter.RemoteRole = ROLE_None;
+				m_pEmmiter.Role = ROLE_Authority;
+			}
+			// End:0x7F
+			if(__NFUN_119__(m_pExplosionLight, none))
+			{
+				pEffectLight = __NFUN_278__(m_pExplosionLight);
+			}			
+		}
+		else
+		{
+			// End:0x99
+			if(__NFUN_119__(m_pEmmiter, none))
+			{
+				m_pEmmiter.__NFUN_279__();
+			}
+		}
+	}
+	return;
 }
 
 simulated function FirstPassReset()
 {
-    SelfDestroy();
+	SelfDestroy();
+	return;
 }
 
 simulated function Explode()
 {
-    local actor HitActor;
-	local vector vHitLocation, vHitNormal;
-    local material HitMaterial;
+	local Actor HitActor;
+	local Vector vHitLocation, vHitNormal;
+	local Material HitMaterial;
+	local R6GrenadeDecal GrenadeDecal;
+	local R6ActorSound pGrenadeSound;
+	local Rotator GrenadeDecalRotation;
 
-    local R6GrenadeDecal GrenadeDecal;
-    local R6ActorSound pGrenadeSound;
-    local rotator GrenadeDecalRotation;
-
-    // set the right sound to play.
-    if (m_sndExplosionSound == none)
-    {
-        HitActor = Trace(vHitLocation, vHitNormal, Location - vect(0,0,40), Location, false,, HitMaterial);
-
-        if ((HitMaterial == None) && (m_sndExplodeAir != None))
-        {
-            m_sndExplosionSound = m_sndExplodeAir;
-        }
-
-        if (((m_sndExplosionSound == none) && (m_sndExplodeMetal != none)) && ((HitMaterial.m_eSurfIdForSnd == SURF_HardMetal) || (HitMaterial.m_eSurfIdForSnd == SURF_SheetMetal)))
-        {
-            m_sndExplosionSound = m_sndExplodeMetal;
-        }
-
-        if (((m_sndExplosionSound == none) && (m_sndExplodeWater != none)) && ((HitMaterial.m_eSurfIdForSnd == SURF_WaterPuddle) || (HitMaterial.m_eSurfIdForSnd == SURF_DeepWater)))
-        {
-            m_sndExplosionSound = m_sndExplodeWater;
-        }
-
-        if (m_sndExplosionSound == none)
-        {
-            if (m_sndExplodeDirt != none)
-            {
-                m_sndExplosionSound = m_sndExplodeDirt;
-            }
-            else
-            {
-                log("Missing SOUND for the grenade!");
-            }
-        }
-    }
-
-    //log("SOUND for the grenade is " @ m_sndExplosionSound );
-    HurtPawns();
-    R6MakeNoise( m_eExplosionSoundType );
-
-/*
-    if (IsA('R6FlashBang'))
-        PlaySound(m_sndExplosionSound, SLOT_GrenadeEffect);
-    else
-        PlaySound(m_sndExplosionSound, SLOT_SFX);
-
-*/
-    //log("<<<<<<<<<<<<<<<<<Explode>>>>>>>>>>>>>>>" @ m_sndExplosionSound);
-
-    //Spawn grenade decal
-    if(m_GrenadeDecalClass != none)
-    {
-        GrenadeDecalRotation.Pitch = 0;
-        GrenadeDecalRotation.Yaw = 0;
-        GrenadeDecalRotation.Roll = 0;
-        GrenadeDecal = Spawn(m_GrenadeDecalClass,,, Location, GrenadeDecalRotation);
-    }
-
-    pGrenadeSound = Spawn(class'Engine.R6ActorSound',,, Location);
-    if (pGrenadeSound != none)
-    {
-        if (IsA('R6FlashBang'))
-            pGrenadeSound.m_eTypeSound = SLOT_GrenadeEffect;
-        else
-            pGrenadeSound.m_eTypeSound = SLOT_Guns;
-
-        pGrenadeSound.m_ImpactSound = m_sndExplosionSound;
-        pGrenadeSound.m_ImpactSoundStop = m_sndExplosionSoundStop;
-        if (m_eGrenadeType == GTYPE_Smoke)
-            pGrenadeSound.m_fExplosionDelay = m_fDuration - 35;
-        else
-            pGrenadeSound.m_fExplosionDelay = m_fDuration;
-    }
-
-
+	// End:0x159
+	if(__NFUN_114__(m_sndExplosionSound, none))
+	{
+		HitActor = __NFUN_277__(vHitLocation, vHitNormal, __NFUN_216__(Location, vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
+		// End:0x61
+		if(__NFUN_130__(__NFUN_114__(HitMaterial, none), __NFUN_119__(m_sndExplodeAir, none)))
+		{
+			m_sndExplosionSound = m_sndExplodeAir;
+		}
+		// End:0xBA
+		if(__NFUN_130__(__NFUN_130__(__NFUN_114__(m_sndExplosionSound, none), __NFUN_119__(m_sndExplodeMetal, none)), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(10)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(11)))))
+		{
+			m_sndExplosionSound = m_sndExplodeMetal;
+		}
+		// End:0x113
+		if(__NFUN_130__(__NFUN_130__(__NFUN_114__(m_sndExplosionSound, none), __NFUN_119__(m_sndExplodeWater, none)), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(12)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(13)))))
+		{
+			m_sndExplosionSound = m_sndExplodeWater;
+		}
+		// End:0x159
+		if(__NFUN_114__(m_sndExplosionSound, none))
+		{
+			// End:0x137
+			if(__NFUN_119__(m_sndExplodeDirt, none))
+			{
+				m_sndExplosionSound = m_sndExplodeDirt;				
+			}
+			else
+			{
+				__NFUN_231__("Missing SOUND for the grenade!");
+			}
+		}
+	}
+	HurtPawns();
+	R6MakeNoise(m_eExplosionSoundType);
+	// End:0x1B3
+	if(__NFUN_119__(m_GrenadeDecalClass, none))
+	{
+		GrenadeDecalRotation.Pitch = 0;
+		GrenadeDecalRotation.Yaw = 0;
+		GrenadeDecalRotation.Roll = 0;
+		GrenadeDecal = __NFUN_278__(m_GrenadeDecalClass,,, Location, GrenadeDecalRotation);
+	}
+	pGrenadeSound = __NFUN_278__(Class'Engine.R6ActorSound',,, Location);
+	// End:0x26C
+	if(__NFUN_119__(pGrenadeSound, none))
+	{
+		// End:0x1F2
+		if(__NFUN_303__('R6FlashBang'))
+		{
+			pGrenadeSound.m_eTypeSound = 4;			
+		}
+		else
+		{
+			pGrenadeSound.m_eTypeSound = 2;
+		}
+		pGrenadeSound.m_ImpactSound = m_sndExplosionSound;
+		pGrenadeSound.m_ImpactSoundStop = m_sndExplosionSoundStop;
+		// End:0x258
+		if(__NFUN_154__(int(m_eGrenadeType), int(1)))
+		{
+			pGrenadeSound.m_fExplosionDelay = __NFUN_175__(m_fDuration, float(35));			
+		}
+		else
+		{
+			pGrenadeSound.m_fExplosionDelay = m_fDuration;
+		}
+	}
+	return;
 }
 
-simulated function HitWall( vector HitNormal, actor Wall )
+simulated function HitWall(Vector HitNormal, Actor Wall)
 {
-    local vector vHitLocation;
-    local vector vHitNormal;
-    local vector vTraceEnd;
-    local vector vTraceStart;
-    local actor pHit;
-    local material HitMaterial;
+	local Vector vHitLocation, vHitNormal, vTraceEnd, vTraceStart;
+	local Actor pHit;
+	local Material HitMaterial;
 
-    if(m_fExplosionDelay == 0)
-    {
-        Explode();
-    }
-    else
-    {
-		if((Wall != none) && (Instigator != none) && (Instigator.m_CollisionBox == Wall))
+	// End:0x16
+	if(__NFUN_180__(m_fExplosionDelay, float(0)))
+	{
+		Explode();		
+	}
+	else
+	{
+		// End:0x6D
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Wall, none), __NFUN_119__(Instigator, none)), __NFUN_114__(Instigator.m_collisionBox, Wall)))
 		{
-			vTraceEnd = Location + 10*normal(velocity);
-			SetLocation(vTraceEnd, true);
+			vTraceEnd = __NFUN_215__(Location, __NFUN_213__(float(10), __NFUN_226__(Velocity)));
+			__NFUN_267__(vTraceEnd, true);
 			return;
 		}
-   
-		// Check if it's a fake backdrop
-        if(Wall == Level)
-        {
-            vTraceStart = Location + 10*HitNormal;
-            vTraceEnd = Location - 10*HitNormal;
-
-            pHit = R6Trace( vHitLocation, vHitNormal, vTraceEnd, vTraceStart, TF_Visibility|TF_ShadowCast );
-            if(pHit==none)
-            {
-                // Teleport other side of skybox
-                SetLocation(vTraceEnd, true);
-                return;
-            }
-        }
-
-        // Check if it's an InteractiveObject that bullet pass through
-        if((Wall != none) && Wall.m_bBulletGoThrough && Wall.IsA( 'R6InteractiveObject' ) )
-        {
-            Wall.R6TakeDamage( 10000, 10000, Instigator, vHitLocation, Velocity, 0);
-            vTraceEnd = Location - 10*HitNormal;
-            SetLocation(vTraceEnd, true);
-            Velocity *= 0.5;
-            return;
-        }
-
-        // For testing, the grenade stop there
-        //Velocity = vect(0,0,0);
-        //SetPhysics(PHYS_None);
-        //bBounce = false;
-
-        DesiredRotation = RotRand();
-    
-        // The grenade will bounce off the wall with 20% of it's original velocity
-        Velocity = 0.2 * MirrorVectorByNormal( Velocity, HitNormal );
-
-        // FRand() only affect visual here... does not modify any position
-        RotationRate.Yaw   = 1000*VSize(Velocity) * FRand() - 500*VSize(Velocity);
-        RotationRate.Pitch = 1000*VSize(Velocity) * FRand() - 500*VSize(Velocity);
-        RotationRate.Roll  = 1000*VSize(Velocity) * FRand() - 500*VSize(Velocity);
-
-        if( Velocity.Z > 400 )      // Max falling speed
-        {
-            Velocity.Z = 400;
-        }
-        else if ( VSize(Velocity) < 10 )
-        {
-            SetPhysics(PHYS_None);
-            bBounce = false;
-            RotationRate = rot(0,0,0);
-        }
-    
-		if (m_bFirstImpact)
+		// End:0xE5
+		if(__NFUN_114__(Wall, Level))
 		{
-			m_bFirstImpact =  false;
-			// Play a sound on client
-
-			// Set a sound by default
+			vTraceStart = __NFUN_215__(Location, __NFUN_213__(float(10), HitNormal));
+			vTraceEnd = __NFUN_216__(Location, __NFUN_213__(float(10), HitNormal));
+			pHit = __NFUN_1806__(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, __NFUN_158__(2, 16));
+			// End:0xE5
+			if(__NFUN_114__(pHit, none))
+			{
+				__NFUN_267__(vTraceEnd, true);
+				return;
+			}
+		}
+		// End:0x172
+		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Wall, none), Wall.m_bBulletGoThrough), Wall.__NFUN_303__('R6InteractiveObject')))
+		{
+			Wall.R6TakeDamage(10000, 10000, Instigator, vHitLocation, Velocity, 0);
+			vTraceEnd = __NFUN_216__(Location, __NFUN_213__(float(10), HitNormal));
+			__NFUN_267__(vTraceEnd, true);
+			__NFUN_221__(Velocity, 0.5000000);
+			return;
+		}
+		DesiredRotation = __NFUN_320__();
+		Velocity = __NFUN_213__(0.2000000, __NFUN_300__(Velocity, HitNormal));
+		RotationRate.Yaw = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+		RotationRate.Pitch = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+		RotationRate.Roll = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+		// End:0x257
+		if(__NFUN_177__(Velocity.Z, float(400)))
+		{
+			Velocity.Z = 400.0000000;			
+		}
+		else
+		{
+			// End:0x287
+			if(__NFUN_176__(__NFUN_225__(Velocity), float(10)))
+			{
+				__NFUN_3970__(0);
+				bBounce = false;
+				RotationRate = rot(0, 0, 0);
+			}
+		}
+		// End:0x32C
+		if(m_bFirstImpact)
+		{
+			m_bFirstImpact = false;
 			m_ImpactSound = m_ImpactGroundSound;
-
-			pHit = Trace(vHitLocation, vHitNormal, Location - vect(0,0,40), Location, false,, HitMaterial);
-
-			if ((HitMaterial != none) && ((HitMaterial.m_eSurfIdForSnd == SURF_WaterPuddle) || (HitMaterial.m_eSurfIdForSnd == SURF_DeepWater)))
+			pHit = __NFUN_277__(vHitLocation, vHitNormal, __NFUN_216__(Location, vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
+			// End:0x322
+			if(__NFUN_130__(__NFUN_119__(HitMaterial, none), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(12)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(13)))))
 			{
 				m_ImpactSound = m_ImpactWaterSound;
 			}
-        
-			PlaySound( m_ImpactSound, SLOT_SFX);
-			
+			__NFUN_264__(m_ImpactSound, 3);
 		}
-        R6MakeNoise( SNDTYPE_GrenadeImpact );
-    }
+		R6MakeNoise(3);
+	}
+	return;
 }
 
-simulated function Landed( vector HitNormal )
+simulated function Landed(Vector HitNormal)
 {
-     HitWall( HitNormal, None );
-}
-    
-simulated singular function Touch(Actor Other)
-{
+	HitWall(HitNormal, none);
+	return;
 }
 
-simulated function ProcessTouch(Actor Other, vector vHitLocation)
+singular simulated function Touch(Actor Other)
 {
-    HitWall( vHitLocation, Other);
+	return;
 }
 
-function FLOAT GetLocalizedDamagePercentage( eGrenadePawnPose ePawnPose, eGrenadeBoneTarget eBoneTarget )
+simulated function ProcessTouch(Actor Other, Vector vHitLocation)
 {
-    switch( ePawnPose )
-    {
-    case GPP_Stand :          // Stand & Prone Siding
-        switch( eBoneTarget )
-        {
-        case GBT_Head :     return m_DmgPercentStand.fHead;
-        case GBT_Body :     return m_DmgPercentStand.fBody;
-        case GBT_LeftArm :  
-        case GBT_RightArm : return m_DmgPercentStand.fArms;
-        case GBT_LeftLeg :
-        case GBT_RightLeg : return m_DmgPercentStand.fLegs;
-        }
-
-    case GPP_Crouch:          // Crouch
-        switch( eBoneTarget )
-        {
-        case GBT_Head :     return m_DmgPercentCrouch.fHead;
-        case GBT_Body :     return m_DmgPercentCrouch.fBody;
-        case GBT_LeftArm :  
-        case GBT_RightArm : return m_DmgPercentCrouch.fArms;
-        case GBT_LeftLeg :
-        case GBT_RightLeg : return m_DmgPercentCrouch.fLegs;
-        }
-
-    case GPP_ProneFacing:    // Prone, facing the grenade
-        switch( eBoneTarget )
-        {
-        case GBT_Head :     return m_DmgPercentProne.fHead;
-        case GBT_Body :     return m_DmgPercentProne.fBody;
-        case GBT_LeftArm :  
-        case GBT_RightArm : return m_DmgPercentProne.fArms;
-        case GBT_LeftLeg :
-        case GBT_RightLeg : return m_DmgPercentProne.fLegs;
-        }
-    }
-
-    return 0.0f;    // Hum... should not get here
+	HitWall(vHitLocation, Other);
+	return;
 }
 
-
-function eGrenadeBoneTarget HitRandomBodyPart( eGrenadePawnPose ePawnPose )
+function float GetLocalizedDamagePercentage(R6Grenade.eGrenadePawnPose ePawnPose, R6Grenade.eGrenadeBoneTarget eBoneTarget)
 {
-    local FLOAT fRandVal;
-    local FLOAT fLeftArmVal;
-    local FLOAT fRightArmVal;
-    local FLOAT fLeftLegVal;
-    local FLOAT fRighLegVal;
-    local FLOAT fBodyVal;
-    local FLOAT fHeadVal;
-
-    // Network Here, Aristo HELP!! :)
-    fRandVal = FRand();
-
-    fLeftArmVal  = GetLocalizedDamagePercentage( ePawnPose, GBT_LeftArm );
-    fRightArmVal = GetLocalizedDamagePercentage( ePawnPose, GBT_RightArm ) + fLeftArmVal;
-    fLeftLegVal  = GetLocalizedDamagePercentage( ePawnPose, GBT_LeftLeg ) + fRightArmVal;
-    fRighLegVal  = GetLocalizedDamagePercentage( ePawnPose, GBT_RightLeg ) + fLeftLegVal;
-    fBodyVal     = GetLocalizedDamagePercentage( ePawnPose, GBT_Body ) + fRighLegVal;
-    fHeadVal     = GetLocalizedDamagePercentage( ePawnPose, GBT_Head ) + fBodyVal;
-
-    if( fRandVal < fLeftArmVal )
-    {
-        return GBT_LeftArm;
-    }
-    else if( fRandVal < fRightArmVal ) 
-    {
-        return GBT_RightArm;
-    }
-    else if( fRandVal < fLeftLegVal ) 
-    {
-        return GBT_LeftLeg;
-    }
-    else if( fRandVal < fRighLegVal ) 
-    {
-        return GBT_RightLeg;
-    }
-    else if( fRandVal < fBodyVal ) 
-    {
-        return GBT_Body;
-    }
-    
-    // Headshot !! :)
-    return GBT_Head;
+	switch(ePawnPose)
+	{
+		// End:0x60
+		case 0:
+			switch(eBoneTarget)
+			{
+				// End:0x23
+				case 0:
+					return m_DmgPercentStand.fHead;
+				// End:0x33
+				case 1:
+					return m_DmgPercentStand.fBody;
+				// End:0x38
+				case 2:
+				// End:0x48
+				case 3:
+					return m_DmgPercentStand.fArms;
+				// End:0x4D
+				case 4:
+				// End:0x5D
+				case 5:
+					return m_DmgPercentStand.fLegs;
+				// End:0xFFFF
+				default:
+					break;
+				}
+		// End:0xB9
+		case 1:
+			switch(eBoneTarget)
+			{
+				// End:0x7C
+				case 0:
+					return m_DmgPercentCrouch.fHead;
+				// End:0x8C
+				case 1:
+					return m_DmgPercentCrouch.fBody;
+				// End:0x91
+				case 2:
+				// End:0xA1
+				case 3:
+					return m_DmgPercentCrouch.fArms;
+				// End:0xA6
+				case 4:
+				// End:0xB6
+				case 5:
+					return m_DmgPercentCrouch.fLegs;
+				// End:0xFFFF
+				default:
+					break;
+				}
+		// End:0x112
+		case 2:
+			switch(eBoneTarget)
+			{
+				// End:0xD5
+				case 0:
+					return m_DmgPercentProne.fHead;
+				// End:0xE5
+				case 1:
+					return m_DmgPercentProne.fBody;
+				// End:0xEA
+				case 2:
+				// End:0xFA
+				case 3:
+					return m_DmgPercentProne.fArms;
+				// End:0xFF
+				case 4:
+				// End:0x10F
+				case 5:
+					return m_DmgPercentProne.fLegs;
+				// End:0xFFFF
+				default:
+					break;
+				}
+		// End:0xFFFF
+		default:
+			return 0.0000000;
+			break;
+	}
+	return;
 }
 
-
-function eGrenadePawnPose GetPawnPose( R6Pawn aPawn )
+function R6Grenade.eGrenadeBoneTarget HitRandomBodyPart(R6Grenade.eGrenadePawnPose ePawnPose)
 {
-    local FLOAT fDistFeet;
-    local FLOAT fDistHead;
+	local float fRandVal, fLeftArmVal, fRightArmVal, fLeftLegVal, fRighLegVal, fBodyVal,
+		fHeadVal;
 
-    local vector vFeet;
-    local vector vHead;
-
-    // If pawn is prone, find if it's facing the grenade or not
-    if( aPawn.m_bIsProne )
-    {
-        vFeet = aPawn.GetBoneCoords( 'R6 L Foot' ).Origin;
-        vHead = aPawn.GetBoneCoords( 'R6 Head' ).Origin;
-        
-        fDistHead = VSize( vHead - Location );
-        fDistFeet = VSize( vFeet - Location );
-
-        // Really cheap, there may be a better way... but it's working :)
-        if( fDistFeet - fDistHead > (VSize(vFeet - vHead) * 0.75) )
-        {
-            return GPP_ProneFacing;
-        }
-        else
-        {
-            return GPP_Stand;
-        }
-    }
-
-    // Pawn is crouching
-    if( aPawn.bIsCrouched )
-    {
-        return GPP_Crouch;
-    }
-
-    return GPP_Stand;
+	fRandVal = __NFUN_195__();
+	fLeftArmVal = GetLocalizedDamagePercentage(ePawnPose, 2);
+	fRightArmVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 3), fLeftArmVal);
+	fLeftLegVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 4), fRightArmVal);
+	fRighLegVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 5), fLeftLegVal);
+	fBodyVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 1), fRighLegVal);
+	fHeadVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 0), fBodyVal);
+	// End:0xB2
+	if(__NFUN_176__(fRandVal, fLeftArmVal))
+	{
+		return 2;		
+	}
+	else
+	{
+		// End:0xC7
+		if(__NFUN_176__(fRandVal, fRightArmVal))
+		{
+			return 3;			
+		}
+		else
+		{
+			// End:0xDC
+			if(__NFUN_176__(fRandVal, fLeftLegVal))
+			{
+				return 4;				
+			}
+			else
+			{
+				// End:0xF1
+				if(__NFUN_176__(fRandVal, fRighLegVal))
+				{
+					return 5;					
+				}
+				else
+				{
+					// End:0x103
+					if(__NFUN_176__(fRandVal, fBodyVal))
+					{
+						return 1;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+	return;
 }
 
-
-function HurtPawns() 
+function R6Grenade.eGrenadePawnPose GetPawnPose(R6Pawn aPawn)
 {
-    //Specific to each grenade.
+	local float fDistFeet, fDistHead;
+	local Vector vFeet, vHead;
+
+	// End:0xA7
+	if(aPawn.m_bIsProne)
+	{
+		vFeet = aPawn.GetBoneCoords('R6 L Foot').Origin;
+		vHead = aPawn.GetBoneCoords('R6 Head').Origin;
+		fDistHead = __NFUN_225__(__NFUN_216__(vHead, Location));
+		fDistFeet = __NFUN_225__(__NFUN_216__(vFeet, Location));
+		// End:0xA4
+		if(__NFUN_177__(__NFUN_175__(fDistFeet, fDistHead), __NFUN_171__(__NFUN_225__(__NFUN_216__(vFeet, vHead)), 0.7500000)))
+		{
+			return 2;			
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	// End:0xBC
+	if(aPawn.bIsCrouched)
+	{
+		return 1;
+	}
+	return 0;
+	return;
+}
+
+function HurtPawns()
+{
+	return;
 }
 
 defaultproperties
 {
-     m_eOldPhysic=PHYS_Falling
-     m_eExplosionSoundType=SNDTYPE_Explosion
-     m_iNumberOfFragments=4
-     m_bFirstImpact=True
-     m_fShakeRadius=1000.000000
-     m_ImpactGroundSound=Sound'Foley_CommonGrenade.Play_Grenades_GroundImpacts'
-     m_sndEarthQuake=Sound'CommonWeapons.Play_GrenadeQuake'
-     m_bIsGrenade=True
-     m_fExplosionDelay=3.000000
-     Physics=PHYS_Falling
-     RemoteRole=ROLE_SimulatedProxy
-     DrawType=DT_StaticMesh
-     bHidden=False
-     bStasis=False
-     bNetTemporary=False
-     bAlwaysRelevant=True
-     m_bBypassAmbiant=True
-     m_bRenderOutOfWorld=True
-     m_bDoPerBoneTrace=False
-     bIgnoreOutOfWorld=True
-     bFixedRotationDir=True
+	m_eOldPhysic=2
+	m_eExplosionSoundType=5
+	m_iNumberOfFragments=4
+	m_bFirstImpact=true
+	m_fShakeRadius=1000.0000000
+	m_ImpactGroundSound=Sound'Foley_CommonGrenade.Play_Grenades_GroundImpacts'
+	m_sndEarthQuake=Sound'CommonWeapons.Play_GrenadeQuake'
+	m_bIsGrenade=true
+	m_fExplosionDelay=3.0000000
+	Physics=2
+	RemoteRole=2
+	DrawType=8
+	bHidden=false
+	bStasis=false
+	bNetTemporary=false
+	bAlwaysRelevant=true
+	m_bBypassAmbiant=true
+	m_bRenderOutOfWorld=true
+	m_bDoPerBoneTrace=false
+	bIgnoreOutOfWorld=true
+	bFixedRotationDir=true
 }
+
+// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
+// REMOVED IN 1.60: function HitRandomBodyPart
+// REMOVED IN 1.60: function GetPawnPose

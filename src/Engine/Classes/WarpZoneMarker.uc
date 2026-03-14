@@ -1,64 +1,63 @@
 //=============================================================================
+// WarpZoneMarker - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+// From SDK 1.56 - verify still applicable
+//=============================================================================
 // WarpZoneMarker.
 //=============================================================================
 class WarpZoneMarker extends SmallNavigationPoint
-	native;
+	native
+	notplaceable
+ hidecategories(Lighting,LightColor,Karma,Force);
 
 var WarpZoneInfo markedWarpZone;
-
 // AI related
-var Actor TriggerActor;		//used to tell AI how to trigger me
+var Actor TriggerActor;  // used to tell AI how to trigger me
 var Actor TriggerActor2;
 
 function PostBeginPlay()
 {
-	if ( markedWarpZone.numDestinations > 1 )
+	// End:0x1A
+	if(__NFUN_151__(markedWarpZone.numDestinations, 1))
+	{
 		FindTriggerActor();
-	Super.PostBeginPlay();
+	}
+	super(Actor).PostBeginPlay();
+	return;
 }
 
 function FindTriggerActor()
 {
 	local ZoneTrigger Z;
-	ForEach AllActors(class 'ZoneTrigger', Z)
-		if ( Z.Event == markedWarpZone.ZoneTag)
+
+	// End:0x40
+	foreach __NFUN_304__(Class'Engine.ZoneTrigger', Z)
+	{
+		// End:0x3F
+		if(__NFUN_254__(Z.Event, markedWarpZone.ZoneTag))
 		{
-			TriggerActor = Z;
+			TriggerActor = Z;			
 			return;
-		} 
+		}		
+	}	
+	return;
 }
 
-/* SpecialHandling is called by the navigation code when the next path has been found.  
-It gives that path an opportunity to modify the result based on any special considerations
-*/
-
-/* FIXME - how to figure out if other side actor is OK and use intelligently for all dests? 
-*/
 function Actor SpecialHandling(Pawn Other)
 {
-	if (Other.Region.Zone == markedWarpZone)
-		markedWarpZone.ActorEntered(Other);
-	return self;
-}
-/*	if ( markedWarpZone.numDestinations <= 1 )
-		return self;
-	
-	if ( markedWarpZone.OtherSideActor is OK )
-		return self;
-			
-	if (TriggerActor == None)
+	// End:0x31
+	if(__NFUN_114__(Other.Region.Zone, markedWarpZone))
 	{
-		FindTriggerActor();
-		if (TriggerActor == None)
-			return None;
+		markedWarpZone.ActorEntered(Other);
 	}
-	
-	return TriggerActor;			
-}	 
-*/
+	return self;
+	return;
+}
 
 defaultproperties
 {
-     bCollideWhenPlacing=False
-     bHiddenEd=True
+	bCollideWhenPlacing=false
+	bHiddenEd=true
 }

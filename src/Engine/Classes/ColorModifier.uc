@@ -1,14 +1,21 @@
+//=============================================================================
+// ColorModifier - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
 class ColorModifier extends Modifier
+	native
 	noteditinlinenew
-	native;
+	collapsecategories
+ hidecategories(Object,Material);
 
-var() color Color;
-var() bool	RenderTwoSided;
-var() bool	AlphaBlend;
+var() bool RenderTwoSided;
+var() bool AlphaBlend;
+var() Color Color;
 
 defaultproperties
 {
-     RenderTwoSided=True
-     AlphaBlend=True
-     Color=(B=255,G=255,R=255,A=255)
+	RenderTwoSided=true
+	AlphaBlend=true
+	Color=(R=255,G=255,B=255,A=255)
 }

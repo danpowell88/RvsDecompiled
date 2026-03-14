@@ -1,36 +1,37 @@
-class ACTION_ForceMoveToPoint extends ScriptedAction;
+//=============================================================================
+// ACTION_ForceMoveToPoint - extracted from retail RavenShield 1.60
+// Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
+// Comments from Ubisoft SDK 1.56 where applicable
+//=============================================================================
+class ACTION_ForceMoveToPoint extends ScriptedAction
+	editinlinenew
+	collapsecategories
+ hidecategories(Object);
 
-var(Action) name DestinationTag;	// tag of destination - if none, then use the ScriptedSequence
-var Actor Dest;
 var byte originalPhys;
+var Actor Dest;
+var(Action) name DestinationTag;  // tag of destination - if none, then use the ScriptedSequence
 
 function bool InitActionFor(ScriptedController C)
 {
 	Dest = C.SequenceScript.GetMoveTarget();
-
-	if ( (DestinationTag != 'None') && (DestinationTag != '') )
+	// End:0x61
+	if(__NFUN_130__(__NFUN_255__(DestinationTag, 'None'), __NFUN_255__(DestinationTag, 'None')))
 	{
-		ForEach C.AllActors(class'Actor',Dest,DestinationTag)
-			break;
+		// End:0x60
+		foreach C.__NFUN_304__(Class'Engine.Actor', Dest, DestinationTag)
+		{
+			// End:0x60
+			break;			
+		}		
 	}
-
 	originalPhys = C.Pawn.Physics;
-
-	C.Pawn.SetCollision(False, False, False);
+	C.Pawn.__NFUN_262__(false, false, false);
 	C.Pawn.bCollideWorld = false;
-
-	//Log("SetLocation:"$Dest.Location);
-	C.Pawn.SetLocation(Dest.Location);
-	//Log("NewLocation:"$C.Pawn.Location);
-
-	//Log("SetRotation:"$Dest.Rotation);
-	C.Pawn.SetRotation(Dest.Rotation);
-
-	C.Pawn.SetPhysics(PHYS_None);
-
+	C.Pawn.__NFUN_267__(Dest.Location);
+	C.Pawn.__NFUN_299__(Dest.Rotation);
+	C.Pawn.__NFUN_3970__(0);
 	return false;
+	return;
 }
 
-defaultproperties
-{
-}
