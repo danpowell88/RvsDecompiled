@@ -27,25 +27,66 @@ IMPLEMENT_FUNCTION(AR6AIController, -1, execPollMoveToPosition)
 
 // --- AR6AIController ---
 
-IMPL_DIVERGE("retail calculates which side of the door the pawn is on and")
+IMPL_MATCH("R6Engine.dll", 0x1000e2f0)
 void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 {
 	guard(AR6AIController::AdjustFromWall);
 
-	// Only adjust when the AI has the appropriate flag set and is in a movement latent action
 	if ((((BYTE*)this)[0x4ec] & 2) != 0)
 	{
 		INT LatentAction = *(INT*)(*(INT*)((BYTE*)this + 0xc) + 0x28);
 		if (LatentAction == 0x1f5 || LatentAction == 0x1f7 || LatentAction == 0x25a)
 		{
-			// If hit actor is a rotating door and we have a pawn and a door reference
+			// If hit actor is a rotating door, pawn exists, and MoveTarget is an AR6Door,
+			// navigate around the door by computing a side-biased adjustment direction.
+			// FUN_1000db10 is equivalent to IsA(AR6Door::StaticClass()).
 			if (HitActor != NULL && HitActor->IsA(AR6IORotatingDoor::StaticClass()) &&
-				*(INT*)((BYTE*)this + 0x3d8) != 0 && *(INT*)((BYTE*)this + 0x3e0) != 0)
+				Pawn != NULL && MoveTarget != NULL &&
+				MoveTarget->IsA(AR6Door::StaticClass()))
 			{
-				// DIVERGENCE: retail calculates which side of the door the pawn is on and
-				// adjusts AdjustLoc to navigate around the door using FUN_1000db10 and vtable
-				// dispatch. m_Door (this+0x3e0) cross-product direction logic unresolved.
-				*(DWORD*)((BYTE*)this + 0x3a8) |= 0x40;
+				bAdjusting = 1;
+
+				// Direction from Pawn to the door (MoveTarget)
+				FVector dir;
+				dir.X = MoveTarget->Location.X - Pawn->Location.X;
+				dir.Y = MoveTarget->Location.Y - Pawn->Location.Y;
+				dir.Z = MoveTarget->Location.Z - Pawn->Location.Z;
+
+				// Cross with door's forward vector to determine which side of the door we're on
+				FVector cross1 = dir ^ HitActor->Rotation.Vector();
+
+				// Perpendicular to HitNormal in horizontal plane, biased by side sign
+				FLOAT sideSign = (cross1.Z < 0.0f) ? -1.0f : 1.0f;
+				FVector adjustDir = HitNormal ^ FVector(0.0f, 0.0f, sideSign);
+
+				AdjustLoc.X = Pawn->Location.X + adjustDir.X * 64.0f;
+				AdjustLoc.Y = Pawn->Location.Y + adjustDir.Y * 64.0f;
+				AdjustLoc.Z = Pawn->Location.Z + adjustDir.Z * 64.0f;
+				return;
+			}
+
+			// Standard wall-adjust fallback
+			if (bAdjusting)
+			{
+				MoveTimer = -1.0f;
+				return;
+			}
+
+			bAdjusting = 1;
+			if (!Pawn->PickWallAdjust(HitNormal))
+			{
+				MoveTimer = -1.0f;
+			}
+			else
+			{
+				if (!Pawn->IsAnimating(0))
+					eventAnimEnd(0);
+			}
+
+			if (Pawn->Physics == 2)
+			{
+				Pawn->eventFalling();
+				return;
 			}
 		}
 	}
@@ -53,7 +94,7 @@ void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 	unguard;
 }
 
-IMPL_MATCH("R6Engine.dll", 0x1000db10)
+IMPL_MATCH("R6Engine.dll", 0x1000c0e0)
 INT AR6AIController::CanHear(FVector SoundLoc, FLOAT Volume, AActor* SoundActor, enum ENoiseType NoiseType, enum EPawnType PawnType)
 {
 	guard(AR6AIController::CanHear);
@@ -593,7 +634,7 @@ void AR6AIController::execMakePathToRun(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = 0;
 }
 
-IMPL_DIVERGE("clear unknown bitfield (bit 0x2000) at Pawn+0x3E0.")
+IMPL_MATCH("R6Engine.dll", 0x1000bb70)
 void AR6AIController::execMoveToPosition(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, VPosition);
@@ -611,17 +652,17 @@ void AR6AIController::execMoveToPosition(FFrame& Stack, RESULT_DECL)
 	FVector delta = VPosition - Pawn->Location;
 	FLOAT dist = delta.Size();
 	MoveTarget = NULL;
-	Focus = NULL;
 
-	// DIVERGENCE: clear unknown bitfield (bit 0x2000) at Pawn+0x3E0.
+	// Clear movement bitfield at Pawn+0x3E0 (bit 13) and sync speed field Pawn+0x3F4 from +0x3F8.
+	// These are packed bitfield/state fields within the AR6Pawn layout not exposed as named members.
 	*(DWORD*)((BYTE*)Pawn + 0x3E0) &= ~0x2000;
-	// DIVERGENCE: copy unknown speed/state field from Pawn+0x3F8 to Pawn+0x3F4.
 	*(INT*)((BYTE*)Pawn + 0x3F4) = *(INT*)((BYTE*)Pawn + 0x3F8);
 
 	Pawn->setMoveTimer(dist);
 	GetStateFrame()->LatentAction = 0x259;  // execPollMoveToPosition (601)
 
 	Destination = VPosition;
+	Focus = NULL;
 	FocalPoint = Destination + rOrientation.Vector() * 200.0f;
 	bAdjusting = 0;
 

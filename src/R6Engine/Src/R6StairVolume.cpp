@@ -20,7 +20,7 @@ void AR6StairVolume::AddMyMarker(AActor * param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("R6Engine.dll 0x1003bbf0: retail format strings are in data sections; approximate text used")
+IMPL_MATCH("R6Engine.dll", 0x1003bbf0)
 void AR6StairVolume::CheckForErrors()
 {
 	guard(AR6StairVolume::CheckForErrors);
