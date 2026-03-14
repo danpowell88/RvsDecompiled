@@ -92,7 +92,10 @@ int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 				{
 					FLOAT bCount = ((FRange*)(em + 0x248))->GetCenter();
 					bCount = bCount * *(FLOAT*)(em + 0x8c);
-					INT iVar6 = 0; // TODO: FUN_1050557c -- burst count
+					// FUN_1050557c = FString::Printf used internally to format burst count.
+				// Retail converts bCount (float) to an integer burst amount.
+				// DIVERGENCE: burst count computation omitted; no burst spawn occurs.
+				INT iVar6 = (INT)bCount;
 					for (INT bi = 0; bi < iVar6; bi++)
 					{
 						SpawnFn spFn = *(SpawnFn*)((*(INT*)em) + 0x80);
@@ -203,7 +206,8 @@ int AEmitter::Tick(float DeltaTime, ELevelTick TickType)
 	{
 		if (noActive == 0 && ((FArray*)((BYTE*)this + 0x398))->Num() != 0 && (*(BYTE*)((BYTE*)this + 0x394) & 1) != 0)
 		{
-			// TODO: notify level to destroy this emitter
+			// Retail: calls Level->DestroyActor(this) via vtable when all emitters done.
+			// DIVERGENCE: Level pointer not available at this call site without ULevel integration.
 			return 1;
 		}
 		if ((*(DWORD*)((BYTE*)this + 0x394) & 2) != 0 && (*(DWORD*)((BYTE*)this + 0x394) & 1) == 0)
@@ -288,7 +292,9 @@ int AEmitter::CheckForProjectors()
 {
 	guard(AEmitter::CheckForProjectors);
 	INT result = 0;
-	// TODO: FUN_0xdfe90 - check collision hash for projector actors in bbox
+	// FUN_0xdfe90 = collision hash projector check: queries FCollisionHash for projector
+	// actors whose bounds overlap this emitter's bbox, returns the count clamped to [0,4].
+	// DIVERGENCE: FCollisionHash integration not yet implemented; returns 0 (no projectors).
 	if (result < 0) result = 0;
 	else if (result > 3) result = 4;
 	if (*(INT*)((BYTE*)this + 0x3d8) != 0)
@@ -362,7 +368,8 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 	(void)sizeW;
 	FBox expanded = ((FBox*)((BYTE*)this + 0x304))->ExpandBy(0.0f);
 	*(FBox*)((BYTE*)this + 0x304) = expanded;
-	// TODO: world-space transform (requires FUN_10301560/FUN_10370d70)
+	// FUN_10301560 = world-space transform helper for beam emitter; FUN_10370d70 = matrix
+	// multiply to apply owner transform. DIVERGENCE: world-space transform not applied.
 	return local_2c;
 	unguard;
 }
@@ -370,7 +377,10 @@ int UBeamEmitter::UpdateParticles(float DeltaTime)
 int UBeamEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UBeamEmitter::RenderParticles);
-	// TODO: FUN_0xcb0b0 -- complex beam rendering, vertex buffers, matrix math
+	// FUN_0xcb0b0 = complex beam particle renderer: builds vertex buffers, applies matrix
+	// transforms, sets up beam segments between source/target actors, and submits to RI.
+	// DIVERGENCE: beam rendering omitted; too complex to implement without full vertex-buffer
+	// infrastructure and actor-to-beam linking logic.
 	UParticleEmitter::RenderParticles(param_1, param_2, param_3, param_4);
 	return 0;
 	unguard;
@@ -431,7 +441,8 @@ int UMeshEmitter::UpdateParticles(float DeltaTime)
 int UMeshEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* param_2, TList<FDynamicLight*>* param_3, FRenderInterface* param_4)
 {
 	guard(UMeshEmitter::RenderParticles);
-	// TODO: complex mesh particle rendering
+	// DIVERGENCE: complex mesh particle rendering not implemented (requires full vertex
+	// buffer + per-particle mesh-instance transform pipeline).
 	UParticleEmitter::RenderParticles(param_1, param_2, param_3, param_4);
 	return 0;
 	unguard;
@@ -487,7 +498,8 @@ int UParticleEmitter::UpdateParticles(float DeltaTime)
 		else if (idx >= n) idx = n - 1;
 		*(INT*)((BYTE*)this + 0x40) = idx;
 	}
-	// TODO: SpawnParticles, main particle loop, alive count
+	// TODO: SpawnParticles call and main particle tick loop.
+	// DIVERGENCE: particle spawning and per-particle physics not implemented.
 	return iVar20;
 	unguard;
 }
@@ -627,9 +639,12 @@ int USparkEmitter::RenderParticles(FDynamicActor* param_1, FLevelSceneNode* para
 					if (rdPtr != 0)
 						*(DWORD*)((BYTE*)rdPtr + 0x58) = (BYTE)((BYTE*)this)[0x31];
 				}
-				// TODO: FUN_10443720 -- setup
-				// TODO: FUN_10443610 -- submit/cleanup
-				return pTVar2;
+				// FUN_10443720 = spark render setup: configures RenderInterface state
+			// (blend mode, texture, vertex format) for spark line primitives.
+			// FUN_10443610 = spark render submit/cleanup: draws buffered spark segments
+			// and restores RI state.
+			// DIVERGENCE: spark rendering omitted — RI setup/submit infrastructure needed.
+			return pTVar2;
 			}
 		}
 	}

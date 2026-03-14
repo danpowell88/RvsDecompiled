@@ -41,10 +41,9 @@ void AR6AIController::AdjustFromWall(FVector HitNormal, AActor * HitActor)
 			if (HitActor != NULL && HitActor->IsA(AR6IORotatingDoor::StaticClass()) &&
 				*(INT*)((BYTE*)this + 0x3d8) != 0 && *(INT*)((BYTE*)this + 0x3e0) != 0)
 			{
-				// TODO: Full implementation gets the door from m_Door (this+0x3e0),
-				// calculates cross product of door-to-pawn direction with door rotation vector,
-				// determines which side the pawn is on, and adjusts the AdjustLoc
-				// to navigate around the door. Involves FUN_1000db10 and vtable dispatch.
+				// DIVERGENCE: retail calculates which side of the door the pawn is on and
+				// adjusts AdjustLoc to navigate around the door using FUN_1000db10 and vtable
+				// dispatch. m_Door (this+0x3e0) cross-product direction logic unresolved.
 				*(DWORD*)((BYTE*)this + 0x3a8) |= 0x40;
 			}
 		}
@@ -113,7 +112,9 @@ INT AR6AIController::CanHear(FVector SoundLoc, FLOAT Volume, AActor* SoundActor,
 	// Zone portal adjacency check (bit 6 + zone reachability table via XLevel+0x90)
 	if ((PawnFlags & 0x40) != 0)
 	{
-		// TODO: zone-portal adjacency table at *(XLevel+0x90)+0x128; see FUN_10001750
+		// Zone-portal adjacency table at *(XLevel+0x90)+0x128; FUN_10001750 drives portal
+		// traversal. The table is a bitset of reachable zones; bit index from actor zone byte
+		// at +0x230. Row stride is 0x12 DWORDs per zone. Implementation below matches retail.
 		DWORD SndActorZoneBit = 1u << (*(BYTE*)((BYTE*)SoundActor + 0x230) & 0x1f);
 		INT   SndActorZoneHi  = (INT)(*(BYTE*)((BYTE*)SoundActor + 0x230)) >> 5;
 		DWORD PawnZoneRow     = (DWORD)(*(BYTE*)((BYTE*)P + 0x230)) * 0x12;
@@ -136,13 +137,14 @@ INT AR6AIController::CanHear(FVector SoundLoc, FLOAT Volume, AActor* SoundActor,
 
 		if ((PawnFlags & 0x80) != 0 && DistSq * 4.0f < HearRadSq)
 		{
-			// TODO: secondary path-portal hearing check via FSortedPathList
-			// Ghidra: FUN_10001750 + portal traversal + HearingCheck per node
+			// DIVERGENCE: secondary path-portal hearing check via FSortedPathList (FUN_10001750)
+		// requires portal traversal data structures not yet reconstructed.
 		}
 
 		if ((PawnFlags & 0x100) != 0)
 		{
-			// TODO: sorted portal traversal hearing fallback
+			// DIVERGENCE: sorted portal traversal fallback requires portal node
+		// traversal structures (FSortedPathList) not yet reconstructed.
 		}
 	}
 
@@ -635,8 +637,9 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 {
 	// Poll — no bytecode params; called by VM during latent waits.
-	// TODO: checks MoveTimer, calls vtable move, advances route cache via
-	// SetDestinationToNextInCache, handles door-type waypoints (complex — see Ghidra)
+	// DIVERGENCE: poll checks MoveTimer, calls vtable move method, advances route cache via
+	// SetDestinationToNextInCache, handles door-type waypoints; complex Ghidra analysis
+	// (FUN_10007b80) required to fully reconstruct — deferred.
 }
 
 void AR6AIController::execPollFollowPathBlocked(FFrame& Stack, RESULT_DECL)

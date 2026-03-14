@@ -30,7 +30,7 @@ FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 			iVar4 = ((TGetMeshInst)*(DWORD*)(*(DWORD*)mesh + 0x88))(mesh, actor);
 		}
 
-		// TODO: FUN_10024530 — get anim controller from mesh instance
+		// DIVERGENCE: FUN_10024530 = get anim controller from UMeshInstance vtable; unresolved
 		INT* piVar5 = (INT*)FUN_10024530(iVar4);
 		if (piVar5 != (INT*)0)
 		{
@@ -47,7 +47,7 @@ FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 			typedef void (__thiscall *TReleaseAnim)(void*, DWORD);
 			((TReleaseAnim)*(DWORD*)(*(DWORD*)piVar5 + 0xc0))(piVar5, uVar6);
 
-			// TODO: FUN_10042934 — get frame count (returns ulonglong)
+			// DIVERGENCE: FUN_10042934 = high-resolution frame counter (QWORD); unresolved
 			QWORD uVar8 = FUN_10042934();
 
 			FLOAT fVar2 = *(FLOAT*)((BYTE*)param_1 + 0x3c); // rate
@@ -199,7 +199,7 @@ LAB_PctToFrameDone:
 	typedef void (__thiscall *TReleaseAnim2)(void*, DWORD);
 	((TReleaseAnim2)*(DWORD*)(*(DWORD*)piVar3 + 0xc0))(piVar3, uVar4);
 
-	// TODO: FUN_10042934 — get frame count
+	// DIVERGENCE: FUN_10042934 = get high-resolution frame counter (returns QWORD); unresolved.
 	QWORD uVar7 = FUN_10042934();
 
 	FLOAT local_1c = 0.0f;

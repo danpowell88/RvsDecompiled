@@ -67,20 +67,18 @@ INT AMP2IOKarma::KMP2DynKarmaInterface(INT Cmd, FVector P, FRotator R, AActor* A
 	}
 	else if (Cmd == 33)
 	{
-		// TODO: FCoords rotation and ZDR impulse application
-		// Ghidra: FCoords::operator/ then iterate m_ZDRList (0x480/0x484),
-		//         call physics vtable[0x84/4] for impulse per spring constraint
+		// DIVERGENCE: FCoords rotation and ZDR impulse — FCoords::operator/ + ZDR spring list
+		// (this+0x480, stride 0x2c) + physics vtable[0x84/4] impulse call unresolved.
 	}
 	else if (Cmd == 9) // ApplySpringForces
 	{
-		// TODO: iterate spring constraints (type==3) at this+0x480, stride 0x2c
-		// Ghidra: TransformVectorByTranspose, compute dist to target,
-		//         call physics vtable[0x84/4] for impulse
+		// DIVERGENCE: spring constraint iteration (type==3, this+0x480, stride 0x2c) —
+		// TransformVectorByTranspose and physics vtable[0x84/4] impulse call unresolved.
 	}
 	else if (Cmd == 8) // ApplyConstraints
 	{
-		// TODO: iterate constraints (type==2), locate connected constraint,
-		// Ghidra: FUN_1001c600 helper, nested constraint lookup
+		// DIVERGENCE: constraint iteration (type==2) and nested constraint lookup via
+		// FUN_1001c600 helper unresolved.
 	}
 
 	return 0;
@@ -93,10 +91,10 @@ void AMP2IOKarma::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface*
 
 	if ((*(DWORD*)((BYTE*)this + 0xAC) & 0x4000) != 0)
 	{
-		// TODO: Complex editor rendering that iterates karma constraint list at (this+0x480),
-		// transforms positions by inverse GMath coords, and draws spheres at each constraint point.
-		// Involves FLineBatcher, FCoords, FVector::TransformVectorByTranspose, and per-constraint
-		// iteration with stride 0x2c. Omitted due to unresolved helper FUN_1000d610/FUN_1000ea00.
+		// DIVERGENCE: editor constraint visualization — iterates karma constraint list
+		// (this+0x480, stride 0x2c), transforms positions by inverse GMath coords,
+		// draws spheres at each point via FLineBatcher. Helpers FUN_1000d610 and
+		// FUN_1000ea00 are unresolved.
 	}
 
 	unguard;

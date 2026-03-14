@@ -254,17 +254,11 @@ void AR6PlayerController::UpdateCircumstantialAction()
 {
 	guard(AR6PlayerController::UpdateCircumstantialAction);
 
-	// TODO: Extremely complex function (0x308c0, ~2000 bytes).
-	// Queries the circumtstantial action system (m_CircumstantialAction at this+0x8b4):
-	// 1. If Role==ROLE_Authority (this[0x2d]==4), clears action query state
-	// 2. Fires a line trace from eye position along view direction (m_fCircumActionRange at this+0x848)
-	// 3. Checks hit actor class hierarchy via IsA for various interactive/pawn types
-	// 4. Extracts material info from hit (bone index, texture params) for reticule identification
-	// 5. In capture-the-enemy mode, does secondary trace for pawn identification
-	// 6. Calls eventR6QueryCircumstantialAction on the hit actor
-	// 7. Updates reticule target position at (this+0x9bc, 0x9c0, 0x9c4)
-	// Full implementation requires resolving PrivateStaticClass_exref comparisons,
-	// FVector0_exref, and vtable dispatch patterns.
+	// DIVERGENCE: ~2000-byte function (Ghidra 0x308c0). Queries circumtstantial action system
+	// (m_CircumstantialAction at this+0x8b4): fires a line trace from eye position, checks hit
+	// actor class hierarchy for interactive/pawn types, extracts material/bone info for reticule,
+	// calls eventR6QueryCircumstantialAction, updates reticule target at (this+0x9bc/0x9c0/0x9c4).
+	// Unresolved PrivateStaticClass_exref comparisons and vtable dispatch patterns deferred.
 
 	unguard;
 }
@@ -273,15 +267,10 @@ void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
 	guard(AR6PlayerController::UpdateReticule);
 
-	// TODO: Complex function (0x31010, ~1100 bytes).
-	// Iterates all pawns in the level (XLevel->Actors at this+0x328+0x101c0),
-	// checks if they are alive terrorists (type 0x2), gets bone positions via
-	// USkeletalMeshInstance::GetBoneCoords for "R6 PonyTail1" bone,
-	// projects them to screen via FUN_1002ff80, and finds the closest enemy
-	// in screen-space within the reticule radius. Updates aim target info
-	// at (this+0x8b0, 0x918, 0x91c, 0x920, 0x86c, 0x870).
-	// When target changes, sets blend time at (this+0x87c) to 0.15f (0x3e19999a).
-	// Smoothly interpolates reticule position using DeltaTime / blendTime.
+	// DIVERGENCE: ~1100-byte function (Ghidra 0x31010). Iterates level actors for alive
+	// terrorists, gets bone positions via USkeletalMeshInstance::GetBoneCoords ("R6 PonyTail1"),
+	// projects to screen via FUN_1002ff80, finds closest in reticule radius. Updates aim info
+	// at (this+0x8b0/0x918/0x91c/0x920/0x86c/0x870). FUN_1002ff80 and bone name logic unresolved.
 
 	unguard;
 }
@@ -310,13 +299,9 @@ void AR6PlayerController::UpdateSpectatorReticule()
 {
 	guard(AR6PlayerController::UpdateSpectatorReticule);
 
-	// TODO: Complex function (0x305f0, 656 bytes).
-	// In spectator mode (Flags & 0x20000): uses own Rotation vector and Location.
-	// Otherwise: uses ViewTarget's GetViewRotation and EyePosition.
-	// Fires a line trace from eye to eye + viewDir * m_fCircumActionRange (this+0x848)
-	// with trace flags 0x210bf. If hit actor has a Pawn owner, copies the pawn's
-	// PlayerReplicationInfo->PlayerName (or Pawn's PlayerName at offset 0x630)
-	// into (this+0xa68). Clears name to empty string if no valid target.
+	// DIVERGENCE: ~656-byte function (Ghidra 0x305f0). Fires line trace from eye/spectator
+	// position; if hit actor has a Pawn owner, copies PlayerName into (this+0xa68).
+	// FVector/rotation resolution and FName-to-FString copy logic unresolved.
 
 	unguard;
 }
@@ -444,8 +429,9 @@ void AR6PlayerController::execPlayVoicesPriority(FFrame& Stack, RESULT_DECL)
 	P_GET_UBOOL(bWaitToFinishSound);
 	P_GET_FLOAT(fTime);
 	P_FINISH;
-	// TODO: manages m_PlayVoicesPriority list, allocates FstSoundPriorityPtr,
-	// routes through SelectActorForSound and per-slot stop/play logic (see Ghidra)
+	// DIVERGENCE: manages m_PlayVoicesPriority list, allocates FstSoundPriorityPtr,
+	// routes through SelectActorForSound and per-slot stop/play logic.
+	// Full implementation requires resolving FstSoundPriorityPtr struct and priority queue.
 }
 
 void AR6PlayerController::execUpdateCircumstantialAction(FFrame& Stack, RESULT_DECL)
