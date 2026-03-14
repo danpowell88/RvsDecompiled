@@ -55,4 +55,15 @@ class FSceneNode;
 // Sourced from src/Core/Inc/ImplSource.h — zero compile-time overhead.
 #include "ImplSource.h"
 
+/*----------------------------------------------------------------------------
+    Missing Core.dll exports not declared in the community SDK headers.
+    Verified against retail Core.dll via Ghidra / dumpbin.
+    (The SDK is a community project and may omit or misrepresent symbols.)
+----------------------------------------------------------------------------*/
+
+// GScriptEntryTag — script call depth counter (Core.dll export ?GScriptEntryTag@@3HA).
+// Used together with GScriptCycles to track script execution entry/exit.
+// GScriptCycles is declared in Core.h; this companion variable was omitted from the SDK.
+CORE_API extern INT GScriptEntryTag;
+
 #endif

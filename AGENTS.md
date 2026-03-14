@@ -46,3 +46,19 @@ tags: [tag1, tag2]
 ```
 
 All six fields (`slug`, `title`, `authors`, `date`, `tags`, and the `<!-- truncate -->` marker somewhere in the body) are mandatory.
+
+## Ground Truth Priority
+
+**The SDK included in this repo is a community-maintained project and is NOT official / NOT always correct.**
+
+When there is any conflict between the SDK headers and Ghidra analysis of the retail binaries:
+
+1. **Ghidra is always the ground truth.** Function signatures, struct sizes, member offsets, calling conventions — all come from Ghidra analysis of the retail DLLs, not the SDK.
+
+2. **The SDK is a useful starting point / cross-reference only.** It can help identify parameter names and intent, but must not be blindly trusted for signatures, types, or struct layouts.
+
+3. **When adding a new declaration or shim** (e.g. adding a missing function to `EnginePrivate.h` or `CorePrivate.h`), derive the signature from Ghidra's decompilation output in `ghidra/exports/`, not from the SDK. Document the Ghidra address in a comment.
+
+4. **When a SDK declaration disagrees with Ghidra**, the Ghidra-derived version wins. Note the discrepancy with a comment: `// DIVERGENCE from SDK: Ghidra shows N params, SDK shows M`.
+
+5. **`IMPL_SDK` attribution** is only appropriate when Ghidra confirms the SDK implementation matches retail. If the SDK code was modified or differs, use `IMPL_SDK_MODIFIED` or `IMPL_INFERRED`.

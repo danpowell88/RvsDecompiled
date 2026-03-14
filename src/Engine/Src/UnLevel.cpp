@@ -70,14 +70,80 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	// Phase 2 (TMap hash-table setup): many pairs of (ptr[+0xC]=0, ptr[+0x10]=8, FUN_103*())
 	//          at offsets 0xdc, 0x10150, 0x10164, 0x101ac, 0x101e4, 0x101f8, 0x1020c, …
 	//          FUN_1031f850/f990/fa30/fb80/fc20 = TMap hash-table rehash helpers (8 initial buckets).
-	//          DIVERGENCE: TMap hash tables left empty; game TMap usage rare at startup.
-	// Phase 3 (runtime init):
+	//          DIVERGENCE from Ghidra: TMap hash tables left empty; game TMap usage rare at startup.
+	//          Full TMap init requires calling internal TMap rehash helpers by function pointer —
+	//          deferred until needed (lazy init).
+
+	// Phase 3 (runtime init) — Ghidra 0xc2c40 lines 350231–350352:
+
+	// RF_Transactional
 	SetFlags( RF_Transactional );
-	// TODO: UModel allocation via StaticAllocateObject
-	// TODO: ALevelInfo spawn via FRotator(0,0,0)+SpawnActor
-	// TODO: SpawnBrush and brush/model RF flag setup
-	// TODO: GetDefaultPhysicsVolume call
-	// TODO: GScriptCycles/GScriptEntryTag zero-init and level flags
+
+	// Allocate and construct the level's world geometry model (worldGeometry brush).
+	// StaticAllocateObject allocates without calling the UObject default constructor;
+	// UModel::UModel(NULL, InRootOutside) is then called explicitly.
+	// Note: community SDK declares StaticAllocateObject with 7 params; Ghidra shows 8.
+	// The 8th param (bSubobjectInstancing) is always 0 here — omitted per SDK declaration.
+	UModel* WorldModel = (UModel*)UObject::StaticAllocateObject(
+		UModel::StaticClass(), GetOuter(), NAME_None, 0, NULL, GError, NULL );
+	if ( WorldModel )
+		new(WorldModel) UModel( NULL, InRootOutside );
+	*(UModel**)((BYTE*)this + 0x90) = WorldModel;
+	if ( WorldModel )
+		WorldModel->SetFlags( RF_Transactional );
+
+	// Spawn the ALevelInfo actor into this level at the origin.
+	SpawnActor( ALevelInfo::StaticClass(), NAME_None, FVector(0,0,0), FRotator(0,0,0),
+	            NULL, 1, 0, NULL, NULL );
+
+	// Assert: LevelInfo must now exist.
+	if ( !GetLevelInfo() )
+		appFailAssert( "GetLevelInfo()", ".\\UnLevel.cpp", 0x6c );
+
+	// Spawn the default world brush and assert it is at Actors(1).
+	ABrush* WorldBrush = SpawnBrush();
+	if ( WorldBrush != Actors(1) )
+		appFailAssert( "Temp==Actors(1)", ".\\UnLevel.cpp", 0x70 );
+
+	// Allocate and construct the brush's geometry model.
+	UModel* BrushModel = (UModel*)UObject::StaticAllocateObject(
+		UModel::StaticClass(), GetOuter(), FName(TEXT("Brush"), FNAME_Add), 0, NULL, GError, NULL );
+	if ( BrushModel )
+		new(BrushModel) UModel( WorldBrush, 1 );
+	*(UModel**)((BYTE*)WorldBrush + 0x178) = BrushModel;
+
+	// Flag both the brush actor and its model as non-networked transactional objects.
+	// 0x300001 = RF_Transactional | RF_NotForClient | RF_NotForServer (Ghidra confirmed).
+	WorldBrush->SetFlags( 0x300001 );
+	if ( BrushModel )
+		BrushModel->SetFlags( 0x300001 );
+
+	// Ensure the default physics volume exists (creates ADefaultPhysicsVolume if needed).
+	ALevelInfo* LI = GetLevelInfo();
+	if ( LI )
+		LI->GetDefaultPhysicsVolume();
+
+	// Zero script profiling counters.
+	GScriptCycles   = 0;
+	GScriptEntryTag = 0;
+
+	// Init replication table sizes (Ghidra offsets 0x10178, 0x1017c).
+	*(INT*)((BYTE*)this + 0x10178) = 1;
+	*(INT*)((BYTE*)this + 0x1017c) = 1;
+
+	// Zero network statistics counters (Ghidra offsets 0x1011c–0x10128, 0x10180).
+	*(INT*)((BYTE*)this + 0x1011c) = 0;
+	*(INT*)((BYTE*)this + 0x10120) = 0;
+	*(INT*)((BYTE*)this + 0x10124) = 0;
+	*(INT*)((BYTE*)this + 0x10128) = 0;
+	*(INT*)((BYTE*)this + 0x10180) = 0;
+
+	// Reset ReachSpecs TArray (element size 0x24 = sizeof(UReachSpec*) in array).
+	// Ghidra: FArray::Empty(this+0x101e4, 0x24, 0) then rehash TMap at 0x101f0/0x101f4.
+	((FArray*)((BYTE*)this + 0x101e4))->Empty( 0x24, 0 );
+	*(INT*)((BYTE*)this + 0x101f4) = 8;
+	// TMap rehash helper FUN_1031fa30 not called — DIVERGENCE: deferred until TMap is used.
+
 	unguard;
 }
 
