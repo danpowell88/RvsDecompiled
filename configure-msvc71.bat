@@ -36,8 +36,16 @@ if not exist "%VS2019_X86%\nmake.exe" (
 )
 
 REM --- Set PATH: MSVC 7.1 bin first (for c1.dll, c2.dll, mspdb71.dll),
-REM              then VS2019 x86 bin (for nmake.exe, lib.exe, rc.exe) ---
-set "PATH=%MSVC71%;%VS2019_X86%;%PATH%"
+REM              then VS2019 x86 bin (for nmake.exe, lib.exe),
+REM              then Windows Kits x86 bin (for rc.exe) ---
+set "WINKITS_BIN=C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x86"
+if not exist "%WINKITS_BIN%\rc.exe" (
+    REM Try finding any Windows Kits rc.exe
+    for /d %%V in ("C:\Program Files (x86)\Windows Kits\10\bin\*") do (
+        if exist "%%V\x86\rc.exe" set "WINKITS_BIN=%%V\x86"
+    )
+)
+set "PATH=%MSVC71%;%VS2019_X86%;%WINKITS_BIN%;%PATH%"
 
 REM --- Set LIB: linker library search paths ---
 set "LIB=%MSVC71_LIB%;%WINSDK_LIB%;%DXSDK_LIB%"
