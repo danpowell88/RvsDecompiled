@@ -714,26 +714,41 @@ IMPLEMENT_FUNCTION( APlayerController, 2714, execChangeVolumeTypeLinear );
 
 /*-- AAIController functions -------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038cf10; 203b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038cf10; 203b; omits 3 optional param reads; sets Focus=Enemy before latent action")
 void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execWaitToSeeEnemy);
 	P_FINISH;
-	GetStateFrame()->LatentAction = AI_PollWaitToSeeEnemy;
+	if( Pawn && Enemy )
+	{
+		Focus = Enemy;
+		GetStateFrame()->LatentAction = AI_PollWaitToSeeEnemy;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execWaitToSeeEnemy );
 
-IMPL_DIVERGE("Ghidra 0x1038e7c0; 163b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038e7c0; 163b; retail checks time (LastSeenTime+0.1s) and rotation, not LOS trace")
 void AAIController::execPollWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execPollWaitToSeeEnemy);
-	if( Enemy && Pawn )
+	if( Pawn && Enemy )
 	{
-		FCheckResult Hit(1.f);
-		if( !Pawn->XLevel->SingleLineCheck( Hit, Pawn, Enemy->Location, Pawn->Location, TRACE_World | TRACE_Level, FVector(0,0,0) ) )
-			GetStateFrame()->LatentAction = 0;
+		// Wait until Level->TimeSeconds is at most 0.1s ahead of LastSeenTime
+		if( Level->TimeSeconds - LastSeenTime > 0.1f )
+			return;
+		// Check if pawn has finished rotating toward enemy (same logic as PollFinishRotation)
+		INT iYawDiff = *(INT*)((BYTE*)Pawn + 0x300) - (INT)(*(DWORD*)((BYTE*)Pawn + 0x244) & 0xffff);
+		if( iYawDiff < 0 ) iYawDiff = -iYawDiff;
+		if( iYawDiff > 1999 )
+		{
+			INT iYawDiff2 = *(INT*)((BYTE*)Pawn + 0x300) - (INT)(*(DWORD*)((BYTE*)Pawn + 0x244) & 0xffff);
+			if( iYawDiff2 < 0 ) iYawDiff2 = -iYawDiff2;
+			if( iYawDiff2 < 0xf830 )
+				return;
+		}
 	}
+	GetStateFrame()->LatentAction = 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execPollWaitToSeeEnemy );
