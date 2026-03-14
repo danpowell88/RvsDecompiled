@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	WinDrv.cpp: WinDrv package init and WWindowsViewportWindow.
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -104,15 +104,13 @@ UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	StartupFullscreen = Other.StartupFullscreen;
 }
 
-IMPL_DIVERGE("found at 0x11101ea0; copies FNotifyHook (offset 0x98) and fields 0x9c..0xce not mapped in local headers")
+IMPL_MATCH("WinDrv.dll", 0x11101ea0)
 UWindowsClient& UWindowsClient::operator=(const UWindowsClient& Other)
 {
-	if (this != &Other)
-	{
-		UClient::operator=(Other);
-		UseJoystick      = Other.UseJoystick;
-		StartupFullscreen = Other.StartupFullscreen;
-	}
+	UClient::operator=(Other);
+	// FNotifyHook at +0x98 has no data members — copy is a no-op.
+	// Copy 11 DWORDs (0x9c–0xc4) and 4 WORDs (0xc8–0xce) as one contiguous block.
+	appMemcpy((BYTE*)this + 0x9c, (const BYTE*)&Other + 0x9c, 11 * sizeof(DWORD) + 4 * sizeof(WORD));
 	return *this;
 }
 
@@ -321,11 +319,12 @@ UWindowsViewport::UWindowsViewport(const UWindowsViewport& Other)
 {
 }
 
-IMPL_DIVERGE("found at 0x11102130; copies 24 raw fields offsets 0x204..0x264 not mapped in local headers")
+IMPL_MATCH("WinDrv.dll", 0x11102130)
 UWindowsViewport& UWindowsViewport::operator=(const UWindowsViewport& Other)
 {
-	if (this != &Other)
-		UViewport::operator=(Other);
+	UViewport::operator=(Other);
+	// Copy 25 contiguous DWORDs at offsets 0x204–0x264.
+	appMemcpy((BYTE*)this + 0x204, (const BYTE*)&Other + 0x204, 25 * sizeof(DWORD));
 	return *this;
 }
 

@@ -59,12 +59,12 @@ INT          FFileStream::MaxStreams  = 0;
 INT          FFileStream::StreamIndex = 0;
 FStream*     FFileStream::Streams    = NULL;
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_EMPTY("Ghidra confirms trivially empty; VA 0x10003f10 shared with other trivial ctors")
 FFileStream::FFileStream()
 {
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_EMPTY("Ghidra confirms trivially empty; VA 0x10001320 shared with other trivial dtors")
 FFileStream::~FFileStream()
 {
 }
