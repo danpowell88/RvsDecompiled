@@ -59,14 +59,17 @@ INT          FFileStream::MaxStreams  = 0;
 INT          FFileStream::StreamIndex = 0;
 FStream*     FFileStream::Streams    = NULL;
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 FFileStream::FFileStream()
 {
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 FFileStream::~FFileStream()
 {
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 FFileStream* FFileStream::Init( INT InMaxStreams )
 {
 	// Ghidra: Instance is allocated with GMalloc->Malloc(sizeof(FFileStream)).
@@ -83,6 +86,7 @@ FFileStream* FFileStream::Init( INT InMaxStreams )
 	return Instance;
 }
 
+IMPL_PERMANENT_DIVERGENCE("retail busy-waits for background streaming thread; no thread in reconstruction")
 void FFileStream::Destroy()
 {
 	// DIVERGENCE: The retail binary sets Destroyed=1 and then busy-waits for a
@@ -102,6 +106,7 @@ void FFileStream::Destroy()
 	}
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 INT FFileStream::Create( INT StreamId, const TCHAR* Filename )
 {
 	guard(FFileStream::Create);
@@ -158,6 +163,7 @@ INT FFileStream::Create( INT StreamId, const TCHAR* Filename )
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 INT FFileStream::CreateStream( const TCHAR* Filename, INT BlockSizeIn, INT NumChunks, void* Buffer, EFileStreamType Type, void* Callback )
 {
 	guard(FFileStream::CreateStream);
@@ -193,6 +199,7 @@ INT FFileStream::CreateStream( const TCHAR* Filename, INT BlockSizeIn, INT NumCh
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 INT FFileStream::Destroy( INT StreamId )
 {
 	guard(FFileStream::Destroy_Stream);
@@ -223,6 +230,7 @@ INT FFileStream::Destroy( INT StreamId )
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 void FFileStream::DestroyStream( INT StreamId, INT bForce )
 {
 	guard(FFileStream::DestroyStream);
@@ -243,6 +251,7 @@ void FFileStream::DestroyStream( INT StreamId, INT bForce )
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 void FFileStream::Enter( INT StreamId )
 {
 	guard(FFileStream::Enter);
@@ -254,6 +263,7 @@ void FFileStream::Enter( INT StreamId )
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 void FFileStream::Leave( INT StreamId )
 {
 	guard(FFileStream::Leave);
@@ -262,6 +272,7 @@ void FFileStream::Leave( INT StreamId )
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 INT FFileStream::QueryStream( INT StreamId, INT& OutStatus )
 {
 	guard(FFileStream::QueryStream);
@@ -283,6 +294,7 @@ INT FFileStream::QueryStream( INT StreamId, INT& OutStatus )
 	unguard;
 }
 
+IMPL_PERMANENT_DIVERGENCE("Ogg Vorbis paths not available without vorbisfile SDK; Win32 path reconstructed")
 INT FFileStream::Read( INT StreamId, INT NumBytes )
 {
 	guard(FFileStream::Read);
@@ -346,6 +358,7 @@ INT FFileStream::Read( INT StreamId, INT NumBytes )
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 {
 	guard(FFileStream::RequestChunks);
@@ -363,6 +376,7 @@ void FFileStream::RequestChunks( INT StreamId, INT NumChunks, void* ChunkInfo )
 	unguard;
 }
 
+IMPL_INFERRED("Ravenshield-specific streaming file manager; reconstructed from context")
 FFileStream& FFileStream::operator=( const FFileStream& Other )
 {
 	return *this;
@@ -372,6 +386,7 @@ FFileStream& FFileStream::operator=( const FFileStream& Other )
 	FString constructors and methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( BYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -382,6 +397,7 @@ FString::FString( BYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( SBYTE Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -392,6 +408,7 @@ FString::FString( SBYTE Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( _WORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -402,6 +419,7 @@ FString::FString( _WORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( SWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -412,6 +430,7 @@ FString::FString( SWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( INT Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -422,6 +441,7 @@ FString::FString( INT Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( DWORD Arg, INT Digits )
 : TArray<TCHAR>()
 {
@@ -432,6 +452,7 @@ FString::FString( DWORD Arg, INT Digits )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 : TArray<TCHAR>()
 {
@@ -442,6 +463,7 @@ FString::FString( FLOAT Arg, INT Digits, INT RightDigits, UBOOL LeadZero )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
 : TArray<TCHAR>()
 {
@@ -452,12 +474,14 @@ FString::FString( DOUBLE Arg, INT Digits, INT RightDigits, INT LeadZero )
 	appMemcpy( &(*this)(0), Buf, (Len+1)*sizeof(TCHAR) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::Chr( TCHAR Ch )
 {
 	TCHAR Buf[2] = { Ch, 0 };
 	return FString( Buf );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::Printf( const TCHAR* Fmt, ... )
 {
 	TCHAR TempStr[4096];
@@ -465,12 +489,14 @@ FString FString::Printf( const TCHAR* Fmt, ... )
 	return FString( TempStr );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::FormatAsNumber( INT InNumber )
 {
 	FString Number( InNumber, 0 );
 	return Number;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::LeftPad( INT ChCount )
 {
 	guard(FString::LeftPad);
@@ -487,6 +513,7 @@ FString FString::LeftPad( INT ChCount )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::RightPad( INT ChCount )
 {
 	guard(FString::RightPad);
@@ -501,6 +528,7 @@ FString FString::RightPad( INT ChCount )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 FString FString::Reverse()
 {
 	guard(FString::Reverse);
@@ -511,6 +539,7 @@ FString FString::Reverse()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 {
 	guard(FString::ParseIntoArray);
@@ -536,6 +565,7 @@ INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 	FArchive << FString operator.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 {
 	if( Ar.IsLoading() )
@@ -583,6 +613,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 	Explicit template instantiations for .def export.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 {
@@ -591,6 +622,7 @@ TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 	return *this;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnStream.cpp")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+=( const TArray<TCHAR>& Other )
 {
