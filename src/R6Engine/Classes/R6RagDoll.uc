@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6RagDoll.uc : (add small description)
+//  R6RagDoll.uc : Native corpse actor using Karma ragdoll physics for death animations.
+//  Extends R6AbstractCorpse; NB_PARTICLES defines the number of blood particles on death.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

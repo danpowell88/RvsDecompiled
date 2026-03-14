@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DZonePoint.uc : (add small description)
+//  R6DZonePoint.uc : Single-point deployment zone with a specified stance.
+//  Used for precise insertion/deployment positions where a pawn must start in a given stance.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

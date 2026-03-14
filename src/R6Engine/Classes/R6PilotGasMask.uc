@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6PilotGasMask.uc : (add small description)
+//  R6PilotGasMask.uc : Gas mask variant for the pilot character model; uses a different mesh.
+//  Extends R6GasMask with the R6RPilotGMask static mesh.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

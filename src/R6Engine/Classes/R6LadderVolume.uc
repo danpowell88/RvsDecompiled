@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6LadderVolume.uc : (add small description)
+//  R6LadderVolume.uc : R6-specific ladder volume that extends the base LadderVolume.
+//  Adds R6 action icons and textures so players can visually identify climbable ladders.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

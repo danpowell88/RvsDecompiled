@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DZoneRandomPoint.uc : (add small description)
+//  R6DZoneRandomPoint.uc : Deployment zone that spawns pawns at randomly chosen DZoneRandomPointNodes.
+//  m_bUseAllowLeave propagates the zone's AllowLeave flag to all child nodes.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

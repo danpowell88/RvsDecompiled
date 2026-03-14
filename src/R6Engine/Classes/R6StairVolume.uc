@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6StairVolume.uc : (add small description)
+//  R6StairVolume.uc : Physics volume that adjusts pawn movement on staircase geometry.
+//  m_pStairOrientation provides the staircase's up-direction and bounding shape.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

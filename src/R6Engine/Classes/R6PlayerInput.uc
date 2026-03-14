@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6PlayerInput.uc : (add small description)
+//  R6PlayerInput.uc : R6-specific player input handler.
+//  Extends PlayerInput with Rainbow Six stance, lean, and gadget keybind processing.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

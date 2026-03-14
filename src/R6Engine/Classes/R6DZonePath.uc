@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DZonePath.uc : (add small description)
+//  R6DZonePath.uc : Deployment zone that routes pawns along a sequence of DZonePathNodes.
+//  Supports team-notification settings to alert either team when the zone is traversed.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

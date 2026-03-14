@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DZonePathNode.uc : (add small description)
+//  R6DZonePathNode.uc : A single waypoint on an R6DZonePath route.
+//  Each node can trigger a sound when a pawn arrives at this point along the path.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

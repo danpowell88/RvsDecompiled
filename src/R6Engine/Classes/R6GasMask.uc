@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6GasMask.uc : (add small description)
+//  R6GasMask.uc : StaticMesh actor representing a wearable gas mask prop.
+//  Spawned on a pawn's head when they equip the gas mask gadget.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:

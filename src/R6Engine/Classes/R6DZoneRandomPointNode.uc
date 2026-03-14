@@ -1,5 +1,6 @@
 //=============================================================================
-//  R6DZoneRandomPointNode.uc : (add small description)
+//  R6DZoneRandomPointNode.uc : A randomly-selectable waypoint within an R6DZoneRandomPoints zone.
+//  High-priority nodes (m_bHighPriority) are preferred over normal ones when picking at random.
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
 //  Revision history:
