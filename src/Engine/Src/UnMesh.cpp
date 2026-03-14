@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnMesh.cpp: UMesh, ULodMesh, USkeletalMesh, UStaticMesh registration.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -667,19 +667,11 @@ void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 	// normalize each vertex normal and optionally (param2 != 0) add it to the vertex
 	// position as a displacement.
 	// DIVERGENCE: SEH frame differs; FUN_10324640 (temp-array destructor thunk) differs.
-	if (Normals.Num() != 0)
-	{
-		unguard;
-		return;
-	}
+	if (Normals.Num() != 0) return;
 
 	FArray* vertArr = (FArray*)((BYTE*)this + 0x1b8);
 	INT vertCount = vertArr->Num();
-	if (vertCount == 0)
-	{
-		unguard;
-		return;
-	}
+	if (vertCount == 0) return;
 
 	// Allocate temp per-vertex normal accumulation buffer (zeroed FVectors).
 	// Ghidra: FArray::AddZeroed(local_44, 0xc, iVar1) where iVar1 = vertCount.
