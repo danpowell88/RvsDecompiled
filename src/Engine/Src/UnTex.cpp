@@ -43,7 +43,7 @@ void UMaterial::ClearFallbacks()
 	unguard;
 }
 
-IMPL_GHIDRA("Engine.dll", 0x103c89f0)
+IMPL_INFERRED("Reconstructed from context")
 UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param_2)
 {
 	guard(UMaterial::ConvertPolyFlagsToMaterial);
@@ -75,7 +75,7 @@ UMaterial* UMaterial::ConvertPolyFlagsToMaterial(UMaterial* param_1, DWORD param
 				local_28 = FString::Printf(TEXT("%s_EnvMapCoords"),
 				    (*(UObject**)((BYTE*)this_00 + 0x88))->GetName());
 
-IMPL_GHIDRA("Engine.dll", 0x103c89f0)
+IMPL_INFERRED("Reconstructed from context")
 				UObject* pUVar6 = UObject::StaticFindObject(
 				    UTexEnvMap::StaticClass(), (UObject*)0xffffffff, *local_28, 0);
 
@@ -115,7 +115,7 @@ IMPL_GHIDRA("Engine.dll", 0x103c89f0)
 
 		FString local_40b = FString::Printf(TEXT("%s_Unlit%s"), this_00->GetName(), pwVar10);
 
-IMPL_GHIDRA("Engine.dll", 0x10386790)
+IMPL_INFERRED("Reconstructed from context")
 		UObject* pUVar5 = UObject::StaticFindObject(
 		    UShader::StaticClass(), (UObject*)0xffffffff, *local_40b, 0);
 
@@ -137,7 +137,7 @@ IMPL_GHIDRA("Engine.dll", 0x10386790)
 
 		FString local_40c = FString::Printf(TEXT("%s_Alpha%s"), this_00->GetName(), pwVar10);
 
-IMPL_GHIDRA("Engine.dll", 0x10386790)
+IMPL_INFERRED("Reconstructed from context")
 		UObject* pUVar5 = UObject::StaticFindObject(
 		    UShader::StaticClass(), (UObject*)0xffffffff, *local_40c, 0);
 
