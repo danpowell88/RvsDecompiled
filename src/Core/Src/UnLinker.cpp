@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnLinker.cpp: ULinker, ULinkerLoad, ULinkerSave — package file
 	loading/saving, export/import tables, object resolution.
 	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
