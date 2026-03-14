@@ -733,16 +733,43 @@ FBaseTexture * UCubemap::GetRenderInterface()
 
 
 // --- UFadeColor ---
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103c8d80 is 411 bytes; FColor/FPlane cosine-blend pipeline not yet reconstructed")
-FColor UFadeColor::GetColor(float)
+IMPL_MATCH("Engine.dll", 0x103c8d80)
+FColor UFadeColor::GetColor(float Time)
 {
-	// Ghidra 0xc8d80, 411B. Three-mode colour animation:
-	//   Mode 0 (linear):  fmod((Time + phase) / period, 1.0) lerp between Color1 and Color2.
-	//   Mode 1 (cosine):  appCos(t * PI/2) blend between Color1 (this+0x68) and Color2 (this+0x64).
-	//   Default:          return Color2 (this+0x64).
-	// Requires FColor::Plane() → FPlane and FPlane arithmetic not yet exposed in headers.
-	// DIVERGENCE: returns black/transparent as safe fallback.
-	return FColor(0,0,0,0);
+	guard(UFadeColor::GetColor);
+	const FLOAT period = *(FLOAT*)((BYTE*)this + 0x5c);
+	const FLOAT phase  = *(FLOAT*)((BYTE*)this + 0x60);
+	const BYTE  mode   = *(BYTE *)((BYTE*)this + 0x58);
+	const BYTE* color1 = (BYTE*)this + 0x68;  // FColor at this+0x68
+	const BYTE* color2 = (BYTE*)this + 0x64;  // FColor at this+0x64
+
+	FLOAT fVar1 = (Time + phase) / period;
+
+	if (mode == 1)  // cosine blend
+	{
+		FLOAT t = (FLOAT)appCos((DOUBLE)(fVar1 * 1.5707964f));
+		FLOAT s = 1.0f - t;
+		return FColor(
+			(BYTE)(color1[0] * t + color2[0] * s),
+			(BYTE)(color1[1] * t + color2[1] * s),
+			(BYTE)(color1[2] * t + color2[2] * s),
+			(BYTE)(color1[3] * t + color2[3] * s)
+		);
+	}
+	if (mode == 0)  // linear (fmod) blend
+	{
+		FLOAT t = fVar1 - (FLOAT)appFloor(fVar1);
+		FLOAT s = 1.0f - t;
+		return FColor(
+			(BYTE)(color1[0] * t + color2[0] * s),
+			(BYTE)(color1[1] * t + color2[1] * s),
+			(BYTE)(color1[2] * t + color2[2] * s),
+			(BYTE)(color1[3] * t + color2[3] * s)
+		);
+	}
+	// Default: return Color2
+	return *(FColor*)((BYTE*)this + 0x64);
+	unguard;
 }
 
 
