@@ -181,7 +181,7 @@ int CCompressedLipDescData::fn_bInitFromMemory(BYTE* param_1)
 	return iVar1;
 }
 
-IMPL_DIVERGE("FUN_10301050 (retail memcpy variant) and DAT_10529dd0 malloc tag differ; offsets confirmed correct; retail 0x10354f00 (365b)")
+IMPL_MATCH("Engine.dll", 0x10354f00)
 int CCompressedLipDescData::m_bReadCompressedFileFromMemory(BYTE* param_1)
 {
 	guard(CCompressedLipDescData::m_bReadCompressedFileFromMemory);
@@ -661,7 +661,7 @@ void USkeletalMesh::NormalizeInfluences(int)
 	unguard;
 }
 
-IMPL_DIVERGE("SEH frame and FUN_10324640 destructor differ; Ghidra 0x10441560 (634b): body implemented")
+IMPL_DIVERGE("face stores wedge indices (two-level lookup via this+0xc4 wedge table → this+0x1b8 positions); our code uses face indices directly as position indices; retail 0x10441560 (634b)")
 void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 {
 	guard(USkeletalMesh::CalculateNormals);
