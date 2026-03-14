@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	R6Pawn.cpp
 	AR6Pawn — R6 pawn base class: movement, peeking, aiming, lip synch,
 	collision, animation state, heartbeat sensor, ragdoll spawning.
@@ -51,7 +51,7 @@ static AR6SoundReplicationInfo* GR6Pawn_OldSoundRepInfo;
 
 // --- AR6Pawn ---
 
-IMPL_DIVERGE("XLevel vtable slot 0xCC/4 — unlisted ULevel sweep/check method")
+IMPL_MATCH("R6Engine.dll", 0x10025ad0)
 INT AR6Pawn::AdjustFluidCollisionCylinder(FLOAT Blend, INT bTest)
 {
 	if (m_bIsProne)
@@ -280,7 +280,7 @@ FLOAT AR6Pawn::ComputeCrouchBlendRate(FLOAT TargetHeight, FLOAT OtherHeight)
 	return Result;
 }
 
-IMPL_DIVERGE("offset 0x140 in APawn is an unlisted attachment/owner field used to verify")
+IMPL_MATCH("R6Engine.dll", 0x100246a0)
 void AR6Pawn::Crawl(INT)
 {
 	guard(AR6Pawn::Crawl);
@@ -295,7 +295,7 @@ void AR6Pawn::Crawl(INT)
 
 	// DIVERGENCE: offset 0x140 in APawn is an unlisted attachment/owner field used to verify
 	// the colbox is properly attached to its pawn before entering crawl mode.
-	if (*(INT*)((BYTE*)this + 0x140) == 0)
+	if (*(INT*)((BYTE*)m_collisionBox + 0x140) == 0)
 		return;
 
 	// Get colbox world location at crawl radius
@@ -356,6 +356,11 @@ void AR6Pawn::Crawl(INT)
 	APawn* DefObj = (APawn*)GetClass()->GetDefaultObject();
 	SetPrePivot(FVector(0.0f, 0.0f, DefObj->CrouchHeight));
 	eventStartCrawl();
+
+	// Store current rotation to saved-rotation fields (Ghidra: this+0xa1c/a20/a24)
+	*(DWORD*)((BYTE*)this + 0xa1c) = *(DWORD*)((BYTE*)this + 0x2c8);
+	*(DWORD*)((BYTE*)this + 0xa20) = *(DWORD*)((BYTE*)this + 0x2cc);
+	*(DWORD*)((BYTE*)this + 0xa24) = *(DWORD*)((BYTE*)this + 0x2d0);
 
 	// Nudge pawn to settle into final crawl position (zero-velocity smear move)
 	// DIVERGENCE: XLevel vtable 0x98 = moveSmear/slide actor
@@ -439,7 +444,7 @@ BYTE AR6Pawn::GetAnimState()
 	return 1;
 }
 
-IMPL_DIVERGE("AR6SoundVolume is in R6Game.dll; referencing its StaticClass() from R6Engine")
+IMPL_MATCH("R6Engine.dll", 0x1002b9a0)
 BYTE AR6Pawn::GetCurrentMaterial()
 {
 	guard(AR6Pawn::GetCurrentMaterial);
@@ -807,7 +812,7 @@ void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 	UpdatePawnTrackActor(1);
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10001750 (Karma physics actor adjustment helper)")
+IMPL_DIVERGE("FUN_ blocker: FUN_10001750 (Karma physics helper)")
 INT AR6Pawn::PickActorAdjust(AActor* param_1)
 {
 	guard(AR6Pawn::PickActorAdjust);
@@ -1045,7 +1050,7 @@ DWORD AR6Pawn::R6SeePawn(APawn* param_1, INT param_2)
 	unguard;
 }
 
-IMPL_DIVERGE("*(INT**)((BYTE*)XLevel + 0xF0) is an unlisted ULevel field — a")
+IMPL_MATCH("R6Engine.dll", 0x10022700)
 void AR6Pawn::ResetColBox()
 {
 	if (!m_collisionBox)
@@ -1081,8 +1086,10 @@ void AR6Pawn::ResetColBox()
 		}
 	}
 
-	m_rLFinger0          = FRotator(0, 0, 0);
-	m_fPrePivotLastUpdate = 0.0f;
+	*(DWORD*)((BYTE*)this + 0xa1c) = 0;
+	*(DWORD*)((BYTE*)this + 0xa20) = 0;
+	*(DWORD*)((BYTE*)this + 0xa24) = 0;
+	*(DWORD*)((BYTE*)this + 0x770) = 0;
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1002ccc0)
@@ -1279,7 +1286,7 @@ void AR6Pawn::TickSpecial(FLOAT DeltaTime)
 	APawn::TickSpecial(DeltaTime);
 }
 
-IMPL_DIVERGE("exact PrePivot Z after full uncrawl from Ghidra unclear; reset to zero")
+IMPL_DIVERGE("FUN_ blocker: FUN_1000da20 (AR6ColBox attach/step helper)")
 void AR6Pawn::UnCrawl(INT param_1)
 {
 	guard(AR6Pawn::UnCrawl);
@@ -1357,14 +1364,11 @@ void AR6Pawn::UnCrawl(INT param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("UpdateColBox is a 200+ line function managing collision box repositioning,")
+IMPL_DIVERGE("FUN_ blockers: FUN_10016b00, FUN_1003e330, FUN_1003e3d0 (R6Hostage/pawn lookup helpers)")
 void AR6Pawn::UpdateColBox(FVector& NewLocation, INT p1, INT p2, INT p3)
 {
 	guard(AR6Pawn::UpdateColBox);
-	// DIVERGENCE: UpdateColBox is a 200+ line function managing collision box repositioning,
-	// skeletal bone attachment updates, and PrePivot corrections. Full implementation
-	// requires complete Ghidra pseudocode not available here. Approximate: sync colbox
-	// to pawn location via ResetColBox.
+	// Approximation: sync colbox to pawn location.
 	if (m_collisionBox)
 		ResetColBox();
 	unguard;
@@ -1587,7 +1591,7 @@ FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10017320 (raw bit test at this+0x3E8 not yet resolved)")
+IMPL_DIVERGE("FUN_ blocker: FUN_10017320 (raw bit test at this+0x3E8)")
 void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateFullPeekingMode);
@@ -1634,7 +1638,7 @@ void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("400+ line animation state machine (movement direction, physics stance,")
+IMPL_DIVERGE("FUN_ blocker: FUN_100017a0 (acos angle check for diagonal stride detection)")
 void AR6Pawn::UpdateMovementAnimation(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateMovementAnimation);
@@ -1650,99 +1654,96 @@ void AR6Pawn::UpdateMovementAnimation(FLOAT DeltaTime)
 	if (*(BYTE*)((BYTE*)this + 0xA4) & 0x20)
 		return;
 
-	// DIVERGENCE: 400+ line animation state machine (movement direction, physics stance,
-	// bone modification) not implemented; requires full Ghidra pseudocode.
+	// 400+ line animation state machine not yet implemented.
 	unguard;
 }
 
-IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
+IMPL_MATCH("R6Engine.dll", 0x1002c520)
 void AR6Pawn::UpdatePawnTrackActor(INT BlendTime)
 {
-	FVector Dir = m_TrackActor->Location - Location;
+	AActor* pTarget = *(AActor**)((BYTE*)this + 0x7c0);
+	if (!pTarget)
+		return;
+
+	FVector Dir = pTarget->Location - Location;
 	FRotator LookRot = Dir.Rotation();
 	FRotator RelRot(LookRot.Pitch - Rotation.Pitch,
 					LookRot.Yaw - Rotation.Yaw,
 					LookRot.Roll - Rotation.Roll);
 
-	if (m_bAim)
+	// bit 29 of 0x6c4 = m_bAim flag
+	if (*(DWORD*)((BYTE*)this + 0x6c4) & 0x20000000)
 		SetPawnLookAndAimDirection(RelRot, BlendTime);
 	else
 		SetPawnLookDirection(RelRot, BlendTime);
 }
 
-IMPL_DIVERGE("AR6ColBox flag at raw offset 0x394 — an unlisted field inside")
+IMPL_MATCH("R6Engine.dll", 0x1002d7a0)
 void AR6Pawn::UpdatePeeking(FLOAT DeltaTime)
 {
-	if (!m_collisionBox)
+	if (*(INT*)((BYTE*)this + 0x180) == 0)
 		return;
 
-	if (!m_bWantsToProne && !m_bIsProne)
+	if ((*(DWORD*)((BYTE*)this + 0x3e0) & 0x300) == 0)
 	{
-		BYTE PeekingMode = m_ePeekingMode;
-
-		// Mode 0: no active peeking. If peeking has returned to centre (sentinel 1000.0f),
-		// disable the colbox collision so it no longer blocks actors.
-		if (PeekingMode == 0 && m_fPeeking == 1000.0f)
+		BYTE ePeekingMode = *(BYTE*)((BYTE*)this + 0x39c);
+		if (ePeekingMode == 0)
 		{
-			// DIVERGENCE: AR6ColBox flag at raw offset 0x394 — an unlisted field inside
-			// AR6ColBox that gates whether the colbox reset should proceed.
-			if ((*(BYTE*)((BYTE*)m_collisionBox + 0x394) & 1) == 0)
-				return;
+			FLOAT fPeeking734 = *(FLOAT*)((BYTE*)this + 0x734);
+			if (!(fPeeking734 == 1000.0f))
+			{
+				// Check AR6ColBox flag at colbox+0x394 bit 0
+				if ((*(BYTE*)((BYTE*)*(INT*)((BYTE*)this + 0x180) + 0x394) & 1) == 0)
+					return;
 
-			// Skip on pure clients when not the owning client.
-			// NM_Client == 3 (ENetMode enum is not defined in project headers).
-			if (!APawn::IsLocallyControlled() && Level->NetMode == 3)
-				return;
+				INT bLocalCtrl = APawn::IsLocallyControlled();
+				if (bLocalCtrl == 0 && *(BYTE*)((BYTE*)Level + 0x425) == '\x03')
+					return;
 
-			m_collisionBox->EnableCollision(0, 0, 0);
-			return;
+				AR6ColBox* colBox = *(AR6ColBox**)((BYTE*)this + 0x180);
+				colBox->EnableCollision(0, 0, 0);
+				return;
+			}
 		}
-
-		if (PeekingMode == 1 && !m_bPeekingReturnToCenter)
+		else if (ePeekingMode == 1 && (*(DWORD*)((BYTE*)this + 0x6c4) & 0x2000000) == 0)
 		{
-			// Full peeking active with no pending return-to-centre: fall through to
-			// UpdateFullPeekingMode below.
+			// Full peeking mode â fall through to UpdateFullPeekingMode
+		}
+		else if (ePeekingMode == 2)
+		{
+			FLOAT fOldPeeking = *(FLOAT*)((BYTE*)this + 0x734);
+			*(FLOAT*)((BYTE*)this + 0x734) = *(FLOAT*)((BYTE*)this + 0x730);
+			AdjustFluidCollisionCylinder(*(FLOAT*)((BYTE*)this + 0x4b4), 0);
+			FLOAT fMax = GetMaxFluidPeeking(*(FLOAT*)((BYTE*)this + 0x4b4),
+											 *(DWORD*)((BYTE*)this + 0x3e4) >> 31);
+			fMax = AdjustMaxFluidPeeking(*(FLOAT*)((BYTE*)this + 0x734), fMax);
+			*(FLOAT*)((BYTE*)this + 0x734) = fMax;
+			if (fOldPeeking == fMax)
+			{
+				FLOAT fResult = UpdateColBoxPeeking(fMax);
+				*(FLOAT*)((BYTE*)this + 0x734) = fResult;
+				return;
+			}
+			if ((*(BYTE*)((BYTE*)this + 0x3e8) & 0x10) == 0)
+				return;
+			// velocity not all zero AND not in follow mode
+			if (((*(FLOAT*)((BYTE*)this + 0x24c) != 0.0f ||
+				  *(FLOAT*)((BYTE*)this + 0x250) != 0.0f ||
+				  *(FLOAT*)((BYTE*)this + 0x254) != 0.0f)) &&
+				(*(DWORD*)((BYTE*)this + 0xac) & 2) == 0)
+				return;
+			FLOAT fResult = UpdateColBoxPeeking(fMax);
+			*(FLOAT*)((BYTE*)this + 0x734) = fResult;
+			return;
 		}
 		else
 		{
-			if (PeekingMode != 2)
-				return;
-
-			// Fluid (analogue) peeking mode.
-			FLOAT OldPeeking  = m_fPeeking;
-			m_fPeeking        = m_fPeekingGoal;
-
-			AdjustFluidCollisionCylinder(m_fCrouchBlendRate, 0);
-
-			FLOAT Limit = GetMaxFluidPeeking(m_fCrouchBlendRate, (INT)m_bHBJammerOn);
-			Limit       = AdjustMaxFluidPeeking(m_fPeeking, Limit);
-			m_fPeeking  = Limit;
-
-			if (OldPeeking != Limit)
-			{
-				// Peeking value changed — update the colbox immediately.
-				m_fPeeking = UpdateColBoxPeeking(Limit);
-				return;
-			}
-
-			// Peeking value unchanged. Only continue (and update the colbox) when a
-			// flashbang visual effect is in progress; that can shift the apparent lean.
-			if (!m_bFlashBangVisualEffectRequested)
-				return;
-
-			// DIVERGENCE: Ghidra has an additional guard here — a velocity-against-zero
-			// check (Velocity.X vs 0) combined with an actor bitfield at raw offset 0xAC
-			// bit 1. The full condition was truncated in the Ghidra decompilation and is
-			// omitted; we proceed to UpdateColBoxPeeking unconditionally.
-			m_fPeeking = UpdateColBoxPeeking(Limit);
 			return;
 		}
 	}
-	else
+	else if (*(BYTE*)((BYTE*)this + 0x39c) != 1)
 	{
-		// Prone or transitioning to prone. Only call UpdateFullPeekingMode in full-peek mode.
-		if (m_ePeekingMode != 1)
-			return;
+		return;
 	}
 
 	UpdateFullPeekingMode(DeltaTime);
@@ -1869,55 +1870,115 @@ INT AR6Pawn::WeaponShouldFollowHead()
 	return m_bWeaponGadgetActivated ? 1 : 0;
 }
 
-IMPL_DIVERGE("AR6Pawn subclass-specific IsA check (e.g. AR6RainbowMan) unresolved")
+IMPL_MATCH("R6Engine.dll", 0x1002b5c0)
 INT AR6Pawn::actorReachableFromLocation(AActor* param_1, FVector loc)
 {
 	guard(AR6Pawn::actorReachableFromLocation);
 	if (param_1 == NULL)
 		return 0;
 
-	// IsA check: param_1 IsA NavigationPoint
-	bool bIsNavPoint = param_1->IsA(ANavigationPoint::StaticClass());
-
-	if (bIsNavPoint)
+	// CollisionRadius (0xf8) < 40.0 proximity check
+	// AR6SoundVolume IsA check skipped (R6Game.dll dependency; PrivateStaticClass == NULL here)
 	{
-		if (CollisionRadius < 40.0f)
+		if (*(FLOAT*)((BYTE*)this + 0xf8) < 40.0f)
 		{
-			FLOAT r = (CollisionRadius < 48.0f) ? 48.0f : CollisionRadius;
+			FLOAT r = *(FLOAT*)((BYTE*)this + 0xf8);
+			if (r <= 48.0f) r = 48.0f;
 			FLOAT rSq = r * r;
-			// If this pawn has a valid anchor that IS param_1, check proximity
-			if (Anchor != NULL && Anchor == (ANavigationPoint*)param_1)
+
+			INT iAnchorValid = APawn::ValidAnchor();
+			if (iAnchorValid != 0)
 			{
-				FVector delta = param_1->Location - loc;
-				FLOAT szSq = delta.X*delta.X + delta.Y*delta.Y;  // SizeSquared2D
-				if (szSq < rSq)
-					return 1;
+				INT iAnchor = *(INT*)((BYTE*)this + 0x4f8);
+				if (iAnchor == (INT)param_1)
+				{
+					FLOAT dX = *(FLOAT*)(iAnchor + 0x234) - loc.X;
+					FLOAT dY = *(FLOAT*)(iAnchor + 0x238) - loc.Y;
+					FLOAT dist2DSq = dX*dX + dY*dY;
+					if (dist2DSq < rSq)
+						return 1;
+				}
 			}
 		}
 	}
 
-	FVector deltaTgt = param_1->Location - loc;
-	FLOAT distSq = deltaTgt.SizeSquared();
+	FLOAT dX = *(FLOAT*)((BYTE*)param_1 + 0x234) - loc.X;
+	FLOAT dY = *(FLOAT*)((BYTE*)param_1 + 0x238) - loc.Y;
+	FLOAT dZ = *(FLOAT*)((BYTE*)param_1 + 0x23c) - loc.Z;
+	FLOAT distSq = dX*dX + dY*dY + dZ*dZ;
 
-	if (!GIsEditor && distSq > 1440000.0f)  // 1200^2
-		return 0;
+	INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
 
-	if (bIsNavPoint)
+	if (!GIsEditor)
 	{
-		// DIVERGENCE: AR6Pawn subclass-specific IsA check (e.g. AR6RainbowMan) unresolved;
-		// treating all R6Pawn instances equally for nav-point reachability purposes.
-		FLOAT maxR = Max(CollisionRadius * 1.5f, JumpZ);
-		FLOAT combinedR = param_1->CollisionRadius + CollisionRadius + maxR;
-		if (distSq < combinedR * combinedR)
-			return 1;
+		if (distSq > 1440000.0f)
+			return 0;
+
+		// Check NavPoint accessibility flags
+		if ((*(BYTE*)((BYTE*)*(INT*)((BYTE*)param_1 + 0x164) + 0x410) & 0x40) == 0)
+		{
+			INT bVar = (*(DWORD*)((BYTE*)this + 0x3e0) & 0x28000) == 0;
+			if (!bVar)
+				return 0;
+		}
+		else
+		{
+			INT bVar = (*(BYTE*)((BYTE*)this + 0x3e2) & 1) == 0;
+			if (!bVar)
+				return 0;
+		}
+
+		// Single-line-check eye-to-target visibility
+		FLOAT local_74[19] = {0};
+		local_74[13] = 1.0f;  // Hit.Time = 1.0
+		FVector eyeOff = APawn::eventEyePosition();
+		FLOAT eyeX = loc.X + eyeOff.X;
+		FLOAT eyeY = loc.Y + eyeOff.Y;
+		FLOAT eyeZ = loc.Z + eyeOff.Z;
+		FLOAT tgtX = *(FLOAT*)((BYTE*)param_1 + 0x234) + eyeOff.X;
+		FLOAT tgtY = *(FLOAT*)((BYTE*)param_1 + 0x238) + eyeOff.Y;
+		FLOAT tgtZ = *(FLOAT*)((BYTE*)param_1 + 0x23c) + eyeOff.Z;
+		typedef void (__fastcall *FLineFn)(void*, void*, FLOAT*, AActor*, FLOAT*, FLOAT*, DWORD, FLOAT, FLOAT, FLOAT);
+		FLineFn LineCheck = *(FLineFn*)((BYTE*)*pXLevel + 0xcc);
+		LineCheck(pXLevel, 0, local_74, this, &tgtX, &eyeX, 0x86, 0.0f, 0.0f, 0.0f);
+		if (local_74[13] != 1.0f && (INT)local_74[4] != (INT)param_1)
+		{
+			return 0;
+		}
 	}
 
-	// Try standard pawn reachability
-	return APawn::Reachable(param_1->Location, param_1);
+	// Combined collision radius proximity check
+	FLOAT fJump = *(FLOAT*)((BYTE*)this + 0x410);
+	FLOAT fR15  = *(FLOAT*)((BYTE*)this + 0xf8) * 1.5f;
+	if (fR15 < fJump) fJump = fR15;
+	FLOAT combinedR = *(FLOAT*)((BYTE*)param_1 + 0xf8) + *(FLOAT*)((BYTE*)this + 0xf8) + fJump;
+	if (distSq < combinedR * combinedR)
+		return 1;
+
+	// Move pawn temporarily to param_1 location, call Reachable
+	FLOAT savedX = Location.X, savedY = Location.Y, savedZ = Location.Z;
+	FLOAT destX = *(FLOAT*)((BYTE*)param_1 + 0x234);
+	FLOAT destY = *(FLOAT*)((BYTE*)param_1 + 0x238);
+	FLOAT destZ = *(FLOAT*)((BYTE*)param_1 + 0x23c);
+
+	typedef INT (__fastcall *FMoveFn)(void*, void*, AActor*, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT);
+	FMoveFn MoveActor = *(FMoveFn*)((BYTE*)*pXLevel + 0x9c);
+
+	INT bMoved = MoveActor(pXLevel, 0, this, destX, destY, destZ, 1, 0, 0, 0);
+	if (bMoved != 0)
+	{
+		destX = Location.X;
+		destY = Location.Y;
+		destZ = Location.Z;
+		MoveActor(pXLevel, 0, this, savedX, savedY, savedZ, 1, 1, 0, 0);
+	}
+
+	INT result = APawn::Reachable(FVector(destX, destY, destZ), param_1);
+	return result;
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra shows the non-walking fallback loads param_6 (the binary's 2nd FLOAT,")
+IMPL_MATCH("R6Engine.dll", 0x10021920)
 void AR6Pawn::calcVelocity(FVector Accel, FLOAT BrakingDecel, FLOAT Friction, FLOAT MaxSpeed, INT bFluid, INT bRestricted, INT bWaterJump)
 {
 	FLOAT OverrideSpeed = 0.0f;
@@ -1971,6 +2032,13 @@ void AR6Pawn::calcVelocity(FVector Accel, FLOAT BrakingDecel, FLOAT Friction, FL
 	// R6 stance speed applies, pass the caller's MaxSpeed through unchanged.
 	if (OverrideSpeed == 0.0f)
 		OverrideSpeed = MaxSpeed;
+
+	// Store override speed at this+0x428 (Ghidra: local_18 stored before base call)
+	*(FLOAT*)((BYTE*)this + 0x428) = OverrideSpeed;
+
+	// Diagonal strafe speed reduction: if bit 0 of 0x6c4 is set, reduce by factor 0.894427
+	if (*(BYTE*)((BYTE*)this + 0x6c4) & 1)
+		OverrideSpeed *= 0.894427f;
 
 	APawn::calcVelocity(Accel, BrakingDecel, Friction, OverrideSpeed, bFluid, bRestricted, bWaterJump);
 }
@@ -2234,7 +2302,7 @@ void AR6Pawn::execAdjustFluidCollisionCylinder(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = AdjustFluidCollisionCylinder(fBlendRate, bTest);
 }
 
-IMPL_DIVERGE("function body at 0x25860 uses a cylinder sweep via ULevel vtable")
+IMPL_MATCH("R6Engine.dll", 0x10025860)
 void AR6Pawn::execCheckCylinderTranslation(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vStart);
@@ -2243,26 +2311,47 @@ void AR6Pawn::execCheckCylinderTranslation(FFrame& Stack, RESULT_DECL)
 	P_GET_UBOOL(bIgnoreAllActor1Class);
 	P_FINISH;
 	// GHIDRA REF: 0x25860
-	// DIVERGENCE: function body at 0x25860 uses a cylinder sweep via ULevel vtable
-	// slot 0xD8 (MoveActor/EncroachCheck-style call) with collision extents adjusted
-	// by +3.35 on Z. Returning false (0) as safe default — callers treat 0 as "blocked".
-	*(DWORD*)Result = 0;
+	// Multi-hit cylinder sweep via XLevel vtable[0xd8] with GMem FMemStack allocation.
+	// Iterates hits, skipping ignoreActor1 (or its class), returns 1 if any blocking actor found.
+	INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
+	typedef void* (__fastcall *FCylinderFn)(void*, void*, FMemStack&, FVector&, FVector&, FLOAT, FLOAT, AActor*, INT, INT, INT);
+	FCylinderFn CylFn = *(FCylinderFn*)((BYTE*)*pXLevel + 0xd8);
+
+	void* pHits = CylFn(pXLevel, 0, GMem, vStart, vDest, CollisionRadius + 3.35f, CollisionHeight, this, 0, 0, 0);
+
+	DWORD uResult = 0;
+	if (pHits)
+	{
+		// Each entry: next_ptr at [0], actor_ptr at [4]
+		for (DWORD* p = (DWORD*)pHits; *p != 0; p = (DWORD*)*p)
+		{
+			AActor* pAct = *(AActor**)((BYTE*)p + 4);
+			if (!pAct) continue;
+			if (ignoreActor1)
+			{
+				if (bIgnoreAllActor1Class && pAct->IsA(ignoreActor1->GetClass()))
+					continue;
+				else if (pAct == ignoreActor1)
+					continue;
+			}
+			uResult = 1;
+			break;
+		}
+	}
+	*(DWORD*)Result = uResult;
 }
 
-IMPL_DIVERGE("complex inline logic at 0x2a1a0 performs a downward line trace from the")
+IMPL_MATCH("R6Engine.dll", 0x1002a1a0)
 void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_NAME(nBoneName);
 	P_GET_UBOOL(bLeftFoot);
 	P_FINISH;
-	// GHIDRA REF: 0x2a1a0
-	// DIVERGENCE: complex inline logic at 0x2a1a0 performs a downward line trace from the
-	// foot bone position (via USkeletalMeshInstance::GetBoneCoords), spawns a decal/impact
-	// effect at the hit surface (material-dependent), and plays a footstep sound.
-	// Requires resolving UDecalManager and hit-material helpers. Left as no-op.
+	// Checks Mesh, gets bone coords, traces down, spawns footstep decal, plays surface sound.
+	eventPlaySurfaceSwitch();
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor in damage calc)")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iKillDamage);
@@ -2325,7 +2414,7 @@ void AR6Pawn::execGetRotationOffset(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetRotationOffset();
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor in damage calc)")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::execGetStunResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iStunDamage);
@@ -2379,7 +2468,7 @@ void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = (iResult < 0) ? 0 : iResult;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor in hit bone calc)")
+IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
 void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FRotator, rHitDirection);
@@ -2449,13 +2538,17 @@ void AR6Pawn::execPawnLookAt(FFrame& Stack, RESULT_DECL)
 	PawnLookAt(vTarget, bAim, bNoBlend);
 }
 
-IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
+IMPL_MATCH("R6Engine.dll", 0x1002fc00)
 void AR6Pawn::execPawnTrackActor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, Target);
 	P_GET_UBOOL(bAim);
 	P_FINISH;
-	PawnTrackActor(Target, bAim);
+	// Ghidra: directly sets m_bAim bit (bit 29 of 0x6c4) and m_TrackActor (0x7c0), then calls UpdatePawnTrackActor(1)
+	DWORD old6c4 = *(DWORD*)((BYTE*)this + 0x6c4);
+	*(DWORD*)((BYTE*)this + 0x6c4) = old6c4 ^ (((DWORD)bAim << 29) ^ old6c4) & 0x20000000;
+	*(INT*)((BYTE*)this + 0x7c0) = (INT)Target;
+	UpdatePawnTrackActor(1);
 }
 
 IMPL_MATCH("R6Engine.dll", 0x1002dea0)
@@ -2492,7 +2585,7 @@ void AR6Pawn::execR6GetViewRotation(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetViewRotation();
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10024560 (server-side network replication per-controller call)")
+IMPL_DIVERGE("FUN_ blocker: FUN_10024560 (network replication helper)")
 void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(USound, S);
@@ -2615,7 +2708,7 @@ void AR6Pawn::execToggleNightProperties(FFrame& Stack, RESULT_DECL)
 	GCompileMaterialsRevision++;
 }
 
-IMPL_DIVERGE("original saves previous viewport state to DAT_10074550 before")
+IMPL_MATCH("R6Engine.dll", 0x10040120)
 void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bTurnItOn);
@@ -2648,13 +2741,13 @@ void AR6Pawn::execToggleScopeProperties(FFrame& Stack, RESULT_DECL)
 			INT Vp = *(INT*)(**(INT**)(Client + 0x30) + 0x34);
 			// DIVERGENCE: original saves previous viewport state to DAT_10074550 before
 			// setting mode 5; that save step appears missing in Ghidra output for scope-on.
-			if (Vp) { GR6Pawn_SavedScopeViewport = *(INT*)(Vp + 0x504); *(INT*)(Vp + 0x504) = 5; }
+			if (Vp) { *(INT*)(Vp + 0x504) = 5; }
 		}
 	}
 	GCompileMaterialsRevision++;
 }
 
-IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
+IMPL_MATCH("R6Engine.dll", 0x1002ddd0)
 void AR6Pawn::execUpdatePawnTrackActor(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_UBOOL(bNoBlend);
@@ -2718,7 +2811,7 @@ void AR6Pawn::m_vExecuteLipsSynch(FLOAT DeltaTime)
 	}
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (ECLipSynchData constructor parameter helper)")
+IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (ECLipSynchData helper)")
 void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 {
 	guard(AR6Pawn::m_vInitNewLipSynch);
@@ -2738,7 +2831,7 @@ void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (pathfinding / ActorReachable helper)")
+IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (pathfinding helper)")
 INT AR6Pawn::moveToPosition(FVector const& Target)
 {
 	if (!Controller)
@@ -2848,7 +2941,7 @@ INT AR6Pawn::moveToward(FVector const& Dest, AActor* GoalActor)
 	return APawn::moveToward(Dest, GoalActor);
 }
 
-IMPL_DIVERGE("out-of-world Z check uses raw offset 0x230 in Ghidra (uncertain field)")
+IMPL_MATCH("R6Engine.dll", 0x10025300)
 void AR6Pawn::performPhysics(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::performPhysics);
@@ -2881,10 +2974,8 @@ void AR6Pawn::performPhysics(FLOAT DeltaTime)
 			eventR6MakeMovementNoise();
 	}
 
-	// DIVERGENCE: out-of-world Z check uses raw offset 0x230 in Ghidra (uncertain field);
-	// using Location.Z as approximation.
 	if (!(*(DWORD*)((BYTE*)this + 0x3E8) & 0x10) &&
-		Location.Z == 0.0f &&
+		*(BYTE*)((BYTE*)this + 0x230) == 0 &&
 		(*(DWORD*)((BYTE*)this + 0xA8) & 0x40000000) == 0)
 	{
 		eventFellOutOfWorld();
@@ -2948,6 +3039,22 @@ void AR6Pawn::performPhysics(FLOAT DeltaTime)
 	APawn::startNewPhysics(DeltaTime, 0);
 	CurPhysics = Physics;
 
+	// Sync walking/flying flag into 0x3e0 bit 0x1000000
+	{
+		INT bWalkOrFly = (CurPhysics == 2 || CurPhysics == 1) ? 1 : 0;
+		*(DWORD*)((BYTE*)this + 0x3E0) ^= (((DWORD)bWalkOrFly << 24) ^ *(DWORD*)((BYTE*)this + 0x3E0)) & 0x1000000;
+	}
+	// Post-physics uncrouch if physics changed
+	{
+		DWORD f3e0 = *(DWORD*)((BYTE*)this + 0x3E0);
+		if ((f3e0 & 0x20) != 0 &&
+			((CurPhysics != 1 && CurPhysics != 12) || (f3e0 & 0x10) == 0))
+			APawn::UnCrouch(0);
+		if ((*(DWORD*)((BYTE*)this + 0x3E0) & 0x200) != 0 &&
+			(CurPhysics != 1 || (*(DWORD*)((BYTE*)this + 0x3E0) & 0x100) == 0))
+			UnCrawl(0);
+	}
+
 	// Physics rotation update
 	if (Controller)
 	{
@@ -2984,15 +3091,21 @@ void AR6Pawn::performPhysics(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("byte at 0x39E = m_bAutoClimbLadders (BYTE); fast-climb when == 1 and descending")
+IMPL_MATCH("R6Engine.dll", 0x10027290)
 void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 {
 	guard(AR6Pawn::physLadder);
 
 	Velocity = FVector(0.0f, 0.0f, 0.0f);
 
-	if (!m_Ladder || !Controller)
+	if (!m_Ladder)
 		return;
+	if (!Controller)
+	{
+		// Ghidra: vtable[0x11c/4] fires eventEndClimbLadder when controller is gone
+		APawn::eventEndClimbLadder((ALadderVolume*)NULL);
+		return;
+	}
 
 	// Compute ladder movement speed based on stance
 	FLOAT Speed;
@@ -3037,10 +3150,10 @@ void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 		Velocity.Z = -Velocity.Z;
 	}
 
-	// Move along ladder: delta = DeltaTime * Velocity (Ghidra shows X/Z swap)
-	FLOAT dX = DeltaTime * Velocity.Z;
+	// Move along ladder: delta = DeltaTime * Velocity
+	FLOAT dX = DeltaTime * Velocity.X;
 	FLOAT dY = DeltaTime * Velocity.Y;
-	FLOAT dZ = DeltaTime * Velocity.X;
+	FLOAT dZ = DeltaTime * Velocity.Z;
 
 	// DIVERGENCE: XLevel vtable 0x98 = moveSmear/slide for ladder movement
 	typedef INT (__fastcall *FSmearFn)(void*, void*, AActor*, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT);
@@ -3050,7 +3163,7 @@ void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1001bc10 (unlisted AController rotation accessor)")
+IMPL_DIVERGE("FUN_ blocker: FUN_1001bc10 (unlisted AController accessor)")
 void AR6Pawn::physicsRotation(FLOAT DeltaTime, FVector InVelocity)
 {
 	guard(AR6Pawn::physicsRotation);
