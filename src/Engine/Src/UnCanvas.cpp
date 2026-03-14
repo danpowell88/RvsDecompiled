@@ -277,8 +277,10 @@ void UCanvas::DrawTileClipped(UMaterial* Material, FLOAT XL, FLOAT YL, FLOAT U, 
 }
 int UCanvas::_DrawString(UFont *Font, int XL, int YL, const TCHAR* Text, FPlane Color, int CR, int RenderStyle, int DrawExtraLine)
 {
-	// Ghidra 0x8b130: delegates to FUN_1038ac40 (internal DrawString worker).
-	// TODO: resolve FUN_1038ac40
+	// FUN_1038ac40 = UCanvas_DrawStringInternal() — internal low-level DrawString worker.
+	// DIVERGENCE: called via hardcoded address; this function is not yet reconstructed
+	// as a standalone C++ function. The call is preserved as an address thunk.
+	// GHIDRA REF: 0x1038ac40 — TCHAR string → font atlas → viewport blit sequence.
 	typedef int (__thiscall* DrawStrFn)(UCanvas*, UFont*, int, int, const TCHAR*, FPlane, int, int, int);
 	return ((DrawStrFn)0x1038ac40)(this, Font, XL, YL, Text, Color, CR, RenderStyle, DrawExtraLine);
 }
