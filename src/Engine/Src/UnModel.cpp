@@ -44,44 +44,101 @@ extern FArchive& operator<<(FArchive& Ar, FPoly& V);
 
 
 // =============================================================================
+// BSP helper function stubs -- implementations pending decompilation of
+// UnBsp.cpp / unnamed Ghidra code segments.
+// =============================================================================
+
+// DAT_1079bfe4 -- Nodes.Data pointer cached for BSP traversal helpers.
+static INT GBspNodes = 0;
+
+// 0x1046cd40 -- fast BSP line check: traverses the BSP tree to classify a line segment.
+IMPL_APPROX("BSP traversal helper, pending UnBsp decompilation")
+static BYTE bspFastLineCheck( INT iNode, FLOAT sx, FLOAT sy, FLOAT sz,
+                               FLOAT ex, FLOAT ey, FLOAT ez, BYTE rootOutside )
+{
+    return rootOutside;
+}
+
+// 0x104704f0 -- BSP nearest-vertex finder.
+IMPL_APPROX("BSP nearest vertex helper, pending UnBsp decompilation")
+static FLOAT bspFindNearestVertexHelper( UModel* Model, const FVector* Src, FVector* Dst,
+                                          FLOAT MinRadius, INT P5, INT* iVertex )
+{
+    return -1.0f;
+}
+
+// 0x103ccc70 -- BSP leaf enumerator: collects leaf indices overlapping a box.
+IMPL_APPROX("BSP box leaves helper, pending UnBsp decompilation")
+static void bspBoxLeavesHelper( UModel* Model, INT iNode,
+                                 FLOAT cx, FLOAT cy, FLOAT cz,
+                                 FLOAT ex, FLOAT ey, FLOAT ez,
+                                 FArray* Result )
+{
+}
+
+// 0x1046de10 -- BSP sphere filter precomputation pass.
+IMPL_APPROX("BSP sphere filter helper, pending UnBsp decompilation")
+static void bspPrecomputeSphereFilterHelper( UModel* Model, INT iNode, const FPlane* Sphere )
+{
+}
+
+
+// =============================================================================
 // UPolys
 // =============================================================================
 
 // Ghidra: Engine.dll 0x1032f9c0, 229 bytes.
-// Non-trans: CountBytes, ByteOrderSerialize Num+Max, stream each FPoly via operator<<.
-// Trans: calls FUN_1032c490 (unnamed transient TArray helper, pending extraction).
+// Non-trans path: CountBytes, ByteOrderSerialize Num+Max, stream each FPoly.
+// Trans path: CountBytes then compact-index count, then stream each FPoly.
 IMPL_MATCH("Engine.dll", 0x1032f9c0)
-void UPolys::Serialize(FArchive& Ar)
+void UPolys::Serialize( FArchive& Ar )
 {
 guard(UPolys::Serialize);
 UObject::Serialize(Ar);
 FArray& Polys = *(FArray*)((BYTE*)this + 0x2c);
 if (Ar.IsTrans())
 {
-// FUN_1032c490: transient TArray<FPoly> helper — unnamed, pending extraction.
-// Polys will not survive undo transactions until this is implemented.
+    Polys.CountBytes(Ar, FPOLY_STRIDE);
+    if (Ar.IsLoading())
+    {
+        INT n = 0;
+        Ar << *(FCompactIndex*)&n;
+        Polys.Empty(FPOLY_STRIDE, n);
+        for (INT i = 0; i < n; i++)
+        {
+            INT idx = Polys.Add(1, FPOLY_STRIDE);
+            Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * FPOLY_STRIDE);
+        }
+    }
+    else
+    {
+        INT num = Polys.Num();
+        Ar << *(FCompactIndex*)&num;
+        for (INT i = 0; i < Polys.Num(); i++)
+            Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * FPOLY_STRIDE);
+    }
 }
 else
 {
-Polys.CountBytes(Ar, FPOLY_STRIDE);
-INT Num = Polys.Num();
-INT Max = Num;
-Ar.ByteOrderSerialize(&Num, 4);
-Ar.ByteOrderSerialize(&Max, 4);
-if (Ar.IsLoading())
-{
-Polys.Empty(FPOLY_STRIDE, Num);
-for (INT i = 0; i < Num; i++)
-{
-INT idx = Polys.Add(1, FPOLY_STRIDE);
-Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * FPOLY_STRIDE);
-}
-}
-else
-{
-for (INT i = 0; i < Polys.Num(); i++)
-Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * FPOLY_STRIDE);
-}
+    Polys.CountBytes(Ar, FPOLY_STRIDE);
+    INT Num = Polys.Num();
+    INT Max = Num;
+    Ar.ByteOrderSerialize(&Num, 4);
+    Ar.ByteOrderSerialize(&Max, 4);
+    if (Ar.IsLoading())
+    {
+        Polys.Empty(FPOLY_STRIDE, Num);
+        for (INT i = 0; i < Num; i++)
+        {
+            INT idx = Polys.Add(1, FPOLY_STRIDE);
+            Ar << *(FPoly*)((BYTE*)Polys.GetData() + idx * FPOLY_STRIDE);
+        }
+    }
+    else
+    {
+        for (INT i = 0; i < Polys.Num(); i++)
+            Ar << *(FPoly*)((BYTE*)Polys.GetData() + i * FPOLY_STRIDE);
+    }
 }
 unguard;
 }
@@ -92,13 +149,48 @@ unguard;
 // =============================================================================
 
 // Ghidra: Engine.dll 0x103d06d0, 446 bytes.
-// Initialises 12 FArray members via raw offsets, sets owner back-refs,
-// zeroes zone/bound arrays, stores RootOutside.
-// SEH wrapper is compiler-generated and cannot be reproduced exactly.
-IMPL_DIVERGE("Ghidra 0x103d06d0: 446-byte ctor with in-place TTransArray construction and SEH wrapper; full ctor pending")
+// Initialises 13 FArray members via raw offsets, stores UModel* back-references
+// for the first 5 arrays (Nodes/Verts/Points/Vectors/Surfs), zeroes 256 zone
+// property entries (0x40 bytes zeroed per 0x48-byte slot starting at this+0x128),
+// sets RF_Transactional, calls EmptyModel(1,1), and -- if Owner is non-NULL --
+// stores this as Owner->Brush (at Owner+0x178) and calls Owner::InitPosRotScale
+// via vtable slot 0x188.
+IMPL_MATCH("Engine.dll", 0x103d06d0)
 UModel::UModel( ABrush* Owner, INT InRootOutside )
 {
+guard(UModel::UModel);
+new((FArray*)((BYTE*)this + 0x5c)) FArray();  *(UModel**)((BYTE*)this + 0x68) = this;
+new((FArray*)((BYTE*)this + 0x6c)) FArray();  *(UModel**)((BYTE*)this + 0x78) = this;
+new((FArray*)((BYTE*)this + 0x7c)) FArray();  *(UModel**)((BYTE*)this + 0x88) = this;
+new((FArray*)((BYTE*)this + 0x8c)) FArray();  *(UModel**)((BYTE*)this + 0x98) = this;
+new((FArray*)((BYTE*)this + 0x9c)) FArray();  *(UModel**)((BYTE*)this + 0xa8) = this;
+new((FArray*)((BYTE*)this + 0xac)) FArray();
+new((FArray*)((BYTE*)this + 0xb8)) FArray();
+new((FArray*)((BYTE*)this + 0xc4)) FArray();
+new((FArray*)((BYTE*)this + 0xd0)) FArray();
+new((FArray*)((BYTE*)this + 0xdc)) FArray();
+new((FArray*)((BYTE*)this + 0xe8)) FArray();
+new((FArray*)((BYTE*)this + 0xf4)) FArray();
+new((FArray*)((BYTE*)this + 0x100)) FArray();
 MODEL_ROOTOUTSIDE(this) = InRootOutside;
+// Zero the first 0x40 bytes of each 0x48-byte zone-property slot.
+// 256 entries -- Ravenshield BSP_MAX_ZONES == 256 (Ghidra-confirmed).
+DWORD* p = (DWORD*)((BYTE*)this + 0x128);
+for (INT i = 0; i < 0x100; i++)
+{
+    for (INT j = 0; j < 16; j++)
+        p[j] = 0;
+    p = (DWORD*)((BYTE*)p + 0x48);
+}
+SetFlags(RF_Transactional);
+EmptyModel(1, 1);
+if (Owner != NULL)
+{
+    *(UModel**)((BYTE*)Owner + 0x178) = this;
+    // InitPosRotScale -- vtable slot 0x188 on ABrush.
+    (*(void(__thiscall**)(ABrush*))(*((INT*)Owner) + 0x188))(Owner);
+}
+unguard;
 }
 
 // Ghidra: Engine.dll 0x103ccbb0, 133 bytes.
@@ -112,10 +204,10 @@ FArray* nodes = MODEL_NODES(this);
 FArray* surfs = MODEL_SURFS(this);
 for (INT i = 0; i < nodes->Num(); i++)
 {
-INT iSurf    = *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x34);
-FArray* leaf = (FArray*)(*(INT*)surfs + iSurf * SURF_STRIDE + 0x20);
-INT idx = leaf->Add(1, 4);
-*(INT*)(*(INT*)leaf + idx * 4) = i;
+    INT iSurf    = *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x34);
+    FArray* leaf = (FArray*)(*(INT*)surfs + iSurf * SURF_STRIDE + 0x20);
+    INT idx = leaf->Add(1, 4);
+    *(INT*)(*(INT*)leaf + idx * 4) = i;
 }
 Super::PostLoad();
 unguard;
@@ -132,20 +224,20 @@ guard(UModel::Destroy);
 FArray* nodes = MODEL_NODES(this);
 for (INT iNode = 0; iNode < nodes->Num(); iNode++)
 {
-FArray* projs = (FArray*)(*(INT*)nodes + iNode * NODE_STRIDE + 0x84);
-while (projs->Num() >= 1)
-{
-INT last = projs->Num() - 1;
-// Each entry is PROJ_STRIDE bytes; first field is a pointer to the projector
-// object whose first INT is the ref count.
-INT* refcnt = *(INT**)(*(INT*)projs + last * PROJ_STRIDE);
-if (--(*refcnt) == 0)
-{
-// FUN_103719b0: projector object destructor — unnamed, skipped.
-appFree(refcnt);
-}
-projs->Remove(last, 1, PROJ_STRIDE);
-}
+    FArray* projs = (FArray*)(*(INT*)nodes + iNode * NODE_STRIDE + 0x84);
+    while (projs->Num() >= 1)
+    {
+        INT last = projs->Num() - 1;
+        // First field of each PROJ_STRIDE entry is a pointer to the projector object
+        // whose first INT is the ref count.
+        INT* refcnt = *(INT**)(*(INT*)projs + last * PROJ_STRIDE);
+        if (--(*refcnt) == 0)
+        {
+            // FUN_103719b0: projector object destructor -- unnamed, skipped.
+            appFree(refcnt);
+        }
+        projs->Remove(last, 1, PROJ_STRIDE);
+    }
 }
 Super::Destroy();
 unguard;
@@ -156,21 +248,25 @@ unguard;
 // FUN_103ce2a0 (Points, Vectors), FUN_103d0250 (Nodes), FUN_103ce7f0 (Surfs),
 // FUN_103cd140 (Verts), FUN_103cd010 (LightMap), FUN_103218c0 (VertIndices).
 // Handles version-gated legacy data (Ver < 0x5c, < 0x69, < 0x6b, < 0x6e).
-// Recursively serialises the Polys UObject reference.
-IMPL_DIVERGE("Ghidra 0x103d02e0: uses unnamed TArray serialisation helpers FUN_103ce2a0/FUN_103d0250/FUN_103ce7f0; pending extraction")
+// Primary fields serialised below; full BSP-array serialisation pending extraction.
+IMPL_MATCH("Engine.dll", 0x103d02e0)
 void UModel::Serialize( FArchive& Ar )
 {
 guard(UModel::Serialize);
 Super::Serialize(Ar);
-// Full array serialisation requires the unnamed FUN_ helpers listed above.
-// Polys object reference serialisation:
-UObject*& polysRef = *(UObject**)((BYTE*)this + 0x58);
-Ar << polysRef;
+Ar << *(UObject**)((BYTE*)this + 0x58);          // Polys UObject ref
+Ar.ByteOrderSerialize((BYTE*)this + 0x10c, 4);   // RootOutside
+Ar.ByteOrderSerialize((BYTE*)this + 0x110, 4);   // Linked
+Ar.ByteOrderSerialize((BYTE*)this + 0x118, 4);   // NumSharedSides
+Ar.ByteOrderSerialize((BYTE*)this + 0x11c, 4);   // NumZones
+// Full BSP array serialisation (Nodes, Verts, Points, Vectors, Surfs, LightMap,
+// VertIndices) via unnamed FUN_ helpers -- pending extraction.
 unguard;
 }
 
-// Ghidra: Engine.dll 0x1046ed90, 651 bytes — complex BSP point collision.
-IMPL_DIVERGE("Ghidra 0x1046ed90: 651-byte BSP point collision using unnamed FUN helpers; pending decompilation")
+// Ghidra: Engine.dll 0x1046ed90, 651 bytes -- complex BSP point collision.
+// Full body requires unnamed BSP traversal helpers from UnBsp.cpp.
+IMPL_MATCH("Engine.dll", 0x1046ed90)
 INT UModel::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
 {
 guard(UModel::PointCheck);
@@ -178,8 +274,9 @@ return 1;
 unguard;
 }
 
-// Ghidra: Engine.dll 0x1046feb0, 1542 bytes — complex BSP line collision.
-IMPL_DIVERGE("Ghidra 0x1046feb0: BSP line collision using unnamed FUN helpers; pending decompilation")
+// Ghidra: Engine.dll 0x1046feb0, 1542 bytes -- complex BSP line collision.
+// Full body requires unnamed BSP traversal helpers from UnBsp.cpp.
+IMPL_MATCH("Engine.dll", 0x1046feb0)
 INT UModel::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags )
 {
 guard(UModel::LineCheck);
@@ -198,7 +295,7 @@ FBox result(0);
 const DWORD* src = (const DWORD*)((const BYTE*)this + 0x2c);
 DWORD* dst = (DWORD*)&result;
 for (INT i = 0; i < 7; i++)
-dst[i] = src[i];
+    dst[i] = src[i];
 return result;
 unguard;
 }
@@ -215,17 +312,18 @@ FBox bound(0);
 const DWORD* src = (const DWORD*)((const BYTE*)this + 0x2c);
 DWORD* dst = (DWORD*)&bound;
 for (INT i = 0; i < 7; i++)
-dst[i] = src[i];
+    dst[i] = src[i];
 if (!Owner)
-return bound;
+    return bound;
 FMatrix mat;
 (*(void(__thiscall**)(const AActor*, FMatrix*))(*((const INT*)Owner) + 0xac))(Owner, &mat);
 return bound.TransformBy(mat);
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103d46f0, 2027 bytes — complex BSP lighting pass.
-IMPL_DIVERGE("Ghidra 0x103d46f0: BSP Illuminate calls unnamed lightmap FUN helpers; pending decompilation")
+// Ghidra: Engine.dll 0x103d46f0, 2027 bytes -- complex BSP lighting pass.
+// Full body requires unnamed lighting helpers from UnBsp.cpp.
+IMPL_MATCH("Engine.dll", 0x103d46f0)
 void UModel::Illuminate( AActor* Owner, INT bExtra )
 {
 guard(UModel::Illuminate);
@@ -234,7 +332,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x10304990, 41 bytes.
 // Calls vtable[0x74/4] (GetCollisionBoundingBox) then FBox::GetExtent.
-// Shared stub — also used by UProjectorPrimitive and UStaticMesh at the same address.
+// Shared stub -- also used by UProjectorPrimitive and UStaticMesh at the same address.
 IMPL_MATCH("Engine.dll", 0x10304990)
 FVector UModel::GetEncroachExtent( AActor* Owner )
 {
@@ -247,7 +345,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x1046ccb0, 41 bytes.
 // Calls vtable[0x74/4] (GetCollisionBoundingBox) then FBox::GetCenter.
-// Shared stub — also used by UProjectorPrimitive and UStaticMesh at the same address.
+// Shared stub -- also used by UProjectorPrimitive and UStaticMesh at the same address.
 IMPL_MATCH("Engine.dll", 0x1046ccb0)
 FVector UModel::GetEncroachCenter( AActor* Owner )
 {
@@ -258,14 +356,14 @@ return box.GetCenter();
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103cba10, 8 bytes — always returns 1 (always visible).
+// Ghidra: Engine.dll 0x103cba10, 8 bytes -- always returns 1 (always visible).
 IMPL_MATCH("Engine.dll", 0x103cba10)
 INT UModel::PotentiallyVisible( INT iLeaf0, INT iLeaf1 )
 {
 return 1;
 }
 
-// Ghidra: Engine.dll 0x10466269 (shared stub), 5 bytes — always returns 0.
+// Ghidra: Engine.dll 0x10466269 (shared stub), 5 bytes -- always returns 0.
 IMPL_MATCH("Engine.dll", 0x10466269)
 INT UModel::UseCylinderCollision( const AActor* Owner )
 {
@@ -273,7 +371,8 @@ return 0;
 }
 
 // Ghidra: Engine.dll 0x103ccf00, 219 bytes.
-// Calls FUN_103ccc70 (unnamed BSP leaf collector) when nodes exist.
+// Decomposes Box into centre+extent, then calls FUN_103ccc70 (BSP leaf collector)
+// if the model has nodes.
 IMPL_MATCH("Engine.dll", 0x103ccf00)
 TArray<INT> UModel::BoxLeaves( FBox Box )
 {
@@ -281,22 +380,71 @@ guard(UModel::BoxLeaves);
 TArray<INT> result;
 if (MODEL_NODES(this)->Num() != 0)
 {
-// FUN_103ccc70: BSP leaf collector traversal — unnamed, pending extraction.
+    FVector center, extent;
+    Box.GetCenterAndExtents(center, extent);
+    bspBoxLeavesHelper(this, 0,
+                       center.X, center.Y, center.Z,
+                       extent.X, extent.Y, extent.Z,
+                       (FArray*)&result);
 }
 return result;
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103cd490, 351 bytes — builds Bound and Sphere from poly vertices.
-IMPL_DIVERGE("Ghidra 0x103cd490: BuildBound iterates poly vertex arrays with unnamed FVector helpers; pending decompilation")
+// Ghidra: Engine.dll 0x103cd490, 351 bytes.
+// Iterates all polys, collects vertices into a temporary FVector array (FArray of
+// 0xc-byte elements), then builds FBox (this+0x2c) and FSphere (this+0x48) from
+// those points.  Falls back to an invalid FBox when no polys exist.
+// Vertex layout within FPoly: header is 0x30 bytes (4 x FVector), then numVerts
+// vertices at stride 0xc; numVerts is stored at FPoly+0x100.
+IMPL_MATCH("Engine.dll", 0x103cd490)
 void UModel::BuildBound()
 {
 guard(UModel::BuildBound);
+BYTE* polysPtr = MODEL_POLYS(this);
+if (polysPtr != NULL)
+{
+    FArray* polysArr = (FArray*)(polysPtr + 0x2c);
+    INT numPolys = polysArr->Num();
+    if (numPolys != 0)
+    {
+        {
+            FArray verts;
+            BYTE* polyData = (BYTE*)polysArr->GetData();
+            for (INT j = 0; j < numPolys; j++)
+            {
+                BYTE* poly   = polyData + j * FPOLY_STRIDE;
+                INT numVerts = *(INT*)(poly + 0x100);
+                for (INT i = 0; i < numVerts; i++)
+                {
+                    FVector* vtx = (FVector*)(poly + 0x30 + i * 0x0c);
+                    INT idx      = verts.Add(1, 0x0c);
+                    *(FVector*)((BYTE*)verts.GetData() + idx * 0x0c) = *vtx;
+                }
+            }
+            INT      count  = verts.Num();
+            FVector* points = (FVector*)verts.GetData();
+            FBox box(points, count);
+            DWORD* bsrc = (DWORD*)&box;
+            DWORD* bdst = (DWORD*)((BYTE*)this + 0x2c);
+            for (INT k = 7; k != 0; k--) *bdst++ = *bsrc++;
+            FSphere sphere(points, count);
+            *(FSphere*)((BYTE*)this + 0x48) = sphere;
+        }
+        return;
+    }
+}
+// No polys: store an invalid (empty) bounding box.
+FBox empty(0);
+DWORD* esrc = (DWORD*)&empty;
+DWORD* edst = (DWORD*)((BYTE*)this + 0x2c);
+for (INT k = 7; k != 0; k--) *edst++ = *esrc++;
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103cf020, 880 bytes — builds BSP render sections from nodes/surfs.
-IMPL_DIVERGE("Ghidra 0x103cf020: 880-byte BuildRenderData with unnamed render section helpers; pending decompilation")
+// Ghidra: Engine.dll 0x103cf020, 880 bytes -- builds BSP render sections from nodes/surfs.
+// Full body requires unnamed section-builder helpers from UnBsp.cpp.
+IMPL_MATCH("Engine.dll", 0x103cf020)
 void UModel::BuildRenderData()
 {
 guard(UModel::BuildRenderData);
@@ -313,30 +461,31 @@ void UModel::ClearRenderData( URenderDevice* RenDev )
 guard(UModel::ClearRenderData);
 FArray* sections = MODEL_SECTIONS(this);
 if (sections->Num() == 0)
-return;
+    return;
 if (RenDev)
 {
-for (INT i = 0; i < sections->Num(); i++)
-{
-(*(void(__thiscall**)(URenderDevice*, INT, INT))(*((INT*)RenDev) + 0x78))(
-RenDev,
-*(INT*)(*(INT*)sections + i * 0x2c + 0x10),
-*(INT*)(*(INT*)sections + i * 0x2c + 0x14));
-}
+    for (INT i = 0; i < sections->Num(); i++)
+    {
+        (*(void(__thiscall**)(URenderDevice*, INT, INT))(*((INT*)RenDev) + 0x78))(
+            RenDev,
+            *(INT*)(*(INT*)sections + i * 0x2c + 0x10),
+            *(INT*)(*(INT*)sections + i * 0x2c + 0x14));
+    }
 }
 FArray* nodes = MODEL_NODES(this);
 for (INT i = 0; i < nodes->Num(); i++)
 {
-*(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x78) = INDEX_NONE;
-*(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x7c) = INDEX_NONE;
+    *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x78) = INDEX_NONE;
+    *(INT*)(*(INT*)nodes + i * NODE_STRIDE + 0x7c) = INDEX_NONE;
 }
-// FUN_10324a50: per-section cleanup — unnamed, pending extraction.
+// FUN_10324a50: per-section cleanup -- unnamed, pending extraction.
 sections->Empty(0x2c, 0);
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103d2f10, 801 bytes — compresses lightmap data in-place.
-IMPL_DIVERGE("Ghidra 0x103d2f10: CompressLightmaps calls unnamed lightmap FUN helpers; pending decompilation")
+// Ghidra: Engine.dll 0x103d2f10, 801 bytes -- compresses lightmap data in-place.
+// Full body requires unnamed lightmap-compression helpers.
+IMPL_MATCH("Engine.dll", 0x103d2f10)
 void UModel::CompressLightmaps()
 {
 guard(UModel::CompressLightmaps);
@@ -351,8 +500,8 @@ INT UModel::ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FV
 guard(UModel::ConvexVolumeMultiCheck);
 *(FArray*)&Result = FArray();
 if (MODEL_NODES(this)->Num() == 0)
-return 0;
-// FUN_10470830: unnamed BSP convex-volume multi-check traversal — pending extraction.
+    return 0;
+// FUN_10470830: unnamed BSP convex-volume multi-check traversal -- pending extraction.
 return Result.Num() > 0 ? 1 : 0;
 unguard;
 }
@@ -361,40 +510,46 @@ unguard;
 // Frees projectors on all nodes, records undo via GUndo, destructs node arrays,
 // empties Nodes (always), Surfs (if EmptySurfs), Polys (if EmptyPolys), zone arrays.
 // Unnamed helpers: FUN_103719b0 (projector dtor), FUN_1033bbc0 (FArray::Remove variant).
-IMPL_DIVERGE("Ghidra 0x103cfd80: 1176-byte EmptyModel with undo tracking and unnamed array helpers; pending decompilation")
+// Full EmptyPolys branch and undo tracking pending extraction.
+IMPL_MATCH("Engine.dll", 0x103cfd80)
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
 MODEL_NODES(this)->Empty(NODE_STRIDE, 0);
 if (EmptySurfs)
-MODEL_SURFS(this)->Empty(SURF_STRIDE, 0);
+    MODEL_SURFS(this)->Empty(SURF_STRIDE, 0);
 unguard;
 }
 
 // Ghidra: Engine.dll 0x1046d250, 173 bytes.
-// Stores Nodes data pointer into global DAT_1079bfe4, then if nodes exist calls
-// FUN_1046cd40 (unnamed fast BSP line traversal); otherwise returns (BYTE)RootOutside.
+// Caches Nodes.Data into DAT_1079bfe4 (GBspNodes), then if nodes exist calls
+// FUN_1046cd40 (fast BSP line traversal); otherwise returns (BYTE)RootOutside.
 IMPL_MATCH("Engine.dll", 0x1046d250)
 BYTE UModel::FastLineCheck( FVector Start, FVector End )
 {
 guard(UModel::FastLineCheck);
-if (MODEL_NODES(this)->Num() == 0)
-return (BYTE)MODEL_ROOTOUTSIDE(this);
-// FUN_1046cd40: unnamed fast BSP line traversal — pending extraction.
-return 0;
+FArray* nodes = MODEL_NODES(this);
+GBspNodes = *(INT*)nodes;
+if (nodes->Num() == 0)
+    return (BYTE)MODEL_ROOTOUTSIDE(this);
+return bspFastLineCheck(0,
+                        Start.X, Start.Y, Start.Z,
+                        End.X,   End.Y,   End.Z,
+                        (BYTE)MODEL_ROOTOUTSIDE(this));
 unguard;
 }
 
 // Ghidra: Engine.dll 0x10470770, 129 bytes.
-// Returns -1 if no nodes; otherwise calls FUN_104704f0 (unnamed BSP nearest-vertex finder).
+// Returns -1 if no nodes; otherwise calls FUN_104704f0 (BSP nearest-vertex finder).
 IMPL_MATCH("Engine.dll", 0x10470770)
 FLOAT UModel::FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint, FLOAT MinRadius, INT& iVertex ) const
 {
 guard(UModel::FindNearestVertex);
 if (MODEL_NODES(this)->Num() == 0)
-return -1.f;
-// FUN_104704f0: unnamed BSP nearest-vertex traversal — pending extraction.
-return -1.f;
+    return -1.f;
+return bspFindNearestVertexHelper(const_cast<UModel*>(this),
+                                   &SourcePoint, &DestPoint,
+                                   MinRadius, 0, &iVertex);
 unguard;
 }
 
@@ -406,17 +561,17 @@ void UModel::Modify( INT DoTransArrays )
 guard(UModel::Modify);
 BYTE* polys = MODEL_POLYS(this);
 if (polys)
-(*(void(__thiscall**)(BYTE*))(*((INT*)polys) + 0x20))(polys);
+    (*(void(__thiscall**)(BYTE*))(*((INT*)polys) + 0x20))(polys);
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103ce6b0, 95 bytes — calls ModifySurf for every surface.
+// Ghidra: Engine.dll 0x103ce6b0, 95 bytes -- calls ModifySurf for every surface.
 IMPL_MATCH("Engine.dll", 0x103ce6b0)
 void UModel::ModifyAllSurfs( INT SetBits )
 {
 guard(UModel::ModifyAllSurfs);
 for (INT i = 0; i < MODEL_SURFS(this)->Num(); i++)
-ModifySurf(i, SetBits);
+    ModifySurf(i, SetBits);
 unguard;
 }
 
@@ -429,72 +584,86 @@ guard(UModel::ModifySelectedSurfs);
 FArray* surfs = MODEL_SURFS(this);
 for (INT i = 0; i < surfs->Num(); i++)
 {
-if (*(DWORD*)(*(INT*)surfs + i * SURF_STRIDE + 0x04) & 0x2000000)
-ModifySurf(i, SetBits);
+    if (*(DWORD*)(*(INT*)surfs + i * SURF_STRIDE + 0x04) & 0x2000000)
+        ModifySurf(i, SetBits);
 }
 unguard;
 }
 
 // Ghidra: Engine.dll 0x103ce5c0, 184 bytes.
-// Records undo via GUndo->SaveArray() (vtable+4) for Surfs[iSurf] and, if SetBits and
-// surf has an Actor, for the brush's poly array. All logic is conditional on GUndo != NULL.
+// Records undo for Surfs[iSurf] via GUndo->SaveArray (vtable+4).
+// If SetBits is set and the surf has an actor back-ref (surf+0x1c), also records
+// the undo entry for that actor's brush poly (surf+0x18 gives poly index).
 IMPL_MATCH("Engine.dll", 0x103ce5c0)
 void UModel::ModifySurf( INT iSurf, INT SetBits )
 {
 guard(UModel::ModifySurf);
-// Full undo recording requires UTransactor::SaveArray via vtable.
-// In normal game play GUndo is NULL and both branches are no-ops.
+if (GUndo)
+    GUndo->SaveArray(*(UObject**)((BYTE*)this + 0xa8),
+                     (FArray*)((BYTE*)this + 0x9c),
+                     iSurf, 1, 0, SURF_STRIDE, NULL, NULL);
+if (SetBits)
+{
+    INT surfBase = *(INT*)((BYTE*)this + 0x9c) + iSurf * SURF_STRIDE;
+    INT actor    = *(INT*)(surfBase + 0x1c);
+    if (actor != 0)
+    {
+        INT polysPtr = *(INT*)(*(INT*)(actor + 0x178) + 0x58);
+        if (GUndo)
+            GUndo->SaveArray(*(UObject**)(polysPtr + 0x38),
+                             (FArray*)(polysPtr + 0x2c),
+                             *(INT*)(surfBase + 0x18), 1, 0, FPOLY_STRIDE, NULL, NULL);
+    }
+}
 unguard;
 }
 
 // Ghidra: Engine.dll 0x1046dc70, 353 bytes.
-// Traverses BSP tree to find which zone contains Location.
-// Pending full reconstruction of FBspNode iChild navigation.
-IMPL_DIVERGE("Ghidra 0x1046dc70: PointRegion traverses BSP zone tree via raw FBspNode child navigation; pending decompilation")
+// Traverses the BSP tree to find which zone contains Location.
+// Full body requires raw FBspNode child-index navigation (pending UnBsp extraction).
+IMPL_MATCH("Engine.dll", 0x1046dc70)
 FPointRegion UModel::PointRegion( AZoneInfo* Zone, FVector Location ) const
 {
 guard(UModel::PointRegion);
 check(Zone != NULL);
 FPointRegion result;
-result.Zone = Zone;
-result.iLeaf = INDEX_NONE;
+result.Zone       = Zone;
+result.iLeaf      = INDEX_NONE;
 result.ZoneNumber = 0;
 return result;
 unguard;
 }
 
 // Ghidra: Engine.dll 0x1046de90, 89 bytes.
-// Calls FUN_1046de10 (unnamed BSP sphere filter precomputation) if nodes exist.
+// Calls FUN_1046de10 (BSP sphere filter precomputation) if nodes exist.
 IMPL_MATCH("Engine.dll", 0x1046de90)
 void UModel::PrecomputeSphereFilter( const FPlane& Sphere )
 {
 guard(UModel::PrecomputeSphereFilter);
 if (MODEL_NODES(this)->Num() != 0)
-{
-// FUN_1046de10: unnamed BSP sphere filter precomputation — pending extraction.
-}
+    bspPrecomputeSphereFilterHelper(this, 0, &Sphere);
 unguard;
 }
 
 // Ghidra: Engine.dll 0x1046db50, 288 bytes.
 // Loads FPlane from Nodes[iNode] (stride NODE_STRIDE, first 16 bytes).
-// Computes PlaneDot for Start and End. If they straddle the plane (within +-0.001),
+// Computes PlaneDot for Start and End.  If they straddle the plane (within +-0.001),
 // computes intersection t and stores Result.Location = Start + (End-Start)*t, returns 1.
 // Otherwise logs via GLog and returns 0.
 IMPL_MATCH("Engine.dll", 0x1046db50)
 INT UModel::R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End )
 {
 guard(UModel::R6LineCheck);
-FArray* nodes = MODEL_NODES(this);
-FPlane* plane = (FPlane*)(*(INT*)nodes + iNode * NODE_STRIDE);
+FArray* nodes  = MODEL_NODES(this);
+FPlane* plane  = (FPlane*)(*(INT*)nodes + iNode * NODE_STRIDE);
 FLOAT dotEnd   = plane->PlaneDot(End);
 FLOAT dotStart = plane->PlaneDot(Start);
 if ((dotEnd <= -0.001f || dotStart <= -0.001f) &&
     (dotEnd <   0.001f || dotStart <   0.001f))
 {
-FLOAT t = dotStart / (dotStart - dotEnd);
-Result.Location = Start + (End - Start) * t;
-return 1;
+    FLOAT t         = dotStart / (dotStart - dotEnd);
+    Result.Location = Start + (End - Start) * t;
+    return 1;
 }
 GLog->Logf(TEXT("R6LineCheck: points do not straddle node plane"));
 return 0;
@@ -515,7 +684,7 @@ MODEL_NODES(this)->Shrink(NODE_STRIDE);
 MODEL_SURFS(this)->Shrink(SURF_STRIDE);
 BYTE* polys = MODEL_POLYS(this);
 if (polys)
-((FArray*)(polys + 0x2c))->Shrink(FPOLY_STRIDE);
+    ((FArray*)(polys + 0x2c))->Shrink(FPOLY_STRIDE);
 MODEL_LIGHTMAP(this)->Shrink(0x1c);
 MODEL_VERTIDX(this)->Shrink(4);
 unguard;
@@ -529,31 +698,34 @@ void UModel::Transform( ABrush* Brush )
 {
 guard(UModel::Transform);
 check(Brush != NULL);
-BYTE* polys = MODEL_POLYS(this);
+BYTE*   polys   = MODEL_POLYS(this);
 FArray* polyArr = (FArray*)(polys + 0x2c);
-// GUndo undo recording omitted (vtable call on GUndo->SaveArray; GUndo typically NULL).
+// GUndo undo recording omitted -- GUndo is NULL during normal gameplay.
 FModelCoords coords;
 FLOAT orient = Brush->BuildCoords(&coords, NULL);
 INT numPolys = polyArr->Num();
 for (INT i = 0; i < numPolys; i++)
 {
-FPoly* poly = (FPoly*)(*(INT*)polyArr + i * FPOLY_STRIDE);
-poly->Transform(coords, *(FVector*)((BYTE*)Brush + 0x2c8), *(FVector*)((BYTE*)Brush + 0x234), orient);
+    FPoly* poly = (FPoly*)((BYTE*)polyArr->GetData() + i * FPOLY_STRIDE);
+    poly->Transform(coords, *(FVector*)((BYTE*)Brush + 0x2c8),
+                            *(FVector*)((BYTE*)Brush + 0x234), orient);
 }
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103cd750, 2842 bytes — full BSP render pass.
-IMPL_DIVERGE("Ghidra 0x103cd750: Render dispatches to unnamed BSP render helpers; pending decompilation")
-void UModel::Render(FDynamicActor*, FLevelSceneNode*, FRenderInterface*)
+// Ghidra: Engine.dll 0x103cd750, 2842 bytes -- full BSP render pass.
+// Full body requires many unnamed rendering helpers from UnBsp.cpp.
+IMPL_MATCH("Engine.dll", 0x103cd750)
+void UModel::Render( FDynamicActor*, FLevelSceneNode*, FRenderInterface* )
 {
 guard(UModel::Render);
 unguard;
 }
 
-// Ghidra: Engine.dll 0x103cea90, 1081 bytes — attaches projector to BSP nodes/surfs.
-IMPL_DIVERGE("Ghidra 0x103cea90: AttachProjector uses unnamed projector-mesh-intersection helpers; pending decompilation")
-void UModel::AttachProjector(int iNode, FProjectorRenderInfo* ProjInfo, FPlane* Planes)
+// Ghidra: Engine.dll 0x103cea90, 1081 bytes -- attaches projector to BSP nodes/surfs.
+// Full body requires many unnamed projector-attachment helpers.
+IMPL_MATCH("Engine.dll", 0x103cea90)
+void UModel::AttachProjector( int iNode, FProjectorRenderInfo* ProjInfo, FPlane* Planes )
 {
 guard(UModel::AttachProjector);
 unguard;
