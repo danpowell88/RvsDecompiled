@@ -49,8 +49,13 @@ int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 	*(INT*)((BYTE*)this + 0) = appAtoi(*lines(0));
 	for (INT i = 0; i < *(INT*)((BYTE*)this + 0); i++)
 	{
-		((TArray<FString>*)((BYTE*)this + 8))->AddZeroed(1);
-		// TODO: FUN_1031efc0 -- deep copy FString array element
+		// Retail: FArray::Add(1, 0xc) then FString copy-ctor via placement-new.
+		// FUN_1031efc0 is an SEH element-destructor helper (destroys n FString objects
+		// before FArray::~FArray releases the buffer) — not a copy routine.
+		// We emulate the add+copy via the TArray<FString> API directly.
+		INT newIdx = ((FArray*)((BYTE*)this + 8))->Add(1, sizeof(FString));
+		FString* newSlot = (FString*)(*(INT*)((BYTE*)this + 8) + newIdx * sizeof(FString));
+		if (newSlot) new(newSlot) FString(lines(i + 1)); // copy bone-name line into slot
 	}
 	*(INT*)((BYTE*)this + 4) = appAtoi(*lines(*(INT*)((BYTE*)this + 0) + 4));
 	INT frameCount = *(INT*)((BYTE*)this + 4);
@@ -269,9 +274,11 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	}
 	if (foundIdx >= 0)
 	{
-		// Per-sequence footprint: just return stride size as approximation
-		// (retail calls FUN_10430990(0) which is not yet identified)
-		return 0x2C;  // placeholder — retail: calls FUN_10430990(0)
+		// Retail calls FUN_10430990(0) to obtain the per-sequence memory footprint.
+		// FUN_10430990 appears to be a virtual/static "sizeof this item" helper;
+		// its true identity is unresolved. We return the known FMeshAnimSeq stride.
+		// DIVERGENCE: FUN_10430990(0) not called — returns fixed stride 0x2C instead.
+		return 0x2C;
 	}
 	return 0;
 }
@@ -279,9 +286,10 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13fee0: UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version),
-	// then 3 TArray serializations at +0x30 (Notifys), +0x3C (Movements), +0x48 (Sequences).
-	// Divergence: TArray helpers (FUN_10437c90, FUN_1043fd50, FUN_1043f770) not called;
-	// mesh animation data is loaded directly from packages by the serialization system.
+	// then 3 TArray serializations at +0x30 (Notifys), +0x3C (Movements), +0x48 (Sequences)
+	// via helpers FUN_10437c90, FUN_1043fd50, FUN_1043f770 (complex TArray<UObject> serializers).
+	// DIVERGENCE: those TArray helpers are unresolved external calls; mesh animation data
+	// is loaded directly from packages by the UE2 serialization system.
 	UObject::Serialize(Ar);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
@@ -291,12 +299,14 @@ int UMeshAnimation::MemFootprint()
 	// Retail: 0x130ae0, ordinal 3775. Sums memory footprint across all entries in
 	// the Movements TArray at this+0x3C (stride unknown). Iterates count of that array
 	// and for each calls FUN_10430990(0) to get that entry's footprint. Returns total.
-	// Since FUN_10430990 is not yet identified, returns count * approximate size.
+	// FUN_10430990 is a virtual "sizeof this item" helper whose identity is unresolved.
+	// DIVERGENCE: FUN_10430990(0) not called — total is 0 (no per-item footprint known).
 	TArray<INT>& Movements = *(TArray<INT>*)((BYTE*)this + 0x3C);
 	INT total = 0;
 	for (INT i = 0; i < Movements.Num(); i++)
 	{
-		// retail: total += FUN_10430990(0);
+		// FUN_10430990(0) = virtual "size of one MotionChunk item" helper; unresolved.
+		// DIVERGENCE: item footprint not accumulated (FUN_10430990 identity unknown).
 		(void)i; // avoid unused warning
 	}
 	return total;
@@ -306,8 +316,9 @@ void UMeshAnimation::PostLoad()
 {
 	// Ghidra 0x130a30: UObject::PostLoad, then iterate Sequences (this+0x48) once per
 	// entry calling FUN_103ca8f0(GetOuter()) to preload linked animation packages.
-	// Divergence: FUN_103ca8f0 (lazy preload helper) not called; outer object loading
-	// is handled by the package system.
+	// FUN_103ca8f0 = lazy package preload helper — forces load of the outer package
+	// so any cross-referenced animation data is available before first use.
+	// DIVERGENCE: FUN_103ca8f0 not called; the UE2 linker handles cross-ref loading.
 	UObject::PostLoad();
 }
 
@@ -374,8 +385,10 @@ void UMeshAnimation::InitForDigestion()
 	guard(UMeshAnimation::InitForDigestion);
 	if (*(INT*)((BYTE*)this + 0x54) == 0)
 	{
+		// FUN_1032b9b0 = raw memory allocator for animation digest struct (0x2C bytes).
+		// Ghidra shows it returns appMalloc(0x2C, ...) equivalent; the 11-DWORD zero loop
+		// and the 1.0f seed follow in the caller, so our appMalloc+memzero is faithful.
 		void* p = appMalloc(0x2C, TEXT("Digest"));
-		// TODO: FUN_1032b9b0 — placement-new constructor called on allocated block (skipped)
 		*(void**)((BYTE*)this + 0x54) = p;
 		appMemzero(p, 0x2C); // loop: 11 DWORDs zeroed = 0x2C bytes
 		*(DWORD*)((BYTE*)p + 0x28) = 0x3f800000; // 1.0f
@@ -446,14 +459,18 @@ void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
 	ULodMesh::Serialize(Ar);
-	// TODO: FUN_10323030 (lazy-loader sub-archive for +0x14C) feeds ByteOrderSerialize(+0x160)
-	// TODO: FUN_103c7240, FUN_10438000, FUN_1043f770, FUN_1032d5f0 (TArray serializers at
-	//       +0xF4, +0x10C, +0x118, +0x100), FUN_103cd010, FUN_10474600 (+0x124, +0x130)
+	// FUN_10323030 = TArray<0x20-element>::Serialize (lazy-loader sub-archive for +0x14C)
+	// followed by ByteOrderSerialize(+0x160). FUN_103c7240/FUN_10438000/FUN_1043f770/
+	// FUN_1032d5f0 are TArray serializers for +0xF4, +0x10C, +0x118, +0x100 respectively;
+	// FUN_103cd010 and FUN_10474600 handle +0x124 and +0x130.
+	// DIVERGENCE: all TArray serializers omitted; vert mesh data loaded from package.
 	Ar.ByteOrderSerialize((BYTE*)this + 0x13C, 4);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x140, 4);
 	if (!Ar.IsPersistent())
 	{
-		// TODO: FUN_1043fc30 (FAnimMeshVertexStream TArray serializer) after each index buffer
+		// FUN_1043fc30 = FAnimMeshVertexStream TArray serializer; called between each of the
+		// four index-buffer ByteOrderSerialize calls below. Unresolved — omitted.
+		// DIVERGENCE: FAnimMeshVertexStream TArray streams not serialized here.
 		Ar.ByteOrderSerialize((BYTE*)this + 0x170, 4);
 		Ar.ByteOrderSerialize((BYTE*)this + 0x19C, 4);
 		Ar.ByteOrderSerialize((BYTE*)this + 0x1C8, 4);
@@ -471,8 +488,8 @@ void UVertMesh::PostLoad()
 {
 	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
 	// entry calling FUN_103ca8f0(GetOuter()) to preload linked animation packages.
-	// Divergence: FUN_103ca8f0 (lazy preload helper) not called; outer object loading
-	// is handled by the package system.
+	// FUN_103ca8f0 = lazy package preload helper (same as UMeshAnimation::PostLoad).
+	// DIVERGENCE: FUN_103ca8f0 not called; the UE2 linker handles cross-ref loading.
 	UObject::PostLoad();
 }
 
@@ -507,7 +524,20 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 
 	FArray* nameArr = (FArray*)((BYTE*)this + 0x2d0);
 	INT iVar1_before = nameArr->Num();
-	INT iVar2 = nameArr->Add(1, 4); // TODO: FUN_10437fb0 -- find/insert name
+	// FUN_10437fb0(&param_2) = TArray<FName>::AddUnique(param_2):
+	// searches the array for param_2, returns its index if found (no insertion),
+	// otherwise appends and returns the new index. Ghidra 0x37fb0 confirms this pattern:
+	// local_18=Num() before, iVar2=FUN_10437fb0(&name), iVar1=Num() after; if equal=found.
+	INT iVar2 = -1;
+	for (INT k = 0; k < iVar1_before; k++)
+	{
+		if (*(FName*)(*(INT*)nameArr + k * 4) == param_2) { iVar2 = k; break; }
+	}
+	if (iVar2 < 0)
+	{
+		iVar2 = nameArr->Add(1, 4);
+		*(FName*)(*(INT*)nameArr + iVar2 * 4) = param_2;
+	}
 	INT iVar1_after = nameArr->Num();
 
 	if (iVar1_before == iVar1_after)
@@ -535,7 +565,10 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
 	guard(USkeletalMesh::SetAttachmentLocation);
-	// TODO: get bone transform from SkeletalMeshInstance and apply to param_3
+	// Retail: reads bone transforms from SkeletalMeshInstance (via GetMeshInstance on param_2)
+	// and applies the world-space bone transform to param_3's Location/Rotation.
+	// DIVERGENCE: stub — requires a fully implemented USkeletalMeshInstance::GetTagCoords
+	// and bone-transform-to-world conversion, neither of which is complete.
 	return 0;
 	unguard;
 }
@@ -581,8 +614,8 @@ void USkeletalMesh::CalculateNormals(TArray<FVector>& Normals, int param2)
 	guard(USkeletalMesh::CalculateNormals);
 	// Ghidra 0x1441e0: complex per-triangle normal accumulation.
 	// Reads faces (this+0xAC, stride 8), verts (this+0x1B8), bone weights.
-	// TODO: full implementation — depends on multiple unidentified data arrays
-	//       and inline arithmetic not yet decompilable without stride constants.
+	// DIVERGENCE: full implementation deferred — requires stride constants and inline
+	// arithmetic from multiple unidentified TArray serializers to be accurate.
 	(void)Normals; (void)param2;
 	unguard;
 }
@@ -621,11 +654,11 @@ void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int
 	guard(USkeletalMesh::GenerateLodModel);
 	// Ghidra 0x142d40: validates param1 in [0,8], then calls many FUN_ helpers
 	// to compute LOD vertex/face streams from the full-resolution mesh.
-	// TODO: FUN_ helpers for progressive mesh reduction not yet identified.
+	// DIVERGENCE: progressive mesh reduction helpers (FUN_10437c20 and related) are
+	// unresolved external calls in Engine.dll; LOD generation is not implementable here.
 	if (param1 >= 0 && param1 < 9)
 	{
 		(void)param2; (void)param3; (void)param4; (void)param5;
-		// TODO: implement full LOD generation — requires unidentified FUN_ helpers
 	}
 	unguard;
 }
@@ -634,8 +667,9 @@ void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float para
 {
 	guard(USkeletalMesh::InsertLodModel);
 	// Ghidra 0x142970: inserts LOD model from param2 at slot param1 in LOD array.
-	// TODO: array element copy helpers (FUN_1043f4c0 and vtable stream-copy calls)
-	//       not yet identified — full copy of param2's stream data skipped.
+	// FUN_1043f4c0 = LOD entry constructor (initialises the 0x11C-byte slot);
+	// following vtable stream-copy calls deep-copy param2's vertex/index streams.
+	// DIVERGENCE: FUN_1043f4c0 and stream-copy helpers are unresolved — no data copy.
 	if (param1 >= 0 && param1 < 9)
 	{
 		FArray* lodArr = (FArray*)((BYTE*)this + 0x1AC);
@@ -645,11 +679,11 @@ void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float para
 			INT idx = lodArr->Add(1, 0x11C);
 			if (idx * 0x11C + *(INT*)lodArr != 0)
 			{
-				// TODO: FUN_1043f4c0 — LOD entry constructor (unidentified)
+				// FUN_1043f4c0 = LOD entry constructor; unresolved — slot left zeroed.
 			}
 		}
 		(void)param2; (void)param3; (void)param4;
-		// TODO: copy stream data from param2 into LOD slot at param1
+		// DIVERGENCE: stream data not copied from param2 (stream-copy helpers unresolved)
 	}
 	unguard;
 }
@@ -666,7 +700,9 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	guard(USkeletalMesh::R6LineCheck);
 	if ((param_6 & 0x10000) == 0 || (*(DWORD*)((BYTE*)param_2 + 0xa8) & 0x2000) == 0)
 		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
-	// TODO: skeletal hit detection via SkeletalMeshInstance bone pivots
+	// TODO: skeletal hit detection via bone pivots from USkeletalMeshInstance.
+	// Retail reads bone world positions from the mesh instance (via GetMeshInstance)
+	// and tests the ray against per-bone cylinders. Full impl requires GetBoneCylinder.
 	return 1;
 	unguard;
 }
@@ -684,7 +720,9 @@ int USkeletalMesh::LineCheck(FCheckResult& param_1, AActor* param_2, FVector par
 	guard(USkeletalMesh::LineCheck);
 	if (*(BYTE*)((BYTE*)param_2 + 0x2c) != 0x0e) // PHYS_KarmaRagDoll = 14
 		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
-	// TODO: Karma ragdoll line check
+	// TODO: Karma ragdoll line check.
+	// Retail delegates to Karma physics engine (MeXContactPoints) for per-body ray cast.
+	// DIVERGENCE: stub returns 1 (no hit) — Karma integration not implemented.
 	return 1;
 	unguard;
 }

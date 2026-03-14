@@ -13,6 +13,12 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
+// FUN_103c89f0 = StaticConstructObject wrapper for creating a UTexEnvMap.
+// FUN_10386790 = StaticConstructObject wrapper for creating a UShader.
+// Both take (class, outer, name_as_DWORD, flags) and return UObject*.
+// DIVERGENCE: these helpers call StaticConstructObject with additional initialisation
+// that is not safe to replicate without full CDO layout knowledge; returning NULL
+// ensures ConvertPolyFlagsToMaterial gracefully falls back to the existing object.
 static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
 static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
 
@@ -24,10 +30,12 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
-	// Ghidra 0xc97f0: static function — iterates GObjObjects via FUN_10318850
-	// (unknown object-iterator advance), clears UseFallback (bit 0) and Validated
-	// (bit 1) flags at UObject+0x34 for every loaded object.
-	// TODO: FUN_10318850 (GObj iterator advance) not yet identified — full loop skipped.
+	// Ghidra 0xc97f0: iterates GObjObjects via FUN_10318850 (GObj iterator advance),
+	// clears UseFallback (bit 0) and Validated (bit 1) flags at UObject+0x34 for every
+	// loaded object that has these bits set.
+	// FUN_10318850 = internal GObj.Objects iterator; advances through the global object
+	// table one entry at a time; its signature/calling convention is not yet resolved.
+	// DIVERGENCE: FUN_10318850 not called — full ClearFallbacks loop omitted.
 	unguard;
 }
 
@@ -171,7 +179,7 @@ int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
 	guard(UTexture::Compress);
 	// Retail: 0x16c600, 2427b. DXT compression pipeline — too complex to decompile.
-	// TODO: implement full per-format DXT compression.
+	// DIVERGENCE: full per-format DXT compression not implemented.
 	return 0;
 	unguard;
 }
@@ -220,8 +228,7 @@ void UTexture::CreateMips(int param1, int param2)
 	guard(UTexture::CreateMips);
 	// Ghidra 0x16bac0 (2741 bytes): complex per-format mip chain generation.
 	// Handles P8, RGBA8, RGBA16, DXT1/3/5 and box/kaiser filtering.
-	// TODO: full implementation — requires many inline color-conversion helpers
-	//       and format-dispatch blocks not yet decompilable.
+	// DIVERGENCE: format-dispatch + colour-conversion helpers not yet decompiled.
 	(void)param1; (void)param2;
 	unguard;
 }
@@ -229,7 +236,7 @@ int UTexture::Decompress(ETextureFormat)
 {
 	guard(UTexture::Decompress);
 	// Retail: 0x16b0c0, ~250b. DXT1 block decompression — too complex to decompile.
-	// TODO: implement DXT1→RGBA8 conversion.
+	// DIVERGENCE: DXT1→RGBA8 conversion not implemented.
 	return 0;
 	unguard;
 }
@@ -435,7 +442,9 @@ void UTexture::Init(int InUSize, int InVSize)
 	*(INT*)((BYTE*)this + 0x64) = InVSize; // VSize
 	*(BYTE*)((BYTE*)this + 0x5B) = (BYTE)appCeilLogTwo(InUSize);  // UBits
 	*(BYTE*)((BYTE*)this + 0x5C) = (BYTE)appCeilLogTwo(*(DWORD*)((BYTE*)this + 0x64)); // VBits
-	// TODO: FUN_1032e620(0) — unknown flush/mark-dirty helper, skipped
+	// FUN_1032e620(0) = texture revision/dirty helper: increments a global texture
+	// revision counter or marks this texture as needing a cache flush.
+	// DIVERGENCE: FUN_1032e620 not called; GPU cache invalidation not triggered here.
 	FArray* mipArr = (FArray*)((BYTE*)this + 0xBC);
 	BYTE fmt = *(BYTE*)((BYTE*)this + 0x58); // Format
 	INT idx = mipArr->Add(1, 0x28);
@@ -707,8 +716,9 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 UPalette * UPalette::ReplaceWithExisting()
 {
 	// Retail: 0x16aea0, ~200b with SEH. Iterates GObjObjects to find a matching
-	// palette and returns it, or returns 'this' if none found.
-	// TODO: implement — requires GObj iterator helper FUN_10318850.
+	// palette (same size + same color data) and returns it, or returns 'this' if none.
+	// FUN_10318850 = internal GObj iterator; identity unresolved.
+	// DIVERGENCE: FUN_10318850 not called — returns NULL (caller should treat as "no match").
 	return NULL;
 }
 
@@ -840,7 +850,7 @@ void UShadowBitmapMaterial::Destroy()
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
 	// Retail: 0x12e3e0, 2594b. Shadow map rendering pipeline — too complex to decompile.
-	// TODO: implement shadow projection and render-to-texture.
+	// DIVERGENCE: shadow projection and render-to-texture not implemented.
 	return NULL;
 }
 
@@ -961,7 +971,7 @@ int UTexModifier::GetValidated()
 FMatrix * UTexOscillator::GetMatrix(float)
 {
 	guard(UTexOscillator::GetMatrix);
-	// Retail: 0x4720 shared null-stub. TODO: oscillating UV matrix.
+	// Retail: 0x4720 shared null-stub. DIVERGENCE: oscillating UV matrix not implemented.
 	return NULL;
 	unguard;
 }
@@ -971,7 +981,7 @@ FMatrix * UTexOscillator::GetMatrix(float)
 FMatrix * UTexPanner::GetMatrix(float)
 {
 	guard(UTexPanner::GetMatrix);
-	// Retail: 0x4720 shared null-stub. TODO: panning UV matrix.
+	// Retail: 0x4720 shared null-stub. DIVERGENCE: panning UV matrix not implemented.
 	return NULL;
 	unguard;
 }
@@ -994,7 +1004,7 @@ void UTexRotator::PostLoad()
 FMatrix * UTexRotator::GetMatrix(float)
 {
 	guard(UTexRotator::GetMatrix);
-	// Retail: 0x4720 shared null-stub. TODO: rotating UV matrix.
+	// Retail: 0x4720 shared null-stub. DIVERGENCE: rotating UV matrix not implemented.
 	return NULL;
 	unguard;
 }
@@ -1004,7 +1014,7 @@ FMatrix * UTexRotator::GetMatrix(float)
 FMatrix * UTexScaler::GetMatrix(float)
 {
 	guard(UTexScaler::GetMatrix);
-	// Retail: 0x4720 shared null-stub. TODO: scaling UV matrix.
+	// Retail: 0x4720 shared null-stub. DIVERGENCE: scaling UV matrix not implemented.
 	return NULL;
 	unguard;
 }

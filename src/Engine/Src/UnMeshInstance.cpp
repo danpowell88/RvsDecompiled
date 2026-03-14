@@ -444,7 +444,11 @@ void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
 	if (Channel >= arr->Num()) return;
 
-	// Find the anim object that contains this sequence
+	// Find the anim object that contains this sequence.
+	// FUN_10431D00 = anim-slot lookup in AnimObjects TArray. Ghidra: searches this+0xAC
+	// (stride 0x18) for an AnimObject containing SeqName, returns slot index or -1.
+	// DIVERGENCE: we use vtable[0x12C/4] (RefreshAnimObjects / FindAnimObject) as an
+	// approximation; the returned value may differ from the exact slot index.
 	typedef void* (__thiscall *FindAnimObjFn)(USkeletalMeshInstance*, FName);
 	FindAnimObjFn FindAnimObj = *(FindAnimObjFn*)((*(BYTE**)this) + 0x12C);
 	void* AnimObj = FindAnimObj(this, SeqName);
@@ -452,11 +456,15 @@ void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 	INT SlotIdx = -1;
 	if (AnimObj)
 	{
-		// Find slot index of this anim in AnimObjects array
-		typedef INT (*FindSlotFn)(FArray*, void*);
-		FindSlotFn FindSlot = (FindSlotFn)0x10431D00;
+		// FUN_10431D00(AnimArr, AnimObj) = linear search of AnimObjects for AnimObj pointer,
+		// returns its index. Ghidra 0x31d00: iterate stride-0x18 array, compare ptr at slot+0.
 		FArray* AnimArr = (FArray*)((BYTE*)this + 0xAC);
-		SlotIdx = FindSlot(AnimArr, AnimObj);
+		INT ACount = AnimArr->Num();
+		for (INT k = 0; k < ACount; k++)
+		{
+			BYTE* Slot = (BYTE*)(*(BYTE**)AnimArr) + k * 0x18;
+			if (*(void**)Slot == AnimObj) { SlotIdx = k; break; }
+		}
 	}
 
 	// Get the sequence object (vtbl[0xB0/4] = GetAnimIndexed or equivalent)
@@ -1710,7 +1718,9 @@ void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 {
 	guard(USkeletalMeshInstance::MeshSkinVertsCallback);
 	// Retail 0x13da50 (~36b): calls vtable[0x8c/4] with skin params, then FUN_10438ce0.
-	// Divergence: stub pending FUN_10438ce0 identification.
+	// FUN_10438ce0 = skinned-mesh vertex transform helper: takes (vertIdx, this, vertBuffer,
+	// stride=0x20, outArray) and fills a local vertex array with bone-weighted positions.
+	// DIVERGENCE: FUN_10438ce0 is a complex GPU-skinning transform; identity unresolved.
 	unguard;
 }
 
@@ -2032,8 +2042,10 @@ int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate,
 
 			INT   slotOffset  = Channel * 0x74;
 			INT   channelData = *(INT*)((BYTE*)this + 0x10C);
-			// TODO: FUN_10431d00(this+0xAC, animObj_EBX) — anim-slot lookup; omitted (unidentified).
-			// Retail stores the slot index at channelData+slotOffset+4.
+			// FUN_10431D00(this+0xAC, animObj) = anim-slot index lookup (same as SetAnimSequence).
+			// DIVERGENCE: slot index at channelData+slotOffset+4 is not updated here
+			// because the anim object from animPkg->GetAnimIndexed is not available at
+			// this call site without further vtable plumbing.
 			*(FLOAT*)(channelData + slotOffset + 0x10) = Frame;
 			*(FLOAT*)(channelData + slotOffset + 8)    = Rate;
 
@@ -2376,7 +2388,8 @@ void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(USkeletalMeshInstance::GetMeshVerts);
 	// Retail 0x13d8e0: extracts transformed vertex positions via FUN_10438ce0.
-	// Divergence: stub pending FUN_10438ce0 identification.
+	// FUN_10438ce0 = skinned-mesh vertex transform helper (see MeshSkinVertsCallback).
+	// DIVERGENCE: FUN_10438ce0 identity unresolved; no vertex output produced.
 	unguard;
 }
 
@@ -2695,7 +2708,8 @@ void UVertMeshInstance::Serialize(FArchive &)
 	guard(UVertMeshInstance::Serialize);
 	// Retail 0x174730: calls ULodMeshInstance::Serialize then serialises per-frame
 	// animation state (TArrays at +0x80, +0x8c) for non-persistent archives.
-	// Divergence: stub pending FUN_10321a80 identification.
+	// FUN_10321a80 = TArray<FVertMeshFrame>::Serialize (variable-stride per-frame data).
+	// DIVERGENCE: FUN_10321a80 identity unresolved; anim state not serialized here.
 	unguard;
 }
 
@@ -2842,8 +2856,15 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 		if (*(FLOAT*)((BYTE*)this + 0xCC) < 0.0f)
 		{
 			FLOAT speed = ((FVector*)(owner + 0x24C))->Size();
-			// FUN_103808e0 = TweenRate helper (TODO: unresolved)
-			*(FLOAT*)((BYTE*)this + 200) = 0.0f; // TODO: FUN_103808e0(rate*0.5, speed*cc*-1)
+			// FUN_103808e0(rate*0.5, speed*cc*-1.0) = TweenRate safe-divide helper.
+			// Ghidra: result stored as tween frame-rate at this+0xC8(=200).
+			// Approximation: (rate*0.5) / (speed*|cc|); clamped to avoid div-by-zero.
+			// DIVERGENCE: FUN_103808e0 body unresolved — approximated as safe-divide.
+			{
+				FLOAT a = *(FLOAT*)((BYTE*)this + 0xBC) * 0.5f;
+				FLOAT b = speed * (*(FLOAT*)((BYTE*)this + 0xCC)) * -1.0f;
+				*(FLOAT*)((BYTE*)this + 200) = (b > 0.0f) ? (a / b) : 0.0f;
+			}
 			goto LAB_VertPlayAnim_End;
 		}
 		*(FLOAT*)((BYTE*)this + 200) = 1.0f / (fc * 0.025f);
@@ -2911,8 +2932,13 @@ int UVertMeshInstance::PlayAnim(INT Channel, FName SeqName, FLOAT Rate, FLOAT Tw
 		if (*(FLOAT*)((BYTE*)this + 0xCC) < 0.0f)
 		{
 			FLOAT speed = ((FVector*)(owner + 0x24C))->Size();
-			// TODO: FUN_103808e0 TweenRate helper
-			*(FLOAT*)((BYTE*)this + 200) = 0.0f;
+			// FUN_103808e0(rate*0.5, speed*cc*-1.0) — see non-looping branch above.
+			// DIVERGENCE: approximated as safe-divide.
+			{
+				FLOAT a = ifc * 0.5f;
+				FLOAT b = speed * (*(FLOAT*)((BYTE*)this + 0xCC)) * -1.0f;
+				*(FLOAT*)((BYTE*)this + 200) = (b > 0.0f) ? (a / b) : 0.0f;
+			}
 			goto LAB_VertPlayAnim_End;
 		}
 		*(FLOAT*)((BYTE*)this + 200) = 1.0f / (fc * 0.025f);

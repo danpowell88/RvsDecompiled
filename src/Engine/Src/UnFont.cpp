@@ -68,12 +68,17 @@ void UFont::Serialize(FArchive& Ar)
 	Super::Serialize(Ar);
 	UBOOL SavedLazyLoad = GLazyLoad;
 	GLazyLoad = 1; // Ghidra: force eager load during font serialize
-	// TODO: FUN_1039c090(Ar, this+0x30) — serialize Pages TArray (operator<< for font pages)
+	// FUN_1039c090(Ar, this+0x30) = TArray<FFontPage>::Serialize — serializes the Pages array
+	// and returns the FArchive* (same Ar, or a sub-archive for lazy-loaded textures).
+	// The retail ByteOrderSerialize below is called on the RETURNED FArchive*, not Ar directly.
+	// DIVERGENCE: FUN_1039c090 not called; Pages TArray not serialized here.
+	// ByteOrderSerialize(CharactersPerPage) intentionally called on Ar directly as fallback.
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2c, 4); // CharactersPerPage at +0x2c
 	check(!(*(DWORD*)((BYTE*)this+0x2c) & (*(DWORD*)((BYTE*)this+0x2c)-1))); // must be power of 2
 	if (!GLazyLoad)
 	{
-		// TODO: iterate Pages TArray at +0x30, trigger texture loads for each page
+		// DIVERGENCE: texture preload loop omitted (triggers vtable calls on each page's
+		// texture objects; requires fully serialized Pages TArray above).
 	}
 	GLazyLoad = SavedLazyLoad;
 	if (Ar.Ver() < 0x45)
@@ -81,10 +86,14 @@ void UFont::Serialize(FArchive& Ar)
 		*(DWORD*)((BYTE*)this + 0x50) = 0; // zero DropShadowX for pre-v69 data
 		return;
 	}
-	// TODO: FUN_1039be10(Ar, this+0x3c) — serialize additional font fields at +0x3c
+	// FUN_1039be10(Ar, this+0x3c) = serialize additional font fields at +0x3c
+	// (likely TArray<FFontInfo> or per-font-page UV/glyph metadata).
+	// DIVERGENCE: FUN_1039be10 not called; those fields remain default-initialized.
 	if (Ar.IsLoading())
 	{
-		// TODO: FUN_1031f260() — post-load font fixup
+		// FUN_1031f260() = post-load font fixup: rebuilds the character-lookup table
+		// (glyph hash / remap array) from the deserialized Pages data.
+		// DIVERGENCE: FUN_1031f260 not called; lookup table not rebuilt.
 	}
 	Ar.ByteOrderSerialize((BYTE*)this + 0x50, 4); // DropShadowX at +0x50
 	unguard;
