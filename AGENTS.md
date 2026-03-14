@@ -55,7 +55,7 @@ giving the wrong result. Always sort numerically with the expression above.
 - The filename prefix **must** match the `slug:` NNN and the `title: "NNN."` prefix exactly.
 - After renaming a file, also update the `slug:`, `title:`, and remove any body text referencing the old number.
 
-**Current max post (as of last update): 194**
+**Current max post (as of last update): 195**
 
 ## Ground Truth Priority
 
