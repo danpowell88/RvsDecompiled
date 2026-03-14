@@ -251,7 +251,7 @@ IMPLEMENT_CLASS(AR6WallHit);
 
 /*-- AActor Karma physics functions (Karma not implemented — stubs) -----*/
 
-IMPL_DIVERGE("Ghidra 0x1042c7d0: retail calls GetServerOptionsRefreshed on GameInfo; stat system not implemented")
+IMPL_DIVERGE("Ghidra 0x1042c7d0 (222 bytes): calls UR6ModMgr::eventGetServerIni() then UObject::LoadConfig; GModMgr dependency not available")
 void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptionsRefreshed);
@@ -613,7 +613,7 @@ IMPLEMENT_FUNCTION( AVolume, INDEX_NONE, execEncompasses );
 
 /*-- AZoneInfo ---------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1042b1e0: retail uses raw offsets for XLevel/Actors and zone checks differ")
+IMPL_DIVERGE("Ghidra 0x1042b1e0 (456 bytes): current impl follows UT2k4 ZoneActors pattern; retail uses raw XLevel/Actors ptr offsets for the iterator")
 void AZoneInfo::execZoneActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AZoneInfo::execZoneActors);
@@ -643,7 +643,7 @@ IMPLEMENT_FUNCTION( AZoneInfo, 308, execZoneActors );
 
 /*-- AWarpZoneInfo -----------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x10424c80: retail applies WarpZone coordinate transform to Loc/Vel/R")
+IMPL_DIVERGE("Ghidra 0x10424c80 (516 bytes): complex FCoords/FRotator warp coordinate transform; needs FCoords::operator%() and WarpZoneInfo matrices")
 void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 {
 	guard(AWarpZoneInfo::execWarp);
@@ -656,7 +656,7 @@ void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AWarpZoneInfo, 314, execWarp );
 
-IMPL_DIVERGE("Ghidra 0x10424e90: retail applies inverse WarpZone coordinate transform to Loc/Vel/R")
+IMPL_DIVERGE("Ghidra 0x10424e90 (477 bytes): inverse FCoords coordinate transform; paired with execWarp, same complexity")
 void AWarpZoneInfo::execUnWarp( FFrame& Stack, RESULT_DECL )
 {
 	guard(AWarpZoneInfo::execUnWarp);
@@ -726,7 +726,7 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_DIVERGE("Ghidra 0x1041f610: retail logs and calls scene teardown; scene manager not implemented")
+IMPL_DIVERGE("Ghidra 0x1041f610 (137 bytes): GLog->Logf() + unnamed scene teardown function (FUN_103db080); scene manager not implemented")
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
@@ -735,7 +735,7 @@ void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, 2909, execSceneDestroyed );
 
-IMPL_DIVERGE("Ghidra 0x1041d870: retail accumulates scene time into this+0x3d0; scene manager not implemented")
+IMPL_DIVERGE("Ghidra 0x1041d870 (118 bytes): this[0x3d0] += *(float*)(*(int*)(this+0x3d8)+0x34); raw-offset time accumulation needs private ASceneManager fields")
 void ASceneManager::execTerminateAIAction( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execTerminateAIAction);
@@ -755,7 +755,7 @@ void AStatLog::execBatchLocal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execBatchLocal );
 
-IMPL_DIVERGE("Ghidra 0x10317930: retail calls ShellExecute or OS URL handler; stat system not implemented")
+IMPL_DIVERGE("Ghidra 0x10317930 (238 bytes): GFileManager->vtable[0xD]()+FString concat+appLaunchURL(); GFileManager vtable-slot dependency")
 void AStatLog::execBrowseRelativeLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execBrowseRelativeLocalURL);
@@ -802,17 +802,17 @@ void AStatLog::execGetGMTRef( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetGMTRef );
 
-IMPL_DIVERGE("Ghidra 0x10317c30: retail returns map filename from XLevel URL; stat system not implemented")
+IMPL_MATCH("Engine.dll", 0x10317c30)
 void AStatLog::execGetMapFileName( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetMapFileName);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	*(FString*)Result = XLevel->URL.Map;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetMapFileName );
 
-IMPL_DIVERGE("Ghidra 0x10317d10: retail computes player checksum; stat system not implemented")
+IMPL_DIVERGE("Ghidra 0x10317d10 (561 bytes): FMD5Context + appMD5Init/Update/Final over player name and properties; stat system not implemented")
 void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetPlayerChecksum);
@@ -823,7 +823,7 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_DIVERGE("Ghidra 0x1032f0c0: retail performs stat system initialization checks; not implemented")
+IMPL_DIVERGE("Ghidra 0x1032f0c0 (1867 bytes): very large; multiple FMD5Context computations + UClass lookup + FString comparisons; full stat system required")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);
@@ -835,7 +835,7 @@ IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execInitialCheck );
 
 /*-- AStatLogFile ------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103180d0: retail closes log file handle; file logging not implemented")
+IMPL_DIVERGE("Ghidra 0x103180d0 (193 bytes): GMalloc->Free(this+0x394) releases FMD5Context; needs FMD5Context* member at +0x394")
 void AStatLogFile::execCloseLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execCloseLog);
@@ -844,7 +844,7 @@ void AStatLogFile::execCloseLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execCloseLog );
 
-IMPL_DIVERGE("Ghidra 0x10318500: retail flushes file handle at this+0x404; file logging not implemented")
+IMPL_DIVERGE("Ghidra 0x10318500 (114 bytes): this[0x404]->vtable[0x13]() Flush(); needs FArchive* member at +0x404")
 void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileFlush);
@@ -853,7 +853,7 @@ void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileFlush );
 
-IMPL_DIVERGE("Ghidra 0x103185e0: retail writes to log file; file logging not implemented")
+IMPL_DIVERGE("Ghidra 0x103185e0 (435 bytes): FString formatting + appMD5Update + write to FArchive* at this+0x404; file logging not implemented")
 void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileLog);
@@ -863,7 +863,7 @@ void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileLog );
 
-IMPL_DIVERGE("Ghidra 0x10318320: retail computes file checksum; file logging not implemented")
+IMPL_DIVERGE("Ghidra 0x10318320 (380 bytes): FMD5Final from FMD5Context at this+0x394 formatted as hex digest string")
 void AStatLogFile::execGetChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execGetChecksum);
@@ -873,7 +873,7 @@ void AStatLogFile::execGetChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execGetChecksum );
 
-IMPL_DIVERGE("Ghidra 0x10317fa0: retail opens log file for writing; file logging not implemented")
+IMPL_DIVERGE("Ghidra 0x10317fa0 (203 bytes): GFileManager creates FArchive* at this+0x404; allocs FMD5Context at this+0x394 when bUseMD5; file logging not implemented")
 void AStatLogFile::execOpenLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execOpenLog);
@@ -882,7 +882,7 @@ void AStatLogFile::execOpenLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execOpenLog );
 
-IMPL_DIVERGE("Ghidra 0x103181f0: retail writes watermark string to log file; file logging not implemented")
+IMPL_DIVERGE("Ghidra 0x103181f0 (207 bytes): appMD5Update(this+0x394, Item+newline, len); needs FMD5Context* at +0x394")
 void AStatLogFile::execWatermark( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execWatermark);
@@ -919,7 +919,7 @@ void AR6DecalGroup::execActivateGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2904, execActivateGroup );
 
-IMPL_DIVERGE("Ghidra 0x10477530: retail AddDecal(vec,rot,tex,type,4xfloat)->INT; decal system not implemented")
+IMPL_DIVERGE("Ghidra 0x10477530 (386 bytes): calls AR6DecalGroup::AddDecal() C++ member(vec,rot,tex,type,4xfloat,int); decal system not implemented")
 void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execAddDecal);
@@ -937,7 +937,7 @@ void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2902, execAddDecal );
 
-IMPL_DIVERGE("Ghidra 0x10476d70: retail clears active flag at this+0x3a0; decal system not implemented")
+IMPL_DIVERGE("Ghidra 0x10476d70 (112 bytes): *(uint*)(this+0x3a0) &= ~1; clears bActive bitfield; needs AR6DecalGroup BITFIELD member layout")
 void AR6DecalGroup::execDeActivateGroup( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execDeActivateGroup);
@@ -955,7 +955,7 @@ void AR6DecalGroup::execKillDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2903, execKillDecal );
 
-IMPL_DIVERGE("Ghidra 0x10477a90: retail AddDecal(vec,rot,tex,byte,type,4xfloat)->INT; decal system not implemented")
+IMPL_DIVERGE("Ghidra 0x10477a90 (420 bytes): calls AR6DecalManager::AddDecal() C++ member(vec,rot,tex,byte,type,4xfloat,int); decal system not implemented")
 void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalManager::execAddDecal);
@@ -985,19 +985,19 @@ IMPLEMENT_FUNCTION( AR6DecalManager, 2901, execKillDecal );
 
 /*-- AR6eviLTesting ----------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x10478e30: retail calls eviLTestATS(this); test runner not implemented")
+IMPL_MATCH("Engine.dll", 0x10478e30)
 void AR6eviLTesting::execNativeRunAllTests( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6eviLTesting::execNativeRunAllTests);
 	P_FINISH;
-	debugf( TEXT("NativeRunAllTests: no tests implemented") );
+	eviLTestATS();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6eviLTesting, 1356, execNativeRunAllTests );
 
 /*-- UInteraction ------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103b5fd0: retail dispatches console command through interaction chain")
+IMPL_DIVERGE("Ghidra 0x103b5fd0 (264 bytes): dispatches via ViewportOwner->Master->ProcessConsoleCommand or Viewport->Actor; complex interaction chain")
 void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execConsoleCommand);
@@ -1008,7 +1008,7 @@ void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execConsoleCommand );
 
-IMPL_DIVERGE("Ghidra 0x103b5ee0: retail calls virtual Initialize() then fires Initialized event")
+IMPL_DIVERGE("Ghidra 0x103b5ee0 (132 bytes): calls vtable[0x3c/4=15] (Initialize native) + FindFunctionChecked('Initialized') + ProcessEvent; vtable slot unknown without full layout")
 void UInteraction::execInitialize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execInitialize);
