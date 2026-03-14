@@ -38,13 +38,16 @@ if(SOURCE_COUNT GREATER 0)
 
     # --- DareAudio.dll (retail, links ret backend) ---
     dareaudio_target(DareAudio SNDDSound3DDLL_ret)
+    add_impl_verification(DareAudio ${DAREAUDIO_SRC_DIR}/Src)
 
     # --- DareAudioScript.dll (scripted/editor variant, links VSR backend) ---
     dareaudio_target(DareAudioScript SNDDSound3DDLL_VSR)
+    add_impl_verification(DareAudioScript ${DAREAUDIO_SRC_DIR}/Src)
 
     # --- DareAudioRelease.dll (dead variant — VBD backend not in retail) ---
     # Links ret as a stand-in since VBD doesn't exist.
     dareaudio_target(DareAudioRelease SNDDSound3DDLL_ret)
+    add_impl_verification(DareAudioRelease ${DAREAUDIO_SRC_DIR}/Src)
 else()
     message(STATUS "DareAudio: no source files yet — skipping")
 endif()

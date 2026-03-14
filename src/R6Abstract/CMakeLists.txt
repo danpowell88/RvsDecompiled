@@ -18,6 +18,7 @@ if(SOURCE_COUNT GREATER 0)
         ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     )
     target_link_libraries(R6Abstract Core_Dep Engine_Dep)
+    add_impl_verification(R6Abstract ${R6ABSTRACT_SRC_DIR}/Src)
 else()
     message(STATUS "R6Abstract: no source files yet — skipping")
 endif()

@@ -25,6 +25,7 @@ if(SOURCE_COUNT GREATER 0)
         Core_Dep Engine_Dep
         user32 gdi32 comctl32 comdlg32 shell32 advapi32
     )
+    add_impl_verification(Window ${WINDOW_SRC_DIR}/Src)
 else()
     message(STATUS "Window: no source files yet — skipping")
 endif()

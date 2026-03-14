@@ -16,6 +16,12 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(RavenShield LANGUAGES CXX)
 
+# --- IMPL_xxx attribution system ---
+# OFF (default): issues are warnings, build continues (use during annotation pass)
+# ON: build fails if any function lacks IMPL_xxx or still uses IMPL_TODO
+option(IMPL_STRICT "Fail build on missing/TODO IMPL_xxx annotations" OFF)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ImplVerification.cmake)
+
 # --- C++ Standard ---
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 98)
@@ -71,11 +77,15 @@ add_definitions(-DDO_GUARD=0 -D_UNICODE -DUNICODE)
 
 # --- Global include directories ---
 # Available to all modules: core Unreal headers + R6 SDK headers
+# NOTE: src/Core/Inc is included globally so ImplSource.h (and other
+# hand-crafted shim headers) are available to all modules without duplication.
+# It is listed AFTER the SDK paths so per-module BEFORE overrides still win.
 include_directories(
     ${CSDK_CORE_INC}
     ${UT99_CORE_INC}
     ${UT99_ENGINE_INC}
     ${CSDK_INC}
+    ${PROJECT_SOURCE_DIR}/src/Core/Inc
 )
 
 # =============================================================================

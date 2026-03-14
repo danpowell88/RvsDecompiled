@@ -27,6 +27,7 @@ if(SOURCE_COUNT GREATER 0)
     # Allow duplicate symbol definitions from compiler-generated virtual destructors
     # across multiple translation units that include the same class definitions.
     target_link_options(Engine PRIVATE /FORCE:MULTIPLE)
+    add_impl_verification(Engine ${ENGINE_SRC_DIR}/Src)
 else()
     message(STATUS "Engine: no source files yet — skipping")
 endif()

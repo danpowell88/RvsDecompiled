@@ -28,6 +28,7 @@ if(SOURCE_COUNT GREATER 0)
         ${R6WEAPONS_BUILT_LIB}
     )
     add_dependencies(R6Game R6Abstract R6Engine R6Weapons)
+    add_impl_verification(R6Game ${R6GAME_SRC_DIR}/Src)
 else()
     message(STATUS "R6Game: no source files yet — skipping")
 endif()

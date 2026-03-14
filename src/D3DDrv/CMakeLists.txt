@@ -26,6 +26,7 @@ if(SOURCE_COUNT GREATER 0)
         ${DXSDK_LIB}/dxguid.lib
         ddraw.lib
     )
+    add_impl_verification(D3DDrv ${D3DDRV_SRC_DIR}/Src)
 else()
     message(STATUS "D3DDrv: no source files yet — skipping")
 endif()

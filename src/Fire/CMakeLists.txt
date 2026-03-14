@@ -21,6 +21,7 @@ if(SOURCE_COUNT GREATER 0)
         ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     )
     target_link_libraries(Fire Core_Dep Engine_Dep)
+    add_impl_verification(Fire ${FIRE_SRC_DIR}/Src)
 else()
     message(STATUS "Fire: no source files yet — skipping")
 endif()

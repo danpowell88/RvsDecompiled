@@ -50,6 +50,7 @@
 // Additional headers NOT included by Core.h.
 #include "UnLinker.h"
 #include "UnCoreNative.h"
+#include "ImplSource.h"
 
 // SendMessageX / SendMessageLX — Unicode wrappers used by FFeedbackContextWindows.h.
 // Normally defined in Window.h (UT99 Window module), needed here for Core builds.
@@ -74,6 +75,10 @@
 #include "FFileManagerWindows.h"
 #include "FConfigCacheIni.h"
 #include "FCodec.h"
+
+// Function source attribution macros (IMPL_GHIDRA, IMPL_TODO, etc.)
+// Zero compile-time overhead — all macros expand to nothing.
+#include "ImplSource.h"
 
 #pragma pack(pop)
 

@@ -31,6 +31,7 @@ if(SOURCE_COUNT GREATER 0)
     # dinput8.lib (legacy DX SDK) is not SAFESEH-compatible; disable the check for this target.
     target_link_options(WinDrv PRIVATE /SAFESEH:NO)
     add_dependencies(WinDrv Window)
+    add_impl_verification(WinDrv ${WINDRV_SRC_DIR}/Src)
 else()
     message(STATUS "WinDrv: no source files yet — skipping")
 endif()

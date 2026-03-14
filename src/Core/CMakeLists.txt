@@ -29,6 +29,7 @@ if(SOURCE_COUNT GREATER 0)
     target_link_libraries(Core
         kernel32 user32 advapi32
     )
+    add_impl_verification(Core ${CORE_SRC_DIR}/Src)
 else()
     message(STATUS "Core: no source files yet — skipping")
 endif()

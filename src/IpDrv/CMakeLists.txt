@@ -19,6 +19,7 @@ if(SOURCE_COUNT GREATER 0)
         ${PROJECT_SOURCE_DIR}/src/Engine/Inc
     )
     target_link_libraries(IpDrv Core_Dep Engine_Dep ws2_32)
+    add_impl_verification(IpDrv ${IPDRV_SRC_DIR}/Src)
 else()
     message(STATUS "IpDrv: no source files yet — skipping")
 endif()

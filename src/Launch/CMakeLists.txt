@@ -47,6 +47,7 @@ if(SOURCE_COUNT GREATER 0)
         comctl32 comdlg32 shell32
     )
     add_dependencies(RavenShield Window)
+    add_impl_verification(RavenShield ${LAUNCH_SRC_DIR}/Src)
 else()
     message(STATUS "RavenShield (launch): no source files yet — skipping")
 endif()
