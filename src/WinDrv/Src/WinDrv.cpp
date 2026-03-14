@@ -47,7 +47,7 @@ WWindowsViewportWindow::WWindowsViewportWindow(const WWindowsViewportWindow& Oth
 {
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("found at 0x11102420; calls WWindow::operator= which requires WWindow inheritance absent from reconstructed headers")
 WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewportWindow& Other)
 {
 	if( this != &Other )
@@ -104,7 +104,7 @@ UWindowsClient::UWindowsClient(const UWindowsClient& Other)
 	StartupFullscreen = Other.StartupFullscreen;
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("found at 0x11101ea0; copies FNotifyHook (offset 0x98) and fields 0x9c..0xce not mapped in local headers")
 UWindowsClient& UWindowsClient::operator=(const UWindowsClient& Other)
 {
 	if (this != &Other)
@@ -298,7 +298,7 @@ DIDEVCAPS             UWindowsViewport::JoystickCaps  = {};
 	Exported at ordinal @31: ?DirectInputError@@YAXVFString@@JH@Z
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("found at 0x11101c80; implementation uses internal exception-handling not replicated here")
 WINDRV_API void DirectInputError(FString Msg, LONG hResult, INT Fatal)
 {
 	debugf(TEXT("DirectInput error: %s (hr=0x%08X)"), *Msg, (DWORD)hResult);
@@ -321,7 +321,7 @@ UWindowsViewport::UWindowsViewport(const UWindowsViewport& Other)
 {
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("found at 0x11102130; copies 24 raw fields offsets 0x204..0x264 not mapped in local headers")
 UWindowsViewport& UWindowsViewport::operator=(const UWindowsViewport& Other)
 {
 	if (this != &Other)
@@ -657,14 +657,14 @@ void UWindowsViewport::TryRenderDevice(const TCHAR* ClassName, INT NewX, INT New
 	unguard;
 }
 
-IMPL_DIVERGE("DIVERGENCE: HoldCount accessed via raw offset 0x214")
+IMPL_MATCH("WinDrv.dll", 0x11102010)
 void UWindowsViewport::Hold(INT Horiz)
 {
-	guard(UWindowsViewport::Hold);
-	// DIVERGENCE: HoldCount is at raw offset 0x214 in UViewport; not exposed in local headers.
-	INT& HoldCount = *(INT*)((BYTE*)this + 0x214);
-	if (Horiz) HoldCount++; else HoldCount--;
-	unguard;
+	// Ghidra: no guard/unguard (34-byte function, no SEH frame). HoldCount at raw offset 0x214.
+	if (Horiz)
+		*(INT*)((BYTE*)this + 0x214) += 1;
+	else
+		*(INT*)((BYTE*)this + 0x214) -= 1;
 }
 
 IMPL_MATCH("WinDrv.dll", 0x11102b60)

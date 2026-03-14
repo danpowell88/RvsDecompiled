@@ -867,7 +867,7 @@ void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 	UpdatePawnTrackActor(1);
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10001750 (Karma physics helper)")
+IMPL_DIVERGE("0x10026140: FUN_10001750 initializes FCheckResult; loop uses dual line-check per direction with sizes from this+0x118; FocalPoint taken directly from Controller+0x480 not FocusActor")
 INT AR6Pawn::PickActorAdjust(AActor* param_1)
 {
 	guard(AR6Pawn::PickActorAdjust);
@@ -1419,7 +1419,7 @@ void AR6Pawn::UnCrawl(INT param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blockers: FUN_10016b00, FUN_1003e330, FUN_1003e3d0 (R6Hostage/pawn lookup helpers)")
+IMPL_DIVERGE("0x10028920: large function using FUN_10042934 (bone angle from FPU), FUN_10016b00 (FString copy), FUN_1003e330 (hostage pick), FUN_1003e3d0 (bool pick); full implementation pending")
 void AR6Pawn::UpdateColBox(FVector& NewLocation, INT p1, INT p2, INT p3)
 {
 	guard(AR6Pawn::UpdateColBox);
@@ -1646,7 +1646,7 @@ FLOAT AR6Pawn::UpdateColBoxPeeking(FLOAT param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10017320 (raw bit test at this+0x3E8)")
+IMPL_MATCH("R6Engine.dll", 0x1002be50)
 void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateFullPeekingMode);
@@ -1655,45 +1655,119 @@ void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 
 	if (bIsOver != 0)
 	{
-		// Full peeking has ended
-		// DIVERGENCE: raw bit check at this+0x3E8 bit 4; approximated with m_bWantsToProne
-		if (!m_bWantsToProne)
+		// Peeking is over
+		if ((*(BYTE*)((BYTE*)this + 0x3e8) & 0x10) == 0)
 			return;
 
-		// If still moving (and not in special follow mode), don't transition yet
-		if ((Velocity.X != 0.0f || Velocity.Y != 0.0f || Velocity.Z != 0.0f) &&
-			(*(DWORD*)((BYTE*)this + 0xAC) & 2) == 0)
+		// Return if moving in ALL directions and not in follow mode
+		if (Velocity.X != 0.0f &&
+			Velocity.Y != 0.0f &&
+			Velocity.Z != 0.0f &&
+			(*(DWORD*)((BYTE*)this + 0xac) & 2) == 0)
 			return;
 
-		// Use current peeking as target (return-to-centre)
-		*(FLOAT*)((BYTE*)this + 0x734) = UpdateColBoxPeeking(*(FLOAT*)((BYTE*)this + 0x734));
+		FLOAT fResult = UpdateColBoxPeeking(*(FLOAT*)((BYTE*)this + 0x734));
+		*(FLOAT*)((BYTE*)this + 0x734) = fResult;
 		return;
 	}
 
-	// Peeking still active: determine target peeking value
+	// Peeking still active: determine target
+	DWORD bFreeAim = (*(DWORD*)((BYTE*)this + 0x3e0) >> 5) & 1;
 	FLOAT TargetPeeking;
-	DWORD bFreeAim = (*(DWORD*)((BYTE*)this + 0x3E0) >> 5) & 1;
-	if (bFreeAim == 0 || (*(DWORD*)((BYTE*)this + 0x6C4) & 0x2000000) != 0)
+	if (bFreeAim == 0 || (*(DWORD*)((BYTE*)this + 0x6c4) & 0x2000000) != 0)
+	{
+		TargetPeeking = *(FLOAT*)((BYTE*)this + 0x730);
+	}
+	else if (*(FLOAT*)((BYTE*)this + 0x730) < 400.0f)
+	{
+		TargetPeeking = 400.0f;
+	}
+	else if (*(FLOAT*)((BYTE*)this + 0x730) < 1600.0f)
 	{
 		TargetPeeking = *(FLOAT*)((BYTE*)this + 0x730);
 	}
 	else
 	{
-		// Free-aim: clamp peek goal to [400, 1600]
-		FLOAT Goal = *(FLOAT*)((BYTE*)this + 0x730);
-		if (Goal < 400.0f)
-			TargetPeeking = 400.0f;
-		else if (Goal < 1600.0f)
-			TargetPeeking = Goal;
-		else
-			TargetPeeking = 1600.0f;
+		TargetPeeking = 1600.0f;
 	}
 
-	*(FLOAT*)((BYTE*)this + 0x734) = UpdateColBoxPeeking(TargetPeeking);
+	FLOAT fOld = *(FLOAT*)((BYTE*)this + 0x734);
+	FLOAT fStep = DeltaTime * 3000.0f;
+	FLOAT fDiff = *(FLOAT*)((BYTE*)this + 0x734) - TargetPeeking;
+	if (fDiff < 0.0f) fDiff = -fDiff;
+	if (fDiff >= 1000.0f)
+		fStep += fStep;
+
+	if (TargetPeeking <= *(FLOAT*)((BYTE*)this + 0x734))
+		*(FLOAT*)((BYTE*)this + 0x734) -= fStep;
+	else
+		*(FLOAT*)((BYTE*)this + 0x734) += fStep;
+
+	FLOAT fClamped;
+	if ((*(DWORD*)((BYTE*)this + 0x6c4) & 0x2000000) == 0)
+	{
+		FLOAT fLo = TargetPeeking, fHi = TargetPeeking;
+		FLOAT fVal;
+		if (bFreeAim == 0)
+		{
+			if (*(INT*)((BYTE*)this + 0x3e4) >= 0)
+			{
+				fLo = 0.0f;
+				fVal = *(FLOAT*)((BYTE*)this + 0x734);
+			}
+			else
+			{
+				fVal = *(FLOAT*)((BYTE*)this + 0x734);
+				fHi = 2000.0f;
+			}
+		}
+		else if (*(INT*)((BYTE*)this + 0x3e4) < 0)
+		{
+			fHi = 1600.0f;
+			fVal = *(FLOAT*)((BYTE*)this + 0x734);
+		}
+		else
+		{
+			fVal = *(FLOAT*)((BYTE*)this + 0x734);
+			fLo = 400.0f;
+		}
+		if (fVal < fLo) fClamped = fLo;
+		else if (fVal > fHi) fClamped = fHi;
+		else fClamped = fVal;
+	}
+	else
+	{
+		fClamped = *(FLOAT*)((BYTE*)this + 0x734);
+		if (fOld >= 1000.0f)
+		{
+			if (fClamped >= 1000.0f)
+				fClamped = 1000.0f;
+			else if (fClamped >= 2000.0f)
+				fClamped = 2000.0f;
+		}
+		else
+		{
+			if (fClamped >= 0.0f)
+				fClamped = 0.0f;
+			else if (fClamped < 1000.0f)
+				fClamped = 1000.0f;
+		}
+	}
+	*(FLOAT*)((BYTE*)this + 0x734) = fClamped;
+
+	if ((*(BYTE*)((BYTE*)this + 0x3e8) & 0x10) == 0)
+		return;
+
+	if (fOld != *(FLOAT*)((BYTE*)this + 0x734))
+		return;
+
+	FLOAT fResult = UpdateColBoxPeeking(*(FLOAT*)((BYTE*)this + 0x734));
+	*(FLOAT*)((BYTE*)this + 0x734) = fResult;
+
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_100017a0 (acos angle check for diagonal stride detection)")
+IMPL_DIVERGE("large animation state machine (~6245 bytes); FUN_100017a0 is Abs(float); full implementation pending - too complex for single decompilation pass")
 void AR6Pawn::UpdateMovementAnimation(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateMovementAnimation);
@@ -1804,7 +1878,7 @@ void AR6Pawn::UpdatePeeking(FLOAT DeltaTime)
 	UpdateFullPeekingMode(DeltaTime);
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_DIVERGE("0x10022e40: FUN_10042934 (x87 ftol2) reads cached clavicle bone rotation from FPU - 3 values per bone cannot be recovered from Ghidra decompilation")
 void AR6Pawn::WeaponFollow(INT param_1, FLOAT param_2)
 {
 	guard(AR6Pawn::WeaponFollow);
@@ -1855,7 +1929,7 @@ INT AR6Pawn::WeaponIsAGadget()
 	return 1;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_DIVERGE("0x10023580: FUN_10042934 (x87 ftol2) reads cached clavicle bone rotation from FPU - values not recoverable from Ghidra decompilation")
 void AR6Pawn::WeaponLock(INT param_1, FLOAT param_2, FLOAT param_3)
 {
 	guard(AR6Pawn::WeaponLock);
@@ -2406,7 +2480,7 @@ void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 	eventPlaySurfaceSwitch();
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_DIVERGE("0x100402e0: FUN_10042934 (x87 ftol2) computes armor-modified damage (iKillDamage * armor_factor * appFrand()); formula not recoverable from Ghidra decompilation")
 void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iKillDamage);
@@ -2469,7 +2543,7 @@ void AR6Pawn::execGetRotationOffset(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetRotationOffset();
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_DIVERGE("0x100406c0: FUN_10042934 (x87 ftol2) computes armor-modified stun damage; same pattern as execGetKillResult - formula not recoverable from Ghidra decompilation")
 void AR6Pawn::execGetStunResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iStunDamage);
@@ -2523,7 +2597,7 @@ void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = (iResult < 0) ? 0 : iResult;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10042934 (bone rotation cache accessor)")
+IMPL_DIVERGE("0x1002c140: FUN_10042934 (x87 ftol2) computes cross-product-derived bone rotation pitch/yaw from hit direction; values depend on FPU state not visible in Ghidra decompilation")
 void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FRotator, rHitDirection);
@@ -2640,7 +2714,7 @@ void AR6Pawn::execR6GetViewRotation(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetViewRotation();
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10024560 (network replication helper)")
+IMPL_DIVERGE("0x1002e120: server network loop walks controller list at Level+0x4d4; proximity check uses vtable[0x100] with pawn+0x5e4..0x5ec fields; FUN_10024560 and FUN_1002ba20 unresolved")
 void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(USound, S);
@@ -2866,7 +2940,7 @@ void AR6Pawn::m_vExecuteLipsSynch(FLOAT DeltaTime)
 	}
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (ECLipSynchData helper)")
+IMPL_MATCH("R6Engine.dll", 0x100228f0)
 void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 {
 	guard(AR6Pawn::m_vInitNewLipSynch);
@@ -2875,18 +2949,14 @@ void AR6Pawn::m_vInitNewLipSynch(USound* pStartSound, USound* pStopSound)
 		GMalloc->Free((void*)m_hLipSynchData);
 		m_hLipSynchData = 0;
 	}
-	// Allocate ECLipSynchData (size 0x18 = 24 bytes) via global new
 	UMeshInstance* MeshInst = Mesh ? (UMeshInstance*)Mesh->MeshGetInstance(this) : NULL;
-	// DIVERGENCE: ECLipSynchData constructor param order uncertain from Ghidra;
-	// using (MeshInst, pStartSound, pStopSound, this) based on execStartLipSynch call site.
 	ECLipSynchData* pNew = new ECLipSynchData(MeshInst, pStartSound, pStopSound, (AActor*)this);
 	m_hLipSynchData = (INT)pNew;
-	if (pNew)
-		pNew->m_vStartLipsynch();
+	pNew->m_vStartLipsynch();
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_100015a0 (pathfinding helper)")
+IMPL_MATCH("R6Engine.dll", 0x10025e20)
 INT AR6Pawn::moveToPosition(FVector const& Target)
 {
 	if (!Controller)
@@ -3218,7 +3288,7 @@ void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1001bc10 (unlisted AController accessor)")
+IMPL_DIVERGE("FUN_10042934 reads x87 FPU rotation cache (bone angles computed via FPU ops not visible to Ghidra decompiler)")
 void AR6Pawn::physicsRotation(FLOAT DeltaTime, FVector InVelocity)
 {
 	guard(AR6Pawn::physicsRotation);
@@ -3267,10 +3337,10 @@ void AR6Pawn::physicsRotation(FLOAT DeltaTime, FVector InVelocity)
 
 		if (*(DWORD*)((BYTE*)this + 0xAC) & 2)
 		{
-			// DIVERGENCE: FUN_1001bc10 on Controller is an unknown accessor; approximate
-			// TurnRate from offset 0x50C (RotationRate or similar stored field).
-			INT LR = *(INT*)((BYTE*)this + 0x50C);
-			RotSpeed = appRound((FLOAT)(LR << 1) * DeltaTime);
+			// FUN_1001bc10 is the IsA walk for AR6PlayerController; for human controllers it
+			// always returns Controller unchanged. Read the turn-rate from Controller+0x50C.
+			INT LR = *(INT*)((BYTE*)Controller + 0x50C) << 1;
+			RotSpeed = appRound((FLOAT)LR * DeltaTime);
 			*(DWORD*)((BYTE*)this + 0x2FC) = *(DWORD*)((BYTE*)Controller + 0x2FC);
 			*(DWORD*)((BYTE*)this + 0x300) = *(DWORD*)((BYTE*)Controller + 0x300);
 		}
