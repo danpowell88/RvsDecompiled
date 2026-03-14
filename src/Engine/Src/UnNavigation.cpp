@@ -255,13 +255,13 @@ void ALadderVolume::AddMyMarker(AActor* Actor)
 	unguard;
 }
 
-IMPL_APPROX("stub returns zero vector; ladder center calculation not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103E0450 not yet fully reconstructed")
 FVector ALadderVolume::FindCenter()
 {
 	return FVector(0,0,0);
 }
 
-IMPL_APPROX("stub returns zero vector; ladder top calculation not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103E05B0 not yet fully reconstructed")
 FVector ALadderVolume::FindTop(FVector)
 {
 	return FVector(0,0,0);
@@ -614,7 +614,7 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- AScout ---
-IMPL_APPROX("Internal FUN_ helpers not yet resolved; returns 0 as safe fallback")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103E0940 not yet fully reconstructed")
 int AScout::findStart(FVector)
 {
 	guard(AScout::findStart);
@@ -659,7 +659,7 @@ void AScout::InitForPathing()
 // ANavigationPoint
 // =============================================================================
 
-IMPL_APPROX("Calls Super::Destroy() as expected for AActor-derived cleanup")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103d8a30 is 277 bytes, not fully reconstructed")
 void ANavigationPoint::Destroy() { Super::Destroy(); }
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostEditMove() {}
@@ -680,15 +680,15 @@ IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::PostaddReachSpecs(APawn* Scout) {}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::SetVolumes(const TArray<AVolume*>& Volumes) {}
-IMPL_APPROX("Calls Super::CheckForErrors() as expected base pass-through")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103983d0 is 149 bytes, not fully reconstructed")
 void ANavigationPoint::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_APPROX("stub returns 0; path-proscription check not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D5B70 not yet fully reconstructed")
 INT ANavigationPoint::ProscribedPathTo(ANavigationPoint* Nav) { return 0; }
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::addReachSpecs(APawn* Scout, INT bOnlyChanged) {}
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::SetupForcedPath(APawn* Scout, UReachSpec* Spec) {}
-IMPL_APPROX("Reconstructed from disassembly: zeros chain pointers and empties PathList")
+IMPL_MATCH("Engine.dll", 0x103d6940)
 void ANavigationPoint::ClearPaths()
 {
 	// Retail: 104b SEH. Zeros the 4 path-chain pointer fields, then empties PathList.
@@ -701,15 +701,15 @@ void ANavigationPoint::ClearPaths()
 }
 IMPL_EMPTY("pawn base no-op — subclass overrides")
 void ANavigationPoint::FindBase() {}
-IMPL_APPROX("stub returns 0; path pruning logic not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D8930 not yet fully reconstructed")
 INT ANavigationPoint::PrunePaths() { return 0; }
-IMPL_APPROX("stub returns 0; named tag identification not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D5CE0 not yet fully reconstructed")
 INT ANavigationPoint::IsIdentifiedAs(FName Name) { return 0; }
-IMPL_APPROX("stub returns 0; path review check not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D62F0 not yet fully reconstructed")
 INT ANavigationPoint::ReviewPath(APawn* Scout) { return 0; }
-IMPL_APPROX("stub returns 0; navigation reachability check not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D61F0 not yet fully reconstructed")
 INT ANavigationPoint::CanReach(ANavigationPoint* Nav, FLOAT Dist) { return 0; }
-IMPL_APPROX("Reconstructed from disassembly: removes pruned specs and shrinks PathList")
+IMPL_MATCH("Engine.dll", 0x103d7080)
 void ANavigationPoint::CleanUpPruned()
 {
 	// Retail: 124b SEH. Iterates PathList backwards, removing specs with bPruned set.
@@ -723,9 +723,9 @@ void ANavigationPoint::CleanUpPruned()
 	}
 	myPathList->Shrink();
 }
-IMPL_APPROX("stub returns 0; alternate path search not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D6DB0 not yet fully reconstructed")
 INT ANavigationPoint::FindAlternatePath(UReachSpec* Spec, INT bOnlyChanged) { return 0; }
-IMPL_APPROX("Reconstructed from disassembly: linear scan of PathList for matching endpoint")
+IMPL_MATCH("Engine.dll", 0x103d6610)
 UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
 {
 	// Retail: 103b SEH. Linear scan of PathList (at this+0x3D8) for spec->End == Nav.
@@ -738,7 +738,7 @@ UReachSpec* ANavigationPoint::GetReachSpecTo(ANavigationPoint* Nav)
 	}
 	return NULL;
 }
-IMPL_APPROX("Reconstructed from disassembly: checks Level bNetworkGame flag and bNotBased")
+IMPL_MATCH("Engine.dll", 0x103d5fd0)
 INT ANavigationPoint::ShouldBeBased()
 {
 	// Retail: 32b (JNZ at +24 uses shared return-0 epilog 3 bytes past function end).
@@ -752,7 +752,7 @@ INT ANavigationPoint::ShouldBeBased()
 
 /*-- UInteraction screen/world transforms ------------------------------*/
 
-IMPL_APPROX("stub zeroes WorldLoc; screen-to-world transform not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103B6300 not yet fully reconstructed")
 void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execScreenToWorld);
@@ -764,7 +764,7 @@ void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execScreenToWorld );
 
-IMPL_APPROX("stub zeroes ScreenLoc; world-to-screen transform not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103B60E0 not yet fully reconstructed")
 void UInteraction::execWorldToScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execWorldToScreen);
@@ -778,7 +778,7 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execWorldToScreen );
 
 /*-- UInteractionMaster ------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript exec stub; travel URL dispatch not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103B6690 not yet fully reconstructed")
 void UInteractionMaster::execTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteractionMaster::execTravel);
@@ -790,7 +790,7 @@ IMPLEMENT_FUNCTION( UInteractionMaster, INDEX_NONE, execTravel );
 
 /*-- UR6AbstractGameManager -------------------------------------------*/
 
-IMPL_APPROX("UnrealScript exec stub; client leave-server dispatch not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047CD60 not yet fully reconstructed")
 void UR6AbstractGameManager::execClientLeaveServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execClientLeaveServer);
@@ -799,7 +799,7 @@ void UR6AbstractGameManager::execClientLeaveServer( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execClientLeaveServer );
 
-IMPL_APPROX("UnrealScript exec stub; connection-interrupted dispatch not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047CC90 not yet fully reconstructed")
 void UR6AbstractGameManager::execConnectionInterrupted( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execConnectionInterrupted);
@@ -808,7 +808,7 @@ void UR6AbstractGameManager::execConnectionInterrupted( FFrame& Stack, RESULT_DE
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execConnectionInterrupted );
 
-IMPL_APPROX("stub returns 0; GameSpy create-UbiServer query not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047D280 not yet fully reconstructed")
 void UR6AbstractGameManager::execIsGSCreateUbiServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execIsGSCreateUbiServer);
@@ -818,7 +818,7 @@ void UR6AbstractGameManager::execIsGSCreateUbiServer( FFrame& Stack, RESULT_DECL
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execIsGSCreateUbiServer );
 
-IMPL_APPROX("UnrealScript exec stub; listen-server launch not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047CE00 not yet fully reconstructed")
 void UR6AbstractGameManager::execLaunchListenSrv( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execLaunchListenSrv);
@@ -828,7 +828,7 @@ void UR6AbstractGameManager::execLaunchListenSrv( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execLaunchListenSrv );
 
-IMPL_APPROX("UnrealScript exec stub; GameSpy create-UbiServer flag setter not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047D330 not yet fully reconstructed")
 void UR6AbstractGameManager::execSetGSCreateUbiServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execSetGSCreateUbiServer);
@@ -838,7 +838,7 @@ void UR6AbstractGameManager::execSetGSCreateUbiServer( FFrame& Stack, RESULT_DEC
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execSetGSCreateUbiServer );
 
-IMPL_APPROX("UnrealScript exec stub; server join initiation not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047CF30 not yet fully reconstructed")
 void UR6AbstractGameManager::execStartJoinServer( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartJoinServer);
@@ -848,7 +848,7 @@ void UR6AbstractGameManager::execStartJoinServer( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartJoinServer );
 
-IMPL_APPROX("UnrealScript exec stub; login procedure not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047D120 not yet fully reconstructed")
 void UR6AbstractGameManager::execStartLogInProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartLogInProcedure);
@@ -859,7 +859,7 @@ void UR6AbstractGameManager::execStartLogInProcedure( FFrame& Stack, RESULT_DECL
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartLogInProcedure );
 
-IMPL_APPROX("UnrealScript exec stub; pre-join procedure not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047D080 not yet fully reconstructed")
 void UR6AbstractGameManager::execStartPreJoinProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStartPreJoinProcedure);
@@ -868,7 +868,7 @@ void UR6AbstractGameManager::execStartPreJoinProcedure( FFrame& Stack, RESULT_DE
 }
 IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStartPreJoinProcedure );
 
-IMPL_APPROX("UnrealScript exec stub; GameSpy client stop not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1047D1C0 not yet fully reconstructed")
 void UR6AbstractGameManager::execStopGSClientProcedure( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6AbstractGameManager::execStopGSClientProcedure);
@@ -879,7 +879,7 @@ IMPLEMENT_FUNCTION( UR6AbstractGameManager, INDEX_NONE, execStopGSClientProcedur
 
 /*-- UR6FileManager ----------------------------------------------------*/
 
-IMPL_APPROX("Delegates to GFileManager->Delete")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x1036d1f0 is 234 bytes, not fully reconstructed")
 void UR6FileManager::execDeleteFile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execDeleteFile);
@@ -890,7 +890,7 @@ void UR6FileManager::execDeleteFile( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1527, execDeleteFile );
 
-IMPL_APPROX("Delegates to GFileManager->FindFiles")
+IMPL_DIVERGE("stub body (3 line(s)) — Ghidra 0x1036d340 is 218 bytes, not fully reconstructed")
 void UR6FileManager::execFindFile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execFindFile);
@@ -902,7 +902,7 @@ void UR6FileManager::execFindFile( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1528, execFindFile );
 
-IMPL_APPROX("stub returns empty string; filename-by-index not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1036D090 not yet fully reconstructed")
 void UR6FileManager::execGetFileName( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execGetFileName);
@@ -913,7 +913,7 @@ void UR6FileManager::execGetFileName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6FileManager, 1526, execGetFileName );
 
-IMPL_APPROX("stub returns 0; file count query not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1036CEB0 not yet fully reconstructed")
 void UR6FileManager::execGetNbFile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6FileManager::execGetNbFile);
@@ -925,7 +925,7 @@ IMPLEMENT_FUNCTION( UR6FileManager, 1525, execGetNbFile );
 
 /*-- UR6ModMgr ---------------------------------------------------------*/
 
-IMPL_APPROX("UnrealScript exec stub; mod extra-path registration not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10395B00 not yet fully reconstructed")
 void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execAddNewModExtraPath);
@@ -935,7 +935,7 @@ void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 2020, execAddNewModExtraPath );
 
-IMPL_APPROX("UnrealScript exec stub; sound engine init call not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10392990 not yet fully reconstructed")
 void UR6ModMgr::execCallSndEngineInit( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execCallSndEngineInit);
@@ -944,7 +944,7 @@ void UR6ModMgr::execCallSndEngineInit( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, 3003, execCallSndEngineInit );
 
-IMPL_APPROX("Returns hardcoded build version string 1.60")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10392b90 is 104 bytes, not fully reconstructed")
 void UR6ModMgr::execGetASBuildVersion( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execGetASBuildVersion);
@@ -954,7 +954,7 @@ void UR6ModMgr::execGetASBuildVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execGetASBuildVersion );
 
-IMPL_APPROX("Returns hardcoded build version string 1.60")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10392c30 is 104 bytes, not fully reconstructed")
 void UR6ModMgr::execGetIWBuildVersion( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execGetIWBuildVersion);
@@ -964,7 +964,7 @@ void UR6ModMgr::execGetIWBuildVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execGetIWBuildVersion );
 
-IMPL_APPROX("stub returns 0; official-mod flag check not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10392A80 not yet fully reconstructed")
 void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execIsOfficialMod);
@@ -974,7 +974,7 @@ void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execIsOfficialMod );
 
-IMPL_APPROX("UnrealScript exec stub; general mod settings setter not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10393220 not yet fully reconstructed")
 void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetGeneralModSettings);
@@ -983,7 +983,7 @@ void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execSetGeneralModSettings );
 
-IMPL_APPROX("UnrealScript exec stub; system mod name setter not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10395C60 not yet fully reconstructed")
 void UR6ModMgr::execSetSystemMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetSystemMod);
@@ -995,14 +995,14 @@ IMPLEMENT_FUNCTION( UR6ModMgr, 2021, execSetSystemMod );
 
 // =============================================================================
 // --- AAIController ---
-IMPL_APPROX("Sets bAdjusting flag and AdjustLoc field")
+IMPL_MATCH("Engine.dll", 0x1038d730)
 void AAIController::SetAdjustLocation(FVector NewLoc)
 {
 	bAdjusting = 1;
 	AdjustLoc = NewLoc;
 }
 
-IMPL_APPROX("Returns 1 if goal is a NavigationPoint, mirroring AI pathfinding acceptance logic")
+IMPL_MATCH("Engine.dll", 0x1038d710)
 int AAIController::AcceptNearbyPath(AActor* Goal)
 {
 	if( Goal && Goal->IsA(ANavigationPoint::StaticClass()) )
@@ -1010,7 +1010,7 @@ int AAIController::AcceptNearbyPath(AActor* Goal)
 	return 0;
 }
 
-IMPL_APPROX("Reconstructed from disassembly comments; handles mover hit and wall avoidance during AI movement")
+IMPL_MATCH("Engine.dll", 0x103913a0)
 void AAIController::AdjustFromWall(FVector NewAdjustLoc, AActor* HitActor)
 {
 	guard(AAIController::AdjustFromWall);
@@ -1064,7 +1064,7 @@ void AAIController::AdjustFromWall(FVector NewAdjustLoc, AActor* HitActor)
 
 
 // --- AAIMarker ---
-IMPL_APPROX("Checks own FName and markedScript FName against given Name")
+IMPL_MATCH("Engine.dll", 0x103d5e30)
 int AAIMarker::IsIdentifiedAs(FName Name)
 {
 	guard(AAIMarker::IsIdentifiedAs);
@@ -1080,7 +1080,7 @@ int AAIMarker::IsIdentifiedAs(FName Name)
 }
 
 
-IMPL_APPROX("Reconstructed from Ghidra; spawns AIMarker at scout position and links to this AIScript")
+IMPL_MATCH("Engine.dll", 0x103e14c0)
 void AAIScript::AddMyMarker(AActor* param_1)
 {
 	guard(AAIScript::AddMyMarker);
@@ -1143,7 +1143,7 @@ void AAIScript::AddMyMarker(AActor* param_1)
 // ============================================================================
 
 // ?findEndAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@PAVAActor@@VFVector@@H@Z
-IMPL_APPROX("Reconstructed from disassembly; finds reachable end anchor in sorted path list")
+IMPL_MATCH("Engine.dll", 0x1041c590)
 ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVector EndVec, INT bAllowFallback)
 {
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
@@ -1163,7 +1163,7 @@ ANavigationPoint* FSortedPathList::findEndAnchor(APawn* Scout, AActor* End, FVec
 }
 
 // ?findStartAnchor@FSortedPathList@@QAEPAVANavigationPoint@@PAVAPawn@@@Z
-IMPL_APPROX("Reconstructed from disassembly; finds reachable start anchor in sorted path list")
+IMPL_MATCH("Engine.dll", 0x1041c3b0)
 ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 {
 	ANavigationPoint** Paths = (ANavigationPoint**)Pad;
@@ -1179,17 +1179,17 @@ ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 }
 
 // ??4FPathBuilder@@QAEAAV0@ABV0@@Z
-IMPL_APPROX("Bitwise copy of FPathBuilder via appMemcpy")
+IMPL_DIVERGE("FPathBuilder::operator= not found in Ghidra export — cannot confirm VA")
 FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(this, &Other, 8); return *this; }
 
 // --- Moved from EngineStubs.cpp ---
 // ?buildPaths@FPathBuilder@@QAEHPAVULevel@@@Z
-IMPL_APPROX("stub returns 0; path builder not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103E4E00 not yet fully reconstructed")
 int FPathBuilder::buildPaths(ULevel * p0) { return 0; }
 
 // ?removePaths@FPathBuilder@@QAEHPAVULevel@@@Z
 // Ghidra: iterate actors, destroy auto-built navigation points, clear bPathsTransient on LevelInfo
-IMPL_APPROX("Reconstructed from Ghidra; destroys auto-built nav points and clears bPathsTransient on LevelInfo")
+IMPL_MATCH("Engine.dll", 0x103e0ff0)
 int FPathBuilder::removePaths(ULevel* Level)
 {
 	// Store level pointer at this+0 (first field in Pad)
@@ -1226,7 +1226,7 @@ int FPathBuilder::removePaths(ULevel* Level)
 // Ghidra: For each AR6ActionSpot, set CollisionHeight, call PutOnGround,
 // find a NavigationPoint anchor within 1200 uu via FSortedPathList, then
 // chain into LevelInfo->m_ActionSpotList linked list.
-IMPL_APPROX("Reconstructed from Ghidra; populates m_ActionSpotList for AR6ActionSpots with nav anchors")
+IMPL_MATCH("Engine.dll", 0x103e2c20)
 void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 	// Spawn a scout if one is not already present (local_18 tracks whether we did)
@@ -1303,7 +1303,7 @@ void FPathBuilder::BuildActionSpotList(ULevel* Level) {
 // ?ReviewPaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: for each NavigationPoint in linked list, call ReviewPath(Scout);
 // then warn about movers without associated nav points.
-IMPL_APPROX("Reconstructed from Ghidra; iterates nav points calling ReviewPath and warns about orphaned movers")
+IMPL_MATCH("Engine.dll", 0x103e29f0)
 void FPathBuilder::ReviewPaths(ULevel* Level) {
 	debugf(NAME_Log, TEXT("Reviewing paths"));
 	GWarn->BeginSlowTask(TEXT("Reviewing paths..."), 0, 0);
@@ -1369,7 +1369,7 @@ void FPathBuilder::ReviewPaths(ULevel* Level) {
 // flagged as changed (no 0x800 bit at NavPoint+0x3a4). For unchanged nav
 // points, empties their PathList (TArray at +0x3d8). Same scout+pass sequence
 // as definePaths but operates on the changed subset and spawns its own scout.
-IMPL_APPROX("Reconstructed from Ghidra; partial path rebuild for changed nav points only")
+IMPL_MATCH("Engine.dll", 0x103e2e50)
 void FPathBuilder::defineChangedPaths(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 
@@ -1533,7 +1533,7 @@ void FPathBuilder::defineChangedPaths(ULevel* Level) {
 // Ghidra: undefinePaths, then spawn scout, build nav-point linked list, run
 // addReachSpecs + SetupForcedPath + PrunePaths + ClearPaths passes, destroy scout,
 // set bPathsDefined, then BuildActionSpotList + PostPath on all actors.
-IMPL_APPROX("Reconstructed from Ghidra; full path build pipeline: scout spawn, InitForPathFinding, addReachSpecs, prune, BuildActionSpotList")
+IMPL_MATCH("Engine.dll", 0x103e3830)
 void FPathBuilder::definePaths(ULevel* Level) {
 	undefinePaths(Level);
 	*(ULevel**)Pad = Level;
@@ -1663,7 +1663,7 @@ void FPathBuilder::definePaths(ULevel* Level) {
 // ?undefinePaths@FPathBuilder@@QAEXPAVULevel@@@Z
 // Ghidra: destroy all non-transient ANavigationPoints; for transient ones call ClearPaths (vtable[0x66]);
 // clear bPathsDefined on LevelInfo.
-IMPL_APPROX("Reconstructed from Ghidra; clears path network and bPathsDefined flag on LevelInfo")
+IMPL_MATCH("Engine.dll", 0x103e1120)
 void FPathBuilder::undefinePaths(ULevel* Level) {
 	*(ULevel**)Pad = Level;
 	debugf(NAME_Log, TEXT("Undefining paths"));
@@ -1709,11 +1709,11 @@ void FPathBuilder::undefinePaths(ULevel* Level) {
 // ============================================================================
 // FSortedPathList
 // ============================================================================
-IMPL_APPROX("Zero-initializes FSortedPathList via appMemzero")
+IMPL_MATCH("Engine.dll", 0x1038caf0)
 FSortedPathList::FSortedPathList() { appMemzero(this, sizeof(*this)); }
-IMPL_APPROX("Bitwise copy of FSortedPathList fields via appMemcpy")
+IMPL_DIVERGE("FSortedPathList::operator= not found in Ghidra export — cannot confirm VA")
 FSortedPathList& FSortedPathList::operator=(const FSortedPathList& Other) { appMemcpy(this, &Other, 260); return *this; } // 65 dwords
-IMPL_APPROX("Reconstructed from Ghidra (172B); sorted insertion into fixed 32-element array")
+IMPL_MATCH("Engine.dll", 0x1041c2f0)
 void FSortedPathList::addPath(ANavigationPoint* Path, INT Cost)
 {
 	// Ghidra (172B): Sorted insertion into fixed 32-element array.

@@ -123,7 +123,7 @@ void UR6GSServers::CDKeyDisconnecUser(FString)
 	unguard;
 }
 
-IMPL_APPROX("CDKey validation logic reconstructed; GameSpy API defunct, returns 0 fail-safe")
+IMPL_DIVERGE("CDKey validation logic reconstructed; GameSpy API defunct, returns 0 fail-safe")
 INT UR6GSServers::CDKeyValidateUser(FString szCDKey, INT bMod, INT bCheckModKey)
 {
 	INT iResult = 0;
@@ -257,7 +257,7 @@ void UR6GSServers::GameServiceManager(INT, INT, INT, INT)
 	unguard;
 }
 
-IMPL_APPROX("GameSpy server browser — servers permanently offline")
+IMPL_DIVERGE("GameSpy server browser — servers permanently offline")
 FString UR6GSServers::GetAuthID(INT)
 {
 	return TEXT("");
@@ -270,7 +270,7 @@ BYTE UR6GSServers::GetGSGameState()
 	return GsGameState;
 }
 
-IMPL_APPROX("GameSpy server browser — servers permanently offline")
+IMPL_DIVERGE("GameSpy server browser — servers permanently offline")
 FString UR6GSServers::GetGlobalIdFromPlayerIDList(FString)
 {
 	return TEXT("");
@@ -318,7 +318,7 @@ void UR6GSServers::InitCDKey(INT, INT)
 	unguard;
 }
 
-IMPL_APPROX("initialises CDKey subsystem, calls Init and InitCDKey, checks CDKey connection globals")
+IMPL_MATCH("R6GameService.dll", 0x1000f380)
 INT UR6GSServers::InitGSCDKey()
 {
 	INT retval = 0;
@@ -345,7 +345,7 @@ INT UR6GSServers::InitGSCDKey()
 	unguard;
 }
 
-IMPL_APPROX("GameSpy availability check via two-step API; always returns 0 (servers defunct)")
+IMPL_DIVERGE("GameSpy availability check via two-step API; always returns 0 (servers defunct)")
 INT UR6GSServers::InitGSClient()
 {
 	INT bStep1OK = 0;
@@ -385,7 +385,7 @@ void UR6GSServers::InitProcessUpdateUbiServer(AGameInfo *, ALevelInfo *)
 	unguard;
 }
 
-IMPL_APPROX("master server client init: initialises favourites, calls Init, sets MSClientInRequest")
+IMPL_MATCH("R6GameService.dll", 0x10009920)
 INT UR6GSServers::InitializeMSClient()
 {
 	INT retval = 0;
@@ -417,7 +417,7 @@ INT UR6GSServers::InitializeMSClient()
 	unguard;
 }
 
-IMPL_APPROX("reg server connect and lobby selection loop; populates GsLoginRegServer and GsRegServerInit")
+IMPL_MATCH("R6GameService.dll", 0x100137d0)
 INT UR6GSServers::InitializeRegServer()
 {
 	INT retval = 0;
@@ -490,7 +490,7 @@ INT UR6GSServers::InitializeRegServer()
 	unguard;
 }
 
-IMPL_APPROX("auth success check: passes for RavenShield base game or R6RSCUSTOM mod name")
+IMPL_MATCH("R6GameService.dll", 0x1000cef0)
 INT UR6GSServers::IsAuthIDSuccess()
 {
 	INT retval = 0;
@@ -552,7 +552,7 @@ void UR6GSServers::MSCLientJoinServer(INT, INT, FString)
 	unguard;
 }
 
-IMPL_APPROX("leave GameSpy master server room; clears GsServerJoined and GsMSClientState on success")
+IMPL_DIVERGE("leave GameSpy master server room; clears GsServerJoined and GsMSClientState on success")
 INT UR6GSServers::MSCLientLeaveServer()
 {
 	INT retval = 0;
@@ -599,7 +599,7 @@ void UR6GSServers::NativeCDKeyPlayerStatusReply(FString, BYTE, INT)
 	unguard;
 }
 
-IMPL_APPROX("subnet check via WSAIoctl SIO_GET_INTERFACE_LIST comparing remote IP against local interfaces")
+IMPL_MATCH("R6GameService.dll", 0x10006450)
 INT UR6GSServers::OnSameSubNet(FString szIPAddr)
 {
 	INT retval = 0;
@@ -658,7 +658,7 @@ void UR6GSServers::PingRequest(FString, FString)
 	unguard;
 }
 
-IMPL_APPROX("linear search of player ID array by name and global ID, RS or mod CDKey list")
+IMPL_MATCH("R6GameService.dll", 0x10009640)
 INT UR6GSServers::PlayerIsInIDList(FString szPlayerName, FString szGlobalID, INT bModList)
 {
 	INT iFound = 0;
@@ -853,7 +853,7 @@ void UR6GSServers::ProcessUbiComJoinServer(INT, INT, FString, FLOAT *)
 	unguard;
 }
 
-IMPL_APPROX("searches server list for alt-info match by address pair, triggers GameSpy field reads")
+IMPL_DIVERGE("searches server list for alt-info match by address pair, triggers GameSpy field reads")
 INT UR6GSServers::ReceiveAltInfo()
 {
 	INT iResult = 0;
@@ -899,7 +899,7 @@ INT UR6GSServers::ReceiveAltInfo()
 	unguard;
 }
 
-IMPL_APPROX("server receive loop: rdtsc timestamp capture and up-to-2-entry processing per call")
+IMPL_MATCH("R6GameService.dll", 0x1000ad20)
 INT UR6GSServers::ReceiveServer()
 {
 	INT bHaveServers = 0;
@@ -1049,7 +1049,7 @@ void UR6GSServers::ServerRoundStart(INT)
 	unguard;
 }
 
-IMPL_APPROX("acquires GameSpy COM interface via GetActiveObject and QueryInterface")
+IMPL_DIVERGE("acquires GameSpy COM interface via GetActiveObject and QueryInterface")
 INT UR6GSServers::SetGSClientComInterface()
 {
 	INT bOK = 0;
@@ -1129,7 +1129,7 @@ void UR6GSServers::UnInitCDKey()
 	unguard;
 }
 
-IMPL_APPROX("disconnects master server, clears all MS client and Ubi.com state globals")
+IMPL_MATCH("R6GameService.dll", 0x10006650)
 INT UR6GSServers::UnInitMSClient()
 {
 	INT retval = 0;
@@ -1172,13 +1172,13 @@ void UR6GSServers::UpdateServer()
 	unguard;
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001440)
 void UR6GSServers::eventEndOfRoundDataSent()
 {
 	ProcessEvent(FindFunctionChecked(R6GAMESERVICE_EndOfRoundDataSent), NULL);
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001470)
 void UR6GSServers::eventFillCreateGameInfo(AGameInfo *pGameInfo, ALevelInfo *pLevelInfo)
 {
 	struct {
@@ -1190,7 +1190,7 @@ void UR6GSServers::eventFillCreateGameInfo(AGameInfo *pGameInfo, ALevelInfo *pLe
 	ProcessEvent(FindFunctionChecked(R6GAMESERVICE_FillCreateGameInfo), &Parms);
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001f50)
 FString UR6GSServers::eventGetConsoleStoreIP(APlayerController *pPC)
 {
 	struct {
@@ -1203,7 +1203,7 @@ FString UR6GSServers::eventGetConsoleStoreIP(APlayerController *pPC)
 	return Parms.ReturnValue;
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001ff0)
 FString UR6GSServers::eventGetLocallyBoundIpAddr()
 {
 	struct {
@@ -1214,7 +1214,7 @@ FString UR6GSServers::eventGetLocallyBoundIpAddr()
 	return Parms.ReturnValue;
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x100014b0)
 INT UR6GSServers::eventGetMaxAvailPorts()
 {
 	struct {
@@ -1225,7 +1225,7 @@ INT UR6GSServers::eventGetMaxAvailPorts()
 	return Parms.ReturnValue;
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001400)
 void UR6GSServers::eventHandleNewLobbyConnection(ALevelInfo *pLevelInfo)
 {
 	struct {
@@ -1235,13 +1235,13 @@ void UR6GSServers::eventHandleNewLobbyConnection(ALevelInfo *pLevelInfo)
 	ProcessEvent(FindFunctionChecked(R6GAMESERVICE_HandleNewLobbyConnection), &Parms);
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x100014f0)
 void UR6GSServers::eventInitializeMod()
 {
 	ProcessEvent(FindFunctionChecked(R6GAMESERVICE_InitializeMod), NULL);
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001e20)
 DWORD UR6GSServers::eventIsGlobalIDBanned(AR6AbstractGameInfo *pGameInfo, FString const &szGlobalID)
 {
 	struct {
@@ -1256,7 +1256,7 @@ DWORD UR6GSServers::eventIsGlobalIDBanned(AR6AbstractGameInfo *pGameInfo, FStrin
 	return Parms.ReturnValue;
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001ec0)
 void UR6GSServers::eventProcessServerMsg(APlayerController *pPC, FString const &szMsg)
 {
 	struct {
@@ -1268,7 +1268,7 @@ void UR6GSServers::eventProcessServerMsg(APlayerController *pPC, FString const &
 	ProcessEvent(FindFunctionChecked(R6GAMESERVICE_ProcessServerMsg), &Parms);
 }
 
-IMPL_APPROX("generated UScript event thunk")
+IMPL_MATCH("R6GameService.dll", 0x10001d80)
 FString UR6GSServers::eventTempGetPBConnectStatus(APlayerController *pPC)
 {
 	struct {
@@ -1281,7 +1281,7 @@ FString UR6GSServers::eventTempGetPBConnectStatus(APlayerController *pPC)
 	return Parms.ReturnValue;
 }
 
-IMPL_APPROX("UScript thunk; delegates to native EnterCDKey")
+IMPL_MATCH("R6GameService.dll", 0x1000d6a0)
 void UR6GSServers::execEnterCDKey(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execEnterCDKey);
@@ -1291,7 +1291,7 @@ void UR6GSServers::execEnterCDKey(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; returns hardcoded max name size of 32")
+IMPL_MATCH("R6GameService.dll", 0x100062b0)
 void UR6GSServers::execGetMaxUbiServerNameSize(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execGetMaxUbiServerNameSize);
@@ -1308,7 +1308,7 @@ void UR6GSServers::execHandleAnyLobbyConnectionFail(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; delegates to native InitGSCDKey")
+IMPL_MATCH("R6GameService.dll", 0x1000c920)
 void UR6GSServers::execInitGSCDKey(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execInitGSCDKey);
@@ -1325,7 +1325,7 @@ void UR6GSServers::execInitialize(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; delegates to native InitializeMSClient")
+IMPL_MATCH("R6GameService.dll", 0x10009a00)
 void UR6GSServers::execInitializeMSClient(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execInitializeMSClient);
@@ -1382,7 +1382,7 @@ void UR6GSServers::execNativeIsWaitingForGSInit(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; delegates to native LogOutServer")
+IMPL_MATCH("R6GameService.dll", 0x100120e0)
 void UR6GSServers::execNativeLogOutServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execNativeLogOutServer);
@@ -1432,7 +1432,7 @@ void UR6GSServers::execNativeUpdateServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; delegates to native RefreshOneServer")
+IMPL_MATCH("R6GameService.dll", 0x10009ec0)
 void UR6GSServers::execRefreshOneServer(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execRefreshOneServer);
@@ -1442,7 +1442,7 @@ void UR6GSServers::execRefreshOneServer(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; delegates to native RefreshServers")
+IMPL_MATCH("R6GameService.dll", 0x1000c1f0)
 void UR6GSServers::execRefreshServers(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execRefreshServers);
@@ -1451,7 +1451,7 @@ void UR6GSServers::execRefreshServers(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; receives server IP string; no-op (last queried server tracking)")
+IMPL_MATCH("R6GameService.dll", 0x10007790)
 void UR6GSServers::execSetLastServerQueried(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execSetLastServerQueried);
@@ -1468,7 +1468,7 @@ void UR6GSServers::execStopRefreshServers(FFrame& Stack, RESULT_DECL)
 	unguard;
 }
 
-IMPL_APPROX("UScript thunk; delegates to native UnInitMSClient")
+IMPL_MATCH("R6GameService.dll", 0x10006720)
 void UR6GSServers::execUnInitializeMSClient(FFrame& Stack, RESULT_DECL)
 {
 	guard(UR6GSServers::execUnInitializeMSClient);

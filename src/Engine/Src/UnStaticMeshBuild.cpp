@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnStaticMeshBuild.cpp: Static mesh objects (UStaticMesh, UStaticMeshInstance)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UStaticMesh ---
-IMPL_APPROX("needs Ghidra analysis for full implementation - registers class properties via IMPLEMENT_CLASS")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10446A90 not yet fully reconstructed")
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);
@@ -33,7 +33,7 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("needs Ghidra analysis for full implementation - fixes up triangle normals and builds render data")
+IMPL_DIVERGE("body incomplete — Ghidra 0x104472F0 not yet fully reconstructed")
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
@@ -43,7 +43,7 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("needs Ghidra analysis for full implementation - iterates collision triangles against sphere")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1044CDA0 not yet fully reconstructed")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
@@ -59,7 +59,7 @@ void UStaticMesh::Build()
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
-IMPL_APPROX("fallback GetDefaultMaterial CDO (FUN_10317670) not resolved; returns NULL instead")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1031C9F0 not yet fully reconstructed")
 UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 {
 	// Ghidra 0x1c9f0, 69b:call Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
@@ -94,7 +94,7 @@ FTags * UStaticMesh::GetTag(FString Name)
 	return NULL;
 	unguard;
 }
-IMPL_APPROX("simplified to UObject::Serialize only; version-conditional geometry arrays not reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10449DE0 not yet fully reconstructed")
 void UStaticMesh::Serialize(FArchive& Ar)
 {
 	// Retail: 0x10449de0.Calls UPrimitive::Serialize (if version >= 0x55) or UObject::Serialize,
@@ -103,7 +103,7 @@ void UStaticMesh::Serialize(FArchive& Ar)
 	// Divergence: simplified to base class; geometry is loaded from package.
 	UObject::Serialize(Ar);
 }
-IMPL_APPROX("needs Ghidra analysis for full implementation - BVH/OPCODE ray-triangle traversal; returns 1 (no hit) as fallback")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1044EB60 not yet fully reconstructed")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
@@ -113,7 +113,7 @@ int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD
 	return 1;
 	unguard;
 }
-IMPL_APPROX("needs Ghidra analysis for full implementation - OPCODE point-overlap traversal; returns 1 (no overlap) as fallback")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1044EF40 not yet fully reconstructed")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
@@ -123,7 +123,7 @@ int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 	return 1;
 	unguard;
 }
-IMPL_APPROX("FUN_103582d0 called via hardcoded address thunk")
+IMPL_MATCH("Engine.dll", 0x104469d0)
 void UStaticMesh::Destroy()
 {
 	// Retail: 0x104469d0.Calls FUN_103582d0(this) to release the static mesh collision
@@ -132,30 +132,30 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_APPROX("needs Ghidra analysis for full implementation - returns empty FBox as fallback")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1044c130 is 206 bytes, not fully reconstructed")
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
 {
 	return FBox();
 }
-IMPL_APPROX("Retail 41b; delegates to GetCollisionBoundingBox().GetCenter()")
+IMPL_DIVERGE("UStaticMesh::GetEncroachCenter not found in Ghidra export — cannot confirm VA")
 FVector UStaticMesh::GetEncroachCenter(AActor * Actor)
 {
 	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetCenter().
 	return GetCollisionBoundingBox(Actor).GetCenter();
 }
-IMPL_APPROX("Retail 41b; delegates to GetCollisionBoundingBox().GetExtent()")
+IMPL_DIVERGE("UStaticMesh::GetEncroachExtent not found in Ghidra export — cannot confirm VA")
 FVector UStaticMesh::GetEncroachExtent(AActor * Actor)
 {
 	// Retail: 41b. Calls GetCollisionBoundingBox, then FBox::GetExtent().
 	return GetCollisionBoundingBox(Actor).GetExtent();
 }
-IMPL_APPROX("Retail 23b; raw FBox copy from this+0x2C")
+IMPL_DIVERGE("UStaticMesh::GetRenderBoundingBox not found in Ghidra export — cannot confirm VA")
 FBox UStaticMesh::GetRenderBoundingBox(const AActor*)
 {
 	// Retail: 23b. REP MOVSD 7 DWORDs (28b = FBox) from this+0x2C to return buffer.
 	return *(FBox*)((BYTE*)this + 0x2C);
 }
-IMPL_APPROX("Retail 23b; raw FSphere copy from this+0x48")
+IMPL_MATCH("Engine.dll", 0x10446a70)
 FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 {
 	// Retail: 23b. Copy-constructs FSphere from this+0x48.
@@ -172,7 +172,7 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
-IMPL_APPROX("simplified to UObject::Serialize; version-conditional color-stream/index-buffer serialization not reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10449BB0 not yet fully reconstructed")
 void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
 	guard(UStaticMeshInstance::Serialize);
@@ -183,7 +183,7 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_APPROX("needs Ghidra analysis for full implementation - attaches projector with triangle clipping")
+IMPL_DIVERGE("body incomplete/diverged — body contains divergence markers (Divergence:)")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
@@ -192,7 +192,7 @@ void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 	unguard;
 }
 
-IMPL_APPROX("needs Ghidra analysis for full implementation - removes projector from per-instance projector list")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10448470 not yet fully reconstructed")
 void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 {
 	guard(UStaticMeshInstance::DetachProjectorClipped);
@@ -202,7 +202,7 @@ void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 }
 
 // --- FOrientation ---
-IMPL_APPROX("Zero-initialised orientation struct; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x103019d0)
 FOrientation::FOrientation()
 {
 	*(INT*)&_Data[0x00] = 2;
@@ -215,14 +215,14 @@ FOrientation::FOrientation()
 	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
-IMPL_APPROX("Raw memcpy assignment; no Ghidra reference")
+IMPL_DIVERGE("FOrientation::operator= not found in Ghidra export — cannot confirm VA")
 FOrientation& FOrientation::operator=(FOrientation Other)
 {
 	appMemcpy(this, &Other, 0x34);
 	return *this;
 }
 
-IMPL_APPROX("Compares single DWORD field; no Ghidra reference")
+IMPL_DIVERGE("FOrientation::operator!= not found in Ghidra export — cannot confirm VA")
 int FOrientation::operator!=(FOrientation const & Other) const
 {
 	return *(INT*)&_Data[0x18] != *(INT*)&Other._Data[0x18];
@@ -230,14 +230,14 @@ int FOrientation::operator!=(FOrientation const & Other) const
 
 
 // --- FRebuildOptions ---
-IMPL_APPROX("Copy constructor with memcpy + FString copy; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x10301cf0)
 FRebuildOptions::FRebuildOptions(FRebuildOptions const & Other)
 	: Name(Other.Name)
 {
 	appMemcpy(Options, Other.Options, sizeof(Options));
 }
 
-IMPL_APPROX("Default constructor with known option values; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x10301cf0)
 FRebuildOptions::FRebuildOptions()
 {
 	Options[0] = 2;    // 0x0C
@@ -257,7 +257,7 @@ FRebuildOptions::~FRebuildOptions()
 	// Name's implicit destructor handles FString cleanup
 }
 
-IMPL_APPROX("Assignment with FString copy + memcpy; no Ghidra reference")
+IMPL_DIVERGE("FRebuildOptions::operator= not found in Ghidra export — cannot confirm VA")
 FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
 	Name = Other.Name;
@@ -265,13 +265,13 @@ FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 	return *this;
 }
 
-IMPL_APPROX("Returns Name field; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x10301cd0)
 FString FRebuildOptions::GetName()
 {
 	return Name;
 }
 
-IMPL_APPROX("Resets option values to defaults; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x103fd220)
 void FRebuildOptions::Init()
 {
 	Options[0] = 2;
@@ -294,7 +294,7 @@ FTags::FTags(FTags const &Other)
 	new ((BYTE*)this + 0x30) FString(*(const FString*)((const BYTE*)&Other + 0x30));
 }
 
-IMPL_APPROX("Zero-initialised FTags with empty FString; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x10302ea0)
 FTags::FTags()
 {
 	// Zero first 0x30 bytes;initialize owned FString at +0x30 to empty
@@ -318,7 +318,7 @@ FTags& FTags::operator=(const FTags& Other)
 	return *this;
 }
 
-IMPL_APPROX("Ghidra layout; resets FString at +0x30; no explicit RVA")
+IMPL_MATCH("Engine.dll", 0x10302e20)
 void FTags::Init()
 {
 	guard(FTags::Init);
@@ -334,11 +334,11 @@ void FTags::Init()
 // ============================================================================
 
 // ?GetCurrent@FRebuildTools@@QAEPAVFRebuildOptions@@XZ
-IMPL_APPROX("Returns first member pointer; no Ghidra reference")
+IMPL_DIVERGE("FRebuildTools::GetCurrent not found in Ghidra export — cannot confirm VA")
 FRebuildOptions * FRebuildTools::GetCurrent() { return *(FRebuildOptions**)this; }
 
 // ?GetFromName@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-IMPL_APPROX("Linear search of option array by name; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x103fd460)
 FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 {
 	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
@@ -353,7 +353,7 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 }
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-IMPL_APPROX("editor tool: saves named rebuild option; returns NULL stub")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103FD770 not yet fully reconstructed")
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
 
 // --- Moved from EngineStubs.cpp ---
@@ -361,7 +361,7 @@ extern ENGINE_API FRebuildTools GRebuildTools;
 
 // ?GetIdxFromName@FRebuildTools@@QAEHVFString@@@Z
 // Ghidra: same array walk as GetFromName; returns index or -1 (NOT 0 — 0 is a valid index).
-IMPL_APPROX("Ghidra: same array walk as GetFromName; returns index or -1")
+IMPL_MATCH("Engine.dll", 0x103fd560)
 int FRebuildTools::GetIdxFromName(FString p0)
 {
 	FRebuildOptions* data = *(FRebuildOptions**)((BYTE*)this + 4);
@@ -389,7 +389,7 @@ void FRebuildTools::SetCurrent(FString p0) {}
 // ?Shutdown@FRebuildTools@@QAEXXZ
 IMPL_EMPTY("editor tool: shuts down rebuild tools")
 void FRebuildTools::Shutdown() {}
-IMPL_APPROX("Vertex component layout; no Ghidra reference")
+IMPL_MATCH("Engine.dll", 0x10316200)
 INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
 	C[0].Type = 4; C[0].Function = 3;
 	return 1;

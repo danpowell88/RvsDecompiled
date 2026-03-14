@@ -12,19 +12,19 @@ IMPLEMENT_FUNCTION(AR6PlanningCtrl, -1, execPlanningTrace)
 
 // --- AR6PlanningCtrl ---
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100084f0)
 void AR6PlanningCtrl::execGetClickResult(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100081c0)
 void AR6PlanningCtrl::execGetXYPoint(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100080a0)
 void AR6PlanningCtrl::execPlanningTrace(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

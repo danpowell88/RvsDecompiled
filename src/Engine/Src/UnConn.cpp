@@ -363,7 +363,7 @@ UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 	guard(UDemoRecConnection::UDemoRecConnection);
 	unguard;
 }
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void UDemoRecConnection::StaticConstructor() {}
 IMPL_MATCH("Engine.dll", 0x187C50)
 FString UDemoRecConnection::LowLevelDescribe() { return FString(TEXT("Demo recording driver connection")); }
@@ -390,9 +390,9 @@ void UDemoRecConnection::FlushNet() {
 }
 IMPL_MATCH("Engine.dll", 0x187CE0)
 INT UDemoRecConnection::IsNetReady(INT) { return 1; }
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void UDemoRecConnection::HandleClientPlayer(APlayerController*) {}
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_MATCH("Engine.dll", 0x701C0)
 UDemoRecDriver* UDemoRecConnection::GetDriver() { return (UDemoRecDriver*)Driver; }
 IMPL_MATCH("Engine.dll", 0x18BD30)
 INT UPackageMapLevel::SerializeObject(FArchive&, UClass*, UObject*&) { return 1; } // Ghidra 0x18bd30: returns 1 on all paths; full net-object lookup TODO

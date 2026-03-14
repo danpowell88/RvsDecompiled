@@ -35,19 +35,19 @@ IMPLEMENT_PACKAGE(Window)
 
 IMPLEMENT_CLASS(UWindowManager)
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 void UWindowManager::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("Window.dll", 0x11022780)
 void UWindowManager::Destroy()
 {
 	Super::Destroy();
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 void UWindowManager::Tick(FLOAT DeltaTime)
 {
 	guard(UWindowManager::Tick);
@@ -105,7 +105,7 @@ TArray<WWindow*> WWindow::_DeleteWindows;
 	WPropertiesBase helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Window.dll", 0x110127e0)
 FTreeItem* WPropertiesBase::GetListItem( INT i )
 {
 	guard(WProperties::GetListItem);
@@ -172,7 +172,7 @@ WINDOW_API BOOL (WINAPI* SHGetSpecialFolderPathWX)( HWND hwndOwner, LPTSTR lpszP
 	FDelegate copy constructor (declared but not inline in Window.h).
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Window.dll", 0x11001300)
 FDelegate::FDelegate(const FDelegate& Other)
 : TargetObject(Other.TargetObject)
 , TargetInvoke(Other.TargetInvoke)
@@ -182,7 +182,7 @@ FDelegate::FDelegate(const FDelegate& Other)
 	Global functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_APPROX("Reconstructed from UT99 reference")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 WINDOW_API void InitWindowing()
 {
 	guard(InitWindowing);
@@ -247,7 +247,7 @@ WINDOW_API void InitWindowing()
 	unguard;
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 WINDOW_API HBITMAP LoadFileToBitmap( const TCHAR* Filename, INT& SizeX, INT& SizeY )
 {
 	guard(LoadFileToBitmap);

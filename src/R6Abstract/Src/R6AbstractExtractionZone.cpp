@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6AbstractExtractionZone)
 
 // --- AR6AbstractExtractionZone ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Abstract.dll", 0x100031e0)
 void AR6AbstractExtractionZone::CheckForErrors()
 {
 	Super::CheckForErrors();

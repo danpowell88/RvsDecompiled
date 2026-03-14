@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6AbstractGadget)
 
 // --- AR6AbstractGadget ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Abstract.dll", 0x10003570)
 INT* AR6AbstractGadget::GetOptimizedRepList(BYTE* Recent, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Channel)
 {
 	return Super::GetOptimizedRepList(Recent, Retire, Ptr, Map, Channel);

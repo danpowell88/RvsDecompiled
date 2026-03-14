@@ -15,7 +15,7 @@ INT AR6SmokeCloud::IsBlockedBy(AActor const* Other) const
 	return 0;
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Weapons.dll", 0x10002e70)
 INT AR6SmokeCloud::ShouldTrace(AActor* Other, DWORD TraceFlags)
 {
 	if (TraceFlags & 0x80000)

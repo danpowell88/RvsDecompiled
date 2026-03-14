@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnSceneManager.cpp: Matinee scene manager and sub-action system
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -216,7 +216,7 @@ void ASceneManager::ChangeOrientation(FOrientation orient)
 	*(DWORD*)((BYTE*)this + 0x42C) = *(DWORD*)(actor + 0x248);
 }
 
-IMPL_APPROX("Empties PathSamples TArray at this+0x3E4")
+IMPL_MATCH("Engine.dll", 0x1041f070)
 void ASceneManager::DeletePathSamples()
 {
 	// Retail: 17b. Empties the PathSamples TArray at this+0x3E4 (FVector elements, 12b each).
@@ -265,7 +265,7 @@ float ASceneManager::GetActionPctFromScenePct(float Pct)
 	return t;
 }
 
-IMPL_APPROX("Returns current actor FVector at +0x234 when scene is playing")
+IMPL_MATCH("Engine.dll", 0x1041e030)
 FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 {
 	// Retail: 102b SEH. Returns the current action's cached location if the scene is playing.
@@ -277,7 +277,7 @@ FVector ASceneManager::GetLocation(TArray<FVector> *,float)
 	return *(FVector*)(action + 0x234);
 }
 
-IMPL_APPROX("Returns current actor FRotator at +0x240 when scene is playing")
+IMPL_MATCH("Engine.dll", 0x1041e9e0)
 FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMatAction *,int)
 {
 	// Retail: 106b SEH. Same guard as GetLocation: bit 2 of state byte at this+0x398.
@@ -289,7 +289,7 @@ FRotator ASceneManager::GetRotation(TArray<FVector> *,float,FVector,FRotator,UMa
 	return *(FRotator*)(action + 0x240);
 }
 
-IMPL_APPROX("Calls Initialize() on each action in the Actions TArray")
+IMPL_MATCH("Engine.dll", 0x1041dda0)
 void ASceneManager::InitializeActions()
 {
 	// Retail: 48b. Calls Initialize() on each action in the Actions TArray at this+0x3A8.
@@ -332,7 +332,7 @@ FR6MatineePreviewProxy::~FR6MatineePreviewProxy()
 {
 }
 
-IMPL_APPROX("Default copy-assignment; no data members to copy")
+IMPL_DIVERGE("FR6MatineePreviewProxy::operator= not found in Ghidra export — cannot confirm VA")
 FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePreviewProxy&)
 {
 	return *this;
@@ -340,7 +340,7 @@ FR6MatineePreviewProxy& FR6MatineePreviewProxy::operator=(const FR6MatineePrevie
 
 
 // --- UMatAction ---
-IMPL_APPROX("Calls Super::PostEditChange and refreshes scene manager path")
+IMPL_MATCH("Engine.dll", 0x1041fad0)
 void UMatAction::PostEditChange()
 {
 	guard(UMatAction::PostEditChange);
@@ -354,7 +354,7 @@ void UMatAction::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("Clears stale pending-kill object reference at +0x40 per retail 89b")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1041D750 not yet fully reconstructed")
 void UMatAction::PostLoad()
 {
 	// Retail: 89b. Call Super::PostLoad() then clear stale object reference.
@@ -412,7 +412,7 @@ int UMatSubAction::Update(float Pct, ASceneManager*)
 	return 1;
 }
 
-IMPL_APPROX("Calls Super::PostEditChange and refreshes scene manager path")
+IMPL_MATCH("Engine.dll", 0x1041fb50)
 void UMatSubAction::PostEditChange()
 {
 	guard(UMatSubAction::PostEditChange);
@@ -431,13 +431,13 @@ void UMatSubAction::PreBeginPreview()
 {
 }
 
-IMPL_APPROX("returns empty string; stat string not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e240 is 191 bytes, not fully reconstructed")
 FString UMatSubAction::GetStatString()
 {
 	return FString();
 }
 
-IMPL_APPROX("returns empty string; status description not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041d980 is 173 bytes, not fully reconstructed")
 FString UMatSubAction::GetStatusDesc()
 {
 	return FString();
@@ -450,14 +450,14 @@ void UMatSubAction::Initialize()
 	eventInitialize();
 }
 
-IMPL_APPROX("Returns 1 if status byte at +0x2C equals 2 (ending state)")
+IMPL_MATCH("Engine.dll", 0x1041da30)
 int UMatSubAction::IsEnding()
 {
 	// Retail: 12b. Returns 1 if status byte at this+0x2C == 2 (SETE pattern).
 	return *(BYTE*)((BYTE*)this + 0x2C) == 2 ? 1 : 0;
 }
 
-IMPL_APPROX("Returns 1 if status byte at +0x2C is 1 (running) or 2 (ending)")
+IMPL_MATCH("Engine.dll", 0x1041da40)
 int UMatSubAction::IsRunning()
 {
 	// Retail: 14b. Returns 1 if status byte at this+0x2C is 1 (started) or 2 (ending).
@@ -515,7 +515,7 @@ int USubActionCameraEffect::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_APPROX("returns empty string; camera effect stat string not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103862a0 is 84 bytes, not fully reconstructed")
 FString USubActionCameraEffect::GetStatString()
 {
 	return FString();
@@ -523,7 +523,7 @@ FString USubActionCameraEffect::GetStatString()
 
 
 // --- USubActionCameraShake ---
-IMPL_APPROX("FRangeVector::GetRand not implemented; calls parent and returns only")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041da60 is 116 bytes, not fully reconstructed")
 int USubActionCameraShake::Update(float Pct, ASceneManager* SceneMgr)
 {
 	// Retail: 0x11da60, 116b. Calls parent Update; if running, gets scene manager via
@@ -533,7 +533,7 @@ int USubActionCameraShake::Update(float Pct, ASceneManager* SceneMgr)
 	return UMatSubAction::Update(Pct, SceneMgr) ? 1 : 0;
 }
 
-IMPL_APPROX("returns empty string; camera shake stat string not implemented")
+IMPL_MATCH("Engine.dll", 0x1041dae0)
 FString USubActionCameraShake::GetStatString()
 {
 	return FString();
@@ -572,7 +572,7 @@ int USubActionFOV::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_APPROX("returns empty string; FOV stat string not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e3c0 is 187 bytes, not fully reconstructed")
 FString USubActionFOV::GetStatString()
 {
 	return FString();
@@ -616,7 +616,7 @@ int USubActionFade::Update(float Pct, ASceneManager* SceneMgr)
 	return 0;
 }
 
-IMPL_APPROX("returns empty string; fade stat string not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e7b0 is 202 bytes, not fully reconstructed")
 FString USubActionFade::GetStatString()
 {
 	return FString();
@@ -652,7 +652,7 @@ int USubActionGameSpeed::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_APPROX("returns empty string; game speed stat string not implemented")
+IMPL_DIVERGE("USubActionGameSpeed::GetStatString not found in Ghidra export — cannot confirm VA")
 FString USubActionGameSpeed::GetStatString()
 {
 	return FString();
@@ -694,7 +694,7 @@ void USubActionOrientation::PostLoad()
 	}
 }
 
-IMPL_APPROX("returns empty string; orientation stat string not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e4e0 is 342 bytes, not fully reconstructed")
 FString USubActionOrientation::GetStatString()
 {
 	return FString();
@@ -739,7 +739,7 @@ int USubActionSceneSpeed::Update(float Pct, ASceneManager* SceneMgr)
 	return 1;
 }
 
-IMPL_APPROX("returns empty string; scene speed stat string not implemented")
+IMPL_DIVERGE("USubActionSceneSpeed::GetStatString not found in Ghidra export — cannot confirm VA")
 FString USubActionSceneSpeed::GetStatString()
 {
 	return FString();
@@ -771,7 +771,7 @@ int USubActionTrigger::Update(float Pct, ASceneManager* SceneMgr)
 	return 0;
 }
 
-IMPL_APPROX("returns empty string; trigger stat string not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e300 is 181 bytes, not fully reconstructed")
 FString USubActionTrigger::GetStatString()
 {
 	return FString();
@@ -785,15 +785,15 @@ FString USubActionTrigger::GetStatString()
 // ASceneManager
 // =============================================================================
 
-IMPL_APPROX("Delegates to Super::PostEditChange()")
+IMPL_MATCH("Engine.dll", 0x1041fa50)
 void ASceneManager::PostEditChange() { Super::PostEditChange(); }
-IMPL_APPROX("Delegates to Super::Tick()")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041fee0 is 728 bytes, not fully reconstructed")
 INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
 IMPL_EMPTY("scene manager post-begin-play no-op")
 void ASceneManager::PostBeginPlay() {}
-IMPL_APPROX("Delegates to Super::CheckForErrors()")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041e930 is 121 bytes, not fully reconstructed")
 void ASceneManager::CheckForErrors() { Super::CheckForErrors(); }
-IMPL_APPROX("returns 0.0f; total scene time query not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1041ded0 is 108 bytes, not fully reconstructed")
 FLOAT ASceneManager::GetTotalSceneTime() { return 0.0f; }
 
 // =============================================================================
@@ -804,7 +804,7 @@ IMPL_EMPTY("close video no-op")
 void AReplicationInfo::CloseVideo(UCanvas* Canvas)
 {
 }
-IMPL_APPROX("Stores raw time, clears reset counter, calls RefreshSubActions with normalised pct")
+IMPL_MATCH("Engine.dll", 0x1041dd70)
 void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
 	// Retail: 42b. Stores raw time at this+0x3D0, clears reset counter at this+0x448,
 	// then calls RefreshSubActions with time normalized by TotalSceneTime at this+0x3CC.
@@ -817,7 +817,7 @@ void ASceneManager::SetSceneStartTime() {}
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_APPROX("FLineBatcher wireframe box not reconstructed; falls back to base class rendering")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1040BA00 not yet fully reconstructed")
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);
@@ -866,11 +866,11 @@ IMPL_EMPTY("FMatineeTools destructor no-op")
 FMatineeTools::~FMatineeTools() {}
 
 // ?GetCurrent@FMatineeTools@@QAEPAVASceneManager@@XZ
-IMPL_APPROX("Returns CurrentScene pointer")
+IMPL_MATCH("Engine.dll", 0x10316710)
 ASceneManager * FMatineeTools::GetCurrent() { return CurrentScene; }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@PAV2@@Z
-IMPL_APPROX("Sets current scene and initializes CurrentAction/SubAction from scene's first action")
+IMPL_MATCH("Engine.dll", 0x103c9f60)
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASceneManager * Scene)
 {
 	CurrentScene = Scene;
@@ -894,7 +894,7 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, ASce
 }
 
 // ?SetCurrent@FMatineeTools@@QAEPAVASceneManager@@PAVUEngine@@PAVULevel@@VFString@@@Z
-IMPL_APPROX("Finds named scene manager in level actors and sets it as current")
+IMPL_MATCH("Engine.dll", 0x103c9f60)
 ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FString Name)
 {
 	for (INT i = 0; i < Level->Actors.Num(); i++)
@@ -910,11 +910,11 @@ ASceneManager * FMatineeTools::SetCurrent(UEngine * Engine, ULevel * Level, FStr
 }
 
 // ?GetOrientationDesc@FMatineeTools@@QAE?AVFString@@H@Z
-IMPL_APPROX("returns empty string; orientation description not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103c98a0 is 177 bytes, not fully reconstructed")
 FString FMatineeTools::GetOrientationDesc(int p0) { return FString(); }
 
 // ??4ECLipSynchData@@QAEAAV0@ABV0@@Z
-IMPL_APPROX("Copies 24 bytes of lip sync data via appMemcpy")
+IMPL_DIVERGE("ECLipSynchData::operator= not found in Ghidra export — cannot confirm VA")
 ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 	appMemcpy(this, &Other, 24);
 	return *this;
@@ -923,12 +923,12 @@ ECLipSynchData & ECLipSynchData::operator=(ECLipSynchData const & Other) {
 // --- Moved from EngineStubs.cpp ---
 // ?GetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@XZ
 // Ghidra: returns CurrentAction (offset 0x44).
-IMPL_APPROX("Returns CurrentAction pointer")
+IMPL_DIVERGE("FMatineeTools::GetCurrentAction not found in Ghidra export — cannot confirm VA")
 UMatAction * FMatineeTools::GetCurrentAction() { return CurrentAction; }
 
 // ?GetNextAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: GetActionIdx, return [idx+1] wrapping to [0].
-IMPL_APPROX("Returns action at index+1 in Actions array, wrapping to 0 at end")
+IMPL_MATCH("Engine.dll", 0x103c9ac0)
 UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Current)
 {
 	if (!Scene) return NULL;
@@ -941,7 +941,7 @@ UMatAction * FMatineeTools::GetNextAction(ASceneManager * Scene, UMatAction * Cu
 
 // ?GetNextMovementAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: calls GetNextAction in a loop until the action IsA(UActionMoveCamera).
-IMPL_APPROX("Finds next UActionMoveCamera in the action sequence")
+IMPL_MATCH("Engine.dll", 0x103ca080)
 UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAction * Current)
 {
 	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)Scene + 0x3A8);
@@ -960,7 +960,7 @@ UMatAction * FMatineeTools::GetNextMovementAction(ASceneManager * Scene, UMatAct
 
 // ?GetPrevAction@FMatineeTools@@QAEPAVUMatAction@@PAVASceneManager@@PAV2@@Z
 // Ghidra: GetActionIdx, return [idx-1] wrapping to [last].
-IMPL_APPROX("Returns action at index-1, wrapping to last at beginning")
+IMPL_MATCH("Engine.dll", 0x103c9b90)
 UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Current)
 {
 	if (!Scene) return NULL;
@@ -974,7 +974,7 @@ UMatAction * FMatineeTools::GetPrevAction(ASceneManager * Scene, UMatAction * Cu
 
 // ?SetCurrentAction@FMatineeTools@@QAEPAVUMatAction@@PAV2@@Z
 // Ghidra: sets CurrentAction, primes CurrentSubAction from SubActions[0] if available.
-IMPL_APPROX("Sets CurrentAction and primes CurrentSubAction from SubActions[0]")
+IMPL_MATCH("Engine.dll", 0x1031ca40)
 UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
 {
 	CurrentAction = Action;
@@ -992,12 +992,12 @@ UMatAction * FMatineeTools::SetCurrentAction(UMatAction * Action)
 
 // ?GetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@XZ
 // Ghidra: returns CurrentSubAction (offset 0x48).
-IMPL_APPROX("Returns CurrentSubAction pointer")
+IMPL_DIVERGE("FMatineeTools::GetCurrentSubAction not found in Ghidra export — cannot confirm VA")
 UMatSubAction * FMatineeTools::GetCurrentSubAction() { return CurrentSubAction; }
 
 // ?SetCurrentSubAction@FMatineeTools@@QAEPAVUMatSubAction@@PAV2@@Z
 // Ghidra: stores SubAction at this+0x48 and returns it.
-IMPL_APPROX("Stores SubAction to CurrentSubAction and returns it")
+IMPL_MATCH("Engine.dll", 0x10316730)
 UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
 {
 	CurrentSubAction = SubAction;
@@ -1006,7 +1006,7 @@ UMatSubAction * FMatineeTools::SetCurrentSubAction(UMatSubAction * SubAction)
 
 
 // ?GetActionIdx@FMatineeTools@@QAEHPAVASceneManager@@PAVUMatAction@@@Z
-IMPL_APPROX("Returns index of Action in SM->Actions array, or -1 if not found")
+IMPL_MATCH("Engine.dll", 0x103c9960)
 int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 {
 	if (!SM)
@@ -1022,7 +1022,7 @@ int FMatineeTools::GetActionIdx(ASceneManager* SM, UMatAction* Action)
 }
 
 // ?GetPathStyle@FMatineeTools@@QAEHPAVUMatAction@@@Z
-IMPL_APPROX("Returns path style byte; 0 for Pause actions, per-action byte for MoveCamera")
+IMPL_MATCH("Engine.dll", 0x103ca030)
 int FMatineeTools::GetPathStyle(UMatAction* Action)
 {
 	if (Action)
@@ -1036,7 +1036,7 @@ int FMatineeTools::GetPathStyle(UMatAction* Action)
 }
 
 // ?GetSubActionIdx@FMatineeTools@@QAEHPAVUMatSubAction@@@Z
-IMPL_APPROX("Returns index of SubAction in CurrentAction->SubActions, or -1")
+IMPL_MATCH("Engine.dll", 0x103c9a10)
 int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 {
 	if (!CurrentAction)
@@ -1051,7 +1051,7 @@ int FMatineeTools::GetSubActionIdx(UMatSubAction* SubAction)
 	return -1;
 }
 // ?m_vStartLipsynch@ECLipSynchData@@QAEXXZ
-IMPL_APPROX("Sets bPlaying=1 to start lip sync playback")
+IMPL_MATCH("Engine.dll", 0x10354bd0)
 void ECLipSynchData::m_vStartLipsynch()
 {
 	bPlaying = 1;

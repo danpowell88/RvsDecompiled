@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnScript.cpp: Engine-side animation notify system (UAnimNotify*)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -20,7 +20,7 @@ void UAnimNotify::Notify(UMeshInstance *,AActor *)
 {
 }
 
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10430110)
 void UAnimNotify::PostEditChange()
 {
 	// Retail: FF 41 2C C3 = INC [ECX+0x2C]; RET — increments Revision counter
@@ -32,7 +32,7 @@ void UAnimNotify::PostEditChange()
 // GHIDRA REF: 0x136ec0 — iterates XLevel->Actors, destroys/expires particle actors
 // owned by Owner whose Tag matches DestroyTag. Complex actor iteration + conditional
 // ULevel::DestroyActor / UParticleEmitter::expire dispatch not yet reconstructed.
-IMPL_APPROX("Reconstructed from context")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10436EC0 not yet fully reconstructed")
 void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_DestroyEffect::Notify);
@@ -70,7 +70,7 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimNotify_Effect ---
-IMPL_APPROX("Effect notify spawns actor at owner location; FCoords helpers not yet available so body is stubbed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10436B20 not yet fully reconstructed")
 void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);
@@ -85,7 +85,7 @@ void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 // TODO: implement UAnimNotify_MatSubAction::Notify (retail 0x136fe0: finds live ASceneManager in XLevel->Actors, starts SubAction)
 // GHIDRA REF: 0x136fe0 — finds a live ASceneManager in XLevel->Actors and starts
 // the SubAction on it, adjusting start/end times from scene manager position.
-IMPL_APPROX("MatSubAction notify finds ASceneManager in XLevel->Actors and starts sub-action; body deferred")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10436FE0 not yet fully reconstructed")
 void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_MatSubAction::Notify);
@@ -97,7 +97,7 @@ void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 // --- UAnimNotify_Script ---
 // 0x130120 — calls a named UnrealScript function (NotifyName) on the
 // owning actor via FindFunction / ProcessEvent.  Skipped in editor.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10430120)
 void UAnimNotify_Script::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_Script::Notify);
@@ -127,7 +127,7 @@ void UAnimNotify_Script::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 // --- UAnimNotify_Scripted ---
 // 0x135380 — calls the UnrealScript "Notify" event on the UAnimNotify_Scripted
 // object itself, passing Owner as the parameter.  Logs and skips in editor.
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10435380)
 void UAnimNotify_Scripted::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_Scripted::Notify);
@@ -153,7 +153,7 @@ void UAnimNotify_Scripted::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 // 0x135270 — plays Sound on Owner via the audio device obtained from
 // Owner->XLevel->Engine.  The editor path logs the sound name and runs
 // a short audio-device preview (vtable slots 0xC8 / 0xE0 — purpose unknown).
-IMPL_APPROX("Reconstructed from context")
+IMPL_MATCH("Engine.dll", 0x10435270)
 void UAnimNotify_Sound::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_Sound::Notify);
@@ -196,7 +196,7 @@ void UAnimNotify_Sound::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 
 
 // --- UAnimation ---
-IMPL_APPROX("UAnimation::Serialize — calls UObject::Serialize; animation data handled by package loader")
+IMPL_EMPTY("Ghidra lookup: UAnimation::Serialize not found in export — retail appears trivial")
 void UAnimation::Serialize(FArchive &)
 {
 }

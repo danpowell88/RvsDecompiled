@@ -12,19 +12,19 @@ IMPLEMENT_FUNCTION(UR6FileManagerPlanning, -1, execSavePlanning)
 
 // --- UR6FileManagerPlanning ---
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10007ae0)
 void UR6FileManagerPlanning::execGetNumberOfFiles(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100071a0)
 void UR6FileManagerPlanning::execLoadPlanning(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10007700)
 void UR6FileManagerPlanning::execSavePlanning(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

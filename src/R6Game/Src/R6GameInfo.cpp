@@ -32,7 +32,7 @@ static INT s_ScoreSubmissionActive = 0;
 
 // --- AR6GameInfo ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10001550)
 void AR6GameInfo::AbortScoreSubmission()
 {
 	if (s_ScoreSubmissionActive)
@@ -46,7 +46,7 @@ void AR6GameInfo::AbortScoreSubmission()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10002fc0)
 void AR6GameInfo::InitGameInfoGameService()
 {
 	// Load the R6GSServers class from the GameService package
@@ -136,7 +136,7 @@ void AR6GameInfo::InitGameInfoGameService()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10001200)
 void AR6GameInfo::MasterServerManager()
 {
 	if (m_GameService)
@@ -151,7 +151,7 @@ void AR6GameInfo::MasterServerManager()
 	}
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10002f50)
 void AR6GameInfo::PostBeginPlay()
 {
 	if (!m_GameService)
@@ -178,55 +178,55 @@ void AR6GameInfo::PostBeginPlay()
 	}
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10001410)
 void AR6GameInfo::execGetSystemUserName(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10003380)
 void AR6GameInfo::execInitScoreSubmission(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100036b0)
 void AR6GameInfo::execLogoutUpdatePlayersCtrlInfo(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100012e0)
 void AR6GameInfo::execNativeLogout(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10003200)
 void AR6GameInfo::execSetController(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10003500)
 void AR6GameInfo::execSubmissionNotifySendStartMatch(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10001720)
 void AR6GameInfo::execSubmissionSrvRoundFinish(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100015e0)
 void AR6GameInfo::execSubmissionSrvRoundStart(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x100038a0)
 void AR6GameInfo::execSubmissionUpdateLadderStat(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

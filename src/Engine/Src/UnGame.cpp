@@ -733,11 +733,11 @@ void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void AGameInfo::AbortScoreSubmission() {}
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void AGameInfo::MasterServerManager() {}
-IMPL_DIVERGE("Reconstructed from context — not in Engine.dll Ghidra index")
+IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
 void AGameInfo::InitGameInfoGameService() {}
 IMPL_MATCH("Engine.dll", 0xA2BE0)
 void AGameInfo::ProcessR6Availabilty(ULevel*, FString) {}

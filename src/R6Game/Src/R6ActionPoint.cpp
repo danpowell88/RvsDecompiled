@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6ActionPoint)
 
 // --- AR6ActionPoint ---
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10007cd0)
 void AR6ActionPoint::SetRotationToward(FVector Target)
 {
 	// Compute direction vector from Location to Target in the XY plane
@@ -31,7 +31,7 @@ void AR6ActionPoint::SetRotationToward(FVector Target)
 	*(BYTE*)((BYTE*)this + 0x3f) = (BYTE)(Yaw / 255);
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Game.dll", 0x10009360)
 void AR6ActionPoint::TransferFile(FArchive& Ar)
 {
 	// BYTE action/movement fields (0x3A4-0x3A7)

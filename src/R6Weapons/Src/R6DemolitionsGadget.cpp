@@ -44,13 +44,13 @@ void AR6DemolitionsGadget::PostNetReceive()
 		eventNbBulletChange();
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Weapons.dll", 0x10001b60)
 void AR6DemolitionsGadget::eventNbBulletChange()
 {
 	ProcessEvent(FindFunctionChecked(R6WEAPONS_NbBulletChange), NULL);
 }
 
-IMPL_APPROX("Ravenshield-specific; reconstructed from context")
+IMPL_MATCH("R6Weapons.dll", 0x10001b30)
 void AR6DemolitionsGadget::eventSetGadgetStaticMesh()
 {
 	ProcessEvent(FindFunctionChecked(R6WEAPONS_SetGadgetStaticMesh), NULL);

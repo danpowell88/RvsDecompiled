@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnTerrainTools.cpp: Terrain editor brush hierarchy (UTerrainBrush*)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -45,7 +45,7 @@ UTerrainBrush::UTerrainBrush(UTerrainBrush const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_DIVERGE("stub body (2 line(s)) — Ghidra 0x10315690 is 217 bytes, not fully reconstructed")
 UTerrainBrush::UTerrainBrush()
 {
 	// Initialize 2 FStrings to empty
@@ -75,7 +75,7 @@ UTerrainBrush& UTerrainBrush::operator=(const UTerrainBrush& Other)
 static ATerrainInfo* GCurrentTerrainInfo  = NULL; // DAT_1061b794
 static UTexture*     GCurrentAlphaTexture = NULL; // DAT_1061b790
 
-IMPL_APPROX("reads GCurrentTerrainInfo/GCurrentAlphaTexture globals and locks alpha texture")
+IMPL_MATCH("Engine.dll", 0x10465a30)
 int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 {
 	guard(UTerrainBrush::BeginPainting);
@@ -120,7 +120,7 @@ void UTerrainBrush::Execute(int)
 	unguard;
 }
 
-IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
+IMPL_MATCH("Engine.dll", 0x104651f0)
 FBox UTerrainBrush::GetRect()
 {
 	return FBox();
@@ -128,7 +128,7 @@ FBox UTerrainBrush::GetRect()
 
 
 // --- UTerrainBrushColor ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315980)
 UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -137,14 +137,14 @@ UTerrainBrushColor::UTerrainBrushColor(UTerrainBrushColor const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315980)
 UTerrainBrushColor::UTerrainBrushColor()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushColor::~UTerrainBrushColor not found in Ghidra export — cannot confirm VA")
 UTerrainBrushColor::~UTerrainBrushColor()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -168,7 +168,7 @@ void UTerrainBrushColor::Execute(int)
 
 
 // --- UTerrainBrushEdgeTurn ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315e20)
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -177,14 +177,14 @@ UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn(UTerrainBrushEdgeTurn const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315e20)
 UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn not found in Ghidra export — cannot confirm VA")
 UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -206,7 +206,7 @@ void UTerrainBrushEdgeTurn::Execute(int)
 	unguard;
 }
 
-IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10466130 is 172 bytes, not fully reconstructed")
 FBox UTerrainBrushEdgeTurn::GetRect()
 {
 	return FBox();
@@ -214,7 +214,7 @@ FBox UTerrainBrushEdgeTurn::GetRect()
 
 
 // --- UTerrainBrushFlatten ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315b00)
 UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -223,14 +223,14 @@ UTerrainBrushFlatten::UTerrainBrushFlatten(UTerrainBrushFlatten const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315b00)
 UTerrainBrushFlatten::UTerrainBrushFlatten()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushFlatten::~UTerrainBrushFlatten not found in Ghidra export — cannot confirm VA")
 UTerrainBrushFlatten::~UTerrainBrushFlatten()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -254,7 +254,7 @@ void UTerrainBrushFlatten::Execute(int)
 
 
 // --- UTerrainBrushNoise ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315a80)
 UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -263,14 +263,14 @@ UTerrainBrushNoise::UTerrainBrushNoise(UTerrainBrushNoise const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315a80)
 UTerrainBrushNoise::UTerrainBrushNoise()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushNoise::~UTerrainBrushNoise not found in Ghidra export — cannot confirm VA")
 UTerrainBrushNoise::~UTerrainBrushNoise()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -294,7 +294,7 @@ void UTerrainBrushNoise::Execute(int)
 
 
 // --- UTerrainBrushPaint ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315900)
 UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -303,14 +303,14 @@ UTerrainBrushPaint::UTerrainBrushPaint(UTerrainBrushPaint const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315900)
 UTerrainBrushPaint::UTerrainBrushPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushPaint::~UTerrainBrushPaint not found in Ghidra export — cannot confirm VA")
 UTerrainBrushPaint::~UTerrainBrushPaint()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -341,7 +341,7 @@ void UTerrainBrushPlanningPaint::MouseButtonDown(UViewport *)
 	unguard;
 }
 
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315ea0)
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPaint const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -350,14 +350,14 @@ UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint(UTerrainBrushPlanningPain
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315ea0)
 UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint not found in Ghidra export — cannot confirm VA")
 UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -395,7 +395,7 @@ void UTerrainBrushSelect::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315d20)
 UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -404,14 +404,14 @@ UTerrainBrushSelect::UTerrainBrushSelect(UTerrainBrushSelect const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315d20)
 UTerrainBrushSelect::UTerrainBrushSelect()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushSelect::~UTerrainBrushSelect not found in Ghidra export — cannot confirm VA")
 UTerrainBrushSelect::~UTerrainBrushSelect()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -433,7 +433,7 @@ void UTerrainBrushSelect::Execute(int)
 	unguard;
 }
 
-IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x104657c0 is 113 bytes, not fully reconstructed")
 FBox UTerrainBrushSelect::GetRect()
 {
 	return FBox();
@@ -441,7 +441,7 @@ FBox UTerrainBrushSelect::GetRect()
 
 
 // --- UTerrainBrushSmooth ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315a00)
 UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -450,14 +450,14 @@ UTerrainBrushSmooth::UTerrainBrushSmooth(UTerrainBrushSmooth const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315a00)
 UTerrainBrushSmooth::UTerrainBrushSmooth()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushSmooth::~UTerrainBrushSmooth not found in Ghidra export — cannot confirm VA")
 UTerrainBrushSmooth::~UTerrainBrushSmooth()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -488,7 +488,7 @@ void UTerrainBrushTexPan::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315ba0)
 UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -497,14 +497,14 @@ UTerrainBrushTexPan::UTerrainBrushTexPan(UTerrainBrushTexPan const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315ba0)
 UTerrainBrushTexPan::UTerrainBrushTexPan()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushTexPan::~UTerrainBrushTexPan not found in Ghidra export — cannot confirm VA")
 UTerrainBrushTexPan::~UTerrainBrushTexPan()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -528,7 +528,7 @@ void UTerrainBrushTexRotate::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315c20)
 UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -537,14 +537,14 @@ UTerrainBrushTexRotate::UTerrainBrushTexRotate(UTerrainBrushTexRotate const &Oth
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315c20)
 UTerrainBrushTexRotate::UTerrainBrushTexRotate()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushTexRotate::~UTerrainBrushTexRotate not found in Ghidra export — cannot confirm VA")
 UTerrainBrushTexRotate::~UTerrainBrushTexRotate()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -568,7 +568,7 @@ void UTerrainBrushTexScale::MouseMove(float,float)
 	unguard;
 }
 
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315ca0)
 UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -577,14 +577,14 @@ UTerrainBrushTexScale::UTerrainBrushTexScale(UTerrainBrushTexScale const &Other)
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315ca0)
 UTerrainBrushTexScale::UTerrainBrushTexScale()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushTexScale::~UTerrainBrushTexScale not found in Ghidra export — cannot confirm VA")
 UTerrainBrushTexScale::~UTerrainBrushTexScale()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -601,7 +601,7 @@ UTerrainBrushTexScale& UTerrainBrushTexScale::operator=(const UTerrainBrushTexSc
 
 
 // --- UTerrainBrushVertexEdit ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315880)
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -610,14 +610,14 @@ UTerrainBrushVertexEdit::UTerrainBrushVertexEdit(UTerrainBrushVertexEdit const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315880)
 UTerrainBrushVertexEdit::UTerrainBrushVertexEdit()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit not found in Ghidra export — cannot confirm VA")
 UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -634,7 +634,7 @@ UTerrainBrushVertexEdit& UTerrainBrushVertexEdit::operator=(const UTerrainBrushV
 
 
 // --- UTerrainBrushVisibility ---
-IMPL_APPROX("same FString+DWORD layout as UTerrainBrush copy ctor")
+IMPL_MATCH("Engine.dll", 0x10315da0)
 UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &Other)
 {
 	// Same layout as UTerrainBrush; vtable set by compiler
@@ -643,14 +643,14 @@ UTerrainBrushVisibility::UTerrainBrushVisibility(UTerrainBrushVisibility const &
 	appMemcpy((BYTE*)this + 0x1C, (const BYTE*)&Other + 0x1C, 0x4C); // 19 DWORDs
 }
 
-IMPL_APPROX("placement-new initializes two FStrings to empty")
+IMPL_MATCH("Engine.dll", 0x10315da0)
 UTerrainBrushVisibility::UTerrainBrushVisibility()
 {
 	new ((BYTE*)this + 0x04) FString();
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_APPROX("reverse-order FString destruction matching UTerrainBrush dtor")
+IMPL_DIVERGE("UTerrainBrushVisibility::~UTerrainBrushVisibility not found in Ghidra export — cannot confirm VA")
 UTerrainBrushVisibility::~UTerrainBrushVisibility()
 {
 	((FString*)((BYTE*)this + 0x10))->~FString();
@@ -672,7 +672,7 @@ void UTerrainBrushVisibility::Execute(int)
 	unguard;
 }
 
-IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10466050 is 172 bytes, not fully reconstructed")
 FBox UTerrainBrushVisibility::GetRect()
 {
 	return FBox();

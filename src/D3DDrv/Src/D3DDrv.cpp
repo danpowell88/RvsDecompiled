@@ -117,7 +117,7 @@ static INT                  GBinkHeight      = 0;
 	The retail binary uses movntps streaming stores for large aligned copies.
 	This reconstruction uses appMemcpy as a functional equivalent.
 -----------------------------------------------------------------------------*/
-IMPL_APPROX("Retail uses SSE movntps streaming stores for large aligned copies; reconstructed as appMemcpy fallback")
+IMPL_DIVERGE("Retail uses SSE movntps streaming stores for large aligned copies; reconstructed as appMemcpy fallback")
 static void D3DMemcpy( void* Dst, const void* Src, DWORD Count )
 {
 	appMemcpy( Dst, Src, Count );
@@ -126,7 +126,7 @@ static void D3DMemcpy( void* Dst, const void* Src, DWORD Count )
 /*=============================================================================
 	Helper: D3D error string.
 =============================================================================*/
-IMPL_APPROX("Helper mapping D3D HRESULT codes to human-readable strings; not a standalone function in the retail binary")
+IMPL_DIVERGE("Helper mapping D3D HRESULT codes to human-readable strings; not a standalone function in the retail binary")
 static const TCHAR* D3DError( HRESULT hr )
 {
 	switch( hr )
@@ -143,7 +143,7 @@ static const TCHAR* D3DError( HRESULT hr )
 	}
 }
 
-IMPL_APPROX("Default constructor initialising config bitfields and zeroing render caps; no dedicated Ghidra address identified")
+IMPL_DIVERGE("Default constructor initialising config bitfields and zeroing render caps; no dedicated Ghidra address identified")
 UD3DRenderDevice::UD3DRenderDevice()
 {
 	// Set default config values. Bitfields cannot be initialised via
@@ -163,7 +163,7 @@ UD3DRenderDevice::UD3DRenderDevice()
 	appMemzero( &GRenderCaps, sizeof(GRenderCaps) );
 }
 
-IMPL_APPROX("Retail copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; omitted as those fields are not in the reconstructed header")
+IMPL_DIVERGE("Retail copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; omitted as those fields are not in the reconstructed header")
 UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	: URenderDevice(Other)
 	, UsePrecaching(Other.UsePrecaching)
@@ -187,7 +187,7 @@ UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	unguard;
 }
 
-IMPL_APPROX("Assignment operator mirroring the config fields copied by the copy constructor; no Ghidra address identified")
+IMPL_DIVERGE("Reconstructed; no Ghidra match found")
 UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 {
 	if (this != &Other)
@@ -220,7 +220,7 @@ UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 	The retail binary registers all BITFIELD and INT config properties here.
 	This reconstruction follows the UT99 pattern adapted for R6's config set.
 =============================================================================*/
-IMPL_APPROX("Config property registration omitted; CPP_PROPERTY cannot take address of bitfield member in standard C++")
+IMPL_DIVERGE("Config property registration omitted; CPP_PROPERTY cannot take address of bitfield member in standard C++")
 void UD3DRenderDevice::StaticConstructor()
 {
 	guard(UD3DRenderDevice::StaticConstructor);
@@ -614,7 +614,7 @@ void UD3DRenderDevice::FlushResource(QWORD CacheID)
 
 	Retail address: 0x1000ad50 (Ghidra)
 =============================================================================*/
-IMPL_APPROX("Retail reads brightness from Viewport->GetOuterUClient()->Brightness; hardcoded to 2.5f pending UViewport stub implementation")
+IMPL_DIVERGE("Retail reads brightness from Viewport->GetOuterUClient()->Brightness; hardcoded to 2.5f pending UViewport stub implementation")
 void UD3DRenderDevice::UpdateGamma(UViewport* Viewport)
 {
 	guard(UD3DRenderDevice::UpdateGamma);
@@ -843,7 +843,7 @@ void UD3DRenderDevice::ReadPixels(UViewport* Viewport, FColor* Pixels)
 
 	The retail binary appears to ignore this (no D3D reference device usage).
 =============================================================================*/
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("D3DDrv.dll", 0x1000b7e0)
 void UD3DRenderDevice::SetEmulationMode(EHardwareEmulationMode Mode)
 {
 	guard(UD3DRenderDevice::SetEmulationMode);
@@ -904,7 +904,7 @@ static BinkCopyToBufferFunc GBinkCopyToBuffer = NULL;
 static BinkNextFrameFunc    GBinkNextFrame    = NULL;
 static BinkWaitFunc         GBinkWait         = NULL;
 
-IMPL_APPROX("Helper to dynamically load binkw32.dll and resolve Bink function pointers at runtime; retail links statically but binkw32.lib is unavailable")
+IMPL_DIVERGE("Helper to dynamically load binkw32.dll and resolve Bink function pointers at runtime; retail links statically but binkw32.lib is unavailable")
 static UBOOL LoadBinkDLL()
 {
 	if( GBinkDLL )
@@ -935,7 +935,7 @@ static UBOOL LoadBinkDLL()
 #define BINKSURFACE32    3
 #define BINKCOPYALL      0x80000000L
 
-IMPL_APPROX("Opens a Bink video file via dynamically loaded binkw32.dll and creates a D3D texture to receive decoded frames")
+IMPL_DIVERGE("Opens a Bink video file via dynamically loaded binkw32.dll and creates a D3D texture to receive decoded frames")
 INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTrack, INT Flags)
 {
 	guard(UD3DRenderDevice::OpenVideo);
@@ -983,7 +983,7 @@ INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTra
 	unguard;
 }
 
-IMPL_APPROX("Releases GBinkTexture and closes GBinkHandle via BinkClose; resets Bink state")
+IMPL_DIVERGE("Releases GBinkTexture and closes GBinkHandle via BinkClose; resets Bink state")
 void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::CloseVideo);
@@ -1004,7 +1004,7 @@ void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 	unguard;
 }
 
-IMPL_APPROX("Decodes the current Bink frame into GBinkTexture via BinkDoFrame/BinkCopyToBuffer and sets it on D3D texture stage 0")
+IMPL_DIVERGE("Decodes the current Bink frame into GBinkTexture via BinkDoFrame/BinkCopyToBuffer and sets it on D3D texture stage 0")
 void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 {
 	guard(UD3DRenderDevice::DisplayVideo);
@@ -1044,7 +1044,7 @@ void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("D3DDrv.dll", 0x10009a60)
 void UD3DRenderDevice::StartVideo(UCanvas* Canvas, INT Width, INT Height, INT Flags)
 {
 	guard(UD3DRenderDevice::StartVideo);
@@ -1053,7 +1053,7 @@ void UD3DRenderDevice::StartVideo(UCanvas* Canvas, INT Width, INT Height, INT Fl
 	unguard;
 }
 
-IMPL_APPROX("Delegates video teardown to CloseVideo; distinction from CloseVideo exists for audio track cueing in other drivers")
+IMPL_DIVERGE("Delegates video teardown to CloseVideo; distinction from CloseVideo exists for audio track cueing in other drivers")
 void UD3DRenderDevice::StopVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::StopVideo);
@@ -1110,7 +1110,7 @@ void UD3DRenderDevice::Draw3DLine(FVector Start, FVector End, FColor Color, UTex
 
 	Used for render-to-texture effects (scope overlays, camera feeds).
 =============================================================================*/
-IMPL_APPROX("Off-screen render target path deferred pending further Ghidra analysis; only the default back buffer restore path is implemented")
+IMPL_DIVERGE("Off-screen render target path deferred pending further Ghidra analysis; only the default back buffer restore path is implemented")
 void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(UD3DRenderDevice::ChangeDrawingSurface);
@@ -1139,7 +1139,7 @@ void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 	Handles full-screen effects like flashbang, gas, and night vision.
 	The Param1/Param2 encode effect type and intensity.
 =============================================================================*/
-IMPL_APPROX("Full-screen effect overlay not implemented; deferred pending Ghidra analysis of the effect dispatch at FUN_10005d50")
+IMPL_DIVERGE("Full-screen effect overlay not implemented; deferred pending Ghidra analysis of the effect dispatch at FUN_10005d50")
 void UD3DRenderDevice::HandleFullScreenEffects(INT Param1, INT Param2)
 {
 	guard(UD3DRenderDevice::HandleFullScreenEffects);
@@ -1383,7 +1383,7 @@ FD3DVertexShader* UD3DRenderDevice::GetVertexShader(EVertexShader Shader, FShade
 	Called when SetRes encounters a fatal error. Cleans up any partially
 	created D3D objects and returns 0 (failure).
 =============================================================================*/
-IMPL_APPROX("Error-path helper for SetRes: logs failure reason, releases partially-created D3D objects, and returns 0")
+IMPL_DIVERGE("Error-path helper for SetRes: logs failure reason, releases partially-created D3D objects, and returns 0")
 INT UD3DRenderDevice::UnSetRes(const TCHAR* Reason, LONG hResult)
 {
 	guard(UD3DRenderDevice::UnSetRes);

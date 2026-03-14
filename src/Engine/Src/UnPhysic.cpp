@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnPhysic.cpp: Physics volumes and zone system
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -54,7 +54,7 @@ void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 	unguard;
 }
 
-IMPL_APPROX("Delegates to AActor::GetOptimizedRepList")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10375370 is 774 bytes, not fully reconstructed")
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -128,7 +128,7 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_APPROX("R6 decoration-volume spawning deferred: undocumented struct layout at +0x3f8 not yet reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x10475AB0 not yet fully reconstructed")
 void AVolume::PostBeginPlay()
 {
 	guard(AVolume::PostBeginPlay);
@@ -141,7 +141,7 @@ void AVolume::PostBeginPlay()
 	unguard;
 }
 
-IMPL_APPROX("No Ghidra RVA; Brush PointCheck pattern inferred from Ghidra notes")
+IMPL_MATCH("Engine.dll", 0x103f05c0)
 int AVolume::Encompasses(FVector Location)
 {
 	// Ghidra: Check if Brush is NULL (offset 0x178), return 0 if so.
@@ -158,7 +158,7 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
-IMPL_APPROX("scout zone-resize fallback path deferred: unknown Level vtable slot 0x9c")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103E12C0 not yet fully reconstructed")
 void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
 	guard(AWarpZoneInfo::AddMyMarker);
@@ -197,7 +197,7 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 
 
 // --- AWarpZoneMarker ---
-IMPL_APPROX("addReachSpecs — navigation reach spec generation; Ghidra analysis pending")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103D8360 not yet fully reconstructed")
 void AWarpZoneMarker::addReachSpecs(APawn*,int)
 {
 	guardSlow(AWarpZoneMarker::addReachSpecs);
@@ -220,7 +220,7 @@ int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 
 
 // --- AZoneInfo ---
-IMPL_APPROX("PostEditChange — zone property sync; no-op acceptable for non-editor builds")
+IMPL_DIVERGE("stub body — Ghidra 0x1037CC60 shows 137-byte implementation not yet reconstructed")
 void AZoneInfo::PostEditChange()
 {
 	guard(AZoneInfo::PostEditChange);

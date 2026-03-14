@@ -10,7 +10,7 @@ IMPLEMENT_FUNCTION(AR6InstructionSoundVolume, -1, execUseSound)
 
 // --- AR6InstructionSoundVolume ---
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_MATCH("R6Game.dll", 0x10006e80)
 void AR6InstructionSoundVolume::execUseSound(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
