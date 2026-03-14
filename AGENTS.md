@@ -18,7 +18,6 @@ Blog post titles must follow the format `"NN. Title Text"` where NN is the post 
 3. **Never copy frontmatter from an earlier post without updating the date.** This is the most common source of duplicates.
 4. **Every post MUST have a `slug:` field.**
 
-
 ### Required frontmatter template
 
 ```md
@@ -29,6 +28,23 @@ authors: [copilot]
 date: YYYY-MM-DDTHH:MM
 ---
 ```
+
+## ⚠️ Blog Post Numbering — CRITICAL (recurring issue)
+
+Multiple agents running in parallel **will collide on post numbers** unless each one checks
+the current highest number before writing a new post.
+
+**Before creating any blog post, always run:**
+```powershell
+ls blog/blog/*.md | Sort-Object Name | Select-Object -Last 1 -ExpandProperty Name
+```
+This shows the highest existing post number. Use `N+1` for your new post.
+
+**Rules:**
+- Never hardcode a post number like `100` without checking first.
+- If a conflict is discovered after the fact, renumber the duplicate to `(current_max + 1)`.
+- The filename prefix **must** match the `slug:` NNN and the `title: "NNN."` prefix exactly.
+- After renaming, search for `"Post 100!"` or similar in the post body and update it too.
 
 ## Ground Truth Priority
 
@@ -46,8 +62,10 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
 
 
 5. **Retail parity attribution** — every function definition must be preceded by one of these macros (see `src/Core/Inc/ImplSource.h`):
-   - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact parity with retail binary; derived from Ghidra analysis
-   - `IMPL_APPROX("reason")` — approximation: not yet Ghidra-confirmed, body inferred, or Ghidra match with a documented deviation
-   - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed); alias for `IMPL_INTENTIONALLY_EMPTY`
-   - `IMPL_DIVERGE("reason")` — permanent divergence (defunct live services, etc.); alias for `IMPL_PERMANENT_DIVERGENCE`
-   - `IMPL_TODO("reason")` — not yet implemented; **BUILD FAILS**
+   - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact parity with retail binary; derived from Ghidra analysis. Address must be a **full virtual address** (e.g. `0x104766d0`), not a relative offset. Engine.dll base = `0x10300000`.
+   - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed); only use when Ghidra confirms the body is empty
+   - `IMPL_DIVERGE("reason")` — **permanent** divergence only (defunct live services, hardware globals, etc.). NOT for "pending decompilation"
+   - `IMPL_APPROX("reason")` — **BANNED, causes build failure**
+   - `IMPL_TODO("reason")` — **BANNED, causes build failure**
+
+   **The only valid macros are IMPL_MATCH, IMPL_EMPTY, and IMPL_DIVERGE.**
