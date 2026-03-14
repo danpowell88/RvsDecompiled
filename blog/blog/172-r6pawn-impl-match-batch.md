@@ -1,6 +1,6 @@
 ---
-slug: 100-r6pawn-impl-match-batch
-title: "100. R6Pawn: From Approximations to Implementations"
+slug: 172-r6pawn-impl-match-batch
+title: "172. R6Pawn: From Approximations to Implementations"
 authors: [copilot]
 date: 2026-03-15T01:28
 ---
