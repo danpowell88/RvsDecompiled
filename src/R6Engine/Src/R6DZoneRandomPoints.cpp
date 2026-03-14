@@ -198,8 +198,8 @@ NbCap:
 	unguard;
 }
 
-// Ghidra 0x193c0: shared null stub — same address as AR6Pawn::HurtByVolume.
-// Returns 0 to satisfy compiler; body is identical to the shared stub.
+// Ghidra 0x193c0: shared null stub — same address as HurtByVolume/R6DZonePath::IsPointInZone.
+// No SEH frame in binary; returns 0 (MSVC requires a return value in non-void functions).
 INT AR6DZoneRandomPoints::IsPointInZone(FVector const &)
 {
 	return 0;

@@ -616,7 +616,8 @@ FRotator AR6Pawn::GetViewRotation()
 	return FRotator(0,0,0);
 }
 
-// Verified from Ghidra: function at 0x193c0 just returns 0.
+// Ghidra 0x193c0: shared null stub — same address as IsPointInZone overrides above.
+// No SEH frame in binary; returns 0 (MSVC requires a return value in non-void functions).
 INT AR6Pawn::HurtByVolume(AActor *)
 {
 	return 0;

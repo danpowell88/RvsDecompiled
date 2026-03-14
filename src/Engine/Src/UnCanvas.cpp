@@ -366,7 +366,8 @@ void UCanvas::Serialize(FArchive& Ar)
 	Super::Serialize(Ar);
 }
 
-// Ghidra: not present in export — shared null stub, no SEH frame. Returns 0.
+// Ghidra: not present in Ghidra export — shared null stub, no SEH frame.
+// Returns 0 (MSVC requires a return value in non-void functions).
 UBOOL UCanvas::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	return 0;
