@@ -435,14 +435,17 @@ FLightMapTexture::FLightMapTexture(FLightMapTexture const &Other)
 	appMemcpy((BYTE*)this + 0x60, (const BYTE*)&Other + 0x60, 0x0C); // 3 DWORDs
 }
 
-IMPL_DIVERGE("0x10410bd0 confirmed; DAT_1060b564 CacheId not yet propagated in FLightMapTexture ULevel* ctor")
+IMPL_MATCH("Engine.dll", 0x10410bd0)
 FLightMapTexture::FLightMapTexture(ULevel* Level)
 {
-	// Ghidra 0x110bd0 (132b): init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14, store Level at +4
-	// DIVERGENCE: retail also reads/increments DAT_1060b564 for a QWORD cache ID at +0x60; we zero it here.
+	// Ghidra 0x110bd0 (132b): init TArray<FLOAT> at +8, init FStaticLightMapTexture at +0x14, store Level at +4,
+	// then read/increment DAT_1060b564 global counter and store composite cache ID at +0x60, zero +0x68.
 	new ((BYTE*)this + 0x08) TArray<FLOAT>();
 	new ((BYTE*)this + 0x14) FStaticLightMapTexture();
 	*(ULevel**)((BYTE*)this + 0x04) = Level;
+	*(QWORD*)((BYTE*)this + 0x60) = (QWORD)(DWORD)DAT_1060b564 * 0x100 + 0xe0;
+	DAT_1060b564++;
+	*(DWORD*)((BYTE*)this + 0x68) = 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x103279b0)
@@ -1590,7 +1593,7 @@ FDynamicActor& FDynamicActor::operator=(const FDynamicActor& Other)
 
 
 // --- FDynamicLight ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x1040D5D0 not yet fully reconstructed")
+IMPL_DIVERGE("calls FUN_1040d530 (unresolved radius-based falloff helper) in general-case branch; directional/cylinder/cone cases reconstructed from Ghidra 0x1040D5D0")
 float FDynamicLight::SampleIntensity(FVector Point, FVector Normal)
 {
 	// Retail: 0x10D5D0, ~200b. Evaluates per-sample light intensity based on light type.

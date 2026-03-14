@@ -131,7 +131,7 @@ CBoneDescData::CBoneDescData()
 	*(DWORD*)((BYTE*)this + 0x20) = 0;
 }
 
-IMPL_DIVERGE("retail 0x10355b90 (196b) has SEH frame; body logic faithful")
+IMPL_MATCH("Engine.dll", 0x10355b90)
 CBoneDescData::~CBoneDescData()
 {
 	// Ghidra 0x55b90: if +0x20 non-null, free each frame buffer (count=this+4),
@@ -249,7 +249,7 @@ UClass * ULodMesh::MeshGetInstanceClass()
 
 
 // --- UMesh ---
-IMPL_DIVERGE("retail 0x103ca570 (96b) has SEH guard frame; body logic faithful")
+IMPL_MATCH("Engine.dll", 0x103ca570)
 void UMesh::Serialize(FArchive& Ar)
 {
 	// Retail: 0xca570, 60b. Calls UPrimitive::Serialize, then if archive is not
