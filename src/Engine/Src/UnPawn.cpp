@@ -1115,9 +1115,9 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
-	// DIVERGENCE: retail drives blend-tree animation nodes from velocity and physics state.
-	// Animation node graph (FUN_-based vtable calls) not fully reconstructed.
-	// Movement animations play through the existing mesh instance state machine instead.
+	// DIVERGENCE: APawn::UpdateMovementAnimation not yet implemented.
+	// GHIDRA REF: reads Velocity magnitude and Physics state to select animation
+	// blend weights. Requires animation blend tree integration not yet reconstructed.
 	unguard;
 }
 
@@ -1434,8 +1434,10 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
-	// DIVERGENCE: retail has pawn-specific step-height/ledge logic not yet reconstructed.
-	// Delegating to AActor::stepUp as a safe fallback.
+	// DIVERGENCE: APawn::stepUp delegates to AActor::stepUp without the pawn-specific
+	// pre/post adjustments (crouch state checks, step height clamping).
+	// GHIDRA REF: pawn step-up adds collision capsule half-height adjustment before
+	// calling the base AActor::stepUp, then corrects Z after.
 	AActor::stepUp( GravDir, DesiredDir, Delta, Hit );
 	unguard;
 }
