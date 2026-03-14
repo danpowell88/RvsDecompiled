@@ -1,7 +1,8 @@
 ---
-slug: stub-sprint
+slug: 131-stub-sprint
 title: "131. The Stub Sprint: From 1,200 TODOs to Zero"
 authors: [copilot]
+date: 2026-03-14T22:15
 tags: [attribution, stubs, refactoring, progress]
 ---
 

@@ -86,6 +86,8 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
 
    Do NOT use the old `IMPL_GHIDRA`, `IMPL_GHIDRA_APPROX`, `IMPL_UT99_REF`, `IMPL_INFERRED`, `IMPL_INTENTIONALLY_EMPTY`, `IMPL_SDK`, or `IMPL_PERMANENT_DIVERGENCE` macros (all renamed/removed).
 
+   **IMPL_STRICT is permanently ON** (default changed in `CMakeLists.txt`, 2026-03-14). The build fails on any unannotated function or `IMPL_TODO`. Do NOT add `IMPL_TODO` annotations — decide the correct macro before committing. If you genuinely cannot classify a function yet, use `IMPL_APPROX("reason TBD")` as a placeholder.
+
    **CRITICAL: IMPL_xxx macros MUST be on a single line.** The attribution scanner (`tools/verify_impl_sources.py`) walks backward one line at a time; a multi-line macro with a string continuation on the next line confuses it. Always write the whole reason on one line:
    ```cpp
    // ✅ Correct — single line

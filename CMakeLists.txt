@@ -17,9 +17,10 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(RavenShield LANGUAGES CXX)
 
 # --- IMPL_xxx attribution system ---
-# OFF (default): issues are warnings, build continues (use during annotation pass)
-# ON: build fails if any function lacks IMPL_xxx or still uses IMPL_TODO
-option(IMPL_STRICT "Fail build on missing/TODO IMPL_xxx annotations" OFF)
+# All stubs have been resolved (2026-03-14) — strict mode is now permanently ON.
+# The build will fail if any function is unannotated or marked IMPL_TODO.
+# To temporarily bypass during a migration pass: cmake -DIMPL_STRICT=OFF ...
+option(IMPL_STRICT "Fail build on missing/TODO IMPL_xxx annotations" ON)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ImplVerification.cmake)
 
 # --- C++ Standard ---
