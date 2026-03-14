@@ -9,49 +9,60 @@
 #include "EnginePrivate.h"
 #include "EngineDecls.h"
 
-// ?KME2UPosition@@YAXPAVFVector@@QBM@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; scale factor 50")
+// ?KME2UPosition@@YAXPAVFVector@@QBM@Z  (Engine.dll 0x1036a2c0)
+IMPL_MATCH("Engine.dll", 0x1036a2c0)
 void KME2UPosition(FVector* Out, float const * const In) {
 	Out->X = In[0] * 50.0f;
 	Out->Y = In[1] * 50.0f;
 	Out->Z = In[2] * 50.0f;
 }
 
-// ?KME2UVecCopy@@YAXPAVFVector@@QBM@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; direct copy")
+// ?KME2UVecCopy@@YAXPAVFVector@@QBM@Z  (Engine.dll 0x1036a310)
+IMPL_MATCH("Engine.dll", 0x1036a310)
 void KME2UVecCopy(FVector* Out, float const * const In) {
 	Out->X = In[0];
 	Out->Y = In[1];
 	Out->Z = In[2];
 }
 
-// ?KTermGameKarma@@YAXXZ
-IMPL_TODO("Needs Ghidra analysis")
+// ?KTermGameKarma@@YAXXZ  (Engine.dll 0x10357cf0, 565 bytes)
+// Tears down the Karma physics world: destroys geometry manager, asset DB,
+// framework, and frees KGData global. Calls MeSDK internal functions that
+// have not yet been fully decompiled into src/MeSDK/.
+IMPL_DIVERGE("KTermGameKarma calls MeSDK internals FUN_104f0110/FUN_104f00e0/FUN_104f1560/FUN_104a9ff0 not yet in MeSDK")
 void KTermGameKarma() {}
 
-// ?KU2MEPosition@@YAXQAMVFVector@@@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; scale factor 0.02")
+// ?KU2MEPosition@@YAXQAMVFVector@@@Z  (Engine.dll 0x1036a290)
+IMPL_MATCH("Engine.dll", 0x1036a290)
 void KU2MEPosition(float * const Out, FVector In) {
 	Out[0] = In.X * 0.02f;
 	Out[1] = In.Y * 0.02f;
 	Out[2] = In.Z * 0.02f;
 }
 
-// ?KU2MEVecCopy@@YAXQAMVFVector@@@Z
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; direct copy")
+// ?KU2MEVecCopy@@YAXQAMVFVector@@@Z  (Engine.dll 0x1036a2f0)
+IMPL_MATCH("Engine.dll", 0x1036a2f0)
 void KU2MEVecCopy(float * const Out, FVector In) {
 	Out[0] = In.X;
 	Out[1] = In.Y;
 	Out[2] = In.Z;
 }
 
-// ?KUpdateMassProps@@YAXPAVUKMeshProps@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+// ?KUpdateMassProps@@YAXPAVUKMeshProps@@@Z  (Engine.dll 0x1036af30, 396 bytes)
+// Computes mass properties by creating a temporary Karma world, instantiating
+// the aggregate geometry, calling McdGeomGetMassProperties, then tearing down.
+// Calls MeSDK internals FUN_104a9ee0/FUN_104f0080/FUN_104ac5a0 etc.
+IMPL_DIVERGE("KUpdateMassProps calls MeSDK internals (FUN_104a9ee0 and related) not yet in MeSDK")
 void KUpdateMassProps(UKMeshProps * p0) {}
 
-// ?KarmaTriListDataInit@@YAXPAU_KarmaTriListData@@@Z
-IMPL_TODO("Needs Ghidra analysis")
-void KarmaTriListDataInit(_KarmaTriListData * p0) {}
+// ?KarmaTriListDataInit@@YAXPAU_KarmaTriListData@@@Z  (Engine.dll 0x10369b80, 25 bytes)
+// Initialises the three count fields of a _KarmaTriListData struct to zero.
+IMPL_MATCH("Engine.dll", 0x10369b80)
+void KarmaTriListDataInit(_KarmaTriListData * p0) {
+	*(int*)((char*)p0 + 0x6000)  = 0;
+	*(int*)((char*)p0 + 0xf004)  = 0;
+	*(int*)((char*)p0 + 0x14008) = 0;
+}
 
 
 // --- Moved from EngineStubs.cpp ---
@@ -66,9 +77,17 @@ template class TLazyArray<BYTE>;
 struct _McdGeometry;
 struct McdGeomMan;
 
-IMPL_TODO("Needs Ghidra analysis")
+// ?KAggregateGeomInstance@@YAPAU_McdGeometry@@PAVFKAggregateGeom@@VFVector@@PAUMcdGeomMan@@PBG@Z
+// (Engine.dll 0x1036a890, 1632 bytes)
+// Builds aggregate Karma geometry from FKAggregateGeom (spheres, boxes,
+// cylinders, convex elements). Calls many MeSDK geometry-creation internals.
+IMPL_DIVERGE("KAggregateGeomInstance calls MeSDK geometry internals (FUN_104c3xxx, FUN_104a8xxx etc.) not yet in MeSDK")
 _McdGeometry* KAggregateGeomInstance(FKAggregateGeom*, FVector, McdGeomMan*, const _WORD*) { return NULL; }
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; scale factor 50")
+
+// ?KME2UCoords@@YAXPAVFCoords@@QAY03$$CBM@Z  (Engine.dll 0x1036a0d0, 158 bytes)
+// Converts a Karma 4x4 column-major matrix to an Unreal FCoords.
+// Origin scaled by 50 (ME → UU). Columns 0-2 map to XAxis/YAxis/ZAxis.
+IMPL_MATCH("Engine.dll", 0x1036a0d0)
 void KME2UCoords(FCoords* Out, const FLOAT (* const tm)[4]) {
 	*Out = FCoords(
 		FVector(tm[3][0]*50.f, tm[3][1]*50.f, tm[3][2]*50.f),
@@ -77,11 +96,18 @@ void KME2UCoords(FCoords* Out, const FLOAT (* const tm)[4]) {
 		FVector(tm[2][0], tm[2][1], tm[2][2])
 	);
 }
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; direct memcpy")
+
+// ?KME2UMatrixCopy@@YAXPAVFMatrix@@QAY03M@Z  (Engine.dll 0x1036a330, 103 bytes)
+// Also serves as KU2MEMatrixCopy — both symbols share this body (raw memcpy).
+IMPL_MATCH("Engine.dll", 0x1036a330)
 void KME2UMatrixCopy(FMatrix* Out, FLOAT (* const In)[4]) {
 	appMemcpy(Out, In, sizeof(FLOAT)*16);
 }
-IMPL_APPROX("Reconstructed from Karma coordinate conversion")
+
+// ?KME2UTransform@@YAXPAVFVector@@PAVFRotator@@QAY03$$CBM@Z  (Engine.dll 0x1036a220)
+// Extracts position (scaled *50) and orientation (via KME2UCoords+OrthoRotation)
+// from a Karma 4x4 matrix into separate FVector/FRotator outputs.
+IMPL_MATCH("Engine.dll", 0x1036a220)
 void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[4]) {
 	OutPos->X = tm[3][0] * 50.0f;
 	OutPos->Y = tm[3][1] * 50.0f;
@@ -90,23 +116,40 @@ void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[
 	KME2UCoords(&Coords, tm);
 	*OutRot = Coords.OrthoRotation();
 }
-IMPL_TODO("Needs Ghidra analysis")
+
+// ?KModelToHulls@@YAXPAVFKAggregateGeom@@PAVUModel@@VFVector@@@Z  (Engine.dll 0x1036c810, 143 bytes)
+// Decomposes a BSP UModel into convex hulls stored in FKAggregateGeom.
+// Calls FUN_1033ac90 (lock BSP), FUN_1036c5a0 (extract hulls), FUN_10323b40 (unlock).
+IMPL_DIVERGE("KModelToHulls calls unnamed Engine internals FUN_1033ac90/FUN_1036c5a0/FUN_10323b40 not yet decompiled")
 void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
-IMPL_APPROX("Reconstructed from Karma coordinate conversion; direct memcpy")
+
+// ?KU2MEMatrixCopy@@YAXQAY03MPAVFMatrix@@@Z  (Engine.dll 0x1036a330, same body as KME2UMatrixCopy)
+IMPL_MATCH("Engine.dll", 0x1036a330)
 void KU2MEMatrixCopy(FLOAT (* const Out)[4], FMatrix* In) {
 	appMemcpy(Out, In, sizeof(FLOAT)*16);
 }
-IMPL_APPROX("Reconstructed from Karma coordinate conversion")
+
+// ?KU2METransform@@YAXQAY03MVFVector@@VFRotator@@@Z  (Engine.dll 0x1036a170, 161 bytes)
+// Converts FVector position and FRotator orientation to a Karma 4x4 matrix.
+// IMPORTANT: Karma uses column-major rotation storage — axis vectors are
+// stored as COLUMNS (transposed relative to Unreal's row convention):
+//   tm[row][0..2] = { XAxis[row], YAxis[row], ZAxis[row] }
+// Position scaled by 0.02 (UU → ME).
+IMPL_MATCH("Engine.dll", 0x1036a170)
 void KU2METransform(FLOAT (* const tm)[4], FVector Pos, FRotator Rot) {
 	FCoords Coords(FVector(0.f,0.f,0.f));
 	Coords *= Rot;
-	tm[0][0] = Coords.XAxis.X; tm[0][1] = Coords.XAxis.Y; tm[0][2] = Coords.XAxis.Z; tm[0][3] = 0.f;
-	tm[1][0] = Coords.YAxis.X; tm[1][1] = Coords.YAxis.Y; tm[1][2] = Coords.YAxis.Z; tm[1][3] = 0.f;
-	tm[2][0] = Coords.ZAxis.X; tm[2][1] = Coords.ZAxis.Y; tm[2][2] = Coords.ZAxis.Z; tm[2][3] = 0.f;
+	// Columns of the rotation matrix = axis vectors (Karma column-major layout)
+	tm[0][0] = Coords.XAxis.X; tm[0][1] = Coords.YAxis.X; tm[0][2] = Coords.ZAxis.X; tm[0][3] = 0.f;
+	tm[1][0] = Coords.XAxis.Y; tm[1][1] = Coords.YAxis.Y; tm[1][2] = Coords.ZAxis.Y; tm[1][3] = 0.f;
+	tm[2][0] = Coords.XAxis.Z; tm[2][1] = Coords.YAxis.Z; tm[2][2] = Coords.ZAxis.Z; tm[2][3] = 0.f;
 	tm[3][0] = Pos.X * 0.02f; tm[3][1] = Pos.Y * 0.02f; tm[3][2] = Pos.Z * 0.02f; tm[3][3] = 1.0f;
 }
 
-IMPL_APPROX("Forces TLazyArray<BYTE> template instantiation for retail symbol export")
+// Local helper to force TLazyArray<BYTE> out-of-line template instantiation.
+// This function does NOT exist in the retail Engine.dll binary; it is our
+// mechanism for emitting the symbols that retail compiled from an unknown TU.
+IMPL_DIVERGE("template instantiation helper; no retail equivalent function")
 void _ForceTLazyArrayByteEmit() {
     TLazyArray<BYTE>* p = new TLazyArray<BYTE>[1];
     TLazyArray<BYTE> copy(*p);

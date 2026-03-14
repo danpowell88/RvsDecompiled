@@ -1,0 +1,826 @@
+[*] Loading Ghidra global.cpp ...
+    592944 lines loaded
+
+======================================================================
+FILE: src/Engine/Src/UnLevel.cpp
+======================================================================
+Found 87 IMPL_APPROX occurrences
+
+  Line    29: [ULevelBase::ULevelBase]
+           Sig: ULevelBase::ULevelBase( UEngine* InOwner, const FURL& InURL )
+           VA:  0x3A220
+           --> IMPL_MATCH("Engine.dll", 0x3A220)
+
+  Line    39: [ULevelBase::Destroy]
+           Sig: void ULevelBase::Destroy()
+           VA:  0xBF030
+           --> IMPL_MATCH("Engine.dll", 0xBF030)
+
+  Line    45: [ULevelBase::Serialize]
+           Sig: void ULevelBase::Serialize( FArchive& Ar )
+           VA:  0xC0F60
+           --> IMPL_MATCH("Engine.dll", 0xC0F60)
+
+  Line    68: [ULevel::ULevel]
+           Sig: ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
+           VA:  0x50990
+           --> IMPL_MATCH("Engine.dll", 0x50990)
+
+  Line   155: [ULevel::Serialize]
+           Sig: void ULevel::Serialize( FArchive& Ar )
+           VA:  0xC3070
+           --> IMPL_MATCH("Engine.dll", 0xC3070)
+
+  Line   161: [ULevel::PostLoad]
+           Sig: void ULevel::PostLoad()
+           VA:  0xC13F0
+           --> IMPL_MATCH("Engine.dll", 0xC13F0)
+
+  Line   167: [ULevel::Destroy]
+           Sig: void ULevel::Destroy()
+           VA:  0xC10C0
+           --> IMPL_MATCH("Engine.dll", 0xC10C0)
+
+  Line   176: [ULevel::Modify]
+           Sig: void ULevel::Modify( INT DoTransArrays )
+           VA:  0xBF1E0
+           --> IMPL_MATCH("Engine.dll", 0xBF1E0)
+
+  Line   186: [ULevel::SetActorCollision]
+           Sig: void ULevel::SetActorCollision( INT bCollision, INT bUnused )
+           VA:  0xBFC60
+           --> IMPL_MATCH("Engine.dll", 0xBFC60)
+
+  Line   234: [ULevel::Tick]
+           Sig: void ULevel::Tick( ELevelTick TickType, FLOAT DeltaSeconds )
+           VA:  0xC6700
+           --> IMPL_MATCH("Engine.dll", 0xC6700)
+
+  Line   242: [ULevel::TickNetClient]
+           Sig: void ULevel::TickNetClient( FLOAT DeltaSeconds )
+           VA:  0xC6E40
+           --> IMPL_MATCH("Engine.dll", 0xC6E40)
+
+  Line   283: [ULevel::TickNetServer]
+           Sig: void ULevel::TickNetServer( FLOAT DeltaSeconds )
+           VA:  0xC5DB0
+           --> IMPL_MATCH("Engine.dll", 0xC5DB0)
+
+  Line   291: [ULevel::ServerTickClient]
+           Sig: INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
+           VA:  0xC53B0
+           --> IMPL_MATCH("Engine.dll", 0xC53B0)
+
+  Line   300: [ULevel::ReconcileActors]
+           Sig: void ULevel::ReconcileActors()
+           VA:  0xBFE10
+           --> IMPL_MATCH("Engine.dll", 0xBFE10)
+
+  Line   382: [ULevel::RememberActors]
+           Sig: void ULevel::RememberActors()
+           VA:  0xBF8B0
+           --> IMPL_MATCH("Engine.dll", 0xBF8B0)
+
+  Line   411: [ULevel::Exec]
+           Sig: INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
+           VA:  0xC1630
+           --> IMPL_MATCH("Engine.dll", 0xC1630)
+
+  Line   420: [ULevel::ShrinkLevel]
+           Sig: void ULevel::ShrinkLevel()
+           VA:  0xBF160
+           --> IMPL_MATCH("Engine.dll", 0xBF160)
+
+  Line   429: [ULevel::CompactActors]
+           Sig: void ULevel::CompactActors()
+           VA:  0xBC540
+           --> IMPL_MATCH("Engine.dll", 0xBC540)
+
+  Line   466: [ULevel::Listen]
+           Sig: INT ULevel::Listen( FString& Error )
+           VA:  0xC0460
+           --> IMPL_MATCH("Engine.dll", 0xC0460)
+
+  Line   490: [ULevel::MoveActor]
+           Sig: INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   499: [ULevel::FarMoveActor]
+           Sig: INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bN
+           VA:  0xB93E0
+           --> IMPL_MATCH("Engine.dll", 0xB93E0)
+
+  Line   524: [ULevel::DestroyActor]
+           Sig: INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
+           VA:  0xB8200
+           --> IMPL_MATCH("Engine.dll", 0xB8200)
+
+  Line   709: [ULevel::CleanupDestroyed]
+           Sig: void ULevel::CleanupDestroyed( INT bForce )
+           VA:  0xB70B0
+           --> IMPL_MATCH("Engine.dll", 0xB70B0)
+
+  Line   769: [ULevel::SpawnActor]
+           Sig: AActor* ULevel::SpawnActor( UClass* Class, FName InName, FVector Location, FRota
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   984: [ULevel::SpawnBrush]
+           Sig: ABrush* ULevel::SpawnBrush()
+           VA:  0xB6FB0
+           --> IMPL_MATCH("Engine.dll", 0xB6FB0)
+
+  Line   995: [ULevel::SpawnViewActor]
+           Sig: void ULevel::SpawnViewActor( UViewport* Viewport )
+           VA:  0xB8840
+           --> IMPL_MATCH("Engine.dll", 0xB8840)
+
+  Line  1003: [ULevel::SpawnPlayActor]
+           Sig: APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1012: [ULevel::FindSpot]
+           Sig: INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActo
+           VA:  0xB9020
+           --> IMPL_MATCH("Engine.dll", 0xB9020)
+
+  Line  1021: [ULevel::CheckSlice]
+           Sig: INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
+           VA:  0xB8B30
+           --> IMPL_MATCH("Engine.dll", 0xB8B30)
+
+  Line  1030: [ULevel::CheckEncroachment]
+           Sig: INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator Tes
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1039: [ULevel::SinglePointCheck]
+           Sig: INT ULevel::SinglePointCheck( FCheckResult& Hit, AActor* SourceActor, FVector Lo
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1061: [ULevel::SinglePointCheck]
+           Sig: INT ULevel::SinglePointCheck( FCheckResult& Hit, FVector Location, FVector Exten
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1082: [ULevel::SingleLineCheck]
+           Sig: INT ULevel::SingleLineCheck( FCheckResult& Hit, AActor* SourceActor, const FVect
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1102: [ULevel::EncroachingWorldGeometry]
+           Sig: INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1119: [ULevel::MultiPointCheck]
+           Sig: FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1128: [ULevel::MultiLineCheck]
+           Sig: FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1137: [ULevel::DetailChange]
+           Sig: void ULevel::DetailChange( INT NewDetail )
+           VA:  0xBFB90
+           --> IMPL_MATCH("Engine.dll", 0xBFB90)
+
+  Line  1167: [ULevel::TickDemoRecord]
+           Sig: INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
+           VA:  0xC62F0
+           --> IMPL_MATCH("Engine.dll", 0xC62F0)
+
+  Line  1178: [ULevel::TickDemoPlayback]
+           Sig: INT ULevel::TickDemoPlayback( FLOAT DeltaSeconds )
+           VA:  0xC65A0
+           --> IMPL_MATCH("Engine.dll", 0xC65A0)
+
+  Line  1204: [ULevel::UpdateTime]
+           Sig: void ULevel::UpdateTime( ALevelInfo* Info )
+           VA:  0xBF5B0
+           --> IMPL_MATCH("Engine.dll", 0xBF5B0)
+
+  Line  1221: [ULevel::IsPaused]
+           Sig: INT ULevel::IsPaused()
+           VA:  0xC66C0
+           --> IMPL_MATCH("Engine.dll", 0xC66C0)
+
+  Line  1237: [ULevel::WelcomePlayer]
+           Sig: void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
+           VA:  0xC0890
+           --> IMPL_MATCH("Engine.dll", 0xC0890)
+
+  Line  1261: [ULevel::IsAudibleAt]
+           Sig: INT ULevel::IsAudibleAt( FVector Location, FVector ListenerLocation, AActor* Sou
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1263: [ULevel::CalculateRadiusMultiplier]
+           Sig: FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner )
+           VA:  0xBF600
+           --> IMPL_MATCH("Engine.dll", 0xBF600)
+
+  Line  1267: [ULevel::NotifyAcceptingConnection]
+           Sig: EAcceptConnection ULevel::NotifyAcceptingConnection() { return ACCEPTC_Reject; }
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1269: [ULevel::NotifyAcceptedConnection]
+           Sig: void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
+           VA:  0xBF2A0
+           --> IMPL_MATCH("Engine.dll", 0xBF2A0)
+
+  Line  1281: [ULevel::NotifyAcceptingChannel]
+           Sig: INT ULevel::NotifyAcceptingChannel( UChannel* Channel ) { return 1; }
+           VA:  0xBF3B0
+           --> IMPL_MATCH("Engine.dll", 0xBF3B0)
+
+  Line  1283: [ULevel::NotifyGetLevel]
+           Sig: ULevel* ULevel::NotifyGetLevel() { return this; }
+           VA:  0x116C0
+           --> IMPL_EMPTY or IMPL_MATCH(0x116C0)
+
+  Line  1285: [ULevel::NotifyReceivedText]
+           Sig: void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
+           VA:  0xC1D30
+           --> IMPL_MATCH("Engine.dll", 0xC1D30)
+
+  Line  1294: [ULevel::NotifySendingFile]
+           Sig: INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
+           VA:  0xBF590
+           --> IMPL_EMPTY or IMPL_MATCH(0xBF590)
+
+  Line  1313: [ULevel::Brush]
+           Sig: ABrush* ULevel::Brush() { return (Actors.Num()>=2 && Actors(1)) ? (ABrush*)Actor
+           VA:  0x1BF30
+           --> IMPL_MATCH("Engine.dll", 0x1BF30)
+
+  Line  1315: [ULevel::EditorDestroyActor]
+           Sig: INT ULevel::EditorDestroyActor( AActor* Actor ) { return DestroyActor( Actor ); 
+           VA:  0xB8100
+           --> IMPL_MATCH("Engine.dll", 0xB8100)
+
+  Line  1317: [ULevel::GetActorIndex]
+           Sig: INT ULevel::GetActorIndex( AActor* Actor )
+           VA:  0x1BFB0
+           --> IMPL_MATCH("Engine.dll", 0x1BFB0)
+
+  Line  1325: [ULevel::GetLevelInfo]
+           Sig: ALevelInfo* ULevel::GetLevelInfo() { return (Actors.Num()>0 && Actors(0)) ? (ALe
+           VA:  0x1C080
+           --> IMPL_MATCH("Engine.dll", 0x1C080)
+
+  Line  1341: [ULevel::MoveActorFirstBlocking]
+           Sig: INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bTest, INT bIgnorePawns, 
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1343: [ULevel::ToFloor]
+           Sig: INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0;
+           VA:  0xC0140
+           --> IMPL_MATCH("Engine.dll", 0xC0140)
+
+  Line  1345: [ULevel::UpdateTerrainArrays]
+           Sig: void ULevel::UpdateTerrainArrays()
+           VA:  0xC11A0
+           --> IMPL_MATCH("Engine.dll", 0xC11A0)
+
+  Line  1397: [ALevelInfo::execGetAddressURL]
+           Sig: void ALevelInfo::execGetAddressURL( FFrame& Stack, RESULT_DECL )
+           VA:  0x125BF0
+           --> IMPL_MATCH("Engine.dll", 0x125BF0)
+
+  Line  1410: [ALevelInfo::execGetLocalURL]
+           Sig: void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
+           VA:  0x125B60
+           --> IMPL_MATCH("Engine.dll", 0x125B60)
+
+  Line  1421: [ALevelInfo::execGetMapNameLocalisation]
+           Sig: void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
+           VA:  0xBDB70
+           --> IMPL_MATCH("Engine.dll", 0xBDB70)
+
+  Line  1432: [ALevelInfo::execFinalizeLoading]
+           Sig: void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
+           VA:  0xB7920
+           --> IMPL_MATCH("Engine.dll", 0xB7920)
+
+  Line  1443: [ALevelInfo::execResetLevelInNative]
+           Sig: void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
+           VA:  0xBD770
+           --> IMPL_MATCH("Engine.dll", 0xBD770)
+
+  Line  1453: [ALevelInfo::execSetBankSound]
+           Sig: void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
+           VA:  0xB79D0
+           --> IMPL_MATCH("Engine.dll", 0xB79D0)
+
+  Line  1465: [ALevelInfo::execNotifyMatchStart]
+           Sig: void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
+           VA:  0xBC230
+           --> IMPL_MATCH("Engine.dll", 0xBC230)
+
+  Line  1475: [ALevelInfo::execPBNotifyServerTravel]
+           Sig: void ALevelInfo::execPBNotifyServerTravel( FFrame& Stack, RESULT_DECL )
+           VA:  0x120330
+           --> IMPL_MATCH("Engine.dll", 0x120330)
+
+  Line  1485: [ALevelInfo::execCallLogThisActor]
+           Sig: void ALevelInfo::execCallLogThisActor( FFrame& Stack, RESULT_DECL )
+           VA:  0xB6E70
+           --> IMPL_MATCH("Engine.dll", 0xB6E70)
+
+  Line  1497: [ALevelInfo::execAddWritableMapPoint]
+           Sig: void ALevelInfo::execAddWritableMapPoint( FFrame& Stack, RESULT_DECL )
+           VA:  0xBBBD0
+           --> IMPL_MATCH("Engine.dll", 0xBBBD0)
+
+  Line  1509: [ALevelInfo::execAddWritableMapIcon]
+           Sig: void ALevelInfo::execAddWritableMapIcon( FFrame& Stack, RESULT_DECL )
+           VA:  0xBC060
+           --> IMPL_MATCH("Engine.dll", 0xBC060)
+
+  Line  1521: [ALevelInfo::execAddEncodedWritableMapStrip]
+           Sig: void ALevelInfo::execAddEncodedWritableMapStrip( FFrame& Stack, RESULT_DECL )
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1536: [AGameInfo::execGetNetworkNumber]
+           Sig: void AGameInfo::execGetNetworkNumber( FFrame& Stack, RESULT_DECL )
+           VA:  0x12B3B0
+           --> IMPL_MATCH("Engine.dll", 0x12B3B0)
+
+  Line  1547: [AGameInfo::execGetCurrentMapNum]
+           Sig: void AGameInfo::execGetCurrentMapNum( FFrame& Stack, RESULT_DECL )
+           VA:  0xA0170
+           --> IMPL_MATCH("Engine.dll", 0xA0170)
+
+  Line  1558: [AGameInfo::execSetCurrentMapNum]
+           Sig: void AGameInfo::execSetCurrentMapNum( FFrame& Stack, RESULT_DECL )
+           VA:  0xA0240
+           --> IMPL_MATCH("Engine.dll", 0xA0240)
+
+  Line  1569: [AGameInfo::execParseKillMessage]
+           Sig: void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
+           VA:  0x12B4F0
+           --> IMPL_MATCH("Engine.dll", 0x12B4F0)
+
+  Line  1584: [AGameInfo::execProcessR6Availabilty]
+           Sig: void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
+           VA:  0xA7070
+           --> IMPL_MATCH("Engine.dll", 0xA7070)
+
+  Line  1594: [AGameInfo::execAbortScoreSubmission]
+           Sig: void AGameInfo::execAbortScoreSubmission( FFrame& Stack, RESULT_DECL )
+           VA:  0xA0330
+           --> IMPL_MATCH("Engine.dll", 0xA0330)
+
+  Line  1609: ??? COULD NOT PARSE --- FPointRegion& FPointRegion::operator=(const FPointRegion& Ot
+  Line  1619: [FPointRegion::FPointRegion]
+           Sig: FPointRegion::FPointRegion() : Zone(NULL), iLeaf(0), ZoneNumber(0) {}
+           VA:  0x2980
+           --> IMPL_MATCH("Engine.dll", 0x2980)
+
+  Line  1622: [FPointRegion::FPointRegion]
+           Sig: FPointRegion::FPointRegion(AZoneInfo* InZone) : Zone(InZone), iLeaf(INDEX_NONE),
+           VA:  0x2980
+           --> IMPL_MATCH("Engine.dll", 0x2980)
+
+  Line  1625: [FPointRegion::FPointRegion]
+           Sig: FPointRegion::FPointRegion(AZoneInfo* InZone, INT InLeaf, BYTE InZoneNumber) : Z
+           VA:  0x2980
+           --> IMPL_MATCH("Engine.dll", 0x2980)
+
+  Line  1633: [ALevelInfo::SetZone]
+           Sig: void ALevelInfo::SetZone(INT ZoneNumber, INT ZoneBitField)
+           VA:  0xB78E0
+           --> IMPL_MATCH("Engine.dll", 0xB78E0)
+
+  Line  1650: [ALevelInfo::GetOptimizedRepList]
+           Sig: INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1662: [ALevelInfo::GetDefaultPhysicsVolume]
+           Sig: APhysicsVolume* ALevelInfo::GetDefaultPhysicsVolume()
+           VA:  0xBB8B0
+           --> IMPL_MATCH("Engine.dll", 0xBB8B0)
+
+  Line  1679: [ALevelInfo::GetDisplayAs]
+           Sig: FString ALevelInfo::GetDisplayAs(FString s) { return s; }
+           VA:  0xB7AB0
+           --> IMPL_MATCH("Engine.dll", 0xB7AB0)
+
+  Line  1740: [ALevelInfo::IsSoundAudibleFromZone]
+           Sig: INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
+           VA:  0x68F0
+           --> IMPL_MATCH("Engine.dll", 0x68F0)
+
+  Line  1754: [AGameReplicationInfo::GetOptimizedRepList]
+           Sig: INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* R
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1761: [APlayerReplicationInfo::GetOptimizedRepList]
+           Sig: INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement*
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line  1776: [AReplicationInfo::GetAvailableVideoMemory]
+           Sig: DWORD AReplicationInfo::GetAvailableVideoMemory() { return 0; }
+           VA:  NOT FOUND
+           --> IMPL_DIVERGE (no Ghidra match)
+
+
+======================================================================
+FILE: src/Engine/Src/UnMaterial.cpp
+======================================================================
+Found 41 IMPL_APPROX occurrences
+
+  Line    52: [UMaterial::Serialize]
+           Sig: void UMaterial::Serialize( FArchive& Ar )
+           VA:  0xC78B0
+           --> IMPL_MATCH("Engine.dll", 0xC78B0)
+
+  Line    60: [UMaterial::CheckCircularReferences]
+           Sig: UBOOL UMaterial::CheckCircularReferences( TArray<UMaterial*>& History )
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   123: [UMaterial::RequiresSorting]
+           Sig: UBOOL UMaterial::RequiresSorting()
+           VA:  NOT FOUND
+           --> IMPL_DIVERGE (no Ghidra match)
+
+  Line   130: [UMaterial::RequiredUVStreams]
+           Sig: BYTE UMaterial::RequiredUVStreams()
+           VA:  0x39A0
+           --> IMPL_EMPTY or IMPL_MATCH(0x39A0)
+
+  Line   148: [UMaterial::HasFallback]
+           Sig: UBOOL UMaterial::HasFallback()
+           VA:  0x39B0
+           --> IMPL_EMPTY or IMPL_MATCH(0x39B0)
+
+  Line   155: [UMaterial::GetDiffuse]
+           Sig: UMaterial* UMaterial::GetDiffuse()
+           VA:  0x1A90
+           --> IMPL_EMPTY or IMPL_MATCH(0x1A90)
+
+  Line   165: [UBitmapMaterial::MaterialUSize]
+           Sig: INT UBitmapMaterial::MaterialUSize()
+           VA:  0x3D20
+           --> IMPL_EMPTY or IMPL_MATCH(0x3D20)
+
+  Line   171: [UBitmapMaterial::MaterialVSize]
+           Sig: INT UBitmapMaterial::MaterialVSize()
+           VA:  0x3D30
+           --> IMPL_EMPTY or IMPL_MATCH(0x3D30)
+
+  Line   181: [UTexture::PostLoad]
+           Sig: void UTexture::PostLoad()
+           VA:  0x16B790
+           --> IMPL_MATCH("Engine.dll", 0x16B790)
+
+  Line   189: [UTexture::Destroy]
+           Sig: void UTexture::Destroy()
+           VA:  0x167B90
+           --> IMPL_MATCH("Engine.dll", 0x167B90)
+
+  Line   197: [UTexture::Serialize]
+           Sig: void UTexture::Serialize( FArchive& Ar )
+           VA:  0x16C940
+           --> IMPL_MATCH("Engine.dll", 0x16C940)
+
+  Line   205: [UTexture::RequiresSorting]
+           Sig: UBOOL UTexture::RequiresSorting()
+           VA:  0x44C0
+           --> IMPL_MATCH("Engine.dll", 0x44C0)
+
+  Line   214: [UTexture::IsTransparent]
+           Sig: UBOOL UTexture::IsTransparent()
+           VA:  0x44E0
+           --> IMPL_MATCH("Engine.dll", 0x44E0)
+
+  Line   224: [UShader::PostEditChange]
+           Sig: void UShader::PostEditChange()
+           VA:  0xC7A80
+           --> IMPL_MATCH("Engine.dll", 0xC7A80)
+
+  Line   232: [UShader::CheckCircularReferences]
+           Sig: UBOOL UShader::CheckCircularReferences( TArray<UMaterial*>& History )
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   251: [UShader::MaterialUSize]
+           Sig: INT UShader::MaterialUSize()
+           VA:  0xC7A40
+           --> IMPL_MATCH("Engine.dll", 0xC7A40)
+
+  Line   262: [UShader::MaterialVSize]
+           Sig: INT UShader::MaterialVSize()
+           VA:  0xC7A60
+           --> IMPL_MATCH("Engine.dll", 0xC7A60)
+
+  Line   273: [UShader::RequiresSorting]
+           Sig: UBOOL UShader::RequiresSorting()
+           VA:  0xC7A00
+           --> IMPL_MATCH("Engine.dll", 0xC7A00)
+
+  Line   288: [UShader::IsTransparent]
+           Sig: UBOOL UShader::IsTransparent()
+           VA:  NOT FOUND
+           --> IMPL_DIVERGE (no Ghidra match)
+
+  Line   295: [UShader::RequiredUVStreams]
+           Sig: BYTE UShader::RequiredUVStreams()
+           VA:  0xC7960
+           --> IMPL_MATCH("Engine.dll", 0xC7960)
+
+  Line   334: [UShader::HasFallback]
+           Sig: UBOOL UShader::HasFallback()
+           VA:  0xC7B30
+           --> IMPL_MATCH("Engine.dll", 0xC7B30)
+
+  Line   340: [UShader::GetDiffuse]
+           Sig: UMaterial* UShader::GetDiffuse()
+           VA:  0x3D20
+           --> IMPL_EMPTY or IMPL_MATCH(0x3D20)
+
+  Line   350: [UModifier::PostEditChange]
+           Sig: void UModifier::PostEditChange()
+           VA:  0xC7CC0
+           --> IMPL_MATCH("Engine.dll", 0xC7CC0)
+
+  Line   358: [UModifier::CheckCircularReferences]
+           Sig: UBOOL UModifier::CheckCircularReferences( TArray<UMaterial*>& History )
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   372: [UModifier::MaterialUSize]
+           Sig: INT UModifier::MaterialUSize()
+           VA:  0xA480
+           --> IMPL_MATCH("Engine.dll", 0xA480)
+
+  Line   378: [UModifier::MaterialVSize]
+           Sig: INT UModifier::MaterialVSize()
+           VA:  0xA4A0
+           --> IMPL_MATCH("Engine.dll", 0xA4A0)
+
+  Line   384: [UModifier::RequiresSorting]
+           Sig: UBOOL UModifier::RequiresSorting()
+           VA:  0xA440
+           --> IMPL_MATCH("Engine.dll", 0xA440)
+
+  Line   390: [UModifier::IsTransparent]
+           Sig: UBOOL UModifier::IsTransparent()
+           VA:  0xA460
+           --> IMPL_MATCH("Engine.dll", 0xA460)
+
+  Line   396: [UModifier::RequiredUVStreams]
+           Sig: BYTE UModifier::RequiredUVStreams()
+           VA:  0xA420
+           --> IMPL_MATCH("Engine.dll", 0xA420)
+
+  Line   407: [UCombiner::PostEditChange]
+           Sig: void UCombiner::PostEditChange()
+           VA:  0xC7C10
+           --> IMPL_MATCH("Engine.dll", 0xC7C10)
+
+  Line   415: [UCombiner::CheckCircularReferences]
+           Sig: UBOOL UCombiner::CheckCircularReferences( TArray<UMaterial*>& History )
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   430: [UCombiner::MaterialUSize]
+           Sig: INT UCombiner::MaterialUSize()
+           VA:  0x1AA70
+           --> IMPL_MATCH("Engine.dll", 0x1AA70)
+
+  Line   439: [UCombiner::MaterialVSize]
+           Sig: INT UCombiner::MaterialVSize()
+           VA:  0x1AAB0
+           --> IMPL_MATCH("Engine.dll", 0x1AAB0)
+
+  Line   457: [UCombiner::RequiresSorting]
+           Sig: UBOOL UCombiner::RequiresSorting()
+           VA:  0x114310
+           --> IMPL_EMPTY or IMPL_MATCH(0x114310)
+
+  Line   478: [UFinalBlend::PostEditChange]
+           Sig: void UFinalBlend::PostEditChange()
+           VA:  0xC83D0
+           --> IMPL_MATCH("Engine.dll", 0xC83D0)
+
+  Line   486: [UFinalBlend::GetValidated]
+           Sig: INT UFinalBlend::GetValidated()
+           VA:  0xC7E10
+           --> IMPL_MATCH("Engine.dll", 0xC7E10)
+
+  Line   494: [UFinalBlend::SetValidated]
+           Sig: void UFinalBlend::SetValidated( UBOOL InValidated )
+           VA:  0xC8480
+           --> IMPL_MATCH("Engine.dll", 0xC8480)
+
+  Line   503: [UFinalBlend::RequiresSorting]
+           Sig: UBOOL UFinalBlend::RequiresSorting()
+           VA:  0xC83A0
+           --> IMPL_MATCH("Engine.dll", 0xC83A0)
+
+  Line   513: [UFinalBlend::IsTransparent]
+           Sig: UBOOL UFinalBlend::IsTransparent()
+           VA:  0xC7A30
+           --> IMPL_MATCH("Engine.dll", 0xC7A30)
+
+  Line   524: [UPalette::Serialize]
+           Sig: void UPalette::Serialize( FArchive& Ar )
+           VA:  0x16ADF0
+           --> IMPL_MATCH("Engine.dll", 0x16ADF0)
+
+  Line   543: [UMaterial::PostEditChange]
+           Sig: void UMaterial::PostEditChange()
+           VA:  NOT FOUND
+           --> IMPL_DIVERGE (no Ghidra match)
+
+
+======================================================================
+FILE: src/Engine/Src/UnModel.cpp
+======================================================================
+Found 34 IMPL_APPROX occurrences
+
+  Line    33: [UModel::Render]
+           Sig: void UModel::Render(FDynamicActor *,FLevelSceneNode *,FRenderInterface *)
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line    42: [UModel::AttachProjector]
+           Sig: void UModel::AttachProjector(int,FProjectorRenderInfo *,FPlane *)
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line    55: [UPolys::Serialize]
+           Sig: void UPolys::Serialize(FArchive & Ar)
+           VA:  0x2F9C0
+           --> IMPL_MATCH("Engine.dll", 0x2F9C0)
+
+  Line   114: [UModel::UModel]
+           Sig: UModel::UModel( ABrush* Owner, INT InRootOutside ) {}
+           VA:  0x54050
+           --> IMPL_MATCH("Engine.dll", 0x54050)
+
+  Line   116: [UModel::PostLoad]
+           Sig: void UModel::PostLoad() { Super::PostLoad(); }
+           VA:  0xCCBB0
+           --> IMPL_MATCH("Engine.dll", 0xCCBB0)
+
+  Line   118: [UModel::Destroy]
+           Sig: void UModel::Destroy() { Super::Destroy(); }
+           VA:  0xCE9A0
+           --> IMPL_MATCH("Engine.dll", 0xCE9A0)
+
+  Line   120: [UModel::Serialize]
+           Sig: void UModel::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+           VA:  0xD02E0
+           --> IMPL_MATCH("Engine.dll", 0xD02E0)
+
+  Line   122: [UModel::PointCheck]
+           Sig: INT UModel::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, F
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   124: [UModel::LineCheck]
+           Sig: INT UModel::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   126: [UModel::GetRenderBoundingBox]
+           Sig: FBox UModel::GetRenderBoundingBox( const AActor* Owner ) { return FBox(); }
+           VA:  0x146A50
+           --> IMPL_MATCH("Engine.dll", 0x146A50)
+
+  Line   128: [UModel::GetCollisionBoundingBox]
+           Sig: FBox UModel::GetCollisionBoundingBox( const AActor* Owner ) const { return FBox(
+           VA:  0x16CBE0
+           --> IMPL_MATCH("Engine.dll", 0x16CBE0)
+
+  Line   130: [UModel::Illuminate]
+           Sig: void UModel::Illuminate( AActor* Owner, INT bExtra ) {}
+           VA:  0xD46F0
+           --> IMPL_MATCH("Engine.dll", 0xD46F0)
+
+  Line   132: [UModel::GetEncroachExtent]
+           Sig: FVector UModel::GetEncroachExtent( AActor* Owner ) { return FVector(0,0,0); }
+           VA:  0x4990
+           --> IMPL_MATCH("Engine.dll", 0x4990)
+
+  Line   134: [UModel::GetEncroachCenter]
+           Sig: FVector UModel::GetEncroachCenter( AActor* Owner ) { return FVector(0,0,0); }
+           VA:  0x16CCB0
+           --> IMPL_MATCH("Engine.dll", 0x16CCB0)
+
+  Line   136: [UModel::UseCylinderCollision]
+           Sig: INT UModel::UseCylinderCollision( const AActor* Owner ) { return 0; }
+           VA:  0x4720
+           --> IMPL_EMPTY or IMPL_MATCH(0x4720)
+
+  Line   138: [UModel::BoxLeaves]
+           Sig: TArray<INT> UModel::BoxLeaves( FBox Box ) { return TArray<INT>(); }
+           VA:  0xCCF00
+           --> IMPL_MATCH("Engine.dll", 0xCCF00)
+
+  Line   140: [UModel::BuildBound]
+           Sig: void UModel::BuildBound() {}
+           VA:  0xCD490
+           --> IMPL_MATCH("Engine.dll", 0xCD490)
+
+  Line   142: [UModel::BuildRenderData]
+           Sig: void UModel::BuildRenderData() {}
+           VA:  0xCF020
+           --> IMPL_MATCH("Engine.dll", 0xCF020)
+
+  Line   144: [UModel::ClearRenderData]
+           Sig: void UModel::ClearRenderData( URenderDevice* RenDev ) {}
+           VA:  0xCEF10
+           --> IMPL_MATCH("Engine.dll", 0xCEF10)
+
+  Line   146: [UModel::CompressLightmaps]
+           Sig: void UModel::CompressLightmaps() {}
+           VA:  0xD2F10
+           --> IMPL_MATCH("Engine.dll", 0xD2F10)
+
+  Line   148: [UModel::ConvexVolumeMultiCheck]
+           Sig: INT UModel::ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FV
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   150: [UModel::EmptyModel]
+           Sig: void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys ) {}
+           VA:  0xCFD80
+           --> IMPL_MATCH("Engine.dll", 0xCFD80)
+
+  Line   152: [UModel::FastLineCheck]
+           Sig: BYTE UModel::FastLineCheck( FVector Start, FVector End ) { return 0; }
+           VA:  0x16D250
+           --> IMPL_MATCH("Engine.dll", 0x16D250)
+
+  Line   154: [UModel::FindNearestVertex]
+           Sig: FLOAT UModel::FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint,
+           VA:  0x170770
+           --> IMPL_MATCH("Engine.dll", 0x170770)
+
+  Line   156: [UModel::Modify]
+           Sig: void UModel::Modify( INT DoTransArrays ) {}
+           VA:  0xCB990
+           --> IMPL_MATCH("Engine.dll", 0xCB990)
+
+  Line   158: [UModel::ModifyAllSurfs]
+           Sig: void UModel::ModifyAllSurfs( INT SetBits ) {}
+           VA:  0xCE6B0
+           --> IMPL_MATCH("Engine.dll", 0xCE6B0)
+
+  Line   160: [UModel::ModifySelectedSurfs]
+           Sig: void UModel::ModifySelectedSurfs( INT SetBits ) {}
+           VA:  0xCE740
+           --> IMPL_MATCH("Engine.dll", 0xCE740)
+
+  Line   162: [UModel::ModifySurf]
+           Sig: void UModel::ModifySurf( INT iSurf, INT SetBits ) {}
+           VA:  0xCE5C0
+           --> IMPL_MATCH("Engine.dll", 0xCE5C0)
+
+  Line   164: [UModel::PointRegion]
+           Sig: FPointRegion UModel::PointRegion( AZoneInfo* Zone, FVector Location ) const { re
+           VA:  VA_UNKNOWN
+           --> IMPL_MATCH("Engine.dll", VA_UNKNOWN)
+
+  Line   166: [UModel::PotentiallyVisible]
+           Sig: INT UModel::PotentiallyVisible( INT iLeaf0, INT iLeaf1 ) { return 0; }
+           VA:  0xCBA10
+           --> IMPL_EMPTY or IMPL_MATCH(0xCBA10)
+
+  Line   168: [UModel::PrecomputeSphereFilter]
+           Sig: void UModel::PrecomputeSphereFilter( const FPlane& Sphere ) {}
+           VA:  0x16DE90
+           --> IMPL_MATCH("Engine.dll", 0x16DE90)
+
+  Line   170: [UModel::R6LineCheck]
+           Sig: INT UModel::R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector
+           VA:  0x16DB50
+           --> IMPL_MATCH("Engine.dll", 0x16DB50)
+
+  Line   172: [UModel::ShrinkModel]
+           Sig: void UModel::ShrinkModel() {}
+           VA:  0xCC780
+           --> IMPL_MATCH("Engine.dll", 0xCC780)
+
+  Line   174: [UModel::Transform]
+           Sig: void UModel::Transform( ABrush* Brush ) {}
+           VA:  0xCD620
+           --> IMPL_MATCH("Engine.dll", 0xCD620)
+
