@@ -37,6 +37,14 @@ build_errors.txt
 # --- Tools (large binaries) ---
 tools/toolchain/
 tools/extlibs/
+tools/umodel/
+tools/vgmstream/
+
+# --- Extracted game content (large binary assets, local use only) ---
+content/textures/
+content/sounds/
+content/animations/
+content/staticmeshes/
 
 # --- Blog build output ---
 blog/node_modules/
