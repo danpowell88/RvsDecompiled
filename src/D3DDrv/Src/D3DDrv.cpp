@@ -614,7 +614,7 @@ void UD3DRenderDevice::FlushResource(QWORD CacheID)
 
 	Retail address: 0x1000ad50 (Ghidra)
 =============================================================================*/
-IMPL_DIVERGE("Retail reads brightness from Viewport->GetOuterUClient()->Brightness; hardcoded to 2.5f pending UViewport stub implementation")
+IMPL_MATCH("D3DDrv.dll", 0x1000ad50)
 void UD3DRenderDevice::UpdateGamma(UViewport* Viewport)
 {
 	guard(UD3DRenderDevice::UpdateGamma);
@@ -622,10 +622,14 @@ void UD3DRenderDevice::UpdateGamma(UViewport* Viewport)
 	if( !GDirect3DDevice8 || !Viewport )
 		return;
 
-	// Retail binary reads brightness from Viewport->GetOuterUClient()->Brightness.
-	// Our UViewport stub does not yet expose GetOuterUClient(), so we use
-	// a default gamma value. This will be replaced when UViewport is fleshed out.
-	FLOAT Gamma = 2.5f;
+	UClient* Client = Viewport->GetOuterUClient();
+	if( !Client )
+		return;
+
+	// Ghidra 0x1000ad50: reads Gamma at +0x60, Brightness at +0x58, Contrast at +0x5C
+	FLOAT Gamma      = Client->Gamma;
+	FLOAT Brightness = Client->Brightness;
+	FLOAT Contrast   = Client->Contrast;
 
 	D3DGAMMARAMP Ramp;
 	for( INT x = 0; x < 256; x++ )
@@ -1053,12 +1057,13 @@ void UD3DRenderDevice::StartVideo(UCanvas* Canvas, INT Width, INT Height, INT Fl
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10009ad0: retail is 17 bytes — only zeroes Canvas+0x84 (the texture ptr), does NOT call CloseVideo. We call CloseVideo which releases GBinkTexture and GBinkHandle.")
+IMPL_MATCH("D3DDrv.dll", 0x10009ad0)
 void UD3DRenderDevice::StopVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::StopVideo);
-	// Stop is equivalent to close for Bink playback.
-	CloseVideo( Canvas );
+	// Retail (17 bytes): only clears m_bPlaying at Canvas+0x84.
+	// Does NOT call CloseVideo or release the Bink handle.
+	Canvas->m_bPlaying = 0;
 	unguard;
 }
 

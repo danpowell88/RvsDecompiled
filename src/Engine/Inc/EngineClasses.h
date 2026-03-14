@@ -5176,7 +5176,17 @@ class ENGINE_API UClient : public UObject
 {
 public:
 	DECLARE_CLASS(UClient,UObject,CLASS_Config,Engine)
-	TArray<UViewport*> Viewports;   // All active viewports managed by this client
+	TArray<UViewport*> Viewports;   // 0x34 — all active viewports managed by this client
+	// Config fields confirmed from Ghidra Engine.dll 0x10087060 UClient::StaticConstructor
+	INT   _ClientPad0;               // 0x40 — (unknown field before WindowedViewportX)
+	INT   _ClientPad1;               // 0x44 — (unknown field)
+	INT   WindowedViewportX;         // 0x48 — CPF_Config "Client"
+	INT   WindowedViewportY;         // 0x4C — CPF_Config "Client"
+	INT   FullscreenViewportX;       // 0x50 — CPF_Config "Client"
+	INT   FullscreenViewportY;       // 0x54 — CPF_Config "Client"
+	FLOAT Brightness;                // 0x58 — CPF_Config "Display"
+	FLOAT Contrast;                  // 0x5C — CPF_Config "Display"
+	FLOAT Gamma;                     // 0x60 — CPF_Config "Display"
 	// Auto-generated method declarations
 	void StaticConstructor();
 	virtual void UpdateGamma();
