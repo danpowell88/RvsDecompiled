@@ -12,6 +12,7 @@
 	FGlobalMath constructor — builds trig and sqrt lookup tables.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FGlobalMath::FGlobalMath()
 :	WorldMin		(-32700.f,-32700.f,-32700.f)
 ,	WorldMax		(32700.f,32700.f,32700.f)
@@ -36,16 +37,19 @@ FGlobalMath::FGlobalMath()
 	FVector out-of-line methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FLOAT FVector::Size() const
 {
 	return appSqrt( X*X + Y*Y + Z*Z );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FLOAT FVector::Size2D() const
 {
 	return appSqrt( X*X + Y*Y );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 UBOOL FVector::Normalize()
 {
 	FLOAT SquareSum = X*X + Y*Y + Z*Z;
@@ -58,12 +62,14 @@ UBOOL FVector::Normalize()
 	return 0;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FVector::UnsafeNormal() const
 {
 	FLOAT Scale = 1.f / appSqrt(X*X + Y*Y + Z*Z);
 	return FVector( X*Scale, Y*Scale, Z*Scale );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FVector::SafeNormal() const
 {
 	FLOAT SquareSum = X*X + Y*Y + Z*Z;
@@ -75,6 +81,7 @@ FVector FVector::SafeNormal() const
 	return FVector( 0.f, 0.f, 0.f );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FRotator FVector::Rotation()
 {
 	FRotator R;
@@ -91,6 +98,7 @@ FRotator FVector::Rotation()
 	return R;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 void FVector::FindBestAxisVectors( FVector& Axis1, FVector& Axis2 )
 {
 	FLOAT NX = Abs(X);
@@ -105,6 +113,7 @@ void FVector::FindBestAxisVectors( FVector& Axis1, FVector& Axis2 )
 	Axis2 = Axis1 ^ *this;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FLOAT FDist( const FVector& V1, const FVector& V2 )
 {
 	return appSqrt( Square(V2.X-V1.X) + Square(V2.Y-V1.Y) + Square(V2.Z-V1.Z) );
@@ -114,6 +123,7 @@ FLOAT FDist( const FVector& V1, const FVector& V2 )
 	FBox.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FBox::FBox( const FVector* Points, INT Count )
 :	Min(0,0,0), Max(0,0,0), IsValid(0)
 {
@@ -125,6 +135,7 @@ FBox::FBox( const FVector* Points, INT Count )
 	FSphere.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FSphere::FSphere( const FVector* Pts, INT Count )
 :	FPlane(0,0,0,0)
 {
@@ -146,6 +157,7 @@ FSphere::FSphere( const FVector* Pts, INT Count )
 	FCoords functions.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FCoords FCoords::Inverse() const
 {
 	FLOAT RDet = 1.f / (XAxis | (YAxis ^ ZAxis));
@@ -173,6 +185,7 @@ FCoords FCoords::Inverse() const
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FCoords FCoords::PivotInverse() const
 {
 	return FCoords
@@ -184,6 +197,7 @@ FCoords FCoords::PivotInverse() const
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FCoords FCoords::ApplyPivot(const FCoords& CoordsB) const
 {
 	// Equivalent to IsometricInverse * CoordsB.
@@ -195,6 +209,7 @@ FCoords FCoords::ApplyPivot(const FCoords& CoordsB) const
 	return Result;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FRotator FCoords::OrthoRotation() const
 {
 	FRotator R;
@@ -216,6 +231,7 @@ FRotator FCoords::OrthoRotation() const
 	FMatrix.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix CombineTransforms( const FMatrix& M, const FMatrix& N )
 {
 	FMatrix Result;
@@ -242,6 +258,7 @@ FMatrix CombineTransforms( const FMatrix& M, const FMatrix& N )
 	return Result;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FQuat FMatrix::FMatrixToFQuat()
 {
 	FQuat Q;
@@ -281,6 +298,7 @@ FQuat FMatrix::FMatrixToFQuat()
 	FQuat out-of-line methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 UBOOL FQuat::Normalize()
 {
 	FLOAT SquareSum = X*X + Y*Y + Z*Z + W*W;
@@ -303,6 +321,7 @@ UBOOL FQuat::Normalize()
 	}
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FQuat FQuat::AngAxisToFQuat()
 {
 	FLOAT scale = X*X + Y*Y + Z*Z;
@@ -326,6 +345,7 @@ FQuat FQuat::AngAxisToFQuat()
 	return Q;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix FQuat::FQuatToFMatrix()
 {
 	FMatrix M;
@@ -364,26 +384,31 @@ FMatrix FQuat::FQuatToFMatrix()
 	Math utility stubs.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API DOUBLE appAsin( DOUBLE Value )
 {
 	return asin( Value );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API FLOAT appFractional( FLOAT Value )
 {
 	return Value - floorf( Value );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API FLOAT appSRand()
 {
 	return (FLOAT)appRand() / (FLOAT)RAND_MAX * 2.0f - 1.0f;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API void appSRandInit( INT Seed )
 {
 	appRandInit( Seed );
 }
 
+IMPL_INFERRED("platform-specific Win32 wrapper; reconstructed from context")
 CORE_API INT appIsDebuggerPresent()
 {
 	return ::IsDebuggerPresent();
@@ -411,6 +436,7 @@ CORE_API INT appIsDebuggerPresent()
 #define MD5_HH(a,b,c,d,x,s,t) { (a)+=MD5_H(b,c,d)+(x)+(DWORD)(t); (a)=MD5_ROL(a,s)+(b); }
 #define MD5_II(a,b,c,d,x,s,t) { (a)+=MD5_I(b,c,d)+(x)+(DWORD)(t); (a)=MD5_ROL(a,s)+(b); }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API void appMD5Init( FMD5Context* Context )
 {
 	Context->count[0] = Context->count[1] = 0;
@@ -423,6 +449,7 @@ CORE_API void appMD5Init( FMD5Context* Context )
 
 // Core compression: processes exactly one 64-byte block.
 // State is the current A,B,C,D; Block is the raw 64 input bytes.
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API void appMD5Transform( DWORD* State, BYTE* Block )
 {
 	DWORD a=State[0], b=State[1], c=State[2], d=State[3];
@@ -474,6 +501,7 @@ CORE_API void appMD5Transform( DWORD* State, BYTE* Block )
 }
 
 // Accumulate up to InputLen bytes, processing 64-byte blocks as they fill.
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API void appMD5Update( FMD5Context* Context, BYTE* Input, INT InputLen )
 {
 	// Compute byte offset into the current partial buffer.
@@ -503,6 +531,7 @@ CORE_API void appMD5Update( FMD5Context* Context, BYTE* Input, INT InputLen )
 }
 
 // Finalize: pad, append bit-count, encode digest into 16-byte Digest.
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API void appMD5Final( BYTE* Digest, FMD5Context* Context )
 {
 	BYTE Bits[8];
@@ -521,6 +550,7 @@ CORE_API void appMD5Final( BYTE* Digest, FMD5Context* Context )
 	appMemzero( Context, sizeof(*Context) ); // security-wipe
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API void appMD5Encode( BYTE* Output, DWORD* Input, INT Len )
 {
 	for( INT i=0, j=0; j<Len; i++, j+=4 )
@@ -532,6 +562,7 @@ CORE_API void appMD5Encode( BYTE* Output, DWORD* Input, INT Len )
 	}
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API void appMD5Decode( DWORD* Output, BYTE* Input, INT Len )
 {
 	for( INT i=0, j=0; j<Len; i++, j+=4 )
@@ -542,6 +573,7 @@ CORE_API void appMD5Decode( DWORD* Output, BYTE* Input, INT Len )
 	Misc geometry / utility functions.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, const FVector& End, const FVector& Extent, FVector& HitLocation, FVector& HitNormal, FLOAT& HitTime )
 {
 	// Expand the AABB by the sweep half-extents (Minkowski sum).
@@ -609,6 +641,7 @@ CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, 
 	return 1;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API INT GetFVECTOR( const TCHAR* Stream, FVector& Value )
 {
 	Value = FVector(0,0,0);
@@ -624,6 +657,7 @@ CORE_API INT GetFVECTOR( const TCHAR* Stream, FVector& Value )
 	return 1;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 CORE_API INT GetFROTATOR( const TCHAR* Stream, FRotator& Value, INT bScaled )
 {
 	Value = FRotator(0,0,0);
@@ -651,10 +685,12 @@ const FVector FVector::FVector0(0,0,0);
 	Note: FMatrix uses M(i,j) method accessor, not M[i][j] array.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix::~FMatrix()
 {
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix FMatrix::Inverse()
 {
 	FMatrix Result;
@@ -716,6 +752,7 @@ FMatrix FMatrix::Inverse()
 	return Result;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix FMatrix::Transpose()
 {
 	FMatrix Result;
@@ -725,6 +762,7 @@ FMatrix FMatrix::Transpose()
 	return Result;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix FMatrix::TransposeAdjoint() const
 {
 	// Cofactor matrix of the upper-left 3x3 submatrix, stored transposed.
@@ -754,6 +792,7 @@ FMatrix FMatrix::TransposeAdjoint() const
 	return TA;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FLOAT FMatrix::Determinant() const
 {
 	return M(0,0) * (
@@ -775,6 +814,7 @@ FLOAT FMatrix::Determinant() const
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FCoords FMatrix::Coords()
 {
 	FCoords Result;
@@ -785,6 +825,7 @@ FCoords FMatrix::Coords()
 	return Result;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix FMatrix::operator*( FMatrix Other ) const
 {
 	FMatrix Result;
@@ -798,27 +839,32 @@ FMatrix FMatrix::operator*( FMatrix Other ) const
 	return Result;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 void FMatrix::operator*=( FMatrix Other )
 {
 	*this = *this * Other;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 INT FMatrix::operator==( FMatrix& Other ) const
 {
 	return appMemcmp( this, &Other, sizeof(FMatrix) ) == 0;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 INT FMatrix::operator!=( FMatrix& Other ) const
 {
 	return appMemcmp( this, &Other, sizeof(FMatrix) ) != 0;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 void FMatrix::SetIdentity()
 {
 	appMemzero( this, sizeof(*this) );
 	M(0,0) = M(1,1) = M(2,2) = M(3,3) = 1.0f;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FMatrix::TransformNormal( const FVector& V ) const
 {
 	return FPlane(
@@ -829,6 +875,7 @@ FPlane FMatrix::TransformNormal( const FVector& V ) const
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FMatrix FCoords::Matrix() const
 {
 	FMatrix Result;
@@ -843,22 +890,34 @@ FMatrix FCoords::Matrix() const
 	FPlane methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator+( const FPlane& V ) const { return FPlane( X+V.X, Y+V.Y, Z+V.Z, W+V.W ); }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator-( const FPlane& V ) const { return FPlane( X-V.X, Y-V.Y, Z-V.Z, W-V.W ); }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator*( const FPlane& V )        { return FPlane( X*V.X, Y*V.Y, Z*V.Z, W*V.W ); }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator*( FLOAT Scale ) const      { return FPlane( X*Scale, Y*Scale, Z*Scale, W*Scale ); }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator/( FLOAT Scale ) const      { FLOAT RScale = 1.0f/Scale; return FPlane( X*RScale, Y*RScale, Z*RScale, W*RScale ); }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator+=(const FPlane& V)         { X+=V.X; Y+=V.Y; Z+=V.Z; W+=V.W; return *this; }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator-=(const FPlane& V)         { X-=V.X; Y-=V.Y; Z-=V.Z; W-=V.W; return *this; }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator*=( const FPlane& V )       { X*=V.X; Y*=V.Y; Z*=V.Z; W*=V.W; return *this; }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator*=( FLOAT Scale )           { X*=Scale; Y*=Scale; Z*=Scale; W*=Scale; return *this; }
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::operator/=( FLOAT Scale )           { FLOAT RScale = 1.0f/Scale; X*=RScale; Y*=RScale; Z*=RScale; W*=RScale; return *this; }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::TransformBy( const FCoords& Coords ) const
 {
 	return FPlane( *this | Coords.XAxis, *this | Coords.YAxis, *this | Coords.ZAxis, W - (*this | Coords.Origin) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::TransformBy( const FMatrix& M ) const
 {
 	return FPlane(
@@ -869,6 +928,7 @@ FPlane FPlane::TransformBy( const FMatrix& M ) const
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::TransformByUsingAdjointT( const FMatrix& M, const FMatrix& TA ) const
 {
 	return FPlane(
@@ -879,6 +939,7 @@ FPlane FPlane::TransformByUsingAdjointT( const FMatrix& M, const FMatrix& TA ) c
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPlane FPlane::TransformPlaneByOrtho( const FMatrix& M ) const
 {
 	return TransformBy( M );
@@ -888,11 +949,13 @@ FPlane FPlane::TransformPlaneByOrtho( const FMatrix& M ) const
 	FVector methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector::FVector( FLOAT InVal )
 : X(InVal), Y(InVal), Z(InVal)
 {
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FVector::GetNonParallel()
 {
 	if( Abs(X) < 0.9f )
@@ -901,6 +964,7 @@ FVector FVector::GetNonParallel()
 		return FVector(0,1,0);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FVector::GetNormalized()
 {
 	FLOAT Sz = Size();
@@ -909,6 +973,7 @@ FVector FVector::GetNormalized()
 	return FVector(0,0,0);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FVector::RotateAngleAxis( INT Angle, const FVector& Axis ) const
 {
 	FLOAT S = GMath.SinTab(Angle);
@@ -930,6 +995,7 @@ FVector FVector::RotateAngleAxis( INT Angle, const FVector& Axis ) const
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FVector::TransformVectorByTranspose( const FCoords& Coords ) const
 {
 	return FVector(
@@ -939,21 +1005,25 @@ FVector FVector::TransformVectorByTranspose( const FCoords& Coords ) const
 	);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FLOAT FVector::GetAbsMax() const
 {
 	return ::Max( ::Max( Abs(X), Abs(Y) ), Abs(Z) );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FLOAT FVector::GetMax() const
 {
 	return ::Max( ::Max( X, Y ), Z );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 INT FVector::IsUniform()
 {
 	return (X == Y) && (Y == Z);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FLOAT& FVector::operator[]( INT i )
 {
 	check(i>=0 && i<3);
@@ -964,6 +1034,7 @@ FLOAT& FVector::operator[]( INT i )
 	FBox methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 bool FBox::Intersect( const FBox& Other ) const
 {
 	if( Min.X > Other.Max.X || Other.Min.X > Max.X )
@@ -975,6 +1046,7 @@ bool FBox::Intersect( const FBox& Other ) const
 	return true;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FBox FBox::TransformBy( const FMatrix& M ) const
 {
 	FBox Result(0);
@@ -988,28 +1060,33 @@ FBox FBox::TransformBy( const FMatrix& M ) const
 	return Result;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FBox::GetCenter() const
 {
 	return FVector( (Min.X+Max.X)*0.5f, (Min.Y+Max.Y)*0.5f, (Min.Z+Max.Z)*0.5f );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector FBox::GetExtent() const
 {
 	return FVector( (Max.X-Min.X)*0.5f, (Max.Y-Min.Y)*0.5f, (Max.Z-Min.Z)*0.5f );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 void FBox::GetCenterAndExtents( FVector& Center, FVector& Extents )
 {
 	Center  = GetCenter();
 	Extents = GetExtent();
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 void FBox::Init()
 {
 	Min = Max = FVector(0,0,0);
 	IsValid = 0;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FVector& FBox::operator[]( INT i )
 {
 	check( i>=0 && i<2 );
@@ -1021,16 +1098,19 @@ FVector& FBox::operator[]( INT i )
 	FRotator methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FRotator::FRotator( FLOAT InVal )
 : Pitch((INT)InVal), Yaw((INT)InVal), Roll((INT)InVal)
 {
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FRotator FRotator::Clamp()
 {
 	return FRotator( Pitch&65535, Yaw&65535, Roll&65535 );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FRotator FRotator::ClampPos()
 {
 	FRotator R = Clamp();
@@ -1044,6 +1124,7 @@ FRotator FRotator::ClampPos()
 	FSphere methods.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FSphere FSphere::TransformBy( const FMatrix& M ) const
 {
 	FVector Center(X, Y, Z);
@@ -1060,15 +1141,18 @@ FSphere FSphere::TransformBy( const FMatrix& M ) const
 	FPosition class.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPosition::FPosition()
 {
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPosition::FPosition( FVector InLocation, FCoords InCoords )
 : Location(InLocation), Coords(InCoords)
 {
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FPosition& FPosition::operator=( const FPosition& Other )
 {
 	Location = Other.Location;
@@ -1080,11 +1164,13 @@ FPosition& FPosition::operator=( const FPosition& Other )
 	FCylinder class.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FCylinder::FCylinder()
 : Radius(0), Height(0)
 {
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FCylinder& FCylinder::operator=( const FCylinder& Other )
 {
 	Radius = Other.Radius;
@@ -1092,6 +1178,7 @@ FCylinder& FCylinder::operator=( const FCylinder& Other )
 	return *this;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 INT FCylinder::LineCheck( const FVector& Start, const FVector& End, FVector& HitNormal ) const
 {
 	// DIVERGENCE: The binary FCylinder has additional fields (Center FVector,
@@ -1125,6 +1212,7 @@ INT FCylinder::LineCheck( const FVector& Start, const FVector& End, FVector& Hit
 	return 1;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 INT FCylinder::LineIntersection( const FVector& Start, const FVector& End, FLOAT* const HitTime ) const
 {
 	// DIVERGENCE: Same as LineCheck above — binary has Center/Axis/HalfHeight fields.
@@ -1164,18 +1252,21 @@ INT FCylinder::LineIntersection( const FVector& Start, const FVector& End, FLOAT
 	FEdge class.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FEdge::FEdge()
 {
 	Vertex[0] = FVector(0,0,0);
 	Vertex[1] = FVector(0,0,0);
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FEdge::FEdge( FVector InVertex0, FVector InVertex1 )
 {
 	Vertex[0] = InVertex0;
 	Vertex[1] = InVertex1;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 FEdge& FEdge::operator=( const FEdge& Other )
 {
 	Vertex[0] = Other.Vertex[0];
@@ -1183,6 +1274,7 @@ FEdge& FEdge::operator=( const FEdge& Other )
 	return *this;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnMath.cpp")
 INT FEdge::operator==( const FEdge& Other ) const
 {
 	return (Vertex[0] == Other.Vertex[0] && Vertex[1] == Other.Vertex[1]) ||
