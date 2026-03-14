@@ -730,13 +730,13 @@ IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execPollWaitToSeeEnemy );
 	Reconstructed from Ghidra decompilation + UT99 reference.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x10301a90; 3b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 APawn* APawn::GetPawnOrColBoxOwner() const
 {
 	return (APawn*)this;
 }
 
-IMPL_DIVERGE("Ghidra 0x10301a90; 3b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 APawn* APawn::GetPlayerPawn() const
 {
 	// Retail: 8B C1 C3 = mov eax,ecx; ret — APawn always returns itself.

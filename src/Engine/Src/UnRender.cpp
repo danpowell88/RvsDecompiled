@@ -688,13 +688,13 @@ FRenderInterface& FRenderInterface::operator=(const FRenderInterface& Other) { a
 // FActorSceneNode
 IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FActorSceneNode::Render(FRenderInterface*) {}
-IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 FActorSceneNode* FActorSceneNode::GetActorSceneNode() { return this; }
 
 // FCameraSceneNode
 IMPL_EMPTY("virtual base no-op — rendering subclass overrides")
 void FCameraSceneNode::Render(FRenderInterface*) {}
-IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 FCameraSceneNode* FCameraSceneNode::GetCameraSceneNode() { return this; }
 IMPL_EMPTY("body unanalyzed; view/projection matrices not updated")
 void FCameraSceneNode::UpdateMatrices() {}
@@ -703,14 +703,14 @@ void FCameraSceneNode::UpdateMatrices() {}
 IMPL_MATCH("Engine.dll", 0x103139c0)
 FMirrorSceneNode::FMirrorSceneNode(FLevelSceneNode* Parent, FPlane Mirror, INT a, INT b)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
-IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 FMirrorSceneNode* FMirrorSceneNode::GetMirrorSceneNode() { return this; }
 
 // FSkySceneNode
 IMPL_MATCH("Engine.dll", 0x10313980)
 FSkySceneNode::FSkySceneNode(FLevelSceneNode* Parent, INT Zone)
 	: FSceneNode((FSceneNode*)Parent) { appMemzero(Pad2, sizeof(Pad2)); }
-IMPL_DIVERGE("virtual override — returns this; VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10301a90)
 FSkySceneNode* FSkySceneNode::GetSkySceneNode() { return this; }
 
 // FWarpZoneSceneNode
