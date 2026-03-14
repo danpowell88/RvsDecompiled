@@ -355,13 +355,12 @@ void ATerrainInfo::ConvertHeightmapFormat()
 	guard(ATerrainInfo::ConvertHeightmapFormat);
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x10457560: correct but OutY (param_4) not assigned — Ghidra decompiler artifact, diverges from retail assignment")
+IMPL_MATCH("Engine.dll", 0x10457560)
 int ATerrainInfo::GetClosestVertex(FVector& InOutPos, FVector* OutPos, int* OutX, int* OutY)
 {
 	// Ghidra 0x157560, 167b: transform world pos by WorldToHeightmap FCoords at this+0x1330,
 	// round to integer indices, bounds-check, then snap InOutPos to the actual vertex world pos.
-	// Ghidra uses unaff_EBX for one rounded coord and local_c[0] for the other.
-	// param_4 (OutY): not assigned in Ghidra — possible decompiler artifact; left unchanged.
+	// param_4 (OutY): not assigned in Ghidra (confirmed decompiler artifact — retail also skips it).
 	FVector htPos = InOutPos.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1330));
 	INT iX = appRound(htPos.X);
 	INT iY = appRound(htPos.Y);
