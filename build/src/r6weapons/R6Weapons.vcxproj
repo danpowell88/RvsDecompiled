@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Win32">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Win32">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E69C9441-6582-36BC-8DA3-96BDC5A98A49}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>Win32</Platform>
+    <ProjectName>R6Weapons</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\danpo\Desktop\rvs\build\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">R6Weapons.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">R6Weapons</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Users\danpo\Desktop\rvs\build\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">R6Weapons.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">R6Weapons</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">C:\Users\danpo\Desktop\rvs\build\bin\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">R6Weapons.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">R6Weapons</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">C:\Users\danpo\Desktop\rvs\build\bin\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">R6Weapons.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">R6Weapons</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR="Debug";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR=\"Debug\";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\R6Abstract\Release\R6Abstract.lib;..\R6Engine\Release\R6Engine.lib;..\Core\Release\Core.lib;..\Engine\Release\Engine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/danpo/Desktop/rvs/build/src/r6weapons/Debug/R6Weapons.lib</ImportLibrary>
+      <ModuleDefinitionFile>C:/Users/danpo/Desktop/rvs/src/R6Weapons/Src/R6Weapons.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>C:/Users/danpo/Desktop/rvs/build/bin/R6Weapons.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR="Release";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR=\"Release\";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\R6Abstract\Release\R6Abstract.lib;..\R6Engine\Release\R6Engine.lib;..\Core\Release\Core.lib;..\Engine\Release\Engine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/danpo/Desktop/rvs/build/src/r6weapons/Release/R6Weapons.lib</ImportLibrary>
+      <ModuleDefinitionFile>C:/Users/danpo/Desktop/rvs/src/R6Weapons/Src/R6Weapons.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>C:/Users/danpo/Desktop/rvs/build/bin/R6Weapons.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR="MinSizeRel";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR=\"MinSizeRel\";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\R6Abstract\Release\R6Abstract.lib;..\R6Engine\Release\R6Engine.lib;..\Core\Release\Core.lib;..\Engine\Release\Engine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/danpo/Desktop/rvs/build/src/r6weapons/MinSizeRel/R6Weapons.lib</ImportLibrary>
+      <ModuleDefinitionFile>C:/Users/danpo/Desktop/rvs/src/R6Weapons/Src/R6Weapons.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>C:/Users/danpo/Desktop/rvs/build/bin/MinSizeRel/R6Weapons.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR="RelWithDebInfo";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;R6WEAPONS_EXPORTS;ThisPackage=R6Weapons;DO_GUARD=0;_UNICODE;UNICODE;CMAKE_INTDIR=\"RelWithDebInfo\";R6Weapons_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc;C:\Users\danpo\Desktop\rvs\src\R6Abstract\Inc;C:\Users\danpo\Desktop\rvs\src\R6Engine\Inc;C:\Users\danpo\Desktop\rvs\src\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\432Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Core\Inc;C:\Users\danpo\Desktop\rvs\sdk\Ut99PubSrc\Engine\Inc;C:\Users\danpo\Desktop\rvs\sdk\Raven_Shield_C_SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\R6Abstract\Release\R6Abstract.lib;..\R6Engine\Release\R6Engine.lib;..\Core\Release\Core.lib;..\Engine\Release\Engine.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Users/danpo/Desktop/rvs/build/src/r6weapons/RelWithDebInfo/R6Weapons.lib</ImportLibrary>
+      <ModuleDefinitionFile>C:/Users/danpo/Desktop/rvs/src/R6Weapons/Src/R6Weapons.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>C:/Users/danpo/Desktop/rvs/build/bin/R6Weapons.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\CMakeLists.txt">
+      <StdOutEncoding>UTF-8</StdOutEncoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building Custom Rule C:/Users/danpo/Desktop/rvs/src/R6Weapons/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/danpo/Desktop/rvs -BC:/Users/danpo/Desktop/rvs/build --check-stamp-file C:/Users/danpo/Desktop/rvs/build/src/r6weapons/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Users\danpo\Desktop\rvs\build\src\r6weapons\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building Custom Rule C:/Users/danpo/Desktop/rvs/src/R6Weapons/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/danpo/Desktop/rvs -BC:/Users/danpo/Desktop/rvs/build --check-stamp-file C:/Users/danpo/Desktop/rvs/build/src/r6weapons/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Users\danpo\Desktop\rvs\build\src\r6weapons\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">Building Custom Rule C:/Users/danpo/Desktop/rvs/src/R6Weapons/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/danpo/Desktop/rvs -BC:/Users/danpo/Desktop/rvs/build --check-stamp-file C:/Users/danpo/Desktop/rvs/build/src/r6weapons/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">C:\Users\danpo\Desktop\rvs\build\src\r6weapons\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">Building Custom Rule C:/Users/danpo/Desktop/rvs/src/R6Weapons/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/danpo/Desktop/rvs -BC:/Users/danpo/Desktop/rvs/build --check-stamp-file C:/Users/danpo/Desktop/rvs/build/src/r6weapons/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">C:\Users\danpo\Desktop\rvs\build\src\r6weapons\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc\R6WeaponsClasses.h" />
+    <ClInclude Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Inc\R6WeaponsPrivate.h" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6Bullet.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6DemolitionsGadget.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6Gadget.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6Grenade.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6GrenadeWeapon.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6HBSGadget.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6Reticule.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6SmokeCloud.cpp" />
+    <ClCompile Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6Weapons.cpp" />
+    <None Include="C:\Users\danpo\Desktop\rvs\src\R6Weapons\Src\R6Weapons.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\danpo\Desktop\rvs\build\ZERO_CHECK.vcxproj">
+      <Project>{2E7B7915-CCCF-3763-BA86-8880CFC90732}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\danpo\Desktop\rvs\build\src\r6abstract\R6Abstract.vcxproj">
+      <Project>{4E5098CE-6B74-32BC-81A4-B825DFCD70BA}</Project>
+      <Name>R6Abstract</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
