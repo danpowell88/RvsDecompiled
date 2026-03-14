@@ -367,24 +367,34 @@ INT UWindowsViewport::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_DIVERGE("DIVERGENCE: simplified HWND validity check; retail checks WWindowsViewportWindow and HoldCount")
+IMPL_MATCH("WinDrv.dll", 0x11102940)
 INT UWindowsViewport::Lock(BYTE* HitData, INT* HitSize)
 {
 	guard(UWindowsViewport::Lock);
-	// DIVERGENCE: retail checks WWindowsViewportWindow (this+0x204+4), HoldCount
-	// (this+0x214), and render resource flags before delegating. We test HWND validity only.
-	if (GViewportHWnd && !IsWindow(GViewportHWnd))
+	// m_Window is a WWindowsViewportWindow* at this+0x204; hWnd is at offset +4 in WWindow.
+	HWND hWnd = *(HWND*)(*(DWORD**)((BYTE*)this + 0x204) + 1);
+	if (hWnd && !IsWindow(hWnd))
 		return 0;
-	return Super::Lock(HitData, HitSize);
+	// HoldCount @ +0x214; viewport dims @ +0xa4/+0xa8; RenDev @ +0x8c
+	if (*(INT*)((BYTE*)this + 0x214) == 0
+		&& *(INT*)((BYTE*)this + 0xa4) != 0
+		&& *(INT*)((BYTE*)this + 0xa8) != 0
+		&& *(INT*)((BYTE*)this + 0x8c) != 0)
+	{
+		*(INT*)((BYTE*)this + 0x160) = *(INT*)((BYTE*)this + 0xa4);
+		return Super::Lock(HitData, HitSize);
+	}
+	return 0;
 	unguard;
 }
 
-IMPL_DIVERGE("DIVERGENCE: HoldCount accessed via raw offset 0x214")
+IMPL_MATCH("WinDrv.dll", 0x11102a20)
 void UWindowsViewport::Unlock()
 {
 	guard(UWindowsViewport::Unlock);
-	// DIVERGENCE: HoldCount is at raw offset 0x214 in UViewport; not exposed in local headers.
-	check(*(INT*)((BYTE*)this + 0x214) == 0);
+	// HoldCount is at raw offset 0x214; assert it's zero before unlocking.
+	if (*(INT*)((BYTE*)this + 0x214) != 0)
+		appFailAssert("!HoldCount", __FILE__, __LINE__);
 	Super::Unlock();
 	unguard;
 }
@@ -702,29 +712,37 @@ void UWindowsViewport::CheckCD()
 	unguard;
 }
 
-IMPL_DIVERGE("DIVERGENCE: uses GViewportHWnd instead of m_Window->hWnd")
+IMPL_MATCH("WinDrv.dll", 0x11102cb0)
 void UWindowsViewport::AcquireKeyboard()
 {
 	guard(UWindowsViewport::AcquireKeyboard);
-	if (DirectInput8 && !Keyboard)
+	// Retail always calls ReleaseKeyboard first, then creates a fresh device.
+	ReleaseKeyboard();
+	if (!DirectInput8)
+		return;
+	HRESULT hr = DirectInput8->CreateDevice(GUID_SysKeyboard, &Keyboard, NULL);
+	if (hr < 0 || !Keyboard)
 	{
-		HRESULT hr = DirectInput8->CreateDevice(GUID_SysKeyboard, &Keyboard, NULL);
-		if (SUCCEEDED(hr) && Keyboard)
-		{
-			hr = Keyboard->SetDataFormat(&c_dfDIKeyboard);
-			if (SUCCEEDED(hr))
-			{
-				// DIVERGENCE: retail uses m_Window->hWnd (this+0x204+4); we use GViewportHWnd.
-				hr = Keyboard->SetCooperativeLevel(GViewportHWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-				if (SUCCEEDED(hr))
-					Keyboard->Acquire();
-			}
-		}
+		ReleaseKeyboard();
+		return;
 	}
-	else if (Keyboard)
+	hr = Keyboard->SetDataFormat(&c_dfDIKeyboard);
+	if (hr < 0)
 	{
-		Keyboard->Acquire();
+		ReleaseKeyboard();
+		return;
 	}
+	// m_Window->hWnd: WWindowsViewportWindow* at this+0x204, hWnd is at +4 in WWindow.
+	HWND hWnd = *(HWND*)(*(DWORD**)((BYTE*)this + 0x204) + 1);
+	hr = Keyboard->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	if (hr < 0)
+	{
+		ReleaseKeyboard();
+		return;
+	}
+	hr = Keyboard->Acquire();
+	if (hr < 0)
+		ReleaseKeyboard();
 	unguard;
 }
 
@@ -733,7 +751,11 @@ void UWindowsViewport::ReleaseKeyboard()
 {
 	guard(UWindowsViewport::ReleaseKeyboard);
 	if (UWindowsViewport::Keyboard)
+	{
 		UWindowsViewport::Keyboard->Unacquire();
+		UWindowsViewport::Keyboard->Release();
+		UWindowsViewport::Keyboard = NULL;
+	}
 	unguard;
 }
 
