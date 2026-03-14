@@ -163,7 +163,7 @@ void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execClipTextNative );
 
-IMPL_DIVERGE("UCanvas::execDrawTile not found in Ghidra export — cannot confirm VA")
+IMPL_DIVERGE("VA confirmed 0x10388 9b0; Ghidra reports unreachable blocks in function body — main draw logic lost, stub preserved")
 void UCanvas::execDrawTile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawTile);
@@ -499,27 +499,27 @@ IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated scene node")
 FSceneNode::~FSceneNode() {}
 
 // ?GetActorSceneNode@FSceneNode@@UAEPAVFActorSceneNode@@XZ
-IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FActorSceneNode")
+IMPL_MATCH("Engine.dll", 0x10414310)
 FActorSceneNode * FSceneNode::GetActorSceneNode() { return NULL; }
 
 // ?GetCameraSceneNode@FSceneNode@@UAEPAVFCameraSceneNode@@XZ
-IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FCameraSceneNode")
+IMPL_MATCH("Engine.dll", 0x10414310)
 FCameraSceneNode * FSceneNode::GetCameraSceneNode() { return NULL; }
 
 // ?GetLevelSceneNode@FSceneNode@@UAEPAVFLevelSceneNode@@XZ
-IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FLevelSceneNode")
+IMPL_MATCH("Engine.dll", 0x10414310)
 FLevelSceneNode * FSceneNode::GetLevelSceneNode() { return NULL; }
 
 // ?GetMirrorSceneNode@FSceneNode@@UAEPAVFMirrorSceneNode@@XZ
-IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FMirrorSceneNode")
+IMPL_MATCH("Engine.dll", 0x10414310)
 FMirrorSceneNode * FSceneNode::GetMirrorSceneNode() { return NULL; }
 
 // ?GetSkySceneNode@FSceneNode@@UAEPAVFSkySceneNode@@XZ
-IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FSkySceneNode")
+IMPL_MATCH("Engine.dll", 0x10414310)
 FSkySceneNode * FSceneNode::GetSkySceneNode() { return NULL; }
 
 // ?GetWarpZoneSceneNode@FSceneNode@@UAEPAVFWarpZoneSceneNode@@XZ
-IMPL_DIVERGE("virtual base default — base class returns NULL, overridden in FWarpZoneSceneNode")
+IMPL_MATCH("Engine.dll", 0x10414310)
 FWarpZoneSceneNode * FSceneNode::GetWarpZoneSceneNode() { return NULL; }
 
 // ?Project@FSceneNode@@QAE?AVFPlane@@VFVector@@@Z
@@ -555,8 +555,14 @@ IMPL_EMPTY("body unanalyzed; no cleanup needed for stack-allocated level scene n
 FLevelSceneNode::~FLevelSceneNode() {}
 
 // ??4FLevelSceneNode@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("VA unconfirmed; appMemcpy implementation approximate")
-FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+// Ghidra 0x103136F0: calls FSceneNode::operator= then copies 6 DWORDs at +0x1b8..+0x1cc.
+IMPL_MATCH("Engine.dll", 0x103136F0)
+FLevelSceneNode& FLevelSceneNode::operator=(const FLevelSceneNode& Other)
+{
+	FSceneNode::operator=(*(const FSceneNode*)&Other);
+	appMemcpy(((BYTE*)this) + 0x1b8, ((const BYTE*)&Other) + 0x1b8, 0x18);
+	return *this;
+}
 
 // =============================================================================
 // UVertexStream class implementations.
@@ -591,7 +597,7 @@ UVertexBuffer::UVertexBuffer(DWORD InFlags)
 : UVertexStreamBase(0x2C, InFlags, 0) {}
 IMPL_DIVERGE("Ghidra 0x10326340: calls URenderResource::Serialize then ElementSize/StreamFlags/StreamType; also FUN_10321c80 (vertex data TArray serialization) unresolved — data array not serialized")
 void UVertexBuffer::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexBuffer::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302470)
 INT UVertexBuffer::GetDataSize() { return Data.Num() * 0x2C; }
@@ -604,7 +610,7 @@ UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
 : UVertexStreamBase(4, InFlags, 2) {}
 IMPL_DIVERGE("Ghidra 0x10326950: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamCOLOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamCOLOR::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302510)
 INT UVertexStreamCOLOR::GetDataSize() { return Data.Num() * 4; }
@@ -617,7 +623,7 @@ UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
 : UVertexStreamBase(0x28, InFlags, 5) {}
 IMPL_DIVERGE("Ghidra 0x10326f70: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamPosNormTex::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamPosNormTex::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302650)
 INT UVertexStreamPosNormTex::GetDataSize() { return Data.Num() * 0x28; }
@@ -630,7 +636,7 @@ UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
 : UVertexStreamBase(8, InFlags, 3) {}
 IMPL_DIVERGE("Ghidra 0x10326c60: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamUV::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamUV::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302560)
 INT UVertexStreamUV::GetDataSize() { return Data.Num() * 8; }
@@ -643,7 +649,7 @@ UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
 : UVertexStreamBase(0xC, InFlags, 1) {}
 IMPL_DIVERGE("Ghidra 0x10326680: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
 void UVertexStreamVECTOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
-IMPL_DIVERGE("virtual — returns Data.GetData(); VA unconfirmed")
+IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamVECTOR::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x103024c0)
 INT UVertexStreamVECTOR::GetDataSize() { return Data.Num() * 0xC; }
@@ -668,8 +674,14 @@ IMPL_MATCH("Engine.dll", 0x103029c0)
 FDbgVectorInfo::FDbgVectorInfo(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); }
 IMPL_EMPTY("trivial destructor; no heap resources to free")
 FDbgVectorInfo::~FDbgVectorInfo() {}
-IMPL_DIVERGE("VA unconfirmed; trivial memcpy implementation")
-FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other) { appMemcpy(this, &Other, sizeof(*this)); return *this; }
+// Ghidra 0x10302a60: copies 8 DWORDs (0x0–0x1c) then calls FString::operator= for m_szDef at +0x20.
+IMPL_MATCH("Engine.dll", 0x10302a60)
+FDbgVectorInfo& FDbgVectorInfo::operator=(const FDbgVectorInfo& Other)
+{
+	appMemcpy(this, &Other, 0x20);
+	*(FString*)((BYTE*)this + 0x20) = *(const FString*)((const BYTE*)&Other + 0x20);
+	return *this;
+}
 
 // ============================================================================
 // FRenderInterface
