@@ -2357,6 +2357,9 @@ void UIceTexture::PostLoad()
 
 IMPL_TODO("Needs Ghidra analysis")
 void UIceTexture::Destroy()
+{
+	UTexture::Destroy();
+}
 
 IMPL_GHIDRA("Fire.dll", 0x89e0)
 void UIceTexture::MoveIcePosition( FLOAT Delta )
