@@ -161,11 +161,11 @@ UTerrainBrushColor::UTerrainBrushColor()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushColor::~UTerrainBrushColor not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104653a0)
 UTerrainBrushColor::~UTerrainBrushColor()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x1653a0: reset vtable (implicit in C++ virtual dtor), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -201,11 +201,11 @@ UTerrainBrushEdgeTurn::UTerrainBrushEdgeTurn()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10465980)
 UTerrainBrushEdgeTurn::~UTerrainBrushEdgeTurn()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x165980: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -257,11 +257,11 @@ UTerrainBrushFlatten::UTerrainBrushFlatten()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushFlatten::~UTerrainBrushFlatten not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10465520)
 UTerrainBrushFlatten::~UTerrainBrushFlatten()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x165520: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -297,11 +297,11 @@ UTerrainBrushNoise::UTerrainBrushNoise()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushNoise::~UTerrainBrushNoise not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104654a0)
 UTerrainBrushNoise::~UTerrainBrushNoise()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x1654a0: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -337,11 +337,11 @@ UTerrainBrushPaint::UTerrainBrushPaint()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushPaint::~UTerrainBrushPaint not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10465320)
 UTerrainBrushPaint::~UTerrainBrushPaint()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x165320: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -384,11 +384,11 @@ UTerrainBrushPlanningPaint::UTerrainBrushPlanningPaint()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10465a00)
 UTerrainBrushPlanningPaint::~UTerrainBrushPlanningPaint()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x165a00: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -438,11 +438,11 @@ UTerrainBrushSelect::UTerrainBrushSelect()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushSelect::~UTerrainBrushSelect not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10465790)
 UTerrainBrushSelect::~UTerrainBrushSelect()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x165790: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -487,11 +487,11 @@ UTerrainBrushSmooth::UTerrainBrushSmooth()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushSmooth::~UTerrainBrushSmooth not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10465420)
 UTerrainBrushSmooth::~UTerrainBrushSmooth()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x165420: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -534,11 +534,11 @@ UTerrainBrushTexPan::UTerrainBrushTexPan()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushTexPan::~UTerrainBrushTexPan not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104655b0)
 UTerrainBrushTexPan::~UTerrainBrushTexPan()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x1655b0: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -574,11 +574,11 @@ UTerrainBrushTexRotate::UTerrainBrushTexRotate()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushTexRotate::~UTerrainBrushTexRotate not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10465640)
 UTerrainBrushTexRotate::~UTerrainBrushTexRotate()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x165640: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -614,11 +614,11 @@ UTerrainBrushTexScale::UTerrainBrushTexScale()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushTexScale::~UTerrainBrushTexScale not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104656d0)
 UTerrainBrushTexScale::~UTerrainBrushTexScale()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x1656d0: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -647,11 +647,11 @@ UTerrainBrushVertexEdit::UTerrainBrushVertexEdit()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104652a0)
 UTerrainBrushVertexEdit::~UTerrainBrushVertexEdit()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x1652a0: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
@@ -680,11 +680,11 @@ UTerrainBrushVisibility::UTerrainBrushVisibility()
 	new ((BYTE*)this + 0x10) FString();
 }
 
-IMPL_DIVERGE("UTerrainBrushVisibility::~UTerrainBrushVisibility not found in Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x104658f0)
 UTerrainBrushVisibility::~UTerrainBrushVisibility()
 {
-	((FString*)((BYTE*)this + 0x10))->~FString();
-	((FString*)((BYTE*)this + 0x04))->~FString();
+	// Ghidra 0x1658f0: reset vtable (implicit), then call UTerrainBrush::~UTerrainBrush
+	reinterpret_cast<UTerrainBrush*>(this)->UTerrainBrush::~UTerrainBrush();
 }
 
 IMPL_MATCH("Engine.dll", 0x10315b20)
