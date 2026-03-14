@@ -936,18 +936,18 @@ IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 UTerrainPrimitive::UTerrainPrimitive(ATerrainInfo*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10456d50 is 81 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10456d50: calls UPrimitive::Serialize then serializes terrain sector vertex data; data serialization FUN_ unresolved")
 void UTerrainPrimitive::Serialize(FArchive& Ar) { UPrimitive::Serialize(Ar); }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1045E740 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1045E740: delegates to sector line checks; sector data structures unresolved — returns 1")
 INT UTerrainPrimitive::LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD) { return 1; }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1045E820 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1045E820: delegates to sector point checks; sector data structures unresolved — returns 1")
 INT UTerrainPrimitive::PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD) { return 1; }
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainPrimitive::Illuminate(AActor*, INT) {}
-IMPL_DIVERGE("body incomplete — Ghidra 0x10456620 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10456620: computes terrain AABB from sector data; sector layout unresolved — returns empty FBox")
 FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor*, INT) { return FBox(); }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x10460b60 is 583 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10460b60: calls UObject::Serialize then serializes all sector vertex/triangle data; FUN_ blockers for mesh data TArrays")
 void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::PostLoad() {}
@@ -968,7 +968,7 @@ IMPL_MATCH("Engine.dll", 0x103153a0)
 INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
 	return (SectorSizeX + 1) * Y + X;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x104590F0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x104590F0: complex per-triangle LOD/culling test; sector mesh data unresolved — returns 1")
 INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
 // ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
 // Gets the alpha texture for the layer, computes texel range for this sector,
@@ -1002,7 +1002,7 @@ INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 
 	return 1;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10458D70 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10458D70: checks all texels in a triangle for matching alpha value; triangle data unresolved — returns 0")
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}
