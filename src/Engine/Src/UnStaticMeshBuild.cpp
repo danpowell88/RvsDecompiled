@@ -67,7 +67,8 @@ UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 		if (materialsData != NULL)
 			pSkin = *(UMaterial**)(materialsData + SkinIndex * 0x0c);
 	}
-	// TODO: if still NULL, use FUN_10317670(UMaterial CDO)+0x30 — unresolved.
+	// DIVERGENCE: if still NULL, FUN_10317670 (GetDefaultMaterial CDO) is unresolved.
+	// Retail returns a fallback default UMaterial; we return NULL here.
 	return pSkin;
 }
 FTags * UStaticMesh::GetTag(FString Name)
@@ -98,8 +99,8 @@ int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD
 {
 	guard(UStaticMesh::LineCheck);
 	// Ghidra 0x44eb60, 931 bytes: full static mesh ray-triangle intersection (BVH/OPCODE).
-	// TODO: complex tree traversal — many unresolved FUN_ calls.
-	// DIVERGENCE: returns 1 (no hit) pending full implementation.
+	// DIVERGENCE: complex OPCODE/BVH ray-triangle traversal requires many unresolved FUN_ calls.
+	// Returns 1 (no hit) pending full collision geometry implementation.
 	return 1;
 	unguard;
 }
@@ -107,8 +108,8 @@ int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
 	// Ghidra 0x44ef40, 403 bytes: point overlap test against static mesh collision geometry.
-	// TODO: OPCODE tree traversal — unresolved FUN_ calls.
-	// DIVERGENCE: returns 1 (no overlap) pending full implementation.
+	// DIVERGENCE: OPCODE point-overlap traversal requires many unresolved FUN_ calls.
+	// Returns 1 (no overlap) pending full collision geometry implementation.
 	return 1;
 	unguard;
 }

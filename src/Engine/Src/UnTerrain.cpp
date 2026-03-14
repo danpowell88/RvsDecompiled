@@ -124,8 +124,9 @@ int ATerrainInfo::SelectVertex(FVector)
 	// Ghidra 0x15cbf0, 4358 bytes: find closest heightmap vertex at the given world pos,
 	// then add it (and symmetry mirrors) to the selection list at this+0x1360.
 	// Uses external editor globals (DAT_1061b728/b738/b7a8/b71c/b76c/b7a0) for symmetry mode.
-	// TODO: external editor globals and FUN_1031fe20 unresolved — full impl deferred.
-	// DIVERGENCE: returns 0 (no selection made).
+	// DIVERGENCE: editor symmetry globals (DAT_1061b728 etc.) and FUN_1031fe20 (TArray remove)
+	// are unresolved; full vertex selection with symmetry mirrors deferred.
+	// Returns 0 (no selection made).
 	return 0;
 	unguard;
 }
@@ -135,7 +136,8 @@ int ATerrainInfo::SelectVertexX(int X, int Y)
 	// If found: remove via FUN_1031fe20(i,1) and return 0.
 	// If not found: append new entry and return 1.
 	// Entry layout: [+0]=X, [+4]=Y, [+8]=heightmap_val, [+0xC]=strength(float), [+0x10]=0.
-	// TODO: FUN_1031fe20 (element removal) and editor strength globals unresolved.
+	// DIVERGENCE: FUN_1031fe20 (TArray element removal at index) is unresolved; found entry
+	// is not removed from the selection list.
 	FArray* list = (FArray*)((BYTE*)this + 0x1360);
 	INT count = list->Num();
 	INT off = 0;
@@ -144,7 +146,7 @@ int ATerrainInfo::SelectVertexX(int X, int Y)
 		BYTE* base = (BYTE*)*(INT*)list;
 		if (*(INT*)(base + off) == X && *(INT*)(base + off + 4) == Y)
 		{
-			// TODO: FUN_1031fe20(i, 1) — remove entry at index i from selection list
+			// DIVERGENCE: FUN_1031fe20(i,1) = remove element at index i from TArray; unresolved.
 			return 0;
 		}
 	}
@@ -152,7 +154,7 @@ int ATerrainInfo::SelectVertexX(int X, int Y)
 	BYTE* base = (BYTE*)*(INT*)list;
 	*(INT*) (base + idx)          = X;
 	*(INT*) (base + idx + 4)      = Y;
-	*(FLOAT*)(base + idx + 0x0c)  = 0.5f; // TODO: strength from editor globals / 100.0f
+	*(FLOAT*)(base + idx + 0x0c)  = 0.5f; // DIVERGENCE: retail reads strength from editor global (DAT_1061b71c) / 100.0f; global unresolved, defaulting to 0.5
 	*(DWORD*)(base + idx + 0x08)  = (DWORD)GetHeightmap(X, Y);
 	*(INT*) (base + idx + 0x10)   = 0;
 	return 1;
@@ -227,8 +229,8 @@ int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
 	// Ghidra 0x15c3c0, 1445 bytes: ray-terrain intersection test across all heightmap sectors.
-	// TODO: FUN_1050557c (sector ray test), rdtsc perf counters, full sector iteration unresolved.
-	// DIVERGENCE: returns 1 (no hit) pending full implementation.
+	// DIVERGENCE: FUN_1050557c (per-sector ray test), rdtsc perf counters, and full sector
+	// iteration tree are unresolved; returns 1 (no hit) pending full implementation.
 	return 1;
 	unguard;
 }
