@@ -18,12 +18,14 @@ inline void  operator delete(void*, void*) noexcept {}
 ENGINE_API FArchive& operator<<(FArchive& Ar, FRawColorStream& V);
 
 // --- UStaticMesh ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x10446A90 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10446A90: registers 3 UBoolProperty + 1 UArrayProperty<FStaticMeshMaterial> via UProperty ctor calls; UProperty reflection infrastructure not yet decompiled")
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);
-	// Retail: complex property registration via IMPLEMENT_CLASS (FUN_10449d30).
-	// Divergence: not fully reconstructed from Ghidra.
+	// Retail: registers UseSimpleLineCollision (+0x128), UseSimpleBoxCollision (+0x2BC),
+	// UseVertexColor (+0x130) as UBoolProperty, and Materials as UArrayProperty<UStaticMeshMaterial>.
+	// All require UBoolProperty::UBoolProperty / UObjectProperty::UObjectProperty ctors
+	// which are not yet decompiled.
 	unguard;
 }
 
@@ -36,22 +38,25 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x104472F0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x104472F0: calls UObject::PostLoad then fixes triangle normals via TArray<FStaticMeshTriangle> at +0x58 using TArray::operator()(index) vtable calls; unresolved vtable dispatch")
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
-	// Retail: fixes up triangle normals and builds render data.
-	// Divergence: not fully reconstructed from Ghidra.
+	UObject::PostLoad();
+	// Retail (1401b): iterates Materials TArray at +0x58 (stride 0x14) when this+0x150 == -1,
+	// fixing up UMaterial references and rebuilding render/collision structures.
+	// DIVERGENCE: unresolved vtable[29] and FUN_ calls block full reconstruction.
 	unguard;
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("body incomplete — Ghidra 0x1044CDA0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1044CDA0: OPCODE BVH traversal (1017b) — FUN_104487d0/FUN_10448ba0 (BVH node test/traverse) unresolved; collision tree not yet decompiled")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
-	// Retail: iterates collision triangles and tests against the sphere.
-	// Divergence: not fully reconstructed from Ghidra.
+	// Retail: uses Actor->WorldToLocal() to transform sphere, then traverses the OPCODE
+	// collision BVH tree at this+0x124, collecting triangles that overlap the sphere.
+	// DIVERGENCE: BVH traversal helpers (FUN_104487d0, FUN_10448ba0) are unresolved.
 	unguard;
 }
 IMPL_EMPTY("editor tool: builds static mesh geometry and collision data")
@@ -62,12 +67,12 @@ void UStaticMesh::Build()
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1031C9F0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1031C9F0: FUN_10317670 (UMaterial CDO lookup via USubsystem chain) unresolved; fallback default material cannot be returned")
 UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 {
-	// Ghidra 0x1c9f0, 69b:call Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
-	// If NULL, fall back to Materials TArray at this+0xfc (stride 0x0c; UMaterial* at +0).
-	// If still NULL: FUN_10317670 (default UMaterial CDO) unresolved — return NULL.
+	// Ghidra 0x1c9f0 (69b): calls Owner->GetSkin(SkinIndex) via vtable[0xa0/4=40].
+	// If NULL, falls back to Materials TArray at this+0xfc (stride 0x0c; UMaterial* at +0).
+	// If still NULL: FUN_10317670 fetches the default UMaterial from USubsystem chain.
 	typedef UMaterial* (__thiscall* GetSkinFn)(AActor*, INT);
 	UMaterial* pSkin = ((GetSkinFn)(*(INT*)(*(INT*)Owner + 0xa0)))(Owner, SkinIndex);
 	if (pSkin == NULL)
@@ -76,8 +81,7 @@ UMaterial * UStaticMesh::GetSkin(AActor* Owner, int SkinIndex)
 		if (materialsData != NULL)
 			pSkin = *(UMaterial**)(materialsData + SkinIndex * 0x0c);
 	}
-	// DIVERGENCE: if still NULL, FUN_10317670 (GetDefaultMaterial CDO) is unresolved.
-	// Retail returns a fallback default UMaterial; we return NULL here.
+	// DIVERGENCE: FUN_10317670 (default UMaterial CDO path) is unresolved; returns NULL.
 	return pSkin;
 }
 IMPL_MATCH("Engine.dll", 0x104478b0)
@@ -97,33 +101,36 @@ FTags * UStaticMesh::GetTag(FString Name)
 	return NULL;
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10449DE0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10449DE0: FUN_10449c90 (triangle stream serializer), FUN_10301400 (bbox rebuild) unresolved; geometry arrays not fully serialized")
 void UStaticMesh::Serialize(FArchive& Ar)
 {
-	// Retail: 0x10449de0.Calls UPrimitive::Serialize (if version >= 0x55) or UObject::Serialize,
-	// then serializes geometry arrays: +0x154/+0x158 (v<0x5C), +0x58 (triangle data),
-	// +0x2C (render bounds), +0x1C4, +0x1D0 (materials), etc.
-	// Divergence: simplified to base class; geometry is loaded from package.
-	UObject::Serialize(Ar);
+	// Ghidra 0x149de0 (970b): version-conditional UPrimitive::Serialize base call,
+	// then serializes geometry arrays (triangle data at +0x58, render bounds at +0x2C,
+	// materials at +0x1C4, FTags at +0x17c, etc.) via FUN_10449c90 and FUN_10449c50.
+	// DIVERGENCE: geometry serialize helpers are unresolved; loads base-class fields only.
+	if (Ar.Ver() < 0x55)
+		UObject::Serialize(Ar);
+	else
+		UPrimitive::Serialize(Ar);
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1044EB60 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1044EB60: OPCODE BVH ray-triangle traversal (931b) — FUN_104487d0/FUN_10448ba0 (BVH test/traverse) unresolved; returns no-hit")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
-	// Ghidra 0x44eb60, 931 bytes: full static mesh ray-triangle intersection (BVH/OPCODE).
-	// DIVERGENCE: complex OPCODE/BVH ray-triangle traversal requires many unresolved FUN_ calls.
-	// Returns 1 (no hit) pending full collision geometry implementation.
-	return 1;
+	// Retail: transforms ray to local space, traverses OPCODE BVH collision tree at +0x124,
+	// tests each leaf triangle with ray-plane intersection, fills FCheckResult on hit.
+	// DIVERGENCE: BVH helpers (FUN_104487d0, FUN_10448ba0) are unresolved.
+	return 1; // no hit
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1044EF40 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x1044EF40: OPCODE BVH point-overlap test (403b) — same FUN_ blockers as LineCheck; returns no-overlap")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
-	// Ghidra 0x44ef40, 403 bytes: point overlap test against static mesh collision geometry.
-	// DIVERGENCE: OPCODE point-overlap traversal requires many unresolved FUN_ calls.
-	// Returns 1 (no overlap) pending full collision geometry implementation.
-	return 1;
+	// Retail: transforms point+extent to local space, traverses OPCODE BVH tree at +0x124,
+	// tests each leaf triangle for overlap with the swept sphere.
+	// DIVERGENCE: BVH helpers (FUN_104487d0, FUN_10448ba0) are unresolved.
+	return 1; // no overlap
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x104469d0)
@@ -135,12 +142,14 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_DIVERGE("Ghidra 0x1044c130: model bbox (this+0x120 via vtable[29]) not merged — DIVERGENCE")
+IMPL_DIVERGE("Ghidra 0x1044c130: vtable[29] (this+0x120) = model bbox merge — thiscall target not identified; model bbox omitted")
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor* Actor) const
 {
-	// Ghidra: if actor flag[0x2a] & 0x400000 == 0, transform mesh bbox (this+0x2c)
-	// by Actor->LocalToWorld(), then optionally merge model bbox via this+0x120 vtable[29].
-	// We omit the model merge due to unresolved vtable target.
+	// Ghidra 0x144c130 (267b): if actor flag [this+0xA8] & 0x400000 == 0,
+	// transforms mesh bbox (this+0x2c) by Actor->LocalToWorld().
+	// Then if (this+0x120 != NULL), calls vtable[29](Actor) to merge in model bbox.
+	// DIVERGENCE: vtable[29] target (FUN_1044c0a0 / UModel::GetCollisionBoundingBox?)
+	// not yet identified — model bbox merge omitted.
 	if (Actor && !(((const DWORD*)Actor)[0x2a] & 0x400000))
 		return (*(const FBox*)((const BYTE*)this + 0x2c)).TransformBy(Actor->LocalToWorld());
 	return UPrimitive::GetCollisionBoundingBox(Actor);
