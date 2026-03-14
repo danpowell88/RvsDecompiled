@@ -8,7 +8,9 @@
 #pragma warning(disable: 4996)
 
 #include "IpDrvPrivate.h"
+#if _MSC_VER > 1310
 #include <intrin.h>
+#endif
 
 /*-----------------------------------------------------------------------------
 	Package.

@@ -115,4 +115,25 @@
     #define noexcept throw()
 #endif
 
+// ---------------------------------------------------------------------------
+// __rdtsc() compatibility
+//   MSVC 7.1 does not expose __rdtsc() as a C++ intrinsic. Use inline asm.
+//   This is guarded so VS2019+ continues to use the real intrinsic from
+//   <intrin.h>. All sites that include <intrin.h> should guard that include
+//   with #if _MSC_VER > 1310.
+// ---------------------------------------------------------------------------
+#if _MSC_VER <= 1310
+    static inline unsigned __int64 _RVS_RDTSC()
+    {
+        unsigned long _lo, _hi;
+        __asm {
+            rdtsc
+            mov _lo, eax
+            mov _hi, edx
+        }
+        return ((unsigned __int64)_hi << 32) | _lo;
+    }
+    #define __rdtsc _RVS_RDTSC
+#endif
+
 #endif // IMPL_SOURCE_H

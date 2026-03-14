@@ -6,7 +6,9 @@
 
 // Placement new for placement-new stubs in this TU.
 #include "EnginePrivate.h"
+#if _MSC_VER > 1310
 #include <intrin.h>
+#endif
 #pragma warning(push)
 #pragma warning(disable: 4291)
 inline void* operator new(size_t, void* p) noexcept { return p; }

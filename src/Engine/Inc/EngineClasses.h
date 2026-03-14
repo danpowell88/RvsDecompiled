@@ -1,14 +1,15 @@
-/*===========================================================================
+﻿/*===========================================================================
 	EngineClasses.h: Ravenshield Engine class declarations.
 	Reconstructed for decompilation — provides DECLARE_CLASS macros that
 	IMPLEMENT_CLASS requires, plus the AUTOGENERATE_NAME / FUNCTION pattern.
 
 	This file deliberately omits member variables (sizeof will be minimal).
 	The runtime .u package metadata overrides PropertiesSize at load time.
+
+	NOTE: This file intentionally has NO include guard or #pragma once.
+	It is designed to be included twice: once normally (for declarations)
+	and once with NAMES_ONLY defined (for FName definitions in Engine.cpp).
 ===========================================================================*/
-#pragma once
-#ifndef ENGINECLASSES_H
-#define ENGINECLASSES_H
 
 #ifndef ENGINE_API
 #define ENGINE_API DLL_IMPORT
@@ -27,6 +28,8 @@ struct MdtBaseConstraint;
 class MotionChunk;
 class UDemoRecDriver;
 class FSpriteParticleVertex;
+#ifndef EDECALTYPE_DEFINED
+#define EDECALTYPE_DEFINED
 enum eDecalType {
     DECAL_Footstep,
     DECAL_Bullet,
@@ -34,6 +37,7 @@ enum eDecalType {
     DECAL_BloodBaths,
     DECAL_GrenadeDecals
 };
+#endif // EDECALTYPE_DEFINED
 
 
 /*==========================================================================
@@ -537,11 +541,14 @@ struct FVertexComponent {
 };
 class ENGINE_API FConvexVolume {
 public:
-	// Layout from Ghidra (SphereCheck, BoxCheck):
-	// FPlane array at 0x00 (up to 0x200 = 32 planes × 16 bytes each),
-	// NumPlanes at 0x200.
-	FPlane Planes[32];        // 0x00..0x1FF (32 * 16 = 512 bytes)
-	INT NumPlanes;            // 0x200
+	// Layout from Ghidra (SphereCheck, BoxCheck, ctor/dtor at confirmed VAs):
+	// Full object size = 0x260 (608) bytes.
+	FPlane Planes[32];        // 0x000..0x1FF (32 * 16 = 512 bytes)
+	INT   NumPlanes;          // 0x200
+	FVector _ExtraVec0;       // 0x204 (confirmed via ctor 0x10414360; purpose unknown)
+	FVector _ExtraVec1;       // 0x210 (confirmed via ctor 0x10414360; purpose unknown)
+	INT   _Pad21C;            // 0x21C (zeroed by ctor; exact field name unknown)
+	FMatrix _ExtraMatrix;     // 0x220 (confirmed via ctor+dtor at 0x10414360/0x10303740)
 	BYTE SphereCheck(FSphere);
 	FConvexVolume(FConvexVolume const &);
 	FConvexVolume();
@@ -7052,4 +7059,3 @@ public:
 #endif
 #endif // _INC_ENGINE_CLASSES_DECLS
 #endif // NAMES_ONLY
-#endif // ENGINECLASSES_H
