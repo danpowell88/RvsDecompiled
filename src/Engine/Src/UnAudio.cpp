@@ -23,9 +23,7 @@ IMPLEMENT_CLASS(UMusic);
 
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -57,7 +55,7 @@ void USound::PS2Convert()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 USound::USound(const TCHAR* InName, INT InFlags)
 {
 	guard(USound::USound);

@@ -7,9 +7,7 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -17,20 +15,20 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UBinaryFileDownload ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::StaticConstructor()
 {
 	// Retail: 0x189160, 71b. Sets the config key FString at +0x38 to "Enabled".
 	*(FString*)((BYTE*)this + 0x38) = TEXT("Enabled");
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::Tick()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UBinaryFileDownload::TrySkipFile()
 {
 	guard(UBinaryFileDownload::TrySkipFile);
@@ -60,7 +58,7 @@ void UBinaryFileDownload::ReceiveData(BYTE* Data, int Size)
 		*(INT*)((BYTE*)this + 0x44C) += Size;
 	}
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::ReceiveFile(UNetConnection *,int,const TCHAR*,int)
 {
 	// Retail: 0x14770 (shared empty stub)
@@ -100,7 +98,7 @@ void UBinaryFileDownload::DownloadDone()
 		*(INT*)((BYTE*)this + 0x44C) = 0;
 	}
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UBinaryFileDownload::DownloadError(const TCHAR*)
 {
 	// Retail: 0x176d60 (shared empty stub)
@@ -108,7 +106,7 @@ void UBinaryFileDownload::DownloadError(const TCHAR*)
 
 
 // --- UChannelDownload ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UChannelDownload::StaticConstructor()
 {
 	// Retail: 0x188ea0, 71b. Sets the config key FString at +0x38 to "Enabled".
@@ -191,7 +189,7 @@ void UChannelDownload::Destroy()
 
 
 // --- UDownload ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UDownload::StaticConstructor()
 {
 	// Retail: 0x1889d0, 80b. Initialise config key FString at +0x38 to "" and zero +0x44.
@@ -199,7 +197,7 @@ void UDownload::StaticConstructor()
 	*(DWORD*)((BYTE*)this + 0x44) = 0;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UDownload::Tick()
 {
 	// Retail: 0x176d60 (shared empty stub)

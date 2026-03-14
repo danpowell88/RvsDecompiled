@@ -7,9 +7,7 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -26,14 +24,14 @@ FCanvasUtil::FCanvasUtil(FCanvasUtil const &Other)
 	appMemcpy((BYTE*)this + 0x94, (const BYTE*)&Other + 0x94, 0xC14);
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 FCanvasUtil::FCanvasUtil(UViewport *,FRenderInterface *,int,int)
 {
 	guard(FCanvasUtil::FCanvasUtil);
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 FCanvasUtil::~FCanvasUtil()
 {
 	guard(FCanvasUtil::~FCanvasUtil);
@@ -64,31 +62,31 @@ void FCanvasUtil::BeginPrimitive(EPrimitiveType PrimType, UMaterial* Mat)
 	}
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void FCanvasUtil::DrawLine(float,float,float,float,FColor)
 {
 	guard(FCanvasUtil::DrawLine);
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void FCanvasUtil::DrawPoint(float,float,float,float,float,FColor)
 {
 	guard(FCanvasUtil::DrawPoint);
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void FCanvasUtil::DrawTile(float,float,float,float,float,float,float,float,float,UMaterial *,FColor)
 {
 	guard(FCanvasUtil::DrawTile);
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void FCanvasUtil::DrawTileRotated(float,float,float,float,float,float,float,float,float,UMaterial *,FColor,float)
 {
 	guard(FCanvasUtil::DrawTileRotated);
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void FCanvasUtil::Flush()
 {
 	guard(FCanvasUtil::Flush);
@@ -108,7 +106,7 @@ int FCanvasUtil::GetComponents(FVertexComponent* C)
 	C[2].Type = 2; C[2].Function = 4;
 	return 3;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void FCanvasUtil::GetRawStreamData(void * *,int)
 {
 	guard(FCanvasUtil::GetRawStreamData);
@@ -140,7 +138,7 @@ int FCanvasUtil::GetStride()
 
 
 // --- UCanvas ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void __cdecl UCanvas::WrappedPrint(ERenderStyle,int &,int &,UFont *,int,const TCHAR*)
 {
 	guard(UCanvas::WrappedPrint);
@@ -354,7 +352,7 @@ void UCanvas::DrawPattern(UMaterial* Material, FLOAT X, FLOAT Y, FLOAT XL, FLOAT
 	         (Y - TileV) * Scale + (FLOAT)MatVSize,
 	         XL * Scale, YL * Scale, TileZ, Color, AlphaScale, 0.0f);
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,float,float,FPlane,FPlane,float)
 {
 	guard(UCanvas::DrawTile);
@@ -363,7 +361,7 @@ void UCanvas::DrawTile(UMaterial *,float,float,float,float,float,float,float,flo
 
 
 // --- FCanvasVertex ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float InV)
 :	Point(InPoint)
 ,	Color(InColor)
@@ -372,7 +370,7 @@ FCanvasVertex::FCanvasVertex(FVector InPoint, FColor InColor, float InU, float I
 {
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 FCanvasVertex::FCanvasVertex()
 {
 }
@@ -408,7 +406,7 @@ void UCanvas::Serialize(FArchive& Ar)
 
 // Ghidra: not present in Ghidra export — shared null stub, no SEH frame.
 // Returns 0 (MSVC requires a return value in non-void functions).
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_INFERRED("Needs Ghidra analysis")
 UBOOL UCanvas::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	return 0;

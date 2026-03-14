@@ -7,9 +7,7 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -116,13 +114,13 @@ void AProjector::PostEditChange()
 	Attach();
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AProjector::PostEditLoad()
 {
 	// Retail: 0x176d60 (shared empty stub)
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AProjector::PostEditMove()
 {
 	// Retail: 0x176d60 (shared empty stub)
@@ -202,7 +200,7 @@ void AProjector::Attach()
 	// BSP attachment (bit 0 of this+0x3a0) — loops not reconstructed (see above).
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void AProjector::CalcMatrix()
 {
 	// Retail: 0xf8f90, 4699b. Builds projection matrix and 8 frustum corner points

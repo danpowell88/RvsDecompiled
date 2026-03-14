@@ -7,9 +7,7 @@
 // Placement new for placement-new stubs in this TU.
 #pragma warning(push)
 #pragma warning(disable: 4291)
-IMPL_INFERRED("Reconstructed from context")
 inline void* operator new(size_t, void* p) noexcept { return p; }
-IMPL_INFERRED("Reconstructed from context")
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 
@@ -17,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UStaticMesh ---
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);
@@ -26,7 +24,7 @@ void UStaticMesh::StaticConstructor()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::PostEditChange()
 {
 	guard(UStaticMesh::PostEditChange);
@@ -35,7 +33,7 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
@@ -45,7 +43,7 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
@@ -53,7 +51,7 @@ void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshColli
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::Build()
 {
 	guard(UStaticMesh::Build);
@@ -105,7 +103,7 @@ void UStaticMesh::Serialize(FArchive& Ar)
 	// Divergence: simplified to base class; geometry is loaded from package.
 	UObject::Serialize(Ar);
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
@@ -115,7 +113,7 @@ int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD
 	return 1;
 	unguard;
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
@@ -134,7 +132,7 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
 {
 	return FBox();
@@ -163,7 +161,7 @@ FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 	// Retail: 23b. Copy-constructs FSphere from this+0x48.
 	return *(FSphere*)((BYTE*)this + 0x48);
 }
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMesh::Illuminate(AActor *,int)
 {
 	guard(UStaticMesh::Illuminate);
@@ -185,7 +183,7 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
@@ -194,7 +192,7 @@ void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 	unguard;
 }
 
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 {
 	guard(UStaticMeshInstance::DetachProjectorClipped);
@@ -355,7 +353,7 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 }
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
 
 // --- Moved from EngineStubs.cpp ---
@@ -377,19 +375,19 @@ int FRebuildTools::GetIdxFromName(FString p0)
 	return -1;
 }
 // ?Delete@FRebuildTools@@QAEXVFString@@@Z
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::Delete(FString p0) {}
 
 // ?Init@FRebuildTools@@QAEXXZ
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::Init() {}
 
 // ?SetCurrent@FRebuildTools@@QAEXVFString@@@Z
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::SetCurrent(FString p0) {}
 
 // ?Shutdown@FRebuildTools@@QAEXXZ
-IMPL_APPROX("Needs Ghidra analysis")
+IMPL_TODO("Needs Ghidra analysis")
 void FRebuildTools::Shutdown() {}
 IMPL_INFERRED("Vertex component layout; no Ghidra reference")
 INT FStaticMeshColorStream::GetComponents(FVertexComponent* C) {
