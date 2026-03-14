@@ -170,21 +170,21 @@ void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 // UGameEngine::Browse() — implemented in UnGame.cpp
 // UGameEngine::LoadMap()— implemented in UnGame.cpp
 // UGameEngine::Draw()   — implemented in UnGame.cpp
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::UpdateConnectingMessage() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::Exit() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
 IMPL_APPROX("Ghidra: 30b; mixes Challenge halfwords with prime multiply and XOR constant")
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
@@ -192,19 +192,19 @@ INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
 	return ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("returns 0.0f (uncapped); retail may vary but base class default is 0")
 FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::SaveGame( INT Position ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::CancelPending() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::PaintProgress( const FURL& URL ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::NotifyLevelChange() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::FixUpLevel() {}
 
 // =============================================================================

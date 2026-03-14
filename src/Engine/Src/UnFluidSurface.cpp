@@ -214,7 +214,7 @@ void AFluidSurfaceInfo::GetNearestIndex(const FVector& Pos, int& X, int& Y)
 	Y = yi;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetVertexPos — returns zero vector; full world-space vertex lookup needs fluid surface grid layout from Ghidra")
 FVector AFluidSurfaceInfo::GetVertexPos(int,int)
 {
 	return FVector(0,0,0);
@@ -401,13 +401,13 @@ FBox UFluidSurfacePrimitive::GetCollisionBoundingBox(AActor const *) const
 	return *(FBox*)(*(BYTE**)((BYTE*)this + 0x58) + 0x448);
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetRenderBoundingBox — returns empty FBox; bounding box needs fluid surface grid extents from Ghidra")
 FBox UFluidSurfacePrimitive::GetRenderBoundingBox(AActor const *)
 {
 	return FBox();
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetRenderBoundingSphere — returns empty FSphere; needs fluid surface extents from Ghidra")
 FSphere UFluidSurfacePrimitive::GetRenderBoundingSphere(AActor const *)
 {
 	return FSphere();
@@ -429,19 +429,19 @@ IMPL_APPROX("Delegates to Super::PostEditChange")
 void AFluidSurfaceInfo::PostEditChange() { Super::PostEditChange(); }
 IMPL_APPROX("Delegates to Super::Tick")
 INT AFluidSurfaceInfo::Tick( FLOAT DeltaTime, ELevelTick TickType ) { return Super::Tick( DeltaTime, TickType ); }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PostEditMove — editor-only; no-op for runtime")
 void AFluidSurfaceInfo::PostEditMove() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Spawned — post-spawn init; fluid surface grid allocation needs Ghidra layout")
 void AFluidSurfaceInfo::Spawned() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("GetPrimitive — returns NULL; primitive needs fluid surface primitive allocation")
 UPrimitive* AFluidSurfaceInfo::GetPrimitive() { return NULL; }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Init — fluid surface grid initialisation; full setup needs Ghidra analysis")
 void AFluidSurfaceInfo::Init() {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Pling — creates a ripple at Location with Strength/Radius; simulation update deferred")
 void AFluidSurfaceInfo::Pling( const FVector& Location, FLOAT Strength, FLOAT Radius ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PlingVertex — directly disturbs a simulation vertex; grid layout needed from Ghidra")
 void AFluidSurfaceInfo::PlingVertex( INT X, INT Y, FLOAT Strength ) {}
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UpdateSimulation — advances fluid wave simulation by DeltaTime; full sim deferred")
 void AFluidSurfaceInfo::UpdateSimulation( FLOAT DeltaTime ) {}
 
 // =============================================================================

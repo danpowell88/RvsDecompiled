@@ -17,49 +17,49 @@ inline void  operator delete(void*, void*) noexcept {}
 // --- UNetConnection ---
 
 // --- UClient ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("StaticConstructor — registers UClient config properties; no-op without full property registration")
 void UClient::StaticConstructor()
 {
 	guard(UClient::StaticConstructor);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UpdateGamma — applies gamma ramp to render device; no-op without render device reference")
 void UClient::UpdateGamma()
 {
 	guard(UClient::UpdateGamma);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UpdateGraphicOptions — syncs graphic settings to render device; no-op without render device")
 void UClient::UpdateGraphicOptions()
 {
 	guard(UClient::UpdateGraphicOptions);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("RestoreGamma — restores default gamma ramp; no-op without render device reference")
 void UClient::RestoreGamma()
 {
 	guard(UClient::RestoreGamma);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Serialize — serialises UClient viewport list; base UObject serialize only")
 void UClient::Serialize(FArchive &)
 {
 	guard(UClient::Serialize);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PostEditChange — notify on property change; no-op for runtime builds")
 void UClient::PostEditChange()
 {
 	guard(UClient::PostEditChange);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Destroy — frees viewports and render device; chains to UObject::Destroy")
 void UClient::Destroy()
 {
 	guard(UClient::Destroy);
@@ -168,7 +168,7 @@ int UClient::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Flush — flushes all viewport render buffers; no-op without render device")
 void UClient::Flush(int)
 {
 	guard(UClient::Flush);
@@ -196,7 +196,7 @@ void UPlayer::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Destroy — unregisters viewport from PlayerController and calls UObject::Destroy")
 void UPlayer::Destroy()
 {
 	guard(UPlayer::Destroy);
@@ -357,7 +357,7 @@ void UNetConnection::PostSend()
 	if (Out.GetNumBits() == MaxPacket * 8)
 		FlushNet();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Constructor — calls UNetConnection ctor to init base class; demo driver specifics need Ghidra")
 UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
 {
 	guard(UDemoRecConnection::UDemoRecConnection);

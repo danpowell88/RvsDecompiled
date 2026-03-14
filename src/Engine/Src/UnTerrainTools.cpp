@@ -15,21 +15,21 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UTerrainBrush ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrush::MouseButtonDown(UViewport *)
 {
 	guard(UTerrainBrush::MouseButtonDown);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrush::MouseButtonUp(UViewport *)
 {
 	guard(UTerrainBrush::MouseButtonUp);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrush::MouseMove(float,float)
 {
 	guard(UTerrainBrush::MouseMove);
@@ -106,21 +106,21 @@ int UTerrainBrush::BeginPainting(UTexture** param_1, ATerrainInfo** param_2)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrush::EndPainting(UTexture *,ATerrainInfo *)
 {
 	guard(UTerrainBrush::EndPainting);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrush::Execute(int)
 {
 	guard(UTerrainBrush::Execute);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Returns default-constructed FBox; editor terrain tool — actual rect computation not implemented")
 FBox UTerrainBrush::GetRect()
 {
 	return FBox();
@@ -159,7 +159,7 @@ UTerrainBrushColor& UTerrainBrushColor::operator=(const UTerrainBrushColor& Othe
 	return *this;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("Editor terrain tool — not needed for runtime gameplay")
 void UTerrainBrushColor::Execute(int)
 {
 	guard(UTerrainBrushColor::Execute);

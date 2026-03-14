@@ -23,7 +23,7 @@ INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPrope
 
 
 // --- AR6ActionSpot ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("AR6ActionSpot has no special editor geometry; retail body is guard/unguard only")
 void AR6ActionSpot::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 	guard(AR6ActionSpot::RenderEditorInfo);

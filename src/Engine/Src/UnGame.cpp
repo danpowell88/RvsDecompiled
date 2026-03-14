@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnGame.cpp: Engine and game-engine core (UEngine, UGameEngine)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -239,7 +239,7 @@ void UGameEngine::Init()
     unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Loads BMP/TGA from disk and uploads to render surface; render target upload helper FUN_10316cb0 not reconstructed")
 int UGameEngine::ReplaceTexture(FString,UTexture *)
 {
 	guard(UGameEngine::ReplaceTexture);
@@ -251,7 +251,7 @@ int UGameEngine::ReplaceTexture(FString,UTexture *)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Loads background image file into UTexture(s); render target upload deferred")
 int UGameEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 {
 	guard(UGameEngine::LoadBackgroundImage);
@@ -284,7 +284,7 @@ void UGameEngine::LoadRandomMenuBackgroundImage(FString Path)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("PostRenderFullScreenEffects — UFinalBlend full-screen pass; FCanvasUtil and lazy material construction need render pipeline")
 void UGameEngine::PostRenderFullScreenEffects(FLevelSceneNode* SceneNode, UViewport* Viewport)
 {
 	guard(UGameEngine::PostRenderFullScreenEffects);
@@ -432,7 +432,7 @@ void UGameEngine::AddLinkerToMasterMap(UNetDriver* NetDriver, UStaticMesh* Mesh)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DisplayGameVideo — builds .bik path and dispatches to GModMgr; GModMgr not declared in this TU")
 void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 {
 	guard(UGameEngine::DisplayGameVideo);
@@ -444,7 +444,7 @@ void UGameEngine::DisplayGameVideo(eGameVideoType VideoType)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("InitializeMissionDescription — builds map INI path via GModMgr; GModMgr and GR6MissionDescription not declared in this TU")
 void UGameEngine::InitializeMissionDescription(FString& OutDesc)
 {
 	guard(UGameEngine::InitializeMissionDescription);
@@ -478,7 +478,7 @@ void UEngine::StaticConstructor()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UEngine::ReplaceTexture — Ghidra 0x10311900: destructs FString param, returns 0; base implementation")
 int UEngine::ReplaceTexture(FString,UTexture *)
 {
 	// Ghidra 0x10311900: destructs FString by-value param, returns 0.
@@ -522,13 +522,13 @@ int UEngine::LoadBackgroundImage(FString,UTexture *,UTexture *)
 	return 1;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("UEngine::LoadRandomMenuBackgroundImage — Ghidra 0x103118d0: destructs FString param only; subclass UGameEngine overrides with real impl")
 void UEngine::LoadRandomMenuBackgroundImage(FString)
 {
 	// Ghidra 0x103118d0: destructs FString by-value param, returns.
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("CacheArmPatch — ARM copy-protection validation; many unresolved FUN_ crypto calls; returns 0")
 int UEngine::CacheArmPatch(FGuid *,DWORD *)
 {
 	guard(UEngine::CacheArmPatch);
@@ -557,7 +557,7 @@ void UEngine::Destroy()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("ExecServerProf — server profiling command handler; profiling-data FUN_ calls unresolved; returns 0")
 int UEngine::ExecServerProf(const TCHAR*,int,FOutputDevice &)
 {
 	guard(UEngine::ExecServerProf);
@@ -639,7 +639,7 @@ int UEngine::InputEvent(UViewport* Viewport, EInputKey Key, EInputAction Action,
 
 
 // --- UInteractionMaster ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("MasterProcessKeyEvent — calls FUN_1031ded0 then iterates interactions; FUN_1031ded0 identity unknown; returns 0")
 int UInteractionMaster::MasterProcessKeyEvent(EInputKey,EInputAction,float)
 {
 	guard(UInteractionMaster::MasterProcessKeyEvent);
@@ -649,7 +649,7 @@ int UInteractionMaster::MasterProcessKeyEvent(EInputKey,EInputAction,float)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("MasterProcessKeyType — same pattern as MasterProcessKeyEvent via FUN_1031ded0; returns 0")
 int UInteractionMaster::MasterProcessKeyType(EInputKey)
 {
 	guard(UInteractionMaster::MasterProcessKeyType);
@@ -658,7 +658,7 @@ int UInteractionMaster::MasterProcessKeyType(EInputKey)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("MasterProcessMessage — FUN_1031ded0 then eventProcess_Message, iterates interactions; identity unknown")
 void UInteractionMaster::MasterProcessMessage(FString const &,float)
 {
 	guard(UInteractionMaster::MasterProcessMessage);
@@ -666,7 +666,7 @@ void UInteractionMaster::MasterProcessMessage(FString const &,float)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("MasterProcessPostRender — iterates interactions calling eventProcess_PostRender; FUN_1031ded0 dependency")
 void UInteractionMaster::MasterProcessPostRender(UCanvas *)
 {
 	guard(UInteractionMaster::MasterProcessPostRender);
@@ -675,7 +675,7 @@ void UInteractionMaster::MasterProcessPostRender(UCanvas *)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("MasterProcessPreRender — same pattern as PostRender; FUN_1031ded0 dependency")
 void UInteractionMaster::MasterProcessPreRender(UCanvas *)
 {
 	guard(UInteractionMaster::MasterProcessPreRender);
@@ -683,7 +683,7 @@ void UInteractionMaster::MasterProcessPreRender(UCanvas *)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("MasterProcessTick — FUN_1031ded0 then eventProcess_Tick, iterates interactions")
 void UInteractionMaster::MasterProcessTick(float)
 {
 	guard(UInteractionMaster::MasterProcessTick);
@@ -691,7 +691,7 @@ void UInteractionMaster::MasterProcessTick(float)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DisplayCopyright — logs engine name and copyright via LocalizeGeneral; EName values not yet determined")
 void UInteractionMaster::DisplayCopyright()
 {
 	guard(UInteractionMaster::DisplayCopyright);
@@ -700,7 +700,7 @@ void UInteractionMaster::DisplayCopyright()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("Exec — dispatches to first interaction via vtable[0x30] if Level has interactions; returns 0")
 int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 {
 	// Ghidra 0x103b6660: if Level has interactions, dispatch Exec to first interaction
@@ -709,21 +709,21 @@ int UInteractionMaster::Exec(const TCHAR*,FOutputDevice &)
 }
 
 // --- AHUD ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DrawInGameMap — R6-specific in-game map overlay; full render implementation deferred")
 void AHUD::DrawInGameMap(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawInGameMap);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DrawRadar — R6-specific radar overlay; render implementation deferred")
 void AHUD::DrawRadar(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawRadar);
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("DrawSpecificModeInfo — R6-specific mode info overlay; render implementation deferred")
 void AHUD::DrawSpecificModeInfo(FCameraSceneNode *,UViewport *)
 {
 	guard(AHUD::DrawSpecificModeInfo);

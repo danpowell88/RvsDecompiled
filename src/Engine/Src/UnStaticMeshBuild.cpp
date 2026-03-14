@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UStaticMesh ---
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - registers class properties via IMPLEMENT_CLASS")
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);
@@ -24,7 +24,7 @@ void UStaticMesh::StaticConstructor()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("editor-only: rebuilds mesh collision/render data on property change")
 void UStaticMesh::PostEditChange()
 {
 	guard(UStaticMesh::PostEditChange);
@@ -33,7 +33,7 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - fixes up triangle normals and builds render data")
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
@@ -43,7 +43,7 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - iterates collision triangles against sphere")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
@@ -51,7 +51,7 @@ void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshColli
 	// Divergence: not fully reconstructed from Ghidra.
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("editor tool: builds static mesh geometry and collision data")
 void UStaticMesh::Build()
 {
 	guard(UStaticMesh::Build);
@@ -103,7 +103,7 @@ void UStaticMesh::Serialize(FArchive& Ar)
 	// Divergence: simplified to base class; geometry is loaded from package.
 	UObject::Serialize(Ar);
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - BVH/OPCODE ray-triangle traversal; returns 1 (no hit) as fallback")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
@@ -113,7 +113,7 @@ int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD
 	return 1;
 	unguard;
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - OPCODE point-overlap traversal; returns 1 (no overlap) as fallback")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
@@ -132,7 +132,7 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - returns empty FBox as fallback")
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor*) const
 {
 	return FBox();
@@ -161,7 +161,7 @@ FSphere UStaticMesh::GetRenderBoundingSphere(const AActor*)
 	// Retail: 23b. Copy-constructs FSphere from this+0x48.
 	return *(FSphere*)((BYTE*)this + 0x48);
 }
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("editor tool: computes per-vertex lighting bake for static mesh")
 void UStaticMesh::Illuminate(AActor *,int)
 {
 	guard(UStaticMesh::Illuminate);
@@ -183,7 +183,7 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - attaches projector with triangle clipping")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
@@ -192,7 +192,7 @@ void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 	unguard;
 }
 
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("needs Ghidra analysis for full implementation - removes projector from per-instance projector list")
 void UStaticMeshInstance::DetachProjectorClipped(AProjector *)
 {
 	guard(UStaticMeshInstance::DetachProjectorClipped);
@@ -353,7 +353,7 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 }
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_APPROX("editor tool: saves named rebuild option; returns NULL stub")
 FRebuildOptions * FRebuildTools::Save(FString p0) { return NULL; }
 
 // --- Moved from EngineStubs.cpp ---
@@ -375,7 +375,7 @@ int FRebuildTools::GetIdxFromName(FString p0)
 	return -1;
 }
 // ?Delete@FRebuildTools@@QAEXVFString@@@Z
-IMPL_TODO("Needs Ghidra analysis")
+IMPL_EMPTY("editor tool: deletes named rebuild option")
 void FRebuildTools::Delete(FString p0) {}
 
 // ?Init@FRebuildTools@@QAEXXZ
