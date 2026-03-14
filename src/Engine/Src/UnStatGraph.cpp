@@ -26,23 +26,22 @@ FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
 	appMemcpy((BYTE*)this + 0x24, (const BYTE*)&Other + 0x24, 0x10); // 4 DWORDs
 }
 
-IMPL_DIVERGE("VA unconfirmed (not at 0x1032c410 which is copy ctor); correct init of TArray<FLOAT> and FString members")
+IMPL_MATCH("Engine.dll", 0x10445b60)
 FStatGraphLine::FStatGraphLine()
 {
-	// Initialize TArray<FLOAT> at +4 and FString at +18 to empty
 	new ((BYTE*)this + 0x04) TArray<FLOAT>();
 	new ((BYTE*)this + 0x18) FString();
 }
 
-IMPL_DIVERGE("VA unconfirmed; destroys FString at +0x18 and TArray<FLOAT> at +0x04")
+IMPL_DIVERGE("Ghidra 0x1032c3c0: calls FString::~FString(this+0x18) then FUN_10322eb0 (unresolved TArray<FLOAT> dtor helper)")
 FStatGraphLine::~FStatGraphLine()
 {
-	// Destroy FString at +18 then TArray<FLOAT> at +4 (reverse order)
+	// Destroy FString at +0x18, then TArray<FLOAT> at +4 via FUN_10322eb0 (unresolved).
 	((FString*)((BYTE*)this + 0x18))->~FString();
 	((TArray<FLOAT>*)((BYTE*)this + 0x04))->~TArray();
 }
 
-IMPL_DIVERGE("VA unconfirmed; correct field-by-field copy")
+IMPL_DIVERGE("Ghidra 0x10321790: copies fields using FUN_1031f660 for TArray<FLOAT> at +4; FUN_ unresolved")
 FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 {
 	// Ghidra 0x21790: DWORD at +0, TArray<FLOAT> at +4 (FUN_1031f660=4-byte data points),
@@ -55,10 +54,9 @@ FStatGraphLine& FStatGraphLine::operator=(const FStatGraphLine& Other)
 	return *this;
 }
 
-IMPL_DIVERGE("VA unconfirmed; pointer equality")
+IMPL_MATCH("Engine.dll", 0x10316930)
 int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 {
-	// Ghidra 0x16930: pointer equality comparison only.
 	return this == &Other;
 }
 
@@ -69,15 +67,18 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // ============================================================================
 
 // ??0FStatGraph@@QAE@ABV0@@Z
-IMPL_DIVERGE("Ghidra 0x103518f0: copy ctor with FUN_ calls for nested TArrays/FStrings — bulk memcpy approximation")
+IMPL_DIVERGE("Ghidra 0x103518f0: copy ctor copies 2 DWORDs then calls FUN_1033b2a0/FUN_1032dff0/FUN_1031ce50 for TArrays, copies scalar fields, then FString copy at +0x54; FUN_ unresolved")
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
-IMPL_DIVERGE("VA unconfirmed; trivially empty")
-FStatGraph::~FStatGraph() {}
+IMPL_DIVERGE("Ghidra 0x10446960: calls FString::~FString(this+0x54) then FUN_10322eb0/FUN_1034fa30/FUN_1033b300 (TArray dtors, unresolved)")
+FStatGraph::~FStatGraph() {
+	((FString*)((BYTE*)this + 0x54))->~FString();
+	// FUN_10322eb0/FUN_1034fa30/FUN_1033b300 (TArray element dtors) -- pending extraction
+}
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("VA unconfirmed; bulk memcpy of Pad fields")
+IMPL_DIVERGE("Ghidra 0x103519b0: copies 2 DWORDs then FUN_10326110/FUN_1031fea0/FUN_1034fa80/FUN_1031f660 for TArrays; FUN_ unresolved")
 FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
@@ -110,9 +111,9 @@ void FStatGraph::Reset() {}
 // ============================================================================
 // FStats
 // ============================================================================
-IMPL_DIVERGE("Ghidra 0x1033bdb0, 346 bytes: copy ctor with FUN_ calls for nested TArrays; bulk memcpy approximation")
+IMPL_DIVERGE("Ghidra 0x1033bdb0: copy ctor copies 7 DWORDs then calls FUN_1031ce50/FUN_1031cb20/FUN_1031ded0 for TArrays and _eh_vector_copy_constructor_iterator_; FUN_ unresolved")
 FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_DIVERGE("VA unconfirmed; trivially empty")
+IMPL_DIVERGE("Ghidra 0x1033bca0: calls FUN_1033a7d0 then _eh_vector_destructor_iterator_ then FUN_103217e0/FUN_10322eb0 per TArray member; FUN_ unresolved")
 FStats::~FStats() {}
 IMPL_DIVERGE("Ghidra 0x1044f1a0, 595 bytes: updates display string for a stat slot; FUN_ blockers")
 void FStats::UpdateString(FString&, INT) {}
@@ -162,7 +163,7 @@ INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	pRec[2] = (INT)Unit;
 	return SlotIdx;
 }
-IMPL_DIVERGE("Ghidra 0x1044f5d0, 257 bytes: moving average on stat data; FUN_ blockers")
+IMPL_DIVERGE("Ghidra 0x1044f5d0, 257 bytes: moving average on stat data using offset 0x100 array; FUN_ blockers")
 void FStats::CalcMovingAverage(INT, DWORD) {}
 IMPL_MATCH("Engine.dll", 0x1044f430)
 void FStats::Clear()
