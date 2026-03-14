@@ -87,4 +87,6 @@
 
 #pragma pack(pop)
 
+#include "ImplSource.h"
+
 #endif // _INC_WINDRV_PRIVATE

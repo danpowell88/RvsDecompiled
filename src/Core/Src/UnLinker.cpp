@@ -12,6 +12,7 @@
 	FObjectExport / FObjectImport constructors.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FObjectExport::FObjectExport()
 :	ClassIndex   ( 0 )
 ,	SuperIndex   ( 0 )
@@ -24,6 +25,7 @@ FObjectExport::FObjectExport()
 ,	_iHashNext   ( INDEX_NONE )
 {}
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FObjectExport::FObjectExport( UObject* InObject )
 :	ClassIndex   ( 0 )
 ,	SuperIndex   ( 0 )
@@ -36,6 +38,7 @@ FObjectExport::FObjectExport( UObject* InObject )
 ,	_iHashNext   ( INDEX_NONE )
 {}
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FObjectImport::FObjectImport()
 :	ClassPackage ( NAME_None )
 ,	ClassName    ( NAME_None )
@@ -46,6 +49,7 @@ FObjectImport::FObjectImport()
 ,	SourceIndex  ( INDEX_NONE )
 {}
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FObjectImport::FObjectImport( UObject* InObject )
 :	ClassPackage ( InObject ? FName(InObject->GetClass()->GetOuter()->GetName()) : NAME_None )
 ,	ClassName    ( InObject ? FName(InObject->GetClass()->GetName()) : NAME_None )
@@ -60,11 +64,13 @@ FObjectImport::FObjectImport( UObject* InObject )
 	FGenerationInfo / FPackageFileSummary constructors.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FGenerationInfo::FGenerationInfo( INT InExportCount, INT InNameCount )
 :	ExportCount( InExportCount )
 ,	NameCount  ( InNameCount )
 {}
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FPackageFileSummary::FPackageFileSummary()
 :	Tag          ( PACKAGE_FILE_TAG )
 ,	FileVersion  ( PACKAGE_FILE_VERSION )
@@ -81,6 +87,7 @@ FPackageFileSummary::FPackageFileSummary()
 	ULinker.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 ULinker::ULinker( UObject* InRoot, const TCHAR* InFilename )
 :	LinkerRoot    ( InRoot )
 ,	Success       ( 0 )
@@ -93,6 +100,7 @@ ULinker::ULinker( UObject* InRoot, const TCHAR* InFilename )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinker::Serialize( FArchive& Ar )
 {
 	guard(ULinker::Serialize);
@@ -105,6 +113,7 @@ void ULinker::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FString ULinker::GetImportFullName( INT i )
 {
 	guard(ULinker::GetImportFullName);
@@ -119,6 +128,7 @@ FString ULinker::GetImportFullName( INT i )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FString ULinker::GetExportFullName( INT i, const TCHAR* FakeRoot )
 {
 	guard(ULinker::GetExportFullName);
@@ -141,6 +151,7 @@ IMPLEMENT_CLASS(ULinker);
 	ULinkerLoad.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags )
 :	ULinker    ( InParent, InFilename )
 ,	LoadFlags  ( InLoadFlags )
@@ -207,6 +218,7 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::Verify()
 {
 	guard(ULinkerLoad::Verify);
@@ -220,6 +232,7 @@ void ULinkerLoad::Verify()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FName ULinkerLoad::GetExportClassPackage( INT i )
 {
 	guard(ULinkerLoad::GetExportClassPackage);
@@ -233,6 +246,7 @@ FName ULinkerLoad::GetExportClassPackage( INT i )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FName ULinkerLoad::GetExportClassName( INT i )
 {
 	guard(ULinkerLoad::GetExportClassName);
@@ -246,6 +260,7 @@ FName ULinkerLoad::GetExportClassName( INT i )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::VerifyImport( INT i )
 {
 	guard(ULinkerLoad::VerifyImport);
@@ -268,6 +283,7 @@ void ULinkerLoad::VerifyImport( INT i )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::LoadAllObjects()
 {
 	guard(ULinkerLoad::LoadAllObjects);
@@ -276,6 +292,7 @@ void ULinkerLoad::LoadAllObjects()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
@@ -292,6 +309,7 @@ INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName Obj
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoadFlags, UBOOL Checked )
 {
 	guard(ULinkerLoad::Create);
@@ -304,6 +322,7 @@ UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoa
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::Preload( UObject* Object )
 {
 	guard(ULinkerLoad::Preload);
@@ -323,6 +342,7 @@ void ULinkerLoad::Preload( UObject* Object )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 UObject* ULinkerLoad::CreateExport( INT Index )
 {
 	guard(ULinkerLoad::CreateExport);
@@ -364,6 +384,7 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -407,6 +428,7 @@ UObject* ULinkerLoad::CreateImport( INT Index )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 UObject* ULinkerLoad::IndexToObject( INT Index )
 {
 	guard(ULinkerLoad::IndexToObject);
@@ -419,6 +441,7 @@ UObject* ULinkerLoad::IndexToObject( INT Index )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::DetachExport( INT i )
 {
 	guard(ULinkerLoad::DetachExport);
@@ -432,6 +455,7 @@ void ULinkerLoad::DetachExport( INT i )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::Serialize( FArchive& Ar )
 {
 	guard(ULinkerLoad::Serialize_FArchive);
@@ -439,6 +463,7 @@ void ULinkerLoad::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::Destroy()
 {
 	guard(ULinkerLoad::Destroy);
@@ -459,6 +484,7 @@ void ULinkerLoad::Destroy()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::AttachLazyLoader);
@@ -467,6 +493,7 @@ void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::DetachLazyLoader);
@@ -474,6 +501,7 @@ void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 {
 	guard(ULinkerLoad::DetachAllLazyLoaders);
@@ -487,21 +515,25 @@ void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::Seek( INT InPos )
 {
 	Loader->Seek( InPos );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 INT ULinkerLoad::Tell()
 {
 	return Loader->Tell();
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 INT ULinkerLoad::TotalSize()
 {
 	return Loader->TotalSize();
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerLoad::Serialize( void* V, INT Length )
 {
 	Loader->Serialize( V, Length );
@@ -513,6 +545,7 @@ IMPLEMENT_CLASS(ULinkerLoad);
 	ULinkerSave.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )
@@ -524,6 +557,7 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerSave::Destroy()
 {
 	guard(ULinkerSave::Destroy);
@@ -534,6 +568,7 @@ void ULinkerSave::Destroy()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 INT ULinkerSave::MapName( FName* Name )
 {
 	guard(ULinkerSave::MapName);
@@ -541,6 +576,7 @@ INT ULinkerSave::MapName( FName* Name )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 INT ULinkerSave::MapObject( UObject* Object )
 {
 	guard(ULinkerSave::MapObject);
@@ -548,16 +584,19 @@ INT ULinkerSave::MapObject( UObject* Object )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerSave::Seek( INT InPos )
 {
 	Saver->Seek( InPos );
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 INT ULinkerSave::Tell()
 {
 	return Saver->Tell();
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 void ULinkerSave::Serialize( void* V, INT Length )
 {
 	Saver->Serialize( V, Length );
@@ -571,6 +610,7 @@ IMPLEMENT_CLASS(ULinkerSave);
 	to the inline operator<< already in UnLinker.h.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FArchive& FObjectExport::Serialize( FArchive& Ar )
 {
 	guard(FObjectExport::Serialize);
@@ -586,6 +626,7 @@ FArchive& FObjectExport::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnLinker.cpp")
 FArchive& FObjectImport::Serialize( FArchive& Ar )
 {
 	guard(FObjectImport::Serialize);

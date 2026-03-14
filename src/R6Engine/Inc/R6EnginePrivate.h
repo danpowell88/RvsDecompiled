@@ -64,4 +64,6 @@ CORE_API const INT appMsgf(INT Type, const TCHAR* Fmt, ...);
 
 #pragma pack(pop)
 
+#include "ImplSource.h"
+
 #endif

@@ -5048,6 +5048,7 @@ public:
 
 	UClient*        Client;         // 0x44: Active client (viewport manager)
 	UAudioSubsystem* Audio;         // 0x48: Audio subsystem
+	URenderDevice*  GRenDev;        // 0x4c: Active render device
 
 	// --- Virtual method table ---
 	// The following virtual methods MUST appear in exactly this order to match

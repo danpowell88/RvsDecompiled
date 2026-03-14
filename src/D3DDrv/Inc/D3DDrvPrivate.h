@@ -133,4 +133,6 @@ class FD3DRenderInterface;
 
 #pragma pack(pop)
 
+#include "ImplSource.h"
+
 #endif // _INC_D3DDRV_PRIVATE

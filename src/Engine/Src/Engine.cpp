@@ -149,7 +149,7 @@ void UGameEngine::Destroy() { Super::Destroy(); }
 void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
 void UGameEngine::Tick( FLOAT DeltaSeconds ) {}
 void UGameEngine::UpdateConnectingMessage() {}
-void UGameEngine::Init() {}
+// UGameEngine::Init() implemented in UnGame.cpp
 void UGameEngine::Exit() {}
 void UGameEngine::Draw( UViewport* Viewport, INT bFlush, BYTE* HitData, INT* HitSize ) {}
 void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}

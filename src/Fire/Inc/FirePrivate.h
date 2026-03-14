@@ -52,4 +52,6 @@
 
 #pragma pack(pop)
 
+#include "ImplSource.h"
+
 #endif

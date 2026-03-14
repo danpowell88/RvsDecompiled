@@ -12,6 +12,7 @@
 	UPackage.
 -----------------------------------------------------------------------------*/
 
+IMPL_GHIDRA("Core.dll", 0x1013b0a0)
 UPackage::UPackage()
 :	DllHandle    ( NULL )
 ,	AttemptedBind( 0 )
@@ -25,6 +26,7 @@ UPackage::UPackage()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 void UPackage::Destroy()
 {
 	guard(UPackage::Destroy);
@@ -37,6 +39,7 @@ void UPackage::Destroy()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 void UPackage::Serialize( FArchive& Ar )
 {
 	guard(UPackage::Serialize);
@@ -45,6 +48,7 @@ void UPackage::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 void* UPackage::GetDllExport( const TCHAR* ExportName, UBOOL Checked )
 {
 	guard(UPackage::GetDllExport);
@@ -86,6 +90,7 @@ IMPLEMENT_CLASS(ULanguage);
 	UTextBuffer.
 -----------------------------------------------------------------------------*/
 
+IMPL_GHIDRA("Core.dll", 0x1013aee0)
 UTextBuffer::UTextBuffer( const TCHAR* InText )
 :	Pos  ( 0 )
 ,	Top  ( 0 )
@@ -96,6 +101,7 @@ UTextBuffer::UTextBuffer( const TCHAR* InText )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 void UTextBuffer::Serialize( FArchive& Ar )
 {
 	guard(UTextBuffer::Serialize);
@@ -104,6 +110,7 @@ void UTextBuffer::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 void UTextBuffer::Serialize( const TCHAR* Data, EName Event )
 {
 	guard(UTextBuffer::Serialize_OutputDevice);
@@ -117,6 +124,7 @@ IMPLEMENT_CLASS(UTextBuffer);
 	UCommandlet.
 -----------------------------------------------------------------------------*/
 
+IMPL_GHIDRA("Core.dll", 0x1013af70)
 UCommandlet::UCommandlet()
 :	LogToStdout   ( 0 )
 ,	IsServer      ( 0 )
@@ -132,6 +140,7 @@ UCommandlet::UCommandlet()
 	unguard;
 }
 
+IMPL_GHIDRA("Core.dll", 0x1010bf20)
 UCommandlet::~UCommandlet()
 {
 	guard(UCommandlet::~UCommandlet);
@@ -141,6 +150,7 @@ UCommandlet::~UCommandlet()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 INT UCommandlet::Main( const TCHAR* Parms )
 {
 	guard(UCommandlet::Main);
@@ -148,6 +158,7 @@ INT UCommandlet::Main( const TCHAR* Parms )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCommandlet::execMain);
@@ -158,6 +169,7 @@ void UCommandlet::execMain( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCommandlet, 0, execMain );
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 INT UCommandlet::eventMain( const FString& InParms )
 {
 	UCommandlet_eventMain_Parms Parms;
@@ -173,6 +185,7 @@ IMPLEMENT_CLASS(UCommandlet);
 	USystem.
 -----------------------------------------------------------------------------*/
 
+IMPL_GHIDRA("Core.dll", 0x1014ba90)
 USystem::USystem()
 :	LicenseeMode  ( 0 )
 ,	PurgeCacheDays( 30 )
@@ -184,6 +197,7 @@ USystem::USystem()
 	// TArrays (offsets +0x5C, +0x60, +0x64 zeroed directly in compiled output).
 }
 
+IMPL_PERMANENT_DIVERGENCE("field layout diverges from binary; Paths/Suppress offsets may not match retail")
 void USystem::StaticConstructor()
 {
 	guard(USystem::StaticConstructor);
@@ -210,6 +224,7 @@ void USystem::StaticConstructor()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 UBOOL USystem::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(USystem::Exec);
@@ -256,6 +271,7 @@ IMPLEMENT_CLASS(USystem);
 	UConst.
 -----------------------------------------------------------------------------*/
 
+IMPL_GHIDRA("Core.dll", 0x10116c40)
 UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 :	UField( InSuperConst )
 ,	Value( InValue )
@@ -265,6 +281,7 @@ UConst::UConst( UConst* InSuperConst, const TCHAR* InValue )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnCorObj.cpp")
 void UConst::Serialize( FArchive& Ar )
 {
 	guard(UConst::Serialize);

@@ -12,6 +12,7 @@
 	UExporter.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 UExporter::UExporter()
 :	SupportedClass( NULL )
 ,	TextIndent     ( 0 )
@@ -20,6 +21,7 @@ UExporter::UExporter()
 {
 }
 
+IMPL_GHIDRA("Core.dll", 0x11240)
 void UExporter::StaticConstructor()
 {
 	guard(UExporter::StaticConstructor);
@@ -31,6 +33,7 @@ void UExporter::StaticConstructor()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 void UExporter::Serialize( FArchive& Ar )
 {
 	guard(UExporter::Serialize);
@@ -39,6 +42,7 @@ void UExporter::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 UExporter* UExporter::FindExporter( UObject* Object, const TCHAR* FileType )
 {
 	guard(UExporter::FindExporter);
@@ -63,6 +67,7 @@ UExporter* UExporter::FindExporter( UObject* Object, const TCHAR* FileType )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 INT UExporter::ExportToFile( UObject* Object, UExporter* InExporter, const TCHAR* Filename, UBOOL NoReplaceIdentical, UBOOL Prompt )
 {
 	guard(UExporter::ExportToFile);
@@ -109,6 +114,7 @@ INT UExporter::ExportToFile( UObject* Object, UExporter* InExporter, const TCHAR
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 void UExporter::ExportToArchive( UObject* Object, UExporter* InExporter, FArchive& Ar, const TCHAR* FileType )
 {
 	guard(UExporter::ExportToArchive);
@@ -119,6 +125,7 @@ void UExporter::ExportToArchive( UObject* Object, UExporter* InExporter, FArchiv
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 void UExporter::ExportToOutputDevice( UObject* Object, UExporter* InExporter, FOutputDevice& Out, const TCHAR* FileType, INT Indent )
 {
 	guard(UExporter::ExportToOutputDevice);
@@ -138,6 +145,7 @@ IMPLEMENT_CLASS(UExporter);
 	UFactory.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 UFactory::UFactory()
 :	SupportedClass    ( NULL )
 ,	ContextClass      ( NULL )
@@ -150,6 +158,7 @@ UFactory::UFactory()
 {
 }
 
+IMPL_GHIDRA("Core.dll", 0x12310)
 void UFactory::StaticConstructor()
 {
 	guard(UFactory::StaticConstructor);
@@ -167,6 +176,7 @@ void UFactory::StaticConstructor()
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 void UFactory::Serialize( FArchive& Ar )
 {
 	guard(UFactory::Serialize);
@@ -175,6 +185,7 @@ void UFactory::Serialize( FArchive& Ar )
 	unguard;
 }
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/UnExport.cpp")
 UObject* UFactory::StaticImportObject( UClass* Class, UObject* InOuter, FName Name, DWORD Flags, const TCHAR* Filename, UObject* Context, UFactory* InFactory, const TCHAR* Parms, FFeedbackContext* Warn )
 {
 	guard(UFactory::StaticImportObject);

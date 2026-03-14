@@ -1,0 +1,230 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  STUB AUDIT - QUICK REFERENCE CARD                        ║
+║              Rainbow Six: Siege Reverse Engineering Project                ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT IS A STUB?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A stub is any function with NO real implementation:
+  • Empty body: void Func() { }
+  • Just guard/unguard: guard("x"); unguard;
+  • Just return: return 0;
+  • Just TODO: // TODO: implement this
+  • Just error: appUnimplemented();
+
+These 1,179 stubs must be implemented for the game to work properly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BY THE NUMBERS (AUDIT SNAPSHOT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Total .cpp Files:              176 files
+Total Functions:             5,048 functions
+Total Stubs:                 1,179 functions (23%)
+
+By Module (Top 5):
+  1. SNDDSound3D:    312 stubs (91%) ⚠️  CRITICAL
+  2. R6GameService:   84 stubs (52%)
+  3. R6Abstract:      39 stubs (74%)
+  4. Engine:         605 stubs (25%)
+  5. Core:            47 stubs (4%)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CRITICAL ISSUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔴 DIVERGENCE MISMATCH (34 instances)
+   Functions marked DIVERGENCE but contain only stubs
+   Files affected: UnStaticMeshBuild (8), UnMeshInstance (5), UnTerrain (5)
+   Action: Implement these or remove DIVERGENCE marker
+
+🟠 UNRECOVERED SYMBOLS (~10 instances)
+   FUN_XXXXXXXX functions need symbol recovery
+   Tools: IDA Pro, Ghidra
+   Impact: Makes some functions difficult to implement
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPLEMENTATION PRIORITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TIER 1 - DO FIRST (Days 1-14)
+  ├─ R6AbstractGameService.cpp (36 stubs) - Game service base
+  ├─ R6GSServers.cpp (70 stubs) - Multiplayer critical
+  └─ Core module (47 stubs) - Foundational
+
+TIER 2 - FOUNDATION (Weeks 2-4)
+  ├─ UnGame.cpp (25 stubs) - Game loop
+  ├─ NullDrv.cpp (25 stubs) - Rendering device
+  ├─ Engine.cpp (23 stubs) - Primitive rendering
+  └─ UnLevel.cpp (26 stubs) - Level management
+
+TIER 3 - AUDIO (Weeks 3-6) ⚠️ ESSENTIAL
+  └─ SNDDSound3D.cpp (312 stubs) - Audio system
+
+TIER 4 - CONTENT (Weeks 5-8)
+  ├─ UnActor.cpp (46 stubs)
+  ├─ UnMeshInstance.cpp (40 stubs)
+  ├─ UnCamera.cpp (33 stubs)
+  └─ UnTerrain.cpp (31 stubs)
+
+TIER 5 - POLISH (Weeks 8-12)
+  └─ Remaining modules (~175 stubs)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EFFORT ESTIMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Single Developer:    6-8 months
+Team of 2:           4-5 months
+Team of 3:           3-4 months
+
+Breakdown:
+  Phase 1 (Critical):   10 days
+  Phase 2 (Foundation): 22 days
+  Phase 3 (Audio):      26 days
+  Phase 4 (Features):   32 days
+  Phase 5 (Polish):     35 days
+  Total:               ~125 days
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DOCUMENT REFERENCE GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 AUDIT_INDEX_README.txt
+   ├─ Start here for guidance
+   ├─ Explains all documents
+   └─ Quick reference for each role
+
+📊 STUB_AUDIT_COMPLETE.txt
+   ├─ Executive summary
+   ├─ Module breakdown
+   ├─ Statistics by category
+   └─ Recommendations
+
+🎯 IMPLEMENTATION_ROADMAP.txt
+   ├─ 5-phase schedule
+   ├─ Effort per phase
+   ├─ Dependencies
+   ├─ Risk mitigation
+   └─ Team structure
+
+⚠️  DIVERGENCE_ISSUES_DETAIL.txt
+   ├─ All 34 divergence issues listed
+   ├─ File locations
+   ├─ Priority ranking
+   └─ Remediation advice
+
+📈 STUB_AUDIT_SUMMARY.csv
+   ├─ Module statistics
+   ├─ Stub percentages
+   ├─ File counts
+   └─ For Excel/Sheets
+
+📑 STUB_AUDIT_DETAILED.csv
+   ├─ Complete file listing
+   ├─ Function names (all stubs)
+   ├─ Divergence flags
+   └─ For task assignment
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ROLE-SPECIFIC INSTRUCTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROJECT MANAGER
+  ► Read: STUB_AUDIT_COMPLETE.txt, IMPLEMENTATION_ROADMAP.txt Phase 1
+  ► Track: STUB_AUDIT_SUMMARY.csv (monthly updates)
+  ► Focus: Phases and milestones in roadmap
+
+DEVELOPER
+  ► Read: STUB_AUDIT_COMPLETE.txt, DIVERGENCE_ISSUES_DETAIL.txt
+  ► Get tasks: STUB_AUDIT_DETAILED.csv (filtered by module)
+  ► Follow: IMPLEMENTATION_ROADMAP.txt phases (in order)
+
+QA / CODE REVIEWER
+  ► Reference: DIVERGENCE_ISSUES_DETAIL.txt
+  ► Verify: STUB_AUDIT_DETAILED.csv (check implementation)
+  ► Track: Stub count reduction per week
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COMMON QUESTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Q: Why so many stubs?
+A: Decompilation from retail binary was incomplete. Stubs are placeholders
+   that need implementation based on decompiled code and documentation.
+
+Q: What's a DIVERGENCE comment?
+A: Marks intentional differences from retail. Finding 34 stubs with this
+   marker suggests cleanup was incomplete.
+
+Q: Should we implement all stubs?
+A: Yes. Each stub is a gap in functionality. Prioritize by tier.
+
+Q: Can we skip some stubs?
+A: Not recommended. Each stub impacts functionality. Some (audio) are
+   critical; others (editor tools) can be deferred.
+
+Q: How do we know if an implementation is correct?
+A: Compare against retail behavior. Document deviations from retail.
+   Use test suite to validate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMMEDIATE ACTION ITEMS (THIS WEEK)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+☐ Read AUDIT_INDEX_README.txt (all team members)
+☐ Review DIVERGENCE_ISSUES_DETAIL.txt (technical leads)
+☐ Investigate divergence issues in:
+  ├─ UnStaticMeshBuild.cpp (8 issues)
+  ├─ UnMeshInstance.cpp (5 issues)
+  └─ UnTerrain.cpp (5 issues)
+☐ Assign Phase 1 tasks from STUB_AUDIT_DETAILED.csv
+☐ Schedule symbol recovery session for FUN_XXXXXXXX functions
+☐ Set up progress tracking spreadsheet
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KEY FILES BY IMPACT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AUDIO (Essential for gameplay)
+  SNDDSound3D.cpp ..................... 312 stubs (91%) [TIER 3]
+
+MULTIPLAYER (Essential for connectivity)
+  R6GSServers.cpp ..................... 70 stubs (56%) [TIER 1]
+  R6AbstractGameService.cpp ........... 36 stubs (95%) [TIER 1]
+
+CORE ENGINE (Essential for everything)
+  Engine.cpp .......................... 23 stubs (50%) [TIER 2]
+  UnGame.cpp .......................... 25 stubs (68%) [TIER 2]
+  UnLevel.cpp ......................... 26 stubs (24%) [TIER 2]
+  UnActor.cpp ......................... 46 stubs (14%) [TIER 4]
+
+RENDERING (Essential for graphics)
+  UnMeshInstance.cpp .................. 40 stubs (24%) [TIER 4]
+  UnCamera.cpp ........................ 33 stubs (47%) [TIER 4]
+  NullDrv.cpp ......................... 25 stubs (93%) [TIER 2]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FULLY IMPLEMENTED FILES (0 STUBS) - GOOD EXAMPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Core:    UnFile.cpp, UnLinker.cpp, UnScript.cpp, UnMath.cpp
+Engine:  EngineEvents.cpp (214 funcs!), UnEffects.cpp, UnFPoly.cpp
+R6:      R6RainbowAI.cpp, R6TerroristAI.cpp
+
+These serve as reference implementations for style and completeness.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONTACTS & RESOURCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All audit files:     C:\Users\danpo\Desktop\rvs\
+Detailed CSV:        STUB_AUDIT_DETAILED.csv (143 rows with functions)
+Summary stats:       STUB_AUDIT_SUMMARY.csv (16 rows by module)
+Full roadmap:        IMPLEMENTATION_ROADMAP.txt (5 phases, 407 lines)
+
+Last updated: 2026-03-14 15:57:22
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

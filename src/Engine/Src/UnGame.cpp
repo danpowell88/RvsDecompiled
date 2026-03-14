@@ -15,6 +15,229 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- UGameEngine ---
+
+// g_pEngine is defined in UnCamera.cpp; declared here so Init() can set it.
+extern ENGINE_API UEngine* g_pEngine;
+
+IMPL_GHIDRA_APPROX("Engine.dll", 0xa37a0,
+    "FUN_103563f0 (post-render-device resource setup) omitted: identity not established. "
+    "appSprintf CLASS= third arg derived from PlayerURL options; Ghidra lost the arg. "
+    "GConfig server-ini section call uses GetSection; original vtable slot unclear. "
+    "GLevel vtable[0xb4] and vtable[0xdc] preserved via raw dispatch; identities unknown. "
+    "Audio vtable[0x78] setup signature approximated as (void*, FString&) -> INT.")
+void UGameEngine::Init()
+{
+    guard(UGameEngine::Init);
+
+    // Retail UnGame.cpp line 0x230: sizeof(UGameEngine) must equal the UClass property size.
+    check(GetClass()->GetPropertiesSize() == 0x4d0);
+
+    // Register as the global engine singleton.
+    g_pEngine = this;
+
+    // Initialise the base UEngine subsystem.
+    UEngine::Init();
+
+    // Clear the GLevel slot (populated by Browse → LoadMap below).
+    *(DWORD*)((BYTE*)this + 0x458) = 0;
+
+    // Remove stale files from the package cache.
+    appCleanFileCache();
+
+    // -------------------------------------------------------------------------
+    // Client-side subsystem setup: viewport manager + render device.
+    // -------------------------------------------------------------------------
+    if (GIsClient)
+    {
+        // Load and construct the viewport manager (UClient subclass).
+        UClass* ClientClass = UObject::StaticLoadClass(
+            UClient::StaticClass(), NULL,
+            TEXT("ini:Engine.Engine.ViewportManager"), NULL, LOAD_NoFail, NULL);
+        Client = Cast<UClient>(UObject::StaticConstructObject(
+            ClientClass, UObject::GetTransientPackage(), NAME_None, 0, NULL, GError, NULL));
+
+        // Ghidra: vtable byte-offset 0x64 (slot 25) called on the new client with no args.
+        // In the UClient vtable this is UpdateGamma() — acts as a post-construction display init.
+        Client->UpdateGamma();
+
+        // Default viewport dimensions: 640 × 480.
+        // Offsets confirmed from Ghidra (UClient retail layout).
+        BYTE* CR = (BYTE*)Client;
+        *(DWORD*)(CR + 0x50) = 0x280;  // full width
+        *(DWORD*)(CR + 0x48) = 0x280;  // preferred width
+        *(DWORD*)(CR + 0x54) = 0x1e0;  // full height
+        *(DWORD*)(CR + 0x4c) = 0x1e0;  // preferred height
+
+        // Load and construct the render device (URenderDevice subclass).
+        UClass* RenDevClass = UObject::StaticLoadClass(
+            URenderDevice::StaticClass(), NULL,
+            TEXT("ini:Engine.Engine.RenderDevice"), NULL, LOAD_NoFail, NULL);
+        UObject* RenDevObj = UObject::StaticConstructObject(
+            RenDevClass, UObject::GetTransientPackage(), NAME_None, 0, NULL, GError, NULL);
+        // Stored at UEngine+0x4c (unnamed field archived by UEngine::Serialize).
+        *(UObject**)((BYTE*)this + 0x4c) = RenDevObj;
+
+        // Initialise the render device (URenderDevice::Init — vtable[0x68/4]).
+        Cast<URenderDevice>(RenDevObj)->Init();
+
+        // FUN_103563f0: post-init render resource setup (GIsClient guard confirmed).
+        // Identity unknown — omitted. See IMPL_GHIDRA_APPROX annotation above.
+    }
+
+    // Error string used throughout Browse / LoadMap.
+    FString Error;
+
+    // -------------------------------------------------------------------------
+    // Browse to the Entry level to prime engine-level object state.
+    // -------------------------------------------------------------------------
+    if (Client)
+    {
+        FURL EntryURL(TEXT("Entry"));
+        if (!Browse(EntryURL, NULL, Error))
+            GError->Logf(LocalizeError(TEXT("FailedBrowse"), TEXT("Engine")));
+
+        // Swap GLevel ↔ GEntry so the entry level becomes the persistent base.
+        // Ghidra: exchanges DWORD at (this+0x458) with DWORD at (this+0x45c).
+        DWORD Tmp            = *(DWORD*)((BYTE*)this + 0x458);
+        *(DWORD*)((BYTE*)this + 0x458) = *(DWORD*)((BYTE*)this + 0x45c);
+        *(DWORD*)((BYTE*)this + 0x45c) = Tmp;
+
+        // Bind static input tables.
+        UInput::StaticInitInput();
+        UInputPlanning::StaticInitInput();
+
+        // Construct and install the InteractionMaster at Client+0x94.
+        UClass* IMClass = UObject::StaticLoadClass(
+            UInteractionMaster::StaticClass(), NULL,
+            TEXT("engine.InteractionMaster"), NULL, LOAD_NoFail, NULL);
+        *(UObject**)((BYTE*)Client + 0x94) = UObject::StaticConstructObject(
+            IMClass, UObject::GetTransientPackage(), NAME_None, 0, NULL, GError, NULL);
+    }
+
+    // -------------------------------------------------------------------------
+    // Build the default player URL from User.ini [DefaultPlayer].
+    // -------------------------------------------------------------------------
+    FURL PlayerURL(NULL);
+    PlayerURL.LoadURLConfig(TEXT("DefaultPlayer"), TEXT("User"));
+    if (Client)
+    {
+        // Ghidra: appSprintf(buf, L"CLASS=%s") — third arg lost in analysis.
+        // Carry the CLASS option from the DefaultPlayer section explicitly.
+        TCHAR ClassBuf[64];
+        appSprintf(ClassBuf, TEXT("CLASS=%s"),
+            PlayerURL.GetOption(TEXT("CLASS="), TEXT("")));
+        PlayerURL.AddOption(ClassBuf);
+    }
+
+    // Server-only: override game class from the mod manager's server ini.
+    TCHAR ClassOverride[4096];
+    ClassOverride[0] = 0;
+    if (GIsServer && !GIsClient)
+    {
+        FString ServerIni = GModMgr->eventGetServerIni();
+        // Ghidra: GConfig->vtable[0xc/4] fills a local FString from the ini section.
+        // Using GetSection as the closest typed equivalent.
+        TCHAR SectionBuf[32000];
+        GConfig->GetSection(*ServerIni, SectionBuf, ARRAY_COUNT(SectionBuf), NULL);
+        appStrcpy(ClassOverride, SectionBuf);
+    }
+
+    // Construct and validate the initial map URL (TRAVEL_Partial = 1).
+    FURL FinalURL(&PlayerURL, ClassOverride, TRAVEL_Partial);
+    if (!FinalURL.Valid)
+        GError->Logf(LocalizeError(TEXT("InvalidUrl"), TEXT("Engine")));
+
+    // -------------------------------------------------------------------------
+    // Load the initial map; fall back to DefaultLocalMap on first failure.
+    // -------------------------------------------------------------------------
+    if (!LoadMap(FinalURL, NULL, NULL, Error))
+    {
+        UBOOL Recovered = 0;
+        if (!Error.Len() && appStricmp(ClassOverride, *FURL::DefaultLocalMap) != 0)
+        {
+            FURL FallbackURL(&PlayerURL, *FURL::DefaultLocalMap, TRAVEL_Partial);
+            if (LoadMap(FallbackURL, NULL, NULL, Error))
+                Recovered = 1;
+        }
+        if (!Recovered)
+            GError->Logf(LocalizeError(TEXT("FailedBrowse"), TEXT("Engine")));
+    }
+
+    // -------------------------------------------------------------------------
+    // Client-side post-map setup.
+    // -------------------------------------------------------------------------
+    if (Client)
+    {
+        BYTE* CR = (BYTE*)Client;
+        UInteractionMaster* IM = *(UInteractionMaster**)(CR + 0x94);
+
+        // Wire the InteractionMaster's parent pointer back to Client (IM+0x34).
+        *(INT*)((BYTE*)IM + 0x34) = (INT)Client;
+
+        // Display the engine copyright splash.
+        IM->DisplayCopyright();
+
+        // Obtain the primary viewport.
+        // Ghidra: UClient vtable byte-offset 0x88 (slot 34); method not named in headers.
+        typedef UViewport* (__thiscall *tGetViewport)(void*);
+        UViewport* Viewport = ((tGetViewport)(*(void***)CR)[0x88 / sizeof(void*)])(CR);
+
+        // Create and bind the PlayerConsole interaction.
+        FString PlayerConsoleClass(TEXT("ini:Engine.Engine.PlayerConsole"));
+        UInteraction* Console =
+            IM->eventAddInteraction(PlayerConsoleClass, (UPlayer*)Viewport);
+        if (Console)
+        {
+            *(UInteraction**)((BYTE*)Viewport + 0x38) = Console;
+            *(UInteraction**)((BYTE*)IM       + 0x3c) = Console;
+        }
+
+        // GLevel vtable[0xb4/4] — likely BeginPlay or similar game-start notification.
+        FString LevelError;
+        void* GLevel = *(void**)((BYTE*)this + 0x458);
+        if (GLevel)
+        {
+            typedef INT (__thiscall *tLevelBegin)(void*, FString&);
+            if (!((tLevelBegin)(*(void***)GLevel)[0xb4 / sizeof(void*)])(GLevel, LevelError))
+                GError->Logf(*LevelError);
+        }
+
+        // Bind the UInput system to the viewport.
+        Viewport->InitInput();
+
+        // Viewport render-surface setup (vtable[0x88/4] = open window / surface).
+        typedef void* (__thiscall *tVpSurface)(void*);
+        ((tVpSurface)(*(void***)Viewport)[0x88 / sizeof(void*)])(Viewport);
+
+        // GLevel vtable[0xdc/4] — likely CommenceMatch or NotifyBeginPlay.
+        if (GLevel)
+        {
+            typedef void (__thiscall *tLevelPost)(void*);
+            ((tLevelPost)(*(void***)GLevel)[0xdc / sizeof(void*)])(GLevel);
+        }
+
+        // Initialise the audio subsystem.
+        UEngine::InitAudio();
+
+        // Audio post-init viewport / channel setup (vtable[0x78/4] on Audio).
+        // On failure: log and tear down the audio subsystem.
+        if (Audio)
+        {
+            typedef INT (__thiscall *tAudioSetup)(void*, FString&);
+            FString AudioError;
+            if (!((tAudioSetup)(*(void***)Audio)[0x78 / sizeof(void*)])(Audio, AudioError))
+            {
+                GLog->Logf(NAME_Init, TEXT("Failed to set up audio viewport"));
+                if (Audio) Audio->ConditionalDestroy();
+                Audio = NULL;
+            }
+        }
+    }
+
+    GLog->Logf(NAME_Init, TEXT("UGameEngine::Init complete"));
+    unguard;
+}
+
 int UGameEngine::ReplaceTexture(FString,UTexture *)
 {
 	guard(UGameEngine::ReplaceTexture);

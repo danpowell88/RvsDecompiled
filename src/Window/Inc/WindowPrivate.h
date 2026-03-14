@@ -153,4 +153,6 @@ class WINDOW_API UWindowManager : public UObject
 	extern "C" DLL_EXPORT UClass* autoclass##TClass;\
 	DLL_EXPORT UClass* autoclass##TClass = TClass::StaticClass();
 
+#include "ImplSource.h"
+
 #endif

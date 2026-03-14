@@ -184,6 +184,7 @@ private:
 	HANDLE Heap;
 };
 
+IMPL_INFERRED("Core pre-init CRC table bootstrap; Ravenshield-specific")
 static void appInitPreloadCRCTable()
 {
 	for( DWORD iCRC=0; iCRC<256; iCRC++ )
@@ -195,6 +196,7 @@ static void appInitPreloadCRCTable()
 	}
 }
 
+IMPL_INFERRED("Core pre-init allocator factory; Ravenshield-specific")
 static FCoreBootstrapMalloc& GetCorePreInitMalloc()
 {
 	static FCoreBootstrapMalloc Malloc;
@@ -222,6 +224,7 @@ static FCorePreInit GCorePreInit;
 	FArray::Remove.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/Core.cpp")
 void FArray::Remove( INT Index, INT Count, INT ElementSize )
 {
 	guardSlow(FArray::Remove);
@@ -242,6 +245,7 @@ void FArray::Remove( INT Index, INT Count, INT ElementSize )
 	FArray::Realloc.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/Core.cpp")
 void FArray::Realloc( INT ElementSize )
 {
 	guardSlow(FArray::Realloc);
@@ -253,6 +257,7 @@ void FArray::Realloc( INT ElementSize )
 	FInterpCurve implementation.
 -----------------------------------------------------------------------------*/
 
+IMPL_SDK("sdk/Ut99PubSrc/Core/Src/Core.cpp")
 FLOAT FInterpCurve::Eval( FLOAT Input )
 {
 	if( Points.Num() == 0 )

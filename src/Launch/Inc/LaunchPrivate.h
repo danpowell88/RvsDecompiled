@@ -82,4 +82,6 @@ CORE_API const int appMsgf(int Type, const TCHAR* Fmt, ...);
 
 #include "Res/LaunchRes.h"
 
+#include "ImplSource.h"
+
 #endif // _INC_LAUNCH_PRIVATE

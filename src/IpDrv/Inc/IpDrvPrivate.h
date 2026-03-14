@@ -87,4 +87,6 @@ class FResolveInfo;
 
 #pragma pack(pop)
 
+#include "ImplSource.h"
+
 #endif

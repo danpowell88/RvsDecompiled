@@ -66,4 +66,9 @@ class FSceneNode;
 // GScriptCycles is declared in Core.h; this companion variable was omitted from the SDK.
 CORE_API extern INT GScriptEntryTag;
 
+// g_pEngine — Ravenshield-specific engine pointer (Engine.dll export ?g_pEngine@@3PAVUEngine@@A).
+// Set in UGameEngine::Init() and read by camera/rendering code.
+// Distinct from GEngine (the standard UE2 global). Defined in UnCamera.cpp.
+ENGINE_API extern UEngine* g_pEngine;
+
 #endif

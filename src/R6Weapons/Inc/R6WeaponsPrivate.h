@@ -69,4 +69,6 @@ extern DWORD g_net_old_nbBullets;  // DAT_1000cb08: bullet count snapshot
 extern DWORD g_net_old_bit6;       // DAT_1000cb10: gadget bitfield bit 6 snapshot
 extern DWORD g_net_old_bit7;       // DAT_1000cb14: gadget bitfield bit 7 snapshot
 
+#include "ImplSource.h"
+
 #endif

@@ -197,4 +197,6 @@ void  SND_fn_vSynchroSound(void);
 
 #pragma pack(pop)
 
+#include "ImplSource.h"
+
 #endif
