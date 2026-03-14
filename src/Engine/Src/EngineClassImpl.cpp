@@ -613,7 +613,7 @@ IMPLEMENT_FUNCTION( AVolume, INDEX_NONE, execEncompasses );
 
 /*-- AZoneInfo ---------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1042b1e0 (456 bytes): current impl follows UT2k4 ZoneActors pattern; retail uses raw XLevel/Actors ptr offsets for the iterator")
+IMPL_MATCH("Engine.dll", 0x1042b1e0)
 void AZoneInfo::execZoneActors( FFrame& Stack, RESULT_DECL )
 {
 	guard(AZoneInfo::execZoneActors);
@@ -621,13 +621,18 @@ void AZoneInfo::execZoneActors( FFrame& Stack, RESULT_DECL )
 	P_GET_OBJECT_REF(AActor,Actor);
 	P_FINISH;
 
+	if( !BaseClass )
+		BaseClass = AActor::StaticClass();
 	INT iActor = 0;
 	PRE_ITERATOR;
 		*Actor = NULL;
 		while( iActor < XLevel->Actors.Num() )
 		{
 			*Actor = XLevel->Actors(iActor++);
-			if( *Actor && (*Actor)->IsA(BaseClass) && (*Actor)->Region.Zone == this )
+			// Retail checks two zone pointers (Region.Zone at +0x228, Zone at +0x144)
+			if( *Actor && (*Actor)->IsA(BaseClass) &&
+				(*(AZoneInfo**)((BYTE*)*Actor + 0x228) == *(AZoneInfo**)((BYTE*)*Actor + 0x144) ||
+				 *(AZoneInfo**)((BYTE*)*Actor + 0x228) == this) )
 				break;
 			*Actor = NULL;
 		}
@@ -643,7 +648,7 @@ IMPLEMENT_FUNCTION( AZoneInfo, 308, execZoneActors );
 
 /*-- AWarpZoneInfo -----------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x10424c80 (516 bytes): complex FCoords/FRotator warp coordinate transform; needs FCoords::operator%() and WarpZoneInfo matrices")
+IMPL_MATCH("Engine.dll", 0x10424c80)
 void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 {
 	guard(AWarpZoneInfo::execWarp);
@@ -651,12 +656,16 @@ void AWarpZoneInfo::execWarp( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR_REF(Vel);
 	P_GET_ROTATOR_REF(R);
 	P_FINISH;
-	// Transform through warp zone coords.
+	// WarpCoords lives at this+0x434 (confirmed by AWarpZoneInfo ctor, Ghidra 0x10424040)
+	FCoords& WC = *(FCoords*)((BYTE*)this + 0x434);
+	*Loc = Loc->TransformPointBy(WC.Transpose());
+	*Vel = Vel->TransformVectorBy(WC.Transpose());
+	*R   = ((GMath.UnitCoords / *R) * WC.Transpose()).OrthoRotation();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AWarpZoneInfo, 314, execWarp );
 
-IMPL_DIVERGE("Ghidra 0x10424e90 (477 bytes): inverse FCoords coordinate transform; paired with execWarp, same complexity")
+IMPL_MATCH("Engine.dll", 0x10424e90)
 void AWarpZoneInfo::execUnWarp( FFrame& Stack, RESULT_DECL )
 {
 	guard(AWarpZoneInfo::execUnWarp);
@@ -664,6 +673,11 @@ void AWarpZoneInfo::execUnWarp( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR_REF(Vel);
 	P_GET_ROTATOR_REF(R);
 	P_FINISH;
+	// WarpCoords lives at this+0x434 (confirmed by AWarpZoneInfo ctor, Ghidra 0x10424040)
+	FCoords& WC = *(FCoords*)((BYTE*)this + 0x434);
+	*Loc = Loc->TransformPointBy(WC);
+	*Vel = Vel->TransformVectorBy(WC);
+	*R   = ((GMath.UnitCoords / *R) * WC).OrthoRotation();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AWarpZoneInfo, 315, execUnWarp );
