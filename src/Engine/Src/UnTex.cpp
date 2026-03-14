@@ -13,31 +13,49 @@ inline void* operator new(size_t, void* p) noexcept { return p; }
 inline void  operator delete(void*, void*) noexcept {}
 #pragma warning(pop)
 #include "EngineDecls.h"
-// FUN_103c89f0 = StaticConstructObject wrapper for creating a UTexEnvMap.
-// FUN_10386790 = StaticConstructObject wrapper for creating a UShader.
-// Both take (class, outer, name_as_DWORD, flags) and return UObject*.
-// DIVERGENCE: these helpers call StaticConstructObject with additional initialisation
-// that is not safe to replicate without full CDO layout knowledge; returning NULL
-// ensures ConvertPolyFlagsToMaterial gracefully falls back to the existing object.
-IMPL_DIVERGE("free function Ghidra 0x103c89f0 — not fully reconstructed")
-static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
-IMPL_DIVERGE("free function Ghidra 0x10386790 — not fully reconstructed")
-static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flags) { return NULL; }
+// FUN_103c89f0 = type-checked StaticConstructObject wrapper for UTexEnvMap.
+// FUN_10386790 = type-checked StaticConstructObject wrapper for UShader.
+// Ghidra: both assert IsChildOf, resolve transient package, then call
+// UObject::StaticConstructObject(cls, outer, name, flags, NULL, GError, 0).
+// FName is 4 bytes (INDEX only) in this SDK; *(FName*)&name is safe.
+IMPL_MATCH("Engine.dll", 0x103c89f0)
+static UObject* FUN_103c89f0(UClass* cls, UObject* outer, DWORD name, DWORD flags)
+{
+	if (!cls->IsChildOf(UTexEnvMap::StaticClass()))
+		appFailAssert("Class->IsChildOf(T::StaticClass())",
+		              "d:\\ravenshield\\412\\core\\inc\\UnObjBas.h", 0x476);
+	if (outer == (UObject*)0xffffffff)
+		outer = (UObject*)UObject::GetTransientPackage();
+	return UObject::StaticConstructObject(cls, outer, *(FName*)&name, flags,
+	                                      NULL, GError, 0);
+}
+IMPL_MATCH("Engine.dll", 0x10386790)
+static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flags)
+{
+	if (!cls->IsChildOf(UShader::StaticClass()))
+		appFailAssert("Class->IsChildOf(T::StaticClass())",
+		              "d:\\ravenshield\\412\\core\\inc\\UnObjBas.h", 0x476);
+	if (outer == (UObject*)0xffffffff)
+		outer = (UObject*)UObject::GetTransientPackage();
+	return UObject::StaticConstructObject(cls, outer, *(FName*)&name, flags,
+	                                      NULL, GError, 0);
+}
 
 // --- UMaterial ---
 
 
 
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103C97F0 not yet fully reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x103C97F0: uses FUN_10318850 ECX-based GObjObjects iterator; calling convention not standard C++")
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
-	// Ghidra 0xc97f0: iterates GObjObjects via FUN_10318850 (GObj iterator advance),
-	// clears UseFallback (bit 0) and Validated (bit 1) flags at UObject+0x34 for every
-	// loaded object that has these bits set.
-	// FUN_10318850 = internal GObj.Objects iterator; advances through the global object
-	// table one entry at a time; its signature/calling convention is not yet resolved.
+	// Ghidra 0xc97f0 (confirmed at 0x103c97f0), 2407B.
+	// Iterates all loaded UObjects via FUN_10318850 (GObjObjects iterator at
+	// 0x10318850, 59B) and clears bits 0 (UseFallback) and 1 (Validated) of
+	// UObject+0x34 for every object that has them set.
+	// FUN_10318850 uses ECX as a pointer to an iterator-state struct; it cannot
+	// be called from standard C++ without replicating that calling convention.
 	// DIVERGENCE: FUN_10318850 not called — full ClearFallbacks loop omitted.
 	unguard;
 }
@@ -715,9 +733,15 @@ FBaseTexture * UCubemap::GetRenderInterface()
 
 
 // --- UFadeColor ---
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103c8d80 is 411 bytes, not fully reconstructed")
+IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103c8d80 is 411 bytes; FColor/FPlane cosine-blend pipeline not yet reconstructed")
 FColor UFadeColor::GetColor(float)
 {
+	// Ghidra 0xc8d80, 411B. Three-mode colour animation:
+	//   Mode 0 (linear):  fmod((Time + phase) / period, 1.0) lerp between Color1 and Color2.
+	//   Mode 1 (cosine):  appCos(t * PI/2) blend between Color1 (this+0x68) and Color2 (this+0x64).
+	//   Default:          return Color2 (this+0x64).
+	// Requires FColor::Plane() → FPlane and FPlane arithmetic not yet exposed in headers.
+	// DIVERGENCE: returns black/transparent as safe fallback.
 	return FColor(0,0,0,0);
 }
 
@@ -777,14 +801,16 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 
 
 // --- UPalette ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x1046AEA0 not yet fully reconstructed")
+IMPL_DIVERGE("body incomplete — Ghidra 0x1046AEA0: uses FUN_10318850 ECX-based GObjObjects iterator; not standard-callable")
 UPalette * UPalette::ReplaceWithExisting()
 {
-	// Retail: 0x16aea0, ~200b with SEH. Iterates GObjObjects to find a matching
-	// palette (same size + same color data) and returns it, or returns 'this' if none.
-	// FUN_10318850 = internal GObj iterator; identity unresolved.
-	// DIVERGENCE: FUN_10318850 not called — returns NULL (caller should treat as "no match").
-	return NULL;
+	// Retail 0x16aea0, 297B with SEH. Iterates all loaded UObjects via
+	// FUN_10318850 (GObjObjects iterator), finds a UPalette with the same outer
+	// and identical 256-entry color data, logs the match and returns it.
+	// Falls through to return 'this' if no duplicate found.
+	// DIVERGENCE: FUN_10318850 uses non-standard ECX calling convention —
+	// returns this unchanged as "no duplicate found" safe fallback.
+	return this;
 }
 
 
@@ -881,20 +907,48 @@ void UPalette::FixPalette()
 
 
 // --- UProxyBitmapMaterial ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x10303f00: sets TextureInterface then queries Format/USize/VSize/UBits/VBits via FBaseTexture vtable; vtable layout not yet mapped")
+IMPL_MATCH("Engine.dll", 0x10303f00)
 void UProxyBitmapMaterial::SetTextureInterface(FBaseTexture * Interface)
 {
-	// DIVERGENCE: retail also populates Format (this+0x58), UBits (0x59), VBits (0x5a),
-	// USize (0x60,0x68), VSize (0x64,0x6c), UBits_log2 (0x5b), VBits_log2 (0x5c)
-	// by calling virtual methods on Interface via raw vtable offsets +0x1c,+0x20,+0x2c,+0x30,+0x34.
-	// These vtable slots are not yet mapped to named FBaseTexture methods.
-	TextureInterface = Interface;
+	// Ghidra 0x3f00, 101B. Store Interface then query its vtable for
+	// Format, UBits, VBits, USize, VSize; compute log2 of dimensions.
+	// FBaseTexture vtable offsets (all __thiscall on the Interface object):
+	//   +0x1c → USize() → DWORD
+	//   +0x20 → VSize() → DWORD
+	//   +0x2c → GetFormat() → BYTE (ETextureFormat)
+	//   +0x30 → GetUBits() → BYTE
+	//   +0x34 → GetVBits() → BYTE
+	typedef BYTE  (__thiscall *ByteGetFn)(FBaseTexture*);
+	typedef DWORD (__thiscall *DWordGetFn)(FBaseTexture*);
+
+	*(FBaseTexture**)((BYTE*)this + 0x70) = Interface;
+
+	void** vtbl = *(void***)Interface;
+	*(BYTE*)((BYTE*)this + 0x58) = ((ByteGetFn)vtbl[0x2c/4])(Interface);   // Format
+
+	FBaseTexture* iface = *(FBaseTexture**)((BYTE*)this + 0x70);
+	vtbl = *(void***)iface;
+	*(BYTE*)((BYTE*)this + 0x59) = ((ByteGetFn)vtbl[0x30/4])(iface);       // UBits
+	*(BYTE*)((BYTE*)this + 0x5a) = ((ByteGetFn)vtbl[0x34/4])(iface);       // VBits
+
+	DWORD uSize = ((DWordGetFn)vtbl[0x1c/4])(iface);
+	*(DWORD*)((BYTE*)this + 0x60) = uSize;   // USize
+	*(DWORD*)((BYTE*)this + 0x68) = uSize;   // UClamp
+
+	DWORD vSize = ((DWordGetFn)vtbl[0x20/4])(iface);
+	*(DWORD*)((BYTE*)this + 0x64) = vSize;   // VSize
+	*(DWORD*)((BYTE*)this + 0x6c) = vSize;   // VClamp
+
+	*(BYTE*)((BYTE*)this + 0x5b) = (BYTE)appCeilLogTwo(*(DWORD*)((BYTE*)this + 0x68)); // UBits_log2
+	*(BYTE*)((BYTE*)this + 0x5c) = (BYTE)appCeilLogTwo(*(DWORD*)((BYTE*)this + 0x6c)); // VBits_log2
 }
 
-IMPL_DIVERGE("UProxyBitmapMaterial::Get not found in Engine.dll Ghidra export — cannot confirm VA")
+IMPL_MATCH("Engine.dll", 0x10303f80)
 UBitmapMaterial * UProxyBitmapMaterial::Get(double,UViewport *)
 {
-	return this;
+	// Ghidra 0x3f80 shared entry: ?Get@UBitmapMaterial and ?Get@UProxyBitmapMaterial
+	// both resolve to this 5-byte stub that just returns this.
+	return (UBitmapMaterial*)this;
 }
 
 IMPL_MATCH("Engine.dll", 0x10303f70)

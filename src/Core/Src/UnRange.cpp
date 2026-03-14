@@ -103,56 +103,56 @@ INT FRange::IsZero() const
 	return Min == 0.f && Max == 0.f;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109500)
 FRange FRange::operator+( const FRange& R ) const
 {
 	return FRange( Min + R.Min, Max + R.Max );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109540)
 FRange FRange::operator+( FLOAT F ) const
 {
 	return FRange( Min + F, Max + F );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101095c0)
 FRange FRange::operator-( const FRange& R ) const
 {
 	return FRange( Min - R.Min, Max - R.Max );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109580)
 FRange FRange::operator-( FLOAT F ) const
 {
 	return FRange( Min - F, Max - F );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101096d0)
 FRange FRange::operator-() const
 {
 	return FRange( -Min, -Max );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109690)
 FRange FRange::operator*( const FRange& R ) const
 {
 	return FRange( Min * R.Min, Max * R.Max );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109600)
 FRange FRange::operator*( FLOAT F ) const
 {
 	return FRange( Min * F, Max * F );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109640)
 FRange FRange::operator/( FLOAT F ) const
 {
 	FLOAT Inv = 1.f / F;
 	return FRange( Min * Inv, Max * Inv );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104560)
 FRange FRange::operator+=( const FRange& R )
 {
 	Min += R.Min;
@@ -160,7 +160,7 @@ FRange FRange::operator+=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101045c0)
 FRange FRange::operator+=( FLOAT F )
 {
 	Min += F;
@@ -168,7 +168,7 @@ FRange FRange::operator+=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104590)
 FRange FRange::operator-=( const FRange& R )
 {
 	Min -= R.Min;
@@ -176,7 +176,7 @@ FRange FRange::operator-=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101045f0)
 FRange FRange::operator-=( FLOAT F )
 {
 	Min -= F;
@@ -184,7 +184,7 @@ FRange FRange::operator-=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104680)
 FRange FRange::operator*=( const FRange& R )
 {
 	Min *= R.Min;
@@ -192,7 +192,7 @@ FRange FRange::operator*=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104620)
 FRange FRange::operator*=( FLOAT F )
 {
 	Min *= F;
@@ -200,7 +200,7 @@ FRange FRange::operator*=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101046b0)
 FRange FRange::operator/=( const FRange& R )
 {
 	Min /= R.Min;
@@ -208,7 +208,7 @@ FRange FRange::operator/=( const FRange& R )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104650)
 FRange FRange::operator/=( FLOAT F )
 {
 	FLOAT Inv = 1.f / F;
@@ -217,19 +217,19 @@ FRange FRange::operator/=( FLOAT F )
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10105150)
 INT FRange::operator==( const FRange& R ) const
 {
 	return Min == R.Min && Max == R.Max;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104530)
 INT FRange::operator!=( const FRange& R ) const
 {
 	return Min != R.Min || Max != R.Max;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10101ca0)
 FRange& FRange::operator=( const FRange& R )
 {
 	Min = R.Min;
@@ -315,123 +315,123 @@ INT FRangeVector::IsZero() const
 	return X.IsZero() && Y.IsZero() && Z.IsZero();
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101098b0)
 FRangeVector FRangeVector::operator+( const FRangeVector& R ) const
 {
 	return FRangeVector( X+R.X, Y+R.Y, Z+R.Z );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109a90)
 FRangeVector FRangeVector::operator+( const FVector& V ) const
 {
 	return FRangeVector( X+V.X, Y+V.Y, Z+V.Z );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101099a0)
 FRangeVector FRangeVector::operator-( const FRangeVector& R ) const
 {
 	return FRangeVector( X-R.X, Y-R.Y, Z-R.Z );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109b90)
 FRangeVector FRangeVector::operator-( const FVector& V ) const
 {
 	return FRangeVector( X-V.X, Y-V.Y, Z-V.Z );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109f70)
 FRangeVector FRangeVector::operator-() const
 {
 	return FRangeVector( -X, -Y, -Z );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109e80)
 FRangeVector FRangeVector::operator*( const FRangeVector& R ) const
 {
 	return FRangeVector( X*R.X, Y*R.Y, Z*R.Z );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109c90)
 FRangeVector FRangeVector::operator*( FLOAT F ) const
 {
 	return FRangeVector( X*F, Y*F, Z*F );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10109d80)
 FRangeVector FRangeVector::operator/( FLOAT F ) const
 {
 	return FRangeVector( X/F, Y/F, Z/F );
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101048f0)
 FRangeVector FRangeVector::operator+=( const FRangeVector& R )
 {
 	X += R.X; Y += R.Y; Z += R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101049d0)
 FRangeVector FRangeVector::operator+=( const FVector& V )
 {
 	X += V.X; Y += V.Y; Z += V.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104960)
 FRangeVector FRangeVector::operator-=( const FRangeVector& R )
 {
 	X -= R.X; Y -= R.Y; Z -= R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104a40)
 FRangeVector FRangeVector::operator-=( const FVector& V )
 {
 	X -= V.X; Y -= V.Y; Z -= V.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104b90)
 FRangeVector FRangeVector::operator*=( const FRangeVector& R )
 {
 	X *= R.X; Y *= R.Y; Z *= R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104ab0)
 FRangeVector FRangeVector::operator*=( FLOAT F )
 {
 	X *= F; Y *= F; Z *= F;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104c00)
 FRangeVector FRangeVector::operator/=( const FRangeVector& R )
 {
 	X /= R.X; Y /= R.Y; Z /= R.Z;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104b20)
 FRangeVector FRangeVector::operator/=( FLOAT F )
 {
 	X /= F; Y /= F; Z /= F;
 	return *this;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104810)
 INT FRangeVector::operator==( const FRangeVector& R ) const
 {
 	return X==R.X && Y==R.Y && Z==R.Z;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x10104880)
 INT FRangeVector::operator!=( const FRangeVector& R ) const
 {
 	return X!=R.X || Y!=R.Y || Z!=R.Z;
 }
 
-IMPL_DIVERGE("free function - not in Core.dll name export, body verified correct")
+IMPL_MATCH("Core.dll", 0x101038d0)
 FRangeVector& FRangeVector::operator=( const FRangeVector& R )
 {
 	X = R.X;

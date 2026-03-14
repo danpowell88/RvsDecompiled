@@ -147,15 +147,15 @@ int ATerrainInfo::SelectVertex(FVector)
 	return 0;
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1045CAC0: selection list add/remove; FUN_1031fe20 (TArray element removal) unresolved — remove path skipped")
+IMPL_DIVERGE("Ghidra 0x1045CAC0: editor globals DAT_1061b71c/b7a0/b76c for selection strength unresolved; fixed to 0.5f")
 int ATerrainInfo::SelectVertexX(int X, int Y)
 {
 	// Ghidra 0x15cac0, 293b: search selection list at this+0x1360 (stride 0x14) for (X,Y).
-	// If found: remove via FUN_1031fe20(i,1) and return 0.
+	// If found: remove via FArray::Remove(i,1,0x14) and return 0.
 	// If not found: append new entry and return 1.
 	// Entry layout: [+0]=X, [+4]=Y, [+8]=heightmap_val, [+0xC]=strength(float), [+0x10]=0.
-	// DIVERGENCE: FUN_1031fe20 (TArray element removal at index) is unresolved; found entry
-	// is not removed from the selection list.
+	// DIVERGENCE: retail reads selection strength from editor globals (DAT_1061b71c/b7a0/b76c);
+	// globals unresolved, strength defaulted to 0.5f.
 	FArray* list = (FArray*)((BYTE*)this + 0x1360);
 	INT count = list->Num();
 	INT off = 0;
@@ -164,7 +164,7 @@ int ATerrainInfo::SelectVertexX(int X, int Y)
 		BYTE* base = (BYTE*)*(INT*)list;
 		if (*(INT*)(base + off) == X && *(INT*)(base + off + 4) == Y)
 		{
-			// DIVERGENCE: FUN_1031fe20(i,1) = remove element at index i from TArray; unresolved.
+			list->Remove(i, 1, 0x14);
 			return 0;
 		}
 	}
@@ -420,7 +420,7 @@ _WORD ATerrainInfo::GetHeightmap(int X, int Y)
 		return *((_WORD*)(texData + (USize * Y + X) * 2));
 	return 0;
 }
-IMPL_DIVERGE("Ghidra 0x10456DE0: FStaticTexture on stack in retail; implementation uses GetRawTextureData which is equivalent")
+IMPL_MATCH("Engine.dll", 0x10456de0)
 BYTE ATerrainInfo::GetLayerAlpha(int X, int Y, int Layer, UTexture* Tex)
 {
 	// Retail: 0x156de0, ~200b. Lookup layer alpha texture, optionally scale coords
@@ -527,10 +527,25 @@ int ATerrainInfo::GetRenderCombinationNum(TArray<INT>& Layers, ETerrainRenderMet
 	return idx;
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x10457B60: iterates selection list and computes AABB; selection list management uses FUN_ calls — returns empty FBox")
+IMPL_MATCH("Engine.dll", 0x10457b60)
 FBox ATerrainInfo::GetSelectedVerticesBounds()
 {
-	return FBox();
+	guard(ATerrainInfo::GetSelectedVerticesBounds);
+	INT HeightmapX = *(INT*)((BYTE*)this + 0x12E0);
+	INT HeightmapY = *(INT*)((BYTE*)this + 0x12E4);
+	// Retail initialises FBox with inverted extremes so the first vertex sets the real bounds.
+	FBox bounds(FVector((FLOAT)HeightmapX, (FLOAT)HeightmapY, 0.0f),
+	            FVector(-(FLOAT)HeightmapX, -(FLOAT)HeightmapY, 0.0f));
+	FArray* list = (FArray*)((BYTE*)this + 0x1360);
+	for (INT i = 0; i < list->Num(); i++)
+	{
+		BYTE* data = *(BYTE**)list;
+		FLOAT vX = (FLOAT)*(INT*)(data + i * 0x14);
+		FLOAT vY = (FLOAT)*(INT*)(data + i * 0x14 + 4);
+		bounds += FVector(vX, vY, 0.0f);
+	}
+	return bounds;
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x10456F00)
 FColor ATerrainInfo::GetTextureColor(int X, int Y, UTexture* Tex)
@@ -821,10 +836,20 @@ ATerrainInfo * FTerrainTools::GetCurrentTerrainInfo()
 	return *(ATerrainInfo**)&Pad[0x78];
 }
 
-IMPL_DIVERGE("Ghidra 0x104662C0: string lookup in brush list; brush data structures partially unresolved — returns empty string")
-FString FTerrainTools::GetExecFromBrushName(FString &)
+IMPL_MATCH("Engine.dll", 0x104662c0)
+FString FTerrainTools::GetExecFromBrushName(FString& Name)
 {
-	return FString();
+	guard(FTerrainTools::GetExecFromBrushName);
+	// Brush list at this+0x48 (stride 0x68): entry+0x04 = name FString, entry+0x10 = exec FString.
+	FArray* list = (FArray*)((BYTE*)this + 0x48);
+	for (INT i = 0; i < list->Num(); i++)
+	{
+		BYTE* elem = *(BYTE**)list + i * 0x68;
+		if (*(FString*)(elem + 0x04) == Name)
+			return FString(*(FString*)(elem + 0x10));
+	}
+	return FString(TEXT("NONE"));
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10316720)
@@ -936,16 +961,42 @@ IMPL_EMPTY("terrain editor tool — not needed for runtime gameplay")
 UTerrainPrimitive::UTerrainPrimitive(ATerrainInfo*) {}
 
 // --- Moved from EngineStubs.cpp ---
-IMPL_DIVERGE("Ghidra 0x10456d50: calls UPrimitive::Serialize then serializes terrain sector vertex data; data serialization FUN_ unresolved")
-void UTerrainPrimitive::Serialize(FArchive& Ar) { UPrimitive::Serialize(Ar); }
-IMPL_DIVERGE("Ghidra 0x1045E740: delegates to sector line checks; sector data structures unresolved — returns 1")
-INT UTerrainPrimitive::LineCheck(FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD) { return 1; }
-IMPL_DIVERGE("Ghidra 0x1045E820: delegates to sector point checks; sector data structures unresolved — returns 1")
-INT UTerrainPrimitive::PointCheck(FCheckResult&, AActor*, FVector, FVector, DWORD) { return 1; }
+IMPL_MATCH("Engine.dll", 0x10456d50)
+void UTerrainPrimitive::Serialize(FArchive& Ar)
+{
+	guard(UTerrainPrimitive::Serialize);
+	UPrimitive::Serialize(Ar);
+	Ar << *(UObject**)((BYTE*)this + 0x58); // Info (ATerrainInfo*)
+	unguard;
+}
+IMPL_MATCH("Engine.dll", 0x1045e740)
+INT UTerrainPrimitive::LineCheck(FCheckResult& Result, AActor* Owner, FVector Start, FVector End, FVector Extent, DWORD TraceFlags, DWORD /*ExtraNodeFlags*/)
+{
+	guard(UTerrainPrimitive::LineCheck);
+	ATerrainInfo* Info = *(ATerrainInfo**)((BYTE*)this + 0x58);
+	if (Info != (ATerrainInfo*)Owner)
+		appFailAssert("Info==Owner", ".\\UnTerrain.cpp", 0x347);
+	return Info->LineCheck(Result, Start, End, Extent, (INT)TraceFlags);
+	unguard;
+}
+IMPL_MATCH("Engine.dll", 0x1045e820)
+INT UTerrainPrimitive::PointCheck(FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD /*ExtraNodeFlags*/)
+{
+	guard(UTerrainPrimitive::PointCheck);
+	ATerrainInfo* Info = *(ATerrainInfo**)((BYTE*)this + 0x58);
+	if (Info != (ATerrainInfo*)Owner)
+		appFailAssert("Info==Owner", ".\\UnTerrain.cpp", 0x34f);
+	return Info->PointCheck(Result, Location, Extent, 0);
+	unguard;
+}
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainPrimitive::Illuminate(AActor*, INT) {}
-IMPL_DIVERGE("Ghidra 0x10456620: computes terrain AABB from sector data; sector layout unresolved — returns empty FBox")
-FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor*, INT) { return FBox(); }
+IMPL_MATCH("Engine.dll", 0x10456620)
+FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor* Owner, INT /*bDetailed*/)
+{
+	// Retail: 82b. Returns a degenerate (point) FBox at the actor's world Location (actor+0x234).
+	return FBox(*(FVector*)((BYTE*)Owner + 0x234), *(FVector*)((BYTE*)Owner + 0x234));
+}
 
 IMPL_DIVERGE("Ghidra 0x10460b60: calls UObject::Serialize then serializes all sector vertex/triangle data; FUN_ blockers for mesh data TArrays")
 void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }

@@ -493,7 +493,7 @@ void AR6eviLTesting::evilTestUpdateSystem()
 
 
 // --- UR6AbstractGameManager ---
-IMPL_DIVERGE("Requires R6-specific UbiSoft online-service SDK types not available in Engine.dll")
+IMPL_EMPTY("Ghidra 0x1030e7c0: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::StartJoinServer(FString,FString,int)
 {
 	guard(UR6AbstractGameManager::StartJoinServer);
@@ -507,49 +507,49 @@ int UR6AbstractGameManager::StartLogInProcedure()
 	return 0;
 }
 
-IMPL_DIVERGE("Requires R6-specific UbiSoft game-service pre-join SDK types not available")
+IMPL_EMPTY("Ghidra 0x104651d0: base-class stub; shared empty-return thunk (3 bytes). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::StartPreJoinProcedure(int)
 {
 	guard(UR6AbstractGameManager::StartPreJoinProcedure);
 	unguard;
 }
 
-IMPL_DIVERGE("Requires R6-specific game-service teardown; SDK types not available")
+IMPL_EMPTY("Ghidra 0x10476d60: base-class stub; shared empty-return thunk (1 byte). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::UnInitialize()
 {
 	guard(UR6AbstractGameManager::UnInitialize);
 	unguard;
 }
 
-IMPL_DIVERGE("Requires UbiSoft GS (UbisoftGameService) SDK; server-creation types not available")
+IMPL_EMPTY("Ghidra 0x104651d0: base-class stub; shared empty-return thunk (3 bytes). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::SetGSCreateUbiServer(int)
 {
 	guard(UR6AbstractGameManager::SetGSCreateUbiServer);
 	unguard;
 }
 
-IMPL_DIVERGE("Requires R6-specific listen-server and game-service SDK types not available")
+IMPL_EMPTY("Ghidra 0x1030e770: base-class stub; body is empty (FString param cleanup only). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::LaunchListenSrv(FString,FString)
 {
 	guard(UR6AbstractGameManager::LaunchListenSrv);
 	unguard;
 }
 
-IMPL_DIVERGE("Requires R6-specific game-service session management; SDK types not available")
+IMPL_EMPTY("Ghidra 0x10476d60: base-class stub; shared empty-return thunk (1 byte). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::ClientLeaveServer()
 {
 	guard(UR6AbstractGameManager::ClientLeaveServer);
 	unguard;
 }
 
-IMPL_DIVERGE("Requires R6-specific UbiSoft connection-error handler SDK types not available")
+IMPL_EMPTY("Ghidra 0x104651d0: base-class stub; shared empty-return thunk (3 bytes). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::ConnectionInterrupted(int)
 {
 	guard(UR6AbstractGameManager::ConnectionInterrupted);
 	unguard;
 }
 
-IMPL_DIVERGE("Requires R6-specific UbiSoft game-service polling; SDK types not available")
+IMPL_EMPTY("Ghidra 0x104651d0: base-class stub; shared empty-return thunk (3 bytes). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::GameServiceTick(UConsole *)
 {
 	guard(UR6AbstractGameManager::GameServiceTick);
@@ -563,7 +563,7 @@ int UR6AbstractGameManager::GetGSCreateUbiServer()
 	return 0;
 }
 
-IMPL_DIVERGE("Requires R6-specific UbiSoft game-service SDK initialization; types not available")
+IMPL_EMPTY("Ghidra 0x104651d0: base-class stub; shared empty-return thunk (3 bytes). Derived class in R6GameService.dll overrides.")
 void UR6AbstractGameManager::InitializeGameService(UConsole *)
 {
 	guard(UR6AbstractGameManager::InitializeGameService);

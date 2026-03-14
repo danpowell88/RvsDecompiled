@@ -185,12 +185,11 @@ UBOOL UProperty::Port() const
 	return (Category != NAME_None) && !(PropertyFlags & (CPF_Transient|CPF_Native));
 }
 
-IMPL_DIVERGE("raw class-object type byte read at offset 0x20; field name unknown")
+IMPL_MATCH("Core.dll", 0x10145a30)
 BYTE UProperty::GetID() const
 {
-	// DIVERGENCE: Ghidra reads *(BYTE*)(GetClass() + 0x20) — a class-object-embedded
-	// type byte that identifies the CPT_ property type.  The named field is unknown;
-	// we replicate the raw access faithfully.
+	// Ghidra: return *(uchar *)(*(int *)(this + 0x24) + 0x20);
+	// GetClass() is equivalent to *(UClass**)(this + 0x24) since Class is at offset 0x24.
 	return *(BYTE*)((BYTE*)GetClass() + 0x20);
 }
 
