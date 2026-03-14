@@ -62,7 +62,7 @@ void AR6Terrorist::UpdateAiming(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("Not found in Ghidra export — unresolved implementation")
+IMPL_DIVERGE("address absent from Ghidra unnamed export; implementation follows identical ProcessEvent pattern to AR6Hostage::eventFinishInitialization at R6Engine.dll 0x10004c60")
 void AR6Terrorist::eventFinishInitialization()
 {
 	ProcessEvent(FindFunctionChecked(R6ENGINE_FinishInitialization), NULL);

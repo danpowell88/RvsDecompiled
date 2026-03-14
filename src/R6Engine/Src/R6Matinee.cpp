@@ -15,7 +15,7 @@ static const FLOAT s_flt_1_0f = 1.0f;
 
 // --- UR6SubActionAnimSequence ---
 
-IMPL_DIVERGE("FUN_10024530 = get anim controller from UMeshInstance vtable; unresolved")
+IMPL_DIVERGE("FUN_10024530 (R6Engine.dll 0x10024530): class hierarchy traversal via UMeshInstance linked list at +0x24/+0x2c against PrivateStaticClass_exref; stub returns NULL")
 FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 {
 	guard(UR6SubActionAnimSequence::GetAnimDuration);
