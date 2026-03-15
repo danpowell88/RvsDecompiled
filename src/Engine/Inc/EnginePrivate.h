@@ -71,4 +71,8 @@ CORE_API extern INT GScriptEntryTag;
 // Distinct from GEngine (the standard UE2 global). Defined in UnCamera.cpp.
 ENGINE_API extern UEngine* g_pEngine;
 
+// GIsNightmare — nightmare difficulty flag (Core.dll export ?GIsNightmare@@3HA, ordinal 906).
+// Set by game logic to select nightmare-specific behaviour (e.g. larger blood/dirt decals).
+CORE_API extern UBOOL GIsNightmare;
+
 #endif
