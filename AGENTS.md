@@ -12,28 +12,6 @@ The blog uses Docusaurus with MDX. In blog post prose (outside of code blocks), 
 
 Blog post titles must follow the format `"NN. Title Text"` where NN is the post number matching the filename prefix (e.g. file `47-foo.md` → title `"47. Foo"`). Do not use alternative prefixes like "Batch NNN:", "Dev Blog #NN:", or "Post NN:".
 
-## Blog Frontmatter Rules
-
-**Use `python tools/new_blog_post.py "Title" --tags tag1,tag2` to create every new post.**
-It handles numbering and date assignment automatically.
-
-1. **Every post MUST have a `date:` field.** A missing date causes the post to be silently omitted or mis-sorted.
-2. **Dates must be unique.** The script guarantees this by incrementing +15 minutes from the latest post.
-3. **Never copy frontmatter from an earlier post without updating the date.** This is the most common source of duplicates.
-4. **Every post MUST have a `slug:` field.**
-
-### Required frontmatter template
-
-```md
----
-slug: NNN-short-kebab-title
-title: "NNN. Full Human-Readable Title"
-authors: [copilot]
-date: YYYY-MM-DDTHH:MM
----
-```
-
-Note blog post dates must be unique, split by minutes if required for multiple
 
 ## ⚠️ Blog Post Creation — ALWAYS use the script
 
@@ -43,29 +21,7 @@ Note blog post dates must be unique, split by minutes if required for multiple
 python tools/new_blog_post.py "Your Post Title Here" --tags tag1,tag2
 ```
 
-This script automatically:
-- Finds the numerically highest existing post number and uses `N+1`
-- Sets `date:` to the latest existing post's date **plus 15 minutes** (guaranteeing uniqueness)
-- Writes all required frontmatter fields (`slug`, `title`, `authors`, `date`, `tags`)
-- Places a `<!-- truncate -->` marker in the body
-
 After running the script, open the created file and replace the placeholder body with your content.
-
-**Why this matters (recurring issue, happened 4+ times):** Agents that hand-write frontmatter:
-- Copy `date:` from an earlier post → duplicate dates → posts vanish from the listing
-- Check filenames alphabetically → `99` sorts after `100` → duplicate post numbers
-- Set dates in the past → posts appear buried far down the chronological listing
-
-**If the script is unavailable**, manually find the max post number numerically:
-```powershell
-ls blog\blog\*.md | ForEach-Object { if ($_.Name -match "^(\d+)-") { [int]$Matches[1] } } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
-```
-Then check the `date:` of that file and add 15 minutes for your new post's date.
-
-**Rules:**
-- NEVER hardcode a post number without running the check above first.
-- The filename prefix **must** match the `slug:` NNN and the `title: "NNN."` prefix exactly.
-- After renaming a file, also update the `slug:`, `title:`, and remove any body text referencing the old number.
 
 ## Ground Truth Priority
 
@@ -86,8 +42,6 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
    - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact parity with retail binary; derived from Ghidra analysis. Address must be a **full virtual address** (e.g. `0x104766d0`), not a relative offset. Engine.dll base = `0x10300000`.
    - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed); only use when Ghidra confirms the body is empty
    - `IMPL_DIVERGE("reason")` — **permanent** divergence only (defunct live services, hardware globals, etc.). NOT for "pending decompilation"
-   - `IMPL_APPROX("reason")` — **BANNED, causes build failure**
-   - `IMPL_TODO("reason")` — **BANNED, causes build failure**
 
    **The only valid macros are IMPL_MATCH, IMPL_EMPTY, and IMPL_DIVERGE.**
 
