@@ -278,21 +278,22 @@ FLOAT FInterpCurve::Eval( FLOAT Input )
 // Note: DllMain, hInstance, and GPackage are provided by IMPLEMENT_PACKAGE(Core) above.
 
 /*-----------------------------------------------------------------------------
-	__FUNC_NAME__ external linkage workaround (MSVC 2019 / DO_GUARD=0 builds only).
+	__FUNC_NAME__ external linkage workaround — always required.
 
-	With DO_GUARD=0 the guard/unguard macros are no-ops, so the function-local
-	__FUNC_NAME__ statics that retail Core.def exports are never emitted.
-	We define equivalent global arrays and use /alternatename to redirect the
-	mangled names so the .def-exported ordinals resolve correctly.
+	The retail Core.def exports the __FUNC_NAME__ function-local statics from
+	six guarded functions. Although DO_GUARD=1 causes guard() to define these
+	statics, MSVC generates function-local statics with COFF storage class
+	"Static" (internal linkage). The linker cannot satisfy a DEF-file export
+	with an internal symbol.
 
-	When building with MSVC 7.1 (DO_GUARD=1), the guard() macro creates the
-	statics naturally — this entire block is skipped.
+	Fix: define global external fallback arrays and use /alternatename to
+	redirect the mangled names. /alternatename is a weak alias: it only
+	activates when the primary symbol has no external definition, which is
+	always the case for function-local statics regardless of DO_GUARD.
 
 	The `extern` keyword is required to give each array external linkage — in
 	C++, `const` at namespace scope has internal linkage by default.
-	MSVC 7.1 enforces this strictly even inside `extern "C"`.
 -----------------------------------------------------------------------------*/
-#if DO_GUARD == 0
 extern "C" {
 extern __declspec(dllexport) const unsigned short _gfn_Reverse[]        = {'F','S','t','r','i','n','g',':',':','R','e','v','e','r','s','e',0};
 extern __declspec(dllexport) const unsigned short _gfn_ParseIntoArray[] = {'F','S','t','r','i','n','g',':',':','P','a','r','s','e','I','n','t','o','A','r','r','a','y',0};
@@ -312,7 +313,6 @@ static volatile const void* _gfnRefs[] = {_gfn_Reverse, _gfn_ParseIntoArray, _gf
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectExport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeExp")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2??Serialize@FObjectImport@@QAEAAVFArchive@@AAV3@@Z@4QBGB=__gfn_SerializeImp")
 #pragma comment(linker, "/alternatename:?__FUNC_NAME__@?2???3UObject@@SAXPAXI@Z@4QBGB=__gfn_OpDelete")
-#endif // DO_GUARD == 0
 
 /*-----------------------------------------------------------------------------
 	Force inline functions to emit out-of-line copies for .def export.
