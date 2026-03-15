@@ -5145,7 +5145,11 @@ private:
 	static class TArray<class UObject *> GObjLoaded();
 	static class TArray<class UObject *> GObjLoaders();
 	static INT GObjNoRegister();
+private:
+	// GObjObjects is private in UObject (Core.def exports @@0-mangled symbol).
+	// FObjectIterator / TObjectIterator can access it via the friend declaration.
 	static class TArray<class UObject *> GObjObjects;
+public:
 	static class TMultiMap<class FName,class FName> * GObjPackageRemap();
 	static class TArray<class FPreferencesInfo> GObjPreferences();
 	static INT GObjRegisterCount();
