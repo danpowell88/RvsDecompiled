@@ -898,23 +898,23 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 
 
 // --- UPalette ---
-// FUN_10318850 (ECX-based iterator) is replaced by a standard GObjObjects loop.
+// FUN_10318850 (ECX-based GObjObjects iterator) replaced by TObjectIterator<UPalette>
+// which is a friend of UObject and semantically equivalent for UPalette-class filter.
 // Ghidra 0x16aea0, 297B: finds a UPalette with the same outer and identical
 // 256-entry colour data; logs the match, schedules this for destruction, and
 // returns the found duplicate.  Falls through to 'this' if none found.
-IMPL_MATCH("Engine.dll", 0x1046aea0)
+IMPL_DIVERGE("Ghidra 0x1046aea0: uses FUN_10318850 (ECX-based iterator); we use TObjectIterator<UPalette> (friend of UObject) which is functionally equivalent but generates different code")
 UPalette* UPalette::ReplaceWithExisting()
 {
 	guard(UPalette::ReplaceWithExisting);
-	for (INT i = 0; i < GObjObjects.Num(); i++)
+	for (TObjectIterator<UPalette> It; It; ++It)
 	{
-		UObject* Obj = GObjObjects(i);
-		if (!Obj || Obj == this) continue;
-		if (!Obj->IsA(UPalette::StaticClass())) continue;
-		if (Obj->GetOuter() != this->GetOuter()) continue;
+		UPalette* Pal = *It;
+		if (Pal == this) continue;
+		if (Pal->GetOuter() != this->GetOuter()) continue;
 
 		// Compare the 256 colour entries (each 4 bytes = one INT)
-		INT* Theirs = *(INT**)((BYTE*)Obj  + 0x2c);
+		INT* Theirs = *(INT**)((BYTE*)Pal  + 0x2c);
 		INT* Ours   = *(INT**)((BYTE*)this + 0x2c);
 		INT j;
 		for (j = 0; j < 0x100; j++)
@@ -923,13 +923,13 @@ UPalette* UPalette::ReplaceWithExisting()
 
 		// Duplicate found
 		debugf(TEXT("Replaced palette %s with existing %s"),
-		       this->GetName(), Obj->GetName());
+		       this->GetName(), Pal->GetName());
 		// Call virtual destructor on this (vtable[3] at offset 0xC).
 		typedef void (__thiscall *VDtorFn)(UPalette*);
 		void** vtbl = *(void***)this;
 		if (vtbl) ((VDtorFn)vtbl[3])(this);
 
-		return (UPalette*)Obj;
+		return Pal;
 	}
 	return this;
 	unguard;

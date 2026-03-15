@@ -31,31 +31,37 @@ date: YYYY-MM-DDTHH:MM
 
 Note blog post dates must be unique, split by minutes if required for multiple
 
-## ⚠️ Blog Post Numbering — CRITICAL (recurring issue, happened 4+ times)
+## ⚠️ Blog Post Creation — ALWAYS use the script
 
-Multiple agents running in parallel **will collide on post numbers** unless each one checks
-the current highest number before writing a new post.
+**Never create a blog post file by hand.** Always use the generator script:
 
-**Before creating any blog post, ALWAYS run this exact command first:**
+```powershell
+python tools/new_blog_post.py "Your Post Title Here" --tags tag1,tag2
+```
+
+This script automatically:
+- Finds the numerically highest existing post number and uses `N+1`
+- Sets `date:` to the latest existing post's date **plus 15 minutes** (guaranteeing uniqueness)
+- Writes all required frontmatter fields (`slug`, `title`, `authors`, `date`, `tags`)
+- Places a `<!-- truncate -->` marker in the body
+
+After running the script, open the created file and replace the placeholder body with your content.
+
+**Why this matters (recurring issue, happened 4+ times):** Agents that hand-write frontmatter:
+- Copy `date:` from an earlier post → duplicate dates → posts vanish from the listing
+- Check filenames alphabetically → `99` sorts after `100` → duplicate post numbers
+- Set dates in the past → posts appear buried far down the chronological listing
+
+**If the script is unavailable**, manually find the max post number numerically:
 ```powershell
 ls blog\blog\*.md | ForEach-Object { if ($_.Name -match "^(\d+)-") { [int]$Matches[1] } } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
 ```
-This shows the **numerically** highest existing post number. Use `N+1` for your new post.
-
-**Why this keeps breaking:** Agents that check alphabetically (e.g. `Sort-Object Name`) will get
-`99` as the max before `100`, then create another `100`. Always use the numeric check above.
-
-⚠️ **Do NOT use `Sort-Object Name`** — that sorts alphabetically and `99` comes after `100` alphabetically,
-giving the wrong result. Always sort numerically with the expression above.
+Then check the `date:` of that file and add 15 minutes for your new post's date.
 
 **Rules:**
-- NEVER write `100` or any specific number without running the check above first.
-- Do NOT reference a "milestone" post number (like "Post 100!") — it will be wrong.
-- If a conflict is discovered after the fact, renumber the duplicate to `(current_max + 1)`.
+- NEVER hardcode a post number without running the check above first.
 - The filename prefix **must** match the `slug:` NNN and the `title: "NNN."` prefix exactly.
 - After renaming a file, also update the `slug:`, `title:`, and remove any body text referencing the old number.
-
-**Current max post (as of last update): 195**
 
 ## Ground Truth Priority
 

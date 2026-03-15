@@ -335,7 +335,7 @@ int FURL::DefaultPort = 0;
 
 _KarmaGlobals * KGData = NULL;
 
-static INT bGameShutDown = 0;
+INT bGameShutDown = 0;
 
 
 /*-----------------------------------------------------------------------------
