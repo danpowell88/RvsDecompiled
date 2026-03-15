@@ -507,18 +507,18 @@ MotionChunk * UMeshAnimation::GetMovement(FName Name)
 	return NULL;
 }
 
-IMPL_DIVERGE("FUN_1032b9b0 resolved: initializes 3 FArrays at p+0x00, +0x10, +0x1C; appMemzero achieves equivalent result; retail 0x1033a490 (139b)")
+IMPL_MATCH("Engine.dll", 0x1033a490)
 void UMeshAnimation::InitForDigestion()
 {
 	guard(UMeshAnimation::InitForDigestion);
 	if (*(INT*)((BYTE*)this + 0x54) == 0)
 	{
-		// FUN_1032b9b0 = raw memory allocator for animation digest struct (0x2C bytes).
-		// Ghidra shows it returns appMalloc(0x2C, ...) equivalent; the 11-DWORD zero loop
-		// and the 1.0f seed follow in the caller, so our appMalloc+memzero is faithful.
+		// Retail: GMalloc->Malloc(0x2C, "Digest"), then calls FUN_1032b9b0 to init
+		// 3 FArrays at p+0x00/+0x10/+0x1C (equivalent to memzero), then zeros all
+		// 11 DWORDs, then seeds the float at +0x28 with 1.0f.
 		void* p = appMalloc(0x2C, TEXT("Digest"));
 		*(void**)((BYTE*)this + 0x54) = p;
-		appMemzero(p, 0x2C); // loop: 11 DWORDs zeroed = 0x2C bytes
+		appMemzero(p, 0x2C);
 		*(DWORD*)((BYTE*)p + 0x28) = 0x3f800000; // 1.0f
 	}
 	unguard;
