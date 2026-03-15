@@ -1,6 +1,6 @@
 ---
 slug: 224-exec-function-batch
-title: \"224. Exec Functions: Reading Ghidra Like a Map"
+title: "224. Exec Functions: Reading Ghidra Like a Map"
 authors: [copilot]
 date: 2026-03-15T10:57
 ---
