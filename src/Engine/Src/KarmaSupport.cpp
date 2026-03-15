@@ -31,7 +31,7 @@ unguard;
 
 
 // --- AKConeLimit ---
-IMPL_TODO("calls FUN_104969c0/e0/c0/a10 in Karma SDK range — MeSDK constraint params unresolved")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — constraint params (0x104969c0+) are MeSDK internal functions; binary unavailable")
 void AKConeLimit::KUpdateConstraintParams()
 {
 guard(AKConeLimit::KUpdateConstraintParams);
@@ -56,7 +56,7 @@ return NULL;
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x5a510: physKarma uses RDTSC profiling and Karma SDK FUN_104xxxxx calls")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — physKarma (0x5a510) calls FUN_104xxxxx and uses RDTSC profiling globals; MeSDK binary unavailable")
 void AKConstraint::physKarma(float)
 {
 guard(AKConstraint::physKarma);
@@ -73,7 +73,7 @@ void AKConstraint::preKarmaStep(float)
 {
 }
 
-IMPL_TODO("Ghidra 0x10c6c0: editor constraint rendering requires Karma SDK FUN_104xxxxx calls")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — editor constraint rendering (0x10c6c0) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AKConstraint::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 guard(AKConstraint::RenderEditorSelected);
@@ -98,7 +98,7 @@ if (GIsEditor)
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x5a710: PostEditMove uses KU2METransform/KU2MEPosition/KME2UVecCopy — FUN_104xxxxx blockers")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — PostEditMove (0x5a710) calls KU2METransform/Position/VecCopy (FUN_104xxxxx); MeSDK binary unavailable")
 void AKConstraint::PostEditMove()
 {
 guard(AKConstraint::PostEditMove);
@@ -163,14 +163,14 @@ unguard;
 
 
 // --- AKHinge ---
-IMPL_TODO("Ghidra 0x59c20: preKarmaStep calls FUN_104935c0/FUN_10505fc0/FUN_10496720 in Karma SDK range")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — preKarmaStep (0x59c20) calls FUN_104935c0/10505fc0/10496720 in MeSDK range; binary unavailable")
 void AKHinge::preKarmaStep(float)
 {
 guard(AKHinge::preKarmaStep);
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x5a250: KUpdateConstraintParams calls FUN_104935c0/FUN_104961e0/FUN_10496120 in Karma SDK range")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KUpdateConstraintParams (0x5a250) calls FUN_104935c0/104961e0/10496120 in MeSDK range; binary unavailable")
 void AKHinge::KUpdateConstraintParams()
 {
 guard(AKHinge::KUpdateConstraintParams);
@@ -389,7 +389,7 @@ return *this;
 
 
 // --- UKMeshProps ---
-IMPL_TODO("FKAggregateGeom serialization helpers (FUN_10322930/ab0/c70/4f570) not available; TArray at +0x50 not serialized (Ghidra 0x501b0 serializes it)")
+IMPL_DIVERGE("permanent: FKAggregateGeom serialization helpers (FUN_10322930/ab0/c70/4f570) are unnamed internal functions not accessible; TArray at +0x50 is unserialised in our reconstruction")
 void UKMeshProps::Serialize(FArchive& Ar)
 {
 // Ghidra 0x501b0: UObject::Serialize + 9 FLOAT fields at +0x2C..+0x4C (mass props),
@@ -408,7 +408,7 @@ Ar.ByteOrderSerialize((BYTE*)this + 0x48, 4);
 Ar.ByteOrderSerialize((BYTE*)this + 0x4C, 4);
 }
 
-IMPL_TODO("editor mesh props visualization calls Karma SDK FUN_104xxxxx drawing routines")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — editor mesh props visualization calls FUN_104xxxxx drawing routines; MeSDK binary unavailable")
 void UKMeshProps::Draw(FRenderInterface *,int)
 {
 guard(UKMeshProps::Draw);
@@ -417,7 +417,7 @@ unguard;
 
 
 // --- UKarmaParams ---
-IMPL_TODO("Ghidra 0x62210: PostEditChange updates live Karma body params via FUN_104c3660 (MdtBody handle) and MdtBody API")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — PostEditChange (0x62210) updates live body via FUN_104c3660 (MdtBody handle) and MdtBody API; binary unavailable")
 void UKarmaParams::PostEditChange()
 {
 guard(UKarmaParams::PostEditChange);
