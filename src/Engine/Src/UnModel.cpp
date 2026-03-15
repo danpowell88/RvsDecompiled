@@ -586,9 +586,12 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x1046dc70, 353 bytes.
-// Traverses the BSP tree to find which zone contains Location.
-// Full body requires raw FBspNode child-index navigation (pending UnBsp extraction).
-IMPL_DIVERGE("Ghidra 0x1046dc70: PointRegion traverses BSP zone tree via raw FBspNode child navigation; pending decompilation")
+// Traverses the BSP tree from root to find which zone contains Location.
+// Each node splits space with its FPlane; negative dot → back child, non-negative → front child.
+// iOutside (init = RootOutside) tracks the current zone-boundary state.
+// After traversal the zone leaf and zone number are read from the last node visited,
+// and the AZoneInfo actor is fetched from the per-zone slot at this+0x120+N*0x48.
+IMPL_MATCH("Engine.dll", 0x1046dc70)
 FPointRegion UModel::PointRegion( AZoneInfo* Zone, FVector Location ) const
 {
 guard(UModel::PointRegion);
@@ -597,6 +600,64 @@ FPointRegion result;
 result.Zone       = Zone;
 result.iLeaf      = INDEX_NONE;
 result.ZoneNumber = 0;
+
+FArray* nodes = MODEL_NODES(this);
+if (nodes->Num() == 0)
+    return result;
+
+INT  iOutside = MODEL_ROOTOUTSIDE(this);
+INT  iSide    = 0;
+INT  iLast    = 0;
+INT  iNode    = 0;   // start at root
+
+while (iNode != INDEX_NONE)
+{
+    BYTE*   nodeBase = (BYTE*)nodes->GetData() + iNode * NODE_STRIDE;
+    FPlane* plane    = (FPlane*)nodeBase;
+    FLOAT   dot      = plane->PlaneDot(Location);
+    iLast = iNode;
+
+    if (dot < 0.0f)
+    {
+        // Back side
+        iSide = 0;
+        BYTE leaf  = *(BYTE*)(nodeBase + 0x6e);
+        BYTE flags = *(BYTE*)(nodeBase + 0x6f);
+        if ((iOutside == 0) || (leaf != 0 && (flags & 0x21) == 0))
+            iOutside = 0;
+        else
+            iOutside = 1;
+        iNode = *(INT*)(nodeBase + 0x38);   // back child
+    }
+    else
+    {
+        // Front side
+        iSide = 1;
+        BYTE leaf  = *(BYTE*)(nodeBase + 0x6e);
+        BYTE flags = *(BYTE*)(nodeBase + 0x6f);
+        if ((iOutside == 0) && (leaf == 0 || (flags & 0x21) != 0))
+            iOutside = 0;
+        else
+            iOutside = 1;
+        iNode = *(INT*)(nodeBase + 0x3c);   // front child
+    }
+}
+
+// Read iLeaf: node[iLast].iLeaf[iSide] lives at nodes.Data + iLast*0x90 + 0x70 + iSide*4.
+// Ghidra: (iSide + iLast*0x24)*4 = iSide*4 + iLast*0x90
+result.iLeaf = *(INT*)((BYTE*)nodes->GetData() + 0x70 + (iSide + iLast * 0x24) * 4);
+
+// ZoneNumber byte at node[iLast]+0x6c+iSide (only when NumZones != 0)
+BYTE zoneNum = 0;
+if (*(INT*)((BYTE*)this + 0x11c) != 0)   // NumZones
+    zoneNum = *(BYTE*)((BYTE*)nodes->GetData() + iLast * NODE_STRIDE + 0x6c + iSide);
+result.ZoneNumber = zoneNum;
+
+// Zone actor slot: this + (zoneNum+4)*0x48  (zone 0 entry is at this+0x120 = this+4*0x48)
+AZoneInfo* zoneActor = *(AZoneInfo**)((BYTE*)this + (zoneNum + 4) * 0x48);
+if (zoneActor != NULL)
+    result.Zone = zoneActor;
+
 return result;
 unguard;
 }

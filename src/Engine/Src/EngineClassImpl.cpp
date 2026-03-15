@@ -903,12 +903,36 @@ void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileFlush );
 
-IMPL_DIVERGE("Ghidra 0x103185e0 (435 bytes): FString formatting + appMD5Update + write to FArchive* at this+0x404; file logging not implemented")
+IMPL_MATCH("Engine.dll", 0x103185e0)
 void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileLog);
 	P_GET_STR(Item);
 	P_FINISH;
+	// Append newline separator (DAT_1052d238 = L"\n") then write to archive.
+	Item += TEXT("\n");
+	FArchive* arch = *(FArchive**)((BYTE*)this + 0x404);
+	if (*(BYTE*)((BYTE*)this + 0x398) & 1)
+	{
+		// XOR-encode path: each wide-char's two bytes are XOR'd with 0xa7
+		// and formatted as a 4-digit hex string (DAT_1052d2e8 = TEXT("%04x")).
+		FString encoded;
+		for (INT i = 0; i < Item.Len(); i++)
+		{
+			WORD w = 0;
+			const BYTE* src = reinterpret_cast<const BYTE*>(*Item) + i * sizeof(TCHAR);
+			reinterpret_cast<BYTE*>(&w)[0] = src[0] ^ 0xa7;
+			reinterpret_cast<BYTE*>(&w)[1] = src[1] ^ 0xa7;
+			encoded += FString::Printf(TEXT("%04x"), static_cast<DWORD>(w));
+		}
+		if (arch)
+			arch->Serialize(const_cast<TCHAR*>(*encoded), encoded.Len() * sizeof(TCHAR));
+	}
+	else
+	{
+		if (arch)
+			arch->Serialize(const_cast<TCHAR*>(*Item), Item.Len() * sizeof(TCHAR));
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileLog );

@@ -2090,7 +2090,7 @@ INT APawn::calcMoveFlags()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103f06e0; 248b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103f06e0: passes NULL (not this) as Actor arg; trace flags 0x86 (Movers|Level|LevelGeometry) vs TRACE_AllBlocking; hit dispatch via vtable[0xd0] not processHitWall")
 INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 {
 	guard(APawn::checkFloor);
@@ -2174,7 +2174,7 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1041cfa0; 1916b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body; Ghidra 0x1041cfa0 is 1916b: A* pathfinding with FSortedPathList open/closed sets; not yet reconstructed")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -2182,7 +2182,7 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra address unknown; reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103f2c70: iterates XLevel ActorList for water volumes, finds water surface intersection; stub returns zero vector here")
 FVector APawn::findWaterLine(FVector Start, FVector End)
 {
 	guard(APawn::findWaterLine);
@@ -2190,7 +2190,7 @@ FVector APawn::findWaterLine(FVector Start, FVector End)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e6e50; 629b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body; Ghidra 0x103e6e50 is 629b: MoveActor in fly direction, wall-slide and reflection on hit; not yet reconstructed")
 ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::flyMove);
@@ -2206,7 +2206,7 @@ INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e88b0; 1264b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body; Ghidra 0x103e88b0 is 1264b: iterative gravity integration with floor detection, AScout-specific handling; not yet reconstructed")
 ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 {
 	guard(APawn::jumpLanding);
@@ -2214,7 +2214,7 @@ ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e87e0; 200b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103eb1c0)
 INT APawn::jumpReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::jumpReachable);

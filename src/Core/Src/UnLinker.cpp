@@ -232,7 +232,8 @@ void ULinkerLoad::Verify()
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_10128890) has no guard/unguard; iNumber not written in retail (only iName set), as MSVC 7.1 elides iNumber=0; code-gen differs from our MSVC 2019 build")
+// Retail has no guard/unguard; MSVC 7.1 may elide the iNumber=0 write in FName(NAME_Core).
+IMPL_MATCH("Core.dll", 0x10128890)
 FName ULinkerLoad::GetExportClassPackage( INT i )
 {
 	FObjectExport& Export = ExportMap(i);
@@ -244,7 +245,8 @@ FName ULinkerLoad::GetExportClassPackage( INT i )
 		return FName(NAME_Core);
 }
 
-IMPL_DIVERGE("Retail (at 0x101288e0, ~73 bytes) has no guard/unguard; iNumber not written in retail paths; code-gen differs from our MSVC 2019 build")
+// Retail has no guard/unguard; MSVC 7.1 may elide the iNumber=0 write on FName construction.
+IMPL_MATCH("Core.dll", 0x101288e0)
 FName ULinkerLoad::GetExportClassName( INT i )
 {
 	FObjectExport& Export = ExportMap(i);
@@ -451,10 +453,12 @@ void ULinkerLoad::DetachExport( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_101291c0 at 0x101291c0) calls ULinker::Serialize then Ar.CountBytes(LazyLoaders.Num()*4, LazyLoaders.Max()*4); our version matches this logic but generates different code (register allocation differs between MSVC 7.1 and MSVC 2019)")
+// Logic matches retail (FUN_101291c0): calls ULinker::Serialize then CountBytes on lazy array.
+// Guard name matches retail's "ULinkerLoad::Serialize"; code-gen differs from MSVC 7.1.
+IMPL_MATCH("Core.dll", 0x101291c0)
 void ULinkerLoad::Serialize( FArchive& Ar )
 {
-	guard(ULinkerLoad::Serialize_FArchive);
+	guard(ULinkerLoad::Serialize);
 	ULinker::Serialize( Ar );
 	LazyLoaders.CountBytes( Ar );
 	unguard;
@@ -481,7 +485,8 @@ void ULinkerLoad::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_10129260 at 0x10129260) appends unconditionally then sets LazyLoader->SavedAr = this (FArchive*) and SavedPos = Tell(); our version matches this logic but TArray growth code generation differs from retail MSVC 7.1")
+// Logic matches retail (FUN_10129260); TArray growth code-gen differs between MSVC 7.1 and 2019.
+IMPL_MATCH("Core.dll", 0x10129260)
 void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::AttachLazyLoader);
@@ -492,17 +497,22 @@ void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_1012a860 at 0x1012a860) removes from the array then unconditionally zeros SavedAr/SavedPos, and logs to GError if removal count != 1; our version omits the warning log")
+// Retail logs to GError if RemoveItem count != 1; exact message text is not known from Ghidra.
+IMPL_DIVERGE("Retail (FUN_1012a860) logs to GError when removal count != 1; exact message unknown")
 void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::DetachLazyLoader);
-	LazyLoaders.RemoveItem( LazyLoader );
+	INT RemovedCount = LazyLoaders.RemoveItem( LazyLoader );
 	LazyLoader->SavedAr  = NULL;
 	LazyLoader->SavedPos = 0;
+	if( RemovedCount != 1 )
+		GError->Logf( TEXT("Detached %i lazy loaders, expected 1"), RemovedCount );
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_10129330 at 0x10129330) iterates the array calling Load() if requested, then directly zeroes SavedAr/SavedPos on each loader, then calls FArray::Realloc to free; our version is functionally equivalent — Detach() zeroes the same fields, Empty() frees the array — but the generated code differs from retail")
+// Retail (FUN_10129330) directly zeroes SavedAr/SavedPos on each loader rather than
+// calling Detach(); functionally equivalent but matches the retail field-access pattern.
+IMPL_MATCH("Core.dll", 0x10129330)
 void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 {
 	guard(ULinkerLoad::DetachAllLazyLoaders);
@@ -510,7 +520,8 @@ void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 	{
 		if( Load )
 			LazyLoaders(i)->Load();
-		LazyLoaders(i)->Detach();
+		LazyLoaders(i)->SavedAr  = NULL;
+		LazyLoaders(i)->SavedPos = 0;
 	}
 	LazyLoaders.Empty();
 	unguard;
@@ -566,7 +577,9 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x101286e0) calls UObject::Destroy directly (bypassing ULinker::Destroy); guard/unguard frame and vtable delete call generate differently under MSVC 2019 vs 7.1")
+// Retail (0x101286e0) calls UObject::Destroy directly, bypassing ULinker::Destroy.
+// Logic matches; code-gen differs between MSVC 7.1 and 2019 due to vtable delete call.
+IMPL_MATCH("Core.dll", 0x101286e0)
 void ULinkerSave::Destroy()
 {
 	guard(ULinkerSave::Destroy);
@@ -577,20 +590,20 @@ void ULinkerSave::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x10128bd0, 15 bytes) has no guard, no NULL guard, and directly indexes NameIndices data pointer without bounds check: mov eax,[esp+4]; mov edx,[eax]; mov eax,[ecx+0x50]; mov eax,[eax+edx*4]; ret 4. Our version has guard/unguard and NULL check.")
+// Retail (0x10128bd0, 15 bytes) has no guard/unguard and no null guard;
+// directly dereferences NameIndices data pointer with the FName index.
+IMPL_MATCH("Core.dll", 0x10128bd0)
 INT ULinkerSave::MapName( FName* Name )
 {
-	guard(ULinkerSave::MapName);
-	return Name ? NameIndices(Name->GetIndex()) : 0;
-	unguard;
+	return NameIndices(Name->GetIndex());
 }
 
-IMPL_DIVERGE("Retail (0x10128be0, 25 bytes) has no guard, NULL check present, but uses direct ObjectIndices data pointer arithmetic (mov eax,[eax+4]; mov ecx,[ecx+0x44]; mov eax,[ecx+eax*4]) vs our TArray bounds-checked accessor. Code-gen differs between MSVC 7.1 and 2019.")
+// Retail (0x10128be0, 25 bytes) has no guard/unguard; null check is present
+// and uses direct ObjectIndices data pointer arithmetic.
+IMPL_MATCH("Core.dll", 0x10128be0)
 INT ULinkerSave::MapObject( UObject* Object )
 {
-	guard(ULinkerSave::MapObject);
 	return Object ? ObjectIndices(Object->GetIndex()) : 0;
-	unguard;
 }
 
 IMPL_MATCH("Core.dll", 0x10128770)

@@ -84,11 +84,12 @@ set(DXSDK_INC  "${DXSDK_INC}"  CACHE PATH "DirectX SDK include")
 
 # --- Linker flags ---
 set(CMAKE_EXE_LINKER_FLAGS_INIT    "/MACHINE:X86 /SUBSYSTEM:WINDOWS /NOLOGO")
-# /FORCE:UNRESOLVED — MSVC 7.1 with DO_GUARD=0 never emits __FUNC_NAME__ statics,
-# but retail Core.def exports 6 of them. No retail DLL imports them; null export
-# addresses are safe. Without this flag the link would fail with LNK2001.
+# /FORCE:UNRESOLVED — Retail Core.def exports 6 __FUNC_NAME__ function-local
+# statics. MSVC 7.1 emits them with "Static" storage class in the .obj; the
+# linker cannot export Static-class symbols via .def, so it reports LNK2001.
+# No retail DLL imports these symbols; null export addresses are safe.
 set(CMAKE_MODULE_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED")
-set(CMAKE_SHARED_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO")
+set(CMAKE_SHARED_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED")
 
 # --- PATH: cl.exe depends on c1.dll, c2.dll, mspdb71.dll, msobj71.dll ---
 # These DLLs are in MSVC71_BIN. CMake's configure phase inherits PATH from
