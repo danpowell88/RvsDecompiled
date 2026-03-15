@@ -76,6 +76,11 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
+        {
+          href: 'https://github.com/danpowell88/RvsDecompiled',
+          label: 'GitHub',
+          position: 'right',
+        },
       ],
     },
     footer: {
@@ -91,6 +96,15 @@ const config: Config = {
             {
               label: 'Docs',
               to: '/docs/intro',
+            },
+          ],
+        },
+        {
+          title: 'Source',
+          items: [
+            {
+              label: 'GitHub Repository',
+              href: 'https://github.com/danpowell88/RvsDecompiled',
             },
           ],
         },
