@@ -92,6 +92,7 @@ if not exist "%ROOT%\build-71" mkdir "%ROOT%\build-71"
     -DCMAKE_TOOLCHAIN_FILE="%ROOT%\cmake\msvc71.cmake" ^
     -DCMAKE_BUILD_TYPE=Release ^
     -DCMAKE_RC_COMPILER="%WINKITS_BIN%\rc.exe" ^
+    "-DCMAKE_SHARED_LINKER_FLAGS=/MACHINE:X86 /NOLOGO /FORCE:UNRESOLVED" ^
     "%ROOT%"
 
 if errorlevel 1 (
