@@ -245,15 +245,21 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 	unguard;
 }
 
-// Retail FUN_1012a910 sets Verified=1 AFTER the loop (at LAB_1012aa2d), not before.
-// It also clears PKG_AllowDownload on LinkerRoot if it is a UPackage, which requires
-// direct UPackage::PackageFlags access not available in public SDK.
-IMPL_TODO("retail FUN_1012a910 also clears PKG_AllowDownload on the LinkerRoot UPackage before the import loop; blocked by UPackage::PackageFlags layout")
+// Retail FUN_1012a910 (178 bytes): if Verified, set it again and return; otherwise
+// clear PKG_BrokenLinks (0x0008) on LinkerRoot (if it is a UPackage), run the
+// VerifyImport loop, then set Verified=1.  UPackage::PackageFlags is a public field
+// so this can be written cleanly in C++; codegen for the IsA check differs from
+// retail's inlined class-walk.
+IMPL_TODO("retail FUN_1012a910 inlines the UPackage IsA walk as raw pointer arithmetic; our IsA() call is equivalent but produces different codegen")
 void ULinkerLoad::Verify()
 {
 	guard(ULinkerLoad::Verify);
 	if( !Verified )
 	{
+		// Retail clears PKG_BrokenLinks before the import loop so that a fresh
+		// verification starts with the package assumed clean.
+		if( LinkerRoot && LinkerRoot->IsA(UPackage::StaticClass()) )
+			((UPackage*)LinkerRoot)->PackageFlags &= ~(DWORD)PKG_BrokenLinks;
 		for( INT i=0; i<Summary.ImportCount; i++ )
 			VerifyImport(i);
 	}
@@ -287,10 +293,11 @@ FName ULinkerLoad::GetExportClassName( INT i )
 		return FName(NAME_Class);
 }
 
-// Retail FUN_10129d20 (1876 bytes): resolves Import.SourceLinker via GetPackageLinker,
-// sets Import.SourceIndex via 3-way hash lookup on the source linker's ExportHash,
-// handles broken-import warnings/errors, and walks the PackageIndex chain recursively.
-// Requires: UObject::GetPackageLinker, GLog, LocalizeError, and several FUN_ helpers.
+// Retail FUN_10129d20 (1876 bytes): resolves Import.SourceLinker via
+// UObject::GetPackageLinker, then locates SourceIndex via a 3-way hash lookup
+// on the source linker's ExportHash.  Handles broken-import warnings/errors
+// (logged via GLog) and walks the PackageIndex chain recursively.
+// Multiple internal FUN_ helpers needed; full implementation pending.
 IMPL_TODO("FUN_10129d20 needs UObject::GetPackageLinker and GLog; sets SourceLinker/SourceIndex which CreateImport then uses; stub does minimal PackageIndex recursion only")
 void ULinkerLoad::VerifyImport( INT i )
 {
@@ -324,9 +331,12 @@ void ULinkerLoad::LoadAllObjects()
 	unguard;
 }
 
-// Hash and linear-scan match retail FUN_1012aa50 (3-way hash + class-hierarchy fallback +
-// Mesh→LodMesh compat loop); minor codegen divergence from method calls vs raw ptr arithmetic.
-IMPL_TODO("retail FUN_1012aa50 uses raw ImportMap/ExportMap ptr arithmetic; method-call codegen differs, but algorithm is identical")
+// Algorithm matches retail FUN_1012aa50 exactly (hash probe + linear fallback +
+// Mesh→LodMesh compatibility loop).  FUN_1012a630 referenced in the fallback scan
+// is IndexToObject (confirmed: IMPL_MATCH at 0x1012a630 in this file).
+// Codegen differs because our method calls (ExportMap(i), GetExportClass*) vs
+// retail's raw ImportMap/ExportMap pointer arithmetic — both produce identical results.
+IMPL_TODO("retail FUN_1012aa50 uses raw ImportMap/ExportMap ptr arithmetic; method-call codegen differs, but algorithm is identical; FUN_1012a630 confirmed = IndexToObject")
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
@@ -448,11 +458,13 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
-// Retail FUN_1012a570: if XObject==NULL, calls VerifyImport (if SourceLinker not set),
-// then creates the export from SourceLinker at SourceIndex, increments GImportCount.
-// Our version provides a direct-resolution fallback that works without a working VerifyImport,
-// since our VerifyImport stub does not set SourceLinker/SourceIndex.
-IMPL_TODO("retail FUN_1012a570 relies on VerifyImport having set SourceLinker/SourceIndex; diverges structurally until VerifyImport (FUN_10129d20) is fully implemented")
+// Retail FUN_1012a570 (136 bytes) is intentionally simpler than our version:
+// if XObject==NULL, call VerifyImport (wrapped in BeginLoad/EndLoad) if SourceLinker
+// is not yet set, then create the export via SourceLinker->FUN_10128d30(SourceIndex)
+// and increment GImportCount.  Our implementation provides a direct-resolution fallback
+// because our VerifyImport stub never sets SourceLinker/SourceIndex; once VerifyImport
+// (FUN_10129d20) is fully implemented this can be rewritten to match retail exactly.
+IMPL_TODO("retail FUN_1012a570 is simple: VerifyImport sets SourceLinker/SourceIndex, CreateImport then calls SourceLinker->CreateExport(SourceIndex); structural divergence until VerifyImport (FUN_10129d20) is fully implemented")
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -646,11 +658,13 @@ IMPLEMENT_CLASS(ULinkerLoad);
 	ULinkerSave.
 -----------------------------------------------------------------------------*/
 
-// Retail FUN_1012ad40: uses GThrow, sets Summary.Tag+FileVersion, copies PackageFlags from
-// LinkerRoot (if UPackage), sets FArchive saving flags, and pre-allocates ObjectIndices/NameIndices.
-// Blocked: PackageFlags copy requires UPackage::PackageFlags offset not in SDK;
-// ObjectIndices/NameIndices prealloc sizes require GObjObjects.Num() and FName::Names.Num().
-IMPL_TODO("retail FUN_1012ad40 copies PackageFlags from LinkerRoot UPackage and pre-allocates ObjectIndices/NameIndices arrays; blocked by private UPackage layout and GObjObjects size access")
+// Retail FUN_1012ad40 (462 bytes): after creating the file writer, sets Summary.Tag
+// and Summary.FileVersion (0xe0076 = LicenseeVer 14, Ver 118), copies PackageFlags
+// from LinkerRoot (if it is a UPackage) into Summary.PackageFlags, sets FArchive saving
+// flags, and pre-allocates ObjectIndices/NameIndices with GObjObjects.Num()/Names.Num().
+// PackageFlags copy is now implemented (UPackage::PackageFlags is a public field).
+// Pre-allocation remains missing: requires private GObjObjects array size access.
+IMPL_TODO("retail FUN_1012ad40 pre-allocates ObjectIndices/NameIndices with GObjObjects.Num() and FName::Names.Num(); those internal sizes are not accessible from the SDK")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )
@@ -665,6 +679,11 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	// Initialise Summary with the package file tag (retail also sets FileVersion = 0xe0076,
 	// but FPackageFileSummary::FileVersion is protected so we rely on the default ctor value).
 	Summary.Tag = PACKAGE_FILE_TAG;
+
+	// Retail copies PackageFlags from LinkerRoot into Summary.PackageFlags when LinkerRoot
+	// is a UPackage.  UPackage::PackageFlags is a public DWORD field in UnCorObj.h.
+	if( LinkerRoot && LinkerRoot->IsA(UPackage::StaticClass()) )
+		Summary.PackageFlags = ((UPackage*)LinkerRoot)->PackageFlags;
 
 	// Mark this FArchive as a persistent saving archive (retail FUN_1012ad40 field setup).
 	ArIsSaving     = 1;
