@@ -270,7 +270,7 @@ void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetServerOptionsRefreshed );
 
-IMPL_TODO("Ghidra 0x10364340 (582 bytes): calls MeSDK KAddBoneLifter — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KAddBoneLifter (0x10364340) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddBoneLifter);
@@ -283,7 +283,7 @@ void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddBoneLifter );
 
-IMPL_TODO("Ghidra 0x10363f00 (622 bytes): calls MeSDK KAddImpulse — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KAddImpulse (0x10363f00) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddImpulse);
@@ -347,7 +347,7 @@ void AActor::execKGetCOMOffset( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetCOMOffset );
 
-IMPL_TODO("Ghidra 0x103626d0 (235 bytes): calls vtable KGetCOMPosition — blocked by MeSDK FUN_104xxxxx")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KGetCOMPosition (0x103626d0) dispatches via MeSDK vtable; FUN_104xxxxx unavailable")
 void AActor::execKGetCOMPosition( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMPosition);
@@ -430,7 +430,7 @@ void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetRestitution );
 
-IMPL_TODO("Ghidra 0x103645c0 (324 bytes): calls MeSDK KGetSkelMass — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KGetSkelMass (0x103645c0) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetSkelMass);
@@ -440,7 +440,7 @@ void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetSkelMass );
 
-IMPL_TODO("Ghidra 0x10362c70 (190 bytes): calls FUN_104c3660 (MeSDK body handle) and FUN_10494230 (MdtBodyIsEnabled)")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KIsBodyEnabled (0x10362c70) calls FUN_104c3660 and MdtBodyIsEnabled (FUN_10494230); MeSDK binary unavailable")
 void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsAwake);
@@ -460,7 +460,7 @@ void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsRagdollAvailable );
 
-IMPL_TODO("Ghidra 0x10364740 (440 bytes): calls MeSDK KMakeRagdollAvailable — FUN_104xxxxx blockers")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KMakeRagdollAvailable (0x10364740) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMakeRagdollAvailable);
@@ -469,7 +469,7 @@ void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMakeRagdollAvailable );
 
-IMPL_TODO("Ghidra 0x10364a60 (1445 bytes): large MeSDK IO dispatch — FUN_104xxxxx blockers throughout")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — large MeSDK IO dispatch (0x10364a60) uses FUN_104xxxxx throughout; MeSDK binary unavailable")
 void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMP2IOKarmaAllNativeFct);
@@ -478,7 +478,7 @@ void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMP2IOKarmaAllNativeFct );
 
-IMPL_TODO("Ghidra 0x103651f0 (300 bytes): calls MeSDK KRemoveAllBoneLifters — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KRemoveAllBoneLifters (0x103651f0) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveAllBoneLifters);
@@ -487,7 +487,7 @@ void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveAllBoneLifters );
 
-IMPL_TODO("Ghidra 0x10365040 (368 bytes): calls MeSDK KRemoveLifterFromBone — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — KRemoveLifterFromBone (0x10365040) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveLifterFromBone);
@@ -624,7 +624,7 @@ void AActor::execKSetRestitution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetRestitution );
 
-IMPL_TODO("Ghidra 0x103641a0 (366 bytes): sets skeletal mesh Karma velocity — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — skeletal mesh velocity setter (0x103641a0) calls FUN_104xxxxx; MeSDK binary unavailable")
 void AActor::execKSetSkelVel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetSkelVel);
@@ -653,7 +653,7 @@ void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetStayUpright );
 
-IMPL_TODO("Ghidra 0x10363df0 (219 bytes): calls FUN_104c3660 (MeSDK body handle) to wake rigid body")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — rigid body wake (0x10363df0) calls FUN_104c3660 (MeSDK body handle); MeSDK binary unavailable")
 void AActor::execKWake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKWake);
@@ -763,7 +763,7 @@ IMPLEMENT_FUNCTION( AFluidSurfaceInfo, INDEX_NONE, execPling );
 
 /*-- AKConstraint ------------------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x10359ea0 (227 bytes): reads constraint force via MeSDK getKConstraint() — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — constraint force reader (0x10359ea0) calls getKConstraint via FUN_104xxxxx; MeSDK binary unavailable")
 void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintForce);
@@ -773,7 +773,7 @@ void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintForce );
 
-IMPL_TODO("Ghidra 0x10359fc0 (227 bytes): reads constraint torque via MeSDK getKConstraint() — FUN_104xxxxx blocker")
+IMPL_DIVERGE("permanent: Karma/MeSDK proprietary SDK — constraint torque reader (0x10359fc0) calls getKConstraint via FUN_104xxxxx; MeSDK binary unavailable")
 void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintTorque);
