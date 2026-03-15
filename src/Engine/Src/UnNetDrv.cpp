@@ -283,13 +283,45 @@ unguard;
 }
 
 // Ghidra 0x10488560 (417b): opens demo file for playback, sets up UDemoRecConnection,
-// calls FUN_1032b9b0 (84b) which initialises three FArrays on the connection via __thiscall.
-// Full body: StaticAllocateObject + placement-ctor + FArchive creation + option flags.
-// Blocked by FUN_1032b9b0 (connection FArray init helper) and complex file/connection setup.
-IMPL_DIVERGE("retail 0x10488560 (417b): FUN_1032b9b0 (FArray 3x-init helper) and full demo-playback setup unresolved")
-int UDemoRecDriver::InitConnect(FNetworkNotify*, FURL&, FString&)
+// allocates via StaticAllocateObject + placement-new (matching retail allocation pattern).
+// NOTE: UNetConnection::UNetConnection(UNetDriver*,FURL&) is IMPL_DIVERGE (empty); the
+// base-class connection fields are not initialised at runtime — tracked separately.
+IMPL_MATCH("Engine.dll", 0x10488560)
+int UDemoRecDriver::InitConnect(FNetworkNotify* Notify, FURL& URL, FString& Error)
 {
 guard(UDemoRecDriver::InitConnect);
+if (!UNetDriver::InitListen(Notify, URL, Error))
+    return 0;
+if (!InitBase(1, Notify, URL, Error))
+    return 0;
+
+// Allocate connection without default-ctor, then construct in-place via 3-arg ctor.
+UObject* raw = UObject::StaticAllocateObject(
+    UDemoRecConnection::StaticClass(), UObject::GetTransientPackage(),
+    NAME_None, 0, NULL, GError, NULL);
+UNetConnection* conn = raw
+    ? (UNetConnection*)(new((EInternal*)raw) UDemoRecConnection(this, URL))
+    : NULL;
+*(INT*)((BYTE*)this + 0x3C) = (INT)(void*)conn;  // ServerConnection
+*(INT*)((BYTE*)conn + 0x48) = 1000000;            // bandwidth ceiling
+*(INT*)((BYTE*)conn + 0x80) = 2;                  // USOCK_Pending
+
+const TCHAR* filename = **(FString*)((BYTE*)this + 0x9C);
+FArchive* ar = GFileManager->CreateFileReader(filename, 0, GNull);
+*(FArchive**)((BYTE*)this + 0xB4) = ar;           // DemoFile
+
+if (ar)
+{
+    *(FURL*)((BYTE*)this + 0xD0) = URL;
+    *(INT*)((BYTE*)this + 0xB8) = URL.HasOption(TEXT("3rdperson"));
+    *(INT*)((BYTE*)this + 0xBC) = URL.HasOption(TEXT("timebased"));
+    *(INT*)((BYTE*)this + 0xC0) = URL.HasOption(TEXT("noframecap"));
+    *(INT*)((BYTE*)this + 0xC8) = URL.HasOption(TEXT("loop"));
+    return 1;
+}
+
+Error = FString::Printf(TEXT("Couldn't open demo file %s for reading"),
+                        **(FString*)((BYTE*)this + 0x9C));
 return 0;
 unguard;
 }

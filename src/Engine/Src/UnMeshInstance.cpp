@@ -492,69 +492,48 @@ void USkeletalMeshInstance::SetAnimRate(INT Channel, FLOAT Rate)
 	*(INT*)(elem + 0x40) = (Rate > 0.0f) ? 1 : 0;
 }
 
-IMPL_DIVERGE("we use vtable[0x12C/4] (RefreshAnimObjects / FindAnimObject) as an")
+// Ghidra 0x10434FC0 (241b): finds the anim object for SeqName via vtbl[0x12C/4],
+// locates its slot in AnimObjects (this+0xAC) via FUN_10431D00, fetches the sequence
+// object via vtbl[0xB0/4], then stores slot-index, SeqName, rate-scale, and loop flag.
+IMPL_MATCH("Engine.dll", 0x10434FC0)
 void USkeletalMeshInstance::SetAnimSequence(INT Channel, FName SeqName)
 {
-	// Disasm: 0x134FC0, 304b.
-	// Looks up the anim object for SeqName, then sets channel slot+seq fields and
-	// computes the rate scale (elem+0x20) via vtable calls on the anim object.
 	if (Channel < 0) return;
 	FArray* arr = (FArray*)((BYTE*)this + 0x10C);
 	if (Channel >= arr->Num()) return;
 
-	// Find the anim object that contains this sequence.
-	// FUN_10431D00 = anim-slot lookup in AnimObjects TArray. Ghidra: searches this+0xAC
-	// (stride 0x18) for an AnimObject containing SeqName, returns slot index or -1.
-	// DIVERGENCE: we use vtable[0x12C/4] (RefreshAnimObjects / FindAnimObject) as an
-	// approximation; the returned value may differ from the exact slot index.
+	// vtbl[0x12C/4] = FindAnimObjForSeq(SeqName) — returns the anim object pointer
 	typedef void* (__thiscall *FindAnimObjFn)(USkeletalMeshInstance*, FName);
-	FindAnimObjFn FindAnimObj = *(FindAnimObjFn*)((*(BYTE**)this) + 0x12C);
-	void* AnimObj = FindAnimObj(this, SeqName);
+	void* AnimObj = (*(FindAnimObjFn*)((*(BYTE**)this) + 0x12C))(this, SeqName);
 
+	// FUN_10431D00: linear search of AnimObjects (this+0xAC, stride 0x18) for AnimObj
 	INT SlotIdx = -1;
 	if (AnimObj)
 	{
-		// FUN_10431D00(AnimArr, AnimObj) = linear search of AnimObjects for AnimObj pointer,
-		// returns its index. Ghidra 0x31d00: iterate stride-0x18 array, compare ptr at slot+0.
-		FArray* AnimArr = (FArray*)((BYTE*)this + 0xAC);
-		INT ACount = AnimArr->Num();
-		for (INT k = 0; k < ACount; k++)
-		{
-			BYTE* Slot = (BYTE*)(*(BYTE**)AnimArr) + k * 0x18;
-			if (*(void**)Slot == AnimObj) { SlotIdx = k; break; }
-		}
+		typedef INT (__cdecl *FindAnimSlotFn)(FArray*, void*);
+		SlotIdx = ((FindAnimSlotFn)0x10431D00)((FArray*)((BYTE*)this + 0xAC), AnimObj);
 	}
 
-	// Get the sequence object (vtbl[0xB0/4] = GetAnimIndexed or equivalent)
+	// vtbl[0xB0/4] = GetAnimNamed(SeqName) — returns the sequence object
 	typedef void* (__thiscall *GetAnimNamedFn)(USkeletalMeshInstance*, FName);
-	GetAnimNamedFn GetAnimNamed_fn = *(GetAnimNamedFn*)((*(BYTE**)this) + 0xB0);
-	void* SeqObj = GetAnimNamed_fn(this, SeqName);
+	void* SeqObj = (*(GetAnimNamedFn*)((*(BYTE**)this) + 0xB0))(this, SeqName);
 
 	if (SlotIdx < 0 || !SeqObj) return;
 
-	// Compute channel element offset
-	BYTE* ChannelData = *(BYTE**)arr;
-	BYTE* elem = ChannelData + Channel * 0x74;
-
-	// Store slot index and sequence name
-	*(INT*)(elem + 4) = SlotIdx;
+	BYTE* elem = (BYTE*)(*(BYTE**)arr) + Channel * 0x74;
+	*(INT*)(elem + 4)  = SlotIdx;
 	*(FName*)(elem + 8) = SeqName;
 
-	// Compute rate scale = vtbl[0xC4](seqObj) / vtbl[0xC0](seqObj)
-	// vtbl[0xC4/4] = GetActiveAnimRate, vtbl[0xC0/4] = GetAnimFrameCount (returns anim native rate)
+	// Rate scale = vtbl[0xC4/4](seqObj) / vtbl[0xC0/4](seqObj)
 	typedef FLOAT (__thiscall *GetRateFn)(USkeletalMeshInstance*, void*);
 	typedef FLOAT (__thiscall *GetFrameCountFn)(USkeletalMeshInstance*, void*);
-	GetRateFn GetRate     = *(GetRateFn*)((*(BYTE**)this) + 0xC4);
-	GetFrameCountFn GetFC = *(GetFrameCountFn*)((*(BYTE**)this) + 0xC0);
-	FLOAT NativeRate = GetRate(this, SeqObj);
-	FLOAT FrameCount = GetFC(this, SeqObj);
-	if (FrameCount != 0.0f)
-		*(FLOAT*)(elem + 0x20) = NativeRate / FrameCount;
+	FLOAT rate  = (*(GetRateFn*)      ((*(BYTE**)this) + 0xC4))(this, SeqObj);
+	FLOAT count = (*(GetFrameCountFn*)((*(BYTE**)this) + 0xC0))(this, SeqObj);
+	*(FLOAT*)(elem + 0x20) = rate / count; // retail does not guard against count==0
 
-	// vtbl[0xC8/4] = AnimStopLooping (or IsLooping check) — store as bool in elem+0x34
+	// vtbl[0xC8/4] = IsLooping(seqObj) → store bool in elem+0x34
 	typedef INT (__thiscall *IsLoopingFn)(USkeletalMeshInstance*, void*);
-	IsLoopingFn IsLooping = *(IsLoopingFn*)((*(BYTE**)this) + 0xC8);
-	*(INT*)(elem + 0x34) = (IsLooping(this, SeqObj) != 0) ? 1 : 0;
+	*(DWORD*)(elem + 0x34) = ((*(IsLoopingFn*)((*(BYTE**)this) + 0xC8))(this, SeqObj) != 0) ? 1 : 0;
 }
 
 IMPL_MATCH("Engine.dll", 0x10434C20)
