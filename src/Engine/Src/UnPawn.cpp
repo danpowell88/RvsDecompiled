@@ -1225,7 +1225,7 @@ DWORD APawn::R6SeePawn( APawn* Other, INT bMaySkipChecks )
 	return 0;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ebe70; 310b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103ebe70)
 INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::Reachable);
@@ -1267,7 +1267,7 @@ INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c35b0; 125b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Wrong address in claim (0x103c35b0 not in Ghidra); actual ReachedDestination is 0x103e6280 (4240); retail checks NavPoint anchor proximity and per-class default collision radius, not a simple Threshold*Threshold XY check")
 INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::ReachedDestination);
@@ -1288,7 +1288,7 @@ void APawn::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* 
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1037c590; 140b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1037c590; retail checks bIsProne (this+0x3e0 & 0x200) and skips base if NewBase is non-null and IsEncroacher(); saves NewFloor to this+0x590-0x598 before delegating; our stub just calls the base unconditionally")
 void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 {
 	guard(APawn::SetBase);
@@ -1296,7 +1296,7 @@ void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103bd4a0; 573b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103bd4a0; 573b: calls UModel::PointRegion to compute new Zone, fires eventActorLeaving/eventActorEntered on zone transitions, also calls GetPhysicsVolume for body and eye positions; our stub only calls AActor::SetZone")
 void APawn::SetZone( INT bTest, INT bForceRefresh )
 {
 	guard(APawn::SetZone);
@@ -1304,7 +1304,7 @@ void APawn::SetZone( INT bTest, INT bForceRefresh )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5630; 204b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103e5630; 204b: checks TRACE_ShadowCast (0x80000) flag → queries GModMgr->IsMissionPack() and returns 0 for team/mission conditions; also checks bHidden, IsEncroacher, TRACE_ProjectActors, TRACE_Pawns; our stub just delegates to base")
 INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 {
 	guard(APawn::ShouldTrace);
