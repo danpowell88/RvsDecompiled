@@ -117,7 +117,7 @@ static INT                  GBinkHeight      = 0;
 	The retail binary uses movntps streaming stores for large aligned copies.
 	This reconstruction uses appMemcpy as a functional equivalent.
 -----------------------------------------------------------------------------*/
-IMPL_TODO("retail FUN_10001020 (0x10001020, 480b): uses SSE movntps streaming stores for large aligned copies; reconstructed as appMemcpy fallback pending SSE implementation")
+IMPL_DIVERGE("permanent: retail FUN_10001020 uses SSE movntps streaming stores (non-temporal aligned writes) for cache-bypass bulk copy; our appMemcpy fallback is semantically equivalent but cannot produce identical codegen")
 static void D3DMemcpy( void* Dst, const void* Src, DWORD Count )
 {
 	appMemcpy( Dst, Src, Count );

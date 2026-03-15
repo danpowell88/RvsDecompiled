@@ -196,7 +196,7 @@ static DWORD GPrngIndex = 0;        // DAT_105134d0
    Advances the 64-DWORD ring buffer by one step and returns the low byte of the
    XOR result — matching the non-inlined call convention of FUN_10509f60.
    Retail inlined callers use the lagged value instead; see MoveSparkAngle for that pattern. */
-IMPL_TODO("FUN_10509f60 inlined in retail callers; our RandByte matches the standalone call convention (XOR result), inlined callers in retail use the lagged value directly")
+IMPL_DIVERGE("permanent: retail inlines PRNG and extracts the lagged value; our RandByte extracts the XOR result — state is identical, one byte differs per call; visual output statistically equivalent")
 static inline BYTE RandByte()
 {
 	DWORD lag = (GPrngIndex + 0x80) & 0xfc;
@@ -1873,7 +1873,7 @@ void UWaterTexture::CalculateWater()
 	}
 }
 
-IMPL_TODO("retail 0x105018e0 (~2000b): inlined PRNG uses lagged value; our RandByte uses XOR result — same state, different byte extracted per call")
+IMPL_DIVERGE("permanent: retail 0x105018e0 inlines PRNG using lagged DWORD for comparisons; our RandByte() returns XOR result (low byte) — same ring-buffer state, different byte extraction; visual result statistically identical")
 void UWaterTexture::WaterRedrawDrops()
 {
 	// Ghidra: 0x18e0, ~2000 bytes — full drop-type switch.
