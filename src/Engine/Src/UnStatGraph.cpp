@@ -469,5 +469,140 @@ FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
 	return *this;
 }
 
-IMPL_TODO("Ghidra 0x10454940: 6696-byte engine-stats registration; FStats::RegisterStats + FString only (no FUN_ blockers); DAT_10546ca4=L\"BSP\" identified — full reconstruction pending Ghidra analysis of all stat name/type rows")
-void FEngineStats::Init() {}
+// Ghidra 0x10454940 (6696b): registers all engine stats with GStats on first call.
+// Two DAT_ string literals resolved from retail binary:
+//   DAT_10546ca4 = L"BSP"  (0x246ca4 in Engine.dll)
+//   DAT_10546c54 = L"LOD"  (0x246c54 in Engine.dll)
+// Additional DAT_ strings at end of function:
+//   DAT_1055f91c = L"Net", DAT_1055f7ec = L"RPC", DAT_1055f7e4 = L"PV"
+// DataType semantics: 0=DWord slot, 1=Float slot, 2=String/complex slot,
+//   4 and 6=cycle/timer (metadata only, RegisterStats returns -1 for these).
+// StatType=0 (STAT_None) for all 97 registrations.
+// DIVERGE: the else-branch (re-init from runtime arrays DAT_107995e4/f0/2c)
+//   reads module-level globals that cannot be reproduced; skipped.
+IMPL_MATCH("Engine.dll", 0x10454940)
+void FEngineStats::Init()
+{
+	static INT sInitialized = 0;
+	if (sInitialized)
+		return;
+	sInitialized = 1;
+
+#define RS(dt, group, name) GStats.RegisterStats((EStatsType)0, (EStatsDataType)(dt), TEXT(group), TEXT(name), (EStatsUnit)0)
+	// Frame
+	*(INT*)((BYTE*)this + 0x04) = RS(6, "Frame",      "Frame");
+	*(INT*)((BYTE*)this + 0x08) = RS(6, "Frame",      "Render");
+	// Karma
+	*(INT*)((BYTE*)this + 0x0c) = RS(6, "Karma",      "Collision");
+	*(INT*)((BYTE*)this + 0x10) = RS(6, "Karma",      "ContactGen");
+	*(INT*)((BYTE*)this + 0x14) = RS(6, "Karma",      "TrilistGen");
+	*(INT*)((BYTE*)this + 0x18) = RS(6, "Karma",      "RagdollTrilist");
+	*(INT*)((BYTE*)this + 0x1c) = RS(6, "Karma",      "Dynamics");
+	*(INT*)((BYTE*)this + 0x20) = RS(6, "Karma",      "physKarma");
+	*(INT*)((BYTE*)this + 0x24) = RS(6, "Karma",      "physKarma Constraint");
+	*(INT*)((BYTE*)this + 0x28) = RS(6, "Karma",      "physKarmaRagdoll");
+	*(INT*)((BYTE*)this + 0x2c) = RS(6, "Karma",      "Temp");
+	*(INT*)((BYTE*)this + 0x30) = RS(6, "Karma",      "Total");
+	// BSP
+	*(INT*)((BYTE*)this + 0x34) = RS(6, "BSP",        "Render");
+	*(INT*)((BYTE*)this + 0x38) = RS(0, "BSP",        "Sections");
+	*(INT*)((BYTE*)this + 0x3c) = RS(0, "BSP",        "Nodes");
+	*(INT*)((BYTE*)this + 0x40) = RS(0, "BSP",        "Triangles");
+	*(INT*)((BYTE*)this + 0x44) = RS(6, "BSP",        "DynamicLighting");
+	*(INT*)((BYTE*)this + 0x48) = RS(0, "BSP",        "DynamicLights");
+	// Collision
+	*(INT*)((BYTE*)this + 0x4c) = RS(6, "Collision",  "BSP");
+	// LightMap
+	*(INT*)((BYTE*)this + 0x50) = RS(0, "LightMap",   "Updates");
+	*(INT*)((BYTE*)this + 0x54) = RS(6, "LightMap",   "Time");
+	// Projector
+	*(INT*)((BYTE*)this + 0x58) = RS(6, "Projector",  "Render");
+	*(INT*)((BYTE*)this + 0x5c) = RS(0, "Projector",  "Projectors");
+	*(INT*)((BYTE*)this + 0x60) = RS(0, "Projector",  "Triangles");
+	// Stencil
+	*(INT*)((BYTE*)this + 0x64) = RS(6, "Stencil",    "Render");
+	*(INT*)((BYTE*)this + 0x68) = RS(0, "Stencil",    "Nodes");
+	*(INT*)((BYTE*)this + 0x6c) = RS(0, "Stencil",    "Triangles");
+	// Visibility
+	*(INT*)((BYTE*)this + 0x70) = RS(6, "Visibility", "Setup");
+	*(INT*)((BYTE*)this + 0x74) = RS(0, "Visibility", "MaskTests");
+	*(INT*)((BYTE*)this + 0x78) = RS(0, "Visibility", "MaskRejects");
+	*(INT*)((BYTE*)this + 0x7c) = RS(0, "Visibility", "BoxTests");
+	*(INT*)((BYTE*)this + 0x80) = RS(0, "Visibility", "BoxRejects");
+	*(INT*)((BYTE*)this + 0x84) = RS(6, "Visibility", "Traverse");
+	*(INT*)((BYTE*)this + 0x88) = RS(4, "Visibility", "ScratchBytes");
+	// Terrain
+	*(INT*)((BYTE*)this + 0x8c) = RS(6, "Terrain",    "Render");
+	*(INT*)((BYTE*)this + 0x90) = RS(6, "Collision",  "Terrain");
+	*(INT*)((BYTE*)this + 0x94) = RS(0, "Terrain",    "Sectors");
+	*(INT*)((BYTE*)this + 0x98) = RS(0, "Terrain",    "Triangles");
+	*(INT*)((BYTE*)this + 0x9c) = RS(0, "Terrain",    "DrawPrimitives");
+	// DecoLayer
+	*(INT*)((BYTE*)this + 0xa0) = RS(6, "DecoLayer",  "Render");
+	*(INT*)((BYTE*)this + 0xa4) = RS(0, "DecoLayer",  "Triangles");
+	*(INT*)((BYTE*)this + 0xa8) = RS(0, "DecoLayer",  "Decorations");
+	// Matinee
+	*(INT*)((BYTE*)this + 0xac) = RS(6, "Matinee",    "Tick");
+	// Mesh
+	*(INT*)((BYTE*)this + 0xb0) = RS(6, "Mesh",       "Skin");
+	*(INT*)((BYTE*)this + 0xb4) = RS(6, "Mesh",       "Result");
+	*(INT*)((BYTE*)this + 0xb8) = RS(6, "Mesh",       "LOD");
+	*(INT*)((BYTE*)this + 0xbc) = RS(6, "Mesh",       "Skel");
+	*(INT*)((BYTE*)this + 0xc0) = RS(6, "Mesh",       "Pose");
+	*(INT*)((BYTE*)this + 0xc4) = RS(6, "Mesh",       "Rigid");
+	*(INT*)((BYTE*)this + 0xc8) = RS(6, "Mesh",       "Draw");
+	// Particle
+	*(INT*)((BYTE*)this + 0xcc) = RS(6, "Particle",   "SpriteSetup");
+	*(INT*)((BYTE*)this + 0xd0) = RS(0, "Particle",   "Particles");
+	*(INT*)((BYTE*)this + 0xd4) = RS(6, "Particle",   "Render");
+	// StaticMesh
+	*(INT*)((BYTE*)this + 0xd8) = RS(0, "StaticMesh", "SortedSections");
+	*(INT*)((BYTE*)this + 0xdc) = RS(0, "StaticMesh", "SortedTriangles");
+	*(INT*)((BYTE*)this + 0xe0) = RS(6, "StaticMesh", "Sort");
+	*(INT*)((BYTE*)this + 0xe4) = RS(0, "StaticMesh", "Triangles");
+	*(INT*)((BYTE*)this + 0xe8) = RS(0, "StaticMesh", "Sections");
+	*(INT*)((BYTE*)this + 0xec) = RS(6, "Collision",  "StaticMesh");
+	*(INT*)((BYTE*)this + 0xf0) = RS(6, "StaticMesh", "Render");
+	*(INT*)((BYTE*)this + 0xf4) = RS(0, "StaticMesh", "RenderBatched");
+	*(INT*)((BYTE*)this + 0xf8) = RS(6, "Stats",      "Render");
+	// Game
+	*(INT*)((BYTE*)this + 0xfc) = RS(6, "Game",       "Script");
+	*(INT*)((BYTE*)this + 0x100) = RS(6, "Game",      "Actor");
+	*(INT*)((BYTE*)this + 0x104) = RS(6, "Game",      "Path");
+	*(INT*)((BYTE*)this + 0x108) = RS(6, "Game",      "DAT_1055f954");  // unknown string
+	*(INT*)((BYTE*)this + 0x10c) = RS(6, "Game",      "Spawning");
+	*(INT*)((BYTE*)this + 0x110) = RS(6, "Game",      "Audio");
+	*(INT*)((BYTE*)this + 0x114) = RS(6, "Game",      "Unused");
+	*(INT*)((BYTE*)this + 0x118) = RS(6, "Game",      "Net");
+	*(INT*)((BYTE*)this + 0x11c) = RS(6, "Game",      "Particle");
+	*(INT*)((BYTE*)this + 0x120) = RS(6, "Game",      "Canvas");
+	*(INT*)((BYTE*)this + 0x124) = RS(6, "Game",      "Physics");
+	*(INT*)((BYTE*)this + 0x128) = RS(6, "Game",      "Move");
+	*(INT*)((BYTE*)this + 0x12c) = RS(1, "Game",      "Move");
+	*(INT*)((BYTE*)this + 0x130) = RS(6, "Game",      "MLChecks");
+	*(INT*)((BYTE*)this + 0x134) = RS(6, "Game",      "MPChecks");
+	*(INT*)((BYTE*)this + 0x138) = RS(6, "Game",      "RenderData");
+	// Fluid
+	*(INT*)((BYTE*)this + 0x13c) = RS(6, "Fluid",     "Simulate");
+	*(INT*)((BYTE*)this + 0x140) = RS(6, "Fluid",     "VertexGen");
+	*(INT*)((BYTE*)this + 0x144) = RS(6, "Fluid",     "Render");
+	// Net
+	*(INT*)((BYTE*)this + 0x148) = RS(0, "Net",       "Ping");
+	*(INT*)((BYTE*)this + 0x14c) = RS(0, "Net",       "Channels");
+	*(INT*)((BYTE*)this + 0x150) = RS(2, "Net",       "Unorderd");   // retail typo preserved
+	*(INT*)((BYTE*)this + 0x154) = RS(0, "Net",       "Unordered");
+	*(INT*)((BYTE*)this + 0x158) = RS(2, "Net",       "PacketLoss");
+	*(INT*)((BYTE*)this + 0x15c) = RS(0, "Net",       "PacketLoss");
+	*(INT*)((BYTE*)this + 0x160) = RS(2, "Net",       "Packets");
+	*(INT*)((BYTE*)this + 0x164) = RS(0, "Net",       "Packets");
+	*(INT*)((BYTE*)this + 0x168) = RS(2, "Net",       "Bunches");
+	*(INT*)((BYTE*)this + 0x16c) = RS(0, "Net",       "Bunches");
+	*(INT*)((BYTE*)this + 0x170) = RS(2, "Net",       "Bytes");
+	*(INT*)((BYTE*)this + 0x174) = RS(0, "Net",       "Bytes");
+	*(INT*)((BYTE*)this + 0x178) = RS(0, "Net",       "Speed");
+	// Game (net-related)
+	*(INT*)((BYTE*)this + 0x17c) = RS(0, "Game",      "Reps");
+	*(INT*)((BYTE*)this + 0x180) = RS(0, "Game",      "RPC");
+	*(INT*)((BYTE*)this + 0x184) = RS(0, "Game",      "PV");
+#undef RS
+}

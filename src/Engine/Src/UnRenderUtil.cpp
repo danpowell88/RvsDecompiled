@@ -2066,11 +2066,129 @@ void FTempLineBatcher::AddLine(FVector Start, FVector End, FColor Color)
 
 
 // --- UConvexVolume ---
-IMPL_TODO("retail 0x103921d0 (109b) serializes convex planes via FUN_10392040/FUN_10391e60/FUN_10301400 (unresolved TArray serializers)")
+// FUN_10392040: TArray<FConvexPlane> serializer (0x1c-byte elements).
+// Each element = FPlane (16 bytes) + TArray<FVector> (12 bytes).
+// Loading path constructs each element with placement new before reading.
+IMPL_MATCH("Engine.dll", 0x103921d0)
 void UConvexVolume::Serialize(FArchive& Ar)
 {
+	guard(UConvexVolume::Serialize);
 	UPrimitive::Serialize(Ar);
-	// Retail serializes convex plane TArrays via FUN_10392040/FUN_10391e60/FUN_10301400 (unresolved TArray serializers)
+
+	// ---- Planes array at this+0x58 (Ghidra: FUN_10392040) ----
+	// 0x1c-byte elements: FPlane (16b) + TArray<FVector> (12b)
+	{
+		FArray* planes = (FArray*)((BYTE*)this + 0x58);
+		planes->CountBytes(Ar, 0x1c);
+		INT num;
+		if (!Ar.IsLoading())
+		{
+			INT pnum = planes->Num();
+			Ar << AR_INDEX(pnum);
+			for (INT i = 0; i < pnum; i++)
+			{
+				BYTE* elem = (BYTE*)planes->GetData() + i * 0x1c;
+				Ar.ByteOrderSerialize(elem,       4); // FPlane.X
+				Ar.ByteOrderSerialize(elem + 0x4, 4); // FPlane.Y
+				Ar.ByteOrderSerialize(elem + 0x8, 4); // FPlane.Z
+				Ar.ByteOrderSerialize(elem + 0xc, 4); // FPlane.W
+				// TArray<FVector> at elem+0x10 (Ghidra: FUN_10321a80, 0xc-byte elements)
+				FArray* verts = (FArray*)(elem + 0x10);
+				verts->CountBytes(Ar, 0xc);
+				INT vn = verts->Num();
+				Ar << AR_INDEX(vn);
+				for (INT j = 0; j < vn; j++)
+				{
+					BYTE* v = (BYTE*)verts->GetData() + j * 0xc;
+					Ar.ByteOrderSerialize(v,       4); // X
+					Ar.ByteOrderSerialize(v + 0x4, 4); // Y
+					Ar.ByteOrderSerialize(v + 0x8, 4); // Z
+				}
+			}
+		}
+		else
+		{
+			Ar << AR_INDEX(num);
+			// Destroy nested FArray in each existing element (Ghidra: FUN_1033b410)
+			for (INT i = 0; i < planes->Num(); i++)
+			{
+				FArray* nested = (FArray*)((BYTE*)planes->GetData() + i * 0x1c + 0x10);
+				nested->~FArray();
+			}
+			planes->Empty(0x1c, num);
+			for (INT i = 0; i < num; i++)
+			{
+				INT idx = planes->Add(1, 0x1c);
+				BYTE* elem = (BYTE*)planes->GetData() + idx * 0x1c;
+				if (elem)
+				{
+					new (elem) FPlane();
+					new (elem + 0x10) FArray();
+				}
+				Ar.ByteOrderSerialize(elem,       4); // FPlane.X
+				Ar.ByteOrderSerialize(elem + 0x4, 4); // FPlane.Y
+				Ar.ByteOrderSerialize(elem + 0x8, 4); // FPlane.Z
+				Ar.ByteOrderSerialize(elem + 0xc, 4); // FPlane.W
+				// TArray<FVector> at elem+0x10
+				FArray* verts = (FArray*)(elem + 0x10);
+				verts->CountBytes(Ar, 0xc);
+				INT vnum;
+				Ar << AR_INDEX(vnum);
+				verts->Empty(0xc, vnum);
+				for (INT j = 0; j < vnum; j++)
+				{
+					INT vi = verts->Add(1, 0xc);
+					BYTE* v = (BYTE*)verts->GetData() + vi * 0xc;
+					if (v) new (v) FVector();
+					Ar.ByteOrderSerialize(v,       4); // X
+					Ar.ByteOrderSerialize(v + 0x4, 4); // Y
+					Ar.ByteOrderSerialize(v + 0x8, 4); // Z
+				}
+			}
+		}
+	}
+
+	// ---- FPlane array at this+0x64 (Ghidra: FUN_10391e60) ----
+	// 0x10-byte elements = 4 floats per FPlane
+	{
+		FArray* planes2 = (FArray*)((BYTE*)this + 0x64);
+		planes2->CountBytes(Ar, 0x10);
+		INT num2;
+		if (!Ar.IsLoading())
+		{
+			INT n2 = planes2->Num();
+			Ar << AR_INDEX(n2);
+			for (INT i = 0; i < n2; i++)
+			{
+				BYTE* elem = (BYTE*)planes2->GetData() + i * 0x10;
+				Ar.ByteOrderSerialize(elem,       4); // X
+				Ar.ByteOrderSerialize(elem + 0x4, 4); // Y
+				Ar.ByteOrderSerialize(elem + 0x8, 4); // Z
+				Ar.ByteOrderSerialize(elem + 0xc, 4); // W
+			}
+		}
+		else
+		{
+			Ar << AR_INDEX(num2);
+			planes2->Empty(0x10, num2);
+			for (INT i = 0; i < num2; i++)
+			{
+				INT idx = planes2->Add(1, 0x10);
+				BYTE* elem = (BYTE*)planes2->GetData() + idx * 0x10;
+				if (elem) new (elem) FPlane();
+				Ar.ByteOrderSerialize(elem,       4); // X
+				Ar.ByteOrderSerialize(elem + 0x4, 4); // Y
+				Ar.ByteOrderSerialize(elem + 0x8, 4); // Z
+				Ar.ByteOrderSerialize(elem + 0xc, 4); // W
+			}
+		}
+	}
+
+	// ---- FBox at this+0x70 (Ghidra: FUN_10301400) ----
+	// 6 floats (Min+Max) + 1 BYTE (IsValid) = FBox
+	Ar << *(FBox*)((BYTE*)this + 0x70);
+
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10303220)
