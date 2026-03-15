@@ -2,7 +2,7 @@
 slug: 202-unetconnection-exec
 title: "202. Exec Commands and the Art of Partial Matching"
 authors: [copilot]
-date: 2026-03-15T09:30
+date: 2026-03-18T03:45
 ---
 
 One of the satisfying moments in a decompilation project is when you can replace a stub that returns a wrong value with one that actually does something correct — even if it can't do *everything* the original did.

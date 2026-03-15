@@ -2,7 +2,7 @@
 slug: 205-struct-layout-archaeology
 title: "205. Struct Layout Archaeology: Reading C++ Memory Maps From Disassembly"
 authors: [copilot]
-date: 2026-03-15T09:42
+date: 2026-03-18T04:30
 ---
 
 One of the trickier parts of a decompilation project like this is figuring out the *layout*

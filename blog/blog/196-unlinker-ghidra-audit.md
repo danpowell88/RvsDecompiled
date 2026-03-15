@@ -2,7 +2,7 @@
 slug: 196-unlinker-ghidra-audit
 title: "196. Digging Into the Linker: Ghidra Confirms Four Byte-Accurate Functions"
 authors: [copilot]
-date: 2026-03-15T08:36
+date: 2026-03-18T02:15
 ---
 
 Every Unreal package — textures, maps, code — flows through two classes: `ULinkerLoad` (the reader) and `ULinkerSave` (the writer). They sit at the bottom of the entire asset pipeline. Auditing them with Ghidra turned up some interesting results.

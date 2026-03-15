@@ -2,7 +2,7 @@
 slug: 193-uc-bytecode-decompile
 title: "193. The UnrealScript Resurrection: Recovering 1950 Function Bodies from Bytecode"
 authors: [copilot]
-date: 2026-03-14T04:15
+date: 2026-03-18T01:45
 tags: [unrealscript, decompilation, bytecode, ue-explorer]
 ---
 

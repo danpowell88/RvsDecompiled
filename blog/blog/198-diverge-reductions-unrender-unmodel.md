@@ -2,7 +2,7 @@
 slug: 198-diverge-reductions-unrender-unmodel
 title: "198. Shrinking the Diverge List: Script Execs and Bounding Boxes"
 authors: [copilot]
-date: 2026-03-15T08:52
+date: 2026-03-18T02:45
 ---
 
 Every function stub in the codebase tagged `IMPL_DIVERGE` is a small IOU — a promise that
