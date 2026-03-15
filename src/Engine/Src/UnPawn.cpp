@@ -102,20 +102,26 @@ void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 500, execMoveTo );
 
-IMPL_DIVERGE("Ghidra 0x1038cfe0; 163 bytes; simplified — retail checks MoveTimer at +0x3bc and uses vtable dispatch on Pawn for arrival")
+IMPL_DIVERGE("Ghidra 0x1038cfe0; 163 bytes; retail has no guard/unguard; uses MoveTimer at +0x3bc, bAdjusting bit, and Pawn->moveToward vtable dispatch")
 void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveTo);
-	if( Pawn )
+	if( !Pawn || MoveTimer < 0.0f )
 	{
-		FVector Dir = Destination - Pawn->Location;
-		Dir.Z = 0.f;
-		if( Dir.SizeSquared() < Pawn->CollisionRadius * Pawn->CollisionRadius )
-			GetStateFrame()->LatentAction = 0;
+		GetStateFrame()->LatentAction = 0;
+		m_eMoveToResult = 2;
 	}
 	else
 	{
-		GetStateFrame()->LatentAction = 0;
+		if( bAdjusting )
+		{
+			INT bArrived = Pawn->moveToward( AdjustLoc, NULL );
+			bAdjusting = (bArrived == 0);
+			if( bAdjusting )
+				return;
+		}
+		if( Pawn->moveToward( Destination, NULL ) )
+			GetStateFrame()->LatentAction = 0;
 	}
 	unguard;
 }
@@ -138,20 +144,28 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
-IMPL_DIVERGE("Ghidra 0x1038d110; 534 bytes; simplified — retail checks MoveTimer at +0x3bc and uses vtable dispatch for arrival")
+IMPL_DIVERGE("Ghidra 0x1038d110; 534 bytes; retail has no guard/unguard; uses MoveTimer at +0x3bc, bAdjusting/bPreparingMove bits, Pawn->moveToward vtable, and NavPoint arrival path; PHYS_Climbing/Spider adjustments omitted")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollMoveToward);
-	if( Pawn && MoveTarget )
-	{
-		FVector Dir = MoveTarget->Location - Pawn->Location;
-		Dir.Z = 0.f;
-		if( Dir.SizeSquared() < Pawn->CollisionRadius * Pawn->CollisionRadius )
-			GetStateFrame()->LatentAction = 0;
-	}
-	else
+	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
 	{
 		GetStateFrame()->LatentAction = 0;
+		m_eMoveToResult = 2;
+		return;
+	}
+	if( bPreparingMove )
+		return;
+	if( bAdjusting )
+	{
+		INT bArrived = Pawn->moveToward( AdjustLoc, MoveTarget );
+		bAdjusting = (bArrived == 0);
+	}
+	if( !bAdjusting )
+	{
+		Destination = MoveTarget->Location;
+		if( Pawn->moveToward( Destination, MoveTarget ) )
+			GetStateFrame()->LatentAction = 0;
 	}
 	unguard;
 }
@@ -816,10 +830,12 @@ IMPLEMENT_FUNCTION( APlayerController, 2714, execChangeVolumeTypeLinear );
 
 /*-- AAIController functions -------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038cf10; 203b; omits 3 optional param reads; sets Focus=Enemy before latent action")
+IMPL_DIVERGE("Ghidra 0x1038cf10; 203b; retail reads 3 optional params (FVector, UBOOL, FLOAT=1.0f) then sets Focus=Enemy; params read but unused; guard/unguard diverge")
 void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execWaitToSeeEnemy);
+	// Retail reads 3 optional params before P_FINISH; they are consumed but unused.
+	// Omitting reads here; P_FINISH handles the case where params are not provided.
 	P_FINISH;
 	if( Pawn && Enemy )
 	{
@@ -888,9 +904,12 @@ INT APawn::IsAlive()
 	return m_eHealth < 2;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ecae0; 77b — implements CollisionHeight < Default.CollisionHeight check; retail also tests field_0x454 but that field is unidentified in our SDK")
+IMPL_DIVERGE("Ghidra 0x103ecae0; 77b — retail NaN-safe equality check: enters body only when CollisionHeight==CrouchHeight (+0x454), then confirms < default->CollisionHeight and m_ePeekingMode (+0x39c) != 2")
 INT APawn::IsCrouched()
 {
+	// Outer check: only consider crouched if currently at exactly CrouchHeight
+	if( CollisionHeight != CrouchHeight )
+		return 0;
 	APawn* defObj = (APawn*)GetClass()->GetDefaultObject();
 	return CollisionHeight < defObj->CollisionHeight && m_ePeekingMode != 2;
 }
@@ -2285,11 +2304,66 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body — Ghidra 0x103E8150 shows 491-byte implementation not yet reconstructed")
+IMPL_DIVERGE("Ghidra 0x103E8150, 491b — vtable[0x68] reachability call approximated; Acceleration scale unknown")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
-	guard(APawn::rotateToward);
-	unguard;
+guard(APawn::rotateToward);
+
+// Skip if bRollToDesired set (bit 11 of pawn bitfield at +0x3e4) or Physics==PHYS_None
+if ((*(DWORD*)(this + 0x3e4) & 0x800) || Physics == PHYS_None)
+return;
+
+// Swimming/flying without bCanStrafe (bit 19 of +0x3e0): align acceleration with facing.
+// DIVERGENCE: Ghidra multiplies the unit vector by an unknown stack float.
+if (!(*(DWORD*)(this + 0x3e0) & 0x80000) &&
+(Physics == PHYS_Flying || Physics == PHYS_Swimming))
+{
+Acceleration = Rotation.Vector();
+}
+
+// Determine target position; use tangent offset when following a NavPoint
+// with a non-zero velocity (smooth bezier path following).
+FVector TargetPos = FocalPoint;
+if (Focus)
+{
+UBOOL usedTangent = false;
+ANavigationPoint* NavFocus = Cast<ANavigationPoint>(Focus);
+INT ctrlPtr = *(INT*)(this + 0x4ec); // APawn::Controller
+if (NavFocus && ctrlPtr)
+{
+INT curNavPtr = *(INT*)(ctrlPtr + 0x448); // controller's current nav node
+if (curNavPtr && *(AActor**)(curNavPtr + 0x3e0) == Focus && !Velocity.IsZero())
+{
+AActor* nextNode = *(AActor**)(curNavPtr + 0x48);
+if (nextNode)
+{
+TargetPos.X = (Focus->Location.X - nextNode->Location.X) + Location.X;
+TargetPos.Y = (Focus->Location.Y - nextNode->Location.Y) + Location.Y;
+TargetPos.Z = (Focus->Location.Z - nextNode->Location.Z) + Location.Z;
+usedTangent = true;
+}
+}
+}
+if (!usedTangent)
+TargetPos = Focus->Location;
+}
+
+// Set DesiredRotation toward target; clear upper 16 bits of Yaw
+FVector delta = TargetPos - Location;
+DesiredRotation = delta.Rotation();
+DesiredRotation.Yaw &= 0xFFFF;
+
+// Walking: zero pitch unless a valid MoveTarget exists.
+// DIVERGENCE: Ghidra calls vtable[0x68] on MoveTarget to test reachability;
+// approximated here by checking MoveTarget != NULL only.
+if (Physics == PHYS_Walking)
+{
+INT ctrlPtr = *(INT*)(this + 0x4ec);
+if (!ctrlPtr || !*(INT*)(ctrlPtr + 0x3e0)) // Controller->MoveTarget
+DesiredRotation.Pitch = 0;
+}
+
+unguard;
 }
 
 IMPL_DIVERGE("Ghidra 0x103e5a30; 245b -- reconstructed from context, parity unverified")
@@ -2495,10 +2569,14 @@ void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038d410; 13b — correct logic; parity unverified without guard/unguard")
+IMPL_MATCH("Engine.dll", 0x1038d410)
 AActor* AController::GetViewTarget()
 {
-	return Pawn ? (AActor*)Pawn : (AActor*)this;
+	// Ghidra: reads Pawn at this+0x3d8 twice; returns Pawn if non-null, else this (controller).
+	AActor* ViewTarget = Pawn;
+	if( !ViewTarget )
+		ViewTarget = this;
+	return ViewTarget;
 }
 
 IMPL_EMPTY("Ghidra lookup: AController::SetAdjustLocation not found in export — retail appears trivial")

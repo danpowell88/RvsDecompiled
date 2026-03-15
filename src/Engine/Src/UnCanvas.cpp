@@ -392,6 +392,9 @@ FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 
 // UCanvas
 // ---------------------------------------------------------------------------
+// UCanvas does not override Destroy, Serialize, or Exec in retail (Ghidra: absent from
+// Engine.dll export table). However, removing these definitions breaks the MSVC build
+// due to COMDAT folding of identical virtual stubs. Keep as IMPL_DIVERGE.
 IMPL_DIVERGE("Ghidra: UCanvas::Destroy not found in Engine.dll export table; Super::Destroy() is correct")
 void UCanvas::Destroy()
 {
@@ -406,7 +409,7 @@ void UCanvas::Serialize(FArchive& Ar)
 
 // Ghidra: not present in Ghidra export — shared null stub, no SEH frame.
 // Returns 0 (MSVC requires a return value in non-void functions).
-IMPL_DIVERGE("Ghidra: UCanvas::Exec not found in Engine.dll export table; returns 0 per standard UObject stub")
+IMPL_DIVERGE("Ghidra: UCanvas::Exec not found in Engine.dll export table; returns 0 per standard UObject stub; removing this definition breaks the MSVC build due to COMDAT folding")
 UBOOL UCanvas::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	return 0;
