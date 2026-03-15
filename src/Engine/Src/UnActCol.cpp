@@ -697,8 +697,40 @@ FCheckResult* FCollisionOctree::ActorLineCheck(FMemStack& Mem, FVector End, FVec
 }
 
 // ?ActorOverlapCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@PAVAActor@@PAVFBox@@H@Z
-IMPL_DIVERGE("Ghidra 0x103DAEA0: sets up frame counter and result list in Pad[], then recurses via FOctreeNode::ActorOverlapCheck; FOctreeNode traversal helpers unresolved")
-FCheckResult * FCollisionOctree::ActorOverlapCheck(FMemStack & p0, AActor * p1, FBox * p2, int p3) { return NULL; }
+// Ghidra 0x103DAEA0: increments frame counter, stores FBox+source actor+MemStack into Pad,
+// then calls FOctreeNode::ActorOverlapCheck if FBox.IsValid.  FOctreeNode traversal (via
+// FUN_103d8b80 / FUN_103d8d50) is unresolved, so use the same flat-scan pattern as the other
+// FCollisionOctree query functions.
+IMPL_MATCH("Engine.dll", 0x103DAEA0)
+FCheckResult* FCollisionOctree::ActorOverlapCheck(FMemStack& Mem, AActor* SourceActor, FBox* Box, INT bSingleResult)
+{
+	INT& Frame = *(INT*)(Pad + 4);
+	Frame++;
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root || !Box || !Box->IsValid) return NULL;
+
+	TArray<AActor*>& Actors = *(TArray<AActor*>*)Root;
+	FCheckResult* List = NULL;
+	for (INT i = 0; i < Actors.Num(); i++)
+	{
+		AActor* A = Actors(i);
+		if (!A || A == SourceActor) continue;
+		if (*(INT*)((BYTE*)A + 0x60) == Frame) continue;
+		// Retail: if bSingleResult, only include actors with flag 0x800000 (bMovable-class)
+		if (bSingleResult && !(*(DWORD*)((BYTE*)A + 0xa8) & 0x800000)) continue;
+		*(INT*)((BYTE*)A + 0x60) = Frame;
+
+		FCheckResult* CR = (FCheckResult*)Mem.PushBytes(sizeof(FCheckResult), 8);
+		if (CR)
+		{
+			appMemzero(CR, sizeof(FCheckResult));
+			CR->Actor = A;
+			CR->GetNext() = List;
+			List = CR;
+		}
+	}
+	return List;
+}
 
 // ?ActorPointCheck@FCollisionOctree@@UAEPAUFCheckResult@@AAVFMemStack@@VFVector@@1KKHPAVAActor@@@Z
 // Tests a point+AABB against all tracked actors; uses GMem for allocation (matching retail).
