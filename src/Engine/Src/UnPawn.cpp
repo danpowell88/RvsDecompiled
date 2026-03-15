@@ -2557,11 +2557,44 @@ FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJu
 	unguard;
 }
 
-IMPL_TODO("stub body; Ghidra 0x103f3e60 is 514b: water-surface line split, MoveActor with water-movement physics, slide on blocking hits; not yet reconstructed")
+// Ghidra 0x103f3e60, 514b.
+// MoveActor vtable call: XLevel->vtable[0x98/4=38] = MoveActor(pawn, delta, rot, hit, ...).
+// Zone check: this+0x164 = some zone pointer; bit6 (0x40) at zone+0x410 = bWaterZone.
+// If exited water: findWaterLine(OldLoc, Location) → surface crossing point;
+//   result = (WaterLine - Location).Size() / Delta.Size()
+//   if (move.dot.(waterLine-Location) > 0) → result = 0 (still crossing, not yet exited)
+//   second MoveActor to snap pawn to water surface.
+// DIVERGE: Zone ptr at this+0x164 unidentified (approx'd via Region.Zone); MoveActor
+// call signature exact (matches retail vtable[0x98/4]).
+IMPL_DIVERGE("Ghidra 0x103f3e60; 514b — zone ptr at this+0x164 approx'd via Region.Zone; otherwise water-surface split logic faithfully implemented")
 FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 {
 	guard(APawn::Swim);
-	return 0.f;
+	FVector OldLoc = Location;
+	FLOAT result = 0.f;
+	XLevel->MoveActor(this, Delta, Rotation, Hit, 0, 0, 0, 0);
+	// Ghidra: checks *(byte*)(this+0x164+0x410) & 0x40 for bWaterZone.
+	// this+0x164 is an unidentified zone pointer; approximate with Region.Zone.
+	AZoneInfo* CurrZone = Region.Zone;
+	if (!CurrZone || !(*(BYTE*)((BYTE*)CurrZone + 0x410) & 0x40))
+	{
+		// Exited water — find where we crossed the surface
+		FVector WaterLine = findWaterLine(OldLoc, Location);
+		if (WaterLine != Location)
+		{
+			// Fraction of Delta that was underwater = dist to surface / total delta size
+			FVector toSurface = WaterLine - Location;
+			result = toSurface.Size() / Delta.Size();
+			// If (move direction) · (surface - newLoc) > 0: surface is ahead → no water fraction
+			FLOAT dot = (Location.Z - OldLoc.Z) * (WaterLine.Z - Location.Z)
+			           + (Location.Y - OldLoc.Y) * (WaterLine.Y - Location.Y)
+			           + (Location.X - OldLoc.X) * (WaterLine.X - Location.X);
+			if (dot > 0.f) result = 0.f;
+			// Snap pawn to the water surface
+			XLevel->MoveActor(this, toSurface, Rotation, Hit, 0, 0, 0, 0);
+		}
+	}
+	return result;
 	unguard;
 }
 
@@ -3521,10 +3554,43 @@ void AController::SetAdjustLocation( FVector NewLoc )
 	AController — Non-virtual methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("stub body — Ghidra 0x10391B60 shows 510-byte implementation not yet reconstructed")
+// Ghidra 0x10391B60, 510b.
+// rdtsc profiling: DIVERGE (omitted).
+// FUN_10391970 visibility hash table: DIVERGE (omitted; probe check always performed).
+// Level->ControllerList: Ghidra raw *(AController**)(Level+0x4d4) = Level->ControllerList.
+// SeePawn condition: bIsPlayer(this)||bIsPlayer(other) guards; SightCounter>=0 gate.
+// FNames: bIsPlayer→EName(0x154), non-player→EName(0x158) (specific probe name indices).
+// Pawn->m_ePawnType (APawn own +0x0a) == 1 = player-type pawn (used for hash & event dispatch).
+IMPL_DIVERGE("Ghidra 0x10391B60; 510b — rdtsc profiling omitted; FUN_10391970 visibility hash omitted (probe always checked); Level bit12 guard omitted")
 void AController::ShowSelf()
 {
 	guard(AController::ShowSelf);
+	if( !Pawn )
+		return;
+
+	const UBOOL bSelfIsPlayer = (bIsPlayer != 0);
+
+	for( AController* other = Level->ControllerList; other; other = other->nextController )
+	{
+		if( other == this ) continue;
+		// Ghidra: (bIsPlayer(this) || bIsPlayer(other)) && other->SightCounter >= 0
+		if( !(bSelfIsPlayer || other->bIsPlayer) ) continue;
+		if( !(other->SightCounter >= 0.f) ) continue;
+
+		// Probe check: use FName(0x154) for player-pawn, FName(0x158) for AI-pawn
+		// (Ghidra: hash table guards this — we always check the probe)
+		EName probeName = bSelfIsPlayer ? (EName)0x154 : (EName)0x158;
+		if( !other->IsProbing(FName(probeName)) ) continue;
+
+		// Check if other can see our pawn
+		if( other->SeePawn(Pawn, 1) )
+		{
+			if( !bSelfIsPlayer )
+				other->eventSeeMonster( Pawn );
+			else
+				other->eventSeePlayer( Pawn );
+		}
+	}
 	unguard;
 }
 
