@@ -25,7 +25,7 @@ function Created()
 	m_Title.m_Font = Root.Fonts[6];
 	m_Title.m_BGTexture = none;
 	m_Title.m_bDrawBorders = false;
-	m_OperativeText = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', 0.0000000, __NFUN_174__(m_Title.WinTop, m_Title.WinHeight), WinWidth, __NFUN_175__(WinHeight, m_Title.WinHeight), self));
+	m_OperativeText = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', 0.0000000, (m_Title.WinTop + m_Title.WinHeight), WinWidth, (WinHeight - m_Title.WinHeight), self));
 	m_OperativeText.m_HBorderTexture = none;
 	m_OperativeText.m_VBorderTexture = none;
 	m_OperativeText.m_fHBorderHeight = 0.0000000;
@@ -47,7 +47,7 @@ function Paint(Canvas C, float X, float Y)
 {
 	R6WindowLookAndFeel(LookAndFeel).DrawBGShading(self, C, m_OperativeText.WinLeft, m_OperativeText.WinTop, m_OperativeText.WinWidth, m_OperativeText.WinHeight);
 	C.Style = 5;
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTexture(C, 0.0000000, m_OperativeText.WinTop, WinWidth, 1.0000000, Texture'UWindow.WhiteTexture');
 	return;
 }

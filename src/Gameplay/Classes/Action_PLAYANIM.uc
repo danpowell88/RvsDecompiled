@@ -30,7 +30,7 @@ function bool InitActionFor(ScriptedController C)
 function SetCurrentAnimationFor(ScriptedController C)
 {
 	// End:0x2C
-	if(C.Pawn.__NFUN_282__(0))
+	if(C.Pawn.IsAnimating(0))
 	{
 		C.CurrentAnimation = self;		
 	}
@@ -44,7 +44,7 @@ function SetCurrentAnimationFor(ScriptedController C)
 function bool PawnPlayBaseAnim(ScriptedController C, bool bFirstPlay)
 {
 	// End:0x22
-	if(__NFUN_132__(__NFUN_254__(BaseAnim, 'None'), __NFUN_254__(BaseAnim, 'None')))
+	if(((BaseAnim == 'None') || (BaseAnim == 'None')))
 	{
 		return false;
 	}
@@ -52,14 +52,14 @@ function bool PawnPlayBaseAnim(ScriptedController C, bool bFirstPlay)
 	// End:0x63
 	if(bFirstPlay)
 	{
-		C.Pawn.__NFUN_259__(BaseAnim, AnimRate, BlendInTime);		
+		C.Pawn.PlayAnim(BaseAnim, AnimRate, BlendInTime);		
 	}
 	else
 	{
 		// End:0xA4
-		if(__NFUN_132__(bLoopAnim, __NFUN_151__(C.AnimsRemaining, 0)))
+		if((bLoopAnim || (C.AnimsRemaining > 0)))
 		{
-			C.Pawn.__NFUN_260__(BaseAnim, AnimRate);			
+			C.Pawn.LoopAnim(BaseAnim, AnimRate);			
 		}
 		else
 		{
@@ -72,7 +72,7 @@ function bool PawnPlayBaseAnim(ScriptedController C, bool bFirstPlay)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(BaseAnim));
+	return (ActionString @ string(BaseAnim));
 	return;
 }
 

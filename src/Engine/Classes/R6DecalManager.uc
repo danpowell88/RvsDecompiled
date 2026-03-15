@@ -42,33 +42,33 @@ native(2901) final function KillDecal();
 simulated event Destroyed()
 {
 	// End:0x1E
-	if(__NFUN_119__(m_FootSteps, none))
+	if((m_FootSteps != none))
 	{
-		m_FootSteps.__NFUN_279__();
+		m_FootSteps.Destroy();
 		m_FootSteps = none;
 	}
 	// End:0x3C
-	if(__NFUN_119__(m_WallHit, none))
+	if((m_WallHit != none))
 	{
-		m_WallHit.__NFUN_279__();
+		m_WallHit.Destroy();
 		m_WallHit = none;
 	}
 	// End:0x5A
-	if(__NFUN_119__(m_BloodSplats, none))
+	if((m_BloodSplats != none))
 	{
-		m_BloodSplats.__NFUN_279__();
+		m_BloodSplats.Destroy();
 		m_BloodSplats = none;
 	}
 	// End:0x78
-	if(__NFUN_119__(m_BloodBaths, none))
+	if((m_BloodBaths != none))
 	{
-		m_BloodBaths.__NFUN_279__();
+		m_BloodBaths.Destroy();
 		m_BloodBaths = none;
 	}
 	// End:0x96
-	if(__NFUN_119__(m_GrenadeDecals, none))
+	if((m_GrenadeDecals != none))
 	{
-		m_GrenadeDecals.__NFUN_279__();
+		m_GrenadeDecals.Destroy();
 		m_GrenadeDecals = none;
 	}
 	super.Destroyed();

@@ -45,7 +45,7 @@ function string GetGamePassword()
 
 function bool GamePasswordNeeded()
 {
-	return __NFUN_123__(GamePassword, "");
+	return (GamePassword != "");
 	return;
 }
 
@@ -60,19 +60,19 @@ function KickBan(string S)
 	J0x14:
 
 	// End:0xEC [Loop If]
-	if(__NFUN_119__(_Ctrl, none))
+	if((_Ctrl != none))
 	{
 		P = PlayerController(_Ctrl);
 		// End:0xD5
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(P, none), __NFUN_124__(P.PlayerReplicationInfo.PlayerName, S)), __NFUN_119__(NetConnection(P.Player), none)))
+		if((((P != none) && (P.PlayerReplicationInfo.PlayerName ~= S)) && (NetConnection(P.Player) != none)))
 		{
 			ID = P.m_szGlobalID;
 			// End:0xD3
-			if(__NFUN_129__(IsGlobalIDBanned(ID)))
+			if((!IsGlobalIDBanned(ID)))
 			{
-				__NFUN_231__(__NFUN_112__("Adding ID Ban for: ", __NFUN_235__(ID)));
-				Banned[Banned.Length] = __NFUN_235__(ID);
-				__NFUN_536__();
+				Log(("Adding ID Ban for: " $ Caps(ID)));
+				Banned[Banned.Length] = Caps(ID);
+				SaveConfig();
 			}
 			return;
 		}
@@ -91,22 +91,22 @@ function int RemoveBan(string szBanPrefix)
 	i = -1;
 	J0x12:
 
-	__NFUN_165__(i);
+	(i++);
 	i = NextMatchingID(szBanPrefix, i);
 	// End:0x50
-	if(__NFUN_151__(i, -1))
+	if((i > -1))
 	{
-		__NFUN_165__(iMatchesFound);
+		(iMatchesFound++);
 		iPosFound = i;
 	}
 	// End:0x12
-	if(!(__NFUN_154__(i, -1)))
+	if(!((i == -1)))
 		goto J0x12;
 	// End:0x79
-	if(__NFUN_154__(iMatchesFound, 1))
+	if((iMatchesFound == 1))
 	{
 		Banned.Remove(iPosFound, 1);
-		__NFUN_536__();
+		SaveConfig();
 	}
 	return iMatchesFound;
 	return;
@@ -120,19 +120,19 @@ function int NextMatchingID(string szBanPrefix, int iLastIt)
 	J0x0B:
 
 	// End:0x4B [Loop If]
-	if(__NFUN_150__(i, Banned.Length))
+	if((i < Banned.Length))
 	{
 		// End:0x41
-		if(__NFUN_154__(__NFUN_1306__(Banned[i], szBanPrefix, __NFUN_125__(szBanPrefix)), 0))
+		if((Strnicmp(Banned[i], szBanPrefix, Len(szBanPrefix)) == 0))
 		{
 			return i;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0B;
 	}
 	// End:0x61
-	if(__NFUN_153__(i, Banned.Length))
+	if((i >= Banned.Length))
 	{
 		return -1;
 	}
@@ -148,14 +148,14 @@ event PreLogin(string Options, string Address, out string Error, out string Fail
 	Error = "";
 	InPassword = Level.Game.ParseOption(Options, "Password");
 	// End:0x92
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), Level.Game.AtCapacity(bSpectator)))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && Level.Game.AtCapacity(bSpectator)))
 	{
 		Error = "PopUp_Error_ServerFull";		
 	}
 	else
 	{
 		// End:0xF7
-		if(__NFUN_130__(__NFUN_130__(__NFUN_123__(GamePassword, ""), __NFUN_123__(InPassword, GamePassword)), __NFUN_132__(__NFUN_122__(AdminPassword, ""), __NFUN_123__(InPassword, AdminPassword))))
+		if((((GamePassword != "") && (InPassword != GamePassword)) && ((AdminPassword == "") || (InPassword != AdminPassword))))
 		{
 			Error = "PopUp_Error_PassWd";
 			FailCode = "WRONGPW";
@@ -173,14 +173,14 @@ event bool IsGlobalIDBanned(string GlobalID)
 	J0x07:
 
 	// End:0x38 [Loop If]
-	if(__NFUN_150__(i, Banned.Length))
+	if((i < Banned.Length))
 	{
 		// End:0x2E
-		if(__NFUN_124__(Banned[i], GlobalID))
+		if((Banned[i] ~= GlobalID))
 		{
 			return true;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}

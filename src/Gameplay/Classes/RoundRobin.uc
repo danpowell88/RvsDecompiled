@@ -21,9 +21,9 @@ var() name OutEvents[16];  // Events to generate.
 function Trigger(Actor Other, Pawn EventInstigator)
 {
 	TriggerEvent(OutEvents[i], self, EventInstigator);
-	__NFUN_165__(i);
+	(i++);
 	// End:0x71
-	if(__NFUN_132__(__NFUN_132__(__NFUN_153__(i, 16), __NFUN_254__(OutEvents[i], 'None')), __NFUN_254__(OutEvents[i], 'None')))
+	if((((i >= 16) || (OutEvents[i] == 'None')) || (OutEvents[i] == 'None')))
 	{
 		// End:0x6B
 		if(bLoop)
@@ -32,7 +32,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		}
 		else
 		{
-			__NFUN_262__(false, false, false);
+			SetCollision(false, false, false);
 		}
 	}
 	return;

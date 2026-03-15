@@ -193,9 +193,9 @@ function logX(string szText, optional int iSource)
 	local string szSource, Time;
 
 	Time = string(Level.TimeSeconds);
-	Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
-	szSource = __NFUN_112__(__NFUN_112__("(", Time), ":X) ");
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szSource, string(Name)), ""), szText));
+	Time = Left(Time, (InStr(Time, ".") + 3));
+	szSource = (("(", Time) $ ":X) " $ ???);
+	Log((((szSource $ string(Name)) $ "") $ szText));
 	return;
 }
 
@@ -206,7 +206,7 @@ function logX(string szText, optional int iSource)
 function InsertAnimTransInfo(int iSourceAnim, int iTargetAnim, name pawnState, float fTime)
 {
 	// End:0x10
-	if(__NFUN_153__(m_iAnimTransIndex, 32))
+	if((m_iAnimTransIndex >= 32))
 	{
 		assert(false);
 	}
@@ -217,7 +217,7 @@ function InsertAnimTransInfo(int iSourceAnim, int iTargetAnim, name pawnState, f
 	m_aAnimTransInfo[m_iAnimTransIndex].m_iTargetAnim = iTargetAnim;
 	m_aAnimTransInfo[m_iAnimTransIndex].m_targetAnimName = GetAnimInfo(iTargetAnim).m_name;
 	m_aAnimTransInfo[m_iAnimTransIndex].m_fTargetAnimRate = GetAnimInfo(iTargetAnim).m_fRate;
-	__NFUN_165__(m_iAnimTransIndex);
+	(m_iAnimTransIndex++);
 	return;
 }
 
@@ -226,21 +226,21 @@ function string GetAnimTransInfoLog(AnimTransInfo Info, optional R6HostageMgr.EA
 	local string szLog, szType;
 
 	// End:0x1F
-	if(__NFUN_154__(int(eType), int(1)))
+	if((int(eType) == int(1)))
 	{
 		szType = "data";		
 	}
 	else
 	{
 		// End:0x3F
-		if(__NFUN_154__(int(eType), int(2)))
+		if((int(eType) == int(2)))
 		{
 			szType = "group";			
 		}
 		else
 		{
 			// End:0x60
-			if(__NFUN_154__(int(eType), int(3)))
+			if((int(eType) == int(3)))
 			{
 				szType = "manual";				
 			}
@@ -250,7 +250,7 @@ function string GetAnimTransInfoLog(AnimTransInfo Info, optional R6HostageMgr.EA
 			}
 		}
 	}
-	szLog = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("AnimTransType: ", szType), " src: "), string(Info.m_sourceAnimName)), " target: "), string(Info.m_targetAnimName)), " time: "), string(Info.m_fTime)), " rate: "), string(Info.m_fTargetAnimRate)), " toAIstate: "), string(Info.m_AIState)), " toPawnState: "), string(Info.m_pawnState));
+	szLog = ((((((((((((("AnimTransType: " $ szType) $ " src: ") $ string(Info.m_sourceAnimName)) $ " target: ") $ string(Info.m_targetAnimName)) $ " time: ") $ string(Info.m_fTime)) $ " rate: ") $ string(Info.m_fTargetAnimRate)) $ " toAIstate: ") $ string(Info.m_AIState)) $ " toPawnState: ") $ string(Info.m_pawnState));
 	return szLog;
 	return;
 }
@@ -267,15 +267,15 @@ function bool GetAnimTransInfo(name sourceAnimName, int iTargetAnim, out AnimTra
 	J0x07:
 
 	// End:0x69 [Loop If]
-	if(__NFUN_150__(i, m_iAnimTransIndex))
+	if((i < m_iAnimTransIndex))
 	{
 		// End:0x5F
-		if(__NFUN_130__(__NFUN_254__(sourceAnimName, m_aAnimTransInfo[i].m_sourceAnimName), __NFUN_154__(iTargetAnim, m_aAnimTransInfo[i].m_iTargetAnim)))
+		if(((sourceAnimName == m_aAnimTransInfo[i].m_sourceAnimName) && (iTargetAnim == m_aAnimTransInfo[i].m_iTargetAnim)))
 		{
 			Info = m_aAnimTransInfo[i];
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -305,14 +305,14 @@ function int GetAnimIndex(name animName)
 	J0x07:
 
 	// End:0x3D [Loop If]
-	if(__NFUN_150__(i, 40))
+	if((i < 40))
 	{
 		// End:0x33
-		if(__NFUN_254__(m_aAnimInfo[i].m_name, animName))
+		if((m_aAnimInfo[i].m_name == animName))
 		{
 			return i;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -337,16 +337,16 @@ function int GetAnimInfoSize()
 function InsertAnimInfo(name aName, out int ID, optional R6HostageMgr.EGroupAnimType eGroupAnim, optional R6HostageMgr.EPlayAnimType ePlayType, optional float fRate)
 {
 	ID = ANIM_eMAX;
-	__NFUN_165__(ANIM_eMAX);
+	(ANIM_eMAX++);
 	// End:0x2A
-	if(__NFUN_180__(fRate, float(0)))
+	if((fRate == float(0)))
 	{
 		fRate = 1.0000000;
 	}
 	// End:0xBF
-	if(__NFUN_255__(m_aAnimInfo[ID].m_name, 'None'))
+	if((m_aAnimInfo[ID].m_name != 'None'))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("ScriptWarning: Hostage anim ", string(aName)), " was not inserted. Conflict with "), string(m_aAnimInfo[ID].m_name)), " at index "), string(ID)));
+		Log(((((("ScriptWarning: Hostage anim " @ string(aName)) @ " was not inserted. Conflict with ") @ string(m_aAnimInfo[ID].m_name)) @ " at index ") $ string(ID)));
 		return;
 	}
 	m_aAnimInfo[ID].m_id = ID;
@@ -367,25 +367,25 @@ function ValidAnimInfo()
 	local string playType;
 
 	// End:0x6A
-	if(__NFUN_155__(40, ANIM_eMAX))
+	if((40 != ANIM_eMAX))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__("ScriptWarning: m_aAnimInfo wrong size. Array size is ", string(40)), " and ANIM_eMAX is "), string(ANIM_eMAX)));
+		Log(((("ScriptWarning: m_aAnimInfo wrong size. Array size is " @ string(40)) @ " and ANIM_eMAX is ") $ string(ANIM_eMAX)));
 	}
 	i = 0;
 	J0x71:
 
 	// End:0x10F [Loop If]
-	if(__NFUN_150__(i, 40))
+	if((i < 40))
 	{
 		// End:0xCA
-		if(__NFUN_254__(m_aAnimInfo[i].m_name, 'None'))
+		if((m_aAnimInfo[i].m_name == 'None'))
 		{
-			__NFUN_231__(__NFUN_112__("ScriptWarning: missing anim index: ", string(i)));
+			Log(("ScriptWarning: missing anim index: " $ string(i)));
 			// [Explicit Continue]
 			goto J0x105;
 		}
 		// End:0xF6
-		if(__NFUN_154__(int(m_aAnimInfo[i].m_ePlayType), int(1)))
+		if((int(m_aAnimInfo[i].m_ePlayType) == int(1)))
 		{
 			playType = "random";
 			// [Explicit Continue]
@@ -394,7 +394,7 @@ function ValidAnimInfo()
 		playType = "default";
 		J0x105:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x71;
 	}
@@ -402,10 +402,10 @@ function ValidAnimInfo()
 	J0x116:
 
 	// End:0x209 [Loop If]
-	if(__NFUN_150__(i, 40))
+	if((i < 40))
 	{
 		// End:0x13F
-		if(__NFUN_254__(m_aAnimInfo[i].m_name, 'None'))
+		if((m_aAnimInfo[i].m_name == 'None'))
 		{
 			// [Explicit Continue]
 			goto J0x1FF;
@@ -414,32 +414,32 @@ function ValidAnimInfo()
 		J0x146:
 
 		// End:0x1FF [Loop If]
-		if(__NFUN_150__(j, 40))
+		if((j < 40))
 		{
 			// End:0x164
-			if(__NFUN_154__(i, j))
+			if((i == j))
 			{
 				// [Explicit Continue]
 				goto J0x1F5;
 			}
 			// End:0x1F5
-			if(__NFUN_254__(m_aAnimInfo[i].m_name, m_aAnimInfo[j].m_name))
+			if((m_aAnimInfo[i].m_name == m_aAnimInfo[j].m_name))
 			{
 				// End:0x1F5
-				if(__NFUN_180__(m_aAnimInfo[i].m_fRate, m_aAnimInfo[j].m_fRate))
+				if((m_aAnimInfo[i].m_fRate == m_aAnimInfo[j].m_fRate))
 				{
-					__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__("ScriptWarning: identical anim at index: ", string(i)), " and "), string(j)));
+					Log(((("ScriptWarning: identical anim at index: " @ string(i)) @ " and ") $ string(j)));
 				}
 			}
 			J0x1F5:
 
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x146;
 		}
 		J0x1FF:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x116;
 	}
@@ -514,14 +514,14 @@ function PostBeginPlay()
 //------------------------------------------------------------------
 function InsertThreatDefinition(name GroupName, string szName, R6HostageMgr.EThreatType EThreatType, Actor.ENoiseType ENoiseType, int iThreatLevel, int iCaringDistance, optional name considerThreat)
 {
-	assert(__NFUN_150__(m_iThreatDefinitionIndex, 27));
+	assert((m_iThreatDefinitionIndex < 27));
 	// End:0x9A
-	if(__NFUN_151__(m_iThreatDefinitionIndex, 1))
+	if((m_iThreatDefinitionIndex > 1))
 	{
 		// End:0x9A
-		if(__NFUN_130__(__NFUN_150__(m_aThreatDefinition[__NFUN_147__(m_iThreatDefinitionIndex, 1)].m_iThreatLevel, iThreatLevel), __NFUN_254__(m_aThreatDefinition[__NFUN_147__(m_iThreatDefinitionIndex, 1)].m_groupName, GroupName)))
+		if(((m_aThreatDefinition[(m_iThreatDefinitionIndex - 1)].m_iThreatLevel < iThreatLevel) && (m_aThreatDefinition[(m_iThreatDefinitionIndex - 1)].m_groupName == GroupName)))
 		{
-			__NFUN_231__(__NFUN_112__("ScriptWarning: InsertThreatDefinition wrong ThreatLevel for ", szName));
+			Log(("ScriptWarning: InsertThreatDefinition wrong ThreatLevel for " $ szName));
 		}
 	}
 	m_aThreatDefinition[m_iThreatDefinitionIndex].m_groupName = GroupName;
@@ -531,7 +531,7 @@ function InsertThreatDefinition(name GroupName, string szName, R6HostageMgr.EThr
 	m_aThreatDefinition[m_iThreatDefinitionIndex].m_iThreatLevel = iThreatLevel;
 	m_aThreatDefinition[m_iThreatDefinitionIndex].m_iCaringDistance = iCaringDistance;
 	m_aThreatDefinition[m_iThreatDefinitionIndex].m_considerThreat = considerThreat;
-	__NFUN_165__(m_iThreatDefinitionIndex);
+	(m_iThreatDefinitionIndex++);
 	return;
 }
 
@@ -545,9 +545,9 @@ function string GetThreatInfoLog(ThreatInfo Info)
 	local name pawnName, ActorName;
 	local int Index;
 
-	Index = __NFUN_251__(Info.m_id, 0, Info.m_id);
+	Index = Clamp(Info.m_id, 0, Info.m_id);
 	// End:0x3B
-	if(__NFUN_114__(Info.m_pawn, none))
+	if((Info.m_pawn == none))
 	{
 		pawnName = ' ';		
 	}
@@ -556,7 +556,7 @@ function string GetThreatInfoLog(ThreatInfo Info)
 		pawnName = Info.m_pawn.Name;
 	}
 	// End:0x72
-	if(__NFUN_114__(Info.m_actorExt, none))
+	if((Info.m_actorExt == none))
 	{
 		ActorName = ' ';		
 	}
@@ -564,7 +564,7 @@ function string GetThreatInfoLog(ThreatInfo Info)
 	{
 		ActorName = Info.m_actorExt.Name;
 	}
-	szOutput = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(m_aThreatDefinition[Index].m_groupName)), ": "), GetThreatName(Index)), ", a:"), string(ActorName)), " "), string(Info.m_iThreatLevel)), "s:"), string(Info.m_state)), " a2:"), string(ActorName));
+	szOutput = ((((((((((("" $ string(m_aThreatDefinition[Index].m_groupName)) $ ": ") $ GetThreatName(Index)) $ ") $ string(ActorName)) $ " ") $ string(Info.m_iThreatLevel)) $ "s:") $ string(Info.m_state)) $ " a2:") $ string(ActorName));
 	return szOutput;
 	return;
 }
@@ -622,7 +622,7 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 
 	bRealThreat = false;
 	// End:0x34
-	if(__NFUN_155__(int(eType), int(0)))
+	if((int(eType) != int(0)))
 	{
 		aPawn = R6Pawn(threat.Instigator);		
 	}
@@ -634,11 +634,11 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 	J0x4B:
 
 	// End:0x297 [Loop If]
-	if(__NFUN_150__(i, 27))
+	if((i < 27))
 	{
 		bCheckDistance = false;
 		// End:0x7F
-		if(__NFUN_255__(m_aThreatDefinition[i].m_groupName, threatGroupName))
+		if((m_aThreatDefinition[i].m_groupName != threatGroupName))
 		{
 			// [Explicit Continue]
 			goto J0x28D;			
@@ -646,10 +646,10 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 		else
 		{
 			// End:0xB8
-			if(__NFUN_155__(int(eType), int(0)))
+			if((int(eType) != int(0)))
 			{
 				// End:0xB5
-				if(__NFUN_154__(int(m_aThreatDefinition[i].m_eNoiseType), int(eType)))
+				if((int(m_aThreatDefinition[i].m_eNoiseType) == int(eType)))
 				{
 					bCheckDistance = true;
 				}				
@@ -657,7 +657,7 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 			else
 			{
 				// End:0x1C9
-				if(__NFUN_119__(aPawn, none))
+				if((aPawn != none))
 				{
 					// End:0x12A
 					if(__NFUN_154__(int(m_aThreatDefinition[i].m_eThreatType), int(4)))

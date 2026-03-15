@@ -29,7 +29,7 @@ var string m_Ext;
 function CreateListBox(int X, int Y, int W, int H)
 {
 	// End:0x0D
-	if(__NFUN_119__(m_ArmPatchListBox, none))
+	if((m_ArmPatchListBox != none))
 	{
 		return;
 	}
@@ -43,7 +43,7 @@ function CreateListBox(int X, int Y, int W, int H)
 function CreateTextLabel(int X, int Y, int W, int H, string _szText, string _szToolTip)
 {
 	// End:0x0D
-	if(__NFUN_119__(m_pTextLabel, none))
+	if((m_pTextLabel != none))
 	{
 		return;
 	}
@@ -60,7 +60,7 @@ function CreateTextLabel(int X, int Y, int W, int H, string _szText, string _szT
 function CreateArmPatchBitmap(int X, int Y, int W, int H)
 {
 	// End:0x0D
-	if(__NFUN_119__(m_ArmpatchBitmap, none))
+	if((m_ArmpatchBitmap != none))
 	{
 		return;
 	}
@@ -78,20 +78,20 @@ function RefreshListBox()
 	local R6WindowListBoxItem NewItem;
 
 	// End:0x0D
-	if(__NFUN_114__(m_ArmPatchListBox, none))
+	if((m_ArmPatchListBox == none))
 	{
 		return;
 	}
 	m_ArmPatchListBox.Items.Clear();
 	// End:0x54
-	if(__NFUN_114__(m_pFileManager, none))
+	if((m_pFileManager == none))
 	{
-		__NFUN_231__("m_pFileManager == NONE");
+		Log("m_pFileManager == NONE");
 		iFiles = 0;		
 	}
 	else
 	{
-		iFiles = m_pFileManager.__NFUN_1525__(m_path, m_Ext);
+		iFiles = m_pFileManager.GetNbFile(m_path, m_Ext);
 	}
 	m_DefaultItem = R6WindowListBoxItem(m_ArmPatchListBox.Items.Append(m_ArmPatchListBox.ListClass));
 	m_DefaultItem.HelpText = Localize("Options", "DEFAULT", "R6Menu");
@@ -100,22 +100,22 @@ function RefreshListBox()
 	J0xE8:
 
 	// End:0x18B [Loop If]
-	if(__NFUN_150__(i, iFiles))
+	if((i < iFiles))
 	{
-		m_pFileManager.__NFUN_1526__(i, szFileName);
+		m_pFileManager.GetFileName(i, szFileName);
 		// End:0x181
-		if(__NFUN_123__(szFileName, ""))
+		if((szFileName != ""))
 		{
 			NewItem = R6WindowListBoxItem(m_ArmPatchListBox.Items.Append(m_ArmPatchListBox.ListClass));
-			NewItem.HelpText = __NFUN_128__(szFileName, __NFUN_147__(__NFUN_125__(szFileName), 4));
-			NewItem.m_szToolTip = __NFUN_235__(szFileName);
+			NewItem.HelpText = Left(szFileName, (Len(szFileName) - 4));
+			NewItem.m_szToolTip = Caps(szFileName);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xE8;
 	}
 	// End:0x1E3
-	if(__NFUN_151__(m_ArmPatchListBox.Items.Count(), 0))
+	if((m_ArmPatchListBox.Items.Count() > 0))
 	{
 		m_ArmPatchListBox.SetSelectedItem(R6WindowListBoxItem(m_ArmPatchListBox.Items.Next));
 		m_ArmPatchListBox.MakeSelectedVisible();
@@ -131,20 +131,20 @@ function SetDesiredSelectedArmpatch(string _ArmPatchName)
 	local string inString;
 
 	// End:0x16
-	if(__NFUN_114__(m_ArmPatchListBox.Items, none))
+	if((m_ArmPatchListBox.Items == none))
 	{
 		return;
 	}
-	inString = __NFUN_235__(_ArmPatchName);
+	inString = Caps(_ArmPatchName);
 	CurItem = R6WindowListBoxItem(m_ArmPatchListBox.Items.Next);
 	i = 0;
 	J0x4C:
 
 	// End:0xC2 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, m_ArmPatchListBox.Items.Count()), __NFUN_242__(Found, false)))
+	if(((i < m_ArmPatchListBox.Items.Count()) && (Found == false)))
 	{
 		// End:0x9F
-		if(__NFUN_122__(CurItem.m_szToolTip, inString))
+		if((CurItem.m_szToolTip == inString))
 		{
 			Found = true;
 			// [Explicit Continue]
@@ -153,7 +153,7 @@ function SetDesiredSelectedArmpatch(string _ArmPatchName)
 		CurItem = R6WindowListBoxItem(CurItem.Next);
 		J0xB8:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x4C;
 	}
@@ -168,10 +168,10 @@ function SetDesiredSelectedArmpatch(string _ArmPatchName)
 function string GetSelectedArmpatch()
 {
 	// End:0x73
-	if(__NFUN_119__(m_ArmPatchListBox.m_SelectedItem, none))
+	if((m_ArmPatchListBox.m_SelectedItem != none))
 	{
 		// End:0x6D
-		if(__NFUN_242__(Class'Engine.Actor'.static.__NFUN_2616__(__NFUN_112__(m_path, m_ArmPatchListBox.m_SelectedItem.m_szToolTip), m_ArmpatchBitmap.t), true))
+		if((Class'Engine.Actor'.static.ReplaceTexture((m_path $ m_ArmPatchListBox.m_SelectedItem.m_szToolTip), m_ArmpatchBitmap.t) == true))
 		{
 			return m_ArmPatchListBox.m_SelectedItem.m_szToolTip;			
 		}
@@ -194,7 +194,7 @@ function Notify(UWindowDialogControl C, byte E)
 		// End:0x48
 		case 12:
 			// End:0x45
-			if(__NFUN_114__(C, m_ArmPatchListBox))
+			if((C == m_ArmPatchListBox))
 			{
 				m_pTextLabel.ChangeColorLabel(Root.Colors.ButtonTextColor[2], 0);
 			}
@@ -203,7 +203,7 @@ function Notify(UWindowDialogControl C, byte E)
 		// End:0x86
 		case 9:
 			// End:0x83
-			if(__NFUN_114__(C, m_ArmPatchListBox))
+			if((C == m_ArmPatchListBox))
 			{
 				m_pTextLabel.ChangeColorLabel(Root.Colors.White, 0);
 			}
@@ -212,13 +212,13 @@ function Notify(UWindowDialogControl C, byte E)
 		// End:0x14B
 		case 2:
 			// End:0x148
-			if(__NFUN_114__(C, m_ArmPatchListBox))
+			if((C == m_ArmPatchListBox))
 			{
 				// End:0x148
-				if(__NFUN_119__(m_ArmPatchListBox.m_SelectedItem, none))
+				if((m_ArmPatchListBox.m_SelectedItem != none))
 				{
 					// End:0xE2
-					if(__NFUN_114__(R6WindowListBoxItem(m_ArmPatchListBox.m_SelectedItem), m_DefaultItem))
+					if((R6WindowListBoxItem(m_ArmPatchListBox.m_SelectedItem) == m_DefaultItem))
 					{
 						m_ArmpatchBitmap.t = m_TDefaultTexture;						
 					}
@@ -226,7 +226,7 @@ function Notify(UWindowDialogControl C, byte E)
 					{
 						m_ArmpatchBitmap.t = m_TBlankTexture;
 						// End:0x148
-						if(__NFUN_242__(Class'Engine.Actor'.static.__NFUN_2616__(__NFUN_112__(m_path, m_ArmPatchListBox.m_SelectedItem.m_szToolTip), m_ArmpatchBitmap.t), false))
+						if((Class'Engine.Actor'.static.ReplaceTexture((m_path $ m_ArmPatchListBox.m_SelectedItem.m_szToolTip), m_ArmpatchBitmap.t) == false))
 						{
 							m_ArmpatchBitmap.t = m_TInvalidTexture;
 						}

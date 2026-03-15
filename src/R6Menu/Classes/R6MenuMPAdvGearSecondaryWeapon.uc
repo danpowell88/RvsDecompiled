@@ -26,7 +26,7 @@ function Created()
 	m_2DBullet = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', m_fWeaponWidth, 0.0000000, m_fBulletWidth, WinHeight, self));
 	m_2DBullet.bUseRegion = true;
 	m_2DBullet.m_iDrawStyle = 5;
-	m_2DWeaponGadget = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', __NFUN_174__(m_fWeaponWidth, m_2DBullet.WinWidth), 0.0000000, __NFUN_175__(__NFUN_175__(WinWidth, m_2DBullet.WinWidth), m_2DWeapon.WinWidth), WinHeight, self));
+	m_2DWeaponGadget = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', (m_fWeaponWidth + m_2DBullet.WinWidth), 0.0000000, ((WinWidth - m_2DBullet.WinWidth) - m_2DWeapon.WinWidth), WinHeight, self));
 	m_2DWeaponGadget.bUseRegion = true;
 	m_2DWeaponGadget.m_iDrawStyle = 5;
 	m_BorderColor = Root.Colors.GrayLight;
@@ -38,9 +38,9 @@ function Paint(Canvas C, float X, float Y)
 {
 	DrawSimpleBorder(C);
 	C.Style = 5;
-	C.__NFUN_2626__(m_InsideLinesColor.R, m_InsideLinesColor.G, m_InsideLinesColor.B);
+	C.SetDrawColor(m_InsideLinesColor.R, m_InsideLinesColor.G, m_InsideLinesColor.B);
 	DrawStretchedTextureSegment(C, m_2DWeapon.WinWidth, 0.0000000, float(m_LinesRegion.W), WinHeight, float(m_LinesRegion.X), float(m_LinesRegion.Y), float(m_LinesRegion.W), float(m_LinesRegion.H), m_LinesTexture);
-	DrawStretchedTextureSegment(C, __NFUN_174__(m_2DBullet.WinLeft, m_2DBullet.WinWidth), 0.0000000, float(m_LinesRegion.W), WinHeight, float(m_LinesRegion.X), float(m_LinesRegion.Y), float(m_LinesRegion.W), float(m_LinesRegion.H), m_LinesTexture);
+	DrawStretchedTextureSegment(C, (m_2DBullet.WinLeft + m_2DBullet.WinWidth), 0.0000000, float(m_LinesRegion.W), WinHeight, float(m_LinesRegion.X), float(m_LinesRegion.Y), float(m_LinesRegion.W), float(m_LinesRegion.H), m_LinesTexture);
 	return;
 }
 

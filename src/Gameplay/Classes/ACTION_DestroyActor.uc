@@ -15,12 +15,12 @@ function bool InitActionFor(ScriptedController C)
 	local Actor A;
 
 	// End:0x3B
-	if(__NFUN_255__(DestroyTag, 'None'))
+	if((DestroyTag != 'None'))
 	{
 		// End:0x3A
-		foreach C.__NFUN_304__(Class'Engine.Actor', A, DestroyTag)
+		foreach C.AllActors(Class'Engine.Actor', A, DestroyTag)
 		{
-			A.__NFUN_279__();			
+			A.Destroy();			
 		}		
 	}
 	return false;

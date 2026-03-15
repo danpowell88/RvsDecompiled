@@ -16,16 +16,16 @@ function Timer()
 {
 	TriggerEvent(Event, self, none);
 	// End:0x1B
-	if(__NFUN_129__(bRepeating))
+	if((!bRepeating))
 	{
-		__NFUN_279__();
+		Destroy();
 	}
 	return;
 }
 
 function MatchStarting()
 {
-	__NFUN_280__(DelaySeconds, bRepeating);
+	SetTimer(DelaySeconds, bRepeating);
 	return;
 }
 

@@ -33,7 +33,7 @@ function AddButtonInList(bool _bSelected, string _szLoc, string _szTip, int _iBu
 
 	fXOffset = 5.0000000;
 	fYOffset = 7.0000000;
-	fWidth = __NFUN_175__(WinWidth, __NFUN_171__(float(2), fXOffset));
+	fWidth = (WinWidth - (float(2) * fXOffset));
 	fHeight = 15.0000000;
 	ButtonFont = Root.Fonts[5];
 	NewItem = R6WindowListGeneralItem(m_pListGen.GetItemAtIndex(m_pListGen.Items.CountShown()));
@@ -51,13 +51,13 @@ function AddButtonInList(bool _bSelected, string _szLoc, string _szTip, int _iBu
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x4B
-	if(C.__NFUN_303__('R6WindowButtonBox'))
+	if(C.IsA('R6WindowButtonBox'))
 	{
 		// End:0x4B
-		if(__NFUN_154__(int(E), 2))
+		if((int(E) == 2))
 		{
 			// End:0x4B
-			if(__NFUN_119__(OwnerWindow, none))
+			if((OwnerWindow != none))
 			{
 				R6MenuMPMenuTab(OwnerWindow).Notify(C, E);
 			}
@@ -72,7 +72,7 @@ function Notify(UWindowDialogControl C, byte E)
 function MouseWheelDown(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(m_pListGen, none))
+	if((m_pListGen != none))
 	{
 		m_pListGen.MouseWheelDown(X, Y);
 	}
@@ -85,7 +85,7 @@ function MouseWheelDown(float X, float Y)
 function MouseWheelUp(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(m_pListGen, none))
+	if((m_pListGen != none))
 	{
 		m_pListGen.MouseWheelUp(X, Y);
 	}

@@ -31,16 +31,16 @@ function Created()
 	super(R6WindowFramedWindow).Created();
 	ButtonTexture = R6WindowLookAndFeel(LookAndFeel).m_R6ScrollTexture;
 	ToolTipString = Localize("PlanningLegend", "MainTip", "R6Menu");
-	m_PreviousPageButton = R6LegendPreviousPageButton(CreateWindow(Class'R6Menu.R6LegendPreviousPageButton', float(__NFUN_146__(m_iFrameWidth, 4)), float(__NFUN_146__(m_iFrameWidth, 4)), float(m_NavButtonSize), float(m_NavButtonSize), self));
-	m_NextPageButton = R6LegendNextPageButton(CreateWindow(Class'R6Menu.R6LegendNextPageButton', float(__NFUN_146__(m_iFrameWidth, 4)), float(__NFUN_146__(m_iFrameWidth, 4)), float(m_NavButtonSize), float(m_NavButtonSize), self));
-	m_PrevBg = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', float(__NFUN_146__(m_iFrameWidth, 2)), float(__NFUN_146__(m_iFrameWidth, 2)), float(ButtonBg.W), float(ButtonBg.H), self));
+	m_PreviousPageButton = R6LegendPreviousPageButton(CreateWindow(Class'R6Menu.R6LegendPreviousPageButton', float((m_iFrameWidth + 4)), float((m_iFrameWidth + 4)), float(m_NavButtonSize), float(m_NavButtonSize), self));
+	m_NextPageButton = R6LegendNextPageButton(CreateWindow(Class'R6Menu.R6LegendNextPageButton', float((m_iFrameWidth + 4)), float((m_iFrameWidth + 4)), float(m_NavButtonSize), float(m_NavButtonSize), self));
+	m_PrevBg = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', float((m_iFrameWidth + 2)), float((m_iFrameWidth + 2)), float(ButtonBg.W), float(ButtonBg.H), self));
 	m_PrevBg.bAlwaysBehind = true;
 	m_PrevBg.m_bUseColor = true;
 	m_PrevBg.m_iDrawStyle = 5;
 	m_PrevBg.t = ButtonTexture;
 	m_PrevBg.R = ButtonBg;
 	m_PrevBg.SendToBack();
-	m_NextBg = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', float(__NFUN_146__(m_iFrameWidth, 2)), float(__NFUN_146__(m_iFrameWidth, 2)), float(ButtonBg.W), float(ButtonBg.H), self));
+	m_NextBg = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', float((m_iFrameWidth + 2)), float((m_iFrameWidth + 2)), float(ButtonBg.W), float(ButtonBg.H), self));
 	m_NextBg.bAlwaysBehind = true;
 	m_NextBg.m_bUseColor = true;
 	m_NextBg.m_iDrawStyle = 5;
@@ -67,7 +67,7 @@ function BeforePaint(Canvas C, float X, float Y)
 	local int iTeamColor;
 
 	// End:0x133
-	if(__NFUN_242__(m_bInitialized, false))
+	if((m_bInitialized == false))
 	{
 		m_bInitialized = true;
 		m_LegendPages[0].BeforePaint(C, X, Y);
@@ -76,9 +76,9 @@ function BeforePaint(Canvas C, float X, float Y)
 		m_LegendPages[3].BeforePaint(C, X, Y);
 		m_LegendPages[4].BeforePaint(C, X, Y);
 		Resized();
-		m_fTitleOffSet = __NFUN_171__(__NFUN_175__(WinWidth, R6MenuLegendPage(m_ButtonList).m_fTitleWidth), 0.5000000);
-		m_NextBg.WinLeft = __NFUN_175__(__NFUN_175__(__NFUN_175__(WinWidth, float(m_iFrameWidth)), float(m_NavButtonSize)), float(2));
-		m_NextPageButton.WinLeft = __NFUN_174__(m_NextBg.WinLeft, float(2));
+		m_fTitleOffSet = ((WinWidth - R6MenuLegendPage(m_ButtonList).m_fTitleWidth) * 0.5000000);
+		m_NextBg.WinLeft = (((WinWidth - float(m_iFrameWidth)) - float(m_NavButtonSize)) - float(2));
+		m_NextPageButton.WinLeft = (m_NextBg.WinLeft + float(2));
 	}
 	iTeamColor = R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam;
 	m_PrevBg.m_TextureColor = Root.Colors.TeamColor[iTeamColor];
@@ -92,43 +92,43 @@ function Resized()
 
 	fBiggestButtonList = m_LegendPages[0].WinWidth;
 	// End:0x46
-	if(__NFUN_176__(fBiggestButtonList, m_LegendPages[1].WinWidth))
+	if((fBiggestButtonList < m_LegendPages[1].WinWidth))
 	{
 		fBiggestButtonList = m_LegendPages[1].WinWidth;
 	}
 	// End:0x78
-	if(__NFUN_176__(fBiggestButtonList, m_LegendPages[2].WinWidth))
+	if((fBiggestButtonList < m_LegendPages[2].WinWidth))
 	{
 		fBiggestButtonList = m_LegendPages[2].WinWidth;
 	}
 	// End:0xAA
-	if(__NFUN_176__(fBiggestButtonList, m_LegendPages[3].WinWidth))
+	if((fBiggestButtonList < m_LegendPages[3].WinWidth))
 	{
 		fBiggestButtonList = m_LegendPages[3].WinWidth;
 	}
 	// End:0xDC
-	if(__NFUN_176__(fBiggestButtonList, m_LegendPages[4].WinWidth))
+	if((fBiggestButtonList < m_LegendPages[4].WinWidth))
 	{
 		fBiggestButtonList = m_LegendPages[4].WinWidth;
 	}
-	fWidth = __NFUN_174__(fBiggestButtonList, float(__NFUN_144__(m_iFrameWidth, 2)));
-	fHeight = __NFUN_174__(__NFUN_174__(m_ButtonList.WinHeight, m_fTitleBarHeight), float(__NFUN_144__(m_iFrameWidth, 2)));
+	fWidth = (fBiggestButtonList + float((m_iFrameWidth * 2)));
+	fHeight = ((m_ButtonList.WinHeight + m_fTitleBarHeight) + float((m_iFrameWidth * 2)));
 	// End:0x1C0
-	if(__NFUN_132__(__NFUN_181__(fWidth, WinWidth), __NFUN_181__(fHeight, WinHeight)))
+	if(((fWidth != WinWidth) || (fHeight != WinHeight)))
 	{
 		m_ButtonList.WinTop = m_fTitleBarHeight;
 		m_ButtonList.WinLeft = float(m_iFrameWidth);
 		super.Resized();
 		// End:0x18B
-		if(__NFUN_242__(m_bDisplayLeft, true))
+		if((m_bDisplayLeft == true))
 		{
-			__NFUN_184__(WinLeft, __NFUN_175__(WinWidth, fWidth));
+			(WinLeft += (WinWidth - fWidth));
 		}
 		WinWidth = fWidth;
 		// End:0x1B5
-		if(__NFUN_242__(m_bDisplayUp, true))
+		if((m_bDisplayUp == true))
 		{
-			__NFUN_184__(WinTop, __NFUN_175__(WinHeight, fHeight));
+			(WinTop += (WinHeight - fHeight));
 		}
 		WinHeight = fHeight;
 	}
@@ -137,9 +137,9 @@ function Resized()
 
 function NextPage()
 {
-	__NFUN_165__(m_iCurrentPage);
+	(m_iCurrentPage++);
 	// End:0x1A
-	if(__NFUN_154__(m_iCurrentPage, 5))
+	if((m_iCurrentPage == 5))
 	{
 		m_iCurrentPage = 0;
 	}
@@ -147,15 +147,15 @@ function NextPage()
 	m_ButtonList = m_LegendPages[m_iCurrentPage];
 	m_ButtonList.ShowWindow();
 	m_szWindowTitle = m_LegendPages[m_iCurrentPage].m_szPageTitle;
-	m_fTitleOffSet = __NFUN_171__(__NFUN_175__(WinWidth, m_LegendPages[m_iCurrentPage].m_fTitleWidth), 0.5000000);
+	m_fTitleOffSet = ((WinWidth - m_LegendPages[m_iCurrentPage].m_fTitleWidth) * 0.5000000);
 	return;
 }
 
 function PreviousPage()
 {
-	__NFUN_166__(m_iCurrentPage);
+	(m_iCurrentPage--);
 	// End:0x1A
-	if(__NFUN_150__(m_iCurrentPage, 0))
+	if((m_iCurrentPage < 0))
 	{
 		m_iCurrentPage = 4;
 	}
@@ -163,15 +163,15 @@ function PreviousPage()
 	m_ButtonList = m_LegendPages[m_iCurrentPage];
 	m_ButtonList.ShowWindow();
 	m_szWindowTitle = m_LegendPages[m_iCurrentPage].m_szPageTitle;
-	m_fTitleOffSet = __NFUN_171__(__NFUN_175__(WinWidth, m_LegendPages[m_iCurrentPage].m_fTitleWidth), 0.5000000);
+	m_fTitleOffSet = ((WinWidth - m_LegendPages[m_iCurrentPage].m_fTitleWidth) * 0.5000000);
 	return;
 }
 
 function ToggleLegend()
 {
-	m_bDisplayWindow = __NFUN_129__(m_bDisplayWindow);
+	m_bDisplayWindow = (!m_bDisplayWindow);
 	// End:0x24
-	if(__NFUN_242__(m_bDisplayWindow, true))
+	if((m_bDisplayWindow == true))
 	{
 		ShowWindow();		
 	}

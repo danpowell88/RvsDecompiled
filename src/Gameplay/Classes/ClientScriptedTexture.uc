@@ -11,7 +11,7 @@ var() Texture ScriptedTexture;
 simulated function BeginPlay()
 {
 	// End:0x20
-	if(__NFUN_119__(ScriptedTexture, none))
+	if((ScriptedTexture != none))
 	{
 		ScriptedTexture(ScriptedTexture).NotifyActor = self;
 	}
@@ -21,7 +21,7 @@ simulated function BeginPlay()
 simulated function Destroyed()
 {
 	// End:0x20
-	if(__NFUN_119__(ScriptedTexture, none))
+	if((ScriptedTexture != none))
 	{
 		ScriptedTexture(ScriptedTexture).NotifyActor = none;
 	}

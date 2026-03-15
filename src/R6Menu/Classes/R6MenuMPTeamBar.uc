@@ -86,21 +86,21 @@ function Paint(Canvas C, float X, float Y)
 {
 	C.Style = 5;
 	// End:0x150
-	if(__NFUN_129__(m_bDisplayObj))
+	if((!m_bDisplayObj))
 	{
 		// End:0x83
 		if(m_vTeamColor == Root.Colors.TeamColorLight[0])
 		{
-			DrawSimpleBackGround(C, 2.0000000, 0.0000000, __NFUN_175__(WinWidth, float(4)), WinHeight, Root.Colors.TeamColorDark[0]);			
+			DrawSimpleBackGround(C, 2.0000000, 0.0000000, (WinWidth - float(4)), WinHeight, Root.Colors.TeamColorDark[0]);			
 		}
 		else
 		{
-			DrawSimpleBackGround(C, 2.0000000, 0.0000000, __NFUN_175__(WinWidth, float(4)), WinHeight, Root.Colors.TeamColorDark[1]);
+			DrawSimpleBackGround(C, 2.0000000, 0.0000000, (WinWidth - float(4)), WinHeight, Root.Colors.TeamColorDark[1]);
 		}
-		C.__NFUN_2626__(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
+		C.SetDrawColor(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
 		DrawInGameTeamBar(C, 0.0000000, 15.0000000);
-		DrawInGameTeamBarUpBorder(C, 2.0000000, 0.0000000, __NFUN_175__(WinWidth, float(4)), 15.0000000);
-		DrawInGameTeamBarDownBorder(C, 2.0000000, __NFUN_175__(WinHeight, float(12)), __NFUN_175__(WinWidth, float(4)), 12.0000000);
+		DrawInGameTeamBarUpBorder(C, 2.0000000, 0.0000000, (WinWidth - float(4)), 15.0000000);
+		DrawInGameTeamBarDownBorder(C, 2.0000000, (WinHeight - float(12)), (WinWidth - float(4)), 12.0000000);
 	}
 	return;
 }
@@ -122,24 +122,24 @@ function SetWindowSize(float _fX, float _fY, float _fW, float _fH)
 	if(m_bDisplayObj)
 	{
 		// End:0x92
-		if(__NFUN_119__(m_pTitleCoop, none))
+		if((m_pTitleCoop != none))
 		{
 			m_pTitleCoop.WinTop = 0.0000000;
 			m_pTitleCoop.WinWidth = _fW;
 			m_pTitleCoop.WinHeight = 20.0000000;
 		}
 		// End:0x112
-		if(__NFUN_119__(m_pMissionObj, none))
+		if((m_pMissionObj != none))
 		{
 			m_pMissionObj.WinTop = 20.0000000;
 			m_pMissionObj.WinWidth = _fW;
-			m_pMissionObj.WinHeight = __NFUN_175__(_fH, float(20));
+			m_pMissionObj.WinHeight = (_fH - float(20));
 			m_pMissionObj.SetNewObjWindowSizes(_fX, _fY, _fW, _fH, true);
 			m_pMissionObj.UpdateObjectives();
 		}
 	}
 	// End:0x15F
-	if(__NFUN_119__(m_pTextTeamBar, none))
+	if((m_pTextTeamBar != none))
 	{
 		m_pTextTeamBar.WinTop = 0.0000000;
 		m_pTextTeamBar.WinWidth = _fW;
@@ -147,11 +147,11 @@ function SetWindowSize(float _fX, float _fY, float _fW, float _fH)
 		Refresh();
 	}
 	// End:0x1AE
-	if(__NFUN_119__(m_IGPlayerInfoListBox, none))
+	if((m_IGPlayerInfoListBox != none))
 	{
 		m_IGPlayerInfoListBox.WinTop = 15.0000000;
 		m_IGPlayerInfoListBox.WinWidth = _fW;
-		m_IGPlayerInfoListBox.WinHeight = __NFUN_175__(_fH, GetPlayerListBorderHeight());
+		m_IGPlayerInfoListBox.WinHeight = (_fH - GetPlayerListBorderHeight());
 	}
 	return;
 }
@@ -166,7 +166,7 @@ function RefreshTeamBarInfo(int _iTeam)
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x42
-	if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_DeathmatchMode"))
+	if((r6Root.m_szCurrentGameType == "RGM_DeathmatchMode"))
 	{
 		iTotalOfPlayers = 16;		
 	}
@@ -183,7 +183,7 @@ function RefreshTeamBarInfo(int _iTeam)
 	ClearListOfItem();
 	AddItems(_iTeam, iTotalOfPlayers);
 	// End:0x185
-	if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_DeathmatchMode"))
+	if((r6Root.m_szCurrentGameType == "RGM_DeathmatchMode"))
 	{
 		m_pTextTeamBar.ChangeTextLabel(Localize("MPInGame", "PlayersName", "R6Menu"), m_iIndex[1]);
 		m_pTextTeamBar.ChangeTextLabel("", m_iIndex[8]);
@@ -219,7 +219,7 @@ function Refresh()
 	fWidth = m_stMenuCoord[int(2)].fWidth;
 	m_iIndex[1] = m_pTextTeamBar.AddTextLabel(m_szTeamName, fXOffset, fYOffset, fWidth, 0, false);
 	fXOffset = 4.0000000;
-	fYOffset = __NFUN_174__(__NFUN_175__(WinHeight, float(12)), float(1));
+	fYOffset = ((WinHeight - float(12)) + float(1));
 	m_iIndex[8] = m_pTextTeamBar.AddTextLabel("", fXOffset, fYOffset, fWidth, 0, false);
 	fXOffset = m_stMenuCoord[int(4)].fXPos;
 	fWidth = m_stMenuCoord[int(4)].fWidth;
@@ -253,7 +253,7 @@ function AddItems(int _iTeam, int _iTotalOfPlayers)
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x96D
-	if(__NFUN_119__(r6Root.m_R6GameMenuCom, none))
+	if((r6Root.m_R6GameMenuCom != none))
 	{
 		MpInter = R6MenuMPInterWidget(OwnerWindow);
 		CurItem = m_IGPlayerInfoListBox.Items.Next;
@@ -262,23 +262,23 @@ function AddItems(int _iTeam, int _iTotalOfPlayers)
 		J0x5F:
 
 		// End:0x950 [Loop If]
-		if(__NFUN_150__(i, r6Root.m_R6GameMenuCom.m_iLastValidIndex))
+		if((i < r6Root.m_R6GameMenuCom.m_iLastValidIndex))
 		{
 			bAddItem = true;
 			iIndex = r6Root.m_R6GameMenuCom.GeTTeamSelection(i);
-			GetLevel().__NFUN_1230__(i, _PlayerMenuInfo);
+			GetLevel().GetFPlayerMenuInfo(i, _PlayerMenuInfo);
 			// End:0x1FB
-			if(__NFUN_155__(iIndex, _iTeam))
+			if((iIndex != _iTeam))
 			{
 				bAddItem = false;
 				// End:0x1FB
-				if(__NFUN_154__(iIndex, int(r6Root.m_R6GameMenuCom.4)))
+				if((iIndex == int(r6Root.m_R6GameMenuCom.4)))
 				{
 					// End:0x133
-					if(__NFUN_154__(_iTeam, int(r6Root.m_R6GameMenuCom.2)))
+					if((_iTeam == int(r6Root.m_R6GameMenuCom.2)))
 					{
 						// End:0x130
-						if(__NFUN_150__(m_iTotalRoomTake, _iTotalOfPlayers))
+						if((m_iTotalRoomTake < _iTotalOfPlayers))
 						{
 							bAddItem = true;
 						}						
@@ -286,7 +286,7 @@ function AddItems(int _iTeam, int _iTotalOfPlayers)
 					else
 					{
 						// End:0x1FB
-						if(__NFUN_154__(MpInter.m_pR6AlphaTeam.m_iTotalRoomTake, _iTotalOfPlayers))
+						if((MpInter.m_pR6AlphaTeam.m_iTotalRoomTake == _iTotalOfPlayers))
 						{
 							bAddItem = true;
 							pListTemp = MpInter.m_pR6AlphaTeam.m_IGPlayerInfoListBox;
@@ -295,17 +295,17 @@ function AddItems(int _iTeam, int _iTotalOfPlayers)
 							J0x19D:
 
 							// End:0x1FB [Loop If]
-							if(__NFUN_150__(j, _iTotalOfPlayers))
+							if((j < _iTotalOfPlayers))
 							{
 								// End:0x1DD
-								if(__NFUN_124__(__NFUN_128__(_PlayerMenuInfo.szPlayerName, 15), R6WindowListIGPlayerInfoItem(ParseItem).szPlName))
+								if((Left(_PlayerMenuInfo.szPlayerName, 15) ~= R6WindowListIGPlayerInfoItem(ParseItem).szPlName))
 								{
 									bAddItem = false;
 									// [Explicit Break]
 									goto J0x1FB;
 								}
 								ParseItem = ParseItem.Next;
-								__NFUN_165__(j);
+								(j++);
 								// [Loop Continue]
 								goto J0x19D;
 							}
@@ -364,12 +364,12 @@ function AddItems(int _iTeam, int _iTotalOfPlayers)
 				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(1)].fXPos;
 				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(1)].fWidth;
 				iIndex = int(NewItem.2);
-				NewItem.szPlName = __NFUN_128__(_PlayerMenuInfo.szPlayerName, 15);
+				NewItem.szPlName = Left(_PlayerMenuInfo.szPlayerName, 15);
 				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(2)].fXPos;
 				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(2)].fWidth;
 				iIndex = int(NewItem.3);
-				NewItem.stTagCoord[iIndex].bDisplay = __NFUN_129__(m_bTeamMenuLayout);
-				NewItem.szRoundsWon = __NFUN_112__(__NFUN_112__(string(_PlayerMenuInfo.iRoundsWon), "/"), string(_PlayerMenuInfo.iRoundsPlayed));
+				NewItem.stTagCoord[iIndex].bDisplay = (!m_bTeamMenuLayout);
+				NewItem.szRoundsWon = ((string(_PlayerMenuInfo.iRoundsWon) $ "/") $ string(_PlayerMenuInfo.iRoundsPlayed));
 				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(3)].fXPos;
 				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(3)].fWidth;
 				iIndex = int(NewItem.4);
@@ -401,28 +401,28 @@ function AddItems(int _iTeam, int _iTotalOfPlayers)
 				NewItem.stTagCoord[iIndex].fXPos = m_stMenuCoord[int(10)].fXPos;
 				NewItem.stTagCoord[iIndex].fWidth = m_stMenuCoord[int(10)].fWidth;
 				NewItem.bOwnPlayer = _PlayerMenuInfo.bOwnPlayer;
-				__NFUN_161__(m_iTotalKills, NewItem.iKills);
-				__NFUN_161__(m_iTotalNbOfDead, NewItem.iMyDeadCounter);
-				__NFUN_161__(m_iTotalEfficiency, NewItem.iEfficiency);
-				__NFUN_161__(m_iTotalRoundsFired, NewItem.iRoundsFired);
-				__NFUN_161__(m_iTotalRoundsTaken, NewItem.iRoundsHit);
-				__NFUN_161__(m_iTotalRoomTake, 1);
+				(m_iTotalKills += NewItem.iKills);
+				(m_iTotalNbOfDead += NewItem.iMyDeadCounter);
+				(m_iTotalEfficiency += NewItem.iEfficiency);
+				(m_iTotalRoundsFired += NewItem.iRoundsFired);
+				(m_iTotalRoundsTaken += NewItem.iRoundsHit);
+				(m_iTotalRoomTake += 1);
 				// End:0x921
-				if(__NFUN_130__(__NFUN_129__(_PlayerMenuInfo.bSpectator), __NFUN_129__(_PlayerMenuInfo.bJoinedTeamLate)))
+				if(((!_PlayerMenuInfo.bSpectator) && (!_PlayerMenuInfo.bJoinedTeamLate)))
 				{
-					__NFUN_165__(iTeamPlayerCount);
+					(iTeamPlayerCount++);
 				}
 				NewItem.m_bShowThisItem = true;
 				CurItem = CurItem.Next;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x5F;
 		}
 		// End:0x96D
-		if(__NFUN_151__(iTeamPlayerCount, 0))
+		if((iTeamPlayerCount > 0))
 		{
-			m_iTotalEfficiency = __NFUN_145__(m_iTotalEfficiency, iTeamPlayerCount);
+			m_iTotalEfficiency = (m_iTotalEfficiency / iTeamPlayerCount);
 		}
 	}
 	return;
@@ -436,7 +436,7 @@ function ClearListOfItem()
 	local bool bAlreadyCreate;
 
 	// End:0x42
-	if(__NFUN_119__(m_IGPlayerInfoListBox.Items.Next, none))
+	if((m_IGPlayerInfoListBox.Items.Next != none))
 	{
 		bAlreadyCreate = true;
 		CurItem = m_IGPlayerInfoListBox.Items.Next;
@@ -445,7 +445,7 @@ function ClearListOfItem()
 	J0x49:
 
 	// End:0xD2 [Loop If]
-	if(__NFUN_150__(i, 16))
+	if((i < 16))
 	{
 		// End:0x86
 		if(bAlreadyCreate)
@@ -459,7 +459,7 @@ function ClearListOfItem()
 		NewItem.m_bShowThisItem = false;
 		J0xC8:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x49;
 	}
@@ -471,7 +471,7 @@ function ClearListOfItem()
 //===============================================================================
 function float GetPlayerListBorderHeight()
 {
-	return __NFUN_174__(15.0000000, float(12));
+	return (15.0000000 + float(12));
 	return;
 }
 
@@ -490,15 +490,15 @@ function DrawInGameTeamBar(Canvas C, float _fY, float _fHeight)
 	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 1);
 	fXOffset = m_stMenuCoord[int(2)].fXPos;
 	fWidth = m_stMenuCoord[int(2)].fWidth;
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
 	// End:0x186
-	if(__NFUN_129__(m_bTeamMenuLayout))
+	if((!m_bTeamMenuLayout))
 	{
 		fXOffset = m_stMenuCoord[int(3)].fXPos;
 		fWidth = m_stMenuCoord[int(3)].fWidth;
 		AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 2);
-		fXOffset = __NFUN_174__(fXOffset, fWidth);
+		fXOffset = (fXOffset + fWidth);
 		AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
 	}
 	fXOffset = m_stMenuCoord[int(4)].fXPos;
@@ -507,7 +507,7 @@ function DrawInGameTeamBar(Canvas C, float _fY, float _fHeight)
 	fXOffset = m_stMenuCoord[int(5)].fXPos;
 	fWidth = m_stMenuCoord[int(5)].fWidth;
 	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 4);
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
 	fXOffset = m_stMenuCoord[int(6)].fXPos;
 	fWidth = m_stMenuCoord[int(6)].fWidth;
@@ -518,7 +518,7 @@ function DrawInGameTeamBar(Canvas C, float _fY, float _fHeight)
 	fXOffset = m_stMenuCoord[int(8)].fXPos;
 	fWidth = m_stMenuCoord[int(8)].fWidth;
 	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 7);
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
 	fXOffset = m_stMenuCoord[int(9)].fXPos;
 	fWidth = m_stMenuCoord[int(9)].fWidth;

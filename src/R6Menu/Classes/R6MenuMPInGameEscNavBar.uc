@@ -45,7 +45,7 @@ function Created()
 	else
 	{
 		// End:0x1B6
-		if(__NFUN_132__(R6Console(Root.Console).m_bNonUbiMatchMakingHost, R6Console(Root.Console).m_bNonUbiMatchMaking))
+		if((R6Console(Root.Console).m_bNonUbiMatchMakingHost || R6Console(Root.Console).m_bNonUbiMatchMaking))
 		{
 			m_MainMenuButton.bDisabled = true;
 			m_AbortButton.bDisabled = true;
@@ -60,7 +60,7 @@ function Notify(UWindowDialogControl C, byte E)
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x237
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{

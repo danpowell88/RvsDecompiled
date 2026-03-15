@@ -63,14 +63,14 @@ function BeforePaint(Canvas C, float X, float Y)
 	{
 		m_bRefresh = false;
 		// End:0x3F
-		if(__NFUN_123__(m_szMsgBoxText, ""))
+		if((m_szMsgBoxText != ""))
 		{
 			m_fXMsgBoxText = AlignText(C, m_fXBox, 90.0000000, m_szMsgBoxText, 2);
 		}
 		// End:0x7B
-		if(__NFUN_123__(Text, ""))
+		if((Text != ""))
 		{
-			m_fXText = AlignText(C, 0.0000000, __NFUN_175__(WinWidth, float(m_RButtonBG.W)), Text, 0);
+			m_fXText = AlignText(C, 0.0000000, (WinWidth - float(m_RButtonBG.W)), Text, 0);
 		}
 	}
 	return;
@@ -98,15 +98,15 @@ function float AlignText(Canvas C, float _fXStartPos, float _fWidth, out string 
 	J0x7F:
 
 	// End:0x11B [Loop If]
-	if(__NFUN_150__(i, ALowerFont.Length))
+	if((i < ALowerFont.Length))
 	{
 		C.Font = ALowerFont[i];
 		szTmpText = TextSize(C, _szTextToAlign, W, H, int(_fWidth));
 		TextSize(C, _szTextToAlign, W, H);
 		// End:0x104
-		if(__NFUN_123__(szTmpText, _szTextToAlign))
+		if((szTmpText != _szTextToAlign))
 		{
-			__NFUN_165__(i);			
+			(i++);			
 		}
 		else
 		{
@@ -120,7 +120,7 @@ function float AlignText(Canvas C, float _fXStartPos, float _fWidth, out string 
 	J0x11B:
 
 	// End:0x135
-	if(__NFUN_122__(_szTextToAlign, m_szMsgBoxText))
+	if((_szTextToAlign == m_szMsgBoxText))
 	{
 		m_fHMsgBoxText = H;
 	}
@@ -129,35 +129,35 @@ function float AlignText(Canvas C, float _fXStartPos, float _fWidth, out string 
 		// End:0x186
 		case 0:
 			// End:0x171
-			if(__NFUN_180__(m_fXBox, float(0)))
+			if((m_fXBox == float(0)))
 			{
-				fXTemp = __NFUN_174__(__NFUN_174__(float(m_RButtonBG.W), _fXStartPos), fLMarge);				
+				fXTemp = ((float(m_RButtonBG.W) + _fXStartPos) + fLMarge);				
 			}
 			else
 			{
-				fXTemp = __NFUN_174__(_fXStartPos, fLMarge);
+				fXTemp = (_fXStartPos + fLMarge);
 			}
 			// End:0x1B0
 			break;
 		// End:0x1AD
 		case 2:
-			fXTemp = __NFUN_174__(_fXStartPos, __NFUN_172__(__NFUN_175__(_fWidth, W), float(2)));
+			fXTemp = (_fXStartPos + ((_fWidth - W) / float(2)));
 			// End:0x1B0
 			break;
 		// End:0xFFFF
 		default:
 			break;
 	}
-	m_fYTextPos = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-	m_fYTextPos = float(int(__NFUN_174__(m_fYTextPos, 0.5000000)));
+	m_fYTextPos = ((WinHeight - H) / float(2));
+	m_fYTextPos = float(int((m_fYTextPos + 0.5000000)));
 	// End:0x23E
 	if(m_bResizeToText)
 	{
-		WinWidth = __NFUN_174__(__NFUN_174__(__NFUN_174__(__NFUN_174__(float(m_RButtonBG.W), _fXStartPos), fLMarge), W), fDistBetBoxAndText);
+		WinWidth = ((((float(m_RButtonBG.W) + _fXStartPos) + fLMarge) + W) + fDistBetBoxAndText);
 		// End:0x23B
-		if(__NFUN_181__(m_fXBox, float(0)))
+		if((m_fXBox != float(0)))
 		{
-			m_fXBox = __NFUN_175__(WinWidth, float(m_RButtonBG.W));
+			m_fXBox = (WinWidth - float(m_RButtonBG.W));
 		}		
 	}
 	else
@@ -174,7 +174,7 @@ function Paint(Canvas C, float X, float Y)
 	local Color vTempColor;
 
 	// End:0x6E
-	if(__NFUN_132__(__NFUN_129__(bDisabled), __NFUN_123__(m_szToolTipWhenDisable, "")))
+	if(((!bDisabled) || (m_szToolTipWhenDisable != "")))
 	{
 		m_bMouseIsOver = MouseIsOver();
 		// End:0x6E
@@ -186,7 +186,7 @@ function Paint(Canvas C, float X, float Y)
 				ToolTipString = m_szToolTipWhenDisable;
 			}
 			// End:0x6E
-			if(__NFUN_123__(ToolTipString, ""))
+			if((ToolTipString != ""))
 			{
 				// End:0x66
 				if(m_bMouseIsOver)
@@ -201,20 +201,20 @@ function Paint(Canvas C, float X, float Y)
 		}
 	}
 	// End:0x9C
-	if(__NFUN_154__(int(m_eButtonType), int(0)))
+	if((int(m_eButtonType) == int(0)))
 	{
 		DrawCheckBox(C, m_fXBox, m_fYBox, m_bMouseIsOver);		
 	}
 	else
 	{
 		// End:0xC7
-		if(__NFUN_154__(int(m_eButtonType), int(2)))
+		if((int(m_eButtonType) == int(2)))
 		{
 			DrawResKitBotton(C, m_fXBox, m_fYBox, m_bMouseIsOver);
 		}
 	}
 	// End:0x1DF
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		C.Font = m_TextFont;
 		C.SpaceX = 0.0000000;
@@ -222,7 +222,7 @@ function Paint(Canvas C, float X, float Y)
 		// End:0x13C
 		if(bDisabled)
 		{
-			C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);			
+			C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);			
 		}
 		else
 		{
@@ -230,7 +230,7 @@ function Paint(Canvas C, float X, float Y)
 			if(m_bMouseIsOver)
 			{
 				vTempColor = m_OverTextColor;
-				C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);				
+				C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);				
 			}
 			else
 			{
@@ -238,7 +238,7 @@ function Paint(Canvas C, float X, float Y)
 				if(vTempColor != m_vTextColor)
 				{
 					vTempColor = m_vTextColor;
-					C.__NFUN_2626__(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
+					C.SetDrawColor(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
 				}
 			}
 		}
@@ -253,25 +253,25 @@ function DrawCheckBox(Canvas C, float _fXBox, float _fYBox, bool _bMouseOverButt
 	// End:0x47
 	if(bDisabled)
 	{
-		C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);		
+		C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);		
 	}
 	else
 	{
 		// End:0x7D
 		if(_bMouseOverButton)
 		{
-			C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);			
+			C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);			
 		}
 		else
 		{
-			C.__NFUN_2626__(m_vBorder.R, m_vBorder.G, m_vBorder.B);
+			C.SetDrawColor(m_vBorder.R, m_vBorder.G, m_vBorder.B);
 		}
 	}
 	DrawStretchedTextureSegment(C, _fXBox, _fYBox, float(m_RButtonBG.W), float(m_RButtonBG.H), float(m_RButtonBG.X), float(m_RButtonBG.Y), float(m_RButtonBG.W), float(m_RButtonBG.H), m_TButtonBG);
 	// End:0x182
 	if(m_bSelected)
 	{
-		DrawStretchedTextureSegment(C, __NFUN_174__(2.0000000, _fXBox), __NFUN_174__(2.0000000, _fYBox), float(DownRegion.W), float(DownRegion.H), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);
+		DrawStretchedTextureSegment(C, (2.0000000 + _fXBox), (2.0000000 + _fYBox), float(DownRegion.W), float(DownRegion.H), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);
 	}
 	return;
 }
@@ -285,26 +285,26 @@ function DrawResKitBotton(Canvas C, float _fXBox, float _fYBox, bool _bMouseOver
 	// End:0x5B
 	if(bDisabled)
 	{
-		C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);		
+		C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);		
 	}
 	else
 	{
 		// End:0x91
 		if(_bMouseOverButton)
 		{
-			C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);			
+			C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);			
 		}
 		else
 		{
-			C.__NFUN_2626__(m_vBorder.R, m_vBorder.G, m_vBorder.B);
+			C.SetDrawColor(m_vBorder.R, m_vBorder.G, m_vBorder.B);
 		}
 	}
 	fYLineTop = m_fYTextPos;
-	fYLineBottom = __NFUN_175__(__NFUN_174__(m_fYTextPos, m_fHMsgBoxText), float(2));
-	DrawStretchedTextureSegment(C, _fXBox, fYLineTop, __NFUN_175__(WinWidth, _fXBox), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, _fXBox, fYLineBottom, __NFUN_175__(WinWidth, _fXBox), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, _fXBox, fYLineTop, float(m_BorderTextureRegion.W), __NFUN_175__(m_fHMsgBoxText, float(2)), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(_fXBox, float(90)), float(m_BorderTextureRegion.W)), fYLineTop, float(m_BorderTextureRegion.W), __NFUN_175__(m_fHMsgBoxText, float(2)), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	fYLineBottom = ((m_fYTextPos + m_fHMsgBoxText) - float(2));
+	DrawStretchedTextureSegment(C, _fXBox, fYLineTop, (WinWidth - _fXBox), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fXBox, fYLineBottom, (WinWidth - _fXBox), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fXBox, fYLineTop, float(m_BorderTextureRegion.W), (m_fHMsgBoxText - float(2)), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, ((_fXBox + float(90)) - float(m_BorderTextureRegion.W)), fYLineTop, float(m_BorderTextureRegion.W), (m_fHMsgBoxText - float(2)), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	ClipText(C, m_fXMsgBoxText, m_fYTextPos, m_szMsgBoxText, true);
 	return;
 }
@@ -340,16 +340,16 @@ function bool CheckText_Box_Region()
 	GetMouseXY(fX, fY);
 	FMin = m_fXBox;
 	// End:0x47
-	if(__NFUN_154__(int(m_eButtonType), int(0)))
+	if((int(m_eButtonType) == int(0)))
 	{
-		FMax = __NFUN_174__(m_fXBox, float(m_RButtonBG.W));		
+		FMax = (m_fXBox + float(m_RButtonBG.W));		
 	}
 	else
 	{
 		// End:0x68
-		if(__NFUN_154__(int(m_eButtonType), int(2)))
+		if((int(m_eButtonType) == int(2)))
 		{
-			FMax = __NFUN_174__(m_fXBox, float(90));
+			FMax = (m_fXBox + float(90));
 		}
 	}
 	// End:0x82
@@ -364,10 +364,10 @@ function bool CheckText_Box_Region()
 function bool InRange(float _fTestValue, float _fMin, float _fMax)
 {
 	// End:0x20
-	if(__NFUN_177__(_fTestValue, _fMin))
+	if((_fTestValue > _fMin))
 	{
 		// End:0x20
-		if(__NFUN_176__(_fTestValue, _fMax))
+		if((_fTestValue < _fMax))
 		{
 			return true;
 		}
@@ -392,10 +392,10 @@ function CreateTextAndBox(string _szText, string _szToolTip, float _fXText, int 
 	}
 	else
 	{
-		m_fXBox = __NFUN_175__(WinWidth, float(m_RButtonBG.W));
+		m_fXBox = (WinWidth - float(m_RButtonBG.W));
 	}
-	m_fYBox = __NFUN_172__(__NFUN_175__(WinHeight, float(m_RButtonBG.H)), float(2));
-	m_fYBox = float(int(__NFUN_174__(m_fYBox, 0.5000000)));
+	m_fYBox = ((WinHeight - float(m_RButtonBG.H)) / float(2));
+	m_fYBox = float(int((m_fYBox + 0.5000000)));
 	m_bAutomaticResizeFont = _bUseAutomaticResizeFont;
 	return;
 }
@@ -406,7 +406,7 @@ function CreateTextAndMsgBox(string _szText, string _szToolTip, string _szTextBo
 	ToolTipString = _szToolTip;
 	m_fXText = _fXText;
 	m_iButtonID = _iButtonID;
-	m_fXBox = __NFUN_175__(WinWidth, float(90));
+	m_fXBox = (WinWidth - float(90));
 	ModifyMsgBox(_szTextBox);
 	m_fYBox = 0.0000000;
 	return;
@@ -441,7 +441,7 @@ function SetButtonBox(bool _bSelected)
 function SetNewWidth(float _fWidth)
 {
 	WinWidth = _fWidth;
-	m_fXBox = __NFUN_175__(_fWidth, float(m_RButtonBG.W));
+	m_fXBox = (_fWidth - float(m_RButtonBG.W));
 	m_bRefresh = true;
 	return;
 }
@@ -457,7 +457,7 @@ function bool GetSelectStatus()
 		return false;
 	}
 	// End:0x21
-	if(__NFUN_130__(m_bMouseOnButton, m_bMouseIsOver))
+	if((m_bMouseOnButton && m_bMouseIsOver))
 	{
 		return true;
 	}

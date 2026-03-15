@@ -43,14 +43,14 @@ simulated function BeginPlay()
 // Called whenever time passes.
 function Tick(float DeltaTime)
 {
-	__NFUN_184__(Alpha, __NFUN_172__(__NFUN_171__(direction, DeltaTime), ChangeTime));
+	(Alpha += ((direction * DeltaTime) / ChangeTime));
 	// End:0x58
-	if(__NFUN_177__(Alpha, 1.0000000))
+	if((Alpha > 1.0000000))
 	{
 		Alpha = 1.0000000;
-		__NFUN_118__('Tick');
+		Disable('Tick');
 		// End:0x55
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.EndEvent();
 		}		
@@ -58,26 +58,26 @@ function Tick(float DeltaTime)
 	else
 	{
 		// End:0x93
-		if(__NFUN_176__(Alpha, 0.0000000))
+		if((Alpha < 0.0000000))
 		{
 			Alpha = 0.0000000;
-			__NFUN_118__('Tick');
+			Disable('Tick');
 			// End:0x93
-			if(__NFUN_119__(SavedTrigger, none))
+			if((SavedTrigger != none))
 			{
 				SavedTrigger.EndEvent();
 			}
 		}
 	}
 	// End:0xB3
-	if(__NFUN_129__(bDelayFullOn))
+	if((!bDelayFullOn))
 	{
-		LightBrightness = __NFUN_171__(Alpha, InitialBrightness);		
+		LightBrightness = (Alpha * InitialBrightness);		
 	}
 	else
 	{
 		// End:0xEC
-		if(__NFUN_132__(__NFUN_130__(__NFUN_177__(direction, float(0)), __NFUN_181__(Alpha, float(1))), __NFUN_180__(Alpha, float(0))))
+		if((((direction > float(0)) && (Alpha != float(1))) || (Alpha == float(0))))
 		{
 			LightBrightness = 0.0000000;			
 		}
@@ -94,14 +94,14 @@ state() TriggerTurnsOn
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x1A
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.EndEvent();
 		}
 		SavedTrigger = Other;
 		SavedTrigger.BeginEvent();
 		direction = 1.0000000;
-		__NFUN_117__('Tick');
+		Enable('Tick');
 		return;
 	}
 	stop;
@@ -112,14 +112,14 @@ state() TriggerTurnsOff
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x1A
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.EndEvent();
 		}
 		SavedTrigger = Other;
 		SavedTrigger.BeginEvent();
 		direction = -1.0000000;
-		__NFUN_117__('Tick');
+		Enable('Tick');
 		return;
 	}
 	stop;
@@ -130,14 +130,14 @@ state() TriggerToggle
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x1A
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.EndEvent();
 		}
 		SavedTrigger = Other;
 		SavedTrigger.BeginEvent();
-		__NFUN_182__(direction, float(-1));
-		__NFUN_117__('Tick');
+		(direction *= float(-1));
+		Enable('Tick');
 		return;
 	}
 	stop;
@@ -148,7 +148,7 @@ state() TriggerControl
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x1A
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.EndEvent();
 		}
@@ -163,14 +163,14 @@ state() TriggerControl
 		{
 			direction = 1.0000000;
 		}
-		__NFUN_117__('Tick');
+		Enable('Tick');
 		return;
 	}
 
 	function UnTrigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x1A
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.EndEvent();
 		}
@@ -185,7 +185,7 @@ state() TriggerControl
 		{
 			direction = -1.0000000;
 		}
-		__NFUN_117__('Tick');
+		Enable('Tick');
 		return;
 	}
 	stop;
@@ -196,20 +196,20 @@ state() TriggerPound
 	function Timer()
 	{
 		// End:0x16
-		if(__NFUN_179__(poundTime, RemainOnTime))
+		if((poundTime >= RemainOnTime))
 		{
-			__NFUN_118__('Timer');
+			Disable('Timer');
 		}
-		__NFUN_184__(poundTime, ChangeTime);
-		__NFUN_182__(direction, float(-1));
-		__NFUN_280__(ChangeTime, false);
+		(poundTime += ChangeTime);
+		(direction *= float(-1));
+		SetTimer(ChangeTime, false);
 		return;
 	}
 
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x1A
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.EndEvent();
 		}
@@ -217,9 +217,9 @@ state() TriggerPound
 		SavedTrigger.BeginEvent();
 		direction = 1.0000000;
 		poundTime = ChangeTime;
-		__NFUN_280__(ChangeTime, false);
-		__NFUN_117__('Timer');
-		__NFUN_117__('Tick');
+		SetTimer(ChangeTime, false);
+		Enable('Timer');
+		Enable('Tick');
 		return;
 	}
 	stop;

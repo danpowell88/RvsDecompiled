@@ -50,7 +50,7 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 	HidePopup();
 	super(R6WindowListRadioButton).SetSelectedItem(NewSelected);
 	// End:0x74
-	if(__NFUN_243__(m_bAutoSelect, true))
+	if((m_bAutoSelect != true))
 	{
 		Planning.SetMovementMode(R6MenuModeButtonItem(m_SelectedItem).m_eMode);
 		ShowPopup();
@@ -61,7 +61,7 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 function HidePopup()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_WinSpeed, none))
+	if((m_WinSpeed != none))
 	{
 		m_WinSpeed.HideWindow();
 	}
@@ -76,7 +76,7 @@ function ShowWindow()
 	super(UWindowWindow).ShowWindow();
 	m_bAutoSelect = true;
 	// End:0x53
-	if(__NFUN_119__(m_ButtonItem[int(eMode)], m_SelectedItem))
+	if((m_ButtonItem[int(eMode)] != m_SelectedItem))
 	{
 		SetSelectedItem(m_ButtonItem[int(eMode)]);
 	}
@@ -89,9 +89,9 @@ function ShowPopup()
 	local float fGlobalLeft, fGlobalTop;
 
 	WindowToGlobal(ParentWindow.WinLeft, ParentWindow.WinTop, fGlobalLeft, fGlobalTop);
-	fGlobalLeft = __NFUN_174__(ParentWindow.WinLeft, ParentWindow.WinWidth);
+	fGlobalLeft = (ParentWindow.WinLeft + ParentWindow.WinWidth);
 	// End:0xAD
-	if(__NFUN_114__(m_WinSpeed, none))
+	if((m_WinSpeed == none))
 	{
 		m_WinSpeed = R6MenuSpeedMenu(R6MenuRootWindow(Root).m_PlanningWidget.CreateWindow(Class'R6Menu.R6MenuSpeedMenu', fGlobalLeft, ParentWindow.WinTop, 150.0000000, 100.0000000, OwnerWindow));		
 	}
@@ -103,14 +103,14 @@ function ShowPopup()
 	}
 	m_WinSpeed.AjustPosition(R6MenuFramePopup(OwnerWindow).m_bDisplayUp, R6MenuFramePopup(OwnerWindow).m_bDisplayLeft);
 	// End:0x162
-	if(__NFUN_242__(R6MenuFramePopup(ParentWindow).m_bDisplayLeft, true))
+	if((R6MenuFramePopup(ParentWindow).m_bDisplayLeft == true))
 	{
-		__NFUN_185__(m_WinSpeed.WinLeft, __NFUN_175__(ParentWindow.WinWidth, float(6)));
+		(m_WinSpeed.WinLeft -= (ParentWindow.WinWidth - float(6)));
 	}
 	// End:0x1AA
-	if(__NFUN_242__(R6MenuFramePopup(ParentWindow).m_bDisplayUp, true))
+	if((R6MenuFramePopup(ParentWindow).m_bDisplayUp == true))
 	{
-		__NFUN_185__(m_WinSpeed.WinTop, __NFUN_175__(m_WinSpeed.WinHeight, ParentWindow.WinHeight));
+		(m_WinSpeed.WinTop -= (m_WinSpeed.WinHeight - ParentWindow.WinHeight));
 	}
 	return;
 }

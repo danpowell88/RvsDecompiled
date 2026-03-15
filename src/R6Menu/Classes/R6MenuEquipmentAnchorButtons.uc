@@ -129,19 +129,19 @@ var Region m_GENERALDown;
 
 function Created()
 {
-	m_fYTopOffset = __NFUN_175__(WinHeight, m_fButtonTabHeight);
+	m_fYTopOffset = (WinHeight - m_fButtonTabHeight);
 	m_SUBGUNButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', m_fPrimarWTabOffset, m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_ASSAULTButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_SUBGUNButton.WinLeft, m_SUBGUNButton.WinWidth), m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_SHOTGUNButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_ASSAULTButton.WinLeft, m_ASSAULTButton.WinWidth), m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_SNIPERButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_SHOTGUNButton.WinLeft, m_SHOTGUNButton.WinWidth), m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_LMGButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_SNIPERButton.WinLeft, m_SNIPERButton.WinWidth), m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_ASSAULTButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_SUBGUNButton.WinLeft + m_SUBGUNButton.WinWidth) + m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_SHOTGUNButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_ASSAULTButton.WinLeft + m_ASSAULTButton.WinWidth) + m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_SNIPERButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_SHOTGUNButton.WinLeft + m_SHOTGUNButton.WinWidth) + m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_LMGButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_SNIPERButton.WinLeft + m_SNIPERButton.WinWidth) + m_fPrimaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_PISTOLSButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', m_fPistolOffset, m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_MACHINEPISTOLSButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_PISTOLSButton.WinLeft, m_PISTOLSButton.WinWidth), m_fSecondaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_MACHINEPISTOLSButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_PISTOLSButton.WinLeft + m_PISTOLSButton.WinWidth) + m_fSecondaryBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_GRENADESButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', m_fGrenadesOffset, m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_EXPLOSIVESButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_GRENADESButton.WinLeft, m_GRENADESButton.WinWidth), m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_HBDEVICEButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_EXPLOSIVESButton.WinLeft, m_EXPLOSIVESButton.WinWidth), m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_KITSButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_HBDEVICEButton.WinLeft, m_HBDEVICEButton.WinWidth), m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
-	m_GENERALButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_KITSButton.WinLeft, m_KITSButton.WinWidth), m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_EXPLOSIVESButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_GRENADESButton.WinLeft + m_GRENADESButton.WinWidth) + m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_HBDEVICEButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_EXPLOSIVESButton.WinLeft + m_EXPLOSIVESButton.WinWidth) + m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_KITSButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_HBDEVICEButton.WinLeft + m_HBDEVICEButton.WinWidth) + m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_GENERALButton = R6WindowListBoxAnchorButton(CreateWindow(Class'R6Window.R6WindowListBoxAnchorButton', ((m_KITSButton.WinLeft + m_KITSButton.WinWidth) + m_fGadgetsBetweenButtonOffset), m_fYTopOffset, m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_ASSAULTButton.ToolTipString = Localize("Tip", "GearRoomButAssaultRif", "R6Menu");
 	m_LMGButton.ToolTipString = Localize("Tip", "GearRoomButLightMach", "R6Menu");
 	m_SHOTGUNButton.ToolTipString = Localize("Tip", "GearRoomButShotGun", "R6Menu");
@@ -286,24 +286,24 @@ function Register(UWindowDialogClientWindow W)
 
 function Resize()
 {
-	m_fYTopOffset = __NFUN_175__(WinHeight, m_fButtonTabHeight);
+	m_fYTopOffset = (WinHeight - m_fButtonTabHeight);
 	m_SUBGUNButton.WinLeft = m_fPrimarWTabOffset;
 	m_SUBGUNButton.WinTop = m_fYTopOffset;
 	m_SUBGUNButton.WinWidth = m_fButtonTabWidth;
 	m_SUBGUNButton.WinHeight = m_fButtonTabHeight;
-	m_ASSAULTButton.WinLeft = __NFUN_174__(__NFUN_174__(m_SUBGUNButton.WinLeft, m_SUBGUNButton.WinWidth), m_fPrimaryBetweenButtonOffset);
+	m_ASSAULTButton.WinLeft = ((m_SUBGUNButton.WinLeft + m_SUBGUNButton.WinWidth) + m_fPrimaryBetweenButtonOffset);
 	m_ASSAULTButton.WinTop = m_fYTopOffset;
 	m_ASSAULTButton.WinWidth = m_fButtonTabWidth;
 	m_ASSAULTButton.WinHeight = m_fButtonTabHeight;
-	m_SHOTGUNButton.WinLeft = __NFUN_174__(__NFUN_174__(m_ASSAULTButton.WinLeft, m_ASSAULTButton.WinWidth), m_fPrimaryBetweenButtonOffset);
+	m_SHOTGUNButton.WinLeft = ((m_ASSAULTButton.WinLeft + m_ASSAULTButton.WinWidth) + m_fPrimaryBetweenButtonOffset);
 	m_SHOTGUNButton.WinTop = m_fYTopOffset;
 	m_SHOTGUNButton.WinWidth = m_fButtonTabWidth;
 	m_SHOTGUNButton.WinHeight = m_fButtonTabHeight;
-	m_SNIPERButton.WinLeft = __NFUN_174__(__NFUN_174__(m_SHOTGUNButton.WinLeft, m_SHOTGUNButton.WinWidth), m_fPrimaryBetweenButtonOffset);
+	m_SNIPERButton.WinLeft = ((m_SHOTGUNButton.WinLeft + m_SHOTGUNButton.WinWidth) + m_fPrimaryBetweenButtonOffset);
 	m_SNIPERButton.WinTop = m_fYTopOffset;
 	m_SNIPERButton.WinWidth = m_fButtonTabWidth;
 	m_SNIPERButton.WinHeight = m_fButtonTabHeight;
-	m_LMGButton.WinLeft = __NFUN_174__(__NFUN_174__(m_SNIPERButton.WinLeft, m_SNIPERButton.WinWidth), m_fPrimaryBetweenButtonOffset);
+	m_LMGButton.WinLeft = ((m_SNIPERButton.WinLeft + m_SNIPERButton.WinWidth) + m_fPrimaryBetweenButtonOffset);
 	m_LMGButton.WinTop = m_fYTopOffset;
 	m_LMGButton.WinWidth = m_fButtonTabWidth;
 	m_LMGButton.WinHeight = m_fButtonTabHeight;
@@ -311,7 +311,7 @@ function Resize()
 	m_PISTOLSButton.WinTop = m_fYTopOffset;
 	m_PISTOLSButton.WinWidth = m_fButtonTabWidth;
 	m_PISTOLSButton.WinHeight = m_fButtonTabHeight;
-	m_MACHINEPISTOLSButton.WinLeft = __NFUN_174__(__NFUN_174__(m_PISTOLSButton.WinLeft, m_PISTOLSButton.WinWidth), m_fSecondaryBetweenButtonOffset);
+	m_MACHINEPISTOLSButton.WinLeft = ((m_PISTOLSButton.WinLeft + m_PISTOLSButton.WinWidth) + m_fSecondaryBetweenButtonOffset);
 	m_MACHINEPISTOLSButton.WinTop = m_fYTopOffset;
 	m_MACHINEPISTOLSButton.WinWidth = m_fButtonTabWidth;
 	m_MACHINEPISTOLSButton.WinHeight = m_fButtonTabHeight;
@@ -319,19 +319,19 @@ function Resize()
 	m_GRENADESButton.WinTop = m_fYTopOffset;
 	m_GRENADESButton.WinWidth = m_fButtonTabWidth;
 	m_GRENADESButton.WinHeight = m_fButtonTabHeight;
-	m_EXPLOSIVESButton.WinLeft = __NFUN_174__(__NFUN_174__(m_GRENADESButton.WinLeft, m_GRENADESButton.WinWidth), m_fGadgetsBetweenButtonOffset);
+	m_EXPLOSIVESButton.WinLeft = ((m_GRENADESButton.WinLeft + m_GRENADESButton.WinWidth) + m_fGadgetsBetweenButtonOffset);
 	m_EXPLOSIVESButton.WinTop = m_fYTopOffset;
 	m_EXPLOSIVESButton.WinWidth = m_fButtonTabWidth;
 	m_EXPLOSIVESButton.WinHeight = m_fButtonTabHeight;
-	m_HBDEVICEButton.WinLeft = __NFUN_174__(__NFUN_174__(m_EXPLOSIVESButton.WinLeft, m_EXPLOSIVESButton.WinWidth), m_fGadgetsBetweenButtonOffset);
+	m_HBDEVICEButton.WinLeft = ((m_EXPLOSIVESButton.WinLeft + m_EXPLOSIVESButton.WinWidth) + m_fGadgetsBetweenButtonOffset);
 	m_HBDEVICEButton.WinTop = m_fYTopOffset;
 	m_HBDEVICEButton.WinWidth = m_fButtonTabWidth;
 	m_HBDEVICEButton.WinHeight = m_fButtonTabHeight;
-	m_KITSButton.WinLeft = __NFUN_174__(__NFUN_174__(m_HBDEVICEButton.WinLeft, m_HBDEVICEButton.WinWidth), m_fGadgetsBetweenButtonOffset);
+	m_KITSButton.WinLeft = ((m_HBDEVICEButton.WinLeft + m_HBDEVICEButton.WinWidth) + m_fGadgetsBetweenButtonOffset);
 	m_KITSButton.WinTop = m_fYTopOffset;
 	m_KITSButton.WinWidth = m_fButtonTabWidth;
 	m_KITSButton.WinHeight = m_fButtonTabHeight;
-	m_GENERALButton.WinLeft = __NFUN_174__(__NFUN_174__(m_KITSButton.WinLeft, m_KITSButton.WinWidth), m_fGadgetsBetweenButtonOffset);
+	m_GENERALButton.WinLeft = ((m_KITSButton.WinLeft + m_KITSButton.WinWidth) + m_fGadgetsBetweenButtonOffset);
 	m_GENERALButton.WinTop = m_fYTopOffset;
 	m_GENERALButton.WinWidth = m_fButtonTabWidth;
 	m_GENERALButton.WinHeight = m_fButtonTabHeight;

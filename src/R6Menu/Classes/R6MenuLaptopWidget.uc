@@ -31,32 +31,32 @@ function Created()
 	local Region R;
 
 	LAF = R6MenuRSLookAndFeel(OwnerWindow.LookAndFeel);
-	m_Left = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, float(LAF.m_stLapTopFrame.t.H), float(LAF.m_stLapTopFrame.L.W), float(__NFUN_146__(__NFUN_146__(__NFUN_146__(LAF.m_stLapTopFrame.L.H, LAF.m_stLapTopFrame.L2.H), LAF.m_stLapTopFrame.L3.H), LAF.m_stLapTopFrame.L4.H)), self);
-	m_Right = CreateWindow(Class'UWindow.UWindowWindow', float(__NFUN_147__(__NFUN_146__(__NFUN_146__(LAF.m_stLapTopFrame.BL.W, LAF.m_stLapTopFrame.B.W), LAF.m_stLapTopFrame.BR.W), LAF.m_stLapTopFrame.R.W)), float(LAF.m_stLapTopFrame.t.H), float(LAF.m_stLapTopFrame.R.W), float(__NFUN_146__(__NFUN_146__(__NFUN_146__(LAF.m_stLapTopFrame.R.H, LAF.m_stLapTopFrame.R2.H), LAF.m_stLapTopFrame.R3.H), LAF.m_stLapTopFrame.R4.H)), self);
-	m_Bottom = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, float(__NFUN_146__(__NFUN_146__(__NFUN_146__(__NFUN_146__(LAF.m_stLapTopFrame.t.H, LAF.m_stLapTopFrame.L.H), LAF.m_stLapTopFrame.L2.H), LAF.m_stLapTopFrame.L3.H), LAF.m_stLapTopFrame.L4.H)), float(__NFUN_146__(__NFUN_146__(LAF.m_stLapTopFrame.BL.W, LAF.m_stLapTopFrame.B.W), LAF.m_stLapTopFrame.BR.W)), float(LAF.m_stLapTopFrame.B.H), self);
-	m_Top = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, 0.0000000, float(__NFUN_146__(__NFUN_146__(LAF.m_stLapTopFrame.BL.W, LAF.m_stLapTopFrame.B.W), LAF.m_stLapTopFrame.BR.W)), float(LAF.m_stLapTopFrame.t.H), self);
+	m_Left = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, float(LAF.m_stLapTopFrame.t.H), float(LAF.m_stLapTopFrame.L.W), float((((LAF.m_stLapTopFrame.L.H + LAF.m_stLapTopFrame.L2.H) + LAF.m_stLapTopFrame.L3.H) + LAF.m_stLapTopFrame.L4.H)), self);
+	m_Right = CreateWindow(Class'UWindow.UWindowWindow', float((((LAF.m_stLapTopFrame.BL.W + LAF.m_stLapTopFrame.B.W) + LAF.m_stLapTopFrame.BR.W) - LAF.m_stLapTopFrame.R.W)), float(LAF.m_stLapTopFrame.t.H), float(LAF.m_stLapTopFrame.R.W), float((((LAF.m_stLapTopFrame.R.H + LAF.m_stLapTopFrame.R2.H) + LAF.m_stLapTopFrame.R3.H) + LAF.m_stLapTopFrame.R4.H)), self);
+	m_Bottom = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, float(((((LAF.m_stLapTopFrame.t.H + LAF.m_stLapTopFrame.L.H) + LAF.m_stLapTopFrame.L2.H) + LAF.m_stLapTopFrame.L3.H) + LAF.m_stLapTopFrame.L4.H)), float(((LAF.m_stLapTopFrame.BL.W + LAF.m_stLapTopFrame.B.W) + LAF.m_stLapTopFrame.BR.W)), float(LAF.m_stLapTopFrame.B.H), self);
+	m_Top = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, 0.0000000, float(((LAF.m_stLapTopFrame.BL.W + LAF.m_stLapTopFrame.B.W) + LAF.m_stLapTopFrame.BR.W)), float(LAF.m_stLapTopFrame.t.H), self);
 	m_Left.HideWindow();
 	m_Right.HideWindow();
 	m_Bottom.HideWindow();
 	m_Top.HideWindow();
 	R.H = 33;
-	R.X = __NFUN_146__(LAF.m_stLapTopFrame.L.W, 2);
-	R.Y = int(__NFUN_175__(__NFUN_175__(m_Bottom.WinTop, float(R.H)), m_fLaptopPadding));
-	R.W = __NFUN_147__(640, __NFUN_144__(2, R.X));
+	R.X = (LAF.m_stLapTopFrame.L.W + 2);
+	R.Y = int(((m_Bottom.WinTop - float(R.H)) - m_fLaptopPadding));
+	R.W = (640 - (2 * R.X));
 	m_NavBar = R6MenuNavigationBar(CreateWindow(Class'R6Menu.R6MenuNavigationBar', float(R.X), float(R.Y), float(R.W), float(R.H), self));
 	R.H = 16;
-	R.Y = int(__NFUN_175__(__NFUN_175__(m_NavBar.WinTop, float(R.H)), m_fLaptopPadding));
+	R.Y = int(((m_NavBar.WinTop - float(R.H)) - m_fLaptopPadding));
 	R.X = int(m_NavBar.WinLeft);
 	R.W = 35;
 	m_EmptyBox1 = R6MenuSimpleWindow(CreateWindow(Class'R6Menu.R6MenuSimpleWindow', float(R.X), float(R.Y), float(R.W), float(R.H), self));
 	m_EmptyBox1.m_BorderColor = Root.Colors.BlueLight;
-	R.X = int(__NFUN_175__(__NFUN_174__(m_NavBar.WinLeft, m_NavBar.WinWidth), float(R.W)));
+	R.X = int(((m_NavBar.WinLeft + m_NavBar.WinWidth) - float(R.W)));
 	m_EmptyBox2 = R6MenuSimpleWindow(CreateWindow(Class'R6Menu.R6MenuSimpleWindow', float(R.X), float(R.Y), float(R.W), float(R.H), self));
 	m_EmptyBox2.m_BorderColor = Root.Colors.BlueLight;
 	R.H = 16;
-	R.Y = int(__NFUN_175__(__NFUN_175__(m_NavBar.WinTop, float(R.H)), m_fLaptopPadding));
-	R.X = int(__NFUN_174__(__NFUN_174__(m_NavBar.WinLeft, float(R.W)), float(2)));
-	R.W = int(__NFUN_175__(__NFUN_175__(m_NavBar.WinWidth, float(__NFUN_144__(2, R.W))), float(4)));
+	R.Y = int(((m_NavBar.WinTop - float(R.H)) - m_fLaptopPadding));
+	R.X = int(((m_NavBar.WinLeft + float(R.W)) + float(2)));
+	R.W = int(((m_NavBar.WinWidth - float((2 * R.W))) - float(4)));
 	m_HelpTextBar = R6MenuHelpTextFrameBar(CreateWindow(Class'R6Menu.R6MenuHelpTextFrameBar', float(R.X), float(R.Y), float(R.W), float(R.H), self));
 	m_fRightMouseXClipping = m_Right.WinLeft;
 	m_fRightMouseYClipping = m_Bottom.WinTop;
@@ -73,27 +73,27 @@ function SetMousePos(float X, float Y)
 	fMouseX = X;
 	fMouseY = Y;
 	// End:0x45
-	if(__NFUN_176__(fMouseX, m_Left.WinWidth))
+	if((fMouseX < m_Left.WinWidth))
 	{
 		fMouseX = m_Left.WinWidth;		
 	}
 	else
 	{
 		// End:0x71
-		if(__NFUN_177__(fMouseX, m_Right.WinLeft))
+		if((fMouseX > m_Right.WinLeft))
 		{
 			fMouseX = m_Right.WinLeft;
 		}
 	}
 	// End:0xA0
-	if(__NFUN_176__(fMouseY, m_Top.WinHeight))
+	if((fMouseY < m_Top.WinHeight))
 	{
 		fMouseY = m_Top.WinHeight;		
 	}
 	else
 	{
 		// End:0xCC
-		if(__NFUN_177__(fMouseY, m_Bottom.WinTop))
+		if((fMouseY > m_Bottom.WinTop))
 		{
 			fMouseY = m_Bottom.WinTop;
 		}

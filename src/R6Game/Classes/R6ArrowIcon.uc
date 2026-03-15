@@ -21,10 +21,10 @@ state FollowPath
 	function Tick(float DeltaTime)
 	{
 		// End:0x7D
-		if(__NFUN_154__(int(Physics), int(5)))
+		if((int(Physics) == int(5)))
 		{
 			// End:0x7A
-			if(__NFUN_130__(__NFUN_176__(__NFUN_186__(float(__NFUN_147__(DesiredRotation.Yaw, __NFUN_156__(Rotation.Yaw, 65535)))), float(20)), __NFUN_176__(__NFUN_186__(float(__NFUN_147__(DesiredRotation.Pitch, __NFUN_156__(Rotation.Pitch, 65535)))), float(20))))
+			if(((Abs(float((DesiredRotation.Yaw - (Rotation.Yaw & 65535)))) < float(20)) && (Abs(float((DesiredRotation.Pitch - (Rotation.Pitch & 65535)))) < float(20))))
 			{
 				R6PlanningPawn(Owner).ArrowRotationIsOK();
 			}			
@@ -32,12 +32,12 @@ state FollowPath
 		else
 		{
 			// End:0xB2
-			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_vPointToReach, m_vStartLocation)), __NFUN_225__(__NFUN_216__(Location, m_vStartLocation))))
+			if((VSize((m_vPointToReach - m_vStartLocation)) < VSize((Location - m_vStartLocation))))
 			{
 				R6PlanningPawn(Owner).ArrowReachedNavPoint();
 			}
 		}
-		m_u8SpritePlanningAngle = byte(__NFUN_146__(__NFUN_145__(Rotation.Yaw, 255), 64));
+		m_u8SpritePlanningAngle = byte(((Rotation.Yaw / 255) + 64));
 		return;
 	}
 

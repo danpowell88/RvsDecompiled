@@ -15,8 +15,8 @@ var Sound m_ImpactWaterSound;
 
 simulated function SetSpeed(float fSpeed)
 {
-	Velocity = __NFUN_213__(fSpeed, Vector(Rotation));
-	Acceleration = __NFUN_212__(Vector(Rotation), float(50));
+	Velocity = (fSpeed * Vector(Rotation));
+	Acceleration = (Vector(Rotation) * float(50));
 	SetDrawType(8);
 	return;
 }
@@ -31,13 +31,13 @@ simulated event HitWall(Vector HitNormal, Actor Wall)
 	local Material HitMaterial;
 
 	// End:0xDE
-	if(__NFUN_119__(Wall, none))
+	if((Wall != none))
 	{
 		// End:0x55
-		if(__NFUN_130__(__NFUN_119__(Instigator, none), __NFUN_114__(Instigator.m_collisionBox, Wall)))
+		if(((Instigator != none) && (Instigator.m_collisionBox == Wall)))
 		{
-			vTraceEnd = __NFUN_215__(Location, __NFUN_213__(float(10), __NFUN_226__(Velocity)));
-			__NFUN_267__(vTraceEnd, true);
+			vTraceEnd = (Location + (float(10) * Normal(Velocity)));
+			__NFUN_267__(vTraceEnd, true) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 			return;
 		}
 		// End:0xDE

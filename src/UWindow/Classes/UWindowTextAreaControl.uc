@@ -46,13 +46,13 @@ function SetScrollable(bool newScrollable)
 	// End:0x6D
 	if(newScrollable)
 	{
-		VertSB = UWindowVScrollbar(CreateWindow(Class'UWindow.UWindowVScrollbar', __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+		VertSB = UWindowVScrollbar(CreateWindow(Class'UWindow.UWindowVScrollbar', (WinWidth - LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
 		VertSB.bAlwaysOnTop = true;		
 	}
 	else
 	{
 		// End:0x8E
-		if(__NFUN_119__(VertSB, none))
+		if((VertSB != none))
 		{
 			VertSB.Close();
 			VertSB = none;
@@ -65,12 +65,12 @@ function BeforePaint(Canvas C, float X, float Y)
 {
 	super.BeforePaint(C, X, Y);
 	// End:0x89
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
 		VertSB.WinTop = 0.0000000;
 		VertSB.WinHeight = WinHeight;
 		VertSB.WinWidth = LookAndFeel.Size_ScrollbarWidth;
-		VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+		VertSB.WinLeft = (WinWidth - LookAndFeel.Size_ScrollbarWidth);
 	}
 	return;
 }
@@ -88,7 +88,7 @@ function Paint(Canvas C, float X, float Y)
 	local float XL, YL, W, H;
 
 	// End:0x22
-	if(__NFUN_119__(AbsoluteFont, none))
+	if((AbsoluteFont != none))
 	{
 		C.Font = AbsoluteFont;		
 	}
@@ -96,82 +96,82 @@ function Paint(Canvas C, float X, float Y)
 	{
 		C.Font = Root.Fonts[Font];
 	}
-	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	C.SetDrawColor(byte(255), byte(255), byte(255));
 	TextSize(C, "TEST", XL, YL);
-	VisibleRows = int(__NFUN_172__(WinHeight, YL));
+	VisibleRows = int((WinHeight / YL));
 	TempHead = Head;
 	TempTail = Tail;
 	Line = TempHead;
 	// End:0xD8
-	if(__NFUN_122__(Prompt, ""))
+	if((Prompt == ""))
 	{
-		__NFUN_166__(Line);
+		(Line--);
 		// End:0xD8
-		if(__NFUN_150__(Line, 0))
+		if((Line < 0))
 		{
-			__NFUN_161__(Line, BufSize);
+			(Line += BufSize);
 		}
 	}
 	// End:0x183
 	if(bScrollable)
 	{
 		// End:0x183
-		if(__NFUN_179__(__NFUN_175__(VertSB.MaxPos, VertSB.pos), float(0)))
+		if(((VertSB.MaxPos - VertSB.pos) >= float(0)))
 		{
-			__NFUN_162__(Line, int(__NFUN_175__(VertSB.MaxPos, VertSB.pos)));
-			__NFUN_162__(TempTail, int(__NFUN_175__(VertSB.MaxPos, VertSB.pos)));
+			(Line -= int((VertSB.MaxPos - VertSB.pos)));
+			(TempTail -= int((VertSB.MaxPos - VertSB.pos)));
 			// End:0x16C
-			if(__NFUN_150__(Line, 0))
+			if((Line < 0))
 			{
-				__NFUN_161__(Line, BufSize);
+				(Line += BufSize);
 			}
 			// End:0x183
-			if(__NFUN_150__(TempTail, 0))
+			if((TempTail < 0))
 			{
-				__NFUN_161__(TempTail, BufSize);
+				(TempTail += BufSize);
 			}
 		}
 	}
 	// End:0x199
-	if(__NFUN_129__(bCursor))
+	if((!bCursor))
 	{
 		bShowCaret = false;		
 	}
 	else
 	{
 		// End:0x1DD
-		if(__NFUN_132__(__NFUN_177__(GetTime(), __NFUN_174__(LastDrawTime, 0.3000000)), __NFUN_176__(GetTime(), LastDrawTime)))
+		if(((GetTime() > (LastDrawTime + 0.3000000)) || (GetTime() < LastDrawTime)))
 		{
 			LastDrawTime = GetTime();
-			bShowCaret = __NFUN_129__(bShowCaret);
+			bShowCaret = (!bShowCaret);
 		}
 	}
 	i = 0;
 	J0x1E4:
 
 	// End:0x2C9 [Loop If]
-	if(__NFUN_150__(i, __NFUN_146__(VisibleRows, 1)))
+	if((i < (VisibleRows + 1)))
 	{
-		ClipText(C, 2.0000000, __NFUN_175__(WinHeight, __NFUN_171__(YL, float(__NFUN_146__(i, 1)))), TextArea[Line]);
+		ClipText(C, 2.0000000, (WinHeight - (YL * float((i + 1)))), TextArea[Line]);
 		// End:0x28F
-		if(__NFUN_130__(__NFUN_154__(Line, Head), bShowCaret))
+		if(((Line == Head) && bShowCaret))
 		{
 			TextSize(C, TextArea[Line], W, H);
-			ClipText(C, W, __NFUN_175__(WinHeight, __NFUN_171__(YL, float(__NFUN_146__(i, 1)))), "|");
+			ClipText(C, W, (WinHeight - (YL * float((i + 1)))), "|");
 		}
 		// End:0x2A1
-		if(__NFUN_154__(TempTail, Line))
+		if((TempTail == Line))
 		{
 			// [Explicit Break]
 			goto J0x2C9;
 		}
-		__NFUN_166__(Line);
+		(Line--);
 		// End:0x2BF
-		if(__NFUN_150__(Line, 0))
+		if((Line < 0))
 		{
-			__NFUN_161__(Line, BufSize);
+			(Line += BufSize);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x1E4;
 	}
@@ -185,7 +185,7 @@ function AddText(string _szNewLine, Color _TextColor, Font _Font)
 	TextColorArea[Lines] = _TextColor;
 	TextFontArea[Lines] = _Font;
 	TextArea[Lines] = _szNewLine;
-	__NFUN_161__(Lines, 1);
+	(Lines += 1);
 	return;
 }
 
@@ -201,23 +201,23 @@ function AddTextWithCanvas(Canvas C, float _fXOffSet, float _fYOffset, string Ne
 
 	m_fXOffSet = _fXOffSet;
 	m_fYOffSet = _fYOffset;
-	fWidthToReduce = __NFUN_174__(_fXOffSet, float(11));
-	fTotalWToReduce = __NFUN_174__(__NFUN_171__(2.0000000, _fXOffSet), float(11));
+	fWidthToReduce = (_fXOffSet + float(11));
+	fTotalWToReduce = ((2.0000000 * _fXOffSet) + float(11));
 	iNbLineTemp = 0;
-	temp = __NFUN_235__(NewLine);
+	temp = Caps(NewLine);
 	szTempTextArea[iNbLineTemp] = NewLine;
-	i = __NFUN_126__(temp, "\\N");
+	i = InStr(temp, "\\N");
 	J0x75:
 
 	// End:0xF8 [Loop If]
-	if(__NFUN_155__(i, -1))
+	if((i != -1))
 	{
-		temp = __NFUN_127__(szTempTextArea[iNbLineTemp], __NFUN_146__(i, 2));
-		szTempTextArea[iNbLineTemp] = __NFUN_128__(szTempTextArea[iNbLineTemp], i);
-		__NFUN_161__(iNbLineTemp, 1);
+		temp = Mid(szTempTextArea[iNbLineTemp], (i + 2));
+		szTempTextArea[iNbLineTemp] = Left(szTempTextArea[iNbLineTemp], i);
+		(iNbLineTemp += 1);
 		szTempTextArea[iNbLineTemp] = temp;
-		temp = __NFUN_235__(temp);
-		i = __NFUN_126__(temp, "\\N");
+		temp = Caps(temp);
+		i = InStr(temp, "\\N");
 		// [Loop Continue]
 		goto J0x75;
 	}
@@ -232,7 +232,7 @@ function AddTextWithCanvas(Canvas C, float _fXOffSet, float _fYOffset, string Ne
 	if(bSentry)
 	{
 		// End:0x17C
-		if(__NFUN_122__(Out, ""))
+		if((Out == ""))
 		{
 			i = 0;
 			PrevPos = 0;
@@ -240,27 +240,27 @@ function AddTextWithCanvas(Canvas C, float _fXOffSet, float _fYOffset, string Ne
 			TotalPos = 0;
 			numLines = 1;
 			PrevNumLines = 1;
-			__NFUN_165__(i);
+			(i++);
 			Out = szTempTextArea[iNbLineTemp];
 		}
-		WordPos = __NFUN_126__(Out, " ");
+		WordPos = InStr(Out, " ");
 		// End:0x1B6
-		if(__NFUN_154__(WordPos, -1))
+		if((WordPos == -1))
 		{
 			temp = Out;
-			WordPos = __NFUN_125__(temp);			
+			WordPos = Len(temp);			
 		}
 		else
 		{
-			temp = __NFUN_112__(__NFUN_128__(Out, WordPos), " ");
+			temp = (Left(Out, WordPos) $ " ");
 		}
 		C.Font = _Font;
-		szTSResult = TextSize(C, temp, WordWidth, WordHeight, int(__NFUN_175__(WinWidth, fTotalWToReduce)));
+		szTSResult = TextSize(C, temp, WordWidth, WordHeight, int((WinWidth - fTotalWToReduce)));
 		// End:0x299
-		if(__NFUN_177__(__NFUN_174__(__NFUN_174__(WordWidth, XWordPos), fTotalWToReduce), __NFUN_175__(WinWidth, _fXOffSet)))
+		if((((WordWidth + XWordPos) + fTotalWToReduce) > (WinWidth - _fXOffSet)))
 		{
 			// End:0x284
-			if(__NFUN_180__(XWordPos, _fXOffSet))
+			if((XWordPos == _fXOffSet))
 			{
 				temp = szTSResult;
 				WordPos = __NFUN_125__(temp);

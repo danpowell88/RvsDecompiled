@@ -152,7 +152,7 @@ function PreBeginPlay()
 {
 	StartTime = 0.0000000;
 	SetGameSpeed(GameSpeed);
-	GameReplicationInfo = __NFUN_278__(GameReplicationInfoClass);
+	GameReplicationInfo = Spawn(GameReplicationInfoClass);
 	InitGameReplicationInfo();
 	return;
 }
@@ -184,16 +184,16 @@ function InitLogging()
 	local bool bLoggingWorld;
 
 	// End:0x0D
-	if(__NFUN_129__(bLoggingGame))
+	if((!bLoggingGame))
 	{
 		return;
 	}
-	bLoggingWorld = __NFUN_130__(bWorldLog, __NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))));
+	bLoggingWorld = (bWorldLog && ((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))));
 	// End:0xDC
-	if(__NFUN_132__(bLocalLog, bLoggingWorld))
+	if((bLocalLog || bLoggingWorld))
 	{
-		StatLog = __NFUN_278__(StatLogClass);
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Initiating logging using ", string(StatLog)), " class "), string(StatLogClass)));
+		StatLog = Spawn(StatLogClass);
+		Log(((("Initiating logging using " $ string(StatLog)) $ " class ") $ string(StatLogClass)));
 		StatLog.GenerateLogs(bLocalLog, bLoggingWorld);
 		StatLog.StartLog();
 		LogGameParameters();
@@ -244,7 +244,7 @@ function string GetInfo()
 	local string ResultSet;
 
 	// End:0x41
-	if(__NFUN_130__(StatLog.bWorld, __NFUN_129__(StatLog.bWorldBatcherError)))
+	if((StatLog.bWorld && (!StatLog.bWorldBatcherError)))
 	{
 		ResultSet = "\\worldlog\\true";		
 	}
@@ -255,11 +255,11 @@ function string GetInfo()
 	// End:0x8E
 	if(StatLog.bWorld)
 	{
-		ResultSet = __NFUN_112__(ResultSet, "\\wantworldlog\\true");		
+		ResultSet = (ResultSet $ "\\wantworldlog\\true");		
 	}
 	else
 	{
-		ResultSet = __NFUN_112__(ResultSet, "\\wantworldlog\\false");
+		ResultSet = (ResultSet $ "\\wantworldlog\\false");
 	}
 	return ResultSet;
 	return;
@@ -272,16 +272,16 @@ function int GetServerPort()
 	local int i;
 
 	S = Level.GetAddressURL();
-	i = __NFUN_126__(S, ":");
-	assert(__NFUN_153__(i, 0));
-	return int(__NFUN_127__(S, __NFUN_146__(i, 1)));
+	i = InStr(S, ":");
+	assert((i >= 0));
+	return int(Mid(S, (i + 1)));
 	return;
 }
 
 function bool SetPause(bool bPause, PlayerController P)
 {
 	// End:0x62
-	if(__NFUN_132__(bPauseable, __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	if((bPauseable || (int(Level.NetMode) == int(NM_Standalone))))
 	{
 		// End:0x4D
 		if(bPause)
@@ -303,14 +303,14 @@ function bool SetPause(bool bPause, PlayerController P)
 
 function LogGameParameters()
 {
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameName"), __NFUN_236__(9)), GameName));
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameClass"), __NFUN_236__(9)), string(Class)));
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameVersion"), __NFUN_236__(9)), Level.EngineVersion));
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "MinNetVersion"), __NFUN_236__(9)), Level.MinNetVersion));
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GoreLevel"), __NFUN_236__(9)), string(GoreLevel)));
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "GameSpeed"), __NFUN_236__(9)), string(int(__NFUN_171__(GameSpeed, float(100))))));
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "MaxSpectators"), __NFUN_236__(9)), string(MaxSpectators)));
-	StatLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(StatLog.GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), "MaxPlayers"), __NFUN_236__(9)), string(MaxPlayers)));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "GameName") $ Chr(9)) $ GameName));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "GameClass") $ Chr(9)) $ string(Class)));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "GameVersion") $ Chr(9)) $ Level.EngineVersion));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "MinNetVersion") $ Chr(9)) $ Level.MinNetVersion));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "GoreLevel") $ Chr(9)) $ string(GoreLevel)));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "GameSpeed") $ Chr(9)) $ string(int((GameSpeed * float(100))))));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "MaxSpectators") $ Chr(9)) $ string(MaxSpectators)));
+	StatLog.LogEventString(((((((StatLog.GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ "MaxPlayers") $ Chr(9)) $ string(MaxPlayers)));
 	return;
 }
 
@@ -322,14 +322,14 @@ function SetGameSpeed(float t)
 	local float OldSpeed;
 
 	OldSpeed = GameSpeed;
-	GameSpeed = __NFUN_245__(t, 0.1000000);
+	GameSpeed = FMax(t, 0.1000000);
 	Level.TimeDilation = GameSpeed;
 	// End:0x43
-	if(__NFUN_181__(GameSpeed, OldSpeed))
+	if((GameSpeed != OldSpeed))
 	{
-		__NFUN_536__();
+		SaveConfig();
 	}
-	__NFUN_280__(Level.TimeDilation, true);
+	SetTimer(Level.TimeDilation, true);
 	return;
 }
 
@@ -338,11 +338,11 @@ function SetGamePassword(string szPasswd)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	AccessControl.SetGamePassword(szPasswd);
 	pServerOptions.GamePassword = szPasswd;
-	pServerOptions.UsePassword = __NFUN_129__(__NFUN_122__(szPasswd, ""));
-	pServerOptions.__NFUN_536__();
+	pServerOptions.UsePassword = (!(szPasswd == ""));
+	pServerOptions.SaveConfig();
 	return;
 }
 
@@ -355,20 +355,20 @@ event DetailChange()
 	local ZoneInfo Z;
 
 	// End:0x5A
-	if(__NFUN_129__(Level.bHighDetailMode))
+	if((!Level.bHighDetailMode))
 	{
 		// End:0x59
-		foreach __NFUN_313__(Class'Engine.Actor', A)
+		foreach DynamicActors(Class'Engine.Actor', A)
 		{
 			// End:0x58
-			if(__NFUN_130__(A.bHighDetail, __NFUN_129__(A.bGameRelevant)))
+			if((A.bHighDetail && (!A.bGameRelevant)))
 			{
-				A.__NFUN_279__();
+				A.Destroy();
 			}			
 		}		
 	}
 	// End:0x7A
-	foreach __NFUN_304__(Class'Engine.ZoneInfo', Z)
+	foreach AllActors(Class'Engine.ZoneInfo', Z)
 	{
 		Z.LinkToSkybox();		
 	}	
@@ -381,19 +381,19 @@ event DetailChange()
 function bool GrabOption(out string Options, out string Result)
 {
 	// End:0x8A
-	if(__NFUN_122__(__NFUN_128__(Options, 1), "?"))
+	if((Left(Options, 1) == "?"))
 	{
-		Result = __NFUN_127__(Options, 1);
+		Result = Mid(Options, 1);
 		// End:0x45
-		if(__NFUN_153__(__NFUN_126__(Result, "?"), 0))
+		if((InStr(Result, "?") >= 0))
 		{
-			Result = __NFUN_128__(Result, __NFUN_126__(Result, "?"));
+			Result = Left(Result, InStr(Result, "?"));
 		}
-		Options = __NFUN_127__(Options, 1);
+		Options = Mid(Options, 1);
 		// End:0x7D
-		if(__NFUN_153__(__NFUN_126__(Options, "?"), 0))
+		if((InStr(Options, "?") >= 0))
 		{
-			Options = __NFUN_127__(Options, __NFUN_126__(Options, "?"));			
+			Options = Mid(Options, InStr(Options, "?"));			
 		}
 		else
 		{
@@ -414,10 +414,10 @@ function bool GrabOption(out string Options, out string Result)
 function GetKeyValue(string Pair, out string Key, out string Value)
 {
 	// End:0x44
-	if(__NFUN_153__(__NFUN_126__(Pair, "="), 0))
+	if((InStr(Pair, "=") >= 0))
 	{
-		Key = __NFUN_128__(Pair, __NFUN_126__(Pair, "="));
-		Value = __NFUN_127__(Pair, __NFUN_146__(__NFUN_126__(Pair, "="), 1));		
+		Key = Left(Pair, InStr(Pair, "="));
+		Value = Mid(Pair, (InStr(Pair, "=") + 1));		
 	}
 	else
 	{
@@ -437,7 +437,7 @@ function string ParseOption(string Options, string InKey)
 	{
 		GetKeyValue(Pair, Key, Value);
 		// End:0x3D
-		if(__NFUN_124__(Key, InKey))
+		if((Key ~= InKey))
 		{
 			return Value;
 		}
@@ -455,21 +455,21 @@ event InitGame(string Options, out string Error)
 	local Class<AccessControl> ACClass;
 	local Class<BroadcastHandler> BHClass;
 
-	__NFUN_231__(__NFUN_168__("InitGame:", Options));
-	MaxPlayers = __NFUN_249__(32, GetIntOption(Options, "MaxPlayers", MaxPlayers));
+	Log(("InitGame:" @ Options));
+	MaxPlayers = Min(32, GetIntOption(Options, "MaxPlayers", MaxPlayers));
 	Difficulty = byte(GetIntOption(Options, "Difficulty", int(Difficulty)));
 	InOpt = ParseOption(Options, "GameSpeed");
 	// End:0xA9
-	if(__NFUN_123__(InOpt, ""))
+	if((InOpt != ""))
 	{
-		__NFUN_231__(__NFUN_168__("GameSpeed", InOpt));
+		Log(("GameSpeed" @ InOpt));
 		SetGameSpeed(float(InOpt));
 	}
 	BHClass = Class<BroadcastHandler>(DynamicLoadObject(BroadcastHandlerClass, Class'Core.Class'));
-	BroadcastHandler = __NFUN_278__(BHClass);
+	BroadcastHandler = Spawn(BHClass);
 	InOpt = ParseOption(Options, "AccessControl");
 	// End:0x119
-	if(__NFUN_123__(InOpt, ""))
+	if((InOpt != ""))
 	{
 		ACClass = Class<AccessControl>(DynamicLoadObject(InOpt, Class'Core.Class'));
 	}

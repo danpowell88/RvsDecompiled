@@ -90,7 +90,7 @@ native(1838) final function R6Hostage GetClosestHostage(Vector vPoint);
 
 function InitZone()
 {
-	__NFUN_1830__();
+	FirstInit();
 	return;
 }
 

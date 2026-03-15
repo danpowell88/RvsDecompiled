@@ -33,12 +33,12 @@ function Init()
 	if(R6MissionObjectiveMgr(m_mgr).m_bEnableCheckForErrors)
 	{
 		// End:0x44
-		if(__NFUN_114__(m_r6IOObject, none))
+		if((m_r6IOObject == none))
 		{
 			logMObj("m_r6IOObject not specified");
 		}
 		// End:0xB8
-		if(__NFUN_130__(m_bIfDestroyedObjectiveIsCompleted, m_bIfDestroyedObjectiveIsFailed))
+		if((m_bIfDestroyedObjectiveIsCompleted && m_bIfDestroyedObjectiveIsFailed))
 		{
 			logMObj("both are set to true m_bIfDestroyedObjectiveIsCompleted, m_bIfDestroyedObjectiveIsFailed");
 		}
@@ -53,7 +53,7 @@ function Init()
 function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 {
 	// End:0x11
-	if(__NFUN_119__(m_r6IOObject, anInteractiveObject))
+	if((m_r6IOObject != anInteractiveObject))
 	{
 		return;
 	}
@@ -100,7 +100,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 {
 	// End:0x11
-	if(__NFUN_119__(m_r6IOObject, anInteractiveObject))
+	if((m_r6IOObject != anInteractiveObject))
 	{
 		return;
 	}

@@ -29,14 +29,14 @@ function Created()
 	J0x0F:
 
 	// End:0xFA [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		m_ActiveList[i] = R6MenuTeamButton(CreateWindow(Class'R6Menu.R6MenuTeamButton', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTeamButton'.default.UpRegion.W), 23.0000000, self));
 		m_ActiveList[i].m_iTeamColor = i;
 		m_ActiveList[i].ToolTipString = Localize("PlanningMenu", "TeamActive", "R6Menu");
 		m_ActiveList[i].m_vButtonColor = Root.Colors.TeamColorLight[i];
-		__NFUN_161__(xPosition, 14);
-		__NFUN_165__(i);
+		(xPosition += 14);
+		(i++);
 		// [Loop Continue]
 		goto J0x0F;
 	}
@@ -44,18 +44,18 @@ function Created()
 	J0x101:
 
 	// End:0x1F1 [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		m_DisplayList[i] = R6MenuTeamDisplayButton(CreateWindow(Class'R6Menu.R6MenuTeamDisplayButton', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTeamDisplayButton'.default.UpRegion.W), 23.0000000, self));
 		m_DisplayList[i].m_iTeamColor = i;
 		m_DisplayList[i].m_vButtonColor = Root.Colors.TeamColorLight[i];
 		m_DisplayList[i].ToolTipString = Localize("PlanningMenu", "TeamDisplay", "R6Menu");
-		__NFUN_161__(xPosition, __NFUN_147__(28, 2));
-		__NFUN_165__(i);
+		(xPosition += (28 - 2));
+		(i++);
 		// [Loop Continue]
 		goto J0x101;
 	}
-	WinWidth = float(__NFUN_146__(xPosition, 4));
+	WinWidth = float((xPosition + 4));
 	SetTeamActive(0);
 	m_BorderColor = Root.Colors.GrayLight;
 	return;
@@ -73,7 +73,7 @@ function Reset()
 	m_DisplayList[1].m_bSelected = true;
 	m_DisplayList[2].m_bSelected = true;
 	// End:0xE2
-	if(__NFUN_119__(OwnerCtrl, none))
+	if((OwnerCtrl != none))
 	{
 		OwnerCtrl.m_pTeamInfo[0].SetPathDisplay(true);
 		OwnerCtrl.m_pTeamInfo[1].SetPathDisplay(true);
@@ -103,7 +103,7 @@ function SetTeamActive(int iActive)
 	m_ActiveList[2].m_bSelected = false;
 	m_ActiveList[iActive].m_bSelected = true;
 	// End:0xF7
-	if(__NFUN_119__(OwnerCtrl, none))
+	if((OwnerCtrl != none))
 	{
 		switch(iActive)
 		{
@@ -142,14 +142,14 @@ function ResetTeams(int iWhatToReset)
 
 	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
 	// End:0xE3
-	if(__NFUN_130__(__NFUN_150__(iWhatToReset, 3), __NFUN_243__(m_ActiveList[OwnerCtrl.m_iCurrentTeam].m_bSelected, true)))
+	if(((iWhatToReset < 3) && (m_ActiveList[OwnerCtrl.m_iCurrentTeam].m_bSelected != true)))
 	{
 		m_ActiveList[0].m_bSelected = false;
 		m_ActiveList[1].m_bSelected = false;
 		m_ActiveList[2].m_bSelected = false;
 		m_ActiveList[OwnerCtrl.m_iCurrentTeam].m_bSelected = true;
 		// End:0xE0
-		if(__NFUN_129__(m_DisplayList[OwnerCtrl.m_iCurrentTeam].m_bSelected))
+		if((!m_DisplayList[OwnerCtrl.m_iCurrentTeam].m_bSelected))
 		{
 			m_DisplayList[OwnerCtrl.m_iCurrentTeam].m_bSelected = true;
 		}		
@@ -157,9 +157,9 @@ function ResetTeams(int iWhatToReset)
 	else
 	{
 		// End:0x124
-		if(__NFUN_151__(iWhatToReset, 2))
+		if((iWhatToReset > 2))
 		{
-			m_DisplayList[__NFUN_147__(iWhatToReset, 3)].m_bSelected = __NFUN_129__(m_DisplayList[__NFUN_147__(iWhatToReset, 3)].m_bSelected);
+			m_DisplayList[(iWhatToReset - 3)].m_bSelected = (!m_DisplayList[(iWhatToReset - 3)].m_bSelected);
 		}
 	}
 	return;

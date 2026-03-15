@@ -79,7 +79,7 @@ function ClearLevelReferences()
 //====================================================================================
 function bool IsInitialisationCompleted()
 {
-	return __NFUN_130__(__NFUN_119__(m_PlayerController, none), __NFUN_119__(m_GameRepInfo, none));
+	return ((m_PlayerController != none) && (m_GameRepInfo != none));
 	return;
 }
 
@@ -146,14 +146,14 @@ function PlayerSelection(Object.ePlayerTeamSelection newTeam)
 	local int _TeamACount, _TeamBCount;
 
 	// End:0x4F
-	if(__NFUN_154__(int(newTeam), int(0)))
+	if((int(newTeam) == int(0)))
 	{
-		__NFUN_231__("ERROR: Menu engine returned PTS_UnSelected as player team");
+		Log("ERROR: Menu engine returned PTS_UnSelected as player team");
 		return;
 	}
 	RefreshReadyButtonStatus();
 	// End:0x7B
-	if(__NFUN_154__(int(newTeam), int(m_PlayerController.m_TeamSelection)))
+	if((int(newTeam) == int(m_PlayerController.m_TeamSelection)))
 	{
 		SetStatMenuState(2);
 		return;
@@ -162,10 +162,10 @@ function PlayerSelection(Object.ePlayerTeamSelection newTeam)
 	if(m_GameRepInfo.IsInAGameState())
 	{
 		// End:0xFD
-		if(__NFUN_132__(__NFUN_154__(int(newTeam), int(4)), __NFUN_129__(m_GameRepInfo.m_bRestartableByJoin)))
+		if(((int(newTeam) == int(4)) || (!m_GameRepInfo.m_bRestartableByJoin)))
 		{
 			// End:0xEC
-			if(__NFUN_114__(m_PlayerController.Pawn, none))
+			if((m_PlayerController.Pawn == none))
 			{
 				m_PlayerController.m_bReadyToEnterSpectatorMode = true;
 				m_PlayerController.Fire(0.0000000);
@@ -182,7 +182,7 @@ function PlayerSelection(Object.ePlayerTeamSelection newTeam)
 	{
 		SetStatMenuState(2);
 		// End:0x126
-		if(__NFUN_154__(int(newTeam), int(4)))
+		if((int(newTeam) == int(4)))
 		{
 			LoadSoundBankInSpectator();
 		}
@@ -196,7 +196,7 @@ function PlayerSelection(Object.ePlayerTeamSelection newTeam)
 function LoadSoundBankInSpectator()
 {
 	// End:0x34
-	if(__NFUN_129__(m_PlayerController.m_bLoadSoundGun))
+	if((!m_PlayerController.m_bLoadSoundGun))
 	{
 		m_PlayerController.m_bLoadSoundGun = true;
 		m_PlayerController.ServerReadyToLoadWeaponSound();
@@ -242,7 +242,7 @@ function int PTSToInt(Object.ePlayerTeamSelection inEnum)
 function RefreshMPlayerInfo()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_GameRepInfo, none))
+	if((m_GameRepInfo != none))
 	{
 		m_GameRepInfo.RefreshMPlayerInfo();
 	}
@@ -259,34 +259,34 @@ function int GeTTeamSelection(int _iIndex)
 function NewServerState()
 {
 	// End:0x0D
-	if(__NFUN_114__(m_GameRepInfo, none))
+	if((m_GameRepInfo == none))
 	{
 		return;
 	}
 	RefreshReadyButtonStatus();
 	// End:0x5D
-	if(__NFUN_132__(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.1), __NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.0)))
+	if(((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.1) || (int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.0)))
 	{
 		SetPlayerReadyStatus(false);		
 	}
 	else
 	{
 		// End:0x88
-		if(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.2))
+		if((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.2))
 		{
 			SetStatMenuState(7);			
 		}
 		else
 		{
 			// End:0x10D
-			if(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.3))
+			if((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.3))
 			{
 				// End:0x102
-				if(__NFUN_132__(__NFUN_154__(int(m_PlayerController.m_TeamSelection), int(2)), __NFUN_154__(int(m_PlayerController.m_TeamSelection), int(3))))
+				if(((int(m_PlayerController.m_TeamSelection) == int(2)) || (int(m_PlayerController.m_TeamSelection) == int(3))))
 				{
 					SetPlayerReadyStatus(true);
 					// End:0xFF
-					if(__NFUN_129__(m_PlayerController.bOnlySpectator))
+					if((!m_PlayerController.bOnlySpectator))
 					{
 						SetStatMenuState(3);
 					}					
@@ -299,18 +299,18 @@ function NewServerState()
 			else
 			{
 				// End:0x1CB
-				if(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.4))
+				if((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.4))
 				{
 					SetPlayerReadyStatus(false);
 					// End:0x189
-					if(__NFUN_130__(__NFUN_119__(m_PlayerController.Pawn, none), __NFUN_119__(m_PlayerController.Pawn.EngineWeapon, none)))
+					if(((m_PlayerController.Pawn != none) && (m_PlayerController.Pawn.EngineWeapon != none)))
 					{
-						m_PlayerController.Pawn.EngineWeapon.__NFUN_113__('None');
+						m_PlayerController.Pawn.EngineWeapon.GotoState('None');
 					}
 					// End:0x1C3
 					if(bShowLog)
 					{
-						__NFUN_231__("NewServerState() m_GameRepInfo.RSS_EndOfMatch");
+						Log("NewServerState() m_GameRepInfo.RSS_EndOfMatch");
 					}
 					SetStatMenuState(4);
 				}
@@ -334,7 +334,7 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 function SetPlayerReadyStatus(bool _bPlayerReady)
 {
 	// End:0x25
-	if(__NFUN_242__(_bPlayerReady, m_PlayerController.PlayerReplicationInfo.m_bPlayerReady))
+	if((_bPlayerReady == m_PlayerController.PlayerReplicationInfo.m_bPlayerReady))
 	{
 		return;
 	}

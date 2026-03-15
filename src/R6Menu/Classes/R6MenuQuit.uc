@@ -29,7 +29,7 @@ function Created()
 	m_ButtonMainMenu.m_buttonFont = ButtonFont;
 	m_ButtonMainMenu.ResizeToText();
 	// End:0x12C
-	if(__NFUN_132__(Root.Console.m_bStartedByGSClient, Root.Console.m_bNonUbiMatchMakingHost))
+	if((Root.Console.m_bStartedByGSClient || Root.Console.m_bNonUbiMatchMakingHost))
 	{
 		m_ButtonMainMenu.bDisabled = true;
 	}
@@ -57,7 +57,7 @@ function ShowWindow()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x4E
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{

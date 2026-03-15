@@ -23,20 +23,20 @@ function Paint(Canvas C, float X, float Y)
 	local bool bUseAreaFont;
 
 	// End:0x0D
-	if(__NFUN_154__(Lines, 0))
+	if((Lines == 0))
 	{
 		return;
 	}
 	bUseAreaFont = false;
 	// End:0x37
-	if(__NFUN_119__(AbsoluteFont, none))
+	if((AbsoluteFont != none))
 	{
 		C.Font = AbsoluteFont;		
 	}
 	else
 	{
 		// End:0x65
-		if(__NFUN_119__(TextFontArea[0], none))
+		if((TextFontArea[0] != none))
 		{
 			bUseAreaFont = true;
 			C.Font = TextFontArea[0];			
@@ -47,10 +47,10 @@ function Paint(Canvas C, float X, float Y)
 		}
 	}
 	TextSize(C, "TEST", XL, YL);
-	AddLine = int(__NFUN_172__(m_fYOffSet, YL));
-	__NFUN_161__(AddLine, 1);
-	__NFUN_161__(AddLine, Lines);
-	VisibleRows = int(__NFUN_172__(WinHeight, YL));
+	AddLine = int((m_fYOffSet / YL));
+	(AddLine += 1);
+	(AddLine += Lines);
+	VisibleRows = int((WinHeight / YL));
 	i = 0;
 	// End:0x11E
 	if(bScrollable)
@@ -62,30 +62,30 @@ function Paint(Canvas C, float X, float Y)
 	J0x125:
 
 	// End:0x208 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(j, VisibleRows), __NFUN_150__(__NFUN_146__(i, j), Lines)))
+	if(((j < VisibleRows) && ((i + j) < Lines)))
 	{
-		C.__NFUN_2626__(TextColorArea[__NFUN_146__(i, j)].R, TextColorArea[__NFUN_146__(i, j)].G, TextColorArea[__NFUN_146__(i, j)].B);
+		C.SetDrawColor(TextColorArea[(i + j)].R, TextColorArea[(i + j)].G, TextColorArea[(i + j)].B);
 		// End:0x1C7
 		if(bUseAreaFont)
 		{
-			C.Font = TextFontArea[__NFUN_146__(i, j)];
+			C.Font = TextFontArea[(i + j)];
 		}
-		ClipText(C, m_fXOffSet, __NFUN_174__(m_fYOffSet, __NFUN_171__(YL, float(j))), TextArea[__NFUN_146__(i, j)]);
-		__NFUN_165__(j);
+		ClipText(C, m_fXOffSet, (m_fYOffSet + (YL * float(j))), TextArea[(i + j)]);
+		(j++);
 		// [Loop Continue]
 		goto J0x125;
 	}
 	// End:0x265
-	if(__NFUN_151__(__NFUN_146__(i, j), Lines))
+	if(((i + j) > Lines))
 	{
 		j = 0;
 		J0x225:
 
 		// End:0x265 [Loop If]
-		if(__NFUN_150__(j, AddLine))
+		if((j < AddLine))
 		{
-			ClipText(C, m_fXOffSet, __NFUN_174__(m_fYOffSet, __NFUN_171__(YL, float(j))), "");
-			__NFUN_165__(j);
+			ClipText(C, m_fXOffSet, (m_fYOffSet + (YL * float(j))), "");
+			(j++);
 			// [Loop Continue]
 			goto J0x225;
 		}
@@ -102,7 +102,7 @@ function NewAddText(Canvas C)
 	local string TempTextArea[80];
 
 	// End:0x0D
-	if(__NFUN_154__(Lines, 0))
+	if((Lines == 0))
 	{
 		return;
 	}
@@ -110,12 +110,12 @@ function NewAddText(Canvas C)
 	J0x14:
 
 	// End:0x72 [Loop If]
-	if(__NFUN_150__(i, Lines))
+	if((i < Lines))
 	{
 		TempTextFontArea[i] = TextFontArea[i];
 		TempTextColorArea[i] = TextColorArea[i];
 		TempTextArea[i] = TextArea[i];
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x14;
 	}
@@ -125,10 +125,10 @@ function NewAddText(Canvas C)
 	J0x8B:
 
 	// End:0xDA [Loop If]
-	if(__NFUN_150__(i, iTempLines))
+	if((i < iTempLines))
 	{
 		AddTextWithCanvas(C, m_fXOffSet, m_fYOffSet, TempTextArea[i], TempTextFontArea[i], TempTextColorArea[i]);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x8B;
 	}

@@ -52,16 +52,16 @@ var() string DecoderRingURL;  // URL to log format decoder ring.
 // Object
 function BeginPlay()
 {
-	__NFUN_280__(30.0000000, true);
+	SetTimer(30.0000000, true);
 	return;
 }
 
 function Destroyed()
 {
 	// End:0x17
-	if(__NFUN_119__(LocalLog, none))
+	if((LocalLog != none))
 	{
-		LocalLog.__NFUN_279__();
+		LocalLog.Destroy();
 	}
 	return;
 }
@@ -81,7 +81,7 @@ function GenerateLogs(bool bLogLocal, bool bLogWorld)
 		// End:0x28
 		if(bLogLocal)
 		{
-			LocalLog = __NFUN_278__(Class);
+			LocalLog = Spawn(Class);
 		}
 	}
 	return;
@@ -105,18 +105,18 @@ function FlushLog()
 
 function LogEventString(string EventString)
 {
-	__NFUN_231__(EventString);
+	Log(EventString);
 	// End:0x22
-	if(__NFUN_119__(LocalLog, none))
+	if((LocalLog != none))
 	{
-		LocalLog.__NFUN_231__(EventString);
+		LocalLog.Log(EventString);
 	}
 	return;
 }
 
 function LogWorldEventString(string EventString)
 {
-	__NFUN_231__(EventString);
+	Log(EventString);
 	return;
 }
 
@@ -154,61 +154,61 @@ function string GetAbsoluteTime()
 
 	AbsoluteTime = string(Level.Year);
 	// End:0x51
-	if(__NFUN_150__(Level.Month, 10))
+	if((Level.Month < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Month));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Month));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Month));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Month));
 	}
 	// End:0xAE
-	if(__NFUN_150__(Level.Day, 10))
+	if((Level.Day < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Day));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Day));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Day));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Day));
 	}
 	// End:0x10B
-	if(__NFUN_150__(Level.Hour, 10))
+	if((Level.Hour < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Hour));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Hour));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Hour));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Hour));
 	}
 	// End:0x168
-	if(__NFUN_150__(Level.Minute, 10))
+	if((Level.Minute < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Minute));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Minute));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Minute));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Minute));
 	}
 	// End:0x1C5
-	if(__NFUN_150__(Level.Second, 10))
+	if((Level.Second < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Second));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Second));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Second));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Second));
 	}
 	// End:0x222
-	if(__NFUN_150__(Level.Millisecond, 10))
+	if((Level.Millisecond < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Millisecond));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Millisecond));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Millisecond));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Millisecond));
 	}
 	GMTRef = GetGMTRef();
-	AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), GMTRef);
+	AbsoluteTime = ((AbsoluteTime $ ".") $ GMTRef);
 	TimeStamp = 0.0000000;
 	return AbsoluteTime;
 	return;
@@ -221,49 +221,49 @@ function string GetShortAbsoluteTime()
 
 	AbsoluteTime = string(Level.Year);
 	// End:0x51
-	if(__NFUN_150__(Level.Month, 10))
+	if((Level.Month < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Month));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Month));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Month));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Month));
 	}
 	// End:0xAE
-	if(__NFUN_150__(Level.Day, 10))
+	if((Level.Day < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Day));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Day));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Day));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Day));
 	}
 	// End:0x10B
-	if(__NFUN_150__(Level.Hour, 10))
+	if((Level.Hour < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Hour));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Hour));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Hour));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Hour));
 	}
 	// End:0x168
-	if(__NFUN_150__(Level.Minute, 10))
+	if((Level.Minute < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Minute));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Minute));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Minute));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Minute));
 	}
 	// End:0x1C5
-	if(__NFUN_150__(Level.Second, 10))
+	if((Level.Second < 10))
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, ".0"), string(Level.Second));		
+		AbsoluteTime = ((AbsoluteTime $ ".0") $ string(Level.Second));		
 	}
 	else
 	{
-		AbsoluteTime = __NFUN_112__(__NFUN_112__(AbsoluteTime, "."), string(Level.Second));
+		AbsoluteTime = ((AbsoluteTime $ ".") $ string(Level.Second));
 	}
 	TimeStamp = 0.0000000;
 	return AbsoluteTime;
@@ -277,7 +277,7 @@ function string GetTimeStamp()
 	local int pos;
 
 	Time = string(TimeStamp);
-	Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
+	Time = Left(Time, (InStr(Time, ".") + 3));
 	return Time;
 	return;
 }
@@ -292,7 +292,7 @@ event string GetLocalLogFileName()
 // Track relative timestamps.
 function Tick(float Delta)
 {
-	__NFUN_184__(TimeStamp, Delta);
+	(TimeStamp += Delta);
 	return;
 }
 
@@ -302,19 +302,19 @@ function LogStandardInfo()
 	// End:0x9A
 	if(bWorld)
 	{
-		LogWorldEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Log_Standard"), __NFUN_236__(9)), WorldStandard));
+		LogWorldEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Log_Standard") $ Chr(9)) $ WorldStandard));
 		// End:0x97
-		if(__NFUN_119__(LocalLog, none))
+		if((LocalLog != none))
 		{
-			LocalLog.LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Log_Standard"), __NFUN_236__(9)), LocalStandard));
+			LocalLog.LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Log_Standard") $ Chr(9)) $ LocalStandard));
 		}		
 	}
 	else
 	{
-		LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Log_Standard"), __NFUN_236__(9)), LocalStandard));
+		LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Log_Standard") $ Chr(9)) $ LocalStandard));
 	}
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Log_Version"), __NFUN_236__(9)), LogVersion));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Log_Info_URL"), __NFUN_236__(9)), LogInfoURL));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Log_Version") $ Chr(9)) $ LogVersion));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Log_Info_URL") $ Chr(9)) $ LogInfoURL));
 	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Name"), __NFUN_236__(9)), GameName));
 	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Version"), __NFUN_236__(9)), Level.EngineVersion));
 	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Creator"), __NFUN_236__(9)), GameCreator));

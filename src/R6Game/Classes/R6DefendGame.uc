@@ -34,9 +34,9 @@ function InitObjectives()
 	missionObjTerro.m_bVisibleInMenu = true;
 	missionObjTerro.m_szDescription = "Neutralize all terro and protect the VIP at all cost";
 	missionObjTerro.m_szDescriptionInMenu = "NeutralizeTerroAndDefendVIP";
-	__NFUN_165__(Index);
+	(Index++);
 	// End:0x1FF
-	foreach __NFUN_313__(Class'R6Engine.R6Hostage', H)
+	foreach DynamicActors(Class'R6Engine.R6Hostage', H)
 	{
 		m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjRescueHostage';
 		misionObjVIP = R6MObjRescueHostage(m_missionMgr.m_aMissionObjectives[Index]);
@@ -45,23 +45,23 @@ function InitObjectives()
 		misionObjVIP.m_iRescuePercentage = 100;
 		misionObjVIP.m_depZone = H.m_DZone;
 		// End:0x1EC
-		if(__NFUN_119__(huntedPawn, none))
+		if((huntedPawn != none))
 		{
-			__NFUN_231__(__NFUN_112__("Warning: there's more than one hostage in the game mode ", string(self.Name)));
+			Log(("Warning: there's more than one hostage in the game mode " $ string(self.Name)));
 			// End:0x1FF
 			break;
 		}
 		huntedPawn = H;
-		__NFUN_165__(Index);		
+		(Index++);		
 	}	
 	// End:0x25F
-	if(__NFUN_130__(__NFUN_114__(huntedPawn, none), m_missionMgr.m_bEnableCheckForErrors))
+	if(((huntedPawn == none) && m_missionMgr.m_bEnableCheckForErrors))
 	{
-		__NFUN_231__(__NFUN_112__("Warning: there is no hostage in the game mode ", string(self.Name)));
+		Log(("Warning: there is no hostage in the game mode " $ string(self.Name)));
 	}
 	m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjAcceptableRainbowLosses';
 	// End:0x2C1
-	foreach __NFUN_313__(Class'R6Engine.R6TerroristAI', terroAI)
+	foreach DynamicActors(Class'R6Engine.R6TerroristAI', terroAI)
 	{
 		terroAI.m_huntedPawn = huntedPawn;
 		R6Terrorist(terroAI.Pawn).m_eStrategy = 3;		
@@ -82,7 +82,7 @@ function SetPawnTeamFriendlies(Pawn aPawn)
 	{
 		// End:0x39
 		case 1:
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(0));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(0));
 			// End:0x3C
 			break;
 		// End:0xFFFF

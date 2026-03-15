@@ -14,16 +14,16 @@ function Touch(Actor Other)
 
 	super.Touch(Other);
 	// End:0x57
-	if(__NFUN_119__(ActorToChange, none))
+	if((ActorToChange != none))
 	{
 		iSkinCount = 0;
 		J0x1D:
 
 		// End:0x57 [Loop If]
-		if(__NFUN_150__(iSkinCount, Skins.Length))
+		if((iSkinCount < Skins.Length))
 		{
 			ActorToChange.Skins[iSkinCount] = Skins[iSkinCount];
-			__NFUN_165__(iSkinCount);
+			(iSkinCount++);
 			// [Loop Continue]
 			goto J0x1D;
 		}

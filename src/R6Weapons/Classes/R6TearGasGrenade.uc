@@ -22,14 +22,14 @@ function Timer()
 	local R6SmokeCloud pCloud;
 
 	// End:0x98
-	if(__NFUN_129__(m_bGrenadeExploded))
+	if((!m_bGrenadeExploded))
 	{
-		__NFUN_280__(0.5000000, true);
+		SetTimer(0.5000000, true);
 		m_fStartTime = Level.TimeSeconds;
 		// End:0x88
-		if(__NFUN_154__(int(m_eGrenadeType), int(1)))
+		if((int(m_eGrenadeType) == int(1)))
 		{
-			pCloud = __NFUN_278__(Class'R6Weapons.R6SmokeCloud',,, __NFUN_215__(Location, vect(0.0000000, 0.0000000, 130.0000000)), rot(0, 0, 0));
+			pCloud = Spawn(Class'R6Weapons.R6SmokeCloud',,, (Location + vect(0.0000000, 0.0000000, 130.0000000)), rot(0, 0, 0));
 			pCloud.SetCloud(self, 20.0000000, 500.0000000, 35.0000000);
 		}
 		m_bGrenadeExploded = true;
@@ -47,20 +47,20 @@ simulated function Explode()
 
 	pExplosionParticles = GetGrenadeEmitter();
 	// End:0x33
-	if(__NFUN_119__(pExplosionParticles, none))
+	if((pExplosionParticles != none))
 	{
-		m_pEmmiter = __NFUN_278__(pExplosionParticles);
+		m_pEmmiter = Spawn(pExplosionParticles);
 		m_pExplosionParticles = none;
 		m_pExplosionParticlesLOW = none;
 	}
 	// End:0x53
-	if(__NFUN_119__(m_pExplosionLight, none))
+	if((m_pExplosionLight != none))
 	{
-		pEffectLight = __NFUN_278__(m_pExplosionLight);
+		pEffectLight = Spawn(m_pExplosionLight);
 		m_pExplosionLight = none;
 	}
 	// End:0x6B
-	if(__NFUN_154__(int(m_eGrenadeType), int(2)))
+	if((int(m_eGrenadeType) == int(2)))
 	{
 		bHidden = true;
 	}
@@ -79,21 +79,21 @@ function HurtPawns()
 	local R6Pawn aPawn;
 	local float fElapsedTime, fVisibilityRadius, fMessageRadius;
 
-	fElapsedTime = __NFUN_175__(Level.TimeSeconds, m_fStartTime);
+	fElapsedTime = (Level.TimeSeconds - m_fStartTime);
 	// End:0x3B
-	if(__NFUN_177__(fElapsedTime, m_fDuration))
+	if((fElapsedTime > m_fDuration))
 	{
-		__NFUN_280__(0.0000000, false);
+		SetTimer(0.0000000, false);
 		SelfDestroy();
 		return;
 	}
 	// End:0x79
-	if(__NFUN_130__(__NFUN_154__(int(m_eGrenadeType), int(1)), __NFUN_155__(int(Physics), int(0))))
+	if(((int(m_eGrenadeType) == int(1)) && (int(Physics) != int(0))))
 	{
 		// End:0x79
-		if(__NFUN_119__(m_pEmmiter, none))
+		if((m_pEmmiter != none))
 		{
-			m_pEmmiter.__NFUN_267__(Location);
+			m_pEmmiter.__NFUN_267__(Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		}
 	}
 	// End:0xBD

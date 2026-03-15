@@ -68,11 +68,11 @@ var string m_sDisplayLOGO;
 function Created()
 {
 	// End:0x2A
-	if(__NFUN_132__(__NFUN_119__(R6MenuInGameMultiPlayerRootWindow(Root), none), __NFUN_119__(R6MenuInGameRootWindow(Root), none)))
+	if(((R6MenuInGameMultiPlayerRootWindow(Root) != none) || (R6MenuInGameRootWindow(Root) != none)))
 	{
 		m_bInGame = true;
 	}
-	__NFUN_1854__("SOFTWARE\\Red Storm Entertainment\\RAVENSHIELD", "DisplayLOGO", m_sDisplayLOGO);
+	GetRegistryKey("SOFTWARE\\Red Storm Entertainment\\RAVENSHIELD", "DisplayLOGO", m_sDisplayLOGO);
 	InitTitle();
 	InitOptionsButtons();
 	InitOptionsWindow();
@@ -88,14 +88,14 @@ function Paint(Canvas C, float X, float Y)
 	{
 		C.Style = 5;
 		// End:0x82
-		if(__NFUN_124__(m_sDisplayLOGO, "New"))
+		if((m_sDisplayLOGO ~= "New"))
 		{
 			DrawStretchedTextureSegment(C, 544.0000000, 436.0000000, 64.0000000, 64.0000000, 0.0000000, 0.0000000, 64.0000000, 64.0000000, Texture'R6Characters_T.Rainbow.R6armpatch');			
 		}
 		else
 		{
 			// End:0x95
-			if(__NFUN_124__(m_sDisplayLOGO, "None"))
+			if((m_sDisplayLOGO ~= "None"))
 			{				
 			}
 			else
@@ -111,11 +111,11 @@ function ShowWindow()
 {
 	Root.SetLoadRandomBackgroundImage("Option");
 	// End:0x96
-	if(__NFUN_129__(m_bInGame))
+	if((!m_bInGame))
 	{
-		m_ButtonMODS.bDisabled = __NFUN_132__(R6MenuRootWindow(Root).IsInsidePlanning(), R6Console(Root.Console).m_bStartedByGSClient);
+		m_ButtonMODS.bDisabled = (R6MenuRootWindow(Root).IsInsidePlanning() || R6Console(Root.Console).m_bStartedByGSClient);
 		// End:0x96
-		if(__NFUN_130__(m_ButtonMODS.bDisabled, __NFUN_154__(int(m_eCurrentPageDisplay), int(6))))
+		if((m_ButtonMODS.bDisabled && (int(m_eCurrentPageDisplay) == int(6))))
 		{
 			ManageOptionsSelection(int(0));
 		}
@@ -150,27 +150,27 @@ function ManageOptionsSelection(int _OptionsChoice)
 	J0x12:
 
 	// End:0x113 [Loop If]
-	if(__NFUN_150__(i, m_AListOptionsPages.Length))
+	if((i < m_AListOptionsPages.Length))
 	{
 		m_AListOptionsPages[i].pAssociateButton.m_bSelected = false;
 		// End:0x76
-		if(__NFUN_154__(int(m_AListOptionsPages[i].ePageID), int(m_eCurrentPageDisplay)))
+		if((int(m_AListOptionsPages[i].ePageID) == int(m_eCurrentPageDisplay)))
 		{
 			m_AListOptionsPages[i].pOptionsPage.HideWindow();
 		}
 		// End:0x109
-		if(__NFUN_154__(int(m_AListOptionsPages[i].ePageID), _OptionsChoice))
+		if((int(m_AListOptionsPages[i].ePageID) == _OptionsChoice))
 		{
 			m_AListOptionsPages[i].pAssociateButton.m_bSelected = true;
 			eCurrentPageDisplay = m_AListOptionsPages[i].ePageID;
 			// End:0xEF
-			if(__NFUN_119__(m_pOptionsTextLabel, none))
+			if((m_pOptionsTextLabel != none))
 			{
 				m_pOptionsTextLabel.SetNewText(m_AListOptionsPages[i].szPageTitle, true);
 			}
 			m_AListOptionsPages[i].pOptionsPage.ShowWindow();
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x12;
 	}
@@ -186,21 +186,21 @@ function UpdateOptions()
 	local int i;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	i = 0;
 	J0x19:
 
 	// End:0x52 [Loop If]
-	if(__NFUN_150__(i, m_AListOptionsPages.Length))
+	if((i < m_AListOptionsPages.Length))
 	{
 		R6MenuOptionsTab(m_AListOptionsPages[i].pOptionsPage).UpdateOptionsInEngine();
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x19;
 	}
-	pGameOptions.m_bChangeResolution = __NFUN_130__(m_bInGame, __NFUN_129__(Root.m_bWidgetResolutionFix));
-	pGameOptions.__NFUN_536__();
-	GetPlayerOwner().__NFUN_2713__();
+	pGameOptions.m_bChangeResolution = (m_bInGame && (!Root.m_bWidgetResolutionFix));
+	pGameOptions.SaveConfig();
+	GetPlayerOwner().SetSoundOptions();
 	GetPlayerOwner().UpdateOptions();
 	// End:0x126
 	if(m_bInGame)
@@ -208,7 +208,7 @@ function UpdateOptions()
 		R6HUD(GetPlayerOwner().myHUD).UpdateHudFilter();
 		R6PlayerController(GetPlayerOwner()).UpdateTriggerLagInfo();
 		// End:0x126
-		if(__NFUN_129__(Root.m_bWidgetResolutionFix))
+		if((!Root.m_bWidgetResolutionFix))
 		{
 			Root.SetResolution(float(pGameOptions.R6ScreenSizeX), float(pGameOptions.R6ScreenSizeY));
 		}
@@ -224,15 +224,15 @@ function RefreshOptions()
 	local int i;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	i = 0;
 	J0x19:
 
 	// End:0x52 [Loop If]
-	if(__NFUN_150__(i, m_AListOptionsPages.Length))
+	if((i < m_AListOptionsPages.Length))
 	{
 		R6MenuOptionsTab(m_AListOptionsPages[i].pOptionsPage).UpdateOptionsInPage();
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x19;
 	}
@@ -254,7 +254,7 @@ function MenuOptionsLoadProfile()
 //*********************************
 function InitTitle()
 {
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("Options", "Title", "R6Menu");
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
@@ -265,8 +265,8 @@ function InitTitle()
 
 function InitOptionsWindow()
 {
-	Class'Engine.Actor'.static.__NFUN_1009__().m_bChangeResolution = m_bInGame;
-	m_pOptionsTextLabel = R6WindowTextLabelCurved(CreateWindow(Class'R6Window.R6WindowTextLabelCurved', 198.0000000, __NFUN_174__(__NFUN_175__(101.0000000, float(30)), float(1)), 422.0000000, 30.0000000, self));
+	Class'Engine.Actor'.static.GetGameOptions().m_bChangeResolution = m_bInGame;
+	m_pOptionsTextLabel = R6WindowTextLabelCurved(CreateWindow(Class'R6Window.R6WindowTextLabelCurved', 198.0000000, ((101.0000000 - float(30)) + float(1)), 422.0000000, 30.0000000, self));
 	m_pOptionsTextLabel.bAlwaysBehind = true;
 	m_pOptionsTextLabel.Align = 2;
 	m_pOptionsTextLabel.m_Font = Root.Fonts[5];
@@ -297,7 +297,7 @@ function CreateAndAddPageOptionsToList(Class<UWindowWindow> _PageToCreate, R6Win
 	local R6MenuOptionsTab NewOptionsPage;
 	local stOptionsPage NewItem;
 
-	NewOptionsPage = R6MenuOptionsTab(CreateWindow(_PageToCreate, __NFUN_174__(198.0000000, m_pOptionsBorder.m_fVBorderOffset), 101.0000000, __NFUN_175__(422.0000000, __NFUN_171__(float(2), m_pOptionsBorder.m_fVBorderOffset)), 321.0000000, self));
+	NewOptionsPage = R6MenuOptionsTab(CreateWindow(_PageToCreate, (198.0000000 + m_pOptionsBorder.m_fVBorderOffset), 101.0000000, (422.0000000 - (float(2) * m_pOptionsBorder.m_fVBorderOffset)), 321.0000000, self));
 	NewOptionsPage.InitPageOptions();
 	NewOptionsPage.HideWindow();
 	NewItem.pOptionsPage = NewOptionsPage;
@@ -337,7 +337,7 @@ function InitOptionsButtons()
 	m_ButtonGame.CheckToDownSizeFont(m_SmallButtonFont, 0.0000000);
 	m_ButtonGame.ResizeToText();
 	m_ButtonGame.m_bSelected = true;
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_ButtonSound = R6WindowButtonOptions(CreateWindow(Class'R6Menu.R6WindowButtonOptions', fXOffset, fYPos, fWidth, fHeight, self));
 	m_ButtonSound.ToolTipString = Localize("Tip", "ButtonSound", "R6Menu");
 	m_ButtonSound.Text = Localize("Options", "ButtonSound", "R6Menu");
@@ -346,7 +346,7 @@ function InitOptionsButtons()
 	m_ButtonSound.m_buttonFont = ButtonFont;
 	m_ButtonSound.CheckToDownSizeFont(m_SmallButtonFont, 0.0000000);
 	m_ButtonSound.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_ButtonGraphic = R6WindowButtonOptions(CreateWindow(Class'R6Menu.R6WindowButtonOptions', fXOffset, fYPos, fWidth, fHeight, self));
 	m_ButtonGraphic.ToolTipString = Localize("Tip", "ButtonGraphic", "R6Menu");
 	m_ButtonGraphic.Text = Localize("Options", "ButtonGraphic", "R6Menu");
@@ -355,7 +355,7 @@ function InitOptionsButtons()
 	m_ButtonGraphic.m_buttonFont = ButtonFont;
 	m_ButtonGraphic.CheckToDownSizeFont(m_SmallButtonFont, 0.0000000);
 	m_ButtonGraphic.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_ButtonHudFilter = R6WindowButtonOptions(CreateWindow(Class'R6Menu.R6WindowButtonOptions', fXOffset, fYPos, fWidth, fHeight, self));
 	m_ButtonHudFilter.ToolTipString = Localize("Tip", "ButtonHud", "R6Menu");
 	m_ButtonHudFilter.Text = Localize("Options", "ButtonHud", "R6Menu");
@@ -364,7 +364,7 @@ function InitOptionsButtons()
 	m_ButtonHudFilter.m_buttonFont = ButtonFont;
 	m_ButtonHudFilter.CheckToDownSizeFont(m_SmallButtonFont, 0.0000000);
 	m_ButtonHudFilter.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_ButtonMultiPlayer = R6WindowButtonOptions(CreateWindow(Class'R6Menu.R6WindowButtonOptions', fXOffset, fYPos, fWidth, fHeight, self));
 	m_ButtonMultiPlayer.ToolTipString = Localize("Tip", "ButtonMultiPlayer", "R6Menu");
 	m_ButtonMultiPlayer.Text = Localize("Options", "ButtonMultiPlayer", "R6Menu");
@@ -373,7 +373,7 @@ function InitOptionsButtons()
 	m_ButtonMultiPlayer.m_buttonFont = ButtonFont;
 	m_ButtonMultiPlayer.CheckToDownSizeFont(m_SmallButtonFont, 0.0000000);
 	m_ButtonMultiPlayer.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_ButtonControls = R6WindowButtonOptions(CreateWindow(Class'R6Menu.R6WindowButtonOptions', fXOffset, fYPos, fWidth, fHeight, self));
 	m_ButtonControls.ToolTipString = Localize("Tip", "ButtonControls", "R6Menu");
 	m_ButtonControls.Text = Localize("Options", "ButtonControls", "R6Menu");
@@ -382,7 +382,7 @@ function InitOptionsButtons()
 	m_ButtonControls.m_buttonFont = ButtonFont;
 	m_ButtonControls.CheckToDownSizeFont(m_SmallButtonFont, 0.0000000);
 	m_ButtonControls.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_ButtonMODS = R6WindowButtonOptions(CreateWindow(Class'R6Menu.R6WindowButtonOptions', fXOffset, fYPos, fWidth, fHeight, self));
 	m_ButtonMODS.ToolTipString = Localize("Tip", "ButtonCustomGame", "R6Menu");
 	m_ButtonMODS.Text = Localize("Options", "ButtonCustomGame", "R6Menu");
@@ -392,7 +392,7 @@ function InitOptionsButtons()
 	m_ButtonMODS.CheckToDownSizeFont(m_SmallButtonFont, 0.0000000);
 	m_ButtonMODS.ResizeToText();
 	m_ButtonMODS.bDisabled = m_bInGame;
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_ButtonPatchService = R6WindowButtonOptions(CreateWindow(Class'R6Menu.R6WindowButtonOptions', fXOffset, fYPos, fWidth, fHeight, self));
 	m_ButtonPatchService.ToolTipString = Localize("Tip", "ButtonPatchService", "R6Menu");
 	m_ButtonPatchService.Text = Localize("Options", "ButtonPatchService", "R6Menu");
@@ -408,7 +408,7 @@ function InitOptionsButtons()
 function ResizeAllOptionsButtons()
 {
 	// End:0x1B6
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_ButtonGame.IsFontDownSizingNeeded(), m_ButtonSound.IsFontDownSizingNeeded()), m_ButtonGraphic.IsFontDownSizingNeeded()), m_ButtonHudFilter.IsFontDownSizingNeeded()), m_ButtonMultiPlayer.IsFontDownSizingNeeded()), m_ButtonControls.IsFontDownSizingNeeded()), m_ButtonMODS.IsFontDownSizingNeeded()), m_ButtonPatchService.IsFontDownSizingNeeded()))
+	if((((((((m_ButtonGame.IsFontDownSizingNeeded() || m_ButtonSound.IsFontDownSizingNeeded()) || m_ButtonGraphic.IsFontDownSizingNeeded()) || m_ButtonHudFilter.IsFontDownSizingNeeded()) || m_ButtonMultiPlayer.IsFontDownSizingNeeded()) || m_ButtonControls.IsFontDownSizingNeeded()) || m_ButtonMODS.IsFontDownSizingNeeded()) || m_ButtonPatchService.IsFontDownSizingNeeded()))
 	{
 		m_ButtonGame.m_buttonFont = m_SmallButtonFont;
 		m_ButtonSound.m_buttonFont = m_SmallButtonFont;

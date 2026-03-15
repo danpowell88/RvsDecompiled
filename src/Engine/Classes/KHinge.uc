@@ -50,7 +50,7 @@ state() ToggleMotor
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x2E
-		if(__NFUN_154__(int(KHingeType), int(2)))
+		if((int(KHingeType) == int(2)))
 		{
 			KDesiredAngle = KCurrentAngle;
 			KUseAltDesired = false;
@@ -77,7 +77,7 @@ state() ControlMotor
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x2D
-		if(__NFUN_155__(int(KHingeType), int(2)))
+		if((int(KHingeType) != int(2)))
 		{
 			KHingeType = 2;
 			KUpdateConstraintParams();
@@ -89,7 +89,7 @@ state() ControlMotor
 	function UnTrigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x40
-		if(__NFUN_154__(int(KHingeType), int(2)))
+		if((int(KHingeType) == int(2)))
 		{
 			KDesiredAngle = KCurrentAngle;
 			KUseAltDesired = false;

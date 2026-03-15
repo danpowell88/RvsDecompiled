@@ -159,22 +159,22 @@ var Vector m_vNoiseSource;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_Team, m_TeamColour, 
 		m_bHasGrenade, m_eGoCode, 
 		m_eTeamState, m_iMemberCount, 
 		m_iMembersLost;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bTeamIsClimbingLadder;
 
 	// Pos:0x01A
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientUpdateFirstPersonWpnAndPeeking;
 
 	// Pos:0x027
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		TeamActionRequest, TeamActionRequestFromRoseDesVents, 
 		TeamActionRequestWaitForZuluGoCode;
 }
@@ -182,14 +182,14 @@ replication
 function SetTeamState(R6RainbowTeam.eTeamState eNewState)
 {
 	// End:0x3B
-	if(__NFUN_132__(__NFUN_130__(m_bLeaderIsAPlayer, __NFUN_154__(m_iMemberCount, 1)), __NFUN_130__(__NFUN_129__(m_bLeaderIsAPlayer), __NFUN_154__(m_iMemberCount, 0))))
+	if(((m_bLeaderIsAPlayer && (m_iMemberCount == 1)) || ((!m_bLeaderIsAPlayer) && (m_iMemberCount == 0))))
 	{
 		m_eTeamState = 21;		
 	}
 	else
 	{
 		// End:0x59
-		if(__NFUN_155__(int(m_eTeamState), int(6)))
+		if((int(m_eTeamState) != int(6)))
 		{
 			m_eTeamState = eNewState;			
 		}
@@ -204,7 +204,7 @@ function SetTeamState(R6RainbowTeam.eTeamState eNewState)
 function TeamIsSeparatedFromLead(bool bSeparated)
 {
 	// End:0x0D
-	if(__NFUN_152__(m_iMemberCount, 1))
+	if((m_iMemberCount <= 1))
 	{
 		return;
 	}
@@ -218,7 +218,7 @@ function TeamIsRegroupingOnLead(bool bIsRegrouping)
 
 	bPreviousTeamIsRegrouping = m_bTeamIsRegrouping;
 	// End:0x59
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_bLeaderIsAPlayer, m_bPlayerRequestedTeamReform), m_bTeamIsRegrouping), __NFUN_129__(bIsRegrouping)))
+	if((((m_bLeaderIsAPlayer && m_bPlayerRequestedTeamReform) && m_bTeamIsRegrouping) && (!bIsRegrouping)))
 	{
 		m_bPlayerRequestedTeamReform = false;
 		m_MemberVoicesMgr.PlayRainbowMemberVoices(m_Team[1], 5);
@@ -231,7 +231,7 @@ function TeamIsRegroupingOnLead(bool bIsRegrouping)
 		SetTeamState(5);
 	}
 	// End:0x9F
-	if(__NFUN_130__(__NFUN_129__(bIsRegrouping), bPreviousTeamIsRegrouping))
+	if(((!bIsRegrouping) && bPreviousTeamIsRegrouping))
 	{
 		Escort_ManageList();
 	}
@@ -241,9 +241,9 @@ function TeamIsRegroupingOnLead(bool bIsRegrouping)
 simulated event Destroyed()
 {
 	// End:0x1E
-	if(__NFUN_119__(m_actionRequested, none))
+	if((m_actionRequested != none))
 	{
-		m_actionRequested.__NFUN_279__();
+		m_actionRequested.Destroy();
 		m_actionRequested = none;
 	}
 	super.Destroyed();
@@ -256,7 +256,7 @@ event PostBeginPlay()
 
 	super.PostBeginPlay();
 	// End:0x3B
-	foreach __NFUN_304__(Class'R6Engine.R6InteractiveObject', IntObject)
+	foreach AllActors(Class'R6Engine.R6InteractiveObject', IntObject)
 	{
 		// End:0x3A
 		if(IntObject.m_bRainbowCanInteract)
@@ -264,7 +264,7 @@ event PostBeginPlay()
 			m_InteractiveObjectList[m_InteractiveObjectList.Length] = IntObject;
 		}		
 	}	
-	m_actionRequested = __NFUN_278__(Class'R6Engine.R6CircumstantialActionQuery');
+	m_actionRequested = Spawn(Class'R6Engine.R6CircumstantialActionQuery');
 	return;
 }
 
@@ -288,7 +288,7 @@ function CreateMPPlayerTeam(PlayerController MyPlayer, R6RainbowStartInfo Info, 
 	local int i, iMembersToSpawn;
 
 	// End:0x0D
-	if(__NFUN_151__(m_iMemberCount, 0))
+	if((m_iMemberCount > 0))
 	{
 		return;
 	}
@@ -303,16 +303,16 @@ function CreateMPPlayerTeam(PlayerController MyPlayer, R6RainbowStartInfo Info, 
 	J0x92:
 
 	// End:0xC9 [Loop If]
-	if(__NFUN_150__(i, iMemberCount))
+	if((i < iMemberCount))
 	{
 		CreateTeamMember(Info, Start, false);
 		m_iTeamHealth[i] = 0;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x92;
 	}
 	UpdateTeamGrenadeStatus();
-	Info.__NFUN_279__();
+	Info.Destroy();
 	return;
 }
 
@@ -326,22 +326,22 @@ function SetMultiVoicesMgr(R6AbstractGameInfo aGameInfo, int iTeamNumber, int iM
 	m_PreRecMsgVoicesMgr = none;
 	bCoopGameType = Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag);
 	// End:0xB1
-	if(__NFUN_132__(bCoopGameType, Level.IsGameTypeTeamAdversarial(Level.Game.m_szGameTypeFlag)))
+	if((bCoopGameType || Level.IsGameTypeTeamAdversarial(Level.Game.m_szGameTypeFlag)))
 	{
 		m_MultiCommonVoicesMgr = R6MultiCommonVoices(aGameInfo.GetMultiCommonVoicesMgr());
 		m_PreRecMsgVoicesMgr = R6PreRecordedMsgVoices(aGameInfo.GetPreRecordedMsgVoicesMgr());
 	}
 	// End:0xF2
-	if(__NFUN_132__(bCoopGameType, Level.IsGameTypePlayWithNonRainbowNPCs(Level.Game.m_szGameTypeFlag)))
+	if((bCoopGameType || Level.IsGameTypePlayWithNonRainbowNPCs(Level.Game.m_szGameTypeFlag)))
 	{
 		SetVoicesMgr(aGameInfo, true, true);
 	}
 	// End:0x16A
 	if(bCoopGameType)
 	{
-		m_MultiCoopPlayerVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopPlayerVoicesMgr(__NFUN_147__(Level.Game.CurrentID, Level.Game.default.CurrentID)));
+		m_MultiCoopPlayerVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopPlayerVoicesMgr((Level.Game.CurrentID - Level.Game.default.CurrentID)));
 		// End:0x16A
-		if(__NFUN_151__(iMemberCount, 1))
+		if((iMemberCount > 1))
 		{
 			m_MultiCoopMemberVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopMemberVoicesMgr());
 		}
@@ -359,7 +359,7 @@ function SetVoicesMgr(R6AbstractGameInfo aGameInfo, bool bPlayerTeamStart, bool 
 	m_OtherTeamVoicesMgr = none;
 	m_bPlayerInGhostMode = bInGhostMode;
 	// End:0x43
-	if(__NFUN_130__(__NFUN_129__(bPlayerTeamStart), bPlayerInTeam))
+	if(((!bPlayerTeamStart) && bPlayerInTeam))
 	{
 		m_bPlayerHasFocus = true;		
 	}
@@ -372,7 +372,7 @@ function SetVoicesMgr(R6AbstractGameInfo aGameInfo, bool bPlayerTeamStart, bool 
 	if(bPlayerTeamStart)
 	{
 		// End:0x93
-		if(__NFUN_151__(m_iMemberCount, 1))
+		if((m_iMemberCount > 1))
 		{
 			m_MemberVoicesMgr = R6RainbowMemberVoices(aGameInfo.GetRainbowMemberVoicesMgr());
 		}		
@@ -380,7 +380,7 @@ function SetVoicesMgr(R6AbstractGameInfo aGameInfo, bool bPlayerTeamStart, bool 
 	else
 	{
 		// End:0xE3
-		if(__NFUN_130__(m_bPlayerHasFocus, __NFUN_129__(m_bPlayerInGhostMode)))
+		if((m_bPlayerHasFocus && (!m_bPlayerInGhostMode)))
 		{
 			m_MemberVoicesMgr = R6RainbowMemberVoices(aGameInfo.GetRainbowMemberVoicesMgr());
 			m_MultiCoopMemberVoicesMgr = R6MultiCoopVoices(aGameInfo.GetMultiCoopMemberVoicesMgr());			
@@ -388,7 +388,7 @@ function SetVoicesMgr(R6AbstractGameInfo aGameInfo, bool bPlayerTeamStart, bool 
 		else
 		{
 			// End:0x10C
-			if(__NFUN_151__(m_iMemberCount, 1))
+			if((m_iMemberCount > 1))
 			{
 				aGameInfo.GetRainbowMemberVoicesMgr();
 				aGameInfo.GetCommonRainbowMemberVoicesMgr();
@@ -408,7 +408,7 @@ function CreatePlayerTeam(R6TeamStartInfo TeamInfo, NavigationPoint StartingPoin
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_151__(m_iMemberCount, 0))
+	if((m_iMemberCount > 0))
 	{
 		return;
 	}
@@ -418,11 +418,11 @@ function CreatePlayerTeam(R6TeamStartInfo TeamInfo, NavigationPoint StartingPoin
 	J0x23:
 
 	// End:0x9F [Loop If]
-	if(__NFUN_150__(i, TeamInfo.m_iNumberOfMembers))
+	if((i < TeamInfo.m_iNumberOfMembers))
 	{
-		CreateTeamMember(TeamInfo.m_CharacterInTeam[i], StartingPoint, __NFUN_154__(m_iMemberCount, 0), R6PlayerController(aRainbowPC));
+		CreateTeamMember(TeamInfo.m_CharacterInTeam[i], StartingPoint, (m_iMemberCount == 0), R6PlayerController(aRainbowPC));
 		m_iTeamHealth[i] = TeamInfo.m_CharacterInTeam[i].m_iHealth;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x23;
 	}
@@ -438,7 +438,7 @@ function CreateAITeam(R6TeamStartInfo TeamInfo, NavigationPoint StartingPoint)
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_151__(m_iMemberCount, 0))
+	if((m_iMemberCount > 0))
 	{
 		return;
 	}
@@ -449,11 +449,11 @@ function CreateAITeam(R6TeamStartInfo TeamInfo, NavigationPoint StartingPoint)
 	J0x2A:
 
 	// End:0x95 [Loop If]
-	if(__NFUN_150__(i, TeamInfo.m_iNumberOfMembers))
+	if((i < TeamInfo.m_iNumberOfMembers))
 	{
 		CreateTeamMember(TeamInfo.m_CharacterInTeam[i], StartingPoint, false);
 		m_iTeamHealth[i] = TeamInfo.m_CharacterInTeam[i].m_iHealth;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x2A;
 	}
@@ -474,12 +474,12 @@ function CreateTeamMember(R6RainbowStartInfo RainbowToCreate, NavigationPoint St
 	local Rotator rPosOrientation, rStartingPointRot;
 
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		return;
 	}
 	// End:0x8C
-	if(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_155__(m_TeamPlanning.m_NodeList.Length, 0)))
+	if(((int(Level.NetMode) == int(NM_Standalone)) && (m_TeamPlanning.m_NodeList.Length != 0)))
 	{
 		vOriginStart = m_TeamPlanning.m_NodeList[0].Location;
 		rStartingPointRot = m_TeamPlanning.m_NodeList[0].Rotation;		
@@ -494,64 +494,64 @@ function CreateTeamMember(R6RainbowStartInfo RainbowToCreate, NavigationPoint St
 	J0xC7:
 
 	// End:0x7B9 [Loop If]
-	if(__NFUN_155__(iSpawnTry, -1))
+	if((iSpawnTry != -1))
 	{
 		// End:0xEF
-		if(__NFUN_154__(iSpawnTry, 0))
+		if((iSpawnTry == 0))
 		{
 			vStart = vOriginStart;			
 		}
 		else
 		{
 			// End:0x19D
-			if(__NFUN_150__(iSpawnTry, 8))
+			if((iSpawnTry < 8))
 			{
 				rPosOrientation = rStartingPointRot;
-				__NFUN_161__(rPosOrientation.Yaw, __NFUN_146__(32768, __NFUN_144__(8192, __NFUN_146__(iSpawnTry, 1))));
+				(rPosOrientation.Yaw += (32768 + (8192 * (iSpawnTry + 1))));
 				// End:0x17D
-				if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(iSpawnTry, 1), __NFUN_154__(iSpawnTry, 3)), __NFUN_154__(iSpawnTry, 5)), __NFUN_154__(iSpawnTry, 7)))
+				if(((((iSpawnTry == 1) || (iSpawnTry == 3)) || (iSpawnTry == 5)) || (iSpawnTry == 7)))
 				{
-					vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(m_iSpawnDistance), Vector(rPosOrientation)));					
+					vStart = (vOriginStart - (float(m_iSpawnDistance) * Vector(rPosOrientation)));					
 				}
 				else
 				{
-					vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(m_iSpawnDiagDist), Vector(rPosOrientation)));
+					vStart = (vOriginStart - (float(m_iSpawnDiagDist) * Vector(rPosOrientation)));
 				}				
 			}
 			else
 			{
 				// End:0x2B2
-				if(__NFUN_150__(iSpawnTry, 24))
+				if((iSpawnTry < 24))
 				{
 					rPosOrientation = rStartingPointRot;
-					__NFUN_161__(rPosOrientation.Yaw, __NFUN_146__(__NFUN_146__(32768, 16384), __NFUN_144__(4096, __NFUN_147__(iSpawnTry, 9))));
+					(rPosOrientation.Yaw += ((32768 + 16384) + (4096 * (iSpawnTry - 9))));
 					// End:0x238
-					if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(iSpawnTry, 9), __NFUN_154__(iSpawnTry, 13)), __NFUN_154__(iSpawnTry, 17)), __NFUN_154__(iSpawnTry, 21)))
+					if(((((iSpawnTry == 9) || (iSpawnTry == 13)) || (iSpawnTry == 17)) || (iSpawnTry == 21)))
 					{
-						vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(__NFUN_144__(m_iSpawnDistance, 2)), Vector(rPosOrientation)));						
+						vStart = (vOriginStart - (float((m_iSpawnDistance * 2)) * Vector(rPosOrientation)));						
 					}
 					else
 					{
 						// End:0x292
-						if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(iSpawnTry, 11), __NFUN_154__(iSpawnTry, 15)), __NFUN_154__(iSpawnTry, 19)), __NFUN_154__(iSpawnTry, 23)))
+						if(((((iSpawnTry == 11) || (iSpawnTry == 15)) || (iSpawnTry == 19)) || (iSpawnTry == 23)))
 						{
-							vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(__NFUN_144__(m_iSpawnDiagDist, 2)), Vector(rPosOrientation)));							
+							vStart = (vOriginStart - (float((m_iSpawnDiagDist * 2)) * Vector(rPosOrientation)));							
 						}
 						else
 						{
-							vStart = __NFUN_216__(vOriginStart, __NFUN_213__(float(m_iSpawnDiagOther), Vector(rPosOrientation)));
+							vStart = (vOriginStart - (float(m_iSpawnDiagOther) * Vector(rPosOrientation)));
 						}
 					}					
 				}
 				else
 				{
-					__NFUN_231__("    Rainbow6    <R6GameInfo::CreateTeamMember> attempt to create a rainbow member failed!!");
+					Log("    Rainbow6    <R6GameInfo::CreateTeamMember> attempt to create a rainbow member failed!!");
 					return;
 				}
 			}
 		}
 		// End:0x4A5
-		if(__NFUN_154__(iSpawnTry, 0))
+		if((iSpawnTry == 0))
 		{
 			// End:0x32A
 			if(__NFUN_114__(RainbowToCreate, none))

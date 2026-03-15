@@ -35,7 +35,7 @@ function Created()
 {
 	super(UWindowRootWindow).Created();
 	m_eRootId = 2;
-	m_bInTraining = __NFUN_122__(Root.Console.Master.m_StartGameInfo.m_GameMode, "R6Game.R6TrainingMgr");
+	m_bInTraining = (Root.Console.Master.m_StartGameInfo.m_GameMode == "R6Game.R6TrainingMgr");
 	m_DebriefingWidget = R6MenuDebriefingWidget(CreateWindow(Class'R6Menu.R6MenuDebriefingWidget', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 	m_DebriefingWidget.HideWindow();
 	m_InGameOperativeSelectorWidget = R6MenuInGameOperativeSelectorWidget(CreateWindow(Class'R6Menu.R6MenuInGameOperativeSelectorWidget', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
@@ -67,14 +67,14 @@ function ChangeInstructionWidget(Actor pISV, bool bShow, int iBox, int iParagrap
 		J0x4A:
 
 		// End:0x80 [Loop If]
-		if(__NFUN_150__(i, iNbOfWindow))
+		if((i < iNbOfWindow))
 		{
 			// End:0x76
-			if(__NFUN_154__(int(m_pListOfActiveWidget[i].m_eGameWidgetID), int(3)))
+			if((int(m_pListOfActiveWidget[i].m_eGameWidgetID) == int(3)))
 			{
 				return;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x4A;
 		}
@@ -155,7 +155,7 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 		// End:0x148
 		case 2:
 			Root.Console.ViewportOwner.Actor.Level.m_bInGamePlanningActive = false;
-			Root.Console.ViewportOwner.Actor.Level.__NFUN_2011__(false);
+			Root.Console.ViewportOwner.Actor.Level.SetPlanningMode(false);
 			pStNewWidget.m_pWidget = m_DebriefingWidget;
 			m_bWidgetResolutionFix = true;
 			// End:0x360
@@ -198,11 +198,11 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 		// End:0x35A
 		case 17:
 			// End:0x357
-			if(__NFUN_155__(iNbOfShowWindow, 0))
+			if((iNbOfShowWindow != 0))
 			{
-				pStNewWidget = m_pListOfActiveWidget[__NFUN_147__(iNbOfShowWindow, 1)];
+				pStNewWidget = m_pListOfActiveWidget[(iNbOfShowWindow - 1)];
 				ConsoleState = pStNewWidget.m_WidgetConsoleState;
-				__NFUN_162__(iNbOfShowWindow, 1);
+				(iNbOfShowWindow -= 1);
 			}
 			// End:0x360
 			break;
@@ -213,13 +213,13 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 			break;
 	}
 	// End:0x4A6
-	if(__NFUN_119__(pStNewWidget.m_pWidget, none))
+	if((pStNewWidget.m_pWidget != none))
 	{
 		// End:0x44A
-		if(__NFUN_129__(Console.__NFUN_281__(ConsoleState)))
+		if((!Console.IsInState(ConsoleState)))
 		{
 			// End:0x3CC
-			if(__NFUN_254__(ConsoleState, 'TrainingInstruction'))
+			if((ConsoleState == 'TrainingInstruction'))
 			{
 				Console.ViewportOwner.bSuspendPrecaching = false;
 				Console.ViewportOwner.bShowWindowsMouse = false;				
@@ -231,14 +231,14 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 			}
 			Console.bUWindowActive = true;
 			// End:0x43F
-			if(__NFUN_119__(Console.Root, none))
+			if((Console.Root != none))
 			{
 				Console.Root.bWindowVisible = true;
 			}
 			CheckConsoleTypingState(ConsoleState);
 		}
 		// End:0x46E
-		if(__NFUN_119__(pStNewWidget.m_pPopUpFrame, none))
+		if((pStNewWidget.m_pPopUpFrame != none))
 		{
 			pStNewWidget.m_pPopUpFrame.ShowWindow();
 		}
@@ -251,7 +251,7 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 		Console.bUWindowActive = false;
 		Console.ViewportOwner.bShowWindowsMouse = false;
 		// End:0x4FF
-		if(__NFUN_119__(Console.Root, none))
+		if((Console.Root != none))
 		{
 			Console.Root.bWindowVisible = false;
 		}
@@ -269,7 +269,7 @@ function MoveMouse(float X, float Y)
 	MouseX = X;
 	MouseY = Y;
 	// End:0x3A
-	if(__NFUN_129__(bMouseCapture))
+	if((!bMouseCapture))
 	{
 		NewMouseWindow = FindWindowUnder(X, Y);		
 	}
@@ -278,14 +278,14 @@ function MoveMouse(float X, float Y)
 		NewMouseWindow = MouseWindow;
 	}
 	// End:0x7D
-	if(__NFUN_119__(NewMouseWindow, MouseWindow))
+	if((NewMouseWindow != MouseWindow))
 	{
 		MouseWindow.MouseLeave();
 		NewMouseWindow.MouseEnter();
 		MouseWindow = NewMouseWindow;
 	}
 	// End:0xE5
-	if(__NFUN_132__(__NFUN_181__(MouseX, OldMouseX), __NFUN_181__(MouseY, OldMouseY)))
+	if(((MouseX != OldMouseX) || (MouseY != OldMouseY)))
 	{
 		OldMouseX = MouseX;
 		OldMouseY = MouseY;
@@ -307,14 +307,14 @@ function DrawMouse(Canvas C)
 	}
 	else
 	{
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+		C.SetDrawColor(byte(255), byte(255), byte(255));
 		C.Style = 5;
-		C.__NFUN_2623__(__NFUN_175__(MouseX, float(MouseWindow.Cursor.HotX)), __NFUN_175__(MouseY, float(MouseWindow.Cursor.HotY)));
+		C.SetPos((MouseX - float(MouseWindow.Cursor.HotX)), (MouseY - float(MouseWindow.Cursor.HotY)));
 		// End:0x143
-		if(__NFUN_119__(MouseWindow.Cursor.Tex, none))
+		if((MouseWindow.Cursor.Tex != none))
 		{
 			MouseTex = MouseWindow.Cursor.Tex;
-			C.__NFUN_466__(MouseTex, float(MouseTex.USize), float(MouseTex.VSize), 0.0000000, 0.0000000, float(MouseTex.USize), float(MouseTex.VSize));
+			C.DrawTile(MouseTex, float(MouseTex.USize), float(MouseTex.VSize), 0.0000000, 0.0000000, float(MouseTex.USize), float(MouseTex.VSize));
 		}
 		C.Style = 1;
 	}
@@ -330,7 +330,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 
 	super.PopUpBoxDone(Result, _ePopUpID);
 	// End:0x360
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -403,7 +403,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x8A
 		case 11:
 			// End:0x68
-			if(__NFUN_132__(__NFUN_181__(WinWidth, float(C.SizeX)), __NFUN_181__(WinHeight, float(C.SizeY))))
+			if(((WinWidth != float(C.SizeX)) || (WinHeight != float(C.SizeY))))
 			{
 				SetResolution(float(C.SizeX), float(C.SizeY));
 			}
@@ -413,7 +413,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0xC4
 		case 8:
 			// End:0xA2
-			if(__NFUN_129__(ProcessKeyUp(Key)))
+			if((!ProcessKeyUp(Key)))
 			{
 				// [Explicit Continue]
 				goto J0x120;
@@ -424,7 +424,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0xFE
 		case 9:
 			// End:0xDC
-			if(__NFUN_129__(ProcessKeyDown(Key)))
+			if((!ProcessKeyDown(Key)))
 			{
 				// [Explicit Continue]
 				goto J0x120;
@@ -446,7 +446,7 @@ function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePop
 {
 	m_bInPopUp = true;
 	// End:0x37
-	if(__NFUN_114__(OwnerWindow, none))
+	if((OwnerWindow == none))
 	{
 		super.SimplePopUp(_szTitle, _szText, _ePopUpID, _iButtonsType, bAddDisableDlg, self);		
 	}
@@ -463,26 +463,26 @@ function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePop
 function bool ProcessKeyDown(int Key)
 {
 	// End:0x12
-	if(__NFUN_154__(int(m_eCurWidgetInUse), int(16)))
+	if((int(m_eCurWidgetInUse) == int(16)))
 	{
 		return true;
 	}
 	// End:0x12C
-	if(__NFUN_154__(Key, m_ESCMenuKey))
+	if((Key == m_ESCMenuKey))
 	{
 		// End:0x40
-		if(__NFUN_132__(__NFUN_242__(m_bInPopUp, true), __NFUN_154__(m_iLastKeyDown, m_ESCMenuKey)))
+		if(((m_bInPopUp == true) || (m_iLastKeyDown == m_ESCMenuKey)))
 		{
 			return true;
 		}
 		// End:0x11A
-		if(__NFUN_155__(int(m_eCurWidgetInUse), int(1)))
+		if((int(m_eCurWidgetInUse) != int(1)))
 		{
 			// End:0x117
-			if(__NFUN_129__(R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bGameOver))
+			if((!R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bGameOver))
 			{
 				Root.Console.ViewportOwner.Actor.Level.m_bInGamePlanningActive = false;
-				Root.Console.ViewportOwner.Actor.Level.__NFUN_2011__(false);
+				Root.Console.ViewportOwner.Actor.Level.SetPlanningMode(false);
 				m_iLastKeyDown = m_ESCMenuKey;
 				ChangeCurrentWidget(1);
 				m_bInEscMenu = true;
@@ -496,7 +496,7 @@ function bool ProcessKeyDown(int Key)
 		return false;
 	}
 	// End:0x185
-	if(__NFUN_130__(__NFUN_154__(Key, int(GetPlayerOwner().__NFUN_2706__("OperativeSelector"))), __NFUN_154__(int(m_eCurWidgetInUse), int(0))))
+	if(((Key == int(GetPlayerOwner().GetKey("OperativeSelector"))) && (int(m_eCurWidgetInUse) == int(0))))
 	{
 		// End:0x183
 		if(m_bCanDisplayOperativeSelector)
@@ -516,15 +516,15 @@ function bool ProcessKeyDown(int Key)
 function bool ProcessKeyUp(int Key)
 {
 	// End:0x2B
-	if(__NFUN_130__(__NFUN_155__(m_iLastKeyDown, -1), __NFUN_154__(m_iLastKeyDown, m_ESCMenuKey)))
+	if(((m_iLastKeyDown != -1) && (m_iLastKeyDown == m_ESCMenuKey)))
 	{
 		m_iLastKeyDown = -1;
 	}
 	// End:0x79
-	if(__NFUN_154__(Key, int(GetPlayerOwner().__NFUN_2706__("OperativeSelector"))))
+	if((Key == int(GetPlayerOwner().GetKey("OperativeSelector"))))
 	{
 		// End:0x6F
-		if(__NFUN_154__(int(m_eCurWidgetInUse), int(35)))
+		if((int(m_eCurWidgetInUse) == int(35)))
 		{
 			ChangeCurrentWidget(0);
 		}
@@ -541,7 +541,7 @@ function bool ProcessKeyUp(int Key)
 function MenuLoadProfile(bool _bServerProfile)
 {
 	// End:0x1A
-	if(__NFUN_129__(_bServerProfile))
+	if((!_bServerProfile))
 	{
 		m_OptionsWidget.MenuOptionsLoadProfile();
 	}

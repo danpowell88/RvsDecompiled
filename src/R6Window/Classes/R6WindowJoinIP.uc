@@ -61,12 +61,12 @@ function StartJoinIPProcedure(UWindowWindow _pCurrentWidget, string _szLastIP)
 // command line, chances are that he won't be connect on ubi.com.
 function StartCmdLineJoinIPProcedure(UWindowWindow _pCurrentWidget, string _szLastIP)
 {
-	__NFUN_231__("R6WindowJoinIP::StartCmdLineJoinIPProcedure");
+	Log("R6WindowJoinIP::StartCmdLineJoinIPProcedure");
 	m_pSendMessageDest = _pCurrentWidget;
 	ShowWindow();
 	eState = 3;
 	m_pPleaseWait.ShowWindow();
-	__NFUN_231__("R6WindowJoinIP::SetValue");
+	Log("R6WindowJoinIP::SetValue");
 	R6WindowEditBox(m_pEnterIP.m_ClientArea).SetValue(_szLastIP);
 	m_bStartByCmdLine = true;
 	return;
@@ -93,7 +93,7 @@ function Manager(UWindowWindow _pCurrentWidget)
 			if(m_GameService.m_ClientBeacon.PreJoinInfo.bResponseRcvd)
 			{
 				// End:0x12B
-				if(__NFUN_123__(Root.Console.ViewportOwner.Actor.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield())), m_GameService.m_ClientBeacon.PreJoinInfo.szGameVersion))
+				if((Root.Console.ViewportOwner.Actor.GetGameVersion(false, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield())) != m_GameService.m_ClientBeacon.PreJoinInfo.szGameVersion))
 				{
 					eState = 2;
 					m_pPleaseWait.HideWindow();
@@ -107,7 +107,7 @@ function Manager(UWindowWindow _pCurrentWidget)
 					{
 						_pCurrentWidget.SendMessage(6);
 						// End:0x16D
-						if(__NFUN_129__(m_bStartByCmdLine))
+						if((!m_bStartByCmdLine))
 						{
 							HideWindow();
 						}						
@@ -115,7 +115,7 @@ function Manager(UWindowWindow _pCurrentWidget)
 					else
 					{
 						// End:0x20B
-						if(__NFUN_129__(m_GameService.m_ClientBeacon.PreJoinInfo.bInternetServer))
+						if((!m_GameService.m_ClientBeacon.PreJoinInfo.bInternetServer))
 						{
 							eState = 2;
 							m_pPleaseWait.HideWindow();
@@ -124,7 +124,7 @@ function Manager(UWindowWindow _pCurrentWidget)
 						}
 						else
 						{
-							m_bRoomValid = __NFUN_130__(__NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID, 0), __NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID, 0));
+							m_bRoomValid = ((m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID != 0) && (m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID != 0));
 							_pCurrentWidget.SendMessage(6);
 							HideWindow();
 						}
@@ -133,9 +133,9 @@ function Manager(UWindowWindow _pCurrentWidget)
 			}
 			else
 			{
-				elapsedTime = __NFUN_175__(m_GameService.__NFUN_3530__(), m_fBeaconTime);
+				elapsedTime = (m_GameService.NativeGetSeconds() - m_fBeaconTime);
 				// End:0x30C
-				if(__NFUN_177__(elapsedTime, 5.0000000))
+				if((elapsedTime > 5.0000000))
 				{
 					eState = 2;
 					m_pPleaseWait.HideWindow();
@@ -203,7 +203,7 @@ function PopUpBoxCreate()
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
 	// End:0x147
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -211,19 +211,19 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			case 10:
 				m_szIP = R6WindowEditBox(m_pEnterIP.m_ClientArea).GetValue();
 				// End:0x8D
-				if(__NFUN_242__(m_GameService.m_ClientBeacon.PreJoinQuery(m_szIP, 0), false))
+				if((m_GameService.m_ClientBeacon.PreJoinQuery(m_szIP, 0) == false))
 				{
 					PopUpBoxDone(3, 11);
-					__NFUN_231__("Invalid IP string entered");
+					Log("Invalid IP string entered");
 					// [Explicit Continue]
 					goto J0x144;
 				}
 				// End:0xA7
-				if(__NFUN_129__(m_bStartByCmdLine))
+				if((!m_bStartByCmdLine))
 				{
 					m_pPleaseWait.ShowWindow();
 				}
-				m_fBeaconTime = m_GameService.__NFUN_3530__();
+				m_fBeaconTime = m_GameService.NativeGetSeconds();
 				eState = 1;
 				// End:0x144
 				break;
@@ -255,7 +255,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	else
 	{
 		// End:0x192
-		if(__NFUN_154__(int(Result), int(4)))
+		if((int(Result) == int(4)))
 		{
 			switch(_ePopUpID)
 			{

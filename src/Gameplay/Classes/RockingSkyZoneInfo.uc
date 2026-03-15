@@ -15,10 +15,10 @@ simulated function Tick(float DeltaTime)
 	local Rotator newRot;
 
 	super(Actor).Tick(DeltaTime);
-	newRot.Pitch = int(__NFUN_174__(float(Rotation.Pitch), __NFUN_171__(float(1024), DeltaTime)));
+	newRot.Pitch = int((float(Rotation.Pitch) + (float(1024) * DeltaTime)));
 	newRot.Roll = Rotation.Roll;
 	newRot.Yaw = Rotation.Yaw;
-	__NFUN_299__(newRot);
+	SetRotation(newRot);
 	return;
 }
 

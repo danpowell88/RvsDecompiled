@@ -19,7 +19,7 @@ function Created()
 	local UWindowListBoxItem CurItem;
 	local float fXOffset, fYOffset, fWidth, fXSecondWindow;
 
-	fXSecondWindow = __NFUN_175__(__NFUN_175__(WinWidth, float(7)), float(135));
+	fXSecondWindow = ((WinWidth - float(7)) - float(135));
 	m_pTextInfo = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, WinWidth, WinHeight, self));
 	m_pTextInfo.bAlwaysBehind = true;
 	m_pTextInfo.SetNoBorder();
@@ -32,9 +32,9 @@ function Created()
 	fXOffset = fXSecondWindow;
 	m_pTextInfo.AddTextLabel(Localize("MPCreateGame", "Options_MapList", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
 	fXOffset = 5.0000000;
-	fYOffset = __NFUN_174__(__NFUN_174__(16.0000000, float(214)), float(5));
+	fYOffset = ((16.0000000 + float(214)) + float(5));
 	m_pTextInfo.m_Font = Root.Fonts[6];
-	m_iTextIndex = m_pTextInfo.AddTextLabel(__NFUN_112__(__NFUN_112__(m_szLocGameMode, " "), Localize("MPCreateGame", "Options_GameType", "R6Menu")), fXOffset, fYOffset, __NFUN_175__(fXSecondWindow, fXOffset), 0, false);
+	m_iTextIndex = m_pTextInfo.AddTextLabel(((m_szLocGameMode $ " ") $ Localize("MPCreateGame", "Options_GameType", "R6Menu")), fXOffset, fYOffset, (fXSecondWindow - fXOffset), 0, false);
 	m_pStartMapList = R6WindowTextListBoxExt(CreateControl(Class'R6Window.R6WindowTextListBoxExt', 7.0000000, 16.0000000, 135.0000000, 214.0000000, self));
 	m_pStartMapList.TextColor = Root.Colors.BlueLight;
 	m_pStartMapList.SetCornerType(0);
@@ -49,7 +49,7 @@ function Created()
 	m_pSelectButton.m_bDrawButtonBorders = true;
 	SetButtonRegion(true);
 	m_pSelectButton.ToolTipString = Localize("Tip", "Options_MapListAddRemove", "R6Menu");
-	fYOffset = __NFUN_174__(__NFUN_174__(16.0000000, float(214)), float(5));
+	fYOffset = ((16.0000000 + float(214)) + float(5));
 	m_pGameTypeCombo = R6WindowComboControl(CreateControl(Class'R6Window.R6WindowComboControl', fXSecondWindow, fYOffset, fWidth, LookAndFeel.Size_ComboHeight));
 	m_pGameTypeCombo.SetFont(6);
 	m_pGameTypeCombo.SetEditBoxTip(Localize("Tip", "Options_MapListGameType", "R6Menu"));
@@ -72,64 +72,64 @@ function FillMapListItem()
 	pLevel = GetLevel();
 	R6Console = R6Console(Root.Console);
 	m_pStartMapList.Items.Clear();
-	szMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord;
-	szRavenShieldMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pRVS.m_szKeyWord;
+	szMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord;
+	szRavenShieldMod = Class'Engine.Actor'.static.GetModMgr().m_pRVS.m_szKeyWord;
 	i = 0;
 	J0x8C:
 
 	// End:0x26B [Loop If]
-	if(__NFUN_150__(i, R6Console.m_aMissionDescriptions.Length))
+	if((i < R6Console.m_aMissionDescriptions.Length))
 	{
 		mission = R6Console.m_aMissionDescriptions[i];
 		// End:0x261
-		if(__NFUN_123__(mission.m_MapName, ""))
+		if((mission.m_MapName != ""))
 		{
 			j = 0;
 			J0xDB:
 
 			// End:0x261 [Loop If]
-			if(__NFUN_150__(j, mission.m_szGameTypes.Length))
+			if((j < mission.m_szGameTypes.Length))
 			{
 				bLoadMap = false;
 				// End:0x11F
-				if(__NFUN_124__(szMod, mission.mod))
+				if((szMod ~= mission.mod))
 				{
 					bLoadMap = true;					
 				}
 				else
 				{
 					// End:0x13F
-					if(__NFUN_124__(mission.mod, szRavenShieldMod))
+					if((mission.mod ~= szRavenShieldMod))
 					{
 						bLoadMap = true;
 					}
 				}
 				// End:0x257
-				if(__NFUN_130__(bLoadMap, pLevel.IsGameTypeMultiplayer(mission.m_szGameTypes[j], true)))
+				if((bLoadMap && pLevel.IsGameTypeMultiplayer(mission.m_szGameTypes[j], true)))
 				{
 					NewItem = R6WindowListBoxItemExt(m_pStartMapList.Items.Append(m_pStartMapList.ListClass));
 					// End:0x1DD
-					if(__NFUN_129__(Root.GetMapNameLocalisation(mission.m_MapName, szLocMapName)))
+					if((!Root.GetMapNameLocalisation(mission.m_MapName, szLocMapName)))
 					{
 						szLocMapName = mission.m_MapName;
 					}
 					ItemR.X = 5;
 					ItemR.Y = 0;
-					ItemR.W = __NFUN_147__(__NFUN_147__(135, 5), 13);
+					ItemR.W = ((135 - 5) - 13);
 					ItemR.H = 14;
 					AssignParamsToNewItem(NewItem, 0, szLocMapName, mission.m_MapName, ItemR, 0);
 					AssignParamsToNewItem(NewItem, 1, "", "", ItemR, 0, true);
 					// [Explicit Break]
 					goto J0x261;
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0xDB;
 			}
 		}
 		J0x261:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x8C;
 	}
@@ -150,30 +150,30 @@ function string FillFinalMapList()
 	local LevelInfo pLevel;
 	local Region ItemRegion;
 
-	pServerOpt = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOpt = Class'Engine.Actor'.static.GetServerOptions();
 	pLevel = GetLevel();
 	m_pFinalMapList.Items.Clear();
 	// End:0x6B
-	if(__NFUN_114__(pServerOpt.m_ServerMapList, none))
+	if((pServerOpt.m_ServerMapList == none))
 	{
-		pServerOpt.m_ServerMapList = GetPlayerOwner().__NFUN_278__(Class'Engine.R6MapList');
+		pServerOpt.m_ServerMapList = GetPlayerOwner().Spawn(Class'Engine.R6MapList');
 	}
 	i = 0;
 	J0x72:
 
 	// End:0x3A0 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, 32), __NFUN_123__(pServerOpt.m_ServerMapList.Maps[i], "")))
+	if(((i < 32) && (pServerOpt.m_ServerMapList.Maps[i] != "")))
 	{
 		szGameType = pLevel.GetGameTypeFromClassName(pServerOpt.m_ServerMapList.GameType[i]);
 		szTemp = GetGameModeFromList(szGameType);
 		// End:0x142
-		if(__NFUN_154__(int(m_eMyGameMode), int(GetPlayerOwner().3)))
+		if((int(m_eMyGameMode) == int(GetPlayerOwner().3)))
 		{
 			// End:0x134
-			if(__NFUN_129__(pLevel.IsGameTypeAdversarial(szGameType)))
+			if((!pLevel.IsGameTypeAdversarial(szGameType)))
 			{
 				// End:0x131
-				if(__NFUN_122__(szResult, ""))
+				if((szResult == ""))
 				{
 					szResult = szTemp;
 				}
@@ -185,13 +185,13 @@ function string FillFinalMapList()
 		else
 		{
 			// End:0x19D
-			if(__NFUN_154__(int(m_eMyGameMode), int(GetPlayerOwner().2)))
+			if((int(m_eMyGameMode) == int(GetPlayerOwner().2)))
 			{
 				// End:0x18F
-				if(__NFUN_129__(pLevel.IsGameTypeCooperative(szGameType)))
+				if((!pLevel.IsGameTypeCooperative(szGameType)))
 				{
 					// End:0x18C
-					if(__NFUN_122__(szResult, ""))
+					if((szResult == ""))
 					{
 						szResult = szTemp;
 					}
@@ -207,10 +207,10 @@ function string FillFinalMapList()
 			}
 		}
 		// End:0x224
-		if(__NFUN_129__(Root.GetMapNameLocalisation(pServerOpt.m_ServerMapList.Maps[i], szTemp)))
+		if((!Root.GetMapNameLocalisation(pServerOpt.m_ServerMapList.Maps[i], szTemp)))
 		{
 			// End:0x201
-			if(__NFUN_129__(FindMapInStartMapList(pServerOpt.m_ServerMapList.Maps[i])))
+			if((!FindMapInStartMapList(pServerOpt.m_ServerMapList.Maps[i])))
 			{
 				// [Explicit Continue]
 				goto J0x396;
@@ -220,11 +220,11 @@ function string FillFinalMapList()
 		NewItem = R6WindowListBoxItemExt(m_pFinalMapList.Items.Append(m_pFinalMapList.ListClass));
 		ItemR.X = 5;
 		ItemR.Y = 0;
-		ItemR.W = __NFUN_147__(__NFUN_147__(135, 5), 13);
+		ItemR.W = ((135 - 5) - 13);
 		ItemR.H = 14;
 		AssignParamsToNewItem(NewItem, 0, szTemp, pServerOpt.m_ServerMapList.Maps[i], ItemR, 0);
 		ItemR.X = 10;
-		ItemR.W = __NFUN_147__(__NFUN_147__(135, 10), 13);
+		ItemR.W = ((135 - 10) - 13);
 		ItemR.H = 11;
 		AssignParamsToNewItem(NewItem, 1, pLevel.GetGameNameLocalization(szGameType), pServerOpt.m_ServerMapList.GameType[i], ItemR, 1);
 		GetInitArmor(szTemp, szGameType, szGreenArmor, szRedArmor, szGreenPkg, szRedPkg);
@@ -232,12 +232,12 @@ function string FillFinalMapList()
 		AssignParamsToNewItem(NewItem, 3, szRedArmor, szRedPkg, ItemR, 3);
 		J0x396:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x72;
 	}
 	// End:0x3B9
-	if(__NFUN_122__(szResult, ""))
+	if((szResult == ""))
 	{
 		szResult = string(m_eMyGameMode);
 	}
@@ -259,7 +259,7 @@ function ManageAvailableGameTypes(UWindowList _pSelectItem, optional bool _bKeep
 	pLevel = GetLevel();
 	R6Console = R6Console(Root.Console);
 	// End:0x32
-	if(__NFUN_114__(_pSelectItem, none))
+	if((_pSelectItem == none))
 	{
 		return;
 	}
@@ -269,23 +269,23 @@ function ManageAvailableGameTypes(UWindowList _pSelectItem, optional bool _bKeep
 	J0x6F:
 
 	// End:0xD6 [Loop If]
-	if(__NFUN_150__(i, R6Console.m_aMissionDescriptions.Length))
+	if((i < R6Console.m_aMissionDescriptions.Length))
 	{
 		// End:0xCC
-		if(__NFUN_122__(szMapName, R6Console.m_aMissionDescriptions[i].m_MapName))
+		if((szMapName == R6Console.m_aMissionDescriptions[i].m_MapName))
 		{
 			pCurMissionDesc = R6Console.m_aMissionDescriptions[i];
 			// [Explicit Break]
 			goto J0xD6;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x6F;
 	}
 	J0xD6:
 
 	// End:0x258
-	if(__NFUN_119__(pCurMissionDesc, none))
+	if((pCurMissionDesc != none))
 	{
 		m_pGameTypeCombo.DisableAllItems();
 		szEditBoxValue = m_pGameTypeCombo.GetValue();
@@ -294,42 +294,42 @@ function ManageAvailableGameTypes(UWindowList _pSelectItem, optional bool _bKeep
 		J0x123:
 
 		// End:0x258 [Loop If]
-		if(__NFUN_150__(i, pCurMissionDesc.m_szGameTypes.Length))
+		if((i < pCurMissionDesc.m_szGameTypes.Length))
 		{
 			szGameTypeFind = pCurMissionDesc.m_szGameTypes[i];
-			szGameTypeClassName = __NFUN_112__(__NFUN_112__(pCurMissionDesc.GameTypes[i].Package, "."), pCurMissionDesc.GameTypes[i].type);
+			szGameTypeClassName = ((pCurMissionDesc.GameTypes[i].Package $ ".") $ pCurMissionDesc.GameTypes[i].type);
 			pComboListItem = m_pGameTypeCombo.GetItem(pLevel.GetGameNameLocalization(szGameTypeFind));
 			// End:0x24E
-			if(__NFUN_119__(pComboListItem, none))
+			if((pComboListItem != none))
 			{
 				pComboListItem.bDisabled = false;
 				// End:0x200
-				if(__NFUN_122__(szFirstGameTypeFound, "RGM_NoRulesMode"))
+				if((szFirstGameTypeFound == "RGM_NoRulesMode"))
 				{
 					szFirstGameTypeFound = szGameTypeFind;
 				}
 				// End:0x228
-				if(__NFUN_130__(_bKeepItemGameType, __NFUN_122__(szItemGameType, szGameTypeClassName)))
+				if((_bKeepItemGameType && (szItemGameType == szGameTypeClassName)))
 				{
 					szFirstGameTypeFound = szGameTypeFind;
 					// [Explicit Continue]
 					goto J0x24E;
 				}
 				// End:0x24E
-				if(__NFUN_122__(szEditBoxValue, pLevel.GetGameNameLocalization(szGameTypeFind)))
+				if((szEditBoxValue == pLevel.GetGameNameLocalization(szGameTypeFind)))
 				{
 					bUseSameGameType = true;
 				}
 			}
 			J0x24E:
 
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x123;
 		}
 	}
 	// End:0x2B7
-	if(__NFUN_130__(__NFUN_129__(bUseSameGameType), __NFUN_123__(szFirstGameTypeFound, "RGM_NoRulesMode")))
+	if(((!bUseSameGameType) && (szFirstGameTypeFound != "RGM_NoRulesMode")))
 	{
 		m_pGameTypeCombo.SetValue(pLevel.GetGameNameLocalization(szFirstGameTypeFound), pLevel.GetGameTypeClassName(szFirstGameTypeFound));
 	}
@@ -343,17 +343,17 @@ function CopyAndAddItemInList(UWindowListBoxItem _ItemToAdd, UWindowListControl 
 	local string szGreenArmor, szRedArmor, szGreenPkg, szRedPkg;
 
 	// End:0x1EB
-	if(__NFUN_130__(__NFUN_150__(_ListAddItem.Items.Count(), 32), __NFUN_119__(_ItemToAdd, none)))
+	if(((_ListAddItem.Items.Count() < 32) && (_ItemToAdd != none)))
 	{
 		ItemToAdd = R6WindowListBoxItemExt(_ItemToAdd);
 		NewItem = R6WindowListBoxItemExt(_ListAddItem.Items.Append(_ListAddItem.ListClass));
 		ItemR.X = 5;
 		ItemR.Y = 0;
-		ItemR.W = __NFUN_147__(__NFUN_147__(135, 5), 13);
+		ItemR.W = ((135 - 5) - 13);
 		ItemR.H = 14;
 		AssignParamsToNewItem(NewItem, 0, ItemToAdd.GetItemText(0), ItemToAdd.GetItemMisc(0), ItemR, 0);
 		ItemR.X = 10;
-		ItemR.W = __NFUN_147__(__NFUN_147__(135, 10), 13);
+		ItemR.W = ((135 - 10) - 13);
 		ItemR.H = 11;
 		szGreenArmor = GetLevel().GetGameTypeFromLocName(m_pGameTypeCombo.GetValue(), true);
 		AssignParamsToNewItem(NewItem, 1, m_pGameTypeCombo.GetValue(), GetLevel().GetGameTypeClassName(szGreenArmor), ItemR, 1);
@@ -369,7 +369,7 @@ function AssignParamsToNewItem(R6WindowListBoxItemExt NewItem, int _index, strin
 	local stItemDesc NewItemDesc;
 
 	// End:0xED
-	if(__NFUN_119__(NewItem, none))
+	if((NewItem != none))
 	{
 		NewItemDesc.szText = _szText;
 		NewItemDesc.szMisc = _szMisc;

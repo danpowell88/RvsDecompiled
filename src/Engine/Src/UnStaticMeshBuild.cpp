@@ -177,16 +177,26 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_DIVERGE("Ghidra 0x1044c130: vtable[29] (this+0x120) = model bbox merge — thiscall target not identified; model bbox omitted")
+IMPL_DIVERGE("Ghidra 0x1044c130 (206b): model bbox merge at this+0x120 added via raw vtable[0x74/4=29] dispatch; SEH frame and explicit FMatrix::~FMatrix call in retail are not reproduced")
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor* Actor) const
 {
-	// Ghidra 0x144c130 (267b): if actor flag [this+0xA8] & 0x400000 == 0,
-	// transforms mesh bbox (this+0x2c) by Actor->LocalToWorld().
-	// Then if (this+0x120 != NULL), calls vtable[29](Actor) to merge in model bbox.
-	// DIVERGENCE: vtable[29] target (FUN_1044c0a0 / UModel::GetCollisionBoundingBox?)
-	// not yet identified — model bbox merge omitted.
+	// Ghidra 0x1044c130: if actor flag [0x2a]&0x400000 == 0, transform mesh bbox (this+0x2c)
+	// by Actor->LocalToWorld(), then if (this+0x120 != NULL) call vtable[29] on model to get
+	// its bbox and merge via FBox::operator+=.
 	if (Actor && !(((const DWORD*)Actor)[0x2a] & 0x400000))
-		return (*(const FBox*)((const BYTE*)this + 0x2c)).TransformBy(Actor->LocalToWorld());
+	{
+		FBox result = (*(const FBox*)((const BYTE*)this + 0x2c)).TransformBy(Actor->LocalToWorld());
+		void* model = *(void**)((const BYTE*)this + 0x120);
+		if (model)
+		{
+			// vtable[0x74/4=29] on the model object: returns FBox via hidden ptr, no explicit params.
+			FBox modelBBox(0);
+			typedef void (__thiscall* GetBBoxFn)(void*, FBox*);
+			((GetBBoxFn)(*(INT*)(*(INT*)model + 0x74)))(model, &modelBBox);
+			result += modelBBox;
+		}
+		return result;
+	}
 	return UPrimitive::GetCollisionBoundingBox(Actor);
 }
 IMPL_MATCH("Engine.dll", 0x1046ccb0)
@@ -240,7 +250,7 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10446b40: full projector triangle-clipping loop — FUN_10449ee0 (clip triangle), FUN_10448ca0 (OPCODE BVH gather) unresolved")
+IMPL_DIVERGE("Ghidra 0x10446b40: NOT present in Ghidra exports; full projector triangle-clipping loop — FUN_10449ee0 (clip triangle), FUN_10448ca0 (OPCODE BVH gather) unresolved")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);

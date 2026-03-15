@@ -50,7 +50,7 @@ var string m_szDefaultHelpText;
 function Created()
 {
 	super.Created();
-	m_VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	m_VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, (WinWidth - LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
 	return;
 }
 
@@ -77,48 +77,48 @@ function Paint(Canvas C, float fMouseX, float fMouseY)
 	LAF = R6WindowLookAndFeel(LookAndFeel);
 	CurItem = Items.Next;
 	// End:0x40
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		fItemHeight = GetSizeOfAnItem(CurItem);
 	}
 	fListHeight = GetSizeOfList();
 	// End:0xD1
-	if(__NFUN_119__(m_VertSB, none))
+	if((m_VertSB != none))
 	{
-		m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(fListHeight, fItemHeight))));
+		m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int((fListHeight / fItemHeight))));
 		J0x8C:
 
 		// End:0xD1 [Loop If]
-		if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), m_VertSB.pos)))
+		if(((CurItem != none) && (float(i) < m_VertSB.pos)))
 		{
-			__NFUN_165__(i);
+			(i++);
 			CurItem = CurItem.Next;
 			// [Loop Continue]
 			goto J0x8C;
 		}
 	}
 	// End:0x10C
-	if(__NFUN_132__(__NFUN_114__(m_VertSB, none), m_VertSB.isHidden()))
+	if(((m_VertSB == none) || m_VertSB.isHidden()))
 	{
-		fdrawWidth = __NFUN_175__(__NFUN_175__(WinWidth, m_fXItemRightPadding), m_fXItemOffset);		
+		fdrawWidth = ((WinWidth - m_fXItemRightPadding) - m_fXItemOffset);		
 	}
 	else
 	{
-		fdrawWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(WinWidth, m_VertSB.WinWidth), m_fXItemRightPadding), m_fXItemOffset);
+		fdrawWidth = (((WinWidth - m_VertSB.WinWidth) - m_fXItemRightPadding) - m_fXItemOffset);
 	}
 	m_iTotItemsDisplayed = 0;
 	Y = float(LAF.m_SBHBorder.H);
 	J0x157:
 
 	// End:0x1F7 [Loop If]
-	if(__NFUN_130__(__NFUN_178__(__NFUN_174__(Y, fItemHeight), __NFUN_174__(fListHeight, float(LAF.m_SBHBorder.H))), __NFUN_119__(CurItem, none)))
+	if((((Y + fItemHeight) <= (fListHeight + float(LAF.m_SBHBorder.H))) && (CurItem != none)))
 	{
 		// End:0x1E0
 		if(CurItem.ShowThisItem())
 		{
 			DrawItem(C, CurItem, m_fXItemOffset, Y, fdrawWidth, fItemHeight);
-			Y = __NFUN_174__(Y, fItemHeight);
-			__NFUN_165__(m_iTotItemsDisplayed);
+			Y = (Y + fItemHeight);
+			(m_iTotItemsDisplayed++);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -131,11 +131,11 @@ function float GetSizeOfAnItem(UWindowList _pItem)
 {
 	local float fTotalItemHeigth;
 
-	fTotalItemHeigth = __NFUN_174__(m_fItemHeight, m_fSpaceBetItem);
+	fTotalItemHeigth = (m_fItemHeight + m_fSpaceBetItem);
 	// End:0x48
 	if(UWindowListBoxItem(_pItem).m_bUseSubText)
 	{
-		__NFUN_184__(fTotalItemHeigth, UWindowListBoxItem(_pItem).m_stSubText.fHeight);
+		(fTotalItemHeigth += UWindowListBoxItem(_pItem).m_stSubText.fHeight);
 	}
 	return fTotalItemHeigth;
 	return;
@@ -143,7 +143,7 @@ function float GetSizeOfAnItem(UWindowList _pItem)
 
 function float GetSizeOfList()
 {
-	return __NFUN_175__(WinHeight, float(__NFUN_144__(2, R6WindowLookAndFeel(LookAndFeel).m_SBHBorder.H)));
+	return (WinHeight - float((2 * R6WindowLookAndFeel(LookAndFeel).m_SBHBorder.H)));
 	return;
 }
 
@@ -151,7 +151,7 @@ function Resized()
 {
 	super(UWindowWindow).Resized();
 	// End:0xCF
-	if(__NFUN_119__(m_VertSB, none))
+	if((m_VertSB != none))
 	{
 		switch(m_eCornerType)
 		{
@@ -159,7 +159,7 @@ function Resized()
 			case 0:
 			// End:0x49
 			case 1:
-				m_VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+				m_VertSB.WinLeft = (WinWidth - LookAndFeel.Size_ScrollbarWidth);
 				// End:0x99
 				break;
 			// End:0x4E
@@ -168,7 +168,7 @@ function Resized()
 			case 3:
 			// End:0x96
 			case 4:
-				m_VertSB.WinLeft = __NFUN_175__(__NFUN_175__(WinWidth, m_VertSB.WinWidth), float(R6WindowLookAndFeel(LookAndFeel).m_iListVPadding));
+				m_VertSB.WinLeft = ((WinWidth - m_VertSB.WinWidth) - float(R6WindowLookAndFeel(LookAndFeel).m_iListVPadding));
 				// End:0x99
 				break;
 			// End:0xFFFF
@@ -197,38 +197,38 @@ function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
 
 	LAF = R6WindowLookAndFeel(LookAndFeel);
 	// End:0x3D
-	if(__NFUN_132__(__NFUN_114__(m_VertSB, none), m_VertSB.isHidden()))
+	if(((m_VertSB == none) || m_VertSB.isHidden()))
 	{
 		fdrawWidth = WinWidth;		
 	}
 	else
 	{
-		fdrawWidth = __NFUN_175__(WinWidth, m_VertSB.WinWidth);
+		fdrawWidth = (WinWidth - m_VertSB.WinWidth);
 	}
 	// End:0x78
-	if(__NFUN_132__(__NFUN_176__(fMouseX, float(0)), __NFUN_177__(fMouseX, fdrawWidth)))
+	if(((fMouseX < float(0)) || (fMouseX > fdrawWidth)))
 	{
 		return none;
 	}
 	CurItem = Items.Next;
 	// End:0xA8
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		fItemHeight = GetSizeOfAnItem(CurItem);
 	}
 	fListHeight = GetSizeOfList();
 	// End:0x116
-	if(__NFUN_119__(m_VertSB, none))
+	if((m_VertSB != none))
 	{
 		J0xBF:
 
 		// End:0x116 [Loop If]
-		if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), m_VertSB.pos)))
+		if(((CurItem != none) && (float(i) < m_VertSB.pos)))
 		{
 			// End:0xFF
 			if(CurItem.ShowThisItem())
 			{
-				__NFUN_165__(i);
+				(i++);
 			}
 			CurItem = CurItem.Next;
 			// [Loop Continue]
@@ -239,17 +239,17 @@ function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
 	J0x131:
 
 	// End:0x1DF [Loop If]
-	if(__NFUN_130__(__NFUN_178__(__NFUN_174__(Y, fItemHeight), __NFUN_174__(fListHeight, float(LAF.m_SBHBorder.H))), __NFUN_119__(CurItem, none)))
+	if((((Y + fItemHeight) <= (fListHeight + float(LAF.m_SBHBorder.H))) && (CurItem != none)))
 	{
 		// End:0x1C8
 		if(CurItem.ShowThisItem())
 		{
 			// End:0x1B6
-			if(__NFUN_130__(__NFUN_179__(fMouseY, Y), __NFUN_178__(fMouseY, __NFUN_175__(__NFUN_174__(Y, fItemHeight), m_fSpaceBetItem))))
+			if(((fMouseY >= Y) && (fMouseY <= ((Y + fItemHeight) - m_fSpaceBetItem))))
 			{
 				return UWindowListBoxItem(CurItem);
 			}
-			Y = __NFUN_174__(Y, fItemHeight);
+			Y = (Y + fItemHeight);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -265,13 +265,13 @@ function MakeSelectedVisible()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_114__(m_VertSB, none))
+	if((m_VertSB == none))
 	{
 		return;
 	}
-	m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(GetSizeOfList(), GetSizeOfAnItem(Items.Next)))));
+	m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int((GetSizeOfList() / GetSizeOfAnItem(Items.Next)))));
 	// End:0x5F
-	if(__NFUN_114__(m_SelectedItem, none))
+	if((m_SelectedItem == none))
 	{
 		return;
 	}
@@ -279,10 +279,10 @@ function MakeSelectedVisible()
 	J0x73:
 
 	// End:0xC0 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0x90
-		if(__NFUN_114__(CurItem, m_SelectedItem))
+		if((CurItem == m_SelectedItem))
 		{
 			// [Explicit Break]
 			goto J0xC0;
@@ -290,7 +290,7 @@ function MakeSelectedVisible()
 		// End:0xA9
 		if(CurItem.ShowThisItem())
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -305,16 +305,16 @@ function MakeSelectedVisible()
 function SetSelectedItem(UWindowListBoxItem NewSelected)
 {
 	// End:0x67
-	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_119__(m_SelectedItem, NewSelected)))
+	if(((NewSelected != none) && (m_SelectedItem != NewSelected)))
 	{
 		// End:0x38
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = false;
 		}
 		m_SelectedItem = NewSelected;
 		// End:0x5F
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = true;
 		}
@@ -329,7 +329,7 @@ function SetSelected(float X, float Y)
 
 	NewSelected = GetItemAt(X, Y);
 	// End:0x30
-	if(__NFUN_119__(NewSelected, m_SelectedItem))
+	if((NewSelected != m_SelectedItem))
 	{
 		ClickTime = 0.0000000;
 	}
@@ -348,7 +348,7 @@ function LMouseDown(float X, float Y)
 	SetAcceptsFocus();
 	SetSelected(X, Y);
 	// End:0x67
-	if(__NFUN_132__(m_bCanDrag, m_bCanDragExternal))
+	if((m_bCanDrag || m_bCanDragExternal))
 	{
 		m_bDragging = true;
 		Root.CaptureMouse();
@@ -360,12 +360,12 @@ function LMouseDown(float X, float Y)
 function DoubleClick(float X, float Y)
 {
 	// End:0x18
-	if(__NFUN_132__(m_bIgnoreUserClicks, __NFUN_114__(m_SelectedItem, none)))
+	if((m_bIgnoreUserClicks || (m_SelectedItem == none)))
 	{
 		return;
 	}
 	// End:0x3D
-	if(__NFUN_114__(GetItemAt(X, Y), m_SelectedItem))
+	if((GetItemAt(X, Y) == m_SelectedItem))
 	{
 		DoubleClickItem(m_SelectedItem);
 	}
@@ -392,12 +392,12 @@ function DoubleClickItem(UWindowListBoxItem i)
 	}
 	Notify(11);
 	// End:0x30
-	if(__NFUN_119__(m_DoubleClickClient, none))
+	if((m_DoubleClickClient != none))
 	{
 		m_DoubleClickClient.NotifyWindow(self, 11);
 	}
 	// End:0x5D
-	if(__NFUN_130__(__NFUN_119__(m_DoubleClickList, none), __NFUN_119__(i, none)))
+	if(((m_DoubleClickList != none) && (i != none)))
 	{
 		m_DoubleClickList.ReceiveDoubleClickItem(self, i);
 	}
@@ -434,15 +434,15 @@ function MouseMove(float X, float Y)
 
 	super(UWindowDialogControl).MouseMove(X, Y);
 	// End:0xFA
-	if(__NFUN_130__(m_bDragging, bMouseDown))
+	if((m_bDragging && bMouseDown))
 	{
 		OverItem = GetItemAt(X, Y);
 		// End:0xCE
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_bCanDrag, __NFUN_119__(OverItem, m_SelectedItem)), __NFUN_119__(OverItem, none)), __NFUN_119__(m_SelectedItem, none)))
+		if((((m_bCanDrag && (OverItem != m_SelectedItem)) && (OverItem != none)) && (m_SelectedItem != none)))
 		{
 			m_SelectedItem.Remove();
 			// End:0xA3
-			if(__NFUN_176__(Y, m_fDragY))
+			if((Y < m_fDragY))
 			{
 				OverItem.InsertItemBefore(m_SelectedItem);				
 			}
@@ -456,7 +456,7 @@ function MouseMove(float X, float Y)
 		else
 		{
 			// End:0xF7
-			if(__NFUN_130__(m_bCanDragExternal, __NFUN_119__(CheckExternalDrag(X, Y), none)))
+			if((m_bCanDragExternal && (CheckExternalDrag(X, Y) != none)))
 			{
 				m_bDragging = false;
 			}
@@ -472,7 +472,7 @@ function MouseMove(float X, float Y)
 function MouseWheelDown(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(m_VertSB, none))
+	if((m_VertSB != none))
 	{
 		m_VertSB.MouseWheelDown(X, Y);
 	}
@@ -482,7 +482,7 @@ function MouseWheelDown(float X, float Y)
 function MouseWheelUp(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(m_VertSB, none))
+	if((m_VertSB != none))
 	{
 		m_VertSB.MouseWheelUp(X, Y);
 	}
@@ -496,7 +496,7 @@ function bool ExternalDragOver(UWindowDialogControl ExternalControl, float X, fl
 
 	B = R6WindowListBox(ExternalControl);
 	// End:0x134
-	if(__NFUN_130__(__NFUN_119__(B, none), __NFUN_119__(B.m_SelectedItem, none)))
+	if(((B != none) && (B.m_SelectedItem != none)))
 	{
 		OverItem = GetItemAt(X, Y);
 		B.m_SelectedItem.Remove();

@@ -22,9 +22,9 @@ var Vector m_vOrientationNorm;
 simulated function PostBeginPlay()
 {
 	// End:0x43
-	if(__NFUN_114__(m_pStairOrientation, none))
+	if((m_pStairOrientation == none))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__("WARNING: ", string(self)), " is missing m_pStairOrientation"));		
+		Log((("WARNING: " $ string(self)) $ " is missing m_pStairOrientation"));		
 	}
 	else
 	{
@@ -39,18 +39,18 @@ simulated event PawnEnteredVolume(Pawn P)
 
 	thisPawn = R6Pawn(P);
 	// End:0x1D
-	if(__NFUN_114__(thisPawn, none))
+	if((thisPawn == none))
 	{
 		return;
 	}
 	super.PawnEnteredVolume(P);
 	// End:0x7A
-	if(__NFUN_129__(thisPawn.m_bIsClimbingStairs))
+	if((!thisPawn.m_bIsClimbingStairs))
 	{
 		// End:0x55
 		if(m_bShowLog)
 		{
-			__NFUN_231__("STAIR: enter");
+			Log("STAIR: enter");
 		}
 		thisPawn.m_bIsClimbingStairs = true;
 		thisPawn.ClimbStairs(m_vOrientationNorm);
@@ -65,7 +65,7 @@ simulated event PawnLeavingVolume(Pawn P)
 
 	thisPawn = R6Pawn(P);
 	// End:0x1D
-	if(__NFUN_114__(thisPawn, none))
+	if((thisPawn == none))
 	{
 		return;
 	}
@@ -73,7 +73,7 @@ simulated event PawnLeavingVolume(Pawn P)
 	// End:0x41
 	if(m_bShowLog)
 	{
-		__NFUN_231__("STAIR: leave");
+		Log("STAIR: leave");
 	}
 	// End:0x73
 	if(thisPawn.m_bIsClimbingStairs)

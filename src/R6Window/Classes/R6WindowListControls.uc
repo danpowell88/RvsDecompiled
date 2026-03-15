@@ -31,41 +31,41 @@ function Paint(Canvas C, float fMouseX, float fMouseY)
 	LAF = R6WindowLookAndFeel(LookAndFeel);
 	CurItem = Items.Next;
 	// End:0x40
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		fItemHeight = GetSizeOfAnItem(CurItem);
 	}
 	fListHeight = GetSizeOfList();
 	// End:0xD1
-	if(__NFUN_119__(m_VertSB, none))
+	if((m_VertSB != none))
 	{
-		m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(fListHeight, fItemHeight))));
+		m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int((fListHeight / fItemHeight))));
 		J0x8C:
 
 		// End:0xD1 [Loop If]
-		if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), m_VertSB.pos)))
+		if(((CurItem != none) && (float(i) < m_VertSB.pos)))
 		{
-			__NFUN_165__(i);
+			(i++);
 			CurItem = CurItem.Next;
 			// [Loop Continue]
 			goto J0x8C;
 		}
 	}
 	// End:0xFE
-	if(__NFUN_132__(__NFUN_114__(m_VertSB, none), m_VertSB.isHidden()))
+	if(((m_VertSB == none) || m_VertSB.isHidden()))
 	{
 		fdrawWidth = WinWidth;		
 	}
 	else
 	{
-		fdrawWidth = __NFUN_175__(WinWidth, m_VertSB.WinWidth);
+		fdrawWidth = (WinWidth - m_VertSB.WinWidth);
 	}
 	m_iTotItemsDisplayed = 0;
 	Y = float(LAF.m_SBHBorder.H);
 	J0x13B:
 
 	// End:0x209 [Loop If]
-	if(__NFUN_130__(__NFUN_178__(__NFUN_174__(Y, fItemHeight), fListHeight), __NFUN_119__(CurItem, none)))
+	if((((Y + fItemHeight) <= fListHeight) && (CurItem != none)))
 	{
 		// End:0x1F2
 		if(CurItem.ShowThisItem())
@@ -77,10 +77,10 @@ function Paint(Canvas C, float fMouseX, float fMouseY)
 			}
 			else
 			{
-				DrawItem(C, CurItem, m_fXOffSet, Y, __NFUN_175__(fdrawWidth, m_fXOffSet), fItemHeight);
+				DrawItem(C, CurItem, m_fXOffSet, Y, (fdrawWidth - m_fXOffSet), fItemHeight);
 			}
-			Y = __NFUN_174__(Y, fItemHeight);
-			__NFUN_165__(m_iTotItemsDisplayed);
+			Y = (Y + fItemHeight);
+			(m_iTotItemsDisplayed++);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -97,43 +97,43 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	local UWindowListBoxItem pListBoxItem;
 
 	pListBoxItem = UWindowListBoxItem(Item);
-	C.__NFUN_2626__(UWindowListBoxItem(Item).m_vItemColor.R, UWindowListBoxItem(Item).m_vItemColor.G, UWindowListBoxItem(Item).m_vItemColor.B);
+	C.SetDrawColor(UWindowListBoxItem(Item).m_vItemColor.R, UWindowListBoxItem(Item).m_vItemColor.G, UWindowListBoxItem(Item).m_vItemColor.B);
 	// End:0x133
 	if(pListBoxItem.m_bImALine)
 	{
 		C.Style = 5;
 		// End:0xC2
-		if(__NFUN_130__(__NFUN_177__(__NFUN_173__(H, float(2)), float(0)), __NFUN_178__(float(m_BorderTextureRegion.H), 1.0000000)))
+		if((((H % float(2)) > float(0)) && (float(m_BorderTextureRegion.H) <= 1.0000000)))
 		{
-			H = __NFUN_174__(H, float(1));
+			H = (H + float(1));
 		}
-		DrawStretchedTextureSegment(C, 1.0000000, __NFUN_174__(Y, __NFUN_171__(H, 0.5000000)), __NFUN_175__(W, float(1)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);		
+		DrawStretchedTextureSegment(C, 1.0000000, (Y + (H * 0.5000000)), (W - float(1)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);		
 	}
 	else
 	{
 		// End:0x3BE
-		if(__NFUN_123__(pListBoxItem.HelpText, ""))
+		if((pListBoxItem.HelpText != ""))
 		{
 			C.Style = 5;
 			C.Font = Root.Fonts[11];
 			C.SpaceX = m_fFontSpacing;
 			TextSize(C, UWindowListBoxItem(Item).HelpText, fW, fH);
-			fTextY = __NFUN_171__(__NFUN_175__(m_fItemHeight, fH), 0.5000000);
-			fTextY = float(int(__NFUN_174__(TextY, 0.5000000)));
+			fTextY = ((m_fItemHeight - fH) * 0.5000000);
+			fTextY = float(int((TextY + 0.5000000)));
 			// End:0x389
-			if(__NFUN_123__(pListBoxItem.m_szActionKey, ""))
+			if((pListBoxItem.m_szActionKey != ""))
 			{
 				t = Texture'UWindow.WhiteTexture';
 				C.DrawColor = Root.Colors.Black;
 				C.Style = 5;
-				C.__NFUN_2626__(C.DrawColor.R, C.DrawColor.G, C.DrawColor.B, 50);
-				DrawStretchedTexture(C, pListBoxItem.m_fXFakeEditBox, __NFUN_174__(Y, fTextY), pListBoxItem.m_fWFakeEditBox, H, t);
-				C.__NFUN_2626__(pListBoxItem.m_vItemColor.R, pListBoxItem.m_vItemColor.G, pListBoxItem.m_vItemColor.B);
+				C.SetDrawColor(C.DrawColor.R, C.DrawColor.G, C.DrawColor.B, 50);
+				DrawStretchedTexture(C, pListBoxItem.m_fXFakeEditBox, (Y + fTextY), pListBoxItem.m_fWFakeEditBox, H, t);
+				C.SetDrawColor(pListBoxItem.m_vItemColor.R, pListBoxItem.m_vItemColor.G, pListBoxItem.m_vItemColor.B);
 				TextSize(C, pListBoxItem.m_szFakeEditBoxValue, fW, fH);
-				fXPos = __NFUN_174__(pListBoxItem.m_fXFakeEditBox, __NFUN_172__(__NFUN_175__(pListBoxItem.m_fWFakeEditBox, fW), float(2)));
-				ClipTextWidth(C, fXPos, __NFUN_174__(Y, fTextY), pListBoxItem.m_szFakeEditBoxValue, W);
+				fXPos = (pListBoxItem.m_fXFakeEditBox + ((pListBoxItem.m_fWFakeEditBox - fW) / float(2)));
+				ClipTextWidth(C, fXPos, (Y + fTextY), pListBoxItem.m_szFakeEditBoxValue, W);
 			}
-			ClipTextWidth(C, __NFUN_174__(X, float(2)), __NFUN_174__(Y, fTextY), pListBoxItem.HelpText, W);
+			ClipTextWidth(C, (X + float(2)), (Y + fTextY), pListBoxItem.HelpText, W);
 		}
 	}
 	return;
@@ -159,17 +159,17 @@ function ManageOverEffect(float X, float Y)
 
 	OverItem = GetItemAt(X, Y);
 	// End:0x56
-	if(__NFUN_119__(m_pPreviousItem, none))
+	if((m_pPreviousItem != none))
 	{
 		m_pPreviousItem.m_vItemColor = Root.Colors.White;
 		m_pPreviousItem = none;
 		ToolTip("");
 	}
 	// End:0xBA
-	if(__NFUN_119__(OverItem, none))
+	if((OverItem != none))
 	{
 		// End:0xBA
-		if(__NFUN_129__(OverItem.m_bNotAffectByNotify))
+		if((!OverItem.m_bNotAffectByNotify))
 		{
 			OverItem.m_vItemColor = Root.Colors.BlueLight;
 			ToolTip(OverItem.m_szToolTip);
@@ -185,21 +185,21 @@ function ManageOverEffect(float X, float Y)
 function SetSelectedItem(UWindowListBoxItem NewSelected)
 {
 	// End:0x61
-	if(__NFUN_119__(NewSelected, none))
+	if((NewSelected != none))
 	{
 		// End:0x27
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = false;
 		}
 		m_SelectedItem = NewSelected;
 		// End:0x4E
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = true;
 		}
 		// End:0x61
-		if(__NFUN_119__(m_pPreviousItem, none))
+		if((m_pPreviousItem != none))
 		{
 			Notify(2);
 		}

@@ -30,29 +30,29 @@ function InitObjectives()
 	local int iLength, iTotalHostage;
 
 	// End:0x43
-	foreach __NFUN_313__(Class'R6Engine.R6Hostage', hostage)
+	foreach DynamicActors(Class'R6Engine.R6Hostage', hostage)
 	{
 		hostage.m_controller.m_bForceToStayHere = true;
 		hostage.m_ePersonality = 0;
-		__NFUN_165__(iTotalHostage);		
+		(iTotalHostage++);		
 	}	
 	// End:0x9B
-	if(__NFUN_130__(__NFUN_154__(iTotalHostage, 0), m_missionMgr.m_bEnableCheckForErrors))
+	if(((iTotalHostage == 0) && m_missionMgr.m_bEnableCheckForErrors))
 	{
-		__NFUN_231__(__NFUN_112__("WARNING: there is no hostage in the game type: ", string(self)));
+		Log(("WARNING: there is no hostage in the game type: " $ string(self)));
 	}
-	m_iIfDeadHostageMinNbToRescue = __NFUN_251__(iTotalHostage, 0, 2);
+	m_iIfDeadHostageMinNbToRescue = Clamp(iTotalHostage, 0, 2);
 	m_objRescueHostage = new (none) Class'R6Game.R6MObjRescueHostage';
 	m_objRescueHostage.m_szDescriptionInMenu = m_objRescueHostage.GetDescriptionBasedOnNbOfHostages(Level);
 	iLength = m_missionMgr.m_aMissionObjectives.Length;
 	m_missionMgr.m_aMissionObjectives[iLength] = m_objRescueHostage;
-	__NFUN_165__(iLength);
+	(iLength++);
 	m_objHostageLossesByAlpha = new (none) Class'R6Game.R6MObjAcceptableHostageLossesByRainbow';
 	m_missionMgr.m_aMissionObjectives[iLength] = m_objHostageLossesByAlpha;
-	__NFUN_165__(iLength);
+	(iLength++);
 	m_objHostageLossesByBravo = new (none) Class'R6Game.R6MObjAcceptableHostageLossesByRainbow';
 	m_missionMgr.m_aMissionObjectives[iLength] = m_objHostageLossesByBravo;
-	__NFUN_165__(iLength);
+	(iLength++);
 	m_objRescueHostage.m_iRescuePercentage = 0;
 	m_objRescueHostage.m_bRescueAllRemainingHostage = true;
 	m_objRescueHostage.m_bIfFailedMissionIsAborted = true;
@@ -80,14 +80,14 @@ function InitObjHostageLossesByTeamID(R6MObjAcceptableHostageLossesByRainbow obj
 	obj.m_iAcceptableLost = iAcceptableLost;
 	obj.m_bVisibleInMenu = false;
 	// End:0x77
-	if(__NFUN_154__(iTeamId, 2))
+	if((iTeamId == 2))
 	{
 		szTeamName = "Alpha";		
 	}
 	else
 	{
 		// End:0x93
-		if(__NFUN_154__(iTeamId, 3))
+		if((iTeamId == 3))
 		{
 			szTeamName = "Bravo";			
 		}
@@ -96,7 +96,7 @@ function InitObjHostageLossesByTeamID(R6MObjAcceptableHostageLossesByRainbow obj
 			szTeamName = "Unknow";
 		}
 	}
-	obj.m_szDescription = __NFUN_112__("HostageLossesByTeamID by ", szTeamName);
+	obj.m_szDescription = ("HostageLossesByTeamID by " $ szTeamName);
 	obj.m_szDescriptionInMenu = "AvoidHostageCasualities";
 	return;
 }
@@ -135,15 +135,15 @@ function EnteredExtractionZone(Actor anActor)
 	}
 	aPawn = R6Pawn(anActor);
 	// End:0x43
-	if(__NFUN_130__(__NFUN_114__(aPawn, none), __NFUN_155__(int(aPawn.m_ePawnType), int(3))))
+	if(((aPawn == none) && (int(aPawn.m_ePawnType) != int(3))))
 	{
 		return;
 	}
 	// End:0xE2
-	foreach __NFUN_313__(Class'R6Engine.R6Hostage', hostage)
+	foreach DynamicActors(Class'R6Engine.R6Hostage', hostage)
 	{
 		// End:0xA8
-		if(__NFUN_130__(__NFUN_130__(hostage.m_bExtracted, hostage.IsAlive()), __NFUN_129__(hostage.m_bFeedbackExtracted)))
+		if(((hostage.m_bExtracted && hostage.IsAlive()) && (!hostage.m_bFeedbackExtracted)))
 		{
 			hostage.m_bFeedbackExtracted = true;
 			bSendMsg = true;
@@ -151,25 +151,25 @@ function EnteredExtractionZone(Actor anActor)
 		// End:0xDA
 		if(hostage.IsAlive())
 		{
-			__NFUN_163__(iTotalAlive);
+			(++iTotalAlive);
 			// End:0xDA
 			if(hostage.m_bExtracted)
 			{
-				__NFUN_163__(iTotalRescued);
+				(++iTotalRescued);
 			}
 		}
-		__NFUN_165__(iTotalHostage);		
+		(iTotalHostage++);		
 	}	
 	// End:0x1CB
 	if(bSendMsg)
 	{
 		// End:0x179
-		if(__NFUN_132__(__NFUN_154__(iTotalHostage, iTotalRescued), __NFUN_130__(__NFUN_155__(iTotalAlive, iTotalHostage), __NFUN_153__(iTotalRescued, m_iIfDeadHostageMinNbToRescue))))
+		if(((iTotalHostage == iTotalRescued) || ((iTotalAlive != iTotalHostage) && (iTotalRescued >= m_iIfDeadHostageMinNbToRescue))))
 		{
 			// End:0x150
 			if(bShowLog)
 			{
-				__NFUN_231__(" ** Game: All hostage has been rescued");
+				Log(" ** Game: All hostage has been rescued");
 			}
 			BroadcastMissionObjMsg("", "", "AllHostagesHaveBeenRescued");			
 		}
@@ -178,7 +178,7 @@ function EnteredExtractionZone(Actor anActor)
 			// End:0x1AA
 			if(bShowLog)
 			{
-				__NFUN_231__(" ** Game: A hostage has been rescued");
+				Log(" ** Game: A hostage has been rescued");
 			}
 			BroadcastMissionObjMsg("", "", "HostageHasBeenRescued");
 		}
@@ -204,7 +204,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0x3F
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : it's a draw");
+			Log("** Game : it's a draw");
 		}
 		BroadcastGameMsg("", "", "RoundIsADraw", m_sndRoundIsADraw, int(GetGameMsgLifeTime()));		
 	}
@@ -216,7 +216,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 			// End:0xC4
 			if(bShowLog)
 			{
-				__NFUN_231__("** Game : bravo win, because alpha eleminated too much hostage");
+				Log("** Game : bravo win, because alpha eleminated too much hostage");
 			}
 			BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 			BroadcastMissionObjMsg("", "", "GreenEleminatedTooManyHostages", none, int(GetGameMsgLifeTime()));
@@ -230,7 +230,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 				// End:0x18A
 				if(bShowLog)
 				{
-					__NFUN_231__("** Game : alpha win, because bravo eleminated too much hostage");
+					Log("** Game : alpha win, because bravo eleminated too much hostage");
 				}
 				BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 				BroadcastMissionObjMsg("", "", "RedEleminatedTooManyHostages", none, int(GetGameMsgLifeTime()));
@@ -244,7 +244,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 					// End:0x227
 					if(bShowLog)
 					{
-						__NFUN_231__("** Game : it's a draw");
+						Log("** Game : it's a draw");
 					}
 					BroadcastGameMsg("", "", "RoundIsADraw", m_sndRoundIsADraw, int(GetGameMsgLifeTime()));					
 				}
@@ -254,12 +254,12 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 					if(m_objDeathmatch.m_bCompleted)
 					{
 						// End:0x303
-						if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 2))
+						if((m_objDeathmatch.m_iWinningTeam == 2))
 						{
 							// End:0x2A3
 							if(bShowLog)
 							{
-								__NFUN_231__("** Game : alpha eleminated bravo");
+								Log("** Game : alpha eleminated bravo");
 							}
 							BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 							BroadcastMissionObjMsg("", "", "GreenNeutralizedRed", none, int(GetGameMsgLifeTime()));
@@ -268,12 +268,12 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 						else
 						{
 							// End:0x3A0
-							if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 3))
+							if((m_objDeathmatch.m_iWinningTeam == 3))
 							{
 								// End:0x345
 								if(bShowLog)
 								{
-									__NFUN_231__("** Game : bravo eleminated alpha");
+									Log("** Game : bravo eleminated alpha");
 								}
 								BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 								BroadcastMissionObjMsg("", "", "RedNeutralizedGreen", none, int(GetGameMsgLifeTime()));
@@ -289,7 +289,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 							// End:0x3E8
 							if(bShowLog)
 							{
-								__NFUN_231__("** Game : alpha rescued enough hostage");
+								Log("** Game : alpha rescued enough hostage");
 							}
 							BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 							BroadcastMissionObjMsg("", "", "HostagesHaveBeenRescued", none, int(GetGameMsgLifeTime()));
@@ -300,7 +300,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 							// End:0x484
 							if(bShowLog)
 							{
-								__NFUN_231__("** Game : bravo kept the hostage from Alpha");
+								Log("** Game : bravo kept the hostage from Alpha");
 							}
 							BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 							BroadcastMissionObjMsg("", "", "HostagesWhereNotRescued", none, int(GetGameMsgLifeTime()));
@@ -323,34 +323,34 @@ function SetPawnTeamFriendlies(Pawn aPawn)
 		case 0:
 			aPawn.m_iFriendlyTeams = 0;
 			aPawn.m_iEnemyTeams = GetTeamNumBit(1);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(3));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(3));
 			// End:0x1C0
 			break;
 		// End:0xA1
 		case 1:
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(1);
 			aPawn.m_iEnemyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(3));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(3));
 			// End:0x1C0
 			break;
 		// End:0xEE
 		case 2:
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(2);
 			aPawn.m_iEnemyTeams = GetTeamNumBit(3);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(1));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(1));
 			// End:0x1C0
 			break;
 		// End:0x152
 		case 3:
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(3);
 			aPawn.m_iEnemyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(1));
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(0));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(1));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(0));
 			// End:0x1C0
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("warning: SetPawnTeamFriendlies team not supported for ", string(aPawn.Name)), " team="), string(aPawn.m_iTeam)));
+			Log(((("warning: SetPawnTeamFriendlies team not supported for " $ string(aPawn.Name)) $ " team=") $ string(aPawn.m_iTeam)));
 			// End:0x1C0
 			break;
 			break;

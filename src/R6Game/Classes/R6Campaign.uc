@@ -35,31 +35,31 @@ function InitCampaign(LevelInfo aLevel, string szFileName, R6Console Console)
 	local bool bFound;
 
 	m_szCampaignFile = szFileName;
-	__NFUN_1010__(__NFUN_112__(Class'Engine.Actor'.static.__NFUN_1524__().GetCampaignMapDir(szFileName), m_szCampaignFile));
-	Console.GetAllMissionDescriptions(Class'Engine.Actor'.static.__NFUN_1524__().GetCampaignMapDir(szFileName));
+	LoadConfig((Class'Engine.Actor'.static.GetModMgr().GetCampaignMapDir(szFileName) $ m_szCampaignFile));
+	Console.GetAllMissionDescriptions(Class'Engine.Actor'.static.GetModMgr().GetCampaignMapDir(szFileName));
 	i = 0;
 	iMission = 0;
 	J0x68:
 
 	// End:0x1E5 [Loop If]
-	if(__NFUN_150__(i, missions.Length))
+	if((i < missions.Length))
 	{
-		missions[i] = __NFUN_235__(missions[i]);
-		szIniFile = __NFUN_112__(missions[i], ".INI");
+		missions[i] = Caps(missions[i]);
+		szIniFile = (missions[i] $ ".INI");
 		bFound = false;
 		j = 0;
 		J0xB9:
 
 		// End:0x188 [Loop If]
-		if(__NFUN_150__(j, Console.m_aMissionDescriptions.Length))
+		if((j < Console.m_aMissionDescriptions.Length))
 		{
 			// End:0x17E
-			if(__NFUN_122__(Console.m_aMissionDescriptions[j].m_missionIniFile, szIniFile))
+			if((Console.m_aMissionDescriptions[j].m_missionIniFile == szIniFile))
 			{
 				m_missions[iMission] = Console.m_aMissionDescriptions[j];
 				m_missions[iMission].m_bCampaignMission = true;
 				// End:0x155
-				if(__NFUN_154__(iMission, 0))
+				if((iMission == 0))
 				{
 					m_missions[iMission].m_bIsLocked = false;					
 				}
@@ -67,23 +67,23 @@ function InitCampaign(LevelInfo aLevel, string szFileName, R6Console Console)
 				{
 					m_missions[iMission].m_bIsLocked = true;
 				}
-				__NFUN_165__(iMission);
+				(iMission++);
 				bFound = true;
 				// [Explicit Break]
 				goto J0x188;
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0xB9;
 		}
 		J0x188:
 
 		// End:0x1DB
-		if(__NFUN_129__(bFound))
+		if((!bFound))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Warning: missing mission description ", szIniFile), " in campaign "), szFileName));
+			Log(((("Warning: missing mission description " $ szIniFile) $ " in campaign ") $ szFileName));
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x68;
 	}
@@ -99,30 +99,30 @@ function LogInfo()
 {
 	local int i;
 
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("CAMPAIGN name=", m_szCampaignFile), " localizationFile="), LocalizationFile));
-	__NFUN_231__("===========================================================");
-	__NFUN_231__(" List mission (.ini files)");
+	Log(((("CAMPAIGN name=" $ m_szCampaignFile) $ " localizationFile=") $ LocalizationFile));
+	Log("===========================================================");
+	Log(" List mission (.ini files)");
 	J0x93:
 
 	// End:0xD6 [Loop If]
-	if(__NFUN_150__(i, missions.Length))
+	if((i < missions.Length))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("  Mission ", string(i)), " "), missions[i]));
-		__NFUN_165__(i);
+		Log(((("  Mission " $ string(i)) $ " ") $ missions[i]));
+		(i++);
 		// [Loop Continue]
 		goto J0x93;
 	}
-	__NFUN_231__(" List operative");
+	Log(" List operative");
 	i = 0;
-	__NFUN_231__("  List backup operative");
+	Log("  List backup operative");
 	i = 0;
 	J0x112:
 
 	// End:0x150 [Loop If]
-	if(__NFUN_150__(i, m_OperativeBackupClassName.Length))
+	if((i < m_OperativeBackupClassName.Length))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("  bk ", string(i)), " "), m_OperativeBackupClassName[i]));
-		__NFUN_165__(i);
+		Log(((("  bk " $ string(i)) $ " ") $ m_OperativeBackupClassName[i]));
+		(i++);
 		// [Loop Continue]
 		goto J0x112;
 	}

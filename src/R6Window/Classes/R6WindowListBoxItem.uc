@@ -34,11 +34,11 @@ function R6WindowListBoxItem AppendAfterSeparator(Class<R6WindowListBoxItem> C, 
 	J0x0B:
 
 	// End:0x9D [Loop If]
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_114__(NewElement, none)))
+	if(((TempItem != none) && (NewElement == none)))
 	{
 		workItem = R6WindowListBoxItem(TempItem);
 		// End:0x86
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(workItem, none), workItem.m_IsSeparator), __NFUN_154__(workItem.m_iSeparatorID, iSeparatorID)))
+		if((((workItem != none) && workItem.m_IsSeparator) && (workItem.m_iSeparatorID == iSeparatorID)))
 		{
 			NewElement = workItem.InsertAfter(Class'R6Window.R6WindowListBoxItem');
 		}
@@ -61,11 +61,11 @@ function R6WindowListBoxItem InsertLastAfterSeparator(Class<R6WindowListBoxItem>
 	J0x0B:
 
 	// End:0xA2 [Loop If]
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_242__(bSeparatorFound, false)))
+	if(((TempItem != none) && (bSeparatorFound == false)))
 	{
 		workItem = R6WindowListBoxItem(TempItem);
 		// End:0x80
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(workItem, none), workItem.m_IsSeparator), __NFUN_154__(workItem.m_iSeparatorID, iSeparatorID)))
+		if((((workItem != none) && workItem.m_IsSeparator) && (workItem.m_iSeparatorID == iSeparatorID)))
 		{
 			Separator = workItem;
 			bSeparatorFound = true;
@@ -78,7 +78,7 @@ function R6WindowListBoxItem InsertLastAfterSeparator(Class<R6WindowListBoxItem>
 	J0xA2:
 
 	// End:0xEB [Loop If]
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_242__(R6WindowListBoxItem(TempItem).m_IsSeparator, false)))
+	if(((TempItem != none) && (R6WindowListBoxItem(TempItem).m_IsSeparator == false)))
 	{
 		LastItem = TempItem;
 		TempItem = TempItem.Next;
@@ -101,15 +101,15 @@ function int FindItemIndex(UWindowList Item)
 	J0x12:
 
 	// End:0x55 [Loop If]
-	if(__NFUN_150__(i, Count()))
+	if((i < Count()))
 	{
 		// End:0x37
-		if(__NFUN_114__(L, Item))
+		if((L == Item))
 		{
 			return i;
 		}
 		L = L.Next;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x12;
 	}

@@ -12,10 +12,10 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	local Pawn P;
 
 	// End:0x44
-	foreach __NFUN_313__(Class'Engine.Pawn', P, Event)
+	foreach DynamicActors(Class'Engine.Pawn', P, Event)
 	{
 		// End:0x43
-		if(__NFUN_151__(P.Health, 0))
+		if((P.Health > 0))
 		{
 			P.TriggerEvent(RedirectionEvent, self, P);
 		}		

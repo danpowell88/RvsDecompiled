@@ -18,7 +18,7 @@ function Created()
 	super.Created();
 	EditBox = UWindowEditBox(CreateWindow(Class'UWindow.UWindowEditBox', 0.0000000, 0.0000000, WinWidth, WinHeight));
 	EditBox.NotifyOwner = self;
-	EditBoxWidth = __NFUN_172__(WinWidth, float(2));
+	EditBoxWidth = (WinWidth / float(2));
 	SetEditTextColor(LookAndFeel.EditBoxTextColor);
 	return;
 }

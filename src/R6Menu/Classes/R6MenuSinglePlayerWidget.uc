@@ -78,8 +78,8 @@ function Created()
 	m_ButtonOptions.Align = 0;
 	m_ButtonOptions.m_buttonFont = ButtonFont;
 	m_ButtonOptions.ResizeToText();
-	XPos = int(__NFUN_174__(m_pHelpWindow.WinLeft, m_pHelpWindow.WinWidth));
-	m_ButtonStart = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(XPos), 452.0000000, __NFUN_175__(__NFUN_175__(WinWidth, float(XPos)), float(20)), 25.0000000, self));
+	XPos = int((m_pHelpWindow.WinLeft + m_pHelpWindow.WinWidth));
+	m_ButtonStart = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(XPos), 452.0000000, ((WinWidth - float(XPos)) - float(20)), 25.0000000, self));
 	m_ButtonStart.ToolTipString = m_ButtonStartHelpText[0];
 	m_ButtonStart.Text = m_ButtonStartText[0];
 	m_ButtonStart.Align = 1;
@@ -91,7 +91,7 @@ function Created()
 	m_Map.CreateClientWindow(Class'R6Window.R6WindowBitMap');
 	m_Map.m_eCornerType = 3;
 	m_Map.HideWindow();
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("SinglePlayer", "Title", "R6Menu");
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
@@ -118,7 +118,7 @@ function ShowWindow()
 	super(UWindowWindow).ShowWindow();
 	m_CampaignSelect.RefreshListBox();
 	// End:0x51
-	if(__NFUN_154__(m_CampaignSelect.m_CampaignListBox.Items.Count(), 0))
+	if((m_CampaignSelect.m_CampaignListBox.Items.Count() == 0))
 	{
 		switchWidget(1);
 		SetCurrentBut(int(1));		
@@ -179,20 +179,20 @@ function switchWidget(R6MenuSinglePlayerWidget.eWidgetID newWidget)
 function ButtonClicked(int ButtonID)
 {
 	// End:0x2B4
-	if(__NFUN_155__(ButtonID, m_iSelectedButtonID))
+	if((ButtonID != m_iSelectedButtonID))
 	{
 		switch(ButtonID)
 		{
 			// End:0xA6
 			case int(0):
 				// End:0x47
-				if(__NFUN_154__(m_CampaignSelect.m_CampaignListBox.Items.Count(), 0))
+				if((m_CampaignSelect.m_CampaignListBox.Items.Count() == 0))
 				{
 					// [Explicit Continue]
 					goto J0x2A9;
 				}
 				// End:0x5D
-				if(__NFUN_154__(m_iSelectedButtonID, int(1)))
+				if((m_iSelectedButtonID == int(1)))
 				{
 					switchWidget(0);
 				}
@@ -210,13 +210,13 @@ function ButtonClicked(int ButtonID)
 			// End:0x148
 			case int(2):
 				// End:0xE9
-				if(__NFUN_154__(m_CampaignSelect.m_CampaignListBox.Items.Count(), 0))
+				if((m_CampaignSelect.m_CampaignListBox.Items.Count() == 0))
 				{
 					// [Explicit Continue]
 					goto J0x2A9;
 				}
 				// End:0xFF
-				if(__NFUN_154__(m_iSelectedButtonID, int(1)))
+				if((m_iSelectedButtonID == int(1)))
 				{
 					switchWidget(0);
 				}
@@ -256,7 +256,7 @@ function ButtonClicked(int ButtonID)
 					// End:0x2A0
 					case int(2):
 						// End:0x29D
-						if(__NFUN_119__(m_CampaignSelect.m_CampaignListBox.m_SelectedItem, none))
+						if((m_CampaignSelect.m_CampaignListBox.m_SelectedItem != none))
 						{
 							R6MenuRootWindow(Root).SimplePopUp(Localize("SinglePlayer", "ButtonDelete", "R6Menu"), Localize("POPUP", "DELETECAMPAIGN", "R6Menu"), 42);
 						}
@@ -285,9 +285,9 @@ function bool CampaignExists()
 	local R6MenuSinglePlayerCampaignCreate R6PCC;
 
 	R6PCC = R6MenuSinglePlayerCampaignCreate(m_CampaignCreate.m_ClientArea);
-	szDir = Class'Engine.Actor'.static.__NFUN_1524__().GetCampaignDir();
-	temp = __NFUN_112__(__NFUN_112__(szDir, R6PCC.m_CampaignNameEdit.GetValue()), ".cmp");
-	return m_pFileManager.__NFUN_1528__(temp);
+	szDir = Class'Engine.Actor'.static.GetModMgr().GetCampaignDir();
+	temp = ((szDir $ R6PCC.m_CampaignNameEdit.GetValue()) $ ".cmp");
+	return m_pFileManager.FindFile(temp);
 	return;
 }
 
@@ -306,7 +306,7 @@ function DeleteCurrentSelectedCampaign()
 {
 	m_CampaignSelect.DeleteCampaign();
 	// End:0x48
-	if(__NFUN_154__(m_CampaignSelect.m_CampaignListBox.Items.Count(), 0))
+	if((m_CampaignSelect.m_CampaignListBox.Items.Count() == 0))
 	{
 		switchWidget(1);
 		SetCurrentBut(int(1));
@@ -325,7 +325,7 @@ function UpdateSelectedCampaign(R6PlayerCampaign _PlayerCampaign)
 	tempVar = R6MenuCampaignDescription(m_CampaignDescription.m_ClientArea);
 	mapBitmap = R6WindowBitMap(m_Map.m_ClientArea);
 	// End:0x9D
-	if(__NFUN_114__(_PlayerCampaign, none))
+	if((_PlayerCampaign == none))
 	{
 		tempVar.m_MissionValue.Text = "";
 		tempVar.m_NameValue.Text = "";
@@ -336,9 +336,9 @@ function UpdateSelectedCampaign(R6PlayerCampaign _PlayerCampaign)
 	CampaignType = new (none) Class'R6Game.R6Campaign';
 	CampaignType.InitCampaign(GetLevel(), _PlayerCampaign.m_CampaignFileName, R6Console(Root.Console));
 	CurrentMission = CampaignType.m_missions[_PlayerCampaign.m_iNoMission];
-	tempVar.m_MissionValue.SetNewText(string(__NFUN_146__(_PlayerCampaign.m_iNoMission, 1)), true);
+	tempVar.m_MissionValue.SetNewText(string((_PlayerCampaign.m_iNoMission + 1)), true);
 	tempVar.m_NameValue.SetNewText(Localize(CurrentMission.m_MapName, "ID_CODENAME", CurrentMission.LocalizationFile), true);
-	tempVar.m_DifficultyValue.SetNewText(Localize("SinglePlayer", __NFUN_112__("Difficulty", string(_PlayerCampaign.m_iDifficultyLevel)), "R6Menu"), true);
+	tempVar.m_DifficultyValue.SetNewText(Localize("SinglePlayer", ("Difficulty" $ string(_PlayerCampaign.m_iDifficultyLevel)), "R6Menu"), true);
 	mapBitmap.R = CurrentMission.m_RMissionOverview;
 	mapBitmap.t = CurrentMission.m_TMissionOverview;
 	return;
@@ -348,7 +348,7 @@ function KeyDown(int Key, float X, float Y)
 {
 	super.KeyDown(Key, X, Y);
 	// End:0x3F
-	if(__NFUN_154__(Key, int(Root.Console.13)))
+	if((Key == int(Root.Console.13)))
 	{
 		ButtonClicked(int(3));
 	}
@@ -358,7 +358,7 @@ function KeyDown(int Key, float X, float Y)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x7C
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -375,7 +375,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0xFFFF
 			default:
 				// End:0x79
-				if(__NFUN_119__(R6WindowButton(C), none))
+				if((R6WindowButton(C) != none))
 				{
 					ButtonClicked(R6WindowButton(C).m_iButtonID);
 				}
@@ -420,7 +420,7 @@ function CreateButtons()
 	m_pButResumeCampaign.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButResumeCampaign.ResizeToText();
 	m_pButResumeCampaign.m_bSelected = true;
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButNewCampaign = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButNewCampaign.ToolTipString = Localize("Tip", "ButtonNewCampaign", "R6Menu");
 	m_pButNewCampaign.Text = Localize("SinglePlayer", "ButtonNew", "R6Menu");
@@ -429,7 +429,7 @@ function CreateButtons()
 	m_pButNewCampaign.m_buttonFont = m_LeftButtonFont;
 	m_pButNewCampaign.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButNewCampaign.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButDelCampaign = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButDelCampaign.ToolTipString = Localize("Tip", "ButtonDeleteCampaign", "R6Menu");
 	m_pButDelCampaign.Text = Localize("SinglePlayer", "ButtonDelete", "R6Menu");
@@ -447,7 +447,7 @@ function bool ButtonsUsingDownSizeFont()
 	local bool Result;
 
 	// End:0x42
-	if(__NFUN_132__(__NFUN_132__(m_pButResumeCampaign.IsFontDownSizingNeeded(), m_pButNewCampaign.IsFontDownSizingNeeded()), m_pButDelCampaign.IsFontDownSizingNeeded()))
+	if(((m_pButResumeCampaign.IsFontDownSizingNeeded() || m_pButNewCampaign.IsFontDownSizingNeeded()) || m_pButDelCampaign.IsFontDownSizingNeeded()))
 	{
 		Result = true;
 	}

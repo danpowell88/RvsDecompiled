@@ -55,7 +55,7 @@ function string GetActionString()
 		default:
 			break;
 	}
-	return __NFUN_168__(ActionString, S);
+	return (ActionString @ S);
 	return;
 }
 

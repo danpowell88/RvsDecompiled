@@ -53,7 +53,7 @@ function Select()
 {
 	Owner.LookAndFeel.PlayMenuSound(Owner, 0);
 	Menu.ShowWindow();
-	Menu.WinLeft = __NFUN_174__(ItemLeft, Owner.WinLeft);
+	Menu.WinLeft = (ItemLeft + Owner.WinLeft);
 	Menu.WinTop = 14.0000000;
 	Menu.WinWidth = 100.0000000;
 	Menu.WinHeight = 100.0000000;

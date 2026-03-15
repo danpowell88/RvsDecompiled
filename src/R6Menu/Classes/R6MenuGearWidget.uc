@@ -79,12 +79,12 @@ function Created()
 
 	super.Created();
 	m_labelFont = Root.Fonts[9];
-	labelWidth = __NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3);
-	labelWidth = __NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3);
+	labelWidth = (int((m_Right.WinLeft - m_Left.WinWidth)) / 3);
+	labelWidth = (int((m_Right.WinLeft - m_Left.WinWidth)) / 3);
 	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_Left.WinWidth, m_Top.WinHeight, float(labelWidth), 18.0000000, self));
-	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_CodeName.WinLeft, m_CodeName.WinWidth), m_Top.WinHeight, float(labelWidth), 18.0000000, self));
-	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_DateTime.WinLeft, m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, 18.0000000, self));
-	m_RosterListCtrl = R6MenuDynTeamListsControl(CreateWindow(Class'R6Menu.R6MenuDynTeamListsControl', __NFUN_174__(m_Left.WinWidth, float(m_IRosterListLeftPad)), __NFUN_174__(m_CodeName.WinTop, m_CodeName.WinHeight), 199.0000000, __NFUN_175__(__NFUN_175__(m_HelpTextBar.WinTop, __NFUN_174__(m_CodeName.WinTop, m_CodeName.WinHeight)), float(2)), self));
+	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_CodeName.WinLeft + m_CodeName.WinWidth), m_Top.WinHeight, float(labelWidth), 18.0000000, self));
+	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_DateTime.WinLeft + m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, 18.0000000, self));
+	m_RosterListCtrl = R6MenuDynTeamListsControl(CreateWindow(Class'R6Menu.R6MenuDynTeamListsControl', (m_Left.WinWidth + float(m_IRosterListLeftPad)), (m_CodeName.WinTop + m_CodeName.WinHeight), 199.0000000, ((m_HelpTextBar.WinTop - (m_CodeName.WinTop + m_CodeName.WinHeight)) - float(2)), self));
 	m_OperativeDetails = R6MenuOperativeDetailControl(CreateWindow(Class'R6Menu.R6MenuOperativeDetailControl', 430.0000000, m_RosterListCtrl.WinTop, 189.0000000, 339.0000000, self));
 	m_OperativeDetails.HideWindow();
 	m_EquipmentDetails = R6MenuEquipmentDetailControl(CreateWindow(Class'R6Menu.R6MenuEquipmentDetailControl', 430.0000000, m_RosterListCtrl.WinTop, 189.0000000, 339.0000000, self));
@@ -92,40 +92,40 @@ function Created()
 	m_Equipment2dSelect = R6MenuEquipmentSelectControl(CreateWindow(Class'R6Menu.R6MenuEquipmentSelectControl', 222.0000000, m_RosterListCtrl.WinTop, 206.0000000, 339.0000000, self));
 	m_NavBar.m_GearButton.bDisabled = true;
 	m_PrimaryMagsGadget = new (none) Class'R6Description.R6DescPrimaryMags';
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	i = 0;
 	J0x2DF:
 
 	// End:0x402 [Loop If]
-	if(__NFUN_150__(i, pCurrentMod.m_aDescriptionPackage.Length))
+	if((i < pCurrentMod.m_aDescriptionPackage.Length))
 	{
 		// End:0x3F8
-		if(__NFUN_123__(pCurrentMod.m_aDescriptionPackage[i], "R6Description"))
+		if((pCurrentMod.m_aDescriptionPackage[i] != "R6Description"))
 		{
-			ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6DescPrimaryMags'));
+			ExtraMags = Class<R6DescPrimaryMags>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[i] $ ".u"), Class'R6Description.R6DescPrimaryMags'));
 			J0x34D:
 
 			// End:0x3F8 [Loop If]
-			if(__NFUN_119__(ExtraMags, none))
+			if((ExtraMags != none))
 			{
 				j = 0;
 				J0x35F:
 
 				// End:0x3E7 [Loop If]
-				if(__NFUN_150__(j, ExtraMags.default.m_iNewTagsToAdd))
+				if((j < ExtraMags.default.m_iNewTagsToAdd))
 				{
 					m_PrimaryMagsGadget.m_Mags[m_PrimaryMagsGadget.m_Mags.Length] = ExtraMags.default.m_Mags[j];
 					m_PrimaryMagsGadget.m_MagTags[m_PrimaryMagsGadget.m_MagTags.Length] = ExtraMags.default.m_MagTags[j];
-					__NFUN_165__(j);
+					(j++);
 					// [Loop Continue]
 					goto J0x35F;
 				}
-				ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1006__());
+				ExtraMags = Class<R6DescPrimaryMags>(GetNextClass());
 				// [Loop Continue]
 				goto J0x34D;
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x2DF;
 	}
@@ -138,11 +138,11 @@ function ShowWindow()
 
 	super(UWindowWindow).ShowWindow();
 	// End:0x72
-	if(__NFUN_242__(R6MenuRootWindow(Root).m_bPlayerPlanInitialized, false))
+	if((R6MenuRootWindow(Root).m_bPlayerPlanInitialized == false))
 	{
-		pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+		pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 		// End:0x72
-		if(__NFUN_242__(pGameOptions.PopUpLoadPlan, true))
+		if((pGameOptions.PopUpLoadPlan == true))
 		{
 			R6MenuRootWindow(Root).m_ePopUpID = 48;
 			R6MenuRootWindow(Root).PopUpMenu(true);
@@ -170,63 +170,63 @@ function OperativeSelected(R6Operative selectedOperative, R6MenuGearWidget.eOper
 	m_currentOperative = selectedOperative;
 	m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DynamicLoadObject(m_currentOperative.m_szPrimaryWeapon, Class'Core.Class'));
 	// End:0x8A
-	if(__NFUN_114__(m_OpFirstWeaponDesc, none))
+	if((m_OpFirstWeaponDesc == none))
 	{
 		m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DynamicLoadObject(m_currentOperative.default.m_szPrimaryWeapon, Class'Core.Class'));
 		m_currentOperative.m_szPrimaryWeapon = m_currentOperative.default.m_szPrimaryWeapon;
 	}
 	m_OpFirstWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponGadget);
 	// End:0x102
-	if(__NFUN_114__(m_OpFirstWeaponGadgetDesc, none))
+	if((m_OpFirstWeaponGadgetDesc == none))
 	{
 		m_OpFirstWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryWeaponGadgetDesc(m_OpFirstWeaponDesc, m_currentOperative.default.m_szPrimaryWeaponGadget);
 		m_currentOperative.m_szPrimaryWeaponGadget = m_currentOperative.default.m_szPrimaryWeaponGadget;
 	}
 	m_OpFirstWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.m_szPrimaryWeaponBullet);
 	// End:0x17A
-	if(__NFUN_114__(m_OpFirstWeaponBulletDesc, none))
+	if((m_OpFirstWeaponBulletDesc == none))
 	{
 		m_OpFirstWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetPrimaryBulletDesc(m_OpFirstWeaponDesc, m_currentOperative.default.m_szPrimaryWeaponBullet);
 		m_currentOperative.m_szPrimaryWeaponBullet = m_currentOperative.default.m_szPrimaryWeaponBullet;
 	}
 	m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DynamicLoadObject(m_currentOperative.m_szSecondaryWeapon, Class'Core.Class'));
 	// End:0x1EA
-	if(__NFUN_114__(m_OpSecondaryWeaponDesc, none))
+	if((m_OpSecondaryWeaponDesc == none))
 	{
 		m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DynamicLoadObject(m_currentOperative.default.m_szSecondaryWeapon, Class'Core.Class'));
 		m_currentOperative.m_szSecondaryWeapon = m_currentOperative.default.m_szSecondaryWeapon;
 	}
 	m_OpSecondWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponGadget);
 	// End:0x262
-	if(__NFUN_114__(m_OpSecondWeaponGadgetDesc, none))
+	if((m_OpSecondWeaponGadgetDesc == none))
 	{
 		m_OpSecondWeaponGadgetDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryWeaponGadgetDesc(m_OpSecondaryWeaponDesc, m_currentOperative.default.m_szSecondaryWeaponGadget);
 		m_currentOperative.m_szSecondaryWeaponGadget = m_currentOperative.default.m_szSecondaryWeaponGadget;
 	}
 	m_OpSecondWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.m_szSecondaryWeaponBullet);
 	// End:0x2DA
-	if(__NFUN_114__(m_OpSecondWeaponBulletDesc, none))
+	if((m_OpSecondWeaponBulletDesc == none))
 	{
 		m_OpSecondWeaponBulletDesc = Class'R6Description.R6DescriptionManager'.static.GetSecondaryBulletDesc(m_OpSecondaryWeaponDesc, m_currentOperative.default.m_szSecondaryWeaponBullet);
 		m_currentOperative.m_szSecondaryWeaponBullet = m_currentOperative.default.m_szSecondaryWeaponBullet;
 	}
 	m_OpFirstGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.m_szPrimaryGadget, Class'Core.Class'));
 	// End:0x34A
-	if(__NFUN_114__(m_OpFirstGadgetDesc, none))
+	if((m_OpFirstGadgetDesc == none))
 	{
 		m_OpFirstGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.default.m_szPrimaryGadget, Class'Core.Class'));
 		m_currentOperative.m_szPrimaryGadget = m_currentOperative.default.m_szPrimaryGadget;
 	}
 	m_OpSecondGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.m_szSecondaryGadget, Class'Core.Class'));
 	// End:0x3BA
-	if(__NFUN_114__(m_OpSecondGadgetDesc, none))
+	if((m_OpSecondGadgetDesc == none))
 	{
 		m_OpSecondGadgetDesc = Class<R6GadgetDescription>(DynamicLoadObject(m_currentOperative.default.m_szSecondaryGadget, Class'Core.Class'));
 		m_currentOperative.m_szSecondaryGadget = m_currentOperative.default.m_szSecondaryGadget;
 	}
 	m_OpArmorDesc = Class<R6ArmorDescription>(DynamicLoadObject(m_currentOperative.m_szArmor, Class'Core.Class'));
 	// End:0x42A
-	if(__NFUN_114__(m_OpArmorDesc, none))
+	if((m_OpArmorDesc == none))
 	{
 		m_OpArmorDesc = Class<R6ArmorDescription>(DynamicLoadObject(m_currentOperative.default.m_szArmor, Class'Core.Class'));
 		m_currentOperative.m_szArmor = m_currentOperative.default.m_szArmor;
@@ -235,9 +235,9 @@ function OperativeSelected(R6Operative selectedOperative, R6MenuGearWidget.eOper
 	m_OperativeDetails.UpdateDetails();
 	m_Equipment2dSelect.UpdateDetails();
 	m_currentOperativeTeam = _selectedTeam;
-	m_Equipment2dSelect.DisableControls(__NFUN_154__(int(m_currentOperativeTeam), int(3)));
+	m_Equipment2dSelect.DisableControls((int(m_currentOperativeTeam) == int(3)));
 	// End:0x4A5
-	if(__NFUN_130__(bWindowVisible, __NFUN_119__(_pActiveWindow, none)))
+	if((bWindowVisible && (_pActiveWindow != none)))
 	{
 		_pActiveWindow.ActivateWindow(0, false);
 	}
@@ -250,7 +250,7 @@ function SetupOperative(out R6Operative OpToChek)
 
 	currentArmor = Class<R6ArmorDescription>(DynamicLoadObject(OpToChek.m_szArmor, Class'Core.Class'));
 	// End:0x63
-	if(__NFUN_242__(m_EquipmentDetails.IsAmorAvailable(currentArmor, OpToChek), false))
+	if((m_EquipmentDetails.IsAmorAvailable(currentArmor, OpToChek) == false))
 	{
 		OpToChek.m_szArmor = string(m_EquipmentDetails.GetDefaultArmor());
 	}
@@ -275,11 +275,11 @@ function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
 			J0x94:
 
 			// End:0x136 [Loop If]
-			if(__NFUN_119__(tmpItem, none))
+			if((tmpItem != none))
 			{
 				tmpOperative = R6Operative(tmpItem.m_Object);
 				// End:0x11A
-				if(__NFUN_119__(tmpOperative, none))
+				if((tmpOperative != none))
 				{
 					tmpOperative.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
 					tmpOperative.m_szPrimaryWeaponBullet = m_currentOperative.m_szPrimaryWeaponBullet;
@@ -297,11 +297,11 @@ function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
 			J0x168:
 
 			// End:0x20A [Loop If]
-			if(__NFUN_119__(tmpItem, none))
+			if((tmpItem != none))
 			{
 				tmpOperative = R6Operative(tmpItem.m_Object);
 				// End:0x1EE
-				if(__NFUN_119__(tmpOperative, none))
+				if((tmpOperative != none))
 				{
 					tmpOperative.m_szSecondaryWeapon = m_currentOperative.m_szSecondaryWeapon;
 					tmpOperative.m_szSecondaryWeaponBullet = m_currentOperative.m_szSecondaryWeaponBullet;
@@ -319,11 +319,11 @@ function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
 			J0x23C:
 
 			// End:0x2A4 [Loop If]
-			if(__NFUN_119__(tmpItem, none))
+			if((tmpItem != none))
 			{
 				tmpOperative = R6Operative(tmpItem.m_Object);
 				// End:0x288
-				if(__NFUN_119__(tmpOperative, none))
+				if((tmpOperative != none))
 				{
 					tmpOperative.m_szPrimaryGadget = m_currentOperative.m_szPrimaryGadget;
 				}
@@ -339,11 +339,11 @@ function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
 			J0x2D6:
 
 			// End:0x33E [Loop If]
-			if(__NFUN_119__(tmpItem, none))
+			if((tmpItem != none))
 			{
 				tmpOperative = R6Operative(tmpItem.m_Object);
 				// End:0x322
-				if(__NFUN_119__(tmpOperative, none))
+				if((tmpOperative != none))
 				{
 					tmpOperative.m_szSecondaryGadget = m_currentOperative.m_szSecondaryGadget;
 				}
@@ -359,11 +359,11 @@ function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
 			J0x370:
 
 			// End:0x3D8 [Loop If]
-			if(__NFUN_119__(tmpItem, none))
+			if((tmpItem != none))
 			{
 				tmpOperative = R6Operative(tmpItem.m_Object);
 				// End:0x3BC
-				if(__NFUN_119__(tmpOperative, none))
+				if((tmpOperative != none))
 				{
 					tmpOperative.m_szArmor = m_currentOperative.m_szArmor;
 				}
@@ -379,17 +379,17 @@ function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
 			J0x3E7:
 
 			// End:0x575 [Loop If]
-			if(__NFUN_150__(i, 3))
+			if((i < 3))
 			{
 				tmpItem = R6WindowListBoxItem(listboxes[i].Items.Next);
 				J0x41B:
 
 				// End:0x56B [Loop If]
-				if(__NFUN_119__(tmpItem, none))
+				if((tmpItem != none))
 				{
 					tmpOperative = R6Operative(tmpItem.m_Object);
 					// End:0x54F
-					if(__NFUN_119__(tmpOperative, none))
+					if((tmpOperative != none))
 					{
 						tmpOperative.m_szPrimaryWeapon = m_currentOperative.m_szPrimaryWeapon;
 						tmpOperative.m_szPrimaryWeaponBullet = m_currentOperative.m_szPrimaryWeaponBullet;
@@ -405,7 +405,7 @@ function EquipmentSelected(R6MenuGearWidget.e2DEquipment EquipmentSelected)
 					// [Loop Continue]
 					goto J0x41B;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x3E7;
 			}
@@ -433,14 +433,14 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 		case 0:
 			inDescriptionClass = DecriptionClass;
 			// End:0x1D0
-			if(__NFUN_119__(m_OpFirstWeaponDesc, Class<R6PrimaryWeaponDescription>(DecriptionClass)))
+			if((m_OpFirstWeaponDesc != Class<R6PrimaryWeaponDescription>(DecriptionClass)))
 			{
 				m_currentOperative.m_szPrimaryWeapon = string(DecriptionClass);
 				m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DecriptionClass);
 				// End:0x9F
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon for "), m_currentOperative.m_szPrimaryWeapon));
+					Log(((("Changing" @ string(m_currentOperative.Class)) @ " Primary Weapon for ") @ m_currentOperative.m_szPrimaryWeapon));
 				}
 				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
 				m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.default.m_NameID;
@@ -448,7 +448,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x12D
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Gadget for "), m_currentOperative.m_szPrimaryWeaponGadget));
+					Log(((("Changing" @ string(m_currentOperative.Class)) @ " Primary Weapon Gadget for ") @ m_currentOperative.m_szPrimaryWeaponGadget));
 				}
 				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findPrimaryDefaultAmmo(Class<R6PrimaryWeaponDescription>(inDescriptionClass));
 				m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.default.m_NameTag;
@@ -456,7 +456,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x1D0
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Bullets for "), m_currentOperative.m_szPrimaryWeaponBullet));
+					Log(((("Changing" @ string(m_currentOperative.Class)) @ " Primary Weapon Bullets for ") @ m_currentOperative.m_szPrimaryWeaponBullet));
 				}
 			}
 			// End:0x74A
@@ -468,7 +468,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x25A
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Gadget for "), m_currentOperative.m_szPrimaryWeaponGadget));
+				Log(((("Changing" @ string(m_currentOperative.Class)) @ " Primary Weapon Gadget for ") @ m_currentOperative.m_szPrimaryWeaponGadget));
 			}
 			// End:0x74A
 			break;

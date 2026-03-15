@@ -56,7 +56,7 @@ function StopLog()
 		ExecuteSilentLogBatcher();
 	}
 	// End:0x35
-	if(__NFUN_119__(LocalLog, none))
+	if((LocalLog != none))
 	{
 		LocalLog.StopLog();
 	}
@@ -67,7 +67,7 @@ function FlushLog()
 {
 	FileFlush();
 	// End:0x20
-	if(__NFUN_119__(LocalLog, none))
+	if((LocalLog != none))
 	{
 		LocalLog.FlushLog();
 	}
@@ -84,7 +84,7 @@ function LogEventString(string EventString)
 	FileLog(EventString);
 	FileFlush();
 	// End:0x44
-	if(__NFUN_119__(LocalLog, none))
+	if((LocalLog != none))
 	{
 		LocalLog.LogEventString(EventString);
 	}
@@ -110,7 +110,7 @@ event string GetLocalLogFileName()
 	if(bWorld)
 	{
 		// End:0x30
-		if(__NFUN_119__(StatLogFile(LocalLog), none))
+		if((StatLogFile(LocalLog) != none))
 		{
 			return StatLogFile(LocalLog).StatLogFinal;			
 		}
@@ -128,7 +128,7 @@ function LogPlayerConnect(Controller Player, optional string Checksum)
 	// End:0x91
 	if(bWorld)
 	{
-		LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "player"), __NFUN_236__(9)), "Connect"), __NFUN_236__(9)), Player.PlayerReplicationInfo.PlayerName), __NFUN_236__(9)), string(Player.PlayerReplicationInfo.PlayerID)), __NFUN_236__(9)), Checksum));
+		LogEventString(((((((((((GetTimeStamp() $ Chr(9)) $ "player") $ Chr(9)) $ "Connect") $ Chr(9)) $ Player.PlayerReplicationInfo.PlayerName) $ Chr(9)) $ string(Player.PlayerReplicationInfo.PlayerID)) $ Chr(9)) $ Checksum));
 		LogPlayerInfo(Player);		
 	}
 	else
@@ -147,7 +147,7 @@ function LogGameEnd(string Reason)
 	{
 		bWatermark = false;
 		GetChecksum(Checksum);
-		LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "game_end"), __NFUN_236__(9)), Reason), __NFUN_236__(9)), Checksum), ""));		
+		LogEventString((((((((GetTimeStamp() $ Chr(9)) $ "game_end") $ Chr(9)) $ Reason) $ Chr(9)) $ Checksum) $ ""));		
 	}
 	else
 	{

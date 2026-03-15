@@ -33,7 +33,7 @@ function Created()
 	m_pEditSaveNameBox.MoveEnd();
 	m_pEditSaveNameBox.MaxLength = 20;
 	m_pEditSaveNameBox.offset = 5.0000000;
-	m_BDeletePlan = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(m_IBXPos), __NFUN_175__(__NFUN_175__(WinHeight, float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)), float(m_IBYPos)), __NFUN_175__(WinWidth, float(m_IBXPos)), float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)));
+	m_BDeletePlan = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(m_IBXPos), ((WinHeight - float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)) - float(m_IBYPos)), (WinWidth - float(m_IBXPos)), float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)));
 	m_BDeletePlan.m_buttonFont = Root.Fonts[6];
 	m_BDeletePlan.m_fLMarge = 4.0000000;
 	m_BDeletePlan.m_fRMarge = 4.0000000;
@@ -42,7 +42,7 @@ function Created()
 	m_BDeletePlan.Align = 0;
 	m_BDeletePlan.Text = Localize("POPUP", "DELETEPLANBUTTON", "R6Menu");
 	m_BDeletePlan.ResizeToText();
-	m_pListOfSavedPlan = R6WindowTextListBox(CreateWindow(Class'R6Window.R6WindowTextListBox', 0.0000000, 24.0000000, WinWidth, __NFUN_175__(m_BDeletePlan.WinTop, float(24))));
+	m_pListOfSavedPlan = R6WindowTextListBox(CreateWindow(Class'R6Window.R6WindowTextListBox', 0.0000000, 24.0000000, WinWidth, (m_BDeletePlan.WinTop - float(24))));
 	m_pListOfSavedPlan.ListClass = Class'R6Window.R6WindowListBoxItem';
 	m_pListOfSavedPlan.m_Font = Root.Fonts[6];
 	m_pListOfSavedPlan.Register(self);
@@ -56,7 +56,7 @@ function Created()
 function Paint(Canvas C, float X, float Y)
 {
 	C.Style = 1;
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTexture(C, 0.0000000, m_pListOfSavedPlan.WinTop, WinWidth, 1.0000000, Texture'UWindow.WhiteTexture');
 	return;
 }
@@ -66,13 +66,13 @@ function Notify(UWindowDialogControl C, byte E)
 	local string DelPlanMsg;
 
 	// End:0x129
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x5A
-		if(__NFUN_114__(C, m_pListOfSavedPlan))
+		if((C == m_pListOfSavedPlan))
 		{
 			// End:0x57
-			if(__NFUN_119__(m_pListOfSavedPlan.m_SelectedItem, none))
+			if((m_pListOfSavedPlan.m_SelectedItem != none))
 			{
 				m_pEditSaveNameBox.SetValue(m_pListOfSavedPlan.m_SelectedItem.HelpText);
 			}			
@@ -80,12 +80,12 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x129
-			if(__NFUN_114__(C, m_BDeletePlan))
+			if((C == m_BDeletePlan))
 			{
 				// End:0x129
-				if(__NFUN_119__(m_pListOfSavedPlan.m_SelectedItem, none))
+				if((m_pListOfSavedPlan.m_SelectedItem != none))
 				{
-					DelPlanMsg = __NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(Localize("POPUP", "DelPlanMsg", "R6Menu"), ":"), m_pListOfSavedPlan.m_SelectedItem.HelpText), "\\n"), Localize("POPUP", "DelPlanQuestion", "R6Menu"));
+					DelPlanMsg = ((((Localize("POPUP", "DelPlanMsg", "R6Menu") @ ":") @ m_pListOfSavedPlan.m_SelectedItem.HelpText) @ "\\n") @ Localize("POPUP", "DelPlanQuestion", "R6Menu"));
 					R6MenuRootWindow(Root).SimplePopUp(Localize("POPUP", "DelPlan", "R6Menu"), DelPlanMsg, 41);
 				}
 			}

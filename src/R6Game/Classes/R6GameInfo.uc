@@ -169,16 +169,16 @@ simulated function FirstPassReset()
 	local int i;
 
 	// End:0x64
-	if(__NFUN_119__(m_missionMgr, none))
+	if((m_missionMgr != none))
 	{
 		i = 0;
 		J0x12:
 
 		// End:0x53 [Loop If]
-		if(__NFUN_150__(i, m_missionMgr.m_aMissionObjectives.Length))
+		if((i < m_missionMgr.m_aMissionObjectives.Length))
 		{
 			m_missionMgr.m_aMissionObjectives[i].Reset();
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x12;
 		}
@@ -187,7 +187,7 @@ simulated function FirstPassReset()
 	ResetRepMissionObjectives();
 	m_listAllTerrorists.Remove(0, m_listAllTerrorists.Length);
 	// End:0x90
-	if(__NFUN_151__(m_RainbowAIBackup.Length, 0))
+	if((m_RainbowAIBackup.Length > 0))
 	{
 		m_RainbowAIBackup.Remove(0, m_RainbowAIBackup.Length);
 	}
@@ -199,10 +199,10 @@ function R6AbstractInsertionZone GetAStartSpot()
 	local R6AbstractInsertionZone aZone;
 
 	// End:0x2C
-	foreach __NFUN_304__(Class'R6Abstract.R6AbstractInsertionZone', aZone)
+	foreach AllActors(Class'R6Abstract.R6AbstractInsertionZone', aZone)
 	{
 		// End:0x2B
-		if(aZone.__NFUN_1513__(m_szGameTypeFlag))
+		if(aZone.IsAvailableInGameType(m_szGameTypeFlag))
 		{			
 			return aZone;
 		}		
@@ -234,19 +234,19 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 
 	aPawn = R6Pawn(PlayerPawn);
 	// End:0x596
-	if(__NFUN_130__(__NFUN_119__(aPawn, none), __NFUN_114__(aPawn.EngineWeapon, none)))
+	if(((aPawn != none) && (aPawn.EngineWeapon == none)))
 	{
 		m_PlayerPrefs = PlayerController(aPawn.Controller).m_PlayerPrefs;
 		// End:0x17E
-		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(IsPrimaryWeaponRestrictedToPawn(aPawn)), __NFUN_123__(m_PlayerPrefs.m_WeaponName1, "")), __NFUN_129__(IsPrimaryWeaponRestricted(m_PlayerPrefs.m_WeaponName1))))
+		if((((!IsPrimaryWeaponRestrictedToPawn(aPawn)) && (m_PlayerPrefs.m_WeaponName1 != "")) && (!IsPrimaryWeaponRestricted(m_PlayerPrefs.m_WeaponName1))))
 		{
 			// End:0xCB
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("NOW GIVING ", m_PlayerPrefs.m_WeaponName1), " to "), string(aPawn.Controller)));
+				Log(((("NOW GIVING " $ m_PlayerPrefs.m_WeaponName1) $ " to ") $ string(aPawn.Controller)));
 			}
 			// End:0x118
-			if(__NFUN_130__(__NFUN_123__(m_PlayerPrefs.m_WeaponGadgetName1, ""), IsPrimaryGadgetRestricted(m_PlayerPrefs.m_WeaponGadgetName1)))
+			if(((m_PlayerPrefs.m_WeaponGadgetName1 != "") && IsPrimaryGadgetRestricted(m_PlayerPrefs.m_WeaponGadgetName1)))
 			{
 				aPawn.ServerGivesWeaponToClient(m_PlayerPrefs.m_WeaponName1, 1, m_PlayerPrefs.m_BulletType1);				
 			}
@@ -257,11 +257,11 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x17E
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("AcceptInventory PrimaryWeapon =", m_PlayerPrefs.m_WeaponName1));
+				Log(("AcceptInventory PrimaryWeapon =" @ m_PlayerPrefs.m_WeaponName1));
 			}
 		}
 		// End:0x2CE
-		if(__NFUN_130__(__NFUN_129__(IsSecondaryWeaponRestrictedToPawn(aPawn)), __NFUN_123__(m_PlayerPrefs.m_WeaponName2, "")))
+		if(((!IsSecondaryWeaponRestrictedToPawn(aPawn)) && (m_PlayerPrefs.m_WeaponName2 != "")))
 		{
 			// End:0x1DC
 			if(IsSecondaryWeaponRestricted(m_PlayerPrefs.m_WeaponName2))
@@ -275,10 +275,10 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x225
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("NOW GIVING ", szSecWeapon), " to "), string(aPawn.Controller)));
+				Log(((("NOW GIVING " $ szSecWeapon) $ " to ") $ string(aPawn.Controller)));
 			}
 			// End:0x26E
-			if(__NFUN_130__(__NFUN_123__(m_PlayerPrefs.m_WeaponGadgetName2, ""), IsSecondaryGadgetRestricted(m_PlayerPrefs.m_WeaponGadgetName2)))
+			if(((m_PlayerPrefs.m_WeaponGadgetName2 != "") && IsSecondaryGadgetRestricted(m_PlayerPrefs.m_WeaponGadgetName2)))
 			{
 				aPawn.ServerGivesWeaponToClient(szSecWeapon, 2, m_PlayerPrefs.m_BulletType2);				
 			}
@@ -289,35 +289,35 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x2CE
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__("AcceptInventory SecondaryWeapon = ", szSecWeapon));
+				Log(("AcceptInventory SecondaryWeapon = " $ szSecWeapon));
 			}
 		}
 		// End:0x3A2
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(IsTertiaryWeaponRestrictedToPawn(aPawn)), __NFUN_123__(m_PlayerPrefs.m_GadgetName1, "")), __NFUN_129__(IsTertiaryWeaponRestricted(m_PlayerPrefs.m_GadgetName1))), __NFUN_129__(IsTertiaryWeaponRestrictedForGamePlay(aPawn, m_PlayerPrefs.m_GadgetName1))))
+		if(((((!IsTertiaryWeaponRestrictedToPawn(aPawn)) && (m_PlayerPrefs.m_GadgetName1 != "")) && (!IsTertiaryWeaponRestricted(m_PlayerPrefs.m_GadgetName1))) && (!IsTertiaryWeaponRestrictedForGamePlay(aPawn, m_PlayerPrefs.m_GadgetName1))))
 		{
 			// End:0x352
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(" AND ", m_PlayerPrefs.m_GadgetName1), "  (gadget 1)"));
+				Log(((" AND " $ m_PlayerPrefs.m_GadgetName1) $ "  (gadget 1)"));
 			}
 			aPawn.ServerGivesWeaponToClient(m_PlayerPrefs.m_GadgetName1, 3);
 			// End:0x3A2
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__("AcceptInventory GadgetOne = ", m_PlayerPrefs.m_GadgetName1));
+				Log(("AcceptInventory GadgetOne = " $ m_PlayerPrefs.m_GadgetName1));
 			}
 		}
 		// End:0x4F4
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(IsTertiaryWeaponRestrictedToPawn(aPawn)), __NFUN_123__(m_PlayerPrefs.m_GadgetName2, "")), __NFUN_129__(IsTertiaryWeaponRestricted(m_PlayerPrefs.m_GadgetName2))), __NFUN_129__(IsTertiaryWeaponRestrictedForGamePlay(aPawn, m_PlayerPrefs.m_GadgetName2))))
+		if(((((!IsTertiaryWeaponRestrictedToPawn(aPawn)) && (m_PlayerPrefs.m_GadgetName2 != "")) && (!IsTertiaryWeaponRestricted(m_PlayerPrefs.m_GadgetName2))) && (!IsTertiaryWeaponRestrictedForGamePlay(aPawn, m_PlayerPrefs.m_GadgetName2))))
 		{
 			// End:0x426
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(" AND ", m_PlayerPrefs.m_GadgetName2), "  (gadget 2)"));
+				Log(((" AND " $ m_PlayerPrefs.m_GadgetName2) $ "  (gadget 2)"));
 			}
-			caps_szSecGadget = __NFUN_235__(m_PlayerPrefs.m_GadgetName2);
+			caps_szSecGadget = Caps(m_PlayerPrefs.m_GadgetName2);
 			// End:0x4A4
-			if(__NFUN_130__(__NFUN_130__(__NFUN_123__(caps_szSecGadget, "PRIMARYMAGS"), __NFUN_123__(caps_szSecGadget, "SECONDARYMAGS")), __NFUN_122__(caps_szSecGadget, __NFUN_235__(m_PlayerPrefs.m_GadgetName1))))
+			if((((caps_szSecGadget != "PRIMARYMAGS") && (caps_szSecGadget != "SECONDARYMAGS")) && (caps_szSecGadget == Caps(m_PlayerPrefs.m_GadgetName1))))
 			{
 				aPawn.ServerGivesWeaponToClient("DoubleGadget", 4);				
 			}
@@ -328,12 +328,12 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x4F4
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__("AcceptInventory GadgetTwo = ", m_PlayerPrefs.m_GadgetName2));
+				Log(("AcceptInventory GadgetTwo = " $ m_PlayerPrefs.m_GadgetName2));
 			}
 		}
 		aRainbow = R6Rainbow(PlayerPawn);
 		// End:0x56E
-		if(__NFUN_119__(aRainbow, none))
+		if((aRainbow != none))
 		{
 			aRainbow.m_szPrimaryWeapon = m_PlayerPrefs.m_WeaponName1;
 			aRainbow.m_szSecondaryWeapon = szSecWeapon;
@@ -341,7 +341,7 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			aRainbow.m_szSecondaryItem = m_PlayerPrefs.m_GadgetName2;
 		}
 		// End:0x596
-		if(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))
+		if((int(Level.NetMode) == int(NM_ListenServer)))
 		{
 			aPawn.ReceivedWeapons();
 		}
@@ -396,19 +396,19 @@ function bool IsPrimaryWeaponRestricted(string szWeaponName)
 
 	_GRI = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x36
-	if(__NFUN_155__(__NFUN_126__(szWeaponName, "PrimaryWeaponNone"), -1))
+	if((InStr(szWeaponName, "PrimaryWeaponNone") != -1))
 	{
 		return true;
 	}
 	WeaponClass = Class<R6AbstractWeapon>(DynamicLoadObject(szWeaponName, Class'Core.Class'));
 	WeaponClassNameId = WeaponClass.default.m_NameID;
 	// End:0x135
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(IsInResArray(WeaponClassNameId, _GRI.m_szSubMachineGunsRes), IsInResArray(WeaponClassNameId, _GRI.m_szShotGunRes)), IsInResArray(WeaponClassNameId, _GRI.m_szAssRifleRes)), IsInResArray(WeaponClassNameId, _GRI.m_szMachGunRes)), IsInResArray(WeaponClassNameId, _GRI.m_szSnipRifleRes)))
+	if(((((IsInResArray(WeaponClassNameId, _GRI.m_szSubMachineGunsRes) || IsInResArray(WeaponClassNameId, _GRI.m_szShotGunRes)) || IsInResArray(WeaponClassNameId, _GRI.m_szAssRifleRes)) || IsInResArray(WeaponClassNameId, _GRI.m_szMachGunRes)) || IsInResArray(WeaponClassNameId, _GRI.m_szSnipRifleRes)))
 	{
 		// End:0x133
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(szWeaponName, " is restricted and will not be spawned"));
+			Log((szWeaponName $ " is restricted and will not be spawned"));
 		}
 		return true;
 	}
@@ -424,7 +424,7 @@ function bool IsPrimaryGadgetRestricted(string szWeaponGadgetName)
 	local string RequestedGadget;
 
 	// End:0x0E
-	if(__NFUN_122__(szWeaponGadgetName, ""))
+	if((szWeaponGadgetName == ""))
 	{
 		return true;
 	}
@@ -448,7 +448,7 @@ function bool IsSecondaryGadgetRestricted(string szWeaponGadgetName)
 	local string RequestedGadget;
 
 	// End:0x0E
-	if(__NFUN_122__(szWeaponGadgetName, ""))
+	if((szWeaponGadgetName == ""))
 	{
 		return true;
 	}
@@ -461,7 +461,7 @@ function bool IsSecondaryGadgetRestricted(string szWeaponGadgetName)
 		// End:0xA3
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(szWeaponGadgetName, " is restricted and will not be spawned"));
+			Log((szWeaponGadgetName $ " is restricted and will not be spawned"));
 		}
 		return true;
 	}
@@ -481,12 +481,12 @@ function bool IsSecondaryWeaponRestricted(string szWeaponName)
 	WeaponClass = Class<R6AbstractWeapon>(DynamicLoadObject(szWeaponName, Class'Core.Class'));
 	RequestedWeapon = WeaponClass.default.m_NameID;
 	// End:0xB5
-	if(__NFUN_132__(IsInResArray(RequestedWeapon, _GRI.m_szPistolRes), IsInResArray(RequestedWeapon, _GRI.m_szMachPistolRes)))
+	if((IsInResArray(RequestedWeapon, _GRI.m_szPistolRes) || IsInResArray(RequestedWeapon, _GRI.m_szMachPistolRes)))
 	{
 		// End:0xB3
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(szWeaponName, " is restricted and will not be spawned"));
+			Log((szWeaponName $ " is restricted and will not be spawned"));
 		}
 		return true;
 	}
@@ -506,16 +506,16 @@ function bool IsTertiaryWeaponRestricted(string szWeaponName)
 
 	_GRI = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x1E
-	if(__NFUN_122__(szWeaponName, ""))
+	if((szWeaponName == ""))
 	{
 		return true;
 	}
 	// End:0x78
-	if(__NFUN_119__(Class<R6AbstractWeapon>(FindObject(szWeaponName, Class'Core.Class')), none))
+	if((Class<R6AbstractWeapon>(FindObject(szWeaponName, Class'Core.Class')) != none))
 	{
 		WeaponClass = Class<R6AbstractWeapon>(DynamicLoadObject(szWeaponName, Class'Core.Class'));
 		// End:0x61
-		if(__NFUN_114__(WeaponClass, none))
+		if((WeaponClass == none))
 		{
 			return false;
 		}
@@ -531,7 +531,7 @@ function bool IsTertiaryWeaponRestricted(string szWeaponName)
 		// End:0xD9
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(szWeaponName, " is restricted and will not be spawned"));
+			Log((szWeaponName $ " is restricted and will not be spawned"));
 		}
 		return true;
 	}
@@ -547,19 +547,19 @@ function bool IsInResArray(string szWeaponNameId, string RestrictionArray[32])
 	J0x07:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, 32), __NFUN_123__(RestrictionArray[i], "")))
+	if(((i < 32) && (RestrictionArray[i] != "")))
 	{
 		// End:0x78
-		if(__NFUN_124__(RestrictionArray[i], szWeaponNameId))
+		if((RestrictionArray[i] ~= szWeaponNameId))
 		{
 			// End:0x76
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(szWeaponNameId, " is restricted and will not be spawned"));
+				Log((szWeaponNameId $ " is restricted and will not be spawned"));
 			}
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -579,25 +579,25 @@ function PostBeginPlay()
 	local R6ServerInfo pServerOptions;
 
 	super.PostBeginPlay();
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	Level.m_ServerSettings = pServerOptions;
 	CreateMissionObjectiveMgr();
 	m_missionMgr.m_bEnableCheckForErrors = false;
 	InitObjectives();
 	// End:0x79
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
-		R6GameReplicationInfo(GameReplicationInfo).m_iMapIndex = __NFUN_1280__();
+		R6GameReplicationInfo(GameReplicationInfo).m_iMapIndex = GetCurrentMapNum();
 	}
 	R6GameReplicationInfo(GameReplicationInfo).m_szGameTypeFlagRep = m_szGameTypeFlag;
 	R6GameReplicationInfo(GameReplicationInfo).m_iDeathCameraMode = m_iDeathCameraMode;
 	// End:0x129
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		bPauseable = false;
-		m_szSvrName = __NFUN_128__(pServerOptions.ServerName, m_GameService.__NFUN_3532__());
+		m_szSvrName = Left(pServerOptions.ServerName, m_GameService.GetMaxUbiServerNameSize());
 		// End:0x129
-		if(__NFUN_123__(m_szSvrName, ""))
+		if((m_szSvrName != ""))
 		{
 			GameReplicationInfo.ServerName = m_szSvrName;
 		}
@@ -610,7 +610,7 @@ function PostBeginPlay()
 	R6GameReplicationInfo(GameReplicationInfo).m_bFriendlyFire = m_bFriendlyFire;
 	R6GameReplicationInfo(GameReplicationInfo).m_bAutoBalance = m_bAutoBalance;
 	R6GameReplicationInfo(GameReplicationInfo).m_bMenuTKPenaltySetting = m_bTKPenalty;
-	m_bTKPenalty = __NFUN_130__(m_bTKPenalty, Level.IsGameTypeTeamAdversarial(m_szGameTypeFlag));
+	m_bTKPenalty = (m_bTKPenalty && Level.IsGameTypeTeamAdversarial(m_szGameTypeFlag));
 	R6GameReplicationInfo(GameReplicationInfo).m_bTKPenalty = m_bTKPenalty;
 	R6GameReplicationInfo(GameReplicationInfo).m_bShowNames = m_bShowNames;
 	R6GameReplicationInfo(GameReplicationInfo).m_MaxPlayers = MaxPlayers;
@@ -620,9 +620,9 @@ function PostBeginPlay()
 	R6GameReplicationInfo(GameReplicationInfo).m_bAIBkp = m_bAIBkp;
 	R6GameReplicationInfo(GameReplicationInfo).m_bRotateMap = m_bRotateMap;
 	R6GameReplicationInfo(GameReplicationInfo).m_bAdminPasswordReq = m_bAdminPasswordReq;
-	R6GameReplicationInfo(GameReplicationInfo).m_bDedicatedSvr = __NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer));
+	R6GameReplicationInfo(GameReplicationInfo).m_bDedicatedSvr = (int(Level.NetMode) == int(NM_DedicatedServer));
 	R6GameReplicationInfo(GameReplicationInfo).m_bIsWritableMapAllowed = m_bIsWritableMapAllowed;
-	R6GameReplicationInfo(GameReplicationInfo).m_bPunkBuster = __NFUN_1402__();
+	R6GameReplicationInfo(GameReplicationInfo).m_bPunkBuster = IsPBServerEnabled();
 	// End:0x398
 	if(m_bIsWritableMapAllowed)
 	{

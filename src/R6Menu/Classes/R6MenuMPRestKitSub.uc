@@ -60,7 +60,7 @@ var array<byte> m_ASelected;
 
 function Created()
 {
-	m_pRestKitButList = R6WindowListRestKit(CreateWindow(Class'R6Window.R6WindowListRestKit', 0.0000000, 23.0000000, __NFUN_175__(310.0000000, float(1)), __NFUN_175__(WinHeight, float(23)), self));
+	m_pRestKitButList = R6WindowListRestKit(CreateWindow(Class'R6Window.R6WindowListRestKit', 0.0000000, 23.0000000, (310.0000000 - float(1)), (WinHeight - float(23)), self));
 	m_pRestKitButList.m_fXItemOffset = 5.0000000;
 	m_pRestKitButList.bAlwaysBehind = true;
 	return;
@@ -68,8 +68,8 @@ function Created()
 
 function Paint(Canvas C, float fMouseX, float fMouseY)
 {
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
-	DrawStretchedTextureSegment(C, 0.0000000, 23.0000000, __NFUN_175__(310.0000000, float(1)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	DrawStretchedTextureSegment(C, 0.0000000, 23.0000000, (310.0000000 - float(1)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;
 }
 
@@ -83,7 +83,7 @@ function InitSelectButtons(bool _bInGame)
 	m_bIsInGame = _bInGame;
 	fYOffset = 4.0000000;
 	fWidth = 100.0000000;
-	fXOffset = __NFUN_172__(__NFUN_175__(__NFUN_172__(310.0000000, float(2)), fWidth), float(2));
+	fXOffset = (((310.0000000 / float(2)) - fWidth) / float(2));
 	fHeight = 16.0000000;
 	ButtonFont = Root.Fonts[5];
 	m_pSelectAll = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYOffset, fWidth, fHeight, self));
@@ -99,7 +99,7 @@ function InitSelectButtons(bool _bInGame)
 	m_pSelectAll.SetFont(0);
 	m_pSelectAll.TextColor = Root.Colors.White;
 	m_pSelectAll.ToolTipString = Localize("Tip", "Kit_SelectAll", "R6Menu");
-	fXOffset = __NFUN_174__(__NFUN_172__(310.0000000, float(2)), __NFUN_172__(__NFUN_175__(float(__NFUN_145__(310, 2)), fWidth), float(2)));
+	fXOffset = ((310.0000000 / float(2)) + ((float((310 / 2)) - fWidth) / float(2)));
 	m_pUnSelectAll = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pUnSelectAll.m_vButtonColor = Root.Colors.White;
 	m_pUnSelectAll.SetButtonBorderColor(Root.Colors.White);
@@ -124,11 +124,11 @@ function InitSubMachineGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 	local int i;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASubMachineGuns.Remove(0, m_ASubMachineGuns.Length);
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x5E
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_ASubMachineGuns = GetRestrictionKit(Class'R6Description.R6SubGunDescription', pServerOptions.RestrictedSubMachineGuns, _pR6GameRepInfo);		
 	}
@@ -137,14 +137,14 @@ function InitSubMachineGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 		m_ASubMachineGuns = GetRestrictionKit(Class'R6Description.R6SubGunDescription', pServerOptions.RestrictedSubMachineGuns, _pR6GameRepInfo, _pR6GameRepInfo.m_szSubMachineGunsRes);
 	}
 	CreateRestKitButtons(m_ASubMachineGuns, m_ASelected, "R6Weapons", m_pSubMachineGuns);
-	i = __NFUN_146__(m_ASubMachineGuns.Length, 1);
+	i = (m_ASubMachineGuns.Length + 1);
 	J0xBF:
 
 	// End:0xE2 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		m_pSubMachineGuns[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xBF;
 	}
@@ -155,10 +155,10 @@ function UpdateSubMachineGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x51
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_ASubMachineGuns = GetRestrictionKit(Class'R6Description.R6SubGunDescription', pServerOptions.RestrictedSubMachineGuns, _pR6GameRepInfo);		
 	}
@@ -178,11 +178,11 @@ function InitShotGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 	local int i;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_AShotguns.Remove(0, m_AShotguns.Length);
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x5E
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_AShotguns = GetRestrictionKit(Class'R6Description.R6ShotgunDescription', pServerOptions.RestrictedShotGuns, _pR6GameRepInfo);		
 	}
@@ -191,14 +191,14 @@ function InitShotGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 		m_AShotguns = GetRestrictionKit(Class'R6Description.R6ShotgunDescription', pServerOptions.RestrictedShotGuns, _pR6GameRepInfo, _pR6GameRepInfo.m_szShotGunRes);
 	}
 	CreateRestKitButtons(m_AShotguns, m_ASelected, "R6Weapons", m_pShotguns);
-	i = __NFUN_146__(m_AShotguns.Length, 1);
+	i = (m_AShotguns.Length + 1);
 	J0xBF:
 
 	// End:0xE2 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		m_pShotguns[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xBF;
 	}
@@ -209,10 +209,10 @@ function UpdateShotGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x51
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_AShotguns = GetRestrictionKit(Class'R6Description.R6ShotgunDescription', pServerOptions.RestrictedShotGuns, _pR6GameRepInfo);		
 	}
@@ -232,11 +232,11 @@ function InitAssaultRifleTab(R6GameReplicationInfo _pR6GameRepInfo)
 	local int i;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_AAssaultRifle.Remove(0, m_AAssaultRifle.Length);
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x5E
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_AAssaultRifle = GetRestrictionKit(Class'R6Description.R6AssaultDescription', pServerOptions.RestrictedAssultRifles, _pR6GameRepInfo);		
 	}
@@ -245,14 +245,14 @@ function InitAssaultRifleTab(R6GameReplicationInfo _pR6GameRepInfo)
 		m_AAssaultRifle = GetRestrictionKit(Class'R6Description.R6AssaultDescription', pServerOptions.RestrictedAssultRifles, _pR6GameRepInfo, _pR6GameRepInfo.m_szAssRifleRes);
 	}
 	CreateRestKitButtons(m_AAssaultRifle, m_ASelected, "R6Weapons", m_pAssaultRifle);
-	i = __NFUN_146__(m_AAssaultRifle.Length, 1);
+	i = (m_AAssaultRifle.Length + 1);
 	J0xBF:
 
 	// End:0xE2 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		m_pAssaultRifle[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xBF;
 	}
@@ -263,10 +263,10 @@ function UpdateAssaultRifleTab(R6GameReplicationInfo _pR6GameRepInfo)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x51
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_AAssaultRifle = GetRestrictionKit(Class'R6Description.R6AssaultDescription', pServerOptions.RestrictedAssultRifles, _pR6GameRepInfo);		
 	}
@@ -286,11 +286,11 @@ function InitMachineGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 	local int i;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_AMachineGuns.Remove(0, m_AMachineGuns.Length);
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x5E
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_AMachineGuns = GetRestrictionKit(Class'R6Description.R6LMGDescription', pServerOptions.RestrictedMachineGuns, _pR6GameRepInfo);		
 	}
@@ -299,14 +299,14 @@ function InitMachineGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 		m_AMachineGuns = GetRestrictionKit(Class'R6Description.R6LMGDescription', pServerOptions.RestrictedMachineGuns, _pR6GameRepInfo, _pR6GameRepInfo.m_szMachGunRes);
 	}
 	CreateRestKitButtons(m_AMachineGuns, m_ASelected, "R6Weapons", m_pMachineGuns);
-	i = __NFUN_146__(m_AMachineGuns.Length, 1);
+	i = (m_AMachineGuns.Length + 1);
 	J0xBF:
 
 	// End:0xE2 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		m_pMachineGuns[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xBF;
 	}
@@ -317,10 +317,10 @@ function UpdateMachineGunsTab(R6GameReplicationInfo _pR6GameRepInfo)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x51
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_AMachineGuns = GetRestrictionKit(Class'R6Description.R6LMGDescription', pServerOptions.RestrictedMachineGuns, _pR6GameRepInfo);		
 	}
@@ -340,11 +340,11 @@ function InitSniperRifleTab(R6GameReplicationInfo _pR6GameRepInfo)
 	local int i;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASniperRifle.Remove(0, m_ASniperRifle.Length);
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x5E
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_ASniperRifle = GetRestrictionKit(Class'R6Description.R6SniperDescription', pServerOptions.RestrictedSniperRifles, _pR6GameRepInfo);		
 	}
@@ -353,14 +353,14 @@ function InitSniperRifleTab(R6GameReplicationInfo _pR6GameRepInfo)
 		m_ASniperRifle = GetRestrictionKit(Class'R6Description.R6SniperDescription', pServerOptions.RestrictedSniperRifles, _pR6GameRepInfo, _pR6GameRepInfo.m_szSnipRifleRes);
 	}
 	CreateRestKitButtons(m_ASniperRifle, m_ASelected, "R6Weapons", m_pSniperRifle);
-	i = __NFUN_146__(m_ASniperRifle.Length, 1);
+	i = (m_ASniperRifle.Length + 1);
 	J0xBF:
 
 	// End:0xE2 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		m_pSniperRifle[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xBF;
 	}
@@ -371,10 +371,10 @@ function UpdateSniperRifleTab(R6GameReplicationInfo _pR6GameRepInfo)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x51
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_ASniperRifle = GetRestrictionKit(Class'R6Description.R6SniperDescription', pServerOptions.RestrictedSniperRifles, _pR6GameRepInfo);		
 	}
@@ -394,11 +394,11 @@ function InitPistolTab(R6GameReplicationInfo _pR6GameRepInfo)
 	local int i;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_APistol.Remove(0, m_APistol.Length);
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x5E
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_APistol = GetRestrictionKit(Class'R6Description.R6PistolsDescription', pServerOptions.RestrictedPistols, _pR6GameRepInfo);		
 	}
@@ -409,14 +409,14 @@ function InitPistolTab(R6GameReplicationInfo _pR6GameRepInfo)
 	CreateRestKitButtons(m_APistol, m_ASelected, "R6Weapons", m_pPistol);
 	m_pPistol[0].m_bSelected = false;
 	m_pPistol[0].bDisabled = true;
-	i = __NFUN_146__(m_APistol.Length, 1);
+	i = (m_APistol.Length + 1);
 	J0xE5:
 
 	// End:0x108 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		m_pPistol[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xE5;
 	}
@@ -427,10 +427,10 @@ function UpdatePistolsTab(R6GameReplicationInfo _pR6GameRepInfo)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x51
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_APistol = GetRestrictionKit(Class'R6Description.R6PistolsDescription', pServerOptions.RestrictedPistols, _pR6GameRepInfo);		
 	}
@@ -450,11 +450,11 @@ function InitMachinePistolTab(R6GameReplicationInfo _pR6GameRepInfo)
 	local int i;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	m_AMachinePistol.Remove(0, m_AMachinePistol.Length);
 	m_ASelected.Remove(0, m_ASelected.Length);
 	// End:0x5E
-	if(__NFUN_114__(_pR6GameRepInfo, none))
+	if((_pR6GameRepInfo == none))
 	{
 		m_AMachinePistol = GetRestrictionKit(Class'R6Description.R6MachinePistolsDescription', pServerOptions.RestrictedMachinePistols, _pR6GameRepInfo);		
 	}

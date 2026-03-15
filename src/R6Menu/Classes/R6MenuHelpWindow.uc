@@ -40,12 +40,12 @@ function Created()
 function ToolTip(string strTip)
 {
 	// End:0xB8
-	if(__NFUN_132__(__NFUN_123__(strTip, ToolTipString), m_bForceRefreshOnSameTip))
+	if(((strTip != ToolTipString) || m_bForceRefreshOnSameTip))
 	{
 		ToolTipString = strTip;
 		UWindowWrappedTextArea(m_ClientArea).Clear();
 		// End:0xB8
-		if(__NFUN_123__(ToolTipString, ""))
+		if((ToolTipString != ""))
 		{
 			UWindowWrappedTextArea(m_ClientArea).m_fXOffSet = 5.0000000;
 			UWindowWrappedTextArea(m_ClientArea).m_fYOffSet = 5.0000000;

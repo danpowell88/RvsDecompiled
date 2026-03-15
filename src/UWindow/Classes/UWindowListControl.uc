@@ -37,10 +37,10 @@ function UWindowList GetItemAtIndex(int _iIndex)
 	local int i;
 
 	// End:0x39
-	if(__NFUN_114__(Items.Next, none))
+	if((Items.Next == none))
 	{
 		// End:0x37
-		if(__NFUN_154__(_iIndex, 0))
+		if((_iIndex == 0))
 		{
 			return Items.Append(ListClass);			
 		}
@@ -54,24 +54,24 @@ function UWindowList GetItemAtIndex(int _iIndex)
 	J0x54:
 
 	// End:0xA0 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0x82
-		if(__NFUN_154__(i, _iIndex))
+		if((i == _iIndex))
 		{
 			CurItem.m_bShowThisItem = true;
 			// [Explicit Break]
 			goto J0xA0;
 		}
 		CurItem = CurItem.Next;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x54;
 	}
 	J0xA0:
 
 	// End:0xC3
-	if(__NFUN_114__(CurItem, none))
+	if((CurItem == none))
 	{
 		return Items.Append(ListClass);		
 	}
@@ -88,10 +88,10 @@ function UWindowList GetNextItem(int _iIndex, UWindowList prevItem)
 	local int i;
 
 	// End:0x39
-	if(__NFUN_114__(Items.Next, none))
+	if((Items.Next == none))
 	{
 		// End:0x37
-		if(__NFUN_154__(_iIndex, 0))
+		if((_iIndex == 0))
 		{
 			return Items.Append(ListClass);			
 		}
@@ -101,20 +101,20 @@ function UWindowList GetNextItem(int _iIndex, UWindowList prevItem)
 		}
 	}
 	// End:0x5B
-	if(__NFUN_154__(_iIndex, 0))
+	if((_iIndex == 0))
 	{
 		CurItem = Items.Next;		
 	}
 	else
 	{
 		// End:0x7A
-		if(__NFUN_119__(prevItem, none))
+		if((prevItem != none))
 		{
 			CurItem = prevItem.Next;
 		}
 	}
 	// End:0x9A
-	if(__NFUN_114__(CurItem, none))
+	if((CurItem == none))
 	{
 		return Items.Append(ListClass);
 	}
@@ -129,7 +129,7 @@ function ClearListOfItems()
 	local int i, iListLength;
 
 	// End:0x16
-	if(__NFUN_114__(Items.Next, none))
+	if((Items.Next == none))
 	{
 		return;
 	}
@@ -139,10 +139,10 @@ function ClearListOfItems()
 	J0x46:
 
 	// End:0x93 [Loop If]
-	if(__NFUN_150__(i, iListLength))
+	if((i < iListLength))
 	{
 		// End:0x86
-		if(__NFUN_119__(CurItem, none))
+		if((CurItem != none))
 		{
 			CurItem.ClearItem();
 			CurItem = CurItem.Next;
@@ -153,7 +153,7 @@ function ClearListOfItems()
 		goto J0x93;
 		J0x89:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x46;
 	}

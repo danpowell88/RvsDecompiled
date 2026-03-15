@@ -32,7 +32,7 @@ function SetCloud(R6Grenade aGrenade, float fExpansionTime, float fFinalRadius, 
 	LifeSpan = fDuration;
 	m_fStartTime = Level.TimeSeconds;
 	Instigator = none;
-	__NFUN_280__(0.2500000, true);
+	SetTimer(0.2500000, true);
 	return;
 }
 
@@ -43,11 +43,11 @@ event Timer()
 {
 	local float fElapsedTime;
 
-	fElapsedTime = __NFUN_175__(Level.TimeSeconds, m_fStartTime);
+	fElapsedTime = (Level.TimeSeconds - m_fStartTime);
 	// End:0x61
-	if(__NFUN_130__(__NFUN_119__(m_grenade, none), __NFUN_155__(int(m_grenade.Physics), int(0))))
+	if(((m_grenade != none) && (int(m_grenade.Physics) != int(0))))
 	{
-		__NFUN_267__(__NFUN_215__(m_grenade.Location, vect(0.0000000, 0.0000000, 125.0000000)));
+		__NFUN_267__((m_grenade.Location + vect(0.0000000, 0.0000000, 125.0000000))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	}
 	// End:0x8C
 	if(__NFUN_176__(fElapsedTime, m_fExpansionTime))

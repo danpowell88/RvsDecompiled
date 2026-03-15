@@ -22,7 +22,7 @@ function Paint(Canvas C, float X, float Y)
 	local int XAdjust, YAdjust, RegW, RegH;
 
 	// End:0x0D
-	if(__NFUN_114__(t, none))
+	if((t == none))
 	{
 		return;
 	}
@@ -33,29 +33,29 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bHorizontalFlip)
 	{
 		XAdjust = R.W;
-		RegW = __NFUN_143__(R.W);
+		RegW = (-R.W);
 	}
 	// End:0x99
 	if(m_bVerticalFlip)
 	{
 		YAdjust = R.H;
-		RegH = __NFUN_143__(R.H);
+		RegH = (-R.H);
 	}
 	// End:0xFD
 	if(bStretch)
 	{
-		DrawStretchedTextureSegment(C, m_ImageX, m_ImageY, WinWidth, WinHeight, float(__NFUN_146__(R.X, XAdjust)), float(__NFUN_146__(R.Y, YAdjust)), float(RegW), float(RegH), t);		
+		DrawStretchedTextureSegment(C, m_ImageX, m_ImageY, WinWidth, WinHeight, float((R.X + XAdjust)), float((R.Y + YAdjust)), float(RegW), float(RegH), t);		
 	}
 	else
 	{
 		// End:0x197
 		if(bCenter)
 		{
-			DrawStretchedTextureSegment(C, __NFUN_172__(__NFUN_175__(WinWidth, float(R.W)), float(2)), __NFUN_172__(__NFUN_175__(WinHeight, float(R.H)), float(2)), float(R.W), float(R.H), float(__NFUN_146__(R.X, XAdjust)), float(__NFUN_146__(R.Y, YAdjust)), float(RegW), float(RegH), t);			
+			DrawStretchedTextureSegment(C, ((WinWidth - float(R.W)) / float(2)), ((WinHeight - float(R.H)) / float(2)), float(R.W), float(R.H), float((R.X + XAdjust)), float((R.Y + YAdjust)), float(RegW), float(RegH), t);			
 		}
 		else
 		{
-			DrawStretchedTextureSegment(C, m_ImageX, m_ImageY, float(R.W), float(R.H), float(__NFUN_146__(R.X, XAdjust)), float(__NFUN_146__(R.Y, YAdjust)), float(RegW), float(RegH), t);
+			DrawStretchedTextureSegment(C, m_ImageX, m_ImageY, float(R.W), float(R.H), float((R.X + XAdjust)), float((R.Y + YAdjust)), float(RegW), float(RegH), t);
 		}
 	}
 	return;

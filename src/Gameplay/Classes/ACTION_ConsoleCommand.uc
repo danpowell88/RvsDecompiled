@@ -20,7 +20,7 @@ var(Action) string CommandStr;  // The console command to execute
 function bool InitActionFor(ScriptedController C)
 {
 	// End:0x21
-	if(__NFUN_123__(CommandStr, ""))
+	if((CommandStr != ""))
 	{
 		C.ConsoleCommand(CommandStr);
 	}
@@ -30,7 +30,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, CommandStr);
+	return (ActionString @ CommandStr);
 	return;
 }
 

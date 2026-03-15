@@ -49,15 +49,15 @@ function LMouseDown(float X, float Y)
 	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
 	super(UWindowWindow).LMouseDown(X, Y);
 	// End:0x5B
-	if(__NFUN_132__(bDisabled, __NFUN_152__(OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam].GetNbActionPoint(), 1)))
+	if((bDisabled || (OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam].GetNbActionPoint() <= 1)))
 	{
 		return;
 	}
 	// End:0xDC
-	if(__NFUN_242__(m_bPlaying, false))
+	if((m_bPlaying == false))
 	{
 		// End:0xCB
-		if(__NFUN_154__(__NFUN_147__(OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam].GetNbActionPoint(), 1), OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam].m_iCurrentNode))
+		if(((OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam].GetNbActionPoint() - 1) == OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam].m_iCurrentNode))
 		{
 			OwnerCtrl.GotoFirstNode();
 		}

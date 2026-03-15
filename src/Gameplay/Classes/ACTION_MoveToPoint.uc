@@ -20,23 +20,23 @@ function bool MoveToGoal()
 function Actor GetMoveTargetFor(ScriptedController C)
 {
 	// End:0x11
-	if(__NFUN_119__(MoveTarget, none))
+	if((MoveTarget != none))
 	{
 		return MoveTarget;
 	}
 	MoveTarget = C.SequenceScript.GetMoveTarget();
 	// End:0x72
-	if(__NFUN_130__(__NFUN_255__(DestinationTag, 'None'), __NFUN_255__(DestinationTag, 'None')))
+	if(((DestinationTag != 'None') && (DestinationTag != 'None')))
 	{
 		// End:0x71
-		foreach C.__NFUN_304__(Class'Engine.Actor', MoveTarget, DestinationTag)
+		foreach C.AllActors(Class'Engine.Actor', MoveTarget, DestinationTag)
 		{
 			// End:0x71
 			break;			
 		}		
 	}
 	// End:0x9C
-	if(__NFUN_119__(AIScript(MoveTarget), none))
+	if((AIScript(MoveTarget) != none))
 	{
 		MoveTarget = AIScript(MoveTarget).GetMoveTarget();
 	}
@@ -46,7 +46,7 @@ function Actor GetMoveTargetFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(DestinationTag));
+	return (ActionString @ string(DestinationTag));
 	return;
 }
 

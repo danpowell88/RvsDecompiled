@@ -43,14 +43,14 @@ function Paint(Canvas C, float X, float Y)
 	if(bDisabled)
 	{
 		// End:0xD5
-		if(__NFUN_119__(DisabledTexture, none))
+		if((DisabledTexture != none))
 		{
 			// End:0x61
-			if(__NFUN_129__(m_HighLight))
+			if((!m_HighLight))
 			{
-				C.__NFUN_2626__(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B, byte(m_fAlpha));
+				C.SetDrawColor(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B, byte(m_fAlpha));
 			}
-			DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_186__(__NFUN_171__(float(DisabledRegion.W), RegionScale)), __NFUN_186__(__NFUN_171__(float(DisabledRegion.H), RegionScale)), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);
+			DrawStretchedTextureSegment(C, ImageX, ImageY, Abs((float(DisabledRegion.W) * RegionScale)), Abs((float(DisabledRegion.H) * RegionScale)), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);
 		}		
 	}
 	else
@@ -64,35 +64,35 @@ function Paint(Canvas C, float X, float Y)
 		if(bMouseDown)
 		{
 			// End:0x1E1
-			if(__NFUN_119__(DownTexture, none))
+			if((DownTexture != none))
 			{
-				C.__NFUN_2626__(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
-				DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_186__(__NFUN_171__(float(DownRegion.W), RegionScale)), __NFUN_186__(__NFUN_171__(float(DownRegion.H), RegionScale)), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);
+				C.SetDrawColor(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
+				DrawStretchedTextureSegment(C, ImageX, ImageY, Abs((float(DownRegion.W) * RegionScale)), Abs((float(DownRegion.H) * RegionScale)), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);
 			}			
 		}
 		else
 		{
 			// End:0x2A4
-			if(__NFUN_132__(MouseIsOver(), m_bForceMouseOver))
+			if((MouseIsOver() || m_bForceMouseOver))
 			{
 				// End:0x2A1
-				if(__NFUN_119__(OverTexture, none))
+				if((OverTexture != none))
 				{
-					C.__NFUN_2626__(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
-					DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_186__(__NFUN_171__(float(OverRegion.W), RegionScale)), __NFUN_186__(__NFUN_171__(float(OverRegion.H), RegionScale)), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);
+					C.SetDrawColor(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
+					DrawStretchedTextureSegment(C, ImageX, ImageY, Abs((float(OverRegion.W) * RegionScale)), Abs((float(OverRegion.H) * RegionScale)), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);
 				}				
 			}
 			else
 			{
 				// End:0x35F
-				if(__NFUN_119__(UpTexture, none))
+				if((UpTexture != none))
 				{
 					// End:0x2EB
-					if(__NFUN_129__(m_HighLight))
+					if((!m_HighLight))
 					{
-						C.__NFUN_2626__(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B, byte(m_fAlpha));
+						C.SetDrawColor(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B, byte(m_fAlpha));
 					}
-					DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_186__(__NFUN_171__(float(UpRegion.W), RegionScale)), __NFUN_186__(__NFUN_171__(float(UpRegion.H), RegionScale)), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);
+					DrawStretchedTextureSegment(C, ImageX, ImageY, Abs((float(UpRegion.W) * RegionScale)), Abs((float(UpRegion.H) * RegionScale)), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);
 				}
 			}
 		}

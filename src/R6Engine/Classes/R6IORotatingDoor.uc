@@ -86,13 +86,13 @@ var Vector m_vDoorADir2D;  // The direction toward DoorA (direction toward DoorB
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetInitial && (int(Role) == int(ROLE_Authority))))
 		m_DoorActorA, m_DoorActorB, 
 		m_bIsDoorLocked, m_bIsOpeningClockWise, 
 		m_iInitialOpeningDeg, m_iMaxOpeningDeg;
 
 	// Pos:0x018
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bInProcessOfClosing, m_bInProcessOfOpening, 
 		m_bIsDoorClosed, m_iInitialOpening, 
 		m_iMaxOpening, m_iYawInit, 
@@ -147,55 +147,55 @@ simulated function ResetOriginalData()
 	m_fPlayerCAStartTime = 0.0000000;
 	SetDoorProcessStates(false, false);
 	m_iCurrentLockHP = m_iLockHP;
-	m_iInitialOpening = __NFUN_145__(__NFUN_144__(m_iInitialOpeningDeg, 65536), 360);
-	m_iMaxOpening = __NFUN_145__(__NFUN_144__(m_iMaxOpeningDeg, 65536), 360);
-	m_iMaxOpening = __NFUN_251__(m_iMaxOpening, 0, 65535);
-	m_iInitialOpening = __NFUN_251__(m_iInitialOpening, 0, m_iMaxOpening);
+	m_iInitialOpening = ((m_iInitialOpeningDeg * 65536) / 360);
+	m_iMaxOpening = ((m_iMaxOpeningDeg * 65536) / 360);
+	m_iMaxOpening = Clamp(m_iMaxOpening, 0, 65535);
+	m_iInitialOpening = Clamp(m_iInitialOpening, 0, m_iMaxOpening);
 	rTempRotation = sm_Rotation;
-	rTempRotation.Yaw = __NFUN_156__(sm_Rotation.Yaw, 65535);
+	rTempRotation.Yaw = (sm_Rotation.Yaw & 65535);
 	bCA = bCollideActors;
 	bBA = bBlockActors;
 	bBP = bBlockPlayers;
-	__NFUN_262__(false, false, false);
-	__NFUN_299__(rTempRotation);
-	__NFUN_262__(bCA, bBA, bBP);
+	SetCollision(false, false, false);
+	SetRotation(rTempRotation);
+	SetCollision(bCA, bBA, bBP);
 	DesiredRotation = rTempRotation;
 	bRotateToDesired = false;
 	m_iYawInit = Rotation.Yaw;
 	rNewRotation.Yaw = m_iYawInit;
-	m_vCenterOfDoor = __NFUN_216__(Location, __NFUN_213__(float(64), Vector(rNewRotation)));
-	m_vNormal = __NFUN_220__(Vector(rNewRotation), vect(0.0000000, 0.0000000, 1.0000000));
+	m_vCenterOfDoor = (Location - (float(64) * Vector(rNewRotation)));
+	m_vNormal = Cross(Vector(rNewRotation), vect(0.0000000, 0.0000000, 1.0000000));
 	// End:0x1B1
-	if(__NFUN_119__(m_DoorActorA, none))
+	if((m_DoorActorA != none))
 	{
-		m_vDoorADir2D = __NFUN_216__(m_DoorActorA.Location, m_vCenterOfDoor);
+		m_vDoorADir2D = (m_DoorActorA.Location - m_vCenterOfDoor);
 	}
 	m_vDoorADir2D.Z = 0.0000000;
-	m_vDoorADir2D = __NFUN_226__(m_vDoorADir2D);
+	m_vDoorADir2D = Normal(m_vDoorADir2D);
 	rNewRotation = Rotation;
 	// End:0x21B
 	if(m_bIsOpeningClockWise)
 	{
-		m_iYawMax = __NFUN_146__(m_iYawInit, m_iMaxOpening);
-		rNewRotation.Yaw = __NFUN_146__(Rotation.Yaw, __NFUN_251__(m_iInitialOpening, 0, m_iMaxOpening));		
+		m_iYawMax = (m_iYawInit + m_iMaxOpening);
+		rNewRotation.Yaw = (Rotation.Yaw + Clamp(m_iInitialOpening, 0, m_iMaxOpening));		
 	}
 	else
 	{
-		m_iYawMax = __NFUN_147__(m_iYawInit, m_iMaxOpening);
-		rNewRotation.Yaw = __NFUN_147__(Rotation.Yaw, __NFUN_251__(m_iInitialOpening, 0, m_iMaxOpening));
+		m_iYawMax = (m_iYawInit - m_iMaxOpening);
+		rNewRotation.Yaw = (Rotation.Yaw - Clamp(m_iInitialOpening, 0, m_iMaxOpening));
 	}
-	m_iYawMax = __NFUN_156__(m_iYawMax, 65535);
+	m_iYawMax = (m_iYawMax & 65535);
 	DesiredRotation = rNewRotation;
 	// End:0x2CE
-	if(__NFUN_155__(rNewRotation.Yaw, m_iYawInit))
+	if((rNewRotation.Yaw != m_iYawInit))
 	{
 		m_bUseWheel = true;
 		SetDoorState(false);
 		m_bHidePortal = m_bIsDoorClosed;
 		// End:0x2BF
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) == int(NM_Client)))
 		{
-			__NFUN_299__(rNewRotation);
+			SetRotation(rNewRotation);
 		}
 		ClientSetDoor(rNewRotation, true);		
 	}
@@ -226,9 +226,9 @@ function SetDoorProcessStates(bool bOpening, bool bClosing)
 	m_bInProcessOfOpening = bOpening;
 	m_bInProcessOfClosing = bClosing;
 	// End:0x35
-	if(__NFUN_132__(bOpening, bClosing))
+	if((bOpening || bClosing))
 	{
-		__NFUN_117__('Tick');
+		Enable('Tick');
 	}
 	return;
 }
@@ -243,45 +243,45 @@ function bool updateAction(float fDeltaMouse, Actor actionInstigator)
 
 	SetDoorProcessStates(false, false);
 	// End:0x19
-	if(__NFUN_180__(fDeltaMouse, 0.0000000))
+	if((fDeltaMouse == 0.0000000))
 	{
 		return false;
 	}
 	RotationRate.Yaw = default.RotationRate.Yaw;
 	// End:0x47
-	if(__NFUN_129__(m_bIsOpeningClockWise))
+	if((!m_bIsOpeningClockWise))
 	{
-		__NFUN_182__(fDeltaMouse, float(-1));
+		(fDeltaMouse *= float(-1));
 	}
 	fDoorMouvement = fDeltaMouse;
-	fDoorMouvement = __NFUN_172__(__NFUN_171__(fDoorMouvement, float(m_iMaxOpening)), m_fMaxMouseMove);
+	fDoorMouvement = ((fDoorMouvement * float(m_iMaxOpening)) / m_fMaxMouseMove);
 	// End:0xA2
-	if(__NFUN_130__(__NFUN_181__(default.Mass, float(0)), __NFUN_181__(Mass, float(0))))
+	if(((default.Mass != float(0)) && (Mass != float(0))))
 	{
-		fDoorMouvement = __NFUN_172__(__NFUN_171__(fDoorMouvement, default.Mass), Mass);
+		fDoorMouvement = ((fDoorMouvement * default.Mass) / Mass);
 	}
 	rNewRotation = Rotation;
 	rRotation = Rotation;
 	// End:0x104
 	if(m_bIsOpeningClockWise)
 	{
-		iNewOpening = int(__NFUN_174__(float(m_iCurrentOpening), fDoorMouvement));
-		iNewOpening = __NFUN_251__(iNewOpening, 0, m_iMaxOpening);
-		rNewRotation.Yaw = __NFUN_146__(m_iYawInit, iNewOpening);		
+		iNewOpening = int((float(m_iCurrentOpening) + fDoorMouvement));
+		iNewOpening = Clamp(iNewOpening, 0, m_iMaxOpening);
+		rNewRotation.Yaw = (m_iYawInit + iNewOpening);		
 	}
 	else
 	{
-		iNewOpening = int(__NFUN_175__(float(m_iCurrentOpening), fDoorMouvement));
-		iNewOpening = __NFUN_251__(iNewOpening, 0, m_iMaxOpening);
-		rNewRotation.Yaw = __NFUN_147__(m_iYawInit, iNewOpening);
+		iNewOpening = int((float(m_iCurrentOpening) - fDoorMouvement));
+		iNewOpening = Clamp(iNewOpening, 0, m_iMaxOpening);
+		rNewRotation.Yaw = (m_iYawInit - iNewOpening);
 	}
 	// End:0x1AE
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bUseWheel), __NFUN_154__(rRotation.Yaw, m_iYawInit)), __NFUN_155__(rNewRotation.Yaw, m_iYawInit)))
+	if((((!m_bUseWheel) && (rRotation.Yaw == m_iYawInit)) && (rNewRotation.Yaw != m_iYawInit)))
 	{
 		// End:0x190
-		if(__NFUN_119__(m_OpeningWheelSound, none))
+		if((m_OpeningWheelSound != none))
 		{
-			__NFUN_264__(m_OpeningWheelSound, 3);
+			__NFUN_264__(m_OpeningWheelSound, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		}
 		AmbientSound = m_MoveAmbientSound;
 		AmbientSoundStop = m_MoveAmbientSoundStop;

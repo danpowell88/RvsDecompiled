@@ -91,30 +91,30 @@ function Created()
 	m_Texture = Texture(DynamicLoadObject("R6MenuTextures.Gui_BoxScroll", Class'Engine.Texture'));
 	m_labelFont = Root.Fonts[9];
 	m_R6Font14 = Root.Fonts[5];
-	labelWidth = __NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3);
+	labelWidth = (int((m_Right.WinLeft - m_Left.WinWidth)) / 3);
 	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_Left.WinWidth, m_Top.WinHeight, float(labelWidth), m_fLabelHeight, self));
-	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_CodeName.WinLeft, m_CodeName.WinWidth), m_Top.WinHeight, float(labelWidth), m_fLabelHeight, self));
-	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_DateTime.WinLeft, m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, m_fLabelHeight, self));
-	m_2DSpeaker = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', __NFUN_174__(m_Left.WinWidth, m_fLaptopPadding), __NFUN_174__(m_CodeName.WinTop, m_fLabelHeight), m_fSpeakerWidgetWidth, m_fSpeakerWidgetHeight, self));
+	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_CodeName.WinLeft + m_CodeName.WinWidth), m_Top.WinHeight, float(labelWidth), m_fLabelHeight, self));
+	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_DateTime.WinLeft + m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, m_fLabelHeight, self));
+	m_2DSpeaker = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', (m_Left.WinWidth + m_fLaptopPadding), (m_CodeName.WinTop + m_fLabelHeight), m_fSpeakerWidgetWidth, m_fSpeakerWidgetHeight, self));
 	m_2DSpeaker.m_bDrawBorder = true;
 	m_2DSpeaker.m_BorderColor = Root.Colors.GrayLight;
 	m_2DSpeaker.t = m_TSpeaker;
-	m_SpeakerControls = R6MenuIntelRadioArea(CreateWindow(Class'R6Menu.R6MenuIntelRadioArea', m_2DSpeaker.WinLeft, __NFUN_174__(m_2DSpeaker.WinTop, m_2DSpeaker.WinHeight), m_2DSpeaker.WinWidth, __NFUN_175__(230.0000000, m_2DSpeaker.WinHeight), self));
+	m_SpeakerControls = R6MenuIntelRadioArea(CreateWindow(Class'R6Menu.R6MenuIntelRadioArea', m_2DSpeaker.WinLeft, (m_2DSpeaker.WinTop + m_2DSpeaker.WinHeight), m_2DSpeaker.WinWidth, (230.0000000 - m_2DSpeaker.WinHeight), self));
 	m_SpeakerControls.m_BorderColor = Root.Colors.GrayLight;
 	m_iCurrentSpeaker = -1;
 	m_fVideoTop = m_2DSpeaker.WinTop;
-	m_fVideoLeft = __NFUN_175__(__NFUN_175__(m_Right.WinLeft, float(438)), m_fLaptopPadding);
-	m_fVideoRight = __NFUN_175__(m_Right.WinLeft, m_fLaptopPadding);
-	m_fVideoBottom = __NFUN_174__(m_fVideoTop, float(230));
-	m_fRightTileModulo = __NFUN_173__(m_fVideoRight, float(m_TBackGround.USize));
-	m_fLeftTileModulo = __NFUN_173__(m_fVideoLeft, float(m_TBackGround.USize));
-	m_fBottomTileModulo = __NFUN_173__(m_fVideoBottom, float(m_TBackGround.VSize));
-	m_fRightBGWidth = __NFUN_175__(WinWidth, m_fVideoRight);
-	m_fUpBGWidth = __NFUN_175__(m_fVideoRight, m_fVideoLeft);
-	m_fBottomHeight = __NFUN_175__(WinHeight, m_fVideoBottom);
+	m_fVideoLeft = ((m_Right.WinLeft - float(438)) - m_fLaptopPadding);
+	m_fVideoRight = (m_Right.WinLeft - m_fLaptopPadding);
+	m_fVideoBottom = (m_fVideoTop + float(230));
+	m_fRightTileModulo = (m_fVideoRight % float(m_TBackGround.USize));
+	m_fLeftTileModulo = (m_fVideoLeft % float(m_TBackGround.USize));
+	m_fBottomTileModulo = (m_fVideoBottom % float(m_TBackGround.VSize));
+	m_fRightBGWidth = (WinWidth - m_fVideoRight);
+	m_fUpBGWidth = (m_fVideoRight - m_fVideoLeft);
+	m_fBottomHeight = (WinHeight - m_fVideoBottom);
 	m_MissionDesc = R6MenuVideo(CreateWindow(Class'R6Menu.R6MenuVideo', m_fVideoLeft, m_fVideoTop, 438.0000000, 230.0000000, self));
 	m_MissionDesc.m_BorderColor = Root.Colors.GrayLight;
-	m_SrcrollingTextArea = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', m_fVideoLeft, __NFUN_174__(m_fVideoBottom, m_fPaddingBetweenElements), 438.0000000, __NFUN_175__(__NFUN_175__(__NFUN_175__(m_HelpTextBar.WinTop, m_fPaddingBetweenElements), m_fVideoBottom), m_fPaddingBetweenElements), self));
+	m_SrcrollingTextArea = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', m_fVideoLeft, (m_fVideoBottom + m_fPaddingBetweenElements), 438.0000000, (((m_HelpTextBar.WinTop - m_fPaddingBetweenElements) - m_fVideoBottom) - m_fPaddingBetweenElements), self));
 	m_SrcrollingTextArea.m_BorderColor = Root.Colors.GrayLight;
 	m_SrcrollingTextArea.SetScrollable(true);
 	m_SrcrollingTextArea.VertSB.SetBorderColor(Root.Colors.GrayLight);
@@ -143,7 +143,7 @@ function HideWindow()
 {
 	super(UWindowWindow).HideWindow();
 	StopIntelWidgetSound();
-	GetPlayerOwner().__NFUN_2721__(3.0000000, 100, 5);
+	GetPlayerOwner().FadeSound(3.0000000, 100, 5);
 	return;
 }
 
@@ -158,18 +158,18 @@ function ShowWindow()
 	// End:0x3E
 	if(bShowLog)
 	{
-		__NFUN_231__("R6MenuIntelWidget::Show()");
+		Log("R6MenuIntelWidget::Show()");
 	}
 	CurrentMission = R6MissionDescription(R6Console(Root.Console).Master.m_StartGameInfo.m_CurrentMission);
 	m_CodeName.SetProperties(Localize(CurrentMission.m_MapName, "ID_CODENAME", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
 	m_DateTime.SetProperties(Localize(CurrentMission.m_MapName, "ID_DATETIME", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
 	m_Location.SetProperties(Localize(CurrentMission.m_MapName, "ID_LOCATION", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
 	m_SpeakerControls.AssociateButtons();
-	m_MissionDesc.PlayVideo(int(__NFUN_175__(__NFUN_175__(m_Right.WinLeft, float(438)), m_fLaptopPadding)), int(__NFUN_175__(__NFUN_175__(m_SrcrollingTextArea.WinTop, float(230)), m_fPaddingBetweenElements)), __NFUN_112__(R6AbstractGameInfo(Root.Console.ViewportOwner.Actor.Level.Game).GetIntelVideoName(CurrentMission), ".bik"));
+	m_MissionDesc.PlayVideo(int(((m_Right.WinLeft - float(438)) - m_fLaptopPadding)), int(((m_SrcrollingTextArea.WinTop - float(230)) - m_fPaddingBetweenElements)), (R6AbstractGameInfo(Root.Console.ViewportOwner.Actor.Level.Game).GetIntelVideoName(CurrentMission) $ ".bik"));
 	m_MissionObjectives.Clear();
-	GetPlayerOwner().__NFUN_2716__(CurrentMission.m_AudioBankName, 3);
-	GetLevel().__NFUN_1604__();
-	GetLevel().__NFUN_2711__(0);
+	GetPlayerOwner().AddSoundBank(CurrentMission.m_AudioBankName, 3);
+	GetLevel().FinalizeLoading();
+	GetLevel().SetBankSound(0);
 	m_MissionObjectives.Clear();
 	m_MissionObjectives.m_fXOffSet = 10.0000000;
 	m_MissionObjectives.m_fYOffSet = 5.0000000;
@@ -179,15 +179,15 @@ function ShowWindow()
 	J0x35E:
 
 	// End:0x48D [Loop If]
-	if(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length))
+	if((i < moMgr.m_aMissionObjectives.Length))
 	{
 		// End:0x483
-		if(__NFUN_130__(__NFUN_129__(moMgr.m_aMissionObjectives[i].m_bMoralityObjective), moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
+		if(((!moMgr.m_aMissionObjectives[i].m_bMoralityObjective) && moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
 		{
 			m_MissionObjectives.AddText(Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i])), Root.Colors.White, Root.Fonts[10]);
 			m_MissionObjectives.AddText(" ", Root.Colors.White, Root.Fonts[10]);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x35E;
 	}
@@ -196,13 +196,13 @@ function ShowWindow()
 	// End:0x4C5
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("itempSpeaker", string(itempSpeaker)));
+		Log(("itempSpeaker" @ string(itempSpeaker)));
 	}
 	// End:0x506
-	if(__NFUN_129__(m_SpeakerControls.m_ControlButton.bDisabled))
+	if((!m_SpeakerControls.m_ControlButton.bDisabled))
 	{
 		// End:0x4FB
-		if(__NFUN_154__(itempSpeaker, -1))
+		if((itempSpeaker == -1))
 		{
 			ManageButtonSelection(0);			
 		}
@@ -243,7 +243,7 @@ function bool SetMissionText(string _szOriginal)
 
 	m_szScrollingText = "";
 	// End:0xBA
-	if(__NFUN_242__(R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing, true))
+	if((R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing == true))
 	{
 		CurrentMission = R6MissionDescription(R6Console(Root.Console).Master.m_StartGameInfo.m_CurrentMission);
 		m_szScrollingText = Localize(CurrentMission.m_MapName, _szOriginal, CurrentMission.LocalizationFile, true, true);		
@@ -252,7 +252,7 @@ function bool SetMissionText(string _szOriginal)
 	{
 		m_szScrollingText = Localize(GetLevel().GameTypeToString(GetLevel().Game.m_szGameTypeFlag), _szOriginal, GetLevel().GameTypeLocalizationFile(GetLevel().Game.m_szGameTypeFlag), true, true);
 	}
-	return __NFUN_123__(m_szScrollingText, "");
+	return (m_szScrollingText != "");
 	return;
 }
 
@@ -266,24 +266,24 @@ function ManageButtonSelection(int _eButtonSelection)
 	// End:0x34
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__("ManageButtonSelection", string(m_iCurrentSpeaker)), string(_eButtonSelection)));
+		Log((("ManageButtonSelection" @ string(m_iCurrentSpeaker)) @ string(_eButtonSelection)));
 	}
 	// End:0x60
-	if(__NFUN_154__(m_iCurrentSpeaker, _eButtonSelection))
+	if((m_iCurrentSpeaker == _eButtonSelection))
 	{
 		// End:0x5E
 		if(bShowLog)
 		{
-			__NFUN_231__("Nothing To Do!");
+			Log("Nothing To Do!");
 		}
 		return;
 	}
 	m_iCurrentSpeaker = _eButtonSelection;
 	CurrentMission = R6MissionDescription(R6Console(Root.Console).Master.m_StartGameInfo.m_CurrentMission);
 	// End:0xC1
-	if(__NFUN_119__(m_sndPlayEvent, none))
+	if((m_sndPlayEvent != none))
 	{
-		GetPlayerOwner().__NFUN_2725__(m_sndPlayEvent);
+		GetPlayerOwner().StopSound(m_sndPlayEvent);
 	}
 	m_sndPlayEvent = none;
 	switch(_eButtonSelection)
@@ -292,7 +292,7 @@ function ManageButtonSelection(int _eButtonSelection)
 		case int(0):
 			SetMissionText("ID_CONTROL");
 			// End:0x143
-			if(__NFUN_242__(R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing, true))
+			if((R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing == true))
 			{
 				m_sndPlayEvent = CurrentMission.m_PlayEventControl;
 			}
@@ -303,7 +303,7 @@ function ManageButtonSelection(int _eButtonSelection)
 		case int(1):
 			SetMissionText("ID_CLARK");
 			// End:0x1CC
-			if(__NFUN_242__(R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing, true))
+			if((R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing == true))
 			{
 				m_sndPlayEvent = CurrentMission.m_PlayEventClark;
 			}
@@ -314,7 +314,7 @@ function ManageButtonSelection(int _eButtonSelection)
 		case int(2):
 			SetMissionText("ID_SWEENY");
 			// End:0x256
-			if(__NFUN_242__(R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing, true))
+			if((R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingCampaignBriefing == true))
 			{
 				m_sndPlayEvent = CurrentMission.m_PlayEventSweeney;
 			}
@@ -340,9 +340,9 @@ function ManageButtonSelection(int _eButtonSelection)
 			break;
 	}
 	// End:0x30F
-	if(__NFUN_119__(m_sndPlayEvent, none))
+	if((m_sndPlayEvent != none))
 	{
-		GetPlayerOwner().__NFUN_264__(m_sndPlayEvent, 7);
+		GetPlayerOwner().__NFUN_264__(m_sndPlayEvent, 7) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		GetPlayerOwner().__NFUN_2721__(3.0000000, 15, 5);
 	}
 	m_SrcrollingTextArea.Clear();

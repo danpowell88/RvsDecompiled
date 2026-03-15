@@ -105,14 +105,14 @@ function Created()
 	J0x07:
 
 	// End:0x9A [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		m_sBorderForm[i].vColor = Root.Colors.BlueLight;
 		m_sBorderForm[i].fXPos = 0.0000000;
 		m_sBorderForm[i].fYPos = 0.0000000;
 		m_sBorderForm[i].fWidth = 1.0000000;
 		m_sBorderForm[i].bActive = false;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -132,18 +132,18 @@ function CreateClientWindow(Class<UWindowWindow> ClientClass, optional bool _bBu
 	// End:0x66
 	if(_bButtonBar)
 	{
-		m_ButClientArea = CreateWindow(m_ClientClass, float(m_RWindowBorder.X), float(__NFUN_147__(__NFUN_146__(m_RWindowBorder.Y, m_RWindowBorder.H), 25)), float(m_RWindowBorder.W), 25.0000000, OwnerWindow);		
+		m_ButClientArea = CreateWindow(m_ClientClass, float(m_RWindowBorder.X), float(((m_RWindowBorder.Y + m_RWindowBorder.H) - 25)), float(m_RWindowBorder.W), 25.0000000, OwnerWindow);		
 	}
 	else
 	{
 		// End:0xD0
 		if(_bDrawClientOnBorder)
 		{
-			m_ClientArea = CreateWindow(m_ClientClass, float(__NFUN_146__(m_RWindowBorder.X, 1)), float(__NFUN_147__(m_RWindowBorder.Y, 1)), float(__NFUN_147__(m_RWindowBorder.W, __NFUN_144__(2, 1))), float(__NFUN_147__(__NFUN_146__(m_RWindowBorder.H, __NFUN_144__(2, 1)), 25)), OwnerWindow);			
+			m_ClientArea = CreateWindow(m_ClientClass, float((m_RWindowBorder.X + 1)), float((m_RWindowBorder.Y - 1)), float((m_RWindowBorder.W - (2 * 1))), float(((m_RWindowBorder.H + (2 * 1)) - 25)), OwnerWindow);			
 		}
 		else
 		{
-			m_ClientArea = CreateWindow(m_ClientClass, float(__NFUN_146__(__NFUN_146__(m_RWindowBorder.X, 1), 1)), float(m_RWindowBorder.Y), float(__NFUN_147__(__NFUN_147__(m_RWindowBorder.W, __NFUN_144__(2, 1)), 1)), float(__NFUN_147__(m_RWindowBorder.H, 25)), OwnerWindow);
+			m_ClientArea = CreateWindow(m_ClientClass, float(((m_RWindowBorder.X + 1) + 1)), float(m_RWindowBorder.Y), float(((m_RWindowBorder.W - (2 * 1)) - 1)), float((m_RWindowBorder.H - 25)), OwnerWindow);
 		}
 	}
 	return;
@@ -156,19 +156,19 @@ function BeforePaint(Canvas C, float X, float Y)
 	local float _TextHeight, _X, _Y, _fWidth, _fHeight;
 
 	// End:0x135
-	if(__NFUN_119__(m_pTextLabel, none))
+	if((m_pTextLabel != none))
 	{
 		C.Font = Root.Fonts[8];
 		_szTitleText = m_pTextLabel.GetTextLabel(0);
-		TextSize(C, __NFUN_112__(__NFUN_112__("  ", _szTitleText), "  "), W, H);
+		TextSize(C, (("  " $ _szTitleText) $ "  "), W, H);
 		// End:0x135
-		if(__NFUN_177__(W, m_pTextLabel.WinWidth))
+		if((W > m_pTextLabel.WinWidth))
 		{
-			XOff = __NFUN_175__(W, m_pTextLabel.WinWidth);
+			XOff = (W - m_pTextLabel.WinWidth);
 			_TextHeight = m_pTextLabel.WinHeight;
-			_X = __NFUN_175__(m_pTextLabel.WinLeft, __NFUN_172__(XOff, float(2)));
+			_X = (m_pTextLabel.WinLeft - (XOff / float(2)));
 			_Y = m_pTextLabel.WinTop;
-			_fWidth = __NFUN_174__(m_pTextLabel.WinWidth, XOff);
+			_fWidth = (m_pTextLabel.WinWidth + XOff);
 			_fHeight = float(m_RWindowBorder.H);
 			ModifyPopUpFrameWindow(_szTitleText, _TextHeight, _X, _Y, _fWidth, _fHeight);
 		}
@@ -182,17 +182,17 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bResizePopUpOnTextLabel)
 	{
 		// End:0x2A
-		if(__NFUN_119__(m_pTextLabel, none))
+		if((m_pTextLabel != none))
 		{
 			m_pTextLabel.m_bPreCalculatePos = m_bHideAllChild;
 		}
 		// End:0x4B
-		if(__NFUN_119__(m_ClientArea, none))
+		if((m_ClientArea != none))
 		{
 			m_ClientArea.m_bPreCalculatePos = m_bHideAllChild;
 		}
 		// End:0x6C
-		if(__NFUN_119__(m_ButClientArea, none))
+		if((m_ButClientArea != none))
 		{
 			m_ButClientArea.m_bPreCalculatePos = m_bHideAllChild;
 		}
@@ -208,22 +208,22 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bTextWindowOnly)
 	{
 		// End:0xBC
-		if(__NFUN_119__(m_ClientArea, none))
+		if((m_ClientArea != none))
 		{
 			m_ClientArea.HideWindow();
 		}
 		// End:0xD6
-		if(__NFUN_119__(m_ButClientArea, none))
+		if((m_ButClientArea != none))
 		{
 			m_ButClientArea.HideWindow();
 		}
 		return;
 	}
 	// End:0x186
-	if(__NFUN_132__(__NFUN_119__(m_ButClientArea, none), m_bForceButtonLine))
+	if(((m_ButClientArea != none) || m_bForceButtonLine))
 	{
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
-		DrawStretchedTextureSegment(C, float(__NFUN_146__(m_RWindowBorder.X, 1)), float(__NFUN_147__(__NFUN_146__(m_RWindowBorder.Y, m_RWindowBorder.H), 25)), float(__NFUN_147__(m_RWindowBorder.W, 2)), 1.0000000, float(SimpleBorderRegion.X), float(SimpleBorderRegion.Y), float(SimpleBorderRegion.W), float(SimpleBorderRegion.H), m_BGTexture);
+		C.SetDrawColor(byte(255), byte(255), byte(255));
+		DrawStretchedTextureSegment(C, float((m_RWindowBorder.X + 1)), float(((m_RWindowBorder.Y + m_RWindowBorder.H) - 25)), float((m_RWindowBorder.W - 2)), 1.0000000, float(SimpleBorderRegion.X), float(SimpleBorderRegion.Y), float(SimpleBorderRegion.W), float(SimpleBorderRegion.H), m_BGTexture);
 	}
 	return;
 }
@@ -234,7 +234,7 @@ function Paint(Canvas C, float X, float Y)
 function CreateStdPopUpWindow(string _szPopUpTitle, float _fTextHeight, float _fXPos, float _fYPos, float _fWidth, float _fHeight, optional int _iButtonsType)
 {
 	CreateTextWindow(_szPopUpTitle, _fXPos, _fYPos, _fWidth, _fTextHeight);
-	CreatePopUpFrame(_fXPos, __NFUN_174__(_fYPos, _fTextHeight), _fWidth, _fHeight);
+	CreatePopUpFrame(_fXPos, (_fYPos + _fTextHeight), _fWidth, _fHeight);
 	CreateClientWindow(Class'R6Window.R6WindowPopUpBoxCW', true);
 	SetButtonsType(_iButtonsType);
 	return;
@@ -246,7 +246,7 @@ function CreateStdPopUpWindow(string _szPopUpTitle, float _fTextHeight, float _f
 function CreatePopUpFrameWindow(string _szPopUpTitle, float _fTextHeight, float _fXPos, float _fYPos, float _fWidth, float _fHeight)
 {
 	CreateTextWindow(_szPopUpTitle, _fXPos, _fYPos, _fWidth, _fTextHeight);
-	CreatePopUpFrame(_fXPos, __NFUN_174__(_fYPos, _fTextHeight), _fWidth, _fHeight);
+	CreatePopUpFrame(_fXPos, (_fYPos + _fTextHeight), _fWidth, _fHeight);
 	return;
 }
 
@@ -254,22 +254,22 @@ function ModifyPopUpFrameWindow(string _szPopUpTitle, float _fTextHeight, float 
 {
 	m_bTextWindowOnly = false;
 	ModifyTextWindow(_szPopUpTitle, _fXPos, _fYPos, _fWidth, _fTextHeight);
-	CreatePopUpFrame(_fXPos, __NFUN_174__(_fYPos, _fTextHeight), _fWidth, _fHeight);
+	CreatePopUpFrame(_fXPos, (_fYPos + _fTextHeight), _fWidth, _fHeight);
 	// End:0xD3
-	if(__NFUN_119__(m_ButClientArea, none))
+	if((m_ButClientArea != none))
 	{
 		m_ButClientArea.WinLeft = float(m_RWindowBorder.X);
-		m_ButClientArea.WinTop = float(__NFUN_147__(__NFUN_146__(m_RWindowBorder.Y, m_RWindowBorder.H), 25));
+		m_ButClientArea.WinTop = float(((m_RWindowBorder.Y + m_RWindowBorder.H) - 25));
 		m_ButClientArea.WinWidth = float(m_RWindowBorder.W);
 		m_ButClientArea.WinHeight = 25.0000000;
 		SetButtonsType(_iButtonsType);
 	}
 	// End:0x149
-	if(__NFUN_119__(m_ClientArea, none))
+	if((m_ClientArea != none))
 	{
-		m_ClientArea.WinLeft = float(__NFUN_146__(m_RWindowBorder.X, 1));
+		m_ClientArea.WinLeft = float((m_RWindowBorder.X + 1));
 		m_ClientArea.WinTop = float(m_RWindowBorder.Y);
-		m_ClientArea.SetSize(float(__NFUN_147__(m_RWindowBorder.W, __NFUN_144__(2, 1))), float(__NFUN_147__(m_RWindowBorder.H, 25)));
+		m_ClientArea.SetSize(float((m_RWindowBorder.W - (2 * 1))), float((m_RWindowBorder.H - 25)));
 	}
 	return;
 }
@@ -287,7 +287,7 @@ function CreateTextWindow(string _szTitleText, float _X, float _Y, float _fWidth
 	m_pTextLabel.m_Font = Root.Fonts[8];
 	m_pTextLabel.m_vTextColor = Root.Colors.White;
 	m_pTextLabel.AddTextLabel(_szTitleText, 0.0000000, 0.0000000, _fWidth, 2, false, 0.0000000, m_bResizePopUpOnTextLabel);
-	m_pTextLabel.AddTextLabel("", __NFUN_175__(_fWidth, float(10)), 0.0000000, 0.0000000, 1, false, 0.0000000, true);
+	m_pTextLabel.AddTextLabel("", (_fWidth - float(10)), 0.0000000, 0.0000000, 1, false, 0.0000000, true);
 	m_pTextLabel.m_bTextCenterToWindow = true;
 	m_pTextLabel.m_eCornerType = 1;
 	SetCornerColor(1, Root.Colors.White);
@@ -297,7 +297,7 @@ function CreateTextWindow(string _szTitleText, float _X, float _Y, float _fWidth
 function ModifyTextWindow(string _szTitleText, float _X, float _Y, float _fWidth, float _fHeight)
 {
 	// End:0x1DB
-	if(__NFUN_119__(m_pTextLabel, none))
+	if((m_pTextLabel != none))
 	{
 		m_pTextLabel.WinLeft = _X;
 		m_pTextLabel.WinTop = _Y;
@@ -310,7 +310,7 @@ function ModifyTextWindow(string _szTitleText, float _X, float _Y, float _fWidth
 		m_pTextLabel.Clear();
 		m_pTextLabel.m_vTextColor = Root.Colors.White;
 		m_pTextLabel.AddTextLabel(_szTitleText, 0.0000000, 0.0000000, _fWidth, 2, false, 0.0000000, m_bResizePopUpOnTextLabel);
-		m_pTextLabel.AddTextLabel("", __NFUN_175__(_fWidth, float(10)), 0.0000000, 0.0000000, 1, false, 0.0000000, true);
+		m_pTextLabel.AddTextLabel("", (_fWidth - float(10)), 0.0000000, 0.0000000, 1, false, 0.0000000, true);
 		m_pTextLabel.m_bTextCenterToWindow = true;
 	}
 	return;
@@ -319,7 +319,7 @@ function ModifyTextWindow(string _szTitleText, float _X, float _Y, float _fWidth
 function TextWindowOnly(string _szTitleText, float _X, float _Y, float _fWidth, float _fHeight)
 {
 	// End:0x1D4
-	if(__NFUN_119__(m_pTextLabel, none))
+	if((m_pTextLabel != none))
 	{
 		m_bTextWindowOnly = true;
 		SetNoBorder();
@@ -348,29 +348,29 @@ function UpdateTimeInTextLabel(int _iNewTime, optional string _StringInstead)
 	local string szTemp;
 
 	// End:0xC6
-	if(__NFUN_119__(m_pTextLabel, none))
+	if((m_pTextLabel != none))
 	{
 		vTimeColor = Root.Colors.White;
 		// End:0x51
-		if(__NFUN_150__(_iNewTime, 10))
+		if((_iNewTime < 10))
 		{
 			vTimeColor = Root.Colors.Red;
 		}
 		// End:0x6B
-		if(__NFUN_123__(_StringInstead, ""))
+		if((_StringInstead != ""))
 		{
 			szTemp = _StringInstead;			
 		}
 		else
 		{
 			// End:0x85
-			if(__NFUN_154__(_iNewTime, -1))
+			if((_iNewTime == -1))
 			{
 				szTemp = "";				
 			}
 			else
 			{
-				szTemp = Class'Engine.Actor'.static.__NFUN_1520__(_iNewTime);
+				szTemp = Class'Engine.Actor'.static.ConvertIntTimeToString(_iNewTime);
 			}
 		}
 		m_pTextLabel.ChangeColorLabel(vTimeColor, 1);
@@ -393,9 +393,9 @@ function CreatePopUpFrame(float _X, float _Y, float _fWidth, float _fHeight)
 	m_RWindowBorder.W = int(_fWidth);
 	m_RWindowBorder.H = int(_fHeight);
 	ActiveBorder(int(0), false);
-	SetBorderParam(int(1), 7.0000000, __NFUN_175__(_fHeight, fBorderSize), __NFUN_175__(_fWidth, float(14)), fBorderWidth, Root.Colors.White);
-	SetBorderParam(int(2), fBorderSize, 0.0000000, fBorderWidth, __NFUN_175__(_fHeight, __NFUN_171__(float(2), fBorderSize)), Root.Colors.White);
-	SetBorderParam(int(3), __NFUN_175__(_fWidth, float(2)), 0.0000000, fBorderWidth, __NFUN_175__(_fHeight, __NFUN_171__(float(2), fBorderSize)), Root.Colors.White);
+	SetBorderParam(int(1), 7.0000000, (_fHeight - fBorderSize), (_fWidth - float(14)), fBorderWidth, Root.Colors.White);
+	SetBorderParam(int(2), fBorderSize, 0.0000000, fBorderWidth, (_fHeight - (float(2) * fBorderSize)), Root.Colors.White);
+	SetBorderParam(int(3), (_fWidth - float(2)), 0.0000000, fBorderWidth, (_fHeight - (float(2) * fBorderSize)), Root.Colors.White);
 	m_eCornerType = 2;
 	SetCornerColor(int(2), Root.Colors.White);
 	return;
@@ -406,7 +406,7 @@ function CreatePopUpFrame(float _X, float _Y, float _fWidth, float _fHeight)
 //===========================================================================
 function SetBorderParam(int _iBorderType, float _X, float _Y, float _fWidth, float _fHeight, Color _vColor)
 {
-	m_sBorderForm[_iBorderType].fXPos = __NFUN_174__(_X, float(m_RWindowBorder.X));
+	m_sBorderForm[_iBorderType].fXPos = (_X + float(m_RWindowBorder.X));
 	m_sBorderForm[_iBorderType].fYPos = __NFUN_174__(_Y, float(m_RWindowBorder.Y));
 	m_sBorderForm[_iBorderType].fWidth = _fWidth;
 	m_sBorderForm[_iBorderType].fHeight = _fHeight;

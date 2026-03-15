@@ -26,7 +26,7 @@ var transient Object OtherSideLevel;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		OtherSideActor, OtherSideURL, 
 		ThisTag;
 }
@@ -46,12 +46,12 @@ function PreBeginPlay()
 	J0x13:
 
 	// End:0x46 [Loop If]
-	if(__NFUN_150__(numDestinations, 8))
+	if((numDestinations < 8))
 	{
 		// End:0x3B
-		if(__NFUN_123__(Destinations[numDestinations], ""))
+		if((Destinations[numDestinations] != ""))
 		{
-			__NFUN_165__(numDestinations);			
+			(numDestinations++);			
 		}
 		else
 		{
@@ -61,7 +61,7 @@ function PreBeginPlay()
 		goto J0x13;
 	}
 	// End:0x6C
-	if(__NFUN_130__(__NFUN_151__(numDestinations, 0), __NFUN_122__(OtherSideURL, "")))
+	if(((numDestinations > 0) && (OtherSideURL == "")))
 	{
 		OtherSideURL = Destinations[0];
 	}
@@ -73,7 +73,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	local int nextPick;
 
 	// End:0x0D
-	if(__NFUN_154__(numDestinations, 0))
+	if((numDestinations == 0))
 	{
 		return;
 	}
@@ -81,15 +81,15 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	J0x14:
 
 	// End:0x41 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(nextPick, 8), __NFUN_123__(Destinations[nextPick], OtherSideURL)))
+	if(((nextPick < 8) && (Destinations[nextPick] != OtherSideURL)))
 	{
-		__NFUN_165__(nextPick);
+		(nextPick++);
 		// [Loop Continue]
 		goto J0x14;
 	}
-	__NFUN_165__(nextPick);
+	(nextPick++);
 	// End:0x6F
-	if(__NFUN_132__(__NFUN_151__(nextPick, 7), __NFUN_122__(Destinations[nextPick], "")))
+	if(((nextPick > 7) || (Destinations[nextPick] == "")))
 	{
 		nextPick = 0;
 	}
@@ -102,7 +102,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 simulated event Generate()
 {
 	// End:0x0D
-	if(__NFUN_119__(OtherSideLevel, none))
+	if((OtherSideLevel != none))
 	{
 		return;
 	}
@@ -114,7 +114,7 @@ simulated event Generate()
 simulated event ForceGenerate()
 {
 	// End:0x21
-	if(__NFUN_153__(__NFUN_126__(OtherSideURL, "/"), 0))
+	if((InStr(OtherSideURL, "/") >= 0))
 	{
 		OtherSideLevel = none;
 		OtherSideActor = none;		
@@ -123,10 +123,10 @@ simulated event ForceGenerate()
 	{
 		OtherSideLevel = XLevel;
 		// End:0x67
-		foreach __NFUN_304__(Class'Engine.WarpZoneInfo', OtherSideActor)
+		foreach AllActors(Class'Engine.WarpZoneInfo', OtherSideActor)
 		{
 			// End:0x66
-			if(__NFUN_130__(__NFUN_124__(string(OtherSideActor.ThisTag), OtherSideURL), __NFUN_119__(OtherSideActor, self)))
+			if(((string(OtherSideActor.ThisTag) ~= OtherSideURL) && (OtherSideActor != self)))
 			{
 				// End:0x67
 				break;
@@ -144,28 +144,28 @@ simulated function ActorEntered(Actor Other)
 	local Controller P;
 
 	// End:0x241
-	if(__NFUN_129__(Other.bJustTeleported))
+	if((!Other.bJustTeleported))
 	{
 		Generate();
 		// End:0x241
-		if(__NFUN_119__(OtherSideActor, none))
+		if((OtherSideActor != none))
 		{
-			Other.__NFUN_118__('Touch');
-			Other.__NFUN_118__('UnTouch');
+			Other.Disable('Touch');
+			Other.Disable('UnTouch');
 			L = Other.Location;
 			// End:0x83
-			if(__NFUN_119__(Pawn(Other), none))
+			if((Pawn(Other) != none))
 			{
 				R = Pawn(Other).GetViewRotation();
 			}
-			__NFUN_315__(L, Other.Velocity, R);
-			OtherSideActor.__NFUN_314__(L, Other.Velocity, R);
+			UnWarp(L, Other.Velocity, R);
+			OtherSideActor.Warp(L, Other.Velocity, R);
 			// End:0x1FF
-			if(Other.__NFUN_303__('Pawn'))
+			if(Other.IsA('Pawn'))
 			{
 				Pawn(Other).bWarping = bNoTeleFrag;
 				// End:0x1F5
-				if(Other.__NFUN_267__(L))
+				if(Other.__NFUN_267__(L) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/)
 				{
 					// End:0x174
 					if(__NFUN_154__(int(Role), int(ROLE_Authority)))

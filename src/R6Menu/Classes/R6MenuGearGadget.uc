@@ -25,12 +25,12 @@ function Created()
 {
 	m_BorderColor = Root.Colors.GrayLight;
 	// End:0xF8
-	if(__NFUN_242__(m_bAssignAllButton, true))
+	if((m_bAssignAllButton == true))
 	{
-		m_AssignAll = R6MenuAssignAllButton(CreateWindow(Class'R6Menu.R6MenuAssignAllButton', __NFUN_175__(__NFUN_175__(WinWidth, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W)), float(1)), 0.0000000, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W), WinHeight, self));
+		m_AssignAll = R6MenuAssignAllButton(CreateWindow(Class'R6Menu.R6MenuAssignAllButton', ((WinWidth - float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W)) - float(1)), 0.0000000, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W), WinHeight, self));
 		m_AssignAll.ToolTipString = Localize("Tip", "GearRoomItemAll", "R6Menu");
 		m_AssignAll.ImageX = 0.0000000;
-		m_AssignAll.ImageY = __NFUN_172__(__NFUN_175__(WinHeight, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.H)), float(2));
+		m_AssignAll.ImageY = ((WinHeight - float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.H)) / float(2));
 	}
 	m_2DGadget = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', 0.0000000, 0.0000000, m_2DGadgetWidth, WinHeight, self));
 	m_2DGadget.ToolTipString = Localize("Tip", "GearRoomItem", "R6Menu");
@@ -43,7 +43,7 @@ function Register(UWindowDialogClientWindow W)
 {
 	super.Register(W);
 	// End:0x2B
-	if(__NFUN_242__(m_bAssignAllButton, true))
+	if((m_bAssignAllButton == true))
 	{
 		m_AssignAll.Register(W);
 	}
@@ -64,8 +64,8 @@ function SetGadgetTexture(Texture t, Region R)
 	// End:0x120
 	if(m_bCenterTexture)
 	{
-		m_2DGadget.ImageX = __NFUN_172__(__NFUN_175__(m_2DGadget.WinWidth, float(m_2DGadget.UpRegion.W)), float(2));
-		m_2DGadget.ImageY = __NFUN_172__(__NFUN_175__(m_2DGadget.WinHeight, float(m_2DGadget.UpRegion.H)), float(2));		
+		m_2DGadget.ImageX = ((m_2DGadget.WinWidth - float(m_2DGadget.UpRegion.W)) / float(2));
+		m_2DGadget.ImageY = ((m_2DGadget.WinHeight - float(m_2DGadget.UpRegion.H)) / float(2));		
 	}
 	else
 	{

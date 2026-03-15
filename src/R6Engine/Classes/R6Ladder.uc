@@ -24,7 +24,7 @@ var R6Ladder m_pOtherFloor;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bIsTopOfLadder;
 }
 
@@ -35,21 +35,21 @@ simulated function Touch(Actor Other)
 
 	Pawn = R6Pawn(Other);
 	// End:0x49
-	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(Pawn, none), __NFUN_129__(Pawn.bCanClimbLadders)), __NFUN_114__(Pawn.Controller, none)))
+	if((((Pawn == none) || (!Pawn.bCanClimbLadders)) || (Pawn.Controller == none)))
 	{
 		return;
 	}
 	// End:0x80
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(string(Pawn), " has touched ladder actor : "), string(self)));
+		Log(((string(Pawn) $ " has touched ladder actor : ") $ string(self)));
 	}
 	Pawn.m_Ladder = self;
 	// End:0x269
-	if(__NFUN_154__(int(Pawn.Physics), int(11)))
+	if((int(Pawn.Physics) == int(11)))
 	{
 		// End:0xCC
-		if(__NFUN_130__(__NFUN_129__(Pawn.bIsWalking), __NFUN_129__(m_bIsTopOfLadder)))
+		if(((!Pawn.bIsWalking) && (!m_bIsTopOfLadder)))
 		{
 			return;
 		}
@@ -60,7 +60,7 @@ simulated function Touch(Actor Other)
 			if(Pawn.m_bIsClimbingLadder)
 			{
 				// End:0x176
-				if(__NFUN_132__(__NFUN_130__(__NFUN_176__(__NFUN_219__(__NFUN_226__(Pawn.Acceleration), __NFUN_226__(MyLadder.ClimbDir)), -0.9000000), __NFUN_129__(m_bIsTopOfLadder)), __NFUN_130__(__NFUN_177__(__NFUN_219__(__NFUN_226__(Pawn.Acceleration), __NFUN_226__(MyLadder.ClimbDir)), 0.9000000), m_bIsTopOfLadder)))
+				if((((Dot(Normal(Pawn.Acceleration), Normal(MyLadder.ClimbDir)) < -0.9000000) && (!m_bIsTopOfLadder)) || ((Dot(Normal(Pawn.Acceleration), Normal(MyLadder.ClimbDir)) > 0.9000000) && m_bIsTopOfLadder)))
 				{
 					Pawn.EndClimbLadder(MyLadder);
 				}
@@ -71,20 +71,20 @@ simulated function Touch(Actor Other)
 			// End:0x1B4
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(" pawn.m_bIsClimbingLadder =", string(Pawn.m_bIsClimbingLadder)));
+				Log((" pawn.m_bIsClimbingLadder =" $ string(Pawn.m_bIsClimbingLadder)));
 			}
 			// End:0x264
-			if(__NFUN_130__(Pawn.m_bIsClimbingLadder, __NFUN_129__(Pawn.Controller.__NFUN_281__('EndClimbingLadder'))))
+			if((Pawn.m_bIsClimbingLadder && (!Pawn.Controller.IsInState('EndClimbingLadder'))))
 			{
 				// End:0x226
-				if(__NFUN_130__(__NFUN_177__(Pawn.Acceleration.Z, 30.0000000), m_bIsTopOfLadder))
+				if(((Pawn.Acceleration.Z > 30.0000000) && m_bIsTopOfLadder))
 				{
 					Pawn.EndClimbLadder(MyLadder);					
 				}
 				else
 				{
 					// End:0x264
-					if(__NFUN_130__(__NFUN_176__(Pawn.Acceleration.Z, 30.0000000), __NFUN_129__(m_bIsTopOfLadder)))
+					if(((Pawn.Acceleration.Z < 30.0000000) && (!m_bIsTopOfLadder)))
 					{
 						Pawn.EndClimbLadder(MyLadder);
 					}
@@ -98,7 +98,7 @@ simulated function Touch(Actor Other)
 		// End:0x2A9
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(string(Pawn), " is not in PHYSICS_Ladder yet... for "), string(self)));
+			Log(((string(Pawn) $ " is not in PHYSICS_Ladder yet... for ") $ string(self)));
 		}
 		// End:0x2BD
 		if(Pawn.m_bIsClimbingLadder)
@@ -111,24 +111,24 @@ simulated function Touch(Actor Other)
 			Pawn.PotentialClimbLadder(MyLadder);
 		}
 		// End:0x2F9
-		if(Pawn.Controller.__NFUN_281__('ApproachLadder'))
+		if(Pawn.Controller.IsInState('ApproachLadder'))
 		{
 			return;
 		}
 		// End:0x451
-		if(__NFUN_130__(__NFUN_155__(int(Pawn.m_ePawnType), int(1)), R6AIController(Pawn.Controller).CanClimbLadders(self)))
+		if(((int(Pawn.m_ePawnType) != int(1)) && R6AIController(Pawn.Controller).CanClimbLadders(self)))
 		{
 			// End:0x451
-			if(__NFUN_132__(__NFUN_130__(m_bIsTopOfLadder, __NFUN_176__(__NFUN_219__(Vector(Pawn.Rotation), MyLadder.LookDir), float(0))), __NFUN_130__(__NFUN_129__(m_bIsTopOfLadder), __NFUN_177__(__NFUN_219__(Vector(Pawn.Rotation), MyLadder.LookDir), float(0)))))
+			if(((m_bIsTopOfLadder && (Dot(Vector(Pawn.Rotation), MyLadder.LookDir) < float(0))) || ((!m_bIsTopOfLadder) && (Dot(Vector(Pawn.Rotation), MyLadder.LookDir) > float(0)))))
 			{
 				// End:0x3ED
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__(string(Pawn), " was detected by R6Ladder, climb ladder automatically..."));
+					Log((string(Pawn) $ " was detected by R6Ladder));
 				}
-				Pawn.Controller.NextState = Pawn.Controller.__NFUN_284__();
+				Pawn.Controller.NextState = Pawn.Controller.GetStateName();
 				Pawn.Controller.MoveTarget = self;
-				R6AIController(Pawn.Controller).__NFUN_113__('ApproachLadder');
+				R6AIController(Pawn.Controller).GotoState('ApproachLadder');
 			}
 		}
 	}

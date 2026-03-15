@@ -8,7 +8,7 @@ class R6WindowconfirmationButton extends R6WindowButton;
 function Paint(Canvas C, float X, float Y)
 {
 	// End:0x22
-	if(__NFUN_119__(m_buttonFont, none))
+	if((m_buttonFont != none))
 	{
 		C.Font = m_buttonFont;		
 	}

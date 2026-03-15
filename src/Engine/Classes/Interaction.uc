@@ -182,29 +182,29 @@ event string ConvertKeyToLocalisation(byte _Key, string _szEnumKeyName)
 	local string szResult;
 
 	// End:0x40
-	if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(48), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(57), 1))))
+	if(((int(_Key) > (int(48) - 1)) && (int(_Key) < (int(57) + 1))))
 	{
-		szResult = string(__NFUN_147__(int(_Key), int(48)));		
+		szResult = string((int(_Key) - int(48)));		
 	}
 	else
 	{
 		// End:0x7A
-		if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(65), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(90), 1))))
+		if(((int(_Key) > (int(65) - 1)) && (int(_Key) < (int(90) + 1))))
 		{
-			szResult = __NFUN_236__(int(_Key));			
+			szResult = Chr(int(_Key));			
 		}
 		else
 		{
 			// End:0xC2
-			if(__NFUN_130__(__NFUN_151__(int(_Key), __NFUN_147__(int(112), 1)), __NFUN_150__(int(_Key), __NFUN_146__(int(135), 1))))
+			if(((int(_Key) > (int(112) - 1)) && (int(_Key) < (int(135) + 1))))
 			{
-				szResult = __NFUN_112__("F", string(__NFUN_146__(__NFUN_147__(int(_Key), int(112)), 1)));				
+				szResult = ("F" $ string(((int(_Key) - int(112)) + 1)));				
 			}
 			else
 			{
-				szResult = Localize("Interactions", __NFUN_112__("IK_", _szEnumKeyName), "R6Menu");
+				szResult = Localize("Interactions", ("IK_" $ _szEnumKeyName), "R6Menu");
 				// End:0x127
-				if(__NFUN_122__(szResult, Localize("Interactions", "IK_None", "R6Menu")))
+				if((szResult == Localize("Interactions", "IK_None", "R6Menu")))
 				{
 					szResult = "";
 				}

@@ -72,7 +72,7 @@ event Message(coerce string Msg, float MsgLife)
 	local PlayerController PController;
 
 	// End:0x0D
-	if(__NFUN_114__(ViewportOwner, none))
+	if((ViewportOwner == none))
 	{
 		return;
 	}
@@ -94,17 +94,17 @@ function InitCampaignAndMissionDescription()
 	local string szCampaignName, szCampaignPathName;
 	local int iAdditionalModIndex;
 
-	szCampaignName = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szCampaignIniFile;
+	szCampaignName = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szCampaignIniFile;
 	pFileManager = new (none) Class'Engine.R6FileManager';
-	szCampaignPathName = __NFUN_112__("..\\maps\\", szCampaignName);
+	szCampaignPathName = ("..\\maps\\" $ szCampaignName);
 	// End:0x68
-	if(__NFUN_129__(pFileManager.__NFUN_1528__(szCampaignPathName)))
+	if((!pFileManager.FindFile(szCampaignPathName)))
 	{
 		szCampaignName = "";
 	}
 	m_aMissionDescriptions.Remove(0, m_aMissionDescriptions.Length);
 	// End:0xCC
-	if(__NFUN_130__(__NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield()), __NFUN_123__(szCampaignName, "RavenShieldCampaign")))
+	if(((!Class'Engine.Actor'.static.GetModMgr().IsRavenShield()) && (szCampaignName != "RavenShieldCampaign")))
 	{
 		LoadCampaignIni("RavenShieldCampaign");
 	}
@@ -112,19 +112,19 @@ function InitCampaignAndMissionDescription()
 	J0xD3:
 
 	// End:0x14D [Loop If]
-	if(__NFUN_119__(Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.GetExtraMods(iAdditionalModIndex), none))
+	if((Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.GetExtraMods(iAdditionalModIndex) != none))
 	{
-		szCampaignName = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.GetExtraMods(iAdditionalModIndex).m_szCampaignIniFile;
+		szCampaignName = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.GetExtraMods(iAdditionalModIndex).m_szCampaignIniFile;
 		LoadCampaignIni(szCampaignName);
-		__NFUN_165__(iAdditionalModIndex);
+		(iAdditionalModIndex++);
 		szCampaignName = "";
 		// [Loop Continue]
 		goto J0xD3;
 	}
 	// End:0x17D
-	if(__NFUN_122__(szCampaignName, ""))
+	if((szCampaignName == ""))
 	{
-		szCampaignName = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szCampaignIniFile;
+		szCampaignName = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szCampaignIniFile;
 	}
 	LoadCampaignIni(szCampaignName);
 	return;
@@ -140,20 +140,20 @@ function LoadCampaignIni(string szCampaign)
 	J0x07:
 
 	// End:0x58 [Loop If]
-	if(__NFUN_150__(i, m_aCampaigns.Length))
+	if((i < m_aCampaigns.Length))
 	{
 		// End:0x4E
-		if(__NFUN_122__(m_aCampaigns[i].m_szCampaignFile, szCampaign))
+		if((m_aCampaigns[i].m_szCampaignFile == szCampaign))
 		{
 			m_CurrentCampaign = m_aCampaigns[i];
 			bFound = true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
 	// End:0x84
-	if(__NFUN_242__(bFound, false))
+	if((bFound == false))
 	{
 		m_CurrentCampaign = new (none) Class'R6Game.R6Campaign';
 		m_aCampaigns[i] = m_CurrentCampaign;
@@ -170,7 +170,7 @@ function InitMod()
 
 	m_aMissionDescriptions.Remove(0, m_aMissionDescriptions.Length);
 	// End:0x43
-	if(__NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield()))
+	if((!Class'Engine.Actor'.static.GetModMgr().IsRavenShield()))
 	{
 		LoadCampaignIni("RavenShieldCampaign");
 	}
@@ -179,22 +179,22 @@ function InitMod()
 	J0x51:
 
 	// End:0xC3 [Loop If]
-	if(__NFUN_119__(Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.GetExtraMods(iAdditionalModIndex), none))
+	if((Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.GetExtraMods(iAdditionalModIndex) != none))
 	{
-		szCampaign = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.GetExtraMods(iAdditionalModIndex).m_szCampaignIniFile;
+		szCampaign = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.GetExtraMods(iAdditionalModIndex).m_szCampaignIniFile;
 		LoadCampaignIni(szCampaign);
-		__NFUN_165__(iAdditionalModIndex);
+		(iAdditionalModIndex++);
 		// [Loop Continue]
 		goto J0x51;
 	}
-	szCampaign = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szCampaignIniFile;
+	szCampaign = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szCampaignIniFile;
 	LoadCampaignIni(szCampaign);
 	// End:0x10E
-	if(__NFUN_119__(m_PlayerCampaign, none))
+	if((m_PlayerCampaign != none))
 	{
 		m_PlayerCampaign.m_bCampaignCompleted = 0;
 	}
-	ConsoleCommand(__NFUN_112__(__NFUN_112__("LOADSERVER ", Class'Engine.Actor'.static.__NFUN_1524__().GetServerIni()), ".ini"));
+	ConsoleCommand((("LOADSERVER " $ Class'Engine.Actor'.static.GetModMgr().GetServerIni()) $ ".ini"));
 	return;
 }
 
@@ -203,22 +203,22 @@ event Initialized()
 	// End:0x22
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console Initialized");
+		Log("R6Console Initialized");
 	}
 	m_PlayerCampaign = new (none) Class'R6Game.R6PlayerCampaign';
 	m_PlayerCampaign.m_OperativesMissionDetails = new (none) Class'R6Game.R6MissionRoster';
 	m_playerCustomMission = new (none) Class'R6Game.R6PlayerCustomMission';
-	Class'Engine.Actor'.static.__NFUN_1551__().SetConsoleInGameMgr(self);
+	Class'Engine.Actor'.static.GetGameManager().SetConsoleInGameMgr(self);
 	return;
 }
 
 function InitializedGameService()
 {
-	m_GameService = R6GSServers(Class'Engine.Actor'.static.__NFUN_1551__().GetGameMgrGameService());
+	m_GameService = R6GSServers(Class'Engine.Actor'.static.GetGameManager().GetGameMgrGameService());
 	// End:0x45
-	if(__NFUN_114__(m_GameService, none))
+	if((m_GameService == none))
 	{
-		__NFUN_231__("m_GameService is none");
+		Log("m_GameService is none");
 	}
 	return;
 }
@@ -226,16 +226,16 @@ function InitializedGameService()
 function Object SetGameServiceLinks(PlayerController _localPlayer)
 {
 	// End:0x37
-	if(__NFUN_119__(Class'Engine.Actor'.static.__NFUN_1551__().GetGameMgrGameService(), none))
+	if((Class'Engine.Actor'.static.GetGameManager().GetGameMgrGameService() != none))
 	{
-		Class'Engine.Actor'.static.__NFUN_1551__().SetLocalPlayerCtrl(_localPlayer);
+		Class'Engine.Actor'.static.GetGameManager().SetLocalPlayerCtrl(_localPlayer);
 	}
 	// End:0x56
-	if(__NFUN_119__(m_LanServers, none))
+	if((m_LanServers != none))
 	{
 		m_LanServers.m_LocalPlayerController = _localPlayer;
 	}
-	return Class'Engine.Actor'.static.__NFUN_1551__().GetGameMgrGameService();
+	return Class'Engine.Actor'.static.GetGameManager().GetGameMgrGameService();
 	return;
 }
 
@@ -244,12 +244,12 @@ event UserDisconnected()
 	// End:0x5A
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console::UserDisconnected() Returning to menus due to Server disconnection!");
+		Log("R6Console::UserDisconnected() Returning to menus due to Server disconnection!");
 	}
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1287__(true);
+	Class'Engine.Actor'.static.GetGameManager().ConnectionInterrupted(true);
 	SetGameServiceLinks(none);
 	// End:0x94
-	if(__NFUN_132__(m_bNonUbiMatchMaking, m_bNonUbiMatchMakingHost))
+	if((m_bNonUbiMatchMaking || m_bNonUbiMatchMakingHost))
 	{
 		LeaveR6Game(7);		
 	}
@@ -265,10 +265,10 @@ event ServerDisconnected()
 	// End:0x5C
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console::ServerDisconnected() Returning to menus due to Server disconnection!");
+		Log("R6Console::ServerDisconnected() Returning to menus due to Server disconnection!");
 	}
 	LeaveR6Game(8);
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1287__();
+	Class'Engine.Actor'.static.GetGameManager().ConnectionInterrupted();
 	SetGameServiceLinks(none);
 	return;
 }
@@ -278,12 +278,12 @@ event R6ConnectionFailed(string szError)
 	// End:0x34
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("R6Console::R6ConnectionFailed() ", szError));
+		Log(("R6Console::R6ConnectionFailed() " $ szError));
 	}
 	m_szLastError = szError;
 	Root.ResetMenus(true);
 	LeaveR6Game(8);
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1287__();
+	Class'Engine.Actor'.static.GetGameManager().ConnectionInterrupted();
 	SetGameServiceLinks(none);
 	return;
 }
@@ -293,10 +293,10 @@ event R6ConnectionSuccess()
 	// End:0x2D
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console::R6ConnectionSuccess()");
+		Log("R6Console::R6ConnectionSuccess()");
 	}
 	// End:0x55
-	if(__NFUN_155__(int(Root.m_eRootId), int(Root.3)))
+	if((int(Root.m_eRootId) != int(Root.3)))
 	{
 		LaunchR6MultiPlayerGame();
 	}
@@ -308,17 +308,17 @@ event R6ConnectionInterrupted()
 	// End:0x31
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console::R6ConnectionInterrupted()");
+		Log("R6Console::R6ConnectionInterrupted()");
 	}
 	// End:0x4C
-	if(__NFUN_242__(m_bNonUbiMatchMaking, true))
+	if((m_bNonUbiMatchMaking == true))
 	{
 		Root.DoQuitGame();
 	}
-	Class'Engine.Actor'.static.__NFUN_2619__(true);
+	Class'Engine.Actor'.static.EnableLoadingScreen(true);
 	Root.ResetMenus(true);
 	LeaveR6Game(3);
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1287__();
+	Class'Engine.Actor'.static.GetGameManager().ConnectionInterrupted();
 	SetGameServiceLinks(none);
 	return;
 }
@@ -326,7 +326,7 @@ event R6ConnectionInterrupted()
 event R6ConnectionInProgress()
 {
 	// End:0x80
-	if(__NFUN_154__(int(Root.GetSimplePopUpID()), int(0)))
+	if((int(Root.GetSimplePopUpID()) == int(0)))
 	{
 		Root.SimplePopUp(Localize("MultiPlayer", "PopUp_Downloading", "R6Menu"), Localize("PopUP", "PopUpEscCancel", "R6Menu"), 33, 4);
 	}
@@ -355,7 +355,7 @@ function bool KeyEvent(Interactions.EInputKey Key, Interactions.EInputAction Act
 	// End:0x3E
 	if(bShowLog)
 	{
-		__NFUN_231__("ERROR!!!!!!!!!!!!!!!!!!! IN R6Console >> KeyEvent");
+		Log("ERROR!!!!!!!!!!!!!!!!!!! IN R6Console >> KeyEvent");
 	}
 	return false;
 	return;
@@ -366,7 +366,7 @@ function bool KeyType(Interactions.EInputKey Key)
 	// End:0x3D
 	if(bShowLog)
 	{
-		__NFUN_231__("ERROR!!!!!!!!!!!!!!!!!!! IN R6Console >> KeyType");
+		Log("ERROR!!!!!!!!!!!!!!!!!!! IN R6Console >> KeyType");
 	}
 	return false;
 	return;

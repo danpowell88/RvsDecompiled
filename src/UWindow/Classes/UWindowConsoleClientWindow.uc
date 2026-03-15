@@ -11,7 +11,7 @@ var UWindowEditControl EditControl;
 function Created()
 {
 	TextArea = UWindowConsoleTextAreaControl(CreateWindow(Class'UWindow.UWindowConsoleTextAreaControl', 0.0000000, 0.0000000, WinWidth, WinHeight));
-	EditControl = UWindowEditControl(CreateControl(Class'UWindow.UWindowEditControl', 0.0000000, __NFUN_175__(WinHeight, float(16)), WinWidth, 16.0000000));
+	EditControl = UWindowEditControl(CreateControl(Class'UWindow.UWindowEditControl', 0.0000000, (WinHeight - float(16)), WinWidth, 16.0000000));
 	EditControl.SetFont(0);
 	EditControl.SetNumericOnly(false);
 	EditControl.SetMaxLength(400);
@@ -33,13 +33,13 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0xED
 				case EditControl:
 					// End:0xEA
-					if(__NFUN_123__(EditControl.GetValue(), ""))
+					if((EditControl.GetValue() != ""))
 					{
 						S = EditControl.GetValue();
-						Root.Console.Message(__NFUN_112__("> ", S), 6.0000000);
+						Root.Console.Message(("> " $ S), 6.0000000);
 						EditControl.Clear();
 						// End:0xEA
-						if(__NFUN_129__(Root.Console.ConsoleCommand(S)))
+						if((!Root.Console.ConsoleCommand(S)))
 						{
 							Root.Console.Message(Localize("Errors", "Exec", "R6Engine"), 6.0000000);
 						}
@@ -94,9 +94,9 @@ function BeforePaint(Canvas C, float X, float Y)
 	super(UWindowWindow).BeforePaint(C, X, Y);
 	EditControl.SetSize(WinWidth, 17.0000000);
 	EditControl.WinLeft = 0.0000000;
-	EditControl.WinTop = __NFUN_175__(WinHeight, EditControl.WinHeight);
+	EditControl.WinTop = (WinHeight - EditControl.WinHeight);
 	EditControl.EditBoxWidth = WinWidth;
-	TextArea.SetSize(WinWidth, __NFUN_175__(WinHeight, EditControl.WinHeight));
+	TextArea.SetSize(WinWidth, (WinHeight - EditControl.WinHeight));
 	return;
 }
 

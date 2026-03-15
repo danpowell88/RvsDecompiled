@@ -21,11 +21,11 @@ var R6MenuAssignAllButton m_AssignAll;
 function Created()
 {
 	m_BorderColor = Root.Colors.GrayLight;
-	m_AssignAll = R6MenuAssignAllButton(CreateWindow(Class'R6Menu.R6MenuAssignAllButton', __NFUN_175__(__NFUN_175__(WinWidth, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W)), float(1)), 0.0000000, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W), WinHeight, self));
+	m_AssignAll = R6MenuAssignAllButton(CreateWindow(Class'R6Menu.R6MenuAssignAllButton', ((WinWidth - float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W)) - float(1)), 0.0000000, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.W), WinHeight, self));
 	m_AssignAll.ToolTipString = Localize("Tip", "GearRoomArmorAll", "R6Menu");
 	m_AssignAll.ImageX = 0.0000000;
-	m_AssignAll.ImageY = __NFUN_172__(__NFUN_175__(WinHeight, float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.H)), float(2));
-	m_2DArmor = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', 0.0000000, 0.0000000, __NFUN_175__(WinWidth, m_AssignAll.WinWidth), WinHeight, self));
+	m_AssignAll.ImageY = ((WinHeight - float(Class'R6Menu.R6MenuAssignAllButton'.default.UpRegion.H)) / float(2));
+	m_2DArmor = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', 0.0000000, 0.0000000, (WinWidth - m_AssignAll.WinWidth), WinHeight, self));
 	m_2DArmor.ToolTipString = Localize("Tip", "GearRoomArmor", "R6Menu");
 	m_2DArmor.bUseRegion = true;
 	m_2DArmor.m_iDrawStyle = 5;

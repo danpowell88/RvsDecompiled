@@ -47,10 +47,10 @@ function bool IsBasicMap()
 {
 	local string szMapName;
 
-	szMapName = Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_MapName;
-	szMapName = __NFUN_235__(szMapName);
+	szMapName = Class'Engine.Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_MapName;
+	szMapName = Caps(szMapName);
 	// End:0x69
-	if(__NFUN_122__(szMapName, "TRAINING_BASICS"))
+	if((szMapName == "TRAINING_BASICS"))
 	{
 		return true;
 	}
@@ -104,11 +104,11 @@ function DeployCharacters(PlayerController ControlledByPlayer)
 	local R6StartGameInfo StartGameInfo;
 
 	super(R6GameInfo).DeployCharacters(ControlledByPlayer);
-	StartGameInfo = Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo;
+	StartGameInfo = Class'Engine.Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo;
 	szMapName = StartGameInfo.m_MapName;
-	szMapName = __NFUN_235__(szMapName);
+	szMapName = Caps(szMapName);
 	// End:0xC1
-	if(__NFUN_129__(__NFUN_132__(__NFUN_132__(__NFUN_122__(szMapName, "TRAINING_BASICS"), __NFUN_122__(szMapName, "TRAINING_SHOOTING")), __NFUN_122__(szMapName, "TRAINING_EXPLOSIVES"))))
+	if((!(((szMapName == "TRAINING_BASICS") || (szMapName == "TRAINING_SHOOTING")) || (szMapName == "TRAINING_EXPLOSIVES"))))
 	{
 		return;
 	}
@@ -119,10 +119,10 @@ function DeployCharacters(PlayerController ControlledByPlayer)
 	J0x102:
 
 	// End:0x147 [Loop If]
-	if(__NFUN_150__(i, 12))
+	if((i < 12))
 	{
 		R6PlayerController(m_Player).SetWeaponSound(m_Player.m_PawnRepInfo, m_WeaponsName[i], 0);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x102;
 	}
@@ -144,31 +144,31 @@ function LoadWeapons()
 	J0x20:
 
 	// End:0x201 [Loop If]
-	if(__NFUN_150__(i, 12))
+	if((i < 12))
 	{
 		// End:0x7A
-		if(__NFUN_154__(i, 0))
+		if((i == 0))
 		{
 			pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6MiniScopeGadget");			
 		}
 		else
 		{
 			// End:0xCC
-			if(__NFUN_154__(i, 2))
+			if((i == 2))
 			{
 				pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6ThermalScopeGadget");				
 			}
 			else
 			{
 				// End:0x11B
-				if(__NFUN_154__(i, 4))
+				if((i == 4))
 				{
 					pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6MiniScopeGadget");					
 				}
 				else
 				{
 					// End:0x169
-					if(__NFUN_154__(i, 5))
+					if((i == 5))
 					{
 						pPawn.ServerGivesWeaponToClient(m_WeaponsName[i], 1, "", "R6WeaponGadgets.R6SilencerGadget");						
 					}
@@ -184,7 +184,7 @@ function LoadWeapons()
 		ShowWeaponAndAttachment(m_Weapons[i], false);
 		m_Weapons[i].WeaponInitialization(pPawn);
 		m_Weapons[i].LoadFirstPersonWeapon();
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x20;
 	}
@@ -202,14 +202,14 @@ function ResetGunAmmo()
 	J0x07:
 
 	// End:0x71 [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		// End:0x67
-		if(__NFUN_119__(R6Pawn(m_Player.Pawn).m_WeaponsCarried[i], none))
+		if((R6Pawn(m_Player.Pawn).m_WeaponsCarried[i] != none))
 		{
 			R6Pawn(m_Player.Pawn).m_WeaponsCarried[i].FillClips();
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -225,35 +225,35 @@ function ShowWeaponAndAttachment(R6EngineWeapon AWeapon, bool bShow)
 
 	pWeapon = R6AbstractWeapon(AWeapon);
 	// End:0x1D
-	if(__NFUN_114__(pWeapon, none))
+	if((pWeapon == none))
 	{
 		return;
 	}
-	pWeapon.bHidden = __NFUN_129__(bShow);
+	pWeapon.bHidden = (!bShow);
 	// End:0x6A
-	if(__NFUN_119__(pWeapon.m_SelectedWeaponGadget, none))
+	if((pWeapon.m_SelectedWeaponGadget != none))
 	{
-		pWeapon.m_SelectedWeaponGadget.bHidden = __NFUN_129__(bShow);
+		pWeapon.m_SelectedWeaponGadget.bHidden = (!bShow);
 	}
 	// End:0x9F
-	if(__NFUN_119__(pWeapon.m_MuzzleGadget, none))
+	if((pWeapon.m_MuzzleGadget != none))
 	{
-		pWeapon.m_MuzzleGadget.bHidden = __NFUN_129__(bShow);
+		pWeapon.m_MuzzleGadget.bHidden = (!bShow);
 	}
 	// End:0xD4
-	if(__NFUN_119__(pWeapon.m_ScopeGadget, none))
+	if((pWeapon.m_ScopeGadget != none))
 	{
-		pWeapon.m_ScopeGadget.bHidden = __NFUN_129__(bShow);
+		pWeapon.m_ScopeGadget.bHidden = (!bShow);
 	}
 	// End:0x109
-	if(__NFUN_119__(pWeapon.m_BipodGadget, none))
+	if((pWeapon.m_BipodGadget != none))
 	{
-		pWeapon.m_BipodGadget.bHidden = __NFUN_129__(bShow);
+		pWeapon.m_BipodGadget.bHidden = (!bShow);
 	}
 	// End:0x13E
-	if(__NFUN_119__(pWeapon.m_MagazineGadget, none))
+	if((pWeapon.m_MagazineGadget != none))
 	{
-		pWeapon.m_MagazineGadget.bHidden = __NFUN_129__(bShow);
+		pWeapon.m_MagazineGadget.bHidden = (!bShow);
 	}
 	return;
 }
@@ -269,24 +269,24 @@ function SwitchToWeapon(R6TrainingMgr.ETrainingWeapons eWT, bool bSwitch)
 
 	pPawn = R6Pawn(m_Player.Pawn);
 	// End:0x53
-	if(__NFUN_132__(__NFUN_155__(R6PlayerController(m_Player).m_TeamManager.m_iRainbowTeamName, 0), __NFUN_155__(pPawn.m_iPermanentID, 0)))
+	if(((R6PlayerController(m_Player).m_TeamManager.m_iRainbowTeamName != 0) || (pPawn.m_iPermanentID != 0)))
 	{
 		return;
 	}
 	R6PlayerController(m_Player).DoZoom(true);
 	// End:0x111
-	if(__NFUN_153__(int(eWT), int(8)))
+	if((int(eWT) >= int(8)))
 	{
 		pGadget = R6DemolitionsGadget(m_Weapons[int(eWT)]);
 		// End:0xC2
-		if(__NFUN_130__(__NFUN_119__(pGadget, none), __NFUN_129__(pGadget.__NFUN_281__('ChargeArmed'))))
+		if(((pGadget != none) && (!pGadget.IsInState('ChargeArmed'))))
 		{
 			pGadget.UpdateHands();
 		}
 		// End:0xF7
-		if(__NFUN_129__(m_Weapons[int(eWT)].HasAmmo()))
+		if((!m_Weapons[int(eWT)].HasAmmo()))
 		{
-			pPawn.EngineWeapon.__NFUN_113__('RaiseWeapon');
+			pPawn.EngineWeapon.GotoState('RaiseWeapon');
 		}
 		m_Weapons[int(eWT)].FullAmmo();		
 	}
@@ -295,23 +295,23 @@ function SwitchToWeapon(R6TrainingMgr.ETrainingWeapons eWT, bool bSwitch)
 		R6AbstractWeapon(m_Weapons[int(eWT)]).m_FPHands.ResetNeutralAnim();
 		wpn = R6Pawn(m_Player.Pawn).m_WeaponsCarried[m_WeaponsSlot[int(eWT)]];
 		// End:0x180
-		if(__NFUN_119__(wpn, none))
+		if((wpn != none))
 		{
 			wpn.FillClips();
 		}
 	}
 	// End:0x195
-	if(__NFUN_154__(int(m_eCurrentWeapon), int(eWT)))
+	if((int(m_eCurrentWeapon) == int(eWT)))
 	{
 		return;
 	}
 	ShowWeaponAndAttachment(pPawn.m_WeaponsCarried[m_WeaponsSlot[int(eWT)]], false);
 	ShowWeaponAndAttachment(m_Weapons[int(eWT)], true);
-	__NFUN_2719__(pPawn.m_SoundRepInfo);
+	StopAllSoundsActor(pPawn.m_SoundRepInfo);
 	pPawn.m_WeaponsCarried[m_WeaponsSlot[int(eWT)]] = m_Weapons[int(eWT)];
 	R6PlayerController(m_Player).SetWeaponSound(m_Player.m_PawnRepInfo, m_WeaponsName[int(eWT)], byte(m_WeaponsSlot[int(eWT)]));
 	// End:0x280
-	if(__NFUN_119__(pPawn.m_SoundRepInfo, none))
+	if((pPawn.m_SoundRepInfo != none))
 	{
 		pPawn.m_SoundRepInfo.m_CurrentWeapon = byte(m_WeaponsSlot[int(eWT)]);
 	}
@@ -320,16 +320,16 @@ function SwitchToWeapon(R6TrainingMgr.ETrainingWeapons eWT, bool bSwitch)
 	if(bSwitch)
 	{
 		// End:0x2DB
-		if(__NFUN_119__(pPawn.EngineWeapon, none))
+		if((pPawn.EngineWeapon != none))
 		{
 			pPawn.EngineWeapon.bHidden = true;
-			pPawn.EngineWeapon.__NFUN_113__('PutWeaponDown');
+			pPawn.EngineWeapon.GotoState('PutWeaponDown');
 		}
 		pPawn.ServerChangedWeapon(pPawn.EngineWeapon, m_Weapons[int(eWT)]);
 		// End:0x332
-		if(__NFUN_119__(pPawn.EngineWeapon, none))
+		if((pPawn.EngineWeapon != none))
 		{
-			pPawn.EngineWeapon.__NFUN_113__('RaiseWeapon');
+			pPawn.EngineWeapon.GotoState('RaiseWeapon');
 		}		
 	}
 	else
@@ -348,31 +348,31 @@ function LoadPlanningInTraining()
 	local R6MissionDescription missionDescription;
 	local int i, j;
 
-	StartGameInfo = Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo;
+	StartGameInfo = Class'Engine.Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo;
 	pFileManager = new (none) Class'R6Game.R6FileManagerPlanning';
 	missionDescription = R6MissionDescription(StartGameInfo.m_CurrentMission);
 	szMapName = Localize(missionDescription.m_MapName, "ID_MENUNAME", missionDescription.LocalizationFile, true);
 	// End:0xB4
-	if(__NFUN_122__(szMapName, ""))
+	if((szMapName == ""))
 	{
 		szMapName = StartGameInfo.m_MapName;
 	}
 	Level.GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
 	// End:0x1B5
-	if(pFileManager.__NFUN_1416__(missionDescription.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, __NFUN_112__(__NFUN_112__(missionDescription.m_ShortName, ""), m_szDefaultActionPlan), StartGameInfo, szLoadErrorMsgMapName, szLoadErrorMsgGameType))
+	if(pFileManager.LoadPlanning(missionDescription.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, ((missionDescription.m_ShortName $ "") $ m_szDefaultActionPlan), StartGameInfo, szLoadErrorMsgMapName, szLoadErrorMsgGameType))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("LoadPlanningInTraining failed  map=", StartGameInfo.m_MapName), " filename="), missionDescription.m_ShortName), ""), m_szDefaultActionPlan));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Planning Was Created for : ", szLoadErrorMsgMapName), " : "), szLoadErrorMsgGameType));
+		Log(((((("LoadPlanningInTraining failed  map=" $ StartGameInfo.m_MapName) $ " filename=") $ missionDescription.m_ShortName) $ "") $ m_szDefaultActionPlan));
+		Log(((("Planning Was Created for : " $ szLoadErrorMsgMapName) $ " : ") $ szLoadErrorMsgGameType));
 	}
 	i = 0;
 	J0x1BC:
 
 	// End:0x67D [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).InitPlanning(i, none);
 		// End:0x25C
-		if(__NFUN_151__(R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).GetNbActionPoint(), 0))
+		if((R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).GetNbActionPoint() > 0))
 		{
 			R6PlanningInfo(StartGameInfo.m_TeamInfo[i].m_pPlanning).m_iCurrentNode = 0;			
 		}
@@ -384,7 +384,7 @@ function LoadPlanningInTraining()
 		J0x294:
 
 		// End:0x673 [Loop If]
-		if(__NFUN_150__(j, StartGameInfo.m_TeamInfo[i].m_iNumberOfMembers))
+		if((j < StartGameInfo.m_TeamInfo[i].m_iNumberOfMembers))
 		{
 			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_CharacterName = Localize("Training", "ROOKIE", "R6Menu", true);
 			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceTexture = Class'R6Game.R6RookieAssault'.default.m_TMenuFaceSmall;

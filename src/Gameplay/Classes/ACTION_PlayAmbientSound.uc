@@ -16,7 +16,7 @@ var(Action) Sound AmbientSound;
 function bool InitActionFor(ScriptedController C)
 {
 	// End:0x62
-	if(__NFUN_119__(AmbientSound, none))
+	if((AmbientSound != none))
 	{
 		C.SequenceScript.AmbientSound = AmbientSound;
 		C.SequenceScript.SoundPitch = SoundPitch;
@@ -28,7 +28,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(AmbientSound));
+	return (ActionString @ string(AmbientSound));
 	return;
 }
 

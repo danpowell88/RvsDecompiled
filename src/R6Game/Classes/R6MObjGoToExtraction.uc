@@ -57,7 +57,7 @@ function Reset()
 function PawnKilled(Pawn killedPawn)
 {
 	// End:0x16
-	if(__NFUN_119__(R6Pawn(killedPawn), m_pawnToExtract))
+	if((R6Pawn(killedPawn) != m_pawnToExtract))
 	{
 		return;
 	}
@@ -65,7 +65,7 @@ function PawnKilled(Pawn killedPawn)
 	// End:0x80
 	if(m_bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("PawnKilled: m_pawnToExtract= ", string(m_pawnToExtract.Name)), " bFailed="), string(m_bFailed)));
+		Log(((("PawnKilled: m_pawnToExtract= " $ string(m_pawnToExtract.Name)) $ " bFailed=") $ string(m_bFailed)));
 	}
 	return;
 }
@@ -80,7 +80,7 @@ function EnteredExtractionZone(Pawn aPawn)
 	if(m_bExtractAtLeastOneRainbow)
 	{
 		// End:0x24
-		if(__NFUN_155__(int(aPawn.m_ePawnType), int(1)))
+		if((int(aPawn.m_ePawnType) != int(1)))
 		{
 			return;
 		}		
@@ -88,7 +88,7 @@ function EnteredExtractionZone(Pawn aPawn)
 	else
 	{
 		// End:0x3D
-		if(__NFUN_119__(R6Pawn(aPawn), m_pawnToExtract))
+		if((R6Pawn(aPawn) != m_pawnToExtract))
 		{
 			return;
 		}
@@ -98,13 +98,13 @@ function EnteredExtractionZone(Pawn aPawn)
 	if(m_bShowLog)
 	{
 		// End:0xC3
-		if(__NFUN_119__(m_pawnToExtract, none))
+		if((m_pawnToExtract != none))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("EnteredExtractionZone: m_pawnToExtract= ", string(m_pawnToExtract.Name)), " bCompleted="), string(m_bCompleted)));			
+			Log(((("EnteredExtractionZone: m_pawnToExtract= " $ string(m_pawnToExtract.Name)) $ " bCompleted=") $ string(m_bCompleted)));			
 		}
 		else
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("EnteredExtractionZone: m_bExtractAtLeastOneRainbow = ", string(aPawn.Name)), " bCompleted="), string(m_bCompleted)));
+			Log(((("EnteredExtractionZone: m_bExtractAtLeastOneRainbow = " $ string(aPawn.Name)) $ " bCompleted=") $ string(m_bCompleted)));
 		}
 	}
 	return;

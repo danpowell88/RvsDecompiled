@@ -67,10 +67,10 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 	HidePopup();
 	super(R6WindowListRadioButton).SetSelectedItem(NewSelected);
 	// End:0xC3
-	if(__NFUN_243__(m_bAutoSelect, true))
+	if((m_bAutoSelect != true))
 	{
 		// End:0x9B
-		if(__NFUN_154__(int(R6MenuActionTypeButtonItem(m_SelectedItem).m_eActionType), int(5)))
+		if((int(R6MenuActionTypeButtonItem(m_SelectedItem).m_eActionType) == int(5)))
 		{
 			Planning.DeleteNode();
 			R6MenuRootWindow(Root).m_PlanningWidget.m_bClosePopup = true;			
@@ -88,15 +88,15 @@ function DisplayMilestoneButton()
 {
 	local bool bDoIDisplay;
 
-	bDoIDisplay = __NFUN_150__(R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam].m_iNbMilestone, 9);
-	R6MenuActionTypeButtonItem(m_ButtonItem[int(1)]).m_Button.bDisabled = __NFUN_129__(bDoIDisplay);
+	bDoIDisplay = (R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam].m_iNbMilestone < 9);
+	R6MenuActionTypeButtonItem(m_ButtonItem[int(1)]).m_Button.bDisabled = (!bDoIDisplay);
 	return;
 }
 
 function HidePopup()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_WinAction, none))
+	if((m_WinAction != none))
 	{
 		m_WinAction.HideWindow();
 	}
@@ -111,7 +111,7 @@ function ShowWindow()
 	super(UWindowWindow).ShowWindow();
 	m_bAutoSelect = true;
 	// End:0x53
-	if(__NFUN_119__(m_ButtonItem[int(eType)], m_SelectedItem))
+	if((m_ButtonItem[int(eType)] != m_SelectedItem))
 	{
 		SetSelectedItem(m_ButtonItem[int(eType)]);
 	}
@@ -124,9 +124,9 @@ function ShowPopup()
 	local float fGlobalLeft, fGlobalTop;
 
 	WindowToGlobal(ParentWindow.WinLeft, ParentWindow.WinTop, fGlobalLeft, fGlobalTop);
-	fGlobalLeft = __NFUN_174__(ParentWindow.WinLeft, ParentWindow.WinWidth);
+	fGlobalLeft = (ParentWindow.WinLeft + ParentWindow.WinWidth);
 	// End:0xAD
-	if(__NFUN_114__(m_WinAction, none))
+	if((m_WinAction == none))
 	{
 		m_WinAction = R6MenuActionMenu(R6MenuRootWindow(Root).m_PlanningWidget.CreateWindow(Class'R6Menu.R6MenuActionMenu', fGlobalLeft, ParentWindow.WinTop, 150.0000000, 100.0000000, OwnerWindow));		
 	}
@@ -136,18 +136,18 @@ function ShowPopup()
 		m_WinAction.WinTop = ParentWindow.WinTop;
 		m_WinAction.ShowWindow();
 	}
-	R6MenuListActionButton(m_WinAction.m_ButtonList).DisplaySnipeButton(__NFUN_151__(int(R6MenuActionTypeButtonItem(m_SelectedItem).m_eActionType), int(1)));
+	R6MenuListActionButton(m_WinAction.m_ButtonList).DisplaySnipeButton((int(R6MenuActionTypeButtonItem(m_SelectedItem).m_eActionType) > int(1)));
 	R6MenuListActionButton(m_WinAction.m_ButtonList).DisplayBreachDoor(R6PlanningCtrl(GetPlayerOwner()).GetCurrentPoint().m_bDoorInRange);
 	m_WinAction.AjustPosition(R6MenuFramePopup(OwnerWindow).m_bDisplayUp, R6MenuFramePopup(OwnerWindow).m_bDisplayLeft);
 	// End:0x1D6
-	if(__NFUN_242__(R6MenuFramePopup(ParentWindow).m_bDisplayLeft, true))
+	if((R6MenuFramePopup(ParentWindow).m_bDisplayLeft == true))
 	{
-		__NFUN_185__(m_WinAction.WinLeft, __NFUN_175__(ParentWindow.WinWidth, float(6)));
+		(m_WinAction.WinLeft -= (ParentWindow.WinWidth - float(6)));
 	}
 	// End:0x21E
-	if(__NFUN_242__(R6MenuFramePopup(ParentWindow).m_bDisplayUp, true))
+	if((R6MenuFramePopup(ParentWindow).m_bDisplayUp == true))
 	{
-		__NFUN_185__(m_WinAction.WinTop, __NFUN_175__(m_WinAction.WinHeight, ParentWindow.WinHeight));
+		(m_WinAction.WinTop -= (m_WinAction.WinHeight - ParentWindow.WinHeight));
 	}
 	return;
 }

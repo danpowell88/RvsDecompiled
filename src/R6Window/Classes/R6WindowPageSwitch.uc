@@ -18,7 +18,7 @@ function Created()
 	m_iTotalPages = 1;
 	m_iCurrentPages = 1;
 	CreateButtons();
-	m_pPageInfo = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_pPreviousButton.WinLeft, m_pPreviousButton.WinWidth), 0.0000000, __NFUN_175__(__NFUN_175__(WinWidth, m_pPreviousButton.WinWidth), m_pNextButton.WinWidth), WinHeight, self));
+	m_pPageInfo = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_pPreviousButton.WinLeft + m_pPreviousButton.WinWidth), 0.0000000, ((WinWidth - m_pPreviousButton.WinWidth) - m_pNextButton.WinWidth), WinHeight, self));
 	m_pPageInfo.bAlwaysBehind = true;
 	SetTotalPages(m_iTotalPages);
 	SetCurrentPage(m_iCurrentPages);
@@ -31,7 +31,7 @@ function Created()
 function SetLabelText(string _szText, Font _TextFont, Color _vTextColor)
 {
 	// End:0x7A
-	if(__NFUN_119__(m_pPageInfo, none))
+	if((m_pPageInfo != none))
 	{
 		m_pPageInfo.m_Font = _TextFont;
 		m_pPageInfo.TextColor = _vTextColor;
@@ -56,7 +56,7 @@ function CreateButtons()
 	m_pPreviousButton.m_DisabledTextColor = Root.Colors.Black;
 	m_pPreviousButton.Text = "<<<";
 	m_pPreviousButton.m_buttonFont = Root.Fonts[5];
-	m_pNextButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', __NFUN_175__(WinWidth, float(m_iButtonWidth)), 0.0000000, float(m_iButtonWidth), float(m_iButtonHeight)));
+	m_pNextButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', (WinWidth - float(m_iButtonWidth)), 0.0000000, float(m_iButtonWidth), float(m_iButtonHeight)));
 	m_pNextButton.m_bDrawBorders = false;
 	m_pNextButton.SetButtonBorderColor(Root.Colors.White);
 	m_pNextButton.TextColor = Root.Colors.White;
@@ -73,12 +73,12 @@ function CreateButtons()
 function SetButtonToolTip(string _szLeftToolTip, string _szRightToolTip)
 {
 	// End:0x1F
-	if(__NFUN_119__(m_pNextButton, none))
+	if((m_pNextButton != none))
 	{
 		m_pNextButton.ToolTipString = _szLeftToolTip;
 	}
 	// End:0x3E
-	if(__NFUN_119__(m_pPreviousButton, none))
+	if((m_pPreviousButton != none))
 	{
 		m_pPreviousButton.ToolTipString = _szRightToolTip;
 	}
@@ -116,7 +116,7 @@ function UpdatePageNb()
 	local string szText;
 
 	// End:0x26
-	if(__NFUN_152__(m_iCurrentPages, 1))
+	if((m_iCurrentPages <= 1))
 	{
 		m_pPreviousButton.bDisabled = true;
 		m_iCurrentPages = 1;		
@@ -124,7 +124,7 @@ function UpdatePageNb()
 	else
 	{
 		// End:0x54
-		if(__NFUN_153__(m_iCurrentPages, m_iTotalPages))
+		if((m_iCurrentPages >= m_iTotalPages))
 		{
 			m_pPreviousButton.bDisabled = false;
 			m_iCurrentPages = m_iTotalPages;			
@@ -135,7 +135,7 @@ function UpdatePageNb()
 		}
 	}
 	// End:0x8B
-	if(__NFUN_152__(m_iTotalPages, 1))
+	if((m_iTotalPages <= 1))
 	{
 		m_iTotalPages = 1;
 		m_pNextButton.bDisabled = true;		
@@ -143,7 +143,7 @@ function UpdatePageNb()
 	else
 	{
 		// End:0xAE
-		if(__NFUN_154__(m_iCurrentPages, m_iTotalPages))
+		if((m_iCurrentPages == m_iTotalPages))
 		{
 			m_pNextButton.bDisabled = true;			
 		}
@@ -152,20 +152,20 @@ function UpdatePageNb()
 			m_pNextButton.bDisabled = false;
 		}
 	}
-	szText = __NFUN_112__(__NFUN_112__(string(m_iCurrentPages), " / "), string(m_iTotalPages));
+	szText = ((string(m_iCurrentPages) $ " / ") $ string(m_iTotalPages));
 	SetLabelText(szText, Root.Fonts[5], Root.Colors.White);
 	return;
 }
 
 function NextPage()
 {
-	SetCurrentPage(__NFUN_146__(m_iCurrentPages, 1));
+	SetCurrentPage((m_iCurrentPages + 1));
 	return;
 }
 
 function PreviousPage()
 {
-	SetCurrentPage(__NFUN_147__(m_iCurrentPages, 1));
+	SetCurrentPage((m_iCurrentPages - 1));
 	return;
 }
 
@@ -175,14 +175,14 @@ function PreviousPage()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x8A
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
 			// End:0x4E
 			case m_pNextButton:
 				// End:0x4B
-				if(__NFUN_119__(UWindowDialogClientWindow(OwnerWindow), none))
+				if((UWindowDialogClientWindow(OwnerWindow) != none))
 				{
 					UWindowDialogClientWindow(OwnerWindow).Notify(C, E);
 				}
@@ -191,7 +191,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0x87
 			case m_pPreviousButton:
 				// End:0x84
-				if(__NFUN_119__(UWindowDialogClientWindow(OwnerWindow), none))
+				if((UWindowDialogClientWindow(OwnerWindow) != none))
 				{
 					UWindowDialogClientWindow(OwnerWindow).Notify(C, E);
 				}

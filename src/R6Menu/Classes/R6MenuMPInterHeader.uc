@@ -50,19 +50,19 @@ function Paint(Canvas C, float X, float Y)
 {
 	local float fX;
 
-	fX = __NFUN_174__(2.0000000, float(4));
+	fX = (2.0000000 + float(4));
 	// End:0xF5
 	if(m_bDisplayTotVictory)
 	{
-		DrawTeamScore(C, Root.Colors.TeamColor[1], Root.Colors.TeamColorDark[1], fX, 48.0000000, __NFUN_175__(__NFUN_171__(WinWidth, 0.5000000), __NFUN_171__(float(2), fX)), 14.0000000);
-		DrawTeamScore(C, Root.Colors.TeamColor[0], Root.Colors.TeamColorDark[0], __NFUN_174__(__NFUN_171__(WinWidth, 0.5000000), fX), 48.0000000, __NFUN_175__(__NFUN_171__(WinWidth, 0.5000000), __NFUN_171__(float(2), fX)), 14.0000000);		
+		DrawTeamScore(C, Root.Colors.TeamColor[1], Root.Colors.TeamColorDark[1], fX, 48.0000000, ((WinWidth * 0.5000000) - (float(2) * fX)), 14.0000000);
+		DrawTeamScore(C, Root.Colors.TeamColor[0], Root.Colors.TeamColorDark[0], ((WinWidth * 0.5000000) + fX), 48.0000000, ((WinWidth * 0.5000000) - (float(2) * fX)), 14.0000000);		
 	}
 	else
 	{
 		// End:0x158
 		if(m_bDisplayCoopBox)
 		{
-			DrawTeamScore(C, m_pTextHeader.GetTextColor(m_iIndex[8]), m_pTextHeader.GetTextColor(m_iIndex[8]), fX, 48.0000000, __NFUN_175__(WinWidth, __NFUN_171__(float(2), fX)), 14.0000000);
+			DrawTeamScore(C, m_pTextHeader.GetTextColor(m_iIndex[8]), m_pTextHeader.GetTextColor(m_iIndex[8]), fX, 48.0000000, (WinWidth - (float(2) * fX)), 14.0000000);
 		}
 	}
 	return;
@@ -74,11 +74,11 @@ function Paint(Canvas C, float X, float Y)
 function DrawTeamScore(Canvas C, Color _cTeamColor, Color _cBGColor, float _fX, float _fY, float _fW, float _fH)
 {
 	DrawSimpleBackGround(C, _fX, _fY, _fW, _fH, _cBGColor);
-	C.__NFUN_2626__(_cTeamColor.R, _cTeamColor.G, _cTeamColor.B);
+	C.SetDrawColor(_cTeamColor.R, _cTeamColor.G, _cTeamColor.B);
 	DrawStretchedTextureSegment(C, _fX, _fY, _fW, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, _fX, __NFUN_175__(__NFUN_174__(_fY, _fH), float(m_BorderTextureRegion.H)), _fW, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, _fX, __NFUN_174__(_fY, float(m_BorderTextureRegion.H)), float(m_BorderTextureRegion.W), __NFUN_175__(_fH, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(_fX, _fW), float(m_BorderTextureRegion.W)), __NFUN_174__(_fY, float(m_BorderTextureRegion.H)), float(m_BorderTextureRegion.W), __NFUN_175__(_fH, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fX, ((_fY + _fH) - float(m_BorderTextureRegion.H)), _fW, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fX, (_fY + float(m_BorderTextureRegion.H)), float(m_BorderTextureRegion.W), (_fH - float((2 * m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, ((_fX + _fW) - float(m_BorderTextureRegion.W)), (_fY + float(m_BorderTextureRegion.H)), float(m_BorderTextureRegion.W), (_fH - float((2 * m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;
 }
 
@@ -99,48 +99,48 @@ function InitTextHeader()
 	m_pTextHeader.m_vTextColor = Root.Colors.White;
 	fXOffset = 4.0000000;
 	fYOffset = 4.0000000;
-	fWidth = __NFUN_171__(WinWidth, 0.5000000);
+	fWidth = (WinWidth * 0.5000000);
 	fYStep = 14.0000000;
 	m_pTextHeader.AddTextLabel(Localize("MPInGame", "ServerName", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pTextHeader.AddTextLabel(Localize("MPInGame", "ServerIP", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pTextHeader.AddTextLabel(Localize("MPInGame", "MapName", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	fXOffset = __NFUN_174__(fWidth, float(4));
+	fXOffset = (fWidth + float(4));
 	fYOffset = 4.0000000;
 	m_pTextHeader.AddTextLabel(Localize("MPInGame", "GameType", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pTextHeader.AddTextLabel(Localize("MPInGame", "Round", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pTextHeader.AddTextLabel(Localize("MPInGame", "TimePerRound", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	fWidth = __NFUN_171__(WinWidth, 0.2500000);
-	fXOffset = __NFUN_171__(WinWidth, 0.2000000);
+	fWidth = (WinWidth * 0.2500000);
+	fXOffset = (WinWidth * 0.2000000);
 	fYOffset = 4.0000000;
 	m_pTextHeader.m_vTextColor = Root.Colors.BlueLight;
 	m_pTextHeader.m_bUpDownBG = true;
 	m_iIndex[0] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 12.0000000);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_iIndex[1] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 12.0000000);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_iIndex[2] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 12.0000000);
-	fXOffset = __NFUN_174__(__NFUN_171__(WinWidth, 0.5000000), fXOffset);
+	fXOffset = ((WinWidth * 0.5000000) + fXOffset);
 	fYOffset = 4.0000000;
 	m_iIndex[3] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 12.0000000);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_iIndex[4] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 12.0000000);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_iIndex[5] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 12.0000000);
 	fXOffset = 4.0000000;
-	fYOffset = __NFUN_174__(48.0000000, float(1));
-	fWidth = __NFUN_175__(__NFUN_171__(WinWidth, 0.5000000), __NFUN_171__(float(2), fXOffset));
+	fYOffset = (48.0000000 + float(1));
+	fWidth = ((WinWidth * 0.5000000) - (float(2) * fXOffset));
 	m_pTextHeader.m_bUpDownBG = false;
 	m_pTextHeader.m_vTextColor = Root.Colors.TeamColorLight[1];
 	m_iIndex[6] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 14.0000000);
-	fXOffset = __NFUN_174__(fWidth, float(4));
+	fXOffset = (fWidth + float(4));
 	m_pTextHeader.m_vTextColor = Root.Colors.TeamColorLight[0];
 	m_iIndex[7] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 14.0000000);
-	fXOffset = __NFUN_174__(2.0000000, float(4));
-	fWidth = __NFUN_175__(WinWidth, __NFUN_171__(float(2), fXOffset));
+	fXOffset = (2.0000000 + float(4));
+	fWidth = (WinWidth - (float(2) * fXOffset));
 	m_pTextHeader.m_vTextColor = Root.Colors.White;
 	m_iIndex[8] = m_pTextHeader.AddTextLabel("", fXOffset, fYOffset, fWidth, 2, false, 14.0000000);
 	return;
@@ -159,11 +159,11 @@ function RefreshInterHeaderInfo()
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x5B9
-	if(__NFUN_119__(r6Root.m_R6GameMenuCom, none))
+	if((r6Root.m_R6GameMenuCom != none))
 	{
 		r6GameRep = R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo);
 		// End:0x53
-		if(__NFUN_114__(r6GameRep, none))
+		if((r6GameRep == none))
 		{
 			return;
 		}
@@ -171,9 +171,9 @@ function RefreshInterHeaderInfo()
 		m_pTextHeader.ChangeTextLabel(r6GameRep.ServerName, m_iIndex[0]);
 		m_pTextHeader.ChangeTextLabel(szIP, m_iIndex[1]);
 		// End:0xED
-		if(__NFUN_129__(Root.GetMapNameLocalisation(GetLevel().__NFUN_547__(), szTemp)))
+		if((!Root.GetMapNameLocalisation(GetLevel().GetURLMap(), szTemp)))
 		{
-			szTemp = GetLevel().__NFUN_547__();
+			szTemp = GetLevel().GetURLMap();
 		}
 		m_pTextHeader.ChangeTextLabel(szTemp, m_iIndex[2]);
 		szGameType = GetLevel().GetGameNameLocalization(r6Root.m_R6GameMenuCom.GetGameType());
@@ -189,12 +189,12 @@ function RefreshInterHeaderInfo()
 		{
 			fCurrentTime = r6GameRep.GetRoundTime();
 		}
-		m_pTextHeader.ChangeTextLabel(__NFUN_168__(__NFUN_168__(Class'Engine.Actor'.static.__NFUN_1520__(int(fCurrentTime)), "/"), Class'Engine.Actor'.static.__NFUN_1520__(r6GameRep.TimeLimit)), m_iIndex[5]);
+		m_pTextHeader.ChangeTextLabel(((Class'Engine.Actor'.static.ConvertIntTimeToString(int(fCurrentTime)) @ "/") @ Class'Engine.Actor'.static.ConvertIntTimeToString(r6GameRep.TimeLimit)), m_iIndex[5]);
 		// End:0x277
 		if(m_bDisplayTotVictory)
 		{
-			m_pTextHeader.ChangeTextLabel(__NFUN_112__(__NFUN_112__(m_szGameResult[0], " "), string(r6GameRep.m_aTeamScore[0])), m_iIndex[6]);
-			m_pTextHeader.ChangeTextLabel(__NFUN_112__(__NFUN_112__(m_szGameResult[1], " "), string(r6GameRep.m_aTeamScore[1])), m_iIndex[7]);			
+			m_pTextHeader.ChangeTextLabel(((m_szGameResult[0] $ " ") $ string(r6GameRep.m_aTeamScore[0])), m_iIndex[6]);
+			m_pTextHeader.ChangeTextLabel(((m_szGameResult[1] $ " ") $ string(r6GameRep.m_aTeamScore[1])), m_iIndex[7]);			
 		}
 		else
 		{
@@ -205,7 +205,7 @@ function RefreshInterHeaderInfo()
 				if(MpInter.IsMissionInProgress())
 				{
 					// End:0x300
-					if(__NFUN_129__(r6Root.m_R6GameMenuCom.IsInBetweenRoundMenu(true)))
+					if((!r6Root.m_R6GameMenuCom.IsInBetweenRoundMenu(true)))
 					{
 						m_pTextHeader.ChangeColorLabel(Root.Colors.White, m_iIndex[8]);
 						m_pTextHeader.ChangeTextLabel(m_szGameResult[4], m_iIndex[8]);						
@@ -213,14 +213,14 @@ function RefreshInterHeaderInfo()
 					else
 					{
 						// End:0x333
-						if(__NFUN_154__(int(MpInter.GetLastMissionSuccess()), 0))
+						if((int(MpInter.GetLastMissionSuccess()) == 0))
 						{
 							m_pTextHeader.ChangeTextLabel("", m_iIndex[8]);							
 						}
 						else
 						{
 							// End:0x3A1
-							if(__NFUN_154__(int(R6MenuMPInterWidget(OwnerWindow).GetLastMissionSuccess()), 1))
+							if((int(R6MenuMPInterWidget(OwnerWindow).GetLastMissionSuccess()) == 1))
 							{
 								m_pTextHeader.ChangeColorLabel(Root.Colors.TeamColorLight[1], m_iIndex[8]);
 								m_pTextHeader.ChangeTextLabel(m_szGameResult[2], m_iIndex[8]);								
@@ -247,7 +247,7 @@ function RefreshInterHeaderInfo()
 						m_pTextHeader.ChangeTextLabel(m_szGameResult[3], m_iIndex[8]);
 					}
 				}
-				m_bDisplayCoopBox = __NFUN_123__(m_pTextHeader.GetTextLabel(m_iIndex[8]), "");				
+				m_bDisplayCoopBox = (m_pTextHeader.GetTextLabel(m_iIndex[8]) != "");				
 			}
 			else
 			{
@@ -291,7 +291,7 @@ function RefreshRoundInfo()
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	r6GameRep = R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo);
 	// End:0x3F
-	if(__NFUN_114__(r6GameRep, none))
+	if((r6GameRep == none))
 	{
 		return;
 	}
@@ -301,18 +301,18 @@ function RefreshRoundInfo()
 		// End:0xA6
 		if(r6GameRep.m_bRotateMap)
 		{
-			m_pTextHeader.ChangeTextLabel(__NFUN_168__(string(__NFUN_146__(r6GameRep.m_iCurrentRound, 1)), "/ --"), m_iIndex[4]);
+			m_pTextHeader.ChangeTextLabel((string((r6GameRep.m_iCurrentRound + 1)) @ "/ --"), m_iIndex[4]);
 			return;
 		}
 	}
 	// End:0x12C
-	if(__NFUN_154__(int(r6Root.m_R6GameMenuCom.m_GameRepInfo.m_eCurrectServerState), r6Root.m_R6GameMenuCom.m_GameRepInfo.4))
+	if((int(r6Root.m_R6GameMenuCom.m_GameRepInfo.m_eCurrectServerState) == r6Root.m_R6GameMenuCom.m_GameRepInfo.4))
 	{
 		m_pTextHeader.ChangeTextLabel(Localize("MPInGame", "MatchCompleted", "R6Menu"), m_iIndex[4]);		
 	}
 	else
 	{
-		m_pTextHeader.ChangeTextLabel(__NFUN_168__(__NFUN_168__(string(__NFUN_146__(r6GameRep.m_iCurrentRound, 1)), "/"), string(r6GameRep.m_iRoundsPerMatch)), m_iIndex[4]);
+		m_pTextHeader.ChangeTextLabel(((string((r6GameRep.m_iCurrentRound + 1)) @ "/") @ string(r6GameRep.m_iRoundsPerMatch)), m_iIndex[4]);
 	}
 	return;
 }

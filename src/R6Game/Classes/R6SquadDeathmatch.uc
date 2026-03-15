@@ -34,7 +34,7 @@ function InitObjectives()
 function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 {
 	// End:0x27
-	if(__NFUN_154__(int(R6PlayerController(aController).m_TeamSelection), int(2)))
+	if((int(R6PlayerController(aController).m_TeamSelection) == int(2)))
 	{
 		return m_iNbOfRainbowAIToSpawn;		
 	}
@@ -57,7 +57,7 @@ function ResetPlayerTeam(Controller aPlayer)
 	aPawn = R6Pawn(aPlayer.Pawn);
 	aPawn.PlayerReplicationInfo.TeamID = m_iNextPlayerTeamID;
 	aPawn.m_iTeam = m_iNextPlayerTeamID;
-	__NFUN_165__(m_iNextPlayerTeamID);
+	(m_iNextPlayerTeamID++);
 	R6PlayerController(aPlayer).m_TeamManager.SetMemberTeamID(aPawn.m_iTeam);
 	return;
 }
@@ -69,7 +69,7 @@ function ResetPlayerTeam(Controller aPlayer)
 function SetPawnTeamFriendlies(Pawn aPawn)
 {
 	aPawn.m_iFriendlyTeams = GetTeamNumBit(aPawn.m_iTeam);
-	aPawn.m_iEnemyTeams = __NFUN_141__(aPawn.m_iFriendlyTeams);
+	aPawn.m_iEnemyTeams = (~aPawn.m_iFriendlyTeams);
 	return;
 }
 
@@ -94,7 +94,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0x78
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : the pilot was extracted");
+			Log("** Game : the pilot was extracted");
 		}
 		BroadcastGameMsg("", m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.PlayerName, "HasWonTheRound", none, int(GetGameMsgLifeTime()));		
 	}
@@ -103,7 +103,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0xDE
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : it's a draw");
+			Log("** Game : it's a draw");
 		}
 		BroadcastGameMsg("", "", "RoundIsADraw", none, int(GetGameMsgLifeTime()));
 	}
@@ -122,12 +122,12 @@ auto state InBetweenRoundMenu
 		J0x14:
 
 		// End:0x87 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x70
-			if(__NFUN_130__(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_119__(P.PlayerReplicationInfo, none)), __NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2))))
+			if(((P.IsA('PlayerController') && (P.PlayerReplicationInfo != none)) && (int(R6PlayerController(P).m_TeamSelection) == int(2))))
 			{
-				__NFUN_163__(iNbOfPlayer);
+				(++iNbOfPlayer);
 			}
 			P = P.nextController;
 			// [Loop Continue]
@@ -198,7 +198,7 @@ auto state InBetweenRoundMenu
 		// End:0x192
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("NotifyMatchStart nb of player: ", string(iNbOfPlayer)), " AI in a team: "), string(m_iNbOfRainbowAIToSpawn)));
+			Log(((("NotifyMatchStart nb of player: " $ string(iNbOfPlayer)) $ " AI in a team: ") $ string(m_iNbOfRainbowAIToSpawn)));
 		}
 		super.EndState();
 		return;

@@ -25,21 +25,21 @@ event PostBeginPlay()
 {
 	m_MatineeAttach = new (none) Class'R6Engine.R6MatineeAttach';
 	// End:0x4D
-	if(__NFUN_130__(__NFUN_119__(m_HostageTemplate, none), m_bUseHostageTemplate))
+	if(((m_HostageTemplate != none) && m_bUseHostageTemplate))
 	{
 		Skins = m_HostageTemplate.default.Skins;
 		LinkMesh(m_HostageTemplate.default.Mesh);
 	}
 	super.PostBeginPlay();
 	// End:0x64
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		UnPossessed();
 	}
-	Controller = __NFUN_278__(ControllerClass);
+	Controller = Spawn(ControllerClass);
 	Controller.Possess(self);
 	m_controller = R6HostageAI(Controller);
-	__NFUN_3970__(Physics);
+	SetPhysics(Physics);
 	return;
 }
 

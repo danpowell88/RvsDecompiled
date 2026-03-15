@@ -94,8 +94,8 @@ function Created()
 	m_pCountDownWidget.HideWindow();
 	m_InGameOperativeSelectorWidget = R6MenuInGameOperativeSelectorWidget(CreateWindow(Root.MenuClassDefines.ClassInGameOperativeSelectorWidget, 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 	m_InGameOperativeSelectorWidget.HideWindow();
-	m_szGameModeLoc[0] = __NFUN_235__(Localize("MultiPlayer", "GameMode_Adversarial", "R6Menu"));
-	m_szGameModeLoc[1] = __NFUN_235__(Localize("MultiPlayer", "GameMode_Cooperative", "R6Menu"));
+	m_szGameModeLoc[0] = Caps(Localize("MultiPlayer", "GameMode_Adversarial", "R6Menu"));
+	m_szGameModeLoc[1] = Caps(Localize("MultiPlayer", "GameMode_Cooperative", "R6Menu"));
 	FillListOfKeyAvailability();
 	return;
 }
@@ -106,20 +106,20 @@ function Created()
 //=============================================================================================
 function FillListOfKeyAvailability()
 {
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("Talk")), 63);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("TeamTalk")), 63);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("ToggleGameStats")), 8);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("DrawingTool")), 4);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("VotingMenu")), 2);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("PreRecMessages")), 2);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("PrimaryWeapon")), 16);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("SecondaryWeapon")), 16);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("GadgetOne")), 16);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("GadgetTwo")), 16);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("RaisePosture")), 16);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("LowerPosture")), 16);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("ChangeRateOfFire")), 16);
-	AddKeyInList(int(GetPlayerOwner().__NFUN_2706__("Reload")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("Talk")), 63);
+	AddKeyInList(int(GetPlayerOwner().GetKey("TeamTalk")), 63);
+	AddKeyInList(int(GetPlayerOwner().GetKey("ToggleGameStats")), 8);
+	AddKeyInList(int(GetPlayerOwner().GetKey("DrawingTool")), 4);
+	AddKeyInList(int(GetPlayerOwner().GetKey("VotingMenu")), 2);
+	AddKeyInList(int(GetPlayerOwner().GetKey("PreRecMessages")), 2);
+	AddKeyInList(int(GetPlayerOwner().GetKey("PrimaryWeapon")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("SecondaryWeapon")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("GadgetOne")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("GadgetTwo")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("RaisePosture")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("LowerPosture")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("ChangeRateOfFire")), 16);
+	AddKeyInList(int(GetPlayerOwner().GetKey("Reload")), 16);
 	AddKeyInList(int(Console.27), 32);
 	return;
 }
@@ -173,7 +173,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 		// End:0xDB
 		case 27:
 			// End:0xCB
-			if(Console.__NFUN_281__('UWindowCanPlay'))
+			if(Console.IsInState('UWindowCanPlay'))
 			{
 				// End:0xB1
 				if(m_bPlayerDidASelection)
@@ -236,7 +236,7 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 			pStNewWidget.m_pPopUpFrame.ModifyPopUpFrameWindow(Localize("MPInGame", "TeamSelect", "R6Menu"), R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize(), float(m_RJoinWidget.X), float(m_RJoinWidget.Y), float(m_RJoinWidget.W), float(m_RJoinWidget.H));
 			pStNewWidget.m_pWidget = m_pJoinTeamWidget;
 			m_pJoinTeamWidget.SetMenuToDisplay(m_szCurrentGameType);
-			m_iWidgetKA = __NFUN_158__(8, 32);
+			m_iWidgetKA = (8 | 32);
 			// End:0x663
 			break;
 		// End:0x279
@@ -246,14 +246,14 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 			pStNewWidget.m_pPopUpFrame.m_bBGClientArea = false;
 			pStNewWidget.m_pWidget = m_pIntermissionMenuWidget;
 			m_pIntermissionMenuWidget.SetInterWidgetMenu(m_szCurrentGameType, m_bActiveBar);
-			m_iWidgetKA = __NFUN_158__(__NFUN_158__(8, 32), 4);
+			m_iWidgetKA = ((8 | 32) | 4);
 			// End:0x255
-			if(__NFUN_130__(__NFUN_119__(GetPlayerOwner().Pawn, none), GetPlayerOwner().Pawn.IsAlive()))
+			if(((GetPlayerOwner().Pawn != none) && GetPlayerOwner().Pawn.IsAlive()))
 			{
 				m_bActiveBar = false;
 			}
 			// End:0x276
-			if(__NFUN_130__(__NFUN_129__(m_bActiveBar), m_bPlayerDidASelection))
+			if(((!m_bActiveBar) && m_bPlayerDidASelection))
 			{
 				ConsoleState = 'UWindowCanPlay';
 			}
@@ -267,14 +267,14 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 			pStNewWidget.m_pWidget = m_pIntermissionMenuWidget;
 			m_bActiveBar = true;
 			m_pIntermissionMenuWidget.SetInterWidgetMenu(m_szCurrentGameType, m_bActiveBar);
-			m_iWidgetKA = __NFUN_158__(32, 4);
+			m_iWidgetKA = (32 | 4);
 			// End:0x663
 			break;
 		// End:0x382
 		case 23:
 			pStNewWidget.m_pPopUpFrame = GetPopUpFrame(iNbOfShowWindow);
 			pStNewWidget.m_pWidget = m_InGameWritableMapWidget;
-			m_iWidgetKA = __NFUN_158__(4, 32);
+			m_iWidgetKA = (4 | 32);
 			// End:0x663
 			break;
 		// End:0x422
@@ -295,42 +295,42 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 		// End:0x480
 		case 28:
 			pStNewWidget.m_pWidget = m_pRecMessagesMenuWidget;
-			m_iWidgetKA = __NFUN_158__(2, 32);
+			m_iWidgetKA = (2 | 32);
 			ConsoleState = 'UWindowCanPlay';
 			// End:0x663
 			break;
 		// End:0x4AF
 		case 29:
 			pStNewWidget.m_pWidget = m_pOffensiveMenuWidget;
-			m_iWidgetKA = __NFUN_158__(2, 32);
+			m_iWidgetKA = (2 | 32);
 			ConsoleState = 'UWindowCanPlay';
 			// End:0x663
 			break;
 		// End:0x4DE
 		case 30:
 			pStNewWidget.m_pWidget = m_pDefensiveMenuWidget;
-			m_iWidgetKA = __NFUN_158__(2, 32);
+			m_iWidgetKA = (2 | 32);
 			ConsoleState = 'UWindowCanPlay';
 			// End:0x663
 			break;
 		// End:0x50D
 		case 31:
 			pStNewWidget.m_pWidget = m_pReplyMenuWidget;
-			m_iWidgetKA = __NFUN_158__(2, 32);
+			m_iWidgetKA = (2 | 32);
 			ConsoleState = 'UWindowCanPlay';
 			// End:0x663
 			break;
 		// End:0x53C
 		case 32:
 			pStNewWidget.m_pWidget = m_pStatusMenuWidget;
-			m_iWidgetKA = __NFUN_158__(2, 32);
+			m_iWidgetKA = (2 | 32);
 			ConsoleState = 'UWindowCanPlay';
 			// End:0x663
 			break;
 		// End:0x56B
 		case 33:
 			pStNewWidget.m_pWidget = m_pVoteWidget;
-			m_iWidgetKA = __NFUN_158__(2, 32);
+			m_iWidgetKA = (2 | 32);
 			ConsoleState = 'UWindowCanPlay';
 			// End:0x663
 			break;
@@ -353,11 +353,11 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 		// End:0x65D
 		case 17:
 			// End:0x65A
-			if(__NFUN_155__(iNbOfShowWindow, 0))
+			if((iNbOfShowWindow != 0))
 			{
-				pStNewWidget = m_pListOfActiveWidget[__NFUN_147__(iNbOfShowWindow, 1)];
+				pStNewWidget = m_pListOfActiveWidget[(iNbOfShowWindow - 1)];
 				m_iWidgetKA = pStNewWidget.iWidgetKA;
-				__NFUN_162__(iNbOfShowWindow, 1);
+				(iNbOfShowWindow -= 1);
 			}
 			// End:0x663
 			break;
@@ -368,28 +368,28 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 			break;
 	}
 	// End:0x7B2
-	if(__NFUN_119__(pStNewWidget.m_pWidget, none))
+	if((pStNewWidget.m_pWidget != none))
 	{
 		// End:0x6D9
-		if(__NFUN_129__(Console.__NFUN_281__(ConsoleState)))
+		if((!Console.IsInState(ConsoleState)))
 		{
 			CloseAllWindow();
 			Console.bUWindowActive = true;
 			// End:0x6CE
-			if(__NFUN_119__(Console.Root, none))
+			if((Console.Root != none))
 			{
 				Console.Root.bWindowVisible = true;
 			}
 			CheckConsoleTypingState(ConsoleState);
 		}
 		// End:0x71C
-		if(__NFUN_254__(ConsoleState, 'UWindow'))
+		if((ConsoleState == 'UWindow'))
 		{
 			Console.ViewportOwner.bSuspendPrecaching = true;
 			Console.ViewportOwner.bShowWindowsMouse = true;
 		}
 		// End:0x740
-		if(__NFUN_119__(pStNewWidget.m_pPopUpFrame, none))
+		if((pStNewWidget.m_pPopUpFrame != none))
 		{
 			pStNewWidget.m_pPopUpFrame.ShowWindow();
 		}
@@ -398,7 +398,7 @@ function ChangeWidget(UWindowRootWindow.eGameWidgetID widgetID, bool _bClearPrev
 		m_eCurWidgetInUse = pStNewWidget.m_eGameWidgetID;
 		m_pListOfActiveWidget[iNbOfShowWindow] = pStNewWidget;
 		// End:0x7AF
-		if(__NFUN_154__(int(m_eCurWidgetInUse), int(34)))
+		if((int(m_eCurWidgetInUse) == int(34)))
 		{
 			Console.ViewportOwner.bShowWindowsMouse = false;
 		}		
@@ -432,7 +432,7 @@ function UpdateCurrentGameMode()
 		}
 		else
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("szGameType:", m_szCurrentGameType), "in R6MenuInGameMultiPlayerRootWindow not VALID"));
+			Log((("szGameType:" @ m_szCurrentGameType) @ "in R6MenuInGameMultiPlayerRootWindow not VALID"));
 		}
 	}
 	return;
@@ -443,7 +443,7 @@ function UpdateCurrentGameMode()
 function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePopUpID, optional int _iButtonsType, optional bool bAddDisableDlg, optional UWindowWindow OwnerWindow)
 {
 	// End:0x2F
-	if(__NFUN_114__(OwnerWindow, none))
+	if((OwnerWindow == none))
 	{
 		super.SimplePopUp(_szTitle, _szText, _ePopUpID, _iButtonsType, bAddDisableDlg, self);		
 	}
@@ -452,7 +452,7 @@ function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePop
 		super.SimplePopUp(_szTitle, _szText, _ePopUpID, _iButtonsType, bAddDisableDlg, OwnerWindow);
 	}
 	// End:0x6C
-	if(__NFUN_154__(int(m_eCurWidgetInUse), int(23)))
+	if((int(m_eCurWidgetInUse) == int(23)))
 	{
 		ChangeCurrentWidget(0);
 	}
@@ -466,7 +466,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 {
 	super.PopUpBoxDone(Result, _ePopUpID);
 	// End:0x125
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -504,7 +504,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	else
 	{
 		// End:0x15A
-		if(__NFUN_154__(int(Result), int(4)))
+		if((int(Result) == int(4)))
 		{
 			switch(_ePopUpID)
 			{
@@ -522,7 +522,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 		}
 	}
 	// End:0x1AF
-	if(__NFUN_154__(int(m_eCurWidgetInUse), int(0)))
+	if((int(m_eCurWidgetInUse) == int(0)))
 	{
 		Console.bUWindowActive = false;
 		Console.ViewportOwner.bShowWindowsMouse = false;
@@ -537,7 +537,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 function CloseSimplePopUpBox()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_pSimplePopUp, none))
+	if((m_pSimplePopUp != none))
 	{
 		m_pSimplePopUp.Close();
 	}
@@ -560,15 +560,15 @@ function NotifyBeforeLevelChange()
 	// End:0x49
 	if(bShowLog)
 	{
-		__NFUN_231__("R6MenuInGameMultiPlayerRootWindow::NotifyBeforeLevelChange()");
+		Log("R6MenuInGameMultiPlayerRootWindow::NotifyBeforeLevelChange()");
 	}
 	// End:0xB9
-	if(__NFUN_119__(m_R6GameMenuCom, none))
+	if((m_R6GameMenuCom != none))
 	{
 		// End:0xA9
 		if(bShowLog)
 		{
-			R6Console(Root.Console).ConsoleCommand(__NFUN_112__("OBJ REFS CLASS=R6MPGameMenuCom NAME=", string(m_R6GameMenuCom)));
+			R6Console(Root.Console).ConsoleCommand(("OBJ REFS CLASS=R6MPGameMenuCom NAME=" $ string(m_R6GameMenuCom)));
 		}
 		m_R6GameMenuCom.m_pCurrentRoot = none;
 	}
@@ -584,7 +584,7 @@ function NotifyAfterLevelChange()
 	// End:0x48
 	if(bShowLog)
 	{
-		__NFUN_231__("R6MenuInGameMultiPlayerRootWindow::NotifyAfterLevelChange()");
+		Log("R6MenuInGameMultiPlayerRootWindow::NotifyAfterLevelChange()");
 	}
 	m_R6GameMenuCom = R6MPGameMenuCom(new Root.MenuClassDefines.ClassGameMenuCom);
 	m_R6GameMenuCom.m_pCurrentRoot = self;
@@ -607,7 +607,7 @@ function MoveMouse(float X, float Y)
 	MouseX = X;
 	MouseY = Y;
 	// End:0x48
-	if(__NFUN_129__(bMouseCapture))
+	if((!bMouseCapture))
 	{
 		NewMouseWindow = FindWindowUnder(__NFUN_171__(X, m_fWindowScaleX), __NFUN_171__(Y, m_fWindowScaleY));		
 	}

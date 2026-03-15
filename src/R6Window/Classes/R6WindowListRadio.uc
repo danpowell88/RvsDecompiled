@@ -25,17 +25,17 @@ function BeforePaint(Canvas C, float fMouseX, float fMouseY)
 
 	szNewHelpText = m_szDefaultHelpText;
 	// End:0x66
-	if(__NFUN_119__(m_SelectedItem, none))
+	if((m_SelectedItem != none))
 	{
 		OverItem = GetItemAt(fMouseX, fMouseY);
 		// End:0x66
-		if(__NFUN_130__(__NFUN_114__(OverItem, m_SelectedItem), __NFUN_123__(OverItem.HelpText, "")))
+		if(((OverItem == m_SelectedItem) && (OverItem.HelpText != "")))
 		{
 			szNewHelpText = OverItem.HelpText;
 		}
 	}
 	// End:0x88
-	if(__NFUN_123__(szNewHelpText, HelpText))
+	if((szNewHelpText != HelpText))
 	{
 		HelpText = szNewHelpText;
 		Notify(13);
@@ -67,13 +67,13 @@ function Paint(Canvas C, float fMouseX, float fMouseY)
 	J0x1F:
 
 	// End:0x9A [Loop If]
-	if(__NFUN_130__(__NFUN_176__(Y, WinHeight), __NFUN_119__(CurItem, none)))
+	if(((Y < WinHeight) && (CurItem != none)))
 	{
 		// End:0x83
 		if(CurItem.ShowThisItem())
 		{
 			DrawItem(C, CurItem, 0.0000000, Y, WinWidth, m_fItemHeight);
-			Y = __NFUN_174__(Y, m_fItemHeight);
+			Y = (Y + m_fItemHeight);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -89,7 +89,7 @@ function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
 	local int i;
 
 	// End:0x20
-	if(__NFUN_132__(__NFUN_176__(fMouseX, float(0)), __NFUN_177__(fMouseX, WinWidth)))
+	if(((fMouseX < float(0)) || (fMouseX > WinWidth)))
 	{
 		return none;
 	}
@@ -98,17 +98,17 @@ function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
 	J0x3F:
 
 	// End:0xC8 [Loop If]
-	if(__NFUN_130__(__NFUN_176__(Y, WinHeight), __NFUN_119__(CurItem, none)))
+	if(((Y < WinHeight) && (CurItem != none)))
 	{
 		// End:0xB1
 		if(CurItem.ShowThisItem())
 		{
 			// End:0x9F
-			if(__NFUN_130__(__NFUN_179__(fMouseY, Y), __NFUN_178__(fMouseY, __NFUN_174__(Y, m_fItemHeight))))
+			if(((fMouseY >= Y) && (fMouseY <= (Y + m_fItemHeight))))
 			{
 				return UWindowListBoxItem(CurItem);
 			}
-			Y = __NFUN_174__(Y, m_fItemHeight);
+			Y = (Y + m_fItemHeight);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -124,7 +124,7 @@ function MakeSelectedVisible()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_114__(m_SelectedItem, none))
+	if((m_SelectedItem == none))
 	{
 		return;
 	}
@@ -132,10 +132,10 @@ function MakeSelectedVisible()
 	J0x21:
 
 	// End:0x6E [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0x3E
-		if(__NFUN_114__(CurItem, m_SelectedItem))
+		if((CurItem == m_SelectedItem))
 		{
 			// [Explicit Break]
 			goto J0x6E;
@@ -143,7 +143,7 @@ function MakeSelectedVisible()
 		// End:0x57
 		if(CurItem.ShowThisItem())
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -157,16 +157,16 @@ function MakeSelectedVisible()
 function SetSelectedItem(UWindowListBoxItem NewSelected)
 {
 	// End:0x67
-	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_119__(m_SelectedItem, NewSelected)))
+	if(((NewSelected != none) && (m_SelectedItem != NewSelected)))
 	{
 		// End:0x38
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = false;
 		}
 		m_SelectedItem = NewSelected;
 		// End:0x5F
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = true;
 		}
@@ -195,7 +195,7 @@ function DoubleClick(float X, float Y)
 {
 	super(UWindowWindow).DoubleClick(X, Y);
 	// End:0x35
-	if(__NFUN_114__(GetItemAt(X, Y), m_SelectedItem))
+	if((GetItemAt(X, Y) == m_SelectedItem))
 	{
 		DoubleClickItem(m_SelectedItem);
 	}
@@ -216,7 +216,7 @@ function ReceiveDoubleClickItem(R6WindowListRadio L, UWindowListBoxItem i)
 function DoubleClickItem(UWindowListBoxItem i)
 {
 	// End:0x2D
-	if(__NFUN_130__(__NFUN_119__(m_DoubleClickList, none), __NFUN_119__(i, none)))
+	if(((m_DoubleClickList != none) && (i != none)))
 	{
 		m_DoubleClickList.ReceiveDoubleClickItem(self, i);
 	}

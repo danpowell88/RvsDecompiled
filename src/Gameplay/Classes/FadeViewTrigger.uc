@@ -17,7 +17,7 @@ var Vector OldViewFlash;
 event Trigger(Actor Other, Pawn EventInstigator)
 {
 	// End:0x35
-	if(__NFUN_130__(bTriggered, __NFUN_129__(bTriggerOnceOnly)))
+	if((bTriggered && (!bTriggerOnceOnly)))
 	{
 		bTriggered = false;
 		PhysicsVolume.ViewFlash = OldViewFlash;		
@@ -26,7 +26,7 @@ event Trigger(Actor Other, Pawn EventInstigator)
 	{
 		bTriggered = true;
 		OldViewFlash = PhysicsVolume.ViewFlash;
-		__NFUN_113__('IsTriggered');
+		GotoState('IsTriggered');
 	}
 	return;
 }
@@ -44,30 +44,30 @@ state IsTriggered
 			bXDone = false;
 			bYDone = false;
 			bZDone = false;
-			V = __NFUN_216__(PhysicsVolume.ViewFlash, __NFUN_212__(__NFUN_216__(OldViewFlash, TargetFlash), __NFUN_172__(DeltaTime, FadeSeconds)));
+			V = (PhysicsVolume.ViewFlash - ((OldViewFlash - TargetFlash) * (DeltaTime / FadeSeconds)));
 			// End:0x87
-			if(__NFUN_176__(V.X, TargetFlash.X))
+			if((V.X < TargetFlash.X))
 			{
 				V.X = TargetFlash.X;
 				bXDone = true;
 			}
 			// End:0xBD
-			if(__NFUN_176__(V.Y, TargetFlash.Y))
+			if((V.Y < TargetFlash.Y))
 			{
 				V.Y = TargetFlash.Y;
 				bYDone = true;
 			}
 			// End:0xF3
-			if(__NFUN_176__(V.Z, TargetFlash.Z))
+			if((V.Z < TargetFlash.Z))
 			{
 				V.Z = TargetFlash.Z;
 				bZDone = true;
 			}
 			PhysicsVolume.ViewFlash = V;
 			// End:0x12D
-			if(__NFUN_130__(__NFUN_130__(bXDone, bYDone), bZDone))
+			if(((bXDone && bYDone) && bZDone))
 			{
-				__NFUN_113__('None');
+				GotoState('None');
 			}
 		}
 		return;

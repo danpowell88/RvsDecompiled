@@ -30,10 +30,10 @@ simulated function FindPlayer()
 	J0x14:
 
 	// End:0x7D [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x66
-		if(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_119__(Viewport(PlayerController(P).Player), none)))
+		if((P.IsA('PlayerController') && (Viewport(PlayerController(P).Player) != none)))
 		{
 			Player = PlayerController(P);
 			// [Explicit Break]
@@ -54,26 +54,26 @@ simulated event RenderTexture(ScriptedTexture Tex)
 	local PlayerReplicationInfo Leading, PRI;
 
 	// End:0x11
-	if(__NFUN_114__(Player, none))
+	if((Player == none))
 	{
 		FindPlayer();
 	}
 	// End:0x4A
-	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(Player, none), __NFUN_114__(Player.PlayerReplicationInfo, none)), __NFUN_114__(Player.GameReplicationInfo, none)))
+	if((((Player == none) || (Player.PlayerReplicationInfo == none)) || (Player.GameReplicationInfo == none)))
 	{
 		return;
 	}
 	// End:0x6E
-	if(__NFUN_180__(LastDrawTime, float(0)))
+	if((LastDrawTime == float(0)))
 	{
 		Position = Tex.USize;		
 	}
 	else
 	{
-		__NFUN_162__(Position, int(__NFUN_171__(__NFUN_175__(Level.TimeSeconds, LastDrawTime), float(PixelsPerSecond))));
+		(Position -= int(((Level.TimeSeconds - LastDrawTime) * float(PixelsPerSecond))));
 	}
 	// End:0xBA
-	if(__NFUN_150__(Position, __NFUN_143__(ScrollWidth)))
+	if((Position < (-ScrollWidth)))
 	{
 		Position = Tex.USize;
 	}
@@ -90,20 +90,20 @@ simulated event RenderTexture(ScriptedTexture Tex)
 	}
 	Text = Replace(Text, "%p", Player.PlayerReplicationInfo.PlayerName);
 	// End:0x258
-	if(__NFUN_132__(__NFUN_155__(__NFUN_126__(Text, "%lf"), -1), __NFUN_155__(__NFUN_126__(Text, "%lp"), -1)))
+	if(((InStr(Text, "%lf") != -1) || (InStr(Text, "%lp") != -1)))
 	{
 		Leading = none;
 		// End:0x1EC
-		foreach __NFUN_304__(Class'Engine.PlayerReplicationInfo', PRI)
+		foreach AllActors(Class'Engine.PlayerReplicationInfo', PRI)
 		{
 			// End:0x1EB
-			if(__NFUN_130__(__NFUN_129__(PRI.bIsSpectator), __NFUN_132__(__NFUN_114__(Leading, none), __NFUN_177__(PRI.Score, Leading.Score))))
+			if(((!PRI.bIsSpectator) && ((Leading == none) || (PRI.Score > Leading.Score))))
 			{
 				Leading = PRI;
 			}			
 		}		
 		// End:0x20C
-		if(__NFUN_114__(Leading, none))
+		if((Leading == none))
 		{
 			Leading = Player.PlayerReplicationInfo;
 		}
@@ -113,15 +113,15 @@ simulated event RenderTexture(ScriptedTexture Tex)
 	// End:0x26E
 	if(bCaps)
 	{
-		Text = __NFUN_235__(Text);
+		Text = Caps(Text);
 	}
 	// End:0x2A7
-	if(__NFUN_130__(__NFUN_123__(Text, OldText), bResetPosOnTextChange))
+	if(((Text != OldText) && bResetPosOnTextChange))
 	{
 		Position = Tex.USize;
 		OldText = Text;
 	}
-	Tex.__NFUN_474__(float(Position), YPos, Text, Font, FontColor);
+	Tex.DrawColoredText(float(Position), YPos, Text, Font, FontColor);
 	return;
 }
 
@@ -129,11 +129,11 @@ simulated function string Replace(string Text, string Match, string Replacement)
 {
 	local int i;
 
-	i = __NFUN_126__(Text, Match);
+	i = InStr(Text, Match);
 	// End:0x5F
-	if(__NFUN_155__(i, -1))
+	if((i != -1))
 	{
-		return __NFUN_112__(__NFUN_112__(__NFUN_128__(Text, i), Replacement), Replace(__NFUN_127__(Text, __NFUN_146__(i, __NFUN_125__(Match))), Match, Replacement));		
+		return ((Left(Text, i) $ Replacement) $ Replace(Mid(Text, (i + Len(Match))), Match, Replacement));		
 	}
 	else
 	{

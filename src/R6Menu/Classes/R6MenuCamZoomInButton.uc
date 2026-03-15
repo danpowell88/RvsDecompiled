@@ -38,7 +38,7 @@ function LMouseDown(float X, float Y)
 		return;
 	}
 	// End:0x64
-	if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+	if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).m_bZoomIn = 1;
 		R6MenuRootWindow(Root).m_PlanningWidget.CloseAllPopup();
@@ -55,7 +55,7 @@ function LMouseUp(float X, float Y)
 		return;
 	}
 	// End:0x47
-	if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+	if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).m_bZoomIn = 0;
 	}
@@ -66,7 +66,7 @@ function MouseLeave()
 {
 	super(UWindowDialogControl).MouseLeave();
 	// End:0x32
-	if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+	if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).m_bZoomIn = 0;
 	}

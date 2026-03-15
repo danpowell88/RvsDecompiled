@@ -97,14 +97,14 @@ function BeginPlay()
 
 	InitBeaconProduct();
 	// End:0x4E
-	if(__NFUN_151__(BindPort(BeaconPort, true, LocalIpAddress), 0))
+	if((BindPort(BeaconPort, true, LocalIpAddress) > 0))
 	{
-		__NFUN_280__(1.0000000, true);
-		__NFUN_231__("ClientBeaconReceiver initialized.");		
+		SetTimer(1.0000000, true);
+		Log("ClientBeaconReceiver initialized.");		
 	}
 	else
 	{
-		__NFUN_231__("ClientBeaconReceiver failed: Beacon port in use.");
+		Log("ClientBeaconReceiver failed: Beacon port in use.");
 	}
 	Addr.Addr = BroadcastAddr;
 	Addr.Port = ServerBeaconPort;
@@ -114,7 +114,7 @@ function BeginPlay()
 
 function Destroyed()
 {
-	__NFUN_231__("ClientBeaconReceiver finished.");
+	Log("ClientBeaconReceiver finished.");
 	return;
 }
 
@@ -126,14 +126,14 @@ function Timer()
 	J0x07:
 
 	// End:0x7D [Loop If]
-	if(__NFUN_150__(i, 32))
+	if((i < 32))
 	{
 		// End:0x73
-		if(__NFUN_130__(__NFUN_155__(Beacons[i].Addr.Addr, 0), __NFUN_176__(__NFUN_175__(Level.TimeSeconds, Beacons[i].Time), BeaconTimeout)))
+		if(((Beacons[i].Addr.Addr != 0) && ((Level.TimeSeconds - Beacons[i].Time) < BeaconTimeout)))
 		{
-			Beacons[__NFUN_165__(j)] = Beacons[i];
+			Beacons[(j++)] = Beacons[i];
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -141,10 +141,10 @@ function Timer()
 	J0x88:
 
 	// End:0xB5 [Loop If]
-	if(__NFUN_150__(j, 32))
+	if((j < 32))
 	{
 		Beacons[j].Addr.Addr = 0;
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x88;
 	}
@@ -160,12 +160,12 @@ function BroadcastBeacon(IpAddr Addr)
 	J0x07:
 
 	// End:0x62 [Loop If]
-	if(__NFUN_150__(i, __NFUN_1221__()))
+	if((i < GetMaxAvailPorts()))
 	{
 		lAddr.Addr = Addr.Addr;
-		lAddr.Port = __NFUN_146__(Addr.Port, i);
+		lAddr.Port = (Addr.Port + i);
 		SendText(lAddr, "REPORT");
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -181,22 +181,22 @@ function bool PreJoinQuery(string szIP, int iBeaconPort)
 	PreJoinInfo.iGroupID = 0;
 	PreJoinInfo.szGameVersion = "";
 	// End:0x5D
-	if(__NFUN_155__(__NFUN_126__(szIP, ":"), -1))
+	if((InStr(szIP, ":") != -1))
 	{
-		szIP = __NFUN_128__(szIP, __NFUN_126__(szIP, ":"));
+		szIP = Left(szIP, InStr(szIP, ":"));
 	}
 	// End:0x74
-	if(__NFUN_129__(StringToIpAddr(szIP, Addr)))
+	if((!StringToIpAddr(szIP, Addr)))
 	{
 		return false;
 	}
 	// End:0x86
-	if(__NFUN_154__(Addr.Addr, 0))
+	if((Addr.Addr == 0))
 	{
 		return false;
 	}
 	// End:0xA4
-	if(__NFUN_155__(iBeaconPort, 0))
+	if((iBeaconPort != 0))
 	{
 		Addr.Port = iBeaconPort;		
 	}
@@ -217,51 +217,51 @@ event ReceivedText(IpAddr Addr, string Text)
 	local bool bBooleanValue;
 	local string szStringValue;
 
-	N = __NFUN_125__(BeaconProduct);
+	N = Len(BeaconProduct);
 	// End:0x59D
-	if(__NFUN_124__(__NFUN_128__(Text, __NFUN_146__(N, 1)), __NFUN_112__(BeaconProduct, " ")))
+	if((Left(Text, (N + 1)) ~= (BeaconProduct $ " ")))
 	{
-		szSecondWord = __NFUN_127__(Text, __NFUN_146__(N, 1));
+		szSecondWord = Mid(Text, (N + 1));
 		Addr.Port = int(szSecondWord);
-		szThirdWord = __NFUN_127__(szSecondWord, __NFUN_146__(__NFUN_126__(szSecondWord, " "), 1));
-		N = __NFUN_125__(KeyWordMarker);
+		szThirdWord = Mid(szSecondWord, (InStr(szSecondWord, " ") + 1));
+		N = Len(KeyWordMarker);
 		// End:0x277
-		if(__NFUN_124__(__NFUN_128__(szThirdWord, __NFUN_146__(N, 1)), __NFUN_112__(KeyWordMarker, " ")))
+		if((Left(szThirdWord, (N + 1)) ~= (KeyWordMarker $ " ")))
 		{
 			i = 0;
 			J0x9E:
 
 			// End:0x101 [Loop If]
-			if(__NFUN_150__(i, 32))
+			if((i < 32))
 			{
 				// End:0xF7
-				if(__NFUN_130__(__NFUN_154__(Beacons[i].Addr.Addr, Addr.Addr), __NFUN_154__(Beacons[i].Addr.Port, Addr.Port)))
+				if(((Beacons[i].Addr.Addr == Addr.Addr) && (Beacons[i].Addr.Port == Addr.Port)))
 				{
 					// [Explicit Break]
 					goto J0x101;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x9E;
 			}
 			J0x101:
 
 			// End:0x148
-			if(__NFUN_154__(i, 32))
+			if((i == 32))
 			{
 				i = 0;
 				J0x114:
 
 				// End:0x148 [Loop If]
-				if(__NFUN_150__(i, 32))
+				if((i < 32))
 				{
 					// End:0x13E
-					if(__NFUN_154__(Beacons[i].Addr.Addr, 0))
+					if((Beacons[i].Addr.Addr == 0))
 					{
 						// [Explicit Break]
 						goto J0x148;
 					}
-					__NFUN_165__(i);
+					(i++);
 					// [Loop Continue]
 					goto J0x114;
 				}
@@ -269,22 +269,22 @@ event ReceivedText(IpAddr Addr, string Text)
 			J0x148:
 
 			// End:0x156
-			if(__NFUN_154__(i, 32))
+			if((i == 32))
 			{
 				return;
 			}
-			pos = __NFUN_126__(szThirdWord, ModNameMarker);
+			pos = InStr(szThirdWord, ModNameMarker);
 			// End:0x1F5
-			if(__NFUN_155__(pos, -1))
+			if((pos != -1))
 			{
-				szStringValue = __NFUN_127__(szThirdWord, __NFUN_146__(__NFUN_146__(pos, __NFUN_125__(ModNameMarker)), 1));
-				pos = __NFUN_126__(szStringValue, "¶");
+				szStringValue = Mid(szThirdWord, ((pos + Len(ModNameMarker)) + 1));
+				pos = InStr(szStringValue, "¶");
 				// End:0x1F5
-				if(__NFUN_155__(pos, -1))
+				if((pos != -1))
 				{
-					szStringValue = __NFUN_128__(szStringValue, __NFUN_147__(pos, 1));
+					szStringValue = Left(szStringValue, (pos - 1));
 					// End:0x1F5
-					if(__NFUN_129__(__NFUN_124__(Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord, szStringValue)))
+					if((!(Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord ~= szStringValue)))
 					{
 						return;
 					}
@@ -292,7 +292,7 @@ event ReceivedText(IpAddr Addr, string Text)
 			}
 			Beacons[i].Addr = Addr;
 			Beacons[i].Time = Level.TimeSeconds;
-			Beacons[i].Text = __NFUN_127__(Text, __NFUN_146__(__NFUN_126__(Text, " "), 1));
+			Beacons[i].Text = Mid(Text, (InStr(Text, " ") + 1));
 			Beacons[i].bNewData = true;
 			DecodeKeyWordString(i, szThirdWord);
 			return;			
@@ -300,13 +300,13 @@ event ReceivedText(IpAddr Addr, string Text)
 		else
 		{
 			// End:0x59D
-			if(__NFUN_124__(__NFUN_128__(szThirdWord, __NFUN_146__(__NFUN_125__(PreJoinQueryMarker), 1)), __NFUN_112__(PreJoinQueryMarker, " ")))
+			if((Left(szThirdWord, (Len(PreJoinQueryMarker) + 1)) ~= (PreJoinQueryMarker $ " ")))
 			{
-				pos = __NFUN_126__(__NFUN_127__(szThirdWord, 1), "¶");
+				pos = InStr(Mid(szThirdWord, 1), "¶");
 				// End:0x2CB
-				if(__NFUN_155__(pos, -1))
+				if((pos != -1))
 				{
-					szPreJoinString = __NFUN_127__(szThirdWord, pos);
+					szPreJoinString = Mid(szThirdWord, pos);
 				}
 				PreJoinInfo.bResponseRcvd = true;
 				PreJoinInfo.iLobbyID = 0;
@@ -314,14 +314,14 @@ event ReceivedText(IpAddr Addr, string Text)
 				J0x2F0:
 
 				// End:0x59D [Loop If]
-				if(__NFUN_151__(pos, 0))
+				if((pos > 0))
 				{
-					pos = __NFUN_126__(__NFUN_127__(szPreJoinString, 1), "¶");
+					pos = InStr(Mid(szPreJoinString, 1), "¶");
 					// End:0x34F
-					if(__NFUN_155__(pos, -1))
+					if((pos != -1))
 					{
-						__NFUN_161__(pos, 1);
-						szOneKWMessage = __NFUN_128__(szPreJoinString, __NFUN_147__(pos, 1));
+						(pos += 1);
+						szOneKWMessage = Left(szPreJoinString, (pos - 1));
 						szPreJoinString = __NFUN_127__(szPreJoinString, pos);						
 					}
 					else

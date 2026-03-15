@@ -34,7 +34,7 @@ function BroadcastTeam(Actor Sender, coerce string Msg, optional name type)
 //------------------------------------------------------------------
 function InitObjectives()
 {
-	m_iNextPlayerTeamID = __NFUN_146__(4, 1);
+	m_iNextPlayerTeamID = (4 + 1);
 	m_missionMgr.m_bOnSuccessAllObjectivesAreCompleted = false;
 	Level.m_bUseDefaultMoralityRules = false;
 	super.InitObjectives();
@@ -56,14 +56,14 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	}
 	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0xD3
-	if(__NFUN_130__(m_objDeathmatch.m_bCompleted, __NFUN_242__(m_bCompilingStats, true)))
+	if((m_objDeathmatch.m_bCompleted && (m_bCompilingStats == true)))
 	{
 		// End:0x6D
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : someone won the deathmatch ");
+			Log("** Game : someone won the deathmatch ");
 		}
-		__NFUN_165__(m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.m_iRoundsWon);
+		(m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.m_iRoundsWon++);
 		BroadcastGameMsg("", m_objDeathmatch.m_winnerCtrl.PlayerReplicationInfo.PlayerName, "HasWonTheRound", none, int(GetGameMsgLifeTime()));		
 	}
 	else
@@ -72,7 +72,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0x116
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : it's a draw");
+			Log("** Game : it's a draw");
 		}
 	}
 	super.EndGame(Winner, Reason);
@@ -98,7 +98,7 @@ function ResetPlayerTeam(Controller aPlayer)
 	super.ResetPlayerTeam(aPlayer);
 	aPlayer.Pawn.PlayerReplicationInfo.TeamID = m_iNextPlayerTeamID;
 	R6Pawn(aPlayer.Pawn).m_iTeam = m_iNextPlayerTeamID;
-	__NFUN_165__(m_iNextPlayerTeamID);
+	(m_iNextPlayerTeamID++);
 	return;
 }
 
@@ -109,7 +109,7 @@ function ResetPlayerTeam(Controller aPlayer)
 function SetPawnTeamFriendlies(Pawn aPawn)
 {
 	aPawn.m_iFriendlyTeams = GetTeamNumBit(aPawn.m_iTeam);
-	aPawn.m_iEnemyTeams = __NFUN_141__(aPawn.m_iFriendlyTeams);
+	aPawn.m_iEnemyTeams = (~aPawn.m_iFriendlyTeams);
 	return;
 }
 

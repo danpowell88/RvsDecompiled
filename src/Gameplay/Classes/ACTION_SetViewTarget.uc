@@ -14,31 +14,31 @@ var(Action) name ViewTargetTag;
 function bool InitActionFor(ScriptedController C)
 {
 	// End:0x2F
-	if(__NFUN_254__(ViewTargetTag, 'Enemy'))
+	if((ViewTargetTag == 'Enemy'))
 	{
 		C.ScriptedFocus = C.Enemy;		
 	}
 	else
 	{
 		// End:0x62
-		if(__NFUN_132__(__NFUN_254__(ViewTargetTag, 'None'), __NFUN_254__(ViewTargetTag, 'None')))
+		if(((ViewTargetTag == 'None') || (ViewTargetTag == 'None')))
 		{
 			C.ScriptedFocus = none;			
 		}
 		else
 		{
 			// End:0xA1
-			if(__NFUN_130__(__NFUN_114__(ViewTarget, none), __NFUN_255__(ViewTargetTag, 'None')))
+			if(((ViewTarget == none) && (ViewTargetTag != 'None')))
 			{
 				// End:0xA0
-				foreach C.__NFUN_304__(Class'Engine.Actor', ViewTarget, ViewTargetTag)
+				foreach C.AllActors(Class'Engine.Actor', ViewTarget, ViewTargetTag)
 				{
 					// End:0xA0
 					break;					
 				}				
 			}
 			// End:0xBD
-			if(__NFUN_114__(ViewTarget, none))
+			if((ViewTarget == none))
 			{
 				C.bBroken = true;
 			}
@@ -51,7 +51,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(__NFUN_168__(ActionString, string(ViewTarget)), string(ViewTargetTag));
+	return ((ActionString @ string(ViewTarget)) @ string(ViewTargetTag));
 	return;
 }
 

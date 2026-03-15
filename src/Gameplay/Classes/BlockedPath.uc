@@ -13,7 +13,7 @@ class BlockedPath extends NavigationPoint
 
 function Trigger(Actor Other, Pawn EventInstigator)
 {
-	bBlocked = __NFUN_129__(bBlocked);
+	bBlocked = (!bBlocked);
 	return;
 }
 

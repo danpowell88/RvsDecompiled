@@ -27,42 +27,42 @@ function PlayMultiCommonVoices(R6Pawn aPawn, Pawn.EMultiCommonVoices eVoices)
 	{
 		// End:0x26
 		case 0:
-			aPawn.__NFUN_2730__(m_sndFragThrow, 8, 10, 1);
+			aPawn.PlayVoices(m_sndFragThrow, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0x45
 		case 1:
-			aPawn.__NFUN_2730__(m_sndFlashThrow, 8, 10, 1);
+			aPawn.PlayVoices(m_sndFlashThrow, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0x64
 		case 2:
-			aPawn.__NFUN_2730__(m_sndGasThrow, 8, 10, 1);
+			aPawn.PlayVoices(m_sndGasThrow, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0x83
 		case 3:
-			aPawn.__NFUN_2730__(m_sndSmokeThrow, 8, 10, 1);
+			aPawn.PlayVoices(m_sndSmokeThrow, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0xA2
 		case 4:
-			aPawn.__NFUN_2730__(m_sndActivatingBomb, 8, 10, 1);
+			aPawn.PlayVoices(m_sndActivatingBomb, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0xC1
 		case 5:
-			aPawn.__NFUN_2730__(m_sndBombActivated, 8, 10, 1);
+			aPawn.PlayVoices(m_sndBombActivated, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0xE0
 		case 6:
-			aPawn.__NFUN_2730__(m_sndDeactivatingBomb, 8, 10, 1);
+			aPawn.PlayVoices(m_sndDeactivatingBomb, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0xFF
 		case 7:
-			aPawn.__NFUN_2730__(m_sndBombDeactivated, 8, 10, 1);
+			aPawn.PlayVoices(m_sndBombDeactivated, 8, 10, 1);
 			// End:0x102
 			break;
 		// End:0xFFFF

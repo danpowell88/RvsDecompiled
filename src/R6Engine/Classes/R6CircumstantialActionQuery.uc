@@ -27,23 +27,23 @@ simulated event Tick(float fDelta)
 	if(m_bNeedsTick)
 	{
 		// End:0xF2
-		if(__NFUN_179__(__NFUN_175__(Level.TimeSeconds, m_fPressedTime), 0.4000000))
+		if(((Level.TimeSeconds - m_fPressedTime) >= 0.4000000))
 		{
 			PlayerController = R6PlayerController(aQueryOwner);
 			// End:0x6D
-			if(__NFUN_130__(__NFUN_154__(int(iInRange), 1), bCanBeInterrupted))
+			if(((int(iInRange) == 1) && bCanBeInterrupted))
 			{
 				PlayerController.m_InteractionCA.PerformCircumstantialAction(0);				
 			}
 			else
 			{
 				// End:0xEA
-				if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(iInRange), 0), __NFUN_155__(int(iTeamActionIDList[0]), 0)), PlayerController.CanIssueTeamOrder()))
+				if((((int(iInRange) == 0) && (int(iTeamActionIDList[0]) != 0)) && PlayerController.CanIssueTeamOrder()))
 				{
 					// End:0xD1
 					if(bShowLog)
 					{
-						__NFUN_231__("**** Displaying rose des vents ! ****");
+						Log("**** Displaying rose des vents ! ****");
 					}
 					PlayerController.m_InteractionCA.DisplayMenu(true);
 				}
@@ -59,7 +59,7 @@ simulated function ClientPerformCircumstantialAction()
 	// End:0x36
 	if(bShowLog)
 	{
-		__NFUN_231__("R6CAQ **** Executing player action ! ****");
+		Log("R6CAQ **** Executing player action ! ****");
 	}
 	R6PlayerController(aQueryOwner).m_InteractionCA.PerformCircumstantialAction(0);
 	return;
@@ -70,7 +70,7 @@ simulated function ClientDisplayMenu(bool bDisplay)
 	// End:0x2B
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("setting DisplayMenu ", string(bDisplay)));
+		Log(("setting DisplayMenu " $ string(bDisplay)));
 	}
 	R6PlayerController(aQueryOwner).m_InteractionCA.DisplayMenu(bDisplay);
 	return;

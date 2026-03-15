@@ -36,9 +36,9 @@ function Created()
 {
 	local float labelWidth, RightLabelXPos, fLabelHeight;
 
-	labelWidth = __NFUN_175__(__NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fLabelXOffset)), m_fVlabelWidth);
-	RightLabelXPos = __NFUN_175__(WinWidth, m_fVlabelWidth);
-	fLabelHeight = __NFUN_172__(__NFUN_175__(WinHeight, m_fTopBGHeight), float(2));
+	labelWidth = ((WinWidth - (float(2) * m_fLabelXOffset)) - m_fVlabelWidth);
+	RightLabelXPos = (WinWidth - m_fVlabelWidth);
+	fLabelHeight = ((WinHeight - m_fTopBGHeight) / float(2));
 	m_Team = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 0.0000000, WinWidth, m_fTopBGHeight, self));
 	m_Team.m_bDrawBorders = false;
 	m_Team.Align = 2;
@@ -55,7 +55,7 @@ function Created()
 	m_GoCode.m_BGTexture = none;
 	m_GoCode.Text = Localize("ExecuteMenu", "GOCODE", "R6Menu");
 	m_GoCode.m_fLMarge = 2.0000000;
-	m_Waypoint = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fLabelXOffset, __NFUN_174__(m_GoCode.WinTop, m_GoCode.WinHeight), labelWidth, fLabelHeight, self));
+	m_Waypoint = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fLabelXOffset, (m_GoCode.WinTop + m_GoCode.WinHeight), labelWidth, fLabelHeight, self));
 	m_Waypoint.m_bDrawBorders = false;
 	m_Waypoint.Align = 0;
 	m_Waypoint.TextColor = Root.Colors.White;
@@ -106,12 +106,12 @@ function SetTeamName(string szTeamName)
 function Paint(Canvas C, float X, float Y)
 {
 	C.Style = 5;
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B, m_BTopAlpha);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B, m_BTopAlpha);
 	DrawStretchedTexture(C, 0.0000000, 0.0000000, WinWidth, m_fTopBGHeight, m_TTopBG);
-	C.__NFUN_2626__(m_CDarkTeamColor.R, m_CDarkTeamColor.G, m_CDarkTeamColor.B, m_BBottomAlpha);
-	DrawStretchedTexture(C, 0.0000000, m_fTopBGHeight, WinWidth, __NFUN_175__(WinHeight, m_fTopBGHeight), m_TTopBG);
+	C.SetDrawColor(m_CDarkTeamColor.R, m_CDarkTeamColor.G, m_CDarkTeamColor.B, m_BBottomAlpha);
+	DrawStretchedTexture(C, 0.0000000, m_fTopBGHeight, WinWidth, (WinHeight - m_fTopBGHeight), m_TTopBG);
 	C.Style = 1;
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B, m_BorderColor.A);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B, m_BorderColor.A);
 	DrawStretchedTexture(C, 0.0000000, m_fTopBGHeight, WinWidth, 1.0000000, m_TTopBG);
 	DrawSimpleBorder(C);
 	return;

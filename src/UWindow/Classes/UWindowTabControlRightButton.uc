@@ -15,9 +15,9 @@ function LMouseDown(float X, float Y)
 {
 	super(UWindowWindow).LMouseDown(X, Y);
 	// End:0x39
-	if(__NFUN_129__(bDisabled))
+	if((!bDisabled))
 	{
-		__NFUN_165__(UWindowTabControl(ParentWindow).TabArea.TabOffset);
+		(UWindowTabControl(ParentWindow).TabArea.TabOffset++);
 	}
 	return;
 }

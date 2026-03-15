@@ -297,11 +297,11 @@ static function int InStrAfter(string Text, string Match, int pos)
 {
 	local int i;
 
-	i = __NFUN_126__(__NFUN_127__(Text, pos), Match);
+	i = InStr(Mid(Text, pos), Match);
 	// End:0x35
-	if(__NFUN_155__(i, -1))
+	if((i != -1))
 	{
-		return __NFUN_146__(i, pos);
+		return (i + pos);
 	}
 	return -1;
 	return;
@@ -314,70 +314,70 @@ static function Object BuildObjectWithProperties(string Text)
 	local Class C;
 	local Object o;
 
-	i = __NFUN_126__(Text, ",");
+	i = InStr(Text, ",");
 	// End:0x35
-	if(__NFUN_154__(i, -1))
+	if((i == -1))
 	{
 		ObjectClass = Text;
 		Text = "";		
 	}
 	else
 	{
-		ObjectClass = __NFUN_128__(Text, i);
-		Text = __NFUN_127__(Text, __NFUN_146__(i, 1));
+		ObjectClass = Left(Text, i);
+		Text = Mid(Text, (i + 1));
 	}
 	C = Class<Object>(DynamicLoadObject(ObjectClass, Class'Core.Class'));
 	o = new C;
 	J0x86:
 
 	// End:0x296 [Loop If]
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
-		i = __NFUN_126__(Text, "=");
+		i = InStr(Text, "=");
 		// End:0xF9
-		if(__NFUN_154__(i, -1))
+		if((i == -1))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Missing value for property ", ObjectClass), "."), Text));
+			Log(((("Missing value for property " $ ObjectClass) $ ".") $ Text));
 			PropertyName = Text;
 			PropertyValue = "";			
 		}
 		else
 		{
-			PropertyName = __NFUN_128__(Text, i);
-			Text = __NFUN_127__(Text, __NFUN_146__(i, 1));
+			PropertyName = Left(Text, i);
+			Text = Mid(Text, (i + 1));
 		}
 		// End:0x21E
-		if(__NFUN_122__(__NFUN_128__(Text, 1), "\""))
+		if((Left(Text, 1) == "\""))
 		{
 			i = InStrAfter(Text, "\"", 1);
 			// End:0x183
-			if(__NFUN_154__(i, -1))
+			if((i == -1))
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Missing quote for ", ObjectClass), "."), PropertyName));
+				Log(((("Missing quote for " $ ObjectClass) $ ".") $ PropertyName));
 				return o;
 			}
-			PropertyValue = __NFUN_127__(Text, 1, __NFUN_147__(i, 1));
-			temp = __NFUN_127__(Text, __NFUN_146__(i, 1), 1);
+			PropertyValue = Mid(Text, 1, (i - 1));
+			temp = Mid(Text, (i + 1), 1);
 			// End:0x205
-			if(__NFUN_130__(__NFUN_123__(temp, ""), __NFUN_123__(temp, ",")))
+			if(((temp != "") && (temp != ")))
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Missing comma after close quote for ", ObjectClass), "."), PropertyName));
+				Log(((("Missing comma after close quote for " $ ObjectClass) $ ".") $ PropertyName));
 			}
-			Text = __NFUN_127__(Text, __NFUN_146__(i, 2));			
+			Text = Mid(Text, (i + 2));			
 		}
 		else
 		{
-			i = __NFUN_126__(Text, ",");
+			i = InStr(Text, ",");
 			// End:0x253
-			if(__NFUN_154__(i, -1))
+			if((i == -1))
 			{
 				PropertyValue = Text;
 				Text = "";				
 			}
 			else
 			{
-				PropertyValue = __NFUN_128__(Text, i);
-				Text = __NFUN_127__(Text, __NFUN_146__(i, 1));
+				PropertyValue = Left(Text, i);
+				Text = Mid(Text, (i + 1));
 			}
 		}
 		o.SetPropertyText(PropertyName, PropertyValue);

@@ -22,7 +22,7 @@ var(R6Attachment) Class<Actor> m_pFPMuzzleClass;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_130__(bNetOwner, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetOwner && (int(Role) == int(ROLE_Authority))))
 		m_FPMuzzelModel;
 }
 
@@ -39,9 +39,9 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 	local Rotator rTagRotator;
 
 	super.UpdateAttachment(weapOwner);
-	__NFUN_298__(none);
-	__NFUN_298__(weapOwner, weapOwner.Location);
-	weapOwner.__NFUN_2008__("TagMuzzle", vTagLocation, rTagRotator);
+	SetBase(none);
+	SetBase(weapOwner, weapOwner.Location);
+	weapOwner.GetTagInformations("TagMuzzle", vTagLocation, rTagRotator);
 	SetRelativeLocation(vTagLocation);
 	SetRelativeRotation(rTagRotator);
 	return;
@@ -50,21 +50,21 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 simulated function AttachFPGadget()
 {
 	// End:0x28
-	if(__NFUN_132__(__NFUN_114__(m_WeaponOwner, none), __NFUN_114__(R6AbstractWeapon(m_WeaponOwner).m_FPWeapon, none)))
+	if(((m_WeaponOwner == none) || (R6AbstractWeapon(m_WeaponOwner).m_FPWeapon == none)))
 	{
 		return;
 	}
 	// End:0x4C
-	if(__NFUN_114__(m_FPMuzzelModel, none))
+	if((m_FPMuzzelModel == none))
 	{
 		// End:0x4C
-		if(__NFUN_119__(m_pFPMuzzleClass, none))
+		if((m_pFPMuzzleClass != none))
 		{
-			m_FPMuzzelModel = __NFUN_278__(m_pFPMuzzleClass);
+			m_FPMuzzelModel = Spawn(m_pFPMuzzleClass);
 		}
 	}
 	// End:0x7E
-	if(__NFUN_119__(m_FPMuzzelModel, none))
+	if((m_FPMuzzelModel != none))
 	{
 		R6AbstractWeapon(m_WeaponOwner).m_FPWeapon.AttachToBone(m_FPMuzzelModel, 'TagMuzzle');
 	}
@@ -76,11 +76,11 @@ simulated function DestroyFPGadget()
 	local Actor temp;
 
 	// End:0x29
-	if(__NFUN_119__(m_FPMuzzelModel, none))
+	if((m_FPMuzzelModel != none))
 	{
 		temp = m_FPMuzzelModel;
 		m_FPMuzzelModel = none;
-		temp.__NFUN_279__();
+		temp.Destroy();
 	}
 	return;
 }

@@ -31,17 +31,17 @@ var UWindowWindow m_pSendMessageDest;  // Window to which the send message funct
 function StartQueryServerInfoProcedure(UWindowWindow _pCurrentWidget, string _szServerIP, int _iBeaconPort)
 {
 	// End:0x2B
-	if(__NFUN_155__(__NFUN_126__(_szServerIP, ":"), -1))
+	if((InStr(_szServerIP, ":") != -1))
 	{
-		_szServerIP = __NFUN_128__(_szServerIP, __NFUN_126__(_szServerIP, ":"));
+		_szServerIP = Left(_szServerIP, InStr(_szServerIP, ":"));
 	}
 	m_pSendMessageDest = _pCurrentWidget;
-	m_GameService.__NFUN_3541__(_szServerIP);
+	m_GameService.SetLastServerQueried(_szServerIP);
 	m_GameService.m_ClientBeacon.PreJoinQuery(_szServerIP, _iBeaconPort);
 	ShowWindow();
 	m_bWaitingForBeacon = true;
 	m_pPleaseWait.ShowWindow();
-	m_fBeaconTime = m_GameService.__NFUN_3530__();
+	m_fBeaconTime = m_GameService.NativeGetSeconds();
 	return;
 }
 
@@ -57,7 +57,7 @@ function Manager(UWindowWindow _pCurrentWidget)
 		{
 			m_bWaitingForBeacon = false;
 			// End:0xC1
-			if(__NFUN_129__(IsSameGameVersion(m_GameService.m_ClientBeacon.PreJoinInfo.szPreJoinModName, m_GameService.m_ClientBeacon.PreJoinInfo.szGameVersion)))
+			if((!IsSameGameVersion(m_GameService.m_ClientBeacon.PreJoinInfo.szPreJoinModName, m_GameService.m_ClientBeacon.PreJoinInfo.szGameVersion)))
 			{
 				m_pPleaseWait.HideWindow();
 				DisplayErrorMsg(Localize("MultiPlayer", "PopUp_Error_BadVersion", "R6Menu"), 29);				
@@ -65,14 +65,14 @@ function Manager(UWindowWindow _pCurrentWidget)
 			else
 			{
 				// End:0x14B
-				if(__NFUN_153__(m_GameService.m_ClientBeacon.PreJoinInfo.iNumPlayers, m_GameService.m_ClientBeacon.PreJoinInfo.iMaxPlayers))
+				if((m_GameService.m_ClientBeacon.PreJoinInfo.iNumPlayers >= m_GameService.m_ClientBeacon.PreJoinInfo.iMaxPlayers))
 				{
 					m_pPleaseWait.HideWindow();
 					DisplayErrorMsg(Localize("MultiPlayer", "PopUp_Error_ServerFull", "R6Menu"), 29);					
 				}
 				else
 				{
-					m_bRoomValid = __NFUN_130__(__NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID, 0), __NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID, 0));
+					m_bRoomValid = ((m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID != 0) && (m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID != 0));
 					_pCurrentWidget.SendMessage(8);
 					HideWindow();
 				}
@@ -80,9 +80,9 @@ function Manager(UWindowWindow _pCurrentWidget)
 		}
 		else
 		{
-			elapsedTime = __NFUN_175__(m_GameService.__NFUN_3530__(), m_fBeaconTime);
+			elapsedTime = (m_GameService.NativeGetSeconds() - m_fBeaconTime);
 			// End:0x25B
-			if(__NFUN_177__(elapsedTime, 5.0000000))
+			if((elapsedTime > 5.0000000))
 			{
 				m_bWaitingForBeacon = false;
 				// End:0x213
@@ -110,25 +110,25 @@ function bool IsSameGameVersion(string _szPreJoinModName, string _szPreJoinInfoG
 	local int i;
 	local bool bSameGameVersion;
 
-	pModMgr = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModMgr = Class'Engine.Actor'.static.GetModMgr();
 	// End:0x112
-	if(__NFUN_130__(__NFUN_123__(pModMgr.m_szPendingModName, ""), __NFUN_129__(__NFUN_124__(pModMgr.m_szPendingModName, pModMgr.m_pCurrentMod.m_szKeyWord))))
+	if(((pModMgr.m_szPendingModName != "") && (!(pModMgr.m_szPendingModName ~= pModMgr.m_pCurrentMod.m_szKeyWord))))
 	{
 		pTempCurrentMod = pModMgr.GetModInstance(_szPreJoinModName);
 		// End:0x10F
-		if(__NFUN_119__(pTempCurrentMod, none))
+		if((pTempCurrentMod != none))
 		{
 			pBkpMod = pModMgr.m_pCurrentMod;
 			pModMgr.m_pCurrentMod = pTempCurrentMod;
-			szTemp = Root.Console.ViewportOwner.Actor.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield()));
-			bSameGameVersion = __NFUN_124__(szTemp, _szPreJoinInfoGameVer);
+			szTemp = Root.Console.ViewportOwner.Actor.GetGameVersion(false, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield()));
+			bSameGameVersion = (szTemp ~= _szPreJoinInfoGameVer);
 			pModMgr.m_pCurrentMod = pBkpMod;
 		}		
 	}
 	else
 	{
-		szTemp = Root.Console.ViewportOwner.Actor.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield()));
-		bSameGameVersion = __NFUN_124__(szTemp, _szPreJoinInfoGameVer);
+		szTemp = Root.Console.ViewportOwner.Actor.GetGameVersion(false, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield()));
+		bSameGameVersion = (szTemp ~= _szPreJoinInfoGameVer);
 	}
 	return bSameGameVersion;
 	return;
@@ -164,7 +164,7 @@ function PopUpBoxCreate()
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
 	// End:0xA2
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -182,7 +182,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 					m_pPleaseWait.HideWindow();
 					m_pError.HideWindow();
 					m_pSendMessageDest.SendMessage(9);
-					m_GameService.__NFUN_3541__("0");
+					m_GameService.SetLastServerQueried("0");
 					HideWindow();
 				}
 				// End:0xA2

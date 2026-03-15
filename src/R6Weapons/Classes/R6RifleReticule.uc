@@ -24,11 +24,11 @@ simulated function PostRender(Canvas C)
 	local float X, Y, fScale;
 
 	super.PostRender(C);
-	fScale = __NFUN_171__(__NFUN_172__(32.0000000, float(m_FixedPart.VSize)), m_fZoomScale);
-	X = __NFUN_175__(m_fReticuleOffsetX, __NFUN_171__(float(__NFUN_145__(m_FixedPart.USize, 2)), fScale));
+	fScale = ((32.0000000 / float(m_FixedPart.VSize)) * m_fZoomScale);
+	X = (m_fReticuleOffsetX - (float((m_FixedPart.USize / 2)) * fScale));
 	Y = m_fReticuleOffsetY;
 	C.Style = 5;
-	C.__NFUN_2623__(X, __NFUN_174__(Y, float(2)));
+	C.SetPos(X, (Y + float(2)));
 	C.DrawIcon(m_FixedPart, fScale);
 	return;
 }

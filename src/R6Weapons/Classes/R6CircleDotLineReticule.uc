@@ -20,8 +20,8 @@ simulated function PostRender(Canvas C)
 {
 	super.PostRender(C);
 	C.Style = 5;
-	C.__NFUN_2623__(__NFUN_175__(m_fReticuleOffsetX, 1.0000000), __NFUN_174__(m_fReticuleOffsetY, 1.0000000));
-	C.DrawRect(m_LineTexture, __NFUN_171__(float(c_iLineWidth), m_fZoomScale), __NFUN_171__(float(c_iLineHeight), m_fZoomScale));
+	C.SetPos((m_fReticuleOffsetX - 1.0000000), (m_fReticuleOffsetY + 1.0000000));
+	C.DrawRect(m_LineTexture, (float(c_iLineWidth) * m_fZoomScale), (float(c_iLineHeight) * m_fZoomScale));
 	return;
 }
 

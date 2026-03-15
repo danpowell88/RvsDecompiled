@@ -23,7 +23,7 @@ function Created()
 function Paint(Canvas C, float X, float Y)
 {
 	// End:0x16
-	if(__NFUN_130__(bDisabled, m_bHideSBWhenDisable))
+	if((bDisabled && m_bHideSBWhenDisable))
 	{
 		return;
 	}
@@ -40,20 +40,20 @@ function LMouseDown(float X, float Y)
 		return;
 	}
 	UWindowHScrollbar(ParentWindow).Scroll(UWindowHScrollbar(ParentWindow).ScrollAmount);
-	NextClickTime = __NFUN_174__(GetTime(), 0.5000000);
+	NextClickTime = (GetTime() + 0.5000000);
 	return;
 }
 
 function Tick(float Delta)
 {
 	// End:0x64
-	if(__NFUN_130__(__NFUN_130__(bMouseDown, __NFUN_177__(NextClickTime, float(0))), __NFUN_176__(NextClickTime, GetTime())))
+	if(((bMouseDown && (NextClickTime > float(0))) && (NextClickTime < GetTime())))
 	{
 		UWindowHScrollbar(ParentWindow).Scroll(UWindowHScrollbar(ParentWindow).ScrollAmount);
-		NextClickTime = __NFUN_174__(GetTime(), 0.1000000);
+		NextClickTime = (GetTime() + 0.1000000);
 	}
 	// End:0x7A
-	if(__NFUN_129__(bMouseDown))
+	if((!bMouseDown))
 	{
 		NextClickTime = 0.0000000;
 	}

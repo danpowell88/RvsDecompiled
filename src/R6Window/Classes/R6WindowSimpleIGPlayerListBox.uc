@@ -28,20 +28,20 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	if(pListIGPlayerInfoItem.bSelected)
 	{
 		// End:0x106
-		if(__NFUN_119__(m_BGSelTexture, none))
+		if((m_BGSelTexture != none))
 		{
 			C.Style = m_BGRenderStyle;
-			C.__NFUN_2626__(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B, m_BGSelColor.A);
-			fYPos = __NFUN_174__(Y, __NFUN_172__(__NFUN_175__(H, float(m_BGSelRegion.H)), float(2)));
+			C.SetDrawColor(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B, m_BGSelColor.A);
+			fYPos = (Y + ((H - float(m_BGSelRegion.H)) / float(2)));
 			DrawStretchedTextureSegment(C, X, fYPos, W, float(m_BGSelRegion.H), float(m_BGSelRegion.X), float(m_BGSelRegion.Y), float(m_BGSelRegion.W), float(m_BGSelRegion.H), m_BGSelTexture);
 		}
 	}
 	C.Style = 5;
 	C.Font = m_Font;
 	TextSize(C, pListIGPlayerInfoItem.szPlName, tW, tH);
-	TextY = __NFUN_172__(__NFUN_175__(H, tH), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	fYPos = __NFUN_174__(Y, TextY);
+	TextY = ((H - tH) / float(2));
+	TextY = float(int((TextY + 0.5000000)));
+	fYPos = (Y + TextY);
 	// End:0x1D0
 	if(pListIGPlayerInfoItem.bSelected)
 	{
@@ -51,7 +51,7 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	{
 		co = Root.Colors.TeamColor[pListIGPlayerInfoItem.m_iRainbowTeam];
 	}
-	C.__NFUN_2626__(co.R, co.G, co.B, co.A);
+	C.SetDrawColor(co.R, co.G, co.B, co.A);
 	pLookAndFeel.DrawInGamePlayerStats(self, C, 4, pListIGPlayerInfoItem.stTagCoord[0].fXPos, Y, H, pListIGPlayerInfoItem.stTagCoord[0].fWidth);
 	switch(pListIGPlayerInfoItem.eStatus)
 	{
@@ -79,30 +79,30 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	// End:0x3D0
 	if(pListIGPlayerInfoItem.bSelected)
 	{
-		C.__NFUN_2626__(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
+		C.SetDrawColor(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
 	}
 	else
 	{
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 	}
-	C.__NFUN_2623__(pListIGPlayerInfoItem.stTagCoord[1].fXPos, fYPos);
-	C.__NFUN_465__(pListIGPlayerInfoItem.szPlName);
+	C.SetPos(pListIGPlayerInfoItem.stTagCoord[1].fXPos, fYPos);
+	C.DrawText(pListIGPlayerInfoItem.szPlName);
 	TextSize(C, string(pListIGPlayerInfoItem.iKills), tW, tH);
-	fTemp = __NFUN_174__(pListIGPlayerInfoItem.stTagCoord[3].fXPos, float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[3].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(string(pListIGPlayerInfoItem.iKills));
+	fTemp = (pListIGPlayerInfoItem.stTagCoord[3].fXPos + float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[3].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(string(pListIGPlayerInfoItem.iKills));
 	TextSize(C, string(pListIGPlayerInfoItem.iEfficiency), tW, tH);
-	fTemp = __NFUN_174__(pListIGPlayerInfoItem.stTagCoord[4].fXPos, float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[4].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(string(pListIGPlayerInfoItem.iEfficiency));
+	fTemp = (pListIGPlayerInfoItem.stTagCoord[4].fXPos + float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[4].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(string(pListIGPlayerInfoItem.iEfficiency));
 	TextSize(C, string(pListIGPlayerInfoItem.iRoundsFired), tW, tH);
-	fTemp = __NFUN_174__(pListIGPlayerInfoItem.stTagCoord[5].fXPos, float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[5].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(string(pListIGPlayerInfoItem.iRoundsFired));
+	fTemp = (pListIGPlayerInfoItem.stTagCoord[5].fXPos + float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[5].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(string(pListIGPlayerInfoItem.iRoundsFired));
 	TextSize(C, string(pListIGPlayerInfoItem.iRoundsHit), tW, tH);
-	fTemp = __NFUN_174__(pListIGPlayerInfoItem.stTagCoord[6].fXPos, float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[6].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(string(pListIGPlayerInfoItem.iRoundsHit));
+	fTemp = (pListIGPlayerInfoItem.stTagCoord[6].fXPos + float(GetCenterXPos(pListIGPlayerInfoItem.stTagCoord[6].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(string(pListIGPlayerInfoItem.iRoundsHit));
 	return;
 }
 

@@ -39,9 +39,9 @@ var string m_szCurGameType;
 //===================================================================================
 function Created()
 {
-	m_fYStartTeamBarPos = __NFUN_174__(float(R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RInterWidget.Y), R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize());
+	m_fYStartTeamBarPos = (float(R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RInterWidget.Y) + R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize());
 	m_pMPInterHeader = R6MenuMPInterHeader(CreateWindow(Class'R6Menu.R6MenuMPInterHeader', float(R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RInterWidget.X), m_fYStartTeamBarPos, float(R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RInterWidget.W), 66.0000000, self));
-	__NFUN_184__(m_fYStartTeamBarPos, m_pMPInterHeader.WinHeight);
+	(m_fYStartTeamBarPos += m_pMPInterHeader.WinHeight);
 	m_pR6AlphaTeam = R6MenuMPTeamBar(CreateWindow(Class'R6Menu.R6MenuMPTeamBar', 0.0000000, 0.0000000, 10.0000000, 10.0000000, self));
 	m_pR6AlphaTeam.m_vTeamColor = Root.Colors.TeamColorLight[1];
 	m_pR6AlphaTeam.m_szTeamName = Localize("MPInGame", "AlphaTeam", "R6Menu");
@@ -60,7 +60,7 @@ function Created()
 
 function Tick(float Delta)
 {
-	__NFUN_165__(m_Counter);
+	(m_Counter++);
 	// End:0x1F
 	if(m_bForceRefreshOfGear)
 	{
@@ -68,7 +68,7 @@ function Tick(float Delta)
 		RefreshGearMenu(true);
 	}
 	// End:0x31
-	if(__NFUN_151__(m_Counter, 10))
+	if((m_Counter > 10))
 	{
 		RefreshServerInfo();
 	}
@@ -85,14 +85,14 @@ function SetInterWidgetMenu(string _szCurrentGameType, bool _bActiveMenuBar)
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	fXPos = float(r6Root.m_RInterWidget.X);
 	fWidth = float(r6Root.m_RInterWidget.W);
-	fAvailableSpace = __NFUN_175__(float(r6Root.m_RInterWidget.H), m_pMPInterHeader.WinHeight);
+	fAvailableSpace = (float(r6Root.m_RInterWidget.H) - m_pMPInterHeader.WinHeight);
 	m_pR6BravoTeam.HideWindow();
 	m_pR6MissionObj.HideWindow();
 	m_bDisplayNavBar = _bActiveMenuBar;
 	m_pInGameNavBar.SetNavBarButtonsStatus(_bActiveMenuBar);
 	bActiveMenuBar = true;
 	// End:0xE2
-	if(__NFUN_123__(m_szCurGameType, _szCurrentGameType))
+	if((m_szCurGameType != _szCurrentGameType))
 	{
 		m_pMPInterHeader.ResetDisplayInfo();
 		m_szCurGameType = _szCurrentGameType;
@@ -107,17 +107,17 @@ function SetInterWidgetMenu(string _szCurrentGameType, bool _bActiveMenuBar)
 		// End:0x20A
 		if(bActiveMenuBar)
 		{
-			__NFUN_185__(fAvailableSpace, m_pInGameNavBar.WinHeight);
-			m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
-			m_pR6BravoTeam.SetWindowSize(fXPos, __NFUN_174__(m_fYStartTeamBarPos, __NFUN_171__(fAvailableSpace, 0.5000000)), fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
+			(fAvailableSpace -= m_pInGameNavBar.WinHeight);
+			m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, (fAvailableSpace * 0.5000000));
+			m_pR6BravoTeam.SetWindowSize(fXPos, (m_fYStartTeamBarPos + (fAvailableSpace * 0.5000000)), fWidth, (fAvailableSpace * 0.5000000));
 			m_pR6BravoTeam.ShowWindow();
-			SetWindowSize(m_pInGameNavBar, fXPos, __NFUN_174__(m_fYStartTeamBarPos, fAvailableSpace), fWidth, m_pInGameNavBar.WinHeight);
+			SetWindowSize(m_pInGameNavBar, fXPos, (m_fYStartTeamBarPos + fAvailableSpace), fWidth, m_pInGameNavBar.WinHeight);
 			m_pInGameNavBar.ShowWindow();			
 		}
 		else
 		{
-			m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
-			m_pR6BravoTeam.SetWindowSize(fXPos, __NFUN_174__(m_fYStartTeamBarPos, __NFUN_171__(fAvailableSpace, 0.5000000)), fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
+			m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, (fAvailableSpace * 0.5000000));
+			m_pR6BravoTeam.SetWindowSize(fXPos, (m_fYStartTeamBarPos + (fAvailableSpace * 0.5000000)), fWidth, (fAvailableSpace * 0.5000000));
 			m_pR6BravoTeam.ShowWindow();
 		}		
 	}
@@ -130,9 +130,9 @@ function SetInterWidgetMenu(string _szCurrentGameType, bool _bActiveMenuBar)
 			// End:0x328
 			if(bActiveMenuBar)
 			{
-				__NFUN_185__(fAvailableSpace, m_pInGameNavBar.WinHeight);
+				(fAvailableSpace -= m_pInGameNavBar.WinHeight);
 				m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, fAvailableSpace);
-				SetWindowSize(m_pInGameNavBar, fXPos, __NFUN_174__(m_fYStartTeamBarPos, fAvailableSpace), fWidth, m_pInGameNavBar.WinHeight);
+				SetWindowSize(m_pInGameNavBar, fXPos, (m_fYStartTeamBarPos + fAvailableSpace), fWidth, m_pInGameNavBar.WinHeight);
 				m_pInGameNavBar.ShowWindow();				
 			}
 			else
@@ -150,17 +150,17 @@ function SetInterWidgetMenu(string _szCurrentGameType, bool _bActiveMenuBar)
 				// End:0x457
 				if(bActiveMenuBar)
 				{
-					__NFUN_185__(fAvailableSpace, m_pInGameNavBar.WinHeight);
-					m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
-					SetWindowSize(m_pInGameNavBar, fXPos, __NFUN_174__(m_fYStartTeamBarPos, fAvailableSpace), fWidth, m_pInGameNavBar.WinHeight);
+					(fAvailableSpace -= m_pInGameNavBar.WinHeight);
+					m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, (fAvailableSpace * 0.5000000));
+					SetWindowSize(m_pInGameNavBar, fXPos, (m_fYStartTeamBarPos + fAvailableSpace), fWidth, m_pInGameNavBar.WinHeight);
 					m_pInGameNavBar.ShowWindow();
-					m_pR6MissionObj.SetWindowSize(fXPos, __NFUN_174__(m_fYStartTeamBarPos, __NFUN_171__(fAvailableSpace, 0.5000000)), fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
+					m_pR6MissionObj.SetWindowSize(fXPos, (m_fYStartTeamBarPos + (fAvailableSpace * 0.5000000)), fWidth, (fAvailableSpace * 0.5000000));
 					m_pR6MissionObj.ShowWindow();					
 				}
 				else
 				{
-					m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
-					m_pR6MissionObj.SetWindowSize(fXPos, __NFUN_174__(m_fYStartTeamBarPos, __NFUN_171__(fAvailableSpace, 0.5000000)), fWidth, __NFUN_171__(fAvailableSpace, 0.5000000));
+					m_pR6AlphaTeam.SetWindowSize(fXPos, m_fYStartTeamBarPos, fWidth, (fAvailableSpace * 0.5000000));
+					m_pR6MissionObj.SetWindowSize(fXPos, (m_fYStartTeamBarPos + (fAvailableSpace * 0.5000000)), fWidth, (fAvailableSpace * 0.5000000));
 					m_pR6MissionObj.ShowWindow();
 				}
 			}
@@ -181,7 +181,7 @@ function SetInterWidgetMenu(string _szCurrentGameType, bool _bActiveMenuBar)
 function PopUpGearMenu()
 {
 	// End:0xD4
-	if(__NFUN_114__(m_pPopUpGearRoom, none))
+	if((m_pPopUpGearRoom == none))
 	{
 		m_pPopUpGearRoom = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 		m_pPopUpGearRoom.CreateStdPopUpWindow(Localize("MPInGame", "Gear", "R6Menu"), 32.0000000, 103.0000000, 70.0000000, 434.0000000, 340.0000000);
@@ -206,7 +206,7 @@ function PopUpGearMenu()
 function PopUpServerOptMenu()
 {
 	// End:0xD9
-	if(__NFUN_114__(m_pPopUpServerOption, none))
+	if((m_pPopUpServerOption == none))
 	{
 		m_pPopUpServerOption = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 		m_pPopUpServerOption.CreateStdPopUpWindow(Localize("MPInGame", "ServerOpt", "R6Menu"), 32.0000000, 10.0000000, 80.0000000, 620.0000000, 325.0000000);
@@ -230,7 +230,7 @@ function PopUpKitRestMenu()
 	local R6MenuMPRestKitMain pR6MenuMPRestKitMain;
 
 	// End:0xF4
-	if(__NFUN_114__(m_pPopUpKitRest, none))
+	if((m_pPopUpKitRest == none))
 	{
 		m_pPopUpKitRest = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 		m_pPopUpKitRest.CreateStdPopUpWindow(Localize("MPInGame", "KitRestriction", "R6Menu"), 32.0000000, 10.0000000, 70.0000000, 620.0000000, 332.0000000);
@@ -254,7 +254,7 @@ function PopUpKitRestMenu()
 function ForceClosePopUp()
 {
 	// End:0x31
-	if(__NFUN_119__(m_pPopUpGearRoom, none))
+	if((m_pPopUpGearRoom != none))
 	{
 		// End:0x31
 		if(m_bDisplayNavBar)
@@ -263,7 +263,7 @@ function ForceClosePopUp()
 		}
 	}
 	// End:0x5D
-	if(__NFUN_119__(m_pPopUpBoxCurrent, none))
+	if((m_pPopUpBoxCurrent != none))
 	{
 		// End:0x5D
 		if(m_pPopUpBoxCurrent.bWindowVisible)
@@ -290,7 +290,7 @@ function HideWindow()
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
 	// End:0x92
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		m_InGameOptionsChange = _ePopUpID;
 		switch(_ePopUpID)
@@ -298,7 +298,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			// End:0x52
 			case 9:
 				// End:0x4F
-				if(__NFUN_119__(m_pPopUpGearRoom, none))
+				if((m_pPopUpGearRoom != none))
 				{
 					R6MenuMPAdvGearWidget(m_pPopUpGearRoom.m_ClientArea).AcceptSelection();
 				}
@@ -322,14 +322,14 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	else
 	{
 		// End:0xE9
-		if(__NFUN_154__(int(Result), int(4)))
+		if((int(Result) == int(4)))
 		{
 			switch(_ePopUpID)
 			{
 				// End:0xD9
 				case 9:
 					// End:0xD6
-					if(__NFUN_119__(m_pPopUpGearRoom, none))
+					if((m_pPopUpGearRoom != none))
 					{
 						R6MenuMPAdvGearWidget(m_pPopUpGearRoom.m_ClientArea).CancelSelection();
 					}
@@ -367,9 +367,9 @@ function SetClientServerSettings(bool _bChange)
 			case 7:
 				pServerOpt = R6MenuMPCreateGameTab(m_pPopUpServerOption.m_ClientArea);
 				bSetNewSettings = pServerOpt.SendNewServerSettings();
-				bSetNewSettings = __NFUN_132__(pServerOpt.SendNewMapSettings(_bMapCount), bSetNewSettings);
+				bSetNewSettings = (pServerOpt.SendNewMapSettings(_bMapCount) || bSetNewSettings);
 				// End:0x9F
-				if(__NFUN_130__(__NFUN_242__(bSetNewSettings, true), __NFUN_154__(int(_bMapCount), 0)))
+				if(((bSetNewSettings == true) && (int(_bMapCount) == 0)))
 				{
 					R6PlayerController(GetPlayerOwner()).SendSettingsAndRestartServer(false, false);					
 				}
@@ -408,10 +408,10 @@ function RefreshServerInfo()
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	m_Counter = 0;
 	// End:0xEC
-	if(__NFUN_129__(r6Root.m_bPreventMenuSwitch))
+	if((!r6Root.m_bPreventMenuSwitch))
 	{
 		// End:0xEC
-		if(__NFUN_119__(r6Root.m_R6GameMenuCom, none))
+		if((r6Root.m_R6GameMenuCom != none))
 		{
 			r6Root.m_R6GameMenuCom.RefreshMPlayerInfo();
 			m_pMPInterHeader.RefreshInterHeaderInfo();
@@ -429,13 +429,13 @@ function RefreshServerInfo()
 		}
 	}
 	// End:0x1D3
-	if(__NFUN_119__(m_pPopUpBoxCurrent, none))
+	if((m_pPopUpBoxCurrent != none))
 	{
 		// End:0x1CB
 		if(m_pPopUpBoxCurrent.bWindowVisible)
 		{
 			// End:0x170
-			if(__NFUN_154__(int(m_pPopUpBoxCurrent.m_ePopUpID), int(8)))
+			if((int(m_pPopUpBoxCurrent.m_ePopUpID) == int(8)))
 			{
 				// End:0x150
 				if(m_bRefreshRestKit)
@@ -448,14 +448,14 @@ function RefreshServerInfo()
 			else
 			{
 				// End:0x1A9
-				if(__NFUN_154__(int(m_pPopUpBoxCurrent.m_ePopUpID), int(7)))
+				if((int(m_pPopUpBoxCurrent.m_ePopUpID) == int(7)))
 				{
 					R6MenuMPCreateGameTab(m_pPopUpServerOption.m_ClientArea).Refresh();					
 				}
 				else
 				{
 					// End:0x1C8
-					if(__NFUN_154__(int(m_pPopUpBoxCurrent.m_ePopUpID), int(9)))
+					if((int(m_pPopUpBoxCurrent.m_ePopUpID) == int(9)))
 					{
 						RefreshGearMenu();
 					}
@@ -479,7 +479,7 @@ function RefreshGearMenu(optional bool _bForceUpdate)
 
 	bForceUpdate = _bForceUpdate;
 	// End:0x26
-	if(__NFUN_114__(m_pPopUpGearRoom, none))
+	if((m_pPopUpGearRoom == none))
 	{
 		PopUpGearMenu();
 		bForceUpdate = true;
@@ -531,7 +531,7 @@ function bool IsMissionInProgress()
 	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
-	return __NFUN_154__(int(r6Root.m_R6GameMenuCom.m_GameRepInfo.m_bRepMObjInProgress), 1);
+	return (int(r6Root.m_R6GameMenuCom.m_GameRepInfo.m_bRepMObjInProgress) == 1);
 	return;
 }
 
@@ -549,7 +549,7 @@ function bool IsMissionSuccess()
 	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
-	return __NFUN_154__(int(r6Root.m_R6GameMenuCom.m_GameRepInfo.m_bRepMObjSuccess), 1);
+	return (int(r6Root.m_R6GameMenuCom.m_GameRepInfo.m_bRepMObjSuccess) == 1);
 	return;
 }
 

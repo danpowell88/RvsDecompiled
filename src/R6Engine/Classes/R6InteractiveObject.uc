@@ -116,7 +116,7 @@ var(R6Attachments) array<Actor> m_AttachedActors;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_aRepSkins, m_fNetDamagePercentage;
 }
 
@@ -149,18 +149,18 @@ simulated function SaveOriginalData()
 	super.SaveOriginalData();
 	sm_staticMesh = StaticMesh;
 	// End:0x5A
-	if(__NFUN_150__(4, Skins.Length))
+	if((4 < Skins.Length))
 	{
-		__NFUN_231__("WARNING c_iIObjectSkinMax < Skins.Length");
+		Log("WARNING c_iIObjectSkinMax < Skins.Length");
 	}
 	iSkin = 0;
 	J0x61:
 
 	// End:0xCF [Loop If]
-	if(__NFUN_150__(iSkin, Skins.Length))
+	if((iSkin < Skins.Length))
 	{
 		// End:0x80
-		if(__NFUN_151__(iSkin, 4))
+		if((iSkin > 4))
 		{
 			// [Explicit Break]
 			goto J0xCF;
@@ -168,7 +168,7 @@ simulated function SaveOriginalData()
 		sm_aSkins[iSkin] = Skins[iSkin];
 		m_aOldSkins[iSkin] = Skins[iSkin];
 		m_aRepSkins[iSkin] = Skins[iSkin];
-		__NFUN_165__(iSkin);
+		(iSkin++);
 		// [Loop Continue]
 		goto J0x61;
 	}
@@ -197,9 +197,9 @@ simulated function ResetOriginalData()
 	AmbientSound = sm_AmbientSound;
 	AmbientSoundStop = sm_AmbientSoundStop;
 	// End:0x7C
-	if(__NFUN_132__(__NFUN_130__(__NFUN_181__(m_fProbability, 0.0000000), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	if((((m_fProbability != 0.0000000) && (int(Level.NetMode) == int(NM_Standalone))) || (int(Role) == int(ROLE_Authority))))
 	{
-		__NFUN_280__(m_fTimerInterval, true);
+		SetTimer(m_fTimerInterval, true);
 		m_iCurrentHitPoints = m_iHitPoints;
 	}
 	m_fNetDamagePercentage = 100.0000000;
@@ -211,7 +211,7 @@ simulated function ResetOriginalData()
 	// End:0xE6
 	if(m_bCollisionRemovedFromActor)
 	{
-		m_RemoveCollisionFromActor.__NFUN_262__(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
+		m_RemoveCollisionFromActor.SetCollision(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
 		m_bCollisionRemovedFromActor = false;
 	}
 	Skins.Remove(0, Skins.Length);
@@ -219,17 +219,17 @@ simulated function ResetOriginalData()
 	J0xFA:
 
 	// End:0x159 [Loop If]
-	if(__NFUN_150__(i, sm_aSkins.Length))
+	if((i < sm_aSkins.Length))
 	{
 		Skins[i] = sm_aSkins[i];
 		m_aOldSkins[i] = Skins[i];
 		m_aRepSkins[i] = Skins[i];
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xFA;
 	}
 	// End:0x173
-	if(__NFUN_119__(StaticMesh, sm_staticMesh))
+	if((StaticMesh != sm_staticMesh))
 	{
 		ChangeStaticMesh(sm_staticMesh);
 	}
@@ -246,15 +246,15 @@ function PostBeginPlay()
 	J0x18:
 
 	// End:0x6C [Loop If]
-	if(__NFUN_150__(i, m_AttachedActors.Length))
+	if((i < m_AttachedActors.Length))
 	{
 		// End:0x62
-		if(__NFUN_119__(m_AttachedActors[i], none))
+		if((m_AttachedActors[i] != none))
 		{
-			m_AttachedActors[i].__NFUN_298__(self);
+			m_AttachedActors[i].SetBase(self);
 			m_AttachedActors[i].m_AttachedTo = self;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x18;
 	}
@@ -268,7 +268,7 @@ function PostBeginPlay()
 simulated function SetSkin(Material aSkin, int iIndex)
 {
 	// End:0x0E
-	if(__NFUN_151__(iIndex, 4))
+	if((iIndex > 4))
 	{
 		return;
 	}
@@ -284,16 +284,16 @@ simulated function SetSkin(Material aSkin, int iIndex)
 simulated function ChangeStaticMesh(StaticMesh sm)
 {
 	// End:0x21
-	if(__NFUN_130__(__NFUN_114__(sm, none), __NFUN_119__(StaticMesh, none)))
+	if(((sm == none) && (StaticMesh != none)))
 	{
-		__NFUN_262__(false, false, false);		
+		SetCollision(false, false, false);		
 	}
 	else
 	{
 		// End:0x4E
-		if(__NFUN_130__(__NFUN_119__(sm, none), __NFUN_114__(StaticMesh, none)))
+		if(((sm != none) && (StaticMesh == none)))
 		{
-			__NFUN_262__(default.bCollideActors, default.bBlockActors, default.bBlockPlayers);
+			SetCollision(default.bCollideActors, default.bBlockActors, default.bBlockPlayers);
 		}
 	}
 	SetStaticMesh(sm);
@@ -318,43 +318,43 @@ simulated function Timer()
 {
 	local R6Pawn P;
 
-	__NFUN_184__(m_fTimeSinceAction, m_fTimerInterval);
+	(m_fTimeSinceAction += m_fTimerInterval);
 	// End:0x39
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_155__(int(Role), int(ROLE_Authority))))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && (int(Role) != int(ROLE_Authority))))
 	{
 		return;
 	}
 	// End:0x12E
-	if(__NFUN_119__(m_InteractionOwner, none))
+	if((m_InteractionOwner != none))
 	{
 		// End:0x12C
-		if(__NFUN_130__(__NFUN_119__(m_CurrentInteractiveObject, none), __NFUN_132__(m_CurrentInteractiveObject.__NFUN_303__('R6InteractiveObjectActionLoopAnim'), m_CurrentInteractiveObject.__NFUN_303__('R6InteractiveObjectActionLoopRandomAnim'))))
+		if(((m_CurrentInteractiveObject != none) && (m_CurrentInteractiveObject.IsA('R6InteractiveObjectActionLoopAnim') || m_CurrentInteractiveObject.IsA('R6InteractiveObjectActionLoopRandomAnim'))))
 		{
 			// End:0x12C
-			if(__NFUN_130__(__NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlay, none), __NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlayStop, none)))
+			if(((m_CurrentInteractiveObject.m_eSoundToPlay != none) && (m_CurrentInteractiveObject.m_eSoundToPlayStop != none)))
 			{
 				// End:0x12C
-				if(__NFUN_177__(m_fTimeSinceAction, m_fTimeForNextSound))
+				if((m_fTimeSinceAction > m_fTimeForNextSound))
 				{
 					// End:0xF9
-					if(__NFUN_119__(R6Pawn(m_InteractionOwner.Pawn), none))
+					if((R6Pawn(m_InteractionOwner.Pawn) != none))
 					{
-						R6Pawn(m_InteractionOwner.Pawn).__NFUN_2730__(m_CurrentInteractiveObject.m_eSoundToPlay, 6, 15);
+						R6Pawn(m_InteractionOwner.Pawn).PlayVoices(m_CurrentInteractiveObject.m_eSoundToPlay, 6, 15);
 					}
-					__NFUN_184__(m_fTimeForNextSound, RandRange(m_CurrentInteractiveObject.m_SoundRange.Min, m_CurrentInteractiveObject.m_SoundRange.Max));
+					(m_fTimeForNextSound += RandRange(m_CurrentInteractiveObject.m_SoundRange.Min, m_CurrentInteractiveObject.m_SoundRange.Max));
 				}
 			}
 		}
 		return;
 	}
 	// End:0x1BC
-	if(__NFUN_130__(__NFUN_176__(__NFUN_195__(), m_fProbability), __NFUN_179__(m_fTimeSinceAction, m_fActionInterval)))
+	if(((FRand() < m_fProbability) && (m_fTimeSinceAction >= m_fActionInterval)))
 	{
 		// End:0x1BB
-		foreach __NFUN_312__(Class'R6Engine.R6Pawn', P, m_fRadius, Location)
+		foreach VisibleCollidingActors(Class'R6Engine.R6Pawn', P, m_fRadius, Location)
 		{
 			// End:0x1BA
-			if(__NFUN_130__(__NFUN_119__(R6AIController(P.Controller), none), R6AIController(P.Controller).CanInteractWithObjects(self)))
+			if(((R6AIController(P.Controller) != none) && R6AIController(P.Controller).CanInteractWithObjects(self)))
 			{
 				m_fTimeSinceAction = 0.0000000;
 				PerformAction(P);
@@ -374,7 +374,7 @@ simulated function SetBroken()
 {
 	m_bBroken = true;
 	StopInteraction();
-	__NFUN_280__(0.0000000, false);
+	SetTimer(0.0000000, false);
 	return;
 }
 
@@ -386,7 +386,7 @@ function StopInteraction()
 		return;
 	}
 	// End:0x8D
-	if(__NFUN_119__(m_InteractionOwner, none))
+	if((m_InteractionOwner != none))
 	{
 		m_InteractionOwner.PerformAction_StopInteraction();
 		m_InteractionOwner.m_bCantInterruptIO = false;
@@ -396,7 +396,7 @@ function StopInteraction()
 		// End:0x8D
 		if(m_bCollisionRemovedFromActor)
 		{
-			m_RemoveCollisionFromActor.__NFUN_262__(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
+			m_RemoveCollisionFromActor.SetCollision(m_bOriginalCollideActors, m_bOriginalBlockActors, m_bOriginalBlockPlayers);
 			m_bCollisionRemovedFromActor = false;
 		}
 	}
@@ -411,7 +411,7 @@ function StopInteractionWithEndingActions()
 		return;
 	}
 	// End:0x38
-	if(__NFUN_129__(m_bEndAction))
+	if((!m_bEndAction))
 	{
 		m_bEndAction = true;
 		m_iActionIndex = m_iActionNumber;
@@ -427,34 +427,34 @@ function PerformAction(R6Pawn P)
 	m_iActionIndex = -1;
 	m_iActionNumber = m_ActionList.Length;
 	// End:0xA4
-	if(__NFUN_119__(m_RemoveCollisionFromActor, none))
+	if((m_RemoveCollisionFromActor != none))
 	{
 		m_bOriginalCollideActors = m_RemoveCollisionFromActor.bCollideActors;
 		m_bOriginalBlockActors = m_RemoveCollisionFromActor.bBlockActors;
 		m_bOriginalBlockPlayers = m_RemoveCollisionFromActor.bBlockPlayers;
-		m_RemoveCollisionFromActor.__NFUN_262__(false, false, false);
+		m_RemoveCollisionFromActor.SetCollision(false, false, false);
 		m_bCollisionRemovedFromActor = true;
 	}
-	__NFUN_113__('PA_ExecuteStartInteraction');
+	GotoState('PA_ExecuteStartInteraction');
 	return;
 }
 
 function SwitchToNextAction()
 {
-	__NFUN_165__(m_iActionIndex);
+	(m_iActionIndex++);
 	// End:0x1F
-	if(__NFUN_153__(m_iActionIndex, m_iActionNumber))
+	if((m_iActionIndex >= m_iActionNumber))
 	{
-		__NFUN_113__('PA_ExecutePlayEnding');
+		GotoState('PA_ExecutePlayEnding');
 		return;
 	}
 	m_CurrentInteractiveObject = m_ActionList[m_iActionIndex];
 	// End:0xC3
-	if(__NFUN_130__(__NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlay, none), __NFUN_119__(m_CurrentInteractiveObject.m_eSoundToPlayStop, none)))
+	if(((m_CurrentInteractiveObject.m_eSoundToPlay != none) && (m_CurrentInteractiveObject.m_eSoundToPlayStop != none)))
 	{
-		R6Pawn(m_InteractionOwner.Pawn).__NFUN_2730__(m_CurrentInteractiveObject.m_eSoundToPlay, 6, 15);
+		R6Pawn(m_InteractionOwner.Pawn).PlayVoices(m_CurrentInteractiveObject.m_eSoundToPlay, 6, 15);
 		// End:0xC3
-		if(__NFUN_154__(m_iActionIndex, 0))
+		if((m_iActionIndex == 0))
 		{
 			m_fTimeForNextSound = RandRange(m_CurrentInteractiveObject.m_SoundRange.Min, m_CurrentInteractiveObject.m_SoundRange.Max);
 		}
@@ -463,22 +463,22 @@ function SwitchToNextAction()
 	{
 		// End:0xE2
 		case 2:
-			__NFUN_113__('PA_ExecuteLookAt');
+			GotoState('PA_ExecuteLookAt');
 			// End:0x130
 			break;
 		// End:0xF1
 		case 0:
-			__NFUN_113__('PA_ExecuteGoto');
+			GotoState('PA_ExecuteGoto');
 			// End:0x130
 			break;
 		// End:0x100
 		case 1:
-			__NFUN_113__('PA_ExecutePlayAnim');
+			GotoState('PA_ExecutePlayAnim');
 			// End:0x130
 			break;
 		// End:0x10F
 		case 3:
-			__NFUN_113__('PA_ExecuteLoopAnim');
+			GotoState('PA_ExecuteLoopAnim');
 			// End:0x130
 			break;
 		// End:0x11E

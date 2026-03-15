@@ -112,16 +112,16 @@ function Tick(float fDeltaTime)
 {
 	super(Actor).Tick(fDeltaTime);
 	// End:0x81
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		Pawn.m_bIsFiringWeapon = bFire;
 		// End:0x81
-		if(__NFUN_119__(m_r6pawn.m_TrackActor, none))
+		if((m_r6pawn.m_TrackActor != none))
 		{
 			// End:0x64
 			if(IsActorInView(m_r6pawn.m_TrackActor))
 			{
-				m_r6pawn.__NFUN_2218__();				
+				m_r6pawn.UpdatePawnTrackActor();				
 			}
 			else
 			{
@@ -135,7 +135,7 @@ function Tick(float fDeltaTime)
 function bool IsActorInView(Actor Actor)
 {
 	// End:0x3D
-	if(__NFUN_176__(__NFUN_219__(__NFUN_216__(Actor.Location, Pawn.Location), Vector(Pawn.Rotation)), float(0)))
+	if((Dot((Actor.Location - Pawn.Location), Vector(Pawn.Rotation)) < float(0)))
 	{
 		return false;		
 	}
@@ -149,7 +149,7 @@ function bool IsActorInView(Actor Actor)
 function bool IsActorRightOfView(Actor Actor)
 {
 	// End:0x3D
-	if(__NFUN_176__(__NFUN_219__(__NFUN_216__(Actor.Location, Pawn.Location), Vector(Pawn.Rotation)), float(0)))
+	if((Dot((Actor.Location - Pawn.Location), Vector(Pawn.Rotation)) < float(0)))
 	{
 		return false;		
 	}
@@ -163,14 +163,14 @@ function bool IsActorRightOfView(Actor Actor)
 event R6SetMovement(R6Pawn.eMovementPace ePace)
 {
 	// End:0x3A
-	if(__NFUN_130__(__NFUN_129__(Pawn.m_bIsProne), __NFUN_154__(int(ePace), int(1))))
+	if(((!Pawn.m_bIsProne) && (int(ePace) == int(1))))
 	{
 		Pawn.m_bWantsToProne = true;		
 	}
 	else
 	{
 		// End:0x83
-		if(__NFUN_130__(Pawn.m_bIsProne, __NFUN_155__(int(ePace), int(1))))
+		if((Pawn.m_bIsProne && (int(ePace) != int(1))))
 		{
 			Pawn.m_bWantsToProne = false;
 			Pawn.bWantsToCrouch = true;			
@@ -181,7 +181,7 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 			if(Pawn.bIsCrouched)
 			{
 				// End:0xC8
-				if(__NFUN_132__(__NFUN_154__(int(ePace), int(4)), __NFUN_154__(int(ePace), int(5))))
+				if(((int(ePace) == int(4)) || (int(ePace) == int(5))))
 				{
 					Pawn.bWantsToCrouch = false;
 				}				
@@ -189,7 +189,7 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 			else
 			{
 				// End:0xFE
-				if(__NFUN_132__(__NFUN_154__(int(ePace), int(2)), __NFUN_154__(int(ePace), int(3))))
+				if(((int(ePace) == int(2)) || (int(ePace) == int(3))))
 				{
 					Pawn.bWantsToCrouch = true;
 				}
@@ -197,10 +197,10 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 		}
 	}
 	// End:0x159
-	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(ePace), int(4)), __NFUN_154__(int(ePace), int(2))), __NFUN_154__(int(ePace), int(1))))
+	if((((int(ePace) == int(4)) || (int(ePace) == int(2))) || (int(ePace) == int(1))))
 	{
 		// End:0x156
-		if(__NFUN_129__(Pawn.bIsWalking))
+		if((!Pawn.bIsWalking))
 		{
 			Pawn.SetWalking(true);
 		}		
@@ -208,7 +208,7 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 	else
 	{
 		// End:0x19D
-		if(__NFUN_132__(__NFUN_154__(int(ePace), int(5)), __NFUN_154__(int(ePace), int(3))))
+		if(((int(ePace) == int(5)) || (int(ePace) == int(3))))
 		{
 			// End:0x19D
 			if(Pawn.bIsWalking)
@@ -229,17 +229,17 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 function CheckPaceForInjury(out R6Pawn.eMovementPace ePace)
 {
 	// End:0x4C
-	if(__NFUN_154__(int(m_r6pawn.m_eHealth), int(1)))
+	if((int(m_r6pawn.m_eHealth) == int(1)))
 	{
 		// End:0x34
-		if(__NFUN_154__(int(ePace), int(3)))
+		if((int(ePace) == int(3)))
 		{
 			ePace = 2;			
 		}
 		else
 		{
 			// End:0x4C
-			if(__NFUN_154__(int(ePace), int(5)))
+			if((int(ePace) == int(5)))
 			{
 				ePace = 4;
 			}
@@ -278,7 +278,7 @@ function int GetFacingDirection()
 	local Vector vFocus2D, vLoc2D, vDest2D, vDir, vLookDir, vY;
 
 	// End:0x11
-	if(__NFUN_217__(FocalPoint, Destination))
+	if((FocalPoint == Destination))
 	{
 		return 0;
 	}
@@ -288,22 +288,22 @@ function int GetFacingDirection()
 	vLoc2D.Z = 0.0000000;
 	vDest2D = Destination;
 	vDest2D.Z = 0.0000000;
-	vLookDir = __NFUN_226__(__NFUN_216__(vFocus2D, vLoc2D));
-	vDir = __NFUN_226__(__NFUN_216__(vDest2D, vLoc2D));
-	fStrafeMag = __NFUN_219__(vLookDir, vDir);
+	vLookDir = Normal((vFocus2D - vLoc2D));
+	vDir = Normal((vDest2D - vLoc2D));
+	fStrafeMag = Dot(vLookDir, vDir);
 	// End:0x110
-	if(__NFUN_176__(fStrafeMag, 0.7500000))
+	if((fStrafeMag < 0.7500000))
 	{
 		// End:0xCC
-		if(__NFUN_176__(fStrafeMag, -0.7500000))
+		if((fStrafeMag < -0.7500000))
 		{
 			return 32768;			
 		}
 		else
 		{
-			vY = __NFUN_220__(vLookDir, vect(0.0000000, 0.0000000, 1.0000000));
+			vY = Cross(vLookDir, vect(0.0000000, 0.0000000, 1.0000000));
 			// End:0x10A
-			if(__NFUN_177__(__NFUN_219__(vY, __NFUN_216__(vDest2D, vLoc2D)), float(0)))
+			if((Dot(vY, (vDest2D - vLoc2D)) > float(0)))
 			{
 				return 49152;				
 			}
@@ -353,12 +353,12 @@ function bool LadderIsAvailable()
 
 	ladderVol = R6LadderVolume(m_TargetLadder.MyLadder);
 	// End:0x34
-	if(__NFUN_129__(ladderVol.IsAvailable(Pawn)))
+	if((!ladderVol.IsAvailable(Pawn)))
 	{
 		return false;
 	}
 	// End:0x73
-	if(__NFUN_130__(__NFUN_130__(m_TargetLadder.m_bIsTopOfLadder, ladderVol.IsAShortLadder()), __NFUN_129__(ladderVol.SpaceIsAvailableAtBottomOfLadder(true))))
+	if(((m_TargetLadder.m_bIsTopOfLadder && ladderVol.IsAShortLadder()) && (!ladderVol.SpaceIsAvailableAtBottomOfLadder(true))))
 	{
 		return false;
 	}
@@ -369,10 +369,10 @@ function bool LadderIsAvailable()
 function bool AreClimbingInSameDirection(R6Pawn npcPawn, R6Pawn PlayerPawn)
 {
 	// End:0x42
-	if(__NFUN_181__(PlayerPawn.Velocity.Z, 0.0000000))
+	if((PlayerPawn.Velocity.Z != 0.0000000))
 	{
 		// End:0x42
-		if(__NFUN_242__(npcPawn.IsMovingUpLadder(), PlayerPawn.IsMovingUpLadder()))
+		if((npcPawn.IsMovingUpLadder() == PlayerPawn.IsMovingUpLadder()))
 		{
 			return true;
 		}
@@ -384,7 +384,7 @@ function bool AreClimbingInSameDirection(R6Pawn npcPawn, R6Pawn PlayerPawn)
 // Called when killed
 function PawnDied()
 {
-	__NFUN_113__('Dead');
+	GotoState('Dead');
 	return;
 }
 
@@ -395,7 +395,7 @@ function PawnDied()
 function StopMoving()
 {
 	// End:0x0D
-	if(__NFUN_114__(Pawn, none))
+	if((Pawn == none))
 	{
 		return;
 	}
@@ -409,22 +409,22 @@ function StopMoving()
 event bool NotifyBump(Actor Other)
 {
 	// End:0x18
-	if(__NFUN_129__(Other.__NFUN_303__('R6Pawn')))
+	if((!Other.IsA('R6Pawn')))
 	{
 		return false;
 	}
 	// End:0xA3
-	if(__NFUN_132__(m_r6pawn.IsStationary(), __NFUN_129__(m_r6pawn.HasBumpPriority(R6Pawn(Other)))))
+	if((m_r6pawn.IsStationary() || (!m_r6pawn.HasBumpPriority(R6Pawn(Other)))))
 	{
 		// End:0x9E
-		if(__NFUN_130__(__NFUN_129__(m_bIgnoreBackupBump), __NFUN_129__(__NFUN_281__('ApproachLadder'))))
+		if(((!m_bIgnoreBackupBump) && (!IsInState('ApproachLadder'))))
 		{
 			StopMoving();
 			m_BumpedBy = Other;
 			// End:0x8E
-			if(__NFUN_255__(__NFUN_284__(), 'BumpBackUp'))
+			if((GetStateName() != 'BumpBackUp'))
 			{
-				GotoBumpBackUpState(__NFUN_284__());				
+				GotoBumpBackUpState(GetStateName());				
 			}
 			else
 			{
@@ -439,7 +439,7 @@ event bool NotifyBump(Actor Other)
 	}
 	else
 	{
-		return __NFUN_1813__(Other);
+		return PickActorAdjust(Other);
 	}
 	return;
 }
@@ -457,12 +457,12 @@ function bool IsInCrouchedPosture()
 function GotoBumpBackUpState(name returnState)
 {
 	// End:0x11
-	if(__NFUN_254__(returnState, 'BumpBackUp'))
+	if((returnState == 'BumpBackUp'))
 	{
 		return;
 	}
 	m_bumpBackUpNextState = returnState;
-	__NFUN_113__('BumpBackUp');
+	GotoState('BumpBackUp');
 	return;
 }
 
@@ -473,11 +473,11 @@ function GotoBumpBackUpState(name returnState)
 function bool IsBumpBackUpStateFinish()
 {
 	// End:0x21
-	if(__NFUN_176__(__NFUN_174__(m_fLastBump, 1.0000000), Level.TimeSeconds))
+	if(((m_fLastBump + 1.0000000) < Level.TimeSeconds))
 	{
 		return true;
 	}
-	return __NFUN_179__(DistanceTo(m_BumpedBy), float(c_iDistanceBumpBackUp));
+	return (DistanceTo(m_BumpedBy) >= float(c_iDistanceBumpBackUp));
 	return;
 }
 
@@ -487,7 +487,7 @@ function bool IsBumpBackUpStateFinish()
 //------------------------------------------------------------------
 function BumpBackUpStateFinished()
 {
-	__NFUN_231__("ScriptWarning: BumpBackUpStateFinished was not inherited");
+	Log("ScriptWarning: BumpBackUpStateFinished was not inherited");
 	return;
 }
 
@@ -500,17 +500,17 @@ function float DistanceTo(Actor member, optional bool bIncludeZ)
 	local Vector vDistance;
 
 	// End:0x11
-	if(__NFUN_114__(member, none))
+	if((member == none))
 	{
 		return 0.0000000;
 	}
-	vDistance = __NFUN_216__(Pawn.Location, member.Location);
+	vDistance = (Pawn.Location - member.Location);
 	// End:0x50
-	if(__NFUN_129__(bIncludeZ))
+	if((!bIncludeZ))
 	{
 		vDistance.Z = 0.0000000;
 	}
-	return __NFUN_225__(vDistance);
+	return VSize(vDistance);
 	return;
 }
 
@@ -542,7 +542,7 @@ function SetStateTestMakePath(Pawn anEnemy, R6Pawn.eMovementPace ePace)
 	Enemy = anEnemy;
 	m_r6pawn.m_eMovementPace = ePace;
 	LastSeenTime = Level.TimeSeconds;
-	__NFUN_113__('TestMakePath');
+	GotoState('TestMakePath');
 	return;
 }
 
@@ -554,14 +554,14 @@ function float GetCurrentChanceToHit(Actor aTarget)
 	local float fAngle, fDistance, fError;
 
 	// End:0x1A
-	if(__NFUN_114__(Pawn.EngineWeapon, none))
+	if((Pawn.EngineWeapon == none))
 	{
 		return 0.0000000;
 	}
-	fAngle = __NFUN_171__(Pawn.EngineWeapon.GetCurrentMaxAngle(), 0.0174533);
-	fAngle = __NFUN_189__(fAngle);
-	fDistance = __NFUN_225__(__NFUN_216__(Pawn.Location, aTarget.Location));
-	fError = __NFUN_171__(fAngle, fDistance);
+	fAngle = (Pawn.EngineWeapon.GetCurrentMaxAngle() * 0.0174533);
+	fAngle = Tan(fAngle);
+	fDistance = VSize((Pawn.Location - aTarget.Location));
+	fError = (fAngle * fDistance);
 	return __NFUN_172__(aTarget.CollisionRadius, fError);
 	return;
 }

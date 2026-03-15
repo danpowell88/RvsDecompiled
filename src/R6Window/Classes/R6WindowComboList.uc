@@ -39,7 +39,7 @@ function Created()
 
 function Setup()
 {
-	VertSB = UWindowVScrollbar(CreateWindow(m_SBClass, __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	VertSB = UWindowVScrollbar(CreateWindow(m_SBClass, (WinWidth - LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
 	return;
 }
 
@@ -52,23 +52,23 @@ function BeforePaint(Canvas C, float X, float Y)
 
 	Count = Items.Count();
 	// End:0x48
-	if(__NFUN_151__(Count, MaxVisible))
+	if((Count > MaxVisible))
 	{
-		WinHeight = __NFUN_174__(float(__NFUN_144__(ItemHeight, MaxVisible)), float(__NFUN_144__(VBorder, 2)));		
+		WinHeight = (float((ItemHeight * MaxVisible)) + float((VBorder * 2)));		
 	}
 	else
 	{
 		VertSB.pos = 0.0000000;
-		WinHeight = __NFUN_174__(float(__NFUN_144__(ItemHeight, Count)), float(__NFUN_144__(VBorder, 2)));
+		WinHeight = (float((ItemHeight * Count)) + float((VBorder * 2)));
 	}
 	ListX = Owner.EditBox.WinLeft;
-	ListY = __NFUN_175__(__NFUN_174__(Owner.Button.WinTop, Owner.Button.WinHeight), float(1));
+	ListY = ((Owner.Button.WinTop + Owner.Button.WinHeight) - float(1));
 	// End:0x172
-	if(__NFUN_151__(Count, MaxVisible))
+	if((Count > MaxVisible))
 	{
 		VertSB.ShowWindow();
 		VertSB.SetRange(0.0000000, float(Count), float(MaxVisible));
-		VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+		VertSB.WinLeft = (WinWidth - LookAndFeel.Size_ScrollbarWidth);
 		VertSB.WinTop = 0.0000000;
 		VertSB.SetSize(LookAndFeel.Size_ScrollbarWidth, WinHeight);		
 	}
@@ -96,22 +96,22 @@ function Paint(Canvas C, float X, float Y)
 	J0x4E:
 
 	// End:0x17C [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x114
 		if(VertSB.bWindowVisible)
 		{
 			// End:0x111
-			if(__NFUN_130__(__NFUN_179__(float(Count), VertSB.pos), __NFUN_150__(__NFUN_147__(Count, int(VertSB.pos)), MaxVisible)))
+			if(((float(Count) >= VertSB.pos) && ((Count - int(VertSB.pos)) < MaxVisible)))
 			{
-				DrawItem(C, i, float(HBorder), __NFUN_174__(float(VBorder), __NFUN_171__(float(ItemHeight), __NFUN_175__(float(Count), VertSB.pos))), __NFUN_175__(__NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), VertSB.WinWidth), float(ItemHeight));
+				DrawItem(C, i, float(HBorder), (float(VBorder) + (float(ItemHeight) * (float(Count) - VertSB.pos))), ((WinWidth - float((2 * HBorder))) - VertSB.WinWidth), float(ItemHeight));
 			}			
 		}
 		else
 		{
-			DrawItem(C, i, float(HBorder), float(__NFUN_146__(VBorder, __NFUN_144__(ItemHeight, Count))), __NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), float(ItemHeight));
+			DrawItem(C, i, float(HBorder), float((VBorder + (ItemHeight * Count))), (WinWidth - float((2 * HBorder))), float(ItemHeight));
 		}
-		__NFUN_165__(Count);
+		(Count++);
 		i = UWindowComboListItem(i.Next);
 		// [Loop Continue]
 		goto J0x4E;
@@ -122,7 +122,7 @@ function Paint(Canvas C, float X, float Y)
 function DrawMenuBackground(Canvas C)
 {
 	C.Style = m_BGRenderStyle;
-	C.__NFUN_2626__(m_BGColor.R, m_BGColor.G, m_BGColor.B);
+	C.SetDrawColor(m_BGColor.R, m_BGColor.G, m_BGColor.B);
 	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	DrawSimpleBorder(C);
 	return;
@@ -134,26 +134,26 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 
 	pComboListItem = UWindowComboListItem(Item);
 	// End:0xDE
-	if(__NFUN_114__(Selected, Item))
+	if((Selected == Item))
 	{
 		C.Style = m_BGSelRenderStyle;
-		C.__NFUN_2626__(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
+		C.SetDrawColor(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
 		DrawStretchedTextureSegment(C, X, Y, W, H, float(m_BGSelRegion.X), float(m_BGSelRegion.Y), float(m_BGSelRegion.W), float(m_BGSelRegion.H), m_BGSelTexture);
-		C.__NFUN_2626__(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
+		C.SetDrawColor(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
 	}
 	else
 	{
 		// End:0x11D
 		if(pComboListItem.bDisabled)
 		{
-			C.__NFUN_2626__(m_DisableTextColor.R, m_DisableTextColor.G, m_DisableTextColor.B);			
+			C.SetDrawColor(m_DisableTextColor.R, m_DisableTextColor.G, m_DisableTextColor.B);			
 		}
 		else
 		{
-			C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+			C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 		}
 	}
-	ClipText(C, __NFUN_174__(__NFUN_174__(X, float(TextBorder)), float(2)), __NFUN_174__(Y, float(3)), pComboListItem.Value);
+	ClipText(C, ((X + float(TextBorder)) + float(2)), (Y + float(3)), pComboListItem.Value);
 	return;
 }
 

@@ -410,9 +410,9 @@ function bool SetAttachmentStaticMesh(R6Pawn.EHeadAttachmentType eAttType, R6Paw
 			break;
 	}
 	// End:0x1CD4
-	if(__NFUN_151__(iNbChoice, 0))
+	if((iNbChoice > 0))
 	{
-		sm = StaticMesh(DynamicLoadObject(aMesh[__NFUN_167__(iNbChoice)], Class'Engine.StaticMesh'));
+		sm = StaticMesh(DynamicLoadObject(aMesh[Rand(iNbChoice)], Class'Engine.StaticMesh'));
 		SetStaticMesh(sm);
 		return true;		
 	}

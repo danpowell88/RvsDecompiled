@@ -15,7 +15,7 @@ function bool InitActionFor(ScriptedController C)
 	local PlayerController P;
 
 	// End:0x30
-	foreach C.__NFUN_313__(Class'Engine.PlayerController', P)
+	foreach C.DynamicActors(Class'Engine.PlayerController', P)
 	{
 		P.ClientPlaySound(Sound, 3);		
 	}	
@@ -25,7 +25,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(Sound));
+	return (ActionString @ string(Sound));
 	return;
 }
 

@@ -16,7 +16,7 @@ function Init(Actor aActor)
 
 function PlayRecordedMsgVoices(R6Pawn aPawn, Pawn.EPreRecordedMsgVoices eRainbowVoices)
 {
-	aPawn.__NFUN_2730__(m_sndPreRecordedMsg[int(eRainbowVoices)], 8, 10, 1);
+	aPawn.PlayVoices(m_sndPreRecordedMsg[int(eRainbowVoices)], 8, 10, 1);
 	return;
 }
 

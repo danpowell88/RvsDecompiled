@@ -18,7 +18,7 @@ var(PlayAnim) editinline array<editinline name> m_aAnimName;
 
 function name GetNextAnim()
 {
-	return m_aAnimName[__NFUN_167__(m_aAnimName.Length)];
+	return m_aAnimName[Rand(m_aAnimName.Length)];
 	return;
 }
 

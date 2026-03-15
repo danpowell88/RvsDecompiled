@@ -42,15 +42,15 @@ var string m_szDetonatorReticuleClass;
 replication
 {
 	// Pos:0x00D
-	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) == int(ROLE_Authority)))
 		ClientMyUnitIsDestroyed;
 
 	// Pos:0x01A
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		ServerCancelChargeInstallation, ServerGotoSetExplosive;
 
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		BulletActor, m_bDetonator, 
 		m_bHide;
 }
@@ -63,7 +63,7 @@ event NbBulletChange()
 function MyUnitIsDestroyed()
 {
 	// End:0x18
-	if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) == 0))
 	{
 		m_bHide = true;		
 	}
@@ -83,31 +83,31 @@ simulated function ClientMyUnitIsDestroyed()
 	m_bChargeInPosition = false;
 	BulletActor.m_bDestroyedByImpact = true;
 	// End:0x86
-	if(__NFUN_281__('ChargeArmed'))
+	if(IsInState('ChargeArmed'))
 	{
 		R6Pawn(Owner).m_bIsFiringState = false;
 		// End:0x65
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
-			m_FPHands.__NFUN_113__('DiscardWeapon');
+			m_FPHands.GotoState('DiscardWeapon');
 		}
 		// End:0x7C
-		if(__NFUN_152__(int(m_iNbBulletsInWeapon), 0))
+		if((int(m_iNbBulletsInWeapon) <= 0))
 		{
-			__NFUN_113__('NoChargesLeft');			
+			GotoState('NoChargesLeft');			
 		}
 		else
 		{
-			__NFUN_113__('GetNextCharge');
+			GotoState('GetNextCharge');
 		}		
 	}
 	else
 	{
 		// End:0xAA
-		if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+		if((int(m_iNbBulletsInWeapon) > 0))
 		{
 			// End:0xAA
-			if(__NFUN_119__(m_FPHands, none))
+			if((m_FPHands != none))
 			{
 				SetAmmoStaticMesh();
 				SwitchToChargeHandAnimations();
@@ -120,7 +120,7 @@ simulated function ClientMyUnitIsDestroyed()
 simulated function UpdateHands()
 {
 	// End:0x32
-	if(__NFUN_242__(m_bChargeInPosition, true))
+	if((m_bChargeInPosition == true))
 	{
 		m_FPWeapon.m_smGun.SetStaticMesh(m_DetonatorStaticMesh);
 		SwitchToDetonatorHandAnimations();		
@@ -152,22 +152,22 @@ simulated function ServerPlaceCharge(Vector vLocation)
 	local Rotator rDesiredRotation;
 
 	// End:0x0F
-	if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) == 0))
 	{
 		return;
 	}
-	__NFUN_140__(m_iNbBulletsInWeapon);
+	(m_iNbBulletsInWeapon--);
 	m_bDetonator = true;
 	rDesiredRotation = Pawn(Owner).GetViewRotation();
 	rDesiredRotation.Pitch = 0;
-	__NFUN_161__(rDesiredRotation.Yaw, 32768);
-	BulletActor = R6Grenade(__NFUN_278__(m_pBulletClass, self));
+	(rDesiredRotation.Yaw += 32768);
+	BulletActor = R6Grenade(Spawn(m_pBulletClass, self));
 	// End:0xE1
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("R6DemolitionsGadget :: ServerPlaceCharge() ", string(BulletActor)), " rDesiredRotation="), string(rDesiredRotation)), " vLocation="), string(vLocation)));
+		Log(((((("R6DemolitionsGadget :: ServerPlaceCharge() " $ string(BulletActor)) $ " rDesiredRotation=") $ string(rDesiredRotation)) $ " vLocation=") $ string(vLocation)));
 	}
-	BulletActor.__NFUN_267__(__NFUN_215__(vLocation, vect(0.0000000, 0.0000000, 10.0000000)));
+	BulletActor.__NFUN_267__((vLocation + vect(0.0000000, 0.0000000, 10.0000000))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	BulletActor.__NFUN_299__(rDesiredRotation);
 	BulletActor.m_Weapon = self;
 	BulletActor.Instigator = Pawn(Owner);

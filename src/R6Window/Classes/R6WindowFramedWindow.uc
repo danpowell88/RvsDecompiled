@@ -41,11 +41,11 @@ var string m_szStatusBarText;
 
 function Created()
 {
-	m_ClientArea = CreateWindow(m_ClientClass, float(LookAndFeel.FrameL.W), float(LookAndFeel.FrameT.H), __NFUN_175__(WinWidth, float(__NFUN_146__(LookAndFeel.FrameL.W, LookAndFeel.FrameR.W))), __NFUN_175__(WinHeight, float(__NFUN_146__(LookAndFeel.FrameB.H, LookAndFeel.FrameT.H))), OwnerWindow);
+	m_ClientArea = CreateWindow(m_ClientClass, float(LookAndFeel.FrameL.W), float(LookAndFeel.FrameT.H), (WinWidth - float((LookAndFeel.FrameL.W + LookAndFeel.FrameR.W))), (WinHeight - float((LookAndFeel.FrameB.H + LookAndFeel.FrameT.H))), OwnerWindow);
 	// End:0x138
 	if(m_bDisplayClose)
 	{
-		m_CloseBoxButton = UWindowFrameCloseBox(CreateWindow(Class'UWindow.UWindowFrameCloseBox', __NFUN_175__(__NFUN_175__(__NFUN_175__(WinWidth, float(LookAndFeel.FrameTL.W)), float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W)), float(1)), 1.0000000, float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W), float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.H), self));
+		m_CloseBoxButton = UWindowFrameCloseBox(CreateWindow(Class'UWindow.UWindowFrameCloseBox', (((WinWidth - float(LookAndFeel.FrameTL.W)) - float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W)) - float(1)), 1.0000000, float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W), float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.H), self));
 	}
 	return;
 }
@@ -58,7 +58,7 @@ function Texture GetLookAndFeelTexture()
 
 function bool IsActive()
 {
-	return __NFUN_114__(ParentWindow.ActiveWindow, self);
+	return (ParentWindow.ActiveWindow == self);
 	return;
 }
 
@@ -73,12 +73,12 @@ function BeforePaint(Canvas C, float X, float Y)
 		Resized();
 	}
 	// End:0x49
-	if(__NFUN_119__(m_CloseBoxButton, none))
+	if((m_CloseBoxButton != none))
 	{
 		R6WindowLookAndFeel(LookAndFeel).R6FW_SetupFrameButtons(self, C);
 	}
 	// End:0x10E
-	if(__NFUN_123__(m_szWindowTitle, ""))
+	if((m_szWindowTitle != ""))
 	{
 		C.Font = Root.Fonts[8];
 		TextSize(C, m_szWindowTitle, W, H);
@@ -91,12 +91,12 @@ function BeforePaint(Canvas C, float X, float Y)
 				break;
 			// End:0xEB
 			case 1:
-				m_fTitleOffSet = __NFUN_175__(__NFUN_175__(WinWidth, W), float(LookAndFeel.FrameTL.W));
+				m_fTitleOffSet = ((WinWidth - W) - float(LookAndFeel.FrameTL.W));
 				// End:0x10E
 				break;
 			// End:0x10B
 			case 2:
-				m_fTitleOffSet = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
+				m_fTitleOffSet = ((WinWidth - W) / float(2));
 				// End:0x10E
 				break;
 			// End:0xFFFF
@@ -126,7 +126,7 @@ function LMouseDown(float X, float Y)
 	if(m_bMovable)
 	{
 		// End:0x7D
-		if(__NFUN_154__(int(H), int(8)))
+		if((int(H) == int(8)))
 		{
 			m_fMoveX = X;
 			m_fMoveY = Y;
@@ -196,7 +196,7 @@ function Resized()
 	local Region R;
 
 	// End:0x0D
-	if(__NFUN_114__(m_ClientArea, none))
+	if((m_ClientArea == none))
 	{
 		return;
 	}
@@ -204,7 +204,7 @@ function Resized()
 	m_ClientArea.WinLeft = float(R.X);
 	m_ClientArea.WinTop = float(R.Y);
 	// End:0xC5
-	if(__NFUN_132__(__NFUN_181__(float(R.W), m_ClientArea.WinWidth), __NFUN_181__(float(R.H), m_ClientArea.WinHeight)))
+	if(((float(R.W) != m_ClientArea.WinWidth) || (float(R.H) != m_ClientArea.WinHeight)))
 	{
 		m_ClientArea.SetSize(float(R.W), float(R.H));
 	}
@@ -221,10 +221,10 @@ function MouseMove(float X, float Y)
 	if(m_bMovable)
 	{
 		// End:0x7F
-		if(__NFUN_130__(m_bMoving, bMouseDown))
+		if((m_bMoving && bMouseDown))
 		{
-			WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, X), m_fMoveX)));
-			WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, Y), m_fMoveY)));			
+			WinLeft = float(int(((WinLeft + X) - m_fMoveX)));
+			WinTop = float(int(((WinTop + Y) - m_fMoveY)));			
 		}
 		else
 		{
@@ -233,7 +233,7 @@ function MouseMove(float X, float Y)
 	}
 	Cursor = Root.NormalCursor;
 	// End:0x13F
-	if(__NFUN_130__(m_bSizable, __NFUN_129__(m_bMoving)))
+	if((m_bSizable && (!m_bMoving)))
 	{
 		switch(H)
 		{
@@ -281,59 +281,59 @@ function MouseMove(float X, float Y)
 				Cursor = Root.DiagCursor1;
 				fOldW = WinWidth;
 				fOldH = WinHeight;
-				SetSize(float(__NFUN_250__(int(m_fMinWinWidth), int(__NFUN_175__(WinWidth, X)))), float(__NFUN_250__(int(m_fMinWinHeight), int(__NFUN_175__(WinHeight, Y)))));
-				WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, fOldW), WinWidth)));
-				WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, fOldH), WinHeight)));
+				SetSize(float(Max(int(m_fMinWinWidth), int((WinWidth - X)))), float(Max(int(m_fMinWinHeight), int((WinHeight - Y)))));
+				WinLeft = float(int(((WinLeft + fOldW) - WinWidth)));
+				WinTop = float(int(((WinTop + fOldH) - WinHeight)));
 			}
 			// End:0x256
 			if(m_bTSizing)
 			{
 				Cursor = Root.NSCursor;
 				fOldH = WinHeight;
-				SetSize(WinWidth, float(__NFUN_250__(int(m_fMinWinHeight), int(__NFUN_175__(WinHeight, Y)))));
-				WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, fOldH), WinHeight)));
+				SetSize(WinWidth, float(Max(int(m_fMinWinHeight), int((WinHeight - Y)))));
+				WinTop = float(int(((WinTop + fOldH) - WinHeight)));
 			}
 			// End:0x2CC
 			if(m_bTRSizing)
 			{
 				Cursor = Root.DiagCursor2;
 				fOldH = WinHeight;
-				SetSize(float(__NFUN_250__(int(m_fMinWinWidth), int(X))), float(__NFUN_250__(int(m_fMinWinHeight), int(__NFUN_175__(WinHeight, Y)))));
-				WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, fOldH), WinHeight)));
+				SetSize(float(Max(int(m_fMinWinWidth), int(X))), float(Max(int(m_fMinWinHeight), int((WinHeight - Y)))));
+				WinTop = float(int(((WinTop + fOldH) - WinHeight)));
 			}
 			// End:0x335
 			if(m_bLSizing)
 			{
 				Cursor = Root.WECursor;
 				fOldW = WinWidth;
-				SetSize(float(__NFUN_250__(int(m_fMinWinWidth), int(__NFUN_175__(WinWidth, X)))), WinHeight);
-				WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, fOldW), WinWidth)));
+				SetSize(float(Max(int(m_fMinWinWidth), int((WinWidth - X)))), WinHeight);
+				WinLeft = float(int(((WinLeft + fOldW) - WinWidth)));
 			}
 			// End:0x36F
 			if(m_bRSizing)
 			{
 				Cursor = Root.WECursor;
-				SetSize(float(__NFUN_250__(int(m_fMinWinWidth), int(X))), WinHeight);
+				SetSize(float(Max(int(m_fMinWinWidth), int(X))), WinHeight);
 			}
 			// End:0x3E5
 			if(m_bBLSizing)
 			{
 				Cursor = Root.DiagCursor2;
 				fOldW = WinWidth;
-				SetSize(float(__NFUN_250__(int(m_fMinWinWidth), int(__NFUN_175__(WinWidth, X)))), float(__NFUN_250__(int(m_fMinWinHeight), int(Y))));
-				WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, fOldW), WinWidth)));
+				SetSize(float(Max(int(m_fMinWinWidth), int((WinWidth - X)))), float(Max(int(m_fMinWinHeight), int(Y))));
+				WinLeft = float(int(((WinLeft + fOldW) - WinWidth)));
 			}
 			// End:0x41F
 			if(m_bBSizing)
 			{
 				Cursor = Root.NSCursor;
-				SetSize(WinWidth, float(__NFUN_250__(int(m_fMinWinHeight), int(Y))));
+				SetSize(WinWidth, float(Max(int(m_fMinWinHeight), int(Y))));
 			}
 			// End:0x466
 			if(m_bBRSizing)
 			{
 				Cursor = Root.DiagCursor1;
-				SetSize(float(__NFUN_250__(int(m_fMinWinWidth), int(X))), float(__NFUN_250__(int(m_fMinWinHeight), int(Y))));
+				SetSize(float(Max(int(m_fMinWinWidth), int(X))), float(Max(int(m_fMinWinHeight), int(Y))));
 			}			
 		}
 		else
@@ -360,7 +360,7 @@ function ToolTip(string strTip)
 function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, int iKey)
 {
 	// End:0x3F
-	if(__NFUN_132__(__NFUN_154__(int(Msg), int(11)), __NFUN_129__(WaitModal())))
+	if(((int(Msg) == int(11)) || (!WaitModal())))
 	{
 		super.WindowEvent(Msg, C, X, Y, iKey);		
 	}
@@ -369,7 +369,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x90
 		if(WaitModal())
 		{
-			ModalWindow.WindowEvent(Msg, C, __NFUN_175__(X, ModalWindow.WinLeft), __NFUN_175__(Y, ModalWindow.WinTop), iKey);
+			ModalWindow.WindowEvent(Msg, C, (X - ModalWindow.WinLeft), (Y - ModalWindow.WinTop), iKey);
 		}
 	}
 	return;
@@ -389,16 +389,16 @@ function SetDisplayClose(bool bNewDisplay)
 	if(m_bDisplayClose)
 	{
 		// End:0xBD
-		if(__NFUN_114__(m_CloseBoxButton, none))
+		if((m_CloseBoxButton == none))
 		{
-			m_CloseBoxButton = UWindowFrameCloseBox(CreateWindow(Class'UWindow.UWindowFrameCloseBox', __NFUN_175__(__NFUN_175__(__NFUN_175__(WinWidth, float(LookAndFeel.FrameTL.W)), float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W)), float(1)), 1.0000000, float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W), float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.H), self));
+			m_CloseBoxButton = UWindowFrameCloseBox(CreateWindow(Class'UWindow.UWindowFrameCloseBox', (((WinWidth - float(LookAndFeel.FrameTL.W)) - float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W)) - float(1)), 1.0000000, float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.W), float(R6WindowLookAndFeel(LookAndFeel).m_CloseBoxUp.H), self));
 			m_CloseBoxButton.ShowWindow();
 		}		
 	}
 	else
 	{
 		// End:0xDA
-		if(__NFUN_119__(m_CloseBoxButton, none))
+		if((m_CloseBoxButton != none))
 		{
 			m_CloseBoxButton.Close();
 		}

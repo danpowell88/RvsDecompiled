@@ -31,7 +31,7 @@ function ArrowRotationIsOK()
 
 event PostBeginPlay()
 {
-	m_ArrowInPlanningView = __NFUN_278__(Class'R6Game.R6ArrowIcon', self);
+	m_ArrowInPlanningView = Spawn(Class'R6Game.R6ArrowIcon', self);
 	return;
 }
 
@@ -49,13 +49,13 @@ function FollowPlanning(R6PlanningInfo m_pTeamInfo)
 {
 	m_PlanToFollow = m_pTeamInfo;
 	m_PlanToFollow.m_iCurrentPathIndex = -1;
-	__NFUN_113__('FollowPlan');
+	GotoState('FollowPlan');
 	return;
 }
 
 function StopFollowingPlanning()
 {
-	__NFUN_113__('None');
+	GotoState('None');
 	return;
 }
 
@@ -87,12 +87,12 @@ state FollowPlan
 		OwnerPlanningCtrl = R6PlanningCtrl(Owner);
 		m_pActorToReach = m_PlanToFollow.GetNextActionPoint();
 		// End:0x4DB
-		if(__NFUN_130__(__NFUN_119__(m_pActorToReach, none), __NFUN_119__(m_PlanToFollow.PreviewNextActionPoint(), none)))
+		if(((m_pActorToReach != none) && (m_PlanToFollow.PreviewNextActionPoint() != none)))
 		{
 			// End:0xA3
-			if(__NFUN_130__(m_pActorToReach.__NFUN_303__('R6Ladder'), __NFUN_242__(R6Ladder(m_pActorToReach).m_bIsTopOfLadder, false)))
+			if((m_pActorToReach.IsA('R6Ladder') && (R6Ladder(m_pActorToReach).m_bIsTopOfLadder == false)))
 			{
-				m_ArrowInPlanningView.__NFUN_267__(__NFUN_215__(m_pActorToReach.Location, vect(0.0000000, 0.0000000, 100.0000000)));				
+				m_ArrowInPlanningView.__NFUN_267__((m_pActorToReach.Location + vect(0.0000000, 0.0000000, 100.0000000))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;				
 			}
 			else
 			{

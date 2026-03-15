@@ -195,25 +195,25 @@ function UWindowLookAndFeel GetLookAndFeel(string LFClassName)
 	J0x22:
 
 	// End:0xA9 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		// End:0x75
-		if(__NFUN_114__(LooksAndFeels[i], none))
+		if((LooksAndFeels[i] == none))
 		{
 			LooksAndFeels[i] = new LFClass;
 			LooksAndFeels[i].Setup();
 			return LooksAndFeels[i];
 		}
 		// End:0x9F
-		if(__NFUN_114__(LooksAndFeels[i].Class, LFClass))
+		if((LooksAndFeels[i].Class == LFClass))
 		{
 			return LooksAndFeels[i];
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x22;
 	}
-	__NFUN_231__("Out of LookAndFeel array space!!");
+	Log("Out of LookAndFeel array space!!");
 	return none;
 	return;
 }
@@ -288,7 +288,7 @@ function MoveMouse(float X, float Y)
 	MouseX = X;
 	MouseY = Y;
 	// End:0x3A
-	if(__NFUN_129__(bMouseCapture))
+	if((!bMouseCapture))
 	{
 		NewMouseWindow = FindWindowUnder(X, Y);		
 	}
@@ -297,14 +297,14 @@ function MoveMouse(float X, float Y)
 		NewMouseWindow = MouseWindow;
 	}
 	// End:0x7D
-	if(__NFUN_119__(NewMouseWindow, MouseWindow))
+	if((NewMouseWindow != MouseWindow))
 	{
 		MouseWindow.MouseLeave();
 		NewMouseWindow.MouseEnter();
 		MouseWindow = NewMouseWindow;
 	}
 	// End:0xE5
-	if(__NFUN_132__(__NFUN_181__(MouseX, OldMouseX), __NFUN_181__(MouseY, OldMouseY)))
+	if(((MouseX != OldMouseX) || (MouseY != OldMouseY)))
 	{
 		OldMouseX = MouseX;
 		OldMouseY = MouseY;
@@ -325,8 +325,8 @@ function DrawMouse(Canvas C)
 	}
 	else
 	{
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
-		C.__NFUN_2623__(__NFUN_175__(__NFUN_171__(MouseX, GUIScale), float(MouseWindow.Cursor.HotX)), __NFUN_175__(__NFUN_171__(MouseY, GUIScale), float(MouseWindow.Cursor.HotY)));
+		C.SetDrawColor(byte(255), byte(255), byte(255));
+		C.SetPos(((MouseX * GUIScale) - float(MouseWindow.Cursor.HotX)), ((MouseY * GUIScale) - float(MouseWindow.Cursor.HotY)));
 		C.DrawIcon(MouseWindow.Cursor.Tex, 1.0000000);
 	}
 	return;
@@ -374,7 +374,7 @@ function CaptureMouse(optional UWindowWindow W)
 {
 	bMouseCapture = true;
 	// End:0x1E
-	if(__NFUN_119__(W, none))
+	if((W != none))
 	{
 		MouseWindow = W;
 	}
@@ -405,7 +405,7 @@ function RemoveHotkeyWindow(UWindowWindow W)
 
 	L = HotkeyWindows.FindWindow(W);
 	// End:0x34
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		L.Remove();
 	}
@@ -418,7 +418,7 @@ function bool IsAHotKeyWindow(UWindowWindow W)
 
 	L = HotkeyWindows.FindWindow(W);
 	// End:0x27
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		return true;
 	}
@@ -477,10 +477,10 @@ function bool HotKeyDown(int Key, float X, float Y)
 	J0x19:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		// End:0x66
-		if(__NFUN_130__(__NFUN_119__(L.Window, self), L.Window.HotKeyDown(Key, X, Y)))
+		if(((L.Window != self) && L.Window.HotKeyDown(Key, X, Y)))
 		{
 			return true;
 		}
@@ -500,10 +500,10 @@ function bool HotKeyUp(int Key, float X, float Y)
 	J0x19:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		// End:0x66
-		if(__NFUN_130__(__NFUN_119__(L.Window, self), L.Window.HotKeyUp(Key, X, Y)))
+		if(((L.Window != self) && L.Window.HotKeyUp(Key, X, Y)))
 		{
 			return true;
 		}
@@ -523,10 +523,10 @@ function bool MouseUpDown(int Key, float X, float Y)
 	J0x19:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		// End:0x66
-		if(__NFUN_130__(__NFUN_119__(L.Window, self), L.Window.MouseUpDown(Key, X, Y)))
+		if(((L.Window != self) && L.Window.MouseUpDown(Key, X, Y)))
 		{
 			return true;
 		}
@@ -541,7 +541,7 @@ function bool MouseUpDown(int Key, float X, float Y)
 function CloseActiveWindow()
 {
 	// End:0x1D
-	if(__NFUN_119__(ActiveWindow, none))
+	if((ActiveWindow != none))
 	{
 		ActiveWindow.EscClose();		
 	}
@@ -560,8 +560,8 @@ function Resized()
 
 function SetScale(float NewScale)
 {
-	WinWidth = __NFUN_172__(RealWidth, NewScale);
-	WinHeight = __NFUN_172__(RealHeight, NewScale);
+	WinWidth = (RealWidth / NewScale);
+	WinHeight = (RealHeight / NewScale);
 	GUIScale = NewScale;
 	ClippingRegion.X = 0;
 	ClippingRegion.Y = 0;
@@ -606,7 +606,7 @@ function SetupFonts()
 function ChangeLookAndFeel(string NewLookAndFeel)
 {
 	LookAndFeelClass = NewLookAndFeel;
-	__NFUN_536__();
+	SaveConfig();
 	Console.ResetUWindow();
 	return;
 }
@@ -633,7 +633,7 @@ function QuitGame()
 
 function DoQuitGame()
 {
-	__NFUN_536__();
+	SaveConfig();
 	Console.ViewportOwner.Actor.ConsoleCommand("exit");
 	return;
 }
@@ -644,11 +644,11 @@ function Tick(float Delta)
 	if(bRequestQuit)
 	{
 		// End:0x1E
-		if(__NFUN_177__(QuitTime, 0.2500000))
+		if((QuitTime > 0.2500000))
 		{
 			DoQuitGame();
 		}
-		__NFUN_184__(QuitTime, Delta);
+		(QuitTime += Delta);
 	}
 	super.Tick(Delta);
 	return;
@@ -682,13 +682,13 @@ function DrawBackGroundEffect(Canvas C, Color _BGColor)
 	OrgY = C.OrgY;
 	ClipX = C.ClipX;
 	ClipY = C.ClipY;
-	C.__NFUN_2624__(0.0000000, 0.0000000);
-	C.__NFUN_2625__(float(C.SizeX), float(C.SizeY));
-	C.__NFUN_2626__(_BGColor.R, _BGColor.G, _BGColor.B, _BGColor.A);
-	C.__NFUN_2623__(0.0000000, 0.0000000);
-	C.__NFUN_466__(Texture'UWindow.WhiteTexture', float(C.SizeX), float(C.SizeY), 0.0000000, 0.0000000, 10.0000000, 10.0000000);
-	C.__NFUN_2625__(ClipX, ClipY);
-	C.__NFUN_2624__(OrgX, OrgY);
+	C.SetOrigin(0.0000000, 0.0000000);
+	C.SetClip(float(C.SizeX), float(C.SizeY));
+	C.SetDrawColor(_BGColor.R, _BGColor.G, _BGColor.B, _BGColor.A);
+	C.SetPos(0.0000000, 0.0000000);
+	C.DrawTile(Texture'UWindow.WhiteTexture', float(C.SizeX), float(C.SizeY), 0.0000000, 0.0000000, 10.0000000, 10.0000000);
+	C.SetClip(ClipX, ClipY);
+	C.SetOrigin(OrgX, OrgY);
 	return;
 }
 
@@ -719,7 +719,7 @@ function UnRegisterMsgWindow()
 function ProcessGSMsg(string _szMsg)
 {
 	// End:0x1F
-	if(__NFUN_119__(m_NotifyMsgWindow, none))
+	if((m_NotifyMsgWindow != none))
 	{
 		m_NotifyMsgWindow.ProcessGSMsg(_szMsg);
 	}

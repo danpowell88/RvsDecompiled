@@ -38,7 +38,7 @@ function LMouseDown(float X, float Y)
 		return;
 	}
 	// End:0x7B
-	if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+	if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).m_bLevelUp = 1;
 		R6PlanningCtrl(GetPlayerOwner()).m_bGoLevelUp = 1;
@@ -56,7 +56,7 @@ function LMouseUp(float X, float Y)
 		return;
 	}
 	// End:0x5E
-	if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+	if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).m_bLevelUp = 0;
 		R6PlanningCtrl(GetPlayerOwner()).m_bGoLevelUp = 1;

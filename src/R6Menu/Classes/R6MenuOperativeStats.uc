@@ -42,28 +42,28 @@ function Created()
 {
 	local float Y, X, TitlesHeight, ValuesHeight;
 
-	TitlesHeight = __NFUN_174__(m_fTitleHeight, m_fYPaddingBetweenElements);
+	TitlesHeight = (m_fTitleHeight + m_fYPaddingBetweenElements);
 	ValuesHeight = float(Class'R6Menu.R6MenuOperativeSkillsLabel'.default.m_BGTextureRegion.H);
 	m_TNbMissions = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, m_fTopYPadding, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TNbMissions.Text = Localize("R6Operative", "NbMissions", "R6Menu");
 	m_TNbMissions.m_BGTexture = none;
-	Y = __NFUN_174__(m_TNbMissions.WinTop, TitlesHeight);
+	Y = (m_TNbMissions.WinTop + TitlesHeight);
 	m_TTerroKilled = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TTerroKilled.Text = Localize("R6Operative", "TerroKilled", "R6Menu");
 	m_TTerroKilled.m_BGTexture = none;
-	Y = __NFUN_174__(m_TTerroKilled.WinTop, TitlesHeight);
+	Y = (m_TTerroKilled.WinTop + TitlesHeight);
 	m_TRoundsFired = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TRoundsFired.Text = Localize("R6Operative", "RoundsFired", "R6Menu");
 	m_TRoundsFired.m_BGTexture = none;
-	Y = __NFUN_174__(m_TRoundsFired.WinTop, TitlesHeight);
+	Y = (m_TRoundsFired.WinTop + TitlesHeight);
 	m_TRoundsOnTarget = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TRoundsOnTarget.Text = Localize("R6Operative", "RoundsOnTarget", "R6Menu");
 	m_TRoundsOnTarget.m_BGTexture = none;
-	Y = __NFUN_174__(m_TRoundsOnTarget.WinTop, TitlesHeight);
+	Y = (m_TRoundsOnTarget.WinTop + TitlesHeight);
 	m_TShootPercent = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TShootPercent.Text = Localize("R6Operative", "ShootPercent", "R6Menu");
 	m_TShootPercent.m_BGTexture = none;
-	X = __NFUN_175__(__NFUN_175__(WinWidth, m_fValueLabelWidth), m_fHSidePadding);
+	X = ((WinWidth - m_fValueLabelWidth) - m_fHSidePadding);
 	Y = m_TNbMissions.WinTop;
 	m_NNbMissions = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', X, Y, m_fValueLabelWidth, ValuesHeight, self));
 	m_NNbMissions.Align = 1;

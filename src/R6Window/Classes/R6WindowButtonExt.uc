@@ -56,13 +56,13 @@ function BeforePaint(Canvas C, float X, float Y)
 	{
 		m_bOneTime = false;
 		// End:0x85
-		if(__NFUN_123__(Text, ""))
+		if((Text != ""))
 		{
 			C.Font = m_TextFont;
 			TextSize(C, Text, W, H);
-			__NFUN_184__(m_fXText, float(2));
-			m_fYTextPos = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-			m_fYTextPos = float(int(__NFUN_174__(m_fYTextPos, 0.5000000)));
+			(m_fXText += float(2));
+			m_fYTextPos = ((WinHeight - H) / float(2));
+			m_fYTextPos = float(int((m_fYTextPos + 0.5000000)));
 		}
 	}
 	return;
@@ -75,7 +75,7 @@ function Paint(Canvas C, float X, float Y)
 	local int i;
 
 	// End:0x62
-	if(__NFUN_129__(bDisabled))
+	if((!bDisabled))
 	{
 		m_bMouseIsOver = MouseIsOver();
 		// End:0x2E
@@ -87,7 +87,7 @@ function Paint(Canvas C, float X, float Y)
 		if(m_bMouseOnButton)
 		{
 			// End:0x62
-			if(__NFUN_123__(ToolTipString, ""))
+			if((ToolTipString != ""))
 			{
 				// End:0x5A
 				if(m_bMouseIsOver)
@@ -103,7 +103,7 @@ function Paint(Canvas C, float X, float Y)
 	}
 	DrawCheckBox(C, m_bMouseIsOver);
 	// End:0x1F0
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		C.Font = m_TextFont;
 		C.SpaceX = 0.0000000;
@@ -111,7 +111,7 @@ function Paint(Canvas C, float X, float Y)
 		// End:0xE8
 		if(bDisabled)
 		{
-			C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);			
+			C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);			
 		}
 		else
 		{
@@ -119,7 +119,7 @@ function Paint(Canvas C, float X, float Y)
 			if(m_bMouseIsOver)
 			{
 				vTempColor = m_OverTextColor;
-				C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);				
+				C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);				
 			}
 			else
 			{
@@ -127,7 +127,7 @@ function Paint(Canvas C, float X, float Y)
 				if(vTempColor != m_vTextColor)
 				{
 					vTempColor = m_vTextColor;
-					C.__NFUN_2626__(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
+					C.SetDrawColor(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
 				}
 			}
 		}
@@ -136,10 +136,10 @@ function Paint(Canvas C, float X, float Y)
 		J0x192:
 
 		// End:0x1F0 [Loop If]
-		if(__NFUN_150__(i, m_iNumberOfCheckBox))
+		if((i < m_iNumberOfCheckBox))
 		{
-			ClipText(C, __NFUN_174__(__NFUN_174__(m_stCheckBox[i].fXBoxPos, float(m_RButtonBG.W)), float(2)), m_fYTextPos, m_stCheckBox[i].szText, true);
-			__NFUN_165__(i);
+			ClipText(C, ((m_stCheckBox[i].fXBoxPos + float(m_RButtonBG.W)) + float(2)), m_fYTextPos, m_stCheckBox[i].szText, true);
+			(i++);
 			// [Loop Continue]
 			goto J0x192;
 		}
@@ -155,33 +155,33 @@ function DrawCheckBox(Canvas C, bool _bMouseOverButton)
 	// End:0x47
 	if(bDisabled)
 	{
-		C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);		
+		C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);		
 	}
 	else
 	{
 		// End:0x7D
 		if(_bMouseOverButton)
 		{
-			C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);			
+			C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);			
 		}
 		else
 		{
-			C.__NFUN_2626__(m_vBorder.R, m_vBorder.G, m_vBorder.B);
+			C.SetDrawColor(m_vBorder.R, m_vBorder.G, m_vBorder.B);
 		}
 	}
 	i = 0;
 	J0xAE:
 
 	// End:0x1C3 [Loop If]
-	if(__NFUN_150__(i, m_iNumberOfCheckBox))
+	if((i < m_iNumberOfCheckBox))
 	{
 		DrawStretchedTextureSegment(C, m_stCheckBox[i].fXBoxPos, m_fYBox, float(m_RButtonBG.W), float(m_RButtonBG.H), float(m_RButtonBG.X), float(m_RButtonBG.Y), float(m_RButtonBG.W), float(m_RButtonBG.H), m_TButtonBG);
 		// End:0x1B9
 		if(m_stCheckBox[i].bSelected)
 		{
-			DrawStretchedTextureSegment(C, __NFUN_174__(2.0000000, m_stCheckBox[i].fXBoxPos), __NFUN_174__(2.0000000, m_fYBox), float(DownRegion.W), float(DownRegion.H), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);
+			DrawStretchedTextureSegment(C, (2.0000000 + m_stCheckBox[i].fXBoxPos), (2.0000000 + m_fYBox), float(DownRegion.W), float(DownRegion.H), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xAE;
 	}
@@ -221,15 +221,15 @@ function bool CheckText_Box_Region()
 	J0x17:
 
 	// End:0x79 [Loop If]
-	if(__NFUN_150__(i, m_iNumberOfCheckBox))
+	if((i < m_iNumberOfCheckBox))
 	{
 		// End:0x6F
-		if(InRange(fX, m_stCheckBox[i].fXBoxPos, __NFUN_174__(m_stCheckBox[i].fXBoxPos, float(m_RButtonBG.W))))
+		if(InRange(fX, m_stCheckBox[i].fXBoxPos, (m_stCheckBox[i].fXBoxPos + float(m_RButtonBG.W))))
 		{
 			m_iCheckBoxOver = i;
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x17;
 	}
@@ -240,10 +240,10 @@ function bool CheckText_Box_Region()
 function bool InRange(float _fTestValue, float _fMin, float _fMax)
 {
 	// End:0x20
-	if(__NFUN_177__(_fTestValue, _fMin))
+	if((_fTestValue > _fMin))
 	{
 		// End:0x20
-		if(__NFUN_176__(_fTestValue, _fMax))
+		if((_fTestValue < _fMax))
 		{
 			return true;
 		}
@@ -262,8 +262,8 @@ function CreateTextAndBox(string _szText, string _szToolTip, float _fXText, int 
 	m_fXText = _fXText;
 	m_iButtonID = _iButtonID;
 	m_iNumberOfCheckBox = _iNumberOfCheckBox;
-	m_fYBox = __NFUN_172__(__NFUN_175__(WinHeight, float(m_RButtonBG.H)), float(2));
-	m_fYBox = float(int(__NFUN_174__(m_fYTextPos, 0.5000000)));
+	m_fYBox = ((WinHeight - float(m_RButtonBG.H)) / float(2));
+	m_fYBox = float(int((m_fYTextPos + 0.5000000)));
 	return;
 }
 
@@ -298,7 +298,7 @@ function bool GetSelectStatus()
 		return false;
 	}
 	// End:0x21
-	if(__NFUN_130__(m_bMouseOnButton, m_bMouseIsOver))
+	if((m_bMouseOnButton && m_bMouseIsOver))
 	{
 		return true;
 	}
@@ -312,7 +312,7 @@ function bool GetSelectStatus()
 function ChangeCheckBoxStatus()
 {
 	// End:0x40
-	if(__NFUN_155__(m_iCurSelectedBox, m_iCheckBoxOver))
+	if((m_iCurSelectedBox != m_iCheckBoxOver))
 	{
 		m_stCheckBox[m_iCurSelectedBox].bSelected = false;
 		m_stCheckBox[m_iCheckBoxOver].bSelected = true;

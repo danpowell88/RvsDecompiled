@@ -43,12 +43,12 @@ function Init()
 	if(R6MissionObjectiveMgr(m_mgr).m_bEnableCheckForErrors)
 	{
 		// End:0x6B
-		if(__NFUN_119__(m_depZone, none))
+		if((m_depZone != none))
 		{
 			// End:0x68
-			if(__NFUN_154__(m_depZone.m_aHostage.Length, 0))
+			if((m_depZone.m_aHostage.Length == 0))
 			{
-				logMObj(__NFUN_112__("there is no hostage in ", string(m_depZone.Name)));
+				logMObj(("there is no hostage in " $ string(m_depZone.Name)));
 			}			
 		}
 		else
@@ -71,12 +71,12 @@ function PawnKilled(Pawn killedPawn)
 	local int iTotal, i;
 
 	// End:0x0D
-	if(__NFUN_129__(m_bCheckPawnKilled))
+	if((!m_bCheckPawnKilled))
 	{
 		return;
 	}
 	// End:0x28
-	if(__NFUN_155__(int(killedPawn.m_ePawnType), int(3)))
+	if((int(killedPawn.m_ePawnType) != int(3)))
 	{
 		return;
 	}
@@ -87,10 +87,10 @@ function PawnKilled(Pawn killedPawn)
 		return;
 	}
 	// End:0xD2
-	if(__NFUN_119__(m_depZone, none))
+	if((m_depZone != none))
 	{
 		// End:0x71
-		if(__NFUN_119__(m_depZone, H.m_DZone))
+		if((m_depZone != H.m_DZone))
 		{
 			return;
 		}
@@ -98,15 +98,15 @@ function PawnKilled(Pawn killedPawn)
 		J0x78:
 
 		// End:0xCF [Loop If]
-		if(__NFUN_150__(i, m_depZone.m_aHostage.Length))
+		if((i < m_depZone.m_aHostage.Length))
 		{
 			// End:0xBE
-			if(__NFUN_129__(m_depZone.m_aHostage[i].IsAlive()))
+			if((!m_depZone.m_aHostage[i].IsAlive()))
 			{
-				__NFUN_184__(fTotalDeath, float(1));
+				(fTotalDeath += float(1));
 			}
-			__NFUN_163__(iTotal);
-			__NFUN_163__(i);
+			(++iTotal);
+			(++i);
 			// [Loop Continue]
 			goto J0x78;
 		}		
@@ -114,17 +114,17 @@ function PawnKilled(Pawn killedPawn)
 	else
 	{
 		// End:0x125
-		foreach m_mgr.__NFUN_313__(Class'R6Engine.R6Hostage', aHostage)
+		foreach m_mgr.DynamicActors(Class'R6Engine.R6Hostage', aHostage)
 		{
 			// End:0x124
-			if(__NFUN_129__(aHostage.m_bCivilian))
+			if((!aHostage.m_bCivilian))
 			{
 				// End:0x11D
-				if(__NFUN_129__(aHostage.IsAlive()))
+				if((!aHostage.IsAlive()))
 				{
-					__NFUN_184__(fTotalDeath, float(1));
+					(fTotalDeath += float(1));
 				}
-				__NFUN_163__(iTotal);
+				(++iTotal);
 			}			
 		}		
 	}
@@ -132,7 +132,7 @@ function PawnKilled(Pawn killedPawn)
 	if(m_bRescueAllRemainingHostage)
 	{
 		// End:0x157
-		if(__NFUN_180__(fTotalDeath, float(iTotal)))
+		if((fTotalDeath == float(iTotal)))
 		{
 			R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, false, true);
 		}		
@@ -140,7 +140,7 @@ function PawnKilled(Pawn killedPawn)
 	else
 	{
 		// End:0x1A7
-		if(__NFUN_130__(__NFUN_177__(fTotalDeath, float(0)), __NFUN_178__(__NFUN_175__(float(100), __NFUN_171__(__NFUN_172__(fTotalDeath, float(iTotal)), 100.0000000)), float(m_iRescuePercentage))))
+		if(((fTotalDeath > float(0)) && ((float(100) - ((fTotalDeath / float(iTotal)) * 100.0000000)) <= float(m_iRescuePercentage))))
 		{
 			R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, false, true);
 		}
@@ -148,7 +148,7 @@ function PawnKilled(Pawn killedPawn)
 	// End:0x206
 	if(m_bShowLog)
 	{
-		logX(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("PawnKilled. failed=", string(m_bFailed)), " "), string(__NFUN_171__(__NFUN_172__(fTotalDeath, float(iTotal)), 100.0000000))), "/"), string(m_iRescuePercentage)), "%"));
+		logX((((((("PawnKilled. failed=" $ string(m_bFailed)) $ " ") $ string(((fTotalDeath / float(iTotal)) * 100.0000000))) $ "/") $ string(m_iRescuePercentage)) $ "%"));
 	}
 	return;
 }
@@ -160,7 +160,7 @@ function EnteredExtractionZone(Pawn aPawn)
 	local int iTotal, i, iTotalAlive;
 
 	// End:0x1B
-	if(__NFUN_155__(int(aPawn.m_ePawnType), int(3)))
+	if((int(aPawn.m_ePawnType) != int(3)))
 	{
 		return;
 	}
@@ -171,10 +171,10 @@ function EnteredExtractionZone(Pawn aPawn)
 		return;
 	}
 	// End:0xFB
-	if(__NFUN_119__(m_depZone, none))
+	if((m_depZone != none))
 	{
 		// End:0x64
-		if(__NFUN_119__(m_depZone, H.m_DZone))
+		if((m_depZone != H.m_DZone))
 		{
 			return;
 		}
@@ -182,25 +182,25 @@ function EnteredExtractionZone(Pawn aPawn)
 		J0x6B:
 
 		// End:0xF8 [Loop If]
-		if(__NFUN_150__(i, m_depZone.m_aHostage.Length))
+		if((i < m_depZone.m_aHostage.Length))
 		{
 			aHostage = m_depZone.m_aHostage[i];
 			// End:0xEE
-			if(__NFUN_129__(aHostage.m_bCivilian))
+			if((!aHostage.m_bCivilian))
 			{
 				// End:0xE7
 				if(aHostage.IsAlive())
 				{
-					__NFUN_165__(iTotalAlive);
+					(iTotalAlive++);
 					// End:0xE7
 					if(aHostage.m_bExtracted)
 					{
-						__NFUN_184__(fRescuedNum, float(1));
+						(fRescuedNum += float(1));
 					}
 				}
-				__NFUN_163__(iTotal);
+				(++iTotal);
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x6B;
 		}		
@@ -208,22 +208,22 @@ function EnteredExtractionZone(Pawn aPawn)
 	else
 	{
 		// End:0x165
-		foreach m_mgr.__NFUN_313__(Class'R6Engine.R6Hostage', aHostage)
+		foreach m_mgr.DynamicActors(Class'R6Engine.R6Hostage', aHostage)
 		{
 			// End:0x164
-			if(__NFUN_129__(aHostage.m_bCivilian))
+			if((!aHostage.m_bCivilian))
 			{
 				// End:0x15D
 				if(aHostage.IsAlive())
 				{
-					__NFUN_165__(iTotalAlive);
+					(iTotalAlive++);
 					// End:0x15D
 					if(aHostage.m_bExtracted)
 					{
-						__NFUN_184__(fRescuedNum, float(1));
+						(fRescuedNum += float(1));
 					}
 				}
-				__NFUN_163__(iTotal);
+				(++iTotal);
 			}			
 		}		
 	}
@@ -231,7 +231,7 @@ function EnteredExtractionZone(Pawn aPawn)
 	if(m_bRescueAllRemainingHostage)
 	{
 		// End:0x197
-		if(__NFUN_180__(fRescuedNum, float(iTotalAlive)))
+		if((fRescuedNum == float(iTotalAlive)))
 		{
 			R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, true, true);
 		}		
@@ -239,7 +239,7 @@ function EnteredExtractionZone(Pawn aPawn)
 	else
 	{
 		// End:0x1D2
-		if(__NFUN_179__(__NFUN_171__(__NFUN_172__(fRescuedNum, float(iTotal)), 100.0000000), float(m_iRescuePercentage)))
+		if((((fRescuedNum / float(iTotal)) * 100.0000000) >= float(m_iRescuePercentage)))
 		{
 			R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, true, true);
 		}
@@ -247,7 +247,7 @@ function EnteredExtractionZone(Pawn aPawn)
 	// End:0x238
 	if(m_bShowLog)
 	{
-		logX(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("EnteredExtZone. completed=", string(m_bCompleted)), " "), string(__NFUN_171__(__NFUN_172__(fRescuedNum, float(iTotal)), 100.0000000))), "/"), string(m_iRescuePercentage)), "%"));
+		logX((((((("EnteredExtZone. completed=" $ string(m_bCompleted)) $ " ") $ string(((fRescuedNum / float(iTotal)) * 100.0000000))) $ "/") $ string(m_iRescuePercentage)) $ "%"));
 	}
 	return;
 }
@@ -258,12 +258,12 @@ function string GetDescriptionBasedOnNbOfHostages(LevelInfo Level)
 	local int iTotal;
 
 	// End:0x49
-	foreach Level.__NFUN_313__(Class'R6Engine.R6Hostage', aHostage)
+	foreach Level.DynamicActors(Class'R6Engine.R6Hostage', aHostage)
 	{
 		// End:0x48
-		if(__NFUN_130__(aHostage.IsAlive(), __NFUN_129__(aHostage.m_bCivilian)))
+		if((aHostage.IsAlive() && (!aHostage.m_bCivilian)))
 		{
-			__NFUN_163__(iTotal);
+			(++iTotal);
 		}		
 	}	
 	switch(iTotal)

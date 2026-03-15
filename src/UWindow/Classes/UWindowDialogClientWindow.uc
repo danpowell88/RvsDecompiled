@@ -28,10 +28,10 @@ function UWindowDialogControl CreateControl(Class<UWindowDialogControl> ControlC
 	C.Register(self);
 	C.Notify(C.0);
 	// End:0x112
-	if(__NFUN_129__(_bNotTabRegister))
+	if((!_bNotTabRegister))
 	{
 		// End:0xA5
-		if(__NFUN_114__(TabLast, none))
+		if((TabLast == none))
 		{
 			TabLast = C;
 			C.TabNext = C;

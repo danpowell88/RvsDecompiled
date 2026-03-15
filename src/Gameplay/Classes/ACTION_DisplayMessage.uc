@@ -29,7 +29,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, Message);
+	return (ActionString @ Message);
 	return;
 }
 

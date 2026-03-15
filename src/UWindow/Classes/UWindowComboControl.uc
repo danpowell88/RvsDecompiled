@@ -26,9 +26,9 @@ function Created()
 	super.Created();
 	EditBox = UWindowEditBox(CreateWindow(Class'UWindow.UWindowEditBox', 0.0000000, 0.0000000, WinWidth, LookAndFeel.Size_ComboHeight));
 	EditBox.NotifyOwner = self;
-	EditBoxWidth = __NFUN_172__(WinWidth, float(2));
+	EditBoxWidth = (WinWidth / float(2));
 	EditBox.bTransient = true;
-	Button = UWindowComboButton(CreateWindow(Class'UWindow.UWindowComboButton', __NFUN_175__(WinWidth, LookAndFeel.Size_ComboButtonWidth), 0.0000000, LookAndFeel.Size_ComboButtonWidth, LookAndFeel.Size_ComboHeight));
+	Button = UWindowComboButton(CreateWindow(Class'UWindow.UWindowComboButton', (WinWidth - LookAndFeel.Size_ComboButtonWidth), 0.0000000, LookAndFeel.Size_ComboButtonWidth, LookAndFeel.Size_ComboHeight));
 	Button.Owner = self;
 	List = UWindowComboList(Root.CreateWindow(ListClass, 0.0000000, 0.0000000, 100.0000000, 100.0000000));
 	List.LookAndFeel = LookAndFeel;
@@ -46,8 +46,8 @@ function SetButtons(bool bInButtons)
 	// End:0x8B
 	if(bInButtons)
 	{
-		LeftButton = UWindowComboLeftButton(CreateWindow(Class'UWindow.UWindowComboLeftButton', __NFUN_175__(WinWidth, float(12)), 0.0000000, 12.0000000, LookAndFeel.Size_ComboHeight));
-		RightButton = UWindowComboRightButton(CreateWindow(Class'UWindow.UWindowComboRightButton', __NFUN_175__(WinWidth, float(12)), 0.0000000, 12.0000000, LookAndFeel.Size_ComboHeight));		
+		LeftButton = UWindowComboLeftButton(CreateWindow(Class'UWindow.UWindowComboLeftButton', (WinWidth - float(12)), 0.0000000, 12.0000000, LookAndFeel.Size_ComboHeight));
+		RightButton = UWindowComboRightButton(CreateWindow(Class'UWindow.UWindowComboRightButton', (WinWidth - float(12)), 0.0000000, 12.0000000, LookAndFeel.Size_ComboHeight));		
 	}
 	else
 	{
@@ -61,13 +61,13 @@ function Notify(byte E)
 {
 	super.Notify(E);
 	// End:0x5F
-	if(__NFUN_154__(int(E), 10))
+	if((int(E) == 10))
 	{
 		// End:0x59
-		if(__NFUN_130__(__NFUN_129__(bListVisible), __NFUN_129__(m_bDisabled)))
+		if(((!bListVisible) && (!m_bDisabled)))
 		{
 			// End:0x56
-			if(__NFUN_129__(bCanEdit))
+			if((!bCanEdit))
 			{
 				DropDown();
 				Root.CaptureMouse(List);
@@ -102,7 +102,7 @@ function int FindItemIndex2(string v2, optional bool bIgnoreCase)
 function Close(optional bool bByParent)
 {
 	// End:0x1A
-	if(__NFUN_130__(bByParent, bListVisible))
+	if((bByParent && bListVisible))
 	{
 		CloseUp();
 	}
@@ -214,7 +214,7 @@ function BeforePaint(Canvas C, float X, float Y)
 {
 	super.BeforePaint(C, X, Y);
 	LookAndFeel.Combo_SetupSizes(self, C);
-	List.bLeaveOnscreen = __NFUN_130__(bListVisible, bLeaveOnscreen);
+	List.bLeaveOnscreen = (bListVisible && bLeaveOnscreen);
 	return;
 }
 
@@ -233,7 +233,7 @@ function DropDown()
 	bListVisible = true;
 	EditBox.SetEditable(false);
 	// End:0x57
-	if(__NFUN_119__(List.Selected, none))
+	if((List.Selected != none))
 	{
 		// End:0x57
 		if(List.Selected.bDisabled)
@@ -269,7 +269,7 @@ function FocusOtherWindow(UWindowWindow W)
 {
 	super(UWindowWindow).FocusOtherWindow(W);
 	// End:0x5B
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bListVisible, __NFUN_119__(W.ParentWindow, self)), __NFUN_119__(W, List)), __NFUN_119__(W.ParentWindow, List)))
+	if((((bListVisible && (W.ParentWindow != self)) && (W != List)) && (W.ParentWindow != List)))
 	{
 		CloseUp();
 	}

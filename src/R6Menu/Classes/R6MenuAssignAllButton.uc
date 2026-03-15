@@ -53,7 +53,7 @@ function LMouseDown(float X, float Y)
 function DrawSimpleBorder(Canvas C)
 {
 	C.Style = byte(m_BorderStyle);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	// End:0xA4
 	if(m_bDrawTopBorder)
 	{
@@ -62,17 +62,17 @@ function DrawSimpleBorder(Canvas C)
 	// End:0x116
 	if(m_bDrawDownBorder)
 	{
-		DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(WinHeight, float(m_BorderTextureRegion.H)), WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+		DrawStretchedTextureSegment(C, 0.0000000, (WinHeight - float(m_BorderTextureRegion.H)), WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	}
 	// End:0x193
 	if(m_bDrawLeftBorder)
 	{
-		DrawStretchedTextureSegment(C, 0.0000000, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), __NFUN_175__(WinHeight, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+		DrawStretchedTextureSegment(C, 0.0000000, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), (WinHeight - float((2 * m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	}
 	// End:0x21E
 	if(m_bDrawRightBorder)
 	{
-		DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_BorderTextureRegion.W)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), __NFUN_175__(WinHeight, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+		DrawStretchedTextureSegment(C, (WinWidth - float(m_BorderTextureRegion.W)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), (WinHeight - float((2 * m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	}
 	return;
 }
@@ -114,7 +114,7 @@ function SetCompleteAssignAllButton()
 	OverRegion = NewRegion(172.0000000, 13.0000000, 30.0000000, 13.0000000);
 	DownRegion = NewRegion(172.0000000, 26.0000000, 30.0000000, 13.0000000);
 	DisabledRegion = NewRegion(172.0000000, 0.0000000, 30.0000000, 13.0000000);
-	ImageX = __NFUN_172__(__NFUN_175__(WinWidth, float(UpRegion.W)), float(2));
+	ImageX = ((WinWidth - float(UpRegion.W)) / float(2));
 	ImageY = 0.0000000;
 	return;
 }

@@ -57,7 +57,7 @@ var(Rainbow) byte m_iNightVisionFactor;
 function Trigger(Actor Other, Actor EventInstigator)
 {
 	// End:0x24
-	if(__NFUN_119__(FallbackMaterial, none))
+	if((FallbackMaterial != none))
 	{
 		FallbackMaterial.Trigger(Other, EventInstigator);
 	}

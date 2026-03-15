@@ -85,7 +85,7 @@ simulated event PostBeginPlay()
 	PlayerOwner = PlayerController(Owner);
 	Colors = new (none) Class'Engine.R6GameColors';
 	// End:0x40
-	if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) == int(NM_DedicatedServer)))
 	{
 		return;
 	}
@@ -152,7 +152,7 @@ function CopyMessage(out HUDLocalizedMessage M1, HUDLocalizedMessage M2)
 simulated event WorldSpaceOverlays()
 {
 	// End:0x2A
-	if(__NFUN_130__(bShowDebugInfo, __NFUN_119__(Pawn(PlayerOwner.ViewTarget), none)))
+	if((bShowDebugInfo && (Pawn(PlayerOwner.ViewTarget) != none)))
 	{
 		DrawRoute();
 	}
@@ -164,11 +164,11 @@ event RenderFirstPersonGun(Canvas Canvas)
 	local Pawn P;
 
 	// End:0x6B
-	if(__NFUN_129__(PlayerOwner.bBehindView))
+	if((!PlayerOwner.bBehindView))
 	{
 		P = Pawn(PlayerOwner.ViewTarget);
 		// End:0x6B
-		if(__NFUN_130__(__NFUN_119__(P, none), __NFUN_119__(P.EngineWeapon, none)))
+		if(((P != none) && (P.EngineWeapon != none)))
 		{
 			P.EngineWeapon.RenderOverlays(Canvas);
 		}
@@ -190,7 +190,7 @@ simulated event PostRender(Canvas Canvas)
 
 	DisplayMessages(Canvas);
 	// End:0x44
-	if(__NFUN_130__(__NFUN_129__(bHideCenterMessages), __NFUN_177__(PlayerOwner.ProgressTimeOut, Level.TimeSeconds)))
+	if(((!bHideCenterMessages) && (PlayerOwner.ProgressTimeOut > Level.TimeSeconds)))
 	{
 		DisplayProgressMessage(Canvas);
 	}
@@ -212,7 +212,7 @@ simulated event PostRender(Canvas Canvas)
 		J0xA3:
 
 		// End:0xD9 [Loop If]
-		if(__NFUN_119__(H, none))
+		if((H != none))
 		{
 			H.DrawHUD(Canvas);
 			H = H.nextHUD;
@@ -232,12 +232,12 @@ simulated function DrawRoute()
 
 	C = Pawn(PlayerOwner.ViewTarget).Controller;
 	// End:0x2F
-	if(__NFUN_114__(C, none))
+	if((C == none))
 	{
 		return;
 	}
 	// End:0x6C
-	if(__NFUN_119__(C.CurrentPath, none))
+	if((C.CurrentPath != none))
 	{
 		Start = C.CurrentPath.Start.Location;		
 	}
@@ -253,27 +253,27 @@ simulated function DrawRoute()
 		Start = C.AdjustLoc;
 	}
 	// End:0x2DC
-	if(__NFUN_132__(__NFUN_114__(C, PlayerOwner), __NFUN_130__(__NFUN_114__(C.MoveTarget, C.RouteCache[0]), __NFUN_119__(C.MoveTarget, none))))
+	if(((C == PlayerOwner) || ((C.MoveTarget == C.RouteCache[0]) && (C.MoveTarget != none))))
 	{
 		// End:0x1F8
-		if(__NFUN_130__(__NFUN_114__(C, PlayerOwner), __NFUN_218__(C.Destination, vect(0.0000000, 0.0000000, 0.0000000))))
+		if(((C == PlayerOwner) && (C.Destination != vect(0.0000000, 0.0000000, 0.0000000))))
 		{
 			// End:0x1DE
-			if(C.__NFUN_521__(C.Destination))
+			if(C.pointReachable(C.Destination))
 			{
 				Draw3DLine(C.Pawn.Location, C.Destination, Class'Engine.Canvas'.static.MakeColor(byte(255), byte(255), byte(255)));
 				return;
 			}
-			C.__NFUN_518__(C.Destination);
+			C.FindPathTo(C.Destination);
 		}
 		i = 0;
 		J0x1FF:
 
 		// End:0x29C [Loop If]
-		if(__NFUN_150__(i, 16))
+		if((i < 16))
 		{
 			// End:0x228
-			if(__NFUN_114__(C.RouteCache[i], none))
+			if((C.RouteCache[i] == none))
 			{
 				// [Explicit Break]
 				goto J0x29C;
@@ -281,7 +281,7 @@ simulated function DrawRoute()
 			bPath = true;
 			Draw3DLine(Start, C.RouteCache[i].Location, Class'Engine.Canvas'.static.MakeColor(0, byte(255), 0));
 			Start = C.RouteCache[i].Location;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1FF;
 		}
@@ -296,18 +296,18 @@ simulated function DrawRoute()
 	else
 	{
 		// End:0x339
-		if(__NFUN_218__(PlayerOwner.ViewTarget.Velocity, vect(0.0000000, 0.0000000, 0.0000000)))
+		if((PlayerOwner.ViewTarget.Velocity != vect(0.0000000, 0.0000000, 0.0000000)))
 		{
 			Draw3DLine(RealStart, C.Destination, Class'Engine.Canvas'.static.MakeColor(byte(255), byte(255), byte(255)));
 		}
 	}
 	// End:0x34A
-	if(__NFUN_114__(C, PlayerOwner))
+	if((C == PlayerOwner))
 	{
 		return;
 	}
 	// End:0x37E
-	if(__NFUN_119__(C.Focus, none))
+	if((C.Focus != none))
 	{
 		End = C.Focus.Location;		
 	}
@@ -329,31 +329,31 @@ simulated function DisplayProgressMessage(Canvas Canvas)
 	local float XL, YL, YOffset;
 	local GameReplicationInfo GRI;
 
-	PlayerOwner.ProgressTimeOut = __NFUN_244__(PlayerOwner.ProgressTimeOut, __NFUN_174__(Level.TimeSeconds, float(8)));
+	PlayerOwner.ProgressTimeOut = FMin(PlayerOwner.ProgressTimeOut, (Level.TimeSeconds + float(8)));
 	Canvas.Style = 5;
 	Canvas.Font = m_FontRainbow6_22pt;
 	// End:0x77
-	if(__NFUN_114__(Canvas.Font, none))
+	if((Canvas.Font == none))
 	{
 		UseLargeFont(Canvas);
 	}
-	YOffset = __NFUN_171__(0.3000000, Canvas.ClipY);
+	YOffset = (0.3000000 * Canvas.ClipY);
 	i = 0;
 	J0x99:
 
 	// End:0x15B [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		Canvas.DrawColor = PlayerOwner.ProgressColor[i];
-		Canvas.__NFUN_464__(PlayerOwner.ProgressMessage[i], XL, YL);
-		Canvas.__NFUN_2623__(__NFUN_171__(0.5000000, __NFUN_175__(Canvas.ClipX, XL)), YOffset);
-		Canvas.__NFUN_465__(PlayerOwner.ProgressMessage[i], false);
-		__NFUN_184__(YOffset, __NFUN_174__(YL, float(1)));
-		__NFUN_165__(i);
+		Canvas.StrLen(PlayerOwner.ProgressMessage[i], XL, YL);
+		Canvas.SetPos((0.5000000 * (Canvas.ClipX - XL)), YOffset);
+		Canvas.DrawText(PlayerOwner.ProgressMessage[i], false);
+		(YOffset += (YL + float(1)));
+		(i++);
 		// [Loop Continue]
 		goto J0x99;
 	}
-	Canvas.__NFUN_2626__(byte(255), byte(255), byte(255));
+	Canvas.SetDrawColor(byte(255), byte(255), byte(255));
 	return;
 }
 
@@ -365,9 +365,9 @@ function DisplayBadConnectionAlert()
 simulated function Message(PlayerReplicationInfo PRI, coerce string Msg, name MsgType)
 {
 	// End:0x41
-	if(__NFUN_132__(__NFUN_254__(MsgType, 'Say'), __NFUN_254__(MsgType, 'TeamSay')))
+	if(((MsgType == 'Say') || (MsgType == 'TeamSay')))
 	{
-		Msg = __NFUN_112__(__NFUN_112__(PRI.PlayerName, ": "), Msg);
+		Msg = ((PRI.PlayerName $ ": ") $ Msg);
 	}
 	AddTextMessage(Msg, Class'Engine.LocalMessage');
 	return;
@@ -387,7 +387,7 @@ simulated function PlayReceivedMessage(string S, string PName, ZoneInfo PZone)
 function bool ProcessKeyEvent(int Key, int Action, float Delta)
 {
 	// End:0x2A
-	if(__NFUN_119__(nextHUD, none))
+	if((nextHUD != none))
 	{
 		return nextHUD.ProcessKeyEvent(Key, Action, Delta);
 	}
@@ -405,26 +405,26 @@ function AddTextMessage(string M, Class<LocalMessage> MessageClass)
 	local int i, iLifeTime;
 
 	// End:0x16
-	if(__NFUN_129__(PlayerOwner.ShouldDisplayIncomingMessages()))
+	if((!PlayerOwner.ShouldDisplayIncomingMessages()))
 	{
 		return;
 	}
-	iLifeTime = __NFUN_146__(MessageClass.default.Lifetime, 2);
-	Class'Engine.Actor'.static.__NFUN_2620__(M, m_ChatMessagesColor);
+	iLifeTime = (MessageClass.default.Lifetime + 2);
+	Class'Engine.Actor'.static.AddMessageToConsole(M, m_ChatMessagesColor);
 	i = 0;
 	J0x4B:
 
 	// End:0x99 [Loop If]
-	if(__NFUN_150__(i, 6))
+	if((i < 6))
 	{
 		// End:0x8F
-		if(__NFUN_122__(TextMessages[i], ""))
+		if((TextMessages[i] == ""))
 		{
 			TextMessages[i] = M;
 			MessageLife[i] = float(iLifeTime);
 			return;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x4B;
 	}
@@ -432,16 +432,16 @@ function AddTextMessage(string M, Class<LocalMessage> MessageClass)
 	J0xA0:
 
 	// End:0xED [Loop If]
-	if(__NFUN_150__(i, __NFUN_147__(6, 1)))
+	if((i < (6 - 1)))
 	{
-		TextMessages[i] = TextMessages[__NFUN_146__(i, 1)];
-		MessageLife[i] = MessageLife[__NFUN_146__(i, 1)];
-		__NFUN_165__(i);
+		TextMessages[i] = TextMessages[(i + 1)];
+		MessageLife[i] = MessageLife[(i + 1)];
+		(i++);
 		// [Loop Continue]
 		goto J0xA0;
 	}
-	TextMessages[__NFUN_147__(6, 1)] = M;
-	MessageLife[__NFUN_147__(6, 1)] = float(iLifeTime);
+	TextMessages[(6 - 1)] = M;
+	MessageLife[(6 - 1)] = float(iLifeTime);
 	return;
 }
 
@@ -451,25 +451,25 @@ function AddDeathTextMessage(string M, Class<LocalMessage> MessageClass)
 	local int i;
 
 	// End:0x31
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_129__(PlayerOwner.ShouldDisplayIncomingMessages())))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && (!PlayerOwner.ShouldDisplayIncomingMessages())))
 	{
 		return;
 	}
-	Class'Engine.Actor'.static.__NFUN_2620__(M, m_KillMessagesColor);
+	Class'Engine.Actor'.static.AddMessageToConsole(M, m_KillMessagesColor);
 	i = 0;
 	J0x4E:
 
 	// End:0xA5 [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		// End:0x9B
-		if(__NFUN_122__(TextKillMessages[i], ""))
+		if((TextKillMessages[i] == ""))
 		{
 			TextKillMessages[i] = M;
 			MessageKillLife[i] = float(MessageClass.default.Lifetime);
 			return;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x4E;
 	}
@@ -477,9 +477,9 @@ function AddDeathTextMessage(string M, Class<LocalMessage> MessageClass)
 	J0xAC:
 
 	// End:0xF9 [Loop If]
-	if(__NFUN_150__(i, __NFUN_147__(4, 1)))
+	if((i < (4 - 1)))
 	{
-		TextKillMessages[i] = TextKillMessages[__NFUN_146__(i, 1)];
+		TextKillMessages[i] = TextKillMessages[(i + 1)];
 		MessageKillLife[i] = MessageKillLife[__NFUN_146__(i, 1)];
 		__NFUN_165__(i);
 		// [Loop Continue]

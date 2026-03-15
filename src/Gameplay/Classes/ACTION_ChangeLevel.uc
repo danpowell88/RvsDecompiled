@@ -20,7 +20,7 @@ function bool InitActionFor(ScriptedController C)
 	}
 	else
 	{
-		C.Level.ServerTravel(__NFUN_112__(URL, "?quiet"), false);
+		C.Level.ServerTravel((URL $ "?quiet"), false);
 	}
 	return true;
 	return;

@@ -34,7 +34,7 @@ function BeforePaint(Canvas C, float fMouseX, float fMouseY)
 
 	C.Font = m_Font;
 	TextSize(C, "TEST", tW, tH);
-	m_fItemHeight = __NFUN_174__(tH, float(2));
+	m_fItemHeight = (tH + float(2));
 	m_VertSB.SetBorderColor(m_BorderColor);
 	super(UWindowDialogControl).BeforePaint(C, fMouseX, fMouseY);
 	return;
@@ -60,20 +60,20 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	C.Style = 5;
 	C.Font = m_Font;
 	TextSize(C, "TEST", tW, tH);
-	TextY = __NFUN_172__(__NFUN_175__(H, tH), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	__NFUN_184__(X, pListInfoPlayerItem.fNameXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	ClipTextWidth(C, X, __NFUN_174__(Y, TextY), pListInfoPlayerItem.szPlName, pListInfoPlayerItem.fNameWidth);
-	__NFUN_184__(X, pListInfoPlayerItem.fSkillsXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(string(pListInfoPlayerItem.iSkills));
-	__NFUN_184__(X, pListInfoPlayerItem.fTimeXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(pListInfoPlayerItem.szTime);
-	__NFUN_184__(X, pListInfoPlayerItem.fPingXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(string(pListInfoPlayerItem.iPing));
+	TextY = ((H - tH) / float(2));
+	TextY = float(int((TextY + 0.5000000)));
+	(X += pListInfoPlayerItem.fNameXOff);
+	C.SetPos(X, (Y + TextY));
+	ClipTextWidth(C, X, (Y + TextY), pListInfoPlayerItem.szPlName, pListInfoPlayerItem.fNameWidth);
+	(X += pListInfoPlayerItem.fSkillsXOff);
+	C.SetPos(X, (Y + TextY));
+	C.DrawText(string(pListInfoPlayerItem.iSkills));
+	(X += pListInfoPlayerItem.fTimeXOff);
+	C.SetPos(X, (Y + TextY));
+	C.DrawText(pListInfoPlayerItem.szTime);
+	(X += pListInfoPlayerItem.fPingXOff);
+	C.SetPos(X, (Y + TextY));
+	C.DrawText(string(pListInfoPlayerItem.iPing));
 	return;
 }
 

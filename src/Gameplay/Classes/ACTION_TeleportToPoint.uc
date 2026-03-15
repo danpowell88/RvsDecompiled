@@ -17,17 +17,17 @@ function bool InitActionFor(ScriptedController C)
 
 	Dest = C.SequenceScript.GetMoveTarget();
 	// End:0x61
-	if(__NFUN_130__(__NFUN_255__(DestinationTag, 'None'), __NFUN_255__(DestinationTag, 'None')))
+	if(((DestinationTag != 'None') && (DestinationTag != 'None')))
 	{
 		// End:0x60
-		foreach C.__NFUN_304__(Class'Engine.Actor', Dest, DestinationTag)
+		foreach C.AllActors(Class'Engine.Actor', Dest, DestinationTag)
 		{
 			// End:0x60
 			break;			
 		}		
 	}
 	P = C.GetInstigator();
-	P.__NFUN_267__(Dest.Location);
+	P.__NFUN_267__(Dest.Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	P.__NFUN_299__(Dest.Rotation);
 	P.OldRotYaw = float(P.Rotation.Yaw);
 	return false;

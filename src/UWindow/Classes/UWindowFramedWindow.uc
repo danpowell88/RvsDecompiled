@@ -37,8 +37,8 @@ function Created()
 	super.Created();
 	MinWinWidth = 50.0000000;
 	MinWinHeight = 50.0000000;
-	ClientArea = CreateWindow(ClientClass, 4.0000000, 16.0000000, __NFUN_175__(WinWidth, float(8)), __NFUN_175__(WinHeight, float(20)), OwnerWindow);
-	CloseBox = UWindowFrameCloseBox(CreateWindow(Class'UWindow.UWindowFrameCloseBox', __NFUN_175__(WinWidth, float(20)), __NFUN_175__(WinHeight, float(20)), 11.0000000, 10.0000000));
+	ClientArea = CreateWindow(ClientClass, 4.0000000, 16.0000000, (WinWidth - float(8)), (WinHeight - float(20)), OwnerWindow);
+	CloseBox = UWindowFrameCloseBox(CreateWindow(Class'UWindow.UWindowFrameCloseBox', (WinWidth - float(20)), (WinHeight - float(20)), 11.0000000, 10.0000000));
 	return;
 }
 
@@ -50,7 +50,7 @@ function Texture GetLookAndFeelTexture()
 
 function bool IsActive()
 {
-	return __NFUN_114__(ParentWindow.ActiveWindow, self);
+	return (ParentWindow.ActiveWindow == self);
 	return;
 }
 
@@ -75,7 +75,7 @@ function LMouseDown(float X, float Y)
 	H = LookAndFeel.FW_HitTest(self, X, Y);
 	super.LMouseDown(X, Y);
 	// End:0x6F
-	if(__NFUN_154__(int(H), int(8)))
+	if((int(H) == int(8)))
 	{
 		MoveX = X;
 		MoveY = Y;
@@ -144,16 +144,16 @@ function Resized()
 	local Region R;
 
 	// End:0x2E
-	if(__NFUN_114__(ClientArea, none))
+	if((ClientArea == none))
 	{
-		__NFUN_231__(__NFUN_112__("Client Area is None for ", string(self)));
+		Log(("Client Area is None for " $ string(self)));
 		return;
 	}
 	R = LookAndFeel.FW_GetClientArea(self);
 	ClientArea.WinLeft = float(R.X);
 	ClientArea.WinTop = float(R.Y);
 	// End:0xE1
-	if(__NFUN_132__(__NFUN_181__(float(R.W), ClientArea.WinWidth), __NFUN_181__(float(R.H), ClientArea.WinHeight)))
+	if(((float(R.W) != ClientArea.WinWidth) || (float(R.H) != ClientArea.WinHeight)))
 	{
 		ClientArea.SetSize(float(R.W), float(R.H));
 	}
@@ -167,10 +167,10 @@ function MouseMove(float X, float Y)
 
 	H = LookAndFeel.FW_HitTest(self, X, Y);
 	// End:0x71
-	if(__NFUN_130__(bMoving, bMouseDown))
+	if((bMoving && bMouseDown))
 	{
-		WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, X), MoveX)));
-		WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, Y), MoveY)));		
+		WinLeft = float(int(((WinLeft + X) - MoveX)));
+		WinTop = float(int(((WinTop + Y) - MoveY)));		
 	}
 	else
 	{
@@ -178,7 +178,7 @@ function MouseMove(float X, float Y)
 	}
 	Cursor = Root.NormalCursor;
 	// End:0x131
-	if(__NFUN_130__(bSizable, __NFUN_129__(bMoving)))
+	if((bSizable && (!bMoving)))
 	{
 		switch(H)
 		{
@@ -218,92 +218,92 @@ function MouseMove(float X, float Y)
 	else
 	{
 		// End:0x1E4
-		if(__NFUN_130__(bTLSizing, bMouseDown))
+		if((bTLSizing && bMouseDown))
 		{
 			Cursor = Root.DiagCursor1;
 			OldW = WinWidth;
 			OldH = WinHeight;
-			SetSize(float(__NFUN_250__(int(MinWinWidth), int(__NFUN_175__(WinWidth, X)))), float(__NFUN_250__(int(MinWinHeight), int(__NFUN_175__(WinHeight, Y)))));
-			WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, OldW), WinWidth)));
-			WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, OldH), WinHeight)));			
+			SetSize(float(Max(int(MinWinWidth), int((WinWidth - X)))), float(Max(int(MinWinHeight), int((WinHeight - Y)))));
+			WinLeft = float(int(((WinLeft + OldW) - WinWidth)));
+			WinTop = float(int(((WinTop + OldH) - WinHeight)));			
 		}
 		else
 		{
 			bTLSizing = false;
 		}
 		// End:0x263
-		if(__NFUN_130__(bTSizing, bMouseDown))
+		if((bTSizing && bMouseDown))
 		{
 			Cursor = Root.NSCursor;
 			OldH = WinHeight;
-			SetSize(WinWidth, float(__NFUN_250__(int(MinWinHeight), int(__NFUN_175__(WinHeight, Y)))));
-			WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, OldH), WinHeight)));			
+			SetSize(WinWidth, float(Max(int(MinWinHeight), int((WinHeight - Y)))));
+			WinTop = float(int(((WinTop + OldH) - WinHeight)));			
 		}
 		else
 		{
 			bTSizing = false;
 		}
 		// End:0x2EF
-		if(__NFUN_130__(bTRSizing, bMouseDown))
+		if((bTRSizing && bMouseDown))
 		{
 			Cursor = Root.DiagCursor2;
 			OldH = WinHeight;
-			SetSize(float(__NFUN_250__(int(MinWinWidth), int(X))), float(__NFUN_250__(int(MinWinHeight), int(__NFUN_175__(WinHeight, Y)))));
-			WinTop = float(int(__NFUN_175__(__NFUN_174__(WinTop, OldH), WinHeight)));			
+			SetSize(float(Max(int(MinWinWidth), int(X))), float(Max(int(MinWinHeight), int((WinHeight - Y)))));
+			WinTop = float(int(((WinTop + OldH) - WinHeight)));			
 		}
 		else
 		{
 			bTRSizing = false;
 		}
 		// End:0x36E
-		if(__NFUN_130__(bLSizing, bMouseDown))
+		if((bLSizing && bMouseDown))
 		{
 			Cursor = Root.WECursor;
 			OldW = WinWidth;
-			SetSize(float(__NFUN_250__(int(MinWinWidth), int(__NFUN_175__(WinWidth, X)))), WinHeight);
-			WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, OldW), WinWidth)));			
+			SetSize(float(Max(int(MinWinWidth), int((WinWidth - X)))), WinHeight);
+			WinLeft = float(int(((WinLeft + OldW) - WinWidth)));			
 		}
 		else
 		{
 			bLSizing = false;
 		}
 		// End:0x3BE
-		if(__NFUN_130__(bRSizing, bMouseDown))
+		if((bRSizing && bMouseDown))
 		{
 			Cursor = Root.WECursor;
-			SetSize(float(__NFUN_250__(int(MinWinWidth), int(X))), WinHeight);			
+			SetSize(float(Max(int(MinWinWidth), int(X))), WinHeight);			
 		}
 		else
 		{
 			bRSizing = false;
 		}
 		// End:0x44A
-		if(__NFUN_130__(bBLSizing, bMouseDown))
+		if((bBLSizing && bMouseDown))
 		{
 			Cursor = Root.DiagCursor2;
 			OldW = WinWidth;
-			SetSize(float(__NFUN_250__(int(MinWinWidth), int(__NFUN_175__(WinWidth, X)))), float(__NFUN_250__(int(MinWinHeight), int(Y))));
-			WinLeft = float(int(__NFUN_175__(__NFUN_174__(WinLeft, OldW), WinWidth)));			
+			SetSize(float(Max(int(MinWinWidth), int((WinWidth - X)))), float(Max(int(MinWinHeight), int(Y))));
+			WinLeft = float(int(((WinLeft + OldW) - WinWidth)));			
 		}
 		else
 		{
 			bBLSizing = false;
 		}
 		// End:0x49A
-		if(__NFUN_130__(bBSizing, bMouseDown))
+		if((bBSizing && bMouseDown))
 		{
 			Cursor = Root.NSCursor;
-			SetSize(WinWidth, float(__NFUN_250__(int(MinWinHeight), int(Y))));			
+			SetSize(WinWidth, float(Max(int(MinWinHeight), int(Y))));			
 		}
 		else
 		{
 			bBSizing = false;
 		}
 		// End:0x4F7
-		if(__NFUN_130__(bBRSizing, bMouseDown))
+		if((bBRSizing && bMouseDown))
 		{
 			Cursor = Root.DiagCursor1;
-			SetSize(float(__NFUN_250__(int(MinWinWidth), int(X))), float(__NFUN_250__(int(MinWinHeight), int(Y))));			
+			SetSize(float(Max(int(MinWinWidth), int(X))), float(Max(int(MinWinHeight), int(Y))));			
 		}
 		else
 		{
@@ -322,7 +322,7 @@ function ToolTip(string strTip)
 function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, int Key)
 {
 	// End:0x3F
-	if(__NFUN_132__(__NFUN_154__(int(Msg), int(11)), __NFUN_129__(WaitModal())))
+	if(((int(Msg) == int(11)) || (!WaitModal())))
 	{
 		super.WindowEvent(Msg, C, X, Y, Key);		
 	}
@@ -331,7 +331,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x90
 		if(WaitModal())
 		{
-			ModalWindow.WindowEvent(Msg, C, __NFUN_175__(X, ModalWindow.WinLeft), __NFUN_175__(Y, ModalWindow.WinTop), Key);
+			ModalWindow.WindowEvent(Msg, C, (X - ModalWindow.WinLeft), (Y - ModalWindow.WinTop), Key);
 		}
 	}
 	return;

@@ -19,7 +19,7 @@ var Vector LookDir;  // direction to look while ambushing
 
 function PreBeginPlay()
 {
-	LookDir = __NFUN_213__(float(2000), Vector(Rotation));
+	LookDir = (float(2000) * Vector(Rotation));
 	super(Actor).PreBeginPlay();
 	return;
 }

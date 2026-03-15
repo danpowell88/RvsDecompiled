@@ -30,50 +30,50 @@ function Created()
 	m_pInGameStatusPopUp.CreatePopUpFrameWindow(Localize("Status", "ID_HEADER", "R6RecMessages"), R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize(), float(m_RMsgSize.X), float(m_RMsgSize.Y), float(m_RMsgSize.W), float(m_RMsgSize.H));
 	m_pInGameStatusPopUp.bAlwaysBehind = true;
 	m_pInGameStatusPopUp.m_bBGFullScreen = false;
-	m_TextStatus[0] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float(__NFUN_146__(m_RMsgSize.Y, 30)), __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
-	m_TextStatus[0].Text = __NFUN_112__(__NFUN_112__(Localize("Number", "ID_NUM1", "R6RecMessages"), " "), Localize("Status", "ID_MSG41", "R6RecMessages"));
+	m_TextStatus[0] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float((m_RMsgSize.Y + 30)), (WinWidth - float(5)), 25.0000000, self));
+	m_TextStatus[0].Text = ((Localize("Number", "ID_NUM1", "R6RecMessages") $ " ") $ Localize("Status", "ID_MSG41", "R6RecMessages"));
 	m_TextStatus[0].Align = 0;
 	m_TextStatus[0].m_Font = Root.Fonts[5];
 	m_TextStatus[0].TextColor = LabelTextColor;
 	m_TextStatus[0].m_BGTexture = none;
 	m_TextStatus[0].m_bDrawBorders = false;
-	m_TextStatus[1] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float(__NFUN_146__(m_RMsgSize.Y, 50)), __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
-	m_TextStatus[1].Text = __NFUN_112__(__NFUN_112__(Localize("Number", "ID_NUM2", "R6RecMessages"), " "), Localize("Status", "ID_MSG42", "R6RecMessages"));
+	m_TextStatus[1] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float((m_RMsgSize.Y + 50)), (WinWidth - float(5)), 25.0000000, self));
+	m_TextStatus[1].Text = ((Localize("Number", "ID_NUM2", "R6RecMessages") $ " ") $ Localize("Status", "ID_MSG42", "R6RecMessages"));
 	m_TextStatus[1].Align = 0;
 	m_TextStatus[1].m_Font = Root.Fonts[5];
 	m_TextStatus[1].TextColor = LabelTextColor;
 	m_TextStatus[1].m_BGTexture = none;
 	m_TextStatus[1].m_bDrawBorders = false;
-	m_TextStatus[2] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float(__NFUN_146__(m_RMsgSize.Y, 70)), __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
-	m_TextStatus[2].Text = __NFUN_112__(__NFUN_112__(Localize("Number", "ID_NUM3", "R6RecMessages"), " "), Localize("Status", "ID_MSG43", "R6RecMessages"));
+	m_TextStatus[2] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float((m_RMsgSize.Y + 70)), (WinWidth - float(5)), 25.0000000, self));
+	m_TextStatus[2].Text = ((Localize("Number", "ID_NUM3", "R6RecMessages") $ " ") $ Localize("Status", "ID_MSG43", "R6RecMessages"));
 	m_TextStatus[2].Align = 0;
 	m_TextStatus[2].m_Font = Root.Fonts[5];
 	m_TextStatus[2].TextColor = LabelTextColor;
 	m_TextStatus[2].m_BGTexture = none;
 	m_TextStatus[2].m_bDrawBorders = false;
-	m_TextStatus[3] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float(__NFUN_146__(m_RMsgSize.Y, 90)), __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
-	m_TextStatus[3].Text = __NFUN_112__(__NFUN_112__(Localize("Number", "ID_NUM4", "R6RecMessages"), " "), Localize("Status", "ID_MSG44", "R6RecMessages"));
+	m_TextStatus[3] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float((m_RMsgSize.Y + 90)), (WinWidth - float(5)), 25.0000000, self));
+	m_TextStatus[3].Text = ((Localize("Number", "ID_NUM4", "R6RecMessages") $ " ") $ Localize("Status", "ID_MSG44", "R6RecMessages"));
 	m_TextStatus[3].Align = 0;
 	m_TextStatus[3].m_Font = Root.Fonts[5];
 	m_TextStatus[3].TextColor = LabelTextColor;
 	m_TextStatus[3].m_BGTexture = none;
 	m_TextStatus[3].m_bDrawBorders = false;
-	m_TextStatus[4] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float(__NFUN_146__(m_RMsgSize.Y, 110)), __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
-	m_TextStatus[4].Text = __NFUN_112__(__NFUN_112__(Localize("Number", "ID_NUM5", "R6RecMessages"), " "), Localize("Status", "ID_MSG45", "R6RecMessages"));
+	m_TextStatus[4] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float((m_RMsgSize.Y + 110)), (WinWidth - float(5)), 25.0000000, self));
+	m_TextStatus[4].Text = ((Localize("Number", "ID_NUM5", "R6RecMessages") $ " ") $ Localize("Status", "ID_MSG45", "R6RecMessages"));
 	m_TextStatus[4].Align = 0;
 	m_TextStatus[4].m_Font = Root.Fonts[5];
 	m_TextStatus[4].TextColor = LabelTextColor;
 	m_TextStatus[4].m_BGTexture = none;
 	m_TextStatus[4].m_bDrawBorders = false;
-	m_TextStatus[5] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float(__NFUN_146__(m_RMsgSize.Y, 130)), __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
-	m_TextStatus[5].Text = __NFUN_112__(__NFUN_112__(Localize("Number", "ID_NUM6", "R6RecMessages"), " "), Localize("Status", "ID_MSG46", "R6RecMessages"));
+	m_TextStatus[5] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float((m_RMsgSize.Y + 130)), (WinWidth - float(5)), 25.0000000, self));
+	m_TextStatus[5].Text = ((Localize("Number", "ID_NUM6", "R6RecMessages") $ " ") $ Localize("Status", "ID_MSG46", "R6RecMessages"));
 	m_TextStatus[5].Align = 0;
 	m_TextStatus[5].m_Font = Root.Fonts[5];
 	m_TextStatus[5].TextColor = LabelTextColor;
 	m_TextStatus[5].m_BGTexture = none;
 	m_TextStatus[5].m_bDrawBorders = false;
-	m_TextStatus[6] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float(__NFUN_146__(m_RMsgSize.Y, 150)), __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
-	m_TextStatus[6].Text = __NFUN_112__(__NFUN_112__(Localize("Number", "ID_NUM0", "R6RecMessages"), " "), Localize("ExitMenu", "ID_MSG0", "R6RecMessages"));
+	m_TextStatus[6] = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, float((m_RMsgSize.Y + 150)), (WinWidth - float(5)), 25.0000000, self));
+	m_TextStatus[6].Text = ((Localize("Number", "ID_NUM0", "R6RecMessages") $ " ") $ Localize("ExitMenu", "ID_MSG0", "R6RecMessages"));
 	m_TextStatus[6].Align = 0;
 	m_TextStatus[6].m_Font = Root.Fonts[5];
 	m_TextStatus[6].TextColor = LabelTextColor;
@@ -87,7 +87,7 @@ function Paint(Canvas C, float X, float Y)
 {
 	super(UWindowWindow).Paint(C, X, Y);
 	// End:0x44
-	if(__NFUN_129__(GetPlayerOwner().Pawn.IsAlive()))
+	if((!GetPlayerOwner().Pawn.IsAlive()))
 	{
 		Root.ChangeCurrentWidget(0);
 	}
@@ -100,12 +100,12 @@ function BeforePaint(Canvas C, float X, float Y)
 	local int i;
 
 	// End:0x194
-	if(__NFUN_129__(m_bFirstTimePaint))
+	if((!m_bFirstTimePaint))
 	{
 		m_bFirstTimePaint = true;
 		TextSize(C, Localize("Status", "ID_HEADER", "R6RecMessages"), fWidth, fHeight);
 		// End:0x79
-		if(__NFUN_177__(fWidth, float(m_RMsgSize.W)))
+		if((fWidth > float(m_RMsgSize.W)))
 		{
 			m_RMsgSize.W = int(fWidth);
 		}
@@ -113,16 +113,16 @@ function BeforePaint(Canvas C, float X, float Y)
 		J0x80:
 
 		// End:0x119 [Loop If]
-		if(__NFUN_150__(i, 7))
+		if((i < 7))
 		{
 			C.Font = m_TextStatus[i].m_Font;
 			TextSize(C, m_TextStatus[i].Text, fWidth, fHeight);
 			// End:0x10F
-			if(__NFUN_177__(fWidth, __NFUN_175__(float(m_RMsgSize.W), m_fOffsetTxtPos)))
+			if((fWidth > (float(m_RMsgSize.W) - m_fOffsetTxtPos)))
 			{
-				m_RMsgSize.W = int(__NFUN_174__(fWidth, m_fOffsetTxtPos));
+				m_RMsgSize.W = int((fWidth + m_fOffsetTxtPos));
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x80;
 		}
@@ -178,7 +178,7 @@ function KeyDown(int Key, float X, float Y)
 			break;
 	}
 	// End:0x22D
-	if(__NFUN_130__(__NFUN_153__(Key, int(r6Root.Console.48)), __NFUN_152__(Key, int(r6Root.Console.57))))
+	if(((Key >= int(r6Root.Console.48)) && (Key <= int(r6Root.Console.57))))
 	{
 		r6Root.ChangeCurrentWidget(0);
 	}
@@ -190,12 +190,12 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 	local float fBkpOrgX, fBkpOrgY;
 
 	// End:0xC3
-	if(__NFUN_154__(int(Msg), int(11)))
+	if((int(Msg) == int(11)))
 	{
 		fBkpOrgX = C.OrgX;
 		fBkpOrgY = C.OrgY;
 		C.OrgX = 0.0000000;
-		C.OrgY = __NFUN_171__(float(__NFUN_147__(C.SizeY, 480)), 0.5000000);
+		C.OrgY = (float((C.SizeY - 480)) * 0.5000000);
 		super(UWindowWindow).WindowEvent(Msg, C, X, Y, Key);
 		C.OrgX = fBkpOrgX;
 		C.OrgY = fBkpOrgY;		

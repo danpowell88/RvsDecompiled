@@ -58,26 +58,26 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	// End:0x85
 	if(pItem.bOwnPlayer)
 	{
-		C.__NFUN_2626__(Root.Colors.BlueLight.R, Root.Colors.BlueLight.G, Root.Colors.BlueLight.B);		
+		C.SetDrawColor(Root.Colors.BlueLight.R, Root.Colors.BlueLight.G, Root.Colors.BlueLight.B);		
 	}
 	else
 	{
 		// End:0xD4
-		if(__NFUN_154__(int(pItem.eStatus), int(pItem.4)))
+		if((int(pItem.eStatus) == int(pItem.4)))
 		{
-			C.__NFUN_2626__(m_SpectatorColor.R, m_SpectatorColor.G, m_SpectatorColor.B);			
+			C.SetDrawColor(m_SpectatorColor.R, m_SpectatorColor.G, m_SpectatorColor.B);			
 		}
 		else
 		{
-			C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+			C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 		}
 	}
 	C.Style = 5;
 	C.Font = m_Font;
-	szTemp = TextSize(C, pItem.szPlName, tW, tH, int(__NFUN_175__(pItem.stTagCoord[int(pItem.2)].fWidth, float(2))));
-	TextY = __NFUN_172__(__NFUN_175__(H, tH), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	fYPos = __NFUN_174__(__NFUN_174__(Y, TextY), float(m_fYOffSet));
+	szTemp = TextSize(C, pItem.szPlName, tW, tH, int((pItem.stTagCoord[int(pItem.2)].fWidth - float(2))));
+	TextY = ((H - tH) / float(2));
+	TextY = float(int((TextY + 0.5000000)));
+	fYPos = ((Y + TextY) + float(m_fYOffSet));
 	// End:0x22C
 	if(pItem.bReady)
 	{
@@ -88,47 +88,47 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 		DrawIcon(C, 5, pItem.stTagCoord[int(pItem.0)].fXPos, fYPos, pItem.stTagCoord[int(pItem.0)].fWidth, H);
 	}
 	// End:0x31B
-	if(__NFUN_155__(int(pItem.eStatus), int(pItem.5)))
+	if((int(pItem.eStatus) != int(pItem.5)))
 	{
 		DrawIcon(C, pItem.GetHealth(pItem.eStatus), pItem.stTagCoord[int(pItem.1)].fXPos, fYPos, pItem.stTagCoord[int(pItem.1)].fWidth, H);
 	}
-	C.__NFUN_2623__(__NFUN_174__(pItem.stTagCoord[int(pItem.2)].fXPos, float(2)), fYPos);
-	C.__NFUN_465__(szTemp);
+	C.SetPos((pItem.stTagCoord[int(pItem.2)].fXPos + float(2)), fYPos);
+	C.DrawText(szTemp);
 	// End:0x453
 	if(pItem.stTagCoord[int(pItem.3)].bDisplay)
 	{
 		szTemp = TextSize(C, pItem.szRoundsWon, tW, tH, int(pItem.stTagCoord[int(pItem.3)].fWidth));
-		fTemp = __NFUN_174__(pItem.stTagCoord[int(pItem.3)].fXPos, float(GetCenterXPos(pItem.stTagCoord[int(pItem.3)].fWidth, tW)));
-		C.__NFUN_2623__(fTemp, fYPos);
-		C.__NFUN_465__(szTemp);
+		fTemp = (pItem.stTagCoord[int(pItem.3)].fXPos + float(GetCenterXPos(pItem.stTagCoord[int(pItem.3)].fWidth, tW)));
+		C.SetPos(fTemp, fYPos);
+		C.DrawText(szTemp);
 	}
 	szTemp = TextSize(C, string(pItem.iKills), tW, tH, int(pItem.stTagCoord[int(pItem.4)].fWidth));
-	fTemp = __NFUN_174__(pItem.stTagCoord[int(pItem.4)].fXPos, float(GetCenterXPos(pItem.stTagCoord[int(pItem.4)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(szTemp);
+	fTemp = (pItem.stTagCoord[int(pItem.4)].fXPos + float(GetCenterXPos(pItem.stTagCoord[int(pItem.4)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(szTemp);
 	szTemp = TextSize(C, string(pItem.iMyDeadCounter), tW, tH, int(pItem.stTagCoord[int(pItem.5)].fWidth));
-	fTemp = __NFUN_174__(pItem.stTagCoord[int(pItem.5)].fXPos, float(GetCenterXPos(pItem.stTagCoord[int(pItem.5)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(szTemp);
+	fTemp = (pItem.stTagCoord[int(pItem.5)].fXPos + float(GetCenterXPos(pItem.stTagCoord[int(pItem.5)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(szTemp);
 	szTemp = TextSize(C, string(pItem.iEfficiency), tW, tH, int(pItem.stTagCoord[int(pItem.6)].fWidth));
-	fTemp = __NFUN_174__(pItem.stTagCoord[int(pItem.6)].fXPos, float(GetCenterXPos(pItem.stTagCoord[int(pItem.6)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(szTemp);
+	fTemp = (pItem.stTagCoord[int(pItem.6)].fXPos + float(GetCenterXPos(pItem.stTagCoord[int(pItem.6)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(szTemp);
 	szTemp = TextSize(C, string(pItem.iRoundsFired), tW, tH, int(pItem.stTagCoord[int(pItem.7)].fWidth));
-	fTemp = __NFUN_174__(pItem.stTagCoord[int(pItem.7)].fXPos, float(GetCenterXPos(pItem.stTagCoord[int(pItem.7)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(szTemp);
+	fTemp = (pItem.stTagCoord[int(pItem.7)].fXPos + float(GetCenterXPos(pItem.stTagCoord[int(pItem.7)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(szTemp);
 	szTemp = TextSize(C, string(pItem.iRoundsHit), tW, tH, int(pItem.stTagCoord[int(pItem.8)].fWidth));
-	fTemp = __NFUN_174__(pItem.stTagCoord[int(pItem.8)].fXPos, float(GetCenterXPos(pItem.stTagCoord[int(pItem.8)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(szTemp);
-	szTemp = TextSize(C, pItem.szKillBy, tW, tH, int(__NFUN_175__(pItem.stTagCoord[int(pItem.9)].fWidth, float(2))));
-	C.__NFUN_2623__(__NFUN_174__(pItem.stTagCoord[int(pItem.9)].fXPos, float(2)), fYPos);
-	C.__NFUN_465__(szTemp);
-	szTemp = TextSize(C, string(pItem.iPingTime), tW, tH, int(__NFUN_175__(pItem.stTagCoord[int(pItem.10)].fWidth, float(2))));
-	fTemp = __NFUN_174__(pItem.stTagCoord[int(pItem.10)].fXPos, float(GetCenterXPos(pItem.stTagCoord[int(pItem.10)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(szTemp);
+	fTemp = (pItem.stTagCoord[int(pItem.8)].fXPos + float(GetCenterXPos(pItem.stTagCoord[int(pItem.8)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(szTemp);
+	szTemp = TextSize(C, pItem.szKillBy, tW, tH, int((pItem.stTagCoord[int(pItem.9)].fWidth - float(2))));
+	C.SetPos((pItem.stTagCoord[int(pItem.9)].fXPos + float(2)), fYPos);
+	C.DrawText(szTemp);
+	szTemp = TextSize(C, string(pItem.iPingTime), tW, tH, int((pItem.stTagCoord[int(pItem.10)].fWidth - float(2))));
+	fTemp = (pItem.stTagCoord[int(pItem.10)].fXPos + float(GetCenterXPos(pItem.stTagCoord[int(pItem.10)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(szTemp);
 	return;
 }
 

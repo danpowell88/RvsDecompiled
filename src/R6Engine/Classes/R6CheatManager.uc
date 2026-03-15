@@ -71,7 +71,7 @@ exec function help()
 	local string szDot;
 
 	// End:0x1534
-	if(__NFUN_154__(m_iCommandInfoIndex, 0))
+	if((m_iCommandInfoIndex == 0))
 	{
 		AddCommandInfo(' ', "-- on/off function ------");
 		AddCommandInfo('BoneCorpse', "diplay bone of Ragdoll");
@@ -102,7 +102,7 @@ exec function help()
 		AddCommandInfo('dbgThis', "debug ouput this actor (pointed by the gun) (false = TraceActor,  true = TraceWorld)");
 		AddCommandInfo('dbgEdit', "edit this actor (pointed by the gun)");
 		AddCommandInfo('SetPawn', "set the current pawn");
-		AddCommandInfo('SetPawnPace', __NFUN_112__("", SetPawnPace(0, true)));
+		AddCommandInfo('SetPawnPace', ("" $ SetPawnPace(0, true)));
 		AddCommandInfo('UsePath', "current pawn will walk/run away from the player (int 1=run)");
 		AddCommandInfo('SetPState', "set the selected pawn's state");
 		AddCommandInfo('SetCState', "set the selected controller's state");
@@ -189,20 +189,20 @@ exec function help()
 		AddCommandInfo('AbortMission', "Abort the mission");
 		AddCommandInfo('None', "");
 	}
-	__NFUN_231__("  -- List all registered function ---------------");
+	Log("  -- List all registered function ---------------");
 	i = 0;
 	J0x1570:
 
 	// End:0x15E7 [Loop If]
-	if(__NFUN_132__(__NFUN_255__(m_aCommandInfo[i].m_functionName, 'None'), __NFUN_123__(m_aCommandInfo[i].m_szDescription, "")))
+	if(((m_aCommandInfo[i].m_functionName != 'None') || (m_aCommandInfo[i].m_szDescription != "")))
 	{
-		sz = __NFUN_112__("", string(m_aCommandInfo[i].m_functionName));
+		sz = ("" $ string(m_aCommandInfo[i].m_functionName));
 		// End:0x15DD
-		if(__NFUN_151__(__NFUN_125__(sz), iSize))
+		if((Len(sz) > iSize))
 		{
-			iSize = __NFUN_125__(sz);
+			iSize = Len(sz);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x1570;
 	}
@@ -211,20 +211,20 @@ exec function help()
 	J0x1617:
 
 	// End:0x16DF [Loop If]
-	if(__NFUN_132__(__NFUN_255__(m_aCommandInfo[i].m_functionName, 'None'), __NFUN_123__(m_aCommandInfo[i].m_szDescription, "")))
+	if(((m_aCommandInfo[i].m_functionName != 'None') || (m_aCommandInfo[i].m_szDescription != "")))
 	{
-		sz = __NFUN_112__("", string(m_aCommandInfo[i].m_functionName));
+		sz = ("" $ string(m_aCommandInfo[i].m_functionName));
 		// End:0x1695
-		if(__NFUN_254__(m_aCommandInfo[i].m_functionName, ' '))
+		if((m_aCommandInfo[i].m_functionName == ' '))
 		{
-			__NFUN_231__(m_aCommandInfo[i].m_szDescription);
+			Log(m_aCommandInfo[i].m_szDescription);
 			// [Explicit Continue]
 			goto J0x16D5;
 		}
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", sz), ""), __NFUN_128__(szDot, __NFUN_147__(iSize, __NFUN_125__(sz)))), "..: "), m_aCommandInfo[i].m_szDescription));
+		Log(((((("" $ sz) $ "") $ Left(szDot, (iSize - Len(sz)))) $ "..: ") $ m_aCommandInfo[i].m_szDescription));
 		J0x16D5:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x1617;
 	}
@@ -239,10 +239,10 @@ function AddCommandInfo(name functionName, string szDescription)
 {
 	local int i;
 
-	assert(__NFUN_150__(m_iCommandInfoIndex, 128));
+	assert((m_iCommandInfoIndex < 128));
 	m_aCommandInfo[m_iCommandInfoIndex].m_szDescription = szDescription;
 	m_aCommandInfo[m_iCommandInfoIndex].m_functionName = functionName;
-	__NFUN_165__(m_iCommandInfoIndex);
+	(m_iCommandInfoIndex++);
 	return;
 }
 
@@ -251,7 +251,7 @@ function AddCommandInfo(name functionName, string szDescription)
 exec function PhyStat()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -262,7 +262,7 @@ exec function PhyStat()
 exec function ToggleRadius()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -273,77 +273,77 @@ exec function ToggleRadius()
 exec function BoneCorpse()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRenderBoneCorpse = __NFUN_129__(m_bRenderBoneCorpse);
-	Outer.Player.Console.Message(__NFUN_112__("BoneCorpse = ", string(m_bRenderBoneCorpse)), 6.0000000);
+	m_bRenderBoneCorpse = (!m_bRenderBoneCorpse);
+	Outer.Player.Console.Message(("BoneCorpse = " $ string(m_bRenderBoneCorpse)), 6.0000000);
 	return;
 }
 
 exec function GunDirection()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRenderGunDirection = __NFUN_129__(m_bRenderGunDirection);
-	Outer.Player.Console.Message(__NFUN_112__("GunDirection = ", string(m_bRenderGunDirection)), 6.0000000);
+	m_bRenderGunDirection = (!m_bRenderGunDirection);
+	Outer.Player.Console.Message(("GunDirection = " $ string(m_bRenderGunDirection)), 6.0000000);
 	return;
 }
 
 exec function ViewDirection()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRenderViewDirection = __NFUN_129__(m_bRenderViewDirection);
-	Outer.Player.Console.Message(__NFUN_112__("GunDirection = ", string(m_bRenderViewDirection)), 6.0000000);
+	m_bRenderViewDirection = (!m_bRenderViewDirection);
+	Outer.Player.Console.Message(("GunDirection = " $ string(m_bRenderViewDirection)), 6.0000000);
 	return;
 }
 
 exec function Route()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRenderRoute = __NFUN_129__(m_bRenderRoute);
-	Outer.Player.Console.Message(__NFUN_112__("Draw route = ", string(m_bRenderRoute)), 6.0000000);
+	m_bRenderRoute = (!m_bRenderRoute);
+	Outer.Player.Console.Message(("Draw route = " $ string(m_bRenderRoute)), 6.0000000);
 	return;
 }
 
 exec function NavPoint()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRenderNavPoint = __NFUN_129__(m_bRenderNavPoint);
-	Outer.Player.Console.Message(__NFUN_112__("Draw nav point = ", string(m_bRenderNavPoint)), 6.0000000);
+	m_bRenderNavPoint = (!m_bRenderNavPoint);
+	Outer.Player.Console.Message(("Draw nav point = " $ string(m_bRenderNavPoint)), 6.0000000);
 	return;
 }
 
 exec function RouteAll(optional float fDistance)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x37
-	if(__NFUN_181__(fDistance, float(0)))
+	if((fDistance != float(0)))
 	{
 		Outer.Level.m_fDbgNavPointDistance = fDistance;
 	}
 	Outer.ConsoleCommand("rend paths");
-	Outer.Player.Console.Message(__NFUN_112__(__NFUN_112__("RouteAll: ", string(Outer.Level.m_fDbgNavPointDistance)), " units"), 6.0000000);
+	Outer.Player.Console.Message((("RouteAll: " $ string(Outer.Level.m_fDbgNavPointDistance)) $ " units"), 6.0000000);
 	return;
 }
 
@@ -352,7 +352,7 @@ exec function ShowFOV()
 	local R6Pawn P;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -360,13 +360,13 @@ exec function ShowFOV()
 	if(m_bRenderFOV)
 	{
 		// End:0x9C
-		foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', P)
+		foreach Outer.AllActors(Class'R6Engine.R6Pawn', P)
 		{
 			// End:0x9B
-			if(__NFUN_130__(__NFUN_129__(P.m_bIsPlayer), __NFUN_119__(P.m_FOV, none)))
+			if(((!P.m_bIsPlayer) && (P.m_FOV != none)))
 			{
 				P.DetachFromBone(P.m_FOV);
-				P.m_FOV.__NFUN_279__();
+				P.m_FOV.Destroy();
 				P.m_FOV = none;
 			}			
 		}				
@@ -374,18 +374,18 @@ exec function ShowFOV()
 	else
 	{
 		// End:0x12D
-		foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', P)
+		foreach Outer.AllActors(Class'R6Engine.R6Pawn', P)
 		{
 			// End:0x12C
-			if(__NFUN_130__(__NFUN_129__(P.m_bIsPlayer), P.IsAlive()))
+			if(((!P.m_bIsPlayer) && P.IsAlive()))
 			{
-				P.m_FOV = Outer.__NFUN_278__(P.m_FOVClass);
+				P.m_FOV = Outer.Spawn(P.m_FOVClass);
 				P.AttachToBone(P.m_FOV, 'R6 PonyTail2');
 			}			
 		}		
 	}
-	m_bRenderFOV = __NFUN_129__(m_bRenderFOV);
-	Outer.Player.Console.Message(__NFUN_112__("ShowFOV = ", string(m_bRenderFOV)), 6.0000000);
+	m_bRenderFOV = (!m_bRenderFOV);
+	Outer.Player.Console.Message(("ShowFOV = " $ string(m_bRenderFOV)), 6.0000000);
 	return;
 }
 
@@ -398,28 +398,28 @@ exec function ToggleUnlimitedPractice()
 	local R6AbstractGameInfo GameInfo;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	GameInfo = R6AbstractGameInfo(Outer.Level.Game);
-	GameInfo.SetUnlimitedPractice(__NFUN_129__(GameInfo.IsUnlimitedPractice()), true);
+	GameInfo.SetUnlimitedPractice((!GameInfo.IsUnlimitedPractice()), true);
 	return;
 }
 
 exec function God()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x28
-	if(__NFUN_114__(R6Pawn(Outer.Pawn), none))
+	if((R6Pawn(Outer.Pawn) == none))
 	{
 		return;
 	}
-	Outer.bGodMode = __NFUN_129__(Outer.bGodMode);
+	Outer.bGodMode = (!Outer.bGodMode);
 	R6Pawn(Outer.Pawn).ServerGod(Outer.bGodMode, false, false, Outer.PlayerReplicationInfo.PlayerName, false);
 	Outer.Player.Console.Message(__NFUN_112__("God ", string(Outer.bGodMode)), 6.0000000);
 	return;

@@ -31,12 +31,12 @@ var name FiringMode;
 function TakeControlOf(Pawn aPawn)
 {
 	// End:0x2A
-	if(__NFUN_119__(Pawn, aPawn))
+	if((Pawn != aPawn))
 	{
 		aPawn.PossessedBy(self);
 		Pawn = aPawn;
 	}
-	__NFUN_113__('Scripting');
+	GotoState('Scripting');
 	return;
 }
 
@@ -48,24 +48,24 @@ function SetEnemyReaction(int AlertnessLevel)
 function DestroyPawn()
 {
 	// End:0x17
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
-		Pawn.__NFUN_279__();
+		Pawn.Destroy();
 	}
-	__NFUN_279__();
+	Destroy();
 	return;
 }
 
 function Pawn GetMyPlayer()
 {
 	// End:0x4A
-	if(__NFUN_132__(__NFUN_114__(MyPlayerController, none), __NFUN_114__(MyPlayerController.Pawn, none)))
+	if(((MyPlayerController == none) || (MyPlayerController.Pawn == none)))
 	{
 		// End:0x49
-		foreach __NFUN_313__(Class'Engine.PlayerController', MyPlayerController)
+		foreach DynamicActors(Class'Engine.PlayerController', MyPlayerController)
 		{
 			// End:0x48
-			if(__NFUN_119__(MyPlayerController.Pawn, none))
+			if((MyPlayerController.Pawn != none))
 			{
 				// End:0x49
 				break;
@@ -73,7 +73,7 @@ function Pawn GetMyPlayer()
 		}		
 	}
 	// End:0x57
-	if(__NFUN_114__(MyPlayerController, none))
+	if((MyPlayerController == none))
 	{
 		return none;
 	}
@@ -84,7 +84,7 @@ function Pawn GetMyPlayer()
 function Pawn GetInstigator()
 {
 	// End:0x11
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		return Pawn;
 	}
@@ -95,7 +95,7 @@ function Pawn GetInstigator()
 function Actor GetSoundSource()
 {
 	// End:0x11
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		return Pawn;
 	}
@@ -108,7 +108,7 @@ function bool CheckIfNearPlayer(float Distance)
 	local Pawn MyPlayer;
 
 	MyPlayer = GetMyPlayer();
-	return __NFUN_130__(__NFUN_130__(__NFUN_119__(MyPlayer, none), __NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, MyPlayer.Location)), __NFUN_174__(__NFUN_174__(Distance, CollisionRadius), MyPlayer.CollisionRadius))), Pawn.__NFUN_532__());
+	return (((MyPlayer != none) && (VSize((Pawn.Location - MyPlayer.Location)) < ((Distance + CollisionRadius) + MyPlayer.CollisionRadius))) && Pawn.PlayerCanSeeMe());
 	return;
 }
 
@@ -139,18 +139,18 @@ function ClearAnimation()
 
 function int SetFireYaw(int FireYaw)
 {
-	FireYaw = __NFUN_156__(FireYaw, 65535);
+	FireYaw = (FireYaw & 65535);
 	// End:0xAD
-	if(__NFUN_130__(__NFUN_177__(__NFUN_186__(float(__NFUN_147__(FireYaw, __NFUN_156__(Rotation.Yaw, 65535)))), float(8192)), __NFUN_176__(__NFUN_186__(float(__NFUN_147__(FireYaw, __NFUN_156__(Rotation.Yaw, 65535)))), float(57343))))
+	if(((Abs(float((FireYaw - (Rotation.Yaw & 65535)))) > float(8192)) && (Abs(float((FireYaw - (Rotation.Yaw & 65535)))) < float(57343))))
 	{
 		// End:0x96
 		if(ClockwiseFrom_IntInt(FireYaw, Rotation.Yaw))
 		{
-			FireYaw = __NFUN_146__(Rotation.Yaw, 8192);			
+			FireYaw = (Rotation.Yaw + 8192);			
 		}
 		else
 		{
-			FireYaw = __NFUN_147__(Rotation.Yaw, 8192);
+			FireYaw = (Rotation.Yaw - 8192);
 		}
 	}
 	return FireYaw;
@@ -167,9 +167,9 @@ state Scripting
 	function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 	{
 		super(AIController).DisplayDebug(Canvas, YL, YPos);
-		Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("AIScript ", string(SequenceScript)), " ActionNum "), string(ActionNum)), false);
-		__NFUN_184__(YPos, YL);
-		Canvas.__NFUN_2623__(4.0000000, YPos);
+		Canvas.DrawText(((("AIScript " $ string(SequenceScript)) $ " ActionNum ") $ string(ActionNum)), false);
+		(YPos += YL);
+		Canvas.SetPos(4.0000000, YPos);
 		CurrentAction.DisplayDebug(Canvas, YL, YPos);
 		return;
 	}
@@ -178,13 +178,13 @@ state Scripting
 	{
 		Pawn.UnPossessed();
 		// End:0x4C
-		if(__NFUN_130__(__NFUN_119__(Pawn, none), __NFUN_119__(PendingController, none)))
+		if(((Pawn != none) && (PendingController != none)))
 		{
 			PendingController.bStasis = false;
 			PendingController.Possess(Pawn);
 		}
 		Pawn = none;
-		__NFUN_279__();
+		Destroy();
 		return;
 	}
 
@@ -198,14 +198,14 @@ state Scripting
 	{
 		SequenceScript.SetActions(self);
 		// End:0x23
-		if(__NFUN_114__(CurrentAction, none))
+		if((CurrentAction == none))
 		{
 			LeaveScripting();
 			return;
 		}
 		MyScript = SequenceScript;
 		// End:0x3F
-		if(__NFUN_114__(CurrentAnimation, none))
+		if((CurrentAnimation == none))
 		{
 			ClearAnimation();
 		}
@@ -225,7 +225,7 @@ state Scripting
 	function Timer()
 	{
 		// End:0x35
-		if(__NFUN_130__(CurrentAction.WaitForPlayer(), CheckIfNearPlayer(CurrentAction.GetDistance())))
+		if((CurrentAction.WaitForPlayer() && CheckIfNearPlayer(CurrentAction.GetDistance())))
 		{
 			CompleteAction();			
 		}
@@ -249,10 +249,10 @@ state Scripting
 			return;
 		}
 		// End:0x56
-		if(__NFUN_154__(Channel, 0))
+		if((Channel == 0))
 		{
 			// End:0x53
-			if(__NFUN_132__(__NFUN_114__(CurrentAnimation, none), __NFUN_129__(CurrentAnimation.PawnPlayBaseAnim(self, false))))
+			if(((CurrentAnimation == none) || (!CurrentAnimation.PawnPlayBaseAnim(self, false))))
 			{
 				ClearAnimation();
 			}			
@@ -266,8 +266,8 @@ state Scripting
 
 	function CompleteAction()
 	{
-		__NFUN_165__(ActionNum);
-		__NFUN_113__('Scripting', 'Begin');
+		(ActionNum++);
+		GotoState('Scripting', 'Begin');
 		return;
 	}
 
@@ -278,29 +278,29 @@ state Scripting
 		Focus = ScriptedFocus;
 		NextMoveTarget = CurrentAction.GetMoveTargetFor(self);
 		// End:0x35
-		if(__NFUN_114__(NextMoveTarget, none))
+		if((NextMoveTarget == none))
 		{
-			__NFUN_113__('Broken');
+			GotoState('Broken');
 			return;
 		}
 		// End:0x4B
-		if(__NFUN_114__(Focus, none))
+		if((Focus == none))
 		{
 			Focus = NextMoveTarget;
 		}
 		MoveTarget = NextMoveTarget;
 		// End:0x9E
-		if(__NFUN_129__(__NFUN_520__(MoveTarget)))
+		if((!actorReachable(MoveTarget)))
 		{
-			MoveTarget = __NFUN_517__(MoveTarget);
+			MoveTarget = FindPathToward(MoveTarget);
 			// End:0x84
-			if(__NFUN_114__(MoveTarget, none))
+			if((MoveTarget == none))
 			{
 				AbortScript();
 				return;
 			}
 			// End:0x9E
-			if(__NFUN_114__(Focus, NextMoveTarget))
+			if((Focus == NextMoveTarget))
 			{
 				Focus = MoveTarget;
 			}
@@ -323,9 +323,9 @@ state Scripting
 			MayShootTarget();
 		}
 		// End:0x52
-		if(__NFUN_130__(__NFUN_129__(bPendingShoot), __NFUN_132__(__NFUN_114__(CurrentAction, none), __NFUN_129__(CurrentAction.StillTicking(self, DeltaTime)))))
+		if(((!bPendingShoot) && ((CurrentAction == none) || (!CurrentAction.StillTicking(self, DeltaTime)))))
 		{
-			__NFUN_118__('Tick');
+			Disable('Tick');
 		}
 		return;
 	}
@@ -347,15 +347,15 @@ Begin:
 	// End:0x16
 	if(bBroken)
 	{
-		__NFUN_113__('Broken');
+		GotoState('Broken');
 	}
 	// End:0x2F
 	if(CurrentAction.TickedAction())
 	{
-		__NFUN_117__('Tick');
+		Enable('Tick');
 	}
 	// End:0x4D
-	if(__NFUN_129__(bShootTarget))
+	if((!bShootTarget))
 	{
 		bFire = 0;
 		bAltFire = 0;		
@@ -372,15 +372,15 @@ Begin:
 	if(CurrentAction.MoveToGoal())
 	{
 		Pawn.SetMovementPhysics();
-		__NFUN_527__();
+		WaitForLanding();
 KeepMoving:
 
 
 		SetMoveTarget();
 		MayShootTarget();
-		__NFUN_502__(MoveTarget, Focus,,,, Pawn.bIsWalking);
+		MoveToward(MoveTarget, Focus,,,, Pawn.bIsWalking);
 		// End:0xF1
-		if(__NFUN_132__(__NFUN_119__(MoveTarget, CurrentAction.GetMoveTargetFor(self)), __NFUN_129__(Pawn.ReachedDestination(CurrentAction.GetMoveTargetFor(self)))))
+		if(((MoveTarget != CurrentAction.GetMoveTargetFor(self)) || (!Pawn.ReachedDestination(CurrentAction.GetMoveTargetFor(self)))))
 		{
 			goto 'KeepMoving';
 		}
@@ -394,11 +394,11 @@ KeepMoving:
 			Pawn.SetMovementPhysics();
 			Focus = CurrentAction.GetMoveTargetFor(self);
 			// End:0x16B
-			if(__NFUN_114__(Focus, none))
+			if((Focus == none))
 			{
-				FocalPoint = __NFUN_215__(Pawn.Location, __NFUN_213__(float(1000), Vector(SequenceScript.Rotation)));
+				FocalPoint = (Pawn.Location + (float(1000) * Vector(SequenceScript.Rotation)));
 			}
-			__NFUN_508__();
+			FinishRotation();
 			CompleteAction();			
 		}
 		else
@@ -406,17 +406,17 @@ KeepMoving:
 			Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
 			Focus = ScriptedFocus;
 			// End:0x1DB
-			if(__NFUN_129__(bUseScriptFacing))
+			if((!bUseScriptFacing))
 			{
-				FocalPoint = __NFUN_215__(Pawn.Location, __NFUN_213__(float(1000), Vector(Pawn.Rotation)));				
+				FocalPoint = (Pawn.Location + (float(1000) * Vector(Pawn.Rotation)));				
 			}
 			else
 			{
 				// End:0x21B
-				if(__NFUN_114__(Focus, none))
+				if((Focus == none))
 				{
 					MayShootAtEnemy();
-					FocalPoint = __NFUN_215__(Pawn.Location, __NFUN_213__(float(1000), Vector(SequenceScript.Rotation)));
+					FocalPoint = (Pawn.Location + (float(1000) * Vector(SequenceScript.Rotation)));
 				}
 			}
 			__NFUN_508__();

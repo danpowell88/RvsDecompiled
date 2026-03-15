@@ -63,29 +63,29 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	if(pSItem.bSelected)
 	{
 		// End:0xBF
-		if(__NFUN_119__(m_BGSelTexture, none))
+		if((m_BGSelTexture != none))
 		{
 			C.Style = m_BGRenderStyle;
-			C.__NFUN_2626__(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
+			C.SetDrawColor(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
 			DrawStretchedTextureSegment(C, X, Y, W, H, float(m_BGSelRegion.X), float(m_BGSelRegion.Y), float(m_BGSelRegion.W), float(m_BGSelRegion.H), m_BGSelTexture);
 		}
-		C.__NFUN_2626__(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
+		C.SetDrawColor(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
 	}
 	else
 	{
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 	}
 	C.Font = m_Font;
 	C.Style = 5;
 	// End:0x1AF
-	if(__NFUN_129__(pSItem.bSameVersion))
+	if((!pSItem.bSameVersion))
 	{
-		C.__NFUN_2626__(Root.Colors.GrayLight.R, Root.Colors.GrayLight.G, Root.Colors.GrayLight.B);
+		C.SetDrawColor(Root.Colors.GrayLight.R, Root.Colors.GrayLight.G, Root.Colors.GrayLight.B);
 	}
 	TextSize(C, "A", tW, tH);
-	TextY = __NFUN_172__(__NFUN_175__(H, tH), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	fYPos = __NFUN_174__(Y, TextY);
+	TextY = ((H - tH) / float(2));
+	TextY = float(int((TextY + 0.5000000)));
+	fYPos = (Y + TextY);
 	// End:0x27E
 	if(pSItem.bFavorite)
 	{
@@ -111,10 +111,10 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	{
 		pSItem.szName = TextSize(C, pSItem.szName, tW, tH, int(pSItem.m_stServerItemPos[int(pSItem.4)].fWidth));
 	}
-	C.__NFUN_2623__(__NFUN_174__(pSItem.m_stServerItemPos[int(pSItem.4)].fXPos, float(2)), fYPos);
-	C.__NFUN_465__(pSItem.szName);
+	C.SetPos((pSItem.m_stServerItemPos[int(pSItem.4)].fXPos + float(2)), fYPos);
+	C.DrawText(pSItem.szName);
 	// End:0x4CA
-	if(__NFUN_150__(pSItem.iPing, m_iPingTimeOut))
+	if((pSItem.iPing < m_iPingTimeOut))
 	{
 		szTemp = string(pSItem.iPing);		
 	}
@@ -123,29 +123,29 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 		szTemp = "-";
 	}
 	TextSize(C, szTemp, tW, tH);
-	fTemp = __NFUN_174__(pSItem.m_stServerItemPos[int(pSItem.5)].fXPos, float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.5)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(szTemp);
+	fTemp = (pSItem.m_stServerItemPos[int(pSItem.5)].fXPos + float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.5)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(szTemp);
 	pSItem.szGameType = TextSize(C, pSItem.szGameType, tW, tH, int(pSItem.m_stServerItemPos[int(pSItem.6)].fWidth));
-	fTemp = __NFUN_174__(pSItem.m_stServerItemPos[int(pSItem.6)].fXPos, float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.6)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(pSItem.szGameType);
+	fTemp = (pSItem.m_stServerItemPos[int(pSItem.6)].fXPos + float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.6)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(pSItem.szGameType);
 	pSItem.szGameMode = TextSize(C, pSItem.szGameMode, tW, tH, int(pSItem.m_stServerItemPos[int(pSItem.7)].fWidth));
-	fTemp = __NFUN_174__(pSItem.m_stServerItemPos[int(pSItem.7)].fXPos, float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.7)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(pSItem.szGameMode);
+	fTemp = (pSItem.m_stServerItemPos[int(pSItem.7)].fXPos + float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.7)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(pSItem.szGameMode);
 	pSItem.szMap = TextSize(C, pSItem.szMap, tW, tH, int(pSItem.m_stServerItemPos[int(pSItem.8)].fWidth));
-	fTemp = __NFUN_174__(pSItem.m_stServerItemPos[int(pSItem.8)].fXPos, float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.8)].fWidth, tW)));
-	C.__NFUN_2623__(fTemp, fYPos);
-	C.__NFUN_465__(pSItem.szMap);
+	fTemp = (pSItem.m_stServerItemPos[int(pSItem.8)].fXPos + float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.8)].fWidth, tW)));
+	C.SetPos(fTemp, fYPos);
+	C.DrawText(pSItem.szMap);
 	// End:0x8F0
-	if(__NFUN_130__(__NFUN_151__(pSItem.iMaxPlayers, 0), __NFUN_153__(pSItem.iNumPlayers, 0)))
+	if(((pSItem.iMaxPlayers > 0) && (pSItem.iNumPlayers >= 0)))
 	{
-		szTemp = __NFUN_112__(__NFUN_112__(string(pSItem.iNumPlayers), "/"), string(pSItem.iMaxPlayers));
+		szTemp = ((string(pSItem.iNumPlayers) $ "/") $ string(pSItem.iMaxPlayers));
 		TextSize(C, szTemp, tW, tH);
-		fTemp = __NFUN_174__(pSItem.m_stServerItemPos[int(pSItem.9)].fXPos, float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.9)].fWidth, tW)));
-		C.__NFUN_2623__(fTemp, fYPos);
-		C.__NFUN_465__(szTemp);
+		fTemp = (pSItem.m_stServerItemPos[int(pSItem.9)].fXPos + float(GetCenterXPos(pSItem.m_stServerItemPos[int(pSItem.9)].fWidth, tW)));
+		C.SetPos(fTemp, fYPos);
+		C.DrawText(szTemp);
 	}
 	pSItem.m_bNewItem = false;
 	return;
@@ -191,7 +191,7 @@ function DrawIcon(Canvas C, int _iPlayerStats, float _fX, float _fY, float _fWid
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("R6WindowServerListBox DrawIcon() --> This icon ", string(_iPlayerStats)), "don't exist"));
+			Log((("R6WindowServerListBox DrawIcon() --> This icon " @ string(_iPlayerStats)) @ "don't exist"));
 			// End:0x144
 			break;
 			break;
@@ -209,7 +209,7 @@ function RMouseDown(float X, float Y)
 {
 	super(UWindowWindow).RMouseDown(X, Y);
 	// End:0x3E
-	if(__NFUN_119__(GetItemAt(X, Y), none))
+	if((GetItemAt(X, Y) != none))
 	{
 		SetSelected(X, Y);
 		Notify(6);
@@ -225,16 +225,16 @@ function RMouseDown(float X, float Y)
 function SetSelectedItem(UWindowListBoxItem NewSelected)
 {
 	// End:0x5F
-	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_119__(m_SelectedItem, NewSelected)))
+	if(((NewSelected != none) && (m_SelectedItem != NewSelected)))
 	{
 		// End:0x38
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = false;
 		}
 		m_SelectedItem = NewSelected;
 		// End:0x5F
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = true;
 		}

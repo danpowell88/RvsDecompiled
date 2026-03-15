@@ -36,13 +36,13 @@ event Initialized()
 function ActionKeyPressed()
 {
 	// End:0x31
-	if(__NFUN_155__(int(m_Player.Level.NetMode), int(NM_Standalone)))
+	if((int(m_Player.Level.NetMode) != int(NM_Standalone)))
 	{
 		m_Player.ServerActionKeyPressed();
 	}
 	m_Player.SetRequestedCircumstantialAction();
 	// End:0xA8
-	if(__NFUN_154__(int(m_Player.m_RequestedCircumstantialAction.iHasAction), 1))
+	if((int(m_Player.m_RequestedCircumstantialAction.iHasAction) == 1))
 	{
 		m_Player.m_RequestedCircumstantialAction.m_bNeedsTick = true;
 		m_Player.m_RequestedCircumstantialAction.m_fPressedTime = m_Player.Level.TimeSeconds;
@@ -61,7 +61,7 @@ function ActionKeyReleased()
 	if(m_Player.PlayerCanSwitchToAIBackup())
 	{
 		// End:0xAB
-		if(__NFUN_130__(__NFUN_119__(m_Player.Pawn, none), __NFUN_129__(m_Player.Pawn.IsAlive())))
+		if(((m_Player.Pawn != none) && (!m_Player.Pawn.IsAlive())))
 		{
 			m_Player.RegroupOnMe();
 			return;
@@ -77,23 +77,23 @@ function ActionKeyReleased()
 		}
 	}
 	// End:0xF9
-	if(__NFUN_155__(int(m_Player.m_RequestedCircumstantialAction.iHasAction), 1))
+	if((int(m_Player.m_RequestedCircumstantialAction.iHasAction) != 1))
 	{
 		DisplayMenu(false);
 		return;
 	}
 	// End:0x135
-	if(__NFUN_155__(int(m_Player.m_RequestedCircumstantialAction.iInRange), 1))
+	if((int(m_Player.m_RequestedCircumstantialAction.iInRange) != 1))
 	{
 		m_Player.m_InteractionCA.PerformCircumstantialAction(1);		
 	}
 	else
 	{
 		// End:0x1E0
-		if(__NFUN_130__(__NFUN_130__(m_Player.m_pawn.CanInteractWithObjects(), __NFUN_154__(int(m_Player.m_RequestedCircumstantialAction.iInRange), 1)), __NFUN_129__(m_Player.m_RequestedCircumstantialAction.bCanBeInterrupted)))
+		if(((m_Player.m_pawn.CanInteractWithObjects() && (int(m_Player.m_RequestedCircumstantialAction.iInRange) == 1)) && (!m_Player.m_RequestedCircumstantialAction.bCanBeInterrupted)))
 		{
 			// End:0x1C3
-			if(__NFUN_114__(m_Player.m_RequestedCircumstantialAction.aQueryTarget, m_Player))
+			if((m_Player.m_RequestedCircumstantialAction.aQueryTarget == m_Player))
 			{
 				m_Player.RegroupOnMe();				
 			}
@@ -105,7 +105,7 @@ function ActionKeyReleased()
 		else
 		{
 			// End:0x26A
-			if(m_Player.m_RequestedCircumstantialAction.aQueryTarget.__NFUN_303__('R6IORotatingDoor'))
+			if(m_Player.m_RequestedCircumstantialAction.aQueryTarget.IsA('R6IORotatingDoor'))
 			{
 				// End:0x26A
 				if(R6IORotatingDoor(m_Player.m_RequestedCircumstantialAction.aQueryTarget).m_bIsDoorLocked)
@@ -124,21 +124,21 @@ simulated function bool MenuItemEnabled(int iItem)
 	local bool bActionCanBeExecuted;
 	local int iSubMenuChoice;
 
-	iSubMenuChoice = __NFUN_146__(__NFUN_144__(m_iCurrentSubMnuChoice, 4), iItem);
+	iSubMenuChoice = ((m_iCurrentSubMnuChoice * 4) + iItem);
 	// End:0x31
-	if(__NFUN_132__(__NFUN_150__(iItem, 0), __NFUN_151__(iItem, 3)))
+	if(((iItem < 0) || (iItem > 3)))
 	{
 		return false;
 	}
 	// End:0x8F
-	if(__NFUN_155__(m_iCurrentSubMnuChoice, -1))
+	if((m_iCurrentSubMnuChoice != -1))
 	{
 		bActionCanBeExecuted = m_Player.m_CurrentCircumstantialAction.aQueryTarget.R6ActionCanBeExecuted(int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[iSubMenuChoice]), m_Player);		
 	}
 	else
 	{
 		// End:0x103
-		if(__NFUN_155__(int(m_Player.m_CurrentCircumstantialAction.iTeamActionIDList[iItem]), 0))
+		if((int(m_Player.m_CurrentCircumstantialAction.iTeamActionIDList[iItem]) != 0))
 		{
 			bActionCanBeExecuted = m_Player.m_CurrentCircumstantialAction.aQueryTarget.R6ActionCanBeExecuted(int(m_Player.m_CurrentCircumstantialAction.iTeamActionIDList[iItem]), m_Player);			
 		}
@@ -156,22 +156,22 @@ function bool CurrentItemHasSubMenu()
 	local int i;
 
 	// End:0x11
-	if(__NFUN_155__(m_iCurrentSubMnuChoice, -1))
+	if((m_iCurrentSubMnuChoice != -1))
 	{
 		return false;
 	}
-	i = __NFUN_144__(m_iCurrentMnuChoice, 4);
+	i = (m_iCurrentMnuChoice * 4);
 	J0x20:
 
 	// End:0x67 [Loop If]
-	if(__NFUN_150__(i, __NFUN_144__(__NFUN_146__(m_iCurrentMnuChoice, 1), 4)))
+	if((i < ((m_iCurrentMnuChoice + 1) * 4)))
 	{
 		// End:0x5D
-		if(__NFUN_155__(int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[i]), 0))
+		if((int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[i]) != 0))
 		{
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x20;
 	}
@@ -184,22 +184,22 @@ function bool ItemHasSubMenu(int iItem)
 	local int i;
 
 	// End:0x11
-	if(__NFUN_155__(m_iCurrentSubMnuChoice, -1))
+	if((m_iCurrentSubMnuChoice != -1))
 	{
 		return false;
 	}
-	i = __NFUN_144__(iItem, 4);
+	i = (iItem * 4);
 	J0x20:
 
 	// End:0x67 [Loop If]
-	if(__NFUN_150__(i, __NFUN_144__(__NFUN_146__(iItem, 1), 4)))
+	if((i < ((iItem + 1) * 4)))
 	{
 		// End:0x5D
-		if(__NFUN_155__(int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[i]), 0))
+		if((int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[i]) != 0))
 		{
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x20;
 	}
@@ -219,14 +219,14 @@ function bool IsValidMenuChoice(int iChoice)
 {
 	local int iSubMenuChoice;
 
-	iSubMenuChoice = __NFUN_146__(__NFUN_144__(m_iCurrentSubMnuChoice, 4), iChoice);
+	iSubMenuChoice = ((m_iCurrentSubMnuChoice * 4) + iChoice);
 	// End:0x31
-	if(__NFUN_132__(__NFUN_150__(iChoice, 0), __NFUN_151__(iChoice, 3)))
+	if(((iChoice < 0) || (iChoice > 3)))
 	{
 		return false;
 	}
 	// End:0xDA
-	if(__NFUN_132__(__NFUN_130__(__NFUN_130__(__NFUN_155__(m_iCurrentSubMnuChoice, -1), __NFUN_155__(int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[iSubMenuChoice]), 0)), m_Player.m_CurrentCircumstantialAction.aQueryTarget.R6ActionCanBeExecuted(int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[iSubMenuChoice]), m_Player)), __NFUN_155__(int(m_Player.m_CurrentCircumstantialAction.iTeamActionIDList[iChoice]), 0)))
+	if(((((m_iCurrentSubMnuChoice != -1) && (int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[iSubMenuChoice]) != 0)) && m_Player.m_CurrentCircumstantialAction.aQueryTarget.R6ActionCanBeExecuted(int(m_Player.m_CurrentCircumstantialAction.iTeamSubActionsIDList[iSubMenuChoice]), m_Player)) || (int(m_Player.m_CurrentCircumstantialAction.iTeamActionIDList[iChoice]) != 0)))
 	{
 		return true;
 	}
@@ -237,7 +237,7 @@ function bool IsValidMenuChoice(int iChoice)
 function SetMenuChoice(int iChoice)
 {
 	// End:0x27
-	if(__NFUN_132__(__NFUN_150__(iChoice, 0), __NFUN_151__(iChoice, 3)))
+	if(((iChoice < 0) || (iChoice > 3)))
 	{
 		m_iCurrentMnuChoice = -1;		
 	}
@@ -250,7 +250,7 @@ function SetMenuChoice(int iChoice)
 		}
 		else
 		{
-			SetMenuChoice(__NFUN_147__(iChoice, 1));
+			SetMenuChoice((iChoice - 1));
 		}
 	}
 	return;
@@ -277,20 +277,20 @@ function ItemRightClicked(int iItem)
 function PerformCircumstantialAction(R6InteractionCircumstantialAction.eCircumstantialActionPerformer ePerformer)
 {
 	// End:0x16
-	if(__NFUN_114__(m_Player.m_RequestedCircumstantialAction, none))
+	if((m_Player.m_RequestedCircumstantialAction == none))
 	{
 		return;
 	}
 	// End:0xA1
-	if(__NFUN_155__(m_iCurrentSubMnuChoice, -1))
+	if((m_iCurrentSubMnuChoice != -1))
 	{
 		m_Player.m_RequestedCircumstantialAction.iMenuChoice = int(m_Player.m_RequestedCircumstantialAction.iTeamActionIDList[m_iCurrentSubMnuChoice]);
-		m_Player.m_RequestedCircumstantialAction.iSubMenuChoice = int(m_Player.m_RequestedCircumstantialAction.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(m_iCurrentSubMnuChoice, 4), m_iCurrentMnuChoice)]);		
+		m_Player.m_RequestedCircumstantialAction.iSubMenuChoice = int(m_Player.m_RequestedCircumstantialAction.iTeamSubActionsIDList[((m_iCurrentSubMnuChoice * 4) + m_iCurrentMnuChoice)]);		
 	}
 	else
 	{
 		// End:0x104
-		if(__NFUN_155__(m_iCurrentMnuChoice, -1))
+		if((m_iCurrentMnuChoice != -1))
 		{
 			m_Player.m_RequestedCircumstantialAction.iMenuChoice = int(m_Player.m_RequestedCircumstantialAction.iTeamActionIDList[m_iCurrentMnuChoice]);
 			m_Player.m_RequestedCircumstantialAction.iSubMenuChoice = -1;
@@ -339,28 +339,28 @@ function PerformCircumstantialAction(R6InteractionCircumstantialAction.eCircumst
 function ActionProgressStart()
 {
 	// End:0x24
-	if(__NFUN_129__(R6Pawn(m_Player.Pawn).CanInteractWithObjects()))
+	if((!R6Pawn(m_Player.Pawn).CanInteractWithObjects()))
 	{
 		return;
 	}
 	m_Player.m_PlayerCurrentCA = m_Player.m_RequestedCircumstantialAction;
-	__NFUN_113__('ActionProgress');
+	GotoState('ActionProgress');
 	m_Player.ServerPlayerActionProgress();
 	// End:0x90
-	if(m_Player.m_PlayerCurrentCA.aQueryTarget.__NFUN_303__('R6Terrorist'))
+	if(m_Player.m_PlayerCurrentCA.aQueryTarget.IsA('R6Terrorist'))
 	{
-		m_Player.__NFUN_113__('PlayerSecureTerrorist');		
+		m_Player.GotoState('PlayerSecureTerrorist');		
 	}
 	else
 	{
 		// End:0xE4
-		if(__NFUN_130__(Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack(), m_Player.m_PlayerCurrentCA.aQueryTarget.__NFUN_303__('R6Rainbow')))
+		if((Class'Engine.Actor'.static.GetModMgr().IsMissionPack() && m_Player.m_PlayerCurrentCA.aQueryTarget.IsA('R6Rainbow')))
 		{
-			m_Player.__NFUN_113__('PlayerSecureRainbow');			
+			m_Player.GotoState('PlayerSecureRainbow');			
 		}
 		else
 		{
-			m_Player.__NFUN_113__('PlayerActionProgress');
+			m_Player.GotoState('PlayerActionProgress');
 		}
 	}
 	return;
@@ -373,12 +373,12 @@ function ActionProgressStop()
 {
 	DisplayMenu(false);
 	// End:0x6D
-	if(Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack())
+	if(Class'Engine.Actor'.static.GetModMgr().IsMissionPack())
 	{
 		// End:0x6A
-		if(__NFUN_130__(m_Player.Pawn.IsAlive(), __NFUN_129__(m_Player.m_pawn.m_bIsSurrended)))
+		if((m_Player.Pawn.IsAlive() && (!m_Player.m_pawn.m_bIsSurrended)))
 		{
-			m_Player.__NFUN_113__('PlayerWalking');
+			m_Player.GotoState('PlayerWalking');
 		}		
 	}
 	else
@@ -386,7 +386,7 @@ function ActionProgressStop()
 		// End:0x98
 		if(m_Player.Pawn.IsAlive())
 		{
-			m_Player.__NFUN_113__('PlayerWalking');
+			m_Player.GotoState('PlayerWalking');
 		}
 	}
 	m_Player.m_PlayerCurrentCA = none;
@@ -401,7 +401,7 @@ function ActionProgressDone()
 	m_Player.m_pawn.ActionRequest(m_Player.m_PlayerCurrentCA);
 	DisplayMenu(false);
 	m_bIgnoreNextActionKeyRelease = true;
-	m_Player.__NFUN_113__('PlayerWalking');
+	m_Player.GotoState('PlayerWalking');
 	m_Player.m_PlayerCurrentCA = none;
 	return;
 }
@@ -410,30 +410,30 @@ function PostRender(Canvas C)
 {
 	local R6GameOptions GameOptions;
 
-	GameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	GameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	// End:0x1F
-	if(__NFUN_114__(m_Player, none))
+	if((m_Player == none))
 	{
 		return;
 	}
-	C.__NFUN_1606__(true);
+	C.UseVirtualSize(true);
 	// End:0x11A
-	if(__NFUN_132__(GameOptions.HUDShowActionIcon, m_Player.m_bShowCompleteHUD))
+	if((GameOptions.HUDShowActionIcon || m_Player.m_bShowCompleteHUD))
 	{
 		// End:0x11A
-		if(__NFUN_130__(__NFUN_119__(m_Player.Pawn, none), __NFUN_129__(m_Player.Pawn.IsAlive())))
+		if(((m_Player.Pawn != none) && (!m_Player.Pawn.IsAlive())))
 		{
 			// End:0xB4
 			if(m_Player.PlayerCanSwitchToAIBackup())
 			{
 				DrawDeadCircumstantialIcon(C);
-				C.__NFUN_1606__(false);
+				C.UseVirtualSize(false);
 				return;				
 			}
 			else
 			{
 				// End:0x11A
-				if(__NFUN_130__(__NFUN_130__(__NFUN_155__(int(m_Player.Level.NetMode), int(NM_Standalone)), m_Player.m_bReadyToEnterSpectatorMode), __NFUN_129__(m_Player.bOnlySpectator)))
+				if((((int(m_Player.Level.NetMode) != int(NM_Standalone)) && m_Player.m_bReadyToEnterSpectatorMode) && (!m_Player.bOnlySpectator)))
 				{
 					DrawGotoSpectatorModeIcon(C);
 					C.__NFUN_1606__(false);

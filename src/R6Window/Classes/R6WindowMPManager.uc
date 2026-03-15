@@ -75,7 +75,7 @@ function DisplayErrorMsg(string _szErrorMsg, UWindowBase.EPopUpID _ePopUpID)
 	local R6WindowWrappedTextArea pR6WrapLabelTemp;
 
 	// End:0x57
-	if(__NFUN_150__(__NFUN_125__(_szErrorMsg), 30))
+	if((Len(_szErrorMsg) < 30))
 	{
 		m_pError.m_ePopUpID = _ePopUpID;
 		R6WindowTextLabel(m_pError.m_ClientArea).SetNewText(_szErrorMsg, true);
@@ -100,17 +100,17 @@ function HandlePunkBusterSvrSituation()
 	local bool bHandlePBSrvSituation;
 	local R6GameManager pGameMgr;
 
-	pGameMgr = R6GameManager(Class'Engine.Actor'.static.__NFUN_1551__());
-	bHandlePBSrvSituation = __NFUN_132__(m_preJoinRespInfo.bResponseRcvd, __NFUN_130__(R6Console(Root.Console).m_bStartedByGSClient, __NFUN_129__(pGameMgr.__NFUN_1201__())));
+	pGameMgr = R6GameManager(Class'Engine.Actor'.static.GetGameManager());
+	bHandlePBSrvSituation = (m_preJoinRespInfo.bResponseRcvd || (R6Console(Root.Console).m_bStartedByGSClient && (!pGameMgr.NativeInit())));
 	// End:0xD0
-	if(__NFUN_130__(__NFUN_130__(bHandlePBSrvSituation, __NFUN_242__(Class'Engine.Actor'.static.__NFUN_1400__(), false)), __NFUN_154__(m_preJoinRespInfo.iPunkBusterEnabled, 1)))
+	if(((bHandlePBSrvSituation && (Class'Engine.Actor'.static.IsPBClientEnabled() == false)) && (m_preJoinRespInfo.iPunkBusterEnabled == 1)))
 	{
 		DisplayErrorMsg(Localize("MultiPlayer", "PopUp_Error_PunkBuster_Only", "R6Menu"), 25);		
 	}
 	else
 	{
 		// End:0x1F6
-		if(__NFUN_130__(__NFUN_130__(bHandlePBSrvSituation, __NFUN_242__(Class'Engine.Actor'.static.__NFUN_1400__(), true)), __NFUN_154__(m_preJoinRespInfo.iPunkBusterEnabled, 0)))
+		if(((bHandlePBSrvSituation && (Class'Engine.Actor'.static.IsPBClientEnabled() == true)) && (m_preJoinRespInfo.iPunkBusterEnabled == 0)))
 		{
 			R6WindowRootWindow(Root).m_RSimplePopUp.X = 140;
 			R6WindowRootWindow(Root).m_RSimplePopUp.Y = 170;
@@ -131,15 +131,15 @@ function HandleLockedServerPopUp()
 	local string _GamePassword;
 
 	// End:0xD9
-	if(__NFUN_130__(m_preJoinRespInfo.bLocked, __NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient)))
+	if((m_preJoinRespInfo.bLocked && (!R6Console(Root.Console).m_bStartedByGSClient)))
 	{
 		m_pPassword.ShowWindow();
 		// End:0xC7
 		if(R6Console(Root.Console).m_bNonUbiMatchMaking)
 		{
-			Class'Engine.Actor'.static.__NFUN_1305__(_GamePassword);
+			Class'Engine.Actor'.static.NativeNonUbiMatchMakingPassword(_GamePassword);
 			// End:0x90
-			if(__NFUN_122__(_GamePassword, ""))
+			if((_GamePassword == ""))
 			{
 				m_pPasswordEditBox.SelectAll();				
 			}

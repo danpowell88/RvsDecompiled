@@ -49,11 +49,11 @@ function InitPageOptions()
 	local Font ButtonFont;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	ButtonFont = Root.Fonts[5];
 	rRegionW.X = 5;
 	rRegionW.Y = 5;
-	rRegionW.W = int(__NFUN_175__(__NFUN_175__(WinWidth, float(rRegionW.X)), float(20)));
+	rRegionW.W = int(((WinWidth - float(rRegionW.X)) - float(20)));
 	rRegionW.H = 14;
 	fYStep = 19.0000000;
 	m_pVideoRes = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapVideoRes", "R6Menu"), Localize("Tip", "Opt_GrapVideoRes", "R6Menu"));
@@ -61,61 +61,61 @@ function InitPageOptions()
 	// End:0x114
 	if(m_bInGame)
 	{
-		m_pVideoRes.SetDisableButton(__NFUN_129__(pGameOptions.AllowChangeResInGame));
+		m_pVideoRes.SetDisableButton((!pGameOptions.AllowChangeResInGame));
 	}
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pTextureDetail = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapTexDetail", "R6Menu"), Localize("Tip", "Opt_GrapTexDetail", "R6Menu"));
 	AddGraphComboControlItem(15, m_pTextureDetail, "EGameOptionsGraphicLevel");
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pLightmapDetail = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapLightMap", "R6Menu"), Localize("Tip", "Opt_GrapLightMap", "R6Menu"));
 	AddGraphComboControlItem(15, m_pLightmapDetail, "EGameOptionsGraphicLevel", true);
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pRainbowsDetail = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapRainbowDetail", "R6Menu"), Localize("Tip", "Opt_GrapRainbowDetail", "R6Menu"));
 	AddGraphComboControlItem(15, m_pRainbowsDetail, "EGameOptionsGraphicLevel");
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pHostagesDetail = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapHostDetail", "R6Menu"), Localize("Tip", "Opt_GrapHostDetail", "R6Menu"));
 	AddGraphComboControlItem(15, m_pHostagesDetail, "EGameOptionsGraphicLevel");
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pTerrosDetail = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapTerroDetail", "R6Menu"), Localize("Tip", "Opt_GrapTerroDetail", "R6Menu"));
 	AddGraphComboControlItem(15, m_pTerrosDetail, "EGameOptionsGraphicLevel");
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pRainbowsShadowLevel = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapRainbowShadow", "R6Menu"), Localize("Tip", "Opt_GrapRainbowShadow", "R6Menu"));
 	AddGraphComboControlItem(11, m_pRainbowsShadowLevel, "EGameOptionsEffectLevel", true);
 	m_pRainbowsShadowLevel.SetDisableButton(m_bInGame);
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pHostagesShadowLevel = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapHostShadow", "R6Menu"), Localize("Tip", "Opt_GrapHostShadow", "R6Menu"));
 	AddGraphComboControlItem(11, m_pHostagesShadowLevel, "EGameOptionsEffectLevel", true);
 	m_pHostagesShadowLevel.SetDisableButton(m_bInGame);
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pTerrosShadowLevel = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapTerroShadow", "R6Menu"), Localize("Tip", "Opt_GrapTerroShadow", "R6Menu"));
 	AddGraphComboControlItem(11, m_pTerrosShadowLevel, "EGameOptionsEffectLevel", true);
 	m_pTerrosShadowLevel.SetDisableButton(m_bInGame);
 	// End:0x70A
-	if(__NFUN_129__(pGameOptions.SplashScreen))
+	if((!pGameOptions.SplashScreen))
 	{
-		__NFUN_161__(rRegionW.Y, int(fYStep));
+		(rRegionW.Y += int(fYStep));
 		m_pGoreLevel = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapGoreLevel", "R6Menu"), Localize("Tip", "Opt_GrapGoreLevel", "R6Menu"));
 		AddGraphComboControlItem(10, m_pGoreLevel, "EGameOptionsGraphicLevel");
 		m_pGoreLevel.SetDisableButton(m_bInGame);
 	}
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pDecalsDetail = SetComboControlButton(rRegionW, Localize("Options", "Opt_GrapDecalsDetail", "R6Menu"), Localize("Tip", "Opt_GrapDecalsDetail", "R6Menu"));
 	AddGraphComboControlItem(15, m_pDecalsDetail, "EGameOptionsEffectLevel");
 	m_pDecalsDetail.SetDisableButton(m_bInGame);
-	__NFUN_161__(rRegionW.Y, int(fYStep));
-	__NFUN_162__(rRegionW.W, 20);
+	(rRegionW.Y += int(fYStep));
+	(rRegionW.W -= 20);
 	m_pAnimGeometry = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', float(rRegionW.X), float(rRegionW.Y), float(rRegionW.W), float(rRegionW.H), self));
 	m_pAnimGeometry.SetButtonBox(true);
 	m_pAnimGeometry.CreateTextAndBox(Localize("Options", "Opt_GrapAnimGeometry", "R6Menu"), Localize("Tip", "Opt_GrapAnimGeometry", "R6Menu"), 0.0000000, 0);
 	// End:0x98F
-	if(__NFUN_129__(pGameOptions.SplashScreen))
+	if((!pGameOptions.SplashScreen))
 	{
-		__NFUN_161__(rRegionW.Y, int(fYStep));
+		(rRegionW.Y += int(fYStep));
 		m_pHideDeadBodies = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', float(rRegionW.X), float(rRegionW.Y), float(rRegionW.W), float(rRegionW.H), self));
 		m_pHideDeadBodies.SetButtonBox(true);
 		m_pHideDeadBodies.CreateTextAndBox(Localize("Options", "Opt_GrapHideDeadBodies", "R6Menu"), Localize("Tip", "Opt_GrapHideDeadBodies", "R6Menu"), 0.0000000, 0);
 	}
-	__NFUN_161__(rRegionW.Y, int(fYStep));
+	(rRegionW.Y += int(fYStep));
 	m_pLowDetailSmoke = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', float(rRegionW.X), float(rRegionW.Y), float(rRegionW.W), float(rRegionW.H), self));
 	m_pLowDetailSmoke.SetButtonBox(false);
 	m_pLowDetailSmoke.CreateTextAndBox(Localize("Options", "Opt_GrapLowDetailSmoke", "R6Menu"), Localize("Tip", "Opt_GrapLowDetailSmoke", "R6Menu"), 0.0000000, 0);
@@ -129,7 +129,7 @@ function UpdateOptionsInEngine()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	GetResolutionXY(pGameOptions.R6ScreenSizeX, pGameOptions.R6ScreenSizeY, pGameOptions.R6ScreenRefreshRate);
 	pGameOptions.TextureDetail = ConvertToGLEnum(m_pTextureDetail.GetValue());
 	pGameOptions.LightmapDetail = ConvertToGLEnum(m_pLightmapDetail.GetValue());
@@ -161,9 +161,9 @@ function UpdateOptionsInEngine()
 	}
 	pGameOptions.LowDetailSmoke = m_pLowDetailSmoke.m_bSelected;
 	// End:0x28C
-	if(__NFUN_130__(R6MenuOptionsWidget(OwnerWindow).m_bInGame, __NFUN_129__(m_bUpdateFileOnly)))
+	if((R6MenuOptionsWidget(OwnerWindow).m_bInGame && (!m_bUpdateFileOnly)))
 	{
-		Class'Engine.Actor'.static.__NFUN_2621__();
+		Class'Engine.Actor'.static.UpdateGraphicOptions();
 	}
 	return;
 }
@@ -172,15 +172,15 @@ function UpdateOptionsInPage()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	// End:0x8E
-	if(__NFUN_130__(pGameOptions.ShowRefreshRates, __NFUN_155__(pGameOptions.R6ScreenRefreshRate, -1)))
+	if((pGameOptions.ShowRefreshRates && (pGameOptions.R6ScreenRefreshRate != -1)))
 	{
-		m_pVideoRes.SetValue(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(pGameOptions.R6ScreenSizeX), "x"), string(pGameOptions.R6ScreenSizeY)), "@"), string(pGameOptions.R6ScreenRefreshRate)));		
+		m_pVideoRes.SetValue(((((string(pGameOptions.R6ScreenSizeX) $ "x") $ string(pGameOptions.R6ScreenSizeY)) $ "@") $ string(pGameOptions.R6ScreenRefreshRate)));		
 	}
 	else
 	{
-		m_pVideoRes.SetValue(__NFUN_112__(__NFUN_112__(string(pGameOptions.R6ScreenSizeX), "x"), string(pGameOptions.R6ScreenSizeY)));
+		m_pVideoRes.SetValue(((string(pGameOptions.R6ScreenSizeX) $ "x") $ string(pGameOptions.R6ScreenSizeY)));
 	}
 	m_pTextureDetail.SetValue(ConvertToGraphicString(15, int(pGameOptions.TextureDetail), "EGameOptionsGraphicLevel"));
 	m_pLightmapDetail.SetValue(ConvertToGraphicString(15, int(pGameOptions.LightmapDetail), "EGameOptionsGraphicLevel", true));
@@ -191,14 +191,14 @@ function UpdateOptionsInPage()
 	m_pHostagesShadowLevel.SetValue(ConvertToGraphicString(11, int(pGameOptions.HostagesShadowLevel), "EGameOptionsEffectLevel", true));
 	m_pTerrosShadowLevel.SetValue(ConvertToGraphicString(11, int(pGameOptions.TerrosShadowLevel), "EGameOptionsEffectLevel", true));
 	// End:0x321
-	if(__NFUN_129__(pGameOptions.SplashScreen))
+	if((!pGameOptions.SplashScreen))
 	{
 		m_pGoreLevel.SetValue(ConvertToGraphicString(10, int(pGameOptions.GoreLevel), "EGameOptionsEffectLevel"));
 	}
 	m_pDecalsDetail.SetValue(ConvertToGraphicString(15, int(pGameOptions.DecalsDetail), "EGameOptionsEffectLevel"));
 	m_pAnimGeometry.SetButtonBox(pGameOptions.AnimatedGeometry);
 	// End:0x3B1
-	if(__NFUN_129__(pGameOptions.SplashScreen))
+	if((!pGameOptions.SplashScreen))
 	{
 		m_pHideDeadBodies.SetButtonBox(pGameOptions.HideDeadBodies);
 	}
@@ -278,14 +278,14 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 	local string szResult;
 
 	// End:0xED
-	if(__NFUN_122__(_szGraphicsEnumName, "EGameOptionsGraphicLevel"))
+	if((_szGraphicsEnumName == "EGameOptionsGraphicLevel"))
 	{
 		switch(_iValueToConvert)
 		{
 			// End:0x4E
 			case 0:
 				// End:0x4B
-				if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 2), 0))
+				if(((_iAddItemMask & 2) > 0))
 				{
 					szResult = m_pComboLevel[1];
 				}
@@ -294,7 +294,7 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 			// End:0x92
 			case 1:
 				// End:0x72
-				if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 4), 0))
+				if(((_iAddItemMask & 4) > 0))
 				{
 					szResult = m_pComboLevel[2];					
 				}
@@ -307,7 +307,7 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 			// End:0xD7
 			case 2:
 				// End:0xB7
-				if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 8), 0))
+				if(((_iAddItemMask & 8) > 0))
 				{
 					szResult = m_pComboLevel[3];					
 				}
@@ -332,7 +332,7 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 			// End:0x116
 			case 0:
 				// End:0x113
-				if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 1), 0))
+				if(((_iAddItemMask & 1) > 0))
 				{
 					szResult = m_pComboLevel[0];
 				}
@@ -341,7 +341,7 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 			// End:0x159
 			case 1:
 				// End:0x139
-				if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 2), 0))
+				if(((_iAddItemMask & 2) > 0))
 				{
 					szResult = m_pComboLevel[1];					
 				}
@@ -354,7 +354,7 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 			// End:0x19E
 			case 2:
 				// End:0x17E
-				if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 4), 0))
+				if(((_iAddItemMask & 4) > 0))
 				{
 					szResult = m_pComboLevel[2];					
 				}
@@ -367,7 +367,7 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 			// End:0x1E4
 			case 3:
 				// End:0x1C3
-				if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 8), 0))
+				if(((_iAddItemMask & 8) > 0))
 				{
 					szResult = m_pComboLevel[3];					
 				}
@@ -389,13 +389,13 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 	if(_bCheckFor32MegVideoCard)
 	{
 		// End:0x297
-		if(__NFUN_129__(Class'Engine.Actor'.static.__NFUN_2617__()))
+		if((!Class'Engine.Actor'.static.IsVideoHardwareAtLeast64M()))
 		{
 			// End:0x267
-			if(__NFUN_122__(_szGraphicsEnumName, "EGameOptionsGraphicLevel"))
+			if((_szGraphicsEnumName == "EGameOptionsGraphicLevel"))
 			{
 				// End:0x264
-				if(__NFUN_122__(szResult, m_pComboLevel[3]))
+				if((szResult == m_pComboLevel[3]))
 				{
 					szResult = ConvertToGraphicString(_iAddItemMask, 1, _szGraphicsEnumName, _bCheckFor32MegVideoCard);
 				}				
@@ -403,7 +403,7 @@ function string ConvertToGraphicString(int _iAddItemMask, int _iValueToConvert, 
 			else
 			{
 				// End:0x297
-				if(__NFUN_122__(szResult, m_pComboLevel[3]))
+				if((szResult == m_pComboLevel[3]))
 				{
 					szResult = ConvertToGraphicString(_iAddItemMask, 2, _szGraphicsEnumName, _bCheckFor32MegVideoCard);
 				}
@@ -420,21 +420,21 @@ function AddGraphComboControlItem(int _iAddItemMask, R6WindowComboControl _pR6Wi
 
 	bAddHiItem = true;
 	// End:0x51
-	if(__NFUN_122__(_szGraphicsEnumName, "EGameOptionsEffectLevel"))
+	if((_szGraphicsEnumName == "EGameOptionsEffectLevel"))
 	{
 		// End:0x51
-		if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 1), 0))
+		if(((_iAddItemMask & 1) > 0))
 		{
 			_pR6WindowComboControl.AddItem(m_pComboLevel[0], "");
 		}
 	}
 	// End:0x78
-	if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 2), 0))
+	if(((_iAddItemMask & 2) > 0))
 	{
 		_pR6WindowComboControl.AddItem(m_pComboLevel[1], "");
 	}
 	// End:0xA0
-	if(__NFUN_151__(__NFUN_156__(_iAddItemMask, 4), 0))
+	if(((_iAddItemMask & 4) > 0))
 	{
 		_pR6WindowComboControl.AddItem(m_pComboLevel[2], "");
 	}
@@ -442,13 +442,13 @@ function AddGraphComboControlItem(int _iAddItemMask, R6WindowComboControl _pR6Wi
 	if(_bCheckFor32MegVideoCard)
 	{
 		// End:0xC2
-		if(__NFUN_129__(Class'Engine.Actor'.static.__NFUN_2617__()))
+		if((!Class'Engine.Actor'.static.IsVideoHardwareAtLeast64M()))
 		{
 			bAddHiItem = false;
 		}
 	}
 	// End:0xF5
-	if(__NFUN_130__(bAddHiItem, __NFUN_151__(__NFUN_156__(_iAddItemMask, 8), 0)))
+	if((bAddHiItem && ((_iAddItemMask & 8) > 0)))
 	{
 		_pR6WindowComboControl.AddItem(m_pComboLevel[3], "");
 	}
@@ -461,15 +461,15 @@ function AddVideoResolution(R6WindowComboControl _pR6WindowComboControl)
 
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
-	i = Class'Engine.Actor'.static.__NFUN_2614__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
+	i = Class'Engine.Actor'.static.GetNbAvailableResolutions();
 	j = 0;
 	J0x2B:
 
 	// End:0xD3 [Loop If]
-	if(__NFUN_150__(j, i))
+	if((j < i))
 	{
-		Class'Engine.Actor'.static.__NFUN_2615__(j, iWidth, iHeight, iRefreshRate);
+		Class'Engine.Actor'.static.GetAvailableResolution(j, iWidth, iHeight, iRefreshRate);
 		// End:0xA3
 		if(pGameOptions.ShowRefreshRates)
 		{

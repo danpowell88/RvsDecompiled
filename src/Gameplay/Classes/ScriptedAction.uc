@@ -38,7 +38,7 @@ function ScriptedSequence GetScript(ScriptedSequence S)
 
 function ProceedToNextAction(ScriptedController C)
 {
-	__NFUN_161__(C.ActionNum, 1);
+	(C.ActionNum += 1);
 	return;
 }
 
@@ -49,28 +49,28 @@ function ProceedToSectionEnd(ScriptedController C)
 
 	J0x00:
 	// End:0xAD [Loop If]
-	if(__NFUN_150__(C.ActionNum, C.SequenceScript.Actions.Length))
+	if((C.ActionNum < C.SequenceScript.Actions.Length))
 	{
 		A = C.SequenceScript.Actions[C.ActionNum];
 		// End:0x73
 		if(A.StartsSection())
 		{
-			__NFUN_165__(Nesting);			
+			(Nesting++);			
 		}
 		else
 		{
 			// End:0x99
 			if(A.EndsSection())
 			{
-				__NFUN_166__(Nesting);
+				(Nesting--);
 				// End:0x99
-				if(__NFUN_150__(Nesting, 0))
+				if((Nesting < 0))
 				{
 					return;
 				}
 			}
 		}
-		__NFUN_161__(C.ActionNum, 1);
+		(C.ActionNum += 1);
 		// [Loop Continue]
 		goto J0x00;
 	}

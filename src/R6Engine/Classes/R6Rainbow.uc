@@ -114,15 +114,15 @@ var string m_szSpecialityID;  // specialty of the rainbow
 replication
 {
 	// Pos:0x034
-	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) == int(ROLE_Authority)))
 		ClientQuickResetPeeking;
 
 	// Pos:0x000
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerSetComAnim, ServerToggleNightVision;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bHasDiffuseKit, m_bHasElectronicsKit, 
 		m_bHasLockPickKit, m_bRainbowIsFemale, 
 		m_iExtraPrimaryClips, m_iExtraSecondaryClips, 
@@ -130,24 +130,24 @@ replication
 		m_u8DesiredYaw;
 
 	// Pos:0x01A
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientFinishAnimation;
 
 	// Pos:0x027
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_NightVision, m_bIsLockPicking;
 
 	// Pos:0x041
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientSetCrouch, m_bIsSurrended, 
 		m_bIsUnderArrest;
 
 	// Pos:0x04E
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerSetCrouch;
 
 	// Pos:0x05B
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bHasDataObject, m_bIsTheIntruder;
 }
 
@@ -171,14 +171,14 @@ simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
 	if(m_bIsPlayer)
 	{
 		// End:0x30
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) == int(NM_Standalone)))
 		{
 			szName = m_CharacterName;			
 		}
 		else
 		{
 			// End:0x52
-			if(__NFUN_119__(PlayerReplicationInfo, none))
+			if((PlayerReplicationInfo != none))
 			{
 				szName = PlayerReplicationInfo.PlayerName;				
 			}
@@ -191,7 +191,7 @@ simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
 	else
 	{
 		// End:0x79
-		if(__NFUN_119__(m_TeamMemberRepInfo, none))
+		if((m_TeamMemberRepInfo != none))
 		{
 			szName = m_TeamMemberRepInfo.m_CharacterName;			
 		}
@@ -201,37 +201,37 @@ simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
 		}
 	}
 	// End:0x91
-	if(__NFUN_114__(ownerReticule, none))
+	if((ownerReticule == none))
 	{
 		return false;
 	}
-	return __NFUN_132__(ownerReticule.IsFriend(self), ownerReticule.IsNeutral(self));
+	return (ownerReticule.IsFriend(self) || ownerReticule.IsNeutral(self));
 	return;
 }
 
 // the following three functions are to keep stats for Rainbow in Single Player Games
 function IncrementKillCount()
 {
-	__NFUN_165__(m_iKills);
+	(m_iKills++);
 	return;
 }
 
 function IncrementBulletsFired()
 {
-	__NFUN_165__(m_iBulletsFired);
+	(m_iBulletsFired++);
 	return;
 }
 
 function IncrementRoundsHit()
 {
-	__NFUN_165__(m_iBulletsHit);
+	(m_iBulletsHit++);
 	return;
 }
 
 simulated function StartSliding()
 {
 	m_eLadderSlide = 0;
-	__NFUN_2729__(R6LadderVolume(m_Ladder.MyLadder).m_SlideSound, 3);
+	SendPlaySound(R6LadderVolume(m_Ladder.MyLadder).m_SlideSound, 3);
 	m_eLadderSlide = 1;
 	return;
 }
@@ -239,7 +239,7 @@ simulated function StartSliding()
 simulated function EndSliding()
 {
 	m_eLadderSlide = 2;
-	__NFUN_2729__(R6LadderVolume(m_Ladder.MyLadder).m_SlideSoundStop, 3);
+	SendPlaySound(R6LadderVolume(m_Ladder.MyLadder).m_SlideSoundStop, 3);
 	m_eLadderSlide = 3;
 	return;
 }
@@ -247,34 +247,34 @@ simulated function EndSliding()
 simulated event Destroyed()
 {
 	// End:0x4C
-	if(__NFUN_130__(IsLocallyControlled(), __NFUN_119__(Controller, none)))
+	if((IsLocallyControlled() && (Controller != none)))
 	{
-		__NFUN_2004__(false, none, none);
-		__NFUN_2600__(false, none, none);
-		__NFUN_2605__(false, none, none);
+		ToggleHeatProperties(false, none, none);
+		ToggleNightProperties(false, none, none);
+		ToggleScopeProperties(false, none, none);
 		// End:0x4C
-		if(__NFUN_119__(R6PlayerController(Controller), none))
+		if((R6PlayerController(Controller) != none))
 		{
 			R6PlayerController(Controller).ResetBlur();
 		}
 	}
 	super.Destroyed();
 	// End:0x70
-	if(__NFUN_119__(m_Helmet, none))
+	if((m_Helmet != none))
 	{
-		m_Helmet.__NFUN_279__();
+		m_Helmet.Destroy();
 		m_Helmet = none;
 	}
 	// End:0x8E
-	if(__NFUN_119__(m_NightVision, none))
+	if((m_NightVision != none))
 	{
-		m_NightVision.__NFUN_279__();
+		m_NightVision.Destroy();
 		m_NightVision = none;
 	}
 	// End:0xAC
-	if(__NFUN_119__(m_GasMask, none))
+	if((m_GasMask != none))
 	{
-		m_GasMask.__NFUN_279__();
+		m_GasMask.Destroy();
 		m_GasMask = none;
 	}
 	return;
@@ -288,9 +288,9 @@ simulated function SetRainbowFaceTexture()
 simulated function AttachNightVision()
 {
 	// End:0x1A
-	if(__NFUN_114__(m_NightVision, none))
+	if((m_NightVision == none))
 	{
-		m_NightVision = __NFUN_278__(m_NightVisionClass, self);
+		m_NightVision = Spawn(m_NightVisionClass, self);
 	}
 	m_NightVision.bHidden = true;
 	AttachToBone(m_NightVision, 'R6 Head');
@@ -302,35 +302,35 @@ simulated event PostBeginPlay()
 	super.PostBeginPlay();
 	SetMovementPhysics();
 	// End:0x33
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		AttachCollisionBox(2);
 		AttachNightVision();
 	}
 	// End:0x4A
-	if(__NFUN_119__(m_Helmet, none))
+	if((m_Helmet != none))
 	{
-		m_Helmet.__NFUN_279__();
+		m_Helmet.Destroy();
 	}
 	// End:0x6D
-	if(__NFUN_242__(m_bUseSpecialSkin, true))
+	if((m_bUseSpecialSkin == true))
 	{
-		m_Helmet = R6AbstractHelmet(__NFUN_278__(m_HelmetClass, self));		
+		m_Helmet = R6AbstractHelmet(Spawn(m_HelmetClass, self));		
 	}
 	else
 	{
 		// End:0xB4
-		if(__NFUN_130__(__NFUN_154__(m_iDefaultTeam, 3), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+		if(((m_iDefaultTeam == 3) && (int(Level.NetMode) != int(NM_Standalone))))
 		{
-			m_Helmet = R6AbstractHelmet(__NFUN_278__(Level.RedHelmet, self));			
+			m_Helmet = R6AbstractHelmet(Spawn(Level.RedHelmet, self));			
 		}
 		else
 		{
-			m_Helmet = R6AbstractHelmet(__NFUN_278__(Level.GreenHelmet, self));
+			m_Helmet = R6AbstractHelmet(Spawn(Level.GreenHelmet, self));
 		}
 	}
 	// End:0xEC
-	if(__NFUN_119__(m_Helmet, none))
+	if((m_Helmet != none))
 	{
 		AttachToBone(m_Helmet, 'R6 Head');
 	}
@@ -340,10 +340,10 @@ simulated event PostBeginPlay()
 simulated event PostNetBeginPlay()
 {
 	// End:0x74
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		// End:0x5C
-		if(__NFUN_130__(m_bIsPlayer, __NFUN_119__(PlayerReplicationInfo, none)))
+		if((m_bIsPlayer && (PlayerReplicationInfo != none)))
 		{
 			bIsFemale = PlayerReplicationInfo.bIsFemale;
 			m_iOperativeID = PlayerReplicationInfo.iOperativeID;			
@@ -355,15 +355,15 @@ simulated event PostNetBeginPlay()
 		}
 	}
 	// End:0xAE
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	if(((int(Level.NetMode) == int(NM_Client)) || (int(Level.NetMode) == int(NM_Standalone))))
 	{
 		SetRainbowFaceTexture();
 	}
 	super.PostNetBeginPlay();
 	// End:0x144
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer))))
+	if(((int(Level.NetMode) == int(NM_ListenServer)) || (int(Level.NetMode) == int(NM_DedicatedServer))))
 	{
-		m_TeamMemberRepInfo = __NFUN_278__(Class'R6Engine.R6TeamMemberReplicationInfo');
+		m_TeamMemberRepInfo = Spawn(Class'R6Engine.R6TeamMemberReplicationInfo');
 		m_TeamMemberRepInfo.m_iTeam = m_iTeam;
 		m_TeamMemberRepInfo.Instigator = self;
 		m_TeamMemberRepInfo.m_CharacterName = m_CharacterName;
@@ -376,29 +376,29 @@ simulated event PostNetBeginPlay()
 simulated function InitializeRainbowAnimations()
 {
 	// End:0x2B
-	if(__NFUN_154__(int(Physics), int(11)))
+	if((int(Physics) == int(11)))
 	{
 		m_eEquipWeapon = 2;
 		m_ePlayerIsUsingHands = 3;
-		__NFUN_259__('StandLadder_nt');		
+		PlayAnim('StandLadder_nt');		
 	}
 	else
 	{
 		// End:0x3F
 		if(m_bIsProne)
 		{
-			__NFUN_259__('ProneWaitBreathe');			
+			PlayAnim('ProneWaitBreathe');			
 		}
 		else
 		{
 			// End:0x53
 			if(bIsCrouched)
 			{
-				__NFUN_259__('CrouchWaitBreathe01');				
+				PlayAnim('CrouchWaitBreathe01');				
 			}
 			else
 			{
-				__NFUN_259__('StandWaitBreathe');
+				PlayAnim('StandWaitBreathe');
 			}
 		}
 	}

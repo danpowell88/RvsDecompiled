@@ -28,7 +28,7 @@ function ActionKeyPressed()
 function bool IsValidMenuChoice(int iChoice)
 {
 	// End:0x6E
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_150__(iChoice, 0), __NFUN_151__(iChoice, 3)), __NFUN_114__(m_Player.m_pawn.m_WeaponsCarried[iChoice], none)), __NFUN_129__(m_Player.m_pawn.m_WeaponsCarried[iChoice].HasAmmo())))
+	if(((((iChoice < 0) || (iChoice > 3)) || (m_Player.m_pawn.m_WeaponsCarried[iChoice] == none)) || (!m_Player.m_pawn.m_WeaponsCarried[iChoice].HasAmmo())))
 	{
 		return false;
 	}
@@ -39,20 +39,20 @@ function bool IsValidMenuChoice(int iChoice)
 function SetMenuChoice(int iChoice)
 {
 	// End:0x27
-	if(__NFUN_132__(__NFUN_150__(iChoice, 0), __NFUN_151__(iChoice, 3)))
+	if(((iChoice < 0) || (iChoice > 3)))
 	{
 		m_iCurrentMnuChoice = -1;		
 	}
 	else
 	{
 		// End:0x84
-		if(__NFUN_130__(__NFUN_119__(m_Player.m_pawn.m_WeaponsCarried[iChoice], none), m_Player.m_pawn.m_WeaponsCarried[iChoice].HasAmmo()))
+		if(((m_Player.m_pawn.m_WeaponsCarried[iChoice] != none) && m_Player.m_pawn.m_WeaponsCarried[iChoice].HasAmmo()))
 		{
 			m_iCurrentMnuChoice = iChoice;			
 		}
 		else
 		{
-			SetMenuChoice(__NFUN_147__(iChoice, 1));
+			SetMenuChoice((iChoice - 1));
 		}
 	}
 	return;
@@ -63,21 +63,21 @@ function ItemClicked(int iItem)
 	// End:0x33
 	if(bShowLog)
 	{
-		__NFUN_231__("**** LeftMouse -> Change weapon ! ****");
+		Log("**** LeftMouse -> Change weapon ! ****");
 	}
 	// End:0x5B
-	if(__NFUN_155__(iItem, -1))
+	if((iItem != -1))
 	{
-		m_Player.SwitchWeapon(byte(__NFUN_146__(iItem, 1)));
+		m_Player.SwitchWeapon(byte((iItem + 1)));
 	}
 	return;
 }
 
 function PostRender(Canvas C)
 {
-	C.__NFUN_1606__(true);
+	C.UseVirtualSize(true);
 	DrawInventoryMenu(C);
-	C.__NFUN_1606__(false);
+	C.UseVirtualSize(false);
 	return;
 }
 
@@ -97,34 +97,34 @@ function DrawInventoryMenu(Canvas C)
 	local R6EngineWeapon pWeapon;
 
 	// End:0x0D
-	if(__NFUN_114__(m_Player, none))
+	if((m_Player == none))
 	{
 		return;
 	}
 	// End:0x35
-	if(__NFUN_132__(m_Player.bOnlySpectator, m_Player.bCheatFlying))
+	if((m_Player.bOnlySpectator || m_Player.bCheatFlying))
 	{
 		return;
 	}
 	PlayerPawn = m_Player.m_pawn;
 	// End:0x63
-	if(__NFUN_132__(__NFUN_114__(PlayerPawn, none), __NFUN_129__(bVisible)))
+	if(((PlayerPawn == none) || (!bVisible)))
 	{
 		return;
 	}
 	DrawRoseDesVents(C, m_iCurrentMnuChoice);
-	fScaleX = __NFUN_172__(float(C.SizeX), 800.0000000);
-	fScaleY = __NFUN_172__(float(C.SizeY), 600.0000000);
-	fPosX = __NFUN_174__(__NFUN_172__(float(C.SizeX), 2.0000000), fScaleX);
-	fPosY = __NFUN_174__(__NFUN_172__(float(C.SizeY), 2.0000000), fScaleY);
+	fScaleX = (float(C.SizeX) / 800.0000000);
+	fScaleY = (float(C.SizeY) / 600.0000000);
+	fPosX = ((float(C.SizeX) / 2.0000000) + fScaleX);
+	fPosY = ((float(C.SizeY) / 2.0000000) + fScaleY);
 	iWeapon = 0;
 	J0xFC:
 
 	// End:0x22C [Loop If]
-	if(__NFUN_150__(iWeapon, 2))
+	if((iWeapon < 2))
 	{
 		// End:0x1CA
-		if(__NFUN_119__(PlayerPawn.m_WeaponsCarried[iWeapon], none))
+		if((PlayerPawn.m_WeaponsCarried[iWeapon] != none))
 		{
 			strWeapon[iWeapon] = PlayerPawn.m_WeaponsCarried[iWeapon].m_WeaponShortName;
 			// End:0x19B
@@ -143,13 +143,13 @@ function DrawInventoryMenu(Canvas C)
 		TextColor[iWeapon] = m_Player.m_TeamManager.Colors.HUDGrey;
 		J0x222:
 
-		__NFUN_165__(iWeapon);
+		(iWeapon++);
 		// [Loop Continue]
 		goto J0xFC;
 	}
 	pWeapon = PlayerPawn.m_WeaponsCarried[2];
 	// End:0x2C4
-	if(__NFUN_130__(__NFUN_119__(pWeapon, none), pWeapon.HasAmmo()))
+	if(((pWeapon != none) && pWeapon.HasAmmo()))
 	{
 		strWeapon[2] = Localize(pWeapon.m_NameID, "ID_NAME", "R6Gadgets");
 		bPrimaryGadgetSet = true;
@@ -157,7 +157,7 @@ function DrawInventoryMenu(Canvas C)
 	}
 	pWeapon = PlayerPawn.m_WeaponsCarried[3];
 	// End:0x35C
-	if(__NFUN_130__(__NFUN_119__(pWeapon, none), pWeapon.HasAmmo()))
+	if(((pWeapon != none) && pWeapon.HasAmmo()))
 	{
 		strWeapon[3] = Localize(pWeapon.m_NameID, "ID_NAME", "R6Gadgets");
 		bSecondaryGadgetSet = true;
@@ -167,7 +167,7 @@ function DrawInventoryMenu(Canvas C)
 	if(PlayerPawn.m_bHasLockPickKit)
 	{
 		// End:0x3DD
-		if(__NFUN_129__(bPrimaryGadgetSet))
+		if((!bPrimaryGadgetSet))
 		{
 			strWeapon[2] = Localize("LOCKPICKKIT", "ID_NAME", "R6Gadgets");
 			bPrimaryGadgetSet = true;
@@ -176,7 +176,7 @@ function DrawInventoryMenu(Canvas C)
 		else
 		{
 			// End:0x449
-			if(__NFUN_129__(bSecondaryGadgetSet))
+			if((!bSecondaryGadgetSet))
 			{
 				strWeapon[3] = Localize("LOCKPICKKIT", "ID_NAME", "R6Gadgets");
 				bSecondaryGadgetSet = true;
@@ -188,7 +188,7 @@ function DrawInventoryMenu(Canvas C)
 	if(PlayerPawn.m_bHasDiffuseKit)
 	{
 		// End:0x4C9
-		if(__NFUN_129__(bPrimaryGadgetSet))
+		if((!bPrimaryGadgetSet))
 		{
 			strWeapon[2] = Localize("DIFFUSEKIT", "ID_NAME", "R6Gadgets");
 			bPrimaryGadgetSet = true;
@@ -197,7 +197,7 @@ function DrawInventoryMenu(Canvas C)
 		else
 		{
 			// End:0x534
-			if(__NFUN_129__(bSecondaryGadgetSet))
+			if((!bSecondaryGadgetSet))
 			{
 				strWeapon[3] = Localize("DIFFUSEKIT", "ID_NAME", "R6Gadgets");
 				bSecondaryGadgetSet = true;
@@ -209,7 +209,7 @@ function DrawInventoryMenu(Canvas C)
 	if(PlayerPawn.m_bHasElectronicsKit)
 	{
 		// End:0x5B7
-		if(__NFUN_129__(bPrimaryGadgetSet))
+		if((!bPrimaryGadgetSet))
 		{
 			strWeapon[2] = Localize("ELECTRONICKIT", "ID_NAME", "R6Gadgets");
 			bPrimaryGadgetSet = true;
@@ -218,7 +218,7 @@ function DrawInventoryMenu(Canvas C)
 		else
 		{
 			// End:0x625
-			if(__NFUN_129__(bSecondaryGadgetSet))
+			if((!bSecondaryGadgetSet))
 			{
 				strWeapon[3] = Localize("ELECTRONICKIT", "ID_NAME", "R6Gadgets");
 				bSecondaryGadgetSet = true;
@@ -230,7 +230,7 @@ function DrawInventoryMenu(Canvas C)
 	if(PlayerPawn.m_bHaveGasMask)
 	{
 		// End:0x6A2
-		if(__NFUN_129__(bPrimaryGadgetSet))
+		if((!bPrimaryGadgetSet))
 		{
 			strWeapon[2] = Localize("GASMASK", "ID_NAME", "R6Gadgets");
 			bPrimaryGadgetSet = true;
@@ -239,7 +239,7 @@ function DrawInventoryMenu(Canvas C)
 		else
 		{
 			// End:0x70A
-			if(__NFUN_129__(bSecondaryGadgetSet))
+			if((!bSecondaryGadgetSet))
 			{
 				strWeapon[3] = Localize("GASMASK", "ID_NAME", "R6Gadgets");
 				bSecondaryGadgetSet = true;
@@ -248,14 +248,14 @@ function DrawInventoryMenu(Canvas C)
 		}
 	}
 	// End:0x76F
-	if(__NFUN_129__(bPrimaryGadgetSet))
+	if((!bPrimaryGadgetSet))
 	{
 		strWeapon[2] = Localize("MISC", "ID_EMPTY", "R6Common");
 		bPrimaryGadgetSet = true;
 		TextColor[2] = m_Player.m_TeamManager.Colors.HUDGrey;
 	}
 	// End:0x7D4
-	if(__NFUN_129__(bSecondaryGadgetSet))
+	if((!bSecondaryGadgetSet))
 	{
 		strWeapon[3] = Localize("MISC", "ID_EMPTY", "R6Common");
 		bSecondaryGadgetSet = true;
@@ -264,34 +264,34 @@ function DrawInventoryMenu(Canvas C)
 	fTextSizeX = 75.0000000;
 	fTextSizeY = 32.0000000;
 	C.Style = 3;
-	C.__NFUN_1606__(false);
+	C.UseVirtualSize(false);
 	iWeapon = 0;
 	J0x80F:
 
 	// End:0xA0D [Loop If]
-	if(__NFUN_150__(iWeapon, 4))
+	if((iWeapon < 4))
 	{
-		C.__NFUN_2626__(TextColor[iWeapon].R, TextColor[iWeapon].G, TextColor[iWeapon].B, TextColor[iWeapon].A);
+		C.SetDrawColor(TextColor[iWeapon].R, TextColor[iWeapon].G, TextColor[iWeapon].B, TextColor[iWeapon].A);
 		switch(iWeapon)
 		{
 			// End:0x8D6
 			case 0:
-				DrawTextCenteredInBox(C, strWeapon[iWeapon], __NFUN_175__(fPosX, __NFUN_172__(__NFUN_171__(fTextSizeX, fScaleX), 2.0000000)), __NFUN_175__(fPosY, __NFUN_171__(__NFUN_174__(float(50), fTextSizeY), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strWeapon[iWeapon], (fPosX - ((fTextSizeX * fScaleX) / 2.0000000)), (fPosY - ((float(50) + fTextSizeY) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0xA03
 				break;
 			// End:0x936
 			case 1:
-				DrawTextCenteredInBox(C, strWeapon[iWeapon], __NFUN_174__(fPosX, __NFUN_171__(float(35), fScaleX)), __NFUN_175__(fPosY, __NFUN_171__(__NFUN_172__(fTextSizeY, float(2)), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strWeapon[iWeapon], (fPosX + (float(35) * fScaleX)), (fPosY - ((fTextSizeY / float(2)) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0xA03
 				break;
 			// End:0x998
 			case 2:
-				DrawTextCenteredInBox(C, strWeapon[iWeapon], __NFUN_175__(fPosX, __NFUN_172__(__NFUN_171__(fTextSizeX, fScaleX), 2.0000000)), __NFUN_174__(fPosY, __NFUN_171__(float(50), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strWeapon[iWeapon], (fPosX - ((fTextSizeX * fScaleX) / 2.0000000)), (fPosY + (float(50) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0xA03
 				break;
 			// End:0xA00
 			case 3:
-				DrawTextCenteredInBox(C, strWeapon[iWeapon], __NFUN_175__(fPosX, __NFUN_171__(__NFUN_174__(float(35), fTextSizeX), fScaleX)), __NFUN_175__(fPosY, __NFUN_171__(__NFUN_172__(fTextSizeY, float(2)), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strWeapon[iWeapon], (fPosX - ((float(35) + fTextSizeX) * fScaleX)), (fPosY - ((fTextSizeY / float(2)) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0xA03
 				break;
 			// End:0xFFFF

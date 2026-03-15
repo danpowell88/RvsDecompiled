@@ -27,22 +27,22 @@ simulated state FiringWeapon
 	function AnimEnd(int iChannel)
 	{
 		// End:0x1A
-		if(__NFUN_132__(__NFUN_155__(iChannel, 0), __NFUN_114__(Owner, none)))
+		if(((iChannel != 0) || (Owner == none)))
 		{
 			return;
 		}
 		// End:0x41
 		if(bShowLog)
 		{
-			__NFUN_231__("HANDS - EndAnim, goto wait");
+			Log("HANDS - EndAnim, goto wait");
 		}
-		AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
+		AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
 		AnimBlendParams(1, 0.0000000);
 		R6AbstractWeapon(Owner).FirstPersonAnimOver();
 		m_bCanQuitOnAnimEnd = false;
 		m_bCannotPlayEmpty = false;
 		m_bInBurst = false;
-		__NFUN_113__('DiscardWeaponAfterFire');
+		GotoState('DiscardWeaponAfterFire');
 		return;
 	}
 	stop;
@@ -61,23 +61,23 @@ state DiscardWeaponAfterFire
 		// End:0x3C
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("IN:", string(self)), "::DiscardWeaponAfterFire::AnimEnd()"));
+			Log((("IN:" @ string(self)) @ "::DiscardWeaponAfterFire::AnimEnd()"));
 		}
 		// End:0x49
-		if(__NFUN_114__(Owner, none))
+		if((Owner == none))
 		{
 			return;
 		}
 		// End:0x73
-		if(__NFUN_154__(Channel, 0))
+		if((Channel == 0))
 		{
 			SetDrawType(0);
-			__NFUN_280__(R6AbstractWeapon(Owner).m_fPauseWhenChanging, false);
+			SetTimer(R6AbstractWeapon(Owner).m_fPauseWhenChanging, false);
 		}
 		// End:0xB0
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("OUT:", string(self)), "::DiscardWeaponAfterFire::AnimEnd()"));
+			Log((("OUT:" @ string(self)) @ "::DiscardWeaponAfterFire::AnimEnd()"));
 		}
 		return;
 	}
@@ -87,13 +87,13 @@ state DiscardWeaponAfterFire
 		// End:0x3F
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("IN:", string(self)), "::DiscardWeaponAfterFire::BeginState()"));
+			Log((("IN:" @ string(self)) @ "::DiscardWeaponAfterFire::BeginState()"));
 		}
-		__NFUN_259__('FireEmpty', R6Pawn(Owner.Owner).ArmorSkillEffect());
+		PlayAnim('FireEmpty', R6Pawn(Owner.Owner).ArmorSkillEffect());
 		// End:0xA4
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("OUT:", string(self)), "::DiscardWeaponAfterFire::BeginState()"));
+			Log((("OUT:" @ string(self)) @ "::DiscardWeaponAfterFire::BeginState()"));
 		}
 		return;
 	}
@@ -113,18 +113,18 @@ state DiscardWeapon
 		// End:0x56
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  "), string(self)), " -   IN:"), string(self)), "::DiscardWeapon::AnimEnd()"));
+			Log((((((("HANDS - " $ string(self)) $ " -  ") $ string(self)) $ " -   IN:") @ string(self)) @ "::DiscardWeapon::AnimEnd()"));
 		}
 		// End:0x63
-		if(__NFUN_114__(Owner, none))
+		if((Owner == none))
 		{
 			return;
 		}
 		// End:0x8D
-		if(__NFUN_154__(Channel, 0))
+		if((Channel == 0))
 		{
 			SetDrawType(0);
-			__NFUN_280__(R6AbstractWeapon(Owner).m_fPauseWhenChanging, false);
+			SetTimer(R6AbstractWeapon(Owner).m_fPauseWhenChanging, false);
 		}
 		return;
 	}
@@ -134,9 +134,9 @@ state DiscardWeapon
 		// End:0x4B
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  IN:"), string(self)), "::DiscardWeapon::BeginState()"));
+			Log((((("HANDS - " $ string(self)) $ " -  IN:") @ string(self)) @ "::DiscardWeapon::BeginState()"));
 		}
-		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_UnEquipSnd, 3);
+		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_UnEquipSnd, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		__NFUN_259__('End', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
 		return;
 	}

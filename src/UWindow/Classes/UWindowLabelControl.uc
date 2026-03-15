@@ -18,8 +18,8 @@ function BeforePaint(Canvas C, float X, float Y)
 
 	super.BeforePaint(C, X, Y);
 	TextSize(C, Text, W, H);
-	WinHeight = __NFUN_174__(H, float(1));
-	TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
+	WinHeight = (H + float(1));
+	TextY = ((WinHeight - H) / float(2));
 	switch(Align)
 	{
 		// End:0x67
@@ -28,12 +28,12 @@ function BeforePaint(Canvas C, float X, float Y)
 			break;
 		// End:0x87
 		case 2:
-			TextX = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
+			TextX = ((WinWidth - W) / float(2));
 			// End:0xA4
 			break;
 		// End:0xA1
 		case 1:
-			TextX = __NFUN_175__(WinWidth, W);
+			TextX = (WinWidth - W);
 			// End:0xA4
 			break;
 		// End:0xFFFF
@@ -46,12 +46,12 @@ function BeforePaint(Canvas C, float X, float Y)
 function Paint(Canvas C, float X, float Y)
 {
 	// End:0x8B
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 		C.Font = Root.Fonts[Font];
 		ClipText(C, TextX, TextY, Text);
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+		C.SetDrawColor(byte(255), byte(255), byte(255));
 	}
 	return;
 }

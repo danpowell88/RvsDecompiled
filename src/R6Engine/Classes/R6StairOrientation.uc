@@ -17,9 +17,9 @@ simulated function PostBeginPlay()
 {
 	super.PostBeginPlay();
 	// End:0x57
-	if(__NFUN_114__(m_pStairVolume, none))
+	if((m_pStairVolume == none))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__("WARNING: ", string(Name)), " is not linked to a stair volume. Remove it."));
+		Log((("WARNING: " $ string(Name)) $ " is not linked to a stair volume. Remove it."));
 	}
 	return;
 }

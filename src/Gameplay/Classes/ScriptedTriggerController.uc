@@ -16,16 +16,16 @@ function InitializeFor(ScriptedTrigger t)
 	SequenceScript = t;
 	ActionNum = 0;
 	SequenceScript.SetActions(self);
-	__NFUN_113__('Scripting');
+	GotoState('Scripting');
 	return;
 }
 
 function DestroyPawn()
 {
 	// End:0x17
-	if(__NFUN_119__(Instigator, none))
+	if((Instigator != none))
 	{
-		Instigator.__NFUN_279__();
+		Instigator.Destroy();
 	}
 	return;
 }
@@ -55,7 +55,7 @@ state Scripting
 
 	function LeaveScripting()
 	{
-		__NFUN_279__();
+		Destroy();
 		return;
 	}
 Begin:
@@ -64,12 +64,12 @@ Begin:
 	// End:0x16
 	if(bBroken)
 	{
-		__NFUN_113__('Broken');
+		GotoState('Broken');
 	}
 	// End:0x2F
 	if(CurrentAction.TickedAction())
 	{
-		__NFUN_117__('Tick');
+		Enable('Tick');
 	}
 	stop;				
 }
@@ -77,7 +77,7 @@ Begin:
 state Broken
 {Begin:
 
-	__NFUN_232__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" Trigger Scripted Sequence BROKEN ", string(SequenceScript)), " ACTION "), string(CurrentAction)));
+	Warn((((" Trigger Scripted Sequence BROKEN " $ string(SequenceScript)) $ " ACTION ") $ string(CurrentAction)));
 	stop;			
 }
 

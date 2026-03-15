@@ -21,7 +21,7 @@ var() string Song;
 function BeginPlay()
 {
 	// End:0x20
-	if(__NFUN_122__(Song, ""))
+	if((Song == ""))
 	{
 		Song = Level.Song;
 	}
@@ -45,10 +45,10 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		J0x1D:
 
 		// End:0x71 [Loop If]
-		if(__NFUN_119__(A, none))
+		if((A != none))
 		{
 			// End:0x5A
-			if(A.__NFUN_303__('PlayerController'))
+			if(A.IsA('PlayerController'))
 			{
 				PlayerController(A).ClientSetMusic(Song, Transition);
 			}
@@ -61,7 +61,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		P = PlayerController(EventInstigator.Controller);
 		// End:0x9A
-		if(__NFUN_114__(P, none))
+		if((P == none))
 		{
 			return;
 		}
@@ -70,8 +70,8 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	// End:0xC9
 	if(bOnceOnly)
 	{
-		__NFUN_262__(false, false, false);
-		__NFUN_118__('Trigger');
+		SetCollision(false, false, false);
+		Disable('Trigger');
 	}
 	return;
 }

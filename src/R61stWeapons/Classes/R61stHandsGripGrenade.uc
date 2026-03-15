@@ -23,10 +23,10 @@ auto state Waiting
 	{
 		local int HowLongBeforeWait;
 
-		__NFUN_259__('Wait01');
+		PlayAnim('Wait01');
 		m_bPlayWaitAnim = true;
-		HowLongBeforeWait = __NFUN_167__(10);
-		__NFUN_280__(float(__NFUN_146__(HowLongBeforeWait, 5)), false);
+		HowLongBeforeWait = Rand(10);
+		SetTimer(float((HowLongBeforeWait + 5)), false);
 		return;
 	}
 	stop;
@@ -38,8 +38,8 @@ state RaiseWeapon
 	{
 		SetDrawType(2);
 		AssociatedWeapon.SetDrawType(2);
-		AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
-		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_EquipSnd, 3);
+		AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
+		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_EquipSnd, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		__NFUN_259__('Begin', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
 		return;
 	}

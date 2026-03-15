@@ -53,35 +53,35 @@ function Created()
 	m_LTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 0.0000000, WinWidth, m_fTitleHeight, self));
 	m_LTitle.SetProperties(Localize("DebriefingMenu", "CARREERSTATS", "R6Menu"), 2, Root.Fonts[8], Root.Colors.BlueLight, false);
 	YPos = int(m_fYOffSet);
-	m_LMissionServed = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), __NFUN_175__(WinWidth, m_fXOffSet), m_fLabelHeight, self));
+	m_LMissionServed = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), (WinWidth - m_fXOffSet), m_fLabelHeight, self));
 	m_LMissionServed.SetProperties("", 0, Root.Fonts[5], Root.Colors.BlueLight, false);
-	__NFUN_161__(YPos, int(m_fLabelHeight));
-	m_LTerroKilled = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), __NFUN_175__(WinWidth, m_fXOffSet), m_fLabelHeight, self));
+	(YPos += int(m_fLabelHeight));
+	m_LTerroKilled = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), (WinWidth - m_fXOffSet), m_fLabelHeight, self));
 	m_LTerroKilled.SetProperties("", 0, Root.Fonts[5], Root.Colors.BlueLight, false);
-	__NFUN_161__(YPos, int(m_fLabelHeight));
-	m_LRoundsFired = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), __NFUN_175__(WinWidth, m_fXOffSet), m_fLabelHeight, self));
+	(YPos += int(m_fLabelHeight));
+	m_LRoundsFired = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), (WinWidth - m_fXOffSet), m_fLabelHeight, self));
 	m_LRoundsFired.SetProperties("", 0, Root.Fonts[5], Root.Colors.BlueLight, false);
-	__NFUN_161__(YPos, int(m_fLabelHeight));
-	m_LRoundsOnTarget = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), __NFUN_175__(WinWidth, m_fXOffSet), m_fLabelHeight, self));
+	(YPos += int(m_fLabelHeight));
+	m_LRoundsOnTarget = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), (WinWidth - m_fXOffSet), m_fLabelHeight, self));
 	m_LRoundsOnTarget.SetProperties("", 0, Root.Fonts[5], Root.Colors.BlueLight, false);
-	__NFUN_161__(YPos, int(m_fLabelHeight));
-	m_LShootPercent = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), __NFUN_175__(WinWidth, m_fXOffSet), m_fLabelHeight, self));
+	(YPos += int(m_fLabelHeight));
+	m_LShootPercent = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXOffSet, float(YPos), (WinWidth - m_fXOffSet), m_fLabelHeight, self));
 	m_LShootPercent.SetProperties("", 0, Root.Fonts[5], Root.Colors.BlueLight, false);
 	m_RainBowLogo = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', 204.0000000, 31.0000000, float(m_RRainBowLogo.W), float(m_RRainBowLogo.H), self));
 	m_RainBowLogo.t = m_TRainBowLogo;
 	m_RainBowLogo.R = m_RRainBowLogo;
 	m_RainBowLogo.m_iDrawStyle = 5;
 	m_BorderColor = Root.Colors.GrayLight;
-	m_OperativeFace = R6MenuCarreerOperative(CreateWindow(Class'R6Menu.R6MenuCarreerOperative', float(m_iPadding), 138.0000000, __NFUN_175__(WinWidth, float(__NFUN_144__(2, m_iPadding))), float(m_iHeight), self));
-	m_LOpName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fLOpNameX, m_OperativeFace.WinTop, m_fLOpNameW, __NFUN_172__(m_OperativeFace.WinHeight, float(3)), self));
+	m_OperativeFace = R6MenuCarreerOperative(CreateWindow(Class'R6Menu.R6MenuCarreerOperative', float(m_iPadding), 138.0000000, (WinWidth - float((2 * m_iPadding))), float(m_iHeight), self));
+	m_LOpName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fLOpNameX, m_OperativeFace.WinTop, m_fLOpNameW, (m_OperativeFace.WinHeight / float(3)), self));
 	m_LOpName.m_bFixedYPos = true;
 	m_LOpName.TextY = 16.0000000;
 	m_LOpName.SetProperties("", 1, Root.Fonts[6], Root.Colors.White, false);
 	m_LOpName.bAlwaysOnTop = true;
-	m_LOpSpecility = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_LOpName.WinLeft, __NFUN_174__(m_LOpName.WinTop, m_LOpName.WinHeight), m_LOpName.WinWidth, m_LOpName.WinHeight, self));
+	m_LOpSpecility = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_LOpName.WinLeft, (m_LOpName.WinTop + m_LOpName.WinHeight), m_LOpName.WinWidth, m_LOpName.WinHeight, self));
 	m_LOpSpecility.SetProperties("", 1, Root.Fonts[6], Root.Colors.White, false);
 	m_LOpSpecility.bAlwaysOnTop = true;
-	m_LOpHealthStatus = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_LOpName.WinLeft, __NFUN_174__(m_LOpSpecility.WinTop, m_LOpSpecility.WinHeight), m_LOpName.WinWidth, __NFUN_175__(__NFUN_175__(m_OperativeFace.WinHeight, m_LOpName.WinHeight), m_LOpSpecility.WinHeight), self));
+	m_LOpHealthStatus = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_LOpName.WinLeft, (m_LOpSpecility.WinTop + m_LOpSpecility.WinHeight), m_LOpName.WinWidth, ((m_OperativeFace.WinHeight - m_LOpName.WinHeight) - m_LOpSpecility.WinHeight), self));
 	m_LOpHealthStatus.m_bFixedYPos = true;
 	m_LOpHealthStatus.TextY = 2.0000000;
 	m_LOpHealthStatus.SetProperties("", 1, Root.Fonts[6], Root.Colors.White, false);
@@ -92,11 +92,11 @@ function Created()
 //To change the current operative Carreer Stats
 function UpdateStats(string _MissionServed, string _TerroKilled, string _RoundsShot, string _RoundsOnTarget, string _ShootPercent)
 {
-	m_LMissionServed.SetNewText(__NFUN_168__(Localize("R6Operative", "NbMissions", "R6Menu"), _MissionServed), true);
-	m_LTerroKilled.SetNewText(__NFUN_168__(Localize("R6Operative", "TerroKilled", "R6Menu"), _TerroKilled), true);
-	m_LRoundsFired.SetNewText(__NFUN_168__(Localize("R6Operative", "RoundsFired", "R6Menu"), _RoundsShot), true);
-	m_LRoundsOnTarget.SetNewText(__NFUN_168__(Localize("R6Operative", "RoundsOnTarget", "R6Menu"), _RoundsOnTarget), true);
-	m_LShootPercent.SetNewText(__NFUN_168__(Localize("R6Operative", "ShootPercent", "R6Menu"), _ShootPercent), true);
+	m_LMissionServed.SetNewText((Localize("R6Operative", "NbMissions", "R6Menu") @ _MissionServed), true);
+	m_LTerroKilled.SetNewText((Localize("R6Operative", "TerroKilled", "R6Menu") @ _TerroKilled), true);
+	m_LRoundsFired.SetNewText((Localize("R6Operative", "RoundsFired", "R6Menu") @ _RoundsShot), true);
+	m_LRoundsOnTarget.SetNewText((Localize("R6Operative", "RoundsOnTarget", "R6Menu") @ _RoundsOnTarget), true);
+	m_LShootPercent.SetNewText((Localize("R6Operative", "ShootPercent", "R6Menu") @ _ShootPercent), true);
 	return;
 }
 
@@ -133,7 +133,7 @@ function UpdateHealthStatus(string _szHealthStatus)
 
 function Paint(Canvas C, float X, float Y)
 {
-	R6WindowLookAndFeel(LookAndFeel).DrawBGShading(self, C, 0.0000000, m_fTitleHeight, WinWidth, __NFUN_175__(WinHeight, m_fTitleHeight));
+	R6WindowLookAndFeel(LookAndFeel).DrawBGShading(self, C, 0.0000000, m_fTitleHeight, WinWidth, (WinHeight - m_fTitleHeight));
 	DrawSimpleBorder(C);
 	DrawStretchedTextureSegment(C, 0.0000000, m_fTitleHeight, WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;

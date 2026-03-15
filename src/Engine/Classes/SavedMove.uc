@@ -40,27 +40,27 @@ final function Clear()
 final function SetMoveFor(PlayerController P, float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir InDoubleClick)
 {
 	// End:0x29
-	if(__NFUN_177__(__NFUN_225__(NewAccel), float(3072)))
+	if((VSize(NewAccel) > float(3072)))
 	{
-		NewAccel = __NFUN_213__(float(3072), __NFUN_226__(NewAccel));
+		NewAccel = (float(3072) * Normal(NewAccel));
 	}
 	// End:0x67
-	if(__NFUN_177__(Delta, float(0)))
+	if((Delta > float(0)))
 	{
-		Acceleration = __NFUN_214__(__NFUN_215__(__NFUN_213__(DeltaTime, NewAccel), __NFUN_213__(Delta, Acceleration)), __NFUN_174__(Delta, DeltaTime));		
+		Acceleration = (((DeltaTime * NewAccel) + (Delta * Acceleration)) / (Delta + DeltaTime));		
 	}
 	else
 	{
 		Acceleration = NewAccel;
 	}
-	__NFUN_184__(Delta, DeltaTime);
+	(Delta += DeltaTime);
 	// End:0x99
-	if(__NFUN_154__(int(DoubleClickMove), int(0)))
+	if((int(DoubleClickMove) == int(0)))
 	{
 		DoubleClickMove = InDoubleClick;
 	}
-	bRun = __NFUN_151__(int(P.bRun), 0);
-	bDuck = __NFUN_151__(int(P.bDuck), 0);
+	bRun = (int(P.bRun) > 0);
+	bDuck = (int(P.bDuck) > 0);
 	TimeStamp = Level.TimeSeconds;
 	m_bCrawl = P.m_bCrawl;
 	return;

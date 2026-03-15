@@ -15,16 +15,16 @@ function PostBeginPlay()
 	LinkSkelAnim(MeshAnimation'R61stShotgun_UKX.R61stShotgunUSAS12A');
 	super.PostBeginPlay();
 	// End:0x2A
-	if(__NFUN_114__(m_smGun, none))
+	if((m_smGun == none))
 	{
-		m_smGun = __NFUN_278__(Class'R61stWeapons.R61stWeaponStaticMesh');
+		m_smGun = Spawn(Class'R61stWeapons.R61stWeaponStaticMesh');
 	}
 	m_smGun.SetStaticMesh(StaticMesh'R61stWeapons_SM.Shotguns.R61stShotgunUSAS12Frame');
 	AttachToBone(m_smGun, 'TagFrame');
 	// End:0x67
-	if(__NFUN_114__(m_smGun2, none))
+	if((m_smGun2 == none))
 	{
-		m_smGun2 = __NFUN_278__(Class'R61stWeapons.R61stWeaponStaticMesh');
+		m_smGun2 = Spawn(Class'R61stWeapons.R61stWeaponStaticMesh');
 	}
 	m_smGun2.SetStaticMesh(StaticMesh'R61stWeapons_SM.Shotguns.R61stShotgunUSAS12Magazine');
 	AttachToBone(m_smGun2, 'TagMagazine');

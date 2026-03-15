@@ -51,10 +51,10 @@ function Created()
 	local float labelWidth, NavXPos, fStatsHeight, fStatsWidth;
 
 	super.Created();
-	labelWidth = __NFUN_172__(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth), float(3));
+	labelWidth = ((m_Right.WinLeft - m_Left.WinWidth) / float(3));
 	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_Left.WinWidth, m_Top.WinHeight, labelWidth, 18.0000000, self));
-	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_CodeName.WinLeft, m_CodeName.WinWidth), m_Top.WinHeight, labelWidth, 18.0000000, self));
-	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_DateTime.WinLeft, m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, 18.0000000, self));
+	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_CodeName.WinLeft + m_CodeName.WinWidth), m_Top.WinHeight, labelWidth, 18.0000000, self));
+	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_DateTime.WinLeft + m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, 18.0000000, self));
 	m_MissionResultTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 21.0000000, 52.0000000, m_fMissionResultTitleWidth, m_fMissionResultTitleHeight, self));
 	m_MissionResultTitle.m_bUseBGColor = true;
 	m_MissionResultTitle.m_BGTexture = m_TBGMissionResult;
@@ -83,11 +83,11 @@ function Created()
 	m_MissionObjectives.m_BGColor = Root.Colors.Black;
 	m_MissionObjectives.m_BGColor.A = byte(Root.Colors.DarkBGAlpha);
 	m_NavBar.HideWindow();
-	m_fNavAreaY = __NFUN_175__(__NFUN_175__(m_Bottom.WinTop, float(33)), m_fLaptopPadding);
-	NavXPos = __NFUN_174__(m_Left.WinWidth, float(2));
+	m_fNavAreaY = ((m_Bottom.WinTop - float(33)) - m_fLaptopPadding);
+	NavXPos = (m_Left.WinWidth + float(2));
 	m_DebriefNavBar = R6MenuDebriefNavBar(CreateWindow(Class'R6Menu.R6MenuDebriefNavBar', m_NavBar.WinLeft, m_NavBar.WinTop, m_NavBar.WinWidth, m_NavBar.WinHeight, self));
 	fStatsHeight = 227.0000000;
-	m_pR6RainbowTeamBar = R6MenuSingleTeamBar(CreateControl(Class'R6Menu.R6MenuSingleTeamBar', m_MissionObjectives.WinLeft, __NFUN_174__(__NFUN_174__(m_MissionObjectives.WinTop, m_MissionObjectives.WinHeight), float(3)), m_fStatsWidth, fStatsHeight, self));
+	m_pR6RainbowTeamBar = R6MenuSingleTeamBar(CreateControl(Class'R6Menu.R6MenuSingleTeamBar', m_MissionObjectives.WinLeft, ((m_MissionObjectives.WinTop + m_MissionObjectives.WinHeight) + float(3)), m_fStatsWidth, fStatsHeight, self));
 	m_pR6RainbowTeamBar.m_bDrawBorders = true;
 	m_pR6RainbowTeamBar.m_bDrawTotalsShading = true;
 	m_pR6RainbowTeamBar.m_IFirstItempYOffset = 4;
@@ -104,7 +104,7 @@ function Created()
 	m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.m_fXItemRightPadding = 1.0000000;
 	m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.m_fItemHeight = 18.0000000;
 	m_pR6RainbowTeamBar.Resize();
-	m_RainbowCarreerStats = R6MenuCarreerStats(CreateWindow(Class'R6Menu.R6MenuCarreerStats', __NFUN_174__(__NFUN_174__(m_pR6RainbowTeamBar.WinLeft, m_pR6RainbowTeamBar.WinWidth), m_fPaddingBetween), m_pR6RainbowTeamBar.WinTop, 301.0000000, m_pR6RainbowTeamBar.WinHeight, self));
+	m_RainbowCarreerStats = R6MenuCarreerStats(CreateWindow(Class'R6Menu.R6MenuCarreerStats', ((m_pR6RainbowTeamBar.WinLeft + m_pR6RainbowTeamBar.WinWidth) + m_fPaddingBetween), m_pR6RainbowTeamBar.WinTop, 301.0000000, m_pR6RainbowTeamBar.WinHeight, self));
 	return;
 }
 
@@ -115,12 +115,12 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bReadyShowWindow)
 	{
 		// End:0xA4
-		if(__NFUN_154__(m_iCountFrame, 1))
+		if((m_iCountFrame == 1))
 		{
 			m_bReadyShowWindow = false;
 			GetPlayerOwner().StopAllMusic();
 			R6AbstractHUD(GetPlayerOwner().myHUD).StopFadeToBlack();
-			GetPlayerOwner().__NFUN_2720__(5);
+			GetPlayerOwner().ResetVolume_TypeSound(5);
 			// End:0x8F
 			if(m_bMissionVictory)
 			{
@@ -144,7 +144,7 @@ function ShowWindow()
 	local string szObjectiveDesc;
 	local Canvas C;
 
-	C = Class'Engine.Actor'.static.__NFUN_2618__();
+	C = Class'Engine.Actor'.static.GetCanvas();
 	C.m_iNewResolutionX = 640;
 	C.m_iNewResolutionY = 480;
 	C.m_bChangeResRequested = true;
@@ -164,7 +164,7 @@ function ShowWindow()
 	m_MissionObjectives.m_fYOffSet = 5.0000000;
 	m_MissionObjectives.AddText(Localize("Briefing", "SUMMARY", "R6Menu"), Root.Colors.BlueLight, Root.Fonts[5]);
 	// End:0x52F
-	if(__NFUN_154__(int(moMgr.m_eMissionObjectiveStatus), int(1)))
+	if((int(moMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
 		m_bMissionVictory = true;
 		m_MissionResultTitle.SetProperties(Localize("DebriefingMenu", "SUCCESS", "R6Menu"), 2, Root.Fonts[4], Root.Colors.Green, true);
@@ -173,24 +173,24 @@ function ShowWindow()
 		J0x395:
 
 		// End:0x52C [Loop If]
-		if(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length))
+		if((i < moMgr.m_aMissionObjectives.Length))
 		{
 			// End:0x522
-			if(__NFUN_130__(__NFUN_129__(moMgr.m_aMissionObjectives[i].m_bMoralityObjective), moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
+			if(((!moMgr.m_aMissionObjectives[i].m_bMoralityObjective) && moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
 			{
 				szObjectiveDesc = Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i]));
 				// End:0x4AD
 				if(moMgr.m_aMissionObjectives[i].isCompleted())
 				{
-					szObjectiveDesc = __NFUN_168__(__NFUN_168__(__NFUN_168__("-", szObjectiveDesc), ":"), Localize("OBJECTIVES", "SUCCESS", "R6Menu"));					
+					szObjectiveDesc = ((("-" @ szObjectiveDesc) @ ":") @ Localize("OBJECTIVES", "SUCCESS", "R6Menu"));					
 				}
 				else
 				{
-					szObjectiveDesc = __NFUN_168__(__NFUN_168__(__NFUN_168__("-", szObjectiveDesc), ":"), Localize("OBJECTIVES", "FAILED", "R6Menu"));
+					szObjectiveDesc = ((("-" @ szObjectiveDesc) @ ":") @ Localize("OBJECTIVES", "FAILED", "R6Menu"));
 				}
 				m_MissionObjectives.AddText(szObjectiveDesc, Root.Colors.White, Root.Fonts[10]);
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x395;
 		}		
@@ -204,7 +204,7 @@ function ShowWindow()
 		J0x5C4:
 
 		// End:0x7DE [Loop If]
-		if(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length))
+		if((i < moMgr.m_aMissionObjectives.Length))
 		{
 			// End:0x7D4
 			if(moMgr.m_aMissionObjectives[i].m_bVisibleInMenu)
@@ -216,7 +216,7 @@ function ShowWindow()
 					// End:0x6A8
 					if(moMgr.m_aMissionObjectives[i].isFailed())
 					{
-						szObjectiveDesc = __NFUN_168__("-", Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionFailure, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i])));
+						szObjectiveDesc = ("-" @ Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionFailure, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i])));
 					}					
 				}
 				else
@@ -230,15 +230,15 @@ function ShowWindow()
 					{
 						szObjectiveDesc = Localize("OBJECTIVES", "FAILED", "R6Menu");
 					}
-					szObjectiveDesc = __NFUN_168__(__NFUN_168__(__NFUN_168__("-", Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i]))), ":"), szObjectiveDesc);
+					szObjectiveDesc = ((("-" @ Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i]))) @ ":") @ szObjectiveDesc);
 				}
 				// End:0x7D4
-				if(__NFUN_123__(szObjectiveDesc, ""))
+				if((szObjectiveDesc != ""))
 				{
 					m_MissionObjectives.AddText(szObjectiveDesc, Root.Colors.White, Root.Fonts[10]);
 				}
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x5C4;
 		}
@@ -250,12 +250,12 @@ function ShowWindow()
 	}
 	m_pR6RainbowTeamBar.RefreshTeamBarInfo();
 	// End:0x897
-	if(__NFUN_129__(R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingPlayerCampaign))
+	if((!R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_bUsingPlayerCampaign))
 	{
 		BuildMissionOperatives();
 	}
 	// End:0x928
-	if(__NFUN_119__(m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.Items.Next, none))
+	if((m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.Items.Next != none))
 	{
 		m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.SetSelectedItem(R6WindowListIGPlayerInfoItem(m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.Items.Next));
 		DisplayOperativeStats(R6WindowListIGPlayerInfoItem(m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.m_SelectedItem).m_iOperativeID);		
@@ -271,7 +271,7 @@ function HideWindow()
 {
 	local Canvas C;
 
-	C = Class'Engine.Actor'.static.__NFUN_2618__();
+	C = Class'Engine.Actor'.static.GetCanvas();
 	super(UWindowWindow).HideWindow();
 	C.m_iNewResolutionX = 0;
 	C.m_iNewResolutionY = 0;
@@ -291,7 +291,7 @@ function BuildMissionOperatives()
 	J0x38:
 
 	// End:0x15A [Loop If]
-	if(__NFUN_119__(tmpItem, none))
+	if((tmpItem != none))
 	{
 		tmpOperative = new (none) Class<R6Operative>(DynamicLoadObject(R6Console(Root.Console).m_CurrentCampaign.m_OperativeClassName[tmpItem.m_iOperativeID], Class'Core.Class'));
 		tmpItem.m_iOperativeID = m_MissionOperatives.Length;
@@ -344,14 +344,14 @@ function DisplayOperativeStats(int _OperativeId)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x74
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
 			// End:0x71
 			case m_pR6RainbowTeamBar.m_IGPlayerInfoListBox:
 				// End:0x6E
-				if(__NFUN_119__(m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.m_SelectedItem, none))
+				if((m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.m_SelectedItem != none))
 				{
 					DisplayOperativeStats(R6WindowListIGPlayerInfoItem(m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.m_SelectedItem).m_iOperativeID);
 				}

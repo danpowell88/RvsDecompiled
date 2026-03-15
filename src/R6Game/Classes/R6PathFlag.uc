@@ -40,9 +40,9 @@ function RefreshLocation()
 
 	OwnerPoint = R6ActionPoint(Owner);
 	// End:0x93
-	if(__NFUN_154__(OwnerPoint.prevActionPoint.m_PathToNextPoint.Length, 0))
+	if((OwnerPoint.prevActionPoint.m_PathToNextPoint.Length == 0))
 	{
-		__NFUN_267__(__NFUN_212__(__NFUN_215__(OwnerPoint.Location, OwnerPoint.prevActionPoint.Location), 0.5000000));
+		__NFUN_267__(((OwnerPoint.Location + OwnerPoint.prevActionPoint.Location) * 0.5000000)) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		m_iPlanningFloor_0 = Owner.m_iPlanningFloor_0;
 		m_iPlanningFloor_1 = OwnerPoint.prevActionPoint.m_iPlanningFloor_0;		
 	}

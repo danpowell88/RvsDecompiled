@@ -19,7 +19,7 @@ var float m_fDefusedTimeMessage;  // defused message shown for 3 secs
 function StartTimer()
 {
 	// End:0x32
-	if(__NFUN_177__(m_fSelfDetonationTime, float(0)))
+	if((m_fSelfDetonationTime > float(0)))
 	{
 		m_fTimeLeft = m_fSelfDetonationTime;
 		m_fTimeOfExplosion = m_fSelfDetonationTime;
@@ -32,10 +32,10 @@ function StartTimer()
 simulated function Timer()
 {
 	// End:0x7F
-	if(__NFUN_119__(Level.Game, none))
+	if((Level.Game != none))
 	{
 		// End:0x7C
-		if(__NFUN_130__(__NFUN_155__(int(R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus), int(1)), __NFUN_155__(int(R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus), int(2))))
+		if(((int(R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus) != int(1)) && (int(R6AbstractGameInfo(Level.Game).m_missionMgr.m_eMissionObjectiveStatus) != int(2))))
 		{
 			super.Timer();
 		}		
@@ -55,7 +55,7 @@ simulated function PostRender(Canvas C)
 	local int iTimeLeft;
 
 	// End:0x29
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		iTimeLeft = int(m_fRepTimeLeft);		
 	}
@@ -66,32 +66,32 @@ simulated function PostRender(Canvas C)
 	// End:0x196
 	if(m_bIsActivated)
 	{
-		sTime = __NFUN_112__(Localize("Game", "TimeLeft", "R6GameInfo"), " ");
-		sTime = __NFUN_112__(sTime, __NFUN_1520__(iTimeLeft, true));
-		C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+		sTime = (Localize("Game", "TimeLeft", "R6GameInfo") $ " ");
+		sTime = (sTime $ ConvertIntTimeToString(iTimeLeft, true));
+		C.UseVirtualSize(true, 640.0000000, 480.0000000);
 		X = int(C.HalfClipX);
-		Y = int(__NFUN_172__(C.HalfClipY, float(8)));
+		Y = int((C.HalfClipY / float(8)));
 		C.Font = Font'R6Font.Rainbow6_14pt';
 		// End:0x106
-		if(__NFUN_151__(iTimeLeft, 20))
+		if((iTimeLeft > 20))
 		{
-			C.__NFUN_2626__(byte(255), byte(255), byte(255));			
+			C.SetDrawColor(byte(255), byte(255), byte(255));			
 		}
 		else
 		{
 			// End:0x12B
-			if(__NFUN_151__(iTimeLeft, 10))
+			if((iTimeLeft > 10))
 			{
-				C.__NFUN_2626__(byte(255), byte(255), 0);				
+				C.SetDrawColor(byte(255), byte(255), 0);				
 			}
 			else
 			{
-				C.__NFUN_2626__(byte(255), 0, 0);
+				C.SetDrawColor(byte(255), 0, 0);
 			}
 		}
-		C.__NFUN_464__(sTime, fStrSizeX, fStrSizeY);
-		C.__NFUN_2623__(__NFUN_175__(float(X), __NFUN_172__(fStrSizeX, float(2))), float(__NFUN_146__(Y, 24)));
-		C.__NFUN_465__(sTime);
+		C.StrLen(sTime, fStrSizeX, fStrSizeY);
+		C.SetPos((float(X) - (fStrSizeX / float(2))), float((Y + 24)));
+		C.DrawText(sTime);
 	}
 	return;
 }
@@ -108,20 +108,20 @@ simulated function PostRender2(Canvas C)
 		m_fDefusedTimeMessage = Level.TimeSeconds;
 	}
 	// End:0x142
-	if(__NFUN_129__(m_bIsActivated))
+	if((!m_bIsActivated))
 	{
 		// End:0x142
-		if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, m_fDefusedTimeMessage), float(3)))
+		if(((Level.TimeSeconds - m_fDefusedTimeMessage) < float(3)))
 		{
-			sTime = __NFUN_112__(Localize("Game", "BombDefused", "R6GameInfo"), " ");
-			C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+			sTime = (Localize("Game", "BombDefused", "R6GameInfo") $ " ");
+			C.UseVirtualSize(true, 640.0000000, 480.0000000);
 			X = int(C.HalfClipX);
-			Y = int(__NFUN_172__(C.HalfClipY, float(8)));
+			Y = int((C.HalfClipY / float(8)));
 			C.Font = Font'R6Font.Rainbow6_14pt';
-			C.__NFUN_2626__(byte(255), byte(255), byte(255));
-			C.__NFUN_464__(sTime, fStrSizeX, fStrSizeY);
-			C.__NFUN_2623__(__NFUN_175__(float(X), __NFUN_172__(fStrSizeX, float(2))), float(__NFUN_146__(Y, 48)));
-			C.__NFUN_465__(sTime);
+			C.SetDrawColor(byte(255), byte(255), byte(255));
+			C.StrLen(sTime, fStrSizeX, fStrSizeY);
+			C.SetPos((float(X) - (fStrSizeX / float(2))), float((Y + 48)));
+			C.DrawText(sTime);
 		}
 	}
 	return;

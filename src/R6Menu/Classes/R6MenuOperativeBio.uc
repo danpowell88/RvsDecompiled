@@ -44,32 +44,32 @@ function Created()
 {
 	local float Y, X, TitlesHeight, ValuesHeight;
 
-	TitlesHeight = __NFUN_174__(m_fTitleHeight, m_fYPaddingBetweenElements);
+	TitlesHeight = (m_fTitleHeight + m_fYPaddingBetweenElements);
 	ValuesHeight = float(Class'R6Menu.R6MenuOperativeSkillsLabel'.default.m_BGTextureRegion.H);
 	m_TDateBirth = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, m_fTopYPadding, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TDateBirth.Text = Localize("R6Operative", "DateBirth", "R6Menu");
 	m_TDateBirth.m_BGTexture = none;
-	Y = __NFUN_174__(m_TDateBirth.WinTop, TitlesHeight);
+	Y = (m_TDateBirth.WinTop + TitlesHeight);
 	m_THeight = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_THeight.Text = Localize("R6Operative", "Height", "R6Menu");
 	m_THeight.m_BGTexture = none;
-	Y = __NFUN_174__(m_THeight.WinTop, TitlesHeight);
+	Y = (m_THeight.WinTop + TitlesHeight);
 	m_TWeight = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TWeight.Text = Localize("R6Operative", "Weight", "R6Menu");
 	m_TWeight.m_BGTexture = none;
-	Y = __NFUN_174__(m_TWeight.WinTop, TitlesHeight);
+	Y = (m_TWeight.WinTop + TitlesHeight);
 	m_THair = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_THair.Text = Localize("R6Operative", "Hair", "R6Menu");
 	m_THair.m_BGTexture = none;
-	Y = __NFUN_174__(m_THair.WinTop, TitlesHeight);
+	Y = (m_THair.WinTop + TitlesHeight);
 	m_TEyes = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TEyes.Text = Localize("R6Operative", "Eyes", "R6Menu");
 	m_TEyes.m_BGTexture = none;
-	Y = __NFUN_174__(m_TEyes.WinTop, TitlesHeight);
+	Y = (m_TEyes.WinTop + TitlesHeight);
 	m_TGender = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', m_fHSidePadding, Y, m_fTileLabelWidth, m_fTitleHeight, self));
 	m_TGender.Text = Localize("R6Operative", "Gender", "R6Menu");
 	m_TGender.m_BGTexture = none;
-	X = __NFUN_175__(__NFUN_175__(WinWidth, m_fValueLabelWidth), m_fHSidePadding);
+	X = ((WinWidth - m_fValueLabelWidth) - m_fHSidePadding);
 	Y = m_TDateBirth.WinTop;
 	m_NDateBirth = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', X, Y, m_fValueLabelWidth, ValuesHeight, self));
 	m_NDateBirth.Align = 0;
@@ -88,7 +88,7 @@ function Created()
 	Y = m_TGender.WinTop;
 	m_NGender = R6MenuOperativeSkillsLabel(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsLabel', X, Y, m_fValueLabelWidth, ValuesHeight, self));
 	m_NGender.Align = 0;
-	m_TStatus = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, __NFUN_175__(WinHeight, m_fHealthHeight), WinWidth, m_fHealthHeight, self));
+	m_TStatus = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, (WinHeight - m_fHealthHeight), WinWidth, m_fHealthHeight, self));
 	m_TStatus.m_bDrawBorders = true;
 	m_TStatus.m_BGTexture = none;
 	m_TStatus.Align = 2;

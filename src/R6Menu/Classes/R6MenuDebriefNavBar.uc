@@ -155,7 +155,7 @@ function Notify(UWindowDialogControl C, byte E)
 
 	GameInfo = R6GameInfo(Root.Console.ViewportOwner.Actor.Level.Game);
 	// End:0x3D9
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -208,7 +208,7 @@ function Notify(UWindowDialogControl C, byte E)
 				if(GameInfo.m_bUsingPlayerCampaign)
 				{
 					// End:0x39A
-					if(__NFUN_242__(AcceptMissionOutcome(), true))
+					if((AcceptMissionOutcome() == true))
 					{
 						R6Console(Root.Console).LeaveR6Game(R6Console(Root.Console).1);
 					}					
@@ -239,7 +239,7 @@ function DenyMissionOutcome()
 	MyCampaign = R6Console(Root.Console).m_PlayerCampaign;
 	MyCampaign.m_OperativesMissionDetails = none;
 	MyCampaign.m_OperativesMissionDetails = new (none) Class'R6Game.R6MissionRoster';
-	FileManager.__NFUN_1003__(MyCampaign);
+	FileManager.LoadCampaign(MyCampaign);
 	return;
 }
 
@@ -247,7 +247,7 @@ function Paint(Canvas C, float X, float Y)
 {
 	DrawSimpleBorder(C);
 	C.Style = 5;
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTextureSegment(C, 120.0000000, 0.0000000, 1.0000000, 33.0000000, float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;
 }
@@ -262,9 +262,9 @@ function bool AcceptMissionOutcome()
 	MyCampaign = R6Console.m_PlayerCampaign;
 	pFileManager = new Class'R6Game.R6FileManagerCampaign';
 	// End:0xCB
-	if(__NFUN_242__(pFileManager.__NFUN_1004__(MyCampaign), false))
+	if((pFileManager.SaveCampaign(MyCampaign) == false))
 	{
-		R6MenuInGameRootWindow(Root).SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), __NFUN_168__(__NFUN_168__(MyCampaign.m_FileName, ":"), Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, int(2));
+		R6MenuInGameRootWindow(Root).SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), ((MyCampaign.m_FileName @ ":") @ Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, int(2));
 		return false;
 	}
 	return true;

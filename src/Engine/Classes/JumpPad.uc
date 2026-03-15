@@ -20,7 +20,7 @@ var() Vector JumpModifier;  // for tweaking JumpVelocity, if needed
 event Touch(Actor Other)
 {
 	// End:0x12
-	if(__NFUN_114__(Pawn(Other), none))
+	if((Pawn(Other) == none))
 	{
 		return;
 	}
@@ -35,12 +35,12 @@ event PostTouch(Actor Other)
 
 	P = Pawn(Other);
 	// End:0x1D
-	if(__NFUN_114__(P, none))
+	if((P == none))
 	{
 		return;
 	}
 	// End:0xAA
-	if(__NFUN_119__(AIController(P.Controller), none))
+	if((AIController(P.Controller) != none))
 	{
 		P.Controller.MoveTarget = JumpTarget;
 		P.Controller.Focus = JumpTarget;
@@ -48,11 +48,11 @@ event PostTouch(Actor Other)
 		P.DestinationOffset = JumpTarget.CollisionRadius;
 	}
 	// End:0xD1
-	if(__NFUN_154__(int(P.Physics), int(1)))
+	if((int(P.Physics) == int(1)))
 	{
-		P.__NFUN_3970__(2);
+		P.SetPhysics(2);
 	}
-	P.Velocity = __NFUN_215__(JumpVelocity, JumpModifier);
+	P.Velocity = (JumpVelocity + JumpModifier);
 	P.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
 	return;
 }

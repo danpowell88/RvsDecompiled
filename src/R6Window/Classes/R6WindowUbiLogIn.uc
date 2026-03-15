@@ -30,7 +30,7 @@ function StartLogInProcedure(UWindowWindow _pCurrentWidget)
 {
 	m_pSendMessageDest = _pCurrentWidget;
 	Root.RegisterMsgWindow(self);
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1289__();
+	Class'Engine.Actor'.static.GetGameManager().NativeGSClientPostMessage();
 	return;
 }
 
@@ -58,10 +58,10 @@ function ProcessGSMsg(string _szMsg)
 	// End:0x38
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("R6WindowUbiLogIn ProcessGSMsg msg = ", _szMsg));
+		Log(("R6WindowUbiLogIn ProcessGSMsg msg = " @ _szMsg));
 	}
 	// End:0x63
-	if(__NFUN_122__(m_szInitError, "INITIALIZEMSCLIENT"))
+	if((m_szInitError == "INITIALIZEMSCLIENT"))
 	{
 		m_szInitError = _szMsg;
 		return;
@@ -98,7 +98,7 @@ function ProcessGSMsg(string _szMsg)
 			m_pR6UbiAccount.HideWindow();
 			m_pDisconnected.HideWindow();
 			HideWindow();
-			m_GameService.__NFUN_536__();
+			m_GameService.SaveConfig();
 			m_pSendMessageDest.SendMessage(0);
 			// End:0x500
 			break;
@@ -173,7 +173,7 @@ function PopUpBoxCreate()
 	pR6LoginClientTemp.m_pUserName.SetValue(m_GameService.m_szUserID);
 	pR6LoginClientTemp.m_pSavePassword.SetButtonBox(m_GameService.m_bSavePWSave);
 	pR6LoginClientTemp.m_pAutoLogIn.SetButtonBox(m_GameService.m_bAutoLISave);
-	pR6LoginClientTemp.m_pAutoLogIn.bDisabled = __NFUN_129__(pR6LoginClientTemp.m_pSavePassword.m_bSelected);
+	pR6LoginClientTemp.m_pAutoLogIn.bDisabled = (!pR6LoginClientTemp.m_pSavePassword.m_bSelected);
 	m_pR6UbiAccount.HideWindow();
 	fTextHeight = 30.0000000;
 	fX = 205.0000000;
@@ -202,7 +202,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	local R6WindowUbiLoginClient pUbiLoginClient;
 
 	// End:0x244
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -223,14 +223,14 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 				m_GameService.m_bSavePWSave = pUbiLoginClient.m_pSavePassword.m_bSelected;
 				m_GameService.m_bAutoLISave = pUbiLoginClient.m_pAutoLogIn.m_bSelected;
 				// End:0x158
-				if(__NFUN_129__(m_GameService.__NFUN_3531__()))
+				if((!m_GameService.NativeGetMSClientInitialized()))
 				{
 					m_szInitError = "INITIALIZEMSCLIENT";
-					m_GameService.__NFUN_3502__();
+					m_GameService.InitializeMSClient();
 				}
 				m_pR6UbiAccount.ShowWindow();
 				// End:0x19E
-				if(__NFUN_130__(__NFUN_123__(m_szInitError, ""), __NFUN_123__(m_szInitError, "INITIALIZEMSCLIENT")))
+				if(((m_szInitError != "") && (m_szInitError != "INITIALIZEMSCLIENT")))
 				{
 					ProcessGSMsg(m_szInitError);
 				}
@@ -244,14 +244,14 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			// End:0x23E
 			case 15:
 				// End:0x1ED
-				if(__NFUN_129__(m_GameService.__NFUN_3531__()))
+				if((!m_GameService.NativeGetMSClientInitialized()))
 				{
 					m_szInitError = "INITIALIZEMSCLIENT";
-					m_GameService.__NFUN_3502__();
+					m_GameService.InitializeMSClient();
 				}
 				m_pDisconnected.ShowWindow();
 				// End:0x233
-				if(__NFUN_130__(__NFUN_123__(m_szInitError, ""), __NFUN_123__(m_szInitError, "INITIALIZEMSCLIENT")))
+				if(((m_szInitError != "") && (m_szInitError != "INITIALIZEMSCLIENT")))
 				{
 					ProcessGSMsg(m_szInitError);
 				}
@@ -266,7 +266,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	else
 	{
 		// End:0x299
-		if(__NFUN_154__(int(Result), int(4)))
+		if((int(Result) == int(4)))
 		{
 			switch(_ePopUpID)
 			{

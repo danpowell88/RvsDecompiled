@@ -18,7 +18,7 @@ simulated function PostBeginPlay()
 {
 	LinkSkelAnim(MeshAnimation'R61stItems_UKX.R61stItemAttachementA');
 	super.PostBeginPlay();
-	m_smGun = __NFUN_278__(Class'R61stWeapons.R61stWeaponStaticMesh');
+	m_smGun = Spawn(Class'R61stWeapons.R61stWeaponStaticMesh');
 	m_smGun.SetStaticMesh(StaticMesh'R61stWeapons_SM.Items.R61stC4');
 	AttachToBone(m_smGun, 'TagFrame');
 	return;

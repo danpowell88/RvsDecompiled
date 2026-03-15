@@ -55,13 +55,13 @@ event int GetNbMods()
 
 event bool IsMissionPack()
 {
-	return __NFUN_129__(IsRavenShield());
+	return (!IsRavenShield());
 	return;
 }
 
 event bool IsRavenShield()
 {
-	return __NFUN_114__(m_pCurrentMod, m_pRVS);
+	return (m_pCurrentMod == m_pRVS);
 	return;
 }
 
@@ -72,16 +72,16 @@ function bool CheckValidModVersion(R6Mod pModToCheck)
 
 	bReturnValue = true;
 	// End:0x45
-	if(__NFUN_124__(pModToCheck.m_szKeyWord, "AthenaSword"))
+	if((pModToCheck.m_szKeyWord ~= "AthenaSword"))
 	{
-		bReturnValue = __NFUN_154__(__NFUN_2024__(), pModToCheck.BuildVersion);		
+		bReturnValue = (GetASBuildVersion() == pModToCheck.BuildVersion);		
 	}
 	else
 	{
 		// End:0x7D
-		if(__NFUN_124__(pModToCheck.m_szKeyWord, "IronWrath"))
+		if((pModToCheck.m_szKeyWord ~= "IronWrath"))
 		{
-			bReturnValue = __NFUN_154__(__NFUN_2025__(), pModToCheck.BuildVersion);
+			bReturnValue = (GetIWBuildVersion() == pModToCheck.BuildVersion);
 		}
 	}
 	return bReturnValue;
@@ -106,16 +106,16 @@ event InitModMgr()
 	pFileManager = new (none) Class'Engine.R6FileManager';
 	m_pUPackageMgr = new (none) Class'Engine.R6UPackageMgr';
 	m_pUPackageMgr.InitOperativeClassesMgr();
-	iFiles = pFileManager.__NFUN_1525__("..\\Mods\\", "mod");
+	iFiles = pFileManager.GetNbFile("..\\Mods\\", "mod");
 	i = 0;
 	J0xAD:
 
 	// End:0x1FD [Loop If]
-	if(__NFUN_150__(i, iFiles))
+	if((i < iFiles))
 	{
-		pFileManager.__NFUN_1526__(i, szIniFilename);
+		pFileManager.GetFileName(i, szIniFilename);
 		// End:0xE1
-		if(__NFUN_122__(szIniFilename, ""))
+		if((szIniFilename == ""))
 		{
 			// [Explicit Continue]
 			goto J0x1F3;
@@ -125,14 +125,14 @@ event InitModMgr()
 		J0xF0:
 
 		// End:0x129 [Loop If]
-		if(__NFUN_150__(j, ModsList.Length))
+		if((j < ModsList.Length))
 		{
 			// End:0x11F
-			if(__NFUN_122__(ModsList[j], __NFUN_235__(szIniFilename)))
+			if((ModsList[j] == Caps(szIniFilename)))
 			{
 				bNotFound = false;
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0xF0;
 		}
@@ -148,15 +148,15 @@ event InitModMgr()
 		J0x15F:
 
 		// End:0x1A3 [Loop If]
-		if(__NFUN_150__(j, m_aMods.Length))
+		if((j < m_aMods.Length))
 		{
 			// End:0x199
-			if(__NFUN_176__(aMod.m_fPriority, m_aMods[j].m_fPriority))
+			if((aMod.m_fPriority < m_aMods[j].m_fPriority))
 			{
 				// [Explicit Break]
 				goto J0x1A3;
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x15F;
 		}
@@ -166,17 +166,17 @@ event InitModMgr()
 		J0x1AF:
 
 		// End:0x1E2 [Loop If]
-		if(__NFUN_155__(jMove, j))
+		if((jMove != j))
 		{
-			m_aMods[jMove] = m_aMods[__NFUN_147__(jMove, 1)];
-			__NFUN_166__(jMove);
+			m_aMods[jMove] = m_aMods[(jMove - 1)];
+			(jMove--);
 			// [Loop Continue]
 			goto J0x1AF;
 		}
 		m_aMods[j] = aMod;
 		J0x1F3:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xAD;
 	}
@@ -184,10 +184,10 @@ event InitModMgr()
 	J0x204:
 
 	// End:0x22F [Loop If]
-	if(__NFUN_150__(i, m_aMods.Length))
+	if((i < m_aMods.Length))
 	{
 		FindExtraMods(m_aMods[i]);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x204;
 	}
@@ -204,24 +204,24 @@ function FindExtraMods(R6Mod pCurrentMod)
 	J0x07:
 
 	// End:0xA2 [Loop If]
-	if(__NFUN_150__(i, pCurrentMod.m_aExtraModInfo.Length))
+	if((i < pCurrentMod.m_aExtraModInfo.Length))
 	{
 		j = 0;
 		J0x27:
 
 		// End:0x98 [Loop If]
-		if(__NFUN_150__(j, m_aMods.Length))
+		if((j < m_aMods.Length))
 		{
 			// End:0x8E
-			if(__NFUN_124__(pCurrentMod.m_aExtraModInfo[i], m_aMods[j].m_szKeyWord))
+			if((pCurrentMod.m_aExtraModInfo[i] ~= m_aMods[j].m_szKeyWord))
 			{
 				pCurrentMod.m_aExtraMods[pCurrentMod.m_aExtraMods.Length] = m_aMods[j];
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x27;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -237,27 +237,27 @@ function IsMapAvailable(string szKeyWord, Console pConsole)
 	J0x07:
 
 	// End:0xB6 [Loop If]
-	if(__NFUN_150__(i, m_aMods.Length))
+	if((i < m_aMods.Length))
 	{
 		// End:0xAC
-		if(__NFUN_124__(m_aMods[i].m_szKeyWord, szKeyWord))
+		if((m_aMods[i].m_szKeyWord ~= szKeyWord))
 		{
 			// End:0x5D
-			if(__NFUN_114__(m_aMods[i], m_pRVS))
+			if((m_aMods[i] == m_pRVS))
 			{
 				szMapDir = "..\\Maps\\";				
 			}
 			else
 			{
-				szMapDir = __NFUN_112__(__NFUN_112__("..\\mods\\", m_aMods[i].m_szKeyWord), "\\MAPS\\");
+				szMapDir = (("..\\mods\\" $ m_aMods[i].m_szKeyWord) $ "\\MAPS\\");
 			}
 			// End:0xAC
-			if(__NFUN_119__(pConsole, none))
+			if((pConsole != none))
 			{
 				pConsole.GetAllMissionDescriptions(szMapDir);
 			}
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -278,14 +278,14 @@ function R6Mod GetModInstance(string szKeyWord)
 	J0x07:
 
 	// End:0x4B [Loop If]
-	if(__NFUN_150__(i, m_aMods.Length))
+	if((i < m_aMods.Length))
 	{
 		// End:0x41
-		if(__NFUN_124__(m_aMods[i].m_szKeyWord, szKeyWord))
+		if((m_aMods[i].m_szKeyWord ~= szKeyWord))
 		{
 			return m_aMods[i];
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -304,48 +304,48 @@ event SetCurrentMod(string szKeyWord, LevelInfo pLevelInfo, optional bool bInitS
 	J0x1D:
 
 	// End:0x9C [Loop If]
-	if(__NFUN_150__(i, m_aMods.Length))
+	if((i < m_aMods.Length))
 	{
 		// End:0x92
-		if(__NFUN_130__(__NFUN_124__(m_aMods[i].m_szKeyWord, szKeyWord), CheckValidModVersion(m_aMods[i])))
+		if(((m_aMods[i].m_szKeyWord ~= szKeyWord) && CheckValidModVersion(m_aMods[i])))
 		{
 			// End:0x81
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__("CurrentMod: ", szKeyWord));
+				Log(("CurrentMod: " $ szKeyWord));
 			}
 			m_pCurrentMod = m_aMods[i];
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x1D;
 	}
 	// End:0x121
-	if(__NFUN_119__(pPreviousMod, m_pCurrentMod))
+	if((pPreviousMod != m_pCurrentMod))
 	{
-		__NFUN_3003__(pLevel);
-		__NFUN_2020__(m_pCurrentMod, 1);
+		CallSndEngineInit(pLevel);
+		AddNewModExtraPath(m_pCurrentMod, 1);
 		i = 0;
 		J0xC3:
 
 		// End:0xFE [Loop If]
-		if(__NFUN_150__(i, m_pCurrentMod.m_aExtraMods.Length))
+		if((i < m_pCurrentMod.m_aExtraMods.Length))
 		{
-			__NFUN_2020__(m_pCurrentMod.m_aExtraMods[i], 0);
-			__NFUN_165__(i);
+			AddNewModExtraPath(m_pCurrentMod.m_aExtraMods[i], 0);
+			(i++);
 			// [Loop Continue]
 			goto J0xC3;
 		}
-		__NFUN_2021__();
+		SetSystemMod();
 		// End:0x121
-		if(__NFUN_119__(pConsole, none))
+		if((pConsole != none))
 		{
 			pConsole.GetAllMissionDescriptions(GetMapsDir());
 		}
 	}
-	__NFUN_2022__(m_pCurrentMod);
+	SetGeneralModSettings(m_pCurrentMod);
 	// End:0x13F
-	if(__NFUN_119__(pLevelInfo, none))
+	if((pLevelInfo != none))
 	{
 		AddGameTypes(pLevelInfo);
 	}

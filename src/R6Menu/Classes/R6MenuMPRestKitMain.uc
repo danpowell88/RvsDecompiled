@@ -68,7 +68,7 @@ function CreateKitRestriction()
 	local R6GameReplicationInfo pGameRepInfo;
 
 	GetR6GameReplicationInfo(pGameRepInfo);
-	m_pKitText = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, __NFUN_171__(2.0000000, float(310)), WinHeight, self));
+	m_pKitText = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, (2.0000000 * float(310)), WinHeight, self));
 	m_pKitText.bAlwaysBehind = true;
 	m_pKitText.ActiveBorder(0, false);
 	m_pKitText.ActiveBorder(1, false);
@@ -87,14 +87,14 @@ function CreateKitRestriction()
 	ButtonFont = Root.Fonts[5];
 	fXOffset = 5.0000000;
 	fYOffset = 20.0000000;
-	fWidth = __NFUN_175__(__NFUN_175__(310.0000000, fXOffset), float(10));
+	fWidth = ((310.0000000 - fXOffset) - float(10));
 	fYStep = 15.0000000;
 	fHeight = 15.0000000;
 	m_ATextBoxLoc[0] = Localize("MultiPlayer", "BoutonMsgBox", "R6Menu");
 	m_ATextBoxLoc[1] = Localize("MultiPlayer", "BoutonMsgBoxInGame", "R6Menu");
 	bInGame = false;
 	// End:0x2FC
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		bInGame = true;
 	}
@@ -105,12 +105,12 @@ function CreateKitRestriction()
 	m_pKitSubMachinesGuns.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_SubMachGuns", "R6Menu");
 	// End:0x3D5
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
 	m_pKitSubMachinesGuns.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_SubMachGuns", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 0);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pKitShotGuns = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pKitShotGuns.m_TextFont = ButtonFont;
 	m_pKitShotGuns.m_vTextColor = Root.Colors.White;
@@ -118,12 +118,12 @@ function CreateKitRestriction()
 	m_pKitShotGuns.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_ShotGun", "R6Menu");
 	// End:0x504
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
 	m_pKitShotGuns.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_ShotGun", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 1);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pKitAssaultRifles = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pKitAssaultRifles.m_TextFont = ButtonFont;
 	m_pKitAssaultRifles.m_vTextColor = Root.Colors.White;
@@ -131,12 +131,12 @@ function CreateKitRestriction()
 	m_pKitAssaultRifles.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_Assault", "R6Menu");
 	// End:0x62F
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
 	m_pKitAssaultRifles.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_Assault", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 2);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pKitMachinesGuns = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pKitMachinesGuns.m_TextFont = ButtonFont;
 	m_pKitMachinesGuns.m_vTextColor = Root.Colors.White;
@@ -144,12 +144,12 @@ function CreateKitRestriction()
 	m_pKitMachinesGuns.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_MachGuns", "R6Menu");
 	// End:0x75C
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
 	m_pKitMachinesGuns.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_MachGuns", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 3);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pKitSniperRifles = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pKitSniperRifles.m_TextFont = ButtonFont;
 	m_pKitSniperRifles.m_vTextColor = Root.Colors.White;
@@ -157,7 +157,7 @@ function CreateKitRestriction()
 	m_pKitSniperRifles.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_Sniper", "R6Menu");
 	// End:0x888
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
@@ -170,12 +170,12 @@ function CreateKitRestriction()
 	m_pKitPistols.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_Pistols", "R6Menu");
 	// End:0x9B2
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
 	m_pKitPistols.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_Pistols", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 5);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pKitMachinePistols = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pKitMachinePistols.m_TextFont = ButtonFont;
 	m_pKitMachinePistols.m_vTextColor = Root.Colors.White;
@@ -183,7 +183,7 @@ function CreateKitRestriction()
 	m_pKitMachinePistols.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_MachPistols", "R6Menu");
 	// End:0xAE2
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
@@ -196,12 +196,12 @@ function CreateKitRestriction()
 	m_pKitPrimaryWeapon.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_PrimaryWeaponMin", "R6Menu");
 	// End:0xC1A
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
 	m_pKitPrimaryWeapon.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_PrimaryWeaponMin", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 7);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pKitSecWeapon = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pKitSecWeapon.m_TextFont = ButtonFont;
 	m_pKitSecWeapon.m_vTextColor = Root.Colors.White;
@@ -209,12 +209,12 @@ function CreateKitRestriction()
 	m_pKitSecWeapon.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_SecWeaponMin", "R6Menu");
 	// End:0xD54
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
 	m_pKitSecWeapon.CreateTextAndMsgBox(Localize("MPCreateGame", "Kit_SecWeaponMin", "R6Menu"), szTemp, m_ATextBoxLoc[0], 0.0000000, 8);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pKitMisc = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pKitMisc.m_TextFont = ButtonFont;
 	m_pKitMisc.m_vTextColor = Root.Colors.White;
@@ -222,7 +222,7 @@ function CreateKitRestriction()
 	m_pKitMisc.m_eButtonType = 2;
 	szTemp = Localize("Tip", "Kit_Misc", "R6Menu");
 	// End:0xE82
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		szTemp = "";
 	}
@@ -244,7 +244,7 @@ function InitRightPart()
 	GetR6GameReplicationInfo(pGameRepInfo);
 	bInGame = false;
 	// End:0x52
-	if(__NFUN_119__(pGameRepInfo, none))
+	if((pGameRepInfo != none))
 	{
 		bInGame = true;
 	}
@@ -288,7 +288,7 @@ function InitRightPart()
 	m_pMiscGadgetTab.InitSelectButtons(bInGame);
 	m_pMiscGadgetTab.InitMiscGadgetTab(pGameRepInfo);
 	m_pMiscGadgetTab.HideWindow();
-	m_pRestKitOptFakeW = R6MenuSimpleWindow(CreateWindow(Class'R6Menu.R6MenuSimpleWindow', __NFUN_171__(WinWidth, 0.5000000), 0.0000000, __NFUN_171__(WinWidth, 0.5000000), WinHeight, self));
+	m_pRestKitOptFakeW = R6MenuSimpleWindow(CreateWindow(Class'R6Menu.R6MenuSimpleWindow', (WinWidth * 0.5000000), 0.0000000, (WinWidth * 0.5000000), WinHeight, self));
 	m_pRestKitOptFakeW.bAlwaysOnTop = true;
 	m_pRestKitOptFakeW.m_bDrawSimpleBorder = false;
 	m_pRestKitOptFakeW.pAdviceParent = self;
@@ -296,23 +296,23 @@ function InitRightPart()
 	if(bInGame)
 	{
 		Refresh();
-		__NFUN_185__(m_pSubMachinesGunsTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pShotgunsTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pAssaultRifleTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pMachineGunsTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pSniperRifleTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pPistolTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pMachinePistolTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pPriWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pSecWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));
-		__NFUN_185__(m_pMiscGadgetTab.m_pRestKitButList.m_VertSB.WinLeft, float(1));		
+		(m_pSubMachinesGunsTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pShotgunsTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pAssaultRifleTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pMachineGunsTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pSniperRifleTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pPistolTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pMachinePistolTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pPriWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pSecWpnGadgetTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));
+		(m_pMiscGadgetTab.m_pRestKitButList.m_VertSB.WinLeft -= float(1));		
 	}
 	else
 	{
 		m_pRestKitOptFakeW.HideWindow();
 		RefreshCreateGameKitRest();
 		// End:0x64E
-		if(__NFUN_119__(m_pCurrentSubKit, none))
+		if((m_pCurrentSubKit != none))
 		{
 			m_pCurrentSubKit.HideWindow();
 		}
@@ -346,7 +346,7 @@ function Refresh()
 	if(R6PlayerController(GetPlayerOwner()).CheckAuthority(R6PlayerController(GetPlayerOwner()).1))
 	{
 		// End:0x51
-		if(__NFUN_242__(m_bImAnAdmin, false))
+		if((m_bImAnAdmin == false))
 		{
 			m_bImAnAdmin = true;
 			R6PlayerController(GetPlayerOwner()).ServerPausePreGameRoundTime();
@@ -425,10 +425,10 @@ function CopyStaticAToDynA(string _ASrvRest[32], out array<string> _ASrvRestCopy
 	J0x14:
 
 	// End:0x55 [Loop If]
-	if(__NFUN_130__(__NFUN_123__(_ASrvRest[i], ""), __NFUN_150__(i, 32)))
+	if(((_ASrvRest[i] != "") && (i < 32)))
 	{
 		_ASrvRestCopy[i] = _ASrvRest[i];
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x14;
 	}
@@ -446,16 +446,16 @@ function bool SendNewRestrictionsKit()
 
 	R6GameRepInfo = R6GameReplicationInfo(R6MenuInGameMultiPlayerRootWindow(Root).m_R6GameMenuCom.m_GameRepInfo);
 	bSettingsChange = CompareARestKit(0, m_SrvRestSubMachineGunsACopy, m_pSubMachinesGunsTab.m_ASubMachineGuns, m_pSubMachinesGunsTab.m_pSubMachineGuns);
-	bSettingsChange = __NFUN_132__(CompareARestKit(1, m_SrvRestShotGunsACopy, m_pShotgunsTab.m_AShotguns, m_pShotgunsTab.m_pShotguns), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(2, m_SrvRestAssultRiflesACopy, m_pAssaultRifleTab.m_AAssaultRifle, m_pAssaultRifleTab.m_pAssaultRifle), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(3, m_SrvRestMachineGunsACopy, m_pMachineGunsTab.m_AMachineGuns, m_pMachineGunsTab.m_pMachineGuns), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(4, m_SrvRestSniperRiflesACopy, m_pSniperRifleTab.m_ASniperRifle, m_pSniperRifleTab.m_pSniperRifle), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(5, m_SrvRestPistolsACopy, m_pPistolTab.m_APistol, m_pPistolTab.m_pPistol), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(6, m_SrvRestMachinePistolsACopy, m_pMachinePistolTab.m_AMachinePistol, m_pMachinePistolTab.m_pMachinePistol), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(7, m_SrvRestPrimaryACopy, m_pPriWpnGadgetTab.m_APriWpnGadget, m_pPriWpnGadgetTab.m_pPriWpnGadget, true), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(8, m_SrvRestSecondaryACopy, m_pSecWpnGadgetTab.m_ASecWpnGadget, m_pSecWpnGadgetTab.m_pSecWpnGadget, true), bSettingsChange);
-	bSettingsChange = __NFUN_132__(CompareARestKit(9, m_SrvRestMiscGadgetsACopy, m_pMiscGadgetTab.m_AMiscGadget, m_pMiscGadgetTab.m_pMiscGadget, true), bSettingsChange);
-	__NFUN_231__(__NFUN_112__("SendNewRestrictionsKit --> bSettingsChange: ", string(bSettingsChange)));
+	bSettingsChange = (CompareARestKit(1, m_SrvRestShotGunsACopy, m_pShotgunsTab.m_AShotguns, m_pShotgunsTab.m_pShotguns) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(2, m_SrvRestAssultRiflesACopy, m_pAssaultRifleTab.m_AAssaultRifle, m_pAssaultRifleTab.m_pAssaultRifle) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(3, m_SrvRestMachineGunsACopy, m_pMachineGunsTab.m_AMachineGuns, m_pMachineGunsTab.m_pMachineGuns) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(4, m_SrvRestSniperRiflesACopy, m_pSniperRifleTab.m_ASniperRifle, m_pSniperRifleTab.m_pSniperRifle) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(5, m_SrvRestPistolsACopy, m_pPistolTab.m_APistol, m_pPistolTab.m_pPistol) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(6, m_SrvRestMachinePistolsACopy, m_pMachinePistolTab.m_AMachinePistol, m_pMachinePistolTab.m_pMachinePistol) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(7, m_SrvRestPrimaryACopy, m_pPriWpnGadgetTab.m_APriWpnGadget, m_pPriWpnGadgetTab.m_pPriWpnGadget, true) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(8, m_SrvRestSecondaryACopy, m_pSecWpnGadgetTab.m_ASecWpnGadget, m_pSecWpnGadgetTab.m_pSecWpnGadget, true) || bSettingsChange);
+	bSettingsChange = (CompareARestKit(9, m_SrvRestMiscGadgetsACopy, m_pMiscGadgetTab.m_AMiscGadget, m_pMiscGadgetTab.m_pMiscGadget, true) || bSettingsChange);
+	Log(("SendNewRestrictionsKit --> bSettingsChange: " $ string(bSettingsChange)));
 	return bSettingsChange;
 	return;
 }
@@ -472,10 +472,10 @@ function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<stri
 	J0x07:
 
 	// End:0x38 [Loop If]
-	if(__NFUN_150__(i, _ANextSrvRestriction.Length))
+	if((i < _ANextSrvRestriction.Length))
 	{
 		szAOldCopyOfSrvRest[i] = _ANextSrvRestriction[i];
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -487,7 +487,7 @@ function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<stri
 	J0x65:
 
 	// End:0x1CA [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		// End:0x85
 		if(__NFUN_114__(_pAButtonBox[i], none))

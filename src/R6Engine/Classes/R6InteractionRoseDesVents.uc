@@ -144,13 +144,13 @@ function DisplayMenu(bool bDisplay, optional bool bOpen)
 	m_iCurrentSubMnuChoice = -1;
 	m_Player.m_bAMenuIsDisplayed = bDisplay;
 	// End:0x4E
-	if(__NFUN_129__(bVisible))
+	if((!bVisible))
 	{
-		__NFUN_113__('None');		
+		GotoState('None');		
 	}
 	else
 	{
-		m_Player.__NFUN_264__(m_RoseOpenSnd, 9);
+		m_Player.__NFUN_264__(m_RoseOpenSnd, 9) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		__NFUN_113__('MenuDisplayed');
 		SetMenuChoice(0);
 	}

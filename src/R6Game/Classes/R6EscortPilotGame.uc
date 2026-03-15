@@ -26,13 +26,13 @@ var Sound m_sndPilot;
 event PostBeginPlay()
 {
 	super.PostBeginPlay();
-	__NFUN_1010__("R6EscortPilotGame.ini");
+	LoadConfig("R6EscortPilotGame.ini");
 	// End:0xA7
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("EnablePilotPrimaryWeapon   =", string(EnablePilotPrimaryWeapon)));
-		__NFUN_231__(__NFUN_112__("EnablePilotSecondaryWeapon =", string(EnablePilotSecondaryWeapon)));
-		__NFUN_231__(__NFUN_112__("EnablePilotTertiaryWeapon  =", string(EnablePilotTertiaryWeapon)));
+		Log(("EnablePilotPrimaryWeapon   =" $ string(EnablePilotPrimaryWeapon)));
+		Log(("EnablePilotSecondaryWeapon =" $ string(EnablePilotSecondaryWeapon)));
+		Log(("EnablePilotTertiaryWeapon  =" $ string(EnablePilotTertiaryWeapon)));
 	}
 	return;
 }
@@ -51,7 +51,7 @@ function InitObjectives()
 	m_objGoToExtraction.SetPawnToExtract(none);
 	iLength = m_missionMgr.m_aMissionObjectives.Length;
 	m_missionMgr.m_aMissionObjectives[iLength] = m_objGoToExtraction;
-	__NFUN_165__(iLength);
+	(iLength++);
 	m_objGoToExtraction.m_szDescriptionInMenu = "EscortPilotToExtraction";
 	m_missionMgr.m_bOnSuccessAllObjectivesAreCompleted = false;
 	Level.m_bUseDefaultMoralityRules = false;
@@ -71,7 +71,7 @@ function PawnKilled(Pawn killedPawn)
 		return;
 	}
 	// End:0x42
-	if(__NFUN_114__(R6Pawn(killedPawn), m_objGoToExtraction.m_pawnToExtract))
+	if((R6Pawn(killedPawn) == m_objGoToExtraction.m_pawnToExtract))
 	{
 		BroadcastMissionObjMsg("", "", "PilotWasKilled");
 	}
@@ -86,12 +86,12 @@ function PawnKilled(Pawn killedPawn)
 function UnselectPilot()
 {
 	// End:0x6C
-	if(__NFUN_119__(m_pilotController, none))
+	if((m_pilotController != none))
 	{
 		m_pilotController.PlayerReplicationInfo.m_bIsEscortedPilot = false;
 		m_previousPilot = m_pilotController;
 		// End:0x6C
-		if(__NFUN_130__(__NFUN_119__(m_previousPilot.m_pawn, none), __NFUN_154__(int(m_previousPilot.m_pawn.m_bSuicideType), 1)))
+		if(((m_previousPilot.m_pawn != none) && (int(m_previousPilot.m_pawn.m_bSuicideType) == 1)))
 		{
 			m_previousPilot = none;
 		}
@@ -120,7 +120,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0x5B
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : the pilot was extracted");
+			Log("** Game : the pilot was extracted");
 		}
 		BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 		BroadcastMissionObjMsg("", "", "PilotHasEscaped", none, int(GetGameMsgLifeTime()));
@@ -134,7 +134,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 			// End:0xF5
 			if(bShowLog)
 			{
-				__NFUN_231__("** Game : the pilot was killed ");
+				Log("** Game : the pilot was killed ");
 			}
 			BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 			AddTeamWonRound(c_iBravoTeam);
@@ -148,7 +148,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 				// End:0x165
 				if(bShowLog)
 				{
-					__NFUN_231__("** Game : it's a draw");
+					Log("** Game : it's a draw");
 				}
 				BroadcastGameMsg("", "", "RoundIsADraw", m_sndRoundIsADraw, int(GetGameMsgLifeTime()));
 				UnselectPilot();				
@@ -159,12 +159,12 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 				if(m_objDeathmatch.m_bCompleted)
 				{
 					// End:0x247
-					if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 2))
+					if((m_objDeathmatch.m_iWinningTeam == 2))
 					{
 						// End:0x1E7
 						if(bShowLog)
 						{
-							__NFUN_231__("** Game : alpha eleminated bravo");
+							Log("** Game : alpha eleminated bravo");
 						}
 						BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 						BroadcastMissionObjMsg("", "", "GreenNeutralizedRed", none, int(GetGameMsgLifeTime()));
@@ -173,12 +173,12 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 					else
 					{
 						// End:0x2EA
-						if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 3))
+						if((m_objDeathmatch.m_iWinningTeam == 3))
 						{
 							// End:0x289
 							if(bShowLog)
 							{
-								__NFUN_231__("** Game : bravo eleminated alpha");
+								Log("** Game : bravo eleminated alpha");
 							}
 							BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 							BroadcastMissionObjMsg("", "", "RedNeutralizedGreen", none, int(GetGameMsgLifeTime()));
@@ -192,7 +192,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 					// End:0x32C
 					if(bShowLog)
 					{
-						__NFUN_231__("** Game : bravo prevented the escape of the pilot ");
+						Log("** Game : bravo prevented the escape of the pilot ");
 					}
 					BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 					BroadcastMissionObjMsg("", "", "PilotHasNotEscaped", none, int(GetGameMsgLifeTime()));
@@ -226,7 +226,7 @@ function R6SetPilotClassInMultiPlayer(Controller PlayerController)
 {
 	local R6ModMgr pModManager;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	R6PlayerController(PlayerController).PawnClass = pModManager.GetDefaultPilotPawn();
 	return;
 }
@@ -238,7 +238,7 @@ function R6SetPilotClassInMultiPlayer(Controller PlayerController)
 function R6SetPawnClassInMultiPlayer(Controller PlayerController)
 {
 	// End:0x1D
-	if(__NFUN_114__(PlayerController, m_pilotController))
+	if((PlayerController == m_pilotController))
 	{
 		R6SetPilotClassInMultiPlayer(PlayerController);		
 	}
@@ -257,7 +257,7 @@ function RestartPlayer(Controller aPlayer)
 {
 	super(R6GameInfo).RestartPlayer(aPlayer);
 	// End:0x3C
-	if(__NFUN_114__(aPlayer, m_pilotController))
+	if((aPlayer == m_pilotController))
 	{
 		m_objGoToExtraction.SetPawnToExtract(R6Pawn(m_pilotController.Pawn));
 	}
@@ -271,9 +271,9 @@ function RestartPlayer(Controller aPlayer)
 function bool IsPrimaryWeaponRestrictedToPawn(Pawn aPawn)
 {
 	// End:0x21
-	if(__NFUN_114__(m_objGoToExtraction.m_pawnToExtract, aPawn))
+	if((m_objGoToExtraction.m_pawnToExtract == aPawn))
 	{
-		return __NFUN_129__(EnablePilotPrimaryWeapon);
+		return (!EnablePilotPrimaryWeapon);
 	}
 	return false;
 	return;
@@ -286,9 +286,9 @@ function bool IsPrimaryWeaponRestrictedToPawn(Pawn aPawn)
 function bool IsSecondaryWeaponRestrictedToPawn(Pawn aPawn)
 {
 	// End:0x21
-	if(__NFUN_114__(m_objGoToExtraction.m_pawnToExtract, aPawn))
+	if((m_objGoToExtraction.m_pawnToExtract == aPawn))
 	{
-		return __NFUN_129__(EnablePilotSecondaryWeapon);
+		return (!EnablePilotSecondaryWeapon);
 	}
 	return false;
 	return;
@@ -301,9 +301,9 @@ function bool IsSecondaryWeaponRestrictedToPawn(Pawn aPawn)
 function bool IsTertiaryWeaponRestrictedToPawn(Pawn aPawn)
 {
 	// End:0x21
-	if(__NFUN_114__(m_objGoToExtraction.m_pawnToExtract, aPawn))
+	if((m_objGoToExtraction.m_pawnToExtract == aPawn))
 	{
-		return __NFUN_129__(EnablePilotTertiaryWeapon);
+		return (!EnablePilotTertiaryWeapon);
 	}
 	return false;
 	return;
@@ -320,12 +320,12 @@ function BroadcastGameTypeDescription()
 
 	super(R6GameInfo).BroadcastGameTypeDescription();
 	// End:0x13
-	if(__NFUN_114__(m_pilotController, none))
+	if((m_pilotController == none))
 	{
 		return;
 	}
 	// End:0x29
-	if(__NFUN_114__(m_pilotController.PlayerReplicationInfo, none))
+	if((m_pilotController.PlayerReplicationInfo == none))
 	{
 		return;
 	}
@@ -334,11 +334,11 @@ function BroadcastGameTypeDescription()
 	J0x53:
 
 	// End:0xE5 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		PlayerController = R6PlayerController(P);
 		// End:0xCE
-		if(__NFUN_130__(__NFUN_119__(PlayerController, none), __NFUN_154__(int(PlayerController.m_TeamSelection), int(2))))
+		if(((PlayerController != none) && (int(PlayerController.m_TeamSelection) == int(2))))
 		{
 			PlayerController.ClientMissionObjMsg("", m_pilotController.PlayerReplicationInfo.PlayerName, "PlayerIsThePilot");
 		}
@@ -360,16 +360,16 @@ auto state InBetweenRoundMenu
 		J0x14:
 
 		// End:0xEF [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x38
-			if(__NFUN_129__(P.__NFUN_303__('PlayerController')))
+			if((!P.IsA('PlayerController')))
 			{				
 			}
 			else
 			{
 				// End:0xBE
-				if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2)), P.PlayerReplicationInfo.m_bIsEscortedPilot), __NFUN_150__(iTotalPilot, 1)))
+				if((((int(R6PlayerController(P).m_TeamSelection) == int(2)) && P.PlayerReplicationInfo.m_bIsEscortedPilot) && (iTotalPilot < 1)))
 				{
 					// End:0xB4
 					if(R6PlayerController(P).m_bPenaltyBox)
@@ -378,7 +378,7 @@ auto state InBetweenRoundMenu
 					}
 					else
 					{
-						__NFUN_165__(iTotalPilot);
+						(iTotalPilot++);
 					}					
 				}
 				else
@@ -396,33 +396,33 @@ auto state InBetweenRoundMenu
 		J0x110:
 
 		// End:0x1F9 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x134
-			if(__NFUN_129__(P.__NFUN_303__('PlayerController')))
+			if((!P.IsA('PlayerController')))
 			{				
 			}
 			else
 			{
 				// End:0x1E2
-				if(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2)))
+				if((int(R6PlayerController(P).m_TeamSelection) == int(2)))
 				{
 					// End:0x1C2
-					if(__NFUN_130__(__NFUN_114__(m_pilotController, none), P.PlayerReplicationInfo.m_bIsEscortedPilot))
+					if(((m_pilotController == none) && P.PlayerReplicationInfo.m_bIsEscortedPilot))
 					{
 						// End:0x1AF
 						if(bShowLog)
 						{
-							__NFUN_231__("InBetweenRoundMenu: still the same pilot");
+							Log("InBetweenRoundMenu: still the same pilot");
 						}
 						m_pilotController = R6PlayerController(P);						
 					}
 					else
 					{
 						// End:0x1E2
-						if(__NFUN_129__(R6PlayerController(P).m_bPenaltyBox))
+						if((!R6PlayerController(P).m_bPenaltyBox))
 						{
-							__NFUN_165__(iTeamACount);
+							(iTeamACount++);
 						}
 					}
 				}
@@ -432,27 +432,27 @@ auto state InBetweenRoundMenu
 			goto J0x110;
 		}
 		// End:0x3A4
-		if(__NFUN_114__(m_pilotController, none))
+		if((m_pilotController == none))
 		{
-			iNewGen = __NFUN_167__(iTeamACount);
+			iNewGen = Rand(iTeamACount);
 			i = 0;
 			P = Level.ControllerList;
 			J0x22C:
 
 			// End:0x3A4 [Loop If]
-			if(__NFUN_119__(P, none))
+			if((P != none))
 			{
 				// End:0x382
-				if(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_130__(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2)), __NFUN_129__(R6PlayerController(P).m_bPenaltyBox))))
+				if((P.IsA('PlayerController') && ((int(R6PlayerController(P).m_TeamSelection) == int(2)) && (!R6PlayerController(P).m_bPenaltyBox))))
 				{
 					// End:0x37B
-					if(__NFUN_154__(i, iNewGen))
+					if((i == iNewGen))
 					{
 						// End:0x307
-						if(__NFUN_114__(m_previousPilot, R6PlayerController(P)))
+						if((m_previousPilot == R6PlayerController(P)))
 						{
 							// End:0x2C7
-							if(__NFUN_154__(iTeamACount, 1))
+							if((iTeamACount == 1))
 							{
 								m_pilotController = R6PlayerController(P);								
 							}
@@ -461,9 +461,9 @@ auto state InBetweenRoundMenu
 								J0x2C7:
 
 								// End:0x2E6 [Loop If]
-								if(__NFUN_154__(iNewGen, i))
+								if((iNewGen == i))
 								{
-									iNewGen = __NFUN_167__(iTeamACount);
+									iNewGen = Rand(iTeamACount);
 									// [Loop Continue]
 									goto J0x2C7;
 								}
@@ -477,7 +477,7 @@ auto state InBetweenRoundMenu
 							m_pilotController = R6PlayerController(P);
 						}
 						// End:0x378
-						if(__NFUN_119__(m_pilotController, none))
+						if((m_pilotController != none))
 						{
 							// End:0x350
 							if(bShowLog)

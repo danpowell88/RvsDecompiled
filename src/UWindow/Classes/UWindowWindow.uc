@@ -132,10 +132,10 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x89
 		case 0:
 			// End:0x86
-			if(__NFUN_129__(Root.CheckCaptureMouseDown()))
+			if((!Root.CheckCaptureMouseDown()))
 			{
 				// End:0x86
-				if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+				if((!MessageClients(Msg, C, X, Y, Key)))
 				{
 					LMouseDown(X, Y);
 				}
@@ -145,10 +145,10 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0xD9
 		case 1:
 			// End:0xD6
-			if(__NFUN_129__(Root.CheckCaptureMouseUp()))
+			if((!Root.CheckCaptureMouseUp()))
 			{
 				// End:0xD6
-				if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+				if((!MessageClients(Msg, C, X, Y, Key)))
 				{
 					LMouseUp(X, Y);
 				}
@@ -158,7 +158,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x115
 		case 4:
 			// End:0x112
-			if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+			if((!MessageClients(Msg, C, X, Y, Key)))
 			{
 				RMouseDown(X, Y);
 			}
@@ -167,7 +167,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x151
 		case 5:
 			// End:0x14E
-			if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+			if((!MessageClients(Msg, C, X, Y, Key)))
 			{
 				RMouseUp(X, Y);
 			}
@@ -176,7 +176,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x18D
 		case 2:
 			// End:0x18A
-			if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+			if((!MessageClients(Msg, C, X, Y, Key)))
 			{
 				MMouseDown(X, Y);
 			}
@@ -185,7 +185,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x1C9
 		case 3:
 			// End:0x1C6
-			if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+			if((!MessageClients(Msg, C, X, Y, Key)))
 			{
 				MMouseUp(X, Y);
 			}
@@ -194,7 +194,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x205
 		case 6:
 			// End:0x202
-			if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+			if((!MessageClients(Msg, C, X, Y, Key)))
 			{
 				MouseWheelDown(X, Y);
 			}
@@ -203,7 +203,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x241
 		case 7:
 			// End:0x23E
-			if(__NFUN_129__(MessageClients(Msg, C, X, Y, Key)))
+			if((!MessageClients(Msg, C, X, Y, Key)))
 			{
 				MouseWheelUp(X, Y);
 			}
@@ -212,7 +212,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x282
 		case 9:
 			// End:0x27F
-			if(__NFUN_129__(PropagateKey(Msg, C, X, Y, Key)))
+			if((!PropagateKey(Msg, C, X, Y, Key)))
 			{
 				KeyDown(Key, X, Y);
 			}
@@ -221,7 +221,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x2C3
 		case 8:
 			// End:0x2C0
-			if(__NFUN_129__(PropagateKey(Msg, C, X, Y, Key)))
+			if((!PropagateKey(Msg, C, X, Y, Key)))
 			{
 				KeyUp(Key, X, Y);
 			}
@@ -230,7 +230,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x304
 		case 10:
 			// End:0x301
-			if(__NFUN_129__(PropagateKey(Msg, C, X, Y, Key)))
+			if((!PropagateKey(Msg, C, X, Y, Key)))
 			{
 				KeyType(Key, X, Y);
 			}
@@ -264,7 +264,7 @@ final function LevelInfo GetLevel()
 
 final function float GetTime()
 {
-	return Class'Engine.Actor'.static.__NFUN_1012__();
+	return Class'Engine.Actor'.static.GetTime();
 	return;
 }
 
@@ -280,7 +280,7 @@ final function UWindowWindow GetButtonsDefinesUnique(Class<UWindowWindow> WndCla
 
 	Child = Root.FindChildWindow(WndClass, true);
 	// End:0x56
-	if(__NFUN_114__(Child, none))
+	if((Child == none))
 	{
 		Child = Root.CreateWindow(WndClass, 0.0000000, 0.0000000, 0.0000000, 0.0000000, none, true);
 	}
@@ -351,7 +351,7 @@ function Created()
 function MouseEnter()
 {
 	// End:0x17
-	if(__NFUN_123__(ToolTipString, ""))
+	if((ToolTipString != ""))
 	{
 		ToolTip(ToolTipString);
 	}
@@ -374,7 +374,7 @@ function MouseLeave()
 	bMMouseDown = false;
 	bRMouseDown = false;
 	// End:0x2C
-	if(__NFUN_123__(ToolTipString, ""))
+	if((ToolTipString != ""))
 	{
 		ToolTip("");
 	}
@@ -449,7 +449,7 @@ function RMouseUp(float X, float Y)
 	if(bRMouseDown)
 	{
 		// End:0x7B
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(bIgnoreRDoubleClick), __NFUN_178__(__NFUN_186__(__NFUN_175__(X, RClickX)), float(1))), __NFUN_178__(__NFUN_186__(__NFUN_175__(Y, RClickY)), float(1))), __NFUN_176__(GetTime(), __NFUN_174__(RClickTime, 0.4000000))))
+		if(((((!bIgnoreRDoubleClick) && (Abs((X - RClickX)) <= float(1))) && (Abs((Y - RClickY)) <= float(1))) && (GetTime() < (RClickTime + 0.4000000))))
 		{
 			RDoubleClick(X, Y);
 			RClickTime = 0.0000000;			
@@ -479,7 +479,7 @@ function MMouseUp(float X, float Y)
 	if(bMMouseDown)
 	{
 		// End:0x79
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(bIgnoreMDoubleClick), __NFUN_178__(__NFUN_186__(__NFUN_175__(X, MClickX)), float(1))), __NFUN_178__(__NFUN_175__(Y, MClickY), float(1))), __NFUN_176__(GetTime(), __NFUN_174__(MClickTime, 0.4000000))))
+		if(((((!bIgnoreMDoubleClick) && (Abs((X - MClickX)) <= float(1))) && ((Y - MClickY) <= float(1))) && (GetTime() < (MClickTime + 0.4000000))))
 		{
 			MDoubleClick(X, Y);
 			MClickTime = 0.0000000;			
@@ -519,7 +519,7 @@ function LMouseUp(float X, float Y)
 	if(bMouseDown)
 	{
 		// End:0x79
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(bIgnoreLDoubleClick), __NFUN_178__(__NFUN_186__(__NFUN_175__(X, ClickX)), float(1))), __NFUN_178__(__NFUN_175__(Y, ClickY), float(1))), __NFUN_176__(GetTime(), __NFUN_174__(ClickTime, 0.4000000))))
+		if(((((!bIgnoreLDoubleClick) && (Abs((X - ClickX)) <= float(1))) && ((Y - ClickY) <= float(1))) && (GetTime() < (ClickTime + 0.4000000))))
 		{
 			DoubleClick(X, Y);
 			ClickTime = 0.0000000;			
@@ -539,7 +539,7 @@ function LMouseUp(float X, float Y)
 function FocusWindow()
 {
 	// End:0x43
-	if(__NFUN_130__(__NFUN_119__(Root.FocusedWindow, none), __NFUN_119__(Root.FocusedWindow, self)))
+	if(((Root.FocusedWindow != none) && (Root.FocusedWindow != self)))
 	{
 		Root.FocusedWindow.FocusOtherWindow(self);
 	}
@@ -566,7 +566,7 @@ function Close(optional bool bByParent)
 	J0x0B:
 
 	// End:0x48 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Prev = Child.PrevSiblingWindow;
 		Child.Close(true);
@@ -576,7 +576,7 @@ function Close(optional bool bByParent)
 	}
 	SaveConfigs();
 	// End:0x5F
-	if(__NFUN_129__(bByParent))
+	if((!bByParent))
 	{
 		HideWindow();
 	}
@@ -586,7 +586,7 @@ function Close(optional bool bByParent)
 final function SetSize(float W, float H)
 {
 	// End:0x3C
-	if(__NFUN_132__(__NFUN_181__(WinWidth, W), __NFUN_181__(WinHeight, H)))
+	if(((WinWidth != W) || (WinHeight != H)))
 	{
 		WinWidth = W;
 		WinHeight = H;
@@ -609,7 +609,7 @@ final function DoTick(float Delta)
 	J0x16:
 
 	// End:0x99 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.bUWindowActive = bUWindowActive;
 		// End:0x51
@@ -618,7 +618,7 @@ final function DoTick(float Delta)
 			Child.bLeaveOnscreen = true;
 		}
 		// End:0x82
-		if(__NFUN_132__(bUWindowActive, Child.bLeaveOnscreen))
+		if((bUWindowActive || Child.bLeaveOnscreen))
 		{
 			Child.super(UWindowWindow).DoTick(Delta);
 		}
@@ -642,61 +642,61 @@ final function PaintClients(Canvas C, float X, float Y)
 	J0x5B:
 
 	// End:0x617 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.bUWindowActive = bUWindowActive;
-		C.__NFUN_2623__(0.0000000, 0.0000000);
+		C.SetPos(0.0000000, 0.0000000);
 		C.Style = GetPlayerOwner().1;
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+		C.SetDrawColor(byte(255), byte(255), byte(255));
 		C.SpaceX = 0.0000000;
 		C.SpaceY = 0.0000000;
-		Child.BeforePaint(C, __NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop));
+		Child.BeforePaint(C, (X - Child.WinLeft), (Y - Child.WinTop));
 		// End:0x145
 		if(bLeaveOnscreen)
 		{
 			Child.bLeaveOnscreen = true;
 		}
 		// End:0x600
-		if(__NFUN_132__(bUWindowActive, Child.bLeaveOnscreen))
+		if((bUWindowActive || Child.bLeaveOnscreen))
 		{
-			C.OrgX = __NFUN_174__(C.OrgX, __NFUN_171__(Child.WinLeft, Root.GUIScale));
-			C.OrgY = __NFUN_174__(C.OrgY, __NFUN_171__(Child.WinTop, Root.GUIScale));
+			C.OrgX = (C.OrgX + (Child.WinLeft * Root.GUIScale));
+			C.OrgY = (C.OrgY + (Child.WinTop * Root.GUIScale));
 			// End:0x500
-			if(__NFUN_129__(Child.bNoClip))
+			if((!Child.bNoClip))
 			{
-				C.ClipX = __NFUN_171__(__NFUN_244__(__NFUN_175__(WinWidth, Child.WinLeft), Child.WinWidth), Root.GUIScale);
-				C.ClipY = __NFUN_171__(__NFUN_244__(__NFUN_175__(WinHeight, Child.WinTop), Child.WinHeight), Root.GUIScale);
-				C.HalfClipX = __NFUN_171__(C.ClipX, 0.5000000);
-				C.HalfClipY = __NFUN_171__(C.ClipY, 0.5000000);
-				Child.ClippingRegion.X = int(__NFUN_175__(float(ClippingRegion.X), Child.WinLeft));
-				Child.ClippingRegion.Y = int(__NFUN_175__(float(ClippingRegion.Y), Child.WinTop));
+				C.ClipX = (FMin((WinWidth - Child.WinLeft), Child.WinWidth) * Root.GUIScale);
+				C.ClipY = (FMin((WinHeight - Child.WinTop), Child.WinHeight) * Root.GUIScale);
+				C.HalfClipX = (C.ClipX * 0.5000000);
+				C.HalfClipY = (C.ClipY * 0.5000000);
+				Child.ClippingRegion.X = int((float(ClippingRegion.X) - Child.WinLeft));
+				Child.ClippingRegion.Y = int((float(ClippingRegion.Y) - Child.WinTop));
 				Child.ClippingRegion.W = ClippingRegion.W;
 				Child.ClippingRegion.H = ClippingRegion.H;
 				// End:0x3B6
-				if(__NFUN_150__(Child.ClippingRegion.X, 0))
+				if((Child.ClippingRegion.X < 0))
 				{
-					__NFUN_161__(Child.ClippingRegion.W, Child.ClippingRegion.X);
+					(Child.ClippingRegion.W += Child.ClippingRegion.X);
 					Child.ClippingRegion.X = 0;
 				}
 				// End:0x40C
-				if(__NFUN_150__(Child.ClippingRegion.Y, 0))
+				if((Child.ClippingRegion.Y < 0))
 				{
-					__NFUN_161__(Child.ClippingRegion.H, Child.ClippingRegion.Y);
+					(Child.ClippingRegion.H += Child.ClippingRegion.Y);
 					Child.ClippingRegion.Y = 0;
 				}
 				// End:0x486
-				if(__NFUN_177__(float(Child.ClippingRegion.W), __NFUN_175__(Child.WinWidth, float(Child.ClippingRegion.X))))
+				if((float(Child.ClippingRegion.W) > (Child.WinWidth - float(Child.ClippingRegion.X))))
 				{
-					Child.ClippingRegion.W = int(__NFUN_175__(Child.WinWidth, float(Child.ClippingRegion.X)));
+					Child.ClippingRegion.W = int((Child.WinWidth - float(Child.ClippingRegion.X)));
 				}
 				// End:0x500
-				if(__NFUN_177__(float(Child.ClippingRegion.H), __NFUN_175__(Child.WinHeight, float(Child.ClippingRegion.Y))))
+				if((float(Child.ClippingRegion.H) > (Child.WinHeight - float(Child.ClippingRegion.Y))))
 				{
-					Child.ClippingRegion.H = int(__NFUN_175__(Child.WinHeight, float(Child.ClippingRegion.Y)));
+					Child.ClippingRegion.H = int((Child.WinHeight - float(Child.ClippingRegion.Y)));
 				}
 			}
 			// End:0x5D8
-			if(__NFUN_130__(__NFUN_151__(Child.ClippingRegion.W, 0), __NFUN_151__(Child.ClippingRegion.H, 0)))
+			if(((Child.ClippingRegion.W > 0) && (Child.ClippingRegion.H > 0)))
 			{
 				// End:0x5C7
 				if(__NFUN_129__(Child.m_bPreCalculatePos))

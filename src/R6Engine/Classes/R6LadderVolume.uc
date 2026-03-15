@@ -59,41 +59,41 @@ simulated function PostNetBeginPlay()
 	local Vector vDir;
 
 	// End:0x41
-	if(__NFUN_114__(LadderList, none))
+	if((LadderList == none))
 	{
-		__NFUN_231__(__NFUN_112__("WARNING - no Ladder actors in LadderVolume ", string(self)));
+		Log(("WARNING - no Ladder actors in LadderVolume " $ string(self)));
 		return;
 	}
 	LookDir = Vector(LadderList.Rotation);
 	WallDir = Rotator(LookDir);
 	// End:0x1E4
-	if(__NFUN_129__(bAutoPath))
+	if((!bAutoPath))
 	{
 		ClimbDir = vect(0.0000000, 0.0000000, 0.0000000);
 		L = LadderList;
 		J0x8D:
 
 		// End:0x1AD [Loop If]
-		if(__NFUN_119__(L, none))
+		if((L != none))
 		{
 			M = LadderList;
 			J0xA3:
 
 			// End:0x196 [Loop If]
-			if(__NFUN_119__(M, none))
+			if((M != none))
 			{
 				// End:0x17F
-				if(__NFUN_119__(M, L))
+				if((M != L))
 				{
-					vDir = __NFUN_226__(__NFUN_216__(M.Location, L.Location));
+					vDir = Normal((M.Location - L.Location));
 					// End:0x105
-					if(__NFUN_176__(__NFUN_219__(vDir, ClimbDir), float(0)))
+					if((Dot(vDir, ClimbDir) < float(0)))
 					{
-						__NFUN_221__(vDir, float(-1));
+						(vDir *= float(-1));
 					}
-					__NFUN_223__(ClimbDir, vDir);
+					(ClimbDir += vDir);
 					// End:0x15F
-					if(__NFUN_177__(M.Location.Z, L.Location.Z))
+					if((M.Location.Z > L.Location.Z))
 					{
 						m_TopLadder = R6Ladder(M);
 						m_BottomLadder = R6Ladder(L);						
@@ -112,29 +112,29 @@ simulated function PostNetBeginPlay()
 			// [Loop Continue]
 			goto J0x8D;
 		}
-		ClimbDir = __NFUN_226__(ClimbDir);
+		ClimbDir = Normal(ClimbDir);
 		// End:0x1E4
-		if(__NFUN_176__(__NFUN_219__(ClimbDir, vect(0.0000000, 0.0000000, 1.0000000)), float(0)))
+		if((Dot(ClimbDir, vect(0.0000000, 0.0000000, 1.0000000)) < float(0)))
 		{
-			__NFUN_221__(ClimbDir, float(-1));
+			(ClimbDir *= float(-1));
 		}
 	}
 	ClimbDir.X = 0.0000000;
 	ClimbDir.Y = 0.0000000;
 	// End:0x2C5
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		// End:0x271
-		if(__NFUN_114__(m_TopCollision, none))
+		if((m_TopCollision == none))
 		{
-			m_TopCollision = __NFUN_278__(Class'R6Engine.R6LadderCollision', self,, __NFUN_216__(m_TopLadder.Location, vect(0.0000000, 0.0000000, 239.0000000)), rot(0, 0, 0));
-			m_TopCollision.__NFUN_262__(false, false, false);
+			m_TopCollision = Spawn(Class'R6Engine.R6LadderCollision', self,, (m_TopLadder.Location - vect(0.0000000, 0.0000000, 239.0000000)), rot(0, 0, 0));
+			m_TopCollision.SetCollision(false, false, false);
 		}
 		// End:0x2C5
-		if(__NFUN_114__(m_BottomCollision, none))
+		if((m_BottomCollision == none))
 		{
-			m_BottomCollision = __NFUN_278__(Class'R6Engine.R6LadderCollision', self,, __NFUN_215__(m_BottomLadder.Location, vect(0.0000000, 0.0000000, 199.0000000)), rot(0, 0, 0));
-			m_BottomCollision.__NFUN_262__(false, false, false);
+			m_BottomCollision = Spawn(Class'R6Engine.R6LadderCollision', self,, (m_BottomLadder.Location + vect(0.0000000, 0.0000000, 199.0000000)), rot(0, 0, 0));
+			m_BottomCollision.SetCollision(false, false, false);
 		}
 	}
 	return;
@@ -143,15 +143,15 @@ simulated function PostNetBeginPlay()
 function Destroyed()
 {
 	// End:0x1E
-	if(__NFUN_119__(m_TopCollision, none))
+	if((m_TopCollision != none))
 	{
-		m_TopCollision.__NFUN_279__();
+		m_TopCollision.Destroy();
 		m_TopCollision = none;
 	}
 	// End:0x3C
-	if(__NFUN_119__(m_BottomCollision, none))
+	if((m_BottomCollision != none))
 	{
-		m_BottomCollision.__NFUN_279__();
+		m_BottomCollision.Destroy();
 		m_BottomCollision = none;
 	}
 	return;
@@ -162,23 +162,23 @@ simulated function ResetOriginalData()
 	local int i;
 
 	// End:0x1A
-	if(__NFUN_119__(m_TopCollision, none))
+	if((m_TopCollision != none))
 	{
-		m_TopCollision.__NFUN_262__(false, false, false);
+		m_TopCollision.SetCollision(false, false, false);
 	}
 	// End:0x34
-	if(__NFUN_119__(m_BottomCollision, none))
+	if((m_BottomCollision != none))
 	{
-		m_BottomCollision.__NFUN_262__(false, false, false);
+		m_BottomCollision.SetCollision(false, false, false);
 	}
 	i = 0;
 	J0x3B:
 
 	// End:0x5E [Loop If]
-	if(__NFUN_150__(i, 6))
+	if((i < 6))
 	{
 		m_Climber[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x3B;
 	}
@@ -188,13 +188,13 @@ simulated function ResetOriginalData()
 function EnableCollisions(R6Ladder Ladder)
 {
 	// End:0x21
-	if(__NFUN_114__(Ladder, m_TopLadder))
+	if((Ladder == m_TopLadder))
 	{
-		m_TopCollision.__NFUN_262__(true, true, true);		
+		m_TopCollision.SetCollision(true, true, true);		
 	}
 	else
 	{
-		m_BottomCollision.__NFUN_262__(true, true, true);
+		m_BottomCollision.SetCollision(true, true, true);
 	}
 	return;
 }
@@ -202,13 +202,13 @@ function EnableCollisions(R6Ladder Ladder)
 function DisableCollisions(R6Ladder Ladder)
 {
 	// End:0x21
-	if(__NFUN_114__(Ladder, m_TopLadder))
+	if((Ladder == m_TopLadder))
 	{
-		m_TopCollision.__NFUN_262__(false, false, false);		
+		m_TopCollision.SetCollision(false, false, false);		
 	}
 	else
 	{
-		m_BottomCollision.__NFUN_262__(false, false, false);
+		m_BottomCollision.SetCollision(false, false, false);
 	}
 	return;
 }
@@ -220,7 +220,7 @@ simulated event PawnEnteredVolume(Pawn P)
 
 	Pawn = R6Pawn(P);
 	// End:0x49
-	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(Pawn, none), __NFUN_129__(Pawn.bCanClimbLadders)), __NFUN_114__(Pawn.Controller, none)))
+	if((((Pawn == none) || (!Pawn.bCanClimbLadders)) || (Pawn.Controller == none)))
 	{
 		return;
 	}
@@ -232,7 +232,7 @@ simulated event PawnEnteredVolume(Pawn P)
 	rPawnRot = Pawn.Rotation;
 	rPawnRot.Pitch = 0;
 	// End:0xCF
-	if(__NFUN_177__(__NFUN_219__(Vector(rPawnRot), LookDir), 0.9000000))
+	if((Dot(Vector(rPawnRot), LookDir) > 0.9000000))
 	{
 		// End:0xBC
 		if(Pawn.m_bIsClimbingLadder)
@@ -256,7 +256,7 @@ simulated event PawnLeavingVolume(Pawn P)
 		UntriggerEvent(Event, P, P);
 	}
 	// End:0x53
-	if(__NFUN_154__(int(P.Physics), int(11)))
+	if((int(P.Physics) == int(11)))
 	{
 		P.EndClimbLadder(self);		
 	}
@@ -269,7 +269,7 @@ simulated event PawnLeavingVolume(Pawn P)
 
 simulated event SetPotentialClimber()
 {
-	__NFUN_113__('PotentialClimb');
+	GotoState('PotentialClimb');
 	return;
 }
 
@@ -280,28 +280,28 @@ simulated function AddClimber(R6Pawn P)
 	// End:0x29
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " AddClimber : "), string(P)));
+		Log(((string(self) $ " AddClimber : ") $ string(P)));
 	}
 	i = 0;
 	J0x30:
 
 	// End:0x83 [Loop If]
-	if(__NFUN_150__(i, 6))
+	if((i < 6))
 	{
 		// End:0x54
-		if(__NFUN_114__(m_Climber[i], P))
+		if((m_Climber[i] == P))
 		{
 			// [Explicit Break]
 			goto J0x83;
 		}
 		// End:0x79
-		if(__NFUN_114__(m_Climber[i], none))
+		if((m_Climber[i] == none))
 		{
 			m_Climber[i] = P;
 			// [Explicit Break]
 			goto J0x83;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x30;
 	}
@@ -317,22 +317,22 @@ simulated function RemoveClimber(R6Pawn P)
 	// End:0x2D
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " Remove Climber : "), string(P)));
+		Log(((string(self) $ " Remove Climber : ") $ string(P)));
 	}
 	i = 0;
 	J0x34:
 
 	// End:0x6F [Loop If]
-	if(__NFUN_150__(i, 6))
+	if((i < 6))
 	{
 		// End:0x65
-		if(__NFUN_114__(m_Climber[i], P))
+		if((m_Climber[i] == P))
 		{
 			m_Climber[i] = none;
 			// [Explicit Break]
 			goto J0x6F;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x34;
 	}

@@ -208,14 +208,14 @@ function bool IsAFavorite(string szIPAddress)
 	J0x0F:
 
 	// End:0x53 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, m_favoriteServersList.Length), __NFUN_129__(bFound)))
+	if(((i < m_favoriteServersList.Length) && (!bFound)))
 	{
 		// End:0x49
-		if(__NFUN_122__(szIPAddress, m_favoriteServersList[i]))
+		if((szIPAddress == m_favoriteServersList[i]))
 		{
 			bFound = true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0F;
 	}
@@ -241,22 +241,22 @@ function AddToFavorites(int sortedListIdx)
 	J0x33:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, m_favoriteServersList.Length), __NFUN_129__(Found)))
+	if(((i < m_favoriteServersList.Length) && (!Found)))
 	{
 		// End:0x78
-		if(__NFUN_122__(m_GameServerList[serverListIndex].szIPAddress, m_favoriteServersList[i]))
+		if((m_GameServerList[serverListIndex].szIPAddress == m_favoriteServersList[i]))
 		{
 			Found = true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x33;
 	}
 	// End:0xAD
-	if(__NFUN_129__(Found))
+	if((!Found))
 	{
 		m_favoriteServersList[m_favoriteServersList.Length] = m_GameServerList[serverListIndex].szIPAddress;
-		__NFUN_1223__();
+		NativeUpdateFavorites();
 	}
 	return;
 }
@@ -279,15 +279,15 @@ function DelFromFavorites(int sortedListIdx)
 	J0x33:
 
 	// End:0x8D [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, m_favoriteServersList.Length), __NFUN_129__(Found)))
+	if(((i < m_favoriteServersList.Length) && (!Found)))
 	{
 		// End:0x83
-		if(__NFUN_122__(m_GameServerList[serverListIndex].szIPAddress, m_favoriteServersList[i]))
+		if((m_GameServerList[serverListIndex].szIPAddress == m_favoriteServersList[i]))
 		{
 			Found = true;
 			favoritesListIndex = i;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x33;
 	}
@@ -295,7 +295,7 @@ function DelFromFavorites(int sortedListIdx)
 	if(Found)
 	{
 		m_favoriteServersList.Remove(favoritesListIndex, 1);
-		__NFUN_1223__();
+		NativeUpdateFavorites();
 	}
 	return;
 }
@@ -306,7 +306,7 @@ function DelFromFavorites(int sortedListIdx)
 function SetSelectedServer(int iServerListIndex)
 {
 	// End:0x20
-	if(__NFUN_132__(__NFUN_151__(iServerListIndex, m_GameServerList.Length), __NFUN_154__(m_GameServerList.Length, 0)))
+	if(((iServerListIndex > m_GameServerList.Length) || (m_GameServerList.Length == 0)))
 	{
 		return;
 	}
@@ -320,7 +320,7 @@ function SetSelectedServer(int iServerListIndex)
 //=============================================================================
 function Created()
 {
-	m_szGameVersion = Class'Engine.Actor'.static.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield()));
+	m_szGameVersion = Class'Engine.Actor'.static.GetGameVersion(false, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield()));
 	return;
 }
 
@@ -364,12 +364,12 @@ function stGameData getSvrData(int iBeaconIdx)
 	J0x339:
 
 	// End:0x3BF [Loop If]
-	if(__NFUN_150__(j, m_ClientBeacon.GetMapListSize(iBeaconIdx)))
+	if((j < m_ClientBeacon.GetMapListSize(iBeaconIdx)))
 	{
 		sMapAndGame.szMap = m_ClientBeacon.GetOneMapName(iBeaconIdx, j);
 		sMapAndGame.szGameType = m_ClientBeacon.GetGameType(iBeaconIdx, j);
 		sGameData.gameMapList[j] = sMapAndGame;
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x339;
 	}
@@ -378,14 +378,14 @@ function stGameData getSvrData(int iBeaconIdx)
 	J0x3DD:
 
 	// End:0x4AB [Loop If]
-	if(__NFUN_150__(j, m_ClientBeacon.GetPlayerListSize(iBeaconIdx)))
+	if((j < m_ClientBeacon.GetPlayerListSize(iBeaconIdx)))
 	{
 		remPlayer.szAlias = m_ClientBeacon.GetPlayerName(iBeaconIdx, j);
 		remPlayer.szTime = m_ClientBeacon.GetPlayerTime(iBeaconIdx, j);
 		remPlayer.iPing = m_ClientBeacon.GetPlayerPingTime(iBeaconIdx, j);
 		remPlayer.iSkills = m_ClientBeacon.GetPlayerKillCount(iBeaconIdx, j);
 		sGameData.PlayerList[j] = remPlayer;
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x3DD;
 	}
@@ -405,35 +405,35 @@ function SortPlayersByKills(bool _bAscending, int _iIdx)
 	J0x23:
 
 	// End:0x195 [Loop If]
-	if(__NFUN_150__(i, __NFUN_147__(iListSize, 1)))
+	if((i < (iListSize - 1)))
 	{
 		j = 0;
 		J0x3C:
 
 		// End:0x18B [Loop If]
-		if(__NFUN_150__(j, __NFUN_147__(__NFUN_147__(iListSize, 1), i)))
+		if((j < ((iListSize - 1) - i)))
 		{
 			// End:0xAD
 			if(_bAscending)
 			{
-				bSwap = __NFUN_151__(m_GameServerList[_iIdx].sGameData.PlayerList[j].iSkills, m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)].iSkills);				
+				bSwap = (m_GameServerList[_iIdx].sGameData.PlayerList[j].iSkills > m_GameServerList[_iIdx].sGameData.PlayerList[(j + 1)].iSkills);				
 			}
 			else
 			{
-				bSwap = __NFUN_150__(m_GameServerList[_iIdx].sGameData.PlayerList[j].iSkills, m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)].iSkills);
+				bSwap = (m_GameServerList[_iIdx].sGameData.PlayerList[j].iSkills < m_GameServerList[_iIdx].sGameData.PlayerList[(j + 1)].iSkills);
 			}
 			// End:0x181
 			if(bSwap)
 			{
 				tempPlayer = m_GameServerList[_iIdx].sGameData.PlayerList[j];
-				m_GameServerList[_iIdx].sGameData.PlayerList[j] = m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)];
-				m_GameServerList[_iIdx].sGameData.PlayerList[__NFUN_146__(j, 1)] = tempPlayer;
+				m_GameServerList[_iIdx].sGameData.PlayerList[j] = m_GameServerList[_iIdx].sGameData.PlayerList[(j + 1)];
+				m_GameServerList[_iIdx].sGameData.PlayerList[(j + 1)] = tempPlayer;
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x3C;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x23;
 	}
@@ -445,19 +445,19 @@ function int GetTotalPlayers()
 	local int i, iTotal, iMaxPlayers;
 
 	iTotal = 0;
-	iMaxPlayers = __NFUN_1355__();
+	iMaxPlayers = NativeGetMaxPlayers();
 	i = 0;
 	J0x17:
 
 	// End:0x89 [Loop If]
-	if(__NFUN_150__(i, m_GameServerList.Length))
+	if((i < m_GameServerList.Length))
 	{
 		// End:0x7F
-		if(__NFUN_130__(__NFUN_152__(m_GameServerList[i].sGameData.iNbrPlayer, iMaxPlayers), __NFUN_151__(m_GameServerList[i].sGameData.iNbrPlayer, 0)))
+		if(((m_GameServerList[i].sGameData.iNbrPlayer <= iMaxPlayers) && (m_GameServerList[i].sGameData.iNbrPlayer > 0)))
 		{
-			__NFUN_161__(iTotal, m_GameServerList[i].sGameData.iNbrPlayer);
+			(iTotal += m_GameServerList[i].sGameData.iNbrPlayer);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x17;
 	}
@@ -469,7 +469,7 @@ function int GetTotalPlayers()
 event GetLobbyAndGroupID(out int _iLobbyID, out int _iGroupID)
 {
 	// End:0x40
-	if(__NFUN_119__(m_ClientBeacon, none))
+	if((m_ClientBeacon != none))
 	{
 		_iLobbyID = m_ClientBeacon.PreJoinInfo.iLobbyID;
 		_iGroupID = m_ClientBeacon.PreJoinInfo.iGroupID;		

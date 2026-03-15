@@ -24,12 +24,12 @@ function Init()
 	if(R6MissionObjectiveMgr(m_mgr).m_bEnableCheckForErrors)
 	{
 		// End:0x6A
-		if(__NFUN_119__(m_depZone, none))
+		if((m_depZone != none))
 		{
 			// End:0x6A
-			if(__NFUN_154__(m_depZone.m_aTerrorist.Length, 0))
+			if((m_depZone.m_aTerrorist.Length == 0))
 			{
-				logMObj(__NFUN_112__("there is no terrorist in ", string(m_depZone.Name)));
+				logMObj(("there is no terrorist in " $ string(m_depZone.Name)));
 			}
 		}
 	}
@@ -44,26 +44,26 @@ function PawnKilled(Pawn killed)
 	local int i, iResult;
 
 	// End:0x1B
-	if(__NFUN_155__(int(killed.m_ePawnType), int(2)))
+	if((int(killed.m_ePawnType) != int(2)))
 	{
 		return;
 	}
 	// End:0xA8
-	if(__NFUN_119__(m_depZone, none))
+	if((m_depZone != none))
 	{
 		aTerrorist = R6Terrorist(killed);
 		// End:0x50
-		if(__NFUN_119__(m_depZone, aTerrorist.m_DZone))
+		if((m_depZone != aTerrorist.m_DZone))
 		{
 			return;
 		}
 		// End:0xA8
-		if(__NFUN_129__(aTerrorist.IsAlive()))
+		if((!aTerrorist.IsAlive()))
 		{
 			// End:0x91
 			if(m_bShowLog)
 			{
-				logX(__NFUN_112__("PawnKilled failed=", string(m_bFailed)));
+				logX(("PawnKilled failed=" $ string(m_bFailed)));
 			}
 			R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, false, true);
 		}

@@ -18,7 +18,7 @@ var R6WindowButton m_Button;
 function SetFront()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_Button, none))
+	if((m_Button != none))
 	{
 		m_Button.BringToFront();
 	}
@@ -28,7 +28,7 @@ function SetFront()
 function SetBack()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_Button, none))
+	if((m_Button != none))
 	{
 		m_Button.SendToBack();
 	}

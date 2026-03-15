@@ -52,7 +52,7 @@ function BeforePaint(Canvas C, float fMouseX, float fMouseY)
 function Paint(Canvas C, float fMouseX, float fMouseY)
 {
 	// End:0x25
-	if(__NFUN_129__(m_bSkipDrawBorders))
+	if((!m_bSkipDrawBorders))
 	{
 		R6WindowLookAndFeel(LookAndFeel).R6List_DrawBackground(self, C);
 	}
@@ -68,14 +68,14 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 
 	pListBoxItem = UWindowListBoxItem(Item);
 	// End:0x397
-	if(__NFUN_123__(pListBoxItem.HelpText, ""))
+	if((pListBoxItem.HelpText != ""))
 	{
 		C.Font = m_Font;
 		C.SpaceX = m_fFontSpacing;
 		// End:0x8B
 		if(m_bForceCaps)
 		{
-			szToDisplay = TextSize(C, __NFUN_235__(pListBoxItem.HelpText), tW, tH, int(W));			
+			szToDisplay = TextSize(C, Caps(pListBoxItem.HelpText), tW, tH, int(W));			
 		}
 		else
 		{
@@ -85,32 +85,32 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 		if(pListBoxItem.bSelected)
 		{
 			// End:0x171
-			if(__NFUN_119__(m_BGSelTexture, none))
+			if((m_BGSelTexture != none))
 			{
 				C.Style = m_BGRenderStyle;
-				C.__NFUN_2626__(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
-				DrawStretchedTextureSegment(C, X, Y, W, __NFUN_175__(H, m_fSpaceBetItem), float(m_BGSelRegion.X), float(m_BGSelRegion.Y), float(m_BGSelRegion.W), float(m_BGSelRegion.H), m_BGSelTexture);
+				C.SetDrawColor(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
+				DrawStretchedTextureSegment(C, X, Y, W, (H - m_fSpaceBetItem), float(m_BGSelRegion.X), float(m_BGSelRegion.Y), float(m_BGSelRegion.W), float(m_BGSelRegion.H), m_BGSelTexture);
 			}
-			C.__NFUN_2626__(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);			
+			C.SetDrawColor(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);			
 		}
 		else
 		{
 			// End:0x1DD
 			if(pListBoxItem.m_bDisabled)
 			{
-				C.__NFUN_2626__(m_DisableTextColor.R, m_DisableTextColor.G, m_DisableTextColor.B);				
+				C.SetDrawColor(m_DisableTextColor.R, m_DisableTextColor.G, m_DisableTextColor.B);				
 			}
 			else
 			{
 				// End:0x247
-				if(__NFUN_130__(__NFUN_119__(R6WindowListBoxItem(Item), none), R6WindowListBoxItem(Item).m_IsSeparator))
+				if(((R6WindowListBoxItem(Item) != none) && R6WindowListBoxItem(Item).m_IsSeparator))
 				{
 					C.Font = m_FontSeparator;
-					C.__NFUN_2626__(m_SeparatorTextColor.R, m_SeparatorTextColor.G, m_SeparatorTextColor.B);					
+					C.SetDrawColor(m_SeparatorTextColor.R, m_SeparatorTextColor.G, m_SeparatorTextColor.B);					
 				}
 				else
 				{
-					C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+					C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 				}
 			}
 		}
@@ -119,12 +119,12 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 		// End:0x397
 		if(pListBoxItem.m_bUseSubText)
 		{
-			fTemp = __NFUN_174__(Y, tH);
+			fTemp = (Y + tH);
 			C.Font = pListBoxItem.m_stSubText.FontSubText;
 			TextSize(C, pListBoxItem.m_stSubText.szGameTypeSelect, tW, tH);
-			TextY = __NFUN_172__(__NFUN_175__(pListBoxItem.m_stSubText.fHeight, tH), float(2));
-			TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-			ClipTextWidth(C, __NFUN_174__(X, pListBoxItem.m_stSubText.fXOffset), __NFUN_174__(fTemp, TextY), pListBoxItem.m_stSubText.szGameTypeSelect, __NFUN_175__(W, float(12)));
+			TextY = ((pListBoxItem.m_stSubText.fHeight - tH) / float(2));
+			TextY = float(int((TextY + 0.5000000)));
+			ClipTextWidth(C, (X + pListBoxItem.m_stSubText.fXOffset), (fTemp + TextY), pListBoxItem.m_stSubText.szGameTypeSelect, (W - float(12)));
 		}
 	}
 	return;
@@ -135,7 +135,7 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 	local bool bNotify;
 
 	// End:0xB9
-	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_119__(m_SelectedItem, NewSelected)))
+	if(((NewSelected != none) && (m_SelectedItem != NewSelected)))
 	{
 		// End:0x30
 		if(NewSelected.m_bDisabled)
@@ -144,21 +144,21 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 		}
 		bNotify = true;
 		// End:0x65
-		if(__NFUN_119__(R6WindowListBoxItem(NewSelected), none))
+		if((R6WindowListBoxItem(NewSelected) != none))
 		{
-			bNotify = __NFUN_129__(R6WindowListBoxItem(NewSelected).m_IsSeparator);
+			bNotify = (!R6WindowListBoxItem(NewSelected).m_IsSeparator);
 		}
 		// End:0xB9
 		if(bNotify)
 		{
 			// End:0x8A
-			if(__NFUN_119__(m_SelectedItem, none))
+			if((m_SelectedItem != none))
 			{
 				m_SelectedItem.bSelected = false;
 			}
 			m_SelectedItem = NewSelected;
 			// End:0xB1
-			if(__NFUN_119__(m_SelectedItem, none))
+			if((m_SelectedItem != none))
 			{
 				m_SelectedItem.bSelected = true;
 			}
@@ -176,7 +176,7 @@ function UWindowList FindItemWithName(string _ItemName)
 	local UWindowList CurItem;
 
 	// End:0x0E
-	if(__NFUN_122__(_ItemName, ""))
+	if((_ItemName == ""))
 	{
 		return none;
 	}
@@ -184,13 +184,13 @@ function UWindowList FindItemWithName(string _ItemName)
 	J0x22:
 
 	// End:0x7D [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0x66
-		if(__NFUN_129__(R6WindowListBoxItem(CurItem).m_IsSeparator))
+		if((!R6WindowListBoxItem(CurItem).m_IsSeparator))
 		{
 			// End:0x66
-			if(__NFUN_122__(R6WindowListBoxItem(CurItem).HelpText, _ItemName))
+			if((R6WindowListBoxItem(CurItem).HelpText == _ItemName))
 			{
 				// [Explicit Break]
 				goto J0x7D;

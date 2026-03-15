@@ -56,25 +56,25 @@ function int Compare(UWindowList t, UWindowList B)
 	TS = UWindowListBoxItem(t).HelpText;
 	BS = UWindowListBoxItem(B).HelpText;
 	// End:0x4B
-	if(__NFUN_122__(TS, "NONE"))
+	if((TS == "NONE"))
 	{
 		return -1;		
 	}
 	else
 	{
 		// End:0x5D
-		if(__NFUN_122__(BS, "NONE"))
+		if((BS == "NONE"))
 		{
 			return 1;
 		}
 	}
 	// End:0x6E
-	if(__NFUN_122__(TS, BS))
+	if((TS == BS))
 	{
 		return 0;
 	}
 	// End:0x83
-	if(__NFUN_115__(TS, BS))
+	if((TS < BS))
 	{
 		return -1;
 	}
@@ -97,7 +97,7 @@ function SetItemParameters(int _index, string _szText, Font _TextFont, float _fX
 	local stItemProperties stItemParam;
 
 	// End:0xA1
-	if(__NFUN_152__(_index, m_AItemProperties.Length))
+	if((_index <= m_AItemProperties.Length))
 	{
 		stItemParam.szText = _szText;
 		stItemParam.TextFont = _TextFont;

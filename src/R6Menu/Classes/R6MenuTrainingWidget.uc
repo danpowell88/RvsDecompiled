@@ -68,8 +68,8 @@ function Created()
 	m_ButtonOptions.Align = 0;
 	m_ButtonOptions.m_buttonFont = ButtonFont;
 	m_ButtonOptions.ResizeToText();
-	XPos = int(__NFUN_174__(m_pHelpWindow.WinLeft, m_pHelpWindow.WinWidth));
-	m_ButtonStart = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(XPos), 452.0000000, __NFUN_175__(__NFUN_175__(WinWidth, float(XPos)), float(20)), 25.0000000, self));
+	XPos = int((m_pHelpWindow.WinLeft + m_pHelpWindow.WinWidth));
+	m_ButtonStart = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(XPos), 452.0000000, ((WinWidth - float(XPos)) - float(20)), 25.0000000, self));
 	m_ButtonStart.ToolTipString = Localize("Tip", "ButtonStart", "R6Menu");
 	m_ButtonStart.Text = Localize("CustomMission", "ButtonStart1", "R6Menu");
 	m_ButtonStart.Align = 1;
@@ -77,7 +77,7 @@ function Created()
 	m_ButtonStart.ResizeToText();
 	m_ButtonStart.m_bWaitSoundFinish = true;
 	m_TitleTextColor = Root.Colors.White;
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(20)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(20)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("Training", "Title", "R6Menu");
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
@@ -114,7 +114,7 @@ function CurrentSelectedButton(R6WindowButton _IwasPressed)
 	local R6WindowBitMap mapBitmap;
 
 	// End:0x1C
-	if(__NFUN_119__(m_pButCurrent, none))
+	if((m_pButCurrent != none))
 	{
 		m_pButCurrent.m_bSelected = false;
 	}
@@ -138,23 +138,23 @@ function SetCurrentMissionInTraining()
 
 	R6Console = R6Console(Root.Console);
 	szMapName2 = R6Console.Master.m_StartGameInfo.m_MapName;
-	szMapName2 = __NFUN_235__(szMapName2);
+	szMapName2 = Caps(szMapName2);
 	iMission = 0;
 	J0x53:
 
 	// End:0xE8 [Loop If]
-	if(__NFUN_150__(iMission, R6Console.m_aMissionDescriptions.Length))
+	if((iMission < R6Console.m_aMissionDescriptions.Length))
 	{
 		mission = R6Console.m_aMissionDescriptions[iMission];
 		szMapName1 = mission.m_MapName;
-		szMapName1 = __NFUN_235__(szMapName1);
+		szMapName1 = Caps(szMapName1);
 		// End:0xDE
-		if(__NFUN_122__(szMapName1, szMapName2))
+		if((szMapName1 == szMapName2))
 		{
 			R6Console.Master.m_StartGameInfo.m_CurrentMission = mission;
 			return;
 		}
-		__NFUN_165__(iMission);
+		(iMission++);
 		// [Loop Continue]
 		goto J0x53;
 	}
@@ -164,7 +164,7 @@ function SetCurrentMissionInTraining()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0xBC
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -212,7 +212,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x135
-		if(__NFUN_154__(int(E), 11))
+		if((int(E) == 11))
 		{
 			switch(C)
 			{
@@ -262,9 +262,9 @@ function StartTraining()
 	SetCurrentMissionInTraining();
 	StartGameInfo.m_GameMode = "R6Game.R6TrainingMgr";
 	szMapName = StartGameInfo.m_MapName;
-	szMapName = __NFUN_235__(szMapName);
+	szMapName = Caps(szMapName);
 	// End:0x451
-	if(__NFUN_132__(__NFUN_132__(__NFUN_122__(szMapName, "TRAINING_BASICS"), __NFUN_122__(szMapName, "TRAINING_SHOOTING")), __NFUN_122__(szMapName, "TRAINING_EXPLOSIVES")))
+	if((((szMapName == "TRAINING_BASICS") || (szMapName == "TRAINING_SHOOTING")) || (szMapName == "TRAINING_EXPLOSIVES")))
 	{
 		StartGameInfo.m_TeamInfo[0].m_iNumberOfMembers = 1;
 		iNbTeam = 1;
@@ -310,7 +310,7 @@ function CreateButtons()
 	m_pButBasics.bIgnoreLDoubleClick = false;
 	m_pButBasics.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButBasics.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButShooting = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButShooting.ToolTipString = Localize("Tip", "ButtonShooting", "R6Menu");
 	m_pButShooting.Text = Localize("Training", "ButtonShooting", "R6Menu");
@@ -320,7 +320,7 @@ function CreateButtons()
 	m_pButShooting.bIgnoreLDoubleClick = false;
 	m_pButShooting.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButShooting.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButExplosives = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButExplosives.ToolTipString = Localize("Tip", "ButtonExplosives", "R6Menu");
 	m_pButExplosives.Text = Localize("Training", "ButtonExplosives", "R6Menu");
@@ -330,7 +330,7 @@ function CreateButtons()
 	m_pButExplosives.bIgnoreLDoubleClick = false;
 	m_pButExplosives.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButExplosives.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButRoomClearing1 = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButRoomClearing1.ToolTipString = Localize("Tip", "ButtonClearing1", "R6Menu");
 	m_pButRoomClearing1.Text = Localize("Training", "ButtonClearing1", "R6Menu");
@@ -340,7 +340,7 @@ function CreateButtons()
 	m_pButRoomClearing1.bIgnoreLDoubleClick = false;
 	m_pButRoomClearing1.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButRoomClearing1.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButRoomClearing2 = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButRoomClearing2.ToolTipString = Localize("Tip", "ButtonClearing2", "R6Menu");
 	m_pButRoomClearing2.Text = Localize("Training", "ButtonClearing2", "R6Menu");
@@ -350,7 +350,7 @@ function CreateButtons()
 	m_pButRoomClearing2.bIgnoreLDoubleClick = false;
 	m_pButRoomClearing2.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButRoomClearing2.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButRoomClearing3 = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButRoomClearing3.ToolTipString = Localize("Tip", "ButtonClearing3", "R6Menu");
 	m_pButRoomClearing3.Text = Localize("Training", "ButtonClearing3", "R6Menu");
@@ -360,7 +360,7 @@ function CreateButtons()
 	m_pButRoomClearing3.bIgnoreLDoubleClick = false;
 	m_pButRoomClearing3.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButRoomClearing3.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButHostageRescue1 = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButHostageRescue1.ToolTipString = Localize("Tip", "ButtonHostageRescue1", "R6Menu");
 	m_pButHostageRescue1.Text = Localize("Training", "ButtonHostageRescue1", "R6Menu");
@@ -370,7 +370,7 @@ function CreateButtons()
 	m_pButHostageRescue1.bIgnoreLDoubleClick = false;
 	m_pButHostageRescue1.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButHostageRescue1.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButHostageRescue2 = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButHostageRescue2.ToolTipString = Localize("Tip", "ButtonHostageRescue2", "R6Menu");
 	m_pButHostageRescue2.Text = Localize("Training", "ButtonHostageRescue2", "R6Menu");
@@ -380,7 +380,7 @@ function CreateButtons()
 	m_pButHostageRescue2.bIgnoreLDoubleClick = false;
 	m_pButHostageRescue2.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButHostageRescue2.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButHostageRescue3 = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButHostageRescue3.ToolTipString = Localize("Tip", "ButtonHostageRescue3", "R6Menu");
 	m_pButHostageRescue3.Text = Localize("Training", "ButtonHostageRescue3", "R6Menu");
@@ -399,7 +399,7 @@ function bool ButtonsUsingDownSizeFont()
 	local bool Result;
 
 	// End:0xBA
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_pButBasics.IsFontDownSizingNeeded(), m_pButShooting.IsFontDownSizingNeeded()), m_pButExplosives.IsFontDownSizingNeeded()), m_pButRoomClearing1.IsFontDownSizingNeeded()), m_pButRoomClearing2.IsFontDownSizingNeeded()), m_pButRoomClearing3.IsFontDownSizingNeeded()), m_pButHostageRescue1.IsFontDownSizingNeeded()), m_pButHostageRescue2.IsFontDownSizingNeeded()), m_pButHostageRescue3.IsFontDownSizingNeeded()))
+	if(((((((((m_pButBasics.IsFontDownSizingNeeded() || m_pButShooting.IsFontDownSizingNeeded()) || m_pButExplosives.IsFontDownSizingNeeded()) || m_pButRoomClearing1.IsFontDownSizingNeeded()) || m_pButRoomClearing2.IsFontDownSizingNeeded()) || m_pButRoomClearing3.IsFontDownSizingNeeded()) || m_pButHostageRescue1.IsFontDownSizingNeeded()) || m_pButHostageRescue2.IsFontDownSizingNeeded()) || m_pButHostageRescue3.IsFontDownSizingNeeded()))
 	{
 		Result = true;
 	}

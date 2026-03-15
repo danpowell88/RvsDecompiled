@@ -40,7 +40,7 @@ function SetBorderColor(Color _NewColor)
 {
 	m_BorderColor = _NewColor;
 	// End:0x2A
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
 		VertSB.SetBorderColor(_NewColor);
 	}
@@ -53,7 +53,7 @@ function SetScrollable(bool newScrollable)
 	// End:0x91
 	if(newScrollable)
 	{
-		VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+		VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, (WinWidth - LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
 		VertSB.bAlwaysOnTop = true;
 		VertSB.SetHideWhenDisable(true);
 		VertSB.m_BorderColor = m_BorderColor;		
@@ -61,7 +61,7 @@ function SetScrollable(bool newScrollable)
 	else
 	{
 		// End:0xB2
-		if(__NFUN_119__(VertSB, none))
+		if((VertSB != none))
 		{
 			VertSB.Close();
 			VertSB = none;
@@ -73,9 +73,9 @@ function SetScrollable(bool newScrollable)
 function Resize()
 {
 	// End:0x74
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
-		VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+		VertSB.WinLeft = (WinWidth - LookAndFeel.Size_ScrollbarWidth);
 		VertSB.WinTop = 0.0000000;
 		VertSB.WinWidth = LookAndFeel.Size_ScrollbarWidth;
 		VertSB.WinHeight = WinHeight;
@@ -91,28 +91,28 @@ function Paint(Canvas C, float X, float Y)
 		// End:0x46
 		if(m_bUseBGColor)
 		{
-			C.__NFUN_2626__(m_BGColor.R, m_BGColor.G, m_BGColor.B, m_BGColor.A);
+			C.SetDrawColor(m_BGColor.R, m_BGColor.G, m_BGColor.B, m_BGColor.A);
 		}
 		C.Style = byte(m_BGDrawStyle);
 		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, float(m_BGRegion.X), float(m_BGRegion.Y), float(m_BGRegion.W), float(m_BGRegion.H), m_BGTexture);
 	}
 	super.Paint(C, X, Y);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	C.Style = byte(m_BorderStyle);
 	// End:0x2DE
 	if(m_bDrawBorders)
 	{
 		// End:0x1E2
-		if(__NFUN_119__(m_HBorderTexture, none))
+		if((m_HBorderTexture != none))
 		{
-			DrawStretchedTextureSegment(C, m_fHBorderPadding, 0.0000000, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
-			DrawStretchedTextureSegment(C, m_fHBorderPadding, __NFUN_175__(WinHeight, m_fHBorderHeight), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+			DrawStretchedTextureSegment(C, m_fHBorderPadding, 0.0000000, (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+			DrawStretchedTextureSegment(C, m_fHBorderPadding, (WinHeight - m_fHBorderHeight), (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 		}
 		// End:0x2DE
-		if(__NFUN_119__(m_VBorderTexture, none))
+		if((m_VBorderTexture != none))
 		{
-			DrawStretchedTextureSegment(C, 0.0000000, __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
-			DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, m_fVBorderWidth), __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+			DrawStretchedTextureSegment(C, 0.0000000, (m_fHBorderHeight + m_fVBorderPadding), m_fVBorderWidth, ((WinHeight - (float(2) * m_fHBorderHeight)) - (float(2) * m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+			DrawStretchedTextureSegment(C, (WinWidth - m_fVBorderWidth), (m_fHBorderHeight + m_fVBorderPadding), m_fVBorderWidth, ((WinHeight - (float(2) * m_fHBorderHeight)) - (float(2) * m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 		}
 	}
 	return;
@@ -121,7 +121,7 @@ function Paint(Canvas C, float X, float Y)
 function MouseWheelDown(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
 		VertSB.MouseWheelDown(X, Y);
 	}
@@ -131,7 +131,7 @@ function MouseWheelDown(float X, float Y)
 function MouseWheelUp(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
 		VertSB.MouseWheelUp(X, Y);
 	}

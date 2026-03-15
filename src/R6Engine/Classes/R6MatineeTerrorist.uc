@@ -31,14 +31,14 @@ event PostBeginPlay()
 {
 	m_MatineeAttach = new (none) Class'R6Engine.R6MatineeAttach';
 	// End:0x4D
-	if(__NFUN_130__(__NFUN_119__(m_TerroristTemplate, none), m_bUseTerroristTemplate))
+	if(((m_TerroristTemplate != none) && m_bUseTerroristTemplate))
 	{
 		Skins = m_TerroristTemplate.default.Skins;
 		LinkMesh(m_TerroristTemplate.default.Mesh);
 	}
 	m_szPrimaryWeapon = string(m_PrimaryWeapon);
 	CommonInit();
-	__NFUN_3970__(Physics);
+	SetPhysics(Physics);
 	return;
 }
 

@@ -13,7 +13,7 @@ class R6PumpShotgun extends R6Shotgun
 
 simulated function bool GunIsFull()
 {
-	return __NFUN_153__(int(m_iNbBulletsInWeapon), m_iClipCapacity);
+	return (int(m_iNbBulletsInWeapon) >= m_iClipCapacity);
 	return;
 }
 
@@ -27,20 +27,20 @@ simulated function bool IsPumpShotGun()
 //To fix a problem with reload animations and network lag.
 function ClientAddShell()
 {
-	__NFUN_139__(m_iNbBulletsInWeapon);
+	(m_iNbBulletsInWeapon++);
 	// End:0x27
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
-		__NFUN_166__(m_iCurrentNbOfClips);
+		(m_iCurrentNbOfClips--);
 	}
 	return;
 }
 
 simulated function AddClips(int iNbOfExtraClips)
 {
-	__NFUN_161__(m_iCurrentNbOfClips, iNbOfExtraClips);
+	(m_iCurrentNbOfClips += iNbOfExtraClips);
 	// End:0x2B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		ServerAddClips();
 	}
@@ -50,18 +50,18 @@ simulated function AddClips(int iNbOfExtraClips)
 function ServerPutBulletInShotgun()
 {
 	// End:0x40
-	if(__NFUN_129__(GunIsFull()))
+	if((!GunIsFull()))
 	{
-		__NFUN_139__(m_iNbBulletsInWeapon);
+		(m_iNbBulletsInWeapon++);
 		// End:0x24
-		if(__NFUN_129__(m_bUnlimitedClip))
+		if((!m_bUnlimitedClip))
 		{
-			__NFUN_166__(m_iCurrentNbOfClips);
+			(m_iCurrentNbOfClips--);
 		}
 		// End:0x40
-		if(__NFUN_119__(m_ReloadSnd, none))
+		if((m_ReloadSnd != none))
 		{
-			Owner.__NFUN_264__(m_ReloadSnd);
+			Owner.__NFUN_264__(m_ReloadSnd) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		}
 	}
 	return;

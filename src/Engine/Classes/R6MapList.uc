@@ -27,10 +27,10 @@ event PreBeginPlay()
 
 	super(Actor).PreBeginPlay();
 	// End:0x45
-	if(__NFUN_129__(m_bInit))
+	if((!m_bInit))
 	{
-		serverIni = Class'Engine.Actor'.static.__NFUN_1524__().GetServerIni();
-		__NFUN_1010__(__NFUN_112__(serverIni, ".ini"));
+		serverIni = Class'Engine.Actor'.static.GetModMgr().GetServerIni();
+		LoadConfig((serverIni $ ".ini"));
 		m_bInit = true;
 	}
 	return;
@@ -42,35 +42,35 @@ function int GetNextMapIndex(int iNextMapNum)
 	local int iNextNum;
 
 	// End:0x30
-	if(__NFUN_150__(iNextMapNum, -1))
+	if((iNextMapNum < -1))
 	{
-		iNextNum = __NFUN_146__(Level.Game.__NFUN_1280__(), 1);		
+		iNextNum = (Level.Game.GetCurrentMapNum() + 1);		
 	}
 	else
 	{
-		iNextNum = __NFUN_147__(iNextMapNum, 1);
+		iNextNum = (iNextMapNum - 1);
 	}
 	// End:0x4F
-	if(__NFUN_151__(iNextNum, __NFUN_147__(32, 1)))
+	if((iNextNum > (32 - 1)))
 	{
 		return 0;
 	}
 	// End:0x91
-	if(__NFUN_150__(iNextNum, 0))
+	if((iNextNum < 0))
 	{
 		iNextNum = 0;
 		J0x61:
 
 		// End:0x91 [Loop If]
-		if(__NFUN_130__(__NFUN_123__(Maps[__NFUN_146__(iNextNum, 1)], ""), __NFUN_150__(iNextNum, __NFUN_147__(32, 1))))
+		if(((Maps[(iNextNum + 1)] != "") && (iNextNum < (32 - 1))))
 		{
-			__NFUN_165__(iNextNum);
+			(iNextNum++);
 			// [Loop Continue]
 			goto J0x61;
 		}
 	}
 	// End:0xA5
-	if(__NFUN_122__(Maps[iNextNum], ""))
+	if((Maps[iNextNum] == ""))
 	{
 		return 0;
 	}
@@ -86,7 +86,7 @@ function string CheckNextMap()
 
 function string CheckNextMapIndex(int iMapIndex)
 {
-	return Maps[GetNextMapIndex(__NFUN_146__(iMapIndex, 1))];
+	return Maps[GetNextMapIndex((iMapIndex + 1))];
 	return;
 }
 
@@ -98,19 +98,19 @@ function string CheckNextGameType()
 
 function string CheckNextGameTypeIndex(int iMapIndex)
 {
-	return GameType[GetNextMapIndex(__NFUN_146__(iMapIndex, 1))];
+	return GameType[GetNextMapIndex((iMapIndex + 1))];
 	return;
 }
 
 function string CheckCurrentMap()
 {
-	return Maps[Level.Game.__NFUN_1280__()];
+	return Maps[Level.Game.GetCurrentMapNum()];
 	return;
 }
 
 function string CheckCurrentGameType()
 {
-	return GameType[Level.Game.__NFUN_1280__()];
+	return GameType[Level.Game.GetCurrentMapNum()];
 	return;
 }
 
@@ -123,7 +123,7 @@ function string GetNextMap(int iNextMapNum)
 	local int _iMapNum;
 
 	_iMapNum = GetNextMapIndex(iNextMapNum);
-	Level.Game.__NFUN_1281__(_iMapNum);
+	Level.Game.SetCurrentMapNum(_iMapNum);
 	return Maps[_iMapNum];
 	return;
 }

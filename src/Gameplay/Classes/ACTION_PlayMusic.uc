@@ -24,10 +24,10 @@ function bool InitActionFor(ScriptedController C)
 		J0x26:
 
 		// End:0x7A [Loop If]
-		if(__NFUN_119__(A, none))
+		if((A != none))
 		{
 			// End:0x63
-			if(A.__NFUN_303__('PlayerController'))
+			if(A.IsA('PlayerController'))
 			{
 				PlayerController(A).ClientSetMusic(Song, Transition);
 			}
@@ -40,7 +40,7 @@ function bool InitActionFor(ScriptedController C)
 	{
 		P = PlayerController(C.GetInstigator().Controller);
 		// End:0xAD
-		if(__NFUN_114__(P, none))
+		if((P == none))
 		{
 			return false;
 		}
@@ -52,7 +52,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, Song);
+	return (ActionString @ Song);
 	return;
 }
 

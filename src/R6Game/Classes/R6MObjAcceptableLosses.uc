@@ -38,61 +38,61 @@ function PawnKilled(Pawn killed)
 	local float fTotal;
 
 	// End:0x1E
-	if(__NFUN_155__(int(killed.m_ePawnType), int(m_ePawnTypeDead)))
+	if((int(killed.m_ePawnType) != int(m_ePawnTypeDead)))
 	{
 		return;
 	}
 	// End:0x60
-	if(__NFUN_155__(m_iKillerTeamID, -1))
+	if((m_iKillerTeamID != -1))
 	{
 		aPawn = R6Pawn(killed);
 		// End:0x60
-		if(__NFUN_155__(aPawn.m_KilledBy.m_iTeam, m_iKillerTeamID))
+		if((aPawn.m_KilledBy.m_iTeam != m_iKillerTeamID))
 		{
 			return;
 		}
 	}
 	// End:0x1AB
-	foreach m_mgr.__NFUN_313__(Class'R6Engine.R6Pawn', aPawn)
+	foreach m_mgr.DynamicActors(Class'R6Engine.R6Pawn', aPawn)
 	{
 		// End:0x99
-		if(__NFUN_155__(int(aPawn.m_ePawnType), int(m_ePawnTypeDead)))
+		if((int(aPawn.m_ePawnType) != int(m_ePawnTypeDead)))
 		{
 			continue;			
 		}
 		// End:0xE3
-		if(__NFUN_154__(int(aPawn.m_ePawnType), int(3)))
+		if((int(aPawn.m_ePawnType) == int(3)))
 		{
 			// End:0xE3
-			if(__NFUN_243__(R6Hostage(killed).m_bCivilian, R6Hostage(aPawn).m_bCivilian))
+			if((R6Hostage(killed).m_bCivilian != R6Hostage(aPawn).m_bCivilian))
 			{
 				continue;				
 			}
 		}
-		__NFUN_184__(fTotal, float(1));
+		(fTotal += float(1));
 		// End:0x103
 		if(aPawn.IsAlive())
 		{
 			continue;			
 		}
 		// End:0x1AA
-		if(__NFUN_132__(__NFUN_132__(__NFUN_130__(m_bConsiderSuicide, aPawn.m_bSuicided), __NFUN_130__(__NFUN_242__(aPawn.m_bSuicided, false), __NFUN_154__(int(m_ePawnTypeKiller), int(4)))), __NFUN_154__(int(aPawn.m_KilledBy.m_ePawnType), int(m_ePawnTypeKiller))))
+		if((((m_bConsiderSuicide && aPawn.m_bSuicided) || ((aPawn.m_bSuicided == false) && (int(m_ePawnTypeKiller) == int(4)))) || (int(aPawn.m_KilledBy.m_ePawnType) == int(m_ePawnTypeKiller))))
 		{
 			// End:0x1AA
-			if(__NFUN_132__(__NFUN_154__(m_iKillerTeamID, -1), __NFUN_154__(aPawn.m_KilledBy.m_iTeam, m_iKillerTeamID)))
+			if(((m_iKillerTeamID == -1) || (aPawn.m_KilledBy.m_iTeam == m_iKillerTeamID)))
 			{
-				__NFUN_161__(iLost, 1);
+				(iLost += 1);
 			}
 		}		
 	}	
-	iLost = int(__NFUN_171__(__NFUN_172__(float(iLost), fTotal), 100.0000000));
+	iLost = int(((float(iLost) / fTotal) * 100.0000000));
 	// End:0x24E
-	if(__NFUN_132__(__NFUN_153__(iLost, 100), __NFUN_130__(__NFUN_151__(iLost, 0), __NFUN_151__(iLost, m_iAcceptableLost))))
+	if(((iLost >= 100) || ((iLost > 0) && (iLost > m_iAcceptableLost))))
 	{
 		// End:0x237
 		if(m_bShowLog)
 		{
-			logX(__NFUN_112__(" failed: iLost > m_iAcceptableLost=", string(__NFUN_151__(iLost, m_iAcceptableLost))));
+			logX((" failed: iLost > m_iAcceptableLost=" $ string((iLost > m_iAcceptableLost))));
 		}
 		R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, false, true);
 	}
@@ -100,7 +100,7 @@ function PawnKilled(Pawn killed)
 	if(m_bShowLog)
 	{
 		aPawn = R6Pawn(killed);
-		logX(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("PawnKilled failed=", string(m_bFailed)), " "), string(killed.Name)), " was killed by "), string(aPawn.m_KilledBy.Name)), " lost="), string(iLost)), " acceptable="), string(m_iAcceptableLost)));
+		logX(((((((((("PawnKilled failed=" $ string(m_bFailed)) $ " ") $ string(killed.Name)) $ " was killed by ") $ string(aPawn.m_KilledBy.Name)) $ " lost=") $ string(iLost)) $ " acceptable=") $ string(m_iAcceptableLost)));
 	}
 	return;
 }

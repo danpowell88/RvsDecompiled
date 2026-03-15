@@ -46,137 +46,137 @@ function PlayRainbowMemberVoices(R6Pawn aPawn, Pawn.ERainbowMembersVoices eRainb
 	{
 		// End:0x24
 		case 0:
-			aPawn.__NFUN_2730__(m_sndContact, 8, 15);
+			aPawn.PlayVoices(m_sndContact, 8, 15);
 			// End:0x327
 			break;
 		// End:0x41
 		case 1:
-			aPawn.__NFUN_2730__(m_sndContactRear, 8, 15);
+			aPawn.PlayVoices(m_sndContactRear, 8, 15);
 			// End:0x327
 			break;
 		// End:0x5E
 		case 2:
-			aPawn.__NFUN_2730__(m_sndContactAndEngages, 8, 15);
+			aPawn.PlayVoices(m_sndContactAndEngages, 8, 15);
 			// End:0x327
 			break;
 		// End:0x7B
 		case 3:
-			aPawn.__NFUN_2730__(m_sndContactRearAndEngages, 8, 15);
+			aPawn.PlayVoices(m_sndContactRearAndEngages, 8, 15);
 			// End:0x327
 			break;
 		// End:0x98
 		case 4:
-			aPawn.__NFUN_2730__(m_sndTeamRegroupOnLead, 8, 15);
+			aPawn.PlayVoices(m_sndTeamRegroupOnLead, 8, 15);
 			// End:0x327
 			break;
 		// End:0xB5
 		case 5:
-			aPawn.__NFUN_2730__(m_sndTeamReformOnLead, 8, 15);
+			aPawn.PlayVoices(m_sndTeamReformOnLead, 8, 15);
 			// End:0x327
 			break;
 		// End:0xD2
 		case 6:
-			aPawn.__NFUN_2730__(m_sndTeamReceiveOrder, 8, 15);
+			aPawn.PlayVoices(m_sndTeamReceiveOrder, 8, 15);
 			// End:0x327
 			break;
 		// End:0xEF
 		case 7:
-			aPawn.__NFUN_2730__(m_sndTeamOrderFromLeadNil, 8, 15);
+			aPawn.PlayVoices(m_sndTeamOrderFromLeadNil, 8, 15);
 			// End:0x327
 			break;
 		// End:0x10C
 		case 8:
-			aPawn.__NFUN_2730__(m_sndNoMoreFrag, 8, 15);
+			aPawn.PlayVoices(m_sndNoMoreFrag, 8, 15);
 			// End:0x327
 			break;
 		// End:0x129
 		case 9:
-			aPawn.__NFUN_2730__(m_sndNoMoreSmoke, 8, 15);
+			aPawn.PlayVoices(m_sndNoMoreSmoke, 8, 15);
 			// End:0x327
 			break;
 		// End:0x146
 		case 10:
-			aPawn.__NFUN_2730__(m_sndNoMoreGas, 8, 15);
+			aPawn.PlayVoices(m_sndNoMoreGas, 8, 15);
 			// End:0x327
 			break;
 		// End:0x163
 		case 11:
-			aPawn.__NFUN_2730__(m_sndNoMoreFlash, 8, 15);
+			aPawn.PlayVoices(m_sndNoMoreFlash, 8, 15);
 			// End:0x327
 			break;
 		// End:0x180
 		case 12:
-			aPawn.__NFUN_2730__(m_sndOnLadder, 8, 15);
+			aPawn.PlayVoices(m_sndOnLadder, 8, 15);
 			// End:0x327
 			break;
 		// End:0x19F
 		case 13:
-			aPawn.__NFUN_2730__(m_sndMemberDown, 8, 10, 2);
+			aPawn.PlayVoices(m_sndMemberDown, 8, 10, 2);
 			// End:0x327
 			break;
 		// End:0x1BC
 		case 14:
-			aPawn.__NFUN_2730__(m_sndAmmoOut, 8, 15);
+			aPawn.PlayVoices(m_sndAmmoOut, 8, 15);
 			// End:0x327
 			break;
 		// End:0x1D9
 		case 15:
-			aPawn.__NFUN_2730__(m_sndFragNear, 8, 15);
+			aPawn.PlayVoices(m_sndFragNear, 8, 15);
 			// End:0x327
 			break;
 		// End:0x1F9
 		case 16:
-			aPawn.__NFUN_2730__(m_sndEntersGasCloud, 8, 5, 0, true);
+			aPawn.PlayVoices(m_sndEntersGasCloud, 8, 5, 0, true);
 			// End:0x327
 			break;
 		// End:0x216
 		case 17:
-			aPawn.__NFUN_2730__(m_sndTakingFire, 8, 15);
+			aPawn.PlayVoices(m_sndTakingFire, 8, 15);
 			// End:0x327
 			break;
 		// End:0x233
 		case 18:
-			aPawn.__NFUN_2730__(m_sndTeamHoldUp, 8, 15);
+			aPawn.PlayVoices(m_sndTeamHoldUp, 8, 15);
 			// End:0x327
 			break;
 		// End:0x250
 		case 19:
-			aPawn.__NFUN_2730__(m_sndTeamMoveOut, 8, 15);
+			aPawn.PlayVoices(m_sndTeamMoveOut, 8, 15);
 			// End:0x327
 			break;
 		// End:0x270
 		case 20:
-			aPawn.__NFUN_2730__(m_sndHostageFollow, 8, 15, 0, true);
+			aPawn.PlayVoices(m_sndHostageFollow, 8, 15, 0, true);
 			// End:0x327
 			break;
 		// End:0x290
 		case 22:
-			aPawn.__NFUN_2730__(m_sndHostageSafe, 8, 15, 0, true);
+			aPawn.PlayVoices(m_sndHostageSafe, 8, 15, 0, true);
 			// End:0x327
 			break;
 		// End:0x2B0
 		case 21:
-			aPawn.__NFUN_2730__(m_sndHostageStay, 8, 15, 0, true);
+			aPawn.PlayVoices(m_sndHostageStay, 8, 15, 0, true);
 			// End:0x327
 			break;
 		// End:0x2CD
 		case 23:
-			aPawn.__NFUN_2730__(m_sndHostageSecured, 8, 15);
+			aPawn.PlayVoices(m_sndHostageSecured, 8, 15);
 			// End:0x327
 			break;
 		// End:0x2EA
 		case 24:
-			aPawn.__NFUN_2730__(m_sndRainbowHitRainbow, 8, 15);
+			aPawn.PlayVoices(m_sndRainbowHitRainbow, 8, 15);
 			// End:0x327
 			break;
 		// End:0x307
 		case 25:
-			aPawn.__NFUN_2730__(m_sndRainbowHitHostage, 8, 15);
+			aPawn.PlayVoices(m_sndRainbowHitHostage, 8, 15);
 			// End:0x327
 			break;
 		// End:0x324
 		case 26:
-			aPawn.__NFUN_2730__(m_sndDoorReform, 8, 15);
+			aPawn.PlayVoices(m_sndDoorReform, 8, 15);
 			// End:0x327
 			break;
 		// End:0xFFFF

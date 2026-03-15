@@ -14,20 +14,20 @@ var() editinline array<editinline Material> Materials;
 
 function Trigger(Actor Other, Actor EventInstigator)
 {
-	__NFUN_165__(Current);
+	(Current++);
 	// End:0x1E
-	if(__NFUN_153__(Current, Materials.Length))
+	if((Current >= Materials.Length))
 	{
 		Current = 0;
 	}
 	Material = Materials[Current];
 	// End:0x53
-	if(__NFUN_119__(Material, none))
+	if((Material != none))
 	{
 		Material.Trigger(Other, EventInstigator);
 	}
 	// End:0x77
-	if(__NFUN_119__(FallbackMaterial, none))
+	if((FallbackMaterial != none))
 	{
 		FallbackMaterial.Trigger(Other, EventInstigator);
 	}

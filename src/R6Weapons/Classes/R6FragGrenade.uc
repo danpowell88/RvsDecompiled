@@ -18,10 +18,10 @@ var float m_fTimerCounter;
 function Activate()
 {
 	// End:0x21
-	if(__NFUN_181__(m_fExplosionDelay, float(0)))
+	if((m_fExplosionDelay != float(0)))
 	{
 		m_fTimerCounter = 0.0000000;
-		__NFUN_280__(0.2000000, true);
+		SetTimer(0.2000000, true);
 	}
 	return;
 }
@@ -33,9 +33,9 @@ simulated event Timer()
 	local R6Pawn aGrenadeOwner;
 	local float fDangerZone;
 
-	__NFUN_184__(m_fTimerCounter, 0.2000000);
+	(m_fTimerCounter += 0.2000000);
 	// End:0x2A
-	if(__NFUN_179__(m_fTimerCounter, m_fExplosionDelay))
+	if((m_fTimerCounter >= m_fExplosionDelay))
 	{
 		Explode();
 		SelfDestroy();		
@@ -44,7 +44,7 @@ simulated event Timer()
 	{
 		aGrenadeOwner = R6Pawn(Owner.Owner);
 		// End:0x77
-		if(__NFUN_130__(__NFUN_119__(aGrenadeOwner, none), __NFUN_154__(int(aGrenadeOwner.m_ePawnType), int(1))))
+		if(((aGrenadeOwner != none) && (int(aGrenadeOwner.m_ePawnType) == int(1))))
 		{
 			fDangerZone = m_fKillBlastRadius;			
 		}
@@ -56,22 +56,22 @@ simulated event Timer()
 		J0x96:
 
 		// End:0x17F [Loop If]
-		if(__NFUN_119__(aController, none))
+		if((aController != none))
 		{
 			rainbowAI = R6RainbowAI(aController);
 			// End:0xD5
-			if(__NFUN_132__(__NFUN_114__(rainbowAI, none), __NFUN_114__(rainbowAI.Pawn, none)))
+			if(((rainbowAI == none) || (rainbowAI.Pawn == none)))
 			{				
 			}
 			else
 			{
 				// End:0x168
-				if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Location, rainbowAI.Pawn.Location)), fDangerZone))
+				if((VSize((Location - rainbowAI.Pawn.Location)) < fDangerZone))
 				{
 					// End:0x168
-					if(__NFUN_132__(__NFUN_217__(Velocity, vect(0.0000000, 0.0000000, 0.0000000)), __NFUN_176__(Location.Z, rainbowAI.Pawn.Location.Z)))
+					if(((Velocity == vect(0.0000000, 0.0000000, 0.0000000)) || (Location.Z < rainbowAI.Pawn.Location.Z)))
 					{
-						rainbowAI.FragGrenadeInProximity(Location, __NFUN_175__(m_fExplosionDelay, m_fTimerCounter), fDangerZone);
+						rainbowAI.FragGrenadeInProximity(Location, (m_fExplosionDelay - m_fTimerCounter), fDangerZone);
 					}
 				}
 			}
@@ -87,9 +87,9 @@ function Explode()
 {
 	local R6SmokeCloud pCloud;
 
-	pCloud = __NFUN_278__(Class'R6Weapons.R6SmokeCloud',,, __NFUN_215__(Location, vect(0.0000000, 0.0000000, 125.0000000)), rot(0, 0, 0));
+	pCloud = Spawn(Class'R6Weapons.R6SmokeCloud',,, (Location + vect(0.0000000, 0.0000000, 125.0000000)), rot(0, 0, 0));
 	pCloud.SetCloud(self, 1.5000000, 150.0000000, 4.0000000);
-	__NFUN_280__(0.0000000, false);
+	SetTimer(0.0000000, false);
 	super.Explode();
 	return;
 }
@@ -113,20 +113,20 @@ function HurtPawns()
 	aPawnInstigator = R6Pawn(Instigator);
 	_bCompilingStats = R6AbstractGameInfo(Level.Game).m_bCompilingStats;
 	// End:0x5E
-	foreach __NFUN_312__(Class'R6Weapons.R6DemolitionsUnit', aDemoUnit, m_fKillBlastRadius, Location)
+	foreach VisibleCollidingActors(Class'R6Weapons.R6DemolitionsUnit', aDemoUnit, m_fKillBlastRadius, Location)
 	{
 		aDemoUnit.DestroyedByImpact();		
 	}	
 	// End:0x16F
-	foreach __NFUN_312__(Class'R6Engine.R6InteractiveObject', anObject, m_fExplosionRadius, Location)
+	foreach VisibleCollidingActors(Class'R6Engine.R6InteractiveObject', anObject, m_fExplosionRadius, Location)
 	{
-		fDistFromGrenade = __NFUN_225__(__NFUN_216__(anObject.Location, Location));
+		fDistFromGrenade = VSize((anObject.Location - Location));
 		// End:0x16E
-		if(__NFUN_178__(fDistFromGrenade, m_fExplosionRadius))
+		if((fDistFromGrenade <= m_fExplosionRadius))
 		{
 			pImADoor = R6IORotatingDoor(anObject);
 			// End:0xD7
-			if(__NFUN_119__(pImADoor, none))
+			if((pImADoor != none))
 			{
 				vDamageLocation = pImADoor.m_vVisibleCenter;				
 			}
@@ -135,70 +135,70 @@ function HurtPawns()
 				vDamageLocation = anObject.Location;
 			}
 			// End:0x10D
-			if(__NFUN_176__(fDistFromGrenade, m_fKillBlastRadius))
+			if((fDistFromGrenade < m_fKillBlastRadius))
 			{
-				fEffectiveKillValue = float(__NFUN_250__(m_iEnergy, 0));				
+				fEffectiveKillValue = float(Max(m_iEnergy, 0));				
 			}
 			else
 			{
-				fEffectiveKillValue = float(__NFUN_250__(int(__NFUN_171__(float(m_iEnergy), fDamagePercent)), 0));
+				fEffectiveKillValue = float(Max(int((float(m_iEnergy) * fDamagePercent)), 0));
 			}
 			// End:0x16E
-			if(__NFUN_181__(fEffectiveKillValue, float(0)))
+			if((fEffectiveKillValue != float(0)))
 			{
-				vExplosionMomentum = __NFUN_216__(vDamageLocation, Location);
+				vExplosionMomentum = (vDamageLocation - Location);
 				anObject.R6TakeDamage(int(fEffectiveKillValue), 0, Instigator, vDamageLocation, vExplosionMomentum, 0);
 			}
 		}		
 	}	
 	// End:0x6A3
-	foreach __NFUN_321__(Class'R6Engine.R6Pawn', aPawn, m_fExplosionRadius, Location)
+	foreach CollidingActors(Class'R6Engine.R6Pawn', aPawn, m_fExplosionRadius, Location)
 	{
 		// End:0x262
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(aPawnInstigator.m_ePawnType), int(1))), __NFUN_129__(__NFUN_130__(__NFUN_119__(R6PlayerController(aPawn.Controller), none), __NFUN_242__(R6AbstractGameInfo(Level.Game).m_bFriendlyFire, true)))), __NFUN_132__(__NFUN_130__(__NFUN_129__(aPawnInstigator.m_bCanFireFriends), aPawnInstigator.IsFriend(aPawn)), __NFUN_130__(__NFUN_129__(aPawnInstigator.m_bCanFireNeutrals), aPawnInstigator.IsNeutral(aPawn)))))
+		if(((((int(Level.NetMode) != int(NM_Standalone)) && (int(aPawnInstigator.m_ePawnType) == int(1))) && (!((R6PlayerController(aPawn.Controller) != none) && (R6AbstractGameInfo(Level.Game).m_bFriendlyFire == true)))) && (((!aPawnInstigator.m_bCanFireFriends) && aPawnInstigator.IsFriend(aPawn)) || ((!aPawnInstigator.m_bCanFireNeutrals) && aPawnInstigator.IsNeutral(aPawn)))))
 		{
 			continue;			
 		}
 		// End:0x6A2
-		if(__NFUN_155__(int(aPawn.m_eHealth), int(3)))
+		if((int(aPawn.m_eHealth) != int(3)))
 		{
 			// End:0x6A2
-			if(aPawn.__NFUN_1845__(Location))
+			if(aPawn.PawnCanBeHurtFrom(Location))
 			{
-				fDistFromGrenade = __NFUN_225__(__NFUN_216__(aPawn.Location, Location));
+				fDistFromGrenade = VSize((aPawn.Location - Location));
 				// End:0x3C1
-				if(__NFUN_178__(fDistFromGrenade, m_fKillBlastRadius))
+				if((fDistFromGrenade <= m_fKillBlastRadius))
 				{
-					vExplosionMomentum = __NFUN_212__(__NFUN_216__(aPawn.Location, Location), 0.2500000);
+					vExplosionMomentum = ((aPawn.Location - Location) * 0.2500000);
 					aPawn.ServerForceKillResult(4);
 					aPawn.R6TakeDamage(m_iEnergy, m_iEnergy, Instigator, aPawn.Location, vExplosionMomentum, 0);
 					aPawn.ServerForceKillResult(0);
 					// End:0x385
-					if(__NFUN_130__(__NFUN_119__(aPawnInstigator, none), __NFUN_129__(aPawnInstigator.IsFriend(aPawn))))
+					if(((aPawnInstigator != none) && (!aPawnInstigator.IsFriend(aPawn))))
 					{
-						__NFUN_165__(_PawnsHurtCount);
+						(_PawnsHurtCount++);
 						R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
 					}
 					// End:0x3BE
 					if(bShowLog)
 					{
-						__NFUN_231__(__NFUN_112__(__NFUN_112__("Pawn ", string(aPawn)), " was killed by a grenade !"));
+						Log((("Pawn " $ string(aPawn)) $ " was killed by a grenade !"));
 					}
 					// End:0x6A2
 					continue;
 				}
-				fDamagePercent = __NFUN_175__(1.0000000, __NFUN_172__(__NFUN_175__(fDistFromGrenade, m_fKillBlastRadius), m_fEffectiveOutsideKillRadius));
+				fDamagePercent = (1.0000000 - ((fDistFromGrenade - m_fKillBlastRadius) / m_fEffectiveOutsideKillRadius));
 				// End:0x446
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Actor ", string(aPawn)), " was hit by a grenade.  Distance : "), string(__NFUN_171__(fDistFromGrenade, 0.0100000))), " % : "), string(fDamagePercent)));
+					Log(((((("Actor " $ string(aPawn)) $ " was hit by a grenade.  Distance : ") $ string((fDistFromGrenade * 0.0100000))) $ " % : ") $ string(fDamagePercent)));
 				}
-				fCurrentNumberOfFragments = __NFUN_171__(float(m_iNumberOfFragments), fDamagePercent);
+				fCurrentNumberOfFragments = (float(m_iNumberOfFragments) * fDamagePercent);
 				iCurrentFragment = 0;
 				J0x461:
 
 				// End:0x6A2 [Loop If]
-				if(__NFUN_176__(float(iCurrentFragment), fCurrentNumberOfFragments))
+				if((float(iCurrentFragment) < fCurrentNumberOfFragments))
 				{
 					eBoneTarget = HitRandomBodyPart(GetPawnPose(aPawn));
 					switch(eBoneTarget)
@@ -237,23 +237,23 @@ function HurtPawns()
 						default:
 							break;
 					}
-					fDistFromGrenade = __NFUN_225__(__NFUN_216__(vDamageLocation, Location));
-					fEffectiveKillValue = float(__NFUN_250__(int(__NFUN_171__(float(m_iEnergy), fDamagePercent)), 0));
+					fDistFromGrenade = VSize((vDamageLocation - Location));
+					fEffectiveKillValue = float(Max(int((float(m_iEnergy) * fDamagePercent)), 0));
 					// End:0x698
-					if(__NFUN_181__(fEffectiveKillValue, float(0)))
+					if((fEffectiveKillValue != float(0)))
 					{
-						fEffectiveStunValue = __NFUN_174__(fEffectiveKillValue, __NFUN_171__(fEffectiveKillValue, m_fKillStunTransfer));
-						vExplosionMomentum = __NFUN_216__(vDamageLocation, Location);
+						fEffectiveStunValue = (fEffectiveKillValue + (fEffectiveKillValue * m_fKillStunTransfer));
+						vExplosionMomentum = (vDamageLocation - Location);
 						_iHealth = int(aPawn.m_eHealth);
 						aPawn.R6TakeDamage(int(fEffectiveKillValue), int(fEffectiveStunValue), Instigator, vDamageLocation, vExplosionMomentum, 0);
 						// End:0x698
-						if(__NFUN_130__(__NFUN_130__(__NFUN_155__(_iHealth, int(aPawn.m_eHealth)), __NFUN_119__(aPawnInstigator, none)), __NFUN_129__(aPawnInstigator.IsFriend(aPawn))))
+						if((((_iHealth != int(aPawn.m_eHealth)) && (aPawnInstigator != none)) && (!aPawnInstigator.IsFriend(aPawn))))
 						{
-							__NFUN_165__(_PawnsHurtCount);
+							(_PawnsHurtCount++);
 							R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
 						}
 					}
-					__NFUN_165__(iCurrentFragment);
+					(iCurrentFragment++);
 					// [Loop Continue]
 					goto J0x461;
 				}
@@ -261,7 +261,7 @@ function HurtPawns()
 		}		
 	}	
 	// End:0x6D7
-	if(__NFUN_154__(_PawnsHurtCount, 0))
+	if((_PawnsHurtCount == 0))
 	{
 		R6AbstractGameInfo(Level.Game).IncrementRoundsFired(aPawnInstigator, _bCompilingStats);
 	}
@@ -269,18 +269,18 @@ function HurtPawns()
 	J0x6EB:
 
 	// End:0x7ED [Loop If]
-	if(__NFUN_119__(aC, none))
+	if((aC != none))
 	{
 		// End:0x7D6
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(aC.Pawn, none), __NFUN_154__(int(aC.Pawn.m_ePawnType), int(1))), aC.Pawn.IsAlive()))
+		if((((aC.Pawn != none) && (int(aC.Pawn.m_ePawnType) == int(1))) && aC.Pawn.IsAlive()))
 		{
 			aPC = R6PlayerController(aC);
 			// End:0x7D6
-			if(__NFUN_119__(aPC, none))
+			if((aPC != none))
 			{
-				fDistFromGrenade = __NFUN_225__(__NFUN_216__(Location, aPC.Pawn.Location));
+				fDistFromGrenade = VSize((Location - aPC.Pawn.Location));
 				// End:0x7D6
-				if(__NFUN_176__(fDistFromGrenade, m_fShakeRadius))
+				if((fDistFromGrenade < m_fShakeRadius))
 				{
 					aPC.R6Shake(1.0000000, __NFUN_175__(m_fShakeRadius, fDistFromGrenade), 0.0500000);
 					aPC.ClientPlaySound(m_sndEarthQuake, 3);

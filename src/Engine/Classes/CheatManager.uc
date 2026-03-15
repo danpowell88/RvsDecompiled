@@ -24,13 +24,13 @@ function bool CanExec()
 		return true;
 	}
 	// End:0x44
-	if(__NFUN_154__(int(Outer.Level.NetMode), int(NM_Client)))
+	if((int(Outer.Level.NetMode) == int(NM_Client)))
 	{
 		Outer.ClientErrorMessageLocalized("Exec");
 		return false;
 	}
 	// End:0x68
-	if(__NFUN_154__(int(Outer.Level.NetMode), int(NM_Standalone)))
+	if((int(Outer.Level.NetMode) == int(NM_Standalone)))
 	{
 		return true;
 	}
@@ -42,13 +42,13 @@ function bool CanExec()
 exec function SloMo(float t)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	Outer.Level.Game.SetGameSpeed(t);
-	Outer.Level.Game.__NFUN_536__();
-	Outer.Level.Game.GameReplicationInfo.__NFUN_536__();
+	Outer.Level.Game.SaveConfig();
+	Outer.Level.Game.GameReplicationInfo.SaveConfig();
 	return;
 }
 
@@ -57,23 +57,23 @@ exec function KillAll(Class<Actor> aClass)
 	local Actor A;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x2F
-	if(__NFUN_258__(aClass, Class'Engine.Pawn'))
+	if(ClassIsChildOf(aClass, Class'Engine.Pawn'))
 	{
 		KillAllPawns(Class<Pawn>(aClass));
 		return;
 	}
 	// End:0x6E
-	foreach Outer.__NFUN_313__(Class'Engine.Actor', A)
+	foreach Outer.DynamicActors(Class'Engine.Actor', A)
 	{
 		// End:0x6D
-		if(__NFUN_258__(A.Class, aClass))
+		if(ClassIsChildOf(A.Class, aClass))
 		{
-			A.__NFUN_279__();
+			A.Destroy();
 		}		
 	}	
 	return;
@@ -85,17 +85,17 @@ function KillAllPawns(Class<Pawn> aClass)
 	local Pawn P;
 
 	// End:0x7E
-	foreach Outer.__NFUN_313__(Class'Engine.Pawn', P)
+	foreach Outer.DynamicActors(Class'Engine.Pawn', P)
 	{
 		// End:0x7D
-		if(__NFUN_130__(__NFUN_258__(P.Class, aClass), __NFUN_129__(P.IsHumanControlled())))
+		if((ClassIsChildOf(P.Class, aClass) && (!P.IsHumanControlled())))
 		{
 			// End:0x71
-			if(__NFUN_119__(P.Controller, none))
+			if((P.Controller != none))
 			{
-				P.Controller.__NFUN_279__();
+				P.Controller.Destroy();
 			}
-			P.__NFUN_279__();
+			P.Destroy();
 		}		
 	}	
 	return;
@@ -105,7 +105,7 @@ exec function ViewSelf(optional bool bQuiet)
 {
 	Outer.bBehindView = false;
 	// End:0x45
-	if(__NFUN_119__(Outer.Pawn, none))
+	if((Outer.Pawn != none))
 	{
 		Outer.SetViewTarget(Outer.Pawn);		
 	}
@@ -114,7 +114,7 @@ exec function ViewSelf(optional bool bQuiet)
 		Outer.SetViewTarget(Outer);
 	}
 	// End:0x86
-	if(__NFUN_129__(bQuiet))
+	if((!bQuiet))
 	{
 		Outer.ClientMessage(Outer.OwnCamera, 'Event');
 	}
@@ -127,15 +127,15 @@ exec function ViewActor(name ActorName)
 	local Actor A;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x67
-	foreach Outer.__NFUN_304__(Class'Engine.Actor', A)
+	foreach Outer.AllActors(Class'Engine.Actor', A)
 	{
 		// End:0x66
-		if(__NFUN_254__(A.Name, ActorName))
+		if((A.Name == ActorName))
 		{
 			Outer.SetViewTarget(A);
 			Outer.bBehindView = true;			
@@ -151,24 +151,24 @@ exec function ViewClass(Class<Actor> aClass, optional bool bQuiet, optional bool
 	local bool bFound;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x61
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bCheat), __NFUN_119__(Outer.Level.Game, none)), __NFUN_129__(Outer.Level.Game.bCanViewOthers)))
+	if((((!bCheat) && (Outer.Level.Game != none)) && (!Outer.Level.Game.bCanViewOthers)))
 	{
 		return;
 	}
 	first = none;
 	// End:0xF8
-	foreach Outer.__NFUN_304__(aClass, Other)
+	foreach Outer.AllActors(aClass, Other)
 	{
 		// End:0xD7
-		if(__NFUN_132__(bFound, __NFUN_114__(first, none)))
+		if((bFound || (first == none)))
 		{
 			// End:0xD7
-			if(__NFUN_132__(__NFUN_114__(Pawn(Other), none), Pawn(Other).IsAlive()))
+			if(((Pawn(Other) == none) || Pawn(Other).IsAlive()))
 			{
 				first = Other;
 				// End:0xD7
@@ -180,29 +180,29 @@ exec function ViewClass(Class<Actor> aClass, optional bool bQuiet, optional bool
 			}
 		}
 		// End:0xF7
-		if(__NFUN_114__(Other, Outer.ViewTarget))
+		if((Other == Outer.ViewTarget))
 		{
 			bFound = true;
 		}		
 	}	
 	// End:0x1F5
-	if(__NFUN_119__(first, none))
+	if((first != none))
 	{
 		// End:0x180
-		if(__NFUN_129__(bQuiet))
+		if((!bQuiet))
 		{
 			// End:0x155
-			if(__NFUN_119__(Pawn(first), none))
+			if((Pawn(first) != none))
 			{
-				Outer.ClientMessage(__NFUN_168__(Outer.ViewingFrom, first.GetHumanReadableName()), 'Event');				
+				Outer.ClientMessage((Outer.ViewingFrom @ first.GetHumanReadableName()), 'Event');				
 			}
 			else
 			{
-				Outer.ClientMessage(__NFUN_168__(Outer.ViewingFrom, string(first)), 'Event');
+				Outer.ClientMessage((Outer.ViewingFrom @ string(first)), 'Event');
 			}
 		}
 		Outer.SetViewTarget(first);
-		Outer.bBehindView = __NFUN_119__(Outer.ViewTarget, Outer);
+		Outer.bBehindView = (Outer.ViewTarget != Outer);
 		// End:0x1E3
 		if(Outer.bBehindView)
 		{

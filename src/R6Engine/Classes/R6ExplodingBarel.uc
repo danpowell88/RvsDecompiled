@@ -53,28 +53,28 @@ function Explode()
 	AmbientSound = none;
 	m_bBroken = true;
 	vDecalLoc = Location;
-	__NFUN_185__(vDecalLoc.Z, float(55));
-	GrenadeDecal = __NFUN_278__(Class'R6Engine.R6GrenadeDecal',,, vDecalLoc, GrenadeDecalRotation);
-	m_pEmmiter = __NFUN_278__(Class'R6SFX.R6ExplosiveDrum');
+	(vDecalLoc.Z -= float(55));
+	GrenadeDecal = Spawn(Class'R6Engine.R6GrenadeDecal',,, vDecalLoc, GrenadeDecalRotation);
+	m_pEmmiter = Spawn(Class'R6SFX.R6ExplosiveDrum');
 	m_pEmmiter.RemoteRole = ROLE_AutonomousProxy;
 	m_pEmmiter.Role = ROLE_Authority;
-	pEffectLight = __NFUN_278__(m_pExplosionLight);
+	pEffectLight = Spawn(m_pExplosionLight);
 	// End:0x2C9
-	foreach __NFUN_321__(Class'Engine.Actor', aActor, m_fExplosionRadius, Location)
+	foreach CollidingActors(Class'Engine.Actor', aActor, m_fExplosionRadius, Location)
 	{
 		pPawn = R6Pawn(aActor);
 		// End:0x209
-		if(__NFUN_119__(pPawn, none))
+		if((pPawn != none))
 		{
 			// End:0x206
 			if(pPawn.IsAlive())
 			{
 				// End:0x18E
-				if(__NFUN_548__(Location, pPawn.Location))
+				if(FastTrace(Location, pPawn.Location))
 				{
-					fDistFromBarel = __NFUN_225__(__NFUN_216__(pPawn.Location, Location));
+					fDistFromBarel = VSize((pPawn.Location - Location));
 					// End:0x119
-					if(__NFUN_178__(fDistFromBarel, m_fKillBlastRadius))
+					if((fDistFromBarel <= m_fKillBlastRadius))
 					{
 						iKillResult = 4;						
 					}
@@ -83,7 +83,7 @@ function Explode()
 						iKillResult = 2;
 					}
 					pPawn.ServerForceKillResult(iKillResult);
-					pPawn.R6TakeDamage(m_iEnergy, m_iEnergy, Instigator, pPawn.Location, __NFUN_212__(__NFUN_216__(pPawn.Location, Location), 0.2500000), 0);
+					pPawn.R6TakeDamage(m_iEnergy, m_iEnergy, Instigator, pPawn.Location, ((pPawn.Location - Location) * 0.2500000), 0);
 					pPawn.ServerForceKillResult(0);
 				}
 				// End:0x206
@@ -91,10 +91,10 @@ function Explode()
 				{
 					pPC = R6PlayerController(pPawn.Controller);
 					// End:0x206
-					if(__NFUN_119__(pPC, none))
+					if((pPC != none))
 					{
-						fDistFromBarel = __NFUN_225__(__NFUN_216__(pPawn.Location, Location));
-						pPC.R6Shake(1.5000000, __NFUN_175__(m_fExplosionRadius, fDistFromBarel), 0.1000000);
+						fDistFromBarel = VSize((pPawn.Location - Location));
+						pPC.R6Shake(1.5000000, (m_fExplosionRadius - fDistFromBarel), 0.1000000);
 					}
 				}
 			}
@@ -103,16 +103,16 @@ function Explode()
 		}
 		pIO = R6InteractiveObject(aActor);
 		// End:0x2C8
-		if(__NFUN_119__(pIO, none))
+		if((pIO != none))
 		{
 			// End:0x2C8
-			if(__NFUN_129__(pIO.m_bBroken))
+			if((!pIO.m_bBroken))
 			{
-				fDistFromBarel = __NFUN_225__(__NFUN_216__(pIO.Location, Location));
+				fDistFromBarel = VSize((pIO.Location - Location));
 				// End:0x2C8
-				if(__NFUN_132__(__NFUN_178__(fDistFromBarel, m_fKillBlastRadius), __NFUN_548__(Location, pIO.Location)))
+				if(((fDistFromBarel <= m_fKillBlastRadius) || FastTrace(Location, pIO.Location)))
 				{
-					pIO.R6TakeDamage(m_iEnergy, m_iEnergy, Instigator, pIO.Location, __NFUN_212__(__NFUN_216__(pIO.Location, Location), 0.2500000), 0);
+					pIO.R6TakeDamage(m_iEnergy, m_iEnergy, Instigator, pIO.Location, ((pIO.Location - Location) * 0.2500000), 0);
 				}
 			}
 		}		

@@ -20,12 +20,12 @@ var Ladder LadderList;
 event bool SuggestMovePreparation(Pawn Other)
 {
 	// End:0x0D
-	if(__NFUN_114__(MyLadder, none))
+	if((MyLadder == none))
 	{
 		return false;
 	}
 	// End:0x3C
-	if(__NFUN_129__(MyLadder.InUse(Other)))
+	if((!MyLadder.InUse(Other)))
 	{
 		MyLadder.PendingClimber = Other;
 		return false;

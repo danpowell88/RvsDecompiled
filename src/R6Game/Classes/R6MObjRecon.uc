@@ -46,12 +46,12 @@ function PawnKilled(Pawn killed)
 	}
 	P = R6Pawn(killed);
 	// End:0x31
-	if(__NFUN_114__(P.m_KilledBy, none))
+	if((P.m_KilledBy == none))
 	{
 		return;
 	}
 	// End:0x55
-	if(__NFUN_155__(int(P.m_KilledBy.m_ePawnType), int(1)))
+	if((int(P.m_KilledBy.m_ePawnType) != int(1)))
 	{
 		return;
 	}
@@ -96,7 +96,7 @@ function PawnSeen(Pawn seen, Pawn witness)
 		return;
 	}
 	// End:0x26
-	if(__NFUN_155__(int(seen.m_ePawnType), int(1)))
+	if((int(seen.m_ePawnType) != int(1)))
 	{
 		return;
 	}
@@ -121,7 +121,7 @@ function PawnHeard(Pawn seen, Pawn witness)
 		return;
 	}
 	// End:0x26
-	if(__NFUN_155__(int(seen.m_ePawnType), int(1)))
+	if((int(seen.m_ePawnType) != int(1)))
 	{
 		return;
 	}

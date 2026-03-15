@@ -45,7 +45,7 @@ var string m_SecondaryGadget;  // REPLICATED: Secondary Gadget ID
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_BlinkCounter, m_CharacterName, 
 		m_Location, m_PrimaryGadget, 
 		m_PrimaryWeapon, m_RotationYaw, 
@@ -56,7 +56,7 @@ replication
 		m_iTeamPosition;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bHasFloppy, m_bIsIntruder, 
 		m_fCompteurFrameDetection;
 }

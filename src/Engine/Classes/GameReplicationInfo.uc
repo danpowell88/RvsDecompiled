@@ -62,7 +62,7 @@ var string m_aRepMObjDescriptionLocFile[16];
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_aRepMObjCompleted, m_aRepMObjDescription, 
 		m_aRepMObjDescriptionLocFile, m_aRepMObjFailed, 
 		m_bGameOverRep, m_bInPostBetweenRoundTime, 
@@ -74,7 +74,7 @@ replication
 		m_iNbWeaponsTerro;
 
 	// Pos:0x00D
-	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetInitial && (int(Role) == int(ROLE_Authority))))
 		AdminEmail, AdminName, 
 		GameClass, GameName, 
 		MOTDLine1, MOTDLine2, 
@@ -103,11 +103,11 @@ simulated event SaveRemoteServerSettings(string NewServerFile)
 function SetServerState(byte NewState)
 {
 	// End:0x3D
-	if(__NFUN_155__(int(NewState), int(m_eCurrectServerState)))
+	if((int(NewState) != int(m_eCurrectServerState)))
 	{
 		m_eCurrectServerState = NewState;
 		// End:0x3D
-		if(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))
+		if((int(Level.NetMode) == int(NM_ListenServer)))
 		{
 			NewServerState();
 		}
@@ -118,7 +118,7 @@ function SetServerState(byte NewState)
 simulated function PostBeginPlay()
 {
 	// End:0x51
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		ServerName = "";
 		AdminName = "";
@@ -196,13 +196,13 @@ simulated function string GetRepMObjString(int Index)
 
 simulated function bool IsRepMObjCompleted(int Index)
 {
-	return __NFUN_154__(int(m_aRepMObjCompleted[Index]), 1);
+	return (int(m_aRepMObjCompleted[Index]) == 1);
 	return;
 }
 
 simulated function bool IsRepMObjFailed(int Index)
 {
-	return __NFUN_154__(int(m_aRepMObjFailed[Index]), 1);
+	return (int(m_aRepMObjFailed[Index]) == 1);
 	return;
 }
 
@@ -214,12 +214,12 @@ simulated function ResetRepMObjInfo()
 	J0x07:
 
 	// End:0x46 [Loop If]
-	if(__NFUN_150__(i, 16))
+	if((i < 16))
 	{
 		m_aRepMObjDescription[i] = "";
 		m_aRepMObjDescriptionLocFile[i] = "";
 		SetRepMObjInfo(i, false, false);
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -270,7 +270,7 @@ simulated function SetRepLastRoundSuccess(byte bLastRoundSuccess)
 
 simulated function bool IsInAGameState()
 {
-	return __NFUN_132__(__NFUN_154__(int(m_eCurrectServerState), 2), __NFUN_154__(int(m_eCurrectServerState), 3));
+	return ((int(m_eCurrectServerState) == 2) || (int(m_eCurrectServerState) == 3));
 	return;
 }
 

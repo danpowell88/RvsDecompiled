@@ -10,12 +10,12 @@ var R6WindowButtonGear m_2DArmorRed;
 
 function Created()
 {
-	m_2DArmor = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', 0.0000000, 0.0000000, __NFUN_175__(__NFUN_171__(WinWidth, 0.5000000), float(1)), WinHeight, self));
+	m_2DArmor = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', 0.0000000, 0.0000000, ((WinWidth * 0.5000000) - float(1)), WinHeight, self));
 	m_2DArmor.bUseRegion = true;
 	m_2DArmor.m_bDrawSimpleBorder = true;
 	m_2DArmor.m_iDrawStyle = 5;
 	SetArmorBorderColor(m_2DArmor, 9);
-	m_2DArmorRed = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', __NFUN_171__(WinWidth, 0.5000000), 0.0000000, __NFUN_171__(WinWidth, 0.5000000), WinHeight, self));
+	m_2DArmorRed = R6WindowButtonGear(CreateWindow(Class'R6Window.R6WindowButtonGear', (WinWidth * 0.5000000), 0.0000000, (WinWidth * 0.5000000), WinHeight, self));
 	m_2DArmorRed.bUseRegion = true;
 	m_2DArmorRed.m_bDrawSimpleBorder = true;
 	m_2DArmorRed.m_iDrawStyle = 5;
@@ -33,13 +33,13 @@ function Register(UWindowDialogClientWindow W)
 
 function SetArmorTexture(Texture t, Region R, bool _bRedTeam)
 {
-	R.X = int(__NFUN_174__(float(R.X), __NFUN_171__(__NFUN_175__(float(119), m_2DArmor.WinWidth), 0.5000000)));
+	R.X = int((float(R.X) + ((float(119) - m_2DArmor.WinWidth) * 0.5000000)));
 	R.W = int(m_2DArmor.WinWidth);
 	// End:0x135
 	if(_bRedTeam)
 	{
-		R.X = __NFUN_146__(R.X, R.W);
-		R.W = __NFUN_143__(R.W);
+		R.X = (R.X + R.W);
+		R.W = (-R.W);
 		m_2DArmorRed.DisabledTexture = t;
 		m_2DArmorRed.DisabledRegion = R;
 		m_2DArmorRed.DownTexture = t;
@@ -106,13 +106,13 @@ function bool IsRedArmorSelect()
 function SetArmorBorderColor(UWindowDialogControl _ArmorButton, byte E)
 {
 	// End:0x84
-	if(__NFUN_114__(m_2DArmor, _ArmorButton))
+	if((m_2DArmor == _ArmorButton))
 	{
 		// End:0x84
-		if(__NFUN_129__(m_2DArmor.bDisabled))
+		if((!m_2DArmor.bDisabled))
 		{
 			// End:0x5C
-			if(__NFUN_154__(int(E), 12))
+			if((int(E) == 12))
 			{
 				m_2DArmor.m_BorderColor = Root.Colors.TeamColorLight[1];				
 			}
@@ -123,13 +123,13 @@ function SetArmorBorderColor(UWindowDialogControl _ArmorButton, byte E)
 		}
 	}
 	// End:0x108
-	if(__NFUN_114__(m_2DArmorRed, _ArmorButton))
+	if((m_2DArmorRed == _ArmorButton))
 	{
 		// End:0x108
-		if(__NFUN_129__(m_2DArmorRed.bDisabled))
+		if((!m_2DArmorRed.bDisabled))
 		{
 			// End:0xE0
-			if(__NFUN_154__(int(E), 12))
+			if((int(E) == 12))
 			{
 				m_2DArmorRed.m_BorderColor = Root.Colors.TeamColorLight[0];				
 			}

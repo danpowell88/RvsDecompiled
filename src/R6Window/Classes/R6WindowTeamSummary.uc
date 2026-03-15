@@ -26,10 +26,10 @@ var R6WindowTeamPlanningSummary m_TeamPlanningSummary;
 function Created()
 {
 	m_TeamPlanningSummary = R6WindowTeamPlanningSummary(CreateWindow(Class'R6Window.R6WindowTeamPlanningSummary', 0.0000000, 0.0000000, WinWidth, m_fSummaryHeight, self));
-	m_OperativeSummary[0] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, __NFUN_174__(__NFUN_174__(m_TeamPlanningSummary.WinTop, m_TeamPlanningSummary.WinHeight), m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
-	m_OperativeSummary[1] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, __NFUN_174__(__NFUN_174__(m_OperativeSummary[0].WinTop, m_OperativeSummary[0].WinHeight), m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
-	m_OperativeSummary[2] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, __NFUN_174__(__NFUN_174__(m_OperativeSummary[1].WinTop, m_OperativeSummary[1].WinHeight), m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
-	m_OperativeSummary[3] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, __NFUN_174__(__NFUN_174__(m_OperativeSummary[2].WinTop, m_OperativeSummary[2].WinHeight), m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
+	m_OperativeSummary[0] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, ((m_TeamPlanningSummary.WinTop + m_TeamPlanningSummary.WinHeight) + m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
+	m_OperativeSummary[1] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, ((m_OperativeSummary[0].WinTop + m_OperativeSummary[0].WinHeight) + m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
+	m_OperativeSummary[2] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, ((m_OperativeSummary[1].WinTop + m_OperativeSummary[1].WinHeight) + m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
+	m_OperativeSummary[3] = R6WindowOperativePlanningSummary(CreateWindow(Class'R6Window.R6WindowOperativePlanningSummary', 0.0000000, ((m_OperativeSummary[2].WinTop + m_OperativeSummary[2].WinHeight) + m_fYPaddingBetweenElements), WinWidth, m_fOperativeSummaryHeight, self));
 	return;
 }
 
@@ -56,7 +56,7 @@ function AddOperative(R6Operative _Operative)
 
 	addedOperative = OperativeCount();
 	// End:0x1A
-	if(__NFUN_154__(addedOperative, 4))
+	if((addedOperative == 4))
 	{
 		return;
 	}
@@ -123,7 +123,7 @@ function TexRegion GetSpeciality(R6Operative _Operative)
 	local TexRegion Result;
 
 	// End:0x56
-	if(__NFUN_122__(_Operative.m_szSpecialityID, "ID_ASSAULT"))
+	if((_Operative.m_szSpecialityID == "ID_ASSAULT"))
 	{
 		Result.X = 229;
 		Result.Y = 10;
@@ -133,7 +133,7 @@ function TexRegion GetSpeciality(R6Operative _Operative)
 	else
 	{
 		// End:0xAB
-		if(__NFUN_122__(_Operative.m_szSpecialityID, "ID_SNIPER"))
+		if((_Operative.m_szSpecialityID == "ID_SNIPER"))
 		{
 			Result.X = 229;
 			Result.Y = 50;
@@ -143,7 +143,7 @@ function TexRegion GetSpeciality(R6Operative _Operative)
 		else
 		{
 			// End:0x105
-			if(__NFUN_122__(_Operative.m_szSpecialityID, "ID_DEMOLITIONS"))
+			if((_Operative.m_szSpecialityID == "ID_DEMOLITIONS"))
 			{
 				Result.X = 239;
 				Result.Y = 10;
@@ -153,7 +153,7 @@ function TexRegion GetSpeciality(R6Operative _Operative)
 			else
 			{
 				// End:0x15F
-				if(__NFUN_122__(_Operative.m_szSpecialityID, "ID_ELECTRONICS"))
+				if((_Operative.m_szSpecialityID == "ID_ELECTRONICS"))
 				{
 					Result.X = 229;
 					Result.Y = 30;
@@ -224,9 +224,9 @@ function int OperativeCount()
 	J0x07:
 
 	// End:0x30 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(addedOperative, 4), __NFUN_119__(m_teamOperatives[addedOperative], none)))
+	if(((addedOperative < 4) && (m_teamOperatives[addedOperative] != none)))
 	{
-		__NFUN_165__(addedOperative);
+		(addedOperative++);
 		// [Loop Continue]
 		goto J0x07;
 	}

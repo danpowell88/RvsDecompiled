@@ -10,7 +10,7 @@ var bool m_bHeartBeatJammerOn;  // Heart Beat Jammer ativated.
 replication
 {
 	// Pos:0x000
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		ServerToggleHeartBeatJammerProperties;
 }
 
@@ -41,7 +41,7 @@ function ServerToggleHeartBeatJammerProperties(bool bGadgetOn)
 	// End:0x46
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("HBJ - ServerToggleHeartBeatJammerProperties is ", string(bGadgetOn)));
+		Log(("HBJ - ServerToggleHeartBeatJammerProperties is " $ string(bGadgetOn)));
 	}
 	R6Pawn(Owner).m_bHBJammerOn = bGadgetOn;
 	return;
@@ -67,7 +67,7 @@ simulated function bool LoadFirstPersonWeapon(optional Pawn NetOwner, optional C
 simulated function TurnOnGadget(bool bGadgetOn)
 {
 	// End:0x2D
-	if(__NFUN_132__(__NFUN_114__(R6Pawn(Owner), none), __NFUN_129__(R6Pawn(Owner).IsLocallyControlled())))
+	if(((R6Pawn(Owner) == none) || (!R6Pawn(Owner).IsLocallyControlled())))
 	{
 		return;
 	}
@@ -88,15 +88,15 @@ state PutWeaponDown
 	simulated function BeginState()
 	{
 		// End:0x1B
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
-			m_FPHands.__NFUN_113__('PutWeaponDown');
+			m_FPHands.GotoState('PutWeaponDown');
 		}
 		TurnOnGadget(false);
 		// End:0x6E
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBSJammer - BeginState of PutWeaponDown for", string(self)), "="), string(m_bHeartBeatJammerOn)));
+			Log(((("HBSJammer - BeginState of PutWeaponDown for" @ string(self)) @ "=") @ string(m_bHeartBeatJammerOn)));
 		}
 		Pawn(Owner).Controller.m_bLockWeaponActions = true;
 		return;
@@ -108,12 +108,12 @@ state BringWeaponUp
 {
 	function FirstPersonAnimOver()
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 		TurnOnGadget(true);
 		// End:0x63
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBSJammer - FirstPersonAnimOver of BringWeaponUp for", string(self)), "="), string(m_bHeartBeatJammerOn)));
+			Log(((("HBSJammer - FirstPersonAnimOver of BringWeaponUp for" @ string(self)) @ "=") @ string(m_bHeartBeatJammerOn)));
 		}
 		return;
 	}
@@ -133,17 +133,17 @@ state RaiseWeapon
 		// End:0x3F
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("HBS - FirstPersonAnimOver in RaiseWeapon for ", string(self)));
+			Log(("HBS - FirstPersonAnimOver in RaiseWeapon for " $ string(self)));
 		}
 		R6PlayerController(Pawn(Owner).Controller).ServerWeaponUpAnimDone();
-		__NFUN_113__('None');
+		GotoState('None');
 		return;
 	}
 
 	function BeginState()
 	{
 		Pawn(Owner).Controller.m_bLockWeaponActions = true;
-		m_FPHands.__NFUN_113__('RaiseWeapon');
+		m_FPHands.GotoState('RaiseWeapon');
 		return;
 	}
 
@@ -165,14 +165,14 @@ state DiscardWeapon
 		// End:0x53
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBSJammer - BeginState of DiscardWeapon for", string(self)), "="), string(m_bHeartBeatJammerOn)));
+			Log(((("HBSJammer - BeginState of DiscardWeapon for" @ string(self)) @ "=") @ string(m_bHeartBeatJammerOn)));
 		}
 		// End:0xAC
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			Pawn(Owner).Controller.m_bLockWeaponActions = true;
 			Pawn(Owner).Controller.m_bHideReticule = true;
-			m_FPHands.__NFUN_113__('DiscardWeapon');
+			m_FPHands.GotoState('DiscardWeapon');
 		}
 		return;
 	}
@@ -183,7 +183,7 @@ state NormalFire
 {
 	simulated function BeginState()
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 		return;
 	}
 	stop;

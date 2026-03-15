@@ -79,16 +79,16 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 {
 	Pling(vHitLocation, ShootStrength, 0.0000000);
 	// End:0x51
-	if(__NFUN_119__(ShootEffect, none))
+	if((ShootEffect != none))
 	{
 		// End:0x42
 		if(OrientShootEffect)
 		{
-			__NFUN_278__(ShootEffect, self,, vHitLocation, Rotator(vMomentum));			
+			Spawn(ShootEffect, self,, vHitLocation, Rotator(vMomentum));			
 		}
 		else
 		{
-			__NFUN_278__(ShootEffect, self,, vHitLocation);
+			Spawn(ShootEffect, self,, vHitLocation);
 		}
 	}
 	return 0;
@@ -101,7 +101,7 @@ function Touch(Actor Other)
 
 	super(Actor).Touch(Other);
 	// End:0x22
-	if(__NFUN_242__(Other.bDisturbFluidSurface, false))
+	if((Other.bDisturbFluidSurface == false))
 	{
 		return;
 	}
@@ -109,16 +109,16 @@ function Touch(Actor Other)
 	touchLocation.Z = Location.Z;
 	Pling(touchLocation, TouchStrength, Other.CollisionRadius);
 	// End:0xAE
-	if(__NFUN_119__(ShootEffect, none))
+	if((ShootEffect != none))
 	{
 		// End:0x9F
 		if(OrientTouchEffect)
 		{
-			__NFUN_278__(TouchEffect, self,, touchLocation, Rotator(Other.Velocity));			
+			Spawn(TouchEffect, self,, touchLocation, Rotator(Other.Velocity));			
 		}
 		else
 		{
-			__NFUN_278__(TouchEffect, self,, touchLocation);
+			Spawn(TouchEffect, self,, touchLocation);
 		}
 	}
 	return;

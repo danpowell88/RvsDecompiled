@@ -13,7 +13,7 @@ var Sound m_sndDesactivation;
 replication
 {
 	// Pos:0x000
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		ServerToggleHeartBeatProperties;
 }
 
@@ -31,7 +31,7 @@ function ServerToggleHeartBeatProperties(bool bActiveHeartBeat)
 	// End:0x3E
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("HBS - ServerToggleHeartBeatProperties =", string(bActiveHeartBeat)));
+		Log(("HBS - ServerToggleHeartBeatProperties =" @ string(bActiveHeartBeat)));
 	}
 	m_bHeartBeatOn = bActiveHeartBeat;
 	return;
@@ -66,20 +66,20 @@ function DisplayHeartBeat(bool bActivateHeartBeat)
 
 	pawnOwner = R6Pawn(Owner);
 	// End:0x26
-	if(__NFUN_129__(pawnOwner.IsLocallyControlled()))
+	if((!pawnOwner.IsLocallyControlled()))
 	{
 		return;
 	}
 	// End:0x67
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBS - DisplayHeartBeat =", string(bActivateHeartBeat)), string(m_sndActivation)), string(m_sndDesactivation)));
+		Log(((("HBS - DisplayHeartBeat =" @ string(bActivateHeartBeat)) @ string(m_sndActivation)) @ string(m_sndDesactivation)));
 	}
 	m_bHeartBeatOn = bActivateHeartBeat;
 	// End:0x93
 	if(bActivateHeartBeat)
 	{
-		pawnOwner.__NFUN_264__(m_sndActivation, 3);		
+		pawnOwner.__NFUN_264__(m_sndActivation, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;		
 	}
 	else
 	{

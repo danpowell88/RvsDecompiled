@@ -14,18 +14,18 @@ var(Action) name TriggeredConditionTag;
 function ProceedToNextAction(ScriptedController C)
 {
 	// End:0x3F
-	if(__NFUN_130__(__NFUN_114__(t, none), __NFUN_255__(TriggeredConditionTag, 'None')))
+	if(((t == none) && (TriggeredConditionTag != 'None')))
 	{
 		// End:0x3E
-		foreach C.__NFUN_304__(Class'Gameplay.TriggeredCondition', t, TriggeredConditionTag)
+		foreach C.AllActors(Class'Gameplay.TriggeredCondition', t, TriggeredConditionTag)
 		{
 			// End:0x3E
 			break;			
 		}		
 	}
-	__NFUN_161__(C.ActionNum, 1);
+	(C.ActionNum += 1);
 	// End:0x6F
-	if(__NFUN_129__(t.bEnabled))
+	if((!t.bEnabled))
 	{
 		ProceedToSectionEnd(C);
 	}
@@ -40,7 +40,7 @@ function bool StartsSection()
 
 function string GetActionString()
 {
-	return __NFUN_168__(__NFUN_168__(ActionString, string(t)), string(TriggeredConditionTag));
+	return ((ActionString @ string(t)) @ string(TriggeredConditionTag));
 	return;
 }
 

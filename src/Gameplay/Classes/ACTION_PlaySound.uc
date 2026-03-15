@@ -21,7 +21,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(Sound));
+	return (ActionString @ string(Sound));
 	return;
 }
 

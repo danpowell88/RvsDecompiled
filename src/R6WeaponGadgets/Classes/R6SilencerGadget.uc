@@ -31,7 +31,7 @@ simulated function Vector GetGadgetMuzzleOffset()
 	local Vector vTagLocation;
 	local Rotator rTagRotator;
 
-	__NFUN_2008__("TAGSilencer", vTagLocation, rTagRotator, 1.0000000);
+	GetTagInformations("TAGSilencer", vTagLocation, rTagRotator, 1.0000000);
 	return vTagLocation;
 	return;
 }
@@ -43,9 +43,9 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 
 	super.UpdateAttachment(weapOwner);
 	m_GadgetShortName = Localize(m_NameID, "ID_SHORTNAME", "R6WeaponGadgets");
-	__NFUN_298__(none);
-	__NFUN_298__(weapOwner, weapOwner.Location);
-	weapOwner.__NFUN_2008__("TagMuzzle", vTagLocation, rTagRotator);
+	SetBase(none);
+	SetBase(weapOwner, weapOwner.Location);
+	weapOwner.GetTagInformations("TagMuzzle", vTagLocation, rTagRotator);
 	SetRelativeLocation(vTagLocation);
 	SetRelativeRotation(rTagRotator);
 	return;
@@ -57,20 +57,20 @@ simulated function AttachFPGadget()
 	local Rotator rTagRotator;
 
 	// End:0x28
-	if(__NFUN_132__(__NFUN_114__(m_WeaponOwner, none), __NFUN_114__(R6AbstractWeapon(m_WeaponOwner).m_FPWeapon, none)))
+	if(((m_WeaponOwner == none) || (R6AbstractWeapon(m_WeaponOwner).m_FPWeapon == none)))
 	{
 		return;
 	}
 	// End:0x41
-	if(__NFUN_114__(m_FPSilencerModel, none))
+	if((m_FPSilencerModel == none))
 	{
-		m_FPSilencerModel = __NFUN_278__(m_pFPSilencerClass);
+		m_FPSilencerModel = Spawn(m_pFPSilencerClass);
 	}
 	// End:0xA8
-	if(__NFUN_119__(m_FPSilencerModel, none))
+	if((m_FPSilencerModel != none))
 	{
 		R6AbstractWeapon(m_WeaponOwner).m_FPWeapon.AttachToBone(m_FPSilencerModel, 'TagMuzzle');
-		m_FPSilencerModel.__NFUN_2008__("TagMuzzle", vTagLocation, rTagRotator);
+		m_FPSilencerModel.GetTagInformations("TagMuzzle", vTagLocation, rTagRotator);
 		m_WeaponOwner.m_FPFlashLocation = vTagLocation;
 	}
 	return;
@@ -83,9 +83,9 @@ simulated function DestroyFPGadget()
 	aFPGadget = m_FPSilencerModel;
 	m_FPSilencerModel = none;
 	// End:0x29
-	if(__NFUN_119__(aFPGadget, none))
+	if((aFPGadget != none))
 	{
-		aFPGadget.__NFUN_279__();
+		aFPGadget.Destroy();
 	}
 	return;
 }

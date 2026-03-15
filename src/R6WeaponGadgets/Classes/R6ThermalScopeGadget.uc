@@ -35,8 +35,8 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 
 	super.UpdateAttachment(weapOwner);
 	m_GadgetShortName = Localize(m_NameID, "ID_SHORTNAME", "R6WeaponGadgets");
-	__NFUN_298__(weapOwner, weapOwner.Location);
-	weapOwner.__NFUN_2008__("TagScope", vTagLocation, rTagRotator);
+	SetBase(weapOwner, weapOwner.Location);
+	weapOwner.GetTagInformations("TagScope", vTagLocation, rTagRotator);
 	SetRelativeLocation(vTagLocation);
 	SetRelativeRotation(rTagRotator);
 	return;
@@ -45,17 +45,17 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 simulated function AttachFPGadget()
 {
 	// End:0x28
-	if(__NFUN_132__(__NFUN_114__(m_WeaponOwner, none), __NFUN_114__(R6AbstractWeapon(m_WeaponOwner).m_FPWeapon, none)))
+	if(((m_WeaponOwner == none) || (R6AbstractWeapon(m_WeaponOwner).m_FPWeapon == none)))
 	{
 		return;
 	}
 	// End:0x41
-	if(__NFUN_114__(m_FPThermalScopeModel, none))
+	if((m_FPThermalScopeModel == none))
 	{
-		m_FPThermalScopeModel = __NFUN_278__(Class'R6WeaponGadgets.R61stThermalScope');
+		m_FPThermalScopeModel = Spawn(Class'R6WeaponGadgets.R61stThermalScope');
 	}
 	// End:0x73
-	if(__NFUN_119__(m_FPThermalScopeModel, none))
+	if((m_FPThermalScopeModel != none))
 	{
 		R6AbstractWeapon(m_WeaponOwner).m_FPWeapon.AttachToBone(m_FPThermalScopeModel, 'TagThermal');
 	}
@@ -69,9 +69,9 @@ simulated function DestroyFPGadget()
 	aFPGadget = m_FPThermalScopeModel;
 	m_FPThermalScopeModel = none;
 	// End:0x29
-	if(__NFUN_119__(aFPGadget, none))
+	if((aFPGadget != none))
 	{
-		aFPGadget.__NFUN_279__();
+		aFPGadget.Destroy();
 	}
 	return;
 }

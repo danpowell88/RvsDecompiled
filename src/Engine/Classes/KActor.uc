@@ -29,14 +29,14 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	local Vector ApplyImpulse;
 
 	// End:0x56
-	if(__NFUN_130__(bKTakeShot, __NFUN_151__(iKillValue, 0)))
+	if((bKTakeShot && (iKillValue > 0)))
 	{
 		// End:0x29
-		if(__NFUN_176__(__NFUN_225__(vMomentum), 0.0010000))
+		if((VSize(vMomentum) < 0.0010000))
 		{
 			return 0;
 		}
-		ApplyImpulse = __NFUN_214__(__NFUN_212__(__NFUN_226__(vMomentum), float(iKillValue)), fKImpulseFactor);
+		ApplyImpulse = ((Normal(vMomentum) * float(iKillValue)) / fKImpulseFactor);
 		KAddImpulse(ApplyImpulse, vHitLocation);
 	}
 	return 0;
@@ -56,13 +56,13 @@ event KImpact(Actor Other, Vector pos, Vector impactVel, Vector impactNorm)
 	local int numSounds, soundNum;
 
 	// End:0x57
-	if(__NFUN_177__(Level.TimeSeconds, __NFUN_174__(LastImpactTime, ImpactInterval)))
+	if((Level.TimeSeconds > (LastImpactTime + ImpactInterval)))
 	{
 		numSounds = ImpactSounds.Length;
 		// End:0x43
-		if(__NFUN_151__(numSounds, 0))
+		if((numSounds > 0))
 		{
-			soundNum = __NFUN_167__(numSounds);
+			soundNum = Rand(numSounds);
 		}
 		LastImpactTime = Level.TimeSeconds;
 	}

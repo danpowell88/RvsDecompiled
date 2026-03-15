@@ -22,19 +22,19 @@ function BuildVolumetric(int direction, int NumSheets, float Height, float Radiu
 	local Vector vtx, NewVtx;
 
 	N = GetVertexCount();
-	RotStep.Yaw = __NFUN_145__(65536, __NFUN_144__(NumSheets, 2));
+	RotStep.Yaw = (65536 / (NumSheets * 2));
 	vtx.X = Radius;
-	vtx.Z = __NFUN_172__(Height, float(2));
+	vtx.Z = (Height / float(2));
 	X = 0;
 	J0x54:
 
 	// End:0xDD [Loop If]
-	if(__NFUN_150__(X, __NFUN_144__(NumSheets, 2)))
+	if((X < (NumSheets * 2)))
 	{
-		NewVtx = __NFUN_276__(vtx, __NFUN_287__(RotStep, float(X)));
+		NewVtx = (vtx >> (RotStep * float(X)));
 		Vertex3f(NewVtx.X, NewVtx.Y, NewVtx.Z);
-		Vertex3f(NewVtx.X, NewVtx.Y, __NFUN_175__(NewVtx.Z, Height));
-		__NFUN_165__(X);
+		Vertex3f(NewVtx.X, NewVtx.Y, (NewVtx.Z - Height));
+		(X++);
 		// [Loop Continue]
 		goto J0x54;
 	}
@@ -42,16 +42,16 @@ function BuildVolumetric(int direction, int NumSheets, float Height, float Radiu
 	J0xE4:
 
 	// End:0x195 [Loop If]
-	if(__NFUN_150__(X, NumSheets))
+	if((X < NumSheets))
 	{
-		Y = __NFUN_146__(__NFUN_144__(X, 2), 1);
+		Y = ((X * 2) + 1);
 		// End:0x128
-		if(__NFUN_153__(Y, __NFUN_144__(NumSheets, 2)))
+		if((Y >= (NumSheets * 2)))
 		{
-			__NFUN_162__(Y, __NFUN_144__(NumSheets, 2));
+			(Y -= (NumSheets * 2));
 		}
-		Poly4i(direction, __NFUN_146__(N, __NFUN_144__(X, 2)), __NFUN_146__(N, Y), __NFUN_146__(__NFUN_146__(N, Y), __NFUN_144__(NumSheets, 2)), __NFUN_146__(__NFUN_146__(N, __NFUN_144__(X, 2)), __NFUN_144__(NumSheets, 2)), 'Sheets', 264);
-		__NFUN_165__(X);
+		Poly4i(direction, (N + (X * 2)), (N + Y), ((N + Y) + (NumSheets * 2)), ((N + (X * 2)) + (NumSheets * 2)), 'Sheets', 264);
+		(X++);
 		// [Loop Continue]
 		goto J0xE4;
 	}
@@ -61,12 +61,12 @@ function BuildVolumetric(int direction, int NumSheets, float Height, float Radiu
 function bool Build()
 {
 	// End:0x13
-	if(__NFUN_150__(NumSheets, 2))
+	if((NumSheets < 2))
 	{
 		return BadParameters();
 	}
 	// End:0x36
-	if(__NFUN_132__(__NFUN_178__(Height, float(0)), __NFUN_178__(Radius, float(0))))
+	if(((Height <= float(0)) || (Radius <= float(0))))
 	{
 		return BadParameters();
 	}

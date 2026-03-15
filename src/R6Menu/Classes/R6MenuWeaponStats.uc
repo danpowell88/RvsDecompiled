@@ -56,30 +56,30 @@ function Created()
 
 	X = m_fNLeftPadding;
 	Y = m_fTopYPadding;
-	W = __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fNLeftPadding));
+	W = (WinWidth - (float(2) * m_fNLeftPadding));
 	H = m_fTitleHeight;
-	TotItemHeight = __NFUN_174__(__NFUN_174__(m_fTitleHeight, float(Class'R6Menu.R6MenuOperativeSkillsBitmap'.default.R.H)), __NFUN_171__(float(2), m_fYPaddingBetweenElements));
+	TotItemHeight = ((m_fTitleHeight + float(Class'R6Menu.R6MenuOperativeSkillsBitmap'.default.R.H)) + (float(2) * m_fYPaddingBetweenElements));
 	m_TRange = CreateTitle(X, Y, W, H, "Range");
-	__NFUN_184__(Y, TotItemHeight);
+	(Y += TotItemHeight);
 	m_TDamage = CreateTitle(X, Y, W, H, "Damage");
-	__NFUN_184__(Y, TotItemHeight);
+	(Y += TotItemHeight);
 	m_TAccuracy = CreateTitle(X, Y, W, H, "Accuracy");
-	__NFUN_184__(Y, TotItemHeight);
+	(Y += TotItemHeight);
 	m_TRecoil = CreateTitle(X, Y, W, H, "Recoil");
-	__NFUN_184__(Y, TotItemHeight);
+	(Y += TotItemHeight);
 	m_TRecovery = CreateTitle(X, Y, W, H, "Recovery");
 	m_fMaxChartWidth = float(Class'R6Menu.R6MenuOperativeSkillsBitmap'.default.R.W);
-	offset = __NFUN_174__(m_fTitleHeight, m_fYPaddingBetweenElements);
-	Y = __NFUN_174__(m_TRange.WinTop, offset);
+	offset = (m_fTitleHeight + m_fYPaddingBetweenElements);
+	Y = (m_TRange.WinTop + offset);
 	H = float(Class'R6Menu.R6MenuOperativeSkillsBitmap'.default.R.H);
 	m_LCRange = R6MenuOperativeSkillsBitmap(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsBitmap', X, Y, W, H, self));
-	Y = __NFUN_174__(m_TDamage.WinTop, offset);
+	Y = (m_TDamage.WinTop + offset);
 	m_LCDamage = R6MenuOperativeSkillsBitmap(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsBitmap', X, Y, W, H, self));
-	Y = __NFUN_174__(m_TAccuracy.WinTop, offset);
+	Y = (m_TAccuracy.WinTop + offset);
 	m_LCAccuracy = R6MenuOperativeSkillsBitmap(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsBitmap', X, Y, W, H, self));
-	Y = __NFUN_174__(m_TRecoil.WinTop, offset);
+	Y = (m_TRecoil.WinTop + offset);
 	m_LCRecoil = R6MenuOperativeSkillsBitmap(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsBitmap', X, Y, W, H, self));
-	Y = __NFUN_174__(m_TRecovery.WinTop, offset);
+	Y = (m_TRecovery.WinTop + offset);
 	m_LCRecovery = R6MenuOperativeSkillsBitmap(CreateWindow(Class'R6Menu.R6MenuOperativeSkillsBitmap', X, Y, W, H, self));
 	return;
 }
@@ -101,31 +101,31 @@ function ResizeCharts()
 	// End:0x15D
 	if(bShowLog)
 	{
-		__NFUN_231__("////////////////////////////////////////////");
-		__NFUN_231__("///////  ResizeCharts() Before Fmin  ///////");
-		__NFUN_231__("////////////////////////////////////////////");
-		__NFUN_231__(__NFUN_168__("m_fRangePercent", string(m_fRangePercent)));
-		__NFUN_231__(__NFUN_168__("m_fDamagePercent", string(m_fDamagePercent)));
-		__NFUN_231__(__NFUN_168__("m_fAccuracyPercent", string(m_fAccuracyPercent)));
-		__NFUN_231__(__NFUN_168__("m_fRecoilPercent", string(m_fRecoilPercent)));
-		__NFUN_231__(__NFUN_168__("m_fRecoveryPercent", string(m_fRecoveryPercent)));
-		__NFUN_231__("////////////////////////////////////////////");
+		Log("////////////////////////////////////////////");
+		Log("///////  ResizeCharts() Before Fmin  ///////");
+		Log("////////////////////////////////////////////");
+		Log(("m_fRangePercent" @ string(m_fRangePercent)));
+		Log(("m_fDamagePercent" @ string(m_fDamagePercent)));
+		Log(("m_fAccuracyPercent" @ string(m_fAccuracyPercent)));
+		Log(("m_fRecoilPercent" @ string(m_fRecoilPercent)));
+		Log(("m_fRecoveryPercent" @ string(m_fRecoveryPercent)));
+		Log("////////////////////////////////////////////");
 	}
-	m_fRangePercent = __NFUN_244__(m_fRangePercent, 100.0000000);
-	m_fDamagePercent = __NFUN_244__(m_fDamagePercent, 100.0000000);
-	m_fAccuracyPercent = __NFUN_244__(m_fAccuracyPercent, 100.0000000);
-	m_fRecoilPercent = __NFUN_244__(m_fRecoilPercent, 100.0000000);
-	m_fRecoveryPercent = __NFUN_244__(m_fRecoveryPercent, 100.0000000);
+	m_fRangePercent = FMin(m_fRangePercent, 100.0000000);
+	m_fDamagePercent = FMin(m_fDamagePercent, 100.0000000);
+	m_fAccuracyPercent = FMin(m_fAccuracyPercent, 100.0000000);
+	m_fRecoilPercent = FMin(m_fRecoilPercent, 100.0000000);
+	m_fRecoveryPercent = FMin(m_fRecoveryPercent, 100.0000000);
 	m_TRange.SetNumericValue(int(m_fInitRangePercent), int(m_fRangePercent));
 	m_TDamage.SetNumericValue(int(m_fInitDamagePercent), int(m_fDamagePercent));
 	m_TAccuracy.SetNumericValue(int(m_fInitAccuracyPercent), int(m_fAccuracyPercent));
 	m_TRecoil.SetNumericValue(int(m_fInitRecoilPercent), int(m_fRecoilPercent));
 	m_TRecovery.SetNumericValue(int(m_fInitRecoveryPercent), int(m_fRecoveryPercent));
-	m_LCRange.WinWidth = __NFUN_172__(__NFUN_171__(m_fRangePercent, m_fMaxChartWidth), 100.0000000);
-	m_LCDamage.WinWidth = __NFUN_172__(__NFUN_171__(m_fDamagePercent, m_fMaxChartWidth), 100.0000000);
-	m_LCAccuracy.WinWidth = __NFUN_172__(__NFUN_171__(m_fAccuracyPercent, m_fMaxChartWidth), 100.0000000);
-	m_LCRecoil.WinWidth = __NFUN_172__(__NFUN_171__(m_fRecoilPercent, m_fMaxChartWidth), 100.0000000);
-	m_LCRecovery.WinWidth = __NFUN_172__(__NFUN_171__(m_fRecoveryPercent, m_fMaxChartWidth), 100.0000000);
+	m_LCRange.WinWidth = ((m_fRangePercent * m_fMaxChartWidth) / 100.0000000);
+	m_LCDamage.WinWidth = ((m_fDamagePercent * m_fMaxChartWidth) / 100.0000000);
+	m_LCAccuracy.WinWidth = ((m_fAccuracyPercent * m_fMaxChartWidth) / 100.0000000);
+	m_LCRecoil.WinWidth = ((m_fRecoilPercent * m_fMaxChartWidth) / 100.0000000);
+	m_LCRecovery.WinWidth = ((m_fRecoveryPercent * m_fMaxChartWidth) / 100.0000000);
 	return;
 }
 

@@ -25,10 +25,10 @@ function Paint(Canvas C, float fMouseX, float fMouseY)
 	J0x28:
 
 	// End:0x80 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		DrawItem(C, CurItem, 0.0000000, Y, WinWidth, m_fItemHeight);
-		Y = __NFUN_174__(Y, m_fItemHeight);
+		Y = (Y + m_fItemHeight);
 		CurItem = CurItem.Next;
 		// [Loop Continue]
 		goto J0x28;
@@ -43,28 +43,28 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 
 	CurSelected = m_SelectedItem;
 	// End:0x35
-	if(__NFUN_119__(m_SelectedItem, none))
+	if((m_SelectedItem != none))
 	{
 		R6WindowListAreaItem(m_SelectedItem).m_Area.m_bSelected = false;
 	}
 	// End:0x9C
-	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_119__(m_SelectedItem, NewSelected)))
+	if(((NewSelected != none) && (m_SelectedItem != NewSelected)))
 	{
 		// End:0x6D
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = false;
 		}
 		m_SelectedItem = NewSelected;
 		// End:0x94
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = true;
 		}
 		Notify(2);
 	}
 	// End:0xC6
-	if(__NFUN_119__(m_SelectedItem, none))
+	if((m_SelectedItem != none))
 	{
 		R6WindowListAreaItem(m_SelectedItem).m_Area.m_bSelected = true;
 	}
@@ -74,10 +74,10 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 function SetDefaultButton(UWindowList Item)
 {
 	// End:0x26
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		// End:0x26
-		if(__NFUN_114__(m_SelectedItem, none))
+		if((m_SelectedItem == none))
 		{
 			SetSelectedItem(UWindowListBoxItem(Item));
 		}

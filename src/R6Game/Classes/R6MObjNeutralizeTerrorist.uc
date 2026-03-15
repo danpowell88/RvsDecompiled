@@ -35,12 +35,12 @@ function Init()
 	if(R6MissionObjectiveMgr(m_mgr).m_bEnableCheckForErrors)
 	{
 		// End:0x6D
-		if(__NFUN_119__(m_depZone, none))
+		if((m_depZone != none))
 		{
 			// End:0x6A
-			if(__NFUN_154__(m_depZone.m_aTerrorist.Length, 0))
+			if((m_depZone.m_aTerrorist.Length == 0))
 			{
-				logMObj(__NFUN_112__("there is no terrorist in ", string(m_depZone.Name)));
+				logMObj(("there is no terrorist in " $ string(m_depZone.Name)));
 			}			
 		}
 		else
@@ -70,16 +70,16 @@ function PawnSecure(Pawn secured)
 	local int i, iResult;
 
 	// End:0x1B
-	if(__NFUN_155__(int(secured.m_ePawnType), int(2)))
+	if((int(secured.m_ePawnType) != int(2)))
 	{
 		return;
 	}
 	// End:0x197
-	if(__NFUN_119__(m_depZone, none))
+	if((m_depZone != none))
 	{
 		aTerrorist = R6Terrorist(secured);
 		// End:0x50
-		if(__NFUN_119__(m_depZone, aTerrorist.m_DZone))
+		if((m_depZone != aTerrorist.m_DZone))
 		{
 			return;
 		}
@@ -87,39 +87,39 @@ function PawnSecure(Pawn secured)
 		J0x57:
 
 		// End:0x194 [Loop If]
-		if(__NFUN_150__(i, m_depZone.m_aTerrorist.Length))
+		if((i < m_depZone.m_aTerrorist.Length))
 		{
 			aTerrorist = m_depZone.m_aTerrorist[i];
 			// End:0x13D
 			if(m_bMustSecureTerroInDepZone)
 			{
 				// End:0x10A
-				if(__NFUN_129__(aTerrorist.IsAlive()))
+				if((!aTerrorist.IsAlive()))
 				{
 					R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, false, true);
 					// End:0x108
 					if(m_bShowLog)
 					{
-						logX(__NFUN_112__(__NFUN_112__("PawnKilled failed=", string(m_bFailed)), " should have been secured"));
+						logX((("PawnKilled failed=" $ string(m_bFailed)) $ " should have been secured"));
 					}
 					return;
 				}
 				// End:0x13A
-				if(__NFUN_132__(aTerrorist.m_bIsKneeling, aTerrorist.m_bIsUnderArrest))
+				if((aTerrorist.m_bIsKneeling || aTerrorist.m_bIsUnderArrest))
 				{
-					__NFUN_184__(fNeutralized, float(1));
+					(fNeutralized += float(1));
 				}				
 			}
 			else
 			{
 				// End:0x183
-				if(__NFUN_132__(__NFUN_132__(__NFUN_129__(aTerrorist.IsAlive()), aTerrorist.m_bIsKneeling), aTerrorist.m_bIsUnderArrest))
+				if((((!aTerrorist.IsAlive()) || aTerrorist.m_bIsKneeling) || aTerrorist.m_bIsUnderArrest))
 				{
-					__NFUN_184__(fNeutralized, float(1));
+					(fNeutralized += float(1));
 				}
 			}
-			__NFUN_163__(iTotal);
-			__NFUN_163__(i);
+			(++iTotal);
+			(++i);
 			// [Loop Continue]
 			goto J0x57;
 		}		
@@ -128,17 +128,17 @@ function PawnSecure(Pawn secured)
 	{
 		fNeutralized = float(R6GameInfo(m_mgr.Level.Game).GetNbTerroNeutralized());
 		// End:0x1E6
-		foreach m_mgr.__NFUN_313__(Class'R6Engine.R6Terrorist', aTerrorist)
+		foreach m_mgr.DynamicActors(Class'R6Engine.R6Terrorist', aTerrorist)
 		{
-			__NFUN_163__(iTotal);			
+			(++iTotal);			
 		}		
 	}
 	// End:0x235
-	if(__NFUN_151__(iTotal, 0))
+	if((iTotal > 0))
 	{
-		iResult = int(__NFUN_171__(__NFUN_172__(fNeutralized, float(iTotal)), 100.0000000));
+		iResult = int(((fNeutralized / float(iTotal)) * 100.0000000));
 		// End:0x235
-		if(__NFUN_153__(iResult, m_iNeutralizePercentage))
+		if((iResult >= m_iNeutralizePercentage))
 		{
 			R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, true, true);
 		}
@@ -146,7 +146,7 @@ function PawnSecure(Pawn secured)
 	// End:0x2B2
 	if(m_bShowLog)
 	{
-		logX(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("PawnSecured/Killed. completed=", string(m_bCompleted)), " neutralized="), string(secured.Name)), " "), string(iResult)), "/"), string(m_iNeutralizePercentage)), "%"));
+		logX((((((((("PawnSecured/Killed. completed=" $ string(m_bCompleted)) $ " neutralized=") $ string(secured.Name)) $ " ") $ string(iResult)) $ "/") $ string(m_iNeutralizePercentage)) $ "%"));
 	}
 	return;
 }

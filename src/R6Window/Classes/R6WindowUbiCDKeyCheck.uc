@@ -80,7 +80,7 @@ function Created()
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
 	// End:0x1B5
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -91,7 +91,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 				{
 					// End:0x82
 					case 1:
-						m_GameService.__NFUN_3571__(m_preJoinRespInfo.iLobbyID, m_preJoinRespInfo.iGroupID, m_szPassword);
+						m_GameService.NativeMSCLientJoinServer(m_preJoinRespInfo.iLobbyID, m_preJoinRespInfo.iGroupID, m_szPassword);
 						m_pPleaseWait.ShowWindow();
 						// End:0xAD
 						break;
@@ -116,7 +116,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			// End:0x12E
 			case 25:
 				// End:0x12E
-				if(__NFUN_132__(R6Console(Root.Console).m_bNonUbiMatchMaking, R6Console(Root.Console).m_bStartedByGSClient))
+				if((R6Console(Root.Console).m_bNonUbiMatchMaking || R6Console(Root.Console).m_bStartedByGSClient))
 				{
 					Root.ChangeCurrentWidget(38);
 				}
@@ -136,7 +136,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 				break;
 			// End:0x1A1
 			case 17:
-				m_GameService.__NFUN_3564__(R6WindowEditBox(m_pR6EnterCDKey.m_ClientArea).GetValue());
+				m_GameService.EnterCDKey(R6WindowEditBox(m_pR6EnterCDKey.m_ClientArea).GetValue());
 				m_pPleaseWait.ShowWindow();
 				// End:0x1B2
 				break;
@@ -153,7 +153,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	else
 	{
 		// End:0x260
-		if(__NFUN_154__(int(Result), int(4)))
+		if((int(Result) == int(4)))
 		{
 			switch(_ePopUpID)
 			{
@@ -219,7 +219,7 @@ function ProcessGSMsg(string _szMsg)
 	// End:0x3D
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("R6WindowUbiCDKeyCheck ProcessGSMsg msg = ", _szMsg));
+		Log(("R6WindowUbiCDKeyCheck ProcessGSMsg msg = " @ _szMsg));
 	}
 	switch(_szMsg)
 	{
@@ -257,7 +257,7 @@ function ProcessGSMsg(string _szMsg)
 		// End:0x25E
 		case "ACT_ID_REQ_TIMEOUT_ERROR":
 			m_pPleaseWait.HideWindow();
-			m_pR6EnterCDKey.ModifyTextWindow(__NFUN_112__(m_szLocMod, Localize("Errors", "CDKeyServerNotResponding", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
+			m_pR6EnterCDKey.ModifyTextWindow((m_szLocMod $ Localize("Errors", "CDKeyServerNotResponding", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
 			m_pR6EnterCDKey.ShowWindow();
 			// End:0x88D
 			break;
@@ -269,33 +269,33 @@ function ProcessGSMsg(string _szMsg)
 		// End:0x319
 		case "ACT_ID_REQ_FAIL_INVALIDCDKEY":
 			m_pPleaseWait.HideWindow();
-			m_pR6EnterCDKey.ModifyTextWindow(__NFUN_112__(m_szLocMod, Localize("Errors", "INVALIDCDKEY", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
+			m_pR6EnterCDKey.ModifyTextWindow((m_szLocMod $ Localize("Errors", "INVALIDCDKEY", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
 			m_pR6EnterCDKey.ShowWindow();
 			// End:0x88D
 			break;
 		// End:0x383
 		case "ACT_ID_REQ_FAIL_CDKEYUSED":
 			m_pPleaseWait.HideWindow();
-			DisplayErrorMsg(__NFUN_112__(m_szLocMod, Localize("Errors", "CDKeyAlreadyInUse", "R6ENGINE")), 20);
+			DisplayErrorMsg((m_szLocMod $ Localize("Errors", "CDKeyAlreadyInUse", "R6ENGINE")), 20);
 			// End:0x88D
 			break;
 		// End:0x411
 		case "ACT_ID_REQ_FAIL_DEFAULT":
 			m_pPleaseWait.HideWindow();
-			m_pR6EnterCDKey.ModifyTextWindow(__NFUN_112__(m_szLocMod, Localize("Errors", "CDKeyTryLater", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
+			m_pR6EnterCDKey.ModifyTextWindow((m_szLocMod $ Localize("Errors", "CDKeyTryLater", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
 			m_pR6EnterCDKey.ShowWindow();
 			// End:0x88D
 			break;
 		// End:0x482
 		case "AUTH_ID_REQ_TIMEOUT_ERROR":
 			m_pPleaseWait.HideWindow();
-			DisplayErrorMsg(__NFUN_112__(m_szLocMod, Localize("Errors", "CDKeyServerNotResponding", "R6ENGINE")), 21);
+			DisplayErrorMsg((m_szLocMod $ Localize("Errors", "CDKeyServerNotResponding", "R6ENGINE")), 21);
 			// End:0x88D
 			break;
 		// End:0x4EA
 		case "AUTH_ID_REQ_INUSE_ERROR":
 			m_pPleaseWait.HideWindow();
-			DisplayErrorMsg(__NFUN_112__(m_szLocMod, Localize("Errors", "CDKeyAlreadyInUse", "R6ENGINE")), 20);
+			DisplayErrorMsg((m_szLocMod $ Localize("Errors", "CDKeyAlreadyInUse", "R6ENGINE")), 20);
 			// End:0x88D
 			break;
 		// End:0x502
@@ -309,21 +309,21 @@ function ProcessGSMsg(string _szMsg)
 		// End:0x5C9
 		case "AUTH_ID_REQ_NOTCHALLENGED":
 			m_pPleaseWait.HideWindow();
-			m_pPleaseWait.ModifyTextWindow(__NFUN_112__(__NFUN_112__(m_szLocMod, Localize("Errors", "CDKeyTryLater", "R6ENGINE")), ": 3"), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
+			m_pPleaseWait.ModifyTextWindow(((m_szLocMod $ Localize("Errors", "CDKeyTryLater", "R6ENGINE")) $ ": 3"), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
 			m_pPleaseWait.ShowWindow();
 			// End:0x88D
 			break;
 		// End:0x65C
 		case "AUTH_ID_REQ_INT_ERROR":
 			m_pPleaseWait.HideWindow();
-			m_pPleaseWait.ModifyTextWindow(__NFUN_112__(__NFUN_112__(m_szLocMod, Localize("Errors", "CDKeyTryLater", "R6ENGINE")), ": 5"), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
+			m_pPleaseWait.ModifyTextWindow(((m_szLocMod $ Localize("Errors", "CDKeyTryLater", "R6ENGINE")) $ ": 5"), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
 			m_pPleaseWait.ShowWindow();
 			// End:0x88D
 			break;
 		// End:0x6E5
 		case "AUTH_ID_REQ_FAILURE":
 			m_pPleaseWait.HideWindow();
-			m_pR6EnterCDKey.ModifyTextWindow(__NFUN_112__(m_szLocMod, Localize("Errors", "INVALIDCDKEY", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
+			m_pR6EnterCDKey.ModifyTextWindow((m_szLocMod $ Localize("Errors", "INVALIDCDKEY", "R6ENGINE")), 205.0000000, 170.0000000, 230.0000000, 30.0000000);
 			m_pR6EnterCDKey.ShowWindow();
 			// End:0x88D
 			break;

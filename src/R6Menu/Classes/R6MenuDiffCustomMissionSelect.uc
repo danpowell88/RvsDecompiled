@@ -30,21 +30,21 @@ function Created()
 	pButtonsDef = R6MenuButtonsDefines(GetButtonsDefinesUnique(Root.MenuClassDefines.ClassButtonsDefines));
 	fXOffset = 5.0000000;
 	fYOffset = 5.0000000;
-	fWidth = __NFUN_175__(WinWidth, float(20));
+	fWidth = (WinWidth - float(20));
 	fHeight = 15.0000000;
-	fYStep = __NFUN_174__(fHeight, float(16));
+	fYStep = (fHeight + float(16));
 	m_pButLevel1 = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pButLevel1.SetButtonBox(false);
 	m_pButLevel1.CreateTextAndBox(pButtonsDef.GetButtonLoc(int(19)), pButtonsDef.GetButtonLoc(int(19), true), 0.0000000, int(19));
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pButLevel2 = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pButLevel2.SetButtonBox(false);
 	m_pButLevel2.CreateTextAndBox(pButtonsDef.GetButtonLoc(int(20)), pButtonsDef.GetButtonLoc(int(20), true), 0.0000000, int(20));
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pButLevel3 = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pButLevel3.SetButtonBox(false);
 	m_pButLevel3.CreateTextAndBox(pButtonsDef.GetButtonLoc(int(21)), pButtonsDef.GetButtonLoc(int(21), true), 0.0000000, int(21));
-	switch(__NFUN_146__(__NFUN_147__(int(19), 1), CustomMissionDifficultyLevel))
+	switch(((int(19) - 1) + CustomMissionDifficultyLevel))
 	{
 		// End:0x220
 		case m_pButLevel1.m_iButtonID:
@@ -75,7 +75,7 @@ function Created()
 //We should receive 1, 2 or 3
 function SetDifficulty(int iDifficulty_)
 {
-	switch(__NFUN_146__(__NFUN_147__(int(19), 1), iDifficulty_))
+	switch(((int(19) - 1) + iDifficulty_))
 	{
 		// End:0x4F
 		case m_pButLevel1.m_iButtonID:
@@ -107,11 +107,11 @@ function SetDifficulty(int iDifficulty_)
 
 function int GetDifficulty()
 {
-	CustomMissionDifficultyLevel = __NFUN_146__(__NFUN_147__(m_pButLastSel.m_iButtonID, int(19)), 1);
+	CustomMissionDifficultyLevel = ((m_pButLastSel.m_iButtonID - int(19)) + 1);
 	// End:0x29
 	if(m_bAutoSave)
 	{
-		__NFUN_536__();
+		SaveConfig();
 	}
 	return CustomMissionDifficultyLevel;
 	return;
@@ -120,7 +120,7 @@ function int GetDifficulty()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x5A
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x5A
 		if(R6WindowButtonBox(C).GetSelectStatus())

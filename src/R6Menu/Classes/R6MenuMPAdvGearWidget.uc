@@ -59,44 +59,44 @@ function Created()
 	m_currentOperative = new (none) Class'R6Game.R6Operative';
 	m_BkpOperative = new (none) Class'R6Game.R6Operative';
 	m_Equipment2dSelect = R6MenuMPAdvEquipmentSelectControl(CreateWindow(Class'R6Menu.R6MenuMPAdvEquipmentSelectControl', 0.0000000, 0.0000000, 241.0000000, WinHeight, self));
-	m_EquipmentDetails = R6MenuMPAdvEquipmentDetailControl(CreateWindow(Class'R6Menu.R6MenuMPAdvEquipmentDetailControl', __NFUN_175__(m_Equipment2dSelect.WinWidth, float(1)), 0.0000000, __NFUN_174__(__NFUN_175__(WinWidth, m_Equipment2dSelect.WinWidth), float(1)), WinHeight, self));
+	m_EquipmentDetails = R6MenuMPAdvEquipmentDetailControl(CreateWindow(Class'R6Menu.R6MenuMPAdvEquipmentDetailControl', (m_Equipment2dSelect.WinWidth - float(1)), 0.0000000, ((WinWidth - m_Equipment2dSelect.WinWidth) + float(1)), WinHeight, self));
 	GetMenuComEquipment(true);
 	m_Equipment2dSelect.Init();
 	m_PrimaryMagsGadget = new (none) Class'R6Description.R6DescPrimaryMags';
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	i = 0;
 	J0xDE:
 
 	// End:0x201 [Loop If]
-	if(__NFUN_150__(i, pCurrentMod.m_aDescriptionPackage.Length))
+	if((i < pCurrentMod.m_aDescriptionPackage.Length))
 	{
 		// End:0x1F7
-		if(__NFUN_123__(pCurrentMod.m_aDescriptionPackage[i], "R6Description"))
+		if((pCurrentMod.m_aDescriptionPackage[i] != "R6Description"))
 		{
-			ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6DescPrimaryMags'));
+			ExtraMags = Class<R6DescPrimaryMags>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[i] $ ".u"), Class'R6Description.R6DescPrimaryMags'));
 			J0x14C:
 
 			// End:0x1F7 [Loop If]
-			if(__NFUN_119__(ExtraMags, none))
+			if((ExtraMags != none))
 			{
 				j = 0;
 				J0x15E:
 
 				// End:0x1E6 [Loop If]
-				if(__NFUN_150__(j, ExtraMags.default.m_iNewTagsToAdd))
+				if((j < ExtraMags.default.m_iNewTagsToAdd))
 				{
 					m_PrimaryMagsGadget.m_Mags[m_PrimaryMagsGadget.m_Mags.Length] = ExtraMags.default.m_Mags[j];
 					m_PrimaryMagsGadget.m_MagTags[m_PrimaryMagsGadget.m_MagTags.Length] = ExtraMags.default.m_MagTags[j];
-					__NFUN_165__(j);
+					(j++);
 					// [Loop Continue]
 					goto J0x15E;
 				}
-				ExtraMags = Class<R6DescPrimaryMags>(__NFUN_1006__());
+				ExtraMags = Class<R6DescPrimaryMags>(GetNextClass());
 				// [Loop Continue]
 				goto J0x14C;
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xDE;
 	}
@@ -168,20 +168,20 @@ function string VerifyEquipment(int _equipmentType, string _szEquipmentToValid)
 			J0x38:
 
 			// End:0x9F [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_APrimaryWeapons.Length), __NFUN_129__(bFound)))
+			if(((i < m_EquipmentDetails.m_APrimaryWeapons.Length) && (!bFound)))
 			{
-				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_APrimaryWeapons[i]));
+				szClassName = ("" $ string(m_EquipmentDetails.m_APrimaryWeapons[i]));
 				// End:0x95
-				if(__NFUN_124__(szClassName, _szEquipmentToValid))
+				if((szClassName ~= _szEquipmentToValid))
 				{
 					bFound = true;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x38;
 			}
 			// End:0xD7
-			if(__NFUN_129__(bFound))
+			if((!bFound))
 			{
 				szEquipmentFind = "R6Description.R6DescPrimaryWeaponNone";
 			}
@@ -195,20 +195,20 @@ function string VerifyEquipment(int _equipmentType, string _szEquipmentToValid)
 			J0xFB:
 
 			// End:0x160 [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_APriWpnGadget.Length), __NFUN_129__(bFound)))
+			if(((i < m_EquipmentDetails.m_APriWpnGadget.Length) && (!bFound)))
 			{
-				szClassName = __NFUN_112__("", m_EquipmentDetails.m_APriWpnGadget[i]);
+				szClassName = ("" $ m_EquipmentDetails.m_APriWpnGadget[i]);
 				// End:0x156
-				if(__NFUN_124__(szClassName, _szEquipmentToValid))
+				if((szClassName ~= _szEquipmentToValid))
 				{
 					bFound = true;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0xFB;
 			}
 			// End:0x197
-			if(__NFUN_129__(bFound))
+			if((!bFound))
 			{
 				szEquipmentFind = "R6Description.R6DescWeaponGadgetNone";
 			}
@@ -228,20 +228,20 @@ function string VerifyEquipment(int _equipmentType, string _szEquipmentToValid)
 			J0x1E8:
 
 			// End:0x24F [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_AGadgets.Length), __NFUN_129__(bFound)))
+			if(((i < m_EquipmentDetails.m_AGadgets.Length) && (!bFound)))
 			{
-				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_AGadgets[i]));
+				szClassName = ("" $ string(m_EquipmentDetails.m_AGadgets[i]));
 				// End:0x245
-				if(__NFUN_124__(szClassName, szEquipmentFind))
+				if((szClassName ~= szEquipmentFind))
 				{
 					bFound = true;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x1E8;
 			}
 			// End:0x280
-			if(__NFUN_129__(bFound))
+			if((!bFound))
 			{
 				szEquipmentFind = "R6Description.R6DescGadgetNone";
 			}
@@ -255,20 +255,20 @@ function string VerifyEquipment(int _equipmentType, string _szEquipmentToValid)
 			J0x2A4:
 
 			// End:0x30B [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_ASecondaryWeapons.Length), __NFUN_129__(bFound)))
+			if(((i < m_EquipmentDetails.m_ASecondaryWeapons.Length) && (!bFound)))
 			{
-				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_ASecondaryWeapons[i]));
+				szClassName = ("" $ string(m_EquipmentDetails.m_ASecondaryWeapons[i]));
 				// End:0x301
-				if(__NFUN_124__(szClassName, _szEquipmentToValid))
+				if((szClassName ~= _szEquipmentToValid))
 				{
 					bFound = true;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x2A4;
 			}
 			// End:0x374
-			if(__NFUN_129__(bFound))
+			if((!bFound))
 			{
 				szEquipmentFind = "R6Description.R6DescPistol92FS";
 				r6Root.m_R6GameMenuCom.m_szSecondaryWeaponGadget = "R6Description.R6DescGadgetNone";
@@ -283,20 +283,20 @@ function string VerifyEquipment(int _equipmentType, string _szEquipmentToValid)
 			J0x398:
 
 			// End:0x3FD [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_ASecWpnGadget.Length), __NFUN_129__(bFound)))
+			if(((i < m_EquipmentDetails.m_ASecWpnGadget.Length) && (!bFound)))
 			{
-				szClassName = __NFUN_112__("", m_EquipmentDetails.m_ASecWpnGadget[i]);
+				szClassName = ("" $ m_EquipmentDetails.m_ASecWpnGadget[i]);
 				// End:0x3F3
-				if(__NFUN_124__(szClassName, _szEquipmentToValid))
+				if((szClassName ~= _szEquipmentToValid))
 				{
 					bFound = true;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x398;
 			}
 			// End:0x434
-			if(__NFUN_129__(bFound))
+			if((!bFound))
 			{
 				szEquipmentFind = "R6Description.R6DescWeaponGadgetNone";
 			}
@@ -315,20 +315,20 @@ function string VerifyEquipment(int _equipmentType, string _szEquipmentToValid)
 			J0x47F:
 
 			// End:0x4E6 [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, m_EquipmentDetails.m_AGadgets.Length), __NFUN_129__(bFound)))
+			if(((i < m_EquipmentDetails.m_AGadgets.Length) && (!bFound)))
 			{
-				szClassName = __NFUN_112__("", string(m_EquipmentDetails.m_AGadgets[i]));
+				szClassName = ("" $ string(m_EquipmentDetails.m_AGadgets[i]));
 				// End:0x4DC
-				if(__NFUN_124__(szClassName, szEquipmentFind))
+				if((szClassName ~= szEquipmentFind))
 				{
 					bFound = true;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x47F;
 			}
 			// End:0x517
-			if(__NFUN_129__(bFound))
+			if((!bFound))
 			{
 				szEquipmentFind = "R6Description.R6DescGadgetNone";
 			}
@@ -350,12 +350,12 @@ function setMenuComEquipment()
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x65
-	if(__NFUN_114__(r6Root.m_R6GameMenuCom, none))
+	if((r6Root.m_R6GameMenuCom == none))
 	{
 		// End:0x63
 		if(bShowLog)
 		{
-			__NFUN_231__("setMenuComEquipment() GameMenuCom is no more valid");
+			Log("setMenuComEquipment() GameMenuCom is no more valid");
 		}
 		return;
 	}
@@ -423,7 +423,7 @@ function AcceptSelection()
 	// End:0x2B
 	if(bShowLog)
 	{
-		__NFUN_231__("MPGearWidget AcceptSelection()");
+		Log("MPGearWidget AcceptSelection()");
 	}
 	RefreshGearInfo(true);
 	setMenuComEquipment();
@@ -437,7 +437,7 @@ function CancelSelection()
 	// End:0x2B
 	if(bShowLog)
 	{
-		__NFUN_231__("MPGearWidget CancelSelection()");
+		Log("MPGearWidget CancelSelection()");
 	}
 	SetOperativeEquipment(true);
 	SetClassEquipment();
@@ -465,14 +465,14 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 		case 0:
 			inDescriptionClass = DecriptionClass;
 			// End:0x18E
-			if(__NFUN_119__(m_OpFirstWeaponDesc, Class<R6PrimaryWeaponDescription>(DecriptionClass)))
+			if((m_OpFirstWeaponDesc != Class<R6PrimaryWeaponDescription>(DecriptionClass)))
 			{
 				m_currentOperative.m_szPrimaryWeapon = string(DecriptionClass);
 				m_OpFirstWeaponDesc = Class<R6PrimaryWeaponDescription>(DecriptionClass);
 				// End:0x89
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Changing Primary Weapon for ", m_currentOperative.m_szPrimaryWeapon));
+					Log(("Changing Primary Weapon for " @ m_currentOperative.m_szPrimaryWeapon));
 				}
 				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
 				m_currentOperative.m_szPrimaryWeaponGadget = DecriptionClass.default.m_NameID;
@@ -480,7 +480,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x101
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Changing Primary Weapon Gadget for ", m_currentOperative.m_szPrimaryWeaponGadget));
+					Log(("Changing Primary Weapon Gadget for " @ m_currentOperative.m_szPrimaryWeaponGadget));
 				}
 				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findPrimaryDefaultAmmo(Class<R6PrimaryWeaponDescription>(inDescriptionClass));
 				m_currentOperative.m_szPrimaryWeaponBullet = DecriptionClass.default.m_NameTag;
@@ -488,7 +488,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x18E
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Changing Primary Weapon Bullets for ", m_currentOperative.m_szPrimaryWeaponBullet));
+					Log(("Changing Primary Weapon Bullets for " @ m_currentOperative.m_szPrimaryWeaponBullet));
 				}
 			}
 			// End:0x5CE
@@ -500,7 +500,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x202
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("Changing Primary Weapon Gadget for ", m_currentOperative.m_szPrimaryWeaponGadget));
+				Log(("Changing Primary Weapon Gadget for " @ m_currentOperative.m_szPrimaryWeaponGadget));
 			}
 			// End:0x5CE
 			break;

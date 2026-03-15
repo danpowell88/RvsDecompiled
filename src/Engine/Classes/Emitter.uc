@@ -40,14 +40,14 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	J0x07:
 
 	// End:0x5F [Loop If]
-	if(__NFUN_150__(i, Emitters.Length))
+	if((i < Emitters.Length))
 	{
 		// End:0x55
-		if(__NFUN_119__(Emitters[i], none))
+		if((Emitters[i] != none))
 		{
-			Emitters[i].Disabled = __NFUN_129__(Emitters[i].Disabled);
+			Emitters[i].Disabled = (!Emitters[i].Disabled);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}

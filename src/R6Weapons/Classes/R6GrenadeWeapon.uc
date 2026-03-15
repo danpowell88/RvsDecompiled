@@ -25,15 +25,15 @@ var bool m_bReadyToThrow;
 replication
 {
 	// Pos:0x01A
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		ServerImReadyToThrow, ServerSetThrow;
 
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientThrowGrenade;
 
 	// Pos:0x00D
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerSetGrenade;
 }
 
@@ -43,19 +43,19 @@ simulated function PostBeginPlay()
 
 	super(R6Weapons).PostBeginPlay();
 	// End:0x25
-	if(__NFUN_119__(m_pBulletClass, none))
+	if((m_pBulletClass != none))
 	{
 		SetStaticMesh(m_pBulletClass.default.StaticMesh);
 	}
 	// End:0xA5
-	if(__NFUN_119__(Pawn(Owner), none))
+	if((Pawn(Owner) != none))
 	{
 		// End:0xA5
-		if(__NFUN_119__(Pawn(Owner).Controller, none))
+		if((Pawn(Owner).Controller != none))
 		{
 			localRainbowAI = R6RainbowAI(Pawn(Owner).Controller);
 			// End:0xA5
-			if(__NFUN_130__(__NFUN_119__(localRainbowAI, none), __NFUN_119__(localRainbowAI.m_TeamManager, none)))
+			if(((localRainbowAI != none) && (localRainbowAI.m_TeamManager != none)))
 			{
 				localRainbowAI.m_TeamManager.UpdateTeamGrenadeStatus();
 			}
@@ -84,7 +84,7 @@ simulated function DropGrenade()
 	{
 		vStart = R6Pawn(Owner).GetHandLocation();
 	}
-	aGrenade = R6Grenade(__NFUN_278__(m_pBulletClass, self,, vStart));
+	aGrenade = R6Grenade(Spawn(m_pBulletClass, self,, vStart));
 	aGrenade.Instigator = Pawn(Owner);
 	aGrenade.SetSpeed(0.0000000);
 	return;
@@ -93,14 +93,14 @@ simulated function DropGrenade()
 simulated function StartFalling()
 {
 	// End:0x49
-	if(__NFUN_155__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) != 0))
 	{
 		// End:0x43
-		if(__NFUN_242__(m_bReadyToThrow, true))
+		if((m_bReadyToThrow == true))
 		{
 			bHidden = true;
 			// End:0x40
-			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			if((int(Level.NetMode) != int(NM_Client)))
 			{
 				DropGrenade();
 			}			
@@ -116,7 +116,7 @@ simulated function StartFalling()
 function float GetExplosionDelay()
 {
 	// End:0x14
-	if(__NFUN_114__(m_pBulletClass, none))
+	if((m_pBulletClass == none))
 	{
 		return 2.0000000;		
 	}
@@ -129,7 +129,7 @@ function float GetExplosionDelay()
 
 function Fire(float fValue)
 {
-	__NFUN_113__('StandByToThrow');
+	GotoState('StandByToThrow');
 	return;
 }
 
@@ -151,7 +151,7 @@ function ServerSetGrenade(Pawn.eGrenadeThrow eGrenade)
 	// End:0x75
 	if(bShowLog)
 	{
-		__NFUN_231__("ServerSetGrenade");
+		Log("ServerSetGrenade");
 	}
 	return;
 }
@@ -163,9 +163,9 @@ function DestroyReticules()
 	aReticule = m_ReticuleInstance;
 	m_ReticuleInstance = none;
 	// End:0x29
-	if(__NFUN_119__(aReticule, none))
+	if((aReticule != none))
 	{
-		aReticule.__NFUN_279__();
+		aReticule.Destroy();
 	}
 	return;
 }
@@ -180,16 +180,16 @@ function ThrowGrenade()
 
 	pawnOwner = R6Pawn(Owner);
 	// End:0x173
-	if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) > 0))
 	{
-		__NFUN_140__(m_iNbBulletsInWeapon);
+		(m_iNbBulletsInWeapon--);
 		// End:0x97
-		if(__NFUN_130__(__NFUN_154__(int(m_iNbBulletsInWeapon), 0), __NFUN_119__(pawnOwner, none)))
+		if(((int(m_iNbBulletsInWeapon) == 0) && (pawnOwner != none)))
 		{
 			SetStaticMesh(none);
 			localRainbowAI = R6RainbowAI(pawnOwner.Controller);
 			// End:0x97
-			if(__NFUN_130__(__NFUN_119__(localRainbowAI, none), __NFUN_119__(localRainbowAI.m_TeamManager, none)))
+			if(((localRainbowAI != none) && (localRainbowAI.m_TeamManager != none)))
 			{
 				localRainbowAI.m_TeamManager.UpdateTeamGrenadeStatus();
 			}
@@ -204,13 +204,13 @@ function ThrowGrenade()
 		{
 			vStart = pawnOwner.GetHandLocation();
 		}
-		aGrenade = R6Grenade(__NFUN_278__(m_pBulletClass, self,, vStart, rFiringDir));
+		aGrenade = R6Grenade(Spawn(m_pBulletClass, self,, vStart, rFiringDir));
 		aGrenade.Instigator = pawnOwner;
 		m_bReadyToThrow = false;
 		// End:0x159
-		if(__NFUN_242__(pawnOwner.m_bIsProne, true))
+		if((pawnOwner.m_bIsProne == true))
 		{
-			aGrenade.SetSpeed(__NFUN_171__(m_fMuzzleVelocity, 0.5000000));			
+			aGrenade.SetSpeed((m_fMuzzleVelocity * 0.5000000));			
 		}
 		else
 		{
@@ -234,7 +234,7 @@ function ClientThrowGrenade()
 function float GetSaveDistanceToThrow()
 {
 	// End:0x29
-	if(__NFUN_177__(m_pBulletClass.default.m_fKillBlastRadius, float(30)))
+	if((m_pBulletClass.default.m_fKillBlastRadius > float(30)))
 	{
 		return m_pBulletClass.default.m_fExplosionRadius;		
 	}
@@ -249,12 +249,12 @@ simulated function WeaponInitialization(Pawn pawnOwner)
 {
 	super(R6Weapons).WeaponInitialization(pawnOwner);
 	// End:0x26
-	if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) == int(NM_DedicatedServer)))
 	{
 		return;
 	}
 	// End:0x39
-	if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) == 0))
 	{
 		HideAttachment();
 	}
@@ -267,7 +267,7 @@ simulated event HideAttachment()
 	// End:0x3A
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__("***** HideAttachment for", string(self)), "******"));
+		Log((("***** HideAttachment for" @ string(self)) @ "******"));
 	}
 	SetDrawType(0);
 	return;
@@ -276,7 +276,7 @@ simulated event HideAttachment()
 function bool CanSwitchToWeapon()
 {
 	// End:0x12
-	if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) > 0))
 	{
 		return true;		
 	}
@@ -297,22 +297,22 @@ state StandByToThrow
 		// End:0x44
 		if(bShowLog)
 		{
-			__NFUN_231__("**** IN  STANDBY TO THROW *******");
+			Log("**** IN  STANDBY TO THROW *******");
 		}
 		// End:0xFE
-		if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+		if((int(m_iNbBulletsInWeapon) == 0))
 		{
 			// End:0x99
 			if(bShowLog)
 			{
-				__NFUN_231__("**** No more Grenades, Autoswitch to Primary Weapon *******");
+				Log("**** No more Grenades, Autoswitch to Primary Weapon *******");
 			}
 			PController = R6PlayerController(Pawn(Owner).Controller);
 			// End:0xFE
-			if(__NFUN_119__(PController, none))
+			if((PController != none))
 			{
 				// End:0xEF
-				if(__NFUN_119__(R6Pawn(Owner).m_WeaponsCarried[0], none))
+				if((R6Pawn(Owner).m_WeaponsCarried[0] != none))
 				{
 					PController.PrimaryWeapon();					
 				}
@@ -330,20 +330,20 @@ state StandByToThrow
 		// End:0x27
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("StandByToThrow =", string(m_bCanThrowGrenade)));
+			Log(("StandByToThrow =" @ string(m_bCanThrowGrenade)));
 		}
 		// End:0x107
-		if(__NFUN_130__(__NFUN_151__(int(m_iNbBulletsInWeapon), 0), m_bCanThrowGrenade))
+		if(((int(m_iNbBulletsInWeapon) > 0) && m_bCanThrowGrenade))
 		{
 			// End:0xF5
-			if(__NFUN_119__(R6PlayerController(Pawn(Owner).Controller), none))
+			if((R6PlayerController(Pawn(Owner).Controller) != none))
 			{
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
 				// End:0xED
-				if(__NFUN_130__(R6Pawn(Owner).IsPeeking(), __NFUN_129__(R6Pawn(Owner).m_bIsProne)))
+				if((R6Pawn(Owner).IsPeeking() && (!R6Pawn(Owner).m_bIsProne)))
 				{
 					// End:0xE2
-					if(__NFUN_154__(int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft), 1))
+					if((int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft) == 1))
 					{
 						m_eThrow = 6;						
 					}
@@ -358,7 +358,7 @@ state StandByToThrow
 				}
 			}
 			ServerSetThrow(m_eThrow);
-			__NFUN_113__('ReadyToThrow');
+			GotoState('ReadyToThrow');
 		}
 		return;
 	}
@@ -366,17 +366,17 @@ state StandByToThrow
 	function AltFire(float fValue)
 	{
 		// End:0xE0
-		if(__NFUN_130__(__NFUN_151__(int(m_iNbBulletsInWeapon), 0), m_bCanThrowGrenade))
+		if(((int(m_iNbBulletsInWeapon) > 0) && m_bCanThrowGrenade))
 		{
 			// End:0xCE
-			if(__NFUN_119__(R6PlayerController(Pawn(Owner).Controller), none))
+			if((R6PlayerController(Pawn(Owner).Controller) != none))
 			{
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
 				// End:0xC6
-				if(__NFUN_130__(R6Pawn(Owner).IsPeeking(), __NFUN_129__(R6Pawn(Owner).m_bIsProne)))
+				if((R6Pawn(Owner).IsPeeking() && (!R6Pawn(Owner).m_bIsProne)))
 				{
 					// End:0xBB
-					if(__NFUN_154__(int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft), 1))
+					if((int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft) == 1))
 					{
 						m_eThrow = 4;						
 					}
@@ -391,7 +391,7 @@ state StandByToThrow
 				}
 			}
 			ServerSetThrow(m_eThrow);
-			__NFUN_113__('ReadyToThrow');
+			GotoState('ReadyToThrow');
 		}
 		return;
 	}
@@ -431,7 +431,7 @@ state ReadyToThrow
 		// End:0x2C
 		if(bShowLog)
 		{
-			__NFUN_231__("**** IN  READY TO THROW *******");
+			Log("**** IN  READY TO THROW *******");
 		}
 		R6Pawn(Owner).m_bIsFiringState = true;
 		m_bFistPersonAnimFinish = true;
@@ -444,17 +444,17 @@ state ReadyToThrow
 		if(R6Pawn(Owner).m_bIsPlayer)
 		{
 			// End:0x10F
-			if(__NFUN_242__(R6PlayerController(Pawn(Owner).Controller).bBehindView, false))
+			if((R6PlayerController(Pawn(Owner).Controller).bBehindView == false))
 			{
 				// End:0x10F
-				if(__NFUN_119__(m_FPHands, none))
+				if((m_FPHands != none))
 				{
 					m_bFistPersonAnimFinish = false;
-					m_FPHands.__NFUN_113__('FiringWeapon');
+					m_FPHands.GotoState('FiringWeapon');
 					// End:0x100
 					if(bShowLog)
 					{
-						__NFUN_231__("Calling Fire SingleShot");
+						Log("Calling Fire SingleShot");
 					}
 					m_FPHands.FireSingleShot();
 				}
@@ -474,7 +474,7 @@ state ReadyToThrow
 		// End:0x39
 		if(bShowLog)
 		{
-			__NFUN_231__("ReadyToThrow = FirstPersonAnimFinish");
+			Log("ReadyToThrow = FirstPersonAnimFinish");
 		}
 		return;
 	}

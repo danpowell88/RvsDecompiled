@@ -57,7 +57,7 @@ function Created()
 	m_ALocGameMode[1] = Localize("MultiPlayer", "GameMode_Cooperative", "R6Menu");
 	super(UWindowWindow).Created();
 	m_pButtonsDef = R6MenuButtonsDefines(GetButtonsDefinesUnique(Root.MenuClassDefines.ClassButtonsDefines));
-	m_pButtonsDef.SetButtonsSizes(__NFUN_175__(310.0000000, float(15)), 15.0000000);
+	m_pButtonsDef.SetButtonsSizes((310.0000000 - float(15)), 15.0000000);
 	return;
 }
 
@@ -97,7 +97,7 @@ function R6WindowButtonAndEditBox CreateButAndEditBox(float _X, float _Y, float 
 	pNewBut.m_vBorder = Root.Colors.White;
 	pNewBut.m_bSelected = false;
 	pNewBut.CreateTextAndBox(_szButName, _szButTip, 0.0000000, 1);
-	pNewBut.CreateEditBox(__NFUN_175__(__NFUN_171__(310.0000000, 0.5000000), float(36)));
+	pNewBut.CreateEditBox(((310.0000000 * 0.5000000) - float(36)));
 	pNewBut.m_pEditBox.EditBox.bPassword = true;
 	pNewBut.m_pEditBox.EditBox.MaxLength = 16;
 	pNewBut.SetEditBoxTip(_szCheckBoxTip);
@@ -111,7 +111,7 @@ function SetButtonAndEditBox(R6MenuMPCreateGameTab.eCreateGameWindow_ID _eCGW_ID
 
 	pBut = R6WindowButtonAndEditBox(GetList(GetCurrentGameMode(), _eCGW_ID));
 	// End:0x5A
-	if(__NFUN_119__(pBut, none))
+	if((pBut != none))
 	{
 		pBut.m_pEditBox.SetValue(_szEditBoxValue);
 		pBut.m_bSelected = _bSelected;
@@ -148,14 +148,14 @@ function UWindowWindow GetList(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGam
 	J0x07:
 
 	// End:0x70 [Loop If]
-	if(__NFUN_150__(i, m_AServerGameOpt.Length))
+	if((i < m_AServerGameOpt.Length))
 	{
 		// End:0x66
-		if(__NFUN_130__(__NFUN_154__(int(m_AServerGameOpt[i].eGameMode), int(_eGameMode)), __NFUN_154__(int(m_AServerGameOpt[i].eCGWindowID), int(_eCGWindowID))))
+		if(((int(m_AServerGameOpt[i].eGameMode) == int(_eGameMode)) && (int(m_AServerGameOpt[i].eCGWindowID) == int(_eCGWindowID))))
 		{
 			return m_AServerGameOpt[i].pGameOptList;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -182,10 +182,10 @@ function SetCurrentGameMode(Actor.EGameModeInfo _eGameMode, optional bool _bAdvi
 		J0x10:
 
 		// End:0x44 [Loop If]
-		if(__NFUN_150__(i, m_ALinkWindow.Length))
+		if((i < m_ALinkWindow.Length))
 		{
 			m_ALinkWindow[i].SetCurrentGameMode(_eGameMode);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x10;
 		}
@@ -194,19 +194,19 @@ function SetCurrentGameMode(Actor.EGameModeInfo _eGameMode, optional bool _bAdvi
 	J0x4B:
 
 	// End:0xDC [Loop If]
-	if(__NFUN_150__(i, m_AServerGameOpt.Length))
+	if((i < m_AServerGameOpt.Length))
 	{
 		// End:0xD2
-		if(__NFUN_155__(int(m_AServerGameOpt[i].eGameMode), int(_eGameMode)))
+		if((int(m_AServerGameOpt[i].eGameMode) != int(_eGameMode)))
 		{
 			// End:0xB8
-			if(m_AServerGameOpt[i].pGameOptList.__NFUN_303__('R6WindowListGeneral'))
+			if(m_AServerGameOpt[i].pGameOptList.IsA('R6WindowListGeneral'))
 			{
 				R6WindowListGeneral(m_AServerGameOpt[i].pGameOptList).ChangeVisualItems(false);
 			}
 			m_AServerGameOpt[i].pGameOptList.HideWindow();
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x4B;
 	}
@@ -214,20 +214,20 @@ function SetCurrentGameMode(Actor.EGameModeInfo _eGameMode, optional bool _bAdvi
 	J0xE3:
 
 	// End:0x17F [Loop If]
-	if(__NFUN_150__(i, m_AServerGameOpt.Length))
+	if((i < m_AServerGameOpt.Length))
 	{
 		// End:0x175
-		if(__NFUN_154__(int(m_AServerGameOpt[i].eGameMode), int(_eGameMode)))
+		if((int(m_AServerGameOpt[i].eGameMode) == int(_eGameMode)))
 		{
 			m_AServerGameOpt[i].pGameOptList.ShowWindow();
 			// End:0x16A
-			if(m_AServerGameOpt[i].pGameOptList.__NFUN_303__('R6WindowListGeneral'))
+			if(m_AServerGameOpt[i].pGameOptList.IsA('R6WindowListGeneral'))
 			{
 				R6WindowListGeneral(m_AServerGameOpt[i].pGameOptList).ChangeVisualItems(true);
 			}
 			m_eCurrentGameMode = _eGameMode;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xE3;
 	}
@@ -281,14 +281,14 @@ function RefreshCGButtons()
 	J0x07:
 
 	// End:0x67 [Loop If]
-	if(__NFUN_150__(i, m_AServerGameOpt.Length))
+	if((i < m_AServerGameOpt.Length))
 	{
 		// End:0x5D
-		if(__NFUN_154__(int(m_AServerGameOpt[i].eGameMode), int(GetCurrentGameMode())))
+		if((int(m_AServerGameOpt[i].eGameMode) == int(GetCurrentGameMode())))
 		{
 			UpdateButtons(m_AServerGameOpt[i].eGameMode, m_AServerGameOpt[i].eCGWindowID, true);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -311,17 +311,17 @@ function Notify(UWindowDialogControl C, byte E)
 	local bool bProcessNotify;
 
 	// End:0x35
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x35
-		if(C.__NFUN_303__('R6WindowButtonBox'))
+		if(C.IsA('R6WindowButtonBox'))
 		{
 			ManageR6ButtonBoxNotify(C);
 			bProcessNotify = true;
 		}
 	}
 	// End:0x5C
-	if(__NFUN_130__(__NFUN_130__(bProcessNotify, m_bInitComplete), __NFUN_129__(m_bNewServerProfile)))
+	if(((bProcessNotify && m_bInitComplete) && (!m_bNewServerProfile)))
 	{
 		SetServerOptions();
 	}
@@ -362,7 +362,7 @@ function ManageR6ButtonBoxNotify(UWindowDialogControl C)
 	// End:0x83
 	if(R6WindowButtonBox(C).GetSelectStatus())
 	{
-		R6WindowButtonBox(C).m_bSelected = __NFUN_129__(R6WindowButtonBox(C).m_bSelected);
+		R6WindowButtonBox(C).m_bSelected = (!R6WindowButtonBox(C).m_bSelected);
 		UpdateMenuOptions(R6WindowButtonBox(C).m_iButtonID, R6WindowButtonBox(C).m_bSelected, R6WindowListGeneral(GetList(GetCurrentGameMode(), 1)), true);
 	}
 	return;
@@ -376,7 +376,7 @@ function ManageR6ButtonAndEditBoxNotify(UWindowDialogControl C)
 	// End:0x42
 	if(R6WindowButtonAndEditBox(C).GetSelectStatus())
 	{
-		R6WindowButtonAndEditBox(C).m_bSelected = __NFUN_129__(R6WindowButtonAndEditBox(C).m_bSelected);
+		R6WindowButtonAndEditBox(C).m_bSelected = (!R6WindowButtonAndEditBox(C).m_bSelected);
 	}
 	return;
 }

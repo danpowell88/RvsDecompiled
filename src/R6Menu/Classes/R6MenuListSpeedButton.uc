@@ -44,14 +44,14 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 
 	super(R6WindowListRadioButton).SetSelectedItem(NewSelected);
 	// End:0x50
-	if(__NFUN_114__(m_SelectedItem, none))
+	if((m_SelectedItem == none))
 	{
-		__NFUN_231__("NoSelected Item in action button menu? that's weird!");
+		Log("NoSelected Item in action button menu? that's weird!");
 		return;
 	}
 	Planning = R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam];
 	// End:0xCB
-	if(__NFUN_129__(m_bAutoSelect))
+	if((!m_bAutoSelect))
 	{
 		Planning.SetMovementSpeed(R6MenuSpeedButtonItem(m_SelectedItem).m_eSpeed);
 		R6MenuRootWindow(Root).m_PlanningWidget.m_bClosePopup = true;
@@ -67,7 +67,7 @@ function ShowWindow()
 	eSpeed = R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam].GetMovementSpeed();
 	m_bAutoSelect = true;
 	// End:0x71
-	if(__NFUN_119__(m_ButtonItem[int(eSpeed)], m_SelectedItem))
+	if((m_ButtonItem[int(eSpeed)] != m_SelectedItem))
 	{
 		SetSelectedItem(m_ButtonItem[int(eSpeed)]);
 	}

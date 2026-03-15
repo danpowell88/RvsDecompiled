@@ -17,11 +17,11 @@ var float m_fExistForHowlong;
 simulated function Tick(float fDeltaTime)
 {
 	super(Actor).Tick(fDeltaTime);
-	__NFUN_184__(m_fExistForHowlong, fDeltaTime);
+	(m_fExistForHowlong += fDeltaTime);
 	// End:0x29
-	if(__NFUN_177__(m_fExistForHowlong, 0.0400000))
+	if((m_fExistForHowlong > 0.0400000))
 	{
-		__NFUN_279__();
+		Destroy();
 	}
 	return;
 }

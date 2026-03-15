@@ -61,7 +61,7 @@ function Created()
 	local Texture ButtonTexture;
 
 	super.Created();
-	m_listBox = R6WindowTextIconsListBox(CreateWindow(Class'R6Window.R6WindowTextIconsListBox', 0.0000000, float(m_LabelRegionTop.H), WinWidth, __NFUN_175__(WinHeight, float(m_LabelRegionTop.H)), self));
+	m_listBox = R6WindowTextIconsListBox(CreateWindow(Class'R6Window.R6WindowTextIconsListBox', 0.0000000, float(m_LabelRegionTop.H), WinWidth, (WinHeight - float(m_LabelRegionTop.H)), self));
 	m_listBox.SetCornerType(1);
 	m_listBox.m_IgnoreAllreadySelected = false;
 	ButtonTexture = R6WindowLookAndFeel(LookAndFeel).m_R6ScrollTexture;
@@ -118,7 +118,7 @@ function Created()
 	m_AddRemoveBg.t = ButtonTexture;
 	m_AddRemoveBg.R = m_AddRemoveBgReg;
 	m_AddRemoveBg.SendToBack();
-	m_UpButton = R6WindowButton(CreateWindow(Class'R6Window.R6WindowButton', __NFUN_175__(WinWidth, float(m_IUpDownXPos)), float(m_IUpDownYPos), UpDownButtonWidth, UpDownButtonHeight, self));
+	m_UpButton = R6WindowButton(CreateWindow(Class'R6Window.R6WindowButton', (WinWidth - float(m_IUpDownXPos)), float(m_IUpDownYPos), UpDownButtonWidth, UpDownButtonHeight, self));
 	m_UpButton.ToolTipString = Localize("Tip", "GearRoomButUp", "R6Menu");
 	m_UpButton.m_bDrawBorders = false;
 	m_UpButton.bUseRegion = true;
@@ -131,7 +131,7 @@ function Created()
 	m_UpButton.UpTexture = ButtonTexture;
 	m_UpButton.UpRegion = m_UpReg.Up;
 	m_UpButton.m_iDrawStyle = 5;
-	m_DownButton = R6WindowButton(CreateWindow(Class'R6Window.R6WindowButton', __NFUN_174__(__NFUN_174__(m_UpButton.WinLeft, m_UpButton.WinWidth), float(m_IUpDownBetweenPadding)), float(m_IUpDownYPos), UpDownButtonWidth, UpDownButtonHeight, self));
+	m_DownButton = R6WindowButton(CreateWindow(Class'R6Window.R6WindowButton', ((m_UpButton.WinLeft + m_UpButton.WinWidth) + float(m_IUpDownBetweenPadding)), float(m_IUpDownYPos), UpDownButtonWidth, UpDownButtonHeight, self));
 	m_DownButton.ToolTipString = Localize("Tip", "GearRoomButDown", "R6Menu");
 	m_DownButton.m_bDrawBorders = false;
 	m_DownButton.bUseRegion = true;
@@ -144,14 +144,14 @@ function Created()
 	m_DownButton.UpTexture = ButtonTexture;
 	m_DownButton.UpRegion = m_DownReg.Up;
 	m_DownButton.m_iDrawStyle = 5;
-	m_UpDownBg = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', __NFUN_175__(WinWidth, float(m_IUpDownBgXPos)), float(m_IUpDownBgYPos), float(m_UpDownBgReg.W), float(m_UpDownBgReg.H), self));
+	m_UpDownBg = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', (WinWidth - float(m_IUpDownBgXPos)), float(m_IUpDownBgYPos), float(m_UpDownBgReg.W), float(m_UpDownBgReg.H), self));
 	m_UpDownBg.bAlwaysBehind = true;
 	m_UpDownBg.m_bUseColor = true;
 	m_UpDownBg.m_iDrawStyle = 5;
 	m_UpDownBg.t = ButtonTexture;
 	m_UpDownBg.R = m_UpDownBgReg;
 	m_UpDownBg.SendToBack();
-	fLabelWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(m_UpButton.WinLeft, m_AddButton.WinLeft), m_AddButton.WinWidth), float(1));
+	fLabelWidth = (((m_UpButton.WinLeft - m_AddButton.WinLeft) - m_AddButton.WinWidth) - float(1));
 	m_Title = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 0.0000000, WinWidth, float(m_LabelRegionTop.H), self));
 	m_Title.bAlwaysBehind = true;
 	m_Title.m_BGTexture = none;
@@ -164,7 +164,7 @@ function Created()
 
 function Resized()
 {
-	m_listBox.SetSize(m_listBox.WinWidth, __NFUN_175__(WinHeight, float(m_LabelRegionTop.H)));
+	m_listBox.SetSize(m_listBox.WinWidth, (WinHeight - float(m_LabelRegionTop.H)));
 	return;
 }
 
@@ -183,10 +183,10 @@ function Register(UWindowDialogClientWindow W)
 function Paint(Canvas C, float X, float Y)
 {
 	C.Style = byte(m_LabelDrawStyle);
-	C.__NFUN_2626__(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B);
+	C.SetDrawColor(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B);
 	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_LabelRegionTop.W), float(m_LabelRegionTop.H), float(m_LabelRegionTop.X), float(m_LabelRegionTop.Y), float(m_LabelRegionTop.W), float(m_LabelRegionTop.H), m_LabelTexture);
-	DrawStretchedTextureSegment(C, 0.0000000, float(m_LabelRegionTop.H), float(m_LabelRegionTile.W), __NFUN_175__(__NFUN_175__(WinHeight, float(m_LabelRegionTop.H)), float(m_LabelRegionBottom.H)), float(m_LabelRegionTile.X), float(m_LabelRegionTile.Y), float(m_LabelRegionTile.W), float(m_LabelRegionTile.H), m_LabelTexture);
-	DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(WinHeight, float(m_LabelRegionBottom.H)), float(m_LabelRegionBottom.W), float(m_LabelRegionBottom.H), float(m_LabelRegionBottom.X), float(m_LabelRegionBottom.Y), float(m_LabelRegionBottom.W), float(m_LabelRegionBottom.H), m_LabelTexture);
+	DrawStretchedTextureSegment(C, 0.0000000, float(m_LabelRegionTop.H), float(m_LabelRegionTile.W), ((WinHeight - float(m_LabelRegionTop.H)) - float(m_LabelRegionBottom.H)), float(m_LabelRegionTile.X), float(m_LabelRegionTile.Y), float(m_LabelRegionTile.W), float(m_LabelRegionTile.H), m_LabelTexture);
+	DrawStretchedTextureSegment(C, 0.0000000, (WinHeight - float(m_LabelRegionBottom.H)), float(m_LabelRegionBottom.W), float(m_LabelRegionBottom.H), float(m_LabelRegionBottom.X), float(m_LabelRegionBottom.Y), float(m_LabelRegionBottom.W), float(m_LabelRegionBottom.H), m_LabelTexture);
 	return;
 }
 
@@ -203,17 +203,17 @@ function UpdateButtons(optional int addButton)
 	local bool bDrawingAddOrRemove;
 
 	// End:0xA2
-	if(__NFUN_119__(m_listBox.m_SelectedItem, none))
+	if((m_listBox.m_SelectedItem != none))
 	{
 		m_UpButton.bDisabled = false;
 		m_DownButton.bDisabled = false;
 		// End:0x64
-		if(__NFUN_114__(m_listBox.m_SelectedItem.Next, none))
+		if((m_listBox.m_SelectedItem.Next == none))
 		{
 			m_DownButton.bDisabled = true;
 		}
 		// End:0x9F
-		if(__NFUN_114__(m_listBox.m_SelectedItem.Prev, m_listBox.Items))
+		if((m_listBox.m_SelectedItem.Prev == m_listBox.Items))
 		{
 			m_UpButton.bDisabled = true;
 		}		
@@ -224,7 +224,7 @@ function UpdateButtons(optional int addButton)
 		m_DownButton.bDisabled = true;
 	}
 	// End:0xF2
-	if(__NFUN_119__(m_listBox.m_SelectedItem, none))
+	if((m_listBox.m_SelectedItem != none))
 	{
 		m_RemoveButton.ShowWindow();
 		bDrawingAddOrRemove = true;		
@@ -234,7 +234,7 @@ function UpdateButtons(optional int addButton)
 		m_RemoveButton.HideWindow();
 	}
 	// End:0x14A
-	if(__NFUN_130__(__NFUN_154__(addButton, 1), __NFUN_150__(m_listBox.Items.Count(), m_maxItemsCount)))
+	if(((addButton == 1) && (m_listBox.Items.Count() < m_maxItemsCount)))
 	{
 		m_AddButton.ShowWindow();
 		bDrawingAddOrRemove = true;		
@@ -244,7 +244,7 @@ function UpdateButtons(optional int addButton)
 		m_AddButton.HideWindow();
 	}
 	// End:0x186
-	if(__NFUN_242__(bDrawingAddOrRemove, true))
+	if((bDrawingAddOrRemove == true))
 	{
 		m_AddRemoveBg.ShowWindow();
 		m_AddRemoveBg.SendToBack();		
@@ -257,7 +257,7 @@ function UpdateButtons(optional int addButton)
 	if(bAcceptsFocus)
 	{
 		// End:0x1C7
-		if(__NFUN_114__(Root.FocusedWindow, m_listBox))
+		if((Root.FocusedWindow == m_listBox))
 		{
 			m_listBox.ActivateWindow(0, false);
 		}

@@ -25,7 +25,7 @@ function GotoTab(UWindowTabControlItem NewSelected, optional bool bByUser)
 	local float fGlobalX, fGlobalY;
 
 	// End:0x2C
-	if(__NFUN_130__(__NFUN_119__(SelectedTab, NewSelected), bByUser))
+	if(((SelectedTab != NewSelected) && bByUser))
 	{
 		LookAndFeel.PlayMenuSound(self, 5);
 	}
@@ -43,10 +43,10 @@ function int GetSelectedTabID()
 	J0x19:
 
 	// End:0x5E [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x42
-		if(__NFUN_114__(i, SelectedTab))
+		if((i == SelectedTab))
 		{
 			return i.m_iItemID;
 		}

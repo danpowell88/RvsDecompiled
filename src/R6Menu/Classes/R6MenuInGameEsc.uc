@@ -48,15 +48,15 @@ function InitInGameEsc()
 	local R6MenuInGameRootWindow r6Root;
 
 	r6Root = R6MenuInGameRootWindow(Root);
-	labelWidth = float(__NFUN_145__(r6Root.m_REscMenuWidget.W, 3));
-	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', float(r6Root.m_REscMenuWidget.X), __NFUN_174__(float(r6Root.m_REscMenuWidget.Y), r6Root.m_fTopLabelHeight), labelWidth, m_fLabelHeight, self));
-	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_CodeName.WinLeft, m_CodeName.WinWidth), m_CodeName.WinTop, labelWidth, m_fLabelHeight, self));
-	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_DateTime.WinLeft, m_DateTime.WinWidth), m_CodeName.WinTop, m_DateTime.WinWidth, m_fLabelHeight, self));
-	m_pInGameNavBar = R6MenuInGameEscSinglePlayerNavBar(CreateWindow(Class'R6Menu.R6MenuInGameEscSinglePlayerNavBar', float(r6Root.m_REscMenuWidget.X), __NFUN_175__(__NFUN_174__(__NFUN_174__(float(r6Root.m_REscMenuWidget.Y), r6Root.m_fTopLabelHeight), float(r6Root.m_REscMenuWidget.H)), m_fNavBarHeight), float(r6Root.m_REscMenuWidget.W), m_fNavBarHeight, self));
+	labelWidth = float((r6Root.m_REscMenuWidget.W / 3));
+	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', float(r6Root.m_REscMenuWidget.X), (float(r6Root.m_REscMenuWidget.Y) + r6Root.m_fTopLabelHeight), labelWidth, m_fLabelHeight, self));
+	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_CodeName.WinLeft + m_CodeName.WinWidth), m_CodeName.WinTop, labelWidth, m_fLabelHeight, self));
+	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_DateTime.WinLeft + m_DateTime.WinWidth), m_CodeName.WinTop, m_DateTime.WinWidth, m_fLabelHeight, self));
+	m_pInGameNavBar = R6MenuInGameEscSinglePlayerNavBar(CreateWindow(Class'R6Menu.R6MenuInGameEscSinglePlayerNavBar', float(r6Root.m_REscMenuWidget.X), (((float(r6Root.m_REscMenuWidget.Y) + r6Root.m_fTopLabelHeight) + float(r6Root.m_REscMenuWidget.H)) - m_fNavBarHeight), float(r6Root.m_REscMenuWidget.W), m_fNavBarHeight, self));
 	m_BorderColor = Root.Colors.Red;
-	m_pR6RainbowTeamBar = R6MenuSingleTeamBar(CreateWindow(Class'R6Menu.R6MenuSingleTeamBar', m_CodeName.WinLeft, __NFUN_174__(m_CodeName.WinTop, m_CodeName.WinHeight), float(r6Root.m_REscMenuWidget.W), m_fRainbowStatsHeight, self));
+	m_pR6RainbowTeamBar = R6MenuSingleTeamBar(CreateWindow(Class'R6Menu.R6MenuSingleTeamBar', m_CodeName.WinLeft, (m_CodeName.WinTop + m_CodeName.WinHeight), float(r6Root.m_REscMenuWidget.W), m_fRainbowStatsHeight, self));
 	m_pR6RainbowTeamBar.m_IGPlayerInfoListBox.m_bIgnoreUserClicks = true;
-	m_EscObj = R6MenuEscObjectives(CreateWindow(Class'R6Menu.R6MenuEscObjectives', m_pR6RainbowTeamBar.WinLeft, __NFUN_174__(m_pR6RainbowTeamBar.WinTop, m_pR6RainbowTeamBar.WinHeight), m_pR6RainbowTeamBar.WinWidth, __NFUN_175__(__NFUN_175__(m_pInGameNavBar.WinTop, m_pR6RainbowTeamBar.WinTop), m_pR6RainbowTeamBar.WinHeight)));
+	m_EscObj = R6MenuEscObjectives(CreateWindow(Class'R6Menu.R6MenuEscObjectives', m_pR6RainbowTeamBar.WinLeft, (m_pR6RainbowTeamBar.WinTop + m_pR6RainbowTeamBar.WinHeight), m_pR6RainbowTeamBar.WinWidth, ((m_pInGameNavBar.WinTop - m_pR6RainbowTeamBar.WinTop) - m_pR6RainbowTeamBar.WinHeight)));
 	return;
 }
 
@@ -65,7 +65,7 @@ function InitTrainingEsc()
 	local R6MenuInGameRootWindow r6Root;
 
 	r6Root = R6MenuInGameRootWindow(Root);
-	m_pInGameNavBar = R6MenuInGameEscSinglePlayerNavBar(CreateWindow(Class'R6Menu.R6MenuInGameEscSinglePlayerNavBar', float(r6Root.m_REscTraining.X), __NFUN_175__(__NFUN_174__(__NFUN_174__(float(r6Root.m_REscTraining.Y), r6Root.m_fTopLabelHeight), float(r6Root.m_REscTraining.H)), m_fNavBarHeight), float(r6Root.m_REscTraining.W), m_fNavBarHeight, self));
+	m_pInGameNavBar = R6MenuInGameEscSinglePlayerNavBar(CreateWindow(Class'R6Menu.R6MenuInGameEscSinglePlayerNavBar', float(r6Root.m_REscTraining.X), (((float(r6Root.m_REscTraining.Y) + r6Root.m_fTopLabelHeight) + float(r6Root.m_REscTraining.H)) - m_fNavBarHeight), float(r6Root.m_REscTraining.W), m_fNavBarHeight, self));
 	m_pInGameNavBar.SetTrainingNavbar();
 	return;
 }
@@ -78,13 +78,13 @@ function ShowWindow()
 	super(UWindowWindow).ShowWindow();
 	r6Root = R6MenuInGameRootWindow(Root);
 	// End:0x8D
-	if(__NFUN_129__(r6Root.m_bInEscMenu))
+	if((!r6Root.m_bInEscMenu))
 	{
 		GetPlayerOwner().SetPause(true);
-		GetPlayerOwner().__NFUN_2722__();
+		GetPlayerOwner().SaveCurrentFadeValue();
 		R6PlayerController(GetPlayerOwner()).ClientFadeCommonSound(0.5000000, 0);
-		GetPlayerOwner().__NFUN_2721__(0.5000000, 0, 5);
-		GetPlayerOwner().__NFUN_2721__(0.5000000, 0, 7);
+		GetPlayerOwner().FadeSound(0.5000000, 0, 5);
+		GetPlayerOwner().FadeSound(0.5000000, 0, 7);
 	}
 	// End:0xA1
 	if(r6Root.m_bInTraining)
@@ -107,10 +107,10 @@ function HideWindow()
 	super(UWindowWindow).HideWindow();
 	r6Root = R6MenuInGameRootWindow(Root);
 	// End:0x4D
-	if(__NFUN_129__(r6Root.m_bInEscMenu))
+	if((!r6Root.m_bInEscMenu))
 	{
 		GetPlayerOwner().SetPause(false);
-		GetPlayerOwner().__NFUN_2723__(0.5000000);
+		GetPlayerOwner().ReturnSavedFadeValue(0.5000000);
 	}
 	return;
 }

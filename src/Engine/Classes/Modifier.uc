@@ -15,12 +15,12 @@ var() editinlineuse Material Material;
 function Trigger(Actor Other, Actor EventInstigator)
 {
 	// End:0x24
-	if(__NFUN_119__(Material, none))
+	if((Material != none))
 	{
 		Material.Trigger(Other, EventInstigator);
 	}
 	// End:0x48
-	if(__NFUN_119__(FallbackMaterial, none))
+	if((FallbackMaterial != none))
 	{
 		FallbackMaterial.Trigger(Other, EventInstigator);
 	}

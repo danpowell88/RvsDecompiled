@@ -13,7 +13,7 @@ var(Action) float PauseTime;
 function bool InitActionFor(ScriptedController C)
 {
 	C.CurrentAction = self;
-	C.__NFUN_280__(PauseTime, false);
+	C.SetTimer(PauseTime, false);
 	return true;
 	return;
 }
@@ -32,7 +32,7 @@ function bool CompleteWhenTimer()
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(PauseTime));
+	return (ActionString @ string(PauseTime));
 	return;
 }
 

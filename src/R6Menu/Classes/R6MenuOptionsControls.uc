@@ -35,7 +35,7 @@ function InitPageOptions()
 
 	fXOffset = 0.0000000;
 	fYOffset = 0.0000000;
-	m_pListControls = R6WindowListControls(CreateControl(Class'R6Window.R6WindowListControls', fXOffset, fYOffset, __NFUN_175__(WinWidth, fXOffset), __NFUN_175__(__NFUN_175__(WinHeight, float(14)), fYOffset), self));
+	m_pListControls = R6WindowListControls(CreateControl(Class'R6Window.R6WindowListControls', fXOffset, fYOffset, (WinWidth - fXOffset), ((WinHeight - float(14)) - fYOffset), self));
 	m_pListControls.m_fItemHeight = 15.0000000;
 	m_pListControls.m_fXOffSet = 5.0000000;
 	CreateKeyPopUp();
@@ -170,7 +170,7 @@ function AddKeyItem(string _szTitle, string _szToolTip, string _szActionKey, R6W
 	NewItem.m_szActionKey = _szActionKey;
 	NewItem.m_szFakeEditBoxValue = GetLocKeyNameByActionKey(_szActionKey, _bPlanningInput);
 	NewItem.m_fXFakeEditBox = 220.0000000;
-	NewItem.m_fWFakeEditBox = __NFUN_175__(__NFUN_175__(WinWidth, NewItem.m_fXFakeEditBox), float(40));
+	NewItem.m_fWFakeEditBox = ((WinWidth - NewItem.m_fXFakeEditBox) - float(40));
 	// End:0x10D
 	if(_bPlanningInput)
 	{
@@ -193,13 +193,13 @@ function UpdateOptionsInPage()
 	J0x1D:
 
 	// End:0xD0 [Loop If]
-	if(__NFUN_119__(ListItem, none))
+	if((ListItem != none))
 	{
 		// End:0xB9
-		if(__NFUN_129__(UWindowListBoxItem(ListItem).m_bNotAffectByNotify))
+		if((!UWindowListBoxItem(ListItem).m_bNotAffectByNotify))
 		{
 			// End:0x8B
-			if(__NFUN_154__(UWindowListBoxItem(ListItem).m_iItemID, 0))
+			if((UWindowListBoxItem(ListItem).m_iItemID == 0))
 			{
 				UWindowListBoxItem(ListItem).m_szFakeEditBoxValue = GetLocKeyNameByActionKey(UWindowListBoxItem(ListItem).m_szActionKey, false);				
 			}
@@ -221,8 +221,8 @@ function string GetLocKeyNameByActionKey(string _szActionKey, optional bool _bPl
 	local string szTemp;
 	local byte Key;
 
-	Key = GetPlayerOwner().__NFUN_2706__(_szActionKey, _bPlanningInput);
-	szTemp = GetPlayerOwner().__NFUN_2708__(Key, _bPlanningInput);
+	Key = GetPlayerOwner().GetKey(_szActionKey, _bPlanningInput);
+	szTemp = GetPlayerOwner().GetEnumName(Key, _bPlanningInput);
 	szTemp = GetPlayerOwner().Player.Console.ConvertKeyToLocalisation(Key, szTemp);
 	return szTemp;
 	return;
@@ -268,18 +268,18 @@ function ManagePopUpKey(UWindowDialogControl C)
 
 	m_pCurItem = R6WindowListControls(C).GetSelectedItem();
 	// End:0x1A1
-	if(__NFUN_129__(m_pCurItem.m_bNotAffectByNotify))
+	if((!m_pCurItem.m_bNotAffectByNotify))
 	{
 		pR6TextLabelExt = R6WindowTextLabelExt(m_pPopUpKeyBG.m_ClientArea);
 		// End:0xDD
-		if(__NFUN_122__(GetCurKeyName(), ""))
+		if((GetCurKeyName() == ""))
 		{
-			pR6TextLabelExt.ChangeTextLabel(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(m_pCurItem.HelpText, " "), Localize("Options", "Key_Advice", "R6Menu")), " "), Localize("Options", "Key_Nothing", "R6Menu")), 0);
+			pR6TextLabelExt.ChangeTextLabel(((((m_pCurItem.HelpText $ " ") $ Localize("Options", "Key_Advice", "R6Menu")) $ " ") $ Localize("Options", "Key_Nothing", "R6Menu")), 0);
 			pR6TextLabelExt.ChangeTextLabel(" ", 1);			
 		}
 		else
 		{
-			pR6TextLabelExt.ChangeTextLabel(__NFUN_112__(__NFUN_112__(m_pCurItem.HelpText, " "), Localize("Options", "Key_Advice", "R6Menu")), 0);
+			pR6TextLabelExt.ChangeTextLabel(((m_pCurItem.HelpText $ " ") $ Localize("Options", "Key_Advice", "R6Menu")), 0);
 			pR6TextLabelExt.ChangeTextLabel(GetCurKeyName(), 1);
 		}
 		m_pPopUpKeyBG.ShowWindow();
@@ -348,7 +348,7 @@ function RefreshKeyItem(string _szNewKeyValue)
 
 	pItem = m_pListControls.GetSelectedItem();
 	// End:0x34
-	if(__NFUN_119__(pItem, none))
+	if((pItem != none))
 	{
 		pItem.m_szFakeEditBoxValue = _szNewKeyValue;
 	}
@@ -363,33 +363,33 @@ function KeyPressed(int Key)
 	local bool bUpdate, bPlanningInput;
 
 	// End:0x14
-	if(__NFUN_154__(GetCurKeyInputClass(), 1))
+	if((GetCurKeyInputClass() == 1))
 	{
 		bPlanningInput = true;
 	}
 	// End:0x2E
-	if(__NFUN_155__(m_iKeyToAssign, -1))
+	if((m_iKeyToAssign != -1))
 	{
 		bUpdate = true;		
 	}
 	else
 	{
 		// End:0xAC
-		if(__NFUN_129__(IsKeyValid(Key)))
+		if((!IsKeyValid(Key)))
 		{
 			CloseAllKeyPopUp(true);
 			Root.SimplePopUp(Localize("Options", "Key_Invalid_Title", "R6Menu"), Localize("Options", "Key_Invalid", "R6Menu"), 0, int(2), false, self);
 			return;
 		}
-		m_szOldActionKey = GetPlayerOwner().__NFUN_2707__(byte(Key), bPlanningInput);
-		szTemp = Localize("Keys", __NFUN_112__("K_", m_szOldActionKey), "R6Menu", true);
+		m_szOldActionKey = GetPlayerOwner().GetActionKey(byte(Key), bPlanningInput);
+		szTemp = Localize("Keys", ("K_" $ m_szOldActionKey), "R6Menu", true);
 		m_iKeyToAssign = Key;
 		// End:0x1FF
-		if(__NFUN_130__(__NFUN_123__(m_szOldActionKey, ""), __NFUN_123__(szTemp, "")))
+		if(((m_szOldActionKey != "") && (szTemp != "")))
 		{
-			szKeyName = GetPlayerOwner().Player.Console.ConvertKeyToLocalisation(byte(m_iKeyToAssign), GetPlayerOwner().__NFUN_2708__(byte(m_iKeyToAssign), bPlanningInput));
+			szKeyName = GetPlayerOwner().Player.Console.ConvertKeyToLocalisation(byte(m_iKeyToAssign), GetPlayerOwner().GetEnumName(byte(m_iKeyToAssign), bPlanningInput));
 			pR6TextLabelExt = R6WindowTextLabelExt(m_pKeyMenuReAssignPopUp.m_ClientArea);
-			pR6TextLabelExt.ChangeTextLabel(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szKeyName, " "), Localize("Options", "Key_Assign", "R6Menu")), " "), Localize("Keys", __NFUN_112__("K_", m_szOldActionKey), "R6Menu")), 0);
+			pR6TextLabelExt.ChangeTextLabel(((((szKeyName $ " ") $ Localize("Options", "Key_Assign", "R6Menu")) $ " ") $ Localize("Keys", ("K_" $ m_szOldActionKey), "R6Menu")), 0);
 			m_pKeyMenuReAssignPopUp.ShowWindow();
 			m_pOptControls.ShowWindow();			
 		}
@@ -407,8 +407,8 @@ function KeyPressed(int Key)
 		{
 			szTemp = "INPUTPLANNING";
 		}
-		szKeyName = GetPlayerOwner().__NFUN_2708__(byte(m_iKeyToAssign), bPlanningInput);
-		GetPlayerOwner().__NFUN_2710__(__NFUN_168__(__NFUN_168__(szTemp, szKeyName), GetCurActionKey()));
+		szKeyName = GetPlayerOwner().GetEnumName(byte(m_iKeyToAssign), bPlanningInput);
+		GetPlayerOwner().SetKey(((szTemp @ szKeyName) @ GetCurActionKey()));
 		UpdateOptionsInPage();
 		m_szOldActionKey = "";
 		m_iKeyToAssign = -1;
@@ -436,10 +436,10 @@ function bool IsKeyValid(int _Key)
 		// End:0xA9
 		case int(Root.Console.1):
 			// End:0xA6
-			if(__NFUN_155__(GetCurKeyInputClass(), 1))
+			if((GetCurKeyInputClass() != 1))
 			{
 				// End:0xA6
-				if(__NFUN_122__(GetCurActionKey(), "Console"))
+				if((GetCurActionKey() == "Console"))
 				{
 					bValidKey = false;
 				}
@@ -451,7 +451,7 @@ function bool IsKeyValid(int _Key)
 		// End:0x2A0
 		case int(Root.Console.236):
 			// End:0x1AD
-			if(__NFUN_154__(GetCurKeyInputClass(), 1))
+			if((GetCurKeyInputClass() == 1))
 			{
 				switch(GetCurActionKey())
 				{
@@ -547,8 +547,8 @@ function RestoreDefaultValue()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
-	GetPlayerOwner().__NFUN_544__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
+	GetPlayerOwner().ResetKeyboard();
 	UpdateOptionsInPage();
 	return;
 }
@@ -560,19 +560,19 @@ function Notify(UWindowDialogControl C, byte E)
 	local bool bUpdateGameOptions;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	OptionsWidget = R6MenuOptionsWidget(OwnerWindow);
 	// End:0x175
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0xE3
-		if(C.__NFUN_303__('R6WindowButton'))
+		if(C.IsA('R6WindowButton'))
 		{
 			// End:0xCE
-			if(__NFUN_114__(C, m_pGeneralButUse))
+			if((C == m_pGeneralButUse))
 			{
 				// End:0xCB
-				if(__NFUN_114__(C, m_pGeneralButUse))
+				if((C == m_pGeneralButUse))
 				{
 					Root.SimplePopUp(Localize("Options", "ResetToDefault", "R6Menu"), Localize("Options", "ResetToDefaultConfirm", "R6Menu"), 55, 0, false, self);
 				}				
@@ -586,18 +586,18 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x105
-			if(C.__NFUN_303__('R6WindowListControls'))
+			if(C.IsA('R6WindowListControls'))
 			{
 				ManagePopUpKey(C);				
 			}
 			else
 			{
 				// End:0x175
-				if(C.__NFUN_303__('R6MenuOptionsMapKeys'))
+				if(C.IsA('R6MenuOptionsMapKeys'))
 				{
 					CloseAllKeyPopUp(true);
 					// End:0x161
-					if(__NFUN_154__(m_pOptControls.m_iLastKeyPressed, int(GetPlayerOwner().Player.Console.27)))
+					if((m_pOptControls.m_iLastKeyPressed == int(GetPlayerOwner().Player.Console.27)))
 					{
 						m_iKeyToAssign = -1;						
 					}

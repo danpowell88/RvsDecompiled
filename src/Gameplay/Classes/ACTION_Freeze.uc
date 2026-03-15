@@ -11,11 +11,11 @@ class ACTION_Freeze extends LatentScriptedAction
 function bool InitActionFor(ScriptedController C)
 {
 	// End:0x5D
-	if(__NFUN_119__(C.Pawn, none))
+	if((C.Pawn != none))
 	{
 		C.Pawn.bPhysicsAnimUpdate = false;
 		C.Pawn.StopAnimating();
-		C.Pawn.__NFUN_3970__(0);
+		C.Pawn.SetPhysics(0);
 	}
 	C.CurrentAction = self;
 	return true;

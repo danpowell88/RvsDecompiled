@@ -22,11 +22,11 @@ var float m_fFeetColBoxRadius;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_132__(__NFUN_130__(bNetOwner, __NFUN_150__(int(Role), int(ROLE_Authority))), __NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+	reliable if(((bNetOwner && (int(Role) < int(ROLE_Authority))) || ((!bNetOwner) && (int(Role) == int(ROLE_Authority)))))
 		m_bActive;
 
 	// Pos:0x037
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_fFeetColBoxRadius;
 }
 
@@ -40,13 +40,13 @@ function logC(string S)
 	local name baseName;
 
 	// End:0x1F
-	if(__NFUN_119__(Base, none))
+	if((Base != none))
 	{
 		baseName = Base.Name;
 	}
 	Time = string(Level.TimeSeconds);
-	Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("[", Time), "] COL BOX ("), string(baseName)), "): "), S));
+	Time = Left(Time, (InStr(Time, ".") + 3));
+	Log(((((("[" $ Time) $ "] COL BOX (")) $ "): " $ ???) $ S));
 	return;
 }
 
@@ -65,7 +65,7 @@ event UnTrigger(Actor Other, Pawn EventInstigator)
 event HitWall(Vector HitNormal, Actor HitWall)
 {
 	// End:0x37
-	if(__NFUN_119__(Pawn(Base), none))
+	if((Pawn(Base) != none))
 	{
 		Pawn(Base).Controller.HitWall(HitNormal, HitWall);
 	}
@@ -75,7 +75,7 @@ event HitWall(Vector HitNormal, Actor HitWall)
 event Touch(Actor Other)
 {
 	// End:0x1F
-	if(__NFUN_119__(Base, none))
+	if((Base != none))
 	{
 		Base.Touch(Other);
 	}
@@ -91,7 +91,7 @@ event PostTouch(Actor Other)
 event UnTouch(Actor Other)
 {
 	// End:0x1F
-	if(__NFUN_119__(Base, none))
+	if((Base != none))
 	{
 		Base.UnTouch(Other);
 	}
@@ -101,7 +101,7 @@ event UnTouch(Actor Other)
 event Bump(Actor Other)
 {
 	// End:0x32
-	if(__NFUN_119__(Pawn(Base), none))
+	if((Pawn(Base) != none))
 	{
 		Pawn(Base).Controller.NotifyBump(Other);
 	}
@@ -140,7 +140,7 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 
 simulated event Destroyed()
 {
-	__NFUN_1503__(false);
+	EnableCollision(false);
 	super.Destroyed();
 	return;
 }

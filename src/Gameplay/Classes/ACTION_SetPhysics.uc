@@ -12,14 +12,14 @@ var(Action) Actor.EPhysics NewPhysicsMode;
 
 function bool InitActionFor(ScriptedController C)
 {
-	C.GetInstigator().__NFUN_3970__(NewPhysicsMode);
+	C.GetInstigator().SetPhysics(NewPhysicsMode);
 	return false;
 	return;
 }
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(NewPhysicsMode));
+	return (ActionString @ string(NewPhysicsMode));
 	return;
 }
 

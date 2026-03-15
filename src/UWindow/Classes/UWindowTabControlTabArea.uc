@@ -48,26 +48,26 @@ function SizeTabsSingleLine(Canvas C)
 	J0x42:
 
 	// End:0x172 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		LookAndFeel.Tab_GetTabSize(self, C, RemoveAmpersand(i.Caption), W, H);
 		i.TabWidth = W;
 		// End:0xC7
-		if(__NFUN_181__(i.m_fFixWidth, float(0)))
+		if((i.m_fFixWidth != float(0)))
 		{
 			i.TabWidth = i.m_fFixWidth;
 		}
-		__NFUN_184__(fTotalTabsWidth, i.TabWidth);
+		(fTotalTabsWidth += i.TabWidth);
 		// End:0x112
-		if(__NFUN_177__(fTotalTabsWidth, WinWidth))
+		if((fTotalTabsWidth > WinWidth))
 		{
-			__NFUN_185__(i.TabWidth, __NFUN_175__(fTotalTabsWidth, WinWidth));
+			(i.TabWidth -= (fTotalTabsWidth - WinWidth));
 			fTotalTabsWidth = WinWidth;
 		}
-		i.TabHeight = __NFUN_174__(H, float(1));
+		i.TabHeight = (H + float(1));
 		i.TabTop = 0.0000000;
 		i.RowNumber = 0;
-		__NFUN_165__(TabCount);
+		(TabCount++);
 		i = UWindowTabControlItem(i.Next);
 		// [Loop Continue]
 		goto J0x42;
@@ -87,10 +87,10 @@ function SizeTabsSingleLine(Canvas C)
 		J0x1EA:
 
 		// End:0x2C9 [Loop If]
-		if(__NFUN_119__(i, none))
+		if((i != none))
 		{
 			// End:0x226
-			if(__NFUN_150__(Count, TabOffset))
+			if((Count < TabOffset))
 			{
 				i.TabLeft = -1.0000000;
 				LastHidden = i;				
@@ -98,35 +98,35 @@ function SizeTabsSingleLine(Canvas C)
 			else
 			{
 				// End:0x23C
-				if(__NFUN_114__(FirstShown, none))
+				if((FirstShown == none))
 				{
 					FirstShown = i;
 				}
 				i.TabLeft = ItemX;
 				// End:0x286
-				if(__NFUN_179__(__NFUN_174__(i.TabLeft, i.TabWidth), __NFUN_174__(WinWidth, float(5))))
+				if(((i.TabLeft + i.TabWidth) >= (WinWidth + float(5))))
 				{
 					bHaveMore = true;
 				}
-				__NFUN_184__(ItemX, i.TabWidth);
-				__NFUN_185__(ItemX, float(15));
+				(ItemX += i.TabWidth);
+				(ItemX -= float(15));
 			}
-			__NFUN_165__(Count);
+			(Count++);
 			i = UWindowTabControlItem(i.Next);
 			// [Loop Continue]
 			goto J0x1EA;
 		}
 		// End:0x312
-		if(__NFUN_130__(__NFUN_130__(__NFUN_151__(TabOffset, 0), __NFUN_119__(LastHidden, none)), __NFUN_176__(__NFUN_174__(LastHidden.TabWidth, float(5)), __NFUN_175__(WinWidth, ItemX))))
+		if((((TabOffset > 0) && (LastHidden != none)) && ((LastHidden.TabWidth + float(5)) < (WinWidth - ItemX))))
 		{
-			__NFUN_166__(TabOffset);			
+			(TabOffset--);			
 		}
 		else
 		{
 			// End:0x387
-			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(bShowSelected, __NFUN_150__(TabOffset, __NFUN_147__(TabCount, 1))), __NFUN_119__(Selected, none)), __NFUN_119__(Selected, FirstShown)), __NFUN_177__(__NFUN_174__(Selected.TabLeft, Selected.TabWidth), __NFUN_175__(WinWidth, float(5)))))
+			if(((((bShowSelected && (TabOffset < (TabCount - 1))) && (Selected != none)) && (Selected != FirstShown)) && ((Selected.TabLeft + Selected.TabWidth) > (WinWidth - float(5)))))
 			{
-				__NFUN_165__(TabOffset);				
+				(TabOffset++);				
 			}
 			else
 			{
@@ -143,8 +143,8 @@ function SizeTabsSingleLine(Canvas C)
 	// End:0x3F8
 	if(UWindowTabControl(ParentWindow).m_bTabButton)
 	{
-		UWindowTabControl(ParentWindow).LeftButton.bDisabled = __NFUN_152__(TabOffset, 0);
-		UWindowTabControl(ParentWindow).RightButton.bDisabled = __NFUN_129__(bHaveMore);
+		UWindowTabControl(ParentWindow).LeftButton.bDisabled = (TabOffset <= 0);
+		UWindowTabControl(ParentWindow).RightButton.bDisabled = (!bHaveMore);
 	}
 	TabRows = 1;
 	return;
@@ -166,18 +166,18 @@ function SizeTabsMultiLine(Canvas C)
 	J0x1D:
 
 	// End:0x1D7 [Loop If]
-	if(__NFUN_130__(bTryAnotherRow, __NFUN_152__(TabRows, 10)))
+	if((bTryAnotherRow && (TabRows <= 10)))
 	{
 		bTryAnotherRow = false;
 		j = 0;
 		J0x43:
 
 		// End:0x7A [Loop If]
-		if(__NFUN_150__(j, TabRows))
+		if((j < TabRows))
 		{
 			RowWidths[j] = 0.0000000;
 			TabCounts[j] = 0;
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x43;
 		}
@@ -185,7 +185,7 @@ function SizeTabsMultiLine(Canvas C)
 		J0xA1:
 
 		// End:0x1D4 [Loop If]
-		if(__NFUN_119__(i, none))
+		if((i != none))
 		{
 			LookAndFeel.Tab_GetTabSize(self, C, RemoveAmpersand(i.Caption), W, H);
 			i.TabWidth = W;
@@ -195,29 +195,29 @@ function SizeTabsMultiLine(Canvas C)
 			J0x115:
 
 			// End:0x154 [Loop If]
-			if(__NFUN_150__(j, TabRows))
+			if((j < TabRows))
 			{
 				// End:0x14A
-				if(__NFUN_176__(RowWidths[j], RowWidths[MinRow]))
+				if((RowWidths[j] < RowWidths[MinRow]))
 				{
 					MinRow = j;
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x115;
 			}
 			// End:0x185
-			if(__NFUN_177__(__NFUN_174__(RowWidths[MinRow], W), WinWidth))
+			if(((RowWidths[MinRow] + W) > WinWidth))
 			{
-				__NFUN_165__(TabRows);
+				(TabRows++);
 				bTryAnotherRow = true;
 				// [Explicit Break]
 				goto J0x1D4;				
 			}
 			else
 			{
-				__NFUN_184__(RowWidths[MinRow], W);
-				__NFUN_165__(TabCounts[MinRow]);
+				(RowWidths[MinRow] += W);
+				(TabCounts[MinRow]++);
 				i.RowNumber = MinRow;
 			}
 			i = UWindowTabControlItem(i.Next);
@@ -231,15 +231,15 @@ function SizeTabsMultiLine(Canvas C)
 	}
 	Selected = UWindowTabControl(ParentWindow).SelectedTab;
 	// End:0x28C
-	if(__NFUN_151__(TabRows, 1))
+	if((TabRows > 1))
 	{
 		i = UWindowTabControlItem(UWindowTabControl(ParentWindow).Items.Next);
 		J0x222:
 
 		// End:0x28C [Loop If]
-		if(__NFUN_119__(i, none))
+		if((i != none))
 		{
-			__NFUN_184__(i.TabWidth, __NFUN_172__(__NFUN_175__(WinWidth, RowWidths[i.RowNumber]), float(TabCounts[i.RowNumber])));
+			(i.TabWidth += ((WinWidth - RowWidths[i.RowNumber]) / float(TabCounts[i.RowNumber])));
 			i = UWindowTabControlItem(i.Next);
 			// [Loop Continue]
 			goto J0x222;
@@ -249,10 +249,10 @@ function SizeTabsMultiLine(Canvas C)
 	J0x293:
 
 	// End:0x2BD [Loop If]
-	if(__NFUN_150__(j, TabRows))
+	if((j < TabRows))
 	{
 		RowWidths[j] = 0.0000000;
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x293;
 	}
@@ -260,19 +260,19 @@ function SizeTabsMultiLine(Canvas C)
 	J0x2E4:
 
 	// End:0x3DF [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		i.TabLeft = RowWidths[i.RowNumber];
 		// End:0x370
 		if(bArrangeRowsLikeTimHates)
 		{
-			i.TabTop = __NFUN_171__(__NFUN_173__(float(__NFUN_146__(i.RowNumber, __NFUN_147__(__NFUN_147__(TabRows, 1), Selected.RowNumber))), float(TabRows)), i.TabHeight);			
+			i.TabTop = ((float((i.RowNumber + ((TabRows - 1) - Selected.RowNumber))) % float(TabRows)) * i.TabHeight);			
 		}
 		else
 		{
-			i.TabTop = __NFUN_171__(float(i.RowNumber), i.TabHeight);
+			i.TabTop = (float(i.RowNumber) * i.TabHeight);
 		}
-		__NFUN_184__(RowWidths[i.RowNumber], i.TabWidth);
+		(RowWidths[i.RowNumber] += i.TabWidth);
 		i = UWindowTabControlItem(i.Next);
 		// [Loop Continue]
 		goto J0x2E4;
@@ -303,24 +303,24 @@ function Paint(Canvas C, float X, float Y)
 
 	t = GetEntryLevel().TimeSeconds;
 	// End:0x63
-	if(__NFUN_176__(UnFlashTime, t))
+	if((UnFlashTime < t))
 	{
-		bFlashShown = __NFUN_129__(bFlashShown);
+		bFlashShown = (!bFlashShown);
 		// End:0x51
 		if(bFlashShown)
 		{
-			UnFlashTime = __NFUN_174__(t, 0.5000000);			
+			UnFlashTime = (t + 0.5000000);			
 		}
 		else
 		{
-			UnFlashTime = __NFUN_174__(t, 0.3000000);
+			UnFlashTime = (t + 0.3000000);
 		}
 	}
 	Row = 0;
 	J0x6A:
 
 	// End:0x246 [Loop If]
-	if(__NFUN_150__(Row, TabRows))
+	if((Row < TabRows))
 	{
 		Count = 0;
 		iTabNumber = 0;
@@ -329,21 +329,21 @@ function Paint(Canvas C, float X, float Y)
 		J0xB6:
 
 		// End:0x23C [Loop If]
-		if(__NFUN_119__(i, none))
+		if((i != none))
 		{
 			// End:0xDA
-			if(__NFUN_150__(Count, TabOffset))
+			if((Count < TabOffset))
 			{
-				__NFUN_165__(Count);				
+				(Count++);				
 			}
 			else
 			{
 				// End:0x220
-				if(__NFUN_154__(i.RowNumber, Row))
+				if((i.RowNumber == Row))
 				{
 					bNextTabSelected = false;
 					// End:0x12D
-					if(__NFUN_114__(UWindowTabControlItem(i.Next), UWindowTabControl(ParentWindow).SelectedTab))
+					if((UWindowTabControlItem(i.Next) == UWindowTabControl(ParentWindow).SelectedTab))
 					{
 						bNextTabSelected = true;
 					}

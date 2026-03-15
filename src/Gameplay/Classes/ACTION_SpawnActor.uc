@@ -23,18 +23,18 @@ function bool InitActionFor(ScriptedController C)
 	// End:0x55
 	if(bOffsetFromScriptedPawn)
 	{
-		Loc = __NFUN_215__(C.Pawn.Location, LocationOffset);
-		Rot = __NFUN_316__(C.Pawn.Rotation, RotationOffset);		
+		Loc = (C.Pawn.Location + LocationOffset);
+		Rot = (C.Pawn.Rotation + RotationOffset);		
 	}
 	else
 	{
-		Loc = __NFUN_215__(C.SequenceScript.Location, LocationOffset);
-		Rot = __NFUN_316__(C.SequenceScript.Rotation, RotationOffset);
+		Loc = (C.SequenceScript.Location + LocationOffset);
+		Rot = (C.SequenceScript.Rotation + RotationOffset);
 	}
-	A = C.__NFUN_278__(ActorClass,,, Loc, Rot);
+	A = C.Spawn(ActorClass,,, Loc, Rot);
 	A.Instigator = C.Pawn;
 	// End:0x101
-	if(__NFUN_255__(ActorTag, 'None'))
+	if((ActorTag != 'None'))
 	{
 		A.Tag = ActorTag;
 	}
@@ -44,7 +44,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(ActorClass));
+	return (ActionString @ string(ActorClass));
 	return;
 }
 

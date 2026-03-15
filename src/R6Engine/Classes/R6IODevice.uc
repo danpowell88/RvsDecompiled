@@ -25,14 +25,14 @@ function PostBeginPlay()
 {
 	super(R6InteractiveObject).PostBeginPlay();
 	// End:0x85
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		// End:0x85
-		if(__NFUN_132__(__NFUN_154__(int(m_eAnimToPlay), int(4)), __NFUN_154__(int(m_eAnimToPlay), int(3))))
+		if(((int(m_eAnimToPlay) == int(4)) || (int(m_eAnimToPlay) == int(3))))
 		{
 			AddSoundBankName("SFX_Penthouse_Single");
 			// End:0x85
-			if(__NFUN_154__(int(m_eAnimToPlay), int(3)))
+			if((int(m_eAnimToPlay) == int(3)))
 			{
 				m_StartSnd = m_PhoneBuggingSnd;
 				m_InterruptedSnd = m_PhoneBuggingStopSnd;
@@ -49,7 +49,7 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 	local Vector vActorDir, vFacingDir;
 
 	// End:0x1B
-	if(__NFUN_132__(__NFUN_242__(CanToggle(), false), __NFUN_129__(m_bRainbowCanInteract)))
+	if(((CanToggle() == false) || (!m_bRainbowCanInteract)))
 	{
 		return;
 	}
@@ -71,14 +71,14 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 	Query.iTeamActionIDList[2] = 0;
 	Query.iTeamActionIDList[3] = 0;
 	// End:0x16F
-	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	if((fDistance < m_fCircumstantialActionRange))
 	{
 		vFacingDir = Vector(Rotation);
 		vFacingDir.Z = 0.0000000;
-		vActorDir = __NFUN_226__(__NFUN_216__(Location, PlayerController.Pawn.Location));
+		vActorDir = Normal((Location - PlayerController.Pawn.Location));
 		vActorDir.Z = 0.0000000;
 		// End:0x15B
-		if(__NFUN_177__(__NFUN_219__(vActorDir, vFacingDir), 0.8500000))
+		if((Dot(vActorDir, vFacingDir) > 0.8500000))
 		{
 			Query.iInRange = 1;			
 		}
@@ -131,7 +131,7 @@ simulated function ToggleDevice(R6Pawn aPawn)
 	local int iSkinCount;
 
 	// End:0x0E
-	if(__NFUN_242__(CanToggle(), false))
+	if((CanToggle() == false))
 	{
 		return;
 	}
@@ -139,17 +139,17 @@ simulated function ToggleDevice(R6Pawn aPawn)
 	// End:0x71
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Set Device", string(self)), "by pawn"), string(aPawn)), "and his controller"), string(aPawn.Controller)));
+		Log(((((("Set Device" @ string(self)) @ "by pawn") @ string(aPawn)) @ "and his controller") @ string(aPawn.Controller)));
 	}
 	m_bIsActivated = false;
 	iSkinCount = 0;
 	J0x80:
 
 	// End:0xB0 [Loop If]
-	if(__NFUN_150__(iSkinCount, m_ArmedTextures.Length))
+	if((iSkinCount < m_ArmedTextures.Length))
 	{
 		SetSkin(m_ArmedTextures[iSkinCount], iSkinCount);
-		__NFUN_165__(iSkinCount);
+		(iSkinCount++);
 		// [Loop Continue]
 		goto J0x80;
 	}
@@ -176,13 +176,13 @@ simulated function float GetTimeRequired(R6Pawn aPawn)
 	// End:0x43
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("GetTimeRequired", string(m_fPlantTimeMin)), string(aPawn)), string(aPawn.GetSkill(2))));
+		Log(((("GetTimeRequired" @ string(m_fPlantTimeMin)) @ string(aPawn)) @ string(aPawn.GetSkill(2))));
 	}
-	fPlantingTime = __NFUN_174__(m_fPlantTimeMin, __NFUN_171__(__NFUN_175__(float(1), aPawn.GetSkill(2)), __NFUN_175__(m_fPlantTimeMax, m_fPlantTimeMin)));
+	fPlantingTime = (m_fPlantTimeMin + ((float(1) - aPawn.GetSkill(2)) * (m_fPlantTimeMax - m_fPlantTimeMin)));
 	// End:0xA4
-	if(__NFUN_130__(HasKit(aPawn), __NFUN_177__(__NFUN_175__(fPlantingTime, m_fGainTimeWithElectronicsKit), float(0))))
+	if((HasKit(aPawn) && ((fPlantingTime - m_fGainTimeWithElectronicsKit) > float(0))))
 	{
-		__NFUN_185__(fPlantingTime, m_fGainTimeWithElectronicsKit);
+		(fPlantingTime -= m_fGainTimeWithElectronicsKit);
 	}
 	return fPlantingTime;
 	return;

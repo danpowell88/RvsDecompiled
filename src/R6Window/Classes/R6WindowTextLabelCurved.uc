@@ -33,61 +33,61 @@ var Region m_topLeftCornerR;
 
 function Created()
 {
-	m_fRightCurveLineX = __NFUN_175__(__NFUN_175__(__NFUN_175__(WinWidth, m_fVBorderWidth), float(m_topLeftCornerR.W)), m_RightCurveLineWidth);
-	m_fLeftCurveLineX = __NFUN_175__(__NFUN_175__(m_fRightCurveLineX, float(__NFUN_144__(2, m_RLeftcurve.W))), float(m_RBetweenCurveBG.W));
+	m_fRightCurveLineX = (((WinWidth - m_fVBorderWidth) - float(m_topLeftCornerR.W)) - m_RightCurveLineWidth);
+	m_fLeftCurveLineX = ((m_fRightCurveLineX - float((2 * m_RLeftcurve.W))) - float(m_RBetweenCurveBG.W));
 	return;
 }
 
 function Paint(Canvas C, float X, float Y)
 {
 	// End:0x266
-	if(__NFUN_119__(m_BGTexture, none))
+	if((m_BGTexture != none))
 	{
 		C.Style = 4;
-		DrawStretchedTextureSegment(C, m_fVBorderWidth, m_fHBorderHeight, __NFUN_175__(m_fLeftCurveLineX, m_fVBorderWidth), __NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
-		DrawStretchedTextureSegment(C, m_fRightCurveLineX, m_fHBorderHeight, __NFUN_175__(__NFUN_175__(WinWidth, m_fVBorderWidth), m_fRightCurveLineX), __NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
-		DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(m_fRightCurveLineX, float(m_RLeftcurve.W)), float(m_RBetweenCurveBG.W)), float(m_RLeftcurve.H), float(m_RBetweenCurveBG.W), __NFUN_175__(__NFUN_175__(WinHeight, m_fHBorderHeight), float(m_RLeftcurve.H)), float(m_RBetweenCurveBG.X), float(m_RBetweenCurveBG.Y), float(m_RBetweenCurveBG.W), float(m_RBetweenCurveBG.H), m_TBetweenCurveBG);
+		DrawStretchedTextureSegment(C, m_fVBorderWidth, m_fHBorderHeight, (m_fLeftCurveLineX - m_fVBorderWidth), (WinHeight - (float(2) * m_fHBorderHeight)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
+		DrawStretchedTextureSegment(C, m_fRightCurveLineX, m_fHBorderHeight, ((WinWidth - m_fVBorderWidth) - m_fRightCurveLineX), (WinHeight - (float(2) * m_fHBorderHeight)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
+		DrawStretchedTextureSegment(C, ((m_fRightCurveLineX - float(m_RLeftcurve.W)) - float(m_RBetweenCurveBG.W)), float(m_RLeftcurve.H), float(m_RBetweenCurveBG.W), ((WinHeight - m_fHBorderHeight) - float(m_RLeftcurve.H)), float(m_RBetweenCurveBG.X), float(m_RBetweenCurveBG.Y), float(m_RBetweenCurveBG.W), float(m_RBetweenCurveBG.H), m_TBetweenCurveBG);
 		DrawStretchedTextureSegment(C, m_fLeftCurveLineX, m_fHBorderHeight, float(m_RUnderLeftCurveBG.W), float(m_RUnderLeftCurveBG.H), float(m_RUnderLeftCurveBG.X), float(m_RUnderLeftCurveBG.Y), float(m_RUnderLeftCurveBG.W), float(m_RUnderLeftCurveBG.H), m_TUnderLeftCurveBG);
-		DrawStretchedTextureSegment(C, __NFUN_175__(m_fRightCurveLineX, float(m_RLeftcurve.W)), m_fHBorderHeight, float(m_RUnderLeftCurveBG.W), float(m_RUnderLeftCurveBG.H), float(__NFUN_146__(m_RUnderLeftCurveBG.X, m_RUnderLeftCurveBG.W)), float(m_RUnderLeftCurveBG.Y), float(__NFUN_143__(m_RUnderLeftCurveBG.W)), float(m_RUnderLeftCurveBG.H), m_TUnderLeftCurveBG);
+		DrawStretchedTextureSegment(C, (m_fRightCurveLineX - float(m_RLeftcurve.W)), m_fHBorderHeight, float(m_RUnderLeftCurveBG.W), float(m_RUnderLeftCurveBG.H), float((m_RUnderLeftCurveBG.X + m_RUnderLeftCurveBG.W)), float(m_RUnderLeftCurveBG.Y), float((-m_RUnderLeftCurveBG.W)), float(m_RUnderLeftCurveBG.H), m_TUnderLeftCurveBG);
 	}
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	// End:0x44D
-	if(__NFUN_119__(m_HBorderTexture, none))
+	if((m_HBorderTexture != none))
 	{
 		C.Style = 5;
-		DrawStretchedTextureSegment(C, m_fHBorderPadding, 0.0000000, __NFUN_175__(m_fLeftCurveLineX, m_fHBorderPadding), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+		DrawStretchedTextureSegment(C, m_fHBorderPadding, 0.0000000, (m_fLeftCurveLineX - m_fHBorderPadding), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 		DrawStretchedTextureSegment(C, m_fRightCurveLineX, 0.0000000, m_RightCurveLineWidth, m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
-		DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(m_fRightCurveLineX, float(m_RLeftcurve.W)), float(m_RBetweenCurveBG.W)), float(__NFUN_147__(m_RLeftcurve.H, m_HBorderTextureRegion.H)), float(m_RBetweenCurveBG.W), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
-		DrawStretchedTextureSegment(C, m_fVBorderOffset, __NFUN_175__(WinHeight, m_fHBorderHeight), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fVBorderOffset)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+		DrawStretchedTextureSegment(C, ((m_fRightCurveLineX - float(m_RLeftcurve.W)) - float(m_RBetweenCurveBG.W)), float((m_RLeftcurve.H - m_HBorderTextureRegion.H)), float(m_RBetweenCurveBG.W), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+		DrawStretchedTextureSegment(C, m_fVBorderOffset, (WinHeight - m_fHBorderHeight), (WinWidth - (float(2) * m_fVBorderOffset)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 	}
 	// End:0x569
-	if(__NFUN_119__(m_TLeftcurve, none))
+	if((m_TLeftcurve != none))
 	{
 		C.Style = 5;
-		DrawStretchedTextureSegment(C, __NFUN_175__(m_fRightCurveLineX, float(m_RLeftcurve.W)), 0.0000000, float(m_RLeftcurve.W), float(m_RLeftcurve.H), float(__NFUN_146__(m_RLeftcurve.X, m_RLeftcurve.W)), float(m_RLeftcurve.Y), float(__NFUN_143__(m_RLeftcurve.W)), float(m_RLeftcurve.H), m_TLeftcurve);
-		DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(m_fRightCurveLineX, float(__NFUN_144__(2, m_RLeftcurve.W))), float(m_RBetweenCurveBG.W)), 0.0000000, float(m_RLeftcurve.W), float(m_RLeftcurve.H), float(m_RLeftcurve.X), float(m_RLeftcurve.Y), float(m_RLeftcurve.W), float(m_RLeftcurve.H), m_TLeftcurve);
+		DrawStretchedTextureSegment(C, (m_fRightCurveLineX - float(m_RLeftcurve.W)), 0.0000000, float(m_RLeftcurve.W), float(m_RLeftcurve.H), float((m_RLeftcurve.X + m_RLeftcurve.W)), float(m_RLeftcurve.Y), float((-m_RLeftcurve.W)), float(m_RLeftcurve.H), m_TLeftcurve);
+		DrawStretchedTextureSegment(C, ((m_fRightCurveLineX - float((2 * m_RLeftcurve.W))) - float(m_RBetweenCurveBG.W)), 0.0000000, float(m_RLeftcurve.W), float(m_RLeftcurve.H), float(m_RLeftcurve.X), float(m_RLeftcurve.Y), float(m_RLeftcurve.W), float(m_RLeftcurve.H), m_TLeftcurve);
 	}
 	// End:0x671
-	if(__NFUN_119__(m_VBorderTexture, none))
+	if((m_VBorderTexture != none))
 	{
 		C.Style = 5;
-		DrawStretchedTextureSegment(C, m_fVBorderOffset, __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), m_fVBorderPadding), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
-		DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(WinWidth, m_fVBorderWidth), m_fVBorderOffset), __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), m_fVBorderPadding), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+		DrawStretchedTextureSegment(C, m_fVBorderOffset, (m_fHBorderHeight + m_fVBorderPadding), m_fVBorderWidth, ((WinHeight - (float(2) * m_fHBorderHeight)) - m_fVBorderPadding), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+		DrawStretchedTextureSegment(C, ((WinWidth - m_fVBorderWidth) - m_fVBorderOffset), (m_fHBorderHeight + m_fVBorderPadding), m_fVBorderWidth, ((WinHeight - (float(2) * m_fHBorderHeight)) - m_fVBorderPadding), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 	}
 	// End:0x76D
-	if(__NFUN_119__(m_topLeftCornerT, none))
+	if((m_topLeftCornerT != none))
 	{
 		C.Style = 5;
 		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(m_topLeftCornerR.Y), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), m_topLeftCornerT);
-		DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float(__NFUN_143__(m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_topLeftCornerT);
+		DrawStretchedTextureSegment(C, (WinWidth - float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float((-m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_topLeftCornerT);
 	}
 	// End:0x7F7
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		C.Style = 1;
 		C.Font = m_Font;
 		C.SpaceX = m_fFontSpacing;
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 		ClipText(C, TextX, TextY, Text, true);
 	}
 	return;

@@ -169,25 +169,25 @@ var string VoiceType;  // for speech
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		R6DamageAttitudeTo;
 
 	// Pos:0x00D
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		Pawn, PlayerReplicationInfo, 
 		m_PawnRepInfo;
 
 	// Pos:0x025
-	reliable if(__NFUN_130__(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))), bNetOwner))
+	reliable if(((bNetDirty && (int(Role) == int(ROLE_Authority))) && bNetOwner))
 		PawnClass;
 
 	// Pos:0x048
-	reliable if(__NFUN_154__(int(RemoteRole), int(ROLE_AutonomousProxy)))
+	reliable if((int(RemoteRole) == int(ROLE_AutonomousProxy)))
 		ClientDying, ClientGameEnded, 
 		ClientSetLocation, ClientSetRotation;
 
 	// Pos:0x055
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerReStartPlayer;
 }
 
@@ -293,46 +293,46 @@ function logX(string szText, optional int iSource)
 	local string szSource, Time;
 
 	Time = string(Level.TimeSeconds);
-	Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
+	Time = Left(Time, (InStr(Time, ".") + 3));
 	// End:0x57
-	if(__NFUN_154__(iSource, 1))
+	if((iSource == 1))
 	{
-		szSource = __NFUN_112__(__NFUN_112__("(", Time), ":P) ");		
+		szSource = (("(", Time) $ ":P) " $ ???);		
 	}
 	else
 	{
-		szSource = __NFUN_112__(__NFUN_112__("(", Time), ":C) ");
+		szSource = (("(", Time) $ ":C) " $ ???);
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szSource, string(Name)), " ["), string(__NFUN_284__())), "|"), string(Pawn.__NFUN_284__())), "] "), szText));
+	Log((((((((szSource $ string(Name)) $ " [") $ string(GetStateName())) $ "|") $ string(Pawn.GetStateName())) $ "] ") $ szText));
 	return;
 }
 
 function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
 	// End:0x22
-	if(__NFUN_114__(Pawn, none))
+	if((Pawn == none))
 	{
 		super.DisplayDebug(Canvas, YL, YPos);
 		return;
 	}
-	Canvas.__NFUN_2626__(byte(255), 0, 0);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("CONTROLLER ", GetItemName(string(self))), " Pawn "), string(Pawn)));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("     STATE: ", string(__NFUN_284__())), " Timer: "), string(TimerCounter)), " Enemy "), string(Enemy)), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.SetDrawColor(byte(255), 0, 0);
+	Canvas.DrawText(((("CONTROLLER " $ GetItemName(string(self))) $ " Pawn ") $ string(Pawn)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((((("     STATE: " $ string(GetStateName())) $ " Timer: ") $ string(TimerCounter)) $ " Enemy ") $ string(Enemy)), false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	// End:0x136
-	if(__NFUN_114__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo == none))
 	{
-		Canvas.__NFUN_465__("     NO PLAYERREPLICATIONINFO", false);		
+		Canvas.DrawText("     NO PLAYERREPLICATIONINFO", false);		
 	}
 	else
 	{
 		PlayerReplicationInfo.DisplayDebug(Canvas, YL, YPos);
 	}
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	return;
 }
 
@@ -353,26 +353,26 @@ function Reset()
 
 function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 {
-	__NFUN_299__(NewRotation);
+	SetRotation(NewRotation);
 	// End:0x8B
-	if(__NFUN_130__(__NFUN_151__(Rotation.Pitch, RotationRate.Pitch), __NFUN_150__(Rotation.Pitch, __NFUN_147__(65536, RotationRate.Pitch))))
+	if(((Rotation.Pitch > RotationRate.Pitch) && (Rotation.Pitch < (65536 - RotationRate.Pitch))))
 	{
 		// End:0x6F
-		if(__NFUN_150__(Rotation.Pitch, 32768))
+		if((Rotation.Pitch < 32768))
 		{
 			NewRotation.Pitch = RotationRate.Pitch;			
 		}
 		else
 		{
-			NewRotation.Pitch = __NFUN_147__(65536, RotationRate.Pitch);
+			NewRotation.Pitch = (65536 - RotationRate.Pitch);
 		}
 	}
 	// End:0xC4
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		NewRotation.Roll = 0;
-		Pawn.__NFUN_299__(NewRotation);
-		Pawn.__NFUN_267__(NewLocation);
+		Pawn.SetRotation(NewRotation);
+		Pawn.__NFUN_267__(NewLocation) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	}
 	return;
 }

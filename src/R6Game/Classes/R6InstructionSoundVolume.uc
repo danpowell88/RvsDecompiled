@@ -46,7 +46,7 @@ simulated event Touch(Actor Other)
 	local Controller C;
 
 	// End:0x40
-	if(Other.__NFUN_303__('R6Pawn'))
+	if(Other.IsA('R6Pawn'))
 	{
 		Other.m_CurrentVolumeSound = self;
 		C = Pawn(Other).Controller;		
@@ -54,25 +54,25 @@ simulated event Touch(Actor Other)
 	else
 	{
 		// End:0x64
-		if(Other.__NFUN_303__('R6PlayerController'))
+		if(Other.IsA('R6PlayerController'))
 		{
 			C = Controller(Other);
 		}
 	}
 	// End:0x175
-	if(__NFUN_119__(C, none))
+	if((C != none))
 	{
 		C.m_CurrentAmbianceObject = self;
 		C.m_CurrentVolumeSound = self;
 		// End:0x175
-		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bSoundIsPlaying), __NFUN_119__(PlayerController(C), none)), __NFUN_119__(Viewport(PlayerController(C).Player), none)))
+		if((((!m_bSoundIsPlaying) && (PlayerController(C) != none)) && (Viewport(PlayerController(C).Player) != none)))
 		{
 			m_iSoundIndex = 0;
 			m_TrainingMgr = R6GameInfo(C.Level.Game).GetTrainingMgr(R6Pawn(C.Pawn));
 			// End:0x175
-			if(__NFUN_129__(R6Console(m_TrainingMgr.m_Player.Player.Console).m_bStartR6GameInProgress))
+			if((!R6Console(m_TrainingMgr.m_Player.Player.Console).m_bStartR6GameInProgress))
 			{
-				R6HUD(m_TrainingMgr.m_Player.myHUD).__NFUN_1609__(m_iBoxNumber, 0);
+				R6HUD(m_TrainingMgr.m_Player.myHUD).HudStep(m_iBoxNumber, 0);
 				ChangeTextAndSound();
 			}
 		}
@@ -85,20 +85,20 @@ simulated event UnTouch(Actor Other)
 	local Controller C;
 
 	// End:0x30
-	if(Other.__NFUN_303__('R6Pawn'))
+	if(Other.IsA('R6Pawn'))
 	{
 		C = Pawn(Other).Controller;		
 	}
 	else
 	{
 		// End:0x54
-		if(Other.__NFUN_303__('R6PlayerController'))
+		if(Other.IsA('R6PlayerController'))
 		{
 			C = Controller(Other);
 		}
 	}
 	// End:0x6F
-	if(__NFUN_119__(C, none))
+	if((C != none))
 	{
 		C.m_CurrentAmbianceObject = self;
 	}
@@ -107,7 +107,7 @@ simulated event UnTouch(Actor Other)
 
 function SkipToNextInstruction()
 {
-	__NFUN_264__(m_sndIntructionSoundStop, 10);
+	__NFUN_264__(m_sndIntructionSoundStop, 10) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	m_iHudStep = 0;
 	J0x11:
 

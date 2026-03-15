@@ -22,7 +22,7 @@ function PostBeginPlay()
 {
 	super.PostBeginPlay();
 	m_vLookDir = Vector(Rotation);
-	m_vLookDir = __NFUN_226__(m_vLookDir);
+	m_vLookDir = Normal(m_vLookDir);
 	return;
 }
 

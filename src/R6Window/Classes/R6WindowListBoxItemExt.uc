@@ -24,7 +24,7 @@ var stItemDesc m_DescTemp;
 
 function ClearItem()
 {
-	__NFUN_231__("+++++++++++++++++++++++++++++++++++++++++++++++ ClearItem()++++++++++++++++++++++++++++++");
+	Log("+++++++++++++++++++++++++++++++++++++++++++++++ ClearItem()++++++++++++++++++++++++++++++");
 	bSelected = false;
 	m_bShowThisItem = false;
 	return;
@@ -35,7 +35,7 @@ function SetItemParameters(int _index, string _szText, Font _TextFont, float _fX
 	local stItemDesc ItemDesc;
 
 	// End:0xAE
-	if(__NFUN_152__(_index, m_AItemDesc.Length))
+	if((_index <= m_AItemDesc.Length))
 	{
 		ItemDesc.szText = _szText;
 		ItemDesc.TextFont = _TextFont;
@@ -54,7 +54,7 @@ function SetItemParameters(int _index, string _szText, Font _TextFont, float _fX
 function SetItemParam(int _index, stItemDesc _ItemParam)
 {
 	// End:0x21
-	if(__NFUN_152__(_index, m_AItemDesc.Length))
+	if((_index <= m_AItemDesc.Length))
 	{
 		m_AItemDesc[_index] = _ItemParam;
 	}
@@ -64,7 +64,7 @@ function SetItemParam(int _index, stItemDesc _ItemParam)
 function bool SetItemDescriptionIndex(int _iIndex)
 {
 	// End:0x23
-	if(__NFUN_150__(_iIndex, m_AItemDesc.Length))
+	if((_iIndex < m_AItemDesc.Length))
 	{
 		m_DescTemp = m_AItemDesc[_iIndex];
 		return true;
@@ -76,7 +76,7 @@ function bool SetItemDescriptionIndex(int _iIndex)
 function string GetItemText(int _iIndex)
 {
 	// End:0x24
-	if(__NFUN_150__(_iIndex, m_AItemDesc.Length))
+	if((_iIndex < m_AItemDesc.Length))
 	{
 		return m_AItemDesc[_iIndex].szText;		
 	}
@@ -90,7 +90,7 @@ function string GetItemText(int _iIndex)
 function string GetItemMisc(int _iIndex)
 {
 	// End:0x24
-	if(__NFUN_150__(_iIndex, m_AItemDesc.Length))
+	if((_iIndex < m_AItemDesc.Length))
 	{
 		return m_AItemDesc[_iIndex].szMisc;		
 	}
@@ -106,7 +106,7 @@ function SetItemMisc(int _index, string _szMisc)
 	local stItemDesc ItemDesc;
 
 	// End:0x42
-	if(__NFUN_152__(_index, m_AItemDesc.Length))
+	if((_index <= m_AItemDesc.Length))
 	{
 		ItemDesc = m_AItemDesc[_index];
 		ItemDesc.szMisc = _szMisc;
@@ -120,7 +120,7 @@ function SetItemText(int _index, string _szText)
 	local stItemDesc ItemDesc;
 
 	// End:0x42
-	if(__NFUN_152__(_index, m_AItemDesc.Length))
+	if((_index <= m_AItemDesc.Length))
 	{
 		ItemDesc = m_AItemDesc[_index];
 		ItemDesc.szText = _szText;
@@ -132,7 +132,7 @@ function SetItemText(int _index, string _szText)
 function HideLine(int _iLineNb)
 {
 	// End:0x23
-	if(__NFUN_150__(_iLineNb, m_AItemDesc.Length))
+	if((_iLineNb < m_AItemDesc.Length))
 	{
 		m_AItemDesc[_iLineNb].bDisplay = false;
 	}
@@ -146,25 +146,25 @@ function int Compare(UWindowList t, UWindowList B)
 	TS = R6WindowListBoxItemExt(t).GetItemText(0);
 	BS = R6WindowListBoxItemExt(B).GetItemText(0);
 	// End:0x4F
-	if(__NFUN_122__(TS, "NONE"))
+	if((TS == "NONE"))
 	{
 		return -1;		
 	}
 	else
 	{
 		// End:0x61
-		if(__NFUN_122__(BS, "NONE"))
+		if((BS == "NONE"))
 		{
 			return 1;
 		}
 	}
 	// End:0x72
-	if(__NFUN_122__(TS, BS))
+	if((TS == BS))
 	{
 		return 0;
 	}
 	// End:0x87
-	if(__NFUN_115__(TS, BS))
+	if((TS < BS))
 	{
 		return -1;
 	}

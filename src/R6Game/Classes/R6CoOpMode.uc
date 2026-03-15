@@ -22,7 +22,7 @@ var bool bRainbowLeft;
 event InitGame(string Options, out string Error)
 {
 	super(R6GameInfo).InitGame(Options, Error);
-	MaxPlayers = __NFUN_249__(8, MaxPlayers);
+	MaxPlayers = Min(8, MaxPlayers);
 	return;
 }
 
@@ -59,7 +59,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	}
 	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x7C
-	if(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(1)))
+	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
 		BroadcastMissionObjMsg("", "", "MissionSuccesfulObjectivesCompleted", Level.m_sndMissionComplete, int(GetGameMsgLifeTime()));		
 	}
@@ -68,7 +68,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		obj = m_missionMgr.GetMObjFailed();
 		BroadcastMissionObjMsg("", "", "MissionFailed", none, int(GetGameMsgLifeTime()));
 		// End:0x100
-		if(__NFUN_119__(obj, none))
+		if((obj != none))
 		{
 			BroadcastMissionObjMsg(Level.GetMissionObjLocFile(obj), "", obj.GetDescriptionFailure(), obj.GetSoundFailure(), int(GetGameMsgLifeTime()));
 		}
@@ -83,7 +83,7 @@ function PlayerReadySelected(PlayerController _Controller)
 	local int iHumanCount;
 
 	// End:0x1F
-	if(__NFUN_132__(__NFUN_114__(R6PlayerController(_Controller), none), __NFUN_281__('InBetweenRoundMenu')))
+	if(((R6PlayerController(_Controller) == none) || IsInState('InBetweenRoundMenu')))
 	{
 		return;
 	}
@@ -91,19 +91,19 @@ function PlayerReadySelected(PlayerController _Controller)
 	J0x33:
 
 	// End:0x8C [Loop If]
-	if(__NFUN_119__(_aController, none))
+	if((_aController != none))
 	{
 		// End:0x75
-		if(__NFUN_130__(__NFUN_119__(R6PlayerController(_aController), none), __NFUN_154__(int(R6PlayerController(_aController).m_TeamSelection), int(2))))
+		if(((R6PlayerController(_aController) != none) && (int(R6PlayerController(_aController).m_TeamSelection) == int(2))))
 		{
-			__NFUN_165__(iHumanCount);
+			(iHumanCount++);
 		}
 		_aController = _aController.nextController;
 		// [Loop Continue]
 		goto J0x33;
 	}
 	// End:0xB8
-	if(__NFUN_130__(__NFUN_129__(R6PlayerController(_Controller).IsPlayerPassiveSpectator()), __NFUN_152__(iHumanCount, 1)))
+	if(((!R6PlayerController(_Controller).IsPlayerPassiveSpectator()) && (iHumanCount <= 1)))
 	{
 		ResetRound();
 	}

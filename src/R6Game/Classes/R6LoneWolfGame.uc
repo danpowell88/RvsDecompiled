@@ -36,20 +36,20 @@ function InitObjectives()
 	missionObjTerro.m_iNeutralizePercentage = 100;
 	missionObjTerro.m_bVisibleInMenu = false;
 	missionObjTerro.m_szFeedbackOnCompletion = "AllTerroristHaveBeenNeutralized";
-	__NFUN_165__(Index);
+	(Index++);
 	missionObjGotoExtraction = new (none) Class'R6Game.R6MObjGoToExtraction';
 	groupMission.m_aSubMissionObjectives[Index] = missionObjGotoExtraction;
 	groupMission.m_aSubMissionObjectives[Index].m_bIfCompletedMissionIsSuccessfull = true;
 	missionObjGotoExtraction.m_sndSoundFailure = m_sndTeamWipedOut;
 	missionObjGotoExtraction.m_bVisibleInMenu = false;
 	// End:0x205
-	foreach __NFUN_313__(Class'R6Engine.R6Rainbow', aRainbow)
+	foreach DynamicActors(Class'R6Engine.R6Rainbow', aRainbow)
 	{
 		missionObjGotoExtraction.SetPawnToExtract(aRainbow);
 		// End:0x205
 		break;		
 	}	
-	__NFUN_165__(Index);
+	(Index++);
 	super.InitObjectives();
 	return;
 }
@@ -69,7 +69,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	}
 	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x74
-	if(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(1)))
+	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
 		BroadcastMissionObjMsg("", "", "MissionSuccesfulObjectivesCompleted", Level.m_sndMissionComplete);		
 	}
@@ -78,7 +78,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		obj = m_missionMgr.GetMObjFailed();
 		BroadcastMissionObjMsg("", "", "MissionFailed");
 		// End:0xEF
-		if(__NFUN_119__(obj, none))
+		if((obj != none))
 		{
 			BroadcastMissionObjMsg(Level.GetMissionObjLocFile(obj), "", obj.GetDescriptionFailure(), obj.GetSoundFailure(), int(GetGameMsgLifeTime()));
 		}

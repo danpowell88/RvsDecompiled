@@ -165,30 +165,30 @@ var(R6Attachment) string m_szTacticalLightClass;
 replication
 {
 	// Pos:0x01A
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		ServerDetonate, ServerPlaceCharge, 
 		ServerPlaceChargeAnimation, ServerPutBulletInShotgun, 
 		ServerShowInfo;
 
 	// Pos:0x034
-	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) == int(ROLE_Authority)))
 		WeaponZoomSound;
 
 	// Pos:0x000
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerStopFire;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientStopFire, StopFire;
 
 	// Pos:0x027
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bDeployBipod, m_bUnlimitedClip, 
 		m_iNbBulletsInWeapon;
 
 	// Pos:0x041
-	reliable if(__NFUN_130__(bNetOwner, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetOwner && (int(Role) == int(ROLE_Authority))))
 		m_fMaxZoom;
 }
 
@@ -625,13 +625,13 @@ simulated function bool IsPumpShotGun()
 
 function bool IsSniperRifle()
 {
-	return __NFUN_154__(int(m_eWeaponType), int(4));
+	return (int(m_eWeaponType) == int(4));
 	return;
 }
 
 simulated function bool IsLMG()
 {
-	return __NFUN_154__(int(m_eWeaponType), int(5));
+	return (int(m_eWeaponType) == int(5));
 	return;
 }
 

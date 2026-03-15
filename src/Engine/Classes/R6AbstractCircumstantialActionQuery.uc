@@ -37,7 +37,7 @@ var Texture textureIcon;  // Icon associated with this actor action
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		aQueryOwner, aQueryTarget, 
 		bCanBeInterrupted, fPlayerActionTimeRequired, 
 		iHasAction, iInRange, 

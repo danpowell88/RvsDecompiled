@@ -23,16 +23,16 @@ static final function Class<R6Description> findPrimaryDefaultAmmo(Class<R6Primar
 	J0x0F:
 
 	// End:0x77 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, WeaponDescriptionClass.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	if(((i < WeaponDescriptionClass.default.m_Bullets.Length) && (Found == false)))
 	{
 		// End:0x6D
-		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag, "FMJ"))
+		if((Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag == "FMJ"))
 		{
 			Found = true;			
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0x0F;
@@ -46,16 +46,16 @@ static final function Class<R6Description> findPrimaryDefaultAmmo(Class<R6Primar
 	J0xA1:
 
 	// End:0x10A [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, WeaponDescriptionClass.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	if(((i < WeaponDescriptionClass.default.m_Bullets.Length) && (Found == false)))
 	{
 		// End:0x100
-		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag, "BUCK"))
+		if((Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag == "BUCK"))
 		{
 			Found = true;			
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0xA1;
@@ -79,16 +79,16 @@ static final function Class<R6Description> findSecondaryDefaultAmmo(Class<R6Seco
 	J0x0F:
 
 	// End:0x77 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, WeaponDescriptionClass.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	if(((i < WeaponDescriptionClass.default.m_Bullets.Length) && (Found == false)))
 	{
 		// End:0x6D
-		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag, "FMJ"))
+		if((Class<R6BulletDescription>(WeaponDescriptionClass.default.m_Bullets[i]).default.m_NameTag == "FMJ"))
 		{
 			Found = true;			
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0x0F;
@@ -108,20 +108,20 @@ static final function Class<R6BulletDescription> GetPrimaryBulletDesc(Class<R6Pr
 	local bool Found;
 	local string caps_Token;
 
-	caps_Token = __NFUN_235__(token);
+	caps_Token = Caps(token);
 	J0x0D:
 
 	// End:0x75 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	if(((i < WeaponDescription.default.m_Bullets.Length) && (Found == false)))
 	{
 		// End:0x6B
-		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]).default.m_NameTag, caps_Token))
+		if((Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]).default.m_NameTag == caps_Token))
 		{
 			Found = true;			
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0x0D;
@@ -144,25 +144,25 @@ static final function Class<R6WeaponGadgetDescription> GetPrimaryWeaponGadgetDes
 	local bool Found;
 	local string caps_Token;
 
-	caps_Token = __NFUN_235__(token);
+	caps_Token = Caps(token);
 	// End:0x23
-	if(__NFUN_122__(caps_Token, "NONE"))
+	if((caps_Token == "NONE"))
 	{
 		return Class'R6Description.R6DescWeaponGadgetNone';
 	}
 	J0x23:
 
 	// End:0xA7 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_MyGadgets.Length), __NFUN_242__(Found, false)))
+	if(((i < WeaponDescription.default.m_MyGadgets.Length) && (Found == false)))
 	{
 		// End:0x9D
-		if(__NFUN_130__(__NFUN_119__(WeaponDescription.default.m_MyGadgets[i], none), __NFUN_122__(Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]).default.m_NameID, caps_Token)))
+		if(((WeaponDescription.default.m_MyGadgets[i] != none) && (Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]).default.m_NameID == caps_Token)))
 		{
 			Found = true;			
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0x23;
@@ -185,20 +185,20 @@ static final function Class<R6BulletDescription> GetSecondaryBulletDesc(Class<R6
 	local bool Found;
 	local string caps_Token;
 
-	caps_Token = __NFUN_235__(token);
+	caps_Token = Caps(token);
 	J0x0D:
 
 	// End:0x75 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_Bullets.Length), __NFUN_242__(Found, false)))
+	if(((i < WeaponDescription.default.m_Bullets.Length) && (Found == false)))
 	{
 		// End:0x6B
-		if(__NFUN_122__(Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]).default.m_NameTag, caps_Token))
+		if((Class<R6BulletDescription>(WeaponDescription.default.m_Bullets[i]).default.m_NameTag == caps_Token))
 		{
 			Found = true;			
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0x0D;
@@ -221,25 +221,25 @@ static final function Class<R6WeaponGadgetDescription> GetSecondaryWeaponGadgetD
 	local bool Found;
 	local string caps_Token;
 
-	caps_Token = __NFUN_235__(token);
+	caps_Token = Caps(token);
 	// End:0x23
-	if(__NFUN_122__(caps_Token, "NONE"))
+	if((caps_Token == "NONE"))
 	{
 		return Class'R6Description.R6DescWeaponGadgetNone';
 	}
 	J0x23:
 
 	// End:0x8B [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, WeaponDescription.default.m_MyGadgets.Length), __NFUN_242__(Found, false)))
+	if(((i < WeaponDescription.default.m_MyGadgets.Length) && (Found == false)))
 	{
 		// End:0x81
-		if(__NFUN_122__(Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]).default.m_NameID, caps_Token))
+		if((Class<R6WeaponGadgetDescription>(WeaponDescription.default.m_MyGadgets[i]).default.m_NameID == caps_Token))
 		{
 			Found = true;			
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0x23;

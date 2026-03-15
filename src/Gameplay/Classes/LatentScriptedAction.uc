@@ -11,9 +11,9 @@ class LatentScriptedAction extends ScriptedAction
 
 function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
-	Canvas.__NFUN_465__(__NFUN_112__("Action ", GetActionString()), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(("Action " $ GetActionString()), false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	return;
 }
 

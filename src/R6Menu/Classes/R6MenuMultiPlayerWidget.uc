@@ -180,7 +180,7 @@ function Created()
 	m_FirstTabWindow.bAlwaysBehind = true;
 	m_FirstTabWindow.Text = "";
 	m_FirstTabWindow.m_BGTexture = none;
-	m_pFirstTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', __NFUN_174__(10.0000000, float(5)), 90.0000000, 500.0000000, 25.0000000, self));
+	m_pFirstTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', (10.0000000 + float(5)), 90.0000000, 500.0000000, 25.0000000, self));
 	m_pFirstTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_InternetServer", "R6Menu"), Localize("Tip", "Tab_InternetServer", "R6Menu"), int(1));
 	m_pFirstTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_LanServer", "R6Menu"), Localize("Tip", "Tab_LanServer", "R6Menu"), int(0));
 	InitInfoBar();
@@ -193,7 +193,7 @@ function Created()
 	m_SecondTabWindow.bAlwaysBehind = true;
 	m_SecondTabWindow.Text = "";
 	m_SecondTabWindow.m_BGTexture = none;
-	m_pSecondTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', __NFUN_174__(10.0000000, float(5)), __NFUN_174__(296.0000000, float(5)), 600.0000000, 25.0000000, self));
+	m_pSecondTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', (10.0000000 + float(5)), (296.0000000 + float(5)), 600.0000000, 25.0000000, self));
 	m_pSecondTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_GameFilter", "R6Menu"), Localize("Tip", "Tab_GameFilter", "R6Menu"), int(2));
 	m_pSecondTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_TechFilter", "R6Menu"), Localize("Tip", "Tab_TechFilter", "R6Menu"), int(3));
 	m_pSecondTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_ServerInfo", "R6Menu"), Localize("Tip", "Tab_ServerInfo", "R6Menu"), int(4));
@@ -222,7 +222,7 @@ function Created()
 		m_ButtonLogInOut.SetButLogInOutState(30);
 	}
 	m_fRefeshDeltaTime = 2.0000000;
-	m_GameService.__NFUN_3523__();
+	m_GameService.StopRefreshServers();
 	m_szMultiLoc[0] = Localize("MultiPlayer", "NbOfServers", "R6Menu");
 	m_szMultiLoc[1] = Localize("MultiPlayer", "NbOfPlayers", "R6Menu");
 	m_PageCount = R6WindowPageSwitch(CreateWindow(Class'R6Window.R6WindowPageSwitch', 530.0000000, 90.0000000, 90.0000000, 25.0000000, self));
@@ -242,18 +242,18 @@ function Paint(Canvas C, float X, float Y)
 	m_fMouseX = X;
 	m_fMouseY = Y;
 	// End:0x4A
-	if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+	if((int(m_ConnectionTab) == int(0)))
 	{
 		m_LanServers.LANSeversManager();
 	}
 	// End:0xFF
-	if(__NFUN_130__(__NFUN_132__(m_LanServers.m_bServerListChanged, m_GameService.m_bServerListChanged), __NFUN_151__(__NFUN_147__(m_GameService.__NFUN_1278__(), m_iTimeLastUpdate), 1000)))
+	if(((m_LanServers.m_bServerListChanged || m_GameService.m_bServerListChanged) && ((m_GameService.NativeGetMilliSeconds() - m_iTimeLastUpdate) > 1000)))
 	{
-		m_iTimeLastUpdate = m_GameService.__NFUN_1278__();
+		m_iTimeLastUpdate = m_GameService.NativeGetMilliSeconds();
 		m_GameService.m_bServerListChanged = false;
 		m_LanServers.m_bServerListChanged = false;
 		// End:0xF3
-		if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+		if((int(m_ConnectionTab) == int(0)))
 		{
 			ResortServerList(m_iLastSortCategory, m_bLastTypeOfSort);
 			UpdateFilters();
@@ -266,7 +266,7 @@ function Paint(Canvas C, float X, float Y)
 		}
 	}
 	// End:0x18E
-	if(__NFUN_154__(int(m_ConnectionTab), int(1)))
+	if((int(m_ConnectionTab) == int(1)))
 	{
 		// End:0x151
 		if(m_GameService.m_bRefreshFinished)
@@ -277,7 +277,7 @@ function Paint(Canvas C, float X, float Y)
 			m_bGetServerInfo = true;
 		}
 		// End:0x177
-		if(m_GameService.__NFUN_3522__())
+		if(m_GameService.IsRefreshServersInProgress())
 		{
 			SetCursor(Root.WaitCursor);			
 		}
@@ -291,14 +291,14 @@ function Paint(Canvas C, float X, float Y)
 		SetCursor(Root.NormalCursor);
 	}
 	// End:0x272
-	if(__NFUN_119__(m_ServerListBox.m_SelectedItem, m_oldSelItem))
+	if((m_ServerListBox.m_SelectedItem != m_oldSelItem))
 	{
 		m_oldSelItem = m_ServerListBox.m_SelectedItem;
 		// End:0x22B
-		if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+		if((int(m_ConnectionTab) == int(0)))
 		{
 			// End:0x21D
-			if(__NFUN_119__(m_ServerListBox.m_SelectedItem, none))
+			if((m_ServerListBox.m_SelectedItem != none))
 			{
 				m_LanServers.SetSelectedServer(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);
 			}
@@ -307,7 +307,7 @@ function Paint(Canvas C, float X, float Y)
 		else
 		{
 			// End:0x26A
-			if(__NFUN_119__(m_ServerListBox.m_SelectedItem, none))
+			if((m_ServerListBox.m_SelectedItem != none))
 			{
 				m_GameService.SetSelectedServer(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);
 			}
@@ -315,30 +315,30 @@ function Paint(Canvas C, float X, float Y)
 		}
 	}
 	// End:0x325
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_bGetServerInfo, __NFUN_129__(m_GameService.__NFUN_3522__())), __NFUN_154__(int(m_ConnectionTab), int(1))), __NFUN_154__(int(m_FilterTab), int(4))))
+	if((((m_bGetServerInfo && (!m_GameService.IsRefreshServersInProgress())) && (int(m_ConnectionTab) == int(1))) && (int(m_FilterTab) == int(4))))
 	{
 		// End:0x317
-		if(__NFUN_151__(m_GameService.m_GameServerList.Length, 0))
+		if((m_GameService.m_GameServerList.Length > 0))
 		{
-			m_GameService.__NFUN_3570__(m_GameService.m_GameServerList[m_GameService.m_iSelSrvIndex].iLobbySrvID, m_GameService.m_GameServerList[m_GameService.m_iSelSrvIndex].iGroupID);
+			m_GameService.NativeMSClientReqAltInfo(m_GameService.m_GameServerList[m_GameService.m_iSelSrvIndex].iLobbySrvID, m_GameService.m_GameServerList[m_GameService.m_iSelSrvIndex].iGroupID);
 		}
 		ClearServerInfo();
 		m_bGetServerInfo = false;
 	}
 	// End:0x365
-	if(__NFUN_130__(m_GameService.m_bServerInfoChanged, __NFUN_154__(int(m_ConnectionTab), int(1))))
+	if((m_GameService.m_bServerInfoChanged && (int(m_ConnectionTab) == int(1))))
 	{
 		GetServerInfo(m_GameService);
 		m_GameService.m_bServerInfoChanged = false;
 	}
 	// End:0x38C
-	if(m_GameService.__NFUN_3550__())
+	if(m_GameService.NativeIsRouterDisconnect())
 	{
 		m_LoginSuccessAction = 5;
 		m_pLoginWindow.LogInAfterDisconnect(self);
 	}
 	// End:0x3AC
-	if(__NFUN_155__(int(m_LoginSuccessAction), int(0)))
+	if((int(m_LoginSuccessAction) != int(0)))
 	{
 		m_pLoginWindow.Manager(self);
 	}
@@ -353,14 +353,14 @@ function Paint(Canvas C, float X, float Y)
 		m_pQueryServerInfo.Manager(self);
 	}
 	// End:0x406
-	if(__NFUN_114__(m_ServerListBox.m_SelectedItem, none))
+	if((m_ServerListBox.m_SelectedItem == none))
 	{
 		m_ButtonJoin.bDisabled = true;		
 	}
 	else
 	{
 		// End:0x43C
-		if(__NFUN_129__(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).bSameVersion))
+		if((!R6WindowListServerItem(m_ServerListBox.m_SelectedItem).bSameVersion))
 		{
 			m_ButtonJoin.bDisabled = true;			
 		}
@@ -378,7 +378,7 @@ function ShowWindow()
 
 	R6MenuRootWindow(Root).m_pMenuCDKeyManager.SetWindowUser(Root.15, self);
 	// End:0x97
-	if(__NFUN_114__(m_LanServers, none))
+	if((m_LanServers == none))
 	{
 		m_LanServers = new (none) Class<R6LanServers>(Root.MenuClassDefines.ClassLanServer);
 		R6Console(Root.Console).m_LanServers = m_LanServers;
@@ -387,20 +387,20 @@ function ShowWindow()
 		InitSecondTabWindow();
 	}
 	// End:0xE6
-	if(__NFUN_114__(m_LanServers.m_ClientBeacon, none))
+	if((m_LanServers.m_ClientBeacon == none))
 	{
-		m_LanServers.m_ClientBeacon = Root.Console.ViewportOwner.Actor.__NFUN_278__(Class'IpDrv.ClientBeaconReceiver');
+		m_LanServers.m_ClientBeacon = Root.Console.ViewportOwner.Actor.Spawn(Class'IpDrv.ClientBeaconReceiver');
 	}
 	m_GameService.m_ClientBeacon = m_LanServers.m_ClientBeacon;
 	m_iLastSortCategory = int(m_LanServers.4);
 	m_bLastTypeOfSort = true;
 	super(UWindowWindow).ShowWindow();
-	R6Console(Root.Console).m_GameService.__NFUN_3501__();
+	R6Console(Root.Console).m_GameService.InitGSCDKey();
 	Root.SetLoadRandomBackgroundImage("Multiplayer");
 	// End:0x1B5
 	if(R6Console(Root.Console).m_bNonUbiMatchMaking)
 	{
-		Class'Engine.Actor'.static.__NFUN_1304__(_szIPAddress);
+		Class'Engine.Actor'.static.NativeNonUbiMatchMakingAddress(_szIPAddress);
 		m_pJoinIPWindow.StartCmdLineJoinIPProcedure(m_ButtonJoinIP, _szIPAddress);
 		m_bJoinIPInProgress = true;
 	}
@@ -422,7 +422,7 @@ function ManageToolTip(string _strTip, optional bool _bForceATip)
 	local int iNbOfServers;
 
 	// End:0x1A
-	if(__NFUN_132__(__NFUN_114__(m_pHelpTextWindow, none), __NFUN_129__(bWindowVisible)))
+	if(((m_pHelpTextWindow == none) || (!bWindowVisible)))
 	{
 		return;
 	}
@@ -432,7 +432,7 @@ function ManageToolTip(string _strTip, optional bool _bForceATip)
 	if(_bForceATip)
 	{
 		// End:0x5E
-		if(__NFUN_154__(int(m_ConnectionTab), int(1)))
+		if((int(m_ConnectionTab) == int(1)))
 		{
 			m_iTotalPlayers = m_GameService.GetTotalPlayers();			
 		}
@@ -442,10 +442,10 @@ function ManageToolTip(string _strTip, optional bool _bForceATip)
 		}
 	}
 	// End:0xF2
-	if(__NFUN_122__(_strTip, ""))
+	if((_strTip == ""))
 	{
 		// End:0xA7
-		if(__NFUN_154__(int(m_ConnectionTab), int(1)))
+		if((int(m_ConnectionTab) == int(1)))
 		{
 			iNbOfServers = m_GameService.m_GameServerList.Length;			
 		}
@@ -453,12 +453,12 @@ function ManageToolTip(string _strTip, optional bool _bForceATip)
 		{
 			iNbOfServers = m_LanServers.m_GameServerList.Length;
 		}
-		szTemp1 = __NFUN_112__(__NFUN_112__(m_szMultiLoc[0], " "), string(iNbOfServers));
-		szTemp2 = __NFUN_112__(__NFUN_112__(m_szMultiLoc[1], " "), string(m_iTotalPlayers));
+		szTemp1 = ((m_szMultiLoc[0] $ " ") $ string(iNbOfServers));
+		szTemp2 = ((m_szMultiLoc[1] $ " ") $ string(m_iTotalPlayers));
 	}
 	m_pHelpTextWindow.ToolTip(szTemp1);
 	// End:0x126
-	if(__NFUN_123__(szTemp2, ""))
+	if((szTemp2 != ""))
 	{
 		m_pHelpTextWindow.AddTipText(szTemp2);
 	}
@@ -476,7 +476,7 @@ function ManageTabSelection(int _MPTabChoiceID)
 		case int(0):
 			m_ConnectionTab = 0;
 			// End:0x32
-			if(__NFUN_154__(m_LanServers.m_GameServerList.Length, 0))
+			if((m_LanServers.m_GameServerList.Length == 0))
 			{
 				Refresh(false);
 			}
@@ -484,7 +484,7 @@ function ManageTabSelection(int _MPTabChoiceID)
 			GetServerInfo(m_LanServers);
 			UpdateServerFilters();
 			m_iLastTabSel = int(0);
-			__NFUN_536__();
+			SaveConfig();
 			// End:0x22E
 			break;
 		// End:0xB8
@@ -493,14 +493,14 @@ function ManageTabSelection(int _MPTabChoiceID)
 			m_LoginSuccessAction = 3;
 			m_pLoginWindow.StartLogInProcedure(self);
 			// End:0x9C
-			if(__NFUN_154__(m_GameService.m_GameServerList.Length, 0))
+			if((m_GameService.m_GameServerList.Length == 0))
 			{
 				Refresh(false);
 			}
 			GetGSServers();
 			UpdateServerFilters();
 			m_iLastTabSel = int(1);
-			__NFUN_536__();
+			SaveConfig();
 			// End:0x22E
 			break;
 		// End:0x120
@@ -538,7 +538,7 @@ function ManageTabSelection(int _MPTabChoiceID)
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("This tab was not supported (R6MenuMultiPlayerWidget)");
+			Log("This tab was not supported (R6MenuMultiPlayerWidget)");
 			// End:0x22E
 			break;
 			break;
@@ -635,13 +635,13 @@ function SetServerFilterBooleans(int _iServerInfoID, bool _bNewChoice)
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("Sorry, no server info associate with this button");
+			Log("Sorry, no server info associate with this button");
 			// End:0x1B1
 			break;
 			break;
 	}
 	// End:0x1D2
-	if(__NFUN_176__(GetTime(), __NFUN_174__(m_fLastUpdateServerFilterTime, 0.3000000)))
+	if((GetTime() < (m_fLastUpdateServerFilterTime + 0.3000000)))
 	{
 		m_bNeedUpdateServerFilter = true;
 		return;
@@ -672,16 +672,16 @@ function UpdateServerFilters()
 	m_pSecondWindowGameMode.UpdateGameTypeFilter();
 	m_pSecondWindowFilter.UpdateGameTypeFilter();
 	// End:0x40
-	if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+	if((int(m_ConnectionTab) == int(0)))
 	{
 		UpdateFilters();
-		__NFUN_536__();
+		SaveConfig();
 		GetLanServers();		
 	}
 	else
 	{
 		UpdateFilters();
-		__NFUN_536__();
+		SaveConfig();
 		GetGSServers();
 	}
 	m_fLastUpdateServerFilterTime = GetTime();
@@ -697,9 +697,9 @@ function UpdateFilters()
 	local string szCurrentMod, szTempGDGameType;
 	local stGameServer stTempGameServerItem;
 
-	pModMgr = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModMgr = Class'Engine.Actor'.static.GetModMgr();
 	szCurrentMod = pModMgr.m_pCurrentMod.m_szKeyWord;
-	bIsLanServers = __NFUN_154__(int(m_ConnectionTab), int(0));
+	bIsLanServers = (int(m_ConnectionTab) == int(0));
 	// End:0x64
 	if(bIsLanServers)
 	{
@@ -713,7 +713,7 @@ function UpdateFilters()
 	J0x80:
 
 	// End:0x50D [Loop If]
-	if(__NFUN_150__(i, iNbOfServers))
+	if((i < iNbOfServers))
 	{
 		// End:0xD1
 		if(bIsLanServers)
@@ -728,19 +728,19 @@ function UpdateFilters()
 		}
 		szTempGDGameType = stTempGameServerItem.sGameData.szGameDataGameType;
 		// End:0x14A
-		if(__NFUN_130__(__NFUN_129__(m_bFilterDeathMatch), __NFUN_122__(szTempGDGameType, "RGM_DeathmatchMode")))
+		if(((!m_bFilterDeathMatch) && (szTempGDGameType == "RGM_DeathmatchMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x17C
-		if(__NFUN_130__(__NFUN_129__(m_bFilterTeamDeathMatch), __NFUN_122__(szTempGDGameType, "RGM_TeamDeathmatchMode")))
+		if(((!m_bFilterTeamDeathMatch) && (szTempGDGameType == "RGM_TeamDeathmatchMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x1A7
-		if(__NFUN_130__(__NFUN_129__(m_bFilterDisarmBomb), __NFUN_122__(szTempGDGameType, "RGM_BombAdvMode")))
+		if(((!m_bFilterDisarmBomb) && (szTempGDGameType == "RGM_BombAdvMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;

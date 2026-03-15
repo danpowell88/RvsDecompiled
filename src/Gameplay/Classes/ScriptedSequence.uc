@@ -26,16 +26,16 @@ function TakeOver(Pawn P)
 	local ScriptedController S;
 
 	// End:0x35
-	if(__NFUN_119__(ScriptedController(P.Controller), none))
+	if((ScriptedController(P.Controller) != none))
 	{
 		S = ScriptedController(P.Controller);		
 	}
 	else
 	{
-		S = __NFUN_278__(ScriptControllerClass);
+		S = Spawn(ScriptControllerClass);
 		S.PendingController = P.Controller;
 		// End:0x8C
-		if(__NFUN_119__(S.PendingController, none))
+		if((S.PendingController != none))
 		{
 			S.PendingController.PendingStasis();
 		}
@@ -58,17 +58,17 @@ function SetActions(ScriptedController C)
 	local bool bDone;
 
 	// End:0x31
-	if(__NFUN_119__(C.CurrentAnimation, none))
+	if((C.CurrentAnimation != none))
 	{
 		C.CurrentAnimation.SetCurrentAnimationFor(C);
 	}
 	J0x31:
 
 	// End:0x2C8 [Loop If]
-	if(__NFUN_129__(bDone))
+	if((!bDone))
 	{
 		// End:0xF8
-		if(__NFUN_150__(C.ActionNum, Actions.Length))
+		if((C.ActionNum < Actions.Length))
 		{
 			// End:0x94
 			if(ValidAction(C.ActionNum))
@@ -78,7 +78,7 @@ function SetActions(ScriptedController C)
 			else
 			{
 				NewScript = none;
-				__NFUN_232__(__NFUN_112__(__NFUN_168__(__NFUN_112__(__NFUN_112__(GetItemName(string(self)), " action "), string(C.ActionNum)), Actions[C.ActionNum].GetActionString()), " NOT VALID!!!"));
+				Warn(((((GetItemName(string(self)) $ " action ") $ string(C.ActionNum)) @ Actions[C.ActionNum].GetActionString()) $ " NOT VALID!!!"));
 			}			
 		}
 		else
@@ -86,21 +86,21 @@ function SetActions(ScriptedController C)
 			NewScript = none;
 		}
 		// End:0x11C
-		if(__NFUN_114__(NewScript, none))
+		if((NewScript == none))
 		{
 			C.CurrentAction = none;
 			return;
 		}
 		// End:0x13D
-		if(__NFUN_119__(NewScript, self))
+		if((NewScript != self))
 		{
 			C.SetNewScript(NewScript);
 			return;
 		}
 		// End:0x196
-		if(__NFUN_114__(Actions[C.ActionNum], none))
+		if((Actions[C.ActionNum] == none))
 		{
-			__NFUN_232__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " no action "), string(C.ActionNum)), "!!!"));
+			Warn((((string(self) $ " no action ") $ string(C.ActionNum)) $ "!!!"));
 			C.CurrentAction = none;
 			return;
 		}
@@ -108,15 +108,15 @@ function SetActions(ScriptedController C)
 		// End:0x23A
 		if(bLoggingEnabled)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetItemName(string(C.Pawn)), " script "), GetItemName(string(Tag))), " action "), string(C.ActionNum)), Actions[C.ActionNum].GetActionString()));
+			Log((((((GetItemName(string(C.Pawn)) $ " script ") $ GetItemName(string(Tag))) $ " action ") $ string(C.ActionNum)) @ Actions[C.ActionNum].GetActionString()));
 		}
 		// End:0x2C5
-		if(__NFUN_129__(bDone))
+		if((!bDone))
 		{
 			// End:0x2A2
-			if(__NFUN_114__(Actions[C.ActionNum], none))
+			if((Actions[C.ActionNum] == none))
 			{
-				__NFUN_232__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " has no action "), string(C.ActionNum)), "!!!"));
+				Warn((((string(self) $ " has no action ") $ string(C.ActionNum)) $ "!!!"));
 				C.CurrentAction = none;
 				return;
 			}

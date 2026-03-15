@@ -12,13 +12,13 @@ var(Action) int ActionNumber;
 
 function ProceedToNextAction(ScriptedController C)
 {
-	C.ActionNum = __NFUN_250__(0, ActionNumber);
+	C.ActionNum = Max(0, ActionNumber);
 	return;
 }
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(ActionNumber));
+	return (ActionString @ string(ActionNumber));
 	return;
 }
 

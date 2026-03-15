@@ -33,42 +33,42 @@ var(R6HandAnimation) name m_WalkAnim;
 function PostBeginPlay()
 {
 	// End:0x18
-	if(__NFUN_129__(__NFUN_263__('Fire')))
+	if((!HasAnim('Fire')))
 	{
 		m_HandFire = 'Neutral';
 	}
 	// End:0x30
-	if(__NFUN_129__(__NFUN_263__('FireLast')))
+	if((!HasAnim('FireLast')))
 	{
 		m_HandFireLast = m_HandFire;
 	}
 	// End:0x48
-	if(__NFUN_129__(__NFUN_263__('BipodFire')))
+	if((!HasAnim('BipodFire')))
 	{
 		m_HandBipodFire = m_HandFire;
 	}
 	// End:0x60
-	if(__NFUN_129__(__NFUN_263__('ReloadEmpty')))
+	if((!HasAnim('ReloadEmpty')))
 	{
 		m_HandReloadEmpty = 'Reload';
 	}
 	// End:0x78
-	if(__NFUN_129__(__NFUN_263__('BipodReloadEmpty')))
+	if((!HasAnim('BipodReloadEmpty')))
 	{
 		m_HandBipodReloadEmpty = 'BipodReload';
 	}
 	// End:0x90
-	if(__NFUN_129__(__NFUN_263__('Wait01')))
+	if((!HasAnim('Wait01')))
 	{
 		m_WaitAnim1 = 'Wait_c';
 	}
 	// End:0xA8
-	if(__NFUN_129__(__NFUN_263__('Wait02')))
+	if((!HasAnim('Wait02')))
 	{
 		m_WaitAnim2 = m_WaitAnim1;
 	}
 	// End:0xC0
-	if(__NFUN_129__(__NFUN_263__('walk_c')))
+	if((!HasAnim('walk_c')))
 	{
 		m_WalkAnim = 'Wait_c';
 	}
@@ -79,16 +79,16 @@ function PostBeginPlay()
 function ResetNeutralAnim()
 {
 	AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
-	AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
+	AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
 	return;
 }
 
 function PlayWalkingAnimation()
 {
 	// End:0x13
-	if(__NFUN_281__('Waiting'))
+	if(IsInState('Waiting'))
 	{
-		__NFUN_260__(m_WalkAnim);
+		LoopAnim(m_WalkAnim);
 	}
 	bPlayerWalking = true;
 	return;
@@ -97,9 +97,9 @@ function PlayWalkingAnimation()
 function StopWalkingAnimation()
 {
 	// End:0x13
-	if(__NFUN_281__('Waiting'))
+	if(IsInState('Waiting'))
 	{
-		__NFUN_260__('Wait_c');
+		LoopAnim('Wait_c');
 	}
 	bPlayerWalking = false;
 	return;
@@ -124,7 +124,7 @@ state Reloading
 		// End:0x39
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Leaving State Reloading"));
+			Log((("HANDS - " $ string(self)) $ " -  Leaving State Reloading"));
 		}
 		return;
 	}
@@ -132,7 +132,7 @@ state Reloading
 	simulated event AnimEnd(int Channel)
 	{
 		// End:0x96
-		if(__NFUN_154__(Channel, 0))
+		if((Channel == 0))
 		{
 			// End:0x34
 			if(m_bBipodDeployed)
@@ -143,9 +143,9 @@ state Reloading
 			{
 				AssociatedWeapon.m_WeaponNeutralAnim = AssociatedWeapon.m_Neutral;
 			}
-			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
-			__NFUN_113__('Waiting');
-			AssociatedWeapon.__NFUN_113__('None');
+			AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
+			GotoState('Waiting');
+			AssociatedWeapon.GotoState('None');
 			R6AbstractWeapon(Owner).FirstPersonAnimOver();
 		}
 		return;
@@ -156,23 +156,23 @@ state Reloading
 		// End:0x37
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  Begin State Reloading"));
+			Log((("HANDS - " $ string(self)) $ " -  Begin State Reloading"));
 		}
 		R6Pawn(Owner.Owner).ServerPlayReloadAnimAgain();
-		AssociatedWeapon.__NFUN_113__('Reloading');
+		AssociatedWeapon.GotoState('Reloading');
 		// End:0x13B
-		if(__NFUN_242__(m_bReloadEmpty, true))
+		if((m_bReloadEmpty == true))
 		{
 			// End:0xD6
 			if(m_bBipodDeployed)
 			{
-				__NFUN_259__(m_HandBipodReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
-				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);				
+				PlayAnim(m_HandBipodReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);				
 			}
 			else
 			{
-				__NFUN_259__(m_HandReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
-				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_ReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				PlayAnim(m_HandReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.PlayAnim(AssociatedWeapon.m_ReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
 			}
 			m_bReloadEmpty = false;			
 		}
@@ -181,13 +181,13 @@ state Reloading
 			// End:0x1A1
 			if(m_bBipodDeployed)
 			{
-				__NFUN_259__('BipodReload', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
-				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_BipodReload, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);				
+				PlayAnim('BipodReload', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.PlayAnim(AssociatedWeapon.m_BipodReload, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);				
 			}
 			else
 			{
-				__NFUN_259__('Reload', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
-				AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_Reload, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				PlayAnim('Reload', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+				AssociatedWeapon.PlayAnim(AssociatedWeapon.m_Reload, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
 			}
 		}
 		return;
@@ -202,15 +202,15 @@ state DiscardWeapon
 		// End:0x56
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  "), string(self)), " -   IN:"), string(self)), "::DiscardWeapon::AnimEnd()"));
+			Log((((((("HANDS - " $ string(self)) $ " -  ") $ string(self)) $ " -   IN:") @ string(self)) @ "::DiscardWeapon::AnimEnd()"));
 		}
 		// End:0x63
-		if(__NFUN_114__(Owner, none))
+		if((Owner == none))
 		{
 			return;
 		}
 		// End:0x8A
-		if(__NFUN_154__(Channel, 0))
+		if((Channel == 0))
 		{
 			SetDrawType(0);
 			R6AbstractWeapon(Owner).FirstPersonAnimOver();
@@ -223,9 +223,9 @@ state DiscardWeapon
 		// End:0x4B
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_112__(__NFUN_112__("HANDS - ", string(self)), " -  IN:"), string(self)), "::DiscardWeapon::BeginState()"));
+			Log((((("HANDS - " $ string(self)) $ " -  IN:") @ string(self)) @ "::DiscardWeapon::BeginState()"));
 		}
-		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_UnEquipSnd, 3);
+		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_UnEquipSnd, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		// End:0xC7
 		if(m_bBipodDeployed)
 		{

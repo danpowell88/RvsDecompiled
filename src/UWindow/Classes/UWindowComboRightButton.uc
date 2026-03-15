@@ -17,12 +17,12 @@ function LMouseDown(float X, float Y)
 
 	super(UWindowWindow).LMouseDown(X, Y);
 	// End:0x8C
-	if(__NFUN_129__(bDisabled))
+	if((!bDisabled))
 	{
 		i = UWindowComboControl(OwnerWindow).GetSelectedIndex();
-		__NFUN_165__(i);
+		(i++);
 		// End:0x73
-		if(__NFUN_153__(i, UWindowComboControl(OwnerWindow).List.Items.Count()))
+		if((i >= UWindowComboControl(OwnerWindow).List.Items.Count()))
 		{
 			i = 0;
 		}

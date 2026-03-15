@@ -32,12 +32,12 @@ function UpdateSentText()
 function bool AllowsBroadcast(Actor broadcaster, int Len)
 {
 	// End:0x36
-	if(__NFUN_130__(__NFUN_130__(bMuteSpectators, __NFUN_119__(PlayerController(broadcaster), none)), PlayerController(broadcaster).bOnlySpectator))
+	if(((bMuteSpectators && (PlayerController(broadcaster) != none)) && PlayerController(broadcaster).bOnlySpectator))
 	{
 		return false;
 	}
-	__NFUN_161__(SentText, Len);
-	return __NFUN_150__(SentText, 260);
+	(SentText += Len);
+	return (SentText < 260);
 	return;
 }
 
@@ -59,25 +59,25 @@ function Broadcast(Actor Sender, coerce string Msg, optional name type)
 	local PlayerReplicationInfo PRI;
 
 	// End:0x19
-	if(__NFUN_129__(AllowsBroadcast(Sender, __NFUN_125__(Msg))))
+	if((!AllowsBroadcast(Sender, Len(Msg))))
 	{
 		return;
 	}
 	// End:0x45
-	if(__NFUN_119__(Pawn(Sender), none))
+	if((Pawn(Sender) != none))
 	{
 		PRI = Pawn(Sender).PlayerReplicationInfo;		
 	}
 	else
 	{
 		// End:0x6E
-		if(__NFUN_119__(Controller(Sender), none))
+		if((Controller(Sender) != none))
 		{
 			PRI = Controller(Sender).PlayerReplicationInfo;
 		}
 	}
 	// End:0x99
-	foreach __NFUN_313__(Class'Engine.PlayerController', P)
+	foreach DynamicActors(Class'Engine.PlayerController', P)
 	{
 		BroadcastText(PRI, P, Msg, type);		
 	}	
@@ -90,23 +90,23 @@ function BroadcastTeam(Actor Sender, coerce string Msg, optional name type)
 	local PlayerReplicationInfo PRI;
 
 	// End:0x2C
-	if(__NFUN_119__(Pawn(Sender), none))
+	if((Pawn(Sender) != none))
 	{
 		PRI = Pawn(Sender).PlayerReplicationInfo;		
 	}
 	else
 	{
 		// End:0x55
-		if(__NFUN_119__(Controller(Sender), none))
+		if((Controller(Sender) != none))
 		{
 			PRI = Controller(Sender).PlayerReplicationInfo;
 		}
 	}
 	// End:0xAA
-	foreach __NFUN_313__(Class'Engine.PlayerController', P)
+	foreach DynamicActors(Class'Engine.PlayerController', P)
 	{
 		// End:0xA9
-		if(__NFUN_154__(P.PlayerReplicationInfo.TeamID, PRI.TeamID))
+		if((P.PlayerReplicationInfo.TeamID == PRI.TeamID))
 		{
 			BroadcastText(PRI, P, Msg, type);
 		}		
@@ -119,7 +119,7 @@ event AllowBroadcastLocalized(Actor Sender, Class<LocalMessage> Message, optiona
 	local PlayerController P;
 
 	// End:0x3A
-	foreach __NFUN_313__(Class'Engine.PlayerController', P)
+	foreach DynamicActors(Class'Engine.PlayerController', P)
 	{
 		BroadcastLocalized(Sender, P, Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject);		
 	}	

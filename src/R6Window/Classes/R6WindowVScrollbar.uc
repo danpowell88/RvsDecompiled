@@ -19,12 +19,12 @@ var Class<UWindowSBDownButton> m_DownButtonClass;
 function SetRange(float NewMinPos, float NewMaxPos, float NewMaxVisible, optional float NewScrollAmount)
 {
 	// End:0x18
-	if(__NFUN_180__(NewScrollAmount, float(0)))
+	if((NewScrollAmount == float(0)))
 	{
 		NewScrollAmount = 1.0000000;
 	}
 	ScrollAmount = NewScrollAmount;
-	MaxPos = __NFUN_175__(NewMaxPos, NewMaxVisible);
+	MaxPos = (NewMaxPos - NewMaxVisible);
 	MaxVisible = NewMaxVisible;
 	MinPos = NewMinPos;
 	CheckRange();
@@ -34,19 +34,19 @@ function SetRange(float NewMinPos, float NewMaxPos, float NewMaxVisible, optiona
 function CheckRange()
 {
 	// End:0x1D
-	if(__NFUN_176__(pos, MinPos))
+	if((pos < MinPos))
 	{
 		pos = MinPos;		
 	}
 	else
 	{
 		// End:0x37
-		if(__NFUN_177__(pos, MaxPos))
+		if((pos > MaxPos))
 		{
 			pos = MaxPos;
 		}
 	}
-	bDisabled = __NFUN_178__(MaxPos, MinPos);
+	bDisabled = (MaxPos <= MinPos);
 	DownButton.bDisabled = bDisabled;
 	UpButton.bDisabled = bDisabled;
 	// End:0xA3
@@ -58,21 +58,21 @@ function CheckRange()
 	}
 	else
 	{
-		ThumbStart = __NFUN_172__(__NFUN_171__(__NFUN_175__(pos, MinPos), __NFUN_175__(WinHeight, __NFUN_174__(__NFUN_171__(float(2), LookAndFeel.Size_ScrollbarButtonHeight), float(2)))), __NFUN_175__(__NFUN_174__(MaxPos, MaxVisible), MinPos));
-		ThumbHeight = __NFUN_172__(__NFUN_171__(MaxVisible, __NFUN_175__(WinHeight, __NFUN_174__(__NFUN_171__(float(2), LookAndFeel.Size_ScrollbarButtonHeight), float(2)))), __NFUN_175__(__NFUN_174__(MaxPos, MaxVisible), MinPos));
+		ThumbStart = (((pos - MinPos) * (WinHeight - ((float(2) * LookAndFeel.Size_ScrollbarButtonHeight) + float(2)))) / ((MaxPos + MaxVisible) - MinPos));
+		ThumbHeight = ((MaxVisible * (WinHeight - ((float(2) * LookAndFeel.Size_ScrollbarButtonHeight) + float(2)))) / ((MaxPos + MaxVisible) - MinPos));
 		// End:0x15C
-		if(__NFUN_176__(ThumbHeight, LookAndFeel.Size_MinScrollbarHeight))
+		if((ThumbHeight < LookAndFeel.Size_MinScrollbarHeight))
 		{
 			ThumbHeight = LookAndFeel.Size_MinScrollbarHeight;
 		}
 		// End:0x1B1
-		if(__NFUN_177__(__NFUN_174__(ThumbHeight, ThumbStart), __NFUN_175__(__NFUN_175__(WinHeight, LookAndFeel.Size_ScrollbarButtonHeight), float(1))))
+		if(((ThumbHeight + ThumbStart) > ((WinHeight - LookAndFeel.Size_ScrollbarButtonHeight) - float(1))))
 		{
-			ThumbStart = __NFUN_175__(__NFUN_175__(__NFUN_175__(WinHeight, LookAndFeel.Size_ScrollbarButtonHeight), float(1)), ThumbHeight);			
+			ThumbStart = (((WinHeight - LookAndFeel.Size_ScrollbarButtonHeight) - float(1)) - ThumbHeight);			
 		}
 		else
 		{
-			ThumbStart = __NFUN_174__(__NFUN_174__(ThumbStart, LookAndFeel.Size_ScrollbarButtonHeight), float(1));
+			ThumbStart = ((ThumbStart + LookAndFeel.Size_ScrollbarButtonHeight) + float(1));
 		}
 	}
 	return;

@@ -35,7 +35,7 @@ var(R6GunProperties) Class<R6AbstractFirstPersonWeapon> m_pFPWeaponClass;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_WeaponGadgetClass;
 }
 

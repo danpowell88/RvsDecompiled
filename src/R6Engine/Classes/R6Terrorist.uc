@@ -102,13 +102,13 @@ var() string m_szGadget;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bIsUnderArrest, m_bPreventWeaponAnimation, 
 		m_bSprayFire, m_eDefCon, 
 		m_eSpecialAnimValid, m_szSpecialAnimName;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_wWantedAimingPitch, m_wWantedHeadYaw;
 }
 
@@ -119,9 +119,9 @@ simulated event Destroyed()
 {
 	super.Destroyed();
 	// End:0x24
-	if(__NFUN_119__(m_HeadAttachment, none))
+	if((m_HeadAttachment != none))
 	{
-		m_HeadAttachment.__NFUN_279__();
+		m_HeadAttachment.Destroy();
 		m_HeadAttachment = none;
 	}
 	return;
@@ -145,9 +145,9 @@ simulated function PostBeginPlay()
 	local Rotator rTagRotator;
 
 	// End:0x36
-	if(__NFUN_119__(Level.Game, none))
+	if((Level.Game != none))
 	{
-		assert(__NFUN_154__(default.m_iTeam, R6AbstractGameInfo(Level.Game).1));
+		assert((default.m_iTeam == R6AbstractGameInfo(Level.Game).1));
 	}
 	super.PostBeginPlay();
 	SetMovementPhysics();
@@ -161,13 +161,13 @@ function SetToNormalWeapon()
 {
 	EngineWeapon = GetWeaponInGroup(1);
 	// End:0x26
-	if(__NFUN_114__(EngineWeapon, none))
+	if((EngineWeapon == none))
 	{
 		EngineWeapon = GetWeaponInGroup(2);
 	}
 	EngineWeapon.RemoteRole = ROLE_SimulatedProxy;
 	// End:0x76
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
 		AttachWeapon(EngineWeapon, 'TagRightHand');
 		EngineWeapon.WeaponInitialization(self);
@@ -182,7 +182,7 @@ function SetToNormalWeapon()
 function SetToGrenade()
 {
 	// End:0x3F
-	if(__NFUN_130__(__NFUN_129__(EngineWeapon.m_bUseMicroAnim), __NFUN_155__(int(EngineWeapon.m_eWeaponType), int(0))))
+	if(((!EngineWeapon.m_bUseMicroAnim) && (int(EngineWeapon.m_eWeaponType) != int(0))))
 	{
 		AttachWeapon(EngineWeapon, 'TagLeftHand');
 	}
@@ -210,20 +210,20 @@ function CommonInit()
 	local R6EngineWeapon aGrenade;
 
 	// End:0x11
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		UnPossessed();
 	}
-	Controller = __NFUN_278__(ControllerClass);
+	Controller = Spawn(ControllerClass);
 	Controller.Possess(self);
 	// End:0x4D
-	if(__NFUN_123__(m_szPrimaryWeapon, ""))
+	if((m_szPrimaryWeapon != ""))
 	{
 		ServerGivesWeaponToClient(m_szPrimaryWeapon, 1);
 		SetToNormalWeapon();
 	}
 	// End:0x9E
-	if(__NFUN_123__(m_szGrenadeWeapon, ""))
+	if((m_szGrenadeWeapon != ""))
 	{
 		ServerGivesWeaponToClient(m_szGrenadeWeapon, 3);
 		m_bHaveAGrenade = true;
@@ -234,15 +234,15 @@ function CommonInit()
 	Controller.m_PawnRepInfo.m_PawnType = m_ePawnType;
 	Controller.m_PawnRepInfo.m_bSex = bIsFemale;
 	// End:0x102
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
 		m_SoundRepInfo.m_PawnRepInfo = Controller.m_PawnRepInfo;
 	}
 	// End:0x165
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
 		// End:0x144
-		if(__NFUN_130__(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(4)), EngineWeapon.__NFUN_303__('R6BoltActionSniperRifle')))
+		if(((int(EngineWeapon.m_eWeaponType) == int(4)) && EngineWeapon.IsA('R6BoltActionSniperRifle')))
 		{
 			m_bBoltActionRifle = true;
 		}
@@ -250,35 +250,35 @@ function CommonInit()
 		EngineWeapon.SetTerroristNbOfClips(1);
 	}
 	// End:0x1D4
-	if(__NFUN_130__(__NFUN_123__(m_szGadget, ""), __NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer))))
+	if(((m_szGadget != "") && (int(Level.NetMode) != int(NM_DedicatedServer))))
 	{
 		R6AbstractWeapon(EngineWeapon).R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szGadget, Class'Core.Class')));
 		R6AbstractWeapon(EngineWeapon).m_SelectedWeaponGadget.ActivateGadget(true, true);
 	}
 	// End:0x255
-	if(__NFUN_155__(int(m_eHeadAttachmentType), int(3)))
+	if((int(m_eHeadAttachmentType) != int(3)))
 	{
-		m_HeadAttachment = __NFUN_278__(Class'R6Engine.R6THeadAttachment');
+		m_HeadAttachment = Spawn(Class'R6Engine.R6THeadAttachment');
 		// End:0x242
 		if(m_HeadAttachment.SetAttachmentStaticMesh(m_eHeadAttachmentType, m_eTerroType))
 		{
-			m_HeadAttachment.__NFUN_272__(self);
+			m_HeadAttachment.SetOwner(self);
 			AttachToBone(m_HeadAttachment, 'R6 Head');
-			m_bHaveGasMask = __NFUN_154__(int(m_eHeadAttachmentType), int(2));			
+			m_bHaveGasMask = (int(m_eHeadAttachmentType) == int(2));			
 		}
 		else
 		{
-			m_HeadAttachment.__NFUN_279__();
+			m_HeadAttachment.Destroy();
 			m_HeadAttachment = none;
 		}
 	}
 	AttachCollisionBox(2);
 	// End:0x34D
-	if(__NFUN_119__(R6AbstractGameInfo(Level.Game), none))
+	if((R6AbstractGameInfo(Level.Game) != none))
 	{
 		m_iDiffLevel = R6AbstractGameInfo(Level.Game).m_iDiffLevel;
 		// End:0x2AB
-		if(__NFUN_154__(m_iDiffLevel, 0))
+		if((m_iDiffLevel == 0))
 		{
 			m_iDiffLevel = 2;
 		}
@@ -303,14 +303,14 @@ function CommonInit()
 			default:
 				break;
 		}
-		__NFUN_182__(m_fSkillAssault, fFactor);
-		__NFUN_182__(m_fSkillDemolitions, fFactor);
-		__NFUN_182__(m_fSkillElectronics, fFactor);
-		__NFUN_182__(m_fSkillSniper, fFactor);
-		__NFUN_182__(m_fSkillStealth, fFactor);
-		__NFUN_182__(m_fSkillSelfControl, fFactor);
-		__NFUN_182__(m_fSkillLeadership, fFactor);
-		__NFUN_182__(m_fSkillObservation, fFactor);
+		(m_fSkillAssault *= fFactor);
+		(m_fSkillDemolitions *= fFactor);
+		(m_fSkillElectronics *= fFactor);
+		(m_fSkillSniper *= fFactor);
+		(m_fSkillStealth *= fFactor);
+		(m_fSkillSelfControl *= fFactor);
+		(m_fSkillLeadership *= fFactor);
+		(m_fSkillObservation *= fFactor);
 	}
 	return;
 }
@@ -320,7 +320,7 @@ function CommonInit()
 //============================================================================
 simulated function SetMovementPhysics()
 {
-	__NFUN_3970__(1);
+	SetPhysics(1);
 	return;
 }
 
@@ -330,7 +330,7 @@ simulated function SetMovementPhysics()
 simulated function AnimateStandTurning()
 {
 	// End:0x41
-	if(__NFUN_132__(__NFUN_132__(m_bDroppedWeapon, __NFUN_114__(EngineWeapon, none)), __NFUN_151__(int(m_eDefCon), int(3))))
+	if(((m_bDroppedWeapon || (EngineWeapon == none)) || (int(m_eDefCon) > int(3))))
 	{
 		TurnLeftAnim = 'RelaxTurnLeft';
 		TurnRightAnim = 'RelaxTurnRight';		
@@ -349,7 +349,7 @@ simulated function AnimateStandTurning()
 simulated function AnimateWalking()
 {
 	// End:0x6C
-	if(__NFUN_132__(__NFUN_132__(m_bDroppedWeapon, __NFUN_114__(EngineWeapon, none)), __NFUN_151__(int(m_eDefCon), int(3))))
+	if(((m_bDroppedWeapon || (EngineWeapon == none)) || (int(m_eDefCon) > int(3))))
 	{
 		m_fWalkingSpeed = 116.0000000;
 		MovementAnims[0] = 'RelaxWalkForward';
@@ -360,7 +360,7 @@ simulated function AnimateWalking()
 	else
 	{
 		// End:0xC0
-		if(__NFUN_154__(int(m_eHealth), int(1)))
+		if((int(m_eHealth) == int(1)))
 		{
 			m_fWalkingSpeed = 120.0000000;
 			MovementAnims[0] = 'HurtStandWalkForward';
@@ -389,7 +389,7 @@ simulated function AnimateRunning()
 
 	nFoward = 'StandRunSubGunForward';
 	// End:0x74
-	if(__NFUN_130__(__NFUN_129__(m_bDroppedWeapon), __NFUN_119__(EngineWeapon, none)))
+	if(((!m_bDroppedWeapon) && (EngineWeapon != none)))
 	{
 		switch(EngineWeapon.m_eWeaponType)
 		{
@@ -432,7 +432,7 @@ simulated function AnimateWalkingUpStairs()
 {
 	super.AnimateWalkingUpStairs();
 	// End:0x3B
-	if(__NFUN_132__(__NFUN_132__(m_bDroppedWeapon, __NFUN_114__(EngineWeapon, none)), __NFUN_151__(int(m_eDefCon), int(3))))
+	if(((m_bDroppedWeapon || (EngineWeapon == none)) || (int(m_eDefCon) > int(3))))
 	{
 		MovementAnims[0] = 'RelaxStairUp';
 	}
@@ -446,7 +446,7 @@ simulated function AnimateWalkingDownStairs()
 {
 	super.AnimateWalkingDownStairs();
 	// End:0x3B
-	if(__NFUN_132__(__NFUN_132__(m_bDroppedWeapon, __NFUN_114__(EngineWeapon, none)), __NFUN_151__(int(m_eDefCon), int(3))))
+	if(((m_bDroppedWeapon || (EngineWeapon == none)) || (int(m_eDefCon) > int(3))))
 	{
 		MovementAnims[0] = 'RelaxStairDown';
 	}
@@ -462,7 +462,7 @@ simulated function PlayWaiting()
 	local R6Terrorist.EDefCon EDefCon;
 
 	// End:0x21
-	if(__NFUN_132__(m_bDroppedWeapon, __NFUN_114__(EngineWeapon, none)))
+	if((m_bDroppedWeapon || (EngineWeapon == none)))
 	{
 		EDefCon = 5;		
 	}
@@ -471,7 +471,7 @@ simulated function PlayWaiting()
 		EDefCon = m_eDefCon;
 	}
 	// End:0x44
-	if(__NFUN_154__(int(Physics), int(2)))
+	if((int(Physics) == int(2)))
 	{
 		PlayFalling();
 		return;
@@ -741,7 +741,7 @@ simulated function PlayDuck()
 	else
 	{
 		// End:0x47
-		if(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(0)))
+		if((int(EngineWeapon.m_eWeaponType) == int(0)))
 		{
 			Anim = 'CrouchHandGunHigh_nt';			
 		}
@@ -768,7 +768,7 @@ function ResetArrest()
 		m_bPawnSpecificAnimInProgress = false;
 		m_bIsUnderArrest = false;
 		PlayWaiting();
-		__NFUN_262__(true, true, true);
+		SetCollision(true, true, true);
 	}
 	return;
 }
@@ -779,11 +779,11 @@ function ResetArrest()
 event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
 {
 	// End:0x105
-	if(__NFUN_130__(m_bIsKneeling, IsAlive()))
+	if((m_bIsKneeling && IsAlive()))
 	{
 		Query.iHasAction = 1;
 		// End:0x48
-		if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+		if((fDistance < m_fCircumstantialActionRange))
 		{
 			Query.iInRange = 1;			
 		}
@@ -835,8 +835,8 @@ function int R6GetCircumstantialActionProgress(R6AbstractCircumstantialActionQue
 	local float fFrame, fRate;
 
 	actingPawn.GetAnimParams(1, Anim, fFrame, fRate);
-	__NFUN_251__(int(fFrame), 0, 100);
-	return int(__NFUN_171__(fFrame, float(100)));
+	Clamp(int(fFrame), 0, 100);
+	return int((fFrame * float(100)));
 	return;
 }
 
@@ -852,7 +852,7 @@ function R6CircumstantialActionProgressStart(R6AbstractCircumstantialActionQuery
 function ReleaseGrenade()
 {
 	// End:0x0D
-	if(__NFUN_129__(IsAlive()))
+	if((!IsAlive()))
 	{
 		return;
 	}
@@ -871,14 +871,14 @@ function EndGrenade()
 simulated event AnimEnd(int iChannel)
 {
 	// End:0x67
-	if(__NFUN_130__(__NFUN_154__(iChannel, 16), __NFUN_155__(int(m_eSpecialAnimValid), int(2))))
+	if(((iChannel == 16) && (int(m_eSpecialAnimValid) != int(2))))
 	{
 		AnimBlendToAlpha(16, 0.0000000, 0.5000000);
 		m_ePlayerIsUsingHands = 0;
 		PlayWeaponAnimation();
 		m_bPawnSpecificAnimInProgress = false;
 		// End:0x67
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			m_eSpecialAnimValid = 0;
 		}

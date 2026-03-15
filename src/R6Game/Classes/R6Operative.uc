@@ -72,9 +72,9 @@ var string m_szArmor;  // R6ArmorDescription class name
 function string GetName()
 {
 	// End:0x40
-	if(__NFUN_155__(m_iRookieID, -1))
+	if((m_iRookieID != -1))
 	{
-		return __NFUN_112__(Localize(m_szOperativeClass, "ID_NAME", "R6Operatives", true, true), string(m_iRookieID));		
+		return (Localize(m_szOperativeClass, "ID_NAME", "R6Operatives", true, true) $ string(m_iRookieID));		
 	}
 	else
 	{
@@ -86,9 +86,9 @@ function string GetName()
 function string GetShortName()
 {
 	// End:0x45
-	if(__NFUN_155__(m_iRookieID, -1))
+	if((m_iRookieID != -1))
 	{
-		return __NFUN_112__(Localize(m_szOperativeClass, "ID_SHORTNAME", "R6Operatives", true, true), string(m_iRookieID));		
+		return (Localize(m_szOperativeClass, "ID_SHORTNAME", "R6Operatives", true, true) $ string(m_iRookieID));		
 	}
 	else
 	{
@@ -196,9 +196,9 @@ function string GetNbRoundsOnTarget()
 function string GetShootPercent()
 {
 	// End:0x29
-	if(__NFUN_151__(m_iRoundsfired, 0))
+	if((m_iRoundsfired > 0))
 	{
-		return string(int(__NFUN_171__(__NFUN_172__(float(m_iRoundsOntarget), float(m_iRoundsfired)), float(100))));		
+		return string(int(((float(m_iRoundsOntarget) / float(m_iRoundsfired)) * float(100))));		
 	}
 	else
 	{
@@ -211,34 +211,34 @@ function string GetTextDescription()
 {
 	local string szDescription, szTemp;
 
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(Localize("IdentificationField", "ID_IDNUMBER", "R6Operatives"), " "), GetIDNumber()), __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_BIRTHPLACE", "R6Operatives")), " "), GetCountry());
+	szDescription = (((Localize("IdentificationField", "ID_IDNUMBER", "R6Operatives") $ " ") $ GetIDNumber()) $ Chr(13));
+	szDescription = (((szDescription $ Localize("IdentificationField", "ID_BIRTHPLACE", "R6Operatives")) $ " ") $ GetCountry());
 	szTemp = GetCountry();
 	// End:0xCB
-	if(__NFUN_123__(szTemp, ""))
+	if((szTemp != ""))
 	{
-		szDescription = __NFUN_112__(szDescription, szTemp);
+		szDescription = (szDescription $ szTemp);
 	}
 	szTemp = GetCity();
 	// End:0xFB
-	if(__NFUN_123__(szTemp, ""))
+	if((szTemp != ""))
 	{
-		szDescription = __NFUN_112__(__NFUN_112__(szDescription, ", "), szTemp);
+		szDescription = ((szDescription $ ") $ szTemp);
 	}
 	szTemp = GetState();
 	// End:0x12B
-	if(__NFUN_123__(szTemp, ""))
+	if((szTemp != ""))
 	{
-		szDescription = __NFUN_112__(__NFUN_112__(szDescription, ", "), szTemp);
+		szDescription = ((szDescription $ ") $ szTemp);
 	}
-	szDescription = __NFUN_112__(szDescription, __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_SPECIALITY", "R6Operatives")), " "), GetSpeciality()), __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_BIRTHDATE", "R6Operatives")), " "), GetBirthDate()), __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_HEIGHT", "R6Operatives")), " "), GetHeight()), __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_WEIGHT", "R6Operatives")), " "), GetWeight()), __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_HAIR", "R6Operatives")), " "), GetHairColor()), __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_EYES", "R6Operatives")), " "), GetEyesColor()), __NFUN_236__(13));
-	szDescription = __NFUN_112__(__NFUN_112__(__NFUN_112__(szDescription, Localize("IdentificationField", "ID_GENDER", "R6Operatives")), " "), GetGender());
+	szDescription = (szDescription $ Chr(13));
+	szDescription = ((((szDescription $ Localize("IdentificationField", "ID_SPECIALITY", "R6Operatives")) $ " ") $ GetSpeciality()) $ Chr(13));
+	szDescription = ((((szDescription $ Localize("IdentificationField", "ID_BIRTHDATE", "R6Operatives")) $ " ") $ GetBirthDate()) $ Chr(13));
+	szDescription = ((((szDescription $ Localize("IdentificationField", "ID_HEIGHT", "R6Operatives")) $ " ") $ GetHeight()) $ Chr(13));
+	szDescription = ((((szDescription $ Localize("IdentificationField", "ID_WEIGHT", "R6Operatives")) $ " ") $ GetWeight()) $ Chr(13));
+	szDescription = ((((szDescription $ Localize("IdentificationField", "ID_HAIR", "R6Operatives")) $ " ") $ GetHairColor()) $ Chr(13));
+	szDescription = ((((szDescription $ Localize("IdentificationField", "ID_EYES", "R6Operatives")) $ " ") $ GetEyesColor()) $ Chr(13));
+	szDescription = (((szDescription $ Localize("IdentificationField", "ID_GENDER", "R6Operatives")) $ " ") $ GetGender());
 	return szDescription;
 	return;
 }
@@ -285,7 +285,7 @@ function string GetHealthStatus()
 //=============================================================
 function bool IsOperativeReady()
 {
-	return __NFUN_154__(m_iHealth, 0);
+	return (m_iHealth == 0);
 	return;
 }
 
@@ -294,21 +294,21 @@ function string GetRealOperativeClass()
 	local int ITemp;
 
 	// End:0x15
-	if(__NFUN_154__(m_iRookieID, -1))
+	if((m_iRookieID == -1))
 	{
 		return m_szOperativeClass;
 	}
 	// End:0x33
-	if(__NFUN_150__(m_iRookieID, 30))
+	if((m_iRookieID < 30))
 	{
-		ITemp = __NFUN_147__(29, m_iRookieID);		
+		ITemp = (29 - m_iRookieID);		
 	}
 	else
 	{
-		ITemp = __NFUN_147__(__NFUN_145__(m_iRookieID, 30), 1);
-		ITemp = __NFUN_147__(m_iRookieID, __NFUN_146__(29, __NFUN_144__(ITemp, 30)));
+		ITemp = ((m_iRookieID / 30) - 1);
+		ITemp = (m_iRookieID - (29 + (ITemp * 30)));
 	}
-	return __NFUN_112__("R6Operative", string(ITemp));
+	return ("R6Operative" $ string(ITemp));
 	return;
 }
 
@@ -318,68 +318,68 @@ function UpdateSkills()
 	local float fDecision, fIncreaseSkill;
 
 	fIncreaseSkill = 0.5000000;
-	iD5 = __NFUN_146__(__NFUN_167__(5), 1);
-	iD2 = __NFUN_146__(__NFUN_167__(2), 1);
-	fDecision = __NFUN_195__();
+	iD5 = (Rand(5) + 1);
+	iD2 = (Rand(2) + 1);
+	fDecision = FRand();
 	// End:0x42
-	if(__NFUN_154__(m_iHealth, 1))
+	if((m_iHealth == 1))
 	{
 		m_iHealth = 0;		
 	}
 	else
 	{
 		// End:0x4F
-		if(__NFUN_151__(m_iHealth, 1))
+		if((m_iHealth > 1))
 		{
 			return;
 		}
 	}
 	// End:0x95
-	if(__NFUN_122__(m_szSpecialityID, "ID_ASSAULT"))
+	if((m_szSpecialityID == "ID_ASSAULT"))
 	{
-		__NFUN_184__(m_fAssault, __NFUN_171__(__NFUN_171__(fIncreaseSkill, __NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000)), __NFUN_175__(float(100), m_fAssault)));		
+		(m_fAssault += ((fIncreaseSkill * (float((iD5 + 5)) / 100.0000000)) * (float(100) - m_fAssault)));		
 	}
 	else
 	{
-		__NFUN_184__(m_fAssault, __NFUN_171__(__NFUN_171__(fIncreaseSkill, __NFUN_172__(float(__NFUN_146__(iD2, 2)), 100.0000000)), __NFUN_175__(float(100), m_fAssault)));
+		(m_fAssault += ((fIncreaseSkill * (float((iD2 + 2)) / 100.0000000)) * (float(100) - m_fAssault)));
 	}
 	// End:0x10C
-	if(__NFUN_122__(m_szSpecialityID, "ID_DEMOLITIONS"))
+	if((m_szSpecialityID == "ID_DEMOLITIONS"))
 	{
-		__NFUN_184__(m_fDemolitions, __NFUN_171__(__NFUN_171__(fIncreaseSkill, __NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000)), __NFUN_175__(float(100), m_fDemolitions)));		
+		(m_fDemolitions += ((fIncreaseSkill * (float((iD5 + 5)) / 100.0000000)) * (float(100) - m_fDemolitions)));		
 	}
 	else
 	{
 		// End:0x13B
-		if(__NFUN_178__(fDecision, 0.2000000))
+		if((fDecision <= 0.2000000))
 		{
-			__NFUN_184__(m_fDemolitions, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fDemolitions))));
+			(m_fDemolitions += (fIncreaseSkill * (0.0200000 * (float(100) - m_fDemolitions))));
 		}
-		fDecision = __NFUN_195__();
+		fDecision = FRand();
 	}
 	// End:0x18D
-	if(__NFUN_122__(m_szSpecialityID, "ID_ELECTRONICS"))
+	if((m_szSpecialityID == "ID_ELECTRONICS"))
 	{
-		__NFUN_184__(m_fElectronics, __NFUN_171__(__NFUN_171__(fIncreaseSkill, __NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000)), __NFUN_175__(float(100), m_fElectronics)));		
+		(m_fElectronics += ((fIncreaseSkill * (float((iD5 + 5)) / 100.0000000)) * (float(100) - m_fElectronics)));		
 	}
 	else
 	{
 		// End:0x1BC
-		if(__NFUN_178__(fDecision, 0.2000000))
+		if((fDecision <= 0.2000000))
 		{
-			__NFUN_184__(m_fElectronics, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fElectronics))));
+			(m_fElectronics += (fIncreaseSkill * (0.0200000 * (float(100) - m_fElectronics))));
 		}
-		fDecision = __NFUN_195__();
+		fDecision = FRand();
 	}
 	// End:0x20A
-	if(__NFUN_122__(m_szSpecialityID, "ID_STEALTH"))
+	if((m_szSpecialityID == "ID_STEALTH"))
 	{
-		__NFUN_184__(m_fStealth, __NFUN_171__(__NFUN_171__(fIncreaseSkill, __NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000)), __NFUN_175__(float(100), m_fStealth)));		
+		(m_fStealth += ((fIncreaseSkill * (float((iD5 + 5)) / 100.0000000)) * (float(100) - m_fStealth)));		
 	}
 	else
 	{
 		// End:0x239
-		if(__NFUN_178__(fDecision, 0.2000000))
+		if((fDecision <= 0.2000000))
 		{
 			__NFUN_184__(m_fStealth, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fStealth))));
 		}

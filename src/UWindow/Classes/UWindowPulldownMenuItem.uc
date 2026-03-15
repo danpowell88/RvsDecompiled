@@ -30,10 +30,10 @@ function UWindowPulldownMenu CreateSubMenu(Class<UWindowPulldownMenu> MenuClass,
 function Select()
 {
 	// End:0x7F
-	if(__NFUN_119__(SubMenu, none))
+	if((SubMenu != none))
 	{
-		SubMenu.WinLeft = __NFUN_175__(__NFUN_174__(Owner.WinLeft, Owner.WinWidth), float(Owner.HBorder));
-		SubMenu.WinTop = __NFUN_175__(ItemTop, float(Owner.VBorder));
+		SubMenu.WinLeft = ((Owner.WinLeft + Owner.WinWidth) - float(Owner.HBorder));
+		SubMenu.WinTop = (ItemTop - float(Owner.VBorder));
 		SubMenu.ShowWindow();
 	}
 	return;
@@ -51,7 +51,7 @@ function SetCaption(string C)
 function DeSelect()
 {
 	// End:0x29
-	if(__NFUN_119__(SubMenu, none))
+	if((SubMenu != none))
 	{
 		SubMenu.DeSelect();
 		SubMenu.HideWindow();

@@ -47,13 +47,13 @@ function ShowWindow()
 {
 	R6MenuRootWindow(Root).m_pMenuCDKeyManager.SetWindowUser(Root.22, self);
 	// End:0x14D
-	if(__NFUN_132__(m_bNonUbiMatchMakingClient, R6Console(Root.Console).m_bAutoLoginFirstPass))
+	if((m_bNonUbiMatchMakingClient || R6Console(Root.Console).m_bAutoLoginFirstPass))
 	{
 		R6Console(Root.Console).m_bAutoLoginFirstPass = false;
 		R6MenuRootWindow(Root).InitBeaconService();
 		R6Console(Root.Console).m_GameService.StartAutoLogin();
 		// End:0x135
-		if(__NFUN_129__(R6Console(Root.Console).m_GameService.m_bAutoLoginInProgress))
+		if((!R6Console(Root.Console).m_GameService.m_bAutoLoginInProgress))
 		{
 			R6Console(Root.Console).szStoreGamePassWd = R6Console(Root.Console).m_GameService.m_szSavedPwd;
 			m_pLoginWindow.StartLogInProcedure(self);
@@ -75,7 +75,7 @@ function Paint(Canvas C, float X, float Y)
 	local float W, H;
 
 	C.Style = 5;
-	C.__NFUN_2626__(Root.Colors.Black.R, Root.Colors.Black.G, Root.Colors.Black.B);
+	C.SetDrawColor(Root.Colors.Black.R, Root.Colors.Black.G, Root.Colors.Black.B);
 	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, 0.0000000, 0.0000000, 10.0000000, 10.0000000, Texture'UWindow.WhiteTexture');
 	return;
 }
@@ -114,7 +114,7 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 		// End:0x61
 		case 2:
 			m_bLoginInProgress = false;
-			Class'Engine.Actor'.static.__NFUN_1304__(_szIPAddress);
+			Class'Engine.Actor'.static.NativeNonUbiMatchMakingAddress(_szIPAddress);
 			// End:0x5E
 			if(m_bNonUbiMatchMakingClient)
 			{
@@ -138,7 +138,7 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 		// End:0xF8
 		case 8:
 			QueryReceivedStartPreJoin();
-			__NFUN_231__(__NFUN_168__("m_bRoomValid =", string(m_pQueryServerInfo.m_bRoomValid)));
+			Log(("m_bRoomValid =" @ string(m_pQueryServerInfo.m_bRoomValid)));
 			m_bQueryServerInfoInProgress = false;
 			// End:0x10B
 			break;
@@ -159,7 +159,7 @@ function QueryReceivedStartPreJoin()
 	local R6WindowUbiCDKeyCheck.eJoinRoomChoice eJoinRoom;
 	local bool bRoomValid;
 
-	bRoomValid = __NFUN_130__(__NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID, 0), __NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID, 0));
+	bRoomValid = ((m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID != 0) && (m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID != 0));
 	// End:0x5E
 	if(bRoomValid)
 	{
@@ -184,16 +184,16 @@ function PromptConnectionError()
 	r6Root.m_RSimplePopUp.W = 360;
 	r6Root.m_RSimplePopUp.H = 77;
 	// End:0x1AD
-	if(__NFUN_123__(R6Console(Root.Console).m_szLastError, ""))
+	if((R6Console(Root.Console).m_szLastError != ""))
 	{
 		szTemp = Localize("Multiplayer", R6Console(Root.Console).m_szLastError, "R6Menu", true);
 		// End:0x113
-		if(__NFUN_122__(szTemp, ""))
+		if((szTemp == ""))
 		{
 			szTemp = Localize("Errors", R6Console(Root.Console).m_szLastError, "R6Engine", true);
 		}
 		// End:0x141
-		if(__NFUN_122__(szTemp, ""))
+		if((szTemp == ""))
 		{
 			szTemp = R6Console(Root.Console).m_szLastError;
 		}
@@ -214,7 +214,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 {
 	R6WindowRootWindow(Root).m_RSimplePopUp = R6WindowRootWindow(Root).default.m_RSimplePopUp;
 	// End:0x48
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		Root.ChangeCurrentWidget(38);
 	}

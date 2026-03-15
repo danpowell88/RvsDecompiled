@@ -52,7 +52,7 @@ function Clear()
 function DeSelect()
 {
 	// End:0x21
-	if(__NFUN_119__(Selected, none))
+	if((Selected != none))
 	{
 		Selected.DeSelect();
 		Selected = none;
@@ -68,25 +68,25 @@ function Select(UWindowPulldownMenuItem i)
 function PerformSelect(UWindowPulldownMenuItem NewSelected)
 {
 	// End:0x2B
-	if(__NFUN_130__(__NFUN_119__(Selected, none), __NFUN_119__(NewSelected, Selected)))
+	if(((Selected != none) && (NewSelected != Selected)))
 	{
 		Selected.DeSelect();
 	}
 	// End:0x40
-	if(__NFUN_114__(NewSelected, none))
+	if((NewSelected == none))
 	{
 		Selected = none;		
 	}
 	else
 	{
 		// End:0x8F
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Selected, NewSelected), __NFUN_123__(NewSelected.Caption, "-")), __NFUN_129__(NewSelected.bDisabled)))
+		if((((Selected != NewSelected) && (NewSelected.Caption != "-")) && (!NewSelected.bDisabled)))
 		{
 			LookAndFeel.PlayMenuSound(self, 2);
 		}
 		Selected = NewSelected;
 		// End:0xBF
-		if(__NFUN_119__(Selected, none))
+		if((Selected != none))
 		{
 			Selected.Select();
 			Select(Selected);
@@ -99,7 +99,7 @@ function SetSelected(float X, float Y)
 {
 	local UWindowPulldownMenuItem NewSelected;
 
-	NewSelected = UWindowPulldownMenuItem(Items.FindEntry(__NFUN_145__(int(__NFUN_175__(Y, float(VBorder))), ItemHeight)));
+	NewSelected = UWindowPulldownMenuItem(Items.FindEntry((int((Y - float(VBorder))) / ItemHeight)));
 	PerformSelect(NewSelected);
 	return;
 }
@@ -125,7 +125,7 @@ function MouseMove(float X, float Y)
 function LMouseUp(float X, float Y)
 {
 	// End:0x4F
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Selected, none), __NFUN_123__(Selected.Caption, "-")), __NFUN_129__(Selected.bDisabled)))
+	if((((Selected != none) && (Selected.Caption != "-")) && (!Selected.bDisabled)))
 	{
 		BeforeExecuteItem(Selected);
 		ExecuteItem(Selected);
@@ -148,17 +148,17 @@ function BeforePaint(Canvas C, float X, float Y)
 	MaxWidth = 100.0000000;
 	Count = 0;
 	C.Font = Root.Fonts[0];
-	C.__NFUN_2623__(0.0000000, 0.0000000);
+	C.SetPos(0.0000000, 0.0000000);
 	i = UWindowPulldownMenuItem(Items.Next);
 	J0x60:
 
 	// End:0xD2 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
-		__NFUN_165__(Count);
+		(Count++);
 		TextSize(C, RemoveAmpersand(i.Caption), W, H);
 		// End:0xB6
-		if(__NFUN_177__(W, MaxWidth))
+		if((W > MaxWidth))
 		{
 			MaxWidth = W;
 		}
@@ -166,21 +166,21 @@ function BeforePaint(Canvas C, float X, float Y)
 		// [Loop Continue]
 		goto J0x60;
 	}
-	WinWidth = __NFUN_174__(MaxWidth, float(__NFUN_144__(__NFUN_146__(HBorder, TextBorder), 2)));
-	WinHeight = __NFUN_174__(float(__NFUN_144__(ItemHeight, Count)), float(__NFUN_144__(VBorder, 2)));
+	WinWidth = (MaxWidth + float(((HBorder + TextBorder) * 2)));
+	WinHeight = (float((ItemHeight * Count)) + float((VBorder * 2)));
 	// End:0x177
-	if(__NFUN_132__(__NFUN_130__(__NFUN_119__(UWindowMenuBarItem(Owner), none), UWindowMenuBarItem(Owner).bHelp), __NFUN_177__(__NFUN_174__(WinLeft, WinWidth), ParentWindow.WinWidth)))
+	if((((UWindowMenuBarItem(Owner) != none) && UWindowMenuBarItem(Owner).bHelp) || ((WinLeft + WinWidth) > ParentWindow.WinWidth)))
 	{
-		WinLeft = __NFUN_175__(ParentWindow.WinWidth, WinWidth);
+		WinLeft = (ParentWindow.WinWidth - WinWidth);
 	}
 	// End:0x1F5
-	if(__NFUN_119__(UWindowPulldownMenuItem(Owner), none))
+	if((UWindowPulldownMenuItem(Owner) != none))
 	{
 		i = UWindowPulldownMenuItem(Owner);
 		// End:0x1F5
-		if(__NFUN_177__(__NFUN_174__(WinWidth, WinLeft), ParentWindow.WinWidth))
+		if(((WinWidth + WinLeft) > ParentWindow.WinWidth))
 		{
-			WinLeft = __NFUN_175__(__NFUN_174__(i.Owner.WinLeft, float(i.Owner.HBorder)), WinWidth);
+			WinLeft = ((i.Owner.WinLeft + float(i.Owner.HBorder)) - WinWidth);
 		}
 	}
 	return;
@@ -197,10 +197,10 @@ function Paint(Canvas C, float X, float Y)
 	J0x2B:
 
 	// End:0x9E [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
-		DrawItem(C, i, float(HBorder), float(__NFUN_146__(VBorder, __NFUN_144__(ItemHeight, Count))), __NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), float(ItemHeight));
-		__NFUN_165__(Count);
+		DrawItem(C, i, float(HBorder), float((VBorder + (ItemHeight * Count))), (WinWidth - float((2 * HBorder))), float(ItemHeight));
+		(Count++);
 		i = UWindowPulldownMenuItem(i.Next);
 		// [Loop Continue]
 		goto J0x2B;
@@ -216,7 +216,7 @@ function DrawMenuBackground(Canvas C)
 
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
-	LookAndFeel.Menu_DrawPulldownMenuItem(self, UWindowPulldownMenuItem(Item), C, X, Y, W, H, __NFUN_114__(Selected, Item));
+	LookAndFeel.Menu_DrawPulldownMenuItem(self, UWindowPulldownMenuItem(Item), C, X, Y, W, H, (Selected == Item));
 	return;
 }
 
@@ -237,15 +237,15 @@ function CloseUp(optional bool bByOwner)
 	local UWindowPulldownMenuItem i;
 
 	// End:0x53
-	if(__NFUN_129__(bByOwner))
+	if((!bByOwner))
 	{
 		// End:0x2F
-		if(__NFUN_119__(UWindowPulldownMenuItem(Owner), none))
+		if((UWindowPulldownMenuItem(Owner) != none))
 		{
 			UWindowPulldownMenuItem(Owner).CloseUp();
 		}
 		// End:0x53
-		if(__NFUN_119__(UWindowMenuBarItem(Owner), none))
+		if((UWindowMenuBarItem(Owner) != none))
 		{
 			UWindowMenuBarItem(Owner).CloseUp();
 		}
@@ -254,10 +254,10 @@ function CloseUp(optional bool bByOwner)
 	J0x6C:
 
 	// End:0xC0 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0xA4
-		if(__NFUN_119__(i.SubMenu, none))
+		if((i.SubMenu != none))
 		{
 			i.SubMenu.CloseUp(true);
 		}
@@ -271,12 +271,12 @@ function CloseUp(optional bool bByOwner)
 function UWindowMenuBar GetMenuBar()
 {
 	// End:0x25
-	if(__NFUN_119__(UWindowPulldownMenuItem(Owner), none))
+	if((UWindowPulldownMenuItem(Owner) != none))
 	{
 		return UWindowPulldownMenuItem(Owner).GetMenuBar();
 	}
 	// End:0x4A
-	if(__NFUN_119__(UWindowMenuBarItem(Owner), none))
+	if((UWindowMenuBarItem(Owner) != none))
 	{
 		return UWindowMenuBarItem(Owner).GetMenuBar();
 	}
@@ -287,19 +287,19 @@ function FocusOtherWindow(UWindowWindow W)
 {
 	super(UWindowWindow).FocusOtherWindow(W);
 	// End:0x30
-	if(__NFUN_119__(Selected, none))
+	if((Selected != none))
 	{
 		// End:0x30
-		if(__NFUN_114__(W, Selected.SubMenu))
+		if((W == Selected.SubMenu))
 		{
 			return;
 		}
 	}
 	// End:0x5F
-	if(__NFUN_119__(UWindowPulldownMenuItem(Owner), none))
+	if((UWindowPulldownMenuItem(Owner) != none))
 	{
 		// End:0x5F
-		if(__NFUN_114__(UWindowPulldownMenuItem(Owner).Owner, W))
+		if((UWindowPulldownMenuItem(Owner).Owner == W))
 		{
 			return;
 		}
@@ -322,7 +322,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x11B
 		case 38:
 			// End:0x58
-			if(__NFUN_132__(__NFUN_114__(i, none), __NFUN_114__(i, Items.Next)))
+			if(((i == none) || (i == Items.Next)))
 			{
 				i = UWindowPulldownMenuItem(Items.Last);				
 			}
@@ -331,25 +331,25 @@ function KeyDown(int Key, float X, float Y)
 				i = UWindowPulldownMenuItem(i.Prev);
 			}
 			// End:0x98
-			if(__NFUN_114__(i, none))
+			if((i == none))
 			{
 				i = UWindowPulldownMenuItem(Items.Last);				
 			}
 			else
 			{
 				// End:0xC7
-				if(__NFUN_122__(i.Caption, "-"))
+				if((i.Caption == "-"))
 				{
 					i = UWindowPulldownMenuItem(i.Prev);
 				}
 			}
 			// End:0xEB
-			if(__NFUN_114__(i, none))
+			if((i == none))
 			{
 				i = UWindowPulldownMenuItem(Items.Last);
 			}
 			// End:0x10D
-			if(__NFUN_114__(i.SubMenu, none))
+			if((i.SubMenu == none))
 			{
 				PerformSelect(i);				
 			}
@@ -362,7 +362,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x20A
 		case 40:
 			// End:0x147
-			if(__NFUN_114__(i, none))
+			if((i == none))
 			{
 				i = UWindowPulldownMenuItem(Items.Next);				
 			}
@@ -371,25 +371,25 @@ function KeyDown(int Key, float X, float Y)
 				i = UWindowPulldownMenuItem(i.Next);
 			}
 			// End:0x187
-			if(__NFUN_114__(i, none))
+			if((i == none))
 			{
 				i = UWindowPulldownMenuItem(Items.Next);				
 			}
 			else
 			{
 				// End:0x1B6
-				if(__NFUN_122__(i.Caption, "-"))
+				if((i.Caption == "-"))
 				{
 					i = UWindowPulldownMenuItem(i.Next);
 				}
 			}
 			// End:0x1DA
-			if(__NFUN_114__(i, none))
+			if((i == none))
 			{
 				i = UWindowPulldownMenuItem(Items.Next);
 			}
 			// End:0x1FC
-			if(__NFUN_114__(i.SubMenu, none))
+			if((i.SubMenu == none))
 			{
 				PerformSelect(i);				
 			}
@@ -402,13 +402,13 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x2A3
 		case 37:
 			// End:0x264
-			if(__NFUN_119__(UWindowPulldownMenuItem(Owner), none))
+			if((UWindowPulldownMenuItem(Owner) != none))
 			{
 				UWindowPulldownMenuItem(Owner).Owner.PerformSelect(none);
 				UWindowPulldownMenuItem(Owner).Owner.Selected = UWindowPulldownMenuItem(Owner);
 			}
 			// End:0x2A0
-			if(__NFUN_119__(UWindowMenuBarItem(Owner), none))
+			if((UWindowMenuBarItem(Owner) != none))
 			{
 				UWindowMenuBarItem(Owner).Owner.KeyDown(Key, X, Y);
 			}
@@ -417,7 +417,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x3B4
 		case 39:
 			// End:0x31B
-			if(__NFUN_130__(__NFUN_119__(i, none), __NFUN_119__(i.SubMenu, none)))
+			if(((i != none) && (i.SubMenu != none)))
 			{
 				Selected = none;
 				PerformSelect(i);
@@ -426,13 +426,13 @@ function KeyDown(int Key, float X, float Y)
 			else
 			{
 				// End:0x375
-				if(__NFUN_119__(UWindowPulldownMenuItem(Owner), none))
+				if((UWindowPulldownMenuItem(Owner) != none))
 				{
 					UWindowPulldownMenuItem(Owner).Owner.PerformSelect(none);
 					UWindowPulldownMenuItem(Owner).Owner.KeyDown(Key, X, Y);
 				}
 				// End:0x3B1
-				if(__NFUN_119__(UWindowMenuBarItem(Owner), none))
+				if((UWindowMenuBarItem(Owner) != none))
 				{
 					UWindowMenuBarItem(Owner).Owner.KeyDown(Key, X, Y);
 				}
@@ -442,7 +442,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x434
 		case 13:
 			// End:0x3E2
-			if(__NFUN_119__(i.SubMenu, none))
+			if((i.SubMenu != none))
 			{
 				Selected = none;
 				PerformSelect(i);				

@@ -19,17 +19,17 @@ function int Compare(UWindowList t, UWindowList B)
 	TI = UWindowComboListItem(t);
 	BI = UWindowComboListItem(B);
 	// End:0x98
-	if(__NFUN_154__(TI.SortWeight, BI.SortWeight))
+	if((TI.SortWeight == BI.SortWeight))
 	{
-		TS = __NFUN_235__(TI.Value);
-		BS = __NFUN_235__(BI.Value);
+		TS = Caps(TI.Value);
+		BS = Caps(BI.Value);
 		// End:0x7E
-		if(__NFUN_122__(TS, BS))
+		if((TS == BS))
 		{
 			return 0;
 		}
 		// End:0x93
-		if(__NFUN_115__(TS, BS))
+		if((TS < BS))
 		{
 			return -1;
 		}
@@ -37,7 +37,7 @@ function int Compare(UWindowList t, UWindowList B)
 	}
 	else
 	{
-		return __NFUN_147__(TI.SortWeight, BI.SortWeight);
+		return (TI.SortWeight - BI.SortWeight);
 	}
 	return;
 }

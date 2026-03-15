@@ -64,227 +64,227 @@ function PlayRainbowPlayerVoices(R6Pawn aPawn, Pawn.ERainbowPlayerVoices eRainbo
 	{
 		// End:0x24
 		case 0:
-			aPawn.__NFUN_2730__(m_sndTeamRegroup, 8, 10);
+			aPawn.PlayVoices(m_sndTeamRegroup, 8, 10);
 			// End:0x526
 			break;
 		// End:0x41
 		case 1:
-			aPawn.__NFUN_2730__(m_sndTeamMove, 8, 10);
+			aPawn.PlayVoices(m_sndTeamMove, 8, 10);
 			// End:0x526
 			break;
 		// End:0x5E
 		case 2:
-			aPawn.__NFUN_2730__(m_sndTeamHold, 8, 10);
+			aPawn.PlayVoices(m_sndTeamHold, 8, 10);
 			// End:0x526
 			break;
 		// End:0x7B
 		case 3:
-			aPawn.__NFUN_2730__(m_sndAllTeamsHold, 8, 10);
+			aPawn.PlayVoices(m_sndAllTeamsHold, 8, 10);
 			// End:0x526
 			break;
 		// End:0x98
 		case 4:
-			aPawn.__NFUN_2730__(m_sndAllTeamsMove, 8, 10);
+			aPawn.PlayVoices(m_sndAllTeamsMove, 8, 10);
 			// End:0x526
 			break;
 		// End:0xB5
 		case 5:
-			aPawn.__NFUN_2730__(m_sndTeamMoveAndFrag, 8, 10);
+			aPawn.PlayVoices(m_sndTeamMoveAndFrag, 8, 10);
 			// End:0x526
 			break;
 		// End:0xD2
 		case 6:
-			aPawn.__NFUN_2730__(m_sndTeamMoveAndGas, 8, 10);
+			aPawn.PlayVoices(m_sndTeamMoveAndGas, 8, 10);
 			// End:0x526
 			break;
 		// End:0xEF
 		case 7:
-			aPawn.__NFUN_2730__(m_sndTeamMoveAndSmoke, 8, 10);
+			aPawn.PlayVoices(m_sndTeamMoveAndSmoke, 8, 10);
 			// End:0x526
 			break;
 		// End:0x10C
 		case 8:
-			aPawn.__NFUN_2730__(m_sndTeamMoveAndFlash, 8, 10);
+			aPawn.PlayVoices(m_sndTeamMoveAndFlash, 8, 10);
 			// End:0x526
 			break;
 		// End:0x129
 		case 9:
-			aPawn.__NFUN_2730__(m_sndTeamOpenDoor, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenDoor, 8, 10);
 			// End:0x526
 			break;
 		// End:0x146
 		case 10:
-			aPawn.__NFUN_2730__(m_sndTeamCloseDoor, 8, 10);
+			aPawn.PlayVoices(m_sndTeamCloseDoor, 8, 10);
 			// End:0x526
 			break;
 		// End:0x163
 		case 11:
-			aPawn.__NFUN_2730__(m_sndTeamOpenShudder, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenShudder, 8, 10);
 			// End:0x526
 			break;
 		// End:0x180
 		case 12:
-			aPawn.__NFUN_2730__(m_sndTeamCloseShudder, 8, 10);
+			aPawn.PlayVoices(m_sndTeamCloseShudder, 8, 10);
 			// End:0x526
 			break;
 		// End:0x19D
 		case 13:
-			aPawn.__NFUN_2730__(m_sndTeamOpenAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x1BA
 		case 14:
-			aPawn.__NFUN_2730__(m_sndTeamOpenAndFrag, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenAndFrag, 8, 10);
 			// End:0x526
 			break;
 		// End:0x1D7
 		case 15:
-			aPawn.__NFUN_2730__(m_sndTeamOpenAndGas, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenAndGas, 8, 10);
 			// End:0x526
 			break;
 		// End:0x1F4
 		case 16:
-			aPawn.__NFUN_2730__(m_sndTeamOpenAndSmoke, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenAndSmoke, 8, 10);
 			// End:0x526
 			break;
 		// End:0x211
 		case 17:
-			aPawn.__NFUN_2730__(m_sndTeamOpenAndFlash, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenAndFlash, 8, 10);
 			// End:0x526
 			break;
 		// End:0x22E
 		case 18:
-			aPawn.__NFUN_2730__(m_sndTeamOpenFragAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenFragAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x24B
 		case 19:
-			aPawn.__NFUN_2730__(m_sndTeamOpenGasAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenGasAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x268
 		case 20:
-			aPawn.__NFUN_2730__(m_sndTeamOpenSmokeAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenSmokeAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x285
 		case 21:
-			aPawn.__NFUN_2730__(m_sndTeamOpenFlashAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamOpenFlashAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x2A2
 		case 22:
-			aPawn.__NFUN_2730__(m_sndTeamFragAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamFragAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x2BF
 		case 23:
-			aPawn.__NFUN_2730__(m_sndTeamGasAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamGasAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x2DC
 		case 24:
-			aPawn.__NFUN_2730__(m_sndTeamSmokeAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamSmokeAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x2F9
 		case 25:
-			aPawn.__NFUN_2730__(m_sndTeamFlashAndClear, 8, 10);
+			aPawn.PlayVoices(m_sndTeamFlashAndClear, 8, 10);
 			// End:0x526
 			break;
 		// End:0x316
 		case 26:
-			aPawn.__NFUN_2730__(m_sndTeamUseLadder, 8, 10);
+			aPawn.PlayVoices(m_sndTeamUseLadder, 8, 10);
 			// End:0x526
 			break;
 		// End:0x333
 		case 27:
-			aPawn.__NFUN_2730__(m_sndTeamSecureTerrorist, 8, 10);
+			aPawn.PlayVoices(m_sndTeamSecureTerrorist, 8, 10);
 			// End:0x526
 			break;
 		// End:0x350
 		case 28:
-			aPawn.__NFUN_2730__(m_sndTeamGoGetHostage, 8, 10);
+			aPawn.PlayVoices(m_sndTeamGoGetHostage, 8, 10);
 			// End:0x526
 			break;
 		// End:0x36D
 		case 29:
-			aPawn.__NFUN_2730__(m_sndTeamHostageStayPut, 8, 10);
+			aPawn.PlayVoices(m_sndTeamHostageStayPut, 8, 10);
 			// End:0x526
 			break;
 		// End:0x38A
 		case 30:
-			aPawn.__NFUN_2730__(m_sndTeamStatusReport, 8, 10);
+			aPawn.PlayVoices(m_sndTeamStatusReport, 8, 10);
 			// End:0x526
 			break;
 		// End:0x3A7
 		case 32:
-			aPawn.__NFUN_2730__(m_sndTeamUseDemolition, 8, 10);
+			aPawn.PlayVoices(m_sndTeamUseDemolition, 8, 10);
 			// End:0x526
 			break;
 		// End:0x3C4
 		case 31:
-			aPawn.__NFUN_2730__(m_sndTeamUseElectronic, 8, 10);
+			aPawn.PlayVoices(m_sndTeamUseElectronic, 8, 10);
 			// End:0x526
 			break;
 		// End:0x3E1
 		case 33:
-			aPawn.__NFUN_2730__(m_sndAlphaGoCode, 8, 10);
+			aPawn.PlayVoices(m_sndAlphaGoCode, 8, 10);
 			// End:0x526
 			break;
 		// End:0x3FE
 		case 34:
-			aPawn.__NFUN_2730__(m_sndBravoGoCode, 8, 10);
+			aPawn.PlayVoices(m_sndBravoGoCode, 8, 10);
 			// End:0x526
 			break;
 		// End:0x41B
 		case 35:
-			aPawn.__NFUN_2730__(m_sndCharlieGoCode, 8, 10);
+			aPawn.PlayVoices(m_sndCharlieGoCode, 8, 10);
 			// End:0x526
 			break;
 		// End:0x438
 		case 36:
-			aPawn.__NFUN_2730__(m_sndZuluGoCode, 8, 10);
+			aPawn.PlayVoices(m_sndZuluGoCode, 8, 10);
 			// End:0x526
 			break;
 		// End:0x458
 		case 37:
-			aPawn.__NFUN_2730__(m_sndOrderTeamWithGoCode, 8, 15, 0, true);
+			aPawn.PlayVoices(m_sndOrderTeamWithGoCode, 8, 15, 0, true);
 			// End:0x526
 			break;
 		// End:0x475
 		case 38:
-			aPawn.__NFUN_2730__(m_sndHostageFollow, 8, 10);
+			aPawn.PlayVoices(m_sndHostageFollow, 8, 10);
 			// End:0x526
 			break;
 		// End:0x492
 		case 39:
-			aPawn.__NFUN_2730__(m_sndHostageStay, 8, 10);
+			aPawn.PlayVoices(m_sndHostageStay, 8, 10);
 			// End:0x526
 			break;
 		// End:0x4AF
 		case 40:
-			aPawn.__NFUN_2730__(m_sndHostageSafe, 8, 10);
+			aPawn.PlayVoices(m_sndHostageSafe, 8, 10);
 			// End:0x526
 			break;
 		// End:0x4CC
 		case 41:
-			aPawn.__NFUN_2730__(m_sndHostageSecured, 8, 10);
+			aPawn.PlayVoices(m_sndHostageSecured, 8, 10);
 			// End:0x526
 			break;
 		// End:0x4E9
 		case 42:
-			aPawn.__NFUN_2730__(m_sndMemberDown, 8, 10);
+			aPawn.PlayVoices(m_sndMemberDown, 8, 10);
 			// End:0x526
 			break;
 		// End:0x506
 		case 43:
-			aPawn.__NFUN_2730__(m_sndSniperFree, 8, 10);
+			aPawn.PlayVoices(m_sndSniperFree, 8, 10);
 			// End:0x526
 			break;
 		// End:0x523
 		case 44:
-			aPawn.__NFUN_2730__(m_sndSniperHold, 8, 10);
+			aPawn.PlayVoices(m_sndSniperHold, 8, 10);
 			// End:0x526
 			break;
 		// End:0xFFFF

@@ -24,7 +24,7 @@ function PlayerReadySelected(PlayerController _Controller)
 
 function LetPlayerPopIn(Controller aPlayer)
 {
-	__NFUN_231__(__NFUN_112__("LetPlayerPopIn ", string(aPlayer)));
+	Log(("LetPlayerPopIn " $ string(aPlayer)));
 	R6PlayerController(aPlayer).m_TeamSelection = 2;
 	ResetPlayerTeam(aPlayer);
 	return;
@@ -33,7 +33,7 @@ function LetPlayerPopIn(Controller aPlayer)
 function ResetPlayerTeam(Controller aPlayer)
 {
 	// End:0x4A
-	if(__NFUN_114__(R6Pawn(aPlayer.Pawn), none))
+	if((R6Pawn(aPlayer.Pawn) == none))
 	{
 		RestartPlayer(aPlayer);
 		aPlayer.Pawn.PlayerReplicationInfo = aPlayer.PlayerReplicationInfo;
@@ -49,7 +49,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	// End:0x10
 	if(m_bGameStarted)
 	{
-		__NFUN_113__('InBetweenRoundMenu');
+		GotoState('InBetweenRoundMenu');
 	}
 	return super.Login(Portal, Options, Error);
 	return;
@@ -68,7 +68,7 @@ auto state InMPWaitForPlayersMenu
 		local Controller P;
 
 		// End:0x16
-		if(__NFUN_114__(Level.ControllerList, none))
+		if((Level.ControllerList == none))
 		{
 			return;
 		}
@@ -76,13 +76,13 @@ auto state InMPWaitForPlayersMenu
 		J0x2A:
 
 		// End:0xD7 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0xC0
-			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_119__(P.PlayerReplicationInfo, none)), __NFUN_155__(int(R6PlayerController(P).m_TeamSelection), int(0))), __NFUN_155__(int(R6PlayerController(P).m_TeamSelection), int(4))))
+			if((((P.IsA('PlayerController') && (P.PlayerReplicationInfo != none)) && (int(R6PlayerController(P).m_TeamSelection) != int(0))) && (int(R6PlayerController(P).m_TeamSelection) != int(4))))
 			{
 				GameReplicationInfo.SetServerState(GameReplicationInfo.1);
-				__NFUN_113__('InBetweenRoundMenu');
+				GotoState('InBetweenRoundMenu');
 			}
 			P = P.nextController;
 			// [Loop Continue]
@@ -103,10 +103,10 @@ auto state InBetweenRoundMenu
 		J0x14:
 
 		// End:0x92 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x7B
-			if(__NFUN_130__(__NFUN_114__(P.Pawn, none), __NFUN_129__(R6PlayerController(P).IsPlayerPassiveSpectator())))
+			if(((P.Pawn == none) && (!R6PlayerController(P).IsPlayerPassiveSpectator())))
 			{
 				LetPlayerPopIn(P);
 				m_bGameStarted = true;

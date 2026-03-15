@@ -44,7 +44,7 @@ function SetLocalPlayerCtrl(PlayerController _localPlayer)
 event GMProcessMsg(string _szMsg)
 {
 	// End:0x28
-	if(__NFUN_119__(m_GameMgrConsole, none))
+	if((m_GameMgrConsole != none))
 	{
 		m_GameMgrConsole.Root.ProcessGSMsg(_szMsg);
 	}

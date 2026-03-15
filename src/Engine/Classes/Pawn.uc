@@ -584,7 +584,7 @@ var transient CompressedPosition PawnPosition;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		AnimAction, AnimStatus, 
 		Controller, OnLadder, 
 		PlayerReplicationInfo, TakeHitLocation, 
@@ -597,49 +597,49 @@ replication
 		m_iFriendlyTeams, m_iTeam;
 
 	// Pos:0x018
-	reliable if(__NFUN_130__(__NFUN_130__(bNetDirty, bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if(((bNetDirty && bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		AccelRate, AirControl, 
 		AirSpeed, GroundSpeed, 
 		Health, JumpZ, 
 		WaterSpeed;
 
 	// Pos:0x03B
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+	reliable if((bNetDirty && ((!bNetOwner) && (int(Role) == int(ROLE_Authority)))))
 		EngineWeapon, PendingWeapon, 
 		bSteadyFiring;
 
 	// Pos:0x060
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bIsPlayer, m_fFallingHeight;
 
 	// Pos:0x06D
-	reliable if(__NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if(((!bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		m_bPeekingLeft, m_ePeekingMode, 
 		m_fCrouchBlendRate;
 
 	// Pos:0x087
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))), m_bIsPlayer))
+	reliable if((((!bNetOwner) && (int(Role) == int(ROLE_Authority))) && m_bIsPlayer))
 		m_bRepFinishShotgun, m_rRotationOffset;
 
 	// Pos:0x0AC
-	reliable if(__NFUN_132__(__NFUN_130__(bNetOwner, __NFUN_150__(int(Role), int(ROLE_Authority))), __NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+	reliable if(((bNetOwner && (int(Role) < int(ROLE_Authority))) || ((!bNetOwner) && (int(Role) == int(ROLE_Authority)))))
 		m_bIsFiringWeapon, m_bTurnLeft, 
 		m_bTurnRight;
 
 	// Pos:0x0E3
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(bTearOff, m_bUseRagdoll), bNetDirty), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((((bTearOff || m_bUseRagdoll) && bNetDirty) && (int(Role) == int(ROLE_Authority))))
 		TearOffMomentum;
 
 	// Pos:0x111
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerChangedWeapon, ServerFinishShotgunAnimation;
 
 	// Pos:0x11E
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_fRepDecrementalBlurValue;
 
 	// Pos:0x12B
-	reliable if(__NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if(((!bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		PawnPosition;
 }
 
@@ -695,16 +695,16 @@ simulated event PlayWeaponAnimation()
 //For shotguns anims in MP
 function ServerFinishShotgunAnimation()
 {
-	m_bRepFinishShotgun = __NFUN_129__(m_bRepFinishShotgun);
+	m_bRepFinishShotgun = (!m_bRepFinishShotgun);
 	return;
 }
 
 function Reset()
 {
 	// End:0x25
-	if(__NFUN_132__(__NFUN_114__(Controller, none), Controller.bIsPlayer))
+	if(((Controller == none) || Controller.bIsPlayer))
 	{
-		__NFUN_279__();		
+		Destroy();		
 	}
 	else
 	{
@@ -716,7 +716,7 @@ function Reset()
 function string GetHumanReadableName()
 {
 	// End:0x1A
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		return PlayerReplicationInfo.PlayerName;
 	}
@@ -726,7 +726,7 @@ function string GetHumanReadableName()
 
 function PlayTeleportEffect(bool bOut, bool bSound)
 {
-	__NFUN_512__(1.0000000);
+	MakeNoise(1.0000000);
 	return;
 }
 
@@ -735,22 +735,22 @@ function PossessedBy(Controller C)
 	Controller = C;
 	NetPriority = 3.0000000;
 	// End:0x52
-	if(__NFUN_119__(C.PlayerReplicationInfo, none))
+	if((C.PlayerReplicationInfo != none))
 	{
 		PlayerReplicationInfo = C.PlayerReplicationInfo;
 		OwnerName = PlayerReplicationInfo.PlayerName;
 	}
 	// End:0xD3
-	if(C.__NFUN_303__('PlayerController'))
+	if(C.IsA('PlayerController'))
 	{
 		// End:0x87
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) != int(NM_Standalone)))
 		{
 			RemoteRole = ROLE_AutonomousProxy;
 		}
 		BecomeViewTarget();
 		// End:0xD0
-		if(__NFUN_119__(PlayerController(C).Player, none))
+		if((PlayerController(C).Player != none))
 		{
 			m_ArmPatchGUID = PlayerController(C).Player.m_ArmPatchGUID;
 			m_bArmPatchSet = false;
@@ -760,7 +760,7 @@ function PossessedBy(Controller C)
 	{
 		RemoteRole = default.RemoteRole;
 	}
-	__NFUN_272__(Controller);
+	SetOwner(Controller);
 	ChangeAnimation();
 	return;
 }
@@ -768,11 +768,11 @@ function PossessedBy(Controller C)
 function UnPossessed()
 {
 	// End:0x3A
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_119__(PlayerReplicationInfo, none)))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && (PlayerReplicationInfo != none)))
 	{
 		m_CharacterName = PlayerReplicationInfo.PlayerName;
 	}
-	__NFUN_272__(none);
+	SetOwner(none);
 	Controller = none;
 	return;
 }
@@ -793,15 +793,15 @@ function DropToGround()
 	bCollideWorld = true;
 	bInterpolating = false;
 	// End:0x46
-	if(__NFUN_151__(Health, 0))
+	if((Health > 0))
 	{
-		__NFUN_262__(true, true, true);
-		__NFUN_3970__(2);
+		SetCollision(true, true, true);
+		SetPhysics(2);
 		AmbientSound = none;
 		// End:0x46
 		if(IsHumanControlled())
 		{
-			Controller.__NFUN_113__(LandMovementState);
+			Controller.GotoState(LandMovementState);
 		}
 	}
 	return;
@@ -809,14 +809,14 @@ function DropToGround()
 
 function bool CanGrabLadder()
 {
-	return __NFUN_130__(__NFUN_130__(__NFUN_130__(bCanClimbLadders, __NFUN_119__(Controller, none)), __NFUN_155__(int(Physics), int(11))), __NFUN_132__(__NFUN_155__(int(Physics), int(2)), __NFUN_178__(__NFUN_186__(Velocity.Z), JumpZ)));
+	return (((bCanClimbLadders && (Controller != none)) && (int(Physics) != int(11))) && ((int(Physics) != int(2)) || (Abs(Velocity.Z) <= JumpZ)));
 	return;
 }
 
 event SetWalking(bool bNewIsWalking)
 {
 	// End:0x24
-	if(__NFUN_243__(bNewIsWalking, bIsWalking))
+	if((bNewIsWalking != bIsWalking))
 	{
 		bIsWalking = bNewIsWalking;
 		ChangeAnimation();
@@ -827,7 +827,7 @@ event SetWalking(bool bNewIsWalking)
 function bool CanSplash()
 {
 	// End:0x70
-	if(__NFUN_130__(__NFUN_130__(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, SplashTime), 0.2500000), __NFUN_132__(__NFUN_154__(int(Physics), int(2)), __NFUN_154__(int(Physics), int(4)))), __NFUN_177__(__NFUN_186__(Velocity.Z), float(100))))
+	if(((((Level.TimeSeconds - SplashTime) > 0.2500000) && ((int(Physics) == int(2)) || (int(Physics) == int(4)))) && (Abs(Velocity.Z) > float(100))))
 	{
 		SplashTime = Level.TimeSeconds;
 		return true;
@@ -840,14 +840,14 @@ function bool CanSplash()
 event EndClimbLadder(LadderVolume OldLadder)
 {
 	// End:0x1A
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.EndClimbLadder();
 	}
 	// End:0x2F
-	if(__NFUN_154__(int(Physics), int(11)))
+	if((int(Physics) == int(11)))
 	{
-		__NFUN_3970__(2);
+		SetPhysics(2);
 	}
 	return;
 }
@@ -855,12 +855,12 @@ event EndClimbLadder(LadderVolume OldLadder)
 function ClimbLadder(LadderVolume L)
 {
 	OnLadder = L;
-	__NFUN_299__(OnLadder.WallDir);
-	__NFUN_3970__(11);
+	SetRotation(OnLadder.WallDir);
+	SetPhysics(11);
 	// End:0x3A
 	if(IsHumanControlled())
 	{
-		Controller.__NFUN_113__('PlayerClimbing');
+		Controller.GotoState('PlayerClimbing');
 	}
 	return;
 }
@@ -870,24 +870,24 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 	local string t;
 
 	super.DisplayDebug(Canvas, YL, YPos);
-	Canvas.__NFUN_2626__(byte(255), byte(255), byte(255));
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Animation Action ", string(AnimAction)), " Status "), string(AnimStatus)));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Anchor ", string(Anchor)), " Serpentine Dist "), string(SerpentineDist)), " Time "), string(SerpentineTime)));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	t = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Floor ", string(Floor)), " DesiredSpeed "), string(DesiredSpeed)), " Crouched "), string(bIsCrouched)), " Try to uncrouch "), string(UncrouchTime));
+	Canvas.SetDrawColor(byte(255), byte(255), byte(255));
+	Canvas.DrawText(((("Animation Action " $ string(AnimAction)) $ " Status ") $ string(AnimStatus)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((((("Anchor " $ string(Anchor)) $ " Serpentine Dist ") $ string(SerpentineDist)) $ " Time ") $ string(SerpentineTime)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	t = ((((((("Floor " $ string(Floor)) $ " DesiredSpeed ") $ string(DesiredSpeed)) $ " Crouched ") $ string(bIsCrouched)) $ " Try to uncrouch ") $ string(UncrouchTime));
 	// End:0x1A5
-	if(__NFUN_132__(__NFUN_119__(OnLadder, none), __NFUN_154__(int(Physics), int(11))))
+	if(((OnLadder != none) || (int(Physics) == int(11))))
 	{
-		t = __NFUN_112__(__NFUN_112__(t, " on ladder "), string(OnLadder));
+		t = ((t $ " on ladder ") $ string(OnLadder));
 	}
-	Canvas.__NFUN_465__(t);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(t);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	// End:0x237
-	if(__NFUN_114__(Controller, none))
+	if((Controller == none))
 	{
 		Canvas.__NFUN_2626__(byte(255), 0, 0);
 		Canvas.__NFUN_465__("NO CONTROLLER");

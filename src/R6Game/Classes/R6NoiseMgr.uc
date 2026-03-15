@@ -54,7 +54,7 @@ var config STPawnMovement m_Hostage;
 //============================================================================
 function Init()
 {
-	__NFUN_536__();
+	SaveConfig();
 	return;
 }
 
@@ -64,9 +64,9 @@ function Init()
 function MakeANoise(Actor Source, float fDist, Actor.ENoiseType ENoiseType, Actor.EPawnType EPawnType, Actor.ESoundType ESoundType)
 {
 	// End:0x2F
-	if(__NFUN_177__(fDist, 0.0000000))
+	if((fDist > 0.0000000))
 	{
-		Source.__NFUN_512__(fDist, ENoiseType, EPawnType, ESoundType);
+		Source.MakeNoise(fDist, ENoiseType, EPawnType, ESoundType);
 	}
 	return;
 }
@@ -84,7 +84,7 @@ event R6MakeNoise(Actor.ESoundType ESoundType, Actor Source)
 
 	aR6Pawn = R6AbstractPawn(Source.Instigator);
 	// End:0x323
-	if(__NFUN_119__(aR6Pawn, none))
+	if((aR6Pawn != none))
 	{
 		EPawnType = aR6Pawn.m_ePawnType;
 		switch(ESoundType)
@@ -93,28 +93,28 @@ event R6MakeNoise(Actor.ESoundType ESoundType, Actor Source)
 			case 1:
 				srcWeapon = R6Weapons(Source);
 				// End:0x61
-				if(__NFUN_114__(srcWeapon, none))
+				if((srcWeapon == none))
 				{
 					return;
 				}
 				// End:0x8D
-				if(__NFUN_177__(aR6Pawn.m_NextFireSound, aR6Pawn.Level.TimeSeconds))
+				if((aR6Pawn.m_NextFireSound > aR6Pawn.Level.TimeSeconds))
 				{
 					return;
 				}
-				aR6Pawn.m_NextFireSound = __NFUN_174__(aR6Pawn.Level.TimeSeconds, 0.3300000);
-				fDist = __NFUN_171__(srcWeapon.m_fFireSoundRadius, 1.5000000);
+				aR6Pawn.m_NextFireSound = (aR6Pawn.Level.TimeSeconds + 0.3300000);
+				fDist = (srcWeapon.m_fFireSoundRadius * 1.5000000);
 				ENoiseType = 1;
 				// End:0x304
 				break;
 			// End:0x161
 			case 2:
 				// End:0x111
-				if(__NFUN_177__(aR6Pawn.m_NextBulletImpact, aR6Pawn.Level.TimeSeconds))
+				if((aR6Pawn.m_NextBulletImpact > aR6Pawn.Level.TimeSeconds))
 				{
 					return;
 				}
-				aR6Pawn.m_NextBulletImpact = __NFUN_174__(aR6Pawn.Level.TimeSeconds, 0.3300000);
+				aR6Pawn.m_NextBulletImpact = (aR6Pawn.Level.TimeSeconds + 0.3300000);
 				fDist = m_SndBulletImpact.fSndDist;
 				ENoiseType = m_SndBulletImpact.eType;
 				// End:0x304
@@ -205,14 +205,14 @@ event R6MakePawnMovementNoise(R6AbstractPawn Pawn)
 	aR6Pawn = R6Pawn(Pawn);
 	EPawnType = aR6Pawn.m_ePawnType;
 	// End:0x42
-	if(__NFUN_154__(int(EPawnType), int(2)))
+	if((int(EPawnType) == int(2)))
 	{
 		pawnMove = m_Terro;		
 	}
 	else
 	{
 		// End:0x60
-		if(__NFUN_154__(int(EPawnType), int(1)))
+		if((int(EPawnType) == int(1)))
 		{
 			pawnMove = m_Rainbow;			
 		}
@@ -256,8 +256,8 @@ event R6MakePawnMovementNoise(R6AbstractPawn Pawn)
 		}
 	}
 	fStealth = Pawn.GetSkill(4);
-	fStealth = float(__NFUN_251__(int(fStealth), 0, int(1.5000000)));
-	__NFUN_182__(fDist, __NFUN_175__(1.2500000, __NFUN_171__(fStealth, 0.5000000)));
+	fStealth = float(Clamp(int(fStealth), 0, int(1.5000000)));
+	(fDist *= (1.2500000 - (fStealth * 0.5000000)));
 	MakeANoise(Pawn, fDist, pawnMove.eType, EPawnType, 6);
 	return;
 }

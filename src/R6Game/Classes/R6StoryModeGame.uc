@@ -43,7 +43,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	}
 	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x97
-	if(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(1)))
+	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
 		BroadcastMissionObjMsg("", "", "", m_Player.Level.m_sndMissionComplete);
 		BroadcastMissionObjMsg("", "", "MissionSuccesfulObjectivesCompleted", Level.m_sndPlayMissionExtro);		
@@ -53,7 +53,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		obj = m_missionMgr.GetMObjFailed();
 		BroadcastMissionObjMsg("", "", "MissionFailed");
 		// End:0x10A
-		if(__NFUN_119__(obj, none))
+		if((obj != none))
 		{
 			BroadcastMissionObjMsg(Level.GetMissionObjLocFile(obj), "", obj.GetDescriptionFailure(), obj.GetSoundFailure());
 		}
@@ -89,37 +89,37 @@ function UpdatePlayerCampaign()
 	// End:0x85
 	if(bShowLog)
 	{
-		__NFUN_231__("===== Update operative skills in mission =====");
+		Log("===== Update operative skills in mission =====");
 	}
 	i = 0;
 	J0x8C:
 
 	// End:0x5F0 [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		aR6Team = R6RainbowTeam(GetRainbowTeam(i));
 		// End:0x5E6
-		if(__NFUN_119__(aR6Team, none))
+		if((aR6Team != none))
 		{
 			// End:0xD6
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__("R6Team ", string(aR6Team)));
+				Log(("R6Team " $ string(aR6Team)));
 			}
 			j = 0;
 			J0xDD:
 
 			// End:0x5E6 [Loop If]
-			if(__NFUN_150__(j, 4))
+			if((j < 4))
 			{
 				aR6Rainbow = aR6Team.m_Team[j];
 				// End:0x123
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__("R6Rainbow ", string(aR6Rainbow)));
+					Log(("R6Rainbow " $ string(aR6Rainbow)));
 				}
 				// End:0x131
-				if(__NFUN_114__(aR6Rainbow, none))
+				if((aR6Rainbow == none))
 				{
 					// [Explicit Break]
 					goto J0x5E6;
@@ -128,30 +128,30 @@ function UpdatePlayerCampaign()
 				// End:0x178
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("aR6Rainbow.m_iOperativeID", string(aR6Rainbow.m_iOperativeID)));
+					Log(("aR6Rainbow.m_iOperativeID" @ string(aR6Rainbow.m_iOperativeID)));
 				}
 				iOperativeInMission[iOperativeInMission.Length] = aR6Rainbow.m_iOperativeID;
 				oOperative = oDetailOfTheOperative.m_MissionOperatives[aR6Rainbow.m_iOperativeID];
-				oOperative.m_fAssault = __NFUN_171__(aR6Rainbow.m_fSkillAssault, float(100));
-				oOperative.m_fDemolitions = __NFUN_171__(aR6Rainbow.m_fSkillDemolitions, float(100));
-				oOperative.m_fElectronics = __NFUN_171__(aR6Rainbow.m_fSkillElectronics, float(100));
-				oOperative.m_fSniper = __NFUN_171__(aR6Rainbow.m_fSkillSniper, float(100));
-				oOperative.m_fStealth = __NFUN_171__(aR6Rainbow.m_fSkillStealth, float(100));
-				oOperative.m_fSelfControl = __NFUN_171__(aR6Rainbow.m_fSkillSelfControl, float(100));
-				oOperative.m_fLeadership = __NFUN_171__(aR6Rainbow.m_fSkillLeadership, float(100));
-				oOperative.m_fObservation = __NFUN_171__(aR6Rainbow.m_fSkillObservation, float(100));
+				oOperative.m_fAssault = (aR6Rainbow.m_fSkillAssault * float(100));
+				oOperative.m_fDemolitions = (aR6Rainbow.m_fSkillDemolitions * float(100));
+				oOperative.m_fElectronics = (aR6Rainbow.m_fSkillElectronics * float(100));
+				oOperative.m_fSniper = (aR6Rainbow.m_fSkillSniper * float(100));
+				oOperative.m_fStealth = (aR6Rainbow.m_fSkillStealth * float(100));
+				oOperative.m_fSelfControl = (aR6Rainbow.m_fSkillSelfControl * float(100));
+				oOperative.m_fLeadership = (aR6Rainbow.m_fSkillLeadership * float(100));
+				oOperative.m_fObservation = (aR6Rainbow.m_fSkillObservation * float(100));
 				oOperative.m_iHealth = int(aR6Rainbow.m_eHealth);
-				__NFUN_165__(oOperative.m_iNbMissionPlayed);
-				__NFUN_161__(oOperative.m_iTerrokilled, aR6Rainbow.m_iKills);
-				__NFUN_161__(oOperative.m_iRoundsfired, aR6Rainbow.m_iBulletsFired);
-				__NFUN_161__(oOperative.m_iRoundsOntarget, aR6Rainbow.m_iBulletsHit);
+				(oOperative.m_iNbMissionPlayed++);
+				(oOperative.m_iTerrokilled += aR6Rainbow.m_iKills);
+				(oOperative.m_iRoundsfired += aR6Rainbow.m_iBulletsFired);
+				(oOperative.m_iRoundsOntarget += aR6Rainbow.m_iBulletsHit);
 				// End:0x36F
 				if(bShowLog)
 				{
 					oOperative.DisplayStats();
 				}
 				// End:0x5DC
-				if(__NFUN_151__(oOperative.m_iHealth, 1))
+				if((oOperative.m_iHealth > 1))
 				{
 					switch(aR6Rainbow.m_szSpecialityID)
 					{
@@ -192,62 +192,62 @@ function UpdatePlayerCampaign()
 					// End:0x51F
 					if(bShowLog)
 					{
-						__NFUN_231__(__NFUN_112__("aR6Rainbow.m_szSpecialityID: ", aR6Rainbow.m_szSpecialityID));
+						Log(("aR6Rainbow.m_szSpecialityID: " $ aR6Rainbow.m_szSpecialityID));
 					}
 					// End:0x55B
 					if(bShowLog)
 					{
-						__NFUN_231__(__NFUN_112__("oOperative.m_szOperativeClass: ", oOperative.m_szOperativeClass));
+						Log(("oOperative.m_szOperativeClass: " $ oOperative.m_szOperativeClass));
 					}
 					oOperative.m_iUniqueID = oDetailOfTheOperative.m_MissionOperatives.Length;
 					oOperative.m_iRookieID = GetNextRookieIndex(oOperative.m_szOperativeClass);
 					iOperativeInMission[iOperativeInMission.Length] = oDetailOfTheOperative.m_MissionOperatives.Length;
 					oDetailOfTheOperative.m_MissionOperatives[oDetailOfTheOperative.m_MissionOperatives.Length] = oOperative;
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0xDD;
 			}
 		}
 		J0x5E6:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x8C;
 	}
 	// End:0x62C
 	if(bShowLog)
 	{
-		__NFUN_231__("===== Update operative skills in training =====");
+		Log("===== Update operative skills in training =====");
 	}
 	i = 0;
 	J0x633:
 
 	// End:0x6FD [Loop If]
-	if(__NFUN_150__(i, MyCampaign.m_OperativesMissionDetails.m_MissionOperatives.Length))
+	if((i < MyCampaign.m_OperativesMissionDetails.m_MissionOperatives.Length))
 	{
 		bAlreadyUpdate = false;
 		j = 0;
 		J0x664:
 
 		// End:0x69E [Loop If]
-		if(__NFUN_150__(j, iOperativeInMission.Length))
+		if((j < iOperativeInMission.Length))
 		{
 			// End:0x694
-			if(__NFUN_154__(i, iOperativeInMission[j]))
+			if((i == iOperativeInMission[j]))
 			{
 				bAlreadyUpdate = true;
 				// [Explicit Break]
 				goto J0x69E;
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x664;
 		}
 		J0x69E:
 
 		// End:0x6F3
-		if(__NFUN_129__(bAlreadyUpdate))
+		if((!bAlreadyUpdate))
 		{
 			oOperative = MyCampaign.m_OperativesMissionDetails.m_MissionOperatives[i];
 			oOperative.UpdateSkills();
@@ -257,17 +257,17 @@ function UpdatePlayerCampaign()
 				oOperative.DisplayStats();
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x633;
 	}
 	// End:0x779
-	if(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(1)))
+	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
 		// End:0x768
-		if(__NFUN_150__(MyCampaign.m_iNoMission, __NFUN_147__(R6Console.m_CurrentCampaign.m_missions.Length, 1)))
+		if((MyCampaign.m_iNoMission < (R6Console.m_CurrentCampaign.m_missions.Length - 1)))
 		{
-			__NFUN_165__(MyCampaign.m_iNoMission);
+			(MyCampaign.m_iNoMission++);
 			MyCampaign.m_bCampaignCompleted = 0;			
 		}
 		else
@@ -292,22 +292,22 @@ function int GetNextRookieIndex(string _szOperativeClass)
 	J0x62:
 
 	// End:0xF3 [Loop If]
-	if(__NFUN_150__(i, iNbOfOperatives))
+	if((i < iNbOfOperatives))
 	{
 		// End:0xE9
-		if(__NFUN_122__(oDetailOfTheOperative.m_MissionOperatives[i].m_szOperativeClass, _szOperativeClass))
+		if((oDetailOfTheOperative.m_MissionOperatives[i].m_szOperativeClass == _szOperativeClass))
 		{
 			// End:0xE9
-			if(__NFUN_155__(oDetailOfTheOperative.m_MissionOperatives[i].m_iRookieID, -1))
+			if((oDetailOfTheOperative.m_MissionOperatives[i].m_iRookieID != -1))
 			{
-				iRookieIndex = __NFUN_250__(iRookieIndex, oDetailOfTheOperative.m_MissionOperatives[i].m_iRookieID);
+				iRookieIndex = Max(iRookieIndex, oDetailOfTheOperative.m_MissionOperatives[i].m_iRookieID);
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x62;
 	}
-	__NFUN_165__(iRookieIndex);
+	(iRookieIndex++);
 	return iRookieIndex;
 	return;
 }

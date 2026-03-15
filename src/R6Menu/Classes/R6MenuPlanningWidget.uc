@@ -54,35 +54,35 @@ function Created()
 	LAF = R6MenuRSLookAndFeel(OwnerWindow.LookAndFeel);
 	super.Created();
 	fLaptopPadding = 2.0000000;
-	TheRegion.Y = __NFUN_147__(__NFUN_147__(__NFUN_147__(480, LAF.m_stLapTopFrame.B.H), 4), LAF.m_NavBarBack[0].H);
+	TheRegion.Y = (((480 - LAF.m_stLapTopFrame.B.H) - 4) - LAF.m_NavBarBack[0].H);
 	TheRegion.H = 16;
-	TheRegion.Y = int(__NFUN_175__(__NFUN_175__(m_NavBar.WinTop, float(TheRegion.H)), fLaptopPadding));
+	TheRegion.Y = int(((m_NavBar.WinTop - float(TheRegion.H)) - fLaptopPadding));
 	TheRegion.X = int(m_NavBar.WinLeft);
 	TheRegion.W = 35;
 	m_3DButton = R6Menu3DViewOnOffButton(CreateWindow(Class'R6Menu.R6Menu3DViewOnOffButton', float(TheRegion.X), float(TheRegion.Y), float(TheRegion.W), float(TheRegion.H), self));
 	TheRegion.H = 16;
-	TheRegion.Y = int(__NFUN_175__(__NFUN_175__(m_NavBar.WinTop, float(TheRegion.H)), fLaptopPadding));
-	TheRegion.X = int(__NFUN_175__(__NFUN_174__(m_NavBar.WinLeft, m_NavBar.WinWidth), float(35)));
+	TheRegion.Y = int(((m_NavBar.WinTop - float(TheRegion.H)) - fLaptopPadding));
+	TheRegion.X = int(((m_NavBar.WinLeft + m_NavBar.WinWidth) - float(35)));
 	TheRegion.W = 35;
 	m_LegendButton = R6MenuLegendButton(CreateWindow(Class'R6Menu.R6MenuLegendButton', float(TheRegion.X), float(TheRegion.Y), float(TheRegion.W), float(TheRegion.H), self));
-	TheRegion.X = __NFUN_146__(LAF.m_stLapTopFrame.L.W, 1);
-	TheRegion.H = __NFUN_146__(2, 23);
-	__NFUN_162__(TheRegion.Y, __NFUN_146__(2, TheRegion.H));
-	TheRegion.W = int(__NFUN_175__(float(640), m_Right.WinWidth));
+	TheRegion.X = (LAF.m_stLapTopFrame.L.W + 1);
+	TheRegion.H = (2 + 23);
+	(TheRegion.Y -= (2 + TheRegion.H));
+	TheRegion.W = int((float(640) - m_Right.WinWidth));
 	m_PlanningBar = R6MenuPlanningBar(CreateWindow(Class'R6Menu.R6MenuPlanningBar', float(TheRegion.X), float(TheRegion.Y), float(TheRegion.W), float(TheRegion.H), self));
-	TheRegion.W = __NFUN_146__(__NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3), 2);
-	TheRegion.H = __NFUN_146__(__NFUN_145__(int(__NFUN_175__(m_Bottom.WinTop, m_Top.WinHeight)), 3), 2);
-	TheRegion.X = int(__NFUN_174__(m_Left.WinWidth, float(2)));
-	TheRegion.Y = int(__NFUN_174__(__NFUN_174__(m_Top.WinHeight, m_fLabelHeight), float(1)));
+	TheRegion.W = ((int((m_Right.WinLeft - m_Left.WinWidth)) / 3) + 2);
+	TheRegion.H = ((int((m_Bottom.WinTop - m_Top.WinHeight)) / 3) + 2);
+	TheRegion.X = int((m_Left.WinWidth + float(2)));
+	TheRegion.Y = int(((m_Top.WinHeight + m_fLabelHeight) + float(1)));
 	m_3DWindow = R6Window3DButton(CreateWindow(Class'R6Menu.R6Window3DButton', float(TheRegion.X), float(TheRegion.Y), float(TheRegion.W), float(TheRegion.H), self));
 	m_3DWindow.HideWindow();
-	m_LegendWindow = R6WindowLegend(CreateWindow(Class'R6Menu.R6WindowLegend', __NFUN_175__(m_Right.WinLeft, float(103)), __NFUN_174__(__NFUN_174__(m_Top.WinHeight, m_fLabelHeight), float(1)), 100.0000000, 100.0000000, self));
+	m_LegendWindow = R6WindowLegend(CreateWindow(Class'R6Menu.R6WindowLegend', (m_Right.WinLeft - float(103)), ((m_Top.WinHeight + m_fLabelHeight) + float(1)), 100.0000000, 100.0000000, self));
 	m_LegendWindow.HideWindow();
 	m_labelFont = Root.Fonts[9];
-	labelWidth = __NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3);
+	labelWidth = (int((m_Right.WinLeft - m_Left.WinWidth)) / 3);
 	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_Left.WinWidth, m_Top.WinHeight, float(labelWidth), m_fLabelHeight, self));
-	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_CodeName.WinLeft, m_CodeName.WinWidth), m_Top.WinHeight, float(labelWidth), m_fLabelHeight, self));
-	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_DateTime.WinLeft, m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, m_fLabelHeight, self));
+	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_CodeName.WinLeft + m_CodeName.WinWidth), m_Top.WinHeight, float(labelWidth), m_fLabelHeight, self));
+	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_DateTime.WinLeft + m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, m_fLabelHeight, self));
 	m_NavBar.m_PlanningButton.bDisabled = true;
 	return;
 }
@@ -115,7 +115,7 @@ function HideWindow()
 function Hide3DAndLegend()
 {
 	// End:0x26
-	if(__NFUN_119__(R6PlanningCtrl(GetPlayerOwner()), none))
+	if((R6PlanningCtrl(GetPlayerOwner()) != none))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).TurnOff3DView();
 	}
@@ -136,7 +136,7 @@ function ShowWindow()
 
 	r6Root = R6MenuRootWindow(Root);
 	// End:0x70
-	if(__NFUN_130__(r6Root.m_bPlayerPlanInitialized, __NFUN_129__(r6Root.m_bPlayerDoNotWant3DView)))
+	if((r6Root.m_bPlayerPlanInitialized && (!r6Root.m_bPlayerDoNotWant3DView)))
 	{
 		m_3DButton.m_bSelected = true;
 		m_3DWindow.Toggle3DWindow();
@@ -149,7 +149,7 @@ function ShowWindow()
 		m_3DButton.m_bSelected = false;
 	}
 	// End:0xEE
-	if(__NFUN_130__(r6Root.m_bPlayerPlanInitialized, r6Root.m_bPlayerWantLegend))
+	if((r6Root.m_bPlayerPlanInitialized && r6Root.m_bPlayerWantLegend))
 	{
 		m_LegendButton.m_bSelected = true;
 		m_LegendWindow.ToggleLegend();		
@@ -166,11 +166,11 @@ function ShowWindow()
 	m_DateTime.SetProperties(Localize(CurrentMission.m_MapName, "ID_DATETIME", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
 	m_Location.SetProperties(Localize(CurrentMission.m_MapName, "ID_LOCATION", CurrentMission.LocalizationFile), 2, m_labelFont, Root.Colors.White, false);
 	// End:0x2CF
-	if(__NFUN_242__(r6Root.m_bPlayerPlanInitialized, false))
+	if((r6Root.m_bPlayerPlanInitialized == false))
 	{
-		pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+		pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 		// End:0x2CF
-		if(__NFUN_242__(pGameOptions.PopUpLoadPlan, true))
+		if((pGameOptions.PopUpLoadPlan == true))
 		{
 			r6Root.m_ePopUpID = 48;
 			r6Root.PopUpMenu(true);
@@ -182,26 +182,26 @@ function ShowWindow()
 function Paint(Canvas C, float X, float Y)
 {
 	C.Style = 1;
-	C.__NFUN_2626__(Root.Colors.GrayLight.R, Root.Colors.GrayLight.G, Root.Colors.GrayLight.B);
-	DrawStretchedTextureSegment(C, __NFUN_174__(m_Left.WinWidth, float(1)), __NFUN_174__(m_Top.WinHeight, m_fLabelHeight), __NFUN_175__(__NFUN_175__(WinWidth, m_Right.WinWidth), float(2)), 1.0000000, 18.0000000, 56.0000000, 1.0000000, 1.0000000, Texture'R6MenuTextures.Gui_BoxScroll');
-	DrawStretchedTextureSegment(C, __NFUN_174__(m_Left.WinWidth, float(1)), __NFUN_174__(m_Top.WinHeight, m_fLabelHeight), 1.0000000, __NFUN_175__(__NFUN_175__(364.0000000, m_Top.WinHeight), m_fLabelHeight), 18.0000000, 56.0000000, 1.0000000, 1.0000000, Texture'R6MenuTextures.Gui_BoxScroll');
-	DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(WinWidth, m_Right.WinWidth), float(2)), __NFUN_174__(m_Top.WinHeight, m_fLabelHeight), 1.0000000, __NFUN_175__(__NFUN_175__(364.0000000, m_Top.WinHeight), m_fLabelHeight), 18.0000000, 56.0000000, 1.0000000, 1.0000000, Texture'R6MenuTextures.Gui_BoxScroll');
-	C.__NFUN_2626__(Root.Colors.GrayDark.R, Root.Colors.GrayDark.G, Root.Colors.GrayDark.B);
+	C.SetDrawColor(Root.Colors.GrayLight.R, Root.Colors.GrayLight.G, Root.Colors.GrayLight.B);
+	DrawStretchedTextureSegment(C, (m_Left.WinWidth + float(1)), (m_Top.WinHeight + m_fLabelHeight), ((WinWidth - m_Right.WinWidth) - float(2)), 1.0000000, 18.0000000, 56.0000000, 1.0000000, 1.0000000, Texture'R6MenuTextures.Gui_BoxScroll');
+	DrawStretchedTextureSegment(C, (m_Left.WinWidth + float(1)), (m_Top.WinHeight + m_fLabelHeight), 1.0000000, ((364.0000000 - m_Top.WinHeight) - m_fLabelHeight), 18.0000000, 56.0000000, 1.0000000, 1.0000000, Texture'R6MenuTextures.Gui_BoxScroll');
+	DrawStretchedTextureSegment(C, ((WinWidth - m_Right.WinWidth) - float(2)), (m_Top.WinHeight + m_fLabelHeight), 1.0000000, ((364.0000000 - m_Top.WinHeight) - m_fLabelHeight), 18.0000000, 56.0000000, 1.0000000, 1.0000000, Texture'R6MenuTextures.Gui_BoxScroll');
+	C.SetDrawColor(Root.Colors.GrayDark.R, Root.Colors.GrayDark.G, Root.Colors.GrayDark.B);
 	DrawStretchedTextureSegment(C, 0.0000000, 364.0000000, m_PlanningBar.WinWidth, m_PlanningBar.WinHeight, 0.0000000, 364.0000000, m_PlanningBar.WinWidth, m_PlanningBar.WinHeight, m_TBackGround);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	DrawStretchedTextureSegment(C, 0.0000000, m_Top.WinHeight, WinWidth, m_fLabelHeight, 0.0000000, m_Top.WinHeight, WinWidth, m_fLabelHeight, m_TBackGround);
-	DrawStretchedTextureSegment(C, m_Left.WinWidth, __NFUN_174__(m_Top.WinHeight, m_fLabelHeight), 1.0000000, 364.0000000, m_Left.WinWidth, __NFUN_174__(m_Top.WinHeight, m_fLabelHeight), 1.0000000, 364.0000000, m_TBackGround);
-	DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(WinWidth, m_Right.WinWidth), float(1)), __NFUN_174__(m_Top.WinHeight, m_fLabelHeight), 1.0000000, 364.0000000, __NFUN_175__(__NFUN_175__(WinWidth, m_Right.WinWidth), float(1)), __NFUN_174__(m_Top.WinHeight, m_fLabelHeight), 1.0000000, 364.0000000, m_TBackGround);
-	DrawStretchedTextureSegment(C, 0.0000000, __NFUN_174__(364.0000000, m_PlanningBar.WinHeight), WinWidth, 96.0000000, 0.0000000, __NFUN_174__(364.0000000, m_PlanningBar.WinHeight), WinWidth, 96.0000000, m_TBackGround);
+	DrawStretchedTextureSegment(C, m_Left.WinWidth, (m_Top.WinHeight + m_fLabelHeight), 1.0000000, 364.0000000, m_Left.WinWidth, (m_Top.WinHeight + m_fLabelHeight), 1.0000000, 364.0000000, m_TBackGround);
+	DrawStretchedTextureSegment(C, ((WinWidth - m_Right.WinWidth) - float(1)), (m_Top.WinHeight + m_fLabelHeight), 1.0000000, 364.0000000, ((WinWidth - m_Right.WinWidth) - float(1)), (m_Top.WinHeight + m_fLabelHeight), 1.0000000, 364.0000000, m_TBackGround);
+	DrawStretchedTextureSegment(C, 0.0000000, (364.0000000 + m_PlanningBar.WinHeight), WinWidth, 96.0000000, 0.0000000, (364.0000000 + m_PlanningBar.WinHeight), WinWidth, 96.0000000, m_TBackGround);
 	m_HelpTextBar.m_HelpTextBar.m_szDefaultText = Localize("PlanningMenu", "LevelText", "R6Menu");
-	m_HelpTextBar.m_HelpTextBar.m_szDefaultText = __NFUN_168__(m_HelpTextBar.m_HelpTextBar.m_szDefaultText, string(__NFUN_147__(R6PlanningCtrl(GetPlayerOwner()).m_iLevelDisplay, 100)));
+	m_HelpTextBar.m_HelpTextBar.m_szDefaultText = (m_HelpTextBar.m_HelpTextBar.m_szDefaultText @ string((R6PlanningCtrl(GetPlayerOwner()).m_iLevelDisplay - 100)));
 	// End:0x550
 	if(bShowLog)
 	{
 		// End:0x550
-		if(__NFUN_119__(DEB_FocusedWindow, Root.FocusedWindow))
+		if((DEB_FocusedWindow != Root.FocusedWindow))
 		{
-			__NFUN_231__(__NFUN_112__("-->FocusedWindow: ", string(Root.FocusedWindow)));
+			Log(("-->FocusedWindow: " $ string(Root.FocusedWindow)));
 			DEB_FocusedWindow = Root.FocusedWindow;
 		}
 	}
@@ -216,14 +216,14 @@ function Tick(float fDelta)
 
 	super(UWindowWindow).Tick(fDelta);
 	// End:0x44F
-	if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+	if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 	{
 		PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 		// End:0x1E5
-		if(__NFUN_242__(Root.m_bUseDragIcon, false))
+		if((Root.m_bUseDragIcon == false))
 		{
 			// End:0x90
-			if(__NFUN_176__(Root.MouseX, __NFUN_174__(m_Left.WinWidth, float(1))))
+			if((Root.MouseX < (m_Left.WinWidth + float(1))))
 			{
 				PlanningCtrl.m_bMoveLeft = 1;
 				m_bMoveRLByLaptop = true;
@@ -232,7 +232,7 @@ function Tick(float fDelta)
 			else
 			{
 				// End:0xD2
-				if(__NFUN_177__(Root.MouseX, __NFUN_175__(m_Right.WinLeft, float(1))))
+				if((Root.MouseX > (m_Right.WinLeft - float(1))))
 				{
 					PlanningCtrl.m_bMoveRight = 1;
 					m_bMoveRLByLaptop = true;					
