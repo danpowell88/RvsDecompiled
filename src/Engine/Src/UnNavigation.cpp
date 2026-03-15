@@ -301,7 +301,7 @@ FVector ALadderVolume::FindCenter()
 	return result;
 }
 
-IMPL_DIVERGE("calls vtable[0xC0] on this (unknown level/interface getter) and vtable[0x68] on result (unknown trace call)")
+IMPL_TODO("calls vtable[0xC0] on this (unknown level/interface getter) and vtable[0x68] on result (unknown trace call)")
 FVector ALadderVolume::FindTop(FVector InLoc)
 {
 	// Ghidra 0xe05b0: recursive search — if InLoc is inside the volume, step along the
@@ -670,7 +670,7 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- AScout ---
-IMPL_DIVERGE("calls XLevel vtable[0x9C] (FarMoveActor-like) and vtable[0x98] (MoveActor-like) on XLevel; also AActor::TwoWallAdjust; 787-byte body not fully translated")
+IMPL_TODO("calls XLevel vtable[0x9C] (FarMoveActor-like) and vtable[0x98] (MoveActor-like) on XLevel; also AActor::TwoWallAdjust; 787-byte body not fully translated")
 int AScout::findStart(FVector Loc)
 {
 	guard(AScout::findStart);
@@ -1023,7 +1023,7 @@ INT ANavigationPoint::ShouldBeBased()
 
 /*-- UInteraction screen/world transforms ------------------------------*/
 
-IMPL_DIVERGE("complex FCanvasUtil/FMatrix/FCameraSceneNode camera un-projection — unresolved")
+IMPL_TODO("complex FCanvasUtil/FMatrix/FCameraSceneNode camera un-projection — unresolved")
 void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execScreenToWorld);
@@ -1035,7 +1035,7 @@ void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execScreenToWorld );
 
-IMPL_DIVERGE("complex FCanvasUtil/FMatrix/FCameraSceneNode world-to-screen projection — unresolved")
+IMPL_TODO("complex FCanvasUtil/FMatrix/FCameraSceneNode world-to-screen projection — unresolved")
 void UInteraction::execWorldToScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execWorldToScreen);
@@ -1305,7 +1305,7 @@ void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execIsOfficialMod );
 
-IMPL_DIVERGE("uses unnamed DAT_10529f90 string constant and unresolved GConfig vtable calls")
+IMPL_TODO("uses unnamed DAT_10529f90 string constant and unresolved GConfig vtable calls")
 void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetGeneralModSettings);

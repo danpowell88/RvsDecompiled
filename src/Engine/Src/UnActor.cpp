@@ -979,7 +979,7 @@ IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execDetachFromBone );
 
 /*-- Sound dispatch hooks -----------------------------------------------*/
 
-IMPL_DIVERGE("DIVERGENCE: UAudioSubsystem::PlaySound not declared; audio runs through DareAudio/SNDDSound3D at runtime")
+IMPL_TODO("DIVERGENCE: UAudioSubsystem::PlaySound not declared; audio runs through DareAudio/SNDDSound3D at runtime")
 void AActor::execPlaySound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlaySound);
@@ -996,7 +996,7 @@ void AActor::execPlaySound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 264, execPlaySound );
 
-IMPL_DIVERGE("DIVERGENCE: UAudioSubsystem::PlayOwnedSound not declared in reconstruction")
+IMPL_TODO("DIVERGENCE: UAudioSubsystem::PlayOwnedSound not declared in reconstruction")
 void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayOwnedSound);
@@ -1014,7 +1014,7 @@ void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayOwnedSound );
 
-IMPL_DIVERGE("DIVERGENCE: UAudioSubsystem::DemoPlaySound not declared; demo recording audio omitted")
+IMPL_TODO("DIVERGENCE: UAudioSubsystem::DemoPlaySound not declared; demo recording audio omitted")
 void AActor::execDemoPlaySound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDemoPlaySound);
@@ -1067,7 +1067,7 @@ void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2703, execIsPlayingSound );
 
-IMPL_DIVERGE("always returns 0 — music playback not implemented")
+IMPL_TODO("always returns 0 — music playback not implemented")
 void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayMusic);
@@ -1079,7 +1079,7 @@ void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayMusic );
 
-IMPL_DIVERGE("always returns 0 — music stop not implemented")
+IMPL_TODO("always returns 0 — music stop not implemented")
 void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopMusic);
@@ -2333,7 +2333,7 @@ void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2622, execGarbageCollect );
 
-IMPL_DIVERGE("DIVERGENCE: retail appends to global debug ring buffer DAT_1066679c — binary-specific global; dashed line debug rendering stubbed")
+IMPL_TODO("DIVERGENCE: retail appends to global debug ring buffer DAT_1066679c — binary-specific global; dashed line debug rendering stubbed")
 void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawDashedLine);
@@ -2346,7 +2346,7 @@ void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2608, execDrawDashedLine );
 
-IMPL_DIVERGE("DIVERGENCE: retail appends to global debug ring buffer DAT_10666790 — binary-specific global; 3D text debug rendering stubbed")
+IMPL_TODO("DIVERGENCE: retail appends to global debug ring buffer DAT_10666790 — binary-specific global; 3D text debug rendering stubbed")
 void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawText3D);
@@ -2359,7 +2359,7 @@ void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_DIVERGE("DIVERGENCE: retail stores render callback data in binary-specific globals (DAT_1066677c..10666788); render-from-actor stubbed")
+IMPL_TODO("DIVERGENCE: retail stores render callback data in binary-specific globals (DAT_1066677c..10666788); render-from-actor stubbed")
 void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
@@ -3449,7 +3449,7 @@ void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 	unguard;
 }
 
-IMPL_DIVERGE("DIVERGENCE: retail rebuilds static mesh batches; render data rebuilt implicitly at draw time")
+IMPL_TODO("DIVERGENCE: retail rebuilds static mesh batches; render data rebuilt implicitly at draw time")
 void AActor::UpdateRenderData()
 {
 	guard(AActor::UpdateRenderData);

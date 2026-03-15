@@ -390,7 +390,7 @@ unguard;
 // UNetConnection
 // =============================================================================
 
-IMPL_DIVERGE("FUN_ blocker: complex 300+ byte constructor; UNetConnection fields not fully mapped")
+IMPL_TODO("FUN_ blocker: complex 300+ byte constructor; UNetConnection fields not fully mapped")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 
 // Ghidra 0x104842b0 (210b): GETPING/GETLOSS call FUN_1050557c (float10→ulonglong ROUND helper,

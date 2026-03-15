@@ -129,7 +129,7 @@ INT UR6SubActionAnimSequence::IncrementSequence()
 	return 0;
 }
 
-IMPL_DIVERGE("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
+IMPL_TODO("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
 INT UR6SubActionAnimSequence::IsAnimAtFrame(INT param_1, INT param_2)
 {
 	guard(UR6SubActionAnimSequence::IsAnimAtFrame);
@@ -187,7 +187,7 @@ INT UR6SubActionAnimSequence::LaunchSequence()
 	return 1;
 }
 
-IMPL_DIVERGE("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
+IMPL_TODO("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
 FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT param_2)
 {
 	guard(UR6SubActionAnimSequence::PctToFrameNumber);

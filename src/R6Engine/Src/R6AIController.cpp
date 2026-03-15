@@ -578,7 +578,7 @@ void AR6AIController::execFollowPath(FFrame& Stack, RESULT_DECL)
 	FollowPath((enum eMovementPace)ePace, returnLabel, bContinuePath);
 }
 
-IMPL_DIVERGE("retail calls XLevel vtable[39] on vDestination before FindPath.")
+IMPL_TODO("retail calls XLevel vtable[39] on vDestination before FindPath.")
 void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vDestination);

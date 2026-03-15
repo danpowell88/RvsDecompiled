@@ -75,7 +75,7 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 // the spawn offset (+0x44) through bone FCoords, otherwise through GMath.UnitCoords.
 // Then calls Level->SpawnActor.  Full reconstruction pending: FCoords bone helpers,
 // SpawnActor param mapping, and rotation-from-FCoords math not yet reconstructed.
-IMPL_DIVERGE("875-byte spawn function; FCoords math + SpawnActor not yet reconstructed")
+IMPL_TODO("875-byte spawn function; FCoords math + SpawnActor not yet reconstructed")
 void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 {
 	guard(UAnimNotify_Effect::Notify);

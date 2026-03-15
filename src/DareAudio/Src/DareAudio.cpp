@@ -919,7 +919,7 @@ if (lines[i]) SND_fn_vSetSoundVolumeLine(lines[i], saved);
 Sound options.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("EAX toggle is handled at Init; runtime changes unsupported by DARE stubs")
+IMPL_TODO("EAX toggle is handled at Init; runtime changes unsupported by DARE stubs")
 void UDareAudioSubsystem::SND_SetSoundOptions(bool bEAX, FString DeviceName)
 {
 // EAX / hardware acceleration toggle is done during Init; runtime changes
