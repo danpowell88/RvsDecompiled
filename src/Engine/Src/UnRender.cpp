@@ -430,7 +430,7 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
 
-IMPL_DIVERGE("Ghidra 0x10389ee0: calls _BinkSetVolume_12(Canvas+0x80, 0, 0) then RenDev vtable[0xac/4]; Bink SDK not available so volume mute is skipped")
+IMPL_TODO("Ghidra 0x10389ee0: calls _BinkSetVolume_12(Canvas+0x80, 0, 0) then RenDev vtable[0xac/4]; Bink SDK not available so volume mute is skipped")
 void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoStop);

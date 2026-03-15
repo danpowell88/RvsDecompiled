@@ -145,7 +145,7 @@ void AProjector::Abandon()
 	}
 }
 
-IMPL_DIVERGE("Ghidra 0x103FB160: terrain sector iteration and BSP ConvexVolumeMultiCheck loops (1291b) — FUN_103f82f0 (render info init) partially resolved; sector/BSP loops unresolved")
+IMPL_TODO("Ghidra 0x103FB160: terrain sector iteration and BSP ConvexVolumeMultiCheck loops (1291b) — FUN_103f82f0 (render info init) partially resolved; sector/BSP loops unresolved")
 void AProjector::Attach()
 {
 	// Ghidra 0xfb160 (1291b): CalcMatrix(), editor snapshot, allocate FProjectorRenderInfo,
@@ -200,7 +200,7 @@ void AProjector::Attach()
 	// BSP attachment (bit 0 of this+0x3A0) loops not reconstructed.
 }
 
-IMPL_DIVERGE("Ghidra 0x103F8F90: FCoords rotation decomposition and 8 frustum corner generation (4699b) — matrix/coord helper FUN_ calls unresolved")
+IMPL_TODO("Ghidra 0x103F8F90: FCoords rotation decomposition and 8 frustum corner generation (4699b) — matrix/coord helper FUN_ calls unresolved")
 void AProjector::CalcMatrix()
 {
 	// Ghidra 0xf8f90 (4699b): builds AProjector's projection matrix from Position/Rotation/FOV

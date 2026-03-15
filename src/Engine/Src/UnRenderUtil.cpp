@@ -1436,12 +1436,11 @@ FBspSection::FBspSection(FBspSection const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 }
 
-IMPL_TODO("0x10327a70 confirmed; FBspSection has no virtual base in source so vtable pointer is not set by compiler")
+IMPL_DIVERGE("vtable pointer value differs from retail; constructor logic is otherwise correct — retail sets FBspVertexStream::_vftable_ at offset 0, but FBspSection has no virtual base in source so the compiler never emits that store")
 FBspSection::FBspSection()
 {
 	// Ghidra 0x27a70: sets vtable (FBspVertexStream::_vftable_), inits TArray at +4,
 	// sets CacheId at +0x10 = DAT_1060b564*0x100+0xE1, zeros +0x18/+0x1C/+0x20/+0x24, sets +0x28 = -1.
-	// DIVERGENCE: vtable not set (FBspSection not declared as virtual class in source).
 	new ((BYTE*)this + 0x04) TArray<FBspVertex>();
 	*(QWORD*)((BYTE*)this + 0x10) = (QWORD)(DWORD)DAT_1060b564 * 0x100 + 0xE1;
 	DAT_1060b564++;

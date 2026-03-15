@@ -47,7 +47,7 @@ WWindowsViewportWindow::WWindowsViewportWindow(const WWindowsViewportWindow& Oth
 {
 }
 
-IMPL_DIVERGE("found at 0x11102420; calls WWindow::operator= which requires WWindow inheritance absent from reconstructed headers")
+IMPL_TODO("found at 0x11102420; calls WWindow::operator= which requires WWindow inheritance absent from reconstructed headers")
 WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewportWindow& Other)
 {
 	if( this != &Other )
@@ -296,7 +296,7 @@ DIDEVCAPS             UWindowsViewport::JoystickCaps  = {};
 	Exported at ordinal @31: ?DirectInputError@@YAXVFString@@JH@Z
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("found at 0x11101c80; implementation uses internal exception-handling not replicated here")
+IMPL_TODO("found at 0x11101c80; implementation uses internal exception-handling not replicated here")
 WINDRV_API void DirectInputError(FString Msg, LONG hResult, INT Fatal)
 {
 	debugf(TEXT("DirectInput error: %s (hr=0x%08X)"), *Msg, (DWORD)hResult);

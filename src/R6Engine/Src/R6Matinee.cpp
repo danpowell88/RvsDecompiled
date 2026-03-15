@@ -8,16 +8,16 @@ IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
 // Stubs for unresolved R6Engine internal functions
 // FUN_10024530 (0x10024530): class hierarchy traversal - IsA pattern against PrivateStaticClass
-IMPL_DIVERGE("R6Engine.dll 0x10024530: class hierarchy check via +0x24/+0x2c linked list; stub returns NULL")
+IMPL_TODO("R6Engine.dll 0x10024530: class hierarchy check via +0x24/+0x2c linked list; stub returns NULL")
 static INT*  FUN_10024530(INT) { return NULL; }
 // FUN_10042934 (0x10042934): x87 FPU QWORD conversion; reads ST0 FPU register state
-IMPL_DIVERGE("R6Engine.dll 0x10042934: x87 ftol2 reads FPU ST0; not recoverable from Ghidra")
+IMPL_TODO("R6Engine.dll 0x10042934: x87 ftol2 reads FPU ST0; not recoverable from Ghidra")
 static QWORD FUN_10042934()    { return 0; }
 static const FLOAT s_flt_1_0f = 1.0f;
 
 // --- UR6SubActionAnimSequence ---
 
-IMPL_DIVERGE("FUN_10024530 (R6Engine.dll 0x10024530): class hierarchy traversal via UMeshInstance linked list at +0x24/+0x2c against PrivateStaticClass_exref; stub returns NULL")
+IMPL_TODO("FUN_10024530 (R6Engine.dll 0x10024530): class hierarchy traversal via UMeshInstance linked list at +0x24/+0x2c against PrivateStaticClass_exref; stub returns NULL")
 FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 {
 	guard(UR6SubActionAnimSequence::GetAnimDuration);
@@ -276,7 +276,7 @@ INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 // Remaining divergence: in the first-time path Ghidra reads Data[0] unconditionally
 // before checking Num==0||Data[0]==NULL, while our code uses a ternary (Num>0?Data[0]:NULL)
 // followed by a single null check — functionally identical but generates different assembly.
-IMPL_DIVERGE("Ghidra 0x10041420 (343b): first-time path reads Data[0] unconditionally then dual-null-checks (Num==0||ptr==NULL); our ternary check generates different assembly")
+IMPL_TODO("Ghidra 0x10041420 (343b): first-time path reads Data[0] unconditionally then dual-null-checks (Num==0||ptr==NULL); our ternary check generates different assembly")
 INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 {
 	if (!IsRunning())

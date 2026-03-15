@@ -54,7 +54,7 @@ void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10375370: FUN_10370800 (FVector-compare helper) and FUN_10371990 (property handle cache) unresolved")
+IMPL_TODO("Ghidra 0x10375370: FUN_10370800 (FVector-compare helper) and FUN_10371990 (property handle cache) unresolved")
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -128,7 +128,7 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10475AB0: FUN_1050557c (PRNG, unresolved) and R6 decoration struct layout at +0x3f8 not reproduced")
+IMPL_TODO("Ghidra 0x10475AB0: FUN_1050557c (PRNG, unresolved) and R6 decoration struct layout at +0x3f8 not reproduced")
 void AVolume::PostBeginPlay()
 {
 	guard(AVolume::PostBeginPlay);
@@ -157,7 +157,7 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
-IMPL_DIVERGE("Ghidra 0x103E12C0: Level vtable slot 0x9c (void, no-args) when Scout.findStart fails after resize — method unidentified")
+IMPL_TODO("Ghidra 0x103E12C0: Level vtable slot 0x9c (void, no-args) when Scout.findStart fails after resize — method unidentified")
 void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
 	guard(AWarpZoneInfo::AddMyMarker);

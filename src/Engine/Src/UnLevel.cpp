@@ -172,7 +172,7 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	unguard;
 }
 
-IMPL_DIVERGE("TravelInfo TMap serialization unresolved (FUN_103c0ce0); modern path partially missing; retail at Ghidra 0x103c3070")
+IMPL_TODO("TravelInfo TMap serialization unresolved (FUN_103c0ce0); modern path partially missing; retail at Ghidra 0x103c3070")
 void ULevel::Serialize( FArchive& Ar )
 {
 	guard(ULevel::Serialize);
@@ -1497,7 +1497,7 @@ FLOAT ULevel::CalculateRadiusMultiplier( INT SoundRadius, INT SoundRadiusInner )
 }
 
 // FNetworkNotify interface.
-IMPL_DIVERGE("this-pointer offset differs; retail at Ghidra 0x103c07c0")
+IMPL_TODO("this-pointer offset differs; retail at Ghidra 0x103c07c0")
 EAcceptConnection ULevel::NotifyAcceptingConnection()
 {
 	guard(ULevel::NotifyAcceptingConnection);
@@ -1516,7 +1516,7 @@ EAcceptConnection ULevel::NotifyAcceptingConnection()
 	return ACCEPTC_Accept;
 	unguard;
 }
-IMPL_DIVERGE("this-pointer offset differs; DevNet log format not fully reproduced; retail at Ghidra 0x103bf2a0")
+IMPL_TODO("this-pointer offset differs; DevNet log format not fully reproduced; retail at Ghidra 0x103bf2a0")
 void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 {
 	guard(ULevel::NotifyAcceptedConnection);
@@ -1533,7 +1533,7 @@ void ULevel::NotifyAcceptedConnection( UNetConnection* Connection )
 	debugf( NAME_DevNet, TEXT("%s accepted connection %s"), GetName(), *desc );
 	unguard;
 }
-IMPL_DIVERGE("this-pointer offset differs; retail at Ghidra 0x103bf3b0")
+IMPL_TODO("this-pointer offset differs; retail at Ghidra 0x103bf3b0")
 INT ULevel::NotifyAcceptingChannel( UChannel* Channel )
 {
 	guard(ULevel::NotifyAcceptingChannel);
@@ -1578,7 +1578,7 @@ void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 	// Unresolved — accepting connections will not progress through the handshake.
 	unguard;
 }
-IMPL_DIVERGE("this-pointer offset differs: retail receives FNetworkNotify subobject at Ghidra 0x103bf590")
+IMPL_TODO("this-pointer offset differs: retail receives FNetworkNotify subobject at Ghidra 0x103bf590")
 INT ULevel::NotifySendingFile( UNetConnection* Connection, FGuid GUID )
 {
 	// Ghidra 0xbf590 (18 bytes): return (Driver->ServerConnection == NULL).

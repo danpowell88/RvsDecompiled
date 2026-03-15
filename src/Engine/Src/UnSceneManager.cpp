@@ -1002,7 +1002,7 @@ void ASceneManager::SetSceneStartTime() {}
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_DIVERGE("Ghidra 0x1040BA00: FLineBatcher wireframe box render (2837b) — editor-only interpolation point visualiser; runtime not affected")
+IMPL_TODO("Ghidra 0x1040BA00: FLineBatcher wireframe box render (2837b) — editor-only interpolation point visualiser; runtime not affected")
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);

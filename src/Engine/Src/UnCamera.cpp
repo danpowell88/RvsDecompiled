@@ -352,7 +352,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
 // FUN_10323030 = TArray<0x20-element>::Serialize. Each element via FUN_10446ec0 = 8×ByteOrderSerialize(4).
 // Layout (after vtable): Pad[4] TArray<elem>  Pad[0x18] Revision
-IMPL_DIVERGE("Ghidra: no direct RVA; sub-function mapping via FUN_10323030/FUN_10446ec0 only")
+IMPL_TODO("Ghidra: no direct RVA; sub-function mapping via FUN_10323030/FUN_10446ec0 only")
 FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 	// TArray at Pad[4] (obj+8), element size 0x20. Manual serialization.
 	FArray& Arr = *(FArray*)&V.Pad[4];
@@ -916,7 +916,7 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 // Ghidra 0x10316110: legacy paths for Ver<0x70 serialize garbage stack bytes (ancient compiler bug).
 // Ver==0x6f paths serialize Ghidra stack-frame artifacts not reconstructable. 
 // All Ravenshield assets use Ver >= 0x70, so legacy paths are dead code.
-IMPL_DIVERGE("Ghidra 0x10316110: omits legacy Ver<0x70 and Ver==0x6f paths — these serialize garbage stack data from ancient compiler bug; dead code for all Ravenshield assets (Ver>=0x70)")
+IMPL_TODO("Ghidra 0x10316110: omits legacy Ver<0x70 and Ver==0x6f paths — these serialize garbage stack data from ancient compiler bug; dead code for all Ravenshield assets (Ver>=0x70)")
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 	// 6 floats: Position (3) + Normal (3)
 	for (INT i = 0; i < 6; i++)

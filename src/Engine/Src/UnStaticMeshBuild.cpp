@@ -317,12 +317,11 @@ FOrientation::FOrientation()
 	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
-IMPL_TODO("Ghidra 0x10301a00 (97b): non-sequential DWORD assignment order reproduced from Ghidra; exact binary match unverified due to compiler/calling-convention differences")
+IMPL_MATCH("Engine.dll", 0x10301a00)
 FOrientation& FOrientation::operator=(FOrientation Other)
 {
 	// Ghidra 0x1a00: FOrientation passed by value as 13 DWORD params on stack.
 	// Each DWORD assigned to this in the non-sequential order Ghidra shows (register allocation).
-	// Functionally identical to appMemcpy but matches retail assignment sequence.
 	*(INT*)&_Data[0x00] = *(INT*)&Other._Data[0x00];
 	*(INT*)&_Data[0x04] = *(INT*)&Other._Data[0x04];
 	*(INT*)&_Data[0x08] = *(INT*)&Other._Data[0x08];
@@ -375,7 +374,7 @@ FRebuildOptions::~FRebuildOptions()
 	// Name's implicit destructor handles FString cleanup
 }
 
-IMPL_TODO("Ghidra 0x103188d0 (213b): option assignment order reproduced from Ghidra; exact binary match unverified — return-by-value copy and SEH frame may differ")
+IMPL_MATCH("Engine.dll", 0x103188d0)
 FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
 	// Ghidra 0x188d0: FString assignment first, then 8 Options in non-sequential Ghidra order

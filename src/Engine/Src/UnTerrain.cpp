@@ -134,7 +134,7 @@ void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisib
 	guard(ATerrainInfo::RenderDecorations);
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1045CBF0: editor vertex selection with symmetry mirrors; DAT_1061bXXX editor globals unresolved — returns 0")
+IMPL_TODO("Ghidra 0x1045CBF0: editor vertex selection with symmetry mirrors; DAT_1061bXXX editor globals unresolved — returns 0")
 int ATerrainInfo::SelectVertex(FVector)
 {
 	guard(ATerrainInfo::SelectVertex);
@@ -147,7 +147,7 @@ int ATerrainInfo::SelectVertex(FVector)
 	return 0;
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1045CAC0: editor globals DAT_1061b71c/b7a0/b76c for selection strength unresolved; fixed to 0.5f")
+IMPL_TODO("Ghidra 0x1045CAC0: editor globals DAT_1061b71c/b7a0/b76c for selection strength unresolved; fixed to 0.5f")
 int ATerrainInfo::SelectVertexX(int X, int Y)
 {
 	// Ghidra 0x15cac0, 293b: search selection list at this+0x1360 (stride 0x14) for (X,Y).
@@ -250,7 +250,7 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 	guard(ATerrainInfo::SetTextureColor);
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1045C3C0: per-sector ray test; FUN_1050557c (sector ray test) unresolved — returns 1 (no hit)")
+IMPL_TODO("Ghidra 0x1045C3C0: per-sector ray test; FUN_1050557c (sector ray test) unresolved — returns 1 (no hit)")
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
@@ -260,7 +260,7 @@ int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 	return 1;
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1045A480: per-quad ray intersection; sector/quad data structures and FUN_ calls unresolved — returns 1")
+IMPL_TODO("Ghidra 0x1045A480: per-quad ray intersection; sector/quad data structures and FUN_ calls unresolved — returns 1")
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheckWithQuad);
@@ -612,7 +612,7 @@ FVector ATerrainInfo::HeightmapToWorld(FVector In)
 	// Retail: 29b. ECX=this+0x1300 (world FCoords), call FVector::TransformPointBy.
 	return In.TransformPointBy(*(FCoords*)((BYTE*)this + 0x1300));
 }
-IMPL_DIVERGE("Ghidra 0x10464CF0: serializes terrain dimensions plus full sector/coord data; legacy version paths omitted — only dims serialized")
+IMPL_TODO("Ghidra 0x10464CF0: serializes terrain dimensions plus full sector/coord data; legacy version paths omitted — only dims serialized")
 void ATerrainInfo::Serialize(FArchive& Ar)
 {
 	// Retail: 0x164cf0. Calls AActor::Serialize then serializes terrain dimensions,
@@ -653,7 +653,7 @@ void ATerrainInfo::Destroy()
 	}
 	AActor::Destroy();
 }
-IMPL_DIVERGE("Ghidra 0x103155C0: lazy-creates UTerrainPrimitive via StaticAllocateObject; creation path omitted — returns existing ptr only")
+IMPL_TODO("Ghidra 0x103155C0: lazy-creates UTerrainPrimitive via StaticAllocateObject; creation path omitted — returns existing ptr only")
 UPrimitive * ATerrainInfo::GetPrimitive()
 {
 	// Retail: 0x155c0. If sector list at this+0x12C8 is empty, defer to AActor.
@@ -997,7 +997,7 @@ FBox UTerrainPrimitive::GetRenderBoundingBox(const AActor* Owner, INT /*bDetaile
 	return FBox(*(FVector*)((BYTE*)Owner + 0x234), *(FVector*)((BYTE*)Owner + 0x234));
 }
 
-IMPL_DIVERGE("Ghidra 0x10460b60: calls UObject::Serialize then serializes all sector vertex/triangle data; FUN_ blockers for mesh data TArrays")
+IMPL_TODO("Ghidra 0x10460b60: calls UObject::Serialize then serializes all sector vertex/triangle data; FUN_ blockers for mesh data TArrays")
 void UTerrainSector::Serialize(FArchive& Ar) { UObject::Serialize(Ar); }
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::PostLoad() {}
@@ -1018,7 +1018,7 @@ IMPL_MATCH("Engine.dll", 0x103153a0)
 INT UTerrainSector::GetLocalVertex(INT X, INT Y) {
 	return (SectorSizeX + 1) * Y + X;
 }
-IMPL_DIVERGE("Ghidra 0x104590F0: complex per-triangle LOD/culling test; sector mesh data unresolved — returns 1")
+IMPL_TODO("Ghidra 0x104590F0: complex per-triangle LOD/culling test; sector mesh data unresolved — returns 1")
 INT UTerrainSector::PassShouldRenderTriangle(INT, INT, INT, INT, INT) { return 1; }
 // ?IsSectorAll@UTerrainSector@@QAEHHE@Z  Ghidra at ~0x107bae30 (336 bytes).
 // Gets the alpha texture for the layer, computes texel range for this sector,
@@ -1052,7 +1052,7 @@ INT UTerrainSector::IsSectorAll(INT layerIdx, BYTE value)
 
 	return 1;
 }
-IMPL_DIVERGE("Ghidra 0x10458D70: checks all texels in a triangle for matching alpha value; triangle data unresolved — returns 0")
+IMPL_TODO("Ghidra 0x10458D70: checks all texels in a triangle for matching alpha value; triangle data unresolved — returns 0")
 INT UTerrainSector::IsTriangleAll(INT, INT, INT, INT, INT, BYTE) { return 0; }
 IMPL_EMPTY("virtual base no-op — subclass overrides")
 void UTerrainSector::AttachProjector(AProjector*, FProjectorRenderInfo*) {}
