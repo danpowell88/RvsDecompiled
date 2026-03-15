@@ -2623,10 +2623,15 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 	unguard;
 }
 
-IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+// Ghidra 0x1037b4d0 (~140 bytes): iterates XLevel+0x5d0 game-type array (stride 0x98),
+// calls GetR6AvailabilityPtr for each entry, sets availability flags.
+// If GameType=="RGM_AllMode": enable all entries, disable AllMode flag.
+// Else: enable all entries, disable the matching GameType entry.
+IMPL_DIVERGE("GetR6AvailabilityPtr returns NULL in base class so loop is no-op; XLevel+0x5d0 field not mapped (Ghidra 0x1037b4d0)")
 void AActor::SetGameType( FString GameType )
 {
-    // STUB: too complex (>150 lines in Ghidra)
+	// Ghidra: iterates XLevel->gameTypes array; GetR6AvailabilityPtr is NULL in base class.
+	// Until XLevel+0x5d0 field is mapped, the full implementation is deferred.
 }
 
 
@@ -2635,10 +2640,9 @@ void AActor::SetGameType( FString GameType )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-// Ghidra 0x1037c130 (139 bytes): retail increments a binary-specific global counter
-// (DAT_10666b50) and calls GEngine->PaintProgress() every 16th actor during loading.
-// We replicate the logic with a static counter; the counter address differs from retail.
-IMPL_DIVERGE("loading tick counter is anonymous static (address differs from retail DAT_10666b50) — see Ghidra 0x1037c130")
+// Ghidra 0x1037c130 (139 bytes): retail increments binary-specific global DAT_10666b50
+// (& 0xF == 0 triggers GEngine->PaintProgress). Logic reproduced; address differs.
+IMPL_DIVERGE("loading tick uses local static instead of retail binary global DAT_10666b50 (Ghidra 0x1037c130)")
 void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
@@ -2710,11 +2714,13 @@ INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Sta
 	unguard;
 }
 
-IMPL_DIVERGE("Demo recording support — no-op for this reconstruction")
+// Ghidra 0x1042d510 (425 bytes): dispatches to demo-replay system; checks function flags
+// (0x74 & 0x2040 == 0x40), sets up FFrame, invokes GNatives. Demo recording omitted.
+IMPL_DIVERGE("demo recording omitted; retail dispatches function to replay system via FFrame (Ghidra 0x1042d510)")
 void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessDemoRecFunction);
-	// Demo recording stub.
+	// Demo recording stub — no replay system in this reconstruction.
 	unguard;
 }
 
@@ -2728,12 +2734,14 @@ void AActor::NetDirty( UProperty* Property )
 	*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000u;  // set bNetDirty (bit 30 of bitfield at +0xA0)
 }
 
-IMPL_DIVERGE("DIVERGENCE: base AActor returns Ptr; optimized rep lists are subclass-only")
+// Ghidra 0x1037ab0 (RVA): checks global flag DAT_10650414 & 0x800 first — returns Ptr
+// immediately if not set. When set, performs cached-property optimisation using
+// DAT_106668bc/b8, UProperty::StaticClass(), and per-channel change tracking.
+// Our version always returns Ptr (correct for the flag==0 fast path only).
+IMPL_DIVERGE("returns Ptr (fast path only); retail also optimises via DAT_10650414&0x800 cache (Ghidra 0x1037ab0)")
 INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(AActor::GetOptimizedRepList);
-	// DIVERGENCE: base AActor doesn't use optimized rep lists in retail either (returns Ptr).
-	// Subclass overrides (APawn, APlayerController etc.) have real implementations.
 	return Ptr;
 	unguard;
 }
@@ -2765,22 +2773,29 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 	unguard;
 }
 
-IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+// Ghidra 0x1037e30 (~90 bytes): snapshots actor fields (Location+0x234, Rotation+0x240,
+// DrawScale3D+0x24c, etc.) into binary-specific globals DAT_106666f4..DAT_10666728;
+// then calls XLevel replication interface. Requires matching retail binary globals.
+IMPL_DIVERGE("retail writes actor state snapshot to binary globals DAT_106666f4-1066672c (Ghidra 0x1037e30)")
 void AActor::PreNetReceive()
 {
-    // STUB: too complex (>150 lines in Ghidra)
+    // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
 }
 
-IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+// Ghidra 0x103781f0 (~295 bytes): reads snapshot globals saved by PreNetReceive, applies
+// position/rotation/physics changes via XLevel. Requires matching PreNetReceive globals.
+IMPL_DIVERGE("reads binary globals saved by PreNetReceive; requires matching DAT_106666f4-* (Ghidra 0x103781f0)")
 void AActor::PostNetReceive()
 {
-    // STUB: too complex (>150 lines in Ghidra)
+    // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
 }
 
-IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+// Ghidra 0x1037c210 (38 bytes): calls XLevel->MoveActor via vtable[0x9c] with
+// the pre-receive location saved in DAT_106666f4/f8/fc by PreNetReceive.
+IMPL_DIVERGE("calls XLevel MoveActor via vtable[0x9c] with location from DAT_106666f4/f8/fc (Ghidra 0x1037c210)")
 void AActor::PostNetReceiveLocation()
 {
-    // STUB: too complex (>150 lines in Ghidra)
+    // STUB: requires binary-specific globals from PreNetReceive (DAT_106666f4/f8/fc)
 }
 
 IMPL_MATCH("Engine.dll", 0x10414310)
@@ -3005,32 +3020,32 @@ void AActor::UpdateTimers( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_DIVERGE("Divergence: retail uses FMemStack frame-arena allocator; we use appMalloc")
+// Ghidra 0x103c3460 (60 bytes): no guard/unguard in retail; uses GEngineMem frame-arena.
+// DIVERGE: MSVC 7.1 vs 2019 codegen differs even with identical logic.
+IMPL_DIVERGE("codegen differs from retail MSVC 7.1 (Ghidra 0x103c3460); functionally equivalent")
 INT AActor::CheckOwnerUpdated()
 {
-	guard(AActor::CheckOwnerUpdated);
-	// Retail 0xC3460: detect owner network-state change and queue actor for replication.
+	// Retail: detect owner network-state change and queue actor for replication.
 	// this+0x140 = Owner, Owner+0x320 bit0 = network state bit,
 	// this+0x328 = replication-node ptr (ctrl), ctrl+0x100 = stored state, ctrl+0xF8 = list head.
-	// Divergence: retail uses a FMemStack frame-arena allocator; we use appMalloc.
 	AActor* owner = *(AActor**)((BYTE*)this + 0x140);
 	if ( !owner ) return 1;
-	INT ownerBit = *(INT*)((BYTE*)owner + 0x320) & 1;
-	BYTE* ctrl   = *(BYTE**)((BYTE*)this + 0x328);
-	INT   ctrlBit = *(INT*)(ctrl + 0x100);
+	DWORD ownerBit = *(DWORD*)((BYTE*)owner + 0x320) & 1;
+	BYTE* ctrl    = *(BYTE**)((BYTE*)this + 0x328);
+	DWORD  ctrlBit = *(DWORD*)(ctrl + 0x100);
 	if ( ownerBit == ctrlBit ) return 1;
-	struct OwnedActorLink { void* Actor; OwnedActorLink* Prev; };
-	OwnedActorLink* node = (OwnedActorLink*)appMalloc( sizeof(OwnedActorLink), TEXT("OwnerUpdateNode") );
-	if ( !node )
+	// Retail uses GEngineMem frame-arena (PushBytes(8,8)); we do the same.
+	BYTE* node = GEngineMem.PushBytes( 8, 8 );
+	if ( node )
 	{
-		*(void**)(ctrl + 0xF8) = NULL;
+		BYTE* oldHead        = *(BYTE**)(ctrl + 0xF8);
+		*(AActor**)node      = this;
+		*(BYTE**)(node + 4)  = oldHead;
+		*(BYTE**)(ctrl + 0xF8) = node;
 		return 0;
 	}
-	node->Actor = this;
-	node->Prev  = *(OwnedActorLink**)(ctrl + 0xF8);
-	*(OwnedActorLink**)(ctrl + 0xF8) = node;
+	*(DWORD*)(ctrl + 0xF8) = 0;
 	return 0;
-	unguard;
 }
 
 IMPL_EMPTY("Retail Engine.dll: ret, truly empty")
@@ -3390,16 +3405,21 @@ INT AActor::DetachFromBone( AActor* Attachment )
 	unguard;
 }
 
-IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+// Ghidra 0x1042dfa0 (~800 bytes): fast path for static mesh instances (type==0x8),
+// slow path builds projector render info, iterates mesh primitives, allocates FMatrix.
+// Requires full projector render subsystem; binary-specific vtable calls at +0x100/0x7c/0x80.
+IMPL_DIVERGE("projector render subsystem not implemented; binary-specific vtable calls (Ghidra 0x1042dfa0)")
 void AActor::AttachProjector( AProjector* Proj )
 {
-    // STUB: too complex (>150 lines in Ghidra)
+    // STUB: requires projector render subsystem and binary-specific vtable slots
 }
 
-IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+// Ghidra 0x1042d870 (174 bytes): checks static mesh fast path (type==0x8), then searches
+// projector array at +0x344, decrements refcount, frees via FUN_1031f5e0 if 0.
+IMPL_DIVERGE("projector render subsystem not implemented; searches +0x344 array and frees via binary-specific FUN_1031f5e0 (Ghidra 0x1042d870)")
 void AActor::DetachProjector( AProjector* Proj )
 {
-    // STUB: too complex (complex, Ghidra)
+    // STUB: requires projector array at +0x344 and binary-specific FUN_1031f5e0
 }
 
 IMPL_MATCH("Engine.dll", 0x1037cd20)
@@ -3437,16 +3457,21 @@ FLOAT AActor::WorldLightRadius() const
 	return 25.f * LightRadius;
 }
 
-IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+// Ghidra 0x1040c960 (2237 bytes): large editor visualization function.
+// Renders actor type indicators, collision hulls, and debug annotations.
+// Requires render interface types not fully mapped in this reconstruction.
+IMPL_DIVERGE("editor rendering subsystem not implemented; 2237 bytes at Ghidra 0x1040c960")
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
-    // STUB: too complex (>150 lines in Ghidra)
+    // STUB: requires editor render subsystem (FRenderInterface, FLevelSceneNode calls)
 }
 
-IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+// Ghidra 0x1040b2f0 (1601 bytes): renders selection highlight for selected actors.
+// Outlines mesh primitives and calls render interface via binary-specific vtable layout.
+IMPL_DIVERGE("editor selection rendering not implemented; 1601 bytes at Ghidra 0x1040b2f0")
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
-    // STUB: too complex (complex, Ghidra)
+    // STUB: requires editor render subsystem (FRenderInterface, FLevelSceneNode calls)
 }
 
 IMPL_MATCH("Engine.dll", 0x103bd2a0)
@@ -4127,10 +4152,13 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 	unguard;
 }
 
-IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+// Ghidra 0x103978a0 (2040 bytes): validates actor consistency — checks bDeleteMe, hidden
+// default vs instance flags, duplicate locations, broken base links, Karma params.
+// Requires XLevel actor list, GWarn, UClass::GetDefaultActor. Deferred.
+IMPL_DIVERGE("editor validation function 2040 bytes; requires XLevel actor list and GWarn (Ghidra 0x103978a0)")
 void AActor::CheckForErrors()
 {
-    // STUB: too complex (complex, Ghidra)
+    // STUB: requires full editor environment (GWarn, XLevel actor iteration)
 }
 
 IMPL_EMPTY("Retail: shared empty-virtual stub; base AActor no-op")
@@ -4357,10 +4385,13 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 	unguard;
 }
 
-IMPL_DIVERGE("Complex function — needs dedicated Ghidra analysis pass for full reconstruction")
+// Ghidra 0x1042c8e0 (268 bytes): checks if FileName matches the mod config path (via
+// GModMgr->eventGetServerIni()), then calls UObject::SaveConfig on GServerOptions.
+// Requires GModMgr and GServerOptions globals not in this reconstruction.
+IMPL_DIVERGE("requires GModMgr and GServerOptions globals not in reconstruction (Ghidra 0x1042c8e0)")
 void AActor::SaveServerOptions( FString FileName )
 {
-    // STUB: too complex (complex, Ghidra)
+    // STUB: requires GModMgr->eventGetServerIni() and GServerOptions->SaveConfig() chain
 }
 
 IMPL_MATCH("Engine.dll", 0x1037aed0)
