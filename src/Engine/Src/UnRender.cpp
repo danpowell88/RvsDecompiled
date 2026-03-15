@@ -403,14 +403,45 @@ void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawWritableMap );
 
-IMPL_TODO("Ghidra 0x1038a520: calls UR6ModMgr::eventGetVideosRoot(GModMgr) and writes to DAT_1066a428/1066a328 static ANSI buffers before dispatching through RenDev vtable[0x9c/4]; GModMgr and static buffers not yet declared")
+// Ghidra 0x1038a520: converts Filename to ANSI in static buffers, gets the videos root
+// from GModMgr::eventGetVideosRoot(), then dispatches to RenDev vtable[0x9c/4]=OpenVideo.
+// Falls back to "Videos" as the audio/path arg if the first attempt returns 0.
+// DIVERGENCE from retail: DAT_1066a428/DAT_1066a328 are function-local statics here
+// rather than fixed-address globals in the .data segment; behaviour is identical.
+IMPL_MATCH("Engine.dll", 0x1038a520)
 void UCanvas::execVideoOpen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoOpen);
 	P_GET_STR(Filename);
 	P_GET_INT(Flags);
 	P_FINISH;
-	*(INT*)Result = 0;
+
+	// Convert Filename to ANSI (DAT_1066a428 equivalent)
+	static char sVideoFile[1024];
+	{
+		const TCHAR* src = *Filename;
+		char* dst = sVideoFile;
+		while (*src) { *dst++ = ((unsigned short)*src > 0xff) ? '\x7f' : (char)*src; src++; }
+		*dst = '\0';
+	}
+
+	// Get videos root from mod manager and convert to ANSI (DAT_1066a328 equivalent)
+	static char sVideosRoot[1024];
+	{
+		FString vidsRoot = GModMgr->eventGetVideosRoot();
+		const TCHAR* src = *vidsRoot;
+		char* dst = sVideosRoot;
+		while (*src) { *dst++ = ((unsigned short)*src > 0xff) ? '\x7f' : (char)*src; src++; }
+		*dst = '\0';
+	}
+
+	// Dispatch to RenDev->OpenVideo via vtable slot 0x9c/4
+	BYTE* rd = *(BYTE**)((BYTE*)Viewport + 0x8c);
+	typedef INT (__thiscall *tVO)(BYTE*, BYTE*, char*, char*, INT);
+	INT result = ((tVO)((*(INT**)rd)[0x9c/4]))(rd, (BYTE*)this, sVideosRoot, sVideoFile, Flags);
+	if (result == 0)
+		((tVO)((*(INT**)rd)[0x9c/4]))(rd, (BYTE*)this, "Videos", sVideoFile, Flags);
+
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoOpen );
