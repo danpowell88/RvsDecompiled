@@ -317,7 +317,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038e490; 244 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038e490; 244 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
@@ -329,7 +329,7 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_DIVERGE("Ghidra 0x1038e590; 289b — logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038e590; 289b — logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
@@ -355,7 +355,7 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_DIVERGE("Ghidra 0x1038e3e0; 172 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038e3e0; 172 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);
@@ -366,7 +366,7 @@ void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_DIVERGE("Ghidra 0x1038e030; 273 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038e030; 273 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
@@ -377,7 +377,7 @@ void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e150; 286 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038e150; 286 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
@@ -388,7 +388,7 @@ void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e6c0; 131 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038e6c0; 131 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
@@ -399,7 +399,7 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_DIVERGE("Ghidra 0x1038ce20; 236b — logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038ce20; 236b — logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
@@ -417,7 +417,7 @@ void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_DIVERGE("Ghidra 0x10390770; 281b — logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x10390770; 281b — logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
@@ -439,7 +439,7 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_DIVERGE("Ghidra 0x1038df50; 209 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038df50; 209 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
@@ -3078,7 +3078,7 @@ void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; logic matches retail; omits rdtsc profiling counters — permanent binary difference")
+IMPL_TODO("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; logic matches retail; omits rdtsc profiling counters binary difference")
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 {
 	guard(APawn::pointReachable);
@@ -3549,7 +3549,7 @@ INT AController::LocalPlayerController()
 // DIVERGE: vtable[0xf0] call on 'this' (Role > ROLE_DumbProxy path) is an unidentified
 // virtual function; raw offset accesses for ULevel+0x100 and actor+0x144 have no named
 // counterpart; Pawn+0xb4 = LastRenderTime (AActor field, no named decl here); rdtsc omitted.
-IMPL_DIVERGE("Ghidra 0x103c3870: vtable[0xf0] unidentified; actor+0x144 ptr, ULevel+0x100 and actor+0x320 raw; LastRenderTime at +0xb4 unnamed; rdtsc profiling omitted")
+IMPL_TODO("Ghidra 0x103c3870: vtable[0xf0] unidentified; actor+0x144 ptr, ULevel+0x100 and actor+0x320 raw; LastRenderTime at +0xb4 unnamed; rdtsc profiling omitted")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
@@ -3808,7 +3808,7 @@ void AController::SetAdjustLocation( FVector NewLoc )
 // SeePawn condition: bIsPlayer(this)||bIsPlayer(other) guards; SightCounter>=0 gate.
 // FNames: bIsPlayer→EName(0x154), non-player→EName(0x158) (specific probe name indices).
 // Pawn->m_ePawnType (APawn own +0x0a) == 1 = player-type pawn (used for hash & event dispatch).
-IMPL_DIVERGE("Ghidra 0x10391B60; 510b — rdtsc profiling omitted; FUN_10391970 visibility hash omitted (probe always checked); Level bit12 guard omitted")
+IMPL_TODO("Ghidra 0x10391B60; 510b — rdtsc profiling omitted; FUN_10391970 visibility hash omitted (probe always checked); Level bit12 guard omitted")
 void AController::ShowSelf()
 {
 	guard(AController::ShowSelf);
@@ -4011,7 +4011,7 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038ed20; 173b — logic matches retail; omits rdtsc profiling counters and guard/unguard overhead differs from retail — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038ed20; 173b — logic matches retail; omits rdtsc profiling counters and guard/unguard overhead differs from retail binary difference")
 void AController::CheckEnemyVisible()
 {
 	guard(AController::CheckEnemyVisible);
@@ -4024,7 +4024,7 @@ void AController::CheckEnemyVisible()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038e270; logic matches retail exactly; omits rdtsc profiling counters (GScriptCycles, function timer array) — permanent binary difference")
+IMPL_TODO("Ghidra 0x1038e270; logic matches retail exactly; omits rdtsc profiling counters (GScriptCycles, function timer array) binary difference")
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 {
 	guard(AController::FindPath);
@@ -4040,7 +4040,7 @@ AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038ee00; 252b — logic verified; guard/unguard frame overhead diverges; rdtsc profiling omitted")
+IMPL_TODO("Ghidra 0x1038ee00; 252b — logic verified; guard/unguard frame overhead diverges; rdtsc profiling omitted")
 AActor* AController::HandleSpecial( AActor* BestPath )
 {
 	guard(AController::HandleSpecial);
