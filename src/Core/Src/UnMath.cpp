@@ -113,7 +113,7 @@ void FVector::FindBestAxisVectors( FVector& Axis1, FVector& Axis2 )
 	Axis2 = Axis1 ^ *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; inlined by compiler at call sites")
 FLOAT FDist( const FVector& V1, const FVector& V2 )
 {
 	return appSqrt( Square(V2.X-V1.X) + Square(V2.Y-V1.Y) + Square(V2.Z-V1.Z) );
@@ -231,7 +231,7 @@ FRotator FCoords::OrthoRotation() const
 	FMatrix.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; inlined by compiler at call sites")
 FMatrix CombineTransforms( const FMatrix& M, const FMatrix& N )
 {
 	FMatrix Result;
@@ -384,31 +384,31 @@ FMatrix FQuat::FQuatToFMatrix()
 	Math utility stubs.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10112e10 (9 bytes): uses x87 _CIasin intrinsic; ordinal 1621")
 CORE_API DOUBLE appAsin( DOUBLE Value )
 {
 	return asin( Value );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10112f60 (38 bytes): calls floor() then FUN_1014e410; our floorf() differs; ordinal 1651")
 CORE_API FLOAT appFractional( FLOAT Value )
 {
 	return Value - floorf( Value );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x101132a0 (82 bytes): custom LCG rand; our impl uses appRand()/RAND_MAX; ordinal 1694")
 CORE_API FLOAT appSRand()
 {
 	return (FLOAT)appRand() / (FLOAT)RAND_MAX * 2.0f - 1.0f;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10112ef0 (10 bytes): sets LCG seed global directly; our impl calls appRandInit; ordinal 1695")
 CORE_API void appSRandInit( INT Seed )
 {
 	appRandInit( Seed );
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x101497d0 (93 bytes): dynamically loads kernel API; our impl calls IsDebuggerPresent directly; ordinal 1664")
 CORE_API INT appIsDebuggerPresent()
 {
 	return ::IsDebuggerPresent();
@@ -436,7 +436,7 @@ CORE_API INT appIsDebuggerPresent()
 #define MD5_HH(a,b,c,d,x,s,t) { (a)+=MD5_H(b,c,d)+(x)+(DWORD)(t); (a)=MD5_ROL(a,s)+(b); }
 #define MD5_II(a,b,c,d,x,s,t) { (a)+=MD5_I(b,c,d)+(x)+(DWORD)(t); (a)=MD5_ROL(a,s)+(b); }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x1012ded0 (40 bytes): RFC 1321 init; ordinal 1676")
 CORE_API void appMD5Init( FMD5Context* Context )
 {
 	Context->count[0] = Context->count[1] = 0;
@@ -449,7 +449,7 @@ CORE_API void appMD5Init( FMD5Context* Context )
 
 // Core compression: processes exactly one 64-byte block.
 // State is the current A,B,C,D; Block is the raw 64 input bytes.
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x1012e570 (2291 bytes): RFC 1321 compression; ordinal 1678")
 CORE_API void appMD5Transform( DWORD* State, BYTE* Block )
 {
 	DWORD a=State[0], b=State[1], c=State[2], d=State[3];
@@ -501,7 +501,7 @@ CORE_API void appMD5Transform( DWORD* State, BYTE* Block )
 }
 
 // Accumulate up to InputLen bytes, processing 64-byte blocks as they fill.
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x1012f030 (174 bytes): RFC 1321 update; ordinal 1679")
 CORE_API void appMD5Update( FMD5Context* Context, BYTE* Input, INT InputLen )
 {
 	// Compute byte offset into the current partial buffer.
@@ -531,7 +531,7 @@ CORE_API void appMD5Update( FMD5Context* Context, BYTE* Input, INT InputLen )
 }
 
 // Finalize: pad, append bit-count, encode digest into 16-byte Digest.
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x1012f0e0 (178 bytes): RFC 1321 finalize; ordinal 1675")
 CORE_API void appMD5Final( BYTE* Digest, FMD5Context* Context )
 {
 	BYTE Bits[8];
@@ -550,7 +550,7 @@ CORE_API void appMD5Final( BYTE* Digest, FMD5Context* Context )
 	appMemzero( Context, sizeof(*Context) ); // security-wipe
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x1012df00 (65 bytes): RFC 1321 encode; ordinal 1674")
 CORE_API void appMD5Encode( BYTE* Output, DWORD* Input, INT Len )
 {
 	for( INT i=0, j=0; j<Len; i++, j+=4 )
@@ -562,7 +562,7 @@ CORE_API void appMD5Encode( BYTE* Output, DWORD* Input, INT Len )
 	}
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x1012df50 (73 bytes): RFC 1321 decode; ordinal 1673")
 CORE_API void appMD5Decode( DWORD* Output, BYTE* Input, INT Len )
 {
 	for( INT i=0, j=0; j<Len; i++, j+=4 )
@@ -573,7 +573,7 @@ CORE_API void appMD5Decode( DWORD* Output, BYTE* Input, INT Len )
 	Misc geometry / utility functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x1012ca00 (992 bytes): slab-test AABB sweep; our algorithm differs; ordinal 1650")
 CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, const FVector& End, const FVector& Extent, FVector& HitLocation, FVector& HitNormal, FLOAT& HitTime )
 {
 	// Expand the AABB by the sweep half-extents (Minkowski sum).
@@ -641,7 +641,7 @@ CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, 
 	return 1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; likely a Ravenshield addition")
 CORE_API INT GetFVECTOR( const TCHAR* Stream, FVector& Value )
 {
 	Value = FVector(0,0,0);
@@ -657,7 +657,7 @@ CORE_API INT GetFVECTOR( const TCHAR* Stream, FVector& Value )
 	return 1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; likely a Ravenshield addition")
 CORE_API INT GetFROTATOR( const TCHAR* Stream, FRotator& Value, INT bScaled )
 {
 	Value = FRotator(0,0,0);
@@ -825,7 +825,7 @@ FCoords FMatrix::Coords()
 	return Result;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x101069d0 (682 bytes): fully-unrolled 4x4 multiply; our loop differs; ordinal 516")
 FMatrix FMatrix::operator*( FMatrix Other ) const
 {
 	FMatrix Result;
@@ -839,19 +839,19 @@ FMatrix FMatrix::operator*( FMatrix Other ) const
 	return Result;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10106c80 (666 bytes): fully-unrolled multiply-assign; our loop differs; ordinal 517")
 void FMatrix::operator*=( FMatrix Other )
 {
 	*this = *this * Other;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10106f20 (71 bytes): element-by-element NaN-aware compare; our memcmp differs; ordinal 487")
 INT FMatrix::operator==( FMatrix& Other ) const
 {
 	return appMemcmp( this, &Other, sizeof(FMatrix) ) == 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10106f70 (18 bytes): calls operator==() and negates; our memcmp differs; ordinal 498")
 INT FMatrix::operator!=( FMatrix& Other ) const
 {
 	return appMemcmp( this, &Other, sizeof(FMatrix) ) != 0;
@@ -890,25 +890,25 @@ FMatrix FCoords::Matrix() const
 	FPlane methods.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x101065b0 (44 bytes): adds all 4 components; ordinal 547")
 FPlane FPlane::operator+( const FPlane& V ) const { return FPlane( X+V.X, Y+V.Y, Z+V.Z, W+V.W ); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103ba0 (44 bytes): subtracts all 4 components; ordinal 532")
 FPlane FPlane::operator-( const FPlane& V ) const { return FPlane( X-V.X, Y-V.Y, Z-V.Z, W-V.W ); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; inlined at call sites")
 FPlane FPlane::operator*( const FPlane& V )        { return FPlane( X*V.X, Y*V.Y, Z*V.Z, W*V.W ); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103c10 (45 bytes): scalar multiply; ordinal 549")
 FPlane FPlane::operator*( FLOAT Scale ) const      { return FPlane( X*Scale, Y*Scale, Z*Scale, W*Scale ); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103bd0 (55 bytes): scalar divide; ordinal 561")
 FPlane FPlane::operator/( FLOAT Scale ) const      { FLOAT RScale = 1.0f/Scale; return FPlane( X*RScale, Y*RScale, Z*RScale, W*RScale ); }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103c70 (74 bytes): add-assign all 4 components; ordinal 551")
 FPlane FPlane::operator+=(const FPlane& V)         { X+=V.X; Y+=V.Y; Z+=V.Z; W+=V.W; return *this; }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103cc0 (74 bytes): subtract-assign all 4 components; ordinal 552")
 FPlane FPlane::operator-=(const FPlane& V)         { X-=V.X; Y-=V.Y; Z-=V.Z; W-=V.W; return *this; }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; inlined at call sites")
 FPlane FPlane::operator*=( const FPlane& V )       { X*=V.X; Y*=V.Y; Z*=V.Z; W*=V.W; return *this; }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103d10 (75 bytes): scalar multiply-assign; ordinal 553")
 FPlane FPlane::operator*=( FLOAT Scale )           { X*=Scale; Y*=Scale; Z*=Scale; W*=Scale; return *this; }
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103db0 (75 bytes): scalar divide-assign; ordinal 562")
 FPlane FPlane::operator/=( FLOAT Scale )           { FLOAT RScale = 1.0f/Scale; X*=RScale; Y*=RScale; Z*=RScale; W*=RScale; return *this; }
 
 IMPL_MATCH("Core.dll", 0x10107800)
@@ -1023,7 +1023,7 @@ INT FVector::IsUniform()
 	return (X == Y) && (Y == Z);
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x101033b0 (91 bytes): bounds-checked array access; ordinal 510")
 FLOAT& FVector::operator[]( INT i )
 {
 	check(i>=0 && i<3);
@@ -1086,7 +1086,7 @@ void FBox::Init()
 	IsValid = 0;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10104e90 (78 bytes): returns Min or Max by index; ordinal 509")
 FVector& FBox::operator[]( INT i )
 {
 	check( i>=0 && i<2 );
@@ -1152,7 +1152,7 @@ FPosition::FPosition( FVector InLocation, FCoords InCoords )
 {
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10104500 (22 bytes): memcpy loop 60 bytes; ordinal 418")
 FPosition& FPosition::operator=( const FPosition& Other )
 {
 	Location = Other.Location;
@@ -1164,13 +1164,13 @@ FPosition& FPosition::operator=( const FPosition& Other )
 	FCylinder class.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_TODO("Ghidra 0x10103f10 (3 bytes): trivially empty shared stub; our ctor initializes Radius/Height; ordinal 387")
 FCylinder::FCylinder()
 : Radius(0), Height(0)
 {
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; inlined at call sites")
 FCylinder& FCylinder::operator=( const FCylinder& Other )
 {
 	Radius = Other.Radius;
@@ -1266,7 +1266,7 @@ FEdge::FEdge( FVector InVertex0, FVector InVertex1 )
 	Vertex[1] = InVertex1;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x101038d0 (47 bytes): copies 6 floats (2 FVectors); ordinal 390")
 FEdge& FEdge::operator=( const FEdge& Other )
 {
 	Vertex[0] = Other.Vertex[0];
@@ -1274,7 +1274,7 @@ FEdge& FEdge::operator=( const FEdge& Other )
 	return *this;
 }
 
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+IMPL_TODO("Ghidra 0x10103800 (193 bytes): checks both orderings; ordinal 485")
 INT FEdge::operator==( const FEdge& Other ) const
 {
 	return (Vertex[0] == Other.Vertex[0] && Vertex[1] == Other.Vertex[1]) ||

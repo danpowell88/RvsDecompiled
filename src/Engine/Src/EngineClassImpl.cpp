@@ -749,7 +749,7 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_DIVERGE("Ghidra 0x1041f610 (137 bytes): GLog->Logf() + unnamed scene teardown function (FUN_103db080); scene manager not implemented")
+IMPL_TODO("Ghidra 0x1041f610 (137 bytes): calls GLog->Logf() and FUN_103db080 scene teardown; blocked pending scene manager implementation")
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
@@ -878,7 +878,7 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_DIVERGE("Ghidra 0x1032f0c0 (1867 bytes): very large; multiple FMD5Context computations + UClass lookup + FString comparisons; full stat system required")
+IMPL_TODO("Ghidra 0x1032f0c0 (1867 bytes): large function; FMD5Context computations + UClass lookup + FString comparisons; pending full stat system implementation")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);
