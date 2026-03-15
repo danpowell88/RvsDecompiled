@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnTex.cpp: Texture and material system (UTexture hierarchy)
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -310,8 +310,8 @@ int UTexture::Decompress(ETextureFormat TargetFormat)
 					// Colour endpoints as RGB565 at [8] and [10]; selectors at [12..15].
 					BYTE* blk = SrcData + ((xb >> 2) + (yb >> 2) * BlocksW) * 16;
 
-					_WORD c0 = *(_WORD*)(blk + 8);
-					_WORD c1 = *(_WORD*)(blk + 10);
+					unsigned short c0 = *(unsigned short*)(blk + 8);
+					unsigned short c1 = *(unsigned short*)(blk + 10);
 
 					// Decode RGB565 → BGRA8 palette (B=low5, G=mid6, R=high5)
 					BYTE pal[4][4];
