@@ -268,11 +268,15 @@ var transient float m_fPreviousBroadcastTimeStamp;  // Time of the "say" before 
 var transient float m_fEndOfChatLockTime;  // Set to -1.0 to unlock chatlock
 var transient float m_fLastVoteEmoteTimeStamp;  // Time of the last "vote" message sent
 
+// Replication block: variables and RPCs synced across the network.
+// 'unreliable' = best-effort, no retransmit; 'reliable' = guaranteed delivery.
+// Condition is evaluated server-side each tick to decide what to send.
 replication
 {
+	// Server -> clients (unreliable): notification RPCs that can tolerate packet loss.
 	// Pos:0x000
 	unreliable if((int(Role) == int(ROLE_Authority)))
-		ClientActionProgressDone, ClientAdminBanOff, 
+		ClientActionProgressDone,ClientAdminBanOff, 
 		ClientAdminKickOff, ClientCantRequestChangeMapYet, 
 		ClientCantRequestKickYet, ClientDisableFirstPersonViewEffects, 
 		ClientHideReticule, ClientMPMiscMessage, 
@@ -283,6 +287,7 @@ replication
 		ClientVoteSessionAbort, R6ClientWeaponShake, 
 		R6Shake, ResetBlur;
 
+	// Client -> server (unreliable): player input events sent every move update.
 	// Pos:0x034
 	unreliable if((int(Role) < int(ROLE_Authority)))
 		RegroupOnMe, ServerActionKeyReleased, 
@@ -300,6 +305,7 @@ replication
 		ServerWeaponUpAnimDone, ToggleAllTeamsHold, 
 		ToggleTeamHold;
 
+	// Server -> clients (reliable): important game-state RPCs that must not be dropped.
 	// Pos:0x00D
 	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientAdminLogin, ClientBanMatches, 
@@ -325,9 +331,10 @@ replication
 		CountDownPopUpBoxDone, ServerIndicatesInvalidCDKey, 
 		TKPopUpBox, ToggleHelmetCameraZoom;
 
+	// Server -> clients (reliable variables): game state variables that own client needs.
 	// Pos:0x01A
 	reliable if((int(Role) == int(ROLE_Authority)))
-		m_bRequestTKPopUp, m_bSkipBeginState, 
+		m_bRequestTKPopUp,m_bSkipBeginState, 
 		m_iAdmin;
 
 	// Pos:0x027
@@ -336,6 +343,7 @@ replication
 		m_iPlayerCAProgress, m_pawn, 
 		m_rCurrentShakeRotation;
 
+	// Client -> server (reliable): admin commands and persistent configuration RPCs.
 	// Pos:0x041
 	reliable if((int(Role) < int(ROLE_Authority)))
 		Admin, AutoAdminLogin, 
@@ -386,6 +394,7 @@ native(2726) final function PlayVoicesPriority(R6SoundReplicationInfo aAudioRepI
 // ResetOriginalData
 //	
 //------------------------------------------------------------------
+// Resets all controller state at the start of a new round; called on both server and client.
 simulated function ResetOriginalData()
 {
 	// End:0x10
@@ -1315,7 +1324,8 @@ event PostRender(Canvas Canvas)
 	{
 		Canvas.SetMotionBlurIntensity(0);
 	}
-	// End:0x1AD
+		// One-shot scan for self-detonating bomb actors in the level (CountDown/MissionPack1 mode).
+		// End:0x1AD
 	if((!m_bBombSearched))
 	{
 		// End:0xDE
@@ -1401,6 +1411,7 @@ simulated function RenderTimeLeft(Canvas C)
 	X = int(C.HalfClipX);
 	Y = int((C.HalfClipY / float(8)));
 	C.Font = Font'R6Font.Rainbow6_14pt';
+	// Colour-code the timer: white >20s, yellow >10s, red <=10s.
 	// End:0x10D
 	if((iTimeLeft > 20))
 	{
@@ -1629,12 +1640,14 @@ simulated function R6Shake(float fTime, float fMaxShake, float fMaxShakeTime)
 	return;
 }
 
+// Samples the eye-bone position each frame and advances any active hit-shake timer, decaying the rotation noise over its lifetime.
 function SetEyeLocation(Pawn pViewTarget, float fDeltaTime)
 {
 	local Coords cEyesPos;
 
 	cEyesPos = pViewTarget.GetBoneCoords('R6 PonyTail1');
 	pViewTarget.m_vEyeLocation = cEyesPos.Origin;
+	// Shake is still running: randomly re-roll the hit rotation each sub-tick and scale amplitude toward zero.
 	// End:0x145
 	if((m_fShakeTime > float(0)))
 	{
@@ -1908,6 +1921,7 @@ function ServerReloadWeapon()
 // RBrek - 14 Aug 2001 - made a modification so that if player is 
 //      strafing and moving forward the facing direction is forward...
 ///////////////////////////////////////////////////////////////////////////////////////
+// Returns the compass quadrant (0=forward, 16384=right, 32768=back, 49152=left) of the pawn's movement relative to its facing direction.
 function int GetFacingDirection()
 {
 	local Vector X, Y, Z, Dir;
@@ -1943,6 +1957,7 @@ function int GetFacingDirection()
 // CalcSmoothedRotation()
 // used for spectator camera to smooth turning
 ///////////////////////////////////////////////////////////////////////////////////////
+// Smooths spectator camera yaw toward the desired facing using a max-per-frame step to avoid snapping.
 function CalcSmoothedRotation()
 {
 	local Rotator rCurrent;
@@ -1996,6 +2011,7 @@ function CalcSmoothedRotation()
 		}
 	}
 	rCurrent.Pitch = m_iSpectatorPitch;
+	// Wrap yaw to 0-65535 before computing the delta so the interpolation handles the 0/65535 seam correctly.
 	iOldYaw = (m_iSpectatorYaw & 65535);
 	iDesiredYaw = (Rotation.Yaw & 65535);
 	// End:0x1EA
@@ -2062,6 +2078,7 @@ function CalcSmoothedRotation()
 	return;
 }
 
+// Computes first-person camera position and rotation, applying weapon sway offsets and a wall-clip trace for the behind-view distance.
 function CalcFirstPersonView(out Vector CameraLocation, out Rotator CameraRotation)
 {
 	local Rotator rAdjust, rPitchOnly;
@@ -2163,6 +2180,7 @@ function CalcBehindView(out Vector CameraLocation, out Rotator CameraRotation, f
 		}
 	}
 	View = (vect(1.0000000, 0.0000000, 0.0000000) >> CameraRotation);
+	// Prevent the behind-view camera from clipping through walls by moving it forward to the hit point.
 	// End:0x106
 	if((Trace(HitLocation, HitNormal, (CameraLocation - (Dist * Vector(CameraRotation))), CameraLocation) != none))
 	{
@@ -2226,9 +2244,11 @@ function bool DirectionChanged()
 ///////////////////////////////////////////////////////////////////////////////////////
 // AdjustViewPitch()
 ///////////////////////////////////////////////////////////////////////////////////////
+// Clamps pitch to the half-open range used by the pawn so the player cannot look past vertical limits.
 simulated function AdjustViewPitch(out int iPitch)
 {
 	iPitch = (iPitch & 65535);
+	// Pitch is in the 'upside-down' half of the 0-65535 range — snap it back to the nearest limit.
 	// End:0x58
 	if(((iPitch > 16384) && (iPitch < 49152)))
 	{
@@ -2254,6 +2274,7 @@ simulated function AdjustViewYaw(out int iYaw)
 	// End:0x6A
 	if(m_pawn.m_bIsClimbingLadder)
 	{
+		// Yaw is in the disallowed ladder-turn arc — snap to the nearest permitted facing.
 		// End:0x6A
 		if(((iYaw > 10923) && (iYaw < 54613)))
 		{
@@ -2292,6 +2313,7 @@ simulated function AdjustViewYaw(out int iYaw)
 //   is rotated back to reflect the direction that the player is looking (which remains straight ahead).
 //   returns true if bone rotation is done, false otherwise...
 ///////////////////////////////////////////////////////////////////////////////////////
+// Rotates the skeleton to face the true diagonal direction and counter-rotates the torso to keep the view straight ahead.
 function HandleDiagonalStrafing()
 {
 	// End:0x5E
@@ -2382,6 +2404,7 @@ function SetPeekingInfo(Pawn.ePeekingMode eMode, float fPeekingRatio, optional b
 	// End:0xC0
 	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
+		// Normalize the raw peek ratio into a 0-254 byte for network transmission to avoid sending a float.
 		fNormalizedPeekingRatio = (((fPeekingRatio - m_pawn.0.0000000) / (m_pawn.2000.0000000 - m_pawn.0.0000000)) * 254.0000000);
 		PackedPeekingRatio = byte(fNormalizedPeekingRatio);
 		// End:0xB0
@@ -2445,6 +2468,7 @@ function ServerSetBipodRotation(float fRotation)
 	return;
 }
 
+// Returns true if the player is actively pulling the trigger with ammo remaining, used by UpdateRotation to decide sway direction.
 function bool PlayerIsFiring()
 {
 	// End:0x16
@@ -2464,6 +2488,7 @@ function bool PlayerIsFiring()
 ///////////////////////////////////////////////////////////////////////////////////////
 // UpdateRotation()
 ///////////////////////////////////////////////////////////////////////////////////////
+// Applies mouse/joystick input as rotation, handling bipod limits, peeking offset blending, and diagonal strafe bone adjustments.
 simulated function UpdateRotation(float DeltaTime, float maxPitch)
 {
 	local Rotator rNewRotation, rViewRotation, rRotationOffset;
@@ -2498,6 +2523,7 @@ simulated function UpdateRotation(float DeltaTime, float maxPitch)
 	{
 		fBipodRotationToAdd = (32.0000000 * DeltaTime);
 		DesiredRotation.Yaw = Rotation.Yaw;
+		// Moving with bipod deployed: decay the rotation offset back toward zero at double speed.
 		// End:0x1AF
 		if((Pawn.Velocity != vect(0.0000000, 0.0000000, 0.0000000)))
 		{
@@ -2559,6 +2585,7 @@ simulated function UpdateRotation(float DeltaTime, float maxPitch)
 	}
 	AdjustViewPitch(rViewRotation.Pitch);
 	rViewRotation.Roll = 0;
+	// Apply a slight camera roll proportional to the lean angle to give visual feedback of the peek.
 	// End:0x3A0
 	if(((!bBehindView) && (m_pawn.m_fPeeking != m_pawn.1000.0000000)))
 	{
@@ -2588,6 +2615,7 @@ simulated function UpdateRotation(float DeltaTime, float maxPitch)
 			// End:0x540
 			if(m_pawn.m_bUsingBipod)
 			{
+				// Bipod pitch limit exceeded — clamp to the maximum upward angle allowed while prone.
 				// End:0x506
 				if(((rRotationOffset.Pitch > 5461) && (rRotationOffset.Pitch < 18001)))
 				{
@@ -2606,7 +2634,8 @@ simulated function UpdateRotation(float DeltaTime, float maxPitch)
 				// End:0x5A6
 				if((rRotationOffset.Yaw > 0))
 				{
-					fOffset = float(Clamp(rRotationOffset.Yaw, 0, int((float(6600) * DeltaTime))));					
+					// Rate-limit the body yaw correction so the pawn rotates smoothly rather than teleporting to the desired yaw.
+				fOffset = float(Clamp(rRotationOffset.Yaw, 0, int((float(6600) * DeltaTime))));					
 				}
 				else
 				{
@@ -2752,6 +2781,7 @@ function ResetFluidPeeking()
 	return;
 }
 
+// Smoothly interpolates peeking ratio and crouch blend each tick, giving fluid camera lean and stance transitions.
 function HandleFluidMovement(float DeltaTime)
 {
 	local float fCrouchRate, fPeekingRate, fBlendAlpha;
@@ -3559,6 +3589,7 @@ function bool PlayerIsInFrontOfDoubleDoors()
 	return;
 }
 
+// Determines which of a double-door pair the player is facing by checking which door is to the right via cross product.
 function bool PlayerLookingAtFirstDoor()
 {
 	local Vector vLookDir, vCenter, vCutOff, vResult;
@@ -3611,6 +3642,7 @@ function bool PlayerLookingAtFirstDoor()
 	return;
 }
 
+// Maps the player's mouse axis to a continuous door-open speed, returning the door that should be moved this frame.
 function bool GraduallyControlDoor(out R6Door aDoor)
 {
 	local bool bIsLookingAtFirstDoor;
@@ -3731,10 +3763,12 @@ function ServerGraduallyCloseDoor(byte bSpeedUpDoor)
 // note:  using either the peekleft or peekright buttons while in a 
 //		  fluid-set position will reset the player's posture.
 ///////////////////////////////////////////////////////////////////////////////////////
+// Processes peek-left / peek-right button state changes each frame to start, hold, or cancel a lean action.
 function UpdatePlayerPeeking()
 {
 	local bool bPeekingLeft, bPeekingRight;
 
+	// Cancel any active lean if the prone player starts moving, to prevent clipping into geometry.
 	// End:0x65
 	if((m_pawn.m_bIsProne && (Pawn.Acceleration != vect(0.0000000, 0.0000000, 0.0000000))))
 	{
@@ -4021,6 +4055,7 @@ function ServerTeamRequested(Object.ePlayerTeamSelection eTeamSelected, optional
 			Log((("PlayerController " $ string(self)) $ " has a PunkBuster version mismatch"));
 		}
 	}
+	// Random team (1) requested: assign to whichever side has fewer players, falling back to spectator if the server is full.
 	// End:0x1B8
 	if((int(eTeamSelected) == int(1)))
 	{
@@ -4539,6 +4574,7 @@ function ServerSetHelmetParams(float fZoomLevel, bool bScopeZoom)
 	return;
 }
 
+// Toggles helmet-camera magnification: routes to weapon ZoomIn state for scope weapons, or calls DoZoom for all others.
 function ToggleHelmetCameraZoom(optional bool bTurnOff)
 {
 	// End:0x19
@@ -4558,6 +4594,7 @@ function ToggleHelmetCameraZoom(optional bool bTurnOff)
 	return;
 }
 
+// Applies or removes the FoV zoom on the helmet camera, cycling through sniper-scope, weapon-scope, and iron-sight modes.
 function DoZoom(optional bool bTurnOff)
 {
 	// End:0x23
@@ -4657,6 +4694,7 @@ event float GetZoomMultiplyFactor(float fWeaponMaxZoom)
 	return;
 }
 
+// Initiates a directional view-shake: projects the impact vector onto the camera axes to determine pitch/roll orientation and amplitude.
 function ShakeView(float fWaveTime, float fRollMax, Vector vImpactDirection, float fRollSpeed, Vector vPositionOffset, float fReturnTime)
 {
 	local Vector vRotationX, vRotationY, vRotationZ;
@@ -4732,6 +4770,7 @@ function ResetPlayerVisualEffects()
 	return;
 }
 
+// Advances the view-shake simulation each frame: accumulates shake rotation, randomly redirects at limits, and decays toward zero.
 function R6ViewShake(float fDeltaTime, out Rotator rRotationOffset)
 {
 	local Rotator rOriginalFiringDirection;
@@ -4933,6 +4972,7 @@ function R6ViewShake(float fDeltaTime, out Rotator rRotationOffset)
 		}
 	}
 	(rRotationOffset -= m_rCurrentShakeRotation);
+	// Final pitch clamp: prevent the resulting view offset from pushing the camera past vertical.
 	// End:0x85D
 	if(((rRotationOffset.Pitch > 16384) && (rRotationOffset.Pitch < 32000)))
 	{
@@ -4969,6 +5009,7 @@ function R6WeaponShake()
 	return;
 }
 
+// Updates controller attitude based on bullet momentum — applies a hit-shake on a local client, does nothing for bots/AI.
 simulated function R6DamageAttitudeTo(Pawn Other, Actor.eKillResult eKillResultFromTable, Actor.eStunResult eStunFromTable, Vector vBulletMomentum)
 {
 	// End:0x13D
@@ -5141,6 +5182,7 @@ simulated function ClientFadeCommonSound(float fTime, int iVolume)
 	return;
 }
 
+// Switches to the weapon in slot f, respecting lock/transition/game-over guards and notifying the server in MP.
 function SwitchWeapon(byte f)
 {
 	local R6EngineWeapon NewWeapon;
@@ -6093,6 +6135,7 @@ exec function Vote(int _bVoteResult)
 	{
 		ClientPlayerVoteMessage(_PlayerNameOne, m_iVoteResult, _PlayerNameTwo);
 	}
+	// Record the vote end time if a majority has been reached so the game can tally and act.
 	// End:0x453
 	if(((float(_iAgainstKickVotes) >= (float(_iTotalPlayers) / float(2))) || (float(_iForKickVotes) > (float(_iTotalPlayers) / float(2)))))
 	{
@@ -6270,6 +6313,7 @@ exec function NewPassword(string _NewPassword)
 	return;
 }
 
+// Returns true if the player's admin level meets the minimum required, or if they are the listen-server host.
 function bool CheckAuthority(int _LevelNeeded)
 {
 	// End:0x1B
@@ -7682,6 +7726,7 @@ exec function Say(string Msg)
 		return;
 	}
 	pServerInfo = Class'Engine.Actor'.static.GetServerOptions();
+	// Allow chat only if enough time has passed since the last message; otherwise lock the player out for ChatLockDuration.
 	// End:0xE0
 	if((m_fPreviousBroadcastTimeStamp <= (Level.TimeSeconds - pServerInfo.SpamThreshold)))
 	{
@@ -7690,7 +7735,7 @@ exec function Say(string Msg)
 		{
 			m_fPreviousBroadcastTimeStamp = m_fLastBroadcastTimeStamp;
 			m_fLastBroadcastTimeStamp = Level.TimeSeconds;
-			Level.Game.Broadcast(self, Msg, 'Say');			
+			Level.Game.Broadcast(self, Msg, 'Say');
 		}
 		else
 		{
@@ -7762,6 +7807,7 @@ exec function HideWeapon()
 	return;
 }
 
+// PlayerFlying: cheat-fly mode; used for noclip-style debugging where the pawn moves freely ignoring gravity.
 state PlayerFlying
 {
 	function BeginState()
@@ -7779,10 +7825,12 @@ state PlayerFlying
 	stop;
 }
 
+// GameEnded: post-match freeze; all input is suppressed by the empty stop while the end screen is displayed.
 state GameEnded
 {	stop;
 }
 
+// PenaltyBox: temporary out-of-play state for team-kill violations; pawn is marked dead and firing is blocked.
 state PenaltyBox
 {
 	ignores KilledBy;
@@ -7847,6 +7895,7 @@ Begin:
 	stop;				
 }
 
+// PlayerWalking: the primary in-game movement state; handles all movement, peeking, weapon, and door interactions.
 state PlayerWalking
 {
 	function PlayerMove(float DeltaTime)
@@ -7990,6 +8039,7 @@ state PlayerWalking
 	stop;
 }
 
+// BaseSpectating: the initial / pre-game spectator state (auto state); player can fly around the map before spawning.
 auto state BaseSpectating
 {
 	simulated function BeginState()
@@ -8051,6 +8101,7 @@ auto state BaseSpectating
 	stop;
 }
 
+// PauseController: pauses all player movement input while still allowing rotation; used during in-game menus/planning.
 state PauseController extends PlayerWalking
 {
 	ignores KilledBy;
@@ -8141,6 +8192,7 @@ state PauseController extends PlayerWalking
 	stop;
 }
 
+// WaitForGameRepInfo: initial client-side wait state until GameReplicationInfo is available before entering Dead/Spectator.
 state WaitForGameRepInfo
 {
 	function BeginState()
@@ -8181,6 +8233,7 @@ state WaitForGameRepInfo
 	stop;
 }
 
+// Dead: post-death spectator state; blocks firing/movement inputs and selects the appropriate death-camera mode from server flags.
 state Dead
 {
 	function PlayFiring()
@@ -8240,6 +8293,7 @@ state Dead
 		m_bCameraGhost = false;
 		m_bFadeToBlack = false;
 		m_bSpectatorCameraTeamOnly = false;
+		// Read bitmask from server to decide which death-camera modes are available and enable them.
 		// End:0xC4
 		if(((R6GameReplicationInfo(GameReplicationInfo).m_iDeathCameraMode & Level.1) > 0))
 		{
@@ -8552,6 +8606,7 @@ state Dead
 	stop;
 }
 
+// CameraPlayer: free-roaming spectator/camera state; used after death, for surrender/arrest sequences, and in singleplayer cinematic views.
 state CameraPlayer
 {
 	simulated function BeginState()
@@ -9075,6 +9130,7 @@ state CameraPlayer
 				// End:0x26F
 				break;
 			// End:0x26C
+			// Case 3 = free-look ghost camera: detach from target, position above the previous view target or at the level CamSpot.
 			case 3:
 				// End:0x126
 				if((ViewTarget != self))
@@ -9480,6 +9536,7 @@ state CameraPlayer
 	stop;
 }
 
+// PlayerStartSurrenderSequence: initiation state that halts movement and stows the weapon as the surrender animation begins.
 state PlayerStartSurrenderSequence extends PlayerWalking
 {
 	function BeginState()
@@ -9725,6 +9782,7 @@ state PlayerStartSurrenderSequence extends PlayerWalking
 	stop;
 }
 
+// PlayerFinishReloadingBeforeSurrender: waits for the current reload animation to finish before transitioning to the surrender sequence.
 state PlayerFinishReloadingBeforeSurrender
 {
 	function BeginState()
@@ -9802,6 +9860,7 @@ state PlayerFinishReloadingBeforeSurrender
 	stop;
 }
 
+// PlayerPreBeginSurrending: switches to CameraPlayer mode and removes weapon/zoom before the actual surrender animation plays.
 state PlayerPreBeginSurrending extends CameraPlayer
 {
 	function BeginState()
@@ -9970,6 +10029,7 @@ state PlayerPreBeginSurrending extends CameraPlayer
 	stop;
 }
 
+// PlayerStartSurrending: triggers the kneel-down surrender animation and notifies the server to begin the surrender action.
 state PlayerStartSurrending extends CameraPlayer
 {
 	function BeginState()
@@ -10093,6 +10153,7 @@ state PlayerStartSurrending extends CameraPlayer
 	stop;
 }
 
+// PlayerSurrended: idle surrendered state; pawn is vulnerable and waits for an operative to arrest or a timeout to free them.
 state PlayerSurrended extends CameraPlayer
 {
 	function BeginState()
@@ -10236,6 +10297,7 @@ state PlayerSurrended extends CameraPlayer
 	stop;
 }
 
+// PlayerEndSurrended: plays the stand-up animation after arrest/freedom and restores collision and weapon state.
 state PlayerEndSurrended extends CameraPlayer
 {
 	function BeginState()
@@ -10394,6 +10456,7 @@ state PlayerEndSurrended extends CameraPlayer
 	stop;
 }
 
+// PlayerSecureRainbow: the operative's side of the arrest — stows the weapon and plays the secure-rainbow animation while facing the target.
 state PlayerSecureRainbow
 {
 	function BeginState()
@@ -10624,6 +10687,7 @@ state PlayerSecureRainbow
 	stop;
 }
 
+// PlayerStartArrest: plays the initial arrest animation on the surrendered pawn and notifies the server to begin the arrest action.
 state PlayerStartArrest extends CameraPlayer
 {
 	function BeginState()
@@ -10759,6 +10823,7 @@ state PlayerStartArrest extends CameraPlayer
 	stop;
 }
 
+// PlayerArrested: locked post-arrest state; all input is blocked while the arrest animation plays and collision is managed by AnimEnd.
 state PlayerArrested extends CameraPlayer
 {
 	function BeginState()
@@ -10907,6 +10972,7 @@ state PlayerArrested extends CameraPlayer
 	stop;
 }
 
+// PlayerSetFree: plays the stand-up-from-arrest animation, restores invulnerability, and returns the pawn to PlayerWalking on completion.
 state PlayerSetFree extends CameraPlayer
 {
 	function BeginState()
@@ -11116,6 +11182,7 @@ Begin:
 	stop;			
 }
 
+// PlayerActionProgress: locks movement while the pawn interacts with a device or lock, tracking progress toward 105% completion.
 state PlayerActionProgress extends PlayerWalking
 {
 	function BeginState()
