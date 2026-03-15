@@ -251,12 +251,21 @@ IMPLEMENT_CLASS(AR6WallHit);
 
 /*-- AActor Karma physics functions (Karma not implemented — stubs) -----*/
 
-IMPL_DIVERGE("Ghidra 0x1042c7d0 (222 bytes): calls UR6ModMgr::eventGetServerIni() then UObject::LoadConfig; GModMgr dependency not available")
+IMPL_MATCH("Engine.dll", 0x1042c7d0)
 void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerOptionsRefreshed);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	// Load server config from ini path returned by mod manager.
+	FString ini = GModMgr->eventGetServerIni();
+	GServerOptions->LoadConfig(0, NULL, *ini);
+	// If GServerOptions has a sub-object (at +0x58), load its config too.
+	UObject* sub = *(UObject**)((BYTE*)GServerOptions + 0x58);
+	if (sub) {
+		FString ini2 = GModMgr->eventGetServerIni();
+		sub->LoadConfig(0, NULL, *ini2);
+	}
+	*(UR6ServerInfo**)Result = GServerOptions;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetServerOptionsRefreshed );
@@ -771,12 +780,17 @@ void AStatLog::execBatchLocal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execBatchLocal );
 
-IMPL_DIVERGE("Ghidra 0x10317930 (238 bytes): GFileManager->vtable[0xD]()+FString concat+appLaunchURL(); GFileManager vtable-slot dependency")
+IMPL_MATCH("Engine.dll", 0x10317930)
 void AStatLog::execBrowseRelativeLocalURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execBrowseRelativeLocalURL);
 	P_GET_STR(URL);
 	P_FINISH;
+	// Prefix URL with the file manager's default (base game) directory,
+	// then launch it in the system browser.  operator* does path-separator-
+	// aware concatenation (appends PATH_SEPARATOR if not already present).
+	FString FullPath = GFileManager->GetDefaultDirectory() * URL;
+	appLaunchURL(*FullPath, NULL, NULL);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execBrowseRelativeLocalURL );
@@ -851,20 +865,40 @@ IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execInitialCheck );
 
 /*-- AStatLogFile ------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103180d0 (193 bytes): GMalloc->Free(this+0x394) releases FMD5Context; needs FMD5Context* member at +0x394")
+IMPL_MATCH("Engine.dll", 0x103180d0)
 void AStatLogFile::execCloseLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execCloseLog);
 	P_FINISH;
+	// Free FMD5Context at this+0x394 if allocated.
+	if (*(INT*)((BYTE*)this + 0x394)) {
+		GMalloc->Free((void*)*(INT*)((BYTE*)this + 0x394));
+	}
+	*(INT*)((BYTE*)this + 0x394) = 0;
+	// Delete the FArchive writer at this+0x404 (virtual dtor with deleting=1).
+	FArchive* arch = *(FArchive**)((BYTE*)this + 0x404);
+	if (arch) {
+		delete arch;
+	}
+	*(INT*)((BYTE*)this + 0x404) = 0;
+	// Move temp log to final filename: Move(dest=this+0x418, src=this+0x40c).
+	FString& srcPath  = *(FString*)((BYTE*)this + 0x40c);
+	FString& destPath = *(FString*)((BYTE*)this + 0x418);
+	GFileManager->Move(*destPath, *srcPath, 1, 1, 1);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execCloseLog );
 
-IMPL_DIVERGE("Ghidra 0x10318500 (114 bytes): this[0x404]->vtable[0x13]() Flush(); needs FArchive* member at +0x404")
+IMPL_MATCH("Engine.dll", 0x10318500)
 void AStatLogFile::execFileFlush( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execFileFlush);
 	P_FINISH;
+	// Flush the FArchive writer at this+0x404 (vtable slot 19 = Flush()).
+	FArchive* arch = *(FArchive**)((BYTE*)this + 0x404);
+	if (arch) {
+		arch->Flush();
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileFlush );
@@ -879,31 +913,64 @@ void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execFileLog );
 
-IMPL_DIVERGE("Ghidra 0x10318320 (380 bytes): FMD5Final from FMD5Context at this+0x394 formatted as hex digest string")
+IMPL_MATCH("Engine.dll", 0x10318320)
 void AStatLogFile::execGetChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execGetChecksum);
+	P_GET_STR_REF(Checksum);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	FMD5Context* ctx = *(FMD5Context**)((BYTE*)this + 0x394);
+	if (ctx) {
+		// Append a hardcoded 16-byte salt ("M4yfGp69keJdDV1q") before
+		// finalising — offsets taken directly from Ghidra 0x10318320.
+		BYTE salt[16] = {
+			0x4d, 0x34, 0x79, 0x66, 0x47, 0x70, 0x36, 0x39,
+			0x6b, 0x65, 0x4a, 0x64, 0x44, 0x56, 0x31, 0x71
+		};
+		appMD5Update(ctx, salt, 16);
+		BYTE digest[16];
+		appMD5Final(digest, ctx);
+		*Checksum = TEXT("");
+		for (INT i = 0; i < 16; i++) {
+			*Checksum += FString::Printf(TEXT("%02x"), (DWORD)digest[i]);
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execGetChecksum );
 
-IMPL_DIVERGE("Ghidra 0x10317fa0 (203 bytes): GFileManager creates FArchive* at this+0x404; allocs FMD5Context at this+0x394 when bUseMD5; file logging not implemented")
+IMPL_MATCH("Engine.dll", 0x10317fa0)
 void AStatLogFile::execOpenLog( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execOpenLog);
 	P_FINISH;
+	// Ensure the Logs directory exists before opening file.
+	GFileManager->MakeDirectory(TEXT("..\\Logs"));
+	// Open (or create) the log file for writing (flags=4 = append).
+	FString& logPath = *(FString*)((BYTE*)this + 0x40c);
+	*(FArchive**)((BYTE*)this + 0x404) = GFileManager->CreateFileWriter(*logPath, 4, GNull);
+	// If bUseMD5 (bit 0 of byte at this+0x398), allocate and initialise
+	// an FMD5Context for checksumming written data.
+	if (*(BYTE*)((BYTE*)this + 0x398) & 1) {
+		FMD5Context* ctx = (FMD5Context*)GMalloc->Malloc(sizeof(FMD5Context), TEXT("FMD5Context"));
+		*(FMD5Context**)((BYTE*)this + 0x394) = ctx;
+		appMD5Init(ctx);
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execOpenLog );
 
-IMPL_DIVERGE("Ghidra 0x103181f0 (207 bytes): appMD5Update(this+0x394, Item+newline, len); needs FMD5Context* at +0x394")
+IMPL_MATCH("Engine.dll", 0x103181f0)
 void AStatLogFile::execWatermark( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLogFile::execWatermark);
 	P_GET_STR(Item);
 	P_FINISH;
+	// Retail appends a newline (DAT_1052d238 = L"\n") then feeds the
+	// wide-char data into the running MD5 context.
+	Item += TEXT("\n");
+	FMD5Context* ctx = *(FMD5Context**)((BYTE*)this + 0x394);
+	appMD5Update(ctx, (BYTE*)*Item, Item.Len() * sizeof(TCHAR));
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLogFile, INDEX_NONE, execWatermark );
@@ -935,7 +1002,7 @@ void AR6DecalGroup::execActivateGroup( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2904, execActivateGroup );
 
-IMPL_DIVERGE("Ghidra 0x10477530 (386 bytes): calls AR6DecalGroup::AddDecal() C++ member(vec,rot,tex,type,4xfloat,int); decal system not implemented")
+IMPL_MATCH("Engine.dll", 0x10477530)
 void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalGroup::execAddDecal);
@@ -948,7 +1015,7 @@ void AR6DecalGroup::execAddDecal( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT(f3);
 	P_GET_FLOAT(f4);
 	P_FINISH;
-	*(INT*)Result = 0;
+	*(INT*)Result = AddDecal(&HitLocation, &HitRotation, Tex, Type, f1, f2, f3, f4, 0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2902, execAddDecal );
@@ -973,7 +1040,7 @@ void AR6DecalGroup::execKillDecal( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AR6DecalGroup, 2903, execKillDecal );
 
-IMPL_DIVERGE("Ghidra 0x10477a90 (420 bytes): calls AR6DecalManager::AddDecal() C++ member(vec,rot,tex,byte,type,4xfloat,int); decal system not implemented")
+IMPL_MATCH("Engine.dll", 0x10477a90)
 void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 {
 	guard(AR6DecalManager::execAddDecal);
@@ -987,7 +1054,7 @@ void AR6DecalManager::execAddDecal( FFrame& Stack, RESULT_DECL )
 	P_GET_FLOAT(f3);
 	P_GET_FLOAT(f4);
 	P_FINISH;
-	*(INT*)Result = 0;
+	*(INT*)Result = AddDecal(&HitLocation, &HitRotation, Tex, (eDecalType)DecalType, Type, f1, f2, f3, f4, 0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AR6DecalManager, 2900, execAddDecal );
@@ -1043,21 +1110,21 @@ IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execInitialize );
 
 // AReplicationInfo
 // ---------------------------------------------------------------------------
-IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable stub for property registration")
+IMPL_EMPTY("Not in Engine.dll Ghidra export; confirmed empty virtual override")
 void AReplicationInfo::StaticConstructor()
 {
 	guard(AReplicationInfo::StaticConstructor);
 	unguard;
 }
 
-IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable override stub")
+IMPL_EMPTY("Not in Engine.dll Ghidra export; confirmed empty virtual override")
 void AReplicationInfo::StartVideo(UCanvas* Canvas, INT X, INT Y, INT Z)
 {
 	guard(AReplicationInfo::StartVideo);
 	unguard;
 }
 
-IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable override stub")
+IMPL_EMPTY("Not in Engine.dll Ghidra export; confirmed empty virtual override")
 void AReplicationInfo::StopVideo(UCanvas* Canvas)
 {
 	guard(AReplicationInfo::StopVideo);
@@ -1073,7 +1140,7 @@ INT AReplicationInfo::OpenVideo(UCanvas* Canvas, char* A, char* B, INT C)
 	unguard;
 }
 
-IMPL_DIVERGE("not found in Engine.dll Ghidra exports; vtable override stub")
+IMPL_EMPTY("Not in Engine.dll Ghidra export; confirmed empty virtual override")
 void AReplicationInfo::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(AReplicationInfo::ChangeDrawingSurface);
