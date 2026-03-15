@@ -14,9 +14,10 @@ class R6MultiPlayerGameInfo extends R6GameInfo
     config
     hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
-const K_VoteTime = 90;
-const K_RefreshCheckPlayerReadyFreq = 1;
+const K_VoteTime = 90; // duration in seconds during which players may cast kick/map-change votes
+const K_RefreshCheckPlayerReadyFreq = 1; // server polls player ready-state once per second
 
+// True once all players confirm ready; prevents team changes before round starts
 var bool m_TeamSelectionLocked;
 var float m_fNextCheckPlayerReadyTime;  // place holder for time of next CheckPlayerReady
 var float m_fLastUpdateTime;  // Time of lat update sent to ubi.com
@@ -50,6 +51,7 @@ function InitObjectives()
 		Index = m_missionMgr.m_aMissionObjectives.Length;
 		m_missionObjTimer = new (none) Class'R6Game.R6MObjTimer';
 		m_missionObjTimer.m_bVisibleInMenu = false;
+		// Reuses the morality objective slot so the timer appears in the same HUD slot as single-player.
 		m_missionObjTimer.m_bMoralityObjective = true;
 		m_missionMgr.m_aMissionObjectives[Index] = m_missionObjTimer;
 	}
@@ -62,7 +64,7 @@ function bool AtCapacity(bool bSpectator)
 	// End:0x1B
 	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
-		return false;
+		return false; // no server capacity limit in single-player
 	}
 	return (NumPlayers >= MaxPlayers);
 	return;
@@ -98,6 +100,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	}
 	m_GameService.NativeUpdateServer();
 	InName = Left(ParseOption(Options, "Name"), 20);
+	// Sanitize player name: replace URL/query-string special chars with underscores.
 	ReplaceText(InName, " ", "_");
 	ReplaceText(InName, "~", "_");
 	ReplaceText(InName, "?", "_");
@@ -108,14 +111,16 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	// End:0x162
 	if((InName == "UbiPlayer"))
 	{
+		// "UbiPlayer" is the Ubi.com default; fall back to the OS username instead.
 		InName = Left(ParseOption(Options, "UserName"), 20);
 	}
 	// End:0x19B
+	// Notify all currently connected players that someone is joining.
 	foreach DynamicActors(Class'R6Engine.R6PlayerController', P)
 	{
 		P.ClientMPMiscMessage("PlayerJoinedServer", InName);		
 	}	
-	InTeam = byte(GetIntOption(Options, "Team", 255));
+	InTeam = byte(GetIntOption(Options, "Team", 255)); // 255 = no team preference; assigned during round setup
 	InPassword = ParseOption(Options, "Password");
 	InChecksum = ParseOption(Options, "Checksum");
 	_iPBEnabled = GetIntOption(Options, "iPB", 0);
@@ -123,6 +128,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	Log(("Login:" @ InName));
 	CamSpot = Level.GetCamSpot(m_szGameTypeFlag);
 	// End:0x2DA
+	// Place the new controller at the game-type camera spot, or fall back to the nearest insertion zone.
 	if((CamSpot == none))
 	{
 		StartSpot = GetAStartSpot();
@@ -145,7 +151,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 		CamRot = CamSpot.Rotation;
 	}
 	pModManager = Class'Engine.Actor'.static.GetModMgr();
-	bDelayedStart = true;
+	bDelayedStart = true; // defer actual pawn spawn until round transition; controller sits at camera position
 	// End:0x36A
 	if((pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn != ""))
 	{
@@ -182,6 +188,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	}
 	NewPlayer.GameReplicationInfo = GameReplicationInfo;
 	// End:0x5BA
+	// Players joining mid-round (game started or winding down) go directly to the dead/spectator state.
 	if((IsBetweenRoundTimeOver() && (m_szGameTypeFlag != "RGM_NoRulesMode")))
 	{
 		// End:0x5AA
@@ -197,7 +204,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	{
 		StatLog.LogPlayerConnect(NewPlayer);
 	}
-	NewPlayer.ReceivedSecretChecksum = (!(InChecksum ~= "NoChecksum"));
+	NewPlayer.ReceivedSecretChecksum = (!(InChecksum ~= "NoChecksum")); // true when a real CD-key checksum was supplied
 	// End:0x64C
 	if((Viewport(NewPlayer.Player) != none))
 	{
@@ -237,6 +244,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 
 function bool IsBetweenRoundTimeOver()
 {
+	// Round is considered live if the game has started OR the post-between-round countdown is running.
 	return ((m_bGameStarted == true) || IsInState('PostBetweenRoundTime'));
 	return;
 }
@@ -258,12 +266,14 @@ event PostLogin(PlayerController NewPlayer)
 		return;
 	}
 	// End:0xF1
+	// Wire up game service links for a local listen-server client that hasn't been initialised yet.
 	if((((Viewport(_NewPlayer.Player) != none) && (_NewPlayer.Player.Console != none)) && (_NewPlayer.m_GameService == none)))
 	{
 		_NewPlayer.m_GameService = R6GSServers(_NewPlayer.Player.Console.SetGameServiceLinks(NewPlayer));
 		_NewPlayer.ServerSetUbiID(_NewPlayer.m_GameService.m_szUserID);
 	}
 	// End:0x176
+	// Sync the new player with any vote session already in progress so they can cast a ballot.
 	if((m_fEndVoteTime != float(0)))
 	{
 		// End:0x148
@@ -284,6 +294,7 @@ event PostLogin(PlayerController NewPlayer)
 function ResetPlayerTeam(Controller aPlayer)
 {
 	// End:0x4A
+	// Spawn a fresh pawn for the player if they don't have an R6Pawn yet before reassigning team.
 	if((R6Pawn(aPlayer.Pawn) == none))
 	{
 		RestartPlayer(aPlayer);
@@ -320,6 +331,7 @@ function ProcessAutoBalanceTeam()
 	{
 		GetNbHumanPlayerInTeam(iAlphaNb, iBravoNb);
 		// End:0x17A
+		// Move a player from Alpha to Bravo when Alpha has 2 or more players more (allows 1-player imbalance).
 		if((iAlphaNb > (iBravoNb + 1)))
 		{
 			// End:0x7C
@@ -334,6 +346,7 @@ function ProcessAutoBalanceTeam()
 			if(((P != none) && (iAlphaNb > (iBravoNb + 1))))
 			{
 				// End:0x160
+				// 2 = PTS_Alpha (Green/Rainbow team); subclasses can exempt players via CanAutoBalancePlayer.
 				if(((P.IsA('R6PlayerController') && (int(R6PlayerController(P).m_TeamSelection) == int(2))) && CanAutoBalancePlayer(R6PlayerController(P))))
 				{
 					// End:0x13B
@@ -343,7 +356,7 @@ function ProcessAutoBalanceTeam()
 					}
 					(iAlphaNb--);
 					(iBravoNb++);
-					R6PlayerController(P).ServerTeamRequested(3, true);
+					R6PlayerController(P).ServerTeamRequested(3, true); // force-move to Bravo (Red), bypassing player consent
 				}
 				P = P.nextController;
 				// [Loop Continue]
@@ -367,6 +380,7 @@ function ProcessAutoBalanceTeam()
 				if(((P != none) && (iBravoNb > (iAlphaNb + 1))))
 				{
 					// End:0x288
+					// 3 = PTS_Bravo (Red); no CanAutoBalancePlayer guard in this direction (SDK omission).
 					if((P.IsA('R6PlayerController') && (int(R6PlayerController(P).m_TeamSelection) == int(3))))
 					{
 						// End:0x263
@@ -376,7 +390,7 @@ function ProcessAutoBalanceTeam()
 						}
 						(iAlphaNb++);
 						(iBravoNb--);
-						R6PlayerController(P).ServerTeamRequested(2, true);
+						R6PlayerController(P).ServerTeamRequested(2, true); // force-move to Alpha (Green), bypassing player consent
 					}
 					P = P.nextController;
 					// [Loop Continue]
@@ -414,6 +428,7 @@ function Logout(Controller Exiting)
 	// End:0xDD
 	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
+		// Resume between-round countdown, which may have been paused while this player was in an options page.
 		UnPauseCountDown();
 		// End:0xD0
 		if((Level.IsGameTypeCooperative(m_szGameTypeFlag) && (m_RainbowAIBackup.Length > 0)))
@@ -422,6 +437,7 @@ function Logout(Controller Exiting)
 			if((!((int(Level.NetMode) == int(NM_Standalone)) || (int(Level.NetMode) == int(NM_Client)))))
 			{
 				// End:0xD0
+				// Remove AI backup slots that were reserved for this player's team members.
 				if(((R6PlayerController(Exiting) != none) && (R6PlayerController(Exiting).m_TeamManager != none)))
 				{
 					m_RainbowAIBackup.Remove(0, Min(m_RainbowAIBackup.Length, R6PlayerController(Exiting).m_TeamManager.m_iMemberCount));
@@ -441,6 +457,7 @@ function Tick(float Delta)
 
 	super.Tick(Delta);
 	// End:0x18
+	// InBetweenRoundMenu state has its own Tick; skip global processing while it's active.
 	if(IsInState('InBetweenRoundMenu'))
 	{
 		return;
@@ -452,6 +469,7 @@ function Tick(float Delta)
 		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int((R6GameInfo(Level.Game).m_fEndingTime - Level.TimeSeconds));
 		(R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate += Delta);
 		// End:0xF1
+		// Only push the replicated float every 10 seconds to reduce bandwidth.
 		if((R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate >= float(10)))
 		{
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate = 0.0000000;
@@ -459,6 +477,7 @@ function Tick(float Delta)
 		}
 	}
 	// End:0x1DB
+	// When the round time limit expires and the timer objective hasn't already failed, trigger failure.
 	if(((((m_missionObjTimer != none) && (m_fEndingTime > float(0))) && (Level.m_fTimeLimit > float(0))) && (Level.TimeSeconds > m_fEndingTime)))
 	{
 		// End:0x1DB
@@ -474,6 +493,7 @@ function Tick(float Delta)
 				// End:0x1AA
 				if((PlayerController != none))
 				{
+					// Slot 7 = SLOT_Speak; plays the time-failure voice cue to each player.
 					PlayerController.ClientPlayVoices(none, m_sndSoundTimeFailure, 7, 5, true, 1.0000000);
 				}
 				C = C.nextController;
@@ -489,6 +509,7 @@ function Tick(float Delta)
 
 function EndGame(PlayerReplicationInfo Winner, string Reason)
 {
+	// Clear ready-flags so players must re-confirm for the next round.
 	ResetPlayerReady();
 	super.EndGame(Winner, Reason);
 	return;
@@ -536,6 +557,7 @@ function GetNbHumanPlayerInTeam(out int iAlphaNb, out int iBravoNb)
 		if((R6PlayerController(P) != none))
 		{
 			// End:0x62
+			// 2 = PTS_Alpha (Green/Rainbow team), 3 = PTS_Bravo (Red/Terrorist team).
 			if((int(R6PlayerController(P).m_TeamSelection) == int(2)))
 			{
 				(++iAlphaNb);
@@ -566,6 +588,7 @@ function IncrementRoundsPlayed()
 	{
 		_aPlayerController = R6PlayerController(P);
 		// End:0xBC
+		// Only active team players (not spectators) get rounds counted and are forced-ready.
 		if(((_aPlayerController != none) && ((int(_aPlayerController.m_TeamSelection) == int(2)) || (int(_aPlayerController.m_TeamSelection) == int(3)))))
 		{
 			// End:0x92
@@ -573,8 +596,8 @@ function IncrementRoundsPlayed()
 			{
 				(_aPlayerController.PlayerReplicationInfo.m_iRoundsPlayed++);
 			}
-			_aPlayerController.ServerSetPlayerReadyStatus(true);
-			_aPlayerController.PlayerReplicationInfo.bIsSpectator = false;
+			_aPlayerController.ServerSetPlayerReadyStatus(true); // force all active players to ready at round start
+			_aPlayerController.PlayerReplicationInfo.bIsSpectator = false; // ensure team players aren't flagged as spectators
 		}
 		P = P.nextController;
 		// [Loop Continue]
@@ -590,6 +613,7 @@ function bool ProcessChangeMapVote(string InstigatorName)
 	local R6PlayerController _playerController;
 
 	// End:0x0F
+	// Reject a new vote if one is already in progress.
 	if((m_fEndVoteTime != float(0)))
 	{
 		return false;
@@ -611,7 +635,7 @@ function bool ProcessChangeMapVote(string InstigatorName)
 		// [Loop Continue]
 		goto J0x23;
 	}
-	m_fEndVoteTime = (Level.TimeSeconds + float(90));
+	m_fEndVoteTime = (Level.TimeSeconds + float(90)); // K_VoteTime = 90s vote window
 	return true;
 	return;
 }
@@ -622,10 +646,12 @@ function bool ProcessKickVote(PlayerController _KickPlayer, string InstigatorNam
 	local R6PlayerController _playerController;
 
 	// End:0x0F
+	// Reject the kick request if a vote is already in progress.
 	if((m_fEndVoteTime != float(0)))
 	{
 		return false;
 	}
+	// Record who is being kicked and who initiated the vote so late-joiners can be informed.
 	m_PlayerKick = _KickPlayer;
 	m_VoteInstigatorName = InstigatorName;
 	_itController = Level.ControllerList;
@@ -645,7 +671,7 @@ function bool ProcessKickVote(PlayerController _KickPlayer, string InstigatorNam
 		// [Loop Continue]
 		goto J0x39;
 	}
-	m_fEndVoteTime = (Level.TimeSeconds + float(90));
+	m_fEndVoteTime = (Level.TimeSeconds + float(90)); // K_VoteTime = 90s vote window
 	return true;
 	return;
 }
@@ -661,6 +687,7 @@ function HandleVotesTick()
 	local R6GameReplicationInfo pGRI;
 
 	// End:0x36
+	// Skip if no vote is pending, the vote window is still open, or no players are connected.
 	if((((m_fEndVoteTime == float(0)) || (m_fEndVoteTime > Level.TimeSeconds)) || (NumPlayers == 0)))
 	{
 		return;
@@ -702,8 +729,9 @@ function HandleVotesTick()
 		// [Loop Continue]
 		goto J0x63;
 	}
-	bChangeMapVote = (m_PlayerKick == none);
+	bChangeMapVote = (m_PlayerKick == none); // no kick target means this is a change-map vote
 	// End:0x256
+	// Simple majority: for-votes must exceed half of all ballots cast (empty = counted against).
 	if((_iForVotes > ((_iForVotes + _iAgainstVotes) / 2)))
 	{
 		_bResult = true;
@@ -717,8 +745,8 @@ function HandleVotesTick()
 			}
 			bChangeLevels = true;
 			EndGame(none, "");
-			AbortScoreSubmission();
-			RestartGame();			
+			AbortScoreSubmission(); // cancel any in-flight stat submission before switching map
+			RestartGame();
 		}
 		else
 		{
@@ -728,7 +756,7 @@ function HandleVotesTick()
 				Log((((("<<KICK>> HandleVotesTick " $ string(_iForVotes)) $ " voted yes ") $ string(_iAgainstVotes)) $ " considered as voted no -- VOTE PASSES"));
 			}
 			R6PlayerController(m_PlayerKick).ClientKickedOut();
-			m_PlayerKick.SpecialDestroy();
+			m_PlayerKick.SpecialDestroy(); // hard-remove the kicked player's controller from the server
 		}		
 	}
 	else
@@ -806,12 +834,14 @@ auto state InBetweenRoundMenu
 		local R6IOSelfDetonatingBomb AIt;
 
 		// End:0x22
+		// Deactivate self-detonating bombs from the previous round so they don't explode during the menu.
 		foreach AllActors(Class'R6Engine.R6IOSelfDetonatingBomb', AIt)
 		{
 			AIt.m_bIsActivated = false;			
 		}		
 		m_bGameStarted = false;
 		// End:0x4E
+		// In single-player there is no between-round menu; skip straight to the default state.
 		if((int(Level.NetMode) == int(NM_Standalone)))
 		{
 			GotoState('None');			
@@ -820,15 +850,18 @@ auto state InBetweenRoundMenu
 		{
 			Level.PBNotifyServerTravel();
 			// End:0x82
+			// Pre-spawn AI backup Rainbow operatives so co-op players aren't waiting at round start.
 			if((m_bAIBkp && Level.IsGameTypeCooperative(m_szGameTypeFlag)))
 			{
 				CreateBackupRainbowAI();
 			}
+			// RSS_PlayersConnectingStage (0): players are selecting teams and configuring loadouts.
 			GameReplicationInfo.SetServerState(GameReplicationInfo.0);
 			SpawnAIandInitGoInGame();
 		}
 		HandleVotesTick();
 		// End:0x127
+		// Configure countdown: fixed duration when m_fTimeBetRounds > 0, unlimited (wait-for-ready) otherwise.
 		if((m_fTimeBetRounds > float(0)))
 		{
 			m_fRoundStartTime = (Level.TimeSeconds + m_fTimeBetRounds);
@@ -837,6 +870,7 @@ auto state InBetweenRoundMenu
 		}
 		else
 		{
+			// Zero start time signals unlimited-wait mode; round starts only when all players are ready.
 			m_fRoundStartTime = 0.0000000;
 			R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited = true;
 			R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = 0;
@@ -893,6 +927,7 @@ auto state InBetweenRoundMenu
 		HandleVotesTick();
 		_bAllActivePlayersReady = false;
 		// End:0x97
+		// Throttled ready-check: poll at K_RefreshCheckPlayerReadyFreq intervals while countdown is running.
 		if(((m_fNextCheckPlayerReadyTime < Level.TimeSeconds) && ((Level.TimeSeconds < m_fRoundStartTime) || (!UnlimitedTBRPassed()))))
 		{
 			_bAllActivePlayersReady = ProcessPlayerReadyStatus();
@@ -900,6 +935,7 @@ auto state InBetweenRoundMenu
 			// End:0x97
 			if(_bAllActivePlayersReady)
 			{
+				// All players ready: lock teams and collapse the countdown to now to trigger immediate transition.
 				SetLockOnTeamSelection(true);
 				m_fRoundStartTime = Level.TimeSeconds;
 			}
@@ -910,6 +946,7 @@ auto state InBetweenRoundMenu
 			R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int((m_fRoundStartTime - Level.TimeSeconds));
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime);
 			// End:0x16E
+			// RSS_CountDownStage (1): countdown is visible to all clients.
 			if((Level.TimeSeconds < m_fRoundStartTime))
 			{
 				GameReplicationInfo.SetServerState(GameReplicationInfo.1);				
@@ -917,12 +954,14 @@ auto state InBetweenRoundMenu
 			else
 			{
 				// End:0x1A8
+				// RSS_InPreGameState (2): 1-second grace window; force-closes any open popups on clients.
 				if((Level.TimeSeconds < (m_fRoundStartTime + float(1))))
 				{
 					GameReplicationInfo.SetServerState(GameReplicationInfo.2);					
 				}
 				else
 				{
+					// Countdown expired; transition to the pawn-spawn pause phase.
 					GotoState('PostBetweenRoundTime');
 					_playerController = Level.ControllerList;
 					J0x1C3:
@@ -931,6 +970,7 @@ auto state InBetweenRoundMenu
 					if((_playerController != none))
 					{
 						// End:0x230
+						// Freeze non-spectator players server- and client-side during pawn spawning.
 						if((_playerController.IsA('R6PlayerController') && (!R6PlayerController(_playerController).IsPlayerPassiveSpectator())))
 						{
 							R6PlayerController(_playerController).GotoState('PauseController');
@@ -957,7 +997,7 @@ auto state InBetweenRoundMenu
 		{
 			return;
 		}
-		m_fPausedAtTime = Level.TimeSeconds;
+		m_fPausedAtTime = Level.TimeSeconds; // record when pause started so remaining time can be recalculated on unpause
 		R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused = true;
 		return;
 	}
@@ -978,6 +1018,7 @@ auto state InBetweenRoundMenu
 		if((_Player != none))
 		{
 			// End:0x6D
+			// Don't resume if any player still has an options page open.
 			if((_Player.IsA('R6PlayerController') && (R6PlayerController(_Player).m_bInAnOptionsPage == true)))
 			{
 				return;
@@ -987,6 +1028,7 @@ auto state InBetweenRoundMenu
 			goto J0x30;
 		}
 		// End:0xF1
+		// Shift m_fRoundStartTime forward so remaining countdown time is preserved after the pause.
 		if((!R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited))
 		{
 			m_fRoundStartTime = (float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime) + Level.TimeSeconds);
@@ -1016,6 +1058,7 @@ auto state InBetweenRoundMenu
 			Log(((("GameInfo: EndState InBetweenRoundMenu m_GameService = " $ string(m_GameService)) $ " m_iUbiComGameMode = ") $ string(m_iUbiComGameMode)));
 		}
 		R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited = false;
+		// Last chance to balance teams before pawns are spawned for the round.
 		ProcessAutoBalanceTeam();
 		P = Level.ControllerList;
 		J0xB9:
@@ -1029,8 +1072,9 @@ auto state InBetweenRoundMenu
 				// End:0x1ED
 				if((!R6PlayerController(P).IsPlayerPassiveSpectator()))
 				{
-					R6PlayerController(P).bOnlySpectator = false;
+					R6PlayerController(P).bOnlySpectator = false; // promote from spectator before assigning a team pawn
 					ResetPlayerTeam(P);
+					// Assign visual team colour (Green=Alpha, Red=Bravo) to the player's team manager.
 					R6PlayerController(P).m_TeamManager.SetTeamColor(GetRainbowTeamColourIndex(R6Pawn(P.Pawn).m_iTeam));
 					// End:0x1A6
 					if((R6PlayerController(P).m_TeamManager != none))
@@ -1045,6 +1089,7 @@ auto state InBetweenRoundMenu
 				}
 				else
 				{
+					// Passive spectators remain dead/spectating for the upcoming round.
 					// End:0x264
 					if(bShowLog)
 					{
@@ -1059,8 +1104,8 @@ auto state InBetweenRoundMenu
 					P.m_PawnRepInfo.m_PawnType = P.Pawn.m_ePawnType;
 					P.m_PawnRepInfo.m_bSex = P.Pawn.bIsFemale;
 				}
-				P.PlayerReplicationInfo.m_szKillersName = "";
-				P.PlayerReplicationInfo.m_bJoinedTeamLate = false;
+				P.PlayerReplicationInfo.m_szKillersName = ""; // clear kill attribution so it doesn't carry over to next round
+				P.PlayerReplicationInfo.m_bJoinedTeamLate = false; // reset late-join flag for all players at round start
 			}
 			P = P.nextController;
 			// [Loop Continue]
@@ -1070,6 +1115,7 @@ auto state InBetweenRoundMenu
 		J0x347:
 
 		// End:0x3F0 [Loop If]
+		// Partition all controllers by type to efficiently distribute weapon-sound data.
 		if((P != none))
 		{
 			// End:0x380
@@ -1172,7 +1218,7 @@ auto state InBetweenRoundMenu
 			{
 				aZoneInfo = R6PlayerControllerList[i].Region.Zone;
 			}
-			R6PlayerControllerList[i].ClientFinalizeLoading(aZoneInfo);
+			R6PlayerControllerList[i].ClientFinalizeLoading(aZoneInfo); // signal client to complete map load from their zone
 			(i++);
 			// [Loop Continue]
 			goto J0x3F7;
@@ -1181,9 +1227,10 @@ auto state InBetweenRoundMenu
 		Level.NotifyMatchStart();
 		GetNbHumanPlayerInTeam(iAlphaNb, iBravoNb);
 		// End:0x868
+		// Enable stat recording only when human players are present on each required team.
 		if(Level.IsGameTypeCooperative(m_szGameTypeFlag))
 		{
-			SetCompilingStats((iAlphaNb > 0));
+			SetCompilingStats((iAlphaNb > 0)); // co-op: at least 1 human player needed
 			SetRoundRestartedByJoinFlag((iAlphaNb < 1));			
 		}
 		else
@@ -1191,16 +1238,16 @@ auto state InBetweenRoundMenu
 			// End:0x8AA
 			if(_gameTypeTeamAdversarial)
 			{
-				SetCompilingStats(((iAlphaNb > 0) && (iBravoNb > 0)));
+				SetCompilingStats(((iAlphaNb > 0) && (iBravoNb > 0))); // adversarial: both teams must have a player
 				SetRoundRestartedByJoinFlag(((iAlphaNb == 0) || (iBravoNb == 0)));				
 			}
 			else
 			{
-				SetCompilingStats((iAlphaNb > 1));
+				SetCompilingStats((iAlphaNb > 1)); // free-for-all: at least 2 human players needed
 				SetRoundRestartedByJoinFlag((iAlphaNb < 2));
 			}
 		}
-		NativeRegServerRouterLogin();
+		NativeRegServerRouterLogin(); // register this round's session with the Ubi.com router
 		IncrementRoundsPlayed();
 		SetGameTypeInLocal();
 		BroadcastGameTypeDescription();
@@ -1216,12 +1263,14 @@ state PostBetweenRoundTime
 		local Controller P;
 
 		m_bStopPostBetweenRoundCountdown = false;
+		// Unlock team selection so late-joining players can still pick a side.
 		SetLockOnTeamSelection(false);
 		// End:0x2C
 		if(Level.IsGameTypeCooperative(m_szGameTypeFlag))
 		{
 			ResetMatchStat();
 		}
+		// K_InGamePauseTime = 5 seconds; gives clients time to spawn and load their pawns before input is re-enabled.
 		m_fInGameStartTime = (Level.TimeSeconds + float(5));
 		P = Level.ControllerList;
 		J0x5A:
@@ -1232,6 +1281,7 @@ state PostBetweenRoundTime
 			// End:0x8D
 			if(P.IsA('R6PlayerController'))
 			{
+				// Show the pre-game countdown popup on each client.
 				R6PlayerController(P).CountDownPopUpBox();
 			}
 			P = P.nextController;
@@ -1249,6 +1299,7 @@ state PostBetweenRoundTime
 		local Controller P;
 
 		// End:0x0B
+		// m_bStopPostBetweenRoundCountdown is set by GSClient waiting for round-start ACK from Ubi.com.
 		if(m_bStopPostBetweenRoundCountdown)
 		{
 			return;
@@ -1257,6 +1308,7 @@ state PostBetweenRoundTime
 		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int((m_fInGameStartTime - Level.TimeSeconds));
 		R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime);
 		// End:0x6D
+		// Stall round start while waiting for a lobby registration response from the game service.
 		if(NativeRegServerGetLobbies())
 		{
 			return;
@@ -1274,6 +1326,7 @@ state PostBetweenRoundTime
 		local Controller P;
 
 		m_bGameStarted = true;
+		// RSS_InGameState (3): round is now live, HUD switches to in-game mode.
 		GameReplicationInfo.SetServerState(GameReplicationInfo.3);
 		P = Level.ControllerList;
 		J0x36:
@@ -1285,6 +1338,7 @@ state PostBetweenRoundTime
 			if(((P.IsA('R6PlayerController') && (!PlayerController(P).bOnlySpectator)) && (!R6PlayerController(P).IsPlayerPassiveSpectator())))
 			{
 				// End:0xD8
+				// Players in the penalty box stay frozen rather than receiving normal movement input.
 				if(R6PlayerController(P).m_bPenaltyBox)
 				{
 					R6PlayerController(P).GotoState('PenaltyBox');
@@ -1301,6 +1355,7 @@ state PostBetweenRoundTime
 			goto J0x36;
 		}
 		// End:0x13B
+		// Discard any leftover AI backup slot controllers that weren't claimed by human players.
 		if((m_RainbowAIBackup.Length > 0))
 		{
 			m_RainbowAIBackup.Remove(0, m_RainbowAIBackup.Length);
@@ -1315,6 +1370,7 @@ state PostBetweenRoundTime
 		local R6IOSelfDetonatingBomb AIt;
 
 		GameReplicationInfo.m_bInPostBetweenRoundTime = false;
+		// Record the absolute time when this round expires based on the configured time limit.
 		m_fEndingTime = (Level.TimeSeconds + Level.m_fTimeLimit);
 		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int(Level.m_fTimeLimit);
 		R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = Level.m_fTimeLimit;
@@ -1327,6 +1383,7 @@ state PostBetweenRoundTime
 			// End:0xC2
 			if(P.IsA('R6PlayerController'))
 			{
+				// Dismiss the pre-game countdown popup on each client now that the round is starting.
 				R6PlayerController(P).CountDownPopUpBoxDone();
 			}
 			P = P.nextController;
@@ -1334,6 +1391,7 @@ state PostBetweenRoundTime
 			goto J0x8F;
 		}
 		// End:0x130
+		// Arm self-detonating bombs with the round time limit; only the server drives their timers.
 		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			// End:0x12F
