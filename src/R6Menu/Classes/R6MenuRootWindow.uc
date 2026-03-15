@@ -12,49 +12,62 @@
 class R6MenuRootWindow extends R6WindowRootWindow
     config;
 
+// Top-level menu controller for RavenShield's entire UI. Owns every full-screen "widget"
+// (major menu page) and manages which one is active via m_CurrentWidget. All navigation
+// flows through ChangeCurrentWidget(). Pop-up dialogs (save/load plan, confirmations) are
+// managed separately via m_ePopUpID + PopUpMenu(). Every widget is created hidden in
+// Created() and shown on demand — only one is visible at a time.
+
 var UWindowBase.EPopUpID m_ePopUpID;  // ID of currently active pop up menu
 var bool m_bReloadPlan;  // Load default plan, this is to be able to retouch last plan
-var bool m_bLoadingPlanning;
+var bool m_bLoadingPlanning;  // true while waiting for the planning map to finish async loading
 var bool m_bPlayerPlanInitialized;  // this help us find out if we have to prompt the player with the loading default planing pop up
-var bool m_bPlayerDoNotWant3DView;
-var bool m_bPlayerWantLegend;
-var bool bShowLog;
+var bool m_bPlayerDoNotWant3DView;  // mirrors pGameOptions.Hide3DView; true = skip 3D overlay in planning
+var bool m_bPlayerWantLegend;  // true when the planning map legend panel is open
+var bool bShowLog;  // debug flag: set in INI to enable verbose logging of window events
 var bool m_bJoinServerProcess;  // true, we currently join a server
 // Don't remove: they are here only to make sure they are referenced (needed by cpp code)
 var Texture m_BGTexture0;
 var Texture m_BGTexture1;
-var R6MenuWidget m_CurrentWidget;
-var R6MenuWidget m_PreviousWidget;
-var R6MenuIntelWidget m_IntelWidget;
-var R6MenuPlanningWidget m_PlanningWidget;
-var R6MenuExecuteWidget m_ExecuteWidget;
-var R6MenuMainWidget m_MainMenuWidget;
-var R6MenuSinglePlayerWidget m_SinglePlayerWidget;
-var R6MenuCustomMissionWidget m_CustomMissionWidget;
-var R6MenuTrainingWidget m_TrainingWidget;
-var R6MenuMultiPlayerWidget m_MultiPlayerWidget;
-var R6MenuOptionsWidget m_OptionsWidget;
-var R6MenuCreditsWidget m_CreditsWidget;
-var R6MenuGearWidget m_GearRoomWidget;
+var R6MenuWidget m_CurrentWidget;   // the full-screen widget page currently displayed
+var R6MenuWidget m_PreviousWidget;  // widget shown before CurrentWidget; restored by PreviousWidgetID (back-button)
+// Mission planning pipeline screens: Intel -> GearRoom -> Planning -> Execute
+var R6MenuIntelWidget m_IntelWidget;       // mission briefing / intel screen
+var R6MenuPlanningWidget m_PlanningWidget; // tactical waypoint and action-point map
+var R6MenuExecuteWidget m_ExecuteWidget;   // final go/no-go execution screen
+var R6MenuMainWidget m_MainMenuWidget;              // top-level hub screen
+var R6MenuSinglePlayerWidget m_SinglePlayerWidget;  // campaign mission selection
+var R6MenuCustomMissionWidget m_CustomMissionWidget;// custom / skirmish mission setup
+var R6MenuTrainingWidget m_TrainingWidget;          // training missions
+var R6MenuMultiPlayerWidget m_MultiPlayerWidget;    // LAN / direct-connect server browser
+var R6MenuOptionsWidget m_OptionsWidget;            // audio, video, controls settings
+var R6MenuCreditsWidget m_CreditsWidget;            // credits roll
+var R6MenuGearWidget m_GearRoomWidget;              // operative gear and loadout selection
 // NEW IN 1.60
-var R6MenuCDKeyManager m_pMenuCDKeyManager;
-var R6MenuMPCreateGameWidget m_pMPCreateGameWidget;
-var R6MenuUbiComWidget m_pUbiComWidget;
+var R6MenuCDKeyManager m_pMenuCDKeyManager;          // CD key entry / validation screen
+var R6MenuMPCreateGameWidget m_pMPCreateGameWidget;  // host a new multiplayer game
+var R6MenuUbiComWidget m_pUbiComWidget;              // Ubi.com (GameSpy) online lobby
 // NEW IN 1.60
-var R6MenuUbiComModsWidget m_pUbiComModsWidget;
-var R6MenuNonUbiWidget m_pNonUbiWidget;
-var R6MenuQuit m_pMenuQuit;
-var R6FileManager m_pFileManager;
+var R6MenuUbiComModsWidget m_pUbiComModsWidget;  // Ubi.com mod and content browser
+var R6MenuNonUbiWidget m_pNonUbiWidget;          // peer-to-peer matchmaking without Ubi.com
+var R6MenuQuit m_pMenuQuit;                      // quit confirmation (shown in demo builds instead of direct quit)
+var R6FileManager m_pFileManager;                // file I/O helper for save/load of .PLN planning files
 /////////////////////////////////////////////////////////////////////////////////////////
 //                                  POP UP
 /////////////////////////////////////////////////////////////////////////////////////////
-var R6WindowPopUpBox m_PopUpSavePlan;
+var R6WindowPopUpBox m_PopUpSavePlan;  // modal dialog for saving a tactical plan (EPopUpID 47 = EPopUpID_SavePlanning)
 // NEW IN 1.60
-var R6WindowPopUpBox m_PopUpLoadPlan;
+var R6WindowPopUpBox m_PopUpLoadPlan;  // modal dialog for loading a saved plan  (EPopUpID 48 = EPopUpID_LoadPlanning)
 var Sound m_MainMenuMusic;  // Music for the MainMenu
 /////////////////////////////////////////////////////////////////////////////////
+// Operative objects for the current mission; populated by GotoCampaignPlanning() and
+// ResetCustomMissionOperatives(). Includes both campaign operatives and any from loaded mods.
 var array<R6Operative> m_GameOperatives;
 
+// Created: called once when the root window is first constructed.
+// Initialises all subsystems, creates every widget page (all hidden), picks the
+// first visible screen based on launch context, sets up save/load pop-up dialogs,
+// and starts the main menu music (unless launched by the Ubi.com client).
 function Created()
 {
 	local R6WindowEditBox EditPopUpBox;
@@ -66,18 +79,22 @@ function Created()
 	{
 		Log("R6MenuRootWindow Created()");
 	}
+	// Call UWindowRootWindow.Created() directly, skipping R6WindowRootWindow — no extra
+	// R6-specific init is needed here that R6WindowRootWindow would add.
 	super(UWindowRootWindow).Created();
-	R6Console(Console).InitializedGameService();
-	m_pFileManager = new Class'Engine.R6FileManager';
+	R6Console(Console).InitializedGameService();  // start GameSpy / online game service connection
+	m_pFileManager = new Class'Engine.R6FileManager';  // planning file I/O helper (save/load .PLN files)
 	// End:0x75
 	if((m_pFileManager == none))
 	{
 		Log("m_pFileManager == NONE");
 	}
 	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
-	m_bPlayerDoNotWant3DView = pGameOptions.Hide3DView;
-	m_eRootId = 1;
-	SetResolution(640.0000000, 480.0000000);
+	m_bPlayerDoNotWant3DView = pGameOptions.Hide3DView;  // restore user preference for the 3D overlay
+	m_eRootId = 1;  // 1 = RootID_R6Menu; identifies this root to the engine's C++ layer
+	SetResolution(640.0000000, 480.0000000);  // the entire menu UI is authored at 640x480
+	// Create every widget page up-front and immediately close (hide) each one.
+	// ChangeCurrentWidget() will show the appropriate page on demand.
 	m_IntelWidget = R6MenuIntelWidget(CreateWindow(MenuClassDefines.ClassIntelWidget, WinLeft, WinTop, WinWidth, WinHeight, self));
 	m_IntelWidget.Close();
 	m_PlanningWidget = R6MenuPlanningWidget(CreateWindow(MenuClassDefines.ClassPlanningWidget, WinLeft, WinTop, WinWidth, WinHeight, self));
@@ -90,6 +107,7 @@ function Created()
 	m_CustomMissionWidget.Close();
 	m_TrainingWidget = R6MenuTrainingWidget(CreateWindow(MenuClassDefines.ClassTrainingWidget, WinLeft, WinTop, WinWidth, WinHeight, self));
 	m_TrainingWidget.Close();
+	// Ensure all SP-category widgets use consistent button fonts before any are shown.
 	HarmonizeMenuFonts();
 	m_MultiPlayerWidget = R6MenuMultiPlayerWidget(CreateWindow(MenuClassDefines.ClassMultiPlayerWidget, WinLeft, WinTop, WinWidth, WinHeight, self));
 	m_MultiPlayerWidget.Close();
@@ -113,21 +131,26 @@ function Created()
 	m_pMenuQuit.Close();
 	m_MainMenuWidget = R6MenuMainWidget(CreateWindow(MenuClassDefines.ClassMainWidget, WinLeft, WinTop, WinWidth, WinHeight, self));
 	m_MainMenuWidget.Close();
+	// Decide which screen to show first based on how the game was launched.
 	AssignShowFirstWidget();
-	m_CurrentWidget.SetMousePos((WinWidth * 0.5000000), (WinHeight * 0.5000000));
+	m_CurrentWidget.SetMousePos((WinWidth * 0.5000000), (WinHeight * 0.5000000));  // start cursor at screen centre
 	m_ePopUpID = 0;
+	// Build the save/load pop-up dialogs. They are full 640x480 overlays; the visible
+	// frame and client area are positioned inside them with absolute coordinates.
 	m_PopUpSavePlan = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 	m_PopUpSavePlan.CreateStdPopUpWindow(Localize("POPUP", "PopUpTitle_SavePlan", "R6Menu"), 30.0000000, 188.0000000, 150.0000000, 264.0000000, 180.0000000);
 	m_PopUpSavePlan.CreateClientWindow(Class'R6Menu.R6MenuSavePlan', false, true);
-	m_PopUpSavePlan.m_ePopUpID = 47;
+	m_PopUpSavePlan.m_ePopUpID = 47;  // 47 = EPopUpID_SavePlanning
 	m_PopUpSavePlan.HideWindow();
 	m_PopUpLoadPlan = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 	m_PopUpLoadPlan.CreateStdPopUpWindow(Localize("POPUP", "PopUpTitle_Load", "R6Menu"), 30.0000000, 188.0000000, 150.0000000, 264.0000000, 180.0000000);
 	m_PopUpLoadPlan.CreateClientWindow(Class'R6Menu.R6MenuLoadPlan', false, true);
-	m_PopUpLoadPlan.m_ePopUpID = 48;
+	m_PopUpLoadPlan.m_ePopUpID = 48;  // 48 = EPopUpID_LoadPlanning
 	m_PopUpLoadPlan.HideWindow();
-	GUIScale = 1.0000000;
+	GUIScale = 1.0000000;  // no scaling; menus run at native 640x480
 	// End:0x6F4
+	// Only play the main menu music when NOT launched by the Ubi.com client —
+	// the GS client manages its own audio state.
 	if((!R6Console(Console).m_bStartedByGSClient))
 	{
 		GetPlayerOwner().PlayMusic(m_MainMenuMusic, true);
@@ -135,9 +158,15 @@ function Created()
 	return;
 }
 
+// AssignShowFirstWidget: decides which screen to display on startup based on launch context.
+// Ubi.com client spawned us  -> show the Ubi.com lobby.
+// Joining a P2P session     -> show non-Ubi matchmaking.
+// Hosting a P2P session     -> show the create-game screen.
+// Normal launch             -> show the main menu.
 function AssignShowFirstWidget()
 {
 	// End:0x25
+	// m_bStartedByGSClient: the Ubi.com (GameSpy) client launched us as a child process
 	if(R6Console(Console).m_bStartedByGSClient)
 	{
 		m_CurrentWidget = m_pUbiComWidget;		
@@ -145,6 +174,7 @@ function AssignShowFirstWidget()
 	else
 	{
 		// End:0x4A
+		// m_bNonUbiMatchMaking: joining a LAN/direct-connect game (client side)
 		if(R6Console(Console).m_bNonUbiMatchMaking)
 		{
 			m_CurrentWidget = m_pNonUbiWidget;			
@@ -152,6 +182,7 @@ function AssignShowFirstWidget()
 		else
 		{
 			// End:0x7E
+			// m_bNonUbiMatchMakingHost: we are hosting a LAN/direct-connect game
 			if(R6Console(Console).m_bNonUbiMatchMakingHost)
 			{
 				m_CurrentWidget = m_pMPCreateGameWidget;
@@ -167,6 +198,8 @@ function AssignShowFirstWidget()
 	return;
 }
 
+// Set3dView: persists the player's 3D-overlay preference across sessions.
+// bSelected=true means the player wants the 3D view hidden (the flag name is inverted).
 function Set3dView(bool bSelected)
 {
 	local R6GameOptions pGameOptions;
@@ -177,6 +210,10 @@ function Set3dView(bool bSelected)
 	return;
 }
 
+// DrawMouse: renders the software mouse cursor each frame.
+// In windowed mode with a Windows cursor available, delegates to the OS cursor.
+// Otherwise draws a texture cursor manually; it is clipped against the widget's right/bottom
+// boundary (m_fRightMouseX/YClipping) to prevent the cursor rendering over the laptop bezel.
 function DrawMouse(Canvas C)
 {
 	local float X, Y, fMouseClipX, fMouseClipY;
@@ -190,7 +227,7 @@ function DrawMouse(Canvas C)
 	else
 	{
 		C.SetDrawColor(byte(255), byte(255), byte(255));
-		C.Style = 5;
+		C.Style = 5;  // STY_Alpha: alpha-blended cursor texture
 		// End:0xD1
 		if((m_bUseAimIcon == true))
 		{
@@ -219,11 +256,14 @@ function DrawMouse(Canvas C)
 		{
 			C.DrawTileClipped(MouseTex, float(MouseTex.USize), float(MouseTex.VSize), 0.0000000, 0.0000000, float(MouseTex.USize), float(MouseTex.VSize));
 		}
-		C.Style = 1;
+		C.Style = 1;  // STY_Normal: restore default blend mode after drawing cursor
 	}
 	return;
 }
 
+// ResetMenus: called when returning to the main menu after a mission or connection attempt.
+// If a connection failed, tells the multiplayer widget to display an error.
+// Otherwise resets the intel/planning widgets and clears the plan-initialisation flag.
 function ResetMenus(optional bool _bConnectionFailed)
 {
 	// End:0x1B
@@ -240,6 +280,9 @@ function ResetMenus(optional bool _bConnectionFailed)
 	return;
 }
 
+// UpdateMenus: refreshes team data in the planning widget.
+// The none-check guards against a race where a multiplayer error message can recreate the
+// menu root before the planning widget has been fully initialised in Created().
 function UpdateMenus(int iWhatToUpdate)
 {
 	// End:0x1F
@@ -250,6 +293,8 @@ function UpdateMenus(int iWhatToUpdate)
 	return;
 }
 
+// MoveMouse: propagates mouse position to the active widget for hover effects, then
+// forwards to UWindowRootWindow (which routes to the currently focused child window).
 function MoveMouse(float X, float Y)
 {
 	// End:0x24
@@ -261,6 +306,8 @@ function MoveMouse(float X, float Y)
 	return;
 }
 
+// ClosePopups: hides floating sub-panels (3D view, legend) on the planning widget.
+// Called before a modal dialog opens so the dialog renders cleanly over the map.
 function ClosePopups()
 {
 	// End:0x1E
@@ -271,18 +318,27 @@ function ClosePopups()
 	return;
 }
 
+// IsInsidePlanning: returns true if the previous widget was any screen in the
+// mission-preparation pipeline. Used by the C++ layer to gate planning-mode input.
+// Widget IDs: 8=Intel, 12=GearRoom, 9=Planning, 13=Execute,
+//             10=RetryCampaignPlanning, 11=RetryCustomMissionPlanning
 function bool IsInsidePlanning()
 {
 	return ((((((int(m_ePrevWidgetInUse) == int(8)) || (int(m_ePrevWidgetInUse) == int(12))) || (int(m_ePrevWidgetInUse) == int(9))) || (int(m_ePrevWidgetInUse) == int(13))) || (int(m_ePrevWidgetInUse) == int(10))) || (int(m_ePrevWidgetInUse) == int(11)));
 	return;
 }
 
+// ChangeCurrentWidget: the central navigation router for the entire menu system.
+// Hides the current widget, shows the requested one, and updates the prev/cur tracking
+// variables used by C++ for input routing (IsInsidePlanning, PlanningShouldProcessKey).
+// widgetID 17 (PreviousWidgetID) is special: it swaps current/prev (back-button behaviour).
 function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 {
 	local bool bDontQuitNow;
 
-	m_bJoinServerProcess = false;
+	m_bJoinServerProcess = false;  // leaving any active flow; clear join-in-progress flag
 	// End:0x2E
+	// 17 = PreviousWidgetID: swap tracking variables so history stays consistent on back
 	if((int(widgetID) == int(17)))
 	{
 		m_eCurWidgetInUse = m_ePrevWidgetInUse;
@@ -293,6 +349,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 		m_ePrevWidgetInUse = m_eCurWidgetInUse;
 		m_eCurWidgetInUse = widgetID;
 		// End:0x7A
+		// 9 = PlanningWidgetID: cancel any in-progress waypoint placement when leaving planning
 		if((int(m_ePrevWidgetInUse) == int(9)))
 		{
 			// End:0x7A
@@ -305,7 +362,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 	switch(widgetID)
 	{
 		// End:0xBD
-		case 5:
+		case 5:  // SinglePlayerWidgetID: campaign mission selection
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_SinglePlayerWidget;
@@ -313,7 +370,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0xF9
-		case 4:
+		case 4:  // TrainingWidgetID: training missions
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_TrainingWidget;
@@ -321,7 +378,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x15E
-		case 7:
+		case 7:  // MainMenuWidgetID: return to the top-level hub
 			// End:0x121
 			if((m_CurrentWidget == m_MultiPlayerWidget))
 			{
@@ -335,7 +392,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x19A
-		case 8:
+		case 8:  // IntelWidgetID: mission briefing screen (called from nav planning)
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_IntelWidget;
@@ -343,7 +400,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x1C6
-		case 11:
+		case 11:  // RetryCustomMissionPlanningID: re-enter planning after a failed custom mission
 			ResetCustomMissionOperatives();
 			m_bReloadPlan = true;
 			m_bLoadingPlanning = true;
@@ -352,7 +409,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x211
-		case 9:
+		case 9:  // PlanningWidgetID: tactical waypoint map (guard prevents redundant re-show)
 			// End:0x20E
 			if((m_CurrentWidget != m_PlanningWidget))
 			{
@@ -364,7 +421,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x24D
-		case 13:
+		case 13:  // ExecuteWidgetID: final briefing before launching the mission
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_ExecuteWidget;
@@ -372,7 +429,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x289
-		case 12:
+		case 12:  // GearRoomWidgetID: operative gear / loadout selection
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_GearRoomWidget;
@@ -380,7 +437,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x2C5
-		case 14:
+		case 14:  // CustomMissionWidgetID: custom / skirmish mission configuration
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_CustomMissionWidget;
@@ -388,7 +445,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x301
-		case 15:
+		case 15:  // MultiPlayerWidgetID: LAN / direct-connect server browser
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_MultiPlayerWidget;
@@ -396,7 +453,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x33D
-		case 20:
+		case 20:  // UbiComWidgetID: Ubi.com (GameSpy) online lobby
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_pUbiComWidget;
@@ -404,7 +461,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x379
-		case 21:
+		case 21:  // UbiComModsWidgetID: Ubi.com mod browser (new in 1.60)
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_pUbiComModsWidget;
@@ -412,7 +469,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x414
-		case 36:
+		case 36:  // MultiPlayerError: route to the appropriate error screen based on connection type
 			// End:0x3AF
 			if(R6Console(Console).m_bStartedByGSClient)
 			{
@@ -443,13 +500,13 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x433
-		case 37:
+		case 37:  // MultiPlayerErrorUbiCom: force Ubi.com error regardless of connection type
 			ChangeCurrentWidget(20);
 			m_pUbiComWidget.PromptConnectionError();
 			// End:0x5D3
 			break;
 		// End:0x47E
-		case 16:
+		case 16:  // OptionsWidgetID: audio/video/controls settings (refreshed on every entry)
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_OptionsWidget;
@@ -458,7 +515,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x4BA
-		case 18:
+		case 18:  // CreditsWidgetID
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_CreditsWidget;
@@ -466,7 +523,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x505
-		case 19:
+		case 19:  // MPCreateGameWidgetID: host a new multiplayer game
 			m_CurrentWidget.HideWindow();
 			m_PreviousWidget = m_CurrentWidget;
 			m_CurrentWidget = m_pMPCreateGameWidget;
@@ -475,18 +532,20 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x524
-		case 10:
+		case 10:  // RetryCampaignPlanningID: re-enter planning after a failed campaign mission
 			m_bReloadPlan = true;
 			m_bPlayerPlanInitialized = true;
-			GotoCampaignPlanning(true);
+			GotoCampaignPlanning(true);  // true = map already loaded, skip preload
 			// End:0x5D3
 			break;
 		// End:0x533
-		case 6:
-			GotoCampaignPlanning(false);
+		case 6:  // CampaignPlanningID: first-time entry into campaign planning (must preload map)
+			GotoCampaignPlanning(false);  // false = trigger async map preload first
 			// End:0x5D3
 			break;
 		// End:0x58A
+		// MenuQuitID: in the retail build bDontQuitNow is never set so this goes straight to DoQuitGame.
+		// Demo builds would set it true to show a quit-confirmation screen instead.
 		case 38:
 			// End:0x578
 			if(bDontQuitNow)
@@ -503,13 +562,13 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 			// End:0x5D3
 			break;
 		// End:0x5CD
-		case 17:
+		case 17:  // PreviousWidgetID: go back one level (back button in options etc.)
 			// End:0x5CA
 			if((m_PreviousWidget != none))
 			{
 				m_CurrentWidget.HideWindow();
 				m_CurrentWidget = m_PreviousWidget;
-				m_PreviousWidget = none;
+				m_PreviousWidget = none;  // clear so a second back doesn't loop
 				m_CurrentWidget.ShowWindow();
 			}
 			// End:0x5D3
@@ -523,9 +582,12 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 	return;
 }
 
+// PlanningShouldProcessKey: returns true only when the planning widget is active AND
+// no pop-up is open (m_ePopUpID == 0 = None). Called by C++ to gate planning hotkeys.
 function bool PlanningShouldProcessKey()
 {
 	// End:0x24
+	// 0 = EPopUpID_None; 9 = PlanningWidgetID
 	if(((int(m_ePopUpID) == int(0)) && (int(m_eCurWidgetInUse) == int(9))))
 	{
 		return true;
@@ -534,9 +596,12 @@ function bool PlanningShouldProcessKey()
 	return;
 }
 
+// PlanningShouldDrawPath: returns true when the planning map is the active screen.
+// Used by C++ to decide whether to render waypoint path overlays.
 function bool PlanningShouldDrawPath()
 {
 	// End:0x12
+	// 9 = PlanningWidgetID
 	if((int(m_eCurWidgetInUse) == int(9)))
 	{
 		return true;
@@ -545,6 +610,10 @@ function bool PlanningShouldDrawPath()
 	return;
 }
 
+// ResetCustomMissionOperatives: rebuilds m_GameOperatives for a custom mission.
+// First populates the list from the current campaign's operative class names, then
+// appends any R6Operative subclasses found in loaded mod packages. This lets mods
+// inject custom operatives without modifying the base campaign data.
 function ResetCustomMissionOperatives()
 {
 	local R6Operative tmpOperative;
@@ -567,6 +636,8 @@ function ResetCustomMissionOperatives()
 		// [Loop Continue]
 		goto J0x49;
 	}
+	// If the active mod uses custom operatives, scan all mod packages for R6Operative subclasses
+	// and append any found to the list after the campaign defaults.
 	iNbTotalOperatives = i;
 	// End:0x19E
 	if((pModManager.m_pCurrentMod.m_bUseCustomOperatives == true))
@@ -602,12 +673,21 @@ function ResetCustomMissionOperatives()
 	return;
 }
 
+// KeyType: forwards typed-character input to the active widget.
+// Used by text-input fields such as the save-plan name edit box.
 function KeyType(int iInputKey, float X, float Y)
 {
 	m_CurrentWidget.KeyType(iInputKey, X, Y);
 	return;
 }
 
+// WindowEvent: main input dispatcher for the menu system.
+// In bShowLog debug mode it logs events and returns early. Normally:
+//   1. WM_Paint (Msg==11) events always pass through; others check connection state.
+//   2. Escape during a server-join aborts the connection.
+//   3. Global hotkeys (HotKeyDown/Up) are processed before modal routing.
+//   4. If a modal dialog is open (WaitModal), events go to it with screen-relative coords;
+//      otherwise the base UWindowRootWindow dispatcher handles routing normally.
 function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, int Key)
 {
 	// End:0xD1
@@ -638,6 +718,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 	else
 	{
 		// End:0x15A
+		// WM_Paint = 11: paint events always pass through; never block rendering
 		if((int(Msg) != int(11)))
 		{
 			// End:0x10E
@@ -646,9 +727,11 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 				return;
 			}
 			// End:0x15A
+			// Let the player press Escape to abort a server-join in progress
 			if(m_bJoinServerProcess)
 			{
 				// End:0x15A
+				// 9 = WM_KeyDown; 27 = IK_Escape key code
 				if((int(Msg) == int(9)))
 				{
 					// End:0x15A
@@ -685,6 +768,8 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 				break;
 		}
 		// End:0x1E7
+		// WM_Paint or no modal active: dispatch through the normal UWindow tree.
+		// Modal open: send events directly to the modal window with screen-relative coords.
 		if(((int(Msg) == int(11)) || (!WaitModal())))
 		{
 			super(UWindowRootWindow).WindowEvent(Msg, C, X, Y, Key);			
@@ -701,6 +786,11 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 	}
 }
 
+// GotoCampaignPlanning: prepares everything needed to enter the planning phase for a campaign mission.
+// Loads the campaign data, picks the correct mission by index, copies the operative list, and sets
+// up all game-start parameters (map name, difficulty, game mode).
+// _bRetrying=true  -> map is already loaded (re-planning after failure), call GotoPlanning() directly.
+// _bRetrying=false -> trigger PreloadMapForPlanning(); GotoPlanning() fires via NotifyAfterLevelChange().
 function GotoCampaignPlanning(bool _bRetrying)
 {
 	local R6PlayerCampaign PlayerCampaign;
@@ -742,7 +832,7 @@ function GotoCampaignPlanning(bool _bRetrying)
 	{
 		Log(("PlayerCampaign.m_iDifficultyLevel" @ string(PlayerCampaign.m_iDifficultyLevel)));
 	}
-	CurrentConsole.Master.m_StartGameInfo.m_GameMode = "R6Game.R6StoryModeGame";
+	CurrentConsole.Master.m_StartGameInfo.m_GameMode = "R6Game.R6StoryModeGame";  // single-player story game type
 	iNbArrayElements = PlayerCampaign.m_OperativesMissionDetails.m_MissionOperatives.Length;
 	// End:0x2D1
 	if(bShowLog)
@@ -767,7 +857,8 @@ function GotoCampaignPlanning(bool _bRetrying)
 		Log("end GotoPlanning");
 	}
 	m_bLoadingPlanning = true;
-	// End:0x35E
+	// _bRetrying: map already in memory, go straight to planning UI.
+	// Otherwise preload the map async; NotifyAfterLevelChange() calls GotoPlanning() when ready.
 	if(_bRetrying)
 	{
 		GotoPlanning();		
@@ -779,6 +870,11 @@ function GotoCampaignPlanning(bool _bRetrying)
 	return;
 }
 
+// GotoPlanning: performs the actual transition into the planning phase.
+// Only runs when m_bLoadingPlanning is true (set by GotoCampaignPlanning or ChangeCurrentWidget).
+// m_bReloadPlan=true: full reset — destroy old player controller, spawn a fresh R6PlanningCtrl,
+//   then reload the backup plan so the player can rework their last saved strategy.
+// m_bReloadPlan=false: map was already preloaded, just reset the gear room and show Intel.
 function GotoPlanning()
 {
 	local Player CurrentPlayer;
@@ -792,6 +888,8 @@ function GotoPlanning()
 		// End:0x1BC
 		if(m_bReloadPlan)
 		{
+			// Full planning reset: destroy the old controller and spawn a fresh R6PlanningCtrl.
+			// This avoids reloading the entire map just to change the plan.
 			R6GameInfo(GetLevel().Game).RestartGameMgr();
 			CurrentPlayer = GetPlayerOwner().Player;
 			GetPlayerOwner().Destroy();
@@ -803,6 +901,8 @@ function GotoPlanning()
 			NewController.SpawnDefaultHUD();
 			NewController.ChangeInputSet(1);
 			R6PlanningCtrl(GetPlayerOwner()).DeleteEverySingleNode();
+			// Backup.pln is written by LeaveForGame() before launching a mission, allowing
+			// the player to resume or retry their exact plan if the mission fails.
 			R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.LoadPlanning("Backup", "Backup", "Backup", "", "Backup.pln", Console.Master.m_StartGameInfo);
 			R6PlanningCtrl(GetPlayerOwner()).InitNewPlanning(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.m_iCurrentTeam);
 			m_GearRoomWidget.LoadRosterFromStartInfo();
@@ -813,15 +913,19 @@ function GotoPlanning()
 			m_GearRoomWidget.Reset();
 		}
 		m_bLoadingPlanning = false;
-		ChangeCurrentWidget(8);
+		ChangeCurrentWidget(8);  // 8 = IntelWidgetID: show mission briefing as the first planning step
 	}
 	return;
 }
 
+// LaunchQuickPlay: loads the mission's default action plan and immediately starts the game
+// if the team configuration is valid. The plan filename is built from the mission's short
+// name plus the game's default action-plan suffix (e.g. "HOUSE_MISSION_DEFAULT").
 function LaunchQuickPlay()
 {
 	local string szFileName;
 
+	// Build the default plan filename: <MissionShortName><DefaultActionPlanSuffix>
 	szFileName = R6MissionDescription(R6Console(Console).Master.m_StartGameInfo.m_CurrentMission).m_ShortName;
 	szFileName = (szFileName $ R6AbstractGameInfo(GetLevel().Game).m_szDefaultActionPlan);
 	// End:0x11C
@@ -836,12 +940,15 @@ function LaunchQuickPlay()
 		}
 		else
 		{
-			SimplePopUp(Localize("POPUP", "INCOMPLETEPLANNING", "R6Menu"), Localize("POPUP", "INCOMPLETEPLANNINGPROBLEM", "R6Menu"), 49, int(2));
+			// 49 = EPopUpID_PlanningIncomplete; 2 = MB_OK button
+		SimplePopUp(Localize("POPUP", "INCOMPLETEPLANNING", "R6Menu"), Localize("POPUP", "INCOMPLETEPLANNINGPROBLEM", "R6Menu"), 49, int(2));
 		}
 	}
 	return;
 }
 
+// NotifyAfterLevelChange: engine callback fired after a level (map) finishes loading.
+// Picks up the planning flow where GotoCampaignPlanning() left off after PreloadMapForPlanning().
 function NotifyAfterLevelChange()
 {
 	GotoPlanning();
@@ -849,7 +956,9 @@ function NotifyAfterLevelChange()
 }
 
 //==============================================================================
-// PopUp The good menu
+// PopUpMenu: shows the modal dialog corresponding to the current m_ePopUpID.
+// Called after m_ePopUpID is set to trigger a pop-up. _bautoLoadPrompt changes
+// the load dialog to include a "don't show again" checkbox and makes it taller.
 //==============================================================================
 function PopUpMenu(optional bool _bautoLoadPrompt)
 {
@@ -860,14 +969,14 @@ function PopUpMenu(optional bool _bautoLoadPrompt)
 	switch(m_ePopUpID)
 	{
 		// End:0x70
-		case 47:
+		case 47:  // EPopUpID_SavePlanning: fill the list and show save dialog; focus the edit box
 			FillListOfSavedPlan(R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pListOfSavedPlan);
 			m_PopUpSavePlan.ShowWindow();
 			R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pEditSaveNameBox.LMouseDown(0.0000000, 0.0000000);
 			// End:0x17A
 			break;
 		// End:0x177
-		case 48:
+		case 48:  // EPopUpID_LoadPlanning
 			// End:0xE6
 			if(_bautoLoadPrompt)
 			{
@@ -891,6 +1000,8 @@ function PopUpMenu(optional bool _bautoLoadPrompt)
 	return;
 }
 
+// SimplePopUp: overrides the parent to default OwnerWindow to 'self' when none provided,
+// ensuring pop-ups are centred on this root window rather than floating freely.
 function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePopUpID, optional int _iButtonsType, optional bool bAddDisableDlg, optional UWindowWindow OwnerWindow)
 {
 	// End:0x2F
@@ -906,7 +1017,11 @@ function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePop
 }
 
 //==============================================================================
-// PopUpBoxDone -  receive the result of the popup box  
+// PopUpBoxDone: called when the user dismisses any pop-up dialog (OK or Cancel).
+// Delegates to the parent first (which clears the modal window state), then handles
+// the result. Result == 3 (MR_OK) means user confirmed; anything else means cancelled.
+// After handling, restores the 3D view and legend panels if the planning widget is active,
+// then clears m_ePopUpID to signal no pop-up is open.
 //==============================================================================
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
@@ -919,14 +1034,15 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 
 	super.PopUpBoxDone(Result, _ePopUpID);
 	// End:0x56F
+	// 3 = MR_OK: user clicked the OK / Confirm button
 	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
 			// End:0x2C
-			case 4:
+			case 4:   // EPopUpID_SaveFileExist: user confirmed overwrite of existing file
 			// End:0x2AE
-			case 47:
+			case 47:  // EPopUpID_SavePlanning: initial save request
 				szFileName = R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pEditSaveNameBox.GetValue();
 				// End:0x2AB
 				if((szFileName != ""))
@@ -968,7 +1084,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 				// End:0x56C
 				break;
 			// End:0x328
-			case 48:
+			case 48:  // EPopUpID_LoadPlanning: load the plan file selected in the list box
 				SavedPlanningListBox = R6MenuLoadPlan(m_PopUpLoadPlan.m_ClientArea).m_pListOfSavedPlan;
 				// End:0x325
 				if((SavedPlanningListBox.m_SelectedItem != none))
@@ -985,7 +1101,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 				// End:0x56C
 				break;
 			// End:0x3D8
-			case 41:
+			case 41:  // EPopUpID_SaveDelPlan: delete a plan from the save-plan dialog
 				SavedPlanningListBox = R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pListOfSavedPlan;
 				// End:0x3C4
 				if((SavedPlanningListBox.m_SelectedItem != none))
@@ -1008,7 +1124,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 				// End:0x56C
 				break;
 			// End:0x488
-			case 40:
+			case 40:  // EPopUpID_LoadDelPlan: delete a plan from the load-plan dialog
 				SavedPlanningListBox = R6MenuLoadPlan(m_PopUpLoadPlan.m_ClientArea).m_pListOfSavedPlan;
 				// End:0x474
 				if((SavedPlanningListBox.m_SelectedItem != none))
@@ -1031,50 +1147,51 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 				// End:0x56C
 				break;
 			// End:0x49F
-			case 43:
+			case 43:  // EPopUpID_OverWriteCampaign: confirmed overwrite of an existing campaign save
 				m_SinglePlayerWidget.TryCreatingCampaign();
 				// End:0x56C
 				break;
 			// End:0x4AF
-			case 39:
+			case 39:  // EPopUpID_QuickPlay: confirmed launch with default action plan
 				LaunchQuickPlay();
 				return;
 				// End:0x56C
 				break;
 			// End:0x4C6
-			case 42:
+			case 42:  // EPopUpID_DeleteCampaign: confirmed deletion of a campaign save
 				m_SinglePlayerWidget.DeleteCurrentSelectedCampaign();
 				// End:0x56C
 				break;
 			// End:0x50E
-			case 46:
+			case 46:  // EPopUpID_LeavePlanningToMain: abandon planning and return to main menu
 				Console.Master.m_StartGameInfo.m_ReloadPlanning = false;
 				R6PlanningCtrl(GetPlayerOwner()).DeleteEverySingleNode();
 				ChangeCurrentWidget(7);
 				// End:0x56C
 				break;
 			// End:0x52B
-			case 44:
+			case 44:  // EPopUpID_DelAllWayPoints: delete waypoints for the current team only
 				R6PlanningCtrl(GetPlayerOwner()).DeleteAllNode();
 				// End:0x56C
 				break;
 			// End:0x548
-			case 45:
+			case 45:  // EPopUpID_DelAllTeamsWayPoints: delete waypoints for all teams
 				R6PlanningCtrl(GetPlayerOwner()).DeleteEverySingleNode();
 				// End:0x56C
 				break;
 			// End:0x54D
-			case 6:
+			// Informational pop-ups only; user simply acknowledges, nothing else needed.
+			case 6:   // EPopUpID_InvalidLoad
 			// End:0x552
-			case 49:
+			case 49:  // EPopUpID_PlanningIncomplete
 			// End:0x557
-			case 27:
+			case 27:  // EPopUpID_InvalidPassword
 			// End:0x55F
-			case 37:
+			case 37:  // (spare slot in 1.60)
 				// End:0x56C
 				break;
 			// End:0x569
-			case 5:
+			case 5:  // EPopUpID_PlanDeleteError: file delete failed (read-only default plan)
 				return;
 				// End:0x56C
 				break;
@@ -1085,25 +1202,27 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 		J0x56C:
 		
 	}
+	// User cancelled (MR_Cancel / closed dialog without confirming).
+	// For delete operations, re-show the parent dialog so the user can pick another file.
 	else
 	{
 		switch(_ePopUpID)
 		{
 			// End:0x58F
-			case 40:
+			case 40:  // EPopUpID_LoadDelPlan cancelled: go back to load dialog
 				m_PopUpLoadPlan.ShowWindow();
 				return;
 				// End:0x5C0
 				break;
 			// End:0x5A8
-			case 41:
+			case 41:  // EPopUpID_SaveDelPlan cancelled: go back to save dialog
 				m_PopUpSavePlan.ShowWindow();
 				return;
 				// End:0x5C0
 				break;
 			// End:0x5BA
-			case 4:
-				m_ePopUpID = 47;
+			case 4:  // EPopUpID_SaveFileExist cancelled: keep save dialog open (m_ePopUpID stays set)
+				m_ePopUpID = 47;  // EPopUpID_SavePlanning
 				return;
 				// End:0x5C0
 				break;
@@ -1115,6 +1234,8 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 		}
 	}
 	// End:0x623
+	// If we're back in the planning widget, restore the 3D view and legend panels that
+	// ClosePopups() hid when the dialog opened.
 	if(((m_CurrentWidget == m_PlanningWidget) && (!m_bPlayerDoNotWant3DView)))
 	{
 		m_PlanningWidget.m_3DButton.m_bSelected = true;
@@ -1128,6 +1249,8 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 		m_PlanningWidget.m_LegendButton.m_bSelected = true;
 	}
 	// End:0x6A2
+	// 3 = EPopUpID_FileWriteErrorBackupPln: backup save failed but game can still launch;
+	// SetStartTeamInfo finalises team data, then LaunchR6Game starts the mission.
 	if((int(_ePopUpID) == int(3)))
 	{
 		m_GearRoomWidget.SetStartTeamInfo();
@@ -1137,6 +1260,8 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	return;
 }
 
+// StopPlayMode: halts the timeline playback animation in the planning widget.
+// Called before entering a game or opening a dialog to avoid animation playing in background.
 function StopPlayMode()
 {
 	m_PlanningWidget.m_PlanningBar.m_TimeLine.StopPlayMode();
@@ -1144,7 +1269,9 @@ function StopPlayMode()
 }
 
 //==============================================================================
-// StopWidgetSound: stop the sound for the current widget
+// StopWidgetSound: stops ambient audio for the current widget.
+// Only the Intel widget (8 = IntelWidgetID) plays ambient sound that needs
+// explicit stopping when navigating away.
 //==============================================================================
 function StopWidgetSound()
 {
@@ -1156,6 +1283,8 @@ function StopWidgetSound()
 	return;
 }
 
+// SetServerOptions: pushes current server configuration from the create-game widget to the
+// underlying game service. Safe to call even if the widget hasn't been created yet.
 function SetServerOptions()
 {
 	// End:0x39
@@ -1179,6 +1308,8 @@ function FillListOfSavedPlan(R6WindowTextListBox _pListOfSavedPlan)
 	local string szMapName, szGameTypeDirName, szEnglishGTDirectory;
 
 	_pListOfSavedPlan.Clear();
+	// Plans are stored at: ..\save\plan\<MapMenuName>\<GameTypeDir>\*.PLN
+	// Resolve the human-readable map name from localisation; fall back to level package name.
 	StartGameInfo = Console.Master.m_StartGameInfo;
 	mission = R6MissionDescription(StartGameInfo.m_CurrentMission);
 	GetLevel().GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
@@ -1186,9 +1317,7 @@ function FillListOfSavedPlan(R6WindowTextListBox _pListOfSavedPlan)
 	// End:0xC1
 	if((szMapName == ""))
 	{
-		szMapName = string(GetLevel().Outer.Name);
-	}
-	iMax = R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.GetNumberOfFiles(szMapName, szGameTypeDirName);
+		szMapName = string(GetLevel().Outer.Name);  // fallback: use the raw level package name
 	i = 0;
 	J0xF3:
 
@@ -1199,7 +1328,7 @@ function FillListOfSavedPlan(R6WindowTextListBox _pListOfSavedPlan)
 		// End:0x189
 		if((szFileName != ""))
 		{
-			szFileName = Left(szFileName, InStr(szFileName, ".PLN"));
+			szFileName = Left(szFileName, InStr(szFileName, ".PLN"));  // strip .PLN extension for display
 			NewItem = R6WindowListBoxItem(_pListOfSavedPlan.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 			NewItem.HelpText = szFileName;
 		}
@@ -1230,9 +1359,8 @@ function bool IsSaveFileAlreadyExist(string _szFileName)
 	{
 		szMapName = string(GetLevel().Outer.Name);
 	}
+	// .PLN files live at: ..\save\plan\<MapMenuName>\<GameTypeDir>\<FileName>.PLN
 	szPathAndFilename = (((((("..\\save\\plan\\" $ szMapName) $ "\\") $ szGameTypeDirName) $ "\\") $ _szFileName) $ ".PLN");
-	// End:0x104
-	if(m_pFileManager.FindFile(szPathAndFilename))
 	{
 		return true;
 	}
@@ -1252,11 +1380,8 @@ function bool LoadAPlanning(string _szFileName)
 	local int iMission;
 	local bool bFoundMission;
 
+	// Clear existing waypoints before loading to avoid stale nodes from a previous plan
 	R6PlanningCtrl(GetPlayerOwner()).DeleteEverySingleNode();
-	StartGameInfo = Console.Master.m_StartGameInfo;
-	mission = R6MissionDescription(StartGameInfo.m_CurrentMission);
-	szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
-	// End:0xAD
 	if((szMapName == ""))
 	{
 		szMapName = string(GetLevel().Outer.Name);
@@ -1266,12 +1391,13 @@ function bool LoadAPlanning(string _szFileName)
 	if((R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.LoadPlanning(mission.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, _szFileName, StartGameInfo, szLoadErrorMsgMapName, szLoadErrorMsgGameType) == true))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).InitNewPlanning(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.m_iCurrentTeam);
-		m_GearRoomWidget.LoadRosterFromStartInfo();
-		m_bPlayerPlanInitialized = true;
+		m_GearRoomWidget.LoadRosterFromStartInfo();  // sync loaded roster into the gear room UI
 		return true;		
 	}
 	else
 	{
+		// Load failed: try to produce a human-readable error by resolving the map name
+		// and game type from the error strings returned by the file manager.
 		bFoundMission = false;
 		iMission = 0;
 		J0x176:
@@ -1302,6 +1428,7 @@ function bool LoadAPlanning(string _szFileName)
 			szGameTypeDirName = Localize("POPUP", "LOADERRORMAPUNKNOWN", "R6Menu");
 		}
 		szLoadErrorMsg = (((Localize("POPUP", "LOADERRORPROBLEM", "R6Menu") @ szMapName) @ Localize("POPUP", "LOADERRORPROBLEM2", "R6Menu")) @ szGameTypeDirName);
+		// 6 = EPopUpID_InvalidLoad; 2 = MB_OK button
 		SimplePopUp(Localize("POPUP", "LOADERROR", "R6Menu"), (_szFileName @ szLoadErrorMsg), 6, int(2));
 		return false;
 	}
@@ -1328,12 +1455,15 @@ function bool DeleteAPlanning(string szFileName)
 	{
 		szMapName = string(GetLevel().Outer.Name);
 	}
+	// Construct the full path; same layout as IsSaveFileAlreadyExist and FillListOfSavedPlan
 	szPathAndFilename = (((((("..\\save\\plan\\" $ szMapName) $ "\\") $ szGameTypeDirName) $ "\\") $ szFileName) $ ".PLN");
 	// End:0x104
 	if(m_pFileManager.DeleteFile(szPathAndFilename))
 	{
 		return true;
 	}
+	// Delete failed; most likely the file is read-only (default plans shipped with the game).
+	// 5 = EPopUpID_PlanDeleteError; 2 = MB_OK button
 	ErrorMsg = ((((Localize("POPUP", "PLANDELETEERRORPROBLEM", "R6Menu") @ ":") @ szFileName) @ "\\n") @ Localize("POPUP", "PLANDELETEERRORMSG", "R6Menu"));
 	SimplePopUp(Localize("POPUP", "PLANDELETEERROR", "R6Menu"), ErrorMsg, 5, int(2));
 	return false;
@@ -1341,7 +1471,9 @@ function bool DeleteAPlanning(string szFileName)
 }
 
 //===========================================================================
-// ISPlanning Empty: Check if something is planned
+// IsPlanningEmpty: returns true only if ALL teams have zero waypoints.
+// Checks all 3 teams (indices 0-2: Red, Gold, Blue). A single waypoint on any
+// team means the planning is not empty.
 //===========================================================================
 function bool IsPlanningEmpty()
 {
@@ -1354,6 +1486,7 @@ function bool IsPlanningEmpty()
 	J0x0F:
 
 	// End:0x7C [Loop If]
+	// 3 = total number of operative teams in RavenShield (Red, Gold, Blue)
 	if((i < 3))
 	{
 		PlanningInfo = R6PlanningInfo(Console.Master.m_StartGameInfo.m_TeamInfo[i].m_pPlanning);
@@ -1371,39 +1504,49 @@ function bool IsPlanningEmpty()
 }
 
 //===========================================================================
-// LeaveForGame: ready to start the game in single... after loadplanning process
+// LeaveForGame: final step before launching a single-player mission.
+// Saves a backup copy of the plan (Backup.pln) so it can be restored if the
+// player retries. _ObserverMode=true spawns as spectator; _iTeamStart selects
+// which team the player controls. On backup save failure shows an error and
+// does NOT launch the game.
 //===========================================================================
 function LeaveForGame(bool _ObserverMode, int _iTeamStart)
 {
 	local R6StartGameInfo StartGameInfo;
 
 	StartGameInfo = Console.Master.m_StartGameInfo;
-	StartGameInfo.m_bIsPlaying = (!_ObserverMode);
+	StartGameInfo.m_bIsPlaying = (!_ObserverMode);  // false = spectator; true = active player
 	StartGameInfo.m_iTeamStart = _iTeamStart;
 	m_GearRoomWidget.SetStartTeamInfoForSaving();
 	R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.m_iCurrentTeam = R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam;
 	// End:0x13F
+	// Save backup plan; GotoPlanning() reloads it so the player can retry with the same plan.
+	// 2 = EPopUpID_FileWriteError; 2 = MB_OK. On failure we show the error but do NOT launch.
 	if((R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.SavePlanning("Backup", "Backup", "Backup", "", "Backup.pln", StartGameInfo) == false))
 	{
 		SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), (("Backup.pln" @ ":") @ Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, int(2));		
 	}
 	else
 	{
-		m_GearRoomWidget.SetStartTeamInfo();
-		SimpleTextPopUp(Localize("POPUP", "LAUNCHING", "R6Menu"));
-		PartialResetOriginalData();
+		m_GearRoomWidget.SetStartTeamInfo();  // finalise team data; must be called after SetStartTeamInfoForSaving
+		SimpleTextPopUp(Localize("POPUP", "LAUNCHING", "R6Menu"));  // show "Launching..." overlay
+		PartialResetOriginalData();  // reset decal manager before handing off to gameplay
 		R6Console(Console).LaunchR6Game(true);
 	}
 	return;
 }
 
 // NEW IN 1.60
+// PartialResetOriginalData: destroys and re-creates the decal manager before transitioning
+// from planning into gameplay. Prevents decal state (footprints, blood, bullet marks from
+// a prior planning session) from leaking into the live mission. bKNoInit suppresses respawn
+// in editor/server contexts where a decal manager isn't meaningful.
 function PartialResetOriginalData()
 {
 	local R6DecalManager aMgr;
 
 	aMgr = GetLevel().m_DecalManager;
-	GetLevel().m_DecalManager = none;
+	GetLevel().m_DecalManager = none;  // detach first so Destroy can't cause re-entrant access
 	// End:0x3D
 	if((aMgr != none))
 	{
@@ -1412,7 +1555,7 @@ function PartialResetOriginalData()
 	// End:0x74
 	if((!GetLevel().bKNoInit))
 	{
-		GetLevel().m_DecalManager = GetLevel().Spawn(Class'Engine.R6DecalManager');
+		GetLevel().m_DecalManager = GetLevel().Spawn(Class'Engine.R6DecalManager');  // fresh instance
 	}
 	return;
 }
@@ -1424,8 +1567,8 @@ function HarmonizeMenuFonts()
 {
 	local Font ButtonFont, DownSizeFont;
 
-	DownSizeFont = Root.Fonts[6];
-	ButtonFont = Root.Fonts[16];
+	DownSizeFont = Root.Fonts[6];   // 6 = F_VerySmallTitle: fallback when button text is too long
+	ButtonFont = Root.Fonts[16];    // 16 = F_PrincipalButton: standard button label font
 	m_SinglePlayerWidget.m_LeftButtonFont = ButtonFont;
 	m_CustomMissionWidget.m_LeftButtonFont = ButtonFont;
 	m_TrainingWidget.m_LeftButtonFont = ButtonFont;
@@ -1436,6 +1579,8 @@ function HarmonizeMenuFonts()
 	m_CustomMissionWidget.CreateButtons();
 	m_TrainingWidget.CreateButtons();
 	// End:0x13A
+	// If ANY of the three widgets needs a smaller font (e.g. long localised strings),
+	// force ALL of them to use it so they look visually consistent across languages.
 	if(((m_SinglePlayerWidget.ButtonsUsingDownSizeFont() || m_CustomMissionWidget.ButtonsUsingDownSizeFont()) || m_TrainingWidget.ButtonsUsingDownSizeFont()))
 	{
 		m_SinglePlayerWidget.ForceFontDownSizing();
@@ -1446,7 +1591,9 @@ function HarmonizeMenuFonts()
 }
 
 //=================================================================================
-// MenuLoadProfile: Advice optionswidget that a load profile was occur
+// MenuLoadProfile: notifies the relevant widget that the user has loaded a profile.
+// Server profiles reload settings in the create-game widget; player profiles reload
+// in the options widget (controls, audio, video preferences).
 //=================================================================================
 function MenuLoadProfile(bool _bServerProfile)
 {
@@ -1463,17 +1610,21 @@ function MenuLoadProfile(bool _bServerProfile)
 }
 
 //=================================================================================
-// NotifyWindow: receive specific notify from pop-up window, etc
+// NotifyWindow: receives widget notifications from child windows.
+// Handles double-click (E == 11 = DE_DoubleClick) on a plan list box: simulates
+// clicking OK on the parent pop-up so double-clicking a plan immediately loads/saves it.
+// Result = 3 = MR_OK is set before Close() so PopUpBoxDone() handles it correctly.
 //=================================================================================
 function NotifyWindow(UWindowWindow C, byte E)
 {
 	// End:0x9D
+	// 11 = DE_DoubleClick: treat double-click on a list item as an OK confirmation
 	if((int(E) == 11))
 	{
 		// End:0x57
 		if((C == R6MenuLoadPlan(m_PopUpLoadPlan.m_ClientArea).m_pListOfSavedPlan))
 		{
-			m_PopUpLoadPlan.Result = 3;
+			m_PopUpLoadPlan.Result = 3;  // 3 = MR_OK
 			m_PopUpLoadPlan.Close();			
 		}
 		else
@@ -1481,7 +1632,7 @@ function NotifyWindow(UWindowWindow C, byte E)
 			// End:0x9D
 			if((C == R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pListOfSavedPlan))
 			{
-				m_PopUpSavePlan.Result = 3;
+				m_PopUpSavePlan.Result = 3;  // 3 = MR_OK
 				m_PopUpSavePlan.Close();
 			}
 		}
@@ -1489,6 +1640,9 @@ function NotifyWindow(UWindowWindow C, byte E)
 	return;
 }
 
+// SetNewMODS: called when the active mod changes; notifies the parent to swap background
+// textures. The _bForceRefresh path was intended to swap the laptop background texture
+// at runtime but was never completed — the body is empty in the retail build.
 function SetNewMODS(string _szNewBkgFolder, optional bool _bForceRefresh)
 {
 	// End:0x09
@@ -1500,7 +1654,9 @@ function SetNewMODS(string _szNewBkgFolder, optional bool _bForceRefresh)
 }
 
 //================================================
-// InitBeaconService: 
+// InitBeaconService: sets up LAN server discovery via UDP broadcast beacons.
+// Creates the R6LanServers container and the ClientBeaconReceiver if they don't
+// already exist, then links the beacon to the game service. Safe to call repeatedly.
 //================================================
 function InitBeaconService()
 {
@@ -1521,10 +1677,10 @@ function InitBeaconService()
 
 defaultproperties
 {
-	m_BGTexture0=Texture'R6MenuBG.Backgrounds.GenericLoad0'
-	m_BGTexture1=Texture'R6MenuBG.Backgrounds.GenericLoad1'
-	m_MainMenuMusic=Sound'Music.Play_theme_Menu1'
-	LookAndFeelClass="R6Menu.R6MenuRSLookAndFeel"
+	m_BGTexture0=Texture'R6MenuBG.Backgrounds.GenericLoad0'  // first loading screen background
+	m_BGTexture1=Texture'R6MenuBG.Backgrounds.GenericLoad1'  // second loading screen background
+	m_MainMenuMusic=Sound'Music.Play_theme_Menu1'             // title screen music track
+	LookAndFeelClass="R6Menu.R6MenuRSLookAndFeel"            // R6-specific UI skin / theme class
 }
 
 // --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
