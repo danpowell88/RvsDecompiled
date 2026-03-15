@@ -86,26 +86,34 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 
 /*-- AController movement latent functions -----------------------------*/
 
-IMPL_TODO("Ghidra 0x1038e870; 566 bytes; simplified — retail sets raw timer at +0xdc=4.0f, adjusts walk-speed, and has complex Pawn null path")
+IMPL_TODO("Ghidra 0x1038e870; 566 bytes; retail reads 4 params (FVector, AActor* opt, FLOAT=1.0f opt, UBOOL=0 opt), calls APawn::setMoveTimer, sets Destination and AdjustLoc at +0x480/0x474, calls moveToward; complex raw-offset walk-speed logic not fully reproduced")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
 	P_GET_VECTOR(NewDestination);
 	P_GET_OBJECT_OPTX(AActor,ViewFocus,NULL);
+	P_GET_FLOAT_OPTX(WalkSpeedMod,1.0f);
 	P_GET_UBOOL_OPTX(bShouldWalk,0);
 	P_FINISH;
+	m_eMoveToResult = 0;
+	if( !Pawn ) { m_eMoveToResult = 2; return; }
 	MoveTarget = NULL;
 	Destination = NewDestination;
 	Focus = ViewFocus;
+	*(FVector*)((BYTE*)this + 0x480) = NewDestination;
+	*(FVector*)((BYTE*)this + 0x474) = NewDestination;
+	Pawn->setMoveTimer( NewDestination.Size() );
 	GetStateFrame()->LatentAction = AI_PollMoveTo;
+	bAdjusting = 0;
+	Pawn->ClearSerpentine();
+	Pawn->moveToward( NewDestination, NULL );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 500, execMoveTo );
 
-IMPL_TODO("Ghidra 0x1038cfe0; 163 bytes; retail has no guard/unguard; uses MoveTimer at +0x3bc, bAdjusting bit, and Pawn->moveToward vtable dispatch")
+IMPL_MATCH("Engine.dll", 0x1038cfe0)
 void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execPollMoveTo);
 	if( !Pawn || MoveTimer < 0.0f )
 	{
 		GetStateFrame()->LatentAction = 0;
@@ -123,31 +131,36 @@ void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 		if( Pawn->moveToward( Destination, NULL ) )
 			GetStateFrame()->LatentAction = 0;
 	}
-	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 
-IMPL_TODO("Ghidra 0x10390940; 1402 bytes; simplified — retail has complex bShouldWalk/MoveTimer/ReachSpec path-following logic")
+IMPL_TODO("Ghidra 0x10390940; 1402 bytes; retail reads 6 params (AActor, AActor* opt, FLOAT=1.0f opt, UBOOL=0 opt, UBOOL=0 opt, AActor* opt), sets Destination/AdjustLoc from MoveTarget->Location, calls setMoveTimer/moveToward; complex ReachSpec/bShouldWalk logic omitted")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
 	P_GET_OBJECT(AActor,NewTarget);
 	P_GET_OBJECT_OPTX(AActor,ViewFocus,NULL);
+	P_GET_FLOAT_OPTX(WalkSpeedMod,1.0f);
 	P_GET_UBOOL_OPTX(bShouldWalk,0);
+	P_GET_UBOOL_OPTX(bCanJump,0);
+	P_GET_OBJECT_OPTX(AActor,ExtraTarget,NULL);
 	P_FINISH;
+	m_eMoveToResult = 0;
+	if( !NewTarget || !Pawn ) { m_eMoveToResult = 2; return; }
 	MoveTarget = NewTarget;
-	if( MoveTarget )
-		Destination = MoveTarget->Location;
+	Destination = MoveTarget->Location;
+	*(FVector*)((BYTE*)this + 0x480) = Destination;
+	*(FVector*)((BYTE*)this + 0x474) = Destination;
 	Focus = ViewFocus;
 	GetStateFrame()->LatentAction = AI_PollMoveToward;
+	bAdjusting = 0;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
-IMPL_TODO("Ghidra 0x1038d110; 534 bytes; retail has no guard/unguard; uses MoveTimer at +0x3bc, bAdjusting/bPreparingMove bits, Pawn->moveToward vtable, and NavPoint arrival path; PHYS_Climbing/Spider adjustments omitted")
+IMPL_TODO("Ghidra 0x1038d110; 534 bytes; retail has no guard/unguard; PHYS_Spider (+0x9) and Climbing (+0x4) MoveTarget Z-offset adjustments omitted; FUN_10301350 spider attachment offset not reconstructed")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execPollMoveToward);
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
 	{
 		GetStateFrame()->LatentAction = 0;
@@ -167,7 +180,6 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 		if( Pawn->moveToward( Destination, MoveTarget ) )
 			GetStateFrame()->LatentAction = 0;
 	}
-	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveToward );
 
@@ -589,16 +601,40 @@ void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 524, execFindStairRotation );
 
-IMPL_TODO("Ghidra 0x1038f400; 228b -- gets viewport at +0x5b4, resets keyboard (this_00+0x84) and mouse (this_00+0x88) input configs via UObject::ResetConfig+SaveConfig; our stub is empty")
+// Ghidra 0x1038f400, 228b. Has SEH (guard/unguard). P_FINISH only.
+// Gets viewport at +0x5b4, verifies IsA(UViewport), then for each input object (at +0x84 keyboard,
+// +0x88 mouse): calls UObject::ResetConfig(class,"",flag) then SaveConfig(0x4000, NULL).
+IMPL_MATCH("Engine.dll", 0x1038f400)
 void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execResetKeyboard);
 	P_FINISH;
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
+	if( P && P->IsA(UViewport::StaticClass()) )
+	{
+		UObject* KeyInput = *(UObject**)((BYTE*)P + 0x84);
+		if( KeyInput )
+		{
+			UObject::ResetConfig(KeyInput->GetClass(), TEXT(""), 1);
+			KeyInput->SaveConfig(0x4000, NULL);
+		}
+		UObject* MouseInput = *(UObject**)((BYTE*)P + 0x88);
+		if( MouseInput )
+		{
+			UObject::ResetConfig(MouseInput->GetClass(), TEXT(""), 0);
+			MouseInput->SaveConfig(0x4000, NULL);
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 544, execResetKeyboard );
 
-IMPL_TODO("Ghidra 0x1038eff0; 372b -- reads 3 params (FString NewOption, FString NewValue, UBOOL bSaveDefault), calls FURL::AddOption on level URL, conditionally calls FURL::SaveURLConfig; our stub reads params but does nothing")
+// Ghidra 0x1038eff0, 372b. Reads 3 params: FString NewOption, FString NewValue, UBOOL bSaveDefault.
+// Calls FUN_1038ef30(Engine) to get pointer; FURL (LastURL) is at that pointer + 0x464.
+// Builds key string (NewOption + "=" + NewValue) and calls FURL::AddOption.
+// If bSaveDefault: calls FURL::SaveURLConfig(url, L"DefaultPlayer", *NewOption, L"User").
+// FUN_1038ef30 not yet identified — assuming it returns Engine, LastURL at UGameEngine+0x464.
+IMPL_TODO("Ghidra 0x1038eff0; FUN_1038ef30(Engine) not identified — using XLevel->Engine raw + 0x464 for LastURL location")
 void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execUpdateURL);
@@ -606,59 +642,101 @@ void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 	P_GET_STR(NewValue);
 	P_GET_UBOOL(bSaveDefault);
 	P_FINISH;
+	if( XLevel && XLevel->Engine )
+	{
+		FString Opt = NewOption + FString(TEXT("=")) + NewValue;
+		FURL* URL = (FURL*)((BYTE*)XLevel->Engine + 0x464);
+		URL->AddOption( *Opt );
+		if( bSaveDefault )
+			URL->SaveURLConfig( TEXT("DefaultPlayer"), *NewOption, TEXT("User") );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 546, execUpdateURL );
 
-IMPL_TODO("Ghidra 0x1038da50; 299b -- routes through player Exec vtable (+0x30) or level engine Exec vtable (+0x2c) and captures output to result FString; our stub diverges in routing and output capture")
+// Ghidra 0x1038da50, 299b. Reads FString Command. Uses FStringOutputDevice to capture result.
+// Routes to Player->Exec (vtable dispatch) if Player at +0x5b4 exists,
+// else Engine->Exec through primary vtable at byte offset 0x2c.
+IMPL_MATCH("Engine.dll", 0x1038da50)
 void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execConsoleCommand);
 	P_GET_STR(Command);
 	P_FINISH;
-	// UPlayer* is stored in _NativeData[50] (offset 0x5B4, set by SetPlayer).
-	UPlayer* P = *(UPlayer**)(&_NativeData[50]);
+	FStringOutputDevice StrOut;
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
 	if( P )
-		P->Exec( *Command, *GLog );
-	*(FString*)Result = TEXT("");
+		P->Exec( *Command, StrOut );
+	else if( XLevel && XLevel->Engine )
+	{
+		typedef UBOOL (__thiscall* TExecFn)(UEngine*, const TCHAR*, FOutputDevice&);
+		TExecFn execFn = *(TExecFn*)((BYTE*)*(DWORD*)XLevel->Engine + 0x2c);
+		execFn(XLevel->Engine, *Command, StrOut);
+	}
+	*(FString*)Result = *StrOut;
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execConsoleCommand );
 
-IMPL_TODO("Ghidra 0x103919e0; 330b -- loads DefaultPlayer URL config, calls FURL::GetOption with the option name, returns the value string; our stub returns empty")
+// Ghidra 0x103919e0, 330b. Reads FString Option. Constructs new FURL, loads DefaultPlayer config,
+// appends "=" to Option string to form key, calls FURL::GetOption(key, "") and returns result.
+IMPL_MATCH("Engine.dll", 0x103919e0)
 void APlayerController::execGetDefaultURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetDefaultURL);
 	P_GET_STR(Option);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	FURL URL(NULL);
+	URL.LoadURLConfig( TEXT("DefaultPlayer"), TEXT("User") );
+	FString Key = Option + FString(TEXT("="));
+	*(FString*)Result = FString(URL.GetOption( *Key, TEXT("") ));
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetDefaultURL );
 
-IMPL_TODO("Ghidra 0x1038f1a0; 263b -- asserts XLevel/Engine/GEntry chain then calls ULevel::GetLevelInfo on GEntry; our stub returns NULL")
+// Ghidra 0x1038f1a0, 263b. P_FINISH only. Asserts XLevel, Engine, UGameEngine GEntry chain.
+// Calls ULevel::GetLevelInfo on GEntry (UGameEngine->GEntry at +0x45c). Returns ALevelInfo*.
+IMPL_MATCH("Engine.dll", 0x1038f1a0)
 void APlayerController::execGetEntryLevel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEntryLevel);
 	P_FINISH;
-	*(ULevelBase**)Result = NULL;
+	check(XLevel);
+	check(XLevel->Engine);
+	ULevel* Entry = *(ULevel**)((BYTE*)XLevel->Engine + 0x45c);
+	check(Entry);
+	*(ALevelInfo**)Result = Entry->GetLevelInfo();
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetEntryLevel );
 
-IMPL_TODO("Ghidra 0x1038f2e0; 226b -- sets +0x5b8, calls vtable at +0x18c (UpdateURL), then if viewport canvas has bFading calls UCanvas::StartFade; our stub only sets the view target")
+// Ghidra 0x1038f2e0, 226b. Sets ViewTarget at +0x5b8, calls vtable[0x63] (byte offset 0x18c)
+// to update camera, then if viewport canvas has bFading set (canvas+0xb8 & 1), calls StartFade.
+IMPL_MATCH("Engine.dll", 0x1038f2e0)
 void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetViewTarget);
 	P_GET_OBJECT(AActor,NewViewTarget);
 	P_FINISH;
-	// ViewTarget stored at _NativeData[51] (offset 0x5B8), matching GetViewTarget() in EngineStubs.cpp.
-	*(AActor**)(&_NativeData[51]) = NewViewTarget;
+	*(AActor**)((BYTE*)this + 0x5b8) = NewViewTarget;
+	typedef void (__thiscall* TUpdateFn)(APlayerController*);
+	TUpdateFn updateFn = *(TUpdateFn*)((BYTE*)*(DWORD*)this + 0x18c);
+	updateFn(this);
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
+	if( P && P->IsA(UViewport::StaticClass()) )
+	{
+		UCanvas* Canvas = *(UCanvas**)((BYTE*)P + 0x7c);
+		if( Canvas && (*(BYTE*)((BYTE*)Canvas + 0xb8) & 1) )
+			Canvas->StartFade(FColor(0xff000000u), FColor(0xffffffffu), 0.f, 1);
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSetViewTarget );
 
-IMPL_TODO("Ghidra 0x10425910; 292b -- if player connected: fires PreClientTravel event via FindFunctionChecked, then calls engine ClientTravel vtable (+0xa4) with URL/type/items; our stub is empty")
+// Ghidra 0x10425910, 292b. Reads: FString URL, BYTE TravelType, UBOOL bItems.
+// If Player connected (+0x5b4 != 0): fires PreClientTravel event, then calls
+// UEngine::SetClientTravel(Viewport, URL, bItems, TravelType).
+IMPL_MATCH("Engine.dll", 0x10425910)
 void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientTravel);
@@ -666,20 +744,41 @@ void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 	P_GET_BYTE(TravelType);
 	P_GET_UBOOL(bItems);
 	P_FINISH;
+	if( *(INT*)((BYTE*)this + 0x5b4) )
+	{
+		eventPreClientTravel();
+		if( XLevel && XLevel->Engine )
+			XLevel->Engine->SetClientTravel(
+				*(UPlayer**)((BYTE*)this + 0x5b4), *URL, bItems, (ETravelType)TravelType );
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientTravel );
 
-IMPL_TODO("Ghidra 0x10425c90; 259b -- if local player and audio system exists, forwards to audio system vtable (+0x84) with Actor, Sound, Location flags; our stub is empty")
+// Ghidra 0x10425c90, 259b. Reads: Object Actor, Object Sound, Byte Flags (3 params, not 5).
+// Checks LocalPlayerController(). If local and Audio exists:
+//   If Actor has bSpatialSound-clear flag (actor+0xa0 high bit set): zero Actor.
+//   Calls Audio->vtable[0x84/4](Actor, Sound, Flags, 0).
+IMPL_MATCH("Engine.dll", 0x10425c90)
 void APlayerController::execClientHearSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientHearSound);
 	P_GET_OBJECT(AActor,Actor);
-	P_GET_INT(Id);
 	P_GET_OBJECT(USound,S);
-	P_GET_VECTOR(SoundLocation);
-	P_GET_INT(Flags);
+	P_GET_BYTE(SoundFlags);
 	P_FINISH;
+	if( LocalPlayerController() )
+	{
+		UAudioSubsystem* Audio = (XLevel && XLevel->Engine) ? XLevel->Engine->Audio : NULL;
+		if( Audio )
+		{
+			if( Actor && *(signed char*)((BYTE*)Actor + 0xa0) < 0 )
+				Actor = NULL;
+			typedef void (__thiscall* TPlayFn)(UAudioSubsystem*, AActor*, USound*, BYTE, INT);
+			TPlayFn playFn = *(TPlayFn*)((BYTE*)*(DWORD*)Audio + 0x84);
+			playFn(Audio, Actor, S, SoundFlags, 0);
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientHearSound );
@@ -705,10 +804,14 @@ void APlayerController::execCopyToClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execCopyToClipboard );
 
-IMPL_TODO("Ghidra 0x10420760; 190b -- Ghidra shows one FString param read before P_FINISH (discarded, never used); our stub omits that param read; appClipboardPaste()+result assignment matches")
+// Ghidra 0x10420760, 190b. SEH frame present → guard/unguard correct.
+// Retail reads one FString param (into a local, discarded) before P_FINISH,
+// then assigns appClipboardPaste() result to the return slot.
+IMPL_MATCH("Engine.dll", 0x10420760)
 void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPasteFromClipboard);
+	P_GET_STR(Dummy); // Ghidra: FString local_28 read from bytecode, never used
 	P_FINISH;
 	*(FString*)Result = appClipboardPaste();
 	unguard;
@@ -761,49 +864,103 @@ void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execIsPBEnabled );
 
-IMPL_TODO("Ghidra 0x1038f520; 299b -- reads FString(KeyName)+INT(device) params and returns UBOOL byte via viewport vtable (+0x88); our stub reads INT and returns FString")
+// Ghidra 0x1038f520, 299b. Reads FString KeyName, INT Device. Returns UBOOL byte.
+// device==0: keyboard input (+0x84)->vtable[0x88](KeyName) → UBOOL.
+// device!=0: mouse/gamepad input (+0x88)->vtable[0x88](KeyName) → UBOOL.
+IMPL_MATCH("Engine.dll", 0x1038f520)
 void APlayerController::execGetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetKey);
-	P_GET_INT(KeyNum);
+	P_GET_STR(KeyName);
+	P_GET_INT(Device);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	*(BYTE*)Result = 0;
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
+	if( P && P->IsA(UViewport::StaticClass()) )
+	{
+		INT* InputObj = (Device == 0)
+			? *(INT**)((BYTE*)P + 0x84)
+			: *(INT**)((BYTE*)P + 0x88);
+		if( InputObj )
+		{
+			typedef BYTE (__thiscall* TKeyFn)(INT*, const TCHAR*);
+			TKeyFn fn = *(TKeyFn*)((BYTE*)*InputObj + 0x88);
+			*(BYTE*)Result = fn(InputObj, *KeyName);
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 2706, execGetKey );
 
-IMPL_TODO("Ghidra 0x1038f7a0; 288b -- reads BYTE(device)+INT(action) params and returns FString via viewport vtable (+0x90); our stub reads FString param and returns empty")
+// Ghidra 0x1038f7a0, 288b. Reads BYTE Device, INT Action. Returns FString.
+// device==0: keyboard input (+0x84)->vtable[0x90](result, action).
+// device!=0: mouse/gamepad input (+0x88)->vtable[0x90](result, action).
+IMPL_MATCH("Engine.dll", 0x1038f7a0)
 void APlayerController::execGetActionKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetActionKey);
-	P_GET_STR(ActionName);
+	P_GET_BYTE(Device);
+	P_GET_INT(Action);
 	P_FINISH;
 	*(FString*)Result = TEXT("");
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
+	if( P && P->IsA(UViewport::StaticClass()) )
+	{
+		INT* InputObj = (Device == 0)
+			? *(INT**)((BYTE*)P + 0x84)
+			: *(INT**)((BYTE*)P + 0x88);
+		if( InputObj )
+		{
+			typedef FString* (__thiscall* TGetActionFn)(INT*, FString*, DWORD);
+			TGetActionFn fn = *(TGetActionFn*)((BYTE*)*InputObj + 0x90);
+			FString* R = fn(InputObj, (FString*)Result, (DWORD)Action);
+			if( R != (FString*)Result )
+				*(FString*)Result = *R;
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 2707, execGetActionKey );
 
-IMPL_TODO("Ghidra 0x1038f680; 231b -- reads BYTE(key)+INT(device) params and returns enum key-name string via viewport vtable (+0x80); falls back to L\"IK_None\"; our stub reads INT and returns empty")
+// Ghidra 0x1038f680, 231b. Reads BYTE Key, INT Device. Returns FString key enum name.
+// device==0: keyboard input (+0x84)->vtable[0x80](key) → const wchar_t* name.
+// device!=0: mouse/gamepad input (+0x88)->vtable[0x80](key) → name. Fallback: L"IK_None".
+IMPL_MATCH("Engine.dll", 0x1038f680)
 void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEnumName);
-	P_GET_INT(EnumIndex);
+	P_GET_BYTE(Key);
+	P_GET_INT(Device);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	const wchar_t* Name = L"IK_None";
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
+	if( P && P->IsA(UViewport::StaticClass()) )
+	{
+		INT* InputObj = (Device == 0)
+			? *(INT**)((BYTE*)P + 0x84)
+			: *(INT**)((BYTE*)P + 0x88);
+		if( InputObj )
+		{
+			typedef const wchar_t* (__thiscall* TGetNameFn)(INT*, BYTE);
+			TGetNameFn fn = *(TGetNameFn*)((BYTE*)*InputObj + 0x80);
+			Name = fn(InputObj, Key);
+		}
+	}
+	*(FString*)Result = FString(Name);
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 2708, execGetEnumName );
 
-IMPL_TODO("Ghidra 0x1038f900; 168b — forwards InputSet to UViewport::ChangeInputSet if player is a viewport")
+// Ghidra 0x1038f900, 168b. Reads BYTE InputSet. Calls UViewport::ChangeInputSet(InputSet).
+IMPL_MATCH("Engine.dll", 0x1038f900)
 void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execChangeInputSet);
-	P_GET_INT(InputSet);
+	P_GET_BYTE(InputSet);
 	P_FINISH;
-	// Forward the input-set change to the viewport if this is a local player.
-	UPlayer* P = *(UPlayer**)(&_NativeData[50]);  // this+0x5b4
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
 	if( P && P->IsA(UViewport::StaticClass()) )
-		((UViewport*)P)->ChangeInputSet( (BYTE)InputSet );
+		((UViewport*)P)->ChangeInputSet( InputSet );
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
@@ -842,19 +999,21 @@ IMPLEMENT_FUNCTION( APlayerController, 2714, execChangeVolumeTypeLinear );
 
 /*-- AAIController functions -------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x1038cf10; 203b; retail reads 3 optional params (FVector, UBOOL, FLOAT=1.0f) then sets Focus=Enemy; params read but unused; guard/unguard diverge")
+// Ghidra 0x1038cf10, 203b. No SEH → no guard/unguard.
+// Reads 3 optional params (FVector, UBOOL, FLOAT=1.0f) — all discarded.
+// Pawn at +0x3d8, Enemy at +0x400, Focus at +0x3e4. LatentAction = AI_PollWaitToSeeEnemy (0x1ff).
+IMPL_MATCH("Engine.dll", 0x1038cf10)
 void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
-	guard(AAIController::execWaitToSeeEnemy);
-	// Retail reads 3 optional params before P_FINISH; they are consumed but unused.
-	// Omitting reads here; P_FINISH handles the case where params are not provided.
+	P_GET_VECTOR_OPTX(UnusedLoc, FVector(0,0,0)); // param 1: FVector, read but discarded
+	P_GET_UBOOL_OPTX(UnusedBool, 0);               // param 2: UBOOL, read but discarded
+	P_GET_FLOAT_OPTX(UnusedFloat, 1.0f);           // param 3: FLOAT default 1.0, discarded
 	P_FINISH;
 	if( Pawn && Enemy )
 	{
 		Focus = Enemy;
 		GetStateFrame()->LatentAction = AI_PollWaitToSeeEnemy;
 	}
-	unguard;
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execWaitToSeeEnemy );
 
@@ -1309,14 +1468,16 @@ void APawn::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* 
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1037c590; 140b — logic matches: skip if m_bIsProne+IsEncroacher, save Floor, delegate; guard/unguard frame diverges")
+// Ghidra 0x1037c590, 140b. SEH present → guard/unguard correct.
+// Logic: if m_bIsProne (bit9 of +0x3e0 = 0x200) && NewBase != NULL
+//   && NewBase->IsEncroacher() (vtable+0x68) → early return.
+// Then stores NewFloor to Floor (+0x590), delegates to AActor::SetBase.
+IMPL_MATCH("Engine.dll", 0x1037c590)
 void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 {
 	guard(APawn::SetBase);
-	// Retail: if prone and new base is an Encroacher (mover/kactor), skip base change
 	if( m_bIsProne && NewBase && NewBase->IsEncroacher() )
 		return;
-	// Save floor vector before delegating (Ghidra: this+0x590 = Floor)
 	Floor = NewFloor;
 	AActor::SetBase( NewBase, NewFloor, bNotifyActor );
 	unguard;
@@ -1769,30 +1930,29 @@ INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AAc
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ef850; raw offsets: CrouchHeight=+0x454, CrouchRadius=+0x458, pawnFlags=+0x3e0, stepFrac=+0x424")
+// Ghidra 0x103ef850, 425b. SEH present → guard/unguard correct.
+// Two SingleLineCheck passes: first zero-extent (flags=0x286), second cylinder-extent (0x86).
+// Both traces: End = FeetLocation+hDelta, Start = TestLocation+hDelta (identical layout).
+// On clear second pass: sets bits 4+6 (0x50) at +0x3e0, stepFrac=0.5 at +0x424, returns 1.
+IMPL_MATCH("Engine.dll", 0x103ef850)
 INT APawn::CanCrouchWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanCrouchWalk);
-	// Height delta: CrouchHeight - CollisionHeight (how much to lower Z)
 	FLOAT hDelta = *(FLOAT*)((BYTE*)this + 0x454) - CollisionHeight;
-	// First trace: zero-extent line at crouch height level
 	FVector Start(TestLocation.X, TestLocation.Y, hDelta + TestLocation.Z);
-	FVector End(FeetLocation.X,   FeetLocation.Y,  hDelta + FeetLocation.Z);
+	FVector End  (FeetLocation.X, FeetLocation.Y, hDelta + FeetLocation.Z);
 	FCheckResult Hit(1.0f);
 	XLevel->SingleLineCheck(Hit, this, End, Start, 0x286, FVector(0.f,0.f,0.f));
 	if (!Hit.Actor)
 	{
-		FLOAT crouchH = *(FLOAT*)((BYTE*)this + 0x454);  // CrouchHeight
-		FLOAT crouchR = *(FLOAT*)((BYTE*)this + 0x458);  // CrouchRadius
-		// Second trace: cylinder-extent check at crouch height
-		FVector Start2(FeetLocation.X, FeetLocation.Y, hDelta + FeetLocation.Z);
-		FVector End2(TestLocation.X,   TestLocation.Y,  hDelta + TestLocation.Z);
+		FLOAT crouchH = *(FLOAT*)((BYTE*)this + 0x454);
+		FLOAT crouchR = *(FLOAT*)((BYTE*)this + 0x458);
 		FCheckResult Hit2(1.0f);
-		XLevel->SingleLineCheck(Hit2, this, End2, Start2, 0x86, FVector(crouchR, crouchR, crouchH));
+		XLevel->SingleLineCheck(Hit2, this, End, Start, 0x86, FVector(crouchR, crouchR, crouchH));
 		if (Hit2.Time == 1.0f)
 		{
-			*(DWORD*)((BYTE*)this + 0x3e0) |= 0x50u;   // set bits 4 and 6
-			*(FLOAT*)((BYTE*)this + 0x424) = 0.5f;     // step fraction
+			*(DWORD*)((BYTE*)this + 0x3e0) |= 0x50u;
+			*(FLOAT*)((BYTE*)this + 0x424) = 0.5f;
 			return 1;
 		}
 	}
@@ -1800,33 +1960,30 @@ INT APawn::CanCrouchWalk(FVector const& TestLocation, FVector const& FeetLocatio
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103efa30; raw offsets: ProneHeight=+0x464, ProneRadius=+0x468, pawnFlags=+0x3e0, stepFrac=+0x424")
+// Ghidra 0x103efa30, 454b. SEH present → guard/unguard correct.
+// Same structure as CanCrouchWalk but uses ProneHeight/ProneRadius and different bit flags.
+// bCanProne flag: bit11 of +0x3e0 (0x800). On clear: (~0x10|0x500) and stepFrac=1.5.
+IMPL_MATCH("Engine.dll", 0x103efa30)
 INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanProneWalk);
-	// Bit 11 of pawn flags must be set (bCanProne capability flag)
 	if (!(*(DWORD*)((BYTE*)this + 0x3e0) & 0x800u))
 		return 0;
-	FLOAT hDelta = *(FLOAT*)((BYTE*)this + 0x464) - CollisionHeight;  // ProneHeight - CollisionHeight
-	// First trace: zero-extent line at prone height level
+	FLOAT hDelta = *(FLOAT*)((BYTE*)this + 0x464) - CollisionHeight;
 	FVector Start(TestLocation.X, TestLocation.Y, hDelta + TestLocation.Z);
-	FVector End(FeetLocation.X,   FeetLocation.Y,  hDelta + FeetLocation.Z);
+	FVector End  (FeetLocation.X, FeetLocation.Y, hDelta + FeetLocation.Z);
 	FCheckResult Hit(1.0f);
 	XLevel->SingleLineCheck(Hit, this, End, Start, 0x286, FVector(0.f,0.f,0.f));
 	if (!Hit.Actor)
 	{
-		FLOAT proneH = *(FLOAT*)((BYTE*)this + 0x464);  // ProneHeight
-		FLOAT proneR = *(FLOAT*)((BYTE*)this + 0x468);  // ProneRadius
-		// Second trace: cylinder-extent check at prone height
-		FVector Start2(FeetLocation.X, FeetLocation.Y, hDelta + FeetLocation.Z);
-		FVector End2(TestLocation.X,   TestLocation.Y,  hDelta + TestLocation.Z);
+		FLOAT proneH = *(FLOAT*)((BYTE*)this + 0x464);
+		FLOAT proneR = *(FLOAT*)((BYTE*)this + 0x468);
 		FCheckResult Hit2(1.0f);
-		XLevel->SingleLineCheck(Hit2, this, End2, Start2, 0x86, FVector(proneR, proneR, proneH));
+		XLevel->SingleLineCheck(Hit2, this, End, Start, 0x86, FVector(proneR, proneR, proneH));
 		if (Hit2.Time == 1.0f)
 		{
-			// Clear bit 4, set bits 8 and 10
 			*(DWORD*)((BYTE*)this + 0x3e0) = (*(DWORD*)((BYTE*)this + 0x3e0) & ~0x10u) | 0x500u;
-			*(FLOAT*)((BYTE*)this + 0x424) = 1.5f;      // step fraction
+			*(FLOAT*)((BYTE*)this + 0x424) = 1.5f;
 			return 1;
 		}
 	}
