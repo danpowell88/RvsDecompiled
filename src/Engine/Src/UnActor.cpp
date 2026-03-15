@@ -1712,7 +1712,7 @@ void AActor::execGetNextSkin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 545, execGetNextSkin );
 
-IMPL_DIVERGE("always returns empty string — locale int lookup not implemented")
+IMPL_TODO("always returns empty string — locale int lookup not implemented")
 void AActor::execGetNextInt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextInt);
@@ -1749,7 +1749,7 @@ void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetCacheEntry );
 
-IMPL_DIVERGE("always returns 0 — cache entry move not implemented")
+IMPL_TODO("always returns 0 — cache entry move not implemented")
 void AActor::execMoveCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMoveCacheEntry);
@@ -1841,7 +1841,7 @@ void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1311, execSetServerBeacon );
 
-IMPL_DIVERGE("always returns empty string — server beacon not implemented")
+IMPL_TODO("always returns empty string — server beacon not implemented")
 void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerBeacon);
@@ -1991,7 +1991,7 @@ void AActor::execConvertIntTimeToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1520, execConvertIntTimeToString );
 
-IMPL_DIVERGE("returns input GUID string unchanged — GlobalID lookup not implemented")
+IMPL_TODO("returns input GUID string unchanged — GlobalID lookup not implemented")
 void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToString);
@@ -2002,7 +2002,7 @@ void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1522, execGlobalIDToString );
 
-IMPL_DIVERGE("parses GUID string but performs no action — GlobalID byte conversion not implemented")
+IMPL_TODO("parses GUID string but performs no action — GlobalID byte conversion not implemented")
 void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToBytes);
@@ -2012,7 +2012,7 @@ void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1523, execGlobalIDToBytes );
 
-IMPL_DIVERGE("always returns empty string — tag informations not implemented")
+IMPL_TODO("always returns empty string — tag informations not implemented")
 void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetTagInformations);
@@ -2060,7 +2060,7 @@ void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1801, execDbgAddLine );
 
-IMPL_DIVERGE("parses Index but performs no action — player menu info not implemented")
+IMPL_TODO("parses Index but performs no action — player menu info not implemented")
 void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetFPlayerMenuInfo);
@@ -2070,7 +2070,7 @@ void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1230, execGetFPlayerMenuInfo );
 
-IMPL_DIVERGE("parses Index but performs no action — set player menu info not implemented")
+IMPL_TODO("parses Index but performs no action — set player menu info not implemented")
 void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFPlayerMenuInfo);
@@ -2080,7 +2080,7 @@ void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1231, execSetFPlayerMenuInfo );
 
-IMPL_DIVERGE("parses Index but performs no action — player setup info not implemented")
+IMPL_TODO("parses Index but performs no action — player setup info not implemented")
 void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetPlayerSetupInfo);
@@ -2090,7 +2090,7 @@ void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1232, execGetPlayerSetupInfo );
 
-IMPL_DIVERGE("parses Index but performs no action — set player setup info not implemented")
+IMPL_TODO("parses Index but performs no action — set player setup info not implemented")
 void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlayerSetupInfo);
@@ -2100,7 +2100,7 @@ void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1233, execSetPlayerSetupInfo );
 
-IMPL_DIVERGE("no-op stub — player menu sort not implemented")
+IMPL_TODO("no-op stub — player menu sort not implemented")
 void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSortFPlayerMenuInfo);
@@ -2183,7 +2183,7 @@ void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2014, execInPlanningMode );
 
-IMPL_DIVERGE("parses ScreenName but performs no action — loading screen not implemented")
+IMPL_TODO("parses ScreenName but performs no action — loading screen not implemented")
 void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadLoadingScreen);
@@ -2193,7 +2193,7 @@ void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2613, execLoadLoadingScreen );
 
-IMPL_DIVERGE("no-op stub — random background image loading not implemented")
+IMPL_TODO("no-op stub — random background image loading not implemented")
 void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadRandomBackgroundImage);
@@ -2202,7 +2202,7 @@ void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2607, execLoadRandomBackgroundImage );
 
-IMPL_DIVERGE("always returns 0 — resolution enumeration not implemented")
+IMPL_TODO("always returns 0 — resolution enumeration not implemented")
 void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNbAvailableResolutions);
@@ -2236,7 +2236,7 @@ void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_DIVERGE("DIVERGENCE: retail queries VRAM via UViewport vtable chain at 0xC0 and tests >32 MB (Ghidra 0x10427350); returns 1 as safe default for modern GPUs")
+IMPL_TODO("DIVERGENCE: retail queries VRAM via UViewport vtable chain at 0xC0 and tests >32 MB (Ghidra 0x10427350); returns 1 as safe default for modern GPUs")
 void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
@@ -2627,7 +2627,7 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 // calls GetR6AvailabilityPtr for each entry, sets availability flags.
 // If GameType=="RGM_AllMode": enable all entries, disable AllMode flag.
 // Else: enable all entries, disable the matching GameType entry.
-IMPL_DIVERGE("GetR6AvailabilityPtr returns NULL in base class so loop is no-op; XLevel+0x5d0 field not mapped (Ghidra 0x1037b4d0)")
+IMPL_TODO("GetR6AvailabilityPtr returns NULL in base class so loop is no-op; XLevel+0x5d0 field not mapped (Ghidra 0x1037b4d0)")
 void AActor::SetGameType( FString GameType )
 {
 	// Ghidra: iterates XLevel->gameTypes array; GetR6AvailabilityPtr is NULL in base class.
@@ -2716,7 +2716,7 @@ INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Sta
 
 // Ghidra 0x1042d510 (425 bytes): dispatches to demo-replay system; checks function flags
 // (0x74 & 0x2040 == 0x40), sets up FFrame, invokes GNatives. Demo recording omitted.
-IMPL_DIVERGE("demo recording omitted; retail dispatches function to replay system via FFrame (Ghidra 0x1042d510)")
+IMPL_TODO("demo recording omitted; retail dispatches function to replay system via FFrame (Ghidra 0x1042d510)")
 void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessDemoRecFunction);
@@ -3460,7 +3460,7 @@ FLOAT AActor::WorldLightRadius() const
 // Ghidra 0x1040c960 (2237 bytes): large editor visualization function.
 // Renders actor type indicators, collision hulls, and debug annotations.
 // Requires render interface types not fully mapped in this reconstruction.
-IMPL_DIVERGE("editor rendering subsystem not implemented; 2237 bytes at Ghidra 0x1040c960")
+IMPL_TODO("editor rendering subsystem not implemented; 2237 bytes at Ghidra 0x1040c960")
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: requires editor render subsystem (FRenderInterface, FLevelSceneNode calls)
@@ -3468,7 +3468,7 @@ void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI,
 
 // Ghidra 0x1040b2f0 (1601 bytes): renders selection highlight for selected actors.
 // Outlines mesh primitives and calls render interface via binary-specific vtable layout.
-IMPL_DIVERGE("editor selection rendering not implemented; 1601 bytes at Ghidra 0x1040b2f0")
+IMPL_TODO("editor selection rendering not implemented; 1601 bytes at Ghidra 0x1040b2f0")
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: requires editor render subsystem (FRenderInterface, FLevelSceneNode calls)
@@ -4155,7 +4155,7 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 // Ghidra 0x103978a0 (2040 bytes): validates actor consistency — checks bDeleteMe, hidden
 // default vs instance flags, duplicate locations, broken base links, Karma params.
 // Requires XLevel actor list, GWarn, UClass::GetDefaultActor. Deferred.
-IMPL_DIVERGE("editor validation function 2040 bytes; requires XLevel actor list and GWarn (Ghidra 0x103978a0)")
+IMPL_TODO("editor validation function 2040 bytes; requires XLevel actor list and GWarn (Ghidra 0x103978a0)")
 void AActor::CheckForErrors()
 {
     // STUB: requires full editor environment (GWarn, XLevel actor iteration)
@@ -4489,7 +4489,7 @@ void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FSt
 
 // Ghidra 0x103791f0 (681 bytes): iterates m_dbgVectorInfo entries and draws each as a
 // cylinder + label via FRenderInterface. Requires render interface not fully mapped.
-IMPL_DIVERGE("iterates m_dbgVectorInfo and draws via FRenderInterface; render types not mapped (Ghidra 0x103791f0)")
+IMPL_TODO("iterates m_dbgVectorInfo and draws via FRenderInterface; render types not mapped (Ghidra 0x103791f0)")
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
     // STUB: requires FRenderInterface draw calls (cylinder, text label)
@@ -4598,7 +4598,7 @@ FLOAT ABrush::BuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 // Ghidra 0x10307930 (471 bytes): builds model coords from TempScale (FScale at +0x3B0) and
 // a second FScale at +0x3C4, combined with Location/Rotation. Returns product of their
 // FScale::Orientation() values. FScale field layout at +0x3B0/0x3C4 not yet confirmed.
-IMPL_DIVERGE("FScale fields at +0x3B0/0x3C4 not confirmed; falls back to identity transforms (Ghidra 0x10307930)")
+IMPL_TODO("FScale fields at +0x3B0/0x3C4 not confirmed; falls back to identity transforms (Ghidra 0x10307930)")
 FLOAT ABrush::OldBuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 {
 	// Retail RVA 0x7930 (0x10307930): builds model coords from brush TempScale, Location
