@@ -13,7 +13,9 @@ class R6PlanningCtrl extends PlayerController
     native
     config(User);
 
+// Raw key code injected into the UI input system to trigger the right-click action-point context popup
 const R6InputKey_ActionPopup = 1024;
+// Raw key code injected to trigger the right-click path-flag context popup
 const R6InputKey_PathFlagPopup = 1026;
 
 var int m_iCurrentTeam;  // editing which team
@@ -23,6 +25,7 @@ var int m_3DWindowPositionW;  // region send by the planning widget to set the 3
 var int m_3DWindowPositionH;  // region send by the planning widget to set the 3d window size.
 var int m_iLevelDisplay;  // Current floor displayed
 var bool m_bRender3DView;  // 3D view is activated
+// True while the user is click-dragging to adjust the 3D mini-viewport camera
 var bool m_bMove3DView;
 var bool m_bActionPointSelected;  // to drag drop selected point.
 var bool m_bCanMoveFirstPoint;  // When dragging the first point, it must be dropped on an insertion zone
@@ -30,8 +33,10 @@ var bool m_bClickToFindLocation;  // Next click is to set an action
 var bool m_bClickedOnRange;  // When clicked on range icon, set to true
 var bool m_bSetSnipeDirection;  // mouse is moving to set the Sniping direction
 var bool m_bPlayMode;  // Play mode has been activated
+// In play-preview mode, locks the 2D camera to track the planning pawn rather than free-panning
 var bool m_bLockCamera;
 var(Debug) bool bShowLog;  // Show debug info
+// Guards one-time native initialisation that must run on the very first game tick
 var bool m_bFirstTick;
 var float m_fLastMouseX;  // mouse last move location to find the sniping direction
 var float m_fLastMouseY;  // mouse last move location to find the sniping direction
@@ -39,9 +44,11 @@ var float m_fZoom;  // Zoom
 var float m_fZoomDelta;  // Modification request on the zoom
 var float m_fZoomRate;  // Zoom speed
 var float m_fZoomMin;  // Minimum Zoom of the camera
+// Maximum zoom value (default 0.4 → FovAngle 36°; the most zoomed-out overhead view)
 var float m_fZoomMax;
 var float m_fZoomFactor;  // to adapt camera speeds with current zoom
 var float m_fCameraAngle;  // Change the camera Angle
+// Rate at which the camera pitch (overhead tilt) changes per second when the angle keys are held
 var float m_fAngleRate;
 var float m_fAngleMax;  // max distance on X to calculate the angle  min is obviously 0
 var float m_fRotateDelta;  // Modification request on the rotation
@@ -49,6 +56,7 @@ var float m_fRotateRate;  // Speed of the rotation
 var float m_fCamRate;  // 
 var(R6Planning) const float m_fCastingHeight;  // Height between the ground and the ActionPoint casted
 //#ifdefDEBUG
+// Debug-only scale multiplier for grenade range rings drawn in the planning view
 var float m_fDebugRangeScale;
 var R6PlanningInfo m_pTeamInfo[3];  // the team's planning
 var R6FileManagerPlanning m_pFileManager;  // to load/save planning
@@ -67,6 +75,7 @@ var Vector m_vCamDesiredPos;  // Camera will reach this direction.
 var Rotator m_rCamRot;  // Camera Rotation
 var Vector m_vCamDelta;  // Modification request on camera deplacement
 var Vector m_vMinLocation;  // Minimum location X,Y of the camera(Restriction from the map)
+// Maximum camera XY pan boundary, derived from Level.R6PlanningMaxVector
 var Vector m_vMaxLocation;
 
 // Export UR6PlanningCtrl::execGetClickResult(FFrame&, void* const)
@@ -102,7 +111,9 @@ function PostBeginPlay()
 	{
 		m_pFileManager = new (none) Class'R6Game.R6FileManagerPlanning';
 	}
+	// MaxInt sentinel; ensures the first valid insertion zone found wins the comparison
 	iCurrentInsertionNumber = 2147483647;
+	// Find the lowest-numbered insertion zone for this game type and centre the camera on it
 	// End:0x108
 	foreach AllActors(Class'R6Game.R6InsertionZone', anInsertionZone)
 	{
@@ -122,9 +133,11 @@ function PostBeginPlay()
 			break;
 		}		
 	}	
+	// Spawn a 2D planning-map icon at each rotating door's centre; locked doors use a distinct icon
 	// End:0x227
 	foreach AllActors(Class'R6Engine.R6IORotatingDoor', aDoor)
 	{
+		// Flag 1 = DF_ShowOnlyIn3DView: hide this door from the 2D overhead map, show in 3D preview only
 		aDoor.m_eDisplayFlag = 1;
 		// End:0x226
 		if((aDoor.m_bTreatDoorAsWindow == false))
@@ -138,21 +151,25 @@ function PostBeginPlay()
 			{
 				pSpawnedIcon = Spawn(Class'R6Engine.R6DoorIcon',,, aDoor.m_vCenterOfDoor);
 			}
+			// Compress 16-bit yaw (0-65535) to a byte (0-255) for the sprite's rotation lookup table
 			pSpawnedIcon.m_u8SpritePlanningAngle = byte((aDoor.Rotation.Yaw / 255));
 			pSpawnedIcon.m_iPlanningFloor_0 = aDoor.m_iPlanningFloor_0;
 			pSpawnedIcon.m_iPlanningFloor_1 = aDoor.m_iPlanningFloor_1;
 			// End:0x226
+			// Counter-clockwise doors get their icon mirrored along Y to indicate swing direction
 			if((aDoor.m_bIsOpeningClockWise == false))
 			{
 				pSpawnedIcon.SetDrawScale3D(vect(1.0000000, -1.0000000, 1.0000000));
 			}
 		}		
 	}	
+	// Unhide all reference icon actors (objective markers, area labels) for the planning overlay
 	// End:0x24A
 	foreach AllActors(Class'R6Engine.R6ReferenceIcons', RefIco)
 	{
 		RefIco.bHidden = false;		
 	}	
+	// Make insertion zone actors visible on the planning map for the current game type
 	// End:0x298
 	foreach AllActors(Class'R6Abstract.R6AbstractInsertionZone', NavPoint)
 	{
@@ -162,6 +179,7 @@ function PostBeginPlay()
 			NavPoint.bHidden = false;
 		}		
 	}	
+	// Make extraction zone actors visible on the planning map for the current game type
 	// End:0x2E6
 	foreach AllActors(Class'R6Abstract.R6AbstractExtractionZone', ExtZone)
 	{
@@ -172,6 +190,7 @@ function PostBeginPlay()
 		}		
 	}	
 	m_CamSpot = Level.GetCamSpot(Level.Game.m_szGameTypeFlag);
+	// Disable 3D world rendering while in the planning screen to save GPU time
 	Level.m_bAllow3DRendering = false;
 	return;
 }
@@ -187,15 +206,18 @@ function Set3DViewPosition(int NewX, int NewY, int NewH, int NewW)
 
 function SetPlanningInfo()
 {
+	// Bind each team's R6PlanningInfo from the pre-game lobby session (Red=0, Green=1, Gold=2)
 	m_pTeamInfo[0] = R6PlanningInfo(Player.Console.Master.m_StartGameInfo.m_TeamInfo[0].m_pPlanning);
 	m_pTeamInfo[1] = R6PlanningInfo(Player.Console.Master.m_StartGameInfo.m_TeamInfo[1].m_pPlanning);
 	m_pTeamInfo[2] = R6PlanningInfo(Player.Console.Master.m_StartGameInfo.m_TeamInfo[2].m_pPlanning);
 	m_pTeamInfo[0].m_pTeamManager = self;
 	m_pTeamInfo[1].m_pTeamManager = self;
 	m_pTeamInfo[2].m_pTeamManager = self;
+	// Record each team's lobby-selected insertion zone index; will be overridden if the player relocates the first waypoint
 	m_pTeamInfo[0].m_iStartingPointNumber = Player.Console.Master.m_StartGameInfo.m_TeamInfo[0].m_iSpawningPointNumber;
 	m_pTeamInfo[1].m_iStartingPointNumber = Player.Console.Master.m_StartGameInfo.m_TeamInfo[1].m_iSpawningPointNumber;
 	m_pTeamInfo[2].m_iStartingPointNumber = Player.Console.Master.m_StartGameInfo.m_TeamInfo[2].m_iSpawningPointNumber;
+	// Assign UI display colours used to tint path lines and action point sprites per team
 	m_pTeamInfo[0].m_TeamColor = WindowConsole(Player.Console).Root.Colors.TeamColorLight[0];
 	m_pTeamInfo[1].m_TeamColor = WindowConsole(Player.Console).Root.Colors.TeamColorLight[1];
 	m_pTeamInfo[2].m_TeamColor = WindowConsole(Player.Console).Root.Colors.TeamColorLight[2];
@@ -254,6 +276,7 @@ event PlayerTick(float fDeltaTime)
 	local R6ActionPoint pCurrentPoint;
 
 	super.PlayerTick(fDeltaTime);
+	// R6PlanningInfo is not an Actor so its Tick() is never called automatically; we drive it here
 	// End:0x77
 	if(WindowConsole(Player.Console).Root.PlanningShouldDrawPath())
 	{
@@ -261,6 +284,7 @@ event PlayerTick(float fDeltaTime)
 		m_pTeamInfo[1].Tick(fDeltaTime);
 		m_pTeamInfo[2].Tick(fDeltaTime);
 	}
+	// Zoom: m_fZoomFactor = zoom*12 scales pan speed; FovAngle = zoom*90 gives true FOV (range 4.5°-36°)
 	// End:0xD2
 	if((m_fZoomDelta != 0.0000000))
 	{
@@ -269,6 +293,7 @@ event PlayerTick(float fDeltaTime)
 		m_fZoomFactor = (m_fZoom * float(12));
 		FovAngle = (m_fZoom * float(90));
 	}
+	// Pitch: camera slides along a circular arc so it always looks at the same ground point while tilting
 	// End:0x1A9
 	if((m_fCameraAngle != float(0)))
 	{
@@ -277,8 +302,10 @@ event PlayerTick(float fDeltaTime)
 		m_vCamPos.Z = (15000.0000000 * fAngle);
 		fAngle = Atan((m_vCamPos.Z / m_vCamPos.X));
 		(fAngle /= (3.1415930 * 0.5000000));
+		// UE2 rotator: 65536 = full circle; 16384 = 90°; subtract to produce a downward-facing pitch
 		m_rCamRot.Pitch = (65536 - int((Abs(fAngle) * float(16384))));
 	}
+	// Yaw: accumulate rotation delta to spin the overhead camera around the map
 	// End:0x1D2
 	if((m_fRotateDelta != 0.0000000))
 	{
@@ -289,6 +316,7 @@ event PlayerTick(float fDeltaTime)
 	vAxisY = Normal(vAxisY);
 	vAxisZ.Z = 0.0000000;
 	vAxisZ = Normal(vAxisZ);
+	// During play-preview with camera lock, follow the planning pawn rather than accepting keyboard pan input
 	// End:0x26C
 	if(((m_bPlayMode == true) && (m_bLockCamera == true)))
 	{
@@ -299,6 +327,7 @@ event PlayerTick(float fDeltaTime)
 	{
 		fMovementX = ((m_vCamDelta.Y * fDeltaTime) * m_fZoomFactor);
 		fMovementY = ((m_vCamDelta.X * fDeltaTime) * m_fZoomFactor);
+		// If the player is actively panning, move immediately; otherwise lerp toward the desired position
 		// End:0x3A9
 		if((((m_vCamDesiredPos == m_vCamPosNoRot) || (fMovementX != float(0))) || (fMovementY != float(0))))
 		{
@@ -310,6 +339,7 @@ event PlayerTick(float fDeltaTime)
 		{
 			m_vCamPosNoRot.X = FClamp((m_vCamPosNoRot.X + ((m_vCamDesiredPos.X - m_vCamPosNoRot.X) * fDeltaTime)), Level.R6PlanningMinVector.X, Level.R6PlanningMaxVector.X);
 			m_vCamPosNoRot.Y = FClamp((m_vCamPosNoRot.Y + ((m_vCamDesiredPos.Y - m_vCamPosNoRot.Y) * fDeltaTime)), Level.R6PlanningMinVector.Y, Level.R6PlanningMaxVector.Y);
+			// Snap camera to the target when within 20 Unreal units to avoid infinite creep
 			// End:0x483
 			if((VSize((m_vCamDesiredPos - m_vCamPosNoRot)) < float(20)))
 			{
@@ -317,6 +347,7 @@ event PlayerTick(float fDeltaTime)
 			}
 		}
 	}
+	// While a snipe direction is being set, re-project the mouse cursor to world space every frame
 	// End:0x4D0
 	if((m_bSetSnipeDirection == true))
 	{
@@ -587,6 +618,7 @@ function ChangeLevelDisplay(int iStep)
 //-----------------------------------------------------------//
 //                      Mouse functions                      //
 //-----------------------------------------------------------//
+// Left-click dispatcher: places new waypoints, selects existing points, or targets a grenade/snipe location
 function LMouseDown(float X, float Y)
 {
 	local Actor pHitActor;
@@ -612,6 +644,7 @@ function LMouseDown(float X, float Y)
 	// End:0x770
 	if((GetClickResult(X, Y, vHitLocation, pHitActor, iChangeLevelTo) == true))
 	{
+		// m_bClickToFindLocation mode: the next click sets a grenade target or other action location, not a waypoint
 		// End:0x251
 		if((m_bClickToFindLocation == true))
 		{
@@ -752,6 +785,7 @@ function LMouseDown(float X, float Y)
 								// End:0x710
 								if(pHitActor.IsA('R6InsertionZone'))
 								{
+									// Insertion zones are the only valid location for a team's very first waypoint
 									// End:0x5E3
 									if((m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode == -1))
 									{
@@ -818,6 +852,7 @@ function LMouseUp(float X, float Y)
 	// End:0x20C
 	if(((m_bActionPointSelected == true) && (WindowConsole(Player.Console).Root.m_bUseDragIcon == true)))
 	{
+		// Temporarily hide the dragged waypoint so the ray-cast hits the surface beneath it, not the waypoint itself
 		m_pTeamInfo[m_iCurrentTeam].GetPoint().bHidden = true;
 		// End:0x1E1
 		if((GetClickResult(X, Y, vHitLocation, pHitActor, iChangeLevelTo) == true))
@@ -1113,6 +1148,7 @@ function ResetIDs()
 	return;
 }
 
+// Maps EPlanActionType to icon texture slots: 2=Alpha, 3=Bravo, 4=Charlie team labels; 1=Milestone (slot 2+iMilestone gives badges 1-9)
 function Texture GetActionTypeTexture(Object.EPlanActionType EActionType, optional int iMilestone)
 {
 	switch(EActionType)
@@ -1150,12 +1186,14 @@ function MoveActionPointTo(Vector vHitLocation, int iFirstFloor, int iSecondFloo
 	local R6ActionPoint pCurrentActionPoint;
 	local Vector vBackupLocation;
 
+	// The first waypoint (insertion point) can only be moved if the drag originated from within an insertion zone
 	// End:0x34
 	if(((m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode == 0) && (m_bCanMoveFirstPoint == false)))
 	{
 		PlaySound(m_PlanningBadClickSnd, 9);
 		return;
 	}
+	// Raise the target Z by m_fCastingHeight so the waypoint spawns above the surface geometry, not inside it
 	(vHitLocation.Z += m_fCastingHeight);
 	pCurrentActionPoint = GetCurrentPoint();
 	vBackupLocation = pCurrentActionPoint.Location;
@@ -1211,6 +1249,7 @@ function bool CastActionPointAt(Vector vLocation, int iFirstFloor, int iSecondFl
 		Log("-->First ActionPoint must be on an InsertionZone!");
 		bReturnValue = false;
 	}
+	// Hard cap: more than 500 waypoints per team causes performance problems and is unsupported
 	// End:0xAF
 	if((pTeamInfo.m_NodeList.Length > 500))
 	{
@@ -1221,6 +1260,7 @@ function bool CastActionPointAt(Vector vLocation, int iFirstFloor, int iSecondFl
 	if(bReturnValue)
 	{
 		(vLocation.Z += m_fCastingHeight);
+		// FindSpot checks clearance using a box matching an operative's crouch size (42x42 lateral, 62 vertical)
 		bResult = FindSpot(vLocation, vect(42.0000000, 42.0000000, 62.0000000));
 		// End:0x374
 		if((bResult == true))
@@ -1254,6 +1294,7 @@ function bool CastActionPointAt(Vector vLocation, int iFirstFloor, int iSecondFl
 					if((m_pTeamInfo[m_iCurrentTeam].InsertPoint(pNewActionPoint) == true))
 					{
 						pNewActionPoint.m_iRainbowTeamName = m_iCurrentTeam;
+						// If the new waypoint lands near the edge of the planning viewport, auto-pan the camera over it
 						// End:0x26E
 						if(((((X < 100) || (X > 544)) || (Y < 54)) || (Y > 326)))
 						{
@@ -1322,6 +1363,7 @@ function DeleteOneNode()
 	{
 		PlaySound(m_PlanningBadClickSnd, 9);
 	}
+	// After deletion, sync the visible floor to the newly selected waypoint's floor index
 	// End:0x5E
 	if((GetCurrentPoint() != none))
 	{
@@ -1343,6 +1385,7 @@ function PositionCameraOnInsertionZone()
 {
 	local R6InsertionZone anInsertionZone;
 
+	// Insertion zone 0 is the primary spawn point; reset the view to it when all waypoints are cleared
 	// End:0x9E
 	foreach AllActors(Class'R6Game.R6InsertionZone', anInsertionZone)
 	{
@@ -1352,6 +1395,7 @@ function PositionCameraOnInsertionZone()
 			SetFloorToDraw(anInsertionZone.m_iPlanningFloor_0);
 			m_iLevelDisplay = anInsertionZone.m_iPlanningFloor_0;
 			m_vCamDesiredPos = anInsertionZone.Location;
+			// Zero Z so the planning camera rests at its overhead height (controlled separately by SetFloorToDraw)
 			m_vCamDesiredPos.Z = 0.0000000;
 			// End:0x9E
 			break;
@@ -1431,6 +1475,7 @@ function Object.EMovementMode GetMovementMode()
 // Locate the camera over the current ActionPoint
 function MoveCamOver()
 {
+	// Pan XY to the selected waypoint; vertical position is managed separately by SetFloorToDraw
 	// End:0x67
 	if((GetCurrentPoint() != none))
 	{
@@ -1458,6 +1503,7 @@ function StopPlayingPlanning()
 
 state PlayerWalking
 {
+	// Translates held boolean input flags into signed delta values; opposing keys cancel each other to produce zero delta
 	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
 	{
 		// End:0x3B
@@ -1605,6 +1651,7 @@ state PlayerWalking
 	stop;
 }
 
+// Initial state; the controller starts here and transitions to PlayerWalking once the planning UI is ready
 auto state PlayerWaiting
 {
 	function EndState()
@@ -1619,6 +1666,7 @@ auto state PlayerWaiting
 	stop;
 }
 
+// Defaults: zoom=0.25 → FovAngle 22.5°; fZoomFactor=2 initial speed; Pitch=49153 ≈ 270° (straight down in UE2 rotator units)
 defaultproperties
 {
 	m_bFirstTick=true
