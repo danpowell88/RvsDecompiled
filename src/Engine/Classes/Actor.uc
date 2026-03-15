@@ -96,20 +96,35 @@ enum EStance
 
 enum EPhysics
 {
+	// No physics simulation; actor position set manually via SetLocation/Move.
 	PHYS_None,                      // 0
+	// Ground movement with gravity; standard mode for Pawns.
 	PHYS_Walking,                   // 1
+	// Airborne with gravity; set automatically when a walking pawn leaves the ground.
 	PHYS_Falling,                   // 2
+	// Fluid movement; reduced gravity inside water volumes.
 	PHYS_Swimming,                  // 3
+	// Full 3D movement, no gravity; used for flying vehicles and spectators.
 	PHYS_Flying,                    // 4
+	// Actor spins in place at RotationRate; no translational movement.
 	PHYS_Rotating,                  // 5
+	// Forward-velocity projectile with optional gravity scaling.
 	PHYS_Projectile,                // 6
+	// Engine-driven path interpolation for scripted/cinematic movement.
 	PHYS_Interpolating,             // 7
+	// For movers (doors, lifts, platforms); driven by C++ mover logic, not script.
 	PHYS_MovingBrush,               // 8
+	// Wall-walking; gravity pulls toward the current floor surface normal.
 	PHYS_Spider,                    // 9
+	// Position locked to Owner each tick; offset controlled by PrePivot.
 	PHYS_Trailer,                   // 10
+	// Constrained movement along a ladder volume.
 	PHYS_Ladder,                    // 11
+	// Position driven by the skeleton's root bone animation clip.
 	PHYS_RootMotion,                // 12
+	// Karma rigid-body physics simulation (MeSDK/Havok precursor).
 	PHYS_Karma,                     // 13
+	// Karma ragdoll physics; used for post-death skeletal mesh simulation.
 	PHYS_KarmaRagDoll               // 14
 };
 
@@ -504,10 +519,14 @@ struct PlayerMenuInfo
 };
 
 // NEW IN 1.60
+// Current physics mode; controls how the engine moves this actor each frame.
 var(Movement) const Actor.EPhysics Physics;
+// This machine's authority level: ROLE_Authority on the server, proxy roles on clients.
 var Actor.ENetRole Role;
+// How the remote end (clients) should simulate this actor; set by the server each replication tick.
 var Actor.ENetRole RemoteRole;
 // NEW IN 1.60
+// Rendering method: determines which draw path runs (DT_Mesh, DT_StaticMesh, DT_Sprite, etc.).
 var(Display) const Actor.EDrawType DrawType;
 var(Display) byte AmbientGlow;  // Ambient brightness, or 255=pulsing.
 var(Display) byte MaxLights;  // Limit to hardware lights active on this primitive.
@@ -593,6 +612,7 @@ var int m_iTracedCycles;
 var int m_iTracedLastTick;
 // Flags.
 var const bool bStatic;  // Does not move or change over time. Don't let L.D.s change this - screws up net play
+// Hidden actors still tick, collide, and receive damage; only rendering is skipped.
 var(Advanced) bool bHidden;  // Is hidden during gameplay.
 var(Advanced) const bool bNoDelete;  // Cannot be deleted during play.
 //#ifdef R6CODE
@@ -631,6 +651,7 @@ var const bool bNetTemporary;  // Tear-off simulation in network play.
 var const bool bNetOptional;  // Actor should only be replicated if bandwidth available.
 var const bool bNetDirty;  // set when any attribute is assigned a value in unrealscript, reset when the actor is replicated
 var bool bAlwaysRelevant;  // Always relevant for network.
+// Enables damage attribution on clients; ensures kill messages correctly identify the shooter.
 var bool bReplicateInstigator;  // Replicate instigator to client (used by bNetTemporary projectiles).
 var bool bReplicateMovement;  // if true, replicate movement/location related properties
 var bool bSkipActorPropertyReplication;  // if true, don't replicate actor class variables for this actor
@@ -686,8 +707,10 @@ var bool bPendingDelete;  // set when actor is about to be deleted (since endsta
 var(Advanced) bool m_bUseDifferentVisibleCollide;  // to use a different point to collide with this actor (in foreach VisibleCollidingActors)
 var bool m_b3DSound;  // Does this actor emits sounds in 3D
 // Collision flags.
+// Must be true for this actor to be findable via Touch/overlap/collision queries; use SetCollision() to change.
 var(Collision) const bool bCollideActors;  // Collides with other actors.
 var(Collision) bool bCollideWorld;  // Collides with the world.
+// When false, other actors can freely move through this one (useful for triggers and volumes).
 var(Collision) bool bBlockActors;  // Blocks other nonplayer actors.
 var(Collision) bool bBlockPlayers;  // Blocks other player actors.
 var(Collision) bool bProjTarget;  // Projectiles should potentially target this actor.
@@ -718,6 +741,7 @@ var bool m_bLightingVisibility;  // R6CODE
 // Options.
 var bool bIgnoreOutOfWorld;  // Don't destroy if enters zone zero
 var(Movement) bool bBounce;  // Bounces when hits ground fast.
+// When true, rotates at RotationRate regardless of velocity direction; useful for spinning decorations.
 var(Movement) bool bFixedRotationDir;  // Fixed direction of rotation.
 var(Movement) bool bRotateToDesired;  // Rotate to DesiredRotation.
 var bool bInterpolating;  // Performing interpolating.
@@ -726,6 +750,7 @@ var const bool bJustTeleported;  // Used by engine physics - not valid for scrip
 var bool m_bUseOriginalRotationInPlanning;
 // Symmetric network flags, valid during replication only.
 var const bool bNetInitial;  // Initial network update.
+// True only on the client that owns (controls) this actor; used for owner-specific HUD and sounds.
 var const bool bNetOwner;  // Player owns this actor.
 var const bool bNetRelevant;  // Actor is currently relevant. Only valid server side, only when replicating variables.
 var const bool bDemoRecording;  // True we are currently demo recording
@@ -788,6 +813,7 @@ var(Sound) float SoundRadius;  // Radius of ambient sound.
 var(Sound) float TransientSoundVolume;  // default sound volume for regular sounds (can be overridden in playsound)
 var(Sound) float TransientSoundRadius;  // default sound radius for regular sounds (can be overridden in playsound)
 // Collision size.
+// Axis-aligned collision cylinder: CollisionRadius = horizontal half-width, CollisionHeight = vertical half-height.
 var(Collision) const float CollisionRadius;  // Radius of collision cyllinder.
 var(Collision) const float CollisionHeight;  // Half-height cyllinder.
 // R6CIRCUMSTANTIALACTION
@@ -819,9 +845,12 @@ var(Lighting) float m_fCoronaMaxSize;
 var float m_fAttachFactor;  // Factor used by R6Tags.  if the scale changes (1.1 for rainbow character, 1 for Terrorists)
 var float m_fCummulativeTick;
 // Owner.
+// The actor that spawned or otherwise 'owns' this one; NULL for actors placed directly in the editor.
 var const Actor Owner;  // Owner actor.
 // Scriptable.
+// Shared reference to the level's LevelInfo; use Level.Game (server-only) to access game rules.
 var const LevelInfo Level;  // Level this actor is on.
+// The Pawn responsible for damage dealt by this actor (e.g. the player who fired a projectile).
 var Pawn Instigator;  // Pawn responsible for damage caused by this actor.
 var(R6Sound) Sound AmbientSound;  // Ambient sound effect.
 var(R6Sound) Sound AmbientSoundStop;  // Stop the ambient sound effect.
@@ -830,6 +859,7 @@ var Actor m_CurrentVolumeSound;  // Object responsible if the current ambience t
 //#ifndef R6CHANGEWEAPONSYSTEM
 //var Inventory             Inventory;     // Inventory chain.
 //#endif
+// When set, RelativeLocation/RelativeRotation describe this actor's offset relative to Base.
 var const Actor Base;  // Actor we're standing on.
 var const Actor Deleted;  // Next actor in just-deleted chain.
 // The actor's position and rotation.
@@ -872,6 +902,7 @@ var array<StaticMeshBatchRenderInfo> m_Batches;
 var const PointRegion Region;  // Region this actor is in.
 var(Movement) const Vector Location;  // Actor's location; use Move to set.
 var(Movement) const Rotator Rotation;  // Rotation.
+// Current movement vector in Unreal Units per second; modified by physics each frame.
 var(Movement) Vector Velocity;  // Velocity.
 var Vector Acceleration;  // Acceleration.
 var const Vector RelativeLocation;  // location relative to base/bone (valid if base exists)
@@ -885,6 +916,7 @@ var Vector PrePivot;  // Offset from box center for drawing.
 var(Display) Color m_fLightingAdditiveAmbiant;
 var(Advanced) Vector m_vVisibleCenter;  // use this vector instead of location when m_bUseDifferentVisibleCollide is true
 var Rotator sm_Rotation;
+// Rotator units: 65536 = full rotation, 16384 = 90 degrees, 32768 = 180 degrees.
 var(Movement) Rotator RotationRate;  // Change in rotation per second.
 var(Movement) Rotator DesiredRotation;  // Physics will smoothly rotate actor to this rotation if bRotateToDesired.
 var const Vector ColLocation;  // Actor's old location one move ago. Only for debugging
@@ -906,6 +938,8 @@ var const transient Vector OctreeBoxRadii;
 var transient AnimRep SimAnim;  // only replicated if bReplicateAnimations is true
 var const transient IndexBufferPtr m_OutlineIndexBuffer;
 
+// Replication block: variables synced from server to clients.
+// 'reliable' guarantees delivery; condition evaluated server-side each tick.
 replication
 {
 	// Pos:0x6E6
@@ -1536,6 +1570,7 @@ native final function StopAllMusic();
 //
 //event Destroyed();
 //R6SHADOW
+// Called just before the actor is removed from the world; clean up references, timers, and attachments here.
 event Destroyed()
 {
 	// End:0x17
@@ -1556,6 +1591,7 @@ event LostChild(Actor Other)
 	return;
 }
 
+// Called every frame by the engine; DeltaTime is elapsed seconds since the last frame.
 event Tick(float DeltaTime)
 {
 	return;
@@ -1564,11 +1600,13 @@ event Tick(float DeltaTime)
 //
 // Triggers.
 //
+// Called when an external actor fires an event matching this actor's Tag.
 event Trigger(Actor Other, Pawn EventInstigator)
 {
 	return;
 }
 
+// Called when an external actor fires an un-trigger event matching this actor's Tag.
 event UnTrigger(Actor Other, Pawn EventInstigator)
 {
 	return;
@@ -1587,6 +1625,7 @@ event EndEvent()
 //
 // Physics & world interaction.
 //
+// Called at intervals set by SetTimer(); bTimerLoop controls whether it repeats.
 event Timer()
 {
 	return;
@@ -1617,16 +1656,19 @@ event PhysicsVolumeChange(PhysicsVolume NewVolume)
 	return;
 }
 
+// Called when another actor first enters this one's collision cylinder.
 event Touch(Actor Other)
 {
 	return;
 }
 
+// Called after a move completes for any actor that was touched during the move.
 event PostTouch(Actor Other)
 {
 	return;
 }
 
+// Called when an actor leaves this one's collision cylinder after previously touching it.
 event UnTouch(Actor Other)
 {
 	return;
@@ -1846,6 +1888,7 @@ event PostTeleport(Teleporter OutTeleporter)
 }
 
 // Level state.
+// Called once after all actors have spawned and initialized; safe to reference other level actors here.
 event BeginPlay()
 {
 	return;
@@ -1874,33 +1917,43 @@ native final function bool GetCacheEntry(int Num, out string Guid, out string Fi
 native final function bool MoveCacheEntry(string Guid, optional string NewFilename);
 
 // Export UActor::execAllActors(FFrame&, void* const)
+// Iterates every actor in the level; very expensive - prefer DynamicActors or narrower iterators.
 native(304) final iterator function AllActors(Class<Actor> BaseClass, out Actor Actor, optional name MatchTag);
 
 // Export UActor::execDynamicActors(FFrame&, void* const)
+// Iterates only non-static (movable) actors; faster than AllActors for runtime use.
 native(313) final iterator function DynamicActors(Class<Actor> BaseClass, out Actor Actor, optional name MatchTag);
 
 // Export UActor::execChildActors(FFrame&, void* const)
+// Iterates actors whose Owner is this actor.
 native(305) final iterator function ChildActors(Class<Actor> BaseClass, out Actor Actor);
 
 // Export UActor::execBasedActors(FFrame&, void* const)
+// Iterates actors currently standing on (based on) this actor.
 native(306) final iterator function BasedActors(Class<Actor> BaseClass, out Actor Actor);
 
 // Export UActor::execTouchingActors(FFrame&, void* const)
+// Iterates actors currently overlapping this actor's collision cylinder.
 native(307) final iterator function TouchingActors(Class<Actor> BaseClass, out Actor Actor);
 
 // Export UActor::execTraceActors(FFrame&, void* const)
+// Iterates actors intersected by a line trace from Start to End.
 native(309) final iterator function TraceActors(Class<Actor> BaseClass, out Actor Actor, out Vector HitLoc, out Vector HitNorm, Vector End, optional Vector Start, optional Vector Extent);
 
 // Export UActor::execRadiusActors(FFrame&, void* const)
+// Iterates actors within Radius Unreal Units of Loc (defaults to this actor's Location).
 native(310) final iterator function RadiusActors(Class<Actor> BaseClass, out Actor Actor, float Radius, optional Vector Loc);
 
 // Export UActor::execVisibleActors(FFrame&, void* const)
+// Iterates actors visible via line-of-sight from Loc; more expensive than RadiusActors.
 native(311) final iterator function VisibleActors(Class<Actor> BaseClass, out Actor Actor, optional float Radius, optional Vector Loc);
 
 // Export UActor::execVisibleCollidingActors(FFrame&, void* const)
+// Iterates collidable actors within Radius that also pass a visibility (LOS) check from Loc.
 native(312) final iterator function VisibleCollidingActors(Class<Actor> BaseClass, out Actor Actor, float Radius, optional Vector Loc, optional bool bIgnoreHidden);
 
 // Export UActor::execCollidingActors(FFrame&, void* const)
+// Iterates actors with collision enabled within Radius of Loc; no visibility check.
 native(321) final iterator function CollidingActors(Class<Actor> BaseClass, out Actor Actor, float Radius, optional Vector Loc);
 
 // Export UActor::execSubtract_ColorColor(FFrame&, void* const)
@@ -1973,6 +2026,7 @@ event PostBeginPlay()
 
 // Called after PostBeginPlay.
 //
+// Called after PostBeginPlay; transitions the actor into its InitialState (or 'Auto' if none set).
 simulated event SetInitialState()
 {
 	bScriptInitialized = true;
@@ -2543,7 +2597,7 @@ event TriggerEvent(name EventName, Actor Other, Pawn EventInstigator)
 {
 	local Actor A;
 
-	// End:0x22
+	// Guard against empty names; the duplicate check mirrors decompiled bytecode exactly.
 	if(((EventName == 'None') || (EventName == 'None')))
 	{
 		return;
@@ -2687,6 +2741,7 @@ function R6FillSubAction(out R6AbstractCircumstantialActionQuery Query, int iSub
 }
 
 //R6CODE
+// Returns remaining kill value after this actor absorbs the hit; 0 if solid, full iKillValue if bullet passes through.
 function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
 	// End:0x15
