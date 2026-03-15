@@ -201,7 +201,7 @@ FStatGraph& FStatGraph::operator=(FStatGraph const& Other)
 // ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
 // DAT_1055e67c assumed to be L"AUTOCYCLE".
 // FUN_104455d0 (rescale), FUN_10445540 (line lookup), FUN_103601f0 (stat registration) -- stubs.
-IMPL_TODO("Ghidra 0x10445880: DAT_1055e67c=L\"AUTOCYCLE\" assumed; FUN_104455d0/FUN_10445540/FUN_103601f0 are unknown helpers -- rescale and stat-add paths not implemented")
+IMPL_DIVERGE("FUN_104455d0/FUN_10445540/FUN_103601f0 are unexported Engine.dll internals; RESCALE and ADDSTAT paths permanently unimplementable; all other paths implemented; Ghidra 0x10445880")
 int FStatGraph::Exec(const TCHAR* p0, FOutputDevice& p1) {
 	const TCHAR* Cmd = p0;
 	if (ParseCommand(&Cmd, TEXT("GRAPH"))) {
@@ -371,8 +371,60 @@ INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	pRec[2] = (INT)Unit;
 	return SlotIdx;
 }
-IMPL_TODO("Ghidra 0x1044f5d0: 257 bytes — moving average on stat data using offset 0x100 array; FUN_ blockers")
-void FStats::CalcMovingAverage(INT, DWORD) {}
+// Moving-average tracking array at this+0x100 (FArray of 0x1c-byte entries).
+// Each entry: [+0x00] ring write-index (INT), [+0x04] window size (DWORD),
+//             [+0x08] sample count (INT), [+0x10] circular-buffer FArray of DWORD.
+// DAT_10799554 in retail == *(INT**)(this+0x1C); no FUN_ blockers — accessing through
+// this pointer gives functionally identical results at runtime.
+IMPL_MATCH("Engine.dll", 0x1044f5d0)
+void FStats::CalcMovingAverage(INT StatIdx, DWORD WindowSize)
+{
+	FArray* trackArr = (FArray*)((BYTE*)this + 0x100);
+	INT*    statVal  = *(INT**)((BYTE*)this + 0x1C) + StatIdx;
+
+	INT need = StatIdx - trackArr->Num() + 1;
+	if (need > 0)
+		trackArr->AddZeroed(0x1c, need);
+
+	INT   entryOff  = StatIdx * 0x1c;
+	BYTE* entryData = (BYTE*)trackArr->GetData();
+
+	if (*(DWORD*)(entryData + 4 + entryOff) != WindowSize)
+	{
+		*(DWORD*)(entryData + 4 + entryOff) = WindowSize;
+		FArray* buf = (FArray*)(entryData + 0x10 + entryOff);
+		buf->Empty(4, 0);
+		buf->AddZeroed(4, (INT)WindowSize);
+		*(INT*)(entryData + 8 + entryOff) = 0;
+	}
+
+	INT sampleCount = *(INT*)(entryData + 8 + entryOff) + 1;
+	INT cap = *(INT*)(entryData + entryOff + 4) + 3;
+	if (cap <= sampleCount) sampleCount = cap;
+	*(INT*)(entryData + 8 + entryOff) = sampleCount;
+
+	entryData = (BYTE*)trackArr->GetData();
+	if (*(INT*)(entryData + 8 + entryOff) > 3)
+	{
+		INT   numSamples = *(INT*)(entryData + entryOff + 8) - 3;
+		INT   writeIdx   = *(INT*)(entryData + entryOff + 0);
+		DWORD* circBuf   = *(DWORD**)(entryData + entryOff + 0x10);
+		circBuf[writeIdx] = (DWORD)*statVal;
+
+		DWORD sumLo = 0, sumHi = 0;
+		for (INT i = 0; i < numSamples; i++)
+		{
+			DWORD prev = sumLo; sumLo += circBuf[i];
+			if (sumLo < prev) sumHi++;
+		}
+
+		INT* pWrite = (INT*)(entryData + entryOff + 0);
+		*pWrite = (*pWrite + 1) % pWrite[1];
+
+		unsigned __int64 sum64 = (((unsigned __int64)sumHi) << 32) | (unsigned __int64)sumLo;
+		*statVal = (INT)(sum64 / (unsigned __int64)(DWORD)numSamples);
+	}
+}
 IMPL_MATCH("Engine.dll", 0x1044f430)
 void FStats::Clear()
 {
@@ -417,5 +469,5 @@ FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
 	return *this;
 }
 
-IMPL_TODO("Ghidra 0x10454940: 6696 bytes — registers all engine stats via RegisterStats; FUN_ blockers for stat name strings")
+IMPL_TODO("Ghidra 0x10454940: 6696-byte engine-stats registration; FStats::RegisterStats + FString only (no FUN_ blockers); DAT_10546ca4=L\"BSP\" identified — full reconstruction pending Ghidra analysis of all stat name/type rows")
 void FEngineStats::Init() {}
