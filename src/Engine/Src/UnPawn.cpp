@@ -2704,11 +2704,47 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103f2c70: iterates XLevel ActorList for water volumes, finds water surface intersection; stub returns zero vector here")
+// Ghidra 0x103f2c70, 477b.
+// MultiLineCheck at vtable[0xd8] of XLevel (slot after SingleLineCheck and EncroachingWorldGeometry).
+// Flags 0x8e = TRACE_LevelGeometry|TRACE_Volumes|TRACE_Level|TRACE_Movers.
+// Level field confirmed at this+0x144 (Ghidra: *(this+0x144) passed as ALevelInfo*).
+// DIVERGE from exact retail: retail uses &APhysicsVolume::PrivateStaticClass directly;
+// PrivateStaticClass is private here so we call StaticClass() (extra indirection, same result).
+// FMemMark only Pop()'d on normal loop exit, NOT on early returns (matches Ghidra SEH unwind).
+IMPL_DIVERGE("Ghidra 0x103f2c70: retail uses &APhysicsVolume::PrivateStaticClass directly; PrivateStaticClass is private so we use StaticClass() (extra indirection, same result)")
 FVector APawn::findWaterLine(FVector Start, FVector End)
 {
 	guard(APawn::findWaterLine);
-	return FVector(0,0,0);
+	FMemMark Mark(GMem);
+	for( FCheckResult* Hit = XLevel->MultiLineCheck(GMem, Start, End, FVector(0,0,0), Level, 0x8e, this);
+	     Hit; Hit = Hit->GetNext() )
+	{
+		// Skip actors in this pawn's Owner chain (this, Owner, Owner->Owner, ...)
+		UBOOL bSkip = 0;
+		for( AActor* P = (AActor*)this; P; P = P->Owner )
+		{
+			if( P == Hit->Actor ) { bSkip = 1; break; }
+		}
+		if( bSkip ) continue;
+
+		// World geometry hit: fall through to return End (no Pop — matches Ghidra)
+		if( *(DWORD*)((BYTE*)Hit->Actor + 0xa0) & 0x100000 )
+			return End;
+
+// PrivateStaticClass is private; use StaticClass() (same address, one indirection)
+		if( Hit->Actor && Hit->Actor->IsA(APhysicsVolume::StaticClass()) &&
+		    (*(BYTE*)((BYTE*)Hit->Actor + 0x410) & 0x40) )
+		{
+			FVector Dir = (Start - End).SafeNormal();
+			// If we're inside our own body volume, push slightly inward; otherwise outward
+			if( Hit->Actor == (AActor*)PhysicsVolume )
+				return Hit->Location + Dir * 0.1f;
+			else
+				return Hit->Location - Dir * 0.1f;
+		}
+	}
+	Mark.Pop();
+	return End;
 	unguard;
 }
 
@@ -3299,9 +3335,9 @@ if (RouteGoal == GoalList[0])
 {
 if (GoalList[1])
 {
-// Walk GoalList[1+] to find the last non-null entry
+// Walk GoalList[1+] to find the first null entry (Ghidra: no upper bound)
 INT i = 1;
-while (i < 3 && GoalList[i]) i++;
+while (i < 4 && GoalList[i]) i++;
 AActor* nextGoal = GoalList[i - 1];
 if (Pawn->actorReachable(nextGoal, 0, 0))
 {
