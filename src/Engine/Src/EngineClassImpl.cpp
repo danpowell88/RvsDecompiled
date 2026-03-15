@@ -842,13 +842,38 @@ void AStatLog::execGetMapFileName( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetMapFileName );
 
-IMPL_DIVERGE("Ghidra 0x10317d10 (561 bytes): FMD5Context + appMD5Init/Update/Final over player name and properties; stat system not implemented")
+// Ghidra 0x10317d10 (561 bytes).
+// Params: Actor P (in), string Checksum (out).
+// P+0x7b4 = player's unique ID string; P+0x450 = sub-object with name string at +0x408.
+// If the unique ID string is empty, Checksum = "NoChecksum".
+// Otherwise MD5(name_string || unique_id_string) → 32-char hex digest written to *Checksum.
+IMPL_MATCH("Engine.dll", 0x10317d10)
 void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execGetPlayerChecksum);
 	P_GET_OBJECT(AActor,P);
+	P_GET_STR_REF(Checksum);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	FString& uniqueId = *(FString*)((BYTE*)P + 0x7b4);
+	if (uniqueId.Len() == 0)
+	{
+		*Checksum = TEXT("NoChecksum");
+	}
+	else
+	{
+		FMD5Context ctx;
+		appMD5Init(&ctx);
+		// Feed the player's name string (at *(P+0x450)+0x408) into MD5.
+		FString& nameStr = *(FString*)(*(INT*)((BYTE*)P + 0x450) + 0x408);
+		appMD5Update(&ctx, (BYTE*)*nameStr, nameStr.Len() * 2);
+		// Feed the unique ID string (at P+0x7b4) into MD5.
+		appMD5Update(&ctx, (BYTE*)*uniqueId, uniqueId.Len() * 2);
+		BYTE digest[16];
+		appMD5Final(digest, &ctx);
+		*Checksum = TEXT("");
+		for (INT i = 0; i < 16; i++)
+			*Checksum += FString::Printf(TEXT("%02x"), (DWORD)digest[i]);
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
@@ -919,7 +944,7 @@ void AStatLogFile::execFileLog( FFrame& Stack, RESULT_DECL )
 		FString encoded;
 		for (INT i = 0; i < Item.Len(); i++)
 		{
-			WORD w = 0;
+			_WORD w = 0;
 			const BYTE* src = reinterpret_cast<const BYTE*>(*Item) + i * sizeof(TCHAR);
 			reinterpret_cast<BYTE*>(&w)[0] = src[0] ^ 0xa7;
 			reinterpret_cast<BYTE*>(&w)[1] = src[1] ^ 0xa7;
@@ -1106,22 +1131,56 @@ IMPLEMENT_FUNCTION( AR6eviLTesting, 1356, execNativeRunAllTests );
 
 /*-- UInteraction ------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103b5fd0 (264 bytes): dispatches via ViewportOwner->Master->ProcessConsoleCommand or Viewport->Actor; complex interaction chain")
+// Ghidra 0x103b5fd0 (264 bytes).
+// Dispatches Command to UInteractionMaster::Exec.
+// Output device sourced from ViewportOwner (this+0x30) or Master's viewport chain (this+0x34 → +0x34 → +0x30[0]).
+// Returns the INT result of Exec to the script VM.
+IMPL_MATCH("Engine.dll", 0x103b5fd0)
 void UInteraction::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execConsoleCommand);
 	P_GET_STR(Command);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	UInteractionMaster* master = *(UInteractionMaster**)((BYTE*)this + 0x34);
+	if (!master)
+	{
+		GWarn->Logf(TEXT(""));
+		return;
+	}
+	UViewport* viewport = *(UViewport**)((BYTE*)this + 0x30);
+	FOutputDevice* ar = NULL;
+	if (viewport)
+	{
+		// Console output device is embedded at viewport+0x2c.
+		ar = (FOutputDevice*)((BYTE*)viewport + 0x2c);
+	}
+	else
+	{
+		// Fall back to first viewport in master's client viewport array.
+		// master+0x34 = some object (engine/client), that object+0x30 = Viewports TArray Data ptr.
+		INT masterObj = *(INT*)((BYTE*)master + 0x34);
+		if (masterObj)
+		{
+			INT firstVp = **(INT**)(masterObj + 0x30);
+			if (firstVp)
+				ar = (FOutputDevice*)(firstVp + 0x2c);
+		}
+	}
+	*(INT*)Result = master->Exec(*Command, ar ? *ar : *GNull);
 	unguard;
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execConsoleCommand );
 
-IMPL_DIVERGE("Ghidra 0x103b5ee0 (132 bytes): calls vtable[0x3c/4=15] (Initialize native) + FindFunctionChecked('Initialized') + ProcessEvent; vtable slot unknown without full layout")
+// Ghidra 0x103b5ee0 (132 bytes).
+// vtable+0x3c (slot 15) = UObject::GotoLabel — resets script state machine to None.
+// Then fires the script event 'Initialized' via eventInitialized() (= FindFunctionChecked + ProcessEvent).
+IMPL_MATCH("Engine.dll", 0x103b5ee0)
 void UInteraction::execInitialize( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execInitialize);
 	P_FINISH;
+	GotoLabel(NAME_None);
+	eventInitialized();
 	unguard;
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execInitialize );
