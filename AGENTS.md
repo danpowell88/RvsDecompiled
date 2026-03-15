@@ -120,7 +120,25 @@ void Foo::Bar() {
 }
 ```
 
-## ⚠️ Always Verify Function Signatures Against the .def Export Table
+## ⚠️ Git Staging — Agents MUST Use Explicit File Paths
+
+**NEVER use `git add -A` or `git add .`** — this stages ALL modified files including ones modified by other concurrently running agents, creating commit regressions.
+
+**ALWAYS explicitly name the files you changed:**
+```powershell
+# CORRECT: only stage the files you actually modified
+git add src/Engine/Src/UnMesh.cpp src/Engine/Src/UnLevel.cpp
+
+# WRONG: stages everything in the working directory
+git add -A
+git add .
+```
+
+**Why this matters:** Multiple agents may run in parallel and modify different files. If Agent A uses `git add -A`, it will also stage Agent B's in-progress work, committing it prematurely (or with wrong content) under Agent A's commit message. This corrupts the history and can **revert previous good work** if Agent B had already modified a file that Agent A staged at an earlier (worse) state.
+
+The check: before committing, run `git status` and verify only the expected files are staged.
+
+
 
 **Before adding, removing, or changing any parameter**, cross-check the mangled name in the module's `.def` file. Adding or removing even one parameter changes the mangled name and causes a linker error (`LNK2001`).
 
