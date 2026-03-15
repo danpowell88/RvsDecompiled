@@ -78,25 +78,32 @@ typedef void (__thiscall* DestroyFn)(void*, INT);
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1048bfa0 (conditional-transact archive helper)")
+IMPL_DIVERGE("retail 0x1048c210 (131b): FUN_1048bfa0 (201b) is TArray<UObject*> serializer — CountBytes + FCompactIndex count + vtable-dispatch per element; 4 UObject* fields (+0x3C,+0x44,+0x7C,+0x80) also need serializing")
 void UNetDriver::Serialize(FArchive &Ar)
 {
 guard(UNetDriver::Serialize);
-// Ghidra 0x1048C210: UObject::Serialize, then a conditional-transact helper (RVA 0x18BFA0)
-// that returns a filtered archive, then serializes fields at +0x3C,+0x44,+0x7C,+0x80.
+// Ghidra 0x1048c210 (131b): UObject::Serialize, then FUN_1048bfa0 serializes
+// ClientConnections TArray (this+0x30) as FArray<UObject*> using FCompactIndex count
+// and FArchive::vtable[6] (= operator<<(UObject*&)) per element.
+// Remaining chain serializes UObject* fields at +0x3C (ServerConnection), +0x44, +0x7C, +0x80.
 UObject::Serialize(Ar);
-// NOTE: Divergence -- object-ref fields (+0x3C ServerConnection, +0x44, +0x7C, +0x80) not serialized;
-// full implementation requires transactor helper identification.
+// NOTE: Divergence — ClientConnections TArray and 4 UObject* fields not serialized;
+// blocked by FCompactIndex encoding in FUN_1048bfa0.
 unguard;
 }
 
-IMPL_DIVERGE("retail 0x1048c2d0 (178b): FUN_103db080 (actor replication flag reset) and FUN_103b7b70 (actor channel lookup) unresolved")
+IMPL_DIVERGE("retail 0x1048c2d0 (178b): full Ghidra body known but FUN_103db080/FUN_103b7b70 ECX tracking incomplete")
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
 guard(UNetDriver::NotifyActorDestroyed);
-// Ghidra 0x1048c2d0: iterates ClientConnections (this+0x30), clears actor replication
-// flag via FUN_103db080 if actor flag 0x10000000 is set, then looks up actor channel
-// via FUN_103b7b70 and destroys it. Both FUN_ helpers unresolved.
+// Ghidra 0x1048c2d0 (178b): iterates ClientConnections (this+0x30) backwards.
+// For each connection: if actor->bFlags & 0x10000000 (bNetTemporary), calls
+// FUN_103db080(&actor) to remove actor from connection's replication array.
+// Then calls FUN_103b7b70(&actor) to look up actor channel; if found asserts
+// OpenedLocally (piVar2[0xf]) and calls channel->vtable[27]() (= Close()).
+// FUN_103db080 (61b): removes actor from an FArray<AActor*> via __thiscall.
+// FUN_103b7b70 (88b): hash-table lookup returning UChannel* via __thiscall.
+// Blocked: ECX for both calls is a sub-field of the connection, offset unknown.
 (void)Actor;
 unguard;
 }
@@ -155,12 +162,11 @@ unguard;
 
 
 // --- UDemoRecDriver ---
-IMPL_DIVERGE("FUN_ blocker: FUN_104c3660 (spectator spawn helper)")
-void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection*)
-{
-guard(UDemoRecDriver::SpawnDemoRecSpectator);
-unguard;
-}
+// Ghidra ordinal table: ?SpawnDemoRecSpectator@UDemoRecDriver@@QAEXPAVUNetConnection@@@Z
+// resolves to 0x1651d0 (= 0x104651d0 with Engine.dll base) — the shared empty stub
+// also used by UNetConnection::ReadInput, AKConstraint::preKarmaStep, and others.
+IMPL_MATCH("Engine.dll", 0x104651d0)
+void UDemoRecDriver::SpawnDemoRecSpectator(UNetConnection*) {}
 
 IMPL_MATCH("Engine.dll", 0x10487da0)
 void UDemoRecDriver::StaticConstructor()
@@ -170,11 +176,17 @@ new(GetClass(),TEXT("DemoSpectatorClass"),RF_Public) UStrProperty(EC_CppProperty
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10301000 (demo file read helper)")
+// Ghidra 0x10488050 (632b): complex demo playback dispatch.
+// Calls FUN_10301000 (TSC-based high-precision timer) for real-time demo playback sync.
+// FUN_10301000 is NOT a "demo file read helper" — it reads RDTSC and converts via
+// GSecondsPerCycle. The full body involves packet demux, archive reads, and FString ops.
+IMPL_DIVERGE("retail 0x10488050 (632b): complex demo playback dispatch; FUN_10301000 is TSC timer not demo-read helper")
 void UDemoRecDriver::TickDispatch(float)
 {
 guard(UDemoRecDriver::TickDispatch);
-// TODO: implement UDemoRecDriver::TickDispatch (complex demo playback)
+// Full body blocked: reads compressed packets from demo file archive (this+0xb4),
+// performs TSC-busy-wait via FUN_10301000 for real-time sync, then dispatches to
+// UNetConnection. 632 bytes with multiple FString/FArchive temporaries.
 unguard;
 }
 
@@ -194,12 +206,16 @@ unguard;
 }
 
 // Ghidra 0x10487f20 (84b): constructs FString from runtime global DAT_10529f90 (WCHAR const*).
-// DAT_10529f90 is a .rdata WCHAR that cannot be reproduced at compile-time; current stub
-// returns an empty FString which may differ if the global is non-empty.
-IMPL_DIVERGE("retail 0x10487f20: returns FString from runtime DAT_10529f90 (unknown WCHAR constant)")
+// DAT_10529f90 is referenced as the empty-string constant (L"") throughout Engine.dll
+// (e.g. UMeshInstance::AnimGetNotifyText returns it directly). Retail body has SEH.
+// We return FString() which equals FString(L"") — functionally equivalent.
+// Staying IMPL_DIVERGE: we cannot confirm DAT_10529f90 at .rdata:0x10529f90 at compile-time.
+IMPL_DIVERGE("retail 0x10487f20: returns FString(DAT_10529f90); DAT_10529f90 appears to be L\"\" but unconfirmed")
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
+guard(UDemoRecDriver::LowLevelGetNetworkNumber);
 return FString();
+unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10488300)
@@ -266,7 +282,11 @@ return 1;
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1032b9b0 (connection init helper)")
+// Ghidra 0x10488560 (417b): opens demo file for playback, sets up UDemoRecConnection,
+// calls FUN_1032b9b0 (84b) which initialises three FArrays on the connection via __thiscall.
+// Full body: StaticAllocateObject + placement-ctor + FArchive creation + option flags.
+// Blocked by FUN_1032b9b0 (connection FArray init helper) and complex file/connection setup.
+IMPL_DIVERGE("retail 0x10488560 (417b): FUN_1032b9b0 (FArray 3x-init helper) and full demo-playback setup unresolved")
 int UDemoRecDriver::InitConnect(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitConnect);
@@ -274,7 +294,9 @@ return 0;
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1038ef30 (demo record init helper)")
+// Ghidra 0x10488740 (551b): creates demo recording file, sets up UDemoRecConnection,
+// calls FUN_1038ef30 (85b) which type-checks a UObject as UGameEngine (asserts on fail).
+IMPL_DIVERGE("retail 0x10488740 (551b): FUN_1038ef30 (UGameEngine type-check/assert) and complex record setup unresolved")
 int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitListen);
@@ -293,7 +315,10 @@ unguard;
 IMPL_DIVERGE("FUN_ blocker: complex 300+ byte constructor; UNetConnection fields not fully mapped")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 
-IMPL_DIVERGE("retail 0x104842b0 (210b): FUN_1050557c (ping/loss stat formatter) unresolved; GETPING/GETLOSS skip stat output")
+// Ghidra 0x104842b0 (210b): GETPING/GETLOSS call FUN_1050557c (float10→ulonglong ROUND helper,
+// 117b) to convert ping/loss stat values, then Logf the result to Ar.
+// FUN_1050557c passes ST(0) (80-bit float) → rounds to ulonglong; stat format unknown.
+IMPL_DIVERGE("retail 0x104842b0 (210b): FUN_1050557c is float10→ulonglong ROUND helper; stat format string unknown — GETPING/GETLOSS skip stat output")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
@@ -325,7 +350,10 @@ fn(fdOut, Data, Event);
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_103db080 (actor channel cleanup)")
+// Ghidra: UNetConnection::Destroy iterates ActorChannels or SentTemporaries and
+// calls FUN_103db080 (61b, removes actor from FArray<AActor*>) for cleanup.
+// FUN_103db080 uses __thiscall on a sub-field of the connection; offset unknown.
+IMPL_DIVERGE("retail: FUN_103db080 (actor-array cleanup via __thiscall on connection sub-field) unresolved; Super::Destroy() only")
 void UNetConnection::Destroy() { Super::Destroy(); }
 
 IMPL_MATCH("Engine.dll", 0x10484200)
@@ -394,19 +422,26 @@ PostSend();
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10301050 (packet assembly helper)")
+// Ghidra: FlushNet is ~1146b. Calls FUN_10301050 (480b) which is a high-performance
+// memcpy/SSE memory-copy helper (not a "packet assembly helper" — it's appMemcpy/SSE-memcpy).
+// The actual packet assembly logic is inline in FlushNet itself.
+IMPL_DIVERGE("retail: large 1146b packet-assembly/send function; FUN_10301050 is SSE-accelerated memcpy helper")
 void UNetConnection::FlushNet()
 {
 guard(UNetConnection::FlushNet);
-// TODO: implement UNetConnection::FlushNet (retail 1146 bytes: complex packet assembly)
+// Full body blocked: builds network packet from FBitWriter (this+0x250), calls
+// LowLevelSend via vtable, updates send statistics. Requires FBitWriter layout.
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1037cf90 (channel tick helper)")
+// Ghidra: Tick is ~1628b. Calls FUN_1037cf90 (151b) which is TArray::RemoveItem
+// (validates bounds then shifts elements) — it's a TArray range-removal helper.
+IMPL_DIVERGE("retail: large 1628b connection-tick function; FUN_1037cf90 is TArray::RemoveItem helper")
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
-// TODO: implement UNetConnection::Tick (retail 1628 bytes: complex tick)
+// Full body blocked: handles timeouts, drives channel ticks, manages saturation.
+// Calls TArray::RemoveItem (FUN_1037cf90) for dirty-channel list maintenance.
 unguard;
 }
 
@@ -503,10 +538,13 @@ INT ackId = *(INT*)(*(INT*)((BYTE*)this + 0x4b70) + i * 4);
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_103bef40 (file download helper)")
+// Ghidra: ReceiveFile calls FUN_103bef40 (118b) which serialises 4×DWORD via
+// FArchive::ByteOrderSerialize — it's an FGuid or similar 16-byte struct serializer.
+IMPL_DIVERGE("retail: ReceiveFile body blocked; FUN_103bef40 is 4×DWORD ByteOrderSerialize helper (probably FGuid)")
 void UNetConnection::ReceiveFile(INT PackageIndex)
 {
 guard(UNetConnection::ReceiveFile);
+(void)PackageIndex;
 unguard;
 }
 
@@ -640,10 +678,13 @@ GLog->Logf(TEXT("Net: ReceivedPacket error"));
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_1050557c (command dispatch helper)")
+// Ghidra: ReceivedRawPacket calls FUN_1050557c (117b) — a float10→ulonglong rounding
+// helper (ROUND + sign-correction); likely used for packet timestamp or stat tracking.
+IMPL_DIVERGE("retail: ReceivedRawPacket body blocked; FUN_1050557c is float10-to-ulonglong ROUND helper (117b)")
 void UNetConnection::ReceivedRawPacket(void* Data, INT Count)
 {
 guard(UNetConnection::ReceivedRawPacket);
+(void)Data; (void)Count;
 unguard;
 }
 
@@ -656,19 +697,25 @@ guard(UNetConnection::SendPackageMap);
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_10481dd0 (bunch serialization helper)")
+// Ghidra: SendRawBunch calls FUN_10481dd0 (59b) which is an "add if not present"
+// helper — searches an FArray<INT> for *param_1 and appends if absent.
+IMPL_DIVERGE("retail: SendRawBunch body blocked; FUN_10481dd0 is AddUnique<INT> on FArray (59b)")
 INT UNetConnection::SendRawBunch(FOutBunch& Bunch, INT InPacketId)
 {
 guard(UNetConnection::SendRawBunch);
+(void)Bunch; (void)InPacketId;
 return 0;
 unguard;
 }
 
-IMPL_DIVERGE("FUN_ blocker: FUN_103b7b70 (actor channel lookup)")
+// Ghidra: SetActorDirty calls FUN_103b7b70 (88b) which is a hash-table lookup
+// returning UChannel* for a given actor (uses UObject::GetIndex for hash key).
+// ECX for the call is a hash-table sub-field of the connection; offset unknown.
+IMPL_DIVERGE("retail: SetActorDirty blocked; FUN_103b7b70 (88b) is actor→channel hash-table lookup via __thiscall on connection sub-field")
 void UNetConnection::SetActorDirty(AActor* Actor)
 {
 guard(UNetConnection::SetActorDirty);
-// TODO: resolve FUN_103b7b70 (actor channel lookup) to implement SetActorDirty
+// Finds actor channel via FUN_103b7b70 hash lookup, then marks it dirty.
 (void)Actor;
 unguard;
 }
@@ -737,14 +784,18 @@ return 0;
 unguard;
 }
 
-IMPL_DIVERGE("not found in Ghidra export — virtual override stub")
+// UNetDriver::LowLevelDestroy — not present in Ghidra export by name.
+// UNetDriver is semi-abstract; concrete subclasses (IpNetDriver, UDemoRecDriver) provide
+// real implementations. The base class version may share an empty stub or be unreachable.
+IMPL_DIVERGE("not found in Ghidra export by name — base class LowLevelDestroy; may share empty stub or be unreachable")
 void UNetDriver::LowLevelDestroy()
 {
 guard(UNetDriver::LowLevelDestroy);
 unguard;
 }
 
-IMPL_DIVERGE("not found in Ghidra export — virtual override stub")
+// UNetDriver::LowLevelGetNetworkNumber — not present in Ghidra export by name.
+IMPL_DIVERGE("not found in Ghidra export by name — base class LowLevelGetNetworkNumber; may share empty stub")
 FString UNetDriver::LowLevelGetNetworkNumber()
 {
 return FString();
