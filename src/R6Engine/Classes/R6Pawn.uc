@@ -651,12 +651,14 @@ simulated event ZoneChange(ZoneInfo NewZone)
 	}
 	PC = PlayerController(Controller);
 	// End:0x6E
+	// Only human-controlled pawns (with a Viewport) receive weather particle effects.
 	if(((PC == none) || (Viewport(PC.Player) == none)))
 	{
 		return;
 	}
 	WZ = Region.Zone;
 	// End:0x160
+	// Pause emitters in the zone we are leaving before activating the new zone's emitters.
 	if(WZ.m_bAlternateEmittersActive)
 	{
 		i = 0;
@@ -668,7 +670,9 @@ simulated event ZoneChange(ZoneInfo NewZone)
 			// End:0x145
 			if(((WZ.m_AlternateWeatherEmitters[i] != none) && (WZ.m_AlternateWeatherEmitters[i].Emitters.Length > 0)))
 			{
+				// Stop emission from the old zone's weather emitter (m_iPaused=1).
 				WZ.m_AlternateWeatherEmitters[i].Emitters[0].m_iPaused = 1;
+				// Prevent premature particle system cleanup; let active particles expire naturally.
 				WZ.m_AlternateWeatherEmitters[i].Emitters[0].AllParticlesDead = false;
 			}
 			(i++);
@@ -689,6 +693,7 @@ simulated event ZoneChange(ZoneInfo NewZone)
 			// End:0x229
 			if(((NewZone.m_AlternateWeatherEmitters[i] != none) && (NewZone.m_AlternateWeatherEmitters[i].Emitters.Length > 0)))
 			{
+				// Resume emission (m_iPaused=0) for the new zone's weather emitter.
 				NewZone.m_AlternateWeatherEmitters[i].Emitters[0].m_iPaused = 0;
 				NewZone.m_AlternateWeatherEmitters[i].Emitters[0].AllParticlesDead = false;
 			}
@@ -723,6 +728,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 	local string DeathMessage;
 
 	// End:0x52
+	// Type 1: player left the game voluntarily.
 	if((int(bDeathMsgType) == 1))
 	{
 		DeathMessage = ((killed $ " ") $ Localize("MPDeathMessages", "LeftTheGame", "R6GameInfo"));		
@@ -730,6 +736,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 	else
 	{
 		// End:0xA7
+		// Type 2: penalty kill.
 		if((int(bDeathMsgType) == 2))
 		{
 			DeathMessage = ((("" $ Localize("MPDeathMessages", "PenaltyTo", "R6GameInfo")) $ " ") $ Killer);			
@@ -737,6 +744,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 		else
 		{
 			// End:0xF1
+			// Type 5: a hostage has died.
 			if((int(bDeathMsgType) == 5))
 			{
 				DeathMessage = Localize("MPDeathMessages", "HostageHasDied", "R6GameInfo");				
@@ -744,6 +752,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 			else
 			{
 				// End:0x14B
+				// Type 9: killed by a bomb.
 				if((int(bDeathMsgType) == 9))
 				{
 					DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "PlayerKilledByBomb", "R6GameInfo"));					
@@ -751,6 +760,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 				else
 				{
 					// End:0x1A5
+					// Type 7: terrorist killed a hostage.
 					if((int(bDeathMsgType) == 7))
 					{
 						DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "TerroKilledHostage", "R6GameInfo"));						
@@ -758,6 +768,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 					else
 					{
 						// End:0x20C
+						// Type 3 or Killer == killed: suicide.
 						if(((int(bDeathMsgType) == 3) || (Killer == killed)))
 						{
 							DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "PlayerSuicided", "R6GameInfo"));							
@@ -765,6 +776,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 						else
 						{
 							// End:0x262
+							// Type 6: Rainbow operator killed a hostage.
 							if((int(bDeathMsgType) == 6))
 							{
 								DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "KilledAHostage", "R6GameInfo"));								
@@ -772,6 +784,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 							else
 							{
 								// End:0x2BB
+								// Type 8: terrorist killed a player.
 								if((int(bDeathMsgType) == 8))
 								{
 									DeathMessage = ((Localize("MPDeathMessages", "TerroKilledPlayer", "R6GameInfo") $ " ") $ killed);									
@@ -779,6 +792,7 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 								else
 								{
 									// End:0x31B
+									// Type 12: IronWrath mode kill (KilledTheIntruder).
 									if((int(bDeathMsgType) == 12))
 									{
 										DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "KilledTheIntruder", "IronWrathGameInfo"));										
@@ -920,11 +934,13 @@ function float SkillModifier()
 
 	fFactor = 1.0000000;
 	// End:0x27
+	// Wounded state (m_eHealth == 1) reduces effective skill by 25% (x0.75).
 	if((int(m_eHealth) == int(1)))
 	{
 		(fFactor *= 0.7500000);
 	}
 	// End:0x43
+	// Tear gas (m_eEffectiveGrenade == 2) adds another 25% skill penalty; stacks with wound.
 	if((int(m_eEffectiveGrenade) == int(2)))
 	{
 		(fFactor *= 0.7500000);
@@ -991,29 +1007,34 @@ simulated event R6DeadEndedMoving()
 		switch(m_eLastHitPart)
 		{
 			// End:0x59
+			// Case 0 (head hit): spawn blood pool under the head bone.
 			case 0:
 				bSpawnBloodBath = true;
 				vBloodBathLocation = GetBoneCoords('R6 Head', true).Origin;
 				// End:0xCA
 				break;
 			// End:0x80
+			// Case 1 (chest hit): spawn blood pool under the spine2 bone.
 			case 1:
 				bSpawnBloodBath = true;
 				vBloodBathLocation = GetBoneCoords('R6 Spine2', true).Origin;
 				// End:0xCA
 				break;
 			// End:0xA7
+			// Case 2 (abdomen hit): spawn blood pool under the spine bone.
 			case 2:
 				bSpawnBloodBath = true;
 				vBloodBathLocation = GetBoneCoords('R6 Spine', true).Origin;
 				// End:0xCA
 				break;
 			// End:0xB7
+			// Case 3 (leg hit): no blood pool decal for limb hits.
 			case 3:
 				bSpawnBloodBath = false;
 				// End:0xCA
 				break;
 			// End:0xC7
+			// Case 4 (arm hit): no blood pool decal for limb hits.
 			case 4:
 				bSpawnBloodBath = false;
 				// End:0xCA
@@ -1027,7 +1048,9 @@ simulated event R6DeadEndedMoving()
 		{
 			rBloodBathRotation.Pitch = -16384;
 			rBloodBathRotation.Yaw = 0;
+		// Random roll randomises the blood pool splat orientation.
 			rBloodBathRotation.Roll = Rand(65535);
+		// Trace 250 UU downward to find the floor surface for decal placement.
 			vTraceEnd = (vBloodBathLocation + (Vector(rBloodBathRotation) * float(250)));
 			// End:0x181
 			if((Trace(vFloorLocation, vFloorNormal, vTraceEnd, vBloodBathLocation) != none))
@@ -1522,12 +1545,14 @@ simulated function Tick(float DeltaTime)
 	{
 		m_bHelmetWasHit = false;
 	}
+	// Accumulate time; heart rate simulation updates once per second.
 	(m_fHBTime += DeltaTime);
 	// End:0x188
 	if((m_fHBTime > 1.0000000))
 	{
 		m_fHBTime = (m_fHBTime - 1.0000000);
 		// End:0xED
+		// Terrorists (ePawnType==2): range 65-184 bpm; other pawn types: 90-182 bpm.
 		if((int(m_ePawnType) == int(2)))
 		{
 			fHeartBeatRateMAX = 184.0000000;
@@ -1538,13 +1563,16 @@ simulated function Tick(float DeltaTime)
 			fHeartBeatRateMAX = 182.0000000;
 			fHeartBeatRateMIN = 90.0000000;
 		}
+		// Target heart rate = base_min * m_fHBMove * m_fHBWound * m_fHBDefcon.
 		fHeartBeatFrequency = (((fHeartBeatRateMIN * m_fHBMove) * m_fHBWound) * m_fHBDefcon);
 		// End:0x138
+		// Being in combat (m_bEngaged) boosts the target rate by 20%.
 		if(m_bEngaged)
 		{
 			(fHeartBeatFrequency *= 1.2000000);
 		}
 		// End:0x16F
+		// Lerp current rate toward target: rises +5 bpm/s, falls -1 bpm/s.
 		if((fHeartBeatFrequency > m_fHeartBeatFrequency))
 		{
 			(m_fHeartBeatFrequency += float(5));
@@ -1617,6 +1645,7 @@ simulated event Vector EyePosition()
 	// End:0x79
 	if(bIsCrouched)
 	{
+		// Crouched eye height: 30 UU above Location.
 		vEyeHeight.Z = 30.0000000;		
 	}
 	else
@@ -1624,6 +1653,7 @@ simulated event Vector EyePosition()
 		// End:0x95
 		if(m_bIsProne)
 		{
+			// Prone eye height: 0 UU (at floor level).
 			vEyeHeight.Z = 0.0000000;			
 		}
 		else
@@ -1631,10 +1661,12 @@ simulated event Vector EyePosition()
 			// End:0xB1
 			if(m_bIsKneeling)
 			{
+				// Kneeling eye height: 20 UU above Location.
 				vEyeHeight.Z = 20.0000000;				
 			}
 			else
 			{
+				// Standing eye height: 70 UU above Location.
 				vEyeHeight.Z = 70.0000000;
 			}
 		}
@@ -1733,11 +1765,13 @@ function bool IsRunning()
 function bool IsMovingForward()
 {
 	// End:0x19
+	// Standing still (zero velocity) is treated as moving forward for animation fallback.
 	if((Velocity == vect(0.0000000, 0.0000000, 0.0000000)))
 	{
 		return true;
 	}
 	// End:0x38
+	// Dot product > 0.5 means velocity is within +-60 degrees of the facing direction.
 	if((Dot(Normal(Velocity), Vector(Rotation)) > 0.5000000))
 	{
 		return true;		
@@ -2084,6 +2118,7 @@ simulated function name GetPeekAnimName(float fPeeking, bool bPeekingLeft)
 	if(m_bPeekingLeft)
 	{
 		// End:0xA7
+		// Peek angle below 15% AND not crouching: too small to need an animation blend; return None.
 		if(((fPeeking <= float(15)) && (m_fCrouchBlendRate < 0.5000000)))
 		{
 			return 'None';			
@@ -2091,6 +2126,7 @@ simulated function name GetPeekAnimName(float fPeeking, bool bPeekingLeft)
 		else
 		{
 			// End:0xBE
+			// Select anim in 20% bands: <=25%=_20, <=45%=_40, <=65%=_60, <=85%=_80, else full.
 			if((fPeeking <= float(25)))
 			{
 				return 'PeekLeft_nt_20';				
@@ -2128,6 +2164,7 @@ simulated function name GetPeekAnimName(float fPeeking, bool bPeekingLeft)
 	else
 	{
 		// End:0x134
+		// Same threshold for peek right: below 15% angle and not crouching returns None.
 		if(((fPeeking <= float(15)) && (m_fCrouchBlendRate < 0.5000000)))
 		{
 			return 'None';			
@@ -2338,6 +2375,7 @@ simulated event PlayFluidPeekingAnim(float fForwardPct, float fLeftPct, float fD
 		return;
 	}
 	fCrouchAnimRate = 1.0000000;
+	// fAnimRateAdjustment compensates for crouch being slower than standing run speed.
 	fAnimRateAdjustment = 0.0000000;
 	AnimBlendParams(2, m_fCrouchBlendRate, 0.0000000, 0.0000000);
 	LoopAnim('CrouchRun_nt', 1.0000000, 0.0000000, 2);
@@ -2354,12 +2392,14 @@ simulated event PlayFluidPeekingAnim(float fForwardPct, float fLeftPct, float fD
 				if(bIsWalking)
 				{
 					crouchAnim = m_crouchWalkForwardName;
+					// Boost anim rate proportionally so footfalls stay in sync with actual crouch walk speed.
 					fAnimRateAdjustment = ((m_fWalkingSpeed - m_fCrouchedWalkingSpeed) / m_fCrouchedWalkingSpeed);					
 				}
 				else
 				{
 					crouchAnim = 'CrouchRunForward';
 					fCrouchAnimRate = 1.5000000;
+					// Same boost when crouch-running: compensates for lower run speed.
 					fAnimRateAdjustment = ((m_fRunningSpeed - m_fCrouchedRunningSpeed) / m_fCrouchedRunningSpeed);
 				}				
 			}
@@ -2464,14 +2504,17 @@ function TurnAwayFromNearbyWalls()
 	rViewDir = GetViewRotation();
 	vViewDir = Vector(rViewDir);
 	vTraceStart = (Location + EyePosition());
+	// Trace up to CollisionRadius + m_fWallCheckDistance (300 UU default) in each direction.
 	vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 	// End:0x6C
+	// If the forward trace hits nothing, the pawn is already clear; no reorientation needed.
 	if((Trace(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false) == none))
 	{
 		return;
 	}
 	fDistFarthest = VSize((vHitLocation - vTraceStart));
 	vDirFarthest = vViewDir;
+	// Direction 2: directly opposite (180 deg, rot yaw +32768).
 	vViewDir = Vector((rViewDir + rot(0, 32768, 0)));
 	vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 	// End:0xF4
@@ -2488,6 +2531,7 @@ function TurnAwayFromNearbyWalls()
 			fDistFarthest = VSize((vHitLocation - vTraceStart));
 			vDirFarthest = vViewDir;
 		}
+		// Direction 3: 90 deg left (rot yaw +16384).
 		vViewDir = Vector((rViewDir + rot(0, 16384, 0)));
 		vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 		// End:0x19F
@@ -2504,6 +2548,7 @@ function TurnAwayFromNearbyWalls()
 				fDistFarthest = fDist;
 				vDirFarthest = vViewDir;
 			}
+			// Direction 4: 90 deg right (rot yaw -16384).
 			vViewDir = Vector((rViewDir - rot(0, 16384, 0)));
 			vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 			// End:0x241
@@ -2519,6 +2564,7 @@ function TurnAwayFromNearbyWalls()
 				{
 					vDirFarthest = vViewDir;
 				}
+				// All 4 directions hit a wall; pick the direction with the most clearance.
 				vDir = vDirFarthest;
 			}
 		}
@@ -3048,8 +3094,10 @@ event Landed(Vector HitNormal)
 		return;
 	}
 	ePreviousHealth = m_eHealth;
+	// fDistanceFallen = height when Falling() was called minus current Z (positive = fell down).
 	fDistanceFallen = (m_fFallingHeight - Location.Z);
 	// End:0x2B6
+	// Falls >= 600 UU are instantly fatal; >= 300 UU while already wounded/serious are also fatal.
 	if(((!InGodMode()) && ((fDistanceFallen >= float(600)) || ((fDistanceFallen >= float(300)) && ((int(m_eHealth) == int(1)) || (int(m_eHealth) == int(2)))))))
 	{
 		m_eHealth = 3;
@@ -3068,9 +3116,11 @@ event Landed(Vector HitNormal)
 	else
 	{
 		// End:0x361
+		// Falls >= 128 UU trigger the landing animation; falls >= 300 UU also cause a wound.
 		if(((fDistanceFallen >= 128.0000000) && (int(m_eHealth) != int(3))))
 		{
 			// End:0x333
+			// Falls >= 300 UU cause a wound (health = 1) even without prior injury.
 			if(((!InGodMode()) && (fDistanceFallen >= 300.0000000)))
 			{
 				m_eHealth = 1;
@@ -3133,6 +3183,7 @@ simulated event PlayLandingAnimation(float impactVel)
 		return;
 	}
 	// End:0x36
+	// Falls under 128 UU are too small to need a landing animation.
 	if(((m_fFallingHeight - Location.Z) < float(128)))
 	{
 		m_bIsLanding = false;
@@ -3151,6 +3202,7 @@ simulated event PlayLandingAnimation(float impactVel)
 	// End:0xA4
 	if(bWantsToCrouch)
 	{
+		// Play at 1.5x speed so the landing animation completes quickly after impact.
 		PlayAnim(m_crouchLandName, 1.5000000, 0.1000000, 1);		
 	}
 	else
@@ -3352,6 +3404,7 @@ simulated event PlayProneToCrouch(optional bool bForcedByClient)
 
 event StartCrouch(float HeightAdjust)
 {
+	// Crouched visibility: 64 (half of standing 128).
 	Visibility = 64;
 	PlayDuck();
 	return;
@@ -3359,12 +3412,14 @@ event StartCrouch(float HeightAdjust)
 
 event EndCrouch(float fHeight)
 {
+	// Return to full standing visibility: 128.
 	Visibility = 128;
 	return;
 }
 
 event StartCrawl()
 {
+	// Prone visibility: 38 (hardest to detect by AI).
 	Visibility = 38;
 	// End:0x2C
 	if((int(Level.NetMode) != int(NM_Client)))
@@ -3380,6 +3435,7 @@ event StartCrawl()
 
 event EndCrawl()
 {
+	// Return to crouched visibility (64) as crawl ends at the crouch transition.
 	Visibility = 64;
 	// End:0x2C
 	if((int(Level.NetMode) != int(NM_Client)))
@@ -3600,10 +3656,12 @@ function bool PawnHaveFinishedRotation()
 {
 	local bool bSuccess;
 
+	// Within 2000 yaw units (~11 deg) of desired direction is considered finished rotating.
 	bSuccess = (Abs(float((DesiredRotation.Yaw - (Rotation.Yaw & 65535)))) < float(2000));
 	// End:0x6D
 	if((!bSuccess))
 	{
+		// 63535 = 65536 - 2001: handles the 360/0 deg yaw wraparound edge case.
 		bSuccess = (Abs(float((DesiredRotation.Yaw - (Rotation.Yaw & 65535)))) > float(63535));
 	}
 	return bSuccess;
@@ -4223,9 +4281,11 @@ simulated event AdjustPawnForDiagonalStrafing()
 		return;
 	}
 	rDirection.Pitch = m_rRotationOffset.Pitch;
+	// 5825 yaw units (~32 deg): root bone rotation so upper body can face target while legs strafe.
 	iOffset = 5825;
 	rBoneRotation.Yaw = iOffset;
 	// End:0xA8
+	// Strafe left or forward-left: rotate root bone +32 deg and counter-rotate the look direction.
 	if(((int(m_eStrafeDirection) == int(1)) || (int(m_eStrafeDirection) == int(4))))
 	{
 		SetBoneRotation('R6', rBoneRotation,, 1.0000000, 0.4000000);
@@ -4310,8 +4370,10 @@ function R6Pawn.eBodyPart WhichBodyPartWasHit(Vector vHitLocation, Vector vBulle
 	{
 		return GetBodyPartFromBoneID(m_iTracedBone, vBulletDirection);
 	}
+	// Measure the hit height above the base of the pawn's collision cylinder.
 	iHitDistanceFromGround = int(((vHitLocation.Z - Location.Z) + CollisionHeight));
 	// End:0x72
+	// Above 80% of total height (2*CollisionHeight) = head hit.
 	if((float(iHitDistanceFromGround) > ((0.8000000 * float(2)) * CollisionHeight)))
 	{
 		CheckForHelmet(vBulletDirection);
@@ -4320,6 +4382,7 @@ function R6Pawn.eBodyPart WhichBodyPartWasHit(Vector vHitLocation, Vector vBulle
 	else
 	{
 		// End:0x96
+		// 60-80% of total height = chest hit.
 		if((float(iHitDistanceFromGround) > ((0.6000000 * float(2)) * CollisionHeight)))
 		{
 			return 1;			
@@ -4327,6 +4390,7 @@ function R6Pawn.eBodyPart WhichBodyPartWasHit(Vector vHitLocation, Vector vBulle
 		else
 		{
 			// End:0xBA
+			// 45-60% = abdomen hit; below 45% = leg hit.
 			if((float(iHitDistanceFromGround) > ((0.4500000 * float(2)) * CollisionHeight)))
 			{
 				return 2;				
@@ -4380,8 +4444,10 @@ function CheckForHelmet(Vector vBulletDirection)
 	rBulletRotator = Rotator(vBulletDirection);
 	iYawDiff = ShortestAngle2D(rBulletRotator.Yaw, rHeadRotator.Yaw);
 	// End:0x55
+	// 24576 yaw units = 135 degrees; shots from beyond 135 degrees of the head facing miss the helmet.
 	if((iYawDiff > 24576))
 	{
+		// Bullet came from the side or rear where the helmet provides no coverage.
 		m_bHelmetWasHit = false;		
 	}
 	else
@@ -4630,6 +4696,7 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 			}
 		}
 		// End:0x619
+		// Health state machine: kill==3, or kill>=2 while already wounded/seriously wounded = dead.
 		if((((int(eKillFromTable) == int(3)) || (((int(eKillFromTable) == int(2)) || (int(eKillFromTable) == int(1))) && (int(m_eHealth) == int(2)))) || ((int(eKillFromTable) == int(2)) && (int(m_eHealth) == int(1)))))
 		{
 			m_eHealth = 3;			
@@ -4637,6 +4704,7 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		else
 		{
 			// End:0x658
+			// kill==2 (serious), or kill==1 while already wounded (health==1) = seriously wounded.
 			if(((int(eKillFromTable) == int(2)) || ((int(eKillFromTable) == int(1)) && (int(m_eHealth) == int(1)))))
 			{
 				m_eHealth = 2;				
@@ -4644,11 +4712,13 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 			else
 			{
 				// End:0x692
+				// kill==1 (wound): enter wounded state and force walk speed on ladders.
 				if((int(eKillFromTable) == int(1)))
 				{
 					m_eHealth = 1;
 					m_fHBWound = 1.2000000;
 					// End:0x68C
+					// Force walk speed when the pawn is newly wounded while climbing a ladder.
 					if(m_bIsClimbingLadder)
 					{
 						bIsWalking = true;
@@ -4698,6 +4768,7 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		// End:0x8CE
 		if((int(eKillFromTable) != int(0)))
 		{
+			// Cap stun momentum at 5000 then multiply by 100 to convert to Unreal physics impulse units.
 			iStunValue = Min(iStunValue, 5000);
 			vMomentum = (Normal(vMomentum) * float((iStunValue * 100)));
 			// End:0x8CE
@@ -6016,10 +6087,12 @@ event float GetStanceReticuleModifier()
 		// End:0x24
 		if(EngineWeapon.GotBipod())
 		{
+			// Prone with bipod: 30% accuracy bonus (reticule tightens most).
 			return 1.3000000;			
 		}
 		else
 		{
+			// Prone without bipod: 20% accuracy bonus.
 			return 1.2000000;
 		}		
 	}
@@ -6028,9 +6101,11 @@ event float GetStanceReticuleModifier()
 		// End:0x3C
 		if(bIsCrouched)
 		{
+			// Crouched: 10% accuracy bonus.
 			return 1.1000000;
 		}
 	}
+	// Standing: base accuracy, no modifier.
 	return 1.0000000;
 	return;
 }
@@ -6043,10 +6118,12 @@ function float GetStanceJumpModifier()
 		// End:0x24
 		if(EngineWeapon.GotBipod())
 		{
+			// Prone with bipod: recoil reduced to 55% (45% reduction).
 			return 0.5500000;			
 		}
 		else
 		{
+			// Prone without bipod: recoil reduced to 75% (25% reduction).
 			return 0.7500000;
 		}		
 	}
@@ -6055,9 +6132,11 @@ function float GetStanceJumpModifier()
 		// End:0x3C
 		if(bIsCrouched)
 		{
+			// Crouched: recoil reduced to 85% (15% reduction).
 			return 0.8500000;
 		}
 	}
+	// Standing: full recoil, no reduction.
 	return 1.0000000;
 	return;
 }
@@ -6109,6 +6188,7 @@ function AffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 		m_fTimeGrenadeEffectBeforeSound = Level.TimeSeconds;
 	}
 	// End:0xBE
+	// Gas mask (m_bHaveGasMask) completely blocks tear gas (eType == 2); other types always affect.
 	if((((int(eType) != int(2)) || (!m_bHaveGasMask)) && CanBeAffectedByGrenade(aGrenade, eType)))
 	{
 		AIController = R6AIController(Controller);
@@ -6125,8 +6205,10 @@ function AffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 		R6ClientAffectedByFlashbang(m_vGrenadeLocation);
 	}
 	// End:0x169
+	// Only play grenade reaction sound if the cooldown has expired (7s base + up to 6s jitter).
 	if(((!m_bHaveGasMask) && (Level.TimeSeconds > m_fTimeGrenadeEffectBeforeSound)))
 	{
+		// Set next allowed sound time: 7s base + 0-6s random to stagger reactions among nearby pawns.
 		m_fTimeGrenadeEffectBeforeSound = ((Level.TimeSeconds + 7.0000000) + RandRange(0.0000000, 6.0000000));
 		// End:0x169
 		if((Controller != none))
@@ -6151,6 +6233,7 @@ function SetRandomWaiting(int iMax, optional bool bDontUseWaitZero)
 	if((int(Role) == int(ROLE_Authority)))
 	{
 		// End:0x24
+		// Engaged (alert) pawns always use animation 0 (alert idle pose, never relaxed).
 		if(m_bEngaged)
 		{
 			m_bRepPlayWaitAnim = 0;			
@@ -6158,8 +6241,10 @@ function SetRandomWaiting(int iMax, optional bool bDontUseWaitZero)
 		else
 		{
 			// End:0x5D
+			// Animation 0 is suppressed for 1-5 subsequent calls to prevent it playing too often.
 			if((bDontUseWaitZero || (int(m_byRemainingWaitZero) <= 0)))
 			{
+				// Reset cooldown to 1-5 calls before animation 0 is eligible again.
 				m_byRemainingWaitZero = byte((Rand(5) + 1));
 				m_bRepPlayWaitAnim = byte(Rand(iMax));				
 			}
@@ -6184,19 +6269,24 @@ function SetNextPendingAction(R6Pawn.EPendingAction eAction, optional int i)
 		logWarning((" client shouldn't call SetNextPendingAction " $ string(eAction)));
 		return;
 	}
+	// Server-side: advance the write pointer in the ring buffer (size 5 = C_MaxPendingAction).
 	(m_iNetCurrentActionIndex++);
 	// End:0x75
+	// Wrap the write index at 5 to implement the circular ring buffer.
 	if((int(m_iNetCurrentActionIndex) >= 5))
 	{
 		m_iNetCurrentActionIndex = 0;
 	}
+	// Write the action and its integer parameter into the current ring buffer slot.
 	m_ePendingAction[int(m_iNetCurrentActionIndex)] = eAction;
 	m_iPendingActionInt[int(m_iNetCurrentActionIndex)] = i;
 	// End:0xFA
 	if((int(Level.NetMode) != int(NM_Client)))
 	{
+		// Advance the local playback pointer so the server plays the action immediately.
 		(m_iLocalCurrentActionIndex++);
 		// End:0xD1
+		// Wrap the local playback index at 5 to match the ring buffer size.
 		if((int(m_iLocalCurrentActionIndex) >= 5))
 		{
 			m_iLocalCurrentActionIndex = 0;
@@ -6385,19 +6475,24 @@ simulated event SpawnRagDoll()
 				// End:0x13B
 				if((TakeHitLocation != vect(0.0000000, 0.0000000, 0.0000000)))
 				{
+					// Hit offset from spine in scaled coords; cross product with shot dir gives angular impulse.
 					hitLocRel = ((TakeHitLocation - GetBoneCoords('R6 Spine').Origin) * 1000.0000000);
 					hitLocRel.Z = 0.0000000;
 					shotDir2D = shotDir;
 					shotDir2D.Z = 0.0000000;
+					// KStartAngVel = cross(hitOffset, shotDir): bullet impact imparts a realistic spin.
 					skelParams.KStartAngVel = Cross(hitLocRel, Normal(shotDir2D));
 				}
+				// Inherit 60% of the pawn's pre-death velocity as initial ragdoll linear velocity.
 				skelParams.KStartLinVel.X = (0.6000000 * Velocity.X);
 				skelParams.KStartLinVel.Y = (0.6000000 * Velocity.Y);
 				skelParams.KStartLinVel.Z = (1.0000000 * Velocity.Z);
+				// Add bullet impulse (200 units along shot direction) to the launch velocity.
 				(skelParams.KStartLinVel += (shotDir * float(200)));
 				maxDim = float(Max(int(CollisionRadius), int(CollisionHeight)));
 				skelParams.KShotStart = (TakeHitLocation - (float(1) * shotDir));
 				skelParams.KShotEnd = (TakeHitLocation + ((float(2) * maxDim) * shotDir));
+				// KShotStrength drives the bone simulation force in the Karma ragdoll solver.
 				skelParams.KShotStrength = VSize(TearOffMomentum);
 				KParams = skelParams;
 				KSetBlockKarma(true);
@@ -6478,11 +6573,13 @@ simulated event UpdateBipodPosture()
 		return;
 	}
 	// End:0x3F
+	// Skip animation update if the replicated rotation ratio has not changed since last tick.
 	if((m_iLastBipodRotation == m_iRepBipodRotationRatio))
 	{
 		return;
 	}
 	// End:0x7B
+	// Positive ratio = bipod rotated right; negative = rotated left.
 	if((m_iRepBipodRotationRatio > 0))
 	{
 		// End:0x6D
@@ -6507,14 +6604,17 @@ simulated event UpdateBipodPosture()
 			animName = 'ProneBipodLeftSniperBreathe';
 		}
 	}
+	// Initialize denominator to 100 for the replicated integer percentage division below.
 	fRatio = 100.0000000;
 	// End:0xF1
+	// Locally controlled non-standalone client uses the precise float (-5600..+5600) normalized to 0..1.
 	if((IsLocallyControlled() && (int(Level.NetMode) != int(NM_Standalone))))
 	{
 		fRatio = Abs((m_fBipodRotation / float(5600)));		
 	}
 	else
 	{
+		// Remote clients divide the replicated integer percentage by 100 to get the blend ratio.
 		fRatio = Abs((float(m_iRepBipodRotationRatio) / fRatio));
 	}
 	AnimBlendParams(12, fRatio, 0.0000000, 0.0000000, 'R6');
@@ -7177,9 +7277,13 @@ Begin:
 	{
 		SetPeekingInfo(0, 1000.0000000);
 	}
+	// Mark as projectile target so the corpse can be hit during the brief settling period.
 	bProjTarget = true;
+	// Block traces only (no actor blocking) so bullets still register on the corpse.
 	SetCollision(true, false, false);
+	// Widen to 1.5x radius so projectiles reliably hit the fallen body.
 	SetCollisionSize((1.5000000 * default.CollisionRadius), (1.0000000 * default.CollisionHeight));
+	// Timer fires 0.5s later (via Timer()) to clear bProjTarget, making corpse non-targetable.
 	SetTimer(0.5000000, false);
 	// End:0x60
 	if((m_collisionBox != none))
