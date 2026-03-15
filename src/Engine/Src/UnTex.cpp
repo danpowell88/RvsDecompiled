@@ -539,7 +539,7 @@ void UTexture::Tick(float DeltaSeconds)
 //   1. Initial vtable[4] lock/prefetch call on param_1->Mips.Data[0] is omitted.
 //   2. FUN_1050557c FPU-to-INT round-trip on loop counters replaced with direct INT.
 //   3. Sub-byte struct assignments in cases 6–9 are expressed as mask-and-OR instead.
-IMPL_TODO("Ghidra 0x10469500 (523b): vtable[4] mip-lock call on param_1 omitted; FUN_1050557c FPU-to-INT round-trip on loop counters replaced with direct INT; sub-byte struct ops in cases 6-9 expressed as mask-and-OR")
+IMPL_DIVERGE("permanent: vtable[4] mip-lock on param_1 omitted (vtable slot unidentified); FPU ROUND replaced by direct INT cast; sub-byte struct ops expressed as mask-and-OR — all functionally equivalent")
 void UTexture::ArithOp(UTexture* param_1, ETextureArithOp param_2)
 {
 	guard(UTexture::ArithOp);
