@@ -577,7 +577,7 @@ void ULinkerSave::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported; Ghidra shows no guard handler for retail MapName; our version has extra guard/unguard overhead")
+IMPL_DIVERGE("Retail (0x10128bd0, 15 bytes) has no guard, no NULL guard, and directly indexes NameIndices data pointer without bounds check: mov eax,[esp+4]; mov edx,[eax]; mov eax,[ecx+0x50]; mov eax,[eax+edx*4]; ret 4. Our version has guard/unguard and NULL check.")
 INT ULinkerSave::MapName( FName* Name )
 {
 	guard(ULinkerSave::MapName);
@@ -585,7 +585,7 @@ INT ULinkerSave::MapName( FName* Name )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported; Ghidra shows no guard handler for retail MapObject; our version has extra guard/unguard overhead")
+IMPL_DIVERGE("Retail (0x10128be0, 25 bytes) has no guard, NULL check present, but uses direct ObjectIndices data pointer arithmetic (mov eax,[eax+4]; mov ecx,[ecx+0x44]; mov eax,[ecx+eax*4]) vs our TArray bounds-checked accessor. Code-gen differs between MSVC 7.1 and 2019.")
 INT ULinkerSave::MapObject( UObject* Object )
 {
 	guard(ULinkerSave::MapObject);
@@ -593,19 +593,19 @@ INT ULinkerSave::MapObject( UObject* Object )
 	unguard;
 }
 
-IMPL_DIVERGE("Not exported; Ghidra confirms retail ULinkerSave::Seek has no guard/unguard; concept matches")
+IMPL_MATCH("Core.dll", 0x10128770)
 void ULinkerSave::Seek( INT InPos )
 {
 	Saver->Seek( InPos );
 }
 
-IMPL_DIVERGE("Not exported; Ghidra confirms retail ULinkerSave::Tell has no guard/unguard; concept matches")
+IMPL_MATCH("Core.dll", 0x10128780)
 INT ULinkerSave::Tell()
 {
 	return Saver->Tell();
 }
 
-IMPL_DIVERGE("Not exported; Ghidra confirms retail ULinkerSave::Serialize has no guard/unguard; concept matches")
+IMPL_MATCH("Core.dll", 0x10128790)
 void ULinkerSave::Serialize( void* V, INT Length )
 {
 	Saver->Serialize( V, Length );
