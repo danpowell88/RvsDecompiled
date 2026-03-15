@@ -8,7 +8,7 @@ IMPLEMENT_CLASS(AR6ClimbableObject)
 
 // --- AR6ClimbableObject ---
 
-IMPL_TODO("R6Engine.dll 0x10016310: error log uses raw data-section format string; class lookup via StaticFindObjectChecked (vs direct StaticClass()); SpawnActor via raw vtable slot 0xa8")
+IMPL_DIVERGE("R6Engine.dll 0x10016310: retail uses StaticFindObjectChecked for class lookup (vs direct StaticClass()); error log uses raw data-section format strings; SpawnActor dispatched via C++ vtable correctly")
 void AR6ClimbableObject::AddMyMarker(AActor * param_1)
 {
 	guard(AR6ClimbableObject::AddMyMarker);

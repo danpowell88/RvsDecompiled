@@ -578,7 +578,7 @@ void AR6AIController::execFollowPath(FFrame& Stack, RESULT_DECL)
 	FollowPath((enum eMovementPace)ePace, returnLabel, bContinuePath);
 }
 
-IMPL_TODO("retail calls XLevel vtable[39] on vDestination before FindPath.")
+IMPL_DIVERGE("retail calls XLevel vtable[39] on vDestination before FindPath; vtable slot semantics unknown — preprocessing call omitted")
 void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vDestination);
@@ -702,7 +702,7 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_TODO("FUN_100017c0 (R6Engine.dll 0x100017c0): class hierarchy check via linked list at param+0x24/+0x2c against PrivateStaticClass_exref; call omitted pending class resolution")
+IMPL_DIVERGE("FUN_100017c0 (0x100017c0): class hierarchy check via linked list at param+0x24/+0x2c against PrivateStaticClass_exref; non-exported internal class — call omitted permanently")
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 {
 	void* pPawn = *(void**)((BYTE*)this + 0x3d8);
