@@ -1070,14 +1070,14 @@ void USkeletalMesh::PostLoad()
 	// vtable slot of the stream object at this+0xF4 (a Clear/Reset operation), then call
 	// ReconstructRawMesh(). If the LOD models array (this+0x1AC) is empty, log a warning
 	// and auto-generate 4 LOD levels at ratios 1.0, 0.7, 0.35, 0.1.
-	// DIVERGENCE: vtable call on stream at this+0xF4 (stream clear before reconstruction)
+	// TODO: vtable call on stream at this+0xF4 (stream clear before reconstruction)
 	// is unresolved and skipped — the vtable layout for the render-stream objects is not
-	// yet determined. ReconstructRawMesh() itself is also IMPL_DIVERGE (empty stub).
+	// yet determined. ReconstructRawMesh() itself is also IMPL_TODO (empty stub).
 	UObject::PostLoad();
 	if (*(INT*)((BYTE*)this + 0x5C) < 2)
 	{
 		// Retail: (*(code**)**(undefined4**)(this+0xF4))() — unresolved stream clear.
-		// DIVERGENCE: stream clear call skipped; vtable layout unknown.
+		// TODO: stream clear call skipped; vtable layout not yet resolved.
 		ReconstructRawMesh();
 	}
 	if (((FArray*)((BYTE*)this + 0x1AC))->Num() == 0)
