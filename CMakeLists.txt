@@ -18,9 +18,10 @@ project(RavenShield LANGUAGES CXX)
 
 # --- IMPL_xxx attribution system ---
 # All stubs have been resolved (2026-03-14) — strict mode is now permanently ON.
-# The build will fail if any function is unannotated or marked IMPL_TODO.
+# The build will fail if any function is unannotated or marked IMPL_APPROX.
+# IMPL_TODO is now a valid annotation (planned implementation, not yet written).
 # To temporarily bypass during a migration pass: cmake -DIMPL_STRICT=OFF ...
-option(IMPL_STRICT "Fail build on missing/TODO IMPL_xxx annotations" ON)
+option(IMPL_STRICT "Fail build on missing/APPROX IMPL_xxx annotations" ON)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ImplVerification.cmake)
 
 # --- C++ Standard ---

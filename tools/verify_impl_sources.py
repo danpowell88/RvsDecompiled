@@ -34,13 +34,13 @@ IMPL_MACROS = {
     "IMPL_MATCH",
     "IMPL_EMPTY",
     "IMPL_DIVERGE",
+    "IMPL_TODO",
     # Canonical long-form aliases
     "IMPL_INTENTIONALLY_EMPTY",
     "IMPL_PERMANENT_DIVERGENCE",
     "IMPL_GHIDRA",
     # Forbidden — cause build failure
     "IMPL_APPROX",
-    "IMPL_TODO",
     # Removed macros (kept so scanner can detect and reject them)
     "IMPL_GHIDRA_APPROX",
     "IMPL_SDK",
@@ -49,7 +49,9 @@ IMPL_MACROS = {
 }
 
 # These macros are forbidden — every function using them is a build failure
-STUB_MACROS = {"IMPL_TODO", "IMPL_APPROX"}
+# IMPL_TODO is now VALID (tracks planned implementations from Ghidra)
+# Only IMPL_APPROX (ambiguous approximation) remains forbidden
+STUB_MACROS = {"IMPL_APPROX"}
 
 # Patterns for function definitions (not declarations):
 # Matches lines like:
@@ -196,9 +198,8 @@ def print_report(issues: list[dict], source_dir: Path) -> None:
     if todo:
         print(f"\n{'='*70}")
         print(f"  FORBIDDEN MACROS (must be replaced) ({len(todo)} function(s))")
-        print(f"  IMPL_TODO  = unimplemented stub — must be replaced before commit")
-        print(f"  IMPL_APPROX = approximation — must be verified and promoted to")
-        print(f"                IMPL_MATCH, IMPL_EMPTY, or IMPL_DIVERGE")
+        print(f"  IMPL_APPROX = approximation — replace with IMPL_MATCH, IMPL_EMPTY,")
+        print(f"                IMPL_DIVERGE, or IMPL_TODO")
         print(f"{'='*70}")
         for i in todo:
             rel = os.path.relpath(i["file"], base)

@@ -41,9 +41,15 @@ When there is any conflict between the SDK headers and Ghidra analysis of the re
 5. **Retail parity attribution** — every function definition must be preceded by one of these macros (see `src/Core/Inc/ImplSource.h`):
    - `IMPL_MATCH("Foo.dll", 0xaddr)` — claims exact parity with retail binary; derived from Ghidra analysis. Address must be a **full virtual address** (e.g. `0x104766d0`), not a relative offset. Engine.dll base = `0x10300000`.
    - `IMPL_EMPTY("reason")` — retail is also trivially empty (Ghidra confirmed); only use when Ghidra confirms the body is empty
-   - `IMPL_DIVERGE("reason")` — **permanent** divergence only (defunct live services, hardware globals, etc.). NOT for "pending decompilation"
+   - `IMPL_TODO("reason")` — **temporary** placeholder; Ghidra body identified at a known address but implementation not yet written, or blocked by an unresolved FUN_ helper that is itself being tracked. Use this instead of IMPL_DIVERGE when the function CAN eventually be implemented.
+   - `IMPL_DIVERGE("reason")` — **permanent** divergence only. Valid reasons: defunct live services (GameSpy), Karma/MeSDK proprietary binary-only SDK, rdtsc CPUID chains, functions confirmed absent from the retail export table. NOT for "pending decompilation" or "blocked by FUN_ helper" — use IMPL_TODO for those.
+   - `IMPL_APPROX` — **BANNED, causes build failure**
 
-   **The only valid macros are IMPL_MATCH, IMPL_EMPTY, and IMPL_DIVERGE.**
+   **The valid macros are IMPL_MATCH, IMPL_EMPTY, IMPL_TODO, and IMPL_DIVERGE.**
+
+   **IMPL_TODO vs IMPL_DIVERGE — the key question:** *Can this function ever match retail?*
+   - Yes (just needs more work) → `IMPL_TODO`
+   - No (permanent external constraint) → `IMPL_DIVERGE`
 
 ## Build Commands
 
