@@ -13,23 +13,26 @@ class R6GrenadeWeapon extends R6Gadget
     abstract
     native;
 
-var Pawn.eGrenadeThrow m_eThrow;
-var bool m_bCanThrowGrenade;
-var bool m_bFistPersonAnimFinish;
-var bool m_bPinToRemove;
-var bool m_bReadyToThrow;
+var Pawn.eGrenadeThrow m_eThrow;        // Selected throw mode (GRENADE_Throw=1, Roll=2, peek variants=4-7)
+var bool m_bCanThrowGrenade;            // Set true once the weapon is raised and ready for a new throw
+var bool m_bFistPersonAnimFinish;       // Set true by the FP anim system when the current FP animation completes
+var bool m_bPinToRemove;                // When true the pin-pull (cook) animation plays before throwing
+var bool m_bReadyToThrow;               // Replicated flag: grenade pin is pulled and live on the server
 
 replication
 {
 	// Pos:0x01A
+	// Client notifies server of readiness and chosen throw mode; unreliable is acceptable for transient state.
 	unreliable if((int(Role) < int(ROLE_Authority)))
 		ServerImReadyToThrow, ServerSetThrow;
 
 	// Pos:0x000
+	// Server tells client the throw was registered so m_bCanThrowGrenade can be set.
 	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientThrowGrenade;
 
 	// Pos:0x00D
+	// Client tells server which grenade animation to play (uses eGrenadeThrow enum).
 	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerSetGrenade;
 }
@@ -40,11 +43,13 @@ simulated function PostBeginPlay()
 
 	super(R6Weapons).PostBeginPlay();
 	// End:0x25
+	// Sync the static mesh to the grenade projectile class so it appears in-hand.
 	if((m_pBulletClass != none))
 	{
 		SetStaticMesh(m_pBulletClass.default.StaticMesh);
 	}
 	// End:0xA5
+	// Notify the AI team manager so the HUD grenade count is correct on spawn.
 	if((Pawn(Owner) != none))
 	{
 		// End:0xA5
@@ -67,12 +72,14 @@ function ServerImReadyToThrow(bool bReady)
 	return;
 }
 
+// Drop a live (zero-velocity) grenade at the pawn's hand; used when the carrier is killed mid-cook.
 simulated function DropGrenade()
 {
 	local R6Grenade aGrenade;
 	local Vector vStart;
 
 	// End:0x39
+	// Players use the grenade slot bone; AI use the generic hand bone.
 	if(R6Pawn(Owner).m_bIsPlayer)
 	{
 		vStart = R6Pawn(Owner).GetGrenadeStartLocation(m_eThrow);		
@@ -83,16 +90,19 @@ simulated function DropGrenade()
 	}
 	aGrenade = R6Grenade(Spawn(m_pBulletClass, self,, vStart));
 	aGrenade.Instigator = Pawn(Owner);
+	// Speed of zero means it just falls straight down from the hand position.
 	aGrenade.SetSpeed(0.0000000);
 	return;
 }
 
+// Called when the pawn starts falling (e.g., killed while cooking); drops a live grenade if the pin was already pulled.
 simulated function StartFalling()
 {
 	// End:0x49
 	if((int(m_iNbBulletsInWeapon) != 0))
 	{
 		// End:0x43
+		// Only drop a live grenade if the pin has been pulled; otherwise delegate to normal weapon falling.
 		if((m_bReadyToThrow == true))
 		{
 			bHidden = true;
@@ -110,6 +120,7 @@ simulated function StartFalling()
 	return;
 }
 
+// Returns how long before this grenade type detonates; defaults to 2 seconds if no bullet class is set.
 function float GetExplosionDelay()
 {
 	// End:0x14
@@ -124,23 +135,25 @@ function float GetExplosionDelay()
 	return;
 }
 
+// Pressing fire enters the stand-by state; actual throw requires releasing the button in ReadyToThrow.
 function Fire(float fValue)
-{
-	GotoState('StandByToThrow');
 	return;
 }
 
+// Replicates the chosen throw mode to the server so it can spawn the grenade with the correct trajectory.
 function ServerSetThrow(Pawn.eGrenadeThrow eThrow)
 {
 	m_eThrow = eThrow;
 	return;
 }
 
+// Authoritative RPC: sets the pawn throw animation state and triggers PlayWeaponAnimation on the server.
 function ServerSetGrenade(Pawn.eGrenadeThrow eGrenade)
 {
 	local R6Pawn pawnOwner;
 
 	pawnOwner = R6Pawn(Owner);
+	// Clear hands-animation flag before starting the grenade throw.
 	pawnOwner.m_ePlayerIsUsingHands = 0;
 	pawnOwner.m_eGrenadeThrow = eGrenade;
 	pawnOwner.m_eRepGrenadeThrow = eGrenade;
@@ -181,6 +194,7 @@ function ThrowGrenade()
 	{
 		(m_iNbBulletsInWeapon--);
 		// End:0x97
+		// When the last grenade is thrown, hide the mesh and update the team HUD.
 		if(((int(m_iNbBulletsInWeapon) == 0) && (pawnOwner != none)))
 		{
 			SetStaticMesh(none);
@@ -193,6 +207,7 @@ function ThrowGrenade()
 		}
 		GetFiringDirection(vStart, rFiringDir);
 		// End:0xD6
+		// Determine the grenade spawn origin: bone position for players, hand position for AI.
 		if(pawnOwner.m_bIsPlayer)
 		{
 			vStart = pawnOwner.GetGrenadeStartLocation(m_eThrow);			
@@ -205,6 +220,7 @@ function ThrowGrenade()
 		aGrenade.Instigator = pawnOwner;
 		m_bReadyToThrow = false;
 		// End:0x159
+		// Prone throws are half-speed — the operator can't get full leverage while crawling.
 		if((pawnOwner.m_bIsProne == true))
 		{
 			aGrenade.SetSpeed((m_fMuzzleVelocity * 0.5000000));			
@@ -213,11 +229,13 @@ function ThrowGrenade()
 		{
 			aGrenade.SetSpeed(m_fMuzzleVelocity);
 		}
+		// Notify the local client that the grenade left the hand, enabling the next throw.
 		ClientThrowGrenade();
 	}
 	return;
 }
 
+// Server→client RPC confirming the throw was processed; unlocks the weapon for the next throw cycle.
 function ClientThrowGrenade()
 {
 	m_bCanThrowGrenade = true;
@@ -284,6 +302,7 @@ function bool CanSwitchToWeapon()
 	return;
 }
 
+// StandByToThrow: idle waiting state — grenade is holstered and the player hasn't committed to a throw yet.
 state StandByToThrow
 {
 	function BeginState()
@@ -297,6 +316,7 @@ state StandByToThrow
 			Log("**** IN  STANDBY TO THROW *******");
 		}
 		// End:0xFE
+		// If no grenades remain, auto-switch to primary weapon (or secondary if no primary).
 		if((int(m_iNbBulletsInWeapon) == 0))
 		{
 			// End:0x99
@@ -337,21 +357,22 @@ state StandByToThrow
 			{
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
 				// End:0xED
+				// While peeking, use the peek-variant throw animations.
 				if((R6Pawn(Owner).IsPeeking() && (!R6Pawn(Owner).m_bIsProne)))
 				{
 					// End:0xE2
 					if((int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft) == 1))
 					{
-						m_eThrow = 6;						
+						m_eThrow = 6; // GRENADE_PeekLeftThrow						
 					}
 					else
 					{
-						m_eThrow = 7;
+						m_eThrow = 7; // GRENADE_PeekRightThrow
 					}					
 				}
 				else
 				{
-					m_eThrow = 1;
+					m_eThrow = 1; // GRENADE_Throw — normal overhand throw
 				}
 			}
 			ServerSetThrow(m_eThrow);
@@ -370,21 +391,22 @@ state StandByToThrow
 			{
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
 				// End:0xC6
+				// AltFire selects a rolling (underhand) throw; peek variants roll around corners.
 				if((R6Pawn(Owner).IsPeeking() && (!R6Pawn(Owner).m_bIsProne)))
 				{
 					// End:0xBB
 					if((int(R6PlayerController(Pawn(Owner).Controller).m_bPeekLeft) == 1))
 					{
-						m_eThrow = 4;						
+						m_eThrow = 4; // GRENADE_PeekLeft						
 					}
 					else
 					{
-						m_eThrow = 5;
+						m_eThrow = 5; // GRENADE_PeekRight
 					}					
 				}
 				else
 				{
-					m_eThrow = 2;
+					m_eThrow = 2; // GRENADE_Roll — underhand ground roll
 				}
 			}
 			ServerSetThrow(m_eThrow);
@@ -401,6 +423,7 @@ state StandByToThrow
 	stop;
 }
 
+// ReadyToThrow: pin has been pulled; fire/altfire are suppressed until the button is released.
 state ReadyToThrow
 {
 	function Fire(float fValue)
@@ -434,10 +457,12 @@ state ReadyToThrow
 		m_bFistPersonAnimFinish = true;
 		ServerImReadyToThrow(true);
 		m_bReadyToThrow = true;
+		// Set the pawn idle animations to the grenade-held poses.
 		m_PawnWaitAnimLow = 'StandGrenade_nt';
 		m_PawnWaitAnimHigh = 'StandGrenade_nt';
 		m_PawnWaitAnimProne = 'ProneGrenade_nt';
 		// End:0x10F
+		// In first-person mode, immediately trigger the pin-pull FP animation.
 		if(R6Pawn(Owner).m_bIsPlayer)
 		{
 			// End:0x10F
@@ -458,6 +483,7 @@ state ReadyToThrow
 			}
 		}
 		// End:0x120
+		// If this grenade type uses a pin (default true), play the pin-removal anim (GRENADE_RemovePin=3).
 		if(m_bPinToRemove)
 		{
 			ServerSetGrenade(3);
@@ -482,6 +508,7 @@ state ReadyToThrow
 
 		pawnOwner = R6Pawn(Owner);
 		// End:0x180
+		// Release condition: fire and altfire both released, no weapon transition, and FP anim done.
 		if((((((pawnOwner.Controller != none) && (int(pawnOwner.Controller.bFire) == 0)) && (int(pawnOwner.Controller.bAltFire) == 0)) && (pawnOwner.m_bWeaponTransition == false)) && m_bFistPersonAnimFinish))
 		{
 			m_bCanThrowGrenade = false;
@@ -491,6 +518,7 @@ state ReadyToThrow
 			{
 				Log("!!!!!!!!!!!!!!! THROW GRENADE!!!!!!!!!!!!!!!");
 			}
+			// Tell the server which throw type to animate on the pawn.
 			ServerSetGrenade(m_eThrow);
 			// End:0x179
 			if(pawnOwner.m_bIsPlayer)
@@ -503,6 +531,7 @@ state ReadyToThrow
 					{
 						m_bFistPersonAnimFinish = false;
 						// End:0x16A
+						// Overhand throws (Throw=1, PeekLeftThrow=6, PeekRightThrow=7) use the throw anim; everything else rolls.
 						if((((int(m_eThrow) == int(1)) || (int(m_eThrow) == int(6))) || (int(m_eThrow) == int(7))))
 						{
 							m_FPHands.FireGrenadeThrow();							
@@ -521,6 +550,7 @@ state ReadyToThrow
 	stop;
 }
 
+// WaitEndOfThrow: throw animation is playing; inputs suppressed until both the FP anim finishes and the server confirms the throw.
 state WaitEndOfThrow
 {
 	function Fire(float fValue)
@@ -557,8 +587,10 @@ state WaitEndOfThrow
 	simulated function Tick(float fDeltaTime)
 	{
 		// End:0xCD
+		// Both the FP hand anim AND the server-side throw must complete before returning to StandBy.
 		if((m_bFistPersonAnimFinish && m_bCanThrowGrenade))
 		{
+			// Reset pawn throw animation to GRENADE_None (0).
 			ServerSetGrenade(0);
 			// End:0x46
 			if(bShowLog)
@@ -566,6 +598,7 @@ state WaitEndOfThrow
 				Log(("ClientThrowGrenade()" @ string(m_iNbBulletsInWeapon)));
 			}
 			// End:0x85
+			// If all grenades are gone, switch to an unarmed idle and enter the no-grenade state.
 			if((int(m_iNbBulletsInWeapon) == 0))
 			{
 				SetStaticMesh(none);
@@ -607,6 +640,7 @@ state WaitEndOfThrow
 	stop;
 }
 
+// NoGrenadeLeft: all grenades expended; hides the reticle and unlocks weapon actions so the player can switch.
 state NoGrenadeLeft
 {
 	function StopFire(optional bool bSoundOnly)
@@ -858,10 +892,10 @@ state BringWeaponUp
 
 defaultproperties
 {
-	m_bCanThrowGrenade=true
-	m_bPinToRemove=true
-	m_iClipCapacity=3
-	m_fMuzzleVelocity=1500.0000000
+	m_bCanThrowGrenade=true                 // Weapon starts in a throwable state.
+	m_bPinToRemove=true                     // Standard grenades always play the pin-pull animation before throwing.
+	m_iClipCapacity=3                       // Default carry capacity; subclasses may override.
+	m_fMuzzleVelocity=1500.0000000          // Throw speed in UU/s; halved when prone (~750 UU/s).
 	m_stWeaponCaps=(bSingle=1)
 	m_szReticuleClass="GRENADE"
 	m_pFPHandsClass=Class'R61stWeapons.R61stHandsGripGrenade'
@@ -872,7 +906,7 @@ defaultproperties
 	m_PawnWaitAnimLow="StandGrenade_nt"
 	m_PawnWaitAnimHigh="StandGrenade_nt"
 	m_PawnWaitAnimProne="ProneGrenade_nt"
-	m_AttachPoint="TagGrenadeHand"
+	m_AttachPoint="TagGrenadeHand"          // Attach to the grenade-hand socket defined on the pawn skeleton.
 	bCollideWorld=true
 }
 
