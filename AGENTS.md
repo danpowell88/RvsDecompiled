@@ -120,6 +120,33 @@ void Foo::Bar() {
 }
 ```
 
+## ⚠️ Always Verify Function Signatures Against the .def Export Table
+
+**Before adding, removing, or changing any parameter**, cross-check the mangled name in the module's `.def` file. Adding or removing even one parameter changes the mangled name and causes a linker error (`LNK2001`).
+
+```powershell
+# Check Engine.dll export for MoveActor — the mangled name encodes parameter types
+Select-String -Path "src/Engine/Src/Engine.def" -Pattern "MoveActor"
+# Output: ?MoveActor@ULevel@@UAEHPAVAActor@@VFVector@@VFRotator@@AAUFCheckResult@@HHHHH@Z
+# HHHHH = 5 INT params — do NOT add a 6th without verifying the retail mangled name
+```
+
+Mangled name suffix type codes (most common):
+| Code | C++ type |
+|------|----------|
+| `H` | `int` / `BOOL` |
+| `M` | `float` |
+| `N` | `double` |
+| `E` | `unsigned char` / `BYTE` |
+| `G` | `unsigned short` / `WORD` |
+| `I` | `unsigned int` / `DWORD` |
+| `_N` | `bool` |
+| `PA...` | pointer to … |
+| `V...@@` | value type (class/struct) |
+| `AA...` | reference to … |
+
+**The lesson from MoveActor:** A `FLOAT fStepDist` 10th param was mistakenly added, generating `HHHHHM@Z` in the `.obj` but the `.def` exports `HHHHH@Z`. Always count the trailing type codes before touching a signature.
+
 ## Ghidra Reference Files
 
 Function decompilations are in `ghidra/exports/`:
@@ -131,6 +158,6 @@ Function decompilations are in `ghidra/exports/`:
 For each DLL there is a `_global.cpp` with all exported functions. Search by address:
 ```powershell
 $content = Get-Content "ghidra\exports\Engine\_global.cpp" -Raw
-$idx = $content.IndexOf("// Address: 103b4130")
+$idx = $content.IndexOf("// Address: 0x103b4130")
 if ($idx -ge 0) { $content.Substring($idx, [Math]::Min(2000, $content.Length - $idx)) }
 ```
