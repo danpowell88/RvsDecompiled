@@ -27,9 +27,14 @@
 
 CORE_API DWORD GCRCTable[256];
 
-IMPL_DIVERGE("Not exported from Core.dll (static internal function)")
+IMPL_DIVERGE("static internal helper absent from retail export table; retail inlines CRC init into appInit using polynomial 0x04c11db7 (MSB-first); our implementation uses 0xEDB88320 (reflected) — algorithm diverges")
 static void appInitCRCTable()
 {
+	// NOTE: GCRCTable values produced here DIFFER from retail. Retail appInit inlines
+	// CRC-32 table generation using MSB-first polynomial 0x04c11db7 (normal CRC-32),
+	// while this function uses 0xEDB88320 (reflected/reversed CRC-32). The resulting
+	// GCRCTable is different, which means appStrCrc and appMemCrc output will also
+	// differ from retail. This is a known divergence tracked for a future fix.
 	for( DWORD iCRC=0; iCRC<256; iCRC++ )
 	{
 		DWORD CRC = iCRC;
@@ -813,7 +818,7 @@ CORE_API void appMemset( void* Dest, INT C, INT Count )
 }
 
 #ifndef DEFINED_appMemcpy
-IMPL_DIVERGE("appMemcpy may be provided as platform assembly in retail build; wrapped in #ifndef DEFINED_appMemcpy")
+IMPL_DIVERGE("not found in Core.dll Ghidra exports; likely inlined or provided as platform assembly; wrapped in #ifndef DEFINED_appMemcpy guard")
 CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 {
 	memcpy( Dest, Src, Count );
@@ -821,7 +826,7 @@ CORE_API void appMemcpy( void* Dest, const void* Src, INT Count )
 #endif
 
 #ifndef DEFINED_appMemzero
-IMPL_DIVERGE("appMemzero may be provided as platform assembly in retail build; wrapped in #ifndef DEFINED_appMemzero")
+IMPL_DIVERGE("not found in Core.dll Ghidra exports; likely inlined or provided as platform assembly; wrapped in #ifndef DEFINED_appMemzero guard")
 CORE_API void appMemzero( void* Dest, INT Count )
 {
 	memset( Dest, 0, Count );
