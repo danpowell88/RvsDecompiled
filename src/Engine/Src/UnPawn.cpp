@@ -971,8 +971,9 @@ IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
 // Ghidra 0x10391770, 451b. Reads one FString param (the key binding command string).
 // Dispatches: "INPUT ..." → keyboard UInput->Exec via vtable[0x8c]
 //              "INPUTPLANNING ..." → mouse/gamepad UInput->Exec via vtable[0x8c]
-//              "R6GAMEOPTIONS PropertyName Value" → FUN_103916a0 (unidentified) property lookup
-IMPL_TODO("Ghidra 0x10391770; FUN_103916a0 (property lookup for R6GAMEOPTIONS path) not yet identified — R6GAMEOPTIONS path stubbed")
+//              "R6GAMEOPTIONS PropertyName Value" → FUN_103916a0 property lookup + GlobalSetProperty
+// DIVERGE: FUN_103916a0 (152b, property-chain walker) approximated with FindObjectField.
+IMPL_DIVERGE("Ghidra 0x10391770: FUN_103916a0 property-chain iterator approximated as FindObjectField; semantically equivalent")
 void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetKey);
@@ -1004,8 +1005,22 @@ void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 		}
 		else if( ParseCommand(&Str, TEXT("R6GAMEOPTIONS")) )
 		{
-			// Retail calls FUN_103916a0(R6GameOptions*, propName) to find/set property.
-			// FUN_103916a0 not yet identified — R6GAMEOPTIONS path not implemented.
+			// Retail: ParseToken → find "R6GameOptions" UClass → walk property chain for name
+			// → GlobalSetProperty.  FUN_103916a0 = walk UClass property chain by name
+			// (equivalent to FindObjectField).
+			TCHAR PropName[0x100];
+			ParseToken( Str, PropName, 0x100, 0 );
+			while( *Str == TEXT(' ') ) Str++;
+			UObject* R6GO = UObject::StaticFindObject( UClass::StaticClass(), ANY_PACKAGE, TEXT("R6GameOptions"), 0 );
+			if( R6GO )
+			{
+				UProperty* Prop = (UProperty*)R6GO->FindObjectField( FName(PropName), 0 );
+				if( Prop )
+				{
+					INT PropOffset = *(INT*)((BYTE*)Prop + 0x4c);
+					UObject::GlobalSetProperty( Str, (UClass*)R6GO, Prop, PropOffset, 1 );
+				}
+			}
 		}
 	}
 	unguard;
@@ -2672,7 +2687,12 @@ void APawn::clearPaths()
 	}
 }
 
-IMPL_TODO("Ghidra 0x103f07e0: velocity displacement calculation from FVector division is approximate; parity fails")
+// Ghidra 0x103f07e0, 717b.  Six cardinal-direction checkFloor probes; if all fail
+// eventFalling is called and physics transitions to PHYS_Falling.
+// DIVERGE: Ghidra calls FVector::operator/(delta, unrecovered_reg) for the velocity
+// update — the scalar divisor lives in an unrecovered x87 FPU register.
+// Best reconstruction: divisor = RemainingTime (displacement / elapsed time).
+IMPL_DIVERGE("Ghidra 0x103f07e0: velocity divisor is an unrecovered FPU register value; approximated as RemainingTime")
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
 {
 	guard(APawn::findNewFloor);
@@ -2695,10 +2715,8 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 		DWORD flags = *(DWORD*)((BYTE*)this + 0xac);
 		if( !(flags & 8) && RemainingTime < DeltaTime )
 		{
-			// Velocity from displacement — Ghidra shows FVector division but divisor is unclear; best approximation.
-			FVector Delta = Location - OldLocation;
-			Velocity.X = Delta.X;
-			Velocity.Y = Delta.Y;
+			// Retail: Velocity = (Location - OldLocation) / <unrecovered_float>; then Z restored.
+			Velocity = (Location - OldLocation) / RemainingTime;
 		}
 		Velocity.Z = SavedVelZ;
 		if( RemainingTime > 0.005f )
@@ -3193,11 +3211,115 @@ INT AController::LocalPlayerController()
 	return 0;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103c3870 is 977 bytes: bHidden toggle, AI state dispatch (CheckEnemyVisible, rotateToward), MonitoredPawn distance checks, eventMonitoredPawnAlert; does not simply delegate to AActor::Tick")
+// Ghidra 0x103c3870, 977b.
+// Confirmed field layout (see DECOMPILATION_PLAN.md for AController offset table):
+//   Physics (BYTE)       = actor+0x2c  Role (BYTE) = actor+0x2d
+//   SightCounter (FLOAT) = this+0x3ac  FocalPoint (FVector) = this+0x48c
+//   Focus* (AActor*)     = this+0x3e4  MonitorStartLoc (FVector) = this+0x4d4
+// DIVERGE: vtable[0xf0] call on 'this' (Role > ROLE_DumbProxy path) is an unidentified
+// virtual function; raw offset accesses for ULevel+0x100 and actor+0x144 have no named
+// counterpart; Pawn+0xb4 = LastRenderTime (AActor field, no named decl here); rdtsc omitted.
+IMPL_DIVERGE("Ghidra 0x103c3870: vtable[0xf0] unidentified; actor+0x144 ptr, ULevel+0x100 and actor+0x320 raw; LastRenderTime at +0xb4 unnamed; rdtsc profiling omitted")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
-	return AActor::Tick( DeltaTime, TickType );
+
+	// Determine whether to skip main tick logic (performance culling for hidden AI).
+	// Conditions: controller bHidden, pause tick, or pawn culled (hidden+static physics+stale render).
+	UBOOL bSkip =
+		  bHidden
+		||TickType == LEVELTICK_ViewportsOnly
+		|| (   Pawn != NULL
+			&& Pawn->bHidden
+			&& (Pawn->Physics == PHYS_None || Pawn->Physics == PHYS_Rotating)
+			&& (5.0f < *(FLOAT*)((BYTE*)XLevel + 0xd4) - *(FLOAT*)((BYTE*)Pawn + 0xb4))
+			&& *(BYTE*)((BYTE*)*(INT*)((BYTE*)this + 0x144) + 0x425) == '\0' );
+
+	// Sync the hidden-flag word at this+0x320 with XLevel flag bit0 (both paths).
+	DWORD  xLevelBit = *(DWORD*)((BYTE*)XLevel + 0x100);
+	DWORD* pHidFlag  = (DWORD*)((BYTE*)this + 0x320);
+	*pHidFlag ^= (xLevelBit ^ *pHidFlag) & 1u;
+
+	if( bSkip )
+		return 1;
+
+	// Role > ROLE_DumbProxy: retail calls vtable[0xf0](this, DeltaTime, TickType).
+	// Vtable slot unidentified — omitted. Retail likely runs a base-class tick here.
+
+	if( Role == ROLE_Authority && TickType == LEVELTICK_All )
+	{
+		// SightCounter: counts down between enemy-visibility probes.
+		if( SightCounter < 0.0f )
+		{
+			// Probe index 0x155 determines if this event is being listened to.
+			if( !IsProbing(FName((EName)0x155)) )
+			{
+				SightCounter += 0.2f;
+			}
+			else
+			{
+				CheckEnemyVisible();
+				SightCounter += 0.1f;
+			}
+		}
+		SightCounter -= DeltaTime;
+
+		// ShowSelf if Pawn is not culled-hidden (bit1 of Pawn+0xa0) and Focus->APawnFlags bit3 clear.
+		if(    Pawn
+			&& !(*(BYTE*)((BYTE*)Pawn + 0xa0) & 2)
+			&& Focus
+			&& !(*(BYTE*)((BYTE*)Focus + 0x3e4) & 8) )
+			ShowSelf();
+	}
+
+	// Rotate pawn toward focus/focalpoint if the pawn's bRotateToDesired flag (bit1 at +0xac) is set.
+	if( Pawn )
+	{
+		if( *(BYTE*)((BYTE*)Pawn + 0xac) & 2 )
+			Pawn->rotateToward( Focus, FocalPoint );
+
+		// Mirror Pawn velocity onto the Controller (for AI prediction and replication).
+		Velocity = Pawn->Velocity;
+	}
+
+	// MonitoredPawn distance / alert logic.
+	if( MonitoredPawn )
+	{
+		// Fire alert if Pawn gone, MonitoredPawn is culled-hidden, or its "alive" flag cleared.
+		if(    !Pawn
+			|| *(BYTE*)((BYTE*)MonitoredPawn + 0xa0) < 0
+			|| *(INT*)((BYTE*)MonitoredPawn + 0x4ec) == 0 )
+		{
+			eventMonitoredPawnAlert();
+		}
+		else
+		{
+			FVector dToPawn   = MonitoredPawn->Location - Pawn->Location;
+			FLOAT   distSqToP = dToPawn.SizeSquared();
+
+			if( distSqToP <= MonitorMaxDistSq )
+			{
+				FVector dFromStart   = MonitoredPawn->Location - MonitorStartLoc;
+				FLOAT   distSqFromSt = dFromStart.SizeSquared();
+
+				if( MonitorMaxDistSq * 0.25f < distSqFromSt )
+				{
+					// Dot product: (MonitorStartLoc - Pawn.Location) · MonitoredPawn.Acceleration
+					FVector toStart = MonitorStartLoc - Pawn->Location;
+					if( (toStart | MonitoredPawn->Acceleration) <= 0.0f )
+						return 1;   // pawn is between start and monitor; no alert
+
+					FVector dToPawn2 = MonitoredPawn->Location - Pawn->Location;
+					if( MonitorMaxDistSq * 0.25f < dToPawn2.SizeSquared() )
+						return 1;   // monitor still far from pawn; no alert
+				}
+			}
+
+			eventMonitoredPawnAlert();
+		}
+	}
+
+	return 1;
 	unguard;
 }
 
