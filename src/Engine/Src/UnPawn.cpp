@@ -317,7 +317,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x1038e490; 244 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038e490")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
@@ -329,7 +329,7 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_TODO("Ghidra 0x1038e590; 289b — logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038e590")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
@@ -355,7 +355,7 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_TODO("Ghidra 0x1038e3e0; 172 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038e3e0")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);
@@ -366,7 +366,7 @@ void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_TODO("Ghidra 0x1038e030; 273 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038e030")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
@@ -377,7 +377,7 @@ void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_TODO("Ghidra 0x1038e150; 286 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038e150")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
@@ -388,7 +388,7 @@ void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_TODO("Ghidra 0x1038e6c0; 131 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038e6c0")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
@@ -399,7 +399,7 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_TODO("Ghidra 0x1038ce20; 236b — logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038ce20")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
@@ -417,7 +417,7 @@ void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_TODO("Ghidra 0x10390770; 281b — logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x10390770")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
@@ -439,7 +439,7 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_TODO("Ghidra 0x1038df50; 209 bytes; logic matches retail exactly; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x1038df50")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
@@ -3078,7 +3078,7 @@ void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; logic matches retail; omits rdtsc profiling counters binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; logic matches retail; Ghidra 0x103ec3f0")
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 {
 	guard(APawn::pointReachable);
@@ -4011,7 +4011,7 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1038ed20; 173b — logic matches retail; omits rdtsc profiling counters and guard/unguard overhead differs from retail binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; guard/unguard frame overhead differs; logic matches retail; Ghidra 0x1038ed20")
 void AController::CheckEnemyVisible()
 {
 	guard(AController::CheckEnemyVisible);
@@ -4024,7 +4024,7 @@ void AController::CheckEnemyVisible()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1038e270; logic matches retail exactly; omits rdtsc profiling counters (GScriptCycles, function timer array) binary difference")
+IMPL_DIVERGE("rdtsc cycle-counter profiling (GScriptCycles, function timer array) omitted; logic matches retail; Ghidra 0x1038e270")
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 {
 	guard(AController::FindPath);
@@ -4040,7 +4040,7 @@ AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1038ee00; 252b — logic verified; guard/unguard frame overhead diverges; rdtsc profiling omitted")
+IMPL_DIVERGE("rdtsc cycle-counter profiling omitted; guard/unguard frame overhead diverges; logic matches retail; Ghidra 0x1038ee00")
 AActor* AController::HandleSpecial( AActor* BestPath )
 {
 	guard(AController::HandleSpecial);

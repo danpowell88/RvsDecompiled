@@ -301,26 +301,26 @@ FVector ALadderVolume::FindCenter()
 	return result;
 }
 
-IMPL_TODO("calls vtable[0xC0] on this (unknown level/interface getter) and vtable[0x68] on result (unknown trace call)")
+// Ghidra 0xe05b0: vtable[0xC0/4=48] on this (level getter) returns XLevel, whose vtable[0x68/4=26]
+// (SingleLineCheck) traces from InLoc-dir*10000 to InLoc. Returns Hit.Location.
+IMPL_MATCH("Engine.dll", 0x103e05b0)
 FVector ALadderVolume::FindTop(FVector InLoc)
 {
-	// Ghidra 0xe05b0: recursive search — if InLoc is inside the volume, step along the
-	// volume's up-direction by 500 units and recurse. Otherwise perform a geometry trace
-	// via vtable[0xC0](this) → some object, then that object's vtable[0x68] → trace.
-	// this+0x4a4/+0x4a8/+0x4ac hold the volume's direction unit vector.
 	if (AVolume::Encompasses(InLoc))
 	{
-		FVector next(
-			InLoc.X + *(FLOAT*)(this + 0x4a4) * 500.0f,
-			InLoc.Y + *(FLOAT*)(this + 0x4a8) * 500.0f,
-			InLoc.Z + *(FLOAT*)(this + 0x4ac) * 500.0f
-		);
-		return FindTop(next);
+		return FindTop(FVector(
+			InLoc.X + *(FLOAT*)((BYTE*)this + 0x4a4) * 500.0f,
+			InLoc.Y + *(FLOAT*)((BYTE*)this + 0x4a8) * 500.0f,
+			InLoc.Z + *(FLOAT*)((BYTE*)this + 0x4ac) * 500.0f));
 	}
-	// Else: vtable[0xC0] on this returns a trace-interface; vtable[0x68] on that runs
-	// a line trace from InLoc − dir*10000 to InLoc; result stored in local FHitResult.
-	// Diverge: vtable slots unresolved.
-	return InLoc;
+	// Trace from InLoc − dir*10000 toward InLoc to find where the ladder volume top is
+	FCheckResult Hit(1.0f);
+	FVector start(
+		InLoc.X - *(FLOAT*)((BYTE*)this + 0x4a4) * 10000.0f,
+		InLoc.Y - *(FLOAT*)((BYTE*)this + 0x4a8) * 10000.0f,
+		InLoc.Z - *(FLOAT*)((BYTE*)this + 0x4ac) * 10000.0f);
+	XLevel->SingleLineCheck(Hit, this, InLoc, start, 0, FVector(0,0,0));
+	return Hit.Location;
 }
 
 
@@ -670,19 +670,52 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- AScout ---
-IMPL_TODO("787-byte wall-slide loop (Ghidra 0xe0940): FarMoveActor/MoveActor confirmed; FCheckResult struct layout and FVector ops need full translation")
+IMPL_MATCH("Engine.dll", 0x103e0940)
 int AScout::findStart(FVector Loc)
 {
 	guard(AScout::findStart);
-	// Ghidra 0xe0940: places Scout at Loc via XLevel->FarMoveActor, then iterates up to 10
-	// wall-slide adjustments using XLevel->MoveActor + AActor::TwoWallAdjust + FVector::SafeNormal.
-	// Returns 1 if a valid collision-free start was found, 0 otherwise.
-	// FarMoveActor = vtable[0x9c/4], MoveActor = vtable[0x98/4] (confirmed from PostNetReceive).
-	INT result = XLevel->FarMoveActor( this, Loc, 0, 0, 0, 0 );
-	if ( result == 0 )
+	// Retail 0xe0940 (787 bytes): place Scout at Loc via FarMoveActor, then iterate up to 10
+	// wall-slide adjustments using MoveActor + TwoWallAdjust until a flat floor is found.
+	if (!XLevel->FarMoveActor( this, Loc, 0, 0, 0, 0 ))
 		return 0;
-	// TODO: wall-slide loop (10 iterations with MoveActor + TwoWallAdjust)
-	return 1;
+
+	FCheckResult Hit(1.0f);   // Time=1.0 (no hit), Normal.Z=0 initially
+	FVector delta(0, 0, -100.0f);
+
+	for (INT i = 0; i < 10; i++)
+	{
+		// Normal.Z >= 0.7 → floor not too steep → success
+		if (Hit.Normal.Z >= 0.7f)
+			return 1;
+
+		XLevel->MoveActor( this, delta, Rotation, Hit, 1, 1, 0, 0, 0 );
+
+		if (Hit.Time < 1.0f && Hit.Normal.Z < 0.7f)
+		{
+			// Compute slide direction: project delta away from hit normal
+			FVector savedNormal = Hit.Normal;
+			FLOAT   dot        = delta | Hit.Normal;   // dot(delta, Normal)
+			FVector slideDir   = delta - Hit.Normal * dot;
+			FVector slideScaled = slideDir * (1.0f - Hit.Time);
+
+			// Only slide if the new direction agrees with the original delta
+			if ((slideScaled | delta) >= 0.0f)
+			{
+				XLevel->MoveActor( this, slideScaled, Rotation, Hit, 1, 1, 0, 0, 0 );
+
+				if (Hit.Time < 1.0f && Hit.Normal.Z < 0.7f)
+				{
+					// Two-wall case: further slide adjustment
+					FVector safeDir = delta.SafeNormal();
+					TwoWallAdjust( safeDir, slideScaled, Hit.Normal, savedNormal, Hit.Time );
+					XLevel->MoveActor( this, slideScaled, Rotation, Hit, 1, 1, 0, 0, 0 );
+				}
+			}
+		}
+	}
+
+	GLog->Logf( TEXT("Couldn't place Scout") );
+	return 0;
 	unguard;
 }
 
