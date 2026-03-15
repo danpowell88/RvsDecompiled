@@ -532,13 +532,26 @@ void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 540, execFindBestInventoryPath );
 
-IMPL_DIVERGE("Ghidra 0x10390890; 162 bytes; complex ALadder overlap check and PHYS_Falling transition; body simplified")
+IMPL_DIVERGE("Ghidra 0x10390890; retail has no guard; checks LatentAction==AI_PollMoveToward+ALadder overlap to set Pawn->Anchor; guard diverges")
 void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEndClimbLadder);
 	P_FINISH;
-	if( Pawn )
-		Pawn->setPhysics( PHYS_Falling, NULL, FVector(0,0,0) );
+	if( GetStateFrame()->LatentAction == AI_PollMoveToward && Pawn && MoveTarget )
+	{
+		if( MoveTarget->IsA( ALadder::StaticClass() ) )
+		{
+			if( Pawn->IsOverlapping( MoveTarget, NULL ) )
+			{
+				// FUN_1038ef90: returns MoveTarget as ANavigationPoint* if IsA, else NULL
+				if( MoveTarget->IsA( ANavigationPoint::StaticClass() ) )
+					Pawn->Anchor = (ANavigationPoint*)MoveTarget;
+				else
+					Pawn->Anchor = NULL;
+			}
+			GetStateFrame()->LatentAction = 0;
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execEndClimbLadder );
@@ -2607,12 +2620,69 @@ DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x1038d500 is 476 bytes, not fully reconstructed")
+// DAT_1066ad7c: module-level goal cache (4 entries), cleared on bInitialPath=1
+static AActor* sGoalCache[4] = {NULL, NULL, NULL, NULL};
+IMPL_DIVERGE("Ghidra 0x1038d500, 476b — DAT_1066ad7c as static sGoalCache[4]; FName 0x15a = NAME_SpecialHandling")
 AActor* AController::SetPath( INT bInitialPath )
 {
-	guard(AController::SetPath);
-	return NULL;
-	unguard;
+guard(AController::SetPath);
+
+AActor* result = RouteCache[0];
+
+if (Pawn && Pawn->ValidAnchor())
+{
+if (!bInitialPath)
+{
+// Save RouteGoal to GoalList if there is an empty slot or it is already there
+for (INT i = 0; i < 4; i++)
+{
+if (GoalList[i] == RouteGoal) break;
+if (!GoalList[i]) { GoalList[i] = RouteGoal; break; }
+}
+}
+else
+{
+for (INT i = 0; i < 4; i++) sGoalCache[i] = NULL;
+
+if (RouteGoal == GoalList[0])
+{
+if (GoalList[1])
+{
+// Walk GoalList[1+] to find the last non-null entry
+INT i = 1;
+while (i < 3 && GoalList[i]) i++;
+AActor* nextGoal = GoalList[i - 1];
+if (Pawn->actorReachable(nextGoal, 0, 0))
+{
+GoalList[i - 1] = NULL;
+return nextGoal;
+}
+FLOAT dist = Pawn->findPathToward(
+nextGoal, nextGoal->Location, 0, 1);
+if (dist > 0.f)
+result = SetPath(0);
+}
+}
+else
+{
+GoalList[0] = RouteGoal;
+for (INT i = 1; i < 4; i++) GoalList[i] = NULL;
+}
+}
+
+// Record result in the module-level goal cache (skip duplicates)
+for (INT i = 0; i < 4; i++)
+{
+if (!sGoalCache[i]) { sGoalCache[i] = result; break; }
+if (sGoalCache[i] == result) return result;
+}
+
+if (result && result->IsProbing(NAME_SpecialHandling))
+result = HandleSpecial(result);
+}
+
+return result;
+unguard;
 }
 
 IMPL_DIVERGE("Ghidra 0x1041CCC0; raw offsets: EndPath+0x394=cost, +0x3ac=prevPath, +0x3b4=nextPath; skips FUN_1035a3d0 profiling call")
