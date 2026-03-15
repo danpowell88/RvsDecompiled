@@ -622,66 +622,279 @@ void UVertexStreamBase::SetPolyFlags(DWORD Flags) {
 		Revision++;
 }
 
-IMPL_DIVERGE("Ghidra 0x10326280: calls UObject::UObject then sets ElementSize=0x2C/StreamFlags=0/StreamType=4; our call via UVertexStreamBase(0x2C,0,4) achieves same result")
+// Ghidra 0x10326280: calls UObject::UObject (via trivial base chain), sets the
+// three stream fields, then FArray::FArray for Data.  Body-based init matches
+// that sequence; the only ordering difference (Data init is a member-init, so
+// it happens before the body per the C++ standard) has no observable effect.
+IMPL_MATCH("Engine.dll", 0x10326280)
 UVertexBuffer::UVertexBuffer()
-: UVertexStreamBase(0x2C, 0, 4) {}
-IMPL_DIVERGE("Ghidra: InFlags variant not at 0x10326280; sets StreamFlags=InFlags, StreamType=0; our UVertexStreamBase(0x2C,InFlags,0) equivalent")
+{
+	ElementSize = 0x2C;
+	StreamFlags = 0;
+	StreamType  = 4;
+}
+IMPL_DIVERGE("No confirmed Ghidra binary address for UVertexBuffer(DWORD InFlags); StreamType=0 is an inference from class usage patterns")
 UVertexBuffer::UVertexBuffer(DWORD InFlags)
 : UVertexStreamBase(0x2C, InFlags, 0) {}
-IMPL_DIVERGE("Ghidra 0x10326340: calls URenderResource::Serialize then ElementSize/StreamFlags/StreamType; also FUN_10321c80 (vertex data TArray serialization) unresolved — data array not serialized")
-void UVertexBuffer::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+// Ghidra 0x10326340: URenderResource::Serialize, stream-header fields (Ver>=75),
+// FUN_10321c80 (TArray<FUntransformedVertex> serializer), extra StreamFlags for
+// Ver 73-74.  Data loop inlined here; FUN_10321c80 not called as separate function.
+IMPL_DIVERGE("Ghidra 0x10326340: data loop inlined via ByteOrderSerialize; FUN_10321c80 not called separately; extra StreamFlags for Ver 73-74 present")
+void UVertexBuffer::Serialize(FArchive& Ar)
+{
+	URenderResource::Serialize(Ar);
+	if( Ar.Ver() > 0x4a )
+	{
+		Ar << ElementSize;
+		Ar << StreamFlags;
+		Ar << StreamType;
+	}
+	if( Ar.IsLoading() )
+	{
+		INT Count = 0;
+		Ar << AR_INDEX(Count);
+		Data.Empty();
+		if( Count > 0 )
+			Data.Add(Count * 0x2C);
+		for( INT i = 0; i < Count; i++ )
+		{
+			DWORD* P = (DWORD*)&Data(i * 0x2C);
+			for( INT f = 0; f < 11; f++ )
+				Ar.ByteOrderSerialize(P + f, 4);
+		}
+	}
+	else
+	{
+		INT Count = Data.Num() / 0x2C;
+		Ar << AR_INDEX(Count);
+		for( INT i = 0; i < Count; i++ )
+		{
+			DWORD* P = (DWORD*)&Data(i * 0x2C);
+			for( INT f = 0; f < 11; f++ )
+				Ar.ByteOrderSerialize(P + f, 4);
+		}
+	}
+	if( Ar.Ver() > 0x48 && Ar.Ver() < 0x4b )
+		Ar << StreamFlags;
+}
 IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexBuffer::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302470)
 INT UVertexBuffer::GetDataSize() { return Data.Num() * 0x2C; }
 
-IMPL_DIVERGE("Ghidra 0x10326880: default ctor; sets ElementSize=4,StreamFlags=0,StreamType=2 via UVertexStreamBase — correct")
+IMPL_MATCH("Engine.dll", 0x10326880)
 UVertexStreamCOLOR::UVertexStreamCOLOR()
-: UVertexStreamBase(4, 0, 2) {}
-IMPL_DIVERGE("Ghidra 0x10326880: default ctor; sets ElementSize=4,StreamFlags=0,StreamType=2 via UVertexStreamBase — correct")
+{
+	ElementSize = 4;
+	StreamFlags = 0;
+	StreamType  = 2;
+}
+IMPL_DIVERGE("No confirmed Ghidra binary address for UVertexStreamCOLOR(DWORD InFlags)")
 UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
 : UVertexStreamBase(4, InFlags, 2) {}
-IMPL_DIVERGE("Ghidra 0x10326950: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
-void UVertexStreamCOLOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+// Ghidra 0x10326950: URenderResource::Serialize, stream-header fields (Ver>=75),
+// FUN_10321e30 (BGRA byte-swap TArray serializer).  Loop inlined here.
+IMPL_DIVERGE("Ghidra 0x10326950: data loop inlined with BGRA byte-swap; FUN_10321e30 not called separately")
+void UVertexStreamCOLOR::Serialize(FArchive& Ar)
+{
+	URenderResource::Serialize(Ar);
+	if( Ar.Ver() > 0x4a )
+	{
+		Ar << ElementSize;
+		Ar << StreamFlags;
+		Ar << StreamType;
+	}
+	if( Ar.IsLoading() )
+	{
+		INT Count = 0;
+		Ar << AR_INDEX(Count);
+		Data.Empty();
+		if( Count > 0 )
+			Data.Add(Count * 4);
+		for( INT i = 0; i < Count; i++ )
+		{
+			BYTE* P = &Data(i * 4);
+			Ar.Serialize(P + 2, 1);
+			Ar.Serialize(P + 1, 1);
+			Ar.Serialize(P + 0, 1);
+			Ar.Serialize(P + 3, 1);
+		}
+	}
+	else
+	{
+		INT Count = Data.Num() / 4;
+		Ar << AR_INDEX(Count);
+		for( INT i = 0; i < Count; i++ )
+		{
+			BYTE* P = &Data(i * 4);
+			Ar.Serialize(P + 2, 1);
+			Ar.Serialize(P + 1, 1);
+			Ar.Serialize(P + 0, 1);
+			Ar.Serialize(P + 3, 1);
+		}
+	}
+}
 IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamCOLOR::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302510)
 INT UVertexStreamCOLOR::GetDataSize() { return Data.Num() * 4; }
 
-IMPL_DIVERGE("Ghidra 0x10326ea0: default ctor; sets ElementSize=0x28,StreamFlags=0,StreamType=5 via UVertexStreamBase — correct")
+IMPL_MATCH("Engine.dll", 0x10326ea0)
 UVertexStreamPosNormTex::UVertexStreamPosNormTex()
-: UVertexStreamBase(0x28, 0, 5) {}
-IMPL_DIVERGE("Ghidra 0x10326ea0: default ctor; sets ElementSize=0x28,StreamFlags=0,StreamType=5 via UVertexStreamBase — correct")
+{
+	ElementSize = 0x28;
+	StreamFlags = 0;
+	StreamType  = 5;
+}
+IMPL_DIVERGE("No confirmed Ghidra binary address for UVertexStreamPosNormTex(DWORD InFlags)")
 UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
 : UVertexStreamBase(0x28, InFlags, 5) {}
-IMPL_DIVERGE("Ghidra 0x10326f70: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
-void UVertexStreamPosNormTex::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+// Ghidra 0x10326f70: URenderResource::Serialize, stream-header fields (Ver>=75),
+// FUN_10322130 (TArray<FPosNormTexData> serializer, 10 DWORDs each).  Loop inlined.
+IMPL_DIVERGE("Ghidra 0x10326f70: data loop inlined via ByteOrderSerialize; FUN_10322130 not called separately")
+void UVertexStreamPosNormTex::Serialize(FArchive& Ar)
+{
+	URenderResource::Serialize(Ar);
+	if( Ar.Ver() > 0x4a )
+	{
+		Ar << ElementSize;
+		Ar << StreamFlags;
+		Ar << StreamType;
+	}
+	if( Ar.IsLoading() )
+	{
+		INT Count = 0;
+		Ar << AR_INDEX(Count);
+		Data.Empty();
+		if( Count > 0 )
+			Data.Add(Count * 0x28);
+		for( INT i = 0; i < Count; i++ )
+		{
+			DWORD* P = (DWORD*)&Data(i * 0x28);
+			for( INT f = 0; f < 10; f++ )
+				Ar.ByteOrderSerialize(P + f, 4);
+		}
+	}
+	else
+	{
+		INT Count = Data.Num() / 0x28;
+		Ar << AR_INDEX(Count);
+		for( INT i = 0; i < Count; i++ )
+		{
+			DWORD* P = (DWORD*)&Data(i * 0x28);
+			for( INT f = 0; f < 10; f++ )
+				Ar.ByteOrderSerialize(P + f, 4);
+		}
+	}
+}
 IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamPosNormTex::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302650)
 INT UVertexStreamPosNormTex::GetDataSize() { return Data.Num() * 0x28; }
 
-IMPL_DIVERGE("Ghidra 0x10326b90: default ctor; sets ElementSize=8,StreamFlags=0,StreamType=3 via UVertexStreamBase — correct")
+IMPL_MATCH("Engine.dll", 0x10326b90)
 UVertexStreamUV::UVertexStreamUV()
-: UVertexStreamBase(8, 0, 3) {}
-IMPL_DIVERGE("Ghidra 0x10326b90: default ctor; sets ElementSize=8,StreamFlags=0,StreamType=3 via UVertexStreamBase — correct")
+{
+	ElementSize = 8;
+	StreamFlags = 0;
+	StreamType  = 3;
+}
+IMPL_DIVERGE("No confirmed Ghidra binary address for UVertexStreamUV(DWORD InFlags)")
 UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
 : UVertexStreamBase(8, InFlags, 3) {}
-IMPL_DIVERGE("Ghidra 0x10326c60: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
-void UVertexStreamUV::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+// Ghidra 0x10326c60: URenderResource::Serialize, stream-header fields (Ver>=75),
+// FUN_10321fa0 (TArray<float[2]> serializer, 2 ByteOrderSerialize each).  Loop inlined.
+IMPL_DIVERGE("Ghidra 0x10326c60: data loop inlined via ByteOrderSerialize; FUN_10321fa0 not called separately")
+void UVertexStreamUV::Serialize(FArchive& Ar)
+{
+	URenderResource::Serialize(Ar);
+	if( Ar.Ver() > 0x4a )
+	{
+		Ar << ElementSize;
+		Ar << StreamFlags;
+		Ar << StreamType;
+	}
+	if( Ar.IsLoading() )
+	{
+		INT Count = 0;
+		Ar << AR_INDEX(Count);
+		Data.Empty();
+		if( Count > 0 )
+			Data.Add(Count * 8);
+		for( INT i = 0; i < Count; i++ )
+		{
+			FLOAT* P = (FLOAT*)&Data(i * 8);
+			Ar.ByteOrderSerialize(P,     4);
+			Ar.ByteOrderSerialize(P + 1, 4);
+		}
+	}
+	else
+	{
+		INT Count = Data.Num() / 8;
+		Ar << AR_INDEX(Count);
+		for( INT i = 0; i < Count; i++ )
+		{
+			FLOAT* P = (FLOAT*)&Data(i * 8);
+			Ar.ByteOrderSerialize(P,     4);
+			Ar.ByteOrderSerialize(P + 1, 4);
+		}
+	}
+}
 IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamUV::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x10302560)
 INT UVertexStreamUV::GetDataSize() { return Data.Num() * 8; }
 
-IMPL_DIVERGE("Ghidra 0x103265b0: default ctor; sets ElementSize=0xC,StreamFlags=0,StreamType=1 via UVertexStreamBase — correct")
+IMPL_MATCH("Engine.dll", 0x103265b0)
 UVertexStreamVECTOR::UVertexStreamVECTOR()
-: UVertexStreamBase(0xC, 0, 1) {}
-IMPL_DIVERGE("Ghidra 0x103265b0: default ctor; sets ElementSize=0xC,StreamFlags=0,StreamType=1 via UVertexStreamBase — correct")
+{
+	ElementSize = 0xC;
+	StreamFlags = 0;
+	StreamType  = 1;
+}
+IMPL_DIVERGE("No confirmed Ghidra binary address for UVertexStreamVECTOR(DWORD InFlags)")
 UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
 : UVertexStreamBase(0xC, InFlags, 1) {}
-IMPL_DIVERGE("Ghidra 0x10326680: calls URenderResource::Serialize then serializes stream fields; our UVertexStreamBase::Serialize chain is equivalent but misses any FUN_ calls")
-void UVertexStreamVECTOR::Serialize(FArchive& Ar) { UVertexStreamBase::Serialize(Ar); }
+// Ghidra 0x10326680: URenderResource::Serialize, stream-header fields (Ver>=75),
+// FUN_10321a80 (TArray<FVector> serializer, 3 ByteOrderSerialize each).  Loop inlined.
+IMPL_DIVERGE("Ghidra 0x10326680: data loop inlined via ByteOrderSerialize; FUN_10321a80 not called separately")
+void UVertexStreamVECTOR::Serialize(FArchive& Ar)
+{
+	URenderResource::Serialize(Ar);
+	if( Ar.Ver() > 0x4a )
+	{
+		Ar << ElementSize;
+		Ar << StreamFlags;
+		Ar << StreamType;
+	}
+	if( Ar.IsLoading() )
+	{
+		INT Count = 0;
+		Ar << AR_INDEX(Count);
+		Data.Empty();
+		if( Count > 0 )
+			Data.Add(Count * 0xC);
+		for( INT i = 0; i < Count; i++ )
+		{
+			FLOAT* P = (FLOAT*)&Data(i * 0xC);
+			Ar.ByteOrderSerialize(P,     4);
+			Ar.ByteOrderSerialize(P + 1, 4);
+			Ar.ByteOrderSerialize(P + 2, 4);
+		}
+	}
+	else
+	{
+		INT Count = Data.Num() / 0xC;
+		Ar << AR_INDEX(Count);
+		for( INT i = 0; i < Count; i++ )
+		{
+			FLOAT* P = (FLOAT*)&Data(i * 0xC);
+			Ar.ByteOrderSerialize(P,     4);
+			Ar.ByteOrderSerialize(P + 1, 4);
+			Ar.ByteOrderSerialize(P + 2, 4);
+		}
+	}
+}
 IMPL_MATCH("Engine.dll", 0x10318b20)
 void* UVertexStreamVECTOR::GetData() { return Data.GetData(); }
 IMPL_MATCH("Engine.dll", 0x103024c0)

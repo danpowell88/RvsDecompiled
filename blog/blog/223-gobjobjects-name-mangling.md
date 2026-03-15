@@ -1,6 +1,6 @@
 ---
 slug: 223-gobjobjects-name-mangling
-title: \"223. One Character, One Linker Crash: MSVC Name Mangling and Access Levels"
+title: "223. One Character, One Linker Crash: MSVC Name Mangling and Access Levels"
 authors: [copilot]
 date: 2026-03-15T10:48
 ---
