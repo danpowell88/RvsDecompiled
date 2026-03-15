@@ -15,6 +15,7 @@ class R6Weapons extends R6
     abstract
     native;
 
+// Multiplier applied to worst-case accuracy when the owning pawn is wounded.
 const AccuracyLostWhenWounded = 1.2;
 
 struct stWeaponCaps
@@ -41,8 +42,10 @@ struct stAccuracyType
 	var() float fWeaponJump;  // How much the weapon jumps after each round.
 };
 
+// Per-magazine bullet counts; index matches m_iCurrentClip (max 20 magazines total).
 var(R6Clip) byte m_aiNbOfBullets[20];  // Number of bullets in each magazines (The current maximum is 16 (8+4+4))
 var byte m_iNbOfRoundsInBurst;  // Number of rounds shot since the trigger was pull
+// eRateOfFire: 0 = single shot, 1 = three-round burst, 2 = full-auto.
 var(R6Firing) R6EngineWeapon.eRateOfFire m_eRateOfFire;  // Current Rate of Fire
 var byte m_wNbOfBounce;  // Location the pawn was at when the weapon start falling.  Used to find a location for the falling weapon if everything else fails.
 var const int C_iMaxNbOfClips;
@@ -50,6 +53,7 @@ var(R6Clip) int m_iClipCapacity;  // Number of round per magazine
 var(R6Clip) int m_iNbOfClips;  // This is the number of clip that the guns had at the beginning of the mission
 var(R6Clip) int m_iNbOfExtraClips;  // Number of extra clips per EXTRA CLIP gadget
 var int m_iCurrentClip;  // Active Clip Number
+// Rounds remaining to fire this trigger pull (1 for semi, 3 for burst, full-mag for auto).
 var int m_iNbOfRoundsToShoot;  // Number of rounds to be shoot by holding the trigger (safe = 0, Single = 1, ThreeRound = 3, FullAuto=MagazineCapacity)
 var int m_iCurrentNbOfClips;  // Number of clip with at least one round in
 var int m_iCurrentAverage;
@@ -66,11 +70,14 @@ var float m_fAverageDegTable[5];
 var float m_fStablePercentage;  // Accuracy improvement when you're stable
 var float m_fWorstAccuracy;  // Accuracy in worst case.
 var float m_fOldWorstAccuracy;  // Old value for worst accuracy, to detect if the value changed
+// Smoothed accuracy value interpolated towards m_fDesiredAccuracy each tick.
 var float m_fEffectiveAccuracy;  // Effective accuracy. This accuracy is compute once a tick
 var float m_fDesiredAccuracy;  // Desired accuracy.
+// Current half-angle error in degrees; multiplied by 91.022 to get Unreal rotator units.
 var float m_fMaxAngleError;  // Angle that is set depending of the effective accuracy
 var float m_fCurrentFireJump;  // 
 var float m_fFireSoundRadius;  // Distance (in unit) at wich the fire is heard by the AI
+// Seconds between successive rounds; e.g. 0.1 = 10 rounds/s = 600 RPM.
 var(R6Firing) float m_fRateOfFire;  // Time between each rounds
 var float m_fDisplayFOV;  // weapon's FOV
 var(R6GunProperties) Texture m_WeaponIcon;  // icon to display weapon in the hud (must be 128x64)
@@ -342,6 +349,7 @@ simulated function PostBeginPlay()
 	return;
 }
 
+// Fills all magazine slots to capacity at mission start.
 simulated function FillClips()
 {
 	local int i;
@@ -366,6 +374,7 @@ simulated function FillClips()
 			// [Loop Continue]
 			goto J0x38;
 		}
+		// Non-LMG primary weapons get one extra round chambered on top of the first magazine.
 		// End:0x85
 		if(((!IsLMG()) && (!IsA('R6Gadget'))))
 		{
@@ -747,6 +756,7 @@ function ReloadShotGun()
 	return;
 }
 
+// Cycles through available fire modes in order: full-auto → burst → semi, wrapping around.
 ////////////////////////////
 // RATE OF FIRE FUNCTIONS //
 ////////////////////////////
@@ -833,6 +843,7 @@ function R6EngineWeapon.eRateOfFire GetRateOfFire()
 	return;
 }
 
+// Returns the number of rounds that will fire for the current trigger pull based on fire mode.
 function int GetNbOfRoundsForROF()
 {
 	// End:0x12
@@ -847,6 +858,7 @@ function int GetNbOfRoundsForROF()
 			// End:0x26
 			case 2:
 				return int(m_iNbBulletsInWeapon);
+			// Burst fires at most 3 rounds, capped by bullets remaining.
 			// End:0x37
 			case 1:
 				return Min(3, int(m_iNbBulletsInWeapon));
@@ -876,6 +888,7 @@ simulated function ServerAddClips()
 	return;
 }
 
+// Appends extra magazines to the array; used when the player picks up a CMag gadget.
 //Called on server and client
 simulated function AddClips(int iNbOfExtraClips)
 {
@@ -1048,9 +1061,11 @@ function GetFiringDirection(out Vector vOrigin, out Rotator rRotation, optional 
 	{
 		rRotation = pawnOwner.GetFiringRotation();
 	}
+	// Only the first pellet/bullet (iBulletNumber == 0) applies fresh random spread.
 	// End:0x1A2
 	if((iBulletNumber == 0))
 	{
+		// Convert accuracy (degrees) to Unreal rotator units: 65536 / 720 ≈ 91.022 units per degree.
 		fMaxError = (m_fMaxAngleError * 91.0220000);
 		fRandValueOne = (((FRand() * float(2)) * fMaxError) - fMaxError);
 		fRandValueTwo = (((FRand() * float(2)) * fMaxError) - fMaxError);
@@ -1072,6 +1087,7 @@ function GetFiringDirection(out Vector vOrigin, out Rotator rRotation, optional 
 	}
 	else
 	{
+		// Subsequent buckshot pellets scatter ±275 rotator units (~1.5°) around the first pellet.
 		rRotation.Pitch = int((float(m_rBuckFirstBullet.Pitch) + ((FRand() * float(550)) - float(275))));
 		rRotation.Yaw = int((float(m_rBuckFirstBullet.Yaw) + ((FRand() * float(550)) - float(275))));
 	}
@@ -1166,6 +1182,7 @@ function ClientStartFiring()
 	return;
 }
 
+// Server-side: sets the round count for this burst/auto spray and plays weapon sound.
 function ServerStartFiring()
 {
 	m_iNbOfRoundsToShoot = GetNbOfRoundsForROF();
@@ -1205,6 +1222,7 @@ function LocalStopFire(optional bool bSoundOnly)
 
 //Originally called when the fire button is released, not automacially anymore, see Timer()
 //Never call directly.  Allways use localstopfire() instead.  Since trigger lag became an option.
+// Plays stop-fire sound and relays to ClientStopFire; never call directly — use LocalStopFire.
 function ServerStopFire(optional bool bSoundOnly)
 {
 	// End:0x46
@@ -1332,6 +1350,7 @@ simulated function AltFire(float fValue)
 	return;
 }
 
+// Authority-side bullet simulation: decrements ammo, spawns bullets, plays sounds, accumulates recoil.
 function ServerFireBullet(float fMaxAngleErrorFromClient)
 {
 	local Vector vStartTrace;
@@ -1348,7 +1367,9 @@ function ServerFireBullet(float fMaxAngleErrorFromClient)
 	pawnOwner = R6Pawn(Owner);
 	BulletManager = GetBulletManager();
 	(m_iNbOfRoundsInBurst++);
+	// Consume one round from the active magazine.
 	(m_iNbBulletsInWeapon--);
+	// When the magazine empties, decrement the clip count (unless using unlimited-clip mode).
 	// End:0x95
 	if(((int(m_iNbBulletsInWeapon) == 0) && (!IsPumpShotGun())))
 	{
@@ -1363,6 +1384,7 @@ function ServerFireBullet(float fMaxAngleErrorFromClient)
 			// End:0x95
 			if((R6Rainbow(Owner) != none))
 			{
+				// Terrorist pistol in MP: when the last unlimited mag empties, cap refill at 5 rounds.
 				m_iClipCapacity = 5;
 			}
 		}
@@ -1377,6 +1399,7 @@ function ServerFireBullet(float fMaxAngleErrorFromClient)
 	{
 		pawnOwner.PlayWeaponAnimation();
 	}
+	// Accept the client's aim angle so server trajectory matches the client's view.
 	m_fMaxAngleError = fMaxAngleErrorFromClient;
 	iCurrentBullet = 0;
 	J0xED:
@@ -1395,6 +1418,7 @@ function ServerFireBullet(float fMaxAngleErrorFromClient)
 	{
 		R6AbstractGameInfo(Level.Game).IncrementRoundsFired(pawnOwner, false);
 	}
+	// Accumulate muzzle-jump penalty; drives camera kick and accuracy degradation.
 	(m_fCurrentFireJump += m_stAccuracyValues.fWeaponJump);
 	// End:0x1DF
 	if((int(m_iNbBulletsInWeapon) == 0))
@@ -1677,6 +1701,7 @@ function ServerStartChangeClip()
 	return;
 }
 
+// Server-side reload: finds the fullest available magazine, moves its rounds into the chamber.
 function ServerChangeClip()
 {
 	local int i, iClipNumber, iMostFullClip, iMaxNbOfRounds, iBulletLeftInWeapon;
@@ -1689,6 +1714,7 @@ function ServerChangeClip()
 	}
 	else
 	{
+		// Save the current magazine's remaining rounds back into the array before switching.
 		m_aiNbOfBullets[m_iCurrentClip] = m_iNbBulletsInWeapon;
 		// End:0x6B
 		if((int(m_aiNbOfBullets[m_iCurrentClip]) == 0))
@@ -1703,6 +1729,7 @@ function ServerChangeClip()
 				// End:0xBF
 				if(IsLMG())
 				{
+					// LMG discards partial links under 8 rounds rather than doing a tactical reload.
 					// End:0xBC
 					if(((int(m_aiNbOfBullets[m_iCurrentClip]) < 8) && (m_iCurrentNbOfClips != 1)))
 					{
@@ -1713,6 +1740,7 @@ function ServerChangeClip()
 				}
 				else
 				{
+					// Non-LMG tactical reload: one round stays chambered, so the old mag loses that round.
 					(m_aiNbOfBullets[m_iCurrentClip] -= byte(1));
 					// End:0xF4
 					if((int(m_aiNbOfBullets[m_iCurrentClip]) == 0))
@@ -1727,6 +1755,7 @@ function ServerChangeClip()
 				}
 			}
 		}
+		// Find the fullest magazine to load next, searching from current clip forward (round-robin).
 		iMostFullClip = m_iCurrentClip;
 		i = 0;
 		J0x10D:
@@ -1750,7 +1779,9 @@ function ServerChangeClip()
 			// [Loop Continue]
 			goto J0x10D;
 		}
+		// Advance to the fullest available magazine.
 		m_iCurrentClip = iMostFullClip;
+		// Add the chambered round back into the new magazine (tactical reload carry-over).
 		(m_aiNbOfBullets[m_iCurrentClip] += byte(iBulletLeftInWeapon));
 		m_iNbBulletsInWeapon = m_aiNbOfBullets[m_iCurrentClip];
 	}
@@ -2061,6 +2092,7 @@ function SetTearOff(bool bNewTearOff)
 	return;
 }
 
+// Unreal rotator range ±65535 used here for randomised tumble speed on bounce.
 //============================================================================
 // function HitWall - Bounce when the weapon fall of a dead pawn
 //============================================================================
@@ -2068,6 +2100,7 @@ simulated function HitWall(Vector HitNormal, Actor Wall)
 {
 	(m_wNbOfBounce++);
 	RotationRate.Pitch = 0;
+	// Random full-circle tumble on each axis (65535 ≈ 360° in Unreal rotator units).
 	RotationRate.Yaw = int(RandRange(-65535.0000000, 65535.0000000));
 	RotationRate.Roll = int(RandRange(-65535.0000000, 65535.0000000));
 	// End:0x7F
@@ -2153,6 +2186,7 @@ simulated function StopFallingAndSetCorrectRotation()
 	bBounce = false;
 	bRotateToDesired = true;
 	DesiredRotation.Yaw = Rotation.Yaw;
+	// 13384 ≈ 74° roll, 49151 ≈ 270° roll: these are the two "flat on ground" resting orientations.
 	// End:0x6C
 	if((Abs(float((Rotation.Roll - 13384))) > Abs(float((Rotation.Roll - 49151)))))
 	{
@@ -2282,6 +2316,7 @@ function SetAccuracyOnHit()
 	return;
 }
 
+// State active while the weapon is firing; Timer() drives inter-shot pacing.
 state NormalFire
 {
 // FiringSpeed is used in UW as the rate parameter in playanim.
@@ -2337,6 +2372,7 @@ state NormalFire
 		}
 		else
 		{
+			// Full-auto: if trigger is still held after an animation cycle, immediately restart firing.
 			// End:0x94
 			if(((int(Pawn(Owner).Controller.bFire) == 1) && (int(m_eRateOfFire) == int(2))))
 			{
@@ -2346,6 +2382,7 @@ state NormalFire
 			}
 			else
 			{
+				// Burst: keep state alive while remaining rounds in the burst are queued.
 				// End:0xB6
 				if(((m_iNbOfRoundsToShoot > 0) && (int(m_eRateOfFire) == int(1))))
 				{
@@ -2370,6 +2407,7 @@ state NormalFire
 
 	simulated function StartFiring()
 	{
+		// Determine how many rounds this trigger pull will fire (1/3/full-mag).
 		m_iNbOfRoundsToShoot = GetNbOfRoundsForROF();
 		ServerStartFiring();
 		// End:0x5F
@@ -2394,6 +2432,7 @@ state NormalFire
 			// End:0xEA
 			if((m_iNbOfRoundsToShoot != 0))
 			{
+				// Start the inter-shot timer; fires once per m_fRateOfFire seconds until burst/auto ends.
 				SetTimer(m_fRateOfFire, true);
 				m_bFireOn = true;				
 			}
@@ -2418,8 +2457,10 @@ state NormalFire
 		return;
 	}
 
+	// Called each m_fRateOfFire interval; fires the next round or terminates the burst.
 	simulated function Timer()
 	{
+		// Consume one round allocation; if burst is exhausted or trigger released, stop firing.
 		(m_iNbOfRoundsToShoot--);
 		// End:0x53
 		if(((m_iNbOfRoundsToShoot > 0) && ((int(m_eRateOfFire) == int(1)) || (int(Pawn(Owner).Controller.bFire) == 1))))
@@ -2448,6 +2489,7 @@ state NormalFire
 	stop;
 }
 
+// State active while a magazine change animation is playing.
 state Reloading
 {
 // FiringSpeed is used in UW as the rate parameter in playanim.
@@ -2571,6 +2613,7 @@ state Reloading
 		return;
 	}
 
+	// Maps the reload animation frame [0.0-1.0] to a progress value [0-110] for the HUD indicator.
 	function int GetReloadProgress()
 	{
 		local name Anim;
@@ -2596,6 +2639,7 @@ state Reloading
 	stop;
 }
 
+// State played when switching away from this weapon (put-down animation).
 state DiscardWeapon
 {
 // FiringSpeed is used in UW as the rate parameter in playanim.
@@ -2668,6 +2712,7 @@ state DiscardWeapon
 	stop;
 }
 
+// State played when switching to this weapon (raise/bring-up animation).
 state RaiseWeapon
 {
 // FiringSpeed is used in UW as the rate parameter in playanim.
@@ -2769,6 +2814,7 @@ state RaiseWeapon
 	stop;
 }
 
+// State that lowers the weapon to a neutral carry position (e.g. entering planning mode).
 state PutWeaponDown
 {
 // FiringSpeed is used in UW as the rate parameter in playanim.
@@ -2830,6 +2876,7 @@ state PutWeaponDown
 	stop;
 }
 
+// State that raises the weapon from the carry position back to the ready position.
 state BringWeaponUp
 {
 // FiringSpeed is used in UW as the rate parameter in playanim.
@@ -2903,6 +2950,7 @@ state BringWeaponUp
 	stop;
 }
 
+// State played during bipod deployment animation; blocks fire and other actions.
 state DeployBipod
 {
 // FiringSpeed is used in UW as the rate parameter in playanim.
