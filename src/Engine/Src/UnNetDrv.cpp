@@ -78,17 +78,45 @@ typedef void (__thiscall* DestroyFn)(void*, INT);
 unguard;
 }
 
-IMPL_DIVERGE("retail 0x1048c210 (131b): FUN_1048bfa0 (201b) is TArray<UObject*> serializer — CountBytes + FCompactIndex count + vtable-dispatch per element; 4 UObject* fields (+0x3C,+0x44,+0x7C,+0x80) also need serializing")
+// Ghidra 0x1048c210 (131b): UObject::Serialize, then FUN_1048bfa0 (inlined below)
+// serializes ClientConnections (this+0x30) as TArray<UObject*> with FCompactIndex count
+// and vtable[6] (operator<<(UObject*&)) per element. Then 4 UObject* fields are chained.
+IMPL_MATCH("Engine.dll", 0x1048c210)
 void UNetDriver::Serialize(FArchive &Ar)
 {
 guard(UNetDriver::Serialize);
-// Ghidra 0x1048c210 (131b): UObject::Serialize, then FUN_1048bfa0 serializes
-// ClientConnections TArray (this+0x30) as FArray<UObject*> using FCompactIndex count
-// and FArchive::vtable[6] (= operator<<(UObject*&)) per element.
-// Remaining chain serializes UObject* fields at +0x3C (ServerConnection), +0x44, +0x7C, +0x80.
-UObject::Serialize(Ar);
-// NOTE: Divergence — ClientConnections TArray and 4 UObject* fields not serialized;
-// blocked by FCompactIndex encoding in FUN_1048bfa0.
+Super::Serialize(Ar);
+
+// Inline FUN_1048bfa0: generic TArray<UObject*> serializer (element stride = 4)
+// applied to field at this+0x30 (ClientConnections array).
+{
+    FArray* arr = (FArray*)((BYTE*)this + 0x30);
+    arr->CountBytes(Ar, 4);
+    if (!Ar.IsLoading())
+    {
+        INT num = arr->Num();
+        Ar << AR_INDEX(num);
+        for (INT i = 0; i < arr->Num(); i++)
+            Ar << *(UObject**)((BYTE*)arr->GetData() + i * 4);
+    }
+    else
+    {
+        INT count = 0;
+        Ar << AR_INDEX(count);
+        arr->Empty(4, count);
+        for (INT i = 0; i < count; i++)
+        {
+            INT idx = arr->Add(1, 4);
+            Ar << *(UObject**)((BYTE*)arr->GetData() + idx * 4);
+        }
+    }
+}
+
+// Serialize 4 UObject* fields: vtable[6] dispatch (= FArchive::operator<<(UObject*&))
+Ar << *(UObject**)((BYTE*)this + 0x3C);
+Ar << *(UObject**)((BYTE*)this + 0x44);
+Ar << *(UObject**)((BYTE*)this + 0x7C);
+Ar << *(UObject**)((BYTE*)this + 0x80);
 unguard;
 }
 
