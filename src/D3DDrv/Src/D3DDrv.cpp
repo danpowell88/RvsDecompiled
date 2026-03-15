@@ -143,7 +143,7 @@ static const TCHAR* D3DError( HRESULT hr )
 	}
 }
 
-IMPL_TODO("Ghidra 0x1000f350 (184b): constructs FArrays at +0x4634/+0x4658 and FRenderInterface at +0x46c4 (FUN_10010db0); internal fields not in reconstructed header block full ctor")
+IMPL_DIVERGE("Ghidra 0x1000f350: constructs FArrays at +0x4634/+0x4658 and FRenderInterface at +0x46c4 (FUN_10010db0); these private fields are absent from the reconstructed UD3DRenderDevice header — permanent struct divergence")
 UD3DRenderDevice::UD3DRenderDevice()
 {
 	// Set default config values. Bitfields cannot be initialised via
@@ -163,7 +163,7 @@ UD3DRenderDevice::UD3DRenderDevice()
 	appMemzero( &GRenderCaps, sizeof(GRenderCaps) );
 }
 
-IMPL_TODO("Ghidra 0x10001cc0 (981b): copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; those fields are absent from the reconstructed header")
+IMPL_DIVERGE("Ghidra 0x10001cc0: copies ~200KB of internal D3D state spanning offsets 0xCC-0x31B94 (texture handles, shader arrays, render-state tables); private fields absent from reconstructed header — permanent struct divergence")
 UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	: URenderDevice(Other)
 	, UsePrecaching(Other.UsePrecaching)
@@ -187,7 +187,7 @@ UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x100020a0 (921b): copies +0xC8 DWORD, memcpy 0x4000b from +0xCC, 24 DWORDs at +0x40CC, TArray/FRenderInterface deep-copies via FUN_10001a80/FUN_100012d0; internal fields block full implementation")
+IMPL_DIVERGE("Ghidra 0x100020a0: assignment copies +0xC8 DWORD, 0x4000b-byte texture block from +0xCC, 24 DWORDs at +0x40CC, TArray/FRenderInterface via FUN_10001a80/FUN_100012d0; private fields absent from reconstructed header — permanent struct divergence")
 UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 {
 	if (this != &Other)

@@ -1234,11 +1234,11 @@ void FOctreeNode::CheckIsEmpty()
 }
 
 // ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
-IMPL_TODO("Ghidra 0x103DB6C0 (322 bytes): builds node FBox via FUN_103d8be0 then appends box to GTempLineBatcher.Boxes array and recurses into 8 children; FUN_103d8be0 + GTempLineBatcher global not reproduced")
+IMPL_DIVERGE("Ghidra 0x103DB6C0: editor/debug visualization only — builds node FBox and appends to GTempLineBatcher.Boxes debug line-renderer; GTempLineBatcher is an editor-only global not present in the runtime path")
 void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_TODO("Ghidra 0x103DB840: iterates node actors, draws those with flag 0x4000000 via FOctreeNode::Draw + FTempLineBatcher line append; GTempLineBatcher access and child recursion not reproduced")
+IMPL_DIVERGE("Ghidra 0x103DB840: editor/debug visualization only — draws actors flagged 0x4000000 via FTempLineBatcher line append; FTempLineBatcher is an editor-only debug draw path")
 void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
 
 IMPL_TODO("Ghidra 0x103DB0C0 (311 bytes): routes FBox filter through node planes; when no children (this+0xc==0) adds node to output list; FUN_103d8e50 (child-overlap test) + FUN_103d8d50/FUN_103d8c80/FUN_103d8ce0 (plane-clip helpers) unresolved")

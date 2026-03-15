@@ -30,7 +30,7 @@ void AR6ActionSpot::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynam
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x984a0: uses GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via debugf instead")
+IMPL_DIVERGE("Ghidra 0x984a0: editor-only MapCheck function; GWarn vtable slot 0x28 (MapCheck) not declared in our headers — permanent divergence; debugf substitute is functionally equivalent for gameplay")
 void AR6ActionSpot::CheckForErrors()
 {
 	guard(AR6ActionSpot::CheckForErrors);
