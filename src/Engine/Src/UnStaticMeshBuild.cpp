@@ -18,7 +18,7 @@ inline void  operator delete(void*, void*) noexcept {}
 ENGINE_API FArchive& operator<<(FArchive& Ar, FRawColorStream& V);
 
 // --- UStaticMesh ---
-IMPL_DIVERGE("Ghidra 0x10446A90 (747b): placement-new property registration generates different binary than low-level UBoolProperty ctors; HideCategories(NAME_Object) uses non-SDK UClass field at +0x4e8")
+IMPL_TODO("Ghidra 0x10446A90 (747b): placement-new property registration — exact binary match unverified; HideCategories access at UClass+0x4e8 is non-SDK")
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);
@@ -63,7 +63,7 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x104472F0: calls UObject::PostLoad then fixes triangle normals via TArray<FStaticMeshTriangle> at +0x58 using TArray::operator()(index) vtable calls; unresolved vtable dispatch")
+IMPL_TODO("Ghidra 0x104472F0 (1401b): blocked by TArray vtable dispatch and FUN_10449c90/FUN_10449c50 (triangle serializers) — geometry fix-up not yet implemented")
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
@@ -75,7 +75,7 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("Ghidra 0x1044CDA0: OPCODE BVH traversal (1017b) — FUN_104487d0/FUN_10448ba0 (BVH node test/traverse) unresolved; collision tree not yet decompiled")
+IMPL_TODO("Ghidra 0x1044CDA0 (1017b): OPCODE BVH traversal blocked by FUN_104487d0/FUN_10448ba0 (BVH node test/traverse) — not yet decompiled")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
@@ -136,7 +136,7 @@ FTags * UStaticMesh::GetTag(FString Name)
 	return NULL;
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x10449DE0: FUN_10449c90 (triangle stream serializer), FUN_10301400 (bbox rebuild) unresolved; geometry arrays not fully serialized")
+IMPL_TODO("Ghidra 0x10449DE0 (970b): blocked by FUN_10449c90 (triangle stream serializer) and FUN_10301400 (bbox rebuild) — geometry arrays not fully serialized")
 void UStaticMesh::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x149de0 (970b): version-conditional UPrimitive::Serialize base call,
@@ -148,7 +148,7 @@ void UStaticMesh::Serialize(FArchive& Ar)
 	else
 		UPrimitive::Serialize(Ar);
 }
-IMPL_DIVERGE("Ghidra 0x1044EB60: OPCODE BVH ray-triangle traversal (931b) — FUN_104487d0/FUN_10448ba0 (BVH test/traverse) unresolved; returns no-hit")
+IMPL_TODO("Ghidra 0x1044EB60 (931b): OPCODE BVH ray-triangle traversal blocked by FUN_104487d0/FUN_10448ba0 — same blockers as TriangleSphereQuery")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
@@ -158,7 +158,7 @@ int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD
 	return 1; // no hit
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1044EF40: OPCODE BVH point-overlap test (403b) — same FUN_ blockers as LineCheck; returns no-overlap")
+IMPL_TODO("Ghidra 0x1044EF40 (403b): OPCODE BVH point-overlap test blocked by FUN_104487d0/FUN_10448ba0 — same blockers as LineCheck")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
@@ -177,7 +177,7 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_DIVERGE("Ghidra 0x1044c130 (206b): model bbox merge at this+0x120 added via raw vtable[0x74/4=29] dispatch; SEH frame and explicit FMatrix::~FMatrix call in retail are not reproduced")
+IMPL_TODO("Ghidra 0x1044c130 (206b): vtable[0x74/4=29] dispatch and SEH frame differ from retail; exact binary match unverified pending vtable layout confirmation")
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor* Actor) const
 {
 	// Ghidra 0x1044c130: if actor flag [0x2a]&0x400000 == 0, transform mesh bbox (this+0x2c)
@@ -237,7 +237,7 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
-IMPL_DIVERGE("Ghidra 0x10449BB0: FUN_10449a90 (legacy color stream, Ver<0x70) and FUN_10448de0 (index buffer, Ver>0x6D) unresolved")
+IMPL_TODO("Ghidra 0x10449BB0 (163b): legacy color stream (Ver<0x70) blocked by FUN_10449a90; index buffer (Ver>0x6D) blocked by FUN_10448de0")
 void UStaticMeshInstance::Serialize(FArchive &Ar)
 {
 	guard(UStaticMeshInstance::Serialize);
@@ -250,7 +250,7 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10446b40: NOT present in Ghidra exports; full projector triangle-clipping loop — FUN_10449ee0 (clip triangle), FUN_10448ca0 (OPCODE BVH gather) unresolved")
+IMPL_TODO("Ghidra 0x10446b40 (not in export set): projector triangle-clipping blocked by FUN_10449ee0 (clip) and FUN_10448ca0 (OPCODE BVH gather)")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
@@ -317,7 +317,7 @@ FOrientation::FOrientation()
 	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
-IMPL_DIVERGE("Ghidra 0x10301a00 (97b): exact non-sequential DWORD assignment order reproduced from Ghidra; compiler version and calling convention differ")
+IMPL_TODO("Ghidra 0x10301a00 (97b): non-sequential DWORD assignment order reproduced from Ghidra; exact binary match unverified due to compiler/calling-convention differences")
 FOrientation& FOrientation::operator=(FOrientation Other)
 {
 	// Ghidra 0x1a00: FOrientation passed by value as 13 DWORD params on stack.
@@ -375,7 +375,7 @@ FRebuildOptions::~FRebuildOptions()
 	// Name's implicit destructor handles FString cleanup
 }
 
-IMPL_DIVERGE("Ghidra 0x103188d0 (213b): option assignment order reproduced; return-by-value copy construction and SEH frame differ from retail")
+IMPL_TODO("Ghidra 0x103188d0 (213b): option assignment order reproduced from Ghidra; exact binary match unverified — return-by-value copy and SEH frame may differ")
 FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
 	// Ghidra 0x188d0: FString assignment first, then 8 Options in non-sequential Ghidra order
@@ -488,7 +488,7 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 // placement-constructs FRebuildOptions, copies current options via operator=, overrides name.
 // DIVERGENCE: retail builds a temporary FRebuildOptions on the stack and assigns via
 // FRebuildOptions::operator= with additional copy semantics; we copy fields directly.
-IMPL_DIVERGE("Ghidra 0x103FD770: retail copies options via stack temp + operator=; we copy fields directly — same observable result")
+IMPL_TODO("Ghidra 0x103FD770 (260b): retail uses stack temp + operator=; we copy fields directly — same observable result, binary not verified")
 FRebuildOptions * FRebuildTools::Save(FString p0)
 {
 	guard(FRebuildTools::Save);

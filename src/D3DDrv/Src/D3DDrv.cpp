@@ -117,7 +117,7 @@ static INT                  GBinkHeight      = 0;
 	The retail binary uses movntps streaming stores for large aligned copies.
 	This reconstruction uses appMemcpy as a functional equivalent.
 -----------------------------------------------------------------------------*/
-IMPL_DIVERGE("Retail uses SSE movntps streaming stores for large aligned copies; reconstructed as appMemcpy fallback")
+IMPL_TODO("retail FUN_10001020 (0x10001020, 480b): uses SSE movntps streaming stores for large aligned copies; reconstructed as appMemcpy fallback pending SSE implementation")
 static void D3DMemcpy( void* Dst, const void* Src, DWORD Count )
 {
 	appMemcpy( Dst, Src, Count );
@@ -143,7 +143,7 @@ static const TCHAR* D3DError( HRESULT hr )
 	}
 }
 
-IMPL_DIVERGE("Ghidra 0x1000f350 (184b): calls URenderDevice ctor, constructs FArrays at +0x4634/+0x4658, constructs FRenderInterface at +0x46c4 (FUN_10010db0), memsets 0xD0 bytes to 0xFF at +0x31aa0, zeros 8 DWORDs — our stub sets config defaults instead")
+IMPL_TODO("Ghidra 0x1000f350 (184b): constructs FArrays at +0x4634/+0x4658 and FRenderInterface at +0x46c4 (FUN_10010db0); internal fields not in reconstructed header block full ctor")
 UD3DRenderDevice::UD3DRenderDevice()
 {
 	// Set default config values. Bitfields cannot be initialised via
@@ -163,7 +163,7 @@ UD3DRenderDevice::UD3DRenderDevice()
 	appMemzero( &GRenderCaps, sizeof(GRenderCaps) );
 }
 
-IMPL_DIVERGE("Retail copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; omitted as those fields are not in the reconstructed header — Ghidra 0x10001cc0")
+IMPL_TODO("Ghidra 0x10001cc0 (981b): copies ~200KB of internal D3D state at offsets 0xCC-0x31B94; those fields are absent from the reconstructed header")
 UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	: URenderDevice(Other)
 	, UsePrecaching(Other.UsePrecaching)
@@ -187,7 +187,7 @@ UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x100020a0 (921b): copies +0xC8 DWORD, memcpy 0x4000b from +0xCC, 24 DWORDs at +0x40CC..+0x4128, TArray deep-copies at +0x4634/+0x4658 via FUN_10001a80/FUN_10001ba0, FRenderInterface copy at +0x46c4 via FUN_100012d0, and multiple state blocks — our stub only copies config fields")
+IMPL_TODO("Ghidra 0x100020a0 (921b): copies +0xC8 DWORD, memcpy 0x4000b from +0xCC, 24 DWORDs at +0x40CC, TArray/FRenderInterface deep-copies via FUN_10001a80/FUN_100012d0; internal fields block full implementation")
 UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 {
 	if (this != &Other)
@@ -220,7 +220,7 @@ UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 	The retail binary registers all BITFIELD and INT config properties here.
 	This reconstruction follows the UT99 pattern adapted for R6's config set.
 =============================================================================*/
-IMPL_DIVERGE("Config property registration omitted; CPP_PROPERTY cannot take address of bitfield member in standard C++")
+IMPL_TODO("Ghidra 0x10008c60 (805b): registers config properties via low-level UBoolProperty/UIntProperty ctors; blocked pending raw property registration approach")
 void UD3DRenderDevice::StaticConstructor()
 {
 	guard(UD3DRenderDevice::StaticConstructor);
@@ -1115,7 +1115,7 @@ void UD3DRenderDevice::Draw3DLine(FVector Start, FVector End, FColor Color, UTex
 
 	Used for render-to-texture effects (scope overlays, camera feeds).
 =============================================================================*/
-IMPL_DIVERGE("Ghidra 0x1000c890: off-screen render target path deferred; only the default back buffer restore path is implemented")
+IMPL_TODO("Ghidra 0x1000c890 (614b): off-screen render target path (R6SS_Offscreen, CreateRenderTarget) blocked pending analysis of the full surface switch logic")
 void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(UD3DRenderDevice::ChangeDrawingSurface);
@@ -1144,7 +1144,7 @@ void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 	Handles full-screen effects like flashbang, gas, and night vision.
 	The Param1/Param2 encode effect type and intensity.
 =============================================================================*/
-IMPL_DIVERGE("Ghidra 0x10009b00: full-screen effect overlay not implemented; deferred pending Ghidra analysis of the effect dispatch at FUN_10005d50")
+IMPL_TODO("Ghidra 0x10009b00 (3253b): full-screen effect overlay blocked by FUN_10005d50 (effect dispatch) and FRenderInterface rendering paths — not yet decompiled")
 void UD3DRenderDevice::HandleFullScreenEffects(INT Param1, INT Param2)
 {
 	guard(UD3DRenderDevice::HandleFullScreenEffects);
