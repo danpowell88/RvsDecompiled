@@ -1101,7 +1101,7 @@ void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 512, execMakeNoise );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0x8c/4=35] (IsPlayingSound); implement via Level->Engine->Audio->vtable[35] (Ghidra 0x10427e00)")
+IMPL_MATCH("Engine.dll", 0x10427e00)
 void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPlayingSound);
@@ -1109,11 +1109,14 @@ void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 	P_GET_OBJECT(USound,Sound);
 	P_FINISH;
 	*(DWORD*)Result = 0;
+	INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+	if (piAudio)
+		*(DWORD*)Result = (*(INT (__thiscall**)(INT*, AActor*, USound*))(*(INT*)piAudio + 0x8c))(piAudio, aActor, Sound);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2703, execIsPlayingSound );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0xec/4=59] (PlayMusic); implement via Level->Engine->Audio->vtable[59] (Ghidra 0x10427a00)")
+IMPL_MATCH("Engine.dll", 0x10427a00)
 void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayMusic);
@@ -1121,17 +1124,23 @@ void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 	P_GET_UBOOL_OPTX(bForcePlayMusic,0);
 	P_FINISH;
 	*(DWORD*)Result = 0;
+	INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+	if (piAudio)
+		*(DWORD*)Result = (*(INT (__thiscall**)(INT*, USound*, UBOOL))(*(INT*)piAudio + 0xec))(piAudio, Music, bForcePlayMusic);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayMusic );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0xf4/4=61] (StopMusic); implement via Level->Engine->Audio->vtable[61] (Ghidra 0x10427ab0)")
+IMPL_MATCH("Engine.dll", 0x10427ab0)
 void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopMusic);
 	P_GET_OBJECT(USound,StopMusic);
 	P_FINISH;
 	*(DWORD*)Result = 0;
+	INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+	if (piAudio)
+		*(DWORD*)Result = (*(INT (__thiscall**)(INT*, USound*))(*(INT*)piAudio + 0xf4))(piAudio, StopMusic);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopMusic );
@@ -1157,27 +1166,33 @@ void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2712, execStopAllSounds );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0xc0/4=48] (StopAllSoundsForActor); implement via Level->Engine->Audio->vtable[48] (Ghidra 0x10428030)")
+IMPL_MATCH("Engine.dll", 0x10428030)
 void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSoundsActor);
 	P_GET_OBJECT(AActor,aActor);
 	P_FINISH;
+	INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+	if (piAudio)
+		(*(void (__thiscall**)(INT*, AActor*, INT))(*(INT*)piAudio + 0xc0))(piAudio, aActor, 0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2719, execStopAllSoundsActor );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0x100/4=64] (StopSound); implement via Level->Engine->Audio->vtable[64] (Ghidra 0x10427f60)")
+IMPL_MATCH("Engine.dll", 0x10427f60)
 void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopSound);
 	P_GET_OBJECT(USound,Sound);
 	P_FINISH;
+	INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+	if (piAudio)
+		(*(void (__thiscall**)(INT*, USound*))(*(INT*)piAudio + 0x100))(piAudio, Sound);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2725, execStopSound );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0xd0/4=52] (FadeSound, float time, int fade, byte slot); implement via Level->Engine->Audio->vtable[52] (Ghidra 0x10427c60)")
+IMPL_MATCH("Engine.dll", 0x10427c60)
 void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFadeSound);
@@ -1185,16 +1200,22 @@ void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 	P_GET_INT_OPTX(iFade,0);
 	P_GET_BYTE_OPTX(eSlot,0);
 	P_FINISH;
+	INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+	if (piAudio)
+		(*(void (__thiscall**)(INT*, FLOAT, INT, BYTE))(*(INT*)piAudio + 0xd0))(piAudio, fTime, iFade, eSlot);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2721, execFadeSound );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0xcc/4=51] (AddSoundBank, FString name); implement via Level->Engine->Audio->vtable[51] (Ghidra 0x104280b0)")
+IMPL_MATCH("Engine.dll", 0x104280b0)
 void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddSoundBank);
 	P_GET_STR(BankName);
 	P_FINISH;
+	INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+	if (piAudio)
+		(*(void (__thiscall**)(INT*, FString*))(*(INT*)piAudio + 0xcc))(piAudio, &BankName);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2716, execAddSoundBank );
@@ -1230,13 +1251,19 @@ void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2720, execResetVolume_TypeSound );
 
-IMPL_TODO("calls UAudioSubsystem vtable[0xa4/4=41] (ChangeVolumeType, byte type, int volume); implement via Level->Engine->Audio->vtable[41] (Ghidra 0x10427ec0)")
+IMPL_MATCH("Engine.dll", 0x10427ec0)
 void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execChangeVolumeType);
 	P_GET_BYTE(VolumeType);
 	P_GET_INT(NewVolume);
 	P_FINISH;
+	if (VolumeType != 0)
+	{
+		INT* piAudio = *(INT**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x44) + 0x48);
+		if (piAudio)
+			(*(void (__thiscall**)(INT*, BYTE, INT))(*(INT*)piAudio + 0xa4))(piAudio, VolumeType, NewVolume);
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2705, execChangeVolumeType );
