@@ -2635,14 +2635,22 @@ void AActor::SetGameType( FString GameType )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("loading tick uses binary-specific global counter DAT_10666b50 — see Ghidra 0x1037c130")
+// Ghidra 0x1037c130 (139 bytes): retail increments a binary-specific global counter
+// (DAT_10666b50) and calls GEngine->PaintProgress() every 16th actor during loading.
+// We replicate the logic with a static counter; the counter address differs from retail.
+IMPL_DIVERGE("loading tick counter is anonymous static (address differs from retail DAT_10666b50) — see Ghidra 0x1037c130")
 void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
 	UObject::Serialize( Ar );
 	if( Ar.LicenseeVer() > 11 )
-		Ar << m_OutlineIndices;  // this+0x210 confirmed = m_OutlineIndices (TArray<INT>)
-	// DIVERGENCE: retail every-16th-actor loading tick via DAT_10666b50 counter omitted.
+		Ar << m_OutlineIndices;
+	if ( Ar.IsLoading() )
+	{
+		static INT LoadActorTick = 0;
+		if ( (++LoadActorTick & 0xF) == 0 )
+			GEngine->PaintProgress();
+	}
 	unguard;
 }
 
