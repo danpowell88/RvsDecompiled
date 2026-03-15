@@ -49,6 +49,7 @@ var string m_szToolTip;  // the tooltipstring
 var string m_szFakeEditBoxValue;  // the value of the fake edit box to display
 var string m_szActionKey;  // the value of the action key in user.ini
 
+// Compares two list items by their HelpText for alphabetical sorting; returns -1, 0, or 1.
 function int Compare(UWindowList t, UWindowList B)
 {
 	local string TS, BS;
@@ -92,6 +93,7 @@ function ClearItem()
 	return;
 }
 
+// Sets the display parameters (text, font, position, size, line, alignment) for a sub-item column.
 function SetItemParameters(int _index, string _szText, Font _TextFont, float _fX, float _fY, float _fW, float _fH, int _iLineNumber, optional UWindowBase.TextAlign _eAlignement)
 {
 	local stItemProperties stItemParam;

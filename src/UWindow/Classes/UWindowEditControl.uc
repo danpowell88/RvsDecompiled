@@ -5,15 +5,14 @@
 //=============================================================================
 class UWindowEditControl extends UWindowDialogControl;
 
-var float EditBoxWidth;
-var float EditAreaDrawX;
+var float EditBoxWidth;         // Width of the edit box portion of the control
+var float EditAreaDrawX;        // X draw offset for the edit area bevel
 // NEW IN 1.60
-var float EditAreaDrawY;
-var UWindowEditBox EditBox;
+var float EditAreaDrawY;        // Y draw offset for the edit area bevel (added in 1.60)
+var UWindowEditBox EditBox;     // The child edit box window that handles text input
 
+// Creates the EditBox child window and initializes the edit area and text color.
 function Created()
-{
-	local Color C;
 
 	super.Created();
 	EditBox = UWindowEditBox(CreateWindow(Class'UWindow.UWindowEditBox', 0.0000000, 0.0000000, WinWidth, WinHeight));
@@ -60,12 +59,14 @@ function Clear()
 	return;
 }
 
+// Returns the current text in the edit box (primary value).
 function string GetValue()
 {
 	return EditBox.GetValue();
 	return;
 }
 
+// Returns the secondary value string stored alongside the primary value.
 function string GetValue2()
 {
 	return EditBox.GetValue2();
@@ -84,12 +85,12 @@ function SetMaxLength(int MaxLength)
 	return;
 }
 
+// Delegates painting to the LookAndFeel Editbox_Draw function.
 function Paint(Canvas C, float X, float Y)
-{
-	LookAndFeel.Editbox_Draw(self, C);
 	return;
 }
 
+// Called before Paint each frame; asks LookAndFeel to recalculate layout sizes.
 function BeforePaint(Canvas C, float X, float Y)
 {
 	super.BeforePaint(C, X, Y);
@@ -97,12 +98,14 @@ function BeforePaint(Canvas C, float X, float Y)
 	return;
 }
 
+// When enabled, change notifications are delayed until the edit box loses focus.
 function SetDelayedNotify(bool bDelayedNotify)
 {
 	EditBox.bDelayedNotify = bDelayedNotify;
 	return;
 }
 
+// Propagates window focus to the inner edit box child window.
 function FocusWindow()
 {
 	super(UWindowWindow).FocusWindow();
@@ -110,12 +113,14 @@ function FocusWindow()
 	return;
 }
 
+// Called when keyboard focus enters this control; forwards to the edit box.
 function KeyFocusEnter()
 {
 	EditBox.KeyFocusEnter();
 	return;
 }
 
+// Called when keyboard focus leaves this control; forwards to the edit box.
 function KeyFocusExit()
 {
 	EditBox.KeyFocusExit();
