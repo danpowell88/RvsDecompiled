@@ -90,7 +90,7 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 // WalkSpeedMod (clamped by MaxDesiredSpeed), zeros DestinationOffset/NextPathRadius,
 // copies Destination to AdjustLoc/FocalPoint, calls setMoveTimer, then calls
 // Pawn->vtable[0x184/4=97] = moveToward.  vtable[26] check omitted (DIVERGE).
-IMPL_TODO("Ghidra 0x1038e870; 566b — bAdvancedTactics cleared; FocalPoint=Destination when Focus NULL; DesiredSpeed/bReducedSpeed set from WalkSpeedMod; vtable[26] guard omitted")
+IMPL_DIVERGE("Ghidra 0x1038e870; 566b — vtable[26] quick-reach guard on MoveTarget unidentified; all other logic implemented")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
@@ -154,7 +154,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
 //   NavigationPoint eventSuggestMovePreparation + ReachSpec UReachSpec::supports path omitted → DIVERGE.
-IMPL_TODO("Ghidra 0x10390940; 1402b — vtable[26] quick-reach guard omitted (always setMoveTimer); bAdvancedTactics=bCanJump; NavigationPoint prep + ReachSpec path omitted")
+IMPL_DIVERGE("Ghidra 0x10390940; 1402b — vtable[26] quick-reach guard and NavigationPoint prep+ReachSpec path unidentified; setMoveTimer always used")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -2441,11 +2441,37 @@ ETestMoveResult APawn::FindBestJump(FVector Dest)
 	unguard;
 }
 
-IMPL_TODO("stub body; Ghidra 0x103e8de0 is 513b: iterative jump-velocity search to find highest reachable point via walkMove; not yet reconstructed")
+IMPL_MATCH("Engine.dll", 0x103e8de0)
 ETestMoveResult APawn::FindJumpUp(FVector Dest)
 {
 	guard(APawn::FindJumpUp);
-	return TESTMOVE_Stopped;
+
+	FVector SavedLoc = Location;
+
+	FCheckResult Hit(1.f);
+	// Zero-delta move to initialise the Hit result before walkMove.
+	XLevel->MoveActor(this, FVector(0.f, 0.f, 0.f), Rotation, Hit, 1, 1, 0, 0, 0);
+
+	ETestMoveResult result = walkMove(Dest, Hit, NULL, 4.1f);
+
+	// Ghidra updates SavedLoc.Z to current Z AFTER walkMove; restore uses new Z.
+	SavedLoc.Z = Location.Z;
+
+	if (result == TESTMOVE_Stopped)
+	{
+		XLevel->FarMoveActor(this, FVector(SavedLoc.X, SavedLoc.Y, SavedLoc.Z), 1, 1);
+		return TESTMOVE_Stopped;
+	}
+
+	// Short fall to settle on floor.
+	XLevel->MoveActor(this, FVector(0.f, 0.f, -33.f), Rotation, Hit, 1, 1, 0, 0, 0);
+
+	// Check 2D progress only (Z intentionally zero — Ghidra param_4 = Location.Z - Location.Z).
+	FVector Disp(SavedLoc.X - Location.X, SavedLoc.Y - Location.Y, 0.f);
+	if (Disp.SizeSquared() < 16.81f)
+		return TESTMOVE_Stopped;
+
+	return result;
 	unguard;
 }
 
@@ -3204,17 +3230,93 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103F5640 shows 790-byte implementation not yet reconstructed")
+IMPL_TODO("Ghidra 0x103F5640; 790b — velocity formula (Velocity*2 - OldAcceleration) transcribed from Ghidra; OldVelocity param treated as old location per Ghidra analysis")
 void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT VelSize, FLOAT AccelSize, INT Iterations)
 {
 	guard(APawn::startSwimming);
+
+	if ((*(INT*)((BYTE*)this + 0xa8) >= 0) && !(*(BYTE*)((BYTE*)this + 0xac) & 8))
+	{
+		if (VelSize > 0.f)
+		{
+			FVector Delta = Location - OldVelocity;
+			Velocity = Delta / VelSize;
+		}
+		Velocity = Velocity * 2.f - OldAcceleration;
+
+		// Cap velocity to PhysicsVolume MaxSpeed.
+		FLOAT sq = Velocity.SizeSquared();
+		FLOAT maxSpd = *(FLOAT*)((BYTE*)*(INT*)((BYTE*)this + 0x164) + 0x418);
+		if (maxSpd * maxSpd < sq)
+			Velocity = Velocity.SafeNormal() * maxSpd;
+	}
+
+	FVector WaterLine = findWaterLine(Location, OldVelocity);
+	if (WaterLine != Location)
+	{
+		FLOAT CrossDist = (WaterLine - Location).Size();
+		FLOAT BackDist  = (Location - OldVelocity).Size();
+		AccelSize = (CrossDist / BackDist) * VelSize + AccelSize;
+
+		FVector CrossDelta = WaterLine - Location;
+		FCheckResult wHit(1.f);
+		XLevel->MoveActor(this, CrossDelta, Rotation, wHit, 0, 0, 0, 0, 0);
+	}
+
+	if (Velocity.Z > -160.f && Velocity.Z < 0.f)
+		Velocity.Z = -80.f - FVector(Velocity.X, Velocity.Y, 0.f).Size() * 0.7f;
+
+	if (AccelSize > 0.01f)
+		physSwimming(AccelSize, Iterations);
+
 	unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103e7100 is 823 bytes: vtable SingleLineCheck, findWaterLine, FVector negation, returns 0/1/5; not yet reconstructed")
+IMPL_MATCH("Engine.dll", 0x103e7100)
 ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::swimMove);
+
+	FVector SavedLoc = Location;
+
+	// NegNorm = -SafeNormal((0,0,-1)) = (0,0,1) — same pattern as flyMove.
+	FVector NegNorm = -(FVector(0.f, 0.f, -1.f).SafeNormal());
+
+	FCheckResult Hit(1.f);
+	XLevel->MoveActor(this, Delta, Rotation, Hit, 1, 1, 0, 0, 0);
+
+	if (HitActor != NULL && Hit.Actor == HitActor)
+		return (ETestMoveResult)5;
+
+	APhysicsVolume* physVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
+	UBOOL bInWater = physVol && ((*(BYTE*)((BYTE*)physVol + 0x410)) & 0x40);
+
+	if (!bInWater)
+	{
+		// Exited water: find water surface boundary and move back to it.
+		FVector WaterLine = findWaterLine(SavedLoc, Location);
+		if (WaterLine != Location)
+		{
+			FVector WaterDelta = WaterLine - Location;
+			XLevel->MoveActor(this, WaterDelta, Rotation, Hit, 1, 1, 0, 0, 0);
+		}
+	}
+	else if (Hit.Time < 1.f)
+	{
+		// In water and hit a wall: slide along wall using NegNorm push + original direction.
+		FLOAT fRemaining = 1.f - Hit.Time;
+		FVector SlideDir = Delta.SafeNormal();
+		XLevel->MoveActor(this, NegNorm * fRemaining, Rotation, Hit, 1, 1, 0, 0, 0);
+		XLevel->MoveActor(this, SlideDir, Rotation, Hit, 1, 1, 0, 0, 0);
+
+		if (HitActor != NULL && Hit.Actor == HitActor)
+			return (ETestMoveResult)5;
+
+		FVector Disp = Location - SavedLoc;
+		if (DeltaTime * DeltaTime <= Disp.SizeSquared())
+			return TESTMOVE_Moved;
+	}
+
 	return TESTMOVE_Stopped;
 	unguard;
 }
