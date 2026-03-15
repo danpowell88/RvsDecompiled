@@ -23,22 +23,22 @@ simulated state FiringWeapon
 	function AnimEnd(int iChannel)
 	{
 		// End:0x1A
-		if(__NFUN_132__(__NFUN_155__(iChannel, 0), __NFUN_114__(Owner, none)))
+		if(((iChannel != 0) || (Owner == none)))
 		{
 			return;
 		}
 		// End:0x41
 		if(bShowLog)
 		{
-			__NFUN_231__("HANDS - EndAnim, goto wait");
+			Log("HANDS - EndAnim, goto wait");
 		}
-		AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
+		AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
 		AnimBlendParams(1, 0.0000000);
 		R6AbstractWeapon(Owner).FirstPersonAnimOver();
 		m_bCanQuitOnAnimEnd = false;
 		m_bCannotPlayEmpty = false;
 		m_bInBurst = false;
-		__NFUN_113__('DiscardWeapon');
+		GotoState('DiscardWeapon');
 		return;
 	}
 	stop;

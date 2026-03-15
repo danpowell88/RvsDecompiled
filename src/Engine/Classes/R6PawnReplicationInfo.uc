@@ -37,7 +37,7 @@ var Sound m_ShellEndFullAutoSnd[4];
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_ControllerOwner, m_PawnType, 
 		m_bSex;
 }
@@ -53,7 +53,7 @@ simulated function ResetOriginalData()
 simulated function AssignSound(Class<R6EngineWeapon> WeaponClass, byte u8CurrentWepon)
 {
 	// End:0x2F3
-	if(__NFUN_119__(WeaponClass, none))
+	if((WeaponClass != none))
 	{
 		m_TriggerSnd[int(u8CurrentWepon)] = WeaponClass.default.m_TriggerSnd;
 		m_SingleFireStereoSnd[int(u8CurrentWepon)] = WeaponClass.default.m_SingleFireStereoSnd;
@@ -68,26 +68,26 @@ simulated function AssignSound(Class<R6EngineWeapon> WeaponClass, byte u8Current
 		m_ShellBurstFireSnd[int(u8CurrentWepon)] = WeaponClass.default.m_ShellBurstFireSnd;
 		m_ShellFullAutoSnd[int(u8CurrentWepon)] = WeaponClass.default.m_ShellFullAutoSnd;
 		m_ShellEndFullAutoSnd[int(u8CurrentWepon)] = WeaponClass.default.m_ShellEndFullAutoSnd;
-		__NFUN_2717__(WeaponClass.default.m_EquipSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_UnEquipSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_ReloadSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_ReloadEmptySnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_ChangeROFSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_SingleFireStereoSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_SingleFireEndStereoSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_BurstFireStereoSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_FullAutoStereoSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_FullAutoEndStereoSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_EmptyMagSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_TriggerSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_ShellSingleFireSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_ShellBurstFireSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_ShellFullAutoSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_ShellEndFullAutoSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_SniperZoomFirstSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_SniperZoomSecondSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_CommonWeaponZoomSnd, 3);
-		__NFUN_2717__(WeaponClass.default.m_BipodSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_EquipSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_UnEquipSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_ReloadSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_ReloadEmptySnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_ChangeROFSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_SingleFireStereoSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_SingleFireEndStereoSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_BurstFireStereoSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_FullAutoStereoSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_FullAutoEndStereoSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_EmptyMagSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_TriggerSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_ShellSingleFireSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_ShellBurstFireSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_ShellFullAutoSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_ShellEndFullAutoSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_SniperZoomFirstSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_SniperZoomSecondSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_CommonWeaponZoomSnd, 3);
+		AddAndFindBankInSound(WeaponClass.default.m_BipodSnd, 3);
 	}
 	return;
 }

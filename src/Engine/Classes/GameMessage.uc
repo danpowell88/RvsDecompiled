@@ -35,46 +35,46 @@ static function string GetString(optional int Switch, optional PlayerReplication
 		// End:0x3F
 		case 1:
 			// End:0x26
-			if(__NFUN_114__(RelatedPRI_1, none))
+			if((RelatedPRI_1 == none))
 			{
 				return "";
 			}
-			return __NFUN_112__(RelatedPRI_1.PlayerName, default.EnteredMessage);
+			return (RelatedPRI_1.PlayerName $ default.EnteredMessage);
 			// End:0x123
 			break;
 		// End:0x7B
 		case 2:
 			// End:0x52
-			if(__NFUN_114__(RelatedPRI_1, none))
+			if((RelatedPRI_1 == none))
 			{
 				return "";
 			}
-			return __NFUN_168__(__NFUN_168__(RelatedPRI_1.OldName, default.GlobalNameChange), RelatedPRI_1.PlayerName);
+			return ((RelatedPRI_1.OldName @ default.GlobalNameChange) @ RelatedPRI_1.PlayerName);
 			// End:0x123
 			break;
 		// End:0xBC
 		case 3:
 			// End:0x8E
-			if(__NFUN_114__(RelatedPRI_1, none))
+			if((RelatedPRI_1 == none))
 			{
 				return "";
 			}
 			// End:0x9C
-			if(__NFUN_114__(OptionalObject, none))
+			if((OptionalObject == none))
 			{
 				return "";
 			}
-			return __NFUN_168__(__NFUN_168__(RelatedPRI_1.PlayerName, default.NewTeamMessage), default.NewTeamMessageTrailer);
+			return ((RelatedPRI_1.PlayerName @ default.NewTeamMessage) @ default.NewTeamMessageTrailer);
 			// End:0x123
 			break;
 		// End:0xE8
 		case 4:
 			// End:0xCF
-			if(__NFUN_114__(RelatedPRI_1, none))
+			if((RelatedPRI_1 == none))
 			{
 				return "";
 			}
-			return __NFUN_112__(RelatedPRI_1.PlayerName, default.LeftMessage);
+			return (RelatedPRI_1.PlayerName $ default.LeftMessage);
 			// End:0x123
 			break;
 		// End:0xF6

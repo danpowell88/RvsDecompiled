@@ -23,21 +23,21 @@ function InitOperativeClassesMgr()
 	local string szPackageFilename;
 
 	pFileManager = new (none) Class'Engine.R6FileManager';
-	iFiles = pFileManager.__NFUN_1525__("..\\Mods\\NewOperative\\", "u");
+	iFiles = pFileManager.GetNbFile("..\\Mods\\NewOperative\\", "u");
 	i = 0;
 	J0x42:
 
 	// End:0xBD [Loop If]
-	if(__NFUN_150__(i, iFiles))
+	if((i < iFiles))
 	{
-		pFileManager.__NFUN_1526__(i, szPackageFilename);
+		pFileManager.GetFileName(i, szPackageFilename);
 		// End:0x95
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("Found Operative package : ", szPackageFilename));
+			Log(("Found Operative package : " $ szPackageFilename));
 		}
-		m_aPackageList[i] = __NFUN_128__(szPackageFilename, __NFUN_147__(__NFUN_125__(szPackageFilename), 2));
-		__NFUN_165__(i);
+		m_aPackageList[i] = Left(szPackageFilename, (Len(szPackageFilename) - 2));
+		(i++);
 		// [Loop Continue]
 		goto J0x42;
 	}
@@ -47,14 +47,14 @@ function InitOperativeClassesMgr()
 // NEW IN 1.60
 function Class GetFirstClassFromPackage(int iPackageIndex, Class ClassType)
 {
-	return __NFUN_1005__(__NFUN_112__(m_aPackageList[iPackageIndex], ".u"), ClassType);
+	return GetFirstPackageClass((m_aPackageList[iPackageIndex] $ ".u"), ClassType);
 	return;
 }
 
 // NEW IN 1.60
 function Class GetNextClassFromPackage()
 {
-	return __NFUN_1006__();
+	return GetNextClass();
 	return;
 }
 
@@ -74,11 +74,11 @@ function string GetLocalizedString(int iPackageIndex, string SectionName, string
 {
 	local string szLocalizedString;
 
-	szLocalizedString = Localize(SectionName, KeyName, __NFUN_112__("..\\Mods\\NewOperative\\", m_aPackageList[iPackageIndex]), bMultipleToken);
+	szLocalizedString = Localize(SectionName, KeyName, ("..\\Mods\\NewOperative\\" $ m_aPackageList[iPackageIndex]), bMultipleToken);
 	// End:0x70
-	if(__NFUN_122__(szLocalizedString, ""))
+	if((szLocalizedString == ""))
 	{
-		szLocalizedString = __NFUN_112__(__NFUN_112__(SectionName, " "), __NFUN_234__(SectionName, __NFUN_147__(__NFUN_125__(SectionName), 3)));
+		szLocalizedString = ((SectionName $ " ") $ Right(SectionName, (Len(SectionName) - 3)));
 	}
 	return szLocalizedString;
 	return;

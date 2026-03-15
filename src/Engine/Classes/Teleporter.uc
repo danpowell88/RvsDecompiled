@@ -50,11 +50,11 @@ var() string URL;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		URL, bEnabled;
 
 	// Pos:0x00D
-	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetInitial && (int(Role) == int(ROLE_Authority))))
 		TargetVelocity, bChangesVelocity, 
 		bChangesYaw, bReversesX, 
 		bReversesY, bReversesZ;
@@ -63,12 +63,12 @@ replication
 function PostBeginPlay()
 {
 	// End:0x12
-	if(__NFUN_124__(URL, ""))
+	if((URL ~= ""))
 	{
-		__NFUN_262__(false, false, false);
+		SetCollision(false, false, false);
 	}
 	// End:0x23
-	if(__NFUN_129__(bEnabled))
+	if((!bEnabled))
 	{
 		FindTriggerActor();
 	}
@@ -83,13 +83,13 @@ function FindTriggerActor()
 	TriggerActor = none;
 	TriggerActor2 = none;
 	// End:0x5E
-	foreach __NFUN_313__(Class'Engine.Actor', A)
+	foreach DynamicActors(Class'Engine.Actor', A)
 	{
 		// End:0x5D
-		if(__NFUN_254__(A.Event, Tag))
+		if((A.Event == Tag))
 		{
 			// End:0x4F
-			if(__NFUN_114__(TriggerActor, none))
+			if((TriggerActor == none))
 			{
 				TriggerActor = A;
 				// End:0x5D
@@ -110,7 +110,7 @@ simulated function bool Accept(Actor Incoming, Actor Source)
 	local Vector oldDir;
 	local Controller P;
 
-	__NFUN_118__('Touch');
+	Disable('Touch');
 	newRot = Incoming.Rotation;
 	// End:0x93
 	if(bChangesYaw)
@@ -118,27 +118,27 @@ simulated function bool Accept(Actor Incoming, Actor Source)
 		OldRot = Incoming.Rotation;
 		newRot.Yaw = Rotation.Yaw;
 		// End:0x93
-		if(__NFUN_119__(Source, none))
+		if((Source != none))
 		{
-			__NFUN_161__(newRot.Yaw, __NFUN_147__(__NFUN_146__(32768, Incoming.Rotation.Yaw), Source.Rotation.Yaw));
+			(newRot.Yaw += ((32768 + Incoming.Rotation.Yaw) - Source.Rotation.Yaw));
 		}
 	}
 	// End:0x22C
-	if(__NFUN_119__(Pawn(Incoming), none))
+	if((Pawn(Incoming) != none))
 	{
 		// End:0x112
-		if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		if((int(Role) == int(ROLE_Authority)))
 		{
 			P = Level.ControllerList;
 			J0xC7:
 
 			// End:0x112 [Loop If]
-			if(__NFUN_119__(P, none))
+			if((P != none))
 			{
 				// End:0xFB
-				if(__NFUN_114__(P.Enemy, Incoming))
+				if((P.Enemy == Incoming))
 				{
-					P.__NFUN_514__(Incoming);
+					P.LineOfSightTo(Incoming);
 				}
 				P = P.nextController;
 				// [Loop Continue]
@@ -146,7 +146,7 @@ simulated function bool Accept(Actor Incoming, Actor Source)
 			}
 		}
 		// End:0x154
-		if(__NFUN_129__(Pawn(Incoming).__NFUN_267__(Location)))
+		if((!Pawn(Incoming).__NFUN_267__(Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/))
 		{
 			__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " Teleport failed for "), string(Incoming)));
 		}

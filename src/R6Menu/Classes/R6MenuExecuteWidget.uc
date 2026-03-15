@@ -100,11 +100,11 @@ function Created()
 	local float labelWidth, fTeamSummaryYPos;
 
 	super.Created();
-	labelWidth = float(__NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3));
+	labelWidth = float((int((m_Right.WinLeft - m_Left.WinWidth)) / 3));
 	m_CodeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_Left.WinWidth, m_Top.WinHeight, labelWidth, 18.0000000, self));
-	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_CodeName.WinLeft, m_CodeName.WinWidth), m_Top.WinHeight, labelWidth, 18.0000000, self));
-	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_DateTime.WinLeft, m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, 18.0000000, self));
-	m_MissionObjectives = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', __NFUN_174__(m_Left.WinWidth, m_fLaptopPadding), __NFUN_174__(m_Location.WinTop, m_Location.WinHeight), m_fObjWidth, m_fObjHeight, self));
+	m_DateTime = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_CodeName.WinLeft + m_CodeName.WinWidth), m_Top.WinHeight, labelWidth, 18.0000000, self));
+	m_Location = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_DateTime.WinLeft + m_DateTime.WinWidth), m_Top.WinHeight, m_DateTime.WinWidth, 18.0000000, self));
+	m_MissionObjectives = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', (m_Left.WinWidth + m_fLaptopPadding), (m_Location.WinTop + m_Location.WinHeight), m_fObjWidth, m_fObjHeight, self));
 	m_MissionObjectives.m_BorderColor = Root.Colors.GrayLight;
 	m_MissionObjectives.SetScrollable(true);
 	m_MissionObjectives.VertSB.SetBorderColor(Root.Colors.GrayLight);
@@ -121,15 +121,15 @@ function Created()
 	m_MissionObjectives.m_bUseBGColor = true;
 	m_MissionObjectives.m_BGColor = Root.Colors.Black;
 	m_MissionObjectives.m_BGColor.A = byte(Root.Colors.DarkBGAlpha);
-	m_SmallMap = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', __NFUN_174__(__NFUN_174__(m_MissionObjectives.WinLeft, m_MissionObjectives.WinWidth), float(4)), m_MissionObjectives.WinTop, m_fMapWidth, m_fObjHeight, self));
+	m_SmallMap = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', ((m_MissionObjectives.WinLeft + m_MissionObjectives.WinWidth) + float(4)), m_MissionObjectives.WinTop, m_fMapWidth, m_fObjHeight, self));
 	m_SmallMap.m_BorderColor = Root.Colors.GrayLight;
 	m_SmallMap.m_BorderStyle = int(1);
 	m_SmallMap.m_bDrawBorder = true;
 	m_SmallMap.bStretch = true;
 	m_SmallMap.m_iDrawStyle = 5;
 	m_NavBar.HideWindow();
-	m_fButtonAreaY = __NFUN_175__(__NFUN_175__(m_Bottom.WinTop, float(33)), m_fLaptopPadding);
-	m_fButtonY = __NFUN_174__(m_fButtonAreaY, float(1));
+	m_fButtonAreaY = ((m_Bottom.WinTop - float(33)) - m_fLaptopPadding);
+	m_fButtonY = (m_fButtonAreaY + float(1));
 	m_BorderColor = Root.Colors.BlueLight;
 	m_GoPlanningButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', m_fGoPlanningButtonX, m_fButtonY, float(m_RGoPlanningButtonUp.W), m_fButtonHeight, self));
 	m_GoPlanningButton.DisabledTexture = m_TGoPlanningButton;
@@ -155,7 +155,7 @@ function Created()
 	m_GoGameButton.bUseRegion = true;
 	m_GoGameButton.ToolTipString = Localize("ExecuteMenu", "GOGAME", "R6Menu");
 	m_GoGameButton.m_iDrawStyle = 5;
-	m_ObserverButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', m_fObserverButtonX, __NFUN_174__(m_fButtonY, float(1)), float(m_RObserverButtonUp.W), m_fButtonHeight, self));
+	m_ObserverButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', m_fObserverButtonX, (m_fButtonY + float(1)), float(m_RObserverButtonUp.W), m_fButtonHeight, self));
 	m_ObserverButton.DisabledTexture = m_TObserverButton;
 	m_ObserverButton.DownTexture = m_TObserverButton;
 	m_ObserverButton.OverTexture = m_TObserverButton;
@@ -172,21 +172,21 @@ function Created()
 	m_RedSummary = R6WindowTeamSummary(CreateWindow(Class'R6Window.R6WindowTeamSummary', m_MissionObjectives.WinLeft, fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
 	m_RedSummary.SetTeam(0);
 	m_RedSummary.bAlwaysBehind = true;
-	m_GreenSummary = R6WindowTeamSummary(CreateWindow(Class'R6Window.R6WindowTeamSummary', __NFUN_174__(__NFUN_174__(m_RedSummary.WinLeft, m_RedSummary.WinWidth), m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
+	m_GreenSummary = R6WindowTeamSummary(CreateWindow(Class'R6Window.R6WindowTeamSummary', ((m_RedSummary.WinLeft + m_RedSummary.WinWidth) + m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
 	m_GreenSummary.SetTeam(1);
 	m_GreenSummary.bAlwaysBehind = true;
-	m_GoldSummary = R6WindowTeamSummary(CreateWindow(Class'R6Window.R6WindowTeamSummary', __NFUN_174__(__NFUN_174__(m_GreenSummary.WinLeft, m_GreenSummary.WinWidth), m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
+	m_GoldSummary = R6WindowTeamSummary(CreateWindow(Class'R6Window.R6WindowTeamSummary', ((m_GreenSummary.WinLeft + m_GreenSummary.WinWidth) + m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
 	m_GoldSummary.SetTeam(2);
 	m_GoldSummary.bAlwaysBehind = true;
 	m_RedSummaryButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', m_MissionObjectives.WinLeft, fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
 	m_RedSummaryButton.ToolTipString = Localize("ExecuteMenu", "OverATeam", "R6Menu");
 	m_RedSummaryButton.m_BorderColor = Root.Colors.BlueLight;
 	m_RedSummaryButton.m_bDrawSimpleBorder = true;
-	m_GreenSummaryButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', __NFUN_174__(__NFUN_174__(m_RedSummary.WinLeft, m_RedSummary.WinWidth), m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
+	m_GreenSummaryButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', ((m_RedSummary.WinLeft + m_RedSummary.WinWidth) + m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
 	m_GreenSummaryButton.ToolTipString = Localize("ExecuteMenu", "OverATeam", "R6Menu");
 	m_GreenSummaryButton.m_BorderColor = Root.Colors.BlueLight;
 	m_GreenSummaryButton.m_bDrawSimpleBorder = true;
-	m_GoldSummaryButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', __NFUN_174__(__NFUN_174__(m_GreenSummary.WinLeft, m_GreenSummary.WinWidth), m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
+	m_GoldSummaryButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', ((m_GreenSummary.WinLeft + m_GreenSummary.WinWidth) + m_fTeamSummaryXPadding), fTeamSummaryYPos, m_fTeamSummaryWidth, m_fTeamSummaryMaxHeight, self));
 	m_GoldSummaryButton.ToolTipString = Localize("ExecuteMenu", "OverATeam", "R6Menu");
 	m_GoldSummaryButton.m_BorderColor = Root.Colors.BlueLight;
 	m_GoldSummaryButton.m_bDrawSimpleBorder = true;
@@ -215,15 +215,15 @@ function ShowWindow()
 	J0x259:
 
 	// End:0x35E [Loop If]
-	if(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length))
+	if((i < moMgr.m_aMissionObjectives.Length))
 	{
 		// End:0x354
-		if(__NFUN_130__(__NFUN_129__(moMgr.m_aMissionObjectives[i].m_bMoralityObjective), moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
+		if(((!moMgr.m_aMissionObjectives[i].m_bMoralityObjective) && moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
 		{
-			szDescription = __NFUN_168__("-", Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i])));
+			szDescription = ("-" @ Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i])));
 			m_MissionObjectives.AddText(szDescription, Root.Colors.White, Root.Fonts[10]);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x259;
 	}
@@ -232,11 +232,11 @@ function ShowWindow()
 	CalculatePlanningDetails();
 	UpdateTeamRoster();
 	// End:0x410
-	if(__NFUN_242__(R6MenuRootWindow(Root).m_bPlayerPlanInitialized, false))
+	if((R6MenuRootWindow(Root).m_bPlayerPlanInitialized == false))
 	{
-		pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+		pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 		// End:0x410
-		if(__NFUN_242__(pGameOptions.PopUpLoadPlan, true))
+		if((pGameOptions.PopUpLoadPlan == true))
 		{
 			R6MenuRootWindow(Root).m_ePopUpID = 48;
 			R6MenuRootWindow(Root).PopUpMenu(true);
@@ -258,7 +258,7 @@ function CalculatePlanningDetails()
 	J0x2F:
 
 	// End:0x18A [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		PlanningInfo = R6PlanningInfo(Root.Console.Master.m_StartGameInfo.m_TeamInfo[i].m_pPlanning);
 		iWaypoint = 0;
@@ -267,20 +267,20 @@ function CalculatePlanningDetails()
 		J0x93:
 
 		// End:0x148 [Loop If]
-		if(__NFUN_150__(Y, PlanningInfo.m_NodeList.Length))
+		if((Y < PlanningInfo.m_NodeList.Length))
 		{
 			// End:0x13E
-			if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(R6ActionPoint(PlanningInfo.m_NodeList[Y]).m_eActionType), int(2)), __NFUN_154__(int(R6ActionPoint(PlanningInfo.m_NodeList[Y]).m_eActionType), int(3))), __NFUN_154__(int(R6ActionPoint(PlanningInfo.m_NodeList[Y]).m_eActionType), int(4))))
+			if((((int(R6ActionPoint(PlanningInfo.m_NodeList[Y]).m_eActionType) == int(2)) || (int(R6ActionPoint(PlanningInfo.m_NodeList[Y]).m_eActionType) == int(3))) || (int(R6ActionPoint(PlanningInfo.m_NodeList[Y]).m_eActionType) == int(4))))
 			{
-				__NFUN_165__(iGoCode);
+				(iGoCode++);
 			}
-			__NFUN_165__(Y);
+			(Y++);
 			// [Loop Continue]
 			goto J0x93;
 		}
 		iWaypoint = PlanningInfo.m_NodeList.Length;
 		TeamSummarys[i].SetPlanningDetails(string(iWaypoint), string(iGoCode));
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x2F;
 	}
@@ -322,7 +322,7 @@ function UpdateTeamRoster()
 	J0x193:
 
 	// End:0x2A7 [Loop If]
-	if(__NFUN_150__(Y, 3))
+	if((Y < 3))
 	{
 		currentListBox = tmpListBox[Y];
 		tmpItem = R6WindowListBoxItem(currentListBox.Items.Next);
@@ -330,15 +330,15 @@ function UpdateTeamRoster()
 		J0x1D9:
 
 		// End:0x29D [Loop If]
-		if(__NFUN_150__(i, currentListBox.Items.Count()))
+		if((i < currentListBox.Items.Count()))
 		{
 			tmpOperative = R6Operative(tmpItem.m_Object);
 			// End:0x27A
-			if(__NFUN_119__(tmpOperative, none))
+			if((tmpOperative != none))
 			{
 				TeamSummarys[Y].AddOperative(tmpOperative);
 				// End:0x27A
-				if(__NFUN_242__(bselectedSet, false))
+				if((bselectedSet == false))
 				{
 					TeamSummaryButton[Y].m_bDrawBorders = true;
 					TeamSummarys[Y].SetSelected(true);
@@ -346,11 +346,11 @@ function UpdateTeamRoster()
 				}
 			}
 			tmpItem = R6WindowListBoxItem(tmpItem.Next);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1D9;
 		}
-		__NFUN_165__(Y);
+		(Y++);
 		// [Loop Continue]
 		goto J0x193;
 	}
@@ -360,7 +360,7 @@ function UpdateTeamRoster()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x209
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -382,7 +382,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0x100
 			case m_RedSummaryButton:
 				// End:0xFD
-				if(__NFUN_151__(m_RedSummary.OperativeCount(), 0))
+				if((m_RedSummary.OperativeCount() > 0))
 				{
 					m_RedSummary.SetSelected(true);
 					m_GreenSummary.SetSelected(false);
@@ -396,7 +396,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0x183
 			case m_GreenSummaryButton:
 				// End:0x180
-				if(__NFUN_151__(m_GreenSummary.OperativeCount(), 0))
+				if((m_GreenSummary.OperativeCount() > 0))
 				{
 					m_RedSummary.SetSelected(false);
 					m_GreenSummary.SetSelected(true);
@@ -410,7 +410,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0x206
 			case m_GoldSummaryButton:
 				// End:0x203
-				if(__NFUN_151__(m_GoldSummary.OperativeCount(), 0))
+				if((m_GoldSummary.OperativeCount() > 0))
 				{
 					m_RedSummary.SetSelected(false);
 					m_GreenSummary.SetSelected(false);
@@ -437,8 +437,8 @@ function Paint(Canvas C, float X, float Y)
 	local float boxX;
 
 	super.Paint(C, X, Y);
-	boxX = __NFUN_174__(m_Left.WinWidth, float(2));
-	R6WindowLookAndFeel(LookAndFeel).DrawBox(self, C, boxX, m_fButtonAreaY, __NFUN_175__(640.0000000, __NFUN_171__(float(2), boxX)), 33.0000000);
+	boxX = (m_Left.WinWidth + float(2));
+	R6WindowLookAndFeel(LookAndFeel).DrawBox(self, C, boxX, m_fButtonAreaY, (640.0000000 - (float(2) * boxX)), 33.0000000);
 	return;
 }
 

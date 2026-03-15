@@ -21,7 +21,7 @@ var(R6ActionObject) Texture m_ProviderIcon;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_fRepTimeLeft;
 }
 
@@ -42,7 +42,7 @@ simulated function ResetOriginalData()
 simulated function float GetTimeLeft()
 {
 	// End:0x22
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		return m_fRepTimeLeft;		
 	}
@@ -76,7 +76,7 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 	local R6Pawn aPawn;
 
 	// End:0x1B
-	if(__NFUN_132__(__NFUN_242__(CanToggle(), false), __NFUN_129__(m_bRainbowCanInteract)))
+	if(((CanToggle() == false) || (!m_bRainbowCanInteract)))
 	{
 		return;
 	}
@@ -95,14 +95,14 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 	Query.iTeamActionIDList[2] = 0;
 	Query.iTeamActionIDList[3] = 0;
 	// End:0x183
-	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	if((fDistance < m_fCircumstantialActionRange))
 	{
 		vFacingDir = Vector(Rotation);
 		vFacingDir.Z = 0.0000000;
-		vActorDir = __NFUN_226__(__NFUN_216__(Location, PlayerController.Pawn.Location));
+		vActorDir = Normal((Location - PlayerController.Pawn.Location));
 		vActorDir.Z = 0.0000000;
 		// End:0x16F
-		if(__NFUN_176__(__NFUN_219__(vActorDir, vFacingDir), -0.4000000))
+		if((Dot(vActorDir, vFacingDir) < -0.4000000))
 		{
 			Query.iInRange = 1;			
 		}
@@ -123,12 +123,12 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 simulated function ToggleDevice(R6Pawn aPawn)
 {
 	// End:0x0E
-	if(__NFUN_242__(CanToggle(), false))
+	if((CanToggle() == false))
 	{
 		return;
 	}
 	super.ToggleDevice(aPawn);
-	__NFUN_280__(1.0000000, true);
+	SetTimer(1.0000000, true);
 	return;
 }
 
@@ -142,7 +142,7 @@ simulated function float GetTimeRequired(R6Pawn aPawn)
 {
 	local float fDisarmingBombTime;
 
-	fDisarmingBombTime = __NFUN_172__(__NFUN_175__(Level.m_fOxygeneTopLevel, R6PlayerController(aPawn.Controller).m_fOxygeneLevel), m_fAugmentationPerSecond);
+	fDisarmingBombTime = ((Level.m_fOxygeneTopLevel - R6PlayerController(aPawn.Controller).m_fOxygeneLevel) / m_fAugmentationPerSecond);
 	return fDisarmingBombTime;
 	return;
 }
@@ -168,30 +168,30 @@ simulated function int R6GetCircumstantialActionProgress(R6AbstractCircumstantia
 {
 	local float fPercentage, foxlevel, fTimeElapsed;
 
-	fPercentage = __NFUN_172__(__NFUN_175__(Level.TimeSeconds, m_fPlayerCAStartTime), Query.fPlayerActionTimeRequired);
-	fTimeElapsed = __NFUN_175__(__NFUN_175__(Level.TimeSeconds, m_fTimeElapsed), m_fPlayerCAStartTime);
+	fPercentage = ((Level.TimeSeconds - m_fPlayerCAStartTime) / Query.fPlayerActionTimeRequired);
+	fTimeElapsed = ((Level.TimeSeconds - m_fTimeElapsed) - m_fPlayerCAStartTime);
 	// End:0xD8
-	if(__NFUN_177__(fTimeElapsed, 0.5000000))
+	if((fTimeElapsed > 0.5000000))
 	{
-		foxlevel = float(int(__NFUN_175__(Level.TimeSeconds, m_fPlayerCAStartTime)));
-		__NFUN_182__(foxlevel, m_fAugmentationPerSecond);
-		__NFUN_184__(foxlevel, m_fOxygeneLevelCAStart);
+		foxlevel = float(int((Level.TimeSeconds - m_fPlayerCAStartTime)));
+		(foxlevel *= m_fAugmentationPerSecond);
+		(foxlevel += m_fOxygeneLevelCAStart);
 		// End:0xCD
-		if(__NFUN_176__(foxlevel, Level.m_fOxygeneTopLevel))
+		if((foxlevel < Level.m_fOxygeneTopLevel))
 		{
 			R6PlayerController(actingPawn.Controller).addToOxygenLevel(foxlevel);
 		}
 		m_fTimeElapsed = fTimeElapsed;
 	}
-	__NFUN_182__(fPercentage, float(100));
+	(fPercentage *= float(100));
 	// End:0x123
-	if(__NFUN_179__(fPercentage, float(100)))
+	if((fPercentage >= float(100)))
 	{
 		R6PlayerController(actingPawn.Controller).addToOxygenLevel(Level.m_fOxygeneTopLevel);
 		LockObjectUse(false);
 	}
 	// End:0x14B
-	if(__NFUN_130__(__NFUN_179__(fPercentage, float(100)), __NFUN_155__(int(m_ObjectState), int(2))))
+	if(((fPercentage >= float(100)) && (int(m_ObjectState) != int(2))))
 	{
 		PerformSoundAction(2);
 	}

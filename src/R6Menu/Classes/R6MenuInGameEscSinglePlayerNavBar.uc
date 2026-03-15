@@ -91,7 +91,7 @@ var Region m_RRetryTrainingButtonOver;
 
 function Created()
 {
-	m_HelpTextBar = R6MenuMPInGameHelpBar(CreateWindow(Class'R6Menu.R6MenuMPInGameHelpBar', 1.0000000, 0.0000000, __NFUN_175__(WinWidth, float(2)), m_fHelpTextHeight, self));
+	m_HelpTextBar = R6MenuMPInGameHelpBar(CreateWindow(Class'R6Menu.R6MenuMPInGameHelpBar', 1.0000000, 0.0000000, (WinWidth - float(2)), m_fHelpTextHeight, self));
 	m_HelpTextBar.m_szDefaultText = Localize("ESCMENUS", "ESCRESUME", "R6Menu");
 	m_ExitButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', m_fExitXPos, m_fButtonsYPos, float(m_RExitButtonUp.W), float(m_RExitButtonUp.H), self));
 	m_ExitButton.UpTexture = m_TExitButton;
@@ -179,7 +179,7 @@ function SetTrainingNavbar()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x316
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{

@@ -57,7 +57,7 @@ function BeforePaint(Canvas C, float X, float Y)
 	{
 		m_bRefresh = false;
 		// End:0x160
-		if(__NFUN_123__(Text, ""))
+		if((Text != ""))
 		{
 			C.Font = m_Font;
 			TextSize(C, Text, W, H);
@@ -70,12 +70,12 @@ function BeforePaint(Canvas C, float X, float Y)
 					break;
 				// End:0x99
 				case 1:
-					TextX = __NFUN_175__(__NFUN_175__(__NFUN_175__(WinWidth, W), __NFUN_171__(float(__NFUN_125__(Text)), m_fFontSpacing)), m_fVBorderWidth);
+					TextX = (((WinWidth - W) - (float(Len(Text)) * m_fFontSpacing)) - m_fVBorderWidth);
 					// End:0xBC
 					break;
 				// End:0xB9
 				case 2:
-					TextX = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
+					TextX = ((WinWidth - W) / float(2));
 					// End:0xBC
 					break;
 				// End:0xFFFF
@@ -83,19 +83,19 @@ function BeforePaint(Canvas C, float X, float Y)
 					break;
 			}
 			// End:0xF5
-			if(__NFUN_129__(m_bFixedYPos))
+			if((!m_bFixedYPos))
 			{
-				TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-				TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
+				TextY = ((WinHeight - H) / float(2));
+				TextY = float(int((TextY + 0.5000000)));
 			}
 			// End:0x160
 			if(m_bResizeToText)
 			{
-				WinWidth = __NFUN_174__(__NFUN_174__(W, __NFUN_171__(float(__NFUN_125__(Text)), m_fFontSpacing)), m_fLMarge);
+				WinWidth = ((W + (float(Len(Text)) * m_fFontSpacing)) + m_fLMarge);
 				// End:0x145
-				if(__NFUN_155__(int(Align), int(0)))
+				if((int(Align) != int(0)))
 				{
-					__NFUN_184__(WinLeft, __NFUN_175__(TextX, m_fLMarge));
+					(WinLeft += (TextX - m_fLMarge));
 				}
 				TextX = m_fLMarge;
 				Align = 0;
@@ -113,12 +113,12 @@ function Paint(Canvas C, float X, float Y)
 
 	C.Style = byte(m_DrawStyle);
 	// End:0x2FE
-	if(__NFUN_130__(__NFUN_119__(m_BGTexture, none), m_bDrawBG))
+	if(((m_BGTexture != none) && m_bDrawBG))
 	{
 		// End:0x69
 		if(m_bUseBGColor)
 		{
-			C.__NFUN_2626__(m_BGColor.R, m_BGColor.G, m_BGColor.B, m_BGColor.A);
+			C.SetDrawColor(m_BGColor.R, m_BGColor.G, m_BGColor.B, m_BGColor.A);
 		}
 		// End:0x290
 		if(m_bUseExtRegion)
@@ -126,44 +126,44 @@ function Paint(Canvas C, float X, float Y)
 			RTemp.X = int(m_fVBorderWidth);
 			RTemp.Y = int(m_fHBorderHeight);
 			RTemp.W = m_BGExtRegion.W;
-			RTemp.H = int(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)));
+			RTemp.H = int((WinHeight - (float(2) * m_fHBorderHeight)));
 			DrawStretchedTextureSegment(C, float(RTemp.X), float(RTemp.Y), float(RTemp.W), float(RTemp.H), float(m_BGExtRegion.X), float(m_BGExtRegion.Y), float(m_BGExtRegion.W), float(m_BGExtRegion.H), m_BGTexture);
-			__NFUN_161__(RTemp.X, RTemp.W);
-			RTemp.W = int(__NFUN_175__(WinWidth, float(__NFUN_144__(2, RTemp.X))));
+			(RTemp.X += RTemp.W);
+			RTemp.W = int((WinWidth - float((2 * RTemp.X))));
 			DrawStretchedTextureSegment(C, float(RTemp.X), float(RTemp.Y), float(RTemp.W), float(RTemp.H), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
-			__NFUN_161__(RTemp.X, RTemp.W);
+			(RTemp.X += RTemp.W);
 			RTemp.W = m_BGExtRegion.W;
-			DrawStretchedTextureSegment(C, float(RTemp.X), float(RTemp.Y), float(RTemp.W), float(RTemp.H), float(__NFUN_146__(m_BGExtRegion.X, m_BGExtRegion.W)), float(m_BGExtRegion.Y), float(__NFUN_143__(m_BGExtRegion.W)), float(m_BGExtRegion.H), m_BGTexture);			
+			DrawStretchedTextureSegment(C, float(RTemp.X), float(RTemp.Y), float(RTemp.W), float(RTemp.H), float((m_BGExtRegion.X + m_BGExtRegion.W)), float(m_BGExtRegion.Y), float((-m_BGExtRegion.W)), float(m_BGExtRegion.H), m_BGTexture);			
 		}
 		else
 		{
-			DrawStretchedTextureSegment(C, m_fVBorderWidth, m_fHBorderHeight, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fVBorderWidth)), __NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
+			DrawStretchedTextureSegment(C, m_fVBorderWidth, m_fHBorderHeight, (WinWidth - (float(2) * m_fVBorderWidth)), (WinHeight - (float(2) * m_fHBorderHeight)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
 		}
 	}
 	// End:0x501
 	if(m_bDrawBorders)
 	{
-		C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+		C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 		// End:0x405
-		if(__NFUN_119__(m_HBorderTexture, none))
+		if((m_HBorderTexture != none))
 		{
-			DrawStretchedTextureSegment(C, m_fHBorderPadding, 0.0000000, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
-			DrawStretchedTextureSegment(C, m_fHBorderPadding, __NFUN_175__(WinHeight, m_fHBorderHeight), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+			DrawStretchedTextureSegment(C, m_fHBorderPadding, 0.0000000, (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+			DrawStretchedTextureSegment(C, m_fHBorderPadding, (WinHeight - m_fHBorderHeight), (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 		}
 		// End:0x501
-		if(__NFUN_119__(m_VBorderTexture, none))
+		if((m_VBorderTexture != none))
 		{
-			DrawStretchedTextureSegment(C, 0.0000000, __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
-			DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, m_fVBorderWidth), __NFUN_174__(m_fHBorderHeight, m_fVBorderPadding), m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+			DrawStretchedTextureSegment(C, 0.0000000, (m_fHBorderHeight + m_fVBorderPadding), m_fVBorderWidth, ((WinHeight - (float(2) * m_fHBorderHeight)) - (float(2) * m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+			DrawStretchedTextureSegment(C, (WinWidth - m_fVBorderWidth), (m_fHBorderHeight + m_fVBorderPadding), m_fVBorderWidth, ((WinHeight - (float(2) * m_fHBorderHeight)) - (float(2) * m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 		}
 	}
 	// End:0x5A4
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		tempSpace = C.SpaceX;
 		C.Font = m_Font;
 		C.SpaceX = m_fFontSpacing;
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 		C.Style = byte(m_TextDrawstyle);
 		ClipText(C, TextX, TextY, Text, true);
 	}

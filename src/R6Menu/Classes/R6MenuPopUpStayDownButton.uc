@@ -16,7 +16,7 @@ function Created()
 function Paint(Canvas C, float X, float Y)
 {
 	// End:0xBF
-	if(LookAndFeel.__NFUN_303__('R6MenuRSLookAndFeel'))
+	if(LookAndFeel.IsA('R6MenuRSLookAndFeel'))
 	{
 		C.Font = m_buttonFont;
 		// End:0x4E
@@ -27,7 +27,7 @@ function Paint(Canvas C, float X, float Y)
 		else
 		{
 			// End:0x7F
-			if(__NFUN_132__(bMouseDown, m_bSelected))
+			if((bMouseDown || m_bSelected))
 			{
 				R6MenuRSLookAndFeel(LookAndFeel).DrawPopupButtonDown(self, C);				
 			}
@@ -53,7 +53,7 @@ function LMouseDown(float X, float Y)
 	local float fGlobalX, fGlobalY;
 
 	// End:0x76
-	if(__NFUN_129__(bDisabled))
+	if((!bDisabled))
 	{
 		GetMouseXY(fGlobalX, fGlobalY);
 		WindowToGlobal(fGlobalX, fGlobalY, fGlobalX, fGlobalY);

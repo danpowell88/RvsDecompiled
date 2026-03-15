@@ -20,14 +20,14 @@ var() name LiftTag;
 function bool SuggestMovePreparation(Pawn Other)
 {
 	// End:0xB8
-	if(__NFUN_130__(__NFUN_114__(Other.Base, MyLift), __NFUN_119__(MyLift, none)))
+	if(((Other.Base == MyLift) && (MyLift != none)))
 	{
 		// End:0x73
-		if(__NFUN_130__(__NFUN_176__(self.Location.Z, __NFUN_174__(Other.Location.Z, Other.CollisionHeight)), Other.LineOfSightTo(self)))
+		if(((self.Location.Z < (Other.Location.Z + Other.CollisionHeight)) && Other.LineOfSightTo(self)))
 		{
 			return false;
 		}
-		Other.DesiredRotation = Rotator(__NFUN_216__(Location, Other.Location));
+		Other.DesiredRotation = Rotator((Location - Other.Location));
 		Other.Controller.WaitForMover(MyLift);
 		return true;
 	}

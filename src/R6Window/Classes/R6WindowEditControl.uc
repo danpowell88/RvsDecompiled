@@ -20,7 +20,7 @@ var R6WindowTextLabel m_pTextLabel;
 function Created()
 {
 	// End:0x11
-	if(__NFUN_129__(bNoKeyboard))
+	if((!bNoKeyboard))
 	{
 		SetAcceptsFocus();
 	}
@@ -37,7 +37,7 @@ function Created()
 function BeforePaint(Canvas C, float X, float Y)
 {
 	// End:0x20
-	if(__NFUN_129__(m_bUseSpecialPaint))
+	if((!m_bUseSpecialPaint))
 	{
 		super.BeforePaint(C, X, Y);
 	}
@@ -57,7 +57,7 @@ function Paint(Canvas C, float X, float Y)
 			return;
 		}
 		// End:0xCE
-		if(__NFUN_119__(m_pTextLabel, none))
+		if((m_pTextLabel != none))
 		{
 			// End:0x6C
 			if(EditBox.m_bMouseOn)
@@ -86,7 +86,7 @@ function Paint(Canvas C, float X, float Y)
 function ForceCaps(bool choice)
 {
 	// End:0x2B
-	if(__NFUN_119__(R6WindowEditBox(EditBox), none))
+	if((R6WindowEditBox(EditBox) != none))
 	{
 		R6WindowEditBox(EditBox).bCaps = choice;
 	}
@@ -118,7 +118,7 @@ function CreateTextLabel(string _szTitle, float _fX, float _fY, float _fWidth, f
 function SetEditControlStatus(bool _bDisable)
 {
 	m_bDisabled = _bDisable;
-	EditBox.bCanEdit = __NFUN_129__(_bDisable);
+	EditBox.bCanEdit = (!_bDisable);
 	// End:0x59
 	if(_bDisable)
 	{

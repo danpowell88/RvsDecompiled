@@ -188,23 +188,23 @@ event Reset()
 
 final function DrawPattern(Texture Tex, float XL, float YL, float Scale)
 {
-	__NFUN_466__(Tex, XL, YL, __NFUN_171__(__NFUN_175__(CurX, OrgX), Scale), __NFUN_171__(__NFUN_175__(CurY, OrgY), Scale), __NFUN_171__(XL, Scale), __NFUN_171__(YL, Scale));
+	DrawTile(Tex, XL, YL, ((CurX - OrgX) * Scale), ((CurY - OrgY) * Scale), (XL * Scale), (YL * Scale));
 	return;
 }
 
 final function DrawIcon(Texture Tex, float Scale)
 {
 	// End:0x6B
-	if(__NFUN_119__(Tex, none))
+	if((Tex != none))
 	{
-		__NFUN_466__(Tex, __NFUN_171__(float(Tex.USize), Scale), __NFUN_171__(float(Tex.VSize), Scale), 0.0000000, 0.0000000, float(Tex.USize), float(Tex.VSize));
+		DrawTile(Tex, (float(Tex.USize) * Scale), (float(Tex.VSize) * Scale), 0.0000000, 0.0000000, float(Tex.USize), float(Tex.VSize));
 	}
 	return;
 }
 
 final function DrawRect(Texture Tex, float RectX, float RectY)
 {
-	__NFUN_466__(Tex, RectX, RectY, 0.0000000, 0.0000000, float(Tex.USize), float(Tex.VSize));
+	DrawTile(Tex, RectX, RectY, 0.0000000, 0.0000000, float(Tex.USize), float(Tex.VSize));
 	return;
 }
 
@@ -216,7 +216,7 @@ static final function Color MakeColor(byte R, byte G, byte B, optional byte A)
 	C.G = G;
 	C.B = B;
 	// End:0x47
-	if(__NFUN_154__(int(A), 0))
+	if((int(A) == 0))
 	{
 		A = byte(255);
 	}
@@ -228,7 +228,7 @@ static final function Color MakeColor(byte R, byte G, byte B, optional byte A)
 // Draw a vertical line
 final function DrawVertical(float X, float Height)
 {
-	__NFUN_2623__(X, CurY);
+	SetPos(X, CurY);
 	DrawRect(Texture'Engine.WhiteSquareTexture', 2.0000000, Height);
 	return;
 }
@@ -236,7 +236,7 @@ final function DrawVertical(float X, float Height)
 // Draw a horizontal line
 final function DrawHorizontal(float Y, float Width)
 {
-	__NFUN_2623__(CurX, Y);
+	SetPos(CurX, Y);
 	DrawRect(Texture'Engine.WhiteSquareTexture', Width, 2.0000000);
 	return;
 }
@@ -251,7 +251,7 @@ final function DrawLine(int direction, float Size)
 	{
 		// End:0x4D
 		case 0:
-			__NFUN_2623__(X, __NFUN_175__(Y, Size));
+			SetPos(X, (Y - Size));
 			DrawRect(Texture'Engine.WhiteSquareTexture', 2.0000000, Size);
 			// End:0xBA
 			break;
@@ -262,7 +262,7 @@ final function DrawLine(int direction, float Size)
 			break;
 		// End:0x9A
 		case 2:
-			__NFUN_2623__(__NFUN_175__(X, Size), Y);
+			SetPos((X - Size), Y);
 			DrawRect(Texture'Engine.WhiteSquareTexture', Size, 2.0000000);
 			// End:0xBA
 			break;
@@ -275,7 +275,7 @@ final function DrawLine(int direction, float Size)
 		default:
 			break;
 	}
-	__NFUN_2623__(X, Y);
+	SetPos(X, Y);
 	return;
 }
 
@@ -285,20 +285,20 @@ final simulated function DrawBracket(float Width, float Height, float bracket_si
 
 	X = CurX;
 	Y = CurY;
-	Width = float(__NFUN_250__(int(Width), 5));
-	Height = float(__NFUN_250__(int(Height), 5));
+	Width = float(Max(int(Width), 5));
+	Height = float(Max(int(Height), 5));
 	DrawLine(3, bracket_size);
 	DrawLine(1, bracket_size);
-	__NFUN_2623__(__NFUN_174__(X, Width), Y);
+	SetPos((X + Width), Y);
 	DrawLine(2, bracket_size);
 	DrawLine(1, bracket_size);
-	__NFUN_2623__(__NFUN_174__(X, Width), __NFUN_174__(Y, Height));
+	SetPos((X + Width), (Y + Height));
 	DrawLine(0, bracket_size);
 	DrawLine(2, bracket_size);
-	__NFUN_2623__(X, __NFUN_174__(Y, Height));
+	SetPos(X, (Y + Height));
 	DrawLine(3, bracket_size);
 	DrawLine(0, bracket_size);
-	__NFUN_2623__(X, Y);
+	SetPos(X, Y);
 	return;
 }
 
@@ -310,11 +310,11 @@ final simulated function DrawBox(Canvas Canvas, float Width, float Height)
 	Y = Canvas.CurY;
 	Canvas.DrawRect(Texture'Engine.WhiteSquareTexture', 2.0000000, Height);
 	Canvas.DrawRect(Texture'Engine.WhiteSquareTexture', Width, 2.0000000);
-	Canvas.__NFUN_2623__(__NFUN_174__(X, Width), Y);
+	Canvas.SetPos((X + Width), Y);
 	Canvas.DrawRect(Texture'Engine.WhiteSquareTexture', 2.0000000, Height);
-	Canvas.__NFUN_2623__(X, __NFUN_174__(Y, Height));
-	Canvas.DrawRect(Texture'Engine.WhiteSquareTexture', __NFUN_174__(Width, float(1)), 2.0000000);
-	Canvas.__NFUN_2623__(X, Y);
+	Canvas.SetPos(X, (Y + Height));
+	Canvas.DrawRect(Texture'Engine.WhiteSquareTexture', (Width + float(1)), 2.0000000);
+	Canvas.SetPos(X, Y);
 	return;
 }
 

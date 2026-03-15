@@ -33,7 +33,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	local Actor A;
 
 	// End:0x6E
-	if(__NFUN_155__(__NFUN_125__(Message), 0))
+	if((Len(Message) != 0))
 	{
 		// End:0x40
 		if(bBroadcast)
@@ -43,27 +43,27 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		else
 		{
 			// End:0x6E
-			if(__NFUN_130__(__NFUN_155__(__NFUN_125__(Message), 0), __NFUN_119__(EventInstigator, none)))
+			if(((Len(Message) != 0) && (EventInstigator != none)))
 			{
 				EventInstigator.ClientMessage(Message);
 			}
 		}
 	}
 	// End:0xB7
-	if(__NFUN_119__(Sound, none))
+	if((Sound != none))
 	{
 		// End:0xAD
 		if(bPlayersPlaySoundEffect)
 		{
 			// End:0xA9
-			foreach __NFUN_313__(Class'Engine.PlayerController', P)
+			foreach DynamicActors(Class'Engine.PlayerController', P)
 			{
 				P.ClientPlaySound(Sound, 3);				
 			}						
 		}
 		else
 		{
-			__NFUN_264__(Sound, 3);
+			__NFUN_264__(Sound, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		}
 	}
 	// End:0xFC

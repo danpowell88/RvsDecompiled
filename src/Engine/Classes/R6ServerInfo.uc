@@ -78,9 +78,9 @@ function ClearSettings()
 event RestartServer()
 {
 	// End:0x59
-	if(__NFUN_119__(m_GameInfo, none))
+	if((m_GameInfo != none))
 	{
-		m_GameInfo.__NFUN_1210__();
+		m_GameInfo.AbortScoreSubmission();
 		m_GameInfo.bChangeLevels = true;
 		m_GameInfo.m_bChangedServerConfig = true;
 		m_GameInfo.SetJumpingMaps(true, 0);

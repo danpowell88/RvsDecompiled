@@ -29,7 +29,7 @@ function BeforePaint(Canvas C, float X, float Y)
 
 	C.Font = Root.Fonts[Font];
 	// End:0x10E
-	if(__NFUN_123__(m_szCurValue, Value))
+	if((m_szCurValue != Value))
 	{
 		m_szCurValue = Value;
 		super(UWindowDialogControl).BeforePaint(C, X, Y);
@@ -41,10 +41,10 @@ function BeforePaint(Canvas C, float X, float Y)
 			J0x6A:
 
 			// End:0x95 [Loop If]
-			if(__NFUN_150__(i, __NFUN_125__(Value)))
+			if((i < Len(Value)))
 			{
-				m_szValueToDisplay = __NFUN_112__(m_szValueToDisplay, "*");
-				__NFUN_165__(i);
+				m_szValueToDisplay = (m_szValueToDisplay $ "*");
+				(i++);
 				// [Loop Continue]
 				goto J0x6A;
 			}			
@@ -54,7 +54,7 @@ function BeforePaint(Canvas C, float X, float Y)
 			// End:0xB1
 			if(bCaps)
 			{
-				m_szValueToDisplay = __NFUN_235__(Value);				
+				m_szValueToDisplay = Caps(Value);				
 			}
 			else
 			{
@@ -63,8 +63,8 @@ function BeforePaint(Canvas C, float X, float Y)
 		}
 		TextSize(C, "W", W, H);
 		m_fTextHeight = H;
-		m_fYTextPos = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-		m_fYTextPos = float(int(__NFUN_174__(m_fYTextPos, 0.5000000)));
+		m_fYTextPos = ((WinHeight - H) / float(2));
+		m_fYTextPos = float(int((m_fYTextPos + 0.5000000)));
 	}
 	return;
 }
@@ -73,23 +73,23 @@ function Paint(Canvas C, float X, float Y)
 {
 	local float fStringLeftOfCaretW, H;
 
-	TextSize(C, __NFUN_128__(m_szValueToDisplay, CaretOffset), fStringLeftOfCaretW, H);
+	TextSize(C, Left(m_szValueToDisplay, CaretOffset), fStringLeftOfCaretW, H);
 	// End:0x36
 	if(m_bDrawEditBoxBG)
 	{
 		PaintEditBoxBG(C);
 	}
 	// End:0x57
-	if(__NFUN_176__(__NFUN_174__(fStringLeftOfCaretW, offset), float(0)))
+	if(((fStringLeftOfCaretW + offset) < float(0)))
 	{
-		offset = __NFUN_169__(fStringLeftOfCaretW);
+		offset = (-fStringLeftOfCaretW);
 	}
 	// End:0xA3
-	if(__NFUN_177__(__NFUN_174__(fStringLeftOfCaretW, offset), __NFUN_175__(WinWidth, float(2))))
+	if(((fStringLeftOfCaretW + offset) > (WinWidth - float(2))))
 	{
-		offset = __NFUN_175__(__NFUN_175__(WinWidth, float(2)), fStringLeftOfCaretW);
+		offset = ((WinWidth - float(2)) - fStringLeftOfCaretW);
 		// End:0xA3
-		if(__NFUN_177__(offset, float(0)))
+		if((offset > float(0)))
 		{
 			offset = 0.0000000;
 		}
@@ -97,38 +97,38 @@ function Paint(Canvas C, float X, float Y)
 	// End:0xCD
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("Offset After", string(offset)));
+		Log(("Offset After" @ string(offset)));
 		bShowLog = false;
 	}
-	C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+	C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 	// End:0x236
-	if(__NFUN_130__(m_CurrentlyEditing, bAllSelected))
+	if((m_CurrentlyEditing && bAllSelected))
 	{
 		C.Style = 5;
-		C.__NFUN_2626__(Root.Colors.m_LisBoxSelectionColor.R, Root.Colors.m_LisBoxSelectionColor.G, Root.Colors.m_LisBoxSelectionColor.B, byte(Root.Colors.EditBoxSelectAllAlpha));
-		DrawStretchedTexture(C, __NFUN_174__(offset, float(1)), m_fYBGPos, fStringLeftOfCaretW, float(m_RBGEditTexture.H), Texture'UWindow.WhiteTexture');
+		C.SetDrawColor(Root.Colors.m_LisBoxSelectionColor.R, Root.Colors.m_LisBoxSelectionColor.G, Root.Colors.m_LisBoxSelectionColor.B, byte(Root.Colors.EditBoxSelectAllAlpha));
+		DrawStretchedTexture(C, (offset + float(1)), m_fYBGPos, fStringLeftOfCaretW, float(m_RBGEditTexture.H), Texture'UWindow.WhiteTexture');
 		C.Style = 5;
-		C.__NFUN_2626__(Root.Colors.m_LisBoxSelectedTextColor.R, Root.Colors.m_LisBoxSelectedTextColor.G, Root.Colors.m_LisBoxSelectedTextColor.B);
+		C.SetDrawColor(Root.Colors.m_LisBoxSelectedTextColor.R, Root.Colors.m_LisBoxSelectedTextColor.G, Root.Colors.m_LisBoxSelectedTextColor.B);
 	}
-	ClipText(C, __NFUN_174__(offset, float(1)), m_fYTextPos, m_szValueToDisplay);
+	ClipText(C, (offset + float(1)), m_fYTextPos, m_szValueToDisplay);
 	// End:0x285
-	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_CurrentlyEditing), __NFUN_129__(bHasKeyboardFocus)), __NFUN_129__(bCanEdit)))
+	if((((!m_CurrentlyEditing) || (!bHasKeyboardFocus)) || (!bCanEdit)))
 	{
 		bShowCaret = false;		
 	}
 	else
 	{
 		// End:0x2D0
-		if(__NFUN_132__(__NFUN_177__(GetTime(), __NFUN_174__(LastDrawTime, 0.3000000)), __NFUN_176__(GetTime(), LastDrawTime)))
+		if(((GetTime() > (LastDrawTime + 0.3000000)) || (GetTime() < LastDrawTime)))
 		{
-			LastDrawTime = GetLevel().__NFUN_1012__();
-			bShowCaret = __NFUN_129__(bShowCaret);
+			LastDrawTime = GetLevel().GetTime();
+			bShowCaret = (!bShowCaret);
 		}
 	}
 	// End:0x2FD
 	if(bShowCaret)
 	{
-		ClipText(C, __NFUN_175__(__NFUN_174__(offset, fStringLeftOfCaretW), float(1)), m_fYTextPos, "|");
+		ClipText(C, ((offset + fStringLeftOfCaretW) - float(1)), m_fYTextPos, "|");
 	}
 	return;
 }
@@ -137,15 +137,15 @@ function PaintEditBoxBG(Canvas C)
 {
 	C.Style = 5;
 	// End:0x35
-	if(__NFUN_177__(m_fTextHeight, float(m_RBGEditTexture.H)))
+	if((m_fTextHeight > float(m_RBGEditTexture.H)))
 	{
 		m_fYBGPos = m_fYTextPos;		
 	}
 	else
 	{
-		m_fYBGPos = __NFUN_171__(__NFUN_175__(float(m_RBGEditTexture.H), m_fTextHeight), 0.5000000);
-		m_fYBGPos = float(int(__NFUN_174__(m_fYBGPos, 0.5000000)));
-		m_fYBGPos = __NFUN_175__(m_fYTextPos, m_fYBGPos);
+		m_fYBGPos = ((float(m_RBGEditTexture.H) - m_fTextHeight) * 0.5000000);
+		m_fYBGPos = float(int((m_fYBGPos + 0.5000000)));
+		m_fYBGPos = (m_fYTextPos - m_fYBGPos);
 	}
 	DrawStretchedTextureSegment(C, 0.0000000, m_fYBGPos, WinWidth, float(m_RBGEditTexture.H), float(m_RBGEditTexture.X), float(m_RBGEditTexture.Y), float(m_RBGEditTexture.W), float(m_RBGEditTexture.H), m_TBGEditTexture);
 	return;

@@ -17,7 +17,7 @@ var Texture m_pIconTex[4];  // List of the grenade icon texture
 
 function SetGrenadeType(Object.EPlanAction eGrenade)
 {
-	Texture = m_pIconTex[__NFUN_147__(int(eGrenade), 1)];
+	Texture = m_pIconTex[(int(eGrenade) - 1)];
 	return;
 }
 

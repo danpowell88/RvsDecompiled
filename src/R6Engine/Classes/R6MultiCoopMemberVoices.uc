@@ -22,12 +22,12 @@ function PlayRainbowTeamVoices(R6Pawn aPawn, Pawn.ERainbowTeamVoices eVoices)
 	{
 		// End:0x34
 		case 10:
-			aPawn.__NFUN_2730__(m_sndGasThreat, 8, 10);
+			aPawn.PlayVoices(m_sndGasThreat, 8, 10);
 			// End:0x54
 			break;
 		// End:0x51
 		case 11:
-			aPawn.__NFUN_2730__(m_sndGrenadeThreat, 8, 10);
+			aPawn.PlayVoices(m_sndGrenadeThreat, 8, 10);
 			// End:0x54
 			break;
 		// End:0xFFFF

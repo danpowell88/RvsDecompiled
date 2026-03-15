@@ -70,7 +70,7 @@ function BeforePaint(Canvas C, float X, float Y)
 	local float W, H, ftextSize;
 
 	// End:0x22
-	if(__NFUN_119__(m_buttonFont, none))
+	if((m_buttonFont != none))
 	{
 		C.Font = m_buttonFont;		
 	}
@@ -88,29 +88,29 @@ function BeforePaint(Canvas C, float X, float Y)
 			break;
 		// End:0xA6
 		case 1:
-			TextX = __NFUN_175__(__NFUN_175__(WinWidth, W), __NFUN_171__(float(__NFUN_125__(Text)), m_fFontSpacing));
+			TextX = ((WinWidth - W) - (float(Len(Text)) * m_fFontSpacing));
 			// End:0xDB
 			break;
 		// End:0xD8
 		case 2:
-			TextX = __NFUN_172__(__NFUN_175__(__NFUN_175__(WinWidth, W), __NFUN_171__(float(__NFUN_125__(Text)), m_fFontSpacing)), float(2));
+			TextX = (((WinWidth - W) - (float(Len(Text)) * m_fFontSpacing)) / float(2));
 			// End:0xDB
 			break;
 		// End:0xFFFF
 		default:
 			break;
 	}
-	TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
+	TextY = ((WinHeight - H) / float(2));
+	TextY = float(int((TextY + 0.5000000)));
 	// End:0x188
 	if(m_bResizeToText)
 	{
-		ftextSize = __NFUN_174__(W, __NFUN_171__(float(__NFUN_125__(Text)), m_fFontSpacing));
-		WinWidth = __NFUN_174__(__NFUN_174__(ftextSize, m_fLMarge), float(m_iTextRightPadding));
+		ftextSize = (W + (float(Len(Text)) * m_fFontSpacing));
+		WinWidth = ((ftextSize + m_fLMarge) + float(m_iTextRightPadding));
 		// End:0x16D
-		if(__NFUN_155__(int(Align), int(0)))
+		if((int(Align) != int(0)))
 		{
-			__NFUN_184__(WinLeft, __NFUN_175__(TextX, m_fLMarge));
+			(WinLeft += (TextX - m_fLMarge));
 		}
 		TextX = m_fLMarge;
 		Align = 0;
@@ -130,12 +130,12 @@ function Paint(Canvas C, float X, float Y)
 	if(bDisabled)
 	{
 		// End:0x118
-		if(__NFUN_119__(DisabledTexture, none))
+		if((DisabledTexture != none))
 		{
 			// End:0xCE
 			if(bUseRegion)
 			{
-				DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(DisabledRegion.W), RegionScale), __NFUN_171__(float(DisabledRegion.H), RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);				
+				DrawStretchedTextureSegment(C, ImageX, ImageY, (float(DisabledRegion.W) * RegionScale), (float(DisabledRegion.H) * RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);				
 			}
 			else
 			{
@@ -173,12 +173,12 @@ function Paint(Canvas C, float X, float Y)
 			else
 			{
 				// End:0x2D0
-				if(__NFUN_119__(UpTexture, none))
+				if((UpTexture != none))
 				{
 					// End:0x286
 					if(bUseRegion)
 					{
-						DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(UpRegion.W), RegionScale), __NFUN_171__(float(UpRegion.H), RegionScale), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);						
+						DrawStretchedTextureSegment(C, ImageX, ImageY, (float(UpRegion.W) * RegionScale), (float(UpRegion.H) * RegionScale), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);						
 					}
 					else
 					{
@@ -203,10 +203,10 @@ function Paint(Canvas C, float X, float Y)
 function DrawButtonText(Canvas C, Color currentTextColor, int currentStyle)
 {
 	// End:0xC0
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		// End:0x2E
-		if(__NFUN_119__(m_buttonFont, none))
+		if((m_buttonFont != none))
 		{
 			C.Font = m_buttonFont;			
 		}
@@ -215,7 +215,7 @@ function DrawButtonText(Canvas C, Color currentTextColor, int currentStyle)
 			C.Font = Root.Fonts[Font];
 		}
 		C.SpaceX = 0.0000000;
-		C.__NFUN_2626__(currentTextColor.R, currentTextColor.G, currentTextColor.B);
+		C.SetDrawColor(currentTextColor.R, currentTextColor.G, currentTextColor.B);
 		C.Style = byte(currentStyle);
 		ClipText(C, TextX, TextY, Text, true);
 	}
@@ -225,21 +225,21 @@ function DrawButtonText(Canvas C, Color currentTextColor, int currentStyle)
 function DrawButtonBackGround(Canvas C, Color currentDrawColor, int currentStyle)
 {
 	C.Style = byte(currentStyle);
-	C.__NFUN_2626__(currentDrawColor.R, currentDrawColor.G, currentDrawColor.B);
+	C.SetDrawColor(currentDrawColor.R, currentDrawColor.G, currentDrawColor.B);
 	// End:0xAD
-	if(__NFUN_119__(m_OverAlphaTexture, none))
+	if((m_OverAlphaTexture != none))
 	{
 		DrawStretchedTextureSegment(C, 0.0000000, ImageY, float(m_OverAlphaRegion.W), float(m_OverAlphaRegion.H), float(m_OverAlphaRegion.X), float(m_OverAlphaRegion.Y), float(m_OverAlphaRegion.W), float(m_OverAlphaRegion.H), m_OverAlphaTexture);
 	}
 	// End:0x12C
-	if(__NFUN_119__(OverTexture, none))
+	if((OverTexture != none))
 	{
-		DrawStretchedTextureSegment(C, float(m_OverAlphaRegion.W), ImageY, __NFUN_175__(WinWidth, float(__NFUN_144__(2, m_OverAlphaRegion.W))), float(OverRegion.H), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);
+		DrawStretchedTextureSegment(C, float(m_OverAlphaRegion.W), ImageY, (WinWidth - float((2 * m_OverAlphaRegion.W))), float(OverRegion.H), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);
 	}
 	// End:0x1B5
-	if(__NFUN_119__(m_OverAlphaTexture, none))
+	if((m_OverAlphaTexture != none))
 	{
-		DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_OverAlphaRegion.W)), ImageY, float(m_OverAlphaRegion.W), float(m_OverAlphaRegion.H), float(__NFUN_146__(m_OverAlphaRegion.X, m_OverAlphaRegion.W)), float(m_OverAlphaRegion.Y), float(__NFUN_143__(m_OverAlphaRegion.W)), float(m_OverAlphaRegion.H), m_OverAlphaTexture);
+		DrawStretchedTextureSegment(C, (WinWidth - float(m_OverAlphaRegion.W)), ImageY, float(m_OverAlphaRegion.W), float(m_OverAlphaRegion.H), float((m_OverAlphaRegion.X + m_OverAlphaRegion.W)), float(m_OverAlphaRegion.Y), float((-m_OverAlphaRegion.W)), float(m_OverAlphaRegion.H), m_OverAlphaTexture);
 	}
 	return;
 }
@@ -249,31 +249,31 @@ function DrawButtonScrollEffect(Canvas C, Color currentDrawColor, int currentSty
 	local int targetPos, lastDisplayedPos, iDisplayXPos, iWidthModifier;
 	local R6MenuRSLookAndFeel currentLookAndFeel;
 
-	m_iMinXPos = int(__NFUN_175__(TextX, float(__NFUN_145__(m_OverScrollingRegion.W, 2))));
-	m_iMaxXPos = int(__NFUN_175__(__NFUN_175__(WinWidth, float(m_iTextRightPadding)), float(__NFUN_145__(m_OverScrollingRegion.W, 2))));
-	m_iTotalScroll = __NFUN_147__(m_iMaxXPos, m_iMinXPos);
+	m_iMinXPos = int((TextX - float((m_OverScrollingRegion.W / 2))));
+	m_iMaxXPos = int(((WinWidth - float(m_iTextRightPadding)) - float((m_OverScrollingRegion.W / 2))));
+	m_iTotalScroll = (m_iMaxXPos - m_iMinXPos);
 	currentLookAndFeel = R6MenuRSLookAndFeel(LookAndFeel);
 	// End:0x25B
-	if(__NFUN_119__(currentLookAndFeel, none))
+	if((currentLookAndFeel != none))
 	{
-		m_fProgressTime = __NFUN_246__(m_fProgressTime, 0.0000000, __NFUN_172__(float(m_iTotalScroll), currentLookAndFeel.m_fScrollRate));
+		m_fProgressTime = FClamp(m_fProgressTime, 0.0000000, (float(m_iTotalScroll) / currentLookAndFeel.m_fScrollRate));
 		// End:0xE6
-		if(__NFUN_132__(__NFUN_180__(m_fProgressTime, 0.0000000), __NFUN_180__(m_fProgressTime, __NFUN_172__(float(m_iTotalScroll), currentLookAndFeel.m_fScrollRate))))
+		if(((m_fProgressTime == 0.0000000) || (m_fProgressTime == (float(m_iTotalScroll) / currentLookAndFeel.m_fScrollRate))))
 		{
-			__NFUN_159__(currentLookAndFeel.m_iMultiplyer, float(-1));
+			(currentLookAndFeel.m_iMultiplyer *= float(-1));
 		}
-		targetPos = int(__NFUN_171__(m_fProgressTime, currentLookAndFeel.m_fScrollRate));
-		iDisplayXPos = __NFUN_251__(__NFUN_146__(m_iMinXPos, targetPos), int(__NFUN_175__(TextX, float(m_iTextRightPadding))), m_iMaxXPos);
+		targetPos = int((m_fProgressTime * currentLookAndFeel.m_fScrollRate));
+		iDisplayXPos = Clamp((m_iMinXPos + targetPos), int((TextX - float(m_iTextRightPadding))), m_iMaxXPos);
 		iWidthModifier = 0;
 		// End:0x17C
-		if(__NFUN_176__(float(__NFUN_146__(m_iMinXPos, targetPos)), __NFUN_175__(TextX, float(m_iTextRightPadding))))
+		if((float((m_iMinXPos + targetPos)) < (TextX - float(m_iTextRightPadding))))
 		{
-			iWidthModifier = int(__NFUN_175__(__NFUN_175__(__NFUN_175__(TextX, float(m_iTextRightPadding)), float(m_iMinXPos)), float(targetPos)));
+			iWidthModifier = int((((TextX - float(m_iTextRightPadding)) - float(m_iMinXPos)) - float(targetPos)));
 		}
-		currentLookAndFeel.m_fCurrentPct = __NFUN_172__(float(targetPos), float(m_iTotalScroll));
+		currentLookAndFeel.m_fCurrentPct = (float(targetPos) / float(m_iTotalScroll));
 		C.Style = byte(currentStyle);
-		C.__NFUN_2626__(currentDrawColor.R, currentDrawColor.G, currentDrawColor.B);
-		DrawStretchedTextureSegment(C, float(iDisplayXPos), ImageY, float(__NFUN_147__(m_OverScrollingRegion.W, iWidthModifier)), __NFUN_171__(float(m_OverScrollingRegion.H), RegionScale), float(__NFUN_146__(m_OverScrollingRegion.X, iWidthModifier)), float(m_OverScrollingRegion.Y), float(__NFUN_147__(m_OverScrollingRegion.W, iWidthModifier)), float(m_OverScrollingRegion.H), m_OverScrollingTexture);
+		C.SetDrawColor(currentDrawColor.R, currentDrawColor.G, currentDrawColor.B);
+		DrawStretchedTextureSegment(C, float(iDisplayXPos), ImageY, float((m_OverScrollingRegion.W - iWidthModifier)), (float(m_OverScrollingRegion.H) * RegionScale), float((m_OverScrollingRegion.X + iWidthModifier)), float(m_OverScrollingRegion.Y), float((m_OverScrollingRegion.W - iWidthModifier)), float(m_OverScrollingRegion.H), m_OverScrollingTexture);
 	}
 	return;
 }
@@ -288,13 +288,13 @@ function Tick(float DeltaTime)
 {
 	super(UWindowWindow).Tick(DeltaTime);
 	// End:0x45
-	if(__NFUN_132__(MouseIsOver(), bMouseDown))
+	if((MouseIsOver() || bMouseDown))
 	{
-		__NFUN_184__(m_fProgressTime, __NFUN_171__(DeltaTime, float(R6MenuRSLookAndFeel(LookAndFeel).m_iMultiplyer)));		
+		(m_fProgressTime += (DeltaTime * float(R6MenuRSLookAndFeel(LookAndFeel).m_iMultiplyer)));		
 	}
 	else
 	{
-		m_fProgressTime = __NFUN_172__(__NFUN_171__(R6MenuRSLookAndFeel(LookAndFeel).m_fCurrentPct, float(m_iTotalScroll)), R6MenuRSLookAndFeel(LookAndFeel).m_fScrollRate);
+		m_fProgressTime = ((R6MenuRSLookAndFeel(LookAndFeel).m_fCurrentPct * float(m_iTotalScroll)) / R6MenuRSLookAndFeel(LookAndFeel).m_fScrollRate);
 	}
 	return;
 }

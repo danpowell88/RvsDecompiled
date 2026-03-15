@@ -41,12 +41,12 @@ function InitAttach()
 	local Rotator MeshRot;
 
 	// End:0x7C
-	if(__NFUN_130__(__NFUN_255__(m_PawnTag, 'None'), __NFUN_119__(m_AttachActor, none)))
+	if(((m_PawnTag != 'None') && (m_AttachActor != none)))
 	{
-		__NFUN_2907__();
-		m_AttachActor.__NFUN_2008__(m_StaticMeshTag, MeshPos, MeshRot);
-		m_InteractionPos = __NFUN_215__(m_AttachActor.Location, MeshPos);
-		m_InteractionRot = __NFUN_316__(m_AttachActor.Rotation, MeshRot);
+		GetBoneInformation();
+		m_AttachActor.GetTagInformations(m_StaticMeshTag, MeshPos, MeshRot);
+		m_InteractionPos = (m_AttachActor.Location + MeshPos);
+		m_InteractionRot = (m_AttachActor.Rotation + MeshRot);
 		m_bInitialized = true;		
 	}
 	else
@@ -59,7 +59,7 @@ function InitAttach()
 function MatineeAttach()
 {
 	// End:0x4D
-	if(__NFUN_242__(m_bInitialized, true))
+	if((m_bInitialized == true))
 	{
 		m_AttachPawn.AttachToBone(m_AttachActor, m_BoneName);
 		m_AttachActor.SetRelativeLocation(m_OffsetPos);
@@ -74,7 +74,7 @@ function MatineeDetach()
 	local Rotator Rotation;
 
 	// End:0x20
-	if(__NFUN_242__(m_bInitialized, true))
+	if((m_bInitialized == true))
 	{
 		m_AttachPawn.DetachFromBone(m_AttachActor);
 	}

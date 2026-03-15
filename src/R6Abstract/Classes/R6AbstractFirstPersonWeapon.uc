@@ -150,9 +150,9 @@ function HideBullet(int iWhichBullet)
 function PlayFireAnim()
 {
 	// End:0x14
-	if(__NFUN_242__(m_bWeaponBipodDeployed, false))
+	if((m_bWeaponBipodDeployed == false))
 	{
-		__NFUN_259__(m_Fire);
+		PlayAnim(m_Fire);
 	}
 	return;
 }
@@ -160,9 +160,9 @@ function PlayFireAnim()
 function PlayFireLastAnim()
 {
 	// End:0x14
-	if(__NFUN_242__(m_bWeaponBipodDeployed, false))
+	if((m_bWeaponBipodDeployed == false))
 	{
-		__NFUN_259__(m_FireLast);
+		PlayAnim(m_FireLast);
 	}
 	return;
 }
@@ -174,16 +174,16 @@ function DestroySM()
 	aActor = m_smGun;
 	m_smGun = none;
 	// End:0x29
-	if(__NFUN_119__(aActor, none))
+	if((aActor != none))
 	{
-		aActor.__NFUN_279__();
+		aActor.Destroy();
 	}
 	aActor = m_smGun2;
 	m_smGun2 = none;
 	// End:0x52
-	if(__NFUN_119__(aActor, none))
+	if((aActor != none))
 	{
-		aActor.__NFUN_279__();
+		aActor.Destroy();
 	}
 	DestroyBullets();
 	return;
@@ -192,72 +192,72 @@ function DestroySM()
 simulated function PostBeginPlay()
 {
 	// End:0x37
-	if(__NFUN_129__(__NFUN_263__(m_Neutral)))
+	if((!HasAnim(m_Neutral)))
 	{
-		__NFUN_231__(__NFUN_112__("Missing Neutral Anim for Weapon :", string(self)));
+		Log(("Missing Neutral Anim for Weapon :" $ string(self)));
 	}
 	// End:0x4F
-	if(__NFUN_129__(__NFUN_263__(m_Empty)))
+	if((!HasAnim(m_Empty)))
 	{
 		m_Empty = m_Neutral;
 	}
 	// End:0x67
-	if(__NFUN_129__(__NFUN_263__(m_Fire)))
+	if((!HasAnim(m_Fire)))
 	{
 		m_Fire = m_Neutral;
 	}
 	// End:0x7F
-	if(__NFUN_129__(__NFUN_263__(m_FireLast)))
+	if((!HasAnim(m_FireLast)))
 	{
 		m_FireLast = m_Fire;
 	}
 	// End:0x97
-	if(__NFUN_129__(__NFUN_263__(m_FireEmpty)))
+	if((!HasAnim(m_FireEmpty)))
 	{
 		m_FireEmpty = m_Neutral;
 	}
 	// End:0xAF
-	if(__NFUN_129__(__NFUN_263__(m_Reload)))
+	if((!HasAnim(m_Reload)))
 	{
 		m_Reload = m_Neutral;
 	}
 	// End:0xC7
-	if(__NFUN_129__(__NFUN_263__(m_ReloadEmpty)))
+	if((!HasAnim(m_ReloadEmpty)))
 	{
 		m_ReloadEmpty = m_Reload;
 	}
 	// End:0xDF
-	if(__NFUN_129__(__NFUN_263__(m_BipodRaise)))
+	if((!HasAnim(m_BipodRaise)))
 	{
 		m_BipodRaise = m_Neutral;
 	}
 	// End:0xF7
-	if(__NFUN_129__(__NFUN_263__(m_BipodDeploy)))
+	if((!HasAnim(m_BipodDeploy)))
 	{
 		m_BipodDeploy = m_Neutral;
 	}
 	// End:0x10F
-	if(__NFUN_129__(__NFUN_263__(m_BipodDiscard)))
+	if((!HasAnim(m_BipodDiscard)))
 	{
 		m_BipodDiscard = m_Neutral;
 	}
 	// End:0x127
-	if(__NFUN_129__(__NFUN_263__(m_BipodClose)))
+	if((!HasAnim(m_BipodClose)))
 	{
 		m_BipodClose = m_Neutral;
 	}
 	// End:0x13F
-	if(__NFUN_129__(__NFUN_263__(m_BipodNeutral)))
+	if((!HasAnim(m_BipodNeutral)))
 	{
 		m_BipodNeutral = m_Neutral;
 	}
 	// End:0x157
-	if(__NFUN_129__(__NFUN_263__(m_BipodReload)))
+	if((!HasAnim(m_BipodReload)))
 	{
 		m_BipodReload = m_BipodNeutral;
 	}
 	// End:0x16F
-	if(__NFUN_129__(__NFUN_263__(m_BipodReloadEmpty)))
+	if((!HasAnim(m_BipodReloadEmpty)))
 	{
 		m_BipodReloadEmpty = m_BipodReload;
 	}

@@ -24,7 +24,7 @@ function CloseUp()
 	super(UWindowComboControl).CloseUp();
 	HideWindow();
 	// End:0x21
-	if(__NFUN_123__(GetValue(), ""))
+	if((GetValue() != ""))
 	{
 		Notify(3);
 	}
@@ -40,9 +40,9 @@ function DisplayMenuHere(float fXPos, float fYPos)
 	SetValue("");
 	List.Selected = none;
 	// End:0x4B
-	if(__NFUN_177__(__NFUN_174__(fXPos, WinWidth), float(640)))
+	if(((fXPos + WinWidth) > float(640)))
 	{
-		WinLeft = __NFUN_175__(__NFUN_175__(640.0000000, WinWidth), float(12));		
+		WinLeft = ((640.0000000 - WinWidth) - float(12));		
 	}
 	else
 	{

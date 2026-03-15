@@ -33,7 +33,7 @@ function SetMousePos(float X, float Y)
 function KeyDown(int Key, float X, float Y)
 {
 	// End:0x1A8
-	if(__NFUN_154__(Key, int(Root.Console.27)))
+	if((Key == int(Root.Console.27)))
 	{
 		switch(Root.m_eCurWidgetInUse)
 		{
@@ -54,7 +54,7 @@ function KeyDown(int Key, float X, float Y)
 				if(R6Console(Root.Console).m_bStartedByGSClient)
 				{
 					Root.ChangeCurrentWidget(20);
-					Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();					
+					Class'Engine.Actor'.static.GetGameManager().RemoveFromIDList();					
 				}
 				else
 				{

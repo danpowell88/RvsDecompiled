@@ -26,48 +26,48 @@ function Init(Actor aActor)
 function PlayHostageVoices(R6Pawn aPawn, Pawn.EHostageVoices EHostageVoices)
 {
 	// End:0x124
-	if(__NFUN_119__(aPawn, none))
+	if((aPawn != none))
 	{
 		switch(EHostageVoices)
 		{
 			// End:0x2F
 			case 0:
-				aPawn.__NFUN_2730__(m_sndRun, 6, 15);
+				aPawn.PlayVoices(m_sndRun, 6, 15);
 				// End:0x124
 				break;
 			// End:0x4C
 			case 1:
-				aPawn.__NFUN_2730__(m_sndFrozen, 6, 15);
+				aPawn.PlayVoices(m_sndFrozen, 6, 15);
 				// End:0x124
 				break;
 			// End:0x69
 			case 2:
-				aPawn.__NFUN_2730__(m_sndFoetal, 6, 15);
+				aPawn.PlayVoices(m_sndFoetal, 6, 15);
 				// End:0x124
 				break;
 			// End:0x86
 			case 3:
-				aPawn.__NFUN_2730__(m_sndHears_Shooting, 6, 15);
+				aPawn.PlayVoices(m_sndHears_Shooting, 6, 15);
 				// End:0x124
 				break;
 			// End:0xA3
 			case 4:
-				aPawn.__NFUN_2730__(m_sndRnbFollow, 6, 15);
+				aPawn.PlayVoices(m_sndRnbFollow, 6, 15);
 				// End:0x124
 				break;
 			// End:0xC0
 			case 5:
-				aPawn.__NFUN_2730__(m_sndRndStayPut, 6, 15);
+				aPawn.PlayVoices(m_sndRndStayPut, 6, 15);
 				// End:0x124
 				break;
 			// End:0xDD
 			case 6:
-				aPawn.__NFUN_2730__(m_sndRnbHurt, 6, 15);
+				aPawn.PlayVoices(m_sndRnbHurt, 6, 15);
 				// End:0x124
 				break;
 			// End:0xFC
 			case 8:
-				aPawn.__NFUN_2730__(m_sndEntersGas, 6, 15, 2);
+				aPawn.PlayVoices(m_sndEntersGas, 6, 15, 2);
 				// End:0x124
 				break;
 			// End:0x104
@@ -76,7 +76,7 @@ function PlayHostageVoices(R6Pawn aPawn, Pawn.EHostageVoices EHostageVoices)
 				break;
 			// End:0x121
 			case 9:
-				aPawn.__NFUN_2730__(m_sndClarkReprimand, 8, 15);
+				aPawn.PlayVoices(m_sndClarkReprimand, 8, 15);
 				// End:0x124
 				break;
 			// End:0xFFFF

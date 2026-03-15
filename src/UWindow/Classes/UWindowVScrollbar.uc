@@ -29,22 +29,22 @@ var UWindowSBDownButton DownButton;
 function Show(float P)
 {
 	// End:0x0F
-	if(__NFUN_176__(P, float(0)))
+	if((P < float(0)))
 	{
 		return;
 	}
 	// End:0x27
-	if(__NFUN_177__(P, __NFUN_174__(MaxPos, MaxVisible)))
+	if((P > (MaxPos + MaxVisible)))
 	{
 		return;
 	}
 	J0x27:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_176__(P, pos))
+	if((P < pos))
 	{
 		// End:0x49
-		if(__NFUN_129__(Scroll(-1.0000000)))
+		if((!Scroll(-1.0000000)))
 		{
 			// [Explicit Break]
 			goto J0x4C;
@@ -55,10 +55,10 @@ function Show(float P)
 	J0x4C:
 
 	// End:0x7D [Loop If]
-	if(__NFUN_177__(__NFUN_175__(P, pos), __NFUN_175__(MaxVisible, float(1))))
+	if(((P - pos) > (MaxVisible - float(1))))
 	{
 		// End:0x7A
-		if(__NFUN_129__(Scroll(1.0000000)))
+		if((!Scroll(1.0000000)))
 		{
 			// [Explicit Break]
 			goto J0x7D;
@@ -76,21 +76,21 @@ function bool Scroll(float Delta)
 	local float OldPos;
 
 	OldPos = pos;
-	pos = __NFUN_174__(pos, Delta);
+	pos = (pos + Delta);
 	CheckRange();
-	return __NFUN_180__(pos, __NFUN_174__(OldPos, Delta));
+	return (pos == (OldPos + Delta));
 	return;
 }
 
 function SetRange(float NewMinPos, float NewMaxPos, float NewMaxVisible, optional float NewScrollAmount)
 {
 	// End:0x18
-	if(__NFUN_180__(NewScrollAmount, float(0)))
+	if((NewScrollAmount == float(0)))
 	{
 		NewScrollAmount = 1.0000000;
 	}
 	ScrollAmount = NewScrollAmount;
-	MaxPos = __NFUN_175__(NewMaxPos, NewMaxVisible);
+	MaxPos = (NewMaxPos - NewMaxVisible);
 	MaxVisible = NewMaxVisible;
 	CheckRange();
 	return;
@@ -99,19 +99,19 @@ function SetRange(float NewMinPos, float NewMaxPos, float NewMaxVisible, optiona
 function CheckRange()
 {
 	// End:0x1D
-	if(__NFUN_176__(pos, MinPos))
+	if((pos < MinPos))
 	{
 		pos = MinPos;		
 	}
 	else
 	{
 		// End:0x37
-		if(__NFUN_177__(pos, MaxPos))
+		if((pos > MaxPos))
 		{
 			pos = MaxPos;
 		}
 	}
-	bDisabled = __NFUN_178__(MaxPos, MinPos);
+	bDisabled = (MaxPos <= MinPos);
 	DownButton.bDisabled = bDisabled;
 	UpButton.bDisabled = bDisabled;
 	// End:0x98
@@ -122,21 +122,21 @@ function CheckRange()
 	}
 	else
 	{
-		ThumbStart = __NFUN_172__(__NFUN_171__(__NFUN_175__(pos, MinPos), __NFUN_175__(WinHeight, __NFUN_174__(__NFUN_171__(float(2), LookAndFeel.Size_ScrollbarButtonHeight), float(2)))), __NFUN_175__(__NFUN_174__(MaxPos, MaxVisible), MinPos));
-		ThumbHeight = __NFUN_172__(__NFUN_171__(MaxVisible, __NFUN_175__(WinHeight, __NFUN_174__(__NFUN_171__(float(2), LookAndFeel.Size_ScrollbarButtonHeight), float(2)))), __NFUN_175__(__NFUN_174__(MaxPos, MaxVisible), MinPos));
+		ThumbStart = (((pos - MinPos) * (WinHeight - ((float(2) * LookAndFeel.Size_ScrollbarButtonHeight) + float(2)))) / ((MaxPos + MaxVisible) - MinPos));
+		ThumbHeight = ((MaxVisible * (WinHeight - ((float(2) * LookAndFeel.Size_ScrollbarButtonHeight) + float(2)))) / ((MaxPos + MaxVisible) - MinPos));
 		// End:0x151
-		if(__NFUN_176__(ThumbHeight, LookAndFeel.Size_MinScrollbarHeight))
+		if((ThumbHeight < LookAndFeel.Size_MinScrollbarHeight))
 		{
 			ThumbHeight = LookAndFeel.Size_MinScrollbarHeight;
 		}
 		// End:0x1A6
-		if(__NFUN_177__(__NFUN_174__(ThumbHeight, ThumbStart), __NFUN_175__(__NFUN_175__(WinHeight, LookAndFeel.Size_ScrollbarButtonHeight), float(1))))
+		if(((ThumbHeight + ThumbStart) > ((WinHeight - LookAndFeel.Size_ScrollbarButtonHeight) - float(1))))
 		{
-			ThumbStart = __NFUN_175__(__NFUN_175__(__NFUN_175__(WinHeight, LookAndFeel.Size_ScrollbarButtonHeight), ThumbHeight), float(1));			
+			ThumbStart = (((WinHeight - LookAndFeel.Size_ScrollbarButtonHeight) - ThumbHeight) - float(1));			
 		}
 		else
 		{
-			ThumbStart = __NFUN_174__(__NFUN_174__(ThumbStart, LookAndFeel.Size_ScrollbarButtonHeight), float(1));
+			ThumbStart = ((ThumbStart + LookAndFeel.Size_ScrollbarButtonHeight) + float(1));
 		}
 	}
 	return;
@@ -145,7 +145,7 @@ function CheckRange()
 function Created()
 {
 	UpButton = UWindowSBUpButton(CreateWindow(Class'UWindow.UWindowSBUpButton', 0.0000000, 0.0000000, LookAndFeel.Size_ScrollbarWidth, LookAndFeel.Size_ScrollbarButtonHeight));
-	DownButton = UWindowSBDownButton(CreateWindow(Class'UWindow.UWindowSBDownButton', 0.0000000, __NFUN_175__(WinHeight, LookAndFeel.Size_ScrollbarButtonHeight), LookAndFeel.Size_ScrollbarWidth, LookAndFeel.Size_ScrollbarButtonHeight));
+	DownButton = UWindowSBDownButton(CreateWindow(Class'UWindow.UWindowSBDownButton', 0.0000000, (WinHeight - LookAndFeel.Size_ScrollbarButtonHeight), LookAndFeel.Size_ScrollbarWidth, LookAndFeel.Size_ScrollbarButtonHeight));
 	return;
 }
 
@@ -163,7 +163,7 @@ function BeforePaint(Canvas C, float X, float Y)
 	UpButton.WinLeft = 0.0000000;
 	UpButton.WinWidth = LookAndFeel.Size_ScrollbarWidth;
 	UpButton.WinHeight = LookAndFeel.Size_ScrollbarButtonHeight;
-	DownButton.WinTop = __NFUN_175__(WinHeight, LookAndFeel.Size_ScrollbarButtonHeight);
+	DownButton.WinTop = (WinHeight - LookAndFeel.Size_ScrollbarButtonHeight);
 	DownButton.WinLeft = 0.0000000;
 	DownButton.WinWidth = LookAndFeel.Size_ScrollbarWidth;
 	DownButton.WinHeight = LookAndFeel.Size_ScrollbarButtonHeight;
@@ -184,7 +184,7 @@ function Paint(Canvas C, float X, float Y)
 
 function bool isHidden()
 {
-	return __NFUN_130__(bDisabled, m_bHideSBWhenDisable);
+	return (bDisabled && m_bHideSBWhenDisable);
 	return;
 }
 
@@ -197,23 +197,23 @@ function LMouseDown(float X, float Y)
 		return;
 	}
 	// End:0x51
-	if(__NFUN_176__(Y, ThumbStart))
+	if((Y < ThumbStart))
 	{
-		Scroll(__NFUN_169__(__NFUN_175__(MaxVisible, float(1))));
-		NextClickTime = __NFUN_174__(GetTime(), 0.5000000);
+		Scroll((-(MaxVisible - float(1))));
+		NextClickTime = (GetTime() + 0.5000000);
 		return;
 	}
 	// End:0x8C
-	if(__NFUN_177__(Y, __NFUN_174__(ThumbStart, ThumbHeight)))
+	if((Y > (ThumbStart + ThumbHeight)))
 	{
-		Scroll(__NFUN_175__(MaxVisible, float(1)));
-		NextClickTime = __NFUN_174__(GetTime(), 0.5000000);
+		Scroll((MaxVisible - float(1)));
+		NextClickTime = (GetTime() + 0.5000000);
 		return;
 	}
 	// End:0xDE
-	if(__NFUN_130__(__NFUN_179__(Y, ThumbStart), __NFUN_178__(Y, __NFUN_174__(ThumbStart, ThumbHeight))))
+	if(((Y >= ThumbStart) && (Y <= (ThumbStart + ThumbHeight))))
 	{
-		DragY = __NFUN_175__(Y, ThumbStart);
+		DragY = (Y - ThumbStart);
 		bDragging = true;
 		Root.CaptureMouse();
 		return;
@@ -249,23 +249,23 @@ function Tick(float Delta)
 	if(bMouseDown)
 	{
 		GetMouseXY(X, Y);
-		bUp = __NFUN_176__(Y, ThumbStart);
-		bDown = __NFUN_177__(Y, __NFUN_174__(ThumbStart, ThumbHeight));
+		bUp = (Y < ThumbStart);
+		bDown = (Y > (ThumbStart + ThumbHeight));
 	}
 	// End:0xBB
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bMouseDown, __NFUN_177__(NextClickTime, float(0))), __NFUN_176__(NextClickTime, GetTime())), bUp))
+	if((((bMouseDown && (NextClickTime > float(0))) && (NextClickTime < GetTime())) && bUp))
 	{
-		Scroll(__NFUN_169__(__NFUN_175__(MaxVisible, float(1))));
-		NextClickTime = __NFUN_174__(GetTime(), 0.1000000);
+		Scroll((-(MaxVisible - float(1))));
+		NextClickTime = (GetTime() + 0.1000000);
 	}
 	// End:0x113
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bMouseDown, __NFUN_177__(NextClickTime, float(0))), __NFUN_176__(NextClickTime, GetTime())), bDown))
+	if((((bMouseDown && (NextClickTime > float(0))) && (NextClickTime < GetTime())) && bDown))
 	{
-		Scroll(__NFUN_175__(MaxVisible, float(1)));
-		NextClickTime = __NFUN_174__(GetTime(), 0.1000000);
+		Scroll((MaxVisible - float(1)));
+		NextClickTime = (GetTime() + 0.1000000);
 	}
 	// End:0x143
-	if(__NFUN_132__(__NFUN_129__(bMouseDown), __NFUN_130__(__NFUN_129__(bUp), __NFUN_129__(bDown))))
+	if(((!bMouseDown) || ((!bUp) && (!bDown))))
 	{
 		NextClickTime = 0.0000000;
 	}
@@ -275,12 +275,12 @@ function Tick(float Delta)
 function MouseMove(float X, float Y)
 {
 	// End:0x8E
-	if(__NFUN_130__(__NFUN_130__(bDragging, bMouseDown), __NFUN_129__(bDisabled)))
+	if(((bDragging && bMouseDown) && (!bDisabled)))
 	{
 		J0x21:
 
 		// End:0x56 [Loop If]
-		if(__NFUN_130__(__NFUN_176__(Y, __NFUN_174__(ThumbStart, DragY)), __NFUN_177__(pos, MinPos)))
+		if(((Y < (ThumbStart + DragY)) && (pos > MinPos)))
 		{
 			Scroll(-1.0000000);
 			// [Loop Continue]
@@ -289,7 +289,7 @@ function MouseMove(float X, float Y)
 		J0x56:
 
 		// End:0x8B [Loop If]
-		if(__NFUN_130__(__NFUN_177__(Y, __NFUN_174__(ThumbStart, DragY)), __NFUN_176__(pos, MaxPos)))
+		if(((Y > (ThumbStart + DragY)) && (pos < MaxPos)))
 		{
 			Scroll(1.0000000);
 			// [Loop Continue]

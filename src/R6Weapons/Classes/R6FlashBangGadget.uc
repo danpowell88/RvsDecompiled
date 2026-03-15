@@ -16,11 +16,11 @@ function ServerSetGrenade(Pawn.eGrenadeThrow eGrenade)
 	local Pawn PawnTmp;
 
 	// End:0xFC
-	if(__NFUN_132__(Level.IsGameTypeTeamAdversarial(Level.Game.m_szGameTypeFlag), Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
+	if((Level.IsGameTypeTeamAdversarial(Level.Game.m_szGameTypeFlag) || Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
 	{
 		PawnTmp = Pawn(Owner);
 		// End:0xFC
-		if(__NFUN_130__(__NFUN_130__(__NFUN_155__(int(eGrenade), int(3)), __NFUN_155__(int(eGrenade), int(0))), __NFUN_132__(__NFUN_154__(int(PawnTmp.m_eHealth), int(0)), __NFUN_154__(int(PawnTmp.m_eHealth), int(1)))))
+		if((((int(eGrenade) != int(3)) && (int(eGrenade) != int(0))) && ((int(PawnTmp.m_eHealth) == int(0)) || (int(PawnTmp.m_eHealth) == int(1)))))
 		{
 			R6PlayerController(Pawn(Owner).Controller).m_TeamManager.m_MultiCommonVoicesMgr.PlayMultiCommonVoices(R6Pawn(Owner), 1);
 		}

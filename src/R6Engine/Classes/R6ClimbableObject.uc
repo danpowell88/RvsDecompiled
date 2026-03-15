@@ -37,7 +37,7 @@ var Vector m_vClimbDir;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetInitial && (int(Role) == int(ROLE_Authority))))
 		m_climbablePoint, m_eClimbHeight, 
 		m_vClimbDir;
 }
@@ -46,7 +46,7 @@ function PostBeginPlay()
 {
 	super(Actor).PostBeginPlay();
 	m_vClimbDir = Vector(Rotation);
-	m_vClimbDir = __NFUN_226__(m_vClimbDir);
+	m_vClimbDir = Normal(m_vClimbDir);
 	return;
 }
 
@@ -57,20 +57,20 @@ simulated function bool IsClimbableBy(R6Pawn P, bool bCheckCylinderTranslation, 
 	local Vector vStart, vDest, vPawnLocation;
 
 	// End:0x2A
-	if(__NFUN_132__(P.m_bIsProne, __NFUN_119__(P.m_climbObject, none)))
+	if((P.m_bIsProne || (P.m_climbObject != none)))
 	{
 		return false;
 	}
-	fFootZ = __NFUN_175__(P.Location.Z, P.CollisionHeight);
+	fFootZ = (P.Location.Z - P.CollisionHeight);
 	// End:0x88
-	if(__NFUN_129__(__NFUN_130__(__NFUN_178__(fFootZ, Location.Z), __NFUN_178__(__NFUN_175__(Location.Z, CollisionHeight), fFootZ))))
+	if((!((fFootZ <= Location.Z) && ((Location.Z - CollisionHeight) <= fFootZ))))
 	{
 		return false;
 	}
 	rPawnRot = P.Rotation;
 	rPawnRot.Pitch = 0;
 	// End:0xCE
-	if(__NFUN_130__(bCheckRotation, __NFUN_176__(__NFUN_219__(Vector(rPawnRot), m_vClimbDir), float(0))))
+	if((bCheckRotation && (Dot(Vector(rPawnRot), m_vClimbDir) < float(0))))
 	{
 		return false;		
 	}
@@ -78,9 +78,9 @@ simulated function bool IsClimbableBy(R6Pawn P, bool bCheckCylinderTranslation, 
 	{
 		vPawnLocation = P.Location;
 		vPawnLocation.Z = Location.Z;
-		fDistance2d = __NFUN_175__(__NFUN_175__(__NFUN_225__(__NFUN_216__(vPawnLocation, Location)), CollisionRadius), P.CollisionRadius);
+		fDistance2d = ((VSize((vPawnLocation - Location)) - CollisionRadius) - P.CollisionRadius);
 		// End:0x136
-		if(__NFUN_177__(fDistance2d, m_fCircumstantialActionRange))
+		if((fDistance2d > m_fCircumstantialActionRange))
 		{
 			return false;			
 		}
@@ -89,12 +89,12 @@ simulated function bool IsClimbableBy(R6Pawn P, bool bCheckCylinderTranslation, 
 			// End:0x1D1
 			if(bCheckCylinderTranslation)
 			{
-				vDest = __NFUN_215__(P.Location, __NFUN_212__(__NFUN_212__(Vector(rPawnRot), P.CollisionRadius), 1.9000000));
-				__NFUN_184__(vDest.Z, __NFUN_171__(CollisionHeight, float(2)));
+				vDest = (P.Location + ((Vector(rPawnRot) * P.CollisionRadius) * 1.9000000));
+				(vDest.Z += (CollisionHeight * float(2)));
 				vStart = P.Location;
 				vStart.Z = vDest.Z;
 				// End:0x1D1
-				if(__NFUN_129__(P.__NFUN_1507__(vStart, vDest, self)))
+				if((!P.CheckCylinderTranslation(vStart, vDest, self)))
 				{
 					return false;
 				}
@@ -111,7 +111,7 @@ event Bump(Actor Other)
 
 	P = R6Pawn(Other);
 	// End:0x1D
-	if(__NFUN_114__(P, none))
+	if((P == none))
 	{
 		return;
 	}
@@ -121,7 +121,7 @@ event Bump(Actor Other)
 		return;
 	}
 	// End:0xAA
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(P.Controller, none), R6AIController(P.Controller).CanClimbObject()), IsClimbableBy(P, false, false)), __NFUN_129__(P.Controller.__NFUN_281__('ClimbObject'))))
+	if(((((P.Controller != none) && R6AIController(P.Controller).CanClimbObject()) && IsClimbableBy(P, false, false)) && (!P.Controller.IsInState('ClimbObject'))))
 	{
 		P.StartClimbObject(self);
 	}
@@ -176,7 +176,7 @@ event Attach(Actor pActor)
 
 	pPawn = R6Pawn(pActor);
 	// End:0x2B
-	if(__NFUN_119__(pPawn, none))
+	if((pPawn != none))
 	{
 		pPawn.AttachToClimbableObject(self);
 	}
@@ -189,7 +189,7 @@ event Detach(Actor pActor)
 
 	pPawn = R6Pawn(pActor);
 	// End:0x2B
-	if(__NFUN_119__(pPawn, none))
+	if((pPawn != none))
 	{
 		pPawn.DetachFromClimbableObject(self);
 	}

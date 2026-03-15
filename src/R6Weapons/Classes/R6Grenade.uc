@@ -77,9 +77,9 @@ simulated function Class<Emitter> GetGrenadeEmitter()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	// End:0x3D
-	if(__NFUN_130__(__NFUN_242__(pGameOptions.LowDetailSmoke, true), __NFUN_119__(m_pExplosionParticlesLOW, none)))
+	if(((pGameOptions.LowDetailSmoke == true) && (m_pExplosionParticlesLOW != none)))
 	{
 		return m_pExplosionParticlesLOW;		
 	}
@@ -93,9 +93,9 @@ simulated function Class<Emitter> GetGrenadeEmitter()
 function SelfDestroy()
 {
 	// End:0x1C
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
-		__NFUN_279__();
+		Destroy();
 	}
 	return;
 }
@@ -105,16 +105,16 @@ function PostBeginPlay()
 	LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsGripGrenadeA');
 	super.PostBeginPlay();
 	Activate();
-	m_fEffectiveOutsideKillRadius = __NFUN_175__(m_fExplosionRadius, m_fKillBlastRadius);
+	m_fEffectiveOutsideKillRadius = (m_fExplosionRadius - m_fKillBlastRadius);
 	return;
 }
 
 function Activate()
 {
 	// End:0x16
-	if(__NFUN_181__(m_fExplosionDelay, float(0)))
+	if((m_fExplosionDelay != float(0)))
 	{
-		__NFUN_280__(m_fExplosionDelay, false);
+		SetTimer(m_fExplosionDelay, false);
 	}
 	return;
 }
@@ -134,30 +134,30 @@ simulated event Destroyed()
 	super(Actor).Destroyed();
 	pExplosionParticles = GetGrenadeEmitter();
 	// End:0x99
-	if(__NFUN_242__(m_bDestroyedByImpact, false))
+	if((m_bDestroyedByImpact == false))
 	{
 		// End:0x82
-		if(__NFUN_180__(default.m_fDuration, float(0)))
+		if((default.m_fDuration == float(0)))
 		{
 			// End:0x66
-			if(__NFUN_119__(pExplosionParticles, none))
+			if((pExplosionParticles != none))
 			{
-				m_pEmmiter = __NFUN_278__(pExplosionParticles);
+				m_pEmmiter = Spawn(pExplosionParticles);
 				m_pEmmiter.RemoteRole = ROLE_None;
 				m_pEmmiter.Role = ROLE_Authority;
 			}
 			// End:0x7F
-			if(__NFUN_119__(m_pExplosionLight, none))
+			if((m_pExplosionLight != none))
 			{
-				pEffectLight = __NFUN_278__(m_pExplosionLight);
+				pEffectLight = Spawn(m_pExplosionLight);
 			}			
 		}
 		else
 		{
 			// End:0x99
-			if(__NFUN_119__(m_pEmmiter, none))
+			if((m_pEmmiter != none))
 			{
-				m_pEmmiter.__NFUN_279__();
+				m_pEmmiter.Destroy();
 			}
 		}
 	}
@@ -180,54 +180,54 @@ simulated function Explode()
 	local Rotator GrenadeDecalRotation;
 
 	// End:0x159
-	if(__NFUN_114__(m_sndExplosionSound, none))
+	if((m_sndExplosionSound == none))
 	{
-		HitActor = __NFUN_277__(vHitLocation, vHitNormal, __NFUN_216__(Location, vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
+		HitActor = Trace(vHitLocation, vHitNormal, (Location - vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
 		// End:0x61
-		if(__NFUN_130__(__NFUN_114__(HitMaterial, none), __NFUN_119__(m_sndExplodeAir, none)))
+		if(((HitMaterial == none) && (m_sndExplodeAir != none)))
 		{
 			m_sndExplosionSound = m_sndExplodeAir;
 		}
 		// End:0xBA
-		if(__NFUN_130__(__NFUN_130__(__NFUN_114__(m_sndExplosionSound, none), __NFUN_119__(m_sndExplodeMetal, none)), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(10)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(11)))))
+		if((((m_sndExplosionSound == none) && (m_sndExplodeMetal != none)) && ((int(HitMaterial.m_eSurfIdForSnd) == int(10)) || (int(HitMaterial.m_eSurfIdForSnd) == int(11)))))
 		{
 			m_sndExplosionSound = m_sndExplodeMetal;
 		}
 		// End:0x113
-		if(__NFUN_130__(__NFUN_130__(__NFUN_114__(m_sndExplosionSound, none), __NFUN_119__(m_sndExplodeWater, none)), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(12)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(13)))))
+		if((((m_sndExplosionSound == none) && (m_sndExplodeWater != none)) && ((int(HitMaterial.m_eSurfIdForSnd) == int(12)) || (int(HitMaterial.m_eSurfIdForSnd) == int(13)))))
 		{
 			m_sndExplosionSound = m_sndExplodeWater;
 		}
 		// End:0x159
-		if(__NFUN_114__(m_sndExplosionSound, none))
+		if((m_sndExplosionSound == none))
 		{
 			// End:0x137
-			if(__NFUN_119__(m_sndExplodeDirt, none))
+			if((m_sndExplodeDirt != none))
 			{
 				m_sndExplosionSound = m_sndExplodeDirt;				
 			}
 			else
 			{
-				__NFUN_231__("Missing SOUND for the grenade!");
+				Log("Missing SOUND for the grenade!");
 			}
 		}
 	}
 	HurtPawns();
 	R6MakeNoise(m_eExplosionSoundType);
 	// End:0x1B3
-	if(__NFUN_119__(m_GrenadeDecalClass, none))
+	if((m_GrenadeDecalClass != none))
 	{
 		GrenadeDecalRotation.Pitch = 0;
 		GrenadeDecalRotation.Yaw = 0;
 		GrenadeDecalRotation.Roll = 0;
-		GrenadeDecal = __NFUN_278__(m_GrenadeDecalClass,,, Location, GrenadeDecalRotation);
+		GrenadeDecal = Spawn(m_GrenadeDecalClass,,, Location, GrenadeDecalRotation);
 	}
-	pGrenadeSound = __NFUN_278__(Class'Engine.R6ActorSound',,, Location);
+	pGrenadeSound = Spawn(Class'Engine.R6ActorSound',,, Location);
 	// End:0x26C
-	if(__NFUN_119__(pGrenadeSound, none))
+	if((pGrenadeSound != none))
 	{
 		// End:0x1F2
-		if(__NFUN_303__('R6FlashBang'))
+		if(IsA('R6FlashBang'))
 		{
 			pGrenadeSound.m_eTypeSound = 4;			
 		}
@@ -238,9 +238,9 @@ simulated function Explode()
 		pGrenadeSound.m_ImpactSound = m_sndExplosionSound;
 		pGrenadeSound.m_ImpactSoundStop = m_sndExplosionSoundStop;
 		// End:0x258
-		if(__NFUN_154__(int(m_eGrenadeType), int(1)))
+		if((int(m_eGrenadeType) == int(1)))
 		{
-			pGrenadeSound.m_fExplosionDelay = __NFUN_175__(m_fDuration, float(35));			
+			pGrenadeSound.m_fExplosionDelay = (m_fDuration - float(35));			
 		}
 		else
 		{
@@ -257,17 +257,17 @@ simulated function HitWall(Vector HitNormal, Actor Wall)
 	local Material HitMaterial;
 
 	// End:0x16
-	if(__NFUN_180__(m_fExplosionDelay, float(0)))
+	if((m_fExplosionDelay == float(0)))
 	{
 		Explode();		
 	}
 	else
 	{
 		// End:0x6D
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Wall, none), __NFUN_119__(Instigator, none)), __NFUN_114__(Instigator.m_collisionBox, Wall)))
+		if((((Wall != none) && (Instigator != none)) && (Instigator.m_collisionBox == Wall)))
 		{
-			vTraceEnd = __NFUN_215__(Location, __NFUN_213__(float(10), __NFUN_226__(Velocity)));
-			__NFUN_267__(vTraceEnd, true);
+			vTraceEnd = (Location + (float(10) * Normal(Velocity)));
+			__NFUN_267__(vTraceEnd, true) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 			return;
 		}
 		// End:0xE5

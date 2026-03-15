@@ -51,7 +51,7 @@ function InitOptionsTab(optional bool _bInGame)
 	local int i;
 
 	m_bInGame = _bInGame;
-	m_pOptionsText = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, __NFUN_171__(2.0000000, float(310)), WinHeight, self));
+	m_pOptionsText = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, (2.0000000 * float(310)), WinHeight, self));
 	m_pOptionsText.bAlwaysBehind = true;
 	m_pOptionsText.ActiveBorder(0, false);
 	m_pOptionsText.ActiveBorder(1, false);
@@ -64,49 +64,49 @@ function InitOptionsTab(optional bool _bInGame)
 	fWidth = 310.0000000;
 	fYStep = 17.0000000;
 	m_pOptionsText.AddTextLabel(Localize("MPCreateGame", "Options_GameMode", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	fXOffset = __NFUN_174__(__NFUN_171__(310.0000000, 0.5000000), float(10));
+	fXOffset = ((310.0000000 * 0.5000000) + float(10));
 	fYOffset = 5.0000000;
-	fWidth = __NFUN_175__(__NFUN_171__(310.0000000, 0.5000000), float(20));
+	fWidth = ((310.0000000 * 0.5000000) - float(20));
 	m_pOptionsGameMode = R6WindowComboControl(CreateControl(Class'R6Window.R6WindowComboControl', fXOffset, fYOffset, fWidth, LookAndFeel.Size_ComboHeight));
 	m_pOptionsGameMode.SetEditBoxTip(Localize("Tip", "Options_GameMode", "R6Menu"));
-	m_pOptionsGameMode.EditBoxWidth = __NFUN_175__(m_pOptionsGameMode.WinWidth, m_pOptionsGameMode.Button.WinWidth);
+	m_pOptionsGameMode.EditBoxWidth = (m_pOptionsGameMode.WinWidth - m_pOptionsGameMode.Button.WinWidth);
 	m_pOptionsGameMode.SetFont(6);
-	m_pOptionsGameMode.AddItem(__NFUN_235__(m_ALocGameMode[0]), string(m_ANbOfGameMode[0]));
-	m_pOptionsGameMode.AddItem(__NFUN_235__(m_ALocGameMode[1]), string(m_ANbOfGameMode[1]));
+	m_pOptionsGameMode.AddItem(Caps(m_ALocGameMode[0]), string(m_ANbOfGameMode[0]));
+	m_pOptionsGameMode.AddItem(Caps(m_ALocGameMode[1]), string(m_ANbOfGameMode[1]));
 	fXOffset = 5.0000000;
-	fWidth = __NFUN_175__(__NFUN_175__(310.0000000, fXOffset), float(10));
+	fWidth = ((310.0000000 - fXOffset) - float(10));
 	fHeight = 15.0000000;
 	// End:0x46A
-	if(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient))
+	if((!R6Console(Root.Console).m_bStartedByGSClient))
 	{
-		__NFUN_184__(fYOffset, fYStep);
+		(fYOffset += fYStep);
 		m_pServerNameEdit = R6WindowEditControl(CreateControl(Class'R6Window.R6WindowEditControl', fXOffset, fYOffset, fWidth, fHeight, self));
 		m_pServerNameEdit.SetValue("");
-		m_pServerNameEdit.CreateTextLabel(Localize("MPCreateGame", "Options_ServerName", "R6Menu"), 0.0000000, 0.0000000, __NFUN_171__(fWidth, 0.5000000), fHeight);
+		m_pServerNameEdit.CreateTextLabel(Localize("MPCreateGame", "Options_ServerName", "R6Menu"), 0.0000000, 0.0000000, (fWidth * 0.5000000), fHeight);
 		m_pServerNameEdit.SetEditBoxTip(Localize("Tip", "Options_ServerName", "R6Menu"));
 		m_pServerNameEdit.ModifyEditBoxW(160.0000000, 0.0000000, 135.0000000, fHeight);
-		m_pServerNameEdit.EditBox.MaxLength = R6Console(Root.Console).m_GameService.__NFUN_3532__();
+		m_pServerNameEdit.EditBox.MaxLength = R6Console(Root.Console).m_GameService.GetMaxUbiServerNameSize();
 		m_pServerNameEdit.SetEditControlStatus(_bInGame);
-		__NFUN_184__(fYOffset, fYStep);
+		(fYOffset += fYStep);
 		InitPassword(fXOffset, fYOffset, fWidth, fHeight);
 	}
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	InitAdminPassword(fXOffset, fYOffset, fWidth, fHeight);
-	__NFUN_184__(fYOffset, fYStep);
-	fWidth = __NFUN_175__(__NFUN_175__(310.0000000, fXOffset), float(10));
+	(fYOffset += fYStep);
+	fWidth = ((310.0000000 - fXOffset) - float(10));
 	fHeight = 227.0000000;
 	i = 0;
 	J0x4C6:
 
 	// End:0x507 [Loop If]
-	if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+	if((i < m_ANbOfGameMode.Length))
 	{
 		CreateListOfButtons(fXOffset, fYOffset, fWidth, fHeight, m_ANbOfGameMode[i], 1);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x4C6;
 	}
-	fXOffset = __NFUN_174__(5.0000000, float(310));
+	fXOffset = (5.0000000 + float(310));
 	fYOffset = 180.0000000;
 	fHeight = 100.0000000;
 	// End:0x582
@@ -116,17 +116,17 @@ function InitOptionsTab(optional bool _bInGame)
 		J0x541:
 
 		// End:0x582 [Loop If]
-		if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+		if((i < m_ANbOfGameMode.Length))
 		{
 			CreateListOfButtons(fXOffset, fYOffset, fWidth, fHeight, m_ANbOfGameMode[i], 2);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x541;
 		}
 	}
 	InitAllMapList();
 	// End:0x59F
-	if(__NFUN_129__(_bInGame))
+	if((!_bInGame))
 	{
 		InitEditMsgButton();
 		InitEditSkinsButton();
@@ -147,14 +147,14 @@ function InitPassword(float _fX, float _fY, float _fW, float _fH)
 	J0x07:
 
 	// End:0xF9 [Loop If]
-	if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+	if((i < m_ANbOfGameMode.Length))
 	{
 		pButton = CreateButAndEditBox(_fX, _fY, _fW, _fH, Localize("MPCreateGame", "Options_Password", "R6Menu"), Localize("Tip", "Options_UsePass", "R6Menu"), Localize("Tip", "Options_UsePassEdit", "R6Menu"));
 		stNewSGOItem.pGameOptList = pButton;
 		stNewSGOItem.eGameMode = m_ANbOfGameMode[i];
 		stNewSGOItem.eCGWindowID = 4;
 		AddWindowInCreateGameArray(stNewSGOItem);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -171,14 +171,14 @@ function InitAdminPassword(float _fX, float _fY, float _fW, float _fH)
 	J0x07:
 
 	// End:0xFB [Loop If]
-	if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+	if((i < m_ANbOfGameMode.Length))
 	{
 		pButton = CreateButAndEditBox(_fX, _fY, _fW, _fH, Localize("MPCreateGame", "Options_AdminPwd", "R6Menu"), Localize("Tip", "Options_AdminPwd", "R6Menu"), Localize("Tip", "Options_AdminPwdEdit", "R6Menu"));
 		stNewSGOItem.pGameOptList = pButton;
 		stNewSGOItem.eGameMode = m_ANbOfGameMode[i];
 		stNewSGOItem.eCGWindowID = 5;
 		AddWindowInCreateGameArray(stNewSGOItem);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -200,7 +200,7 @@ function InitAllMapList()
 	J0x28:
 
 	// End:0x144 [Loop If]
-	if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+	if((i < m_ANbOfGameMode.Length))
 	{
 		// End:0x7A
 		if(m_bInGame)
@@ -214,13 +214,13 @@ function InitAllMapList()
 			pMapList = R6MenuMapList(CreateWindow(Class'R6Menu.R6MenuMapListExt', fXOffset, fYOffset, fWidth, fHeight, self));
 		}
 		pMapList.m_bInGame = m_bInGame;
-		pMapList.m_szLocGameMode = __NFUN_235__(m_ALocGameMode[i]);
+		pMapList.m_szLocGameMode = Caps(m_ALocGameMode[i]);
 		pMapList.m_eMyGameMode = m_ANbOfGameMode[i];
 		stNewSGOItem.pGameOptList = pMapList;
 		stNewSGOItem.eGameMode = m_ANbOfGameMode[i];
 		stNewSGOItem.eCGWindowID = 3;
 		AddWindowInCreateGameArray(stNewSGOItem);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x28;
 	}
@@ -237,14 +237,14 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 
 	pTempList = R6WindowListGeneral(GetList(_eGameMode, _eCGWindowID));
 	// End:0x28
-	if(__NFUN_114__(pTempList, none))
+	if((pTempList == none))
 	{
 		return;
 	}
 	// End:0x43
 	if(_bUpdateValue)
 	{
-		pServerInfo = Class'Engine.Actor'.static.__NFUN_1273__();
+		pServerInfo = Class'Engine.Actor'.static.GetServerOptions();
 	}
 	switch(_eGameMode)
 	{
@@ -258,20 +258,20 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					if(_bUpdateValue)
 					{
 						// End:0xD8
-						if(__NFUN_130__(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient), __NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
+						if(((!R6Console(Root.Console).m_bStartedByGSClient) && (!R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
 						{
 							m_pButtonsDef.ChangeButtonComboValue(int(9), string(pServerInfo.InternetServer), pTempList);
 						}
 						m_pButtonsDef.ChangeButtonCounterValue(int(1), pServerInfo.RoundsPerMatch, pTempList);
-						m_pButtonsDef.ChangeButtonCounterValue(int(2), __NFUN_145__(pServerInfo.RoundTime, 60), pTempList);
+						m_pButtonsDef.ChangeButtonCounterValue(int(2), (pServerInfo.RoundTime / 60), pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(7), pServerInfo.BetweenRoundTime, pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(4), pServerInfo.BombTime, pTempList);
 						// End:0x205
-						if(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient))
+						if((!R6Console(Root.Console).m_bStartedByGSClient))
 						{
 							m_pButtonsDef.ChangeButtonCounterValue(int(3), pServerInfo.MaxPlayers, pTempList);
 							// End:0x205
-							if(__NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost))
+							if((!R6Console(Root.Console).m_bNonUbiMatchMakingHost))
 							{
 								m_pButtonsDef.ChangeButtonBoxValue(int(10), pServerInfo.DedicatedServer, pTempList);
 							}
@@ -287,7 +287,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					else
 					{
 						// End:0x413
-						if(__NFUN_130__(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient), __NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
+						if(((!R6Console(Root.Console).m_bStartedByGSClient) && (!R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
 						{
 							m_pButtonsDef.AddButtonCombo(int(9), pTempList, self);
 							m_pButtonsDef.AddItemInComboButton(int(9), Localize("MPCreateGame", "Options_ServerLocationINT", "R6Menu"), string(true), pTempList);
@@ -299,11 +299,11 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 						m_pButtonsDef.SetButtonCounterUnlimited(int(7), true, pTempList);
 						m_pButtonsDef.AddButtonInt(int(4), 30, 60, 35, pTempList, self);
 						// End:0x522
-						if(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient))
+						if((!R6Console(Root.Console).m_bStartedByGSClient))
 						{
 							m_pButtonsDef.AddButtonInt(int(3), 1, 16, 16, pTempList, self);
 							// End:0x522
-							if(__NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost))
+							if((!R6Console(Root.Console).m_bNonUbiMatchMakingHost))
 							{
 								m_pButtonsDef.AddButtonBool(int(10), false, pTempList, self);
 							}
@@ -360,21 +360,21 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					if(_bUpdateValue)
 					{
 						// End:0x7F3
-						if(__NFUN_130__(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient), __NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
+						if(((!R6Console(Root.Console).m_bStartedByGSClient) && (!R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
 						{
 							m_pButtonsDef.ChangeButtonComboValue(int(9), string(pServerInfo.InternetServer), pTempList);
 						}
 						m_pButtonsDef.ChangeButtonComboValue(int(23), string(pServerInfo.DiffLevel), pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(6), pServerInfo.RoundsPerMatch, pTempList);
-						m_pButtonsDef.ChangeButtonCounterValue(int(2), __NFUN_145__(pServerInfo.RoundTime, 60), pTempList);
+						m_pButtonsDef.ChangeButtonCounterValue(int(2), (pServerInfo.RoundTime / 60), pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(7), pServerInfo.BetweenRoundTime, pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(8), pServerInfo.NbTerro, pTempList);
 						// End:0x948
-						if(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient))
+						if((!R6Console(Root.Console).m_bStartedByGSClient))
 						{
 							m_pButtonsDef.ChangeButtonCounterValue(int(3), pServerInfo.MaxPlayers, pTempList);
 							// End:0x948
-							if(__NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost))
+							if((!R6Console(Root.Console).m_bNonUbiMatchMakingHost))
 							{
 								m_pButtonsDef.ChangeButtonBoxValue(int(10), pServerInfo.DedicatedServer, pTempList);
 							}
@@ -389,7 +389,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					else
 					{
 						// End:0xB38
-						if(__NFUN_130__(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient), __NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
+						if(((!R6Console(Root.Console).m_bStartedByGSClient) && (!R6Console(Root.Console).m_bNonUbiMatchMakingHost)))
 						{
 							m_pButtonsDef.AddButtonCombo(int(9), pTempList, self);
 							m_pButtonsDef.AddItemInComboButton(int(9), Localize("MPCreateGame", "Options_ServerLocationINT", "R6Menu"), string(true), pTempList);
@@ -406,11 +406,11 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 						m_pButtonsDef.SetButtonCounterUnlimited(int(7), true, pTempList);
 						m_pButtonsDef.AddButtonInt(int(8), 5, 40, 32, pTempList, self);
 						// End:0xD49
-						if(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient))
+						if((!R6Console(Root.Console).m_bStartedByGSClient))
 						{
 							m_pButtonsDef.AddButtonInt(int(3), 1, 8, 8, pTempList, self);
 							// End:0xD49
-							if(__NFUN_129__(R6Console(Root.Console).m_bNonUbiMatchMakingHost))
+							if((!R6Console(Root.Console).m_bNonUbiMatchMakingHost))
 							{
 								m_pButtonsDef.AddButtonBool(int(10), false, pTempList, self);
 							}
@@ -453,7 +453,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("UpdateButtons not a valid game mode");
+			Log("UpdateButtons not a valid game mode");
 			// End:0xF16
 			break;
 			break;
@@ -465,9 +465,9 @@ function InitEditMsgButton()
 {
 	local float fXOffset, fYOffset, fWidth, fHeight;
 
-	fXOffset = __NFUN_174__(310.0000000, float(10));
-	fYOffset = __NFUN_175__(WinHeight, float(20));
-	fWidth = __NFUN_175__(310.0000000, float(20));
+	fXOffset = (310.0000000 + float(10));
+	fYOffset = (WinHeight - float(20));
+	fWidth = (310.0000000 - float(20));
 	fHeight = 15.0000000;
 	m_pOptionsWelcomeMsg = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pOptionsWelcomeMsg.SetButtonBorderColor(Root.Colors.White);
@@ -485,7 +485,7 @@ function InitEditMsgButton()
 // NEW IN 1.60
 function InitEditSkinsButton()
 {
-	m_pEditSkins = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', __NFUN_174__(310.0000000, float(10)), 260.0000000, __NFUN_175__(310.0000000, float(20)), 15.0000000, self));
+	m_pEditSkins = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', (310.0000000 + float(10)), 260.0000000, (310.0000000 - float(20)), 15.0000000, self));
 	m_pEditSkins.SetButtonBorderColor(Root.Colors.White);
 	m_pEditSkins.m_bDrawBorders = true;
 	m_pEditSkins.m_bDrawSimpleBorder = true;

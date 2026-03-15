@@ -82,14 +82,14 @@ function Created()
 	J0x07:
 
 	// End:0x9A [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		m_sBorderForm[i].vColor = Root.Colors.BlueLight;
 		m_sBorderForm[i].fXPos = 0.0000000;
 		m_sBorderForm[i].fYPos = 0.0000000;
 		m_sBorderForm[i].fWidth = 1.0000000;
 		m_sBorderForm[i].bActive = false;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -113,8 +113,8 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bDrawBackGround)
 	{
 		C.Style = byte(m_DrawStyle);
-		C.__NFUN_2626__(m_vBGColor.R, m_vBGColor.G, m_vBGColor.B);
-		DrawStretchedTextureSegment(C, 0.0000000, 1.0000000, WinWidth, __NFUN_175__(WinHeight, float(1)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
+		C.SetDrawColor(m_vBGColor.R, m_vBGColor.G, m_vBGColor.B);
+		DrawStretchedTextureSegment(C, 0.0000000, 1.0000000, WinWidth, (WinHeight - float(1)), float(m_BGTextureRegion.X), float(m_BGTextureRegion.Y), float(m_BGTextureRegion.W), float(m_BGTextureRegion.H), m_BGTexture);
 	}
 	return;
 }
@@ -125,7 +125,7 @@ function AfterPaint(Canvas C, float X, float Y)
 
 	C.Style = byte(m_DrawStyle);
 	vBorderColor = Root.Colors.BlueLight;
-	C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+	C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
 	// End:0x154
 	if(m_sBorderForm[int(0)].bActive)
 	{
@@ -133,9 +133,9 @@ function AfterPaint(Canvas C, float X, float Y)
 		if(m_sBorderForm[int(0)].vColor != vBorderColor)
 		{
 			vBorderColor = m_sBorderForm[int(0)].vColor;
-			C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
 		}
-		DrawStretchedTextureSegment(C, m_sBorderForm[int(0)].fXPos, m_sBorderForm[int(0)].fYPos, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_sBorderForm[int(0)].fXPos)), m_sBorderForm[int(0)].fWidth, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+		DrawStretchedTextureSegment(C, m_sBorderForm[int(0)].fXPos, m_sBorderForm[int(0)].fYPos, (WinWidth - (float(2) * m_sBorderForm[int(0)].fXPos)), m_sBorderForm[int(0)].fWidth, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 	}
 	// End:0x263
 	if(m_sBorderForm[int(1)].bActive)
@@ -144,9 +144,9 @@ function AfterPaint(Canvas C, float X, float Y)
 		if(m_sBorderForm[int(1)].vColor != vBorderColor)
 		{
 			vBorderColor = m_sBorderForm[int(1)].vColor;
-			C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
 		}
-		DrawStretchedTextureSegment(C, m_sBorderForm[int(1)].fXPos, __NFUN_175__(__NFUN_175__(WinHeight, m_sBorderForm[int(1)].fWidth), m_sBorderForm[int(1)].fYPos), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_sBorderForm[int(1)].fXPos)), m_sBorderForm[int(1)].fWidth, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+		DrawStretchedTextureSegment(C, m_sBorderForm[int(1)].fXPos, ((WinHeight - m_sBorderForm[int(1)].fWidth) - m_sBorderForm[int(1)].fYPos), (WinWidth - (float(2) * m_sBorderForm[int(1)].fXPos)), m_sBorderForm[int(1)].fWidth, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 	}
 	// End:0x35A
 	if(m_sBorderForm[int(2)].bActive)
@@ -155,9 +155,9 @@ function AfterPaint(Canvas C, float X, float Y)
 		if(m_sBorderForm[int(2)].vColor != vBorderColor)
 		{
 			vBorderColor = m_sBorderForm[int(2)].vColor;
-			C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
 		}
-		DrawStretchedTextureSegment(C, m_sBorderForm[int(2)].fXPos, m_sBorderForm[int(2)].fYPos, m_sBorderForm[int(2)].fWidth, __NFUN_175__(WinHeight, __NFUN_171__(float(2), m_sBorderForm[int(2)].fYPos)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+		DrawStretchedTextureSegment(C, m_sBorderForm[int(2)].fXPos, m_sBorderForm[int(2)].fYPos, m_sBorderForm[int(2)].fWidth, (WinHeight - (float(2) * m_sBorderForm[int(2)].fYPos)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 	}
 	// End:0x469
 	if(m_sBorderForm[int(3)].bActive)
@@ -166,13 +166,13 @@ function AfterPaint(Canvas C, float X, float Y)
 		if(m_sBorderForm[int(3)].vColor != vBorderColor)
 		{
 			vBorderColor = m_sBorderForm[int(3)].vColor;
-			C.__NFUN_2626__(vBorderColor.R, vBorderColor.G, vBorderColor.B);
+			C.SetDrawColor(vBorderColor.R, vBorderColor.G, vBorderColor.B);
 		}
-		DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(WinWidth, m_sBorderForm[int(3)].fWidth), m_sBorderForm[int(3)].fXPos), m_sBorderForm[int(3)].fYPos, m_sBorderForm[int(3)].fWidth, __NFUN_175__(WinHeight, __NFUN_171__(float(2), m_sBorderForm[int(3)].fYPos)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+		DrawStretchedTextureSegment(C, ((WinWidth - m_sBorderForm[int(3)].fWidth) - m_sBorderForm[int(3)].fXPos), m_sBorderForm[int(3)].fYPos, m_sBorderForm[int(3)].fWidth, (WinHeight - (float(2) * m_sBorderForm[int(3)].fYPos)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 	}
 	vCornerColor = Root.Colors.BlueLight;
 	// End:0x7C9
-	if(__NFUN_155__(int(m_eCornerType), int(0)))
+	if((int(m_eCornerType) != int(0)))
 	{
 		switch(m_eCornerType)
 		{
@@ -182,7 +182,7 @@ function AfterPaint(Canvas C, float X, float Y)
 				if(m_eCornerColor[int(3)] != vCornerColor)
 				{
 					vCornerColor = m_eCornerColor[int(3)];
-					C.__NFUN_2626__(vCornerColor.R, vCornerColor.G, vCornerColor.B);
+					C.SetDrawColor(vCornerColor.R, vCornerColor.G, vCornerColor.B);
 				}
 			// End:0x647
 			case 1:
@@ -190,16 +190,16 @@ function AfterPaint(Canvas C, float X, float Y)
 				if(m_eCornerColor[int(1)] != vCornerColor)
 				{
 					vCornerColor = m_eCornerColor[int(1)];
-					C.__NFUN_2626__(vCornerColor.R, vCornerColor.G, vCornerColor.B);
+					C.SetDrawColor(vCornerColor.R, vCornerColor.G, vCornerColor.B);
 				}
 				// End:0x634
-				if(__NFUN_119__(m_topLeftCornerT, none))
+				if((m_topLeftCornerT != none))
 				{
 					DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(m_topLeftCornerR.Y), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), m_topLeftCornerT);
-					DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float(__NFUN_143__(m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_topLeftCornerT);
+					DrawStretchedTextureSegment(C, (WinWidth - float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float((-m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_topLeftCornerT);
 				}
 				// End:0x647
-				if(__NFUN_155__(int(m_eCornerType), int(3)))
+				if((int(m_eCornerType) != int(3)))
 				{
 					// End:0x7C9
 					break;
@@ -210,13 +210,13 @@ function AfterPaint(Canvas C, float X, float Y)
 				if(m_eCornerColor[int(2)] != vCornerColor)
 				{
 					vCornerColor = m_eCornerColor[int(2)];
-					C.__NFUN_2626__(vCornerColor.R, vCornerColor.G, vCornerColor.B);
+					C.SetDrawColor(vCornerColor.R, vCornerColor.G, vCornerColor.B);
 				}
 				// End:0x7C0
-				if(__NFUN_119__(m_topLeftCornerT, none))
+				if((m_topLeftCornerT != none))
 				{
-					DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(__NFUN_143__(m_topLeftCornerR.H)), m_topLeftCornerT);
-					DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_topLeftCornerR.W)), __NFUN_175__(WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(__NFUN_143__(m_topLeftCornerR.W)), float(__NFUN_143__(m_topLeftCornerR.H)), m_topLeftCornerT);
+					DrawStretchedTextureSegment(C, 0.0000000, (WinHeight - float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float((m_topLeftCornerR.Y + m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float((-m_topLeftCornerR.H)), m_topLeftCornerT);
+					DrawStretchedTextureSegment(C, (WinWidth - float(m_topLeftCornerR.W)), (WinHeight - float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float((m_topLeftCornerR.Y + m_topLeftCornerR.H)), float((-m_topLeftCornerR.W)), float((-m_topLeftCornerR.H)), m_topLeftCornerT);
 				}
 				// End:0x7C9
 				break;
@@ -253,14 +253,14 @@ function ActiveBorder(int _iBorderType, bool _Active)
 	J0x27:
 
 	// End:0x59 [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		// End:0x4F
 		if(m_sBorderForm[i].bActive)
 		{
 			bNoBorderToDraw = false;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x27;
 	}
@@ -285,7 +285,7 @@ function ActiveBackGround(bool _bActivate, Color _vBGColor)
 function SetCornerColor(int _iCornerType, Color _Color)
 {
 	// End:0x2E
-	if(__NFUN_154__(_iCornerType, int(3)))
+	if((_iCornerType == int(3)))
 	{
 		m_eCornerColor[int(1)] = _Color;
 		m_eCornerColor[int(2)] = _Color;

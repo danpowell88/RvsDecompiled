@@ -186,7 +186,7 @@ function string GetButtonLoc(int _iButtonID, optional bool _bTip, optional R6Men
 			szName = Localize("MPCreateGame", "Options_PunkBuster", "R6Menu");
 			szTip = Localize("Tip", "Options_PunkBuster", "R6Menu");
 			// End:0x946
-			if(__NFUN_154__(int(_eBLE), int(1)))
+			if((int(_eBLE) == int(1)))
 			{
 				szExt = Localize("MPCreateGame", "Options_PunkBuster", "R6Menu");
 			}
@@ -259,13 +259,13 @@ function string GetButtonLoc(int _iButtonID, optional bool _bTip, optional R6Men
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("Button not supported");
+			Log("Button not supported");
 			// End:0xD3A
 			break;
 			break;
 	}
 	// End:0xD53
-	if(__NFUN_155__(int(_eBLE), int(0)))
+	if((int(_eBLE) != int(0)))
 	{
 		return szExt;		
 	}
@@ -338,7 +338,7 @@ function GetCounterTipLoc(int _iButtonID, out string _szLeftTip, out string _szR
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("Button not supported");
+			Log("Button not supported");
 			// End:0x343
 			break;
 			break;
@@ -354,12 +354,12 @@ function AddButtonCombo(int _iButtonID, R6WindowListGeneral _R6WindowListGeneral
 	local STButton stButtonTemp;
 
 	// End:0x21
-	if(__NFUN_180__(m_fWidth, float(0)))
+	if((m_fWidth == float(0)))
 	{
 		m_fWidth = _R6WindowListGeneral.WinWidth;
 	}
 	// End:0x42
-	if(__NFUN_180__(m_fHeight, float(0)))
+	if((m_fHeight == float(0)))
 	{
 		m_fHeight = _R6WindowListGeneral.WinHeight;
 	}
@@ -382,7 +382,7 @@ function AddCombo(STButton _stButton, R6WindowListGeneral _R6WindowListGeneral, 
 
 	GeneralItem = R6WindowListGeneralItem(_R6WindowListGeneral.Items.Append(_R6WindowListGeneral.ListClass));
 	pR6WindowComboControl = R6WindowComboControl(_pParentWindow.CreateControl(Class'R6Window.R6WindowComboControl', 0.0000000, 0.0000000, _stButton.fWidth, LookAndFeel.Size_ComboHeight, _R6WindowListGeneral));
-	pR6WindowComboControl.AdjustTextW(_stButton.szButtonName, 0.0000000, 0.0000000, __NFUN_171__(_stButton.fWidth, 0.5000000), LookAndFeel.Size_ComboHeight);
+	pR6WindowComboControl.AdjustTextW(_stButton.szButtonName, 0.0000000, 0.0000000, (_stButton.fWidth * 0.5000000), LookAndFeel.Size_ComboHeight);
 	pR6WindowComboControl.AdjustEditBoxW(0.0000000, 120.0000000, LookAndFeel.Size_ComboHeight);
 	pR6WindowComboControl.SetEditBoxTip(_stButton.szTip);
 	pR6WindowComboControl.SetValue("", "");
@@ -402,10 +402,10 @@ function AddItemInComboButton(int _iButtonID, string _NewItem, string _SecondVal
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0x72
-	if(__NFUN_119__(TempItem.m_pR6WindowComboControl, none))
+	if((TempItem.m_pR6WindowComboControl != none))
 	{
 		// End:0x72
-		if(__NFUN_154__(TempItem.m_pR6WindowComboControl.m_iButtonID, _iButtonID))
+		if((TempItem.m_pR6WindowComboControl.m_iButtonID == _iButtonID))
 		{
 			TempItem.m_pR6WindowComboControl.AddItem(_NewItem, _SecondValue);
 		}
@@ -423,14 +423,14 @@ function ChangeButtonComboValue(int _iButtonID, string _szNewValue, R6WindowList
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0xCB
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowComboControl, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowComboControl != none)))
 	{
 		// End:0xCB
-		if(__NFUN_154__(TempItem.m_pR6WindowComboControl.m_iButtonID, _iButtonID))
+		if((TempItem.m_pR6WindowComboControl.m_iButtonID == _iButtonID))
 		{
 			iTemFind = TempItem.m_pR6WindowComboControl.FindItemIndex2(_szNewValue, true);
 			// End:0xAD
-			if(__NFUN_155__(iTemFind, -1))
+			if((iTemFind != -1))
 			{
 				TempItem.m_pR6WindowComboControl.SetSelectedIndex(iTemFind);
 			}
@@ -449,10 +449,10 @@ function string GetButtonComboValue(int _iButtonID, R6WindowListGeneral _pListTo
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0x76
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowComboControl, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowComboControl != none)))
 	{
 		// End:0x76
-		if(__NFUN_154__(TempItem.m_pR6WindowComboControl.m_iButtonID, _iButtonID))
+		if((TempItem.m_pR6WindowComboControl.m_iButtonID == _iButtonID))
 		{
 			return TempItem.m_pR6WindowComboControl.GetValue2();
 		}
@@ -469,12 +469,12 @@ function AddButtonInt(int _iButtonID, int _iMin, int _iMax, int _iInitialValue, 
 	local STButton stButtonTemp;
 
 	// End:0x21
-	if(__NFUN_180__(m_fWidth, float(0)))
+	if((m_fWidth == float(0)))
 	{
 		m_fWidth = _R6WindowListGeneral.WinWidth;
 	}
 	// End:0x42
-	if(__NFUN_180__(m_fHeight, float(0)))
+	if((m_fHeight == float(0)))
 	{
 		m_fHeight = _R6WindowListGeneral.WinHeight;
 	}
@@ -504,7 +504,7 @@ function AddCounterButton(STButton _stButton, int _iMinValue, int _iMaxValue, in
 	pR6WindowCounter.SetAdviceParent(true);
 	pR6WindowCounter.CreateLabelText(0.0000000, 0.0000000, _stButton.fWidth, _stButton.fHeight);
 	pR6WindowCounter.SetLabelText(_stButton.szButtonName, Root.Fonts[5], Root.Colors.White);
-	pR6WindowCounter.CreateButtons(__NFUN_175__(_stButton.fWidth, float(53)), 0.0000000, 53.0000000);
+	pR6WindowCounter.CreateButtons((_stButton.fWidth - float(53)), 0.0000000, 53.0000000);
 	pR6WindowCounter.SetDefaultValues(_iMinValue, _iMaxValue, _iDefaultValue);
 	GetCounterTipLoc(_stButton.iButtonID, szLeftTip, szRightTip);
 	pR6WindowCounter.SetButtonToolTip(szLeftTip, szRightTip);
@@ -522,10 +522,10 @@ function ChangeButtonCounterValue(int _iButtonID, int _iNewValue, R6WindowListGe
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0x99
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowCounter, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowCounter != none)))
 	{
 		// End:0x99
-		if(__NFUN_154__(TempItem.m_pR6WindowCounter.m_iButtonID, _iButtonID))
+		if((TempItem.m_pR6WindowCounter.m_iButtonID == _iButtonID))
 		{
 			TempItem.m_pR6WindowCounter.SetCounterValue(_iNewValue);
 			TempItem.m_pR6WindowCounter.m_bNotAcceptClick = _bNotAcceptClick;
@@ -543,10 +543,10 @@ function int GetButtonCounterValue(int _iButtonID, R6WindowListGeneral _pListToU
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0x75
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowCounter, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowCounter != none)))
 	{
 		// End:0x75
-		if(__NFUN_154__(TempItem.m_pR6WindowCounter.m_iButtonID, _iButtonID))
+		if((TempItem.m_pR6WindowCounter.m_iButtonID == _iButtonID))
 		{
 			return TempItem.m_pR6WindowCounter.m_iCounter;
 		}
@@ -564,10 +564,10 @@ function SetButtonCounterUnlimited(int _iButtonID, bool _bUnlimitedCounterOnZero
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0x7C
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowCounter, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowCounter != none)))
 	{
 		// End:0x7C
-		if(__NFUN_154__(TempItem.m_pR6WindowCounter.m_iButtonID, _iButtonID))
+		if((TempItem.m_pR6WindowCounter.m_iButtonID == _iButtonID))
 		{
 			TempItem.m_pR6WindowCounter.m_bUnlimitedCounterOnZero = _bUnlimitedCounterOnZero;
 		}
@@ -584,12 +584,12 @@ function AddButtonBool(int _iButtonID, bool _bInitialValue, R6WindowListGeneral 
 	local int iInitialValue;
 
 	// End:0x21
-	if(__NFUN_180__(m_fWidth, float(0)))
+	if((m_fWidth == float(0)))
 	{
 		m_fWidth = _R6WindowListGeneral.WinWidth;
 	}
 	// End:0x42
-	if(__NFUN_180__(m_fHeight, float(0)))
+	if((m_fHeight == float(0)))
 	{
 		m_fHeight = _R6WindowListGeneral.WinHeight;
 	}
@@ -631,7 +631,7 @@ function ChangeButtonBoxValue(int _iButtonID, bool _bNewValue, R6WindowListGener
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0xA9
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowButtonBox, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowButtonBox != none)))
 	{
 		TempItem.m_pR6WindowButtonBox.m_bSelected = _bNewValue;
 		TempItem.m_pR6WindowButtonBox.bDisabled = _bDisabled;
@@ -653,7 +653,7 @@ function bool GetButtonBoxValue(int _iButtonID, R6WindowListGeneral _pListToUse)
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0x55
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowButtonBox, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowButtonBox != none)))
 	{
 		return TempItem.m_pR6WindowButtonBox.m_bSelected;
 	}
@@ -670,7 +670,7 @@ function bool IsButtonBoxDisabled(int _iButtonID, R6WindowListGeneral _pListToUs
 
 	TempItem = R6WindowListGeneralItem(FindButtonItem(_iButtonID, _pListToUse));
 	// End:0x55
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_119__(TempItem.m_pR6WindowButtonBox, none)))
+	if(((TempItem != none) && (TempItem.m_pR6WindowButtonBox != none)))
 	{
 		return TempItem.m_pR6WindowButtonBox.bDisabled;
 	}
@@ -695,17 +695,17 @@ function UWindowList FindButtonItem(int _iButtonID, R6WindowListGeneral _pListTo
 	local R6WindowListGeneralItem TempItem;
 
 	// End:0x75
-	if(__NFUN_119__(_pListToUse, none))
+	if((_pListToUse != none))
 	{
 		ListItem = _pListToUse.Items.Next;
 		J0x28:
 
 		// End:0x75 [Loop If]
-		if(__NFUN_119__(ListItem, none))
+		if((ListItem != none))
 		{
 			TempItem = R6WindowListGeneralItem(ListItem);
 			// End:0x5E
-			if(__NFUN_154__(TempItem.m_iItemID, _iButtonID))
+			if((TempItem.m_iItemID == _iButtonID))
 			{
 				// [Explicit Break]
 				goto J0x75;
@@ -733,29 +733,29 @@ function AssociateButtons(int _iButtonID1, int _iButtonID2, int _iAssociateButCa
 	J0x1D:
 
 	// End:0xD7 [Loop If]
-	if(__NFUN_119__(ListItem, none))
+	if((ListItem != none))
 	{
 		TempItem = R6WindowListGeneralItem(ListItem);
 		// End:0xC0
-		if(__NFUN_119__(TempItem.m_pR6WindowCounter, none))
+		if((TempItem.m_pR6WindowCounter != none))
 		{
 			// End:0x86
-			if(__NFUN_154__(TempItem.m_pR6WindowCounter.m_iButtonID, _iButtonID1))
+			if((TempItem.m_pR6WindowCounter.m_iButtonID == _iButtonID1))
 			{
 				pItem1 = TempItem;
 				// End:0x86
-				if(__NFUN_119__(pItem2, none))
+				if((pItem2 != none))
 				{
 					// [Explicit Break]
 					goto J0xD7;
 				}
 			}
 			// End:0xC0
-			if(__NFUN_154__(TempItem.m_pR6WindowCounter.m_iButtonID, _iButtonID2))
+			if((TempItem.m_pR6WindowCounter.m_iButtonID == _iButtonID2))
 			{
 				pItem2 = TempItem;
 				// End:0xC0
-				if(__NFUN_119__(pItem1, none))
+				if((pItem1 != none))
 				{
 					// [Explicit Break]
 					goto J0xD7;
@@ -769,7 +769,7 @@ function AssociateButtons(int _iButtonID1, int _iButtonID2, int _iAssociateButCa
 	J0xD7:
 
 	// End:0x132
-	if(__NFUN_130__(__NFUN_119__(pItem1, none), __NFUN_119__(pItem2, none)))
+	if(((pItem1 != none) && (pItem2 != none)))
 	{
 		pItem1.m_pR6WindowCounter.m_pAssociateButton = pItem2.m_pR6WindowCounter;
 		pItem1.m_pR6WindowCounter.m_iAssociateButCase = _iAssociateButCase;

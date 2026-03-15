@@ -30,38 +30,38 @@ simulated event Touch(Actor Other)
 
 	super(Actor).Touch(Other);
 	// End:0x3B
-	if(Other.__NFUN_303__('R6Pawn'))
+	if(Other.IsA('R6Pawn'))
 	{
 		C = Pawn(Other).Controller;		
 	}
 	else
 	{
 		// End:0x5F
-		if(Other.__NFUN_303__('R6PlayerController'))
+		if(Other.IsA('R6PlayerController'))
 		{
 			C = Controller(Other);
 		}
 	}
 	// End:0x190
-	if(__NFUN_119__(C, none))
+	if((C != none))
 	{
 		C.m_CurrentAmbianceObject = self;
 		C.m_CurrentVolumeSound = self;
 		C.m_bUseExitSounds = false;
 		// End:0x190
-		if(__NFUN_130__(__NFUN_119__(PlayerController(C), none), __NFUN_119__(Viewport(PlayerController(C).Player), none)))
+		if(((PlayerController(C) != none) && (Viewport(PlayerController(C).Player) != none)))
 		{
-			bMissionPack = Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack();
+			bMissionPack = Class'Engine.Actor'.static.GetModMgr().IsMissionPack();
 			// End:0x12A
-			if(__NFUN_129__(bMissionPack))
+			if((!bMissionPack))
 			{
 				iSoundIndex = 0;
 				J0xFA:
 
 				// End:0x127 [Loop If]
-				if(__NFUN_150__(iSoundIndex, m_EntrySound.Length))
+				if((iSoundIndex < m_EntrySound.Length))
 				{
-					__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot);
+					__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 					__NFUN_165__(iSoundIndex);
 					// [Loop Continue]
 					goto J0xFA;

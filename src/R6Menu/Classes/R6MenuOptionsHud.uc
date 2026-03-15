@@ -37,46 +37,46 @@ function InitPageOptions()
 	ButtonFont = Root.Fonts[5];
 	fXOffset = 5.0000000;
 	fYOffset = 5.0000000;
-	fWidth = __NFUN_175__(__NFUN_171__(WinWidth, 0.5000000), __NFUN_171__(float(2), fXOffset));
+	fWidth = ((WinWidth * 0.5000000) - (float(2) * fXOffset));
 	fHeight = 15.0000000;
 	fYStep = 17.0000000;
 	m_pHudWeaponName = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudWeaponName.SetButtonBox(true);
 	m_pHudWeaponName.CreateTextAndBox(Localize("Options", "Opt_HudWeapon", "R6Menu"), Localize("Tip", "Opt_HudWeapon", "R6Menu"), 0.0000000, 0);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudShowFPWeapon = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudShowFPWeapon.SetButtonBox(false);
 	m_pHudShowFPWeapon.CreateTextAndBox(Localize("Options", "Opt_HudShowFPWeapon", "R6Menu"), Localize("Tip", "Opt_HudShowFPWeapon", "R6Menu"), 0.0000000, 1);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudOtherTInfo = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudOtherTInfo.SetButtonBox(true);
 	m_pHudOtherTInfo.CreateTextAndBox(Localize("Options", "Opt_HudOtherTInfo", "R6Menu"), Localize("Tip", "Opt_HudOtherTInfo", "R6Menu"), 0.0000000, 2);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudCurTInfo = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudCurTInfo.SetButtonBox(true);
 	m_pHudCurTInfo.CreateTextAndBox(Localize("Options", "Opt_HudCurTInfo", "R6Menu"), Localize("Tip", "Opt_HudCurTInfo", "R6Menu"), 0.0000000, 3);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudCircumIcon = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudCircumIcon.SetButtonBox(true);
 	m_pHudCircumIcon.CreateTextAndBox(Localize("Options", "Opt_HudCircumIcon", "R6Menu"), Localize("Tip", "Opt_HudCircumIcon", "R6Menu"), 0.0000000, 4);
-	fXOffset = __NFUN_174__(__NFUN_171__(WinWidth, 0.5000000), fXOffset);
+	fXOffset = ((WinWidth * 0.5000000) + fXOffset);
 	fYOffset = 5.0000000;
 	m_pHudWpInfo = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudWpInfo.SetButtonBox(true);
 	m_pHudWpInfo.CreateTextAndBox(Localize("Options", "Opt_HudWPInfo", "R6Menu"), Localize("Tip", "Opt_HudWPInfo", "R6Menu"), 0.0000000, 5);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudReticule = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudReticule.SetButtonBox(true);
 	m_pHudReticule.CreateTextAndBox(Localize("Options", "Opt_HudCrossHair", "R6Menu"), Localize("Tip", "Opt_HudCrossHair", "R6Menu"), 0.0000000, 6);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudShowTNames = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudShowTNames.SetButtonBox(true);
 	m_pHudShowTNames.CreateTextAndBox(Localize("Options", "Opt_HudShowTNames", "R6Menu"), Localize("Tip", "Opt_HudShowTNames", "R6Menu"), 0.0000000, 7);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudCharInfo = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudCharInfo.SetButtonBox(true);
 	m_pHudCharInfo.CreateTextAndBox(Localize("Options", "Opt_HudCharInfo", "R6Menu"), Localize("Tip", "Opt_HudCharInfo", "R6Menu"), 0.0000000, 8);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pHudShowRadar = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pHudShowRadar.SetButtonBox(true);
 	m_pHudShowRadar.CreateTextAndBox(Localize("Options", "Opt_HudShowRadar", "R6Menu"), Localize("Tip", "Opt_HudShowRadar", "R6Menu"), 0.0000000, 9);
@@ -91,7 +91,7 @@ function UpdateOptionsInEngine()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	pGameOptions.HUDShowWeaponInfo = m_pHudWeaponName.m_bSelected;
 	pGameOptions.HUDShowFPWeapon = m_pHudShowFPWeapon.m_bSelected;
 	pGameOptions.HUDShowOtherTeamInfo = m_pHudOtherTInfo.m_bSelected;
@@ -110,7 +110,7 @@ function UpdateOptionsInPage()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	m_pHudWeaponName.SetButtonBox(pGameOptions.HUDShowWeaponInfo);
 	m_pHudShowFPWeapon.SetButtonBox(pGameOptions.HUDShowFPWeapon);
 	m_pHudOtherTInfo.SetButtonBox(pGameOptions.HUDShowOtherTeamInfo);
@@ -227,7 +227,7 @@ function RestoreDefaultValue()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	pGameOptions.ResetHudToDefault();
 	UpdateOptionsInPage();
 	return;
@@ -239,28 +239,28 @@ function Notify(UWindowDialogControl C, byte E)
 	local bool bUpdateGameOptions;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	OptionsWidget = R6MenuOptionsWidget(OwnerWindow);
 	// End:0x11D
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x91
-		if(C.__NFUN_303__('R6WindowButtonBox'))
+		if(C.IsA('R6WindowButtonBox'))
 		{
 			// End:0x8E
 			if(R6WindowButtonBox(C).GetSelectStatus())
 			{
-				R6WindowButtonBox(C).m_bSelected = __NFUN_129__(R6WindowButtonBox(C).m_bSelected);
+				R6WindowButtonBox(C).m_bSelected = (!R6WindowButtonBox(C).m_bSelected);
 				bUpdateGameOptions = true;
 			}			
 		}
 		else
 		{
 			// End:0x11D
-			if(C.__NFUN_303__('R6WindowButton'))
+			if(C.IsA('R6WindowButton'))
 			{
 				// End:0x11D
-				if(__NFUN_114__(C, m_pGeneralButUse))
+				if((C == m_pGeneralButUse))
 				{
 					Root.SimplePopUp(Localize("Options", "ResetToDefault", "R6Menu"), Localize("Options", "ResetToDefaultConfirm", "R6Menu"), 55, 0, false, self);
 				}
@@ -271,7 +271,7 @@ function Notify(UWindowDialogControl C, byte E)
 	if(bUpdateGameOptions)
 	{
 		UpdateOptionsInEngine();
-		pGameOptions.__NFUN_536__();
+		pGameOptions.SaveConfig();
 	}
 	return;
 }

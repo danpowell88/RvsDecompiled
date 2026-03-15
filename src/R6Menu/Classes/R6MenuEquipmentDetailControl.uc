@@ -47,7 +47,7 @@ function Created()
 	m_Title.TextColor = labelFontColor;
 	m_Title.m_BGTexture = none;
 	m_Title.m_BorderColor = m_BorderColor;
-	m_listBox = R6WindowTextListBox(CreateControl(Class'R6Window.R6WindowTextListBox', 0.0000000, __NFUN_175__(m_fListBoxLabelHeight, float(1)), WinWidth, m_fListBoxHeight, self));
+	m_listBox = R6WindowTextListBox(CreateControl(Class'R6Window.R6WindowTextListBox', 0.0000000, (m_fListBoxLabelHeight - float(1)), WinWidth, m_fListBoxHeight, self));
 	m_listBox.ListClass = Class'R6Window.R6WindowListBoxItem';
 	m_listBox.m_VertSB.SetHideWhenDisable(true);
 	m_listBox.m_Font = m_Title.m_Font;
@@ -55,7 +55,7 @@ function Created()
 	m_listBox.m_BorderColor = m_BorderColor;
 	m_listBox.m_fSpaceBetItem = 0.0000000;
 	m_listBox.m_VertSB.SetEffect(true);
-	m_EquipmentText = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', 0.0000000, __NFUN_175__(__NFUN_174__(m_listBox.WinTop, m_listBox.WinHeight), float(1)), WinWidth, __NFUN_174__(__NFUN_175__(__NFUN_175__(WinHeight, m_Title.WinHeight), m_listBox.WinHeight), float(1)), self));
+	m_EquipmentText = R6WindowWrappedTextArea(CreateWindow(Class'R6Window.R6WindowWrappedTextArea', 0.0000000, ((m_listBox.WinTop + m_listBox.WinHeight) - float(1)), WinWidth, (((WinHeight - m_Title.WinHeight) - m_listBox.WinHeight) + float(1)), self));
 	m_EquipmentText.m_HBorderTexture = m_Title.m_HBorderTexture;
 	m_EquipmentText.m_VBorderTexture = m_Title.m_VBorderTexture;
 	m_EquipmentText.m_HBorderTextureRegion = m_Title.m_HBorderTextureRegion;
@@ -83,10 +83,10 @@ function Created()
 	m_AnchorButtons = R6MenuEquipmentAnchorButtons(CreateControl(Class'R6Menu.R6MenuEquipmentAnchorButtons', 0.0000000, 0.0000000, WinWidth, m_fAnchorAreaHeight, self));
 	m_AnchorButtons.m_BorderColor = m_BorderColor;
 	m_AnchorButtons.HideWindow();
-	m_Buttons = R6MenuWeaponDetailRadioArea(CreateWindow(Class'R6Menu.R6MenuWeaponDetailRadioArea', 0.0000000, __NFUN_175__(__NFUN_174__(m_listBox.WinTop, m_listBox.WinHeight), float(1)), WinWidth, m_fAnchorAreaHeight, self));
+	m_Buttons = R6MenuWeaponDetailRadioArea(CreateWindow(Class'R6Menu.R6MenuWeaponDetailRadioArea', 0.0000000, ((m_listBox.WinTop + m_listBox.WinHeight) - float(1)), WinWidth, m_fAnchorAreaHeight, self));
 	m_Buttons.m_BorderColor = m_BorderColor;
 	m_Buttons.HideWindow();
-	m_WeaponStats = R6MenuWeaponStats(CreateWindow(Class'R6Menu.R6MenuWeaponStats', 0.0000000, __NFUN_175__(__NFUN_174__(m_Buttons.WinTop, m_Buttons.WinHeight), float(1)), WinWidth, __NFUN_174__(__NFUN_175__(__NFUN_175__(WinHeight, m_Buttons.WinTop), m_Buttons.WinHeight), float(1)), self));
+	m_WeaponStats = R6MenuWeaponStats(CreateWindow(Class'R6Menu.R6MenuWeaponStats', 0.0000000, ((m_Buttons.WinTop + m_Buttons.WinHeight) - float(1)), WinWidth, (((WinHeight - m_Buttons.WinTop) - m_Buttons.WinHeight) + float(1)), self));
 	m_WeaponStats.m_BorderColor = m_BorderColor;
 	m_WeaponStats.HideWindow();
 	return;
@@ -113,7 +113,7 @@ function Class<R6SecondaryWeaponDescription> GetCurrentSecondaryWeapon()
 function Class<R6WeaponGadgetDescription> GetCurrentWeaponGadget(bool _Primary)
 {
 	// End:0x23
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuGearWidget(OwnerWindow).m_OpFirstWeaponGadgetDesc;		
 	}
@@ -127,7 +127,7 @@ function Class<R6WeaponGadgetDescription> GetCurrentWeaponGadget(bool _Primary)
 function Class<R6BulletDescription> GetCurrentWeaponBullet(bool _Primary)
 {
 	// End:0x23
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuGearWidget(OwnerWindow).m_OpFirstWeaponBulletDesc;		
 	}
@@ -141,7 +141,7 @@ function Class<R6BulletDescription> GetCurrentWeaponBullet(bool _Primary)
 function Class<R6GadgetDescription> GetCurrentGadget(bool _Primary)
 {
 	// End:0x23
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuGearWidget(OwnerWindow).m_OpFirstGadgetDesc;		
 	}
@@ -191,7 +191,7 @@ function FillListBox(int _equipmentType)
 			NewItem.HelpText = Localize(PrimaryWeaponClass.default.m_NameID, "ID_NAME", "R6Weapons");
 			NewItem.m_Object = PrimaryWeaponClass;
 			// End:0x105
-			if(__NFUN_114__(GetCurrentPrimaryWeapon(), PrimaryWeaponClass))
+			if((GetCurrentPrimaryWeapon() == PrimaryWeaponClass))
 			{
 				SelectedItem = NewItem;
 			}
@@ -200,39 +200,39 @@ function FillListBox(int _equipmentType)
 			J0x118:
 
 			// End:0x2FD [Loop If]
-			if(__NFUN_150__(i, m_APrimaryWeapons.Length))
+			if((i < m_APrimaryWeapons.Length))
 			{
 				PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(m_APrimaryWeapons[i]);
 				// End:0x17A
-				if(__NFUN_119__(Class<R6SubGunDescription>(PrimaryWeaponClass), none))
+				if((Class<R6SubGunDescription>(PrimaryWeaponClass) != none))
 				{
 					NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 1);					
 				}
 				else
 				{
 					// End:0x1B7
-					if(__NFUN_119__(Class<R6AssaultDescription>(PrimaryWeaponClass), none))
+					if((Class<R6AssaultDescription>(PrimaryWeaponClass) != none))
 					{
 						NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 2);						
 					}
 					else
 					{
 						// End:0x1F4
-						if(__NFUN_119__(Class<R6ShotgunDescription>(PrimaryWeaponClass), none))
+						if((Class<R6ShotgunDescription>(PrimaryWeaponClass) != none))
 						{
 							NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 3);							
 						}
 						else
 						{
 							// End:0x231
-							if(__NFUN_119__(Class<R6SniperDescription>(PrimaryWeaponClass), none))
+							if((Class<R6SniperDescription>(PrimaryWeaponClass) != none))
 							{
 								NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 4);								
 							}
 							else
 							{
 								// End:0x26E
-								if(__NFUN_119__(Class<R6LMGDescription>(PrimaryWeaponClass), none))
+								if((Class<R6LMGDescription>(PrimaryWeaponClass) != none))
 								{
 									NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 5);									
 								}
@@ -247,11 +247,11 @@ function FillListBox(int _equipmentType)
 				NewItem.HelpText = Localize(PrimaryWeaponClass.default.m_NameID, "ID_NAME", "R6Weapons");
 				NewItem.m_Object = PrimaryWeaponClass;
 				// End:0x2F3
-				if(__NFUN_114__(GetCurrentPrimaryWeapon(), PrimaryWeaponClass))
+				if((GetCurrentPrimaryWeapon() == PrimaryWeaponClass))
 				{
 					SelectedItem = NewItem;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x118;
 			}
@@ -269,22 +269,22 @@ function FillListBox(int _equipmentType)
 			J0x395:
 
 			// End:0x47B [Loop If]
-			if(__NFUN_150__(i, PrimaryWeaponClass.default.m_MyGadgets.Length))
+			if((i < PrimaryWeaponClass.default.m_MyGadgets.Length))
 			{
 				WeaponGadgetDescriptionClass = Class<R6WeaponGadgetDescription>(PrimaryWeaponClass.default.m_MyGadgets[i]);
 				// End:0x471
-				if(__NFUN_119__(WeaponGadgetDescriptionClass, Class'R6Description.R6DescWeaponGadgetNone'))
+				if((WeaponGadgetDescriptionClass != Class'R6Description.R6DescWeaponGadgetNone'))
 				{
 					NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 					NewItem.HelpText = Localize(WeaponGadgetDescriptionClass.default.m_NameID, "ID_NAME", "R6WeaponGadgets");
 					NewItem.m_Object = WeaponGadgetDescriptionClass;
 					// End:0x471
-					if(__NFUN_114__(GetCurrentWeaponGadget(true), WeaponGadgetDescriptionClass))
+					if((GetCurrentWeaponGadget(true) == WeaponGadgetDescriptionClass))
 					{
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x395;
 			}
@@ -294,7 +294,7 @@ function FillListBox(int _equipmentType)
 			NewItem.HelpText = Localize(WeaponGadgetDescriptionClass.default.m_NameID, "ID_NAME", "R6WeaponGadgets");
 			NewItem.m_Object = WeaponGadgetDescriptionClass;
 			// End:0x533
-			if(__NFUN_114__(GetCurrentWeaponGadget(true), WeaponGadgetDescriptionClass))
+			if((GetCurrentWeaponGadget(true) == WeaponGadgetDescriptionClass))
 			{
 				SelectedItem = NewItem;
 			}
@@ -312,22 +312,22 @@ function FillListBox(int _equipmentType)
 			J0x5C4:
 
 			// End:0x6A1 [Loop If]
-			if(__NFUN_150__(i, PrimaryWeaponClass.default.m_Bullets.Length))
+			if((i < PrimaryWeaponClass.default.m_Bullets.Length))
 			{
 				WeaponBulletDescriptionClass = Class<R6BulletDescription>(PrimaryWeaponClass.default.m_Bullets[i]);
 				// End:0x697
-				if(__NFUN_119__(WeaponBulletDescriptionClass, Class'R6Description.R6DescBulletNone'))
+				if((WeaponBulletDescriptionClass != Class'R6Description.R6DescBulletNone'))
 				{
 					NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 					NewItem.HelpText = Localize(WeaponBulletDescriptionClass.default.m_NameID, "ID_NAME", "R6Ammo");
 					NewItem.m_Object = WeaponBulletDescriptionClass;
 					// End:0x697
-					if(__NFUN_114__(GetCurrentWeaponBullet(true), WeaponBulletDescriptionClass))
+					if((GetCurrentWeaponBullet(true) == WeaponBulletDescriptionClass))
 					{
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x5C4;
 			}
@@ -346,7 +346,7 @@ function FillListBox(int _equipmentType)
 			NewItem.HelpText = Localize(GadgetClass.default.m_NameID, "ID_NAME", "R6Gadgets");
 			NewItem.m_Object = GadgetClass;
 			// End:0x7BB
-			if(__NFUN_114__(GetCurrentGadget(true), GadgetClass))
+			if((GetCurrentGadget(true) == GadgetClass))
 			{
 				SelectedItem = NewItem;
 			}
@@ -355,35 +355,35 @@ function FillListBox(int _equipmentType)
 			J0x7CE:
 
 			// End:0x99F [Loop If]
-			if(__NFUN_150__(i, m_AGadgets.Length))
+			if((i < m_AGadgets.Length))
 			{
 				GadgetClass = Class<R6GadgetDescription>(m_AGadgets[i]);
 				// End:0x995
-				if(__NFUN_129__(Class'R6Menu.R6MenuMPAdvGearWidget'.static.CheckGadget(string(GadgetClass), self, false)))
+				if((!Class'R6Menu.R6MenuMPAdvGearWidget'.static.CheckGadget(string(GadgetClass), self, false)))
 				{
 					// End:0x84D
-					if(__NFUN_119__(Class<R6GrenadeDescription>(GadgetClass), none))
+					if((Class<R6GrenadeDescription>(GadgetClass) != none))
 					{
 						NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 1);						
 					}
 					else
 					{
 						// End:0x88A
-						if(__NFUN_119__(Class<R6ExplosiveDescription>(GadgetClass), none))
+						if((Class<R6ExplosiveDescription>(GadgetClass) != none))
 						{
 							NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 2);							
 						}
 						else
 						{
 							// End:0x8C7
-							if(__NFUN_119__(Class<R6HBDeviceDescription>(GadgetClass), none))
+							if((Class<R6HBDeviceDescription>(GadgetClass) != none))
 							{
 								NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 3);								
 							}
 							else
 							{
 								// End:0x904
-								if(__NFUN_119__(Class<R6KitDescription>(GadgetClass), none))
+								if((Class<R6KitDescription>(GadgetClass) != none))
 								{
 									NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 4);									
 								}
@@ -397,12 +397,12 @@ function FillListBox(int _equipmentType)
 					NewItem.HelpText = Localize(GadgetClass.default.m_NameID, "ID_NAME", "R6Gadgets");
 					NewItem.m_Object = GadgetClass;
 					// End:0x995
-					if(__NFUN_114__(GetCurrentGadget(true), GadgetClass))
+					if((GetCurrentGadget(true) == GadgetClass))
 					{
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x7CE;
 			}
@@ -420,18 +420,18 @@ function FillListBox(int _equipmentType)
 			J0xA1C:
 
 			// End:0xB55 [Loop If]
-			if(__NFUN_150__(i, m_ASecondaryWeapons.Length))
+			if((i < m_ASecondaryWeapons.Length))
 			{
 				SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(m_ASecondaryWeapons[i]);
 				// End:0xA7E
-				if(__NFUN_119__(Class<R6PistolsDescription>(SecondaryWeaponClass), none))
+				if((Class<R6PistolsDescription>(SecondaryWeaponClass) != none))
 				{
 					NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 1);					
 				}
 				else
 				{
 					// End:0xABB
-					if(__NFUN_119__(Class<R6MachinePistolsDescription>(SecondaryWeaponClass), none))
+					if((Class<R6MachinePistolsDescription>(SecondaryWeaponClass) != none))
 					{
 						NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 2);						
 					}
@@ -441,17 +441,17 @@ function FillListBox(int _equipmentType)
 					}
 				}
 				// End:0xB4B
-				if(__NFUN_119__(NewItem, none))
+				if((NewItem != none))
 				{
 					NewItem.HelpText = Localize(SecondaryWeaponClass.default.m_NameID, "ID_NAME", "R6Weapons");
 					NewItem.m_Object = SecondaryWeaponClass;
 					// End:0xB4B
-					if(__NFUN_114__(GetCurrentSecondaryWeapon(), SecondaryWeaponClass))
+					if((GetCurrentSecondaryWeapon() == SecondaryWeaponClass))
 					{
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0xA1C;
 			}
@@ -469,22 +469,22 @@ function FillListBox(int _equipmentType)
 			J0xBF0:
 
 			// End:0xCD6 [Loop If]
-			if(__NFUN_150__(i, SecondaryWeaponClass.default.m_MyGadgets.Length))
+			if((i < SecondaryWeaponClass.default.m_MyGadgets.Length))
 			{
 				WeaponGadgetDescriptionClass = Class<R6WeaponGadgetDescription>(SecondaryWeaponClass.default.m_MyGadgets[i]);
 				// End:0xCCC
-				if(__NFUN_119__(WeaponGadgetDescriptionClass, Class'R6Description.R6DescWeaponGadgetNone'))
+				if((WeaponGadgetDescriptionClass != Class'R6Description.R6DescWeaponGadgetNone'))
 				{
 					NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 					NewItem.HelpText = Localize(WeaponGadgetDescriptionClass.default.m_NameID, "ID_NAME", "R6WeaponGadgets");
 					NewItem.m_Object = WeaponGadgetDescriptionClass;
 					// End:0xCCC
-					if(__NFUN_114__(GetCurrentWeaponGadget(false), WeaponGadgetDescriptionClass))
+					if((GetCurrentWeaponGadget(false) == WeaponGadgetDescriptionClass))
 					{
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0xBF0;
 			}
@@ -494,7 +494,7 @@ function FillListBox(int _equipmentType)
 			NewItem.HelpText = Localize(WeaponGadgetDescriptionClass.default.m_NameID, "ID_NAME", "R6WeaponGadgets");
 			NewItem.m_Object = WeaponGadgetDescriptionClass;
 			// End:0xD8E
-			if(__NFUN_114__(GetCurrentWeaponGadget(false), WeaponGadgetDescriptionClass))
+			if((GetCurrentWeaponGadget(false) == WeaponGadgetDescriptionClass))
 			{
 				SelectedItem = NewItem;
 			}
@@ -512,17 +512,17 @@ function FillListBox(int _equipmentType)
 			J0xE21:
 
 			// End:0xEFE [Loop If]
-			if(__NFUN_150__(i, SecondaryWeaponClass.default.m_Bullets.Length))
+			if((i < SecondaryWeaponClass.default.m_Bullets.Length))
 			{
 				WeaponBulletDescriptionClass = Class<R6BulletDescription>(SecondaryWeaponClass.default.m_Bullets[i]);
 				// End:0xEF4
-				if(__NFUN_119__(WeaponBulletDescriptionClass, Class'R6Description.R6DescBulletNone'))
+				if((WeaponBulletDescriptionClass != Class'R6Description.R6DescBulletNone'))
 				{
 					NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 					NewItem.HelpText = Localize(WeaponBulletDescriptionClass.default.m_NameID, "ID_NAME", "R6Ammo");
 					NewItem.m_Object = WeaponBulletDescriptionClass;
 					// End:0xEF4
-					if(__NFUN_114__(GetCurrentWeaponBullet(false), WeaponBulletDescriptionClass))
+					if((GetCurrentWeaponBullet(false) == WeaponBulletDescriptionClass))
 					{
 						SelectedItem = NewItem;
 					}

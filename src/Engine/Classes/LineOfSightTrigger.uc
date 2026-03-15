@@ -27,12 +27,12 @@ var() name SeenActorTag;  // tag of actor which triggers this trigger when seen
 function PostBeginPlay()
 {
 	super(Actor).PostBeginPlay();
-	RequiredViewDir = __NFUN_188__(__NFUN_172__(__NFUN_171__(float(MaxViewAngle), 3.1415930), float(180)));
+	RequiredViewDir = Cos(((float(MaxViewAngle) * 3.1415930) / float(180)));
 	// End:0x5C
-	if(__NFUN_130__(__NFUN_255__(SeenActorTag, 'None'), __NFUN_255__(SeenActorTag, 'None')))
+	if(((SeenActorTag != 'None') && (SeenActorTag != 'None')))
 	{
 		// End:0x5B
-		foreach __NFUN_304__(Class'Engine.Actor', SeenActor, SeenActorTag)
+		foreach AllActors(Class'Engine.Actor', SeenActor, SeenActorTag)
 		{
 			// End:0x5B
 			break;			

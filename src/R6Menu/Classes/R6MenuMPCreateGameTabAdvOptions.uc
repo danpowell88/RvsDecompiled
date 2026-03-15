@@ -43,7 +43,7 @@ function InitAdvOptionsTab(optional bool _bInGame)
 	local float fXOffset, fYOffset, fWidth, fHeight;
 	local int i;
 
-	m_pOptionsTextAdv = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, __NFUN_171__(2.0000000, float(310)), WinHeight, self));
+	m_pOptionsTextAdv = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, (2.0000000 * float(310)), WinHeight, self));
 	m_pOptionsTextAdv.bAlwaysBehind = true;
 	m_pOptionsTextAdv.ActiveBorder(0, false);
 	m_pOptionsTextAdv.ActiveBorder(1, false);
@@ -51,35 +51,35 @@ function InitAdvOptionsTab(optional bool _bInGame)
 	m_pOptionsTextAdv.ActiveBorder(3, false);
 	m_pOptionsTextAdv.m_Font = Root.Fonts[5];
 	m_pOptionsTextAdv.m_vTextColor = Root.Colors.White;
-	fXOffset = __NFUN_174__(310.0000000, float(5));
+	fXOffset = (310.0000000 + float(5));
 	fYOffset = 5.0000000;
 	fWidth = 310.0000000;
 	m_pOptionsTextAdv.AddTextLabel(Localize("MPCreateGame", "Options_DeathCam", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
 	fXOffset = 5.0000000;
 	fYOffset = 5.0000000;
-	fWidth = __NFUN_175__(__NFUN_175__(310.0000000, fXOffset), float(10));
-	fHeight = __NFUN_175__(WinHeight, fYOffset);
+	fWidth = ((310.0000000 - fXOffset) - float(10));
+	fHeight = (WinHeight - fYOffset);
 	i = 0;
 	J0x1B3:
 
 	// End:0x1F4 [Loop If]
-	if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+	if((i < m_ANbOfGameMode.Length))
 	{
 		CreateListOfButtons(fXOffset, fYOffset, fWidth, fHeight, m_ANbOfGameMode[i], 6);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x1B3;
 	}
-	fXOffset = __NFUN_174__(5.0000000, float(310));
+	fXOffset = (5.0000000 + float(310));
 	fHeight = 100.0000000;
 	i = 0;
 	J0x21A:
 
 	// End:0x25B [Loop If]
-	if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+	if((i < m_ANbOfGameMode.Length))
 	{
 		CreateListOfButtons(fXOffset, fYOffset, fWidth, fHeight, m_ANbOfGameMode[i], 2);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x21A;
 	}
@@ -97,14 +97,14 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 
 	pTempList = R6WindowListGeneral(GetList(_eGameMode, _eCGWindowID));
 	// End:0x28
-	if(__NFUN_114__(pTempList, none))
+	if((pTempList == none))
 	{
 		return;
 	}
 	// End:0x43
 	if(_bUpdateValue)
 	{
-		pServerInfo = Class'Engine.Actor'.static.__NFUN_1273__();
+		pServerInfo = Class'Engine.Actor'.static.GetServerOptions();
 	}
 	switch(_eGameMode)
 	{
@@ -118,9 +118,9 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					if(_bUpdateValue)
 					{
 						// End:0xB4
-						if(Class'Engine.Actor'.static.__NFUN_1009__().m_bPBInstalled)
+						if(Class'Engine.Actor'.static.GetGameOptions().m_bPBInstalled)
 						{
-							m_pButtonsDef.ChangeButtonBoxValue(int(22), __NFUN_151__(GetLevel().iPBEnabled, 0), pTempList);							
+							m_pButtonsDef.ChangeButtonBoxValue(int(22), (GetLevel().iPBEnabled > 0), pTempList);							
 						}
 						else
 						{
@@ -177,9 +177,9 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					if(_bUpdateValue)
 					{
 						// End:0x312
-						if(Class'Engine.Actor'.static.__NFUN_1009__().m_bPBInstalled)
+						if(Class'Engine.Actor'.static.GetGameOptions().m_bPBInstalled)
 						{
-							m_pButtonsDef.ChangeButtonBoxValue(int(22), __NFUN_151__(GetLevel().iPBEnabled, 0), pTempList, false);							
+							m_pButtonsDef.ChangeButtonBoxValue(int(22), (GetLevel().iPBEnabled > 0), pTempList, false);							
 						}
 						else
 						{
@@ -222,7 +222,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("UpdateButtons not a valid game mode");
+			Log("UpdateButtons not a valid game mode");
 			// End:0x48F
 			break;
 			break;
@@ -371,12 +371,12 @@ function UpdateCamSpecialCase(bool _bButtonSel, bool _bUpdateDeathCam)
 			m_bBkpCamFreeThirdP = m_pButtonsDef.GetButtonBoxValue(int(26), pCamList);
 			bCamGhostDis = m_pButtonsDef.IsButtonBoxDisabled(int(27), pCamList);
 			// End:0x106
-			if(__NFUN_129__(bCamGhostDis))
+			if((!bCamGhostDis))
 			{
 				m_bBkpCamGhost = m_pButtonsDef.GetButtonBoxValue(int(27), pCamList);
 			}
 			// End:0x13B
-			if(__NFUN_154__(int(GetCurrentGameMode()), int(m_ANbOfGameMode[0])))
+			if((int(GetCurrentGameMode()) == int(m_ANbOfGameMode[0])))
 			{
 				m_bBkpCamTeamOnly = m_pButtonsDef.GetButtonBoxValue(int(29), pCamList);
 			}			
@@ -388,7 +388,7 @@ function UpdateCamSpecialCase(bool _bButtonSel, bool _bUpdateDeathCam)
 			bCamFreeThPerson = m_bBkpCamFreeThirdP;
 			bCamGhost = m_bBkpCamGhost;
 			// End:0x198
-			if(__NFUN_154__(int(GetCurrentGameMode()), int(m_ANbOfGameMode[0])))
+			if((int(GetCurrentGameMode()) == int(m_ANbOfGameMode[0])))
 			{
 				bCamGhostDis = m_bBkpCamTeamOnly;				
 			}
@@ -403,12 +403,12 @@ function UpdateCamSpecialCase(bool _bButtonSel, bool _bUpdateDeathCam)
 		UpdateCamera(int(25), bCamThirdPerson, bCamState, pCamList);
 		UpdateCamera(int(26), bCamFreeThPerson, bCamState, pCamList);
 		// End:0x23A
-		if(__NFUN_129__(bCamGhostDis))
+		if((!bCamGhostDis))
 		{
 			UpdateCamera(int(27), bCamGhost, bCamState, pCamList);
 		}
 		// End:0x26B
-		if(__NFUN_154__(int(GetCurrentGameMode()), int(m_ANbOfGameMode[0])))
+		if((int(GetCurrentGameMode()) == int(m_ANbOfGameMode[0])))
 		{
 			UpdateCamera(int(29), bCanTeamOnly, bCamState, pCamList);
 		}		
@@ -466,14 +466,14 @@ function SetServerOptions()
 	local R6WindowListGeneral pListGen;
 	local bool bPBButtonValue;
 
-	_ServerSettings = Class'Engine.Actor'.static.__NFUN_1273__();
+	_ServerSettings = Class'Engine.Actor'.static.GetServerOptions();
 	pListGen = R6WindowListGeneral(GetList(GetCurrentGameMode(), 2));
 	_ServerSettings.CamFirstPerson = GetCameraSelection(int(24), pListGen);
 	_ServerSettings.CamThirdPerson = GetCameraSelection(int(25), pListGen);
 	_ServerSettings.CamFreeThirdP = GetCameraSelection(int(26), pListGen);
 	_ServerSettings.CamGhost = GetCameraSelection(int(27), pListGen);
 	// End:0xD9
-	if(__NFUN_114__(m_pButtonsDef.FindButtonItem(int(28), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(28), pListGen) == none))
 	{
 		_ServerSettings.CamFadeToBlack = false;		
 	}
@@ -482,7 +482,7 @@ function SetServerOptions()
 		_ServerSettings.CamFadeToBlack = GetCameraSelection(int(28), pListGen);
 	}
 	// End:0x12A
-	if(__NFUN_114__(m_pButtonsDef.FindButtonItem(int(29), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(29), pListGen) == none))
 	{
 		_ServerSettings.CamTeamOnly = false;		
 	}
@@ -492,16 +492,16 @@ function SetServerOptions()
 	}
 	pListGen = R6WindowListGeneral(GetList(GetCurrentGameMode(), 6));
 	// End:0x16F
-	if(__NFUN_114__(pListGen, none))
+	if((pListGen == none))
 	{
 		return;
 	}
 	bPBButtonValue = m_pButtonsDef.GetButtonBoxValue(int(22), pListGen);
-	Class'Engine.Actor'.static.__NFUN_1401__(__NFUN_129__(bPBButtonValue), true);
+	Class'Engine.Actor'.static.SetPBStatus((!bPBButtonValue), true);
 	// End:0x1BD
-	if(__NFUN_242__(bPBButtonValue, true))
+	if((bPBButtonValue == true))
 	{
-		Class'Engine.Actor'.static.__NFUN_1401__(false, false);
+		Class'Engine.Actor'.static.SetPBStatus(false, false);
 	}
 	return;
 }

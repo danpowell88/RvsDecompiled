@@ -65,8 +65,8 @@ function Created()
 	m_ButtonOptions.Align = 0;
 	m_ButtonOptions.m_buttonFont = ButtonFont;
 	m_ButtonOptions.ResizeToText();
-	XPos = int(__NFUN_174__(m_pHelpWindow.WinLeft, m_pHelpWindow.WinWidth));
-	m_ButtonStart = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(XPos), 452.0000000, __NFUN_175__(__NFUN_175__(WinWidth, float(XPos)), float(20)), 25.0000000, self));
+	XPos = int((m_pHelpWindow.WinLeft + m_pHelpWindow.WinWidth));
+	m_ButtonStart = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(XPos), 452.0000000, ((WinWidth - float(XPos)) - float(20)), 25.0000000, self));
 	m_ButtonStart.ToolTipString = Localize("Tip", "ButtonStart", "R6Menu");
 	m_ButtonStart.Text = Localize("CustomMission", "ButtonStart1", "R6Menu");
 	m_ButtonStart.Align = 1;
@@ -77,7 +77,7 @@ function Created()
 	m_Map.CreateClientWindow(Class'R6Window.R6WindowBitMap');
 	m_Map.m_eCornerType = 3;
 	m_TitleTextColor = Root.Colors.White;
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("CustomMission", "Title", "R6Menu");
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
@@ -101,14 +101,14 @@ function Created()
 	m_DifficultyArea.m_TextColor = m_TitleTextColor;
 	m_DifficultyArea.m_BorderColor = Root.Colors.White;
 	m_DifficultyArea.SetCornerType(3);
-	m_TerroArea = R6WindowSimpleFramedWindow(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindow', 390.0000000, __NFUN_175__(__NFUN_174__(m_DifficultyArea.WinTop, m_DifficultyArea.WinHeight), float(1)), m_DifficultyArea.WinWidth, 63.0000000, self));
+	m_TerroArea = R6WindowSimpleFramedWindow(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindow', 390.0000000, ((m_DifficultyArea.WinTop + m_DifficultyArea.WinHeight) - float(1)), m_DifficultyArea.WinWidth, 63.0000000, self));
 	m_TerroArea.CreateClientWindow(Class'R6Menu.R6MenuCustomMissionNbTerroSelect');
 	m_TerroArea.SetCornerType(2);
 	m_TerroArea.HideWindow();
 	// End:0x723
-	if(__NFUN_114__(r6Root.m_pFileManager, none))
+	if((r6Root.m_pFileManager == none))
 	{
-		__NFUN_231__("R6MenuRootWindow(Root).m_pFileManager == NONE");
+		Log("R6MenuRootWindow(Root).m_pFileManager == NONE");
 	}
 	m_pFileManager = new Class'R6Game.R6FileManagerCampaign';
 	InitCustomMission();
@@ -121,43 +121,43 @@ function bool ValidateBeforePlanning()
 
 	r6Root = R6MenuRootWindow(Root);
 	// End:0x50
-	if(__NFUN_114__(r6Root, none))
+	if((r6Root == none))
 	{
 		// End:0x4E
 		if(bShowLog)
 		{
-			__NFUN_231__("ValidateBeforePlanning: R6Root == None");
+			Log("ValidateBeforePlanning: R6Root == None");
 		}
 		return false;
 	}
 	// End:0xB0
-	if(__NFUN_114__(m_GameLevelBox.m_SelectedItem, none))
+	if((m_GameLevelBox.m_SelectedItem == none))
 	{
 		// End:0xAE
 		if(bShowLog)
 		{
-			__NFUN_231__("ValidateBeforePlanning: m_GameLevelBox.m_SelectedItem == NONE");
+			Log("ValidateBeforePlanning: m_GameLevelBox.m_SelectedItem == NONE");
 		}
 		return false;
 	}
 	// End:0x121
-	if(__NFUN_122__(m_GameLevelBox.m_SelectedItem.HelpText, ""))
+	if((m_GameLevelBox.m_SelectedItem.HelpText == ""))
 	{
 		// End:0x11F
 		if(bShowLog)
 		{
-			__NFUN_231__("ValidateBeforePlanning: m_GameLevelBox.m_SelectedItem.HelpText == \"\"");
+			Log("ValidateBeforePlanning: m_GameLevelBox.m_SelectedItem.HelpText == \"\"");
 		}
 		return false;
 	}
 	r6Root.ResetCustomMissionOperatives();
 	// End:0x17A
-	if(__NFUN_152__(r6Root.m_GameOperatives.Length, 0))
+	if((r6Root.m_GameOperatives.Length <= 0))
 	{
 		// End:0x175
 		if(bShowLog)
 		{
-			__NFUN_231__("R6Root.m_GameOperatives.Length <= 0");
+			Log("R6Root.m_GameOperatives.Length <= 0");
 		}
 		return false;		
 	}
@@ -166,7 +166,7 @@ function bool ValidateBeforePlanning()
 		// End:0x1AA
 		if(bShowLog)
 		{
-			__NFUN_231__("ValidateBeforePlanning: return true");
+			Log("ValidateBeforePlanning: return true");
 		}
 		return true;
 	}
@@ -188,10 +188,10 @@ function GotoPlanning()
 	R6Console.Master.m_StartGameInfo.m_MapName = CurrentMission.m_MapName;
 	R6Console.Master.m_StartGameInfo.m_DifficultyLevel = R6MenuDiffCustomMissionSelect(m_DifficultyArea.m_ClientArea).GetDifficulty();
 	R6Console.Master.m_StartGameInfo.m_iNbTerro = R6MenuCustomMissionNbTerroSelect(m_TerroArea.m_ClientArea).GetNbTerro();
-	R6Console.Master.m_StartGameInfo.m_GameMode = GetLevel().GetGameTypeClassName(GetLevel().__NFUN_1256__(m_pButCurrent.m_iButtonID));
+	R6Console.Master.m_StartGameInfo.m_GameMode = GetLevel().GetGameTypeClassName(GetLevel().ConvertGameTypeIntToString(m_pButCurrent.m_iButtonID));
 	CustomMissionMap = CurrentMission.m_MapName;
 	CustomMissionGameType = m_pButCurrent.m_iButtonID;
-	__NFUN_536__();
+	SaveConfig();
 	Root.ResetMenus();
 	r6Root.m_bLoadingPlanning = true;
 	R6Console.PreloadMapForPlanning();
@@ -213,14 +213,14 @@ function bool CampainMapExistInMapList(R6MissionDescription pMission)
 	J0x07:
 
 	// End:0x66 [Loop If]
-	if(__NFUN_150__(iMission, R6Console(Root.Console).m_aMissionDescriptions.Length))
+	if((iMission < R6Console(Root.Console).m_aMissionDescriptions.Length))
 	{
 		// End:0x5C
-		if(__NFUN_114__(pMission, R6Console(Root.Console).m_aMissionDescriptions[iMission]))
+		if((pMission == R6Console(Root.Console).m_aMissionDescriptions[iMission]))
 		{
 			return true;
 		}
-		__NFUN_165__(iMission);
+		(iMission++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -238,27 +238,27 @@ function RefreshList()
 	local R6MissionDescription mission;
 
 	R6Console = R6Console(Root.Console);
-	szGameType = GetLevel().__NFUN_1256__(m_pButCurrent.m_iButtonID);
+	szGameType = GetLevel().ConvertGameTypeIntToString(m_pButCurrent.m_iButtonID);
 	m_GameLevelBox.Clear();
 	iCampaign = 0;
 	J0x50:
 
 	// End:0x218 [Loop If]
-	if(__NFUN_150__(iCampaign, R6Console.m_aCampaigns.Length))
+	if((iCampaign < R6Console.m_aCampaigns.Length))
 	{
 		iMission = 0;
 		J0x70:
 
 		// End:0x20E [Loop If]
-		if(__NFUN_150__(iMission, R6Console.m_aCampaigns[iCampaign].m_missions.Length))
+		if((iMission < R6Console.m_aCampaigns[iCampaign].m_missions.Length))
 		{
 			mission = R6Console.m_aCampaigns[iCampaign].m_missions[iMission];
 			// End:0x204
-			if(__NFUN_130__(__NFUN_130__(mission.IsAvailableInGameType(szGameType), __NFUN_123__(mission.m_MapName, "")), CampainMapExistInMapList(mission)))
+			if(((mission.IsAvailableInGameType(szGameType) && (mission.m_MapName != "")) && CampainMapExistInMapList(mission)))
 			{
 				szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 				// End:0x155
-				if(__NFUN_122__(szMapName, ""))
+				if((szMapName == ""))
 				{
 					szMapName = mission.m_MapName;
 				}
@@ -273,18 +273,18 @@ function RefreshList()
 					goto J0x204;
 				}
 				// End:0x204
-				if(__NFUN_130__(__NFUN_122__(mission.m_MapName, m_LastMapPlayed), __NFUN_114__(ItemToSelect, none)))
+				if(((mission.m_MapName == m_LastMapPlayed) && (ItemToSelect == none)))
 				{
 					ItemToSelect = NewItem;
 				}
 			}
 			J0x204:
 
-			__NFUN_163__(iMission);
+			(++iMission);
 			// [Loop Continue]
 			goto J0x70;
 		}
-		__NFUN_163__(iCampaign);
+		(++iCampaign);
 		// [Loop Continue]
 		goto J0x50;
 	}
@@ -292,15 +292,15 @@ function RefreshList()
 	J0x21F:
 
 	// End:0x3A5 [Loop If]
-	if(__NFUN_150__(iMission, R6Console.m_aMissionDescriptions.Length))
+	if((iMission < R6Console.m_aMissionDescriptions.Length))
 	{
 		mission = R6Console.m_aMissionDescriptions[iMission];
 		// End:0x39B
-		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(mission.m_bCampaignMission), mission.IsAvailableInGameType(szGameType)), __NFUN_123__(mission.m_MapName, "")))
+		if((((!mission.m_bCampaignMission) && mission.IsAvailableInGameType(szGameType)) && (mission.m_MapName != "")))
 		{
 			szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 			// End:0x2EC
-			if(__NFUN_122__(szMapName, ""))
+			if((szMapName == ""))
 			{
 				szMapName = mission.m_MapName;
 			}
@@ -315,22 +315,22 @@ function RefreshList()
 				goto J0x39B;
 			}
 			// End:0x39B
-			if(__NFUN_130__(__NFUN_122__(mission.m_MapName, m_LastMapPlayed), __NFUN_114__(ItemToSelect, none)))
+			if(((mission.m_MapName == m_LastMapPlayed) && (ItemToSelect == none)))
 			{
 				ItemToSelect = NewItem;
 			}
 		}
 		J0x39B:
 
-		__NFUN_163__(iMission);
+		(++iMission);
 		// [Loop Continue]
 		goto J0x21F;
 	}
 	// End:0x41F
-	if(__NFUN_151__(m_GameLevelBox.Items.Count(), 0))
+	if((m_GameLevelBox.Items.Count() > 0))
 	{
 		// End:0x3E5
-		if(__NFUN_119__(ItemToSelect, none))
+		if((ItemToSelect != none))
 		{
 			m_GameLevelBox.SetSelectedItem(ItemToSelect);			
 		}
@@ -358,40 +358,40 @@ function InitCustomMission()
 	R6Console = R6Console(Root.Console);
 	MyCampaign = new Class'R6Game.R6PlayerCampaign';
 	bCheckedRvSDir = false;
-	szDir = Class'Engine.Actor'.static.__NFUN_1524__().GetCampaignDir();
+	szDir = Class'Engine.Actor'.static.GetModMgr().GetCampaignDir();
 	J0x5C:
 
 	// End:0x1D0 [Loop If]
-	if(__NFUN_123__(szDir, ""))
+	if((szDir != ""))
 	{
-		iFiles = r6Root.m_pFileManager.__NFUN_1525__(szDir, "cmp");
+		iFiles = r6Root.m_pFileManager.GetNbFile(szDir, "cmp");
 		i = 0;
 		J0x94:
 
 		// End:0x175 [Loop If]
-		if(__NFUN_150__(i, iFiles))
+		if((i < iFiles))
 		{
-			r6Root.m_pFileManager.__NFUN_1526__(i, MyCampaign.m_FileName);
-			MyCampaign.m_FileName = __NFUN_128__(MyCampaign.m_FileName, __NFUN_126__(MyCampaign.m_FileName, "."));
+			r6Root.m_pFileManager.GetFileName(i, MyCampaign.m_FileName);
+			MyCampaign.m_FileName = Left(MyCampaign.m_FileName, InStr(MyCampaign.m_FileName, "."));
 			MyCampaign.m_OperativesMissionDetails = none;
 			MyCampaign.m_OperativesMissionDetails = new (none) Class'R6Game.R6MissionRoster';
-			m_pFileManager.__NFUN_1003__(MyCampaign);
+			m_pFileManager.LoadCampaign(MyCampaign);
 			bCheckCampaignMission = false;
 			// End:0x151
-			if(__NFUN_154__(i, 0))
+			if((i == 0))
 			{
 				bCheckCampaignMission = true;
 			}
 			R6Console.UpdateCurrentMapAvailable(MyCampaign, bCheckCampaignMission);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x94;
 		}
 		// End:0x1C5
-		if(__NFUN_130__(__NFUN_242__(bCheckedRvSDir, false), __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield())))
+		if(((bCheckedRvSDir == false) && (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield())))
 		{
 			bCheckedRvSDir = true;
-			szDir = Class'Engine.Actor'.static.__NFUN_1524__().GetDefaultCampaignDir();			
+			szDir = Class'Engine.Actor'.static.GetModMgr().GetDefaultCampaignDir();			
 		}
 		else
 		{
@@ -420,7 +420,7 @@ function ToolTip(string strTip)
 function UpdateBackground()
 {
 	// End:0x6E
-	if(GetLevel().GameTypeUseNbOfTerroristToSpawn(GetLevel().__NFUN_1256__(m_pButCurrent.m_iButtonID)))
+	if(GetLevel().GameTypeUseNbOfTerroristToSpawn(GetLevel().ConvertGameTypeIntToString(m_pButCurrent.m_iButtonID)))
 	{
 		m_DifficultyArea.SetCornerType(1);
 		m_TerroArea.ShowWindow();
@@ -448,7 +448,7 @@ function Notify(UWindowDialogControl C, byte E)
 	local R6WindowBitMap mapBitmap;
 
 	// End:0x1AB
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -492,14 +492,14 @@ function Notify(UWindowDialogControl C, byte E)
 				mapBitmap = R6WindowBitMap(m_Map.m_ClientArea);
 				SelectedItem = R6WindowListBoxItem(m_GameLevelBox.m_SelectedItem);
 				// End:0x127
-				if(__NFUN_114__(SelectedItem, none))
+				if((SelectedItem == none))
 				{
 					mapBitmap.t = none;
 					// [Explicit Continue]
 					goto J0x1A8;
 				}
 				// End:0x13E
-				if(__NFUN_114__(SelectedItem.m_Object, none))
+				if((SelectedItem.m_Object == none))
 				{
 					// [Explicit Continue]
 					goto J0x1A8;

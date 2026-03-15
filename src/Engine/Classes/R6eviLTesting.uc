@@ -17,7 +17,7 @@ native(1356) final function NativeRunAllTests();
 
 event RunAll()
 {
-	__NFUN_1356__();
+	NativeRunAllTests();
 	return;
 }
 

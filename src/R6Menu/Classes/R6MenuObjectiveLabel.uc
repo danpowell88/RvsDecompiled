@@ -26,7 +26,7 @@ var Region m_RCheckBoxMark;
 
 function Created()
 {
-	m_Objective = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(float(m_RCheckBoxBorder.W), m_fYPaddingBetweenElements), 0.0000000, __NFUN_175__(__NFUN_175__(WinWidth, float(m_RCheckBoxBorder.W)), m_fYPaddingBetweenElements), WinHeight, self));
+	m_Objective = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (float(m_RCheckBoxBorder.W) + m_fYPaddingBetweenElements), 0.0000000, ((WinWidth - float(m_RCheckBoxBorder.W)) - m_fYPaddingBetweenElements), WinHeight, self));
 	m_Objective.SetProperties("", 0, Root.Fonts[0], Root.Colors.White, false);
 	m_Objective.m_bResizeToText = true;
 	m_ObjectiveFailed = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 0.0000000, 10.0000000, WinHeight, self));
@@ -39,7 +39,7 @@ function SetProperties(string _Objective, bool _completed, optional string _szFa
 	m_Objective.m_bResizeToText = true;
 	m_Objective.SetNewText(_Objective, true);
 	m_bObjectiveCompleted = _completed;
-	m_ObjectiveFailed.WinLeft = __NFUN_174__(m_Objective.WinLeft, m_Objective.WinWidth);
+	m_ObjectiveFailed.WinLeft = (m_Objective.WinLeft + m_Objective.WinWidth);
 	m_ObjectiveFailed.m_bResizeToText = true;
 	m_ObjectiveFailed.SetNewText(_szFailed, true);
 	return;

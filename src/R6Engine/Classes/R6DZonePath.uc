@@ -43,14 +43,14 @@ function int GetNodeIndex(R6DZonePathNode Node)
 	J0x07:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_150__(i, m_aNode.Length))
+	if((i < m_aNode.Length))
 	{
 		// End:0x32
-		if(__NFUN_114__(m_aNode[i], Node))
+		if((m_aNode[i] == Node))
 		{
 			return i;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -67,11 +67,11 @@ function R6DZonePathNode GetNextNode(R6DZonePathNode Node)
 
 	Index = GetNodeIndex(Node);
 	// End:0x4A
-	if(__NFUN_155__(Index, -1))
+	if((Index != -1))
 	{
-		__NFUN_165__(Index);
+		(Index++);
 		// End:0x3E
-		if(__NFUN_153__(Index, m_aNode.Length))
+		if((Index >= m_aNode.Length))
 		{
 			Index = 0;
 		}
@@ -90,14 +90,14 @@ function R6DZonePathNode GetPreviousNode(R6DZonePathNode Node)
 
 	Index = GetNodeIndex(Node);
 	// End:0x4A
-	if(__NFUN_155__(Index, -1))
+	if((Index != -1))
 	{
 		// End:0x37
-		if(__NFUN_154__(Index, 0))
+		if((Index == 0))
 		{
 			Index = m_aNode.Length;
 		}
-		__NFUN_166__(Index);
+		(Index--);
 		return m_aNode[Index];
 	}
 	return none;
@@ -118,18 +118,18 @@ function R6DZonePathNode FindNearestNode(Actor Pawn)
 	J0x07:
 
 	// End:0xBC [Loop If]
-	if(__NFUN_150__(i, m_aNode.Length))
+	if((i < m_aNode.Length))
 	{
 		r6node = m_aNode[i];
-		vDist = __NFUN_216__(Pawn.Location, r6node.Location);
-		fDistSqr = __NFUN_174__(__NFUN_171__(vDist.X, vDist.X), __NFUN_171__(vDist.Y, vDist.Y));
+		vDist = (Pawn.Location - r6node.Location);
+		fDistSqr = ((vDist.X * vDist.X) + (vDist.Y * vDist.Y));
 		// End:0xB2
-		if(__NFUN_132__(__NFUN_176__(fDistSqr, fBestDistSqr), __NFUN_154__(i, 0)))
+		if(((fDistSqr < fBestDistSqr) || (i == 0)))
 		{
 			fBestDistSqr = fDistSqr;
 			Best = r6node;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -143,13 +143,13 @@ function R6DZonePathNode FindNearestNode(Actor Pawn)
 function bool IsLeader(R6Terrorist terro)
 {
 	// End:0x0D
-	if(__NFUN_129__(m_bActAsGroup))
+	if((!m_bActAsGroup))
 	{
 		return true;
 	}
-	__NFUN_1834__();
+	HaveTerrorist();
 	// End:0x26
-	if(__NFUN_114__(m_aTerrorist[0], terro))
+	if((m_aTerrorist[0] == terro))
 	{
 		return true;		
 	}
@@ -175,9 +175,9 @@ function Vector GetRandomPointToNode(R6DZonePathNode Node)
 	local int iDistance;
 	local Vector vDestination;
 
-	R.Yaw = __NFUN_144__(__NFUN_167__(32767), 2);
-	iDistance = __NFUN_167__(int(Node.m_fRadius));
-	vDestination = __NFUN_215__(Node.Location, __NFUN_212__(Vector(R), float(iDistance)));
+	R.Yaw = (Rand(32767) * 2);
+	iDistance = Rand(int(Node.m_fRadius));
+	vDestination = (Node.Location + (Vector(R) * float(iDistance)));
 	return vDestination;
 	return;
 }
@@ -191,21 +191,21 @@ function SetNextNodeForTerro(R6TerroristAI terro)
 	local R6DZonePathNode nextNode;
 
 	// End:0x37
-	if(__NFUN_114__(terro.m_currentNode, none))
+	if((terro.m_currentNode == none))
 	{
 		terro.m_currentNode = FindNearestNode(terro.m_pawn);
 	}
 	// End:0xAE
-	if(__NFUN_129__(m_bCycle))
+	if((!m_bCycle))
 	{
 		Index = GetNodeIndex(terro.m_currentNode);
 		// End:0x81
-		if(__NFUN_154__(Index, 0))
+		if((Index == 0))
 		{
 			terro.m_pawn.m_bPatrolForward = true;
 		}
 		// End:0xAE
-		if(__NFUN_154__(Index, __NFUN_147__(m_aNode.Length, 1)))
+		if((Index == (m_aNode.Length - 1)))
 		{
 			terro.m_pawn.m_bPatrolForward = false;
 		}
@@ -234,14 +234,14 @@ function bool IsAllTerroWaiting()
 	J0x07:
 
 	// End:0x62 [Loop If]
-	if(__NFUN_150__(i, m_aTerrorist.Length))
+	if((i < m_aTerrorist.Length))
 	{
 		// End:0x58
-		if(__NFUN_132__(__NFUN_114__(m_aTerrorist[i].m_controller, none), __NFUN_129__(m_aTerrorist[i].m_controller.m_bWaiting)))
+		if(((m_aTerrorist[i].m_controller == none) || (!m_aTerrorist[i].m_controller.m_bWaiting)))
 		{
 			return false;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -259,12 +259,12 @@ function GoToNextNode(R6TerroristAI terroAI)
 	local Vector vGoal;
 
 	// End:0x3A
-	if(__NFUN_130__(m_bActAsGroup, __NFUN_129__(IsAllTerroWaiting())))
+	if((m_bActAsGroup && (!IsAllTerroWaiting())))
 	{
 		// End:0x38
 		if(bShowLog)
 		{
-			__NFUN_231__("Not all terro waiting");
+			Log("Not all terro waiting");
 		}
 		return;
 	}
@@ -273,43 +273,43 @@ function GoToNextNode(R6TerroristAI terroAI)
 	// End:0x1F4
 	if(m_bActAsGroup)
 	{
-		__NFUN_1837__(terroAI.m_currentNode.Location);
+		OrderTerroListFromDistanceTo(terroAI.m_currentNode.Location);
 		i = 0;
 		J0x89:
 
 		// End:0x1F1 [Loop If]
-		if(__NFUN_150__(i, m_aTerrorist.Length))
+		if((i < m_aTerrorist.Length))
 		{
 			m_aTerrorist[i].m_controller.m_currentNode = terroAI.m_currentNode;
 			// End:0xF6
-			if(__NFUN_154__(i, 0))
+			if((i == 0))
 			{
 				m_aTerrorist[i].m_controller.GotoNode(vGoal);
 				// [Explicit Continue]
 				goto J0x1E7;
 			}
 			// End:0x147
-			if(__NFUN_180__(__NFUN_173__(float(i), float(3)), float(1)))
+			if(((float(i) % float(3)) == float(1)))
 			{
-				m_aTerrorist[i].m_controller.FollowLeader(m_aTerrorist[__NFUN_147__(i, 1)], vect(75.0000000, 75.0000000, 0.0000000));
+				m_aTerrorist[i].m_controller.FollowLeader(m_aTerrorist[(i - 1)], vect(75.0000000, 75.0000000, 0.0000000));
 				// [Explicit Continue]
 				goto J0x1E7;
 			}
 			// End:0x199
-			if(__NFUN_180__(__NFUN_173__(float(i), float(3)), float(2)))
+			if(((float(i) % float(3)) == float(2)))
 			{
-				m_aTerrorist[i].m_controller.FollowLeader(m_aTerrorist[__NFUN_147__(i, 1)], vect(-25.0000000, -150.0000000, 0.0000000));
+				m_aTerrorist[i].m_controller.FollowLeader(m_aTerrorist[(i - 1)], vect(-25.0000000, -150.0000000, 0.0000000));
 				// [Explicit Continue]
 				goto J0x1E7;
 			}
 			// End:0x1E7
-			if(__NFUN_180__(__NFUN_173__(float(i), float(3)), float(0)))
+			if(((float(i) % float(3)) == float(0)))
 			{
-				m_aTerrorist[i].m_controller.FollowLeader(m_aTerrorist[__NFUN_147__(i, 1)], vect(25.0000000, 75.0000000, 0.0000000));
+				m_aTerrorist[i].m_controller.FollowLeader(m_aTerrorist[(i - 1)], vect(25.0000000, 75.0000000, 0.0000000));
 			}
 			J0x1E7:
 
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x89;
 		}		
@@ -331,12 +331,12 @@ function StartWaiting(R6TerroristAI terroAI)
 	local int i, iYawOffset;
 
 	// End:0x3A
-	if(__NFUN_130__(m_bActAsGroup, __NFUN_129__(IsAllTerroWaiting())))
+	if((m_bActAsGroup && (!IsAllTerroWaiting())))
 	{
 		// End:0x38
 		if(bShowLog)
 		{
-			__NFUN_231__("Not all terro waiting");
+			Log("Not all terro waiting");
 		}
 		return;
 	}
@@ -368,24 +368,24 @@ function StartWaiting(R6TerroristAI terroAI)
 		J0x100:
 
 		// End:0x1B7 [Loop If]
-		if(__NFUN_150__(i, m_aTerrorist.Length))
+		if((i < m_aTerrorist.Length))
 		{
 			rDirection = rRefDir;
 			// End:0x17C
-			if(__NFUN_155__(i, 0))
+			if((i != 0))
 			{
 				// End:0x15D
-				if(__NFUN_181__(__NFUN_173__(float(i), float(2)), float(0)))
+				if(((float(i) % float(2)) != float(0)))
 				{
-					__NFUN_162__(rDirection.Yaw, __NFUN_144__(iYawOffset, __NFUN_145__(__NFUN_146__(i, 1), 2)));					
+					(rDirection.Yaw -= (iYawOffset * ((i + 1) / 2)));					
 				}
 				else
 				{
-					__NFUN_161__(rDirection.Yaw, __NFUN_144__(iYawOffset, __NFUN_145__(__NFUN_146__(i, 1), 2)));
+					(rDirection.Yaw += (iYawOffset * ((i + 1) / 2)));
 				}
 			}
 			m_aTerrorist[i].m_controller.WaitAtNode(float(iWaitingTime), float(iFacingTime), rDirection);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x100;
 		}		
@@ -407,7 +407,7 @@ function InformTerroTeam(R6DZonePath.EInformTeam eInfo, R6TerroristAI terroAI)
 	// End:0x43
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Received message ", string(eInfo)), " from "), string(terroAI.Name)));
+		Log(((("Received message " $ string(eInfo)) $ " from ") $ string(terroAI.Name)));
 	}
 	switch(eInfo)
 	{
@@ -427,12 +427,12 @@ function InformTerroTeam(R6DZonePath.EInformTeam eInfo, R6TerroristAI terroAI)
 			break;
 		// End:0xE1
 		case 5:
-			__NFUN_1834__();
+			HaveTerrorist();
 			i = 0;
 			J0x87:
 
 			// End:0xDE [Loop If]
-			if(__NFUN_150__(i, m_aTerrorist.Length))
+			if((i < m_aTerrorist.Length))
 			{
 				m_aTerrorist[i].m_controller.GotoPointAndSearch(terroAI.Pawn.Location, 5, false, 30.0000000);
 				__NFUN_165__(i);

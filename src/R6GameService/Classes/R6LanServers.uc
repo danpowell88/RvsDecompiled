@@ -54,9 +54,9 @@ function SendBeaconToOneServer(int iIndex)
 	local IpAddr Addr;
 	local string szIP;
 
-	__NFUN_165__(m_iIndRefrAttempts);
-	m_iIndRefrEndTime = __NFUN_146__(__NFUN_1278__(), 1000);
-	szIP = __NFUN_128__(m_GameServerList[iIndex].szIPAddress, __NFUN_126__(m_GameServerList[iIndex].szIPAddress, ":"));
+	(m_iIndRefrAttempts++);
+	m_iIndRefrEndTime = (NativeGetMilliSeconds() + 1000);
+	szIP = Left(m_GameServerList[iIndex].szIPAddress, InStr(m_GameServerList[iIndex].szIPAddress, ":"));
 	m_ClientBeacon.StringToIpAddr(szIP, Addr);
 	Addr.Port = m_ClientBeacon.ServerBeaconPort;
 	m_ClientBeacon.BroadcastBeacon(Addr);
@@ -69,7 +69,7 @@ function SendBeaconToOneServer(int iIndex)
 function Created()
 {
 	super.Created();
-	__NFUN_1222__();
+	NativeInitFavorites();
 	return;
 }
 
@@ -91,20 +91,20 @@ function LANSeversManager()
 
 	bListChanged = false;
 	// End:0x15
-	if(__NFUN_114__(m_ClientBeacon, none))
+	if((m_ClientBeacon == none))
 	{
 		return;
 	}
 	iBeaconArraySize = m_ClientBeacon.GetBeaconListSize();
-	szCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord;
+	szCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord;
 	i = 0;
 	J0x55:
 
 	// End:0x3E0 [Loop If]
-	if(__NFUN_150__(i, iBeaconArraySize))
+	if((i < iBeaconArraySize))
 	{
 		// End:0x3D6
-		if(__NFUN_130__(__NFUN_155__(m_ClientBeacon.GetBeaconIntAddress(i), 0), m_ClientBeacon.GetNewDataFlag(i)))
+		if(((m_ClientBeacon.GetBeaconIntAddress(i) != 0) && m_ClientBeacon.GetNewDataFlag(i)))
 		{
 			szSvrAddr = m_ClientBeacon.GetBeaconAddress(i);
 			bFound = false;
@@ -112,31 +112,31 @@ function LANSeversManager()
 			J0xC0:
 
 			// End:0x136 [Loop If]
-			if(__NFUN_130__(__NFUN_150__(j, m_GameServerList.Length), __NFUN_129__(bFound)))
+			if(((j < m_GameServerList.Length) && (!bFound)))
 			{
 				// End:0x12C
-				if(__NFUN_122__(szSvrAddr, m_GameServerList[j].szIPAddress))
+				if((szSvrAddr == m_GameServerList[j].szIPAddress))
 				{
 					bFound = true;
 					iIndex = j;
 					// End:0x12C
-					if(__NFUN_130__(m_bIndRefrInProgress, __NFUN_154__(iIndex, m_iIndRefrIndex)))
+					if((m_bIndRefrInProgress && (iIndex == m_iIndRefrIndex)))
 					{
 						m_bIndRefrInProgress = false;
 					}
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0xC0;
 			}
 			// End:0x3D6
-			if(__NFUN_130__(__NFUN_129__(m_ClientBeacon.GetInternetServer(i)), __NFUN_124__(m_ClientBeacon.GetModName(i), szCurrentMod)))
+			if(((!m_ClientBeacon.GetInternetServer(i)) && (m_ClientBeacon.GetModName(i) ~= szCurrentMod)))
 			{
 				sSvr.sGameData = getSvrData(i);
 				sSvr.szIPAddress = szSvrAddr;
 				sSvr.bDisplay = true;
 				sSvr.bFavorite = IsAFavorite(szSvrAddr);
-				sSvr.iPing = __NFUN_1225__(__NFUN_128__(szSvrAddr, __NFUN_126__(szSvrAddr, ":")));
+				sSvr.iPing = NativeGetPingTime(Left(szSvrAddr, InStr(szSvrAddr, ":")));
 				sSvr.iGroupID = m_ClientBeacon.GetGroupID(i);
 				sSvr.iLobbySrvID = m_ClientBeacon.GetLobbyID(i);
 				sSvr.iBeaconPort = m_ClientBeacon.GetBeaconPort(i);
@@ -155,14 +155,14 @@ function LANSeversManager()
 				{
 					iIndex = m_GameServerList.Length;
 					m_GameServerList[m_GameServerList.Length] = sSvr;
-					m_GSLSortIdx[m_GSLSortIdx.Length] = __NFUN_147__(m_GSLSortIdx.Length, 1);
+					m_GSLSortIdx[m_GSLSortIdx.Length] = (m_GSLSortIdx.Length - 1);
 				}
-				m_GameServerList[iIndex].bSameVersion = __NFUN_122__(m_GameServerList[iIndex].sGameData.szGameVersion, Class'Engine.Actor'.static.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield())));
+				m_GameServerList[iIndex].bSameVersion = (m_GameServerList[iIndex].sGameData.szGameVersion == Class'Engine.Actor'.static.GetGameVersion(false, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield())));
 				m_ClientBeacon.SetNewDataFlag(i, false);
 				m_bServerListChanged = true;
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x55;
 	}
@@ -170,10 +170,10 @@ function LANSeversManager()
 	if(m_bIndRefrInProgress)
 	{
 		// End:0x438
-		if(__NFUN_151__(__NFUN_1278__(), m_iIndRefrEndTime))
+		if((NativeGetMilliSeconds() > m_iIndRefrEndTime))
 		{
 			// End:0x410
-			if(__NFUN_150__(m_iIndRefrAttempts, 4))
+			if((m_iIndRefrAttempts < 4))
 			{
 				SendBeaconToOneServer(m_iIndRefrIndex);				
 			}

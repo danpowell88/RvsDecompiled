@@ -40,10 +40,10 @@ function LMouseDown(float X, float Y)
 	{
 		return;
 	}
-	m_bLocked = __NFUN_129__(m_bLocked);
+	m_bLocked = (!m_bLocked);
 	R6PlanningCtrl(GetPlayerOwner()).m_bLockCamera = m_bLocked;
 	// End:0x8B
-	if(__NFUN_242__(m_bLocked, true))
+	if((m_bLocked == true))
 	{
 		UpRegion = m_ButtonRegions[0];
 		OverRegion = m_ButtonRegions[1];

@@ -12,9 +12,9 @@ var(Action) float Probability;
 
 function ProceedToNextAction(ScriptedController C)
 {
-	__NFUN_161__(C.ActionNum, 1);
+	(C.ActionNum += 1);
 	// End:0x28
-	if(__NFUN_177__(__NFUN_195__(), Probability))
+	if((FRand() > Probability))
 	{
 		ProceedToSectionEnd(C);
 	}

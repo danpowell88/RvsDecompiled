@@ -18,13 +18,13 @@ var R6IORotatingDoor m_IORDoor;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerSetDoor;
 }
 
 function ServerDetonate()
 {
-	m_IORDoor.__NFUN_2019__(BulletActor);
+	m_IORDoor.RemoveBreach(BulletActor);
 	super.ServerDetonate();
 	return;
 }
@@ -46,12 +46,12 @@ function NPCPlaceCharge(Actor aDoor)
 	// End:0x34
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(" NonPlayerPlaceCharge() aDoor=", string(aDoor)));
+		Log((" NonPlayerPlaceCharge() aDoor=" $ string(aDoor)));
 	}
 	m_IORDoor = R6IORotatingDoor(aDoor);
 	ServerPlaceCharge(m_IORDoor.Location);
 	m_bChargeInPosition = true;
-	__NFUN_113__('ChargeArmed');
+	GotoState('ChargeArmed');
 	return;
 }
 
@@ -60,12 +60,12 @@ function NPCDetonateCharge()
 	// End:0x40
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(" NPCDetonateCharge() m_bChargeInPosition=", string(m_bChargeInPosition)));
+		Log((" NPCDetonateCharge() m_bChargeInPosition=" $ string(m_bChargeInPosition)));
 	}
 	// End:0x68
 	if(m_bChargeInPosition)
 	{
-		m_IORDoor.__NFUN_2019__(BulletActor);
+		m_IORDoor.RemoveBreach(BulletActor);
 		Explode();
 		m_bChargeInPosition = false;
 	}
@@ -76,9 +76,9 @@ function bool CharacterOnOtherSide()
 {
 	local int iDiffYaw;
 
-	iDiffYaw = __NFUN_156__(__NFUN_147__(m_IORDoor.Rotation.Yaw, Owner.Rotation.Yaw), 65535);
+	iDiffYaw = ((m_IORDoor.Rotation.Yaw - Owner.Rotation.Yaw) & 65535);
 	// End:0x46
-	if(__NFUN_150__(iDiffYaw, 32768))
+	if((iDiffYaw < 32768))
 	{
 		return true;
 	}
@@ -94,23 +94,23 @@ simulated function ServerSetDoor(R6IORotatingDoor aDoor)
 
 simulated function ServerPlaceCharge(Vector vLocation)
 {
-	BulletActor = R6Grenade(__NFUN_278__(m_pBulletClass, self));
+	BulletActor = R6Grenade(Spawn(m_pBulletClass, self));
 	// End:0x73
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("  ServerPlaceCharge was called for Breach... BulletActor=", string(BulletActor)), " : "), string(m_IORDoor)));
+		Log(((("  ServerPlaceCharge was called for Breach... BulletActor=" $ string(BulletActor)) $ " : ") $ string(m_IORDoor)));
 	}
 	// End:0x9C
-	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(BulletActor, none), __NFUN_114__(m_IORDoor, none)), __NFUN_154__(int(m_iNbBulletsInWeapon), 0)))
+	if((((BulletActor == none) || (m_IORDoor == none)) || (int(m_iNbBulletsInWeapon) == 0)))
 	{
 		return;
 	}
 	BulletActor.m_Weapon = self;
 	BulletActor.Instigator = Pawn(Owner);
 	BulletActor.SetSpeed(0.0000000);
-	BulletActor.__NFUN_272__(m_IORDoor);
-	BulletActor.__NFUN_298__(m_IORDoor, m_IORDoor.Location);
-	m_IORDoor.__NFUN_2018__(BulletActor);
+	BulletActor.SetOwner(m_IORDoor);
+	BulletActor.SetBase(m_IORDoor, m_IORDoor.Location);
+	m_IORDoor.AddBreach(BulletActor);
 	BulletActor.bUnlit = m_IORDoor.bUnlit;
 	BulletActor.bSpecialLit = m_IORDoor.bSpecialLit;
 	// End:0x189
@@ -134,7 +134,7 @@ simulated function ServerPlaceCharge(Vector vLocation)
 	m_AttachPoint = m_DetonatorAttachPoint;
 	SetStaticMesh(default.StaticMesh);
 	Pawn(Owner).AttachToBone(self, m_AttachPoint);
-	__NFUN_140__(m_iNbBulletsInWeapon);
+	(m_iNbBulletsInWeapon--);
 	m_bDetonator = true;
 	return;
 }
@@ -148,7 +148,7 @@ function SetAmmoStaticMesh()
 function Explode()
 {
 	BulletActor.Explode();
-	BulletActor.__NFUN_279__();
+	BulletActor.Destroy();
 	return;
 }
 
@@ -160,19 +160,19 @@ function bool CanPlaceCharge()
 
 	pawnOwner = R6Pawn(Owner);
 	// End:0x5D
-	if(__NFUN_132__(__NFUN_132__(pawnOwner.m_bIsProne, __NFUN_129__(pawnOwner.IsStationary())), __NFUN_181__(pawnOwner.m_fPeeking, pawnOwner.1000.0000000)))
+	if(((pawnOwner.m_bIsProne || (!pawnOwner.IsStationary())) || (pawnOwner.m_fPeeking != pawnOwner.1000.0000000)))
 	{
 		return false;
 	}
 	// End:0xA3
-	if(__NFUN_132__(__NFUN_114__(pawnOwner.m_Door, none), __NFUN_114__(pawnOwner.m_Door2, none)))
+	if(((pawnOwner.m_Door == none) || (pawnOwner.m_Door2 == none)))
 	{
 		m_IORDoor = R6IORotatingDoor(pawnOwner.m_potentialActionActor);		
 	}
 	else
 	{
 		// End:0x12C
-		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(pawnOwner.m_Door.m_RotatingDoor.Location, pawnOwner.Location)), __NFUN_225__(__NFUN_216__(pawnOwner.m_Door2.m_RotatingDoor.Location, pawnOwner.Location))))
+		if((VSize((pawnOwner.m_Door.m_RotatingDoor.Location - pawnOwner.Location)) < VSize((pawnOwner.m_Door2.m_RotatingDoor.Location - pawnOwner.Location))))
 		{
 			m_IORDoor = pawnOwner.m_Door.m_RotatingDoor;			
 		}
@@ -182,40 +182,40 @@ function bool CanPlaceCharge()
 		}
 	}
 	// End:0x156
-	if(__NFUN_114__(m_IORDoor, none))
+	if((m_IORDoor == none))
 	{
 		return false;
 	}
 	// End:0x17E
-	if(__NFUN_132__(m_IORDoor.m_bInProcessOfClosing, m_IORDoor.m_bInProcessOfOpening))
+	if((m_IORDoor.m_bInProcessOfClosing || m_IORDoor.m_bInProcessOfOpening))
 	{
 		return false;
 	}
 	// End:0x1A8
-	if(__NFUN_129__(pawnOwner.m_bIsPlayer))
+	if((!pawnOwner.m_bIsPlayer))
 	{
 		m_vLocation = m_IORDoor.Location;
 		return true;
 	}
-	HitActor = pawnOwner.__NFUN_277__(vHitLocation, vHitNormal, __NFUN_215__(Owner.Location, __NFUN_213__(float(100), Vector(Owner.Rotation))), Owner.Location, true);
+	HitActor = pawnOwner.Trace(vHitLocation, vHitNormal, (Owner.Location + (float(100) * Vector(Owner.Rotation))), Owner.Location, true);
 	// End:0x21E
-	if(__NFUN_132__(__NFUN_114__(HitActor, none), __NFUN_129__(HitActor.__NFUN_303__('R6IORotatingDoor'))))
+	if(((HitActor == none) || (!HitActor.IsA('R6IORotatingDoor'))))
 	{
 		return false;
 	}
 	// End:0x250
-	if(__NFUN_132__(R6IORotatingDoor(HitActor).m_bTreatDoorAsWindow, R6IORotatingDoor(HitActor).m_bBroken))
+	if((R6IORotatingDoor(HitActor).m_bTreatDoorAsWindow || R6IORotatingDoor(HitActor).m_bBroken))
 	{
 		return false;
 	}
 	m_vLocation = m_IORDoor.Location;
 	// End:0x27A
-	if(__NFUN_129__(pawnOwner.IsLocallyControlled()))
+	if((!pawnOwner.IsLocallyControlled()))
 	{
 		return true;
 	}
 	// End:0x2AB
-	if(__NFUN_114__(m_IORDoor, R6PlayerController(pawnOwner.Controller).m_CurrentCircumstantialAction.aQueryTarget))
+	if((m_IORDoor == R6PlayerController(pawnOwner.Controller).m_CurrentCircumstantialAction.aQueryTarget))
 	{
 		return true;
 	}
@@ -240,15 +240,15 @@ simulated function name GetFiringAnimName()
 simulated function Tick(float fDeltaTime)
 {
 	// End:0x0D
-	if(__NFUN_114__(Owner, none))
+	if((Owner == none))
 	{
 		return;
 	}
 	// End:0xB1
-	if(__NFUN_130__(m_bInstallingCharge, __NFUN_132__(__NFUN_132__(m_IORDoor.m_bInProcessOfClosing, m_IORDoor.m_bInProcessOfOpening), __NFUN_176__(m_IORDoor.m_fNetDamagePercentage, 10.0000000))))
+	if((m_bInstallingCharge && ((m_IORDoor.m_bInProcessOfClosing || m_IORDoor.m_bInProcessOfOpening) || (m_IORDoor.m_fNetDamagePercentage < 10.0000000))))
 	{
 		// End:0xAB
-		if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), R6Pawn(Owner).IsLocallyControlled())))
+		if(((int(Level.NetMode) == int(NM_Client)) || ((int(Level.NetMode) == int(NM_ListenServer)) && R6Pawn(Owner).IsLocallyControlled())))
 		{
 			ServerCancelChargeInstallation();
 		}
@@ -264,14 +264,14 @@ state ChargeReady
 	function Timer()
 	{
 		// End:0x41
-		if(__NFUN_132__(__NFUN_132__(__NFUN_129__(R6Pawn(Owner).m_bIsPlayer), R6Pawn(Owner).m_bPostureTransition), __NFUN_129__(m_bInstallingCharge)))
+		if((((!R6Pawn(Owner).m_bIsPlayer) || R6Pawn(Owner).m_bPostureTransition) || (!m_bInstallingCharge)))
 		{
 			return;
 		}
 		// End:0xA2
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " state ChargeReady : Timer() has expired "), string(R6PlayerController(Pawn(Owner).Controller).m_bPlacedExplosive)));
+			Log(((string(self) $ " state ChargeReady : Timer() has expired ") $ string(R6PlayerController(Pawn(Owner).Controller).m_bPlacedExplosive)));
 		}
 		// End:0x119
 		if(R6PlayerController(Pawn(Owner).Controller).m_bPlacedExplosive)
@@ -282,7 +282,7 @@ state ChargeReady
 			m_bInstallingCharge = false;
 			m_bRaiseWeapon = false;
 			m_FPWeapon.m_smGun.SetStaticMesh(m_DetonatorStaticMesh);
-			__NFUN_113__('ChargeArmed');
+			GotoState('ChargeArmed');
 		}
 		return;
 	}

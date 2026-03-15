@@ -28,7 +28,7 @@ function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 	local R6IOBomb bomb;
 
 	// End:0x11
-	if(__NFUN_119__(m_r6IOObject, anInteractiveObject))
+	if((m_r6IOObject != anInteractiveObject))
 	{
 		return;
 	}

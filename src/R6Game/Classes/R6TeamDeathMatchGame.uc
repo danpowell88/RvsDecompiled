@@ -44,7 +44,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	if(m_objDeathmatch.m_bCompleted)
 	{
 		// End:0xA2
-		if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 2))
+		if((m_objDeathmatch.m_iWinningTeam == 2))
 		{
 			BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 			BroadcastMissionObjMsg("", "", "GreenNeutralizedRed", none, int(GetGameMsgLifeTime()));
@@ -53,7 +53,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		else
 		{
 			// End:0x112
-			if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 3))
+			if((m_objDeathmatch.m_iWinningTeam == 3))
 			{
 				BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 				BroadcastMissionObjMsg("", "", "RedNeutralizedGreen", none, int(GetGameMsgLifeTime()));
@@ -66,7 +66,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0x137
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : it's a draw");
+			Log("** Game : it's a draw");
 		}
 		BroadcastGameMsg("", "", "RoundIsADraw", m_sndRoundIsADraw, int(GetGameMsgLifeTime()));
 	}

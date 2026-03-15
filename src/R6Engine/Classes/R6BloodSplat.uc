@@ -22,11 +22,11 @@ simulated function PostBeginPlay()
 	local Rotator DecalRot;
 
 	// End:0x6C
-	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) != int(NM_DedicatedServer)))
 	{
 		DecalRot = Rotation;
-		DecalRot.Roll = __NFUN_167__(65535);
-		Level.m_DecalManager.__NFUN_2900__(Location, DecalRot, m_BloodSplatTexture, 2, 1, 0.0000000, 0.0000000, 300.0000000);
+		DecalRot.Roll = Rand(65535);
+		Level.m_DecalManager.AddDecal(Location, DecalRot, m_BloodSplatTexture, 2, 1, 0.0000000, 0.0000000, 300.0000000);
 	}
 	super.PostBeginPlay();
 	return;

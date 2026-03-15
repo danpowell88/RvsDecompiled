@@ -34,7 +34,7 @@ function BeforePaint(Canvas C, float fMouseX, float fMouseY)
 
 	C.Font = m_Font;
 	TextSize(C, "TEST", tW, tH);
-	m_fItemHeight = __NFUN_174__(tH, float(2));
+	m_fItemHeight = (tH + float(2));
 	m_VertSB.SetBorderColor(m_BorderColor);
 	super(UWindowDialogControl).BeforePaint(C, fMouseX, fMouseY);
 	return;
@@ -60,14 +60,14 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	C.Style = 5;
 	C.Font = m_Font;
 	TextSize(C, "TEST", tW, tH);
-	TextY = __NFUN_172__(__NFUN_175__(H, tH), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	__NFUN_184__(X, pListInfoMapItem.fMapXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	ClipTextWidth(C, X, __NFUN_174__(Y, TextY), pListInfoMapItem.szMap, pListInfoMapItem.fMapWidth);
-	__NFUN_184__(X, pListInfoMapItem.fTypeXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	ClipTextWidth(C, X, __NFUN_174__(Y, TextY), pListInfoMapItem.szType, pListInfoMapItem.fTypeWidth);
+	TextY = ((H - tH) / float(2));
+	TextY = float(int((TextY + 0.5000000)));
+	(X += pListInfoMapItem.fMapXOff);
+	C.SetPos(X, (Y + TextY));
+	ClipTextWidth(C, X, (Y + TextY), pListInfoMapItem.szMap, pListInfoMapItem.fMapWidth);
+	(X += pListInfoMapItem.fTypeXOff);
+	C.SetPos(X, (Y + TextY));
+	ClipTextWidth(C, X, (Y + TextY), pListInfoMapItem.szType, pListInfoMapItem.fTypeWidth);
 	return;
 }
 

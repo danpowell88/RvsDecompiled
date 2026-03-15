@@ -22,13 +22,13 @@ function PostBeginPlay()
 	Dir.Pitch = -16384;
 	Dir.Yaw = 0;
 	Dir.Roll = 0;
-	__NFUN_299__(Dir);
+	SetRotation(Dir);
 	return;
 }
 
 event UpdateShadow()
 {
-	__NFUN_267__(R6Pawn(Owner).GetBoneCoords('R6 Spine', true).Origin);
+	__NFUN_267__(R6Pawn(Owner).GetBoneCoords('R6 Spine', true).Origin) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	AttachProjector();
 	m_bAttached = true;
 	return;

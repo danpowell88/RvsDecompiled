@@ -19,7 +19,7 @@ function bool InitActionFor(ScriptedController C)
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(FadeTime));
+	return (ActionString @ string(FadeTime));
 	return;
 }
 
@@ -34,28 +34,28 @@ function bool StillTicking(ScriptedController C, float DeltaTime)
 	local bool bXDone, bYDone, bZDone;
 	local Vector V;
 
-	V = __NFUN_216__(C.GetInstigator().PhysicsVolume.ViewFlash, __NFUN_212__(__NFUN_216__(C.Instigator.PhysicsVolume.default.ViewFlash, TargetFlash), __NFUN_172__(DeltaTime, FadeTime)));
+	V = (C.GetInstigator().PhysicsVolume.ViewFlash - ((C.Instigator.PhysicsVolume.default.ViewFlash - TargetFlash) * (DeltaTime / FadeTime)));
 	// End:0x94
-	if(__NFUN_176__(V.X, TargetFlash.X))
+	if((V.X < TargetFlash.X))
 	{
 		V.X = TargetFlash.X;
 		bXDone = true;
 	}
 	// End:0xCA
-	if(__NFUN_176__(V.Y, TargetFlash.Y))
+	if((V.Y < TargetFlash.Y))
 	{
 		V.Y = TargetFlash.Y;
 		bYDone = true;
 	}
 	// End:0x100
-	if(__NFUN_176__(V.Z, TargetFlash.Z))
+	if((V.Z < TargetFlash.Z))
 	{
 		V.Z = TargetFlash.Z;
 		bZDone = true;
 	}
 	C.GetInstigator().PhysicsVolume.ViewFlash = V;
 	// End:0x148
-	if(__NFUN_130__(__NFUN_130__(bXDone, bYDone), bZDone))
+	if(((bXDone && bYDone) && bZDone))
 	{
 		return false;
 	}

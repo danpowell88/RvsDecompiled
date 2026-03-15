@@ -18,7 +18,7 @@ class R6ExtractionZone extends R6
 function Touch(Actor Other)
 {
 	// End:0x5D
-	if(__NFUN_130__(__NFUN_119__(R6Pawn(Other), none), __NFUN_119__(Level.Game, none)))
+	if(((R6Pawn(Other) != none) && (Level.Game != none)))
 	{
 		R6Pawn(Other).EnteredExtractionZone(self);
 		R6AbstractGameInfo(Level.Game).EnteredExtractionZone(Other);
@@ -29,7 +29,7 @@ function Touch(Actor Other)
 function UnTouch(Actor Other)
 {
 	// End:0x5D
-	if(__NFUN_130__(__NFUN_119__(R6Pawn(Other), none), __NFUN_119__(Level.Game, none)))
+	if(((R6Pawn(Other) != none) && (Level.Game != none)))
 	{
 		R6AbstractGameInfo(Level.Game).LeftExtractionZone(Other);
 		R6Pawn(Other).LeftExtractionZone(self);

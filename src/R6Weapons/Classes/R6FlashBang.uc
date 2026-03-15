@@ -24,18 +24,18 @@ function HurtPawns()
 	local Actor HitActor;
 
 	// End:0x15B
-	foreach __NFUN_321__(Class'R6Engine.R6Pawn', aPawn, m_fBlindEffectRadius, Location)
+	foreach CollidingActors(Class'R6Engine.R6Pawn', aPawn, m_fBlindEffectRadius, Location)
 	{
 		// End:0x15A
-		if(__NFUN_155__(int(aPawn.m_eHealth), int(3)))
+		if((int(aPawn.m_eHealth) != int(3)))
 		{
-			HitActor = aPawn.__NFUN_1806__(vHitLocation, vHitNormal, Location, __NFUN_215__(aPawn.Location, aPawn.EyePosition()), __NFUN_158__(__NFUN_158__(__NFUN_158__(1, 2), 4), 32));
+			HitActor = aPawn.R6Trace(vHitLocation, vHitNormal, Location, (aPawn.Location + aPawn.EyePosition()), (((1 | 2) | 4) | 32));
 			// End:0x15A
-			if(__NFUN_114__(HitActor, none))
+			if((HitActor == none))
 			{
-				fDistFromFlashbang = __NFUN_225__(__NFUN_216__(aPawn.Location, Location));
-				fEffectiveStunValue = __NFUN_171__(float(m_iEnergy), __NFUN_175__(float(1), __NFUN_172__(fDistFromFlashbang, m_fBlindEffectRadius)));
-				vExplosionMomentum = __NFUN_212__(__NFUN_216__(vDamageLocation, Location), 0.2500000);
+				fDistFromFlashbang = VSize((aPawn.Location - Location));
+				fEffectiveStunValue = (float(m_iEnergy) * (float(1) - (fDistFromFlashbang / m_fBlindEffectRadius)));
+				vExplosionMomentum = ((vDamageLocation - Location) * 0.2500000);
 				vDamageLocation = aPawn.GetBoneCoords('R6 Head').Origin;
 				aPawn.ServerForceStunResult(4);
 				aPawn.R6TakeDamage(0, int(fEffectiveStunValue), Instigator, vDamageLocation, vExplosionMomentum, 0);
@@ -45,10 +45,10 @@ function HurtPawns()
 		}		
 	}	
 	// End:0x1DE
-	foreach __NFUN_312__(Class'R6Engine.R6InteractiveObject', anObject, m_fExplosionRadius, Location)
+	foreach VisibleCollidingActors(Class'R6Engine.R6InteractiveObject', anObject, m_fExplosionRadius, Location)
 	{
 		// End:0x1DD
-		if(__NFUN_130__(__NFUN_242__(anObject.m_bBreakableByFlashBang, true), __NFUN_151__(anObject.m_iHitPoints, 0)))
+		if(((anObject.m_bBreakableByFlashBang == true) && (anObject.m_iHitPoints > 0)))
 		{
 			anObject.R6TakeDamage(1000, int(fEffectiveStunValue), Instigator, anObject.Location, vect(0.0000000, 0.0000000, 0.0000000), 0);
 		}		

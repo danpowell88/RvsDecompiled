@@ -22,9 +22,9 @@ var R6WindowTextLabel m_InTheReleaseLabel;
 function Created()
 {
 	super.Created();
-	m_pServerOptFakeW = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, 0.0000000, __NFUN_171__(WinWidth, 0.5000000), WinHeight, self);
+	m_pServerOptFakeW = CreateWindow(Class'UWindow.UWindowWindow', 0.0000000, 0.0000000, (WinWidth * 0.5000000), WinHeight, self);
 	m_pServerOptFakeW.bAlwaysOnTop = true;
-	m_pServerOptFakeW2 = CreateWindow(Class'UWindow.UWindowWindow', 310.0000000, 136.0000000, __NFUN_171__(WinWidth, 0.5000000), __NFUN_175__(WinHeight, float(136)), self);
+	m_pServerOptFakeW2 = CreateWindow(Class'UWindow.UWindowWindow', 310.0000000, 136.0000000, (WinWidth * 0.5000000), (WinHeight - float(136)), self);
 	m_pServerOptFakeW2.bAlwaysOnTop = true;
 	InitOptionsTab(true);
 	Refresh();
@@ -40,7 +40,7 @@ function Refresh()
 	if(R6PlayerController(GetPlayerOwner()).CheckAuthority(R6PlayerController(GetPlayerOwner()).1))
 	{
 		// End:0x51
-		if(__NFUN_242__(m_bImAnAdmin, false))
+		if((m_bImAnAdmin == false))
 		{
 			m_bImAnAdmin = true;
 			R6PlayerController(GetPlayerOwner()).ServerPausePreGameRoundTime();
@@ -97,7 +97,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 
 	pTempList = R6WindowListGeneral(GetList(_eGameMode, _eCGWindowID));
 	// End:0x28
-	if(__NFUN_114__(pTempList, none))
+	if((pTempList == none))
 	{
 		return;
 	}
@@ -118,11 +118,11 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					if(_bUpdateValue)
 					{
 						m_pButtonsDef.ChangeButtonComboValue(int(9), string(pR6GameRepInfo.m_bInternetSvr), pTempList, true);
-						m_pButtonsDef.ChangeButtonCounterValue(int(1), pR6GameRepInfo.m_iRoundsPerMatch, pTempList, __NFUN_129__(m_bImAnAdmin));
-						m_pButtonsDef.ChangeButtonCounterValue(int(2), __NFUN_145__(pR6GameRepInfo.TimeLimit, 60), pTempList, __NFUN_129__(m_bImAnAdmin));
-						m_pButtonsDef.ChangeButtonCounterValue(int(7), int(pR6GameRepInfo.m_fTimeBetRounds), pTempList, __NFUN_129__(m_bImAnAdmin));
-						m_pButtonsDef.ChangeButtonCounterValue(int(3), pR6GameRepInfo.m_MaxPlayers, pTempList, __NFUN_129__(m_bImAnAdmin));
-						m_pButtonsDef.ChangeButtonCounterValue(int(4), int(pR6GameRepInfo.m_fBombTime), pTempList, __NFUN_129__(m_bImAnAdmin));
+						m_pButtonsDef.ChangeButtonCounterValue(int(1), pR6GameRepInfo.m_iRoundsPerMatch, pTempList, (!m_bImAnAdmin));
+						m_pButtonsDef.ChangeButtonCounterValue(int(2), (pR6GameRepInfo.TimeLimit / 60), pTempList, (!m_bImAnAdmin));
+						m_pButtonsDef.ChangeButtonCounterValue(int(7), int(pR6GameRepInfo.m_fTimeBetRounds), pTempList, (!m_bImAnAdmin));
+						m_pButtonsDef.ChangeButtonCounterValue(int(3), pR6GameRepInfo.m_MaxPlayers, pTempList, (!m_bImAnAdmin));
+						m_pButtonsDef.ChangeButtonCounterValue(int(4), int(pR6GameRepInfo.m_fBombTime), pTempList, (!m_bImAnAdmin));
 						m_pButtonsDef.ChangeButtonBoxValue(int(10), pR6GameRepInfo.m_bDedicatedSvr, pTempList, true);
 						m_pButtonsDef.ChangeButtonBoxValue(int(11), pR6GameRepInfo.m_bFriendlyFire, pTempList);
 						m_bBkpTKPenalty = pR6GameRepInfo.m_bMenuTKPenaltySetting;
@@ -145,7 +145,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					if(_bUpdateValue)
 					{
 						// End:0x34A
-						if(Class'Engine.Actor'.static.__NFUN_1009__().m_bPBInstalled)
+						if(Class'Engine.Actor'.static.GetGameOptions().m_bPBInstalled)
 						{
 							m_pButtonsDef.ChangeButtonBoxValue(int(22), pR6GameRepInfo.m_bPunkBuster, pTempList, true);							
 						}
@@ -153,14 +153,14 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 						{
 							m_pButtonsDef.ChangeButtonBoxValue(int(22), false, pTempList, true);
 						}
-						UpdateCamera(int(28), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 16), 0), false, pTempList);
-						UpdateCamera(int(24), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 1), 0), false, pTempList, true);
-						UpdateCamera(int(25), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 2), 0), false, pTempList, true);
-						UpdateCamera(int(26), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 4), 0), false, pTempList, true);
-						UpdateCamera(int(27), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 8), 0), false, pTempList, true);
-						UpdateCamera(int(29), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 32), 0), false, pTempList, true);
-						UpdateCamSpecialCase(__NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 32), 0), false);
-						UpdateCamSpecialCase(__NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 16), 0), true);						
+						UpdateCamera(int(28), ((pR6GameRepInfo.m_iDeathCameraMode & 16) > 0), false, pTempList);
+						UpdateCamera(int(24), ((pR6GameRepInfo.m_iDeathCameraMode & 1) > 0), false, pTempList, true);
+						UpdateCamera(int(25), ((pR6GameRepInfo.m_iDeathCameraMode & 2) > 0), false, pTempList, true);
+						UpdateCamera(int(26), ((pR6GameRepInfo.m_iDeathCameraMode & 4) > 0), false, pTempList, true);
+						UpdateCamera(int(27), ((pR6GameRepInfo.m_iDeathCameraMode & 8) > 0), false, pTempList, true);
+						UpdateCamera(int(29), ((pR6GameRepInfo.m_iDeathCameraMode & 32) > 0), false, pTempList, true);
+						UpdateCamSpecialCase(((pR6GameRepInfo.m_iDeathCameraMode & 32) > 0), false);
+						UpdateCamSpecialCase(((pR6GameRepInfo.m_iDeathCameraMode & 16) > 0), true);						
 					}
 					else
 					{
@@ -189,7 +189,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 						m_pButtonsDef.ChangeButtonComboValue(int(9), string(pR6GameRepInfo.m_bInternetSvr), pTempList, true);
 						m_pButtonsDef.ChangeButtonComboValue(int(23), string(pR6GameRepInfo.m_iDiffLevel), pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(6), pR6GameRepInfo.m_iRoundsPerMatch, pTempList);
-						m_pButtonsDef.ChangeButtonCounterValue(int(2), __NFUN_145__(pR6GameRepInfo.TimeLimit, 60), pTempList);
+						m_pButtonsDef.ChangeButtonCounterValue(int(2), (pR6GameRepInfo.TimeLimit / 60), pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(7), int(pR6GameRepInfo.m_fTimeBetRounds), pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(3), pR6GameRepInfo.m_MaxPlayers, pTempList);
 						m_pButtonsDef.ChangeButtonCounterValue(int(8), pR6GameRepInfo.m_iNbOfTerro, pTempList);
@@ -213,7 +213,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 					if(_bUpdateValue)
 					{
 						// End:0x772
-						if(Class'Engine.Actor'.static.__NFUN_1009__().m_bPBInstalled)
+						if(Class'Engine.Actor'.static.GetGameOptions().m_bPBInstalled)
 						{
 							m_pButtonsDef.ChangeButtonBoxValue(int(22), pR6GameRepInfo.m_bPunkBuster, pTempList, true);							
 						}
@@ -221,10 +221,10 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 						{
 							m_pButtonsDef.ChangeButtonBoxValue(int(22), false, pTempList, true);
 						}
-						UpdateCamera(int(24), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 1), 0), false, pTempList);
-						UpdateCamera(int(25), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 2), 0), false, pTempList);
-						UpdateCamera(int(26), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 4), 0), false, pTempList);
-						UpdateCamera(int(27), __NFUN_151__(__NFUN_156__(pR6GameRepInfo.m_iDeathCameraMode, 8), 0), false, pTempList);						
+						UpdateCamera(int(24), ((pR6GameRepInfo.m_iDeathCameraMode & 1) > 0), false, pTempList);
+						UpdateCamera(int(25), ((pR6GameRepInfo.m_iDeathCameraMode & 2) > 0), false, pTempList);
+						UpdateCamera(int(26), ((pR6GameRepInfo.m_iDeathCameraMode & 4) > 0), false, pTempList);
+						UpdateCamera(int(27), ((pR6GameRepInfo.m_iDeathCameraMode & 8) > 0), false, pTempList);						
 					}
 					else
 					{
@@ -243,7 +243,7 @@ function UpdateButtons(Actor.EGameModeInfo _eGameMode, R6MenuMPCreateGameTab.eCr
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("UpdateButtons not a valid game mode");
+			Log("UpdateButtons not a valid game mode");
 			// End:0x88B
 			break;
 			break;
@@ -264,7 +264,7 @@ function bool SendNewServerSettings()
 	local bool bTempValue, bSettingsChange, bLogSettingsChange;
 
 	// End:0x0D
-	if(__NFUN_129__(m_bServerSettingsChange))
+	if((!m_bServerSettingsChange))
 	{
 		return false;
 	}
@@ -273,40 +273,40 @@ function bool SendNewServerSettings()
 	pGameRepInfo = R6GameReplicationInfo(R6MenuInGameMultiPlayerRootWindow(Root).m_R6GameMenuCom.m_GameRepInfo);
 	pPlayContr = R6PlayerController(GetPlayerOwner());
 	// End:0xAB
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_114__(pTempButList, none), __NFUN_114__(pTempCamList, none)), __NFUN_114__(pGameRepInfo, none)), __NFUN_114__(pPlayContr, none)))
+	if(((((pTempButList == none) || (pTempCamList == none)) || (pGameRepInfo == none)) || (pPlayContr == none)))
 	{
 		return false;
 	}
 	iTempValue = m_pButtonsDef.GetButtonCounterValue(int(2), pTempButList);
 	// End:0x108
-	if(__NFUN_155__(iTempValue, __NFUN_145__(pGameRepInfo.TimeLimit, 60)))
+	if((iTempValue != (pGameRepInfo.TimeLimit / 60)))
 	{
 		bSettingsChange = true;
-		pPlayContr.ServerNewGeneralSettings(2,, __NFUN_144__(iTempValue, 60));
+		pPlayContr.ServerNewGeneralSettings(2,, (iTempValue * 60));
 	}
 	iTempValue = m_pButtonsDef.GetButtonCounterValue(int(7), pTempButList);
 	// End:0x16A
-	if(__NFUN_181__(float(iTempValue), pGameRepInfo.m_fTimeBetRounds))
+	if((float(iTempValue) != pGameRepInfo.m_fTimeBetRounds))
 	{
 		bSettingsChange = true;
-		__NFUN_132__(pPlayContr.ServerNewGeneralSettings(7,, iTempValue), bSettingsChange);
+		(pPlayContr.ServerNewGeneralSettings(7,, iTempValue) || bSettingsChange);
 	}
 	iTempValue = m_pButtonsDef.GetButtonCounterValue(int(3), pTempButList);
 	// End:0x1D0
-	if(__NFUN_130__(__NFUN_151__(iTempValue, -1), __NFUN_155__(iTempValue, pGameRepInfo.m_MaxPlayers)))
+	if(((iTempValue > -1) && (iTempValue != pGameRepInfo.m_MaxPlayers)))
 	{
 		bSettingsChange = true;
 		pPlayContr.ServerNewGeneralSettings(3,, iTempValue);
 	}
 	bTempValue = m_pButtonsDef.GetButtonBoxValue(int(11), pTempButList);
 	// End:0x228
-	if(__NFUN_243__(bTempValue, pGameRepInfo.m_bFriendlyFire))
+	if((bTempValue != pGameRepInfo.m_bFriendlyFire))
 	{
 		bSettingsChange = true;
 		pPlayContr.ServerNewGeneralSettings(11, bTempValue);
 	}
 	// End:0x2C9
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(14), pTempButList), none))
+	if((m_pButtonsDef.FindButtonItem(int(14), pTempButList) != none))
 	{
 		// End:0x271
 		if(m_pButtonsDef.IsButtonBoxDisabled(int(14), pTempButList))
@@ -318,40 +318,40 @@ function bool SendNewServerSettings()
 			bTempValue = m_pButtonsDef.GetButtonBoxValue(int(14), pTempButList);
 		}
 		// End:0x2C9
-		if(__NFUN_243__(bTempValue, pGameRepInfo.m_bMenuTKPenaltySetting))
+		if((bTempValue != pGameRepInfo.m_bMenuTKPenaltySetting))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(14, bTempValue);
 		}
 	}
 	// End:0x33F
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(15), pTempButList), none))
+	if((m_pButtonsDef.FindButtonItem(int(15), pTempButList) != none))
 	{
 		bTempValue = m_pButtonsDef.GetButtonBoxValue(int(15), pTempButList);
 		// End:0x33F
-		if(__NFUN_243__(bTempValue, pGameRepInfo.m_bRepAllowRadarOption))
+		if((bTempValue != pGameRepInfo.m_bRepAllowRadarOption))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(15, bTempValue);
 		}
 	}
 	// End:0x3B5
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(12), pTempButList), none))
+	if((m_pButtonsDef.FindButtonItem(int(12), pTempButList) != none))
 	{
 		bTempValue = m_pButtonsDef.GetButtonBoxValue(int(12), pTempButList);
 		// End:0x3B5
-		if(__NFUN_243__(bTempValue, pGameRepInfo.m_bShowNames))
+		if((bTempValue != pGameRepInfo.m_bShowNames))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(12, bTempValue);
 		}
 	}
 	// End:0x42B
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(18), pTempButList), none))
+	if((m_pButtonsDef.FindButtonItem(int(18), pTempButList) != none))
 	{
 		bTempValue = m_pButtonsDef.GetButtonBoxValue(int(18), pTempButList);
 		// End:0x42B
-		if(__NFUN_243__(bTempValue, pGameRepInfo.m_bFFPWeapon))
+		if((bTempValue != pGameRepInfo.m_bFFPWeapon))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(18, bTempValue);
@@ -359,45 +359,45 @@ function bool SendNewServerSettings()
 	}
 	bTempValue = GetCameraSelection(int(24), pTempCamList);
 	// End:0x47F
-	if(__NFUN_243__(bTempValue, __NFUN_151__(__NFUN_156__(pGameRepInfo.m_iDeathCameraMode, 1), 0)))
+	if((bTempValue != ((pGameRepInfo.m_iDeathCameraMode & 1) > 0)))
 	{
 		bSettingsChange = true;
 		pPlayContr.ServerNewGeneralSettings(24, bTempValue);
 	}
 	bTempValue = GetCameraSelection(int(25), pTempCamList);
 	// End:0x4D4
-	if(__NFUN_243__(bTempValue, __NFUN_151__(__NFUN_156__(pGameRepInfo.m_iDeathCameraMode, 2), 0)))
+	if((bTempValue != ((pGameRepInfo.m_iDeathCameraMode & 2) > 0)))
 	{
 		bSettingsChange = true;
 		pPlayContr.ServerNewGeneralSettings(25, bTempValue);
 	}
 	bTempValue = GetCameraSelection(int(26), pTempCamList);
 	// End:0x529
-	if(__NFUN_243__(bTempValue, __NFUN_151__(__NFUN_156__(pGameRepInfo.m_iDeathCameraMode, 4), 0)))
+	if((bTempValue != ((pGameRepInfo.m_iDeathCameraMode & 4) > 0)))
 	{
 		bSettingsChange = true;
 		pPlayContr.ServerNewGeneralSettings(26, bTempValue);
 	}
 	bTempValue = GetCameraSelection(int(27), pTempCamList);
 	// End:0x57E
-	if(__NFUN_243__(bTempValue, __NFUN_151__(__NFUN_156__(pGameRepInfo.m_iDeathCameraMode, 8), 0)))
+	if((bTempValue != ((pGameRepInfo.m_iDeathCameraMode & 8) > 0)))
 	{
 		bSettingsChange = true;
 		pPlayContr.ServerNewGeneralSettings(27, bTempValue);
 	}
 	// End:0x76D
-	if(__NFUN_122__(m_pOptionsGameMode.GetValue2(), string(m_ANbOfGameMode[0])))
+	if((m_pOptionsGameMode.GetValue2() == string(m_ANbOfGameMode[0])))
 	{
 		bTempValue = GetCameraSelection(int(28), pTempCamList);
 		// End:0x5F0
-		if(__NFUN_243__(bTempValue, __NFUN_151__(__NFUN_156__(pGameRepInfo.m_iDeathCameraMode, 16), 0)))
+		if((bTempValue != ((pGameRepInfo.m_iDeathCameraMode & 16) > 0)))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(28, bTempValue);
 		}
 		bTempValue = GetCameraSelection(int(29), pTempCamList);
 		// End:0x645
-		if(__NFUN_243__(bTempValue, __NFUN_151__(__NFUN_156__(pGameRepInfo.m_iDeathCameraMode, 32), 0)))
+		if((bTempValue != ((pGameRepInfo.m_iDeathCameraMode & 32) > 0)))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(29, bTempValue);

@@ -14,12 +14,12 @@ var Region m_ROverButton;
 function BeforePaint(Canvas C, float X, float Y)
 {
 	// End:0x6C
-	if(__NFUN_119__(m_pPreviousButtonPos, none))
+	if((m_pPreviousButtonPos != none))
 	{
 		// End:0x69
-		if(__NFUN_129__(m_bSetParam))
+		if((!m_bSetParam))
 		{
-			WinLeft = __NFUN_174__(__NFUN_174__(m_pPreviousButtonPos.WinLeft, m_pPreviousButtonPos.m_textSize), __NFUN_171__(__NFUN_175__(float(620), m_pRefButtonPos.m_fTotalButtonsSize), 0.2500000));
+			WinLeft = ((m_pPreviousButtonPos.WinLeft + m_pPreviousButtonPos.m_textSize) + ((float(620) - m_pRefButtonPos.m_fTotalButtonsSize) * 0.2500000));
 			m_pPreviousButtonPos = none;
 			m_bButtonIsReady = true;
 		}		
@@ -75,7 +75,7 @@ simulated function Click(float X, float Y)
 			break;
 		// End:0x18D
 		case 31:
-			R6MenuMultiPlayerWidget(OwnerWindow).m_GameService.__NFUN_3510__();
+			R6MenuMultiPlayerWidget(OwnerWindow).m_GameService.UnInitializeMSClient();
 			pFirstTabManager = R6MenuMultiPlayerWidget(OwnerWindow).m_pFirstTabManager;
 			pFirstTabManager.m_pMainTabControl.GotoTab(pFirstTabManager.m_pMainTabControl.GetTab(Localize("MultiPlayer", "Tab_LanServer", "R6Menu")));
 			R6MenuMultiPlayerWidget(OwnerWindow).m_GameService.m_GameServerList.Remove(0, R6MenuMultiPlayerWidget(OwnerWindow).m_GameService.m_GameServerList.Length);
@@ -125,44 +125,44 @@ simulated function Click(float X, float Y)
 			// End:0x3C9
 			if(R6Console(Root.Console).m_bStartedByGSClient)
 			{
-				_ServerSettings = Class'Engine.Actor'.static.__NFUN_1273__();
+				_ServerSettings = Class'Engine.Actor'.static.GetServerOptions();
 				// End:0x3C9
-				if(__NFUN_130__(__NFUN_151__(_ServerSettings.MaxPlayers, 8), __NFUN_154__(int(pCreateTabOptions.GetCurrentGameMode()), int(GetLevel().2))))
+				if(((_ServerSettings.MaxPlayers > 8) && (int(pCreateTabOptions.GetCurrentGameMode()) == int(GetLevel().2))))
 				{
 					r6Root.SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), Localize("MultiPlayer", "PopUp_Error_InvalidGSCoOpMaxPlayer", "R6Menu"), 37, int(2));
 					return;
 				}
 			}
 			// End:0x45B
-			if(__NFUN_129__(pCreateTabOptions.IsAdminPasswordValid()))
+			if((!pCreateTabOptions.IsAdminPasswordValid()))
 			{
 				r6Root.SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), Localize("MultiPlayer", "PopUp_Error_InvalidAdminPwrd", "R6Menu"), 27, int(2));
 				return;
 			}
 			pCreateTabOptions.FillSelectedMapList();
 			// End:0x4FB
-			if(__NFUN_152__(pCreateTabOptions.m_SelectedMapList.Length, 0))
+			if((pCreateTabOptions.m_SelectedMapList.Length <= 0))
 			{
 				r6Root.SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), Localize("MultiPlayer", "PopUp_Error_NoMapSelected", "R6Menu"), 27, int(2));				
 			}
 			else
 			{
 				// End:0x5B9
-				if(__NFUN_130__(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient), __NFUN_122__(pCreateTabOptions.m_pServerNameEdit.GetValue(), "")))
+				if(((!R6Console(Root.Console).m_bStartedByGSClient) && (pCreateTabOptions.m_pServerNameEdit.GetValue() == "")))
 				{
 					r6Root.SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), Localize("MultiPlayer", "PopUp_Error_NoServerName", "R6Menu"), 27, int(2));					
 				}
 				else
 				{
 					// End:0x616
-					if(__NFUN_132__(R6Console(Root.Console).m_bStartedByGSClient, R6Console(Root.Console).m_bNonUbiMatchMakingHost))
+					if((R6Console(Root.Console).m_bStartedByGSClient || R6Console(Root.Console).m_bNonUbiMatchMakingHost))
 					{
 						r6Root.m_pMenuCDKeyManager.StartCDKeyProcess();						
 					}
 					else
 					{
 						// End:0x6D3
-						if(__NFUN_130__(bool(pCreateTabOptions.m_pButtonsDef.GetButtonComboValue(int(pCreateTabOptions.9), pListGen)), __NFUN_129__(pCreateTabOptions.m_pButtonsDef.GetButtonBoxValue(int(pCreateTabOptions.10), pListGen))))
+						if((bool(pCreateTabOptions.m_pButtonsDef.GetButtonComboValue(int(pCreateTabOptions.9), pListGen)) && (!pCreateTabOptions.m_pButtonsDef.GetButtonBoxValue(int(pCreateTabOptions.10), pListGen))))
 						{
 							R6Console(Root.Console).szStoreGamePassWd = pCreateTabOptions.GetCreateGamePassword();
 							pCreateGW.m_pLoginWindow.StartLogInProcedure(OwnerWindow);
@@ -171,7 +171,7 @@ simulated function Click(float X, float Y)
 						else
 						{
 							// End:0x71D
-							if(__NFUN_129__(pCreateTabOptions.m_pButtonsDef.GetButtonBoxValue(int(pCreateTabOptions.10), pListGen)))
+							if((!pCreateTabOptions.m_pButtonsDef.GetButtonBoxValue(int(pCreateTabOptions.10), pListGen)))
 							{
 								r6Root.m_pMenuCDKeyManager.StartCDKeyProcess();								
 							}
@@ -188,12 +188,12 @@ simulated function Click(float X, float Y)
 		// End:0x764
 		case 39:
 			r6Root.ChangeCurrentWidget(20);
-			Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();
+			Class'Engine.Actor'.static.GetGameManager().RemoveFromIDList();
 			// End:0x782
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("Button not supported");
+			Log("Button not supported");
 			// End:0x782
 			break;
 			break;

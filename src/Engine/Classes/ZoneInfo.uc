@@ -62,15 +62,15 @@ simulated function LinkToSkybox()
 	local SkyZoneInfo TempSkyZone;
 
 	// End:0x21
-	foreach __NFUN_304__(Class'Engine.SkyZoneInfo', TempSkyZone, 'None')
+	foreach AllActors(Class'Engine.SkyZoneInfo', TempSkyZone, 'None')
 	{
 		SkyZone = TempSkyZone;		
 	}	
 	// End:0x66
-	foreach __NFUN_304__(Class'Engine.SkyZoneInfo', TempSkyZone, 'None')
+	foreach AllActors(Class'Engine.SkyZoneInfo', TempSkyZone, 'None')
 	{
 		// End:0x65
-		if(__NFUN_242__(TempSkyZone.bHighDetail, Level.bHighDetailMode))
+		if((TempSkyZone.bHighDetail == Level.bHighDetailMode))
 		{
 			SkyZone = TempSkyZone;
 		}		
@@ -104,36 +104,36 @@ simulated event ActorEntered(Actor Other)
 	local Controller C;
 
 	// End:0x13A
-	if(__NFUN_130__(Level.m_bPlaySound, __NFUN_155__(m_EnterSounds.Length, 0)))
+	if((Level.m_bPlaySound && (m_EnterSounds.Length != 0)))
 	{
 		// End:0x50
-		if(Other.__NFUN_303__('R6Pawn'))
+		if(Other.IsA('R6Pawn'))
 		{
 			C = Pawn(Other).Controller;			
 		}
 		else
 		{
 			// End:0x74
-			if(Other.__NFUN_303__('R6PlayerController'))
+			if(Other.IsA('R6PlayerController'))
 			{
 				C = Controller(Other);
 			}
 		}
 		// End:0x13A
-		if(__NFUN_119__(C, none))
+		if((C != none))
 		{
 			C.m_CurrentAmbianceObject = self;
 			C.m_bUseExitSounds = false;
 			// End:0x13A
-			if(__NFUN_130__(__NFUN_119__(PlayerController(C), none), __NFUN_119__(Viewport(PlayerController(C).Player), none)))
+			if(((PlayerController(C) != none) && (Viewport(PlayerController(C).Player) != none)))
 			{
 				iSoundNb = 0;
 				J0xD7:
 
 				// End:0x101 [Loop If]
-				if(__NFUN_150__(iSoundNb, m_EnterSounds.Length))
+				if((iSoundNb < m_EnterSounds.Length))
 				{
-					__NFUN_264__(m_EnterSounds[iSoundNb], 11);
+					__NFUN_264__(m_EnterSounds[iSoundNb], 11) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 					__NFUN_165__(iSoundNb);
 					// [Loop Continue]
 					goto J0xD7;

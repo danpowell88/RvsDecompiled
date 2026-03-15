@@ -24,10 +24,10 @@ function bool IsBombArmedOrExploded()
 	local R6IOBomb ioBomb;
 
 	// End:0x3A
-	foreach __NFUN_313__(Class'R6Engine.R6IOBomb', ioBomb)
+	foreach DynamicActors(Class'R6Engine.R6IOBomb', ioBomb)
 	{
 		// End:0x39
-		if(__NFUN_132__(ioBomb.m_bIsActivated, ioBomb.m_bExploded))
+		if((ioBomb.m_bIsActivated || ioBomb.m_bExploded))
 		{			
 			return true;
 		}		
@@ -59,7 +59,7 @@ function PawnKilled(Pawn killedPawn)
 	if(m_objDeathmatch.m_bCompleted)
 	{
 		// End:0x75
-		if(__NFUN_132__(__NFUN_129__(IsBombArmedOrExploded()), __NFUN_154__(m_objDeathmatch.m_iWinningTeam, 3)))
+		if(((!IsBombArmedOrExploded()) || (m_objDeathmatch.m_iWinningTeam == 3)))
 		{
 			m_objDeathmatch.m_bIfCompletedMissionIsSuccessfull = true;
 			bCheckEndGame = true;			
@@ -71,16 +71,16 @@ function PawnKilled(Pawn killedPawn)
 		if(m_objDeathmatch.m_bFailed)
 		{
 			// End:0xB1
-			if(__NFUN_129__(IsBombArmedOrExploded()))
+			if((!IsBombArmedOrExploded()))
 			{
 				m_objDeathmatch.m_bIfFailedMissionIsAborted = true;
 				bCheckEndGame = true;				
 			}
 			else
 			{
-				fTimeLeft = __NFUN_175__(m_fEndingTime, Level.TimeSeconds);
+				fTimeLeft = (m_fEndingTime - Level.TimeSeconds);
 				// End:0xE4
-				if(__NFUN_176__(fTimeLeft, float(0)))
+				if((fTimeLeft < float(0)))
 				{
 					bForceFailNow = true;					
 				}
@@ -89,13 +89,13 @@ function PawnKilled(Pawn killedPawn)
 					bForceFailNow = true;
 					fTimeToExplode = 3.0000000;
 					// End:0x168
-					foreach __NFUN_313__(Class'R6Engine.R6IOBomb', ioBomb)
+					foreach DynamicActors(Class'R6Engine.R6IOBomb', ioBomb)
 					{
 						// End:0x167
-						if(__NFUN_130__(ioBomb.m_bIsActivated, __NFUN_178__(ioBomb.m_fTimeLeft, fTimeLeft)))
+						if((ioBomb.m_bIsActivated && (ioBomb.m_fTimeLeft <= fTimeLeft)))
 						{
 							// End:0x15F
-							if(__NFUN_177__(ioBomb.m_fTimeLeft, fTimeToExplode))
+							if((ioBomb.m_fTimeLeft > fTimeToExplode))
 							{
 								ioBomb.ForceTimeLeft(fTimeToExplode);
 							}
@@ -164,7 +164,7 @@ function NotifyMatchStart()
 	m_objDeathmatch.m_bIfCompletedMissionIsSuccessfull = false;
 	m_objDeathmatch.m_bIfFailedMissionIsAborted = false;
 	// End:0x83
-	foreach __NFUN_313__(Class'R6Engine.R6IOBomb', ioBomb)
+	foreach DynamicActors(Class'R6Engine.R6IOBomb', ioBomb)
 	{
 		ioBomb.m_fTimeLeft = m_fBombTime;
 		ioBomb.m_fTimeOfExplosion = m_fBombTime;
@@ -190,12 +190,12 @@ function InitObjectives()
 
 	iLength = m_missionMgr.m_aMissionObjectives.Length;
 	// End:0x157
-	foreach __NFUN_304__(Class'R6Engine.R6IOBomb', ioBomb)
+	foreach AllActors(Class'R6Engine.R6IOBomb', ioBomb)
 	{
 		objBombDetonation = new (none) Class'R6Game.R6MObjPreventBombDetonation';
 		objBombDetonation.m_r6IOObject = ioBomb;
 		m_missionMgr.m_aMissionObjectives[iLength] = objBombDetonation;
-		__NFUN_165__(iLength);
+		(iLength++);
 		objBombDetonation.m_bIfFailedMissionIsAborted = true;
 		objBombDetonation.m_bIfDetonateObjectiveIsFailed = true;
 		objBombDetonation.m_bIfDeviceIsActivatedObjectiveIsCompleted = false;
@@ -208,13 +208,13 @@ function InitObjectives()
 		// End:0x156
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Bomb Added: ", string(ioBomb)), " armedMsg"), ioBomb.m_szMsgArmedID), " disarmed="), ioBomb.m_szMsgDisarmedID));
+			Log(((((("Bomb Added: " $ string(ioBomb)) $ " armedMsg") $ ioBomb.m_szMsgArmedID) $ " disarmed=") $ ioBomb.m_szMsgDisarmedID));
 		}		
 	}	
 	// End:0x1AC
-	if(__NFUN_130__(__NFUN_129__(bBombExist), m_missionMgr.m_bEnableCheckForErrors))
+	if(((!bBombExist) && m_missionMgr.m_bEnableCheckForErrors))
 	{
-		__NFUN_231__(__NFUN_112__("WARNING: there is no bomb in the game type: ", string(self)));
+		Log(("WARNING: there is no bomb in the game type: " $ string(self)));
 	}
 	m_missionMgr.m_bOnSuccessAllObjectivesAreCompleted = false;
 	Level.m_bUseDefaultMoralityRules = false;
@@ -244,7 +244,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 		// End:0x82
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(" R6TeamBomb: ", Localize("Game", ioBomb.m_szMsgArmedID, ioBomb.GetMissionObjLocFile())));
+			Log((" R6TeamBomb: " $ Localize("Game", ioBomb.m_szMsgArmedID, ioBomb.GetMissionObjLocFile())));
 		}
 		BroadcastMissionObjMsg(ioBomb.GetMissionObjLocFile(), "", ioBomb.m_szMsgArmedID);		
 	}
@@ -253,7 +253,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 		// End:0xEF
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(" R6TeamBomb: ", Localize("Game", ioBomb.m_szMsgDisarmedID, ioBomb.GetMissionObjLocFile())));
+			Log((" R6TeamBomb: " $ Localize("Game", ioBomb.m_szMsgDisarmedID, ioBomb.GetMissionObjLocFile())));
 		}
 		BroadcastMissionObjMsg(ioBomb.GetMissionObjLocFile(), "", ioBomb.m_szMsgDisarmedID);
 	}
@@ -261,7 +261,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 	if(m_objDeathmatch.m_bCompleted)
 	{
 		// End:0x157
-		if(__NFUN_129__(IsBombArmedOrExploded()))
+		if((!IsBombArmedOrExploded()))
 		{
 			m_objDeathmatch.m_bIfCompletedMissionIsSuccessfull = true;
 			// End:0x157
@@ -292,7 +292,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	gameRepInfo = R6GameReplicationInfo(GameReplicationInfo);
 	bBombExploded = false;
 	// End:0x51
-	foreach __NFUN_304__(Class'R6Engine.R6IOBomb', ioBomb)
+	foreach AllActors(Class'R6Engine.R6IOBomb', ioBomb)
 	{
 		// End:0x50
 		if(ioBomb.m_bExploded)
@@ -308,7 +308,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0x8A
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : bravo win: bomb exploded");
+			Log("** Game : bravo win: bomb exploded");
 		}
 		BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 		BroadcastMissionObjMsg(ioBomb.GetMissionObjLocFile(), "", "BombHasDetonated", none, int(GetGameMsgLifeTime()));
@@ -322,7 +322,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 			// End:0x126
 			if(bShowLog)
 			{
-				__NFUN_231__("** Game : it's a draw");
+				Log("** Game : it's a draw");
 			}
 			BroadcastGameMsg("", "", "RoundIsADraw", m_sndRoundIsADraw, int(GetGameMsgLifeTime()));			
 		}
@@ -332,12 +332,12 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 			if(m_objDeathmatch.m_bCompleted)
 			{
 				// End:0x202
-				if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 2))
+				if((m_objDeathmatch.m_iWinningTeam == 2))
 				{
 					// End:0x1A2
 					if(bShowLog)
 					{
-						__NFUN_231__("** Game : alpha eleminated bravo");
+						Log("** Game : alpha eleminated bravo");
 					}
 					BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 					BroadcastMissionObjMsg("", "", "GreenNeutralizedRed", none, int(GetGameMsgLifeTime()));
@@ -346,12 +346,12 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 				else
 				{
 					// End:0x29F
-					if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 3))
+					if((m_objDeathmatch.m_iWinningTeam == 3))
 					{
 						// End:0x244
 						if(bShowLog)
 						{
-							__NFUN_231__("** Game : bravo eleminated alpha");
+							Log("** Game : bravo eleminated alpha");
 						}
 						BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 						BroadcastMissionObjMsg("", "", "RedNeutralizedGreen", none, int(GetGameMsgLifeTime()));
@@ -364,7 +364,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 				// End:0x2D8
 				if(bShowLog)
 				{
-					__NFUN_231__("** Game : alpha prevented bomb detonation");
+					Log("** Game : alpha prevented bomb detonation");
 				}
 				BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 				BroadcastMissionObjMsg("", "", "NoBombsDetonated", none, int(GetGameMsgLifeTime()));

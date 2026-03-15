@@ -24,13 +24,13 @@ function Created()
 	xPosition = 1;
 	m_Button[0] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuWPDeleteButton', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuWPDeleteButton'.default.UpRegion.W), 23.0000000, self));
 	m_Button[0].ToolTipString = Localize("PlanningMenu", "Delete", "R6Menu");
-	__NFUN_161__(xPosition, int(__NFUN_175__(m_Button[0].WinWidth, float(4))));
+	(xPosition += int((m_Button[0].WinWidth - float(4))));
 	m_Button[1] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuWPDeleteAllButton', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuWPDeleteAllButton'.default.UpRegion.W), 23.0000000, self));
 	m_Button[1].ToolTipString = Localize("PlanningMenu", "DeleteAll", "R6Menu");
-	__NFUN_161__(xPosition, int(__NFUN_175__(m_Button[1].WinWidth, float(4))));
+	(xPosition += int((m_Button[1].WinWidth - float(4))));
 	m_Button[2] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuWPDeleteAllTeamButton', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuWPDeleteAllTeamButton'.default.UpRegion.W), 23.0000000, self));
 	m_Button[2].ToolTipString = Localize("PlanningMenu", "DeleteAllTeam", "R6Menu");
-	__NFUN_161__(xPosition, int(m_Button[1].WinWidth));
+	(xPosition += int(m_Button[1].WinWidth));
 	WinWidth = float(xPosition);
 	m_BorderColor = Root.Colors.GrayLight;
 	return;

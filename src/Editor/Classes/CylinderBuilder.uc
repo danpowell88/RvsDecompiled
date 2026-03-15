@@ -28,27 +28,27 @@ function BuildCylinder(int direction, bool AlignToSide, int Sides, float Height,
 	// End:0x33
 	if(AlignToSide)
 	{
-		__NFUN_183__(Radius, __NFUN_188__(__NFUN_172__(3.1415930, float(Sides))));
+		(Radius /= Cos((3.1415930 / float(Sides))));
 		Ofs = 1;
 	}
 	i = 0;
 	J0x3A:
 
 	// End:0xF0 [Loop If]
-	if(__NFUN_150__(i, Sides))
+	if((i < Sides))
 	{
 		j = -1;
 		J0x54:
 
 		// End:0xE6 [Loop If]
-		if(__NFUN_150__(j, 2))
+		if((j < 2))
 		{
-			Vertex3f(__NFUN_171__(Radius, __NFUN_187__(__NFUN_172__(__NFUN_171__(__NFUN_174__(__NFUN_171__(2.0000000, float(i)), float(Ofs)), 3.1415930), float(Sides)))), __NFUN_171__(Radius, __NFUN_188__(__NFUN_172__(__NFUN_171__(__NFUN_174__(__NFUN_171__(2.0000000, float(i)), float(Ofs)), 3.1415930), float(Sides)))), __NFUN_172__(__NFUN_171__(float(j), Height), float(2)));
-			__NFUN_161__(j, 2);
+			Vertex3f((Radius * Sin(((((2.0000000 * float(i)) + float(Ofs)) * 3.1415930) / float(Sides)))), (Radius * Cos(((((2.0000000 * float(i)) + float(Ofs)) * 3.1415930) / float(Sides)))), ((float(j) * Height) / float(2)));
+			(j += 2);
 			// [Loop Continue]
 			goto J0x54;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x3A;
 	}
@@ -56,10 +56,10 @@ function BuildCylinder(int direction, bool AlignToSide, int Sides, float Height,
 	J0xF7:
 
 	// End:0x191 [Loop If]
-	if(__NFUN_150__(i, Sides))
+	if((i < Sides))
 	{
-		Poly4i(direction, __NFUN_146__(N, __NFUN_144__(i, 2)), __NFUN_146__(__NFUN_146__(N, __NFUN_144__(i, 2)), 1), int(__NFUN_174__(float(N), __NFUN_173__(float(__NFUN_146__(__NFUN_144__(i, 2), 3)), float(__NFUN_144__(2, Sides))))), int(__NFUN_174__(float(N), __NFUN_173__(float(__NFUN_146__(__NFUN_144__(i, 2), 2)), float(__NFUN_144__(2, Sides))))), 'Wall');
-		__NFUN_165__(i);
+		Poly4i(direction, (N + (i * 2)), ((N + (i * 2)) + 1), int((float(N) + (float(((i * 2) + 3)) % float((2 * Sides))))), int((float(N) + (float(((i * 2) + 2)) % float((2 * Sides))))), 'Wall');
+		(i++);
 		// [Loop Continue]
 		goto J0xF7;
 	}
@@ -71,17 +71,17 @@ function bool Build()
 	local int i, j, k;
 
 	// End:0x13
-	if(__NFUN_150__(Sides, 3))
+	if((Sides < 3))
 	{
 		return BadParameters();
 	}
 	// End:0x36
-	if(__NFUN_132__(__NFUN_178__(Height, float(0)), __NFUN_178__(OuterRadius, float(0))))
+	if(((Height <= float(0)) || (OuterRadius <= float(0))))
 	{
 		return BadParameters();
 	}
 	// End:0x66
-	if(__NFUN_130__(Hollow, __NFUN_132__(__NFUN_178__(InnerRadius, float(0)), __NFUN_179__(InnerRadius, OuterRadius))))
+	if((Hollow && ((InnerRadius <= float(0)) || (InnerRadius >= OuterRadius))))
 	{
 		return BadParameters();
 	}
@@ -95,20 +95,20 @@ function bool Build()
 		J0xC2:
 
 		// End:0x19C [Loop If]
-		if(__NFUN_150__(j, 2))
+		if((j < 2))
 		{
 			i = 0;
 			J0xD5:
 
 			// End:0x190 [Loop If]
-			if(__NFUN_150__(i, Sides))
+			if((i < Sides))
 			{
-				Poly4i(j, __NFUN_146__(__NFUN_144__(i, 2), __NFUN_145__(__NFUN_147__(1, j), 2)), __NFUN_146__(__NFUN_144__(int(__NFUN_173__(float(__NFUN_146__(i, 1)), float(Sides))), 2), __NFUN_145__(__NFUN_147__(1, j), 2)), __NFUN_146__(__NFUN_146__(__NFUN_144__(int(__NFUN_173__(float(__NFUN_146__(i, 1)), float(Sides))), 2), __NFUN_145__(__NFUN_147__(1, j), 2)), __NFUN_144__(Sides, 2)), __NFUN_146__(__NFUN_146__(__NFUN_144__(i, 2), __NFUN_145__(__NFUN_147__(1, j), 2)), __NFUN_144__(Sides, 2)), 'Cap');
-				__NFUN_165__(i);
+				Poly4i(j, ((i * 2) + ((1 - j) / 2)), ((int((float((i + 1)) % float(Sides))) * 2) + ((1 - j) / 2)), (((int((float((i + 1)) % float(Sides))) * 2) + ((1 - j) / 2)) + (Sides * 2)), (((i * 2) + ((1 - j) / 2)) + (Sides * 2)), 'Cap');
+				(i++);
 				// [Loop Continue]
 				goto J0xD5;
 			}
-			__NFUN_161__(j, 2);
+			(j += 2);
 			// [Loop Continue]
 			goto J0xC2;
 		}		
@@ -119,22 +119,22 @@ function bool Build()
 		J0x1AA:
 
 		// End:0x215 [Loop If]
-		if(__NFUN_150__(j, 2))
+		if((j < 2))
 		{
 			PolyBegin(j, 'Cap');
 			i = 0;
 			J0x1CD:
 
 			// End:0x203 [Loop If]
-			if(__NFUN_150__(i, Sides))
+			if((i < Sides))
 			{
-				Polyi(__NFUN_146__(__NFUN_144__(i, 2), __NFUN_145__(__NFUN_147__(1, j), 2)));
-				__NFUN_165__(i);
+				Polyi(((i * 2) + ((1 - j) / 2)));
+				(i++);
 				// [Loop Continue]
 				goto J0x1CD;
 			}
 			PolyEnd();
-			__NFUN_161__(j, 2);
+			(j += 2);
 			// [Loop Continue]
 			goto J0x1AA;
 		}

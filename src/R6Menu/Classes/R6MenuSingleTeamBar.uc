@@ -68,17 +68,17 @@ function Paint(Canvas C, float X, float Y)
 {
 	local int IDblOffset;
 
-	IDblOffset = __NFUN_144__(2, m_IBorderVOffset);
+	IDblOffset = (2 * m_IBorderVOffset);
 	// End:0x4C
 	if(m_bDrawTotalsShading)
 	{
-		R6WindowLookAndFeel(LookAndFeel).DrawBGShading(self, C, 0.0000000, 16.0000000, WinWidth, __NFUN_175__(WinHeight, float(16)));
+		R6WindowLookAndFeel(LookAndFeel).DrawBGShading(self, C, 0.0000000, 16.0000000, WinWidth, (WinHeight - float(16)));
 	}
 	C.Style = 5;
 	DrawInGameSingleTeamBar(C, 0.0000000, 1.0000000, 16.0000000);
-	DrawInGameSingleTeamBarUpBorder(C, float(m_IBorderVOffset), 0.0000000, __NFUN_175__(WinWidth, float(IDblOffset)), 16.0000000);
-	DrawInGameSingleTeamBarMiddleBorder(C, float(m_IBorderVOffset), __NFUN_175__(__NFUN_175__(WinHeight, float(15)), float(14)), __NFUN_175__(WinWidth, float(IDblOffset)), 15.0000000);
-	DrawInGameSingleTeamBarDownBorder(C, float(m_IBorderVOffset), __NFUN_175__(WinHeight, float(14)), __NFUN_175__(WinWidth, float(IDblOffset)), 14.0000000);
+	DrawInGameSingleTeamBarUpBorder(C, float(m_IBorderVOffset), 0.0000000, (WinWidth - float(IDblOffset)), 16.0000000);
+	DrawInGameSingleTeamBarMiddleBorder(C, float(m_IBorderVOffset), ((WinHeight - float(15)) - float(14)), (WinWidth - float(IDblOffset)), 15.0000000);
+	DrawInGameSingleTeamBarDownBorder(C, float(m_IBorderVOffset), (WinHeight - float(14)), (WinWidth - float(IDblOffset)), 14.0000000);
 	// End:0x11B
 	if(m_bDrawBorders)
 	{
@@ -93,7 +93,7 @@ function Created()
 
 	m_BorderColor = Root.Colors.GrayLight;
 	fXOffset = 4.0000000;
-	YLabelPos = __NFUN_175__(WinHeight, float(14));
+	YLabelPos = (WinHeight - float(14));
 	m_TimeMissionTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, YLabelPos, m_fBottomTitleWidth, 14.0000000, self));
 	m_TimeMissionTitle.Align = 2;
 	m_TimeMissionTitle.m_Font = Root.Fonts[5];
@@ -101,12 +101,12 @@ function Created()
 	m_TimeMissionTitle.m_fLMarge = fXOffset;
 	m_TimeMissionTitle.SetNewText(Localize("DebriefingMenu", "MissionTime", "R6Menu"), true);
 	m_TimeMissionTitle.m_bDrawBorders = false;
-	m_TimeMissionValue = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_TimeMissionTitle.WinWidth, YLabelPos, __NFUN_175__(WinWidth, m_TimeMissionTitle.WinWidth), 14.0000000, self));
+	m_TimeMissionValue = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_TimeMissionTitle.WinWidth, YLabelPos, (WinWidth - m_TimeMissionTitle.WinWidth), 14.0000000, self));
 	m_TimeMissionValue.Align = 2;
 	m_TimeMissionValue.m_Font = Root.Fonts[5];
 	m_TimeMissionValue.TextColor = Root.Colors.White;
 	m_TimeMissionValue.m_bDrawBorders = false;
-	__NFUN_185__(YLabelPos, float(15));
+	(YLabelPos -= float(15));
 	m_BottomTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, YLabelPos, m_fBottomTitleWidth, 15.0000000, self));
 	m_BottomTitle.Align = 2;
 	m_BottomTitle.m_Font = Root.Fonts[5];
@@ -120,19 +120,19 @@ function Created()
 	m_KillLabel.m_Font = Root.Fonts[5];
 	m_KillLabel.TextColor = Root.Colors.White;
 	m_KillLabel.m_bDrawBorders = false;
-	m_EfficiencyLabel = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_KillLabel.WinLeft, m_KillLabel.WinWidth), YLabelPos, m_fEfficiencyWidth, 15.0000000, self));
+	m_EfficiencyLabel = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_KillLabel.WinLeft + m_KillLabel.WinWidth), YLabelPos, m_fEfficiencyWidth, 15.0000000, self));
 	m_EfficiencyLabel.Text = "00";
 	m_EfficiencyLabel.Align = 2;
 	m_EfficiencyLabel.m_Font = Root.Fonts[5];
 	m_EfficiencyLabel.TextColor = Root.Colors.White;
 	m_EfficiencyLabel.m_bDrawBorders = false;
-	m_RoundsFiredLabel = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_EfficiencyLabel.WinLeft, m_EfficiencyLabel.WinWidth), YLabelPos, m_fShotsWidth, 15.0000000, self));
+	m_RoundsFiredLabel = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_EfficiencyLabel.WinLeft + m_EfficiencyLabel.WinWidth), YLabelPos, m_fShotsWidth, 15.0000000, self));
 	m_RoundsFiredLabel.Text = "00";
 	m_RoundsFiredLabel.Align = 2;
 	m_RoundsFiredLabel.m_Font = Root.Fonts[5];
 	m_RoundsFiredLabel.TextColor = Root.Colors.White;
 	m_RoundsFiredLabel.m_bDrawBorders = false;
-	m_RoundsTakenLabel = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_RoundsFiredLabel.WinLeft, m_RoundsFiredLabel.WinWidth), YLabelPos, m_fHitsWidth, 15.0000000, self));
+	m_RoundsTakenLabel = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_RoundsFiredLabel.WinLeft + m_RoundsFiredLabel.WinWidth), YLabelPos, m_fHitsWidth, 15.0000000, self));
 	m_RoundsTakenLabel.Text = "00";
 	m_RoundsTakenLabel.Align = 2;
 	m_RoundsTakenLabel.m_Font = Root.Fonts[5];
@@ -144,30 +144,30 @@ function Created()
 
 function DrawInGameSingleTeamBarMiddleBorder(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, float(m_RBorder.H), float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
 	DrawStretchedTextureSegment(C, m_fBottomTitleWidth, _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
-	DrawStretchedTextureSegment(C, _fX, __NFUN_175__(__NFUN_174__(_fY, _fHeight), float(m_RBorder.H)), _fWidth, float(m_RBorder.H), float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+	DrawStretchedTextureSegment(C, _fX, ((_fY + _fHeight) - float(m_RBorder.H)), _fWidth, float(m_RBorder.H), float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
 	return;
 }
 
 function DrawInGameSingleTeamBarDownBorder(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTextureSegment(C, m_fBottomTitleWidth, _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
 	// End:0x100
-	if(__NFUN_129__(m_bDrawBorders))
+	if((!m_bDrawBorders))
 	{
-		DrawStretchedTextureSegment(C, _fX, __NFUN_175__(__NFUN_174__(_fY, _fHeight), float(m_RBorder.H)), _fWidth, float(m_RBorder.H), float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+		DrawStretchedTextureSegment(C, _fX, ((_fY + _fHeight) - float(m_RBorder.H)), _fWidth, float(m_RBorder.H), float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
 	}
 	return;
 }
 
 function DrawInGameSingleTeamBarUpBorder(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, _fX, __NFUN_174__(_fY, _fHeight), _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fX, (_fY + _fHeight), _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;
 }
 
@@ -178,7 +178,7 @@ function DrawInGameSingleTeamBar(Canvas C, float _fX, float _fY, float _fHeight)
 	local R6MenuRSLookAndFeel R6LAF;
 
 	R6LAF = R6MenuRSLookAndFeel(LookAndFeel);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	RIconToDraw.X = 52;
 	RIconToDraw.Y = 52;
 	RIconToDraw.W = 12;
@@ -187,69 +187,69 @@ function DrawInGameSingleTeamBar(Canvas C, float _fX, float _fY, float _fHeight)
 	fWidth = m_fTeamcolorWidth;
 	RIconRegion = R6LAF.CenterIconInBox(fXOffset, _fY, fWidth, _fHeight, RIconToDraw);
 	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
-	DrawStretchedTextureSegment(C, __NFUN_174__(fXOffset, fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	DrawStretchedTextureSegment(C, (fXOffset + fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	RIconToDraw.X = 0;
 	RIconToDraw.Y = 0;
 	RIconToDraw.W = 13;
 	RIconToDraw.H = 14;
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	fWidth = m_fRainbowWidth;
 	RIconRegion = R6LAF.CenterIconInBox(fXOffset, _fY, fWidth, _fHeight, RIconToDraw);
 	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
-	DrawStretchedTextureSegment(C, __NFUN_174__(fXOffset, fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	DrawStretchedTextureSegment(C, (fXOffset + fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	RIconToDraw.X = 0;
 	RIconToDraw.Y = 28;
 	RIconToDraw.W = 13;
 	RIconToDraw.H = 14;
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	fWidth = m_fHealthWidth;
 	RIconRegion = R6LAF.CenterIconInBox(fXOffset, _fY, fWidth, _fHeight, RIconToDraw);
 	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
-	DrawStretchedTextureSegment(C, __NFUN_174__(fXOffset, fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	DrawStretchedTextureSegment(C, (fXOffset + fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	RIconToDraw.X = 14;
 	RIconToDraw.Y = 0;
 	RIconToDraw.W = 13;
 	RIconToDraw.H = 14;
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	fWidth = m_fSkullWidth;
 	RIconRegion = R6LAF.CenterIconInBox(fXOffset, _fY, fWidth, _fHeight, RIconToDraw);
 	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
-	DrawStretchedTextureSegment(C, __NFUN_174__(fXOffset, fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	DrawStretchedTextureSegment(C, (fXOffset + fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	RIconToDraw.X = 28;
 	RIconToDraw.Y = 0;
 	RIconToDraw.W = 14;
 	RIconToDraw.H = 14;
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	fWidth = m_fEfficiencyWidth;
 	RIconRegion = R6LAF.CenterIconInBox(fXOffset, _fY, fWidth, _fHeight, RIconToDraw);
 	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
-	DrawStretchedTextureSegment(C, __NFUN_174__(fXOffset, fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	DrawStretchedTextureSegment(C, (fXOffset + fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	RIconToDraw.X = 49;
 	RIconToDraw.Y = 14;
 	RIconToDraw.W = 7;
 	RIconToDraw.H = 14;
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	fWidth = m_fShotsWidth;
 	RIconRegion = R6LAF.CenterIconInBox(fXOffset, _fY, fWidth, _fHeight, RIconToDraw);
 	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
-	DrawStretchedTextureSegment(C, __NFUN_174__(fXOffset, fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	DrawStretchedTextureSegment(C, (fXOffset + fWidth), _fY, float(m_RBorder.W), _fHeight, float(m_RBorder.X), float(m_RBorder.Y), float(m_RBorder.W), float(m_RBorder.H), m_TBorder);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	RIconToDraw.X = 14;
 	RIconToDraw.Y = 28;
 	RIconToDraw.W = 16;
 	RIconToDraw.H = 14;
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	fWidth = m_fHitsWidth;
 	RIconRegion = R6LAF.CenterIconInBox(fXOffset, _fY, fWidth, _fHeight, RIconToDraw);
 	DrawStretchedTextureSegment(C, float(RIconRegion.X), float(RIconRegion.Y), float(RIconToDraw.W), float(RIconToDraw.H), float(RIconToDraw.X), float(RIconToDraw.Y), float(RIconToDraw.W), float(RIconToDraw.H), m_TIcon);
@@ -276,16 +276,16 @@ function RefreshTeamBarInfo()
 	AddItems();
 	moMgr = R6AbstractGameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_missionMgr;
 	// End:0xC7
-	if(__NFUN_154__(int(moMgr.m_eMissionObjectiveStatus), int(0)))
+	if((int(moMgr.m_eMissionObjectiveStatus) == int(0)))
 	{
-		fMissionTime = __NFUN_175__(GetLevel().Level.TimeSeconds, R6GameInfo(GetLevel().Game).m_fRoundStartTime);		
+		fMissionTime = (GetLevel().Level.TimeSeconds - R6GameInfo(GetLevel().Game).m_fRoundStartTime);		
 	}
 	else
 	{
 		bPlayTestLog = true;
-		fMissionTime = __NFUN_175__(R6GameInfo(GetLevel().Game).m_fRoundEndTime, R6GameInfo(GetLevel().Game).m_fRoundStartTime);
+		fMissionTime = (R6GameInfo(GetLevel().Game).m_fRoundEndTime - R6GameInfo(GetLevel().Game).m_fRoundStartTime);
 	}
-	m_TimeMissionValue.SetNewText(Class'Engine.Actor'.static.__NFUN_1520__(int(fMissionTime)), true);
+	m_TimeMissionValue.SetNewText(Class'Engine.Actor'.static.ConvertIntTimeToString(int(fMissionTime)), true);
 	m_KillLabel.SetNewText(string(m_iTotalNeutralized), true);
 	m_EfficiencyLabel.SetNewText(string(m_iTotalEfficiency), true);
 	m_RoundsFiredLabel.SetNewText(string(m_iTotalRoundsFired), true);
@@ -298,7 +298,7 @@ function RefreshTeamBarInfo()
 		J0x1DD:
 
 		// End:0x232 [Loop If]
-		if(__NFUN_150__(i, 3))
+		if((i < 3))
 		{
 			CurrentTeam = R6RainbowTeam(GameInfo.GetRainbowTeam(i));
 			// End:0x228

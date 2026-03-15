@@ -43,7 +43,7 @@ var Sound m_CompletedSnd;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bIsActivated, sm_bIsActivated;
 }
 
@@ -120,15 +120,15 @@ simulated function int R6GetCircumstantialActionProgress(R6AbstractCircumstantia
 {
 	local float fPercentage;
 
-	fPercentage = __NFUN_172__(__NFUN_175__(Level.TimeSeconds, m_fPlayerCAStartTime), __NFUN_171__(Query.fPlayerActionTimeRequired, __NFUN_175__(2.0000000, R6Pawn(actingPawn).ArmorSkillEffect())));
-	__NFUN_182__(fPercentage, float(100));
+	fPercentage = ((Level.TimeSeconds - m_fPlayerCAStartTime) / (Query.fPlayerActionTimeRequired * (2.0000000 - R6Pawn(actingPawn).ArmorSkillEffect())));
+	(fPercentage *= float(100));
 	// End:0x68
-	if(__NFUN_179__(fPercentage, float(100)))
+	if((fPercentage >= float(100)))
 	{
 		LockObjectUse(false);
 	}
 	// End:0x90
-	if(__NFUN_130__(__NFUN_179__(fPercentage, float(100)), __NFUN_155__(int(m_ObjectState), int(2))))
+	if(((fPercentage >= float(100)) && (int(m_ObjectState) != int(2))))
 	{
 		PerformSoundAction(2);
 	}
@@ -171,7 +171,7 @@ simulated function ToggleDevice(R6Pawn aPawn)
 
 	fBackup = m_fLockObjectTime;
 	// End:0x2A
-	if(__NFUN_129__(aPawn.m_bIsPlayer))
+	if((!aPawn.m_bIsPlayer))
 	{
 		m_fLockObjectTime = 0.0000000;
 	}
@@ -191,12 +191,12 @@ simulated function bool CanToggle()
 {
 	local bool bCanToggle;
 
-	bCanToggle = __NFUN_132__(__NFUN_242__(sm_bIsActivated, m_bIsActivated), __NFUN_242__(m_bToggleType, true));
+	bCanToggle = ((sm_bIsActivated == m_bIsActivated) || (m_bToggleType == true));
 	// End:0x67
-	if(__NFUN_130__(bCanToggle, __NFUN_181__(m_fLockObjectTime, float(0))))
+	if((bCanToggle && (m_fLockObjectTime != float(0))))
 	{
 		// End:0x65
-		if(__NFUN_176__(GetMaxTimeRequired(), __NFUN_175__(Level.TimeSeconds, m_fLockObjectTime)))
+		if((GetMaxTimeRequired() < (Level.TimeSeconds - m_fLockObjectTime)))
 		{
 			LockObjectUse(false);			
 		}
@@ -219,9 +219,9 @@ function PerformSoundAction(R6IOObject.eStateIOObejct eState)
 			// End:0x47
 			if(bShowLog)
 			{
-				__NFUN_231__("****** PerformSoundAction SIO_Start");
+				Log("****** PerformSoundAction SIO_Start");
 			}
-			__NFUN_264__(m_StartSnd, 3);
+			__NFUN_264__(m_StartSnd, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 			// End:0xE2
 			break;
 		// End:0x9A

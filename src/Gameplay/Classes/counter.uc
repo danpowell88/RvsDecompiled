@@ -56,13 +56,13 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	local int i;
 
 	// End:0x175
-	if(__NFUN_151__(int(NumToCount), 0))
+	if((int(NumToCount) > 0))
 	{
 		// End:0x5F
-		if(__NFUN_154__(int(__NFUN_138__(NumToCount)), 0))
+		if((int((--NumToCount)) == 0))
 		{
 			// End:0x47
-			if(__NFUN_130__(bShowMessage, __NFUN_123__(CompleteMessage, "")))
+			if((bShowMessage && (CompleteMessage != "")))
 			{
 				EventInstigator.ClientMessage(CompleteMessage);
 			}
@@ -71,7 +71,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		else
 		{
 			// End:0x175
-			if(__NFUN_130__(bShowMessage, __NFUN_123__(CountMessage, "")))
+			if((bShowMessage && (CountMessage != "")))
 			{
 				switch(NumToCount)
 				{
@@ -116,10 +116,10 @@ function Trigger(Actor Other, Pawn EventInstigator)
 				J0x111:
 
 				// End:0x161 [Loop If]
-				if(__NFUN_153__(__NFUN_126__(S, "%i"), 0))
+				if((InStr(S, "%i") >= 0))
 				{
-					i = __NFUN_126__(S, "%i");
-					S = __NFUN_112__(__NFUN_112__(__NFUN_128__(S, i), Num), __NFUN_127__(S, __NFUN_146__(i, 2)));
+					i = InStr(S, "%i");
+					S = ((Left(S, i) $ Num) $ Mid(S, (i + 2)));
 					// [Loop Continue]
 					goto J0x111;
 				}

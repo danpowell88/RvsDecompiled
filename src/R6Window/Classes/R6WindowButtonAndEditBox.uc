@@ -23,10 +23,10 @@ function Paint(Canvas C, float X, float Y)
 {
 	super.Paint(C, X, Y);
 	// End:0x8B
-	if(__NFUN_119__(m_pEditBox, none))
+	if((m_pEditBox != none))
 	{
 		// End:0x56
-		if(__NFUN_123__(m_szEditTextHistory, m_pEditBox.GetValue()))
+		if((m_szEditTextHistory != m_pEditBox.GetValue()))
 		{
 			m_szEditTextHistory = m_pEditBox.GetValue();
 			Notify(1);
@@ -34,7 +34,7 @@ function Paint(Canvas C, float X, float Y)
 		// End:0x8B
 		if(m_pEditBox.EditBox.m_CurrentlyEditing)
 		{
-			m_bSelected = __NFUN_123__(m_pEditBox.GetValue(), "");
+			m_bSelected = (m_pEditBox.GetValue() != "");
 		}
 	}
 	return;
@@ -44,7 +44,7 @@ function CreateEditBox(float fWidth)
 {
 	local int fXPos;
 
-	fXPos = int(__NFUN_175__(__NFUN_175__(m_fXBox, fWidth), float(3)));
+	fXPos = int(((m_fXBox - fWidth) - float(3)));
 	m_pEditBox = R6WindowEditControl(CreateWindow(Class'R6Window.R6WindowEditControl', float(fXPos), 0.0000000, fWidth, WinHeight, self));
 	m_pEditBox.SetValue("");
 	return;
@@ -55,7 +55,7 @@ function CreateEditBox(float fWidth)
 //====================================================================
 function SetDisableButtonAndEditBox(bool _bDisable)
 {
-	m_pEditBox.EditBox.bCanEdit = __NFUN_129__(_bDisable);
+	m_pEditBox.EditBox.bCanEdit = (!_bDisable);
 	bDisabled = _bDisable;
 	// End:0x62
 	if(_bDisable)
@@ -72,7 +72,7 @@ function SetDisableButtonAndEditBox(bool _bDisable)
 function SetEditBoxTip(string _szToolTip)
 {
 	// End:0x1F
-	if(__NFUN_119__(m_pEditBox, none))
+	if((m_pEditBox != none))
 	{
 		m_pEditBox.SetEditBoxTip(_szToolTip);
 	}

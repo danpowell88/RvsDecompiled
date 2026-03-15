@@ -22,23 +22,23 @@ function Created()
 	xPosition = 2;
 	m_Button[0] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuTimeLineGotoFirst', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTimeLineGotoFirst'.default.UpRegion.W), 23.0000000, self));
 	m_Button[0].ToolTipString = Localize("PlanningMenu", "GotoFirst", "R6Menu");
-	__NFUN_161__(xPosition, Class'R6Menu.R6MenuTimeLineGotoFirst'.default.UpRegion.W);
+	(xPosition += Class'R6Menu.R6MenuTimeLineGotoFirst'.default.UpRegion.W);
 	m_Button[1] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuTimeLinePrevious', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTimeLinePrevious'.default.UpRegion.W), 23.0000000, self));
 	m_Button[1].ToolTipString = Localize("PlanningMenu", "Previous", "R6Menu");
-	__NFUN_161__(xPosition, Class'R6Menu.R6MenuTimeLinePrevious'.default.UpRegion.W);
+	(xPosition += Class'R6Menu.R6MenuTimeLinePrevious'.default.UpRegion.W);
 	m_Button[2] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuTimeLinePlay', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTimeLinePlay'.default.UpRegion.W), 23.0000000, self));
 	m_Button[2].ToolTipString = Localize("PlanningMenu", "PlayStop", "R6Menu");
-	__NFUN_161__(xPosition, Class'R6Menu.R6MenuTimeLinePlay'.default.UpRegion.W);
+	(xPosition += Class'R6Menu.R6MenuTimeLinePlay'.default.UpRegion.W);
 	m_Button[3] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuTimeLineNext', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTimeLineNext'.default.UpRegion.W), 23.0000000, self));
 	m_Button[3].ToolTipString = Localize("PlanningMenu", "Next", "R6Menu");
-	__NFUN_161__(xPosition, Class'R6Menu.R6MenuTimeLineNext'.default.UpRegion.W);
+	(xPosition += Class'R6Menu.R6MenuTimeLineNext'.default.UpRegion.W);
 	m_Button[4] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuTimeLineGotoLast', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTimeLineGotoLast'.default.UpRegion.W), 23.0000000, self));
 	m_Button[4].ToolTipString = Localize("PlanningMenu", "GotoLast", "R6Menu");
-	__NFUN_161__(xPosition, Class'R6Menu.R6MenuTimeLineGotoLast'.default.UpRegion.W);
+	(xPosition += Class'R6Menu.R6MenuTimeLineGotoLast'.default.UpRegion.W);
 	m_Button[5] = R6WindowButton(CreateWindow(Class'R6Menu.R6MenuTimeLineLock', float(xPosition), 1.0000000, float(Class'R6Menu.R6MenuTimeLineLock'.default.UpRegion.W), 23.0000000, self));
 	m_Button[5].ToolTipString = Localize("PlanningMenu", "Lock", "R6Menu");
-	__NFUN_161__(xPosition, Class'R6Menu.R6MenuTimeLineLock'.default.UpRegion.W);
-	WinWidth = float(__NFUN_146__(xPosition, 1));
+	(xPosition += Class'R6Menu.R6MenuTimeLineLock'.default.UpRegion.W);
+	WinWidth = float((xPosition + 1));
 	m_BorderColor = Root.Colors.GrayLight;
 	return;
 }
@@ -46,7 +46,7 @@ function Created()
 function Reset()
 {
 	// End:0x43
-	if(__NFUN_119__(R6PlanningCtrl(GetPlayerOwner()), none))
+	if((R6PlanningCtrl(GetPlayerOwner()) != none))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).m_bPlayMode = false;
 		R6PlanningCtrl(GetPlayerOwner()).StopPlayingPlanning();
@@ -101,7 +101,7 @@ function StopPlayMode()
 	PlanningBarWindow.m_TeamBar.m_ActiveList[2].bDisabled = false;
 	R6MenuTimeLinePlay(m_Button[2]).m_bPlaying = false;
 	// End:0x239
-	if(__NFUN_119__(R6PlanningCtrl(GetPlayerOwner()), none))
+	if((R6PlanningCtrl(GetPlayerOwner()) != none))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).StopPlayingPlanning();
 	}

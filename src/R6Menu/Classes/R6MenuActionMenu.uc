@@ -26,9 +26,9 @@ function AjustPosition(bool bDisplayUp, bool bDisplayLeft)
 	m_bDisplayUp = bDisplayUp;
 	m_bDisplayLeft = bDisplayLeft;
 	// End:0x38
-	if(__NFUN_242__(m_bDisplayLeft, true))
+	if((m_bDisplayLeft == true))
 	{
-		__NFUN_185__(WinLeft, __NFUN_174__(WinWidth, float(6)));
+		(WinLeft -= (WinWidth + float(6)));
 	}
 	return;
 }

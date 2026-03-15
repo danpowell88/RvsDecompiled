@@ -22,11 +22,11 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	// End:0x1B
 	if(bToggled)
 	{
-		bEnabled = __NFUN_129__(bEnabled);		
+		bEnabled = (!bEnabled);		
 	}
 	else
 	{
-		bEnabled = __NFUN_129__(bInitialValue);
+		bEnabled = (!bInitialValue);
 	}
 	return;
 }

@@ -33,13 +33,13 @@ function Created()
 	m_BorderColor = Root.Colors.GrayLight;
 	m_TopButtons = R6MenuOperativeDetailRadioArea(CreateWindow(Class'R6Menu.R6MenuOperativeDetailRadioArea', 0.0000000, 0.0000000, WinWidth, 23.0000000, self));
 	m_TopButtons.m_BorderColor = m_BorderColor;
-	fYOffset = __NFUN_174__(m_TopButtons.WinTop, m_TopButtons.WinHeight);
+	fYOffset = (m_TopButtons.WinTop + m_TopButtons.WinHeight);
 	m_OperativeFace = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', 0.0000000, fYOffset, WinWidth, 81.0000000, self));
 	m_OperativeFace.m_BorderColor = m_BorderColor;
 	m_OperativeFace.m_bDrawBorder = false;
 	m_OperativeFace.bCenter = true;
-	fYOffset = __NFUN_174__(m_OperativeFace.WinTop, m_OperativeFace.WinHeight);
-	fHeight = __NFUN_175__(WinHeight, __NFUN_174__(m_TopButtons.WinHeight, m_OperativeFace.WinHeight));
+	fYOffset = (m_OperativeFace.WinTop + m_OperativeFace.WinHeight);
+	fHeight = (WinHeight - (m_TopButtons.WinHeight + m_OperativeFace.WinHeight));
 	m_HistoryPage = R6MenuOperativeHistory(CreateWindow(Class'R6Menu.R6MenuOperativeHistory', 0.0000000, fYOffset, WinWidth, fHeight, self));
 	m_HistoryPage.SetBorderColor(m_BorderColor);
 	m_HistoryPage.HideWindow();
@@ -54,8 +54,8 @@ function Created()
 	m_StatsPage.HideWindow();
 	m_CurrentPage = m_SkillsPage;
 	m_CurrentPage.ShowWindow();
-	m_ITopLineYPos = int(__NFUN_174__(m_TopButtons.WinTop, m_TopButtons.WinHeight));
-	m_IBottomLineYPos = int(__NFUN_175__(__NFUN_174__(m_OperativeFace.WinTop, m_OperativeFace.WinHeight), float(1)));
+	m_ITopLineYPos = int((m_TopButtons.WinTop + m_TopButtons.WinHeight));
+	m_IBottomLineYPos = int(((m_OperativeFace.WinTop + m_OperativeFace.WinHeight) - float(1)));
 	return;
 }
 
@@ -146,7 +146,7 @@ function AfterPaint(Canvas C, float X, float Y)
 {
 	DrawSimpleBorder(C);
 	C.Style = 5;
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTexture(C, 0.0000000, float(m_ITopLineYPos), WinWidth, 1.0000000, Texture'UWindow.WhiteTexture');
 	DrawStretchedTexture(C, 0.0000000, float(m_IBottomLineYPos), WinWidth, 1.0000000, Texture'UWindow.WhiteTexture');
 	return;

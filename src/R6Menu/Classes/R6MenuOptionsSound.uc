@@ -47,47 +47,47 @@ function InitPageOptions()
 	fXOffset = 5.0000000;
 	fXRightOffset = 26.0000000;
 	fYOffset = 5.0000000;
-	fWidth = __NFUN_175__(__NFUN_175__(WinWidth, fXOffset), float(40));
+	fWidth = ((WinWidth - fXOffset) - float(40));
 	fHeight = 14.0000000;
 	fYStep = 27.0000000;
-	m_pAmbientVolume = R6WindowHScrollbar(CreateControl(Class'R6Window.R6WindowHScrollbar', fXOffset, fYOffset, __NFUN_175__(__NFUN_175__(WinWidth, fXOffset), fXRightOffset), 14.0000000, self));
+	m_pAmbientVolume = R6WindowHScrollbar(CreateControl(Class'R6Window.R6WindowHScrollbar', fXOffset, fYOffset, ((WinWidth - fXOffset) - fXRightOffset), 14.0000000, self));
 	m_pAmbientVolume.CreateSB(int(GetPlayerOwner().1), 250.0000000, 0.0000000, 140.0000000, 14.0000000, self);
 	m_pAmbientVolume.CreateSBTextLabel(Localize("Options", "Opt_SndAmbient", "R6Menu"), Localize("Tip", "Opt_SndAmbient", "R6Menu"));
 	m_pAmbientVolume.SetScrollBarRange(0.0000000, 100.0000000, 20.0000000);
-	__NFUN_184__(fYOffset, fYStep);
-	m_pVoicesVolume = R6WindowHScrollbar(CreateControl(Class'R6Window.R6WindowHScrollbar', fXOffset, fYOffset, __NFUN_175__(__NFUN_175__(WinWidth, fXOffset), fXRightOffset), 14.0000000, self));
+	(fYOffset += fYStep);
+	m_pVoicesVolume = R6WindowHScrollbar(CreateControl(Class'R6Window.R6WindowHScrollbar', fXOffset, fYOffset, ((WinWidth - fXOffset) - fXRightOffset), 14.0000000, self));
 	m_pVoicesVolume.CreateSB(int(GetPlayerOwner().6), 250.0000000, 0.0000000, 140.0000000, 14.0000000, self);
 	m_pVoicesVolume.CreateSBTextLabel(Localize("Options", "Opt_SndVoices", "R6Menu"), Localize("Tip", "Opt_SndVoices", "R6Menu"));
 	m_pVoicesVolume.SetScrollBarRange(0.0000000, 100.0000000, 20.0000000);
-	__NFUN_184__(fYOffset, fYStep);
-	m_pMusicVolume = R6WindowHScrollbar(CreateControl(Class'R6Window.R6WindowHScrollbar', fXOffset, fYOffset, __NFUN_175__(__NFUN_175__(WinWidth, fXOffset), fXRightOffset), 14.0000000, self));
+	(fYOffset += fYStep);
+	m_pMusicVolume = R6WindowHScrollbar(CreateControl(Class'R6Window.R6WindowHScrollbar', fXOffset, fYOffset, ((WinWidth - fXOffset) - fXRightOffset), 14.0000000, self));
 	m_pMusicVolume.CreateSB(int(GetPlayerOwner().5), 250.0000000, 0.0000000, 140.0000000, 14.0000000, self);
 	m_pMusicVolume.CreateSBTextLabel(Localize("Options", "Opt_SndMusic", "R6Menu"), Localize("Tip", "Opt_SndMusic", "R6Menu"));
 	m_pMusicVolume.SetScrollBarRange(0.0000000, 100.0000000, 20.0000000);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	rRegionW.X = int(fXOffset);
 	rRegionW.Y = int(fYOffset);
-	rRegionW.W = int(__NFUN_174__(fWidth, float(20)));
+	rRegionW.W = int((fWidth + float(20)));
 	rRegionW.H = int(fHeight);
 	m_pSndQuality = SetComboControlButton(rRegionW, Localize("Options", "Opt_SndQuality", "R6Menu"), Localize("Tip", "Opt_SndQuality", "R6Menu"));
 	m_pSndQuality.AddItem(m_pComboLevel[1], "");
 	m_pSndQuality.AddItem(m_pComboLevel[3], "");
 	m_pSndQuality.SetDisableButton(m_bInGame);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	rRegionW.Y = int(fYOffset);
 	m_pAudioVirtual = SetComboControlButton(rRegionW, Localize("Options", "Opt_SndVirtual", "R6Menu"), Localize("Tip", "Opt_SndVirtual", "R6Menu"));
 	m_pAudioVirtual.AddItem(m_pSndLocEnum[2], "");
 	m_pAudioVirtual.AddItem(m_pSndLocEnum[1], "");
 	m_pAudioVirtual.AddItem(m_pSndLocEnum[0], "");
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pSndHardware = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pSndHardware.SetButtonBox(false);
 	m_pSndHardware.CreateTextAndBox(Localize("Options", "Opt_SndHardware", "R6Menu"), Localize("Tip", "Opt_SndHardware", "R6Menu"), 0.0000000, 0);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_pEAX = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, fYOffset, fWidth, fHeight, self));
 	m_pEAX.SetButtonBox(false);
 	m_pEAX.CreateTextAndBox(Localize("Options", "Opt_SndEAX", "R6Menu"), Localize("Tip", "Opt_SndEAX", "R6Menu"), 0.0000000, 1);
-	__NFUN_184__(fYOffset, fYStep);
+	(fYOffset += fYStep);
 	m_EaxLogo = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', 0.0000000, fYOffset, WinWidth, float(m_EaxTextureReg.H), self));
 	m_EaxLogo.bCenter = true;
 	m_EaxLogo.m_iDrawStyle = 5;
@@ -105,7 +105,7 @@ function UpdateOptionsInEngine()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	pGameOptions.AmbientVolume = int(m_pAmbientVolume.GetScrollBarValue());
 	pGameOptions.VoicesVolume = int(m_pVoicesVolume.GetScrollBarValue());
 	pGameOptions.MusicVolume = int(m_pMusicVolume.GetScrollBarValue());
@@ -120,7 +120,7 @@ function UpdateOptionsInPage()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	m_pAmbientVolume.SetScrollBarValue(float(pGameOptions.AmbientVolume));
 	m_pVoicesVolume.SetScrollBarValue(float(pGameOptions.VoicesVolume));
 	m_pMusicVolume.SetScrollBarValue(float(pGameOptions.MusicVolume));
@@ -149,7 +149,7 @@ function UpdateOptionsInPage()
 function int ConvertToSndQuality(string _szValue)
 {
 	// End:0x17
-	if(__NFUN_122__(_szValue, m_pComboLevel[3]))
+	if((_szValue == m_pComboLevel[3]))
 	{
 		return 1;		
 	}
@@ -163,7 +163,7 @@ function int ConvertToSndQuality(string _szValue)
 function string ConvertToSndQualityString(int _iValue)
 {
 	// End:0x17
-	if(__NFUN_154__(_iValue, 1))
+	if((_iValue == 1))
 	{
 		return m_pComboLevel[3];		
 	}
@@ -240,7 +240,7 @@ function RestoreDefaultValue()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	pGameOptions.ResetSoundToDefault(m_bInGame);
 	UpdateOptionsInPage();
 	return;
@@ -251,17 +251,17 @@ function Notify(UWindowDialogControl C, byte E)
 	local bool bUpdateGameOptions;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	// End:0x120
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x91
-		if(C.__NFUN_303__('R6WindowButtonBox'))
+		if(C.IsA('R6WindowButtonBox'))
 		{
 			// End:0x7E
 			if(R6WindowButtonBox(C).GetSelectStatus())
 			{
-				R6WindowButtonBox(C).m_bSelected = __NFUN_129__(R6WindowButtonBox(C).m_bSelected);
+				R6WindowButtonBox(C).m_bSelected = (!R6WindowButtonBox(C).m_bSelected);
 				bUpdateGameOptions = true;
 			}
 			ManageNotifyForSound(C, E);			
@@ -269,10 +269,10 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x11D
-			if(C.__NFUN_303__('R6WindowButton'))
+			if(C.IsA('R6WindowButton'))
 			{
 				// End:0x11D
-				if(__NFUN_114__(C, m_pGeneralButUse))
+				if((C == m_pGeneralButUse))
 				{
 					Root.SimplePopUp(Localize("Options", "ResetToDefault", "R6Menu"), Localize("Options", "ResetToDefaultConfirm", "R6Menu"), 55, 0, false, self);
 				}
@@ -282,17 +282,17 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x337
-		if(C.__NFUN_303__('UWindowHScrollbar'))
+		if(C.IsA('UWindowHScrollbar'))
 		{
 			switch(UWindowHScrollbar(C).m_iScrollBarID)
 			{
 				// End:0x1E8
 				case int(GetPlayerOwner().1):
 					// End:0x1A5
-					if(__NFUN_154__(int(E), 9))
+					if((int(E) == 9))
 					{
 						// End:0x1A2
-						if(__NFUN_181__(float(m_iRefAmbientVolume), m_pAmbientVolume.GetScrollBarValue()))
+						if((float(m_iRefAmbientVolume) != m_pAmbientVolume.GetScrollBarValue()))
 						{
 							m_iRefAmbientVolume = int(m_pAmbientVolume.GetScrollBarValue());
 							bUpdateGameOptions = true;
@@ -301,9 +301,9 @@ function Notify(UWindowDialogControl C, byte E)
 					else
 					{
 						// End:0x1E5
-						if(__NFUN_130__(__NFUN_154__(int(E), 1), m_bInitComplete))
+						if(((int(E) == 1) && m_bInitComplete))
 						{
-							GetPlayerOwner().__NFUN_2714__(GetPlayerOwner().1, m_pAmbientVolume.GetScrollBarValue());
+							GetPlayerOwner().ChangeVolumeTypeLinear(GetPlayerOwner().1, m_pAmbientVolume.GetScrollBarValue());
 						}
 					}
 					// End:0x334
@@ -311,10 +311,10 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x287
 				case int(GetPlayerOwner().5):
 					// End:0x244
-					if(__NFUN_154__(int(E), 9))
+					if((int(E) == 9))
 					{
 						// End:0x241
-						if(__NFUN_181__(float(m_iRefMusicVolume), m_pMusicVolume.GetScrollBarValue()))
+						if((float(m_iRefMusicVolume) != m_pMusicVolume.GetScrollBarValue()))
 						{
 							m_iRefMusicVolume = int(m_pMusicVolume.GetScrollBarValue());
 							bUpdateGameOptions = true;
@@ -323,9 +323,9 @@ function Notify(UWindowDialogControl C, byte E)
 					else
 					{
 						// End:0x284
-						if(__NFUN_130__(__NFUN_154__(int(E), 1), m_bInitComplete))
+						if(((int(E) == 1) && m_bInitComplete))
 						{
-							GetPlayerOwner().__NFUN_2714__(GetPlayerOwner().5, m_pMusicVolume.GetScrollBarValue());
+							GetPlayerOwner().ChangeVolumeTypeLinear(GetPlayerOwner().5, m_pMusicVolume.GetScrollBarValue());
 						}
 					}
 					// End:0x334
@@ -333,10 +333,10 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x326
 				case int(GetPlayerOwner().6):
 					// End:0x2E3
-					if(__NFUN_154__(int(E), 9))
+					if((int(E) == 9))
 					{
 						// End:0x2E0
-						if(__NFUN_181__(float(m_iRefVoicesVolume), m_pVoicesVolume.GetScrollBarValue()))
+						if((float(m_iRefVoicesVolume) != m_pVoicesVolume.GetScrollBarValue()))
 						{
 							m_iRefVoicesVolume = int(m_pVoicesVolume.GetScrollBarValue());
 							bUpdateGameOptions = true;
@@ -345,9 +345,9 @@ function Notify(UWindowDialogControl C, byte E)
 					else
 					{
 						// End:0x323
-						if(__NFUN_130__(__NFUN_154__(int(E), 1), m_bInitComplete))
+						if(((int(E) == 1) && m_bInitComplete))
 						{
-							GetPlayerOwner().__NFUN_2714__(GetPlayerOwner().6, m_pVoicesVolume.GetScrollBarValue());
+							GetPlayerOwner().ChangeVolumeTypeLinear(GetPlayerOwner().6, m_pVoicesVolume.GetScrollBarValue());
 						}
 					}
 					// End:0x334
@@ -363,13 +363,13 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x382
-			if(C.__NFUN_303__('R6WindowComboControl'))
+			if(C.IsA('R6WindowComboControl'))
 			{
 				// End:0x382
-				if(__NFUN_154__(int(E), 1))
+				if((int(E) == 1))
 				{
 					// End:0x382
-					if(__NFUN_130__(m_bInitComplete, R6WindowComboControl(C).m_bSelectedByUser))
+					if((m_bInitComplete && R6WindowComboControl(C).m_bSelectedByUser))
 					{
 						bUpdateGameOptions = true;
 					}
@@ -381,7 +381,7 @@ function Notify(UWindowDialogControl C, byte E)
 	if(bUpdateGameOptions)
 	{
 		UpdateOptionsInEngine();
-		pGameOptions.__NFUN_536__();
+		pGameOptions.SaveConfig();
 	}
 	return;
 }
@@ -389,10 +389,10 @@ function Notify(UWindowDialogControl C, byte E)
 function ManageNotifyForSound(UWindowDialogControl C, byte E)
 {
 	// End:0x8B
-	if(__NFUN_114__(C, m_pSndHardware))
+	if((C == m_pSndHardware))
 	{
 		// End:0x88
-		if(__NFUN_129__(m_bEAXNotSupported))
+		if((!m_bEAXNotSupported))
 		{
 			// End:0x45
 			if(R6WindowButtonBox(C).m_bSelected)
@@ -404,15 +404,15 @@ function ManageNotifyForSound(UWindowDialogControl C, byte E)
 				m_pEAX.bDisabled = true;
 				m_pEAX.m_bSelected = false;
 			}
-			m_EaxLogo.m_bUseColor = __NFUN_129__(m_pEAX.m_bSelected);
+			m_EaxLogo.m_bUseColor = (!m_pEAX.m_bSelected);
 		}		
 	}
 	else
 	{
 		// End:0xBB
-		if(__NFUN_114__(C, m_pEAX))
+		if((C == m_pEAX))
 		{
-			m_EaxLogo.m_bUseColor = __NFUN_129__(m_pEAX.m_bSelected);
+			m_EaxLogo.m_bUseColor = (!m_pEAX.m_bSelected);
 		}
 	}
 	return;

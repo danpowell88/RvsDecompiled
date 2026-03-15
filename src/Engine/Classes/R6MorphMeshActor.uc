@@ -49,12 +49,12 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	local int iDamage;
 
 	iDamage = super.R6TakeDamage(iKillValue, iStunValue, instigatedBy, vHitLocation, vMomentum, iBulletToArmorModifier, iBulletGoup);
-	__NFUN_231__(__NFUN_112__("-------------------  morph -------", string(iDamage)));
+	Log(("-------------------  morph -------" $ string(iDamage)));
 	// End:0x9B
-	if(__NFUN_154__(int(MvtStat), int(1)))
+	if((int(MvtStat) == int(1)))
 	{
 		// End:0x9B
-		if(__NFUN_119__(MorphMesh, none))
+		if((MorphMesh != none))
 		{
 			b_sensMorph = 1;
 			m_bMorph = true;

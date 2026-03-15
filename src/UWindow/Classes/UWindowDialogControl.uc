@@ -30,7 +30,7 @@ var string HelpText;
 function Created()
 {
 	// End:0x11
-	if(__NFUN_129__(bNoKeyboard))
+	if((!bNoKeyboard))
 	{
 		SetAcceptsFocus();
 	}
@@ -65,7 +65,7 @@ function BeforePaint(Canvas C, float X, float Y)
 {
 	C.Font = Root.Fonts[Font];
 	// End:0x57
-	if(__NFUN_114__(C.Font, none))
+	if((C.Font == none))
 	{
 		C.Font = Root.Fonts[5];
 	}
@@ -94,7 +94,7 @@ function Register(UWindowDialogClientWindow W)
 function Notify(byte E)
 {
 	// End:0x20
-	if(__NFUN_119__(NotifyWindow, none))
+	if((NotifyWindow != none))
 	{
 		NotifyWindow.Notify(self, E);
 	}
@@ -117,7 +117,7 @@ function UWindowDialogControl CheckExternalDrag(float X, float Y)
 	W = Root.FindWindowUnder(RootX, RootY);
 	C = UWindowDialogControl(W);
 	// End:0xBB
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(W, self), __NFUN_119__(C, none)), C.bAcceptExternalDragDrop))
+	if((((W != self) && (C != none)) && C.bAcceptExternalDragDrop))
 	{
 		W.GlobalToWindow(RootX, RootY, ExtX, ExtY);
 		// End:0xBB
@@ -141,13 +141,13 @@ function KeyDown(int Key, float X, float Y)
 		// End:0xA0
 		case int(P.Player.Console.9):
 			// End:0x9D
-			if(__NFUN_119__(TabNext, none))
+			if((TabNext != none))
 			{
 				N = TabNext;
 				J0x54:
 
 				// End:0x8C [Loop If]
-				if(__NFUN_130__(__NFUN_119__(N, self), __NFUN_129__(N.bWindowVisible)))
+				if(((N != self) && (!N.bWindowVisible)))
 				{
 					N = N.TabNext;
 					// [Loop Continue]

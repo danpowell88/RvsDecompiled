@@ -36,7 +36,7 @@ event PostBeginPlay()
 {
 	m_MatineeAttach = new (none) Class'R6Engine.R6MatineeAttach';
 	// End:0x61
-	if(__NFUN_130__(__NFUN_119__(m_RainbowTemplate, none), m_bUseRainbowTemplate))
+	if(((m_RainbowTemplate != none) && m_bUseRainbowTemplate))
 	{
 		Skins = m_RainbowTemplate.default.Skins;
 		LinkMesh(m_RainbowTemplate.default.Mesh);
@@ -48,18 +48,18 @@ event PostBeginPlay()
 	m_szSecondaryWeapon = string(m_SecondaryWeapon);
 	m_szSecondaryGadget = string(m_SecondaryGadget);
 	// End:0xAC
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		UnPossessed();
 	}
-	Controller = __NFUN_278__(ControllerClass);
+	Controller = Spawn(ControllerClass);
 	m_controller = R6RainbowAI(Controller);
 	m_controller.m_PaceMember = self;
 	m_controller.m_TeamLeader = self;
 	m_controller.Possess(self);
 	GiveDefaultWeapon();
 	// End:0x132
-	if(__NFUN_242__(m_bActivateGadget, true))
+	if((m_bActivateGadget == true))
 	{
 		m_bWeaponGadgetActivated = true;
 		R6AbstractWeapon(EngineWeapon).m_SelectedWeaponGadget.ActivateGadget(true);
@@ -74,7 +74,7 @@ function SetMovementPhysics()
 
 function SetAttachVar(Actor AttachActor, string StaticMeshTag, name PawnTag)
 {
-	__NFUN_231__("R6MatineeRainbow::SetAttachVar");
+	Log("R6MatineeRainbow::SetAttachVar");
 	m_MatineeAttach.m_AttachActor = AttachActor;
 	m_MatineeAttach.m_StaticMeshTag = StaticMeshTag;
 	m_MatineeAttach.m_PawnTag = PawnTag;

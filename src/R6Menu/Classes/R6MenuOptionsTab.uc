@@ -54,8 +54,8 @@ function Paint(Canvas C, float X, float Y)
 	// End:0x90
 	if(m_bDrawLineOverButton)
 	{
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
-		DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(WinHeight, float(15)), WinWidth, float(SimpleBorderRegion.H), float(SimpleBorderRegion.X), float(SimpleBorderRegion.Y), float(SimpleBorderRegion.W), float(SimpleBorderRegion.H), R6MenuRSLookAndFeel(LookAndFeel).m_R6ScrollTexture);
+		C.SetDrawColor(byte(255), byte(255), byte(255));
+		DrawStretchedTextureSegment(C, 0.0000000, (WinHeight - float(15)), WinWidth, float(SimpleBorderRegion.H), float(SimpleBorderRegion.X), float(SimpleBorderRegion.Y), float(SimpleBorderRegion.W), float(SimpleBorderRegion.H), R6MenuRSLookAndFeel(LookAndFeel).m_R6ScrollTexture);
 	}
 	return;
 }
@@ -64,7 +64,7 @@ function Paint(Canvas C, float X, float Y)
 function InitResetButton()
 {
 	m_bDrawLineOverButton = true;
-	m_pGeneralButUse = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', 0.0000000, __NFUN_175__(WinHeight, float(15)), WinWidth, 15.0000000, self));
+	m_pGeneralButUse = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', 0.0000000, (WinHeight - float(15)), WinWidth, 15.0000000, self));
 	m_pGeneralButUse.Text = m_szGeneralButLoc;
 	m_pGeneralButUse.ToolTipString = m_szGeneralButTip;
 	m_pGeneralButUse.Align = 2;
@@ -88,7 +88,7 @@ function UpdateOptionsInEngine()
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
 	// End:0x28
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -105,7 +105,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	else
 	{
 		// End:0x4E
-		if(__NFUN_119__(R6MenuInGameRootWindow(Root), none))
+		if((R6MenuInGameRootWindow(Root) != none))
 		{
 			R6MenuInGameRootWindow(Root).m_bInPopUp = false;
 		}
@@ -134,7 +134,7 @@ function R6WindowComboControl SetComboControlButton(Region _RDefaultW, string _s
 	local R6WindowComboControl _pR6WindowComboControl;
 
 	_pR6WindowComboControl = R6WindowComboControl(CreateControl(Class'R6Window.R6WindowComboControl', float(_RDefaultW.X), float(_RDefaultW.Y), float(_RDefaultW.W), LookAndFeel.Size_ComboHeight, self));
-	_pR6WindowComboControl.AdjustTextW(_szTitle, 0.0000000, 0.0000000, __NFUN_171__(float(_RDefaultW.W), 0.5000000), LookAndFeel.Size_ComboHeight);
+	_pR6WindowComboControl.AdjustTextW(_szTitle, 0.0000000, 0.0000000, (float(_RDefaultW.W) * 0.5000000), LookAndFeel.Size_ComboHeight);
 	_pR6WindowComboControl.AdjustEditBoxW(0.0000000, 140.0000000, LookAndFeel.Size_ComboHeight);
 	_pR6WindowComboControl.SetEditBoxTip(_szTip);
 	return _pR6WindowComboControl;

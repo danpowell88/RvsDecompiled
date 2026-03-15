@@ -31,11 +31,11 @@ function InitObjectives()
 	groupMission.m_aSubMissionObjectives[Index].m_bIfCompletedMissionIsSuccessfull = true;
 	reconObj = R6MObjRecon(groupMission.m_aSubMissionObjectives[Index]);
 	reconObj.m_bVisibleInMenu = false;
-	__NFUN_165__(Index);
+	(Index++);
 	groupMission.m_aSubMissionObjectives[Index] = new (none) Class'R6Game.R6MObjCompleteAllAndGoToExtraction';
 	groupMission.m_aSubMissionObjectives[Index].m_bIfCompletedMissionIsSuccessfull = true;
 	missionObjTerro.m_bVisibleInMenu = false;
-	__NFUN_165__(Index);
+	(Index++);
 	super(R6MultiPlayerGameInfo).InitObjectives();
 	return;
 }

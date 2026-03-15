@@ -19,7 +19,7 @@ function BeforePaint(Canvas C, float fMouseX, float fMouseY)
 {
 	local UWindowListBoxItem OverItem;
 
-	m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(WinHeight, m_fItemHeight))));
+	m_VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int((WinHeight / m_fItemHeight))));
 	super.BeforePaint(C, fMouseX, fMouseY);
 	return;
 }
@@ -34,9 +34,9 @@ function Paint(Canvas C, float fMouseX, float fMouseY)
 	J0x14:
 
 	// End:0x6D [Loop If]
-	if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), m_VertSB.pos)))
+	if(((CurItem != none) && (float(i) < m_VertSB.pos)))
 	{
-		__NFUN_163__(i);
+		(++i);
 		R6WindowListAreaItem(CurItem).SetBack();
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -45,10 +45,10 @@ function Paint(Canvas C, float fMouseX, float fMouseY)
 	J0x6D:
 
 	// End:0x101 [Loop If]
-	if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), __NFUN_174__(m_VertSB.pos, m_VertSB.MaxVisible))))
+	if(((CurItem != none) && (float(i) < (m_VertSB.pos + m_VertSB.MaxVisible))))
 	{
-		DrawItem(C, CurItem, 0.0000000, Y, __NFUN_175__(WinWidth, m_VertSB.WinWidth), m_fItemHeight);
-		Y = __NFUN_174__(Y, m_fItemHeight);
+		DrawItem(C, CurItem, 0.0000000, Y, (WinWidth - m_VertSB.WinWidth), m_fItemHeight);
+		Y = (Y + m_fItemHeight);
 		CurItem = CurItem.Next;
 		// [Loop Continue]
 		goto J0x6D;

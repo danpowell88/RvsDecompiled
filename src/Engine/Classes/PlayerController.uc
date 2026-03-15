@@ -237,11 +237,11 @@ var transient array<CameraEffect> CameraEffects;  // A stack of camera effects.
 replication
 {
 	// Pos:0x0CB
-	unreliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_129__(bDemoRecording)))
+	unreliable if(((int(Role) == int(ROLE_Authority)) && (!bDemoRecording)))
 		ClientPlaySound, ClientStopSound;
 
 	// Pos:0x0FF
-	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) == int(ROLE_Authority)))
 		ClientAdjustPosition, ClientFlash, 
 		ClientInstantFlash, ClientSetFlash, 
 		ClientShake, LongClientAdjustPosition, 
@@ -249,37 +249,37 @@ replication
 		VeryShortClientAdjustPosition;
 
 	// Pos:0x10C
-	unreliable if(__NFUN_130__(__NFUN_132__(__NFUN_129__(bDemoRecording), __NFUN_130__(bClientDemoRecording, bClientDemoNetFunc)), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	unreliable if((((!bDemoRecording) || (bClientDemoRecording && bClientDemoNetFunc)) && (int(Role) == int(ROLE_Authority))))
 		ClientHearSound;
 
 	// Pos:0x13C
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		Say, ServerMove, 
 		ServerTKPopUpDone, ServerViewNextPlayer, 
 		ServerViewSelf, ShortServerMove, 
 		ShorterServerMove, TeamSay;
 
 	// Pos:0x000
-	reliable if(__NFUN_130__(__NFUN_130__(bNetDirty, bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if(((bNetDirty && bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		GameReplicationInfo, ViewTarget, 
 		bOnlySpectator, m_TeamSelection, 
 		m_eCameraMode;
 
 	// Pos:0x023
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bNetOwner, __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_119__(ViewTarget, Pawn)), __NFUN_119__(Pawn(ViewTarget), none)))
+	reliable if((((bNetOwner && (int(Role) == int(ROLE_Authority))) && (ViewTarget != Pawn)) && (Pawn(ViewTarget) != none)))
 		TargetEyeHeight, TargetViewRotation, 
 		TargetWeaponViewOffset;
 
 	// Pos:0x05E
-	reliable if(__NFUN_130__(bDemoRecording, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bDemoRecording && (int(Role) == int(ROLE_Authority))))
 		DemoViewPitch, DemoViewYaw;
 
 	// Pos:0x076
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		m_bRadarActive;
 
 	// Pos:0x08E
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientAdjustBase, ClientAdjustGlow, 
 		ClientCantRequestChangeNameYet, ClientChangeName, 
 		ClientErrorMessageLocalized, ClientGotoState, 
@@ -293,16 +293,16 @@ replication
 		ToggleZoom;
 
 	// Pos:0x09B
-	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_132__(__NFUN_129__(bDemoRecording), __NFUN_130__(bClientDemoRecording, bClientDemoNetFunc))))
+	reliable if(((int(Role) == int(ROLE_Authority)) && ((!bDemoRecording) || (bClientDemoRecording && bClientDemoNetFunc))))
 		ClientMessage, ReceiveLocalizedMessage, 
 		TeamMessage;
 
 	// Pos:0x0E5
-	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_129__(bDemoRecording)))
+	reliable if(((int(Role) == int(ROLE_Authority)) && (!bDemoRecording)))
 		ClientTravel;
 
 	// Pos:0x149
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		AskForPawn, ChangeName, 
 		Pause, ServerChangeName, 
 		ServerPlayerPref, ServerReadyToLoadWeaponSound, 
@@ -463,14 +463,14 @@ event PostBeginPlay()
 	super.PostBeginPlay();
 	SpawnDefaultHUD();
 	// End:0x35
-	if(__NFUN_123__(Level.LevelEnterText, ""))
+	if((Level.LevelEnterText != ""))
 	{
 		ClientMessage(Level.LevelEnterText);
 	}
 	DesiredFOV = DefaultFOV;
 	SetViewTarget(self);
 	// End:0x66
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		AddCheats();
 	}
@@ -481,7 +481,7 @@ function PendingStasis()
 {
 	bStasis = true;
 	Pawn = none;
-	__NFUN_113__('Scripting');
+	GotoState('Scripting');
 	return;
 }
 
@@ -493,7 +493,7 @@ function AddCheats()
 		return;
 	}
 	// End:0x2E
-	if(__NFUN_114__(CheatManager, none))
+	if((CheatManager == none))
 	{
 		CheatManager = new CheatClass;
 	}
@@ -502,7 +502,7 @@ function AddCheats()
 
 function SpawnDefaultHUD()
 {
-	myHUD = __NFUN_278__(Class'Engine.HUD', self);
+	myHUD = Spawn(Class'Engine.HUD', self);
 	return;
 }
 
@@ -512,8 +512,8 @@ function Reset()
 	super.Reset();
 	SetViewTarget(self);
 	bBehindView = false;
-	WaitDelay = __NFUN_174__(Level.TimeSeconds, float(2));
-	__NFUN_113__('BaseSpectating');
+	WaitDelay = (Level.TimeSeconds + float(2));
+	GotoState('BaseSpectating');
 	return;
 }
 
@@ -538,28 +538,28 @@ function UpdateOptions()
 
 function ClientGotoState(name NewState, name NewLabel)
 {
-	__NFUN_113__(NewState, NewLabel);
+	GotoState(NewState, NewLabel);
 	return;
 }
 
 function AskForPawn()
 {
 	// End:0x19
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		GivePawn(Pawn);		
 	}
 	else
 	{
 		// End:0x37
-		if(__NFUN_281__('GameEnded'))
+		if(IsInState('GameEnded'))
 		{
 			ClientGotoState('GameEnded', 'Begin');			
 		}
 		else
 		{
 			// End:0x50
-			if(__NFUN_281__('Dead'))
+			if(IsInState('Dead'))
 			{
 				bFrozen = false;
 				ServerReStartPlayer();
@@ -572,7 +572,7 @@ function AskForPawn()
 function GivePawn(Pawn NewPawn)
 {
 	// End:0x0D
-	if(__NFUN_114__(NewPawn, none))
+	if((NewPawn == none))
 	{
 		return;
 	}
@@ -586,16 +586,16 @@ function int GetFacingDirection()
 {
 	local Vector X, Y, Z, Dir;
 
-	__NFUN_229__(Pawn.Rotation, X, Y, Z);
-	Dir = __NFUN_226__(Pawn.Acceleration);
+	GetAxes(Pawn.Rotation, X, Y, Z);
+	Dir = Normal(Pawn.Acceleration);
 	// End:0x6D
-	if(__NFUN_177__(__NFUN_219__(Y, Dir), float(0)))
+	if((Dot(Y, Dir) > float(0)))
 	{
-		return int(__NFUN_174__(float(49152), __NFUN_171__(float(16384), __NFUN_219__(X, Dir))));		
+		return int((float(49152) + (float(16384) * Dot(X, Dir))));		
 	}
 	else
 	{
-		return int(__NFUN_175__(float(16384), __NFUN_171__(float(16384), __NFUN_219__(X, Dir))));
+		return int((float(16384) - (float(16384) * Dot(X, Dir))));
 	}
 	return;
 }
@@ -608,12 +608,12 @@ function Possess(Pawn aPawn)
 	{
 		return;
 	}
-	__NFUN_299__(aPawn.Rotation);
+	SetRotation(aPawn.Rotation);
 	aPawn.PossessedBy(self);
 	Pawn = aPawn;
 	Pawn.bStasis = false;
 	// End:0x72
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		PlayerReplicationInfo.bIsFemale = Pawn.bIsFemale;
 	}
@@ -625,9 +625,9 @@ function Possess(Pawn aPawn)
 function UnPossess()
 {
 	// End:0x52
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
-		__NFUN_267__(Pawn.Location);
+		__NFUN_267__(Pawn.Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		Pawn.RemoteRole = ROLE_SimulatedProxy;
 		Pawn.UnPossessed();
 		// End:0x52

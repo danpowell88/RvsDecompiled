@@ -36,13 +36,13 @@ function Created()
 	m_ButtonReturnUbiCom.m_buttonFont = Root.Fonts[15];
 	m_ButtonReturnUbiCom.m_iButtonID = 2;
 	m_ButtonReturnUbiCom.ResizeToText();
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = "CUSTOM MODS";
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
 	m_LMenuTitle.m_BGTexture = none;
 	m_LMenuTitle.m_bDrawBorders = false;
-	m_pOptionsTextLabel = R6WindowTextLabelCurved(CreateWindow(Class'R6Window.R6WindowTextLabelCurved', 189.0000000, __NFUN_174__(__NFUN_175__(92.0000000, float(30)), float(1)), 422.0000000, 30.0000000, self));
+	m_pOptionsTextLabel = R6WindowTextLabelCurved(CreateWindow(Class'R6Window.R6WindowTextLabelCurved', 189.0000000, ((92.0000000 - float(30)) + float(1)), 422.0000000, 30.0000000, self));
 	m_pOptionsTextLabel.bAlwaysBehind = true;
 	m_pOptionsTextLabel.Align = 2;
 	m_pOptionsTextLabel.m_Font = Root.Fonts[5];
@@ -56,7 +56,7 @@ function Created()
 	m_pOptionsBorder.m_eCornerType = 2;
 	m_pOptionsBorder.SetCornerColor(2, Root.Colors.White);
 	m_pOptionsBorder.ActiveBackGround(true, Root.Colors.Black);
-	m_pListOfMods = R6MenuOptionsMODSExt(CreateWindow(Class'R6Menu.R6MenuOptionsMODSExt', __NFUN_174__(189.0000000, float(1)), 92.0000000, __NFUN_175__(422.0000000, float(2)), 321.0000000, self));
+	m_pListOfMods = R6MenuOptionsMODSExt(CreateWindow(Class'R6Menu.R6MenuOptionsMODSExt', (189.0000000 + float(1)), 92.0000000, (422.0000000 - float(2)), 321.0000000, self));
 	m_pListOfMods.InitPageOptions();
 	return;
 }
@@ -77,22 +77,22 @@ function ShowWindow()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x65
-	if(C.__NFUN_303__('R6WindowButton'))
+	if(C.IsA('R6WindowButton'))
 	{
 		// End:0x65
-		if(__NFUN_154__(int(E), 2))
+		if((int(E) == 2))
 		{
 			// End:0x43
-			if(__NFUN_114__(C, m_ButtonQuit))
+			if((C == m_ButtonQuit))
 			{
 				Root.DoQuitGame();				
 			}
 			else
 			{
 				// End:0x65
-				if(__NFUN_114__(C, m_ButtonReturnUbiCom))
+				if((C == m_ButtonReturnUbiCom))
 				{
-					Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();
+					Class'Engine.Actor'.static.GetGameManager().RemoveFromIDList();
 				}
 			}
 		}

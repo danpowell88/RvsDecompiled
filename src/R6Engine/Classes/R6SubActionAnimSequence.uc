@@ -34,7 +34,7 @@ event Initialize()
 {
 	m_bFirstTime = true;
 	// End:0x2B
-	if(__NFUN_130__(__NFUN_119__(m_AffectedPawn, none), __NFUN_114__(m_AffectedActor, none)))
+	if(((m_AffectedPawn != none) && (m_AffectedActor == none)))
 	{
 		m_AffectedActor = m_AffectedPawn;
 	}
@@ -54,7 +54,7 @@ event SequenceFinished()
 	if(m_bUseRootMotion)
 	{
 		m_AffectedActor.bCollideWorld = true;
-		m_AffectedActor.__NFUN_3970__(1);
+		m_AffectedActor.SetPhysics(1);
 	}
 	return;
 }

@@ -43,13 +43,13 @@ state ScaleProjector
 		local RandomTweenNum RandomValue;
 
 		// End:0x5F
-		if(__NFUN_132__(__NFUN_242__(m_bNeedScale, false), __NFUN_130__(__NFUN_179__(DrawScale3D.X, 1.0000000), __NFUN_179__(DrawScale3D.Y, 1.0000000))))
+		if(((m_bNeedScale == false) || ((DrawScale3D.X >= 1.0000000) && (DrawScale3D.Y >= 1.0000000))))
 		{
 			bClipBSP = true;
 			m_bClipStaticMesh = true;
 			DetachProjector(true);
 			AttachProjector();
-			__NFUN_113__('None');			
+			GotoState('None');			
 		}
 		else
 		{
@@ -57,12 +57,12 @@ state ScaleProjector
 			NewScale3D = DrawScale3D;
 			RandomValue.m_fMin = 8.0000000;
 			RandomValue.m_fMax = 16.0000000;
-			__NFUN_184__(NewScale3D.X, __NFUN_172__(DeltaTime, __NFUN_174__(GetRandomTweenNum(RandomValue), __NFUN_171__(NewScale3D.X, 25.0000000))));
-			__NFUN_184__(NewScale3D.Y, __NFUN_172__(DeltaTime, __NFUN_174__(GetRandomTweenNum(RandomValue), __NFUN_171__(NewScale3D.Y, 25.0000000))));
+			(NewScale3D.X += (DeltaTime / (GetRandomTweenNum(RandomValue) + (NewScale3D.X * 25.0000000))));
+			(NewScale3D.Y += (DeltaTime / (GetRandomTweenNum(RandomValue) + (NewScale3D.Y * 25.0000000))));
 			SetDrawScale3D(NewScale3D);
 			NewRotation = Rotation;
-			__NFUN_161__(NewRotation.Roll, int(__NFUN_172__(__NFUN_171__(DeltaTime, 65536.0000000), 256.0000000)));
-			__NFUN_299__(NewRotation);
+			(NewRotation.Roll += int(((DeltaTime * 65536.0000000) / 256.0000000)));
+			SetRotation(NewRotation);
 			AttachProjector();
 		}
 		return;

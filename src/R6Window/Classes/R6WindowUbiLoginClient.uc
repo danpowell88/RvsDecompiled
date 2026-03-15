@@ -36,26 +36,26 @@ function SetupClientWindow(float fWindowWidth)
 	fX = 5.0000000;
 	fY = 2.0000000;
 	fHeight = 15.0000000;
-	fWidth = __NFUN_175__(fWindowWidth, float(__NFUN_146__(5, 10)));
+	fWidth = (fWindowWidth - float((5 + 10)));
 	m_pUserName = R6WindowEditControl(CreateControl(Class'R6Window.R6WindowEditControl', fX, fY, fWidth, fHeight, self));
 	m_pUserName.SetValue("");
-	m_pUserName.CreateTextLabel(Localize("MultiPlayer", "PopUp_LoginName", "R6Menu"), 0.0000000, 0.0000000, __NFUN_171__(fWidth, 0.5000000), fHeight);
+	m_pUserName.CreateTextLabel(Localize("MultiPlayer", "PopUp_LoginName", "R6Menu"), 0.0000000, 0.0000000, (fWidth * 0.5000000), fHeight);
 	m_pUserName.SetEditBoxTip("");
 	fWidth = 165.0000000;
-	m_pUserName.ModifyEditBoxW(__NFUN_175__(__NFUN_175__(fWindowWidth, fWidth), float(10)), 0.0000000, fWidth, fHeight);
+	m_pUserName.ModifyEditBoxW(((fWindowWidth - fWidth) - float(10)), 0.0000000, fWidth, fHeight);
 	m_pUserName.EditBox.MaxLength = 15;
-	__NFUN_184__(fY, float(__NFUN_146__(15, 2)));
-	fWidth = __NFUN_175__(fWindowWidth, float(__NFUN_146__(5, 10)));
+	(fY += float((15 + 2)));
+	fWidth = (fWindowWidth - float((5 + 10)));
 	m_pPassword = R6WindowEditControl(CreateControl(Class'R6Window.R6WindowEditControl', fX, fY, fWidth, fHeight, self));
 	m_pPassword.SetValue("");
-	m_pPassword.CreateTextLabel(Localize("MultiPlayer", "PopUp_UbiPassword", "R6Menu"), 0.0000000, 0.0000000, __NFUN_171__(fWidth, 0.5000000), fHeight);
+	m_pPassword.CreateTextLabel(Localize("MultiPlayer", "PopUp_UbiPassword", "R6Menu"), 0.0000000, 0.0000000, (fWidth * 0.5000000), fHeight);
 	m_pPassword.SetEditBoxTip("");
 	fWidth = 165.0000000;
-	m_pPassword.ModifyEditBoxW(__NFUN_175__(__NFUN_175__(fWindowWidth, fWidth), float(10)), 0.0000000, fWidth, fHeight);
+	m_pPassword.ModifyEditBoxW(((fWindowWidth - fWidth) - float(10)), 0.0000000, fWidth, fHeight);
 	m_pPassword.EditBox.MaxLength = 20;
 	m_pPassword.EditBox.bPassword = true;
-	__NFUN_184__(fY, float(__NFUN_146__(15, 2)));
-	fWidth = __NFUN_175__(fWindowWidth, float(__NFUN_146__(5, 10)));
+	(fY += float((15 + 2)));
+	fWidth = (fWindowWidth - float((5 + 10)));
 	m_pSavePassword = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fX, fY, fWidth, fHeight, self, true));
 	m_pSavePassword.m_TextFont = Root.Fonts[5];
 	m_pSavePassword.m_vTextColor = Root.Colors.White;
@@ -63,7 +63,7 @@ function SetupClientWindow(float fWindowWidth)
 	m_pSavePassword.m_bSelected = false;
 	m_pSavePassword.CreateTextAndBox(Localize("MultiPlayer", "PopUp_RemPass", "R6Menu"), "", 0.0000000, 0);
 	m_pSavePassword.SetButtonBox(true);
-	__NFUN_184__(fY, float(__NFUN_146__(15, 2)));
+	(fY += float((15 + 2)));
 	m_pAutoLogIn = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fX, fY, fWidth, fHeight, self, true));
 	m_pAutoLogIn.m_TextFont = Root.Fonts[5];
 	m_pAutoLogIn.m_vTextColor = Root.Colors.White;
@@ -71,14 +71,14 @@ function SetupClientWindow(float fWindowWidth)
 	m_pAutoLogIn.m_bSelected = false;
 	m_pAutoLogIn.CreateTextAndBox(Localize("MultiPlayer", "PopUp_AutoLogin", "R6Menu"), "", 0.0000000, 0);
 	m_pAutoLogIn.SetButtonBox(true);
-	__NFUN_184__(fY, float(__NFUN_146__(15, 2)));
+	(fY += float((15 + 2)));
 	fWidth = 130.0000000;
 	m_pCrAccountText = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', fX, fY, fWidth, fHeight, self));
 	m_pCrAccountText.m_Font = Root.Fonts[5];
 	m_pCrAccountText.m_vTextColor = Root.Colors.White;
 	m_pCrAccountText.AddTextLabel(Localize("MultiPlayer", "PopUp_www", "R6Menu"), 0.0000000, 0.0000000, 200.0000000, 0, false);
 	m_pCrAccountText.m_bTextCenterToWindow = true;
-	fX = __NFUN_175__(__NFUN_175__(fWindowWidth, float(95)), float(10));
+	fX = ((fWindowWidth - float(95)) - float(10));
 	fWidth = 95.0000000;
 	m_pCrAccountBut = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fX, fY, fWidth, fHeight, self, true));
 	m_pCrAccountBut.m_vButtonColor = Root.Colors.White;
@@ -106,10 +106,10 @@ function Notify(UWindowDialogControl C, byte E)
 		// End:0x93
 		case m_pCrAccountBut:
 			// End:0x90
-			if(__NFUN_154__(int(E), 2))
+			if((int(E) == 2))
 			{
-				R6Console(Root.Console).m_GameService.__NFUN_3500__();
-				Root.Console.ConsoleCommand(__NFUN_168__("startminimized ", R6Console(Root.Console).m_GameService.m_szUbiHomePage));
+				R6Console(Root.Console).m_GameService.Initialize();
+				Root.Console.ConsoleCommand(("startminimized " @ R6Console(Root.Console).m_GameService.m_szUbiHomePage));
 			}
 			// End:0x13D
 			break;
@@ -118,15 +118,15 @@ function Notify(UWindowDialogControl C, byte E)
 		// End:0x13A
 		case m_pAutoLogIn:
 			// End:0xF3
-			if(__NFUN_154__(int(E), 2))
+			if((int(E) == 2))
 			{
 				// End:0xF3
 				if(R6WindowButtonBox(C).GetSelectStatus())
 				{
-					R6WindowButtonBox(C).m_bSelected = __NFUN_129__(R6WindowButtonBox(C).m_bSelected);
+					R6WindowButtonBox(C).m_bSelected = (!R6WindowButtonBox(C).m_bSelected);
 				}
 			}
-			m_pAutoLogIn.bDisabled = __NFUN_129__(m_pSavePassword.m_bSelected);
+			m_pAutoLogIn.bDisabled = (!m_pSavePassword.m_bSelected);
 			// End:0x137
 			if(m_pAutoLogIn.bDisabled)
 			{

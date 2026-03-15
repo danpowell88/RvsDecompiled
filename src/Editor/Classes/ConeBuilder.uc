@@ -30,17 +30,17 @@ function BuildCone(int direction, bool AlignToSide, int Sides, float Height, flo
 	// End:0x33
 	if(AlignToSide)
 	{
-		__NFUN_183__(Radius, __NFUN_188__(__NFUN_172__(3.1415930, float(Sides))));
+		(Radius /= Cos((3.1415930 / float(Sides))));
 		Ofs = 1;
 	}
 	i = 0;
 	J0x3A:
 
 	// End:0xBE [Loop If]
-	if(__NFUN_150__(i, Sides))
+	if((i < Sides))
 	{
-		Vertex3f(__NFUN_171__(Radius, __NFUN_187__(__NFUN_172__(__NFUN_171__(__NFUN_174__(__NFUN_171__(2.0000000, float(i)), float(Ofs)), 3.1415930), float(Sides)))), __NFUN_171__(Radius, __NFUN_188__(__NFUN_172__(__NFUN_171__(__NFUN_174__(__NFUN_171__(2.0000000, float(i)), float(Ofs)), 3.1415930), float(Sides)))), 0.0000000);
-		__NFUN_165__(i);
+		Vertex3f((Radius * Sin(((((2.0000000 * float(i)) + float(Ofs)) * 3.1415930) / float(Sides)))), (Radius * Cos(((((2.0000000 * float(i)) + float(Ofs)) * 3.1415930) / float(Sides)))), 0.0000000);
+		(i++);
 		// [Loop Continue]
 		goto J0x3A;
 	}
@@ -49,10 +49,10 @@ function BuildCone(int direction, bool AlignToSide, int Sides, float Height, flo
 	J0xDA:
 
 	// End:0x139 [Loop If]
-	if(__NFUN_150__(i, Sides))
+	if((i < Sides))
 	{
-		Poly3i(direction, __NFUN_146__(N, i), __NFUN_146__(N, Sides), int(__NFUN_174__(float(N), __NFUN_173__(float(__NFUN_146__(i, 1)), float(Sides)))), Item);
-		__NFUN_165__(i);
+		Poly3i(direction, (N + i), (N + Sides), int((float(N) + (float((i + 1)) % float(Sides)))), Item);
+		(i++);
 		// [Loop Continue]
 		goto J0xDA;
 	}
@@ -64,27 +64,27 @@ function bool Build()
 	local int i;
 
 	// End:0x13
-	if(__NFUN_150__(Sides, 3))
+	if((Sides < 3))
 	{
 		return BadParameters();
 	}
 	// End:0x36
-	if(__NFUN_132__(__NFUN_178__(Height, float(0)), __NFUN_178__(OuterRadius, float(0))))
+	if(((Height <= float(0)) || (OuterRadius <= float(0))))
 	{
 		return BadParameters();
 	}
 	// End:0x66
-	if(__NFUN_130__(Hollow, __NFUN_132__(__NFUN_178__(InnerRadius, float(0)), __NFUN_179__(InnerRadius, OuterRadius))))
+	if((Hollow && ((InnerRadius <= float(0)) || (InnerRadius >= OuterRadius))))
 	{
 		return BadParameters();
 	}
 	// End:0x87
-	if(__NFUN_130__(Hollow, __NFUN_177__(CapHeight, Height)))
+	if((Hollow && (CapHeight > Height)))
 	{
 		return BadParameters();
 	}
 	// End:0xB9
-	if(__NFUN_130__(Hollow, __NFUN_130__(__NFUN_180__(CapHeight, Height), __NFUN_180__(InnerRadius, OuterRadius))))
+	if((Hollow && ((CapHeight == Height) && (InnerRadius == OuterRadius))))
 	{
 		return BadParameters();
 	}
@@ -95,16 +95,16 @@ function bool Build()
 	{
 		BuildCone(-1, AlignToSide, Sides, CapHeight, InnerRadius, 'Cap');
 		// End:0x199
-		if(__NFUN_181__(OuterRadius, InnerRadius))
+		if((OuterRadius != InnerRadius))
 		{
 			i = 0;
 			J0x12A:
 
 			// End:0x199 [Loop If]
-			if(__NFUN_150__(i, Sides))
+			if((i < Sides))
 			{
-				Poly4i(1, i, int(__NFUN_173__(float(__NFUN_146__(i, 1)), float(Sides))), int(__NFUN_174__(float(__NFUN_146__(Sides, 1)), __NFUN_173__(float(__NFUN_146__(i, 1)), float(Sides)))), __NFUN_146__(__NFUN_146__(Sides, 1), i), 'Bottom');
-				__NFUN_165__(i);
+				Poly4i(1, i, int((float((i + 1)) % float(Sides))), int((float((Sides + 1)) + (float((i + 1)) % float(Sides)))), ((Sides + 1) + i), 'Bottom');
+				(i++);
 				// [Loop Continue]
 				goto J0x12A;
 			}
@@ -117,10 +117,10 @@ function bool Build()
 		J0x1AF:
 
 		// End:0x1D3 [Loop If]
-		if(__NFUN_150__(i, Sides))
+		if((i < Sides))
 		{
 			Polyi(i);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1AF;
 		}

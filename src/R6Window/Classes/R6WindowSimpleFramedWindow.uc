@@ -50,17 +50,17 @@ var Region m_topLeftCornerR;
 function CreateClientWindow(Class<UWindowWindow> ClientClass)
 {
 	m_ClientClass = ClientClass;
-	m_ClientArea = CreateWindow(m_ClientClass, __NFUN_174__(m_fVBorderWidth, m_fVBorderOffset), __NFUN_174__(m_fHBorderHeight, m_fHBorderOffset), __NFUN_175__(__NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fVBorderWidth)), __NFUN_171__(float(2), m_fVBorderOffset)), __NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fHBorderOffset)), OwnerWindow);
+	m_ClientArea = CreateWindow(m_ClientClass, (m_fVBorderWidth + m_fVBorderOffset), (m_fHBorderHeight + m_fHBorderOffset), ((WinWidth - (float(2) * m_fVBorderWidth)) - (float(2) * m_fVBorderOffset)), ((WinHeight - (float(2) * m_fHBorderHeight)) - (float(2) * m_fHBorderOffset)), OwnerWindow);
 	// End:0x151
 	if(bShowLog)
 	{
-		__NFUN_231__("Creating Client window");
-		__NFUN_231__(__NFUN_168__("m_ClientClass", string(m_ClientClass)));
-		__NFUN_231__(__NFUN_168__("x:", string(__NFUN_174__(m_fVBorderWidth, m_fVBorderOffset))));
-		__NFUN_231__(__NFUN_168__("y:", string(__NFUN_174__(m_fHBorderHeight, m_fHBorderOffset))));
-		__NFUN_231__(__NFUN_168__("w:", string(__NFUN_175__(__NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fVBorderWidth)), __NFUN_171__(float(2), m_fVBorderOffset)))));
-		__NFUN_231__(__NFUN_168__("h:", string(__NFUN_175__(__NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fHBorderHeight)), __NFUN_171__(float(2), m_fHBorderOffset)))));
-		__NFUN_231__("Done Creating Client window");
+		Log("Creating Client window");
+		Log(("m_ClientClass" @ string(m_ClientClass)));
+		Log(("x:" @ string((m_fVBorderWidth + m_fVBorderOffset))));
+		Log(("y:" @ string((m_fHBorderHeight + m_fHBorderOffset))));
+		Log(("w:" @ string(((WinWidth - (float(2) * m_fVBorderWidth)) - (float(2) * m_fVBorderOffset)))));
+		Log(("h:" @ string(((WinHeight - (float(2) * m_fHBorderHeight)) - (float(2) * m_fHBorderOffset)))));
+		Log("Done Creating Client window");
 	}
 	return;
 }
@@ -75,67 +75,67 @@ function AfterPaint(Canvas C, float X, float Y)
 {
 	local float tempSpace;
 
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	C.Style = byte(m_DrawStyle);
 	switch(m_eCornerType)
 	{
 		// End:0x2EB
 		case 1:
 			// End:0x120
-			if(__NFUN_119__(m_HBorderTexture, none))
+			if((m_HBorderTexture != none))
 			{
-				DrawStretchedTextureSegment(C, m_fHBorderPadding, m_fHBorderOffset, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
-				DrawStretchedTextureSegment(C, m_fVBorderOffset, __NFUN_175__(WinHeight, m_fHBorderHeight), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fVBorderOffset)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+				DrawStretchedTextureSegment(C, m_fHBorderPadding, m_fHBorderOffset, (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+				DrawStretchedTextureSegment(C, m_fVBorderOffset, (WinHeight - m_fHBorderHeight), (WinWidth - (float(2) * m_fVBorderOffset)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 			}
 			// End:0x1FD
-			if(__NFUN_119__(m_VBorderTexture, none))
+			if((m_VBorderTexture != none))
 			{
-				DrawStretchedTextureSegment(C, m_fVBorderOffset, m_fVBorderPadding, m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, m_fVBorderPadding), m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
-				DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(WinWidth, m_fVBorderWidth), m_fVBorderOffset), m_fVBorderPadding, m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, m_fVBorderPadding), m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+				DrawStretchedTextureSegment(C, m_fVBorderOffset, m_fVBorderPadding, m_fVBorderWidth, ((WinHeight - m_fVBorderPadding) - m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+				DrawStretchedTextureSegment(C, ((WinWidth - m_fVBorderWidth) - m_fVBorderOffset), m_fVBorderPadding, m_fVBorderWidth, ((WinHeight - m_fVBorderPadding) - m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 			}
 			// End:0x2E8
-			if(__NFUN_119__(m_topLeftCornerT, none))
+			if((m_topLeftCornerT != none))
 			{
 				DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(m_topLeftCornerR.Y), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), m_topLeftCornerT);
-				DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float(__NFUN_143__(m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_topLeftCornerT);
+				DrawStretchedTextureSegment(C, (WinWidth - float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float((-m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_topLeftCornerT);
 			}
 			// End:0x992
 			break;
 		// End:0x5CE
 		case 2:
 			// End:0x3CB
-			if(__NFUN_119__(m_HBorderTexture, none))
+			if((m_HBorderTexture != none))
 			{
-				DrawStretchedTextureSegment(C, m_fVBorderOffset, 0.0000000, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fVBorderOffset)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
-				DrawStretchedTextureSegment(C, m_fHBorderPadding, __NFUN_175__(__NFUN_175__(WinHeight, m_fHBorderHeight), m_fHBorderOffset), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+				DrawStretchedTextureSegment(C, m_fVBorderOffset, 0.0000000, (WinWidth - (float(2) * m_fVBorderOffset)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+				DrawStretchedTextureSegment(C, m_fHBorderPadding, ((WinHeight - m_fHBorderHeight) - m_fHBorderOffset), (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 			}
 			// End:0x4A8
-			if(__NFUN_119__(m_VBorderTexture, none))
+			if((m_VBorderTexture != none))
 			{
-				DrawStretchedTextureSegment(C, m_fVBorderOffset, m_fHBorderHeight, m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, m_fVBorderPadding), m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
-				DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(WinWidth, m_fVBorderWidth), m_fVBorderOffset), m_fHBorderHeight, m_fVBorderWidth, __NFUN_175__(__NFUN_175__(WinHeight, m_fVBorderPadding), m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+				DrawStretchedTextureSegment(C, m_fVBorderOffset, m_fHBorderHeight, m_fVBorderWidth, ((WinHeight - m_fVBorderPadding) - m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+				DrawStretchedTextureSegment(C, ((WinWidth - m_fVBorderWidth) - m_fVBorderOffset), m_fHBorderHeight, m_fVBorderWidth, ((WinHeight - m_fVBorderPadding) - m_fHBorderHeight), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 			}
 			// End:0x5CB
-			if(__NFUN_119__(m_topLeftCornerT, none))
+			if((m_topLeftCornerT != none))
 			{
-				DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(__NFUN_143__(m_topLeftCornerR.H)), m_topLeftCornerT);
-				DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_topLeftCornerR.W)), __NFUN_175__(WinHeight, float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(__NFUN_146__(m_topLeftCornerR.X, m_topLeftCornerR.W)), float(__NFUN_146__(m_topLeftCornerR.Y, m_topLeftCornerR.H)), float(__NFUN_143__(m_topLeftCornerR.W)), float(__NFUN_143__(m_topLeftCornerR.H)), m_topLeftCornerT);
+				DrawStretchedTextureSegment(C, 0.0000000, (WinHeight - float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float((m_topLeftCornerR.Y + m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float((-m_topLeftCornerR.H)), m_topLeftCornerT);
+				DrawStretchedTextureSegment(C, (WinWidth - float(m_topLeftCornerR.W)), (WinHeight - float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float((m_topLeftCornerR.Y + m_topLeftCornerR.H)), float((-m_topLeftCornerR.W)), float((-m_topLeftCornerR.H)), m_topLeftCornerT);
 			}
 			// End:0x992
 			break;
 		// End:0x98F
 		case 3:
 			// End:0x6AE
-			if(__NFUN_119__(m_HBorderTexture, none))
+			if((m_HBorderTexture != none))
 			{
-				DrawStretchedTextureSegment(C, m_fHBorderPadding, m_fHBorderOffset, __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
-				DrawStretchedTextureSegment(C, m_fHBorderPadding, __NFUN_175__(__NFUN_175__(WinHeight, m_fHBorderHeight), m_fHBorderOffset), __NFUN_175__(WinWidth, __NFUN_171__(float(2), m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+				DrawStretchedTextureSegment(C, m_fHBorderPadding, m_fHBorderOffset, (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
+				DrawStretchedTextureSegment(C, m_fHBorderPadding, ((WinHeight - m_fHBorderHeight) - m_fHBorderOffset), (WinWidth - (float(2) * m_fHBorderPadding)), m_fHBorderHeight, float(m_HBorderTextureRegion.X), float(m_HBorderTextureRegion.Y), float(m_HBorderTextureRegion.W), float(m_HBorderTextureRegion.H), m_HBorderTexture);
 			}
 			// End:0x789
-			if(__NFUN_119__(m_VBorderTexture, none))
+			if((m_VBorderTexture != none))
 			{
-				DrawStretchedTextureSegment(C, m_fVBorderOffset, m_fVBorderPadding, m_fVBorderWidth, __NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
-				DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_175__(WinWidth, m_fVBorderWidth), m_fVBorderOffset), m_fVBorderPadding, m_fVBorderWidth, __NFUN_175__(WinHeight, __NFUN_171__(float(2), m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+				DrawStretchedTextureSegment(C, m_fVBorderOffset, m_fVBorderPadding, m_fVBorderWidth, (WinHeight - (float(2) * m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+				DrawStretchedTextureSegment(C, ((WinWidth - m_fVBorderWidth) - m_fVBorderOffset), m_fVBorderPadding, m_fVBorderWidth, (WinHeight - (float(2) * m_fVBorderPadding)), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 			}
 			// End:0x98C
 			if(__NFUN_119__(m_topLeftCornerT, none))

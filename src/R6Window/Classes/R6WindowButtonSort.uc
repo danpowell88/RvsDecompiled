@@ -34,10 +34,10 @@ function BeforePaint(Canvas C, float X, float Y)
 	{
 		m_bSetParam = false;
 		// End:0x1B2
-		if(__NFUN_123__(Text, ""))
+		if((Text != ""))
 		{
 			// End:0x3F
-			if(__NFUN_119__(m_buttonFont, none))
+			if((m_buttonFont != none))
 			{
 				C.Font = m_buttonFont;				
 			}
@@ -48,13 +48,13 @@ function BeforePaint(Canvas C, float X, float Y)
 			TextSize(C, Text, W, H);
 			fWidth = WinWidth;
 			// End:0x126
-			if(__NFUN_176__(__NFUN_174__(__NFUN_174__(W, float(m_RSortIcon.W)), float(5)), WinWidth))
+			if((((W + float(m_RSortIcon.W)) + float(5)) < WinWidth))
 			{
 				m_bAbleToDrawSortIcon = true;
-				fWidth = __NFUN_175__(__NFUN_175__(WinWidth, float(m_RSortIcon.W)), float(5));
-				m_fXSortIconPos = __NFUN_175__(__NFUN_175__(WinWidth, float(m_RSortIcon.W)), float(4));
-				m_fYSortIconPos = __NFUN_172__(__NFUN_175__(WinHeight, float(m_RSortIcon.H)), float(2));
-				m_fYSortIconPos = float(int(__NFUN_174__(m_fYSortIconPos, 0.5000000)));
+				fWidth = ((WinWidth - float(m_RSortIcon.W)) - float(5));
+				m_fXSortIconPos = ((WinWidth - float(m_RSortIcon.W)) - float(4));
+				m_fYSortIconPos = ((WinHeight - float(m_RSortIcon.H)) / float(2));
+				m_fYSortIconPos = float(int((m_fYSortIconPos + 0.5000000)));
 			}
 			switch(Align)
 			{
@@ -65,20 +65,20 @@ function BeforePaint(Canvas C, float X, float Y)
 					break;
 				// End:0x15A
 				case 1:
-					TextX = __NFUN_175__(fWidth, W);
+					TextX = (fWidth - W);
 					// End:0x184
 					break;
 				// End:0x181
 				case 2:
-					TextX = __NFUN_174__(__NFUN_172__(__NFUN_175__(fWidth, W), float(2)), 0.5000000);
+					TextX = (((fWidth - W) / float(2)) + 0.5000000);
 					// End:0x184
 					break;
 				// End:0xFFFF
 				default:
 					break;
 			}
-			TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-			TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
+			TextY = ((WinHeight - H) / float(2));
+			TextY = float(int((TextY + 0.5000000)));
 		}
 	}
 	return;
@@ -87,18 +87,18 @@ function BeforePaint(Canvas C, float X, float Y)
 function Paint(Canvas C, float X, float Y)
 {
 	// End:0x164
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		C.Style = 1;
 		C.SpaceX = 0.0000000;
 		C.Font = m_buttonFont;
 		// End:0x164
-		if(__NFUN_123__(Text, ""))
+		if((Text != ""))
 		{
 			// End:0x92
 			if(bDisabled)
 			{
-				C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
+				C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
 				m_BorderColor = m_DisabledTextColor;				
 			}
 			else
@@ -106,7 +106,7 @@ function Paint(Canvas C, float X, float Y)
 				// End:0xD3
 				if(m_bSelected)
 				{
-					C.__NFUN_2626__(m_SelectedTextColor.R, m_SelectedTextColor.G, m_SelectedTextColor.B);
+					C.SetDrawColor(m_SelectedTextColor.R, m_SelectedTextColor.G, m_SelectedTextColor.B);
 					m_BorderColor = m_SelectedTextColor;					
 				}
 				else
@@ -114,12 +114,12 @@ function Paint(Canvas C, float X, float Y)
 					// End:0x114
 					if(MouseIsOver())
 					{
-						C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);
+						C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);
 						m_BorderColor = m_OverTextColor;						
 					}
 					else
 					{
-						C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+						C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 						m_BorderColor = TextColor;
 					}
 				}

@@ -93,7 +93,7 @@ simulated function Click(float X, float Y)
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("Button not supported");
+			Log("Button not supported");
 			// End:0x1ED
 			break;
 			break;

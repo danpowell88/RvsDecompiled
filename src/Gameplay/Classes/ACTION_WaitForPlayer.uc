@@ -18,7 +18,7 @@ function bool InitActionFor(ScriptedController C)
 		return false;
 	}
 	C.CurrentAction = self;
-	C.__NFUN_280__(0.1000000, true);
+	C.SetTimer(0.1000000, true);
 	return true;
 	return;
 }

@@ -129,7 +129,7 @@ function Notify(UWindowDialogControl C, byte E)
 
 	gearWidget = R6MenuGearWidget(OwnerWindow);
 	// End:0x1FF
-	if(__NFUN_154__(int(E), 11))
+	if((int(E) == 11))
 	{
 		switch(C)
 		{
@@ -142,24 +142,24 @@ function Notify(UWindowDialogControl C, byte E)
 				tmpSubListBox = R6WindowTextIconsSubListBox(C.OwnerWindow);
 				SelectedItem = R6WindowListBoxItem(tmpSubListBox.m_listBox.m_SelectedItem);
 				// End:0x150
-				if(__NFUN_119__(SelectedItem, none))
+				if((SelectedItem != none))
 				{
 					// End:0xCE
-					if(__NFUN_119__(SelectedItem.Next, none))
+					if((SelectedItem.Next != none))
 					{
 						ListItem = R6WindowListBoxItem(SelectedItem.Next);						
 					}
 					else
 					{
 						// End:0x111
-						if(__NFUN_119__(SelectedItem.Prev, tmpSubListBox.m_listBox.Items))
+						if((SelectedItem.Prev != tmpSubListBox.m_listBox.Items))
 						{
 							ListItem = R6WindowListBoxItem(SelectedItem.Prev);
 						}
 					}
 					RemoveOperativeInSubList(tmpSubListBox);
 					// End:0x144
-					if(__NFUN_119__(ListItem, none))
+					if((ListItem != none))
 					{
 						tmpSubListBox.m_listBox.SetSelectedItem(ListItem);
 					}
@@ -171,14 +171,14 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0x1F9
 			case m_listBox:
 				// End:0x19D
-				if(__NFUN_150__(m_RedListBox.m_listBox.Items.Count(), m_RedListBox.m_maxItemsCount))
+				if((m_RedListBox.m_listBox.Items.Count() < m_RedListBox.m_maxItemsCount))
 				{
 					AddOperativeToSubList(m_RedListBox);					
 				}
 				else
 				{
 					// End:0x1DF
-					if(__NFUN_150__(m_GreenListBox.m_listBox.Items.Count(), m_GreenListBox.m_maxItemsCount))
+					if((m_GreenListBox.m_listBox.Items.Count() < m_GreenListBox.m_maxItemsCount))
 					{
 						AddOperativeToSubList(m_GreenListBox);						
 					}
@@ -199,12 +199,12 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x8F4
-		if(__NFUN_154__(int(E), 2))
+		if((int(E) == 2))
 		{
 			// End:0x243
 			if(bShowLog)
 			{
-				__NFUN_231__("R6MenuDynTeamListsControl Notify DE_Click");
+				Log("R6MenuDynTeamListsControl Notify DE_Click");
 			}
 			switch(C)
 			{
@@ -220,11 +220,11 @@ function Notify(UWindowDialogControl C, byte E)
 				case m_ElectronicButton:
 					itemPos = R6WindowListBoxItem(m_listBox.Items).FindItemIndex(R6WindowListBoxAnchorButton(C).AnchoredElement);
 					// End:0x328
-					if(__NFUN_153__(itemPos, 0))
+					if((itemPos >= 0))
 					{
 						m_listBox.m_VertSB.pos = 0.0000000;
 						m_listBox.m_VertSB.Scroll(float(itemPos));
-						m_listBox.SetSelectedItem(UWindowListBoxItem(R6WindowListBoxItem(m_listBox.Items).FindEntry(__NFUN_146__(itemPos, 1))));
+						m_listBox.SetSelectedItem(UWindowListBoxItem(R6WindowListBoxItem(m_listBox.Items).FindEntry((itemPos + 1))));
 					}
 					// End:0x8F4
 					break;
@@ -232,7 +232,7 @@ function Notify(UWindowDialogControl C, byte E)
 				case m_RedListBox.m_listBox:
 					selectedOperative = R6Operative(R6WindowListBoxItem(m_RedListBox.m_listBox.m_SelectedItem).m_Object);
 					// End:0x3A8
-					if(__NFUN_130__(__NFUN_119__(gearWidget, none), __NFUN_119__(selectedOperative, none)))
+					if(((gearWidget != none) && (selectedOperative != none)))
 					{
 						gearWidget.OperativeSelected(selectedOperative, 0, m_RedListBox.m_listBox);
 					}
@@ -246,7 +246,7 @@ function Notify(UWindowDialogControl C, byte E)
 				case m_GreenListBox.m_listBox:
 					selectedOperative = R6Operative(R6WindowListBoxItem(m_GreenListBox.m_listBox.m_SelectedItem).m_Object);
 					// End:0x46D
-					if(__NFUN_130__(__NFUN_119__(gearWidget, none), __NFUN_119__(selectedOperative, none)))
+					if(((gearWidget != none) && (selectedOperative != none)))
 					{
 						gearWidget.OperativeSelected(selectedOperative, 1, m_GreenListBox.m_listBox);
 					}
@@ -260,7 +260,7 @@ function Notify(UWindowDialogControl C, byte E)
 				case m_GoldListBox.m_listBox:
 					selectedOperative = R6Operative(R6WindowListBoxItem(m_GoldListBox.m_listBox.m_SelectedItem).m_Object);
 					// End:0x532
-					if(__NFUN_130__(__NFUN_119__(gearWidget, none), __NFUN_119__(selectedOperative, none)))
+					if(((gearWidget != none) && (selectedOperative != none)))
 					{
 						gearWidget.OperativeSelected(selectedOperative, 2, m_GoldListBox.m_listBox);
 					}
@@ -274,7 +274,7 @@ function Notify(UWindowDialogControl C, byte E)
 				case m_listBox:
 					selectedOperative = R6Operative(R6WindowListBoxItem(m_listBox.m_SelectedItem).m_Object);
 					// End:0x5DC
-					if(__NFUN_130__(__NFUN_119__(gearWidget, none), __NFUN_119__(selectedOperative, none)))
+					if(((gearWidget != none) && (selectedOperative != none)))
 					{
 						gearWidget.OperativeSelected(selectedOperative, 3, m_listBox);
 					}
@@ -304,21 +304,21 @@ function Notify(UWindowDialogControl C, byte E)
 					tmpSubListBox = R6WindowTextIconsSubListBox(C.OwnerWindow);
 					SelectedItem = R6WindowListBoxItem(tmpSubListBox.m_listBox.m_SelectedItem);
 					// End:0x726
-					if(__NFUN_119__(SelectedItem.Next, none))
+					if((SelectedItem.Next != none))
 					{
 						ListItem = R6WindowListBoxItem(SelectedItem.Next);						
 					}
 					else
 					{
 						// End:0x769
-						if(__NFUN_119__(SelectedItem.Prev, tmpSubListBox.m_listBox.Items))
+						if((SelectedItem.Prev != tmpSubListBox.m_listBox.Items))
 						{
 							ListItem = R6WindowListBoxItem(SelectedItem.Prev);
 						}
 					}
 					RemoveOperativeInSubList(tmpSubListBox);
 					// End:0x79C
-					if(__NFUN_119__(ListItem, none))
+					if((ListItem != none))
 					{
 						tmpSubListBox.m_listBox.SetSelectedItem(ListItem);
 					}
@@ -374,7 +374,7 @@ function RemoveOperativeInSubList(R6WindowTextIconsSubListBox _SubListBox)
 	gearWidget = R6MenuGearWidget(OwnerWindow);
 	SelectedItem = R6WindowListBoxItem(_SubListBox.m_listBox.m_SelectedItem);
 	// End:0xE0
-	if(__NFUN_130__(__NFUN_119__(SelectedItem, none), __NFUN_119__(SelectedItem.m_ParentListItem, none)))
+	if(((SelectedItem != none) && (SelectedItem.m_ParentListItem != none)))
 	{
 		_SubListBox.m_listBox.DropSelection();
 		SelectedItem.m_ParentListItem.m_addedToSubList = false;
@@ -397,56 +397,56 @@ function AddOperativeToSubList(R6WindowTextIconsSubListBox _SubListBox)
 
 	gearWidget = R6MenuGearWidget(OwnerWindow);
 	// End:0x37
-	if(__NFUN_154__(int(gearWidget.m_currentOperativeTeam), int(0)))
+	if((int(gearWidget.m_currentOperativeTeam) == int(0)))
 	{
 		RemoveOperativeInSubList(m_RedListBox);		
 	}
 	else
 	{
 		// End:0x5E
-		if(__NFUN_154__(int(gearWidget.m_currentOperativeTeam), int(1)))
+		if((int(gearWidget.m_currentOperativeTeam) == int(1)))
 		{
 			RemoveOperativeInSubList(m_GreenListBox);			
 		}
 		else
 		{
 			// End:0x82
-			if(__NFUN_154__(int(gearWidget.m_currentOperativeTeam), int(2)))
+			if((int(gearWidget.m_currentOperativeTeam) == int(2)))
 			{
 				RemoveOperativeInSubList(m_GoldListBox);
 			}
 		}
 	}
-	totalCount = __NFUN_146__(__NFUN_146__(m_RedListBox.m_listBox.Items.Count(), m_GreenListBox.m_listBox.Items.Count()), m_GoldListBox.m_listBox.Items.Count());
+	totalCount = ((m_RedListBox.m_listBox.Items.Count() + m_GreenListBox.m_listBox.Items.Count()) + m_GoldListBox.m_listBox.Items.Count());
 	// End:0x245
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("m_RedListBox count :", string(m_RedListBox.m_listBox.Items.Count())));
-		__NFUN_231__(__NFUN_168__("m_GreenListBox count :", string(m_GreenListBox.m_listBox.Items.Count())));
-		__NFUN_231__(__NFUN_168__("m_GoldListBox count :", string(m_GoldListBox.m_listBox.Items.Count())));
+		Log(("m_RedListBox count :" @ string(m_RedListBox.m_listBox.Items.Count())));
+		Log(("m_GreenListBox count :" @ string(m_GreenListBox.m_listBox.Items.Count())));
+		Log(("m_GoldListBox count :" @ string(m_GoldListBox.m_listBox.Items.Count())));
 		// End:0x1E2
-		if(__NFUN_114__(_SubListBox, m_RedListBox))
+		if((_SubListBox == m_RedListBox))
 		{
-			__NFUN_231__("m_RedListBox Adding operative");
+			Log("m_RedListBox Adding operative");
 		}
 		// End:0x214
-		if(__NFUN_114__(_SubListBox, m_GreenListBox))
+		if((_SubListBox == m_GreenListBox))
 		{
-			__NFUN_231__("m_GreenListBox Adding operative");
+			Log("m_GreenListBox Adding operative");
 		}
 		// End:0x245
-		if(__NFUN_114__(_SubListBox, m_GoldListBox))
+		if((_SubListBox == m_GoldListBox))
 		{
-			__NFUN_231__("m_GoldListBox Adding Operative");
+			Log("m_GoldListBox Adding Operative");
 		}
 	}
 	SelectedItem = R6WindowListBoxItem(m_listBox.m_SelectedItem);
 	// End:0x467
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_150__(totalCount, m_iMaxOperativeCount), __NFUN_119__(SelectedItem, none)), __NFUN_242__(SelectedItem.m_addedToSubList, false)), __NFUN_150__(_SubListBox.m_listBox.Items.Count(), _SubListBox.m_maxItemsCount)))
+	if(((((totalCount < m_iMaxOperativeCount) && (SelectedItem != none)) && (SelectedItem.m_addedToSubList == false)) && (_SubListBox.m_listBox.Items.Count() < _SubListBox.m_maxItemsCount)))
 	{
 		TempItem = R6WindowListBoxItem(_SubListBox.m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 		// End:0x464
-		if(__NFUN_119__(TempItem, none))
+		if((TempItem != none))
 		{
 			TempItem.m_Icon = SelectedItem.m_Icon;
 			TempItem.m_IconRegion = SelectedItem.m_IconRegion;
@@ -459,14 +459,14 @@ function AddOperativeToSubList(R6WindowTextIconsSubListBox _SubListBox)
 			_SubListBox.m_listBox.SetSelectedItem(TempItem);
 			selectedOperative = R6Operative(SelectedItem.m_Object);
 			// End:0x426
-			if(__NFUN_114__(_SubListBox, m_RedListBox))
+			if((_SubListBox == m_RedListBox))
 			{
 				gearWidget.OperativeSelected(selectedOperative, 0);				
 			}
 			else
 			{
 				// End:0x44E
-				if(__NFUN_114__(_SubListBox, m_GreenListBox))
+				if((_SubListBox == m_GreenListBox))
 				{
 					gearWidget.OperativeSelected(selectedOperative, 1);					
 				}
@@ -482,17 +482,17 @@ function AddOperativeToSubList(R6WindowTextIconsSubListBox _SubListBox)
 		// End:0x487
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(string(totalCount), "<"), string(m_iMaxOperativeCount)));
+			Log(((string(totalCount) @ "<") @ string(m_iMaxOperativeCount)));
 		}
 	}
 	TempItem = SelectedItem;
 	J0x492:
 
 	// End:0x521 [Loop If]
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_242__(bFound, false)))
+	if(((TempItem != none) && (bFound == false)))
 	{
 		// End:0x505
-		if(__NFUN_130__(__NFUN_242__(TempItem.m_IsSeparator, false), __NFUN_242__(TempItem.m_addedToSubList, false)))
+		if(((TempItem.m_IsSeparator == false) && (TempItem.m_addedToSubList == false)))
 		{
 			m_listBox.SetSelectedItem(TempItem);
 			m_listBox.MakeSelectedVisible();
@@ -515,13 +515,13 @@ function RefreshButtons()
 	local R6MenuGearWidget gearWidget;
 
 	gearWidget = R6MenuGearWidget(OwnerWindow);
-	totalCount = __NFUN_146__(__NFUN_146__(m_RedListBox.m_listBox.Items.Count(), m_GreenListBox.m_listBox.Items.Count()), m_GoldListBox.m_listBox.Items.Count());
+	totalCount = ((m_RedListBox.m_listBox.Items.Count() + m_GreenListBox.m_listBox.Items.Count()) + m_GoldListBox.m_listBox.Items.Count());
 	switch(gearWidget.m_currentOperativeTeam)
 	{
 		// End:0xF1
 		case 3:
 			// End:0xAB
-			if(__NFUN_150__(totalCount, m_iMaxOperativeCount))
+			if((totalCount < m_iMaxOperativeCount))
 			{
 				iShowAdd = 1;				
 			}
@@ -568,15 +568,15 @@ function CreateRosterListBox()
 	local Font listBoxTitleFont;
 
 	listBoxTitleFont = Root.Fonts[11];
-	m_listBox = R6WindowTextIconsListBox(CreateControl(Class'R6Window.R6WindowTextIconsListBox', 0.0000000, __NFUN_174__(m_ElectronicButton.WinTop, m_ElectronicButton.WinHeight), WinWidth, 143.0000000, self));
+	m_listBox = R6WindowTextIconsListBox(CreateControl(Class'R6Window.R6WindowTextIconsListBox', 0.0000000, (m_ElectronicButton.WinTop + m_ElectronicButton.WinHeight), WinWidth, 143.0000000, self));
 	m_listBox.ToolTipString = Localize("Tip", "GearRoomOpListBox", "R6Menu");
 	m_listBox.m_SeparatorTextColor = Root.Colors.BlueLight;
 	m_listBox.m_BorderColor = Root.Colors.GrayLight;
 	m_listBox.m_IgnoreAllreadySelected = false;
 	m_listBox.m_VertSB.SetEffect(true);
-	m_RedListBox = R6WindowTextIconsSubListBox(CreateControl(Class'R6Window.R6WindowTextIconsSubListBox', 0.0000000, __NFUN_174__(__NFUN_174__(m_listBox.WinTop, m_listBox.WinHeight), m_fVPadding), WinWidth, 47.0000000, self));
-	m_GreenListBox = R6WindowTextIconsSubListBox(CreateControl(Class'R6Window.R6WindowTextIconsSubListBox', 0.0000000, __NFUN_174__(__NFUN_174__(m_RedListBox.WinTop, m_RedListBox.WinHeight), m_fVPadding), WinWidth, 47.0000000, self));
-	m_GoldListBox = R6WindowTextIconsSubListBox(CreateControl(Class'R6Window.R6WindowTextIconsSubListBox', 0.0000000, __NFUN_174__(__NFUN_174__(m_GreenListBox.WinTop, m_GreenListBox.WinHeight), m_fVPadding), WinWidth, 73.0000000, self));
+	m_RedListBox = R6WindowTextIconsSubListBox(CreateControl(Class'R6Window.R6WindowTextIconsSubListBox', 0.0000000, ((m_listBox.WinTop + m_listBox.WinHeight) + m_fVPadding), WinWidth, 47.0000000, self));
+	m_GreenListBox = R6WindowTextIconsSubListBox(CreateControl(Class'R6Window.R6WindowTextIconsSubListBox', 0.0000000, ((m_RedListBox.WinTop + m_RedListBox.WinHeight) + m_fVPadding), WinWidth, 47.0000000, self));
+	m_GoldListBox = R6WindowTextIconsSubListBox(CreateControl(Class'R6Window.R6WindowTextIconsSubListBox', 0.0000000, ((m_GreenListBox.WinTop + m_GreenListBox.WinHeight) + m_fVPadding), WinWidth, 73.0000000, self));
 	m_RedListBox.m_listBox.SetScrollable(false);
 	m_GreenListBox.m_listBox.SetScrollable(false);
 	m_GoldListBox.m_listBox.SetScrollable(false);
@@ -611,28 +611,28 @@ function CreateAnchoredButtons()
 	m_ASSAULTButton.DownRegion = m_RASSAULTDown;
 	m_ASSAULTButton.DisabledRegion = m_RAssaultDisabled;
 	m_ASSAULTButton.m_iDrawStyle = 5;
-	m_ReconButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_ASSAULTButton.WinLeft, m_ASSAULTButton.WinWidth), m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
+	m_ReconButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', ((m_ASSAULTButton.WinLeft + m_ASSAULTButton.WinWidth) + m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
 	m_ReconButton.ToolTipString = Localize("Tip", "GearRoomButRecon", "R6Menu");
 	m_ReconButton.UpRegion = m_RReconUp;
 	m_ReconButton.OverRegion = m_RReconOver;
 	m_ReconButton.DownRegion = m_RReconDown;
 	m_ReconButton.DisabledRegion = m_RReconDisabled;
 	m_ReconButton.m_iDrawStyle = 5;
-	m_SNIPERButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_ReconButton.WinLeft, m_ReconButton.WinWidth), m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
+	m_SNIPERButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', ((m_ReconButton.WinLeft + m_ReconButton.WinWidth) + m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
 	m_SNIPERButton.ToolTipString = Localize("Tip", "GearRoomButSniper", "R6Menu");
 	m_SNIPERButton.UpRegion = m_RSNIPERUp;
 	m_SNIPERButton.OverRegion = m_RSNIPEROver;
 	m_SNIPERButton.DownRegion = m_RSNIPERDown;
 	m_SNIPERButton.DisabledRegion = m_RSniperDisabled;
 	m_SNIPERButton.m_iDrawStyle = 5;
-	m_DemolitionButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_SNIPERButton.WinLeft, m_SNIPERButton.WinWidth), m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
+	m_DemolitionButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', ((m_SNIPERButton.WinLeft + m_SNIPERButton.WinWidth) + m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
 	m_DemolitionButton.ToolTipString = Localize("Tip", "GearRoomButDemol", "R6Menu");
 	m_DemolitionButton.UpRegion = m_RDemolitionUp;
 	m_DemolitionButton.OverRegion = m_RDemolitionOver;
 	m_DemolitionButton.DownRegion = m_RDemolitionDown;
 	m_DemolitionButton.DisabledRegion = m_RDemolitionDisabled;
 	m_DemolitionButton.m_iDrawStyle = 5;
-	m_ElectronicButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', __NFUN_174__(__NFUN_174__(m_DemolitionButton.WinLeft, m_DemolitionButton.WinWidth), m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
+	m_ElectronicButton = R6WindowListBoxAnchorButton(CreateControl(Class'R6Window.R6WindowListBoxAnchorButton', ((m_DemolitionButton.WinLeft + m_DemolitionButton.WinWidth) + m_fHButtonPadding), m_ASSAULTButton.WinTop, m_ASSAULTButton.WinWidth, m_ASSAULTButton.WinHeight));
 	m_ElectronicButton.ToolTipString = Localize("Tip", "GearRoomButElec", "R6Menu");
 	m_ElectronicButton.UpRegion = m_RElectronicUp;
 	m_ElectronicButton.OverRegion = m_RElectronicOver;
@@ -686,7 +686,7 @@ function FillRosterList()
 	// End:0x404
 	if(bShowLog)
 	{
-		__NFUN_231__("R6MenuDynTeamListsControl:FillRosterListBox");
+		Log("R6MenuDynTeamListsControl:FillRosterListBox");
 		__NFUN_231__(__NFUN_168__("m_ListBox.Items.Count()", string(m_listBox.Items.Count())));
 		__NFUN_231__(__NFUN_168__("R6Root.m_GameOperatives.Length", string(r6Root.m_GameOperatives.Length)));
 	}

@@ -23,11 +23,11 @@ simulated function PostRender(Canvas C)
 	local float X, Y, fScale;
 
 	super.PostRender(C);
-	fScale = __NFUN_172__(C.ClipX, float(256));
-	X = __NFUN_171__(m_fReticuleOffsetX, 0.2500000);
-	Y = __NFUN_175__(__NFUN_171__(m_fReticuleOffsetY, 0.5000000), X);
+	fScale = (C.ClipX / float(256));
+	X = (m_fReticuleOffsetX * 0.2500000);
+	Y = ((m_fReticuleOffsetY * 0.5000000) - X);
 	C.Style = 5;
-	C.__NFUN_2623__(X, Y);
+	C.SetPos(X, Y);
 	C.DrawIcon(m_FixedPart, fScale);
 	return;
 }

@@ -26,16 +26,16 @@ var string m_szStatusDetail;  // this string is displayed 5 sec.
 function PostRender(Canvas C)
 {
 	// End:0x48
-	if(__NFUN_130__(__NFUN_177__(m_fNewHUDResX, float(0)), __NFUN_177__(m_fNewHUDResY, float(0))))
+	if(((m_fNewHUDResX > float(0)) && (m_fNewHUDResY > float(0))))
 	{
-		C.__NFUN_1607__(m_fNewHUDResX, m_fNewHUDResY);
+		C.SetVirtualSize(m_fNewHUDResX, m_fNewHUDResY);
 		m_fNewHUDResX = 0.0000000;
 		m_fNewHUDResY = 0.0000000;
 	}
 	// End:0x94
 	if(m_bGetRes)
 	{
-		PlayerController(Owner).ClientMessage(__NFUN_168__(__NFUN_168__(string(C.SizeX), "x"), string(C.SizeY)));
+		PlayerController(Owner).ClientMessage(((string(C.SizeX) @ "x") @ string(C.SizeY)));
 		m_bGetRes = false;
 	}
 	super.PostRender(C);
@@ -61,9 +61,9 @@ function DrawTextCenteredInBox(Canvas C, string strText, float fPosX, float fPos
 	C.OrgY = fPosY;
 	C.ClipX = fWidth;
 	C.ClipY = fHeight;
-	C.__NFUN_464__(strText, fTextWidth, fTextHeight);
-	C.__NFUN_2623__(0.0000000, __NFUN_172__(__NFUN_175__(fHeight, fTextHeight), 2.0000000));
-	C.__NFUN_465__(strText);
+	C.StrLen(strText, fTextWidth, fTextHeight);
+	C.SetPos(0.0000000, ((fHeight - fTextHeight) / 2.0000000));
+	C.DrawText(strText);
 	C.bCenter = bBackCenter;
 	C.OrgX = fBackOrgX;
 	C.OrgY = fBackOrgY;
@@ -77,7 +77,7 @@ function DrawTextCenteredInBox(Canvas C, string strText, float fPosX, float fPos
 //===========================================================================//
 function DrawTexturePart(Canvas C, Texture Tex, float fUStart, float fVStart, float fSizeX, float fSizeY)
 {
-	C.__NFUN_466__(Tex, fSizeX, fSizeY, fUStart, fVStart, fSizeX, fSizeY);
+	C.DrawTile(Tex, fSizeX, fSizeY, fUStart, fVStart, fSizeX, fSizeY);
 	return;
 }
 
@@ -89,11 +89,11 @@ exec function HUDRes(string strRes)
 {
 	local int iPos, X, Y;
 
-	iPos = __NFUN_126__(strRes, "x");
-	X = int(__NFUN_128__(strRes, iPos));
-	Y = int(__NFUN_127__(strRes, __NFUN_146__(iPos, 1)));
+	iPos = InStr(strRes, "x");
+	X = int(Left(strRes, iPos));
+	Y = int(Mid(strRes, (iPos + 1)));
 	// End:0x6D
-	if(__NFUN_130__(__NFUN_151__(X, 0), __NFUN_151__(Y, 0)))
+	if(((X > 0) && (Y > 0)))
 	{
 		m_fNewHUDResX = float(X);
 		m_fNewHUDResY = float(Y);
@@ -140,15 +140,15 @@ function string GetGoCodeStr(Object.EGoCode goCode)
 
 exec function ToggleHelmet()
 {
-	m_bToggleHelmet = __NFUN_129__(m_bToggleHelmet);
+	m_bToggleHelmet = (!m_bToggleHelmet);
 	return;
 }
 
 exec function CycleHUDLayer()
 {
-	__NFUN_165__(m_iCycleHUDLayer);
+	(m_iCycleHUDLayer++);
 	// End:0x1A
-	if(__NFUN_154__(m_iCycleHUDLayer, 4))
+	if((m_iCycleHUDLayer == 4))
 	{
 		m_iCycleHUDLayer = 0;
 	}

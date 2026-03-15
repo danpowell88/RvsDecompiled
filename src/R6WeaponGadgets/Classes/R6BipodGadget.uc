@@ -21,7 +21,7 @@ var(R6Meshes) StaticMesh OpenSM;
 simulated function Toggle3rdBipod(bool bBipodOpen)
 {
 	// End:0x1A
-	if(__NFUN_242__(bBipodOpen, false))
+	if((bBipodOpen == false))
 	{
 		SetStaticMesh(CloseSM);		
 	}
@@ -38,9 +38,9 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 	local Rotator rTagRotator;
 
 	super.UpdateAttachment(weapOwner);
-	__NFUN_298__(none);
-	__NFUN_298__(weapOwner, weapOwner.Location);
-	weapOwner.__NFUN_2008__("TagBipod", vTagLocation, rTagRotator);
+	SetBase(none);
+	SetBase(weapOwner, weapOwner.Location);
+	weapOwner.GetTagInformations("TagBipod", vTagLocation, rTagRotator);
 	SetRelativeLocation(vTagLocation);
 	SetRelativeRotation(rTagRotator);
 	return;

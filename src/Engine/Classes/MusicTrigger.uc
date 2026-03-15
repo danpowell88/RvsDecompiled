@@ -22,7 +22,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 	else
 	{
 		// End:0x22
-		if(__NFUN_129__(Triggered))
+		if((!Triggered))
 		{
 			Triggered = true;			
 		}
@@ -30,12 +30,12 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		{
 			Triggered = false;
 			// End:0x38
-			if(__NFUN_155__(SongHandle, 0))
+			if((SongHandle != 0))
 			{				
 			}
 			else
 			{
-				__NFUN_231__("WARNING: invalid song handle");
+				Log("WARNING: invalid song handle");
 			}
 		}
 	}

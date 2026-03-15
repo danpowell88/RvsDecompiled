@@ -156,7 +156,7 @@ function ResetSoundToDefault(bool _bInGame)
 	ResetConfig("EAX");
 	ResetConfig("AudioVirtual");
 	// End:0xA1
-	if(__NFUN_129__(_bInGame))
+	if((!_bInGame))
 	{
 		ResetConfig("SndQuality");
 	}
@@ -181,7 +181,7 @@ function ResetGraphicsToDefault(bool _bInGame)
 	ResetConfig("ShowRefreshRates");
 	ResetConfig("LowDetailSmoke");
 	// End:0x18B
-	if(__NFUN_129__(_bInGame))
+	if((!_bInGame))
 	{
 		ResetConfig("RainbowsShadowLevel");
 		ResetConfig("HostagesShadowLevel");

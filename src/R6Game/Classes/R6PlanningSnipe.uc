@@ -18,9 +18,9 @@ function Rotator SetDirectionRotator(Vector vTowards)
 	local Rotator rActionRotator;
 	local Vector vResultVector;
 
-	vResultVector = __NFUN_226__(__NFUN_216__(vTowards, Location));
+	vResultVector = Normal((vTowards - Location));
 	rActionRotator = Rotator(vResultVector);
-	m_u8SpritePlanningAngle = byte(__NFUN_145__(rActionRotator.Yaw, 255));
+	m_u8SpritePlanningAngle = byte((rActionRotator.Yaw / 255));
 	return rActionRotator;
 	return;
 }

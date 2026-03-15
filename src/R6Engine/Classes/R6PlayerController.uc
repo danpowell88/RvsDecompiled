@@ -274,7 +274,7 @@ var transient float m_fLastVoteEmoteTimeStamp;  // Time of the last "vote" messa
 replication
 {
 	// Pos:0x000
-	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) == int(ROLE_Authority)))
 		ClientActionProgressDone, ClientAdminBanOff, 
 		ClientAdminKickOff, ClientCantRequestChangeMapYet, 
 		ClientCantRequestKickYet, ClientDisableFirstPersonViewEffects, 
@@ -287,7 +287,7 @@ replication
 		R6Shake, ResetBlur;
 
 	// Pos:0x034
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		RegroupOnMe, ServerActionKeyReleased, 
 		ServerActionProgressStop, ServerBroadcast, 
 		ServerChangeOperative, ServerChangeTeams, 
@@ -304,7 +304,7 @@ replication
 		ToggleTeamHold;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientAdminLogin, ClientBanMatches, 
 		ClientBanned, ClientChangeMap, 
 		ClientChatAbuseMsg, ClientChatDisabledMsg, 
@@ -329,18 +329,18 @@ replication
 		TKPopUpBox, ToggleHelmetCameraZoom;
 
 	// Pos:0x01A
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bRequestTKPopUp, m_bSkipBeginState, 
 		m_iAdmin;
 
 	// Pos:0x027
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_CurrentCircumstantialAction, m_TeamManager, 
 		m_iPlayerCAProgress, m_pawn, 
 		m_rCurrentShakeRotation;
 
 	// Pos:0x041
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		Admin, AutoAdminLogin, 
 		Ban, BanId, 
 		Kick, KickId, 
@@ -397,7 +397,7 @@ simulated function ResetOriginalData()
 		LogResetSystem(false);
 	}
 	super(Actor).ResetOriginalData();
-	m_GameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	m_GameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	m_bPawnInitialized = false;
 	m_bEndOfRoundDataReceived = false;
 	m_bCircumstantialActionInProgress = false;
@@ -441,34 +441,34 @@ simulated function ResetOriginalData()
 	m_bInstructionTouch = false;
 	UpdateTriggerLagInfo();
 	// End:0x1CB
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		PlayerReplicationInfo.iOperativeID = -1;
 	}
 	// End:0x228
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_119__(Viewport(Player), none))))
+	if(((int(Level.NetMode) == int(NM_Client)) || ((int(Level.NetMode) == int(NM_ListenServer)) && (Viewport(Player) != none))))
 	{
-		ServerSetGender(__NFUN_151__(m_GameOptions.Gender, 0));
+		ServerSetGender((m_GameOptions.Gender > 0));
 	}
 	ResetBlur();
 	// End:0x25A
-	if(__NFUN_130__(__NFUN_114__(m_CurrentCircumstantialAction, none), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	if(((m_CurrentCircumstantialAction == none) && (int(Role) == int(ROLE_Authority))))
 	{
-		m_CurrentCircumstantialAction = __NFUN_278__(Class'R6Engine.R6CircumstantialActionQuery', self);
+		m_CurrentCircumstantialAction = Spawn(Class'R6Engine.R6CircumstantialActionQuery', self);
 	}
 	// End:0x275
-	if(__NFUN_119__(m_CurrentCircumstantialAction, none))
+	if((m_CurrentCircumstantialAction != none))
 	{
 		m_CurrentCircumstantialAction.aQueryOwner = self;
 	}
 	// End:0x2A1
-	if(__NFUN_119__(m_InteractionCA, none))
+	if((m_InteractionCA != none))
 	{
 		m_InteractionCA.DisplayMenu(false);
 		m_InteractionCA.m_bActionKeyDown = false;
 	}
 	// End:0x2CD
-	if(__NFUN_119__(m_InteractionInventory, none))
+	if((m_InteractionInventory != none))
 	{
 		m_InteractionInventory.DisplayMenu(false);
 		m_InteractionInventory.m_bActionKeyDown = false;
@@ -487,17 +487,17 @@ simulated function ResettingLevel(int iNbOfRestart)
 	m_pawn = none;
 	SetViewTarget(none);
 	// End:0x2F
-	if(__NFUN_119__(m_TeamManager, none))
+	if((m_TeamManager != none))
 	{
 		m_TeamManager.ResetTeam();
 	}
 	// End:0x4B
-	if(__NFUN_119__(m_MenuCommunication, none))
+	if((m_MenuCommunication != none))
 	{
 		m_MenuCommunication.SetStatMenuState(4);
 	}
 	// End:0x78
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		Level.ResetLevel(iNbOfRestart);
 	}
@@ -509,7 +509,7 @@ simulated function FirstPassReset()
 {
 	SetViewTarget(none);
 	// End:0x28
-	if(__NFUN_119__(m_TeamManager, none))
+	if((m_TeamManager != none))
 	{
 		m_TeamManager.ResetTeam();
 		m_TeamManager = none;
@@ -528,7 +528,7 @@ function Reset()
 function bool ShouldDisplayIncomingMessages()
 {
 	// End:0x1B
-	if(__NFUN_119__(m_MenuCommunication, none))
+	if((m_MenuCommunication != none))
 	{
 		return m_MenuCommunication.GetPlayerDidASelection();
 	}
@@ -539,7 +539,7 @@ function bool ShouldDisplayIncomingMessages()
 function ClientChangeMap()
 {
 	// End:0x34
-	if(__NFUN_119__(m_MenuCommunication, none))
+	if((m_MenuCommunication != none))
 	{
 		m_TeamSelection = 0;
 		m_MenuCommunication.SetStatMenuState(6);
@@ -551,7 +551,7 @@ function ClientChangeMap()
 function ClearReferences()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_MenuCommunication, none))
+	if((m_MenuCommunication != none))
 	{
 		m_MenuCommunication.ClearLevelReferences();
 	}
@@ -570,27 +570,27 @@ function ClientNewLobbyConnection(int iLobbyID, int iGroupID)
 function ClientDeathMessage(string Killer, string killed, byte bSuicideType)
 {
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return;
 	}
 	// End:0x177
-	if(__NFUN_119__(myHUD, none))
+	if((myHUD != none))
 	{
 		// End:0x68
-		if(__NFUN_154__(int(bSuicideType), 1))
+		if((int(bSuicideType) == 1))
 		{
 			myHUD.AddTextMessage(Class'R6Engine.R6Pawn'.static.BuildDeathMessage(Killer, killed, bSuicideType), Class'Engine.LocalMessage');			
 		}
 		else
 		{
 			// End:0x177
-			if(__NFUN_155__(int(bSuicideType), 4))
+			if((int(bSuicideType) != 4))
 			{
 				// End:0x145
-				if(__NFUN_122__(GameReplicationInfo.m_szGameTypeFlagRep, "RGM_CaptureTheEnemyAdvMode"))
+				if((GameReplicationInfo.m_szGameTypeFlagRep == "RGM_CaptureTheEnemyAdvMode"))
 				{
-					myHUD.AddDeathTextMessage(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(killed, " "), Localize("MPDeathMessages", "PlayerHasBeenShot", "ASGameMode")), " "), Killer), " "), Localize("MPDeathMessages", "PlayerSurrender", "ASGameMode")), Class'Engine.LocalMessage');					
+					myHUD.AddDeathTextMessage(((((((killed $ " ") $ Localize("MPDeathMessages", "PlayerHasBeenShot", "ASGameMode")) $ " ") $ Killer) $ " ") $ Localize("MPDeathMessages", "PlayerSurrender", "ASGameMode")), Class'Engine.LocalMessage');					
 				}
 				else
 				{
@@ -607,21 +607,21 @@ function ClientMPMiscMessage(string szMsgID, string Name, optional string szEndO
 	local string szMsg;
 
 	// End:0xBC
-	if(__NFUN_119__(myHUD, none))
+	if((myHUD != none))
 	{
 		// End:0x53
-		if(__NFUN_123__(Name, ""))
+		if((Name != ""))
 		{
-			szMsg = __NFUN_112__(__NFUN_112__(Name, " "), Localize("MPMiscMessages", szMsgID, "R6GameInfo"));			
+			szMsg = ((Name $ " ") $ Localize("MPMiscMessages", szMsgID, "R6GameInfo"));			
 		}
 		else
 		{
 			szMsg = Localize("MPMiscMessages", szMsgID, "R6GameInfo");
 		}
 		// End:0xA3
-		if(__NFUN_123__(szEndOfMsg, ""))
+		if((szEndOfMsg != ""))
 		{
-			szMsg = __NFUN_112__(__NFUN_112__(szMsg, " "), szEndOfMsg);
+			szMsg = ((szMsg $ " ") $ szEndOfMsg);
 		}
 		myHUD.AddTextMessage(szMsg, Class'Engine.LocalMessage');
 	}
@@ -631,7 +631,7 @@ function ClientMPMiscMessage(string szMsgID, string Name, optional string szEndO
 function ClientPlayMusic(Sound Sound)
 {
 	// End:0x28
-	if(__NFUN_130__(__NFUN_119__(Sound, none), __NFUN_119__(Viewport(Player), none)))
+	if(((Sound != none) && (Viewport(Player) != none)))
 	{
 		PlayMusic(Sound);
 	}
@@ -649,14 +649,14 @@ function ServerReadyToLoadWeaponSound()
 	J0x14:
 
 	// End:0x197 [Loop If]
-	if(__NFUN_119__(aController, none))
+	if((aController != none))
 	{
 		// End:0x100
-		if(__NFUN_132__(aController.__NFUN_303__('R6PlayerController'), aController.__NFUN_303__('R6RainbowAI')))
+		if((aController.IsA('R6PlayerController') || aController.IsA('R6RainbowAI')))
 		{
 			aRainbow = R6Rainbow(aController.Pawn);
 			// End:0xFD
-			if(__NFUN_119__(aRainbow, none))
+			if((aRainbow != none))
 			{
 				SetWeaponSound(aController.m_PawnRepInfo, aRainbow.m_szPrimaryWeapon, 0);
 				SetWeaponSound(aController.m_PawnRepInfo, aRainbow.m_szSecondaryWeapon, 1);
@@ -667,11 +667,11 @@ function ServerReadyToLoadWeaponSound()
 		else
 		{
 			// End:0x180
-			if(aController.__NFUN_303__('R6TerroristAI'))
+			if(aController.IsA('R6TerroristAI'))
 			{
 				aTerrorist = R6Terrorist(aController.Pawn);
 				// End:0x180
-				if(__NFUN_119__(aTerrorist, none))
+				if((aTerrorist != none))
 				{
 					SetWeaponSound(aController.m_PawnRepInfo, aTerrorist.m_szPrimaryWeapon, 0);
 					SetWeaponSound(aController.m_PawnRepInfo, aTerrorist.m_szGrenadeWeapon, 2);
@@ -683,7 +683,7 @@ function ServerReadyToLoadWeaponSound()
 		goto J0x14;
 	}
 	// End:0x1BE
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		aZoneInfo = Pawn.Region.Zone;		
 	}
@@ -700,15 +700,15 @@ function SetWeaponSound(R6PawnReplicationInfo PawnRepInfo, string szCurrentWeapo
 	local Class<R6EngineWeapon> WeaponClass;
 	local string caps_szWeaponName;
 
-	caps_szWeaponName = __NFUN_235__(szCurrentWeaponTxt);
+	caps_szWeaponName = Caps(szCurrentWeaponTxt);
 	// End:0xE4
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_122__(caps_szWeaponName, "R6WEAPONGADGETS.NONE"), __NFUN_122__(caps_szWeaponName, "PRIMARYMAGS")), __NFUN_122__(caps_szWeaponName, "SECONDARYMAGS")), __NFUN_122__(caps_szWeaponName, "LOCKPICKKIT")), __NFUN_122__(caps_szWeaponName, "DIFFUSEKIT")), __NFUN_122__(caps_szWeaponName, "ELECTRONICKIT")), __NFUN_122__(caps_szWeaponName, "GASMASK")), __NFUN_122__(caps_szWeaponName, "NONE")), __NFUN_122__(caps_szWeaponName, "")))
+	if((((((((((caps_szWeaponName == "R6WEAPONGADGETS.NONE") || (caps_szWeaponName == "PRIMARYMAGS")) || (caps_szWeaponName == "SECONDARYMAGS")) || (caps_szWeaponName == "LOCKPICKKIT")) || (caps_szWeaponName == "DIFFUSEKIT")) || (caps_szWeaponName == "ELECTRONICKIT")) || (caps_szWeaponName == "GASMASK")) || (caps_szWeaponName == "NONE")) || (caps_szWeaponName == "")))
 	{
 		return;
 	}
 	WeaponClass = Class<R6EngineWeapon>(DynamicLoadObject(szCurrentWeaponTxt, Class'Core.Class'));
 	// End:0x11F
-	if(__NFUN_119__(WeaponClass, none))
+	if((WeaponClass != none))
 	{
 		ClientSetWeaponSound(PawnRepInfo, WeaponClass, u8CurrentWepon);
 	}
@@ -718,7 +718,7 @@ function SetWeaponSound(R6PawnReplicationInfo PawnRepInfo, string szCurrentWeapo
 function ClientSetWeaponSound(R6PawnReplicationInfo PawnRepInfo, Class<R6EngineWeapon> PrimaryWeaponClass, byte u8CurrentWeapon)
 {
 	// End:0x24
-	if(__NFUN_119__(PawnRepInfo, none))
+	if((PawnRepInfo != none))
 	{
 		PawnRepInfo.AssignSound(PrimaryWeaponClass, u8CurrentWeapon);
 	}
@@ -727,7 +727,7 @@ function ClientSetWeaponSound(R6PawnReplicationInfo PawnRepInfo, Class<R6EngineW
 
 function ClientFinalizeLoading(ZoneInfo aZoneInfo)
 {
-	Level.__NFUN_1604__();
+	Level.FinalizeLoading();
 	m_CurrentAmbianceObject = aZoneInfo;
 	Level.m_bCanStartStartingSound = true;
 	return;
@@ -749,9 +749,9 @@ event InitInputSystem()
 event InitMultiPlayerOptions()
 {
 	super.InitMultiPlayerOptions();
-	ToggleRadar(__NFUN_1009__().ShowRadar);
+	ToggleRadar(GetGameOptions().ShowRadar);
 	AutoAdminLogin(m_szLastAdminPassword);
-	ServerSetGender(__NFUN_151__(m_GameOptions.Gender, 0));
+	ServerSetGender((m_GameOptions.Gender > 0));
 	m_GameService = R6AbstractGameService(Player.Console.SetGameServiceLinks(self));
 	ServerSetUbiID(m_GameService.m_szUserID);
 	return;
@@ -766,7 +766,7 @@ simulated function ClientHideReticule(bool bNewReticuleValue)
 function ClientShowWeapon()
 {
 	// End:0x37
-	if(__NFUN_132__(__NFUN_242__(m_GameOptions.HUDShowFPWeapon, true), __NFUN_242__(R6GameReplicationInfo(GameReplicationInfo).m_bFFPWeapon, true)))
+	if(((m_GameOptions.HUDShowFPWeapon == true) || (R6GameReplicationInfo(GameReplicationInfo).m_bFFPWeapon == true)))
 	{
 		ShowWeapon();
 	}
@@ -776,12 +776,12 @@ function ClientShowWeapon()
 simulated function bool ShouldDrawWeapon()
 {
 	// End:0x23
-	if(__NFUN_130__(__NFUN_119__(m_pawn, none), __NFUN_129__(m_pawn.IsAlive())))
+	if(((m_pawn != none) && (!m_pawn.IsAlive())))
 	{
 		return false;
 	}
 	// End:0x57
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), R6GameReplicationInfo(GameReplicationInfo).m_bFFPWeapon))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && R6GameReplicationInfo(GameReplicationInfo).m_bFFPWeapon))
 	{
 		return true;
 	}

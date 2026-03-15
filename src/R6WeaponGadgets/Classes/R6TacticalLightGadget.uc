@@ -22,9 +22,9 @@ simulated event Destroyed()
 {
 	super.Destroyed();
 	// End:0x24
-	if(__NFUN_119__(m_GlowLight, none))
+	if((m_GlowLight != none))
 	{
-		m_GlowLight.__NFUN_279__();
+		m_GlowLight.Destroy();
 		m_GlowLight = none;
 	}
 	return;
@@ -38,31 +38,31 @@ function ActivateGadget(bool bActivate, optional bool bControllerInBehindView)
 	local Rotator rGlowLightRotator;
 
 	// End:0xF2
-	if(__NFUN_242__(bActivate, true))
+	if((bActivate == true))
 	{
 		// End:0xEF
-		if(__NFUN_132__(__NFUN_242__(bControllerInBehindView, true), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+		if(((bControllerInBehindView == true) || (int(Level.NetMode) != int(NM_Standalone))))
 		{
 			// End:0x5D
-			if(__NFUN_114__(m_GlowLight, none))
+			if((m_GlowLight == none))
 			{
-				m_GlowLight = __NFUN_278__(Class'R6WeaponGadgets.R6TacticalGlowLight');
-				m_GlowLight.__NFUN_272__(m_WeaponOwner);
+				m_GlowLight = Spawn(Class'R6WeaponGadgets.R6TacticalGlowLight');
+				m_GlowLight.SetOwner(m_WeaponOwner);
 			}
-			m_WeaponOwner.__NFUN_2008__("TagGadget", vTagLocation, rTagRotator, m_OwnerCharacter.m_fAttachFactor);
-			m_GlowLight.__NFUN_298__(none);
-			m_GlowLight.__NFUN_298__(m_WeaponOwner, m_WeaponOwner.Location);
-			m_GlowLight.SetRelativeLocation(__NFUN_215__(vTagLocation, vGlowLightLocation));
-			m_GlowLight.SetRelativeRotation(__NFUN_316__(rTagRotator, rGlowLightRotator));
+			m_WeaponOwner.GetTagInformations("TagGadget", vTagLocation, rTagRotator, m_OwnerCharacter.m_fAttachFactor);
+			m_GlowLight.SetBase(none);
+			m_GlowLight.SetBase(m_WeaponOwner, m_WeaponOwner.Location);
+			m_GlowLight.SetRelativeLocation((vTagLocation + vGlowLightLocation));
+			m_GlowLight.SetRelativeRotation((rTagRotator + rGlowLightRotator));
 		}		
 	}
 	else
 	{
 		// End:0x11D
-		if(__NFUN_119__(m_GlowLight, none))
+		if((m_GlowLight != none))
 		{
-			m_GlowLight.__NFUN_298__(none);
-			m_GlowLight.__NFUN_279__();
+			m_GlowLight.SetBase(none);
+			m_GlowLight.Destroy();
 			m_GlowLight = none;
 		}
 	}
@@ -75,9 +75,9 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 	local Rotator rTagRotator;
 
 	super.UpdateAttachment(weapOwner);
-	__NFUN_298__(none);
-	__NFUN_298__(weapOwner, weapOwner.Location);
-	weapOwner.__NFUN_2008__("TagGadget", vTagLocation, rTagRotator);
+	SetBase(none);
+	SetBase(weapOwner, weapOwner.Location);
+	weapOwner.GetTagInformations("TagGadget", vTagLocation, rTagRotator);
 	SetRelativeLocation(vTagLocation);
 	SetRelativeRotation(rTagRotator);
 	return;

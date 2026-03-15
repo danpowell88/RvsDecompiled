@@ -17,13 +17,13 @@ function Created()
 {
 	super.Created();
 	SelectedTab = none;
-	TabArea = UWindowTabControlTabArea(CreateWindow(Class'UWindow.UWindowTabControlTabArea', 0.0000000, 0.0000000, WinWidth, __NFUN_174__(LookAndFeel.Size_TabAreaHeight, LookAndFeel.Size_TabAreaOverhangHeight)));
+	TabArea = UWindowTabControlTabArea(CreateWindow(Class'UWindow.UWindowTabControlTabArea', 0.0000000, 0.0000000, WinWidth, (LookAndFeel.Size_TabAreaHeight + LookAndFeel.Size_TabAreaOverhangHeight)));
 	TabArea.bAlwaysOnTop = true;
 	// End:0xCA
 	if(m_bTabButton)
 	{
-		LeftButton = UWindowTabControlLeftButton(CreateWindow(Class'UWindow.UWindowTabControlLeftButton', __NFUN_175__(WinWidth, float(20)), 0.0000000, 10.0000000, 12.0000000));
-		RightButton = UWindowTabControlRightButton(CreateWindow(Class'UWindow.UWindowTabControlRightButton', __NFUN_175__(WinWidth, float(10)), 0.0000000, 10.0000000, 12.0000000));
+		LeftButton = UWindowTabControlLeftButton(CreateWindow(Class'UWindow.UWindowTabControlLeftButton', (WinWidth - float(20)), 0.0000000, 10.0000000, 12.0000000));
+		RightButton = UWindowTabControlRightButton(CreateWindow(Class'UWindow.UWindowTabControlRightButton', (WinWidth - float(10)), 0.0000000, 10.0000000, 12.0000000));
 	}
 	return;
 }
@@ -38,7 +38,7 @@ function BeforePaint(Canvas C, float X, float Y)
 		TabArea.WinWidth = WinWidth;
 	}
 	TabArea.LayoutTabs(C);
-	WinHeight = __NFUN_174__(__NFUN_171__(LookAndFeel.Size_TabAreaHeight, float(TabArea.TabRows)), LookAndFeel.Size_TabAreaOverhangHeight);
+	WinHeight = ((LookAndFeel.Size_TabAreaHeight * float(TabArea.TabRows)) + LookAndFeel.Size_TabAreaOverhangHeight);
 	TabArea.WinHeight = WinHeight;
 	super(UWindowDialogControl).BeforePaint(C, X, Y);
 	return;
@@ -67,11 +67,11 @@ function Paint(Canvas C, float X, float Y)
 	local Texture t;
 
 	// End:0x9A
-	if(__NFUN_129__(m_bNotDisplayBkg))
+	if((!m_bNotDisplayBkg))
 	{
 		t = GetLookAndFeelTexture();
 		R = LookAndFeel.TabBackground;
-		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, __NFUN_171__(LookAndFeel.Size_TabAreaHeight, float(TabArea.TabRows)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, (LookAndFeel.Size_TabAreaHeight * float(TabArea.TabRows)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	}
 	return;
 }
@@ -85,7 +85,7 @@ function UWindowTabControlItem AddTab(string Caption, optional int _iItemID)
 	i.SetCaption(Caption);
 	i.m_iItemID = _iItemID;
 	// End:0x6D
-	if(__NFUN_114__(SelectedTab, none))
+	if((SelectedTab == none))
 	{
 		SelectedTab = i;
 	}
@@ -102,7 +102,7 @@ function UWindowTabControlItem InsertTab(UWindowTabControlItem BeforeTab, string
 	i.SetCaption(Caption);
 	i.m_iItemID = _iItemID;
 	// End:0x6D
-	if(__NFUN_114__(SelectedTab, none))
+	if((SelectedTab == none))
 	{
 		SelectedTab = i;
 	}
@@ -113,7 +113,7 @@ function UWindowTabControlItem InsertTab(UWindowTabControlItem BeforeTab, string
 function GotoTab(UWindowTabControlItem NewSelected, optional bool bByUser)
 {
 	// End:0x2C
-	if(__NFUN_130__(__NFUN_119__(SelectedTab, NewSelected), bByUser))
+	if(((SelectedTab != NewSelected) && bByUser))
 	{
 		LookAndFeel.PlayMenuSound(self, 5);
 	}
@@ -130,10 +130,10 @@ function UWindowTabControlItem GetTab(string Caption)
 	J0x19:
 
 	// End:0x5E [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x42
-		if(__NFUN_122__(i.Caption, Caption))
+		if((i.Caption == Caption))
 		{
 			return i;
 		}
@@ -153,14 +153,14 @@ function DeleteTab(UWindowTabControlItem Tab)
 	PrevTab = UWindowTabControlItem(Tab.Prev);
 	Tab.Remove();
 	// End:0xA1
-	if(__NFUN_114__(SelectedTab, Tab))
+	if((SelectedTab == Tab))
 	{
 		// End:0x88
 		if(bSelectNearestTabOnRemove)
 		{
 			Tab = NextTab;
 			// End:0x7A
-			if(__NFUN_114__(Tab, none))
+			if((Tab == none))
 			{
 				Tab = PrevTab;
 			}

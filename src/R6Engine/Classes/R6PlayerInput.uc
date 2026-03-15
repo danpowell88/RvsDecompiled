@@ -24,8 +24,8 @@ function UpdateMouseOptions()
 	local int iScaledSensitivity;
 
 	bInvertMouse = Outer.m_GameOptions.InvertMouse;
-	Outer.m_GameOptions.MouseSensitivity = float(__NFUN_251__(int(Outer.m_GameOptions.MouseSensitivity), 0, 100));
-	iScaledSensitivity = __NFUN_146__(int(__NFUN_172__(Outer.m_GameOptions.MouseSensitivity, float(7))), 1);
+	Outer.m_GameOptions.MouseSensitivity = float(Clamp(int(Outer.m_GameOptions.MouseSensitivity), 0, 100));
+	iScaledSensitivity = (int((Outer.m_GameOptions.MouseSensitivity / float(7))) + 1);
 	Outer.SetSensitivity(float(iScaledSensitivity));
 	return;
 }
@@ -38,10 +38,10 @@ event PlayerInput(float DeltaTime)
 		return;
 	}
 	// End:0x7A
-	if(__NFUN_130__(__NFUN_119__(Outer.m_GameOptions, none), Outer.m_GameOptions.AlwaysRun))
+	if(((Outer.m_GameOptions != none) && Outer.m_GameOptions.AlwaysRun))
 	{
 		// End:0x66
-		if(__NFUN_151__(int(Outer.m_bPlayerRun), 0))
+		if((int(Outer.m_bPlayerRun) > 0))
 		{
 			Outer.bRun = 0;			
 		}
@@ -56,12 +56,12 @@ event PlayerInput(float DeltaTime)
 	}
 	super.PlayerInput(DeltaTime);
 	// End:0xD0
-	if(__NFUN_176__(__NFUN_186__(Outer.aStrafe), 1.0000000))
+	if((Abs(Outer.aStrafe) < 1.0000000))
 	{
 		Outer.aStrafe = 0.0000000;
 	}
-	m_bFluidMovement = __NFUN_131__(m_bWasFluidMovement, __NFUN_151__(int(Outer.m_bSpecialCrouch), 0));
-	m_bWasFluidMovement = __NFUN_151__(int(Outer.m_bSpecialCrouch), 0);
+	m_bFluidMovement = (m_bWasFluidMovement ^^ (int(Outer.m_bSpecialCrouch) > 0));
+	m_bWasFluidMovement = (int(Outer.m_bSpecialCrouch) > 0);
 	return;
 }
 
@@ -70,7 +70,7 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 	local Actor.EDoubleClickDir DoubleClickMove, OldDoubleClick;
 
 	// End:0x24
-	if(__NFUN_154__(int(Outer.DoubleClickDir), int(5)))
+	if((int(Outer.DoubleClickDir) == int(5)))
 	{
 		DoubleClickMove = 5;		
 	}
@@ -79,36 +79,36 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 		DoubleClickMove = 0;
 	}
 	// End:0x24E
-	if(__NFUN_177__(DoubleClickTime, 0.0000000))
+	if((DoubleClickTime > 0.0000000))
 	{
 		// End:0x192
-		if(__NFUN_150__(int(Outer.DoubleClickDir), int(5)))
+		if((int(Outer.DoubleClickDir) < int(5)))
 		{
 			OldDoubleClick = Outer.DoubleClickDir;
 			Outer.DoubleClickDir = 0;
 			// End:0xA1
-			if(__NFUN_130__(m_bFluidMovement, m_bWasFluidMovement))
+			if((m_bFluidMovement && m_bWasFluidMovement))
 			{
 				Outer.DoubleClickDir = 3;				
 			}
 			else
 			{
 				// End:0xC9
-				if(__NFUN_130__(bEdgeBack, bWasBack))
+				if((bEdgeBack && bWasBack))
 				{
 					Outer.DoubleClickDir = 4;					
 				}
 				else
 				{
 					// End:0xF1
-					if(__NFUN_130__(bEdgeLeft, bWasLeft))
+					if((bEdgeLeft && bWasLeft))
 					{
 						Outer.DoubleClickDir = 1;						
 					}
 					else
 					{
 						// End:0x116
-						if(__NFUN_130__(bEdgeRight, bWasRight))
+						if((bEdgeRight && bWasRight))
 						{
 							Outer.DoubleClickDir = 2;
 						}
@@ -116,16 +116,16 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 				}
 			}
 			// End:0x146
-			if(__NFUN_154__(int(Outer.DoubleClickDir), int(0)))
+			if((int(Outer.DoubleClickDir) == int(0)))
 			{
 				Outer.DoubleClickDir = OldDoubleClick;				
 			}
 			else
 			{
 				// End:0x17E
-				if(__NFUN_155__(int(Outer.DoubleClickDir), int(OldDoubleClick)))
+				if((int(Outer.DoubleClickDir) != int(OldDoubleClick)))
 				{
-					DoubleClickTimer = __NFUN_174__(DoubleClickTime, __NFUN_171__(0.5000000, DeltaTime));					
+					DoubleClickTimer = (DoubleClickTime + (0.5000000 * DeltaTime));					
 				}
 				else
 				{
@@ -134,11 +134,11 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 			}
 		}
 		// End:0x1E5
-		if(__NFUN_154__(int(Outer.DoubleClickDir), int(6)))
+		if((int(Outer.DoubleClickDir) == int(6)))
 		{
-			__NFUN_185__(DoubleClickTimer, DeltaTime);
+			(DoubleClickTimer -= DeltaTime);
 			// End:0x1E2
-			if(__NFUN_176__(DoubleClickTimer, -0.3500000))
+			if((DoubleClickTimer < -0.3500000))
 			{
 				Outer.DoubleClickDir = 0;
 				DoubleClickTimer = DoubleClickTime;
@@ -147,11 +147,11 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 		else
 		{
 			// End:0x24E
-			if(__NFUN_130__(__NFUN_155__(int(Outer.DoubleClickDir), int(0)), __NFUN_155__(int(Outer.DoubleClickDir), int(5))))
+			if(((int(Outer.DoubleClickDir) != int(0)) && (int(Outer.DoubleClickDir) != int(5))))
 			{
-				__NFUN_185__(DoubleClickTimer, DeltaTime);
+				(DoubleClickTimer -= DeltaTime);
 				// End:0x24E
-				if(__NFUN_176__(DoubleClickTimer, float(0)))
+				if((DoubleClickTimer < float(0)))
 				{
 					Outer.DoubleClickDir = 0;
 					DoubleClickTimer = DoubleClickTime;

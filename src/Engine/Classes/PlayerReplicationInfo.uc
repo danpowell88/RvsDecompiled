@@ -88,7 +88,7 @@ var string m_szKillersName;  // name of the player that killed me
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		PlayerID, PlayerName, 
 		TalkTexture, TeamID, 
 		VoiceType, bFeigningDeath, 
@@ -100,20 +100,20 @@ replication
 		m_szUbiUserID;
 
 	// Pos:0x018
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		Ping, PlayerLocation, 
 		Score, m_bJoinedTeamLate;
 
 	// Pos:0x030
-	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetInitial && (int(Role) == int(ROLE_Authority))))
 		StartTime, bBot;
 
 	// Pos:0x048
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bClientWillSubmitResult, m_bIsTheIntruder;
 
 	// Pos:0x055
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		Deaths, m_iBackUpDeaths, 
 		m_iBackUpKillCount, m_iBackUpRoundFired, 
 		m_iBackUpRoundsHit, m_iBackUpRoundsPlayed, 
@@ -127,7 +127,7 @@ function PostBeginPlay()
 {
 	StartTime = int(Level.TimeSeconds);
 	Timer();
-	__NFUN_280__(2.0000000, true);
+	SetTimer(2.0000000, true);
 	return;
 }
 
@@ -136,9 +136,9 @@ function PostNetBeginPlay()
 {
 	super(Actor).PostNetBeginPlay();
 	// End:0x35
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
-		PlayerID = __NFUN_165__(Level.Game.CurrentID);
+		PlayerID = (Level.Game.CurrentID++);
 	}
 	return;
 }
@@ -201,7 +201,7 @@ function Reset()
 simulated function string GetLocationName()
 {
 	// End:0x1D
-	if(__NFUN_119__(PlayerLocation, none))
+	if((PlayerLocation != none))
 	{
 		return PlayerLocation.LocationName;		
 	}
@@ -224,10 +224,10 @@ function UpdatePlayerLocation()
 
 	PlayerLocation = none;
 	// End:0x7D
-	foreach __NFUN_307__(Class'Engine.Volume', V)
+	foreach TouchingActors(Class'Engine.Volume', V)
 	{
 		// End:0x7C
-		if(__NFUN_130__(__NFUN_130__(__NFUN_123__(V.LocationName, ""), __NFUN_132__(__NFUN_114__(PlayerLocation, none), __NFUN_151__(V.LocationPriority, PlayerLocation.LocationPriority))), V.Encompasses(self)))
+		if((((V.LocationName != "") && ((PlayerLocation == none) || (V.LocationPriority > PlayerLocation.LocationPriority))) && V.Encompasses(self)))
 		{
 			PlayerLocation = V;
 		}		
@@ -237,7 +237,7 @@ function UpdatePlayerLocation()
 
 simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
-	Canvas.__NFUN_465__(__NFUN_112__("     PlayerName ", PlayerName));
+	Canvas.DrawText(("     PlayerName " $ PlayerName));
 	return;
 }
 
@@ -245,7 +245,7 @@ function Timer()
 {
 	UpdatePlayerLocation();
 	// End:0x14
-	if(__NFUN_176__(__NFUN_195__(), 0.6500000))
+	if((FRand() < 0.6500000))
 	{
 		return;
 	}
@@ -261,7 +261,7 @@ function SetPlayerName(string S)
 	ReplaceText(S, ",", "_");
 	ReplaceText(S, "#", "_");
 	ReplaceText(S, "/", "_");
-	PlayerName = __NFUN_238__(S);
+	PlayerName = RemoveInvalidChars(S);
 	return;
 }
 

@@ -32,18 +32,18 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	// End:0x4F
 	if(pListBoxItem.bSelected)
 	{
-		C.__NFUN_2626__(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
+		C.SetDrawColor(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);		
 	}
 	else
 	{
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 	}
 	C.Font = Root.Fonts[0];
 	// End:0x171
-	if(__NFUN_123__(pListBoxItem.HelpText, ""))
+	if((pListBoxItem.HelpText != ""))
 	{
 		TextSize(C, pListBoxItem.HelpText, W, H);
-		fTextY = __NFUN_172__(__NFUN_175__(m_fItemHeight, H), float(2));
+		fTextY = ((m_fItemHeight - H) / float(2));
 		switch(Align)
 		{
 			// End:0x103
@@ -53,21 +53,21 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 				break;
 			// End:0x11D
 			case 1:
-				fTextX = __NFUN_175__(WinWidth, W);
+				fTextX = (WinWidth - W);
 				// End:0x140
 				break;
 			// End:0x13D
 			case 2:
-				fTextX = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
+				fTextX = ((WinWidth - W) / float(2));
 				// End:0x140
 				break;
 			// End:0xFFFF
 			default:
 				break;
 		}
-		ClipText(C, __NFUN_174__(X, fTextX), __NFUN_174__(Y, fTextY), pListBoxItem.HelpText);
+		ClipText(C, (X + fTextX), (Y + fTextY), pListBoxItem.HelpText);
 	}
-	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	C.SetDrawColor(byte(255), byte(255), byte(255));
 	return;
 }
 

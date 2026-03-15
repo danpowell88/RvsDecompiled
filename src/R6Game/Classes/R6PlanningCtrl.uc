@@ -94,29 +94,29 @@ function PostBeginPlay()
 	local R6AbstractInsertionZone NavPoint;
 	local R6AbstractExtractionZone ExtZone;
 
-	SetFOVAngle(__NFUN_171__(m_fZoom, float(90)));
+	SetFOVAngle((m_fZoom * float(90)));
 	// End:0x2B
-	if(__NFUN_114__(m_pCameraDirIcon, none))
+	if((m_pCameraDirIcon == none))
 	{
-		m_pCameraDirIcon = __NFUN_278__(Class'R6Game.R6CameraDirection', self);
+		m_pCameraDirIcon = Spawn(Class'R6Game.R6CameraDirection', self);
 	}
 	// End:0x45
-	if(__NFUN_114__(m_pFileManager, none))
+	if((m_pFileManager == none))
 	{
 		m_pFileManager = new (none) Class'R6Game.R6FileManagerPlanning';
 	}
 	iCurrentInsertionNumber = 2147483647;
 	// End:0x108
-	foreach __NFUN_304__(Class'R6Game.R6InsertionZone', anInsertionZone)
+	foreach AllActors(Class'R6Game.R6InsertionZone', anInsertionZone)
 	{
 		// End:0x107
-		if(anInsertionZone.__NFUN_1513__(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag))
+		if(anInsertionZone.IsAvailableInGameType(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag))
 		{
 			// End:0x104
-			if(__NFUN_150__(anInsertionZone.m_iInsertionNumber, iCurrentInsertionNumber))
+			if((anInsertionZone.m_iInsertionNumber < iCurrentInsertionNumber))
 			{
 				iCurrentInsertionNumber = anInsertionZone.m_iInsertionNumber;
-				__NFUN_2012__(anInsertionZone.m_iPlanningFloor_0);
+				SetFloorToDraw(anInsertionZone.m_iPlanningFloor_0);
 				m_iLevelDisplay = anInsertionZone.m_iPlanningFloor_0;
 				m_vCamPosNoRot = anInsertionZone.Location;
 				m_vCamDesiredPos = anInsertionZone.Location;
@@ -126,50 +126,50 @@ function PostBeginPlay()
 		}		
 	}	
 	// End:0x227
-	foreach __NFUN_304__(Class'R6Engine.R6IORotatingDoor', aDoor)
+	foreach AllActors(Class'R6Engine.R6IORotatingDoor', aDoor)
 	{
 		aDoor.m_eDisplayFlag = 1;
 		// End:0x226
-		if(__NFUN_242__(aDoor.m_bTreatDoorAsWindow, false))
+		if((aDoor.m_bTreatDoorAsWindow == false))
 		{
 			// End:0x175
-			if(__NFUN_242__(aDoor.m_bIsDoorLocked, true))
+			if((aDoor.m_bIsDoorLocked == true))
 			{
-				pSpawnedIcon = __NFUN_278__(Class'R6Engine.R6DoorLockedIcon',,, aDoor.m_vCenterOfDoor);				
+				pSpawnedIcon = Spawn(Class'R6Engine.R6DoorLockedIcon',,, aDoor.m_vCenterOfDoor);				
 			}
 			else
 			{
-				pSpawnedIcon = __NFUN_278__(Class'R6Engine.R6DoorIcon',,, aDoor.m_vCenterOfDoor);
+				pSpawnedIcon = Spawn(Class'R6Engine.R6DoorIcon',,, aDoor.m_vCenterOfDoor);
 			}
-			pSpawnedIcon.m_u8SpritePlanningAngle = byte(__NFUN_145__(aDoor.Rotation.Yaw, 255));
+			pSpawnedIcon.m_u8SpritePlanningAngle = byte((aDoor.Rotation.Yaw / 255));
 			pSpawnedIcon.m_iPlanningFloor_0 = aDoor.m_iPlanningFloor_0;
 			pSpawnedIcon.m_iPlanningFloor_1 = aDoor.m_iPlanningFloor_1;
 			// End:0x226
-			if(__NFUN_242__(aDoor.m_bIsOpeningClockWise, false))
+			if((aDoor.m_bIsOpeningClockWise == false))
 			{
 				pSpawnedIcon.SetDrawScale3D(vect(1.0000000, -1.0000000, 1.0000000));
 			}
 		}		
 	}	
 	// End:0x24A
-	foreach __NFUN_304__(Class'R6Engine.R6ReferenceIcons', RefIco)
+	foreach AllActors(Class'R6Engine.R6ReferenceIcons', RefIco)
 	{
 		RefIco.bHidden = false;		
 	}	
 	// End:0x298
-	foreach __NFUN_304__(Class'R6Abstract.R6AbstractInsertionZone', NavPoint)
+	foreach AllActors(Class'R6Abstract.R6AbstractInsertionZone', NavPoint)
 	{
 		// End:0x297
-		if(NavPoint.__NFUN_1513__(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag))
+		if(NavPoint.IsAvailableInGameType(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag))
 		{
 			NavPoint.bHidden = false;
 		}		
 	}	
 	// End:0x2E6
-	foreach __NFUN_304__(Class'R6Abstract.R6AbstractExtractionZone', ExtZone)
+	foreach AllActors(Class'R6Abstract.R6AbstractExtractionZone', ExtZone)
 	{
 		// End:0x2E5
-		if(ExtZone.__NFUN_1513__(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag))
+		if(ExtZone.IsAvailableInGameType(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag))
 		{
 			ExtZone.bHidden = false;
 		}		
@@ -213,21 +213,21 @@ function InitNewPlanning(int iSelectedTeam)
 	m_pTeamInfo[1].InitPlanning(1, self);
 	m_pTeamInfo[2].InitPlanning(2, self);
 	// End:0x5B
-	if(__NFUN_154__(m_iCurrentTeam, 0))
+	if((m_iCurrentTeam == 0))
 	{
 		SwitchToRedTeam(true);		
 	}
 	else
 	{
 		// End:0x70
-		if(__NFUN_154__(m_iCurrentTeam, 1))
+		if((m_iCurrentTeam == 1))
 		{
 			SwitchToGreenTeam(true);			
 		}
 		else
 		{
 			// End:0x83
-			if(__NFUN_154__(m_iCurrentTeam, 2))
+			if((m_iCurrentTeam == 2))
 			{
 				SwitchToGoldTeam(true);
 			}
@@ -265,63 +265,63 @@ event PlayerTick(float fDeltaTime)
 		m_pTeamInfo[2].Tick(fDeltaTime);
 	}
 	// End:0xD2
-	if(__NFUN_181__(m_fZoomDelta, 0.0000000))
+	if((m_fZoomDelta != 0.0000000))
 	{
-		__NFUN_184__(m_fZoom, __NFUN_171__(m_fZoomDelta, fDeltaTime));
-		m_fZoom = __NFUN_246__(m_fZoom, m_fZoomMin, m_fZoomMax);
-		m_fZoomFactor = __NFUN_171__(m_fZoom, float(12));
-		FovAngle = __NFUN_171__(m_fZoom, float(90));
+		(m_fZoom += (m_fZoomDelta * fDeltaTime));
+		m_fZoom = FClamp(m_fZoom, m_fZoomMin, m_fZoomMax);
+		m_fZoomFactor = (m_fZoom * float(12));
+		FovAngle = (m_fZoom * float(90));
 	}
 	// End:0x1A9
-	if(__NFUN_181__(m_fCameraAngle, float(0)))
+	if((m_fCameraAngle != float(0)))
 	{
-		m_vCamPos.X = __NFUN_246__(__NFUN_174__(m_vCamPos.X, __NFUN_171__(__NFUN_171__(m_fCameraAngle, m_fZoomFactor), fDeltaTime)), __NFUN_174__(m_fAngleMax, float(5000)), 1.0000000);
-		fAngle = __NFUN_187__(Acos(__NFUN_172__(m_vCamPos.X, m_fAngleMax)));
-		m_vCamPos.Z = __NFUN_171__(15000.0000000, fAngle);
-		fAngle = __NFUN_190__(__NFUN_172__(m_vCamPos.Z, m_vCamPos.X));
-		__NFUN_183__(fAngle, __NFUN_171__(3.1415930, 0.5000000));
-		m_rCamRot.Pitch = __NFUN_147__(65536, int(__NFUN_171__(__NFUN_186__(fAngle), float(16384))));
+		m_vCamPos.X = FClamp((m_vCamPos.X + ((m_fCameraAngle * m_fZoomFactor) * fDeltaTime)), (m_fAngleMax + float(5000)), 1.0000000);
+		fAngle = Sin(Acos((m_vCamPos.X / m_fAngleMax)));
+		m_vCamPos.Z = (15000.0000000 * fAngle);
+		fAngle = Atan((m_vCamPos.Z / m_vCamPos.X));
+		(fAngle /= (3.1415930 * 0.5000000));
+		m_rCamRot.Pitch = (65536 - int((Abs(fAngle) * float(16384))));
 	}
 	// End:0x1D2
-	if(__NFUN_181__(m_fRotateDelta, 0.0000000))
+	if((m_fRotateDelta != 0.0000000))
 	{
-		__NFUN_161__(m_rCamRot.Yaw, int(__NFUN_171__(m_fRotateDelta, fDeltaTime)));
+		(m_rCamRot.Yaw += int((m_fRotateDelta * fDeltaTime)));
 	}
-	__NFUN_229__(m_rCamRot, vAxisX, vAxisY, vAxisZ);
+	GetAxes(m_rCamRot, vAxisX, vAxisY, vAxisZ);
 	vAxisY.Z = 0.0000000;
-	vAxisY = __NFUN_226__(vAxisY);
+	vAxisY = Normal(vAxisY);
 	vAxisZ.Z = 0.0000000;
-	vAxisZ = __NFUN_226__(vAxisZ);
+	vAxisZ = Normal(vAxisZ);
 	// End:0x26C
-	if(__NFUN_130__(__NFUN_242__(m_bPlayMode, true), __NFUN_242__(m_bLockCamera, true)))
+	if(((m_bPlayMode == true) && (m_bLockCamera == true)))
 	{
 		m_vCamPosNoRot = R6PlanningPawn(Pawn).m_ArrowInPlanningView.Location;
 		m_vCamDesiredPos = m_vCamPosNoRot;		
 	}
 	else
 	{
-		fMovementX = __NFUN_171__(__NFUN_171__(m_vCamDelta.Y, fDeltaTime), m_fZoomFactor);
-		fMovementY = __NFUN_171__(__NFUN_171__(m_vCamDelta.X, fDeltaTime), m_fZoomFactor);
+		fMovementX = ((m_vCamDelta.Y * fDeltaTime) * m_fZoomFactor);
+		fMovementY = ((m_vCamDelta.X * fDeltaTime) * m_fZoomFactor);
 		// End:0x3A9
-		if(__NFUN_132__(__NFUN_132__(__NFUN_217__(m_vCamDesiredPos, m_vCamPosNoRot), __NFUN_181__(fMovementX, float(0))), __NFUN_181__(fMovementY, float(0))))
+		if((((m_vCamDesiredPos == m_vCamPosNoRot) || (fMovementX != float(0))) || (fMovementY != float(0))))
 		{
-			m_vCamPosNoRot.X = __NFUN_246__(__NFUN_174__(__NFUN_174__(m_vCamPosNoRot.X, __NFUN_171__(fMovementX, vAxisY.Y)), __NFUN_171__(fMovementY, vAxisY.X)), Level.R6PlanningMinVector.X, Level.R6PlanningMaxVector.X);
-			m_vCamPosNoRot.Y = __NFUN_246__(__NFUN_174__(__NFUN_174__(m_vCamPosNoRot.Y, __NFUN_171__(fMovementX, vAxisZ.Y)), __NFUN_171__(fMovementY, vAxisZ.X)), Level.R6PlanningMinVector.Y, Level.R6PlanningMaxVector.Y);
+			m_vCamPosNoRot.X = FClamp(((m_vCamPosNoRot.X + (fMovementX * vAxisY.Y)) + (fMovementY * vAxisY.X)), Level.R6PlanningMinVector.X, Level.R6PlanningMaxVector.X);
+			m_vCamPosNoRot.Y = FClamp(((m_vCamPosNoRot.Y + (fMovementX * vAxisZ.Y)) + (fMovementY * vAxisZ.X)), Level.R6PlanningMinVector.Y, Level.R6PlanningMaxVector.Y);
 			m_vCamDesiredPos = m_vCamPosNoRot;			
 		}
 		else
 		{
-			m_vCamPosNoRot.X = __NFUN_246__(__NFUN_174__(m_vCamPosNoRot.X, __NFUN_171__(__NFUN_175__(m_vCamDesiredPos.X, m_vCamPosNoRot.X), fDeltaTime)), Level.R6PlanningMinVector.X, Level.R6PlanningMaxVector.X);
-			m_vCamPosNoRot.Y = __NFUN_246__(__NFUN_174__(m_vCamPosNoRot.Y, __NFUN_171__(__NFUN_175__(m_vCamDesiredPos.Y, m_vCamPosNoRot.Y), fDeltaTime)), Level.R6PlanningMinVector.Y, Level.R6PlanningMaxVector.Y);
+			m_vCamPosNoRot.X = FClamp((m_vCamPosNoRot.X + ((m_vCamDesiredPos.X - m_vCamPosNoRot.X) * fDeltaTime)), Level.R6PlanningMinVector.X, Level.R6PlanningMaxVector.X);
+			m_vCamPosNoRot.Y = FClamp((m_vCamPosNoRot.Y + ((m_vCamDesiredPos.Y - m_vCamPosNoRot.Y) * fDeltaTime)), Level.R6PlanningMinVector.Y, Level.R6PlanningMaxVector.Y);
 			// End:0x483
-			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_vCamDesiredPos, m_vCamPosNoRot)), float(20)))
+			if((VSize((m_vCamDesiredPos - m_vCamPosNoRot)) < float(20)))
 			{
 				m_vCamDesiredPos = m_vCamPosNoRot;
 			}
 		}
 	}
 	// End:0x4D0
-	if(__NFUN_242__(m_bSetSnipeDirection, true))
+	if((m_bSetSnipeDirection == true))
 	{
 		vHitLocation = __NFUN_2016__(m_fLastMouseX, m_fLastMouseY, GetCurrentPoint().Location.Z);
 		m_pTeamInfo[m_iCurrentTeam].AjustSnipeDirection(vHitLocation);

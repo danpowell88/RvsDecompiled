@@ -37,37 +37,37 @@ var() editinlineuse Material Detail;
 function Trigger(Actor Other, Actor EventInstigator)
 {
 	// End:0x24
-	if(__NFUN_119__(Diffuse, none))
+	if((Diffuse != none))
 	{
 		Diffuse.Trigger(Other, EventInstigator);
 	}
 	// End:0x48
-	if(__NFUN_119__(Opacity, none))
+	if((Opacity != none))
 	{
 		Opacity.Trigger(Other, EventInstigator);
 	}
 	// End:0x6C
-	if(__NFUN_119__(Specular, none))
+	if((Specular != none))
 	{
 		Specular.Trigger(Other, EventInstigator);
 	}
 	// End:0x90
-	if(__NFUN_119__(SpecularityMask, none))
+	if((SpecularityMask != none))
 	{
 		SpecularityMask.Trigger(Other, EventInstigator);
 	}
 	// End:0xB4
-	if(__NFUN_119__(SelfIllumination, none))
+	if((SelfIllumination != none))
 	{
 		SelfIllumination.Trigger(Other, EventInstigator);
 	}
 	// End:0xD8
-	if(__NFUN_119__(SelfIlluminationMask, none))
+	if((SelfIlluminationMask != none))
 	{
 		SelfIlluminationMask.Trigger(Other, EventInstigator);
 	}
 	// End:0xFC
-	if(__NFUN_119__(FallbackMaterial, none))
+	if((FallbackMaterial != none))
 	{
 		FallbackMaterial.Trigger(Other, EventInstigator);
 	}

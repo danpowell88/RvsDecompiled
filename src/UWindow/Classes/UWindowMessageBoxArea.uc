@@ -18,7 +18,7 @@ function float GetHeight(Canvas C)
 	C.Font = Root.Fonts[0];
 	TextSize(C, "A", tW, tH);
 	L = WrapClipText(C, 0.0000000, 0.0000000, Message,,,, true);
-	H = __NFUN_171__(tH, float(L));
+	H = (tH * float(L));
 	WinHeight = OldWinHeight;
 	return H;
 	return;
@@ -27,9 +27,9 @@ function float GetHeight(Canvas C)
 function Paint(Canvas C, float X, float Y)
 {
 	C.Font = Root.Fonts[0];
-	C.__NFUN_2626__(0, 0, 0);
+	C.SetDrawColor(0, 0, 0);
 	WrapClipText(C, 0.0000000, 0.0000000, Message);
-	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	C.SetDrawColor(byte(255), byte(255), byte(255));
 	return;
 }
 

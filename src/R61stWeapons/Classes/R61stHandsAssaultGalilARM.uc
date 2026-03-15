@@ -18,7 +18,7 @@ function PostBeginPlay()
 
 simulated function SwitchFPAnim()
 {
-	__NFUN_2210__();
+	UnLinkSkelAnim();
 	LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsAssaultGalilARMWithScopeA');
 	PostBeginPlay();
 	return;

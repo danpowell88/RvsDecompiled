@@ -18,21 +18,21 @@ var string strparm;
 
 function int Main(string Parms)
 {
-	__NFUN_231__("Hello, world!");
+	Log("Hello, world!");
 	// End:0x40
-	if(__NFUN_123__(Parms, ""))
+	if((Parms != ""))
 	{
-		__NFUN_231__(__NFUN_112__("Command line parameters=", Parms));
+		Log(("Command line parameters=" $ Parms));
 	}
 	// End:0x6E
-	if(__NFUN_155__(intparm, 0))
+	if((intparm != 0))
 	{
-		__NFUN_231__(__NFUN_112__("You specified intparm=", string(intparm)));
+		Log(("You specified intparm=" $ string(intparm)));
 	}
 	// End:0x9B
-	if(__NFUN_123__(strparm, ""))
+	if((strparm != ""))
 	{
-		__NFUN_231__(__NFUN_112__("You specified strparm=", strparm));
+		Log(("You specified strparm=" $ strparm));
 	}
 	return 0;
 	return;

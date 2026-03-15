@@ -37,7 +37,7 @@ function UpdateOperativeItems()
 
 	gameRepInfo = R6GameReplicationInfo(GetPlayerOwner().GameReplicationInfo);
 	iOperativePos = 0;
-	m_bIsSinglePlayer = __NFUN_154__(int(gameRepInfo.Level.NetMode), int(NM_Standalone));
+	m_bIsSinglePlayer = (int(gameRepInfo.Level.NetMode) == int(NM_Standalone));
 	// End:0x220
 	if(m_bIsSinglePlayer)
 	{
@@ -45,66 +45,66 @@ function UpdateOperativeItems()
 		J0x57:
 
 		// End:0x21D [Loop If]
-		if(__NFUN_150__(iTeam, 3))
+		if((iTeam < 3))
 		{
-			iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_144__(iTeam, __NFUN_146__(c_InsideMarginX, c_ColumnWidth)));
+			iPosX = ((c_OutsideMarginX + c_InsideMarginX) + (iTeam * (c_InsideMarginX + c_ColumnWidth)));
 			// End:0x213
-			if(__NFUN_119__(gameRepInfo.m_RainbowTeam[iTeam], none))
+			if((gameRepInfo.m_RainbowTeam[iTeam] != none))
 			{
-				iOperativeCount = __NFUN_146__(gameRepInfo.m_RainbowTeam[iTeam].m_iMembersLost, gameRepInfo.m_RainbowTeam[iTeam].m_iMemberCount);
+				iOperativeCount = (gameRepInfo.m_RainbowTeam[iTeam].m_iMembersLost + gameRepInfo.m_RainbowTeam[iTeam].m_iMemberCount);
 				iOperative = 0;
 				J0xED:
 
 				// End:0x213 [Loop If]
-				if(__NFUN_150__(iOperative, iOperativeCount))
+				if((iOperative < iOperativeCount))
 				{
-					iPosY = __NFUN_146__(__NFUN_146__(c_OutsideMarginY, c_InsideMarginY), __NFUN_144__(iOperative, __NFUN_146__(c_InsideMarginY, c_RowHeight)));
+					iPosY = ((c_OutsideMarginY + c_InsideMarginY) + (iOperative * (c_InsideMarginY + c_RowHeight)));
 					// End:0x166
-					if(__NFUN_129__(m_bInitalized))
+					if((!m_bInitalized))
 					{
 						aItems[iOperativePos] = R6OperativeSelectorItem(CreateWindow(Class'R6Menu.R6OperativeSelectorItem', float(iPosX), float(iPosY), float(c_ColumnWidth), float(c_RowHeight)));
 					}
 					aItems[iOperativePos].SetCharacterInfo(gameRepInfo.m_RainbowTeam[iTeam].m_Team[iOperative]);
 					aItems[iOperativePos].m_DarkColor = Root.Colors.TeamColorDark[iTeam];
 					aItems[iOperativePos].m_NormalColor = Root.Colors.TeamColor[iTeam];
-					__NFUN_165__(iOperativePos);
-					__NFUN_165__(iOperative);
+					(iOperativePos++);
+					(iOperative++);
 					// [Loop Continue]
 					goto J0xED;
 				}
 			}
-			__NFUN_165__(iTeam);
+			(iTeam++);
 			// [Loop Continue]
 			goto J0x57;
 		}		
 	}
 	else
 	{
-		m_pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+		m_pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 		P = R6Rainbow(GetPlayerOwner().Pawn);
-		iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_146__(c_InsideMarginX, c_ColumnWidth));
+		iPosX = ((c_OutsideMarginX + c_InsideMarginX) + (c_InsideMarginX + c_ColumnWidth));
 		iOperative = 0;
 		J0x273:
 
 		// End:0x308 [Loop If]
-		if(__NFUN_150__(iOperative, 4))
+		if((iOperative < 4))
 		{
 			// End:0x2E9
-			if(__NFUN_129__(m_bInitalized))
+			if((!m_bInitalized))
 			{
-				iPosY = __NFUN_146__(__NFUN_146__(c_OutsideMarginY, c_InsideMarginY), __NFUN_144__(iOperative, __NFUN_146__(c_InsideMarginY, c_RowHeight)));
+				iPosY = ((c_OutsideMarginY + c_InsideMarginY) + (iOperative * (c_InsideMarginY + c_RowHeight)));
 				aItems[iOperative] = R6OperativeSelectorItem(CreateWindow(Class'R6Menu.R6OperativeSelectorItem', float(iPosX), float(iPosY), float(c_ColumnWidth), float(c_RowHeight)));
 			}
 			aItems[iOperative].HideWindow();
-			__NFUN_165__(iOperative);
+			(iOperative++);
 			// [Loop Continue]
 			goto J0x273;
 		}
 		// End:0x3ED
-		foreach P.__NFUN_304__(Class'R6Engine.R6TeamMemberReplicationInfo', pTeamMemberRepInfo)
+		foreach P.AllActors(Class'R6Engine.R6TeamMemberReplicationInfo', pTeamMemberRepInfo)
 		{
 			// End:0x3EC
-			if(__NFUN_154__(P.m_TeamMemberRepInfo.m_iTeamId, pTeamMemberRepInfo.m_iTeamId))
+			if((P.m_TeamMemberRepInfo.m_iTeamId == pTeamMemberRepInfo.m_iTeamId))
 			{
 				aItems[int(pTeamMemberRepInfo.m_iTeamPosition)].SetCharacterInfoMP(pTeamMemberRepInfo);
 				aItems[int(pTeamMemberRepInfo.m_iTeamPosition)].m_DarkColor = m_pGameOptions.HUDMPDarkColor;
@@ -121,7 +121,7 @@ function ShowWindow()
 {
 	super(UWindowWindow).ShowWindow();
 	UpdateOperativeItems();
-	GetPlayerOwner().__NFUN_264__(m_OperativeOpenSnd, 9);
+	GetPlayerOwner().__NFUN_264__(m_OperativeOpenSnd, 9) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	return;
 }
 

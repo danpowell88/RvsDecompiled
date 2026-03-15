@@ -30,7 +30,7 @@ var array<Region> m_TextureRegionCollection;
 function CreateBitmap(int X, int Y, int W, int H)
 {
 	// End:0x3E
-	if(__NFUN_114__(m_CurrentSelection, none))
+	if((m_CurrentSelection == none))
 	{
 		m_CurrentSelection = R6WindowBitMap(CreateControl(Class'R6Window.R6WindowBitMap', float(X), float(Y), float(W), float(H), self));
 	}
@@ -41,7 +41,7 @@ function CreateBitmap(int X, int Y, int W, int H)
 function SetBitmapProperties(bool _bStretch, bool _bCenter, int _iDrawStyle, bool _bUseColor, optional Color _TextureColor)
 {
 	// End:0x75
-	if(__NFUN_119__(m_CurrentSelection, none))
+	if((m_CurrentSelection != none))
 	{
 		m_CurrentSelection.m_bUseColor = _bUseColor;
 		m_CurrentSelection.m_TextureColor = _TextureColor;
@@ -55,7 +55,7 @@ function SetBitmapProperties(bool _bStretch, bool _bCenter, int _iDrawStyle, boo
 function SetBitmapBorder(bool _bDrawBorder, Color _borderColor)
 {
 	// End:0x35
-	if(__NFUN_119__(m_CurrentSelection, none))
+	if((m_CurrentSelection != none))
 	{
 		m_CurrentSelection.m_bDrawBorder = _bDrawBorder;
 		m_CurrentSelection.m_BorderColor = _borderColor;
@@ -89,7 +89,7 @@ function CreateTextLabel(int X, int Y, int W, int H, string _szText, string _szT
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0xBF
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -100,10 +100,10 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x63
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Yo1 m_HSB.Pos", string(m_HSB.pos)));
+					Log(("Yo1 m_HSB.Pos" @ string(m_HSB.pos)));
 				}
 				// End:0xB9
-				if(__NFUN_151__(m_TextureCollection.Length, 0))
+				if((m_TextureCollection.Length > 0))
 				{
 					m_CurrentSelection.t = m_TextureCollection[int(m_HSB.pos)];
 					m_CurrentSelection.R = m_TextureRegionCollection[int(m_HSB.pos)];
@@ -118,7 +118,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x206
-		if(__NFUN_154__(int(E), 1))
+		if((int(E) == 1))
 		{
 			switch(C)
 			{
@@ -127,27 +127,27 @@ function Notify(UWindowDialogControl C, byte E)
 					// End:0x107
 					if(bShowLog)
 					{
-						__NFUN_231__(__NFUN_168__("Yo2 m_HSB.Pos", string(m_HSB.pos)));
+						Log(("Yo2 m_HSB.Pos" @ string(m_HSB.pos)));
 					}
 					// End:0x13C
 					if(bShowLog)
 					{
-						__NFUN_231__(__NFUN_168__("Yo2 m_TextureCollection.length", string(m_TextureCollection.Length)));
+						Log(("Yo2 m_TextureCollection.length" @ string(m_TextureCollection.Length)));
 					}
 					// End:0x200
-					if(__NFUN_151__(m_TextureCollection.Length, 0))
+					if((m_TextureCollection.Length > 0))
 					{
 						m_CurrentSelection.t = m_TextureCollection[int(m_HSB.pos)];
 						m_CurrentSelection.R = m_TextureRegionCollection[int(m_HSB.pos)];
 						// End:0x1C6
 						if(bShowLog)
 						{
-							__NFUN_231__(__NFUN_168__("m_CurrentSelection.T ", string(m_CurrentSelection.t)));
+							Log(("m_CurrentSelection.T " @ string(m_CurrentSelection.t)));
 						}
 						// End:0x200
 						if(bShowLog)
 						{
-							__NFUN_231__(__NFUN_168__("m_CurrentSelection.R.W", string(m_CurrentSelection.R.W)));
+							Log(("m_CurrentSelection.R.W" @ string(m_CurrentSelection.R.W)));
 						}
 					}
 					// End:0x206
@@ -160,7 +160,7 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x2CE
-			if(__NFUN_154__(int(E), 12))
+			if((int(E) == 12))
 			{
 				switch(C)
 				{
@@ -169,17 +169,17 @@ function Notify(UWindowDialogControl C, byte E)
 					// End:0x2CB
 					case m_HSB:
 						// End:0x260
-						if(__NFUN_119__(m_pTextLabel, none))
+						if((m_pTextLabel != none))
 						{
 							m_pTextLabel.ChangeColorLabel(Root.Colors.ButtonTextColor[2], 0);
 						}
 						// End:0x294
-						if(__NFUN_119__(m_CurrentSelection, none))
+						if((m_CurrentSelection != none))
 						{
 							m_CurrentSelection.m_BorderColor = Root.Colors.ButtonTextColor[2];
 						}
 						// End:0x2C8
-						if(__NFUN_119__(m_HSB, none))
+						if((m_HSB != none))
 						{
 							m_HSB.m_NormalColor = Root.Colors.ButtonTextColor[2];
 						}
@@ -193,7 +193,7 @@ function Notify(UWindowDialogControl C, byte E)
 			else
 			{
 				// End:0x38D
-				if(__NFUN_154__(int(E), 9))
+				if((int(E) == 9))
 				{
 					switch(C)
 					{
@@ -202,17 +202,17 @@ function Notify(UWindowDialogControl C, byte E)
 						// End:0x38A
 						case m_HSB:
 							// End:0x325
-							if(__NFUN_119__(m_pTextLabel, none))
+							if((m_pTextLabel != none))
 							{
 								m_pTextLabel.ChangeColorLabel(Root.Colors.White, 0);
 							}
 							// End:0x356
-							if(__NFUN_119__(m_CurrentSelection, none))
+							if((m_CurrentSelection != none))
 							{
 								m_CurrentSelection.m_BorderColor = Root.Colors.White;
 							}
 							// End:0x387
-							if(__NFUN_119__(m_HSB, none))
+							if((m_HSB != none))
 							{
 								m_HSB.m_NormalColor = Root.Colors.White;
 							}
@@ -240,34 +240,34 @@ function int AddTexture(Texture _Texture, Region _Region)
 	// End:0x2E
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("AddTexture inserting at", string(m_TextureCollection.Length)));
+		Log(("AddTexture inserting at" @ string(m_TextureCollection.Length)));
 	}
 	// End:0x177
-	if(__NFUN_119__(_Texture, none))
+	if((_Texture != none))
 	{
 		m_TextureRegionCollection[m_TextureCollection.Length] = _Region;
 		m_TextureCollection[m_TextureCollection.Length] = _Texture;
 		// End:0x8B
-		if(__NFUN_119__(m_HSB, none))
+		if((m_HSB != none))
 		{
 			m_HSB.SetRange(0.0000000, float(m_TextureCollection.Length), float(m_iNbDisplayedElement));
 		}
 		// End:0xDD
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("m_TextureCollection[m_TextureCollection.length -1]", string(m_TextureCollection[__NFUN_147__(m_TextureCollection.Length, 1)])));
+			Log(("m_TextureCollection[m_TextureCollection.length -1]" @ string(m_TextureCollection[(m_TextureCollection.Length - 1)])));
 		}
 		// End:0x13C
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("m_TextureRegionCollection[m_TextureCollection.length -1].W", string(m_TextureRegionCollection[__NFUN_147__(m_TextureCollection.Length, 1)].W)));
+			Log(("m_TextureRegionCollection[m_TextureCollection.length -1].W" @ string(m_TextureRegionCollection[(m_TextureCollection.Length - 1)].W)));
 		}
 		// End:0x16D
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("m_TextureCollection.length", string(m_TextureCollection.Length)));
+			Log(("m_TextureCollection.length" @ string(m_TextureCollection.Length)));
 		}
-		return __NFUN_147__(m_TextureCollection.Length, 1);
+		return (m_TextureCollection.Length - 1);
 	}
 	return -1;
 	return;
@@ -279,9 +279,9 @@ function int AddTexture(Texture _Texture, Region _Region)
 function RemoveTexture(Texture _Texture)
 {
 	// End:0x34
-	if(__NFUN_119__(m_HSB, none))
+	if((m_HSB != none))
 	{
-		m_HSB.SetRange(0.0000000, float(__NFUN_250__(0, __NFUN_147__(m_TextureCollection.Length, 1))), float(m_iNbDisplayedElement));
+		m_HSB.SetRange(0.0000000, float(Max(0, (m_TextureCollection.Length - 1))), float(m_iNbDisplayedElement));
 	}
 	return;
 	return;
@@ -295,9 +295,9 @@ function RemoveTextureFromIndex(int _index)
 	m_TextureCollection.Remove(_index, _index);
 	m_TextureRegionCollection.Remove(_index, _index);
 	// End:0x54
-	if(__NFUN_119__(m_HSB, none))
+	if((m_HSB != none))
 	{
-		m_HSB.SetRange(0.0000000, float(__NFUN_250__(0, __NFUN_147__(m_TextureCollection.Length, 1))), float(m_iNbDisplayedElement));
+		m_HSB.SetRange(0.0000000, float(Max(0, (m_TextureCollection.Length - 1))), float(m_iNbDisplayedElement));
 	}
 	return;
 }
@@ -317,10 +317,10 @@ function int GetTextureIndex(Texture _Texture)
 function int GetCurrentTextureIndex()
 {
 	// End:0x30
-	if(__NFUN_151__(m_TextureCollection.Length, 0))
+	if((m_TextureCollection.Length > 0))
 	{
 		// End:0x2B
-		if(__NFUN_119__(m_HSB, none))
+		if((m_HSB != none))
 		{
 			return int(m_HSB.pos);			
 		}
@@ -342,7 +342,7 @@ function int GetCurrentTextureIndex()
 function SetCurrentTextureFromIndex(int _index)
 {
 	// End:0x26
-	if(__NFUN_151__(m_TextureCollection.Length, _index))
+	if((m_TextureCollection.Length > _index))
 	{
 		m_HSB.Show(float(_index));
 	}

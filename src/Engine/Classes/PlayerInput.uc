@@ -52,49 +52,49 @@ event PlayerInput(float DeltaTime)
 {
 	local float FOVScale, MouseScale;
 
-	bEdgeForward = __NFUN_131__(bWasForward, __NFUN_177__(Outer.aBaseY, float(0)));
-	bEdgeBack = __NFUN_131__(bWasBack, __NFUN_176__(Outer.aBaseY, float(0)));
-	bEdgeLeft = __NFUN_131__(bWasLeft, __NFUN_177__(Outer.aStrafe, float(0)));
-	bEdgeRight = __NFUN_131__(bWasRight, __NFUN_176__(Outer.aStrafe, float(0)));
-	bWasForward = __NFUN_177__(Outer.aBaseY, float(0));
-	bWasBack = __NFUN_176__(Outer.aBaseY, float(0));
-	bWasLeft = __NFUN_177__(Outer.aStrafe, float(0));
-	bWasRight = __NFUN_176__(Outer.aStrafe, float(0));
-	FOVScale = __NFUN_171__(Outer.DesiredFOV, 0.0111100);
-	MouseScale = __NFUN_171__(MouseSensitivity, FOVScale);
-	Outer.aMouseX = SmoothMouse(__NFUN_171__(Outer.aMouseX, MouseScale), DeltaTime, Outer.bXAxis, 0);
-	Outer.aMouseY = SmoothMouse(__NFUN_171__(Outer.aMouseY, MouseScale), DeltaTime, Outer.bYAxis, 1);
-	__NFUN_182__(Outer.aLookUp, FOVScale);
-	__NFUN_182__(Outer.aTurn, FOVScale);
+	bEdgeForward = (bWasForward ^^ (Outer.aBaseY > float(0)));
+	bEdgeBack = (bWasBack ^^ (Outer.aBaseY < float(0)));
+	bEdgeLeft = (bWasLeft ^^ (Outer.aStrafe > float(0)));
+	bEdgeRight = (bWasRight ^^ (Outer.aStrafe < float(0)));
+	bWasForward = (Outer.aBaseY > float(0));
+	bWasBack = (Outer.aBaseY < float(0));
+	bWasLeft = (Outer.aStrafe > float(0));
+	bWasRight = (Outer.aStrafe < float(0));
+	FOVScale = (Outer.DesiredFOV * 0.0111100);
+	MouseScale = (MouseSensitivity * FOVScale);
+	Outer.aMouseX = SmoothMouse((Outer.aMouseX * MouseScale), DeltaTime, Outer.bXAxis, 0);
+	Outer.aMouseY = SmoothMouse((Outer.aMouseY * MouseScale), DeltaTime, Outer.bYAxis, 1);
+	(Outer.aLookUp *= FOVScale);
+	(Outer.aTurn *= FOVScale);
 	// End:0x20A
-	if(__NFUN_155__(int(Outer.bStrafe), 0))
+	if((int(Outer.bStrafe) != 0))
 	{
-		__NFUN_184__(Outer.aStrafe, __NFUN_174__(Outer.aBaseX, Outer.aMouseX));		
+		(Outer.aStrafe += (Outer.aBaseX + Outer.aMouseX));		
 	}
 	else
 	{
-		__NFUN_184__(Outer.aTurn, __NFUN_174__(__NFUN_171__(Outer.aBaseX, FOVScale), Outer.aMouseX));
+		(Outer.aTurn += ((Outer.aBaseX * FOVScale) + Outer.aMouseX));
 	}
 	Outer.aBaseX = 0.0000000;
 	// End:0x2E0
-	if(__NFUN_130__(__NFUN_154__(int(Outer.bStrafe), 0), __NFUN_132__(Outer.bAlwaysMouseLook, __NFUN_155__(int(Outer.bLook), 0))))
+	if(((int(Outer.bStrafe) == 0) && (Outer.bAlwaysMouseLook || (int(Outer.bLook) != 0))))
 	{
 		// End:0x2BF
 		if(bInvertMouse)
 		{
-			__NFUN_185__(Outer.aLookUp, Outer.aMouseY);			
+			(Outer.aLookUp -= Outer.aMouseY);			
 		}
 		else
 		{
-			__NFUN_184__(Outer.aLookUp, Outer.aMouseY);
+			(Outer.aLookUp += Outer.aMouseY);
 		}		
 	}
 	else
 	{
-		__NFUN_184__(Outer.aForward, Outer.aMouseY);
+		(Outer.aForward += Outer.aMouseY);
 	}
 	// End:0x339
-	if(__NFUN_155__(int(Outer.bSnapLevel), 0))
+	if((int(Outer.bSnapLevel) != 0))
 	{
 		Outer.bCenterView = true;
 		Outer.bKeyboardLook = false;		
@@ -102,7 +102,7 @@ event PlayerInput(float DeltaTime)
 	else
 	{
 		// End:0x374
-		if(__NFUN_181__(Outer.aLookUp, float(0)))
+		if((Outer.aLookUp != float(0)))
 		{
 			Outer.bCenterView = false;
 			Outer.bKeyboardLook = true;			
@@ -110,7 +110,7 @@ event PlayerInput(float DeltaTime)
 		else
 		{
 			// End:0x3BE
-			if(__NFUN_130__(Outer.bSnapToLevel, __NFUN_129__(Outer.bAlwaysMouseLook)))
+			if((Outer.bSnapToLevel && (!Outer.bAlwaysMouseLook)))
 			{
 				Outer.bCenterView = true;
 				Outer.bKeyboardLook = false;
@@ -118,14 +118,14 @@ event PlayerInput(float DeltaTime)
 		}
 	}
 	// End:0x414
-	if(__NFUN_155__(int(Outer.bFreeLook), 0))
+	if((int(Outer.bFreeLook) != 0))
 	{
 		Outer.bKeyboardLook = true;
-		__NFUN_184__(Outer.aLookUp, __NFUN_171__(__NFUN_171__(0.5000000, Outer.aBaseY), FOVScale));		
+		(Outer.aLookUp += ((0.5000000 * Outer.aBaseY) * FOVScale));		
 	}
 	else
 	{
-		__NFUN_184__(Outer.aForward, Outer.aBaseY);
+		(Outer.aForward += Outer.aBaseY);
 	}
 	Outer.aBaseY = 0.0000000;
 	Outer.HandleWalking();
@@ -141,7 +141,7 @@ function UpdateMouseOptions()
 exec function SetSmoothingMode(byte B)
 {
 	MouseSmoothingMode = B;
-	__NFUN_231__(__NFUN_112__("Smoothing mode ", string(MouseSmoothingMode)));
+	Log(("Smoothing mode " $ string(MouseSmoothingMode)));
 	return;
 }
 
@@ -155,28 +155,28 @@ function float SmoothMouse(float aMouse, float DeltaTime, out byte SampleCount, 
 	local int i, sum;
 
 	// End:0x13
-	if(__NFUN_154__(int(MouseSmoothingMode), 0))
+	if((int(MouseSmoothingMode) == 0))
 	{
 		return aMouse;
 	}
 	// End:0x11B
-	if(__NFUN_180__(aMouse, float(0)))
+	if((aMouse == float(0)))
 	{
-		__NFUN_184__(ZeroTime[Index], DeltaTime);
+		(ZeroTime[Index] += DeltaTime);
 		// End:0x7F
-		if(__NFUN_176__(ZeroTime[Index], MouseSamplingTime))
+		if((ZeroTime[Index] < MouseSamplingTime))
 		{
-			__NFUN_184__(SamplingTime[Index], DeltaTime);
-			__NFUN_184__(MaybeTime[Index], DeltaTime);
+			(SamplingTime[Index] += DeltaTime);
+			(MaybeTime[Index] += DeltaTime);
 			aMouse = SmoothedMouse[Index];			
 		}
 		else
 		{
 			// End:0xE9
-			if(__NFUN_130__(bAdjustSampling, __NFUN_151__(MouseSamples[Index], 9)))
+			if((bAdjustSampling && (MouseSamples[Index] > 9)))
 			{
-				__NFUN_185__(SamplingTime[Index], MaybeTime[Index]);
-				MouseSamplingTime = __NFUN_174__(__NFUN_171__(0.9000000, MouseSamplingTime), __NFUN_172__(__NFUN_171__(0.1000000, SamplingTime[Index]), float(MouseSamples[Index])));
+				(SamplingTime[Index] -= MaybeTime[Index]);
+				MouseSamplingTime = ((0.9000000 * MouseSamplingTime) + ((0.1000000 * SamplingTime[Index]) / float(MouseSamples[Index])));
 			}
 			SamplingTime[Index] = 0.0000000;
 			SmoothedMouse[Index] = 0.0000000;
@@ -187,42 +187,42 @@ function float SmoothMouse(float aMouse, float DeltaTime, out byte SampleCount, 
 	{
 		MaybeTime[Index] = 0.0000000;
 		// End:0x1C5
-		if(__NFUN_181__(SmoothedMouse[Index], float(0)))
+		if((SmoothedMouse[Index] != float(0)))
 		{
-			__NFUN_161__(MouseSamples[Index], int(SampleCount));
+			(MouseSamples[Index] += int(SampleCount));
 			// End:0x18E
-			if(__NFUN_177__(DeltaTime, __NFUN_171__(MouseSamplingTime, float(__NFUN_146__(int(SampleCount), 1)))))
+			if((DeltaTime > (MouseSamplingTime * float((int(SampleCount) + 1)))))
 			{
-				__NFUN_184__(SamplingTime[Index], __NFUN_171__(MouseSamplingTime, float(SampleCount)));				
+				(SamplingTime[Index] += (MouseSamplingTime * float(SampleCount)));				
 			}
 			else
 			{
-				__NFUN_184__(SamplingTime[Index], DeltaTime);
-				aMouse = __NFUN_172__(__NFUN_171__(aMouse, DeltaTime), __NFUN_171__(MouseSamplingTime, float(SampleCount)));
+				(SamplingTime[Index] += DeltaTime);
+				aMouse = ((aMouse * DeltaTime) / (MouseSamplingTime * float(SampleCount)));
 			}			
 		}
 		else
 		{
-			SamplingTime[Index] = __NFUN_171__(0.5000000, MouseSamplingTime);
+			SamplingTime[Index] = (0.5000000 * MouseSamplingTime);
 		}
-		SmoothedMouse[Index] = __NFUN_172__(aMouse, float(SampleCount));
+		SmoothedMouse[Index] = (aMouse / float(SampleCount));
 		ZeroTime[Index] = 0.0000000;
 	}
 	SampleCount = 0;
 	// End:0x31A
-	if(__NFUN_151__(int(MouseSmoothingMode), 1))
+	if((int(MouseSmoothingMode) > 1))
 	{
 		// End:0x29E
-		if(__NFUN_180__(aMouse, float(0)))
+		if((aMouse == float(0)))
 		{
 			i = 0;
 			J0x231:
 
 			// End:0x28D [Loop If]
-			if(__NFUN_150__(i, 3))
+			if((i < 3))
 			{
-				__NFUN_161__(sum, int(__NFUN_171__(float(__NFUN_146__(i, 1)), 0.1000000)));
-				__NFUN_184__(aMouse, __NFUN_171__(float(sum), OldSamples[i]));
+				(sum += int((float((i + 1)) * 0.1000000)));
+				(aMouse += (float(sum) * OldSamples[i]));
 				OldSamples[i] = 0.0000000;
 				__NFUN_165__(i);
 				// [Loop Continue]

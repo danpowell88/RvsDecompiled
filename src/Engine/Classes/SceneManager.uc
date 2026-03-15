@@ -97,9 +97,9 @@ simulated function BeginPlay()
 {
 	super(Actor).BeginPlay();
 	// End:0x4D
-	if(__NFUN_130__(__NFUN_154__(int(Affect), int(1)), __NFUN_114__(AffectedActor, none)))
+	if(((int(Affect) == int(1)) && (AffectedActor == none)))
 	{
-		__NFUN_231__("SceneManager : Affected actor is NULL!");
+		Log("SceneManager : Affected actor is NULL!");
 	}
 	TotalSceneTime = GetTotalSceneTime();
 	bIsRunning = false;
@@ -111,7 +111,7 @@ function Trigger(Actor Other, Pawn EventInstigator)
 {
 	bIsRunning = true;
 	bIsSceneStarted = false;
-	__NFUN_118__('Trigger');
+	Disable('Trigger');
 	return;
 }
 
@@ -123,7 +123,7 @@ event SceneStarted()
 
 	Viewer = none;
 	// End:0x25
-	if(__NFUN_154__(int(Affect), int(1)))
+	if((int(Affect) == int(1)))
 	{
 		Viewer = AffectedActor;		
 	}
@@ -133,33 +133,33 @@ event SceneStarted()
 		J0x39:
 
 		// End:0x1C4 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
-			__NFUN_231__("for PlayerController");
+			Log("for PlayerController");
 			// End:0x1AD
-			if(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_119__(P.Pawn, none)))
+			if((P.IsA('PlayerController') && (P.Pawn != none)))
 			{
-				__NFUN_231__("Is a Player Controller");
+				Log("Is a Player Controller");
 				Viewer = P;
 				OldPawn = PlayerController(Viewer).Pawn;
 				// End:0x177
-				if(__NFUN_119__(OldPawn, none))
+				if((OldPawn != none))
 				{
 					OldPawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
 					OldPawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
 					PlayerController(Viewer).InitMatineeCamera();
 					PlayerController(Viewer).UnPossess();
 					// End:0x177
-					if(__NFUN_255__(PlayerScriptTag, 'None'))
+					if((PlayerScriptTag != 'None'))
 					{
 						// End:0x157
-						foreach __NFUN_313__(Class'Engine.AIScript', S, PlayerScriptTag)
+						foreach DynamicActors(Class'Engine.AIScript', S, PlayerScriptTag)
 						{
 							// End:0x157
 							break;							
 						}						
 						// End:0x177
-						if(__NFUN_119__(S, none))
+						if((S != none))
 						{
 							S.TakeOver(OldPawn);
 						}
@@ -184,14 +184,14 @@ event SceneEnded()
 {
 	bIsSceneStarted = false;
 	// End:0x7F
-	if(__NFUN_154__(int(Affect), int(0)))
+	if((int(Affect) == int(0)))
 	{
 		PlayerController(Viewer).EndMatineeCamera();
 		// End:0x7F
-		if(__NFUN_119__(PlayerController(Viewer), none))
+		if((PlayerController(Viewer) != none))
 		{
 			// End:0x60
-			if(__NFUN_119__(OldPawn, none))
+			if((OldPawn != none))
 			{
 				PlayerController(Viewer).Possess(OldPawn);
 			}
@@ -199,15 +199,15 @@ event SceneEnded()
 		}
 	}
 	Viewer.FinishedInterpolation();
-	__NFUN_117__('Trigger');
+	Enable('Trigger');
 	return;
 }
 
 //#ifdef R6CODE
 event Destroyed()
 {
-	__NFUN_231__("SceneManager DESTROYED");
-	__NFUN_2909__();
+	Log("SceneManager DESTROYED");
+	SceneDestroyed();
 	return;
 }
 

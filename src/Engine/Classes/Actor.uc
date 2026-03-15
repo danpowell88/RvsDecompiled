@@ -912,75 +912,75 @@ replication
 		DemoPlaySound;
 
 	// Pos:0x000
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_132__(__NFUN_132__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_AutonomousProxy)), bNetInitial), __NFUN_130__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_SimulatedProxy)), __NFUN_132__(bNetInitial, bUpdateSimulatedPosition)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry))), __NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_DumbProxy)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry)))))
+	reliable if((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && bReplicateMovement) && ((((int(RemoteRole) == int(ROLE_AutonomousProxy)) && bNetInitial) || (((int(RemoteRole) == int(ROLE_SimulatedProxy)) && (bNetInitial || bUpdateSimulatedPosition)) && ((Base == none) || Base.bWorldGeometry))) || ((int(RemoteRole) == int(ROLE_DumbProxy)) && ((Base == none) || Base.bWorldGeometry)))))
 		Location;
 
 	// Pos:0x0C4
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_132__(__NFUN_154__(int(DrawType), int(2)), __NFUN_154__(int(DrawType), int(8)))), __NFUN_132__(__NFUN_132__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_AutonomousProxy)), bNetInitial), __NFUN_130__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_SimulatedProxy)), __NFUN_132__(bNetInitial, bUpdateSimulatedPosition)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry))), __NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_DumbProxy)), __NFUN_132__(__NFUN_114__(Base, none), Base.bWorldGeometry)))))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && bReplicateMovement) && ((int(DrawType) == int(2)) || (int(DrawType) == int(8)))) && ((((int(RemoteRole) == int(ROLE_AutonomousProxy)) && bNetInitial) || (((int(RemoteRole) == int(ROLE_SimulatedProxy)) && (bNetInitial || bUpdateSimulatedPosition)) && ((Base == none) || Base.bWorldGeometry))) || ((int(RemoteRole) == int(ROLE_DumbProxy)) && ((Base == none) || Base.bWorldGeometry)))))
 		Rotation;
 
 	// Pos:0x1AC
-	reliable if(__NFUN_132__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_152__(int(RemoteRole), int(ROLE_SimulatedProxy))), __NFUN_130__(__NFUN_130__(m_bForceBaseReplication, __NFUN_129__(bNetOwner)), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && bReplicateMovement) && (int(RemoteRole) <= int(ROLE_SimulatedProxy))) || ((m_bForceBaseReplication && (!bNetOwner)) && (int(Role) == int(ROLE_Authority)))))
 		Base;
 
 	// Pos:0x213
-	reliable if(__NFUN_132__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_152__(int(RemoteRole), int(ROLE_SimulatedProxy))), __NFUN_119__(Base, none)), __NFUN_129__(Base.bWorldGeometry)), __NFUN_130__(__NFUN_130__(m_bForceBaseReplication, __NFUN_129__(bNetOwner)), __NFUN_154__(int(Role), int(ROLE_Authority)))))
+	reliable if(((((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && bReplicateMovement) && (int(RemoteRole) <= int(ROLE_SimulatedProxy))) && (Base != none)) && (!Base.bWorldGeometry)) || ((m_bForceBaseReplication && (!bNetOwner)) && (int(Role) == int(ROLE_Authority)))))
 		AttachmentBone, RelativeLocation, 
 		RelativeRotation;
 
 	// Pos:0x29D
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_132__(__NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_SimulatedProxy)), __NFUN_132__(bNetInitial, bUpdateSimulatedPosition)), __NFUN_130__(__NFUN_154__(int(RemoteRole), int(ROLE_DumbProxy)), __NFUN_154__(int(Physics), int(2))))))
+	reliable if((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && bReplicateMovement) && (((int(RemoteRole) == int(ROLE_SimulatedProxy)) && (bNetInitial || bUpdateSimulatedPosition)) || ((int(RemoteRole) == int(ROLE_DumbProxy)) && (int(Physics) == int(2))))))
 		Velocity;
 
 	// Pos:0x314
-	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_129__(bNetOwner)))
+	reliable if(((int(Role) == int(ROLE_Authority)) && (!bNetOwner)))
 		Physics;
 
 	// Pos:0x32E
-	reliable if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), bNetInitial))
+	reliable if(((int(Role) == int(ROLE_Authority)) && bNetInitial))
 		bActorShadows;
 
 	// Pos:0x346
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bUseRagdoll, m_fAttachFactor;
 
 	// Pos:0x353
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerForceKillResult, ServerForceStunResult, 
 		ServerSendBankToLoad;
 
 	// Pos:0x360
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientAddSoundBank;
 
 	// Pos:0x36D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_collisionBox, m_collisionBox2;
 
 	// Pos:0x37A
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), bReplicateMovement), __NFUN_152__(int(RemoteRole), int(ROLE_SimulatedProxy))), __NFUN_154__(int(Physics), int(5))))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && bReplicateMovement) && (int(RemoteRole) <= int(ROLE_SimulatedProxy))) && (int(Physics) == int(5))))
 		DesiredRotation, RotationRate, 
 		bFixedRotationDir, bRotateToDesired;
 
 	// Pos:0x3C9
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_132__(__NFUN_129__(bNetOwner), __NFUN_129__(bClientAnim))))
+	reliable if((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && ((!bNetOwner) || (!bClientAnim))))
 		AmbientSound;
 
 	// Pos:0x415
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_132__(__NFUN_129__(bNetOwner), __NFUN_129__(bClientAnim))), __NFUN_119__(AmbientSound, none)))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && ((!bNetOwner) || (!bClientAnim))) && (AmbientSound != none)))
 		SoundPitch, SoundRadius, 
 		m_szSoundBoneName;
 
 	// Pos:0x46E
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), __NFUN_154__(int(DrawType), int(2))), bReplicateAnimations))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && (int(DrawType) == int(2))) && bReplicateAnimations))
 		SimAnim;
 
 	// Pos:0x4BD
-	reliable if(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if(((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))))
 		bHidden;
 
 	// Pos:0x4EF
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty))
+	reliable if((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && bNetDirty))
 		DrawScale, DrawScale3D, 
 		DrawType, Owner, 
 		Style, Texture, 
@@ -989,32 +989,32 @@ replication
 		m_fLightingScaleFactor;
 
 	// Pos:0x52C
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_132__(bCollideActors, bCollideWorld)))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && bNetDirty) && (bCollideActors || bCollideWorld)))
 		CollisionHeight, CollisionRadius, 
 		bBlockActors, bBlockPlayers, 
 		bProjTarget;
 
 	// Pos:0x57F
-	reliable if(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if(((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))))
 		LightType, RemoteRole, 
 		Role, bNetOwner, 
 		bTearOff;
 
 	// Pos:0x5B1
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), bReplicateInstigator))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && bNetDirty) && bReplicateInstigator))
 		Instigator;
 
 	// Pos:0x5F9
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_154__(int(DrawType), int(2))))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && bNetDirty) && (int(DrawType) == int(2))))
 		AmbientGlow, Mesh, 
 		PrePivot, bUnlit;
 
 	// Pos:0x648
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_154__(int(DrawType), int(8))))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && bNetDirty) && (int(DrawType) == int(8))))
 		StaticMesh;
 
 	// Pos:0x697
-	reliable if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_132__(__NFUN_130__(__NFUN_129__(m_bUseRagdoll), __NFUN_129__(bSkipActorPropertyReplication)), bNetInitial), __NFUN_154__(int(Role), int(ROLE_Authority))), bNetDirty), __NFUN_155__(int(LightType), int(0))))
+	reliable if(((((((!m_bUseRagdoll) && (!bSkipActorPropertyReplication)) || bNetInitial) && (int(Role) == int(ROLE_Authority))) && bNetDirty) && (int(LightType) != int(0))))
 		LightBrightness, LightEffect, 
 		LightHue, LightPeriod, 
 		LightPhase, LightRadius, 
@@ -1538,9 +1538,9 @@ native final function StopAllMusic();
 event Destroyed()
 {
 	// End:0x17
-	if(__NFUN_119__(Shadow, none))
+	if((Shadow != none))
 	{
-		Shadow.__NFUN_279__();
+		Shadow.Destroy();
 	}
 	return;
 }
@@ -1700,8 +1700,8 @@ function MatineeDetach()
 
 event FellOutOfWorld()
 {
-	__NFUN_3970__(0);
-	__NFUN_279__();
+	SetPhysics(0);
+	Destroy();
 	return;
 }
 
@@ -1807,26 +1807,26 @@ native(512) final function MakeNoise(float Loudness, optional Actor.ENoiseType e
 event R6MakeNoise(Actor.ESoundType eType)
 {
 	// End:0x12
-	if(__NFUN_154__(int(eType), int(0)))
+	if((int(eType) == int(0)))
 	{
 		return;
 	}
 	// End:0x47
-	if(__NFUN_119__(Level.Game, none))
+	if((Level.Game != none))
 	{
 		Level.Game.R6GameInfoMakeNoise(eType, self);		
 	}
 	else
 	{
-		__NFUN_231__("Warning: Call to R6MakeNoise when game is not the server");
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("         From ", string(Name)), " in the state "), string(__NFUN_284__())));
+		Log("Warning: Call to R6MakeNoise when game is not the server");
+		Log(((("         From " $ string(Name)) $ " in the state ") $ string(GetStateName())));
 	}
 	return;
 }
 
 function R6MakeNoise2(float fLoudness, Actor.ENoiseType eNoise, Actor.EPawnType ePawn)
 {
-	__NFUN_512__(fLoudness, eNoise, ePawn);
+	MakeNoise(fLoudness, eNoise, ePawn);
 	return;
 }
 
@@ -1945,7 +1945,7 @@ function RenderOverlays(Canvas Canvas)
 event PreBeginPlay()
 {
 	// End:0x39
-	if(__NFUN_130__(__NFUN_119__(Level.Game, none), Level.Game.m_bGameStarted))
+	if(((Level.Game != none) && Level.Game.m_bGameStarted))
 	{
 		m_bSpawnedInGame = true;
 	}
@@ -1976,13 +1976,13 @@ simulated event SetInitialState()
 {
 	bScriptInitialized = true;
 	// End:0x21
-	if(__NFUN_255__(InitialState, 'None'))
+	if((InitialState != 'None'))
 	{
-		__NFUN_113__(InitialState);		
+		GotoState(InitialState);		
 	}
 	else
 	{
-		__NFUN_113__('Auto');
+		GotoState('Auto');
 	}
 	return;
 }
@@ -2036,14 +2036,14 @@ function string GetItemName(string FullName)
 {
 	local int pos;
 
-	pos = __NFUN_126__(FullName, ".");
+	pos = InStr(FullName, ".");
 	J0x10:
 
 	// End:0x50 [Loop If]
-	if(__NFUN_155__(pos, -1))
+	if((pos != -1))
 	{
-		FullName = __NFUN_234__(FullName, __NFUN_147__(__NFUN_147__(__NFUN_125__(FullName), pos), 1));
-		pos = __NFUN_126__(FullName, ".");
+		FullName = Right(FullName, ((Len(FullName) - pos) - 1));
+		pos = InStr(FullName, ".");
 		// [Loop Continue]
 		goto J0x10;
 	}
@@ -2066,19 +2066,19 @@ final function ReplaceText(out string Text, string Replace, string With)
 
 	Input = Text;
 	Text = "";
-	i = __NFUN_126__(Input, Replace);
+	i = InStr(Input, Replace);
 	J0x25:
 
 	// End:0x84 [Loop If]
-	if(__NFUN_155__(i, -1))
+	if((i != -1))
 	{
-		Text = __NFUN_112__(__NFUN_112__(Text, __NFUN_128__(Input, i)), With);
-		Input = __NFUN_127__(Input, __NFUN_146__(i, __NFUN_125__(Replace)));
-		i = __NFUN_126__(Input, Replace);
+		Text = ((Text $ Left(Input, i)) $ With);
+		Input = Mid(Input, (i + Len(Replace)));
+		i = InStr(Input, Replace);
 		// [Loop Continue]
 		goto J0x25;
 	}
-	Text = __NFUN_112__(Text, Input);
+	Text = (Text $ Input);
 	return;
 }
 
@@ -2129,81 +2129,81 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 	local float frame, Rate;
 
 	Canvas.Style = 1;
-	Canvas.__NFUN_464__("TEST", XL, YL);
-	YPos = __NFUN_174__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_2626__(byte(255), 0, 0);
+	Canvas.StrLen("TEST", XL, YL);
+	YPos = (YPos + YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.SetDrawColor(byte(255), 0, 0);
 	t = GetDebugName();
 	// End:0xA9
 	if(bDeleteMe)
 	{
-		t = __NFUN_112__(t, " DELETED (bDeleteMe == true)");
+		t = (t $ " DELETED (bDeleteMe == true)");
 	}
-	Canvas.__NFUN_465__(t, false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_2626__(byte(255), byte(255), byte(255));
+	Canvas.DrawText(t, false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.SetDrawColor(byte(255), byte(255), byte(255));
 	// End:0x2EC
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		t = "ROLE ";
 		switch(Role)
 		{
 			// End:0x13D
 			case ROLE_None:
-				t = __NFUN_112__(t, "None");
+				t = (t $ "None");
 				// End:0x1CB
 				break;
 			// End:0x15D
 			case 1:
-				t = __NFUN_112__(t, "DumbProxy");
+				t = (t $ "DumbProxy");
 				// End:0x1CB
 				break;
 			// End:0x182
 			case 2:
-				t = __NFUN_112__(t, "SimulatedProxy");
+				t = (t $ "SimulatedProxy");
 				// End:0x1CB
 				break;
 			// End:0x1A8
 			case 3:
-				t = __NFUN_112__(t, "AutonomousProxy");
+				t = (t $ "AutonomousProxy");
 				// End:0x1CB
 				break;
 			// End:0x1C8
 			case 4:
-				t = __NFUN_112__(t, "Authority");
+				t = (t $ "Authority");
 				// End:0x1CB
 				break;
 			// End:0xFFFF
 			default:
 				break;
 		}
-		t = __NFUN_112__(t, " REMOTE ROLE ");
+		t = (t $ " REMOTE ROLE ");
 		switch(RemoteRole)
 		{
 			// End:0x209
 			case ROLE_None:
-				t = __NFUN_112__(t, "None");
+				t = (t $ "None");
 				// End:0x297
 				break;
 			// End:0x229
 			case 1:
-				t = __NFUN_112__(t, "DumbProxy");
+				t = (t $ "DumbProxy");
 				// End:0x297
 				break;
 			// End:0x24E
 			case 2:
-				t = __NFUN_112__(t, "SimulatedProxy");
+				t = (t $ "SimulatedProxy");
 				// End:0x297
 				break;
 			// End:0x274
 			case 3:
-				t = __NFUN_112__(t, "AutonomousProxy");
+				t = (t $ "AutonomousProxy");
 				// End:0x297
 				break;
 			// End:0x294
 			case 4:
-				t = __NFUN_112__(t, "Authority");
+				t = (t $ "Authority");
 				// End:0x297
 				break;
 			// End:0xFFFF
@@ -2213,121 +2213,121 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 		// End:0x2B8
 		if(bTearOff)
 		{
-			t = __NFUN_112__(t, " Tear Off");
+			t = (t $ " Tear Off");
 		}
-		Canvas.__NFUN_465__(t, false);
-		__NFUN_184__(YPos, YL);
-		Canvas.__NFUN_2623__(4.0000000, YPos);
+		Canvas.DrawText(t, false);
+		(YPos += YL);
+		Canvas.SetPos(4.0000000, YPos);
 	}
 	t = "Physics ";
 	switch(Physics)
 	{
 		// End:0x31E
 		case 0:
-			t = __NFUN_112__(t, "None");
+			t = (t $ "None");
 			// End:0x477
 			break;
 		// End:0x33C
 		case 1:
-			t = __NFUN_112__(t, "Walking");
+			t = (t $ "Walking");
 			// End:0x477
 			break;
 		// End:0x35A
 		case 2:
-			t = __NFUN_112__(t, "Falling");
+			t = (t $ "Falling");
 			// End:0x477
 			break;
 		// End:0x379
 		case 3:
-			t = __NFUN_112__(t, "Swimming");
+			t = (t $ "Swimming");
 			// End:0x477
 			break;
 		// End:0x396
 		case 4:
-			t = __NFUN_112__(t, "Flying");
+			t = (t $ "Flying");
 			// End:0x477
 			break;
 		// End:0x3B5
 		case 5:
-			t = __NFUN_112__(t, "Rotating");
+			t = (t $ "Rotating");
 			// End:0x477
 			break;
 		// End:0x3D6
 		case 6:
-			t = __NFUN_112__(t, "Projectile");
+			t = (t $ "Projectile");
 			// End:0x477
 			break;
 		// End:0x3FA
 		case 7:
-			t = __NFUN_112__(t, "Interpolating");
+			t = (t $ "Interpolating");
 			// End:0x477
 			break;
 		// End:0x41C
 		case 8:
-			t = __NFUN_112__(t, "MovingBrush");
+			t = (t $ "MovingBrush");
 			// End:0x477
 			break;
 		// End:0x439
 		case 9:
-			t = __NFUN_112__(t, "Spider");
+			t = (t $ "Spider");
 			// End:0x477
 			break;
 		// End:0x457
 		case 10:
-			t = __NFUN_112__(t, "Trailer");
+			t = (t $ "Trailer");
 			// End:0x477
 			break;
 		// End:0x474
 		case 11:
-			t = __NFUN_112__(t, "Ladder");
+			t = (t $ "Ladder");
 			// End:0x477
 			break;
 		// End:0xFFFF
 		default:
 			break;
 	}
-	t = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(t, " in physicsvolume "), GetItemName(string(PhysicsVolume))), " on base "), GetItemName(string(Base)));
+	t = ((((t $ " in physicsvolume ") $ GetItemName(string(PhysicsVolume))) $ " on base ") $ GetItemName(string(Base)));
 	// End:0x4E9
 	if(bBounce)
 	{
-		t = __NFUN_112__(t, " - will bounce");
+		t = (t $ " - will bounce");
 	}
-	Canvas.__NFUN_465__(t, false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Location: ", string(Location)), " Rotation "), string(Rotation)), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Velocity: ", string(Velocity)), " Speed "), string(__NFUN_225__(Velocity))), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__("Acceleration: ", string(Acceleration)), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(t, false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((("Location: " $ string(Location)) $ " Rotation ") $ string(Rotation)), false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((("Velocity: " $ string(Velocity)) $ " Speed ") $ string(VSize(Velocity))), false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(("Acceleration: " $ string(Acceleration)), false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	Canvas.DrawColor.B = 0;
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Collision Radius ", string(CollisionRadius)), " Height "), string(CollisionHeight)));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Collides with Actors ", string(bCollideActors)), ", world "), string(bCollideWorld)), ", proj. target "), string(bProjTarget)));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Blocks Actors ", string(bBlockActors)), ", players "), string(bBlockPlayers)));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(((("Collision Radius " $ string(CollisionRadius)) $ " Height ") $ string(CollisionHeight)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((((("Collides with Actors " $ string(bCollideActors)) $ ") $ string(bCollideWorld)) $ ") $ string(bProjTarget)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((("Blocks Actors " $ string(bBlockActors)) $ ") $ string(bBlockPlayers)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	t = "Touching ";
 	// End:0x7B2
-	foreach __NFUN_307__(Class'Engine.Actor', A)
+	foreach TouchingActors(Class'Engine.Actor', A)
 	{
-		t = __NFUN_112__(__NFUN_112__(t, GetItemName(string(A))), " ");		
+		t = ((t $ GetItemName(string(A))) $ " ");		
 	}	
 	// End:0x7E0
-	if(__NFUN_122__(t, "Touching "))
+	if((t == "Touching "))
 	{
 		t = "Touching nothing";
 	}
-	Canvas.__NFUN_465__(t, false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(t, false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	Canvas.DrawColor.R = 0;
 	t = "Rendered: ";
 	switch(Style)
@@ -2339,27 +2339,27 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 			break;
 		// End:0x873
 		case 1:
-			t = __NFUN_112__(t, "Normal");
+			t = (t $ "Normal");
 			// End:0x8F1
 			break;
 		// End:0x890
 		case 2:
-			t = __NFUN_112__(t, "Masked");
+			t = (t $ "Masked");
 			// End:0x8F1
 			break;
 		// End:0x8B2
 		case 3:
-			t = __NFUN_112__(t, "Translucent");
+			t = (t $ "Translucent");
 			// End:0x8F1
 			break;
 		// End:0x8D2
 		case 4:
-			t = __NFUN_112__(t, "Modulated");
+			t = (t $ "Modulated");
 			// End:0x8F1
 			break;
 		// End:0x8EE
 		case 5:
-			t = __NFUN_112__(t, "Alpha");
+			t = (t $ "Alpha");
 			// End:0x8F1
 			break;
 		// End:0xFFFF
@@ -2370,47 +2370,47 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 	{
 		// End:0x914
 		case 0:
-			t = __NFUN_112__(t, " None");
+			t = (t $ " None");
 			// End:0xA27
 			break;
 		// End:0x933
 		case 1:
-			t = __NFUN_112__(t, " Sprite ");
+			t = (t $ " Sprite ");
 			// End:0xA27
 			break;
 		// End:0x950
 		case 2:
-			t = __NFUN_112__(t, " Mesh ");
+			t = (t $ " Mesh ");
 			// End:0xA27
 			break;
 		// End:0x96E
 		case 3:
-			t = __NFUN_112__(t, " Brush ");
+			t = (t $ " Brush ");
 			// End:0xA27
 			break;
 		// End:0x991
 		case 4:
-			t = __NFUN_112__(t, " RopeSprite ");
+			t = (t $ " RopeSprite ");
 			// End:0xA27
 			break;
 		// End:0x9B8
 		case 5:
-			t = __NFUN_112__(t, " VerticalSprite ");
+			t = (t $ " VerticalSprite ");
 			// End:0xA27
 			break;
 		// End:0x9DA
 		case 6:
-			t = __NFUN_112__(t, " Terraform ");
+			t = (t $ " Terraform ");
 			// End:0xA27
 			break;
 		// End:0xA01
 		case 7:
-			t = __NFUN_112__(t, " SpriteAnimOnce ");
+			t = (t $ " SpriteAnimOnce ");
 			// End:0xA27
 			break;
 		// End:0xA24
 		case 8:
-			t = __NFUN_112__(t, " StaticMesh ");
+			t = (t $ " StaticMesh ");
 			// End:0xA27
 			break;
 		// End:0xFFFF
@@ -2418,77 +2418,77 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 			break;
 	}
 	// End:0xB7E
-	if(__NFUN_154__(int(DrawType), int(2)))
+	if((int(DrawType) == int(2)))
 	{
-		t = __NFUN_112__(t, string(Mesh));
+		t = (t $ string(Mesh));
 		// End:0xAC6
-		if(__NFUN_151__(Skins.Length, 0))
+		if((Skins.Length > 0))
 		{
-			t = __NFUN_112__(t, " skins: ");
+			t = (t $ " skins: ");
 			i = 0;
 			J0xA75:
 
 			// End:0xAC6 [Loop If]
-			if(__NFUN_150__(i, Skins.Length))
+			if((i < Skins.Length))
 			{
 				// End:0xA9C
-				if(__NFUN_114__(Skins[i], none))
+				if((Skins[i] == none))
 				{
 					// [Explicit Break]
 					goto J0xAC6;
 					// [Explicit Continue]
 					goto J0xABC;
 				}
-				t = __NFUN_112__(__NFUN_112__(t, string(Skins[i])), ", ");
+				t = ((t $ string(Skins[i])) $ ");
 				J0xABC:
 
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0xA75;
 			}
 		}
 		J0xAC6:
 
-		Canvas.__NFUN_465__(t, false);
-		__NFUN_184__(YPos, YL);
-		Canvas.__NFUN_2623__(4.0000000, YPos);
+		Canvas.DrawText(t, false);
+		(YPos += YL);
+		Canvas.SetPos(4.0000000, YPos);
 		GetAnimParams(0, Anim, frame, Rate);
-		t = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("AnimSequence ", string(Anim)), " Frame "), string(frame)), " Rate "), string(Rate));
+		t = ((((("AnimSequence " $ string(Anim)) $ " Frame ") $ string(frame)) $ " Rate ") $ string(Rate));
 		// End:0xB7B
 		if(bAnimByOwner)
 		{
-			t = __NFUN_112__(t, " Anim by Owner");
+			t = (t $ " Anim by Owner");
 		}		
 	}
 	else
 	{
 		// End:0xBB7
-		if(__NFUN_132__(__NFUN_154__(int(DrawType), int(1)), __NFUN_154__(int(DrawType), int(7))))
+		if(((int(DrawType) == int(1)) || (int(DrawType) == int(7))))
 		{
-			t = __NFUN_112__(t, string(Texture));			
+			t = (t $ string(Texture));			
 		}
 		else
 		{
 			// End:0xBDB
-			if(__NFUN_154__(int(DrawType), int(3)))
+			if((int(DrawType) == int(3)))
 			{
-				t = __NFUN_112__(t, string(Brush));
+				t = (t $ string(Brush));
 			}
 		}
 	}
-	Canvas.__NFUN_465__(t, false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(t, false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	Canvas.DrawColor.B = byte(255);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Tag: ", string(Tag)), " Event: "), string(Event)), " STATE: "), string(__NFUN_284__())), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Instigator ", GetItemName(string(Instigator))), " Owner "), GetItemName(string(Owner))));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Timer: ", string(TimerCounter)), " LifeSpan "), string(LifeSpan)), " AmbientSound "), string(AmbientSound)));
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(((((("Tag: " $ string(Tag)) $ " Event: ") $ string(Event)) $ " STATE: ") $ string(GetStateName())), false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((("Instigator " $ GetItemName(string(Instigator))) $ " Owner ") $ GetItemName(string(Owner))));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
+	Canvas.DrawText(((((("Timer: " $ string(TimerCounter)) $ " LifeSpan ") $ string(LifeSpan)) $ " AmbientSound ") $ string(AmbientSound)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	return;
 }
 
@@ -2497,14 +2497,14 @@ final simulated function bool NearSpot(Vector Spot)
 {
 	local Vector Dir;
 
-	Dir = __NFUN_216__(Location, Spot);
+	Dir = (Location - Spot);
 	// End:0x2A
-	if(__NFUN_177__(__NFUN_186__(Dir.Z), CollisionHeight))
+	if((Abs(Dir.Z) > CollisionHeight))
 	{
 		return false;
 	}
 	Dir.Z = 0.0000000;
-	return __NFUN_178__(__NFUN_225__(Dir), CollisionRadius);
+	return (VSize(Dir) <= CollisionRadius);
 	return;
 }
 
@@ -2512,24 +2512,24 @@ final simulated function bool TouchingActor(Actor A)
 {
 	local Vector Dir;
 
-	Dir = __NFUN_216__(Location, A.Location);
+	Dir = (Location - A.Location);
 	// End:0x43
-	if(__NFUN_177__(__NFUN_186__(Dir.Z), __NFUN_174__(CollisionHeight, A.CollisionHeight)))
+	if((Abs(Dir.Z) > (CollisionHeight + A.CollisionHeight)))
 	{
 		return false;
 	}
 	Dir.Z = 0.0000000;
-	return __NFUN_178__(__NFUN_225__(Dir), __NFUN_174__(CollisionRadius, A.CollisionRadius));
+	return (VSize(Dir) <= (CollisionRadius + A.CollisionRadius));
 	return;
 }
 
 simulated function StartInterpolation()
 {
-	__NFUN_113__('None');
-	__NFUN_262__(true, false, false);
+	GotoState('None');
+	SetCollision(true, false, false);
 	bCollideWorld = false;
 	bInterpolating = true;
-	__NFUN_3970__(0);
+	SetPhysics(0);
 	return;
 }
 
@@ -2543,12 +2543,12 @@ event TriggerEvent(name EventName, Actor Other, Pawn EventInstigator)
 	local Actor A;
 
 	// End:0x22
-	if(__NFUN_132__(__NFUN_254__(EventName, 'None'), __NFUN_254__(EventName, 'None')))
+	if(((EventName == 'None') || (EventName == 'None')))
 	{
 		return;
 	}
 	// End:0x51
-	foreach __NFUN_313__(Class'Engine.Actor', A, EventName)
+	foreach DynamicActors(Class'Engine.Actor', A, EventName)
 	{
 		A.Trigger(Other, EventInstigator);		
 	}	
@@ -2560,12 +2560,12 @@ function UntriggerEvent(name EventName, Actor Other, Pawn EventInstigator)
 	local Actor A;
 
 	// End:0x22
-	if(__NFUN_132__(__NFUN_254__(EventName, 'None'), __NFUN_254__(EventName, 'None')))
+	if(((EventName == 'None') || (EventName == 'None')))
 	{
 		return;
 	}
 	// End:0x51
-	foreach __NFUN_313__(Class'Engine.Actor', A, EventName)
+	foreach DynamicActors(Class'Engine.Actor', A, EventName)
 	{
 		A.UnTrigger(Other, EventInstigator);		
 	}	
@@ -2577,10 +2577,10 @@ function bool IsInVolume(Volume aVolume)
 	local Volume V;
 
 	// End:0x23
-	foreach __NFUN_307__(Class'Engine.Volume', V)
+	foreach TouchingActors(Class'Engine.Volume', V)
 	{
 		// End:0x22
-		if(__NFUN_114__(V, aVolume))
+		if((V == aVolume))
 		{			
 			return true;
 		}		
@@ -2604,7 +2604,7 @@ function Vector GetCollisionExtent()
 {
 	local Vector Extent;
 
-	Extent = __NFUN_213__(CollisionRadius, vect(1.0000000, 1.0000000, 0.0000000));
+	Extent = (CollisionRadius * vect(1.0000000, 1.0000000, 0.0000000));
 	Extent.Z = CollisionHeight;
 	return Extent;
 	return;
@@ -2678,10 +2678,10 @@ simulated function bool R6ActionCanBeExecuted(int iAction, PlayerController Play
 //===========================================================================//
 function R6FillSubAction(out R6AbstractCircumstantialActionQuery Query, int iSubMenu, int iAction)
 {
-	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 0)] = byte(iAction);
-	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 1)] = byte(iAction);
-	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 2)] = byte(iAction);
-	Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), 3)] = byte(iAction);
+	Query.iTeamSubActionsIDList[((iSubMenu * 4) + 0)] = byte(iAction);
+	Query.iTeamSubActionsIDList[((iSubMenu * 4) + 1)] = byte(iAction);
+	Query.iTeamSubActionsIDList[((iSubMenu * 4) + 2)] = byte(iAction);
+	Query.iTeamSubActionsIDList[((iSubMenu * 4) + 3)] = byte(iAction);
 	return;
 }
 
@@ -2689,7 +2689,7 @@ function R6FillSubAction(out R6AbstractCircumstantialActionQuery Query, int iSub
 function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
 	// End:0x15
-	if(__NFUN_242__(m_bBulletGoThrough, true))
+	if((m_bBulletGoThrough == true))
 	{
 		return iKillValue;		
 	}
@@ -2717,8 +2717,8 @@ function ServerForceStunResult(int iStunResult)
 //=============================================================================
 static function float GetRandomTweenNum(out RandomTweenNum R)
 {
-	R.m_fResult = __NFUN_171__(__NFUN_195__(), __NFUN_175__(R.m_fMax, R.m_fMin));
-	__NFUN_184__(R.m_fResult, R.m_fMin);
+	R.m_fResult = (FRand() * (R.m_fMax - R.m_fMin));
+	(R.m_fResult += R.m_fMin);
 	return R.m_fResult;
 	return;
 }
@@ -2726,7 +2726,7 @@ static function float GetRandomTweenNum(out RandomTweenNum R)
 function Actor R6GetRootActor()
 {
 	// End:0x1B
-	if(__NFUN_119__(m_AttachedTo, none))
+	if((m_AttachedTo != none))
 	{
 		return m_AttachedTo.R6GetRootActor();
 	}
@@ -2743,23 +2743,23 @@ function AddSoundBankName(string szBank)
 	J0x07:
 
 	// End:0x65 [Loop If]
-	if(__NFUN_150__(i, Level.Game.m_BankListToLoad.Length))
+	if((i < Level.Game.m_BankListToLoad.Length))
 	{
 		// End:0x5B
-		if(__NFUN_122__(Level.Game.m_BankListToLoad[i], szBank))
+		if((Level.Game.m_BankListToLoad[i] == szBank))
 		{
 			bFind = true;
 			// [Explicit Break]
 			goto J0x65;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
 	J0x65:
 
 	// End:0xA6
-	if(__NFUN_129__(bFind))
+	if((!bFind))
 	{
 		Level.Game.m_BankListToLoad[Level.Game.m_BankListToLoad.Length] = szBank;
 	}
@@ -2775,16 +2775,16 @@ function ServerSendBankToLoad()
 	J0x07:
 
 	// End:0xA9 [Loop If]
-	if(__NFUN_150__(i, Level.Game.m_BankListToLoad.Length))
+	if((i < Level.Game.m_BankListToLoad.Length))
 	{
 		lpController = Level.ControllerList;
 		J0x3D:
 
 		// End:0x9F [Loop If]
-		if(__NFUN_119__(lpController, none))
+		if((lpController != none))
 		{
 			// End:0x88
-			if(lpController.__NFUN_303__('PlayerController'))
+			if(lpController.IsA('PlayerController'))
 			{
 				lpController.ClientAddSoundBank(Level.Game.m_BankListToLoad[i]);
 			}
@@ -2792,7 +2792,7 @@ function ServerSendBankToLoad()
 			// [Loop Continue]
 			goto J0x3D;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -2801,7 +2801,7 @@ function ServerSendBankToLoad()
 
 function ClientAddSoundBank(string szBank)
 {
-	__NFUN_2716__(szBank, 1);
+	AddSoundBank(szBank, 1);
 	return;
 }
 
@@ -2824,11 +2824,11 @@ function LogResetSystem(bool bSaving)
 	// End:0x3B
 	if(bSaving)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("SAVING: ", string(Name)), " in "), string(Class.Name)));		
+		Log(((("SAVING: " $ string(Name)) $ " in ") $ string(Class.Name)));		
 	}
 	else
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("RESETTING: ", string(Name)), " in "), string(Class.Name)));
+		Log(((("RESETTING: " $ string(Name)) $ " in ") $ string(Class.Name)));
 	}
 	return;
 }
@@ -2839,7 +2839,7 @@ function LogResetSystem(bool bSaving)
 //------------------------------------------------------------------
 simulated function dbgLogActor(bool bVerbose)
 {
-	__NFUN_231__(__NFUN_112__("Name= ", string(Name)));
+	Log(("Name= " $ string(Name)));
 	return;
 }
 

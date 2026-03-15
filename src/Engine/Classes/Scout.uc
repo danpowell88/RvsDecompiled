@@ -15,7 +15,7 @@ var const float MaxLandingVelocity;
 
 function PreBeginPlay()
 {
-	__NFUN_279__();
+	Destroy();
 	return;
 }
 

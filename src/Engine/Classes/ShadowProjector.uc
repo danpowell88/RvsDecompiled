@@ -23,7 +23,7 @@ simulated event PostBeginPlay()
 	// End:0x0F
 	if(bProjectActor)
 	{
-		__NFUN_262__(true, false, false);
+		SetCollision(true, false, false);
 	}
 	ShadowTexture = new (none) Class'Engine.ShadowBitmapMaterial';
 	ProjTexture = ShadowTexture;
@@ -38,16 +38,16 @@ event UpdateShadow()
 	// End:0x0F
 	if(bProjectActor)
 	{
-		__NFUN_262__(false, false, false);
+		SetCollision(false, false, false);
 	}
 	// End:0x1FE
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(ShadowActor, none), __NFUN_129__(ShadowActor.bHidden)), __NFUN_151__(int(m_bOpacity), 0)))
+	if((((ShadowActor != none) && (!ShadowActor.bHidden)) && (int(m_bOpacity) > 0)))
 	{
 		BoundingSphere = ShadowActor.GetRenderBoundingSphere();
-		__NFUN_182__(BoundingSphere.W, 4.0000000);
-		FOV = int(__NFUN_174__(__NFUN_172__(__NFUN_171__(__NFUN_190__(__NFUN_172__(__NFUN_171__(BoundingSphere.W, float(2)), LightDistance)), float(180)), 3.1415930), float(5)));
+		(BoundingSphere.W *= 4.0000000);
+		FOV = int((((Atan(((BoundingSphere.W * float(2)) / LightDistance)) * float(180)) / 3.1415930) + float(5)));
 		// End:0xEB
-		if(__NFUN_130__(__NFUN_154__(int(ShadowActor.DrawType), int(2)), __NFUN_119__(ShadowActor.Mesh, none)))
+		if(((int(ShadowActor.DrawType) == int(2)) && (ShadowActor.Mesh != none)))
 		{
 			ShadowLocation = ShadowActor.GetBoneCoords('R6 Pelvis', true).Origin;			
 		}
@@ -56,7 +56,7 @@ event UpdateShadow()
 			ShadowLocation = ShadowActor.Location;
 		}
 		ShadowTexture.m_LightLocation = ShadowLocation;
-		__NFUN_267__(ShadowLocation);
+		__NFUN_267__(ShadowLocation) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		__NFUN_299__(Rotator(__NFUN_211__(LightDirection)));
 		SetDrawScale(__NFUN_172__(__NFUN_171__(LightDistance, __NFUN_189__(__NFUN_172__(__NFUN_171__(__NFUN_171__(0.5000000, float(FOV)), 3.1415930), float(180)))), __NFUN_171__(0.5000000, float(ShadowTexture.USize))));
 		ShadowTexture.ShadowActor = ShadowActor;

@@ -22,7 +22,7 @@ state RaiseWeapon
 	{
 		SetDrawType(2);
 		AssociatedWeapon.SetDrawType(2);
-		__NFUN_259__('Begin', R6Pawn(Owner.Owner).ArmorSkillEffect());
+		PlayAnim('Begin', R6Pawn(Owner.Owner).ArmorSkillEffect());
 		return;
 	}
 	stop;

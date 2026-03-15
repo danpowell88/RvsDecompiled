@@ -14,17 +14,17 @@ var(Action) name ExternalEvent;  // tag to give controller (to affect triggering
 function bool InitActionFor(ScriptedController C)
 {
 	// End:0x2E
-	if(__NFUN_114__(t, none))
+	if((t == none))
 	{
 		// End:0x2D
-		foreach C.__NFUN_304__(Class'Gameplay.TriggeredCondition', t, ExternalEvent)
+		foreach C.AllActors(Class'Gameplay.TriggeredCondition', t, ExternalEvent)
 		{
 			// End:0x2D
 			break;			
 		}		
 	}
 	// End:0x4F
-	if(__NFUN_130__(__NFUN_119__(t, none), t.bEnabled))
+	if(((t != none) && t.bEnabled))
 	{
 		return false;
 	}
@@ -42,7 +42,7 @@ function bool CompleteWhenTriggered()
 
 function string GetActionString()
 {
-	return __NFUN_168__(ActionString, string(ExternalEvent));
+	return (ActionString @ string(ExternalEvent));
 	return;
 }
 

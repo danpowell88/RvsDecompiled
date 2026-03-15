@@ -55,18 +55,18 @@ function Created()
 	local float fLabelHeight;
 
 	m_OperativeFace = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), m_fFaceWidth, m_FaceHeight, self));
-	m_BMPSpeciality = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', __NFUN_174__(m_FaceHeight, float(m_IXSpecialityOffset)), float(m_IYIconPos), float(m_ISpecialityWidth), float(m_ISpecialityHeight), self));
+	m_BMPSpeciality = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', (m_FaceHeight + float(m_IXSpecialityOffset)), float(m_IYIconPos), float(m_ISpecialityWidth), float(m_ISpecialityHeight), self));
 	m_BMPSpeciality.m_iDrawStyle = int(5);
-	m_BMPHealth = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', __NFUN_174__(__NFUN_174__(m_BMPSpeciality.WinLeft, m_BMPSpeciality.WinWidth), float(m_IXHealthOffset)), float(m_IYIconPos), float(m_IHealthWidth), float(m_IHealthHeight), self));
+	m_BMPHealth = R6WindowBitMap(CreateWindow(Class'R6Window.R6WindowBitMap', ((m_BMPSpeciality.WinLeft + m_BMPSpeciality.WinWidth) + float(m_IXHealthOffset)), float(m_IYIconPos), float(m_IHealthWidth), float(m_IHealthHeight), self));
 	m_BMPHealth.m_iDrawStyle = int(5);
-	m_OperativeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_BMPHealth.WinLeft, m_BMPHealth.WinWidth), 0.0000000, __NFUN_175__(__NFUN_175__(WinWidth, m_BMPHealth.WinLeft), m_BMPHealth.WinWidth), m_fNameLabelHeight, self));
+	m_OperativeName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_BMPHealth.WinLeft + m_BMPHealth.WinWidth), 0.0000000, ((WinWidth - m_BMPHealth.WinLeft) - m_BMPHealth.WinWidth), m_fNameLabelHeight, self));
 	m_OperativeName.m_bDrawBorders = false;
 	m_OperativeName.Align = 2;
 	m_OperativeName.TextColor = Root.Colors.White;
 	m_OperativeName.m_Font = Root.Fonts[5];
 	m_OperativeName.m_BGTexture = none;
-	fLabelHeight = __NFUN_172__(__NFUN_175__(WinHeight, m_OperativeName.WinHeight), float(2));
-	m_PrimaryWeapon = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), __NFUN_174__(m_OperativeName.WinTop, m_OperativeName.WinHeight), m_OperativeName.WinWidth, fLabelHeight, self));
+	fLabelHeight = ((WinHeight - m_OperativeName.WinHeight) / float(2));
+	m_PrimaryWeapon = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (m_OperativeFace.WinLeft + m_fFaceWidth), (m_OperativeName.WinTop + m_OperativeName.WinHeight), m_OperativeName.WinWidth, fLabelHeight, self));
 	m_PrimaryWeapon.m_bDrawBorders = false;
 	m_PrimaryWeapon.Align = 0;
 	m_PrimaryWeapon.TextColor = Root.Colors.White;
@@ -75,7 +75,7 @@ function Created()
 	m_PrimaryWeapon.m_fLMarge = 4.0000000;
 	m_PrimaryWeapon.m_bFixedYPos = true;
 	m_PrimaryWeapon.TextY = 1.0000000;
-	m_Armor = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_PrimaryWeapon.WinLeft, __NFUN_174__(m_PrimaryWeapon.WinTop, m_PrimaryWeapon.WinHeight), m_OperativeName.WinWidth, fLabelHeight, self));
+	m_Armor = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_PrimaryWeapon.WinLeft, (m_PrimaryWeapon.WinTop + m_PrimaryWeapon.WinHeight), m_OperativeName.WinWidth, fLabelHeight, self));
 	m_Armor.m_bDrawBorders = false;
 	m_Armor.Align = 0;
 	m_Armor.TextColor = Root.Colors.White;
@@ -150,8 +150,8 @@ function SetSelected(bool _IsSelected)
 		m_Armor.TextColor = m_LabelColor;
 		m_BCurrentAlpha = m_BAlphaOpNameBg;
 	}
-	m_BMPSpeciality.m_bUseColor = __NFUN_129__(_IsSelected);
-	m_BMPHealth.m_bUseColor = __NFUN_129__(_IsSelected);
+	m_BMPSpeciality.m_bUseColor = (!_IsSelected);
+	m_BMPHealth.m_bUseColor = (!_IsSelected);
 	m_bIsSelected = _IsSelected;
 	return;
 }
@@ -159,19 +159,19 @@ function SetSelected(bool _IsSelected)
 function Paint(Canvas C, float X, float Y)
 {
 	C.Style = 5;
-	C.__NFUN_2626__(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_BCurrentAlpha);
-	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), 0.0000000, __NFUN_175__(__NFUN_175__(WinWidth, m_fFaceWidth), m_OperativeFace.WinLeft), m_OperativeName.WinHeight, m_TBottomLabelBG);
-	C.__NFUN_2626__(m_CDarkColor.R, m_CDarkColor.G, m_CDarkColor.B, m_BAlphaBg);
-	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), m_OperativeName.WinHeight, __NFUN_175__(__NFUN_175__(WinWidth, m_fFaceWidth), m_OperativeFace.WinLeft), __NFUN_175__(WinHeight, m_OperativeName.WinHeight), m_TBottomLabelBG);
+	C.SetDrawColor(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_BCurrentAlpha);
+	DrawStretchedTexture(C, (m_OperativeFace.WinLeft + m_fFaceWidth), 0.0000000, ((WinWidth - m_fFaceWidth) - m_OperativeFace.WinLeft), m_OperativeName.WinHeight, m_TBottomLabelBG);
+	C.SetDrawColor(m_CDarkColor.R, m_CDarkColor.G, m_CDarkColor.B, m_BAlphaBg);
+	DrawStretchedTexture(C, (m_OperativeFace.WinLeft + m_fFaceWidth), m_OperativeName.WinHeight, ((WinWidth - m_fFaceWidth) - m_OperativeFace.WinLeft), (WinHeight - m_OperativeName.WinHeight), m_TBottomLabelBG);
 	return;
 }
 
 function AfterPaint(Canvas C, float X, float Y)
 {
 	C.Style = 1;
-	C.__NFUN_2626__(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_LabelColor.A);
-	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), 0.0000000, 1.0000000, WinHeight, m_TBottomLabelBG);
-	DrawStretchedTexture(C, __NFUN_174__(m_OperativeFace.WinLeft, m_fFaceWidth), m_fNameLabelHeight, __NFUN_175__(__NFUN_175__(WinWidth, m_fFaceWidth), m_OperativeFace.WinLeft), 1.0000000, m_TBottomLabelBG);
+	C.SetDrawColor(m_LabelColor.R, m_LabelColor.G, m_LabelColor.B, m_LabelColor.A);
+	DrawStretchedTexture(C, (m_OperativeFace.WinLeft + m_fFaceWidth), 0.0000000, 1.0000000, WinHeight, m_TBottomLabelBG);
+	DrawStretchedTexture(C, (m_OperativeFace.WinLeft + m_fFaceWidth), m_fNameLabelHeight, ((WinWidth - m_fFaceWidth) - m_OperativeFace.WinLeft), 1.0000000, m_TBottomLabelBG);
 	DrawSimpleBorder(C);
 	return;
 }

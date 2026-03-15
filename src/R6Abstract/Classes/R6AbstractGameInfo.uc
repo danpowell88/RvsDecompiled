@@ -219,9 +219,9 @@ function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 function CreateMissionObjectiveMgr()
 {
 	// End:0x19
-	if(__NFUN_114__(m_missionMgr, none))
+	if((m_missionMgr == none))
 	{
-		m_missionMgr = __NFUN_278__(Class'R6Abstract.R6MissionObjectiveMgr');
+		m_missionMgr = Spawn(Class'R6Abstract.R6MissionObjectiveMgr');
 	}
 	return;
 }
@@ -349,7 +349,7 @@ function bool IsLastRoundOfTheMatch()
 function float GetEndGamePauseTime()
 {
 	// End:0x2B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return Level.m_fEndGamePauseTime;		
 	}
@@ -383,7 +383,7 @@ function float GetEndGamePauseTime()
 function float GetGameMsgLifeTime()
 {
 	// End:0x2D
-	if(__NFUN_130__(IsLastRoundOfTheMatch(), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+	if((IsLastRoundOfTheMatch() && (int(Level.NetMode) != int(NM_Standalone))))
 	{
 		return 10.0000000;		
 	}
@@ -408,16 +408,16 @@ function EndGameAndJumpToMapID(int iGotoMapId)
 {
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	// End:0x51
-	if(__NFUN_130__(__NFUN_119__(pServerOptions, none), __NFUN_119__(pServerOptions.m_ServerMapList, none)))
+	if(((pServerOptions != none) && (pServerOptions.m_ServerMapList != none)))
 	{
 		pServerOptions.m_ServerMapList.GetNextMap(iGotoMapId);
 	}
-	__NFUN_1210__();
+	AbortScoreSubmission();
 	SetJumpingMaps(true, iGotoMapId);
 	// End:0x81
-	if(__NFUN_132__(__NFUN_281__('InBetweenRoundMenu'), __NFUN_281__('PostBetweenRoundTime')))
+	if((IsInState('InBetweenRoundMenu') || IsInState('PostBetweenRoundTime')))
 	{
 		RestartGameMgr();		
 	}
@@ -435,8 +435,8 @@ function AbortMission()
 	CheckEndGame(none, "");
 	EndGame(none, "");
 	m_bTimerStarted = true;
-	m_fTimerStartTime = int(__NFUN_175__(__NFUN_175__(Level.TimeSeconds, GetEndGamePauseTime()), float(1)));
-	m_fTimerStartTime = __NFUN_251__(m_fTimerStartTime, 0, int(Level.TimeSeconds));
+	m_fTimerStartTime = int(((Level.TimeSeconds - GetEndGamePauseTime()) - float(1)));
+	m_fTimerStartTime = Clamp(m_fTimerStartTime, 0, int(Level.TimeSeconds));
 	return;
 }
 
@@ -488,7 +488,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 		return;
 	}
 	// End:0x18
-	if(__NFUN_114__(m_missionMgr, none))
+	if((m_missionMgr == none))
 	{
 		return;
 	}
@@ -577,7 +577,7 @@ function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 
 function PostBeginPlay()
 {
-	__NFUN_280__(0.0000000, false);
+	SetTimer(0.0000000, false);
 	return;
 }
 

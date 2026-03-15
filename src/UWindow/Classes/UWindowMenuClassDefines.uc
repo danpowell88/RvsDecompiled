@@ -109,13 +109,13 @@ function Created()
 {
 	local string szMenuDefFile;
 
-	szMenuDefFile = Class'Engine.Actor'.static.__NFUN_1524__().GetMenuDefFile();
+	szMenuDefFile = Class'Engine.Actor'.static.GetModMgr().GetMenuDefFile();
 	// End:0x49
-	if(__NFUN_123__(szMenuDefFile, "R6ClassDefines"))
+	if((szMenuDefFile != "R6ClassDefines"))
 	{
-		__NFUN_1010__("R6ClassDefines");
+		LoadConfig("R6ClassDefines");
 	}
-	__NFUN_1010__(szMenuDefFile);
+	LoadConfig(szMenuDefFile);
 	return;
 }
 

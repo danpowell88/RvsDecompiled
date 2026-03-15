@@ -41,22 +41,22 @@ function SetServerOptions()
 	local int iCounter, jCounter;
 	local R6ServerInfo _ServerSettings;
 
-	_ServerSettings = Class'Engine.Actor'.static.__NFUN_1273__();
+	_ServerSettings = Class'Engine.Actor'.static.GetServerOptions();
 	_ServerSettings.ClearSettings();
 	jCounter = 0;
 	iCounter = 0;
 	J0x2F:
 
 	// End:0xBE [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pSubMachinesGunsTab.m_ASubMachineGuns.Length))
+	if((iCounter < m_pMainRestriction.m_pSubMachinesGunsTab.m_ASubMachineGuns.Length))
 	{
 		// End:0xB4
 		if(m_pMainRestriction.m_pSubMachinesGunsTab.m_pSubMachineGuns[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedSubMachineGuns[jCounter] = m_pMainRestriction.m_pSubMachinesGunsTab.m_ASubMachineGuns[iCounter];
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x2F;
 	}
@@ -65,15 +65,15 @@ function SetServerOptions()
 	J0xCC:
 
 	// End:0x15B [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pShotgunsTab.m_AShotguns.Length))
+	if((iCounter < m_pMainRestriction.m_pShotgunsTab.m_AShotguns.Length))
 	{
 		// End:0x151
 		if(m_pMainRestriction.m_pShotgunsTab.m_pShotguns[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedShotGuns[jCounter] = m_pMainRestriction.m_pShotgunsTab.m_AShotguns[iCounter];
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0xCC;
 	}
@@ -82,15 +82,15 @@ function SetServerOptions()
 	J0x169:
 
 	// End:0x1F8 [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pAssaultRifleTab.m_AAssaultRifle.Length))
+	if((iCounter < m_pMainRestriction.m_pAssaultRifleTab.m_AAssaultRifle.Length))
 	{
 		// End:0x1EE
 		if(m_pMainRestriction.m_pAssaultRifleTab.m_pAssaultRifle[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedAssultRifles[jCounter] = m_pMainRestriction.m_pAssaultRifleTab.m_AAssaultRifle[iCounter];
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x169;
 	}
@@ -99,15 +99,15 @@ function SetServerOptions()
 	J0x206:
 
 	// End:0x295 [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pMachineGunsTab.m_AMachineGuns.Length))
+	if((iCounter < m_pMainRestriction.m_pMachineGunsTab.m_AMachineGuns.Length))
 	{
 		// End:0x28B
 		if(m_pMainRestriction.m_pMachineGunsTab.m_pMachineGuns[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedMachineGuns[jCounter] = m_pMainRestriction.m_pMachineGunsTab.m_AMachineGuns[iCounter];
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x206;
 	}
@@ -116,15 +116,15 @@ function SetServerOptions()
 	J0x2A3:
 
 	// End:0x332 [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pSniperRifleTab.m_ASniperRifle.Length))
+	if((iCounter < m_pMainRestriction.m_pSniperRifleTab.m_ASniperRifle.Length))
 	{
 		// End:0x328
 		if(m_pMainRestriction.m_pSniperRifleTab.m_pSniperRifle[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedSniperRifles[jCounter] = m_pMainRestriction.m_pSniperRifleTab.m_ASniperRifle[iCounter];
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x2A3;
 	}
@@ -133,15 +133,15 @@ function SetServerOptions()
 	J0x340:
 
 	// End:0x3CF [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pPistolTab.m_APistol.Length))
+	if((iCounter < m_pMainRestriction.m_pPistolTab.m_APistol.Length))
 	{
 		// End:0x3C5
 		if(m_pMainRestriction.m_pPistolTab.m_pPistol[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedPistols[jCounter] = m_pMainRestriction.m_pPistolTab.m_APistol[iCounter];
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x340;
 	}
@@ -150,15 +150,15 @@ function SetServerOptions()
 	J0x3DD:
 
 	// End:0x46C [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pMachinePistolTab.m_AMachinePistol.Length))
+	if((iCounter < m_pMainRestriction.m_pMachinePistolTab.m_AMachinePistol.Length))
 	{
 		// End:0x462
 		if(m_pMainRestriction.m_pMachinePistolTab.m_pMachinePistol[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedMachinePistols[jCounter] = m_pMainRestriction.m_pMachinePistolTab.m_AMachinePistol[iCounter];
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x3DD;
 	}
@@ -167,15 +167,15 @@ function SetServerOptions()
 	J0x47A:
 
 	// End:0x512 [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pPriWpnGadgetTab.m_APriWpnGadget.Length))
+	if((iCounter < m_pMainRestriction.m_pPriWpnGadgetTab.m_APriWpnGadget.Length))
 	{
 		// End:0x508
 		if(m_pMainRestriction.m_pPriWpnGadgetTab.m_pPriWpnGadget[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedPrimary[jCounter] = m_pMainRestriction.m_pPriWpnGadgetTab.m_pPriWpnGadget[iCounter].m_szMiscText;
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x47A;
 	}
@@ -184,15 +184,15 @@ function SetServerOptions()
 	J0x520:
 
 	// End:0x5B8 [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pSecWpnGadgetTab.m_ASecWpnGadget.Length))
+	if((iCounter < m_pMainRestriction.m_pSecWpnGadgetTab.m_ASecWpnGadget.Length))
 	{
 		// End:0x5AE
 		if(m_pMainRestriction.m_pSecWpnGadgetTab.m_pSecWpnGadget[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedSecondary[jCounter] = m_pMainRestriction.m_pSecWpnGadgetTab.m_pSecWpnGadget[iCounter].m_szMiscText;
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x520;
 	}
@@ -201,15 +201,15 @@ function SetServerOptions()
 	J0x5C6:
 
 	// End:0x65E [Loop If]
-	if(__NFUN_150__(iCounter, m_pMainRestriction.m_pMiscGadgetTab.m_AMiscGadget.Length))
+	if((iCounter < m_pMainRestriction.m_pMiscGadgetTab.m_AMiscGadget.Length))
 	{
 		// End:0x654
 		if(m_pMainRestriction.m_pMiscGadgetTab.m_pMiscGadget[iCounter].m_bSelected)
 		{
 			_ServerSettings.RestrictedMiscGadgets[jCounter] = m_pMainRestriction.m_pMiscGadgetTab.m_pMiscGadget[iCounter].m_szMiscText;
-			__NFUN_165__(jCounter);
+			(jCounter++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x5C6;
 	}

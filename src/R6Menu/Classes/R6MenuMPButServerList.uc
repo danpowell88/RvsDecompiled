@@ -47,23 +47,23 @@ function Created()
 	pSLDummy = R6MenuMultiPlayerWidget(OwnerWindow).m_GameService;
 	fXOffset = 0.0000000;
 	CreateServerListButton(int(pSLDummy.0), "InfoBar_F", "InfoBar_F", fXOffset, 15.0000000, m_pButFavorites);
-	__NFUN_184__(fXOffset, float(15));
+	(fXOffset += float(15));
 	CreateServerListButton(int(pSLDummy.1), "InfoBar_L", "InfoBar_L", fXOffset, 15.0000000, m_pButLocked);
-	__NFUN_184__(fXOffset, float(15));
+	(fXOffset += float(15));
 	CreateServerListButton(int(pSLDummy.2), "InfoBar_D", "InfoBar_D", fXOffset, 15.0000000, m_pButDedicated);
-	__NFUN_184__(fXOffset, float(15));
+	(fXOffset += float(15));
 	CreateServerListButton(int(pSLDummy.3), "InfoBar_P", "InfoBar_P", fXOffset, 15.0000000, m_pButPunkBuster);
-	__NFUN_184__(fXOffset, float(15));
+	(fXOffset += float(15));
 	CreateServerListButton(int(pSLDummy.5), "InfoBar_Server", "InfoBar_Server", fXOffset, 155.0000000, m_pButName);
-	__NFUN_184__(fXOffset, float(155));
+	(fXOffset += float(155));
 	CreateServerListButton(int(pSLDummy.4), "InfoBar_Ping", "InfoBar_Ping", fXOffset, 40.0000000, m_pButPingTime);
-	__NFUN_184__(fXOffset, float(40));
+	(fXOffset += float(40));
 	CreateServerListButton(int(pSLDummy.6), "InfoBar_Type", "InfoBar_Type", fXOffset, 100.0000000, m_pButGameType);
-	__NFUN_184__(fXOffset, float(100));
+	(fXOffset += float(100));
 	CreateServerListButton(int(pSLDummy.7), "InfoBar_GameMode", "InfoBar_GameMode", fXOffset, 100.0000000, m_pButGameMode);
-	__NFUN_184__(fXOffset, float(100));
+	(fXOffset += float(100));
 	CreateServerListButton(int(pSLDummy.8), "InfoBar_Map", "InfoBar_Map", fXOffset, 100.0000000, m_pButMap);
-	__NFUN_184__(fXOffset, float(100));
+	(fXOffset += float(100));
 	CreateServerListButton(int(pSLDummy.9), "InfoBar_Players", "InfoBar_Players", fXOffset, 63.0000000, m_pButNumPlayers);
 	m_pButPingTime.m_bDrawSortIcon = true;
 	m_pButPingTime.m_bAscending = true;
@@ -87,19 +87,19 @@ function Notify(UWindowDialogControl C, byte E)
 	local bool bTypeOfSort;
 
 	// End:0xE9
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		bTypeOfSort = R6MenuMultiPlayerWidget(OwnerWindow).m_bLastTypeOfSort;
 		// End:0x44
-		if(__NFUN_114__(m_pLastButtonClick, none))
+		if((m_pLastButtonClick == none))
 		{
 			m_pLastButtonClick = R6WindowButtonSort(C);
 		}
 		m_pLastButtonClick.m_bDrawSortIcon = false;
 		// End:0x7B
-		if(__NFUN_114__(m_pLastButtonClick, R6WindowButtonSort(C)))
+		if((m_pLastButtonClick == R6WindowButtonSort(C)))
 		{
-			bTypeOfSort = __NFUN_129__(bTypeOfSort);			
+			bTypeOfSort = (!bTypeOfSort);			
 		}
 		else
 		{

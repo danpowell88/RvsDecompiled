@@ -36,7 +36,7 @@ function PostBeginPlay()
 {
 	super(Actor).PostBeginPlay();
 	m_vLookDir = Vector(Rotation);
-	m_vLookDir = __NFUN_226__(m_vLookDir);
+	m_vLookDir = Normal(m_vLookDir);
 	return;
 }
 
@@ -47,12 +47,12 @@ function Touch(Actor Other)
 
 	Pawn = R6Pawn(Other);
 	// End:0x1D
-	if(__NFUN_114__(Pawn, none))
+	if((Pawn == none))
 	{
 		return;
 	}
 	// End:0x53
-	if(__NFUN_132__(__NFUN_154__(int(Pawn.m_ePawnType), int(3)), __NFUN_154__(int(Pawn.m_ePawnType), int(2))))
+	if(((int(Pawn.m_ePawnType) == int(3)) || (int(Pawn.m_ePawnType) == int(2))))
 	{
 		return;
 	}
@@ -69,7 +69,7 @@ function UnTouch(Actor Other)
 
 	Pawn = R6Pawn(Other);
 	// End:0x1D
-	if(__NFUN_114__(Pawn, none))
+	if((Pawn == none))
 	{
 		return;
 	}

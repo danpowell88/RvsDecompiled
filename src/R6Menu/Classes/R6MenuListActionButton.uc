@@ -70,25 +70,25 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 	OwnerCtrl = R6PlanningCtrl(GetPlayerOwner());
 	SelectedItem = R6MenuActionButtonItem(m_SelectedItem);
 	// End:0x71
-	if(__NFUN_114__(m_SelectedItem, none))
+	if((m_SelectedItem == none))
 	{
-		__NFUN_231__("NoSelected Item in action button menu? that's weird!");
+		Log("NoSelected Item in action button menu? that's weird!");
 		return;
 	}
 	Planning = OwnerCtrl.m_pTeamInfo[OwnerCtrl.m_iCurrentTeam];
 	// End:0x1BD
-	if(__NFUN_129__(m_bAutoSelect))
+	if((!m_bAutoSelect))
 	{
 		Planning.SetCurrentPointAction(SelectedItem.m_eAction);
 		// End:0x15E
-		if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(SelectedItem.m_eAction), int(1)), __NFUN_154__(int(SelectedItem.m_eAction), int(2))), __NFUN_154__(int(SelectedItem.m_eAction), int(3))), __NFUN_154__(int(SelectedItem.m_eAction), int(4))))
+		if(((((int(SelectedItem.m_eAction) == int(1)) || (int(SelectedItem.m_eAction) == int(2))) || (int(SelectedItem.m_eAction) == int(3))) || (int(SelectedItem.m_eAction) == int(4))))
 		{
 			OwnerCtrl.m_bClickToFindLocation = true;
 			OwnerCtrl.m_bClickedOnRange = false;
 			R6MenuRootWindow(Root).m_bUseAimIcon = true;
 		}
 		// End:0x19E
-		if(__NFUN_154__(int(SelectedItem.m_eAction), int(5)))
+		if((int(SelectedItem.m_eAction) == int(5)))
 		{
 			OwnerCtrl.m_bSetSnipeDirection = true;
 			R6MenuRootWindow(Root).m_bUseAimIcon = true;
@@ -100,13 +100,13 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 
 function DisplaySnipeButton(bool bDoIDisplay)
 {
-	R6MenuActionButtonItem(m_ButtonItem[int(5)]).m_Button.bDisabled = __NFUN_129__(bDoIDisplay);
+	R6MenuActionButtonItem(m_ButtonItem[int(5)]).m_Button.bDisabled = (!bDoIDisplay);
 	return;
 }
 
 function DisplayBreachDoor(bool bDoIDisplay)
 {
-	R6MenuActionButtonItem(m_ButtonItem[int(6)]).m_Button.bDisabled = __NFUN_129__(bDoIDisplay);
+	R6MenuActionButtonItem(m_ButtonItem[int(6)]).m_Button.bDisabled = (!bDoIDisplay);
 	return;
 }
 
@@ -118,7 +118,7 @@ function ShowWindow()
 	eAction = R6PlanningCtrl(GetPlayerOwner()).m_pTeamInfo[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam].GetAction();
 	m_bAutoSelect = true;
 	// End:0x71
-	if(__NFUN_119__(m_ButtonItem[int(eAction)], m_SelectedItem))
+	if((m_ButtonItem[int(eAction)] != m_SelectedItem))
 	{
 		SetSelectedItem(m_ButtonItem[int(eAction)]);
 	}

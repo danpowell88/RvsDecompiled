@@ -12,7 +12,7 @@ var PhysicsVolume V;
 function PostBeginPlay()
 {
 	super(Actor).PostBeginPlay();
-	__NFUN_280__(1.0000000, true);
+	SetTimer(1.0000000, true);
 	V = PhysicsVolume(Owner);
 	return;
 }

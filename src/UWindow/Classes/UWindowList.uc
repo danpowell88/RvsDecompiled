@@ -41,7 +41,7 @@ function GraftLeft(UWindowList NewLeft)
 	assert(Sentinel.bTreeSort);
 	BranchLeft = NewLeft;
 	// End:0x38
-	if(__NFUN_119__(NewLeft, none))
+	if((NewLeft != none))
 	{
 		NewLeft.ParentNode = self;
 	}
@@ -53,7 +53,7 @@ function GraftRight(UWindowList NewRight)
 	assert(Sentinel.bTreeSort);
 	BranchRight = NewRight;
 	// End:0x38
-	if(__NFUN_119__(NewRight, none))
+	if((NewRight != none))
 	{
 		NewRight.ParentNode = self;
 	}
@@ -67,7 +67,7 @@ function UWindowList RightMost()
 
 	assert(Sentinel.bTreeSort);
 	// End:0x1F
-	if(__NFUN_114__(BranchRight, none))
+	if((BranchRight == none))
 	{
 		return none;
 	}
@@ -75,7 +75,7 @@ function UWindowList RightMost()
 	J0x26:
 
 	// End:0x51 [Loop If]
-	if(__NFUN_119__(L.BranchRight, none))
+	if((L.BranchRight != none))
 	{
 		L = L.BranchRight;
 		// [Loop Continue]
@@ -92,7 +92,7 @@ function UWindowList LeftMost()
 
 	assert(Sentinel.bTreeSort);
 	// End:0x1F
-	if(__NFUN_114__(BranchLeft, none))
+	if((BranchLeft == none))
 	{
 		return none;
 	}
@@ -100,7 +100,7 @@ function UWindowList LeftMost()
 	J0x26:
 
 	// End:0x51 [Loop If]
-	if(__NFUN_119__(L.BranchLeft, none))
+	if((L.BranchLeft != none))
 	{
 		L = L.BranchLeft;
 		// [Loop Continue]
@@ -115,37 +115,37 @@ function Remove()
 	local UWindowList t;
 
 	// End:0x1F
-	if(__NFUN_119__(Next, none))
+	if((Next != none))
 	{
 		Next.Prev = Prev;
 	}
 	// End:0x3E
-	if(__NFUN_119__(Prev, none))
+	if((Prev != none))
 	{
 		Prev.Next = Next;
 	}
 	// End:0x1BD
-	if(__NFUN_119__(Sentinel, none))
+	if((Sentinel != none))
 	{
 		// End:0x15F
-		if(__NFUN_130__(Sentinel.bTreeSort, __NFUN_119__(ParentNode, none)))
+		if((Sentinel.bTreeSort && (ParentNode != none)))
 		{
 			// End:0xFA
-			if(__NFUN_119__(BranchLeft, none))
+			if((BranchLeft != none))
 			{
 				// End:0x9B
-				if(__NFUN_114__(ParentNode.BranchLeft, self))
+				if((ParentNode.BranchLeft == self))
 				{
 					ParentNode.GraftLeft(BranchLeft);
 				}
 				// End:0xC3
-				if(__NFUN_114__(ParentNode.BranchRight, self))
+				if((ParentNode.BranchRight == self))
 				{
 					ParentNode.GraftRight(BranchLeft);
 				}
 				t = BranchLeft.RightMost();
 				// End:0xF7
-				if(__NFUN_119__(t, none))
+				if((t != none))
 				{
 					t.GraftRight(BranchRight);
 				}				
@@ -153,12 +153,12 @@ function Remove()
 			else
 			{
 				// End:0x122
-				if(__NFUN_114__(ParentNode.BranchLeft, self))
+				if((ParentNode.BranchLeft == self))
 				{
 					ParentNode.GraftLeft(BranchRight);
 				}
 				// End:0x14A
-				if(__NFUN_114__(ParentNode.BranchRight, self))
+				if((ParentNode.BranchRight == self))
 				{
 					ParentNode.GraftRight(BranchRight);
 				}
@@ -167,10 +167,10 @@ function Remove()
 			BranchLeft = none;
 			BranchRight = none;
 		}
-		__NFUN_166__(Sentinel.InternalCount);
+		(Sentinel.InternalCount--);
 		Sentinel.bItemOrderChanged = true;
 		// End:0x1A8
-		if(__NFUN_114__(Sentinel.Last, self))
+		if((Sentinel.Last == self))
 		{
 			Sentinel.Last = Prev;
 		}
@@ -211,7 +211,7 @@ function UWindowList InsertAfter(Class<UWindowList> C)
 // Inserts an element before us.  DO NOT CALL on the sentinel.
 function InsertItemBefore(UWindowList NewElement)
 {
-	assert(__NFUN_119__(Sentinel, self));
+	assert((Sentinel != self));
 	NewElement.BranchLeft = none;
 	NewElement.BranchRight = none;
 	NewElement.ParentNode = none;
@@ -224,11 +224,11 @@ function InsertItemBefore(UWindowList NewElement)
 	Prev = NewElement;
 	NewElement.Next = self;
 	// End:0xEA
-	if(__NFUN_114__(Sentinel.Next, self))
+	if((Sentinel.Next == self))
 	{
 		Sentinel.Next = NewElement;
 	}
-	__NFUN_165__(Sentinel.InternalCount);
+	(Sentinel.InternalCount++);
 	Sentinel.bItemOrderChanged = true;
 	return;
 }
@@ -244,7 +244,7 @@ function InsertItemAfter(UWindowList NewElement, optional bool bCheckShowItem)
 		J0x14:
 
 		// End:0x4C [Loop If]
-		if(__NFUN_130__(__NFUN_119__(N, none), __NFUN_129__(N.ShowThisItem())))
+		if(((N != none) && (!N.ShowThisItem())))
 		{
 			N = N.Next;
 			// [Loop Continue]
@@ -252,7 +252,7 @@ function InsertItemAfter(UWindowList NewElement, optional bool bCheckShowItem)
 		}
 	}
 	// End:0x6E
-	if(__NFUN_119__(N, none))
+	if((N != none))
 	{
 		N.InsertItemBefore(NewElement);		
 	}
@@ -273,13 +273,13 @@ function ContinueSort()
 	J0x0F:
 
 	// End:0x6B [Loop If]
-	if(__NFUN_119__(CurrentSortItem, none))
+	if((CurrentSortItem != none))
 	{
 		N = CurrentSortItem.Next;
 		AppendItem(CurrentSortItem);
 		CurrentSortItem = N;
 		// End:0x68
-		if(__NFUN_130__(__NFUN_153__(CompareCount, 10000), bSuspendableSort))
+		if(((CompareCount >= 10000) && bSuspendableSort))
 		{
 			bSortSuspended = true;
 			return;
@@ -322,7 +322,7 @@ function UWindowList Sort()
 	J0x3A:
 
 	// End:0x218 [Loop If]
-	if(__NFUN_119__(CurrentItem, none))
+	if((CurrentItem != none))
 	{
 		S = CurrentItem.Next;
 		Best = CurrentItem.Next;
@@ -331,10 +331,10 @@ function UWindowList Sort()
 		J0x83:
 
 		// End:0xE5 [Loop If]
-		if(__NFUN_119__(S, none))
+		if((S != none))
 		{
 			// End:0xC3
-			if(__NFUN_152__(CurrentItem.Compare(S, Best), 0))
+			if((CurrentItem.Compare(S, Best) <= 0))
 			{
 				Best = S;
 				BestPrev = Previous;
@@ -345,11 +345,11 @@ function UWindowList Sort()
 			goto J0x83;
 		}
 		// End:0x201
-		if(__NFUN_119__(Best, CurrentItem.Next))
+		if((Best != CurrentItem.Next))
 		{
 			BestPrev.Next = Best.Next;
 			// End:0x14B
-			if(__NFUN_119__(BestPrev.Next, none))
+			if((BestPrev.Next != none))
 			{
 				BestPrev.Next.Prev = BestPrev;
 			}
@@ -358,11 +358,11 @@ function UWindowList Sort()
 			CurrentItem.Next.Prev = Best;
 			CurrentItem.Next = Best;
 			// End:0x201
-			if(__NFUN_114__(Sentinel.Last, Best))
+			if((Sentinel.Last == Best))
 			{
 				Sentinel.Last = BestPrev;
 				// End:0x201
-				if(__NFUN_114__(Sentinel.Last, none))
+				if((Sentinel.Last == none))
 				{
 					Sentinel.Last = Sentinel;
 				}
@@ -396,14 +396,14 @@ function DestroyList()
 	L = Next;
 	InternalCount = 0;
 	// End:0x2E
-	if(__NFUN_119__(Sentinel, none))
+	if((Sentinel != none))
 	{
 		Sentinel.bItemOrderChanged = true;
 	}
 	J0x2E:
 
 	// End:0x6A [Loop If]
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		temp = L.Next;
 		L.DestroyListItem();
@@ -436,12 +436,12 @@ function int CountShown()
 	J0x0B:
 
 	// End:0x46 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x2F
 		if(i.ShowThisItem())
 		{
-			__NFUN_165__(C);
+			(C++);
 		}
 		i = i.Next;
 		// [Loop Continue]
@@ -490,10 +490,10 @@ function MoveItemSorted(UWindowList Item)
 		J0x31:
 
 		// End:0x6C [Loop If]
-		if(__NFUN_119__(L, none))
+		if((L != none))
 		{
 			// End:0x55
-			if(__NFUN_152__(Compare(Item, L), 0))
+			if((Compare(Item, L) <= 0))
 			{
 				// [Explicit Break]
 				goto J0x6C;
@@ -505,11 +505,11 @@ function MoveItemSorted(UWindowList Item)
 		J0x6C:
 
 		// End:0xB7
-		if(__NFUN_119__(L, Item))
+		if((L != Item))
 		{
 			Item.Remove();
 			// End:0xA3
-			if(__NFUN_114__(L, none))
+			if((L == none))
 			{
 				AppendItem(Item);				
 			}
@@ -543,34 +543,34 @@ function Validate()
 	local int Count;
 
 	// End:0x46
-	if(__NFUN_119__(Sentinel, self))
+	if((Sentinel != self))
 	{
-		__NFUN_231__(__NFUN_112__("Calling Sentinel.Validate() from ", string(self)));
+		Log(("Calling Sentinel.Validate() from " $ string(self)));
 		Sentinel.Validate();
 		return;
 	}
-	__NFUN_231__(__NFUN_112__("BEGIN Validate(): ", string(Class)));
+	Log(("BEGIN Validate(): " $ string(Class)));
 	Count = 0;
 	Previous = self;
 	i = Next;
 	J0x7E:
 
 	// End:0x1FD [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
-		__NFUN_231__(__NFUN_112__("Checking item: ", string(Count)));
+		Log(("Checking item: " $ string(Count)));
 		// End:0xDE
-		if(__NFUN_119__(i.Sentinel, self))
+		if((i.Sentinel != self))
 		{
-			__NFUN_231__("   I.Sentinel reference is broken");
+			Log("   I.Sentinel reference is broken");
 		}
 		// End:0x117
-		if(__NFUN_119__(i.Prev, Previous))
+		if((i.Prev != Previous))
 		{
-			__NFUN_231__("   I.Prev reference is broken");
+			Log("   I.Prev reference is broken");
 		}
 		// End:0x170
-		if(__NFUN_130__(__NFUN_114__(Last, i), __NFUN_119__(i.Next, none)))
+		if(((Last == i) && (i.Next != none)))
 		{
 			__NFUN_231__("   Item is Sentinel.Last but Item has valid Next");
 		}

@@ -17,15 +17,15 @@ class R6RainbowPawn extends R6Rainbow
 simulated event PostBeginPlay()
 {
 	// End:0x3F
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		m_iTeam = m_iDefaultTeam;
 	}
 	// End:0x151
-	if(__NFUN_242__(m_bUseSpecialSkin, false))
+	if((m_bUseSpecialSkin == false))
 	{
 		// End:0xE3
-		if(__NFUN_130__(__NFUN_154__(m_iDefaultTeam, 3), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+		if(((m_iDefaultTeam == 3) && (int(Level.NetMode) != int(NM_Standalone))))
 		{
 			Skins[0] = Level.RedTeamSkin;
 			Skins[1] = Level.RedHeadSkin;
@@ -55,13 +55,13 @@ simulated event PostNetBeginPlay()
 
 simulated function SetFemaleParameters()
 {
-	__NFUN_2212__(0.9500000);
+	SetPawnScale(0.9500000);
 	m_fAttachFactor = 0.9500000;
 	m_fPrePivotPawnInitialOffset = -4.0000000;
 	// End:0x48
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
-		__NFUN_184__(PrePivot.Z, m_fPrePivotPawnInitialOffset);
+		(PrePivot.Z += m_fPrePivotPawnInitialOffset);
 	}
 	return;
 }
@@ -75,7 +75,7 @@ simulated function SetRainbowFaceTexture()
 	// End:0x5F
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " SetRainbowFaceTexture() : bIsFemale ="), string(bIsFemale)), " m_iOperativeID="), string(m_iOperativeID)));
+		Log(((((string(self) $ " SetRainbowFaceTexture() : bIsFemale =") $ string(bIsFemale)) $ " m_iOperativeID=") $ string(m_iOperativeID)));
 	}
 	iFaceIndex = 3;
 	// End:0xB4
@@ -83,12 +83,12 @@ simulated function SetRainbowFaceTexture()
 	{
 		SetFemaleParameters();
 		// End:0x95
-		if(__NFUN_119__(m_Helmet, none))
+		if((m_Helmet != none))
 		{
 			m_Helmet.DrawScale = 1.0000000;
 		}
 		// End:0xB4
-		if(__NFUN_119__(m_NightVision, none))
+		if((m_NightVision != none))
 		{
 			m_NightVision.DrawScale = 1.0000000;
 		}
@@ -246,7 +246,7 @@ simulated function SetRainbowFaceTexture()
 			break;
 	}
 	// End:0x7A2
-	if(__NFUN_123__(aFaceTexture, ""))
+	if((aFaceTexture != ""))
 	{
 		Skins[iFaceIndex] = Texture(DynamicLoadObject(aFaceTexture, Class'Engine.Texture'));
 	}

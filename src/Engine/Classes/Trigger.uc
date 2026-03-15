@@ -48,7 +48,7 @@ function PreBeginPlay()
 {
 	super(Actor).PreBeginPlay();
 	// End:0x65
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(TriggerType), int(0)), __NFUN_154__(int(TriggerType), int(1))), __NFUN_154__(int(TriggerType), int(5))), __NFUN_130__(__NFUN_154__(int(TriggerType), int(2)), __NFUN_258__(ClassProximityType, Class'Engine.Pawn'))))
+	if(((((int(TriggerType) == int(0)) || (int(TriggerType) == int(1))) || (int(TriggerType) == int(5))) || ((int(TriggerType) == int(2)) && ClassIsChildOf(ClassProximityType, Class'Engine.Pawn'))))
 	{
 		OnlyAffectPawns(true);
 	}
@@ -58,12 +58,12 @@ function PreBeginPlay()
 function PostBeginPlay()
 {
 	// End:0x11
-	if(__NFUN_129__(bInitiallyActive))
+	if((!bInitiallyActive))
 	{
 		FindTriggerActor();
 	}
 	// End:0x39
-	if(__NFUN_154__(int(TriggerType), int(4)))
+	if((int(TriggerType) == int(4)))
 	{
 		bHidden = false;
 		bProjTarget = true;
@@ -79,7 +79,7 @@ function Reset()
 {
 	super(Actor).Reset();
 	bInitiallyActive = bSavedInitialActive;
-	__NFUN_262__(bSavedInitialCollision, bBlockActors, bBlockPlayers);
+	SetCollision(bSavedInitialCollision, bBlockActors, bBlockPlayers);
 	return;
 }
 
@@ -96,7 +96,7 @@ simulated function ResetOriginalData()
 	}
 	super(Actor).ResetOriginalData();
 	bInitiallyActive = bSavedInitialActive;
-	__NFUN_262__(bSavedInitialCollision, bBlockActors, bBlockPlayers);
+	SetCollision(bSavedInitialCollision, bBlockActors, bBlockPlayers);
 	return;
 }
 
@@ -107,13 +107,13 @@ function FindTriggerActor()
 	TriggerActor = none;
 	TriggerActor2 = none;
 	// End:0x5E
-	foreach __NFUN_304__(Class'Engine.Actor', A)
+	foreach AllActors(Class'Engine.Actor', A)
 	{
 		// End:0x5D
-		if(__NFUN_254__(A.Event, Tag))
+		if((A.Event == Tag))
 		{
 			// End:0x4F
-			if(__NFUN_114__(TriggerActor, none))
+			if((TriggerActor == none))
 			{
 				TriggerActor = A;
 				// End:0x5D
@@ -131,35 +131,35 @@ function Actor SpecialHandling(Pawn Other)
 	local Actor A;
 
 	// End:0x18
-	if(__NFUN_130__(bTriggerOnceOnly, __NFUN_129__(bCollideActors)))
+	if((bTriggerOnceOnly && (!bCollideActors)))
 	{
 		return none;
 	}
 	// End:0x40
-	if(__NFUN_130__(__NFUN_154__(int(TriggerType), int(5)), __NFUN_129__(Other.IsHumanControlled())))
+	if(((int(TriggerType) == int(5)) && (!Other.IsHumanControlled())))
 	{
 		return none;
 	}
 	// End:0x68
-	if(__NFUN_130__(__NFUN_154__(int(TriggerType), int(0)), __NFUN_129__(Other.IsPlayerPawn())))
+	if(((int(TriggerType) == int(0)) && (!Other.IsPlayerPawn())))
 	{
 		return none;
 	}
 	// End:0xF2
-	if(__NFUN_129__(bInitiallyActive))
+	if((!bInitiallyActive))
 	{
 		// End:0x84
-		if(__NFUN_114__(TriggerActor, none))
+		if((TriggerActor == none))
 		{
 			FindTriggerActor();
 		}
 		// End:0x91
-		if(__NFUN_114__(TriggerActor, none))
+		if((TriggerActor == none))
 		{
 			return none;
 		}
 		// End:0xEC
-		if(__NFUN_130__(__NFUN_119__(TriggerActor2, none), __NFUN_176__(__NFUN_225__(__NFUN_216__(TriggerActor2.Location, Other.Location)), __NFUN_225__(__NFUN_216__(TriggerActor.Location, Other.Location)))))
+		if(((TriggerActor2 != none) && (VSize((TriggerActor2.Location - Other.Location)) < VSize((TriggerActor.Location - Other.Location)))))
 		{
 			return TriggerActor2;			
 		}
@@ -172,10 +172,10 @@ function Actor SpecialHandling(Pawn Other)
 	if(IsRelevant(Other))
 	{
 		// End:0x12B
-		foreach __NFUN_307__(Class'Engine.Actor', A)
+		foreach TouchingActors(Class'Engine.Actor', A)
 		{
 			// End:0x12A
-			if(__NFUN_114__(A, Other))
+			if((A == Other))
 			{
 				Touch(Other);
 			}			
@@ -191,7 +191,7 @@ function CheckTouchList()
 	local Actor A;
 
 	// End:0x1C
-	foreach __NFUN_307__(Class'Engine.Actor', A)
+	foreach TouchingActors(Class'Engine.Actor', A)
 	{
 		Touch(A);		
 	}	
@@ -204,7 +204,7 @@ function CheckTouchList()
 function bool IsRelevant(Actor Other)
 {
 	// End:0x0D
-	if(__NFUN_129__(bInitiallyActive))
+	if((!bInitiallyActive))
 	{
 		return false;
 	}
@@ -212,16 +212,16 @@ function bool IsRelevant(Actor Other)
 	{
 		// End:0x40
 		case 5:
-			return __NFUN_130__(__NFUN_119__(Pawn(Other), none), Pawn(Other).IsHumanControlled());
+			return ((Pawn(Other) != none) && Pawn(Other).IsHumanControlled());
 		// End:0x6C
 		case 0:
-			return __NFUN_130__(__NFUN_119__(Pawn(Other), none), Pawn(Other).IsPlayerPawn());
+			return ((Pawn(Other) != none) && Pawn(Other).IsPlayerPawn());
 		// End:0x99
 		case 1:
-			return __NFUN_130__(__NFUN_119__(Pawn(Other), none), Pawn(Other).CanTrigger(self));
+			return ((Pawn(Other) != none) && Pawn(Other).CanTrigger(self));
 		// End:0xB5
 		case 2:
-			return __NFUN_258__(Other.Class, ClassProximityType);
+			return ClassIsChildOf(Other.Class, ClassProximityType);
 		// End:0xBC
 		case 3:
 			return true;
@@ -243,10 +243,10 @@ function Touch(Actor Other)
 	if(IsRelevant(Other))
 	{
 		// End:0x50
-		if(__NFUN_177__(ReTriggerDelay, float(0)))
+		if((ReTriggerDelay > float(0)))
 		{
 			// End:0x3C
-			if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, TriggerTime), ReTriggerDelay))
+			if(((Level.TimeSeconds - TriggerTime) < ReTriggerDelay))
 			{
 				return;
 			}
@@ -259,22 +259,22 @@ function Touch(Actor Other)
 			m_pAlarm.SetAlarm(Other.Location);
 		}
 		// End:0x127
-		if(__NFUN_130__(__NFUN_119__(Pawn(Other), none), __NFUN_119__(Pawn(Other).Controller, none)))
+		if(((Pawn(Other) != none) && (Pawn(Other).Controller != none)))
 		{
 			i = 0;
 			J0xC2:
 
 			// End:0x127 [Loop If]
-			if(__NFUN_150__(i, 4))
+			if((i < 4))
 			{
 				// End:0x11D
-				if(__NFUN_114__(Pawn(Other).Controller.GoalList[i], self))
+				if((Pawn(Other).Controller.GoalList[i] == self))
 				{
 					Pawn(Other).Controller.GoalList[i] = none;
 					// [Explicit Break]
 					goto J0x127;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0xC2;
 			}
@@ -282,21 +282,21 @@ function Touch(Actor Other)
 		J0x127:
 
 		// End:0x166
-		if(__NFUN_130__(__NFUN_123__(Message, ""), __NFUN_119__(Other.Instigator, none)))
+		if(((Message != "") && (Other.Instigator != none)))
 		{
 			Other.Instigator.ClientMessage(Message);
 		}
 		// End:0x176
 		if(bTriggerOnceOnly)
 		{
-			__NFUN_262__(false);			
+			SetCollision(false);			
 		}
 		else
 		{
 			// End:0x18C
-			if(__NFUN_177__(RepeatTriggerTime, float(0)))
+			if((RepeatTriggerTime > float(0)))
 			{
-				__NFUN_280__(RepeatTriggerTime, false);
+				SetTimer(RepeatTriggerTime, false);
 			}
 		}
 	}
@@ -310,7 +310,7 @@ function Timer()
 
 	bKeepTiming = false;
 	// End:0x3A
-	foreach __NFUN_307__(Class'Engine.Actor', A)
+	foreach TouchingActors(Class'Engine.Actor', A)
 	{
 		// End:0x39
 		if(IsRelevant(A))
@@ -322,7 +322,7 @@ function Timer()
 	// End:0x4D
 	if(bKeepTiming)
 	{
-		__NFUN_280__(RepeatTriggerTime, false);
+		SetTimer(RepeatTriggerTime, false);
 	}
 	return;
 }
@@ -330,13 +330,13 @@ function Timer()
 function int TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
 	// End:0xE1
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bInitiallyActive, __NFUN_154__(int(TriggerType), int(4))), __NFUN_179__(float(iKillValue), DamageThreshold)), __NFUN_119__(instigatedBy, none)))
+	if((((bInitiallyActive && (int(TriggerType) == int(4))) && (float(iKillValue) >= DamageThreshold)) && (instigatedBy != none)))
 	{
 		// End:0x7D
-		if(__NFUN_177__(ReTriggerDelay, float(0)))
+		if((ReTriggerDelay > float(0)))
 		{
 			// End:0x69
-			if(__NFUN_176__(__NFUN_175__(Level.TimeSeconds, TriggerTime), ReTriggerDelay))
+			if(((Level.TimeSeconds - TriggerTime) < ReTriggerDelay))
 			{
 				return 0;
 			}
@@ -349,14 +349,14 @@ function int TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vecto
 			m_pAlarm.SetAlarm(vHitLocation);
 		}
 		// End:0xD4
-		if(__NFUN_123__(Message, ""))
+		if((Message != ""))
 		{
 			instigatedBy.Instigator.ClientMessage(Message);
 		}
 		// End:0xE1
 		if(bTriggerOnceOnly)
 		{
-			__NFUN_262__(false);
+			SetCollision(false);
 		}
 	}
 	return 0;
@@ -384,7 +384,7 @@ state() OtherTriggerToggles
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		bInitiallyActive = __NFUN_129__(bInitiallyActive);
+		bInitiallyActive = (!bInitiallyActive);
 		// End:0x1E
 		if(bInitiallyActive)
 		{
@@ -404,7 +404,7 @@ state() OtherTriggerTurnsOn
 		bWasActive = bInitiallyActive;
 		bInitiallyActive = true;
 		// End:0x26
-		if(__NFUN_129__(bWasActive))
+		if((!bWasActive))
 		{
 			CheckTouchList();
 		}

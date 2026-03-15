@@ -21,17 +21,17 @@ function PlayCommonRainbowVoices(R6Pawn aPawn, Pawn.ECommonRainbowVoices eRainbo
 	{
 		// End:0x26
 		case 0:
-			aPawn.__NFUN_2730__(m_sndTerroristDown, 8, 10, 1);
+			aPawn.PlayVoices(m_sndTerroristDown, 8, 10, 1);
 			// End:0xCC
 			break;
 		// End:0x45
 		case 1:
-			aPawn.__NFUN_2730__(m_sndTakeWound, 6, 5, 2);
+			aPawn.PlayVoices(m_sndTakeWound, 6, 5, 2);
 			// End:0xCC
 			break;
 		// End:0x64
 		case 2:
-			aPawn.__NFUN_2730__(m_sndGoesDown, 6, 5, 2);
+			aPawn.PlayVoices(m_sndGoesDown, 6, 5, 2);
 			// End:0xCC
 			break;
 		// End:0x6C
@@ -40,17 +40,17 @@ function PlayCommonRainbowVoices(R6Pawn aPawn, Pawn.ECommonRainbowVoices eRainbo
 			break;
 		// End:0x8B
 		case 4:
-			aPawn.__NFUN_2730__(m_sndEntersGas, 6, 5, 2);
+			aPawn.PlayVoices(m_sndEntersGas, 6, 5, 2);
 			// End:0xCC
 			break;
 		// End:0xAA
 		case 5:
-			aPawn.__NFUN_2730__(m_sndCoughOxygene, 6, 5, 2);
+			aPawn.PlayVoices(m_sndCoughOxygene, 6, 5, 2);
 			// End:0xCC
 			break;
 		// End:0xC9
 		case 6:
-			aPawn.__NFUN_2730__(m_sndSuffocation, 6, 5, 2);
+			aPawn.PlayVoices(m_sndSuffocation, 6, 5, 2);
 			// End:0xCC
 			break;
 		// End:0xFFFF

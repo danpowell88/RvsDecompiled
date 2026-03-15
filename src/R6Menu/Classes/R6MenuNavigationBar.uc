@@ -217,7 +217,7 @@ function Notify(UWindowDialogControl C, byte E)
 	local R6GameOptions pGameOptions;
 
 	// End:0x392
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		r6Root = R6MenuRootWindow(Root);
 		switch(C)
@@ -284,9 +284,9 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0x38F
 			case m_QuickPlayButton:
 				r6Root.ClosePopups();
-				pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+				pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 				// End:0x37D
-				if(__NFUN_130__(__NFUN_242__(pGameOptions.PopUpQuickPlay, true), __NFUN_132__(r6Root.m_GearRoomWidget.IsTeamConfigValid(), __NFUN_242__(r6Root.IsPlanningEmpty(), false))))
+				if(((pGameOptions.PopUpQuickPlay == true) && (r6Root.m_GearRoomWidget.IsTeamConfigValid() || (r6Root.IsPlanningEmpty() == false))))
 				{
 					r6Root.SimplePopUp(Localize("POPUP", "PopUpTitle_QuiPlay", "R6Menu"), Localize("POPUP", "PopUpMsg_QuiPlay", "R6Menu"), 39, int(0), true);					
 				}

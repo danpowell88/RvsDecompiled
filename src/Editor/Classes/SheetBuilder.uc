@@ -32,59 +32,59 @@ event bool Build()
 	local int X, Y, XStep, YStep, idx, Count;
 
 	// End:0x39
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_152__(Height, 0), __NFUN_152__(Width, 0)), __NFUN_152__(HorizBreaks, 0)), __NFUN_152__(VertBreaks, 0)))
+	if(((((Height <= 0) || (Width <= 0)) || (HorizBreaks <= 0)) || (VertBreaks <= 0)))
 	{
 		return BadParameters();
 	}
 	BeginBrush(false, GroupName);
-	XStep = __NFUN_145__(Width, HorizBreaks);
-	YStep = __NFUN_145__(Height, VertBreaks);
+	XStep = (Width / HorizBreaks);
+	YStep = (Height / VertBreaks);
 	Count = 0;
 	X = 0;
 	J0x77:
 
 	// End:0x45A [Loop If]
-	if(__NFUN_150__(X, HorizBreaks))
+	if((X < HorizBreaks))
 	{
 		Y = 0;
 		J0x8D:
 
 		// End:0x450 [Loop If]
-		if(__NFUN_150__(Y, VertBreaks))
+		if((Y < VertBreaks))
 		{
 			// End:0x1C7
-			if(__NFUN_154__(int(Axis), int(0)))
+			if((int(Axis) == int(0)))
 			{
-				Vertex3f(__NFUN_175__(float(__NFUN_144__(X, XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(float(__NFUN_144__(Y, YStep)), float(__NFUN_145__(Height, 2))), 0.0000000);
-				Vertex3f(__NFUN_175__(float(__NFUN_144__(X, XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(__NFUN_171__(float(__NFUN_146__(Y, 1)), float(YStep)), float(__NFUN_145__(Height, 2))), 0.0000000);
-				Vertex3f(__NFUN_175__(__NFUN_171__(float(__NFUN_146__(X, 1)), float(XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(__NFUN_171__(float(__NFUN_146__(Y, 1)), float(YStep)), float(__NFUN_145__(Height, 2))), 0.0000000);
-				Vertex3f(__NFUN_175__(__NFUN_171__(float(__NFUN_146__(X, 1)), float(XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(float(__NFUN_144__(Y, YStep)), float(__NFUN_145__(Height, 2))), 0.0000000);				
+				Vertex3f((float((X * XStep)) - float((Width / 2))), (float((Y * YStep)) - float((Height / 2))), 0.0000000);
+				Vertex3f((float((X * XStep)) - float((Width / 2))), ((float((Y + 1)) * float(YStep)) - float((Height / 2))), 0.0000000);
+				Vertex3f(((float((X + 1)) * float(XStep)) - float((Width / 2))), ((float((Y + 1)) * float(YStep)) - float((Height / 2))), 0.0000000);
+				Vertex3f(((float((X + 1)) * float(XStep)) - float((Width / 2))), (float((Y * YStep)) - float((Height / 2))), 0.0000000);				
 			}
 			else
 			{
 				// End:0x2F2
-				if(__NFUN_154__(int(Axis), int(1)))
+				if((int(Axis) == int(1)))
 				{
-					Vertex3f(0.0000000, __NFUN_175__(float(__NFUN_144__(X, XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(float(__NFUN_144__(Y, YStep)), float(__NFUN_145__(Height, 2))));
-					Vertex3f(0.0000000, __NFUN_175__(float(__NFUN_144__(X, XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(__NFUN_171__(float(__NFUN_146__(Y, 1)), float(YStep)), float(__NFUN_145__(Height, 2))));
-					Vertex3f(0.0000000, __NFUN_175__(__NFUN_171__(float(__NFUN_146__(X, 1)), float(XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(__NFUN_171__(float(__NFUN_146__(Y, 1)), float(YStep)), float(__NFUN_145__(Height, 2))));
-					Vertex3f(0.0000000, __NFUN_175__(__NFUN_171__(float(__NFUN_146__(X, 1)), float(XStep)), float(__NFUN_145__(Width, 2))), __NFUN_175__(float(__NFUN_144__(Y, YStep)), float(__NFUN_145__(Height, 2))));					
+					Vertex3f(0.0000000, (float((X * XStep)) - float((Width / 2))), (float((Y * YStep)) - float((Height / 2))));
+					Vertex3f(0.0000000, (float((X * XStep)) - float((Width / 2))), ((float((Y + 1)) * float(YStep)) - float((Height / 2))));
+					Vertex3f(0.0000000, ((float((X + 1)) * float(XStep)) - float((Width / 2))), ((float((Y + 1)) * float(YStep)) - float((Height / 2))));
+					Vertex3f(0.0000000, ((float((X + 1)) * float(XStep)) - float((Width / 2))), (float((Y * YStep)) - float((Height / 2))));					
 				}
 				else
 				{
-					Vertex3f(__NFUN_175__(float(__NFUN_144__(X, XStep)), float(__NFUN_145__(Width, 2))), 0.0000000, __NFUN_175__(float(__NFUN_144__(Y, YStep)), float(__NFUN_145__(Height, 2))));
-					Vertex3f(__NFUN_175__(float(__NFUN_144__(X, XStep)), float(__NFUN_145__(Width, 2))), 0.0000000, __NFUN_175__(__NFUN_171__(float(__NFUN_146__(Y, 1)), float(YStep)), float(__NFUN_145__(Height, 2))));
-					Vertex3f(__NFUN_175__(__NFUN_171__(float(__NFUN_146__(X, 1)), float(XStep)), float(__NFUN_145__(Width, 2))), 0.0000000, __NFUN_175__(__NFUN_171__(float(__NFUN_146__(Y, 1)), float(YStep)), float(__NFUN_145__(Height, 2))));
-					Vertex3f(__NFUN_175__(__NFUN_171__(float(__NFUN_146__(X, 1)), float(XStep)), float(__NFUN_145__(Width, 2))), 0.0000000, __NFUN_175__(float(__NFUN_144__(Y, YStep)), float(__NFUN_145__(Height, 2))));
+					Vertex3f((float((X * XStep)) - float((Width / 2))), 0.0000000, (float((Y * YStep)) - float((Height / 2))));
+					Vertex3f((float((X * XStep)) - float((Width / 2))), 0.0000000, ((float((Y + 1)) * float(YStep)) - float((Height / 2))));
+					Vertex3f(((float((X + 1)) * float(XStep)) - float((Width / 2))), 0.0000000, ((float((Y + 1)) * float(YStep)) - float((Height / 2))));
+					Vertex3f(((float((X + 1)) * float(XStep)) - float((Width / 2))), 0.0000000, (float((Y * YStep)) - float((Height / 2))));
 				}
 			}
-			Poly4i(1, Count, __NFUN_146__(Count, 1), __NFUN_146__(Count, 2), __NFUN_146__(Count, 3), 'Sheet', 264);
+			Poly4i(1, Count, (Count + 1), (Count + 2), (Count + 3), 'Sheet', 264);
 			Count = GetVertexCount();
-			__NFUN_165__(Y);
+			(Y++);
 			// [Loop Continue]
 			goto J0x8D;
 		}
-		__NFUN_165__(X);
+		(X++);
 		// [Loop Continue]
 		goto J0x77;
 	}

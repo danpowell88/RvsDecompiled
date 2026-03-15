@@ -29,7 +29,7 @@ function Paint(Canvas C, float X, float Y)
 function MouseWheelDown(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(pAdviceParent, none))
+	if((pAdviceParent != none))
 	{
 		pAdviceParent.MouseWheelDown(X, Y);
 	}
@@ -39,7 +39,7 @@ function MouseWheelDown(float X, float Y)
 function MouseWheelUp(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(pAdviceParent, none))
+	if((pAdviceParent != none))
 	{
 		pAdviceParent.MouseWheelUp(X, Y);
 	}

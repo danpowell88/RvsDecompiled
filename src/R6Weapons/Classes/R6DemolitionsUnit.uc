@@ -51,7 +51,7 @@ function Explode()
 //a bullet hit the demolition charge
 function bool DestroyedByImpact()
 {
-	__NFUN_278__(Class'R6SFX.R6BreakablePhone', none,, Location);
+	Spawn(Class'R6SFX.R6BreakablePhone', none,, Location);
 	m_Weapon.MyUnitIsDestroyed();
 	m_bDestroyedByImpact = true;
 	SelfDestroy();
@@ -62,7 +62,7 @@ function bool DestroyedByImpact()
 function DoorExploded()
 {
 	// End:0x11
-	if(__NFUN_129__(m_bExploding))
+	if((!m_bExploding))
 	{
 		DestroyedByImpact();
 	}
@@ -79,22 +79,22 @@ function DistributeDamage(Actor anActor, Vector vLocationOfExplosion)
 	local float fDamagePercent, fEffectiveKillValue, fEffectiveStunValue;
 	local R6IORotatingDoor pImADoor;
 
-	fDistFromGrenade = __NFUN_225__(__NFUN_216__(anActor.Location, Location));
-	fDamagePercent = __NFUN_175__(1.0000000, __NFUN_172__(__NFUN_175__(fDistFromGrenade, m_fKillBlastRadius), m_fEffectiveOutsideKillRadius));
+	fDistFromGrenade = VSize((anActor.Location - Location));
+	fDamagePercent = (1.0000000 - ((fDistFromGrenade - m_fKillBlastRadius) / m_fEffectiveOutsideKillRadius));
 	// End:0x90
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Actor ", string(anActor)), " was hit by a grenade.  Distance : "), string(__NFUN_171__(fDistFromGrenade, 0.0100000))));
+		Log(((("Actor " $ string(anActor)) $ " was hit by a grenade.  Distance : ") $ string((fDistFromGrenade * 0.0100000))));
 	}
 	// End:0x281
-	if(anActor.__NFUN_303__('R6Pawn'))
+	if(anActor.IsA('R6Pawn'))
 	{
-		fCurrentNumberOfFragments = __NFUN_171__(float(m_iNumberOfFragments), fDamagePercent);
+		fCurrentNumberOfFragments = (float(m_iNumberOfFragments) * fDamagePercent);
 		iCurrentFragment = 0;
 		J0xBF:
 
 		// End:0x27E [Loop If]
-		if(__NFUN_176__(float(iCurrentFragment), fCurrentNumberOfFragments))
+		if((float(iCurrentFragment) < fCurrentNumberOfFragments))
 		{
 			eBoneTarget = HitRandomBodyPart(GetPawnPose(R6Pawn(anActor)));
 			switch(eBoneTarget)
@@ -133,16 +133,16 @@ function DistributeDamage(Actor anActor, Vector vLocationOfExplosion)
 				default:
 					break;
 			}
-			fDistFromGrenade = __NFUN_225__(__NFUN_216__(vDamageLocation, vLocationOfExplosion));
-			fEffectiveKillValue = float(__NFUN_250__(int(__NFUN_171__(float(m_iEnergy), fDamagePercent)), 0));
+			fDistFromGrenade = VSize((vDamageLocation - vLocationOfExplosion));
+			fEffectiveKillValue = float(Max(int((float(m_iEnergy) * fDamagePercent)), 0));
 			// End:0x274
-			if(__NFUN_181__(fEffectiveKillValue, float(0)))
+			if((fEffectiveKillValue != float(0)))
 			{
-				fEffectiveStunValue = __NFUN_174__(fEffectiveKillValue, __NFUN_171__(fEffectiveKillValue, m_fKillStunTransfer));
-				vExplosionMomentum = __NFUN_216__(vDamageLocation, vLocationOfExplosion);
+				fEffectiveStunValue = (fEffectiveKillValue + (fEffectiveKillValue * m_fKillStunTransfer));
+				vExplosionMomentum = (vDamageLocation - vLocationOfExplosion);
 				anActor.R6TakeDamage(int(fEffectiveKillValue), int(fEffectiveStunValue), Instigator, vDamageLocation, vExplosionMomentum, 0);
 			}
-			__NFUN_165__(iCurrentFragment);
+			(iCurrentFragment++);
 			// [Loop Continue]
 			goto J0xBF;
 		}		
@@ -151,7 +151,7 @@ function DistributeDamage(Actor anActor, Vector vLocationOfExplosion)
 	{
 		pImADoor = R6IORotatingDoor(anActor);
 		// End:0x2B3
-		if(__NFUN_119__(pImADoor, none))
+		if((pImADoor != none))
 		{
 			vDamageLocation = pImADoor.m_vVisibleCenter;			
 		}
@@ -160,18 +160,18 @@ function DistributeDamage(Actor anActor, Vector vLocationOfExplosion)
 			vDamageLocation = anActor.Location;
 		}
 		// End:0x2E9
-		if(__NFUN_176__(fDistFromGrenade, m_fKillBlastRadius))
+		if((fDistFromGrenade < m_fKillBlastRadius))
 		{
-			fEffectiveKillValue = float(__NFUN_250__(m_iEnergy, 0));			
+			fEffectiveKillValue = float(Max(m_iEnergy, 0));			
 		}
 		else
 		{
-			fEffectiveKillValue = float(__NFUN_250__(int(__NFUN_171__(float(m_iEnergy), fDamagePercent)), 0));
+			fEffectiveKillValue = float(Max(int((float(m_iEnergy) * fDamagePercent)), 0));
 		}
 		// End:0x34A
-		if(__NFUN_181__(fEffectiveKillValue, float(0)))
+		if((fEffectiveKillValue != float(0)))
 		{
-			vExplosionMomentum = __NFUN_216__(vDamageLocation, vLocationOfExplosion);
+			vExplosionMomentum = (vDamageLocation - vLocationOfExplosion);
 			anActor.R6TakeDamage(int(fEffectiveKillValue), 0, Instigator, vDamageLocation, vExplosionMomentum, 0);
 		}
 	}

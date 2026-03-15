@@ -31,14 +31,14 @@ function Created()
 	local Color LabelTextColor;
 
 	LabelTextColor = Root.Colors.White;
-	m_CampaignName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, 0.0000000, __NFUN_175__(WinWidth, float(5)), 25.0000000, self));
+	m_CampaignName = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 5.0000000, 0.0000000, (WinWidth - float(5)), 25.0000000, self));
 	m_CampaignName.Text = Localize("SinglePlayer", "CampaignName", "R6Menu");
 	m_CampaignName.Align = 0;
 	m_CampaignName.m_Font = Root.Fonts[5];
 	m_CampaignName.TextColor = LabelTextColor;
 	m_CampaignName.m_BGTexture = none;
 	m_CampaignName.m_bDrawBorders = false;
-	m_CampaignNameEdit = R6WindowEditControl(CreateControl(Class'R6Window.R6WindowEditControl', 3.0000000, 24.0000000, __NFUN_175__(WinWidth, float(6)), 15.0000000, self));
+	m_CampaignNameEdit = R6WindowEditControl(CreateControl(Class'R6Window.R6WindowEditControl', 3.0000000, 24.0000000, (WinWidth - float(6)), 15.0000000, self));
 	m_CampaignNameEdit.SetValue(Localize("SinglePlayer", "DefaultCampaignName", "R6Menu"));
 	m_CampaignNameEdit.EditBox.Font = 5;
 	m_CampaignNameEdit.ForceCaps(true);
@@ -51,10 +51,10 @@ function Created()
 	m_Difficulty.m_Font = Root.Fonts[8];
 	m_Difficulty.TextColor = LabelTextColor;
 	m_Difficulty.m_bDrawBorders = false;
-	m_pDiffSelection = R6MenuDiffCustomMissionSelect(CreateWindow(Class'R6Menu.R6MenuDiffCustomMissionSelect', 0.0000000, __NFUN_174__(m_Difficulty.WinTop, m_Difficulty.WinHeight), WinWidth, __NFUN_175__(WinHeight, __NFUN_174__(m_Difficulty.WinTop, m_Difficulty.WinHeight)), self));
-	m_pDiffSelection.m_pButLevel1.WinTop = __NFUN_174__(m_pDiffSelection.m_pButLevel1.WinTop, float(1));
-	m_pDiffSelection.m_pButLevel2.WinTop = __NFUN_174__(m_pDiffSelection.m_pButLevel2.WinTop, float(12));
-	m_pDiffSelection.m_pButLevel3.WinTop = __NFUN_174__(m_pDiffSelection.m_pButLevel3.WinTop, float(23));
+	m_pDiffSelection = R6MenuDiffCustomMissionSelect(CreateWindow(Class'R6Menu.R6MenuDiffCustomMissionSelect', 0.0000000, (m_Difficulty.WinTop + m_Difficulty.WinHeight), WinWidth, (WinHeight - (m_Difficulty.WinTop + m_Difficulty.WinHeight)), self));
+	m_pDiffSelection.m_pButLevel1.WinTop = (m_pDiffSelection.m_pButLevel1.WinTop + float(1));
+	m_pDiffSelection.m_pButLevel2.WinTop = (m_pDiffSelection.m_pButLevel2.WinTop + float(12));
+	m_pDiffSelection.m_pButLevel3.WinTop = (m_pDiffSelection.m_pButLevel3.WinTop + float(23));
 	bAlwaysAcceptsFocus = true;
 	return;
 }
@@ -63,7 +63,7 @@ function KeyDown(int Key, float X, float Y)
 {
 	super(UWindowWindow).KeyDown(Key, X, Y);
 	// End:0x73
-	if(__NFUN_130__(__NFUN_154__(Key, int(Root.Console.13)), __NFUN_123__(m_CampaignNameEdit.GetValue(), "")))
+	if(((Key == int(Root.Console.13)) && (m_CampaignNameEdit.GetValue() != "")))
 	{
 		R6MenuSinglePlayerWidget(OwnerWindow).ButtonClicked(int(R6MenuSinglePlayerWidget(OwnerWindow).3));
 	}
@@ -73,7 +73,7 @@ function KeyDown(int Key, float X, float Y)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x5D
-	if(__NFUN_130__(__NFUN_130__(__NFUN_114__(C, m_CampaignNameEdit), __NFUN_154__(int(E), 7)), __NFUN_123__(m_CampaignNameEdit.GetValue(), "")))
+	if((((C == m_CampaignNameEdit) && (int(E) == 7)) && (m_CampaignNameEdit.GetValue() != "")))
 	{
 		R6MenuSinglePlayerWidget(OwnerWindow).ButtonClicked(int(R6MenuSinglePlayerWidget(OwnerWindow).3));
 	}
@@ -92,9 +92,9 @@ function Paint(Canvas C, float X, float Y)
 	C.Style = 4;
 	DrawStretchedTextureSegment(C, m_Difficulty.WinLeft, m_Difficulty.WinTop, m_Difficulty.WinWidth, m_Difficulty.WinHeight, 77.0000000, 0.0000000, 4.0000000, 29.0000000, Texture'R6MenuTextures.Gui_BoxScroll');
 	C.Style = 5;
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTexture(C, 0.0000000, m_Difficulty.WinTop, WinWidth, 1.0000000, Texture'UWindow.WhiteTexture');
-	DrawStretchedTexture(C, 0.0000000, __NFUN_174__(m_Difficulty.WinTop, m_Difficulty.WinHeight), WinWidth, 1.0000000, Texture'UWindow.WhiteTexture');
+	DrawStretchedTexture(C, 0.0000000, (m_Difficulty.WinTop + m_Difficulty.WinHeight), WinWidth, 1.0000000, Texture'UWindow.WhiteTexture');
 	return;
 }
 
@@ -107,17 +107,17 @@ function bool CreateCampaign()
 	local R6PlayerCampaign PlayerCampaign;
 	local R6ModMgr pModManager;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	r6Root = R6MenuRootWindow(Root);
 	iNbArrayElements = 0;
 	// End:0x3D4
-	if(__NFUN_130__(__NFUN_130__(__NFUN_123__(m_CampaignNameEdit.GetValue(), ""), __NFUN_119__(r6Root, none)), __NFUN_119__(R6MenuSinglePlayerWidget(OwnerWindow).m_pFileManager, none)))
+	if((((m_CampaignNameEdit.GetValue() != "") && (r6Root != none)) && (R6MenuSinglePlayerWidget(OwnerWindow).m_pFileManager != none)))
 	{
 		PlayerCampaign = R6Console(r6Root.Console).m_PlayerCampaign;
 		PlayerCampaign.m_FileName = m_CampaignNameEdit.GetValue();
 		ReplaceText(PlayerCampaign.m_FileName, " ", "_");
 		PlayerCampaign.m_iDifficultyLevel = m_pDiffSelection.GetDifficulty();
-		PlayerCampaign.m_CampaignFileName = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szCampaignIniFile;
+		PlayerCampaign.m_CampaignFileName = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szCampaignIniFile;
 		PlayerCampaign.m_iNoMission = 0;
 		PlayerCampaign.m_OperativesMissionDetails = none;
 		PlayerCampaign.m_OperativesMissionDetails = new (none) Class'R6Game.R6MissionRoster';
@@ -126,55 +126,55 @@ function bool CreateCampaign()
 		J0x177:
 
 		// End:0x239 [Loop If]
-		if(__NFUN_150__(i, iNbArrayElements))
+		if((i < iNbArrayElements))
 		{
 			tmpOperative = new (none) Class<R6Operative>(DynamicLoadObject(R6Console(r6Root.Console).m_CurrentCampaign.m_OperativeClassName[i], Class'Core.Class'));
 			PlayerCampaign.m_OperativesMissionDetails.m_MissionOperatives[i] = tmpOperative;
 			// End:0x22F
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__("adding", string(tmpOperative)), "to default player campaign roster"));
+				Log((("adding" @ string(tmpOperative)) @ "to default player campaign roster"));
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x177;
 		}
 		iNbTotalOperatives = i;
 		// End:0x33A
-		if(__NFUN_242__(pModManager.m_pCurrentMod.m_bUseCustomOperatives, true))
+		if((pModManager.m_pCurrentMod.m_bUseCustomOperatives == true))
 		{
 			i = 0;
 			J0x269:
 
 			// End:0x33A [Loop If]
-			if(__NFUN_150__(i, pModManager.GetPackageMgr().GetNbPackage()))
+			if((i < pModManager.GetPackageMgr().GetNbPackage()))
 			{
 				tmpOperativeClass = Class<R6Operative>(pModManager.GetPackageMgr().GetFirstClassFromPackage(i, Class'R6Game.R6Operative'));
 				J0x2BA:
 
 				// End:0x330 [Loop If]
-				if(__NFUN_119__(tmpOperativeClass, none))
+				if((tmpOperativeClass != none))
 				{
 					tmpOperative = new (none) tmpOperativeClass;
 					// End:0x309
-					if(__NFUN_119__(tmpOperative, none))
+					if((tmpOperative != none))
 					{
 						PlayerCampaign.m_OperativesMissionDetails.m_MissionOperatives[iNbTotalOperatives] = tmpOperative;
-						__NFUN_165__(iNbTotalOperatives);
+						(iNbTotalOperatives++);
 					}
 					tmpOperativeClass = Class<R6Operative>(pModManager.GetPackageMgr().GetNextClassFromPackage());
 					// [Loop Continue]
 					goto J0x2BA;
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x269;
 			}
 		}
 		// End:0x3D2
-		if(__NFUN_242__(R6MenuSinglePlayerWidget(OwnerWindow).m_pFileManager.__NFUN_1004__(PlayerCampaign), false))
+		if((R6MenuSinglePlayerWidget(OwnerWindow).m_pFileManager.SaveCampaign(PlayerCampaign) == false))
 		{
-			r6Root.SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), __NFUN_168__(__NFUN_168__(PlayerCampaign.m_FileName, ":"), Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, 1);
+			r6Root.SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), ((PlayerCampaign.m_FileName @ ":") @ Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, 1);
 			return false;			
 		}
 		else

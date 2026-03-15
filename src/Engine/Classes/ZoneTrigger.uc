@@ -21,27 +21,27 @@ function Touch(Actor Other)
 	if(IsRelevant(Other))
 	{
 		// End:0x69
-		if(__NFUN_255__(Event, 'None'))
+		if((Event != 'None'))
 		{
 			// End:0x68
-			foreach __NFUN_304__(Class'Engine.ZoneInfo', Z)
+			foreach AllActors(Class'Engine.ZoneInfo', Z)
 			{
 				// End:0x67
-				if(__NFUN_254__(Z.ZoneTag, Event))
+				if((Z.ZoneTag == Event))
 				{
 					Z.Trigger(Other, Other.Instigator);
 				}				
 			}			
 		}
 		// End:0x92
-		if(__NFUN_123__(Message, ""))
+		if((Message != ""))
 		{
 			Other.Instigator.ClientMessage(Message);
 		}
 		// End:0x9F
 		if(bTriggerOnceOnly)
 		{
-			__NFUN_262__(false);
+			SetCollision(false);
 		}
 	}
 	return;
@@ -58,13 +58,13 @@ function UnTouch(Actor Other)
 	if(IsRelevant(Other))
 	{
 		// End:0x69
-		if(__NFUN_255__(Event, 'None'))
+		if((Event != 'None'))
 		{
 			// End:0x68
-			foreach __NFUN_304__(Class'Engine.ZoneInfo', Z)
+			foreach AllActors(Class'Engine.ZoneInfo', Z)
 			{
 				// End:0x67
-				if(__NFUN_254__(Z.ZoneTag, Event))
+				if((Z.ZoneTag == Event))
 				{
 					Z.UnTrigger(Other, Other.Instigator);
 				}				

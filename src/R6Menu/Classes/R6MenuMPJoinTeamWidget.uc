@@ -84,26 +84,26 @@ function FillDescriptionArray()
 	local int i;
 	local R6Mod pCurrentMod;
 
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	i = 0;
 	J0x22:
 
 	// End:0xA3 [Loop If]
-	if(__NFUN_150__(i, pCurrentMod.m_aDescriptionPackage.Length))
+	if((i < pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		DescriptionClass = Class<R6ArmorDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6ArmorDescription'));
+		DescriptionClass = Class<R6ArmorDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[i] $ ".u"), Class'R6Description.R6ArmorDescription'));
 		J0x68:
 
 		// End:0x96 [Loop If]
-		if(__NFUN_119__(DescriptionClass, none))
+		if((DescriptionClass != none))
 		{
 			m_AArmorDescriptions[m_AArmorDescriptions.Length] = DescriptionClass;
-			DescriptionClass = Class<R6ArmorDescription>(__NFUN_1006__());
+			DescriptionClass = Class<R6ArmorDescription>(GetNextClass());
 			// [Loop Continue]
 			goto J0x68;
 		}
-		__NFUN_1007__();
-		__NFUN_165__(i);
+		FreePackageObjects();
+		(i++);
 		// [Loop Continue]
 		goto J0x22;
 	}
@@ -115,7 +115,7 @@ function Tick(float DeltaTime)
 	local string szAutoSelection;
 
 	// End:0x45
-	if(__NFUN_132__(__NFUN_123__(m_szMenuGreenTeamPawnClass, GetLevel().GreenTeamPawnClass), __NFUN_130__(__NFUN_123__(m_szMenuRedTeamPawnClass, GetLevel().RedTeamPawnClass), m_bIsTeamGame)))
+	if(((m_szMenuGreenTeamPawnClass != GetLevel().GreenTeamPawnClass) || ((m_szMenuRedTeamPawnClass != GetLevel().RedTeamPawnClass) && m_bIsTeamGame)))
 	{
 		RefreshBitmaps();
 	}
@@ -123,33 +123,33 @@ function Tick(float DeltaTime)
 	if(m_bIsTeamGame)
 	{
 		// End:0x71
-		if(__NFUN_179__(m_fTimeForRefresh, 4.0000000))
+		if((m_fTimeForRefresh >= 4.0000000))
 		{
 			RefreshButtonsStatus();
 			m_fTimeForRefresh = 0.0000000;			
 		}
 		else
 		{
-			__NFUN_184__(m_fTimeForRefresh, DeltaTime);
+			(m_fTimeForRefresh += DeltaTime);
 		}
 	}
 	// End:0x1BF
-	if(__NFUN_177__(m_fTimeAutoTeam, float(10)))
+	if((m_fTimeAutoTeam > float(10)))
 	{
-		szAutoSelection = Class'Engine.Actor'.static.__NFUN_1009__().MPAutoSelection;
+		szAutoSelection = Class'Engine.Actor'.static.GetGameOptions().MPAutoSelection;
 		// End:0xE6
-		if(__NFUN_124__(szAutoSelection, "GREEN"))
+		if((szAutoSelection ~= "GREEN"))
 		{
 			m_pButAlphaTeam.Click(0.0000000, 0.0000000);
-			Class'Engine.Actor'.static.__NFUN_1009__().__NFUN_536__();			
+			Class'Engine.Actor'.static.GetGameOptions().SaveConfig();			
 		}
 		else
 		{
 			// End:0x12A
-			if(__NFUN_124__(szAutoSelection, "SPECTATOR"))
+			if((szAutoSelection ~= "SPECTATOR"))
 			{
 				m_pButSpectator.Click(0.0000000, 0.0000000);
-				Class'Engine.Actor'.static.__NFUN_1009__().__NFUN_536__();				
+				Class'Engine.Actor'.static.GetGameOptions().SaveConfig();				
 			}
 			else
 			{
@@ -157,18 +157,18 @@ function Tick(float DeltaTime)
 				if(m_bIsTeamGame)
 				{
 					// End:0x171
-					if(__NFUN_124__(szAutoSelection, "RED"))
+					if((szAutoSelection ~= "RED"))
 					{
 						m_pButBravoTeam.Click(0.0000000, 0.0000000);
-						Class'Engine.Actor'.static.__NFUN_1009__().__NFUN_536__();						
+						Class'Engine.Actor'.static.GetGameOptions().SaveConfig();						
 					}
 					else
 					{
 						// End:0x1B1
-						if(__NFUN_124__(szAutoSelection, "AUTOTEAM"))
+						if((szAutoSelection ~= "AUTOTEAM"))
 						{
 							m_pButAutoTeam.Click(0.0000000, 0.0000000);
-							Class'Engine.Actor'.static.__NFUN_1009__().__NFUN_536__();
+							Class'Engine.Actor'.static.GetGameOptions().SaveConfig();
 						}
 					}
 				}
@@ -178,7 +178,7 @@ function Tick(float DeltaTime)
 	}
 	else
 	{
-		__NFUN_184__(m_fTimeAutoTeam, DeltaTime);
+		(m_fTimeAutoTeam += DeltaTime);
 	}
 	return;
 }
@@ -206,10 +206,10 @@ function RefreshServerInfo()
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x11A
-	if(__NFUN_119__(r6Root.m_R6GameMenuCom.m_GameRepInfo, none))
+	if((r6Root.m_R6GameMenuCom.m_GameRepInfo != none))
 	{
-		m_pInfoText.ChangeTextLabel(__NFUN_112__(__NFUN_112__(Localize("MPInGame", "ServerName", "R6Menu"), " "), r6Root.m_R6GameMenuCom.m_GameRepInfo.ServerName), 0);
-		m_pInfoText.ChangeTextLabel(__NFUN_112__(__NFUN_112__(Localize("MPInGame", "GameVersion", "R6Menu"), " "), Class'Engine.Actor'.static.__NFUN_1419__(true, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield()))), 1);
+		m_pInfoText.ChangeTextLabel(((Localize("MPInGame", "ServerName", "R6Menu") $ " ") $ r6Root.m_R6GameMenuCom.m_GameRepInfo.ServerName), 0);
+		m_pInfoText.ChangeTextLabel(((Localize("MPInGame", "GameVersion", "R6Menu") $ " ") $ Class'Engine.Actor'.static.GetGameVersion(true, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield()))), 1);
 		m_pInfoText.ChangeTextLabel(r6Root.m_R6GameMenuCom.m_GameRepInfo.MOTDLine1, 3);
 	}
 	return;
@@ -226,8 +226,8 @@ function CreateButtons()
 	local Font ButtonFont;
 	local float fXOffset, fYOffset;
 
-	fXOffset = float(__NFUN_146__(R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RJoinWidget.X, 100));
-	fYOffset = float(__NFUN_146__(R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RJoinWidget.Y, 100));
+	fXOffset = float((R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RJoinWidget.X + 100));
+	fYOffset = float((R6MenuInGameMultiPlayerRootWindow(OwnerWindow).m_RJoinWidget.Y + 100));
 	ButtonFont = Root.Fonts[16];
 	m_pButAlphaTeam = R6WindowButtonMPInGame(CreateControl(Class'R6Menu.R6WindowButtonMPInGame', fXOffset, fYOffset, float(m_iButtonWidth), float(m_iButtonHeight), self));
 	m_pButAlphaTeam.Text = Localize("MPInGame", "AlphaTeam", "R6Menu");
@@ -236,7 +236,7 @@ function CreateButtons()
 	m_pButAlphaTeam.m_fFontSpacing = 2.0000000;
 	m_pButAlphaTeam.m_buttonFont = ButtonFont;
 	m_pButAlphaTeam.ResizeToText();
-	__NFUN_184__(fYOffset, float(__NFUN_146__(m_iButtonHeight, m_iYBetweenButtonPadding)));
+	(fYOffset += float((m_iButtonHeight + m_iYBetweenButtonPadding)));
 	m_pButBravoTeam = R6WindowButtonMPInGame(CreateControl(Class'R6Menu.R6WindowButtonMPInGame', fXOffset, fYOffset, float(m_iButtonWidth), float(m_iButtonHeight), self));
 	m_pButBravoTeam.Text = Localize("MPInGame", "BravoTeam", "R6Menu");
 	m_pButBravoTeam.m_eButInGame_Action = 1;
@@ -244,7 +244,7 @@ function CreateButtons()
 	m_pButBravoTeam.m_fFontSpacing = 2.0000000;
 	m_pButBravoTeam.m_buttonFont = ButtonFont;
 	m_pButBravoTeam.ResizeToText();
-	__NFUN_184__(fYOffset, float(__NFUN_146__(m_iButtonHeight, m_iYBetweenButtonPadding)));
+	(fYOffset += float((m_iButtonHeight + m_iYBetweenButtonPadding)));
 	m_pButAutoTeam = R6WindowButtonMPInGame(CreateControl(Class'R6Menu.R6WindowButtonMPInGame', fXOffset, fYOffset, float(m_iButtonWidth), float(m_iButtonHeight), self));
 	m_pButAutoTeam.ToolTipString = Localize("Tip", "AutoTeam", "R6Menu");
 	m_pButAutoTeam.Text = Localize("MPInGame", "AutoTeam", "R6Menu");
@@ -253,7 +253,7 @@ function CreateButtons()
 	m_pButAutoTeam.m_fFontSpacing = 2.0000000;
 	m_pButAutoTeam.m_buttonFont = ButtonFont;
 	m_pButAutoTeam.ResizeToText();
-	__NFUN_184__(fYOffset, float(__NFUN_146__(m_iButtonHeight, m_iYBetweenButtonPadding)));
+	(fYOffset += float((m_iButtonHeight + m_iYBetweenButtonPadding)));
 	m_pButSpectator = R6WindowButtonMPInGame(CreateControl(Class'R6Menu.R6WindowButtonMPInGame', fXOffset, fYOffset, float(m_iButtonWidth), float(m_iButtonHeight), self));
 	m_pButSpectator.ToolTipString = Localize("Tip", "Spectator", "R6Menu");
 	m_pButSpectator.Text = Localize("MPInGame", "Spectator", "R6Menu");
@@ -270,7 +270,7 @@ function RefreshButtons(string _szCurrentGameType)
 	local float fSpectatorYPos;
 
 	// End:0xCA
-	if(__NFUN_129__(m_bIsTeamGame))
+	if((!m_bIsTeamGame))
 	{
 		m_pButAlphaTeam.ToolTipString = GetLevel().GetGreenTeamObjective(_szCurrentGameType);
 		m_pButAlphaTeam.Text = Localize("MPInGame", "Play", "R6Menu");
@@ -278,7 +278,7 @@ function RefreshButtons(string _szCurrentGameType)
 		m_pButAlphaTeam.ResizeToText();
 		m_pButBravoTeam.HideWindow();
 		m_pButAutoTeam.HideWindow();
-		fSpectatorYPos = __NFUN_174__(__NFUN_174__(m_pButAlphaTeam.WinTop, m_pButAlphaTeam.WinHeight), float(m_iYBetweenButtonPadding));		
+		fSpectatorYPos = ((m_pButAlphaTeam.WinTop + m_pButAlphaTeam.WinHeight) + float(m_iYBetweenButtonPadding));		
 	}
 	else
 	{
@@ -289,7 +289,7 @@ function RefreshButtons(string _szCurrentGameType)
 		m_pButBravoTeam.ShowWindow();
 		m_pButBravoTeam.ToolTipString = GetLevel().GetRedTeamObjective(_szCurrentGameType);
 		m_pButAutoTeam.ShowWindow();
-		fSpectatorYPos = __NFUN_174__(__NFUN_174__(m_pButAutoTeam.WinTop, m_pButAutoTeam.WinHeight), float(m_iYBetweenButtonPadding));
+		fSpectatorYPos = ((m_pButAutoTeam.WinTop + m_pButAutoTeam.WinHeight) + float(m_iYBetweenButtonPadding));
 	}
 	m_pButSpectator.WinTop = fSpectatorYPos;
 	return;
@@ -303,16 +303,16 @@ function RefreshButtonsStatus()
 	m_pButAlphaTeam.bDisabled = false;
 	m_pButBravoTeam.bDisabled = false;
 	// End:0x7C
-	if(__NFUN_153__(r6Root.m_R6GameMenuCom.GetNbOfTeamPlayer(true), 8))
+	if((r6Root.m_R6GameMenuCom.GetNbOfTeamPlayer(true) >= 8))
 	{
 		// End:0x7C
-		if(__NFUN_154__(int(m_pButAlphaTeam.m_eButInGame_Action), int(0)))
+		if((int(m_pButAlphaTeam.m_eButInGame_Action) == int(0)))
 		{
 			m_pButAlphaTeam.bDisabled = true;
 		}
 	}
 	// End:0xAD
-	if(__NFUN_153__(r6Root.m_R6GameMenuCom.GetNbOfTeamPlayer(false), 8))
+	if((r6Root.m_R6GameMenuCom.GetNbOfTeamPlayer(false) >= 8))
 	{
 		m_pButBravoTeam.bDisabled = true;
 	}
@@ -337,20 +337,20 @@ function CreateTextLabels()
 	m_pInfoText.m_Font = Root.Fonts[6];
 	m_pInfoText.m_vTextColor = Root.Colors.White;
 	fXOffset = 4.0000000;
-	fYOffset = __NFUN_174__(R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize(), float(3));
-	fWidth = __NFUN_171__(fWidth, 0.5000000);
+	fYOffset = (R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize() + float(3));
+	fWidth = (fWidth * 0.5000000);
 	m_pInfoText.AddTextLabel(Localize("MPInGame", "ServerName", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
-	fXOffset = __NFUN_174__(fWidth, float(4));
-	fYOffset = __NFUN_174__(R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize(), float(3));
+	fXOffset = (fWidth + float(4));
+	fYOffset = (R6MenuRSLookAndFeel(LookAndFeel).GetTextHeaderSize() + float(3));
 	m_pInfoText.AddTextLabel(Localize("MPInGame", "GameVersion", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
 	fXOffset = 4.0000000;
-	fYOffset = __NFUN_175__(fHeight, float(40));
+	fYOffset = (fHeight - float(40));
 	fWidth = fWidth;
 	m_pInfoText.m_Font = Root.Fonts[5];
 	m_pInfoText.AddTextLabel(Localize("MPInGame", "PleaseNote", "R6Menu"), fXOffset, fYOffset, fWidth, 0, false);
 	m_pInfoText.m_Font = Root.Fonts[6];
 	fXOffset = 4.0000000;
-	fYOffset = __NFUN_175__(fHeight, float(20));
+	fYOffset = (fHeight - float(20));
 	fWidth = fWidth;
 	m_pInfoText.AddTextLabel("", fXOffset, fYOffset, fWidth, 0, false);
 	return;
@@ -397,7 +397,7 @@ function RefreshBitmaps()
 	m_RightChar.HideWindow();
 	m_BetweenCharIcon.HideWindow();
 	// End:0x102
-	if(__NFUN_119__(m_pButCurrentSelected, none))
+	if((m_pButCurrentSelected != none))
 	{
 		Notify(m_pButCurrentSelected, 12);
 	}
@@ -419,7 +419,7 @@ function ToolTip(string strTip)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x15E
-	if(__NFUN_154__(int(E), 12))
+	if((int(E) == 12))
 	{
 		// End:0x27
 		if(R6WindowButtonMPInGame(C).bDisabled)
@@ -468,7 +468,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x1FF
-		if(__NFUN_154__(int(E), 9))
+		if((int(E) == 9))
 		{
 			// End:0x185
 			if(R6WindowButtonMPInGame(C).bDisabled)

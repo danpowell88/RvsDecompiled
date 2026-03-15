@@ -45,7 +45,7 @@ static function RenderComplexMessage(Canvas Canvas, out float XL, out float YL, 
 static function string GetString(optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
 	// End:0x34
-	if(__NFUN_119__(Class<Actor>(OptionalObject), none))
+	if((Class<Actor>(OptionalObject) != none))
 	{
 		return Class<Actor>(OptionalObject).static.GetLocalString(Switch, RelatedPRI_1, RelatedPRI_2);
 	}

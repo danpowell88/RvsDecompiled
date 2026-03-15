@@ -45,13 +45,13 @@ var(Rainbow) array<Texture> m_DecalTexture;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bPlayEffectSound;
 }
 
 simulated function FirstPassReset()
 {
-	__NFUN_279__();
+	Destroy();
 	return;
 }
 

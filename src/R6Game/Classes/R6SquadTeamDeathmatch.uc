@@ -71,13 +71,13 @@ function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 	local Controller P;
 
 	// End:0x40
-	if(__NFUN_130__(__NFUN_155__(int(R6PlayerController(aController).m_TeamSelection), int(2)), __NFUN_155__(int(R6PlayerController(aController).m_TeamSelection), int(3))))
+	if(((int(R6PlayerController(aController).m_TeamSelection) != int(2)) && (int(R6PlayerController(aController).m_TeamSelection) != int(3))))
 	{
 		return 0;
 	}
 	GetNbHumanPlayerInTeam(iAlphaNb, iBravoNb);
 	// End:0x82
-	if(__NFUN_154__(int(R6PlayerController(aController).m_TeamSelection), int(2)))
+	if((int(R6PlayerController(aController).m_TeamSelection) == int(2)))
 	{
 		iAiMax = GetNbOfRainbowAIToSpawnBaseOnTeamNb(iAlphaNb);		
 	}
@@ -86,15 +86,15 @@ function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 		iAiMax = GetNbOfRainbowAIToSpawnBaseOnTeamNb(iBravoNb);
 	}
 	// End:0xC2
-	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(iAlphaNb, iBravoNb), __NFUN_154__(iAlphaNb, 0)), __NFUN_154__(iBravoNb, 0)))
+	if((((iAlphaNb == iBravoNb) || (iAlphaNb == 0)) || (iBravoNb == 0)))
 	{
 		return iAiMax;
 	}
 	// End:0xF8
-	if(__NFUN_154__(int(R6PlayerController(aController).m_TeamSelection), int(2)))
+	if((int(R6PlayerController(aController).m_TeamSelection) == int(2)))
 	{
 		// End:0xF5
-		if(__NFUN_150__(iAlphaNb, iBravoNb))
+		if((iAlphaNb < iBravoNb))
 		{
 			return iAiMax;
 		}		
@@ -102,48 +102,48 @@ function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 	else
 	{
 		// End:0x10D
-		if(__NFUN_151__(iAlphaNb, iBravoNb))
+		if((iAlphaNb > iBravoNb))
 		{
 			return iAiMax;
 		}
 	}
 	// End:0x14A
-	if(__NFUN_151__(iAlphaNb, iBravoNb))
+	if((iAlphaNb > iBravoNb))
 	{
-		iAdjustedMax = __NFUN_144__(GetNbOfRainbowAIToSpawnBaseOnTeamNb(iBravoNb), iBravoNb);
+		iAdjustedMax = (GetNbOfRainbowAIToSpawnBaseOnTeamNb(iBravoNb) * iBravoNb);
 		eTeamToAdjust = 2;
 		iHumanNb = iAlphaNb;		
 	}
 	else
 	{
-		iAdjustedMax = __NFUN_144__(GetNbOfRainbowAIToSpawnBaseOnTeamNb(iAlphaNb), iAlphaNb);
+		iAdjustedMax = (GetNbOfRainbowAIToSpawnBaseOnTeamNb(iAlphaNb) * iAlphaNb);
 		eTeamToAdjust = 3;
 		iHumanNb = iBravoNb;
 	}
-	__NFUN_162__(iAdjustedMax, iHumanNb);
+	(iAdjustedMax -= iHumanNb);
 	J0x181:
 
 	// End:0x223 [Loop If]
-	if(__NFUN_151__(iAdjustedMax, 0))
+	if((iAdjustedMax > 0))
 	{
 		P = Level.ControllerList;
 		J0x1A0:
 
 		// End:0x220 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x1FB
-			if(__NFUN_130__(__NFUN_119__(R6PlayerController(P), none), __NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(eTeamToAdjust))))
+			if(((R6PlayerController(P) != none) && (int(R6PlayerController(P).m_TeamSelection) == int(eTeamToAdjust))))
 			{
 				// End:0x1F4
-				if(__NFUN_114__(aController, P))
+				if((aController == P))
 				{
-					__NFUN_163__(iNbPawnAssignedForThisController);
+					(++iNbPawnAssignedForThisController);
 				}
-				__NFUN_166__(iAdjustedMax);
+				(iAdjustedMax--);
 			}
 			// End:0x209
-			if(__NFUN_154__(iAdjustedMax, 0))
+			if((iAdjustedMax == 0))
 			{
 				// [Explicit Break]
 				goto J0x220;
@@ -157,7 +157,7 @@ function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 		// [Loop Continue]
 		goto J0x181;
 	}
-	__NFUN_165__(iNbPawnAssignedForThisController);
+	(iNbPawnAssignedForThisController++);
 	return iNbPawnAssignedForThisController;
 	return;
 }
@@ -169,7 +169,7 @@ function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 function SetPawnTeamFriendlies(Pawn aPawn)
 {
 	aPawn.m_iFriendlyTeams = GetTeamNumBit(aPawn.m_iTeam);
-	aPawn.m_iEnemyTeams = __NFUN_141__(aPawn.m_iFriendlyTeams);
+	aPawn.m_iEnemyTeams = (~aPawn.m_iFriendlyTeams);
 	return;
 }
 
@@ -191,7 +191,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	if(m_objDeathmatch.m_bCompleted)
 	{
 		// End:0xA2
-		if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 2))
+		if((m_objDeathmatch.m_iWinningTeam == 2))
 		{
 			BroadcastGameMsg("", "", "GreenTeamWonRound", m_sndGreenTeamWonRound, int(GetGameMsgLifeTime()));
 			BroadcastMissionObjMsg("", "", "GreenNeutralizedRed", none, int(GetGameMsgLifeTime()));
@@ -200,7 +200,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		else
 		{
 			// End:0x112
-			if(__NFUN_154__(m_objDeathmatch.m_iWinningTeam, 3))
+			if((m_objDeathmatch.m_iWinningTeam == 3))
 			{
 				BroadcastGameMsg("", "", "RedTeamWonRound", m_sndRedTeamWonRound, int(GetGameMsgLifeTime()));
 				BroadcastMissionObjMsg("", "", "RedNeutralizedGreen", none, int(GetGameMsgLifeTime()));
@@ -213,7 +213,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		// End:0x137
 		if(bShowLog)
 		{
-			__NFUN_231__("** Game : it's a draw");
+			Log("** Game : it's a draw");
 		}
 		BroadcastGameMsg("", "", "RoundIsADraw", m_sndRoundIsADraw, int(GetGameMsgLifeTime()));
 	}

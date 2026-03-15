@@ -31,13 +31,13 @@ function InitObjectives()
 	missionObjTerro.m_bVisibleInMenu = false;
 	missionObjTerro.m_szFeedbackOnCompletion = "AllTerroristHaveBeenNeutralized";
 	groupMission.m_aSubMissionObjectives[Index] = missionObjTerro;
-	__NFUN_165__(Index);
+	(Index++);
 	objRescueHostage = new (none) Class'R6Game.R6MObjRescueHostage';
 	objRescueHostage.m_bIfCompletedMissionIsSuccessfull = true;
 	objRescueHostage.m_bVisibleInMenu = true;
 	objRescueHostage.m_szFeedbackOnCompletion = "AllHostagesHaveBeenRescued";
 	groupMission.m_aSubMissionObjectives[Index] = objRescueHostage;
-	__NFUN_165__(Index);
+	(Index++);
 	groupMission.m_szDescriptionInMenu = objRescueHostage.GetDescriptionBasedOnNbOfHostages(Level);
 	super(R6MultiPlayerGameInfo).InitObjectives();
 	return;

@@ -78,12 +78,12 @@ event PostBeginPlay()
 	if(bLevelStatic)
 	{
 		AbandonProjector();
-		__NFUN_279__();
+		Destroy();
 	}
 	// End:0x27
 	if(bProjectActor)
 	{
-		__NFUN_262__(true, false, false);
+		SetCollision(true, false, false);
 	}
 	return;
 }
@@ -92,7 +92,7 @@ event PostBeginPlay()
 simulated event Touch(Actor Other)
 {
 	// End:0x69
-	if(__NFUN_130__(__NFUN_130__(Other.bAcceptsProjectors, __NFUN_132__(__NFUN_254__(ProjectTag, 'None'), __NFUN_254__(Other.Tag, ProjectTag))), __NFUN_132__(bProjectStaticMesh, __NFUN_114__(Other.StaticMesh, none))))
+	if(((Other.bAcceptsProjectors && ((ProjectTag == 'None') || (Other.Tag == ProjectTag))) && (bProjectStaticMesh || (Other.StaticMesh == none))))
 	{
 		AttachActor(Other);
 	}

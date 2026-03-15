@@ -20,22 +20,22 @@ function int Main(string Parms)
 	local float floattemp;
 	local string textstring, otherstring;
 
-	__NFUN_231__("Simple commandlet says hi.");
-	__NFUN_231__("Testing function calling.");
+	Log("Simple commandlet says hi.");
+	Log("Testing function calling.");
 	temp = TestFunction();
-	__NFUN_231__(__NFUN_168__("Function call returned", string(temp)));
-	__NFUN_231__("Testing cast to int.");
+	Log(("Function call returned" @ string(temp)));
+	Log("Testing cast to int.");
 	floattemp = 3.0000000;
 	temp = int(floattemp);
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Temp is cast from ", string(floattemp)), " to "), string(temp)));
-	__NFUN_231__("Testing min()");
-	temp = __NFUN_249__(32, TestFunction());
-	__NFUN_231__(__NFUN_112__("Temp is min(32, 666): ", string(temp)));
+	Log(((("Temp is cast from " $ string(floattemp)) $ " to ") $ string(temp)));
+	Log("Testing min()");
+	temp = Min(32, TestFunction());
+	Log(("Temp is min(32, 666): " $ string(temp)));
 	textstring = "wookie";
-	__NFUN_231__(__NFUN_112__("3 is a ", __NFUN_128__(textstring, 3)));
+	Log(("3 is a " $ Left(textstring, 3)));
 	otherstring = "skywalker";
-	otherstring = __NFUN_127__(otherstring, __NFUN_126__(otherstring, "a"));
-	__NFUN_231__(__NFUN_168__("otherstring:", otherstring));
+	otherstring = Mid(otherstring, InStr(otherstring, "a"));
+	Log(("otherstring:" @ otherstring));
 	return 0;
 	return;
 }

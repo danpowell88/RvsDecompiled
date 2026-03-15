@@ -63,10 +63,10 @@ function ResetUWindow()
 	// End:0x28
 	if(bShowLog)
 	{
-		__NFUN_231__("WindowConsole::ResetUWindow");
+		Log("WindowConsole::ResetUWindow");
 	}
 	// End:0x42
-	if(__NFUN_119__(Root, none))
+	if((Root != none))
 	{
 		Root.Close();
 	}
@@ -85,14 +85,14 @@ function bool KeyEvent(Interactions.EInputKey Key, Interactions.EInputAction Act
 	// End:0x57
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("WindowConsole state \" KeyEvent eAction", string(Action)), "Key"), string(Key)));
+		Log(((("WindowConsole state \" KeyEvent eAction" @ string(Action)) @ "Key") @ string(Key)));
 	}
 	switch(Action)
 	{
 		// End:0xD8
 		case 1:
 			// End:0xB3
-			if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+			if((int(k) == int(ViewportOwner.Actor.GetKey("Console"))))
 			{
 				// End:0x9A
 				if(bLocked)
@@ -101,7 +101,7 @@ function bool KeyEvent(Interactions.EInputKey Key, Interactions.EInputAction Act
 				}
 				LaunchUWindow();
 				// End:0xB1
-				if(__NFUN_129__(bShowConsole))
+				if((!bShowConsole))
 				{
 					ShowConsole();
 				}
@@ -155,17 +155,17 @@ function LaunchUWindow()
 	// End:0x29
 	if(bShowLog)
 	{
-		__NFUN_231__("WindowConsole::LaunchUWindow");
+		Log("WindowConsole::LaunchUWindow");
 	}
 	ViewportOwner.bSuspendPrecaching = true;
 	bUWindowActive = true;
 	ViewportOwner.bShowWindowsMouse = true;
 	// End:0x6F
-	if(__NFUN_119__(Root, none))
+	if((Root != none))
 	{
 		Root.bWindowVisible = true;
 	}
-	__NFUN_113__('UWindow');
+	GotoState('UWindow');
 	return;
 }
 
@@ -174,16 +174,16 @@ function CloseUWindow()
 	// End:0x28
 	if(bShowLog)
 	{
-		__NFUN_231__("WindowConsole::CloseUWindow");
+		Log("WindowConsole::CloseUWindow");
 	}
 	bUWindowActive = false;
 	ViewportOwner.bShowWindowsMouse = false;
 	// End:0x5D
-	if(__NFUN_119__(Root, none))
+	if((Root != none))
 	{
 		Root.bWindowVisible = false;
 	}
-	__NFUN_113__('Game');
+	GotoState('Game');
 	ViewportOwner.bSuspendPrecaching = false;
 	return;
 }
@@ -195,10 +195,10 @@ function CreateRootWindow(Canvas Canvas)
 	// End:0x2C
 	if(bShowLog)
 	{
-		__NFUN_231__("WindowConsole::CreateRootWindow");
+		Log("WindowConsole::CreateRootWindow");
 	}
 	// End:0x62
-	if(__NFUN_119__(Canvas, none))
+	if((Canvas != none))
 	{
 		OldClipX = Canvas.ClipX;
 		OldClipY = Canvas.ClipY;		
@@ -213,10 +213,10 @@ function CreateRootWindow(Canvas Canvas)
 	Root.WinTop = 0.0000000;
 	Root.WinLeft = 0.0000000;
 	// End:0x170
-	if(__NFUN_119__(Canvas, none))
+	if((Canvas != none))
 	{
-		Root.WinWidth = __NFUN_172__(Canvas.ClipX, Root.GUIScale);
-		Root.WinHeight = __NFUN_172__(Canvas.ClipY, Root.GUIScale);
+		Root.WinWidth = (Canvas.ClipX / Root.GUIScale);
+		Root.WinHeight = (Canvas.ClipY / Root.GUIScale);
 		Root.RealWidth = Canvas.ClipX;
 		Root.RealHeight = Canvas.ClipY;		
 	}
@@ -236,12 +236,12 @@ function CreateRootWindow(Canvas Canvas)
 	// End:0x2A5
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("CreateRootWindow Setting Root.bUWindowActive=", string(Root.bUWindowActive)));
+		Log(("CreateRootWindow Setting Root.bUWindowActive=" @ string(Root.bUWindowActive)));
 	}
 	Root.Created();
 	bCreatedRoot = true;
 	// End:0x2CD
-	if(__NFUN_129__(bShowConsole))
+	if((!bShowConsole))
 	{
 		HideConsole();
 	}
@@ -256,22 +256,22 @@ function RenderUWindow(Canvas Canvas)
 	// End:0x36
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("WindowConsole::RenderUWindow state", string(__NFUN_284__())));
+		Log(("WindowConsole::RenderUWindow state" @ string(GetStateName())));
 	}
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	Canvas.bNoSmooth = false;
 	Canvas.Z = 1.0000000;
 	Canvas.Style = 1;
-	Canvas.__NFUN_2626__(byte(255), byte(255), byte(255));
-	MouseScale = __NFUN_172__(float(__NFUN_251__(int(pGameOptions.MouseSensitivity), 10, 100)), 32.0000000);
+	Canvas.SetDrawColor(byte(255), byte(255), byte(255));
+	MouseScale = (float(Clamp(int(pGameOptions.MouseSensitivity), 10, 100)) / 32.0000000);
 	// End:0x122
-	if(__NFUN_130__(ViewportOwner.bWindowsMouseAvailable, __NFUN_119__(Root, none)))
+	if((ViewportOwner.bWindowsMouseAvailable && (Root != none)))
 	{
-		MouseX = __NFUN_172__(ViewportOwner.WindowsMouseX, Root.GUIScale);
-		MouseY = __NFUN_172__(ViewportOwner.WindowsMouseY, Root.GUIScale);
+		MouseX = (ViewportOwner.WindowsMouseX / Root.GUIScale);
+		MouseY = (ViewportOwner.WindowsMouseY / Root.GUIScale);
 	}
 	// End:0x138
-	if(__NFUN_129__(bCreatedRoot))
+	if((!bCreatedRoot))
 	{
 		CreateRootWindow(Canvas);
 	}
@@ -280,23 +280,23 @@ function RenderUWindow(Canvas Canvas)
 	// End:0x1B1
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("RenderUWindow Setting", string(Root)), ".bUWindowActive="), string(Root.bUWindowActive)));
+		Log(((("RenderUWindow Setting" @ string(Root)) @ ".bUWindowActive=") @ string(Root.bUWindowActive)));
 	}
 	// End:0x237
-	if(__NFUN_132__(__NFUN_181__(Canvas.ClipX, float(Canvas.SizeX)), __NFUN_181__(Canvas.ClipY, float(Canvas.SizeY))))
+	if(((Canvas.ClipX != float(Canvas.SizeX)) || (Canvas.ClipY != float(Canvas.SizeY))))
 	{
 		Canvas.ClipX = float(Canvas.SizeX);
 		Canvas.ClipY = float(Canvas.SizeY);
 	}
 	// End:0x3CE
-	if(__NFUN_132__(__NFUN_181__(Canvas.ClipX, OldClipX), __NFUN_181__(Canvas.ClipY, OldClipY)))
+	if(((Canvas.ClipX != OldClipX) || (Canvas.ClipY != OldClipY)))
 	{
 		OldClipX = Canvas.ClipX;
 		OldClipY = Canvas.ClipY;
 		Root.WinTop = 0.0000000;
 		Root.WinLeft = 0.0000000;
-		Root.WinWidth = __NFUN_172__(Canvas.ClipX, Root.GUIScale);
-		Root.WinHeight = __NFUN_172__(Canvas.ClipY, Root.GUIScale);
+		Root.WinWidth = (Canvas.ClipX / Root.GUIScale);
+		Root.WinHeight = (Canvas.ClipY / Root.GUIScale);
 		Root.RealWidth = Canvas.ClipX;
 		Root.RealHeight = Canvas.ClipY;
 		Root.ClippingRegion.X = 0;
@@ -306,28 +306,28 @@ function RenderUWindow(Canvas Canvas)
 		Root.Resized();
 	}
 	// End:0x3FE
-	if(__NFUN_177__(MouseX, float(Canvas.SizeX)))
+	if((MouseX > float(Canvas.SizeX)))
 	{
 		MouseX = float(Canvas.SizeX);
 	}
 	// End:0x42E
-	if(__NFUN_177__(MouseY, float(Canvas.SizeY)))
+	if((MouseY > float(Canvas.SizeY)))
 	{
 		MouseY = float(Canvas.SizeY);
 	}
 	// End:0x446
-	if(__NFUN_176__(MouseX, float(0)))
+	if((MouseX < float(0)))
 	{
 		MouseX = 0.0000000;
 	}
 	// End:0x45E
-	if(__NFUN_176__(MouseY, float(0)))
+	if((MouseY < float(0)))
 	{
 		MouseY = 0.0000000;
 	}
 	NewFocusWindow = Root.CheckKeyFocusWindow();
 	// End:0x4CF
-	if(__NFUN_119__(NewFocusWindow, Root.KeyFocusWindow))
+	if((NewFocusWindow != Root.KeyFocusWindow))
 	{
 		Root.KeyFocusWindow.KeyFocusExit();
 		Root.KeyFocusWindow = NewFocusWindow;
@@ -336,13 +336,13 @@ function RenderUWindow(Canvas Canvas)
 	// End:0x506
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("WindowConsole::RenderUWindow root", string(Root)));
+		Log(("WindowConsole::RenderUWindow root" @ string(Root)));
 	}
 	Root.ApplyResolutionOnWindowsPos(MouseX, MouseY);
 	Root.MoveMouse(MouseX, MouseY);
 	Root.WindowEvent(11, Canvas, MouseX, MouseY, 0);
 	// End:0x58A
-	if(__NFUN_130__(bUWindowActive, ViewportOwner.bShowWindowsMouse))
+	if((bUWindowActive && ViewportOwner.bShowWindowsMouse))
 	{
 		Root.DrawMouse(Canvas);
 	}
@@ -353,7 +353,7 @@ event Message(coerce string Msg, float MsgLife)
 {
 	super.Message(Msg, MsgLife);
 	// End:0x26
-	if(__NFUN_114__(ViewportOwner.Actor, none))
+	if((ViewportOwner.Actor == none))
 	{
 		return;
 	}
@@ -362,16 +362,16 @@ event Message(coerce string Msg, float MsgLife)
 
 function UpdateHistory()
 {
-	History[int(__NFUN_173__(float(__NFUN_165__(HistoryCur)), float(16)))] = TypedStr;
+	History[int((float((HistoryCur++)) % float(16)))] = TypedStr;
 	// End:0x33
-	if(__NFUN_151__(HistoryCur, HistoryBot))
+	if((HistoryCur > HistoryBot))
 	{
-		__NFUN_165__(HistoryBot);
+		(HistoryBot++);
 	}
 	// End:0x58
-	if(__NFUN_153__(__NFUN_147__(HistoryCur, HistoryTop), 16))
+	if(((HistoryCur - HistoryTop) >= 16))
 	{
-		HistoryTop = __NFUN_146__(__NFUN_147__(HistoryCur, 16), 1);
+		HistoryTop = ((HistoryCur - 16) + 1);
 	}
 	return;
 }
@@ -379,21 +379,21 @@ function UpdateHistory()
 function HistoryUp()
 {
 	// End:0x47
-	if(__NFUN_151__(HistoryCur, HistoryTop))
+	if((HistoryCur > HistoryTop))
 	{
-		History[int(__NFUN_173__(float(HistoryCur), float(16)))] = TypedStr;
-		TypedStr = History[int(__NFUN_173__(float(__NFUN_164__(HistoryCur)), float(16)))];
+		History[int((float(HistoryCur) % float(16)))] = TypedStr;
+		TypedStr = History[int((float((--HistoryCur)) % float(16)))];
 	}
 	return;
 }
 
 function HistoryDown()
 {
-	History[int(__NFUN_173__(float(HistoryCur), float(16)))] = TypedStr;
+	History[int((float(HistoryCur) % float(16)))] = TypedStr;
 	// End:0x4A
-	if(__NFUN_150__(HistoryCur, HistoryBot))
+	if((HistoryCur < HistoryBot))
 	{
-		TypedStr = History[int(__NFUN_173__(float(__NFUN_163__(HistoryCur)), float(16)))];		
+		TypedStr = History[int((float((++HistoryCur)) % float(16)))];		
 	}
 	else
 	{

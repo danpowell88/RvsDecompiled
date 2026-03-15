@@ -41,7 +41,7 @@ function LMouseDown(float X, float Y)
 		return;
 	}
 	// End:0x116
-	if(__NFUN_132__(__NFUN_132__(__NFUN_155__(OwnerCtrl.m_pTeamInfo[0].GetNbActionPoint(), 0), __NFUN_155__(OwnerCtrl.m_pTeamInfo[1].GetNbActionPoint(), 0)), __NFUN_155__(OwnerCtrl.m_pTeamInfo[2].GetNbActionPoint(), 0)))
+	if((((OwnerCtrl.m_pTeamInfo[0].GetNbActionPoint() != 0) || (OwnerCtrl.m_pTeamInfo[1].GetNbActionPoint() != 0)) || (OwnerCtrl.m_pTeamInfo[2].GetNbActionPoint() != 0)))
 	{
 		R6MenuRootWindow(Root).m_PlanningWidget.Hide3DAndLegend();
 		R6MenuRootWindow(Root).SimplePopUp(Localize("PlanningMenu", "WAYPOINTS", "R6Menu"), Localize("PlanningMenu", "DeleteAllTeam", "R6Menu"), 45);
@@ -52,7 +52,7 @@ function LMouseDown(float X, float Y)
 simulated function Click(float X, float Y)
 {
 	super(UWindowButton).Click(X, Y);
-	GetPlayerOwner().__NFUN_264__(R6PlanningCtrl(GetPlayerOwner()).m_PlanningBadClickSnd, 9);
+	GetPlayerOwner().__NFUN_264__(R6PlanningCtrl(GetPlayerOwner()).m_PlanningBadClickSnd, 9) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	return;
 }
 

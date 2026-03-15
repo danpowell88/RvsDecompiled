@@ -113,18 +113,18 @@ function PostBeginPlay()
 {
 	super(HUD).PostBeginPlay();
 	// End:0x13
-	if(__NFUN_114__(Owner, none))
+	if((Owner == none))
 	{
 		return;
 	}
 	m_PlayerOwner = R6PlayerController(Owner);
 	// End:0x44
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		m_bDisplayRemainingTime = false;
 	}
 	m_bUpdateHUDInTraining = true;
-	__NFUN_280__(0.2500000, true);
+	SetTimer(0.2500000, true);
 	StopFadeToBlack();
 	return;
 }
@@ -152,12 +152,12 @@ simulated function ResetOriginalData()
 function Timer()
 {
 	// End:0x86
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(Level, none), __NFUN_119__(m_PlayerOwner, none)), __NFUN_119__(m_PlayerOwner.GameReplicationInfo, none)), __NFUN_154__(int(m_PlayerOwner.GameReplicationInfo.m_bReceivedGameType), 1)))
+	if(((((Level != none) && (m_PlayerOwner != none)) && (m_PlayerOwner.GameReplicationInfo != none)) && (int(m_PlayerOwner.GameReplicationInfo.m_bReceivedGameType) == 1)))
 	{
 		m_GameRepInfo = R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo);
 		m_PlayerOwner.HidePlanningActors();
 		UpdateHudFilter();
-		__NFUN_280__(0.0000000, false);
+		SetTimer(0.0000000, false);
 	}
 	return;
 }
@@ -172,7 +172,7 @@ simulated function InitBombTimer(bool bDisplayTimeBomb)
 	if(m_bDisplayTimeBomb)
 	{
 		// End:0x46
-		foreach __NFUN_304__(Class'R6Engine.R6IOBomb', ioBomb)
+		foreach AllActors(Class'R6Engine.R6IOBomb', ioBomb)
 		{
 			m_aIOBombs[m_aIOBombs.Length] = ioBomb;			
 		}		
@@ -186,32 +186,32 @@ function UpdateHudFilter()
 	local int iStepCount;
 	local bool bDisplayFPWeapon;
 
-	GameOptions = __NFUN_1009__();
+	GameOptions = GetGameOptions();
 	m_bGMIsSinglePlayer = true;
 	bDisplayFPWeapon = GameOptions.HUDShowFPWeapon;
 	// End:0x87
 	if(Level.IsGameTypeMultiplayer(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep))
 	{
 		m_bGMIsSinglePlayer = false;
-		bDisplayFPWeapon = __NFUN_132__(bDisplayFPWeapon, R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo).m_bFFPWeapon);
+		bDisplayFPWeapon = (bDisplayFPWeapon || R6GameReplicationInfo(m_PlayerOwner.GameReplicationInfo).m_bFFPWeapon);
 	}
 	m_bGMIsCoop = Level.IsGameTypeCooperative(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep);
 	m_bGMIsTeamAdverserial = Level.IsGameTypeTeamAdversarial(m_PlayerOwner.GameReplicationInfo.m_szGameTypeFlagRep);
 	// End:0x2A0
-	if(__NFUN_132__(__NFUN_114__(Level.Game, none), __NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_114__(R6GameInfo(Level.Game).GetTrainingMgr(R6Pawn(m_PlayerOwner.Pawn)), none))))
+	if(((Level.Game == none) || ((Level.Game != none) && (R6GameInfo(Level.Game).GetTrainingMgr(R6Pawn(m_PlayerOwner.Pawn)) == none))))
 	{
 		m_bShowCharacterInfo = GameOptions.HUDShowCharacterInfo;
-		m_bShowCurrentTeamInfo = __NFUN_130__(__NFUN_132__(m_bGMIsSinglePlayer, m_bGMIsCoop), GameOptions.HUDShowCurrentTeamInfo);
-		m_bShowOtherTeamInfo = __NFUN_130__(m_bGMIsSinglePlayer, GameOptions.HUDShowOtherTeamInfo);
+		m_bShowCurrentTeamInfo = ((m_bGMIsSinglePlayer || m_bGMIsCoop) && GameOptions.HUDShowCurrentTeamInfo);
+		m_bShowOtherTeamInfo = (m_bGMIsSinglePlayer && GameOptions.HUDShowOtherTeamInfo);
 		m_bShowWeaponInfo = GameOptions.HUDShowWeaponInfo;
-		m_bShowWaypointInfo = __NFUN_130__(m_bGMIsSinglePlayer, GameOptions.HUDShowWaypointInfo);
+		m_bShowWaypointInfo = (m_bGMIsSinglePlayer && GameOptions.HUDShowWaypointInfo);
 		m_PlayerOwner.Set1stWeaponDisplay(bDisplayFPWeapon);
 		m_bShowActionIcon = GameOptions.HUDShowActionIcon;
 		// End:0x29D
-		if(__NFUN_130__(__NFUN_154__(m_GameRepInfo.m_iDiffLevel, 1), __NFUN_119__(Level.Game, none)))
+		if(((m_GameRepInfo.m_iDiffLevel == 1) && (Level.Game != none)))
 		{
 			// End:0x29D
-			if(__NFUN_132__(__NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_PracticeMode"), __NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_StoryMode")))
+			if(((Level.Game.m_szGameTypeFlag == "RGM_PracticeMode") || (Level.Game.m_szGameTypeFlag == "RGM_StoryMode")))
 			{
 				m_bShowPressGoCode = true;
 				m_bPressGoCodeCanBlink = false;
@@ -237,7 +237,7 @@ function UpdateHudFilter()
 		}
 	}
 	// End:0x34D
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		m_PlayerOwner.m_wAutoAim = byte(GameOptions.AutoTargetSlider);		
 	}
@@ -261,7 +261,7 @@ simulated function Tick(float fDelta)
 	super(Actor).Tick(fDelta);
 	m_PlayerOwner = R6PlayerController(Owner);
 	// End:0x3E
-	if(__NFUN_132__(__NFUN_114__(m_PlayerOwner, none), __NFUN_114__(m_PlayerOwner.GameReplicationInfo, none)))
+	if(((m_PlayerOwner == none) || (m_PlayerOwner.GameReplicationInfo == none)))
 	{
 		return;
 	}
@@ -278,20 +278,20 @@ simulated event PostRender(Canvas C)
 	// End:0x50
 	if(m_bDrawHUDinScript)
 	{
-		C.__NFUN_1606__(true);
+		C.UseVirtualSize(true);
 		super.PostRender(C);
 		// End:0x40
-		if(__NFUN_119__(m_PlayerOwner, none))
+		if((m_PlayerOwner != none))
 		{
 			m_PlayerOwner.PostRender(C);
 		}
-		C.__NFUN_1606__(false);		
+		C.UseVirtualSize(false);		
 	}
 	else
 	{
 		super.PostRender(C);
 		// End:0x7A
-		if(__NFUN_119__(m_PlayerOwner, none))
+		if((m_PlayerOwner != none))
 		{
 			m_PlayerOwner.PostRender(C);
 		}
@@ -310,35 +310,35 @@ function DrawHUD(Canvas C)
 	local R6Pawn aPlayerPawn;
 
 	// End:0x17
-	if(__NFUN_242__(Level.m_bInGamePlanningActive, true))
+	if((Level.m_bInGamePlanningActive == true))
 	{
 		return;
 	}
 	// End:0x3B
-	if(__NFUN_119__(m_PlayerOwner, none))
+	if((m_PlayerOwner != none))
 	{
 		aPlayerPawn = R6Pawn(m_PlayerOwner.Pawn);
 	}
 	// End:0xAA
-	if(__NFUN_130__(__NFUN_119__(m_PlayerOwner, none), __NFUN_119__(m_PlayerOwner.m_TeamManager, none)))
+	if(((m_PlayerOwner != none) && (m_PlayerOwner.m_TeamManager != none)))
 	{
 		// End:0xAA
-		if(__NFUN_119__(R6PlanningInfo(m_PlayerOwner.m_TeamManager.m_TeamPlanning), none))
+		if((R6PlanningInfo(m_PlayerOwner.m_TeamManager.m_TeamPlanning) != none))
 		{
 			m_pNextWayPoint = R6PlanningInfo(m_PlayerOwner.m_TeamManager.m_TeamPlanning).GetNextActionPoint();
 		}
 	}
-	__NFUN_1605__(C);
+	DrawNativeHUD(C);
 	// End:0x11F
-	if(__NFUN_119__(m_PlayerOwner, none))
+	if((m_PlayerOwner != none))
 	{
 		// End:0xEE
-		if(__NFUN_119__(m_PlayerOwner.m_InteractionCA, none))
+		if((m_PlayerOwner.m_InteractionCA != none))
 		{
 			m_PlayerOwner.m_InteractionCA.m_color = m_iCurrentTeamColor;
 		}
 		// End:0x11F
-		if(__NFUN_119__(m_PlayerOwner.m_InteractionInventory, none))
+		if((m_PlayerOwner.m_InteractionInventory != none))
 		{
 			m_PlayerOwner.m_InteractionInventory.m_color = m_iCurrentTeamColor;
 		}
@@ -378,42 +378,42 @@ function DisplayNoDeathCamera(Canvas C)
 	local float W, H, f;
 
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return;
 	}
 	// End:0x35
-	if(__NFUN_132__(__NFUN_114__(m_GameRepInfo, none), __NFUN_114__(m_PlayerOwner, none)))
+	if(((m_GameRepInfo == none) || (m_PlayerOwner == none)))
 	{
 		return;
 	}
 	// End:0x57
-	if(__NFUN_155__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.3))
+	if((int(m_GameRepInfo.m_eCurrectServerState) != m_GameRepInfo.3))
 	{
 		return;
 	}
 	// End:0x8C
-	if(__NFUN_130__(__NFUN_119__(m_GameRepInfo.m_MenuCommunication, none), __NFUN_129__(m_GameRepInfo.m_MenuCommunication.IsInGame())))
+	if(((m_GameRepInfo.m_MenuCommunication != none) && (!m_GameRepInfo.m_MenuCommunication.IsInGame())))
 	{
 		return;
 	}
-	C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+	C.UseVirtualSize(true, 640.0000000, 480.0000000);
 	C.Style = 5;
 	C.Font = m_FontRainbow6_17pt;
-	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	C.SetDrawColor(byte(255), byte(255), byte(255));
 	szText = Localize("Game", "NoDeathCamera", "R6GameInfo");
-	C.__NFUN_470__(szText, W, H);
-	f = __NFUN_172__(__NFUN_175__(640.0000000, W), float(2));
+	C.TextSize(szText, W, H);
+	f = ((640.0000000 - W) / float(2));
 	// End:0x159
-	if(__NFUN_176__(f, float(0)))
+	if((f < float(0)))
 	{
 		f = 0.0000000;
 	}
-	C.__NFUN_2625__(640.0000000, 480.0000000);
-	C.__NFUN_2624__(0.0000000, 0.0000000);
-	C.__NFUN_2623__(f, 220.0000000);
-	C.__NFUN_465__(szText);
-	C.__NFUN_1606__(false);
+	C.SetClip(640.0000000, 480.0000000);
+	C.SetOrigin(0.0000000, 0.0000000);
+	C.SetPos(f, 220.0000000);
+	C.DrawText(szText);
+	C.UseVirtualSize(false);
 	return;
 }
 
@@ -429,17 +429,17 @@ function DisplayRemainingTime(Canvas C)
 	local string szTime;
 
 	// End:0x1A
-	if(__NFUN_132__(__NFUN_114__(m_GameRepInfo, none), __NFUN_114__(m_PlayerOwner, none)))
+	if(((m_GameRepInfo == none) || (m_PlayerOwner == none)))
 	{
 		return;
 	}
 	// End:0x66
-	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_PlayerOwner.bOnlySpectator), __NFUN_155__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.3)), m_GameRepInfo.m_bInPostBetweenRoundTime))
+	if((((!m_PlayerOwner.bOnlySpectator) || (int(m_GameRepInfo.m_eCurrectServerState) != m_GameRepInfo.3)) || m_GameRepInfo.m_bInPostBetweenRoundTime))
 	{
 		return;
 	}
 	// End:0x9B
-	if(__NFUN_130__(__NFUN_119__(m_GameRepInfo.m_MenuCommunication, none), __NFUN_129__(m_GameRepInfo.m_MenuCommunication.IsInGame())))
+	if(((m_GameRepInfo.m_MenuCommunication != none) && (!m_GameRepInfo.m_MenuCommunication.IsInGame())))
 	{
 		return;
 	}
@@ -447,15 +447,15 @@ function DisplayRemainingTime(Canvas C)
 	fBkpOrigY = C.OrgY;
 	C.OrgX = 0.0000000;
 	C.OrgY = 0.0000000;
-	C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+	C.UseVirtualSize(true, 640.0000000, 480.0000000);
 	fDefaultNamePosX = 600.0000000;
 	fPosY = 394.0000000;
 	C.Style = 5;
 	C.Font = m_FontRainbow6_14pt;
-	C.__NFUN_2626__(byte(255), byte(255), byte(255));
-	szTime = __NFUN_112__(Localize("MPInGame", "Round", "R6Menu"), " ");
-	C.__NFUN_470__(szTime, W, H);
-	C.__NFUN_2623__(__NFUN_175__(fDefaultNamePosX, W), fPosY);
+	C.SetDrawColor(byte(255), byte(255), byte(255));
+	szTime = (Localize("MPInGame", "Round", "R6Menu") $ " ");
+	C.TextSize(szTime, W, H);
+	C.SetPos((fDefaultNamePosX - W), fPosY);
 	C.__NFUN_465__(szTime);
 	C.__NFUN_2623__(fDefaultNamePosX, fPosY);
 	C.__NFUN_465__(__NFUN_1520__(int(m_GameRepInfo.GetRoundTime()), true));

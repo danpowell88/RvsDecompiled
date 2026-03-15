@@ -15,7 +15,7 @@ function PostBeginPlay()
 	local ScriptedTriggerController TriggerController;
 
 	super(Actor).PostBeginPlay();
-	TriggerController = __NFUN_278__(Class'Gameplay.ScriptedTriggerController');
+	TriggerController = Spawn(Class'Gameplay.ScriptedTriggerController');
 	TriggerController.InitializeFor(self);
 	return;
 }

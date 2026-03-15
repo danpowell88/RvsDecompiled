@@ -142,7 +142,7 @@ event PostBeginPlay()
 {
 	super(Controller).PostBeginPlay();
 	// End:0x3E
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		m_CommonMemberVoicesMgr = R6CommonRainbowVoices(R6AbstractGameInfo(Level.Game).GetCommonRainbowMemberVoicesMgr());
 	}
@@ -155,10 +155,10 @@ event PostBeginPlay()
 function UpdatePosture()
 {
 	// End:0xF3
-	if(__NFUN_130__(__NFUN_129__(m_PaceMember.m_bPostureTransition), __NFUN_132__(__NFUN_243__(m_PaceMember.m_bIsProne, Pawn.m_bIsProne), __NFUN_243__(m_PaceMember.bIsCrouched, Pawn.bIsCrouched))))
+	if(((!m_PaceMember.m_bPostureTransition) && ((m_PaceMember.m_bIsProne != Pawn.m_bIsProne) || (m_PaceMember.bIsCrouched != Pawn.bIsCrouched))))
 	{
 		// End:0x9A
-		if(__NFUN_130__(m_PaceMember.m_bIsProne, __NFUN_129__(m_PaceMember.m_bIsSniping)))
+		if((m_PaceMember.m_bIsProne && (!m_PaceMember.m_bIsSniping)))
 		{
 			Pawn.m_bWantsToProne = true;			
 		}
@@ -186,7 +186,7 @@ function UpdatePosture()
 function bool PostureHasChanged()
 {
 	// End:0x25
-	if(__NFUN_243__(Pawn.m_bIsProne, Pawn.m_bWantsToProne))
+	if((Pawn.m_bIsProne != Pawn.m_bWantsToProne))
 	{
 		return true;
 	}
@@ -196,7 +196,7 @@ function bool PostureHasChanged()
 		return false;
 	}
 	// End:0x5E
-	if(__NFUN_243__(Pawn.bIsCrouched, Pawn.bWantsToCrouch))
+	if((Pawn.bIsCrouched != Pawn.bWantsToCrouch))
 	{
 		return true;
 	}
@@ -218,11 +218,11 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 	local bool bIndependantPace;
 
 	// End:0x55
-	if(__NFUN_154__(int(ePace), 0))
+	if((int(ePace) == 0))
 	{
 		bIndependantPace = false;
 		// End:0x2F
-		if(__NFUN_132__(__NFUN_114__(m_PaceMember, none), __NFUN_114__(m_TeamLeader, none)))
+		if(((m_PaceMember == none) || (m_TeamLeader == none)))
 		{
 			return;
 		}
@@ -233,14 +233,14 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 	{
 		bIndependantPace = true;
 		// End:0x97
-		if(__NFUN_130__(__NFUN_129__(Pawn.m_bIsProne), __NFUN_154__(int(ePace), int(1))))
+		if(((!Pawn.m_bIsProne) && (int(ePace) == int(1))))
 		{
 			Pawn.m_bWantsToProne = true;			
 		}
 		else
 		{
 			// End:0xE0
-			if(__NFUN_130__(Pawn.m_bIsProne, __NFUN_155__(int(ePace), int(1))))
+			if((Pawn.m_bIsProne && (int(ePace) != int(1))))
 			{
 				Pawn.m_bWantsToProne = false;
 				Pawn.bWantsToCrouch = true;				
@@ -251,7 +251,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 				if(Pawn.bIsCrouched)
 				{
 					// End:0x125
-					if(__NFUN_132__(__NFUN_154__(int(ePace), int(4)), __NFUN_154__(int(ePace), int(5))))
+					if(((int(ePace) == int(4)) || (int(ePace) == int(5))))
 					{
 						Pawn.bWantsToCrouch = false;
 					}					
@@ -259,7 +259,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 				else
 				{
 					// End:0x15B
-					if(__NFUN_132__(__NFUN_154__(int(ePace), int(2)), __NFUN_154__(int(ePace), int(3))))
+					if(((int(ePace) == int(2)) || (int(ePace) == int(3))))
 					{
 						Pawn.bWantsToCrouch = true;
 					}
@@ -269,17 +269,17 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 		m_pawn.m_eMovementPace = ePace;
 	}
 	// End:0x212
-	if(__NFUN_132__(__NFUN_114__(m_TeamLeader, none), bIndependantPace))
+	if(((m_TeamLeader == none) || bIndependantPace))
 	{
 		// End:0x1CC
-		if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(2))))
+		if(((int(m_pawn.m_eMovementPace) == int(4)) || (int(m_pawn.m_eMovementPace) == int(2))))
 		{
 			Pawn.SetWalking(true);			
 		}
 		else
 		{
 			// End:0x210
-			if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(3))))
+			if(((int(m_pawn.m_eMovementPace) == int(5)) || (int(m_pawn.m_eMovementPace) == int(3))))
 			{
 				Pawn.SetWalking(false);
 			}
@@ -287,7 +287,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 		return;
 	}
 	// End:0x2A3
-	if(__NFUN_130__(__NFUN_129__(m_PaceMember.IsMovingForward()), __NFUN_129__(Pawn.m_bIsProne)))
+	if(((!m_PaceMember.IsMovingForward()) && (!Pawn.m_bIsProne)))
 	{
 		// End:0x259
 		if(m_PaceMember.bIsWalking)
@@ -314,17 +314,17 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 		m_bSlowedPace = false;
 	}
 	// End:0x2E4
-	if(__NFUN_130__(__NFUN_154__(int(m_pawn.m_eHealth), int(1)), __NFUN_129__(m_bIsMovingBackwards)))
+	if(((int(m_pawn.m_eHealth) == int(1)) && (!m_bIsMovingBackwards)))
 	{
 		Pawn.SetWalking(true);		
 	}
 	else
 	{
 		// End:0x37D
-		if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(2))))
+		if(((int(m_pawn.m_eMovementPace) == int(4)) || (int(m_pawn.m_eMovementPace) == int(2))))
 		{
 			// End:0x36A
-			if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bSlowedPace), __NFUN_177__(DistanceTo(m_PaceMember), __NFUN_171__(float(2), GetFormationDistance()))), __NFUN_129__(m_TeamManager.m_bTeamIsSeparatedFromLeader)))
+			if((((!m_bSlowedPace) && (DistanceTo(m_PaceMember) > (float(2) * GetFormationDistance()))) && (!m_TeamManager.m_bTeamIsSeparatedFromLeader)))
 			{
 				Pawn.SetWalking(false);				
 			}
@@ -336,7 +336,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 		else
 		{
 			// End:0x3C1
-			if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)), __NFUN_154__(int(m_pawn.m_eMovementPace), int(3))))
+			if(((int(m_pawn.m_eMovementPace) == int(5)) || (int(m_pawn.m_eMovementPace) == int(3))))
 			{
 				Pawn.SetWalking(false);
 			}
@@ -432,19 +432,19 @@ function bool CanSeeGrenade(Vector vGrenadeLocation)
 {
 	local Vector vDir;
 
-	vDir = __NFUN_216__(vGrenadeLocation, Pawn.Location);
+	vDir = (vGrenadeLocation - Pawn.Location);
 	vDir.Z = 0.0000000;
 	// End:0x3D
-	if(__NFUN_176__(__NFUN_225__(vDir), float(100)))
+	if((VSize(vDir) < float(100)))
 	{
 		return true;
 	}
-	vDir = __NFUN_216__(vGrenadeLocation, Pawn.Location);
+	vDir = (vGrenadeLocation - Pawn.Location);
 	// End:0xA4
-	if(__NFUN_177__(__NFUN_175__(__NFUN_219__(__NFUN_226__(vDir), Vector(Pawn.Rotation)), Pawn.PeripheralVision), float(0)))
+	if(((Dot(Normal(vDir), Vector(Pawn.Rotation)) - Pawn.PeripheralVision) > float(0)))
 	{
 		// End:0xA4
-		if(__NFUN_548__(Pawn.Location, vGrenadeLocation))
+		if(FastTrace(Pawn.Location, vGrenadeLocation))
 		{
 			return true;
 		}
@@ -459,12 +459,12 @@ function bool CanSeeGrenade(Vector vGrenadeLocation)
 function FragGrenadeInProximity(Vector vGrenadeLocation, float fTimeLeft, float fGrenadeDangerRadius)
 {
 	// End:0x21
-	if(__NFUN_132__(m_pawn.m_bIsClimbingLadder, __NFUN_281__('RunAwayFromGrenade')))
+	if((m_pawn.m_bIsClimbingLadder || IsInState('RunAwayFromGrenade')))
 	{
 		return;
 	}
 	// End:0x66
-	if(__NFUN_130__(m_pawn.IsAlive(), CanSeeGrenade(vGrenadeLocation)))
+	if((m_pawn.IsAlive() && CanSeeGrenade(vGrenadeLocation)))
 	{
 		m_TeamManager.GrenadeInProximity(m_pawn, vGrenadeLocation, fTimeLeft, fGrenadeDangerRadius);
 	}
@@ -477,14 +477,14 @@ function FragGrenadeInProximity(Vector vGrenadeLocation, float fTimeLeft, float 
 function ReactToFragGrenade(Vector vGrenadeLocation, float fTimeLeft, float fGrenadeDangerRadius)
 {
 	// End:0x52
-	if(__NFUN_132__(__NFUN_132__(m_pawn.m_bIsClimbingLadder, __NFUN_154__(int(Pawn.Physics), int(11))), __NFUN_177__(__NFUN_225__(__NFUN_216__(vGrenadeLocation, Pawn.Location)), fGrenadeDangerRadius)))
+	if(((m_pawn.m_bIsClimbingLadder || (int(Pawn.Physics) == int(11))) || (VSize((vGrenadeLocation - Pawn.Location)) > fGrenadeDangerRadius)))
 	{
 		return;
 	}
 	m_vGrenadeLocation = vGrenadeLocation;
 	m_fGrenadeDangerRadius = fGrenadeDangerRadius;
-	__NFUN_113__('RunAwayFromGrenade');
-	__NFUN_280__(fTimeLeft, false);
+	GotoState('RunAwayFromGrenade');
+	SetTimer(fTimeLeft, false);
 	return;
 }
 
@@ -498,7 +498,7 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 		// End:0x6D
 		case 1:
 			// End:0x4B
-			if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+			if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
 			{
 				m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 3);				
 			}
@@ -511,7 +511,7 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 		// End:0x164
 		case 2:
 			// End:0xB1
-			if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+			if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
 			{
 				m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 4);				
 			}
@@ -519,14 +519,14 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 			{
 				m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 20);
 				// End:0x161
-				if(__NFUN_132__(m_TeamManager.m_bPlayerHasFocus, Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
+				if((m_TeamManager.m_bPlayerHasFocus || Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
 				{
 					// End:0x161
 					if(m_TeamManager.m_bFirstTimeInGas)
 					{
 						m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, 10);
 						m_TeamManager.m_bFirstTimeInGas = false;
-						m_TeamManager.__NFUN_280__(60.0000000, false);
+						m_TeamManager.SetTimer(60.0000000, false);
 					}
 				}
 			}
@@ -545,7 +545,7 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 {
 	// End:0x94
-	if(__NFUN_154__(int(eType), int(2)))
+	if((int(eType) == int(2)))
 	{
 		// End:0x39
 		if(m_pawn.m_bPawnSpecificAnimInProgress)
@@ -556,7 +556,7 @@ function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 		{
 			m_TeamManager.GasGrenadeInProximity(m_pawn);
 			// End:0x91
-			if(__NFUN_176__(m_fLastReactionToGas, __NFUN_175__(Level.TimeSeconds, 2.0000000)))
+			if((m_fLastReactionToGas < (Level.TimeSeconds - 2.0000000)))
 			{
 				m_fLastReactionToGas = Level.TimeSeconds;
 				m_pawn.SetNextPendingAction(1);
@@ -566,10 +566,10 @@ function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 	else
 	{
 		// End:0xD7
-		if(__NFUN_154__(int(eType), int(3)))
+		if((int(eType) == int(3)))
 		{
 			// End:0xD7
-			if(__NFUN_130__(IsFacing(aGrenade), m_pawn.IsStationary()))
+			if((IsFacing(aGrenade) && m_pawn.IsStationary()))
 			{
 				m_pawn.SetNextPendingAction(3);
 			}
@@ -588,14 +588,14 @@ function PlaySoundInflictedDamage(Pawn DeadPawn)
 		// End:0xA3
 		case 2:
 			// End:0x59
-			if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+			if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
 			{
 				m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 0);				
 			}
 			else
 			{
 				// End:0xA0
-				if(__NFUN_130__(__NFUN_119__(m_TeamManager.m_OtherTeamVoicesMgr, none), m_pawn.m_bIsSniping))
+				if(((m_TeamManager.m_OtherTeamVoicesMgr != none) && m_pawn.m_bIsSniping))
 				{
 					m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 2);
 				}
@@ -615,10 +615,10 @@ function PlaySoundInflictedDamage(Pawn DeadPawn)
 function PlaySoundActionCompleted(R6Pawn.eDeviceAnimToPlay eAnimToPlay)
 {
 	// End:0xC2
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		// End:0xC2
-		if(__NFUN_130__(__NFUN_129__(m_TeamManager.m_bLeaderIsAPlayer), __NFUN_129__(m_TeamManager.m_bPlayerHasFocus)))
+		if(((!m_TeamManager.m_bLeaderIsAPlayer) && (!m_TeamManager.m_bPlayerHasFocus)))
 		{
 			switch(eAnimToPlay)
 			{
@@ -646,7 +646,7 @@ function PlaySoundActionCompleted(R6Pawn.eDeviceAnimToPlay eAnimToPlay)
 		{
 		}/* !MISMATCHING REMOVE, tried If got Type:Else Position:0x0C2! */
 		// End:0x16E
-		if(__NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), m_TeamManager.m_bPlayerHasFocus))
+		if(((int(Level.NetMode) != int(NM_Standalone)) || m_TeamManager.m_bPlayerHasFocus))
 		{
 			switch(eAnimToPlay)
 			{
@@ -683,17 +683,17 @@ function PlaySoundActionCompleted(R6Pawn.eDeviceAnimToPlay eAnimToPlay)
 function PlaySoundCurrentAction(Pawn.ERainbowTeamVoices eVoices)
 {
 	// End:0xBA
-	if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+	if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
 	{
 		// End:0x88
-		if(__NFUN_132__(m_TeamManager.m_bPlayerHasFocus, Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
+		if((m_TeamManager.m_bPlayerHasFocus || Level.IsGameTypeCooperative(Level.Game.m_szGameTypeFlag)))
 		{
 			m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, eVoices);			
 		}
 		else
 		{
 			// End:0xB7
-			if(__NFUN_154__(int(eVoices), int(5)))
+			if((int(eVoices) == int(5)))
 			{
 				m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 23);
 			}
@@ -713,7 +713,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 {
 	m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 1);
 	// End:0x16B
-	if(__NFUN_132__(m_TeamManager.m_bLeaderIsAPlayer, m_TeamManager.m_bPlayerHasFocus))
+	if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
 	{
 		switch(m_pawn.m_eHealth)
 		{
@@ -722,7 +722,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 			// End:0xEC
 			case 3:
 				// End:0xE9
-				if(__NFUN_151__(m_TeamManager.m_iMemberCount, 1))
+				if((m_TeamManager.m_iMemberCount > 1))
 				{
 					m_CommonMemberVoicesMgr.PlayCommonRainbowVoices(m_pawn, 2);
 					// End:0xBF
@@ -740,7 +740,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 			// End:0x165
 			case 1:
 				// End:0x162
-				if(__NFUN_119__(instigatedBy, none))
+				if((instigatedBy != none))
 				{
 					switch(R6Pawn(instigatedBy).m_ePawnType)
 					{
@@ -777,7 +777,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 				// End:0x1DC
 				case 3:
 					// End:0x1D9
-					if(__NFUN_130__(__NFUN_119__(m_TeamManager.m_OtherTeamVoicesMgr, none), __NFUN_151__(m_TeamManager.m_iMemberCount, 0)))
+					if(((m_TeamManager.m_OtherTeamVoicesMgr != none) && (m_TeamManager.m_iMemberCount > 0)))
 					{
 						m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_TeamManager.m_Team[0], 3);
 					}
@@ -786,7 +786,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 				// End:0x22E
 				case 1:
 					// End:0x22B
-					if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_154__(int(R6Pawn(instigatedBy).m_ePawnType), int(1))))
+					if(((instigatedBy != none) && (int(R6Pawn(instigatedBy).m_ePawnType) == int(1))))
 					{
 						m_TeamManager.m_OtherTeamVoicesMgr.PlayRainbowOtherTeamVoices(m_pawn, 4);
 					}

@@ -52,10 +52,10 @@ function ResolutionChanged(float W, float H)
 	J0x19:
 
 	// End:0x76 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x5A
-		if(__NFUN_119__(i.Menu, none))
+		if((i.Menu != none))
 		{
 			i.Menu.ResolutionChanged(W, H);
 		}
@@ -77,19 +77,19 @@ function Paint(Canvas C, float MouseX, float MouseY)
 	J0x24:
 
 	// End:0x12E [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		C.Font = Root.Fonts[0];
 		TextSize(C, RemoveAmpersand(i.Caption), W, H);
 		// End:0xCA
 		if(i.bHelp)
 		{
-			DrawItem(C, i, __NFUN_175__(WinWidth, __NFUN_174__(W, float(Spacing))), 1.0000000, __NFUN_174__(W, float(Spacing)), 14.0000000);			
+			DrawItem(C, i, (WinWidth - (W + float(Spacing))), 1.0000000, (W + float(Spacing)), 14.0000000);			
 		}
 		else
 		{
-			DrawItem(C, i, X, 1.0000000, __NFUN_174__(W, float(Spacing)), 14.0000000);
-			X = __NFUN_174__(__NFUN_174__(X, W), float(Spacing));
+			DrawItem(C, i, X, 1.0000000, (W + float(Spacing)), 14.0000000);
+			X = ((X + W) + float(Spacing));
 		}
 		i = UWindowMenuBarItem(i.Next);
 		// [Loop Continue]
@@ -108,16 +108,16 @@ function MouseMove(float X, float Y)
 	J0x30:
 
 	// End:0xF5 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0xD9
-		if(__NFUN_130__(__NFUN_179__(X, i.ItemLeft), __NFUN_178__(X, __NFUN_174__(i.ItemLeft, i.ItemWidth))))
+		if(((X >= i.ItemLeft) && (X <= (i.ItemLeft + i.ItemWidth))))
 		{
 			// End:0xCE
-			if(__NFUN_119__(Selected, none))
+			if((Selected != none))
 			{
 				// End:0xCB
-				if(__NFUN_119__(Selected, i))
+				if((Selected != i))
 				{
 					Selected.DeSelect();
 					Selected = i;
@@ -157,18 +157,18 @@ function LMouseDown(float X, float Y)
 	J0x19:
 
 	// End:0xE7 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0xCB
-		if(__NFUN_130__(__NFUN_179__(X, i.ItemLeft), __NFUN_178__(X, __NFUN_174__(i.ItemLeft, i.ItemWidth))))
+		if(((X >= i.ItemLeft) && (X <= (i.ItemLeft + i.ItemWidth))))
 		{
 			// End:0x80
-			if(__NFUN_119__(Selected, none))
+			if((Selected != none))
 			{
 				Selected.DeSelect();
 			}
 			// End:0xA4
-			if(__NFUN_114__(Selected, i))
+			if((Selected == i))
 			{
 				Selected = none;
 				Over = i;				
@@ -186,7 +186,7 @@ function LMouseDown(float X, float Y)
 		goto J0x19;
 	}
 	// End:0x101
-	if(__NFUN_119__(Selected, none))
+	if((Selected != none))
 	{
 		Selected.DeSelect();
 	}
@@ -201,7 +201,7 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	local UWindowMenuBarItem pMenuBarItem;
 
 	pMenuBarItem = UWindowMenuBarItem(Item);
-	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	C.SetDrawColor(byte(255), byte(255), byte(255));
 	pMenuBarItem.ItemLeft = X;
 	pMenuBarItem.ItemWidth = W;
 	LookAndFeel.Menu_DrawMenuBarItem(self, pMenuBarItem, X, Y, W, H, C);
@@ -217,7 +217,7 @@ function DrawMenuBar(Canvas C)
 function CloseUp()
 {
 	// End:0x21
-	if(__NFUN_119__(Selected, none))
+	if((Selected != none))
 	{
 		Selected.DeSelect();
 		Selected = none;
@@ -242,7 +242,7 @@ function bool HotKeyDown(int Key, float X, float Y)
 	local UWindowMenuBarItem i;
 
 	// End:0x14
-	if(__NFUN_154__(Key, 18))
+	if((Key == 18))
 	{
 		bAltDown = true;
 	}
@@ -253,13 +253,13 @@ function bool HotKeyDown(int Key, float X, float Y)
 		J0x36:
 
 		// End:0xC0 [Loop If]
-		if(__NFUN_119__(i, none))
+		if((i != none))
 		{
 			// End:0xA4
-			if(__NFUN_154__(Key, int(i.HotKey)))
+			if((Key == int(i.HotKey)))
 			{
 				// End:0x75
-				if(__NFUN_119__(Selected, none))
+				if((Selected != none))
 				{
 					Selected.DeSelect();
 				}
@@ -281,7 +281,7 @@ function bool HotKeyDown(int Key, float X, float Y)
 function bool HotKeyUp(int Key, float X, float Y)
 {
 	// End:0x14
-	if(__NFUN_154__(Key, 18))
+	if((Key == 18))
 	{
 		bAltDown = false;
 	}
@@ -299,12 +299,12 @@ function KeyDown(int Key, float X, float Y)
 		case 37:
 			i = UWindowMenuBarItem(Selected.Prev);
 			// End:0x5A
-			if(__NFUN_132__(__NFUN_114__(i, none), __NFUN_114__(i, Items)))
+			if(((i == none) || (i == Items)))
 			{
 				i = UWindowMenuBarItem(Items.Last);
 			}
 			// End:0x74
-			if(__NFUN_119__(Selected, none))
+			if((Selected != none))
 			{
 				Selected.DeSelect();
 			}
@@ -317,12 +317,12 @@ function KeyDown(int Key, float X, float Y)
 		case 39:
 			i = UWindowMenuBarItem(Selected.Next);
 			// End:0xDE
-			if(__NFUN_114__(i, none))
+			if((i == none))
 			{
 				i = UWindowMenuBarItem(Items.Next);
 			}
 			// End:0xF8
-			if(__NFUN_119__(Selected, none))
+			if((Selected != none))
 			{
 				Selected.DeSelect();
 			}
@@ -348,13 +348,13 @@ function MenuCmd(int Menu, int Item)
 	J0x20:
 
 	// End:0xD1 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0xAE
-		if(__NFUN_130__(__NFUN_154__(j, Menu), __NFUN_119__(i.Menu, none)))
+		if(((j == Menu) && (i.Menu != none)))
 		{
 			// End:0x6A
-			if(__NFUN_119__(Selected, none))
+			if((Selected != none))
 			{
 				Selected.DeSelect();
 			}
@@ -364,7 +364,7 @@ function MenuCmd(int Menu, int Item)
 			i.Menu.MenuCmd(Item);
 			return;
 		}
-		__NFUN_165__(j);
+		(j++);
 		i = UWindowMenuBarItem(i.Next);
 		// [Loop Continue]
 		goto J0x20;

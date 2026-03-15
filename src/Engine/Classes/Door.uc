@@ -29,69 +29,69 @@ function PostBeginPlay()
 	local Vector Dist;
 
 	// End:0x9F
-	if(__NFUN_255__(DoorTrigger, 'None'))
+	if((DoorTrigger != 'None'))
 	{
 		// End:0x28
-		foreach __NFUN_304__(Class'Engine.Actor', RecommendedTrigger, DoorTrigger)
+		foreach AllActors(Class'Engine.Actor', RecommendedTrigger, DoorTrigger)
 		{
 			// End:0x28
 			break;			
 		}		
 		// End:0x9F
-		if(__NFUN_119__(RecommendedTrigger, none))
+		if((RecommendedTrigger != none))
 		{
-			Dist = __NFUN_216__(Location, RecommendedTrigger.Location);
+			Dist = (Location - RecommendedTrigger.Location);
 			// End:0x9F
-			if(__NFUN_176__(__NFUN_186__(Dist.Z), RecommendedTrigger.CollisionHeight))
+			if((Abs(Dist.Z) < RecommendedTrigger.CollisionHeight))
 			{
 				Dist.Z = 0.0000000;
 				// End:0x9F
-				if(__NFUN_176__(__NFUN_225__(Dist), RecommendedTrigger.CollisionRadius))
+				if((VSize(Dist) < RecommendedTrigger.CollisionRadius))
 				{
 					RecommendedTrigger = none;
 				}
 			}
 		}
 	}
-	bBlocked = __NFUN_130__(bInitiallyClosed, bBlockedWhenClosed);
-	bDoorOpen = __NFUN_129__(bInitiallyClosed);
+	bBlocked = (bInitiallyClosed && bBlockedWhenClosed);
+	bDoorOpen = (!bInitiallyClosed);
 	super(Actor).PostBeginPlay();
 	return;
 }
 
 function MoverOpened()
 {
-	bBlocked = __NFUN_130__(__NFUN_129__(bInitiallyClosed), bBlockedWhenClosed);
+	bBlocked = ((!bInitiallyClosed) && bBlockedWhenClosed);
 	bDoorOpen = bInitiallyClosed;
 	return;
 }
 
 function MoverClosed()
 {
-	bBlocked = __NFUN_130__(bInitiallyClosed, bBlockedWhenClosed);
-	bDoorOpen = __NFUN_129__(bInitiallyClosed);
+	bBlocked = (bInitiallyClosed && bBlockedWhenClosed);
+	bDoorOpen = (!bInitiallyClosed);
 	return;
 }
 
 function Actor SpecialHandling(Pawn Other)
 {
 	// End:0x0D
-	if(__NFUN_114__(MyDoor, none))
+	if((MyDoor == none))
 	{
 		return self;
 	}
 	// End:0x3E
-	if(__NFUN_130__(__NFUN_154__(int(MyDoor.BumpType), int(0)), __NFUN_129__(Other.IsPlayerPawn())))
+	if(((int(MyDoor.BumpType) == int(0)) && (!Other.IsPlayerPawn())))
 	{
 		return none;
 	}
 	// End:0x79
-	if(__NFUN_242__(bInitiallyClosed, __NFUN_132__(__NFUN_132__(bDoorOpen, MyDoor.bOpening), MyDoor.bDelaying)))
+	if((bInitiallyClosed == ((bDoorOpen || MyDoor.bOpening) || MyDoor.bDelaying)))
 	{
 		return self;
 	}
 	// End:0x8A
-	if(__NFUN_119__(RecommendedTrigger, none))
+	if((RecommendedTrigger != none))
 	{
 		return RecommendedTrigger;
 	}
@@ -102,7 +102,7 @@ function Actor SpecialHandling(Pawn Other)
 function bool ProceedWithMove(Pawn Other)
 {
 	// End:0x21
-	if(__NFUN_132__(bDoorOpen, __NFUN_129__(MyDoor.bDamageTriggered)))
+	if((bDoorOpen || (!MyDoor.bDamageTriggered)))
 	{
 		return true;
 	}
@@ -120,7 +120,7 @@ event bool SuggestMovePreparation(Pawn Other)
 		return false;
 	}
 	// End:0x50
-	if(__NFUN_132__(MyDoor.bOpening, MyDoor.bDelaying))
+	if((MyDoor.bOpening || MyDoor.bDelaying))
 	{
 		Other.Controller.WaitForMover(MyDoor);
 		return true;

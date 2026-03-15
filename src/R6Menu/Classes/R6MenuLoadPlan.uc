@@ -21,7 +21,7 @@ var R6WindowButton m_BDeletePlan;
 
 function Created()
 {
-	m_BDeletePlan = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(m_IBXPos), __NFUN_175__(__NFUN_175__(WinHeight, float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)), float(m_IBYPos)), __NFUN_175__(WinWidth, float(m_IBXPos)), float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)));
+	m_BDeletePlan = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(m_IBXPos), ((WinHeight - float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)) - float(m_IBYPos)), (WinWidth - float(m_IBXPos)), float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)));
 	m_BDeletePlan.m_buttonFont = Root.Fonts[6];
 	m_BDeletePlan.m_fLMarge = 4.0000000;
 	m_BDeletePlan.m_fRMarge = 4.0000000;
@@ -43,7 +43,7 @@ function Created()
 
 function Resized()
 {
-	m_BDeletePlan.WinTop = __NFUN_175__(__NFUN_175__(WinHeight, float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)), float(m_IBYPos));
+	m_BDeletePlan.WinTop = ((WinHeight - float(R6MenuRSLookAndFeel(LookAndFeel).m_RSquareBgLeft.H)) - float(m_IBYPos));
 	m_pListOfSavedPlan.SetSize(WinWidth, m_BDeletePlan.WinTop);
 	return;
 }
@@ -53,12 +53,12 @@ function Notify(UWindowDialogControl C, byte E)
 	local string DelPlanMsg;
 
 	// End:0xDF
-	if(__NFUN_130__(__NFUN_154__(int(E), 2), __NFUN_114__(C, m_BDeletePlan)))
+	if(((int(E) == 2) && (C == m_BDeletePlan)))
 	{
 		// End:0xDF
-		if(__NFUN_119__(m_pListOfSavedPlan.m_SelectedItem, none))
+		if((m_pListOfSavedPlan.m_SelectedItem != none))
 		{
-			DelPlanMsg = __NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(Localize("POPUP", "DelPlanMsg", "R6Menu"), ":"), m_pListOfSavedPlan.m_SelectedItem.HelpText), "\\n"), Localize("POPUP", "DelPlanQuestion", "R6Menu"));
+			DelPlanMsg = ((((Localize("POPUP", "DelPlanMsg", "R6Menu") @ ":") @ m_pListOfSavedPlan.m_SelectedItem.HelpText) @ "\\n") @ Localize("POPUP", "DelPlanQuestion", "R6Menu"));
 			R6MenuRootWindow(Root).SimplePopUp(Localize("POPUP", "DelPlan", "R6Menu"), DelPlanMsg, 40);
 		}
 	}

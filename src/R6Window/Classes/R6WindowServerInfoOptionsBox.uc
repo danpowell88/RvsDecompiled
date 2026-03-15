@@ -34,7 +34,7 @@ function BeforePaint(Canvas C, float fMouseX, float fMouseY)
 
 	C.Font = m_Font;
 	TextSize(C, "TEST", tW, tH);
-	m_fItemHeight = __NFUN_174__(tH, float(2));
+	m_fItemHeight = (tH + float(2));
 	m_VertSB.SetBorderColor(m_BorderColor);
 	super(UWindowDialogControl).BeforePaint(C, fMouseX, fMouseY);
 	return;
@@ -60,12 +60,12 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	pListInfoOptItem = R6WindowListInfoOptionsItem(Item);
 	C.Style = 5;
 	C.Font = m_Font;
-	szText = TextSize(C, pListInfoOptItem.szOptions, tW, tH, int(__NFUN_175__(W, pListInfoOptItem.fOptionsXOff)));
-	TextY = __NFUN_172__(__NFUN_175__(H, tH), float(2));
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	__NFUN_184__(X, pListInfoOptItem.fOptionsXOff);
-	C.__NFUN_2623__(X, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(szText);
+	szText = TextSize(C, pListInfoOptItem.szOptions, tW, tH, int((W - pListInfoOptItem.fOptionsXOff)));
+	TextY = ((H - tH) / float(2));
+	TextY = float(int((TextY + 0.5000000)));
+	(X += pListInfoOptItem.fOptionsXOff);
+	C.SetPos(X, (Y + TextY));
+	C.DrawText(szText);
 	return;
 }
 

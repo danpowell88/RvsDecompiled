@@ -515,21 +515,21 @@ var Vector m_vPrePivotProneBackup;  // when going prone, backup the value
 replication
 {
 	// Pos:0x000
-	unreliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) < int(ROLE_Authority)))
 		ServerPerformDoorAction, ServerPlayReloadAnimAgain, 
 		ServerSuicidePawn, ServerSwitchReloadingWeapon;
 
 	// Pos:0x04E
-	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) == int(ROLE_Authority)))
 		ClientSetJumpValues, R6ClientAffectedByFlashbang;
 
 	// Pos:0x00D
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerActionRequest, ServerClimbLadder, 
 		ServerGivesWeaponToClient;
 
 	// Pos:0x01A
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_KilledBy, m_Ladder, 
 		m_SoundRepInfo, m_TeamMemberRepInfo, 
 		m_bCanArmBomb, m_bCanDisarmBomb, 
@@ -546,13 +546,13 @@ replication
 		m_potentialActionActor, m_rHitDirection;
 
 	// Pos:0x027
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		Arrested, ClientSetFree, 
 		ClientSurrender, m_ePendingAction, 
 		m_iNetCurrentActionIndex, m_iPendingActionInt;
 
 	// Pos:0x034
-	reliable if(__NFUN_130__(__NFUN_129__(bNetOwner), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if(((!bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		m_bToggleServerCancelPlacingCharge, m_fPeekingGoal;
 }
 
@@ -645,13 +645,13 @@ simulated event ZoneChange(ZoneInfo NewZone)
 	local ZoneInfo WZ;
 
 	// End:0x36
-	if(__NFUN_132__(__NFUN_114__(Level.m_WeatherEmitter, none), __NFUN_154__(Level.m_WeatherEmitter.Emitters.Length, 0)))
+	if(((Level.m_WeatherEmitter == none) || (Level.m_WeatherEmitter.Emitters.Length == 0)))
 	{
 		return;
 	}
 	PC = PlayerController(Controller);
 	// End:0x6E
-	if(__NFUN_132__(__NFUN_114__(PC, none), __NFUN_114__(Viewport(PC.Player), none)))
+	if(((PC == none) || (Viewport(PC.Player) == none)))
 	{
 		return;
 	}
@@ -663,36 +663,36 @@ simulated event ZoneChange(ZoneInfo NewZone)
 		J0x97:
 
 		// End:0x14F [Loop If]
-		if(__NFUN_150__(i, WZ.m_AlternateWeatherEmitters.Length))
+		if((i < WZ.m_AlternateWeatherEmitters.Length))
 		{
 			// End:0x145
-			if(__NFUN_130__(__NFUN_119__(WZ.m_AlternateWeatherEmitters[i], none), __NFUN_151__(WZ.m_AlternateWeatherEmitters[i].Emitters.Length, 0)))
+			if(((WZ.m_AlternateWeatherEmitters[i] != none) && (WZ.m_AlternateWeatherEmitters[i].Emitters.Length > 0)))
 			{
 				WZ.m_AlternateWeatherEmitters[i].Emitters[0].m_iPaused = 1;
 				WZ.m_AlternateWeatherEmitters[i].Emitters[0].AllParticlesDead = false;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x97;
 		}
 		WZ.m_bAlternateEmittersActive = false;
 	}
 	// End:0x244
-	if(__NFUN_129__(NewZone.m_bAlternateEmittersActive))
+	if((!NewZone.m_bAlternateEmittersActive))
 	{
 		i = 0;
 		J0x17B:
 
 		// End:0x233 [Loop If]
-		if(__NFUN_150__(i, NewZone.m_AlternateWeatherEmitters.Length))
+		if((i < NewZone.m_AlternateWeatherEmitters.Length))
 		{
 			// End:0x229
-			if(__NFUN_130__(__NFUN_119__(NewZone.m_AlternateWeatherEmitters[i], none), __NFUN_151__(NewZone.m_AlternateWeatherEmitters[i].Emitters.Length, 0)))
+			if(((NewZone.m_AlternateWeatherEmitters[i] != none) && (NewZone.m_AlternateWeatherEmitters[i].Emitters.Length > 0)))
 			{
 				NewZone.m_AlternateWeatherEmitters[i].Emitters[0].m_iPaused = 0;
 				NewZone.m_AlternateWeatherEmitters[i].Emitters[0].AllParticlesDead = false;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x17B;
 		}
@@ -709,7 +709,7 @@ function bool ProcessBuildDeathMessage(Pawn Killer, out string szPlayerName)
 {
 	szPlayerName = "";
 	// End:0x29
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		szPlayerName = PlayerReplicationInfo.PlayerName;
 		return true;
@@ -723,69 +723,69 @@ static function string BuildDeathMessage(string Killer, string killed, byte bDea
 	local string DeathMessage;
 
 	// End:0x52
-	if(__NFUN_154__(int(bDeathMsgType), 1))
+	if((int(bDeathMsgType) == 1))
 	{
-		DeathMessage = __NFUN_112__(__NFUN_112__(killed, " "), Localize("MPDeathMessages", "LeftTheGame", "R6GameInfo"));		
+		DeathMessage = ((killed $ " ") $ Localize("MPDeathMessages", "LeftTheGame", "R6GameInfo"));		
 	}
 	else
 	{
 		// End:0xA7
-		if(__NFUN_154__(int(bDeathMsgType), 2))
+		if((int(bDeathMsgType) == 2))
 		{
-			DeathMessage = __NFUN_112__(__NFUN_112__(__NFUN_112__("", Localize("MPDeathMessages", "PenaltyTo", "R6GameInfo")), " "), Killer);			
+			DeathMessage = ((("" $ Localize("MPDeathMessages", "PenaltyTo", "R6GameInfo")) $ " ") $ Killer);			
 		}
 		else
 		{
 			// End:0xF1
-			if(__NFUN_154__(int(bDeathMsgType), 5))
+			if((int(bDeathMsgType) == 5))
 			{
 				DeathMessage = Localize("MPDeathMessages", "HostageHasDied", "R6GameInfo");				
 			}
 			else
 			{
 				// End:0x14B
-				if(__NFUN_154__(int(bDeathMsgType), 9))
+				if((int(bDeathMsgType) == 9))
 				{
-					DeathMessage = __NFUN_112__(__NFUN_112__(Killer, " "), Localize("MPDeathMessages", "PlayerKilledByBomb", "R6GameInfo"));					
+					DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "PlayerKilledByBomb", "R6GameInfo"));					
 				}
 				else
 				{
 					// End:0x1A5
-					if(__NFUN_154__(int(bDeathMsgType), 7))
+					if((int(bDeathMsgType) == 7))
 					{
-						DeathMessage = __NFUN_112__(__NFUN_112__(Killer, " "), Localize("MPDeathMessages", "TerroKilledHostage", "R6GameInfo"));						
+						DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "TerroKilledHostage", "R6GameInfo"));						
 					}
 					else
 					{
 						// End:0x20C
-						if(__NFUN_132__(__NFUN_154__(int(bDeathMsgType), 3), __NFUN_122__(Killer, killed)))
+						if(((int(bDeathMsgType) == 3) || (Killer == killed)))
 						{
-							DeathMessage = __NFUN_112__(__NFUN_112__(Killer, " "), Localize("MPDeathMessages", "PlayerSuicided", "R6GameInfo"));							
+							DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "PlayerSuicided", "R6GameInfo"));							
 						}
 						else
 						{
 							// End:0x262
-							if(__NFUN_154__(int(bDeathMsgType), 6))
+							if((int(bDeathMsgType) == 6))
 							{
-								DeathMessage = __NFUN_112__(__NFUN_112__(Killer, " "), Localize("MPDeathMessages", "KilledAHostage", "R6GameInfo"));								
+								DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "KilledAHostage", "R6GameInfo"));								
 							}
 							else
 							{
 								// End:0x2BB
-								if(__NFUN_154__(int(bDeathMsgType), 8))
+								if((int(bDeathMsgType) == 8))
 								{
-									DeathMessage = __NFUN_112__(__NFUN_112__(Localize("MPDeathMessages", "TerroKilledPlayer", "R6GameInfo"), " "), killed);									
+									DeathMessage = ((Localize("MPDeathMessages", "TerroKilledPlayer", "R6GameInfo") $ " ") $ killed);									
 								}
 								else
 								{
 									// End:0x31B
-									if(__NFUN_154__(int(bDeathMsgType), 12))
+									if((int(bDeathMsgType) == 12))
 									{
-										DeathMessage = __NFUN_112__(__NFUN_112__(Killer, " "), Localize("MPDeathMessages", "KilledTheIntruder", "IronWrathGameInfo"));										
+										DeathMessage = ((Killer $ " ") $ Localize("MPDeathMessages", "KilledTheIntruder", "IronWrathGameInfo"));										
 									}
 									else
 									{
-										DeathMessage = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(Killer, " "), Localize("MPDeathMessages", "PlayerKilledPlayer", "R6GameInfo")), " "), killed);
+										DeathMessage = ((((Killer $ " ") $ Localize("MPDeathMessages", "PlayerKilledPlayer", "R6GameInfo")) $ " ") $ killed);
 									}
 								}
 							}
@@ -808,16 +808,16 @@ simulated function logX(string szText)
 	local string szSource, Time;
 
 	// End:0x23
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.logX(szText, 1);		
 	}
 	else
 	{
 		Time = string(Level.TimeSeconds);
-		Time = __NFUN_128__(Time, __NFUN_146__(__NFUN_126__(Time, "."), 3));
-		szSource = __NFUN_112__(__NFUN_112__("(", Time), ":P) ");
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(szSource, string(Name)), " [ None |"), string(__NFUN_284__())), "] "), szText));
+		Time = Left(Time, (InStr(Time, ".") + 3));
+		szSource = (("(", Time) $ ":P) " $ ???);
+		Log((((((szSource $ string(Name)) $ " [ None |") $ string(GetStateName())) $ "] ") $ szText));
 	}
 	return;
 }
@@ -828,9 +828,9 @@ simulated function logX(string szText)
 //------------------------------------------------------------------
 simulated function logWarning(string Text)
 {
-	__NFUN_231__(" *********************************************************************************** ");
-	logX(__NFUN_112__(" WARNING!!! ", Text));
-	__NFUN_231__(" *********************************************************************************** ");
+	Log(" *********************************************************************************** ");
+	logX((" WARNING!!! " $ Text));
+	Log(" *********************************************************************************** ");
 	return;
 }
 
@@ -894,23 +894,23 @@ event float GetSkill(R6AbstractPawn.ESkills eSkillName)
 	}
 	fLevelMul = 1.0000000;
 	// End:0x103
-	if(__NFUN_129__(m_bIsPlayer))
+	if((!m_bIsPlayer))
 	{
 		// End:0xDF
-		if(__NFUN_154__(int(m_ePawnType), int(2)))
+		if((int(m_ePawnType) == int(2)))
 		{
 			fLevelMul = Level.m_fTerroSkillMultiplier;			
 		}
 		else
 		{
 			// End:0x103
-			if(__NFUN_154__(int(m_ePawnType), int(1)))
+			if((int(m_ePawnType) == int(1)))
 			{
 				fLevelMul = Level.m_fRainbowSkillMultiplier;
 			}
 		}
 	}
-	return __NFUN_171__(__NFUN_171__(SkillModifier(), fSkill), fLevelMul);
+	return ((SkillModifier() * fSkill) * fLevelMul);
 	return;
 }
 
@@ -920,14 +920,14 @@ function float SkillModifier()
 
 	fFactor = 1.0000000;
 	// End:0x27
-	if(__NFUN_154__(int(m_eHealth), int(1)))
+	if((int(m_eHealth) == int(1)))
 	{
-		__NFUN_182__(fFactor, 0.7500000);
+		(fFactor *= 0.7500000);
 	}
 	// End:0x43
-	if(__NFUN_154__(int(m_eEffectiveGrenade), int(2)))
+	if((int(m_eEffectiveGrenade) == int(2)))
 	{
-		__NFUN_182__(fFactor, 0.7500000);
+		(fFactor *= 0.7500000);
 	}
 	return fFactor;
 	return;
@@ -968,7 +968,7 @@ function bool HasBumpPriority(R6Pawn bumpedBy)
 event R6MakeMovementNoise()
 {
 	// End:0x41
-	if(__NFUN_119__(R6AbstractGameInfo(Level.Game), none))
+	if((R6AbstractGameInfo(Level.Game) != none))
 	{
 		R6AbstractGameInfo(Level.Game).GetNoiseMgr().R6MakePawnMovementNoise(self);
 	}

@@ -110,15 +110,15 @@ event PostBeginPlay()
 
 	super(Controller).PostBeginPlay();
 	m_mgr = R6HostageMgr(Level.GetHostageMgr());
-	assert(__NFUN_153__(12, m_mgr.11));
+	assert((12 >= m_mgr.11));
 	i = 0;
 	J0x39:
 
 	// End:0x61 [Loop If]
-	if(__NFUN_150__(i, 12))
+	if((i < 12))
 	{
 		m_aPlaySndInfo[i].m_iInBetweenTime = 1;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x39;
 	}
@@ -138,9 +138,9 @@ function Possess(Pawn aPawn)
 	m_pawn = R6Hostage(Pawn);
 	m_VoicesManager = R6HostageVoices(R6AbstractGameInfo(Level.Game).GetHostageVoicesMgr(Level.m_eHostageVoices, m_pawn.bIsFemale));
 	// End:0x74
-	if(__NFUN_255__(__NFUN_284__(), 'Configuration'))
+	if((GetStateName() != 'Configuration'))
 	{
-		__NFUN_113__('Configuration');
+		GotoState('Configuration');
 	}
 	return;
 }
@@ -153,7 +153,7 @@ function Tick(float fDeltaTime)
 {
 	super.Tick(fDeltaTime);
 	// End:0x1C
-	if(__NFUN_151__(m_iNbOrder, 0))
+	if((m_iNbOrder > 0))
 	{
 		Order_Process();
 	}
@@ -167,7 +167,7 @@ function PawnDied()
 {
 	StopFollowingPawn(false);
 	// End:0x20
-	if(__NFUN_151__(m_pListOfCoverNodes.Length, 0))
+	if((m_pListOfCoverNodes.Length > 0))
 	{
 		m_pListOfCoverNodes.Remove(0, m_pListOfCoverNodes.Length);
 	}
@@ -191,7 +191,7 @@ function SetFreed(bool bFreed)
 		m_iLastHearNoiseTime = 0;		
 	}
 	// End:0x8F
-	if(__NFUN_130__(m_pawn.m_bFreed, __NFUN_154__(int(m_pawn.m_ePersonality), int(3))))
+	if((m_pawn.m_bFreed && (int(m_pawn.m_ePersonality) == int(3))))
 	{
 		m_pawn.m_ePersonality = 1;
 	}
@@ -205,10 +205,10 @@ function SetFreed(bool bFreed)
 function SetPawnPosition(R6Hostage.EStartingPosition ePos)
 {
 	// End:0x2E
-	if(__NFUN_154__(int(ePos), int(5)))
+	if((int(ePos) == int(5)))
 	{
 		// End:0x26
-		if(__NFUN_152__(__NFUN_167__(100), 50))
+		if((Rand(100) <= 50))
 		{
 			ePos = 1;			
 		}
@@ -265,7 +265,7 @@ function SetPace(R6Pawn.eMovementPace ePace)
 		if(Pawn.bTryToUncrouch)
 		{
 			// End:0x65
-			if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eMovementPace), int(3)), __NFUN_154__(int(ePace), int(3))))
+			if(((int(m_pawn.m_eMovementPace) == int(3)) || (int(ePace) == int(3))))
 			{
 				ePace = 3;				
 			}
@@ -287,14 +287,14 @@ function SetPace(R6Pawn.eMovementPace ePace)
 function SetStateGuarded(R6Hostage.EStartingPosition ePos, int iHstSndEvent)
 {
 	// End:0x1F
-	if(__NFUN_155__(iHstSndEvent, m_mgr.0))
+	if((iHstSndEvent != m_mgr.0))
 	{
 		ProcessPlaySndInfo(iHstSndEvent);
 	}
 	ResetThreatInfo("SetStateGuarded");
 	m_pawn.setFrozen(false);
 	m_eTransitionPosition = ePos;
-	__NFUN_113__('Guarded');
+	GotoState('Guarded');
 	return;
 }
 
@@ -305,7 +305,7 @@ function SetStateGuarded(R6Hostage.EStartingPosition ePos, int iHstSndEvent)
 function SetStateFollowingPawn(R6Pawn runTo, bool bFreed, int iHstSndEvent)
 {
 	// End:0x1F
-	if(__NFUN_155__(iHstSndEvent, m_mgr.0))
+	if((iHstSndEvent != m_mgr.0))
 	{
 		ProcessPlaySndInfo(iHstSndEvent);
 	}
@@ -313,7 +313,7 @@ function SetStateFollowingPawn(R6Pawn runTo, bool bFreed, int iHstSndEvent)
 	m_pawnToFollow = R6Rainbow(runTo).Escort_GetPawnToFollow(true);
 	m_bRunningToward = true;
 	SetThreatState('FollowingPawn');
-	__NFUN_113__(m_threatInfo.m_state);
+	GotoState(m_threatInfo.m_state);
 	return;
 }
 
@@ -323,22 +323,22 @@ function int Roll(int iMax)
 {
 	local int iRoll;
 
-	iRoll = __NFUN_146__(__NFUN_167__(iMax), 1);
+	iRoll = (Rand(iMax) + 1);
 	switch(m_pawn.m_ePersonality)
 	{
 		// End:0x34
 		case 0:
-			__NFUN_161__(iRoll, c_iCowardModifier);
+			(iRoll += c_iCowardModifier);
 			// End:0x5F
 			break;
 		// End:0x48
 		case 1:
-			__NFUN_161__(iRoll, c_iNormalModifier);
+			(iRoll += c_iNormalModifier);
 			// End:0x5F
 			break;
 		// End:0x5C
 		case 2:
-			__NFUN_161__(iRoll, c_iBraveModifier);
+			(iRoll += c_iBraveModifier);
 			// End:0x5F
 			break;
 		// End:0xFFFF
@@ -346,22 +346,22 @@ function int Roll(int iMax)
 			break;
 	}
 	// End:0x84
-	if(__NFUN_154__(int(m_pawn.m_eHealth), int(1)))
+	if((int(m_pawn.m_eHealth) == int(1)))
 	{
-		__NFUN_162__(iRoll, c_iWoundedModifier);
+		(iRoll -= c_iWoundedModifier);
 	}
 	// End:0xC4
-	if(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(2)), __NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(3))))
+	if(((int(m_pawn.m_eEffectiveGrenade) == int(2)) || (int(m_pawn.m_eEffectiveGrenade) == int(3))))
 	{
-		__NFUN_162__(iRoll, c_iGasModifier);
+		(iRoll -= c_iGasModifier);
 	}
 	// End:0xF1
 	if(m_bDbgRoll)
 	{
-		__NFUN_231__(__NFUN_112__("m_bDbgRoll: ", string(m_iDbgRoll)));
+		Log(("m_bDbgRoll: " $ string(m_iDbgRoll)));
 		iRoll = m_iDbgRoll;
 	}
-	iRoll = int(__NFUN_246__(float(iRoll), 0.0000000, 100.0000000));
+	iRoll = int(FClamp(float(iRoll), 0.0000000, 100.0000000));
 	return iRoll;
 	return;
 }
@@ -376,13 +376,13 @@ function Rotator GetRandomTurn90()
 
 	rRot = Pawn.Rotation;
 	// End:0x33
-	if(__NFUN_150__(__NFUN_167__(100), 50))
+	if((Rand(100) < 50))
 	{
-		__NFUN_162__(rRot.Yaw, 16383);		
+		(rRot.Yaw -= 16383);		
 	}
 	else
 	{
-		__NFUN_161__(rRot.Yaw, 16383);
+		(rRot.Yaw += 16383);
 	}
 	return rRot;
 	return;
@@ -400,36 +400,36 @@ function bool CanReturnToNormalState()
 	numFriend = 0;
 	numEnemy = 0;
 	// End:0xDD
-	foreach __NFUN_312__(Class'R6Engine.R6Pawn', P, Pawn.SightRadius, m_pawn.Location)
+	foreach VisibleCollidingActors(Class'R6Engine.R6Pawn', P, Pawn.SightRadius, m_pawn.Location)
 	{
 		// End:0x95
-		if(__NFUN_130__(m_pawn.IsEnemy(P), P.IsAlive()))
+		if((m_pawn.IsEnemy(P) && P.IsAlive()))
 		{
 			// End:0x8E
-			if(__NFUN_132__(P.IsFighting(), P.m_bIsKneeling))
+			if((P.IsFighting() || P.m_bIsKneeling))
 			{				
 				return false;
 			}
-			__NFUN_165__(numEnemy);
+			(numEnemy++);
 		}
 		// End:0xDC
-		if(__NFUN_130__(m_pawn.IsFriend(P), P.IsAlive()))
+		if((m_pawn.IsFriend(P) && P.IsAlive()))
 		{
 			// End:0xD5
 			if(P.IsFighting())
 			{				
 				return false;
 			}
-			__NFUN_165__(numFriend);
+			(numFriend++);
 		}		
 	}	
 	// End:0x101
-	if(__NFUN_176__(Level.TimeSeconds, float(__NFUN_146__(m_iLastHearNoiseTime, c_iCautiousLastHearNoiseTime))))
+	if((Level.TimeSeconds < float((m_iLastHearNoiseTime + c_iCautiousLastHearNoiseTime))))
 	{
 		return false;
 	}
 	// End:0x11B
-	if(__NFUN_132__(__NFUN_154__(numFriend, 0), __NFUN_154__(numEnemy, 0)))
+	if(((numFriend == 0) || (numEnemy == 0)))
 	{
 		return true;
 	}
@@ -450,7 +450,7 @@ function ReturnToNormalState(optional bool bNoTimer)
 	}
 	else
 	{
-		__NFUN_113__('Freed');
+		GotoState('Freed');
 	}
 	return;
 }
@@ -470,17 +470,17 @@ function SeePlayer(Pawn P)
 	}
 	seen = R6Pawn(P);
 	// End:0x27
-	if(__NFUN_154__(__NFUN_167__(2), 0))
+	if((Rand(2) == 0))
 	{
 		return;
 	}
 	// End:0x34
-	if(__NFUN_114__(seen, none))
+	if((seen == none))
 	{
 		return;
 	}
 	// End:0x5E
-	if(__NFUN_132__(__NFUN_129__(seen.IsAlive()), seen.m_bIsKneeling))
+	if(((!seen.IsAlive()) || seen.m_bIsKneeling))
 	{
 		return;
 	}
@@ -496,7 +496,7 @@ function SeePlayer(Pawn P)
 		if(m_pawn.m_bFreed)
 		{
 			// End:0xC0
-			if(__NFUN_130__(m_pawn.IsFriend(seen), __NFUN_114__(m_lastSeenPawn, none)))
+			if((m_pawn.IsFriend(seen) && (m_lastSeenPawn == none)))
 			{
 				m_lastSeenPawn = seen;				
 			}
@@ -512,7 +512,7 @@ function SeePlayer(Pawn P)
 		else
 		{
 			// End:0x121
-			if(__NFUN_130__(__NFUN_119__(m_lastSeenPawn, seen), m_pawn.IsFriend(seen)))
+			if(((m_lastSeenPawn != seen) && m_pawn.IsFriend(seen)))
 			{
 				m_vReactionDirection = seen.Location;
 			}
@@ -530,7 +530,7 @@ function SeePlayer(Pawn P)
 function SeePlayerMgr()
 {
 	// End:0x16
-	if(__NFUN_129__(m_lastSeenPawn.IsAlive()))
+	if((!m_lastSeenPawn.IsAlive()))
 	{
 		return;
 	}
@@ -549,7 +549,7 @@ event HearNoise(float fLoudness, Actor NoiseMaker, Actor.ENoiseType eType, optio
 	local Actor aGrenade;
 
 	// End:0x36
-	if(__NFUN_130__(m_pawn.m_bDontHearPlayer, R6Pawn(NoiseMaker.Instigator).m_bIsPlayer))
+	if((m_pawn.m_bDontHearPlayer && R6Pawn(NoiseMaker.Instigator).m_bIsPlayer))
 	{
 		return;
 	}
@@ -562,7 +562,7 @@ event HearNoise(float fLoudness, Actor NoiseMaker, Actor.ENoiseType eType, optio
 	if(m_pawn.m_bClassicMissionCivilian)
 	{
 		// End:0xAF
-		if(__NFUN_129__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eType), int(2)), __NFUN_154__(int(eType), int(3))), __NFUN_154__(int(eType), int(4))), __NFUN_130__(__NFUN_154__(int(eType), int(1)), __NFUN_154__(int(ESoundType), int(1))))))
+		if((!((((int(eType) == int(2)) || (int(eType) == int(3))) || (int(eType) == int(4))) || ((int(eType) == int(1)) && (int(ESoundType) == int(1))))))
 		{
 			return;
 		}		
@@ -570,7 +570,7 @@ event HearNoise(float fLoudness, Actor NoiseMaker, Actor.ENoiseType eType, optio
 	else
 	{
 		// End:0xEA
-		if(__NFUN_129__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eType), int(2)), __NFUN_154__(int(eType), int(3))), __NFUN_154__(int(eType), int(4)))))
+		if((!(((int(eType) == int(2)) || (int(eType) == int(3))) || (int(eType) == int(4)))))
 		{
 			return;
 		}
@@ -593,19 +593,19 @@ event HearNoise(float fLoudness, Actor NoiseMaker, Actor.ENoiseType eType, optio
 function bool CanConsiderThreat(R6Pawn aPawn, Actor aThreat, name considerThreat)
 {
 	// End:0x27
-	if(__NFUN_254__(considerThreat, 'IsEnemySound'))
+	if((considerThreat == 'IsEnemySound'))
 	{
 		return m_pawn.IsEnemy(aPawn);		
 	}
 	else
 	{
 		// End:0x3F
-		if(__NFUN_254__(considerThreat, 'CanSeeFriend'))
+		if((considerThreat == 'CanSeeFriend'))
 		{
-			return __NFUN_129__(m_bForceToStayHere);
+			return (!m_bForceToStayHere);
 		}
 	}
-	m_pawn.logWarning(__NFUN_112__("CanConsiderThreat: failed to find the threat=", string(considerThreat)));
+	m_pawn.logWarning(("CanConsiderThreat: failed to find the threat=" $ string(considerThreat)));
 	return false;
 	return;
 }

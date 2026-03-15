@@ -20,10 +20,10 @@ simulated function SelectTeam()
 	// End:0x68
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("SelectTeam: currently m_TeamSelection=", string(m_PlayerController.m_TeamSelection)), " m_PlayerController = "), string(m_PlayerController)));
+		Log(((("SelectTeam: currently m_TeamSelection=" $ string(m_PlayerController.m_TeamSelection)) $ " m_PlayerController = ") $ string(m_PlayerController)));
 	}
 	// End:0xDA
-	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(m_PlayerController.m_TeamSelection), int(0)), __NFUN_123__(GetGameType(), m_szPreviousGameType)), __NFUN_155__(m_iOldMapIndex, m_GameRepInfo.m_iMapIndex)))
+	if((((int(m_PlayerController.m_TeamSelection) == int(0)) || (GetGameType() != m_szPreviousGameType)) || (m_iOldMapIndex != m_GameRepInfo.m_iMapIndex)))
 	{
 		m_iOldMapIndex = m_GameRepInfo.m_iMapIndex;
 		SetStatMenuState(0);
@@ -42,7 +42,7 @@ function PlayerSelection(Object.ePlayerTeamSelection newTeam)
 function Object.ePlayerTeamSelection GetPlayerSelection()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_PlayerController, none))
+	if((m_PlayerController != none))
 	{
 		return m_PlayerController.m_TeamSelection;
 	}
@@ -52,7 +52,7 @@ function Object.ePlayerTeamSelection GetPlayerSelection()
 
 function bool IsAPlayerSelection()
 {
-	return __NFUN_132__(__NFUN_154__(int(GetPlayerSelection()), int(2)), __NFUN_154__(int(GetPlayerSelection()), int(3)));
+	return ((int(GetPlayerSelection()) == int(2)) || (int(GetPlayerSelection()) == int(3)));
 	return;
 }
 
@@ -66,13 +66,13 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 	bCloseSimplePopUpBox = true;
 	m_pCurrentRoot.m_bActiveBar = false;
 	// End:0x7A
-	if(__NFUN_243__(m_pCurrentRoot.m_bPlayerDidASelection, true))
+	if((m_pCurrentRoot.m_bPlayerDidASelection != true))
 	{
 		// End:0x65
-		if(__NFUN_154__(int(_eNewClientMenuState), int(0)))
+		if((int(_eNewClientMenuState) == int(0)))
 		{
 			// End:0x62
-			if(__NFUN_154__(int(m_pCurrentRoot.m_eCurWidgetInUse), int(m_pCurrentRoot.24)))
+			if((int(m_pCurrentRoot.m_eCurWidgetInUse) == int(m_pCurrentRoot.24)))
 			{
 				return;
 			}			
@@ -80,7 +80,7 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 		else
 		{
 			// End:0x78
-			if(__NFUN_154__(int(_eNewClientMenuState), int(6)))
+			if((int(_eNewClientMenuState) == int(6)))
 			{				
 			}
 			else
@@ -95,7 +95,7 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 		case 0:
 			m_pCurrentRoot.m_bPreventMenuSwitch = false;
 			// End:0xC1
-			if(__NFUN_154__(int(m_PlayerController.m_TeamSelection), int(0)))
+			if((int(m_PlayerController.m_TeamSelection) == int(0)))
 			{
 				m_pCurrentRoot.m_bPlayerDidASelection = false;
 			}
@@ -105,13 +105,13 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 		// End:0x17B
 		case 5:
 			// End:0x146
-			if(__NFUN_119__(m_pCurrentRoot.m_pSimplePopUp, none))
+			if((m_pCurrentRoot.m_pSimplePopUp != none))
 			{
 				// End:0x146
 				if(m_pCurrentRoot.m_pSimplePopUp.bWindowVisible)
 				{
 					// End:0x146
-					if(__NFUN_154__(int(m_pCurrentRoot.m_pSimplePopUp.m_ePopUpID), int(30)))
+					if((int(m_pCurrentRoot.m_pSimplePopUp.m_ePopUpID) == int(30)))
 					{
 						m_pCurrentRoot.m_iWidgetKA = m_pCurrentRoot.0;
 						return;
@@ -120,7 +120,7 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 			}
 			m_pCurrentRoot.m_pIntermissionMenuWidget.m_pInGameNavBar.SetNavBarState(false, true);
 			// End:0x17B
-			if(__NFUN_154__(int(m_eStatMenuState), int(4)))
+			if((int(m_eStatMenuState) == int(4)))
 			{
 				return;
 			}
@@ -134,7 +134,7 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 		// End:0x242
 		case 2:
 			m_pCurrentRoot.m_bActiveBar = true;
-			m_pCurrentRoot.GetLevel().__NFUN_2711__(0);
+			m_pCurrentRoot.GetLevel().SetBankSound(0);
 			// End:0x226
 			if(m_GameRepInfo.IsInAGameState())
 			{
@@ -155,20 +155,20 @@ function SetStatMenuState(R6GameMenuCom.eClientMenuState _eNewClientMenuState)
 		// End:0x2B6
 		case 4:
 			// End:0x28A
-			if(__NFUN_132__(__NFUN_154__(int(m_PlayerController.m_TeamSelection), int(2)), __NFUN_154__(int(m_PlayerController.m_TeamSelection), int(3))))
+			if(((int(m_PlayerController.m_TeamSelection) == int(2)) || (int(m_PlayerController.m_TeamSelection) == int(3))))
 			{
 				SetReadyButton(false);
 			}
 			m_pCurrentRoot.ChangeCurrentWidget(26);
-			m_pCurrentRoot.GetLevel().__NFUN_2711__(0);
+			m_pCurrentRoot.GetLevel().SetBankSound(0);
 			// End:0x355
 			break;
 		// End:0x327
 		case 6:
 			m_pCurrentRoot.ChangeCurrentWidget(26);
 			m_pCurrentRoot.m_bPreventMenuSwitch = true;
-			Class'Engine.Actor'.static.__NFUN_2619__(false);
-			m_pCurrentRoot.GetLevel().__NFUN_2711__(0);
+			Class'Engine.Actor'.static.EnableLoadingScreen(false);
+			m_pCurrentRoot.GetLevel().SetBankSound(0);
 			m_pCurrentRoot.m_pIntermissionMenuWidget.m_pInGameNavBar.SetNavBarState(true);
 			// End:0x355
 			break;
@@ -225,7 +225,7 @@ function SetupPlayerPrefs()
 		SecondaryGadgetClass = replaceGadgetClass;
 	}
 	// End:0x18D
-	if(__NFUN_123__(m_szArmor, ""))
+	if((m_szArmor != ""))
 	{
 		ArmorDescriptionClass = Class<R6ArmorDescription>(DynamicLoadObject(m_szArmor, Class'Core.Class'));
 		m_PlayerPrefInfo.m_ArmorName = ArmorDescriptionClass.default.m_ClassName;
@@ -239,10 +239,10 @@ function SetupPlayerPrefs()
 	J0x208:
 
 	// End:0x310 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(k, PrimaryWeaponClass.default.m_WeaponTags.Length), __NFUN_242__(Found, false)))
+	if(((k < PrimaryWeaponClass.default.m_WeaponTags.Length) && (Found == false)))
 	{
 		// End:0x29C
-		if(__NFUN_122__(PrimaryWeaponClass.default.m_WeaponTags[k], PrimaryWeaponGadgetClass.default.m_NameTag))
+		if((PrimaryWeaponClass.default.m_WeaponTags[k] == PrimaryWeaponGadgetClass.default.m_NameTag))
 		{
 			Found = true;
 			m_PlayerPrefInfo.m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[k];
@@ -251,7 +251,7 @@ function SetupPlayerPrefs()
 			goto J0x306;
 		}
 		// End:0x306
-		if(__NFUN_122__(PrimaryWeaponClass.default.m_WeaponTags[k], PrimaryWeaponBulletClass.default.m_NameTag))
+		if((PrimaryWeaponClass.default.m_WeaponTags[k] == PrimaryWeaponBulletClass.default.m_NameTag))
 		{
 			Found = true;
 			m_PlayerPrefInfo.m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[k];
@@ -259,15 +259,15 @@ function SetupPlayerPrefs()
 		}
 		J0x306:
 
-		__NFUN_165__(k);
+		(k++);
 		// [Loop Continue]
 		goto J0x208;
 	}
 	// End:0x3B8
-	if(__NFUN_242__(Found, false))
+	if((Found == false))
 	{
 		// End:0x385
-		if(__NFUN_155__(__NFUN_126__(string(PrimaryWeaponClass), "PrimaryWeaponNone"), -1))
+		if((InStr(string(PrimaryWeaponClass), "PrimaryWeaponNone") != -1))
 		{
 			m_PlayerPrefInfo.m_WeaponName[0] = "R6Description.R6DescPrimaryWeaponNone";
 			Tag = "NONE";			
@@ -279,7 +279,7 @@ function SetupPlayerPrefs()
 		}
 	}
 	// End:0x3EA
-	if(__NFUN_122__(Tag, "SILENCED"))
+	if((Tag == "SILENCED"))
 	{
 		m_PlayerPrefInfo.m_BulletType[0] = PrimaryWeaponBulletClass.default.m_SubsonicClassName;		
 	}
@@ -292,10 +292,10 @@ function SetupPlayerPrefs()
 	J0x414:
 
 	// End:0x51C [Loop If]
-	if(__NFUN_130__(__NFUN_150__(k, SecondaryWeaponClass.default.m_WeaponTags.Length), __NFUN_242__(Found, false)))
+	if(((k < SecondaryWeaponClass.default.m_WeaponTags.Length) && (Found == false)))
 	{
 		// End:0x4A8
-		if(__NFUN_122__(SecondaryWeaponClass.default.m_WeaponTags[k], SecondaryWeaponGadgetClass.default.m_NameTag))
+		if((SecondaryWeaponClass.default.m_WeaponTags[k] == SecondaryWeaponGadgetClass.default.m_NameTag))
 		{
 			Found = true;
 			m_PlayerPrefInfo.m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[k];
@@ -304,7 +304,7 @@ function SetupPlayerPrefs()
 			goto J0x512;
 		}
 		// End:0x512
-		if(__NFUN_122__(SecondaryWeaponClass.default.m_WeaponTags[k], SecondaryWeaponBulletClass.default.m_NameTag))
+		if((SecondaryWeaponClass.default.m_WeaponTags[k] == SecondaryWeaponBulletClass.default.m_NameTag))
 		{
 			Found = true;
 			m_PlayerPrefInfo.m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[k];
@@ -312,18 +312,18 @@ function SetupPlayerPrefs()
 		}
 		J0x512:
 
-		__NFUN_165__(k);
+		(k++);
 		// [Loop Continue]
 		goto J0x414;
 	}
 	// End:0x55B
-	if(__NFUN_242__(Found, false))
+	if((Found == false))
 	{
 		m_PlayerPrefInfo.m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[0];
 		Tag = SecondaryWeaponClass.default.m_WeaponTags[0];
 	}
 	// End:0x58D
-	if(__NFUN_122__(Tag, "SILENCED"))
+	if((Tag == "SILENCED"))
 	{
 		m_PlayerPrefInfo.m_BulletType[1] = SecondaryWeaponBulletClass.default.m_SubsonicClassName;		
 	}
@@ -343,9 +343,9 @@ function DisconnectClient(LevelInfo _Level)
 
 	m_bImCurrentlyDisconnect = true;
 	// End:0x66
-	if(__NFUN_154__(int(_Level.NetMode), int(NM_ListenServer)))
+	if((int(_Level.NetMode) == int(NM_ListenServer)))
 	{
-		R6MultiPlayerGameInfo(_Level.Game).m_GameService.__NFUN_3561__(m_GameRepInfo);
+		R6MultiPlayerGameInfo(_Level.Game).m_GameService.NativeLogOutServer(m_GameRepInfo);
 		R6GameInfo(_Level.Game).DestroyBeacon();
 	}
 	return;
@@ -358,7 +358,7 @@ function SetPlayerReadyStatus(bool _bPlayerReady)
 {
 	super.SetPlayerReadyStatus(_bPlayerReady);
 	// End:0x48
-	if(__NFUN_119__(m_pCurrentRoot, none))
+	if((m_pCurrentRoot != none))
 	{
 		m_pCurrentRoot.m_pIntermissionMenuWidget.m_pInGameNavBar.m_pPlayerReady.m_bSelected = _bPlayerReady;
 	}
@@ -368,10 +368,10 @@ function SetPlayerReadyStatus(bool _bPlayerReady)
 function RefreshReadyButtonStatus()
 {
 	// End:0x9B
-	if(__NFUN_132__(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.1), __NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.0)))
+	if(((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.1) || (int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.0)))
 	{
 		// End:0x91
-		if(__NFUN_132__(m_PlayerController.IsPlayerPassiveSpectator(), __NFUN_130__(m_PlayerController.bOnlySpectator, __NFUN_155__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.1))))
+		if((m_PlayerController.IsPlayerPassiveSpectator() || (m_PlayerController.bOnlySpectator && (int(m_GameRepInfo.m_eCurrectServerState) != m_GameRepInfo.1))))
 		{
 			SetReadyButton(true);			
 		}
@@ -383,7 +383,7 @@ function RefreshReadyButtonStatus()
 	else
 	{
 		// End:0x106
-		if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.2), __NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.3)), __NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.4)))
+		if((((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.2) || (int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.3)) || (int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.4)))
 		{
 			SetReadyButton(true);
 		}
@@ -397,7 +397,7 @@ function RefreshReadyButtonStatus()
 function SetReadyButton(bool _bDisable)
 {
 	// End:0x6F
-	if(__NFUN_119__(m_pCurrentRoot, none))
+	if((m_pCurrentRoot != none))
 	{
 		// End:0x43
 		if(_bDisable)
@@ -418,18 +418,18 @@ function bool IsInBetweenRoundMenu(optional bool _bIncludeCMSInit)
 	if(_bIncludeCMSInit)
 	{
 		// End:0x1B
-		if(__NFUN_154__(int(m_eStatMenuState), int(0)))
+		if((int(m_eStatMenuState) == int(0)))
 		{
 			return true;
 		}
 	}
 	// End:0x28
-	if(__NFUN_114__(m_GameRepInfo, none))
+	if((m_GameRepInfo == none))
 	{
 		return false;
 	}
 	// End:0x49
-	if(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.1))
+	if((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.1))
 	{
 		return true;
 	}
@@ -444,15 +444,15 @@ function int GeTTeamSelection(int _iIndex)
 	local PlayerMenuInfo _PlayerMenuInfo;
 
 	// End:0x2B
-	if(__NFUN_122__(GetGameType(), "RGM_DeathmatchMode"))
+	if((GetGameType() == "RGM_DeathmatchMode"))
 	{
 		return PTSToInt(2);		
 	}
 	else
 	{
-		m_pCurrentRoot.GetLevel().__NFUN_1230__(_iIndex, _PlayerMenuInfo);
+		m_pCurrentRoot.GetLevel().GetFPlayerMenuInfo(_iIndex, _PlayerMenuInfo);
 		// End:0x91
-		if(__NFUN_132__(__NFUN_154__(int(IntToPTS(_PlayerMenuInfo.iTeamSelection)), int(2)), __NFUN_154__(int(IntToPTS(_PlayerMenuInfo.iTeamSelection)), int(3))))
+		if(((int(IntToPTS(_PlayerMenuInfo.iTeamSelection)) == int(2)) || (int(IntToPTS(_PlayerMenuInfo.iTeamSelection)) == int(3))))
 		{
 			return _PlayerMenuInfo.iTeamSelection;			
 		}
@@ -467,11 +467,11 @@ function int GeTTeamSelection(int _iIndex)
 simulated function SavePlayerSetupInfo()
 {
 	// End:0x0D
-	if(__NFUN_114__(m_PlayerController, none))
+	if((m_PlayerController == none))
 	{
 		return;
 	}
-	m_pCurrentRoot.GetLevel().__NFUN_1233__(m_PlayerPrefInfo.m_CharacterName, m_szArmor, m_szPrimaryWeapon, m_szPrimaryWeaponGadget, m_szPrimaryWeaponBullet, m_szSecondaryWeapon, m_szSecondaryWeaponGadget, m_szSecondaryWeaponBullet, m_szPrimaryGadget, m_szSecondaryGadget);
+	m_pCurrentRoot.GetLevel().SetPlayerSetupInfo(m_PlayerPrefInfo.m_CharacterName, m_szArmor, m_szPrimaryWeapon, m_szPrimaryWeaponGadget, m_szPrimaryWeaponBullet, m_szSecondaryWeapon, m_szSecondaryWeaponGadget, m_szSecondaryWeaponBullet, m_szPrimaryGadget, m_szSecondaryGadget);
 	SetupPlayerPrefs();
 	m_PlayerController.m_PlayerPrefs.m_CharacterName = m_PlayerPrefInfo.m_CharacterName;
 	m_PlayerController.m_PlayerPrefs.m_ArmorName = m_PlayerPrefInfo.m_ArmorName;
@@ -492,9 +492,9 @@ simulated function InitialisePlayerSetupInfo()
 	// End:0x36
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__("In ", string(self)), "::InitialisePlayerSetupInfo()"));
+		Log((("In " $ string(self)) $ "::InitialisePlayerSetupInfo()"));
 	}
-	m_pCurrentRoot.GetLevel().__NFUN_1232__(m_PlayerPrefInfo.m_CharacterName, m_szArmor, m_szPrimaryWeapon, m_szPrimaryWeaponGadget, m_szPrimaryWeaponBullet, m_szSecondaryWeapon, m_szSecondaryWeaponGadget, m_szSecondaryWeaponBullet, m_szPrimaryGadget, m_szSecondaryGadget);
+	m_pCurrentRoot.GetLevel().GetPlayerSetupInfo(m_PlayerPrefInfo.m_CharacterName, m_szArmor, m_szPrimaryWeapon, m_szPrimaryWeaponGadget, m_szPrimaryWeaponBullet, m_szSecondaryWeapon, m_szSecondaryWeaponGadget, m_szSecondaryWeaponBullet, m_szPrimaryGadget, m_szSecondaryGadget);
 	SetupPlayerPrefs();
 	return;
 }
@@ -502,7 +502,7 @@ simulated function InitialisePlayerSetupInfo()
 simulated function string GetGameType()
 {
 	// End:0x20
-	if(__NFUN_114__(m_GameRepInfo, none))
+	if((m_GameRepInfo == none))
 	{
 		return "RGM_NoRulesMode";		
 	}
@@ -517,7 +517,7 @@ simulated function string GetGameType()
 function TKPopUpBox(string _KillerName)
 {
 	// End:0xEA
-	if(__NFUN_242__(R6PlayerController(m_PlayerController).m_bAlreadyPoppedTKPopUpBox, false))
+	if((R6PlayerController(m_PlayerController).m_bAlreadyPoppedTKPopUpBox == false))
 	{
 		// End:0x52
 		if(__NFUN_129__(m_pCurrentRoot.Console.__NFUN_281__('Game')))

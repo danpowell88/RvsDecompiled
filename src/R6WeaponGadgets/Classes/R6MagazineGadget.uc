@@ -22,9 +22,9 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 	local Rotator rTagRotator;
 
 	super.UpdateAttachment(weapOwner);
-	__NFUN_298__(none);
-	__NFUN_298__(weapOwner, weapOwner.Location);
-	weapOwner.__NFUN_2008__("TagMagazine", vTagLocation, rTagRotator);
+	SetBase(none);
+	SetBase(weapOwner, weapOwner.Location);
+	weapOwner.GetTagInformations("TagMagazine", vTagLocation, rTagRotator);
 	SetRelativeLocation(vTagLocation);
 	SetRelativeRotation(rTagRotator);
 	return;

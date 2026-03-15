@@ -115,7 +115,7 @@ var string m_szUsedTemplate;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bEscorted, m_bExtracted, 
 		m_bFreed, m_bFrozen, 
 		m_bIsFoetus, m_bIsKneeling, 
@@ -127,16 +127,16 @@ replication
 simulated function Tick(float fDeltaTime)
 {
 	// End:0x9B
-	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	if((int(Role) < int(ROLE_Authority)))
 	{
 		// End:0x70
-		if(__NFUN_132__(__NFUN_243__(m_eSavedRepHostageAnim.m_bRepPlayMoving, m_eCurrentRepHostageAnim.m_bRepPlayMoving), __NFUN_155__(int(m_eSavedRepHostageAnim.m_eRepStandWalkingAnim), int(m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim))))
+		if(((m_eSavedRepHostageAnim.m_bRepPlayMoving != m_eCurrentRepHostageAnim.m_bRepPlayMoving) || (int(m_eSavedRepHostageAnim.m_eRepStandWalkingAnim) != int(m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim))))
 		{
 			SetStandWalkingAnim(m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim, m_eCurrentRepHostageAnim.m_bRepPlayMoving);
 			m_eSavedRepHostageAnim = m_eCurrentRepHostageAnim;
 		}
 		// End:0x9B
-		if(__NFUN_155__(int(m_bSavedRepWaitAnimIndex), int(m_bRepWaitAnimIndex)))
+		if((int(m_bSavedRepWaitAnimIndex) != int(m_bRepWaitAnimIndex)))
 		{
 			m_bSavedRepWaitAnimIndex = m_bRepWaitAnimIndex;
 			SetAnimInfo(int(m_bRepWaitAnimIndex));
@@ -153,7 +153,7 @@ simulated function Tick(float fDeltaTime)
 simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
 {
 	szName = "";
-	return __NFUN_132__(ownerReticule.IsFriend(self), ownerReticule.IsNeutral(self));
+	return (ownerReticule.IsFriend(self) || ownerReticule.IsNeutral(self));
 	return;
 }
 
@@ -163,16 +163,16 @@ simulated event bool GetReticuleInfo(Pawn ownerReticule, out string szName)
 event FinishInitialization()
 {
 	// End:0x11
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		UnPossessed();
 	}
-	Controller = __NFUN_278__(ControllerClass);
+	Controller = Spawn(ControllerClass);
 	Controller.Possess(self);
 	Controller.m_PawnRepInfo.m_PawnType = m_ePawnType;
 	Controller.m_PawnRepInfo.m_bSex = bIsFemale;
 	// End:0x93
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
 		m_SoundRepInfo.m_PawnRepInfo = Controller.m_PawnRepInfo;
 	}
@@ -195,12 +195,12 @@ function logAnim(string sz)
 function bool HasBumpPriority(R6Pawn bumpedBy)
 {
 	// End:0x3A
-	if(__NFUN_130__(__NFUN_129__(bumpedBy.m_bIsPlayer), R6AIController(bumpedBy.Controller).__NFUN_281__('BumpBackUp')))
+	if(((!bumpedBy.m_bIsPlayer) && R6AIController(bumpedBy.Controller).IsInState('BumpBackUp')))
 	{
 		return false;
 	}
 	// End:0x60
-	if(__NFUN_130__(IsFriend(bumpedBy), __NFUN_129__(bumpedBy.IsStationary())))
+	if((IsFriend(bumpedBy) && (!bumpedBy.IsStationary())))
 	{
 		return false;
 	}
@@ -219,20 +219,20 @@ simulated event AnimEnd(int iChannel)
 	bPreviousPostureTransition = m_bPostureTransition;
 	super.AnimEnd(iChannel);
 	// End:0x88
-	if(__NFUN_154__(iChannel, 0))
+	if((iChannel == 0))
 	{
 		// End:0x85
-		if(__NFUN_130__(__NFUN_155__(int(Physics), int(12)), __NFUN_129__(m_bPawnSpecificAnimInProgress)))
+		if(((int(Physics) != int(12)) && (!m_bPawnSpecificAnimInProgress)))
 		{
 			// End:0x5B
-			if(__NFUN_154__(int(m_eEffectiveGrenade), int(2)))
+			if((int(m_eEffectiveGrenade) == int(2)))
 			{
 				SetNextPendingAction(1);				
 			}
 			else
 			{
 				// End:0x85
-				if(__NFUN_132__(__NFUN_154__(int(m_eEffectiveGrenade), int(3)), __NFUN_154__(int(m_eEffectiveGrenade), int(4))))
+				if(((int(m_eEffectiveGrenade) == int(3)) || (int(m_eEffectiveGrenade) == int(4))))
 				{
 					SetNextPendingAction(3);
 				}
@@ -242,18 +242,18 @@ simulated event AnimEnd(int iChannel)
 	else
 	{
 		// End:0xEC
-		if(__NFUN_130__(__NFUN_154__(iChannel, 16), m_bPawnSpecificAnimInProgress))
+		if(((iChannel == 16) && m_bPawnSpecificAnimInProgress))
 		{
 			m_bPawnSpecificAnimInProgress = false;
 			// End:0xC2
-			if(__NFUN_154__(int(m_eEffectiveGrenade), int(2)))
+			if((int(m_eEffectiveGrenade) == int(2)))
 			{
 				SetNextPendingAction(1);				
 			}
 			else
 			{
 				// End:0xEC
-				if(__NFUN_132__(__NFUN_154__(int(m_eEffectiveGrenade), int(3)), __NFUN_154__(int(m_eEffectiveGrenade), int(4))))
+				if(((int(m_eEffectiveGrenade) == int(3)) || (int(m_eEffectiveGrenade) == int(4))))
 				{
 					SetNextPendingAction(3);
 				}
@@ -261,7 +261,7 @@ simulated event AnimEnd(int iChannel)
 		}
 	}
 	// End:0x134
-	if(__NFUN_130__(bPreviousPostureTransition, __NFUN_129__(m_bPostureTransition)))
+	if((bPreviousPostureTransition && (!m_bPostureTransition)))
 	{
 		// End:0x111
 		if(m_bCrouchToScaredStandBegin)
@@ -280,10 +280,10 @@ simulated event AnimEnd(int iChannel)
 simulated event PlaySpecialPendingAction(R6Pawn.EPendingAction eAction, int iActionInt)
 {
 	// End:0x36
-	if(__NFUN_154__(int(eAction), int(38)))
+	if((int(eAction) == int(38)))
 	{
 		// End:0x33
-		if(__NFUN_155__(int(Role), int(ROLE_Authority)))
+		if((int(Role) != int(ROLE_Authority)))
 		{
 			SetAnimInfo(m_iPendingActionInt[int(m_iLocalCurrentActionIndex)]);
 		}		
@@ -304,22 +304,22 @@ simulated event SetAnimInfo(int ID)
 	local AnimInfo AnimInfo;
 
 	// End:0x0D
-	if(__NFUN_114__(m_mgr, none))
+	if((m_mgr == none))
 	{
 		return;
 	}
 	AnimInfo = m_mgr.GetAnimInfo(ID);
 	// End:0x4A
-	if(__NFUN_130__(__NFUN_154__(int(AnimInfo.m_eGroupAnim), int(1)), m_bReactionAnim))
+	if(((int(AnimInfo.m_eGroupAnim) == int(1)) && m_bReactionAnim))
 	{		
 	}
 	else
 	{
 		// End:0x90
-		if(__NFUN_130__(m_bPostureTransition, __NFUN_155__(int(AnimInfo.m_eGroupAnim), int(1))))
+		if((m_bPostureTransition && (int(AnimInfo.m_eGroupAnim) != int(1))))
 		{
 			// End:0x8E
-			if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+			if((int(Level.NetMode) == int(NM_Client)))
 			{
 				m_bPostureTransition = false;				
 			}
@@ -330,10 +330,10 @@ simulated event SetAnimInfo(int ID)
 		}
 	}
 	// End:0xED
-	if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+	if(((int(Role) == int(ROLE_Authority)) && (int(Level.NetMode) != int(NM_Standalone))))
 	{
 		// End:0xE0
-		if(__NFUN_154__(int(AnimInfo.m_eGroupAnim), int(2)))
+		if((int(AnimInfo.m_eGroupAnim) == int(2)))
 		{
 			m_bRepWaitAnimIndex = byte(ID);			
 		}
@@ -343,12 +343,12 @@ simulated event SetAnimInfo(int ID)
 		}
 	}
 	// End:0x16B
-	if(__NFUN_132__(__NFUN_154__(int(AnimInfo.m_eGroupAnim), int(3)), __NFUN_154__(int(AnimInfo.m_eGroupAnim), int(1))))
+	if(((int(AnimInfo.m_eGroupAnim) == int(3)) || (int(AnimInfo.m_eGroupAnim) == int(1))))
 	{
 		m_bPostureTransition = true;
 		AnimBlendParams(1, 1.0000000, 0.3000000, 0.0000000);
-		__NFUN_259__(AnimInfo.m_name, 1.0000000, 0.2000000, 1);
-		m_bReactionAnim = __NFUN_154__(int(AnimInfo.m_eGroupAnim), int(3));		
+		PlayAnim(AnimInfo.m_name, 1.0000000, 0.2000000, 1);
+		m_bReactionAnim = (int(AnimInfo.m_eGroupAnim) == int(3));		
 	}
 	else
 	{
@@ -372,9 +372,9 @@ simulated function SetAnimTransition(int iAnimToPlay, name pawnStateToGo)
 
 	SetAnimInfo(iAnimToPlay);
 	// End:0x1D
-	if(__NFUN_129__(m_bUseRagdoll))
+	if((!m_bUseRagdoll))
 	{
-		__NFUN_113__(pawnStateToGo);
+		GotoState(pawnStateToGo);
 	}
 	return;
 }
@@ -387,13 +387,13 @@ simulated event PostBeginPlay()
 	local int i;
 
 	// End:0x36
-	if(__NFUN_119__(Level.Game, none))
+	if((Level.Game != none))
 	{
-		assert(__NFUN_154__(default.m_iTeam, R6AbstractGameInfo(Level.Game).0));
+		assert((default.m_iTeam == R6AbstractGameInfo(Level.Game).0));
 	}
-	m_globalState = __NFUN_284__();
+	m_globalState = GetStateName();
 	super.PostBeginPlay();
-	__NFUN_3970__(1);
+	SetPhysics(1);
 	AttachCollisionBox(1);
 	m_mgr = R6HostageMgr(Level.GetHostageMgr());
 	return;
@@ -453,7 +453,7 @@ function setCrouch(bool bIsCrouch)
 	if(bWantsToCrouch)
 	{
 		// End:0x37
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			m_eHandsUpType = 0;
 		}
@@ -475,7 +475,7 @@ function setProne(bool bIsProne)
 //=============================================================================
 function bool isStanding()
 {
-	return __NFUN_254__(__NFUN_284__(), m_globalState);
+	return (GetStateName() == m_globalState);
 	return;
 }
 
@@ -484,7 +484,7 @@ function bool isStanding()
 //=============================================================================
 function bool isStandingHandUp()
 {
-	return __NFUN_154__(int(m_eHandsUpType), int(2));
+	return (int(m_eHandsUpType) == int(2));
 	return;
 }
 
@@ -523,15 +523,15 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	ePreviousHealth = m_eHealth;
 	iResult = super.R6TakeDamage(iKillValue, iStunValue, instigatedBy, vHitLocation, vMomentum, iBulletToArmorModifier, iBulletGoup);
 	// End:0xA5
-	if(__NFUN_130__(__NFUN_155__(int(ePreviousHealth), int(m_eHealth)), __NFUN_152__(int(1), int(m_eHealth))))
+	if(((int(ePreviousHealth) != int(m_eHealth)) && (int(1) <= int(m_eHealth))))
 	{
 		// End:0x85
-		if(__NFUN_119__(m_controller, none))
+		if((m_controller != none))
 		{
 			m_controller.SetMovementPace(false);
 		}
 		// End:0x9F
-		if(__NFUN_119__(m_escortedByRainbow, none))
+		if((m_escortedByRainbow != none))
 		{
 			m_escortedByRainbow.Escort_UpdateTeamSpeed();
 		}
@@ -565,7 +565,7 @@ simulated function SetStandWalkingAnim(R6Hostage.EStandWalkingAnim eAnim, bool b
 	m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim = eAnim;
 	m_eCurrentRepHostageAnim.m_bRepPlayMoving = bUpdatePlayMoving;
 	// End:0x46
-	if(__NFUN_154__(int(eAnim), int(0)))
+	if((int(eAnim) == int(0)))
 	{
 		SetDefaultWalkAnim();
 		m_fWalkingSpeed = 134.0000000;		
@@ -602,23 +602,23 @@ function PlayReaction()
 	local int Result;
 
 	// End:0x16
-	if(__NFUN_132__(m_bFrozen, m_bReactionAnim))
+	if((m_bFrozen || m_bReactionAnim))
 	{
 		return;
 	}
 	// End:0x83
 	if(isStandingHandUp())
 	{
-		Result = __NFUN_167__(100);
+		Result = Rand(100);
 		// End:0x4C
-		if(__NFUN_150__(Result, 33))
+		if((Result < 33))
 		{
 			SetAnimInfo(m_mgr.ANIM_eStandHandUpReact01);			
 		}
 		else
 		{
 			// End:0x6F
-			if(__NFUN_150__(Result, 66))
+			if((Result < 66))
 			{
 				SetAnimInfo(m_mgr.ANIM_eStandHandUpReact02);				
 			}
@@ -645,7 +645,7 @@ simulated function PlayWaiting()
 		return;
 	}
 	// End:0x23
-	if(__NFUN_154__(int(Physics), int(2)))
+	if((int(Physics) == int(2)))
 	{
 		PlayFalling();
 		return;
@@ -659,7 +659,7 @@ simulated function PlayWaiting()
 	// End:0x120
 	if(m_bIsKneeling)
 	{
-		Result = __NFUN_167__(100);
+		Result = Rand(100);
 		// End:0x67
 		if(m_bFrozen)
 		{
@@ -678,7 +678,7 @@ simulated function PlayWaiting()
 				else
 				{
 					// End:0xAA
-					if(__NFUN_150__(Result, 50))
+					if((Result < 50))
 					{
 						SetAnimInfo(m_mgr.ANIM_eFoetusWait01);						
 					}
@@ -691,7 +691,7 @@ simulated function PlayWaiting()
 			else
 			{
 				// End:0xE4
-				if(__NFUN_150__(Result, 33))
+				if((Result < 33))
 				{
 					SetAnimInfo(m_mgr.ANIM_eKneelWait01);					
 				}

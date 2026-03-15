@@ -12,9 +12,9 @@ class R6HBSSAJammerGadget extends R6DemolitionsGadget;
 function Fire(float fValue)
 {
 	// End:0x2A
-	if(__NFUN_242__(Pawn(Owner).Controller.m_bLockWeaponActions, false))
+	if((Pawn(Owner).Controller.m_bLockWeaponActions == false))
 	{
-		__NFUN_113__('ArmingCharge');
+		GotoState('ArmingCharge');
 	}
 	return;
 }
@@ -43,13 +43,13 @@ simulated function ServerPlaceCharge(Vector vLocation)
 	local R6SAHeartBeatJammer aSAHeartBeatJammer;
 
 	// End:0x0F
-	if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) == 0))
 	{
 		return;
 	}
-	__NFUN_140__(m_iNbBulletsInWeapon);
+	(m_iNbBulletsInWeapon--);
 	// End:0x2B
-	if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) == 0))
 	{
 		m_bHide = true;
 	}
@@ -57,13 +57,13 @@ simulated function ServerPlaceCharge(Vector vLocation)
 	// End:0xAE
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("aSAHeartBeatJammer :: ServerPlaceCharge() rDesiredRotation=", string(rDesiredRotation)), " vLocation="), string(vLocation)));
+		Log(((("aSAHeartBeatJammer :: ServerPlaceCharge() rDesiredRotation=" $ string(rDesiredRotation)) $ " vLocation=") $ string(vLocation)));
 	}
 	rDesiredRotation.Pitch = 0;
-	__NFUN_161__(rDesiredRotation.Yaw, 32768);
-	aSAHeartBeatJammer = __NFUN_278__(Class'R6Engine.R6SAHeartBeatJammer');
+	(rDesiredRotation.Yaw += 32768);
+	aSAHeartBeatJammer = Spawn(Class'R6Engine.R6SAHeartBeatJammer');
 	aSAHeartBeatJammer.Instigator = none;
-	aSAHeartBeatJammer.__NFUN_267__(__NFUN_215__(vLocation, vect(0.0000000, 0.0000000, 10.0000000)));
+	aSAHeartBeatJammer.__NFUN_267__((vLocation + vect(0.0000000, 0.0000000, 10.0000000))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	aSAHeartBeatJammer.__NFUN_299__(rDesiredRotation);
 	aSAHeartBeatJammer.SetSpeed(0.0000000);
 	return;

@@ -39,12 +39,12 @@ function EnteredExtractionZone(Pawn aPawn)
 	local int i, iTotal, iTotalCompleted;
 
 	// End:0x39
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_bCompleted, isFailed()), __NFUN_114__(aPawn, none)), __NFUN_114__(aPawn.Controller, none)))
+	if((((m_bCompleted || isFailed()) || (aPawn == none)) || (aPawn.Controller == none)))
 	{
 		return;
 	}
 	// End:0x4F
-	if(__NFUN_129__(aPawn.IsAlive()))
+	if((!aPawn.IsAlive()))
 	{
 		return;
 	}
@@ -53,10 +53,10 @@ function EnteredExtractionZone(Pawn aPawn)
 	J0x66:
 
 	// End:0x157 [Loop If]
-	if(__NFUN_150__(i, mgr.m_aMissionObjectives.Length))
+	if((i < mgr.m_aMissionObjectives.Length))
 	{
 		// End:0x9C
-		if(__NFUN_114__(mgr.m_aMissionObjectives[i], self))
+		if((mgr.m_aMissionObjectives[i] == self))
 		{
 			// [Explicit Continue]
 			goto J0x14D;
@@ -73,7 +73,7 @@ function EnteredExtractionZone(Pawn aPawn)
 			// [Explicit Continue]
 			goto J0x14D;
 		}
-		__NFUN_163__(iTotal);
+		(++iTotal);
 		// End:0x125
 		if(mgr.m_aMissionObjectives[i].isFailed())
 		{
@@ -83,23 +83,23 @@ function EnteredExtractionZone(Pawn aPawn)
 		// End:0x14D
 		if(mgr.m_aMissionObjectives[i].isCompleted())
 		{
-			__NFUN_163__(iTotalCompleted);
+			(++iTotalCompleted);
 		}
 		J0x14D:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x66;
 	}
 	// End:0x185
-	if(__NFUN_130__(__NFUN_154__(iTotal, iTotalCompleted), __NFUN_151__(iTotal, 0)))
+	if(((iTotal == iTotalCompleted) && (iTotal > 0)))
 	{
 		mgr.SetMissionObjCompleted(self, true, true);
 	}
 	// End:0x1F0
 	if(m_bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("EnteredExtractionZone: completed=", string(m_bCompleted)), " iTotal="), string(iTotal)), " iTotalCompleted="), string(iTotalCompleted)));
+		Log(((((("EnteredExtractionZone: completed=" $ string(m_bCompleted)) $ " iTotal=") $ string(iTotal)) $ " iTotalCompleted=") $ string(iTotalCompleted)));
 	}
 	return;
 }
@@ -125,11 +125,11 @@ function bool isCompleted()
 	J0x28:
 
 	// End:0xFB [Loop If]
-	if(__NFUN_119__(aController, none))
+	if((aController != none))
 	{
 		pR6PlayerController = R6PlayerController(aController);
 		// End:0x65
-		if(__NFUN_119__(pR6PlayerController, none))
+		if((pR6PlayerController != none))
 		{
 			aRainbow = pR6PlayerController.m_pawn;			
 		}
@@ -137,23 +137,23 @@ function bool isCompleted()
 		{
 			pAIController = R6AIController(aController);
 			// End:0x99
-			if(__NFUN_119__(pAIController, none))
+			if((pAIController != none))
 			{
 				aRainbow = R6Rainbow(pAIController.m_r6pawn);
 			}
 		}
 		// End:0xE4
-		if(__NFUN_119__(aRainbow, none))
+		if((aRainbow != none))
 		{
 			// End:0xCC
-			foreach aRainbow.__NFUN_307__(Class'R6Game.R6ExtractionZone', anExtractionZone)
+			foreach aRainbow.TouchingActors(Class'R6Game.R6ExtractionZone', anExtractionZone)
 			{
 				EnteredExtractionZone(aRainbow);
 				// End:0xCC
 				break;				
 			}			
 			// End:0xE4
-			if(__NFUN_132__(m_bCompleted, m_bFailed))
+			if((m_bCompleted || m_bFailed))
 			{
 				// [Explicit Break]
 				goto J0xFB;

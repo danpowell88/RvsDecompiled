@@ -40,19 +40,19 @@ function Paint(Canvas C, float X, float Y)
 	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
 	// End:0x85
-	if(__NFUN_151__(m_iFrameRefresh, 10))
+	if((m_iFrameRefresh > 10))
 	{
 		m_iFrameRefresh = 0;
 		r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
-		iServerCountDownTime = __NFUN_250__(1, int(R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo).GetRoundTime()));
+		iServerCountDownTime = Max(1, int(R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo).GetRoundTime()));
 		// End:0x85
-		if(__NFUN_155__(iServerCountDownTime, m_iLastValue))
+		if((iServerCountDownTime != m_iLastValue))
 		{
 			m_pCountDown.SetNewText(string(iServerCountDownTime), true);
 			m_iLastValue = iServerCountDownTime;
 		}
 	}
-	__NFUN_165__(m_iFrameRefresh);
+	(m_iFrameRefresh++);
 	return;
 }
 

@@ -25,7 +25,7 @@ function PlayVideo(int _iXStartPos, int _iYStartPos, string _szVideoFileName)
 {
 	m_szVideoFilename = _szVideoFileName;
 	// End:0x35
-	if(__NFUN_123__(m_szVideoFilename, ""))
+	if((m_szVideoFilename != ""))
 	{
 		m_bPlayVideo = true;
 		m_iXStartPos = _iXStartPos;
@@ -34,8 +34,8 @@ function PlayVideo(int _iXStartPos, int _iYStartPos, string _szVideoFileName)
 	// End:0x81
 	if(bShowLog)
 	{
-		__NFUN_231__("PlayVideo");
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("m_szVideoFilename", m_szVideoFilename), "m_bPlayVideo"), string(m_bPlayVideo)));
+		Log("PlayVideo");
+		Log(((("m_szVideoFilename" @ m_szVideoFilename) @ "m_bPlayVideo") @ string(m_bPlayVideo)));
 	}
 	return;
 }
@@ -47,22 +47,22 @@ function StopVideo()
 	// End:0x30
 	if(bShowLog)
 	{
-		__NFUN_231__("StopVideo");
-		__NFUN_231__(__NFUN_168__("m_bPlayVideo", string(m_bPlayVideo)));
+		Log("StopVideo");
+		Log(("m_bPlayVideo" @ string(m_bPlayVideo)));
 	}
 	// End:0x67
 	if(m_bPlayVideo)
 	{
-		C = Class'Engine.Actor'.static.__NFUN_2618__();
+		C = Class'Engine.Actor'.static.GetCanvas();
 		m_bPlayVideo = false;
 		m_bAlreadyStart = false;
-		C.__NFUN_2604__();
+		C.VideoStop();
 	}
 	// End:0xA7
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("m_bPlayVideo", string(m_bPlayVideo)));
-		__NFUN_231__(__NFUN_168__("m_bAlreadyStart", string(m_bAlreadyStart)));
+		Log(("m_bPlayVideo" @ string(m_bPlayVideo)));
+		Log(("m_bAlreadyStart" @ string(m_bAlreadyStart)));
 	}
 	return;
 }
@@ -73,16 +73,16 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bPlayVideo)
 	{
 		// End:0x87
-		if(__NFUN_129__(m_bAlreadyStart))
+		if((!m_bAlreadyStart))
 		{
 			// End:0x52
 			if(bShowLog)
 			{
-				__NFUN_231__("Paint m_bPlayVideo = true m_bAlreadyStart = false");
+				Log("Paint m_bPlayVideo = true m_bAlreadyStart = false");
 			}
-			C.__NFUN_2601__(m_szVideoFilename, 0);
+			C.VideoOpen(m_szVideoFilename, 0);
 			m_bAlreadyStart = true;
-			C.__NFUN_2603__(m_iXStartPos, m_iYStartPos, m_iCentered);
+			C.VideoPlay(m_iXStartPos, m_iYStartPos, m_iCentered);
 		}
 	}
 	DrawSimpleBorder(C);

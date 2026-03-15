@@ -44,13 +44,13 @@ var STParticle m_aParticle[16];
 
 function TakeAHit(int iBone, Vector vMomentum)
 {
-	__NFUN_1804__(iBone, vMomentum);
+	AddImpulseToBone(iBone, vMomentum);
 	return;
 }
 
 function RenderCorpseBones(Canvas C)
 {
-	__NFUN_1802__(C);
+	RenderBones(C);
 	return;
 }
 

@@ -28,20 +28,20 @@ function PostBeginPlay()
 {
 	super(Actor).PostBeginPlay();
 	// End:0x40
-	if(__NFUN_130__(__NFUN_255__(AssociatedActorTag, 'None'), __NFUN_255__(AssociatedActorTag, 'None')))
+	if(((AssociatedActorTag != 'None') && (AssociatedActorTag != 'None')))
 	{
 		// End:0x3F
-		foreach __NFUN_304__(Class'Engine.Actor', AssociatedActor, AssociatedActorTag)
+		foreach AllActors(Class'Engine.Actor', AssociatedActor, AssociatedActorTag)
 		{
 			// End:0x3F
 			break;			
 		}		
 	}
 	// End:0x5B
-	if(__NFUN_119__(AssociatedActor, none))
+	if((AssociatedActor != none))
 	{
-		__NFUN_113__('AssociatedTouch');
-		InitialState = __NFUN_284__();
+		GotoState('AssociatedTouch');
+		InitialState = GetStateName();
 	}
 	return;
 }
@@ -49,9 +49,9 @@ function PostBeginPlay()
 function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 {
 	super(Actor).DisplayDebug(Canvas, YL, YPos);
-	Canvas.__NFUN_465__(__NFUN_112__("AssociatedActor ", string(AssociatedActor)), false);
-	__NFUN_184__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, YPos);
+	Canvas.DrawText(("AssociatedActor " $ string(AssociatedActor)), false);
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, YPos);
 	return;
 }
 
@@ -74,7 +74,7 @@ state AssociatedTouch
 		local Actor A;
 
 		// End:0x1C
-		foreach __NFUN_307__(Class'Engine.Actor', A)
+		foreach TouchingActors(Class'Engine.Actor', A)
 		{
 			Touch(A);			
 		}		

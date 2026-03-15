@@ -84,19 +84,19 @@ event bool Init(LevelInfo aLevel, string szMissionFile)
 	local int i;
 	local string szIniFile, szClassName;
 
-	m_missionIniFile = __NFUN_235__(szMissionFile);
-	__NFUN_1010__(szMissionFile);
+	m_missionIniFile = Caps(szMissionFile);
+	LoadConfig(szMissionFile);
 	// End:0x30
-	if(__NFUN_132__(__NFUN_154__(Version, 0), __NFUN_122__(m_MapName, "")))
+	if(((Version == 0) || (m_MapName == "")))
 	{
 		return false;
 	}
-	szIniFile = __NFUN_112__(m_MapName, ".ini");
-	szIniFile = __NFUN_235__(szIniFile);
+	szIniFile = (m_MapName $ ".ini");
+	szIniFile = Caps(szIniFile);
 	// End:0xDD
-	if(__NFUN_150__(__NFUN_126__(m_missionIniFile, szIniFile), 0))
+	if((InStr(m_missionIniFile, szIniFile) < 0))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WARNING: R6MissionDescription m_missionIniFile (", m_missionIniFile), ") != m_MapName ("), szIniFile), ") - "), string(__NFUN_126__(m_missionIniFile, szIniFile))));
+		Log(((((("WARNING: R6MissionDescription m_missionIniFile (", m_missionIniFile) $ ") != m_MapName (") $ szIniFile) $ ") - " $ ???) $ string(InStr(m_missionIniFile, szIniFile))));
 		m_MapName = "";
 		return false;		
 	}
@@ -105,7 +105,7 @@ event bool Init(LevelInfo aLevel, string szMissionFile)
 		m_missionIniFile = szIniFile;
 	}
 	// End:0xF5
-	if(__NFUN_114__(aLevel, none))
+	if((aLevel == none))
 	{
 		return false;
 	}
@@ -113,16 +113,16 @@ event bool Init(LevelInfo aLevel, string szMissionFile)
 	J0xFC:
 
 	// End:0x163 [Loop If]
-	if(__NFUN_150__(i, GameTypes.Length))
+	if((i < GameTypes.Length))
 	{
-		szClassName = __NFUN_112__(__NFUN_112__(GameTypes[i].Package, "."), GameTypes[i].type);
+		szClassName = ((GameTypes[i].Package $ ".") $ GameTypes[i].type);
 		m_szGameTypes[i] = aLevel.GetGameTypeFromClassName(szClassName);
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0xFC;
 	}
 	// End:0x190
-	if(__NFUN_132__(__NFUN_152__(Version, 2), __NFUN_122__(mod, "")))
+	if(((Version <= 2) || (mod == "")))
 	{
 		mod = "RavenShield";
 	}
@@ -144,40 +144,40 @@ event bool GetSkins(out LevelInfo aLevel, string szGameTypeClass)
 	J0x07:
 
 	// End:0x448 [Loop If]
-	if(__NFUN_150__(i, SkinsPerGameTypes.Length))
+	if((i < SkinsPerGameTypes.Length))
 	{
-		szClassName = __NFUN_112__(__NFUN_112__(SkinsPerGameTypes[i].Package, "."), SkinsPerGameTypes[i].type);
+		szClassName = ((SkinsPerGameTypes[i].Package $ ".") $ SkinsPerGameTypes[i].type);
 		// End:0x43E
-		if(__NFUN_124__(szGameTypeClass, szClassName))
+		if((szGameTypeClass ~= szClassName))
 		{
 			// End:0xA3
-			if(__NFUN_132__(__NFUN_124__(SkinsPerGameTypes[i].greenPackage, "none"), __NFUN_124__(SkinsPerGameTypes[i].Green, "none")))
+			if(((SkinsPerGameTypes[i].greenPackage ~= "none") || (SkinsPerGameTypes[i].Green ~= "none")))
 			{
 				aLevel.GreenTeamPawnClass = "none";				
 			}
 			else
 			{
-				aLevel.GreenTeamPawnClass = __NFUN_112__(__NFUN_112__(SkinsPerGameTypes[i].greenPackage, "."), SkinsPerGameTypes[i].Green);
+				aLevel.GreenTeamPawnClass = ((SkinsPerGameTypes[i].greenPackage $ ".") $ SkinsPerGameTypes[i].Green);
 			}
 			// End:0x129
-			if(__NFUN_130__(__NFUN_124__(SkinsPerGameTypes[i].redPackage, "none"), __NFUN_124__(SkinsPerGameTypes[i].Red, "none")))
+			if(((SkinsPerGameTypes[i].redPackage ~= "none") && (SkinsPerGameTypes[i].Red ~= "none")))
 			{
 				aLevel.RedTeamPawnClass = "none";				
 			}
 			else
 			{
-				aLevel.RedTeamPawnClass = __NFUN_112__(__NFUN_112__(SkinsPerGameTypes[i].redPackage, "."), SkinsPerGameTypes[i].Red);
+				aLevel.RedTeamPawnClass = ((SkinsPerGameTypes[i].redPackage $ ".") $ SkinsPerGameTypes[i].Red);
 			}
 			// End:0x43C
-			if(__NFUN_155__(int(aLevel.NetMode), int(NM_Client)))
+			if((int(aLevel.NetMode) != int(NM_Client)))
 			{
 				// End:0x1B5
-				if(__NFUN_123__(aLevel.GreenTeamPawnClass, "none"))
+				if((aLevel.GreenTeamPawnClass != "none"))
 				{
 					TempGreenClass = Class<Pawn>(DynamicLoadObject(aLevel.GreenTeamPawnClass, Class'Core.Class'));
 				}
 				// End:0x2DA
-				if(__NFUN_119__(TempGreenClass, none))
+				if((TempGreenClass != none))
 				{
 					aLevel.GreenTeamSkin = TempGreenClass.default.Skins[0];
 					aLevel.GreenHeadSkin = TempGreenClass.default.Skins[1];
@@ -186,19 +186,19 @@ event bool GetSkins(out LevelInfo aLevel, string szGameTypeClass)
 					aLevel.GreenMesh = TempGreenClass.default.Mesh;
 					aLevel.GreenHelmet = TempGreenClass.default.m_HelmetClass;
 					// End:0x2DA
-					if(__NFUN_119__(aLevel.GreenHelmet, none))
+					if((aLevel.GreenHelmet != none))
 					{
 						aLevel.GreenHelmetMesh = aLevel.GreenHelmet.default.StaticMesh;
 						aLevel.GreenHelmetSkin = aLevel.GreenHelmet.default.Skins[0];
 					}
 				}
 				// End:0x317
-				if(__NFUN_123__(aLevel.RedTeamPawnClass, "none"))
+				if((aLevel.RedTeamPawnClass != "none"))
 				{
 					TempRedClass = Class<Pawn>(DynamicLoadObject(aLevel.RedTeamPawnClass, Class'Core.Class'));
 				}
 				// End:0x43C
-				if(__NFUN_119__(TempRedClass, none))
+				if((TempRedClass != none))
 				{
 					aLevel.RedTeamSkin = TempRedClass.default.Skins[0];
 					aLevel.RedHeadSkin = TempRedClass.default.Skins[1];
@@ -207,7 +207,7 @@ event bool GetSkins(out LevelInfo aLevel, string szGameTypeClass)
 					aLevel.RedMesh = TempRedClass.default.Mesh;
 					aLevel.RedHelmet = TempRedClass.default.m_HelmetClass;
 					// End:0x43C
-					if(__NFUN_119__(aLevel.RedHelmet, none))
+					if((aLevel.RedHelmet != none))
 					{
 						aLevel.RedHelmetMesh = aLevel.RedHelmet.default.StaticMesh;
 						aLevel.RedHelmetSkin = aLevel.RedHelmet.default.Skins[0];
@@ -216,7 +216,7 @@ event bool GetSkins(out LevelInfo aLevel, string szGameTypeClass)
 			}
 			return true;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -234,37 +234,37 @@ function SetSkins(string szGameTypeClass, string GreenSkinClass, string RedSkinC
 	J0x07:
 
 	// End:0x190 [Loop If]
-	if(__NFUN_150__(i, SkinsPerGameTypes.Length))
+	if((i < SkinsPerGameTypes.Length))
 	{
-		szClassName = __NFUN_112__(__NFUN_112__(SkinsPerGameTypes[i].Package, "."), SkinsPerGameTypes[i].type);
+		szClassName = ((SkinsPerGameTypes[i].Package $ ".") $ SkinsPerGameTypes[i].type);
 		// End:0x186
-		if(__NFUN_124__(szGameTypeClass, szClassName))
+		if((szGameTypeClass ~= szClassName))
 		{
-			SkinsPerGameTypes[i].greenPackage = __NFUN_128__(GreenSkinClass, __NFUN_126__(GreenSkinClass, "."));
-			SkinsPerGameTypes[i].Green = __NFUN_127__(GreenSkinClass, __NFUN_146__(__NFUN_126__(GreenSkinClass, "."), 1));
+			SkinsPerGameTypes[i].greenPackage = Left(GreenSkinClass, InStr(GreenSkinClass, "."));
+			SkinsPerGameTypes[i].Green = Mid(GreenSkinClass, (InStr(GreenSkinClass, ".") + 1));
 			// End:0xD7
-			if(__NFUN_124__(RedSkinClass, ""))
+			if((RedSkinClass ~= ""))
 			{
 				SkinsPerGameTypes[i].redPackage = "None";
 				SkinsPerGameTypes[i].Red = "None";				
 			}
 			else
 			{
-				SkinsPerGameTypes[i].redPackage = __NFUN_128__(RedSkinClass, __NFUN_126__(RedSkinClass, "."));
-				SkinsPerGameTypes[i].Red = __NFUN_127__(RedSkinClass, __NFUN_146__(__NFUN_126__(RedSkinClass, "."), 1));
+				SkinsPerGameTypes[i].redPackage = Left(RedSkinClass, InStr(RedSkinClass, "."));
+				SkinsPerGameTypes[i].Red = Mid(RedSkinClass, (InStr(RedSkinClass, ".") + 1));
 			}
 			// End:0x156
-			if(__NFUN_132__(__NFUN_124__(mod, ""), __NFUN_124__(mod, "RavenShield")))
+			if(((mod ~= "") || (mod ~= "RavenShield")))
 			{
 				szMapDir = "..\\maps\\";				
 			}
 			else
 			{
-				szMapDir = __NFUN_112__(__NFUN_112__("..\\mods\\", mod), "\\maps\\");
+				szMapDir = (("..\\mods\\" $ mod) $ "\\maps\\");
 			}
-			__NFUN_536__(__NFUN_112__(szMapDir, m_missionIniFile));
+			SaveConfig((szMapDir $ m_missionIniFile));
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -281,21 +281,21 @@ function LogInfo()
 	local string szClassName, szGreen, szRed;
 	local Class<Pawn> RedPawnClass, GreenPawnClass;
 
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("MissionDescription ", m_missionIniFile), " mapName="), m_MapName), " localizationFile="), LocalizationFile), " version="), string(Version)));
-	__NFUN_231__(__NFUN_112__(" mod                    =", mod));
-	__NFUN_231__(__NFUN_112__(" m_TMissionOverview     =", string(m_TMissionOverview)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" m_RMissionOverview     =", string(m_RMissionOverview.X)), ","), string(m_RMissionOverview.Y)), ","), string(m_RMissionOverview.W)), ","), string(m_RMissionOverview.H)));
-	__NFUN_231__(__NFUN_112__(" m_TWorldMap            =", string(m_TWorldMap)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" m_RWorldMap            =", string(m_RWorldMap.X)), ","), string(m_RWorldMap.Y)), ","), string(m_RWorldMap.W)), ","), string(m_RWorldMap.H)));
-	__NFUN_231__(__NFUN_112__(" m_AudioBankName        =", m_AudioBankName));
-	__NFUN_231__(__NFUN_112__(" m_PlayEventControl     =", string(m_PlayEventControl)));
-	__NFUN_231__(__NFUN_112__(" m_PlayEventClark       =", string(m_PlayEventClark)));
-	__NFUN_231__(__NFUN_112__(" m_PlayEventSweeney     =", string(m_PlayEventSweeney)));
+	Log(((((((("MissionDescription " $ m_missionIniFile) $ " mapName=") $ m_MapName) $ " localizationFile=") $ LocalizationFile) $ " version=") $ string(Version)));
+	Log((" mod                    =" $ mod));
+	Log((" m_TMissionOverview     =" $ string(m_TMissionOverview)));
+	Log((((((((" m_RMissionOverview     =" $ string(m_RMissionOverview.X)) $ ") $ string(m_RMissionOverview.Y)) $ ") $ string(m_RMissionOverview.W)) $ ") $ string(m_RMissionOverview.H)));
+	Log((" m_TWorldMap            =" $ string(m_TWorldMap)));
+	Log((((((((" m_RWorldMap            =" $ string(m_RWorldMap.X)) $ ") $ string(m_RWorldMap.Y)) $ ") $ string(m_RWorldMap.W)) $ ") $ string(m_RWorldMap.H)));
+	Log((" m_AudioBankName        =" $ m_AudioBankName));
+	Log((" m_PlayEventControl     =" $ string(m_PlayEventControl)));
+	Log((" m_PlayEventClark       =" $ string(m_PlayEventClark)));
+	Log((" m_PlayEventSweeney     =" $ string(m_PlayEventSweeney)));
 	i = 0;
 	J0x23A:
 
 	// End:0x28A [Loop If]
-	if(__NFUN_150__(i, m_MissionArmorTypes.Length))
+	if((i < m_MissionArmorTypes.Length))
 	{
 		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" m_MissionArmorTypes ", string(i)), "="), string(m_MissionArmorTypes[i])));
 		__NFUN_163__(i);

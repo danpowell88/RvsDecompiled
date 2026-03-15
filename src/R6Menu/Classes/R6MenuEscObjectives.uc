@@ -34,26 +34,26 @@ function Created()
 {
 	local int i, Y;
 
-	m_Title = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXTitleOffset, m_fYTitleOffset, __NFUN_175__(WinWidth, m_fXTitleOffset), m_fLabelHeight, self));
+	m_Title = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXTitleOffset, m_fYTitleOffset, (WinWidth - m_fXTitleOffset), m_fLabelHeight, self));
 	m_Title.SetProperties(Localize("ESCMENUS", "MISSIONOBJ", "R6Menu"), 0, Root.Fonts[5], Root.Colors.BlueLight, false);
-	Y = int(__NFUN_174__(__NFUN_174__(m_Title.WinTop, m_Title.WinHeight), m_fObjYOffset));
-	m_NoObj = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXTitleOffset, float(Y), __NFUN_175__(WinWidth, m_fXTitleOffset), m_fObjHeight, self));
+	Y = int(((m_Title.WinTop + m_Title.WinHeight) + m_fObjYOffset));
+	m_NoObj = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', m_fXTitleOffset, float(Y), (WinWidth - m_fXTitleOffset), m_fObjHeight, self));
 	m_NoObj.SetProperties(Localize("ESCMENUS", "NOMISSIONOBJ", "R6Menu"), 0, Root.Fonts[0], Root.Colors.White, false);
 	m_NoObj.HideWindow();
 	i = 0;
 	J0x166:
 
 	// End:0x1D9 [Loop If]
-	if(__NFUN_150__(i, 10))
+	if((i < 10))
 	{
-		m_Objectives[i] = R6MenuObjectiveLabel(CreateWindow(Class'R6Menu.R6MenuObjectiveLabel', m_fXTitleOffset, float(Y), __NFUN_175__(WinWidth, m_fXTitleOffset), m_fObjHeight, self));
+		m_Objectives[i] = R6MenuObjectiveLabel(CreateWindow(Class'R6Menu.R6MenuObjectiveLabel', m_fXTitleOffset, float(Y), (WinWidth - m_fXTitleOffset), m_fObjHeight, self));
 		m_Objectives[i].HideWindow();
-		__NFUN_161__(Y, int(m_fObjHeight));
-		__NFUN_165__(i);
+		(Y += int(m_fObjHeight));
+		(i++);
 		// [Loop Continue]
 		goto J0x166;
 	}
-	m_szTextFailed = __NFUN_112__(__NFUN_112__(" (", Localize("OBJECTIVES", "FAILED", "R6Menu")), ")");
+	m_szTextFailed = ((" (", Localize("OBJECTIVES", "FAILED", "R6Menu")) $ ")" $ ???);
 	return;
 }
 
@@ -64,21 +64,21 @@ function UpdateObjectives()
 	local string szTemp;
 	local int i, j;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	moMgr = R6AbstractGameInfo(Root.Console.ViewportOwner.Actor.Level.Game).m_missionMgr;
 	i = 0;
 	J0x5F:
 
 	// End:0x8A [Loop If]
-	if(__NFUN_150__(i, 10))
+	if((i < 10))
 	{
 		m_Objectives[i].HideWindow();
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x5F;
 	}
 	// End:0xB1
-	if(__NFUN_152__(moMgr.m_aMissionObjectives.Length, 0))
+	if((moMgr.m_aMissionObjectives.Length <= 0))
 	{
 		m_NoObj.ShowWindow();		
 	}
@@ -90,14 +90,14 @@ function UpdateObjectives()
 		J0xCE:
 
 		// End:0x24C [Loop If]
-		if(__NFUN_130__(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length), __NFUN_150__(i, 10)))
+		if(((i < moMgr.m_aMissionObjectives.Length) && (i < 10)))
 		{
 			// End:0x242
-			if(__NFUN_130__(__NFUN_129__(moMgr.m_aMissionObjectives[i].m_bMoralityObjective), moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
+			if(((!moMgr.m_aMissionObjectives[i].m_bMoralityObjective) && moMgr.m_aMissionObjectives[i].m_bVisibleInMenu))
 			{
 				szTemp = Localize("Game", moMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, moMgr.Level.GetMissionObjLocFile(moMgr.m_aMissionObjectives[i]));
 				// End:0x1EE
-				if(__NFUN_130__(pGameOptions.UnlimitedPractice, moMgr.m_aMissionObjectives[i].isFailed()))
+				if((pGameOptions.UnlimitedPractice && moMgr.m_aMissionObjectives[i].isFailed()))
 				{
 					m_Objectives[j].SetProperties(szTemp, false, m_szTextFailed);					
 				}
@@ -106,9 +106,9 @@ function UpdateObjectives()
 					m_Objectives[j].SetProperties(szTemp, moMgr.m_aMissionObjectives[i].isCompleted());
 				}
 				m_Objectives[j].ShowWindow();
-				__NFUN_165__(j);
+				(j++);
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0xCE;
 		}

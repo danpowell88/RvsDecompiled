@@ -25,13 +25,13 @@ function StartCDKeyProcess(optional R6WindowUbiCDKeyCheck.eJoinRoomChoice _eJoin
 	// End:0x20
 	if(m_bShowManagerCDKeyLog)
 	{
-		__NFUN_231__("StartCDKeyProcess()");
+		Log("StartCDKeyProcess()");
 	}
 	Root.RegisterMsgWindow(m_pCDKeyCheckWindow);
 	m_pCDKeyCheckWindow.m_pSendMessageDest = self;
 	m_pCDKeyCheckWindow.m_eJoinRoomChoice = _eJoinUbiComRoom;
 	m_pCDKeyCheckWindow.m_preJoinRespInfo = _preJResponseInfo;
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1288__();
+	Class'Engine.Actor'.static.GetGameManager().NativeInitGSClient();
 	m_bPreJoinInProgress = true;
 	ShowWindow();
 	return;
@@ -74,7 +74,7 @@ function ProcessCDKeyMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 					break;
 				// End:0xEB
 				case Root.22:
-					Class'Engine.Actor'.static.__NFUN_1304__(_szIPAddress);
+					Class'Engine.Actor'.static.NativeNonUbiMatchMakingAddress(_szIPAddress);
 					JoinServer(_szIPAddress, m_pCDKeyCheckWindow.m_szPassword);
 					// End:0x117
 					break;
@@ -98,10 +98,10 @@ function ProcessCDKeyMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 			// End:0x160
 			if(R6Console(Root.Console).m_bStartedByGSClient)
 			{
-				Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();
+				Class'Engine.Actor'.static.GetGameManager().RemoveFromIDList();
 			}
 			// End:0x192
-			if(__NFUN_242__(R6Console(Root.Console).m_bNonUbiMatchMaking, true))
+			if((R6Console(Root.Console).m_bNonUbiMatchMaking == true))
 			{
 				Root.DoQuitGame();
 			}
@@ -138,7 +138,7 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__(__NFUN_168__("WARNING CDKeyManager SendMessage not supported", string(eMessage)));
+			Log(("WARNING CDKeyManager SendMessage not supported" @ string(eMessage)));
 			// End:0x65
 			break;
 			break;
@@ -157,24 +157,24 @@ function LaunchServer()
 	pR6Console = R6Console(pConsole);
 	pMPCreateGTOpt = R6MenuMPCreateGameWidget(m_pProcedureOwner).m_pCreateTabOptions;
 	pMPCreateGTOpt.SetServerOptions();
-	Class'Engine.Actor'.static.__NFUN_1283__();
+	Class'Engine.Actor'.static.SaveServerOptions();
 	// End:0x110
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(pR6Console.m_bStartedByGSClient), __NFUN_129__(pR6Console.m_bNonUbiMatchMakingHost)), pMPCreateGTOpt.m_pButtonsDef.GetButtonBoxValue(int(10), R6WindowListGeneral(pMPCreateGTOpt.GetList(pMPCreateGTOpt.GetCurrentGameMode(), pMPCreateGTOpt.1)))))
+	if((((!pR6Console.m_bStartedByGSClient) && (!pR6Console.m_bNonUbiMatchMakingHost)) && pMPCreateGTOpt.m_pButtonsDef.GetButtonBoxValue(int(10), R6WindowListGeneral(pMPCreateGTOpt.GetList(pMPCreateGTOpt.GetCurrentGameMode(), pMPCreateGTOpt.1)))))
 	{
-		pConsole.ConsoleCommand(__NFUN_112__("SERVER mod=", Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord));		
+		pConsole.ConsoleCommand(("SERVER mod=" $ Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord));		
 	}
 	else
 	{
 		// End:0x146
-		if(__NFUN_130__(__NFUN_129__(Class'Engine.Actor'.static.__NFUN_1400__()), __NFUN_155__(GetLevel().iPBEnabled, 0)))
+		if(((!Class'Engine.Actor'.static.IsPBClientEnabled()) && (GetLevel().iPBEnabled != 0)))
 		{
-			Class'Engine.Actor'.static.__NFUN_1401__(false, false);
+			Class'Engine.Actor'.static.SetPBStatus(false, false);
 		}
-		Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1285__(pMPCreateGTOpt.m_SelectedMapList[0], pMPCreateGTOpt.m_SelectedModeList[0]);
+		Class'Engine.Actor'.static.GetGameManager().GetIDListAuthID(pMPCreateGTOpt.m_SelectedMapList[0], pMPCreateGTOpt.m_SelectedModeList[0]);
 		pR6Console.m_LanServers.m_ClientBeacon.GetLocalIP(_localAddr);
 		pR6Console.szStoreIP = pR6Console.m_LanServers.m_ClientBeacon.IpAddrToString(_localAddr);
 		pR6Console.LaunchR6MultiPlayerGame();
-		GetLevel().Game.__NFUN_1281__(0);
+		GetLevel().Game.SetCurrentMapNum(0);
 	}
 	return;
 }
@@ -192,21 +192,21 @@ function JoinServer(string _szIPAddress, optional string _szPassword)
 	iPlayerSpawnNumber = pR6Console.GetSpawnNumber();
 	szOptions = "";
 	// End:0x62
-	if(__NFUN_123__(_szPassword, ""))
+	if((_szPassword != ""))
 	{
-		szOptions = __NFUN_112__(__NFUN_112__(szOptions, "?Password="), _szPassword);
+		szOptions = ((szOptions $ "?Password=") $ _szPassword);
 	}
-	Root.Console.ViewportOwner.Actor.__NFUN_1232__(szCharacterName, m_ArmorName, m_WeaponNameOne, m_WeaponGadgetNameOne, m_BulletTypeOne, m_WeaponNameTwo, m_WeaponGadgetNameTwo, m_BulletTypeTwo, m_GadgetNameOne, m_GadgetNameTwo);
+	Root.Console.ViewportOwner.Actor.GetPlayerSetupInfo(szCharacterName, m_ArmorName, m_WeaponNameOne, m_WeaponGadgetNameOne, m_BulletTypeOne, m_WeaponNameTwo, m_WeaponGadgetNameTwo, m_BulletTypeTwo, m_GadgetNameOne, m_GadgetNameTwo);
 	ReplaceText(szCharacterName, "?", "~");
 	ReplaceText(szCharacterName, ",", "~");
 	ReplaceText(szCharacterName, "#", "~");
 	ReplaceText(szCharacterName, "/", "~");
-	szOptions = __NFUN_112__(__NFUN_112__(szOptions, "?Name="), szCharacterName);
+	szOptions = ((szOptions $ "?Name=") $ szCharacterName);
 	ReplaceText(szOptions, " ", "~");
-	szOptions = __NFUN_112__(__NFUN_112__(szOptions, "?UbiUserID="), R6Console(Root.Console).m_GameService.m_szUserID);
-	szOptions = __NFUN_112__(__NFUN_112__(szOptions, "?iPB="), string(Class'Engine.PlayerController'.static.__NFUN_1318__()));
+	szOptions = ((szOptions $ "?UbiUserID=") $ R6Console(Root.Console).m_GameService.m_szUserID);
+	szOptions = ((szOptions $ "?iPB=") $ string(Class'Engine.PlayerController'.static.IsPBEnabled()));
 	SaveGameServiceConfig();
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1284__(_szIPAddress, szOptions, iPlayerSpawnNumber);
+	Class'Engine.Actor'.static.GetGameManager().GetIDListIPAddr(_szIPAddress, szOptions, iPlayerSpawnNumber);
 	pR6Console.szStoreIP = _szIPAddress;
 	pR6Console.szStoreGamePassWd = _szPassword;
 	R6MenuRootWindow(Root).m_bJoinServerProcess = true;

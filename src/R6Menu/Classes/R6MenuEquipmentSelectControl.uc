@@ -46,11 +46,11 @@ function Created()
 	m_DisableColor = Root.Colors.GrayLight;
 	m_EnableColor = Root.Colors.White;
 	m_2DWeaponPrimary = R6MenuGearPrimaryWeapon(CreateControl(Class'R6Menu.R6MenuGearPrimaryWeapon', 0.0000000, 0.0000000, WinWidth, m_fPrimaryWindowHeight, self));
-	m_2DWeaponSecondary = R6MenuGearSecondaryWeapon(CreateControl(Class'R6Menu.R6MenuGearSecondaryWeapon', __NFUN_175__(m_fArmorWindowWidth, float(1)), __NFUN_175__(m_fPrimaryWindowHeight, float(1)), __NFUN_174__(__NFUN_175__(WinWidth, m_fArmorWindowWidth), float(1)), m_fSecondaryWindowHeight, self));
-	m_2DGadgetPrimary = R6MenuGearGadget(CreateControl(Class'R6Menu.R6MenuGearGadget', __NFUN_175__(m_fArmorWindowWidth, float(1)), __NFUN_175__(__NFUN_174__(m_2DWeaponSecondary.WinTop, m_2DWeaponSecondary.WinHeight), float(1)), m_2DWeaponSecondary.WinWidth, m_fPrimaryGadgetWindowHeight, self));
-	m_2DGadgetSecondary = R6MenuGearGadget(CreateControl(Class'R6Menu.R6MenuGearGadget', __NFUN_175__(m_fArmorWindowWidth, float(1)), __NFUN_175__(__NFUN_174__(m_2DGadgetPrimary.WinTop, m_2DGadgetPrimary.WinHeight), float(1)), m_2DWeaponSecondary.WinWidth, m_fPrimaryGadgetWindowHeight, self));
-	m_2DArmor = R6MenuGearArmor(CreateControl(Class'R6Menu.R6MenuGearArmor', 0.0000000, __NFUN_175__(m_2DWeaponPrimary.WinHeight, float(1)), m_fArmorWindowWidth, 247.0000000, self));
-	m_AssignAllToAllButton = R6MenuAssignAllButton(CreateControl(Class'R6Menu.R6MenuAssignAllButton', 0.0000000, __NFUN_175__(WinHeight, float(12)), WinWidth, 12.0000000, self));
+	m_2DWeaponSecondary = R6MenuGearSecondaryWeapon(CreateControl(Class'R6Menu.R6MenuGearSecondaryWeapon', (m_fArmorWindowWidth - float(1)), (m_fPrimaryWindowHeight - float(1)), ((WinWidth - m_fArmorWindowWidth) + float(1)), m_fSecondaryWindowHeight, self));
+	m_2DGadgetPrimary = R6MenuGearGadget(CreateControl(Class'R6Menu.R6MenuGearGadget', (m_fArmorWindowWidth - float(1)), ((m_2DWeaponSecondary.WinTop + m_2DWeaponSecondary.WinHeight) - float(1)), m_2DWeaponSecondary.WinWidth, m_fPrimaryGadgetWindowHeight, self));
+	m_2DGadgetSecondary = R6MenuGearGadget(CreateControl(Class'R6Menu.R6MenuGearGadget', (m_fArmorWindowWidth - float(1)), ((m_2DGadgetPrimary.WinTop + m_2DGadgetPrimary.WinHeight) - float(1)), m_2DWeaponSecondary.WinWidth, m_fPrimaryGadgetWindowHeight, self));
+	m_2DArmor = R6MenuGearArmor(CreateControl(Class'R6Menu.R6MenuGearArmor', 0.0000000, (m_2DWeaponPrimary.WinHeight - float(1)), m_fArmorWindowWidth, 247.0000000, self));
+	m_AssignAllToAllButton = R6MenuAssignAllButton(CreateControl(Class'R6Menu.R6MenuAssignAllButton', 0.0000000, (WinHeight - float(12)), WinWidth, 12.0000000, self));
 	m_AssignAllToAllButton.bAlwaysOnTop = true;
 	m_AssignAllToAllButton.ToolTipString = Localize("GearRoom", "AssignAllToAll", "R6Menu");
 	m_AssignAllToAllButton.m_iDrawStyle = int(5);
@@ -68,7 +68,7 @@ function DisableControls(bool _Disable)
 	m_2DArmor.SetButtonsStatus(_Disable);
 	m_bDisableControls = _Disable;
 	// End:0xD9
-	if(__NFUN_130__(__NFUN_242__(_Disable, true), __NFUN_119__(m_HighlightedButton, none)))
+	if(((_Disable == true) && (m_HighlightedButton != none)))
 	{
 		m_HighlightedButton.m_HighLight = false;
 		m_HighlightedButton.OwnerWindow.SetBorderColor(m_DisableColor);
@@ -80,13 +80,13 @@ function DisableControls(bool _Disable)
 function setHighLight(R6WindowButtonGear newButton)
 {
 	// End:0x39
-	if(__NFUN_119__(m_HighlightedButton, none))
+	if((m_HighlightedButton != none))
 	{
 		m_HighlightedButton.m_HighLight = false;
 		m_HighlightedButton.OwnerWindow.SetBorderColor(m_DisableColor);
 	}
 	// End:0x95
-	if(__NFUN_119__(newButton, none))
+	if((newButton != none))
 	{
 		m_HighlightedButton = newButton;
 		m_HighlightedButton.m_HighLight = true;
@@ -104,14 +104,14 @@ function Notify(UWindowDialogControl C, byte E)
 		return;
 	}
 	// End:0x180
-	if(__NFUN_154__(int(E), 12))
+	if((int(E) == 12))
 	{
 		switch(C.OwnerWindow)
 		{
 			// End:0x8F
 			case self:
 				// End:0x8C
-				if(__NFUN_114__(C, m_AssignAllToAllButton))
+				if((C == m_AssignAllToAllButton))
 				{
 					m_2DWeaponPrimary.ForceMouseOver(true);
 					m_2DWeaponSecondary.ForceMouseOver(true);
@@ -123,27 +123,27 @@ function Notify(UWindowDialogControl C, byte E)
 				break;
 			// End:0xBE
 			case m_2DWeaponPrimary:
-				m_2DWeaponPrimary.ForceMouseOver(__NFUN_114__(C, m_2DWeaponPrimary.m_AssignAll));
+				m_2DWeaponPrimary.ForceMouseOver((C == m_2DWeaponPrimary.m_AssignAll));
 				// End:0x17D
 				break;
 			// End:0xED
 			case m_2DWeaponSecondary:
-				m_2DWeaponSecondary.ForceMouseOver(__NFUN_114__(C, m_2DWeaponSecondary.m_AssignAll));
+				m_2DWeaponSecondary.ForceMouseOver((C == m_2DWeaponSecondary.m_AssignAll));
 				// End:0x17D
 				break;
 			// End:0x11C
 			case m_2DGadgetPrimary:
-				m_2DGadgetPrimary.ForceMouseOver(__NFUN_114__(C, m_2DGadgetPrimary.m_AssignAll));
+				m_2DGadgetPrimary.ForceMouseOver((C == m_2DGadgetPrimary.m_AssignAll));
 				// End:0x17D
 				break;
 			// End:0x14B
 			case m_2DGadgetSecondary:
-				m_2DGadgetSecondary.ForceMouseOver(__NFUN_114__(C, m_2DGadgetSecondary.m_AssignAll));
+				m_2DGadgetSecondary.ForceMouseOver((C == m_2DGadgetSecondary.m_AssignAll));
 				// End:0x17D
 				break;
 			// End:0x17A
 			case m_2DArmor:
-				m_2DArmor.ForceMouseOver(__NFUN_114__(C, m_2DArmor.m_AssignAll));
+				m_2DArmor.ForceMouseOver((C == m_2DArmor.m_AssignAll));
 				// End:0x17D
 				break;
 			// End:0xFFFF
@@ -154,7 +154,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x1E1
-		if(__NFUN_154__(int(E), 9))
+		if((int(E) == 9))
 		{
 			m_2DWeaponPrimary.ForceMouseOver(false);
 			m_2DWeaponSecondary.ForceMouseOver(false);
@@ -165,7 +165,7 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x51A
-			if(__NFUN_154__(int(E), 2))
+			if((int(E) == 2))
 			{
 				switch(C)
 				{
@@ -281,7 +281,7 @@ function Class<R6SecondaryWeaponDescription> GetCurrentSecondaryWeapon()
 function Class<R6WeaponGadgetDescription> GetCurrentWeaponGadget(bool _Primary)
 {
 	// End:0x23
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuGearWidget(OwnerWindow).m_OpFirstWeaponGadgetDesc;		
 	}
@@ -295,7 +295,7 @@ function Class<R6WeaponGadgetDescription> GetCurrentWeaponGadget(bool _Primary)
 function Class<R6BulletDescription> GetCurrentWeaponBullet(bool _Primary)
 {
 	// End:0x23
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuGearWidget(OwnerWindow).m_OpFirstWeaponBulletDesc;		
 	}
@@ -309,7 +309,7 @@ function Class<R6BulletDescription> GetCurrentWeaponBullet(bool _Primary)
 function TexRegion GetCurrentGadgetTex(bool _Primary)
 {
 	// End:0x37
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuGearWidget(OwnerWindow).GetGadgetTexture(R6MenuGearWidget(OwnerWindow).m_OpFirstGadgetDesc);		
 	}
@@ -327,13 +327,13 @@ function bool CenterGadgetTexture(bool _Primary)
 
 	GearRoom = R6MenuGearWidget(OwnerWindow);
 	// End:0x61
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		// End:0x5E
-		if(__NFUN_114__(Class'R6Description.R6DescPrimaryMags', GearRoom.m_OpFirstGadgetDesc))
+		if((Class'R6Description.R6DescPrimaryMags' == GearRoom.m_OpFirstGadgetDesc))
 		{
 			// End:0x5E
-			if(__NFUN_122__(GearRoom.m_OpFirstWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+			if((GearRoom.m_OpFirstWeaponGadgetDesc.default.m_NameTag == "CMAG"))
 			{
 				Result = true;
 			}
@@ -342,10 +342,10 @@ function bool CenterGadgetTexture(bool _Primary)
 	else
 	{
 		// End:0xA3
-		if(__NFUN_114__(Class'R6Description.R6DescSecondaryMags', GearRoom.m_OpSecondGadgetDesc))
+		if((Class'R6Description.R6DescSecondaryMags' == GearRoom.m_OpSecondGadgetDesc))
 		{
 			// End:0xA3
-			if(__NFUN_122__(GearRoom.m_OpSecondWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+			if((GearRoom.m_OpSecondWeaponGadgetDesc.default.m_NameTag == "CMAG"))
 			{
 				Result = true;
 			}
@@ -378,7 +378,7 @@ function UpdateDetails()
 	m_2DGadgetPrimary.m_bCenterTexture = CenterGadgetTexture(false);
 	m_2DGadgetSecondary.SetGadgetTexture(TR.t, GetRegion(TR));
 	// End:0x1DE
-	if(__NFUN_119__(m_2DArmor, none))
+	if((m_2DArmor != none))
 	{
 		m_2DArmor.SetArmorTexture(static.GetCurrentArmor().default.m_2DMenuTexture, static.GetCurrentArmor().default.m_2dMenuRegion);
 	}

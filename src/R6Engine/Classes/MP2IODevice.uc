@@ -14,12 +14,12 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 	local Vector vActorDir, vFacingDir;
 
 	// End:0x20
-	if(__NFUN_155__(int(R6PlayerController(PlayerController).m_TeamSelection), int(2)))
+	if((int(R6PlayerController(PlayerController).m_TeamSelection) != int(2)))
 	{
 		return;
 	}
 	// End:0x3B
-	if(__NFUN_132__(__NFUN_242__(CanToggle(), false), __NFUN_129__(m_bRainbowCanInteract)))
+	if(((CanToggle() == false) || (!m_bRainbowCanInteract)))
 	{
 		return;
 	}
@@ -41,16 +41,16 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 	Query.iTeamActionIDList[2] = 0;
 	Query.iTeamActionIDList[3] = 0;
 	// End:0x1A7
-	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	if((fDistance < m_fCircumstantialActionRange))
 	{
 		vFacingDir = Vector(Rotation);
 		vFacingDir.Z = 0.0000000;
-		vFacingDir = __NFUN_226__(vFacingDir);
-		vActorDir = __NFUN_216__(Location, PlayerController.Pawn.Location);
+		vFacingDir = Normal(vFacingDir);
+		vActorDir = (Location - PlayerController.Pawn.Location);
 		vActorDir.Z = 0.0000000;
-		vActorDir = __NFUN_226__(vActorDir);
+		vActorDir = Normal(vActorDir);
 		// End:0x193
-		if(__NFUN_177__(__NFUN_219__(vActorDir, vFacingDir), 0.8500000))
+		if((Dot(vActorDir, vFacingDir) > 0.8500000))
 		{
 			Query.iInRange = 1;			
 		}
@@ -75,16 +75,16 @@ simulated function float GetTimeRequired(R6Pawn aPawn)
 	// End:0x43
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("GetTimeRequired", string(m_fPlantTimeMin)), string(aPawn)), string(aPawn.GetSkill(2))));
+		Log(((("GetTimeRequired" @ string(m_fPlantTimeMin)) @ string(aPawn)) @ string(aPawn.GetSkill(2))));
 	}
-	fPlantingTime = __NFUN_174__(m_fPlantTimeMin, __NFUN_171__(__NFUN_175__(float(1), aPawn.GetSkill(2)), __NFUN_175__(m_fPlantTimeMax, m_fPlantTimeMin)));
+	fPlantingTime = (m_fPlantTimeMin + ((float(1) - aPawn.GetSkill(2)) * (m_fPlantTimeMax - m_fPlantTimeMin)));
 	// End:0xA4
-	if(__NFUN_130__(HasKit(aPawn), __NFUN_177__(__NFUN_175__(fPlantingTime, m_fGainTimeWithElectronicsKit), float(0))))
+	if((HasKit(aPawn) && ((fPlantingTime - m_fGainTimeWithElectronicsKit) > float(0))))
 	{
-		__NFUN_185__(fPlantingTime, m_fGainTimeWithElectronicsKit);
+		(fPlantingTime -= m_fGainTimeWithElectronicsKit);
 	}
 	// End:0xCC
-	if(__NFUN_242__(R6Rainbow(aPawn).m_bIsTheIntruder, true))
+	if((R6Rainbow(aPawn).m_bIsTheIntruder == true))
 	{
 		fPlantingTime = m_fPlantTimeMin;		
 	}
@@ -99,7 +99,7 @@ simulated function float GetTimeRequired(R6Pawn aPawn)
 function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
 	// End:0x15
-	if(__NFUN_242__(m_bBulletGoThrough, true))
+	if((m_bBulletGoThrough == true))
 	{
 		return iKillValue;		
 	}

@@ -68,16 +68,16 @@ simulated function PostBeginPlay()
 
 simulated function SetSpeed(float fBulletSpeed)
 {
-	Velocity = __NFUN_213__(fBulletSpeed, Vector(Rotation));
+	Velocity = (fBulletSpeed * Vector(Rotation));
 	return;
 }
 
 // Bullet are not destroyed, but Deactivated and the reactivated by the bullet manager.
 function DeactivateBullet()
 {
-	__NFUN_3970__(0);
+	SetPhysics(0);
 	bStasis = true;
-	__NFUN_262__(false, false, false);
+	SetCollision(false, false, false);
 	m_bBulletDeactivated = true;
 	return;
 }
@@ -91,12 +91,12 @@ singular simulated function Touch(Actor Other)
 	local Material pMaterial;
 
 	// End:0x47
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_114__(Other, Instigator), __NFUN_242__(m_bBulletIsGone, false)), __NFUN_242__(m_bBulletDeactivated, true)), __NFUN_114__(Instigator.m_collisionBox, Other)))
+	if(((((Other == Instigator) || (m_bBulletIsGone == false)) || (m_bBulletDeactivated == true)) || (Instigator.m_collisionBox == Other)))
 	{
 		return;
 	}
 	// End:0x74
-	if(__NFUN_119__(R6Bullet(Other), none))
+	if((R6Bullet(Other) != none))
 	{
 		// End:0x74
 		if(R6Bullet(Other).DestroyedByImpact())
@@ -105,22 +105,22 @@ singular simulated function Touch(Actor Other)
 		}
 	}
 	// End:0x1A5
-	if(__NFUN_132__(__NFUN_132__(Other.bProjTarget, __NFUN_130__(Other.bBlockActors, Other.bBlockPlayers)), Other.__NFUN_303__('R6ColBox')))
+	if(((Other.bProjTarget || (Other.bBlockActors && Other.bBlockPlayers)) || Other.IsA('R6ColBox')))
 	{
-		HitActor = Instigator.__NFUN_1806__(vHitLocation, vHitNormal, __NFUN_215__(Location, __NFUN_213__(Other.CollisionRadius, __NFUN_226__(__NFUN_216__(Location, m_vSpawnedPosition)))), m_vSpawnedPosition, __NFUN_158__(4, 1));
+		HitActor = Instigator.R6Trace(vHitLocation, vHitNormal, (Location + (Other.CollisionRadius * Normal((Location - m_vSpawnedPosition)))), m_vSpawnedPosition, (4 | 1));
 		// End:0x163
-		if(__NFUN_114__(HitActor, Other))
+		if((HitActor == Other))
 		{
 			ProcessTouch(Other, vHitLocation);
 			// End:0x160
-			if(__NFUN_119__(pMaterial, none))
+			if((pMaterial != none))
 			{
 				SpawnSFX(pMaterial.m_pHitEffect, vHitLocation, Rotator(vHitNormal), Other, 0);
 			}			
 		}
 		else
 		{
-			ProcessTouch(Other, __NFUN_215__(Other.Location, __NFUN_213__(Other.CollisionRadius, __NFUN_226__(__NFUN_216__(Location, Other.Location)))));
+			ProcessTouch(Other, (Other.Location + (Other.CollisionRadius * Normal((Location - Other.Location)))));
 		}
 	}
 	return;
@@ -135,36 +135,36 @@ simulated function ProcessTouch(Actor Other, Vector vHitLocation)
 	local R6Pawn OtherPawn, instigatorPawn;
 
 	// End:0x2CC
-	if(__NFUN_119__(Other, Instigator))
+	if((Other != Instigator))
 	{
 		// End:0x2A3
-		if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		if((int(Role) == int(ROLE_Authority)))
 		{
-			fRange = __NFUN_225__(__NFUN_216__(Location, m_vSpawnedPosition));
-			__NFUN_183__(fRange, float(100));
-			fResultKillEnergy = __NFUN_175__(float(m_iEnergy), RangeConversion(fRange));
+			fRange = VSize((Location - m_vSpawnedPosition));
+			(fRange /= float(100));
+			fResultKillEnergy = (float(m_iEnergy) - RangeConversion(fRange));
 			// End:0x72
-			if(__NFUN_176__(fResultKillEnergy, 10.0000000))
+			if((fResultKillEnergy < 10.0000000))
 			{
 				fResultKillEnergy = 10.0000000;
 			}
-			fResultStunEnergy = __NFUN_175__(__NFUN_174__(float(m_iEnergy), __NFUN_171__(fResultKillEnergy, m_fKillStunTransfer)), StunLoss(fRange));
+			fResultStunEnergy = ((float(m_iEnergy) + (fResultKillEnergy * m_fKillStunTransfer)) - StunLoss(fRange));
 			// End:0xB4
-			if(__NFUN_176__(fResultKillEnergy, 15.0000000))
+			if((fResultKillEnergy < 15.0000000))
 			{
 				fResultKillEnergy = 15.0000000;
 			}
 			// End:0x136
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Bullet", string(self)), " Hit "), string(Other)), " By :"), string(Instigator)), " at location "), string(vHitLocation)), " with energy : "), string(fResultKillEnergy)), " : "), string(fResultKillEnergy)));
+				Log(((((((((((("Bullet" $ string(self)) $ " Hit ") $ string(Other)) $ " By :") $ string(Instigator)) $ " at location ") $ string(vHitLocation)) $ " with energy : ") $ string(fResultKillEnergy)) $ " : ") $ string(fResultKillEnergy)));
 			}
 			OtherPawn = R6Pawn(Other);
 			// End:0x1C2
-			if(__NFUN_130__(__NFUN_114__(OtherPawn, none), Other.__NFUN_303__('R6ColBox')))
+			if(((OtherPawn == none) && Other.IsA('R6ColBox')))
 			{
 				// End:0x1A9
-				if(__NFUN_181__(R6ColBox(Other).m_fFeetColBoxRadius, 0.0000000))
+				if((R6ColBox(Other).m_fFeetColBoxRadius != 0.0000000))
 				{
 					OtherPawn = R6Pawn(Other.Base.Base);					
 				}
@@ -175,7 +175,7 @@ simulated function ProcessTouch(Actor Other, Vector vHitLocation)
 			}
 			instigatorPawn = R6Pawn(Instigator);
 			// End:0x245
-			if(__NFUN_132__(__NFUN_130__(__NFUN_119__(OtherPawn, none), __NFUN_130__(__NFUN_129__(instigatorPawn.m_bCanFireFriends), instigatorPawn.IsFriend(OtherPawn))), __NFUN_130__(__NFUN_129__(instigatorPawn.m_bCanFireNeutrals), instigatorPawn.IsNeutral(OtherPawn))))
+			if((((OtherPawn != none) && ((!instigatorPawn.m_bCanFireFriends) && instigatorPawn.IsFriend(OtherPawn))) || ((!instigatorPawn.m_bCanFireNeutrals) && instigatorPawn.IsNeutral(OtherPawn))))
 			{
 				m_iEnergy = 0;				
 			}
@@ -184,7 +184,7 @@ simulated function ProcessTouch(Actor Other, Vector vHitLocation)
 				m_iEnergy = Other.R6TakeDamage(int(fResultKillEnergy), int(fResultStunEnergy), Instigator, vHitLocation, Velocity, m_iNoArmorModifier, m_iBulletGroupID);
 			}
 			// End:0x2A3
-			if(__NFUN_132__(__NFUN_154__(m_iEnergy, 0), __NFUN_122__(m_szBulletType, "JHP")))
+			if(((m_iEnergy == 0) || (m_szBulletType == "JHP")))
 			{
 				DeactivateBullet();
 			}
@@ -192,7 +192,7 @@ simulated function ProcessTouch(Actor Other, Vector vHitLocation)
 		// End:0x2CC
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_168__(string(self), "Hit :"), string(Other.Name)));
+			Log(((string(self) @ "Hit :") $ string(Other.Name)));
 		}
 	}
 	return;
@@ -206,14 +206,14 @@ simulated function SpawnSFX(Class<R6WallHit> fxClass, Vector vLocation, Rotator 
 	local R6WallHit WallHitEffect;
 
 	// End:0x74
-	if(__NFUN_119__(fxClass, none))
+	if((fxClass != none))
 	{
-		WallHitEffect = __NFUN_278__(fxClass,,, vLocation, vRotation);
+		WallHitEffect = Spawn(fxClass,,, vLocation, vRotation);
 		// End:0x60
-		if(__NFUN_119__(WallHitEffect, none))
+		if((WallHitEffect != none))
 		{
 			// End:0x60
-			if(__NFUN_242__(m_BulletManager.AffectActor(m_iBulletGroupID, pSource), false))
+			if((m_BulletManager.AffectActor(m_iBulletGroupID, pSource) == false))
 			{
 				WallHitEffect.m_bPlayEffectSound = false;
 			}
@@ -236,13 +236,13 @@ simulated event HitWall(Vector vHitNormal, Actor Wall)
 	local float fDistance;
 
 	iInitialEnergy = m_iEnergy;
-	eHitResult = __NFUN_2001__(Wall, Location, Velocity, vRealHitLocation, vexitLocation, vexitNormal, CurrentHitEffect, ExitHitEffect);
+	eHitResult = BulletGoesThroughSurface(Wall, Location, Velocity, vRealHitLocation, vexitLocation, vexitNormal, CurrentHitEffect, ExitHitEffect);
 	// End:0xE1
-	if(__NFUN_132__(__NFUN_132__(Wall.__NFUN_303__('R6InteractiveObject'), Wall.__NFUN_303__('R6MorphMeshActor')), Wall.__NFUN_303__('Mover')))
+	if(((Wall.IsA('R6InteractiveObject') || Wall.IsA('R6MorphMeshActor')) || Wall.IsA('Mover')))
 	{
-		vRangeVector = __NFUN_216__(vRealHitLocation, m_vSpawnedPosition);
-		fDistance = __NFUN_171__(__NFUN_225__(vRangeVector), 0.0100000);
-		Wall.R6TakeDamage(int(__NFUN_175__(float(iInitialEnergy), RangeConversion(fDistance))), 0, Instigator, vRealHitLocation, Velocity, m_iPenetrationFactor, -1);
+		vRangeVector = (vRealHitLocation - m_vSpawnedPosition);
+		fDistance = (VSize(vRangeVector) * 0.0100000);
+		Wall.R6TakeDamage(int((float(iInitialEnergy) - RangeConversion(fDistance))), 0, Instigator, vRealHitLocation, Velocity, m_iPenetrationFactor, -1);
 	}
 	switch(eHitResult)
 	{
@@ -251,7 +251,7 @@ simulated event HitWall(Vector vHitNormal, Actor Wall)
 			SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, 0);
 			SpawnSFX(ExitHitEffect, vexitLocation, Rotator(vexitNormal), Wall, 2);
 			// End:0x149
-			if(__NFUN_129__(__NFUN_267__(__NFUN_215__(vexitLocation, __NFUN_212__(vexitNormal, float(2))))))
+			if((!__NFUN_267__((vexitLocation + (vexitNormal * float(2)))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/))
 			{
 				DeactivateBullet();
 			}

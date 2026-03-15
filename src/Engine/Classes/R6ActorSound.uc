@@ -19,7 +19,7 @@ var Sound m_ImpactSoundStop;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_ImpactSound, m_ImpactSoundStop, 
 		m_eTypeSound, m_fExplosionDelay;
 }
@@ -27,9 +27,9 @@ replication
 simulated function Timer()
 {
 	// End:0x2D
-	if(__NFUN_119__(m_ImpactSoundStop, none))
+	if((m_ImpactSoundStop != none))
 	{
-		__NFUN_264__(m_ImpactSoundStop, m_eTypeSound);
+		__NFUN_264__(m_ImpactSoundStop, m_eTypeSound) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		m_ImpactSound = m_ImpactSoundStop;
 		m_ImpactSoundStop = none;		
 	}

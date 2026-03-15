@@ -25,9 +25,9 @@ function Created()
 	m_DisableColor = Root.Colors.GrayLight;
 	m_EnableColor = Root.Colors.White;
 	m_2DWeaponPrimary = R6MenuMPAdvGearPrimaryWeapon(CreateControl(Class'R6Menu.R6MenuMPAdvGearPrimaryWeapon', 0.0000000, 0.0000000, WinWidth, m_fPrimaryWindowHeight, self));
-	m_2DWeaponSecondary = R6MenuMPAdvGearSecondaryWeapon(CreateControl(Class'R6Menu.R6MenuMPAdvGearSecondaryWeapon', 0.0000000, __NFUN_175__(m_fPrimaryWindowHeight, float(1)), WinWidth, __NFUN_174__(m_fSecondaryWindowHeight, float(1)), self));
-	m_2DGadgetPrimary = R6MenuMPAdvGearGadget(CreateControl(Class'R6Menu.R6MenuMPAdvGearGadget', 0.0000000, __NFUN_175__(__NFUN_174__(m_fPrimaryWindowHeight, m_fSecondaryWindowHeight), float(1)), __NFUN_172__(WinWidth, float(2)), __NFUN_174__(__NFUN_175__(__NFUN_175__(WinHeight, m_fPrimaryWindowHeight), m_fSecondaryWindowHeight), float(1)), self));
-	m_2DGadgetSecondary = R6MenuMPAdvGearGadget(CreateControl(Class'R6Menu.R6MenuMPAdvGearGadget', __NFUN_175__(__NFUN_174__(m_2DGadgetPrimary.WinLeft, m_2DGadgetPrimary.WinWidth), float(1)), m_2DGadgetPrimary.WinTop, __NFUN_174__(__NFUN_175__(__NFUN_175__(WinWidth, m_2DGadgetPrimary.WinLeft), m_2DGadgetPrimary.WinWidth), float(1)), m_2DGadgetPrimary.WinHeight, self));
+	m_2DWeaponSecondary = R6MenuMPAdvGearSecondaryWeapon(CreateControl(Class'R6Menu.R6MenuMPAdvGearSecondaryWeapon', 0.0000000, (m_fPrimaryWindowHeight - float(1)), WinWidth, (m_fSecondaryWindowHeight + float(1)), self));
+	m_2DGadgetPrimary = R6MenuMPAdvGearGadget(CreateControl(Class'R6Menu.R6MenuMPAdvGearGadget', 0.0000000, ((m_fPrimaryWindowHeight + m_fSecondaryWindowHeight) - float(1)), (WinWidth / float(2)), (((WinHeight - m_fPrimaryWindowHeight) - m_fSecondaryWindowHeight) + float(1)), self));
+	m_2DGadgetSecondary = R6MenuMPAdvGearGadget(CreateControl(Class'R6Menu.R6MenuMPAdvGearGadget', ((m_2DGadgetPrimary.WinLeft + m_2DGadgetPrimary.WinWidth) - float(1)), m_2DGadgetPrimary.WinTop, (((WinWidth - m_2DGadgetPrimary.WinLeft) - m_2DGadgetPrimary.WinWidth) + float(1)), m_2DGadgetPrimary.WinHeight, self));
 	return;
 }
 
@@ -53,7 +53,7 @@ function Class<R6SecondaryWeaponDescription> GetCurrentSecondaryWeapon()
 function Class<R6WeaponGadgetDescription> GetCurrentWeaponGadget(bool _Primary)
 {
 	// End:0x23
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuMPAdvGearWidget(OwnerWindow).m_OpFirstWeaponGadgetDesc;		
 	}
@@ -67,7 +67,7 @@ function Class<R6WeaponGadgetDescription> GetCurrentWeaponGadget(bool _Primary)
 function Class<R6BulletDescription> GetCurrentWeaponBullet(bool _Primary)
 {
 	// End:0x23
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuMPAdvGearWidget(OwnerWindow).m_OpFirstWeaponBulletDesc;		
 	}
@@ -81,7 +81,7 @@ function Class<R6BulletDescription> GetCurrentWeaponBullet(bool _Primary)
 function TexRegion GetCurrentGadgetTex(bool _Primary)
 {
 	// End:0x37
-	if(__NFUN_242__(_Primary, true))
+	if((_Primary == true))
 	{
 		return R6MenuMPAdvGearWidget(OwnerWindow).GetGadgetTexture(R6MenuMPAdvGearWidget(OwnerWindow).m_OpFirstGadgetDesc);		
 	}
@@ -101,7 +101,7 @@ function bool CenterGadgetTexture(bool _Primary)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x364
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -110,7 +110,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x4F
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DWeaponPrimary.m_2DWeapon");
+					Log("m_2DWeaponPrimary.m_2DWeapon");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(0);
 				setHighLight(m_2DWeaponPrimary.m_2DWeapon);
@@ -121,7 +121,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0xB6
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DWeaponPrimary.m_2DBullet");
+					Log("m_2DWeaponPrimary.m_2DBullet");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(2);
 				setHighLight(m_2DWeaponPrimary.m_2DBullet);
@@ -132,7 +132,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x123
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DWeaponPrimary.m_2DWeaponGadget");
+					Log("m_2DWeaponPrimary.m_2DWeaponGadget");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(1);
 				setHighLight(m_2DWeaponPrimary.m_2DWeaponGadget);
@@ -143,7 +143,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x18C
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DWeaponSecondary.m_2DWeapon");
+					Log("m_2DWeaponSecondary.m_2DWeapon");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(4);
 				setHighLight(m_2DWeaponSecondary.m_2DWeapon);
@@ -154,7 +154,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x1F5
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DWeaponSecondary.m_2DBullet");
+					Log("m_2DWeaponSecondary.m_2DBullet");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(6);
 				setHighLight(m_2DWeaponSecondary.m_2DBullet);
@@ -165,7 +165,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x264
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DWeaponSecondary.m_2DWeaponGadget");
+					Log("m_2DWeaponSecondary.m_2DWeaponGadget");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(5);
 				setHighLight(m_2DWeaponSecondary.m_2DWeaponGadget);
@@ -176,7 +176,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x2CB
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DGadgetPrimary.m_2DGadget");
+					Log("m_2DGadgetPrimary.m_2DGadget");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(3);
 				setHighLight(m_2DGadgetPrimary.m_2DGadget);
@@ -187,7 +187,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x334
 				if(bShowLog)
 				{
-					__NFUN_231__("m_2DGadgetSecondary.m_2DGadget");
+					Log("m_2DGadgetSecondary.m_2DGadget");
 				}
 				R6MenuMPAdvGearWidget(OwnerWindow).EquipmentSelected(7);
 				setHighLight(m_2DGadgetSecondary.m_2DGadget);

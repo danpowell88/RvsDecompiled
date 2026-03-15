@@ -40,7 +40,7 @@ function Created()
 	local float fYPos;
 
 	ButtonTexture = Texture(DynamicLoadObject("R6MenuTextures.Tab_Icon00", Class'Engine.Texture'));
-	fYPos = __NFUN_175__(WinHeight, float(m_RHistoryUp.H));
+	fYPos = (WinHeight - float(m_RHistoryUp.H));
 	m_WeaponHistoryButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', m_fFirstButtonOffset, fYPos, m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_WeaponHistoryButton.UpRegion = m_RHistoryUp;
 	m_WeaponHistoryButton.OverRegion = m_RHistoryOver;
@@ -55,7 +55,7 @@ function Created()
 	m_WeaponHistoryButton.bUseRegion = true;
 	m_CurrentSelectedButton = m_WeaponHistoryButton;
 	m_CurrentSelectedButton.m_bSelected = true;
-	m_WeaponStatsButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', __NFUN_174__(__NFUN_174__(m_WeaponHistoryButton.WinLeft, m_WeaponHistoryButton.WinWidth), m_fBetweenButtonOffset), fYPos, m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_WeaponStatsButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', ((m_WeaponHistoryButton.WinLeft + m_WeaponHistoryButton.WinWidth) + m_fBetweenButtonOffset), fYPos, m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_WeaponStatsButton.UpRegion = m_RStatsUp;
 	m_WeaponStatsButton.OverRegion = m_RStatsOver;
 	m_WeaponStatsButton.DownRegion = m_RStatsDown;
@@ -73,16 +73,16 @@ function Created()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x98
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x98
-		if(__NFUN_130__(__NFUN_119__(R6WindowStayDownButton(C), none), __NFUN_119__(R6WindowStayDownButton(C), m_CurrentSelectedButton)))
+		if(((R6WindowStayDownButton(C) != none) && (R6WindowStayDownButton(C) != m_CurrentSelectedButton)))
 		{
 			m_CurrentSelectedButton.m_bSelected = false;
 			m_CurrentSelectedButton = R6WindowStayDownButton(C);
 			m_CurrentSelectedButton.m_bSelected = true;
 			// End:0x98
-			if(__NFUN_119__(R6MenuEquipmentDetailControl(OwnerWindow), none))
+			if((R6MenuEquipmentDetailControl(OwnerWindow) != none))
 			{
 				R6MenuEquipmentDetailControl(OwnerWindow).ChangePage(m_CurrentSelectedButton.m_iButtonID);
 			}

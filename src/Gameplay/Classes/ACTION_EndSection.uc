@@ -11,14 +11,14 @@ class ACTION_EndSection extends ScriptedAction
 function ProceedToNextAction(ScriptedController C)
 {
 	// End:0x44
-	if(__NFUN_151__(C.IterationCounter, 0))
+	if((C.IterationCounter > 0))
 	{
 		C.ActionNum = C.IterationSectionStart;
-		__NFUN_166__(C.IterationCounter);		
+		(C.IterationCounter--);		
 	}
 	else
 	{
-		__NFUN_161__(C.ActionNum, 1);
+		(C.ActionNum += 1);
 		C.IterationSectionStart = -1;
 	}
 	return;

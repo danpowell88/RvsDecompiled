@@ -22,7 +22,7 @@ var string DefaultHelpText;
 function Created()
 {
 	super.Created();
-	VertSB = UWindowVScrollbar(CreateWindow(Class'UWindow.UWindowVScrollbar', __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+	VertSB = UWindowVScrollbar(CreateWindow(Class'UWindow.UWindowVScrollbar', (WinWidth - LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
 	return;
 }
 
@@ -31,20 +31,20 @@ function BeforePaint(Canvas C, float MouseX, float MouseY)
 	local UWindowListBoxItem OverItem;
 	local string NewHelpText;
 
-	VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(WinHeight, ItemHeight))));
+	VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int((WinHeight / ItemHeight))));
 	NewHelpText = DefaultHelpText;
 	// End:0x9B
-	if(__NFUN_119__(SelectedItem, none))
+	if((SelectedItem != none))
 	{
 		OverItem = GetItemAt(MouseX, MouseY);
 		// End:0x9B
-		if(__NFUN_130__(__NFUN_114__(OverItem, SelectedItem), __NFUN_123__(OverItem.HelpText, "")))
+		if(((OverItem == SelectedItem) && (OverItem.HelpText != "")))
 		{
 			NewHelpText = OverItem.HelpText;
 		}
 	}
 	// End:0xBD
-	if(__NFUN_123__(NewHelpText, HelpText))
+	if((NewHelpText != HelpText))
 	{
 		HelpText = NewHelpText;
 		Notify(13);
@@ -76,12 +76,12 @@ function Paint(Canvas C, float MouseX, float MouseY)
 	J0x1B:
 
 	// End:0x72 [Loop If]
-	if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), VertSB.pos)))
+	if(((CurItem != none) && (float(i) < VertSB.pos)))
 	{
 		// End:0x5B
 		if(CurItem.ShowThisItem())
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -91,13 +91,13 @@ function Paint(Canvas C, float MouseX, float MouseY)
 	J0x7D:
 
 	// End:0x108 [Loop If]
-	if(__NFUN_130__(__NFUN_176__(Y, WinHeight), __NFUN_119__(CurItem, none)))
+	if(((Y < WinHeight) && (CurItem != none)))
 	{
 		// End:0xF1
 		if(CurItem.ShowThisItem())
 		{
-			DrawItem(C, CurItem, 0.0000000, Y, __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), ItemHeight);
-			Y = __NFUN_174__(Y, ItemHeight);
+			DrawItem(C, CurItem, 0.0000000, Y, (WinWidth - LookAndFeel.Size_ScrollbarWidth), ItemHeight);
+			Y = (Y + ItemHeight);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -109,7 +109,7 @@ function Paint(Canvas C, float MouseX, float MouseY)
 function Resized()
 {
 	super(UWindowWindow).Resized();
-	VertSB.WinLeft = __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth);
+	VertSB.WinLeft = (WinWidth - LookAndFeel.Size_ScrollbarWidth);
 	VertSB.WinTop = 0.0000000;
 	VertSB.SetSize(LookAndFeel.Size_ScrollbarWidth, WinHeight);
 	return;
@@ -122,7 +122,7 @@ function UWindowListBoxItem GetItemAt(float MouseX, float MouseY)
 	local int i;
 
 	// End:0x20
-	if(__NFUN_132__(__NFUN_176__(MouseX, float(0)), __NFUN_177__(MouseX, WinWidth)))
+	if(((MouseX < float(0)) || (MouseX > WinWidth)))
 	{
 		return none;
 	}
@@ -131,12 +131,12 @@ function UWindowListBoxItem GetItemAt(float MouseX, float MouseY)
 	J0x3B:
 
 	// End:0x92 [Loop If]
-	if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(i), VertSB.pos)))
+	if(((CurItem != none) && (float(i) < VertSB.pos)))
 	{
 		// End:0x7B
 		if(CurItem.ShowThisItem())
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -146,17 +146,17 @@ function UWindowListBoxItem GetItemAt(float MouseX, float MouseY)
 	J0x9D:
 
 	// End:0x126 [Loop If]
-	if(__NFUN_130__(__NFUN_176__(Y, WinHeight), __NFUN_119__(CurItem, none)))
+	if(((Y < WinHeight) && (CurItem != none)))
 	{
 		// End:0x10F
 		if(CurItem.ShowThisItem())
 		{
 			// End:0xFD
-			if(__NFUN_130__(__NFUN_179__(MouseY, Y), __NFUN_178__(MouseY, __NFUN_174__(Y, ItemHeight))))
+			if(((MouseY >= Y) && (MouseY <= (Y + ItemHeight))))
 			{
 				return UWindowListBoxItem(CurItem);
 			}
-			Y = __NFUN_174__(Y, ItemHeight);
+			Y = (Y + ItemHeight);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -171,9 +171,9 @@ function MakeSelectedVisible()
 	local UWindowList CurItem;
 	local int i;
 
-	VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int(__NFUN_172__(WinHeight, ItemHeight))));
+	VertSB.SetRange(0.0000000, float(Items.CountShown()), float(int((WinHeight / ItemHeight))));
 	// End:0x42
-	if(__NFUN_114__(SelectedItem, none))
+	if((SelectedItem == none))
 	{
 		return;
 	}
@@ -182,10 +182,10 @@ function MakeSelectedVisible()
 	J0x5D:
 
 	// End:0xAA [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0x7A
-		if(__NFUN_114__(CurItem, SelectedItem))
+		if((CurItem == SelectedItem))
 		{
 			// [Explicit Break]
 			goto J0xAA;
@@ -193,7 +193,7 @@ function MakeSelectedVisible()
 		// End:0x93
 		if(CurItem.ShowThisItem())
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -208,16 +208,16 @@ function MakeSelectedVisible()
 function SetSelectedItem(UWindowListBoxItem NewSelected)
 {
 	// End:0x67
-	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_119__(SelectedItem, NewSelected)))
+	if(((NewSelected != none) && (SelectedItem != NewSelected)))
 	{
 		// End:0x38
-		if(__NFUN_119__(SelectedItem, none))
+		if((SelectedItem != none))
 		{
 			SelectedItem.bSelected = false;
 		}
 		SelectedItem = NewSelected;
 		// End:0x5F
-		if(__NFUN_119__(SelectedItem, none))
+		if((SelectedItem != none))
 		{
 			SelectedItem.bSelected = true;
 		}
@@ -232,7 +232,7 @@ function SetSelected(float X, float Y)
 
 	NewSelected = GetItemAt(X, Y);
 	// End:0x30
-	if(__NFUN_119__(NewSelected, SelectedItem))
+	if((NewSelected != SelectedItem))
 	{
 		ClickTime = 0.0000000;
 	}
@@ -245,7 +245,7 @@ function LMouseDown(float X, float Y)
 	super(UWindowWindow).LMouseDown(X, Y);
 	SetSelected(X, Y);
 	// End:0x56
-	if(__NFUN_132__(bCanDrag, bCanDragExternal))
+	if((bCanDrag || bCanDragExternal))
 	{
 		bDragging = true;
 		Root.CaptureMouse();
@@ -258,7 +258,7 @@ function DoubleClick(float X, float Y)
 {
 	super(UWindowWindow).DoubleClick(X, Y);
 	// End:0x35
-	if(__NFUN_114__(GetItemAt(X, Y), SelectedItem))
+	if((GetItemAt(X, Y) == SelectedItem))
 	{
 		DoubleClickItem(SelectedItem);
 	}
@@ -279,7 +279,7 @@ function ReceiveDoubleClickItem(UWindowListBox L, UWindowListBoxItem i)
 function DoubleClickItem(UWindowListBoxItem i)
 {
 	// End:0x2D
-	if(__NFUN_130__(__NFUN_119__(DoubleClickList, none), __NFUN_119__(i, none)))
+	if(((DoubleClickList != none) && (i != none)))
 	{
 		DoubleClickList.ReceiveDoubleClickItem(self, i);
 	}
@@ -292,15 +292,15 @@ function MouseMove(float X, float Y)
 
 	super(UWindowDialogControl).MouseMove(X, Y);
 	// End:0xFA
-	if(__NFUN_130__(bDragging, bMouseDown))
+	if((bDragging && bMouseDown))
 	{
 		OverItem = GetItemAt(X, Y);
 		// End:0xCE
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bCanDrag, __NFUN_119__(OverItem, SelectedItem)), __NFUN_119__(OverItem, none)), __NFUN_119__(SelectedItem, none)))
+		if((((bCanDrag && (OverItem != SelectedItem)) && (OverItem != none)) && (SelectedItem != none)))
 		{
 			SelectedItem.Remove();
 			// End:0xA3
-			if(__NFUN_176__(Y, DragY))
+			if((Y < DragY))
 			{
 				OverItem.InsertItemBefore(SelectedItem);				
 			}
@@ -314,7 +314,7 @@ function MouseMove(float X, float Y)
 		else
 		{
 			// End:0xF7
-			if(__NFUN_130__(bCanDragExternal, __NFUN_119__(CheckExternalDrag(X, Y), none)))
+			if((bCanDragExternal && (CheckExternalDrag(X, Y) != none)))
 			{
 				bDragging = false;
 			}
@@ -334,12 +334,12 @@ function bool ExternalDragOver(UWindowDialogControl ExternalControl, float X, fl
 
 	B = UWindowListBox(ExternalControl);
 	// End:0x134
-	if(__NFUN_130__(__NFUN_119__(B, none), __NFUN_119__(B.SelectedItem, none)))
+	if(((B != none) && (B.SelectedItem != none)))
 	{
 		OverItem = GetItemAt(X, Y);
 		B.SelectedItem.Remove();
 		// End:0x8A
-		if(__NFUN_119__(OverItem, none))
+		if((OverItem != none))
 		{
 			OverItem.InsertItemBefore(B.SelectedItem);			
 		}
@@ -352,7 +352,7 @@ function bool ExternalDragOver(UWindowDialogControl ExternalControl, float X, fl
 		B.Notify(1);
 		Notify(1);
 		// End:0x132
-		if(__NFUN_132__(bCanDrag, bCanDragExternal))
+		if((bCanDrag || bCanDragExternal))
 		{
 			Root.CancelCapture();
 			bDragging = true;

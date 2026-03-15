@@ -43,7 +43,7 @@ function Init(R6AbstractGameInfo GameInfo)
 	// End:0x27
 	if(m_bShowLog)
 	{
-		__NFUN_231__("*** Mission Objectives ***");
+		Log("*** Mission Objectives ***");
 	}
 	m_GameInfo = GameInfo;
 	SetMissionObjStatus(0);
@@ -51,16 +51,16 @@ function Init(R6AbstractGameInfo GameInfo)
 	J0x41:
 
 	// End:0xBB [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		m_aMissionObjectives[i].m_mgr = self;
 		// End:0x9C
 		if(m_bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("  ", string(i)), ": "), m_aMissionObjectives[i].getDescription()));
+			Log(((("  " $ string(i)) $ ": ") $ m_aMissionObjectives[i].getDescription()));
 		}
 		m_aMissionObjectives[i].Init();
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x41;
 	}
@@ -76,10 +76,10 @@ function RemoveObjectives()
 	// End:0x27
 	if(m_bShowLog)
 	{
-		__NFUN_231__("Mission objective: removed");
+		Log("Mission objective: removed");
 	}
 	// End:0x40
-	if(__NFUN_151__(m_aMissionObjectives.Length, 0))
+	if((m_aMissionObjectives.Length > 0))
 	{
 		m_aMissionObjectives.Remove(0, m_aMissionObjectives.Length);
 	}
@@ -105,7 +105,7 @@ function PawnKilled(Pawn killedPawn)
 	local int i;
 
 	// End:0x1F
-	if(__NFUN_132__(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)), __NFUN_114__(killedPawn, none)))
+	if(((int(m_eMissionObjectiveStatus) != int(0)) || (killedPawn == none)))
 	{
 		return;
 	}
@@ -113,23 +113,23 @@ function PawnKilled(Pawn killedPawn)
 	if(m_bShowLog)
 	{
 		// End:0xB0
-		if(__NFUN_130__(__NFUN_119__(PlayerController(killedPawn.Controller), none), __NFUN_119__(PlayerController(killedPawn.Controller).PlayerReplicationInfo, none)))
+		if(((PlayerController(killedPawn.Controller) != none) && (PlayerController(killedPawn.Controller).PlayerReplicationInfo != none)))
 		{
-			__NFUN_231__(__NFUN_112__("MissionObjective: PawnKilled ", PlayerController(killedPawn.Controller).PlayerReplicationInfo.PlayerName));			
+			Log(("MissionObjective: PawnKilled " $ PlayerController(killedPawn.Controller).PlayerReplicationInfo.PlayerName));			
 		}
 		else
 		{
-			__NFUN_231__(__NFUN_112__("MissionObjective: PawnKilled ", string(killedPawn.Name)));
+			Log(("MissionObjective: PawnKilled " $ string(killedPawn.Name)));
 		}
 	}
 	i = 0;
 	J0xEA:
 
 	// End:0x153 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x12F
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x149;
@@ -137,7 +137,7 @@ function PawnKilled(Pawn killedPawn)
 		m_aMissionObjectives[i].PawnKilled(killedPawn);
 		J0x149:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0xEA;
 	}
@@ -153,7 +153,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 	local int i;
 
 	// End:0x12
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return;
 	}
@@ -161,10 +161,10 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 	J0x19:
 
 	// End:0x87 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x5E
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x7D;
@@ -172,7 +172,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 		m_aMissionObjectives[i].IObjectInteract(aPawn, anInteractiveObject);
 		J0x7D:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x19;
 	}
@@ -188,7 +188,7 @@ function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 	local int i;
 
 	// End:0x12
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return;
 	}
@@ -196,10 +196,10 @@ function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 	J0x19:
 
 	// End:0x87 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x5E
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x7D;
@@ -207,7 +207,7 @@ function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 		m_aMissionObjectives[i].IObjectDestroyed(aPawn, anInteractiveObject);
 		J0x7D:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x19;
 	}
@@ -223,7 +223,7 @@ function PawnSeen(Pawn seen, Pawn witness)
 	local int i;
 
 	// End:0x12
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return;
 	}
@@ -231,10 +231,10 @@ function PawnSeen(Pawn seen, Pawn witness)
 	J0x19:
 
 	// End:0x87 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x5E
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x7D;
@@ -242,7 +242,7 @@ function PawnSeen(Pawn seen, Pawn witness)
 		m_aMissionObjectives[i].PawnSeen(seen, witness);
 		J0x7D:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x19;
 	}
@@ -258,7 +258,7 @@ function PawnHeard(Pawn heard, Pawn witness)
 	local int i;
 
 	// End:0x12
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return;
 	}
@@ -266,10 +266,10 @@ function PawnHeard(Pawn heard, Pawn witness)
 	J0x19:
 
 	// End:0x87 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x5E
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x7D;
@@ -277,7 +277,7 @@ function PawnHeard(Pawn heard, Pawn witness)
 		m_aMissionObjectives[i].PawnHeard(heard, witness);
 		J0x7D:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x19;
 	}
@@ -293,7 +293,7 @@ function PawnSecure(Pawn securedPawn)
 	local int i;
 
 	// End:0x12
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return;
 	}
@@ -301,10 +301,10 @@ function PawnSecure(Pawn securedPawn)
 	J0x19:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x5E
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x78;
@@ -312,7 +312,7 @@ function PawnSecure(Pawn securedPawn)
 		m_aMissionObjectives[i].PawnSecure(securedPawn);
 		J0x78:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x19;
 	}
@@ -328,12 +328,12 @@ function EnteredExtractionZone(Pawn aPawn)
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_114__(aPawn, none))
+	if((aPawn == none))
 	{
 		return;
 	}
 	// End:0x1F
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return;
 	}
@@ -341,10 +341,10 @@ function EnteredExtractionZone(Pawn aPawn)
 	J0x26:
 
 	// End:0x8F [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x6B
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x85;
@@ -352,7 +352,7 @@ function EnteredExtractionZone(Pawn aPawn)
 		m_aMissionObjectives[i].EnteredExtractionZone(aPawn);
 		J0x85:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x26;
 	}
@@ -368,12 +368,12 @@ function ExitExtractionZone(Pawn aPawn)
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_114__(aPawn, none))
+	if((aPawn == none))
 	{
 		return;
 	}
 	// End:0x1F
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return;
 	}
@@ -381,10 +381,10 @@ function ExitExtractionZone(Pawn aPawn)
 	J0x26:
 
 	// End:0x8F [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x6B
-		if(__NFUN_132__(m_aMissionObjectives[i].m_bFailed, m_aMissionObjectives[i].m_bCompleted))
+		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
 			goto J0x85;
@@ -392,7 +392,7 @@ function ExitExtractionZone(Pawn aPawn)
 		m_aMissionObjectives[i].ExitExtractionZone(aPawn);
 		J0x85:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x26;
 	}
@@ -404,12 +404,12 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 	local int i, iTotalMissionToComplete, iCompleted, iTotalMissionFailed;
 
 	// End:0x2A
-	if(__NFUN_132__(m_bDontUpdateMgr, __NFUN_130__(__NFUN_2014__(), __NFUN_129__(Level.m_bInGamePlanningActive))))
+	if((m_bDontUpdateMgr || (InPlanningMode() && (!Level.m_bInGamePlanningActive))))
 	{
 		return 0;
 	}
 	// End:0x40
-	if(__NFUN_155__(int(m_eMissionObjectiveStatus), int(0)))
+	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return m_eMissionObjectiveStatus;
 	}
@@ -417,15 +417,15 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 	J0x47:
 
 	// End:0xBA [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0xB0
 		if(m_aMissionObjectives[i].isFailed())
 		{
 			// End:0x90
-			if(__NFUN_129__(m_aMissionObjectives[i].m_bMoralityObjective))
+			if((!m_aMissionObjectives[i].m_bMoralityObjective))
 			{
-				__NFUN_163__(iTotalMissionFailed);
+				(++iTotalMissionFailed);
 			}
 			// End:0xB0
 			if(m_aMissionObjectives[i].isMissionAbortedOnFailure())
@@ -433,12 +433,12 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 				SetMissionObjStatus(2);
 			}
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x47;
 	}
 	// End:0xD0
-	if(__NFUN_154__(int(m_eMissionObjectiveStatus), int(2)))
+	if((int(m_eMissionObjectiveStatus) == int(2)))
 	{
 		return m_eMissionObjectiveStatus;
 	}

@@ -379,15 +379,15 @@ var transient string SelectedGroups;  // A list of selected groups in the group 
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_130__(bNetDirty, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		Pauser, TimeDilation;
 
 	// Pos:0x018
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_RepWeatherEmitterClass;
 
 	// Pos:0x025
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bShowFloppy, m_fCompteurFrameDetection;
 }
 
@@ -428,14 +428,14 @@ simulated event bool GameTypeUseNbOfTerroristToSpawn(string szGameType)
 	J0x07:
 
 	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_bCanSetNbOfTerroristToSpawn;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -455,23 +455,23 @@ simulated function bool IsGameTypeMultiplayer(string szGameType, optional bool _
 	J0x07:
 
 	// End:0x7A [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x70
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			// End:0x57
 			if(_bNotIncludeGMI_None)
 			{
 				// End:0x57
-				if(__NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(0)))
+				if((int(m_aGameTypeInfo[i].m_eGameModeInfo) == int(0)))
 				{
 					return false;
 				}
 			}
-			return __NFUN_155__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(1));
+			return (int(m_aGameTypeInfo[i].m_eGameModeInfo) != int(1));
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -491,14 +491,14 @@ simulated function bool IsGameTypeAdversarial(string szGameType)
 	J0x07:
 
 	// End:0x54 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x4A
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
-			return __NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(3));
+			return (int(m_aGameTypeInfo[i].m_eGameModeInfo) == int(3));
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -514,14 +514,14 @@ simulated function bool IsGameTypeTeamAdversarial(string szGameType)
 	J0x07:
 
 	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_bTeamAdversarial;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -541,14 +541,14 @@ simulated function bool IsGameTypeCooperative(string szGameType)
 	J0x07:
 
 	// End:0x54 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x4A
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
-			return __NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(2));
+			return (int(m_aGameTypeInfo[i].m_eGameModeInfo) == int(2));
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -568,14 +568,14 @@ simulated function bool IsGameTypeSquad(string szGameType)
 	J0x07:
 
 	// End:0x54 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x4A
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
-			return __NFUN_154__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(4));
+			return (int(m_aGameTypeInfo[i].m_eGameModeInfo) == int(4));
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -595,14 +595,14 @@ simulated function bool IsGameTypeUsePreRecMessages(string szGameType)
 	J0x07:
 
 	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_bUsePreRecMessages;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -622,14 +622,14 @@ simulated event bool IsGameTypePlayWithNonRainbowNPCs(string szGameType)
 	J0x07:
 
 	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_bPlayWithNonRainbowNPCs;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -649,14 +649,14 @@ simulated function bool IsGameTypeUseRainbowComm(string szGameType)
 	J0x07:
 
 	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_bUseRainbowComm;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -676,14 +676,14 @@ simulated function string GetGameNameLocalization(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szNameLocalization;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -703,14 +703,14 @@ function string GameTypeToString(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szToString;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -730,14 +730,14 @@ function string GameTypeLocalizationFile(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szLocalizationFile;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -757,14 +757,14 @@ simulated function string GetGreenTeamObjective(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szGreenTeamObjective;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -784,14 +784,14 @@ simulated function string GetRedTeamObjective(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szRedTeamObjective;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}

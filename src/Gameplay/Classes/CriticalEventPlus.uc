@@ -8,7 +8,7 @@ class CriticalEventPlus extends LocalMessagePlus
 
 static function float GetOffset(int Switch, float YL, float ClipY)
 {
-	return __NFUN_171__(__NFUN_172__(default.YPos, 768.0000000), ClipY);
+	return ((default.YPos / 768.0000000) * ClipY);
 	return;
 }
 

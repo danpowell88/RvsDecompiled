@@ -47,10 +47,10 @@ function TestQ()
 	V.X = 2.0000000;
 	V.Y = 3.0000000;
 	V.Z = 4.0000000;
-	assert(__NFUN_217__(V, vect(2.0000000, 3.0000000, 4.0000000)));
-	assert(__NFUN_180__(V.Z, float(4)));
-	assert(__NFUN_180__(V.Y, float(3)));
-	assert(__NFUN_180__(V.X, float(2)));
+	assert((V == vect(2.0000000, 3.0000000, 4.0000000)));
+	assert((V.Z == float(4)));
+	assert((V.Y == float(3)));
+	assert((V.X == float(2)));
 	return;
 }
 
@@ -65,37 +65,37 @@ function PostBeginPlay()
 	local Object o;
 	local Actor TempActor;
 
-	__NFUN_231__("!!BEGIN");
+	Log("!!BEGIN");
 	default.v1 = vect(5.0000000, 4.0000000, 3.0000000);
-	assert(__NFUN_217__(default.v1, vect(5.0000000, 4.0000000, 3.0000000)));
+	assert((default.v1 == vect(5.0000000, 4.0000000, 3.0000000)));
 	test();
-	assert(__NFUN_217__(default.v1, vect(1.0000000, 2.0000000, 3.0000000)));
-	assert(__NFUN_303__('Actor'));
-	assert(__NFUN_303__('TestInfo'));
-	assert(__NFUN_303__('Info'));
-	assert(__NFUN_129__(__NFUN_303__('LevelInfo')));
-	assert(__NFUN_129__(__NFUN_303__('Texture')));
-	__NFUN_231__("!!END");
+	assert((default.v1 == vect(1.0000000, 2.0000000, 3.0000000)));
+	assert(IsA('Actor'));
+	assert(IsA('TestInfo'));
+	assert(IsA('Info'));
+	assert((!IsA('LevelInfo')));
+	assert((!IsA('Texture')));
+	Log("!!END");
 	return;
 }
 
 function TestStructBools()
 {
-	assert(__NFUN_242__(ST.b1, false));
-	assert(__NFUN_242__(ST.b2, false));
-	assert(__NFUN_242__(ST.b3, false));
+	assert((ST.b1 == false));
+	assert((ST.b2 == false));
+	assert((ST.b3 == false));
 	ST.b1 = true;
-	assert(__NFUN_242__(ST.b1, true));
-	assert(__NFUN_242__(ST.b2, false));
-	assert(__NFUN_242__(ST.b3, false));
+	assert((ST.b1 == true));
+	assert((ST.b2 == false));
+	assert((ST.b3 == false));
 	ST.b2 = true;
-	assert(__NFUN_242__(ST.b1, true));
-	assert(__NFUN_242__(ST.b2, true));
-	assert(__NFUN_242__(ST.b3, false));
+	assert((ST.b1 == true));
+	assert((ST.b2 == true));
+	assert((ST.b3 == false));
 	ST.b3 = true;
-	assert(__NFUN_242__(ST.b1, true));
-	assert(__NFUN_242__(ST.b2, true));
-	assert(__NFUN_242__(ST.b3, true));
+	assert((ST.b1 == true));
+	assert((ST.b2 == true));
+	assert((ST.b3 == true));
 	ST.b1 = false;
 	ST.b2 = false;
 	ST.b3 = false;
@@ -123,7 +123,7 @@ function TestX(bool bResource)
 
 	N = int(bResource);
 	MyArray[int(bResource)] = 0;
-	__NFUN_165__(MyArray[int(bResource)]);
+	(MyArray[int(bResource)]++);
 	return;
 }
 
@@ -144,17 +144,17 @@ function TestLimitor(Class C)
 
 static function int OtherStatic(int i)
 {
-	assert(__NFUN_154__(i, 246));
-	assert(__NFUN_154__(default.xnum, 777));
+	assert((i == 246));
+	assert((default.xnum == 777));
 	return 555;
 	return;
 }
 
 static function int TestStatic(int i)
 {
-	assert(__NFUN_154__(i, 123));
-	assert(__NFUN_154__(default.xnum, 777));
-	assert(__NFUN_154__(OtherStatic(__NFUN_144__(i, 2)), 555));
+	assert((i == 123));
+	assert((default.xnum == 777));
+	assert((OtherStatic((i * 2)) == 555));
 	return i;
 	return;
 }
@@ -163,28 +163,28 @@ function TestContinueFor()
 {
 	local int i;
 
-	__NFUN_231__("TestContinue");
+	Log("TestContinue");
 	i = 0;
 	J0x17:
 
 	// End:0x76 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
-		__NFUN_231__(__NFUN_112__("iteration ", string(i)));
+		Log(("iteration " $ string(i)));
 		// End:0x65
-		if(__NFUN_132__(__NFUN_132__(__NFUN_154__(i, 7), __NFUN_154__(i, 9)), __NFUN_154__(i, 19)))
+		if((((i == 7) || (i == 9)) || (i == 19)))
 		{
 			// [Explicit Continue]
 			goto J0x6C;
 		}
-		__NFUN_231__("...");
+		Log("...");
 		J0x6C:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x17;
 	}
-	__NFUN_231__("DoneContinue");
+	Log("DoneContinue");
 	return;
 }
 
@@ -192,25 +192,25 @@ function TestContinueWhile()
 {
 	local int i;
 
-	__NFUN_231__("TestContinue");
+	Log("TestContinue");
 	J0x10:
 
 	// End:0x5C [Loop If]
-	if(__NFUN_152__(__NFUN_163__(i), 20))
+	if(((++i) <= 20))
 	{
-		__NFUN_231__(__NFUN_112__("iteration ", string(i)));
+		Log(("iteration " $ string(i)));
 		// End:0x52
-		if(__NFUN_132__(__NFUN_154__(i, 7), __NFUN_154__(i, 9)))
+		if(((i == 7) || (i == 9)))
 		{			
 		}
 		else
 		{
-			__NFUN_231__("...");
+			Log("...");
 		}
 		// [Loop Continue]
 		goto J0x10;
 	}
-	__NFUN_231__("DoneContinue");
+	Log("DoneContinue");
 	return;
 }
 
@@ -218,21 +218,21 @@ function TestContinueDoUntil()
 {
 	local int i;
 
-	__NFUN_231__("TestContinue");
+	Log("TestContinue");
 	J0x10:
 
-	__NFUN_165__(i);
-	__NFUN_231__(__NFUN_112__("iteration ", string(i)));
+	(i++);
+	Log(("iteration " $ string(i)));
 	// End:0x59
-	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(i, 7), __NFUN_154__(i, 9)), __NFUN_151__(i, 18)))
+	if((((i == 7) || (i == 9)) || (i > 18)))
 	{		
 	}
 	else
 	{
-		__NFUN_231__("...");
+		Log("...");
 	}
 	// End:0x10
-	if(!(__NFUN_151__(i, 20)))
+	if(!((i > 20)))
 		goto J0x10;
 	__NFUN_231__("DoneContinue");
 	return;

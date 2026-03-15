@@ -9,7 +9,7 @@ var R6MenuHelpTextBar m_HelpTextBar;
 
 function Created()
 {
-	m_HelpTextBar = R6MenuHelpTextBar(CreateWindow(Class'R6Menu.R6MenuHelpTextBar', 0.0000000, 1.0000000, WinWidth, __NFUN_175__(WinHeight, float(2)), self));
+	m_HelpTextBar = R6MenuHelpTextBar(CreateWindow(Class'R6Menu.R6MenuHelpTextBar', 0.0000000, 1.0000000, WinWidth, (WinHeight - float(2)), self));
 	m_BorderColor = Root.Colors.BlueLight;
 	return;
 }

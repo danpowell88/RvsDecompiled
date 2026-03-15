@@ -18,7 +18,7 @@ function PawnKilled(Pawn killed)
 	local R6Hostage H;
 
 	// End:0x1E
-	if(__NFUN_155__(int(killed.m_ePawnType), int(m_ePawnTypeDead)))
+	if((int(killed.m_ePawnType) != int(m_ePawnTypeDead)))
 	{
 		return;
 	}

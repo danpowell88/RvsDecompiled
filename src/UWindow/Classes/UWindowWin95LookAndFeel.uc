@@ -41,9 +41,9 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 	R = FrameTL;
 	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameT;
-	W.DrawStretchedTextureSegment(C, float(FrameTL.W), 0.0000000, __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameTL.W)), float(FrameTR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	W.DrawStretchedTextureSegment(C, float(FrameTL.W), 0.0000000, ((W.WinWidth - float(FrameTL.W)) - float(FrameTR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameTR;
-	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	W.DrawStretchedTextureSegment(C, (W.WinWidth - float(R.W)), 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	// End:0x21B
 	if(W.bStatusBar)
 	{
@@ -54,9 +54,9 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 		temp = FrameBL;
 	}
 	R = FrameL;
-	W.DrawStretchedTextureSegment(C, 0.0000000, float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	W.DrawStretchedTextureSegment(C, 0.0000000, float(FrameTL.H), float(R.W), ((W.WinHeight - float(FrameTL.H)) - float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = FrameR;
-	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), float(FrameTL.H), float(R.W), __NFUN_175__(__NFUN_175__(W.WinHeight, float(FrameTL.H)), float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	W.DrawStretchedTextureSegment(C, (W.WinWidth - float(R.W)), float(FrameTL.H), float(R.W), ((W.WinHeight - float(FrameTL.H)) - float(temp.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	// End:0x393
 	if(W.bStatusBar)
 	{
@@ -66,17 +66,17 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 	{
 		R = FrameBL;
 	}
-	W.DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	W.DrawStretchedTextureSegment(C, 0.0000000, (W.WinHeight - float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	// End:0x4E7
 	if(W.bStatusBar)
 	{
 		R = FrameSB;
-		W.DrawStretchedTextureSegment(C, float(FrameBL.W), __NFUN_175__(W.WinHeight, float(R.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameSBL.W)), float(FrameSBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);		
+		W.DrawStretchedTextureSegment(C, float(FrameBL.W), (W.WinHeight - float(R.H)), ((W.WinWidth - float(FrameSBL.W)) - float(FrameSBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);		
 	}
 	else
 	{
 		R = FrameB;
-		W.DrawStretchedTextureSegment(C, float(FrameBL.W), __NFUN_175__(W.WinHeight, float(R.H)), __NFUN_175__(__NFUN_175__(W.WinWidth, float(FrameBL.W)), float(FrameBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+		W.DrawStretchedTextureSegment(C, float(FrameBL.W), (W.WinHeight - float(R.H)), ((W.WinWidth - float(FrameBL.W)) - float(FrameBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	}
 	// End:0x5B9
 	if(W.bStatusBar)
@@ -87,10 +87,10 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 	{
 		R = FrameBR;
 	}
-	W.DrawStretchedTextureSegment(C, __NFUN_175__(W.WinWidth, float(R.W)), __NFUN_175__(W.WinHeight, float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	W.DrawStretchedTextureSegment(C, (W.WinWidth - float(R.W)), (W.WinHeight - float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	C.Font = W.Root.Fonts[W.0];
 	// End:0x6C6
-	if(__NFUN_114__(W.ParentWindow.ActiveWindow, W))
+	if((W.ParentWindow.ActiveWindow == W))
 	{
 		C.DrawColor = FrameActiveTitleColor;		
 	}
@@ -98,14 +98,14 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 	{
 		C.DrawColor = FrameInactiveTitleColor;
 	}
-	W.ClipTextWidth(C, float(FrameTitleX), float(FrameTitleY), W.WindowTitle, __NFUN_175__(W.WinWidth, float(22)));
+	W.ClipTextWidth(C, float(FrameTitleX), float(FrameTitleY), W.WindowTitle, (W.WinWidth - float(22)));
 	// End:0x809
 	if(W.bStatusBar)
 	{
 		C.DrawColor.R = 0;
 		C.DrawColor.G = 0;
 		C.DrawColor.B = 0;
-		W.ClipTextWidth(C, 6.0000000, __NFUN_175__(W.WinHeight, float(13)), W.StatusBarText, __NFUN_175__(W.WinWidth, float(22)));
+		W.ClipTextWidth(C, 6.0000000, (W.WinHeight - float(13)), W.StatusBarText, (W.WinWidth - float(22)));
 		C.DrawColor.R = byte(255);
 		C.DrawColor.G = byte(255);
 		C.DrawColor.B = byte(255);
@@ -118,7 +118,7 @@ function FW_SetupFrameButtons(UWindowFramedWindow W, Canvas C)
 	local Texture t;
 
 	t = W.GetLookAndFeelTexture();
-	W.CloseBox.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(CloseBoxOffsetX)), float(CloseBoxUp.W));
+	W.CloseBox.WinLeft = ((W.WinWidth - float(CloseBoxOffsetX)) - float(CloseBoxUp.W));
 	W.CloseBox.WinTop = float(CloseBoxOffsetY);
 	W.CloseBox.SetSize(float(CloseBoxUp.W), float(CloseBoxUp.H));
 	W.CloseBox.bUseRegion = true;
@@ -139,15 +139,15 @@ function Region FW_GetClientArea(UWindowFramedWindow W)
 
 	R.X = FrameL.W;
 	R.Y = FrameT.H;
-	R.W = int(__NFUN_175__(W.WinWidth, float(__NFUN_146__(FrameL.W, FrameR.W))));
+	R.W = int((W.WinWidth - float((FrameL.W + FrameR.W))));
 	// End:0xA9
 	if(W.bStatusBar)
 	{
-		R.H = int(__NFUN_175__(W.WinHeight, float(__NFUN_146__(FrameT.H, FrameSB.H))));		
+		R.H = int((W.WinHeight - float((FrameT.H + FrameSB.H))));		
 	}
 	else
 	{
-		R.H = int(__NFUN_175__(W.WinHeight, float(__NFUN_146__(FrameT.H, FrameB.H))));
+		R.H = int((W.WinHeight - float((FrameT.H + FrameB.H))));
 	}
 	return R;
 	return;
@@ -156,47 +156,47 @@ function Region FW_GetClientArea(UWindowFramedWindow W)
 function UWindowBase.FrameHitTest FW_HitTest(UWindowFramedWindow W, float X, float Y)
 {
 	// End:0x51
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, float(3)), __NFUN_178__(X, __NFUN_175__(W.WinWidth, float(3)))), __NFUN_179__(Y, float(3))), __NFUN_178__(Y, float(14))))
+	if(((((X >= float(3)) && (X <= (W.WinWidth - float(3)))) && (Y >= float(3))) && (Y <= float(14))))
 	{
 		return 8;
 	}
 	// End:0x92
-	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_176__(Y, float(3))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_176__(Y, float(15)))))
+	if((((X < float(15)) && (Y < float(3))) || ((X < float(3)) && (Y < float(15)))))
 	{
 		return 0;
 	}
 	// End:0xF3
-	if(__NFUN_132__(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))), __NFUN_176__(Y, float(15))), __NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_176__(Y, float(3)))))
+	if((((X > (W.WinWidth - float(3))) && (Y < float(15))) || ((X > (W.WinWidth - float(15))) && (Y < float(3)))))
 	{
 		return 2;
 	}
 	// End:0x154
-	if(__NFUN_132__(__NFUN_130__(__NFUN_176__(X, float(15)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3)))), __NFUN_130__(__NFUN_176__(X, float(3)), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15))))))
+	if((((X < float(15)) && (Y > (W.WinHeight - float(3)))) || ((X < float(3)) && (Y > (W.WinHeight - float(15))))))
 	{
 		return 5;
 	}
 	// End:0x195
-	if(__NFUN_130__(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(15))), __NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(15)))))
+	if(((X > (W.WinWidth - float(15))) && (Y > (W.WinHeight - float(15)))))
 	{
 		return 7;
 	}
 	// End:0x1A6
-	if(__NFUN_176__(Y, float(3)))
+	if((Y < float(3)))
 	{
 		return 1;
 	}
 	// End:0x1C7
-	if(__NFUN_177__(Y, __NFUN_175__(W.WinHeight, float(3))))
+	if((Y > (W.WinHeight - float(3))))
 	{
 		return 6;
 	}
 	// End:0x1D8
-	if(__NFUN_176__(X, float(3)))
+	if((X < float(3)))
 	{
 		return 3;
 	}
 	// End:0x1F9
-	if(__NFUN_177__(X, __NFUN_175__(W.WinWidth, float(3))))
+	if((X > (W.WinWidth - float(3))))
 	{
 		return 4;
 	}
@@ -216,46 +216,46 @@ function Combo_SetupSizes(UWindowComboControl W, Canvas C)
 
 	C.Font = W.Root.Fonts[W.Font];
 	W.TextSize(C, W.Text, tW, tH);
-	W.WinHeight = __NFUN_174__(__NFUN_174__(12.0000000, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
+	W.WinHeight = ((12.0000000 + float(MiscBevelT[2].H)) + float(MiscBevelB[2].H));
 	switch(W.Align)
 	{
 		// End:0xF1
 		case 0:
-			W.EditAreaDrawX = __NFUN_175__(W.WinWidth, W.EditBoxWidth);
+			W.EditAreaDrawX = (W.WinWidth - W.EditBoxWidth);
 			W.TextX = 0.0000000;
 			// End:0x199
 			break;
 		// End:0x131
 		case 1:
 			W.EditAreaDrawX = 0.0000000;
-			W.TextX = __NFUN_175__(W.WinWidth, tW);
+			W.TextX = (W.WinWidth - tW);
 			// End:0x199
 			break;
 		// End:0x196
 		case 2:
-			W.EditAreaDrawX = __NFUN_172__(__NFUN_175__(W.WinWidth, W.EditBoxWidth), float(2));
-			W.TextX = __NFUN_172__(__NFUN_175__(W.WinWidth, tW), float(2));
+			W.EditAreaDrawX = ((W.WinWidth - W.EditBoxWidth) / float(2));
+			W.TextX = ((W.WinWidth - tW) / float(2));
 			// End:0x199
 			break;
 		// End:0xFFFF
 		default:
 			break;
 	}
-	W.EditAreaDrawY = __NFUN_172__(__NFUN_175__(W.WinHeight, float(2)), float(2));
-	W.TextY = __NFUN_172__(__NFUN_175__(W.WinHeight, tH), float(2));
-	W.EditBox.WinLeft = __NFUN_174__(W.EditAreaDrawX, float(MiscBevelL[2].W));
+	W.EditAreaDrawY = ((W.WinHeight - float(2)) / float(2));
+	W.TextY = ((W.WinHeight - tH) / float(2));
+	W.EditBox.WinLeft = (W.EditAreaDrawX + float(MiscBevelL[2].W));
 	W.EditBox.WinTop = float(MiscBevelT[2].H);
 	W.Button.WinWidth = float(ComboBtnUp.W);
 	// End:0x553
 	if(W.bButtons)
 	{
-		W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[2].W)), float(MiscBevelR[2].W)), float(ComboBtnUp.W)), float(SBLeftUp.W)), float(SBRightUp.W));
-		W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
-		W.Button.WinLeft = __NFUN_175__(__NFUN_175__(__NFUN_175__(__NFUN_175__(W.WinWidth, float(ComboBtnUp.W)), float(MiscBevelR[2].W)), float(SBLeftUp.W)), float(SBRightUp.W));
+		W.EditBox.WinWidth = (((((W.EditBoxWidth - float(MiscBevelL[2].W)) - float(MiscBevelR[2].W)) - float(ComboBtnUp.W)) - float(SBLeftUp.W)) - float(SBRightUp.W));
+		W.EditBox.WinHeight = ((W.WinHeight - float(MiscBevelT[2].H)) - float(MiscBevelB[2].H));
+		W.Button.WinLeft = ((((W.WinWidth - float(ComboBtnUp.W)) - float(MiscBevelR[2].W)) - float(SBLeftUp.W)) - float(SBRightUp.W));
 		W.Button.WinTop = W.EditBox.WinTop;
-		W.LeftButton.WinLeft = __NFUN_175__(__NFUN_175__(__NFUN_175__(W.WinWidth, float(MiscBevelR[2].W)), float(SBLeftUp.W)), float(SBRightUp.W));
+		W.LeftButton.WinLeft = (((W.WinWidth - float(MiscBevelR[2].W)) - float(SBLeftUp.W)) - float(SBRightUp.W));
 		W.LeftButton.WinTop = W.EditBox.WinTop;
-		W.RightButton.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(MiscBevelR[2].W)), float(SBRightUp.W));
+		W.RightButton.WinLeft = ((W.WinWidth - float(MiscBevelR[2].W)) - float(SBRightUp.W));
 		W.RightButton.WinTop = W.EditBox.WinTop;
 		W.LeftButton.WinWidth = float(SBLeftUp.W);
 		W.LeftButton.WinHeight = float(SBLeftUp.H);
@@ -264,9 +264,9 @@ function Combo_SetupSizes(UWindowComboControl W, Canvas C)
 	}
 	else
 	{
-		W.EditBox.WinWidth = __NFUN_175__(__NFUN_175__(__NFUN_175__(W.EditBoxWidth, float(MiscBevelL[2].W)), float(MiscBevelR[2].W)), float(ComboBtnUp.W));
-		W.EditBox.WinHeight = __NFUN_175__(__NFUN_175__(W.WinHeight, float(MiscBevelT[2].H)), float(MiscBevelB[2].H));
-		W.Button.WinLeft = __NFUN_175__(__NFUN_175__(W.WinWidth, float(ComboBtnUp.W)), float(MiscBevelR[2].W));
+		W.EditBox.WinWidth = (((W.EditBoxWidth - float(MiscBevelL[2].W)) - float(MiscBevelR[2].W)) - float(ComboBtnUp.W));
+		W.EditBox.WinHeight = ((W.WinHeight - float(MiscBevelT[2].H)) - float(MiscBevelB[2].H));
+		W.Button.WinLeft = ((W.WinWidth - float(ComboBtnUp.W)) - float(MiscBevelR[2].W));
 		W.Button.WinTop = W.EditBox.WinTop;
 	}
 	W.Button.WinHeight = W.EditBox.WinHeight;
@@ -277,7 +277,7 @@ function Combo_Draw(UWindowComboControl W, Canvas C)
 {
 	W.DrawMiscBevel(C, W.EditAreaDrawX, 0.0000000, W.EditBoxWidth, W.WinHeight, Misc, 2);
 	// End:0x102
-	if(__NFUN_123__(W.Text, ""))
+	if((W.Text != ""))
 	{
 		C.DrawColor = W.TextColor;
 		W.ClipText(C, W.TextX, W.TextY, W.Text);
@@ -291,10 +291,10 @@ function Combo_Draw(UWindowComboControl W, Canvas C)
 function ComboList_DrawBackground(UWindowComboList W, Canvas C)
 {
 	W.DrawClippedTexture(C, 0.0000000, 0.0000000, Texture'UWindow.Icons.MenuTL');
-	W.DrawStretchedTexture(C, 4.0000000, 0.0000000, __NFUN_175__(W.WinWidth, float(8)), 4.0000000, Texture'UWindow.Icons.MenuT');
-	W.DrawClippedTexture(C, __NFUN_175__(W.WinWidth, float(4)), 0.0000000, Texture'UWindow.Icons.MenuTR');
-	W.DrawClippedTexture(C, 0.0000000, __NFUN_175__(W.WinHeight, float(4)), Texture'UWindow.Icons.MenuBL');
-	W.DrawStretchedTexture(C, 4.0000000, __NFUN_175__(W.WinHeight, float(4)), __NFUN_175__(W.WinWidth, float(8)), 4.0000000, Texture'UWindow.Icons.MenuB');
+	W.DrawStretchedTexture(C, 4.0000000, 0.0000000, (W.WinWidth - float(8)), 4.0000000, Texture'UWindow.Icons.MenuT');
+	W.DrawClippedTexture(C, (W.WinWidth - float(4)), 0.0000000, Texture'UWindow.Icons.MenuTR');
+	W.DrawClippedTexture(C, 0.0000000, (W.WinHeight - float(4)), Texture'UWindow.Icons.MenuBL');
+	W.DrawStretchedTexture(C, 4.0000000, (W.WinHeight - float(4)), __NFUN_175__(W.WinWidth, float(8)), 4.0000000, Texture'UWindow.Icons.MenuB');
 	W.DrawClippedTexture(C, __NFUN_175__(W.WinWidth, float(4)), __NFUN_175__(W.WinHeight, float(4)), Texture'UWindow.Icons.MenuBR');
 	W.DrawStretchedTexture(C, 0.0000000, 4.0000000, 4.0000000, __NFUN_175__(W.WinHeight, float(8)), Texture'UWindow.Icons.MenuL');
 	W.DrawStretchedTexture(C, __NFUN_175__(W.WinWidth, float(4)), 4.0000000, 4.0000000, __NFUN_175__(W.WinHeight, float(8)), Texture'UWindow.Icons.MenuR');

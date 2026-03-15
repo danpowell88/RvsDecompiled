@@ -57,7 +57,7 @@ function InitObjectives()
 		m_objDeathmatch.m_bTeamDeathmatch = true;
 		iLength = m_missionMgr.m_aMissionObjectives.Length;
 		m_missionMgr.m_aMissionObjectives[iLength] = m_objDeathmatch;
-		__NFUN_165__(iLength);
+		(iLength++);
 	}
 	super.InitObjectives();
 	return;
@@ -70,7 +70,7 @@ function InitObjectives()
 function int GetTeamIDFromTeamSelection(Object.ePlayerTeamSelection eTeam)
 {
 	// End:0x19
-	if(__NFUN_154__(int(eTeam), int(2)))
+	if((int(eTeam) == int(2)))
 	{
 		return c_iAlphaTeam;		
 	}
@@ -88,14 +88,14 @@ function int GetTeamIDFromTeamSelection(Object.ePlayerTeamSelection eTeam)
 function SetControllerTeamID(R6PlayerController PController, Object.ePlayerTeamSelection eTeam)
 {
 	// End:0x2D
-	if(__NFUN_154__(int(eTeam), int(2)))
+	if((int(eTeam) == int(2)))
 	{
 		PController.m_pawn.m_iTeam = 2;		
 	}
 	else
 	{
 		// End:0x57
-		if(__NFUN_154__(int(eTeam), int(3)))
+		if((int(eTeam) == int(3)))
 		{
 			PController.m_pawn.m_iTeam = 3;
 		}
@@ -112,7 +112,7 @@ function bool IsPlayerInTeam(R6PlayerController PController, int iTeamId)
 	local int i;
 
 	// End:0x11
-	if(__NFUN_153__(iTeamId, c_iMaxTeam))
+	if((iTeamId >= c_iMaxTeam))
 	{
 		return false;
 	}
@@ -120,14 +120,14 @@ function bool IsPlayerInTeam(R6PlayerController PController, int iTeamId)
 	J0x18:
 
 	// End:0x5F [Loop If]
-	if(__NFUN_150__(i, m_aTeam[iTeamId].m_aPlayerController.Length))
+	if((i < m_aTeam[iTeamId].m_aPlayerController.Length))
 	{
 		// End:0x55
-		if(__NFUN_114__(m_aTeam[iTeamId].m_aPlayerController[i], PController))
+		if((m_aTeam[iTeamId].m_aPlayerController[i] == PController))
 		{
 			return true;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x18;
 	}
@@ -149,7 +149,7 @@ function AddPlayerToTeam(R6PlayerController PController, Object.ePlayerTeamSelec
 	// End:0x9D
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("AddPlayerToTeam pController=", string(PController)), " (alpha=0, bravo=1) index="), string(iTeamId)));
+		Log(((("AddPlayerToTeam pController=" $ string(PController)) $ " (alpha=0, bravo=1) index=") $ string(iTeamId)));
 	}
 	return;
 }
@@ -167,31 +167,31 @@ function bool RemovePlayerFromTeams(R6PlayerController PController)
 	J0x07:
 
 	// End:0xDC [Loop If]
-	if(__NFUN_150__(iTeam, 2))
+	if((iTeam < 2))
 	{
 		i = 0;
 		J0x1A:
 
 		// End:0xD2 [Loop If]
-		if(__NFUN_150__(i, m_aTeam[iTeam].m_aPlayerController.Length))
+		if((i < m_aTeam[iTeam].m_aPlayerController.Length))
 		{
 			// End:0xC8
-			if(__NFUN_114__(m_aTeam[iTeam].m_aPlayerController[i], PController))
+			if((m_aTeam[iTeam].m_aPlayerController[i] == PController))
 			{
 				m_aTeam[iTeam].m_aPlayerController.Remove(i, 1);
-				__NFUN_164__(i);
+				(--i);
 				bRemoved = true;
 				// End:0xC8
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("RemovePlayerFromTeam pController=", string(PController)), " in team="), string(iTeam)));
+					Log(((("RemovePlayerFromTeam pController=" $ string(PController)) $ " in team=") $ string(iTeam)));
 				}
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x1A;
 		}
-		__NFUN_163__(iTeam);
+		(++iTeam);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -211,25 +211,25 @@ function UpdateTeamInfo()
 	J0x07:
 
 	// End:0x99 [Loop If]
-	if(__NFUN_150__(iTeam, 2))
+	if((iTeam < 2))
 	{
 		m_aTeam[iTeam].m_iLivingPlayers = 0;
 		i = 0;
 		J0x2C:
 
 		// End:0x8F [Loop If]
-		if(__NFUN_150__(i, m_aTeam[iTeam].m_aPlayerController.Length))
+		if((i < m_aTeam[iTeam].m_aPlayerController.Length))
 		{
 			// End:0x85
 			if(m_aTeam[iTeam].m_aPlayerController[i].m_pawn.IsAlive())
 			{
-				__NFUN_165__(m_aTeam[iTeam].m_iLivingPlayers);
+				(m_aTeam[iTeam].m_iLivingPlayers++);
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x2C;
 		}
-		__NFUN_163__(iTeam);
+		(++iTeam);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -254,11 +254,11 @@ simulated function ResetOriginalData()
 	J0x1D:
 
 	// End:0x68 [Loop If]
-	if(__NFUN_150__(iTeam, 2))
+	if((iTeam < 2))
 	{
 		m_aTeam[iTeam].m_aPlayerController.Remove(0, m_aTeam[iTeam].m_aPlayerController.Length);
 		m_aTeam[iTeam].m_iLivingPlayers = 0;
-		__NFUN_163__(iTeam);
+		(++iTeam);
 		// [Loop Continue]
 		goto J0x1D;
 	}
@@ -279,38 +279,38 @@ function R6PlayerController GetLastManStanding()
 	J0x07:
 
 	// End:0x10C [Loop If]
-	if(__NFUN_150__(iTeam, 2))
+	if((iTeam < 2))
 	{
 		m_aTeam[iTeam].m_iLivingPlayers = 0;
 		i = 0;
 		J0x2C:
 
 		// End:0x102 [Loop If]
-		if(__NFUN_150__(i, m_aTeam[iTeam].m_aPlayerController.Length))
+		if((i < m_aTeam[iTeam].m_aPlayerController.Length))
 		{
 			// End:0xD5
-			if(__NFUN_130__(__NFUN_119__(m_aTeam[iTeam].m_aPlayerController[i].m_pawn, none), m_aTeam[iTeam].m_aPlayerController[i].m_pawn.IsAlive()))
+			if(((m_aTeam[iTeam].m_aPlayerController[i].m_pawn != none) && m_aTeam[iTeam].m_aPlayerController[i].m_pawn.IsAlive()))
 			{
 				// End:0xA7
-				if(__NFUN_119__(aController, none))
+				if((aController != none))
 				{
 					return none;
 				}
 				aController = m_aTeam[iTeam].m_aPlayerController[i];
-				__NFUN_165__(m_aTeam[iTeam].m_iLivingPlayers);
+				(m_aTeam[iTeam].m_iLivingPlayers++);
 			}
 			aPotentialWinnerController = m_aTeam[iTeam].m_aPlayerController[i];
-			__NFUN_165__(iPotentialWinner);
-			__NFUN_163__(i);
+			(iPotentialWinner++);
+			(++i);
 			// [Loop Continue]
 			goto J0x2C;
 		}
-		__NFUN_163__(iTeam);
+		(++iTeam);
 		// [Loop Continue]
 		goto J0x07;
 	}
 	// End:0x11D
-	if(__NFUN_154__(iPotentialWinner, 1))
+	if((iPotentialWinner == 1))
 	{
 		return aPotentialWinnerController;
 	}
@@ -320,7 +320,7 @@ function R6PlayerController GetLastManStanding()
 
 function int GetRainbowTeamColourIndex(int eTeamName)
 {
-	return __NFUN_147__(eTeamName, 1);
+	return (eTeamName - 1);
 	return;
 }
 
@@ -343,20 +343,20 @@ function RemoveController(Controller aPlayer)
 function ResetPlayerTeam(Controller aPlayer)
 {
 	// End:0x190
-	if(__NFUN_129__(IsPlayerInTeam(R6PlayerController(aPlayer), GetTeamIDFromTeamSelection(R6PlayerController(aPlayer).m_TeamSelection))))
+	if((!IsPlayerInTeam(R6PlayerController(aPlayer), GetTeamIDFromTeamSelection(R6PlayerController(aPlayer).m_TeamSelection))))
 	{
 		RemovePlayerFromTeams(R6PlayerController(aPlayer));
 		// End:0x7F
-		if(__NFUN_132__(__NFUN_154__(int(R6PlayerController(aPlayer).m_TeamSelection), int(2)), __NFUN_154__(int(R6PlayerController(aPlayer).m_TeamSelection), int(3))))
+		if(((int(R6PlayerController(aPlayer).m_TeamSelection) == int(2)) || (int(R6PlayerController(aPlayer).m_TeamSelection) == int(3))))
 		{			
 		}
 		else
 		{
 			// End:0xF6
-			if(__NFUN_154__(int(R6PlayerController(aPlayer).m_TeamSelection), int(1)))
+			if((int(R6PlayerController(aPlayer).m_TeamSelection) == int(1)))
 			{
 				// End:0xDD
-				if(__NFUN_152__(m_aTeam[c_iAlphaTeam].m_aPlayerController.Length, m_aTeam[c_iBravoTeam].m_aPlayerController.Length))
+				if((m_aTeam[c_iAlphaTeam].m_aPlayerController.Length <= m_aTeam[c_iBravoTeam].m_aPlayerController.Length))
 				{
 					R6PlayerController(aPlayer).m_TeamSelection = 2;					
 				}
@@ -370,7 +370,7 @@ function ResetPlayerTeam(Controller aPlayer)
 				// End:0x14C
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__(__NFUN_112__("R6AdversarialTeamGame: not added player ", string(aPlayer.Pawn)), "to Team yet"));
+					Log((("R6AdversarialTeamGame: not added player " $ string(aPlayer.Pawn)) $ "to Team yet"));
 				}
 				R6Pawn(aPlayer.Pawn).m_iTeam = 4;
 				return;
@@ -380,7 +380,7 @@ function ResetPlayerTeam(Controller aPlayer)
 	}
 	super.ResetPlayerTeam(aPlayer);
 	// End:0x1D7
-	if(__NFUN_119__(R6PlayerController(aPlayer).m_pawn, none))
+	if((R6PlayerController(aPlayer).m_pawn != none))
 	{
 		SetControllerTeamID(R6PlayerController(aPlayer), R6PlayerController(aPlayer).m_TeamSelection);
 	}
@@ -398,7 +398,7 @@ function SetPawnTeamFriendlies(Pawn aPawn)
 		// End:0x5C
 		case 0:
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iFriendlyTeams, GetTeamNumBit(3));
+			(aPawn.m_iFriendlyTeams += GetTeamNumBit(3));
 			aPawn.m_iEnemyTeams = GetTeamNumBit(1);
 			// End:0x1B0
 			break;
@@ -406,26 +406,26 @@ function SetPawnTeamFriendlies(Pawn aPawn)
 		case 1:
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(1);
 			aPawn.m_iEnemyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(3));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(3));
 			// End:0x1B0
 			break;
 		// End:0xF5
 		case 2:
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(2);
 			aPawn.m_iEnemyTeams = GetTeamNumBit(3);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(1));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(1));
 			// End:0x1B0
 			break;
 		// End:0x142
 		case 3:
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(3);
 			aPawn.m_iEnemyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(1));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(1));
 			// End:0x1B0
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("warning: SetPawnTeamFriendlies team not supported for ", string(aPawn.Name)), " team="), string(aPawn.m_iTeam)));
+			Log(((("warning: SetPawnTeamFriendlies team not supported for " $ string(aPawn.Name)) $ " team=") $ string(aPawn.m_iTeam)));
 			// End:0x1B0
 			break;
 			break;
@@ -442,14 +442,14 @@ function PlayerReadySelected(PlayerController _Controller)
 	local Object.ePlayerTeamSelection _TeamSelection;
 
 	// End:0x1F
-	if(__NFUN_132__(__NFUN_114__(R6PlayerController(_Controller), none), __NFUN_281__('InBetweenRoundMenu')))
+	if(((R6PlayerController(_Controller) == none) || IsInState('InBetweenRoundMenu')))
 	{
 		return;
 	}
 	GetNbHumanPlayerInTeam(iHumanCountA, iHumanCountB);
 	_TeamSelection = R6PlayerController(_Controller).m_TeamSelection;
 	// End:0x6E
-	if(__NFUN_129__(__NFUN_132__(__NFUN_154__(int(_TeamSelection), int(2)), __NFUN_154__(int(_TeamSelection), int(3)))))
+	if((!((int(_TeamSelection) == int(2)) || (int(_TeamSelection) == int(3)))))
 	{
 		return;
 	}
@@ -457,7 +457,7 @@ function PlayerReadySelected(PlayerController _Controller)
 	if(Level.IsGameTypeTeamAdversarial(m_szGameTypeFlag))
 	{
 		// End:0xFB
-		if(__NFUN_132__(__NFUN_132__(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(_TeamSelection), int(2)), __NFUN_154__(iHumanCountA, 1)), __NFUN_151__(iHumanCountB, 0)), __NFUN_130__(__NFUN_130__(__NFUN_154__(int(_TeamSelection), int(3)), __NFUN_154__(iHumanCountB, 1)), __NFUN_151__(iHumanCountA, 0))), __NFUN_154__(__NFUN_146__(iHumanCountA, iHumanCountB), 1)))
+		if((((((int(_TeamSelection) == int(2)) && (iHumanCountA == 1)) && (iHumanCountB > 0)) || (((int(_TeamSelection) == int(3)) && (iHumanCountB == 1)) && (iHumanCountA > 0))) || ((iHumanCountA + iHumanCountB) == 1)))
 		{
 			ResetPenalty();
 			ResetRound();
@@ -466,7 +466,7 @@ function PlayerReadySelected(PlayerController _Controller)
 	else
 	{
 		// End:0x116
-		if(__NFUN_152__(iHumanCountA, 2))
+		if((iHumanCountA <= 2))
 		{
 			ResetPenalty();
 			ResetRound();
@@ -488,11 +488,11 @@ function int GetTotalTeamFrag(int iTeamId)
 	J0x07:
 
 	// End:0x99 [Loop If]
-	if(__NFUN_150__(i, m_aTeam[iTeamId].m_aPlayerController.Length))
+	if((i < m_aTeam[iTeamId].m_aPlayerController.Length))
 	{
 		PController = m_aTeam[iTeamId].m_aPlayerController[i];
 		// End:0x8F
-		if(__NFUN_130__(__NFUN_119__(PController.m_pawn, none), __NFUN_129__(PController.m_pawn.m_bSuicided)))
+		if(((PController.m_pawn != none) && (!PController.m_pawn.m_bSuicided)))
 		{
 			__NFUN_161__(iFragCount, PController.PlayerReplicationInfo.m_iRoundKillCount);
 		}

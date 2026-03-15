@@ -26,11 +26,11 @@ function Created()
 
 	fCurrentW = 0.0000000;
 	m_TeamBar = R6MenuTeamBar(CreateWindow(Class'R6Menu.R6MenuTeamBar', fCurrentW, 0.0000000, 10.0000000, 25.0000000, self));
-	__NFUN_184__(fCurrentW, __NFUN_175__(m_TeamBar.WinWidth, float(1)));
+	(fCurrentW += (m_TeamBar.WinWidth - float(1)));
 	m_DelNodeBar = R6MenuDelNodeBar(CreateWindow(Class'R6Menu.R6MenuDelNodeBar', fCurrentW, 0.0000000, 10.0000000, 25.0000000, self));
-	__NFUN_184__(fCurrentW, __NFUN_175__(m_DelNodeBar.WinWidth, float(1)));
+	(fCurrentW += (m_DelNodeBar.WinWidth - float(1)));
 	m_ViewCamBar = R6MenuViewCamBar(CreateWindow(Class'R6Menu.R6MenuViewCamBar', fCurrentW, 0.0000000, 10.0000000, 25.0000000, self));
-	__NFUN_184__(fCurrentW, __NFUN_175__(m_ViewCamBar.WinWidth, float(1)));
+	(fCurrentW += (m_ViewCamBar.WinWidth - float(1)));
 	m_TimeLine = R6MenuTimeLineBar(CreateWindow(Class'R6Menu.R6MenuTimeLineBar', fCurrentW, 0.0000000, 10.0000000, 25.0000000, self));
 	return;
 }

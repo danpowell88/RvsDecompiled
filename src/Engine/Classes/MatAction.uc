@@ -40,15 +40,15 @@ event Initialize()
 event ActionStart(Actor Viewer)
 {
 	// End:0x1E
-	if(__NFUN_242__(m_bCollideActor, true))
+	if((m_bCollideActor == true))
 	{
-		Viewer.__NFUN_262__(true, true, true);		
+		Viewer.SetCollision(true, true, true);		
 	}
 	else
 	{
-		Viewer.__NFUN_262__(true, false, false);
+		Viewer.SetCollision(true, false, false);
 	}
-	Viewer.__NFUN_3970__(m_PhysicsActor);
+	Viewer.SetPhysics(m_PhysicsActor);
 	Viewer.bInterpolating = true;
 	return;
 }

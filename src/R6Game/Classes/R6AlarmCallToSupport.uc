@@ -41,21 +41,21 @@ simulated function ResetOriginalData()
 		LogResetSystem(false);
 	}
 	super(Actor).ResetOriginalData();
-	__NFUN_118__('Tick');
+	Disable('Tick');
 	i = 0;
 	J0x24:
 
 	// End:0x6A [Loop If]
-	if(__NFUN_150__(i, m_IOSoundList.Length))
+	if((i < m_IOSoundList.Length))
 	{
 		m_IOSoundList[i].AmbientSound = none;
 		m_IOSoundList[i].AmbientSoundStop = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x24;
 	}
 	m_fTimeStart = 0.0000000;
-	__NFUN_118__('Tick');
+	Disable('Tick');
 	return;
 }
 
@@ -67,21 +67,21 @@ function SetAlarm(Vector vLocation)
 
 	bStartAlarm = false;
 	// End:0xB6
-	foreach __NFUN_304__(Class'R6Engine.R6TerroristAI', C)
+	foreach AllActors(Class'R6Engine.R6TerroristAI', C)
 	{
 		// End:0xB5
-		if(__NFUN_130__(C.m_pawn.IsAlive(), __NFUN_154__(C.m_pawn.m_iGroupID, m_iTerroristGroup)))
+		if((C.m_pawn.IsAlive() && (C.m_pawn.m_iGroupID == m_iTerroristGroup)))
 		{
 			bStartAlarm = true;
 			// End:0x8B
-			if(__NFUN_154__(int(m_eTerroristTarget), int(0)))
+			if((int(m_eTerroristTarget) == int(0)))
 			{
 				C.GotoPointAndSearch(Location, m_ePace, true);
 				// End:0xB5
 				continue;
 			}
 			// End:0xB5
-			if(__NFUN_154__(int(m_eTerroristTarget), int(1)))
+			if((int(m_eTerroristTarget) == int(1)))
 			{
 				C.GotoPointAndSearch(vLocation, m_ePace, true);
 			}
@@ -94,16 +94,16 @@ function SetAlarm(Vector vLocation)
 		J0xC7:
 
 		// End:0x115 [Loop If]
-		if(__NFUN_150__(i, m_IOSoundList.Length))
+		if((i < m_IOSoundList.Length))
 		{
 			m_IOSoundList[i].AmbientSound = m_sndAlarmSound;
 			m_IOSoundList[i].AmbientSoundStop = m_sndAlarmSoundStop;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xC7;
 		}
 		m_fTimeStart = 0.0000000;
-		__NFUN_117__('Tick');
+		Enable('Tick');
 	}
 	return;
 }
@@ -112,22 +112,22 @@ function Tick(float fDeltaTime)
 {
 	local int i;
 
-	__NFUN_184__(m_fTimeStart, fDeltaTime);
+	(m_fTimeStart += fDeltaTime);
 	// End:0x59
-	if(__NFUN_177__(m_fTimeStart, m_fActivationTime))
+	if((m_fTimeStart > m_fActivationTime))
 	{
 		i = 0;
 		J0x22:
 
 		// End:0x52 [Loop If]
-		if(__NFUN_150__(i, m_IOSoundList.Length))
+		if((i < m_IOSoundList.Length))
 		{
 			m_IOSoundList[i].AmbientSound = none;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x22;
 		}
-		__NFUN_118__('Tick');
+		Disable('Tick');
 	}
 	return;
 }
@@ -135,7 +135,7 @@ function Tick(float fDeltaTime)
 auto state StartUp
 {Begin:
 
-	__NFUN_118__('Tick');
+	Disable('Tick');
 	stop;				
 }
 

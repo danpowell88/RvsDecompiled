@@ -15,7 +15,7 @@ class R6CameraDirection extends R6ReferenceIcons;
 
 function SetPlanningRotation(Rotator PointRotation)
 {
-	m_u8SpritePlanningAngle = byte(__NFUN_145__(PointRotation.Yaw, 255));
+	m_u8SpritePlanningAngle = byte((PointRotation.Yaw / 255));
 	return;
 }
 

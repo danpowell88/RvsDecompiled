@@ -43,18 +43,18 @@ function PaintTexEffect(Canvas C)
 	C.Style = 7;
 	TexScrollEffect = Texture'R6MenuTextures.Credits.Line';
 	// End:0x73
-	if(__NFUN_129__(m_bStopScroll))
+	if((!m_bStopScroll))
 	{
-		__NFUN_185__(m_fYScrollEffect, __NFUN_171__(__NFUN_171__(m_fDelta, m_fScrollSpeed), float(2)));
+		(m_fYScrollEffect -= ((m_fDelta * m_fScrollSpeed) * float(2)));
 		// End:0x73
-		if(__NFUN_176__(m_fYScrollEffect, float(__NFUN_143__(TexScrollEffect.VSize))))
+		if((m_fYScrollEffect < float((-TexScrollEffect.VSize))))
 		{
-			__NFUN_184__(m_fYScrollEffect, float(TexScrollEffect.VSize));
+			(m_fYScrollEffect += float(TexScrollEffect.VSize));
 		}
 	}
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
-	C.__NFUN_2623__(0.0000000, 0.0000000);
-	C.__NFUN_466__(TexScrollEffect, WinWidth, WinHeight, 0.0000000, m_fYScrollEffect, float(TexScrollEffect.USize), float(TexScrollEffect.VSize));
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetPos(0.0000000, 0.0000000);
+	C.DrawTile(TexScrollEffect, WinWidth, WinHeight, 0.0000000, m_fYScrollEffect, float(TexScrollEffect.USize), float(TexScrollEffect.VSize));
 	return;
 }
 
@@ -66,7 +66,7 @@ function PaintCredits(Canvas C)
 	local bool bStopNextTime;
 
 	// End:0x29
-	if(__NFUN_114__(m_FirstItemOnScreen, none))
+	if((m_FirstItemOnScreen == none))
 	{
 		m_FirstItemOnScreen = Items.Next;
 		m_iScrollIndex = 0;		
@@ -74,17 +74,17 @@ function PaintCredits(Canvas C)
 	else
 	{
 		// End:0xB1
-		if(__NFUN_129__(m_bStopScroll))
+		if((!m_bStopScroll))
 		{
-			__NFUN_184__(m_fScrollIndex, __NFUN_171__(m_fDelta, m_fScrollSpeed));
-			__NFUN_162__(m_iScrollIndex, int(m_fScrollIndex));
+			(m_fScrollIndex += (m_fDelta * m_fScrollSpeed));
+			(m_iScrollIndex -= int(m_fScrollIndex));
 			// End:0x71
-			if(__NFUN_177__(m_fScrollIndex, float(m_iScrollStep)))
+			if((m_fScrollIndex > float(m_iScrollStep)))
 			{
 				m_fScrollIndex = 0.0000000;
 			}
 			// End:0xB1
-			if(__NFUN_177__(__NFUN_186__(float(m_iScrollIndex)), R6WindowListBoxCreditsItem(m_FirstItemOnScreen).m_fHeight))
+			if((Abs(float(m_iScrollIndex)) > R6WindowListBoxCreditsItem(m_FirstItemOnScreen).m_fHeight))
 			{
 				m_FirstItemOnScreen = m_FirstItemOnScreen.Next;
 				m_iScrollIndex = -1;
@@ -97,20 +97,20 @@ function PaintCredits(Canvas C)
 	J0xD9:
 
 	// End:0x193 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		DrawItem(C, CurItem, 0.0000000, y1, WinWidth, R6CurItem.m_fHeight);
-		y1 = __NFUN_174__(y1, R6CurItem.m_fHeight);
+		y1 = (y1 + R6CurItem.m_fHeight);
 		CurItem = CurItem.Next;
 		// End:0x159
-		if(__NFUN_132__(__NFUN_114__(CurItem, none), bStopNextTime))
+		if(((CurItem == none) || bStopNextTime))
 		{
 			// [Explicit Break]
 			goto J0x193;
 		}
 		R6CurItem = R6WindowListBoxCreditsItem(CurItem);
 		// End:0x190
-		if(__NFUN_177__(__NFUN_174__(y1, R6CurItem.m_fHeight), WinHeight))
+		if(((y1 + R6CurItem.m_fHeight) > WinHeight))
 		{
 			bStopNextTime = true;
 		}
@@ -129,10 +129,10 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 
 	pItem = R6WindowListBoxCreditsItem(Item);
 	// End:0x4C
-	if(__NFUN_129__(pItem.m_bConvertItemValue))
+	if((!pItem.m_bConvertItemValue))
 	{
 		// End:0x3B
-		if(__NFUN_129__(ConvertItemValue(C, pItem)))
+		if((!ConvertItemValue(C, pItem)))
 		{
 			return;
 		}
@@ -140,17 +140,17 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	}
 	C.Style = 5;
 	C.Font = pItem.m_Font;
-	C.__NFUN_2626__(pItem.m_TextColor.R, pItem.m_TextColor.G, pItem.m_TextColor.B, 225);
-	fXPos = __NFUN_174__(X, float(pItem.m_iXPosOffset));
-	fYPos = __NFUN_174__(Y, float(pItem.m_iYPosOffset));
+	C.SetDrawColor(pItem.m_TextColor.R, pItem.m_TextColor.G, pItem.m_TextColor.B, 225);
+	fXPos = (X + float(pItem.m_iXPosOffset));
+	fYPos = (Y + float(pItem.m_iYPosOffset));
 	ClipText(C, fXPos, fYPos, pItem.m_szName);
 	// End:0x1D9
 	if(pItem.m_bDrawALineUnderText)
 	{
 		TextSize(C, pItem.m_szName, fW, fH);
-		__NFUN_184__(fYPos, fH);
+		(fYPos += fH);
 		// End:0x1D9
-		if(__NFUN_130__(__NFUN_177__(fYPos, float(0)), __NFUN_176__(fYPos, WinHeight)))
+		if(((fYPos > float(0)) && (fYPos < WinHeight)))
 		{
 			DrawStretchedTextureSegment(C, fXPos, fYPos, fW, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 		}
@@ -164,7 +164,7 @@ function bool ConvertItemValue(Canvas C, out R6WindowListBoxCreditsItem _pItemTo
 	local float fTemp, fTextW, fTextH;
 
 	// End:0x0D
-	if(__NFUN_114__(_pItemToConvert, none))
+	if((_pItemToConvert == none))
 	{
 		return false;
 	}
@@ -192,10 +192,10 @@ function bool ConvertItemValue(Canvas C, out R6WindowListBoxCreditsItem _pItemTo
 	szTemp = _pItemToConvert.m_szName;
 	szTemp = TextSize(C, szTemp, fTextW, fTextH, int(WinWidth));
 	_pItemToConvert.m_szName = szTemp;
-	fTemp = __NFUN_172__(__NFUN_175__(WinWidth, fTextW), float(2));
-	_pItemToConvert.m_iXPosOffset = int(__NFUN_174__(fTemp, 0.5000000));
-	fTemp = __NFUN_172__(__NFUN_175__(_pItemToConvert.m_fHeight, fTextH), float(2));
-	_pItemToConvert.m_iYPosOffset = int(__NFUN_174__(fTemp, 0.5000000));
+	fTemp = ((WinWidth - fTextW) / float(2));
+	_pItemToConvert.m_iXPosOffset = int((fTemp + 0.5000000));
+	fTemp = ((_pItemToConvert.m_fHeight - fTextH) / float(2));
+	_pItemToConvert.m_iYPosOffset = int((fTemp + 0.5000000));
 	return true;
 	return;
 }

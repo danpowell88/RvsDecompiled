@@ -28,14 +28,14 @@ function BeforePaint(Canvas C, float X, float Y)
 
 	super.BeforePaint(C, X, Y);
 	// End:0x16B
-	if(__NFUN_123__(m_szMessage, ""))
+	if((m_szMessage != ""))
 	{
 		C.Font = Root.Fonts[0];
 		TextSize(C, m_szMessage, W, H);
 		// End:0xCB
-		if(__NFUN_154__(int(m_MessageAlignY), int(2)))
+		if((int(m_MessageAlignY) == int(2)))
 		{
-			m_fMessageY = __NFUN_174__(float(LookAndFeel.FrameT.H), __NFUN_172__(__NFUN_175__(__NFUN_175__(__NFUN_175__(WinHeight, float(LookAndFeel.FrameT.H)), float(LookAndFeel.FrameB.H)), H), float(2)));			
+			m_fMessageY = (float(LookAndFeel.FrameT.H) + ((((WinHeight - float(LookAndFeel.FrameT.H)) - float(LookAndFeel.FrameB.H)) - H) / float(2)));			
 		}
 		else
 		{
@@ -45,17 +45,17 @@ function BeforePaint(Canvas C, float X, float Y)
 		{
 			// End:0x117
 			case 0:
-				m_fMessageX = __NFUN_174__(float(LookAndFeel.FrameL.W), m_fMessageTab);
+				m_fMessageX = (float(LookAndFeel.FrameL.W) + m_fMessageTab);
 				// End:0x16B
 				break;
 			// End:0x148
 			case 1:
-				m_fMessageX = __NFUN_175__(__NFUN_175__(WinWidth, W), float(LookAndFeel.FrameL.W));
+				m_fMessageX = ((WinWidth - W) - float(LookAndFeel.FrameL.W));
 				// End:0x16B
 				break;
 			// End:0x168
 			case 2:
-				m_fMessageX = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
+				m_fMessageX = ((WinWidth - W) / float(2));
 				// End:0x16B
 				break;
 			// End:0xFFFF
@@ -73,11 +73,11 @@ function Paint(Canvas C, float X, float Y)
 {
 	super.Paint(C, X, Y);
 	// End:0x7E
-	if(__NFUN_123__(m_szMessage, ""))
+	if((m_szMessage != ""))
 	{
-		C.__NFUN_2626__(m_MessageColor.R, m_MessageColor.G, m_MessageColor.B);
+		C.SetDrawColor(m_MessageColor.R, m_MessageColor.G, m_MessageColor.B);
 		ClipText(C, m_fMessageX, m_fMessageY, m_szMessage, true);
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+		C.SetDrawColor(byte(255), byte(255), byte(255));
 	}
 	return;
 }

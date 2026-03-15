@@ -48,7 +48,7 @@ function InitObjectives()
 	local int Index;
 
 	// End:0x79
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		Index = m_missionMgr.m_aMissionObjectives.Length;
 		m_missionObjTimer = new (none) Class'R6Game.R6MObjTimer';
@@ -63,11 +63,11 @@ function InitObjectives()
 function bool AtCapacity(bool bSpectator)
 {
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return false;
 	}
-	return __NFUN_153__(NumPlayers, MaxPlayers);
+	return (NumPlayers >= MaxPlayers);
 	return;
 }
 
@@ -88,33 +88,33 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	local int _iPBEnabled;
 
 	// End:0x2F
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return super.Login(Portal, Options, Error);
 	}
-	__NFUN_231__(__NFUN_112__("Login: received string: ", Options));
+	Log(("Login: received string: " $ Options));
 	// End:0x94
 	if(AtCapacity(false))
 	{
 		Error = Localize("MPMiscMessages", "ServerIsFull", "R6GameInfo");
 		return none;
 	}
-	m_GameService.__NFUN_3560__();
-	InName = __NFUN_128__(ParseOption(Options, "Name"), 20);
+	m_GameService.NativeUpdateServer();
+	InName = Left(ParseOption(Options, "Name"), 20);
 	ReplaceText(InName, " ", "_");
 	ReplaceText(InName, "~", "_");
 	ReplaceText(InName, "?", "_");
 	ReplaceText(InName, ",", "_");
 	ReplaceText(InName, "#", "_");
 	ReplaceText(InName, "/", "_");
-	InName = __NFUN_238__(InName);
+	InName = RemoveInvalidChars(InName);
 	// End:0x162
-	if(__NFUN_122__(InName, "UbiPlayer"))
+	if((InName == "UbiPlayer"))
 	{
-		InName = __NFUN_128__(ParseOption(Options, "UserName"), 20);
+		InName = Left(ParseOption(Options, "UserName"), 20);
 	}
 	// End:0x19B
-	foreach __NFUN_313__(Class'R6Engine.R6PlayerController', P)
+	foreach DynamicActors(Class'R6Engine.R6PlayerController', P)
 	{
 		P.ClientMPMiscMessage("PlayerJoinedServer", InName);		
 	}	
@@ -123,14 +123,14 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	InChecksum = ParseOption(Options, "Checksum");
 	_iPBEnabled = GetIntOption(Options, "iPB", 0);
 	iSpawnPointNum = GetSpawnPointNum(Options);
-	__NFUN_231__(__NFUN_168__("Login:", InName));
+	Log(("Login:" @ InName));
 	CamSpot = Level.GetCamSpot(m_szGameTypeFlag);
 	// End:0x2DA
-	if(__NFUN_114__(CamSpot, none))
+	if((CamSpot == none))
 	{
 		StartSpot = GetAStartSpot();
 		// End:0x2A3
-		if(__NFUN_114__(StartSpot, none))
+		if((StartSpot == none))
 		{
 			Error = Localize("MPMiscMessages", "FailedPlaceMessage", "R6GameInfo");
 			return none;			
@@ -147,10 +147,10 @@ event PlayerController Login(string Portal, string Options, out string Error)
 		CamLoc = CamSpot.Location;
 		CamRot = CamSpot.Rotation;
 	}
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	bDelayedStart = true;
 	// End:0x36A
-	if(__NFUN_123__(pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn, ""))
+	if((pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn != ""))
 	{
 		PlayerControllerClass = Class<PlayerController>(DynamicLoadObject(pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn, Class'Core.Class'));		
 	}
@@ -159,53 +159,53 @@ event PlayerController Login(string Portal, string Options, out string Error)
 		PlayerControllerClass = Class<PlayerController>(DynamicLoadObject("R6Engine.R6PlayerController", Class'Core.Class'));
 	}
 	// End:0x40C
-	if(__NFUN_119__(PlayerControllerClass, none))
+	if((PlayerControllerClass != none))
 	{
-		NewPlayer = __NFUN_278__(PlayerControllerClass,,, CamLoc, CamRot);
+		NewPlayer = Spawn(PlayerControllerClass,,, CamLoc, CamRot);
 		NewPlayer.ClientSetLocation(CamLoc, CamRot);
 		NewPlayer.StartSpot = StartSpot;
 		NewPlayer.m_fLoginTime = Level.TimeSeconds;
 	}
 	// End:0x48C
-	if(__NFUN_114__(NewPlayer, none))
+	if((NewPlayer == none))
 	{
-		__NFUN_231__(__NFUN_112__("Couldn't spawn player controller of class ", string(PlayerControllerClass)));
+		Log(("Couldn't spawn player controller of class " $ string(PlayerControllerClass)));
 		Error = Localize("MPMiscMessages", "FailedSpawnMessage", "R6GameInfo");
 		return none;
 	}
 	// End:0x4A3
-	if(__NFUN_122__(InName, ""))
+	if((InName == ""))
 	{
 		InName = DefaultPlayerName;
 	}
 	// End:0x507
-	if(__NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_130__(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none), __NFUN_122__(NewPlayer.PlayerReplicationInfo.PlayerName, DefaultPlayerName))))
+	if(((int(Level.NetMode) != int(NM_Standalone)) || ((NewPlayer.PlayerReplicationInfo != none) && (NewPlayer.PlayerReplicationInfo.PlayerName == DefaultPlayerName))))
 	{
 		ChangeName(NewPlayer, InName, false, true);
 	}
 	NewPlayer.GameReplicationInfo = GameReplicationInfo;
 	// End:0x5BA
-	if(__NFUN_130__(IsBetweenRoundTimeOver(), __NFUN_123__(m_szGameTypeFlag, "RGM_NoRulesMode")))
+	if((IsBetweenRoundTimeOver() && (m_szGameTypeFlag != "RGM_NoRulesMode")))
 	{
 		// End:0x5AA
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__("In login for ", string(NewPlayer)), " m_bGameStarted==true sending it to dead state"));
+			Log((("In login for " $ string(NewPlayer)) $ " m_bGameStarted==true sending it to dead state"));
 			R6PlayerController(NewPlayer).LogSpecialValues();
 		}
-		NewPlayer.__NFUN_113__('Dead');
+		NewPlayer.GotoState('Dead');
 	}
 	// End:0x5D9
-	if(__NFUN_119__(StatLog, none))
+	if((StatLog != none))
 	{
 		StatLog.LogPlayerConnect(NewPlayer);
 	}
-	NewPlayer.ReceivedSecretChecksum = __NFUN_129__(__NFUN_124__(InChecksum, "NoChecksum"));
+	NewPlayer.ReceivedSecretChecksum = (!(InChecksum ~= "NoChecksum"));
 	// End:0x64C
-	if(__NFUN_119__(Viewport(NewPlayer.Player), none))
+	if((Viewport(NewPlayer.Player) != none))
 	{
 		// End:0x639
-		if(NewPlayer.__NFUN_1400__())
+		if(NewPlayer.IsPBClientEnabled())
 		{
 			NewPlayer.iPBEnabled = 1;			
 		}
@@ -218,19 +218,19 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	{
 		NewPlayer.iPBEnabled = _iPBEnabled;
 	}
-	__NFUN_165__(NumPlayers);
+	(NumPlayers++);
 	// End:0x6B5
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		BroadcastLocalizedMessage(GameMessageClass, 1, NewPlayer.PlayerReplicationInfo);
 	}
 	// End:0x6F4
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_122__(InClass, "")))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && (InClass == "")))
 	{
 		InClass = ParseOption(Options, "Class");
 	}
 	// End:0x724
-	if(__NFUN_123__(InClass, ""))
+	if((InClass != ""))
 	{
 		NewPlayer.PawnClass = Class<Pawn>(DynamicLoadObject(InClass, Class'Core.Class'));
 	}
@@ -240,7 +240,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 
 function bool IsBetweenRoundTimeOver()
 {
-	return __NFUN_132__(__NFUN_242__(m_bGameStarted, true), __NFUN_281__('PostBetweenRoundTime'));
+	return ((m_bGameStarted == true) || IsInState('PostBetweenRoundTime'));
 	return;
 }
 
@@ -250,27 +250,27 @@ event PostLogin(PlayerController NewPlayer)
 
 	super.PostLogin(NewPlayer);
 	// End:0x26
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return;
 	}
 	_NewPlayer = R6PlayerController(NewPlayer);
 	// End:0x43
-	if(__NFUN_114__(_NewPlayer, none))
+	if((_NewPlayer == none))
 	{
 		return;
 	}
 	// End:0xF1
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Viewport(_NewPlayer.Player), none), __NFUN_119__(_NewPlayer.Player.Console, none)), __NFUN_114__(_NewPlayer.m_GameService, none)))
+	if((((Viewport(_NewPlayer.Player) != none) && (_NewPlayer.Player.Console != none)) && (_NewPlayer.m_GameService == none)))
 	{
 		_NewPlayer.m_GameService = R6GSServers(_NewPlayer.Player.Console.SetGameServiceLinks(NewPlayer));
 		_NewPlayer.ServerSetUbiID(_NewPlayer.m_GameService.m_szUserID);
 	}
 	// End:0x176
-	if(__NFUN_181__(m_fEndVoteTime, float(0)))
+	if((m_fEndVoteTime != float(0)))
 	{
 		// End:0x148
-		if(__NFUN_119__(m_PlayerKick, none))
+		if((m_PlayerKick != none))
 		{
 			_NewPlayer.m_iVoteResult = _NewPlayer.3;
 			_NewPlayer.ClientKickVoteMessage(m_PlayerKick.PlayerReplicationInfo, m_VoteInstigatorName);			
@@ -287,13 +287,13 @@ event PostLogin(PlayerController NewPlayer)
 function ResetPlayerTeam(Controller aPlayer)
 {
 	// End:0x4A
-	if(__NFUN_114__(R6Pawn(aPlayer.Pawn), none))
+	if((R6Pawn(aPlayer.Pawn) == none))
 	{
 		RestartPlayer(aPlayer);
 		aPlayer.Pawn.PlayerReplicationInfo = aPlayer.PlayerReplicationInfo;
 	}
 	// End:0x6A
-	if(__NFUN_119__(PlayerController(aPlayer), none))
+	if((PlayerController(aPlayer) != none))
 	{
 		DeployRainbowTeam(PlayerController(aPlayer));
 	}
@@ -319,33 +319,33 @@ function ProcessAutoBalanceTeam()
 
 	_gameTypeTeamAdversarial = Level.IsGameTypeTeamAdversarial(m_szGameTypeFlag);
 	// End:0x29F
-	if(__NFUN_130__(m_bAutoBalance, _gameTypeTeamAdversarial))
+	if((m_bAutoBalance && _gameTypeTeamAdversarial))
 	{
 		GetNbHumanPlayerInTeam(iAlphaNb, iBravoNb);
 		// End:0x17A
-		if(__NFUN_151__(iAlphaNb, __NFUN_146__(iBravoNb, 1)))
+		if((iAlphaNb > (iBravoNb + 1)))
 		{
 			// End:0x7C
 			if(bShowLog)
 			{
-				__NFUN_231__("AutoBalance: Green to Red Team");
+				Log("AutoBalance: Green to Red Team");
 			}
 			P = Level.ControllerList;
 			J0x90:
 
 			// End:0x177 [Loop If]
-			if(__NFUN_130__(__NFUN_119__(P, none), __NFUN_151__(iAlphaNb, __NFUN_146__(iBravoNb, 1))))
+			if(((P != none) && (iAlphaNb > (iBravoNb + 1))))
 			{
 				// End:0x160
-				if(__NFUN_130__(__NFUN_130__(P.__NFUN_303__('R6PlayerController'), __NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2))), CanAutoBalancePlayer(R6PlayerController(P))))
+				if(((P.IsA('R6PlayerController') && (int(R6PlayerController(P).m_TeamSelection) == int(2))) && CanAutoBalancePlayer(R6PlayerController(P))))
 				{
 					// End:0x13B
 					if(bShowLog)
 					{
-						__NFUN_231__(__NFUN_112__(__NFUN_112__("AutoBalance: ", P.PlayerReplicationInfo.PlayerName), " to Red Team"));
+						Log((("AutoBalance: " $ P.PlayerReplicationInfo.PlayerName) $ " to Red Team"));
 					}
-					__NFUN_166__(iAlphaNb);
-					__NFUN_165__(iBravoNb);
+					(iAlphaNb--);
+					(iBravoNb++);
 					R6PlayerController(P).ServerTeamRequested(3, true);
 				}
 				P = P.nextController;
@@ -356,7 +356,7 @@ function ProcessAutoBalanceTeam()
 		else
 		{
 			// End:0x29F
-			if(__NFUN_151__(iBravoNb, __NFUN_146__(iAlphaNb, 1)))
+			if((iBravoNb > (iAlphaNb + 1)))
 			{
 				// End:0x1B7
 				if(bShowLog)

@@ -29,12 +29,12 @@ simulated function SetRainbowFaceTexture()
 		SetFemaleParameters();
 		Skins[1] = Texture(DynamicLoadObject("R6Characters_t.Rainbow.R6RPilotHeadF", Class'Engine.Texture'));
 		// End:0x6C
-		if(__NFUN_119__(m_Helmet, none))
+		if((m_Helmet != none))
 		{
 			m_Helmet.DrawScale = 1.0000000;
 		}
 		// End:0x8B
-		if(__NFUN_119__(m_NightVision, none))
+		if((m_NightVision != none))
 		{
 			m_NightVision.DrawScale = 1.1000000;
 		}

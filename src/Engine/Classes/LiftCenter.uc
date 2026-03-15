@@ -22,10 +22,10 @@ var Vector LiftOffset;  // starting vector between MyLift location and LiftCente
 function PostBeginPlay()
 {
 	// End:0x29
-	if(__NFUN_255__(LiftTrigger, 'None'))
+	if((LiftTrigger != 'None'))
 	{
 		// End:0x28
-		foreach __NFUN_313__(Class'Engine.Trigger', RecommendedTrigger, LiftTrigger)
+		foreach DynamicActors(Class'Engine.Trigger', RecommendedTrigger, LiftTrigger)
 		{
 			// End:0x28
 			break;			
@@ -38,15 +38,15 @@ function PostBeginPlay()
 function Actor SpecialHandling(Pawn Other)
 {
 	// End:0x0D
-	if(__NFUN_114__(MyLift, none))
+	if((MyLift == none))
 	{
 		return self;
 	}
 	// End:0x4B
-	if(__NFUN_129__(MyLift.__NFUN_281__('StandOpenTimed')))
+	if((!MyLift.IsInState('StandOpenTimed')))
 	{
 		// End:0x48
-		if(__NFUN_130__(MyLift.bClosed, __NFUN_119__(RecommendedTrigger, none)))
+		if((MyLift.bClosed && (RecommendedTrigger != none)))
 		{
 			return RecommendedTrigger;
 		}		
@@ -54,7 +54,7 @@ function Actor SpecialHandling(Pawn Other)
 	else
 	{
 		// End:0x7C
-		if(__NFUN_130__(__NFUN_154__(int(MyLift.BumpType), int(0)), __NFUN_129__(Other.IsPlayerPawn())))
+		if(((int(MyLift.BumpType) == int(0)) && (!Other.IsPlayerPawn())))
 		{
 			return none;
 		}
@@ -66,11 +66,11 @@ function Actor SpecialHandling(Pawn Other)
 function bool SuggestMovePreparation(Pawn Other)
 {
 	// End:0x1A
-	if(__NFUN_114__(Other.Base, MyLift))
+	if((Other.Base == MyLift))
 	{
 		return false;
 	}
-	__NFUN_267__(__NFUN_215__(MyLift.Location, LiftOffset));
+	__NFUN_267__((MyLift.Location + LiftOffset)) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	__NFUN_298__(MyLift);
 	// End:0x7D
 	if(__NFUN_132__(MyLift.bInterpolating, __NFUN_129__(ProceedWithMove(Other))))

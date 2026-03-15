@@ -32,7 +32,7 @@ function BeforePaint(Canvas C, float X, float Y)
 
 	C.Font = Root.Fonts[Font];
 	TextSize(C, Text, W, H);
-	TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
+	TextY = ((WinHeight - H) / float(2));
 	switch(Align)
 	{
 		// End:0x65
@@ -41,12 +41,12 @@ function BeforePaint(Canvas C, float X, float Y)
 			break;
 		// End:0x85
 		case 2:
-			TextX = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
+			TextX = ((WinWidth - W) / float(2));
 			// End:0xA2
 			break;
 		// End:0x9F
 		case 1:
-			TextX = __NFUN_175__(WinWidth, W);
+			TextX = (WinWidth - W);
 			// End:0xA2
 			break;
 		// End:0xFFFF

@@ -18,7 +18,7 @@ var R6WindowArea m_Area;
 function SetFront()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_Area, none))
+	if((m_Area != none))
 	{
 		m_Area.BringToFront();
 	}
@@ -28,7 +28,7 @@ function SetFront()
 function SetBack()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_Area, none))
+	if((m_Area != none))
 	{
 		m_Area.SendToBack();
 	}

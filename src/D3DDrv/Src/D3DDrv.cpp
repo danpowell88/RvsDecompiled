@@ -987,7 +987,7 @@ INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTra
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10009a30: retail reads HBINK from Canvas+0x80 (not a global) and zeroes Canvas+0x80 and Canvas+0x84 after BinkClose; our version uses GBinkHandle/GBinkTexture globals")
+IMPL_DIVERGE("binkw32 proprietary API: Ghidra 0x10009a30 (46b) — retail reads HBINK from Canvas+0x80 and zeroes Canvas+0x80/+0x84; our version uses GBinkHandle/GBinkTexture globals instead of Canvas fields")
 void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 {
 	guard(UD3DRenderDevice::CloseVideo);
@@ -1008,7 +1008,7 @@ void UD3DRenderDevice::CloseVideo(UCanvas* Canvas)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1000c6f0: retail reads Canvas+0x80/Canvas+0x84 for Bink handle/texture; our version uses globals. Frame decode path matches structurally.")
+IMPL_DIVERGE("binkw32 proprietary API: Ghidra 0x1000c6f0 (402b) — retail reads HBINK from Canvas+0x80, locks IDirect3DTexture8 surface via vtable, calls _BinkDX8SurfaceType_4 and _BinkCopyToBuffer_28; our version uses globals and simplified surface lock")
 void UD3DRenderDevice::DisplayVideo(UCanvas* Canvas, void* Frame, INT Flags)
 {
 	guard(UD3DRenderDevice::DisplayVideo);

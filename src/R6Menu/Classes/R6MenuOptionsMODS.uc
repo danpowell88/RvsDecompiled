@@ -13,8 +13,8 @@ function InitPageOptions()
 	local float fXOffset, fYOffset;
 
 	m_pInfo = new (none) Class'UWindow.UWindowInfo';
-	m_pInfo.__NFUN_1010__();
-	m_pListOfMods = R6WindowListMODS(CreateWindow(Class'R6Window.R6WindowListMODS', 0.0000000, 0.0000000, WinWidth, __NFUN_175__(WinHeight, float(14))));
+	m_pInfo.LoadConfig();
+	m_pListOfMods = R6WindowListMODS(CreateWindow(Class'R6Window.R6WindowListMODS', 0.0000000, 0.0000000, WinWidth, (WinHeight - float(14))));
 	m_pListOfMods.ListClass = Class'R6Window.R6WindowListBoxItem';
 	m_pListOfMods.m_Font = Root.Fonts[6];
 	m_pListOfMods.Register(self);
@@ -37,22 +37,22 @@ function SetMenuMODS()
 	local R6Mod pTempMod;
 	local string szInstallStatus;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	m_pListOfMods.Items.Clear();
 	i = 0;
 	J0x31:
 
 	// End:0x1F9 [Loop If]
-	if(__NFUN_150__(i, m_pInfo.m_AModsInfo.Length))
+	if((i < m_pInfo.m_AModsInfo.Length))
 	{
 		NewItem = R6WindowListBoxItem(m_pListOfMods.Items.Append(m_pListOfMods.ListClass));
 		NewItem.SetItemParameters(0, Localize(m_pInfo.m_AModsInfo[i], "ModName", "R6Mod", true), Root.Fonts[5], 5.0000000, 2.0000000, WinWidth, 15.0000000, 0, 0);
 		szInstallStatus = Localize("MISC", "NotInstalled", "R6Mod");
 		m_pListOfMods.SetItemState(NewItem, m_pListOfMods.1, true);
-		NewItem.SetItemParameters(1, szInstallStatus, Root.Fonts[5], __NFUN_175__(WinWidth, float(5)), 2.0000000, WinWidth, 15.0000000, 0, 1);
+		NewItem.SetItemParameters(1, szInstallStatus, Root.Fonts[5], (WinWidth - float(5)), 2.0000000, WinWidth, 15.0000000, 0, 1);
 		NewItem.SetItemParameters(2, Localize(m_pInfo.m_AModsInfo[i], "ModInfo", "R6Mod", true), Root.Fonts[5], 5.0000000, 0.0000000, WinWidth, 15.0000000, 1, 0);
 		NewItem.HelpText = m_pInfo.m_AModsInfo[i];
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x31;
 	}
@@ -60,12 +60,12 @@ function SetMenuMODS()
 	J0x200:
 
 	// End:0x48B [Loop If]
-	if(__NFUN_150__(i, pModManager.GetNbMods()))
+	if((i < pModManager.GetNbMods()))
 	{
 		pTempMod = pModManager.m_aMods[i];
 		NewItem = R6WindowListBoxItem(m_pListOfMods.FindItemWithName(pTempMod.m_szKeyWord));
 		// End:0x297
-		if(__NFUN_114__(NewItem, none))
+		if((NewItem == none))
 		{
 			NewItem = R6WindowListBoxItem(m_pListOfMods.Items.Append(m_pListOfMods.ListClass));
 		}
@@ -76,7 +76,7 @@ function SetMenuMODS()
 			szInstallStatus = Localize("MISC", "Installed", "R6Mod");
 			m_pListOfMods.SetItemState(NewItem, m_pListOfMods.1, false);
 			// End:0x373
-			if(__NFUN_114__(pTempMod, pModManager.m_pCurrentMod))
+			if((pTempMod == pModManager.m_pCurrentMod))
 			{
 				m_pListOfMods.SetItemState(NewItem, m_pListOfMods.3, true);				
 			}
@@ -90,10 +90,10 @@ function SetMenuMODS()
 			szInstallStatus = Localize("MISC", "VersionMM", "R6Mod");
 			m_pListOfMods.SetItemState(NewItem, m_pListOfMods.1, true);
 		}
-		NewItem.SetItemParameters(1, szInstallStatus, Root.Fonts[5], __NFUN_175__(WinWidth, float(5)), 2.0000000, WinWidth, 15.0000000, 0, 1);
+		NewItem.SetItemParameters(1, szInstallStatus, Root.Fonts[5], (WinWidth - float(5)), 2.0000000, WinWidth, 15.0000000, 0, 1);
 		NewItem.SetItemParameters(2, pTempMod.m_szModInfo, Root.Fonts[5], 5.0000000, 0.0000000, WinWidth, 15.0000000, 1, 0);
 		NewItem.HelpText = pTempMod.m_szKeyWord;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x200;
 	}
@@ -103,13 +103,13 @@ function SetMenuMODS()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x43
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x40
-		if(C.__NFUN_303__('R6WindowButton'))
+		if(C.IsA('R6WindowButton'))
 		{
 			// End:0x40
-			if(__NFUN_114__(C, m_pGeneralButUse))
+			if((C == m_pGeneralButUse))
 			{
 				m_pListOfMods.ActivateMOD();
 			}
@@ -118,10 +118,10 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x6F
-		if(__NFUN_154__(int(E), 11))
+		if((int(E) == 11))
 		{
 			// End:0x6F
-			if(__NFUN_114__(C, m_pListOfMods))
+			if((C == m_pListOfMods))
 			{
 				m_pListOfMods.ActivateMOD();
 			}

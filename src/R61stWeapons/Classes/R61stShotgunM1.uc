@@ -15,9 +15,9 @@ function PostBeginPlay()
 	LinkSkelAnim(MeshAnimation'R61stShotgun_UKX.R61stShotgunM1A');
 	super.PostBeginPlay();
 	// End:0x2A
-	if(__NFUN_114__(m_smGun, none))
+	if((m_smGun == none))
 	{
-		m_smGun = __NFUN_278__(Class'R61stWeapons.R61stWeaponStaticMesh');
+		m_smGun = Spawn(Class'R61stWeapons.R61stWeaponStaticMesh');
 	}
 	m_smGun.SetStaticMesh(StaticMesh'R61stWeapons_SM.Shotguns.R61stShotgunM1Frame');
 	AttachToBone(m_smGun, 'TagFrame');

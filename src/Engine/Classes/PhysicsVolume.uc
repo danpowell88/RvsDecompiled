@@ -55,14 +55,14 @@ simulated function PostBeginPlay()
 	super.PostBeginPlay();
 	Level.AddPhysicsVolume(self);
 	// End:0x28
-	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	if((int(Role) < int(ROLE_Authority)))
 	{
 		return;
 	}
 	// End:0x40
 	if(bPainCausing)
 	{
-		PainTimer = __NFUN_278__(Class'Engine.VolumeTimer', self);
+		PainTimer = Spawn(Class'Engine.VolumeTimer', self);
 	}
 	return;
 }
@@ -107,10 +107,10 @@ function TimerPop(VolumeTimer t)
 	local Actor A;
 
 	// End:0x1C
-	if(__NFUN_114__(t, PainTimer))
+	if((t == PainTimer))
 	{
 		// End:0x1C
-		if(__NFUN_129__(bPainCausing))
+		if((!bPainCausing))
 		{
 			return;
 		}
@@ -121,13 +121,13 @@ function TimerPop(VolumeTimer t)
 function Trigger(Actor Other, Pawn EventInstigator)
 {
 	// End:0x41
-	if(__NFUN_181__(DamagePerSec, float(0)))
+	if((DamagePerSec != float(0)))
 	{
-		bPainCausing = __NFUN_129__(bPainCausing);
+		bPainCausing = (!bPainCausing);
 		// End:0x41
-		if(__NFUN_130__(bPainCausing, __NFUN_114__(PainTimer, none)))
+		if((bPainCausing && (PainTimer == none)))
 		{
-			PainTimer = __NFUN_278__(Class'Engine.VolumeTimer', self);
+			PainTimer = Spawn(Class'Engine.VolumeTimer', self);
 		}
 	}
 	return;
@@ -137,26 +137,26 @@ event Touch(Actor Other)
 {
 	super(Actor).Touch(Other);
 	// End:0x56
-	if(__NFUN_130__(__NFUN_130__(bNoInventory, Other.__NFUN_303__('Inventory')), __NFUN_114__(Other.Owner, none)))
+	if(((bNoInventory && Other.IsA('Inventory')) && (Other.Owner == none)))
 	{
 		Other.LifeSpan = 1.5000000;
 		return;
 	}
 	// End:0xFB
-	if(__NFUN_130__(bMoveProjectiles, __NFUN_218__(ZoneVelocity, vect(0.0000000, 0.0000000, 0.0000000))))
+	if((bMoveProjectiles && (ZoneVelocity != vect(0.0000000, 0.0000000, 0.0000000))))
 	{
 		// End:0xA9
-		if(__NFUN_154__(int(Other.Physics), int(6)))
+		if((int(Other.Physics) == int(6)))
 		{
-			__NFUN_223__(Other.Velocity, ZoneVelocity);			
+			(Other.Velocity += ZoneVelocity);			
 		}
 		else
 		{
 			// End:0xFB
-			if(__NFUN_130__(Other.__NFUN_303__('Effects'), __NFUN_154__(int(Other.Physics), int(0))))
+			if((Other.IsA('Effects') && (int(Other.Physics) == int(0))))
 			{
-				Other.__NFUN_3970__(6);
-				__NFUN_223__(Other.Velocity, ZoneVelocity);
+				Other.SetPhysics(6);
+				(Other.Velocity += ZoneVelocity);
 			}
 		}
 	}
@@ -166,12 +166,12 @@ event Touch(Actor Other)
 		// End:0x124
 		if(Other.bDestroyInPainVolume)
 		{
-			Other.__NFUN_279__();
+			Other.Destroy();
 			return;
 		}
 	}
 	// End:0x14C
-	if(__NFUN_130__(bWaterVolume, Other.CanSplash()))
+	if((bWaterVolume && Other.CanSplash()))
 	{
 		PlayEntrySplash(Other);
 	}
@@ -183,22 +183,22 @@ function PlayEntrySplash(Actor Other)
 	local float SplashSize;
 	local Actor splash;
 
-	SplashSize = __NFUN_246__(__NFUN_171__(__NFUN_171__(0.0000300, Other.Mass), __NFUN_175__(float(250), __NFUN_171__(0.5000000, __NFUN_245__(-600.0000000, Other.Velocity.Z)))), 0.1000000, 1.0000000);
+	SplashSize = FClamp(((0.0000300 * Other.Mass) * (float(250) - (0.5000000 * FMax(-600.0000000, Other.Velocity.Z)))), 0.1000000, 1.0000000);
 	// End:0x77
-	if(__NFUN_119__(EntrySound, none))
+	if((EntrySound != none))
 	{
 		// End:0x77
-		if(__NFUN_119__(Other.Instigator, none))
+		if((Other.Instigator != none))
 		{
-			__NFUN_512__(SplashSize);
+			MakeNoise(SplashSize);
 		}
 	}
 	// End:0xAF
-	if(__NFUN_119__(EntryActor, none))
+	if((EntryActor != none))
 	{
-		splash = __NFUN_278__(EntryActor);
+		splash = Spawn(EntryActor);
 		// End:0xAF
-		if(__NFUN_119__(splash, none))
+		if((splash != none))
 		{
 			splash.SetDrawScale(SplashSize);
 		}
@@ -209,7 +209,7 @@ function PlayEntrySplash(Actor Other)
 event UnTouch(Actor Other)
 {
 	// End:0x28
-	if(__NFUN_130__(bWaterVolume, Other.CanSplash()))
+	if((bWaterVolume && Other.CanSplash()))
 	{
 		PlayExitSplash(Other);
 	}
@@ -221,13 +221,13 @@ function PlayExitSplash(Actor Other)
 	local float SplashSize;
 	local Actor splash;
 
-	SplashSize = __NFUN_246__(__NFUN_171__(0.0030000, Other.Mass), 0.1000000, 1.0000000);
+	SplashSize = FClamp((0.0030000 * Other.Mass), 0.1000000, 1.0000000);
 	// End:0x5F
-	if(__NFUN_119__(ExitActor, none))
+	if((ExitActor != none))
 	{
-		splash = __NFUN_278__(ExitActor);
+		splash = Spawn(ExitActor);
 		// End:0x5F
-		if(__NFUN_119__(splash, none))
+		if((splash != none))
 		{
 			splash.SetDrawScale(SplashSize);
 		}

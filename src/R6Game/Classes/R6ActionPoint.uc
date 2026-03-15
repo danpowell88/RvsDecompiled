@@ -45,13 +45,13 @@ function InitMyPathFlag()
 	local R6PathFlag pPrevFlag;
 
 	// End:0x87
-	if(__NFUN_114__(m_pMyPathFlag, none))
+	if((m_pMyPathFlag == none))
 	{
-		m_pMyPathFlag = __NFUN_278__(Class'R6Game.R6PathFlag', self,, Location);
+		m_pMyPathFlag = Spawn(Class'R6Game.R6PathFlag', self,, Location);
 		// End:0x5F
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("-->PathFlag spawned at Location ", string(m_pMyPathFlag.Location)));
+			Log(("-->PathFlag spawned at Location " $ string(m_pMyPathFlag.Location)));
 		}
 		m_pMyPathFlag.m_iPlanningFloor_0 = m_iPlanningFloor_0;
 		m_pMyPathFlag.m_iPlanningFloor_1 = m_iPlanningFloor_1;
@@ -69,7 +69,7 @@ function DrawPath(bool bDisplayInfo)
 	local float fDashSize;
 
 	// End:0x0E
-	if(__NFUN_242__(bHidden, true))
+	if((bHidden == true))
 	{
 		return;
 	}
@@ -95,12 +95,12 @@ function DrawPath(bool bDisplayInfo)
 			break;
 	}
 	// End:0xAC
-	if(__NFUN_154__(prevActionPoint.m_PathToNextPoint.Length, 0))
+	if((prevActionPoint.m_PathToNextPoint.Length == 0))
 	{
 		// End:0xA9
 		if(CanIDrawLine(prevActionPoint, self, m_pPlanningCtrl.m_iLevelDisplay, bDisplayInfo))
 		{
-			__NFUN_2608__(prevActionPoint.Location, Location, m_CurrentColor, fDashSize);
+			DrawDashedLine(prevActionPoint.Location, Location, m_CurrentColor, fDashSize);
 		}		
 	}
 	else
@@ -108,27 +108,27 @@ function DrawPath(bool bDisplayInfo)
 		// End:0x112
 		if(CanIDrawLine(prevActionPoint, prevActionPoint.m_PathToNextPoint[0], m_pPlanningCtrl.m_iLevelDisplay, bDisplayInfo))
 		{
-			__NFUN_2608__(prevActionPoint.Location, prevActionPoint.m_PathToNextPoint[0].Location, m_CurrentColor, fDashSize);
+			DrawDashedLine(prevActionPoint.Location, prevActionPoint.m_PathToNextPoint[0].Location, m_CurrentColor, fDashSize);
 		}
 		iCurrentPoint = 0;
 		J0x119:
 
 		// End:0x1D1 [Loop If]
-		if(__NFUN_150__(iCurrentPoint, __NFUN_147__(prevActionPoint.m_PathToNextPoint.Length, 1)))
+		if((iCurrentPoint < (prevActionPoint.m_PathToNextPoint.Length - 1)))
 		{
 			// End:0x1C7
-			if(CanIDrawLine(prevActionPoint.m_PathToNextPoint[iCurrentPoint], prevActionPoint.m_PathToNextPoint[__NFUN_146__(iCurrentPoint, 1)], m_pPlanningCtrl.m_iLevelDisplay, bDisplayInfo))
+			if(CanIDrawLine(prevActionPoint.m_PathToNextPoint[iCurrentPoint], prevActionPoint.m_PathToNextPoint[(iCurrentPoint + 1)], m_pPlanningCtrl.m_iLevelDisplay, bDisplayInfo))
 			{
-				__NFUN_2608__(prevActionPoint.m_PathToNextPoint[iCurrentPoint].Location, prevActionPoint.m_PathToNextPoint[__NFUN_146__(iCurrentPoint, 1)].Location, m_CurrentColor, fDashSize);
+				DrawDashedLine(prevActionPoint.m_PathToNextPoint[iCurrentPoint].Location, prevActionPoint.m_PathToNextPoint[(iCurrentPoint + 1)].Location, m_CurrentColor, fDashSize);
 			}
-			__NFUN_165__(iCurrentPoint);
+			(iCurrentPoint++);
 			// [Loop Continue]
 			goto J0x119;
 		}
 		// End:0x232
 		if(CanIDrawLine(prevActionPoint.m_PathToNextPoint[iCurrentPoint], self, m_pPlanningCtrl.m_iLevelDisplay, bDisplayInfo))
 		{
-			__NFUN_2608__(prevActionPoint.m_PathToNextPoint[iCurrentPoint].Location, Location, m_CurrentColor, fDashSize);
+			DrawDashedLine(prevActionPoint.m_PathToNextPoint[iCurrentPoint].Location, Location, m_CurrentColor, fDashSize);
 		}
 	}
 	return;
@@ -143,16 +143,16 @@ function bool CanIDrawLine(Actor FromPoint, Actor ToPoint, int iDisplayingFloor,
 	// End:0xC1
 	if(bDisplayInfo)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Displaying line from ", string(FromPoint)), " To :"), string(ToPoint)), " : "), string(FromPoint.m_iPlanningFloor_0)), " : "), string(FromPoint.m_iPlanningFloor_1)), " : "), string(ToPoint.m_iPlanningFloor_0)), " : "), string(ToPoint.m_iPlanningFloor_1)));
+		Log(((((((((((("Displaying line from " $ string(FromPoint)) $ " To :") $ string(ToPoint)) $ " : ") $ string(FromPoint.m_iPlanningFloor_0)) $ " : ") $ string(FromPoint.m_iPlanningFloor_1)) $ " : ") $ string(ToPoint.m_iPlanningFloor_0)) $ " : ") $ string(ToPoint.m_iPlanningFloor_1)));
 	}
 	// End:0x1CD
-	if(__NFUN_130__(__NFUN_119__(StairsFromPoint, none), __NFUN_119__(StairsToPoint, none)))
+	if(((StairsFromPoint != none) && (StairsToPoint != none)))
 	{
 		// End:0x163
-		if(__NFUN_242__(StairsFromPoint.m_bIsTopOfStairs, StairsToPoint.m_bIsTopOfStairs))
+		if((StairsFromPoint.m_bIsTopOfStairs == StairsToPoint.m_bIsTopOfStairs))
 		{
 			// End:0x15E
-			if(__NFUN_132__(__NFUN_130__(__NFUN_242__(StairsFromPoint.m_bIsTopOfStairs, true), __NFUN_155__(FromPoint.m_iPlanningFloor_1, iDisplayingFloor)), __NFUN_130__(__NFUN_242__(StairsFromPoint.m_bIsTopOfStairs, false), __NFUN_155__(FromPoint.m_iPlanningFloor_0, iDisplayingFloor))))
+			if((((StairsFromPoint.m_bIsTopOfStairs == true) && (FromPoint.m_iPlanningFloor_1 != iDisplayingFloor)) || ((StairsFromPoint.m_bIsTopOfStairs == false) && (FromPoint.m_iPlanningFloor_0 != iDisplayingFloor))))
 			{
 				return false;
 			}
@@ -161,7 +161,7 @@ function bool CanIDrawLine(Actor FromPoint, Actor ToPoint, int iDisplayingFloor,
 		else
 		{
 			// End:0x1CB
-			if(__NFUN_130__(__NFUN_132__(__NFUN_154__(ToPoint.m_iPlanningFloor_0, iDisplayingFloor), __NFUN_154__(ToPoint.m_iPlanningFloor_1, iDisplayingFloor)), __NFUN_132__(__NFUN_154__(FromPoint.m_iPlanningFloor_0, iDisplayingFloor), __NFUN_154__(FromPoint.m_iPlanningFloor_1, iDisplayingFloor))))
+			if((((ToPoint.m_iPlanningFloor_0 == iDisplayingFloor) || (ToPoint.m_iPlanningFloor_1 == iDisplayingFloor)) && ((FromPoint.m_iPlanningFloor_0 == iDisplayingFloor) || (FromPoint.m_iPlanningFloor_1 == iDisplayingFloor))))
 			{
 				return true;
 			}
@@ -169,13 +169,13 @@ function bool CanIDrawLine(Actor FromPoint, Actor ToPoint, int iDisplayingFloor,
 		}
 	}
 	// End:0x25D
-	if(__NFUN_132__(__NFUN_119__(StairsFromPoint, none), __NFUN_119__(StairsToPoint, none)))
+	if(((StairsFromPoint != none) || (StairsToPoint != none)))
 	{
 		// End:0x227
-		if(__NFUN_119__(StairsFromPoint, none))
+		if((StairsFromPoint != none))
 		{
 			// End:0x224
-			if(__NFUN_132__(__NFUN_154__(ToPoint.m_iPlanningFloor_0, iDisplayingFloor), __NFUN_154__(ToPoint.m_iPlanningFloor_1, iDisplayingFloor)))
+			if(((ToPoint.m_iPlanningFloor_0 == iDisplayingFloor) || (ToPoint.m_iPlanningFloor_1 == iDisplayingFloor)))
 			{
 				return true;
 			}			
@@ -183,7 +183,7 @@ function bool CanIDrawLine(Actor FromPoint, Actor ToPoint, int iDisplayingFloor,
 		else
 		{
 			// End:0x25B
-			if(__NFUN_132__(__NFUN_154__(FromPoint.m_iPlanningFloor_0, iDisplayingFloor), __NFUN_154__(FromPoint.m_iPlanningFloor_1, iDisplayingFloor)))
+			if(((FromPoint.m_iPlanningFloor_0 == iDisplayingFloor) || (FromPoint.m_iPlanningFloor_1 == iDisplayingFloor)))
 			{
 				return true;
 			}
@@ -191,12 +191,12 @@ function bool CanIDrawLine(Actor FromPoint, Actor ToPoint, int iDisplayingFloor,
 		return false;
 	}
 	// End:0x291
-	if(__NFUN_130__(__NFUN_154__(FromPoint.m_iPlanningFloor_0, iDisplayingFloor), __NFUN_154__(FromPoint.m_iPlanningFloor_1, iDisplayingFloor)))
+	if(((FromPoint.m_iPlanningFloor_0 == iDisplayingFloor) && (FromPoint.m_iPlanningFloor_1 == iDisplayingFloor)))
 	{
 		return true;
 	}
 	// End:0x2F9
-	if(__NFUN_132__(__NFUN_130__(__NFUN_152__(FromPoint.m_iPlanningFloor_0, iDisplayingFloor), __NFUN_153__(FromPoint.m_iPlanningFloor_1, iDisplayingFloor)), __NFUN_130__(__NFUN_152__(ToPoint.m_iPlanningFloor_0, iDisplayingFloor), __NFUN_153__(ToPoint.m_iPlanningFloor_1, iDisplayingFloor))))
+	if((((FromPoint.m_iPlanningFloor_0 <= iDisplayingFloor) && (FromPoint.m_iPlanningFloor_1 >= iDisplayingFloor)) || ((ToPoint.m_iPlanningFloor_0 <= iDisplayingFloor) && (ToPoint.m_iPlanningFloor_1 >= iDisplayingFloor))))
 	{
 		return true;
 	}
@@ -209,13 +209,13 @@ function ChangeActionType(Object.EPlanActionType eNewType)
 	local bool bDoIReset;
 
 	// End:0x2A
-	if(__NFUN_132__(__NFUN_154__(int(m_eActionType), int(1)), __NFUN_154__(int(eNewType), int(1))))
+	if(((int(m_eActionType) == int(1)) || (int(eNewType) == int(1))))
 	{
 		bDoIReset = true;
 	}
 	m_eActionType = eNewType;
 	// End:0x71
-	if(__NFUN_154__(int(m_eActionType), int(0)))
+	if((int(m_eActionType) == int(0)))
 	{
 		m_pCurrentTexture = default.m_pCurrentTexture;
 		m_pSelected = default.m_pSelected;
@@ -225,10 +225,10 @@ function ChangeActionType(Object.EPlanActionType eNewType)
 	else
 	{
 		// End:0xB9
-		if(__NFUN_154__(int(m_eActionType), int(1)))
+		if((int(m_eActionType) == int(1)))
 		{
 			// End:0x9B
-			if(__NFUN_119__(m_pPlanningCtrl, none))
+			if((m_pPlanningCtrl != none))
 			{
 				m_pPlanningCtrl.ResetIDs();
 			}
@@ -239,7 +239,7 @@ function ChangeActionType(Object.EPlanActionType eNewType)
 		else
 		{
 			// End:0xDE
-			if(__NFUN_119__(m_pPlanningCtrl, none))
+			if((m_pPlanningCtrl != none))
 			{
 				m_pCurrentTexture = m_pPlanningCtrl.GetActionTypeTexture(m_eActionType);
 			}
@@ -249,7 +249,7 @@ function ChangeActionType(Object.EPlanActionType eNewType)
 		}
 	}
 	// End:0x121
-	if(__NFUN_130__(bDoIReset, __NFUN_119__(m_pPlanningCtrl, none)))
+	if((bDoIReset && (m_pPlanningCtrl != none)))
 	{
 		m_pPlanningCtrl.ResetIDs();
 	}
@@ -261,9 +261,9 @@ function SetPointAction(Object.EPlanAction eAction, optional bool bLoading)
 {
 	m_eAction = eAction;
 	// End:0x29
-	if(__NFUN_119__(m_pActionIcon, none))
+	if((m_pActionIcon != none))
 	{
-		m_pActionIcon.__NFUN_279__();
+		m_pActionIcon.Destroy();
 		m_pActionIcon = none;
 	}
 	// End:0x38
@@ -272,12 +272,12 @@ function SetPointAction(Object.EPlanAction eAction, optional bool bLoading)
 		FindDoor();
 	}
 	// End:0xAA
-	if(__NFUN_154__(int(eAction), int(1)))
+	if((int(eAction) == int(1)))
 	{
 		// End:0x9C
-		if(__NFUN_242__(bLoading, false))
+		if((bLoading == false))
 		{
-			m_pActionIcon = __NFUN_278__(Class'R6Game.R6PlanningRangeFragGrenade', self,, Location);
+			m_pActionIcon = Spawn(Class'R6Game.R6PlanningRangeFragGrenade', self,, Location);
 			m_pActionIcon.m_iPlanningFloor_0 = m_iPlanningFloor_0;
 			m_pActionIcon.m_iPlanningFloor_1 = m_iPlanningFloor_1;
 			bHidden = true;			
@@ -290,12 +290,12 @@ function SetPointAction(Object.EPlanAction eAction, optional bool bLoading)
 	else
 	{
 		// End:0x140
-		if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eAction), int(2)), __NFUN_154__(int(eAction), int(3))), __NFUN_154__(int(eAction), int(4))))
+		if((((int(eAction) == int(2)) || (int(eAction) == int(3))) || (int(eAction) == int(4))))
 		{
 			// End:0x132
-			if(__NFUN_242__(bLoading, false))
+			if((bLoading == false))
 			{
-				m_pActionIcon = __NFUN_278__(Class'R6Game.R6PlanningRangeGrenade', self,, Location);
+				m_pActionIcon = Spawn(Class'R6Game.R6PlanningRangeGrenade', self,, Location);
 				m_pActionIcon.m_iPlanningFloor_0 = m_iPlanningFloor_0;
 				m_pActionIcon.m_iPlanningFloor_1 = m_iPlanningFloor_1;
 				bHidden = true;				
@@ -308,26 +308,26 @@ function SetPointAction(Object.EPlanAction eAction, optional bool bLoading)
 		else
 		{
 			// End:0x1B8
-			if(__NFUN_154__(int(eAction), int(5)))
+			if((int(eAction) == int(5)))
 			{
-				m_pActionIcon = __NFUN_278__(Class'R6Game.R6PlanningSnipe', self,, Location);
+				m_pActionIcon = Spawn(Class'R6Game.R6PlanningSnipe', self,, Location);
 				m_pActionIcon.m_iPlanningFloor_0 = m_iPlanningFloor_0;
 				m_pActionIcon.m_iPlanningFloor_1 = m_iPlanningFloor_1;
 				// End:0x1B5
 				if(bLoading)
 				{
-					m_pActionIcon.m_u8SpritePlanningAngle = byte(__NFUN_145__(m_rActionRotation.Yaw, 255));
+					m_pActionIcon.m_u8SpritePlanningAngle = byte((m_rActionRotation.Yaw / 255));
 				}				
 			}
 			else
 			{
 				// End:0x24B
-				if(__NFUN_154__(int(eAction), int(6)))
+				if((int(eAction) == int(6)))
 				{
 					// End:0x243
-					if(__NFUN_119__(pDoor, none))
+					if((pDoor != none))
 					{
-						m_pActionIcon = __NFUN_278__(Class'R6Game.R6PlanningBreach', self,, pDoor.m_vCenterOfDoor);
+						m_pActionIcon = Spawn(Class'R6Game.R6PlanningBreach', self,, pDoor.m_vCenterOfDoor);
 						m_pActionIcon.m_iPlanningFloor_0 = m_iPlanningFloor_0;
 						m_pActionIcon.m_iPlanningFloor_1 = m_iPlanningFloor_1;
 						R6PlanningBreach(m_pActionIcon).SetSpriteAngle(pDoor.m_iYawInit, Location);						
@@ -353,26 +353,26 @@ function FindDoor()
 	iPreviousDistance = 25000;
 	m_bDoorInRange = false;
 	// End:0x122
-	foreach __NFUN_312__(Class'R6Engine.R6Door', pDoorTest, 150.0000000, Location)
+	foreach VisibleCollidingActors(Class'R6Engine.R6Door', pDoorTest, 150.0000000, Location)
 	{
 		// End:0x65
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Found door ", string(pDoorTest.m_RotatingDoor)), " for "), string(self)));
+			Log(((("Found door " $ string(pDoorTest.m_RotatingDoor)) $ " for ") $ string(self)));
 		}
 		// End:0x121
-		if(__NFUN_129__(pDoorTest.m_RotatingDoor.m_bTreatDoorAsWindow))
+		if((!pDoorTest.m_RotatingDoor.m_bTreatDoorAsWindow))
 		{
 			pRotatingDoor = pDoorTest.m_RotatingDoor;
-			vDistanceVect = __NFUN_216__(pDoorTest.Location, Location);
+			vDistanceVect = (pDoorTest.Location - Location);
 			vDistanceVect.Z = 0.0000000;
-			__NFUN_297__(vDistanceVect, vDistanceVect);
+			(vDistanceVect *= vDistanceVect);
 			// End:0x121
-			if(__NFUN_176__(__NFUN_174__(vDistanceVect.X, vDistanceVect.Y), float(iPreviousDistance)))
+			if(((vDistanceVect.X + vDistanceVect.Y) < float(iPreviousDistance)))
 			{
 				m_bDoorInRange = true;
 				pDoor = pRotatingDoor;
-				iPreviousDistance = int(__NFUN_174__(vDistanceVect.X, vDistanceVect.Y));
+				iPreviousDistance = int((vDistanceVect.X + vDistanceVect.Y));
 			}
 		}		
 	}	

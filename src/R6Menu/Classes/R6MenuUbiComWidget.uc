@@ -47,7 +47,7 @@ function Created()
 	m_ButtonQuit.m_buttonFont = Root.Fonts[14];
 	m_ButtonQuit.m_eButton_Action = 8;
 	m_ButtonQuit.ResizeToText();
-	m_ButtonReturn = R6WindowButtonMainMenu(CreateControl(Class'R6Menu.R6WindowButtonMainMenu', fButtonXpos, __NFUN_174__(fFirstButtonYpos, fButtonOffset), fButtonWidth, fButtonHeight, self));
+	m_ButtonReturn = R6WindowButtonMainMenu(CreateControl(Class'R6Menu.R6WindowButtonMainMenu', fButtonXpos, (fFirstButtonYpos + fButtonOffset), fButtonWidth, fButtonHeight, self));
 	m_ButtonReturn.ToolTipString = Localize("UbiCom", "ButtonReturn", "R6Menu");
 	m_ButtonReturn.Text = Localize("UbiCom", "ButtonReturn", "R6Menu");
 	m_ButtonReturn.Align = 1;
@@ -65,15 +65,15 @@ function Paint(Canvas C, float X, float Y)
 {
 	Root.PaintBackground(C, self);
 	// End:0x6D
-	if(m_GameService.__NFUN_3551__())
+	if(m_GameService.NativeIsWaitingForGSInit())
 	{
 		// End:0x47
-		if(__NFUN_129__(m_ButtonQuit.bWindowVisible))
+		if((!m_ButtonQuit.bWindowVisible))
 		{
 			m_ButtonQuit.ShowWindow();
 		}
 		// End:0x6A
-		if(__NFUN_129__(m_ButtonReturn.bWindowVisible))
+		if((!m_ButtonReturn.bWindowVisible))
 		{
 			m_ButtonReturn.ShowWindow();
 		}		
@@ -97,7 +97,7 @@ function Paint(Canvas C, float X, float Y)
 function ShowWindow()
 {
 	// End:0x42
-	if(__NFUN_119__(R6MenuRootWindow(Root).m_pMenuCDKeyManager, none))
+	if((R6MenuRootWindow(Root).m_pMenuCDKeyManager != none))
 	{
 		R6MenuRootWindow(Root).m_pMenuCDKeyManager.SetWindowUser(Root.20, self);
 	}
@@ -124,30 +124,30 @@ function Tick(float Delta)
 	local R6GameManager pGameMgr;
 	local bool bRequestSrvInfo;
 
-	pGameMgr = R6GameManager(Class'Engine.Actor'.static.__NFUN_1551__());
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pGameMgr = R6GameManager(Class'Engine.Actor'.static.GetGameManager());
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	// End:0x46
 	if(Root.Console.m_bChangeModInProgress)
 	{
 		return;
 	}
 	// End:0x353
-	if(__NFUN_123__(pModManager.m_szPendingModName, ""))
+	if((pModManager.m_szPendingModName != ""))
 	{
 		// End:0x2A2
 		if(pGameMgr.m_bGSJoinUbiServer)
 		{
 			// End:0x180
-			if(__NFUN_132__(m_bIsAnOfficialMod, __NFUN_130__(__NFUN_129__(pModManager.IsRavenShield()), pModManager.__NFUN_2023__(pModManager.m_pCurrentMod.m_szKeyWord))))
+			if((m_bIsAnOfficialMod || ((!pModManager.IsRavenShield()) && pModManager.IsOfficialMod(pModManager.m_pCurrentMod.m_szKeyWord))))
 			{
 				// End:0x175
-				if(__NFUN_124__(pModManager.m_szPendingModName, pModManager.m_pCurrentMod.m_szKeyWord))
+				if((pModManager.m_szPendingModName ~= pModManager.m_pCurrentMod.m_szKeyWord))
 				{
 					// End:0x172
 					if(pGameMgr.m_bQueryServerInfoDone)
 					{
 						pGameMgr.m_bGSJoinUbiServer = false;
-						__NFUN_231__("UbiComWidget Ready to Join server");
+						Log("UbiComWidget Ready to Join server");
 						m_szIPAddress = m_GameService.m_szGSClientIP;
 						R6MenuRootWindow(Root).m_pMenuCDKeyManager.StartCDKeyProcess(0, m_GameService.m_ClientBeacon.PreJoinInfo);
 						return;
@@ -165,7 +165,7 @@ function Tick(float Delta)
 				if(pGameMgr.m_bQueryServerInfoDone)
 				{
 					// End:0x21A
-					if(__NFUN_124__(pModManager.m_szPendingModName, pModManager.m_pCurrentMod.m_szKeyWord))
+					if((pModManager.m_szPendingModName ~= pModManager.m_pCurrentMod.m_szKeyWord))
 					{
 						pGameMgr.m_bGSJoinUbiServer = false;
 						m_szIPAddress = m_GameService.m_szGSClientIP;
@@ -185,7 +185,7 @@ function Tick(float Delta)
 			}
 			else
 			{
-				__NFUN_231__("UbiComWidget Join a srv query info");
+				Log("UbiComWidget Join a srv query info");
 				m_bQueryServerInfoInProgress = true;
 				R6MenuRootWindow(Root).InitBeaconService();
 				m_pQueryServerInfo.StartQueryServerInfoProcedure(self, m_GameService.m_szGSClientIP, 0);
@@ -194,12 +194,12 @@ function Tick(float Delta)
 		else
 		{
 			// End:0x353
-			if(pGameMgr.__NFUN_1201__())
+			if(pGameMgr.NativeInit())
 			{
 				// End:0x330
-				if(__NFUN_124__(pModManager.m_szPendingModName, pModManager.m_pCurrentMod.m_szKeyWord))
+				if((pModManager.m_szPendingModName ~= pModManager.m_pCurrentMod.m_szKeyWord))
 				{
-					Root.Console.ViewportOwner.Actor.__NFUN_264__(Sound'Music.Play_theme_Musicsilence', 5);
+					Root.Console.ViewportOwner.Actor.__NFUN_264__(Sound'Music.Play_theme_Musicsilence', 5) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 					Root.ChangeCurrentWidget(19);
 					R6MenuRootWindow(Root).InitBeaconService();
 					return;

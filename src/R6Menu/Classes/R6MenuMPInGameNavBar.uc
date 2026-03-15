@@ -59,7 +59,7 @@ function Created()
 {
 	local float fXOffset, fHeight;
 
-	m_HelpTextBar = R6MenuMPInGameHelpBar(CreateWindow(Class'R6Menu.R6MenuMPInGameHelpBar', 1.0000000, 0.0000000, __NFUN_175__(WinWidth, float(2)), 20.0000000, self));
+	m_HelpTextBar = R6MenuMPInGameHelpBar(CreateWindow(Class'R6Menu.R6MenuMPInGameHelpBar', 1.0000000, 0.0000000, (WinWidth - float(2)), 20.0000000, self));
 	m_HelpTextBar.m_bUseExternSetTip = true;
 	m_SelectTeamButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', float(m_iXNavBarLoc[0]), float(m_iYNavBarLoc[0]), float(m_RSelectTeamButtonUp.W), float(m_RSelectTeamButtonUp.H), self));
 	m_SelectTeamButton.UpTexture = m_TSelectTeamButton;
@@ -109,7 +109,7 @@ function Created()
 	m_GearButton.bUseRegion = true;
 	m_GearButton.ToolTipString = Localize("Tip", "Gear", "R6Menu");
 	m_GearButton.m_iDrawStyle = 5;
-	fXOffset = float(__NFUN_146__(__NFUN_146__(m_iXNavBarLoc[3], m_RGearButtonUp.W), 30));
+	fXOffset = float(((m_iXNavBarLoc[3] + m_RGearButtonUp.W) + 30));
 	fHeight = 15.0000000;
 	m_pPlayerReady = R6WindowButtonBox(CreateControl(Class'R6Window.R6WindowButtonBox', fXOffset, 30.0000000, 80.0000000, fHeight, self));
 	m_pPlayerReady.m_TextFont = Root.Fonts[5];
@@ -127,30 +127,30 @@ function Created()
 function BeforePaint(Canvas C, float X, float Y)
 {
 	// End:0xBE
-	if(__NFUN_181__(m_fPlayerButWidth, m_pPlayerReady.WinWidth))
+	if((m_fPlayerButWidth != m_pPlayerReady.WinWidth))
 	{
 		// End:0x34
-		if(__NFUN_119__(m_SelectTeamButton, none))
+		if((m_SelectTeamButton != none))
 		{
 			m_SelectTeamButton.m_bPreCalculatePos = true;
 		}
 		// End:0x50
-		if(__NFUN_119__(m_ServerOptButton, none))
+		if((m_ServerOptButton != none))
 		{
 			m_ServerOptButton.m_bPreCalculatePos = true;
 		}
 		// End:0x6C
-		if(__NFUN_119__(m_KitRestrictionButton, none))
+		if((m_KitRestrictionButton != none))
 		{
 			m_KitRestrictionButton.m_bPreCalculatePos = true;
 		}
 		// End:0x88
-		if(__NFUN_119__(m_GearButton, none))
+		if((m_GearButton != none))
 		{
 			m_GearButton.m_bPreCalculatePos = true;
 		}
 		// End:0xA4
-		if(__NFUN_119__(m_pPlayerReady, none))
+		if((m_pPlayerReady != none))
 		{
 			m_pPlayerReady.m_bPreCalculatePos = true;
 		}
@@ -167,7 +167,7 @@ function CheckForNavBarState()
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x6D
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_pPlayerReady.bDisabled), __NFUN_119__(r6Root.m_R6GameMenuCom, none)), r6Root.m_R6GameMenuCom.IsInBetweenRoundMenu()))
+	if((((!m_pPlayerReady.bDisabled) && (r6Root.m_R6GameMenuCom != none)) && r6Root.m_R6GameMenuCom.IsInBetweenRoundMenu()))
 	{
 		SetNavBarState(m_pPlayerReady.m_bSelected, true);
 	}
@@ -178,19 +178,19 @@ function AlignButtons()
 {
 	local float fFreeSpace, fDistanceBetEachBut;
 
-	fFreeSpace = __NFUN_175__(WinWidth, float(4));
-	__NFUN_185__(fFreeSpace, __NFUN_174__(__NFUN_174__(__NFUN_174__(__NFUN_174__(m_SelectTeamButton.WinWidth, m_ServerOptButton.WinWidth), m_KitRestrictionButton.WinWidth), m_GearButton.WinWidth), m_pPlayerReady.WinWidth));
+	fFreeSpace = (WinWidth - float(4));
+	(fFreeSpace -= ((((m_SelectTeamButton.WinWidth + m_ServerOptButton.WinWidth) + m_KitRestrictionButton.WinWidth) + m_GearButton.WinWidth) + m_pPlayerReady.WinWidth));
 	// End:0x80
-	if(__NFUN_177__(fFreeSpace, WinWidth))
+	if((fFreeSpace > WinWidth))
 	{
 		fFreeSpace = WinWidth;
 	}
-	fDistanceBetEachBut = __NFUN_172__(fFreeSpace, float(6));
+	fDistanceBetEachBut = (fFreeSpace / float(6));
 	m_SelectTeamButton.WinLeft = fDistanceBetEachBut;
-	m_ServerOptButton.WinLeft = __NFUN_174__(__NFUN_174__(m_SelectTeamButton.WinLeft, m_SelectTeamButton.WinWidth), fDistanceBetEachBut);
-	m_KitRestrictionButton.WinLeft = __NFUN_174__(__NFUN_174__(m_ServerOptButton.WinLeft, m_ServerOptButton.WinWidth), fDistanceBetEachBut);
-	m_GearButton.WinLeft = __NFUN_174__(__NFUN_174__(m_KitRestrictionButton.WinLeft, m_KitRestrictionButton.WinWidth), fDistanceBetEachBut);
-	m_pPlayerReady.WinLeft = __NFUN_174__(__NFUN_174__(m_GearButton.WinLeft, m_GearButton.WinWidth), fDistanceBetEachBut);
+	m_ServerOptButton.WinLeft = ((m_SelectTeamButton.WinLeft + m_SelectTeamButton.WinWidth) + fDistanceBetEachBut);
+	m_KitRestrictionButton.WinLeft = ((m_ServerOptButton.WinLeft + m_ServerOptButton.WinWidth) + fDistanceBetEachBut);
+	m_GearButton.WinLeft = ((m_KitRestrictionButton.WinLeft + m_KitRestrictionButton.WinWidth) + fDistanceBetEachBut);
+	m_pPlayerReady.WinLeft = ((m_GearButton.WinLeft + m_GearButton.WinWidth) + fDistanceBetEachBut);
 	return;
 }
 
@@ -199,7 +199,7 @@ function Notify(UWindowDialogControl C, byte E)
 	local R6MenuInGameMultiPlayerRootWindow r6Root;
 
 	// End:0x154
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 		switch(C)
@@ -213,7 +213,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0x90
 			case m_ServerOptButton:
 				// End:0x8D
-				if(__NFUN_119__(r6Root.m_pIntermissionMenuWidget, none))
+				if((r6Root.m_pIntermissionMenuWidget != none))
 				{
 					r6Root.m_pIntermissionMenuWidget.PopUpServerOptMenu();
 				}
@@ -222,7 +222,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0xC7
 			case m_KitRestrictionButton:
 				// End:0xC4
-				if(__NFUN_119__(r6Root.m_pIntermissionMenuWidget, none))
+				if((r6Root.m_pIntermissionMenuWidget != none))
 				{
 					r6Root.m_pIntermissionMenuWidget.PopUpKitRestMenu();
 				}
@@ -231,7 +231,7 @@ function Notify(UWindowDialogControl C, byte E)
 			// End:0xFE
 			case m_GearButton:
 				// End:0xFB
-				if(__NFUN_119__(r6Root.m_pIntermissionMenuWidget, none))
+				if((r6Root.m_pIntermissionMenuWidget != none))
 				{
 					r6Root.m_pIntermissionMenuWidget.PopUpGearMenu();
 				}
@@ -242,7 +242,7 @@ function Notify(UWindowDialogControl C, byte E)
 				// End:0x14B
 				if(R6WindowButtonBox(C).GetSelectStatus())
 				{
-					r6Root.m_R6GameMenuCom.SetPlayerReadyStatus(__NFUN_129__(R6WindowButtonBox(C).m_bSelected));
+					r6Root.m_R6GameMenuCom.SetPlayerReadyStatus((!R6WindowButtonBox(C).m_bSelected));
 				}
 				// End:0x154
 				break;
@@ -269,7 +269,7 @@ function SetNavBarState(bool _bDisable, optional bool _bDisableAllExceptReadyBut
 	m_KitRestrictionButton.bDisabled = _bDisable;
 	m_GearButton.bDisabled = _bDisable;
 	// End:0x79
-	if(__NFUN_129__(_bDisableAllExceptReadyBut))
+	if((!_bDisableAllExceptReadyBut))
 	{
 		m_pPlayerReady.bDisabled = _bDisable;
 	}

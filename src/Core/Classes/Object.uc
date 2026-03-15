@@ -760,7 +760,7 @@ native static final function ResetConfig(optional string VarNameToReset);
 // Return a random number within the given range.
 final function float RandRange(float Min, float Max)
 {
-	return __NFUN_174__(Min, __NFUN_171__(__NFUN_175__(Max, Min), __NFUN_195__()));
+	return (Min + ((Max - Min) * FRand()));
 	return;
 }
 

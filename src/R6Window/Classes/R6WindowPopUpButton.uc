@@ -24,23 +24,23 @@ function Paint(Canvas C, float X, float Y)
 	// End:0x83
 	if(m_bDrawRedBG)
 	{
-		C.__NFUN_2626__(Root.Colors.TeamColorLight[0].R, Root.Colors.TeamColorLight[0].G, Root.Colors.TeamColorLight[0].B);		
+		C.SetDrawColor(Root.Colors.TeamColorLight[0].R, Root.Colors.TeamColorLight[0].G, Root.Colors.TeamColorLight[0].B);		
 	}
 	else
 	{
 		// End:0xF5
 		if(m_bDrawGreenBG)
 		{
-			C.__NFUN_2626__(Root.Colors.TeamColorLight[1].R, Root.Colors.TeamColorLight[1].G, Root.Colors.TeamColorLight[1].B);			
+			C.SetDrawColor(Root.Colors.TeamColorLight[1].R, Root.Colors.TeamColorLight[1].G, Root.Colors.TeamColorLight[1].B);			
 		}
 		else
 		{
-			C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+			C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 		}
 	}
 	super.Paint(C, X, Y);
 	// End:0x1CA
-	if(__NFUN_122__(Text, ""))
+	if((Text == ""))
 	{
 		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, float(m_RButBorder.X), float(m_RButBorder.Y), float(m_RButBorder.W), float(m_RButBorder.H), m_TButBorderTex);
 	}

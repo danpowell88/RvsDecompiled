@@ -21,7 +21,7 @@ var() name OutEvents[32];  // Events to generate.
 function Trigger(Actor Other, Pawn EventInstigator)
 {
 	Instigator = EventInstigator;
-	__NFUN_113__('Dispatch');
+	GotoState('Dispatch');
 	return;
 }
 
@@ -32,19 +32,19 @@ state Dispatch
 	J0x07:
 
 	// End:0x6E [Loop If]
-	if(__NFUN_150__(i, 32))
+	if((i < 32))
 	{
 		// End:0x64
-		if(__NFUN_130__(__NFUN_255__(OutEvents[i], 'None'), __NFUN_255__(OutEvents[i], 'None')))
+		if(((OutEvents[i] != 'None') && (OutEvents[i] != 'None')))
 		{
-			__NFUN_256__(OutDelays[i]);
+			Sleep(OutDelays[i]);
 			TriggerEvent(OutEvents[i], self, Instigator);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
-	__NFUN_113__('None');
+	GotoState('None');
 	stop;		
 }
 

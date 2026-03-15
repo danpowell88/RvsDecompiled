@@ -34,7 +34,7 @@ var(Debug) bool bShowLog;
 replication
 {
 	// Pos:0x000
-	unreliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	unreliable if((int(Role) == int(ROLE_Authority)))
 		ClientGetWeapon;
 }
 
@@ -48,7 +48,7 @@ function GetWeapon(R6AbstractWeapon NewWeapon)
 	// End:0x24
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("ak: GetWeapon ", string(NewWeapon)));
+		Log(("ak: GetWeapon " $ string(NewWeapon)));
 	}
 	return;
 }
@@ -56,20 +56,20 @@ function GetWeapon(R6AbstractWeapon NewWeapon)
 function ClientGetWeapon(R6EngineWeapon NewWeapon)
 {
 	// End:0x36
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_Standalone)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		return;
 	}
 	// End:0x62
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("IN: ClientGetWeapon() ", string(NewWeapon)));
+		Log(("IN: ClientGetWeapon() " $ string(NewWeapon)));
 	}
 	GetWeapon(R6AbstractWeapon(NewWeapon));
 	// End:0x9F
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("OUT: ClientGetWeapon() ", string(NewWeapon)));
+		Log(("OUT: ClientGetWeapon() " $ string(NewWeapon)));
 	}
 	return;
 }

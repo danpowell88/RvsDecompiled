@@ -25,7 +25,7 @@ simulated function DisableWeaponOrGadget()
 	// End:0x38
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(string(self), " DisableWeaponOrGadget() was called..."));
+		Log((string(self) $ " DisableWeaponOrGadget() was called..."));
 	}
 	return;
 }
@@ -33,7 +33,7 @@ simulated function DisableWeaponOrGadget()
 function SetHoldAttachPoint()
 {
 	// End:0x17
-	if(__NFUN_154__(m_InventoryGroup, 4))
+	if((m_InventoryGroup == 4))
 	{
 		m_HoldAttachPoint = m_HoldAttachPoint2;
 	}
@@ -42,7 +42,7 @@ function SetHoldAttachPoint()
 
 function GiveMoreAmmo()
 {
-	__NFUN_135__(m_iNbBulletsInWeapon, byte(m_iClipCapacity));
+	(m_iNbBulletsInWeapon += byte(m_iClipCapacity));
 	return;
 }
 

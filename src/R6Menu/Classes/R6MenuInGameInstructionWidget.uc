@@ -49,11 +49,11 @@ function BeforePaint(Canvas C, float X, float Y)
 		TextArea.BeforePaint(C, X, Y);
 		C.Font = Root.Fonts[16];
 		TextSize(C, "TEST", fWidth, fHeight);
-		iNbLines = int(__NFUN_172__(TextArea.m_fYOffSet, fHeight));
-		__NFUN_161__(iNbLines, 1);
-		__NFUN_161__(iNbLines, TextArea.Lines);
-		m_RMsgSize.H = int(__NFUN_171__(fHeight, float(iNbLines)));
-		m_InstructionText.WinHeight = __NFUN_174__(__NFUN_174__(float(m_RMsgSize.H), __NFUN_171__(float(2), m_InstructionText.m_fHBorderHeight)), __NFUN_171__(float(2), m_InstructionText.m_fHBorderOffset));
+		iNbLines = int((TextArea.m_fYOffSet / fHeight));
+		(iNbLines += 1);
+		(iNbLines += TextArea.Lines);
+		m_RMsgSize.H = int((fHeight * float(iNbLines)));
+		m_InstructionText.WinHeight = ((float(m_RMsgSize.H) + (float(2) * m_InstructionText.m_fHBorderHeight)) + (float(2) * m_InstructionText.m_fHBorderOffset));
 		TextArea.WinHeight = float(m_RMsgSize.H);
 	}
 	return;
@@ -62,7 +62,7 @@ function BeforePaint(Canvas C, float X, float Y)
 function Paint(Canvas C, float X, float Y)
 {
 	C.Style = 5;
-	C.__NFUN_2626__(Root.Colors.Black.R, Root.Colors.Black.G, Root.Colors.Black.B, 128);
+	C.SetDrawColor(Root.Colors.Black.R, Root.Colors.Black.G, Root.Colors.Black.B, 128);
 	DrawStretchedTextureSegment(C, m_InstructionText.WinLeft, m_InstructionText.WinTop, m_InstructionText.WinWidth, m_InstructionText.WinHeight, 0.0000000, 0.0000000, 10.0000000, 10.0000000, Texture'UWindow.WhiteTexture');
 	return;
 }
@@ -73,7 +73,7 @@ function ChangeText(R6InstructionSoundVolume pISV, int iBox, int iParagraph)
 	local R6WindowWrappedTextArea TextArea;
 
 	// End:0x2B
-	if(__NFUN_130__(__NFUN_119__(m_pLastIntructionVolume, none), __NFUN_119__(m_pLastIntructionVolume, pISV)))
+	if(((m_pLastIntructionVolume != none) && (m_pLastIntructionVolume != pISV)))
 	{
 		m_pLastIntructionVolume.StopInstruction();
 	}
@@ -250,7 +250,7 @@ function ChangeText(R6InstructionSoundVolume pISV, int iBox, int iParagraph)
 		default:
 			break;
 	}
-	m_szText = R6PlayerController(GetPlayerOwner()).__NFUN_2724__(szSectionID, szParagraphID, "R6Training", iBox, iParagraph);
+	m_szText = R6PlayerController(GetPlayerOwner()).LocalizeTraining(szSectionID, szParagraphID, "R6Training", iBox, iParagraph);
 	TextArea = R6WindowWrappedTextArea(m_InstructionText.m_ClientArea);
 	TextArea.Clear();
 	TextArea.m_fYOffSet = 10.0000000;
@@ -266,16 +266,16 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 	local float fBkpOrgY;
 
 	// End:0x42
-	if(__NFUN_130__(__NFUN_154__(int(Msg), int(8)), __NFUN_154__(Key, int(GetPlayerOwner().__NFUN_2706__("Action")))))
+	if(((int(Msg) == int(8)) && (Key == int(GetPlayerOwner().GetKey("Action")))))
 	{
 		m_pLastIntructionVolume.SkipToNextInstruction();
 	}
 	// End:0xDF
-	if(__NFUN_154__(int(Msg), int(11)))
+	if((int(Msg) == int(11)))
 	{
 		fBkpOrgY = C.OrgY;
 		C.OrgY = 0.0000000;
-		m_InstructionText.WinTop = __NFUN_171__(__NFUN_172__(float(C.SizeY), float(480)), m_fYInstructionTextPos);
+		m_InstructionText.WinTop = ((float(C.SizeY) / float(480)) * m_fYInstructionTextPos);
 		super(UWindowWindow).WindowEvent(Msg, C, X, Y, Key);
 		C.OrgY = fBkpOrgY;		
 	}

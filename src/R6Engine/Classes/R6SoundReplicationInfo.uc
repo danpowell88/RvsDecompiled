@@ -36,12 +36,12 @@ var Vector m_Location;  // REPLICATED: Location
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_Location, m_Material, 
 		m_NewPawnState;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_CurrentWeapon, m_NewWeaponSound, 
 		m_PawnRepInfo, m_pawnOwner;
 }

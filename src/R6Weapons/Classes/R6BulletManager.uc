@@ -32,13 +32,13 @@ function InitBulletMgr(Pawn TheInstigator)
 	J0x07:
 
 	// End:0x7B [Loop If]
-	if(__NFUN_150__(m_iCurrentBullet, 20))
+	if((m_iCurrentBullet < 20))
 	{
-		m_BulletArray[m_iCurrentBullet] = __NFUN_278__(Class'R6Weapons.R6Bullet',,,,, true);
-		m_BulletArray[m_iCurrentBullet].__NFUN_262__(false, false, false);
+		m_BulletArray[m_iCurrentBullet] = Spawn(Class'R6Weapons.R6Bullet',,,,, true);
+		m_BulletArray[m_iCurrentBullet].SetCollision(false, false, false);
 		m_BulletArray[m_iCurrentBullet].Instigator = TheInstigator;
 		m_BulletArray[m_iCurrentBullet].m_BulletManager = self;
-		__NFUN_165__(m_iCurrentBullet);
+		(m_iCurrentBullet++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -53,7 +53,7 @@ function SetBulletParameter(R6EngineWeapon AWeapon)
 
 	aR6Weapon = R6Weapons(AWeapon);
 	// End:0x33
-	if(__NFUN_132__(__NFUN_114__(aR6Weapon, none), __NFUN_114__(aR6Weapon.m_pBulletClass, none)))
+	if(((aR6Weapon == none) || (aR6Weapon.m_pBulletClass == none)))
 	{
 		return;
 	}
@@ -62,7 +62,7 @@ function SetBulletParameter(R6EngineWeapon AWeapon)
 	J0x57:
 
 	// End:0x175 [Loop If]
-	if(__NFUN_150__(m_iCurrentBullet, 20))
+	if((m_iCurrentBullet < 20))
 	{
 		m_BulletArray[m_iCurrentBullet].m_szBulletType = aR6Weapon.m_pBulletClass.default.m_szBulletType;
 		m_BulletArray[m_iCurrentBullet].m_iEnergy = aR6Weapon.m_pBulletClass.default.m_iEnergy;
@@ -70,7 +70,7 @@ function SetBulletParameter(R6EngineWeapon AWeapon)
 		m_BulletArray[m_iCurrentBullet].m_fRangeConversionConst = aR6Weapon.m_pBulletClass.default.m_fRangeConversionConst;
 		m_BulletArray[m_iCurrentBullet].m_fRange = aR6Weapon.m_pBulletClass.default.m_fRange;
 		m_BulletArray[m_iCurrentBullet].m_iPenetrationFactor = aR6Weapon.m_pBulletClass.default.m_iPenetrationFactor;
-		__NFUN_165__(m_iCurrentBullet);
+		(m_iCurrentBullet++);
 		// [Loop Continue]
 		goto J0x57;
 	}
@@ -81,11 +81,11 @@ function SetBulletParameter(R6EngineWeapon AWeapon)
 function SpawnBullet(Vector VPosition, Rotator rRotation, float fBulletSpeed, bool bFirstInShell)
 {
 	// End:0x13
-	if(__NFUN_242__(bFirstInShell, true))
+	if((bFirstInShell == true))
 	{
-		__NFUN_165__(m_iNextBulletGroupID);
+		(m_iNextBulletGroupID++);
 	}
-	m_BulletArray[m_iCurrentBullet].__NFUN_267__(VPosition, true);
+	m_BulletArray[m_iCurrentBullet].__NFUN_267__(VPosition, true) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	m_BulletArray[m_iCurrentBullet].__NFUN_299__(rRotation);
 	m_BulletArray[m_iCurrentBullet].m_vSpawnedPosition = VPosition;
 	m_BulletArray[m_iCurrentBullet].m_bBulletIsGone = true;

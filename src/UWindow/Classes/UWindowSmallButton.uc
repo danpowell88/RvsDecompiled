@@ -23,9 +23,9 @@ function AutoWidth(Canvas C)
 	C.Font = Root.Fonts[Font];
 	TextSize(C, RemoveAmpersand(Text), W, H);
 	// End:0x6A
-	if(__NFUN_176__(WinWidth, __NFUN_174__(W, float(10))))
+	if((WinWidth < (W + float(10))))
 	{
-		WinWidth = __NFUN_174__(W, float(10));
+		WinWidth = (W + float(10));
 	}
 	return;
 }
@@ -36,13 +36,13 @@ function BeforePaint(Canvas C, float X, float Y)
 
 	C.Font = Root.Fonts[Font];
 	TextSize(C, RemoveAmpersand(Text), W, H);
-	TextX = __NFUN_172__(__NFUN_175__(WinWidth, W), float(2));
-	TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
+	TextX = ((WinWidth - W) / float(2));
+	TextY = ((WinHeight - H) / float(2));
 	// End:0x91
 	if(bMouseDown)
 	{
-		__NFUN_184__(TextX, float(1));
-		__NFUN_184__(TextY, float(1));
+		(TextX += float(1));
+		(TextY += float(1));
 	}
 	return;
 }

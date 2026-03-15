@@ -19,9 +19,9 @@ function InitGSMod()
 	local string szFileName;
 	local R6ModMgr pModManager;
 
-	__NFUN_1207__();
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
-	szFileName = __NFUN_112__(__NFUN_112__(__NFUN_112__("..\\", pModManager.GetIniFilesDir()), "\\"), pModManager.GetModKeyword());
-	__NFUN_1010__(szFileName);
+	NativeInitModInfo();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
+	szFileName = ((("..\\" $ pModManager.GetIniFilesDir()) $ "\\") $ pModManager.GetModKeyword());
+	LoadConfig(szFileName);
 	return;
 }

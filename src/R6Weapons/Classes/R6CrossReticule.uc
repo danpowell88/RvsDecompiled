@@ -30,22 +30,22 @@ simulated function PostRender(Canvas C)
 	iHeight = c_iLineHeight;
 	SetReticuleInfo(C);
 	C.Style = 1;
-	C.__NFUN_1606__(false);
-	__NFUN_185__(m_fAccuracy, 0.1400000);
+	C.UseVirtualSize(false);
+	(m_fAccuracy -= 0.1400000);
 	// End:0x65
-	if(__NFUN_176__(m_fAccuracy, 0.0000000))
+	if((m_fAccuracy < 0.0000000))
 	{
 		m_fAccuracy = 0.0000000;
 	}
-	fPositionAjustment = __NFUN_171__(__NFUN_171__(m_fReticuleOffsetY, m_fAccuracy), 0.0200000);
-	__NFUN_161__(iHeight, int(__NFUN_171__(__NFUN_171__(float(c_iLineHeight), m_fAccuracy), 0.0200000)));
-	C.__NFUN_2623__(__NFUN_175__(m_fReticuleOffsetX, 1.0000000), __NFUN_175__(__NFUN_175__(m_fReticuleOffsetY, float(iHeight)), fPositionAjustment));
+	fPositionAjustment = ((m_fReticuleOffsetY * m_fAccuracy) * 0.0200000);
+	(iHeight += int(((float(c_iLineHeight) * m_fAccuracy) * 0.0200000)));
+	C.SetPos((m_fReticuleOffsetX - 1.0000000), ((m_fReticuleOffsetY - float(iHeight)) - fPositionAjustment));
 	C.DrawRect(m_LineTexture, float(iWidth), float(iHeight));
-	C.__NFUN_2623__(__NFUN_175__(m_fReticuleOffsetX, 1.0000000), __NFUN_174__(m_fReticuleOffsetY, fPositionAjustment));
+	C.SetPos((m_fReticuleOffsetX - 1.0000000), (m_fReticuleOffsetY + fPositionAjustment));
 	C.DrawRect(m_LineTexture, float(iWidth), float(iHeight));
-	C.__NFUN_2623__(__NFUN_175__(__NFUN_175__(m_fReticuleOffsetX, float(iHeight)), fPositionAjustment), __NFUN_175__(m_fReticuleOffsetY, 1.0000000));
+	C.SetPos(((m_fReticuleOffsetX - float(iHeight)) - fPositionAjustment), (m_fReticuleOffsetY - 1.0000000));
 	C.DrawRect(m_LineTexture, float(iHeight), float(iWidth));
-	C.__NFUN_2623__(__NFUN_174__(m_fReticuleOffsetX, fPositionAjustment), __NFUN_175__(m_fReticuleOffsetY, 1.0000000));
+	C.SetPos((m_fReticuleOffsetX + fPositionAjustment), (m_fReticuleOffsetY - 1.0000000));
 	C.DrawRect(m_LineTexture, float(iHeight), float(iWidth));
 	return;
 }

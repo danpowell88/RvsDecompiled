@@ -14,7 +14,7 @@ function Paint(Canvas C, float X, float Y)
 	// End:0x33
 	if(m_bUseColor)
 	{
-		C.__NFUN_2626__(m_TextureColor.R, m_TextureColor.G, m_TextureColor.B);
+		C.SetDrawColor(m_TextureColor.R, m_TextureColor.G, m_TextureColor.B);
 	}
 	super.Paint(C, X, Y);
 	// End:0x5C

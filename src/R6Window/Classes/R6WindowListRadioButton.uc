@@ -35,24 +35,24 @@ function Paint(Canvas C, float MouseX, float MouseY)
 	local UWindowList CurItem;
 
 	// End:0x18
-	if(__NFUN_180__(m_fItemWidth, float(0)))
+	if((m_fItemWidth == float(0)))
 	{
 		m_fItemWidth = WinWidth;
 	}
-	X = __NFUN_172__(__NFUN_175__(WinWidth, m_fItemWidth), float(2));
+	X = ((WinWidth - m_fItemWidth) / float(2));
 	CurItem = Items.Next;
 	J0x44:
 
 	// End:0xC3 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		DrawItem(C, CurItem, X, Y, m_fItemWidth, m_fItemHeight);
-		__NFUN_184__(Y, __NFUN_174__(m_fItemHeight, m_fItemVPadding));
+		(Y += (m_fItemHeight + m_fItemVPadding));
 		// End:0xAC
-		if(__NFUN_179__(Y, WinHeight))
+		if((Y >= WinHeight))
 		{
 			Y = 0.0000000;
-			__NFUN_184__(X, WinWidth);
+			(X += WinWidth);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
@@ -67,7 +67,7 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 
 	pListButtonItem = R6WindowListButtonItem(Item);
 	// End:0x7B
-	if(__NFUN_119__(pListButtonItem.m_Button, none))
+	if((pListButtonItem.m_Button != none))
 	{
 		pListButtonItem.m_Button.WinLeft = X;
 		pListButtonItem.m_Button.WinTop = Y;
@@ -83,12 +83,12 @@ function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
 	local int i, j;
 
 	// End:0x20
-	if(__NFUN_132__(__NFUN_176__(fMouseX, float(0)), __NFUN_177__(fMouseX, WinWidth)))
+	if(((fMouseX < float(0)) || (fMouseX > WinWidth)))
 	{
 		return none;
 	}
 	// End:0x2D
-	if(__NFUN_114__(Items, none))
+	if((Items == none))
 	{
 		return none;
 	}
@@ -97,32 +97,32 @@ function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
 	J0x4C:
 
 	// End:0x19D [Loop If]
-	if(__NFUN_130__(__NFUN_176__(X, WinWidth), __NFUN_119__(CurItem, none)))
+	if(((X < WinWidth) && (CurItem != none)))
 	{
 		// End:0x132
-		if(__NFUN_130__(__NFUN_179__(fMouseX, X), __NFUN_178__(fMouseX, __NFUN_174__(X, WinWidth))))
+		if(((fMouseX >= X) && (fMouseX <= (X + WinWidth))))
 		{
 			Y = 0.0000000;
 			J0x9A:
 
 			// End:0x12F [Loop If]
-			if(__NFUN_130__(__NFUN_176__(Y, WinHeight), __NFUN_119__(CurItem, none)))
+			if(((Y < WinHeight) && (CurItem != none)))
 			{
 				// End:0xFA
 				if(CurItem.ShowThisItem())
 				{
 					// End:0xFA
-					if(__NFUN_130__(__NFUN_179__(fMouseY, Y), __NFUN_178__(fMouseY, __NFUN_174__(Y, m_fItemHeight))))
+					if(((fMouseY >= Y) && (fMouseY <= (Y + m_fItemHeight))))
 					{
 						return UWindowListBoxItem(CurItem);
 					}
 				}
 				// End:0x119
-				if(__NFUN_119__(CurItem, none))
+				if((CurItem != none))
 				{
 					CurItem = CurItem.Next;
 				}
-				__NFUN_184__(Y, __NFUN_174__(m_fItemHeight, m_fItemVPadding));
+				(Y += (m_fItemHeight + m_fItemVPadding));
 				// [Loop Continue]
 				goto J0x9A;
 			}			
@@ -133,19 +133,19 @@ function UWindowListBoxItem GetItemAt(float fMouseX, float fMouseY)
 			J0x139:
 
 			// End:0x18E [Loop If]
-			if(__NFUN_130__(__NFUN_119__(CurItem, none), __NFUN_176__(float(j), __NFUN_172__(WinHeight, __NFUN_174__(m_fItemHeight, m_fItemVPadding)))))
+			if(((CurItem != none) && (float(j) < (WinHeight / (m_fItemHeight + m_fItemVPadding)))))
 			{
 				// End:0x184
-				if(__NFUN_119__(CurItem, none))
+				if((CurItem != none))
 				{
 					CurItem = CurItem.Next;
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x139;
 			}
 		}
-		__NFUN_184__(X, WinWidth);
+		(X += WinWidth);
 		// [Loop Continue]
 		goto J0x4C;
 	}
@@ -159,7 +159,7 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 
 	CurSelected = m_SelectedItem;
 	// End:0x35
-	if(__NFUN_119__(m_SelectedItem, none))
+	if((m_SelectedItem != none))
 	{
 		R6WindowListButtonItem(m_SelectedItem).m_Button.m_bSelected = false;
 	}
@@ -168,14 +168,14 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 	if(m_bCanBeUnselected)
 	{
 		// End:0x70
-		if(__NFUN_114__(CurSelected, m_SelectedItem))
+		if((CurSelected == m_SelectedItem))
 		{
 			m_SelectedItem.bSelected = false;
 			m_SelectedItem = none;
 		}
 	}
 	// End:0x9A
-	if(__NFUN_119__(m_SelectedItem, none))
+	if((m_SelectedItem != none))
 	{
 		R6WindowListButtonItem(m_SelectedItem).m_Button.m_bSelected = true;
 	}
@@ -185,10 +185,10 @@ function SetSelectedItem(UWindowListBoxItem NewSelected)
 function SetDefaultButton(UWindowList Item)
 {
 	// End:0x26
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		// End:0x26
-		if(__NFUN_114__(m_SelectedItem, none))
+		if((m_SelectedItem == none))
 		{
 			SetSelectedItem(UWindowListBoxItem(Item));
 		}
@@ -203,12 +203,12 @@ function UWindowListBoxItem GetElement(int ButtonID)
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_150__(ButtonID, 0))
+	if((ButtonID < 0))
 	{
 		return none;
 	}
 	// End:0x1A
-	if(__NFUN_114__(Items, none))
+	if((Items == none))
 	{
 		return none;
 	}
@@ -217,10 +217,10 @@ function UWindowListBoxItem GetElement(int ButtonID)
 	J0x35:
 
 	// End:0xAB [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, Items.Count()), __NFUN_242__(Found, false)))
+	if(((i < Items.Count()) && (Found == false)))
 	{
 		// End:0x8D
-		if(__NFUN_154__(R6WindowListButtonItem(CurItem).m_Button.m_iButtonID, ButtonID))
+		if((R6WindowListButtonItem(CurItem).m_Button.m_iButtonID == ButtonID))
 		{
 			Found = true;
 			// [Explicit Continue]
@@ -229,7 +229,7 @@ function UWindowListBoxItem GetElement(int ButtonID)
 		CurItem = CurItem.Next;
 		J0xA1:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x35;
 	}

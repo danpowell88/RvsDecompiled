@@ -26,52 +26,52 @@ state Reloading
 	simulated event AnimEnd(int Channel)
 	{
 		// End:0x230
-		if(__NFUN_154__(Channel, 0))
+		if((Channel == 0))
 		{
 			// End:0x134
-			if(__NFUN_242__(m_bReloadCycle, true))
+			if((m_bReloadCycle == true))
 			{
 				R6AbstractWeapon(Owner).ServerPutBulletInShotgun();
 				// End:0x58
-				if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+				if((int(Level.NetMode) == int(NM_Client)))
 				{
 					R6AbstractWeapon(Owner).ClientAddShell();
 				}
 				// End:0x105
-				if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(R6PlayerController(Pawn(Owner.Owner).Controller).m_bReloading), 1), __NFUN_155__(R6AbstractWeapon(Owner).GetNbOfClips(), 0)), __NFUN_129__(R6AbstractWeapon(Owner).GunIsFull())))
+				if((((int(R6PlayerController(Pawn(Owner.Owner).Controller).m_bReloading) == 1) && (R6AbstractWeapon(Owner).GetNbOfClips() != 0)) && (!R6AbstractWeapon(Owner).GunIsFull())))
 				{
 					R6Pawn(Owner.Owner).ServerPlayReloadAnimAgain();
-					__NFUN_259__('Reload_c', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);					
+					PlayAnim('Reload_c', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);					
 				}
 				else
 				{
-					__NFUN_259__('Reload_e', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+					PlayAnim('Reload_e', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
 					m_bReloadCycle = false;
 				}				
 			}
 			else
 			{
 				// End:0x205
-				if(__NFUN_242__(m_bReloadEmpty, true))
+				if((m_bReloadEmpty == true))
 				{
 					m_bReloadEmpty = false;
 					R6AbstractWeapon(Owner).ServerPutBulletInShotgun();
 					// End:0x189
-					if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+					if((int(Level.NetMode) == int(NM_Client)))
 					{
 						R6AbstractWeapon(Owner).ClientAddShell();
 					}
 					// End:0x205
-					if(__NFUN_130__(__NFUN_154__(int(R6PlayerController(Pawn(Owner.Owner).Controller).m_bReloading), 1), __NFUN_155__(R6AbstractWeapon(Owner).GetNbOfClips(), 0)))
+					if(((int(R6PlayerController(Pawn(Owner.Owner).Controller).m_bReloading) == 1) && (R6AbstractWeapon(Owner).GetNbOfClips() != 0)))
 					{
-						__NFUN_259__('Reload_b', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+						PlayAnim('Reload_b', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
 						m_bReloadCycle = true;
 						return;
 					}
 				}
 				m_bReloadCycle = false;
-				__NFUN_260__('Wait_c');
-				__NFUN_113__('Waiting');
+				LoopAnim('Wait_c');
+				GotoState('Waiting');
 				R6AbstractWeapon(Owner).FirstPersonAnimOver();
 			}
 		}
@@ -81,15 +81,15 @@ state Reloading
 	simulated function BeginState()
 	{
 		// End:0x71
-		if(__NFUN_242__(m_bReloadEmpty, true))
+		if((m_bReloadEmpty == true))
 		{
-			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_ReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
-			__NFUN_259__('ReloadEmpty', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+			AssociatedWeapon.PlayAnim(AssociatedWeapon.m_ReloadEmpty, R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+			PlayAnim('ReloadEmpty', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
 			m_bReloadEmpty = true;			
 		}
 		else
 		{
-			__NFUN_259__('Reload_b', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
+			PlayAnim('Reload_b', R6Pawn(Owner.Owner).m_fReloadSpeedMultiplier);
 			m_bReloadCycle = true;
 		}
 		return;

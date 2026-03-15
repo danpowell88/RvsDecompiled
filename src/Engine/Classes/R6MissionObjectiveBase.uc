@@ -89,13 +89,13 @@ function ToggleLog(bool bToggle)
 
 function logMObj(string szText)
 {
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WARNING MissionObjective (", string(self.Name)), ")"), szText));
+	Log(((("WARNING MissionObjective (", string(self.Name)) $ ")" $ ???) $ szText));
 	return;
 }
 
 function logX(string szText)
 {
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(self.Name)), ": "), szText));
+	Log(((("" $ string(self.Name)) $ ": ") $ szText));
 	return;
 }
 

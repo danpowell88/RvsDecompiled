@@ -25,20 +25,20 @@ function Paint(Canvas C, float X, float Y)
 	J0x07:
 
 	// End:0x93 [Loop If]
-	if(__NFUN_150__(i, 5))
+	if((i < 5))
 	{
-		C.__NFUN_2623__(0.0000000, float(__NFUN_144__(i, 20)));
-		C.__NFUN_2626__(m_aColorChoice[i].R, m_aColorChoice[i].G, m_aColorChoice[i].B);
+		C.SetPos(0.0000000, float((i * 20)));
+		C.SetDrawColor(m_aColorChoice[i].R, m_aColorChoice[i].G, m_aColorChoice[i].B);
 		C.DrawRect(Texture'Color.Color.White', 40.0000000, 20.0000000);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
-	C.__NFUN_2626__(m_aColorChoice[m_iSelectedColorIndex].R, m_aColorChoice[m_iSelectedColorIndex].G, m_aColorChoice[m_iSelectedColorIndex].B);
-	C.__NFUN_2623__(1.0000000, float(__NFUN_146__(__NFUN_144__(m_iSelectedColorIndex, 20), 1)));
-	C.DrawRect(Texture'Color.Color.Black', __NFUN_175__(40.0000000, float(2)), __NFUN_175__(20.0000000, float(2)));
-	C.__NFUN_2623__(4.0000000, float(__NFUN_146__(__NFUN_144__(m_iSelectedColorIndex, 20), 4)));
-	C.DrawRect(Texture'Color.Color.White', __NFUN_175__(40.0000000, float(8)), __NFUN_175__(20.0000000, float(8)));
+	C.SetDrawColor(m_aColorChoice[m_iSelectedColorIndex].R, m_aColorChoice[m_iSelectedColorIndex].G, m_aColorChoice[m_iSelectedColorIndex].B);
+	C.SetPos(1.0000000, float(((m_iSelectedColorIndex * 20) + 1)));
+	C.DrawRect(Texture'Color.Color.Black', (40.0000000 - float(2)), (20.0000000 - float(2)));
+	C.SetPos(4.0000000, float(((m_iSelectedColorIndex * 20) + 4)));
+	C.DrawRect(Texture'Color.Color.White', (40.0000000 - float(8)), (20.0000000 - float(8)));
 	return;
 }
 
@@ -53,9 +53,9 @@ function LMouseDown(float X, float Y)
 	local int iSelectedColorIndex;
 
 	super(UWindowWindow).LMouseDown(X, Y);
-	iSelectedColorIndex = int(__NFUN_172__(Y, float(20)));
+	iSelectedColorIndex = int((Y / float(20)));
 	// End:0x47
-	if(__NFUN_130__(__NFUN_153__(iSelectedColorIndex, 0), __NFUN_150__(iSelectedColorIndex, 5)))
+	if(((iSelectedColorIndex >= 0) && (iSelectedColorIndex < 5)))
 	{
 		m_iSelectedColorIndex = iSelectedColorIndex;
 	}

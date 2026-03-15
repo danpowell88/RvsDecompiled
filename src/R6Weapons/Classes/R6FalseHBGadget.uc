@@ -18,11 +18,11 @@ function ThrowGrenade()
 
 	pawnOwner = R6Pawn(Owner);
 	// End:0x11C
-	if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) > 0))
 	{
-		__NFUN_140__(m_iNbBulletsInWeapon);
+		(m_iNbBulletsInWeapon--);
 		// End:0x38
-		if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+		if((int(m_iNbBulletsInWeapon) == 0))
 		{
 			SetStaticMesh(none);
 		}
@@ -36,13 +36,13 @@ function ThrowGrenade()
 		{
 			vStart = pawnOwner.GetHandLocation();
 		}
-		aFalseHeartBeat = __NFUN_278__(Class'R6Engine.R6FalseHeartBeat', self,, vStart, rFiringDir);
+		aFalseHeartBeat = Spawn(Class'R6Engine.R6FalseHeartBeat', self,, vStart, rFiringDir);
 		aFalseHeartBeat.Instigator = none;
 		aFalseHeartBeat.m_HeartBeatPuckOwner = Pawn(Owner);
 		// End:0x102
-		if(__NFUN_242__(pawnOwner.m_bIsProne, true))
+		if((pawnOwner.m_bIsProne == true))
 		{
-			aFalseHeartBeat.SetSpeed(__NFUN_171__(m_fMuzzleVelocity, 0.5000000));			
+			aFalseHeartBeat.SetSpeed((m_fMuzzleVelocity * 0.5000000));			
 		}
 		else
 		{

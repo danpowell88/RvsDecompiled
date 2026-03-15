@@ -145,9 +145,9 @@ function SaveInfo()
 	local byte ATemp[16];
 	local string szFileName;
 
-	szFileName = __NFUN_112__(__NFUN_112__(__NFUN_112__("..\\", Class'Engine.Actor'.static.__NFUN_1524__().GetIniFilesDir()), "\\"), Class'Engine.Actor'.static.__NFUN_1524__().GetModKeyword());
-	m_ModGSInfo.__NFUN_536__(szFileName);
-	__NFUN_536__();
+	szFileName = ((("..\\" $ Class'Engine.Actor'.static.GetModMgr().GetIniFilesDir()) $ "\\") $ Class'Engine.Actor'.static.GetModMgr().GetModKeyword());
+	m_ModGSInfo.SaveConfig(szFileName);
+	SaveConfig();
 	return;
 }
 
@@ -156,7 +156,7 @@ event InitializeMod()
 {
 	Created();
 	// End:0x20
-	if(__NFUN_114__(m_ModGSInfo, none))
+	if((m_ModGSInfo == none))
 	{
 		m_ModGSInfo = new (none) Class'R6GameService.R6ModGSInfo';
 	}
@@ -167,9 +167,9 @@ event InitializeMod()
 function StartAutoLogin()
 {
 	// End:0x30
-	if(__NFUN_130__(__NFUN_130__(__NFUN_123__(m_szUserID, ""), __NFUN_123__(m_szPassword, "")), m_bAutoLISave))
+	if((((m_szUserID != "") && (m_szPassword != "")) && m_bAutoLISave))
 	{
-		__NFUN_3502__();
+		InitializeMSClient();
 		m_bAutoLoginInProgress = true;
 	}
 	return;
@@ -194,7 +194,7 @@ function string MyID()
 // NEW IN 1.60
 event int GetMaxAvailPorts()
 {
-	return Class'IpDrv.UdpLink'.static.__NFUN_1221__();
+	return Class'IpDrv.UdpLink'.static.GetMaxAvailPorts();
 	return;
 }
 
@@ -203,15 +203,15 @@ event string GetLocallyBoundIpAddr()
 	local UdpBeacon _udpBeacon;
 
 	// End:0x1D
-	if(__NFUN_119__(m_ClientBeacon, none))
+	if((m_ClientBeacon != none))
 	{
 		return m_ClientBeacon.LocalIpAddress;		
 	}
 	else
 	{
-		_udpBeacon = UdpBeacon(Class'Engine.Actor'.static.__NFUN_1312__());
+		_udpBeacon = UdpBeacon(Class'Engine.Actor'.static.GetServerBeacon());
 		// End:0x4E
-		if(__NFUN_119__(_udpBeacon, none))
+		if((_udpBeacon != none))
 		{
 			return _udpBeacon.LocalIpAddress;
 		}
@@ -237,24 +237,24 @@ function int getServerListSize()
 event ProcessServerMsg(PlayerController _aPlayerController, string _szErrorMsgKey)
 {
 	// End:0x30
-	if(__NFUN_122__(_szErrorMsgKey, "BannedIP"))
+	if((_szErrorMsgKey == "BannedIP"))
 	{
 		R6PlayerController(_aPlayerController).ServerIndicatesInvalidCDKey(_szErrorMsgKey);		
 	}
 	else
 	{
 		// End:0x69
-		if(__NFUN_123__(_szErrorMsgKey, ""))
+		if((_szErrorMsgKey != ""))
 		{
 			R6PlayerController(_aPlayerController).ServerIndicatesInvalidCDKey("ServerAuthNotResponding");
 		}
 	}
 	// End:0x97
-	if(__NFUN_114__(R6PlayerController(_aPlayerController).m_GameService, none))
+	if((R6PlayerController(_aPlayerController).m_GameService == none))
 	{
 		R6PlayerController(_aPlayerController).m_GameService = self;
 	}
-	_aPlayerController.__NFUN_1282__();
+	_aPlayerController.SpecialDestroy();
 	return;
 }
 
@@ -268,19 +268,19 @@ event bool IsGlobalIDBanned(R6AbstractGameInfo _GameInfo, string _szGlobalID)
 // NEW IN 1.60
 event string TempGetPBConnectStatus(PlayerController _aPlayerController)
 {
-	return _aPlayerController.__NFUN_1317__();
+	return _aPlayerController.GetPBConnectStatus();
 	return;
 }
 
 function bool CallNativeProcessIcmpPing(string _ServerIpAddress, out int piPingTime)
 {
-	return __NFUN_3562__(_ServerIpAddress, piPingTime);
+	return NativeProcessIcmpPing(_ServerIpAddress, piPingTime);
 	return;
 }
 
 function CallNativeSetMatchResult(string szUbiUserID, int iField, int iValue)
 {
-	__NFUN_3540__(szUbiUserID, iField, iValue);
+	NativeSetMatchResult(szUbiUserID, iField, iValue);
 	return;
 }
 
@@ -299,69 +299,69 @@ event FillCreateGameInfo(GameInfo pGameInfo, LevelInfo pLevel)
 	local stRemotePlayers sPlayer;
 	local stGameTypeAndMap sMapAndGame;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	iNumPlayers = 0;
 	m_CrGameSrvInfo.sGameData.PlayerList.Remove(0, m_CrGameSrvInfo.sGameData.iNbrPlayer);
 	_PC = pGameInfo.Level.ControllerList;
 	J0x56:
 
 	// End:0x157 [Loop If]
-	if(__NFUN_119__(_PC, none))
+	if((_PC != none))
 	{
 		aPC = PlayerController(_PC);
 		// End:0x140
-		if(__NFUN_119__(aPC, none))
+		if((aPC != none))
 		{
 			sPlayer.szAlias = aPC.PlayerReplicationInfo.PlayerName;
 			sPlayer.iPing = aPC.PlayerReplicationInfo.Ping;
 			sPlayer.iSkills = aPC.PlayerReplicationInfo.m_iKillCount;
-			sPlayer.szTime = DisplayTime(int(__NFUN_175__(pLevel.TimeSeconds, float(aPC.PlayerReplicationInfo.StartTime))));
+			sPlayer.szTime = DisplayTime(int((pLevel.TimeSeconds - float(aPC.PlayerReplicationInfo.StartTime))));
 			m_CrGameSrvInfo.sGameData.PlayerList[iNumPlayers] = sPlayer;
-			__NFUN_165__(iNumPlayers);
+			(iNumPlayers++);
 		}
 		_PC = _PC.nextController;
 		// [Loop Continue]
 		goto J0x56;
 	}
 	m_CrGameSrvInfo.sGameData.gameMapList.Remove(0, m_CrGameSrvInfo.sGameData.gameMapList.Length);
-	MapList = pGameInfo.__NFUN_278__(Class'Engine.R6MapList');
+	MapList = pGameInfo.Spawn(Class'Engine.R6MapList');
 	iCounter = 0;
 	J0x196:
 
 	// End:0x296 [Loop If]
-	if(__NFUN_150__(iCounter, 32))
+	if((iCounter < 32))
 	{
 		// End:0x28C
-		if(__NFUN_123__(MapList.Maps[iCounter], ""))
+		if((MapList.Maps[iCounter] != ""))
 		{
 			// End:0x202
-			if(__NFUN_154__(__NFUN_126__(MapList.Maps[iCounter], "."), -1))
+			if((InStr(MapList.Maps[iCounter], ".") == -1))
 			{
 				sMapAndGame.szMap = MapList.Maps[iCounter];				
 			}
 			else
 			{
-				sMapAndGame.szMap = __NFUN_128__(MapList.Maps[iCounter], __NFUN_126__(MapList.Maps[iCounter], "."));
+				sMapAndGame.szMap = Left(MapList.Maps[iCounter], InStr(MapList.Maps[iCounter], "."));
 			}
 			sMapAndGame.szGameType = pLevel.GetGameTypeFromClassName(MapList.GameType[iCounter]);
 			m_CrGameSrvInfo.sGameData.gameMapList[iNumMaps] = sMapAndGame;
-			__NFUN_165__(iNumMaps);
+			(iNumMaps++);
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x196;
 	}
 	m_CrGameSrvInfo.sGameData.szCurrentMap = MapList.CheckCurrentMap();
-	MapList.__NFUN_279__();
+	MapList.Destroy();
 	// End:0x2E8
-	if(__NFUN_119__(m_ClientBeacon, none))
+	if((m_ClientBeacon != none))
 	{
 		m_CrGameSrvInfo.iBeaconPort = m_ClientBeacon.boundport;		
 	}
 	else
 	{
 		// End:0x32B
-		if(__NFUN_119__(R6AbstractGameInfo(pGameInfo).m_UdpBeacon, none))
+		if((R6AbstractGameInfo(pGameInfo).m_UdpBeacon != none))
 		{
 			m_CrGameSrvInfo.iBeaconPort = R6AbstractGameInfo(pGameInfo).m_UdpBeacon.boundport;			
 		}
@@ -371,12 +371,12 @@ event FillCreateGameInfo(GameInfo pGameInfo, LevelInfo pLevel)
 		}
 	}
 	m_CrGameSrvInfo.sGameData.szName = pGameInfo.GameReplicationInfo.ServerName;
-	m_CrGameSrvInfo.sGameData.szModName = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord;
+	m_CrGameSrvInfo.sGameData.szModName = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord;
 	m_CrGameSrvInfo.sGameData.szPassword = pServerOptions.GamePassword;
 	m_CrGameSrvInfo.sGameData.bUsePassword = pServerOptions.UsePassword;
 	m_CrGameSrvInfo.sGameData.iMaxPlayer = pServerOptions.MaxPlayers;
-	m_CrGameSrvInfo.sGameData.bDedicatedServer = __NFUN_154__(int(pLevel.NetMode), int(NM_DedicatedServer));
-	m_CrGameSrvInfo.sGameData.iPort = int(__NFUN_127__(pLevel.GetAddressURL(), __NFUN_146__(__NFUN_126__(pLevel.GetAddressURL(), ":"), 1)));
+	m_CrGameSrvInfo.sGameData.bDedicatedServer = (int(pLevel.NetMode) == int(NM_DedicatedServer));
+	m_CrGameSrvInfo.sGameData.iPort = int(Mid(pLevel.GetAddressURL(), (InStr(pLevel.GetAddressURL(), ":") + 1)));
 	m_CrGameSrvInfo.sGameData.bAutoBalTeam = pServerOptions.Autobalance;
 	m_CrGameSrvInfo.sGameData.bFriendlyFire = pServerOptions.FriendlyFire;
 	m_CrGameSrvInfo.sGameData.bInternetServer = pServerOptions.InternetServer;
@@ -397,7 +397,7 @@ event FillCreateGameInfo(GameInfo pGameInfo, LevelInfo pLevel)
 	m_CrGameSrvInfo.sGameData.bAIBkp = pServerOptions.AIBkp;
 	m_CrGameSrvInfo.sGameData.bRotateMap = pServerOptions.RotateMap;
 	m_CrGameSrvInfo.sGameData.bForceFPWeapon = pServerOptions.ForceFPersonWeapon;
-	m_CrGameSrvInfo.sGameData.bPunkBuster = Class'Engine.Actor'.static.__NFUN_1402__();
+	m_CrGameSrvInfo.sGameData.bPunkBuster = Class'Engine.Actor'.static.IsPBServerEnabled();
 	return;
 }
 
@@ -413,22 +413,22 @@ function string DisplayTime(int _iTimeToConvert)
 	iMin = 0;
 	iSec = _iTimeToConvert;
 	// End:0x54
-	if(__NFUN_153__(_iTimeToConvert, 60))
+	if((_iTimeToConvert >= 60))
 	{
-		fTemp = __NFUN_172__(float(_iTimeToConvert), float(60));
+		fTemp = (float(_iTimeToConvert) / float(60));
 		iMin = int(fTemp);
-		iSec = __NFUN_147__(_iTimeToConvert, __NFUN_144__(iMin, 60));
+		iSec = (_iTimeToConvert - (iMin * 60));
 	}
 	// End:0x7F
-	if(__NFUN_150__(iSec, 10))
+	if((iSec < 10))
 	{
-		szTime = __NFUN_112__(__NFUN_112__(string(iMin), ":0"), string(iSec));		
+		szTime = ((string(iMin) $ ":0") $ string(iSec));		
 	}
 	else
 	{
 		szTemp = string(iSec);
-		szTemp = __NFUN_128__(szTemp, 2);
-		szTime = __NFUN_112__(__NFUN_112__(string(iMin), ":"), szTemp);
+		szTemp = Left(szTemp, 2);
+		szTime = ((string(iMin) $ ":") $ szTemp);
 	}
 	return szTime;
 	return;
@@ -443,16 +443,16 @@ function string GetSelectedServerIP()
 {
 	local string szIPAddress, szAltIPAddress;
 
-	szIPAddress = __NFUN_128__(m_GameServerList[m_iSelSrvIndex].szIPAddress, __NFUN_126__(m_GameServerList[m_iSelSrvIndex].szIPAddress, ":"));
-	szAltIPAddress = __NFUN_128__(m_GameServerList[m_iSelSrvIndex].szAltIPAddress, __NFUN_126__(m_GameServerList[m_iSelSrvIndex].szAltIPAddress, ":"));
+	szIPAddress = Left(m_GameServerList[m_iSelSrvIndex].szIPAddress, InStr(m_GameServerList[m_iSelSrvIndex].szIPAddress, ":"));
+	szAltIPAddress = Left(m_GameServerList[m_iSelSrvIndex].szAltIPAddress, InStr(m_GameServerList[m_iSelSrvIndex].szAltIPAddress, ":"));
 	// End:0xA5
-	if(__NFUN_153__(m_GameServerList[m_iSelSrvIndex].iPing, __NFUN_1202__()))
+	if((m_GameServerList[m_iSelSrvIndex].iPing >= NativeGetPingTimeOut()))
 	{
 		// End:0xA5
-		if(__NFUN_153__(__NFUN_1225__(szIPAddress), __NFUN_1202__()))
+		if((NativeGetPingTime(szIPAddress) >= NativeGetPingTimeOut()))
 		{
 			// End:0xA5
-			if(__NFUN_150__(__NFUN_1225__(szAltIPAddress), __NFUN_1202__()))
+			if((NativeGetPingTime(szAltIPAddress) < NativeGetPingTimeOut()))
 			{
 				m_GameServerList[m_iSelSrvIndex].bUseAltIP = true;
 			}
@@ -488,10 +488,10 @@ event HandleNewLobbyConnection(LevelInfo _Level)
 	J0x14:
 
 	// End:0xBA [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0xA3
-		if(__NFUN_130__(__NFUN_119__(R6PlayerController(P), none), __NFUN_114__(Viewport(R6PlayerController(P).Player), none)))
+		if(((R6PlayerController(P) != none) && (Viewport(R6PlayerController(P).Player) == none)))
 		{
 			R6PlayerController(P).ClientNewLobbyConnection(_Level.Game.GameReplicationInfo.m_iGameSvrLobbyID, _Level.Game.GameReplicationInfo.m_iGameSvrGroupID);
 		}

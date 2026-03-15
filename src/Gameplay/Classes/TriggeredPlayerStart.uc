@@ -8,7 +8,7 @@ class TriggeredPlayerStart extends PlayerStart
 
 function Trigger(Actor Other, Pawn EventInstigator)
 {
-	bEnabled = __NFUN_129__(bEnabled);
+	bEnabled = (!bEnabled);
 	return;
 }
 

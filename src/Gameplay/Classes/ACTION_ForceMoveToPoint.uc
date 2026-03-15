@@ -16,19 +16,19 @@ function bool InitActionFor(ScriptedController C)
 {
 	Dest = C.SequenceScript.GetMoveTarget();
 	// End:0x61
-	if(__NFUN_130__(__NFUN_255__(DestinationTag, 'None'), __NFUN_255__(DestinationTag, 'None')))
+	if(((DestinationTag != 'None') && (DestinationTag != 'None')))
 	{
 		// End:0x60
-		foreach C.__NFUN_304__(Class'Engine.Actor', Dest, DestinationTag)
+		foreach C.AllActors(Class'Engine.Actor', Dest, DestinationTag)
 		{
 			// End:0x60
 			break;			
 		}		
 	}
 	originalPhys = C.Pawn.Physics;
-	C.Pawn.__NFUN_262__(false, false, false);
+	C.Pawn.SetCollision(false, false, false);
 	C.Pawn.bCollideWorld = false;
-	C.Pawn.__NFUN_267__(Dest.Location);
+	C.Pawn.__NFUN_267__(Dest.Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	C.Pawn.__NFUN_299__(Dest.Rotation);
 	C.Pawn.__NFUN_3970__(0);
 	return false;

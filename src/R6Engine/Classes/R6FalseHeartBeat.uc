@@ -15,16 +15,16 @@ var Pawn m_HeartBeatPuckOwner;  // set to the player pawn that threw the puck (u
 simulated function FirstPassReset()
 {
 	super(R6InteractiveObject).FirstPassReset();
-	__NFUN_279__();
+	Destroy();
 	return;
 }
 
 simulated event PostBeginPlay()
 {
 	// End:0x4A
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
-		m_fHeartBeatTime[0] = float(__NFUN_167__(int(__NFUN_172__(float(1000), __NFUN_172__(m_fHeartBeatFrequency, float(60))))));
+		m_fHeartBeatTime[0] = float(Rand(int((float(1000) / (m_fHeartBeatFrequency / float(60))))));
 		m_fHeartBeatTime[1] = m_fHeartBeatTime[0];
 	}
 	return;
@@ -41,21 +41,21 @@ simulated event bool ProcessHeart(float DeltaSeconds, out float fMul1, out float
 	J0x0F:
 
 	// End:0x40 [Loop If]
-	if(__NFUN_150__(Index, 2))
+	if((Index < 2))
 	{
-		__NFUN_184__(m_fHeartBeatTime[Index], __NFUN_171__(DeltaSeconds, float(1000)));
-		__NFUN_165__(Index);
+		(m_fHeartBeatTime[Index] += (DeltaSeconds * float(1000)));
+		(Index++);
 		// [Loop Continue]
 		goto J0x0F;
 	}
-	fHeartBeatFrenquency = __NFUN_172__(1000.0000000, __NFUN_172__(m_fHeartBeatFrequency, float(60)));
+	fHeartBeatFrenquency = (1000.0000000 / (m_fHeartBeatFrequency / float(60)));
 	// End:0xB8
-	if(__NFUN_177__(m_fHeartBeatTime[m_iNoCircleBeat], fHeartBeatFrenquency))
+	if((m_fHeartBeatTime[m_iNoCircleBeat] > fHeartBeatFrenquency))
 	{
-		fRest = __NFUN_175__(m_fHeartBeatTime[m_iNoCircleBeat], fHeartBeatFrenquency);
-		__NFUN_165__(m_iNoCircleBeat);
+		fRest = (m_fHeartBeatTime[m_iNoCircleBeat] - fHeartBeatFrenquency);
+		(m_iNoCircleBeat++);
 		// End:0x9F
-		if(__NFUN_153__(m_iNoCircleBeat, 2))
+		if((m_iNoCircleBeat >= 2))
 		{
 			m_iNoCircleBeat = 0;
 		}
@@ -63,18 +63,18 @@ simulated event bool ProcessHeart(float DeltaSeconds, out float fMul1, out float
 		bStartNewBeat = true;
 	}
 	// End:0xE2
-	if(__NFUN_176__(m_fHeartBeatTime[0], float(500)))
+	if((m_fHeartBeatTime[0] < float(500)))
 	{
-		fMul1 = __NFUN_171__(0.0012000, m_fHeartBeatTime[0]);		
+		fMul1 = (0.0012000 * m_fHeartBeatTime[0]);		
 	}
 	else
 	{
 		fMul1 = 0.6000000;
 	}
 	// End:0x117
-	if(__NFUN_176__(m_fHeartBeatTime[1], float(500)))
+	if((m_fHeartBeatTime[1] < float(500)))
 	{
-		fMul2 = __NFUN_171__(0.0012000, m_fHeartBeatTime[1]);		
+		fMul2 = (0.0012000 * m_fHeartBeatTime[1]);		
 	}
 	else
 	{

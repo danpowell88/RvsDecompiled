@@ -35,22 +35,22 @@ simulated function ToggleDevice(R6Pawn aPawn)
 	local int iAlarmCount;
 
 	// End:0x0E
-	if(__NFUN_242__(CanToggle(), false))
+	if((CanToggle() == false))
 	{
 		return;
 	}
 	// End:0x66
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Set Device", string(self)), "by pawn"), string(aPawn)), "and his controller"), string(aPawn.Controller)));
+		Log(((((("Set Device" @ string(self)) @ "by pawn") @ string(aPawn)) @ "and his controller") @ string(aPawn.Controller)));
 	}
 	m_bIsActivated = false;
 	// End:0x85
-	if(__NFUN_119__(m_DisarmedTexture, none))
+	if((m_DisarmedTexture != none))
 	{
 		SetSkin(m_DisarmedTexture, 0);
 	}
-	__NFUN_264__(m_DisarmingSound, 3);
+	__NFUN_264__(m_DisarmingSound, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 	m_bToggleType = false;
 	R6AbstractGameInfo(Level.Game).IObjectInteract(aPawn, self);
 	return;

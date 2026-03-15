@@ -40,15 +40,15 @@ function Created()
 	m_ButtonMainMenu.Align = 0;
 	m_ButtonMainMenu.m_buttonFont = Root.Fonts[15];
 	m_ButtonMainMenu.ResizeToText();
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("Credits", "Title", "R6Menu");
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
 	m_LMenuTitle.m_BGTexture = none;
 	m_LMenuTitle.m_bDrawBorders = false;
-	m_IBottomVideoY = __NFUN_146__(m_RVideo.Y, m_RVideo.H);
-	m_IBottomVideoH = __NFUN_147__(512, m_IBottomVideoY);
-	__NFUN_1010__(Class'Engine.Actor'.static.__NFUN_1524__().GetCreditsFile());
+	m_IBottomVideoY = (m_RVideo.Y + m_RVideo.H);
+	m_IBottomVideoH = (512 - m_IBottomVideoY);
+	LoadConfig(Class'Engine.Actor'.static.GetModMgr().GetCreditsFile());
 	return;
 }
 
@@ -74,7 +74,7 @@ function ShowWindow()
 	Root.SetLoadRandomBackgroundImage("Credits");
 	super(UWindowWindow).ShowWindow();
 	// End:0x53
-	if(__NFUN_114__(m_ListOfCredits.Items.Next, none))
+	if((m_ListOfCredits.Items.Next == none))
 	{
 		FillListOfCredits();
 	}
@@ -99,15 +99,15 @@ function FillListOfCredits()
 	J0x07:
 
 	// End:0x6E [Loop If]
-	if(__NFUN_150__(i, CreditsName.Length))
+	if((i < CreditsName.Length))
 	{
 		pItem = R6WindowListBoxCreditsItem(m_ListOfCredits.Items.Append(Class'R6Window.R6WindowListBoxCreditsItem'));
 		// End:0x64
-		if(__NFUN_119__(pItem, none))
+		if((pItem != none))
 		{
 			pItem.Init(CreditsName[i]);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -117,10 +117,10 @@ function FillListOfCredits()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x2E
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x2E
-		if(__NFUN_114__(C, m_ButtonMainMenu))
+		if((C == m_ButtonMainMenu))
 		{
 			Root.ChangeCurrentWidget(7);
 		}
@@ -138,27 +138,27 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0xEC
 		case 9:
 			// End:0x70
-			if(__NFUN_154__(Key, int(Root.Console.109)))
+			if((Key == int(Root.Console.109)))
 			{
 				// End:0x6D
-				if(__NFUN_177__(m_ListOfCredits.m_fScrollSpeed, float(0)))
+				if((m_ListOfCredits.m_fScrollSpeed > float(0)))
 				{
-					m_ListOfCredits.m_fScrollSpeed = float(__NFUN_250__(0, int(__NFUN_175__(m_ListOfCredits.m_fScrollSpeed, 0.5000000))));
+					m_ListOfCredits.m_fScrollSpeed = float(Max(0, int((m_ListOfCredits.m_fScrollSpeed - 0.5000000))));
 				}				
 			}
 			else
 			{
 				// End:0xA8
-				if(__NFUN_154__(Key, int(Root.Console.107)))
+				if((Key == int(Root.Console.107)))
 				{
-					__NFUN_184__(m_ListOfCredits.m_fScrollSpeed, 0.5000000);					
+					(m_ListOfCredits.m_fScrollSpeed += 0.5000000);					
 				}
 				else
 				{
 					// End:0xE9
-					if(__NFUN_154__(Key, int(Root.Console.106)))
+					if((Key == int(Root.Console.106)))
 					{
-						m_ListOfCredits.m_bStopScroll = __NFUN_129__(m_ListOfCredits.m_bStopScroll);
+						m_ListOfCredits.m_bStopScroll = (!m_ListOfCredits.m_bStopScroll);
 					}
 				}
 			}

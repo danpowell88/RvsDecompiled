@@ -23,38 +23,38 @@ var Sound m_sndHearsNoize;
 function PlayTerroristVoices(R6Pawn aPawn, Pawn.ETerroristVoices eTerroSound)
 {
 	// End:0x19A
-	if(__NFUN_119__(aPawn, none))
+	if((aPawn != none))
 	{
 		switch(eTerroSound)
 		{
 			// End:0x31
 			case 0:
-				aPawn.__NFUN_2730__(m_sndWounded, 6, 5, 2);
+				aPawn.PlayVoices(m_sndWounded, 6, 5, 2);
 				// End:0x19A
 				break;
 			// End:0x4E
 			case 1:
-				aPawn.__NFUN_2730__(m_sndTaunt, 6, 10);
+				aPawn.PlayVoices(m_sndTaunt, 6, 10);
 				// End:0x19A
 				break;
 			// End:0x6B
 			case 2:
-				aPawn.__NFUN_2730__(m_sndSurrender, 6, 10);
+				aPawn.PlayVoices(m_sndSurrender, 6, 10);
 				// End:0x19A
 				break;
 			// End:0x88
 			case 3:
-				aPawn.__NFUN_2730__(m_sndSeesTearGas, 6, 10);
+				aPawn.PlayVoices(m_sndSeesTearGas, 6, 10);
 				// End:0x19A
 				break;
 			// End:0xA5
 			case 4:
-				aPawn.__NFUN_2730__(m_sndRunAway, 6, 10);
+				aPawn.PlayVoices(m_sndRunAway, 6, 10);
 				// End:0x19A
 				break;
 			// End:0xC2
 			case 5:
-				aPawn.__NFUN_2730__(m_sndGrenade, 6, 10);
+				aPawn.PlayVoices(m_sndGrenade, 6, 10);
 				// End:0x19A
 				break;
 			// End:0xCA
@@ -63,37 +63,37 @@ function PlayTerroristVoices(R6Pawn aPawn, Pawn.ETerroristVoices eTerroSound)
 				break;
 			// End:0xE9
 			case 7:
-				aPawn.__NFUN_2730__(m_sndCoughsGas, 6, 10, 2);
+				aPawn.PlayVoices(m_sndCoughsGas, 6, 10, 2);
 				// End:0x19A
 				break;
 			// End:0x106
 			case 8:
-				aPawn.__NFUN_2730__(m_sndBackup, 6, 10);
+				aPawn.PlayVoices(m_sndBackup, 6, 10);
 				// End:0x19A
 				break;
 			// End:0x123
 			case 9:
-				aPawn.__NFUN_2730__(m_sndSeesSurrenderedHostage, 6, 10);
+				aPawn.PlayVoices(m_sndSeesSurrenderedHostage, 6, 10);
 				// End:0x19A
 				break;
 			// End:0x140
 			case 10:
-				aPawn.__NFUN_2730__(m_sndSeesRainbow_LowAlert, 6, 10);
+				aPawn.PlayVoices(m_sndSeesRainbow_LowAlert, 6, 10);
 				// End:0x19A
 				break;
 			// End:0x15D
 			case 11:
-				aPawn.__NFUN_2730__(m_sndSeesRainbow_HighAlert, 6, 10);
+				aPawn.PlayVoices(m_sndSeesRainbow_HighAlert, 6, 10);
 				// End:0x19A
 				break;
 			// End:0x17A
 			case 12:
-				aPawn.__NFUN_2730__(m_sndSeesFreeHostage, 6, 10);
+				aPawn.PlayVoices(m_sndSeesFreeHostage, 6, 10);
 				// End:0x19A
 				break;
 			// End:0x197
 			case 13:
-				aPawn.__NFUN_2730__(m_sndHearsNoize, 6, 10);
+				aPawn.PlayVoices(m_sndHearsNoize, 6, 10);
 				// End:0x19A
 				break;
 			// End:0xFFFF

@@ -56,7 +56,7 @@ function CreateLabelText(float _fX, float _fY, float _fWidth, float _fHeight)
 function SetLabelText(string _szText, Font _TextFont, Color _vTextColor)
 {
 	// End:0x79
-	if(__NFUN_119__(m_pTextInfo, none))
+	if((m_pTextInfo != none))
 	{
 		m_pTextInfo.Text = _szText;
 		m_pTextInfo.m_Font = _TextFont;
@@ -86,8 +86,8 @@ function CreateButtons(float _fX, float _fY, float _fSizeOfCounter)
 	RDisableRegion.H = 10;
 	fButtonWidth = float(R6WindowLookAndFeel(LookAndFeel).m_RButtonBackGround.W);
 	fButtonHeight = float(R6WindowLookAndFeel(LookAndFeel).m_RButtonBackGround.H);
-	fHeight = __NFUN_172__(__NFUN_175__(WinHeight, fButtonHeight), float(2));
-	fHeight = float(int(__NFUN_174__(fHeight, 0.5000000)));
+	fHeight = ((WinHeight - fButtonHeight) / float(2));
+	fHeight = float(int((fHeight + 0.5000000)));
 	m_pSubButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', _fX, _fY, fButtonWidth, fButtonHeight));
 	m_pSubButton.SetButtonBorderColor(Root.Colors.White);
 	m_pSubButton.m_vButtonColor = Root.Colors.White;
@@ -103,7 +103,7 @@ function CreateButtons(float _fX, float _fY, float _fSizeOfCounter)
 	m_pSubButton.ImageY = 2.0000000;
 	m_pSubButton.m_iDrawStyle = int(5);
 	m_pSubButton.m_eButtonType = 1;
-	m_pNbOfCounter = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', __NFUN_174__(_fX, fButtonWidth), _fY, __NFUN_175__(_fSizeOfCounter, __NFUN_171__(float(2), fButtonWidth)), fButtonHeight));
+	m_pNbOfCounter = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', (_fX + fButtonWidth), _fY, (_fSizeOfCounter - (float(2) * fButtonWidth)), fButtonHeight));
 	m_pNbOfCounter.m_bDrawBorders = false;
 	m_pNbOfCounter.m_BGTextureRegion.X = 113;
 	m_pNbOfCounter.m_BGTextureRegion.Y = 47;
@@ -116,7 +116,7 @@ function CreateButtons(float _fX, float _fY, float _fSizeOfCounter)
 	m_pNbOfCounter.TextColor = Root.Colors.BlueLight;
 	RNormalRegion.X = 59;
 	RDisableRegion.X = 59;
-	m_pPlusButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', __NFUN_174__(__NFUN_175__(_fX, fButtonWidth), _fSizeOfCounter), _fY, fButtonWidth, fButtonHeight));
+	m_pPlusButton = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', ((_fX - fButtonWidth) + _fSizeOfCounter), _fY, fButtonWidth, fButtonHeight));
 	m_pPlusButton.SetButtonBorderColor(Root.Colors.White);
 	m_pPlusButton.m_vButtonColor = Root.Colors.White;
 	m_pPlusButton.m_bDrawBorders = true;
@@ -140,12 +140,12 @@ function CreateButtons(float _fX, float _fY, float _fSizeOfCounter)
 function SetButtonToolTip(string _szLeftToolTip, string _szRightToolTip)
 {
 	// End:0x1F
-	if(__NFUN_119__(m_pSubButton, none))
+	if((m_pSubButton != none))
 	{
 		m_pSubButton.ToolTipString = _szLeftToolTip;
 	}
 	// End:0x3E
-	if(__NFUN_119__(m_pPlusButton, none))
+	if((m_pPlusButton != none))
 	{
 		m_pPlusButton.ToolTipString = _szRightToolTip;
 	}
@@ -187,7 +187,7 @@ function bool CheckValueForUnlimitedCounter(int _iValue, bool _bDefaultValue)
 	if(m_bUnlimitedCounterOnZero)
 	{
 		// End:0x61
-		if(__NFUN_130__(__NFUN_150__(_iValue, m_iMinCounter), __NFUN_154__(_iValue, 0)))
+		if(((_iValue < m_iMinCounter) && (_iValue == 0)))
 		{
 			m_iCounter = 0;
 			// End:0x4B
@@ -209,14 +209,14 @@ function bool CheckValueForUnlimitedCounter(int _iValue, bool _bDefaultValue)
 function int CheckValue(int _iValue)
 {
 	// End:0x18
-	if(__NFUN_151__(_iValue, m_iMaxCounter))
+	if((_iValue > m_iMaxCounter))
 	{
 		return m_iMaxCounter;		
 	}
 	else
 	{
 		// End:0x30
-		if(__NFUN_150__(_iValue, m_iMinCounter))
+		if((_iValue < m_iMinCounter))
 		{
 			return m_iMinCounter;			
 		}
@@ -234,7 +234,7 @@ function bool CheckAddButton()
 	if(m_bUnlimitedCounterOnZero)
 	{
 		// End:0x38
-		if(__NFUN_154__(m_iCounter, 0))
+		if((m_iCounter == 0))
 		{
 			m_iCounter = m_iMinCounter;
 			m_pNbOfCounter.SetNewText(string(m_iCounter), true);
@@ -242,9 +242,9 @@ function bool CheckAddButton()
 		}
 	}
 	// End:0x73
-	if(__NFUN_152__(__NFUN_146__(m_iCounter, m_iStepCounter), m_iMaxCounter))
+	if(((m_iCounter + m_iStepCounter) <= m_iMaxCounter))
 	{
-		__NFUN_161__(m_iCounter, m_iStepCounter);
+		(m_iCounter += m_iStepCounter);
 		m_pNbOfCounter.SetNewText(string(m_iCounter), true);
 		return true;
 	}
@@ -256,12 +256,12 @@ function bool CheckSubButton()
 {
 	local float bSubValue;
 
-	bSubValue = float(__NFUN_147__(m_iCounter, m_iStepCounter));
+	bSubValue = float((m_iCounter - m_iStepCounter));
 	// End:0x4B
 	if(m_bUnlimitedCounterOnZero)
 	{
 		// End:0x4B
-		if(__NFUN_176__(bSubValue, float(m_iMinCounter)))
+		if((bSubValue < float(m_iMinCounter)))
 		{
 			m_iCounter = 0;
 			m_pNbOfCounter.SetNewText("--", true);
@@ -269,9 +269,9 @@ function bool CheckSubButton()
 		}
 	}
 	// End:0x81
-	if(__NFUN_179__(bSubValue, float(m_iMinCounter)))
+	if((bSubValue >= float(m_iMinCounter)))
 	{
-		__NFUN_162__(m_iCounter, m_iStepCounter);
+		(m_iCounter -= m_iStepCounter);
 		m_pNbOfCounter.SetNewText(string(m_iCounter), true);
 		return true;
 	}
@@ -295,20 +295,20 @@ function Tick(float DeltaTime)
 {
 	local bool bButPressed;
 
-	__NFUN_184__(m_fTimeCheckBut, __NFUN_171__(DeltaTime, m_fTimeCheckBut));
+	(m_fTimeCheckBut += (DeltaTime * m_fTimeCheckBut));
 	// End:0x9C
-	if(__NFUN_179__(m_fTimeCheckBut, m_fTimeToWait))
+	if((m_fTimeCheckBut >= m_fTimeToWait))
 	{
 		m_fTimeCheckBut = 0.5000000;
 		m_fTimeToWait = 1.0000000;
 		bButPressed = m_bButPressed;
 		m_bButPressed = false;
 		m_bButPressed = IsMouseDown(m_pSubButton);
-		m_bButPressed = __NFUN_132__(IsMouseDown(m_pPlusButton), m_bButPressed);
+		m_bButPressed = (IsMouseDown(m_pPlusButton) || m_bButPressed);
 		// End:0x9C
-		if(__NFUN_130__(bButPressed, m_bButPressed))
+		if((bButPressed && m_bButPressed))
 		{
-			__NFUN_182__(m_fTimeToWait, 0.5000000);
+			(m_fTimeToWait *= 0.5000000);
 		}
 	}
 	return;
@@ -320,7 +320,7 @@ function Tick(float DeltaTime)
 function bool IsMouseDown(UWindowDialogControl _pButton)
 {
 	// End:0x2C
-	if(__NFUN_119__(_pButton, none))
+	if((_pButton != none))
 	{
 		// End:0x2C
 		if(_pButton.bMouseDown)
@@ -339,7 +339,7 @@ function bool IsMouseDown(UWindowDialogControl _pButton)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x1A4
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x19
 		if(m_bNotAcceptClick)
@@ -354,13 +354,13 @@ function Notify(UWindowDialogControl C, byte E)
 				if(CheckAddButton())
 				{
 					// End:0x9F
-					if(__NFUN_119__(m_pAssociateButton, none))
+					if((m_pAssociateButton != none))
 					{
 						// End:0x9F
-						if(__NFUN_154__(m_iAssociateButCase, int(1)))
+						if((m_iAssociateButCase == int(1)))
 						{
 							// End:0x9F
-							if(__NFUN_151__(m_iCounter, m_pAssociateButton.m_iCounter))
+							if((m_iCounter > m_pAssociateButton.m_iCounter))
 							{
 								m_pAssociateButton.m_iCounter = m_iCounter;
 								m_pAssociateButton.m_pNbOfCounter.SetNewText(string(m_pAssociateButton.m_iCounter), true);
@@ -374,7 +374,7 @@ function Notify(UWindowDialogControl C, byte E)
 					}
 				}
 				// End:0xDC
-				if(__NFUN_129__(m_bButPressed))
+				if((!m_bButPressed))
 				{
 					m_fTimeCheckBut = 0.5000000;
 				}
@@ -386,13 +386,13 @@ function Notify(UWindowDialogControl C, byte E)
 				if(CheckSubButton())
 				{
 					// End:0x15E
-					if(__NFUN_119__(m_pAssociateButton, none))
+					if((m_pAssociateButton != none))
 					{
 						// End:0x15E
-						if(__NFUN_154__(m_iAssociateButCase, int(0)))
+						if((m_iAssociateButCase == int(0)))
 						{
 							// End:0x15E
-							if(__NFUN_150__(m_iCounter, m_pAssociateButton.m_iCounter))
+							if((m_iCounter < m_pAssociateButton.m_iCounter))
 							{
 								m_pAssociateButton.m_iCounter = m_iCounter;
 								m_pAssociateButton.m_pNbOfCounter.SetNewText(string(m_pAssociateButton.m_iCounter), true);
@@ -406,7 +406,7 @@ function Notify(UWindowDialogControl C, byte E)
 					}
 				}
 				// End:0x19B
-				if(__NFUN_129__(m_bButPressed))
+				if((!m_bButPressed))
 				{
 					m_fTimeCheckBut = 0.5000000;
 				}
@@ -420,14 +420,14 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x2A9
-		if(__NFUN_154__(int(E), 12))
+		if((int(E) == 12))
 		{
 			m_pSubButton.SetButtonBorderColor(Root.Colors.BlueLight);
 			m_pSubButton.m_vButtonColor = Root.Colors.BlueLight;
 			m_pPlusButton.SetButtonBorderColor(Root.Colors.BlueLight);
 			m_pPlusButton.m_vButtonColor = Root.Colors.BlueLight;
 			// End:0x27B
-			if(__NFUN_119__(m_pTextInfo, none))
+			if((m_pTextInfo != none))
 			{
 				m_pTextInfo.TextColor = Root.Colors.BlueLight;
 			}
@@ -440,14 +440,14 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x39A
-			if(__NFUN_154__(int(E), 9))
+			if((int(E) == 9))
 			{
 				m_pSubButton.SetButtonBorderColor(Root.Colors.White);
 				m_pSubButton.m_vButtonColor = Root.Colors.White;
 				m_pPlusButton.SetButtonBorderColor(Root.Colors.White);
 				m_pPlusButton.m_vButtonColor = Root.Colors.White;
 				// End:0x380
-				if(__NFUN_119__(m_pTextInfo, none))
+				if((m_pTextInfo != none))
 				{
 					m_pTextInfo.TextColor = Root.Colors.White;
 				}

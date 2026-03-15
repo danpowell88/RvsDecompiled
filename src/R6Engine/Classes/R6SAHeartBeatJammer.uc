@@ -10,7 +10,7 @@ class R6SAHeartBeatJammer extends R6GenericHB
 simulated function FirstPassReset()
 {
 	super(R6InteractiveObject).FirstPassReset();
-	__NFUN_279__();
+	Destroy();
 	return;
 }
 

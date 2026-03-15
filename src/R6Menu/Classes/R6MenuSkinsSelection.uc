@@ -35,7 +35,7 @@ function Created()
 {
 	local float fXPos, fXStep;
 
-	fXStep = __NFUN_171__(__NFUN_175__(__NFUN_175__(WinWidth, float(__NFUN_144__(2, 140))), float(160)), 0.2500000);
+	fXStep = (((WinWidth - float((2 * 140))) - float(160)) * 0.2500000);
 	m_pTextInfo = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, WinWidth, WinHeight, self));
 	m_pTextInfo.bAlwaysBehind = true;
 	m_pTextInfo.SetNoBorder();
@@ -47,11 +47,11 @@ function Created()
 	m_pMapList.TextColor = Root.Colors.BlueLight;
 	m_pMapList.SetCornerType(0);
 	m_pMapList.SetOverBorderColorEffect(Root.Colors.GrayLight);
-	fXPos = __NFUN_174__(__NFUN_174__(fXPos, float(140)), fXStep);
+	fXPos = ((fXPos + float(140)) + fXStep);
 	m_pTextInfo.m_vTextColor = Root.Colors.BlueLight;
 	m_pTextInfo.AddTextLabel(Localize("MPCreateGame", "Teams", "R6Menu"), fXPos, 15.0000000, 160.0000000, 2, false);
 	m_2DArmor = R6MenuMPArmor(CreateControl(Class'R6Menu.R6MenuMPArmor', fXPos, 40.0000000, 160.0000000, 245.0000000, self));
-	fXPos = __NFUN_174__(__NFUN_174__(fXPos, float(160)), fXStep);
+	fXPos = ((fXPos + float(160)) + fXStep);
 	m_pTextInfo.m_vTextColor = Root.Colors.White;
 	m_pTextInfo.AddTextLabel(Localize("MPCreateGame", "Options_UniformSelect", "R6Menu"), fXPos, 15.0000000, 140.0000000, 2, false);
 	m_ArmorListBox = R6WindowTextListBox(CreateControl(Class'R6Window.R6WindowTextListBox', fXPos, 40.0000000, 140.0000000, 245.0000000, self));
@@ -76,10 +76,10 @@ function ShowWindow()
 function FirstDisplay()
 {
 	// End:0x5E
-	if(__NFUN_114__(m_pMapList.GetSelectedItem(), none))
+	if((m_pMapList.GetSelectedItem() == none))
 	{
 		// End:0x5E
-		if(__NFUN_151__(m_pMapList.Items.Count(), 0))
+		if((m_pMapList.Items.Count() > 0))
 		{
 			m_pMapList.SetSelectedItem(UWindowListBoxItem(m_pMapList.Items.Next));
 		}
@@ -98,7 +98,7 @@ function UpdateImages()
 	local string szTemp;
 
 	// End:0xFB
-	if(__NFUN_119__(m_ArmorListBox.GetSelectedItem(), none))
+	if((m_ArmorListBox.GetSelectedItem() != none))
 	{
 		m_2DArmor.SetArmorTexture(m_GreenArmorDesc.default.m_2DMenuTexture, m_GreenArmorDesc.default.m_2dMenuRegion, false);
 		szTemp = R6WindowListBoxItemExt(m_pMapList.GetSelectedItem()).m_AItemDesc[1].szText;
@@ -127,7 +127,7 @@ function FillArmorList()
 
 	BuildAvailableMissionArmors();
 	// End:0x289
-	if(__NFUN_119__(m_ArmorListBox, none))
+	if((m_ArmorListBox != none))
 	{
 		m_ArmorListBox.Clear();
 		m_GreenArmorDesc = none;
@@ -137,7 +137,7 @@ function FillArmorList()
 		J0x4F:
 
 		// End:0x19E [Loop If]
-		if(__NFUN_150__(i, m_AArmors.Length))
+		if((i < m_AArmors.Length))
 		{
 			ArmorDescriptionClass = Class<R6ArmorDescription>(m_AArmors[i].armorClass);
 			NewItem = R6WindowListBoxItem(m_ArmorListBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
@@ -146,24 +146,24 @@ function FillArmorList()
 			NewItem.m_Object = ArmorDescriptionClass;
 			szTemp = MapListItem.GetItemText(2);
 			// End:0x14F
-			if(__NFUN_122__(szTemp, NewItem.HelpText))
+			if((szTemp == NewItem.HelpText))
 			{
 				m_GreenArmorDesc = ArmorDescriptionClass;
 				GreenItem = NewItem;
 			}
 			szTemp = MapListItem.GetItemText(3);
 			// End:0x194
-			if(__NFUN_122__(szTemp, NewItem.HelpText))
+			if((szTemp == NewItem.HelpText))
 			{
 				m_RedArmorDesc = ArmorDescriptionClass;
 				RedItem = NewItem;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x4F;
 		}
 		// End:0x1FC
-		if(__NFUN_122__(MapListItem.GetItemText(3), ""))
+		if((MapListItem.GetItemText(3) == ""))
 		{
 			// End:0x1FC
 			if(m_2DArmor.IsRedArmorSelect())
@@ -174,17 +174,17 @@ function FillArmorList()
 			}
 		}
 		// End:0x27A
-		if(__NFUN_114__(m_ArmorListBox.GetSelectedItem(), none))
+		if((m_ArmorListBox.GetSelectedItem() == none))
 		{
 			// End:0x247
-			if(__NFUN_130__(__NFUN_119__(GreenItem, none), m_2DArmor.IsGreenArmorSelect()))
+			if(((GreenItem != none) && m_2DArmor.IsGreenArmorSelect()))
 			{
 				m_ArmorListBox.SetSelectedItem(GreenItem);				
 			}
 			else
 			{
 				// End:0x27A
-				if(__NFUN_130__(__NFUN_119__(RedItem, none), m_2DArmor.IsRedArmorSelect()))
+				if(((RedItem != none) && m_2DArmor.IsRedArmorSelect()))
 				{
 					m_ArmorListBox.SetSelectedItem(RedItem);
 				}
@@ -207,30 +207,30 @@ function BuildAvailableMissionArmors()
 	local bool bFind;
 	local R6ModMgr pModManager;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	R6Console = R6Console(Root.Console);
 	m_AArmors.Remove(0, m_AArmors.Length);
 	i = 0;
 	J0x3F:
 
 	// End:0xED [Loop If]
-	if(__NFUN_150__(i, R6Console.m_aMissionDescriptions.Length))
+	if((i < R6Console.m_aMissionDescriptions.Length))
 	{
 		CurrentMission = R6Console.m_aMissionDescriptions[i];
 		// End:0x80
-		if(__NFUN_114__(CurrentMission, none))
+		if((CurrentMission == none))
 		{
 			// [Explicit Break]
 			goto J0xED;
 		}
 		// End:0xAA
-		if(__NFUN_129__(Root.GetMapNameLocalisation(CurrentMission.m_MapName, szTemp)))
+		if((!Root.GetMapNameLocalisation(CurrentMission.m_MapName, szTemp)))
 		{
 			// [Explicit Continue]
 			goto J0xE3;
 		}
 		// End:0xE3
-		if(__NFUN_122__(szTemp, R6WindowListBoxItemExt(m_pMapList.GetSelectedItem()).m_AItemDesc[0].szText))
+		if((szTemp == R6WindowListBoxItemExt(m_pMapList.GetSelectedItem()).m_AItemDesc[0].szText))
 		{
 			bFind = true;
 			// [Explicit Break]
@@ -238,7 +238,7 @@ function BuildAvailableMissionArmors()
 		}
 		J0xE3:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x3F;
 	}
@@ -252,51 +252,51 @@ function BuildAvailableMissionArmors()
 		J0x104:
 
 		// End:0x1B6 [Loop If]
-		if(__NFUN_150__(j, pModManager.m_pCurrentMod.m_aDescriptionPackage.Length))
+		if((j < pModManager.m_pCurrentMod.m_aDescriptionPackage.Length))
 		{
-			ArmorDescriptionClass = Class<R6ArmorDescription>(__NFUN_1005__(__NFUN_112__(pModManager.m_pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6ArmorDescription'));
+			ArmorDescriptionClass = Class<R6ArmorDescription>(GetFirstPackageClass((pModManager.m_pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6ArmorDescription'));
 			J0x15C:
 
 			// End:0x1A9 [Loop If]
-			if(__NFUN_119__(ArmorDescriptionClass, none))
+			if((ArmorDescriptionClass != none))
 			{
 				// End:0x198
-				if(__NFUN_123__(ArmorDescriptionClass.default.m_NameID, "NONE"))
+				if((ArmorDescriptionClass.default.m_NameID != "NONE"))
 				{
 					AArmors[nbArmor] = ArmorDescriptionClass;
-					__NFUN_165__(nbArmor);
+					(nbArmor++);
 				}
-				ArmorDescriptionClass = Class<R6ArmorDescription>(__NFUN_1006__());
+				ArmorDescriptionClass = Class<R6ArmorDescription>(GetNextClass());
 				// [Loop Continue]
 				goto J0x15C;
 			}
-			__NFUN_1007__();
-			__NFUN_165__(j);
+			FreePackageObjects();
+			(j++);
 			// [Loop Continue]
 			goto J0x104;
 		}
 		// End:0x297
-		if(__NFUN_242__(pModManager.m_pCurrentMod.m_bUseCustomOperatives, true))
+		if((pModManager.m_pCurrentMod.m_bUseCustomOperatives == true))
 		{
 			j = 0;
 			J0x1DB:
 
 			// End:0x297 [Loop If]
-			if(__NFUN_150__(j, pModManager.GetPackageMgr().GetNbPackage()))
+			if((j < pModManager.GetPackageMgr().GetNbPackage()))
 			{
 				ArmorDescriptionClass = Class<R6ArmorDescription>(pModManager.GetPackageMgr().GetFirstClassFromPackage(j, Class'R6Description.R6ArmorDescription'));
 				J0x22C:
 
 				// End:0x28D [Loop If]
-				if(__NFUN_130__(__NFUN_119__(ArmorDescriptionClass, none), __NFUN_242__(ArmorDescriptionClass.default.m_bHideFromMenu, false)))
+				if(((ArmorDescriptionClass != none) && (ArmorDescriptionClass.default.m_bHideFromMenu == false)))
 				{
 					AArmors[nbArmor] = ArmorDescriptionClass;
-					__NFUN_165__(nbArmor);
+					(nbArmor++);
 					ArmorDescriptionClass = Class<R6ArmorDescription>(pModManager.GetPackageMgr().GetNextClassFromPackage());
 					// [Loop Continue]
 					goto J0x22C;
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x1DB;
 			}
@@ -306,13 +306,13 @@ function BuildAvailableMissionArmors()
 		J0x2BD:
 
 		// End:0x32B [Loop If]
-		if(__NFUN_150__(j, nbArmor))
+		if((j < nbArmor))
 		{
 			pArmorInfo.armorClass = AArmors[j];
 			ArmorDescriptionClass = Class<R6ArmorDescription>(pArmorInfo.armorClass);
 			pArmorInfo.szArmorPkg = ArmorDescriptionClass.default.m_ClassName;
 			m_AArmors[j] = pArmorInfo;
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x2BD;
 		}
@@ -331,14 +331,14 @@ function CopyAllValues(R6MenuMapListExt _pMyList)
 	J0x52:
 
 	// End:0x148 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		Found = false;
 		FoundItem = R6WindowListBoxItemExt(m_pMapList.Items.Next);
 		J0x87:
 
 		// End:0xC9 [Loop If]
-		if(__NFUN_119__(FoundItem, none))
+		if((FoundItem != none))
 		{
 			// End:0xAD
 			if(SameSkins(FoundItem, CurItem))
@@ -351,7 +351,7 @@ function CopyAllValues(R6MenuMapListExt _pMyList)
 		}
 		CreateItem = CopyItemInList(CurItem, m_pMapList);
 		// End:0x12C
-		if(__NFUN_130__(__NFUN_114__(m_pMapList.GetSelectedItem(), none), __NFUN_114__(_pMyList.m_pFinalMapList.GetSelectedItem(), CurItem)))
+		if(((m_pMapList.GetSelectedItem() == none) && (_pMyList.m_pFinalMapList.GetSelectedItem() == CurItem)))
 		{
 			m_pMapList.SetSelectedItem(CreateItem);
 		}
@@ -371,7 +371,7 @@ function GetAllValues(out R6MenuMapListExt _pMyList)
 	J0x43:
 
 	// End:0x83 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		CopyItemInList(CurItem, _pMyList.m_pFinalMapList);
 		CurItem = R6WindowListBoxItemExt(CurItem.Next);
@@ -388,14 +388,14 @@ function R6WindowListBoxItemExt CopyItemInList(R6WindowListBoxItemExt _ItemToAdd
 	local int i;
 
 	// End:0x208
-	if(__NFUN_150__(_ListAddItem.Items.Count(), 32))
+	if((_ListAddItem.Items.Count() < 32))
 	{
 		NewItem = R6WindowListBoxItemExt(_ListAddItem.Items.Append(_ListAddItem.ListClass));
 		i = 0;
 		J0x57:
 
 		// End:0x208 [Loop If]
-		if(__NFUN_150__(i, _ItemToAdd.m_AItemDesc.Length))
+		if((i < _ItemToAdd.m_AItemDesc.Length))
 		{
 			ItemDesc.szText = _ItemToAdd.m_AItemDesc[i].szText;
 			ItemDesc.szMisc = _ItemToAdd.m_AItemDesc[i].szMisc;
@@ -408,7 +408,7 @@ function R6WindowListBoxItemExt CopyItemInList(R6WindowListBoxItemExt _ItemToAdd
 			ItemDesc.eAlignment = _ItemToAdd.m_AItemDesc[i].eAlignment;
 			ItemDesc.bDisplay = _ItemToAdd.m_AItemDesc[i].bDisplay;
 			NewItem.m_AItemDesc[NewItem.m_AItemDesc.Length] = ItemDesc;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x57;
 		}
@@ -426,10 +426,10 @@ function SetButtonRegion(bool _bInverseTex)
 function bool SameSkins(R6WindowListBoxItemExt Item1, R6WindowListBoxItemExt Item2)
 {
 	// End:0x4C
-	if(__NFUN_122__(Item1.GetItemMisc(0), Item2.GetItemMisc(0)))
+	if((Item1.GetItemMisc(0) == Item2.GetItemMisc(0)))
 	{
 		// End:0x4C
-		if(__NFUN_122__(Item1.GetItemMisc(1), Item2.GetItemMisc(1)))
+		if((Item1.GetItemMisc(1) == Item2.GetItemMisc(1)))
 		{
 			return true;
 		}
@@ -447,7 +447,7 @@ function ChangeCurrentMapSkin(int Skin)
 	J0x3C:
 
 	// End:0xD3 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0xB7
 		if(SameSkins(SelItem, CurItem))
@@ -472,7 +472,7 @@ function Notify(UWindowDialogControl C, byte E)
 		return;
 	}
 	// End:0xF2
-	if(C.__NFUN_303__('R6WindowButtonGear'))
+	if(C.IsA('R6WindowButtonGear'))
 	{
 		switch(E)
 		{
@@ -481,14 +481,14 @@ function Notify(UWindowDialogControl C, byte E)
 				m_2DArmor.SetHighLightGreenArmor(false);
 				m_2DArmor.SetHighLightRedArmor(false);
 				// End:0x76
-				if(__NFUN_114__(C, m_2DArmor.m_2DArmor))
+				if((C == m_2DArmor.m_2DArmor))
 				{
 					m_2DArmor.SetHighLightGreenArmor(true);					
 				}
 				else
 				{
 					// End:0x9E
-					if(__NFUN_114__(C, m_2DArmor.m_2DArmorRed))
+					if((C == m_2DArmor.m_2DArmorRed))
 					{
 						m_2DArmor.SetHighLightRedArmor(true);
 					}
@@ -516,7 +516,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x148
-		if(C.__NFUN_303__('R6WindowTextListBoxExt'))
+		if(C.IsA('R6WindowTextListBoxExt'))
 		{
 			// End:0x145
 			if(__NFUN_132__(__NFUN_154__(int(E), 2), __NFUN_154__(int(E), 11)))

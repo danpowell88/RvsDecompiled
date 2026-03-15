@@ -26,7 +26,7 @@ static function Color GetColor(optional int Switch, optional PlayerReplicationIn
 
 static function float GetOffset(int Switch, float YL, float ClipY)
 {
-	return __NFUN_171__(__NFUN_172__(default.YPos, float(768)), ClipY);
+	return ((default.YPos / float(768)) * ClipY);
 	return;
 }
 

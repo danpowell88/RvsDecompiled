@@ -76,34 +76,34 @@ function Init(string szFile)
 	local R6ModMgr pModManager;
 	local R6Mod ProperMod;
 
-	__NFUN_1010__(__NFUN_112__("..\\Mods\\", szFile));
+	LoadConfig(("..\\Mods\\" $ szFile));
 	// End:0x69
-	if(__NFUN_132__(__NFUN_132__(__NFUN_155__(Version, 1), __NFUN_154__(Version, 0)), __NFUN_122__(m_szKeyWord, "")))
+	if((((Version != 1) || (Version == 0)) || (m_szKeyWord == "")))
 	{
-		__NFUN_231__(__NFUN_112__("WARNING: problem initializing mod ", szFile));
+		Log(("WARNING: problem initializing mod " $ szFile));
 		return;
 	}
 	// End:0x81
-	if(__NFUN_180__(m_fPriority, float(0)))
+	if((m_fPriority == float(0)))
 	{
 		m_fPriority = 2.0000000;
 	}
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	ProperMod = pModManager.m_pCurrentMod;
 	pModManager.m_pCurrentMod = self;
-	pModManager.__NFUN_2021__();
+	pModManager.SetSystemMod();
 	m_szName = Localize(m_szKeyWord, "ModName", "R6Mod", true);
 	m_szModInfo = Localize(m_szKeyWord, "ModInfo", "R6Mod", true);
 	// End:0x119
-	if(__NFUN_151__(__NFUN_125__(m_szKeyWord), 20))
+	if((Len(m_szKeyWord) > 20))
 	{
 		assert(false);
 	}
 	// End:0x144
-	if(__NFUN_119__(ProperMod, none))
+	if((ProperMod != none))
 	{
 		pModManager.m_pCurrentMod = ProperMod;
-		pModManager.__NFUN_2021__();
+		pModManager.SetSystemMod();
 	}
 	return;
 }
@@ -112,15 +112,15 @@ function LogArray(string S, array<string> anArray)
 {
 	local int i;
 
-	__NFUN_231__(__NFUN_112__(S, ":"));
+	Log((S $ ":"));
 	i = 0;
 	J0x13:
 
 	// End:0x42 [Loop If]
-	if(__NFUN_150__(i, anArray.Length))
+	if((i < anArray.Length))
 	{
-		__NFUN_231__(__NFUN_112__("   -", anArray[i]));
-		__NFUN_163__(i);
+		Log(("   -" $ anArray[i]));
+		(++i);
 		// [Loop Continue]
 		goto J0x13;
 	}
@@ -130,7 +130,7 @@ function LogArray(string S, array<string> anArray)
 function R6Mod GetExtraMods(int Index)
 {
 	// End:0x1F
-	if(__NFUN_150__(Index, m_aExtraMods.Length))
+	if((Index < m_aExtraMods.Length))
 	{
 		return m_aExtraMods[Index];		
 	}
@@ -147,7 +147,7 @@ function AddGameTypesFromCurrentMod(LevelInfo pLevelInfo)
 	local R6ModConfig pModConfig;
 
 	// End:0x4A
-	if(__NFUN_123__(m_ConfigClass, ""))
+	if((m_ConfigClass != ""))
 	{
 		pConfigClass = Class<R6ModConfig>(DynamicLoadObject(m_ConfigClass, Class'Core.Class'));
 		pModConfig = new (self) pConfigClass;
@@ -158,24 +158,24 @@ function AddGameTypesFromCurrentMod(LevelInfo pLevelInfo)
 
 function LogInfo()
 {
-	__NFUN_231__("");
-	__NFUN_231__(" R6Mod Information");
-	__NFUN_231__(" =================");
-	__NFUN_231__(__NFUN_112__("	m_szKeyWord = ", m_szKeyWord));
-	__NFUN_231__(__NFUN_112__("  version= ", string(Version)));
-	__NFUN_231__(__NFUN_112__("  m_fPriority=", string(m_fPriority)));
-	__NFUN_231__(__NFUN_112__("  m_szName= ", m_szName));
-	__NFUN_231__(__NFUN_112__("  m_szModInfo=", m_szModInfo));
-	__NFUN_231__(__NFUN_112__("  m_szCampaignIniFile=", m_szCampaignIniFile));
-	__NFUN_231__(__NFUN_112__("  m_szBackgroundRootDir=", m_szBackgroundRootDir));
-	__NFUN_231__(__NFUN_112__("  m_szVideosRootDir=", m_szVideosRootDir));
-	__NFUN_231__(__NFUN_112__("  m_szCreditsFile= ", m_szCreditsFile));
-	__NFUN_231__("");
-	__NFUN_231__("Localization Files:");
-	__NFUN_231__("===================");
-	__NFUN_231__("");
-	__NFUN_231__(" Description Packages");
-	__NFUN_231__(" ====================");
+	Log("");
+	Log(" R6Mod Information");
+	Log(" =================");
+	Log(("	m_szKeyWord = " $ m_szKeyWord));
+	Log(("  version= " $ string(Version)));
+	Log(("  m_fPriority=" $ string(m_fPriority)));
+	Log(("  m_szName= " $ m_szName));
+	Log(("  m_szModInfo=" $ m_szModInfo));
+	Log(("  m_szCampaignIniFile=" $ m_szCampaignIniFile));
+	Log(("  m_szBackgroundRootDir=" $ m_szBackgroundRootDir));
+	Log(("  m_szVideosRootDir=" $ m_szVideosRootDir));
+	Log(("  m_szCreditsFile= " $ m_szCreditsFile));
+	Log("");
+	Log("Localization Files:");
+	Log("===================");
+	Log("");
+	Log(" Description Packages");
+	Log(" ====================");
 	LogArray("	 m_aDescriptionPackage", m_aDescriptionPackage);
 	return;
 }

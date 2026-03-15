@@ -62,7 +62,7 @@ function Created()
 	m_FirstTabWindow.bAlwaysBehind = true;
 	m_FirstTabWindow.Text = "";
 	m_FirstTabWindow.m_BGTexture = none;
-	m_pFirstTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', __NFUN_174__(10.0000000, float(5)), 92.0000000, 550.0000000, 25.0000000, self));
+	m_pFirstTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', (10.0000000 + float(5)), 92.0000000, 550.0000000, 25.0000000, self));
 	m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame", "Tab_Options", "R6Menu"), Localize("Tip", "Tab_Options", "R6Menu"), int(0));
 	m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame", "Tab_AdvOptions", "R6Menu"), Localize("Tip", "Tab_AdvOptions", "R6Menu"), int(1));
 	m_pFirstTabManager.AddTabInControl(Localize("MPCreateGame", "Tab_Kit", "R6Menu"), Localize("Tip", "Tab_Kit", "R6Menu"), int(2));
@@ -94,13 +94,13 @@ function ShowWindow()
 	R6MenuRootWindow(Root).m_pMenuCDKeyManager.SetWindowUser(Root.19, self);
 	Root.SetLoadRandomBackgroundImage("CreateGame");
 	// End:0x191
-	if(__NFUN_130__(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient), __NFUN_132__(R6Console(Root.Console).m_bNonUbiMatchMakingHost, R6Console(Root.Console).m_bAutoLoginFirstPass)))
+	if(((!R6Console(Root.Console).m_bStartedByGSClient) && (R6Console(Root.Console).m_bNonUbiMatchMakingHost || R6Console(Root.Console).m_bAutoLoginFirstPass)))
 	{
 		R6Console(Root.Console).m_bAutoLoginFirstPass = false;
 		R6MenuRootWindow(Root).InitBeaconService();
 		R6Console(Root.Console).m_GameService.StartAutoLogin();
 		// End:0x179
-		if(__NFUN_129__(R6Console(Root.Console).m_GameService.m_bAutoLoginInProgress))
+		if((!R6Console(Root.Console).m_GameService.m_bAutoLoginInProgress))
 		{
 			R6Console(Root.Console).szStoreGamePassWd = m_pCreateTabOptions.GetCreateGamePassword();
 			m_pLoginWindow.StartLogInProcedure(OwnerWindow);
@@ -194,7 +194,7 @@ function ManageTabSelection(int _MPTabChoiceID)
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("This tab was not supported (R6MenuMPCreateGameWidget)");
+			Log("This tab was not supported (R6MenuMPCreateGameWidget)");
 			// End:0xDF
 			break;
 			break;
@@ -222,7 +222,7 @@ function MenuServerLoadProfile()
 //*********************************
 function InitText()
 {
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("MPCreateGame", "Title", "R6Menu");
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
@@ -247,7 +247,7 @@ function InitButton()
 	m_ButtonMainMenu.m_fFontSpacing = 0.0000000;
 	m_ButtonMainMenu.m_buttonFont = Root.Fonts[15];
 	m_ButtonMainMenu.ResizeToText();
-	m_ButtonMainMenu.bDisabled = __NFUN_132__(R6Console(Root.Console).m_bStartedByGSClient, R6Console(Root.Console).m_bNonUbiMatchMakingHost);
+	m_ButtonMainMenu.bDisabled = (R6Console(Root.Console).m_bStartedByGSClient || R6Console(Root.Console).m_bNonUbiMatchMakingHost);
 	m_ButtonOptions = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', 10.0000000, 447.0000000, 250.0000000, 25.0000000, self));
 	m_ButtonOptions.ToolTipString = Localize("Tip", "ButtonOptions", "R6Menu");
 	m_ButtonOptions.Text = Localize("SinglePlayer", "ButtonOptions", "R6Menu");
@@ -284,7 +284,7 @@ function InitTabWindow()
 	local float fWidth, fYPos;
 
 	fWidth = 1.0000000;
-	fYPos = __NFUN_175__(__NFUN_174__(87.0000000, float(30)), float(1));
+	fYPos = ((87.0000000 + float(30)) - float(1));
 	m_pWindowBorder = R6WindowSimpleFramedWindowExt(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindowExt', 10.0000000, fYPos, 620.0000000, 300.0000000, self));
 	m_pWindowBorder.bAlwaysBehind = true;
 	m_pWindowBorder.ActiveBorder(0, false);
@@ -315,7 +315,7 @@ function InitTabWindow()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x50
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{

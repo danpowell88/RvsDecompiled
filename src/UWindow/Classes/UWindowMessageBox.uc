@@ -27,13 +27,13 @@ function BeforePaint(Canvas C, float X, float Y)
 	local Region R;
 
 	// End:0xBC
-	if(__NFUN_129__(bSetupSize))
+	if((!bSetupSize))
 	{
 		SetSize(200.0000000, WinHeight);
 		R = LookAndFeel.FW_GetClientArea(self);
-		SetSize(200.0000000, __NFUN_174__(__NFUN_175__(WinHeight, float(R.H)), UWindowMessageBoxCW(ClientArea).GetHeight(C)));
-		WinLeft = float(int(__NFUN_172__(__NFUN_175__(Root.WinWidth, WinWidth), float(2))));
-		WinTop = float(int(__NFUN_172__(__NFUN_175__(Root.WinHeight, WinHeight), float(2))));
+		SetSize(200.0000000, ((WinHeight - float(R.H)) + UWindowMessageBoxCW(ClientArea).GetHeight(C)));
+		WinLeft = float(int(((Root.WinWidth - WinWidth) / float(2))));
+		WinTop = float(int(((Root.WinHeight - WinHeight) / float(2))));
 		bSetupSize = true;
 	}
 	super.BeforePaint(C, X, Y);
@@ -44,18 +44,18 @@ function AfterPaint(Canvas C, float X, float Y)
 {
 	super(UWindowWindow).AfterPaint(C, X, Y);
 	// End:0x58
-	if(__NFUN_155__(TimeOut, 0))
+	if((TimeOut != 0))
 	{
-		__NFUN_165__(FrameCount);
+		(FrameCount++);
 		// End:0x58
-		if(__NFUN_153__(FrameCount, 5))
+		if((FrameCount >= 5))
 		{
-			TimeOutTime = __NFUN_174__(GetEntryLevel().TimeSeconds, float(TimeOut));
+			TimeOutTime = (GetEntryLevel().TimeSeconds + float(TimeOut));
 			TimeOut = 0;
 		}
 	}
 	// End:0x91
-	if(__NFUN_130__(__NFUN_181__(TimeOutTime, float(0)), __NFUN_177__(GetEntryLevel().TimeSeconds, TimeOutTime)))
+	if(((TimeOutTime != float(0)) && (GetEntryLevel().TimeSeconds > TimeOutTime)))
 	{
 		TimeOutTime = 0.0000000;
 		Close();

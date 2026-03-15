@@ -65,18 +65,18 @@ function BeginPlay()
 {
 	local IpAddr Addr;
 
-	__NFUN_1311__(self);
+	SetServerBeacon(self);
 	Level.Game.SetUdpBeacon(self);
 	boundport = BindPort(ServerBeaconPort, true, LocalIpAddress);
 	// End:0x65
-	if(__NFUN_154__(boundport, 0))
+	if((boundport == 0))
 	{
-		__NFUN_231__("UdpBeacon failed to bind a port.");
+		Log("UdpBeacon failed to bind a port.");
 		return;
 	}
 	Addr.Addr = BroadcastAddr;
 	Addr.Port = BeaconPort;
-	__NFUN_280__(10.0000000, true);
+	SetTimer(10.0000000, true);
 	InitBeaconProduct();
 	return;
 }
@@ -86,13 +86,13 @@ function BroadcastBeacon(IpAddr Addr)
 	local string textData;
 
 	textData = BuildBeaconText();
-	SendText(Addr, __NFUN_168__(__NFUN_168__(BeaconProduct, __NFUN_127__(Level.GetAddressURL(), __NFUN_146__(__NFUN_126__(Level.GetAddressURL(), ":"), 1))), textData));
+	SendText(Addr, ((BeaconProduct @ Mid(Level.GetAddressURL(), (InStr(Level.GetAddressURL(), ":") + 1))) @ textData));
 	return;
 }
 
 function BroadcastBeaconQuery(IpAddr Addr)
 {
-	SendText(Addr, __NFUN_168__(BeaconProduct, string(UdpServerQueryPort)));
+	SendText(Addr, (BeaconProduct @ string(UdpServerQueryPort)));
 	return;
 }
 
@@ -101,23 +101,23 @@ event ReceivedText(IpAddr Addr, string Text)
 	local R6ServerInfo pServerOptions;
 	local bool bServerResistered;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	// End:0x2F
-	if(__NFUN_122__(Text, "REPORT"))
+	if((Text == "REPORT"))
 	{
 		BroadcastBeacon(Addr);
 	}
 	// End:0x51
-	if(__NFUN_122__(Text, "REPORTQUERY"))
+	if((Text == "REPORTQUERY"))
 	{
 		BroadcastBeaconQuery(Addr);
 	}
 	// End:0xE0
-	if(__NFUN_122__(Text, "PREJOIN"))
+	if((Text == "PREJOIN"))
 	{
-		bServerResistered = __NFUN_130__(__NFUN_155__(Level.Game.GameReplicationInfo.m_iGameSvrLobbyID, 0), __NFUN_155__(Level.Game.GameReplicationInfo.m_iGameSvrGroupID, 0));
+		bServerResistered = ((Level.Game.GameReplicationInfo.m_iGameSvrLobbyID != 0) && (Level.Game.GameReplicationInfo.m_iGameSvrGroupID != 0));
 		// End:0xE0
-		if(__NFUN_132__(__NFUN_129__(pServerOptions.InternetServer), bServerResistered))
+		if(((!pServerOptions.InternetServer) || bServerResistered))
 		{
 			RespondPreJoinQuery(Addr);
 		}
@@ -144,10 +144,10 @@ function RespondPreJoinQuery(IpAddr Addr)
 	local PlayerController aPC;
 	local int iNumPlayers;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	textData = PreJoinQueryMarker;
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), LobbyServerIDMarker), " "), string(Level.Game.GameReplicationInfo.m_iGameSvrLobbyID));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), GroupIDMarker), " "), string(Level.Game.GameReplicationInfo.m_iGameSvrGroupID));
+	textData = ((((textData $ " ") $ LobbyServerIDMarker) $ " ") $ string(Level.Game.GameReplicationInfo.m_iGameSvrLobbyID));
+	textData = ((((textData $ " ") $ GroupIDMarker) $ " ") $ string(Level.Game.GameReplicationInfo.m_iGameSvrGroupID));
 	// End:0xCB
 	if(Level.Game.AccessControl.GamePasswordNeeded())
 	{
@@ -157,8 +157,8 @@ function RespondPreJoinQuery(IpAddr Addr)
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), LockedMarker), " "), string(integerData));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), GameVersionMarker), " "), Level.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield())));
+	textData = ((((textData $ " ") $ LockedMarker) $ " ") $ string(integerData));
+	textData = ((((textData $ " ") $ GameVersionMarker) $ " ") $ Level.GetGameVersion(false, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield())));
 	// End:0x156
 	if(pServerOptions.InternetServer)
 	{
@@ -168,26 +168,26 @@ function RespondPreJoinQuery(IpAddr Addr)
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), InternetServerMarker), " "), string(integerData));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), ModNameMarker), " "), Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord);
+	textData = ((((textData $ " ") $ InternetServerMarker) $ " ") $ string(integerData));
+	textData = ((((textData $ " ") $ ModNameMarker) $ " ") $ Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord);
 	// End:0x1F0
 	if(Level.m_bPBSvRunning)
 	{
-		textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PunkBusterMarker), " 1");		
+		textData = (((textData $ " ") $ PunkBusterMarker) $ " 1");		
 	}
 	else
 	{
-		textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PunkBusterMarker), " 0");
+		textData = (((textData $ " ") $ PunkBusterMarker) $ " 0");
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), MaxPlayersMarker), " "), string(Level.Game.MaxPlayers));
+	textData = ((((textData $ " ") $ MaxPlayersMarker) $ " ") $ string(Level.Game.MaxPlayers));
 	iNumPlayers = 0;
 	// End:0x263
-	foreach __NFUN_313__(Class'Engine.PlayerController', aPC)
+	foreach DynamicActors(Class'Engine.PlayerController', aPC)
 	{
-		__NFUN_165__(iNumPlayers);		
+		(iNumPlayers++);		
 	}	
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), NumPlayersMarker), " "), string(iNumPlayers));
-	SendText(Addr, __NFUN_168__(__NFUN_168__(BeaconProduct, __NFUN_127__(Level.GetAddressURL(), __NFUN_146__(__NFUN_126__(Level.GetAddressURL(), ":"), 1))), textData));
+	textData = ((((textData $ " ") $ NumPlayersMarker) $ " ") $ string(iNumPlayers));
+	SendText(Addr, ((BeaconProduct @ Mid(Level.GetAddressURL(), (InStr(Level.GetAddressURL(), ":") + 1))) @ textData));
 	return;
 }
 
@@ -218,21 +218,21 @@ function string BuildBeaconText()
 	local Controller _Controller;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
-	textData = __NFUN_112__(KeyWordMarker, " ");
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), GamePortMarker), " "), __NFUN_127__(Level.GetAddressURL(), __NFUN_146__(__NFUN_126__(Level.GetAddressURL(), ":"), 1)));
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
+	textData = (KeyWordMarker $ " ");
+	textData = ((((textData $ " ") $ GamePortMarker) $ " ") $ Mid(Level.GetAddressURL(), (InStr(Level.GetAddressURL(), ":") + 1)));
 	// End:0xC2
-	if(__NFUN_154__(__NFUN_126__(Level.Game.__NFUN_547__(), "."), -1))
+	if((InStr(Level.Game.GetURLMap(), ".") == -1))
 	{
-		textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), MapNameMarker), " "), Level.Game.__NFUN_547__());		
+		textData = ((((textData $ " ") $ MapNameMarker) $ " ") $ Level.Game.GetURLMap());		
 	}
 	else
 	{
-		textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), MapNameMarker), " "), __NFUN_128__(Level.Game.__NFUN_547__(), __NFUN_126__(Level.Game.__NFUN_547__(), ".")));
+		textData = ((((textData $ " ") $ MapNameMarker) $ " ") $ Left(Level.Game.GetURLMap(), InStr(Level.Game.GetURLMap(), ".")));
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), SvrNameMarker), " "), Level.Game.GameReplicationInfo.ServerName);
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), GameTypeMarker), " "), Level.Game.m_szCurrGameType);
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), MaxPlayersMarker), " "), string(Level.Game.MaxPlayers));
+	textData = ((((textData $ " ") $ SvrNameMarker) $ " ") $ Level.Game.GameReplicationInfo.ServerName);
+	textData = ((((textData $ " ") $ GameTypeMarker) $ " ") $ Level.Game.m_szCurrGameType);
+	textData = ((((textData $ " ") $ MaxPlayersMarker) $ " ") $ string(Level.Game.MaxPlayers));
 	// End:0x1E9
 	if(Level.Game.AccessControl.GamePasswordNeeded())
 	{
@@ -242,9 +242,9 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), LockedMarker), " "), string(integerData));
+	textData = ((((textData $ " ") $ LockedMarker) $ " ") $ string(integerData));
 	// End:0x238
-	if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) == int(NM_DedicatedServer)))
 	{
 		integerData = 1;		
 	}
@@ -252,23 +252,23 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), DecicatedMarker), " "), string(integerData));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PlayerListMarker), " ");
+	textData = ((((textData $ " ") $ DecicatedMarker) $ " ") $ string(integerData));
+	textData = (((textData $ " ") $ PlayerListMarker) $ " ");
 	CheckForPlayerTimeouts();
 	iNumPlayers = 0;
 	_Controller = Level.ControllerList;
 	J0x2A1:
 
 	// End:0x3DE [Loop If]
-	if(__NFUN_119__(_Controller, none))
+	if((_Controller != none))
 	{
 		aPC = PlayerController(_Controller);
 		// End:0x3C7
-		if(__NFUN_119__(aPC, none))
+		if((aPC != none))
 		{
-			textData = __NFUN_112__(__NFUN_112__(textData, "/"), aPC.PlayerReplicationInfo.PlayerName);
+			textData = ((textData $ "/") $ aPC.PlayerReplicationInfo.PlayerName);
 			// End:0x337
-			if(__NFUN_114__(NetConnection(aPC.Player), none))
+			if((NetConnection(aPC.Player) == none))
 			{
 				szIPAddr = WindowConsole(aPC.Player.Console).szStoreIP;				
 			}
@@ -276,29 +276,29 @@ function string BuildBeaconText()
 			{
 				szIPAddr = aPC.GetPlayerNetworkAddress();
 			}
-			szIPAddr = __NFUN_128__(szIPAddr, __NFUN_126__(szIPAddr, ":"));
+			szIPAddr = Left(szIPAddr, InStr(szIPAddr, ":"));
 			iPingTimeMS[iNumPlayers] = aPC.PlayerReplicationInfo.Ping;
 			iKillCount[iNumPlayers] = aPC.PlayerReplicationInfo.m_iKillCount;
 			fPlayingTime[iNumPlayers] = GetPlayingTime(szIPAddr);
-			__NFUN_165__(iNumPlayers);
+			(iNumPlayers++);
 		}
 		_Controller = _Controller.nextController;
 		// [Loop Continue]
 		goto J0x2A1;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PlayerTimeMarker), " ");
+	textData = (((textData $ " ") $ PlayerTimeMarker) $ " ");
 	iCounter = 0;
 	J0x401:
 
 	// End:0x43F [Loop If]
-	if(__NFUN_150__(iCounter, iNumPlayers))
+	if((iCounter < iNumPlayers))
 	{
-		textData = __NFUN_112__(__NFUN_112__(textData, "/"), DisplayTime(int(fPlayingTime[iCounter])));
-		__NFUN_165__(iCounter);
+		textData = ((textData $ "/") $ DisplayTime(int(fPlayingTime[iCounter])));
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x401;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PlayerPingMarker), " ");
+	textData = (((textData $ " ") $ PlayerPingMarker) $ " ");
 	iCounter = 0;
 	J0x462:
 

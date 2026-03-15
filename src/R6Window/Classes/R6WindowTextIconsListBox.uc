@@ -47,7 +47,7 @@ function Created()
 function BeforePaint(Canvas C, float fMouseX, float fMouseY)
 {
 	// End:0x1F
-	if(__NFUN_119__(m_VertSB, none))
+	if((m_VertSB != none))
 	{
 		m_VertSB.SetBorderColor(m_BorderColor);
 	}
@@ -74,16 +74,16 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	if(pItem.bSelected)
 	{
 		// End:0xBF
-		if(__NFUN_119__(m_BGSelTexture, none))
+		if((m_BGSelTexture != none))
 		{
 			C.Style = m_BGRenderStyle;
-			C.__NFUN_2626__(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
+			C.SetDrawColor(m_BGSelColor.R, m_BGSelColor.G, m_BGSelColor.B);
 			DrawStretchedTextureSegment(C, X, Y, W, H, float(m_BGSelRegion.X), float(m_BGSelRegion.Y), float(m_BGSelRegion.W), float(m_BGSelRegion.H), m_BGSelTexture);
 		}
 	}
 	TextX = X;
 	// End:0x2CC
-	if(__NFUN_119__(pItem.m_Icon, none))
+	if((pItem.m_Icon != none))
 	{
 		// End:0x107
 		if(pItem.m_addedToSubList)
@@ -95,19 +95,19 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 			RIcon = pItem.m_IconSelectedRegion;
 		}
 		C.Style = 5;
-		C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
-		__NFUN_184__(TextX, float(3));
+		C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+		(TextX += float(3));
 		DrawStretchedTextureSegment(C, TextX, GetYIconPos(Y, H, float(RIcon.H)), float(RIcon.W), float(RIcon.H), float(RIcon.X), float(RIcon.Y), float(RIcon.W), float(RIcon.H), pItem.m_Icon);
-		__NFUN_184__(TextX, float(__NFUN_146__(4, RIcon.W)));
+		(TextX += float((4 + RIcon.W)));
 		// End:0x2CC
-		if(pItem.m_Object.__NFUN_303__('R6Operative'))
+		if(pItem.m_Object.IsA('R6Operative'))
 		{
 			// End:0x289
 			if(pItem.m_addedToSubList)
 			{
-				C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
+				C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
 			}
-			__NFUN_184__(TextX, __NFUN_174__(float(4), DrawHealthIcon(C, TextX, Y, H, R6Operative(pItem.m_Object).m_iHealth)));
+			(TextX += (float(4) + DrawHealthIcon(C, TextX, Y, H, R6Operative(pItem.m_Object).m_iHealth)));
 		}
 	}
 	C.Font = m_Font;
@@ -115,35 +115,35 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	if(pItem.m_IsSeparator)
 	{
 		C.Font = m_FontSeparator;
-		C.__NFUN_2626__(m_SeparatorTextColor.R, m_SeparatorTextColor.G, m_SeparatorTextColor.B);		
+		C.SetDrawColor(m_SeparatorTextColor.R, m_SeparatorTextColor.G, m_SeparatorTextColor.B);		
 	}
 	else
 	{
 		// End:0x372
 		if(pItem.m_addedToSubList)
 		{
-			C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);			
+			C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);			
 		}
 		else
 		{
 			// End:0x3B1
 			if(pItem.bSelected)
 			{
-				C.__NFUN_2626__(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);				
+				C.SetDrawColor(m_SelTextColor.R, m_SelTextColor.G, m_SelTextColor.B);				
 			}
 			else
 			{
-				C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+				C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 			}
 		}
 	}
 	C.SpaceX = m_fFontSpacing;
 	C.Style = 5;
-	szClipText = TextSize(C, pItem.HelpText, tW, tH, int(__NFUN_175__(W, TextX)), int(m_fFontSpacing));
-	TextY = __NFUN_171__(__NFUN_175__(H, tH), 0.5000000);
-	TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
-	C.__NFUN_2623__(TextX, __NFUN_174__(Y, TextY));
-	C.__NFUN_465__(szClipText);
+	szClipText = TextSize(C, pItem.HelpText, tW, tH, int((W - TextX)), int(m_fFontSpacing));
+	TextY = ((H - tH) * 0.5000000);
+	TextY = float(int((TextY + 0.5000000)));
+	C.SetPos(TextX, (Y + TextY));
+	C.DrawText(szClipText);
 	return;
 }
 
@@ -161,8 +161,8 @@ function float GetYIconPos(float _fYItemPos, float _fItemHeight, float _fIconHei
 {
 	local float fTemp;
 
-	fTemp = __NFUN_171__(__NFUN_175__(_fItemHeight, _fIconHeight), 0.5000000);
-	fTemp = __NFUN_174__(float(int(__NFUN_174__(fTemp, 0.5000000))), _fYItemPos);
+	fTemp = ((_fItemHeight - _fIconHeight) * 0.5000000);
+	fTemp = (float(int((fTemp + 0.5000000))) + _fYItemPos);
 	return fTemp;
 	return;
 }
@@ -204,21 +204,21 @@ function Region GetHealthIconRegion(int _iOperativeHealth)
 function SetSelectedItem(UWindowListBoxItem NewSelected)
 {
 	// End:0x8E
-	if(__NFUN_130__(__NFUN_119__(NewSelected, none), __NFUN_242__(R6WindowListBoxItem(NewSelected).m_IsSeparator, false)))
+	if(((NewSelected != none) && (R6WindowListBoxItem(NewSelected).m_IsSeparator == false)))
 	{
 		// End:0x43
-		if(__NFUN_130__(m_IgnoreAllreadySelected, __NFUN_114__(m_SelectedItem, NewSelected)))
+		if((m_IgnoreAllreadySelected && (m_SelectedItem == NewSelected)))
 		{
 			return;
 		}
 		// End:0x5F
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = false;
 		}
 		m_SelectedItem = NewSelected;
 		// End:0x86
-		if(__NFUN_119__(m_SelectedItem, none))
+		if((m_SelectedItem != none))
 		{
 			m_SelectedItem.bSelected = true;
 		}
@@ -233,13 +233,13 @@ function SetScrollable(bool newScrollable)
 	// End:0x6D
 	if(newScrollable)
 	{
-		m_VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, __NFUN_175__(WinWidth, LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
+		m_VertSB = R6WindowVScrollbar(CreateWindow(m_SBClass, (WinWidth - LookAndFeel.Size_ScrollbarWidth), 0.0000000, LookAndFeel.Size_ScrollbarWidth, WinHeight));
 		m_VertSB.bAlwaysOnTop = true;		
 	}
 	else
 	{
 		// End:0x8E
-		if(__NFUN_119__(m_VertSB, none))
+		if((m_VertSB != none))
 		{
 			m_VertSB.Close();
 			m_VertSB = none;

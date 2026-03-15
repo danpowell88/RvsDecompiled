@@ -54,7 +54,7 @@ function Created()
 	local int YPos;
 
 	ButtonTexture = Texture(DynamicLoadObject("R6MenuTextures.Tab_Icon00", Class'Engine.Texture'));
-	YPos = int(__NFUN_175__(WinHeight, m_fButtonTabHeight));
+	YPos = int((WinHeight - m_fButtonTabHeight));
 	m_OperativeHistoryButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', m_fFirstButtonOffset, float(YPos), m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_OperativeHistoryButton.ToolTipString = Localize("Tip", "GearRoomButHistory", "R6Menu");
 	m_OperativeHistoryButton.UpRegion = m_RHistoryUp;
@@ -67,7 +67,7 @@ function Created()
 	m_OperativeHistoryButton.m_iButtonID = 1;
 	m_OperativeHistoryButton.m_bCanBeUnselected = false;
 	m_OperativeHistoryButton.bUseRegion = true;
-	m_OperativeSkillsButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', __NFUN_174__(__NFUN_174__(m_OperativeHistoryButton.WinLeft, m_OperativeHistoryButton.WinWidth), m_fBetweenButtonOffset), float(YPos), m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_OperativeSkillsButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', ((m_OperativeHistoryButton.WinLeft + m_OperativeHistoryButton.WinWidth) + m_fBetweenButtonOffset), float(YPos), m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_OperativeSkillsButton.ToolTipString = Localize("Tip", "GearRoomButSkills", "R6Menu");
 	m_OperativeSkillsButton.UpRegion = m_RSkillsUp;
 	m_OperativeSkillsButton.OverRegion = m_RSkillsOver;
@@ -79,7 +79,7 @@ function Created()
 	m_OperativeSkillsButton.m_iButtonID = 2;
 	m_OperativeSkillsButton.m_bCanBeUnselected = false;
 	m_OperativeSkillsButton.bUseRegion = true;
-	m_OperativeBioButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', __NFUN_174__(__NFUN_174__(m_OperativeSkillsButton.WinLeft, m_OperativeSkillsButton.WinWidth), m_fBetweenButtonOffset), float(YPos), m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_OperativeBioButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', ((m_OperativeSkillsButton.WinLeft + m_OperativeSkillsButton.WinWidth) + m_fBetweenButtonOffset), float(YPos), m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_OperativeBioButton.ToolTipString = Localize("Tip", "GearRoomButMedic", "R6Menu");
 	m_OperativeBioButton.UpRegion = m_RBioUp;
 	m_OperativeBioButton.OverRegion = m_RBioOver;
@@ -91,7 +91,7 @@ function Created()
 	m_OperativeBioButton.m_iButtonID = 3;
 	m_OperativeBioButton.m_bCanBeUnselected = false;
 	m_OperativeBioButton.bUseRegion = true;
-	m_OperativeStatsButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', __NFUN_174__(__NFUN_174__(m_OperativeBioButton.WinLeft, m_OperativeBioButton.WinWidth), m_fBetweenButtonOffset), float(YPos), m_fButtonTabWidth, m_fButtonTabHeight, self));
+	m_OperativeStatsButton = R6WindowStayDownButton(CreateControl(Class'R6Window.R6WindowStayDownButton', ((m_OperativeBioButton.WinLeft + m_OperativeBioButton.WinWidth) + m_fBetweenButtonOffset), float(YPos), m_fButtonTabWidth, m_fButtonTabHeight, self));
 	m_OperativeStatsButton.ToolTipString = Localize("Tip", "GearRoomButCampStats", "R6Menu");
 	m_OperativeStatsButton.UpRegion = m_RStatsUp;
 	m_OperativeStatsButton.OverRegion = m_RStatsOver;
@@ -111,16 +111,16 @@ function Created()
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x98
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x98
-		if(__NFUN_130__(__NFUN_119__(R6WindowStayDownButton(C), none), __NFUN_119__(R6WindowStayDownButton(C), m_CurrentSelectedButton)))
+		if(((R6WindowStayDownButton(C) != none) && (R6WindowStayDownButton(C) != m_CurrentSelectedButton)))
 		{
 			m_CurrentSelectedButton.m_bSelected = false;
 			m_CurrentSelectedButton = R6WindowStayDownButton(C);
 			m_CurrentSelectedButton.m_bSelected = true;
 			// End:0x98
-			if(__NFUN_119__(R6MenuOperativeDetailControl(OwnerWindow), none))
+			if((R6MenuOperativeDetailControl(OwnerWindow) != none))
 			{
 				R6MenuOperativeDetailControl(OwnerWindow).ChangePage(m_CurrentSelectedButton.m_iButtonID);
 			}

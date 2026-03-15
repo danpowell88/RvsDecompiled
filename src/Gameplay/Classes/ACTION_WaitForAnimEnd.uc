@@ -12,7 +12,7 @@ var(Action) int Channel;
 
 function bool CompleteOnAnim(int Num)
 {
-	return __NFUN_154__(Channel, Num);
+	return (Channel == Num);
 	return;
 }
 

@@ -21,7 +21,7 @@ function Created()
 	m_pMainTabControl = R6WindowTabControl(CreateControl(Class'R6Window.R6WindowTabControl', 0.0000000, 0.0000000, WinWidth, WinHeight));
 	m_pMainTabControl.SetFont(7);
 	LookAndFeel.Size_TabXOffset = 0.0000000;
-	LookAndFeel.Size_TabAreaHeight = __NFUN_175__(WinHeight, LookAndFeel.Size_TabAreaOverhangHeight);
+	LookAndFeel.Size_TabAreaHeight = (WinHeight - LookAndFeel.Size_TabAreaOverhangHeight);
 	return;
 }
 
@@ -33,7 +33,7 @@ function AddTabInControl(string _Caption, string _TabToolTip, int _ItemID)
 	local UWindowTabControlItem pItem;
 
 	// End:0x7B
-	if(__NFUN_119__(m_pMainTabControl, none))
+	if((m_pMainTabControl != none))
 	{
 		pItem = m_pMainTabControl.AddTab(_Caption, _ItemID);
 		pItem.HelpText = _TabToolTip;
@@ -51,10 +51,10 @@ function Notify(UWindowDialogControl C, byte E)
 	local R6GSServers pGameService;
 
 	// End:0x67
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x44
-		if(__NFUN_119__(R6MenuMultiPlayerWidget(OwnerWindow), none))
+		if((R6MenuMultiPlayerWidget(OwnerWindow) != none))
 		{
 			R6MenuMultiPlayerWidget(OwnerWindow).ManageTabSelection(m_pMainTabControl.GetSelectedTabID());			
 		}
@@ -64,24 +64,24 @@ function Notify(UWindowDialogControl C, byte E)
 		}
 	}
 	// End:0xAF
-	if(__NFUN_130__(__NFUN_154__(int(E), 6), C.__NFUN_303__('R6WindowServerListBox')))
+	if(((int(E) == 6) && C.IsA('R6WindowServerListBox')))
 	{
 		// End:0xAF
-		if(__NFUN_119__(R6MenuMultiPlayerWidget(OwnerWindow), none))
+		if((R6MenuMultiPlayerWidget(OwnerWindow) != none))
 		{
 			R6MenuMultiPlayerWidget(OwnerWindow).DisplayRightClickMenu();
 		}
 	}
 	// End:0xE7
-	if(__NFUN_130__(__NFUN_154__(int(E), 11), C.__NFUN_303__('R6WindowServerListBox')))
+	if(((int(E) == 11) && C.IsA('R6WindowServerListBox')))
 	{
 		R6MenuMultiPlayerWidget(OwnerWindow).JoinSelectedServerRequested();
 	}
 	// End:0x12F
-	if(__NFUN_130__(__NFUN_154__(int(E), 3), C.__NFUN_303__('R6WindowRightClickMenu')))
+	if(((int(E) == 3) && C.IsA('R6WindowRightClickMenu')))
 	{
 		// End:0x12F
-		if(__NFUN_119__(R6MenuMultiPlayerWidget(OwnerWindow), none))
+		if((R6MenuMultiPlayerWidget(OwnerWindow) != none))
 		{
 			R6MenuMultiPlayerWidget(OwnerWindow).UpdateFavorites();
 		}

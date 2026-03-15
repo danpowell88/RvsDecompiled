@@ -22,7 +22,7 @@ function Paint(Canvas C, float X, float Y)
 	local float tempSpace;
 
 	// End:0x22
-	if(__NFUN_119__(m_buttonFont, none))
+	if((m_buttonFont != none))
 	{
 		C.Font = m_buttonFont;		
 	}
@@ -35,12 +35,12 @@ function Paint(Canvas C, float X, float Y)
 	if(bDisabled)
 	{
 		// End:0x135
-		if(__NFUN_119__(DisabledTexture, none))
+		if((DisabledTexture != none))
 		{
 			// End:0xEB
 			if(bUseRegion)
 			{
-				DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(DisabledRegion.W), RegionScale), __NFUN_171__(float(DisabledRegion.H), RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);				
+				DrawStretchedTextureSegment(C, ImageX, ImageY, (float(DisabledRegion.W) * RegionScale), (float(DisabledRegion.H) * RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);				
 			}
 			else
 			{
@@ -59,15 +59,15 @@ function Paint(Canvas C, float X, float Y)
 	else
 	{
 		// End:0x220
-		if(__NFUN_132__(bMouseDown, m_bSelected))
+		if((bMouseDown || m_bSelected))
 		{
 			// End:0x21D
-			if(__NFUN_119__(DownTexture, none))
+			if((DownTexture != none))
 			{
 				// End:0x1D3
 				if(bUseRegion)
 				{
-					DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(DownRegion.W), RegionScale), __NFUN_171__(float(DownRegion.H), RegionScale), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);					
+					DrawStretchedTextureSegment(C, ImageX, ImageY, (float(DownRegion.W) * RegionScale), (float(DownRegion.H) * RegionScale), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);					
 				}
 				else
 				{
@@ -89,12 +89,12 @@ function Paint(Canvas C, float X, float Y)
 			if(MouseIsOver())
 			{
 				// End:0x2FA
-				if(__NFUN_119__(OverTexture, none))
+				if((OverTexture != none))
 				{
 					// End:0x2B0
 					if(bUseRegion)
 					{
-						DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(OverRegion.W), RegionScale), __NFUN_171__(float(OverRegion.H), RegionScale), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);						
+						DrawStretchedTextureSegment(C, ImageX, ImageY, (float(OverRegion.W) * RegionScale), (float(OverRegion.H) * RegionScale), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);						
 					}
 					else
 					{
@@ -113,12 +113,12 @@ function Paint(Canvas C, float X, float Y)
 			else
 			{
 				// End:0x3CE
-				if(__NFUN_119__(UpTexture, none))
+				if((UpTexture != none))
 				{
 					// End:0x384
 					if(bUseRegion)
 					{
-						DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(UpRegion.W), RegionScale), __NFUN_171__(float(UpRegion.H), RegionScale), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);						
+						DrawStretchedTextureSegment(C, ImageX, ImageY, (float(UpRegion.W) * RegionScale), (float(UpRegion.H) * RegionScale), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);						
 					}
 					else
 					{
@@ -138,12 +138,12 @@ function Paint(Canvas C, float X, float Y)
 	}
 	C.Style = 1;
 	// End:0x53A
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		// End:0x42C
 		if(bDisabled)
 		{
-			C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
+			C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
 			m_BorderColor = m_DisabledTextColor;			
 		}
 		else
@@ -151,7 +151,7 @@ function Paint(Canvas C, float X, float Y)
 			// End:0x46D
 			if(m_bSelected)
 			{
-				C.__NFUN_2626__(m_SelectedTextColor.R, m_SelectedTextColor.G, m_SelectedTextColor.B);
+				C.SetDrawColor(m_SelectedTextColor.R, m_SelectedTextColor.G, m_SelectedTextColor.B);
 				m_BorderColor = m_SelectedTextColor;				
 			}
 			else
@@ -159,12 +159,12 @@ function Paint(Canvas C, float X, float Y)
 				// End:0x4AE
 				if(MouseIsOver())
 				{
-					C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);
+					C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);
 					m_BorderColor = m_OverTextColor;					
 				}
 				else
 				{
-					C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+					C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 					m_BorderColor = TextColor;
 				}
 			}
@@ -188,7 +188,7 @@ function LMouseDown(float X, float Y)
 		return;
 	}
 	// End:0x67
-	if(__NFUN_129__(m_bUseOnlyNotifyMsg))
+	if((!m_bUseOnlyNotifyMsg))
 	{
 		// End:0x67
 		if(m_bCanBeUnselected)
@@ -197,12 +197,12 @@ function LMouseDown(float X, float Y)
 			// End:0x4F
 			if(m_bCheckSelectState)
 			{
-				bChangeSelection = __NFUN_129__(m_bSelected);
+				bChangeSelection = (!m_bSelected);
 			}
 			// End:0x67
 			if(bChangeSelection)
 			{
-				m_bSelected = __NFUN_129__(m_bSelected);
+				m_bSelected = (!m_bSelected);
 			}
 		}
 	}

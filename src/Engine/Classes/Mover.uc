@@ -148,7 +148,7 @@ var Rotator RealRotation;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		RealPosition, RealRotation, 
 		SimInterpolate, SimOldPos, 
 		SimOldRotPitch, SimOldRotRoll, 
@@ -157,34 +157,34 @@ replication
 
 simulated function StartInterpolation()
 {
-	__NFUN_113__('None');
+	GotoState('None');
 	bInterpolating = true;
 	m_bTickOnlyWhenVisible = false;
-	__NFUN_3970__(0);
+	SetPhysics(0);
 	return;
 }
 
 simulated function Timer()
 {
 	// End:0x21
-	if(__NFUN_218__(Velocity, vect(0.0000000, 0.0000000, 0.0000000)))
+	if((Velocity != vect(0.0000000, 0.0000000, 0.0000000)))
 	{
 		bClientPause = false;
 		return;
 	}
 	// End:0xB3
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		// End:0xA8
-		if(__NFUN_154__(ClientUpdate, 0))
+		if((ClientUpdate == 0))
 		{
 			// End:0x8E
 			if(bClientPause)
 			{
 				// End:0x70
-				if(__NFUN_177__(__NFUN_225__(__NFUN_216__(RealPosition, Location)), float(3)))
+				if((VSize((RealPosition - Location)) > float(3)))
 				{
-					__NFUN_267__(RealPosition);					
+					__NFUN_267__(RealPosition) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;					
 				}
 				else
 				{

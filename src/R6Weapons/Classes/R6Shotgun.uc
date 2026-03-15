@@ -14,7 +14,7 @@ class R6Shotgun extends R6Weapons
 function int NbBulletToShot()
 {
 	// End:0x29
-	if(__NFUN_130__(__NFUN_119__(m_pBulletClass, none), __NFUN_122__(m_pBulletClass.default.m_szBulletType, "BUCK")))
+	if(((m_pBulletClass != none) && (m_pBulletClass.default.m_szBulletType == "BUCK")))
 	{
 		return 9;
 	}

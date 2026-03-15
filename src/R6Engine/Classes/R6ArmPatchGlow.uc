@@ -27,27 +27,27 @@ function Tick(float fDeltaTime)
 	bCorona = false;
 	bHidden = true;
 	// End:0x27
-	if(__NFUN_242__(Level.m_bNightVisionActive, false))
+	if((Level.m_bNightVisionActive == false))
 	{
 		return;
 	}
-	ViewActor = __NFUN_2618__().Viewport.Actor;
+	ViewActor = GetCanvas().Viewport.Actor;
 	// End:0x4F
-	if(__NFUN_114__(ViewActor, none))
+	if((ViewActor == none))
 	{
 		return;
 	}
 	OwnerPawn = Pawn(m_pOwnerNightVision);
 	ViewPawn = ViewActor.Pawn;
 	// End:0x17A
-	if(__NFUN_130__(__NFUN_119__(ViewPawn, none), __NFUN_154__(OwnerPawn.m_iTeam, ViewPawn.m_iTeam)))
+	if(((ViewPawn != none) && (OwnerPawn.m_iTeam == ViewPawn.m_iTeam)))
 	{
 		TempCoord = OwnerPawn.GetBoneCoords(m_AttachedBoneName, true);
 		temp = TempCoord.Origin;
-		__NFUN_223__(temp, __NFUN_212__(TempCoord.XAxis, 14.0000000));
-		__NFUN_224__(temp, __NFUN_212__(TempCoord.YAxis, 2.0000000));
-		__NFUN_223__(temp, __NFUN_212__(__NFUN_212__(TempCoord.ZAxis, 8.0000000), m_fMatrixMul));
-		__NFUN_267__(temp);
+		(temp += (TempCoord.XAxis * 14.0000000));
+		(temp -= (TempCoord.YAxis * 2.0000000));
+		(temp += ((TempCoord.ZAxis * 8.0000000) * m_fMatrixMul));
+		__NFUN_267__(temp) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 		TempRot = OrthoRotation(__NFUN_212__(TempCoord.ZAxis, m_fMatrixMul), __NFUN_212__(TempCoord.YAxis, m_fMatrixMul), __NFUN_212__(TempCoord.XAxis, m_fMatrixMul));
 		__NFUN_299__(TempRot);
 		bCorona = true;

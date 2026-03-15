@@ -37,9 +37,9 @@ function Paint(Canvas C, float X, float Y)
 	local Color vBorderColor;
 
 	C.Style = byte(m_iDrawStyle);
-	C.__NFUN_2626__(m_cButtonColor.R, m_cButtonColor.G, m_cButtonColor.B);
+	C.SetDrawColor(m_cButtonColor.R, m_cButtonColor.G, m_cButtonColor.B);
 	// End:0x9F
-	if(__NFUN_119__(UpTexture, none))
+	if((UpTexture != none))
 	{
 		DrawStretchedTextureSegment(C, ImageX, ImageY, WinWidth, WinHeight, float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);
 	}
@@ -49,7 +49,7 @@ function Paint(Canvas C, float X, float Y)
 function MouseLeave()
 {
 	// End:0x29
-	if(__NFUN_242__(m_bLMouseDown, true))
+	if((m_bLMouseDown == true))
 	{
 		m_bLMouseDown = false;
 		R6PlanningCtrl(GetPlayerOwner()).TurnOff3DMove();
@@ -69,10 +69,10 @@ function MouseEnter()
 function MouseMove(float X, float Y)
 {
 	// End:0x7C
-	if(__NFUN_242__(m_bLMouseDown, true))
+	if((m_bLMouseDown == true))
 	{
-		R6PlanningCtrl(GetPlayerOwner()).Ajust3DRotation(__NFUN_174__(WinLeft, X), __NFUN_174__(WinTop, Y));
-		R6MenuRootWindow(Root).m_CurrentWidget.SetMousePos(__NFUN_174__(WinLeft, __NFUN_171__(WinWidth, 0.5000000)), __NFUN_174__(WinTop, __NFUN_171__(WinHeight, 0.5000000)));
+		R6PlanningCtrl(GetPlayerOwner()).Ajust3DRotation((WinLeft + X), (WinTop + Y));
+		R6MenuRootWindow(Root).m_CurrentWidget.SetMousePos((WinLeft + (WinWidth * 0.5000000)), (WinTop + (WinHeight * 0.5000000)));
 	}
 	return;
 }
@@ -80,8 +80,8 @@ function MouseMove(float X, float Y)
 function LMouseDown(float X, float Y)
 {
 	m_bLMouseDown = true;
-	R6MenuRootWindow(Root).m_CurrentWidget.SetMousePos(__NFUN_174__(WinLeft, __NFUN_171__(WinWidth, 0.5000000)), __NFUN_174__(WinTop, __NFUN_171__(WinHeight, 0.5000000)));
-	R6PlanningCtrl(GetPlayerOwner()).TurnOn3DMove(__NFUN_174__(WinLeft, __NFUN_171__(WinWidth, 0.5000000)), __NFUN_174__(WinTop, __NFUN_171__(WinHeight, 0.5000000)));
+	R6MenuRootWindow(Root).m_CurrentWidget.SetMousePos((WinLeft + (WinWidth * 0.5000000)), (WinTop + (WinHeight * 0.5000000)));
+	R6PlanningCtrl(GetPlayerOwner()).TurnOn3DMove((WinLeft + (WinWidth * 0.5000000)), (WinTop + (WinHeight * 0.5000000)));
 	return;
 }
 
@@ -94,9 +94,9 @@ function LMouseUp(float X, float Y)
 
 function Toggle3DWindow()
 {
-	m_bDisplayWindow = __NFUN_129__(m_bDisplayWindow);
+	m_bDisplayWindow = (!m_bDisplayWindow);
 	// End:0x24
-	if(__NFUN_242__(m_bDisplayWindow, true))
+	if((m_bDisplayWindow == true))
 	{
 		ShowWindow();		
 	}

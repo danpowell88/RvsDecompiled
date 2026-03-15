@@ -22,7 +22,7 @@ function UsedBy(Pawn User)
 function Touch(Actor Other)
 {
 	// End:0x3F
-	if(__NFUN_130__(__NFUN_123__(Message, ""), __NFUN_119__(Other.Instigator, none)))
+	if(((Message != "") && (Other.Instigator != none)))
 	{
 		Other.Instigator.ClientMessage(Message);
 	}

@@ -25,18 +25,18 @@ function SpawnControllerFor(Pawn P)
 	local AIController C;
 
 	// End:0x3B
-	if(__NFUN_114__(ControllerClass, none))
+	if((ControllerClass == none))
 	{
 		// End:0x21
-		if(__NFUN_114__(P.ControllerClass, none))
+		if((P.ControllerClass == none))
 		{
 			return;
 		}
-		C = __NFUN_278__(P.ControllerClass);		
+		C = Spawn(P.ControllerClass);		
 	}
 	else
 	{
-		C = __NFUN_278__(ControllerClass);
+		C = Spawn(ControllerClass);
 	}
 	C.MyScript = self;
 	C.Possess(P);
@@ -46,7 +46,7 @@ function SpawnControllerFor(Pawn P)
 function Actor GetMoveTarget()
 {
 	// End:0x11
-	if(__NFUN_119__(myMarker, none))
+	if((myMarker != none))
 	{
 		return myMarker;
 	}

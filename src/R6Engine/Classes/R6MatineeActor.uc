@@ -20,7 +20,7 @@ simulated event PostBeginPlay()
 	// End:0x51
 	if(bActorShadows)
 	{
-		Shadow = __NFUN_278__(Class'Engine.ShadowProjector', self, 'None', Location);
+		Shadow = Spawn(Class'Engine.ShadowProjector', self, 'None', Location);
 		ShadowProjector(Shadow).ShadowActor = self;
 		ShadowProjector(Shadow).UpdateShadow();
 	}

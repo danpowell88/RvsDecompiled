@@ -46,9 +46,9 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 
 	super.UpdateAttachment(weapOwner);
 	m_GadgetShortName = Localize(m_NameID, "ID_SHORTNAME", "R6WeaponGadgets");
-	__NFUN_298__(none);
-	__NFUN_298__(weapOwner, weapOwner.Location);
-	weapOwner.__NFUN_2008__("TagScope", vTagLocation, rTagRotator);
+	SetBase(none);
+	SetBase(weapOwner, weapOwner.Location);
+	weapOwner.GetTagInformations("TagScope", vTagLocation, rTagRotator);
 	SetRelativeLocation(vTagLocation);
 	SetRelativeRotation(rTagRotator);
 	return;
@@ -57,19 +57,19 @@ simulated function UpdateAttachment(R6EngineWeapon weapOwner)
 simulated function AttachFPGadget()
 {
 	// End:0x28
-	if(__NFUN_132__(__NFUN_114__(m_WeaponOwner, none), __NFUN_114__(R6AbstractWeapon(m_WeaponOwner).m_FPWeapon, none)))
+	if(((m_WeaponOwner == none) || (R6AbstractWeapon(m_WeaponOwner).m_FPWeapon == none)))
 	{
 		return;
 	}
 	// End:0x6C
-	if(__NFUN_130__(__NFUN_114__(m_FPMiniScopeModel, none), __NFUN_119__(m_pFPMiniScopeClass, none)))
+	if(((m_FPMiniScopeModel == none) && (m_pFPMiniScopeClass != none)))
 	{
-		m_FPMiniScopeModel = __NFUN_278__(m_pFPMiniScopeClass);
-		m_FPMiniScopeModel.__NFUN_272__(self);
+		m_FPMiniScopeModel = Spawn(m_pFPMiniScopeClass);
+		m_FPMiniScopeModel.SetOwner(self);
 		m_FPMiniScopeModel.RemoteRole = ROLE_None;
 	}
 	// End:0xD8
-	if(__NFUN_119__(m_FPMiniScopeModel, none))
+	if((m_FPMiniScopeModel != none))
 	{
 		R6AbstractWeapon(m_WeaponOwner).m_FPWeapon.AttachToBone(m_FPMiniScopeModel, 'TagScope');
 		R6AbstractWeapon(m_WeaponOwner).m_FPWeapon.SwitchFPMesh();
@@ -85,11 +85,11 @@ simulated function DestroyFPGadget()
 	local Actor temp;
 
 	// End:0x29
-	if(__NFUN_119__(m_FPMiniScopeModel, none))
+	if((m_FPMiniScopeModel != none))
 	{
 		temp = m_FPMiniScopeModel;
 		m_FPMiniScopeModel = none;
-		temp.__NFUN_279__();
+		temp.Destroy();
 	}
 	return;
 }

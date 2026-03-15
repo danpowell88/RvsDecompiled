@@ -61,10 +61,10 @@ function BeforePaint(Canvas C, float X, float Y)
 	{
 		m_bSetParam = false;
 		// End:0x220
-		if(__NFUN_123__(Text, ""))
+		if((Text != ""))
 		{
 			// End:0x3F
-			if(__NFUN_119__(m_buttonFont, none))
+			if((m_buttonFont != none))
 			{
 				C.Font = m_buttonFont;				
 			}
@@ -73,7 +73,7 @@ function BeforePaint(Canvas C, float X, float Y)
 				C.Font = Root.Fonts[Font];
 			}
 			TextSize(C, Text, W, H);
-			TextWidth = __NFUN_174__(W, __NFUN_171__(float(__NFUN_125__(Text)), m_fFontSpacing));
+			TextWidth = (W + (float(Len(Text)) * m_fFontSpacing));
 			switch(Align)
 			{
 				// End:0xB4
@@ -83,26 +83,26 @@ function BeforePaint(Canvas C, float X, float Y)
 					break;
 				// End:0xD5
 				case 1:
-					TextX = __NFUN_175__(__NFUN_175__(WinWidth, m_fRMarge), TextWidth);
+					TextX = ((WinWidth - m_fRMarge) - TextWidth);
 					// End:0xF8
 					break;
 				// End:0xF5
 				case 2:
-					TextX = __NFUN_172__(__NFUN_175__(WinWidth, TextWidth), float(2));
+					TextX = ((WinWidth - TextWidth) / float(2));
 					// End:0xF8
 					break;
 				// End:0xFFFF
 				default:
 					break;
 			}
-			TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-			TextY = float(int(__NFUN_174__(TextY, 0.5000000)));
+			TextY = ((WinHeight - H) / float(2));
+			TextY = float(int((TextY + 0.5000000)));
 			// End:0x180
 			if(m_bCheckForDownSizeFont)
 			{
 				m_bCheckForDownSizeFont = false;
 				// End:0x170
-				if(__NFUN_130__(__NFUN_119__(m_DownSizeFont, none), __NFUN_177__(__NFUN_174__(TextX, TextWidth), WinWidth)))
+				if(((m_DownSizeFont != none) && ((TextX + TextWidth) > WinWidth)))
 				{
 					m_buttonFont = m_DownSizeFont;
 					m_fFontSpacing = m_fDownSizeFontSpacing;
@@ -115,12 +115,12 @@ function BeforePaint(Canvas C, float X, float Y)
 				if(m_bResizeToText)
 				{
 					m_textSize = TextWidth;
-					WinWidth = __NFUN_244__(__NFUN_174__(__NFUN_174__(m_textSize, m_fLMarge), m_fRMarge), m_fMaxWinWidth);
+					WinWidth = FMin(((m_textSize + m_fLMarge) + m_fRMarge), m_fMaxWinWidth);
 					// End:0x1E2
-					if(__NFUN_155__(int(Align), int(0)))
+					if((int(Align) != int(0)))
 					{
 						WinLeft = m_fOrgWinLeft;
-						__NFUN_184__(WinLeft, __NFUN_175__(TextX, m_fLMarge));
+						(WinLeft += (TextX - m_fLMarge));
 					}
 					TextX = m_fLMarge;
 					m_bResizeToText = false;
@@ -128,9 +128,9 @@ function BeforePaint(Canvas C, float X, float Y)
 			}
 			m_fTotalButtonsSize = WinWidth;
 			// End:0x220
-			if(__NFUN_119__(m_pRefButtonPos, none))
+			if((m_pRefButtonPos != none))
 			{
-				__NFUN_184__(m_pRefButtonPos.m_fTotalButtonsSize, WinWidth);
+				(m_pRefButtonPos.m_fTotalButtonsSize += WinWidth);
 			}
 		}
 	}
@@ -143,24 +143,24 @@ function Paint(Canvas C, float X, float Y)
 	local Color vBorderColor;
 
 	C.Style = byte(m_iDrawStyle);
-	C.__NFUN_2626__(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
+	C.SetDrawColor(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
 	// End:0x1A4
 	if(bDisabled)
 	{
 		// End:0x1A1
-		if(__NFUN_119__(DisabledTexture, none))
+		if((DisabledTexture != none))
 		{
 			// End:0xDB
-			if(__NFUN_130__(bUseRegion, bStretched))
+			if((bUseRegion && bStretched))
 			{
-				DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(DisabledRegion.W), RegionScale), __NFUN_171__(float(DisabledRegion.H), RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);				
+				DrawStretchedTextureSegment(C, ImageX, ImageY, (float(DisabledRegion.W) * RegionScale), (float(DisabledRegion.H) * RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);				
 			}
 			else
 			{
 				// End:0x157
 				if(bUseRegion)
 				{
-					DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(DisabledRegion.W), RegionScale), __NFUN_171__(float(DisabledRegion.H), RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);					
+					DrawStretchedTextureSegment(C, ImageX, ImageY, (float(DisabledRegion.W) * RegionScale), (float(DisabledRegion.H) * RegionScale), float(DisabledRegion.X), float(DisabledRegion.Y), float(DisabledRegion.W), float(DisabledRegion.H), DisabledTexture);					
 				}
 				else
 				{
@@ -183,10 +183,10 @@ function Paint(Canvas C, float X, float Y)
 		if(bMouseDown)
 		{
 			// End:0x2E9
-			if(__NFUN_119__(DownTexture, none))
+			if((DownTexture != none))
 			{
 				// End:0x223
-				if(__NFUN_130__(bUseRegion, bStretched))
+				if((bUseRegion && bStretched))
 				{
 					DrawStretchedTextureSegment(C, ImageX, ImageY, WinWidth, WinHeight, float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);					
 				}
@@ -195,7 +195,7 @@ function Paint(Canvas C, float X, float Y)
 					// End:0x29F
 					if(bUseRegion)
 					{
-						DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(DownRegion.W), RegionScale), __NFUN_171__(float(DownRegion.H), RegionScale), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);						
+						DrawStretchedTextureSegment(C, ImageX, ImageY, (float(DownRegion.W) * RegionScale), (float(DownRegion.H) * RegionScale), float(DownRegion.X), float(DownRegion.Y), float(DownRegion.W), float(DownRegion.H), DownTexture);						
 					}
 					else
 					{
@@ -218,10 +218,10 @@ function Paint(Canvas C, float X, float Y)
 			if(MouseIsOver())
 			{
 				// End:0x431
-				if(__NFUN_119__(OverTexture, none))
+				if((OverTexture != none))
 				{
 					// End:0x36B
-					if(__NFUN_130__(bUseRegion, bStretched))
+					if((bUseRegion && bStretched))
 					{
 						DrawStretchedTextureSegment(C, ImageX, ImageY, WinWidth, WinHeight, float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);						
 					}
@@ -230,7 +230,7 @@ function Paint(Canvas C, float X, float Y)
 						// End:0x3E7
 						if(bUseRegion)
 						{
-							DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(OverRegion.W), RegionScale), __NFUN_171__(float(OverRegion.H), RegionScale), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);							
+							DrawStretchedTextureSegment(C, ImageX, ImageY, (float(OverRegion.W) * RegionScale), (float(OverRegion.H) * RegionScale), float(OverRegion.X), float(OverRegion.Y), float(OverRegion.W), float(OverRegion.H), OverTexture);							
 						}
 						else
 						{
@@ -250,10 +250,10 @@ function Paint(Canvas C, float X, float Y)
 			else
 			{
 				// End:0x570
-				if(__NFUN_119__(UpTexture, none))
+				if((UpTexture != none))
 				{
 					// End:0x4AA
-					if(__NFUN_130__(bUseRegion, bStretched))
+					if((bUseRegion && bStretched))
 					{
 						DrawStretchedTextureSegment(C, ImageX, ImageY, WinWidth, WinHeight, float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);						
 					}
@@ -262,7 +262,7 @@ function Paint(Canvas C, float X, float Y)
 						// End:0x526
 						if(bUseRegion)
 						{
-							DrawStretchedTextureSegment(C, ImageX, ImageY, __NFUN_171__(float(UpRegion.W), RegionScale), __NFUN_171__(float(UpRegion.H), RegionScale), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);							
+							DrawStretchedTextureSegment(C, ImageX, ImageY, (float(UpRegion.W) * RegionScale), (float(UpRegion.H) * RegionScale), float(UpRegion.X), float(UpRegion.Y), float(UpRegion.W), float(UpRegion.H), UpTexture);							
 						}
 						else
 						{
@@ -282,10 +282,10 @@ function Paint(Canvas C, float X, float Y)
 		}
 	}
 	// End:0x72D
-	if(__NFUN_123__(Text, ""))
+	if((Text != ""))
 	{
 		// End:0x59E
-		if(__NFUN_119__(m_buttonFont, none))
+		if((m_buttonFont != none))
 		{
 			C.Font = m_buttonFont;			
 		}
@@ -297,12 +297,12 @@ function Paint(Canvas C, float X, float Y)
 		tempSpace = C.SpaceX;
 		C.SpaceX = m_fFontSpacing;
 		// End:0x72D
-		if(__NFUN_123__(Text, ""))
+		if((Text != ""))
 		{
 			// End:0x647
 			if(bDisabled)
 			{
-				C.__NFUN_2626__(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
+				C.SetDrawColor(m_DisabledTextColor.R, m_DisabledTextColor.G, m_DisabledTextColor.B);
 				m_BorderColor = m_DisabledTextColor;				
 			}
 			else
@@ -310,7 +310,7 @@ function Paint(Canvas C, float X, float Y)
 				// End:0x688
 				if(m_bSelected)
 				{
-					C.__NFUN_2626__(m_SelectedTextColor.R, m_SelectedTextColor.G, m_SelectedTextColor.B);
+					C.SetDrawColor(m_SelectedTextColor.R, m_SelectedTextColor.G, m_SelectedTextColor.B);
 					m_BorderColor = m_SelectedTextColor;					
 				}
 				else
@@ -318,12 +318,12 @@ function Paint(Canvas C, float X, float Y)
 					// End:0x6C9
 					if(MouseIsOver())
 					{
-						C.__NFUN_2626__(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);
+						C.SetDrawColor(m_OverTextColor.R, m_OverTextColor.G, m_OverTextColor.B);
 						m_BorderColor = m_OverTextColor;						
 					}
 					else
 					{
-						C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+						C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 						m_BorderColor = TextColor;
 					}
 				}
@@ -375,9 +375,9 @@ function bool IsFontDownSizingNeeded()
 	local float W, H, TextWidth, TextXPos;
 	local Canvas C;
 
-	C = Class'Engine.Actor'.static.__NFUN_2618__();
+	C = Class'Engine.Actor'.static.GetCanvas();
 	// End:0x34
-	if(__NFUN_119__(m_buttonFont, none))
+	if((m_buttonFont != none))
 	{
 		C.Font = m_buttonFont;		
 	}
@@ -386,7 +386,7 @@ function bool IsFontDownSizingNeeded()
 		C.Font = Root.Fonts[Font];
 	}
 	TextSize(C, Text, W, H);
-	TextWidth = __NFUN_174__(W, __NFUN_171__(float(__NFUN_125__(Text)), m_fFontSpacing));
+	TextWidth = (W + (float(Len(Text)) * m_fFontSpacing));
 	switch(Align)
 	{
 		// End:0xA9
@@ -396,19 +396,19 @@ function bool IsFontDownSizingNeeded()
 			break;
 		// End:0xCA
 		case 1:
-			TextXPos = __NFUN_175__(__NFUN_175__(WinWidth, m_fRMarge), TextWidth);
+			TextXPos = ((WinWidth - m_fRMarge) - TextWidth);
 			// End:0xED
 			break;
 		// End:0xEA
 		case 2:
-			TextXPos = __NFUN_172__(__NFUN_175__(WinWidth, TextWidth), float(2));
+			TextXPos = ((WinWidth - TextWidth) / float(2));
 			// End:0xED
 			break;
 		// End:0xFFFF
 		default:
 			break;
 	}
-	return __NFUN_177__(__NFUN_174__(TextXPos, TextWidth), WinWidth);
+	return ((TextXPos + TextWidth) > WinWidth);
 	return;
 }
 

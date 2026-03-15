@@ -20,7 +20,7 @@ function BeforePaint(Canvas C, float MouseX, float MouseY)
 	local bool bNeedRisize;
 
 	// End:0x20D
-	if(__NFUN_242__(bInitialized, false))
+	if((bInitialized == false))
 	{
 		bInitialized = true;
 		C.Font = Root.Fonts[0];
@@ -28,53 +28,53 @@ function BeforePaint(Canvas C, float MouseX, float MouseY)
 		J0x3A:
 
 		// End:0x11B [Loop If]
-		if(__NFUN_150__(i, m_iNbButton))
+		if((i < m_iNbButton))
 		{
 			// End:0x111
-			if(__NFUN_130__(__NFUN_119__(m_ButtonItem[i], none), __NFUN_119__(m_ButtonItem[i].m_Button, none)))
+			if(((m_ButtonItem[i] != none) && (m_ButtonItem[i].m_Button != none)))
 			{
 				TextSize(C, m_ButtonItem[i].m_Button.Text, fWidth, fHeight);
 				// End:0xDD
-				if(__NFUN_242__(R6MenuPopUpStayDownButton(m_ButtonItem[i].m_Button).m_bSubMenu, true))
+				if((R6MenuPopUpStayDownButton(m_ButtonItem[i].m_Button).m_bSubMenu == true))
 				{
-					__NFUN_184__(fWidth, float(6));
+					(fWidth += float(6));
 				}
 				// End:0xF7
-				if(__NFUN_177__(fWidth, fMaxWidth))
+				if((fWidth > fMaxWidth))
 				{
 					fMaxWidth = fWidth;
 				}
 				// End:0x111
-				if(__NFUN_177__(fHeight, fMaxHeight))
+				if((fHeight > fMaxHeight))
 				{
 					fMaxHeight = fHeight;
 				}
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x3A;
 		}
-		WinWidth = __NFUN_174__(fMaxWidth, float(12));
-		m_fItemHeight = __NFUN_174__(fMaxHeight, float(6));
+		WinWidth = (fMaxWidth + float(12));
+		m_fItemHeight = (fMaxHeight + float(6));
 		iCurrentNbButton = 0;
 		i = 0;
 		J0x14B:
 
 		// End:0x1DE [Loop If]
-		if(__NFUN_150__(i, m_iNbButton))
+		if((i < m_iNbButton))
 		{
 			// End:0x1D4
-			if(__NFUN_130__(__NFUN_119__(m_ButtonItem[i], none), __NFUN_119__(m_ButtonItem[i].m_Button, none)))
+			if(((m_ButtonItem[i] != none) && (m_ButtonItem[i].m_Button != none)))
 			{
 				m_ButtonItem[i].m_Button.WinWidth = WinWidth;
 				m_ButtonItem[i].m_Button.WinHeight = m_fItemHeight;
-				__NFUN_165__(iCurrentNbButton);
+				(iCurrentNbButton++);
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x14B;
 		}
-		WinHeight = __NFUN_174__(__NFUN_171__(m_fItemHeight, float(iCurrentNbButton)), float(__NFUN_147__(iCurrentNbButton, 1)));
+		WinHeight = ((m_fItemHeight * float(iCurrentNbButton)) + float((iCurrentNbButton - 1)));
 		ParentWindow.Resized();
 	}
 	return;
@@ -87,41 +87,41 @@ function Paint(Canvas C, float MouseX, float MouseY)
 	local Color lcolor;
 
 	lcolor = Root.Colors.TeamColor[R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam];
-	C.__NFUN_2626__(lcolor.R, lcolor.G, lcolor.B, byte(Root.Colors.PopUpAlphaFactor));
+	C.SetDrawColor(lcolor.R, lcolor.G, lcolor.B, byte(Root.Colors.PopUpAlphaFactor));
 	// End:0x8D
-	if(__NFUN_180__(m_fItemWidth, float(0)))
+	if((m_fItemWidth == float(0)))
 	{
 		m_fItemWidth = WinWidth;
 	}
-	X = __NFUN_172__(__NFUN_175__(WinWidth, m_fItemWidth), float(2));
+	X = ((WinWidth - m_fItemWidth) / float(2));
 	CurItem = Items.Next;
 	J0xB9:
 
 	// End:0x208 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		R6WindowListButtonItem(CurItem).m_Button.ShowWindow();
 		DrawItem(C, CurItem, X, Y, m_fItemWidth, m_fItemHeight);
-		__NFUN_184__(Y, m_fItemHeight);
+		(Y += m_fItemHeight);
 		// End:0x1CB
-		if(__NFUN_176__(Y, WinHeight))
+		if((Y < WinHeight))
 		{
 			C.Style = GetPlayerOwner().5;
 			DrawStretchedTextureSegment(C, X, Y, float(m_SeperatorLineRegion.W), float(m_SeperatorLineRegion.H), float(m_SeperatorLineRegion.X), float(m_SeperatorLineRegion.Y), float(m_SeperatorLineRegion.W), float(m_SeperatorLineRegion.H), m_SeperatorLineTexture);
 			C.Style = GetPlayerOwner().1;
-			__NFUN_184__(Y, float(m_SeperatorLineRegion.H));
+			(Y += float(m_SeperatorLineRegion.H));
 		}
 		// End:0x1F1
-		if(__NFUN_179__(Y, WinHeight))
+		if((Y >= WinHeight))
 		{
 			Y = 0.0000000;
-			__NFUN_184__(X, WinWidth);
+			(X += WinWidth);
 		}
 		CurItem = CurItem.Next;
 		// [Loop Continue]
 		goto J0xB9;
 	}
-	C.__NFUN_2626__(byte(255), byte(255), byte(255));
+	C.SetDrawColor(byte(255), byte(255), byte(255));
 	return;
 }
 
@@ -131,7 +131,7 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 
 	pListButtonItem = R6WindowListButtonItem(Item);
 	// End:0x7B
-	if(__NFUN_119__(pListButtonItem.m_Button, none))
+	if((pListButtonItem.m_Button != none))
 	{
 		pListButtonItem.m_Button.WinLeft = X;
 		pListButtonItem.m_Button.WinTop = Y;
@@ -148,14 +148,14 @@ function ChangeItemsSize(float fNewWidth)
 	J0x07:
 
 	// End:0x70 [Loop If]
-	if(__NFUN_150__(i, m_iNbButton))
+	if((i < m_iNbButton))
 	{
 		// End:0x66
-		if(__NFUN_130__(__NFUN_119__(m_ButtonItem[i], none), __NFUN_119__(m_ButtonItem[i].m_Button, none)))
+		if(((m_ButtonItem[i] != none) && (m_ButtonItem[i].m_Button != none)))
 		{
 			m_ButtonItem[i].m_Button.WinWidth = fNewWidth;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}

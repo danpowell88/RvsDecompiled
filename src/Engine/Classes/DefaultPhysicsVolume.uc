@@ -14,7 +14,7 @@ class DefaultPhysicsVolume extends PhysicsVolume
 
 function Destroyed()
 {
-	__NFUN_231__(__NFUN_112__(string(self), " destroyed!"));
+	Log((string(self) $ " destroyed!"));
 	assert(false);
 	return;
 }

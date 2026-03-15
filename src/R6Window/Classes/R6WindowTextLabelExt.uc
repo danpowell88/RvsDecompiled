@@ -77,7 +77,7 @@ function BeforePaint(Canvas C, float X, float Y)
 		J0x2B:
 
 		// End:0x329 [Loop If]
-		if(__NFUN_150__(i, m_iNumberOfLabel))
+		if((i < m_iNumberOfLabel))
 		{
 			C.Font = m_sTextLabelArray[i].TextFont;
 			fWinWidth = m_sTextLabelArray[i].fWidth;
@@ -86,19 +86,19 @@ function BeforePaint(Canvas C, float X, float Y)
 			{
 				TextSize(C, m_sTextLabelArray[i].m_szTextLabel, W, H);
 				// End:0x195
-				if(__NFUN_177__(W, WinWidth))
+				if((W > WinWidth))
 				{
 					// End:0x104
-					if(__NFUN_177__(W, float(596)))
+					if((W > float(596)))
 					{
 						m_sTextLabelArray[i].m_szTextLabel = TextSize(C, m_sTextLabelArray[i].m_szTextLabel, W, H, 596);
 					}
 					m_sTextLabelArray[i].XTextPos = 4.0000000;
-					WinWidth = __NFUN_174__(W, float(__NFUN_144__(2, 4)));
+					WinWidth = (W + float((2 * 4)));
 					m_sTextLabelArray[i].fWidth = WinWidth;
 					fWinWidth = m_sTextLabelArray[i].fWidth;
 					// End:0x195
-					if(__NFUN_130__(__NFUN_119__(OwnerWindow, none), OwnerWindow.__NFUN_303__('R6WindowPopUpBox')))
+					if(((OwnerWindow != none) && OwnerWindow.IsA('R6WindowPopUpBox')))
 					{
 						R6WindowPopUpBox(OwnerWindow).ResizePopUp(WinWidth);
 					}
@@ -117,12 +117,12 @@ function BeforePaint(Canvas C, float X, float Y)
 					break;
 				// End:0x238
 				case 1:
-					fXTemp = __NFUN_175__(__NFUN_175__(__NFUN_175__(fWinWidth, W), __NFUN_171__(float(__NFUN_125__(m_sTextLabelArray[i].m_szTextLabel)), m_fFontSpacing)), m_fVBorderWidth);
+					fXTemp = (((fWinWidth - W) - (float(Len(m_sTextLabelArray[i].m_szTextLabel)) * m_fFontSpacing)) - m_fVBorderWidth);
 					// End:0x25B
 					break;
 				// End:0x258
 				case 2:
-					fXTemp = __NFUN_172__(__NFUN_175__(fWinWidth, W), float(2));
+					fXTemp = ((fWinWidth - W) / float(2));
 					// End:0x25B
 					break;
 				// End:0xFFFF
@@ -132,17 +132,17 @@ function BeforePaint(Canvas C, float X, float Y)
 			// End:0x29F
 			if(m_sTextLabelArray[i].bDrawLineAtEnd)
 			{
-				m_sTextLabelArray[i].fXLine = __NFUN_174__(m_sTextLabelArray[i].X, fWinWidth);
+				m_sTextLabelArray[i].fXLine = (m_sTextLabelArray[i].X + fWinWidth);
 				m_bCheckToDrawLine = true;
 			}
-			m_sTextLabelArray[i].XTextPos = __NFUN_174__(m_sTextLabelArray[i].X, fXTemp);
+			m_sTextLabelArray[i].XTextPos = (m_sTextLabelArray[i].X + fXTemp);
 			// End:0x31F
 			if(m_bTextCenterToWindow)
 			{
-				m_sTextLabelArray[i].Y = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-				m_sTextLabelArray[i].Y = float(int(__NFUN_174__(m_sTextLabelArray[i].Y, 0.5000000)));
+				m_sTextLabelArray[i].Y = ((WinHeight - H) / float(2));
+				m_sTextLabelArray[i].Y = float(int((m_sTextLabelArray[i].Y + 0.5000000)));
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x2B;
 		}
@@ -157,7 +157,7 @@ function Paint(Canvas C, float X, float Y)
 	local Texture t;
 
 	// End:0x20
-	if(__NFUN_129__(GetActivateBorder()))
+	if((!GetActivateBorder()))
 	{
 		super.Paint(C, X, Y);
 	}
@@ -165,40 +165,40 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bCheckToDrawLine)
 	{
 		C.Style = byte(m_DrawStyle);
-		C.__NFUN_2626__(m_vLineColor.R, m_vLineColor.G, m_vLineColor.B);
+		C.SetDrawColor(m_vLineColor.R, m_vLineColor.G, m_vLineColor.B);
 		i = 0;
 		J0x70:
 
 		// End:0x106 [Loop If]
-		if(__NFUN_150__(i, __NFUN_147__(m_iNumberOfLabel, 1)))
+		if((i < (m_iNumberOfLabel - 1)))
 		{
 			// End:0xFC
 			if(m_sTextLabelArray[i].bDrawLineAtEnd)
 			{
-				DrawStretchedTextureSegment(C, m_sTextLabelArray[i].fXLine, m_fYLineOffset, 1.0000000, __NFUN_175__(WinHeight, m_fYLineOffset), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
+				DrawStretchedTextureSegment(C, m_sTextLabelArray[i].fXLine, m_fYLineOffset, 1.0000000, (WinHeight - m_fYLineOffset), float(m_VBorderTextureRegion.X), float(m_VBorderTextureRegion.Y), float(m_VBorderTextureRegion.W), float(m_VBorderTextureRegion.H), m_VBorderTexture);
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x70;
 		}
 	}
 	// End:0x362
-	if(__NFUN_123__(m_sTextLabelArray[0].m_szTextLabel, ""))
+	if((m_sTextLabelArray[0].m_szTextLabel != ""))
 	{
 		tempSpace = C.SpaceX;
 		C.Font = m_Font;
 		C.SpaceX = m_fFontSpacing;
 		m_vTextColor = m_sTextLabelArray[0].TextColorFont;
-		C.__NFUN_2626__(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
+		C.SetDrawColor(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
 		C.Style = byte(m_TextDrawstyle);
 		i = 0;
 		J0x1AE:
 
 		// End:0x34E [Loop If]
-		if(__NFUN_150__(i, m_iNumberOfLabel))
+		if((i < m_iNumberOfLabel))
 		{
 			// End:0x20C
-			if(__NFUN_119__(m_sTextLabelArray[i].TextFont, m_Font))
+			if((m_sTextLabelArray[i].TextFont != m_Font))
 			{
 				m_Font = m_sTextLabelArray[i].TextFont;
 				C.Font = m_sTextLabelArray[i].TextFont;
@@ -207,17 +207,17 @@ function Paint(Canvas C, float X, float Y)
 			if(m_sTextLabelArray[i].TextColorFont != m_vTextColor)
 			{
 				m_vTextColor = m_sTextLabelArray[i].TextColorFont;
-				C.__NFUN_2626__(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
+				C.SetDrawColor(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
 			}
 			// End:0x308
 			if(m_sTextLabelArray[i].bUpDownBG)
 			{
 				DrawUpDownBG(C, m_sTextLabelArray[i].X, m_sTextLabelArray[i].Y, m_sTextLabelArray[i].fWidth, m_sTextLabelArray[i].fHeight);
 				C.Style = byte(m_TextDrawstyle);
-				C.__NFUN_2626__(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
+				C.SetDrawColor(m_vTextColor.R, m_vTextColor.G, m_vTextColor.B);
 			}
 			ClipText(C, m_sTextLabelArray[i].XTextPos, m_sTextLabelArray[i].Y, m_sTextLabelArray[i].m_szTextLabel, true);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1AE;
 		}
@@ -240,7 +240,7 @@ function DrawUpDownBG(Canvas C, float _fX, float _fY, float _fW, float _fH)
 	RTexture.W = 2;
 	RTexture.H = 13;
 	C.Style = 5;
-	C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+	C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 	DrawStretchedTextureSegment(C, _fX, _fY, _fW, _fH, float(RTexture.X), float(RTexture.Y), float(RTexture.W), float(RTexture.H), BGTexture);
 	return;
 }
@@ -252,7 +252,7 @@ function int AddTextLabel(string _szTextToAdd, float _X, float _Y, float _fWidth
 
 	iIndex = 0;
 	// End:0x162
-	if(__NFUN_150__(m_iNumberOfLabel, 20))
+	if((m_iNumberOfLabel < 20))
 	{
 		m_sTextLabelArray[m_iNumberOfLabel].m_szTextLabel = _szTextToAdd;
 		m_sTextLabelArray[m_iNumberOfLabel].X = _X;
@@ -260,7 +260,7 @@ function int AddTextLabel(string _szTextToAdd, float _X, float _Y, float _fWidth
 		m_sTextLabelArray[m_iNumberOfLabel].Y = _Y;
 		m_sTextLabelArray[m_iNumberOfLabel].fWidth = _fWidth;
 		// End:0xA7
-		if(__NFUN_180__(_fHeight, float(0)))
+		if((_fHeight == float(0)))
 		{
 			m_sTextLabelArray[m_iNumberOfLabel].fHeight = 15.0000000;			
 		}
@@ -276,7 +276,7 @@ function int AddTextLabel(string _szTextToAdd, float _X, float _Y, float _fWidth
 		m_sTextLabelArray[m_iNumberOfLabel].bUpDownBG = m_bUpDownBG;
 		iIndex = m_iNumberOfLabel;
 		m_bRefresh = true;
-		__NFUN_161__(m_iNumberOfLabel, 1);
+		(m_iNumberOfLabel += 1);
 	}
 	return iIndex;
 	return;
@@ -322,10 +322,10 @@ function Clear()
 	J0x07:
 
 	// End:0x33 [Loop If]
-	if(__NFUN_150__(i, m_iNumberOfLabel))
+	if((i < m_iNumberOfLabel))
 	{
 		m_sTextLabelArray[i].m_szTextLabel = "";
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}

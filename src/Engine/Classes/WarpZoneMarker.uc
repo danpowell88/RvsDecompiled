@@ -20,7 +20,7 @@ var Actor TriggerActor2;
 function PostBeginPlay()
 {
 	// End:0x1A
-	if(__NFUN_151__(markedWarpZone.numDestinations, 1))
+	if((markedWarpZone.numDestinations > 1))
 	{
 		FindTriggerActor();
 	}
@@ -33,10 +33,10 @@ function FindTriggerActor()
 	local ZoneTrigger Z;
 
 	// End:0x40
-	foreach __NFUN_304__(Class'Engine.ZoneTrigger', Z)
+	foreach AllActors(Class'Engine.ZoneTrigger', Z)
 	{
 		// End:0x3F
-		if(__NFUN_254__(Z.Event, markedWarpZone.ZoneTag))
+		if((Z.Event == markedWarpZone.ZoneTag))
 		{
 			TriggerActor = Z;			
 			return;
@@ -48,7 +48,7 @@ function FindTriggerActor()
 function Actor SpecialHandling(Pawn Other)
 {
 	// End:0x31
-	if(__NFUN_114__(Other.Region.Zone, markedWarpZone))
+	if((Other.Region.Zone == markedWarpZone))
 	{
 		markedWarpZone.ActorEntered(Other);
 	}

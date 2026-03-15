@@ -37,9 +37,9 @@ simulated function PostRender(Canvas C)
 {
 	m_iNonFunctionnalX = int(C.HalfClipX);
 	m_iNonFunctionnalY = int(C.HalfClipY);
-	C.__NFUN_2626__(m_color.R, m_color.G, m_color.B);
-	C.__NFUN_2623__(float(m_iNonFunctionnalX), float(m_iNonFunctionnalY));
-	C.__NFUN_465__("(NO RETICULE)");
+	C.SetDrawColor(m_color.R, m_color.G, m_color.B);
+	C.SetPos(float(m_iNonFunctionnalX), float(m_iNonFunctionnalY));
+	C.DrawText("(NO RETICULE)");
 	return;
 }
 
@@ -48,13 +48,13 @@ simulated function SetReticuleInfo(Canvas C)
 	local Color aColor;
 	local R6GameOptions GameOptions;
 
-	C.__NFUN_2626__(m_color.R, m_color.G, m_color.B);
-	GameOptions = __NFUN_1009__();
+	C.SetDrawColor(m_color.R, m_color.G, m_color.B);
+	GameOptions = GetGameOptions();
 	// End:0x7A
 	if(m_bAimingAtFriendly)
 	{
 		aColor = GameOptions.m_reticuleFriendColour;
-		C.__NFUN_2626__(aColor.R, aColor.G, aColor.B);
+		C.SetDrawColor(aColor.R, aColor.G, aColor.B);
 	}
 	return;
 }
@@ -65,15 +65,15 @@ simulated function SetIdentificationReticule(Canvas C)
 	local int X, Y;
 
 	// End:0xC2
-	if(__NFUN_130__(m_bIdentifyCharacter, m_bShowNames))
+	if((m_bIdentifyCharacter && m_bShowNames))
 	{
-		C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+		C.UseVirtualSize(true, 640.0000000, 480.0000000);
 		X = int(C.HalfClipX);
 		Y = int(C.HalfClipY);
 		C.Font = m_SmallFont_14pt;
-		C.__NFUN_464__(m_CharacterName, fStrSizeX, fStrSizeY);
-		C.__NFUN_2623__(__NFUN_175__(float(X), __NFUN_172__(fStrSizeX, float(2))), float(__NFUN_146__(Y, 24)));
-		C.__NFUN_465__(m_CharacterName);
+		C.StrLen(m_CharacterName, fStrSizeX, fStrSizeY);
+		C.SetPos((float(X) - (fStrSizeX / float(2))), float((Y + 24)));
+		C.DrawText(m_CharacterName);
 	}
 	return;
 }

@@ -41,7 +41,7 @@ native(1826) final function R6DeploymentZone FindNearestZoneForHostage(R6Terrori
 
 function Initialization(Actor dummy)
 {
-	__NFUN_1825__(dummy);
+	Init(dummy);
 	return;
 }
 
@@ -56,12 +56,12 @@ function ResetOriginalData()
 	J0x07:
 
 	// End:0x53 [Loop If]
-	if(__NFUN_150__(i, 16))
+	if((i < 16))
 	{
 		m_ArrayHostage[i].hostage = none;
 		m_ArrayHostage[i].terro = none;
 		m_ArrayHostage[i].bInZone = 0;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -77,14 +77,14 @@ function int FindHostageIndex(R6Hostage hostage)
 	local int i;
 
 	// End:0x2A
-	if(__NFUN_155__(hostage.m_iIndex, -1))
+	if((hostage.m_iIndex != -1))
 	{
 		return hostage.m_iIndex;		
 	}
 	else
 	{
-		__NFUN_165__(m_iCurrentMax);
-		assert(__NFUN_150__(m_iCurrentMax, 16));
+		(m_iCurrentMax++);
+		assert((m_iCurrentMax < 16));
 		m_ArrayHostage[m_iCurrentMax].hostage = hostage;
 		hostage.m_iIndex = m_iCurrentMax;
 		return m_iCurrentMax;
@@ -101,13 +101,13 @@ function bool IsHostageAssigned(R6Hostage hostage)
 
 	i = FindHostageIndex(hostage);
 	// End:0x2F
-	if(__NFUN_154__(int(hostage.m_ePersonality), int(3)))
+	if((int(hostage.m_ePersonality) == int(3)))
 	{
 		return true;		
 	}
 	else
 	{
-		return __NFUN_132__(__NFUN_119__(m_ArrayHostage[i].terro, none), __NFUN_154__(m_ArrayHostage[i].bInZone, 1));
+		return ((m_ArrayHostage[i].terro != none) || (m_ArrayHostage[i].bInZone == 1));
 	}
 	return;
 }
@@ -136,7 +136,7 @@ function AssignHostageToZone(R6Hostage hostage, R6DeploymentZone Zone)
 	i = FindHostageIndex(hostage);
 	m_ArrayHostage[i].terro = none;
 	m_ArrayHostage[i].bInZone = 1;
-	Zone.__NFUN_1836__(hostage);
+	Zone.AddHostage(hostage);
 	return;
 }
 

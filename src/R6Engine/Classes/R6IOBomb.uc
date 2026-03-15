@@ -56,11 +56,11 @@ var(R6ActionObject) string m_szMissionObjLocalization;  // set the loc file. if 
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ArmBomb, DisarmBomb;
 
 	// Pos:0x00D
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bExploded, m_fRepTimeLeft;
 }
 
@@ -68,7 +68,7 @@ simulated function PostBeginPlay()
 {
 	super(R6InteractiveObject).PostBeginPlay();
 	// End:0x28
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		AddSoundBankName("Foley_Bomb");
 	}
@@ -80,7 +80,7 @@ simulated function PostBeginPlay()
 simulated function string GetMissionObjLocFile()
 {
 	// End:0x15
-	if(__NFUN_123__(m_szMissionObjLocalization, ""))
+	if((m_szMissionObjLocalization != ""))
 	{
 		return m_szMissionObjLocalization;		
 	}
@@ -114,7 +114,7 @@ simulated function ResetOriginalData()
 	m_fLastLevelTime = 0.0000000;
 	StopSoundBomb();
 	// End:0x8A
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		// End:0x82
 		if(m_bIsActivated)
@@ -127,9 +127,9 @@ simulated function ResetOriginalData()
 		}
 	}
 	// End:0xAC
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
-		__NFUN_280__(0.1000000, true);
+		SetTimer(0.1000000, true);
 	}
 	return;
 }
@@ -148,7 +148,7 @@ simulated function bool CanToggle()
 simulated function float GetTimeLeft()
 {
 	// End:0x22
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		return m_fRepTimeLeft;		
 	}
@@ -165,14 +165,14 @@ simulated function Timer()
 
 	super(R6InteractiveObject).Timer();
 	// End:0x4F
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		// End:0x4C
 		if(m_bIsActivated)
 		{
-			__NFUN_185__(m_fRepTimeLeft, 0.1000000);
+			(m_fRepTimeLeft -= 0.1000000);
 			// End:0x4C
-			if(__NFUN_176__(m_fRepTimeLeft, float(0)))
+			if((m_fRepTimeLeft < float(0)))
 			{
 				m_fRepTimeLeft = 0.0000000;
 			}
@@ -181,18 +181,18 @@ simulated function Timer()
 	else
 	{
 		// End:0xDD
-		if(__NFUN_130__(m_bIsActivated, __NFUN_177__(m_fTimeLeft, float(0))))
+		if((m_bIsActivated && (m_fTimeLeft > float(0))))
 		{
-			__NFUN_185__(m_fTimeLeft, __NFUN_175__(Level.TimeSeconds, m_fLastLevelTime));
+			(m_fTimeLeft -= (Level.TimeSeconds - m_fLastLevelTime));
 			iRemaining = int(m_fTimeLeft);
 			ChangeSoundBomb();
 			// End:0xB6
-			if(__NFUN_180__(__NFUN_173__(float(iRemaining), float(5)), float(0)))
+			if(((float(iRemaining) % float(5)) == float(0)))
 			{
 				m_fRepTimeLeft = m_fTimeLeft;
 			}
 			// End:0xC9
-			if(__NFUN_178__(m_fTimeLeft, float(0)))
+			if((m_fTimeLeft <= float(0)))
 			{
 				DetonateBomb();
 			}
@@ -221,11 +221,11 @@ function ChangeSoundBomb()
 		// End:0x45
 		case 0:
 			// End:0x42
-			if(__NFUN_178__(m_fTimeLeft, float(20)))
+			if((m_fTimeLeft <= float(20)))
 			{
 				AmbientSound = m_sndPlayBeepFast;
 				AmbientSoundStop = m_sndStopBeepFast;
-				__NFUN_264__(m_sndPlayBeepFast, 1);
+				__NFUN_264__(m_sndPlayBeepFast, 1) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
 				m_eBeepState = 1;
 			}
 			// End:0x86

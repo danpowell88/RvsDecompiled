@@ -37,9 +37,9 @@ function Paint(Canvas C, float X, float Y)
 {
 	super.Paint(C, X, Y);
 	// End:0x9F
-	if(__NFUN_242__(m_bSelected, true))
+	if((m_bSelected == true))
 	{
-		C.__NFUN_2626__(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
+		C.SetDrawColor(m_vButtonColor.R, m_vButtonColor.G, m_vButtonColor.B);
 		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, float(m_DotRegion.X), float(m_DotRegion.Y), float(m_DotRegion.W), float(m_DotRegion.H), m_DotTexture);
 	}
 	return;
@@ -51,7 +51,7 @@ function LMouseDown(float X, float Y)
 
 	super(UWindowWindow).LMouseDown(X, Y);
 	// End:0x67
-	if(__NFUN_130__(__NFUN_129__(bDisabled), OwnerWindow.__NFUN_303__('R6MenuTeamBar')))
+	if(((!bDisabled) && OwnerWindow.IsA('R6MenuTeamBar')))
 	{
 		R6MenuTeamBar(OwnerWindow).SetTeamActive(m_iTeamColor);
 		R6MenuRootWindow(Root).m_PlanningWidget.CloseAllPopup();

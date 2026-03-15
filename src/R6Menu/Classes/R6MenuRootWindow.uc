@@ -67,17 +67,17 @@ function Created()
 	// End:0x27
 	if(bShowLog)
 	{
-		__NFUN_231__("R6MenuRootWindow Created()");
+		Log("R6MenuRootWindow Created()");
 	}
 	super(UWindowRootWindow).Created();
 	R6Console(Console).InitializedGameService();
 	m_pFileManager = new Class'Engine.R6FileManager';
 	// End:0x75
-	if(__NFUN_114__(m_pFileManager, none))
+	if((m_pFileManager == none))
 	{
-		__NFUN_231__("m_pFileManager == NONE");
+		Log("m_pFileManager == NONE");
 	}
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	m_bPlayerDoNotWant3DView = pGameOptions.Hide3DView;
 	m_eRootId = 1;
 	SetResolution(640.0000000, 480.0000000);
@@ -117,7 +117,7 @@ function Created()
 	m_MainMenuWidget = R6MenuMainWidget(CreateWindow(MenuClassDefines.ClassMainWidget, WinLeft, WinTop, WinWidth, WinHeight, self));
 	m_MainMenuWidget.Close();
 	AssignShowFirstWidget();
-	m_CurrentWidget.SetMousePos(__NFUN_171__(WinWidth, 0.5000000), __NFUN_171__(WinHeight, 0.5000000));
+	m_CurrentWidget.SetMousePos((WinWidth * 0.5000000), (WinHeight * 0.5000000));
 	m_ePopUpID = 0;
 	m_PopUpSavePlan = R6WindowPopUpBox(CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000));
 	m_PopUpSavePlan.CreateStdPopUpWindow(Localize("POPUP", "PopUpTitle_SavePlan", "R6Menu"), 30.0000000, 188.0000000, 150.0000000, 264.0000000, 180.0000000);
@@ -131,7 +131,7 @@ function Created()
 	m_PopUpLoadPlan.HideWindow();
 	GUIScale = 1.0000000;
 	// End:0x6F4
-	if(__NFUN_129__(R6Console(Console).m_bStartedByGSClient))
+	if((!R6Console(Console).m_bStartedByGSClient))
 	{
 		GetPlayerOwner().PlayMusic(m_MainMenuMusic, true);
 	}
@@ -174,7 +174,7 @@ function Set3dView(bool bSelected)
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	pGameOptions.Hide3DView = bSelected;
 	m_bPlayerDoNotWant3DView = bSelected;
 	return;
@@ -192,35 +192,35 @@ function DrawMouse(Canvas C)
 	}
 	else
 	{
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+		C.SetDrawColor(byte(255), byte(255), byte(255));
 		C.Style = 5;
 		// End:0xD1
-		if(__NFUN_242__(m_bUseAimIcon, true))
+		if((m_bUseAimIcon == true))
 		{
-			C.__NFUN_2623__(__NFUN_175__(__NFUN_171__(MouseX, GUIScale), float(AimCursor.HotX)), __NFUN_175__(__NFUN_171__(MouseY, GUIScale), float(AimCursor.HotY)));
+			C.SetPos(((MouseX * GUIScale) - float(AimCursor.HotX)), ((MouseY * GUIScale) - float(AimCursor.HotY)));
 			MouseTex = AimCursor.Tex;			
 		}
 		else
 		{
 			// End:0x130
-			if(__NFUN_242__(m_bUseDragIcon, true))
+			if((m_bUseDragIcon == true))
 			{
-				C.__NFUN_2623__(__NFUN_175__(__NFUN_171__(MouseX, GUIScale), float(DragCursor.HotX)), __NFUN_175__(__NFUN_171__(MouseY, GUIScale), float(DragCursor.HotY)));
+				C.SetPos(((MouseX * GUIScale) - float(DragCursor.HotX)), ((MouseY * GUIScale) - float(DragCursor.HotY)));
 				MouseTex = DragCursor.Tex;				
 			}
 			else
 			{
-				C.__NFUN_2623__(__NFUN_175__(__NFUN_171__(MouseX, GUIScale), float(MouseWindow.Cursor.HotX)), __NFUN_175__(__NFUN_171__(MouseY, GUIScale), float(MouseWindow.Cursor.HotY)));
+				C.SetPos(((MouseX * GUIScale) - float(MouseWindow.Cursor.HotX)), ((MouseY * GUIScale) - float(MouseWindow.Cursor.HotY)));
 				MouseTex = MouseWindow.Cursor.Tex;
 			}
 		}
-		fMouseClipX = __NFUN_171__(m_CurrentWidget.m_fRightMouseXClipping, GUIScale);
-		fMouseClipY = __NFUN_171__(m_CurrentWidget.m_fRightMouseYClipping, GUIScale);
-		C.__NFUN_2625__(fMouseClipX, fMouseClipY);
+		fMouseClipX = (m_CurrentWidget.m_fRightMouseXClipping * GUIScale);
+		fMouseClipY = (m_CurrentWidget.m_fRightMouseYClipping * GUIScale);
+		C.SetClip(fMouseClipX, fMouseClipY);
 		// End:0x24D
-		if(__NFUN_119__(MouseTex, none))
+		if((MouseTex != none))
 		{
-			C.__NFUN_468__(MouseTex, float(MouseTex.USize), float(MouseTex.VSize), 0.0000000, 0.0000000, float(MouseTex.USize), float(MouseTex.VSize));
+			C.DrawTileClipped(MouseTex, float(MouseTex.USize), float(MouseTex.VSize), 0.0000000, 0.0000000, float(MouseTex.USize), float(MouseTex.VSize));
 		}
 		C.Style = 1;
 	}
@@ -246,7 +246,7 @@ function ResetMenus(optional bool _bConnectionFailed)
 function UpdateMenus(int iWhatToUpdate)
 {
 	// End:0x1F
-	if(__NFUN_119__(m_PlanningWidget, none))
+	if((m_PlanningWidget != none))
 	{
 		m_PlanningWidget.ResetTeams(iWhatToUpdate);
 	}
@@ -256,7 +256,7 @@ function UpdateMenus(int iWhatToUpdate)
 function MoveMouse(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(m_CurrentWidget, none))
+	if((m_CurrentWidget != none))
 	{
 		m_CurrentWidget.SetMousePos(X, Y);
 	}
@@ -267,7 +267,7 @@ function MoveMouse(float X, float Y)
 function ClosePopups()
 {
 	// End:0x1E
-	if(__NFUN_114__(m_CurrentWidget, m_PlanningWidget))
+	if((m_CurrentWidget == m_PlanningWidget))
 	{
 		m_PlanningWidget.Hide3DAndLegend();
 	}
@@ -276,7 +276,7 @@ function ClosePopups()
 
 function bool IsInsidePlanning()
 {
-	return __NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(m_ePrevWidgetInUse), int(8)), __NFUN_154__(int(m_ePrevWidgetInUse), int(12))), __NFUN_154__(int(m_ePrevWidgetInUse), int(9))), __NFUN_154__(int(m_ePrevWidgetInUse), int(13))), __NFUN_154__(int(m_ePrevWidgetInUse), int(10))), __NFUN_154__(int(m_ePrevWidgetInUse), int(11)));
+	return ((((((int(m_ePrevWidgetInUse) == int(8)) || (int(m_ePrevWidgetInUse) == int(12))) || (int(m_ePrevWidgetInUse) == int(9))) || (int(m_ePrevWidgetInUse) == int(13))) || (int(m_ePrevWidgetInUse) == int(10))) || (int(m_ePrevWidgetInUse) == int(11)));
 	return;
 }
 
@@ -286,7 +286,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 
 	m_bJoinServerProcess = false;
 	// End:0x2E
-	if(__NFUN_154__(int(widgetID), int(17)))
+	if((int(widgetID) == int(17)))
 	{
 		m_eCurWidgetInUse = m_ePrevWidgetInUse;
 		m_ePrevWidgetInUse = 0;		
@@ -296,10 +296,10 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 		m_ePrevWidgetInUse = m_eCurWidgetInUse;
 		m_eCurWidgetInUse = widgetID;
 		// End:0x7A
-		if(__NFUN_154__(int(m_ePrevWidgetInUse), int(9)))
+		if((int(m_ePrevWidgetInUse) == int(9)))
 		{
 			// End:0x7A
-			if(__NFUN_119__(R6PlanningCtrl(GetPlayerOwner()), none))
+			if((R6PlanningCtrl(GetPlayerOwner()) != none))
 			{
 				R6PlanningCtrl(GetPlayerOwner()).CancelActionPointAction();
 			}
@@ -326,7 +326,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 		// End:0x15E
 		case 7:
 			// End:0x121
-			if(__NFUN_114__(m_CurrentWidget, m_MultiPlayerWidget))
+			if((m_CurrentWidget == m_MultiPlayerWidget))
 			{
 				R6MenuMultiPlayerWidget(m_CurrentWidget).BackToMainMenu();
 			}
@@ -357,7 +357,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 		// End:0x211
 		case 9:
 			// End:0x20E
-			if(__NFUN_119__(m_CurrentWidget, m_PlanningWidget))
+			if((m_CurrentWidget != m_PlanningWidget))
 			{
 				m_CurrentWidget.HideWindow();
 				m_PreviousWidget = m_CurrentWidget;
@@ -508,7 +508,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 		// End:0x5CD
 		case 17:
 			// End:0x5CA
-			if(__NFUN_119__(m_PreviousWidget, none))
+			if((m_PreviousWidget != none))
 			{
 				m_CurrentWidget.HideWindow();
 				m_CurrentWidget = m_PreviousWidget;
@@ -529,7 +529,7 @@ function ChangeCurrentWidget(UWindowRootWindow.eGameWidgetID widgetID)
 function bool PlanningShouldProcessKey()
 {
 	// End:0x24
-	if(__NFUN_130__(__NFUN_154__(int(m_ePopUpID), int(0)), __NFUN_154__(int(m_eCurWidgetInUse), int(9))))
+	if(((int(m_ePopUpID) == int(0)) && (int(m_eCurWidgetInUse) == int(9))))
 	{
 		return true;
 	}
@@ -540,7 +540,7 @@ function bool PlanningShouldProcessKey()
 function bool PlanningShouldDrawPath()
 {
 	// End:0x12
-	if(__NFUN_154__(int(m_eCurWidgetInUse), int(9)))
+	if((int(m_eCurWidgetInUse) == int(9)))
 	{
 		return true;
 	}
@@ -555,49 +555,49 @@ function ResetCustomMissionOperatives()
 	local int iNbArrayElements, iNbTotalOperatives, i;
 	local R6ModMgr pModManager;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	m_GameOperatives.Remove(0, m_GameOperatives.Length);
 	iNbArrayElements = R6Console(Console).m_CurrentCampaign.m_OperativeClassName.Length;
 	i = 0;
 	J0x49:
 
 	// End:0xAF [Loop If]
-	if(__NFUN_150__(i, iNbArrayElements))
+	if((i < iNbArrayElements))
 	{
 		tmpOperative = new (none) Class<R6Operative>(DynamicLoadObject(R6Console(Console).m_CurrentCampaign.m_OperativeClassName[i], Class'Core.Class'));
 		m_GameOperatives[i] = tmpOperative;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x49;
 	}
 	iNbTotalOperatives = i;
 	// End:0x19E
-	if(__NFUN_242__(pModManager.m_pCurrentMod.m_bUseCustomOperatives, true))
+	if((pModManager.m_pCurrentMod.m_bUseCustomOperatives == true))
 	{
 		i = 0;
 		J0xDF:
 
 		// End:0x19E [Loop If]
-		if(__NFUN_150__(i, pModManager.GetPackageMgr().GetNbPackage()))
+		if((i < pModManager.GetPackageMgr().GetNbPackage()))
 		{
 			tmpOperativeClass = Class<R6Operative>(pModManager.GetPackageMgr().GetFirstClassFromPackage(i, Class'R6Game.R6Operative'));
 			J0x130:
 
 			// End:0x194 [Loop If]
-			if(__NFUN_119__(tmpOperativeClass, none))
+			if((tmpOperativeClass != none))
 			{
 				tmpOperative = new (none) tmpOperativeClass;
 				// End:0x16D
-				if(__NFUN_119__(tmpOperative, none))
+				if((tmpOperative != none))
 				{
 					m_GameOperatives[iNbTotalOperatives] = tmpOperative;
-					__NFUN_165__(iNbTotalOperatives);
+					(iNbTotalOperatives++);
 				}
 				tmpOperativeClass = Class<R6Operative>(pModManager.GetPackageMgr().GetNextClassFromPackage());
 				// [Loop Continue]
 				goto J0x130;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xDF;
 		}
@@ -620,17 +620,17 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		{
 			// End:0x50
 			case 9:
-				__NFUN_231__(__NFUN_168__("R6MenuRoot::WindowEvent Msg= WM_KeyDown Key", string(Key)));
+				Log(("R6MenuRoot::WindowEvent Msg= WM_KeyDown Key" @ string(Key)));
 				// End:0xD1
 				break;
 			// End:0x8E
 			case 8:
-				__NFUN_231__(__NFUN_168__("R6MenuRoot::WindowEvent Msg= WM_KeyUp Key", string(Key)));
+				Log(("R6MenuRoot::WindowEvent Msg= WM_KeyUp Key" @ string(Key)));
 				// End:0xD1
 				break;
 			// End:0xCE
 			case 10:
-				__NFUN_231__(__NFUN_168__("R6MenuRoot::WindowEvent Msg= WM_KeyType Key", string(Key)));
+				Log(("R6MenuRoot::WindowEvent Msg= WM_KeyType Key" @ string(Key)));
 				// End:0xD1
 				break;
 			// End:0xFFFF
@@ -641,10 +641,10 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 	else
 	{
 		// End:0x15A
-		if(__NFUN_155__(int(Msg), int(11)))
+		if((int(Msg) != int(11)))
 		{
 			// End:0x10E
-			if(__NFUN_132__(Console.m_bInterruptConnectionProcess, R6Console(Console).m_bRenderMenuOneTime))
+			if((Console.m_bInterruptConnectionProcess || R6Console(Console).m_bRenderMenuOneTime))
 			{
 				return;
 			}
@@ -652,10 +652,10 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 			if(m_bJoinServerProcess)
 			{
 				// End:0x15A
-				if(__NFUN_154__(int(Msg), int(9)))
+				if((int(Msg) == int(9)))
 				{
 					// End:0x15A
-					if(__NFUN_154__(Key, int(Root.Console.27)))
+					if((Key == int(Root.Console.27)))
 					{
 						Console.m_bInterruptConnectionProcess = true;
 						return;
@@ -688,7 +688,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 				break;
 		}
 		// End:0x1E7
-		if(__NFUN_132__(__NFUN_154__(int(Msg), int(11)), __NFUN_129__(WaitModal())))
+		if(((int(Msg) == int(11)) || (!WaitModal())))
 		{
 			super(UWindowRootWindow).WindowEvent(Msg, C, X, Y, Key);			
 		}
@@ -697,7 +697,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 			// End:0x238
 			if(WaitModal())
 			{
-				ModalWindow.WindowEvent(Msg, C, __NFUN_175__(X, ModalWindow.WinLeft), __NFUN_175__(Y, ModalWindow.WinTop), Key);
+				ModalWindow.WindowEvent(Msg, C, (X - ModalWindow.WinLeft), (Y - ModalWindow.WinTop), Key);
 			}
 		}
 		return;

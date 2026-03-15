@@ -15,10 +15,10 @@ function UWindowHotkeyWindowList FindWindow(UWindowWindow W)
 	J0x10:
 
 	// End:0x55 [Loop If]
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		// End:0x39
-		if(__NFUN_114__(L.Window, W))
+		if((L.Window == W))
 		{
 			return L;
 		}

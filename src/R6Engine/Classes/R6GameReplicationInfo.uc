@@ -69,13 +69,13 @@ var string m_szGadgMiscRes[32];  // Gadget: misceleaneous restricted
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_aTeamScore, m_bRepMenuCountDownTimePaused, 
 		m_bRepMenuCountDownTimeUnlimited, m_fRepMenuCountDownTime, 
 		m_iCurrentRound;
 
 	// Pos:0x00D
-	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetInitial && (int(Role) == int(ROLE_Authority))))
 		m_MaxPlayers, m_bAIBkp, 
 		m_bAdminPasswordReq, m_bAutoBalance, 
 		m_bDedicatedSvr, m_bFFPWeapon, 
@@ -90,7 +90,7 @@ replication
 		m_szCurrGameType;
 
 	// Pos:0x025
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_szAssRifleRes, m_szGadgMiscRes, 
 		m_szGadgPrimaryRes, m_szGadgSecondayRes, 
 		m_szMachGunRes, m_szMachPistolRes, 
@@ -110,11 +110,11 @@ simulated event Tick(float fDeltaTime)
 {
 	super(Actor).Tick(fDeltaTime);
 	// End:0x64
-	if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_129__(m_bRepMenuCountDownTimePaused)), __NFUN_129__(m_bRepMenuCountDownTimeUnlimited)))
+	if((((int(Level.NetMode) == int(NM_Client)) && (!m_bRepMenuCountDownTimePaused)) && (!m_bRepMenuCountDownTimeUnlimited)))
 	{
-		__NFUN_185__(m_fRepMenuCountDownTime, fDeltaTime);
+		(m_fRepMenuCountDownTime -= fDeltaTime);
 		// End:0x64
-		if(__NFUN_176__(m_fRepMenuCountDownTime, 0.0000000))
+		if((m_fRepMenuCountDownTime < 0.0000000))
 		{
 			m_fRepMenuCountDownTime = 0.0000000;
 		}
@@ -125,7 +125,7 @@ simulated event Tick(float fDeltaTime)
 simulated event float GetRoundTime()
 {
 	// End:0x21
-	if(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))
+	if((int(Level.NetMode) == int(NM_ListenServer)))
 	{
 		return float(m_iMenuCountDownTime);
 	}
@@ -143,7 +143,7 @@ simulated event Destroyed()
 {
 	super(Actor).Destroyed();
 	// End:0x20
-	if(__NFUN_119__(m_MenuCommunication, none))
+	if((m_MenuCommunication != none))
 	{
 		m_MenuCommunication.ClearLevelReferences();
 	}
@@ -170,20 +170,20 @@ simulated function RefreshMPInfoPlayerStats()
 	local int _iLastValidIndex;
 
 	// End:0x33A
-	foreach __NFUN_313__(Class'Engine.PlayerReplicationInfo', PRI)
+	foreach DynamicActors(Class'Engine.PlayerReplicationInfo', PRI)
 	{
 		// End:0x6D
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("RefreshMPlayerInfo Index:", string(_iLastValidIndex)), "PRI is"), string(PRI)), "Name is"), PRI.PlayerName));
+			Log(((((("RefreshMPlayerInfo Index:" @ string(_iLastValidIndex)) @ "PRI is") @ string(PRI)) @ "Name is") @ PRI.PlayerName));
 		}
 		// End:0xE2
-		if(__NFUN_151__(PRI.m_iRoundsHit, 0))
+		if((PRI.m_iRoundsHit > 0))
 		{
 			// End:0xD2
-			if(__NFUN_150__(PRI.m_iRoundsHit, PRI.m_iRoundFired))
+			if((PRI.m_iRoundsHit < PRI.m_iRoundFired))
 			{
-				_PlayerMenuInfo.iEfficiency = __NFUN_145__(__NFUN_144__(PRI.m_iRoundsHit, 100), PRI.m_iRoundFired);				
+				_PlayerMenuInfo.iEfficiency = ((PRI.m_iRoundsHit * 100) / PRI.m_iRoundFired);				
 			}
 			else
 			{
@@ -207,27 +207,27 @@ simulated function RefreshMPInfoPlayerStats()
 		_PlayerMenuInfo.iRoundsWon = PRI.m_iRoundsWon;
 		_PlayerMenuInfo.iDeathCount = int(PRI.Deaths);
 		_PlayerMenuInfo.bPlayerReady = PRI.m_bPlayerReady;
-		_PlayerMenuInfo.bSpectator = __NFUN_132__(__NFUN_154__(PRI.TeamID, int(0)), __NFUN_154__(PRI.TeamID, int(4)));
+		_PlayerMenuInfo.bSpectator = ((PRI.TeamID == int(0)) || (PRI.TeamID == int(4)));
 		// End:0x2D1
 		if(m_bShowPlayerStates)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("DBG: ", PRI.PlayerName), " bSpectator="), string(_PlayerMenuInfo.bSpectator)), " TeamID="), string(PRI.TeamID)));
+			Log(((((("DBG: " $ PRI.PlayerName) $ " bSpectator=") $ string(_PlayerMenuInfo.bSpectator)) $ " TeamID=") $ string(PRI.TeamID)));
 		}
 		// End:0x2F5
-		if(__NFUN_114__(PRI.Owner, none))
+		if((PRI.Owner == none))
 		{
 			_PlayerMenuInfo.bOwnPlayer = false;			
 		}
 		else
 		{
-			_PlayerMenuInfo.bOwnPlayer = __NFUN_119__(Viewport(PlayerController(PRI.Owner).Player), none);
+			_PlayerMenuInfo.bOwnPlayer = (Viewport(PlayerController(PRI.Owner).Player) != none);
 		}
-		__NFUN_1231__(_iLastValidIndex, _PlayerMenuInfo);
-		__NFUN_165__(_iLastValidIndex);		
+		SetFPlayerMenuInfo(_iLastValidIndex, _PlayerMenuInfo);
+		(_iLastValidIndex++);		
 	}	
-	__NFUN_1279__(_iLastValidIndex, m_szCurrGameType);
+	SortFPlayerMenuInfo(_iLastValidIndex, m_szCurrGameType);
 	// End:0x367
-	if(__NFUN_119__(m_MenuCommunication, none))
+	if((m_MenuCommunication != none))
 	{
 		m_MenuCommunication.m_iLastValidIndex = _iLastValidIndex;
 	}
@@ -237,7 +237,7 @@ simulated function RefreshMPInfoPlayerStats()
 simulated event NewServerState()
 {
 	// End:0x30
-	if(__NFUN_130__(__NFUN_119__(m_MenuCommunication, none), __NFUN_129__(m_MenuCommunication.m_bImCurrentlyDisconnect)))
+	if(((m_MenuCommunication != none) && (!m_MenuCommunication.m_bImCurrentlyDisconnect)))
 	{
 		m_MenuCommunication.NewServerState();
 	}
@@ -251,14 +251,14 @@ simulated event SaveRemoteServerSettings(string NewServerFile)
 	local WindowConsole _console;
 
 	pServerOptions = new Class'Engine.R6ServerInfo';
-	pServerOptions.m_ServerMapList = __NFUN_278__(Class'Engine.R6MapList');
+	pServerOptions.m_ServerMapList = Spawn(Class'Engine.R6MapList');
 	pServerOptions.ServerName = ServerName;
-	pServerOptions.CamFirstPerson = __NFUN_151__(__NFUN_156__(m_iDeathCameraMode, 1), 0);
-	pServerOptions.CamThirdPerson = __NFUN_151__(__NFUN_156__(m_iDeathCameraMode, 2), 0);
-	pServerOptions.CamFreeThirdP = __NFUN_151__(__NFUN_156__(m_iDeathCameraMode, 4), 0);
-	pServerOptions.CamGhost = __NFUN_151__(__NFUN_156__(m_iDeathCameraMode, 8), 0);
-	pServerOptions.CamFadeToBlack = __NFUN_151__(__NFUN_156__(m_iDeathCameraMode, 16), 0);
-	pServerOptions.CamTeamOnly = __NFUN_151__(__NFUN_156__(m_iDeathCameraMode, 32), 0);
+	pServerOptions.CamFirstPerson = ((m_iDeathCameraMode & 1) > 0);
+	pServerOptions.CamThirdPerson = ((m_iDeathCameraMode & 2) > 0);
+	pServerOptions.CamFreeThirdP = ((m_iDeathCameraMode & 4) > 0);
+	pServerOptions.CamGhost = ((m_iDeathCameraMode & 8) > 0);
+	pServerOptions.CamFadeToBlack = ((m_iDeathCameraMode & 16) > 0);
+	pServerOptions.CamTeamOnly = ((m_iDeathCameraMode & 32) > 0);
 	pServerOptions.MaxPlayers = m_MaxPlayers;
 	pServerOptions.NbTerro = m_iNbOfTerro;
 	pServerOptions.UsePassword = false;
@@ -288,10 +288,10 @@ simulated event SaveRemoteServerSettings(string NewServerFile)
 	J0x2FB:
 
 	// End:0x345 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(m_szGadgPrimaryRes[_iCount], "")))
+	if(((_iCount < 32) && (m_szGadgPrimaryRes[_iCount] != "")))
 	{
 		pServerOptions.RestrictedPrimary[_iCount] = m_szGadgPrimaryRes[_iCount];
-		__NFUN_165__(_iCount);
+		(_iCount++);
 		// [Loop Continue]
 		goto J0x2FB;
 	}
@@ -299,10 +299,10 @@ simulated event SaveRemoteServerSettings(string NewServerFile)
 	J0x34C:
 
 	// End:0x396 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(m_szGadgSecondayRes[_iCount], "")))
+	if(((_iCount < 32) && (m_szGadgSecondayRes[_iCount] != "")))
 	{
 		pServerOptions.RestrictedSecondary[_iCount] = m_szGadgSecondayRes[_iCount];
-		__NFUN_165__(_iCount);
+		(_iCount++);
 		// [Loop Continue]
 		goto J0x34C;
 	}
@@ -310,10 +310,10 @@ simulated event SaveRemoteServerSettings(string NewServerFile)
 	J0x39D:
 
 	// End:0x3E7 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(m_szGadgMiscRes[_iCount], "")))
+	if(((_iCount < 32) && (m_szGadgMiscRes[_iCount] != "")))
 	{
 		pServerOptions.RestrictedMiscGadgets[_iCount] = m_szGadgMiscRes[_iCount];
-		__NFUN_165__(_iCount);
+		(_iCount++);
 		// [Loop Continue]
 		goto J0x39D;
 	}
@@ -321,16 +321,16 @@ simulated event SaveRemoteServerSettings(string NewServerFile)
 	J0x3EE:
 
 	// End:0x456 [Loop If]
-	if(__NFUN_150__(_iCount, 32))
+	if((_iCount < 32))
 	{
 		pServerOptions.m_ServerMapList.GameType[_iCount] = m_gameModeArray[_iCount];
 		pServerOptions.m_ServerMapList.Maps[_iCount] = m_mapArray[_iCount];
-		__NFUN_165__(_iCount);
+		(_iCount++);
 		// [Loop Continue]
 		goto J0x3EE;
 	}
-	pServerOptions.__NFUN_536__(NewServerFile);
-	pServerOptions.m_ServerMapList.__NFUN_536__(NewServerFile);
+	pServerOptions.SaveConfig(NewServerFile);
+	pServerOptions.m_ServerMapList.SaveConfig(NewServerFile);
 	return;
 }
 

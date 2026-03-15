@@ -49,7 +49,7 @@ function SetHistory(bool bInHistory)
 {
 	bHistory = bInHistory;
 	// End:0x4B
-	if(__NFUN_130__(bHistory, __NFUN_114__(HistoryList, none)))
+	if((bHistory && (HistoryList == none)))
 	{
 		HistoryList = new (none) Class'UWindow.UWindowEditBoxHistory';
 		HistoryList.SetupSentinel();
@@ -58,7 +58,7 @@ function SetHistory(bool bInHistory)
 	else
 	{
 		// End:0x71
-		if(__NFUN_130__(__NFUN_129__(bHistory), __NFUN_119__(HistoryList, none)))
+		if(((!bHistory) && (HistoryList != none)))
 		{
 			HistoryList = none;
 			CurrentHistory = none;
@@ -75,29 +75,29 @@ function SetEditable(bool bEditable)
 
 function SetValue(string NewValue, optional string NewValue2, optional bool noUpdateHistory)
 {
-	Value = __NFUN_128__(NewValue, MaxLength);
+	Value = Left(NewValue, MaxLength);
 	Value2 = NewValue2;
-	CaretOffset = __NFUN_125__(Value);
+	CaretOffset = Len(Value);
 	offset = 0.0000000;
 	// End:0x4E
-	if(__NFUN_129__(bHistory))
+	if((!bHistory))
 	{
 		OldValue = Value;		
 	}
 	else
 	{
 		// End:0xE4
-		if(__NFUN_129__(noUpdateHistory))
+		if((!noUpdateHistory))
 		{
 			// End:0xD9
-			if(__NFUN_123__(Value, ""))
+			if((Value != ""))
 			{
 				CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(Class'UWindow.UWindowEditBoxHistory'));
 				CurrentHistory.HistoryText = Value;
 				// End:0xD9
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Set value CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+					Log(("Set value CurrentHistory.HistoryText" @ CurrentHistory.HistoryText));
 				}
 			}
 			CurrentHistory = HistoryList;
@@ -131,7 +131,7 @@ function SelectAll()
 	// End:0x7A
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("SelectAll Begin: bcanedit", string(bCanEdit)), "m_CurrentlyEditing"), string(m_CurrentlyEditing)), "value"), Value), "bAllSelected"), string(bAllSelected)));
+		Log(((((((("SelectAll Begin: bcanedit" @ string(bCanEdit)) @ "m_CurrentlyEditing") @ string(m_CurrentlyEditing)) @ "value") @ Value) @ "bAllSelected") @ string(bAllSelected)));
 	}
 	// End:0x91
 	if(bCanEdit)
@@ -140,15 +140,15 @@ function SelectAll()
 		SetAcceptsFocus();
 	}
 	// End:0xB9
-	if(__NFUN_123__(Value, ""))
+	if((Value != ""))
 	{
-		CaretOffset = __NFUN_125__(Value);
-		bAllSelected = __NFUN_129__(bAllSelected);
+		CaretOffset = Len(Value);
+		bAllSelected = (!bAllSelected);
 	}
 	// End:0x131
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("SelectAll End: bcanedit", string(bCanEdit)), "m_CurrentlyEditing"), string(m_CurrentlyEditing)), "value"), Value), "bAllSelected"), string(bAllSelected)));
+		Log(((((((("SelectAll End: bcanedit" @ string(bCanEdit)) @ "m_CurrentlyEditing") @ string(m_CurrentlyEditing)) @ "value") @ Value) @ "bAllSelected") @ string(bAllSelected)));
 	}
 	return;
 }
@@ -168,7 +168,7 @@ function string GetValue2()
 function Notify(byte E)
 {
 	// End:0x22
-	if(__NFUN_119__(NotifyOwner, none))
+	if((NotifyOwner != none))
 	{
 		NotifyOwner.Notify(E);		
 	}
@@ -187,10 +187,10 @@ function InsertText(string Text)
 	J0x07:
 
 	// End:0x39 [Loop If]
-	if(__NFUN_150__(i, __NFUN_125__(Text)))
+	if((i < Len(Text)))
 	{
-		Insert(byte(__NFUN_237__(__NFUN_127__(Text, i, 1))));
-		__NFUN_165__(i);
+		Insert(byte(Asc(Mid(Text, i, 1))));
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -202,13 +202,13 @@ function bool Insert(byte C)
 {
 	local string NewValue;
 
-	NewValue = __NFUN_112__(__NFUN_112__(__NFUN_128__(Value, CaretOffset), __NFUN_236__(int(C))), __NFUN_127__(Value, CaretOffset));
+	NewValue = ((Left(Value, CaretOffset) $ Chr(int(C))) $ Mid(Value, CaretOffset));
 	// End:0x3E
-	if(__NFUN_151__(__NFUN_125__(NewValue), MaxLength))
+	if((Len(NewValue) > MaxLength))
 	{
 		return false;
 	}
-	__NFUN_165__(CaretOffset);
+	(CaretOffset++);
 	Value = NewValue;
 	// End:0x64
 	if(bDelayedNotify)
@@ -228,12 +228,12 @@ function bool Backspace()
 	local string NewValue;
 
 	// End:0x0D
-	if(__NFUN_154__(CaretOffset, 0))
+	if((CaretOffset == 0))
 	{
 		return false;
 	}
-	NewValue = __NFUN_112__(__NFUN_128__(Value, __NFUN_147__(CaretOffset, 1)), __NFUN_127__(Value, CaretOffset));
-	__NFUN_166__(CaretOffset);
+	NewValue = (Left(Value, (CaretOffset - 1)) $ Mid(Value, CaretOffset));
+	(CaretOffset--);
 	Value = NewValue;
 	// End:0x56
 	if(bDelayedNotify)
@@ -253,11 +253,11 @@ function bool Delete()
 	local string NewValue;
 
 	// End:0x13
-	if(__NFUN_154__(CaretOffset, __NFUN_125__(Value)))
+	if((CaretOffset == Len(Value)))
 	{
 		return false;
 	}
-	NewValue = __NFUN_112__(__NFUN_128__(Value, CaretOffset), __NFUN_127__(Value, __NFUN_146__(CaretOffset, 1)));
+	NewValue = (Left(Value, CaretOffset) $ Mid(Value, (CaretOffset + 1)));
 	Value = NewValue;
 	Notify(1);
 	return true;
@@ -268,18 +268,18 @@ function bool WordLeft()
 {
 	J0x00:
 	// End:0x2F [Loop If]
-	if(__NFUN_130__(__NFUN_151__(CaretOffset, 0), __NFUN_122__(__NFUN_127__(Value, __NFUN_147__(CaretOffset, 1), 1), " ")))
+	if(((CaretOffset > 0) && (Mid(Value, (CaretOffset - 1), 1) == " ")))
 	{
-		__NFUN_166__(CaretOffset);
+		(CaretOffset--);
 		// [Loop Continue]
 		goto J0x00;
 	}
 	J0x2F:
 
 	// End:0x5E [Loop If]
-	if(__NFUN_130__(__NFUN_151__(CaretOffset, 0), __NFUN_123__(__NFUN_127__(Value, __NFUN_147__(CaretOffset, 1), 1), " ")))
+	if(((CaretOffset > 0) && (Mid(Value, (CaretOffset - 1), 1) != " ")))
 	{
-		__NFUN_166__(CaretOffset);
+		(CaretOffset--);
 		// [Loop Continue]
 		goto J0x2F;
 	}
@@ -292,11 +292,11 @@ function bool WordLeft()
 function bool MoveLeft()
 {
 	// End:0x0D
-	if(__NFUN_154__(CaretOffset, 0))
+	if((CaretOffset == 0))
 	{
 		return false;
 	}
-	__NFUN_166__(CaretOffset);
+	(CaretOffset--);
 	LastDrawTime = GetTime();
 	bShowCaret = true;
 	return true;
@@ -306,11 +306,11 @@ function bool MoveLeft()
 function bool MoveRight()
 {
 	// End:0x13
-	if(__NFUN_154__(CaretOffset, __NFUN_125__(Value)))
+	if((CaretOffset == Len(Value)))
 	{
 		return false;
 	}
-	__NFUN_165__(CaretOffset);
+	(CaretOffset++);
 	LastDrawTime = GetTime();
 	bShowCaret = true;
 	return true;
@@ -321,18 +321,18 @@ function bool WordRight()
 {
 	J0x00:
 	// End:0x32 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(CaretOffset, __NFUN_125__(Value)), __NFUN_123__(__NFUN_127__(Value, CaretOffset, 1), " ")))
+	if(((CaretOffset < Len(Value)) && (Mid(Value, CaretOffset, 1) != " ")))
 	{
-		__NFUN_165__(CaretOffset);
+		(CaretOffset++);
 		// [Loop Continue]
 		goto J0x00;
 	}
 	J0x32:
 
 	// End:0x64 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(CaretOffset, __NFUN_125__(Value)), __NFUN_122__(__NFUN_127__(Value, CaretOffset, 1), " ")))
+	if(((CaretOffset < Len(Value)) && (Mid(Value, CaretOffset, 1) == " ")))
 	{
-		__NFUN_165__(CaretOffset);
+		(CaretOffset++);
 		// [Loop Continue]
 		goto J0x32;
 	}
@@ -353,7 +353,7 @@ function bool MoveHome()
 
 function bool MoveEnd()
 {
-	CaretOffset = __NFUN_125__(Value);
+	CaretOffset = Len(Value);
 	LastDrawTime = GetTime();
 	bShowCaret = true;
 	return true;
@@ -363,7 +363,7 @@ function bool MoveEnd()
 function EditCopy()
 {
 	// End:0x36
-	if(__NFUN_130__(__NFUN_132__(bAllSelected, __NFUN_129__(bCanEdit)), m_CurrentlyEditing))
+	if(((bAllSelected || (!bCanEdit)) && m_CurrentlyEditing))
 	{
 		GetPlayerOwner().CopyToClipboard(Value);
 	}
@@ -373,7 +373,7 @@ function EditCopy()
 function EditPaste()
 {
 	// End:0x39
-	if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+	if((bCanEdit && m_CurrentlyEditing))
 	{
 		// End:0x23
 		if(bAllSelected)
@@ -388,7 +388,7 @@ function EditPaste()
 function EditCut()
 {
 	// End:0x43
-	if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+	if((bCanEdit && m_CurrentlyEditing))
 	{
 		// End:0x40
 		if(bAllSelected)
@@ -410,13 +410,13 @@ function KeyType(int Key, float MouseX, float MouseY)
 	// End:0x6D
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("UWindowEditBox::KeyType bCanEdit", string(bCanEdit)), "bKeyDown"), string(bKeyDown)), "m_CurrentlyEditing"), string(m_CurrentlyEditing)));
+		Log(((((("UWindowEditBox::KeyType bCanEdit" @ string(bCanEdit)) @ "bKeyDown") @ string(bKeyDown)) @ "m_CurrentlyEditing") @ string(m_CurrentlyEditing)));
 	}
 	// End:0x10B
-	if(__NFUN_130__(__NFUN_130__(bCanEdit, bKeyDown), m_CurrentlyEditing))
+	if(((bCanEdit && bKeyDown) && m_CurrentlyEditing))
 	{
 		// End:0x10B
-		if(__NFUN_129__(bControlDown))
+		if((!bControlDown))
 		{
 			// End:0xA6
 			if(bAllSelected)
@@ -428,7 +428,7 @@ function KeyType(int Key, float MouseX, float MouseY)
 			if(bNumericOnly)
 			{
 				// End:0xDE
-				if(__NFUN_130__(__NFUN_153__(Key, 48), __NFUN_152__(Key, 57)))
+				if(((Key >= 48) && (Key <= 57)))
 				{
 					Insert(byte(Key));
 				}				
@@ -436,7 +436,7 @@ function KeyType(int Key, float MouseX, float MouseY)
 			else
 			{
 				// End:0x10B
-				if(__NFUN_130__(__NFUN_153__(Key, 32), __NFUN_150__(Key, 256)))
+				if(((Key >= 32) && (Key < 256)))
 				{
 					Insert(byte(Key));
 				}
@@ -486,22 +486,22 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x191
 		case int(Root.Console.27):
 			// End:0x18E
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				// End:0x9F
 				if(bShowLog)
 				{
-					__NFUN_231__("Escape pressed");
+					Log("Escape pressed");
 				}
 				// End:0xBB
-				if(__NFUN_129__(bHistory))
+				if((!bHistory))
 				{
 					SetValue(OldValue, "", true);					
 				}
 				else
 				{
 					// End:0x182
-					if(__NFUN_130__(__NFUN_119__(CurrentHistory, none), __NFUN_119__(CurrentHistory.Next, none)))
+					if(((CurrentHistory != none) && (CurrentHistory.Next != none)))
 					{
 						// End:0x113
 						if(bShowLog)

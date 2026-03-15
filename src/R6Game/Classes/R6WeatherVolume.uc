@@ -13,13 +13,13 @@ class R6WeatherVolume extends R6SoundVolume;
 
 event Touch(Actor Other)
 {
-	__NFUN_165__(Other.m_bInWeatherVolume);
+	(Other.m_bInWeatherVolume++);
 	return;
 }
 
 event UnTouch(Actor Other)
 {
-	__NFUN_166__(Other.m_bInWeatherVolume);
+	(Other.m_bInWeatherVolume--);
 	return;
 }
 

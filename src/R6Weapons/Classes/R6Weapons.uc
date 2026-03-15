@@ -97,25 +97,25 @@ var(R6GunProperties) string m_szWithWeaponReticuleClass;
 replication
 {
 	// Pos:0x000
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientShowBulletFire, ClientStartChangeClip, 
 		ClientStartFiring, ClientYourOwnerIs, 
 		ClientsFireBullet;
 
 	// Pos:0x00D
-	reliable if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerAddClips, ServerChangeClip, 
 		ServerFireBullet, ServerSetNextRateOfFire, 
 		ServerStartChangeClip, ServerStartFiring, 
 		ServerWhoIsMyOwner;
 
 	// Pos:0x01A
-	reliable if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority)))
 		m_eRateOfFire, m_iCurrentClip, 
 		m_iCurrentNbOfClips;
 
 	// Pos:0x027
-	reliable if(__NFUN_130__(bNetInitial, __NFUN_154__(int(Role), int(ROLE_Authority))))
+	reliable if((bNetInitial && (int(Role) == int(ROLE_Authority))))
 		m_iClipCapacity, m_pBulletClass;
 }
 
@@ -126,14 +126,14 @@ simulated event HideAttachment()
 
 function bool HasScope()
 {
-	return __NFUN_177__(m_fMaxZoom, 2.0000000);
+	return (m_fMaxZoom > 2.0000000);
 	return;
 }
 
 simulated function UseScopeStaticMesh()
 {
 	// End:0x16
-	if(__NFUN_119__(m_WithScopeSM, none))
+	if((m_WithScopeSM != none))
 	{
 		SetStaticMesh(m_WithScopeSM);
 	}
@@ -143,12 +143,12 @@ simulated function UseScopeStaticMesh()
 simulated function SpawnSelectedGadget()
 {
 	// End:0x55
-	if(__NFUN_154__(int(m_WeaponGadgetClass.default.m_eGadgetType), int(5)))
+	if((int(m_WeaponGadgetClass.default.m_eGadgetType) == int(5)))
 	{
 		// End:0x37
-		if(__NFUN_119__(m_MuzzleGadget, none))
+		if((m_MuzzleGadget != none))
 		{
-			m_MuzzleGadget.__NFUN_279__();
+			m_MuzzleGadget.Destroy();
 			m_MuzzleGadget = none;
 		}
 		R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szSilencerClass, Class'Core.Class')));		
@@ -156,10 +156,10 @@ simulated function SpawnSelectedGadget()
 	else
 	{
 		// End:0x98
-		if(__NFUN_154__(int(m_WeaponGadgetClass.default.m_eGadgetType), int(6)))
+		if((int(m_WeaponGadgetClass.default.m_eGadgetType) == int(6)))
 		{
 			// End:0x95
-			if(__NFUN_123__(m_szTacticalLightClass, ""))
+			if((m_szTacticalLightClass != ""))
 			{
 				R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szTacticalLightClass, Class'Core.Class')));
 			}			
@@ -175,18 +175,18 @@ simulated function SpawnSelectedGadget()
 simulated function SetGadgets()
 {
 	// End:0xC7
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		// End:0xC7
-		if(__NFUN_119__(m_WeaponGadgetClass, none))
+		if((m_WeaponGadgetClass != none))
 		{
 			// End:0x79
-			if(__NFUN_154__(int(m_WeaponGadgetClass.default.m_eGadgetType), int(5)))
+			if((int(m_WeaponGadgetClass.default.m_eGadgetType) == int(5)))
 			{
 				// End:0x5B
-				if(__NFUN_119__(m_MuzzleGadget, none))
+				if((m_MuzzleGadget != none))
 				{
-					m_MuzzleGadget.__NFUN_279__();
+					m_MuzzleGadget.Destroy();
 					m_MuzzleGadget = none;
 				}
 				R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szSilencerClass, Class'Core.Class')));				
@@ -194,10 +194,10 @@ simulated function SetGadgets()
 			else
 			{
 				// End:0xBC
-				if(__NFUN_154__(int(m_WeaponGadgetClass.default.m_eGadgetType), int(6)))
+				if((int(m_WeaponGadgetClass.default.m_eGadgetType) == int(6)))
 				{
 					// End:0xB9
-					if(__NFUN_123__(m_szTacticalLightClass, ""))
+					if((m_szTacticalLightClass != ""))
 					{
 						R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szTacticalLightClass, Class'Core.Class')));
 					}					
@@ -210,10 +210,10 @@ simulated function SetGadgets()
 		}
 	}
 	// End:0x235
-	if(__NFUN_154__(m_InventoryGroup, 1))
+	if((m_InventoryGroup == 1))
 	{
 		// End:0xFC
-		if(__NFUN_123__(m_szMagazineClass, ""))
+		if((m_szMagazineClass != ""))
 		{
 			R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szMagazineClass, Class'Core.Class')));			
 		}
@@ -225,10 +225,10 @@ simulated function SetGadgets()
 		if(GotBipod())
 		{
 			// End:0x1D6
-			if(__NFUN_303__('R6SniperRifle'))
+			if(IsA('R6SniperRifle'))
 			{
 				// End:0x167
-				if(Owner.__NFUN_303__('R6Rainbow'))
+				if(Owner.IsA('R6Rainbow'))
 				{
 					R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject("R6WeaponGadgets.R63rdRainbowScope", Class'Core.Class')));					
 				}
@@ -244,7 +244,7 @@ simulated function SetGadgets()
 			}
 		}
 		// End:0x232
-		if(__NFUN_123__(m_szMuzzleClass, ""))
+		if((m_szMuzzleClass != ""))
 		{
 			R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szMuzzleClass, Class'Core.Class')));
 		}		
@@ -252,11 +252,11 @@ simulated function SetGadgets()
 	else
 	{
 		// End:0x283
-		if(__NFUN_154__(m_InventoryGroup, 2))
+		if((m_InventoryGroup == 2))
 		{
 			R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szMagazineClass, Class'Core.Class')));
 			// End:0x283
-			if(__NFUN_123__(m_szMuzzleClass, ""))
+			if((m_szMuzzleClass != ""))
 			{
 				R6SetGadget(Class<R6AbstractGadget>(DynamicLoadObject(m_szMuzzleClass, Class'Core.Class')));
 			}
@@ -268,56 +268,56 @@ simulated function SetGadgets()
 simulated event Destroyed()
 {
 	// End:0x2F
-	if(__NFUN_130__(__NFUN_119__(R6Pawn(Owner), none), R6Pawn(Owner).m_bIsPlayer))
+	if(((R6Pawn(Owner) != none) && R6Pawn(Owner).m_bIsPlayer))
 	{
 		RemoveFirstPersonWeapon();
 	}
 	// End:0x4D
-	if(__NFUN_119__(m_pMuzzleFlashEmitter, none))
+	if((m_pMuzzleFlashEmitter != none))
 	{
-		m_pMuzzleFlashEmitter.__NFUN_279__();
+		m_pMuzzleFlashEmitter.Destroy();
 		m_pMuzzleFlashEmitter = none;
 	}
 	// End:0x6B
-	if(__NFUN_119__(m_pEmptyShellsEmitter, none))
+	if((m_pEmptyShellsEmitter != none))
 	{
-		m_pEmptyShellsEmitter.__NFUN_279__();
+		m_pEmptyShellsEmitter.Destroy();
 		m_pEmptyShellsEmitter = none;
 	}
 	// End:0x89
-	if(__NFUN_119__(m_SelectedWeaponGadget, none))
+	if((m_SelectedWeaponGadget != none))
 	{
-		m_SelectedWeaponGadget.__NFUN_279__();
+		m_SelectedWeaponGadget.Destroy();
 		m_SelectedWeaponGadget = none;
 	}
 	// End:0xA7
-	if(__NFUN_119__(m_MuzzleGadget, none))
+	if((m_MuzzleGadget != none))
 	{
-		m_MuzzleGadget.__NFUN_279__();
+		m_MuzzleGadget.Destroy();
 		m_MuzzleGadget = none;
 	}
 	// End:0xC5
-	if(__NFUN_119__(m_ScopeGadget, none))
+	if((m_ScopeGadget != none))
 	{
-		m_ScopeGadget.__NFUN_279__();
+		m_ScopeGadget.Destroy();
 		m_ScopeGadget = none;
 	}
 	// End:0xE3
-	if(__NFUN_119__(m_BipodGadget, none))
+	if((m_BipodGadget != none))
 	{
-		m_BipodGadget.__NFUN_279__();
+		m_BipodGadget.Destroy();
 		m_BipodGadget = none;
 	}
 	// End:0x101
-	if(__NFUN_119__(m_MagazineGadget, none))
+	if((m_MagazineGadget != none))
 	{
-		m_MagazineGadget.__NFUN_279__();
+		m_MagazineGadget.Destroy();
 		m_MagazineGadget = none;
 	}
 	// End:0x11F
-	if(__NFUN_119__(m_FPWeapon, none))
+	if((m_FPWeapon != none))
 	{
-		m_FPWeapon.__NFUN_279__();
+		m_FPWeapon.Destroy();
 		m_FPWeapon = none;
 	}
 	super(Actor).Destroyed();
@@ -335,7 +335,7 @@ simulated function PostBeginPlay()
 	super(Actor).PostBeginPlay();
 	FillClips();
 	// End:0x3F
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(m_eWeaponType), int(0))))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && (int(m_eWeaponType) == int(0))))
 	{
 		m_bUnlimitedClip = true;
 	}
@@ -362,17 +362,17 @@ simulated function FillClips()
 		J0x38:
 
 		// End:0x64 [Loop If]
-		if(__NFUN_150__(i, m_iNbOfClips))
+		if((i < m_iNbOfClips))
 		{
 			m_aiNbOfBullets[i] = byte(m_iClipCapacity);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x38;
 		}
 		// End:0x85
-		if(__NFUN_130__(__NFUN_129__(IsLMG()), __NFUN_129__(__NFUN_303__('R6Gadget'))))
+		if(((!IsLMG()) && (!IsA('R6Gadget'))))
 		{
-			__NFUN_139__(m_iNbBulletsInWeapon);
+			(m_iNbBulletsInWeapon++);
 		}
 	}
 	return;
@@ -395,10 +395,10 @@ event SetIdentifyTarget(bool bIdentifyCharacter, bool bFriendly, string characte
 	local R6GameOptions GameOptions;
 
 	// End:0x8F
-	if(__NFUN_119__(m_ReticuleInstance, none))
+	if((m_ReticuleInstance != none))
 	{
-		GameOptions = __NFUN_1009__();
-		m_ReticuleInstance.m_bIdentifyCharacter = __NFUN_130__(bIdentifyCharacter, __NFUN_132__(GameOptions.HUDShowPlayersName, R6PlayerController(Pawn(Owner).Controller).m_bShowCompleteHUD));
+		GameOptions = GetGameOptions();
+		m_ReticuleInstance.m_bIdentifyCharacter = (bIdentifyCharacter && (GameOptions.HUDShowPlayersName || R6PlayerController(Pawn(Owner).Controller).m_bShowCompleteHUD));
 		m_ReticuleInstance.m_CharacterName = characterName;
 		m_ReticuleInstance.m_bAimingAtFriendly = bFriendly;
 	}

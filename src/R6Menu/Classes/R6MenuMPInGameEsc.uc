@@ -32,22 +32,22 @@ function Created()
 	local float fYNavBarPos;
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(OwnerWindow);
-	m_pEscNavBar = R6MenuMPInGameEscNavBar(CreateWindow(Root.MenuClassDefines.ClassInGameEscNavBar, float(r6Root.m_REscPopUp.X), float(__NFUN_147__(__NFUN_146__(__NFUN_146__(r6Root.m_REscPopUp.Y, r6Root.30), r6Root.m_REscPopUp.H), 55)), float(r6Root.m_REscPopUp.W), 55.0000000));
-	m_pInGameObj = R6MenuMPInGameObj(CreateWindow(Root.MenuClassDefines.ClassInGameObjectives, float(r6Root.m_REscPopUp.X), float(__NFUN_146__(r6Root.m_REscPopUp.Y, r6Root.30)), float(r6Root.m_REscPopUp.W), float(__NFUN_147__(r6Root.m_REscPopUp.H, 55)), self));
+	m_pEscNavBar = R6MenuMPInGameEscNavBar(CreateWindow(Root.MenuClassDefines.ClassInGameEscNavBar, float(r6Root.m_REscPopUp.X), float((((r6Root.m_REscPopUp.Y + r6Root.30) + r6Root.m_REscPopUp.H) - 55)), float(r6Root.m_REscPopUp.W), 55.0000000));
+	m_pInGameObj = R6MenuMPInGameObj(CreateWindow(Root.MenuClassDefines.ClassInGameObjectives, float(r6Root.m_REscPopUp.X), float((r6Root.m_REscPopUp.Y + r6Root.30)), float(r6Root.m_REscPopUp.W), float((r6Root.m_REscPopUp.H - 55)), self));
 	return;
 }
 
 function Tick(float DeltaTime)
 {
 	// End:0x2B
-	if(__NFUN_179__(m_fTimeForRefreshObj, float(2)))
+	if((m_fTimeForRefreshObj >= float(2)))
 	{
 		m_pInGameObj.UpdateObjectives();
 		m_fTimeForRefreshObj = 0.0000000;		
 	}
 	else
 	{
-		__NFUN_184__(m_fTimeForRefreshObj, DeltaTime);
+		(m_fTimeForRefreshObj += DeltaTime);
 	}
 	return;
 }

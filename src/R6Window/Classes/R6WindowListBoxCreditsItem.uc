@@ -30,26 +30,26 @@ function Init(string _szCreditsLine)
 	local int iMarkerPos1, iMarkerPos2;
 
 	szTemp = _szCreditsLine;
-	iMarkerPos1 = __NFUN_126__(szTemp, "[");
+	iMarkerPos1 = InStr(szTemp, "[");
 	// End:0x2C
-	if(__NFUN_154__(iMarkerPos1, -1))
+	if((iMarkerPos1 == -1))
 	{
 		return;
 	}
-	iMarkerPos2 = __NFUN_126__(szTemp, "]");
+	iMarkerPos2 = InStr(szTemp, "]");
 	// End:0x4D
-	if(__NFUN_154__(iMarkerPos2, -1))
+	if((iMarkerPos2 == -1))
 	{
 		return;
 	}
-	__NFUN_161__(iMarkerPos1, 1);
-	szTemp = __NFUN_127__(szTemp, iMarkerPos1, __NFUN_147__(iMarkerPos2, iMarkerPos1));
-	__NFUN_161__(iMarkerPos2, 1);
+	(iMarkerPos1 += 1);
+	szTemp = Mid(szTemp, iMarkerPos1, (iMarkerPos2 - iMarkerPos1));
+	(iMarkerPos2 += 1);
 	switch(szTemp)
 	{
 		// End:0xC0
 		case "T0":
-			m_szName = __NFUN_127__(_szCreditsLine, iMarkerPos2);
+			m_szName = Mid(_szCreditsLine, iMarkerPos2);
 			m_fHeight = 40.0000000;
 			m_iFont = 4;
 			m_iColor = 0;
@@ -58,7 +58,7 @@ function Init(string _szCreditsLine)
 			break;
 		// End:0xF6
 		case "T1":
-			m_szName = __NFUN_127__(_szCreditsLine, iMarkerPos2);
+			m_szName = Mid(_szCreditsLine, iMarkerPos2);
 			m_fHeight = 20.0000000;
 			m_iFont = 16;
 			m_iColor = 0;
@@ -66,7 +66,7 @@ function Init(string _szCreditsLine)
 			break;
 		// End:0x12C
 		case "T2":
-			m_szName = __NFUN_127__(_szCreditsLine, iMarkerPos2);
+			m_szName = Mid(_szCreditsLine, iMarkerPos2);
 			m_fHeight = 20.0000000;
 			m_iFont = 5;
 			m_iColor = 1;

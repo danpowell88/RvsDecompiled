@@ -36,11 +36,11 @@ function LoopWeaponBurst()
 	// End:0x14
 	if(m_bWeaponBipodDeployed)
 	{
-		__NFUN_260__(m_BipodFireBurstCycle);		
+		LoopAnim(m_BipodFireBurstCycle);		
 	}
 	else
 	{
-		__NFUN_260__(m_FireBurstCycle);
+		LoopAnim(m_FireBurstCycle);
 	}
 	return;
 }
@@ -50,11 +50,11 @@ function StartWeaponBurst()
 	// End:0x14
 	if(m_bWeaponBipodDeployed)
 	{
-		__NFUN_259__(m_BipodFireBurstBegin);		
+		PlayAnim(m_BipodFireBurstBegin);		
 	}
 	else
 	{
-		__NFUN_259__(m_FireBurstBegin);
+		PlayAnim(m_FireBurstBegin);
 	}
 	return;
 }
@@ -64,11 +64,11 @@ function StopWeaponBurst()
 	// End:0x14
 	if(m_bWeaponBipodDeployed)
 	{
-		__NFUN_259__(m_BipodFireBurstEnd);		
+		PlayAnim(m_BipodFireBurstEnd);		
 	}
 	else
 	{
-		__NFUN_259__(m_FireBurstEnd);
+		PlayAnim(m_FireBurstEnd);
 	}
 	return;
 }
@@ -77,10 +77,10 @@ function HideBullet(int iWhichBullet)
 {
 	J0x00:
 	// End:0x31 [Loop If]
-	if(__NFUN_150__(iWhichBullet, 8))
+	if((iWhichBullet < 8))
 	{
-		m_Bullets[__NFUN_147__(7, iWhichBullet)].bHidden = true;
-		__NFUN_165__(iWhichBullet);
+		m_Bullets[(7 - iWhichBullet)].bHidden = true;
+		(iWhichBullet++);
 		// [Loop Continue]
 		goto J0x00;
 	}
@@ -95,10 +95,10 @@ function ShowBullets()
 	J0x07:
 
 	// End:0x34 [Loop If]
-	if(__NFUN_150__(i, 8))
+	if((i < 8))
 	{
 		m_Bullets[i].bHidden = false;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -114,18 +114,18 @@ function PostBeginPlay()
 	J0x0D:
 
 	// End:0xC5 [Loop If]
-	if(__NFUN_150__(i, 8))
+	if((i < 8))
 	{
-		m_Bullets[i] = __NFUN_278__(Class'R61stWeapons.R61stWeaponStaticMesh');
+		m_Bullets[i] = Spawn(Class'R61stWeapons.R61stWeaponStaticMesh');
 		// End:0x56
-		if(__NFUN_150__(i, 3))
+		if((i < 3))
 		{
 			m_Bullets[i].SetStaticMesh(m_LWing);			
 		}
 		else
 		{
 			// End:0x7F
-			if(__NFUN_154__(i, 3))
+			if((i == 3))
 			{
 				m_Bullets[i].SetStaticMesh(m_2Wing);				
 			}
@@ -135,7 +135,7 @@ function PostBeginPlay()
 			}
 		}
 		m_Bullets[i].SetDrawScale3D(vect(-1.0000000, -1.0000000, 1.0000000));
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0D;
 	}
@@ -148,32 +148,32 @@ function PostBeginPlay()
 	AttachToBone(m_Bullets[6], 'Ball_07');
 	AttachToBone(m_Bullets[7], 'Ball_08');
 	// End:0x173
-	if(__NFUN_129__(__NFUN_263__('BipodFireBurst_b')))
+	if((!HasAnim('BipodFireBurst_b')))
 	{
 		m_BipodFireBurstBegin = m_BipodNeutral;
 	}
 	// End:0x18B
-	if(__NFUN_129__(__NFUN_263__('BipodFireBurst_c')))
+	if((!HasAnim('BipodFireBurst_c')))
 	{
 		m_BipodFireBurstCycle = m_BipodNeutral;
 	}
 	// End:0x1A3
-	if(__NFUN_129__(__NFUN_263__('BipodFireBurst_e')))
+	if((!HasAnim('BipodFireBurst_e')))
 	{
 		m_BipodFireBurstEnd = m_BipodNeutral;
 	}
 	// End:0x1BB
-	if(__NFUN_129__(__NFUN_263__('Fireburst_b')))
+	if((!HasAnim('Fireburst_b')))
 	{
 		m_FireBurstBegin = m_Neutral;
 	}
 	// End:0x1D3
-	if(__NFUN_129__(__NFUN_263__('Fireburst_c')))
+	if((!HasAnim('Fireburst_c')))
 	{
 		m_FireBurstCycle = m_Neutral;
 	}
 	// End:0x1EB
-	if(__NFUN_129__(__NFUN_263__('Fireburst_e')))
+	if((!HasAnim('Fireburst_e')))
 	{
 		m_FireBurstEnd = m_Neutral;
 	}
@@ -188,15 +188,15 @@ function DestroyBullets()
 	J0x07:
 
 	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, 8))
+	if((i < 8))
 	{
 		// End:0x36
-		if(__NFUN_119__(m_Bullets[i], none))
+		if((m_Bullets[i] != none))
 		{
-			m_Bullets[i].__NFUN_279__();
+			m_Bullets[i].Destroy();
 		}
 		m_Bullets[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
