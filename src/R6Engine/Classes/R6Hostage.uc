@@ -557,6 +557,10 @@ function ResetWeaponAnimation()
 	return;
 }
 
+//------------------------------------------------------------------
+// SetStandWalkingAnim: set the current name for anim to play when
+//	walking
+//------------------------------------------------------------------
 simulated function SetStandWalkingAnim(R6Hostage.EStandWalkingAnim eAnim, bool bUpdatePlayMoving)
 {
 	m_eCurrentRepHostageAnim.m_eRepStandWalkingAnim = eAnim;
@@ -1350,6 +1354,10 @@ function SetToNormalWeapon()
 	return;
 }
 
+//------------------------------------------------------------------
+// state Crouching:
+//	- inherited
+//------------------------------------------------------------------
 simulated state Crouching
 {
 	simulated function BeginState()
@@ -1404,6 +1412,10 @@ simulated state Crouching
 	stop;
 }
 
+//------------------------------------------------------------------
+// State kneeling:
+//	
+//------------------------------------------------------------------
 simulated state Kneeling
 {
 	simulated function BeginState()
@@ -1553,6 +1565,10 @@ simulated state Prone
 	stop;
 }
 
+/*******************************************************************************/
+// State foetus:
+//
+//
 simulated state Foetus
 {
 //////////////////////////////////////////////
