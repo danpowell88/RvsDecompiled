@@ -43,7 +43,12 @@ void UInputPlanning::StaticInitInput()
 // UInput
 // =============================================================================
 
-IMPL_TODO("stub returning 0; retail is 1757-byte command dispatch (0x103b4bd0)")
+// 1757-byte input command dispatch at 0x103b4bd0.
+// Handles BUTTON/PULSE/TOGGLE/AXIS/COUNT/KEYNAME/KEYBINDING and key-binding execution.
+// Blocked by: FindButtonName/FindAxisName (FUN_103b5740), DAT_106717e8 (editor global),
+// and complex FName/FString property management. Full implementation requires
+// FindButtonName and FindAxisName to be unblocked first.
+IMPL_TODO("blocked by FUN_103b5740 (FindButtonName/FindAxisName) and DAT_106717e8 editor global; 1757b dispatch at 0x103b4bd0")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_MATCH("Engine.dll", 0x103b4b40)
 void UInput::Serialize( FArchive& Ar )
@@ -77,9 +82,9 @@ IMPL_EMPTY("key assignment no-op")
 void UInput::SetKey( const TCHAR* KeyName ) {}
 IMPL_MATCH("Engine.dll", 0x103b4350)
 FString UInput::GetActionKey( BYTE Key ) { return *(FString*)((BYTE*)this + Key * 0xC + 0x2B0); }
-IMPL_TODO("stub returning NULL; retail 300-byte FName property search (0x103b5870)")
+IMPL_TODO("blocked by FUN_103b5740 (not in export table): iterates Actor's UClass property list via internal helper; retail 300b at 0x103b5870")
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
-IMPL_TODO("stub returning NULL; retail 300-byte FName property search (0x103b59d0)")
+IMPL_TODO("blocked by FUN_103b5740 (not in export table): iterates Actor's UClass property list via internal helper; retail 300b at 0x103b59d0")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
 IMPL_EMPTY("input command execution no-op")
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
@@ -152,7 +157,11 @@ void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 // Letters A-Z and digits 0-9 are their single character.
 // Numpad, Function keys and special keys use the standard Unreal names.
 // Unrecognised codes return "Unknown%02X" format (e.g. "Unknown3A").
-IMPL_TODO("static lookup table; retail uses FName property array at +0xea8 (0x103b55d0)")
+// Retail 0x103b55d0 (162b): reads FName from property array at *(*(this+0xea8)+0x38)[Key*4],
+// strips "IK_" prefix (skips +3 chars), returns pointer into FName table.
+// Our static table produces identical display strings without the FName reflection.
+// Divergence is permanent: FName property array at +0xea8 requires live UClass reflection.
+IMPL_TODO("permanent functional divergence: retail reads FName property array at this+0xea8; static table produces same strings (0x103b55d0)")
 const TCHAR* UInput::GetKeyName(EInputKey Key) const
 {
 	static TCHAR GenBuf[16]; // used for dynamically generated names
@@ -216,7 +225,10 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 }
 
 // ?FindKeyName@UInput@@QBEHPBGAAHPAVEInputKey@@@Z (reverse lookup: name → EInputKey)
-IMPL_TODO("iterates GetKeyName; retail uses FName IK_-prefix lookup (0x103b5df0)")
+// Retail 0x103b5df0 (178b): prepends "IK_" to KeyName, creates FName, calls FUN_103b56b0
+// (not in export table) to do the actual reverse property lookup. Our fallback iterates
+// GetKeyName() which yields the same display strings — functionally equivalent.
+IMPL_TODO("blocked by FUN_103b56b0 (not in export table): retail creates FName(\"IK_\"+key) then delegates to internal reverse-property-lookup helper; 0x103b5df0")
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 {
 	for (INT i = 1; i < 256; i++)
