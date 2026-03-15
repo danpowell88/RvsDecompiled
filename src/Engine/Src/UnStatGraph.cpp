@@ -74,57 +74,57 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // +0x54: FString
 
 // ??0FStatGraph@@QAE@ABV0@@Z
-IMPL_DIVERGE("Ghidra 0x103518f0: copy ctor — FUN_1033b2a0/FUN_1032dff0/FUN_1031ce50 are per-type TArray copy helpers not yet resolvable to named types for +0x08/+0x1c/+0x28")
+IMPL_TODO("Ghidra 0x103518f0: copy ctor — FUN_1033b2a0/FUN_1032dff0/FUN_1031ce50 per-type TArray copy helpers not yet resolved")
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
-IMPL_DIVERGE("Ghidra 0x10446960: dtor destroys FString@+0x54 then TArray@+0x28/+0x1c/+0x08 via per-type helpers; element dtors needed for TArray<FStatGraphLine>@+0x1c")
+IMPL_TODO("Ghidra 0x10446960: dtor — FString@+0x54 and TArray@+0x28/+0x1c/+0x08 per-type helpers; element dtors for TArray<FStatGraphLine>@+0x1c not yet resolved")
 FStatGraph::~FStatGraph() {
 	((FString*)((BYTE*)this + 0x54))->~FString();
 	// TArray<FStatGraphLine> at +0x1c requires per-element ~FStatGraphLine() before freeing
 }
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("Ghidra 0x103519b0: assigns 2 DWORDs then TArray@+0x08/+0x1c/+0x28 via per-type copy helpers; FStatGraphLine has non-trivial copy ctor")
+IMPL_TODO("Ghidra 0x103519b0: operator= — TArray@+0x08/+0x1c/+0x28 per-type copy helpers; FStatGraphLine non-trivial copy ctor not yet resolved")
 FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
 	appMemcpy(Pad, p0.Pad, sizeof(Pad));
 	return *this;
 }
 
 // ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
-IMPL_DIVERGE("Ghidra 0x10445880, 533 bytes: command dispatch with FUN_ calls — returns 0")
+IMPL_TODO("Ghidra 0x10445880: 533 bytes — command dispatch with FUN_ calls not yet resolved")
 int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
 
 // ?AddDataPoint@FStatGraph@@QAEXVFString@@MH@Z
-IMPL_DIVERGE("Ghidra 0x10445e40, 386 bytes: adds float data to a named graph line; FUN_ blockers")
+IMPL_TODO("Ghidra 0x10445e40: 386 bytes — adds float data to a named graph line; FUN_ blockers")
 void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {}
 
 // ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
-IMPL_DIVERGE("Ghidra 0x10445c30, 219 bytes: adds graph line with color/range; FUN_ blockers")
+IMPL_TODO("Ghidra 0x10445c30: 219 bytes — adds graph line with color/range; FUN_ blockers")
 void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {}
 
 // ?AddLineAutoRange@FStatGraph@@QAEXVFString@@VFColor@@@Z
-IMPL_DIVERGE("Ghidra 0x10445d40, 206 bytes: adds auto-range graph line; FUN_ blockers")
+IMPL_TODO("Ghidra 0x10445d40: 206 bytes — adds auto-range graph line; FUN_ blockers")
 void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {}
 
 // ?Render@FStatGraph@@QAEXPAVUViewport@@PAVFRenderInterface@@@Z
-IMPL_DIVERGE("Ghidra 0x10446000, 1990 bytes: renders stat graph to viewport; FUN_ blockers for D3D draw calls")
+IMPL_TODO("Ghidra 0x10446000: 1990 bytes — renders stat graph to viewport; FUN_ blockers for D3D draw calls")
 void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
 
 // ?Reset@FStatGraph@@QAEXXZ
-IMPL_DIVERGE("Ghidra 0x10446800, 95 bytes: calls FUN_1033bb10, FUN_103203b0, FUN_1031fea0 — unresolved")
+IMPL_TODO("Ghidra 0x10446800: 95 bytes — FUN_1033bb10/FUN_103203b0/FUN_1031fea0 not yet resolved")
 void FStatGraph::Reset() {}
 
 // ============================================================================
 // FStats
 // ============================================================================
-IMPL_DIVERGE("Ghidra 0x1033bdb0: copy ctor copies 7 DWORDs then calls FUN_1031ce50/FUN_1031cb20/FUN_1031ded0 for TArrays and _eh_vector_copy_constructor_iterator_; FUN_ unresolved")
+IMPL_TODO("Ghidra 0x1033bdb0: copy ctor — FUN_1031ce50/FUN_1031cb20/FUN_1031ded0 for TArrays and _eh_vector_copy_constructor_iterator_ not yet resolved")
 FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_DIVERGE("Ghidra 0x1033bca0: calls FUN_1033a7d0 then _eh_vector_destructor_iterator_ then FUN_103217e0/FUN_10322eb0 per TArray member; FUN_ unresolved")
+IMPL_TODO("Ghidra 0x1033bca0: dtor — FUN_1033a7d0/_eh_vector_destructor_iterator_/FUN_103217e0/FUN_10322eb0 per TArray member not yet resolved")
 FStats::~FStats() {}
-IMPL_DIVERGE("Ghidra 0x1044f1a0, 595 bytes: updates display string for a stat slot; FUN_ blockers")
+IMPL_TODO("Ghidra 0x1044f1a0: 595 bytes — updates display string for a stat slot; FUN_ blockers")
 void FStats::UpdateString(FString&, INT) {}
-IMPL_DIVERGE("Ghidra 0x1044f6e0, 20219 bytes: renders all stat categories to viewport; FUN_ blockers for D3D draw calls")
+IMPL_TODO("Ghidra 0x1044f6e0: 20219 bytes — renders all stat categories to viewport; FUN_ blockers for D3D draw calls")
 void FStats::Render(UViewport*, UEngine*) {}
 IMPL_MATCH("Engine.dll", 0x10454670)
 INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
@@ -170,7 +170,7 @@ INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
 	pRec[2] = (INT)Unit;
 	return SlotIdx;
 }
-IMPL_DIVERGE("Ghidra 0x1044f5d0, 257 bytes: moving average on stat data using offset 0x100 array; FUN_ blockers")
+IMPL_TODO("Ghidra 0x1044f5d0: 257 bytes — moving average on stat data using offset 0x100 array; FUN_ blockers")
 void FStats::CalcMovingAverage(INT, DWORD) {}
 IMPL_MATCH("Engine.dll", 0x1044f430)
 void FStats::Clear()
@@ -216,5 +216,5 @@ FEngineStats& FEngineStats::operator=(const FEngineStats& Other)
 	return *this;
 }
 
-IMPL_DIVERGE("Ghidra 0x10454940, 6696 bytes: registers all engine stats via RegisterStats; FUN_ blockers for stat name strings")
+IMPL_TODO("Ghidra 0x10454940: 6696 bytes — registers all engine stats via RegisterStats; FUN_ blockers for stat name strings")
 void FEngineStats::Init() {}
