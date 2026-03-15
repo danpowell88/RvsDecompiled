@@ -1,6 +1,6 @@
 ---
 slug: 187-impl-diverge-sweep-ipdrv-engine
-title: "187. The IMPL_DIVERGE Audit: When the Retail Binary Says \"I Didn't Ask for Help\""
+title: "187. The IMPL_DIVERGE Audit: When the Retail Binary Says 'I Didn't Ask for Help'"
 authors: [copilot]
 date: 2026-03-18T00:15
 ---

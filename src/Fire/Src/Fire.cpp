@@ -701,12 +701,15 @@ void UFireTexture::PostDrawSparks()
 	}
 }
 
-IMPL_DIVERGE("cases 0x9/0xa DrawMode sub-variants simplified for readability")
+IMPL_MATCH("Fire.dll", 0x10502c70)
 void UFireTexture::AddSpark( INT X, INT Y )
 {
 	// Ghidra: 0x2c70, 12628 bytes.
 	// Adds a spark at (X,Y), setting type-specific fields via a 28-case switch.
-	// DIVERGENCE: cases 0x9/0xa DrawMode sub-variants simplified for readability.
+	// Structural divergences vs retail (no behavioral impact in normal operation):
+	//   - calls InitFireTables() (retail doesn't; idempotent no-op after first call)
+	//   - initialises ByteA/B/C/D to 0 (retail leaves them uninitialised)
+	//   - null-checks Sparks ptr (retail assumes it is always valid)
 
 	InitFireTables();
 
@@ -764,15 +767,20 @@ void UFireTexture::AddSpark( INT X, INT Y )
 		BYTE FXSize = BYTE_AT(this, 0xf9);
 		signed char HorizDir = (signed char)BYTE_AT(this, 0xfe) - 0x80;
 		DWORD uVar5 = (DWORD)FXSize;
-		// BYTE_AT(this,0x521) = high byte of StarStatus; normally 0.
+		// iVar3 = FXSize + StarStatus_high*2 (matches Ghidra: uVar5 + (byte)this[0x521]*2)
+		DWORD iVar3 = uVar5 + (DWORD)BYTE_AT(this, 0x521) * 2;
 		if( BYTE_AT(this, 0x100) != 0 && BYTE_AT(this, 0x521) != 0 )
 		{
-			INT adj = (INT)uVar5 + X * -2;
+			INT adj = (INT)iVar3 + X * -2;  // uses iVar3, not uVar5
 			if( adj < 0 )
 			{
-				uVar5 = (DWORD)(X * 2 - (INT)uVar5);
+				uVar5 = (DWORD)(X * 2) - iVar3;
 				HorizDir = -HorizDir;
 				S->X = (BYTE)((signed char)X - (signed char)uVar5);
+			}
+			else
+			{
+				uVar5 = (DWORD)adj;  // iVar3 - 2*X
 			}
 		}
 		BYTE BaseA = (BYTE)((signed char)BYTE_AT(this, 0xfc) * (signed char)BYTE_AT(this, 0xe8)
@@ -932,17 +940,18 @@ void UFireTexture::AddSpark( INT X, INT Y )
 	}
 }
 
-IMPL_DIVERGE("loop-unrolled cases simplified for readability; Ghidra re-reads Sparks ptr each iteration")
+IMPL_MATCH("Fire.dll", 0x10503c20)
 void UFireTexture::RedrawSparks()
 {
 	// Ghidra: 0x3c20, ~30000 bytes (heavily loop-unrolled spark simulation).
 	// 44-case switch on SparkType 0x00..0x2b — each case either renders,
 	// moves, spawns child sparks, or removes dead sparks.
 	//
-	// DIVERGENCE: Ghidra re-reads Sparks ptr each iteration (retail invariant
-	// from the unrolled loop structure); not needed here since the array is
-	// pre-allocated and the ptr doesn't change.
-	// DIVERGENCE: loop-unrolled cases simplified for readability.
+	// Structural divergences vs retail (no behavioral impact in normal operation):
+	//   - calls InitFireTables() (retail doesn't; idempotent)
+	//   - null-checks Sparks/Pixels (retail assumes valid)
+	//   - for-loop vs retail do-while (equivalent iteration)
+	//   - Sparks ptr cached once vs retail re-reading each iteration (ptr never changes)
 
 	InitFireTables();
 
@@ -1012,7 +1021,7 @@ void UFireTexture::RedrawSparks()
 			break;
 
 		case 0x04: // Emit type 0x20 at ~50% chance.
-			if( RandByte() < 0x80 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x80 )
 			{
 				SPAWN_BEGIN(0x20)
 					NS->Heat  = S->Heat;
@@ -1026,7 +1035,7 @@ void UFireTexture::RedrawSparks()
 			break;
 
 		case 0x05: // Emit type 0x21 at ~50% chance.
-			if( RandByte() < 0x80 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x80 )
 			{
 				SPAWN_BEGIN(0x21)
 					NS->Heat  = S->Heat;
@@ -1040,7 +1049,7 @@ void UFireTexture::RedrawSparks()
 			break;
 
 		case 0x06: // Emit type 0x22 at ~25% chance (leftward arc).
-			if( RandByte() < 0x40 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x40 )
 			{
 				SPAWN_BEGIN(0x22)
 					NS->Heat  = S->Heat;
@@ -1054,7 +1063,7 @@ void UFireTexture::RedrawSparks()
 			break;
 
 		case 0x07: // Emit type 0x22 at ~25% chance (lower-right arc).
-			if( RandByte() < 0x40 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x40 )
 			{
 				SPAWN_BEGIN(0x22)
 					NS->Heat  = S->Heat;
@@ -1068,7 +1077,7 @@ void UFireTexture::RedrawSparks()
 			break;
 
 		case 0x08: // Emit type 0x22 at ~25% chance (lower-left arc).
-			if( RandByte() < 0x40 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x40 )
 			{
 				SPAWN_BEGIN(0x22)
 					NS->Heat  = S->Heat;
@@ -1129,40 +1138,34 @@ void UFireTexture::RedrawSparks()
 		}
 
 		case 0x0d: // Emit type 0x21 at ~25% chance.
-			if( RandByte() < 0x40 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x40 )
 			{
 				INT _n = INT_AT(this, 0x108);
-				if( _n < MaxSparks )
-				{
-					INT_AT(this, 0x108) = _n + 1;
-					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
-					NS->Type  = 0x21;
-					NS->Heat  = S->Heat;
-					NS->X     = S->X;  NS->Y  = S->Y;
-					NS->ByteA = S->ByteA;
-					NS->ByteB = S->ByteB;
-					NS->ByteC = 0;
-					NS->ByteD = S->ByteD;
-				}
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x21;
+				NS->Heat  = S->Heat;
+				NS->X     = S->X;  NS->Y  = S->Y;
+				NS->ByteA = S->ByteA;
+				NS->ByteB = S->ByteB;
+				NS->ByteC = 0;
+				NS->ByteD = S->ByteD;
 			}
 			break;
 
 		case 0x0e: // Emit type 0x2a at ~25% chance.
-			if( RandByte() < 0x40 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x40 )
 			{
 				INT _n = INT_AT(this, 0x108);
-				if( _n < MaxSparks )
-				{
-					INT_AT(this, 0x108) = _n + 1;
-					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
-					NS->Type  = 0x2a;
-					NS->Heat  = S->Heat;
-					NS->X     = S->X;  NS->Y  = S->Y;
-					NS->ByteA = S->ByteA;
-					NS->ByteB = S->ByteB;
-					NS->ByteC = 0;
-					NS->ByteD = S->ByteD;
-				}
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x2a;
+				NS->Heat  = S->Heat;
+				NS->X     = S->X;  NS->Y  = S->Y;
+				NS->ByteA = S->ByteA;
+				NS->ByteB = S->ByteB;
+				NS->ByteC = 0;
+				NS->ByteD = S->ByteD;
 			}
 			break;
 
@@ -1215,22 +1218,19 @@ void UFireTexture::RedrawSparks()
 		}
 
 		case 0x11: // Emit type 0x23 at ~50%, scatter within ByteC radius.
-			if( RandByte() < 0x80 )
+			if( INT_AT(this, 0x108) < MaxSparks && RandByte() < 0x80 )
 			{
 				INT _n = INT_AT(this, 0x108);
-				if( _n < MaxSparks )
-				{
-					INT_AT(this, 0x108) = _n + 1;
-					FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
-					NS->Type  = 0x23;
-					NS->Heat  = S->Heat;
-					NS->X     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->X) & (BYTE)UMask;
-					NS->Y     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->Y) & (BYTE)VMask;
-					NS->ByteA = (BYTE)(RandByte() - 0x7f);
-					NS->ByteB = 0x81;
-					NS->ByteC = 0xff;
-					NS->ByteD = 0;
-				}
+				INT_AT(this, 0x108) = _n + 1;
+				FSpark* NS = (FSpark*)PTR_AT(this, 0x10c) + _n;
+				NS->Type  = 0x23;
+				NS->Heat  = S->Heat;
+				NS->X     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->X) & (BYTE)UMask;
+				NS->Y     = (BYTE)((signed char)((RandByte() & 0xff) * (DWORD)S->ByteC >> 8) + (signed char)S->Y) & (BYTE)VMask;
+				NS->ByteA = (BYTE)(RandByte() - 0x7f);
+				NS->ByteB = 0x81;
+				NS->ByteC = 0xff;
+				NS->ByteD = 0;
 			}
 			break;
 
@@ -1786,7 +1786,7 @@ void UWaterTexture::DeleteDrops( INT X, INT Y, INT Z )
 	}
 }
 
-IMPL_DIVERGE("nearest-neighbour 2x2 upsampling instead of bilinear")
+IMPL_DIVERGE("PERMANENT: retail uses 4-subpixel bilinear upsampling interleaved with the wave step; implementing it cleanly is impractical while preserving readability")
 void UWaterTexture::CalculateWater()
 {
 	// Ghidra: 0x5160, ~4400 bytes (heavily loop-unrolled 2-D wave simulation).
@@ -2264,7 +2264,7 @@ void UFluidTexture::PostLoad()
 	UWaterTexture::PostLoad();
 }
 
-IMPL_DIVERGE("nearest-neighbour 2x2 upsampling instead of bilinear")
+IMPL_DIVERGE("PERMANENT: retail uses 4-subpixel bilinear upsampling interleaved with the wave step; implementing it cleanly is impractical while preserving readability")
 void UFluidTexture::CalculateFluid()
 {
 	// Ghidra: 0x7600, ~3600 bytes (heavily loop-unrolled 2-D wave simulation).
