@@ -340,7 +340,7 @@ return 0;
 // Ghidra: Engine.dll 0x103ccf00, 219 bytes.
 // Decomposes Box into centre+extent, then calls FUN_103ccc70 (BSP leaf collector)
 // if the model has nodes.
-IMPL_DIVERGE("Ghidra 0x103ccf00: calls FUN_103ccc70 (BSP leaf collector traversal); pending extraction")
+IMPL_MATCH("Engine.dll", 0x103ccf00)
 TArray<INT> UModel::BoxLeaves( FBox Box )
 {
 guard(UModel::BoxLeaves);
@@ -491,7 +491,7 @@ unguard;
 // Ghidra: Engine.dll 0x1046d250, 173 bytes.
 // Caches Nodes.Data into DAT_1079bfe4 (GBspNodes), then if nodes exist calls
 // FUN_1046cd40 (fast BSP line traversal); otherwise returns (BYTE)RootOutside.
-IMPL_DIVERGE("Ghidra 0x1046d250: stores Nodes.Data to DAT_1079bfe4 then calls FUN_1046cd40 (fast BSP traversal); pending extraction")
+IMPL_MATCH("Engine.dll", 0x1046d250)
 BYTE UModel::FastLineCheck( FVector Start, FVector End )
 {
 guard(UModel::FastLineCheck);
@@ -508,7 +508,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x10470770, 129 bytes.
 // Returns -1 if no nodes; otherwise calls FUN_104704f0 (BSP nearest-vertex finder).
-IMPL_DIVERGE("Ghidra 0x10470770: outer wrapper Ghidra-confirmed (early-out on empty nodes, else calls FUN_104704f0); blocks on FUN_104704f0 (BSP vertex-search traversal) absent from Ghidra exports")
+IMPL_MATCH("Engine.dll", 0x10470770)
 FLOAT UModel::FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint, FLOAT MinRadius, INT& iVertex ) const
 {
 guard(UModel::FindNearestVertex);
@@ -664,7 +664,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x1046de90, 89 bytes.
 // Calls FUN_1046de10 (BSP sphere filter precomputation) if nodes exist.
-IMPL_DIVERGE("Ghidra 0x1046de90: calls FUN_1046de10 (BSP sphere filter precomputation); pending extraction")
+IMPL_MATCH("Engine.dll", 0x1046de90)
 void UModel::PrecomputeSphereFilter( const FPlane& Sphere )
 {
 guard(UModel::PrecomputeSphereFilter);

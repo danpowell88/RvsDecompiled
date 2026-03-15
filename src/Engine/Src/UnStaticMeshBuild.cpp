@@ -317,12 +317,25 @@ FOrientation::FOrientation()
 	*(FRotator*)&_Data[0x28] = FRotator(0,0,0);
 }
 
-IMPL_DIVERGE("Ghidra 0x10301a00: value-type ABI (13 DWORD params) differs from our appMemcpy; VA confirmed")
+IMPL_DIVERGE("Ghidra 0x10301a00 (97b): exact non-sequential DWORD assignment order reproduced from Ghidra; compiler version and calling convention differ")
 FOrientation& FOrientation::operator=(FOrientation Other)
 {
-	// Ghidra 0x1a00: struct passed by value (13 DWORD params on stack), each copied to this+offset.
-	// Our appMemcpy achieves the same result but with different byte pattern.
-	appMemcpy(this, &Other, 0x34);
+	// Ghidra 0x1a00: FOrientation passed by value as 13 DWORD params on stack.
+	// Each DWORD assigned to this in the non-sequential order Ghidra shows (register allocation).
+	// Functionally identical to appMemcpy but matches retail assignment sequence.
+	*(INT*)&_Data[0x00] = *(INT*)&Other._Data[0x00];
+	*(INT*)&_Data[0x04] = *(INT*)&Other._Data[0x04];
+	*(INT*)&_Data[0x08] = *(INT*)&Other._Data[0x08];
+	*(INT*)&_Data[0x28] = *(INT*)&Other._Data[0x28];
+	*(INT*)&_Data[0x2c] = *(INT*)&Other._Data[0x2c];
+	*(INT*)&_Data[0x30] = *(INT*)&Other._Data[0x30];
+	*(INT*)&_Data[0x1c] = *(INT*)&Other._Data[0x1c];
+	*(INT*)&_Data[0x20] = *(INT*)&Other._Data[0x20];
+	*(INT*)&_Data[0x24] = *(INT*)&Other._Data[0x24];
+	*(INT*)&_Data[0x18] = *(INT*)&Other._Data[0x18];
+	*(INT*)&_Data[0x10] = *(INT*)&Other._Data[0x10];
+	*(INT*)&_Data[0x0c] = *(INT*)&Other._Data[0x0c];
+	*(INT*)&_Data[0x14] = *(INT*)&Other._Data[0x14];
 	return *this;
 }
 
@@ -362,12 +375,20 @@ FRebuildOptions::~FRebuildOptions()
 	// Name's implicit destructor handles FString cleanup
 }
 
-IMPL_DIVERGE("Ghidra 0x103188d0: value-type 213b with SEH frame; VA confirmed, return-by-value ABI differs")
+IMPL_DIVERGE("Ghidra 0x103188d0 (213b): option assignment order reproduced; return-by-value copy construction and SEH frame differ from retail")
 FRebuildOptions FRebuildOptions::operator=(FRebuildOptions Other)
 {
-	// Ghidra 0x188d0: copies Name FString, then 8 Option DWORDs at +0xC..+0x28, returns copy.
+	// Ghidra 0x188d0: FString assignment first, then 8 Options in non-sequential Ghidra order
+	// (0,1,3,2,4,6,5,7 — register allocation artefact), then constructs return copy.
 	Name = Other.Name;
-	appMemcpy(Options, Other.Options, sizeof(Options));
+	Options[0] = Other.Options[0];   // this+0x0c
+	Options[1] = Other.Options[1];   // this+0x10
+	Options[3] = Other.Options[3];   // this+0x18
+	Options[2] = Other.Options[2];   // this+0x14
+	Options[4] = Other.Options[4];   // this+0x1c
+	Options[6] = Other.Options[6];   // this+0x24
+	Options[5] = Other.Options[5];   // this+0x20
+	Options[7] = Other.Options[7];   // this+0x28
 	return *this;
 }
 
