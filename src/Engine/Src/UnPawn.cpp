@@ -1448,6 +1448,19 @@ void APawn::PostBeginPlay()
 	// Non-Karma pawns: retail body is a no-op (does NOT call AActor::PostBeginPlay).
 }
 
+// Static pre-receive cache — APawn::PreNetReceive saves these, PostNetReceive reads them back.
+// Ghidra globals: DAT_10666748 (AnimAction), DAT_1066674c..10666770 (9 rep dwords),
+//   DAT_1064ff4c (float 4cc), DAT_1064ff48 (int 3b0), DAT_1064ff50 (EngineWeapon ptr),
+//   DAT_1064ff66 (byte 3a1), DAT_1064ff54..60 (weapons[4]), DAT_1064ff65 (RepFinishShotgun).
+static DWORD g_APawn_PreNet_AnimAction;
+static DWORD g_APawn_PreNet_RepFields[9];   // 9 dwords from this+0x63c (loc/rot/vel)
+static DWORD g_APawn_PreNet_Field4cc;
+static DWORD g_APawn_PreNet_Field3b0;
+static DWORD g_APawn_PreNet_EngineWeapon;
+static BYTE  g_APawn_PreNet_Field3a1;
+static DWORD g_APawn_PreNet_Weapons[4];     // this+0x504..0x510
+static BYTE  g_APawn_PreNet_RepFinishShotgun;
+
 IMPL_MATCH("Engine.dll", 0x1037d840)
 void APawn::PostNetReceive()
 {
@@ -1522,19 +1535,6 @@ void APawn::PostNetReceiveLocation()
 	AActor::PostNetReceiveLocation();
 	unguard;
 }
-
-// Static pre-receive cache — APawn::PreNetReceive saves these, PostNetReceive reads them back.
-// Ghidra globals: DAT_10666748 (AnimAction), DAT_1066674c..10666770 (9 rep dwords),
-//   DAT_1064ff4c (float 4cc), DAT_1064ff48 (int 3b0), DAT_1064ff50 (EngineWeapon ptr),
-//   DAT_1064ff66 (byte 3a1), DAT_1064ff54..60 (weapons[4]), DAT_1064ff65 (RepFinishShotgun).
-static DWORD g_APawn_PreNet_AnimAction;
-static DWORD g_APawn_PreNet_RepFields[9];   // 9 dwords from this+0x63c (loc/rot/vel)
-static DWORD g_APawn_PreNet_Field4cc;
-static DWORD g_APawn_PreNet_Field3b0;
-static DWORD g_APawn_PreNet_EngineWeapon;
-static BYTE  g_APawn_PreNet_Field3a1;
-static DWORD g_APawn_PreNet_Weapons[4];     // this+0x504..0x510
-static BYTE  g_APawn_PreNet_RepFinishShotgun;
 
 IMPL_MATCH("Engine.dll", 0x10377ff0)
 void APawn::PreNetReceive()
@@ -1646,19 +1646,103 @@ void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103bd4a0; 573b: calls UModel::PointRegion to compute new Zone, fires eventActorLeaving/eventActorEntered on zone transitions, also calls GetPhysicsVolume for body and eye positions; our stub only calls AActor::SetZone")
+IMPL_MATCH("Engine.dll", 0x103bd4a0)
 void APawn::SetZone( INT bTest, INT bForceRefresh )
 {
-	guard(APawn::SetZone);
-	AActor::SetZone( bTest, bForceRefresh );
-	unguard;
+	// Early exit if actor byte at 0xa0 has bit7 set (invalid/pending-delete).
+	if (*(BYTE*)((BYTE*)this + 0xa0) & 0x80) return;
+
+	if (bForceRefresh)
+	{
+		// Reset Region to (Level, -1, 0) — forces a clean recalculation.
+		*(AZoneInfo**)((BYTE*)this + 0x228) = Level;
+		*(INT*)((BYTE*)this + 0x22c) = -1;
+		*(DWORD*)((BYTE*)this + 0x230) &= 0xffffff00u;
+	}
+
+	// Compute new zone for current location via BSP point-region test.
+	FPointRegion newRegion = XLevel->Model->PointRegion(Level, Location);
+	AZoneInfo* oldZone = *(AZoneInfo**)((BYTE*)this + 0x228);
+
+	if (newRegion.Zone == oldZone)
+	{
+		// Same zone: just refresh all three region fields.
+		*(AZoneInfo**)((BYTE*)this + 0x228) = newRegion.Zone;
+		*(INT*)((BYTE*)this + 0x22c)        = newRegion.iLeaf;
+		*(DWORD*)((BYTE*)this + 0x230)      = *(DWORD*)&newRegion.iLeaf + 4; // ZoneNumber byte
+	}
+	else
+	{
+		if (!bTest)
+		{
+			AZoneInfo::eventActorLeaving(oldZone, this);
+			eventZoneChange(newRegion.Zone);
+		}
+		*(AZoneInfo**)((BYTE*)this + 0x228) = newRegion.Zone;
+		*(INT*)((BYTE*)this + 0x22c)        = newRegion.iLeaf;
+		*(DWORD*)((BYTE*)this + 0x230)      = *(DWORD*)&newRegion.iLeaf + 4;
+		if (!bTest)
+			AZoneInfo::eventActorEntered(newRegion.Zone, this);
+	}
+
+	// bForceVolumeCheck: 1 only when bCollideActors && !bTest && !bForceRefresh.
+	INT bForceVolumeCheck = (bCollideActors && !bTest && !bForceRefresh) ? 1 : 0;
+
+	// Body physics volume.
+	APhysicsVolume* newVol = Level->GetPhysicsVolume(Location, this, bForceVolumeCheck);
+	// Eye/head physics volume.
+	FVector eyePos = eventEyePosition();
+	APhysicsVolume* newHeadVol = Level->GetPhysicsVolume(Location + eyePos, this, bForceVolumeCheck);
+
+	APhysicsVolume* oldVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
+	if (newVol != oldVol)
+	{
+		if (!bTest)
+		{
+			if (oldVol)
+				APhysicsVolume::eventPawnLeavingVolume(oldVol, this);
+			eventPhysicsVolumeChange(newVol);
+			if (Controller)
+				AController::eventNotifyPhysicsVolumeChange(Controller, newVol);
+		}
+		*(APhysicsVolume**)((BYTE*)this + 0x164) = newVol;
+		if (!bTest)
+			APhysicsVolume::eventPawnEnteredVolume(newVol, this);
+	}
+
+	APhysicsVolume* oldHeadVol = *(APhysicsVolume**)((BYTE*)this + 0x514);
+	if (newHeadVol != oldHeadVol)
+	{
+		if (!bTest && (!Controller || !AController::eventNotifyHeadVolumeChange(Controller, newHeadVol)))
+			eventHeadVolumeChange(newHeadVol);
+		*(APhysicsVolume**)((BYTE*)this + 0x514) = newHeadVol;
+	}
 }
 
-IMPL_TODO("Ghidra 0x103e5630; 204b: checks TRACE_ShadowCast (0x80000) flag → queries GModMgr->IsMissionPack() and returns 0 for team/mission conditions; also checks bHidden, IsEncroacher, TRACE_ProjectActors, TRACE_Pawns; our stub just delegates to base")
+IMPL_MATCH("Engine.dll", 0x103e5630)
 INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 {
 	guard(APawn::ShouldTrace);
-	return AActor::ShouldTrace( SourceActor, TraceFlags );
+	if (TraceFlags & 0x80000)
+	{
+		// TRACE_ShadowCast: check IsMissionPack + team/player conditions.
+		// GModMgr->eventIsMissionPack() result: 0 = not mission pack.
+		DWORD bIsMissionPack = GModMgr->eventIsMissionPack();
+		// this+0x39e byte == 1: bIsPlayer flag specific to this engine build
+		if (!bIsMissionPack && *(BYTE*)((BYTE*)this + 0x39e) == 1)
+			return 0;
+		// this+0x3a2 byte: team slot index; < 2 means a valid team slot
+		return (*(BYTE*)((BYTE*)this + 0x3a2)) < 2;
+	}
+	// bHidden (bit25 of +0xa0) && valid source && not an encroacher → invisible
+	if ((*(DWORD*)((BYTE*)this + 0xa0) & 0x2000000) && SourceActor && !IsEncroacher())
+		return 0;
+	if (TraceFlags & 0x8000)  // TRACE_ProjectActors
+		return (*(DWORD*)((BYTE*)this + 0xa0) >> 0x15) & 1;
+	// Trace flag 0x2000 with a non-null extra field and DT_StaticMesh draw type → visible
+	if ((TraceFlags & 0x2000) && *(INT*)((BYTE*)this + 0x170) != 0 && DrawType == DT_StaticMesh)
+		return 1;
+	return TraceFlags & 1;
 	unguard;
 }
 
@@ -2050,12 +2134,72 @@ void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103f1a50: 844b — begins with null-check on HitActor, then performs dot-product focus check, CanCrouchWalk eval, wall-slide MoveActor adjustments; our stub only fires eventNotifyHitWall")
+IMPL_TODO("Ghidra 0x103f1a50: 844b — vtable[0xC8] on HitActor and vtable[0x194] on Controller unidentified; partial implementation of null/encroacher/focus-dot/crouch-prone wall logic")
 void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::processHitWall);
-	if( Controller )
-		Controller->eventNotifyHitWall( HitNormal, HitActor );
+	// Null HitActor → nothing to process.
+	if (!HitActor) return;
+	// Encroachers (movers, kactors) are skipped.
+	if (HitActor->IsEncroacher()) return;
+
+	if (Controller)
+	{
+		// Acceleration zero → pawn is not trying to move; skip wall response.
+		if (Acceleration.IsZero()) return;
+
+		// Compute focal direction: Controller->FocalPoint - Location, normalised.
+		FVector ctrl_fp = *(FVector*)((BYTE*)Controller + 0x480); // FocalPoint
+		FVector focalDir = (ctrl_fp - Location).SafeNormal();
+		FVector hitN = HitNormal;
+		// For walking physics: ignore Z component of both vectors in dot product.
+		if (Physics == PHYS_Walking) { hitN.Z = 0.f; focalDir.Z = 0.f; }
+		// MinHitWall dot-product gate: if facing wall, skip complex wall logic.
+		if (Controller->MinHitWall < (hitN | focalDir)) return;
+
+		// Notify controller of the wall hit; if it returns non-zero, done.
+		if (AController::eventNotifyHitWall(Controller, HitNormal, HitActor)) return;
+
+		if (Physics != PHYS_Swimming)
+		{
+			// DIVERGENCE: retail calls vtable[0xC8] on HitActor here to decide
+			// whether to skip wall adjustments; that slot is unidentified so we proceed unconditionally.
+
+			// Crouch-walk attempt: AI-controlled walking pawn that can crouch but isn't crouched.
+			BOOL bDidCrouch = FALSE;
+			if (Physics == PHYS_Walking && !IsHumanControlled() && bCanCrouch && !IsCrouched())
+			{
+				bDidCrouch = TRUE;
+				FVector testLoc = Location + focalDir * CollisionRadius;
+				if (CanCrouchWalk(Location, testLoc)) return;
+			}
+
+			// Step down 33 UU and retry.
+			FCheckResult stepHit(1.f);
+			XLevel->MoveActor(this, FVector(0.f, 0.f, -33.f), Rotation, stepHit, 0, 0, 0, 0);
+
+			if (bDidCrouch)
+			{
+				FVector testLoc = Location + focalDir * CollisionRadius;
+				if (CanCrouchWalk(Location, testLoc)) return;
+			}
+
+			// DIVERGENCE: retail calls Controller->vtable[0x194] (unidentified dispatch)
+			// with (HitNormal, HitActor) here; we skip that call.
+
+			// Prone-walk attempt: AI-controlled walking pawn that can go prone but isn't prone.
+			// The MinHitWall float at Controller+0x3bc == -1.0 enables this path.
+			if (*(FLOAT*)((BYTE*)Controller + 0x3bc) == -1.0f
+				&& Physics == PHYS_Walking && !IsHumanControlled()
+				&& m_bCanProne && !m_bIsProne)
+			{
+				FVector testLoc = Location + focalDir * CollisionRadius;
+				if (CanProneWalk(Location, testLoc)) return;
+			}
+		}
+	}
+
+	AActor::eventHitWall(HitNormal, HitActor);
 	unguard;
 }
 
@@ -2197,22 +2341,32 @@ void APawn::Crouch(INT bClientSimulation)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e9020: before comparing progress, calls vtable[0x62] (IsWarpZone) on this and gates on bCanSwim (+0x3e2 bit0) or physics-volume flag (+0x164→+0x410 bit6); our code skips those gates")
+IMPL_MATCH("Engine.dll", 0x103e9020)
 ETestMoveResult APawn::FindBestJump(FVector Dest)
 {
 	guard(APawn::FindBestJump);
 	FVector SavedLoc = Location;
-	FVector JumpVel = SuggestJumpVelocity(Dest, JumpZ, 0.f);
+	// Retail uses GroundSpeed (this+0x428) as the jump-Z parameter, not JumpZ.
+	FVector JumpVel = SuggestJumpVelocity(Dest, GroundSpeed, 0.f);
 	ETestMoveResult hit = jumpLanding(JumpVel, 1);
-	if ( hit == TESTMOVE_Stopped )
-		return TESTMOVE_Stopped;
+	if (hit == TESTMOVE_Stopped) return TESTMOVE_Stopped;
 
-	// DIVERGENCE: Ghidra checks vtable IsWarpZone and bCanSwim/bWaterVolume; simplified
-	FVector vDest = Dest - Location;
-	FVector vSaved = Dest - SavedLoc;
-	if ( vSaved.Size2D() > vDest.Size2D() )
-		return (ETestMoveResult)1;
-
+	// vtable slot 0x62 (0x188/4) on this = IsWarpZone; raw dispatch.
+	INT bIsWarpZone = (*(INT (__thiscall **)(APawn *))(*(INT *)this + 0x188))(this);
+	if (!bIsWarpZone)
+	{
+		// bCanSwim: bit16 of APawn flags = byte at this+0x3e2, bit0
+		// PhysicsVolume->bWaterVolume: bit6 of byte at PhysVol+0x410
+		APhysicsVolume* physVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
+		BOOL bInWater = physVol && ((*(BYTE*)((BYTE*)physVol + 0x410)) & 0x40);
+		if (bCanSwim || !bInWater)
+		{
+			FVector vSaved = Dest - SavedLoc;
+			FVector vNow   = Dest - Location;
+			if (vSaved.Size2D() > vNow.Size2D())
+				return (ETestMoveResult)1;
+		}
+	}
 	return TESTMOVE_Stopped;
 	unguard;
 }
