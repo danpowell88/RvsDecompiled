@@ -2657,8 +2657,7 @@ if (Pawn->actorReachable(nextGoal, 0, 0))
 GoalList[i - 1] = NULL;
 return nextGoal;
 }
-FLOAT dist = Pawn->findPathToward(
-nextGoal, nextGoal->Location, 0, 1);
+FLOAT dist = Pawn->findPathToward(nextGoal, nextGoal->Location, NULL, 0, 1.f);
 if (dist > 0.f)
 result = SetPath(0);
 }
