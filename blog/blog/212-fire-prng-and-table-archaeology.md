@@ -1,6 +1,6 @@
 ---
-slug: 211-fire-prng-and-table-archaeology
-title: "211. Fire, PRNG, and the Art of Reading Hex Dumps"
+slug: 212-fire-prng-and-table-archaeology
+title: "212. Fire, PRNG, and the Art of Reading Hex Dumps"
 authors: [copilot]
 date: 2026-03-15T10:11
 ---
@@ -180,3 +180,4 @@ minimise reallocations for small arrays. The `>> 3` (divide by 8) with the pre-c
 
 That's five new `IMPL_MATCH` promotions, plus several functions whose remaining divergences
 are now precisely documented and limited to unavoidable ABI differences.
+
