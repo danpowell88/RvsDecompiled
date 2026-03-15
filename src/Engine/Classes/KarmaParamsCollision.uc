@@ -2,9 +2,6 @@
 // KarmaParamsCollision - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // The Karma Collision parameters class.
 // This provides 'extra' parameters needed to create Karma collision for this Actor.
 // You can _only_ turn on collision, not dynamics.

@@ -5,26 +5,24 @@
 //=============================================================================
 class UWindowComboControl extends UWindowDialogControl;
 
-var bool bListVisible;
-var bool bCanEdit;
-var bool bButtons;
-var bool m_bDisabled;
-var bool m_bSelectedByUser;
-var float EditBoxWidth;
-var float EditAreaDrawX;
+var bool bListVisible;          // True when the dropdown list is currently visible
+var bool bCanEdit;              // True when the text portion is directly editable by the user
+var bool bButtons;              // True when left/right step buttons are shown alongside the combo
+var bool m_bDisabled;           // True when the combo is disabled and non-interactive
+var bool m_bSelectedByUser;     // True when the current value was set by a user interaction
+var float EditBoxWidth;         // Width of the edit/label area portion of the control
+var float EditAreaDrawX;        // X draw offset for the edit/bevel area
 // NEW IN 1.60
-var float EditAreaDrawY;
-var UWindowEditBox EditBox;
-var UWindowComboButton Button;
-var UWindowComboLeftButton LeftButton;
-var UWindowComboRightButton RightButton;
-var UWindowComboList List;
-var Class<UWindowComboList> ListClass;
+var float EditAreaDrawY;        // Y draw offset for the edit/bevel area (added in 1.60)
+var UWindowEditBox EditBox;     // Child window that displays (and optionally edits) the value
+var UWindowComboButton Button;  // Child button that triggers the dropdown
+var UWindowComboLeftButton LeftButton;    // Left step button (active when bButtons is true)
+var UWindowComboRightButton RightButton;  // Right step button (active when bButtons is true)
+var UWindowComboList List;               // The dropdown list popup child window
+var Class<UWindowComboList> ListClass;   // Class used to instantiate the dropdown list
 
+// Initializes the combo control, creating the edit box, dropdown button, and list child windows.
 function Created()
-{
-	super.Created();
-	EditBox = UWindowEditBox(CreateWindow(Class'UWindow.UWindowEditBox', 0.0000000, 0.0000000, WinWidth, LookAndFeel.Size_ComboHeight));
 	EditBox.NotifyOwner = self;
 	EditBoxWidth = (WinWidth / float(2));
 	EditBox.bTransient = true;
@@ -40,6 +38,7 @@ function Created()
 	return;
 }
 
+// Enables or disables the left/right step buttons flanking the dropdown arrow.
 function SetButtons(bool bInButtons)
 {
 	bButtons = bInButtons;
@@ -57,6 +56,7 @@ function SetButtons(bool bInButtons)
 	return;
 }
 
+// Handles child window events; left-click opens the dropdown (or closes it if already open).
 function Notify(byte E)
 {
 	super.Notify(E);
@@ -81,6 +81,7 @@ function Notify(byte E)
 	return;
 }
 
+// Returns the index of the first list item whose primary value matches V (-1 if not found).
 function int FindItemIndex(string V, optional bool bIgnoreCase)
 {
 	return List.FindItemIndex(V, bIgnoreCase);
@@ -93,12 +94,14 @@ function RemoveItem(int Index)
 	return;
 }
 
+// Returns the index of the first list item whose secondary value matches V2 (-1 if not found).
 function int FindItemIndex2(string v2, optional bool bIgnoreCase)
 {
 	return List.FindItemIndex2(v2, bIgnoreCase);
 	return;
 }
 
+// Closes the control; collapses the dropdown list first if it is currently open.
 function Close(optional bool bByParent)
 {
 	// End:0x1A
@@ -142,25 +145,22 @@ function SetEditable(bool bNewCanEdit)
 	return;
 }
 
+// Returns the index of the currently selected item, or -1 if no match is found.
 function int GetSelectedIndex()
 {
 	return List.FindItemIndex(GetValue());
 	return;
 }
 
+// Selects the item at the given list index, updating the displayed value.
 function SetSelectedIndex(int Index)
 {
 	SetValue(List.GetItemValue(Index), List.GetItemValue2(Index));
 	return;
 }
 
+// Returns the primary value string currently displayed in the edit box.
 function string GetValue()
-{
-	return EditBox.GetValue();
-	return;
-}
-
-function string GetValue2()
 {
 	return EditBox.GetValue2();
 	return;

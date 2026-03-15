@@ -2,9 +2,6 @@
 // R6TacticalGlowLight - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6TacticalGlowLight.uc : Fading light depending on the view angle.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //

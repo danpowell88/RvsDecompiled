@@ -2,9 +2,6 @@
 // UseTrigger - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // UseTrigger: if a player stands within proximity of this trigger, and hits Use, 
 // it will send Trigger/UnTrigger to actors whose names match 'EventName'.
 //=============================================================================

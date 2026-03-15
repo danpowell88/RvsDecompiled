@@ -2,9 +2,6 @@
 // I3DL2Listener - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // I3DL2Listener: Base class for I3DL2 room effects.
 //=============================================================================
 class I3DL2Listener extends Object

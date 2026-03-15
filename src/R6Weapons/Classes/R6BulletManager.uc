@@ -2,9 +2,6 @@
 // R6BulletManager - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//========================================================================================
 //  R6BulletManager.uc :   Manage all bullets for one character.
 //                         Bullets are spawned and managed here.
 //                         There's one manager per character. 

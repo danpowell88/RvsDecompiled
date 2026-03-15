@@ -2,9 +2,6 @@
 // R6WindowButtonExt - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowButtonExt.uc : This class give the following type of button... 
 //						   DESC TEXT                 BOX desc BOX desc BOX desc
 //						   minimum of 1 box and max of 3

@@ -2,9 +2,6 @@
 // R6WindowCounter - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowCounter.uc : This class permit to create a window with a - and + button
 //                       and display the counter in the middle
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.

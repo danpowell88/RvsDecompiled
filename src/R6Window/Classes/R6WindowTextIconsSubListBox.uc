@@ -2,9 +2,6 @@
 // R6WindowTextIconsSubListBox - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowTextIconsSubListBox.uc : This list is designed to be used
 //                                      with th R6WindowDynTeamList
 //                                   Instanciate this with the createControl

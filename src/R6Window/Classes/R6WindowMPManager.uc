@@ -2,9 +2,6 @@
 // R6WindowMPManager - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowMPManager.uc : Manage all the windows to be display when you join a game/create a server/valid CD-Key
 //
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.

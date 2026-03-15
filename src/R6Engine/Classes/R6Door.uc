@@ -2,9 +2,6 @@
 // R6Door - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6Door.uc : One of these actors should be placed on either side of each door
 //              used for detection of pawns and for maintaining info about the 
 //              surroundings.

@@ -2,9 +2,6 @@
 // LevelInfo - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // LevelInfo contains information about the current level. There should 
 // be one per level and it should be actor 0. UnrealEd creates each level's 
 // LevelInfo automatically so you should never have to place one

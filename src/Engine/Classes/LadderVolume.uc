@@ -2,9 +2,6 @@
 // LadderVolume - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-/*=============================================================================
 // LadderVolumes, when touched, cause ladder supporting actors to use Phys_Ladder.
 // note that underwater ladders won't be waterzones (no breathing problems)
 ============================================================================= */

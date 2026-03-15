@@ -14,6 +14,9 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EngineDecls.h"
 
+// Forward declaration for FGetHSV defined in UnCamera.cpp
+ENGINE_API FPlane FGetHSV(BYTE H, BYTE S, BYTE V);
+
 // --- FStatGraphLine ---
 IMPL_MATCH("Engine.dll", 0x1032c410)
 FStatGraphLine::FStatGraphLine(FStatGraphLine const &Other)
@@ -179,12 +182,40 @@ void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {
 }
 
 // ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
-IMPL_TODO("Ghidra 0x10445c30: 219 bytes — adds graph line with color/range; FUN_ blockers")
-void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {}
+// FUN_10445bb0 (name->index registration) is unknown -- line not registered in retail
+// hash lookup, but the array structure and all field assignments are complete.
+IMPL_TODO("Ghidra 0x10445c30: FUN_10445bb0 (name->index registration) unknown -- line not registered in retail lookup table, but array/field structure is complete")
+void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {
+	FArray* lines = (FArray*)((BYTE*)this + 0x1c);
+	INT idx = lines->Add(1, 0x34);
+	FStatGraphLine* newLine = (FStatGraphLine*)((BYTE*)lines->GetData() + idx * 0x34);
+	new (newLine) FStatGraphLine();
+	*(DWORD*)((BYTE*)newLine + 0x00) = 0;
+	((FArray*)((BYTE*)newLine + 0x04))->AddZeroed(4, 0x100);  // 256-entry circular buffer
+	*(INT*)((BYTE*)newLine + 0x10) = 0;
+	*(FColor*)((BYTE*)newLine + 0x14) = p1;
+	*(FString*)((BYTE*)newLine + 0x18) = p0;
+	*(FLOAT*)((BYTE*)newLine + 0x24) = p2;
+	*(FLOAT*)((BYTE*)newLine + 0x28) = p3;
+	*(DWORD*)((BYTE*)newLine + 0x2c) = 0x3e4ccccd;  // 0.2f scale
+	*(INT*)((BYTE*)newLine + 0x30) = 0;
+	// FUN_10445bb0(name_ptr, &idx): name->index registration -- unknown, skip
+}
 
 // ?AddLineAutoRange@FStatGraph@@QAEXVFString@@VFColor@@@Z
-IMPL_TODO("Ghidra 0x10445d40: 206 bytes — adds auto-range graph line; FUN_ blockers")
-void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {}
+// FUN_10445810 (line lookup by name) is unknown -- workaround uses last-added element.
+IMPL_TODO("Ghidra 0x10445d40: FUN_10445810 (line lookup) unknown -- workaround sets auto-range on last-added element instead of looking up by name")
+void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {
+	FString nameCopy(p0);
+	AddLine(nameCopy, p1, 0.0f, 0.0f);
+	FArray* lines = (FArray*)((BYTE*)this + 0x1c);
+	INT lastIdx = lines->Num() - 1;
+	if (lastIdx >= 0) {
+		FStatGraphLine* line = (FStatGraphLine*)((BYTE*)lines->GetData() + lastIdx * 0x34);
+		check(line != NULL);
+		*(INT*)((BYTE*)line + 0x30) = 1;
+	}
+}
 
 // ?Render@FStatGraph@@QAEXPAVUViewport@@PAVFRenderInterface@@@Z
 IMPL_TODO("Ghidra 0x10446000: 1990 bytes — renders stat graph to viewport; FUN_ blockers for D3D draw calls")

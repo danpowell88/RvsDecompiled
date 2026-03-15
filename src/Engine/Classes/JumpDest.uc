@@ -2,9 +2,6 @@
 // JumpDest - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // JumpDest.
 // specifies positions that can be reached with greater than normal jump
 // forced paths will check for greater than normal jump capability

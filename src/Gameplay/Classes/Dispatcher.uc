@@ -2,9 +2,6 @@
 // Dispatcher - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // Dispatcher: receives one trigger (corresponding to its name) as input, 
 // then triggers a set of specifid events with optional delays.
 // OBSOLETE - superceded by ScriptedTrigger

@@ -2,9 +2,6 @@
 // R6EngineWeapon - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//========================================================================================
 //  R6EngineWeapon.uc :     This is the base class for the r6Weapon class.  It's here
 //                          to put a pointer in the Pawn Class. and replace the 
 //                          weapon/inventory system

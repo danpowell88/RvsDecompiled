@@ -2,9 +2,6 @@
 // R6MenuMapList - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuMapList.uc : This menu display the map and the map list window and manage
 //                     all the operations between the two window (+ the button in center)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.

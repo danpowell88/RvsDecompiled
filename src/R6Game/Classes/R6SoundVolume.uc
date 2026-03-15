@@ -2,9 +2,6 @@
 // R6SoundVolume - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6SoundVolume.uc : This class allow to have sound when the player enter 
 //					   and leave a Volume.  All other volume should derive this
 //                     class in order to allow sound designer to reuse other 

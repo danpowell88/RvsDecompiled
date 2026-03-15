@@ -2,9 +2,6 @@
 // SpecialEventTrigger - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // SpecialEventTrigger: Receives trigger messages and does some "special event"
 // some combination of a message, sound playing, damage, and/or death to the instigator
 // if the event of this actor is set, will try to send player on the interpolation path

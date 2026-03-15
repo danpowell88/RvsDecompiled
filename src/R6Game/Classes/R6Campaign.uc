@@ -2,9 +2,6 @@
 // R6Campaign - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6Campaign.uc : This class represents a single player campaign and the list of missions (maps)
 //					included in it
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.

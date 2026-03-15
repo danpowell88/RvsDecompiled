@@ -2,9 +2,6 @@
 // R6WindowRightClickMenu - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowRightClickMenu.uc : This class is used to create a "right-click"
 //  menu at a given position.  A drop down menu will appear and the user
 //  can select from the list of choices

@@ -2,9 +2,6 @@
 // Object - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // Object: The base class all objects.
 // This is a built-in Unreal class and it shouldn't be modified.
 //=============================================================================
@@ -226,15 +223,15 @@ struct CompressedPosition
 };
 
 // Internal variables.
-var private native const int ObjectInternal[6];
-var native const Object Outer;
-var native const int ObjectFlags;
-var() native const editconst name Name;
-var native const editconst Class Class;
+var private native const int ObjectInternal[6];  // Internal object engine state, managed by the C++ engine.
+var native const Object Outer;                    // Outer object that contains this object.
+var native const int ObjectFlags;                 // Object flags bitmask (see RF_* constants above).
+var() native const editconst name Name;           // Name of this object.
+var native const editconst Class Class;           // Class of this object.
 // ***********************************************************************************************
 // * BEGIN UBI MODIF joel tremblay (16 juil 2003)
 // ***********************************************************************************************
-var private native const int DName;
+var private native const int DName;  // Ubisoft addition: deferred/dynamic name for objects.
 
 // Export UObject::execNot_PreBool(FFrame&, void* const)
     native(129) static final preoperator bool !(bool A);

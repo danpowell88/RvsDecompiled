@@ -2,9 +2,6 @@
 // R61stLMG23E - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//===============================================================================
 //  [R61stLMG23E] 
 //===============================================================================
 class R61stLMG23E extends R61stLMGWeapon;

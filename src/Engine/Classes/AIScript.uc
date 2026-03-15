@@ -2,9 +2,6 @@
 // AIScript - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // AIScript - used by Level Designers to specify special AI scripts for pawns 
 // placed in a level, and to change which type of AI controller to use for a pawn.
 // AIScripts can be shared by one or many pawns. 

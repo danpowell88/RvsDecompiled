@@ -2,9 +2,6 @@
 // R6MenuMPInterHeader - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuMPInterHeader.uc : Intermission widget (when you press start during MP game or 
 //  the size of the window is 640 * 480. The part in the top of multi menu in-game
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
