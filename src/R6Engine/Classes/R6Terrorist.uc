@@ -31,12 +31,12 @@ enum EStrategy
 
 enum EDefCon
 {
-	DEFCON_0,                       // 0
-	DEFCON_1,                       // 1
-	DEFCON_2,                       // 2
-	DEFCON_3,                       // 3
-	DEFCON_4,                       // 4
-	DEFCON_5                        // 5
+	DEFCON_0,                       // Don't exist, place holder for value of 0
+	DEFCON_1,                       // Psycho
+	DEFCON_2,                       // Aggressive
+	DEFCON_3,                       // Agitated
+	DEFCON_4,                       // Nervous
+	DEFCON_5                        // Normal
 };
 
 enum ETerroPersonality
@@ -1470,6 +1470,14 @@ event EndCrouch(float fHeight)
 }
 
 //============================================================================
+//##### ####  #####  #### ####  ###  ##      ###   #### ##### ####  ###  #   #   
+//##    ##  # ##    ##     ##  ##  # ##     ##  # ##     ##    ##  ##  # ##  #   
+//##### ####  ####  ##     ##  ##### ##     ##### ##     ##    ##  ##  # # # #   
+//   ## ##    ##    ##     ##  ##  # ##     ##  # ##     ##    ##  ##  # #  ##   
+//##### ##    #####  #### #### ##  # #####  ##  #  ####  ##   ####  ###  #   #   
+//============================================================================
+
+//============================================================================
 // PlaySpecialPendingAction - Called from UpdateMovementAnimation to
 //                            play special animation on all clients
 //============================================================================
@@ -1758,6 +1766,8 @@ function AffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 	}
 	return;
 }
+
+//== End Special Action ======================================================
 
 defaultproperties
 {
