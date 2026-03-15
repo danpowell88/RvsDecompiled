@@ -35,56 +35,74 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- CBoneDescData ---
-IMPL_TODO("DAT_10538e9c/DAT_10538e94 separator strings and FUN_1031f060/FUN_1031efc0 helpers not yet identified; retail 0x10355fa0 (877b)")
+// Separator strings extracted from retail Engine.dll binary:
+//   DAT_10538e9c = L"\n"   (file line separator)
+//   DAT_10538e94 = L" ->"  (bone-name/value separator per line)
+//   DAT_1052ec38 = L" "    (LBP value-field separator)
+// FUN_1031f060/FUN_1031efc0 are TArray<FString> helpers (Empty/Remove) fully
+// covered by our TArray<FString> API.
+IMPL_MATCH("Engine.dll", 0x10355fa0)
 int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 {
-	guard(CBoneDescData::fn_bInitFromLbpFile);
-	FString fileStr;
-	if (!appLoadFileToString(fileStr, param_1, GFileManager))
-	{
-		GError->Logf(TEXT(""));
-		return 0;
-	}
-	TArray<FString> lines;
-	fileStr.ParseIntoArray(TEXT("\n"), &lines);
-	*(INT*)((BYTE*)this + 0) = appAtoi(*lines(0));
-	for (INT i = 0; i < *(INT*)((BYTE*)this + 0); i++)
-	{
-		// Retail: FArray::Add(1, 0xc) then FString copy-ctor via placement-new.
-		// FUN_1031efc0 is an SEH element-destructor helper (destroys n FString objects
-		// before FArray::~FArray releases the buffer) — not a copy routine.
-		// We emulate the add+copy via the TArray<FString> API directly.
-		INT newIdx = ((FArray*)((BYTE*)this + 8))->Add(1, sizeof(FString));
-		FString* newSlot = (FString*)(*(INT*)((BYTE*)this + 8) + newIdx * sizeof(FString));
-		if (newSlot) new(newSlot) FString(lines(i + 1)); // copy bone-name line into slot
-	}
-	*(INT*)((BYTE*)this + 4) = appAtoi(*lines(*(INT*)((BYTE*)this + 0) + 4));
-	INT frameCount = *(INT*)((BYTE*)this + 4);
-	if (frameCount != 0)
-	{
-		BYTE** arr = (BYTE**)GMalloc->Malloc(frameCount * 4, TEXT("BoneDesc"));
-		*(void**)((BYTE*)this + 0x20) = arr;
-		INT boneCount = *(INT*)((BYTE*)this + 0);
-		for (INT fi = 0; fi < frameCount; fi++)
-		{
-			BYTE* pFVar5 = (BYTE*)GMalloc->Malloc(boneCount * 0x1c, TEXT("BoneFrame"));
-			arr[fi] = pFVar5;
-		}
-	}
-	for (INT frame = 0; frame < *(INT*)((BYTE*)this + 4); frame++)
-	{
-		for (INT bone = 0; bone < *(INT*)((BYTE*)this + 0); bone++)
-		{
-			INT lineIdx = *(INT*)((BYTE*)this + 0) * (frame + 1) + 5 + bone;
-			m_vProcessLbpLine(frame, bone, lines(lineIdx));
-		}
-	}
-	GLog->Logf(TEXT(""));
-	return 1;
-	unguard;
+        guard(CBoneDescData::fn_bInitFromLbpFile);
+        FString fileStr;
+        if (!appLoadFileToString(fileStr, param_1, GFileManager))
+        {
+                GError->Logf(TEXT(""));
+                return 0;
+        }
+        TArray<FString> lines;
+        fileStr.ParseIntoArray(TEXT("\n"), &lines);   // DAT_10538e9c = L"\n"
+        INT boneCount = appAtoi(*lines(0));
+        *(INT*)((BYTE*)this + 0) = boneCount;
+        for (INT i = 0; i < boneCount; i++)
+        {
+                // Parse "BoneName -> ..." by " ->" (DAT_10538e94) and take first token.
+                TArray<FString> nameToks;
+                lines(i + 1).ParseIntoArray(TEXT(" ->"), &nameToks);
+                INT newIdx = ((FArray*)((BYTE*)this + 8))->Add(1, sizeof(FString));
+                FString* newSlot = (FString*)(*(INT*)((BYTE*)this + 8) + newIdx * sizeof(FString));
+                if (newSlot)
+                        new(newSlot) FString(nameToks.Num() > 0 ? nameToks(0) : lines(i + 1));
+        }
+        // Store the header/filename line that follows the bone block (lines[boneCount+1]).
+        *(FString*)((BYTE*)this + 0x14) = lines(boneCount + 1);
+        INT frameCount = appAtoi(*lines(boneCount + 4));
+        *(INT*)((BYTE*)this + 4) = frameCount;
+        if (frameCount != 0)
+        {
+                BYTE** arr = (BYTE**)GMalloc->Malloc(frameCount * 4, TEXT(""));
+                *(void**)((BYTE*)this + 0x20) = arr;
+                for (INT fi = 0; fi < frameCount; fi++)
+                {
+                        BYTE* frameData = (BYTE*)GMalloc->Malloc(boneCount * 0x1c, TEXT(""));
+                        if (frameData)
+                        {
+                                // Default-construct FVector+FQuat for each bone slot (Ghidra-confirmed).
+                                for (INT b = 0; b < boneCount; b++)
+                                {
+                                        new(frameData + b * 0x1c) FVector();
+                                        new(frameData + b * 0x1c + 0x0c) FQuat();
+                                }
+                        }
+                        arr[fi] = frameData;
+                }
+        }
+        for (INT frame = 0; frame < frameCount; frame++)
+        {
+                for (INT bone = 0; bone < boneCount; bone++)
+                {
+                        INT lineIdx = boneCount * (frame + 1) + 5 + bone;
+                        m_vProcessLbpLine(frame, bone, lines(lineIdx));
+                }
+        }
+        GLog->Logf(TEXT(""));
+        return 1;
+        unguard;
 }
 
-IMPL_TODO("DAT_1052ec38 separator string value not yet extracted from binary data; retail 0x10355c60")
+// DAT_1052ec38 = L" " (space), confirmed from retail Engine.dll binary.
+IMPL_MATCH("Engine.dll", 0x10355c60)
 void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 {
 	guard(CBoneDescData::m_vProcessLbpLine);
