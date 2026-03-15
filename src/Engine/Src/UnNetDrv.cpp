@@ -676,13 +676,46 @@ INT ackId = *(INT*)(*(INT*)((BYTE*)this + 0x4b70) + i * 4);
 unguard;
 }
 
-// Ghidra: ReceiveFile calls FUN_103bef40 (118b) which serialises 4×DWORD via
-// FArchive::ByteOrderSerialize — it's an FGuid or similar 16-byte struct serializer.
-IMPL_DIVERGE("retail: ReceiveFile body blocked; FUN_103bef40 is 4×DWORD ByteOrderSerialize helper (probably FGuid)")
+IMPL_MATCH("Engine.dll", 0x10484d40)
 void UNetConnection::ReceiveFile(INT PackageIndex)
 {
 guard(UNetConnection::ReceiveFile);
-(void)PackageIndex;
+// Validate package index in PackageMap->List (PackageMap at +0xC8, List at PackageMap+0x2C).
+UPackageMap* pkgMap = *(UPackageMap**)((BYTE*)this + 0xC8);
+FArray* pkgList = (FArray*)((BYTE*)pkgMap + 0x2C);
+if (!pkgList->IsValidIndex(PackageIndex))
+	appFailAssert("PackageMap->List.IsValidIndex(PackageIndex)", ".\\UnConn.cpp", 0x464);
+
+// DownloadInfo array at this+0x4BAC; each element is 0x20 bytes:
+//   +0x00: UClass* (download class), +0x04: FString (class name),
+//   +0x10: FString (URL/filename),   +0x1C: INT (file param/size).
+FArray* dlInfo = (FArray*)((BYTE*)this + 0x4BAC);
+if (dlInfo->Num() == 0)
+{
+	dlInfo->AddZeroed(0x20, 1);
+	BYTE* elem = *(BYTE**)dlInfo;
+	*(UClass**)(elem + 0x00) = UChannelDownload::StaticClass();
+	*(FString*)(elem + 0x04) = TEXT("Engine.UChannelDownload");
+	*(FString*)(elem + 0x10) = TEXT("");
+	*(INT*)(elem + 0x1C) = 0;
+}
+
+// Replace existing Download object: retail calls scalar-deleting destructor (vtable[0x0C], flag=1).
+UDownload* dl = *(UDownload**)((BYTE*)this + 0x4BA8);
+if (dl) delete dl;
+
+// Construct new Download from the class stored in DownloadInfo[0].
+BYTE* elem = *(BYTE**)dlInfo;
+UClass* dlClass = *(UClass**)(elem + 0x00);
+if (!dlClass->IsChildOf(UDownload::StaticClass()))
+	appFailAssert("Class->IsChildOf(T::StaticClass())", "d:\\ravenshield\\412\\core\\inc\\UnObjBas.h", 0x476);
+UDownload* newDl = (UDownload*)UObject::StaticConstructObject(
+	dlClass, UObject::GetTransientPackage(), NAME_None, 0, NULL, GError, NULL);
+*(UDownload**)((BYTE*)this + 0x4BA8) = newDl;
+
+// Invoke ReceiveFile on the newly constructed Download handler.
+const FString& urlStr = *(const FString*)(elem + 0x10);
+newDl->ReceiveFile(this, PackageIndex, *urlStr, *(INT*)(elem + 0x1C));
 unguard;
 }
 
