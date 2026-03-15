@@ -1288,10 +1288,15 @@ void APawn::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* 
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1037c590; retail checks bIsProne (this+0x3e0 & 0x200) and skips base if NewBase is non-null and IsEncroacher(); saves NewFloor to this+0x590-0x598 before delegating; our stub just calls the base unconditionally")
+IMPL_DIVERGE("Ghidra 0x1037c590; 140b — logic matches: skip if m_bIsProne+IsEncroacher, save Floor, delegate; guard/unguard frame diverges")
 void APawn::SetBase( AActor* NewBase, FVector NewFloor, INT bNotifyActor )
 {
 	guard(APawn::SetBase);
+	// Retail: if prone and new base is an Encroacher (mover/kactor), skip base change
+	if( m_bIsProne && NewBase && NewBase->IsEncroacher() )
+		return;
+	// Save floor vector before delegating (Ghidra: this+0x590 = Floor)
+	Floor = NewFloor;
 	AActor::SetBase( NewBase, NewFloor, bNotifyActor );
 	unguard;
 }
@@ -1320,11 +1325,21 @@ void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c36c0; 145b: stores Velocity.SafeNormal to this+0x258 (floor direction), then if bInterpolating calls vtable +0x120; else calls moveSmooth(Velocity*DeltaTime) then eventTick; does NOT delegate to AActor::TickSimulated")
+IMPL_DIVERGE("Ghidra 0x103c36c0; 145b — main path verified: Acceleration=SafeNormal(Velocity)+moveSmooth+eventTick; bInterpolating vtable+0x120 branch unknown; guard/unguard diverges")
 void APawn::TickSimulated( FLOAT DeltaTime )
 {
 	guard(APawn::TickSimulated);
-	AActor::TickSimulated( DeltaTime );
+	// Cache movement direction into Acceleration (Ghidra: this+0x258 = Acceleration)
+	Acceleration = Velocity.SafeNormal();
+	if( bInterpolating )
+	{
+		// Retail calls vtable+0x120 with DeltaTime here; function not identified
+		// Fall back to AActor path to avoid moveSmooth on an interpolating pawn
+		AActor::TickSimulated( DeltaTime );
+		return;
+	}
+	moveSmooth( Velocity * DeltaTime );
+	eventTick( DeltaTime );
 	unguard;
 }
 
