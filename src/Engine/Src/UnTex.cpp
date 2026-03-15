@@ -52,7 +52,7 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 // UObject::GObjObjects is private; UMaterial (Engine module) cannot access it directly.
 // Use FObjectIterator (friend of UObject) which is semantically equivalent but adds
 // an IsA(UObject) check per element — functionally identical for all real objects.
-IMPL_DIVERGE("Ghidra 0x103c97f0: uses FUN_10318850 (ECX-based GObjObjects iterator with custom calling convention); replaced with FObjectIterator — semantically identical but generates different asm")
+IMPL_TODO("Ghidra 0x103c97f0: uses FUN_10318850 (ECX-based GObjObjects iterator with custom calling convention); replaced with FObjectIterator — semantically identical but generates different asm")
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
@@ -202,7 +202,7 @@ void UTexture::SetLastUpdateTime(double Time)
 	// Ghidra (13B): __LastUpdateTime at offset 0xD0 as double
 	*(double*)((BYTE*)this + 0xD0) = Time;
 }
-IMPL_DIVERGE("Ghidra 0x1046c600 (479b): calls unidentified helpers FUN_10301050 (memcpy-like), FUN_1032e620 (unknown), FUN_104f8e40 (DXT compress dispatcher) — not yet decompiled")
+IMPL_TODO("Ghidra 0x1046c600 (479b): calls unidentified helpers FUN_10301050 (memcpy-like), FUN_1032e620 (unknown), FUN_104f8e40 (DXT compress dispatcher) — not yet decompiled")
 int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
 	guard(UTexture::Compress);
@@ -210,12 +210,12 @@ int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 	return 0;
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1046a630 (334b): dispatches to FUN_10469960/FUN_104699f0/FUN_10469b50 per-format DXT decompressors — helpers not yet identified")
+IMPL_TODO("Ghidra 0x1046a630 (334b): dispatches to FUN_10469960/FUN_104699f0/FUN_10469b50 per-format DXT decompressors — helpers not yet identified")
 ETextureFormat UTexture::ConvertDXT(int,int,int,void * *)
 {
 	return TEXF_P8;
 }
-IMPL_DIVERGE("Ghidra 0x1046a7b0 (445b): iterates mip levels and calls ConvertDXT(int,int,int,void**) via unidentified DXT pipeline — not yet fully reconstructed")
+IMPL_TODO("Ghidra 0x1046a7b0 (445b): iterates mip levels and calls ConvertDXT(int,int,int,void**) via unidentified DXT pipeline — not yet fully reconstructed")
 ETextureFormat UTexture::ConvertDXT()
 {
 	return TEXF_P8;
@@ -253,7 +253,7 @@ void UTexture::CreateColorRange()
 	}
 	unguard;
 }
-IMPL_DIVERGE("Ghidra 0x1046bac0 (2741b): complex per-format mip-chain generation with box/kaiser filtering; calls multiple unidentified format-dispatch helpers")
+IMPL_TODO("Ghidra 0x1046bac0 (2741b): complex per-format mip-chain generation with box/kaiser filtering; calls multiple unidentified format-dispatch helpers")
 void UTexture::CreateMips(int param1, int param2)
 {
 	guard(UTexture::CreateMips);
@@ -539,7 +539,7 @@ void UTexture::Tick(float DeltaSeconds)
 //   1. Initial vtable[4] lock/prefetch call on param_1->Mips.Data[0] is omitted.
 //   2. FUN_1050557c FPU-to-INT round-trip on loop counters replaced with direct INT.
 //   3. Sub-byte struct assignments in cases 6–9 are expressed as mask-and-OR instead.
-IMPL_DIVERGE("Ghidra 0x10469500 (523b): vtable[4] mip-lock call on param_1 omitted; FUN_1050557c FPU-to-INT round-trip on loop counters replaced with direct INT; sub-byte struct ops in cases 6-9 expressed as mask-and-OR")
+IMPL_TODO("Ghidra 0x10469500 (523b): vtable[4] mip-lock call on param_1 omitted; FUN_1050557c FPU-to-INT round-trip on loop counters replaced with direct INT; sub-byte struct ops in cases 6-9 expressed as mask-and-OR")
 void UTexture::ArithOp(UTexture* param_1, ETextureArithOp param_2)
 {
 	guard(UTexture::ArithOp);
@@ -1012,7 +1012,7 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 // Ghidra 0x16aea0, 297B: finds a UPalette with the same outer and identical
 // 256-entry colour data; logs the match, schedules this for destruction, and
 // returns the found duplicate.  Falls through to 'this' if none found.
-IMPL_DIVERGE("Ghidra 0x1046aea0 (297b): FUN_10318850 ECX-based GObjObjects iterator replaced by TObjectIterator<UPalette> — semantically equivalent for UPalette filter but generates different asm")
+IMPL_TODO("Ghidra 0x1046aea0 (297b): FUN_10318850 ECX-based GObjObjects iterator replaced by TObjectIterator<UPalette> — semantically equivalent for UPalette filter but generates different asm")
 UPalette* UPalette::ReplaceWithExisting()
 {
 	guard(UPalette::ReplaceWithExisting);
@@ -1207,7 +1207,7 @@ void UShadowBitmapMaterial::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_DIVERGE("Ghidra 0x1042e6e0 (2594b): shadow map rendering pipeline using FRenderInterface and FCanvasUtil — too complex to decompile; depends on undeciphered render helpers")
+IMPL_TODO("Ghidra 0x1042e6e0 (2594b): shadow map rendering pipeline using FRenderInterface and FCanvasUtil — too complex to decompile; depends on undeciphered render helpers")
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
 	// Retail: VA 0x1042e6e0, offset 0x12e6e0, 2594b. Shadow map rendering pipeline — too complex to decompile.

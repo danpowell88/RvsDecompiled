@@ -227,7 +227,7 @@ unguard;
 // Calls FUN_10301000 (TSC-based high-precision timer) for real-time demo playback sync.
 // FUN_10301000 is NOT a "demo file read helper" — it reads RDTSC and converts via
 // GSecondsPerCycle. The full body involves packet demux, archive reads, and FString ops.
-IMPL_DIVERGE("retail 0x10488050 (632b): complex demo playback dispatch; FUN_10301000 is TSC timer not demo-read helper")
+IMPL_TODO("retail 0x10488050 (632b): complex demo playback dispatch; FUN_10301000 is TSC timer not demo-read helper")
 void UDemoRecDriver::TickDispatch(float)
 {
 guard(UDemoRecDriver::TickDispatch);
@@ -374,7 +374,7 @@ unguard;
 
 // Ghidra 0x10488740 (551b): creates demo recording file, sets up UDemoRecConnection,
 // calls FUN_1038ef30 (85b) which type-checks a UObject as UGameEngine (asserts on fail).
-IMPL_DIVERGE("retail 0x10488740 (551b): FUN_1038ef30 (UGameEngine type-check/assert) and complex record setup unresolved")
+IMPL_TODO("retail 0x10488740 (551b): FUN_1038ef30 (UGameEngine type-check/assert) and complex record setup unresolved")
 int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitListen);
@@ -396,7 +396,7 @@ UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
 // Ghidra 0x104842b0 (210b): GETPING/GETLOSS call FUN_1050557c (float10→ulonglong ROUND helper,
 // 117b) to convert ping/loss stat values, then Logf the result to Ar.
 // FUN_1050557c passes ST(0) (80-bit float) → rounds to ulonglong; stat format unknown.
-IMPL_DIVERGE("retail 0x104842b0 (210b): FUN_1050557c is float10→ulonglong ROUND helper; stat format string unknown — GETPING/GETLOSS skip stat output")
+IMPL_TODO("retail 0x104842b0 (210b): FUN_1050557c is float10→ulonglong ROUND helper; stat format string unknown — GETPING/GETLOSS skip stat output")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
@@ -563,7 +563,7 @@ unguard;
 // Ghidra: FlushNet is ~1146b. Calls FUN_10301050 (480b) which is a high-performance
 // memcpy/SSE memory-copy helper (not a "packet assembly helper" — it's appMemcpy/SSE-memcpy).
 // The actual packet assembly logic is inline in FlushNet itself.
-IMPL_DIVERGE("retail: large 1146b packet-assembly/send function; FUN_10301050 is SSE-accelerated memcpy helper")
+IMPL_TODO("retail: large 1146b packet-assembly/send function; FUN_10301050 is SSE-accelerated memcpy helper")
 void UNetConnection::FlushNet()
 {
 guard(UNetConnection::FlushNet);
@@ -574,7 +574,7 @@ unguard;
 
 // Ghidra: Tick is ~1628b. Calls FUN_1037cf90 (151b) which is TArray::RemoveItem
 // (validates bounds then shifts elements) — it's a TArray range-removal helper.
-IMPL_DIVERGE("retail: large 1628b connection-tick function; FUN_1037cf90 is TArray::RemoveItem helper")
+IMPL_TODO("retail: large 1628b connection-tick function; FUN_1037cf90 is TArray::RemoveItem helper")
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
@@ -851,7 +851,7 @@ unguard;
 
 // Ghidra: ReceivedRawPacket calls FUN_1050557c (117b) — a float10→ulonglong rounding
 // helper (ROUND + sign-correction); likely used for packet timestamp or stat tracking.
-IMPL_DIVERGE("retail: ReceivedRawPacket body blocked; FUN_1050557c is float10-to-ulonglong ROUND helper (117b)")
+IMPL_TODO("retail: ReceivedRawPacket body blocked; FUN_1050557c is float10-to-ulonglong ROUND helper (117b)")
 void UNetConnection::ReceivedRawPacket(void* Data, INT Count)
 {
 guard(UNetConnection::ReceivedRawPacket);
@@ -870,7 +870,7 @@ unguard;
 
 // Ghidra: SendRawBunch calls FUN_10481dd0 (59b) which is an "add if not present"
 // helper — searches an FArray<INT> for *param_1 and appends if absent.
-IMPL_DIVERGE("retail: SendRawBunch body blocked; FUN_10481dd0 is AddUnique<INT> on FArray (59b)")
+IMPL_TODO("retail: SendRawBunch body blocked; FUN_10481dd0 is AddUnique<INT> on FArray (59b)")
 INT UNetConnection::SendRawBunch(FOutBunch& Bunch, INT InPacketId)
 {
 guard(UNetConnection::SendRawBunch);

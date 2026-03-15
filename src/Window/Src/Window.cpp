@@ -35,7 +35,7 @@ IMPLEMENT_PACKAGE(Window)
 
 IMPLEMENT_CLASS(UWindowManager)
 
-IMPL_DIVERGE("Ghidra Window.dll 0x110226d0: after Super::Serialize, iterates WWindow::__Windows and WWindow::__DeleteWindows arrays calling their Serialize methods; __Windows is a private WWindow static member inaccessible here")
+IMPL_TODO("Ghidra Window.dll 0x110226d0: after Super::Serialize, iterates WWindow::__Windows and WWindow::__DeleteWindows arrays calling their Serialize methods; __Windows is a private WWindow static member inaccessible here")
 void UWindowManager::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
@@ -182,7 +182,7 @@ FDelegate::FDelegate(const FDelegate& Other)
 	Global functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra Window.dll 0x110229c0: retail creates UWindowManager via StaticAllocateObject+FUN_11021c40(ctor) then sets GWindowManager and AddToRoot; brush/font creation is in the UWindowManager constructor, not here")
+IMPL_TODO("Ghidra Window.dll 0x110229c0: retail creates UWindowManager via StaticAllocateObject+FUN_11021c40(ctor) then sets GWindowManager and AddToRoot; brush/font creation is in the UWindowManager constructor, not here")
 WINDOW_API void InitWindowing()
 {
 	guard(InitWindowing);

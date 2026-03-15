@@ -90,7 +90,7 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 // WalkSpeedMod (clamped by MaxDesiredSpeed), zeros DestinationOffset/NextPathRadius,
 // copies Destination to AdjustLoc/FocalPoint, calls setMoveTimer, then calls
 // Pawn->vtable[0x184/4=97] = moveToward.  vtable[26] check omitted (DIVERGE).
-IMPL_DIVERGE("Ghidra 0x1038e870; 566b — bAdvancedTactics cleared; FocalPoint=Destination when Focus NULL; DesiredSpeed/bReducedSpeed set from WalkSpeedMod; vtable[26] guard omitted")
+IMPL_TODO("Ghidra 0x1038e870; 566b — bAdvancedTactics cleared; FocalPoint=Destination when Focus NULL; DesiredSpeed/bReducedSpeed set from WalkSpeedMod; vtable[26] guard omitted")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
@@ -154,7 +154,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 //   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
 //   ClearSerpentine + CurrentPath=NULL added.
 //   NavigationPoint eventSuggestMovePreparation + ReachSpec UReachSpec::supports path omitted → DIVERGE.
-IMPL_DIVERGE("Ghidra 0x10390940; 1402b — vtable[26] quick-reach guard omitted (always setMoveTimer); bAdvancedTactics=bCanJump; NavigationPoint prep + ReachSpec path omitted")
+IMPL_TODO("Ghidra 0x10390940; 1402b — vtable[26] quick-reach guard omitted (always setMoveTimer); bAdvancedTactics=bCanJump; NavigationPoint prep + ReachSpec path omitted")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -196,7 +196,7 @@ IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 // approximated by moveToward result.  PHYS_Spider Z-offset calls FUN_10301350 (not
 // reconstructed); omitted.  PHYS_Flying adds CollisionHeight*0.7 to Destination Z
 // (Ghidra: MoveTarget+0xfc = CollisionHeight; vtable[26] guard omitted → always applied).
-IMPL_DIVERGE("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Spider FUN_10301350 omitted; PHYS_Flying vtable[26] guard omitted")
+IMPL_TODO("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Spider FUN_10301350 omitted; PHYS_Flying vtable[26] guard omitted")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
@@ -273,7 +273,7 @@ void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
-IMPL_DIVERGE("Ghidra 0x1038dee0; 104b -- logic correct; retail uses ESI-based frame, MSVC 2019 generates EBP+SEH preamble")
+IMPL_TODO("Ghidra 0x1038dee0; 104b -- logic correct; retail uses ESI-based frame, MSVC 2019 generates EBP+SEH preamble")
 void AController::execPollWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollWaitForLanding);
@@ -495,7 +495,7 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
-IMPL_DIVERGE("Ghidra 0x1038f9e0; 1714b — secondary-aim scoring path (alive Pawn test, hostile-only filter, 16M distSq gate) omitted; team filter approximated as PRI-null check")
+IMPL_TODO("Ghidra 0x1038f9e0; 1714b — secondary-aim scoring path (alive Pawn test, hostile-only filter, 16M distSq gate) omitted; team filter approximated as PRI-null check")
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickTarget);
@@ -538,7 +538,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_DIVERGE("Ghidra 0x1038dc20; 688b — vtable[0x1a] actor sub-type gate (before targetable check) unidentified; omitted")
+IMPL_TODO("Ghidra 0x1038dc20; 688b — vtable[0x1a] actor sub-type gate (before targetable check) unidentified; omitted")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -579,7 +579,7 @@ IMPLEMENT_FUNCTION( AController, 534, execPickAnyTarget );
 // Retail: calls APawn::findPathToward with inventory scorer at 0x1038cb00,
 // updates MinWeight with path score, calls SetPath(1).
 // Scorer not reconstructed — cannot implement without it.
-IMPL_DIVERGE("Ghidra 0x1038d870; 416b — inventory-weight scorer at 0x1038cb00 not reconstructed; returns NULL until scorer is decompiled")
+IMPL_TODO("Ghidra 0x1038d870; 416b — inventory-weight scorer at 0x1038cb00 not reconstructed; returns NULL until scorer is decompiled")
 void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindBestInventoryPath);
@@ -596,7 +596,7 @@ IMPLEMENT_FUNCTION( AController, 540, execFindBestInventoryPath );
 
 // Ghidra 0x10390890, 162b. No SEH in retail.
 // PrivateStaticClass direct ref in retail vs our StaticClass() call — minor asm divergence.
-IMPL_DIVERGE("Ghidra 0x10390890; retail uses &ALadder::PrivateStaticClass and &ANavigationPoint::PrivateStaticClass directly; our StaticClass() calls add one indirection each")
+IMPL_TODO("Ghidra 0x10390890; retail uses &ALadder::PrivateStaticClass and &ANavigationPoint::PrivateStaticClass directly; our StaticClass() calls add one indirection each")
 void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 {
 	P_FINISH;
@@ -640,7 +640,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103900a0; 1734b — complex stair-rotation physics (FRotator traces, delta-time blend); stub returns Rotation.Pitch only")
+IMPL_TODO("Ghidra 0x103900a0; 1734b — complex stair-rotation physics (FRotator traces, delta-time blend); stub returns Rotation.Pitch only")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
@@ -683,7 +683,7 @@ IMPLEMENT_FUNCTION( APlayerController, 544, execResetKeyboard );
 // FUN_1038ef30(Engine) = checked cast to UGameEngine*: asserts IsA(UGameEngine) then returns arg.
 // In practice Engine IS always a UGameEngine so the check always passes; we skip the assertion.
 // FURL (LastURL) is at UGameEngine+0x464 — confirmed from Ghidra and UGameEngine layout.
-IMPL_DIVERGE("Ghidra 0x1038eff0: FUN_1038ef30 is a UGameEngine IsA-assertion that we skip; LastURL at Engine+0x464 is correct")
+IMPL_TODO("Ghidra 0x1038eff0: FUN_1038ef30 is a UGameEngine IsA-assertion that we skip; LastURL at Engine+0x464 is correct")
 void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execUpdateURL);
@@ -707,7 +707,7 @@ IMPLEMENT_FUNCTION( APlayerController, 546, execUpdateURL );
 // or Engine->Exec (vtable+0x2c), captures output to custom stack FOutputDevice, returns in Result.
 // DIVERGE: retail uses custom stack-allocated FOutputDevice with captured vtable at 0x105462a8
 // to populate local_34 (output FString). Not replicated — GNull discards output.
-IMPL_DIVERGE("Ghidra 0x1038da50: result-capturing stack FOutputDevice uses hard-coded vtable 0x105462a8; not reproducible")
+IMPL_TODO("Ghidra 0x1038da50: result-capturing stack FOutputDevice uses hard-coded vtable 0x105462a8; not reproducible")
 void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execConsoleCommand);
@@ -870,7 +870,7 @@ IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execPasteFromClipboard );
 // Ghidra 0x10420230, 88b. No SEH in retail.
 // Retail: UObject::IsA(Player, &UNetConnection::PrivateStaticClass) — no null guard on Player.
 // Diverges: our StaticClass() call vs PrivateStaticClass direct ref; null guard on P (safety).
-IMPL_DIVERGE("Ghidra 0x10420230; retail uses &UNetConnection::PrivateStaticClass and has no null-check on Player before IsA — minor safety divergence")
+IMPL_TODO("Ghidra 0x10420230; retail uses &UNetConnection::PrivateStaticClass and has no null-check on Player before IsA — minor safety divergence")
 void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 {
 	P_FINISH;
@@ -886,7 +886,7 @@ IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
 // Ghidra 0x1038cc50 (59b): reads one object param from bytecode (USkeletalMesh*),
 // then calls RenderPreProcess() and stores result. No guard/unguard in retail.
 // DIVERGENCE: we add guard/unguard; retail inlines Stack.Step dispatch directly.
-IMPL_DIVERGE("Ghidra 0x1038cc50: no guard/unguard in retail; inline Stack.Step dispatch vs our P_GET_OBJECT; functionally identical")
+IMPL_TODO("Ghidra 0x1038cc50: no guard/unguard in retail; inline Stack.Step dispatch vs our P_GET_OBJECT; functionally identical")
 void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPB_CanPlayerSpawn);
@@ -897,7 +897,7 @@ void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 1320, execPB_CanPlayerSpawn );
 
-IMPL_DIVERGE("Ghidra 0x1042c250; 562b -- queries GetPlayerNetworkAddress or eventGetLocalPlayerIp, calls FUN_1047f210 (PB status lookup) with IP+port+player-name; our stub returns 0")
+IMPL_TODO("Ghidra 0x1042c250; 562b -- queries GetPlayerNetworkAddress or eventGetLocalPlayerIp, calls FUN_1047f210 (PB status lookup) with IP+port+player-name; our stub returns 0")
 void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPBConnectStatus);
@@ -1023,7 +1023,7 @@ IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
 //              "INPUTPLANNING ..." → mouse/gamepad UInput->Exec via vtable[0x8c]
 //              "R6GAMEOPTIONS PropertyName Value" → FUN_103916a0 property lookup + GlobalSetProperty
 // DIVERGE: FUN_103916a0 (152b, property-chain walker) approximated with FindObjectField.
-IMPL_DIVERGE("Ghidra 0x10391770: FUN_103916a0 property-chain iterator approximated as FindObjectField; semantically equivalent")
+IMPL_TODO("Ghidra 0x10391770: FUN_103916a0 property-chain iterator approximated as FindObjectField; semantically equivalent")
 void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetKey);
@@ -1098,7 +1098,7 @@ IMPLEMENT_FUNCTION( APlayerController, 2713, execSetSoundOptions );
 // Calls FUN_1050557c (Engine.dll internal, 284 refs) for volume conversion, then Audio->vtable[0xa8](VolumeType, float).
 // FUN_1050557c signature unrecoverable from Ghidra (args passed in caller-saved regs, not tracked).
 // Best approximation: pass NewVolume/100.0f as the float volume (linear 0-100→0.0-1.0 mapping).
-IMPL_DIVERGE("Ghidra 0x1038cba0: FUN_1050557c (Engine.dll internal, 284 callers) converts NewVolume to FLOAT; signature unrecoverable — approximating with NewVolume/100.0f")
+IMPL_TODO("Ghidra 0x1038cba0: FUN_1050557c (Engine.dll internal, 284 callers) converts NewVolume to FLOAT; signature unrecoverable — approximating with NewVolume/100.0f")
 void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 {
 	P_GET_BYTE(VolumeType);
@@ -1196,7 +1196,7 @@ INT APawn::IsAlive()
 // Ghidra 0x103ecae0, 77b. No guard/unguard. Uses NaN-safe IEEE equality pattern
 // (fcomi): enters body when CollisionHeight == CrouchHeight OR either is NaN.
 // Our code diverges on the NaN case (returns 0 if either is NaN; retail treats NaN == anything).
-IMPL_DIVERGE("Ghidra 0x103ecae0; NaN-safe fcomi equality check diverges — retail enters body when either float is NaN, our code does not")
+IMPL_TODO("Ghidra 0x103ecae0; NaN-safe fcomi equality check diverges — retail enters body when either float is NaN, our code does not")
 INT APawn::IsCrouched()
 {
 	if( CollisionHeight != CrouchHeight )
@@ -1214,7 +1214,7 @@ INT APawn::IsPlayer()
 // Ghidra 0x103e5600, 34b. No guard/unguard.
 // Retail uses UObject::IsA(Controller, &APlayerController::PrivateStaticClass) directly;
 // our StaticClass() call is functionally equivalent but adds one extra call instruction.
-IMPL_DIVERGE("Ghidra 0x103e5600; retail uses &APlayerController::PrivateStaticClass direct reference vs our StaticClass() call — minor asm difference")
+IMPL_TODO("Ghidra 0x103e5600; retail uses &APlayerController::PrivateStaticClass direct reference vs our StaticClass() call — minor asm difference")
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
@@ -1278,7 +1278,7 @@ INT APawn::IsNeutral( APawn* Other )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5000: 35 bytes; parity fails — retail uses no stack frame (ECX-based thiscall, no push ebp), our compiler generates a standard prologue")
+IMPL_TODO("Ghidra 0x103e5000: 35 bytes; parity fails — retail uses no stack frame (ECX-based thiscall, no push ebp), our compiler generates a standard prologue")
 FLOAT APawn::GetMaxSpeed()
 {
 	FLOAT result = GroundSpeed;
@@ -1330,7 +1330,7 @@ INT APawn::CheckOwnerUpdated()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5260: 29 bytes; parity fails — retail uses no stack frame (ECX thiscall, integer regs for FVector), our compiler uses SSE2 movq")
+IMPL_TODO("Ghidra 0x103e5260: 29 bytes; parity fails — retail uses no stack frame (ECX thiscall, integer regs for FVector), our compiler uses SSE2 movq")
 void APawn::SetPrePivot( FVector NewPrePivot )
 {
 	PrePivot = NewPrePivot;
@@ -1342,7 +1342,7 @@ void APawn::SetPrePivot( FVector NewPrePivot )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103982c0: GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via GWarn->Logf instead; logic otherwise matches retail exactly")
+IMPL_TODO("Ghidra 0x103982c0: GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via GWarn->Logf instead; logic otherwise matches retail exactly")
 void APawn::CheckForErrors()
 {
 	// Retail has guard/unguard SEH frame; reproduce it here.
@@ -1474,7 +1474,7 @@ INT APawn::IsBlockedBy( const AActor* Other ) const
 	return AActor::IsBlockedBy(Other);
 }
 
-IMPL_DIVERGE("Ghidra 0x103c4b30; 2176b — complex net-relevancy caching; stub delegates to AActor::IsNetRelevantFor")
+IMPL_TODO("Ghidra 0x103c4b30; 2176b — complex net-relevancy caching; stub delegates to AActor::IsNetRelevantFor")
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(APawn::IsNetRelevantFor);
@@ -1596,7 +1596,7 @@ void APawn::PostNetReceive()
 	AActor::PostNetReceive();
 }
 
-IMPL_DIVERGE("Ghidra 0x10378250; 883b — complex location smoothing/interpolation with velocity blending; stub delegates to AActor::PostNetReceiveLocation")
+IMPL_TODO("Ghidra 0x10378250; 883b — complex location smoothing/interpolation with velocity blending; stub delegates to AActor::PostNetReceiveLocation")
 void APawn::PostNetReceiveLocation()
 {
 	guard(APawn::PostNetReceiveLocation);
@@ -1678,7 +1678,7 @@ INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e6280; 4240b — navpoint anchor proximity and per-class default collision radius checks omitted; approximate with simple XY distance/threshold")
+IMPL_TODO("Ghidra 0x103e6280; 4240b — navpoint anchor proximity and per-class default collision radius checks omitted; approximate with simple XY distance/threshold")
 INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::ReachedDestination);
@@ -1895,7 +1895,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103E9FF0 — animation blend-weight selection not yet reconstructed; empty body is a permanent stub until animation system is decompiled")
+IMPL_TODO("Ghidra 0x103E9FF0 — animation blend-weight selection not yet reconstructed; empty body is a permanent stub until animation system is decompiled")
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
@@ -1905,7 +1905,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ebfe0; 983b — nav-graph anchor cache and IsBlockedBy vtable check omitted; approximate with straight-line LOS/distance")
+IMPL_TODO("Ghidra 0x103ebfe0; 983b — nav-graph anchor cache and IsBlockedBy vtable check omitted; approximate with straight-line LOS/distance")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
@@ -2205,7 +2205,7 @@ void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103f1a50; 844b — vtable[0xC8] on HitActor (encroacher sub-type gate) and vtable[0x194] on Controller (unidentified notify dispatch) unidentified; both calls omitted")
+IMPL_TODO("Ghidra 0x103f1a50; 844b — vtable[0xC8] on HitActor (encroacher sub-type gate) and vtable[0x194] on Controller (unidentified notify dispatch) unidentified; both calls omitted")
 void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::processHitWall);
@@ -2284,7 +2284,7 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103eea80; 2043b — AR6ColBox::CanStepUp and capsule geometry adjustments for crouch state omitted; unconditionally delegates to AActor::stepUp")
+IMPL_TODO("Ghidra 0x103eea80; 2043b — AR6ColBox::CanStepUp and capsule geometry adjustments for crouch state omitted; unconditionally delegates to AActor::stepUp")
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
@@ -2382,7 +2382,7 @@ void APawn::ClearSerpentine()
 // teleports pawn to crouched Z position; events only fire when not client-simulating.
 // DIVERGENCE: retail uses bit 0x200 for early-exit guard (we now match this);
 // our guard/unguard adds SEH absent in retail; encroachment at fail path omitted.
-IMPL_DIVERGE("Ghidra 0x103e5de0: guard/unguard added; fail-path encroachment revert not implemented")
+IMPL_TODO("Ghidra 0x103e5de0: guard/unguard added; fail-path encroachment revert not implemented")
 void APawn::Crouch(INT bClientSimulation)
 {
 	guard(APawn::Crouch);
@@ -2566,7 +2566,7 @@ FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJu
 //   second MoveActor to snap pawn to water surface.
 // DIVERGE: Zone ptr at this+0x164 unidentified (approx'd via Region.Zone); MoveActor
 // call signature exact (matches retail vtable[0x98/4]).
-IMPL_DIVERGE("Ghidra 0x103f3e60; 514b — zone ptr at this+0x164 approx'd via Region.Zone; otherwise water-surface split logic faithfully implemented")
+IMPL_TODO("Ghidra 0x103f3e60; 514b — zone ptr at this+0x164 approx'd via Region.Zone; otherwise water-surface split logic faithfully implemented")
 FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 {
 	guard(APawn::Swim);
@@ -2602,7 +2602,7 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 // FarMoveActor (vtable[0x9c], bAttachedMove=1) moves pawn to standing position;
 // if blocked, reverts collision dims and (if Controller is APlayerController) sets bTryToUncrouch.
 // DIVERGENCE: missing FMemMark encroachment pre-check; missing APlayerController flag set on fail.
-IMPL_DIVERGE("Ghidra 0x103e5f90: FMemMark encroachment pre-check and APlayerController bTryToUncrouch path omitted")
+IMPL_TODO("Ghidra 0x103e5f90: FMemMark encroachment pre-check and APlayerController bTryToUncrouch path omitted")
 void APawn::UnCrouch(INT bClientSimulation)
 {
 	guard(APawn::UnCrouch);
@@ -2775,7 +2775,7 @@ void APawn::clearPaths()
 // DIVERGE: Ghidra calls FVector::operator/(delta, unrecovered_reg) for the velocity
 // update — the scalar divisor lives in an unrecovered x87 FPU register.
 // Best reconstruction: divisor = RemainingTime (displacement / elapsed time).
-IMPL_DIVERGE("Ghidra 0x103f07e0: velocity divisor is an unrecovered FPU register value; approximated as RemainingTime")
+IMPL_TODO("Ghidra 0x103f07e0: velocity divisor is an unrecovered FPU register value; approximated as RemainingTime")
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
 {
 	guard(APawn::findNewFloor);
@@ -2824,7 +2824,7 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 // DIVERGE from exact retail: retail uses &APhysicsVolume::PrivateStaticClass directly;
 // PrivateStaticClass is private here so we call StaticClass() (extra indirection, same result).
 // FMemMark only Pop()'d on normal loop exit, NOT on early returns (matches Ghidra SEH unwind).
-IMPL_DIVERGE("Ghidra 0x103f2c70: retail uses &APhysicsVolume::PrivateStaticClass directly; PrivateStaticClass is private so we use StaticClass() (extra indirection, same result)")
+IMPL_TODO("Ghidra 0x103f2c70: retail uses &APhysicsVolume::PrivateStaticClass directly; PrivateStaticClass is private so we use StaticClass() (extra indirection, same result)")
 FVector APawn::findWaterLine(FVector Start, FVector End)
 {
 	guard(APawn::findWaterLine);
@@ -2869,7 +2869,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ea940; 685b — vtable[0x188] on APawn (water-entry gate) unidentified; WarpZoneMarker dest-zone field at GoalActor+1000 not in SDK; rest implemented")
+IMPL_TODO("Ghidra 0x103ea940; 685b — vtable[0x188] on APawn (water-entry gate) unidentified; WarpZoneMarker dest-zone field at GoalActor+1000 not in SDK; rest implemented")
 INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::flyReachable);
 INT flags = bClearPath | 2;
@@ -3047,7 +3047,7 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103E8150, 491b — vtable[0x68] (reachability check on MoveTarget) unidentified; Acceleration magnitude scale-factor from local_40 approximated as Acceleration.Size()")
+IMPL_TODO("Ghidra 0x103E8150, 491b — vtable[0x68] (reachability check on MoveTarget) unidentified; Acceleration magnitude scale-factor from local_40 approximated as Acceleration.Size()")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 guard(APawn::rotateToward);
@@ -3177,7 +3177,7 @@ ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e8450; 1065b — vtable[0x188] water-blocker check (in-water loop) omitted; bCanWalk exit-water path simplified (MoveActor step-up skipped → direct flyReachable); WarpZone dest-zone field at GoalActor+1000 not in SDK")
+IMPL_TODO("Ghidra 0x103e8450; 1065b — vtable[0x188] water-blocker check (in-water loop) omitted; bCanWalk exit-water path simplified (MoveActor step-up skipped → direct flyReachable); WarpZone dest-zone field at GoalActor+1000 not in SDK")
 INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::swimReachable);
 INT flags = bClearPath | 4;
@@ -3470,7 +3470,7 @@ INT AController::AcceptNearbyPath( AActor* Goal )
 // LOS: APawn bitfield2 bit4 = bLOSHearing; UModel::FastLineCheck from EyePos to NoiseLoc.
 // Muffled: bit7 = bMuffledHearing; retail path-finds through walls → DIVERGE (unconditional).
 // Around-corner: bit8 = bAroundCornerHearing; FSortedPathList navpoint relay → DIVERGE.
-IMPL_DIVERGE("Ghidra 0x10390ec0; 1187b — NoiseMaker+0x148 chain approx'd by null check; bAdjacentZoneHearing team matrix omitted; bMuffledHearing path check approximated; bAroundCornerHearing navpoint relay omitted")
+IMPL_TODO("Ghidra 0x10390ec0; 1187b — NoiseMaker+0x148 chain approx'd by null check; bAdjacentZoneHearing team matrix omitted; bMuffledHearing path check approximated; bAroundCornerHearing navpoint relay omitted")
 INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, ENoiseType NoiseType, EPawnType PawnType )
 {
 	guard(AController::CanHear);
@@ -3518,7 +3518,7 @@ INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, 
 // for AIHearSound, calls CanHearSound with Pawn->Location as listener, fires eventAIHearSound.
 // Retail multiplies SoundLoc by 1.0f scalar (= SoundLoc unchanged) in the event call.
 // DIVERGENCE: we use ENGINE_AIHearSound FName (same runtime value in practice); SoundLoc direct.
-IMPL_DIVERGE("Ghidra 0x1042cc70: uses FName(0x15e) directly; SoundLoc scaled by 1.0f (no-op) not Volume; functionally identical")
+IMPL_TODO("Ghidra 0x1042cc70: uses FName(0x15e) directly; SoundLoc scaled by 1.0f (no-op) not Volume; functionally identical")
 void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags )
 {
 	guard(AController::CheckHearSound);
@@ -3609,7 +3609,7 @@ static AActor* sGoalCache[4] = {NULL, NULL, NULL, NULL};
 // Ghidra 0x1038d500 (476b): uses DAT_1066ad7c (retail static address) for sGoalCache;
 // FName 0x15a = NAME_SpecialHandling used for IsProbing check.
 // DIVERGENCE: our sGoalCache static has a linker-assigned address ≠ retail DAT_1066ad7c.
-IMPL_DIVERGE("Ghidra 0x1038d500: sGoalCache lives at retail address DAT_1066ad7c; our linker assigns different address")
+IMPL_TODO("Ghidra 0x1038d500: sGoalCache lives at retail address DAT_1066ad7c; our linker assigns different address")
 AActor* AController::SetPath( INT bInitialPath )
 {
 guard(AController::SetPath);
@@ -3674,7 +3674,7 @@ unguard;
 // Ghidra 0x1041CCC0 (676b): uses raw offsets +0x394=cost, +0x3ac=prevPath, +0x3b4=nextPath.
 // Also calls FUN_1035a3d0 (54b profiling timer) before the SingleLineCheck — skipped here.
 // Uses &ANavigationPoint::PrivateStaticClass for IsA check (we use StaticClass()).
-IMPL_DIVERGE("Ghidra 0x1041CCC0: skips FUN_1035a3d0 profiling call; uses StaticClass() not PrivateStaticClass")
+IMPL_TODO("Ghidra 0x1041CCC0: skips FUN_1035a3d0 profiling call; uses StaticClass() not PrivateStaticClass")
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
 	guard(AController::SetRouteCache);

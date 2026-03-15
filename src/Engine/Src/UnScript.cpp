@@ -33,7 +33,7 @@ void UAnimNotify::PostEditChange()
 // FUN_1037a3e0 to cast to AEmitter* then calls vtable[0x18C/4] to let the emitter
 // expire naturally.  We replicate using IsA(AEmitter) + raw vtable dispatch, which
 // is semantically identical but differs at the machine-code level.
-IMPL_DIVERGE("IsA replaces retail FUN_1037a3e0 cast; vtable[0x18C/4] not symbol-identified")
+IMPL_TODO("IsA replaces retail FUN_1037a3e0 cast; vtable[0x18C/4] not symbol-identified")
 void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_DestroyEffect::Notify);
@@ -90,7 +90,7 @@ void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 // then sets SubAction startPct (+0x4C), endPct (+0x50) and length (+0x54) from
 // SceneMgr->curTime (+0x3D0) and SceneMgr->duration (+0x3CC), and marks
 // SubAction->state (+0x2C) = 1.  Retail also logs the three object names via Logf.
-IMPL_DIVERGE("log format string at retail 0x2F8 omitted; field offsets raw")
+IMPL_TODO("log format string at retail 0x2F8 omitted; field offsets raw")
 void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_MatSubAction::Notify);

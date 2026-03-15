@@ -260,7 +260,7 @@ INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	unguard;
 }
 
-IMPL_DIVERGE("R6Engine.dll 0x100308c0 (~1645 bytes): FUN_100017a0 (0x100017a0) is fabsf; full reconstruction blocked by class hierarchy checks and raw line-trace vtable dispatch")
+IMPL_TODO("R6Engine.dll 0x100308c0 (~1645 bytes): FUN_100017a0 (0x100017a0) is fabsf; full reconstruction blocked by class hierarchy checks and raw line-trace vtable dispatch")
 void AR6PlayerController::UpdateCircumstantialAction()
 {
 	guard(AR6PlayerController::UpdateCircumstantialAction);
@@ -274,7 +274,7 @@ void AR6PlayerController::UpdateCircumstantialAction()
 	unguard;
 }
 
-IMPL_DIVERGE("R6Engine.dll 0x10031010 (~1298 bytes): FUN_10001750 (0x10001750, FCheckResult init) and FUN_1002ff80 (0x1002ff80, viewport projection) located; full reconstruction blocked by bone/screen projection dispatch")
+IMPL_TODO("R6Engine.dll 0x10031010 (~1298 bytes): FUN_10001750 (0x10001750, FCheckResult init) and FUN_1002ff80 (0x1002ff80, viewport projection) located; full reconstruction blocked by bone/screen projection dispatch")
 void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
 	guard(AR6PlayerController::UpdateReticule);

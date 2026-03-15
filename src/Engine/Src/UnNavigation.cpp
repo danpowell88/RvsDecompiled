@@ -1230,7 +1230,7 @@ IMPLEMENT_FUNCTION( UR6FileManager, 1525, execGetNbFile );
 
 /*-- UR6ModMgr ---------------------------------------------------------*/
 
-IMPL_DIVERGE("uses unnamed DAT_1066f414 counter and FUN_1031efc0/FUN_10393490/FUN_10321830 — unresolved")
+IMPL_TODO("uses unnamed DAT_1066f414 counter and FUN_1031efc0/FUN_10393490/FUN_10321830 — unresolved")
 void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execAddNewModExtraPath);
@@ -1317,7 +1317,7 @@ void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execSetGeneralModSettings );
 
-IMPL_DIVERGE("calls FUN_1031f060, FUN_10393490, FUN_10321830 — path-list manipulation helpers unresolved")
+IMPL_TODO("calls FUN_1031f060, FUN_10393490, FUN_10321830 — path-list manipulation helpers unresolved")
 void UR6ModMgr::execSetSystemMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetSystemMod);

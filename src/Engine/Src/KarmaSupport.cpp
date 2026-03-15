@@ -389,7 +389,7 @@ return *this;
 
 
 // --- UKMeshProps ---
-IMPL_DIVERGE("FKAggregateGeom serialization helpers (FUN_10322930/ab0/c70/4f570) not available; TArray at +0x50 not serialized (Ghidra 0x501b0 serializes it)")
+IMPL_TODO("FKAggregateGeom serialization helpers (FUN_10322930/ab0/c70/4f570) not available; TArray at +0x50 not serialized (Ghidra 0x501b0 serializes it)")
 void UKMeshProps::Serialize(FArchive& Ar)
 {
 // Ghidra 0x501b0: UObject::Serialize + 9 FLOAT fields at +0x2C..+0x4C (mass props),

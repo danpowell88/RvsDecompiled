@@ -1055,7 +1055,7 @@ void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 512, execMakeNoise );
 
-IMPL_DIVERGE("always returns 0 — audio subsystem not implemented")
+IMPL_TODO("always returns 0 — audio subsystem not implemented")
 void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPlayingSound);
@@ -1090,7 +1090,7 @@ void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execStopMusic );
 
-IMPL_DIVERGE("no-op stub — audio subsystem not implemented")
+IMPL_TODO("no-op stub — audio subsystem not implemented")
 void AActor::execStopAllMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllMusic);
@@ -1108,7 +1108,7 @@ void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2712, execStopAllSounds );
 
-IMPL_DIVERGE("parses aActor but performs no action — audio subsystem not implemented")
+IMPL_TODO("parses aActor but performs no action — audio subsystem not implemented")
 void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSoundsActor);
@@ -1118,7 +1118,7 @@ void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2719, execStopAllSoundsActor );
 
-IMPL_DIVERGE("parses Sound but performs no action — audio subsystem not implemented")
+IMPL_TODO("parses Sound but performs no action — audio subsystem not implemented")
 void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopSound);
@@ -1128,7 +1128,7 @@ void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2725, execStopSound );
 
-IMPL_DIVERGE("parses fTime/iFade/eSlot but performs no action — audio subsystem not implemented")
+IMPL_TODO("parses fTime/iFade/eSlot but performs no action — audio subsystem not implemented")
 void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFadeSound);
@@ -1140,7 +1140,7 @@ void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2721, execFadeSound );
 
-IMPL_DIVERGE("parses BankName but performs no action — audio subsystem not implemented")
+IMPL_TODO("parses BankName but performs no action — audio subsystem not implemented")
 void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddSoundBank);
@@ -1181,7 +1181,7 @@ void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2720, execResetVolume_TypeSound );
 
-IMPL_DIVERGE("parses VolumeType and NewVolume but performs no action — audio subsystem not implemented")
+IMPL_TODO("parses VolumeType and NewVolume but performs no action — audio subsystem not implemented")
 void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execChangeVolumeType);
@@ -1848,7 +1848,7 @@ void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1311, execSetServerBeacon );
 
-IMPL_DIVERGE("returns binary-specific global DAT_10793088 (server beacon string; Ghidra 0x104240c0)")
+IMPL_TODO("returns binary-specific global DAT_10793088 (server beacon string; Ghidra 0x104240c0)")
 void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerBeacon);
@@ -2210,7 +2210,7 @@ void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2607, execLoadRandomBackgroundImage );
 
-IMPL_DIVERGE("calls vtable chain g_pEngine->Client->??->vtable[0xBC/4]() to populate resolution array (Ghidra 0x1042c6f0); binary vtable layout not portable")
+IMPL_TODO("calls vtable chain g_pEngine->Client->??->vtable[0xBC/4]() to populate resolution array (Ghidra 0x1042c6f0); binary vtable layout not portable")
 void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNbAvailableResolutions);
@@ -2220,7 +2220,7 @@ void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2614, execGetNbAvailableResolutions );
 
-IMPL_DIVERGE("DIVERGENCE: retail reads resolution from engine list via vtable for given Index (Ghidra 0x10427090) — binary-specific vtable; hardcoded fallback")
+IMPL_TODO("DIVERGENCE: retail reads resolution from engine list via vtable for given Index (Ghidra 0x10427090) — binary-specific vtable; hardcoded fallback")
 void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAvailableResolution);
@@ -2232,7 +2232,7 @@ void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2615, execGetAvailableResolution );
 
-IMPL_DIVERGE("DIVERGENCE: calls UEngine vtable[0xD4/4] with OldTex name (Ghidra 0x10424160) — binary-specific vtable; texture replacement stubbed")
+IMPL_TODO("DIVERGENCE: calls UEngine vtable[0xD4/4] with OldTex name (Ghidra 0x10424160) — binary-specific vtable; texture replacement stubbed")
 void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReplaceTexture);
@@ -2244,7 +2244,7 @@ void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_DIVERGE("retail calls vtable chain g_pEngine->Client->Viewports[0]->vtable[0xC0/4]() and tests >32MB (Ghidra 0x10427350); binary vtable layout not portable; modern GPUs always pass")
+IMPL_TODO("retail calls vtable chain g_pEngine->Client->Viewports[0]->vtable[0xC0/4]() and tests >32MB (Ghidra 0x10427350); binary vtable layout not portable; modern GPUs always pass")
 void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
@@ -2650,7 +2650,7 @@ void AActor::SetGameType( FString GameType )
 
 // Ghidra 0x1037c130 (139 bytes): retail increments binary-specific global DAT_10666b50
 // (& 0xF == 0 triggers GEngine->PaintProgress). Logic reproduced; address differs.
-IMPL_DIVERGE("loading tick uses local static instead of retail binary global DAT_10666b50 (Ghidra 0x1037c130)")
+IMPL_TODO("loading tick uses local static instead of retail binary global DAT_10666b50 (Ghidra 0x1037c130)")
 void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
@@ -2746,7 +2746,7 @@ void AActor::NetDirty( UProperty* Property )
 // immediately if not set. When set, performs cached-property optimisation using
 // DAT_106668bc/b8, UProperty::StaticClass(), and per-channel change tracking.
 // Our version always returns Ptr (correct for the flag==0 fast path only).
-IMPL_DIVERGE("returns Ptr (fast path only); retail also optimises via DAT_10650414&0x800 cache (Ghidra 0x1037ab0)")
+IMPL_TODO("returns Ptr (fast path only); retail also optimises via DAT_10650414&0x800 cache (Ghidra 0x1037ab0)")
 INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(AActor::GetOptimizedRepList);
@@ -2784,7 +2784,7 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 // Ghidra 0x1037e30 (~90 bytes): snapshots actor fields (Location+0x234, Rotation+0x240,
 // DrawScale3D+0x24c, etc.) into binary-specific globals DAT_106666f4..DAT_10666728;
 // then calls XLevel replication interface. Requires matching retail binary globals.
-IMPL_DIVERGE("retail writes actor state snapshot to binary globals DAT_106666f4-1066672c (Ghidra 0x1037e30)")
+IMPL_TODO("retail writes actor state snapshot to binary globals DAT_106666f4-1066672c (Ghidra 0x1037e30)")
 void AActor::PreNetReceive()
 {
     // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
@@ -2792,7 +2792,7 @@ void AActor::PreNetReceive()
 
 // Ghidra 0x103781f0 (~295 bytes): reads snapshot globals saved by PreNetReceive, applies
 // position/rotation/physics changes via XLevel. Requires matching PreNetReceive globals.
-IMPL_DIVERGE("reads binary globals saved by PreNetReceive; requires matching DAT_106666f4-* (Ghidra 0x103781f0)")
+IMPL_TODO("reads binary globals saved by PreNetReceive; requires matching DAT_106666f4-* (Ghidra 0x103781f0)")
 void AActor::PostNetReceive()
 {
     // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
@@ -2800,7 +2800,7 @@ void AActor::PostNetReceive()
 
 // Ghidra 0x1037c210 (38 bytes): calls XLevel->MoveActor via vtable[0x9c] with
 // the pre-receive location saved in DAT_106666f4/f8/fc by PreNetReceive.
-IMPL_DIVERGE("calls XLevel MoveActor via vtable[0x9c] with location from DAT_106666f4/f8/fc (Ghidra 0x1037c210)")
+IMPL_TODO("calls XLevel MoveActor via vtable[0x9c] with location from DAT_106666f4/f8/fc (Ghidra 0x1037c210)")
 void AActor::PostNetReceiveLocation()
 {
     // STUB: requires binary-specific globals from PreNetReceive (DAT_106666f4/f8/fc)
@@ -3030,7 +3030,7 @@ void AActor::UpdateTimers( FLOAT DeltaSeconds )
 
 // Ghidra 0x103c3460 (60 bytes): no guard/unguard in retail; uses GEngineMem frame-arena.
 // DIVERGE: MSVC 7.1 vs 2019 codegen differs even with identical logic.
-IMPL_DIVERGE("codegen differs from retail MSVC 7.1 (Ghidra 0x103c3460); functionally equivalent")
+IMPL_TODO("codegen differs from retail MSVC 7.1 (Ghidra 0x103c3460); functionally equivalent")
 INT AActor::CheckOwnerUpdated()
 {
 	// Retail: detect owner network-state change and queue actor for replication.
@@ -3416,7 +3416,7 @@ INT AActor::DetachFromBone( AActor* Attachment )
 // Ghidra 0x1042dfa0 (~800 bytes): fast path for static mesh instances (type==0x8),
 // slow path builds projector render info, iterates mesh primitives, allocates FMatrix.
 // Requires full projector render subsystem; binary-specific vtable calls at +0x100/0x7c/0x80.
-IMPL_DIVERGE("projector render subsystem not implemented; binary-specific vtable calls (Ghidra 0x1042dfa0)")
+IMPL_TODO("projector render subsystem not implemented; binary-specific vtable calls (Ghidra 0x1042dfa0)")
 void AActor::AttachProjector( AProjector* Proj )
 {
     // STUB: requires projector render subsystem and binary-specific vtable slots
@@ -3424,7 +3424,7 @@ void AActor::AttachProjector( AProjector* Proj )
 
 // Ghidra 0x1042d870 (174 bytes): checks static mesh fast path (type==0x8), then searches
 // projector array at +0x344, decrements refcount, frees via FUN_1031f5e0 if 0.
-IMPL_DIVERGE("projector render subsystem not implemented; searches +0x344 array and frees via binary-specific FUN_1031f5e0 (Ghidra 0x1042d870)")
+IMPL_TODO("projector render subsystem not implemented; searches +0x344 array and frees via binary-specific FUN_1031f5e0 (Ghidra 0x1042d870)")
 void AActor::DetachProjector( AProjector* Proj )
 {
     // STUB: requires projector array at +0x344 and binary-specific FUN_1031f5e0
@@ -4475,7 +4475,7 @@ void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
 // Retail uses a binary-specific color lookup table (DAT_10666b2c, 8-slot pointer array
 // indexed by (VectorIndex>>2)&7) when Color==NULL; we fall back to white.
 // All other logic (array growth, field assignment, FString copy) matches Ghidra exactly.
-IMPL_DIVERGE("default color when Color==NULL differs: retail reads from binary globals DAT_10666b2c table (Ghidra 0x103794d0)")
+IMPL_TODO("default color when Color==NULL differs: retail reads from binary globals DAT_10666b2c table (Ghidra 0x103794d0)")
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
     if( VectorIndex < 0 )

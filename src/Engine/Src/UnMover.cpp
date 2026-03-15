@@ -2,7 +2,7 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---
-IMPL_DIVERGE("Ghidra 0x1042BC10: 1345-byte keyframe interpolation with encroach checking not yet reconstructed")
+IMPL_TODO("Ghidra 0x1042BC10: 1345-byte keyframe interpolation with encroach checking not yet reconstructed")
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
@@ -96,7 +96,7 @@ void AMover::AddMyMarker(AActor *)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10374f40: global property-handle caches (DAT_106669c8 et al.) and StaticFindObjectChecked_exref call pattern not reproduced")
+IMPL_TODO("Ghidra 0x10374f40: global property-handle caches (DAT_106669c8 et al.) and StaticFindObjectChecked_exref call pattern not reproduced")
 INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -312,7 +312,7 @@ void AMover::PostLoad()
 // PostNetReceive (maps to DAT_10666730/34/38 in Ghidra retail binary).
 static FVector s_AMoverNetRecvSnapshot(0.f, 0.f, 0.f);
 
-IMPL_DIVERGE("Ghidra 0x1037DA40: FUN_1050557c (_ftol2) float input uncertain without raw assembly — implemented assuming FST leaves this+0x6D4*0.01 on FPU stack; vtable +0x11c assumed setPhysics(PHYS_MovingBrush)")
+IMPL_TODO("Ghidra 0x1037DA40: FUN_1050557c (_ftol2) float input uncertain without raw assembly — implemented assuming FST leaves this+0x6D4*0.01 on FPU stack; vtable +0x11c assumed setPhysics(PHYS_MovingBrush)")
 void AMover::PostNetReceive()
 {
 	guard(AMover::PostNetReceive);

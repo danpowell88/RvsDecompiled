@@ -15,7 +15,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AR6AbstractCircumstantialActionQuery ---
-IMPL_DIVERGE("Ghidra 0x77620: 1245-byte property-replication body; this stub delegates to parent as placeholder")
+IMPL_TODO("Ghidra 0x77620: 1245-byte property-replication body; this stub delegates to parent as placeholder")
 INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -30,7 +30,7 @@ void AR6ActionSpot::RenderEditorInfo(FLevelSceneNode *,FRenderInterface *,FDynam
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x984a0: uses GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via debugf instead")
+IMPL_TODO("Ghidra 0x984a0: uses GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via debugf instead")
 void AR6ActionSpot::CheckForErrors()
 {
 	guard(AR6ActionSpot::CheckForErrors);
@@ -254,7 +254,7 @@ void AR6DecalGroup::ActivateGroup()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x176fb0: GIsNightmare global, blood-decal FName/scale init, and appSeconds() expiry not available")
+IMPL_TODO("Ghidra 0x176fb0: GIsNightmare global, blood-decal FName/scale init, and appSeconds() expiry not available")
 int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, int param_4,
 	float param_5, float param_6, float param_7, float param_8, int param_9)
 {
@@ -335,7 +335,7 @@ void AR6DecalManager::Spawned()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x177880: type-1 viewport/global-counter distance-cull requires inaccessible Engine internals")
+IMPL_TODO("Ghidra 0x177880: type-1 viewport/global-counter distance-cull requires inaccessible Engine internals")
 int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, eDecalType param_4,
 	int param_5, float param_6, float param_7, float param_8, float param_9, int param_10)
 {

@@ -211,7 +211,7 @@ void UTexture::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1046B600: omits mip-level TArray serialization — FUN_1046b600 serializes mip array (FUN_1046ace0 per element); FUN_1046ace0 mip-element serializer unresolved")
+IMPL_TODO("Ghidra 0x1046B600: omits mip-level TArray serialization — FUN_1046b600 serializes mip array (FUN_1046ace0 per element); FUN_1046ace0 mip-element serializer unresolved")
 void UTexture::Serialize( FArchive& Ar )
 {
 	guard(UTexture::Serialize);

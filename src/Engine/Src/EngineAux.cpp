@@ -120,7 +120,7 @@ void KME2UTransform(FVector* OutPos, FRotator* OutRot, const FLOAT (* const tm)[
 // ?KModelToHulls@@YAXPAVFKAggregateGeom@@PAVUModel@@VFVector@@@Z  (Engine.dll 0x1036c810, 143 bytes)
 // Decomposes a BSP UModel into convex hulls stored in FKAggregateGeom.
 // Calls FUN_1033ac90 (lock BSP), FUN_1036c5a0 (extract hulls), FUN_10323b40 (unlock).
-IMPL_DIVERGE("KModelToHulls calls unnamed Engine internals FUN_1033ac90/FUN_1036c5a0/FUN_10323b40 not yet decompiled")
+IMPL_TODO("KModelToHulls calls unnamed Engine internals FUN_1033ac90/FUN_1036c5a0/FUN_10323b40 not yet decompiled")
 void KModelToHulls(FKAggregateGeom*, UModel*, FVector) {}
 
 // ?KU2MEMatrixCopy@@YAXQAY03MPAVFMatrix@@@Z  (Engine.dll 0x1036a330, same body as KME2UMatrixCopy)
