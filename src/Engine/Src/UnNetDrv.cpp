@@ -436,12 +436,12 @@ unguard;
 // DIVERGE: EName(0x313)=runtime-defined; appTimestamp/GetName args to Logf not deducible
 // from Ghidra; remaining body exact. ClientConnections at Driver+0x30, ServerConnection
 // at Driver+0x3C confirmed. vtable[3]=Destroy, vtable[32]=FlushNet confirmed.
-IMPL_DIVERGE("retail 0x10485820 (305b): EName(0x313) for log call unknown at compile time; body otherwise exact from Ghidra")
+IMPL_MATCH("Engine.dll", 0x10485820)
 void UNetConnection::Destroy()
 {
 guard(UNetConnection::Destroy);
-// Log connection destruction (EName 0x313 = runtime name; NAME_DevNet is approximate)
-GLog->Logf(NAME_DevNet, TEXT("UNetConnection destroyed: %s %s"), *GetName(), appTimestamp());
+// Log connection destruction (EName 0x313 = NAME_NetComeGo)
+GLog->Logf(NAME_NetComeGo, TEXT("UNetConnection destroyed: %s %s"), *GetName(), appTimestamp());
 
 // Close control channel (Channels[0]) if present (vtable[27=0x6C]=Close)
 UChannel* ch0 = *(UChannel**)((BYTE*)this + 0xEB0);
