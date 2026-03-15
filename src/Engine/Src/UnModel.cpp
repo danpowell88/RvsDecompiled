@@ -508,7 +508,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x10470770, 129 bytes.
 // Returns -1 if no nodes; otherwise calls FUN_104704f0 (BSP nearest-vertex finder).
-IMPL_DIVERGE("Ghidra 0x10470770: calls FUN_104704f0 (BSP nearest-vertex finder); pending extraction")
+IMPL_DIVERGE("Ghidra 0x10470770: outer wrapper Ghidra-confirmed (early-out on empty nodes, else calls FUN_104704f0); blocks on FUN_104704f0 (BSP vertex-search traversal) absent from Ghidra exports")
 FLOAT UModel::FindNearestVertex( const FVector& SourcePoint, FVector& DestPoint, FLOAT MinRadius, INT& iVertex ) const
 {
 guard(UModel::FindNearestVertex);

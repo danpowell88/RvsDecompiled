@@ -272,7 +272,11 @@ INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 	return UpdateGame(Time, Mgr);
 }
 
-IMPL_DIVERGE("Ghidra 0x10041420 (343b): anim-playing check via raw vtable slot 57 (0xE4) on m_AffectedActor; UMatSubAction state field at raw offset 0x2C set to 3 (done) without named field")
+// Ghidra 0x10041420 (343b). Raw vtable and state-field accesses are implemented.
+// Remaining divergence: in the first-time path Ghidra reads Data[0] unconditionally
+// before checking Num==0||Data[0]==NULL, while our code uses a ternary (Num>0?Data[0]:NULL)
+// followed by a single null check — functionally identical but generates different assembly.
+IMPL_DIVERGE("Ghidra 0x10041420 (343b): first-time path reads Data[0] unconditionally then dual-null-checks (Num==0||ptr==NULL); our ternary check generates different assembly")
 INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 {
 	if (!IsRunning())
