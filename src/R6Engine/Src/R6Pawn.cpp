@@ -1307,7 +1307,7 @@ INT AR6Pawn::SetAudioInfo()
 	unguard;
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookAndAimDirection);
@@ -1374,7 +1374,7 @@ void AR6Pawn::SetPawnLookAndAimDirection(FRotator InRot, INT BlendTime)
 	unguard;
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::SetPawnLookDirection(FRotator InRot, INT BlendTime)
 {
 	guard(AR6Pawn::SetPawnLookDirection);
@@ -1538,7 +1538,7 @@ void AR6Pawn::UnCrawl(INT param_1)
 	unguard;
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::UpdateColBox(FVector& NewLocation, INT p1, INT p2, INT p3)
 {
 	guard(AR6Pawn::UpdateColBox);
@@ -1997,7 +1997,7 @@ void AR6Pawn::UpdatePeeking(FLOAT DeltaTime)
 	UpdateFullPeekingMode(DeltaTime);
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::WeaponFollow(INT param_1, FLOAT param_2)
 {
 	guard(AR6Pawn::WeaponFollow);
@@ -2048,7 +2048,7 @@ INT AR6Pawn::WeaponIsAGadget()
 	return 1;
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::WeaponLock(INT param_1, FLOAT param_2, FLOAT param_3)
 {
 	guard(AR6Pawn::WeaponLock);
@@ -2599,7 +2599,7 @@ void AR6Pawn::execFootStep(FFrame& Stack, RESULT_DECL)
 	eventPlaySurfaceSwitch();
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::execGetKillResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iKillDamage);
@@ -2662,7 +2662,7 @@ void AR6Pawn::execGetRotationOffset(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetRotationOffset();
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::execGetStunResult(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_INT(iStunDamage);
@@ -2716,7 +2716,7 @@ void AR6Pawn::execGetThroughResult(FFrame& Stack, RESULT_DECL)
 	*(INT*)Result = (iResult < 0) ? 0 : iResult;
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::execMoveHitBone(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FRotator, rHitDirection);
@@ -3407,7 +3407,7 @@ void AR6Pawn::physLadder(FLOAT DeltaTime, INT)
 	unguard;
 }
 
-IMPL_TODO("FUN_10042934 x87 FPU state — unreconstructable")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation; bone rotation cached value approximated as 0")
 void AR6Pawn::physicsRotation(FLOAT DeltaTime, FVector InVelocity)
 {
 	guard(AR6Pawn::physicsRotation);
