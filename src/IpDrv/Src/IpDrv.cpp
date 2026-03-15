@@ -204,7 +204,7 @@ static bool IsValidSocket(SOCKET s)
 // Helper: get local IP for binding.
 // In the retail binary this is FUN_10701be0 (in _unnamed.cpp) which reads the configured bind
 // address from the output-device/log path.  We return INADDR_ANY for all-interfaces binding.
-IMPL_DIVERGE("static helper; retail FUN_10701be0 reads bind address from config; we return INADDR_ANY")
+IMPL_TODO("retail FUN_10701be0 (0x10701be0): reads bind address from config via FUN_107018d0; we return INADDR_ANY as a simplified fallback")
 static UINT GetLocalBindIP()
 {
 	return INADDR_ANY; // host order = 0
@@ -215,7 +215,7 @@ static UINT GetLocalBindIP()
 //   u_short FUN_10701810(SOCKET s, sockaddr* addr, int num_attempts, int port_increment).
 // Our wrapper has different parameter semantics (mask flags + bReuseAddr vs attempt count +
 // port increment) and calls setsockopt(SO_REUSEADDR) which retail does not.
-IMPL_DIVERGE("static helper; retail FUN_10701810 uses attempt-count/increment params; our version uses flag/reuseaddr params")
+IMPL_TODO("retail FUN_10701810 (0x10701810): uses attempt-count/port-increment params without SO_REUSEADDR; our wrapper adds different semantics")
 static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 {
 	if (bReuseAddr)
@@ -262,7 +262,7 @@ static bool SetSocketOptions(SOCKET s)
 // Retail equivalent is FUN_1070df40 (0x1070df40): uses caller-allocated output FString* (return-by-pointer
 // ABI) vs our return-by-value. Port format uses data reference DAT_10717774 (unknown literal; functionally
 // equivalent to ":%i"). Both produce identical output strings.
-IMPL_DIVERGE("static helper; retail FUN_1070df40 uses return-by-pointer ABI; our version returns FString by value")
+IMPL_TODO("retail FUN_1070df40 (0x1070df40): uses return-by-pointer ABI; our version returns FString by value — functionally equivalent output")
 static FString IpAddrToStr(UINT Addr, UINT Port)
 {
 	BYTE b1 = (BYTE)( Addr        & 0xFF);
@@ -280,7 +280,7 @@ static FString IpAddrToStr(UINT Addr, UINT Port)
 // failure with no retry. On success checks h_addrtype == AF_INET before storing.
 // On failure, retail writes a wide-string error via appSprintf to offset 0x108; we store a
 // short WSA error code there instead. Both are zero on success / non-zero on failure.
-IMPL_DIVERGE("static helper; retail FUN_1070e0f0 writes wchar_t error string via appSprintf to offset +0x108; we store a short WSA error code there instead")
+IMPL_TODO("retail FUN_1070e0f0 (0x1070e0f0): writes wchar_t error string via appSprintf to FResolveInfo+0x108; we store a short WSA error code there instead")
 static DWORD WINAPI ResolveThread(LPVOID Param)
 {
 	FResolveInfo* Info = (FResolveInfo*)Param;
@@ -315,7 +315,7 @@ static DWORD WINAPI ResolveThread(LPVOID Param)
 // lpThreadId (CreateThread writes the thread ID there; the thread clears it to 0 on finish).
 // Also calls appFailAssert if CreateThread fails. We use a separate ThreadId local and omit
 // the assert; both are functionally equivalent for callers that poll bWorking for completion.
-IMPL_DIVERGE("static helper; retail FUN_10701780 copies hostname via appToAnsi+memcpy and logs hostname before launch; our ANSI copy uses WideCharToMultiByte")
+IMPL_TODO("retail FUN_10701780 (0x10701780): copies hostname via appToAnsi+memcpy and logs before CreateThread; our version uses WideCharToMultiByte and skips the log")
 static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 {
 	FResolveInfo* Info = (FResolveInfo*)Buffer;
