@@ -274,7 +274,7 @@ void AR6PlayerController::UpdateCircumstantialAction()
 	unguard;
 }
 
-IMPL_TODO("R6Engine.dll 0x10031010 (~1298 bytes): FUN_10001750 (0x10001750, FCheckResult init) and FUN_1002ff80 (0x1002ff80, viewport projection) located; full reconstruction blocked by bone/screen projection dispatch")
+IMPL_DIVERGE("R6Engine.dll 0x10031010 (~1298 bytes): calls unexported FUN_1002ff80 (0x1002ff80, 729-byte __cdecl viewport renderer projection using FCameraSceneNode/FCanvasUtil, not in export table)")
 void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
 	guard(AR6PlayerController::UpdateReticule);

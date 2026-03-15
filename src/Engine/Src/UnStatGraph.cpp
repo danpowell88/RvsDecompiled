@@ -313,7 +313,7 @@ IMPL_DIVERGE("permanent: D3D viewport stats graph rendering; requires binary-spe
 void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
 
 // ?Reset@FStatGraph@@QAEXXZ
-IMPL_DIVERGE("permanent: FUN_1033bb10/FUN_103203b0 are unexported internal array helpers; FUN_1031fea0 is the same unexported EH-frame ABI helper as in the copy-ctor/dtor patterns — same permanent blocker; Ghidra 0x10446800")
+IMPL_TODO("Ghidra 0x10446800: 95 bytes — FUN_1033bb10/FUN_103203b0/FUN_1031fea0 not yet resolved")
 void FStatGraph::Reset() {}
 
 // ============================================================================
