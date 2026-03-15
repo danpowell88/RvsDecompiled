@@ -3552,8 +3552,9 @@ INT AController::LocalPlayerController()
 //   Focus* (AActor*)     = this+0x3e4  MonitorStartLoc (FVector) = this+0x4d4
 // DIVERGE: vtable[0xf0] call on 'this' (Role > ROLE_DumbProxy path) is an unidentified
 // virtual function; raw offset accesses for ULevel+0x100 and actor+0x144 have no named
-// counterpart; Pawn+0xb4 = LastRenderTime (AActor field, no named decl here); rdtsc omitted.
-IMPL_TODO("Ghidra 0x103c3870: vtable[0xf0] unidentified; actor+0x144 ptr, ULevel+0x100 and actor+0x320 raw; LastRenderTime at +0xb4 unnamed; rdtsc profiling omitted")
+// counterpart; Pawn+0xb4 = LastRenderTime (AActor field, no named decl here).
+// NOTE: Ghidra 977b body has NO rdtsc — prior rdtsc claim was incorrect.
+IMPL_TODO("Ghidra 0x103c3870: vtable[0xf0] unidentified (Role > ROLE_DumbProxy path omitted); actor+0x144 ptr, ULevel+0x100 and actor+0x320 raw offsets have no named counterpart")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
