@@ -198,7 +198,7 @@ int FBspVertexStream::GetStride()
 
 
 // --- FLevelSceneNode ---
-IMPL_DIVERGE("retail 0x10406670 (1270b): full scene render loop; references DAT_10780bf0 (UProxyBitmapMaterial global), FUN_10385b30 (viewport setup), and complex BSP/actor dispatch")
+IMPL_TODO("retail 0x10406670 (1270b): full scene render loop; references DAT_10780bf0 (UProxyBitmapMaterial global), FUN_10385b30 (viewport setup), and complex BSP/actor dispatch")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
 	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
@@ -586,7 +586,7 @@ FLineBatcher& FLineBatcher::operator=(const FLineBatcher& Other)
 	return *this;
 }
 
-IMPL_DIVERGE("retail 0x10415560 (985b): FPoly plane iteration; FPoly class incomplete")
+IMPL_TODO("retail 0x10415560 (985b): FPoly plane iteration; FPoly class incomplete")
 void FLineBatcher::DrawConvexVolume(FConvexVolume Volume, FColor Color)
 {
 	// Ghidra 0x115560: too complex to fully decompile (FPoly + plane iteration); left empty.
@@ -690,7 +690,7 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_DIVERGE("Ghidra 0x10414b90 (656b): uses FUN_10370d70 (unresolved FMatrix ctor from FRotator) — replaced with FCoords/FRotator which produces equivalent axes")
+IMPL_TODO("Ghidra 0x10414b90 (656b): uses FUN_10370d70 (unresolved FMatrix ctor from FRotator) — replaced with FCoords/FRotator which produces equivalent axes")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Retail loops NumSides times using FRotator→FMatrix via FUN_10370d70 to derive circle axes.
@@ -706,7 +706,7 @@ void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT Nu
 	}
 }
 
-IMPL_DIVERGE("retail 0x104172a0 (813b): GCache + UProxyBitmapMaterial proxy + vertex stream submit; multiple unresolved DAT globals")
+IMPL_TODO("retail 0x104172a0 (813b): GCache + UProxyBitmapMaterial proxy + vertex stream submit; multiple unresolved DAT globals")
 void FLineBatcher::Flush(DWORD Flags)
 {
 	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
@@ -886,7 +886,7 @@ return 4;
 
 
 // --- FRawIndexBuffer ---
-IMPL_DIVERGE("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
+IMPL_TODO("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
 int FRawIndexBuffer::Stripify()
 {
 	guard(FRawIndexBuffer::Stripify);
@@ -931,7 +931,7 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_DIVERGE("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
+IMPL_TODO("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
 void FRawIndexBuffer::CacheOptimize()
 {
 	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
@@ -1396,7 +1396,7 @@ int FStaticTexture::GetRevision()
 	}
 	return *(INT*)&Pad[12];
 }
-IMPL_DIVERGE("retail 0x10469da0 (1462b): complex DXT decompression and format conversion pipeline; unresolvable")
+IMPL_TODO("retail 0x10469da0 (1462b): complex DXT decompression and format conversion pipeline; pending full decompilation")
 void FStaticTexture::GetTextureData(int,void *,int,ETextureFormat,int)
 {
 	// TODO: implement FStaticTexture::GetTextureData (Ghidra: complex lazy-load path)
@@ -1436,7 +1436,7 @@ FBspSection::FBspSection(FBspSection const &Other)
 	appMemcpy((BYTE*)this + 0x10, (const BYTE*)&Other + 0x10, 0x1C); // 7 DWORDs
 }
 
-IMPL_DIVERGE("0x10327a70 confirmed; FBspSection has no virtual base in source so vtable pointer is not set by compiler")
+IMPL_TODO("0x10327a70 confirmed; FBspSection has no virtual base in source so vtable pointer is not set by compiler")
 FBspSection::FBspSection()
 {
 	// Ghidra 0x27a70: sets vtable (FBspVertexStream::_vftable_), inits TArray at +4,
@@ -1558,13 +1558,13 @@ BYTE FConvexVolume::BoxCheck(FVector Origin, FVector Extent)
 	return Result;
 }
 
-IMPL_DIVERGE("Ghidra 0x10413f90 (165b): FConvexVolume::ClipPolygon iterates half-space planes; FPoly class incomplete")
+IMPL_TODO("Ghidra 0x10413f90 (165b): FConvexVolume::ClipPolygon iterates half-space planes; FPoly class incomplete")
 FPoly FConvexVolume::ClipPolygon(FPoly)
 {
 	return FPoly();
 }
 
-IMPL_DIVERGE("Ghidra 0x10414040 (165b): FConvexVolume::ClipPolygonPrecise — same as ClipPolygon with higher-precision plane tests; FPoly incomplete")
+IMPL_TODO("Ghidra 0x10414040 (165b): FConvexVolume::ClipPolygonPrecise — same as ClipPolygon with higher-precision plane tests; FPoly incomplete")
 FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 {
 	return FPoly();
@@ -1572,7 +1572,7 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
 
 
 // --- FDynamicActor ---
-IMPL_DIVERGE("retail 0x104038b0 (11290b): FDynamicActor::Render — full per-mesh render dispatch; pending complete decompilation")
+IMPL_TODO("retail 0x104038b0 (11290b): FDynamicActor::Render — full per-mesh render dispatch; pending complete decompilation")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	// Ghidra: deferred to mesh renderer via vtable; actual dispatch is in UMeshInstance::Render.
@@ -1586,7 +1586,7 @@ FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 	appMemcpy(this, &Other, 0x80);
 }
 
-IMPL_DIVERGE("0x103ffb70 confirmed; complex transform/bounds setup requires unresolved FUN_* helpers")
+IMPL_TODO("0x103ffb70 confirmed; complex transform/bounds setup requires unresolved FUN_* helpers")
 FDynamicActor::FDynamicActor(AActor* Actor)
 {
 	// Ghidra 0xffb70: construct sub-objects, store actor pointer, compute transform/bounds.
@@ -1739,7 +1739,7 @@ FDynamicLight::FDynamicLight(FDynamicLight const& Other)
 	appMemcpy( this, &Other, sizeof(FDynamicLight) );
 }
 
-IMPL_DIVERGE("0x1040ff20 confirmed; complex light-color/direction setup (FGetHSV + LightEffect dispatch) not yet reconstructed")
+IMPL_TODO("0x1040ff20 confirmed; complex light-color/direction setup (FGetHSV + LightEffect dispatch) not yet reconstructed")
 FDynamicLight::FDynamicLight(AActor* Actor)
 {
 	// Ghidra 0x10ff20: construct sub-objects, store actor, compute light color/direction.
@@ -1934,7 +1934,7 @@ int FStaticCubemap::GetWidth()
 
 
 // --- FTempLineBatcher ---
-IMPL_DIVERGE("retail 0x104180b0 (454b): constructs a stack-local FLineBatcher (vtable + FArray only) rather than a full FLineBatcher object; our version uses the full ctor/dtor")
+IMPL_TODO("retail 0x104180b0 (454b): constructs a stack-local FLineBatcher (vtable + FArray only) rather than a full FLineBatcher object; our version uses the full ctor/dtor")
 void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 {
 	// Ghidra 0x1180b0: sets local_30 = &FLineBatcher::_vftable_, initialises a bare FArray
@@ -2042,7 +2042,7 @@ void FTempLineBatcher::AddLine(FVector Start, FVector End, FColor Color)
 
 
 // --- UConvexVolume ---
-IMPL_DIVERGE("retail 0x103921d0 (109b) serializes convex planes via FUN_10392040/FUN_10391e60/FUN_10301400 (unresolved TArray serializers)")
+IMPL_TODO("retail 0x103921d0 (109b) serializes convex planes via FUN_10392040/FUN_10391e60/FUN_10301400 (unresolved TArray serializers)")
 void UConvexVolume::Serialize(FArchive& Ar)
 {
 	UPrimitive::Serialize(Ar);

@@ -857,7 +857,7 @@ UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
 : UVertexStreamBase(0xC, InFlags, 1) {}
 // Ghidra 0x10326680: URenderResource::Serialize, stream-header fields (Ver>=75),
 // FUN_10321a80 (TArray<FVector> serializer, 3 ByteOrderSerialize each).  Loop inlined.
-IMPL_DIVERGE("Ghidra 0x10326680: data loop inlined via ByteOrderSerialize; FUN_10321a80 not called separately")
+IMPL_TODO("Ghidra 0x10326680: data loop inlined via ByteOrderSerialize; FUN_10321a80 not called separately")
 void UVertexStreamVECTOR::Serialize(FArchive& Ar)
 {
 	URenderResource::Serialize(Ar);
