@@ -73,39 +73,33 @@ IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108500 size 9 bytes")
 FErrorOutError::FErrorOutError() {}
 IMPL_MATCH("Core.dll", 0x10108510)
 FErrorOutError::FErrorOutError( const FErrorOutError& ) {}
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+// Retail 0x13c0: shared trivial-return stub (same VA as FLogOutError/FNullOutError/FThrowOut::operator=).
+IMPL_MATCH("Core.dll", 0x101013C0)
 FErrorOutError& FErrorOutError::operator=( const FErrorOutError& ) { return *this; }
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
-void FErrorOutError::Serialize( const TCHAR* V, EName Event )
-{
-	if( GError )
-		GError->Serialize( V, Event );
-}
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
-void FErrorOutError::HandleError()
-{
-	if( GError )
-		GError->HandleError();
-}
+// Retail 0x1290: shared null-stub (same VA as FLogOutError::Serialize and FNullOutError::Serialize).
+IMPL_MATCH("Core.dll", 0x10101290)
+void FErrorOutError::Serialize( const TCHAR* V, EName Event ) {}
+// Retail 0x1320: shared no-op stub.
+IMPL_MATCH("Core.dll", 0x10101320)
+void FErrorOutError::HandleError() {}
 
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108520 size 9 bytes")
 FLogOutError::FLogOutError() {}
 IMPL_MATCH("Core.dll", 0x10108530)
 FLogOutError::FLogOutError( const FLogOutError& ) {}
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+// Retail 0x13c0: shared trivial-return stub.
+IMPL_MATCH("Core.dll", 0x101013C0)
 FLogOutError& FLogOutError::operator=( const FLogOutError& ) { return *this; }
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
-void FLogOutError::Serialize( const TCHAR* V, EName Event )
-{
-	if( GLog )
-		GLog->Serialize( V, Event );
-}
+// Retail 0x1290: shared null-stub.
+IMPL_MATCH("Core.dll", 0x10101290)
+void FLogOutError::Serialize( const TCHAR* V, EName Event ) {}
 
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x101012A0 size 9 bytes")
 FNullOutError::FNullOutError() {}
 IMPL_MATCH("Core.dll", 0x101012B0)
 FNullOutError::FNullOutError( const FNullOutError& ) {}
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+// Retail 0x13c0: shared trivial-return stub.
+IMPL_MATCH("Core.dll", 0x101013C0)
 FNullOutError& FNullOutError::operator=( const FNullOutError& ) { return *this; }
 IMPL_MATCH("Core.dll", 0x10101290)
 void FNullOutError::Serialize( const TCHAR* V, EName Event )
@@ -119,7 +113,8 @@ IMPL_MATCH("Core.dll", 0x10101260)
 FThrowOut::FThrowOut() {}
 IMPL_EMPTY("Ghidra confirms retail body is trivial; VA 0x10108540 size 9 bytes")
 FThrowOut::FThrowOut( const FThrowOut& ) {}
-IMPL_DIVERGE("Free function or static; not a class method in Core.dll export")
+// Retail 0x13c0: shared trivial-return stub.
+IMPL_MATCH("Core.dll", 0x101013C0)
 FThrowOut& FThrowOut::operator=( const FThrowOut& ) { return *this; }
 IMPL_MATCH("Core.dll", 0x10101220)
 void FThrowOut::Serialize( const TCHAR* V, EName Event )
