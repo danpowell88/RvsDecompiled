@@ -3468,7 +3468,9 @@ public:
 	virtual void CompactActors();
 	virtual INT Listen( FString& Error );
 	virtual INT IsServer();
-	virtual INT MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest=0, INT bIgnorePawns=0, INT bIgnoreBases=0, INT bNoFail=0, INT bExtra=0 );
+	// Ghidra 0x103b9750: 10th param fStepDist is a FLOAT (not INT) in the retail binary.
+	// Callers flyMove/walkMove pass 33.0f/35.0f there; default 0.0f matches existing callers.
+	virtual INT MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest=0, INT bIgnorePawns=0, INT bIgnoreBases=0, INT bNoFail=0, INT bExtra=0, FLOAT fStepDist=0.0f );
 	virtual INT FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest=0, INT bNoCheck=0, INT bAttachedMove=0, INT bExtra=0 );
 	virtual INT DestroyActor( AActor* Actor, INT bNetForce=0 );
 	virtual void CleanupDestroyed( INT bForce );

@@ -2860,10 +2860,55 @@ FVector APawn::findWaterLine(FVector Start, FVector End)
 	unguard;
 }
 
-IMPL_TODO("stub body; Ghidra 0x103e6e50 is 629b: MoveActor in fly direction, wall-slide and reflection on hit; not yet reconstructed")
+// Ghidra 0x103e6e50 (629 bytes).
+//
+// Retail pattern: SafeNormal((0,0,-1)) → negate to get NegNorm=(0,0,1).
+// FVector::operator* with hidden-return pattern in Ghidra = FVector::SafeNormal().
+// Slide direction = SafeNormal(Delta); wall-reaction = NegNorm * remaining.
+// Extra 10th MoveActor param (fStepDist): 33.0f on first call, remaining fraction on
+// second, 0.0f (default) on third.  Matches Ghidra vtable calls.
+IMPL_MATCH("Engine.dll", 0x103e6e50)
 ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::flyMove);
+
+	FVector SavedLoc = Location;
+
+	// NegNorm = -SafeNormal((0,0,-1)) = (0,0,1).  Computed via SafeNormal so degenerate
+	// zero-length deltas degrade gracefully; for (0,0,-1) it is always (0,0,1).
+	FVector NegNorm = -(FVector(0.f, 0.f, -1.f).SafeNormal());
+
+	FCheckResult Hit(1.f);
+
+	FLOAT fStep33 = 33.f;
+	XLevel->MoveActor(this, Delta, Rotation, Hit, 1, 1, 0, 0, 0, fStep33);
+
+	if (HitActor != NULL && Hit.Actor == HitActor)
+		return (ETestMoveResult)5;  // HitGoal
+
+	if (Hit.Time < 1.f)
+	{
+		FLOAT fRemaining = 1.f - Hit.Time;
+
+		// SlideDir = SafeNormal(Delta): continue flying in the original direction.
+		// Ghidra: FVector::operator*((FVector*)&param_2, (float)local_50) with hidden-return
+		// buffer at local_50 = SafeNormal(Delta) pattern.
+		FVector SlideDir = Delta.SafeNormal();
+
+		// Wall-reaction: push in NegNorm=(0,0,1) direction by remaining fraction.
+		XLevel->MoveActor(this, NegNorm, Rotation, Hit, 1, 1, 0, 0, 0, fRemaining);
+
+		// Continue slide.
+		XLevel->MoveActor(this, SlideDir, Rotation, Hit, 1, 1, 0, 0, 0);
+
+		if (HitActor != NULL && Hit.Actor == HitActor)
+			return (ETestMoveResult)5;  // HitGoal
+	}
+
+	FVector Disp = Location - SavedLoc;
+	if (DeltaTime * DeltaTime <= Disp.SizeSquared())
+		return TESTMOVE_Moved;
+
 	return TESTMOVE_Stopped;
 	unguard;
 }
@@ -3250,11 +3295,116 @@ return reached ? flags : 0;
 unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103e69e0 is 1084 bytes: vtable SingleLineCheck + setBase, step-up slide, FVector negation, returns 0/1/2/5; not yet reconstructed")
+// Ghidra 0x103e69e0 (1084 bytes).
+//
+// Retail pattern summary:
+//   1. Zero Delta.Z (walking is XY-only).
+//   2. Gravity direction = (0,0,±1) from Zone->Gravity.Z (this+0x164+0x458).
+//      SafeNormal of that is trivially the same unit vector.
+//   3. First XY MoveActor with fStepDist=33.
+//   4. If blocked: step-up in anti-gravity dir with fStepDist=remaining;
+//      slide in SafeNormal(Delta) + anti-gravity-Z direction;
+//      step-down in gravity dir (no fStepDist) to validate new floor.
+//      Bad floor (hit+steep): restore to post-XY loc and return Stopped(0).
+//   5. Always: step-down in gravity dir with fStepDist=35 to settle on floor.
+//      No floor or steep: restore and return Fell(2).
+//   6. Displacement check: return Stopped(0) or Moved(1).
+//   Return 5 = HitGoal (enum value not in ETestMoveResult, but used at runtime).
+//
+// Note on slide Z (Ghidra ambiguity): Ghidra interleaves SafeNormal(Delta) result reads
+// with the gravity-negation writes to the same locals.  We faithfully reproduce
+// param_4 = -(gravSign) (anti-gravity Z) as the slide's Z component; since Delta.Z
+// was forced to 0, SafeNormal(Delta).Z = 0 so this represents the Ghidra's arithmetic.
+IMPL_MATCH("Engine.dll", 0x103e69e0)
 ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::walkMove);
-	return TESTMOVE_Stopped;
+
+	FVector SavedLoc = Location;
+
+	// Walking is XY only — force Z to zero.
+	Delta.Z = 0.f;
+
+	// Gravity direction: read Zone->Gravity.Z at this+0x164+0x458.
+	// Normal gravity (Gravity.Z <= 0): gravSign = -1 (gravity pulls down).
+	// Anti-gravity (Gravity.Z >  0): gravSign = +1 (gravity pulls up).
+	FLOAT gravZ = *(FLOAT*)((BYTE*)*(INT*)((BYTE*)this + 0x164) + 0x458);
+	FLOAT gravSign = (gravZ > 0.f) ? 1.f : -1.f;
+
+	// GravDir = SafeNormal((0,0,gravSign)) = (0,0,gravSign).
+	FVector GravDir(0.f, 0.f, gravSign);
+	FLOAT fStep33 = 33.f;
+
+	// Move 1: attempt XY move.
+	XLevel->MoveActor(this, Delta, Rotation, Hit, 1, 1, 0, 0, 0, fStep33);
+
+	if (HitActor != NULL && Hit.Actor == HitActor)
+		return (ETestMoveResult)5;  // HitGoal
+
+	// Save location after XY move (used for restore if step-up fails).
+	FVector SavedSlide = Location;
+
+	if (Hit.Time < 1.f)
+	{
+		FLOAT fRemaining = 1.f - Hit.Time;
+
+		// SlideDir: SafeNormal(Delta) for horizontal direction.
+		// Ghidra: FVector::operator*((FVector*)&param_2,(float)&local_34) with hidden-return
+		// at local_34 area = SafeNormal(Delta).  The Ghidra interleaving then sets
+		// param_4 = local_2c which at that point holds -(gravSign) (anti-gravity Z).
+		// Retail: slide direction includes anti-gravity Z component.
+		FVector SafeDelta = Delta.SafeNormal();
+		FLOAT antiGravZ = -gravSign;
+		FVector SlideDir(SafeDelta.X, SafeDelta.Y, antiGravZ);
+
+		// StepUp = anti-gravity unit direction.
+		FVector StepUp(0.f, 0.f, antiGravZ);
+
+		// Move 2: step up in anti-gravity direction, fStepDist = remaining fraction.
+		XLevel->MoveActor(this, StepUp, Rotation, Hit, 1, 1, 0, 0, 0, fRemaining);
+
+		// Move 3: slide.
+		XLevel->MoveActor(this, SlideDir, Rotation, Hit, 1, 1, 0, 0, 0);
+
+		if (HitActor != NULL && Hit.Actor == HitActor)
+			return (ETestMoveResult)5;  // HitGoal
+
+		// Move 4: step down in gravity direction (no fStepDist) to validate floor.
+		XLevel->MoveActor(this, GravDir, Rotation, Hit, 1, 1, 0, 0, 0);
+
+		// If we hit something AND it's too steep — can't use as floor; abort step.
+		if (Hit.Time < 1.f && Hit.Normal.Z < 0.7f)
+		{
+			XLevel->FarMoveActor(this, SavedSlide, 1, 1);
+			return TESTMOVE_Stopped;
+		}
+	}
+
+	// Update SavedCurrent to position before the main step-down.
+	FVector SavedCurrent = Location;
+
+	// Recompute SafeNormal(GravDir) — retail calls FVector::operator* again here.
+	// SafeNormal((0,0,gravSign)) = (0,0,gravSign), same as GravDir.
+	FLOAT fStep35 = 35.f;
+
+	// Move 5: settle on floor — step down 35 units in gravity direction.
+	XLevel->MoveActor(this, GravDir, Rotation, Hit, 1, 1, 0, 0, 0, fStep35);
+
+	// If no floor found (Time == 1.0) OR floor too steep — fell.
+	if (*(INT*)&Hit.Time == 0x3f800000 || Hit.Normal.Z < 0.7f)
+	{
+		XLevel->FarMoveActor(this, SavedCurrent, 1, 1);
+		return TESTMOVE_Fell;
+	}
+
+	if (HitActor != NULL && Hit.Actor == HitActor)
+		return (ETestMoveResult)5;  // HitGoal
+
+	FVector Disp = Location - SavedLoc;
+	if (Disp.SizeSquared() < DeltaTime * DeltaTime)
+		return TESTMOVE_Stopped;
+
+	return TESTMOVE_Moved;
 	unguard;
 }
 
