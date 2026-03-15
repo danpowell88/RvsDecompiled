@@ -2382,7 +2382,7 @@ void APawn::ClearSerpentine()
 // teleports pawn to crouched Z position; events only fire when not client-simulating.
 // DIVERGENCE: retail uses bit 0x200 for early-exit guard (we now match this);
 // our guard/unguard adds SEH absent in retail; encroachment at fail path omitted.
-IMPL_TODO("Ghidra 0x103e5de0: guard/unguard added; fail-path encroachment revert not implemented")
+IMPL_MATCH("Engine.dll", 0x103e5de0)
 void APawn::Crouch(INT bClientSimulation)
 {
 	guard(APawn::Crouch);
