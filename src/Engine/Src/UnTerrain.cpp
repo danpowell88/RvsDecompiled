@@ -250,7 +250,7 @@ void ATerrainInfo::SetTextureColor(int,int,UTexture *,FColor &)
 	guard(ATerrainInfo::SetTextureColor);
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045C3C0: per-sector ray test; FUN_1050557c (sector ray test) unresolved — returns 1 (no hit)")
+IMPL_TODO("Ghidra 0x1045C3C0 (1445b): per-sector terrain ray test; FUN_1050557c confirmed as __ftol2_sse (FPU rounding helper — not a blocker); full sector iteration + rdtsc profiling pending")
 int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheck);
@@ -260,7 +260,7 @@ int ATerrainInfo::LineCheck(FCheckResult &,FVector,FVector,FVector,int)
 	return 1;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045A480: per-quad ray intersection; sector/quad data structures and FUN_ calls unresolved — returns 1")
+IMPL_TODO("Ghidra 0x1045A480 (7911b): per-quad ray intersection helper called from LineCheck; sector/quad struct offsets partially mapped; complex but no permanent FUN_ blockers")
 int ATerrainInfo::LineCheckWithQuad(int,int,FCheckResult &,FVector,FVector,FVector,int)
 {
 	guard(ATerrainInfo::LineCheckWithQuad);

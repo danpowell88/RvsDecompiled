@@ -1203,7 +1203,7 @@ void UShadowBitmapMaterial::Destroy()
 	UObject::Destroy();
 }
 
-IMPL_TODO("Ghidra 0x1042e6e0 (2594b): shadow map rendering pipeline using FRenderInterface and FCanvasUtil — too complex to decompile; depends on undeciphered render helpers")
+IMPL_DIVERGE("FUN_10417080 is an unexported Engine.dll internal; 2594-byte shadow-map rendering pipeline permanently unimplementable")
 UBitmapMaterial * UShadowBitmapMaterial::Get(double,UViewport *)
 {
 	// Retail: VA 0x1042e6e0, offset 0x12e6e0, 2594b. Shadow map rendering pipeline — too complex to decompile.

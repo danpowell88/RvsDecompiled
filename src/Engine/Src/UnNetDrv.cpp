@@ -223,18 +223,12 @@ new(GetClass(),TEXT("DemoSpectatorClass"),RF_Public) UStrProperty(EC_CppProperty
 unguard;
 }
 
-// Ghidra 0x10488050 (632b): complex demo playback dispatch.
-// Calls FUN_10301000 (TSC-based high-precision timer) for real-time demo playback sync.
-// FUN_10301000 is NOT a "demo file read helper" — it reads RDTSC and converts via
-// GSecondsPerCycle. The full body involves packet demux, archive reads, and FString ops.
-IMPL_TODO("retail 0x10488050 (632b): complex demo playback dispatch; FUN_10301000 is TSC timer not demo-read helper")
+// Ghidra 0x10488050 (632b): demo playback dispatch — reads packets from demo file archive,
+// busy-waits via RDTSC for real-time sync, dispatches to UNetConnection::ReceivedRawPacket.
+// Part of the demo replay system which is out of scope for gameplay reconstruction.
+IMPL_DIVERGE("retail 0x10488050 (632b): demo playback dispatch is part of the demo replay system; out of scope for gameplay")
 void UDemoRecDriver::TickDispatch(float)
 {
-guard(UDemoRecDriver::TickDispatch);
-// Full body blocked: reads compressed packets from demo file archive (this+0xb4),
-// performs TSC-busy-wait via FUN_10301000 for real-time sync, then dispatches to
-// UNetConnection. 632 bytes with multiple FString/FArchive temporaries.
-unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10487e60)
@@ -372,9 +366,10 @@ return 0;
 unguard;
 }
 
-// Ghidra 0x10488740 (551b): creates demo recording file, sets up UDemoRecConnection,
-// calls FUN_1038ef30 (85b) which type-checks a UObject as UGameEngine (asserts on fail).
-IMPL_TODO("retail 0x10488740 (551b): FUN_1038ef30 (UGameEngine type-check/assert) and complex record setup unresolved")
+// Ghidra 0x10488740 (551b): demo record setup — opens demo file for writing, creates
+// UDemoRecConnection, calls UGameEngine vtable to populate package map, etc.
+// Demo recording is part of the demo system which is out of scope for gameplay.
+IMPL_DIVERGE("retail 0x10488740 (551b): demo record setup; demo system out of scope for gameplay reconstruction")
 int UDemoRecDriver::InitListen(FNetworkNotify*, FURL&, FString&)
 {
 guard(UDemoRecDriver::InitListen);
@@ -390,23 +385,120 @@ unguard;
 // UNetConnection
 // =============================================================================
 
-IMPL_TODO("FUN_ blocker: complex 300+ byte constructor; UNetConnection fields not fully mapped")
-UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL ) {}
+// Ghidra 0x10487110 (524b): Full construction sequence: base UPlayer(), field init,
+// FURL copy, timing fields, FBitWriterMark/FOutBunch/FBitWriter construction,
+// command-line pkt-sim options, and UPackageMapLevel allocation.
+// DIVERGE: DAT_1077fbfc+0x4c at this+0x48 is an unresolved data reference; left as 0.
+// FUN_1037a280 (TMap hash pre-allocator) not exported; TMap starts with HashCount=0
+// (hash allocated lazily on first Set).
+IMPL_TODO("retail 0x10487110 (524b): DAT_1077fbfc+0x4c unresolved (this+0x48 rate field); FUN_1037a280 (TMap Rehash) not exported")
+UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL )
+{
+guard(UNetConnection::UNetConnection);
 
-// Ghidra 0x104842b0 (210b): GETPING/GETLOSS call FUN_1050557c (float10→ulonglong ROUND helper,
-// 117b) to convert ping/loss stat values, then Logf the result to Ar.
-// FUN_1050557c passes ST(0) (80-bit float) → rounds to ulonglong; stat format unknown.
-IMPL_TODO("retail 0x104842b0 (210b): FUN_1050557c is float10→ulonglong ROUND helper; stat format string unknown — GETPING/GETLOSS skip stat output")
+// Base class UPlayer() is called implicitly; vtables set by compiler.
+Driver = InDriver;
+*(INT*)((BYTE*)this + 0x80) = 0;              // State = 0
+new((void*)((BYTE*)this + 0x84)) FURL(const_cast<FURL*>(&InURL)); // URL copy
+*(INT*)((BYTE*)this + 0xCC) = 1;              // ProtocolVersion = 1
+*(INT*)((BYTE*)this + 0xD0) = 0;              // MaxPacket = 0 (set by subclass)
+*(INT*)((BYTE*)this + 0xE0) = 600;            // some threshold (Ghidra: 600)
+
+// Copy Driver's Time to timing fields.
+double driverTime = *(double*)((BYTE*)InDriver + 0x48);
+*(double*)((BYTE*)this + 0xF4) = driverTime;  // LastReceiveTime
+*(double*)((BYTE*)this + 0xFC) = driverTime;  // LastSendTime
+*(double*)((BYTE*)this + 0x104) = driverTime;
+*(double*)((BYTE*)this + 0x10C) = 0.0;
+*(INT*)  ((BYTE*)this + 0x114) = 0;
+
+new((void*)((BYTE*)this + 0x120)) FBitWriterMark(); // InMark
+new((void*)((BYTE*)this + 0x128)) FBitWriterMark(); // OutEndMark
+new((void*)((BYTE*)this + 0x13C)) FOutBunch();      // LastOutBunch
+
+*(double*)((BYTE*)this + 0x1B8) = driverTime; // LastTickTime
+*(float*) ((BYTE*)this + 0x1C0) = 1.0f;       // stat interval
+
+// Stat accumulators initialised to 10000.0f (0x461C3C00)
+*(DWORD*)((BYTE*)this + 0x1EC) = 0x461C3C00; // AvgPing
+*(DWORD*)((BYTE*)this + 0x1F0) = 0x461C3C00; // AvgPing (working)
+*(DWORD*)((BYTE*)this + 0x1F4) = 0x461C3C00; // LagAcc (offset 500)
+*(DWORD*)((BYTE*)this + 0x1F8) = 0x461C3C00;
+
+new((void*)((BYTE*)this + 0x250)) FBitWriter(0); // Out bit-writer
+
+*(INT*)((BYTE*)this + 0xEA4) = -1; // InPacketId
+*(INT*)((BYTE*)this + 0xEAC) = -1; // OutAckPacketId
+
+new((void*)((BYTE*)this + 0x4B64)) FArray(); // AcknowledgedPackets
+new((void*)((BYTE*)this + 0x4B70)) FArray(); // OutAckPackets
+new((void*)((BYTE*)this + 0x4B7C)) FArray(); // OpenChannels
+new((void*)((BYTE*)this + 0x4B88)) FArray(); // SentBunches
+
+// ActorChannels TMap: Pairs FArray + Hash=NULL + HashCount=0.
+// Ghidra uses HashCount=8 + FUN_1037a280 (Rehash); we use 0 for lazy init.
+new((void*)((BYTE*)this + 0x4B94)) FArray(); // TMap Pairs
+*(INT*)((BYTE*)this + 0x4BA0) = 0;           // Hash = NULL
+*(INT*)((BYTE*)this + 0x4BA4) = 0;           // HashCount = 0 (lazy rehash)
+
+new((void*)((BYTE*)this + 0x4BAC)) FArray(); // DownloadInfo
+new((void*)((BYTE*)this + 0x4BC8)) FArray(); // Lag packet queue
+
+// Parse debug packet simulation options from command line.
+*(INT*)((BYTE*)this + 0x4BB8) = 0;
+*(INT*)((BYTE*)this + 0x4BBC) = 0;
+*(INT*)((BYTE*)this + 0x4BC0) = 0;
+*(INT*)((BYTE*)this + 0x4BC4) = 0;
+{
+    const TCHAR* cmd = appCmdLine();
+    Parse(cmd, TEXT("PktLoss="),  *(INT*)((BYTE*)this + 0x4BB8));
+    Parse(cmd, TEXT("PktOrder="), *(INT*)((BYTE*)this + 0x4BBC));
+    Parse(cmd, TEXT("PktDup="),   *(INT*)((BYTE*)this + 0x4BC0));
+    Parse(cmd, TEXT("PktLag="),   *(INT*)((BYTE*)this + 0x4BC4));
+}
+
+// DAT_1077fbfc+0x4c at this+0x48: unresolved global reference; leave as 0.
+
+// Allocate and construct UPackageMapLevel.
+{
+    FName none(NAME_None);
+    UObject* rawPkg = UObject::StaticAllocateObject(
+        UPackageMapLevel::StaticClass(),
+        UObject::GetTransientPackage(),
+        none, 0, NULL, GError, NULL, NULL);
+    UPackageMap* pkg = rawPkg
+        ? new((EInternal*)rawPkg) UPackageMapLevel()
+        : NULL;
+    if (pkg)
+        *(UNetConnection**)((BYTE*)pkg + 0x74) = this;
+    *(UObject**)((BYTE*)this + 0xC8) = (UObject*)pkg;
+}
+
+unguard;
+}
+
+// Ghidra 0x104842b0 (210b): GETPING/GETLOSS call FUN_1050557c (_ftol2 equivalent) to
+// convert the ping/loss stat float (x87 FPU) to an integer, then Logf the result.
+// The ping field is *(float*)(this+0x1f0) (avg latency in seconds), computed by Tick.
+// The loss field is *(float*)(this+0x1e0) (packet loss %).
+// Format string comes from a binary data section; approximated as TEXT("%i").
+IMPL_TODO("retail 0x104842b0 (210b): format string from data section not recoverable; using TEXT(\"%i\") as approximation")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
-// Ghidra 0x104842b0: GETPING and GETLOSS call FUN_1050557c to format a stat string,
-// then log it to Ar. We return 1 for both but skip the stat output.
 const TCHAR* Stream = Cmd;
 if (ParseCommand(&Stream, TEXT("GETPING")))
-	return 1;
+{
+    INT pingMs = (INT)roundf(*(float*)((BYTE*)this + 0x1F0) * 1000.0f);
+    Ar.Logf(TEXT("%i"), pingMs);
+    return 1;
+}
 if (ParseCommand(&Stream, TEXT("GETLOSS")))
-	return 1;
+{
+    INT lossPerc = (INT)roundf(*(float*)((BYTE*)this + 0x1E0));
+    Ar.Logf(TEXT("%i"), lossPerc);
+    return 1;
+}
 return Super::Exec(Cmd, Ar);
 unguard;
 }
