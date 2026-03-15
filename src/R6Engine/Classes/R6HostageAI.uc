@@ -323,18 +323,22 @@ function int Roll(int iMax)
 	iRoll = (Rand(iMax) + 1);
 	switch(m_pawn.m_ePersonality)
 	{
+	// Apply personality modifier to the roll: Coward penalises, Brave rewards
 		// End:0x34
+		// HPERSO_Coward = 0
 		case 0:
 			(iRoll += c_iCowardModifier);
 			// End:0x5F
 			break;
 		// End:0x48
+		// HPERSO_Normal = 1
 		case 1:
 			(iRoll += c_iNormalModifier);
 			// End:0x5F
 			break;
 		// End:0x5C
 		case 2:
+			// HPERSO_Brave = 2
 			(iRoll += c_iBraveModifier);
 			// End:0x5F
 			break;
@@ -343,11 +347,13 @@ function int Roll(int iMax)
 			break;
 	}
 	// End:0x84
+	// HEALTH_Wounded = 1: injured hostages are less likely to make extreme decisions
 	if((int(m_pawn.m_eHealth) == int(1)))
 	{
 		(iRoll -= c_iWoundedModifier);
 	}
 	// End:0xC4
+	// GTYPE_TearGas = 2, GTYPE_FlashBang = 3: grenade effects reduce decision-making ability
 	if(((int(m_pawn.m_eEffectiveGrenade) == int(2)) || (int(m_pawn.m_eEffectiveGrenade) == int(3))))
 	{
 		(iRoll -= c_iGasModifier);
@@ -358,6 +364,7 @@ function int Roll(int iMax)
 		Log(("m_bDbgRoll: " $ string(m_iDbgRoll)));
 		iRoll = m_iDbgRoll;
 	}
+	// Clamp to [0, 100] so personality modifiers cannot produce out-of-range values
 	iRoll = int(FClamp(float(iRoll), 0.0000000, 100.0000000));
 	return iRoll;
 	return;
@@ -375,6 +382,7 @@ function Rotator GetRandomTurn90()
 	// End:0x33
 	if((Rand(100) < 50))
 	{
+		// Unreal rotation units: 65536 = 360 degrees, so 16383 approx 90 degrees
 		(rRot.Yaw -= 16383);		
 	}
 	else
@@ -403,6 +411,7 @@ function bool CanReturnToNormalState()
 		if((m_pawn.IsEnemy(P) && P.IsAlive()))
 		{
 			// End:0x8E
+		// Actively fighting enemies or surrendered-but-present enemies block a return to normal
 			if((P.IsFighting() || P.m_bIsKneeling))
 			{				
 				return false;
@@ -421,11 +430,13 @@ function bool CanReturnToNormalState()
 		}		
 	}	
 	// End:0x101
+	// Stay cautious for c_iCautiousLastHearNoiseTime seconds after the last heard gunshot
 	if((Level.TimeSeconds < float((m_iLastHearNoiseTime + c_iCautiousLastHearNoiseTime))))
 	{
 		return false;
 	}
 	// End:0x11B
+	// If no friends or no enemies are visible the standoff has resolved; safe to relax
 	if(((numFriend == 0) || (numEnemy == 0)))
 	{
 		return true;
@@ -443,6 +454,7 @@ function ReturnToNormalState(optional bool bNoTimer)
 	// End:0x24
 	if(IsGuarded(bNoTimer))
 	{
+		// POS_Kneel = 1: return to kneel rather than stand to avoid a jarring stand-up animation
 		SetStateGuarded(1, m_mgr.0);		
 	}
 	else
@@ -467,6 +479,7 @@ function SeePlayer(Pawn P)
 	}
 	seen = R6Pawn(P);
 	// End:0x27
+	// 50% throttle: prevents all nearby hostages reacting simultaneously to the same visible pawn
 	if((Rand(2) == 0))
 	{
 		return;
@@ -493,6 +506,7 @@ function SeePlayer(Pawn P)
 		if(m_pawn.m_bFreed)
 		{
 			// End:0xC0
+			// Freed hostage: only accept a friendly if no higher-priority enemy is already queued
 			if((m_pawn.IsFriend(seen) && (m_lastSeenPawn == none)))
 			{
 				m_lastSeenPawn = seen;				
@@ -509,6 +523,7 @@ function SeePlayer(Pawn P)
 		else
 		{
 			// End:0x121
+			// Record the Rainbow's position as a focal point for the Guarded flinch animation
 			if(((m_lastSeenPawn != seen) && m_pawn.IsFriend(seen)))
 			{
 				m_vReactionDirection = seen.Location;
@@ -559,6 +574,7 @@ event HearNoise(float fLoudness, Actor NoiseMaker, Actor.ENoiseType eType, optio
 	if(m_pawn.m_bClassicMissionCivilian)
 	{
 		// End:0xAF
+		// Classic-mission civilians also react to NOISE_Footstep(1) when fired by a player
 		if((!((((int(eType) == int(2)) || (int(eType) == int(3))) || (int(eType) == int(4))) || ((int(eType) == int(1)) && (int(ESoundType) == int(1))))))
 		{
 			return;
@@ -567,6 +583,7 @@ event HearNoise(float fLoudness, Actor NoiseMaker, Actor.ENoiseType eType, optio
 	else
 	{
 		// End:0xEA
+		// Non-classic hostages: only Grenade(2), Dead(3), and Threat(4) noises trigger a response
 		if((!(((int(eType) == int(2)) || (int(eType) == int(3))) || (int(eType) == int(4)))))
 		{
 			return;
@@ -845,6 +862,7 @@ function bool IsGuarded(optional bool bNoTimer, optional bool bMustSeeMe)
 	local R6Pawn P;
 
 	// End:0x1B
+	// HPERSO_Bait = 3: bait personality is always treated as guarded regardless of surroundings
 	if((int(m_pawn.m_ePersonality) == int(3)))
 	{
 		return true;
@@ -853,6 +871,7 @@ function bool IsGuarded(optional bool bNoTimer, optional bool bMustSeeMe)
 	foreach VisibleCollidingActors(Class'R6Engine.R6Pawn', P, Pawn.SightRadius, m_pawn.Location)
 	{
 		// End:0xFB
+		// m_bIsKneeling means the terrorist has surrendered; ignore surrendered pawns as threats
 		if(((m_pawn.IsEnemy(P) && P.IsAlive()) && (!P.m_bIsKneeling)))
 		{
 			// End:0xF1
@@ -890,6 +909,7 @@ function bool IsGuarded(optional bool bNoTimer, optional bool bMustSeeMe)
 		return false;
 	}
 	// End:0x140
+		// First tick with no enemies in sight: start the cautious grace-period countdown
 	if((m_iNotGuardedSince == 0))
 	{
 		m_iNotGuardedSince = int(Level.TimeSeconds);
@@ -898,6 +918,7 @@ function bool IsGuarded(optional bool bNoTimer, optional bool bMustSeeMe)
 	else
 	{
 		// End:0x171
+		// Cautious timer elapsed: no enemies seen long enough, no longer considered guarded
 		if(((float(m_iNotGuardedSince) + m_pawn.m_stayCautiousGuardedStateTime.m_fResult) < Level.TimeSeconds))
 		{
 			return false;
@@ -1181,11 +1202,13 @@ function SetStateRunForCover(Pawn runAwayOfPawn, name successState, name failure
 function bool IsAwayOfGrenade(Actor Grenade)
 {
 	// End:0x2E
+	// Far enough that the grenade blast radius is unlikely to reach
 	if((VSize((Pawn.Location - Grenade.Location)) > float(c_iRunForCoverOfGrenadeMinDist)))
 	{
 		return true;
 	}
 	// End:0x47
+	// FastTrace succeeds (clear line of sight) means no cover between pawn and grenade — still in danger
 	if(FastTrace(Grenade.Location))
 	{
 		return false;		
@@ -1409,12 +1432,14 @@ function ProcessThreat(Actor P, Actor.ENoiseType eType)
 
 	GroupName = GetThreatGroupName();
 	// End:0x49
+	// Threat group changed (e.g. hostage was freed): reset to avoid acting on stale info
 	if((GroupName != m_threatGroupName))
 	{
 		ResetThreatInfo(("new threat group: " $ string(GroupName)));
 		m_threatGroupName = GroupName;
 	}
 	// End:0x9C
+	// Classic-mission civilians accept any matching threat; no priority comparison needed
 	if(m_pawn.m_bClassicMissionCivilian)
 	{
 		// End:0x99
@@ -1431,6 +1456,7 @@ function ProcessThreat(Actor P, Actor.ENoiseType eType)
 		if(m_mgr.GetThreatInfoFromThreat(GroupName, m_pawn, P, eType, ThreatInfo))
 		{
 			// End:0xFB
+				// Only upgrade to the new threat if it has higher priority than the current one
 			if((ThreatInfo.m_iThreatLevel > m_threatInfo.m_iThreatLevel))
 			{
 				m_threatInfo = ThreatInfo;
@@ -1441,8 +1467,10 @@ function ProcessThreat(Actor P, Actor.ENoiseType eType)
 	// End:0x21F
 	if(bNewThreat)
 	{
+		// Roll(100) produces a personality-adjusted score; GetReaction maps it to a state name
 		stateName = m_mgr.GetReaction(GroupName, m_threatInfo.m_iThreatLevel, Roll(100));
 		// End:0x16B
+		// BaitPlayReaction: bait-personality hostage plays a voice cue but does not change state
 		if(('BaitPlayReaction' == stateName))
 		{
 			ProcessPlaySndInfo(m_mgr.6);
@@ -1451,12 +1479,14 @@ function ProcessThreat(Actor P, Actor.ENoiseType eType)
 		else
 		{
 			// End:0x1C2
+				// GuardedPlayReaction: schedule a flinch animation after a short random delay
 			if(('GuardedPlayReaction' == stateName))
 			{
 				// End:0x1A4
 				if((m_iPlayReaction1 == 0))
 				{
 					m_iPlayReaction1 = 1;
+						// Random 0-2 tick delay desynchronizes flinch animations among nearby hostages
 					m_iPlayReaction2 = int(RandRange(0.0000000, 2.0000000));
 				}
 				ResetThreatInfo("GuardedPlayReaction");				
@@ -1464,6 +1494,7 @@ function ProcessThreat(Actor P, Actor.ENoiseType eType)
 			else
 			{
 				// End:0x200
+					// HearShootingReaction: plays a voice cue in response to gunfire, no state change
 				if(('HearShootingReaction' == stateName))
 				{
 					ProcessPlaySndInfo(m_mgr.1);
@@ -1472,6 +1503,7 @@ function ProcessThreat(Actor P, Actor.ENoiseType eType)
 				else
 				{
 					// End:0x21F
+						// All other valid reactions immediately transition the AI to the named state
 					if((stateName != m_mgr.m_noReactionName))
 					{
 						GotoState(stateName);
@@ -1688,6 +1720,7 @@ function Order_Add(R6Hostage.eHostageOrder eOrder, R6Pawn aPawn, optional bool b
 //------------------------------------------------------------------
 function bool IsInTemporaryState()
 {
+	// Physics 2 = PHYS_Falling, 12 = PHYS_RootMotion; BumpBackUp and OpenDoor are active traversal states
 	return (((((m_pawn.m_bPostureTransition || m_r6pawn.m_bIsClimbingLadder) || (int(Physics) == int(2))) || (int(Physics) == int(12))) || IsInState('BumpBackUp')) || IsInState('OpenDoor'));
 	return;
 }
@@ -2154,11 +2187,13 @@ state Guarded
 	function Timer()
 	{
 		// End:0x25
+		// Timer fires every 0.1 s; 20 ticks = 2 seconds between freedom checks
 		if((m_iWaitingTime >= 20))
 		{
 			// End:0x1E
 			if((!IsGuarded()))
 			{
+				// No nearby enemies left — transition to Freed (crouching/wandering) state
 				GotoState('Freed');
 			}
 			m_iWaitingTime = 0;
@@ -2170,9 +2205,11 @@ state Guarded
 			SeePlayerMgr();
 		}
 		// End:0x8E
+		// Non-zero m_iPlayReaction1 means a deferred flinch animation is pending
 		if((m_iPlayReaction1 != 0))
 		{
 			// End:0x87
+			// Delay elapsed: play the flinch animation now and reset both counters
 			if((m_iPlayReaction1 >= m_iPlayReaction2))
 			{
 				ProcessPlaySndInfo(m_mgr.1);
@@ -2199,6 +2236,7 @@ state GoGuarded_Foetus
 {
 	function BeginState()
 	{
+		// Set state name then immediately forward to the actual Guarded_foetus state
 		SetThreatState('Guarded_foetus');
 		ProcessPlaySndInfo(m_mgr.7);
 		GotoState(m_threatInfo.m_state);
@@ -2226,10 +2264,12 @@ state Guarded_foetus extends Guarded
 		// End:0x18
 		if(CanReturnToNormalState())
 		{
+			// Conditions have cleared — jump to End label to exit foetal posture
 			GotoState('Guarded_foetus', 'End');			
 		}
 		else
 		{
+			// Threats remain — reset the random timer and stay curled in foetal posture
 			GotoState('Guarded_foetus', 'Begin');
 		}
 		return;
@@ -2242,6 +2282,7 @@ End:
 Begin:
 
 
+	// Hold foetal posture for a random duration then re-check whether threats have cleared
 	SetTimer(GetRandomTweenNum(m_pawn.m_stayInFoetusTime), true);
 	stop;	
 }
@@ -2255,6 +2296,7 @@ state GoGuarded_frozen
 {
 	function BeginState()
 	{
+		// HSTSNDEvent_SeeRainbowBaitOrGoFrozen = 6: play the paralysis voice cue
 		ProcessPlaySndInfo(m_mgr.6);
 		GotoState('Guarded_frozen');
 		return;
@@ -2279,6 +2321,7 @@ state Guarded_frozen extends Guarded
 	function Timer()
 	{
 		m_pawn.setFrozen(false);
+		// Frozen timer expired: unfreeze and drop to the more reactive foetal-position state
 		GotoState('Guarded_foetus');
 		return;
 	}
@@ -2287,12 +2330,14 @@ End:
 	m_pawn.setFrozen(false);
 	SetTimer(0.0000000, false);
 	// End:0x2B
+		// End label reached: unfreeze and decide whether the threat has fully cleared
 	if(CanReturnToNormalState())
 	{
 		ReturnToNormalState();		
 	}
 	else
 	{
+			// Threat still present — fall back to foetal posture rather than returning to normal
 		GotoState('Guarded_foetus');
 	}
 	J0x32:
@@ -2315,6 +2360,7 @@ state Freed
 		SetFreed(true);
 		m_lastSeenPawn = none;
 		m_pawn.m_bAvoidFacingWalls = true;
+		// POS_Crouch = 4: freed hostages adopt a low-profile crouching posture
 		SetPawnPosition(4);
 		m_iWaitingTime = int(GetRandomTweenNum(m_pawn.m_changeOrientationTween));
 		m_iFacingTime = int(Level.TimeSeconds);
@@ -2337,6 +2383,7 @@ state Freed
 		{
 			m_iFacingTime = int(Level.TimeSeconds);
 			m_iWaitingTime = int(GetRandomTweenNum(m_pawn.m_changeOrientationTween));
+			// Idle behaviour: turn 90 degrees to face a random direction while crouching
 			ChangeOrientationTo(GetRandomTurn90());
 		}
 		// End:0x86
@@ -2901,6 +2948,7 @@ state RunForCover
 	function BeginState()
 	{
 		// End:0x1C
+		// Force stand posture before sprinting; crouched run is too slow for emergency cover
 		if((!m_pawn.isStanding()))
 		{
 			SetPawnPosition(0);
@@ -2940,9 +2988,11 @@ state RunForCover
 	function EnemyNotVisible()
 	{
 		// End:0x28
+		// Running from grenade: check proximity/line-of-sight instead of enemy visibility
 		if((m_runAwayOfGrenade != none))
 		{
 			// End:0x26
+			// Grenade case: reached minimum safe distance, cover attempt succeeded
 			if(IsAwayOfGrenade(m_runAwayOfGrenade))
 			{
 				StopRunForCover();
@@ -2951,9 +3001,11 @@ state RunForCover
 			return;
 		}
 		// End:0xBB
+		// Wait c_iEnemyNotVisibleTime seconds before accepting that the enemy is truly gone
 		if(((Level.TimeSeconds - LastSeenTime) > float(c_iEnemyNotVisibleTime)))
 		{
 			// End:0xAE
+			// Enemy AI can still see us — reset LastSeenTime and keep running for cover
 			if((((R6Pawn(Enemy) != none) && (R6Pawn(Enemy).Controller != none)) && R6Pawn(Enemy).Controller.CanSee(Pawn)))
 			{
 				LastSeenTime = Level.TimeSeconds;
@@ -3840,6 +3892,7 @@ RunToDestination:
 		m_vMoveToDest = m_pGotoToExtractionZone.Location;
 	}
 	// End:0xB2
+	// Within 100 units of the extraction zone: close enough, stop and switch to Freed state
 	if((VSize((Pawn.Location - m_vMoveToDest)) < float(100)))
 	{
 		StopMoving();
