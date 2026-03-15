@@ -346,10 +346,12 @@ IMPL_DIVERGE("calls FUN_10437c90/FUN_1043fd50/FUN_1043f770 (unresolved TArray se
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13fee0: UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version),
-	// then 3 TArray serializations at +0x30 (Notifys), +0x3C (Movements), +0x48 (Sequences)
-	// via helpers FUN_10437c90, FUN_1043fd50, FUN_1043f770 (complex TArray<UObject> serializers).
-	// DIVERGENCE: those TArray helpers are unresolved external calls; mesh animation data
-	// is loaded directly from packages by the UE2 serialization system.
+	// then 3 TArray serializations:
+	//   FUN_10437c90(ar, this+0x30) = TArray<FMeshAnimNotify> serializer (per-element calls FUN_103ca720)
+	//   FUN_1043fd50(ar, this+0x3C) = TArray<MotionChunk> serializer (per-element calls FUN_1043fb70)
+	//   FUN_1043f770(ar, this+0x48) = TArray<FMeshAnimSeq> serializer (per-element calls FUN_103cab30)
+	// FUN_103cab30/FUN_1043fb70/FUN_103ca720 each call deeper unnamed helpers.
+	// DIVERGENCE: all TArray serializers unresolved; mesh animation data loaded from package.
 	UObject::Serialize(Ar);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
@@ -524,7 +526,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_DIVERGE("FUN_1043d7e0 (unresolved LOD-section entry constructor) used to init new section slots; retail 0x10474da0 (409b)")
+IMPL_DIVERGE("FUN_1043d7e0 resolved: sets FAnimMeshVertexStream vtable (slot+0x14), FArray at slot+0x1C, resource ID via DAT_1060b564 counter (slot+0x28), FRawIndexBuffer at slot+0x40; DAT_1060b564 is Engine.dll runtime global, not accessible; retail 0x10474da0 (409b)")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -873,7 +875,7 @@ void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int
 	unguard;
 }
 
-IMPL_DIVERGE("LOD entry constructor FUN_1043f4c0 and stream-copy helpers unresolved; retail 0x10442970 (925b)")
+IMPL_DIVERGE("FUN_1043f4c0 resolved: inits 4 FArrays, 2 FRawIndexBuffers, FSkinVertexStream vtable, counter (DAT_1060b564), and 4 vtable-table pointers in 0x11C slot; DAT_1060b564 Engine.dll runtime global blocks implementation; retail 0x10442970 (925b)")
 void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float param3, int param4)
 {
 	guard(USkeletalMesh::InsertLodModel);
@@ -924,10 +926,18 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 IMPL_DIVERGE("calls FUN_10321a80/FUN_104378f0/FUN_10415600/FUN_10321870 (unresolved bone/LOD TArray serializers); retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
-	// Retail: calls ULodMesh::Serialize (which calls UMesh::Serialize) then serializes bone ref pose (+0x1B8),
-	// bone array (+0x19C), default anim ref (+0x1DC), vertex inflations, LOD arrays etc.
-	// NOTE: USkeletalMesh inherits from UMesh (not ULodMesh) so we call UMesh::Serialize directly.
-	// DIVERGENCE: bone/LOD TArray serializers unresolved; base-class data is preserved correctly.
+	// Ghidra 0x13ffb0: ULodMesh::Serialize, then:
+	//   FUN_10321a80(ar, this+0x1B8) = FVector TArray serializer (BoneRefSkeleton, stride 0xC)
+	//   FUN_104378f0(ar, this+0x19C) = bone array serializer (FMeshBone TArray)
+	//   ar << (this+0x1DC) = default anim reference (via vtable method)
+	//   ByteOrderSerialize(ar, this+0x1A8, 4) = SkeletalDepth
+	//   FUN_1043ce30, FUN_10437a50, FUN_103ca780 x2, FUN_104371c0 = vertex/attach data
+	//   FUN_1043fa50 = LOD models TArray (this+0x1AC)
+	//   Multiple render stream helpers (FUN_10438510, FUN_1043d430, etc.)
+	//   FUN_1043cfd0 = CBoneDescData serializer (licensee ver > 7)
+	//   IsPersistent branch: raw index buffers, vertex streams
+	// DIVERGENCE: all bone/LOD/stream serializers are unnamed; base-class data only.
+	// NOTE: USkeletalMesh inherits from UMesh not ULodMesh; call UMesh::Serialize.
 	UMesh::Serialize(Ar);
 }
 
