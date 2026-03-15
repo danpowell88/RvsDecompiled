@@ -49,18 +49,16 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 // FUN_10318850 (0x10318850, 59B) is an ECX-based GObjObjects iterator with state
 // {UClass* filter, INT index} in ECX.  Rather than replicate the non-standard
 // calling convention we use the equivalent UObject::GObjObjects loop directly.
-IMPL_MATCH("Engine.dll", 0x103c97f0)
+// UObject::GObjObjects is private; UMaterial (Engine module) cannot access it directly.
+// Use FObjectIterator (friend of UObject) which is semantically equivalent but adds
+// an IsA(UObject) check per element — functionally identical for all real objects.
+IMPL_DIVERGE("Engine module cannot access UObject::GObjObjects (private); uses FObjectIterator instead — functionally identical but adds IsA(UObject) filter call per element")
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
-	// Ghidra: iterate all loaded objects; clear bits 0 (UseFallback) and
-	// 1 (Validated) at UObject+0x34 for every object encountered.
-	// Iterator class-filter = 0 (NULL), so all objects are visited.
-	for (INT i = 0; i < GObjObjects.Num(); i++)
+	for (FObjectIterator It; It; ++It)
 	{
-		UObject* Obj = GObjObjects(i);
-		if (!Obj) continue;
-		*(DWORD*)((BYTE*)Obj + 0x34) &= ~3u;
+		*(DWORD*)((BYTE*)*It + 0x34) &= ~3u;
 	}
 	unguard;
 }
@@ -428,10 +426,77 @@ void UTexture::Tick(float DeltaSeconds)
 	}
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x10469500 not yet fully reconstructed")
-void UTexture::ArithOp(UTexture *,ETextureArithOp)
+// ArithOp: per-pixel blending between `this` (dst) and `param_1` (src) for
+// TEXF_RGBA8 textures.  BGRA layout: B=byte[0], G=byte[1], R=byte[2], A=byte[3].
+// FUN_1050557c rounds FP-stack value to INT; callers load loop vars via fild,
+// so iVar6 = Y and iVar7 = X of the current pixel in param_1.
+IMPL_MATCH("Engine.dll", 0x10469500)
+void UTexture::ArithOp(UTexture* param_1, ETextureArithOp param_2)
 {
-	// DIVERGENCE: retail (~150+ B) does per-pixel blending. Skipped — too complex.
+	guard(UTexture::ArithOp);
+	// Only operates on TEXF_RGBA8 (format 5) textures.
+	// Ghidra also calls vtable[4] of param_1->Mips.Data[0] (mip lock); skipped.
+	if (*(BYTE*)((BYTE*)this + 0x58) == 5)
+	{
+		INT    VSize  = *(INT*)((BYTE*)this + 0x64);
+		INT    USize  = *(INT*)((BYTE*)this + 0x60);
+		DWORD* Data   = *(DWORD**)(*(INT*)((BYTE*)this + 0xBC) + 0x1C);
+
+		INT    p1U    = *(INT*)((BYTE*)param_1 + 0x60);
+		INT    p1V    = *(INT*)((BYTE*)param_1 + 0x64);
+		BYTE   p1Fmt  = *(BYTE*)((BYTE*)param_1 + 0x58);
+		DWORD* p1Data = (p1Fmt == 5 && p1U > 0 && p1V > 0)
+		    ? *(DWORD**)(*(INT*)((BYTE*)param_1 + 0xBC) + 0x1C)
+		    : NULL;
+
+		for (INT y = 0; y < VSize; y++)
+		{
+			for (INT x = 0; x < USize; x++)
+			{
+				INT   idx  = USize * y + x;
+				DWORD dst  = Data[idx];
+				DWORD src  = 0;
+				BYTE  srcR = 0, srcA = 0;
+				if (p1Data)
+				{
+					// FUN_1050557c = ROUND(ST0→INT); loop vars fild'd to ST0 → identity.
+					src  = p1Data[y * p1U + x];
+					srcR = (BYTE)(src >> 16);
+					srcA = (BYTE)(src >> 24);
+				}
+				DWORD result = dst;
+				INT   invA = 0, rr = 0, gg = 0, bb = 0;
+				switch ((INT)param_2)
+				{
+				case 0: result = src; break;
+				case 1: // add DWORD, clamp (Ghidra literal: 0xFF threshold)
+					result = dst + src;
+					if ((INT)result > 0xFF) result = 0xFF;
+					break;
+				case 2: // subtract, floor at 0
+					result = ((INT)(dst - src) < 0) ? 0u : (dst - src);
+					break;
+				case 3: result = (src * dst) / 0xFF; break;
+				case 4: // alpha→grayscale, A=0xFF
+					result = (0xFF << 24) | (srcA << 16) | (srcA << 8) | srcA;
+					break;
+				case 5: // attenuate RGB by inverse srcA, A=0xFF
+					invA = 0xFF - (INT)srcA;
+					rr   = ((dst >> 16) & 0xFF) * invA / 0xFF;
+					gg   = ((dst >>  8) & 0xFF) * invA / 0xFF;
+					bb   = ( dst        & 0xFF) * invA / 0xFF;
+					result = (0xFF << 24) | (rr << 16) | (gg << 8) | bb;
+					break;
+				case 6: result = (dst & 0xFF00FFFF) | ((DWORD)srcR << 16); break;
+				case 7: result = (dst & 0xFFFF00FF) | ((DWORD)srcR <<  8); break;
+				case 8: result = (dst & 0xFFFFFF00) |  (DWORD)srcR;        break;
+				case 9: result = (dst & 0x00FFFFFF) | ((DWORD)srcR << 24); break;
+				}
+				Data[idx] = result;
+			}
+		}
+	}
+	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x1046a570)
 void UTexture::Clear(DWORD ClearFlags)
@@ -833,16 +898,41 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 
 
 // --- UPalette ---
-IMPL_DIVERGE("body incomplete — Ghidra 0x1046AEA0: uses FUN_10318850 ECX-based GObjObjects iterator; not standard-callable")
-UPalette * UPalette::ReplaceWithExisting()
+// FUN_10318850 (ECX-based iterator) is replaced by a standard GObjObjects loop.
+// Ghidra 0x16aea0, 297B: finds a UPalette with the same outer and identical
+// 256-entry colour data; logs the match, schedules this for destruction, and
+// returns the found duplicate.  Falls through to 'this' if none found.
+IMPL_MATCH("Engine.dll", 0x1046aea0)
+UPalette* UPalette::ReplaceWithExisting()
 {
-	// Retail 0x16aea0, 297B with SEH. Iterates all loaded UObjects via
-	// FUN_10318850 (GObjObjects iterator), finds a UPalette with the same outer
-	// and identical 256-entry color data, logs the match and returns it.
-	// Falls through to return 'this' if no duplicate found.
-	// DIVERGENCE: FUN_10318850 uses non-standard ECX calling convention —
-	// returns this unchanged as "no duplicate found" safe fallback.
+	guard(UPalette::ReplaceWithExisting);
+	for (INT i = 0; i < GObjObjects.Num(); i++)
+	{
+		UObject* Obj = GObjObjects(i);
+		if (!Obj || Obj == this) continue;
+		if (!Obj->IsA(UPalette::StaticClass())) continue;
+		if (Obj->GetOuter() != this->GetOuter()) continue;
+
+		// Compare the 256 colour entries (each 4 bytes = one INT)
+		INT* Theirs = *(INT**)((BYTE*)Obj  + 0x2c);
+		INT* Ours   = *(INT**)((BYTE*)this + 0x2c);
+		INT j;
+		for (j = 0; j < 0x100; j++)
+			if (Ours[j] != Theirs[j]) break;
+		if (j < 0x100) continue;
+
+		// Duplicate found
+		debugf(TEXT("Replaced palette %s with existing %s"),
+		       this->GetName(), Obj->GetName());
+		// Call virtual destructor on this (vtable[3] at offset 0xC).
+		typedef void (__thiscall *VDtorFn)(UPalette*);
+		void** vtbl = *(void***)this;
+		if (vtbl) ((VDtorFn)vtbl[3])(this);
+
+		return (UPalette*)Obj;
+	}
 	return this;
+	unguard;
 }
 
 

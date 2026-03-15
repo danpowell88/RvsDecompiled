@@ -256,14 +256,28 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_DIVERGE("Ghidra 0x1038e590; 289 bytes; calls FindPath for nearest of GoalClass; stub returns NULL")
+IMPL_DIVERGE("Ghidra 0x1038e590; 289b — iterates NavigationPointList for exact class match, marks nav+0x3e4 bit0, calls FindPath; omits rdtsc")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
 	P_GET_OBJECT(UClass,GoalClass);
-	P_GET_UBOOL_OPTX(bSinglePath,0);
 	P_FINISH;
-	*(AActor**)Result = NULL;
+	if( !GoalClass || !Pawn )
+	{
+		*(AActor**)Result = NULL;
+		return;
+	}
+	Pawn->clearPaths();
+	ANavigationPoint* Best = NULL;
+	for( ANavigationPoint* Nav = Level->NavigationPointList; Nav; Nav = Nav->nextNavigationPoint )
+	{
+		if( Nav->GetClass() == GoalClass )
+		{
+			*(DWORD*)((BYTE*)Nav + 0x3e4) |= 1;  // mark as endpoint (bEndPoint flag — retail offset)
+			Best = Nav;
+		}
+	}
+	*(AActor**)Result = Best ? FindPath(FVector(0,0,0), Best, 0) : NULL;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
@@ -312,21 +326,42 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_DIVERGE("Ghidra 0x1038ce20; 236 bytes; calls eventEAdjustJump with jump vectors from raw pawn offsets; stub is empty")
+IMPL_DIVERGE("Ghidra 0x1038ce20; 236b — reads BaseZ/XYSpeed, calls Pawn->SuggestJumpVelocity with dest from this+0x480 (AController FVector field); omits rdtsc")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
+	P_GET_FLOAT(BaseZ);
+	P_GET_FLOAT(XYSpeed);
 	P_FINISH;
+	if( Pawn )
+	{
+		FVector JumpDest = *(FVector*)((BYTE*)this + 0x480);  // stored destination in AController (retail +0x480)
+		*(FVector*)Result = Pawn->SuggestJumpVelocity(JumpDest, XYSpeed, BaseZ);
+	}
+	else
+		*(FVector*)Result = FVector(0,0,0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_DIVERGE("Ghidra 0x10390770; 281 bytes; calls findPathToward with random NavPoint destination; stub returns NULL")
+IMPL_DIVERGE("Ghidra 0x10390770; 281b — clearPaths if bClearPaths, findPathToward(NULL,FVector0), returns navpoint at this+0x44c if nav; omits rdtsc")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
+	P_GET_UBOOL_OPTX(bClearPaths, true);
 	P_FINISH;
 	*(AActor**)Result = NULL;
+	if( !Pawn )
+		return;
+	if( bClearPaths )
+		Pawn->clearPaths();
+	FLOAT weight = Pawn->findPathToward(NULL, FVector(0,0,0), NULL, 1, 0.f);
+	if( weight > 0.f )
+	{
+		AActor* dest = *(AActor**)((BYTE*)this + 0x44c);  // current path end (retail AController+0x44c)
+		if( dest && dest->IsA(ANavigationPoint::StaticClass()) )
+			*(AActor**)Result = dest;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
@@ -387,22 +422,50 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
-IMPL_DIVERGE("Ghidra 0x1038f9e0; 1714 bytes; complex target-selection loop through pawn list with aim/distance scoring; stub returns NULL")
+IMPL_DIVERGE("Ghidra 0x1038f9e0; 1714b — iterates Level->ControllerList, scores enemy pawns by FireDir angle and dist; alive check at Pawn+0x3a4; targetable flag at Pawn+0xa9 bit7; team filter via PlayerReplicationInfo; secondary-aim scoring path omitted")
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickTarget);
-	P_GET_OBJECT(UClass,TargetClass);
+	P_GET_OBJECT(UClass, TargetClass);
 	P_GET_FLOAT_REF(bestAim);
 	P_GET_FLOAT_REF(bestDist);
 	P_GET_VECTOR(FireDir);
 	P_GET_VECTOR(projStart);
 	P_FINISH;
-	*(APawn**)Result = NULL;
+	APawn* bestPawn = NULL;
+	if( !Level ) { *(APawn**)Result = NULL; return; }
+	for( AController* C = Level->ControllerList; C; C = C->nextController )
+	{
+		if( C == this ) continue;
+		APawn* targetPawn = C->Pawn;
+		if( !targetPawn ) continue;
+		// Alive check: Ghidra checks *(int*)(Pawn+0x3a4) > 0
+		if( *(INT*)((BYTE*)targetPawn + 0x3a4) <= 0 ) continue;
+		// Targetable flag: Ghidra checks bit7 of byte at Pawn+0xa9
+		if( !((*(DWORD*)((BYTE*)targetPawn + 0xa8) >> 8) & 0x80) ) continue;
+		// Team filter: skip if both have PlayerReplicationInfo (allied)
+		if( PlayerReplicationInfo != NULL && C->PlayerReplicationInfo != NULL ) continue;
+		FVector diff = targetPawn->Location - projStart;
+		FLOAT dp = FireDir | diff;
+		if( dp <= 0.0f ) continue;
+		FLOAT distSq = diff.SizeSquared();
+		// Ghidra: distSq < 1.6e7 (~4000 unit radius)
+		if( distSq >= 16000000.0f ) continue;
+		FLOAT dist = appSqrt(distSq);
+		FLOAT aim = dp / dist;
+		if( aim > *bestAim && LineOfSightTo(targetPawn, 0) )
+		{
+			*bestAim = aim;
+			*bestDist = dist;
+			bestPawn = targetPawn;
+		}
+	}
+	*(APawn**)Result = bestPawn;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_DIVERGE("Ghidra 0x1038dc20; 688 bytes; complex actor-selection loop with aim/distance scoring; stub returns NULL")
+IMPL_DIVERGE("Ghidra 0x1038dc20; 688b — iterates XLevel->Actors, scores by FireDir dot/dist; checks bit7 of actor+0xa9 (targetable flag); vtable[0x1a] check omitted as DIVERGE; dist < 2000 units (distSq < 4e6)")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -411,17 +474,45 @@ void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(FireDir);
 	P_GET_VECTOR(projStart);
 	P_FINISH;
-	*(AActor**)Result = NULL;
+	AActor* best = NULL;
+	if( !XLevel ) { *(AActor**)Result = NULL; return; }
+	INT numActors = XLevel->Actors.Num();
+	for( INT i = 0; i < numActors; i++ )
+	{
+		AActor* actor = XLevel->Actors(i);
+		if( !actor ) continue;
+		// Ghidra flag: bit7 of byte at actor+0xa9 (targetable flag)
+		if( !((*(DWORD*)((BYTE*)actor + 0xa8) >> 8) & 0x80) ) continue;
+		// Ghidra also checks vtable[0x1a]==0 (unidentified virtual) — omitted as DIVERGE
+		FVector diff = actor->Location - projStart;
+		FLOAT dp = FireDir | diff;
+		if( dp <= 0.0f ) continue;
+		FLOAT distSq = diff.SizeSquared();
+		if( distSq >= 4000000.0f ) continue;  // 2000-unit radius (Ghidra: < 4e+06)
+		FLOAT dist = appSqrt(distSq);
+		FLOAT aim = dp / dist;
+		if( aim > *bestAim && LineOfSightTo(actor, 0) )
+		{
+			*bestAim = aim;
+			*bestDist = dist;
+			best = actor;
+		}
+	}
+	*(AActor**)Result = best;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 534, execPickAnyTarget );
 
-IMPL_DIVERGE("Ghidra 0x1038d870; 416 bytes; walks navigation point list finding best pickup path; stub returns NULL")
+IMPL_DIVERGE("Ghidra 0x1038d870; 416b — calls findPathToward with inventory scorer at 0x1038cb00, updates MinWeight with path score, calls SetPath(1); DIVERGE: scorer not reconstructed; returns NULL until scorer is decompiled")
 void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindBestInventoryPath);
 	P_GET_FLOAT_REF(MinWeight);
 	P_FINISH;
+	// Retail calls APawn::findPathToward with an inventory-weight scorer at 0x1038cb00
+	// (which scores each nav point by its reachable inventory weight >= MinWeight),
+	// then calls SetPath(1) to return the first hop. Scorer not yet reconstructed.
+	if( !Pawn ) { *(AActor**)Result = NULL; return; }
 	*(AActor**)Result = NULL;
 	unguard;
 }

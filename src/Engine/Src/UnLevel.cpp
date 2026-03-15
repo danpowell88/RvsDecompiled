@@ -1916,17 +1916,29 @@ void AGameInfo::execSetCurrentMapNum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execSetCurrentMapNum );
 
-// ParseKillMessage() - formats a kill message string.
-IMPL_DIVERGE("partial; retail processes script-level kill message format; Ghidra 0x12b4f0")
+// ParseKillMessage(): formats kill message by substituting %k → KillerName and %o → VictimName.
+// Ghidra 0x1042b4f0 (606 bytes): 3 params (KillerName, VictimName, DeathMessage).
+// Work buffer gets DeathMessage; %k (DAT_1055bbe8) is replaced with KillerName,
+// then %o (DAT_1055bbe0) with VictimName. If %k absent, result is empty (retail behaviour).
+// SEH frame state machine values differ from guard/unguard.
+IMPL_DIVERGE("SEH frame state tracking differs; Ghidra 0x1042b4f0")
 void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execParseKillMessage);
 	P_GET_STR(KillerName);
 	P_GET_STR(VictimName);
-	P_GET_STR(WeaponName);
 	P_GET_STR(DeathMessage);
 	P_FINISH;
-	*(FString*)Result = DeathMessage;
+	FString Work = DeathMessage;
+	FString Out;
+	INT kPos = Work.InStr(TEXT("%k"));
+	if (kPos != -1)
+		Out = Work.Left(kPos) + KillerName + Work.Right(Work.Len() - kPos - 2);
+	Work = Out;
+	INT oPos = Work.InStr(TEXT("%o"));
+	if (oPos != -1)
+		Out = Work.Left(oPos) + VictimName + Work.Right(Work.Len() - oPos - 2);
+	*(FString*)Result = Out;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execParseKillMessage );

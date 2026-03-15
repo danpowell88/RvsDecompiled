@@ -154,7 +154,7 @@ FVector AR6Pawn::CheckForLedges(AActor *, FVector, FVector, FVector, INT &, INT 
 	return FVector(0,0,0);
 }
 
-IMPL_DIVERGE("0x1002cf40: else-branch uses FUN_100015d0 to initialize 4 test positions for multi-point sight check; FUN_100015d0 is an N-times FVector initializer")
+IMPL_MATCH("R6Engine.dll", 0x1002cf40)
 INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 	AActor* param_4, FVector& param_5, AActor* param_6, FVector& param_7)
 {
@@ -203,8 +203,85 @@ INT AR6Pawn::CheckLineOfSight(AActor* param_1, FVector& param_2, INT param_3,
 			FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f));
 		if (Hit.Actor != NULL && Hit.Actor != param_4 && Hit.Actor != param_6)
 		{
-			// DIVERGENCE: distance/size checks and 4-point probe grid from param_5 unresolved.
-			// Retail checks dist_sq(param_5, param_1->Location) <= 6.4e7f then does multi-probe.
+			FLOAT dX = param_5.X - *(FLOAT*)((BYTE*)param_1 + 0x234);
+			FLOAT dY = param_5.Y - *(FLOAT*)((BYTE*)param_1 + 0x238);
+			FLOAT dZ = param_5.Z - *(FLOAT*)((BYTE*)param_1 + 0x23c);
+			FLOAT dist_sq = dX*dX + dY*dY + dZ*dZ;
+
+			if (dist_sq <= 6.4e7f)
+			{
+				typedef INT (__fastcall *FBoolFn)(void*, void*);
+				INT canSeeMe = (pCtrl != NULL) &&
+				               (*(DWORD*)((BYTE*)pCtrl + 0x3a8) & 1) != 0 &&
+				               (*(FBoolFn*)((BYTE*)*(INT*)param_4 + 0x68))((void*)param_4, 0) != 0;
+
+				if (canSeeMe || dist_sq <= 4e6f)
+				{
+					if (param_3 == 0 || (pCtrl == NULL || (*(DWORD*)((BYTE*)pCtrl + 0x3a8) & 4) == 0))
+					{
+						// Try head location
+						FVector headLoc = GetHeadLocation(param_1);
+						param_7 = headLoc;
+						Hit = FCheckResult(1.0f);
+						SingleLineCheck(pXLevel, 0, &Hit, this, &param_7, &param_2, 0x20286,
+							FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f));
+						if (Hit.Actor == NULL || Hit.Actor == param_4 || Hit.Actor == param_6)
+							return 1;
+					}
+
+					if (param_3 == 0 || (pCtrl != NULL && (*(DWORD*)((BYTE*)pCtrl + 0x3a8) & 4) != 0))
+					{
+						// Angular size check: skip target if it subtends less than 0.0001 sr
+						AActor* checkActor = (param_6 == NULL) ? param_4 : param_6;
+						FLOAT actorRadius = *(FLOAT*)((BYTE*)checkActor + 0xf8);
+						FLOAT ratio = (actorRadius / dist_sq) * actorRadius;
+						if (ratio < 0.0001f)
+							return 0;
+						FLOAT adjustRadius = (FLOAT)(INT)actorRadius;
+
+						// Build 4-point grid around observer position (param_5)
+						FVector pts[4];
+						pts[0] = FVector(param_5.X - adjustRadius, param_5.Y + adjustRadius, param_5.Z);
+						pts[1] = FVector(param_5.X + adjustRadius, param_5.Y + adjustRadius, param_5.Z);
+						pts[2] = FVector(param_5.X - adjustRadius, param_5.Y - adjustRadius, param_5.Z);
+						pts[3] = FVector(param_5.X + adjustRadius, param_5.Y - adjustRadius, param_5.Z);
+
+						// Find the pts closest and farthest from world origin
+						FLOAT minD = pts[0].X*pts[0].X + pts[0].Y*pts[0].Y + pts[0].Z*pts[0].Z;
+						FLOAT maxD = minD;
+						INT minIdx = 0, maxIdx = 0;
+						for (INT i = 1; i < 4; i++)
+						{
+							FLOAT d = pts[i].X*pts[i].X + pts[i].Y*pts[i].Y + pts[i].Z*pts[i].Z;
+							if (d < minD) { minD = d; minIdx = i; }
+							else if (d > maxD) { maxD = d; maxIdx = i; }
+						}
+
+						// Check LOS from the non-extreme points (indices 0..2 only, matching Ghidra)
+						for (INT i = 0; i < 3; i++)
+						{
+							if (i != minIdx && i != maxIdx)
+							{
+								param_7 = pts[i];
+								Hit = FCheckResult(1.0f);
+								SingleLineCheck(pXLevel, 0, &Hit, this, &param_7, &param_2, 0x20286,
+									FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f));
+								if (Hit.Actor == NULL || Hit.Actor == param_4 || Hit.Actor == param_6)
+									return 1;
+							}
+						}
+
+						// Check foot location of target
+						FVector footLoc = GetFootLocation(param_1);
+						param_7 = footLoc;
+						Hit = FCheckResult(1.0f);
+						SingleLineCheck(pXLevel, 0, &Hit, this, &param_7, &param_2, 0x20286,
+							FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f));
+						if (Hit.Actor == NULL || Hit.Actor == param_4 || Hit.Actor == param_6)
+							return 1;
+					}
+				}
+			}
 			return 0;
 		}
 	}
@@ -867,7 +944,7 @@ void AR6Pawn::PawnTrackActor(AActor* InActor, INT bShouldAim)
 	UpdatePawnTrackActor(1);
 }
 
-IMPL_DIVERGE("0x10026140: FUN_10001750 initializes FCheckResult; loop uses dual line-check per direction with sizes from this+0x118; FocalPoint taken directly from Controller+0x480 not FocusActor")
+IMPL_MATCH("R6Engine.dll", 0x10026140)
 INT AR6Pawn::PickActorAdjust(AActor* param_1)
 {
 	guard(AR6Pawn::PickActorAdjust);
@@ -875,55 +952,75 @@ INT AR6Pawn::PickActorAdjust(AActor* param_1)
 		return 0;
 
 	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
-	INT* pXLevel = *(INT**)((BYTE*)this + 0x328);
 
-	// Get direction to focal point (controller+0x3e4 = FocusActor, +0x488 = FocalPoint)
-	INT focusActor = *(INT*)((BYTE*)pCtrl + 0x3e4);
-	FLOAT focX = focusActor ? *(FLOAT*)(focusActor + 0x234) : *(FLOAT*)((BYTE*)pCtrl + 0x488);
-	FLOAT focY = focusActor ? *(FLOAT*)(focusActor + 0x238) : *(FLOAT*)((BYTE*)pCtrl + 0x48c);
+	typedef INT (__fastcall *FSweepFn)(void*, void*, FCheckResult*, AActor*, FLOAT*, FLOAT*, INT, FLOAT, FLOAT, FLOAT);
+	FSweepFn SingleLineCheck = *(FSweepFn*)((BYTE*)*(DWORD*)XLevel + 0xCC);
 
-	FLOAT toDx = focX - Location.X,  toDy = focY - Location.Y;
-	FLOAT len = appSqrt(toDx*toDx + toDy*toDy);
-	if (len > 0.0f) { toDx /= len; toDy /= len; }
+	// Direction toward Controller->Destination (ctrl+0x480/0x484)
+	FLOAT dx = *(FLOAT*)((BYTE*)pCtrl + 0x480) - Location.X;
+	FLOAT dy = *(FLOAT*)((BYTE*)pCtrl + 0x484) - Location.Y;
+	FLOAT len = appSqrt(dx*dx + dy*dy);
+	if (len != 0.0f) { dx /= len; dy /= len; }
 
-	// Left and right perpendicular directions
-	FLOAT perpLX = -toDy,  perpLY =  toDx;
-	FLOAT perpRX =  toDy,  perpRY = -toDx;
+	// Perpendicular directions (left and right of movement axis)
+	FLOAT perpLX = -dy,  perpLY =  dx;
+	FLOAT perpRX =  dy,  perpRY = -dx;
 
-	// Lateral offset of param_1 from the movement axis
-	FLOAT lateralDot = (*(FLOAT*)((BYTE*)param_1 + 0x234) - Location.X) * toDy +
-	                   (*(FLOAT*)((BYTE*)param_1 + 0x238) - Location.Y) * (-toDx);
-	// param_1+0x118 = CollisionRadius
-	FLOAT adjustDist = *(FLOAT*)((BYTE*)param_1 + 0x118) + CollisionRadius;
+	// Adjust distance = sum of both radii (param_1 CollisionRadius at 0xf8)
+	FLOAT adjustDist = *(FLOAT*)((BYTE*)param_1 + 0xf8) + CollisionRadius;
+
+	// Signed lateral offset of param_1 from the movement axis
+	FLOAT lateralDot = (*(FLOAT*)((BYTE*)param_1 + 0x238) - Location.Y) * dx
+	                 + (-dy) * (*(FLOAT*)((BYTE*)param_1 + 0x234) - Location.X);
 
 	if (Abs(lateralDot) > adjustDist)
 		return 1;
 
-	FLOAT leftDist  = adjustDist - lateralDot;
-	FLOAT rightDist = adjustDist + lateralDot;
+	FLOAT rightDist = adjustDist - lateralDot;
+	FLOAT leftDist  = adjustDist + lateralDot;
 
-	typedef void (__fastcall *FSingleLineFn)(void*, void*, FCheckResult*, AActor*,
-		const FVector*, const FVector*, DWORD, const FVector&, const FVector&, const FVector&);
-	FSingleLineFn SingleLineCheck = *(FSingleLineFn*)((BYTE*)*pXLevel + 0xcc);
+	// Focal destination: where we want to face (Destination XY, pawn Z)
+	FVector FocalDest(*(FLOAT*)((BYTE*)pCtrl + 0x480), *(FLOAT*)((BYTE*)pCtrl + 0x484), Location.Z);
 
 	for (INT pass = 0; pass < 2; pass++)
 	{
 		FLOAT perpX = (pass == 0) ? perpLX : perpRX;
 		FLOAT perpY = (pass == 0) ? perpLY : perpRY;
 		FLOAT dist  = (pass == 0) ? leftDist : rightDist;
-		FVector tryDest(Location.X + perpX * dist, Location.Y + perpY * dist, Location.Z);
+		FVector TryPos(Location.X + perpX * dist, Location.Y + perpY * dist, Location.Z);
+
+		// First sweep: point check (zero extents) from TryPos toward FocalDest
 		FCheckResult Hit(1.0f);
-		SingleLineCheck(pXLevel, 0, &Hit, this, &tryDest, &Location, 0x20286,
-			FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f), FVector(0.f, 0.f, 0.f));
+		SingleLineCheck(XLevel, 0, &Hit, this, &FocalDest.X, &TryPos.X, 0x286, 0.0f, 0.0f, 0.0f);
 		if (Hit.Time == 1.0f)
 		{
-			// controller+0x3a8 = flags, set bit 0x40 = has adjust destination
-			*(DWORD*)((BYTE*)pCtrl + 0x3a8) |= 0x40;
-			// controller+0x488/0x48c/0x490 = adjust destination
-			*(FLOAT*)((BYTE*)pCtrl + 0x488) = tryDest.X;
-			*(FLOAT*)((BYTE*)pCtrl + 0x48c) = tryDest.Y;
-			*(FLOAT*)((BYTE*)pCtrl + 0x490) = tryDest.Z;
-			return 1;
+			// Second sweep: capsule check with pawn's own collision extents
+			FCheckResult Hit2(1.0f);
+			SingleLineCheck(XLevel, 0, &Hit2, this, &FocalDest.X, &TryPos.X, 0x286,
+				CollisionRadius, CollisionRadius, CollisionHeight);
+
+			INT bSuccess = 0;
+			if (Hit2.Time == 1.0f)
+			{
+				bSuccess = 1;
+			}
+			else
+			{
+				// If hit is far enough away, still accept the position
+				FVector hitDelta = Hit2.Location - Location;
+				FLOAT hitDist = hitDelta.Size();
+				if (adjustDist * 4.0f < hitDist)
+					bSuccess = 1;
+			}
+
+			if (bSuccess)
+			{
+				*(DWORD*)((BYTE*)pCtrl + 0x3a8) |= 0x40;   // bAdjusting
+				*(FLOAT*)((BYTE*)pCtrl + 0x474) = TryPos.X;
+				*(FLOAT*)((BYTE*)pCtrl + 0x478) = TryPos.Y;
+				*(FLOAT*)((BYTE*)pCtrl + 0x47c) = TryPos.Z;
+				return 1;
+			}
 		}
 	}
 	return 0;
@@ -1341,81 +1438,103 @@ void AR6Pawn::TickSpecial(FLOAT DeltaTime)
 	APawn::TickSpecial(DeltaTime);
 }
 
-IMPL_DIVERGE("0x10024e10: sweep flags should be 0x86 not 0x286; move destination uses this+0x2c8..0x2d0 offsets; PrePivot Z uses this+0x4e8 field after uncrawl")
+IMPL_MATCH("R6Engine.dll", 0x10024e10)
 void AR6Pawn::UnCrawl(INT param_1)
 {
 	guard(AR6Pawn::UnCrawl);
 
 	APawn* DefObj = (APawn*)GetClass()->GetDefaultObject();
-	FLOAT SaveRadius = CollisionRadius;
-	FLOAT SaveHeight = CollisionHeight;
+	INT* pCtrl = *(INT**)((BYTE*)this + 0x4ec);
+
+	typedef INT (__fastcall *FSweepFn)(void*, void*, FCheckResult*, AActor*, FLOAT*, FLOAT*, INT, FLOAT, FLOAT, FLOAT);
+	FSweepFn Sweep = *(FSweepFn*)((BYTE*)*(DWORD*)XLevel + 0xCC);
+	typedef INT (__fastcall *FMoveFn)(void*, void*, AActor*, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT);
+	FMoveFn Move = *(FMoveFn*)((BYTE*)*(DWORD*)XLevel + 0x9C);
 
 	if (!(*(DWORD*)((BYTE*)this + 0x3E0) & 0x10))
 	{
-		// Not crouched: try to uncrawl all the way to full standing height
-		FLOAT DestRadius = DefObj->CollisionRadius;
-		FLOAT DestHeight = DefObj->CollisionHeight;
-		FLOAT DeltaH     = DestHeight - CollisionHeight;
+		// Not crouched: attempt full uncrawl to standing size
+		FLOAT DefRadius = DefObj->CollisionRadius;
+		FLOAT DefHeight = DefObj->CollisionHeight;
+		FLOAT DeltaH    = DefHeight - CollisionHeight;
 
 		FCheckResult Hit(1.0f);
-		FVector DestLoc(Location.X, Location.Y, Location.Z + DeltaH);
-		typedef INT (__fastcall *FSweepFn)(void*, void*, FCheckResult*, AActor*, FLOAT*, FLOAT*, INT, FLOAT, FLOAT, FLOAT);
-		FSweepFn Sweep = *(FSweepFn*)((BYTE*)*(DWORD*)XLevel + 0xCC);
-		Sweep(XLevel, 0, &Hit, this, &DestLoc.X, &Location.X, 0x286, DestRadius, DestRadius, DestHeight);
+		FVector SweepDest(Location.X, Location.Y, Location.Z + DeltaH);
+		Sweep(XLevel, 0, &Hit, this, &SweepDest.X, &Location.X, 0x86, DefRadius, DefRadius, DefHeight);
 
 		if (Hit.Time == 1.0f)
 		{
-			SetCollisionSize(DestRadius, DestHeight);
-			typedef INT (__fastcall *FMoveFn)(void*, void*, AActor*, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT);
-			FMoveFn Move = *(FMoveFn*)((BYTE*)*(DWORD*)XLevel + 0x9C);
-			INT MoveResult = Move(XLevel, 0, this, DestLoc.X, DestLoc.Y, DestLoc.Z, 1, 0, 0, 0);
+			SetCollisionSize(DefRadius, DefHeight);
+			INT MoveResult = Move(XLevel, 0, this,
+				Location.X + PrePivot.X, Location.Y + PrePivot.Y, Location.Z + PrePivot.Z,
+				param_1, 0, 0, 0);
 
 			if (MoveResult)
 			{
 				initCrawlMode(false);
-				// DIVERGENCE: exact PrePivot Z after full uncrawl from Ghidra unclear; reset to zero
-				SetPrePivot(FVector(0.0f, 0.0f, 0.0f));
-				if (!param_1)
+				SetPrePivot(FVector(0.0f, 0.0f, m_fPrePivotPawnInitialOffset));
+				if (param_1 == 0)
 					eventEndCrawl();
 				*(DWORD*)((BYTE*)this + 0x3E0) &= ~0x200u;
 				return;
 			}
-			SetCollisionSize(SaveRadius, SaveHeight);
+			// Restore saved collision sizes (runtime copies at 0x464/0x468)
+			SetCollisionSize(*(FLOAT*)((BYTE*)this + 0x468), *(FLOAT*)((BYTE*)this + 0x464));
 		}
 	}
 
-	// Fallback: try partial uncrawl to crouch height
-	FLOAT CrouchH = DefObj->CrouchHeight;
-	FLOAT CrouchR = DefObj->CrouchRadius;
-	if (CrouchH > CollisionHeight)
+	// Fallback: partial uncrawl to crouch height
+	FLOAT crouchDelta  = DefObj->CrouchHeight - CollisionHeight;
+	FLOAT crouchDeltaH = crouchDelta;
+	if (*(DWORD*)((BYTE*)this + 0x6c4) & 1)
+		crouchDeltaH -= 5.0f;
+
+	FLOAT DestZ = 2.0f * crouchDelta + Location.Z;
+	FCheckResult Hit2(1.0f);
+	FVector SweepDest2(Location.X, Location.Y, DestZ);
+	Sweep(XLevel, 0, &Hit2, this, &SweepDest2.X, &Location.X, 0x86,
+		DefObj->CrouchRadius, DefObj->CrouchRadius, CollisionHeight);
+
+	if (Hit2.Time == 1.0f)
 	{
-		FLOAT DeltaH2 = CrouchH - CollisionHeight;
-		FCheckResult Hit2(1.0f);
-		FVector DestLoc2(Location.X, Location.Y, Location.Z + DeltaH2);
-		typedef INT (__fastcall *FSweepFn2)(void*, void*, FCheckResult*, AActor*, FLOAT*, FLOAT*, INT, FLOAT, FLOAT, FLOAT);
-		FSweepFn2 Sweep2 = *(FSweepFn2*)((BYTE*)*(DWORD*)XLevel + 0xCC);
-		Sweep2(XLevel, 0, &Hit2, this, &DestLoc2.X, &Location.X, 0x286, CrouchR, CrouchR, CrouchH);
+		SetCollisionSize(DefObj->CrouchRadius, DefObj->CrouchHeight);
+		FLOAT SavedPrePivotZ = PrePivot.Z;
+		SetPrePivot(FVector(0.0f, 0.0f, crouchDeltaH + m_fPrePivotPawnInitialOffset));
 
-		if (Hit2.Time == 1.0f)
+		INT MoveResult2 = Move(XLevel, 0, this,
+			Location.X + PrePivot.X, Location.Y + PrePivot.Y, Location.Z + PrePivot.Z,
+			param_1, 0, 0, 0);
+
+		if (MoveResult2)
 		{
-			SetCollisionSize(CrouchR, CrouchH);
-			typedef INT (__fastcall *FMoveFn2)(void*, void*, AActor*, FLOAT, FLOAT, FLOAT, INT, INT, INT, INT);
-			FMoveFn2 Move2 = *(FMoveFn2*)((BYTE*)*(DWORD*)XLevel + 0x9C);
-			INT MoveResult2 = Move2(XLevel, 0, this, DestLoc2.X, DestLoc2.Y, DestLoc2.Z, 1, 0, 0, 0);
+			initCrawlMode(false);
+			FLOAT finalZ = (DefObj->CollisionHeight - DefObj->CrouchHeight) + m_fPrePivotPawnInitialOffset;
+			if (*(DWORD*)((BYTE*)this + 0x6c4) & 1)
+				finalZ -= 5.0f;
+			SetPrePivot(FVector(0.0f, 0.0f, finalZ));
 
-			if (MoveResult2)
-			{
-				initCrawlMode(false);
-				SetPrePivot(FVector(0.0f, 0.0f, 0.0f));
-				if (!param_1)
-					eventEndCrawl();
-				*(DWORD*)((BYTE*)this + 0x3E0) &= ~0x200u;
+			if (param_1 != 0)
 				return;
-			}
-			SetCollisionSize(SaveRadius, SaveHeight);
+
+			// Transition to crouch stance
+			*(DWORD*)((BYTE*)this + 0x3E0) = (*(DWORD*)((BYTE*)this + 0x3E0) & ~0x200u) | 0x20u;
+			eventEndCrawl();
+			*(BYTE*)((BYTE*)pCtrl + 0x3a6) = 1;
+			*(DWORD*)((BYTE*)pCtrl + 0x3a8) &= ~0x400u;
+			return;
 		}
+		// Restore saved collision sizes and pivot on failure
+		SetCollisionSize(*(FLOAT*)((BYTE*)this + 0x468), *(FLOAT*)((BYTE*)this + 0x464));
+		SetPrePivot(FVector(0.0f, 0.0f, SavedPrePivotZ));
 	}
 
+	// Both uncrawl attempts failed — update controller locomotion flags
+	if (IsHumanControlled())
+	{
+		*(DWORD*)((BYTE*)this + 0x3E0) = (*(DWORD*)((BYTE*)this + 0x3E0) & ~0x10u) | 0x100u;
+		*(BYTE*)((BYTE*)pCtrl + 0x3a6) = 0;
+		*(DWORD*)((BYTE*)pCtrl + 0x3a8) |= 0x400u;
+	}
 	unguard;
 }
 
