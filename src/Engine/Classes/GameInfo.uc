@@ -40,8 +40,11 @@ var bool bGameEnded;  // set when game ends
 var bool bOverTime;
 var localized bool bAlternateMode;
 var bool bCanViewOthers;
+// When true, new players are held in spectating until StartMatch() is called explicitly.
 var bool bDelayedStart;
+// True until StartMatch() fires; first Login call will trigger StartMatch if this is set.
 var bool bWaitingToStartMatch;
+// When true, RestartGame() rotates through the server's map list instead of reloading the current level.
 var globalconfig bool bChangeLevels;
 //#ifdef R6CODE
 var bool m_bChangedServerConfig;
@@ -68,6 +71,7 @@ var globalconfig float GameSpeed;  // Scale applied to game rate.
 var float StartTime;
 var AccessControl AccessControl;  // AccessControl controls whether players can enter and/or become admins
 var BroadcastHandler BroadcastHandler;  // handles message (text and localized) broadcasts
+// Server-created actor automatically replicated to all clients, containing shared game state.
 var GameReplicationInfo GameReplicationInfo;
 // Statistics Logging
 var StatLog StatLog;
@@ -145,17 +149,21 @@ function R6GameInfoMakeNoise(Actor.ESoundType eType, Actor soundsource)
 	return;
 }
 
+// Called before any actor's BeginPlay; sets up core game state and spawns helper objects.
 function PreBeginPlay()
 {
 	StartTime = 0.0000000;
 	SetGameSpeed(GameSpeed);
+	// Spawn the replicated game state actor early so it's available during actor initialization.
 	GameReplicationInfo = Spawn(GameReplicationInfoClass);
 	InitGameReplicationInfo();
 	return;
 }
 
+// Called after all actors have initialized; safe to reference other actors here.
 function PostBeginPlay()
 {
+	// bAlternateMode is "low violence" mode; GoreLevel 2 suppresses graphic death content.
 	// End:0x11
 	if(bAlternateMode)
 	{
@@ -185,6 +193,7 @@ function InitLogging()
 	{
 		return;
 	}
+	// World logging only makes sense on a dedicated or listen server; standalone sessions don't log remotely.
 	bLoggingWorld = (bWorldLog && ((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))));
 	// End:0xDC
 	if((bLocalLog || bLoggingWorld))
@@ -198,8 +207,10 @@ function InitLogging()
 	return;
 }
 
+// Periodic tick; rate is scaled to GameSpeed via SetTimer in SetGameSpeed.
 function Timer()
 {
+	// Rate-limits broadcast messages to prevent chat spam.
 	BroadcastHandler.UpdateSentText();
 	return;
 }
@@ -278,6 +289,7 @@ function int GetServerPort()
 function bool SetPause(bool bPause, PlayerController P)
 {
 	// End:0x62
+// Multiplayer games cannot be paused unless bPauseable is explicitly set.
 	if((bPauseable || (int(Level.NetMode) == int(NM_Standalone))))
 	{
 		// End:0x4D
@@ -319,13 +331,16 @@ function SetGameSpeed(float t)
 	local float OldSpeed;
 
 	OldSpeed = GameSpeed;
+	// Clamp to 0.1 minimum to prevent the game from stopping completely.
 	GameSpeed = FMax(t, 0.1000000);
+	// TimeDilation scales all actor tick rates; 1.0 is normal speed.
 	Level.TimeDilation = GameSpeed;
 	// End:0x43
 	if((GameSpeed != OldSpeed))
 	{
 		SaveConfig();
 	}
+	// Restart the periodic timer, scaled to the new game speed.
 	SetTimer(Level.TimeDilation, true);
 	return;
 }
@@ -355,9 +370,11 @@ event DetailChange()
 	if((!Level.bHighDetailMode))
 	{
 		// End:0x59
+		// DynamicActors iterates only runtime-spawned actors, not BSP/static geometry.
 		foreach DynamicActors(Class'Engine.Actor', A)
 		{
 			// End:0x58
+			// High-detail-only actors not needed for gameplay are removed in low-detail mode.
 			if((A.bHighDetail && (!A.bGameRelevant)))
 			{
 				A.Destroy();
@@ -365,6 +382,7 @@ event DetailChange()
 		}		
 	}
 	// End:0x7A
+	// AllActors iterates every actor in the level, including static/map actors.
 	foreach AllActors(Class'Engine.ZoneInfo', Z)
 	{
 		Z.LinkToSkybox();		
@@ -445,6 +463,7 @@ function string ParseOption(string Options, string InKey)
 	return;
 }
 
+// Called first at level startup, before any actor PreBeginPlay; parses the URL options string (e.g. ?MaxPlayers=16?GameSpeed=1).
 event InitGame(string Options, out string Error)
 {
 	local string InOpt, LeftOpt;
@@ -453,6 +472,7 @@ event InitGame(string Options, out string Error)
 	local Class<BroadcastHandler> BHClass;
 
 	Log(("InitGame:" @ Options));
+	// Hard cap at 32 players regardless of URL parameter.
 	MaxPlayers = Min(32, GetIntOption(Options, "MaxPlayers", MaxPlayers));
 	Difficulty = byte(GetIntOption(Options, "Difficulty", int(Difficulty)));
 	InOpt = ParseOption(Options, "GameSpeed");
@@ -562,6 +582,7 @@ function ProcessServerTravel(string URL, bool bItems)
 }
 
 // NEW IN 1.60
+// Called before Login; can reject a player by setting Error; runs before content download begins.
 event PreLogin(string Options, string Address, out string Error, out string FailCode)
 {
 	local bool bSpectator;
@@ -569,6 +590,7 @@ event PreLogin(string Options, string Address, out string Error, out string Fail
 
 	spec = ParseOption(Options, "SpectatorOnly");
 	bSpectator = (spec != "");
+	// Delegates ban/password/server-full checks to AccessControl.
 	AccessControl.PreLogin(Options, Address, Error, FailCode, bSpectator);
 	return;
 }
@@ -608,6 +630,7 @@ function bool AtCapacity(bool bSpectator)
 }
 
 // NEW IN 1.60
+// Spawns PlayerController at a start spot and prepares the player; returns None to reject the connection.
 event PlayerController Login(string Portal, string Options, out string Error)
 {
 	local NavigationPoint StartSpot;
@@ -617,9 +640,9 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	local string InName, InPassword, InChecksum, InClass;
 	local byte InTeam;
 	local bool bSpectator;
-
-	bSpectator = (ParseOption(Options, "SpectatorOnly") != "");
+	bSpectator = (ParseOption(Options, "SpectatorOnly") != ""); // SpectatorOnly URL option puts player into observer mode.
 	// End:0x4A
+	// Double-checks capacity; may have changed since PreLogin was called.
 	if(AtCapacity(bSpectator))
 	{
 		Error = GameMessageClass.default.MaxedOutMessage;
@@ -647,6 +670,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	{
 		PlayerControllerClass = Class<PlayerController>(DynamicLoadObject(PlayerControllerClassName, Class'Core.Class'));
 	}
+	// PlayerController is the interface between a human player and the game world.
 	NewPlayer = Spawn(PlayerControllerClass,,, StartSpot.Location, StartSpot.Rotation);
 	// End:0x1F0
 	if((NewPlayer == none))
@@ -671,6 +695,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 		}
 		NewPlayer.GameReplicationInfo = GameReplicationInfo;
 	}
+	// All new players start in Spectating; RestartPlayer or StartMatch moves them to active play.
 	NewPlayer.GotoState('Spectating');
 	// End:0x2E1
 	if(bSpectator)
@@ -681,6 +706,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 		return NewPlayer;
 	}
 	// End:0x314
+	// Monotonically increasing ID uniquely identifies each player connection session.
 	if((NewPlayer.PlayerReplicationInfo != none))
 	{
 		NewPlayer.PlayerReplicationInfo.PlayerID = (CurrentID++);
@@ -704,17 +730,20 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	NewPlayer.ReceivedSecretChecksum = (!(InChecksum ~= "NoChecksum"));
 	(NumPlayers++);
 	// End:0x40B
+	// Broadcast join message only on servers (dedicated or listen); never in standalone.
 	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		BroadcastLocalizedMessage(GameMessageClass, 1, NewPlayer.PlayerReplicationInfo);
 	}
 	// End:0x42A
+	// In multiplayer with delayed start, hold the player in spectating until StartMatch fires.
 	if(bDelayedStart)
 	{
 		NewPlayer.GotoState('BaseSpectating');
 		return NewPlayer;
 	}
 	// End:0x519
+	// Try to match returning player to an existing unoccupied pawn (for savegame/coop reconnect).
 	foreach DynamicActors(Class'Engine.Pawn', TestPawn)
 	{
 		// End:0x518
@@ -731,6 +760,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	return;
 }
 
+// Transitions the game from waiting state to active; notifies all actors and spawns pawns for waiting players.
 function StartMatch()
 {
 	local Controller P;
@@ -742,10 +772,12 @@ function StartMatch()
 		StatLog.LogGameStart();
 	}
 	// End:0x3A
+	// Notify every actor in the level (including static/map actors) that the match is starting.
 	foreach AllActors(Class'Engine.Actor', A)
 	{
 		A.MatchStarting();		
-	}	
+	}
+	// Walk the controller linked list to spawn pawns for all waiting human players.
 	P = Level.ControllerList;
 	J0x4F:
 
@@ -756,6 +788,7 @@ function StartMatch()
 		if((P.IsA('PlayerController') && (P.Pawn == none)))
 		{
 			// End:0x92
+			// A telefrag during StartMatch can end the game before all players spawn.
 			if(bGameEnded)
 			{
 				return;				
@@ -814,7 +847,7 @@ event PostLogin(PlayerController NewPlayer)
 		}
 		bRestartLevel = default.bRestartLevel;
 	}
-	NewPlayer.ClientSetMusic(Level.Song, 3);
+	NewPlayer.ClientSetMusic(Level.Song, 3); // 3 = MTRAN_Fade: fade in the level music.
 	H = Class<HUD>(DynamicLoadObject(HUDType, Class'Core.Class'));
 	NewPlayer.ClientSetHUD(H, none);
 	// End:0xCF
@@ -852,6 +885,7 @@ function Logout(Controller Exiting)
 		}
 	}
 	// End:0xBB
+	// Message index 4 is the "player left" announcement; only broadcast on servers.
 	if((bMessage && ((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer)))))
 	{
 		BroadcastLocalizedMessage(GameMessageClass, 4, Exiting.PlayerReplicationInfo);
@@ -1025,6 +1059,7 @@ function SendPlayer(PlayerController aPlayer, string URL)
 //	Level.ServerTravel( "?Restart", true );
 //}
 // #else R6CODE
+// Called to end the current match; either rotates the server map list or restarts the current level.
 function RestartGame()
 {
 	local string NextMap;
@@ -1038,6 +1073,7 @@ function RestartGame()
 		bAlreadyChanged = true;
 		myList = pServerOptions.m_ServerMapList;
 		// End:0x69
+		// If server config changed mid-game, restart from map index 1; otherwise advance the map list normally.
 		if((m_bChangedServerConfig == true))
 		{
 			NextMap = myList.GetNextMap(1);			
@@ -1058,6 +1094,7 @@ function RestartGame()
 			return;
 		}
 	}
+	// ?Restart reloads the current level without switching maps; 'true' keeps persistent actors.
 	Level.ServerTravel("?Restart", true);
 	return;
 }
@@ -1080,6 +1117,7 @@ event BroadcastLocalized(Actor Sender, Class<LocalMessage> Message, optional int
 	return;
 }
 
+// Notifies all controllers the game has ended; returns false to request overtime instead of ending.
 function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 {
 	local Controller P;
@@ -1105,6 +1143,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	// End:0x1F
 	if((!CheckEndGame(Winner, Reason)))
 	{
+		// CheckEndGame returned false, requesting overtime; game continues without setting bGameEnded.
 		bOverTime = true;
 		return;
 	}
@@ -1128,6 +1167,7 @@ function EndLogging(string Reason)
 	return;
 }
 
+// Walks the NavigationPoint linked list to find the highest-rated spawn point for the given player.
 function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam, optional string incomingName)
 {
 	local NavigationPoint N, BestStart;
@@ -1135,11 +1175,13 @@ function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam
 	local float BestRating, NewRating;
 
 	// End:0x6E
+	// During pre-match or when the player is flagged as waiting, always return their original start spot.
 	if((((Player != none) && (Player.StartSpot != none)) && (bWaitingToStartMatch || ((Player.PlayerReplicationInfo != none) && Player.PlayerReplicationInfo.bWaitingPlayer))))
 	{
 		return Player.StartSpot;
 	}
 	// End:0xAD
+	// A connecting portal name can resolve to a Teleporter actor as the spawn point.
 	if((incomingName != ""))
 	{
 		// End:0xAC
@@ -1152,6 +1194,7 @@ function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam
 			}			
 		}		
 	}
+	// Walk the NavigationPoint linked list; linear scan to find the highest-rated start.
 	N = Level.NavigationPointList;
 	J0xC1:
 
@@ -1203,13 +1246,13 @@ function float RatePlayerStart(NavigationPoint N, byte Team, Controller Player)
 			// End:0x45
 			if(P.bEnabled)
 			{
-				return 1000.0000000;
+				return 1000.0000000; // Enabled single-player start: highest priority.
 			}
-			return 20.0000000;
+			return 20.0000000; // Disabled single-player start: low-priority fallback.
 		}
-		return 10.0000000;
+		return 10.0000000; // Non-single-player start point: valid but lowest priority.
 	}
-	return 0.0000000;
+	return 0.0000000; // Not a PlayerStart node: never use.
 	return;
 }
 
@@ -1240,9 +1283,9 @@ function SetRoundRestartedByJoinFlag(bool bRestartableByJoin)
 
 defaultproperties
 {
-	Difficulty=3
+	Difficulty=3 // 3 = medium difficulty.
 	MaxSpectators=2
-	MaxPlayers=16
+	MaxPlayers=16 // Default max player count for multiplayer sessions.
 	bRestartLevel=true
 	bPauseable=true
 	bCanChangeSkin=true
