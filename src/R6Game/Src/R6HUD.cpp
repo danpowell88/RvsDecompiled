@@ -84,7 +84,7 @@ void AR6HUD::UpdateHUDColors(FColor)
 	unguard;
 }
 
-IMPL_TODO("10251-byte HUD rendering function (Ghidra 0x1000ceb0); Ghidra decompilation failed")
+IMPL_TODO("R6Game.dll 0x1000ceb0: 10251-byte HUD rendering function; Ghidra decompilation failed — function body not yet recovered")
 void AR6HUD::execDrawNativeHUD(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;
