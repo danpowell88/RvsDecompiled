@@ -1851,7 +1851,7 @@ void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1311, execSetServerBeacon );
 
-IMPL_DIVERGE("retail reads binary-specific global DAT_10793088; beacon always empty without SetServerBeacon (Ghidra 0x104240c0)")
+IMPL_TODO("retail reads FString g_ServerBeacon global (DAT_10793088); declare and populate from execSetServerBeacon to implement (Ghidra 0x104240c0)")
 void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerBeacon);
@@ -1926,7 +1926,7 @@ void AActor::execGetGameVersion( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1419, execGetGameVersion );
 
-IMPL_DIVERGE("always returns 0 — PunkBuster client not implemented")
+IMPL_DIVERGE("PunkBuster DLL integration unavailable; always returns 0 (Ghidra 0x104204b0)")
 void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBClientEnabled);
@@ -1936,7 +1936,7 @@ void AActor::execIsPBClientEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1400, execIsPBClientEnabled );
 
-IMPL_DIVERGE("always returns 0 — PunkBuster server not implemented")
+IMPL_DIVERGE("PunkBuster DLL integration unavailable; always returns 0 (Ghidra 0x10420410)")
 void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPBServerEnabled);
@@ -1946,7 +1946,7 @@ void AActor::execIsPBServerEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1402, execIsPBServerEnabled );
 
-IMPL_DIVERGE("parses bEnable but performs no action — PunkBuster not implemented")
+IMPL_DIVERGE("PunkBuster DLL integration unavailable; enable/disable call omitted (Ghidra 0x10420550)")
 void AActor::execSetPBStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPBStatus);
@@ -2223,7 +2223,7 @@ void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2614, execGetNbAvailableResolutions );
 
-IMPL_DIVERGE("retail reads resolution via binary-specific vtable for given Index (Ghidra 0x10427090); hardcoded fallback")
+IMPL_TODO("retail reads resolution via engine client vtable for given Index; blocked on vtable mapping (Ghidra 0x10427090)")
 void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAvailableResolution);
@@ -2235,7 +2235,7 @@ void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2615, execGetAvailableResolution );
 
-IMPL_DIVERGE("calls UEngine vtable[0xD4/4] with OldTex name; binary-specific vtable (Ghidra 0x10424160)")
+IMPL_TODO("calls UEngine virtual ReplaceTexture at vtable[0xD4/4]; blocked on virtual declaration (Ghidra 0x10424160)")
 void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReplaceTexture);
@@ -2336,7 +2336,7 @@ void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2622, execGarbageCollect );
 
-IMPL_DIVERGE("retail appends to binary-specific global ring buffer DAT_1066679c (Ghidra 0x1037b630)")
+IMPL_TODO("retail appends Start/End/Color to debug ring buffer DAT_1066679c; blocked pending struct declaration (Ghidra 0x1037b630)")
 void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawDashedLine);
@@ -2349,7 +2349,7 @@ void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2608, execDrawDashedLine );
 
-IMPL_DIVERGE("retail appends to binary-specific global ring buffer DAT_10666790 (Ghidra 0x10379ce0)")
+IMPL_TODO("retail appends Loc/Text/Color to debug ring buffer DAT_10666790; blocked pending struct declaration (Ghidra 0x10379ce0)")
 void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawText3D);
@@ -2362,7 +2362,7 @@ void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_DIVERGE("retail stores render callback data in binary-specific globals DAT_1066677c..10666788 (Ghidra 0x103716a0)")
+IMPL_TODO("retail stores render callback data in globals DAT_1066677c..10666788; blocked pending global declarations (Ghidra 0x103716a0)")
 void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
@@ -2793,9 +2793,9 @@ void AActor::PreNetReceive()
     // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
 }
 
-// Ghidra 0x103781f0 (~295 bytes): reads snapshot globals saved by PreNetReceive, applies
-// position/rotation/physics changes via XLevel. Requires matching PreNetReceive globals.
-IMPL_TODO("reads binary globals saved by PreNetReceive; requires matching DAT_106666f4-* (Ghidra 0x103781f0)")
+// Ghidra 0x1037d070 (1939 bytes): reads snapshot globals saved by PreNetReceive, applies
+// position/rotation/physics changes via XLevel. Blocked pending same globals.
+IMPL_TODO("reads globals saved by PreNetReceive; blocked pending DAT_106666f4-* declarations (Ghidra 0x1037d070)")
 void AActor::PostNetReceive()
 {
     // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
@@ -3452,7 +3452,7 @@ void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 	unguard;
 }
 
-IMPL_DIVERGE("retail rebuilds static mesh batches via render subsystem; render data rebuilt implicitly at draw time")
+IMPL_TODO("retail rebuilds static mesh batches via render subsystem; blocked pending render subsystem implementation")
 void AActor::UpdateRenderData()
 {
 	guard(AActor::UpdateRenderData);
