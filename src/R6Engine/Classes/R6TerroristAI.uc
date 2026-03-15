@@ -106,7 +106,7 @@ var R6TerroristMgr m_Manager;
 var R6TerroristVoices m_VoicesManager;
 var R6ActionSpot m_pActionSpot;  // Current cover spot of the terrorist
 // NEW IN 1.60
-var NavigationPoint m_aLastNode[10];
+var NavigationPoint m_aLastNode[10]; // Last ten node used by the terrorist
 var R6Pawn m_huntedPawn;  // hunted pawn
 // Hostage interaction
 var R6Hostage m_Hostage;
@@ -1805,6 +1805,9 @@ function HostageSurrender(R6HostageAI hostageAI)
 	return;
 }
 
+//============================================================================
+// EscortIsOver - Called from the hostage AI when the escort is over
+//============================================================================
 function EscortIsOver(R6HostageAI hostageAI, bool bSuccess)
 {
 	// End:0x2B
@@ -2193,6 +2196,11 @@ state WaitToClimbLadder
 	stop;
 }
 
+//============================================================================
+// TransientStateCode
+//      State used when the AI want to execute some latent function
+//      but doesn't need a new state
+//============================================================================
 state TransientStateCode
 {
 	function BeginState()
@@ -4193,6 +4201,7 @@ CheckBehind:
 	stop;		
 }
 
+// Terrorist have seen a freed hostage or civilian
 state FindHostage
 {
 	function BeginState()
