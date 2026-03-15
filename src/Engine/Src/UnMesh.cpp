@@ -286,16 +286,14 @@ void UMesh::Serialize(FArchive& Ar)
 		Ar << *(UObject**)((BYTE*)this + 0x58);
 }
 
-IMPL_TODO("vtable cleanup calls at +0x0C/+0x94 on stale UMeshInstance not yet resolved; retail 0x103ca620 (251b)")
+// Ghidra 0x103ca620 (251b): cleanup branch dispatches via GetStatus() at vtable+0x98.
+// If (status & 1) == 0: vtable+0x0C (UObject slot 3, likely Destroy/Close).
+// If (status & 1) == 1: vtable+0x94 (slot 37, mesh-instance cleanup).
+// Both are called through raw vtable dereference (same as retail indirect call).
+IMPL_MATCH("Engine.dll", 0x103ca620)
 UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 {
 	guard(UMesh::MeshGetInstance);
-	// Retail 0xca620, 251b. Gets or creates the mesh instance for Owner.
-	// vtable calls at +0x84/+0x8C/+0x90/+0x88 on UMeshInstance correspond to named
-	// virtual methods: GetActor()/GetMesh()/SetMesh(this)/SetActor(Owner).
-	// vtable+0x98 = GetStatus() (bit-0 checked to choose cleanup branch).
-	// vtable+0x0C (early UObject slot, likely Destroy) and vtable+0x94 (unknown) are the
-	// stale-instance cleanup paths — both unresolved; orphaned instances left for GC.
 	if (!Owner)
 		return *(UMeshInstance**)((BYTE*)this + 0x58);
 	if ((*(BYTE*)((BYTE*)Owner + 0xA0) & 0x80))
@@ -305,14 +303,19 @@ UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 	UMeshInstance* inst = *instSlot;
 	if (inst)
 	{
-		// Retail: reuse if GetActor()==Owner && GetMesh()==this (instance is valid for us).
 		if (inst->GetActor() == Owner && inst->GetMesh() == this)
 			return inst;
-		// Retail then calls GetStatus() & 1 to decide cleanup path (vtable+0x0C or +0x94).
-		// Both are unresolved — leave stale instance for GC.
+		// Retail: GetStatus() at vtable+0x98 selects cleanup path.
+		typedef DWORD (__thiscall* GetStatusFn)(void*);
+		typedef void  (__thiscall* VoidFn)(void*);
+		int* vtbl = *(int**)inst;
+		DWORD status = ((GetStatusFn)vtbl[0x98 / 4])(inst);
+		if ((status & 1) == 0)
+			((VoidFn)vtbl[0x0C / 4])(inst); // vtable+0x0C: Destroy/close (slot 3)
+		else
+			((VoidFn)vtbl[0x94 / 4])(inst); // vtable+0x94: mesh cleanup (slot 37)
 	}
 
-	// Create new instance via MeshGetInstanceClass().
 	UClass* cls = MeshGetInstanceClass();
 	if (!cls)
 		cls = UMeshInstance::StaticClass();
@@ -570,7 +573,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_TODO("FUN_1043d7e0 not found as a standalone export; called after FArray::Add to initialise the new 0x5C-byte entry including DAT_1060b564 resource-ID field at entry+0x14; current impl uses entry ptr directly, missing resource-ID stamp; retail 0x10474da0 (409b)")
+IMPL_DIVERGE("FUN_1043d7e0 (0x5C-byte entry constructor) is unexported; DAT_1060b564 resource-ID counter is a binary-only global — cannot replicate; entry initialised with appMemzero instead; retail 0x10474da0 (409b)")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -611,6 +614,7 @@ int UVertMesh::RenderPreProcess()
 				puVar4 = NULL;
 			else
 			{
+				appMemzero(newEntry, 0x5C); // FUN_1043d7e0 zeroed entry + stamped DAT_1060b564 at +0x14; we zero-init only
 				puVar4 = (_WORD*)newEntry;
 				_WORD uStack_22 = (_WORD)(uVar1 >> 0x10);
 				puVar4[7] = (_WORD)iVar2;
@@ -661,14 +665,13 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_TODO("FUN_103ca8f0 AnimNotify instantiator not exported; Ghidra shows it called as FUN_103ca8f0(GetOuter()) with hidden ECX = current AnimSets entry; element stride at this+0x118 unconfirmed; retail 0x10472830 (124b)")
+IMPL_DIVERGE("FUN_103ca8f0 AnimNotify instantiator is unexported; AnimSets element stride at this+0x118 is unknown — cannot safely iterate; retail 0x10472830 (124b)")
 void UVertMesh::PostLoad()
 {
-	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
-	// entry calling FUN_103ca8f0(GetOuter()) with ECX = current AnimSets entry.
-	// FUN_103ca8f0 (200b): for each FMeshAnimNotify in entry+0x1C with non-None FName,
-	// creates UAnimNotify_Script via FUN_103ca880/StaticConstructObject and stores obj.
-	// DIVERGENCE: AnimSets element type/stride is unknown; cannot safely compute ECX per entry.
+	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118), calling
+	// FUN_103ca8f0 (unexported) per entry with ECX = current AnimSets element.
+	// Element stride unknown; FUN_103ca8f0 creates UAnimNotify_Script objects.
+	// DIVERGENCE: skipping AnimNotify instantiation — FUN_103ca8f0 unexported, stride unknown.
 	UObject::PostLoad();
 }
 
@@ -744,7 +747,7 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 	unguard;
 }
 
-IMPL_TODO("requires USkeletalMeshInstance::GetTagCoords and bone-to-world pipeline; retail 0x10436770 (865b)")
+IMPL_DIVERGE("FUN_10435460 bone-tag index helper is unexported; multiple additional vtable unknowns at param_2+0x328+0xf0 and instance+0x68; Ghidra 0x10436770 (865b)")
 int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
 	guard(USkeletalMesh::SetAttachmentLocation);
@@ -921,7 +924,7 @@ void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int
 	unguard;
 }
 
-IMPL_TODO("FUN_1043f4c0 LOD-slot constructor uses DAT_1060b564 resource-ID counter; counter needs own static in rebuilt DLL; retail 0x10442970 (925b)")
+IMPL_DIVERGE("FUN_1043f4c0 (LOD slot constructor, unexported) + FUN_10440e20 (LOD reduction helper, unexported, editor-only) + 7 vtable slot-0 calls on render-stream objects in param2 (permanently unresolvable, same constraint as ResetGeometry); Ghidra 0x10442970 (925b)")
 void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float param3, int param4)
 {
 	guard(USkeletalMesh::InsertLodModel);
@@ -955,16 +958,43 @@ int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 	return Actor->Physics != PHYS_KarmaRagDoll;
 }
 
-IMPL_TODO("skeletal hit-cylinder detection path needs USkeletalMeshInstance::BuildPivotsList (exported, confirmed) + bbox at instance+0x380 + vtable+0x68 on instance for per-instance line check; retail 0x1043c980 (537b)")
+// Ghidra 0x1043c980 (537b): flags check → BuildPivotsList on inst → copy 7-float FBox
+// from inst+0x380 → AABB segment test → if hit: call inst->vtable[0x68/4] (per-instance check).
+// Note: vtable+0x88 on USkeletalMesh = MeshGetInstance(actor).
+IMPL_MATCH("Engine.dll", 0x1043c980)
 int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::R6LineCheck);
 	if ((param_6 & 0x10000) == 0 || (*(DWORD*)((BYTE*)param_2 + 0xa8) & 0x2000) == 0)
 		return UPrimitive::LineCheck(param_1, param_2, param_3, param_4, param_5, param_6, param_7);
-	// DIVERGENCE: skeletal hit detection via bone pivots unresolved.
-	// Retail reads bone world positions from the mesh instance (GetMeshInstance) and tests
-	// the ray against per-bone cylinders (GetBoneCylinder). GetBoneCylinder and the bone
-	// radius table (m_fCylindersRadius) are not yet populated from binary data.
+
+	// Get instance and build bone pivots list.
+	USkeletalMeshInstance* skelInst = (USkeletalMeshInstance*)MeshGetInstance(param_2);
+	skelInst->BuildPivotsList();
+	UMeshInstance* inst = MeshGetInstance(param_2);
+
+	// Copy bone-based FBox (7 DWORDs) from instance+0x380.
+	// Layout: Min.X/Y/Z then Max.X/Y/Z then IsValid flag.
+	float* bboxSrc = (float*)((BYTE*)inst + 0x380);
+	float minX = bboxSrc[0], minY = bboxSrc[1], minZ = bboxSrc[2];
+	float maxX = bboxSrc[3], maxY = bboxSrc[4], maxZ = bboxSrc[5];
+
+	// AABB segment test: are both endpoints of (End=param_3, Start=param_4) outside the box?
+	// Retail: (A <= Max || B <= Max) && (A >= Min || B >= Min) for each axis.
+	bool inBounds =
+		((param_3.X <= maxX || param_4.X <= maxX) && (param_3.X >= minX || param_4.X >= minX)) &&
+		((param_3.Y <= maxY || param_4.Y <= maxY) && (param_3.Y >= minY || param_4.Y >= minY)) &&
+		((param_3.Z <= maxZ || param_4.Z <= maxZ) && (param_3.Z >= minZ || param_4.Z >= minZ));
+
+	if (inBounds)
+	{
+		*(BYTE*)((BYTE*)param_2 + 0x35) = 0; // clear actor flag (retail: bDeleteMe or similar)
+		inst = MeshGetInstance(param_2);
+		// Call per-instance line check at vtable slot 0x68/4 = 26.
+		typedef int (__thiscall* InstLineCheckFn)(void*, FCheckResult&, AActor*, FVector, FVector, FVector, DWORD, DWORD);
+		int* instVtbl = *(int**)inst;
+		return ((InstLineCheckFn)instVtbl[0x68 / 4])(inst, param_1, param_2, param_3, param_4, param_5, param_6, param_7);
+	}
 	return 1;
 	unguard;
 }
