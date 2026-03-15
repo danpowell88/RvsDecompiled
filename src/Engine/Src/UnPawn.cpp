@@ -1699,18 +1699,67 @@ INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AAc
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103ef850 is 425 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103ef850; raw offsets: CrouchHeight=+0x454, CrouchRadius=+0x458, pawnFlags=+0x3e0, stepFrac=+0x424")
 INT APawn::CanCrouchWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanCrouchWalk);
+	// Height delta: CrouchHeight - CollisionHeight (how much to lower Z)
+	FLOAT hDelta = *(FLOAT*)((BYTE*)this + 0x454) - CollisionHeight;
+	// First trace: zero-extent line at crouch height level
+	FVector Start(TestLocation.X, TestLocation.Y, hDelta + TestLocation.Z);
+	FVector End(FeetLocation.X,   FeetLocation.Y,  hDelta + FeetLocation.Z);
+	FCheckResult Hit(1.0f);
+	XLevel->SingleLineCheck(Hit, this, End, Start, 0x286, FVector(0.f,0.f,0.f));
+	if (!Hit.Actor)
+	{
+		FLOAT crouchH = *(FLOAT*)((BYTE*)this + 0x454);  // CrouchHeight
+		FLOAT crouchR = *(FLOAT*)((BYTE*)this + 0x458);  // CrouchRadius
+		// Second trace: cylinder-extent check at crouch height
+		FVector Start2(FeetLocation.X, FeetLocation.Y, hDelta + FeetLocation.Z);
+		FVector End2(TestLocation.X,   TestLocation.Y,  hDelta + TestLocation.Z);
+		FCheckResult Hit2(1.0f);
+		XLevel->SingleLineCheck(Hit2, this, End2, Start2, 0x86, FVector(crouchR, crouchR, crouchH));
+		if (Hit2.Time == 1.0f)
+		{
+			*(DWORD*)((BYTE*)this + 0x3e0) |= 0x50u;   // set bits 4 and 6
+			*(FLOAT*)((BYTE*)this + 0x424) = 0.5f;     // step fraction
+			return 1;
+		}
+	}
 	return 0;
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103efa30 is 454 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103efa30; raw offsets: ProneHeight=+0x464, ProneRadius=+0x468, pawnFlags=+0x3e0, stepFrac=+0x424")
 INT APawn::CanProneWalk(FVector const& TestLocation, FVector const& FeetLocation)
 {
 	guard(APawn::CanProneWalk);
+	// Bit 11 of pawn flags must be set (bCanProne capability flag)
+	if (!(*(DWORD*)((BYTE*)this + 0x3e0) & 0x800u))
+		return 0;
+	FLOAT hDelta = *(FLOAT*)((BYTE*)this + 0x464) - CollisionHeight;  // ProneHeight - CollisionHeight
+	// First trace: zero-extent line at prone height level
+	FVector Start(TestLocation.X, TestLocation.Y, hDelta + TestLocation.Z);
+	FVector End(FeetLocation.X,   FeetLocation.Y,  hDelta + FeetLocation.Z);
+	FCheckResult Hit(1.0f);
+	XLevel->SingleLineCheck(Hit, this, End, Start, 0x286, FVector(0.f,0.f,0.f));
+	if (!Hit.Actor)
+	{
+		FLOAT proneH = *(FLOAT*)((BYTE*)this + 0x464);  // ProneHeight
+		FLOAT proneR = *(FLOAT*)((BYTE*)this + 0x468);  // ProneRadius
+		// Second trace: cylinder-extent check at prone height
+		FVector Start2(FeetLocation.X, FeetLocation.Y, hDelta + FeetLocation.Z);
+		FVector End2(TestLocation.X,   TestLocation.Y,  hDelta + TestLocation.Z);
+		FCheckResult Hit2(1.0f);
+		XLevel->SingleLineCheck(Hit2, this, End2, Start2, 0x86, FVector(proneR, proneR, proneH));
+		if (Hit2.Time == 1.0f)
+		{
+			// Clear bit 4, set bits 8 and 10
+			*(DWORD*)((BYTE*)this + 0x3e0) = (*(DWORD*)((BYTE*)this + 0x3e0) & ~0x10u) | 0x500u;
+			*(FLOAT*)((BYTE*)this + 0x424) = 1.5f;      // step fraction
+			return 1;
+		}
+	}
 	return 0;
 	unguard;
 }
