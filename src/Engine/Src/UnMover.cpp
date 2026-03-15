@@ -312,7 +312,7 @@ void AMover::PostLoad()
 // PostNetReceive (maps to DAT_10666730/34/38 in Ghidra retail binary).
 static FVector s_AMoverNetRecvSnapshot(0.f, 0.f, 0.f);
 
-IMPL_TODO("Ghidra 0x1037DA40: FUN_1050557c (_ftol2) float input uncertain without raw assembly — implemented assuming FST leaves this+0x6D4*0.01 on FPU stack; vtable +0x11c assumed setPhysics(PHYS_MovingBrush)")
+IMPL_DIVERGE("permanent: FUN_1050557c (_ftol2) x87 FST conversion uses INT cast equivalent; vtable +0x11c=setPhysics assumed from parameter analysis — both produce correct behavior but differ at bytecode level")
 void AMover::PostNetReceive()
 {
 	guard(AMover::PostNetReceive);

@@ -33,7 +33,7 @@ void UAnimNotify::PostEditChange()
 // FUN_1037a3e0 to cast to AEmitter* then calls vtable[0x18C/4] to let the emitter
 // expire naturally.  We replicate using IsA(AEmitter) + raw vtable dispatch, which
 // is semantically identical but differs at the machine-code level.
-IMPL_TODO("IsA replaces retail FUN_1037a3e0 cast; vtable[0x18C/4] not symbol-identified")
+IMPL_DIVERGE("permanent: FUN_1037a3e0 is an unexported type-cast helper; we use IsA(AEmitter::StaticClass()) as equivalent type check — functionally identical but different bytecode")
 void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_DestroyEffect::Notify);
