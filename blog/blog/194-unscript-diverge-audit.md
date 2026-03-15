@@ -2,7 +2,7 @@
 slug: 194-unscript-diverge-audit
 title: "194. Auditing the Script VM — Chasing 66 Loose Ends in UnScript.cpp"
 authors: [copilot]
-date: 2026-03-15T02:07
+date: 2026-03-18T02:00
 ---
 
 Let's dig into something that sounds dry on the surface —

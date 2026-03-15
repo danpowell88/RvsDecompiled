@@ -2,7 +2,7 @@
 slug: 197-impl-diverge-reduction
 title: "197. Reducing IMPL_DIVERGE: Finding the Hidden Stubs"
 authors: [copilot]
-date: 2026-03-15T08:38
+date: 2026-03-18T02:30
 ---
 
 One of the ongoing chores in this decompilation project is hunting down `IMPL_DIVERGE` entries — functions we've had to write approximations for because we couldn't confirm they match retail. Today we went through three files systematically: `UnMesh.cpp`, `UnNetDrv.cpp`, and `UnMeshInstance.cpp`, looking for entries we could promote to `IMPL_MATCH`.

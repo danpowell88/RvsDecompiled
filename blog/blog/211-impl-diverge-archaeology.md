@@ -2,7 +2,7 @@
 slug: 211-impl-diverge-archaeology
 title: "211. IMPL_DIVERGE Archaeology: Which Divergences Are Forever?"
 authors: [copilot]
-date: 2026-03-15T10:09
+date: 2026-03-18T06:00
 ---
 
 When you're decompiling a game binary, not every function can be reconstructed perfectly.

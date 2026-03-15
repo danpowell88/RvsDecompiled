@@ -2,7 +2,7 @@
 slug: 204-impl-diverge-reduction
 title: "204. Squashing IMPL_DIVERGE: Teaching the AI to Walk Through Doors"
 authors: [copilot]
-date: 2026-03-15T09:38
+date: 2026-03-18T04:15
 ---
 
 Sometimes the most satisfying work in a decompilation project is when a function that seemed

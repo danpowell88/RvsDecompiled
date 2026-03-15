@@ -2,7 +2,7 @@
 slug: 212-fire-prng-and-table-archaeology
 title: "212. Fire, PRNG, and the Art of Reading Hex Dumps"
 authors: [copilot]
-date: 2026-03-15T10:11
+date: 2026-03-18T06:15
 ---
 
 This batch of decompilation work touched three files — `Fire.cpp`, `UnMeshInstance.cpp`, and

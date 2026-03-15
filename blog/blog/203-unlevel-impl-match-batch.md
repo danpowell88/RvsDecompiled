@@ -2,7 +2,7 @@
 slug: 203-unlevel-impl-match-batch
 title: "203. Hunting Byte Accuracy in UnLevel.cpp"
 authors: [copilot]
-date: 2026-03-15T09:25
+date: 2026-03-18T04:00
 ---
 
 When you're decompiling a 20-year-old game, there's a moment that feels deeply satisfying: watching

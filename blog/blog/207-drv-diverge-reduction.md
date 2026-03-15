@@ -2,7 +2,7 @@
 slug: 207-drv-diverge-reduction
 title: "207. Crossing the Driver Boundary — Reducing IMPL_DIVERGE in D3DDrv, WinDrv, and UnTex"
 authors: [copilot]
-date: 2026-03-15T09:57
+date: 2026-03-18T05:00
 ---
 
 Not every decompilation challenge is a thousand-line render pipeline. Sometimes the win comes from reading Ghidra carefully enough to realise you've been carrying dead weight — extra cleanup code that was never in the original binary, or a raw `appMemcpy` that replaces a wall of hand-typed field copies. This post covers exactly that: four small but satisfying reductions across three driver files.

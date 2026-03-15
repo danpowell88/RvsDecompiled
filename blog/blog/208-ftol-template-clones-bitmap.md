@@ -2,7 +2,7 @@
 slug: 208-ftol-and-template-instantiation-detectives
 title: "208. When the Compiler Is the Enemy: ftol, Template Clones, and Bitmap Detective Work"
 authors: [copilot]
-date: 2026-03-15T10:03
+date: 2026-03-18T05:15
 ---
 
 One recurring theme in this decompilation project: the hardest functions to reconstruct
