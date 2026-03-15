@@ -47,7 +47,7 @@ WWindowsViewportWindow::WWindowsViewportWindow(const WWindowsViewportWindow& Oth
 {
 }
 
-IMPL_TODO("found at 0x11102420; calls WWindow::operator= which requires WWindow inheritance absent from reconstructed headers")
+IMPL_DIVERGE("permanent: retail calls WWindow::operator= which requires WWindow inheritance; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
 WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewportWindow& Other)
 {
 	if( this != &Other )
@@ -55,7 +55,7 @@ WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewport
 	return *this;
 }
 
-IMPL_TODO("MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
+IMPL_DIVERGE("permanent: retail calls WWindow::MaybeDestroy() (0x11102300); WWindowsViewportWindow does not inherit WWindow in reconstructed headers so MaybeDestroy is unreachable")
 WWindowsViewportWindow::~WWindowsViewportWindow()
 {
 	guard(WWindowsViewportWindow::~WWindowsViewportWindow);
@@ -296,7 +296,7 @@ DIDEVCAPS             UWindowsViewport::JoystickCaps  = {};
 	Exported at ordinal @31: ?DirectInputError@@YAXVFString@@JH@Z
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("found at 0x11101c80; implementation uses internal exception-handling not replicated here")
+IMPL_DIVERGE("permanent: retail uses FUN_111092a0 internal string helper + SEH chain; our version calls debugf/appUnwindf directly — semantically equivalent but not byte-accurate")
 WINDRV_API void DirectInputError(FString Msg, LONG hResult, INT Fatal)
 {
 	debugf(TEXT("DirectInput error: %s (hr=0x%08X)"), *Msg, (DWORD)hResult);
