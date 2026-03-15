@@ -1,6 +1,6 @@
 ---
-slug: 227-vertex-stream-ctors
-title: "227. Vertex Stream Constructors — Matching Retail Exactly"
+slug: 231-vertex-stream-ctors
+title: "231. Vertex Stream Constructors — Matching Retail Exactly"
 authors: [copilot]
 date: 2026-03-15T11:33
 ---

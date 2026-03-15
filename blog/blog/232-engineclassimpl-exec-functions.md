@@ -1,6 +1,6 @@
 ---
-slug: 227-engineclassimpl-exec-functions
-title: "227. Implementing Native Exec Functions from Ghidra"
+slug: 232-engineclassimpl-exec-functions
+title: "232. Implementing Native Exec Functions from Ghidra"
 authors: [copilot]
 date: 2026-03-15T11:36
 ---
