@@ -77,8 +77,45 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // +0x54: FString
 
 // ??0FStatGraph@@QAE@ABV0@@Z
-IMPL_TODO("Ghidra 0x103518f0: copy ctor — FUN_1033b2a0/FUN_1032dff0/FUN_1031ce50 per-type TArray copy helpers not yet resolved")
-FStatGraph::FStatGraph(FStatGraph const & p0) {}
+// Ghidra 0x103518f0, 180b. TArray@+0x08 element type unknown (FUN_1033b2a0) → shallow copy;
+// FUN_1031fea0 (called via ctor chain) omitted; all other non-trivial members deep-copied.
+IMPL_TODO("Ghidra 0x103518f0; TArray@+0x08 element type unknown — shallow bitwise copy; FUN_1031fea0 call in ctor chain omitted")
+FStatGraph::FStatGraph(FStatGraph const& Other)
+{
+	// Trivial DWORDs at +0x00, +0x04
+	*(DWORD*)((BYTE*)this + 0x00) = *(const DWORD*)((const BYTE*)&Other + 0x00);
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+
+	// TArray at +0x08: element type unknown — shallow bitwise copy only (diverges from retail)
+	appMemcpy((BYTE*)this + 0x08, (const BYTE*)&Other + 0x08, sizeof(FArray));
+	// +0x14: init to 0 (retail ctor sets this; copy ctor does not copy it per Ghidra)
+	*(DWORD*)((BYTE*)this + 0x14) = 0;
+
+	// TArray<FStatGraphLine> at +0x1c: construct empty then element-wise copy ctor
+	{
+		new ((BYTE*)this + 0x1c) FArray();
+		FArray* dst = (FArray*)((BYTE*)this + 0x1c);
+		const FArray* src = (const FArray*)((const BYTE*)&Other + 0x1c);
+		INT n = src->Num();
+		if (n > 0)
+		{
+			dst->Add(n, 0x34);
+			for (INT i = 0; i < n; i++)
+				new ((BYTE*)dst->GetData() + i * 0x34) FStatGraphLine(
+					*(const FStatGraphLine*)((const BYTE*)src->GetData() + i * 0x34));
+		}
+	}
+
+	// TArray<FLOAT> at +0x28: placement new copy ctor
+	new ((BYTE*)this + 0x28) TArray<FLOAT>(*(const TArray<FLOAT>*)((const BYTE*)&Other + 0x28));
+
+	// 7 DWORDs at +0x34..+0x4c
+	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 28);
+	// BYTE at +0x50
+	*(BYTE*)((BYTE*)this + 0x50) = *(const BYTE*)((const BYTE*)&Other + 0x50);
+	// FString at +0x54
+	new ((BYTE*)this + 0x54) FString(*(const FString*)((const BYTE*)&Other + 0x54));
+}
 
 // ??1FStatGraph@@QAE@XZ
 // Destruction order from Ghidra EH state analysis:
@@ -101,9 +138,54 @@ FStatGraph::~FStatGraph() {
 }
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
-IMPL_TODO("Ghidra 0x103519b0: operator= — TArray@+0x08/+0x1c/+0x28 per-type copy helpers; FStatGraphLine non-trivial copy ctor not yet resolved")
-FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
-	appMemcpy(Pad, p0.Pad, sizeof(Pad));
+// Ghidra 0x103519b0, 141b. TArray@+0x08 (FUN_10326110) element type unknown → raw copy;
+// FUN_1031fea0 call omitted; TArray<FStatGraphLine> and TArray<FLOAT> deep-copied.
+IMPL_TODO("Ghidra 0x103519b0; TArray@+0x08 element type unknown — raw bitwise copy; FUN_1031fea0 call omitted")
+FStatGraph& FStatGraph::operator=(FStatGraph const& Other)
+{
+	if (this == &Other) return *this;
+
+	// Trivial DWORDs at +0x00, +0x04
+	*(DWORD*)((BYTE*)this + 0x00) = *(const DWORD*)((const BYTE*)&Other + 0x00);
+	*(DWORD*)((BYTE*)this + 0x04) = *(const DWORD*)((const BYTE*)&Other + 0x04);
+	// TArray at +0x08: element type unknown — raw copy (diverges from retail)
+	appMemcpy((BYTE*)this + 0x08, (const BYTE*)&Other + 0x08, sizeof(FArray));
+	// +0x18: explicitly copied in Ghidra operator= (not in copy ctor)
+	*(DWORD*)((BYTE*)this + 0x18) = *(const DWORD*)((const BYTE*)&Other + 0x18);
+
+	// TArray<FStatGraphLine> at +0x1c: element-wise assignment
+	{
+		FArray* dst = (FArray*)((BYTE*)this + 0x1c);
+		const FArray* src = (const FArray*)((const BYTE*)&Other + 0x1c);
+		INT dstNum = dst->Num(), srcNum = src->Num();
+		INT copyCount = (dstNum < srcNum) ? dstNum : srcNum;
+		// Destroy and remove surplus elements
+		for (INT i = dstNum - 1; i >= srcNum; i--)
+			((FStatGraphLine*)((BYTE*)dst->GetData() + i * 0x34))->~FStatGraphLine();
+		if (dstNum > srcNum)
+			dst->Remove(srcNum, dstNum - srcNum, 0x34);
+		// Assign existing elements
+		for (INT i = 0; i < copyCount; i++)
+			*(FStatGraphLine*)((BYTE*)dst->GetData() + i * 0x34) =
+				*(const FStatGraphLine*)((const BYTE*)src->GetData() + i * 0x34);
+		// Construct new elements
+		if (srcNum > dstNum)
+		{
+			INT firstNew = dst->Add(srcNum - dstNum, 0x34);
+			for (INT i = firstNew; i < srcNum; i++)
+				new ((BYTE*)dst->GetData() + i * 0x34) FStatGraphLine(
+					*(const FStatGraphLine*)((const BYTE*)src->GetData() + i * 0x34));
+		}
+	}
+
+	// TArray<FLOAT> at +0x28
+	*(TArray<FLOAT>*)((BYTE*)this + 0x28) = *(const TArray<FLOAT>*)((const BYTE*)&Other + 0x28);
+	// 7 DWORDs at +0x34..+0x4c
+	appMemcpy((BYTE*)this + 0x34, (const BYTE*)&Other + 0x34, 28);
+	// BYTE at +0x50
+	*(BYTE*)((BYTE*)this + 0x50) = *(const BYTE*)((const BYTE*)&Other + 0x50);
+	// FString at +0x54
+	*(FString*)((BYTE*)this + 0x54) = *(const FString*)((const BYTE*)&Other + 0x54);
 	return *this;
 }
 
