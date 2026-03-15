@@ -690,7 +690,7 @@ void FLineBatcher::DrawPoint(FSceneNode* Scene, FVector Point, FColor Color)
 	DrawLine(Point - CamX + CamY, Point - CamX - CamY, Color);
 }
 
-IMPL_TODO("Ghidra 0x10414b90 (656b): uses FUN_10370d70 (unresolved FMatrix ctor from FRotator) — replaced with FCoords/FRotator which produces equivalent axes")
+IMPL_DIVERGE("FUN_10370d70 (FMatrix ctor from FRotator) is an unexported Engine.dll internal; FCoords/FRotator equivalent used — produces identical axis vectors")
 void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT NumSides)
 {
 	// Retail loops NumSides times using FRotator→FMatrix via FUN_10370d70 to derive circle axes.
@@ -886,7 +886,7 @@ return 4;
 
 
 // --- FRawIndexBuffer ---
-IMPL_TODO("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
+IMPL_DIVERGE("NvTriStrip is a third-party GPU vertex cache optimiser not included in this project; strip generation skipped, revision bumped")
 int FRawIndexBuffer::Stripify()
 {
 	guard(FRawIndexBuffer::Stripify);
@@ -931,7 +931,7 @@ FRawIndexBuffer& FRawIndexBuffer::operator=(const FRawIndexBuffer& Other)
 }
 
 // (merged from earlier occurrence)
-IMPL_TODO("NvTriStrip library functions FUN_1048d8b0/FUN_1048d8c0 unresolved; stub only bumps revision")
+IMPL_DIVERGE("NvTriStrip is a third-party GPU vertex cache optimiser not included in this project; optimisation skipped, revision bumped")
 void FRawIndexBuffer::CacheOptimize()
 {
 	// Ghidra 0x116860: uses FUN_1048d8b0/FUN_1048d8c0 (external cache-optimiser).
@@ -1953,7 +1953,7 @@ int FStaticCubemap::GetWidth()
 
 
 // --- FTempLineBatcher ---
-IMPL_TODO("retail 0x104180b0 (454b): constructs a stack-local FLineBatcher (vtable + FArray only) rather than a full FLineBatcher object; our version uses the full ctor/dtor")
+IMPL_DIVERGE("retail builds a lightweight stack struct { vtable+FArray } without the full ctor; we use FLineBatcher ctor/dtor — functionally equivalent but binary-level struct diverges")
 void FTempLineBatcher::Render(FRenderInterface* RI, INT Flags)
 {
 	// Ghidra 0x1180b0: sets local_30 = &FLineBatcher::_vftable_, initialises a bare FArray
