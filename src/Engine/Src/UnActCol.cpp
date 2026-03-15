@@ -15,6 +15,14 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "ImplSource.h"
 #include "EngineDecls.h"
 
+// --- FCollisionOctree debug draw queues (DAT_1077e2b8, DAT_1077e2c4, DAT_1077e2d0) ---
+// Populated by debug visualization code; consumed by FCollisionOctree::Tick.
+static TArray<FVector> GDbgOctreeLineStart;  // DAT_1077e2b8: line start points (FVector stride=12)
+static TArray<FVector> GDbgOctreeLineEnd;    // DAT_1077e2c4: line end points   (FVector stride=12)
+static TArray<FBox>    GDbgOctreeBoxes;      // DAT_1077e2d0: bounding boxes    (FBox   stride=28)
+
+extern ENGINE_API FTempLineBatcher* GTempLineBatcher;  // defined in Engine.cpp
+
 // --- FReachSpec ---
 IMPL_MATCH("Engine.dll", 0x103115e0)
 FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
@@ -963,8 +971,17 @@ void FCollisionOctree::RemoveActor(AActor* Actor)
 }
 
 // ?Tick@FCollisionOctree@@UAEXXZ
-IMPL_TODO("Ghidra 0x103DBBA0: iterates DAT_1077e2b8/DAT_1077e2c4/DAT_1077e2d0 debug-line arrays via FTempLineBatcher::AddLine; GTempLineBatcher and DAT_ globals not reproduced")
-void FCollisionOctree::Tick() {}
+// Ghidra 0xdbba0 (285 bytes): for each queued debug item, forward one line (green) +
+// one box (bright green) to GTempLineBatcher. Queues populated by debug visualization code.
+IMPL_MATCH("Engine.dll", 0x103dbba0)
+void FCollisionOctree::Tick()
+{
+	for (INT i = 0; i < GDbgOctreeLineStart.Num(); i++)
+	{
+		GTempLineBatcher->AddLine(GDbgOctreeLineStart(i), GDbgOctreeLineEnd(i), FColor(0xff00ff00));
+		GTempLineBatcher->AddBox(GDbgOctreeBoxes(i), FColor(0xff46ff46));
+	}
+}
 // ?GetHashIndices@FCollisionHash@@QAEXVFVector@@AAH11@Z
 // Retail ordinal 3033 (0x6dd20).
 // Converts a world-space coordinate to a hash-table grid index in each axis.
