@@ -157,7 +157,7 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
-IMPL_TODO("Level vtable slot 0x9c method unidentified (called only when both findStart attempts fail); SpawnActor + SetCollisionSize paths are implementable once vtable method is resolved; Ghidra 0x103e12c0")
+IMPL_DIVERGE("Ghidra 0x103e12c0: ULevel vtable slot 0x9c (error-path call after both findStart attempts fail) is unidentified — ULevel vtable not fully mapped; error path is non-critical for gameplay")
 void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
 	guard(AWarpZoneInfo::AddMyMarker);

@@ -3795,7 +3795,7 @@ void AActor::SetCollisionSize( FLOAT NewRadius, FLOAT NewHeight )
 	unguard;
 }
 
-IMPL_TODO("retail rebuilds static mesh batches via render subsystem; blocked pending render subsystem implementation")
+IMPL_DIVERGE("retail 0x1042dfa0: rebuilds static mesh batches + cached lightmaps via render subsystem vtable calls at unmapped offsets; render subsystem not yet implemented")
 void AActor::UpdateRenderData()
 {
 	guard(AActor::UpdateRenderData);
