@@ -232,24 +232,21 @@ void ULinkerLoad::Verify()
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_10128890, ~78 bytes) has no guard/unguard; our version adds unnecessary guard/unguard overhead")
+IMPL_DIVERGE("Retail (FUN_10128890) has no guard/unguard; iNumber not written in retail (only iName set), as MSVC 7.1 elides iNumber=0; code-gen differs from our MSVC 2019 build")
 FName ULinkerLoad::GetExportClassPackage( INT i )
 {
-	guard(ULinkerLoad::GetExportClassPackage);
 	FObjectExport& Export = ExportMap(i);
 	if( Export.ClassIndex < 0 )
 		return ImportMap(-Export.ClassIndex-1).ClassPackage;
 	else if( Export.ClassIndex > 0 )
 		return LinkerRoot->GetFName();
 	else
-		return FName(TEXT("Core"));
-	unguard;
+		return FName(NAME_Core);
 }
 
-IMPL_DIVERGE("Not exported; Ghidra shows no guard handler for retail GetExportClassName; our version adds unnecessary guard/unguard overhead")
+IMPL_DIVERGE("Retail (at 0x101288e0, ~73 bytes) has no guard/unguard; iNumber not written in retail paths; code-gen differs from our MSVC 2019 build")
 FName ULinkerLoad::GetExportClassName( INT i )
 {
-	guard(ULinkerLoad::GetExportClassName);
 	FObjectExport& Export = ExportMap(i);
 	if( Export.ClassIndex < 0 )
 		return ImportMap(-Export.ClassIndex-1).ObjectName;
@@ -257,7 +254,6 @@ FName ULinkerLoad::GetExportClassName( INT i )
 		return ExportMap(Export.ClassIndex-1).ObjectName;
 	else
 		return FName(NAME_Class);
-	unguard;
 }
 
 IMPL_DIVERGE("Retail (catch@0x1012a4a6) resolves imports through a full linker chain; our version is a simplified stub")
@@ -292,7 +288,7 @@ void ULinkerLoad::LoadAllObjects()
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_1012aa50, catch@0x1012abfc) uses ExportHash; concept matches our implementation")
+IMPL_DIVERGE("Retail (FUN_1012aa50) uses a 3-way hash (ClassName*7 + ClassPackage*0x1f + ObjectName) & 0xff with a linear-scan fallback and a Mesh→LodMesh compatibility loop; our version uses only ObjectName hash with no fallback or compat shim")
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
@@ -570,14 +566,14 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x101286e0) calls UObject::Destroy directly instead of ULinker::Destroy; our version incorrectly chains to ULinker::Destroy")
+IMPL_DIVERGE("Retail (0x101286e0) calls UObject::Destroy directly (bypassing ULinker::Destroy); guard/unguard frame and vtable delete call generate differently under MSVC 2019 vs 7.1")
 void ULinkerSave::Destroy()
 {
 	guard(ULinkerSave::Destroy);
 	if( Saver )
 		delete Saver;
 	Saver = NULL;
-	ULinker::Destroy();
+	UObject::Destroy();
 	unguard;
 }
 
