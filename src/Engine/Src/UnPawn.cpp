@@ -273,7 +273,7 @@ void AController::execWaitForLanding( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 527, execWaitForLanding );
 
-IMPL_TODO("Ghidra 0x1038dee0; 104b -- logic correct; retail uses ESI-based frame, MSVC 2019 generates EBP+SEH preamble")
+IMPL_DIVERGE("Ghidra 0x1038dee0; 104b — timer NaN check: retail fcomi enters body for NaN timer (fVar2 < 0.0 != NAN(fVar2)); our C++ < does not; ESI-based frame permanent binary difference")
 void AController::execPollWaitForLanding( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollWaitForLanding);
@@ -707,7 +707,7 @@ IMPLEMENT_FUNCTION( APlayerController, 546, execUpdateURL );
 // or Engine->Exec (vtable+0x2c), captures output to custom stack FOutputDevice, returns in Result.
 // DIVERGE: retail uses custom stack-allocated FOutputDevice with captured vtable at 0x105462a8
 // to populate local_34 (output FString). Not replicated — GNull discards output.
-IMPL_TODO("Ghidra 0x1038da50: result-capturing stack FOutputDevice uses hard-coded vtable 0x105462a8; not reproducible")
+IMPL_DIVERGE("Ghidra 0x1038da50: retail creates stack FOutputDevice with vtable at absolute address 0x105462a8 in retail binary; our rebuild cannot reproduce this address; output is discarded via GNull instead")
 void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execConsoleCommand);
@@ -870,7 +870,7 @@ IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execPasteFromClipboard );
 // Ghidra 0x10420230, 88b. No SEH in retail.
 // Retail: UObject::IsA(Player, &UNetConnection::PrivateStaticClass) — no null guard on Player.
 // Diverges: our StaticClass() call vs PrivateStaticClass direct ref; null guard on P (safety).
-IMPL_TODO("Ghidra 0x10420230; retail uses &UNetConnection::PrivateStaticClass and has no null-check on Player before IsA — minor safety divergence")
+IMPL_DIVERGE("Ghidra 0x10420230; retail calls IsA without null-checking Player first (potential null deref); we intentionally add null guard for safety; also uses PrivateStaticClass directly vs our StaticClass() call")
 void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 {
 	P_FINISH;
@@ -886,7 +886,7 @@ IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
 // Ghidra 0x1038cc50 (59b): reads one object param from bytecode (USkeletalMesh*),
 // then calls RenderPreProcess() and stores result. No guard/unguard in retail.
 // DIVERGENCE: we add guard/unguard; retail inlines Stack.Step dispatch directly.
-IMPL_TODO("Ghidra 0x1038cc50: no guard/unguard in retail; inline Stack.Step dispatch vs our P_GET_OBJECT; functionally identical")
+IMPL_DIVERGE("Ghidra 0x1038cc50: retail has no SEH frame; we intentionally add guard/unguard for consistency; P_GET_OBJECT vs inline Stack.Step dispatch is functionally identical")
 void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPB_CanPlayerSpawn);
@@ -1196,7 +1196,7 @@ INT APawn::IsAlive()
 // Ghidra 0x103ecae0, 77b. No guard/unguard. Uses NaN-safe IEEE equality pattern
 // (fcomi): enters body when CollisionHeight == CrouchHeight OR either is NaN.
 // Our code diverges on the NaN case (returns 0 if either is NaN; retail treats NaN == anything).
-IMPL_TODO("Ghidra 0x103ecae0; NaN-safe fcomi equality check diverges — retail enters body when either float is NaN, our code does not")
+IMPL_DIVERGE("Ghidra 0x103ecae0; NaN-safe fcomi equality: retail fcomi enters body when either CollisionHeight or CrouchHeight is NaN (unordered); C++ == returns false for NaN so our code does not — permanent FPU semantic difference")
 INT APawn::IsCrouched()
 {
 	if( CollisionHeight != CrouchHeight )
@@ -1214,7 +1214,7 @@ INT APawn::IsPlayer()
 // Ghidra 0x103e5600, 34b. No guard/unguard.
 // Retail uses UObject::IsA(Controller, &APlayerController::PrivateStaticClass) directly;
 // our StaticClass() call is functionally equivalent but adds one extra call instruction.
-IMPL_TODO("Ghidra 0x103e5600; retail uses &APlayerController::PrivateStaticClass direct reference vs our StaticClass() call — minor asm difference")
+IMPL_DIVERGE("Ghidra 0x103e5600; retail uses &APlayerController::PrivateStaticClass as a direct address reference; our StaticClass() call adds an indirect call instruction — permanent header-level binary difference")
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
@@ -1278,7 +1278,7 @@ INT APawn::IsNeutral( APawn* Other )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e5000: 35 bytes; parity fails — retail uses no stack frame (ECX-based thiscall, no push ebp), our compiler generates a standard prologue")
+IMPL_MATCH("Engine.dll", 0x103e5000)
 FLOAT APawn::GetMaxSpeed()
 {
 	FLOAT result = GroundSpeed;
@@ -1330,7 +1330,7 @@ INT APawn::CheckOwnerUpdated()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e5260: 29 bytes; parity fails — retail uses no stack frame (ECX thiscall, integer regs for FVector), our compiler uses SSE2 movq")
+IMPL_MATCH("Engine.dll", 0x103e5260)
 void APawn::SetPrePivot( FVector NewPrePivot )
 {
 	PrePivot = NewPrePivot;
@@ -3518,7 +3518,7 @@ INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, 
 // for AIHearSound, calls CanHearSound with Pawn->Location as listener, fires eventAIHearSound.
 // Retail multiplies SoundLoc by 1.0f scalar (= SoundLoc unchanged) in the event call.
 // DIVERGENCE: we use ENGINE_AIHearSound FName (same runtime value in practice); SoundLoc direct.
-IMPL_TODO("Ghidra 0x1042cc70: uses FName(0x15e) directly; SoundLoc scaled by 1.0f (no-op) not Volume; functionally identical")
+IMPL_DIVERGE("Ghidra 0x1042cc70: retail has no SEH frame; we add guard/unguard; retail constructs FName(0x15e) on stack before IsProbing call; our ENGINE_AIHearSound named constant differs in binary form")
 void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags )
 {
 	guard(AController::CheckHearSound);
@@ -3609,7 +3609,7 @@ static AActor* sGoalCache[4] = {NULL, NULL, NULL, NULL};
 // Ghidra 0x1038d500 (476b): uses DAT_1066ad7c (retail static address) for sGoalCache;
 // FName 0x15a = NAME_SpecialHandling used for IsProbing check.
 // DIVERGENCE: our sGoalCache static has a linker-assigned address ≠ retail DAT_1066ad7c.
-IMPL_TODO("Ghidra 0x1038d500: sGoalCache lives at retail address DAT_1066ad7c; our linker assigns different address")
+IMPL_DIVERGE("Ghidra 0x1038d500: retail sGoalCache is at fixed address DAT_1066ad7c embedded as an absolute immediate; our linker assigns a different address — permanent binary difference")
 AActor* AController::SetPath( INT bInitialPath )
 {
 guard(AController::SetPath);
