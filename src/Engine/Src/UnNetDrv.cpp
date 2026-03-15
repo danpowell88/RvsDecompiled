@@ -963,7 +963,7 @@ unguard;
 // UNetDriver::LowLevelDestroy — not present in Ghidra export by name.
 // UNetDriver is semi-abstract; concrete subclasses (IpNetDriver, UDemoRecDriver) provide
 // real implementations. The base class version may share an empty stub or be unreachable.
-IMPL_DIVERGE("not found in Ghidra export by name — base class LowLevelDestroy; may share empty stub or be unreachable")
+IMPL_DIVERGE("UNetDriver::LowLevelDestroy absent from Engine.dll Ghidra export; only UDemoRecDriver override at 0x10487e60 exists in retail binary")
 void UNetDriver::LowLevelDestroy()
 {
 guard(UNetDriver::LowLevelDestroy);
@@ -971,7 +971,7 @@ unguard;
 }
 
 // UNetDriver::LowLevelGetNetworkNumber — not present in Ghidra export by name.
-IMPL_DIVERGE("not found in Ghidra export by name — base class LowLevelGetNetworkNumber; may share empty stub")
+IMPL_DIVERGE("UNetDriver::LowLevelGetNetworkNumber absent from Engine.dll Ghidra export; only UDemoRecDriver override at 0x10487f20 exists in retail binary")
 FString UNetDriver::LowLevelGetNetworkNumber()
 {
 return FString();
