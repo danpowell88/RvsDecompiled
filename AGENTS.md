@@ -72,6 +72,54 @@ The VS2019_X86 path must be in PATH for `cvtres.exe` to be found by the MSVC 7.1
 
 All DLL targets build in 3-5 minutes. A clean build (no errors) will show just the target names.
 
+## ⚠️ guard()/unguard() Rules — Read Before Writing Any Function
+
+`guard(Name)` expands to `{ static ...; try {` and `unguard` expands to `} catch(char*Err){throw;} catch(...){throw;} }`.
+
+**`unguard;` MUST appear at function body scope, never inside a nested block.**
+
+```cpp
+// ✅ CORRECT — unguard at function scope
+void Foo::Bar() {
+    guard(Foo::Bar);
+    if (condition) {
+        return;  // exits through the try block fine
+    }
+    DoWork();
+    unguard;     // closes the try/catch at function scope
+}
+
+// ✅ ALSO CORRECT — return before unguard (unguard is dead but syntactically valid)
+void Foo::Bar() {
+    guard(Foo::Bar);
+    DoWork();
+    return result;
+    unguard;     // dead code, but compiles fine
+}
+
+// ❌ WRONG — unguard inside if-block causes C2318 "no try block associated with catch"
+void Foo::Bar() {
+    guard(Foo::Bar);
+    if (!ptr) {
+        unguard;   // WRONG: closes try inside the if, remaining code has no try
+        return;
+    }
+    DoWork();
+    unguard;
+}
+```
+
+**Fix for early-return pattern:** invert the condition and wrap the body:
+```cpp
+void Foo::Bar() {
+    guard(Foo::Bar);
+    if (ptr) {       // inverted: only proceed if valid
+        DoWork();
+    }
+    unguard;         // always at function scope
+}
+```
+
 ## Ghidra Reference Files
 
 Function decompilations are in `ghidra/exports/`:
