@@ -89,8 +89,11 @@ void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
 // !bActive actors).  If found, appends SubAction to SceneMgr->SubActions (at +0x3F0),
 // then sets SubAction startPct (+0x4C), endPct (+0x50) and length (+0x54) from
 // SceneMgr->curTime (+0x3D0) and SceneMgr->duration (+0x3CC), and marks
-// SubAction->state (+0x2C) = 1.  Retail also logs the three object names via Logf.
-IMPL_TODO("log format string at retail 0x2F8 omitted; field offsets raw")
+// SubAction->state (+0x2C) = 1.  Retail also calls GetName three times and logs via
+// Logf with a format string stored at binary offset 0x2F8 — permanently omitted.
+// DIVERGE: retail also doesn't null-check param_2 (Owner) before accessing XLevel;
+// we add a null-safety check. Log calls omitted (binary-specific format string).
+IMPL_DIVERGE("retail Logf at binary offset 0x2F8 permanently absent; null-safety check on Owner added (Ghidra 0x10436fe0)")
 void UAnimNotify_MatSubAction::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 {
 	guard(UAnimNotify_MatSubAction::Notify);

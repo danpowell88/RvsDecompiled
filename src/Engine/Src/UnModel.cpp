@@ -200,12 +200,30 @@ unguard;
 // Decrements ref-counts on projector entries attached to each BSP node;
 // frees objects whose count reaches zero (FUN_103719b0 = projector dtor, unnamed).
 // Removes entries via FArray::Remove, then calls UObject::Destroy.
-IMPL_TODO("Ghidra 0x103ce9a0: ref-count loop calls FUN_103719b0 (projector dtor) and FUN_1033bbc0 (remove variant); pending extraction")
+IMPL_TODO("Ghidra 0x103ce9a0: FUN_103719b0 (projector dtor) unknown -- ref-count decrement, appFree, and Remove implemented; dtor call skipped")
 void UModel::Destroy()
 {
 guard(UModel::Destroy);
-// Projector ref-count loop and per-node cleanup pending extraction of
-// FUN_103719b0 (projector dtor) and FUN_1033bbc0 (remove variant).
+FArray* nodes = MODEL_NODES(this);
+BYTE* nodeData = (BYTE*)nodes->GetData();
+INT numNodes = nodes->Num();
+for (INT i = 0; i < numNodes; i++)
+{
+	FArray* projectors = (FArray*)(nodeData + i * NODE_STRIDE + 0x84);
+	while (projectors->Num() >= 1)
+	{
+		INT num = projectors->Num();
+		BYTE* lastEntry = (BYTE*)projectors->GetData() + (num - 1) * PROJ_STRIDE;
+		INT* refCount = *(INT**)lastEntry;
+		(*refCount)--;
+		if (*refCount == 0)
+		{
+			// FUN_103719b0: projector dtor -- unknown, skip
+			appFree(refCount);
+		}
+		projectors->Remove(num - 1, 1, PROJ_STRIDE);
+	}
+}
 Super::Destroy();
 unguard;
 }
@@ -474,10 +492,10 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x103cfd80, 1176 bytes.
-// Frees projectors on all nodes, records undo via GUndo (skipped — LAB_ callbacks unknown),
+// Frees projectors on all nodes, records undo via GUndo (skipped -- LAB_ callbacks unknown),
 // destructs per-node projector FArrays, empties Nodes/LightMap/VertIdxBuf (always),
 // and optionally empties Surfs/Polys.
-// EmptyPolys branch requires per-element FPoly cleanup — pending extraction.
+// EmptyPolys branch requires per-element FPoly cleanup -- pending extraction.
 IMPL_TODO("Ghidra 0x103cfd80: FUN_103719b0 (projector dtor) and EmptyPolys branch pending; projector cleanup, array clearing, and EmptySurfs implemented")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
@@ -488,28 +506,28 @@ INT numNodes = nodes->Num();
 BYTE* nodeData = (BYTE*)nodes->GetData();
 for (INT i = 0; i < numNodes; i++)
 {
-    FArray* projectors = (FArray*)(nodeData + i * NODE_STRIDE + 0x84);
-    while (projectors->Num() >= 1)
-    {
-        INT num = projectors->Num();
-        BYTE* lastEntry = (BYTE*)projectors->GetData() + (num - 1) * PROJ_STRIDE;
-        INT* refCount = *(INT**)lastEntry;
-        (*refCount)--;
-        if (*refCount == 0)
-        {
-            // FUN_103719b0: projector dtor — unknown, skip
-            appFree(refCount);
-        }
-        projectors->Remove(num - 1, 1, PROJ_STRIDE);
-    }
-    projectors->Empty(PROJ_STRIDE, 0);  // free backing buffer before Nodes is emptied
+	FArray* projectors = (FArray*)(nodeData + i * NODE_STRIDE + 0x84);
+	while (projectors->Num() >= 1)
+	{
+		INT num = projectors->Num();
+		BYTE* lastEntry = (BYTE*)projectors->GetData() + (num - 1) * PROJ_STRIDE;
+		INT* refCount = *(INT**)lastEntry;
+		(*refCount)--;
+		if (*refCount == 0)
+		{
+			// FUN_103719b0: projector dtor -- unknown, skip
+			appFree(refCount);
+		}
+		projectors->Remove(num - 1, 1, PROJ_STRIDE);
+	}
+	projectors->Empty(PROJ_STRIDE, 0);  // free backing buffer before Nodes is emptied
 }
 // GUndo recording for Nodes array omitted (LAB_ callbacks unknown).
 MODEL_NODES(this)->Empty(NODE_STRIDE, 0);
 MODEL_LIGHTMAP(this)->Empty(0x1c, 0);
 MODEL_VERTIDX(this)->Empty(4, 0);
 if (EmptySurfs)
-    MODEL_SURFS(this)->Empty(SURF_STRIDE, 0);
+	MODEL_SURFS(this)->Empty(SURF_STRIDE, 0);
 // EmptyPolys branch: per-element FPoly cleanup pending extraction.
 unguard;
 }

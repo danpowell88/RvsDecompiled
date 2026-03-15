@@ -1379,6 +1379,26 @@ function name GetThreatGroupName()
 	return;
 }
 
+//------------------------------------------------------------------
+// ProcessThreat: process the possible threat. 
+//------------------------------------------------------------------ 
+/*
+  When a new threat is detected, goto a state
+  How threat ends?
+    - when a state finish normaly       (ie: run for cover completed, play reaction)
+    - when a state failed to continue   (ie: run for cover failed)
+    - when interrupted:
+        - new order: follow me/stay here/surrender
+        - new threat: higher priority threat
+    - change the current threat group (threat_freed/threat_guarded/threat_civilian/threat_bait)
+
+  A threat can be suspended when a transition state is called:
+    - climb object, ladder (many possible state), bump, open door,
+    - ReactToGrenade, FollowingPaceTransition...
+    
+  To avoid any problem with those temp state, SeePlayer and 
+  hearnoise should not update SeePlayerMgr and HearNoiseMgr...
+*/
 function ProcessThreat(Actor P, Actor.ENoiseType eType)
 {
 	local R6Pawn R6Pawn;
@@ -2009,6 +2029,9 @@ function bool ProcessPlaySndInfo(int iSndEvent)
 	return;
 }
 
+//------------------------------------------------------------------
+//	auto state Configuration
+//------------------------------------------------------------------
 auto state Configuration
 {
 	function BeginState()
@@ -2084,6 +2107,10 @@ auto state Configuration
 	stop;			
 }
 
+//------------------------------------------------------------------
+// Guarded: default and base state for freed, prone, foetus, in shock,
+//	frozen.
+//------------------------------------------------------------------
 state Guarded
 {
 	function BeginState()
@@ -2163,6 +2190,11 @@ state Guarded
 	stop;
 }
 
+/////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------
+// Guarded_foetus: the hostage is scared and go in the foetus pos
+//	
+//------------------------------------------------------------------
 state GoGuarded_Foetus
 {
 	function BeginState()
@@ -2214,6 +2246,11 @@ Begin:
 	stop;	
 }
 
+/////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------
+// Guarded_frozen : the hostage is frozen after seeing a rainbow 
+//	
+//------------------------------------------------------------------
 state GoGuarded_frozen
 {
 	function BeginState()
@@ -2264,6 +2301,12 @@ End:
 	stop;	
 }
 
+/////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------
+// Freed: freed from terrorist, In this state the hostage will surrender 
+// when he will see a terrorist. When he will see a rainbow, he will
+// run toward them
+//------------------------------------------------------------------
 state Freed
 {
 	function BeginState()
@@ -2315,6 +2358,10 @@ state Freed
 	stop;		
 }
 
+//------------------------------------------------------------------
+// FollowingPaceTransition: stated used to allow smooth transition
+//	from extrem posture (stand to prone, crouch to prone, prone to crouch
+//------------------------------------------------------------------
 state FollowingPaceTransition
 {
 	function BeginState()
@@ -2363,6 +2410,11 @@ Begin:
 	stop;			
 }
 
+//------------------------------------------------------------------
+// FollowingPawn: follow a pawn OR run towards a pawn.
+//	if run: it will set the temporary escort team
+//  if follow: every was previously set in RainbowOrdersToFollow 
+//------------------------------------------------------------------
 state FollowingPawn
 {
 	function BeginState()
