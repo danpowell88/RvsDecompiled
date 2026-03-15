@@ -2833,7 +2833,7 @@ void AR6Pawn::execR6GetViewRotation(FFrame& Stack, RESULT_DECL)
 	*(FRotator*)Result = GetViewRotation();
 }
 
-IMPL_TODO("0x1002e120: server network loop walks controller list at Level+0x4d4; proximity check uses vtable[0x100] with pawn+0x5e4..0x5ec fields; FUN_10024560 and FUN_1002ba20 unresolved")
+IMPL_DIVERGE("permanent: R6Engine server sound replication loop uses FUN_10024560/FUN_1002ba20 (unresolved R6Engine internals) and raw pawn offsets +0x5e4..0x5ec (R6Pawn struct not fully typed); functionally replaced by SetAudioInfo() call only")
 void AR6Pawn::execSendPlaySound(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(USound, S);
