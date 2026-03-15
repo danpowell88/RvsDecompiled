@@ -247,32 +247,33 @@ WINDOW_API void InitWindowing()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra Window.dll 0x1101d5e0: pixel data offset computed as 0x36+(1<<biBitCount)*4 (correct for 4/8-bit only) vs our bfOffBits (general); SizeX/SizeY assigned before CreateDIBitmap in retail")
+// Retail layout from Ghidra: 
+//   SizeX/SizeY assigned before CreateDIBitmap
+//   Pixel offset = 0x36 + (1 << biBitCount) * 4 (palette-based formula, correct for 4/8-bit BMP)
+IMPL_MATCH("Window.dll", 0x1101d5e0)
 WINDOW_API HBITMAP LoadFileToBitmap( const TCHAR* Filename, INT& SizeX, INT& SizeY )
 {
 	guard(LoadFileToBitmap);
 	TArray<BYTE> Data;
 	if( appLoadFileToArray( Data, Filename ) )
 	{
-		// Create bitmap from BMP file data.
-		BITMAPFILEHEADER* Header = (BITMAPFILEHEADER*)&Data(0);
-		BITMAPINFO* Info = (BITMAPINFO*)(&Data(0) + sizeof(BITMAPFILEHEADER));
-		if( Data.Num() > sizeof(BITMAPFILEHEADER) )
-		{
-			HDC hDC = GetDC(NULL);
-			HBITMAP hBitmap = CreateDIBitmap(
-				hDC,
-				&Info->bmiHeader,
-				CBM_INIT,
-				&Data(0) + Header->bfOffBits,
-				Info,
-				DIB_RGB_COLORS
-			);
-			ReleaseDC( NULL, hDC );
-			SizeX = Info->bmiHeader.biWidth;
-			SizeY = Info->bmiHeader.biHeight;
-			return hBitmap;
-		}
+		BYTE* Buf = &Data(0);
+		HDC hDC = GetDC(NULL);
+		// Retail reads biBitCount as a single byte at Data+0x1c (BITMAPINFOHEADER.biBitCount low byte)
+		BYTE biBitCount = *(BYTE*)(Buf + 0x1c);
+		// Retail assigns SizeX/SizeY before CreateDIBitmap (biWidth/biHeight at Data+0x12/+0x16)
+		SizeX = *(INT*)(Buf + 0x12);
+		SizeY = *(INT*)(Buf + 0x16);
+		HBITMAP hBitmap = CreateDIBitmap(
+			hDC,
+			(BITMAPINFOHEADER*)(Buf + 0x0e),
+			CBM_INIT,
+			(void*)(Buf + 0x36 + (1 << (biBitCount & 0x1f)) * 4),
+			(BITMAPINFO*)(Buf + 0x0e),
+			DIB_RGB_COLORS
+		);
+		ReleaseDC( NULL, hDC );
+		return hBitmap;
 	}
 	SizeX = SizeY = 0;
 	return NULL;
