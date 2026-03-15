@@ -209,7 +209,7 @@ void AWarpZoneMarker::addReachSpecs(APawn* Scout, int bOnlyWeightedPaths)
 	// create a UReachSpec linking this to that marker, add to PathList. Then call base.
 	// FUN_103d7010 = StaticConstructObject wrapper: constructs UReachSpec in the package
 	// that owns XLevel.
-	UObject* lvlOuter = UObject::GetOuter(*(UObject**)((BYTE*)this + 0x328));
+	UObject* lvlOuter = (*(UObject**)((BYTE*)this + 0x328))->GetOuter();
 	UReachSpec* spec = (UReachSpec*)UObject::StaticConstructObject(
 		UReachSpec::StaticClass(), lvlOuter, NAME_None, 0, NULL, GError, NULL);
 
@@ -227,13 +227,13 @@ void AWarpZoneMarker::addReachSpecs(APawn* Scout, int bOnlyWeightedPaths)
 		{
 			// FName of target WarpZone at warpzoneinfo + 0x430.
 			FName* otherFN = (FName*)(*(INT*)((BYTE*)actor + 1000) + 0x430);
-			const TCHAR* otherZoneName = *otherFN;
+			const TCHAR* otherZoneName = *(*otherFN);
 			// FString of this WarpZone at warpzoneinfo + 0x464.
 			FString* thisFStr = (FString*)(*(INT*)((BYTE*)this + 1000) + 0x464);
 			INT match = (*thisFStr == otherZoneName) ? 1 : 0;
 			if (match != 0 &&
-				((*(UINT*)((BYTE*)this  + 0x3a4) & 0x800) != 0 ||
-				 (*(UINT*)((BYTE*)actor + 0x3a4) & 0x800) != 0))
+				((*(DWORD*)((BYTE*)this  + 0x3a4) & 0x800) != 0 ||
+				 (*(DWORD*)((BYTE*)actor + 0x3a4) & 0x800) != 0))
 			{
 				spec->Init();
 				spec->End            = (ANavigationPoint*)actor;  // +0x4c
@@ -246,7 +246,7 @@ void AWarpZoneMarker::addReachSpecs(APawn* Scout, int bOnlyWeightedPaths)
 				PathList(idx) = spec;
 				// Ghidra: allocates another spec (discarded/leaked) before base call.
 				UObject::StaticConstructObject(UReachSpec::StaticClass(),
-					UObject::GetOuter(*(UObject**)((BYTE*)this + 0x328)),
+					(*(UObject**)((BYTE*)this + 0x328))->GetOuter(),
 					NAME_None, 0, NULL, GError, NULL);
 				// goto LAB_103d84b9:
 				ANavigationPoint::addReachSpecs(Scout, bOnlyWeightedPaths);
@@ -274,7 +274,7 @@ int AWarpZoneMarker::IsIdentifiedAs(FName Name)
 
 
 // --- AZoneInfo ---
-IMPL_DIVERGE("Ghidra 0x1037CC60: Level field +0x44 vtable slot 0x78 call — method unidentified; actor render-data loop implemented")
+IMPL_MATCH("Engine.dll", 0x1037CC60)
 void AZoneInfo::PostEditChange()
 {
 	guard(AZoneInfo::PostEditChange);
@@ -282,15 +282,19 @@ void AZoneInfo::PostEditChange()
 	if (*(INT*)GIsEditor)
 	{
 		// Ghidra: (**(code **)(**(int **)(*(int *)(this + 0x328) + 0x44) + 0x78))(0)
-		// = XLevel->field_0x44->vtable[0x78/4](0) — unidentified model/brush rebuild call.
-		// DIVERGENCE: vtable call omitted; the actor render-data loop below is implemented.
+		// XLevel->field_0x44 (UModel* / engine object) vtable[0x78/4] called with arg 0.
+		INT* model = *(INT**)(*(INT*)((BYTE*)this + 0x328) + 0x44);
+		((void(__thiscall*)(void*,INT))(*(void***)model)[0x78/4])(model, 0);
 		INT levelPtr = *(INT*)((BYTE*)this + 0x328);
-		INT count    = *(INT*)(levelPtr + 0x34); // Actors.Num()
-		for (INT i = 0; i < count; i++)
+		INT i = 0;
+		while (true)
 		{
+			INT count = *(INT*)(levelPtr + 0x34); // Actors.Num()
+			if (count <= i) break;
 			AActor* A = *(AActor**)(*(INT*)(levelPtr + 0x30) + i * 4);
 			if (A)
 				A->UpdateRenderData();
+			i++;
 		}
 	}
 	unguard;
