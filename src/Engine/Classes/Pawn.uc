@@ -76,6 +76,7 @@ enum EGunSoundType
 	GS_InteriorMono                 // 3
 };
 
+// Voice-line enums used by the AI/audio system to select situational clips for each faction.
 enum ETerroristVoices
 {
 	TV_Wounded,                     // 0
@@ -360,7 +361,8 @@ var const bool m_bTryToUnProne;
 var() bool m_bCanProne;
 var bool bCrawler;  // crawling - pitch and roll based on surface pawn is on
 var const bool bReducedSpeed;  // used by movement natives
-var bool bCanJump;  // movement capabilities - used by AI
+// Movement capability flags queried by AI pathfinding to determine which path types are usable.
+var bool bCanJump;
 var bool bCanWalk;
 var bool bCanSwim;
 var bool bCanFly;

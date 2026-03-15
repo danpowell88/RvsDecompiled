@@ -25,6 +25,8 @@ const C_iHeartRateMaxTerrorist = 184;
 const C_iHeartRateMaxOther = 182;
 const C_iHeartRateMinTerrorist = 65;
 const C_iHeartRateMinOther = 90;
+// Animation channel assignments; each channel blends a separate animation layer onto the skeleton.
+// Channels 2-11 are reserved for physics-driven animation updates.
 const C_iBaseAnimChannel = 0;
 const C_iBaseBlendAnimChannel = 1;
 const C_iPostureAnimChannel = 12;
@@ -36,6 +38,7 @@ const C_fPrePivotStairOffset = 5.0;
 const C_fHeadRadius = 28.f;
 const C_fHeadHeight = 26.f;
 const C_MaxPendingAction = 5;
+// Peek blend ratios: 0=full left, 1000=center, 2000=full right (separate crouch range 400-1600).
 const C_fPeekLeftMax = 0.0;
 const C_fPeekMiddleMax = 1000.0;
 const C_fPeekRightMax = 2000.0;

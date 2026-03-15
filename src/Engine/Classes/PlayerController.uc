@@ -196,6 +196,8 @@ var Class<LocalMessage> LocalMessageClass;
 //var private CheatManager	CheatManager;	// Object within playercontroller that manages "cheat" commands
 var Class<CheatManager> CheatClass;  // class of my CheatManager
 var Class<PlayerInput> InputClass;  // class of my PlayerInput
+// Screen flash/fog effect vectors: Scale controls brightness, Fog sets a screen-space color tint.
+// FlashScale/FlashFog are blended; ConstantGlow/InstantFog handle persistent and one-shot variants.
 // Screen flashes
 var Vector FlashScale;
 // NEW IN 1.60
