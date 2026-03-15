@@ -1,9 +1,12 @@
+//=============================================================================
 // KTire — Karma physics wheel class used by KVehicle.
 // Represents a single tire on a Karma-simulated vehicle, tracking traction,
 // friction, slip, and ground-contact state for each wheel independently.
 // Comments referencing #ifdef R6KARMA indicate code disabled in Ravenshield's
 // build of the Karma integration (R6 disabled vehicle physics).
 // Extracted from retail Engine.u.
+//=============================================================================
+
 class KTire extends KActor
     native
     abstract;

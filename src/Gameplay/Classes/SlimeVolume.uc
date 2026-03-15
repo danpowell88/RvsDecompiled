@@ -1,6 +1,9 @@
+//=============================================================================
 // Physics volume simulating toxic slime: deals 40 damage/sec (Corroded type), slows
 // movement via fluid friction, and tints the view with a green fog and darkening flash.
 // Marked obsolete; prefer R6-specific volume subclasses in new maps.
+//=============================================================================
+
 class SlimeVolume extends PhysicsVolume notplaceable;
 
 defaultproperties
