@@ -125,6 +125,8 @@ int   __stdcall SND_fn_bLoadBank(const char* bankName);
 int   __stdcall SND_fn_bUnLoadBank(const char* bankName);
 int   __stdcall SND_fn_bGetMasterDirectory(char* buf, int size);
 void* __stdcall SND_fn_hGetSoundEventHandleFromSectionName(const char* name);
+void  __stdcall SND_fn_vPurgeAllDirectories(void);
+void  __stdcall SND_fn_vAddPartialDirectory(const char* dir);
 }
 
 // Group 3 -- __cdecl exports (extern "C", undecorated names)
@@ -163,6 +165,8 @@ void* SND_fn_hGenerateSoundEventPlay(void* evHandle, long actorId, long micro);
 void* SND_fn_hGenerateSoundEventStop(void* evHandle, long actorId);
 void* SND_fn_hGetLastSoundEventOfSoundObjectType(long actorId, int slot);
 void  SND_fn_vSynchroSound(void);
+int   SND_fn_bIsEAXCompatible(void);
+void  SND_fn_bEnableEAX(unsigned int bEnable);
 }
 
 /*----------------------------------------------------------------------------

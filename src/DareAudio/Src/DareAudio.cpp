@@ -919,11 +919,113 @@ if (lines[i]) SND_fn_vSetSoundVolumeLine(lines[i], saved);
 Sound options.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("EAX toggle is handled at Init; runtime changes unsupported by DARE stubs")
+IMPL_MATCH("DareAudio.dll", 0x10003280)
 void UDareAudioSubsystem::SND_SetSoundOptions(bool bEAX, FString DeviceName)
 {
-// EAX / hardware acceleration toggle is done during Init; runtime changes
-// are not supported by the DARE backend stubs.
+// Cache of GGameOptions->SoundQuality is at this+0x210.
+// Update sound directories whenever quality changes OR bEAX is forced.
+INT cachedQuality = *(INT*)((BYTE*)this + 0x210);
+INT curQuality    = *(INT*)((BYTE*)GGameOptions + 0x48);
+if (cachedQuality != curQuality || bEAX)
+{
+*(INT*)((BYTE*)this + 0x210) = curQuality;
+
+// Reinit sound engine via vtable slot 0xc4/4 (SND_fn_vDesInitSound equivalent).
+typedef void (__thiscall *tReinit)(BYTE*);
+((tReinit)((*(INT**)this)[0xc4/4]))((BYTE*)this);
+
+SND_fn_vPurgeAllDirectories();
+
+if (appStrlen(GCdPath) == 0)
+{
+SND_fn_vSetMasterDirectory("..\\Sounds\\");
+}
+else
+{
+TCHAR tSoundsBuf[1024];
+appSprintf(tSoundsBuf, TEXT("%sSounds\\"), GCdPath);
+SND_fn_vSetMasterDirectory(TCHAR_TO_ANSI(tSoundsBuf));
+
+if (!GModMgr->eventIsRavenShield())
+{
+// Primary mod Sounds dir
+FString s1 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\"), *GModMgr->eventGetModName());
+SND_fn_vAddPartialDirectory(appToAnsi(*s1));
+
+// Primary mod quality (Low/High) subdir
+FString s2;
+if (curQuality == 0)
+s2 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\Low\\"), *GModMgr->eventGetModName());
+else
+s2 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\High\\"), *GModMgr->eventGetModName());
+SND_fn_vAddPartialDirectory(appToAnsi(*s2));
+
+// Loop over other loaded mods (raw struct access mirrors Ghidra)
+BYTE* pModInfo    = *(BYTE**)((BYTE*)GModMgr + 0x34);
+INT   nOtherMods  = *(INT*) (pModInfo + 0x80);
+BYTE** ppOtherMods = *(BYTE***)(pModInfo + 0x7c);
+for (INT i = 0; i < nOtherMods; i++)
+{
+FString& modName = *(FString*)(ppOtherMods[i] + 0x94);
+FString s3 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\"), *modName);
+SND_fn_vAddPartialDirectory(appToAnsi(*s3));
+FString s4;
+if (curQuality == 0)
+s4 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\Low\\"), *modName);
+else
+s4 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\High\\"), *modName);
+SND_fn_vAddPartialDirectory(appToAnsi(*s4));
+}
+
+SND_fn_vAddPartialDirectory("..\\Sounds\\");
+}
+else
+{
+SND_fn_vAddPartialDirectory("..\\Sounds\\");
+}
+}
+
+// Editor: add DeviceName mod dirs if non-empty and not default
+if (GIsEditor)
+{
+if (DeviceName != FString(TEXT("")) && DeviceName != FString(TEXT("RavenShield")))
+{
+FString e1 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\"), *DeviceName);
+SND_fn_vAddPartialDirectory(appToAnsi(*e1));
+FString e2;
+if (curQuality == 0)
+e2 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\Low\\"), *DeviceName);
+else
+e2 = FString::Printf(TEXT("..\\Mods\\%s\\Sounds\\High\\"), *DeviceName);
+SND_fn_vAddPartialDirectory(appToAnsi(*e2));
+}
+}
+
+// Always add low/high base sounds dir
+if (curQuality == 0)
+SND_fn_vAddPartialDirectory("..\\Sounds\\Low\\");
+else
+SND_fn_vAddPartialDirectory("..\\Sounds\\High\\");
+}
+
+// Always: update volume lines and EAX state (outside the quality-change guard).
+// vtable slot 0xa8/4 = SND volume setter (slot, value)
+typedef void (__thiscall *tSetVol)(BYTE*, INT, DWORD);
+tSetVol fnSetVol = (tSetVol)((*(INT**)this)[0xa8/4]);
+fnSetVol((BYTE*)this, 3, *(DWORD*)((BYTE*)GGameOptions + 0x3c)); // music
+fnSetVol((BYTE*)this, 5, *(DWORD*)((BYTE*)GGameOptions + 0x44)); // voices
+fnSetVol((BYTE*)this, 6, *(DWORD*)((BYTE*)GGameOptions + 0x40)); // SFX
+
+DWORD goFlags = *(DWORD*)((BYTE*)GGameOptions + 0x60);
+SND_fn_vDisableHardwareAcceleration(~(goFlags >> 10) & 1);
+SND_fn_vSetHRTFOption((_SND_tdeHTRFType)(*(BYTE*)((BYTE*)GGameOptions + 0x2c)));
+
+// Update EAX capable flag in GGameOptions
+unsigned int bEAXCompat = SND_fn_bIsEAXCompatible();
+DWORD& goFlags2 = *(DWORD*)((BYTE*)GGameOptions + 0x60);
+goFlags2 = (goFlags2 & ~1u) | (bEAXCompat & 1u);
+unsigned int bEAXEnable = (goFlags2 & 1u) ? ((goFlags2 >> 11) & 1u) : 0u;
+SND_fn_bEnableEAX(bEAXEnable);
 }
 
 /*-----------------------------------------------------------------------------
