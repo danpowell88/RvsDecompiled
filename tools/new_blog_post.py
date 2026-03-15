@@ -108,7 +108,7 @@ TODO: Write post body here.
 More content here.
 """
 
-    out_path.write_text(content, encoding="utf-8")
+    out_path.write_text(content, encoding="utf-8", newline="\n")
     print(f"Created: {out_path}")
     print(f"  Post number : {post_num}")
     print(f"  Date        : {date_str}")
