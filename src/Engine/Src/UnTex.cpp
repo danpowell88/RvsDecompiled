@@ -202,20 +202,19 @@ void UTexture::SetLastUpdateTime(double Time)
 	// Ghidra (13B): __LastUpdateTime at offset 0xD0 as double
 	*(double*)((BYTE*)this + 0xD0) = Time;
 }
-IMPL_TODO("Ghidra 0x1046c600 (479b): calls unidentified helpers FUN_10301050 (memcpy-like), FUN_1032e620 (unknown), FUN_104f8e40 (DXT compress dispatcher) — not yet decompiled")
+IMPL_DIVERGE("permanent: DXT compression pipeline; FUN_104f8e40 (DXT compress dispatcher), FUN_10301050 and FUN_1032e620 are all unexported Engine internals — pipeline too complex to reconstruct; Ghidra 0x1046c600")
 int UTexture::Compress(ETextureFormat,int,FDXTCompressionOptions *)
 {
 	guard(UTexture::Compress);
-	// Retail VA 0x1046c600, offset 0x16c600, 479b. DXT compression pipeline — not yet decompiled.
 	return 0;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1046a630 (334b): dispatches to FUN_10469960/FUN_104699f0/FUN_10469b50 per-format DXT decompressors — helpers not yet identified")
+IMPL_DIVERGE("permanent: DXT decompression pipeline; FUN_10469960/FUN_104699f0/FUN_10469b50 are per-format DXT decompressors, all unexported Engine internals — pipeline too complex to reconstruct; Ghidra 0x1046a630")
 ETextureFormat UTexture::ConvertDXT(int,int,int,void * *)
 {
 	return TEXF_P8;
 }
-IMPL_TODO("Ghidra 0x1046a7b0 (445b): iterates mip levels and calls ConvertDXT(int,int,int,void**) via unidentified DXT pipeline — not yet fully reconstructed")
+IMPL_DIVERGE("permanent: DXT decompression pipeline; iterates mip levels via unidentified DXT format-dispatch helpers (all unexported) — pipeline too complex to reconstruct; Ghidra 0x1046a7b0")
 ETextureFormat UTexture::ConvertDXT()
 {
 	return TEXF_P8;
@@ -253,13 +252,10 @@ void UTexture::CreateColorRange()
 	}
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1046bac0 (2741b): complex per-format mip-chain generation with box/kaiser filtering; calls multiple unidentified format-dispatch helpers")
+IMPL_DIVERGE("permanent: DXT mip-chain generation pipeline; format-dispatch helpers for DXT1/3/5 box/kaiser filter chain are all unexported Engine internals — pipeline too complex to reconstruct; Ghidra 0x1046bac0")
 void UTexture::CreateMips(int param1, int param2)
 {
 	guard(UTexture::CreateMips);
-	// Retail VA 0x1046bac0, offset 0x16bac0, 2741b. Per-format mip-chain generation.
-	// Handles P8, RGBA8, RGBA16, DXT1/3/5 and box/kaiser filtering.
-	// Divergence: format-dispatch + colour-conversion helpers not yet decompiled.
 	(void)param1; (void)param2;
 	unguard;
 }

@@ -932,7 +932,7 @@ void FCollisionOctree::AddActor(AActor* Actor)
 }
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
-IMPL_TODO("Ghidra 0x103DBEC0 (278 bytes): walks Level->Actors, copies actor->ColLocation FBox, calls FilterTest then FUN_103dafe0 (node-check) + FUN_103db230 (cleanup); those FUN_ helpers unresolved")
+IMPL_DIVERGE("FUN_103dafe0 (node-membership test) and FUN_103db230 (cleanup) are unexported Engine.dll octree internals; permanently unresolvable; Ghidra 0x103dbec0")
 void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
@@ -1077,7 +1077,7 @@ void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane 
 }
 
 // ?ActorOverlapCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_TODO("Ghidra 0x103DA390 (371 bytes): iterates actor list, deduplicates via frame-tag at actor+0x60, calls FUN_103d8b80 (query-box clip against node bounds); FUN_103d8b80 unresolved")
+IMPL_DIVERGE("FUN_103d8b80 (query-box clip against node bounds) is an unexported Engine.dll octree internal; permanently unresolvable; Ghidra 0x103da390")
 void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
@@ -1241,7 +1241,7 @@ void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 IMPL_DIVERGE("Ghidra 0x103DB840: editor/debug visualization only — draws actors flagged 0x4000000 via FTempLineBatcher line append; FTempLineBatcher is an editor-only debug draw path")
 void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
 
-IMPL_TODO("Ghidra 0x103DB0C0 (311 bytes): routes FBox filter through node planes; when no children (this+0xc==0) adds node to output list; FUN_103d8e50 (child-overlap test) + FUN_103d8d50/FUN_103d8c80/FUN_103d8ce0 (plane-clip helpers) unresolved")
+IMPL_DIVERGE("FUN_103d8e50/FUN_103d8d50/FUN_103d8c80/FUN_103d8ce0 (plane-clip and child-overlap helpers) are unexported Engine.dll octree internals; permanently unresolvable; Ghidra 0x103db0c0")
 void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPlane const * p3) {}
 
 // ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z

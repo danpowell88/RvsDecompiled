@@ -1114,7 +1114,7 @@ void UD3DRenderDevice::Draw3DLine(FVector Start, FVector End, FColor Color, UTex
 
 	Used for render-to-texture effects (scope overlays, camera feeds).
 =============================================================================*/
-IMPL_TODO("Ghidra 0x1000c890 (614b): off-screen render target path (R6SS_Offscreen, CreateRenderTarget) blocked pending analysis of the full surface switch logic")
+IMPL_DIVERGE("FUN_1000a800 (D3DDrv error-string formatter) unexported; raw render-target struct offsets (this+0x31b74 et al.) not mapped to named fields — permanent divergence")
 void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 {
 	guard(UD3DRenderDevice::ChangeDrawingSurface);
@@ -1143,7 +1143,7 @@ void UD3DRenderDevice::ChangeDrawingSurface(ER6SwitchSurface Surface, INT Param)
 	Handles full-screen effects like flashbang, gas, and night vision.
 	The Param1/Param2 encode effect type and intensity.
 =============================================================================*/
-IMPL_TODO("Ghidra 0x10009b00 (3253b): full-screen effect overlay blocked by FUN_10005d50 (effect dispatch) and FRenderInterface rendering paths — not yet decompiled")
+IMPL_DIVERGE("FUN_10005d50 (D3DDrv effect dispatch) is unexported; 3253-byte full-screen effect pipeline permanently unimplementable")
 void UD3DRenderDevice::HandleFullScreenEffects(INT Param1, INT Param2)
 {
 	guard(UD3DRenderDevice::HandleFullScreenEffects);

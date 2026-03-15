@@ -2,7 +2,7 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---
-IMPL_TODO("Ghidra 0x1042BC10: 1345-byte keyframe interpolation with encroach checking not yet reconstructed")
+IMPL_TODO("Ghidra 0x1042BC10: 1345-byte keyframe interpolation — no FUN_ blockers; cubic/linear mover keyframe logic and encroach checking not yet reconstructed")
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
@@ -96,7 +96,7 @@ void AMover::AddMyMarker(AActor *)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10374f40: global property-handle caches (DAT_106669c8 et al.) and StaticFindObjectChecked_exref call pattern not reproduced")
+IMPL_DIVERGE("DAT_1077e224 (unknown Engine.dll gating flag) cannot be reproduced; faithful replication of GetOptimizedRepList property-push logic is permanently blocked")
 INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);

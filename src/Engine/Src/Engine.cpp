@@ -176,7 +176,7 @@ extern void KTermGameKarma();             // EngineAux.cpp — tears down the Ka
 // UGameEngine
 // =============================================================================
 
-IMPL_TODO("retail 0xa3f00 is 3692 bytes of console-command dispatch (STAT, SHOW, OPEN, etc.); stub delegates to super")
+IMPL_TODO("Ghidra 0x103a3f00: 3692-byte console-command dispatch (STAT, SHOW, OPEN, etc.) — no FUN_ blockers found; pending full reconstruction of command-dispatch switch table")
 INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
 IMPL_MATCH("Engine.dll", 0x1039edc0)
 void UGameEngine::Destroy()

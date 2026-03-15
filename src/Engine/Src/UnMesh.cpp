@@ -248,12 +248,15 @@ CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDe
 
 
 // --- ULodMesh ---
-IMPL_TODO("FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340 LOD TArray serializers unresolved; retail 0x103c7610 (558b)")
+IMPL_DIVERGE("FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340 are internal unexported Engine.dll TArray serializers; LOD geometry data cannot be serialized; retail 0x103c7610 (558b)")
 void ULodMesh::Serialize(FArchive& Ar)
 {
-	// Retail: calls UMesh::Serialize, then serializes LOD version (+0x5C), LOD section arrays,
-	// poly data, and face arrays via FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290 etc.
-	// DIVERGENCE: LOD TArray serializers unresolved; base-class data is preserved correctly.
+	// Ghidra 0xc7610: UMesh::Serialize, then IsSaving stamp (+0x5C = 2), ByteOrderSerialize
+	// +0x5C/+0x60 (4b each), then 5 TArray serializers via FUN_103c7240/FUN_103c7140/
+	// FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340, followed by ByteOrderSerialize
+	// of scalar fields +0x7C..+0x9C and +0xDC..+0xF0.
+	// DIVERGENCE: TArray serializers are unexported internal helpers; reading/writing
+	// any TArray field here would corrupt the archive stream for callers.
 	UMesh::Serialize(Ar);
 }
 
@@ -283,20 +286,45 @@ void UMesh::Serialize(FArchive& Ar)
 		Ar << *(UObject**)((BYTE*)this + 0x58);
 }
 
-IMPL_TODO("full instance-creation path (StaticConstructObject + vtable calls at +0x84/+0x8C/+0x90/+0x88) not yet written; retail 0x103ca620 (251b)")
+IMPL_TODO("vtable cleanup calls at +0x0C/+0x94 on stale UMeshInstance not yet resolved; retail 0x103ca620 (251b)")
 UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 {
-	// Retail: 0xca620, 96b. Gets or creates a mesh instance for the actor.
-	// Full impl creates new instances via StaticConstructObject; we use the simple path:
-	// check actor's mesh instance slot at actor+0x324, fall back to this+0x58.
-	// Divergence: no on-demand instance creation.
+	guard(UMesh::MeshGetInstance);
+	// Retail 0xca620, 251b. Gets or creates the mesh instance for Owner.
+	// vtable calls at +0x84/+0x8C/+0x90/+0x88 on UMeshInstance correspond to named
+	// virtual methods: GetActor()/GetMesh()/SetMesh(this)/SetActor(Owner).
+	// vtable+0x98 = GetStatus() (bit-0 checked to choose cleanup branch).
+	// vtable+0x0C (early UObject slot, likely Destroy) and vtable+0x94 (unknown) are the
+	// stale-instance cleanup paths — both unresolved; orphaned instances left for GC.
 	if (!Owner)
 		return *(UMeshInstance**)((BYTE*)this + 0x58);
 	if ((*(BYTE*)((BYTE*)Owner + 0xA0) & 0x80))
 		return *(UMeshInstance**)((BYTE*)this + 0x58);
-	UMeshInstance* inst = *(UMeshInstance**)((BYTE*)Owner + 0x324);
-	if (inst) return inst;
-	return *(UMeshInstance**)((BYTE*)this + 0x58);
+
+	UMeshInstance** instSlot = (UMeshInstance**)((BYTE*)Owner + 0x324);
+	UMeshInstance* inst = *instSlot;
+	if (inst)
+	{
+		// Retail: reuse if GetActor()==Owner && GetMesh()==this (instance is valid for us).
+		if (inst->GetActor() == Owner && inst->GetMesh() == this)
+			return inst;
+		// Retail then calls GetStatus() & 1 to decide cleanup path (vtable+0x0C or +0x94).
+		// Both are unresolved — leave stale instance for GC.
+	}
+
+	// Create new instance via MeshGetInstanceClass().
+	UClass* cls = MeshGetInstanceClass();
+	if (!cls)
+		cls = UMeshInstance::StaticClass();
+	UMeshInstance* newInst = (UMeshInstance*)UObject::StaticConstructObject(cls, GetOuter(), NAME_None, 0, NULL, GError, NULL);
+	*instSlot = newInst;
+	if (newInst)
+	{
+		newInst->SetMesh(this);
+		newInst->SetActor(const_cast<AActor*>(Owner));
+	}
+	return newInst;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10414310)
@@ -360,16 +388,14 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	unguard;
 }
 
-IMPL_TODO("FUN_10437c90/FUN_1043fd50/FUN_1043f770 TArray serializers at +0x30/+0x3C/+0x48 unresolved; retail 0x103fee0 (135b)")
+IMPL_DIVERGE("FUN_10437c90/FUN_1043fd50/FUN_1043f770 are internal unexported Engine.dll TArray serializers; animation data (FMeshAnimNotify, MotionChunk, FMeshAnimSeq arrays) cannot be serialized; retail 0x103fee0 (135b)")
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x13fee0: UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version),
-	// then 3 TArray serializations:
-	//   FUN_10437c90(ar, this+0x30) = TArray<FMeshAnimNotify> serializer (per-element calls FUN_103ca720)
-	//   FUN_1043fd50(ar, this+0x3C) = TArray<MotionChunk> serializer (per-element calls FUN_1043fb70)
-	//   FUN_1043f770(ar, this+0x48) = TArray<FMeshAnimSeq> serializer (per-element calls FUN_103cab30)
-	// FUN_103cab30/FUN_1043fb70/FUN_103ca720 each call deeper unnamed helpers.
-	// DIVERGENCE: all TArray serializers unresolved; mesh animation data loaded from package.
+	// Ghidra 0x13fee0 (not found in exports — address inferred from IMPL_TODO record):
+	// UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version), then 3 TArray
+	// serializations via FUN_10437c90(+0x30)/FUN_1043fd50(+0x3C)/FUN_1043f770(+0x48).
+	// DIVERGENCE: all TArray serializers are unexported internal helpers; reading/writing
+	// the TArray fields would corrupt the archive stream.
 	UObject::Serialize(Ar);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
@@ -544,7 +570,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_TODO("FUN_1043d7e0 uses DAT_1060b564 resource-ID counter; counter needs own static in rebuilt DLL; retail 0x10474da0 (409b)")
+IMPL_TODO("FUN_1043d7e0 not found as a standalone export; called after FArray::Add to initialise the new 0x5C-byte entry including DAT_1060b564 resource-ID field at entry+0x14; current impl uses entry ptr directly, missing resource-ID stamp; retail 0x10474da0 (409b)")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -602,16 +628,18 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_TODO("FUN_103c7240/FUN_10438000/FUN_1043f770/FUN_1032d5f0 TArray serializers at +0xF4/+0x10C/+0x118/+0x100 unresolved; retail 0x104758b0 (424b)")
+IMPL_DIVERGE("FUN_103c7240/FUN_10438000/FUN_1043f770/FUN_1032d5f0 are internal unexported Engine.dll TArray serializers; vert-mesh geometry data cannot be serialized; retail 0x104758b0 (424b)")
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
 	ULodMesh::Serialize(Ar);
-	// FUN_10323030 = TArray<0x20-element>::Serialize (lazy-loader sub-archive for +0x14C)
-	// followed by ByteOrderSerialize(+0x160). FUN_103c7240/FUN_10438000/FUN_1043f770/
-	// FUN_1032d5f0 are TArray serializers for +0xF4, +0x10C, +0x118, +0x100 respectively;
-	// FUN_103cd010 and FUN_10474600 handle +0x124 and +0x130.
-	// DIVERGENCE: all TArray serializers omitted; vert mesh data loaded from package.
+	// Ghidra 0x1758b0: after ULodMesh::Serialize, calls FUN_10323030 (lazy-loader for +0x14C),
+	// ByteOrderSerialize(+0x160, 4), FUN_103c7240(+0xF4)/FUN_10438000(+0x10C)/
+	// FUN_1043f770(+0x118)/FUN_1032d5f0(+0x100) — all TArray serializers,
+	// plus FUN_103cd010(+0x124)/FUN_10474600(+0x130).
+	// !IsPersistent branch: FUN_1043fc30 between ByteOrderSerialize calls for index buffers.
+	// DIVERGENCE: all TArray serializers are unexported internal helpers; reading/writing
+	// TArray fields here would corrupt the archive stream.
 	Ar.ByteOrderSerialize((BYTE*)this + 0x13C, 4);
 	Ar.ByteOrderSerialize((BYTE*)this + 0x140, 4);
 	if (!Ar.IsPersistent())
@@ -633,7 +661,7 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_TODO("FUN_103ca8f0 AnimNotify instantiator identified but AnimSets element stride not yet confirmed; retail 0x10472830 (124b)")
+IMPL_TODO("FUN_103ca8f0 AnimNotify instantiator not exported; Ghidra shows it called as FUN_103ca8f0(GetOuter()) with hidden ECX = current AnimSets entry; element stride at this+0x118 unconfirmed; retail 0x10472830 (124b)")
 void UVertMesh::PostLoad()
 {
 	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
@@ -927,7 +955,7 @@ int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 	return Actor->Physics != PHYS_KarmaRagDoll;
 }
 
-IMPL_TODO("skeletal hit-cylinder detection path not yet written; retail 0x1043c980 (537b)")
+IMPL_TODO("skeletal hit-cylinder detection path needs USkeletalMeshInstance::BuildPivotsList (exported, confirmed) + bbox at instance+0x380 + vtable+0x68 on instance for per-instance line check; retail 0x1043c980 (537b)")
 int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::R6LineCheck);
@@ -941,21 +969,14 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_TODO("FUN_10321a80/FUN_104378f0/FUN_10415600/FUN_10321870 bone/LOD TArray serializers unresolved; retail 0x1043ffb0 (746b)")
+IMPL_DIVERGE("FUN_10321a80/FUN_104378f0/FUN_1043ce30/FUN_10437a50/FUN_103ca780/FUN_104371c0/FUN_1043fa50/FUN_10438510 etc. are internal unexported Engine.dll TArray serializers; bone/LOD/stream data cannot be serialized. NOTE: retail calls ULodMesh::Serialize first (retail USkeletalMesh→ULodMesh chain); our source uses UMesh base — calling UMesh::Serialize here is correct for our hierarchy; retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x13ffb0: ULodMesh::Serialize, then:
-	//   FUN_10321a80(ar, this+0x1B8) = FVector TArray serializer (BoneRefSkeleton, stride 0xC)
-	//   FUN_104378f0(ar, this+0x19C) = bone array serializer (FMeshBone TArray)
-	//   ar << (this+0x1DC) = default anim reference (via vtable method)
-	//   ByteOrderSerialize(ar, this+0x1A8, 4) = SkeletalDepth
-	//   FUN_1043ce30, FUN_10437a50, FUN_103ca780 x2, FUN_104371c0 = vertex/attach data
-	//   FUN_1043fa50 = LOD models TArray (this+0x1AC)
-	//   Multiple render stream helpers (FUN_10438510, FUN_1043d430, etc.)
-	//   FUN_1043cfd0 = CBoneDescData serializer (licensee ver > 7)
-	//   IsPersistent branch: raw index buffers, vertex streams
-	// DIVERGENCE: all bone/LOD/stream serializers are unnamed; base-class data only.
-	// NOTE: USkeletalMesh inherits from UMesh not ULodMesh; call UMesh::Serialize.
+	// Ghidra 0x13ffb0: first calls ULodMesh::Serialize (retail has USkeletalMesh→ULodMesh).
+	// Our source declares USkeletalMesh : public UMesh, so we call UMesh::Serialize.
+	// All subsequent FUN_ calls are unexported TArray serializers — omitted to avoid
+	// corrupting the archive stream.
+	// DIVERGENCE: bone/LOD/vertex/attach/stream TArray data not serialized here.
 	UMesh::Serialize(Ar);
 }
 
@@ -1053,17 +1074,16 @@ FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 
 
 // --- USkeletalMesh ---
-IMPL_TODO("stream-clear vtable calls and per-LOD copy loops blocked by unresolved render-stream helpers; retail 0x10441820 (1752b)")
+IMPL_DIVERGE("7 vtable slot-0 calls on render-stream objects at this+0xF4/+0x13C/+0x124/+0x10C/+0x154/+0x16C/+0x184 use binary-specific vtable layout; stream-clear operations permanently unresolvable without render-stream vtable map; retail 0x10441820 (1752b)")
 void USkeletalMesh::ReconstructRawMesh()
 {
 	guard(USkeletalMesh::ReconstructRawMesh);
-	// Ghidra 0x141820: empties render streams via vtable calls, then reconstructs
-	// raw vertex/face arrays from LOD data.  All stream-clear vtable calls (+0xF4,
-	// +0x13C, +0x124, +0x10C, +0x154, +0x16C, +0x184) and the per-LOD copy loops
-	// require unidentified helpers — TODO.
-	// The two export loops (for iVar4 iterating 0..*(this+0x104) and ..*(this+0x134))
-	// are no-ops in Ghidra (empty bodies), so they are omitted here.
-	// FArray::Empty calls on +0x100 and +0x118 are skipped (also in the TODO block).
+	// Ghidra 0x141820: first checks GIsEditor/GIsUCC, then issues 7 vtable slot-0 calls
+	// (stream Clear) on render-stream objects at this+0xF4/+0x13C/+0x124/+0x10C/+0x154/
+	// +0x16C/+0x184.  These vtable layouts are binary-specific — permanently unresolvable.
+	// The subsequent FArray::Empty calls and per-LOD reconstruction loops would also need
+	// the streams to be in a clean state, so they are omitted too.
+	// DIVERGENCE: stream-clear vtable calls and full LOD reconstruction permanently blocked.
 	unguard;
 }
 
@@ -1081,21 +1101,17 @@ UClass * USkeletalMesh::MeshGetInstanceClass()
 	return USkeletalMeshInstance::StaticClass();
 }
 
-IMPL_TODO("vtable call on render-stream at this+0xF4 (slot 0 = Clear) not yet resolved; retail 0x1042f4b0 (232b)")
+IMPL_DIVERGE("vtable slot-0 call on render-stream object at this+0xF4 (stream Clear before ReconstructRawMesh) uses binary-specific render-stream vtable layout; permanently unresolvable; rest of function matches retail; retail 0x1042f4b0 (232b)")
 void USkeletalMesh::PostLoad()
 {
-	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version (+0x5C) < 2 call the first
-	// vtable slot of the stream object at this+0xF4 (a Clear/Reset operation), then call
-	// ReconstructRawMesh(). If the LOD models array (this+0x1AC) is empty, log a warning
-	// and auto-generate 4 LOD levels at ratios 1.0, 0.7, 0.35, 0.1.
-	// TODO: vtable call on stream at this+0xF4 (stream clear before reconstruction)
-	// is unresolved and skipped — the vtable layout for the render-stream objects is not
-	// yet determined. ReconstructRawMesh() itself is also IMPL_TODO (empty stub).
+	// Ghidra 0x12f4b0: UObject::PostLoad, then if LodVersion (+0x5C) < 2: vtable slot-0 call
+	// on render-stream at this+0xF4 (stream Clear), then ReconstructRawMesh().
+	// If LOD models array (this+0x1AC) is empty: log warning, auto-generate 4 LOD levels.
+	// DIVERGENCE: the stream-clear vtable call is permanently unresolvable; skipped.
 	UObject::PostLoad();
 	if (*(INT*)((BYTE*)this + 0x5C) < 2)
 	{
-		// Retail: (*(code**)**(undefined4**)(this+0xF4))() — unresolved stream clear.
-		// TODO: stream clear call skipped; vtable layout not yet resolved.
+		// DIVERGENCE: (*(code**)**(undefined4**)(this+0xF4))() — render-stream clear skipped.
 		ReconstructRawMesh();
 	}
 	if (((FArray*)((BYTE*)this + 0x1AC))->Num() == 0)

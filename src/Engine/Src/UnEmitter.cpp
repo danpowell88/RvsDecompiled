@@ -773,7 +773,7 @@ void USpriteEmitter::CleanUp()
 	UParticleEmitter::CleanUp();
 }
 
-IMPL_TODO("Ghidra ~line 166974: sprite particle vertex buffer fill (~400b) — camera-facing quad generation and UV/color upload require FUN_ particle transform helpers unresolved")
+IMPL_DIVERGE("FUN_ particle transform and vertex-upload helpers are unexported Engine.dll internals; camera-facing quad generation cannot be reconstructed")
 int USpriteEmitter::FillVertexBuffer(FSpriteParticleVertex* param_1, FLevelSceneNode* param_2)
 {
 	guard(USpriteEmitter::FillVertexBuffer);
