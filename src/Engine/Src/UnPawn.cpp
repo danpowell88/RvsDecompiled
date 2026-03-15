@@ -2537,10 +2537,71 @@ AActor* AController::SetPath( INT bInitialPath )
 	unguard;
 }
 
-IMPL_DIVERGE("stub body — Ghidra 0x1041CCC0 shows 676-byte implementation not yet reconstructed")
+IMPL_DIVERGE("Ghidra 0x1041CCC0; raw offsets: EndPath+0x394=cost, +0x3ac=prevPath, +0x3b4=nextPath; skips FUN_1035a3d0 profiling call")
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
 	guard(AController::SetRouteCache);
+	RouteGoal = EndPath;
+	if (!EndPath)
+	{
+		return;  // early return: C++ unwinds the try-block from guard() automatically
+	}
+	// Store total route cost: EndPath's accumulated cost + caller-supplied end distance
+	RouteDist = *(FLOAT*)((BYTE*)EndPath + 0x394) + EndDist;
+	// Walk the nextPath chain (EndPath → ... → FirstNode near pawn) building prevPath back-links
+	*(ANavigationPoint**)((BYTE*)EndPath + 0x3ac) = NULL;
+	ANavigationPoint* nav = EndPath;
+	while (*(ANavigationPoint**)((BYTE*)nav + 0x3b4) != NULL)
+	{
+		ANavigationPoint* nxt = *(ANavigationPoint**)((BYTE*)nav + 0x3b4);
+		*(ANavigationPoint**)((BYTE*)nxt + 0x3ac) = nav;  // nxt->prevPath = nav
+		nav = nxt;
+	}
+	// nav = FirstNode (closest to pawn); try to skip it if pawn is already past it
+	ANavigationPoint* routeStart = nav;
+	ANavigationPoint* prevNode = *(ANavigationPoint**)((BYTE*)nav + 0x3ac);
+	if (prevNode)
+	{
+		if (!Pawn || StartDist <= 0.f)
+		{
+			routeStart = prevNode;
+		}
+		else
+		{
+			// Skip first hop if pawn is close enough and has LOS + actorReachable to prevNode
+			FVector toPrev(Pawn->Location - prevNode->Location);
+			FLOAT distToPrev = toPrev.Size();
+			FVector hopVec(nav->Location - prevNode->Location);
+			FLOAT hopLen = hopVec.Size();
+			if ((distToPrev < 1200.f) && (distToPrev < (hopLen + StartDist) * 0.85f))
+			{
+				FCheckResult Hit(1.0f);
+				XLevel->SingleLineCheck(Hit, this, prevNode->Location, Pawn->Location, 0x286, FVector(0.f,0.f,0.f));
+				if (!Hit.Actor && Pawn->actorReachable(prevNode, 1, 1))
+					routeStart = prevNode;
+			}
+		}
+	}
+	// Fill RouteCache[0..15] following prevPath (toward EndPath)
+	ANavigationPoint* p = routeStart;
+	for (INT i = 0; i < 16; i++)
+	{
+		RouteCache[i] = p;
+		if (p) p = *(ANavigationPoint**)((BYTE*)p + 0x3ac);
+	}
+	// Set Pawn->NextPathRadius from reachspec between RouteCache[0] and RouteCache[1]
+	if (RouteCache[0] && RouteCache[0]->IsA(ANavigationPoint::StaticClass()) &&
+	    RouteCache[1] && RouteCache[1]->IsA(ANavigationPoint::StaticClass()))
+	{
+		UReachSpec* spec = ((ANavigationPoint*)RouteCache[0])->GetReachSpecTo((ANavigationPoint*)RouteCache[1]);
+		if (spec)
+		{
+			// spec+0x34 = reachability radius (INT cast to float)
+			Pawn->NextPathRadius = (FLOAT)*(INT*)((BYTE*)spec + 0x34);
+			return;
+		}
+	}
+	if (Pawn) Pawn->NextPathRadius = 0.f;
 	unguard;
 }
 
