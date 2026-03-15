@@ -221,7 +221,7 @@ void AR6RagDoll::FirstInit(AR6AbstractPawn * param_1)
 	unguard;
 }
 
-IMPL_TODO("R6Engine.dll 0x10033760 (~1000 bytes): FLineBatcher skeleton draw; omitted (editor-only path)")
+IMPL_DIVERGE("R6Engine.dll 0x10033760: FLineBatcher skeleton draw; editor-only debug visualization; raw FLineBatcher vtable call pattern not reconstructed")
 void AR6RagDoll::RenderBones(UCanvas * Canvas)
 {
 	guard(AR6RagDoll::RenderBones);
@@ -291,7 +291,7 @@ void AR6RagDoll::SatisfyConstraints()
 	unguard;
 }
 
-IMPL_TODO("R6Engine.dll 0x10035000: SetBonePosition calls pass an extra buffer argument not present in our signature; dropped")
+IMPL_DIVERGE("R6Engine.dll 0x10035000: SetBonePosition calls pass an extra buffer argument not present in our signature; calls dropped permanently")
 INT AR6RagDoll::Tick(FLOAT param_1, enum ELevelTick param_2)
 {
 	guard(AR6RagDoll::Tick);
