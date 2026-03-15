@@ -228,7 +228,7 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 // Retail 0x103b5df0 (178b): prepends "IK_" to KeyName, creates FName, calls FUN_103b56b0
 // (not in export table) to do the actual reverse property lookup. Our fallback iterates
 // GetKeyName() which yields the same display strings — functionally equivalent.
-IMPL_DIVERGE("permanent: input key name reverse-lookup; retail uses FUN_103b56b0 (unexported internal); current linear-search over GetKeyName() static table produces identical results — permanent code-path divergence; Ghidra 0x103b5df0")
+IMPL_TODO("blocked by FUN_103b56b0 (not in export table): retail creates FName(\"IK_\"+key) then delegates to internal reverse-property-lookup helper; 0x103b5df0")
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 {
 	for (INT i = 1; i < 256; i++)
