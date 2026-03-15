@@ -32,46 +32,46 @@ struct HUDLocalizedMessage
 };
 
 // NEW IN 1.60
-var byte MessageUseBigFont[3];
+var byte MessageUseBigFont[3];  // Per-slot flag; if non-zero the corresponding server message is rendered with the large font
 //#ifndef R6CODE
 //var ScoreBoard Scoreboard;
 //#endif
-var bool bShowScores;
+var bool bShowScores;  // If true, display the scoreboard
 var bool bShowDebugInfo;  // if true, show properties of current ViewTarget
 var bool bHideCenterMessages;  // don't draw centered messages (screen center being used)
 var bool bBadConnectionAlert;  // display warning about bad connection
 var bool bHideHUD;  // Should the hud display itself.
-var float MessageLife[6];
-var float MessageKillLife[4];
-var float MessageServerLife[3];
+var float MessageLife[6];  // Remaining display lifetime for each chat message slot
+var float MessageKillLife[4];  // Remaining display lifetime for each kill message slot
+var float MessageServerLife[3];  // Remaining display lifetime for each server message slot
 // Stock fonts.
 var Font SmallFont;  // Small system font.
 var Font MedFont;  // Medium system font.
 var Font BigFont;  // Big system font.
 var Font LargeFont;  // Largest system font.
 //#ifdef R6CODE
-var R6GameColors Colors;
+var R6GameColors Colors;  // R6 game-wide colour palette; instantiated in PostBeginPlay
 var HUD nextHUD;  // list of huds which render to the canvas
 var PlayerController PlayerOwner;  // always the actual owner
 //R6CODE
-var Font m_FontRainbow6_14pt;
-var Font m_FontRainbow6_17pt;
-var Font m_FontRainbow6_22pt;
-var Font m_FontRainbow6_36pt;
-var Material m_ConsoleBackground;
+var Font m_FontRainbow6_14pt;  // Custom Rainbow Six UI font, 14-point
+var Font m_FontRainbow6_17pt;  // Custom Rainbow Six UI font, 17-point
+var Font m_FontRainbow6_22pt;  // Custom Rainbow Six UI font, 22-point (used for progress messages)
+var Font m_FontRainbow6_36pt;  // Custom Rainbow Six UI font, 36-point
+var Material m_ConsoleBackground;  // Background material rendered behind the in-game console text
 //R6CONSOLE
-var Color m_ChatMessagesColor;
-var Color m_KillMessagesColor;
-var Color m_ServerMessagesColor;
-var string HUDConfigWindowType;
-var localized string LoadingMessage;
-var localized string SavingMessage;
-var localized string ConnectingMessage;
-var localized string PausedMessage;
-var localized string PrecachingMessage;
-var string TextMessages[6];
-var string TextKillMessages[4];
-var string TextServerMessages[3];
+var Color m_ChatMessagesColor;  // Colour applied to chat messages sent to the console
+var Color m_KillMessagesColor;  // Colour applied to kill/death messages sent to the console
+var Color m_ServerMessagesColor;  // Colour applied to server-side notification messages
+var string HUDConfigWindowType;  // Class name string used to spawn the HUD configuration window
+var localized string LoadingMessage;  // Localised string shown during level loading
+var localized string SavingMessage;  // Localised string shown while saving
+var localized string ConnectingMessage;  // Localised string shown while connecting to a server
+var localized string PausedMessage;  // Localised string shown when the game is paused
+var localized string PrecachingMessage;  // Localised string shown during asset pre-caching
+var string TextMessages[6];  // Circular buffer of active chat message strings
+var string TextKillMessages[4];  // Circular buffer of active kill/death message strings
+var string TextServerMessages[3];  // Circular buffer of active server message strings
 
 // Export UHUD::execDraw3DLine(FFrame&, void* const)
 native final function Draw3DLine(Vector Start, Vector End, Color LineColor);
