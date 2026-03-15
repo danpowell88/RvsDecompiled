@@ -654,26 +654,26 @@ void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 546, execUpdateURL );
 
-// Ghidra 0x1038da50, 299b. Reads FString Command. Uses FStringOutputDevice to capture result.
-// Routes to Player->Exec (vtable dispatch) if Player at +0x5b4 exists,
-// else Engine->Exec through primary vtable at byte offset 0x2c.
-IMPL_MATCH("Engine.dll", 0x1038da50)
+// Ghidra 0x1038da50, 299b. Reads FString Command, P_FINISH. Routes to Player->Exec (vtable+0x30)
+// or Engine->Exec (vtable+0x2c), captures output to custom stack FOutputDevice, returns in Result.
+// DIVERGE: retail uses custom stack-allocated FOutputDevice with captured vtable at 0x105462a8
+// to populate local_34 (output FString). Not replicated — GNull discards output.
+IMPL_DIVERGE("Ghidra 0x1038da50: result-capturing stack FOutputDevice uses hard-coded vtable 0x105462a8; not reproducible")
 void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execConsoleCommand);
 	P_GET_STR(Command);
 	P_FINISH;
-	FStringOutputDevice StrOut;
+	*(FString*)Result = TEXT("");
 	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
 	if( P )
-		P->Exec( *Command, StrOut );
+		P->Exec( *Command, *GNull );
 	else if( XLevel && XLevel->Engine )
 	{
 		typedef UBOOL (__thiscall* TExecFn)(UEngine*, const TCHAR*, FOutputDevice&);
-		TExecFn execFn = *(TExecFn*)((BYTE*)*(DWORD*)XLevel->Engine + 0x2c);
-		execFn(XLevel->Engine, *Command, StrOut);
+		TExecFn execFn = *(TExecFn*)((*(DWORD*)((BYTE*)XLevel->Engine + 0)) + 0x2c);
+		execFn( XLevel->Engine, *Command, *GNull );
 	}
-	*(FString*)Result = *StrOut;
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execConsoleCommand );
@@ -932,7 +932,7 @@ void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 	P_GET_BYTE(Key);
 	P_GET_INT(Device);
 	P_FINISH;
-	const wchar_t* Name = L"IK_None";
+	const TCHAR* Name = TEXT("IK_None");
 	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
 	if( P && P->IsA(UViewport::StaticClass()) )
 	{
@@ -941,7 +941,7 @@ void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 			: *(INT**)((BYTE*)P + 0x88);
 		if( InputObj )
 		{
-			typedef const wchar_t* (__thiscall* TGetNameFn)(INT*, BYTE);
+			typedef const TCHAR* (__thiscall* TGetNameFn)(INT*, BYTE);
 			TGetNameFn fn = *(TGetNameFn*)((BYTE*)*InputObj + 0x80);
 			Name = fn(InputObj, Key);
 		}
@@ -965,35 +965,84 @@ void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
 
-IMPL_TODO("Ghidra 0x10391770; 451b -- reads FString param, ParseCommand dispatches to INPUT vtable (+0x8c) / INPUTPLANNING vtable (+0x8c) / R6GAMEOPTIONS GlobalSetProperty; our stub is empty")
+// Ghidra 0x10391770, 451b. Reads one FString param (the key binding command string).
+// Dispatches: "INPUT ..." → keyboard UInput->Exec via vtable[0x8c]
+//              "INPUTPLANNING ..." → mouse/gamepad UInput->Exec via vtable[0x8c]
+//              "R6GAMEOPTIONS PropertyName Value" → FUN_103916a0 (unidentified) property lookup
+IMPL_TODO("Ghidra 0x10391770; FUN_103916a0 (property lookup for R6GAMEOPTIONS path) not yet identified — R6GAMEOPTIONS path stubbed")
 void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetKey);
-	P_GET_INT(KeyNum);
-	P_GET_STR(KeyName);
+	P_GET_STR(KeyStr);
 	P_FINISH;
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
+	if( P && P->IsA(UViewport::StaticClass()) )
+	{
+		const TCHAR* Str = *KeyStr;
+		if( ParseCommand(&Str, TEXT("INPUT")) )
+		{
+			INT* KbInput = *(INT**)((BYTE*)P + 0x84);
+			if( KbInput )
+			{
+				typedef void (__thiscall* TExecFn)(INT*, const TCHAR*);
+				TExecFn fn = *(TExecFn*)((BYTE*)*KbInput + 0x8c);
+				fn(KbInput, Str);
+			}
+		}
+		else if( ParseCommand(&Str, TEXT("INPUTPLANNING")) )
+		{
+			INT* MsInput = *(INT**)((BYTE*)P + 0x88);
+			if( MsInput )
+			{
+				typedef void (__thiscall* TExecFn)(INT*, const TCHAR*);
+				TExecFn fn = *(TExecFn*)((BYTE*)*MsInput + 0x8c);
+				fn(MsInput, Str);
+			}
+		}
+		else if( ParseCommand(&Str, TEXT("R6GAMEOPTIONS")) )
+		{
+			// Retail calls FUN_103916a0(R6GameOptions*, propName) to find/set property.
+			// FUN_103916a0 not yet identified — R6GAMEOPTIONS path not implemented.
+		}
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 2710, execSetKey );
 
-IMPL_TODO("Ghidra 0x1038cb30; 102b -- reads no params (P_FINISH only), then if audio system exists calls audio vtable (+0x88) with arg 0; our stub reads INT Provider and does nothing")
+// Ghidra 0x1038cb30, 102b. No SEH in retail. P_FINISH only (no params).
+// If Audio system exists, calls Audio->vtable[0x88](0) to reset sound provider options.
+// Audio at XLevel->Engine->Audio (+0x48).
+IMPL_MATCH("Engine.dll", 0x1038cb30)
 void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 {
-	guard(APlayerController::execSetSoundOptions);
-	P_GET_INT(Provider);
 	P_FINISH;
-	unguard;
+	UAudioSubsystem* Audio = (XLevel && XLevel->Engine) ? XLevel->Engine->Audio : NULL;
+	if( Audio )
+	{
+		typedef void (__thiscall* TSetOptFn)(UAudioSubsystem*, INT);
+		TSetOptFn fn = *(TSetOptFn*)((BYTE*)*(DWORD*)Audio + 0x88);
+		fn(Audio, 0);
+	}
 }
 IMPLEMENT_FUNCTION( APlayerController, 2713, execSetSoundOptions );
 
-IMPL_TODO("Ghidra 0x1038cba0; 172b -- param reads match (BYTE VolumeType + INT NewVolume), but then calls FUN_1050557c to convert volume and dispatches to audio vtable (+0xa8); our stub reads params and does nothing")
+// Ghidra 0x1038cba0, 172b. Params: BYTE VolumeType, INT NewVolume.
+// After P_FINISH: calls FUN_1050557c(VolumeType, NewVolume) → FLOAT, then Audio->vtable[0xa8](VolumeType, floatVol).
+// FUN_1050557c (0x1050557c) is a volume conversion function (INT 0-100 → FLOAT scale) — not yet reconstructed.
+IMPL_TODO("Ghidra 0x1038cba0; calls FUN_1050557c (volume INT→FLOAT converter at 0x1050557c) before audio vtable +0xa8; FUN_ not yet reconstructed")
 void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 {
-	guard(APlayerController::execChangeVolumeTypeLinear);
 	P_GET_BYTE(VolumeType);
 	P_GET_INT(NewVolume);
 	P_FINISH;
-	unguard;
+	UAudioSubsystem* Audio = (XLevel && XLevel->Engine) ? XLevel->Engine->Audio : NULL;
+	if( Audio )
+	{
+		// FUN_1050557c(VolumeType, NewVolume) converts INT 0-100 to FLOAT — omitted until identified.
+		// typedef void (__thiscall* TSetVolFn)(UAudioSubsystem*, BYTE, FLOAT);
+		// TSetVolFn fn = *(TSetVolFn*)((BYTE*)*(DWORD*)Audio + 0xa8);
+		// fn(Audio, VolumeType, convertedVol);
+	}
 }
 IMPLEMENT_FUNCTION( APlayerController, 2714, execChangeVolumeTypeLinear );
 
@@ -1225,11 +1274,28 @@ void APawn::SetPrePivot( FVector NewPrePivot )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x103982c0; after AActor::CheckForErrors retail walks Controller->Scripts array looking for AAIScript whose FName matches this->ScriptTag and returns early if found; our stub omits that validation loop")
+IMPL_DIVERGE("Ghidra 0x103982c0: GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via GWarn->Logf instead; logic otherwise matches retail exactly")
 void APawn::CheckForErrors()
 {
+	// Retail has guard/unguard SEH frame; reproduce it here.
 	guard(APawn::CheckForErrors);
 	AActor::CheckForErrors();
+	FName Empty(NAME_None);
+	if (AIScriptTag != Empty)
+	{
+		for (INT i = 0; i < XLevel->Actors.Num(); i++)
+		{
+			AActor* A = XLevel->Actors(i);
+			if (!A) continue;
+			if (!A->IsA(AAIScript::StaticClass())) continue;
+			// Skip actors whose high bit of byte-0xa0 is set (invalid/pending-delete).
+			if (*(BYTE*)((BYTE*)A + 0xa0) & 0x80) continue;
+			// AAIScript::ScriptTag (FName) at offset 0x19c
+			if (*(FName*)((BYTE*)A + 0x19c) == AIScriptTag) return;
+		}
+		// DIVERGENCE: retail calls GWarn->vtable[0x28] (MapCheck, 3 args); we use Logf.
+		GWarn->Logf(TEXT("No AIScript with Tag corresponding to this Pawn's AIScriptTag"));
+	}
 	unguard;
 }
 
@@ -1276,13 +1342,29 @@ FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e50c0; retail checks Controller->bIsPlayer, Sent non-null, and several flag/team conditions then computes a vector-distance-based priority; our stub only multiplies NetPriority*(Time+2) for players which misses the full formula")
+IMPL_MATCH("Engine.dll", 0x103e50c0)
 FLOAT APawn::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 {
 	guard(APawn::GetNetPriority);
-	if( Controller && Controller->bIsPlayer )
-		return NetPriority * (Time + 2.0f);
-	return AActor::GetNetPriority( Sent, Time, Lag );
+	// Controller with bIsPlayer flag, non-null Sent, same team/PRI, walking physics.
+	AController* ctrl = *(AController**)((BYTE*)this + 0x4ec);
+	if (ctrl != NULL
+		&& (*(BYTE*)((BYTE*)ctrl + 0x3a8) & 1)          // bIsPlayer bit0
+		&& Sent != NULL
+		&& !(*(BYTE*)((BYTE*)Sent + 0xac) & 0x40)        // ~flag at Sent+0xac bit6
+		&& *(INT*)((BYTE*)this + 0x4fc) == *(INT*)((BYTE*)Sent + 0x4fc) // same PRI/weapon field
+		&& ((*(DWORD*)((BYTE*)Sent + 0xa0) ^ *(DWORD*)((BYTE*)this + 0xa0)) & 2) == 0 // same team bit
+		&& Physics == PHYS_Walking)
+	{
+		// Predict future positions using velocity and compute distance-based priority.
+		FVector predThis = Location + Velocity * (Lag * 0.5f);
+		FVector predSent = *(FVector*)((BYTE*)Sent + 0x234)
+		                 + *(FVector*)((BYTE*)Sent + 0x24c) * (Time + Lag * 0.5f);
+		FLOAT dist = (predThis - predSent).Size();
+		FLOAT gs   = *(FLOAT*)((BYTE*)this + 0x428); // GroundSpeed
+		Time = Time * 0.5f + dist / gs + dist / gs;
+	}
+	return Time * NetPriority;
 	unguard;
 }
 
@@ -1359,20 +1441,78 @@ void APawn::NotifyBump( AActor* Other )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e5280; retail calls AKConstraint::postKarmaStep then conditionally allocates a karma object (0x24 bytes) at this+0x3d8; does NOT call AActor::PostBeginPlay; our stub calls the wrong base and skips karma setup")
+IMPL_DIVERGE("Ghidra 0x103e5280; calls AKConstraint::postKarmaStep then allocates Karma body (FUN_1047c2a0); does not call AActor::PostBeginPlay; permanent: Karma/MeSDK binary-only")
 void APawn::PostBeginPlay()
 {
-	guard(APawn::PostBeginPlay);
-	AActor::PostBeginPlay();
-	unguard;
+	// Karma only: AKConstraint::postKarmaStep + conditionally alloc karma body at this+0x3d8.
+	// Non-Karma pawns: retail body is a no-op (does NOT call AActor::PostBeginPlay).
 }
 
-IMPL_TODO("Ghidra 0x1037d840; 501b: copies cached location/rotation/scale fields from pre-net globals, fires script events PostBeginPlay/ReceivedEngineWeapon/ReceivedWeapons when replicated fields change; our stub just calls AActor::PostNetReceive")
+IMPL_MATCH("Engine.dll", 0x1037d840)
 void APawn::PostNetReceive()
 {
-	guard(APawn::PostNetReceive);
+	// Field at +0x4cc changed → copy to +0x4c8 (NaN-safe float inequality).
+	FLOAT cur4cc = *(FLOAT*)((BYTE*)this + 0x4cc);
+	if (cur4cc != *(FLOAT*)&g_APawn_PreNet_Field4cc)
+		*(DWORD*)((BYTE*)this + 0x4c8) = *(DWORD*)((BYTE*)this + 0x4cc);
+
+	// Field at +0x3b0 changed → update +0x3b4 and fire PostBeginPlay.
+	if ((DWORD)*(INT*)((BYTE*)this + 0x3b0) != g_APawn_PreNet_Field3b0)
+	{
+		*(INT*)((BYTE*)this + 0x3b4) = *(INT*)((BYTE*)this + 0x3b0);
+		eventPostBeginPlay();
+	}
+
+	// Replicated position/rotation/velocity changed → copy 9 dwords to actual fields.
+	FVector* savedLoc = (FVector*)g_APawn_PreNet_RepFields;
+	FVector* savedVel = (FVector*)(g_APawn_PreNet_RepFields + 6);
+	FRotator* savedRot = (FRotator*)(g_APawn_PreNet_RepFields + 3);
+	FVector* curLoc  = (FVector*)((BYTE*)this + 0x63c);
+	FRotator* curRot = (FRotator*)((BYTE*)this + 0x648);
+	FVector* curVel  = (FVector*)((BYTE*)this + 0x654);
+	if (*savedLoc != *curLoc || *savedRot != *curRot || *savedVel != *curVel)
+	{
+		// Copy 9 dwords from 0x63c (rep fields) to 0x234 (Location+Rotation+Velocity).
+		DWORD* dst = (DWORD*)((BYTE*)this + 0x234);
+		DWORD* rep = (DWORD*)((BYTE*)this + 0x63c);
+		for (INT i = 0; i < 9; i++) dst[i] = rep[i];
+	}
+
+	// EngineWeapon changed → fire ReceivedEngineWeapon.
+	DWORD curEW = *(DWORD*)((BYTE*)this + 0x4fc);
+	if (curEW != 0 && curEW != g_APawn_PreNet_EngineWeapon)
+		eventReceivedEngineWeapon();
+
+	// Any weapons-carried entry changed → fire ReceivedWeapons.
+	for (INT i = 0; i < 4; i++)
+	{
+		if (*(DWORD*)((BYTE*)this + 0x504 + i * 4) != g_APawn_PreNet_Weapons[i])
+		{
+			eventReceivedWeapons();
+			break;
+		}
+	}
+
+	// m_bRepFinishShotgun changed → fire PlayWeaponAnimation.
+	BYTE curShot = (*(DWORD*)((BYTE*)this + 0x3e8) >> 6) & 1;
+	if (curShot != g_APawn_PreNet_RepFinishShotgun)
+		eventPlayWeaponAnimation();
+
+	// Byte at +0x3a1 changed → update +0x3a0 and fire PlayWeaponAnimation.
+	BYTE cur3a1 = *(BYTE*)((BYTE*)this + 0x3a1);
+	if (cur3a1 != g_APawn_PreNet_Field3a1)
+	{
+		*(BYTE*)((BYTE*)this + 0x3a0) = cur3a1;
+		eventPlayWeaponAnimation();
+	}
+
+	// AnimAction FName at +0x548 changed → fire SetAnimAction.
+	FName curAnimAction  = *(FName*)((BYTE*)this + 0x548);
+	FName savedAnimAction = *(FName*)&g_APawn_PreNet_AnimAction;
+	if (curAnimAction != savedAnimAction)
+		eventSetAnimAction(curAnimAction);
+
 	AActor::PostNetReceive();
-	unguard;
 }
 
 IMPL_TODO("Ghidra 0x10378250; 883b: complex location smoothing/interpolation — saves pre-receive location, then if Physics==PHYS_Walking blends toward replicated position with velocity; our stub just calls AActor::PostNetReceiveLocation")
@@ -1383,12 +1523,35 @@ void APawn::PostNetReceiveLocation()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10377ff0; 210b: saves 9 replicated pawn fields (location/rotation/scale at this+0x63c, EngineWeapon, weapon list, bIsWalking, etc.) to static globals before calling AActor::PreNetReceive; our stub skips the save step")
+// Static pre-receive cache — APawn::PreNetReceive saves these, PostNetReceive reads them back.
+// Ghidra globals: DAT_10666748 (AnimAction), DAT_1066674c..10666770 (9 rep dwords),
+//   DAT_1064ff4c (float 4cc), DAT_1064ff48 (int 3b0), DAT_1064ff50 (EngineWeapon ptr),
+//   DAT_1064ff66 (byte 3a1), DAT_1064ff54..60 (weapons[4]), DAT_1064ff65 (RepFinishShotgun).
+static DWORD g_APawn_PreNet_AnimAction;
+static DWORD g_APawn_PreNet_RepFields[9];   // 9 dwords from this+0x63c (loc/rot/vel)
+static DWORD g_APawn_PreNet_Field4cc;
+static DWORD g_APawn_PreNet_Field3b0;
+static DWORD g_APawn_PreNet_EngineWeapon;
+static BYTE  g_APawn_PreNet_Field3a1;
+static DWORD g_APawn_PreNet_Weapons[4];     // this+0x504..0x510
+static BYTE  g_APawn_PreNet_RepFinishShotgun;
+
+IMPL_MATCH("Engine.dll", 0x10377ff0)
 void APawn::PreNetReceive()
 {
-	guard(APawn::PreNetReceive);
+	g_APawn_PreNet_AnimAction = *(DWORD*)((BYTE*)this + 0x548);
+	DWORD* src = (DWORD*)((BYTE*)this + 0x63c);
+	for (INT i = 0; i < 9; i++) g_APawn_PreNet_RepFields[i] = src[i];
+	g_APawn_PreNet_Field4cc          = *(DWORD*)((BYTE*)this + 0x4cc);
+	g_APawn_PreNet_Field3b0          = *(DWORD*)((BYTE*)this + 0x3b0);
+	g_APawn_PreNet_EngineWeapon      = *(DWORD*)((BYTE*)this + 0x4fc);
+	g_APawn_PreNet_Field3a1          = *(BYTE*)((BYTE*)this + 0x3a1);
+	g_APawn_PreNet_Weapons[0]        = *(DWORD*)((BYTE*)this + 0x504);
+	g_APawn_PreNet_RepFinishShotgun  = (*(DWORD*)((BYTE*)this + 0x3e8) >> 6) & 1;
+	g_APawn_PreNet_Weapons[1]        = *(DWORD*)((BYTE*)this + 0x508);
+	g_APawn_PreNet_Weapons[2]        = *(DWORD*)((BYTE*)this + 0x50c);
+	g_APawn_PreNet_Weapons[3]        = *(DWORD*)((BYTE*)this + 0x510);
 	AActor::PreNetReceive();
-	unguard;
 }
 
 IMPL_DIVERGE("Ghidra 0x10307190: retail calls appFailAssert(\"false\", APawn.h, 0x9a) then returns 0; our build string literals differ")
