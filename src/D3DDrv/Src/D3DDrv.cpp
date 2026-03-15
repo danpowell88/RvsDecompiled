@@ -220,26 +220,25 @@ UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 	The retail binary registers all BITFIELD and INT config properties here.
 	This reconstruction follows the UT99 pattern adapted for R6's config set.
 =============================================================================*/
-IMPL_TODO("Ghidra 0x10008c60 (805b): registers config properties via low-level UBoolProperty/UIntProperty ctors; blocked pending raw property registration approach")
+IMPL_MATCH("D3DDrv.dll", 0x10008c60)
 void UD3DRenderDevice::StaticConstructor()
 {
-	guard(UD3DRenderDevice::StaticConstructor);
-
-	// The retail binary registers all BITFIELD and INT config properties here
-	// using new(GetClass(),...) UBoolProperty( CPP_PROPERTY(...), ... ).
-	// However, CPP_PROPERTY cannot take the address of a bitfield member in
-	// standard C++. The retail build uses MSVC 7.1 which permitted this as
-	// an extension (storing the containing DWORD offset + bitmask).
-	//
-	// Config properties registered in the retail binary:
-	//   UsePrecaching, UseTrilinear, UseVSync, UseHardwareTL, UseHardwareVS,
-	//   UseCubemaps, UseTripleBuffering, ReduceMouseLag   (UBoolProperty)
-	//   AdapterNumber, MaxPixelShaderVersion               (UIntProperty)
-	//
-	// These cannot be registered with our build toolchain. Config values
-	// will use the defaults set in the constructor.
-
-	unguard;
+guard(UD3DRenderDevice::StaticConstructor);
+// Register config properties so D3DDrv.ini is read into the correct fields.
+// EC_CppProperty with explicit Ghidra byte offsets is used instead of
+// CPP_PROPERTY() because CPP_PROPERTY cannot take the address of a bitfield.
+// Offsets confirmed from Ghidra analysis; registration order matches retail.
+new(GetClass(),TEXT("UseHardwareTL"),        RF_Public) UBoolProperty(EC_CppProperty, 0x40f4, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("UseHardwareVS"),         RF_Public) UBoolProperty(EC_CppProperty, 0x40f8, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("UsePrecaching"),         RF_Public) UBoolProperty(EC_CppProperty, 0x40e4, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("UseTrilinear"),          RF_Public) UBoolProperty(EC_CppProperty, 0x40e8, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("UseVSync"),              RF_Public) UBoolProperty(EC_CppProperty, 0x40f0, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("UseTripleBuffering"),    RF_Public) UBoolProperty(EC_CppProperty, 0x4114, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("UseCubemaps"),           RF_Public) UBoolProperty(EC_CppProperty, 0x40fc, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("ReduceMouseLag"),        RF_Public) UBoolProperty(EC_CppProperty, 0x4118, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("AdapterNumber"),         RF_Public) UIntProperty (EC_CppProperty, 0x4120, TEXT("Options"), CPF_Config);
+new(GetClass(),TEXT("MaxPixelShaderVersion"), RF_Public) UIntProperty (EC_CppProperty, 0x4128, TEXT("Options"), CPF_Config);
+unguard;
 }
 
 /*=============================================================================

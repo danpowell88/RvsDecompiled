@@ -49,23 +49,32 @@ class D3DDRV_API UD3DRenderDevice : public URenderDevice
 	UD3DRenderDevice();
 
 	// --- Config bitfields (CPF_Config) ---
-	// Layout note: the CSDK shows 4 bytes of Unknown3 after UseTrilinear and
-	// 0x14 bytes of Unknown7 between UseCubemaps and UseTripleBuffering.
-	// This matches the original MSVC 7.1 BITFIELD packing.
-	BITFIELD UsePrecaching     : 1; // CPF_Config — pre-cache resources
-	BITFIELD UseTrilinear      : 1; // CPF_Config — trilinear texture filtering
-	char     _pad3[0x0004];        // Unknown3 as in CSDK
-	BITFIELD UseVSync          : 1; // CPF_Config — vertical sync
-	BITFIELD UseHardwareTL     : 1; // CPF_Config — hardware T&L
-	BITFIELD UseHardwareVS     : 1; // CPF_Config — hardware vertex shaders
-	BITFIELD UseCubemaps       : 1; // CPF_Config — cube map reflections
-	char     _pad7[0x0014];        // Unknown7 as in CSDK
-	BITFIELD UseTripleBuffering : 1; // CPF_Config — triple-buffer swap chain
-	BITFIELD ReduceMouseLag    : 1; // CPF_Config — flush before Present()
-	char     _pad9[0x0004];        // Unknown9 as in CSDK
-	INT AdapterNumber;             // CPF_Config — D3D adapter index (0=primary)
-	char     _pad10[0x0004];       // Unknown10 as in CSDK
-	INT MaxPixelShaderVersion;     // CPF_Config — max PS model (e.g. 1=PS1.x, 2=PS2.0)
+	// Each bool property occupies its own 4-byte DWORD in the retail binary
+	// (confirmed by Ghidra: UsePrecaching@0x40e4, UseTrilinear@0x40e8, etc.).
+	// The anonymous :31 fill members prevent MSVC from packing consecutive
+	// BITFIELD :1 entries into a single DWORD.
+	BITFIELD UsePrecaching     :  1; // 0x40e4 — CPF_Config: pre-cache resources
+	BITFIELD                   : 31; // fill DWORD
+	BITFIELD UseTrilinear      :  1; // 0x40e8 — CPF_Config: trilinear texture filtering
+	BITFIELD                   : 31; // fill DWORD
+	char     _pad3[0x0004];          // 0x40ec — Unknown3 as in CSDK
+	BITFIELD UseVSync          :  1; // 0x40f0 — CPF_Config: vertical sync
+	BITFIELD                   : 31; // fill DWORD
+	BITFIELD UseHardwareTL     :  1; // 0x40f4 — CPF_Config: hardware T&L
+	BITFIELD                   : 31; // fill DWORD
+	BITFIELD UseHardwareVS     :  1; // 0x40f8 — CPF_Config: hardware vertex shaders
+	BITFIELD                   : 31; // fill DWORD
+	BITFIELD UseCubemaps       :  1; // 0x40fc — CPF_Config: cube map reflections
+	BITFIELD                   : 31; // fill DWORD
+	char     _pad7[0x0014];          // 0x4100 — Unknown7 as in CSDK
+	BITFIELD UseTripleBuffering :  1; // 0x4114 — CPF_Config: triple-buffer swap chain
+	BITFIELD                   : 31; // fill DWORD
+	BITFIELD ReduceMouseLag    :  1; // 0x4118 — CPF_Config: flush before Present()
+	BITFIELD                   : 31; // fill DWORD
+	char     _pad9[0x0004];          // 0x411c — Unknown9 as in CSDK
+	INT AdapterNumber;               // 0x4120 — CPF_Config: D3D adapter index (0=primary)
+	char     _pad10[0x0004];         // 0x4124 — Unknown10 as in CSDK
+	INT MaxPixelShaderVersion;       // 0x4128 — CPF_Config: max PS model (1=PS1.x, 2=PS2.0)
 
 	// --- Virtual interface ---
 	virtual INT Exec(const TCHAR* Cmd, FOutputDevice& Ar);
