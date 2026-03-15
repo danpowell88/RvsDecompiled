@@ -181,7 +181,7 @@ void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 508, execFinishRotation );
 
-IMPL_DIVERGE("Ghidra 0x1038eab0; 112 bytes; rotation check via raw Pawn offsets +0x300 and +0x244")
+IMPL_DIVERGE("Ghidra 0x1038eab0; 112 bytes; logic matches Ghidra exactly; guard/unguard frame overhead diverges")
 void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPollFinishRotation);
@@ -579,7 +579,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103900a0; 1734b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103900a0; 1734b -- complex stair-rotation physics calculation (APawn::eventEyePosition, FRotator traces, delta-time blending); our stub only returns Rotation.Pitch")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
@@ -590,7 +590,7 @@ void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 524, execFindStairRotation );
 
-IMPL_DIVERGE("Ghidra 0x1038f400; 228b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f400; 228b -- gets viewport at +0x5b4, resets keyboard (this_00+0x84) and mouse (this_00+0x88) input configs via UObject::ResetConfig+SaveConfig; our stub is empty")
 void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execResetKeyboard);
@@ -599,7 +599,7 @@ void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 544, execResetKeyboard );
 
-IMPL_DIVERGE("Ghidra 0x1038eff0; 372b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038eff0; 372b -- reads 3 params (FString NewOption, FString NewValue, UBOOL bSaveDefault), calls FURL::AddOption on level URL, conditionally calls FURL::SaveURLConfig; our stub reads params but does nothing")
 void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execUpdateURL);
@@ -611,7 +611,7 @@ void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 546, execUpdateURL );
 
-IMPL_DIVERGE("Ghidra 0x1038da50; 299b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038da50; 299b -- routes through player Exec vtable (+0x30) or level engine Exec vtable (+0x2c) and captures output to result FString; our stub diverges in routing and output capture")
 void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execConsoleCommand);
@@ -626,7 +626,7 @@ void APlayerController::execConsoleCommand( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execConsoleCommand );
 
-IMPL_DIVERGE("Ghidra 0x103919e0; 330b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103919e0; 330b -- loads DefaultPlayer URL config, calls FURL::GetOption with the option name, returns the value string; our stub returns empty")
 void APlayerController::execGetDefaultURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetDefaultURL);
@@ -637,7 +637,7 @@ void APlayerController::execGetDefaultURL( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetDefaultURL );
 
-IMPL_DIVERGE("Ghidra 0x1038f1a0; 263b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f1a0; 263b -- asserts XLevel/Engine/GEntry chain then calls ULevel::GetLevelInfo on GEntry; our stub returns NULL")
 void APlayerController::execGetEntryLevel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEntryLevel);
@@ -647,7 +647,7 @@ void APlayerController::execGetEntryLevel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetEntryLevel );
 
-IMPL_DIVERGE("Ghidra 0x1038f2e0; 226b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f2e0; 226b -- sets +0x5b8, calls vtable at +0x18c (UpdateURL), then if viewport canvas has bFading calls UCanvas::StartFade; our stub only sets the view target")
 void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetViewTarget);
@@ -659,7 +659,7 @@ void APlayerController::execSetViewTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSetViewTarget );
 
-IMPL_DIVERGE("Ghidra 0x10425910; 292b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10425910; 292b -- if player connected: fires PreClientTravel event via FindFunctionChecked, then calls engine ClientTravel vtable (+0xa4) with URL/type/items; our stub is empty")
 void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientTravel);
@@ -671,7 +671,7 @@ void APlayerController::execClientTravel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execClientTravel );
 
-IMPL_DIVERGE("Ghidra 0x10425c90; 259b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10425c90; 259b -- if local player and audio system exists, forwards to audio system vtable (+0x84) with Actor, Sound, Location flags; our stub is empty")
 void APlayerController::execClientHearSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execClientHearSound);
@@ -695,7 +695,7 @@ void APlayerController::execGetPlayerNetworkAddress( FFrame& Stack, RESULT_DECL 
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetPlayerNetworkAddress );
 
-IMPL_DIVERGE("Ghidra 0x10420680; 169b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x10420680)
 void APlayerController::execCopyToClipboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execCopyToClipboard);
@@ -706,7 +706,7 @@ void APlayerController::execCopyToClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execCopyToClipboard );
 
-IMPL_DIVERGE("Ghidra 0x10420760; 190b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10420760; 190b -- Ghidra shows one FString param read before P_FINISH (discarded, never used); our stub omits that param read; appClipboardPaste()+result assignment matches")
 void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPasteFromClipboard);
@@ -732,7 +732,7 @@ void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
 
-IMPL_DIVERGE("Ghidra 0x1038cc50; 59b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038cc50; 59b -- Ghidra calls USkeletalMesh::RenderPreProcess on a register-spilled value (Ghidra register-tracking confused); our stub unconditionally returns 1")
 void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPB_CanPlayerSpawn);
@@ -742,7 +742,7 @@ void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 1320, execPB_CanPlayerSpawn );
 
-IMPL_DIVERGE("Ghidra 0x1042c250; 562b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1042c250; 562b -- queries GetPlayerNetworkAddress or eventGetLocalPlayerIp, calls FUN_1047f210 (PB status lookup) with IP+port+player-name; our stub returns 0")
 void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPBConnectStatus);
@@ -752,7 +752,7 @@ void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execGetPBConnectStatus );
 
-IMPL_DIVERGE("Ghidra 0x10420290; 105b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10420290; 105b -- calls FUN_1047e850 (PunkBuster enabled check) and returns result; our stub returns 0")
 void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execIsPBEnabled);
@@ -762,7 +762,7 @@ void APlayerController::execIsPBEnabled( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execIsPBEnabled );
 
-IMPL_DIVERGE("Ghidra 0x1038f520; 299b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f520; 299b -- reads FString(KeyName)+INT(device) params and returns UBOOL byte via viewport vtable (+0x88); our stub reads INT and returns FString")
 void APlayerController::execGetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetKey);
@@ -773,7 +773,7 @@ void APlayerController::execGetKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2706, execGetKey );
 
-IMPL_DIVERGE("Ghidra 0x1038f7a0; 288b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f7a0; 288b -- reads BYTE(device)+INT(action) params and returns FString via viewport vtable (+0x90); our stub reads FString param and returns empty")
 void APlayerController::execGetActionKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetActionKey);
@@ -784,7 +784,7 @@ void APlayerController::execGetActionKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2707, execGetActionKey );
 
-IMPL_DIVERGE("Ghidra 0x1038f680; 231b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038f680; 231b -- reads BYTE(key)+INT(device) params and returns enum key-name string via viewport vtable (+0x80); falls back to L\"IK_None\"; our stub reads INT and returns empty")
 void APlayerController::execGetEnumName( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetEnumName);
@@ -809,7 +809,7 @@ void APlayerController::execChangeInputSet( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
 
-IMPL_DIVERGE("Ghidra 0x10391770; 451b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10391770; 451b -- reads FString param, ParseCommand dispatches to INPUT vtable (+0x8c) / INPUTPLANNING vtable (+0x8c) / R6GAMEOPTIONS GlobalSetProperty; our stub is empty")
 void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetKey);
@@ -820,7 +820,7 @@ void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2710, execSetKey );
 
-IMPL_DIVERGE("Ghidra 0x1038cb30; 102b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038cb30; 102b -- reads no params (P_FINISH only), then if audio system exists calls audio vtable (+0x88) with arg 0; our stub reads INT Provider and does nothing")
 void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetSoundOptions);
@@ -830,7 +830,7 @@ void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 2713, execSetSoundOptions );
 
-IMPL_DIVERGE("Ghidra 0x1038cba0; 172b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038cba0; 172b -- param reads match (BYTE VolumeType + INT NewVolume), but then calls FUN_1050557c to convert volume and dispatches to audio vtable (+0xa8); our stub reads params and does nothing")
 void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execChangeVolumeTypeLinear);
@@ -859,7 +859,7 @@ void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execWaitToSeeEnemy );
 
-IMPL_DIVERGE("Ghidra 0x1038e7c0; 163b; retail checks time (LastSeenTime+0.1s) and rotation, not LOS trace")
+IMPL_DIVERGE("Ghidra 0x1038e7c0; 163b; logic matches Ghidra exactly (time+rotation checks); guard/unguard frame diverges")
 void AAIController::execPollWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
 	guard(AAIController::execPollWaitToSeeEnemy);
@@ -1061,7 +1061,7 @@ void APawn::SetPrePivot( FVector NewPrePivot )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x103982c0; 206b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103982c0; after AActor::CheckForErrors retail walks Controller->Scripts array looking for AAIScript whose FName matches this->ScriptTag and returns early if found; our stub omits that validation loop")
 void APawn::CheckForErrors()
 {
 	guard(APawn::CheckForErrors);
@@ -1077,7 +1077,7 @@ FVector APawn::CheckForLedges( AActor* HitActor, FVector Loc, FVector Delta, FVe
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ea860; 166b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103ea860; retail walks Controller->PawnList array removing self, then frees object at this+0x3d8 via GMalloc if non-null, then calls AActor::Destroy; our stub nulls Controller->Pawn instead which is wrong")
 void APawn::Destroy()
 {
 	guard(APawn::Destroy);
@@ -1095,7 +1095,7 @@ FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e50c0; 360b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103e50c0; retail checks Controller->bIsPlayer, Sent non-null, and several flag/team conditions then computes a vector-distance-based priority; our stub only multiplies NetPriority*(Time+2) for players which misses the full formula")
 FLOAT APawn::GetNetPriority( AActor* Sent, FLOAT Time, FLOAT Lag )
 {
 	guard(APawn::GetNetPriority);
@@ -1143,7 +1143,7 @@ INT APawn::IsBlockedBy( const AActor* Other ) const
 	return AActor::IsBlockedBy(Other);
 }
 
-IMPL_DIVERGE("Ghidra 0x103c4b30; 2176b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103c4b30; 2176b complex function: checks cached relevancy by TimeSeconds==LastRenderTime, owner/team/audio-radius early-outs, FastLineCheck visibility, then CacheNetRelevancy; our stub delegates to base")
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(APawn::IsNetRelevantFor);
@@ -1179,7 +1179,7 @@ void APawn::NotifyBump( AActor* Other )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5280; 155b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103e5280; retail calls AKConstraint::postKarmaStep then conditionally allocates a karma object (0x24 bytes) at this+0x3d8; does NOT call AActor::PostBeginPlay; our stub calls the wrong base and skips karma setup")
 void APawn::PostBeginPlay()
 {
 	guard(APawn::PostBeginPlay);
@@ -1187,7 +1187,7 @@ void APawn::PostBeginPlay()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1037d840; 501b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1037d840; 501b: copies cached location/rotation/scale fields from pre-net globals, fires script events PostBeginPlay/ReceivedEngineWeapon/ReceivedWeapons when replicated fields change; our stub just calls AActor::PostNetReceive")
 void APawn::PostNetReceive()
 {
 	guard(APawn::PostNetReceive);
@@ -1195,7 +1195,7 @@ void APawn::PostNetReceive()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10378250; 883b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10378250; 883b: complex location smoothing/interpolation — saves pre-receive location, then if Physics==PHYS_Walking blends toward replicated position with velocity; our stub just calls AActor::PostNetReceiveLocation")
 void APawn::PostNetReceiveLocation()
 {
 	guard(APawn::PostNetReceiveLocation);
@@ -1203,7 +1203,7 @@ void APawn::PostNetReceiveLocation()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x10377ff0; 210b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x10377ff0; 210b: saves 9 replicated pawn fields (location/rotation/scale at this+0x63c, EngineWeapon, weapon list, bIsWalking, etc.) to static globals before calling AActor::PreNetReceive; our stub skips the save step")
 void APawn::PreNetReceive()
 {
 	guard(APawn::PreNetReceive);
@@ -1320,7 +1320,7 @@ void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c36c0; 145b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103c36c0; 145b: stores Velocity.SafeNormal to this+0x258 (floor direction), then if bInterpolating calls vtable +0x120; else calls moveSmooth(Velocity*DeltaTime) then eventTick; does NOT delegate to AActor::TickSimulated")
 void APawn::TickSimulated( FLOAT DeltaTime )
 {
 	guard(APawn::TickSimulated);
@@ -1328,7 +1328,7 @@ void APawn::TickSimulated( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c3760; 267b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103c3760)
 void APawn::TickSpecial( FLOAT DeltaTime )
 {
 	guard(APawn::TickSpecial);
@@ -1388,7 +1388,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ebfe0; 983b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103ebfe0; 983b: full nav-graph reachability — checks NavigationPoint anchor cache for shortcut, enforces 1200 UU distance limit (not 8*GroundSpeed), checks IsBlockedBy via vtable, tests water/physics, uses eventEyePosition for LOS trace; our stub is approximate")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
@@ -2379,7 +2379,7 @@ DesiredRotation.Pitch = 0;
 unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e5a30; 245b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103e5a30)
 void APawn::setMoveTimer(FLOAT DeltaTime)
 {
 	guard(APawn::setMoveTimer);
@@ -2389,7 +2389,7 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 	if ( DesiredSpeed != 0.f )
 	{
 		FLOAT mult = 2.0f;
-		// DIVERGENCE: bIsCrouched (bit5) | bIsWalking (bit2) via named bitfields
+		// Ghidra: (byte)this[0x3e0] & 0x24 — bit5=bIsCrouched, bit2=bIsWalking
 		if ( bIsCrouched || bIsWalking )
 		{
 			FLOAT inv = 1.0f / CrouchedPct;
@@ -2403,7 +2403,7 @@ void APawn::setMoveTimer(FLOAT DeltaTime)
 		Controller->MoveTimer = 0.5f;
 	}
 
-	// Ghidra: bPreparingMove (bit7 of Controller+0x3a8) and PendingMover (Controller+0x3e8)
+	// Ghidra: bit7 of Controller+0x3a8 = bPreparingMove; Controller+0x3e8 = PendingMover
 	if ( Controller->bPreparingMove && Controller->PendingMover )
 		Controller->MoveTimer += 2.0f;
 
@@ -2438,7 +2438,7 @@ void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT Ve
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e7100; 823b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body — Ghidra 0x103e7100 is 823 bytes: vtable SingleLineCheck, findWaterLine, FVector negation, returns 0/1/5; not yet reconstructed")
 ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::swimMove);
@@ -2454,7 +2454,7 @@ INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e69e0; 1084b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body — Ghidra 0x103e69e0 is 1084 bytes: vtable SingleLineCheck + setBase, step-up slide, FVector negation, returns 0/1/2/5; not yet reconstructed")
 ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitActor, FLOAT DeltaTime)
 {
 	guard(APawn::walkMove);
@@ -2497,7 +2497,7 @@ INT AController::LocalPlayerController()
 	return 0;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c3870; 977b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body — Ghidra 0x103c3870 is 977 bytes: bHidden toggle, AI state dispatch (CheckEnemyVisible, rotateToward), MonitoredPawn distance checks, eventMonitoredPawnAlert; does not simply delegate to AActor::Tick")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
@@ -2610,7 +2610,7 @@ void AController::ShowSelf()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038d370; 112b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x1038d370)
 DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 {
 	guard(AController::SeePawn);
@@ -2752,7 +2752,7 @@ void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLO
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038d460; 112b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x1038d460)
 DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
 {
 	guard(AController::LineOfSightTo);
@@ -2770,14 +2770,14 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038ed20; 173b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038ed20; 173b -- omits rdtsc profiling; adds Enemy->IsValid() assertion matching retail; guard/unguard diverges")
 void AController::CheckEnemyVisible()
 {
 	guard(AController::CheckEnemyVisible);
-	// DIVERGENCE: Ghidra has rdtsc profiling; omitted
-	if ( Enemy )
+	if( Enemy )
 	{
-		if ( !LineOfSightTo(Enemy, 0) )
+		check(Enemy->IsValid());
+		if( !LineOfSightTo(Enemy, 0) )
 			eventEnemyNotVisible();
 	}
 	unguard;
@@ -2799,10 +2799,23 @@ AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038ee00; 252b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x1038ee00; 252b — logic verified; guard/unguard frame overhead diverges; rdtsc profiling omitted")
 AActor* AController::HandleSpecial( AActor* BestPath )
 {
 	guard(AController::HandleSpecial);
+	// Ghidra: if (bCanDoSpecial && GoalList[3] == NULL) then try SpecialHandling path
+	if( bCanDoSpecial && !GoalList[3] )
+	{
+		AActor* special = BestPath->eventSpecialHandling( Pawn );
+		if( special && special != BestPath )
+		{
+			if( Pawn->actorReachable( special, 0, 0 ) )
+				return special;
+			FLOAT dist = Pawn->findPathToward( special, special->Location, NULL, 1, 0.f );
+			if( dist > 0.f )
+				BestPath = SetPath( 0 );
+		}
+	}
 	return BestPath;
 	unguard;
 }
