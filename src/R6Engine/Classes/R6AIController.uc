@@ -16,7 +16,7 @@ class R6AIController extends AIController
     abstract
     native;
 
-const C_fMaxBumpTime = 1.f;
+const C_fMaxBumpTime = 1.f; // Max time to be in bumpbackup state
 
 var const int c_iDistanceBumpBackUp;  // distance to backup
 var int m_iCurrentRouteCache;
@@ -403,6 +403,9 @@ function StopMoving()
 	return;
 }
 
+//------------------------------------------------------------------//
+// function NotifyBump()                                            //
+//------------------------------------------------------------------//
 event bool NotifyBump(Actor Other)
 {
 	// End:0x18
@@ -793,6 +796,9 @@ function PerformAction_StopInteraction()
 	return;
 }
 
+//----------------------------//
+// -- state WAITFORLADDER  -- //
+//----------------------------//
 state WaitToClimbLadder
 {
 	function BeginState()
@@ -842,6 +848,13 @@ Wait:
 	stop;	
 }
 
+//----------------------------//
+// -- state APPROACHLADDER -- //
+//----------------------------// 
+// * this state assumes that controller.moveTarget has been set to the R6Ladder actor at the start 
+// of the ladder that the pawn is supposed to climb 
+// * when pawn finishes climbing the ladder, will enter state Dispatcher... will only exit state 
+// Dispatcher if/when nextState != '' 
 state ApproachLadder
 {
 	function BeginState()
@@ -961,6 +974,9 @@ Wait:
 	stop;		
 }
 
+//---------------------------------//
+// -- state BEGINCLIMBINGLADDER -- //
+//---------------------------------//
 state BeginClimbingLadder
 {
 	function BeginState()
@@ -1110,6 +1126,9 @@ BlockedAtTop:
 	stop;				
 }
 
+//-------------------------------//
+// -- state ENDCLIMBINGLADDER -- //
+//-------------------------------//
 state EndClimbingLadder
 {
 	function BeginState()
@@ -1257,6 +1276,9 @@ End:
 	stop;	
 }
 
+//------------------------//
+// -- state DISPATCHER -- //
+//------------------------//
 state Dispatcher
 {
 	function BeginState()
@@ -1288,6 +1310,9 @@ state Dead
 	stop;
 }
 
+//==========================================================//
+//                  -- state BUMPBACKUP --                  //
+//==========================================================//
 state BumpBackUp
 {
 	function BeginState()
@@ -1525,6 +1550,9 @@ BackupFromActor:
 	stop;				
 }
 
+//------------------------------------------------------------------
+// State to open a door: call GotoOpenDoorState to go in this state
+//------------------------------------------------------------------ 
 state OpenDoor
 {
 	function BeginState()
@@ -1686,6 +1714,9 @@ state TestMakePathEnd
 	stop;
 }
 
+//------------------------------------------------------------------
+// TestMakePath: initialized by SetStateTestMakePath
+//------------------------------------------------------------------
 state TestMakePath
 {
 	function BeginState()
