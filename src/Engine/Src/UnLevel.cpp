@@ -565,7 +565,7 @@ INT ULevel::IsServer()
 	return 0;
 }
 IMPL_TODO("stub; retail sweep/collision at Ghidra 0x103b9750")
-INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
+INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra, FLOAT fStepDist )
 {
 	guard(ULevel::MoveActor);
 	// TODO: implement ULevel::MoveActor sweep/collision
