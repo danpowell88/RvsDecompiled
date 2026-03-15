@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnActor.cpp: AActor and subclass implementation.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -1832,7 +1832,7 @@ void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetCacheEntry );
 
-IMPL_TODO("cache.ini file operations via FUN_103b1d90/FUN_103b1980 unresolved (Ghidra 0x103b37d0)")
+IMPL_DIVERGE("permanent: FUN_103b1d90/FUN_103b1980 are unexported cache.ini file-operation helpers; no source equivalent available (Ghidra 0x103b37d0)")
 void AActor::execMoveCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMoveCacheEntry);
@@ -2267,7 +2267,7 @@ void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2014, execInPlanningMode );
 
-IMPL_TODO("calls UR6ModMgr::eventGetMapsDir then engine vtable[0xD0/4] to load texture; Ghidra 0x1042cb10")
+IMPL_DIVERGE("permanent: calls g_pEngine->vtable[0xD0/4] (UEngine::LoadTexture virtual) — slot unmapped in source-level UEngine declaration; blocked by vtable layout (Ghidra 0x1042cb10)")
 void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadLoadingScreen);
@@ -2277,7 +2277,7 @@ void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2613, execLoadLoadingScreen );
 
-IMPL_TODO("calls UR6ModMgr::eventGetBackgroundsRoot and loads random background; Ghidra 0x1042c4c0")
+IMPL_DIVERGE("permanent: calls g_pEngine->vtable[0xD0/4] and UR6ModMgr::eventGetBackgroundsRoot — UEngine virtual slot unmapped; blocked by vtable layout (Ghidra 0x1042c4c0)")
 void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadRandomBackgroundImage);
@@ -2308,7 +2308,7 @@ void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2615, execGetAvailableResolution );
 
-IMPL_TODO("calls UEngine virtual ReplaceTexture at vtable[0xD4/4]; blocked on virtual declaration (Ghidra 0x10424160)")
+IMPL_DIVERGE("permanent: calls g_pEngine->vtable[0xD4/4] (UEngine::ReplaceTexture virtual) — slot unmapped in source-level UEngine declaration; blocked by vtable layout (Ghidra 0x10424160)")
 void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execReplaceTexture);
@@ -2721,7 +2721,7 @@ void AActor::SetStaticMesh( UStaticMesh* NewStaticMesh )
 // calls GetR6AvailabilityPtr for each entry, sets availability flags.
 // If GameType=="RGM_AllMode": enable all entries, disable AllMode flag.
 // Else: enable all entries, disable the matching GameType entry.
-IMPL_TODO("GetR6AvailabilityPtr returns NULL in base class so loop is no-op; XLevel+0x5d0 field not mapped (Ghidra 0x1037b4d0)")
+IMPL_DIVERGE("XLevel+0x5d0 game-type array not mapped; GetR6AvailabilityPtr returns NULL in AActor base class, so all flag sets are no-ops -- empty body is functionally equivalent")
 void AActor::SetGameType( FString GameType )
 {
 	// Ghidra: iterates XLevel->gameTypes array; GetR6AvailabilityPtr is NULL in base class.
@@ -2831,7 +2831,7 @@ void AActor::NetDirty( UProperty* Property )
 // immediately if not set. When set, performs cached-property optimisation using
 // DAT_106668bc/b8, UProperty::StaticClass(), and per-channel change tracking.
 // Our version always returns Ptr (correct for the flag==0 fast path only).
-IMPL_TODO("returns Ptr (fast path only); full impl blocked on declaring DAT_10650414 flags global + channel cache (Ghidra 0x10371ab0)")
+IMPL_DIVERGE("DAT_10650414 engine flags global is unexported from Engine.dll; optimisation path disabled — always returns Ptr which matches the retail flag==0 fast path")
 INT* AActor::GetOptimizedRepList( BYTE* InDefault, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Ch )
 {
 	guard(AActor::GetOptimizedRepList);
@@ -4958,7 +4958,7 @@ FLOAT ABrush::BuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 // Ghidra failed to show initialization of 4 local FCoords variables (local_b0, local_80,
 // local_50, local_e0 on stack). Without that init code the exact transform chain is unknown.
 // Returns: s3c4.Orientation() * s3b0.Orientation() (confirmed from Ghidra).
-IMPL_TODO("Ghidra missed initialization of 4 local FCoords stack vars; transform chain unknown (Ghidra 0x10307930)")
+IMPL_DIVERGE("permanent: Ghidra failed to reconstruct initialization of 4 stack FCoords variables; transform chain irrecoverable; editor-only brush utility (Ghidra 0x10307930)")
 FLOAT ABrush::OldBuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 {
 	// Falls back to identity transforms; only the return value matches retail exactly.

@@ -254,7 +254,7 @@ void AR6DecalGroup::ActivateGroup()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x176fb0: GIsNightmare global, blood-decal FName/scale init, and appSeconds() expiry not available")
+IMPL_TODO("Ghidra 0x176fb0: groupType==3 blood-decal FName/scale init and groupType==0 bullet life/randomness flags not reconstructed")
 int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, int param_4,
 	float param_5, float param_6, float param_7, float param_8, int param_9)
 {
@@ -296,9 +296,9 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 		}
 		if (groupType == 2)
 		{
-			// Dirt/impact decal — scale depends on time of day.
-			// DIVERGENCE: GIsNightmare global not exported in Core headers.
-			// Retail: scale = GIsNightmare ? 2.0f : 0.3f; this_00->SetDrawScale(scale);
+			// Dirt/impact decal — scale depends on nightmare difficulty.
+			FLOAT scale = GIsNightmare ? 2.0f : 0.3f;
+			this_00->SetDrawScale(scale);
 		}
 		if (groupType == 0)
 		{
@@ -311,10 +311,11 @@ int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param
 		*(INT*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0x14) = 0;
 		if (param_5 != 0.0f)
 		{
-			// FUN_10301000 = appSeconds() — returns current wall-clock time as a double.
-			// Retail stores: decalInfo+0x0c = (appSeconds() + param_5) - param_6 (expire time)
-			//                decalInfo+0x14 = param_5 (lifetime)
-			// DIVERGENCE: appSeconds() not available; decal lifetime/expiry not set.
+			// Retail: decalInfo+0x0c = (appSeconds() + param_5) - param_6 (expiry timestamp)
+			//         decalInfo+0x14 = param_5 (lifetime in seconds)
+			DOUBLE now = appSecondsSlow();
+			*(DOUBLE*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0x0c) = (now + param_5) - param_6;
+			*(FLOAT*)(*(INT*)((BYTE*)this_00 + 0x48c) + 0x14) = param_5;
 		}
 		INT iVar3 = *(INT*)((BYTE*)this + 0x39c);
 		*(INT*)((BYTE*)this + 0x39c) = iVar3 + 1;
