@@ -428,11 +428,71 @@ fn(fdOut, Data, Event);
 unguard;
 }
 
-// Ghidra: UNetConnection::Destroy iterates ActorChannels or SentTemporaries and
-// calls FUN_103db080 (61b, removes actor from FArray<AActor*>) for cleanup.
-// FUN_103db080 uses __thiscall on a sub-field of the connection; offset unknown.
-IMPL_DIVERGE("retail: FUN_103db080 (actor-array cleanup via __thiscall on connection sub-field) unresolved; Super::Destroy() only")
-void UNetConnection::Destroy() { Super::Destroy(); }
+// Ghidra 0x10485820 (305b):
+// Sequence: log connection name, close channel 0, call FlushNet (vtable[32]=+0x80),
+// remove from driver's connection list, set State=USOCK_Closed, Destroy all OpenChannels
+// (vtable[3]=+0xC = UObject::Destroy on each), Destroy PackageMap (this+0xC8),
+// Destroy Download (this+0x4BA8), then Super::Destroy.
+// DIVERGE: EName(0x313)=runtime-defined; appTimestamp/GetName args to Logf not deducible
+// from Ghidra; remaining body exact. ClientConnections at Driver+0x30, ServerConnection
+// at Driver+0x3C confirmed. vtable[3]=Destroy, vtable[32]=FlushNet confirmed.
+IMPL_DIVERGE("retail 0x10485820 (305b): EName(0x313) for log call unknown at compile time; body otherwise exact from Ghidra")
+void UNetConnection::Destroy()
+{
+guard(UNetConnection::Destroy);
+// Log connection destruction (EName 0x313 = runtime name; NAME_DevNet is approximate)
+GLog->Logf(NAME_DevNet, TEXT("UNetConnection destroyed: %s %s"), *GetName(), appTimestamp());
+
+// Close control channel (Channels[0]) if present (vtable[27=0x6C]=Close)
+UChannel* ch0 = *(UChannel**)((BYTE*)this + 0xEB0);
+if (ch0)
+    ch0->Close();
+
+// Flush pending data (vtable[32=0x80] = FlushNet)
+FlushNet();
+
+// Handle server-vs-client connection tracking in driver
+UNetDriver* Drv = *(UNetDriver**)((BYTE*)this + 0x7C);
+if (*(UNetConnection**)((BYTE*)Drv + 0x3C) == NULL)
+{
+    // Client connection: remove from ClientConnections (Driver+0x30)
+    TArray<UNetConnection*>* clients = (TArray<UNetConnection*>*)((BYTE*)Drv + 0x30);
+    INT removed = clients->RemoveItem(this);
+    if (removed != 1)
+        appFailAssert("Driver->ClientConnections.RemoveItem( this )==1", ".\\UnConn.cpp", 0x66);
+}
+else
+{
+    if (*(UNetConnection**)((BYTE*)Drv + 0x3C) != this)
+        appFailAssert("Driver->ServerConnection==this", ".\\UnConn.cpp", 0x60);
+    *(UNetConnection**)((BYTE*)Drv + 0x3C) = NULL;
+}
+
+// Mark connection closed (State = USOCK_Closed = 1)
+*(INT*)((BYTE*)this + 0x80) = 1;
+
+// Destroy all open channels (backwards; vtable[3=0xC] = UObject::Destroy on each)
+TArray<UChannel*>& OpenChannels = *(TArray<UChannel*>*)((BYTE*)this + 0x4B7C);
+for (INT i = OpenChannels.Num() - 1; i >= 0; i--)
+{
+    UChannel* ch = OpenChannels(i);
+    if (ch)
+        ch->Destroy();
+}
+
+// Destroy PackageMap (this+0xC8; vtable[3] = Destroy)
+UObject* pkgMap = *(UObject**)((BYTE*)this + 0xC8);
+if (pkgMap)
+    pkgMap->Destroy();
+
+// Destroy active download (vtable[3] = Destroy)
+UDownload* dl = *(UDownload**)((BYTE*)this + 0x4BA8);
+if (dl)
+    dl->Destroy();
+
+Super::Destroy();
+unguard;
+}
 
 IMPL_MATCH("Engine.dll", 0x10484200)
 void UNetConnection::Serialize(FArchive& Ar)

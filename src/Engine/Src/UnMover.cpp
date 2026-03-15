@@ -383,22 +383,21 @@ void AMover::PreNetReceive()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103D5460: FVector0_exref substituted with zero literals; vtable +0x184 slot unidentified")
+// Ghidra 0x103D5460 (134b): copies FVector0_exref (confirmed = (0,0,0) from FCoords and mover
+// usage patterns) into this+0x694..0x69C, then FRotator(0,0,0) into this+0x6B8..0x6C0,
+// then calls vtable[0x184/4=97] on this (no extra args per Ghidra).
+// FVector0_exref confirmed zero: FCoords::FCoords(coords, FVector0_exref) = identity origin.
+IMPL_MATCH("Engine.dll", 0x103D5460)
 void AMover::PreRaytrace()
 {
 	guard(AMover::PreRaytrace);
-	// Ghidra 0xd5460: copy FVector(0,0,0) from FVector0_exref into this+0x694..0x69C,
-	// then store FRotator(0,0,0) at this+0x6B8..0x6C0, then call vtable +0x184.
-	// FVector0_exref is the global Engine.dll FVector zero constant; zeroing directly
-	// is equivalent since it's always (0,0,0).
 	*(float*)((BYTE*)this + 0x694) = 0.0f;
 	*(float*)((BYTE*)this + 0x698) = 0.0f;
 	*(float*)((BYTE*)this + 0x69C) = 0.0f;
 	FRotator ZeroRot(0, 0, 0);
 	*(FRotator*)((BYTE*)this + 0x6B8) = ZeroRot;
-	// vtable[0x184/4] = slot 97; call with implicit this (no extra args per Ghidra)
 	void** vtbl = *(void***)this;
-	((void(__thiscall*)(void*))vtbl[0x184 / 4])(this);
+	((void(__thiscall*)(void*))vtbl[0x184 / sizeof(void*)])(this);
 	unguard;
 }
 
