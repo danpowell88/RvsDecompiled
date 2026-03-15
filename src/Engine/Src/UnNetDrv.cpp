@@ -120,19 +120,38 @@ Ar << *(UObject**)((BYTE*)this + 0x80);
 unguard;
 }
 
-IMPL_DIVERGE("retail 0x1048c2d0 (178b): full Ghidra body known but FUN_103db080/FUN_103b7b70 ECX tracking incomplete")
+// Ghidra 0x1048c2d0 (178b): iterates ClientConnections backwards.
+// FUN_103db080 inlined as TArray<AActor*>::RemoveItem (removes all occurrences).
+// FUN_103b7b70 inlined as TMap<AActor*,UActorChannel*>::Find at conn+0x4B94.
+// ECX for both: conn+0x4B88 (SentTemporaries), conn+0x4B94 (ActorChannels).
+IMPL_MATCH("Engine.dll", 0x1048c2d0)
 void UNetDriver::NotifyActorDestroyed(AActor* Actor)
 {
 guard(UNetDriver::NotifyActorDestroyed);
-// Ghidra 0x1048c2d0 (178b): iterates ClientConnections (this+0x30) backwards.
-// For each connection: if actor->bFlags & 0x10000000 (bNetTemporary), calls
-// FUN_103db080(&actor) to remove actor from connection's replication array.
-// Then calls FUN_103b7b70(&actor) to look up actor channel; if found asserts
-// OpenedLocally (piVar2[0xf]) and calls channel->vtable[27]() (= Close()).
-// FUN_103db080 (61b): removes actor from an FArray<AActor*> via __thiscall.
-// FUN_103b7b70 (88b): hash-table lookup returning UChannel* via __thiscall.
-// Blocked: ECX for both calls is a sub-field of the connection, offset unknown.
-(void)Actor;
+FArray* rawConns = (FArray*)((BYTE*)this + 0x30);
+for (INT i = rawConns->Num() - 1; i >= 0; i--)
+{
+    UNetConnection* conn = *(UNetConnection**)((BYTE*)rawConns->GetData() + i * 4);
+
+    // FUN_103db080: remove Actor from conn->SentTemporaries (TArray<AActor*> at conn+0x4B88)
+    if (*(DWORD*)((BYTE*)Actor + 0xA0) & 0x10000000)
+    {
+        TArray<AActor*>* sentTemps = (TArray<AActor*>*)((BYTE*)conn + 0x4B88);
+        sentTemps->RemoveItem(Actor);
+    }
+
+    // FUN_103b7b70: lookup Actor in conn->ActorChannels (TMap at conn+0x4B94)
+    TMap<AActor*, UActorChannel*>* actorChannels =
+        (TMap<AActor*, UActorChannel*>*)((BYTE*)conn + 0x4B94);
+    UActorChannel** ppCh = actorChannels->Find(Actor);
+    if (ppCh)
+    {
+        // piVar2[0xF] = *(channel + 0x3C) = OpenedLocally; assert non-zero
+        if ((*ppCh)->OpenedLocally == 0)
+            appFailAssert("Channel->OpenedLocally", ".\\UnNetDrv.cpp", 0x108);
+        (*ppCh)->Close();
+    }
+}
 unguard;
 }
 
@@ -768,16 +787,21 @@ return 0;
 unguard;
 }
 
-// Ghidra: SetActorDirty calls FUN_103b7b70 (88b) which is a hash-table lookup
-// returning UChannel* for a given actor (uses UObject::GetIndex for hash key).
-// ECX for the call is a hash-table sub-field of the connection; offset unknown.
-IMPL_DIVERGE("retail: SetActorDirty blocked; FUN_103b7b70 (88b) is actor→channel hash-table lookup via __thiscall on connection sub-field")
+// Ghidra 0x103c5d70 (49b): no exception frame (no guard/unguard in retail).
+// ECX = this (UNetConnection). ECX for FUN_103b7b70 = this+0x4B94 (ActorChannels TMap).
+// FUN_103b7b70 inlined as TMap<AActor*,UActorChannel*>::Find (identical hash algorithm).
+IMPL_MATCH("Engine.dll", 0x103c5d70)
 void UNetConnection::SetActorDirty(AActor* Actor)
 {
-guard(UNetConnection::SetActorDirty);
-// Finds actor channel via FUN_103b7b70 hash lookup, then marks it dirty.
-(void)Actor;
-unguard;
+// No guard — retail 0x103c5d70 has no exception-handler frame (49 bytes, no ExceptionList setup).
+if (*(INT*)((BYTE*)this + 0x34) != 0 && *(INT*)((BYTE*)this + 0x80) == 3)
+{
+    TMap<AActor*, UActorChannel*>* actorChannels =
+        (TMap<AActor*, UActorChannel*>*)((BYTE*)this + 0x4B94);
+    UActorChannel** ppCh = actorChannels->Find(Actor);
+    if (ppCh)
+        *(INT*)((BYTE*)*ppCh + 0x88) = 1;
+}
 }
 
 IMPL_MATCH("Engine.dll", 0x10476d60)

@@ -1,6 +1,6 @@
 ---
-slug: 215-unmodel-bsp-analysis
-title: "215. UnModel.cpp: When the Whole File Is a Blocker"
+slug: 216-unmodel-bsp-analysis
+title: "216. UnModel.cpp: When the Whole File Is a Blocker"
 authors: [copilot]
 date: 2026-03-15T10:33
 ---

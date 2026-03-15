@@ -609,9 +609,30 @@ CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 }
 
 /*-----------------------------------------------------------------------------
-	TArray<TCHAR> operator+ and operator+=.
-	Explicit template instantiations for .def export.
+	TArray<TCHAR> operator=, operator+, operator+=.
+	Explicit template specialisations for FString operations.
+
+	operator= uses the FArray::Realloc+memcpy pattern seen at every callsite
+	in Ghidra (e.g. UCommandlet::operator= 0x1010c140): set ArrayNum=ArrayMax=
+	src.ArrayNum, Realloc, then memcpy.  The general TArray<T>::operator=
+	template uses Empty()+per-element loop which generates different assembly.
+	This specialisation is always inlined; no standalone body exists in Core.dll.
 -----------------------------------------------------------------------------*/
+
+IMPL_DIVERGE("always inlined in retail; no standalone export; specialisation matches FArray::Realloc+memcpy pattern at callsites such as UCommandlet::operator= 0x1010c140")
+template<>
+TArray<TCHAR>& TArray<TCHAR>::operator=( const TArray<TCHAR>& Other )
+{
+	if( this != &Other )
+	{
+		ArrayNum = Other.ArrayNum;
+		ArrayMax = Other.ArrayNum;
+		Realloc( sizeof(TCHAR) );
+		if( ArrayNum != 0 )
+			appMemcpy( Data, Other.GetData(), ArrayNum * sizeof(TCHAR) );
+	}
+	return *this;
+}
 
 IMPL_DIVERGE("found at Core.dll 0x1010a900; retail uses direct FArray::Realloc; AddItem loop is functionally equivalent but not byte-identical")
 template<>

@@ -1904,14 +1904,14 @@ void UObject::ConditionalShutdownAfterError()
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_EMPTY("guard/unguard body only; Ravenshield-specific extension confirmed absent from Core.dll named exports")
 void UObject::CheckDanglingOuter( UObject* Obj )
 {
 	guard(UObject::CheckDanglingOuter);
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_EMPTY("guard/unguard body only; Ravenshield-specific extension confirmed absent from Core.dll named exports")
 void UObject::CheckDanglingRefs( UObject* Obj )
 {
 	guard(UObject::CheckDanglingRefs);
@@ -2228,26 +2228,25 @@ UCommandlet::UCommandlet( const UCommandlet& Other )
 	unguard;
 }
 
-IMPL_DIVERGE("found at 0x1010c140; retail uses FArray-level Realloc+memcpy; C++ member assignment is functionally equivalent, not byte-identical")
+IMPL_MATCH("Core.dll", 0x1010c140)
 UCommandlet& UCommandlet::operator=( const UCommandlet& Other )
 {
-	if( this != &Other )
-	{
-		UObject::operator=( Other );
-		HelpCmd      = Other.HelpCmd;
-		HelpOneLiner = Other.HelpOneLiner;
-		HelpUsage    = Other.HelpUsage;
-		HelpWebLink  = Other.HelpWebLink;
-		for( INT i = 0; i < ARRAY_COUNT(HelpParm); i++ ) HelpParm[i] = Other.HelpParm[i];
-		for( INT i = 0; i < ARRAY_COUNT(HelpDesc); i++ ) HelpDesc[i] = Other.HelpDesc[i];
-		LogToStdout    = Other.LogToStdout;
-		IsServer       = Other.IsServer;
-		IsClient       = Other.IsClient;
-		IsEditor       = Other.IsEditor;
-		LazyLoad       = Other.LazyLoad;
-		ShowErrorCount = Other.ShowErrorCount;
-		ShowBanner     = Other.ShowBanner;
-	}
+	// Ghidra: no outer this!=&Other guard; UObject::operator= called unconditionally;
+	// each FString copy has a per-field self-check (from inlined TArray<TCHAR>::operator=).
+	UObject::operator=( Other );
+	HelpCmd      = Other.HelpCmd;
+	HelpOneLiner = Other.HelpOneLiner;
+	HelpUsage    = Other.HelpUsage;
+	HelpWebLink  = Other.HelpWebLink;
+	for( INT i = 0; i < ARRAY_COUNT(HelpParm); i++ ) HelpParm[i] = Other.HelpParm[i];
+	for( INT i = 0; i < ARRAY_COUNT(HelpDesc); i++ ) HelpDesc[i] = Other.HelpDesc[i];
+	LogToStdout    = Other.LogToStdout;
+	IsServer       = Other.IsServer;
+	IsClient       = Other.IsClient;
+	IsEditor       = Other.IsEditor;
+	LazyLoad       = Other.LazyLoad;
+	ShowErrorCount = Other.ShowErrorCount;
+	ShowBanner     = Other.ShowBanner;
 	return *this;
 }
 
