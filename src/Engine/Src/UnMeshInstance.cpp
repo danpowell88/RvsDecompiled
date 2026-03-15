@@ -927,7 +927,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x38)   = 1;
 }
 
-IMPL_DIVERGE("stub only; retail 0x104361a0 (438b) builds bone pivot list from skeleton data")
+IMPL_TODO("retail 0x104361a0 (438b) builds bone pivot list; blocked by unresolved bone-transform helpers")
 void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
@@ -979,7 +979,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
-IMPL_DIVERGE("stub only; retail 0x10436390 (933b) draws debug cylinders for bone collision shapes")
+IMPL_TODO("retail 0x10436390 (933b) draws debug cylinders; blocked by unresolved bone/render helpers")
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
@@ -1091,7 +1091,7 @@ FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
 	return FCoords();
 }
 
-IMPL_DIVERGE("radius data deferred until binary extraction is complete")
+IMPL_TODO("m_fCylindersRadius data not yet extracted from binary; blocking cylinder collision")
 int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 {
 	guard(USkeletalMeshInstance::GetBoneCylinder);
@@ -1645,7 +1645,7 @@ int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("stub only; retail 0x1043da80 (6631b) full skeletal mesh rendering pipeline")
+IMPL_TODO("retail 0x1043da80 (6631b) full skeletal mesh rendering pipeline; blocked by unresolved GPU skinning and stream helpers")
 void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(USkeletalMeshInstance::Render);
@@ -1661,7 +1661,7 @@ void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDyna
 // FUN_103218c0 etc.), and AnimObjects TArray (+0xB8 via FUN_104371c0).
 // Divergence: FUN_104372f0/FUN_10437430/FUN_104375d0/FUN_10438100/FUN_10321a80/FUN_103218c0/
 // FUN_104371c0 are unresolved TArray serializers; only the two scalar fields are serialized here.
-IMPL_DIVERGE("retail 0x10438750 (264b): TArray serializers FUN_104372f0 etc. unresolved; scalar fields only")
+IMPL_TODO("FUN_104372f0 and related TArray serializers unresolved; retail 0x10438750 (264b)")
 void USkeletalMeshInstance::Serialize(FArchive& Ar)
 {
 	ULodMeshInstance::Serialize(Ar);
@@ -1796,7 +1796,7 @@ int USkeletalMeshInstance::LineCheck(FCheckResult& Hit, AActor* Owner, FVector E
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10438ce0 is a complex GPU-skinning transform; identity unresolved")
+IMPL_TODO("FUN_10438ce0 GPU-skinning transform not yet identified; identity used as placeholder")
 void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 {
 	guard(USkeletalMeshInstance::MeshSkinVertsCallback);
@@ -2080,7 +2080,7 @@ void USkeletalMeshInstance::ActualizeAnimLinkups()
 	}
 }
 
-IMPL_DIVERGE("untracked register values from AnimForcePose Ghidra output;")
+IMPL_TODO("untracked register values in AnimForcePose Ghidra output not yet resolved")
 int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(USkeletalMeshInstance::AnimForcePose);
@@ -2480,7 +2480,7 @@ void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 	return NULL;
 }
 
-IMPL_DIVERGE("Ghidra decompilation failed at 0x10439f40 (10776b); encoding error prevents decompilation")
+IMPL_TODO("Ghidra decompilation failed at 0x10439f40 (10776b) due to encoding error; manual analysis required")
 void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(USkeletalMeshInstance::GetFrame);
@@ -2503,7 +2503,7 @@ UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_DIVERGE("FUN_10438ce0 identity unresolved; no vertex output produced")
+IMPL_TODO("FUN_10438ce0 GPU-skinning transform identity unresolved; no vertex output")
 void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(USkeletalMeshInstance::GetMeshVerts);
@@ -2607,7 +2607,7 @@ int USkeletalMeshInstance::WasSkeletonUpdated()
 	return (UpdateStamp >= GTicks - 1) ? 1 : 0;
 }
 
-IMPL_DIVERGE("stub only; retail 0x10441f40 (516b) computes bounding box/sphere from bone vertices")
+IMPL_TODO("retail 0x10441f40 (516b) computes bounding box/sphere from bone vertices; blocked by unresolved helpers")
 void USkeletalMeshInstance::MeshBuildBounds()
 {
 	guard(USkeletalMeshInstance::MeshBuildBounds);
@@ -2618,7 +2618,7 @@ void USkeletalMeshInstance::MeshBuildBounds()
 
 // Ghidra 0x10433de0 (2228b): complex bone-transform-to-world conversion pipeline.
 // Current stub returns identity; full implementation requires bone cache data.
-IMPL_DIVERGE("retail 0x10433de0 (2228b): complex bone-to-world transform pipeline; stub returns identity")
+IMPL_TODO("retail 0x10433de0 (2228b) complex bone-to-world transform pipeline not yet written")
 FMatrix USkeletalMeshInstance::MeshToWorld()
 {
 	return FMatrix();
@@ -2829,7 +2829,7 @@ int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("stub only; retail 0x10474f70 (2307b) full vertex mesh rendering pipeline")
+IMPL_TODO("retail 0x10474f70 (2307b) full vertex mesh rendering pipeline not yet written")
 void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UVertMeshInstance::Render);
@@ -2838,7 +2838,7 @@ void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicL
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10321a80 identity unresolved; anim state not serialized here")
+IMPL_TODO("FUN_10321a80 anim-state serializer unresolved; anim state not serialized")
 void UVertMeshInstance::Serialize(FArchive &)
 {
 	guard(UVertMeshInstance::Serialize);
@@ -3270,7 +3270,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_DIVERGE("stub only; retail 0x10473c20 (2457b) transforms vertex mesh frames")
+IMPL_TODO("retail 0x10473c20 (2457b) transforms vertex mesh frames; blocked by unresolved helpers")
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UVertMeshInstance::GetFrame);
@@ -3294,7 +3294,7 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_DIVERGE("stub only; retail 0x10474b10 (593b) extracts transformed vertex positions")
+IMPL_TODO("retail 0x10474b10 (593b) extracts transformed vertex positions; blocked by unresolved helpers")
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
@@ -3360,7 +3360,7 @@ int UVertMeshInstance::IsAnimTweening(int)
 
 
 // --- UVertMeshInstance ---
-IMPL_DIVERGE("stub only; retail 0x10474850 (637b) builds bounding box/sphere over all frames")
+IMPL_TODO("retail 0x10474850 (637b) builds bounding box/sphere over all frames; blocked by unresolved helpers")
 void UVertMeshInstance::MeshBuildBounds()
 {
 	guard(UVertMeshInstance::MeshBuildBounds);
