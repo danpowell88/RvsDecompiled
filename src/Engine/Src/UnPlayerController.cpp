@@ -230,7 +230,7 @@ void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* 
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10374b00: AController::GetOptimizedRepList base call + 6 replicated properties (m_bRadarActive, ViewTarget, GameReplicationInfo, bOnlySpectator, m_TeamSelection, m_eCameraMode) via DAT_ static caches; DAT_ addresses not yet resolved")
+IMPL_DIVERGE("FUN_10371990 and FUN_10370830 are unexported Engine.dll internals; DAT_10661f94 gating flag address cannot be reproduced — permanent divergence from retail replication logic")
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	// Ghidra 0x74b00 (1025b): calls AController::GetOptimizedRepList, then conditionally

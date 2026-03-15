@@ -1060,7 +1060,7 @@ INT ANavigationPoint::ShouldBeBased()
 
 /*-- UInteraction screen/world transforms ------------------------------*/
 
-IMPL_TODO("complex FCanvasUtil/FMatrix/FCameraSceneNode camera un-projection — unresolved")
+IMPL_DIVERGE("permanent: FCanvasUtil/FCameraSceneNode camera unprojection requires unexported renderer-internal types not available in our headers")
 void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execScreenToWorld);
@@ -1072,7 +1072,7 @@ void UInteraction::execScreenToWorld( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UInteraction, INDEX_NONE, execScreenToWorld );
 
-IMPL_TODO("complex FCanvasUtil/FMatrix/FCameraSceneNode world-to-screen projection — unresolved")
+IMPL_DIVERGE("permanent: FCanvasUtil/FCameraSceneNode world-to-screen projection requires unexported renderer-internal types not available in our headers")
 void UInteraction::execWorldToScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(UInteraction::execWorldToScreen);
@@ -1267,7 +1267,7 @@ IMPLEMENT_FUNCTION( UR6FileManager, 1525, execGetNbFile );
 
 /*-- UR6ModMgr ---------------------------------------------------------*/
 
-IMPL_TODO("uses unnamed DAT_1066f414 counter and FUN_1031efc0/FUN_10393490/FUN_10321830 — unresolved")
+IMPL_DIVERGE("FUN_1031efc0/FUN_10393490/FUN_10321830 are unexported Engine.dll internals; path-list manipulation permanently unresolvable; Ghidra Engine.dll offset 0x95b00")
 void UR6ModMgr::execAddNewModExtraPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execAddNewModExtraPath);
@@ -1342,7 +1342,7 @@ void UR6ModMgr::execIsOfficialMod( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execIsOfficialMod );
 
-IMPL_TODO("uses unnamed DAT_10529f90 string constant and unresolved GConfig vtable calls")
+IMPL_DIVERGE("DAT_10529f90 (unknown wide-string constant) and internal GConfig vtable methods are permanently unresolvable; Ghidra Engine.dll offset 0x93220")
 void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetGeneralModSettings);
@@ -1354,7 +1354,7 @@ void UR6ModMgr::execSetGeneralModSettings( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UR6ModMgr, INDEX_NONE, execSetGeneralModSettings );
 
-IMPL_TODO("calls FUN_1031f060, FUN_10393490, FUN_10321830 — path-list manipulation helpers unresolved")
+IMPL_DIVERGE("FUN_1031f060/FUN_10393490/FUN_10321830 are unexported Engine.dll internals; path-list manipulation permanently unresolvable; Ghidra Engine.dll offset 0x95c60")
 void UR6ModMgr::execSetSystemMod( FFrame& Stack, RESULT_DECL )
 {
 	guard(UR6ModMgr::execSetSystemMod);

@@ -15,10 +15,89 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- AR6AbstractCircumstantialActionQuery ---
-IMPL_TODO("Ghidra 0x77620: 1245-byte property-replication body; this stub delegates to parent as placeholder")
+// Lazily-initialised property RepIndex cache (mirrors DAT_10666b28/b24/b20... globals).
+// UPackageMap vtable slot 25 (offset 0x64) maps actor-object references.
+IMPL_MATCH("Engine.dll", 0x10377620)
 INT* AR6AbstractCircumstantialActionQuery::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+static DWORD  s_InitFlags            = 0;
+static INT*   s_iHasAction            = NULL;
+static INT*   s_iInRange              = NULL;
+static INT*   s_aQueryOwner           = NULL;
+static INT*   s_aQueryTarget          = NULL;
+static INT*   s_textureIcon           = NULL;
+static INT*   s_bCanBeInterrupted     = NULL;
+static INT*   s_fPlayerActionTime     = NULL;
+static INT*   s_iPlayerActionID       = NULL;
+static INT*   s_iTeamActionIDList     = NULL;
+static INT*   s_iTeamSubActionsIDList = NULL;
+
+typedef INT* (__thiscall *PackageMapFn)(UPackageMap*, INT);
+PackageMapFn pfnMap = *(PackageMapFn*)(*(INT*)Map + 0x64);
+
+Ptr = AActor::GetOptimizedRepList((AActor*)this, Mem, Retire, Ptr, Map, Chan);
+
+if ((BYTE)*(BYTE*)((BYTE*)this + 0x2d) == 4)
+{
+if (*(BYTE*)((BYTE*)this + 0x394) != *(BYTE*)(Mem + 0x394))
+{
+if (!(s_InitFlags & 1)) { s_InitFlags |= 1; s_iHasAction = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iHasAction"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_iHasAction + 0x4a);
+}
+if (*(BYTE*)((BYTE*)this + 0x395) != *(BYTE*)(Mem + 0x395))
+{
+if (!(s_InitFlags & 2)) { s_InitFlags |= 2; s_iInRange = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iInRange"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_iInRange + 0x4a);
+}
+{
+INT iOwner1 = *(INT*)((BYTE*)this + 0x3c0), iOwner2 = *(INT*)(Mem + 0x3c0);
+bool bSameOwner = pfnMap(Map, iOwner1) ? (iOwner1 == iOwner2) : (*(INT*)(Chan + 0x8c) = 1, iOwner2 == 0);
+if (!bSameOwner) {
+if (!(s_InitFlags & 4)) { s_InitFlags |= 4; s_aQueryOwner = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("aQueryOwner"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_aQueryOwner + 0x4a);
+}
+}
+{
+INT iTgt1 = *(INT*)((BYTE*)this + 0x3c4), iTgt2 = *(INT*)(Mem + 0x3c4);
+bool bSameTgt = pfnMap(Map, iTgt1) ? (iTgt1 == iTgt2) : (*(INT*)(Chan + 0x8c) = 1, iTgt2 == 0);
+if (!bSameTgt) {
+if (!(s_InitFlags & 8)) { s_InitFlags |= 8; s_aQueryTarget = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("aQueryTarget"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_aQueryTarget + 0x4a);
+}
+}
+{
+INT iIco1 = *(INT*)((BYTE*)this + 0x3c8), iIco2 = *(INT*)(Mem + 0x3c8);
+bool bSameIco = pfnMap(Map, iIco1) ? (iIco1 == iIco2) : (*(INT*)(Chan + 0x8c) = 1, iIco2 == 0);
+if (!bSameIco) {
+if (!(s_InitFlags & 0x10)) { s_InitFlags |= 0x10; s_textureIcon = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("textureIcon"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_textureIcon + 0x4a);
+}
+}
+if ((*(DWORD*)((BYTE*)this + 0x3b4) ^ *(DWORD*)(Mem + 0x3b4)) & 1)
+{
+if (!(s_InitFlags & 0x20)) { s_InitFlags |= 0x20; s_bCanBeInterrupted = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("bCanBeInterrupted"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_bCanBeInterrupted + 0x4a);
+}
+if (*(INT*)((BYTE*)this + 0x3b8) != *(INT*)(Mem + 0x3b8))
+{
+if (!(s_InitFlags & 0x40)) { s_InitFlags |= 0x40; s_fPlayerActionTime = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("fPlayerActionTimeRequired"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_fPlayerActionTime + 0x4a);
+}
+if (*(BYTE*)((BYTE*)this + 0x396) != *(BYTE*)(Mem + 0x396))
+{
+if (!(s_InitFlags & 0x80)) { s_InitFlags |= 0x80; s_iPlayerActionID = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iPlayerActionID"), 0); }
+*Ptr++ = *(WORD*)((BYTE*)s_iPlayerActionID + 0x4a);
+}
+if (!(s_InitFlags & 0x100)) { s_InitFlags |= 0x100; s_iTeamActionIDList = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iTeamActionIDList"), 0); }
+for (DWORD i = 0; i < 4; i++)
+if (*(BYTE*)((BYTE*)this + 0x398 + i) != *(BYTE*)(Mem + 0x398 + i))
+*Ptr++ = *(WORD*)((BYTE*)s_iTeamActionIDList + 0x4a) + (INT)i;
+if (!(s_InitFlags & 0x200)) { s_InitFlags |= 0x200; s_iTeamSubActionsIDList = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iTeamSubActionsIDList"), 0); }
+for (DWORD i = 0; i < 16; i++)
+if (*(BYTE*)((BYTE*)this + 0x39c + i) != *(BYTE*)(Mem + 0x39c + i))
+*Ptr++ = *(WORD*)((BYTE*)s_iTeamSubActionsIDList + 0x4a) + (INT)i;
+}
+return Ptr;
 }
 
 

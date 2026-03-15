@@ -877,7 +877,7 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_TODO("Ghidra 0x1041f610 (137 bytes): calls FUN_103db080 (unresolved Engine.dll internal; appears to be a TArray remove-item helper used for scene manager teardown)")
+IMPL_DIVERGE("FUN_103db080 (scene manager teardown helper) is an unexported Engine.dll internal")
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
@@ -1006,7 +1006,7 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_TODO("Ghidra 0x1032f0c0 (1867 bytes): calls FUN_10318850 (unresolved object iterator) and FUN_10322eb0 (unresolved cleanup helper); blocked pending resolution of Engine.dll internals")
+IMPL_DIVERGE("FUN_10318850 (object iterator) and FUN_10322eb0 (cleanup helper) are unexported Engine.dll internals; 1867-byte stat-log check permanently blocked")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);

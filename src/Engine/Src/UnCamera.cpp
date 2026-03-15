@@ -352,7 +352,7 @@ FArchive & operator<<(FArchive & Ar, FTerrainVertex & V);
 // ??6@YAAAVFArchive@@AAV0@AAVFAnimMeshVertexStream@@@Z
 // FUN_10323030 = TArray<0x20-element>::Serialize. Each element via FUN_10446ec0 = 8×ByteOrderSerialize(4).
 // Layout (after vtable): Pad[4] TArray<elem>  Pad[0x18] Revision
-IMPL_TODO("Ghidra: no direct RVA; sub-function mapping via FUN_10323030/FUN_10446ec0 only")
+IMPL_DIVERGE("Ghidra: no direct RVA; reconstruction from FUN_10323030/FUN_10446ec0 sub-function analysis only — cannot claim byte accuracy without retail address")
 FArchive & operator<<(FArchive & Ar, FAnimMeshVertexStream & V) {
 	// TArray at Pad[4] (obj+8), element size 0x20. Manual serialization.
 	FArray& Arr = *(FArray*)&V.Pad[4];

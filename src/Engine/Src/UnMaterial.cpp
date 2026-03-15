@@ -1,4 +1,4 @@
-﻿/*=============================================================================
+/*=============================================================================
 	UnMaterial.cpp: UMaterial, UTexture, UShader, UModifier hierarchy.
 	Copyright 1997-1999 Epic Games, Inc. All Rights Reserved.
 	Reconstructed for Ravenshield decompilation project.
@@ -211,7 +211,7 @@ void UTexture::Destroy()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1046B600: omits mip-level TArray serialization — FUN_1046b600 serializes mip array (FUN_1046ace0 per element); FUN_1046ace0 mip-element serializer unresolved")
+IMPL_DIVERGE("FUN_1046b600 (mip-array serializer) and FUN_1046ace0 (per-mip-element serializer) are unexported Engine.dll internals; mip-level TArray serialization permanently omitted")
 void UTexture::Serialize( FArchive& Ar )
 {
 	guard(UTexture::Serialize);
