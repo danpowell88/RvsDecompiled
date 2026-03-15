@@ -161,7 +161,7 @@ void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 // strips "IK_" prefix (skips +3 chars), returns pointer into FName table.
 // Our static table produces identical display strings without the FName reflection.
 // Divergence is permanent: FName property array at +0xea8 requires live UClass reflection.
-IMPL_TODO("permanent functional divergence: retail reads FName property array at this+0xea8; static table produces same strings (0x103b55d0)")
+IMPL_DIVERGE("permanent: retail reads FName property array via UClass reflection at this+0xea8; static table produces identical display strings; 0x103b55d0")
 const TCHAR* UInput::GetKeyName(EInputKey Key) const
 {
 	static TCHAR GenBuf[16]; // used for dynamically generated names

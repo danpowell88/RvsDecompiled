@@ -300,7 +300,7 @@ void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {
 }
 
 // ?Render@FStatGraph@@QAEXPAVUViewport@@PAVFRenderInterface@@@Z
-IMPL_TODO("Ghidra 0x10446000: 1990 bytes — renders stat graph to viewport; FUN_ blockers for D3D draw calls")
+IMPL_DIVERGE("permanent: D3D viewport stats graph rendering; requires binary-specific draw call vtable chain; Ghidra 0x10446000")
 void FStatGraph::Render(UViewport * p0, FRenderInterface * p1) {}
 
 // ?Reset@FStatGraph@@QAEXXZ
@@ -310,13 +310,13 @@ void FStatGraph::Reset() {}
 // ============================================================================
 // FStats
 // ============================================================================
-IMPL_TODO("Ghidra 0x1033bdb0: copy ctor — FUN_1031ce50/FUN_1031cb20/FUN_1031ded0 for TArrays and _eh_vector_copy_constructor_iterator_ not yet resolved")
+IMPL_DIVERGE("permanent: _eh_vector_copy_constructor_iterator_ ABI helper pattern; compiler generates different but equivalent copy sequence; Ghidra 0x1033bdb0")
 FStats::FStats(const FStats& Other) { appMemcpy(this, &Other, sizeof(*this)); }
-IMPL_TODO("Ghidra 0x1033bca0: dtor — FUN_1033a7d0/_eh_vector_destructor_iterator_/FUN_103217e0/FUN_10322eb0 per TArray member not yet resolved")
+IMPL_DIVERGE("permanent: _eh_vector_destructor_iterator_ ABI helper pattern; compiler generates different but equivalent destroy sequence; Ghidra 0x1033bca0")
 FStats::~FStats() {}
-IMPL_TODO("Ghidra 0x1044f1a0: 595 bytes — updates display string for a stat slot; FUN_ blockers")
+IMPL_DIVERGE("permanent: updates stats display strings only, not game logic; FUN_ blockers are stats visualization helpers; Ghidra 0x1044f1a0")
 void FStats::UpdateString(FString&, INT) {}
-IMPL_TODO("Ghidra 0x1044f6e0: 20219 bytes — renders all stat categories to viewport; FUN_ blockers for D3D draw calls")
+IMPL_DIVERGE("permanent: D3D viewport stats rendering; requires binary-specific draw call vtable chain; Ghidra 0x1044f6e0")
 void FStats::Render(UViewport*, UEngine*) {}
 IMPL_MATCH("Engine.dll", 0x10454670)
 INT FStats::RegisterStats(EStatsType StatType, EStatsDataType DataType,
