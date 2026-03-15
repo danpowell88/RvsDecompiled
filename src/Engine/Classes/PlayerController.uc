@@ -39,6 +39,7 @@ struct PlayerPrefInfo
 	var string m_GadgetName2;
 };
 
+// 'input' vars are bound to key/axis bindings; the engine writes them each tick before PlayerInput runs.
 // NEW IN 1.60
 var input byte bStrafe;
 // NEW IN 1.60
@@ -46,11 +47,11 @@ var input byte bSnapLevel;
 // NEW IN 1.60
 var input byte bLook;
 // NEW IN 1.60
-var input byte bFreeLook;
+var input byte bFreeLook;   // non-zero when camera is decoupled from pawn rotation
 // NEW IN 1.60
-var input byte bTurn180;
+var input byte bTurn180;    // triggers a 180-degree turn
 // NEW IN 1.60
-var input byte bTurnToNearest;
+var input byte bTurnToNearest; // snap-turn toward nearest enemy
 // NEW IN 1.60
 var input byte bXAxis;
 // NEW IN 1.60
@@ -85,8 +86,8 @@ var bool bCenterView;
 // Player control flags
 var bool bBehindView;  // Outside-the-player view.
 var bool bFrozen;  // set when game ends or player dies to temporarily prevent player from restarting (until cleared by timer)
-var bool bPressedJump;
-var bool bUpdatePosition;
+var bool bPressedJump;      // true this frame when the jump button was pressed
+var bool bUpdatePosition;   // set when server correction arrives; triggers ClientUpdatePosition next tick
 var bool bIsTyping;
 var bool bFixedCamera;  // used to fix camera in position (to view animations)
 var bool bJumpStatus;  // used in net games
@@ -128,15 +129,15 @@ var input float aMouseX;
 // NEW IN 1.60
 var input float aMouseY;
 // NEW IN 1.60
-var input float aForward;
+var input float aForward;   // forward/backward movement axis (positive = forward)
 // NEW IN 1.60
-var input float aTurn;
+var input float aTurn;      // horizontal turn axis; applied to yaw each tick in UpdateRotation
 // NEW IN 1.60
-var input float aStrafe;
+var input float aStrafe;    // lateral strafe axis
 // NEW IN 1.60
-var input float aUp;
+var input float aUp;        // vertical movement axis (flying/swimming)
 // NEW IN 1.60
-var input float aLookUp;
+var input float aLookUp;    // vertical look axis; applied to pitch each tick in UpdateRotation
 var float OrthoZoom;  // Orthogonal/map view zoom factor.
 var float CameraDist;  // multiplier for behindview camera dist
 //#ifdef R6CODE
@@ -174,13 +175,13 @@ var float m_fNextUpdateTime;
 var float m_fLoginTime;
 // Player info.
 var const Player Player;
-var const Actor ViewTarget;
+var const Actor ViewTarget;         // actor the camera follows; changed via SetViewTarget
 var HUD myHUD;  // heads up display info
 // Move buffering for network games.  Clients save their un-acknowledged moves in order to replay them
 // when they get position updates from the server.
 var SavedMove SavedMoves;  // buffered moves pending position updates
-var SavedMove FreeMoves;  // freed moves, available for buffering
-var SavedMove PendingMove;
+var SavedMove FreeMoves;   // freed moves, available for buffering
+var SavedMove PendingMove; // move being assembled this tick; held until the net send interval expires
 // ReplicationInfo
 var GameReplicationInfo GameReplicationInfo;
 var Pawn TurnTarget;
@@ -192,7 +193,7 @@ var Actor m_SaveOldClientBase;
 var Class<LocalMessage> LocalMessageClass;
 //var private CheatManager	CheatManager;	// Object within playercontroller that manages "cheat" commands
 var Class<CheatManager> CheatClass;  // class of my CheatManager
-var Class<PlayerInput> InputClass;  // class of my PlayerInput
+var Class<PlayerInput> InputClass;  // class of PlayerInput to instantiate (set in defaultproperties)
 // Screen flash/fog effect vectors: Scale controls brightness, Fog sets a screen-space color tint.
 // FlashScale/FlashFog are blended; ConstantGlow/InstantFog handle persistent and one-shot variants.
 // Screen flashes
@@ -230,16 +231,21 @@ var localized string OwnCamera;
 var private globalconfig string ngWorldSecret;
 var string m_szGlobalID;
 var string m_szIpAddr;  // IP address withou port number used to identfy players in beacon code
-var private transient PlayerInput PlayerInput;  // Object within playercontroller that manages player input.
+var private transient PlayerInput PlayerInput;  // subobject that processes raw key/axis input each tick
 var transient array<CameraEffect> CameraEffects;  // A stack of camera effects.
 
+// Replication block: variables and RPCs synced between server and clients.
+// 'reliable' guarantees delivery; unreliable may be dropped under load.
+// Conditions are evaluated server-side each tick; Role < ROLE_Authority means client-to-server.
 replication
 {
 	// Pos:0x0CB
+	// Server -> client: sound play/stop RPCs (skipped during demo recording).
 	unreliable if(((int(Role) == int(ROLE_Authority)) && (!bDemoRecording)))
 		ClientPlaySound, ClientStopSound;
 
 	// Pos:0x0FF
+	// Server -> client: position corrections and screen-flash/shake effects.
 	unreliable if((int(Role) == int(ROLE_Authority)))
 		ClientAdjustPosition, ClientFlash, 
 		ClientInstantFlash, ClientSetFlash, 
@@ -248,10 +254,12 @@ replication
 		VeryShortClientAdjustPosition;
 
 	// Pos:0x10C
+	// Server -> client: spatial sound events (suppressed during demo unless recording locally).
 	unreliable if((((!bDemoRecording) || (bClientDemoRecording && bClientDemoNetFunc)) && (int(Role) == int(ROLE_Authority))))
 		ClientHearSound;
 
 	// Pos:0x13C
+	// Client -> server: movement and chat RPCs (Role < ROLE_Authority = this is the client).
 	unreliable if((int(Role) < int(ROLE_Authority)))
 		Say, ServerMove, 
 		ServerTKPopUpDone, ServerViewNextPlayer, 
@@ -259,25 +267,30 @@ replication
 		ShorterServerMove, TeamSay;
 
 	// Pos:0x000
+	// Server -> owning client only (bNetOwner): HUD-critical state.
 	reliable if(((bNetDirty && bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		GameReplicationInfo, ViewTarget, 
 		bOnlySpectator, m_TeamSelection, 
 		m_eCameraMode;
 
 	// Pos:0x023
+	// Server -> owning client: view data for a spectated remote Pawn (not the controller's own Pawn).
 	reliable if((((bNetOwner && (int(Role) == int(ROLE_Authority))) && (ViewTarget != Pawn)) && (Pawn(ViewTarget) != none)))
 		TargetEyeHeight, TargetViewRotation, 
 		TargetWeaponViewOffset;
 
 	// Pos:0x05E
+	// Server -> client: demo recording view angles.
 	reliable if((bDemoRecording && (int(Role) == int(ROLE_Authority))))
 		DemoViewPitch, DemoViewYaw;
 
 	// Pos:0x076
+	// Server -> all clients: radar active flag (dirty-checked).
 	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		m_bRadarActive;
 
 	// Pos:0x08E
+	// Server -> client: reliable game-state RPCs (HUD, music, respawn, zoom, etc.).
 	reliable if((int(Role) == int(ROLE_Authority)))
 		ClientAdjustBase, ClientAdjustGlow, 
 		ClientCantRequestChangeNameYet, ClientChangeName, 
@@ -292,15 +305,18 @@ replication
 		ToggleZoom;
 
 	// Pos:0x09B
+	// Server -> client: chat and localized messages (suppressed in demo unless client-demo).
 	reliable if(((int(Role) == int(ROLE_Authority)) && ((!bDemoRecording) || (bClientDemoRecording && bClientDemoNetFunc))))
 		ClientMessage, ReceiveLocalizedMessage, 
 		TeamMessage;
 
 	// Pos:0x0E5
+	// Server -> client: level travel (never replicated during demo recording).
 	reliable if(((int(Role) == int(ROLE_Authority)) && (!bDemoRecording)))
 		ClientTravel;
 
 	// Pos:0x149
+	// Client -> server: player management RPCs (name change, pause, suicide, etc.).
 	reliable if((int(Role) < int(ROLE_Authority)))
 		AskForPawn, ChangeName, 
 		Pause, ServerChangeName, 
@@ -457,6 +473,7 @@ simulated function PlayerInput getPlayerInput()
 	return;
 }
 
+// PostBeginPlay: called after the controller is fully initialized in the world.
 event PostBeginPlay()
 {
 	super.PostBeginPlay();
@@ -467,8 +484,10 @@ event PostBeginPlay()
 		ClientMessage(Level.LevelEnterText);
 	}
 	DesiredFOV = DefaultFOV;
+	// Default view target is the controller itself until a pawn is possessed.
 	SetViewTarget(self);
 	// End:0x66
+	// Only enable cheats in standalone (single-player) mode.
 	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		AddCheats();
@@ -524,6 +543,7 @@ event InitMultiPlayerOptions()
 
 event InitInputSystem()
 {
+	// Instantiate the PlayerInput subobject that processes raw key/axis events.
 	PlayerInput = new InputClass;
 	UpdateOptions();
 	return;
@@ -588,13 +608,14 @@ function int GetFacingDirection()
 	GetAxes(Pawn.Rotation, X, Y, Z);
 	Dir = Normal(Pawn.Acceleration);
 	// End:0x6D
+	// 16384 = 90 deg in Unreal rotator units; maps acceleration dot products to a facing quadrant.
 	if((Dot(Y, Dir) > float(0)))
 	{
-		return int((float(49152) + (float(16384) * Dot(X, Dir))));		
+		return int((float(49152) + (float(16384) * Dot(X, Dir))));		// 49152 = 270 deg
 	}
 	else
 	{
-		return int((float(16384) - (float(16384) * Dot(X, Dir))));
+		return int((float(16384) - (float(16384) * Dot(X, Dir))));       // 16384 = 90 deg
 	}
 	return;
 }
@@ -603,6 +624,7 @@ function int GetFacingDirection()
 function Possess(Pawn aPawn)
 {
 	// End:0x0B
+	// Pure spectators are forbidden from possessing pawns.
 	if(bOnlySpectator)
 	{
 		return;
@@ -693,6 +715,7 @@ function ClientSetHUD(Class<HUD> newHUDType, Class<ScoreBoard> newScoringType)
 	return;
 }
 
+// ViewFlash: interpolates FlashScale/FlashFog toward their goal values each tick to produce screen-flash effects.
 function ViewFlash(float DeltaTime)
 {
 	local Vector goalFog;
@@ -1034,6 +1057,7 @@ function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool Newb
 	local Actor.EPhysics ClientPhysics;
 
 	// End:0x11
+	// Drop duplicate or out-of-order moves.
 	if((CurrentTimeStamp >= TimeStamp))
 	{
 		return;
@@ -1045,6 +1069,7 @@ function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool Newb
 		// End:0x1DB
 		if((CurrentTimeStamp < (OldTimeStamp - 0.0010000)))
 		{
+			// Unpack OldAccel: bits 30-23 = X, bits 22-15 = Y, bits 14-7 = Z (sign in bit 7 of each byte).
 			Accel.X = float((OldAccel >>> 23));
 			// End:0xA3
 			if((Accel.X > float(127)))
@@ -1072,16 +1097,19 @@ function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool Newb
 			CurrentTimeStamp = OldTimeStamp;
 		}
 	}
+	// View is a packed int: high 15 bits = pitch/2, low 15 bits = yaw/2; 32768 = 180 deg.
 	ViewPitch = (View / 32768);
 	ViewYaw = (2 * (View - (32768 * ViewPitch)));
 	(ViewPitch *= float(2));
 	Accel = (InAccel / float(10));
 	DeltaTime = (TimeStamp - CurrentTimeStamp);
 	// End:0x2BD
+	// Detect and throttle time-margin abuse (speed hacking): client moved faster than wall-clock time.
 	if((ServerTimeStamp > float(0)))
 	{
 		(TimeMargin += (DeltaTime - (1.0100000 * (Level.TimeSeconds - ServerTimeStamp))));
 		// End:0x2BD
+		// Client is exceeding the allowed time margin; discard excess delta.
 		if((TimeMargin > MaxTimeMargin))
 		{
 			(TimeMargin -= DeltaTime);
@@ -1112,6 +1140,7 @@ function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool Newb
 		Rot.Roll = 0;
 		Rot.Yaw = ViewYaw;
 		// End:0x3C0
+		// Physics 3 = Swimming, 4 = Flying; both allow steeper pitch (double limit).
 		if(((int(Pawn.Physics) == int(3)) || (int(Pawn.Physics) == int(4))))
 		{
 			maxPitch = 2;			
@@ -1121,6 +1150,7 @@ function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool Newb
 			maxPitch = 1;
 		}
 		// End:0x45A
+		// 65536 = 360 deg; 32768 = 180 deg. Clamp pitch to avoid degenerate up/down angles.
 		if(((ViewPitch > (maxPitch * RotationRate.Pitch)) && (ViewPitch < (65536 - (maxPitch * RotationRate.Pitch)))))
 		{
 			// End:0x434
@@ -1146,6 +1176,7 @@ function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool Newb
 		MoveAutonomous(DeltaTime, NewbRun, NewbDuck, NewbCrawl, 0, Accel, DeltaRot);
 	}
 	// End:0x507
+	// Force correction if too much time has passed since last position update.
 	if(((Level.TimeSeconds - LastUpdateTime) > 0.3000000))
 	{
 		clientErr = 10000.0000000;		
@@ -1168,6 +1199,7 @@ function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool Newb
 		}
 	}
 	// End:0x84B
+	// Send position correction if squared distance error exceeds 3 UU (avoid floating-point noise).
 	if((clientErr > float(3)))
 	{
 		// End:0x5C2
@@ -1240,6 +1272,7 @@ function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir Dou
 }
 
 // NEW IN 1.60
+// Re-executes a single move on both client and server to keep physics in sync (client-side prediction).
 final function MoveAutonomous(float DeltaTime, bool NewbRun, bool NewbDuck, bool NewbCrawl, Actor.EDoubleClickDir DoubleClickMove, Vector NewAccel, Rotator DeltaRot)
 {
 	// End:0x14
@@ -1252,6 +1285,7 @@ final function MoveAutonomous(float DeltaTime, bool NewbRun, bool NewbDuck, bool
 		bRun = 0;
 	}
 	// End:0x6D
+	// Duck/crawl state is only applied on the server; clients trust their own input.
 	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		// End:0x49
@@ -1349,6 +1383,7 @@ function LongClientAdjustPosition(float TimeStamp, name NewState, Actor.EPhysics
 	if((Pawn != none))
 	{
 		// End:0x3E
+		// bNetOwner is true only on the owning client; non-owners update eye location from bone data.
 		if((!bNetOwner))
 		{
 			Pawn.m_vEyeLocation = Pawn.GetBoneCoords('R6 PonyTail1').Origin;
@@ -1366,6 +1401,7 @@ function LongClientAdjustPosition(float TimeStamp, name NewState, Actor.EPhysics
 		MoveActor = self;
 	}
 	// End:0x93
+	// Discard corrections for moves already processed (arrived out-of-order).
 	if((CurrentTimeStamp > TimeStamp))
 	{
 		return;
@@ -1382,6 +1418,7 @@ function LongClientAdjustPosition(float TimeStamp, name NewState, Actor.EPhysics
 	NewFloor.Z = NewFloorZ;
 	MoveActor.SetBase(NewBase, NewFloor);
 	// End:0x184
+	// Mover bases use relative coordinates; offset to world space.
 	if((Mover(NewBase) != none))
 	{
 		(NewLocation += NewBase.Location);
@@ -1428,6 +1465,7 @@ function ClientAdjustBase(Actor newClientBase)
 	return;
 }
 
+// ClientUpdatePosition: client re-simulates all unacknowledged SavedMoves after receiving a server correction.
 function ClientUpdatePosition()
 {
 	local SavedMove CurrentMove;
@@ -1513,6 +1551,7 @@ final function SavedMove GetFreeMove()
 		{
 			(i++);
 			// End:0xD3
+			// Too many saved moves (> 30); flush the buffer to prevent unbounded growth.
 			if((i > 30))
 			{
 				first = SavedMoves;
@@ -1550,6 +1589,7 @@ final function SavedMove GetFreeMove()
 	return;
 }
 
+// CompressAccel: packs a signed acceleration component into 8 bits; sign in bit 7, magnitude in bits 0-6.
 function int CompressAccel(int C)
 {
 	// End:0x1D
@@ -1634,7 +1674,7 @@ function ReplicateMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir D
 		FreeMoves.Clear();
 		NewMove = PendingMove;
 	}
-	NetMoveDelta = FMax((80.0000000 / float(Player.CurrentNetSpeed)), 0.0150000);
+	NetMoveDelta = FMax((80.0000000 / float(Player.CurrentNetSpeed)), 0.0150000); // minimum time between server updates, scaled by net speed
 	// End:0x2AE
 	if((PendingMove.Delta < (NetMoveDelta - ClientUpdateTime)))
 	{
@@ -1667,6 +1707,7 @@ function ReplicateMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir D
 	{
 		OldTimeDelta = FMin(255.0000000, ((Level.TimeSeconds - OldMove.TimeStamp) * float(500)));
 		BuildAccel = ((0.0500000 * OldMove.Acceleration) + vect(0.5000000, 0.5000000, 0.5000000));
+		// Pack X/Y/Z acceleration into a single int: bits 30-23 = X, 22-15 = Y, 14-7 = Z; bits 6-0 = flags.
 		OldAccel = (((CompressAccel(int(BuildAccel.X)) << 23) + (CompressAccel(int(BuildAccel.Y)) << 15)) + (CompressAccel(int(BuildAccel.Z)) << 7));
 		// End:0x400
 		if(OldMove.bRun)
@@ -1705,6 +1746,8 @@ function ReplicateMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir D
 		return;
 	}
 	// End:0x67A
+	// Choose the most compact move RPC: ShorterServerMove omits acceleration, ShortServerMove omits it too.
+	// View is packed as: high 15 bits = pitch/2, low 15 bits = yaw/2 (32768 = 180 deg separator).
 	if(((NewMove.Acceleration == vect(0.0000000, 0.0000000, 0.0000000)) && (int(NewMove.DoubleClickMove) == int(0))))
 	{
 		// End:0x5CB
@@ -2095,8 +2138,10 @@ event TravelPostAccept()
 
 event PlayerTick(float DeltaTime)
 {
+	// Process raw key/axis input first, populating aForward, aTurn, etc.
 	PlayerInput.PlayerInput(DeltaTime);
 	// End:0x23
+	// bUpdatePosition is set by LongClientAdjustPosition when the server corrects us.
 	if(bUpdatePosition)
 	{
 		ClientUpdatePosition();
@@ -2132,6 +2177,7 @@ function Controller.EAttitude AttitudeTo(Pawn Other)
 	return;
 }
 
+// AdjustView: smoothly tracks DesiredFOV each frame; also increments zoom level when bZooming is set.
 function AdjustView(float DeltaTime)
 {
 	// End:0x9F
@@ -2166,6 +2212,7 @@ function AdjustView(float DeltaTime)
 	return;
 }
 
+// CalcBehindView: places camera behind the pawn at 'Dist' units, pulling closer if a wall blocks the ray.
 function CalcBehindView(out Vector CameraLocation, out Rotator CameraRotation, float Dist)
 {
 	local Vector View, HitLocation, HitNormal;
@@ -2186,6 +2233,7 @@ function CalcBehindView(out Vector CameraLocation, out Rotator CameraRotation, f
 	return;
 }
 
+// CalcFirstPersonView: positions the camera at the pawn eye location and applies camera shake offset.
 function CalcFirstPersonView(out Vector CameraLocation, out Rotator CameraRotation)
 {
 	CameraRotation = Rotation;
@@ -2239,6 +2287,7 @@ function Rotator GetViewRotation()
 	return;
 }
 
+// PlayerCalcView: main camera calculation entry point; routes to CalcFirstPersonView or CalcBehindView.
 event PlayerCalcView(out Actor ViewActor, out Vector CameraLocation, out Rotator CameraRotation)
 {
 	local Pawn PTarget;
@@ -2342,6 +2391,7 @@ event PlayerCalcView(out Actor ViewActor, out Vector CameraLocation, out Rotator
 	return;
 }
 
+// CheckShake: advances one shake axis, reversing direction and decaying amplitude each bounce.
 function CheckShake(out float MaxOffset, out float offset, out float Rate, out float Time)
 {
 	// End:0x15
@@ -2374,6 +2424,7 @@ function CheckShake(out float MaxOffset, out float offset, out float Rate, out f
 	return;
 }
 
+// ViewShake: applies per-axis positional shake and optional roll to the controller rotation each tick.
 function ViewShake(float DeltaTime)
 {
 	local Rotator ViewRotation;
@@ -2395,6 +2446,7 @@ function ViewShake(float DeltaTime)
 	{
 		ViewRotation.Roll = (int((float((ViewRotation.Roll & 65535)) + (ShakeRollRate * DeltaTime))) & 65535);
 		// End:0x16A
+		// 32768 = 180 deg; convert unsigned roll to signed range [-32768, 32767].
 		if((ViewRotation.Roll > 32768))
 		{
 			(ViewRotation.Roll -= 65536);
@@ -2426,7 +2478,7 @@ function TurnAround()
 	if((!bSetTurnRot))
 	{
 		TurnRot180 = Rotation;
-		(TurnRot180.Yaw += 32768);
+		(TurnRot180.Yaw += 32768); // 32768 = 180 deg in Unreal rotator units
 		bSetTurnRot = true;
 	}
 	DesiredRotation = TurnRot180;
@@ -2467,8 +2519,10 @@ function UpdateRotation(float DeltaTime, float maxPitch)
 			(ViewRotation.Pitch += int(((32.0000000 * DeltaTime) * aLookUp)));
 		}
 	}
+	// Wrap pitch to [0, 65535] (65536 = 360 deg) before clamping.
 	ViewRotation.Pitch = (ViewRotation.Pitch & 65535);
 	// End:0x148
+	// Clamp pitch to avoid gimbal wrap: 18000 (~99 deg up) and 49152 (270 deg = ~-90 deg down).
 	if(((ViewRotation.Pitch > 18000) && (ViewRotation.Pitch < 49152)))
 	{
 		// End:0x138
@@ -2644,6 +2698,7 @@ function ClientPBKickMsg(string PBMessage)
 	return;
 }
 
+// PlayerWalking: normal on-foot movement state; handles walking, running, crouching, and jumping on ground.
 state PlayerWalking
 {
 	function bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
@@ -2748,6 +2803,7 @@ state PlayerWalking
 			bSaveJump = false;
 		}
 		// End:0x21F
+		// Client: bundle move and send to server. Server: apply the move locally.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, (OldRotation - Rotation));			
@@ -2792,6 +2848,7 @@ state PlayerWalking
 	stop;
 }
 
+// PlayerClimbing: ladder movement state; binds forward input to the ladder's ClimbDir vector.
 state PlayerClimbing
 {
 	function bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
@@ -2855,6 +2912,7 @@ state PlayerClimbing
 		OldRotation = Rotation;
 		UpdateRotation(DeltaTime, 1.0000000);
 		// End:0x101
+		// Client: bundle move and send to server. Server: apply the move locally.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, (OldRotation - Rotation));			
@@ -2886,6 +2944,7 @@ state PlayerClimbing
 	stop;
 }
 
+// PlayerSpidering: wall-crawler state (PHYS_Spider = 9); player can walk on any surface normal.
 state PlayerSpidering
 {
 	event bool NotifyHitWall(Vector HitNormal, Actor HitActor)
@@ -3045,6 +3104,7 @@ state PlayerSpidering
 			bSaveJump = false;
 		}
 		// End:0x143
+		// Client: bundle move and send to server. Server: apply the move locally.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, NewAccel, DoubleClickMove, (OldRotation - Rotation));			
@@ -3097,6 +3157,7 @@ state PlayerSpidering
 	stop;
 }
 
+// PlayerSwimming: underwater movement state (PHYS_Swimming = 3); includes water-jump detection.
 state PlayerSwimming
 {
 	function bool WantsSmoothedView()
@@ -3201,6 +3262,7 @@ state PlayerSwimming
 		OldRotation = Rotation;
 		UpdateRotation(DeltaTime, 2.0000000);
 		// End:0xD6
+		// Client: bundle move and send to server. Server: apply the move locally.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, NewAccel, 0, (OldRotation - Rotation));			
@@ -3233,6 +3295,7 @@ state PlayerSwimming
 	stop;
 }
 
+// PlayerFlying: free-fly movement state (PHYS_Flying = 4); used for the noclip cheat.
 state PlayerFlying
 {
 	function PlayerMove(float DeltaTime)
@@ -3253,6 +3316,7 @@ state PlayerFlying
 		}
 		UpdateRotation(DeltaTime, 2.0000000);
 		// End:0x107
+		// Client: bundle move and send to server. Server: apply the move locally.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, Pawn.Acceleration, 0, rot(0, 0, 0));			
@@ -3266,12 +3330,13 @@ state PlayerFlying
 
 	function BeginState()
 	{
-		Pawn.SetPhysics(4);
+		Pawn.SetPhysics(4); // PHYS_Flying
 		return;
 	}
 	stop;
 }
 
+// PlayerHelicoptering: flying variant that also accepts vertical (aUp) axis input.
 state PlayerHelicoptering extends PlayerFlying
 {
 	function PlayerMove(float DeltaTime)
@@ -3292,6 +3357,7 @@ state PlayerHelicoptering extends PlayerFlying
 		}
 		UpdateRotation(DeltaTime, 2.0000000);
 		// End:0x11D
+		// Client: bundle move and send to server. Server: apply the move locally.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, Pawn.Acceleration, 0, rot(0, 0, 0));			
@@ -3305,6 +3371,7 @@ state PlayerHelicoptering extends PlayerFlying
 	stop;
 }
 
+// BaseSpectating: minimal spectator base state; provides free-fly movement with no pawn attached.
 state BaseSpectating
 {
 	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
@@ -3323,6 +3390,7 @@ state BaseSpectating
 		Acceleration = (0.0200000 * (((aForward * X) + (aStrafe * Y)) + (aUp * vect(0.0000000, 0.0000000, 1.0000000))));
 		UpdateRotation(DeltaTime, 1.0000000);
 		// End:0x95
+		// Client: bundle move and send to server. Server: apply the move locally.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, Acceleration, 0, rot(0, 0, 0));			
@@ -3336,6 +3404,7 @@ state BaseSpectating
 	stop;
 }
 
+// Scripting: player input is suppressed during scripted sequences (cutscenes/matinees); Fire is a no-op.
 state Scripting
 {
 // The player wants to fire.
@@ -3353,6 +3422,7 @@ state Scripting
 	stop;
 }
 
+// Spectating: full spectator mode; Fire cycles to next player view, AltFire returns to own camera.
 state Spectating extends BaseSpectating
 {
 	ignores Suicide, ClientReStart;
@@ -3398,6 +3468,7 @@ state Spectating extends BaseSpectating
 	stop;
 }
 
+// PlayerWaiting: auto start state; player spectates and waits for the game to assign a pawn.
 auto state PlayerWaiting extends BaseSpectating
 {
 	ignores R6TakeDamage;
@@ -3480,6 +3551,7 @@ auto state PlayerWaiting extends BaseSpectating
 	stop;
 }
 
+// WaitingForPawn: polls every 0.2 s until a Pawn reference becomes available, then calls ClientReStart.
 state WaitingForPawn extends BaseSpectating
 {
 	ignores KilledBy;
@@ -3534,6 +3606,7 @@ state WaitingForPawn extends BaseSpectating
 	stop;
 }
 
+// GameEnded: post-match state; damage is ignored, scoreboard shown, Fire restarts the game server-side.
 state GameEnded
 {
 	ignores Suicide, R6TakeDamage, KilledBy;
@@ -3614,6 +3687,7 @@ state GameEnded
 		ViewShake(DeltaTime);
 		ViewFlash(DeltaTime);
 		// End:0x15B
+		// Client: keep sending rotation-only moves so the server stays in sync.
 		if((int(Role) < int(ROLE_Authority)))
 		{
 			ReplicateMove(DeltaTime, vect(0.0000000, 0.0000000, 0.0000000), 0, rot(0, 0, 0));			
@@ -3628,10 +3702,12 @@ state GameEnded
 
 	function ServerMove(float TimeStamp, Vector InAccel, Vector ClientLoc, bool NewbRun, bool NewbDuck, bool NewbCrawl, int View, int iNewRotOffset, optional byte OldTimeDelta, optional int OldAccel)
 	{
+		// Game has ended; forward with locked rotation to prevent phantom movement.
 		global.ServerMove(TimeStamp, InAccel, ClientLoc, NewbRun, NewbDuck, NewbCrawl, (((32767 & (Rotation.Pitch / 2)) * 32768) + (32767 & (Rotation.Yaw / 2))), 0);
 		return;
 	}
 
+	// FindGoodView: rotates through 16 yaw angles and picks the one with the most camera clearance.
 	function FindGoodView()
 	{
 		local Vector cameraLoc;
@@ -3642,7 +3718,7 @@ state GameEnded
 		local Actor ViewActor;
 
 		ViewRotation = Rotation;
-		ViewRotation.Pitch = 56000;
+		ViewRotation.Pitch = 56000; // steep downward-looking pitch for death cam
 		tries = 0;
 		besttry = 0;
 		bestDist = 0.0000000;
@@ -3714,6 +3790,7 @@ state GameEnded
 	stop;
 }
 
+// Dead: player is dead; watches from behind view while frozen, Fire triggers respawn.
 state Dead
 {
 	ignores KilledBy;
@@ -3786,6 +3863,7 @@ state Dead
 			}
 			SetRotation(ViewRotation);
 			// End:0x13F
+			// Client: keep sending rotation-only moves while dead so the server stays in sync.
 			if((int(Role) < int(ROLE_Authority)))
 			{
 				ReplicateMove(DeltaTime, vect(0.0000000, 0.0000000, 0.0000000), 0, rot(0, 0, 0));
