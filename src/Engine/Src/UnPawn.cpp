@@ -2313,37 +2313,36 @@ void APawn::ClearSerpentine()
 	SerpentineDist = 0.0f;
 }
 
-IMPL_TODO("retail syncs new position via ctrl (this+0x328) net-channel vtable call")
+// Ghidra 0x103e5de0 (376b): bit9 (0x200) guards against prone state; FarMoveActor (vtable[0x9c])
+// teleports pawn to crouched Z position; events only fire when not client-simulating.
+// DIVERGENCE: retail uses bit 0x200 for early-exit guard (we now match this);
+// our guard/unguard adds SEH absent in retail; encroachment at fail path omitted.
+IMPL_DIVERGE("Ghidra 0x103e5de0: guard/unguard added; fail-path encroachment revert not implemented")
 void APawn::Crouch(INT bClientSimulation)
 {
 	guard(APawn::Crouch);
-	// Retail 0xE5DE0 (376b): resize collision to CrouchHeight/CrouchRadius, fire eventStartCrouch.
-	// APawn bitfield INT at this+0x3E0: bit5=bIsCrouched(0x20), bit8=m_bWantsToProne(0x100).
 	DWORD& flags = *(DWORD*)((BYTE*)this + 0x3E0);
 
-	// Early exit if already at crouch dimensions.
-	if (CollisionHeight == CrouchHeight && CollisionRadius == CrouchRadius)
-		return;
-	// Early exit if m_bWantsToProne (bit 8 in APawn bitflags at this+0x3E0) is set.
-	if (flags & 0x100)
+	// Retail: skip if already at crouch dimensions OR if bit9 (prone-pending) is set.
+	if ((CollisionHeight == CrouchHeight && CollisionRadius == CrouchRadius) || (flags & 0x200))
 		return;
 
 	FLOAT oldHeight = CollisionHeight;
 	SetCollisionSize(CrouchRadius, CrouchHeight);
 
-	// Z pivot = heightDelta + current PrePivot.Z (retail: fadd [this+0x2D0] = PrePivot.Z).
+	// Z pivot = heightDelta + current PrePivot.Z.
 	FLOAT heightAdjust = (oldHeight - CrouchHeight) + PrePivot.Z;
 	SetPrePivot(FVector(0.f, 0.f, heightAdjust));
 
-	// Divergence: retail syncs new position via ctrl (this+0x328) net-channel vtable call.
+	// FarMoveActor: teleport pawn downward by height delta (bTest=bClientSim).
+	XLevel->FarMoveActor(this, FVector(Location.X, Location.Y, Location.Z - (oldHeight - CrouchHeight)), bClientSimulation, 0, 0, 0);
 
-	if (bClientSimulation)
-		return;
-
-	// Set bIsCrouched (bit 5 = 0x20) and AActor net-relevance flag (bit30 at this+0xA0).
-	flags |= 0x20;
-	*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000;
-	eventStartCrouch(heightAdjust);
+	if (!bClientSimulation)
+	{
+		*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000;
+		flags |= 0x20;  // bIsCrouched
+		eventStartCrouch(heightAdjust);
+	}
 	unguard;
 }
 
@@ -2501,16 +2500,23 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 	unguard;
 }
 
-IMPL_TODO("retail does a collision check via ctrl (this+0x328) net-channel vtable[7];")
+// Ghidra 0x103e5f90 (693b): bit8 (0x100) = m_bWantsToProne; m_ePeekingMode==2 early exit.
+// FarMoveActor (vtable[0x9c], bAttachedMove=1) moves pawn to standing position;
+// if blocked, reverts collision dims and (if Controller is APlayerController) sets bTryToUncrouch.
+// DIVERGENCE: missing FMemMark encroachment pre-check; missing APlayerController flag set on fail.
+IMPL_DIVERGE("Ghidra 0x103e5f90: FMemMark encroachment pre-check and APlayerController bTryToUncrouch path omitted")
 void APawn::UnCrouch(INT bClientSimulation)
 {
 	guard(APawn::UnCrouch);
-	// Retail 0xE5F90 (565b): restore collision to class-default dimensions, fire eventEndCrouch.
-	// APawn bitfield INT at this+0x3E0: bit5=bIsCrouched(0x20), bit8=m_bWantsToProne(0x100).
-	// BYTE at this+0x39C (= APawn+8 = m_ePeekingMode) checked for value 2.
 	DWORD& flags = *(DWORD*)((BYTE*)this + 0x3E0);
-	if (flags & 0x100) return;                            // m_bWantsToProne set
-	if (*(BYTE*)((BYTE*)this + 0x39C) == 2) return;      // m_ePeekingMode == 2
+
+	// When prone-pending or peek-mode-2: retail clears bIsCrouched without moving.
+	if ((flags & 0x100) || (*(BYTE*)((BYTE*)this + 0x39C) == 2))
+	{
+		if (!bClientSimulation)
+			flags &= ~0x20u;  // clear bIsCrouched
+		return;
+	}
 
 	// Get uncrouched dimensions from class default object.
 	UClass* cls = GetClass();
@@ -2520,22 +2526,25 @@ void APawn::UnCrouch(INT bClientSimulation)
 	FLOAT defaultRadius = deflt->CollisionRadius;
 	FLOAT heightDelta = defaultHeight - CollisionHeight;
 
-	// Retail: SetCollisionSize to default FIRST, then optionally revert if blocked.
+	// Retail: SetCollisionSize to default FIRST, then revert if FarMoveActor fails.
 	SetCollisionSize(defaultRadius, defaultHeight);
 
-	if (!bClientSimulation)
+	// FarMoveActor: teleport pawn upward to standing position; bAttachedMove=1.
+	INT bMoved = XLevel->FarMoveActor(this, FVector(Location.X, Location.Y, Location.Z + heightDelta), bClientSimulation, 0, 1, 0);
+	if (bMoved)
 	{
-		// Divergence: retail does a collision check via ctrl (this+0x328) net-channel vtable[7];
-		// that check may revert to crouch and set bTryToUncrouch (bit 4 = 0x10 in flags).
-		// Simplified: we always succeed. If blocked in server play this may cause visual glitch.
-
-		// Sync position via ctrl network channel (divergence: omitted).
-
-		// Restore PrePivot to initial standing offset.
 		SetPrePivot(FVector(0.f, 0.f, m_fPrePivotPawnInitialOffset));
 		*(DWORD*)((BYTE*)this + 0xA0) |= 0x40000000;
-		flags &= ~0x20u;  // clear bIsCrouched
-		eventEndCrouch(heightDelta);
+		if (!bClientSimulation)
+		{
+			flags &= ~0x20u;  // clear bIsCrouched
+			eventEndCrouch(heightDelta);
+		}
+	}
+	else
+	{
+		// Blocked: revert to crouch dimensions (retail also sets bTryToUncrouch via Controller).
+		SetCollisionSize(CrouchRadius, CrouchHeight);
 	}
 	unguard;
 }
