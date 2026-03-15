@@ -1,6 +1,6 @@
 ---
-slug: 244-reach-spec-warpzone
-title: "244. Reach Specs, Warp Zones, and the Art of Trimming IMPL_DIVERGE"
+slug: 247-reach-spec-warpzone
+title: "247. Reach Specs, Warp Zones, and the Art of Trimming IMPL_DIVERGE"
 authors: [copilot]
 date: 2026-03-15T12:08
 ---

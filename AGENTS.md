@@ -12,6 +12,7 @@ The blog uses Docusaurus with MDX. In blog post prose (outside of code blocks), 
 
 Blog post titles must follow the format `"NN. Title Text"` where NN is the post number matching the filename prefix (e.g. file `47-foo.md` → title `"47. Foo"`). Do not use alternative prefixes like "Batch NNN:", "Dev Blog #NN:", or "Post NN:".
 
+**Post number collisions cause broken pages.** Two posts with the same number (e.g. two `244-*.md` files) will cause Docusaurus to fail to render one of them. Always check the highest existing number before creating a new post — the `new_blog_post.py` script does this automatically.
 
 ## ⚠️ Blog Post Creation — ALWAYS use the script
 
@@ -21,7 +22,12 @@ Blog post titles must follow the format `"NN. Title Text"` where NN is the post 
 python tools/new_blog_post.py "Your Post Title Here" --tags tag1,tag2
 ```
 
-After running the script, open the created file and replace the placeholder body with your content.
+The script auto-assigns the next available number, sets the slug, and creates the file. After running it, open the created file and replace the placeholder body with your content.
+
+**To verify the blog builds cleanly** (run after writing any post):
+```powershell
+cd blog && npm run build
+```
 
 ## Ground Truth Priority
 
