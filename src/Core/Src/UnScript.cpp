@@ -95,7 +95,7 @@ void UObject::execDefaultVariable( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( UObject, EX_DefaultVariable, execDefaultVariable );
 
 // 0x04 — EX_Return.
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("EX_Return (0x04) bytecode handler; body is Stack.Code = NULL -- trivially inlined by MSVC into the exec dispatch loop; not a named export in Core.dll")
 void UObject::execReturn( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execReturn);
@@ -1102,7 +1102,7 @@ void UObject::execRotatorToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, EX_RotatorToString, execRotatorToString );
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("EX_StringToName (~0x5A) bytecode handler; opcode unconfirmed from Core.dll binary; C++-only EExprToken handler not present in Core.dll Ghidra export")
 void UObject::execStringToName( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execStringToName);
@@ -2137,7 +2137,7 @@ void UObject::execAsc( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 237, execAsc );
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield/UE2.5 string-utility native (locs); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execLocs( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLocs);
@@ -2372,7 +2372,7 @@ void UObject::execSmerp( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 248, execSmerp );
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield math-extension native (Ceil); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execCeil( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCeil);
@@ -2381,7 +2381,7 @@ void UObject::execCeil( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield math-extension native (Round); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execRound( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execRound);
@@ -2582,7 +2582,7 @@ void UObject::execVSize( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 225, execVSize );
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield vector-math extension (VSizeSquared); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execVSizeSquared( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execVSizeSquared);
@@ -2858,7 +2858,7 @@ void UObject::execClockwiseFrom_IntInt( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 246+100, execClockwiseFrom_IntInt );
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield rotation-RNG seeding native (InitRotRand); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execInitRotRand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInitRotRand);
@@ -2889,7 +2889,7 @@ IMPLEMENT_FUNCTION( UObject, 320, execRotRand );
 	Quaternion functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield quaternion-math extension (QuatProduct); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execQuatProduct( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatProduct);
@@ -2899,7 +2899,7 @@ void UObject::execQuatProduct( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield quaternion-math extension (QuatInvert); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execQuatInvert( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatInvert);
@@ -2908,7 +2908,7 @@ void UObject::execQuatInvert( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield quaternion-math extension (QuatRotateVector); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execQuatRotateVector( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatRotateVector);
@@ -2922,7 +2922,7 @@ void UObject::execQuatRotateVector( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield quaternion-math extension (QuatFindBetween); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execQuatFindBetween( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatFindBetween);
@@ -2945,7 +2945,7 @@ void UObject::execQuatFindBetween( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield quaternion-math extension (QuatFromAxisAndAngle); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execQuatFromAxisAndAngle( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execQuatFromAxisAndAngle);
@@ -2971,7 +2971,7 @@ void UObject::execInterpCurveEval( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execInterpCurveEval );
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield interpolation-curve extension (InterpCurveGetInputDomain); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execInterpCurveGetInputDomain( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInterpCurveGetInputDomain);
@@ -2991,7 +2991,7 @@ void UObject::execInterpCurveGetInputDomain( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield interpolation-curve extension (InterpCurveGetOutputRange); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execInterpCurveGetOutputRange( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execInterpCurveGetOutputRange);
@@ -3127,7 +3127,7 @@ void UObject::execFindObject( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UObject, 0, execFindObject );
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield geometry utility native (CalcDirection); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execCalcDirection( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCalcDirection);
@@ -3138,7 +3138,7 @@ void UObject::execCalcDirection( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield geometry utility native (CalcRotation); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCalcRotation);
@@ -3149,7 +3149,7 @@ void UObject::execCalcRotation( FFrame& Stack, RESULT_DECL )
 
 static const TCHAR* GCompressedStringPrefix = TEXT("R6C1:");
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield string-compression helper (FStringToAnsiBytes); static internal function not present in Core.dll Ghidra export")
 static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3160,7 +3160,7 @@ static void FStringToAnsiBytes( const FString& In, TArray<BYTE>& OutBytes )
 		OutBytes(i) = ToAnsi( Chars[i] );
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield string-compression helper (AnsiBytesToFString); static internal function not present in Core.dll Ghidra export")
 static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 {
 	FString Out;
@@ -3172,7 +3172,7 @@ static FString AnsiBytesToFString( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield string-compression helper (RunCodecStage); static internal function not present in Core.dll Ghidra export")
 static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes, UBOOL Encode )
 {
 	FBufferReader Reader( InBytes );
@@ -3183,7 +3183,7 @@ static void RunCodecStage( FCodec& Codec, const TArray<BYTE>& InBytes, TArray<BY
 		Codec.Decode( Reader, Writer );
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield string-compression helper (CompressStringBytes); static internal function not present in Core.dll Ghidra export")
 static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecRLE Stage1;
@@ -3199,7 +3199,7 @@ static void CompressStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutB
 	RunCodecStage( Stage5, Buffer4, OutBytes, 1 );
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield string-compression helper (ExpandStringBytes); static internal function not present in Core.dll Ghidra export")
 static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutBytes )
 {
 	FCodecHuffman Stage1;
@@ -3215,13 +3215,13 @@ static void ExpandStringBytes( const TArray<BYTE>& InBytes, TArray<BYTE>& OutByt
 	RunCodecStage( Stage5, Buffer4, OutBytes, 0 );
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield hex-encoding helper (EncodeHexNibble); static internal function not present in Core.dll Ghidra export")
 static TCHAR EncodeHexNibble( BYTE Value )
 {
 	return Value < 10 ? TEXT('0') + Value : TEXT('A') + (Value - 10);
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield hex-encoding helper (DecodeHexNibble); static internal function not present in Core.dll Ghidra export")
 static INT DecodeHexNibble( TCHAR Ch )
 {
 	if( Ch >= TEXT('0') && Ch <= TEXT('9') )
@@ -3233,7 +3233,7 @@ static INT DecodeHexNibble( TCHAR Ch )
 	return INDEX_NONE;
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield hex-encoding helper (EncodeCompressedBytes); static internal function not present in Core.dll Ghidra export")
 static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 {
 	const INT PrefixLen = appStrlen( GCompressedStringPrefix );
@@ -3251,7 +3251,7 @@ static FString EncodeCompressedBytes( const TArray<BYTE>& InBytes )
 	return Out;
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield hex-encoding helper (DecodeCompressedBytes); static internal function not present in Core.dll Ghidra export")
 static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
 {
 	const TCHAR* Chars = *In;
@@ -3277,7 +3277,7 @@ static UBOOL DecodeCompressedBytes( const FString& In, TArray<BYTE>& OutBytes )
 	return 1;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield string-compression native (execCompress); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execCompress);
@@ -3292,7 +3292,7 @@ void UObject::execCompress( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield string-compression native (execExpand); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execExpand( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execExpand);
@@ -3500,7 +3500,7 @@ IMPLEMENT_FUNCTION( UObject, 0, execGetEnum );
 	Ravenshield INI profile functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 INI-profile native (execGetPrivateProfileInt); wraps Win32 GetPrivateProfileInt; C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPrivateProfileInt);
@@ -3512,7 +3512,7 @@ void UObject::execGetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 INI-profile native (execGetPrivateProfileString); wraps Win32 GetPrivateProfileString; C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPrivateProfileString);
@@ -3524,7 +3524,7 @@ void UObject::execGetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 INI-profile native (execSetPrivateProfileInt); wraps Win32 WritePrivateProfileInt; C++-only addition not in Core.dll Ghidra export")
 void UObject::execSetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetPrivateProfileInt);
@@ -3535,7 +3535,7 @@ void UObject::execSetPrivateProfileInt( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 INI-profile native (execSetPrivateProfileString); wraps Win32 WritePrivateProfileString; C++-only addition not in Core.dll Ghidra export")
 void UObject::execSetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetPrivateProfileString);
@@ -3546,7 +3546,7 @@ void UObject::execSetPrivateProfileString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 INI-profile native (execSavePrivateProfile); C++-only addition not in Core.dll Ghidra export")
 void UObject::execSavePrivateProfile( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSavePrivateProfile);
@@ -3558,7 +3558,7 @@ void UObject::execSavePrivateProfile( FFrame& Stack, RESULT_DECL )
 	Ravenshield-specific version/platform/filter functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield platform-query native (execGetPlatform); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetPlatform( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetPlatform);
@@ -3566,7 +3566,7 @@ void UObject::execGetPlatform( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield version-query native (execGetVersionWarfareEngine); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetVersionWarfareEngine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionWarfareEngine);
@@ -3574,7 +3574,7 @@ void UObject::execGetVersionWarfareEngine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield version-query native (execGetVersionAGPMajor); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetVersionAGPMajor( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPMajor);
@@ -3582,7 +3582,7 @@ void UObject::execGetVersionAGPMajor( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield version-query native (execGetVersionAGPMinor); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetVersionAGPMinor( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPMinor);
@@ -3590,7 +3590,7 @@ void UObject::execGetVersionAGPMinor( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield version-query native (execGetVersionAGPTiny); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetVersionAGPTiny( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetVersionAGPTiny);
@@ -3598,7 +3598,7 @@ void UObject::execGetVersionAGPTiny( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield build-type query native (execIsDebugBuild); C++-only addition not in Core.dll Ghidra export")
 void UObject::execIsDebugBuild( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execIsDebugBuild);
@@ -3610,7 +3610,7 @@ void UObject::execIsDebugBuild( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execGetMilesOnly); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetMilesOnly( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetMilesOnly);
@@ -3618,7 +3618,7 @@ void UObject::execGetMilesOnly( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execSetMilesOnly); C++-only addition not in Core.dll Ghidra export")
 void UObject::execSetMilesOnly( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetMilesOnly);
@@ -3626,7 +3626,7 @@ void UObject::execSetMilesOnly( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execGetNoBlood); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetNoBlood( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNoBlood);
@@ -3634,7 +3634,7 @@ void UObject::execGetNoBlood( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execSetNoBlood); C++-only addition not in Core.dll Ghidra export")
 void UObject::execSetNoBlood( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetNoBlood);
@@ -3642,7 +3642,7 @@ void UObject::execSetNoBlood( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execGetNoSniper); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetNoSniper( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetNoSniper);
@@ -3650,7 +3650,7 @@ void UObject::execGetNoSniper( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execSetNoSniper); C++-only addition not in Core.dll Ghidra export")
 void UObject::execSetNoSniper( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetNoSniper);
@@ -3658,7 +3658,7 @@ void UObject::execSetNoSniper( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execGetLanguageFilter); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetLanguageFilter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetLanguageFilter);
@@ -3666,7 +3666,7 @@ void UObject::execGetLanguageFilter( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield game-settings native (execSetLanguageFilter); C++-only addition not in Core.dll Ghidra export")
 void UObject::execSetLanguageFilter( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execSetLanguageFilter);
@@ -3674,7 +3674,7 @@ void UObject::execSetLanguageFilter( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield input-system native (execGetInputKeyString); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetInputKeyString( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetInputKeyString);
@@ -3683,7 +3683,7 @@ void UObject::execGetInputKeyString( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield filesystem native (execGetBaseDir); C++-only addition not in Core.dll Ghidra export")
 void UObject::execGetBaseDir( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execGetBaseDir);
@@ -3709,7 +3709,7 @@ IMPLEMENT_FUNCTION( UObject, 0x46, execPrimitiveCast );
 	Private set handler.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("execPrivateSet bytecode handler; opcode unconfirmed; C++-only EExprToken handler not in Core.dll Ghidra export or Core.u")
 void UObject::execPrivateSet( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execPrivateSet);
@@ -3727,7 +3727,7 @@ enum { MAX_SCRIPT_FILE_HANDLES = 64 };
 static FArchive* GScriptFileHandles[MAX_SCRIPT_FILE_HANDLES];
 static UBOOL GScriptFileHandlesInit = 0;
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield R6 file-I/O helper (InitFileHandles); static internal function not present in Core.dll Ghidra export")
 static void InitFileHandles()
 {
 	if( !GScriptFileHandlesInit )
@@ -3737,7 +3737,7 @@ static void InitFileHandles()
 	}
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield R6 file-I/O helper (AllocFileHandle); static internal function not present in Core.dll Ghidra export")
 static INT AllocFileHandle( FArchive* Ar )
 {
 	InitFileHandles();
@@ -3753,7 +3753,7 @@ static INT AllocFileHandle( FArchive* Ar )
 	return -1;
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield R6 file-I/O helper (GetFileHandle); static internal function not present in Core.dll Ghidra export")
 static FArchive* GetFileHandle( INT Handle )
 {
 	InitFileHandles();
@@ -3762,7 +3762,7 @@ static FArchive* GetFileHandle( INT Handle )
 	return NULL;
 }
 
-IMPL_DIVERGE("Ravenshield-specific static helper; absent from Core.dll Ghidra export")
+IMPL_DIVERGE("Ravenshield R6 file-I/O helper (FreeFileHandle); static internal function not present in Core.dll Ghidra export")
 static void FreeFileHandle( INT Handle )
 {
 	InitFileHandles();
@@ -3773,7 +3773,7 @@ static void FreeFileHandle( INT Handle )
 	}
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFOpen); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFOpen( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFOpen);
@@ -3788,7 +3788,7 @@ void UObject::execFOpen( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFOpenWrite); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFOpenWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFOpenWrite);
@@ -3798,7 +3798,7 @@ void UObject::execFOpenWrite( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFClose); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFClose( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFClose);
@@ -3807,7 +3807,7 @@ void UObject::execFClose( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFReadLine); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFReadLine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFReadLine);
@@ -3833,7 +3833,7 @@ void UObject::execFReadLine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFWrite); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFWrite);
@@ -3851,7 +3851,7 @@ void UObject::execFWrite( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFWriteLine); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFWriteLine( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFWriteLine);
@@ -3871,7 +3871,7 @@ void UObject::execFWriteLine( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFLoad); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFLoad( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFLoad);
@@ -3891,7 +3891,7 @@ void UObject::execFLoad( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 file-I/O native (execFUnload); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execFUnload( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execFUnload);
@@ -3904,7 +3904,7 @@ void UObject::execFUnload( FFrame& Stack, RESULT_DECL )
 	Log file functions — Ravenshield additions.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 log-file native (execLogFileOpen); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execLogFileOpen( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileOpen);
@@ -3914,7 +3914,7 @@ void UObject::execLogFileOpen( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 log-file native (execLogFileClose); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execLogFileClose( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileClose);
@@ -3923,7 +3923,7 @@ void UObject::execLogFileClose( FFrame& Stack, RESULT_DECL )
 	unguardexecSlow;
 }
 
-IMPL_DIVERGE("Not in Core.dll Ghidra export; Ravenshield-specific addition or inlined by compiler")
+IMPL_DIVERGE("Ravenshield R6 log-file native (execLogFileWrite); C++-only addition not in Core.dll Ghidra export or Core.u")
 void UObject::execLogFileWrite( FFrame& Stack, RESULT_DECL )
 {
 	guardSlow(UObject::execLogFileWrite);

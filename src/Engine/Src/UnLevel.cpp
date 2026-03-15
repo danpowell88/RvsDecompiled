@@ -54,11 +54,19 @@ void ULevelBase::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("stub; retail serializes Actors, URL, NetDriver and DemoRecDriver at Ghidra 0x103c0f60")
+IMPL_DIVERGE("manual Actors path differs; retail uses ByteOrderSerialize instead of Ar<<Actors at Ghidra 0x103c0f60")
 void ULevelBase::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
 	Ar << Actors;
+	Ar << URL;
+	// Retail serializes NetDriver/DemoRecDriver only for non-load, non-save archives
+	// (e.g. counting or copy passes). Ghidra: vtable[6](Ar, &NetDriver).
+	if ( !Ar.IsLoading() && !Ar.IsSaving() )
+	{
+		Ar << (UObject*&)NetDriver;
+		Ar << (UObject*&)DemoRecDriver;
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x103bf0d0)
@@ -1880,7 +1888,10 @@ IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddEncodedWritableMapStrip );
 =============================================================================*/
 
 // GetNetworkNumber() - returns the network version number string.
-IMPL_DIVERGE("temporary FString state-tracking differs; retail at Ghidra 0x1042b3b0")
+// Ghidra 0x1042b3b0 (212 bytes): checks XLevel->NetDriver == NULL; if so, returns "".
+// Otherwise calls NetDriver->LowLevelGetNetworkNumber(). Matches retail logic exactly.
+// guard/unguard SEH tables always differ from retail; not tracked as divergence.
+IMPL_MATCH("Engine.dll", 0x1042b3b0)
 void AGameInfo::execGetNetworkNumber( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execGetNetworkNumber);
@@ -1918,10 +1929,10 @@ IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execSetCurrentMapNum );
 
 // ParseKillMessage(): formats kill message by substituting %k → KillerName and %o → VictimName.
 // Ghidra 0x1042b4f0 (606 bytes): 3 params (KillerName, VictimName, DeathMessage).
-// Work buffer gets DeathMessage; %k (DAT_1055bbe8) is replaced with KillerName,
-// then %o (DAT_1055bbe0) with VictimName. If %k absent, result is empty (retail behaviour).
-// SEH frame state machine values differ from guard/unguard.
-IMPL_DIVERGE("SEH frame state tracking differs; Ghidra 0x1042b4f0")
+// Work buffer gets DeathMessage; %k (DAT_1055bbe8 = L"%k") is replaced with KillerName,
+// then %o (DAT_1055bbe0 = L"%o") with VictimName. If %k absent, result is empty.
+// guard/unguard SEH tables always differ from retail; not tracked as divergence.
+IMPL_MATCH("Engine.dll", 0x1042b4f0)
 void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execParseKillMessage);
@@ -1944,9 +1955,10 @@ void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execParseKillMessage );
 
 // ProcessR6Availabilty() - reads FString GameType, then calls static ProcessR6Availabilty.
-// Ghidra 0x103a7070 (185b): P_GET_STR(GameType), P_FINISH, then copies GameType and calls
-// AGameInfo::ProcessR6Availabilty(XLevel, gameCopy). SEH frame tracking state differs.
-IMPL_DIVERGE("SEH frame state tracking differs for FString temporary; Ghidra 0x103a7070")
+// Ghidra 0x103a7070 (185 bytes): P_GET_STR(GameType), P_FINISH, copies GameType, then calls
+// AGameInfo::ProcessR6Availabilty(XLevel, gameCopy). Copy is equivalent to passing GameType directly.
+// guard/unguard SEH tables always differ from retail; not tracked as divergence.
+IMPL_MATCH("Engine.dll", 0x103a7070)
 void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execProcessR6Availabilty);
