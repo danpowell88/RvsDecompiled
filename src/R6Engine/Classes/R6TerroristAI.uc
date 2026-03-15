@@ -198,15 +198,18 @@ function bool CanClimbLadders(R6Ladder Ladder)
 	{
 		J0x3D:
 
+		// Scan up to 16 cached route nodes looking for the ladder's exit floor
 		// End:0xAE [Loop If]
 		if(((i < 16) && (RouteCache[i] != none)))
 		{
 			// End:0x82
+			// Route passes through the other floor, so this ladder leads to our destination
 			if((RouteCache[i] == Ladder.m_pOtherFloor))
 			{
 				bResult = true;
 			}
 			// End:0xA4
+			// If the route re-enters the ladder node after reaching the other floor, climbing would loop — abort
 			if((bResult && (RouteCache[i] == Ladder)))
 			{
 				return false;
@@ -229,6 +232,7 @@ function bool CanClimbLadders(R6Ladder Ladder)
 //============================================================================
 function bool CanSafelyChangeState()
 {
+// Physics 12 = RootMotion (animation drives movement), Physics 11 = Ladder; both must complete before state can change
 	return ((((Pawn.IsAlive() && (!m_bCantInterruptIO)) && (int(Pawn.Physics) != int(12))) && (int(Pawn.Physics) != int(11))) && (!m_pawn.m_bIsKneeling));
 	return;
 }
@@ -241,6 +245,7 @@ function R6DamageAttitudeTo(Pawn instigatedBy, Actor.eKillResult eKillFromTable,
 	// End:0x37
 	if(IsAnEnemy(R6Pawn(instigatedBy)))
 	{
+		// Only escalate if not already in highest-alert reaction (REACTION_Grenade=4 or REACTION_HearAndSeeNothing=5 would skip)
 		// End:0x37
 		if((int(m_eReactionStatus) <= int(3)))
 		{
@@ -250,6 +255,7 @@ function R6DamageAttitudeTo(Pawn instigatedBy, Actor.eKillResult eKillFromTable,
 	// End:0x63
 	if((m_pawn.EngineWeapon != none))
 	{
+		// Being hit degrades aim temporarily (flinch — accuracy penalty until stabilised)
 		m_pawn.EngineWeapon.SetAccuracyOnHit();
 	}
 	return;
@@ -356,6 +362,7 @@ function ChangeDefCon(R6Terrorist.EDefCon eNewDefCon)
 	switch(eNewDefCon)
 	{
 		// End:0x28
+		// Turn speed decreases as DefCon rises — more relaxed = slower reaction turns (70000 UU/s at full alert)
 		case 1:
 			m_pawn.RotationRate.Yaw = 70000;
 			// End:0xAF
@@ -376,6 +383,7 @@ function ChangeDefCon(R6Terrorist.EDefCon eNewDefCon)
 			// End:0xAF
 			break;
 		// End:0xAC
+		// DefCon 5 = fully relaxed; turn speed 30000 UU/s (~165 deg/s)
 		case 5:
 			m_pawn.RotationRate.Yaw = 30000;
 			// End:0xAF
@@ -386,6 +394,7 @@ function ChangeDefCon(R6Terrorist.EDefCon eNewDefCon)
 	}
 	m_pawn.m_eDefCon = eNewDefCon;
 	// End:0xE7
+	// DefCon 1-2 means combat/alert stance; DefCon 3+ is patrol so stand normally
 	if((int(eNewDefCon) <= int(2)))
 	{
 		m_pawn.m_bWantsHighStance = true;		
@@ -440,6 +449,7 @@ function int GetKillingHostageChance()
 	local int iChance;
 
 	// End:0x14
+	// Random-hostage mode uses a flat 40% base kill chance regardless of zone settings
 	if(UseRandomHostage())
 	{
 		iChance = 40;		
@@ -449,11 +459,13 @@ function int GetKillingHostageChance()
 		iChance = m_pawn.m_DZone.m_HostageShootChance;
 	}
 	// End:0x4E
+	// Easy difficulty reduces kill chance by 20%
 	if((m_pawn.m_iDiffLevel == 1))
 	{
 		(iChance -= 20);
 	}
 	// End:0x6C
+	// Hard difficulty increases kill chance by 20%
 	if((m_pawn.m_iDiffLevel == 3))
 	{
 		(iChance += 20);
@@ -482,12 +494,14 @@ event SeePlayer(Pawn seen)
 	{
 		hostage = R6Hostage(r6seen);
 		// End:0x5D
+		// Classic-mode civilians should be ignored entirely — they are not hostage targets
 		if((hostage.m_bClassicMissionCivilian == true))
 		{
 			return;
 		}
 	}
 	// End:0xA2
+	// EVSTATE_AttackHostage (4): already hunting a hostage — if we see it alive, engage directly
 	if((int(m_eStateForEvent) == int(4)))
 	{
 		// End:0xA0
@@ -550,6 +564,7 @@ event SeePlayer(Pawn seen)
 				{
 					hostageAI = R6HostageAI(hostage.Controller);
 					// End:0x27D
+					// Hostage has fled in a direction another terrorist reported; take over the chase vector
 					if(((hostageAI.m_vReactionDirection != vect(0.0000000, 0.0000000, 0.0000000)) && (m_vHostageReactionDirection == vect(0.0000000, 0.0000000, 0.0000000))))
 					{
 						m_vHostageReactionDirection = hostageAI.m_vReactionDirection;
@@ -655,6 +670,7 @@ event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, option
 		// End:0x178
 		if((m_bHearThreat && (int(eType) == int(2))))
 		{
+			// Capped at 80 (not 100) so there is always at least a 20% chance of failing to locate the shooter
 			// End:0x123
 			if((m_iChanceToDetectShooter < 80))
 			{
@@ -677,6 +693,7 @@ event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, option
 		else
 		{
 			// End:0x268
+			// 16000 UU ~= 88 degrees; only react to grenades roughly within the forward hemisphere
 			if((m_bHearGrenade && (int(eType) == int(3))))
 			{
 				// End:0x265
@@ -730,6 +747,7 @@ event EnemyNotVisible()
 		// End:0x47
 		case 1:
 			// End:0x44
+			// Wait 2 seconds before giving up on the enemy position — brief occlusion shouldn't break attack
 			if((((Level.TimeSeconds - LastSeenTime) > float(2)) && CanSafelyChangeState()))
 			{
 				GotoState('WaitForEnemy');
@@ -752,6 +770,7 @@ event EnemyNotVisible()
 			FocalPoint = LastSeenPos;
 			Focus = none;
 			// End:0x1AA
+			// SprayFireNoStop (3): advance on last-seen position while firing
 			if(((int(m_eAttackMode) == int(3)) && m_pawn.m_bAllowLeave))
 			{
 				m_vMovingDestination = LastSeenPos;
@@ -766,6 +785,7 @@ event EnemyNotVisible()
 					else
 					{
 						vDir = Normal((m_vMovingDestination - m_pawn.Location));
+						// Perpendicular offset 200 UU (~4m) to try to find a side path around the obstruction
 						vTest = (Cross(vDir, vect(0.0000000, 0.0000000, 1.0000000)) * float(200));
 						// End:0x178
 						if(pointReachable((m_vMovingDestination + vTest)))
@@ -1040,6 +1060,7 @@ function bool SetLowestSnipingStance(optional Actor aTarget)
 	local Vector vStart, vTarget;
 
 	vStart = m_pawn.Location;
+	// Prone eye height: floor + 15 UU above collision bottom
 	vStart.Z = ((m_pawn.Location.Z - m_pawn.CollisionHeight) + float(15));
 	// End:0x6A
 	if((aTarget != none))
@@ -1057,6 +1078,7 @@ function bool SetLowestSnipingStance(optional Actor aTarget)
 		m_pawn.bWantsToCrouch = false;
 		return true;
 	}
+	// Crouch eye height: floor + 70 UU
 	vStart.Z = ((m_pawn.Location.Z - m_pawn.CollisionHeight) + float(70));
 	// End:0x11A
 	if((aTarget != none))
@@ -1077,6 +1099,7 @@ function bool SetLowestSnipingStance(optional Actor aTarget)
 	// End:0x1FD
 	if((aTarget != none))
 	{
+		// Standing eye height: floor + 135 UU; return false if even standing has no line of sight
 		vStart.Z = ((m_pawn.Location.Z - m_pawn.CollisionHeight) + float(135));
 		vTarget = aTarget.Location;
 		// End:0x1FB
@@ -1105,6 +1128,7 @@ function ReactToGrenade(Vector vGrenadeLocation)
 	local NavigationPoint aDest;
 
 	ChangeDefCon(1);
+	// Only flee if grenade is within 600 UU (~12m); further away it's safe to ignore
 	// End:0x2D
 	if((VSize((m_pawn.Location - vGrenadeLocation)) > float(600)))
 	{
@@ -1114,6 +1138,7 @@ function ReactToGrenade(Vector vGrenadeLocation)
 	i = 0;
 	J0x4A:
 
+	// Clear recently-visited node history so the terrorist picks a fresh escape route
 	// End:0x6D [Loop If]
 	if((i < 10))
 	{
@@ -1126,6 +1151,7 @@ function ReactToGrenade(Vector vGrenadeLocation)
 	i = 0;
 	J0x7D:
 
+	// Try up to 10 times to find a node far enough from the grenade (400-1000 UU random threshold)
 	// End:0xBF [Loop If]
 	if(((VSize((aDest.Location - vGrenadeLocation)) < fDistance) && (i < 10)))
 	{
@@ -1327,6 +1353,7 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 	local bool bOutnumbered;
 
 	// End:0x16
+	// Designer has overridden random behaviour for this terrorist; return it directly
 	if((int(m_eEngageReaction) != int(0)))
 	{
 		return m_eEngageReaction;
@@ -1342,6 +1369,7 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 		return 1;
 	}
 	m_iRandomNumber = (Rand(100) + 1);
+	// Personality biases the roll: aggressive/bold (-40/-20) favour fighting; cautious/timid (+20/+40) favour fleeing
 	switch(m_pawn.m_ePersonality)
 	{
 		// End:0x8B
@@ -1373,6 +1401,7 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 			break;
 	}
 	// End:0xE7
+	// Outnumbered: (terrorists_in_group + 1) * 2 < rainbows_in_combat (+1 because self is not counted in group total)
 	if((((m_iTerroristInGroup + 1) * 2) < m_iRainbowInCombat))
 	{
 		bOutnumbered = true;
@@ -1381,6 +1410,7 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 	if(bOutnumbered)
 	{
 		// End:0xFF
+		// Outnumbered thresholds: >=81 aimed fire, >=41 spray, >=11 run, else surrender if close (<1000 UU) otherwise run
 		if((m_iRandomNumber >= 81))
 		{
 			return 1;
@@ -1411,6 +1441,7 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 	else
 	{
 		// End:0x167
+		// Even/winning thresholds: >=61 aimed fire, >=11 spray, else run
 		if((m_iRandomNumber >= 61))
 		{
 			return 1;
@@ -1434,6 +1465,7 @@ function bool CheckForInteraction()
 	local Actor aGoal;
 
 	// End:0x82
+	// A triggered interactive object (door, switch) takes priority — must complete it before engaging
 	if((m_TriggeredIO != none))
 	{
 		m_bCantInterruptIO = true;
@@ -1464,6 +1496,7 @@ function bool CheckForInteraction()
 	if(((m_Hostage != none) && (!m_Hostage.m_bExtracted)))
 	{
 		// End:0x11D
+		// Random chance to execute the hostage instead of fighting the enemy
 		if((Rand(100) < GetKillingHostageChance()))
 		{
 			GotoStateAttackHostage(m_Hostage);
@@ -1482,6 +1515,7 @@ function PlayAttackVoices()
 	local int iAngle;
 
 	// End:0x7B
+	// 13000 UU ~= 71 degrees: enemy is facing roughly away; shout to alert them to our presence
 	if((ShortestAngle2D(Enemy.Rotation.Yaw, m_pawn.Rotation.Yaw) > 13000))
 	{
 		// End:0x65
@@ -1520,6 +1554,7 @@ function bool AIPlayCallBackup(Actor pEnemy)
 	local int iShootingChance, iAnimID;
 
 	// End:0x37
+	// Within 400 UU (~8m) the terrorist always fires while calling backup regardless of difficulty
 	if((VSize((Pawn.Location - pEnemy.Location)) < float(400)))
 	{
 		iShootingChance = 100;		
@@ -1529,6 +1564,7 @@ function bool AIPlayCallBackup(Actor pEnemy)
 		switch(m_pawn.m_iDiffLevel)
 		{
 			// End:0x56
+			// Easy = 50% shoot chance, medium = 70%, hard = 90%
 			case 1:
 				iShootingChance = 50;
 				// End:0x79
@@ -1549,6 +1585,7 @@ function bool AIPlayCallBackup(Actor pEnemy)
 		}
 	}
 	// End:0x91
+	// iAnimID 0 = shoot-and-call animation (both actions combined); 1 = stop-and-call-only animation
 	if((Rand(100) < iShootingChance))
 	{
 		iAnimID = 0;		
@@ -1646,6 +1683,7 @@ function GotoStateMovingTo(string sDebugString, R6Pawn.eMovementPace ePace, bool
 	}
 	else
 	{
+		// Ground-snap: trace 200 UU down from destination, then raise 80 UU to place correctly on floor
 		// End:0xEC
 		if((Trace(m_vMovingDestination, vHitNormal, (vDestination - vect(0.0000000, 0.0000000, 200.0000000)), vDestination) != none))
 		{
@@ -1662,6 +1700,7 @@ function GotoStateMovingTo(string sDebugString, R6Pawn.eMovementPace ePace, bool
 	m_labelAfterMovingTo = labelAfter;
 	m_bPreciseMove = bPreciseMove;
 	// End:0x207
+	// If the pawn is not allowed to leave its zone and the destination is outside, clamp to zone boundary
 	if((((!bDontCheckLeave) && (!m_pawn.m_bAllowLeave)) && (!m_pawn.m_DZone.IsPointInZone(m_vMovingDestination))))
 	{
 		// End:0x1B9
@@ -1702,6 +1741,7 @@ event GotoStateEngageByThreat(Vector vThreathLocation)
 		return;
 	}
 	m_vThreatLocation = vThreathLocation;
+	// Search timer stored as absolute game time so comparisons against Level.TimeSeconds work directly
 	m_fSearchTime = (Level.TimeSeconds + float(20));
 	GotoState('EngageByThreat');
 	return;
@@ -1718,6 +1758,7 @@ function GotoStateEngageBySound(Vector vInvestigateDestination, R6Pawn.eMovement
 {
 	m_vThreatLocation = vInvestigateDestination;
 	m_pawn.m_eMovementPace = ePace;
+	// Stored as absolute time (Level.TimeSeconds + duration) for direct comparison in state loops
 	m_fSearchTime = (Level.TimeSeconds + fSearchTime);
 	GotoState('EngageBySound');
 	return;
@@ -2245,6 +2286,7 @@ AfterRunFromGrenade:
 RecoverFromFlash:
 
 
+	// Disable all perception for 5 seconds to simulate flash-bang disorientation
 	Disable('HearNoise');
 	Disable('SeePlayer');
 	StopMoving();
@@ -2389,6 +2431,7 @@ Begin:
 	// End:0x62
 	if((Enemy != none))
 	{
+		// Use native FindBetterShotLocation to find a position with line of sight to the enemy
 		m_vTargetPosition = FindBetterShotLocation(Enemy);
 		R6PreMoveTo(m_vTargetPosition, Enemy.Location, 5);
 		MoveTo(m_vTargetPosition, Enemy);
@@ -2411,6 +2454,7 @@ Grenade:
 EndThrowingGrenade:
 
 
+	// After grenade throw, look for a cover action spot within 2000 UU
 	SetActionSpot(FindPlaceToFire(none, m_vThreatLocation, 2000.0000000));
 	// End:0x100
 	if((m_pActionSpot != none))
@@ -2623,6 +2667,7 @@ auto state Configuration
 	m_eEngageReaction = m_pawn.m_DZone.m_eEngageReaction;
 	ChangeDefCon(m_pawn.m_eDefCon);
 	// End:0x116
+	// Patrol strategy 0 requires a path; if path has fewer than 2 nodes, fall back to GuardPoint (strategy 2)
 	if((int(m_pawn.m_eStrategy) == int(0)))
 	{
 		m_path = R6DZonePath(m_pawn.m_DZone);
@@ -2761,6 +2806,7 @@ Begin:
 		m_Hostage = none;
 	}
 	// End:0x164
+	// NoThreat never drops below DefCon 2 — fully relaxed (5) only happens outside active gameplay
 	if((int(m_pawn.m_eDefCon) <= int(2)))
 	{
 		ChangeDefCon(2);
@@ -2768,6 +2814,7 @@ Begin:
 	m_iRandomNumber = 0;
 	J0x16B:
 
+	// Clear recently-visited node history (10 entries) to reset path memory on each NoThreat entry
 	// End:0x18E [Loop If]
 	if((m_iRandomNumber < 10))
 	{
@@ -2778,6 +2825,7 @@ Begin:
 	}
 	J0x18E:
 
+	// Wait for the game to actually start before doing anything
 	// End:0x1B6 [Loop If]
 	if((!Level.Game.m_bGameStarted))
 	{
@@ -2885,6 +2933,7 @@ state MovingTo
 		if((aPawn != none))
 		{
 			// End:0x43
+			// Pawn type 1 = Rainbow (enemy): immediately exit MovingTo on collision
 			if((int(aPawn.m_ePawnType) == int(1)))
 			{
 				GotoState('MovingTo', 'Exit');				
@@ -2892,6 +2941,7 @@ state MovingTo
 			else
 			{
 				// End:0x15C
+				// Pawn type 2 = Terrorist (friendly): debounce and handle bump carefully
 				if((int(aPawn.m_ePawnType) == int(2)))
 				{
 					// End:0x8D
@@ -2903,9 +2953,11 @@ state MovingTo
 					else
 					{
 						// End:0x15C
+						// Extra 0.1-0.3s random delay before reacting to repeated bumps avoids oscillation
 						if((Level.TimeSeconds > ((m_fLastBumpedTime + 0.3000000) + RandRange(0.1000000, 0.3000000))))
 						{
 							// End:0xF8
+							// Bumped pawn is stationary and move can fail: just exit without pushing
 							if((m_bCanFailMovingTo && (m_LastBumped.Velocity == vect(0.0000000, 0.0000000, 0.0000000))))
 							{
 								GotoState('MovingTo', 'Exit');								
@@ -2936,6 +2988,7 @@ state MovingTo
 
 		vDirection = (Pawn.Location - m_LastBumped.Location);
 		vDirection.Z = 0.0000000;
+		// Move away 4× collision radius to clear the blocking pawn
 		vDirection = ((Normal(vDirection) * Pawn.CollisionRadius) * float(4));
 		vTarget = (Pawn.Location + vDirection);
 		// End:0x7F
@@ -2943,6 +2996,7 @@ state MovingTo
 		{
 			return true;
 		}
+		// Rotate direction 90° left to try a side step
 		fTemp = (-vDirection.X);
 		vDirection.X = vDirection.Y;
 		vDirection.Y = fTemp;
@@ -2952,6 +3006,7 @@ state MovingTo
 		{
 			return true;
 		}
+		// Rotate 90° right (negate previous left rotation) for the other side
 		vDirection.X = (-vDirection.X);
 		vDirection.Y = (-vDirection.Y);
 		vTarget = (Pawn.Location + vDirection);
@@ -2967,6 +3022,7 @@ state MovingTo
 	event Timer()
 	{
 		(m_iStateVariable++);
+		// Cycles 0→1→2→3→0: 0/2=face forward, 1=look right, 3=look left — natural head scan while walking
 		switch(m_iStateVariable)
 		{
 			// End:0x1A
@@ -3003,11 +3059,13 @@ Begin:
 	m_iRandomNumber = 0;
 	m_wBadMoveCount = 0;
 	// End:0x36
+	// Already at destination; skip movement entirely
 	if((VSize((m_vMovingDestination - Pawn.Location)) < 10.0000000))
 	{
 		goto 'Exit';
 	}
 	// End:0x7F
+	// Only start the head-scan timer when walking (DefCon > 2); sprinting terrorists don't look around
 	if((int(m_pawn.m_eMovementPace) == int(4)))
 	{
 		// End:0x63
@@ -3227,6 +3285,7 @@ Wait:
 		GotoStateNoThreat();
 	}
 	// End:0x1F2
+	// 1-in-3 chance each cycle to do a random head sweep while waiting at cover
 	if((Rand(3) == 0))
 	{
 		m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, 10000.0000000) / float(256)));
@@ -3271,6 +3330,7 @@ Begin:
 
 	StopMoving();
 	Focus = none;
+	// Face the threat location first, then wait a moment before moving — realistic alert response
 	FocalPoint = m_vThreatLocation;
 	FinishRotation();
 	Sleep(RandRange(0.2500000, 0.5000000));
@@ -3282,6 +3342,7 @@ Begin:
 		goto 'Exit';
 	}
 	// End:0x88
+	// If not allowed to leave the zone, go directly to the threat location instead of finding an investigation point
 	if((!m_pawn.m_bAllowLeave))
 	{
 		goto 'GoCloserAndLook';
@@ -3343,6 +3404,7 @@ AtRandomPoint:
 		ChangeOrientationTo(m_pActionSpot.Rotation);
 	}
 	// End:0x306
+	// Alternates head-left / head-right sweep to simulate searching while standing still
 	if((Rand(2) == 0))
 	{
 		m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
@@ -3497,6 +3559,7 @@ state WaitForEnemy
 		{
 			SetEnemy(seen);
 			// End:0x31
+			// 50/50 chance between spray fire and aimed fire when enemy reappears
 			if((Rand(2) == 0))
 			{
 				GotoStateSprayFire();				
@@ -3511,6 +3574,7 @@ state WaitForEnemy
 
 	function Timer()
 	{
+		// 10-second timer expires; give up waiting and return to NoThreat
 		GotoStateNoThreat();
 		return;
 	}
@@ -3524,6 +3588,7 @@ Begin:
 	{
 		Pawn.bWantsToCrouch = true;
 	}
+	// 10-second countdown before returning to NoThreat if enemy doesn't reappear
 	SetTimer(10.0000000, false);
 	m_pawn.m_bAvoidFacingWalls = true;
 Wait:
@@ -3538,6 +3603,7 @@ state Attack
 	{
 		SetReactionStatus(4, 2);
 		// End:0x91
+		// An unarmed terrorist cannot fight; force-kill it so it doesn't block the AI
 		if((Pawn.IsAlive() && (Pawn.m_bDroppedWeapon || (Pawn.EngineWeapon == none))))
 		{
 			m_pawn.ServerForceKillResult(4);
@@ -3579,6 +3645,7 @@ state Attack
 			return true;
 		}
 		// End:0x7F
+		// Weapon type 5 = grenade launcher: needs reload if more than 50 rounds below full clip
 		if(((int(Pawn.EngineWeapon.m_eWeaponType) == int(5)) && (Pawn.EngineWeapon.NumberOfBulletsLeftInClip() < (Pawn.EngineWeapon.GetClipCapacity() - 50))))
 		{
 			return true;
@@ -3645,6 +3712,7 @@ Begin:
 	{
 		m_iRandomNumber = Rand(100);
 		// End:0x74
+		// 60% chance: take a short peek (fire briefly then retreat); 20%: clear action spot; 20%: move to fire spot
 		if((m_iRandomNumber < 60))
 		{
 			m_bFireShort = true;			
@@ -3663,6 +3731,7 @@ Begin:
 		}
 	}
 	// End:0xDF
+	// 1-in-3 random chance to crouch before shooting (not forced if crouching is disabled)
 	if((((!m_pawn.m_bPreventCrouching) && (!Pawn.bIsCrouched)) && (Rand(3) == 0)))
 	{
 		Pawn.bWantsToCrouch = true;
@@ -3674,6 +3743,7 @@ Begin:
 ReactionTime:
 
 
+	// Reaction delay scales with difficulty: easy=1s pause, medium=0.5s, hard=0s (fires immediately)
 	switch(m_pawn.m_iDiffLevel)
 	{
 		// End:0x123
@@ -3758,6 +3828,7 @@ Fire:
 		SetGunDirection(Enemy);
 		J0x2FB:
 
+		// Poll until the barrel pitch matches the desired angle (byte-precision: pitch & 0xFFFF / 256 gives upper byte)
 		// End:0x36C [Loop If]
 		if((((Enemy != none) && Enemy.IsAlive()) && (int(m_pawn.m_wWantedAimingPitch) != ((m_pawn.m_iCurrentAimingPitch & 65535) / 256))))
 		{
@@ -3795,6 +3866,7 @@ Fire:
 		StartFiring();
 		m_sDebugString = "AimedFiring";
 		// End:0x482
+		// Automatic weapon (rate 2): fire for 0.4-1.0s; semi-auto/single: fire for 0.2s flat
 		if((int(Pawn.EngineWeapon.GetRateOfFire()) == int(2)))
 		{
 			Sleep(RandRange(0.4000000, 1.0000000));			
@@ -3808,6 +3880,7 @@ Fire:
 	else
 	{
 		// End:0x51A
+		// Spray fire with automatic weapon: fire 0.2-1.5s burst then pause up to 0.5s
 		if((int(Pawn.EngineWeapon.GetRateOfFire()) == int(2)))
 		{
 			StartFiring();
@@ -3820,6 +3893,7 @@ Fire:
 		}
 		else
 		{
+			// Semi-auto/single shot: fire Rand(4)+2 individual shots with small pauses between each
 			m_iRandomNumber = (Rand(4) + 2);
 			J0x528:
 
@@ -3908,6 +3982,7 @@ SprayFireMove:
 	if((VSize((m_vMovingDestination - m_pawn.Location)) > 100.0000000))
 	{
 		R6PreMoveTo(m_vMovingDestination, m_vMovingDestination, 4);
+		// Switch to PHYS_Walking (1) and manually set acceleration so the pawn sprints while firing
 		Pawn.SetPhysics(1);
 		Destination = m_vMovingDestination;
 		Pawn.Acceleration = (Normal((Destination - Pawn.Location)) * m_pawn.m_fWalkingSpeed);
@@ -3927,6 +4002,7 @@ MoveToFireSpot:
 	}
 	J0x86B:
 
+	// Orient to the fire spot facing away from enemy, then keep eyes on enemy throughout the peek
 	MoveToPosition(m_pActionSpot.Location, Rotator((m_pActionSpot.Location - Enemy.Location)));
 	Focus = Enemy;
 	// End:0x8D1
@@ -3979,11 +4055,13 @@ StartWaiting:
 	ChangeOrientationTo(m_rSpawningRotation);
 	FinishRotation();
 	// End:0x5B
+	// Personality 5 = sniper; immediately transition to Sniping state upon reaching the guard position
 	if((int(m_pawn.m_ePersonality) == int(5)))
 	{
 		GotoState('Sniping');
 	}
 	// End:0x9E
+	// Starting stance 2 = crouch; honour the designer's pre-configured crouch request
 	if(((!m_pawn.m_bPreventCrouching) && (int(m_pawn.m_eStartingStance) == int(2))))
 	{
 		Pawn.bWantsToCrouch = true;		
@@ -3995,6 +4073,7 @@ StartWaiting:
 	J0xAF:
 
 	// End:0x188
+	// 1-in-3 chance to do a full left-right head sweep; otherwise glance only one way
 	if((Rand(3) == 0))
 	{
 		m_iRandomNumber = Rand(2);
@@ -4051,6 +4130,7 @@ state Sniping
 		{
 			ReconThreatCheck(r6seen, 0);
 			// End:0xB1
+			// Within 500 UU (~10m) enemy is too close for prone sniping; prefer crouched stance (3-in-4 chance)
 			if((VSize((seen.Location - m_pawn.Location)) < float(500)))
 			{
 				m_pawn.m_bWantsToProne = false;
@@ -4063,6 +4143,7 @@ state Sniping
 			SetEnemy(r6seen);
 			Target = Enemy;
 			// End:0xE0
+			// Call nearby terrorists to back up this sniper when sighting an enemy
 			if(MakeBackupList())
 			{
 				CallBackupForAttack(Enemy.Location, 5);
@@ -4238,10 +4319,12 @@ AskToSurrender:
 
 
 	m_HostageAI.Order_Surrender(m_pawn);
+	// Play a yell animation while ordering the hostage to surrender
 	Pawn.PlayAnim('StandYellAlarm');
 	FinishAnim();
 	m_iRandomNumber = Rand(100);
 	// End:0x93
+	// 50% chance to re-ask, 40% chance to pursue (Rand < 90), 10% chance to shoot
 	if((m_iRandomNumber < 50))
 	{
 		Sleep(2.0000000);
@@ -4328,12 +4411,14 @@ state FollowPawn
 		local Rotator rOrientation;
 
 		// End:0x4B
+		// iFollowYaw == 0: walk directly in line behind the followed pawn
 		if((m_iFollowYaw == 0))
 		{
 			vTargetPos = (m_pawnToFollow.Location + (Normal((Pawn.Location - m_pawnToFollow.Location)) * m_fFollowDist));			
 		}
 		else
 		{
+			// Offset by iFollowYaw angle (e.g. 16384 = 90° left, 49152 = 90° right in Unreal rotation units)
 			rOrientation.Yaw = (m_pawnToFollow.Rotation.Yaw + m_iFollowYaw);
 			vTargetPos = (m_pawnToFollow.Location - (Vector(rOrientation) * m_fFollowDist));
 		}
