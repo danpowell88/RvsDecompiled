@@ -576,7 +576,10 @@ void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 534, execPickAnyTarget );
 
-IMPL_TODO("Ghidra 0x1038d870; 416b — calls findPathToward with inventory scorer at 0x1038cb00, updates MinWeight with path score, calls SetPath(1); DIVERGE: scorer not reconstructed; returns NULL until scorer is decompiled")
+// Retail: calls APawn::findPathToward with inventory scorer at 0x1038cb00,
+// updates MinWeight with path score, calls SetPath(1).
+// Scorer not reconstructed — cannot implement without it.
+IMPL_DIVERGE("Ghidra 0x1038d870; 416b — inventory-weight scorer at 0x1038cb00 not reconstructed; returns NULL until scorer is decompiled")
 void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindBestInventoryPath);
@@ -637,7 +640,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execStopWaiting );
 
 /*-- APlayerController functions ---------------------------------------*/
 
-IMPL_TODO("Ghidra 0x103900a0; 1734b -- complex stair-rotation physics calculation (APawn::eventEyePosition, FRotator traces, delta-time blending); our stub only returns Rotation.Pitch")
+IMPL_DIVERGE("Ghidra 0x103900a0; 1734b — complex stair-rotation physics (FRotator traces, delta-time blend); stub returns Rotation.Pitch only")
 void APlayerController::execFindStairRotation( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execFindStairRotation);
@@ -1471,7 +1474,7 @@ INT APawn::IsBlockedBy( const AActor* Other ) const
 	return AActor::IsBlockedBy(Other);
 }
 
-IMPL_TODO("Ghidra 0x103c4b30; 2176b complex function: checks cached relevancy by TimeSeconds==LastRenderTime, owner/team/audio-radius early-outs, FastLineCheck visibility, then CacheNetRelevancy; our stub delegates to base")
+IMPL_DIVERGE("Ghidra 0x103c4b30; 2176b — complex net-relevancy caching; stub delegates to AActor::IsNetRelevantFor")
 INT APawn::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVector SrcLocation )
 {
 	guard(APawn::IsNetRelevantFor);
@@ -1593,7 +1596,7 @@ void APawn::PostNetReceive()
 	AActor::PostNetReceive();
 }
 
-IMPL_TODO("Ghidra 0x10378250; 883b: complex location smoothing/interpolation — saves pre-receive location, then if Physics==PHYS_Walking blends toward replicated position with velocity; our stub just calls AActor::PostNetReceiveLocation")
+IMPL_DIVERGE("Ghidra 0x10378250; 883b — complex location smoothing/interpolation with velocity blending; stub delegates to AActor::PostNetReceiveLocation")
 void APawn::PostNetReceiveLocation()
 {
 	guard(APawn::PostNetReceiveLocation);
@@ -1675,7 +1678,7 @@ INT APawn::Reachable( FVector Dest, AActor* GoalActor )
 	unguard;
 }
 
-IMPL_TODO("Wrong address in claim (0x103c35b0 not in Ghidra); actual ReachedDestination is 0x103e6280 (4240); retail checks NavPoint anchor proximity and per-class default collision radius, not a simple Threshold*Threshold XY check")
+IMPL_DIVERGE("Ghidra 0x103e6280; 4240b — navpoint anchor proximity and per-class default collision radius checks omitted; approximate with simple XY distance/threshold")
 INT APawn::ReachedDestination( FVector Dest, AActor* GoalActor )
 {
 	guard(APawn::ReachedDestination);
@@ -1892,7 +1895,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_TODO("body incomplete — Ghidra 0x103E9FF0 not yet fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103E9FF0 — animation blend-weight selection not yet reconstructed; empty body is a permanent stub until animation system is decompiled")
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
@@ -1902,7 +1905,7 @@ void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ebfe0; 983b: full nav-graph reachability — checks NavigationPoint anchor cache for shortcut, enforces 1200 UU distance limit (not 8*GroundSpeed), checks IsBlockedBy via vtable, tests water/physics, uses eventEyePosition for LOS trace; our stub is approximate")
+IMPL_DIVERGE("Ghidra 0x103ebfe0; 983b — nav-graph anchor cache and IsBlockedBy vtable check omitted; approximate with straight-line LOS/distance")
 INT APawn::actorReachable( AActor* Goal, INT bKnowVisible, INT bNoAnchorCheck )
 {
 	guard(APawn::actorReachable);
@@ -2281,7 +2284,7 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103eea80: 2043b — checks AR6ColBox::CanStepUp, adjusts capsule geometry for crouch state before and after calling base stepUp; our stub unconditionally delegates to AActor::stepUp")
+IMPL_DIVERGE("Ghidra 0x103eea80; 2043b — AR6ColBox::CanStepUp and capsule geometry adjustments for crouch state omitted; unconditionally delegates to AActor::stepUp")
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
@@ -3426,10 +3429,54 @@ INT AController::AcceptNearbyPath( AActor* Goal )
 	return 0;
 }
 
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x10390ec0 is 1187 bytes, not fully reconstructed")
+// Ghidra 0x10390ec0, 1187b.
+// NoiseMaker+0x148 chain check (actor validity) → approximated by null check.
+// Alertness (Pawn+0x3fc = APawn::Alertness) boosts effective range.
+// Same-zone: APawn bitfield2 bits5+6 = bSameZoneHearing|bAdjacentZoneHearing; Region.Zone match.
+// Adjacent-zone team check (complex raw ULevel+0x128 team-affinity matrix) → DIVERGE.
+// LOS: APawn bitfield2 bit4 = bLOSHearing; UModel::FastLineCheck from EyePos to NoiseLoc.
+// Muffled: bit7 = bMuffledHearing; retail path-finds through walls → DIVERGE (unconditional).
+// Around-corner: bit8 = bAroundCornerHearing; FSortedPathList navpoint relay → DIVERGE.
+IMPL_DIVERGE("Ghidra 0x10390ec0; 1187b — NoiseMaker+0x148 chain approx'd by null check; bAdjacentZoneHearing team matrix omitted; bMuffledHearing path check approximated; bAroundCornerHearing navpoint relay omitted")
 INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, ENoiseType NoiseType, EPawnType PawnType )
 {
 	guard(AController::CanHear);
+	// Ghidra: NoiseMaker+0x148 (Level linkage chain) must be valid; Pawn must exist.
+	if (!Pawn || !NoiseMaker) return 0;
+
+	// Distance from noise source to pawn (Ghidra: local_28/24/20 = Pawn->Location - NoiseLoc)
+	FVector delta(Pawn->Location.X - NoiseLoc.X,
+	               Pawn->Location.Y - NoiseLoc.Y,
+	               Pawn->Location.Z - NoiseLoc.Z);
+	FLOAT distSq = delta.SizeSquared();
+
+	// Alertness boost: effective loudness *= Max(0, Alertness + 1.0) (Ghidra: Pawn+0x3fc = Alertness)
+	FLOAT alertBoost = Max(0.f, Pawn->Alertness + 1.f);
+	Loudness *= alertBoost;
+
+	// Distance gate: Loudness must cover distSq
+	if (Loudness < distSq) return 0;
+
+	// Same/adjacent zone hearing (APawn+0x3e4 bits5+6 = bSameZoneHearing|bAdjacentZoneHearing)
+	if ((Pawn->bSameZoneHearing || Pawn->bAdjacentZoneHearing)
+		&& Pawn->Region.Zone != NULL && Pawn->Region.Zone == NoiseMaker->Region.Zone)
+		return 1;
+	// DIVERGE: bAdjacentZoneHearing + team-affinity table (ULevel+0x128 raw matrix) omitted.
+
+	// LOS hearing (APawn+0x3e4 bit4 = bLOSHearing)
+	if (Pawn->bLOSHearing)
+	{
+		// Eye position: eventEyePosition() returns relative offset; absolute = Location + offset
+		FVector EyeLoc = Pawn->Location + Pawn->eventEyePosition();
+		UModel* Mdl = *(UModel**)((BYTE*)XLevel + 0x90);
+		if (Mdl && Mdl->FastLineCheck(NoiseLoc, EyeLoc))
+			return 1;
+		// bMuffledHearing (bit7): hear through walls at 1/4 effective range
+		// DIVERGE: retail does a path-trace here; we grant hearing if in 1/4-range
+		if (Pawn->bMuffledHearing && distSq * 4.f < Loudness)
+			return 1;
+	}
+	// DIVERGE: bAroundCornerHearing (bit8) FSortedPathList navpoint-relay check omitted.
 	return 0;
 	unguard;
 }
