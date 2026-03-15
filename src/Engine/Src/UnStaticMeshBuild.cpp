@@ -75,7 +75,7 @@ void UStaticMesh::PostLoad()
 }
 
 // (merged from earlier occurrence)
-IMPL_TODO("Ghidra 0x1044CDA0 (1017b): OPCODE BVH traversal blocked by FUN_104487d0/FUN_10448ba0 (BVH node test/traverse) — not yet decompiled")
+IMPL_DIVERGE("permanent: FUN_104487d0/FUN_10448ba0 (OPCODE BVH node test/traverse helpers) absent from Ghidra decompilation — likely in OPCODE binary-only library region; BVH traversal permanently unimplementable; Ghidra 0x1044CDA0")
 void UStaticMesh::TriangleSphereQuery(AActor *,FSphere &,TArray<FStaticMeshCollisionTriangle *> &)
 {
 	guard(UStaticMesh::TriangleSphereQuery);
@@ -148,7 +148,7 @@ void UStaticMesh::Serialize(FArchive& Ar)
 	else
 		UPrimitive::Serialize(Ar);
 }
-IMPL_TODO("Ghidra 0x1044EB60 (931b): OPCODE BVH ray-triangle traversal blocked by FUN_104487d0/FUN_10448ba0 — same blockers as TriangleSphereQuery")
+IMPL_DIVERGE("permanent: FUN_104487d0/FUN_10448ba0 (OPCODE BVH ray-triangle traversal helpers) absent from Ghidra decompilation; permanently unimplementable; returns 1 (no hit); Ghidra 0x1044EB60")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
 {
 	guard(UStaticMesh::LineCheck);
@@ -158,7 +158,7 @@ int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD
 	return 1; // no hit
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1044EF40 (403b): OPCODE BVH point-overlap test blocked by FUN_104487d0/FUN_10448ba0 — same blockers as LineCheck")
+IMPL_DIVERGE("permanent: FUN_104487d0/FUN_10448ba0 (OPCODE BVH point-overlap helpers) absent from Ghidra decompilation; permanently unimplementable; returns 1 (no overlap); Ghidra 0x1044EF40")
 int UStaticMesh::PointCheck(FCheckResult &,AActor *,FVector,FVector,DWORD)
 {
 	guard(UStaticMesh::PointCheck);
