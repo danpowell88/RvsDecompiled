@@ -162,6 +162,13 @@ function SetSelectedIndex(int Index)
 // Returns the primary value string currently displayed in the edit box.
 function string GetValue()
 {
+	return EditBox.GetValue();
+	return;
+}
+
+// Returns the secondary value string associated with the current selection.
+function string GetValue2()
+{
 	return EditBox.GetValue2();
 	return;
 }
