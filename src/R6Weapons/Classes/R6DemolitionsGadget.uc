@@ -12,20 +12,29 @@ class R6DemolitionsGadget extends R6Gadget
     abstract
     native;
 
+// True while the detonation command has been issued but the animation hasn't finished.
 var bool m_bDetonated;
+// True once a charge has been successfully placed in the world (BulletActor is live).
 var bool m_bChargeInPosition;
+// Updated every tick; true when the crosshair is over a valid placement surface.
 var bool m_bCanPlaceCharge;
+// True during the placement animation; releasing fire before it ends cancels placement.
 var bool m_bInstallingCharge;
 var bool m_bCancelChargeInstallation;
 var bool m_bRaiseWeapon;
 var bool m_bHide;
+// When true the detonator static mesh is shown; when false the charge mesh is shown.
 var bool m_bDetonator;
+// Green reticule shown when the player is aiming at a valid placement surface.
 var R6Reticule m_ReticuleConfirm;
+// Red reticule shown when placement is blocked (wrong surface, too far, moving, etc.).
 var R6Reticule m_ReticuleBlock;
+// Reticule shown in ChargeArmed state when the player is ready to detonate.
 var R6Reticule m_ReticuleDetonator;
 var StaticMesh m_DetonatorStaticMesh;  // 1st person
 var Texture m_DetonatorTexture;
 var StaticMesh m_ChargeStaticMesh;  // 3rd person
+// The in-world grenade actor that represents the placed charge; nil until ServerPlaceCharge.
 var R6Grenade BulletActor;
 var name m_ChargeAttachPoint;
 var name m_DetonatorAttachPoint;
@@ -144,6 +153,7 @@ simulated function PostNetBeginPlay()
 	return;
 }
 
+// Spawns the charge actor at vLocation, oriented away from the player, and switches to detonator mesh.
 simulated function ServerPlaceCharge(Vector vLocation)
 {
 	local Rotator rDesiredRotation;
@@ -157,6 +167,7 @@ simulated function ServerPlaceCharge(Vector vLocation)
 	m_bDetonator = true;
 	rDesiredRotation = Pawn(Owner).GetViewRotation();
 	rDesiredRotation.Pitch = 0;
+	// Rotate 180° (32768 = half the 65536-unit full circle) so the charge faces away from the player.
 	(rDesiredRotation.Yaw += 32768);
 	BulletActor = R6Grenade(Spawn(m_pBulletClass, self));
 	// End:0xE1
@@ -164,6 +175,7 @@ simulated function ServerPlaceCharge(Vector vLocation)
 	{
 		Log(((((("R6DemolitionsGadget :: ServerPlaceCharge() " $ string(BulletActor)) $ " rDesiredRotation=") $ string(rDesiredRotation)) $ " vLocation=") $ string(vLocation)));
 	}
+	// Offset 10 UU upward to prevent the charge from clipping into the placement surface.
 	BulletActor.SetLocation((vLocation + vect(0.0000000, 0.0000000, 10.0000000)));
 	BulletActor.SetRotation(rDesiredRotation);
 	BulletActor.m_Weapon = self;
@@ -195,6 +207,7 @@ function SetAmmoStaticMesh()
 	return;
 }
 
+// Authority-side detonation: explodes BulletActor and cleans up; called after the detonation animation.
 function ServerDetonate()
 {
 	// End:0x15
@@ -213,6 +226,7 @@ function ServerDetonate()
 	return;
 }
 
+// Decides whether to enter ChargeArmed (charge placed) or ChargeReady (hold charge to place).
 function Fire(float fValue)
 {
 	// End:0x63
@@ -400,6 +414,7 @@ simulated function R6SetReticule(optional Controller LocalPlayerController)
 }
 
 // this must be redefined in each demolitions gadget class
+// Validates that the player is stationary, not leaning, and aiming within 75 UU of a surface.
 simulated function bool CanPlaceCharge()
 {
 	local Vector vFeetLocation, vLookLocation;
@@ -414,6 +429,7 @@ simulated function bool CanPlaceCharge()
 		return false;
 	}
 	// End:0x60
+	// Reject placement during crouch/prone transitions to prevent mis-placed charges.
 	if(pawnOwner.m_bPostureTransition)
 	{
 		return false;
@@ -429,6 +445,7 @@ simulated function bool CanPlaceCharge()
 		}
 	}
 	// End:0xD1
+	// Require the pawn to be fully stationary and not leaning before allowing placement.
 	if(((!pawnOwner.IsStationary()) || (pawnOwner.m_fPeeking != pawnOwner.1000.0000000)))
 	{
 		return false;
@@ -436,6 +453,7 @@ simulated function bool CanPlaceCharge()
 	vFeetLocation = Owner.Location;
 	(vFeetLocation.Z -= pawnOwner.CollisionHeight);
 	// End:0x118
+	// 75 UU ≈ arm's reach; surface must be within ~75 cm for the charge to stick.
 	if((VSize((vLookLocation - vFeetLocation)) < float(75)))
 	{
 		return true;
@@ -451,6 +469,7 @@ function ServerGotoSetExplosive()
 	return;
 }
 
+// Server-side cancel: plays cancel sound and returns controller to normal walking state.
 function ServerCancelChargeInstallation()
 {
 	// End:0x54
@@ -472,6 +491,7 @@ function ServerCancelChargeInstallation()
 	return;
 }
 
+// Client-side cancel: aborts the placement timer and triggers the raise-weapon animation.
 simulated function CancelChargeInstallation()
 {
 	// End:0x27
@@ -495,6 +515,7 @@ simulated function CancelChargeInstallation()
 	return;
 }
 
+// Each tick: detects fire-button release during install (cancels), and updates placement reticule.
 simulated function Tick(float fDeltaTime)
 {
 	// End:0x28
@@ -509,6 +530,7 @@ simulated function Tick(float fDeltaTime)
 		return;
 	}
 	// End:0xD1
+	// If fire was released during installation, cancel the charge placement.
 	if((m_bInstallingCharge && (int(Pawn(Owner).Controller.bFire) == 0)))
 	{
 		// End:0xCB
@@ -523,8 +545,10 @@ simulated function Tick(float fDeltaTime)
 	{
 		return;
 	}
+	// Re-check placement validity each tick and swap the active reticule accordingly.
 	m_bCanPlaceCharge = CanPlaceCharge();
 	// End:0x100
+	// Show the confirm (green) reticule when placement is valid, block (red) otherwise.
 	if(m_bCanPlaceCharge)
 	{
 		m_ReticuleInstance = m_ReticuleConfirm;		
@@ -556,6 +580,7 @@ simulated event HideAttachment()
 	return;
 }
 
+// Switches the 3rd-person attachment mesh between the charge and the detonator.
 simulated event SetGadgetStaticMesh()
 {
 	// End:0x46
@@ -579,6 +604,7 @@ simulated event SetGadgetStaticMesh()
 	return;
 }
 
+// Blocks weapon switching while a detonator is active or a charge is being planted.
 function bool CanSwitchToWeapon()
 {
 	// End:0x51
@@ -598,6 +624,7 @@ function bool CanSwitchToWeapon()
 	return;
 }
 
+// Plays the raise animation when this gadget is first selected; transitions into ChargeReady or ChargeArmed.
 state RaiseWeapon
 {
 	function Fire(float Value)
@@ -672,6 +699,7 @@ state RaiseWeapon
 	stop;
 }
 
+// Idle state while the player is holding a charge and looking for a placement surface.
 state ChargeReady
 {
 	function BeginState()
@@ -737,6 +765,7 @@ state ChargeReady
 		return;
 	}
 
+	// Begins the placement animation and starts the 0.1 s poll timer for server-side completion.
 	function Fire(float fValue)
 	{
 		local R6PlayerController PlayerCtrl;
@@ -769,6 +798,7 @@ state ChargeReady
 		{
 			m_FPHands.GotoState('DiscardWeapon');
 		}
+		// Poll every 0.1 s until the server confirms the placement animation has finished.
 		SetTimer(0.1000000, true);
 		return;
 	}
@@ -787,6 +817,7 @@ state ChargeReady
 	stop;
 }
 
+// Active while a placed charge is armed and the player is holding the detonator.
 state ChargeArmed
 {
 	function BeginState()
@@ -872,6 +903,7 @@ state ChargeArmed
 		return;
 	}
 
+	// First press sets m_bDetonated and plays the detonation animation; ServerDetonate fires on anim-end.
 	function Fire(float fValue)
 	{
 		// End:0xDA
@@ -908,6 +940,7 @@ state ChargeArmed
 	stop;
 }
 
+// Transitional state: plays a short animation to draw the next charge before re-entering ChargeReady.
 state GetNextCharge
 {
 	function StopFire(optional bool bSoundOnly)
@@ -951,6 +984,7 @@ state GetNextCharge
 	stop;
 }
 
+// Terminal state when all charges have been used; auto-switches to primary or secondary weapon.
 state NoChargesLeft
 {
 	function BeginState()
@@ -1003,6 +1037,7 @@ state NoChargesLeft
 	stop;
 }
 
+// Plays the put-away animation; skips it if no charge or detonator remains.
 state DiscardWeapon
 {
 	function Fire(float Value)
@@ -1048,6 +1083,7 @@ state DiscardWeapon
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
 			}
 			// End:0xDB
+			// Only play the discard animation if there is something to put away.
 			if((m_bDetonator || (int(m_iNbBulletsInWeapon) > 0)))
 			{
 				m_FPHands.GotoState('DiscardWeapon');				
