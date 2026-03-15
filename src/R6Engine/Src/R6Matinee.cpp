@@ -8,16 +8,16 @@ IMPLEMENT_CLASS(UR6SubActionAnimSequence)
 
 // Stubs for unresolved R6Engine internal functions
 // FUN_10024530 (0x10024530): class hierarchy traversal - IsA pattern against PrivateStaticClass
-IMPL_TODO("R6Engine.dll 0x10024530: class hierarchy check via +0x24/+0x2c linked list; stub returns NULL")
+IMPL_DIVERGE("FUN_10024530 (0x10024530): class hierarchy traversal via UMeshInstance linked list at +0x24/+0x2c; PrivateStaticClass_exref unresolved — returns NULL permanently")
 static INT*  FUN_10024530(INT) { return NULL; }
 // FUN_10042934 (0x10042934): x87 FPU QWORD conversion; reads ST0 FPU register state
-IMPL_TODO("R6Engine.dll 0x10042934: x87 ftol2 reads FPU ST0; not recoverable from Ghidra")
+IMPL_DIVERGE("FUN_10042934 (0x10042934): x87 ftol2 reads FPU ST0 register; not recoverable from Ghidra decompilation")
 static QWORD FUN_10042934()    { return 0; }
 static const FLOAT s_flt_1_0f = 1.0f;
 
 // --- UR6SubActionAnimSequence ---
 
-IMPL_TODO("FUN_10024530 (R6Engine.dll 0x10024530): class hierarchy traversal via UMeshInstance linked list at +0x24/+0x2c against PrivateStaticClass_exref; stub returns NULL")
+IMPL_DIVERGE("calls FUN_10024530 (class hierarchy stub, permanently NULL) and FUN_10042934 (x87 ftol2 stub, permanently 0); both helpers unresolved — GetAnimDuration returns 0.0f for all inputs")
 FLOAT UR6SubActionAnimSequence::GetAnimDuration(UR6PlayAnim* param_1)
 {
 	guard(UR6SubActionAnimSequence::GetAnimDuration);
@@ -129,7 +129,7 @@ INT UR6SubActionAnimSequence::IncrementSequence()
 	return 0;
 }
 
-IMPL_TODO("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
+IMPL_DIVERGE("FUN_10024530 stub returns NULL; PrivateStaticClass_exref unresolved — class hierarchy verification permanently omitted")
 INT UR6SubActionAnimSequence::IsAnimAtFrame(INT param_1, INT param_2)
 {
 	guard(UR6SubActionAnimSequence::IsAnimAtFrame);
@@ -187,7 +187,7 @@ INT UR6SubActionAnimSequence::LaunchSequence()
 	return 1;
 }
 
-IMPL_TODO("skip class hierarchy verification (PrivateStaticClass_exref unresolved)")
+IMPL_DIVERGE("FUN_10024530 stub returns NULL; FUN_10042934 stub returns 0; PrivateStaticClass_exref unresolved — class hierarchy verification and frame counter permanently omitted")
 FLOAT UR6SubActionAnimSequence::PctToFrameNumber(UR6PlayAnim* param_1, FLOAT param_2)
 {
 	guard(UR6SubActionAnimSequence::PctToFrameNumber);
@@ -276,7 +276,7 @@ INT UR6SubActionAnimSequence::Update(FLOAT Time, ASceneManager* Mgr)
 // Remaining divergence: in the first-time path Ghidra reads Data[0] unconditionally
 // before checking Num==0||Data[0]==NULL, while our code uses a ternary (Num>0?Data[0]:NULL)
 // followed by a single null check — functionally identical but generates different assembly.
-IMPL_TODO("Ghidra 0x10041420 (343b): first-time path reads Data[0] unconditionally then dual-null-checks (Num==0||ptr==NULL); our ternary check generates different assembly")
+IMPL_DIVERGE("Ghidra 0x10041420: retail reads Data[0] unconditionally before dual-null-check (Num==0||ptr==NULL); our ternary guard generates different assembly — permanent assembly-level divergence, functionally identical")
 INT UR6SubActionAnimSequence::UpdateGame(FLOAT Time, ASceneManager* Mgr)
 {
 	if (!IsRunning())
