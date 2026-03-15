@@ -544,3 +544,6 @@ public:
 	virtual FBox GetRect();
 };
 
+// Global engine stats object — defined in Engine.cpp, declared here for Engine .cpp files.
+extern ENGINE_API FStats GStats;
+
