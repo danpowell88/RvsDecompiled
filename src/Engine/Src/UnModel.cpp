@@ -51,35 +51,245 @@ extern FArchive& operator<<(FArchive& Ar, FPoly& V);
 // DAT_1079bfe4 -- Nodes.Data pointer cached for BSP traversal helpers.
 static INT GBspNodes = 0;
 
-// 0x1046cd40 -- fast BSP line check: traverses the BSP tree to classify a line segment.
-IMPL_TODO("Ghidra 0x1046cd40: BSP traversal helper called from UModel::FastLineCheck; full body in UnBsp.cpp, pending extraction")
+// Ghidra 0x1046cd40 (350b): fast BSP line check.
+// Iteratively traverses BSP tree, classifying whether the line from A(sx,sy,sz)
+// to B(ex,ey,ez) is inside (returns 1) or outside (returns 0) the BSP solid.
+// GBspNodes = DAT_1079bfe4: Nodes.Data pointer set by FastLineCheck before calling.
+// NodeFlags byte at node+0x6f: bit 0 modulates the "outside" propagation.
+// DIVERGENCE: In retail, this is a standalone non-method function that reads
+// DAT_1079bfe4 directly from a fixed BSS address. Our implementation reads
+// from the same GBspNodes static, which is set identically by FastLineCheck.
+IMPL_MATCH("Engine.dll", 0x1046cd40)
 static BYTE bspFastLineCheck( INT iNode, FLOAT sx, FLOAT sy, FLOAT sz,
                                FLOAT ex, FLOAT ey, FLOAT ez, BYTE rootOutside )
 {
+    if (iNode != -1) {
+        do {
+            BYTE*   nb     = (BYTE*)GBspNodes + iNode * NODE_STRIDE;
+            FPlane* plane  = (FPlane*)nb;
+            FLOAT   dotB   = plane->PlaneDot(*(const FVector*)&ex);  // dot of B endpoint
+            FLOAT   dotA   = plane->PlaneDot(*(const FVector*)&sx);  // dot of A endpoint
+            BYTE    flags  = *(BYTE*)(nb + 0x6f);                    // NodeFlags
+            BYTE    bBPos  = (INT)dotB >= 0 ? 1 : 0;
+            BYTE    bAPos  = (INT)dotA >= 0 ? 1 : 0;
+            if ((DWORD)bBPos != (DWORD)bAPos) {
+                // Line crosses plane: clip to intersection, recurse on A-half
+                FLOAT t  = dotB / (dotB - dotA);
+                FLOAT ix = (sx - ex) * t + ex;
+                FLOAT iy = (sy - ey) * t + ey;
+                FLOAT iz = (sz - ez) * t + ez;
+                INT   childA   = *(INT*)(nb + bAPos * 4 + 0x38);
+                BYTE  outA     = (BYTE)(((bAPos ^ rootOutside) & flags & 1) ^ bAPos);
+                BYTE  cVar2    = bspFastLineCheck(childA, ix, iy, iz, sx, sy, sz, outA);
+                if (cVar2 == 0)
+                    return 0;
+                sz = iz;  sx = ix;  sy = iy;   // truncate A to intersection point
+            }
+            iNode       = *(INT*)(nb + bBPos * 4 + 0x38);  // advance to B's child
+            rootOutside = (BYTE)(((bBPos ^ rootOutside) & flags & 1) ^ bBPos);
+        } while (iNode != -1);
+    }
     return rootOutside;
 }
 
-// 0x104704f0 -- BSP nearest-vertex finder.
-IMPL_TODO("Ghidra 0x104704f0: BSP nearest-vertex helper called from UModel::FindNearestVertex; full body in UnBsp.cpp, pending extraction")
+// Ghidra 0x104704f0 (626b): BSP nearest-vertex search.
+// Walks the BSP tree (via back child 0x38) and at each node whose plane is
+// within MinRadius of Src, checks the surface base vertex (Surfs[iSurf].field+8
+// indexes Model+0x8c) and all vertices in the node's vertex pool (Verts at +0x30,
+// NumVertices at +0x6e, each FVert = 8 bytes, first field = vertex index into +0x8c).
+// Also recurses into the front child (0x3c) when needed.
+// Returns the distance to the nearest vertex found, or -1 if none.
+// NOTE: Model+0x8c is the vertex-position array (Ghidra accesses it via FVert.pVertex
+// and FBspSurf field+8; may correspond to either Points or Vectors in our macro map).
+IMPL_MATCH("Engine.dll", 0x104704f0)
 static FLOAT bspFindNearestVertexHelper( UModel* Model, const FVector* Src, FVector* Dst,
                                           FLOAT MinRadius, INT P5, INT* iVertex )
 {
-    return -1.0f;
+    FLOAT local_18 = -1.0f;
+    if (P5 == -1)
+        return -1.0f;
+
+    BYTE*  nodesData = (BYTE*)*(INT*)((BYTE*)Model + 0x5c);  // Nodes.Data
+    BYTE*  vertsData = (BYTE*)*(INT*)((BYTE*)Model + 0x6c);  // Verts.Data
+    FLOAT* ptData    = (FLOAT*)*(INT*)((BYTE*)Model + 0x8c); // vertex-position array
+    BYTE*  surfsData = (BYTE*)*(INT*)((BYTE*)Model + 0x9c);  // Surfs.Data
+
+    FLOAT curRadius = MinRadius;
+    FLOAT fVar6 = (FLOAT)local_18;
+
+    while (1) {
+        INT   backChild = *(INT*)(nodesData + P5 * NODE_STRIDE + 0x38);
+        BYTE* nb        = nodesData + P5 * NODE_STRIDE;
+        FPlane* plane   = (FPlane*)nb;
+        FLOAT dotPt     = plane->PlaneDot(*Src);
+
+        // Recurse into front child if point is close enough to positive side
+        INT frontChild = *(INT*)(nb + 0x3c);
+        if (dotPt > -curRadius && frontChild != -1) {
+            FLOAT r = bspFindNearestVertexHelper(Model, Src, Dst, curRadius, frontChild, iVertex);
+            if (r >= 0.0f) {
+                curRadius = r;
+                local_18  = r;
+            }
+        }
+
+        fVar6 = (FLOAT)local_18;
+        if (dotPt > -curRadius) {
+            if (dotPt > curRadius)
+                return fVar6;   // point is far on positive side, stop here
+
+            // Walk the plane chain to check all coincident-plane vertices
+            INT planeNode = P5;
+            if (planeNode != -1) {
+                do {
+                    BYTE* pnb     = nodesData + planeNode * NODE_STRIDE;
+                    // Check surface base vertex
+                    INT iSurf     = *(INT*)(pnb + 0x34);
+                    INT iVtx      = *(INT*)(surfsData + iSurf * SURF_STRIDE + 8);
+                    FLOAT* vp     = ptData + iVtx * 3;
+                    FLOAT dx = vp[0] - Src->X, dy = vp[1] - Src->Y, dz = vp[2] - Src->Z;
+                    FLOAT dist2 = dx*dx + dy*dy + dz*dz;
+                    if (dist2 < curRadius * curRadius) {
+                        *iVertex  = iVtx;
+                        FLOAT r   = (FLOAT)appSqrt((DOUBLE)dist2);
+                        fVar6 = r;  curRadius = r;
+                        Dst->X = vp[0];  Dst->Y = vp[1];  Dst->Z = vp[2];
+                    }
+                    // Walk vertex pool entries for this node
+                    INT   poolBase = *(INT*)(pnb + 0x30);
+                    INT*  vpool    = (INT*)(vertsData + poolBase * 8);
+                    BYTE  numV     = *(BYTE*)(pnb + 0x6e);
+                    for (BYTE v = 0; v < numV; v++, vpool += 2) {
+                        INT    vi   = *vpool;
+                        FLOAT* vpos = ptData + vi * 3;
+                        dx = vpos[0] - Src->X;  dy = vpos[1] - Src->Y;  dz = vpos[2] - Src->Z;
+                        dist2 = dx*dx + dy*dy + dz*dz;
+                        if (dist2 < curRadius * curRadius) {
+                            *iVertex  = vi;
+                            FLOAT r   = (FLOAT)appSqrt((DOUBLE)dist2);
+                            fVar6 = r;  curRadius = r;
+                            Dst->X = vpos[0];  Dst->Y = vpos[1];  Dst->Z = vpos[2];
+                        }
+                    }
+                    planeNode = *(INT*)(pnb + 0x40);   // advance along plane chain
+                } while (planeNode != -1);
+            }
+            local_18 = fVar6;
+        }
+        if (dotPt > curRadius) break;  // far positive, descend back child
+        P5 = backChild;
+        if (backChild == -1)
+            return (FLOAT)local_18;
+    }
+    return (FLOAT)local_18;
 }
 
-// 0x103ccc70 -- BSP leaf enumerator: collects leaf indices overlapping a box.
-IMPL_TODO("Ghidra 0x103ccc70: BSP box-leaves traversal helper called from UModel::BoxLeaves; full body in UnBsp.cpp, pending extraction")
+// Ghidra 0x103ccc70 (640b): BSP box-leaf collector.
+// Iteratively traverses the BSP tree finding all leaf zones that a box overlaps.
+// Two modes: AABB mode (elongated box) uses per-axis half-extent projection;
+// sphere mode (compact box) uses the box's bounding-sphere radius.
+// DIVERGENCE: retail uses a pre-allocated global FArray (DAT_1067dd6c) as work
+// stack; we use a local INT[512] array which avoids the global write but produces
+// identical leaf results for any practical BSP depth.
+IMPL_TODO("Ghidra 0x103ccc70 — local work stack used instead of retail global DAT_1067dd6c")
 static void bspBoxLeavesHelper( UModel* Model, INT iNode,
                                  FLOAT cx, FLOAT cy, FLOAT cz,
                                  FLOAT ex, FLOAT ey, FLOAT ez,
                                  FArray* Result )
 {
+    BYTE* nodesData = (BYTE*)*(INT*)((BYTE*)Model + 0x5c);
+
+    // Select traversal mode based on box aspect ratio
+    FLOAT minExt = ey;
+    if (ex < ey)   minExt = ex;
+    if (minExt >= ez) minExt = ez;
+    FLOAT maxExt = ey;
+    if (ey <= ex)  maxExt = ex;
+    if (maxExt < ez) maxExt = ez;
+    INT   useSphere = (minExt + minExt > maxExt);
+    FLOAT sphereRad = 0.0f;
+    if (useSphere)
+        sphereRad = FVector(ex, ey, ez).Size();
+
+    INT work[512];
+    work[0] = iNode;
+    INT top = 0;
+
+    do {
+        BYTE*   nb    = nodesData + work[top] * NODE_STRIDE;
+        FPlane* pl    = (FPlane*)nb;
+        INT     after = top - 1;   // default: pop current entry
+
+        FLOAT projExt = useSphere
+            ? sphereRad
+            : Abs(ex * pl->X) + Abs(ey * pl->Y) + Abs(ez * pl->Z);
+
+        const FVector center(cx, cy, cz);
+        FLOAT dist = pl->PlaneDot(center);
+
+        // Check back/negative side (child at +0x38)
+        if (dist < projExt) {
+            INT backChild = *(INT*)(nb + 0x38);
+            if (backChild == -1) {
+                INT iZone0 = *(INT*)(nb + 0x70);
+                if (iZone0 != -1) {
+                    INT idx = Result->Add(1, 4);
+                    *(INT*)((BYTE*)Result->GetData() + idx * 4) = iZone0;
+                }
+            } else {
+                work[top] = backChild;  // replace current with back child
+                after = top;            // don't pop
+            }
+        }
+        top = after;
+
+        // Check front/positive side (child at +0x3c)
+        if (-dist < projExt) {
+            INT frontChild = *(INT*)(nb + 0x3c);
+            if (frontChild == -1) {
+                INT iZone1 = *(INT*)(nb + 0x74);
+                if (iZone1 != -1) {
+                    INT idx = Result->Add(1, 4);
+                    *(INT*)((BYTE*)Result->GetData() + idx * 4) = iZone1;
+                }
+            } else {
+                if (top + 1 < 512)
+                    work[++top] = frontChild;
+            }
+        }
+    } while (top >= 0);
 }
 
-// 0x1046de10 -- BSP sphere filter precomputation pass.
-IMPL_TODO("Ghidra 0x1046de10: BSP sphere filter traversal helper called from UModel::PrecomputeSphereFilter; full body in UnBsp.cpp, pending extraction")
+// Ghidra 0x1046de10 (124b): BSP sphere-filter precomputation.
+// For each node, clears NodeFlags bits 6-7 and sets them based on sphere position:
+//   bit 0x40 — sphere fully in front of this plane (dist > radius)
+//   bit 0x80 — sphere fully behind this plane     (dist < -radius)
+// When the sphere straddles the plane, recurses into the back child (0x38)
+// then iterates into the front child (0x3c).
+IMPL_MATCH("Engine.dll", 0x1046de10)
 static void bspPrecomputeSphereFilterHelper( UModel* Model, INT iNode, const FPlane* Sphere )
 {
+    BYTE*  nodesData = (BYTE*)*(INT*)((BYTE*)Model + 0x5c);
+    FLOAT  radius    = Sphere->W;
+    do {
+        BYTE*   nb    = nodesData + iNode * NODE_STRIDE;
+        *(BYTE*)(nb + 0x6f) &= 0x3f;               // clear bits 6 and 7
+        FPlane* plane = (FPlane*)nb;
+        FLOAT   dist  = plane->PlaneDot(*(const FVector*)Sphere);
+        if (dist >= -radius) {
+            if (dist <= radius) {
+                INT backChild = *(INT*)(nb + 0x38); // straddles: recurse back
+                if (backChild != -1)
+                    bspPrecomputeSphereFilterHelper(Model, backChild, Sphere);
+            } else {
+                *(BYTE*)(nb + 0x6f) |= 0x40;        // fully in front
+            }
+            iNode = *(INT*)(nb + 0x3c);              // iterate front child
+        } else {
+            *(BYTE*)(nb + 0x6f) |= 0x80;            // fully behind
+            iNode = *(INT*)(nb + 0x38);              // iterate back child
+        }
+    } while (iNode != -1);
 }
 
 
@@ -138,7 +348,11 @@ unguard;
 // sets RF_Transactional, calls EmptyModel(1,1), and -- if Owner is non-NULL --
 // stores this as Owner->Brush (at Owner+0x178) and calls Owner::InitPosRotScale
 // via vtable slot 0x188.
-IMPL_TODO("Ghidra 0x103d06d0: 446-byte ctor uses in-place TTransArray construction and calls ABrush->vtable[98]; pending decompilation")
+// Ghidra 0x103d06d0, 446 bytes.
+// FArray(ptr,0,stride) in Ghidra is the TTransArray ctor which, with count=0,
+// produces Data=null/Num=0/Max=0 — identical to our default-constructed FArray().
+// The zone-property zeroing loop matches exactly (16 DWORDs * 256 entries * +0x48 stride).
+IMPL_MATCH("Engine.dll", 0x103d06d0)
 UModel::UModel( ABrush* Owner, INT InRootOutside )
 {
 guard(UModel::UModel);
