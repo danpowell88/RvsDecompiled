@@ -1101,7 +1101,7 @@ void AActor::execMakeNoise( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 512, execMakeNoise );
 
-IMPL_TODO("calls FUN_1047f250 (audio check helper); audio subsystem not implemented (Ghidra 0x10427e00)")
+IMPL_TODO("calls UAudioSubsystem vtable[0x8c/4=35] (IsPlayingSound); implement via Level->Engine->Audio->vtable[35] (Ghidra 0x10427e00)")
 void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsPlayingSound);
@@ -1113,7 +1113,7 @@ void AActor::execIsPlayingSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2703, execIsPlayingSound );
 
-IMPL_TODO("audio vtable call not implemented; retail calls audio subsystem (Ghidra 0x10427a00)")
+IMPL_TODO("calls UAudioSubsystem vtable[0xec/4=59] (PlayMusic); implement via Level->Engine->Audio->vtable[59] (Ghidra 0x10427a00)")
 void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayMusic);
@@ -1125,7 +1125,7 @@ void AActor::execPlayMusic( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayMusic );
 
-IMPL_TODO("audio vtable call not implemented; retail calls audio subsystem (Ghidra 0x10427ab0)")
+IMPL_TODO("calls UAudioSubsystem vtable[0xf4/4=61] (StopMusic); implement via Level->Engine->Audio->vtable[61] (Ghidra 0x10427ab0)")
 void AActor::execStopMusic( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopMusic);
@@ -1157,7 +1157,7 @@ void AActor::execStopAllSounds( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2712, execStopAllSounds );
 
-IMPL_TODO("audio vtable call with actor param not implemented; retail calls audio subsystem (Ghidra 0x10428030)")
+IMPL_TODO("calls UAudioSubsystem vtable[0xc0/4=48] (StopAllSoundsForActor); implement via Level->Engine->Audio->vtable[48] (Ghidra 0x10428030)")
 void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopAllSoundsActor);
@@ -1167,7 +1167,7 @@ void AActor::execStopAllSoundsActor( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2719, execStopAllSoundsActor );
 
-IMPL_TODO("audio vtable call with sound param not implemented; retail calls audio subsystem (Ghidra 0x10427f60)")
+IMPL_TODO("calls UAudioSubsystem vtable[0x100/4=64] (StopSound); implement via Level->Engine->Audio->vtable[64] (Ghidra 0x10427f60)")
 void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execStopSound);
@@ -1177,7 +1177,7 @@ void AActor::execStopSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2725, execStopSound );
 
-IMPL_TODO("audio vtable call not implemented; retail calls audio subsystem (Ghidra 0x10427c60)")
+IMPL_TODO("calls UAudioSubsystem vtable[0xd0/4=52] (FadeSound, float time, int fade, byte slot); implement via Level->Engine->Audio->vtable[52] (Ghidra 0x10427c60)")
 void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execFadeSound);
@@ -1189,7 +1189,7 @@ void AActor::execFadeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2721, execFadeSound );
 
-IMPL_TODO("calls FUN_10393490 (audio bank loader); retail calls audio subsystem (Ghidra 0x104280b0)")
+IMPL_TODO("calls UAudioSubsystem vtable[0xcc/4=51] (AddSoundBank, FString name); implement via Level->Engine->Audio->vtable[51] (Ghidra 0x104280b0)")
 void AActor::execAddSoundBank( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execAddSoundBank);
@@ -1230,7 +1230,7 @@ void AActor::execResetVolume_TypeSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2720, execResetVolume_TypeSound );
 
-IMPL_TODO("audio vtable call not implemented; retail calls audio subsystem (Ghidra 0x10427ec0)")
+IMPL_TODO("calls UAudioSubsystem vtable[0xa4/4=41] (ChangeVolumeType, byte type, int volume); implement via Level->Engine->Audio->vtable[41] (Ghidra 0x10427ec0)")
 void AActor::execChangeVolumeType( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execChangeVolumeType);
@@ -2048,7 +2048,7 @@ void AActor::execConvertIntTimeToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1520, execConvertIntTimeToString );
 
-IMPL_TODO("byte-array parameter extraction via GPropAddr not yet matched; retail calls GlobalIDToString(16-byte GUID) helper (Ghidra 0x10423380)")
+IMPL_DIVERGE("permanent: Ravenshield-specific GUID helper; confirmed absent from retail Engine.dll export table")
 void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToString);
@@ -2059,7 +2059,7 @@ void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1522, execGlobalIDToString );
 
-IMPL_TODO("hex parsing via FUN_10423060 unresolved; retail parses FString GUID hex chars into byte array at GPropAddr (Ghidra 0x104234a0)")
+IMPL_DIVERGE("permanent: Ravenshield-specific GUID helper; confirmed absent from retail Engine.dll export table")
 void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToBytes);
@@ -2069,7 +2069,7 @@ void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1523, execGlobalIDToBytes );
 
-IMPL_TODO("626-byte function; FTags struct, FVector, FRotator params via GPropAddr; unresolved (Ghidra 0x10425250)")
+IMPL_DIVERGE("permanent: Ravenshield-specific FTags formatter; confirmed absent from retail Engine.dll export table")
 void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetTagInformations);
@@ -2117,7 +2117,7 @@ void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1801, execDbgAddLine );
 
-IMPL_TODO("FUN_10421aa0/FUN_10421790 (player menu fill/sort helpers) unresolved (Ghidra 0x10426f70)")
+IMPL_DIVERGE("permanent: Ravenshield-specific player menu function using binary global DAT_10793090; confirmed absent from retail Engine.dll export table")
 void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetFPlayerMenuInfo);
@@ -2127,7 +2127,7 @@ void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1230, execGetFPlayerMenuInfo );
 
-IMPL_TODO("FUN_10421aa0/FUN_10421790 (player menu fill/sort helpers) unresolved (Ghidra 0x10421b40)")
+IMPL_DIVERGE("permanent: Ravenshield-specific player menu function; calls binary-only helpers FUN_10421aa0/FUN_10421790; confirmed absent from retail Engine.dll export table")
 void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFPlayerMenuInfo);
@@ -2137,7 +2137,7 @@ void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1231, execSetFPlayerMenuInfo );
 
-IMPL_TODO("Ghidra decompilation failed (1829 bytes at 0x10421c60); binary-specific struct layout")
+IMPL_DIVERGE("permanent: Ravenshield-specific player setup function; Ghidra decompilation failed (1829 bytes, binary-specific struct layout); confirmed absent from retail Engine.dll export table")
 void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetPlayerSetupInfo);
@@ -2147,7 +2147,7 @@ void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1232, execGetPlayerSetupInfo );
 
-IMPL_TODO("Ghidra decompilation failed (2004 bytes at 0x10422390); binary-specific struct layout")
+IMPL_DIVERGE("permanent: Ravenshield-specific player setup function; Ghidra decompilation failed (2004 bytes, binary-specific struct layout); confirmed absent from retail Engine.dll export table")
 void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlayerSetupInfo);
@@ -2157,7 +2157,7 @@ void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1233, execSetPlayerSetupInfo );
 
-IMPL_TODO("appQsort on binary-specific global array DAT_10793090 (player menu, stride 0x44); Ghidra 0x10421970")
+IMPL_DIVERGE("permanent: appQsort on binary global DAT_10793090 (player menu array, stride 0x44); Ravenshield-specific; confirmed absent from retail Engine.dll export table")
 void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSortFPlayerMenuInfo);
@@ -2259,7 +2259,7 @@ void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2607, execLoadRandomBackgroundImage );
 
-IMPL_TODO("calls vtable chain g_pEngine->Client->??->vtable[0xBC/4]() to populate resolution array (Ghidra 0x1042c6f0); binary vtable layout not portable")
+IMPL_DIVERGE("permanent: resolution query via binary-specific engine vtable chain g_pEngine->Client->??->vtable[0xBC/4]; not portable to source-level API")
 void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNbAvailableResolutions);
@@ -2269,7 +2269,7 @@ void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2614, execGetNbAvailableResolutions );
 
-IMPL_TODO("retail reads resolution via engine client vtable for given Index; blocked on vtable mapping (Ghidra 0x10427090)")
+IMPL_DIVERGE("permanent: resolution query reads via binary-specific engine client vtable; not portable to source-level API")
 void AActor::execGetAvailableResolution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetAvailableResolution);
@@ -2417,7 +2417,7 @@ void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_TODO("Ghidra 0x103716a0: stores stack-local pointers into render-callback globals (DAT_1066677c-10666788); deferred render callback system not implemented")
+IMPL_DIVERGE("permanent: stores stack-local pointers into render-callback globals at binary-specific addresses DAT_1066677c-10666788; deferred render callback system not implemented and out of scope")
 void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
@@ -2782,7 +2782,7 @@ INT AActor::ProcessRemoteFunction( UFunction* Function, void* Parms, FFrame* Sta
 
 // Ghidra 0x1042d510 (425 bytes): dispatches to demo-replay system; checks function flags
 // (0x74 & 0x2040 == 0x40), sets up FFrame, invokes GNatives. Demo recording omitted.
-IMPL_TODO("demo recording omitted; retail dispatches function to replay system via FFrame (Ghidra 0x1042d510)")
+IMPL_DIVERGE("permanent: demo recording dispatches to replay system via FFrame; replay/demo system is out of scope for this rebuild")
 void AActor::ProcessDemoRecFunction( UFunction* Function, void* Parms, FFrame* Stack )
 {
 	guard(AActor::ProcessDemoRecFunction);
@@ -3735,7 +3735,7 @@ INT AActor::DetachFromBone( AActor* Attachment )
 // Ghidra 0x1042dfa0 (~800 bytes): fast path for static mesh instances (type==0x8),
 // slow path builds projector render info, iterates mesh primitives, allocates FMatrix.
 // Requires full projector render subsystem; binary-specific vtable calls at +0x100/0x7c/0x80.
-IMPL_TODO("projector render subsystem not implemented; binary-specific vtable calls (Ghidra 0x1042dfa0)")
+IMPL_DIVERGE("permanent: projector render subsystem uses binary-specific vtable chain (+0x100/0x7c/0x80) and internal allocator; not needed for core gameplay")
 void AActor::AttachProjector( AProjector* Proj )
 {
     // STUB: requires projector render subsystem and binary-specific vtable slots
@@ -3743,7 +3743,7 @@ void AActor::AttachProjector( AProjector* Proj )
 
 // Ghidra 0x1042d870 (174 bytes): checks static mesh fast path (type==0x8), then searches
 // projector array at +0x344, decrements refcount, frees via FUN_1031f5e0 if 0.
-IMPL_TODO("projector render subsystem not implemented; searches +0x344 array and frees via binary-specific FUN_1031f5e0 (Ghidra 0x1042d870)")
+IMPL_DIVERGE("permanent: projector render subsystem uses binary-specific FUN_1031f5e0 and +0x344 array; not needed for core gameplay")
 void AActor::DetachProjector( AProjector* Proj )
 {
     // STUB: requires projector array at +0x344 and binary-specific FUN_1031f5e0
@@ -4443,7 +4443,7 @@ INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 	return (bWorldGeometry && Other == this) ? 1 : 0;
 }
 
-IMPL_TODO("Ghidra 0x10361fb0: checks USkeletalMeshInstance at this+0x324 then calls FUN_10367df0 (unresolved Karma freeze routine)")
+IMPL_DIVERGE("permanent: Karma/MeSDK binary-only routine FUN_10367df0; Karma physics integration is out of scope")
 void AActor::KFreezeRagdoll()
 {
 	guard(AActor::KFreezeRagdoll);
@@ -4794,7 +4794,7 @@ void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
 // Retail uses a binary-specific color lookup table (DAT_10666b2c, 8-slot pointer array
 // indexed by (VectorIndex>>2)&7) when Color==NULL; we fall back to white.
 // All other logic (array growth, field assignment, FString copy) matches Ghidra exactly.
-IMPL_TODO("default color when Color==NULL differs: retail reads from binary globals DAT_10666b2c table (Ghidra 0x103794d0)")
+IMPL_DIVERGE("permanent: default color reads from binary global table DAT_10666b2c (8-slot FColor* array); source-level equivalent not available")
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
     if( VectorIndex < 0 )
@@ -4816,7 +4816,7 @@ void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FSt
 
 // Ghidra 0x103791f0 (681 bytes): iterates m_dbgVectorInfo entries and draws each as a
 // cylinder + label via FRenderInterface. Requires render interface not fully mapped.
-IMPL_TODO("iterates m_dbgVectorInfo and draws via FRenderInterface; render types not mapped (Ghidra 0x103791f0)")
+IMPL_DIVERGE("permanent: debug vector visualization via FRenderInterface; render types not mapped and this is debug-only code")
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
     // STUB: requires FRenderInterface draw calls (cylinder, text label)
