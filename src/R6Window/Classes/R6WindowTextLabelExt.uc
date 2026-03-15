@@ -30,27 +30,27 @@ struct TextLabel
 	var bool bResizeToText;
 };
 
-var UWindowBase.TextAlign Align;
-var int m_TextDrawstyle;
-var int m_DrawStyle;
-var int m_iNumberOfLabel;
-var bool m_bRefresh;
-var bool m_bCheckToDrawLine;
+var UWindowBase.TextAlign Align;    // Default text alignment for new labels
+var int m_TextDrawstyle;            // Canvas draw style used when rendering text
+var int m_DrawStyle;                // Canvas draw style used when rendering separator lines
+var int m_iNumberOfLabel;           // Number of active labels currently in m_sTextLabelArray
+var bool m_bRefresh;                // Dirty flag; triggers position recalculation in BeforePaint
+var bool m_bCheckToDrawLine;        // True if any label has bDrawLineAtEnd set
 var bool m_bTextCenterToWindow;  // center the text to the center of the window
 var bool m_bUpDownBG;  // set to true if you want a background of editbox type behind your text
-var float m_fTextX;
+var float m_fTextX;  // Horizontal text start position, updated by BeforePaint
 // NEW IN 1.60
-var float m_fTextY;
+var float m_fTextY;  // Vertical text start position, updated by BeforePaint
 var float m_fFontSpacing;  // Space between characters
 var float m_fLMarge;  // Left Text Margin
 var float m_fYLineOffset;  // OffSet for the draw line after text
-var Font m_Font;
+var Font m_Font;                 // Current active font used for rendering
 var Texture m_BGTexture;  // Put = None when no background is needed
-var Color m_vTextColor;
-var Color m_vLineColor;
+var Color m_vTextColor;          // Current text draw colour
+var Color m_vLineColor;          // Colour used for separator lines between labels
 // NEW IN 1.60
-var TextLabel m_sTextLabelArray[20];
-var string Text;
+var TextLabel m_sTextLabelArray[20];  // Array of up to iNumberOfLabelMax individual text label entries
+var string Text;                      // Unused legacy text field
 
 function Created()
 {
