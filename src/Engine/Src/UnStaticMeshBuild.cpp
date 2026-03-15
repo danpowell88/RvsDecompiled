@@ -250,7 +250,7 @@ void UStaticMeshInstance::Serialize(FArchive &Ar)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x10446b40 (not in export set): projector triangle-clipping blocked by FUN_10449ee0 (clip) and FUN_10448ca0 (OPCODE BVH gather)")
+IMPL_DIVERGE("permanent: Ghidra 0x10446b40 is absent from retail export table; FUN_10449ee0 (triangle clip) and FUN_10448ca0 (OPCODE BVH gather) absent from Engine.dll exports — not callable")
 void UStaticMeshInstance::AttachProjectorClipped(AActor *,AProjector *)
 {
 	guard(UStaticMeshInstance::AttachProjectorClipped);
