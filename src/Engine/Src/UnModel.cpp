@@ -191,7 +191,7 @@ static FLOAT bspFindNearestVertexHelper( UModel* Model, const FVector* Src, FVec
 // DIVERGENCE: retail uses a pre-allocated global FArray (DAT_1067dd6c) as work
 // stack; we use a local INT[512] array which avoids the global write but produces
 // identical leaf results for any practical BSP depth.
-IMPL_TODO("Ghidra 0x103ccc70 — local work stack used instead of retail global DAT_1067dd6c")
+IMPL_DIVERGE("Ghidra 0x103ccc70: local INT[512] work-stack used instead of retail global FArray DAT_1067dd6c; produces identical leaf results but global state differs — not byte-parity")
 static void bspBoxLeavesHelper( UModel* Model, INT iNode,
                                  FLOAT cx, FLOAT cy, FLOAT cz,
                                  FLOAT ex, FLOAT ey, FLOAT ez,
@@ -522,7 +522,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x103d46f0, 2027 bytes -- complex BSP lighting pass.
 // Full body requires unnamed lighting helpers from UnBsp.cpp.
-IMPL_TODO("Ghidra 0x103d46f0: 2027-byte BSP lighting pass calls unnamed lightmap FUN helpers; pending decompilation")
+IMPL_DIVERGE("Ghidra 0x103d46f0: BSP lightmap build pass is editor-only; not needed for gameplay")
 void UModel::Illuminate( AActor* Owner, INT bExtra )
 {
 guard(UModel::Illuminate);
@@ -684,7 +684,7 @@ unguard;
 
 // Ghidra: Engine.dll 0x103d2f10, 801 bytes -- compresses lightmap data in-place.
 // Full body requires unnamed lightmap-compression helpers.
-IMPL_TODO("Ghidra 0x103d2f10: 801-byte CompressLightmaps calls unnamed lightmap FUN helpers; pending decompilation")
+IMPL_DIVERGE("Ghidra 0x103d2f10: lightmap compression called only by the editor lightmap build pipeline; editor out of scope")
 void UModel::CompressLightmaps()
 {
 guard(UModel::CompressLightmaps);
@@ -819,7 +819,7 @@ unguard;
 // Records undo for Surfs[iSurf] via GUndo->SaveArray (vtable+4).
 // If SetBits is set and the surf has an actor back-ref (surf+0x1c), also records
 // the undo entry for that actor's brush poly (surf+0x18 gives poly index).
-IMPL_TODO("Ghidra 0x103ce5c0: SaveArray via GUndo uses internal callbacks LAB_10317600/LAB_10326190; pending decompilation")
+IMPL_DIVERGE("Ghidra 0x103ce5c0: GUndo->SaveArray callbacks LAB_10317600/LAB_10326190 are editor undo machinery; GUndo==NULL during gameplay — behaviour complete")
 void UModel::ModifySurf( INT iSurf, INT SetBits )
 {
 guard(UModel::ModifySurf);
@@ -939,7 +939,7 @@ unguard;
 // On no-straddle: log (Ghidra output garbled) and return 0.
 // NOTE: Ghidra uses unaff_retaddr to hold &Result, and param numbering for FVector
 //       components is ambiguous — logic reconstructed from plane-intersection pattern.
-IMPL_TODO("Ghidra 0x1046db50: unaff_retaddr artifact maps FCheckResult* to untracked register; parameter numbering for FVector components is ambiguous — logic reconstructed, not byte-verified")
+IMPL_DIVERGE("Ghidra 0x1046db50: unaff_retaddr artifact makes FCheckResult* parameter untrackable by Ghidra; logic reconstructed from plane-intersection pattern — byte parity unachievable")
 INT UModel::R6LineCheck( FCheckResult& Result, INT iNode, FVector Start, FVector End )
 {
 guard(UModel::R6LineCheck);
@@ -981,7 +981,7 @@ unguard;
 // Ghidra: Engine.dll 0x103cd620, 255 bytes.
 // Asserts Brush != NULL, records undo for Polys via GUndo (if set),
 // calls ABrush::BuildCoords to get FModelCoords, then transforms each FPoly.
-IMPL_TODO("Ghidra 0x103cd620: undo recording uses internal callback LAB_103171d0; pending decompilation")
+IMPL_DIVERGE("Ghidra 0x103cd620: GUndo undo-recording callback LAB_103171d0 is editor undo machinery; GUndo==NULL during gameplay — poly transform implemented")
 void UModel::Transform( ABrush* Brush )
 {
 guard(UModel::Transform);

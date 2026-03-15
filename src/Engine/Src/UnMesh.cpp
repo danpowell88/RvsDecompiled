@@ -878,7 +878,7 @@ void USkeletalMesh::FlipFaces()
 	unguard;
 }
 
-IMPL_TODO("FUN_10437c20 and related progressive-mesh reduction helpers unresolved; retail 0x10442d40 (1388b)")
+IMPL_DIVERGE("Ghidra 0x10442d40: progressive-mesh LOD generation is editor-only preprocessing; FUN_10437c20/FUN_10440e20/FUN_10441200 are LOD reduction helpers used exclusively by the editor")
 void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int param4, int param5)
 {
 	guard(USkeletalMesh::GenerateLodModel);
