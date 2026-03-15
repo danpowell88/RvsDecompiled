@@ -357,10 +357,15 @@ void UNetConnection::PostSend()
 	if (Out.GetNumBits() == MaxPacket * 8)
 		FlushNet();
 }
-IMPL_MATCH("Engine.dll", 0x1037eb40)
+// 0x1037eb40 = default ctor (void), sets vtables only — matched by C++ compiler.
+// 0x104884f0 = 3-arg ctor: calls UNetConnection(Driver,URL) base, then sets two extra fields.
+IMPL_MATCH("Engine.dll", 0x104884f0)
 UDemoRecConnection::UDemoRecConnection(UNetDriver* Driver, const FURL& URL)
+	: UNetConnection(Driver, URL)
 {
 	guard(UDemoRecConnection::UDemoRecConnection);
+	*(INT*)((BYTE*)this + 0xD0) = 0x200;  // MaxBitsPerSecond
+	*(INT*)((BYTE*)this + 0xD8) = 1;      // bNoReliabilitySend (demo always reliable)
 	unguard;
 }
 IMPL_EMPTY("Ghidra VA 0x10476D60 (RVA 0x176D60) confirms retail body is trivial (1 byte)")
