@@ -2946,21 +2946,22 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103E8150, 491b — vtable[0x68] reachability call approximated; Acceleration scale unknown")
+IMPL_TODO("Ghidra 0x103E8150, 491b — vtable[0x68] reachability call approximated; local_40 Accel scale approximated as Acceleration.Size()")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 guard(APawn::rotateToward);
 
-// Skip if bRollToDesired set (bit 11 of pawn bitfield at +0x3e4) or Physics==PHYS_None
-if ((*(DWORD*)(this + 0x3e4) & 0x800) || Physics == PHYS_None)
+// Skip if bRollToDesired set (bit 11 of pawn bitfield at +0x3e4) or Physics==PHYS_Spider (0x9).
+// Note: Ghidra explicitly checks for PHYS_Spider (9), not PHYS_None (0).
+if ((*(DWORD*)((BYTE*)this + 0x3e4) & 0x800) || Physics == PHYS_Spider)
 return;
 
 // Swimming/flying without bCanStrafe (bit 19 of +0x3e0): align acceleration with facing.
-// DIVERGENCE: Ghidra multiplies the unit vector by an unknown stack float.
-if (!(*(DWORD*)(this + 0x3e0) & 0x80000) &&
+// Ghidra multiplies rotation unit vector by local_40[0] (likely Acceleration.Size()).
+if (!(*(DWORD*)((BYTE*)this + 0x3e0) & 0x80000) &&
 (Physics == PHYS_Flying || Physics == PHYS_Swimming))
 {
-Acceleration = Rotation.Vector();
+Acceleration = Rotation.Vector() * Acceleration.Size();
 }
 
 // Determine target position; use tangent offset when following a NavPoint
