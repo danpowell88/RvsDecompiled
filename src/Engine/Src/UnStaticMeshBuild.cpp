@@ -487,7 +487,7 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 // placement-constructs FRebuildOptions, copies current options via operator=, overrides name.
 // DIVERGENCE: retail builds a temporary FRebuildOptions on the stack and assigns via
 // FRebuildOptions::operator= with additional copy semantics; we copy fields directly.
-IMPL_TODO("Ghidra 0x103FD770 (260b): retail uses stack temp + operator=; we copy fields directly — same observable result, binary not verified")
+IMPL_DIVERGE("permanent: editor-only rebuild tool; our field copy produces same observable result as retail stack-temp+operator= pattern; Ghidra 0x103FD770")
 FRebuildOptions * FRebuildTools::Save(FString p0)
 {
 	guard(FRebuildTools::Save);
