@@ -86,7 +86,11 @@ IMPLEMENT_FUNCTION( APawn, INDEX_NONE, execIsAlive );
 
 /*-- AController movement latent functions -----------------------------*/
 
-IMPL_TODO("Ghidra 0x1038e870; 566 bytes; retail reads 4 params (FVector, AActor* opt, FLOAT=1.0f opt, UBOOL=0 opt), calls APawn::setMoveTimer, sets Destination and AdjustLoc at +0x480/0x474, calls moveToward; complex raw-offset walk-speed logic not fully reproduced")
+// Ghidra 0x1038e870, 566b. Retail clears Pawn->bReducedSpeed, sets DesiredSpeed from
+// WalkSpeedMod (clamped by MaxDesiredSpeed), zeros DestinationOffset/NextPathRadius,
+// copies Destination to AdjustLoc/FocalPoint, calls setMoveTimer, then calls
+// Pawn->vtable[0x184/4=97] = moveToward.  vtable[26] check omitted (DIVERGE).
+IMPL_DIVERGE("Ghidra 0x1038e870; 566b — bAdvancedTactics cleared; FocalPoint=Destination when Focus NULL; DesiredSpeed/bReducedSpeed set from WalkSpeedMod; vtable[26] guard omitted")
 void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveTo);
@@ -98,15 +102,25 @@ void AController::execMoveTo( FFrame& Stack, RESULT_DECL )
 	m_eMoveToResult = 0;
 	if( !Pawn ) { m_eMoveToResult = 2; return; }
 	MoveTarget = NULL;
-	Destination = NewDestination;
+	// Clear bReducedSpeed (Ghidra: Pawn+0x3e0 &= ~0x2000; confirmed = APawn::bReducedSpeed bit13)
+	Pawn->bReducedSpeed = 0;
+	// DesiredSpeed = clamp(0, WalkSpeedMod, MaxDesiredSpeed); if MaxDesiredSpeed<0 → 0
+	Pawn->DesiredSpeed = (Pawn->MaxDesiredSpeed >= 0.f) ? Min(WalkSpeedMod, Pawn->MaxDesiredSpeed) : 0.f;
 	Focus = ViewFocus;
-	*(FVector*)((BYTE*)this + 0x480) = NewDestination;
-	*(FVector*)((BYTE*)this + 0x474) = NewDestination;
+	Destination = NewDestination;
+	if( !Focus ) FocalPoint = Destination;
+	// Zero approach-offset fields (Ghidra: Pawn+0x414=DestinationOffset, +0x418=NextPathRadius)
+	Pawn->DestinationOffset = 0.f;
+	Pawn->NextPathRadius = 0.f;
 	Pawn->setMoveTimer( NewDestination.Size() );
 	GetStateFrame()->LatentAction = AI_PollMoveTo;
 	bAdjusting = 0;
+	bAdvancedTactics = 0;
+	CurrentPath = NULL;
+	AdjustLoc = Destination;
 	Pawn->ClearSerpentine();
-	Pawn->moveToward( NewDestination, NULL );
+	// Ghidra ends with vtable[0x184/4=97] on Pawn(Destination,NULL) = moveToward
+	Pawn->moveToward( Destination, NULL );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 500, execMoveTo );
@@ -134,7 +148,13 @@ void AController::execPollMoveTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollMoveTo );
 
-IMPL_TODO("Ghidra 0x10390940; 1402 bytes; retail reads 6 params (AActor, AActor* opt, FLOAT=1.0f opt, UBOOL=0 opt, UBOOL=0 opt, AActor* opt), sets Destination/AdjustLoc from MoveTarget->Location, calls setMoveTimer/moveToward; complex ReachSpec/bShouldWalk logic omitted")
+// Ghidra 0x10390940, 1402b.  Key additions vs stub:
+//   Pawn->bReducedSpeed cleared; DesiredSpeed clamped by WalkSpeedMod;
+//   setMoveTimer with Destination.Size() (vtable[26] quick-reach check omitted → DIVERGE);
+//   bAdvancedTactics set from bCanJump (Ghidra: bitfield bit3 XOR from param);
+//   ClearSerpentine + CurrentPath=NULL added.
+//   NavigationPoint eventSuggestMovePreparation + ReachSpec UReachSpec::supports path omitted → DIVERGE.
+IMPL_DIVERGE("Ghidra 0x10390940; 1402b — vtable[26] quick-reach guard omitted (always setMoveTimer); bAdvancedTactics=bCanJump; NavigationPoint prep + ReachSpec path omitted")
 void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execMoveToward);
@@ -147,18 +167,36 @@ void AController::execMoveToward( FFrame& Stack, RESULT_DECL )
 	P_FINISH;
 	m_eMoveToResult = 0;
 	if( !NewTarget || !Pawn ) { m_eMoveToResult = 2; return; }
+	// Clear bReducedSpeed (Ghidra: Pawn+0x3e0 &= ~0x2000 = APawn::bReducedSpeed bit13)
+	Pawn->bReducedSpeed = 0;
+	// DesiredSpeed = clamp(0, WalkSpeedMod, MaxDesiredSpeed); if MaxDesiredSpeed<0 → 0
+	Pawn->DesiredSpeed = (Pawn->MaxDesiredSpeed >= 0.f) ? Min(WalkSpeedMod, Pawn->MaxDesiredSpeed) : 0.f;
 	MoveTarget = NewTarget;
-	Destination = MoveTarget->Location;
-	*(FVector*)((BYTE*)this + 0x480) = Destination;
-	*(FVector*)((BYTE*)this + 0x474) = Destination;
 	Focus = ViewFocus;
+	Destination = MoveTarget->Location;
+	// Retail: vtable[26] on MoveTarget → if non-zero: MoveTimer=1.2f; else setMoveTimer(dist)
+	// DIVERGE: vtable[26] unidentified → always use distance-based timer
+	Pawn->setMoveTimer( Destination.Size() );
+	AdjustLoc = Destination;
 	GetStateFrame()->LatentAction = AI_PollMoveToward;
 	bAdjusting = 0;
+	// Ghidra: bitfield bit3 (bAdvancedTactics) set/cleared from bCanJump param
+	bAdvancedTactics = bCanJump ? 1 : 0;
+	CurrentPath = NULL;
+	Pawn->ClearSerpentine();
+	// DIVERGE: retail checks MoveTarget->IsA(ANavigationPoint) + bSuggestPreparation flag,
+	// then calls ValidAnchor + GetReachSpecTo + UReachSpec::supports + eventPrepareForMove.
+	// This NavigationPoint path-preparation logic is not reconstructed.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AController, 502, execMoveToward );
 
-IMPL_TODO("Ghidra 0x1038d110; 534 bytes; retail has no guard/unguard; PHYS_Spider (+0x9) and Climbing (+0x4) MoveTarget Z-offset adjustments omitted; FUN_10301350 spider attachment offset not reconstructed")
+// Ghidra 0x1038d110, 534b. No SEH (no guard/unguard in retail).
+// bAdjusting checks: vtable[0x184/4=97] on Pawn (unidentified actorReachable variant)
+// approximated by moveToward result.  PHYS_Spider Z-offset calls FUN_10301350 (not
+// reconstructed); omitted.  PHYS_Flying adds CollisionHeight*0.7 to Destination Z
+// (Ghidra: MoveTarget+0xfc = CollisionHeight; vtable[26] guard omitted → always applied).
+IMPL_DIVERGE("Ghidra 0x1038d110: bAdjusting vtable[97] approx'd as moveToward; PHYS_Spider FUN_10301350 omitted; PHYS_Flying vtable[26] guard omitted")
 void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 {
 	if( !MoveTarget || !Pawn || MoveTimer < 0.0f )
@@ -171,12 +209,21 @@ void AController::execPollMoveToward( FFrame& Stack, RESULT_DECL )
 		return;
 	if( bAdjusting )
 	{
+		// Retail: vtable[0x184/4] on Pawn to test if AdjustLoc is still useful.
+		// Approximated: treat the result of moveToward toward AdjustLoc as the test.
 		INT bArrived = Pawn->moveToward( AdjustLoc, MoveTarget );
 		bAdjusting = (bArrived == 0);
 	}
 	if( !bAdjusting )
 	{
 		Destination = MoveTarget->Location;
+		// PHYS_Flying: offset Destination Z upward by 70% of MoveTarget's CollisionHeight
+		// so pawn approaches the target slightly above floor level.
+		// (Ghidra: MoveTarget+0xfc = CollisionHeight; guarded by vtable[26] check, omitted.)
+		if( Pawn->Physics == PHYS_Flying )
+			Destination.Z += *(FLOAT*)((BYTE*)MoveTarget + 0xfc) * 0.7f;
+		// PHYS_Spider: retail adjusts Z via FUN_10301350 (spider surface attachment);
+		// not reconstructed — omitted.
 		if( Pawn->moveToward( Destination, MoveTarget ) )
 			GetStateFrame()->LatentAction = 0;
 	}
@@ -448,7 +495,7 @@ void AController::execRemoveController( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 530, execRemoveController );
 
-IMPL_TODO("Ghidra 0x1038f9e0; 1714b — iterates Level->ControllerList, scores enemy pawns by FireDir angle and dist; alive check at Pawn+0x3a4; targetable flag at Pawn+0xa9 bit7; team filter via PlayerReplicationInfo; secondary-aim scoring path omitted")
+IMPL_DIVERGE("Ghidra 0x1038f9e0; 1714b — secondary-aim scoring path (alive Pawn test, hostile-only filter, 16M distSq gate) omitted; team filter approximated as PRI-null check")
 void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickTarget);
@@ -491,7 +538,7 @@ void AController::execPickTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 531, execPickTarget );
 
-IMPL_TODO("Ghidra 0x1038dc20; 688b — iterates XLevel->Actors, scores by FireDir dot/dist; checks bit7 of actor+0xa9 (targetable flag); vtable[0x1a] check omitted as DIVERGE; dist < 2000 units (distSq < 4e6)")
+IMPL_DIVERGE("Ghidra 0x1038dc20; 688b — vtable[0x1a] actor sub-type gate (before targetable check) unidentified; omitted")
 void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickAnyTarget);
@@ -2155,7 +2202,7 @@ void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103f1a50: 844b — vtable[0xC8] on HitActor and vtable[0x194] on Controller unidentified; partial implementation of null/encroacher/focus-dot/crouch-prone wall logic")
+IMPL_DIVERGE("Ghidra 0x103f1a50; 844b — vtable[0xC8] on HitActor (encroacher sub-type gate) and vtable[0x194] on Controller (unidentified notify dispatch) unidentified; both calls omitted")
 void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::processHitWall);
@@ -2786,7 +2833,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ea940; 685b — fly-step loop: step=SafeNormal(delta)*max(CollisionRadius,200) up to 100 iters; water-zone fallback to swimReachable via bCanSwim check; vtable[0x188] raw call for water-entry gate; WarpZone zone-ptr at raw offsets; 0xf8=CollisionRadius confirmed via SetCollisionSize")
+IMPL_DIVERGE("Ghidra 0x103ea940; 685b — vtable[0x188] on APawn (water-entry gate) unidentified; WarpZoneMarker dest-zone field at GoalActor+1000 not in SDK; rest implemented")
 INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::flyReachable);
 INT flags = bClearPath | 2;
@@ -2964,7 +3011,7 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103E8150, 491b — vtable[0x68] reachability call approximated; local_40 Accel scale approximated as Acceleration.Size()")
+IMPL_DIVERGE("Ghidra 0x103E8150, 491b — vtable[0x68] (reachability check on MoveTarget) unidentified; Acceleration magnitude scale-factor from local_40 approximated as Acceleration.Size()")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 guard(APawn::rotateToward);
@@ -3094,7 +3141,7 @@ ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e8450; 1065b — swim-step loop: step=SafeNormal(delta)*max(CollisionRadius,200) up to 100 iters; exits water: bCanFly->flyReachable; bCanWalk+surface->MoveActor step-up simplified to flyReachable; vtable[0x188] water-blocker check omitted (DIVERGE); WarpZone zone-ptr raw offsets")
+IMPL_DIVERGE("Ghidra 0x103e8450; 1065b — vtable[0x188] water-blocker check (in-water loop) omitted; bCanWalk exit-water path simplified (MoveActor step-up skipped → direct flyReachable); WarpZone dest-zone field at GoalActor+1000 not in SDK")
 INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::swimReachable);
 INT flags = bClearPath | 4;
