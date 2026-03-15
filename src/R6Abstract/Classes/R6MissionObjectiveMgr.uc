@@ -7,6 +7,9 @@
 //
 //=============================================================================
 
+// R6MissionObjectiveMgr: central dispatcher that tracks all mission objectives for a round.
+// Every game-event (kill, sight, interaction, extraction) is funnelled here so each objective
+// can independently decide whether it has been completed or failed.
 // to put in game info
 class R6MissionObjectiveMgr extends Actor
     notplaceable;
@@ -18,14 +21,15 @@ enum EMissionObjectiveStatus
 	eMissionObjStatus_failed        // 2
 };
 
-var R6MissionObjectiveMgr.EMissionObjectiveStatus m_eMissionObjectiveStatus;
+var R6MissionObjectiveMgr.EMissionObjectiveStatus m_eMissionObjectiveStatus; // Overall mission result for the current round.
 var bool m_bShowLog;
-var bool m_bDontUpdateMgr;
-var bool m_bOnSuccessAllObjectivesAreCompleted;
+var bool m_bDontUpdateMgr;                          // Pauses all objective evaluation when true (e.g., between rounds).
+var bool m_bOnSuccessAllObjectivesAreCompleted;     // When true, every non-failed objective is auto-completed on mission success.
 var bool m_bEnableCheckForErrors;
 var R6AbstractGameInfo m_GameInfo;
-var array<R6MissionObjectiveBase> m_aMissionObjectives;
+var array<R6MissionObjectiveBase> m_aMissionObjectives; // Flat list of all registered objectives; subclasses like R6MObjGroupMission extend this pattern.
 
+// Updates m_eMissionObjectiveStatus and pushes the change to all clients via UpdateRepMissionObjectivesStatus.
 function SetMissionObjStatus(R6MissionObjectiveMgr.EMissionObjectiveStatus eStatus)
 {
 	m_eMissionObjectiveStatus = eStatus;
@@ -33,6 +37,7 @@ function SetMissionObjStatus(R6MissionObjectiveMgr.EMissionObjectiveStatus eStat
 	return;
 }
 
+// Binds the manager to its GameInfo, resets status to none, and calls Init() on each registered objective.
 function Init(R6AbstractGameInfo GameInfo)
 {
 	local int i, Index, iTimer;
@@ -102,6 +107,7 @@ function PawnKilled(Pawn killedPawn)
 	local int i;
 
 	// End:0x1F
+	// Bail early if the mission is already decided or the pawn reference is invalid.
 	if(((int(m_eMissionObjectiveStatus) != int(0)) || (killedPawn == none)))
 	{
 		return;
@@ -126,6 +132,7 @@ function PawnKilled(Pawn killedPawn)
 	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x12F
+		// Skip objectives that are already decided — no need to re-evaluate completed or failed ones.
 		if((m_aMissionObjectives[i].m_bFailed || m_aMissionObjectives[i].m_bCompleted))
 		{
 			// [Explicit Continue]
@@ -396,16 +403,20 @@ function ExitExtractionZone(Pawn aPawn)
 	return;
 }
 
+// Update: evaluate all objectives and return the current mission status.
+// Called after every game event; returns immediately if the mission is already decided.
 function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 {
 	local int i, iTotalMissionToComplete, iCompleted, iTotalMissionFailed;
 
 	// End:0x2A
+	// Don't evaluate objectives during pre-game planning unless in-game planning is active.
 	if((m_bDontUpdateMgr || (InPlanningMode() && (!Level.m_bInGamePlanningActive))))
 	{
 		return 0;
 	}
 	// End:0x40
+	// Mission already resolved in a previous call — short-circuit.
 	if((int(m_eMissionObjectiveStatus) != int(0)))
 	{
 		return m_eMissionObjectiveStatus;
@@ -414,17 +425,20 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 	J0x47:
 
 	// End:0xBA [Loop If]
+	// First pass: scan for failed objectives; morality failures are tallied separately.
 	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0xB0
 		if(m_aMissionObjectives[i].isFailed())
 		{
 			// End:0x90
+			// Morality objectives (don't shoot civilians etc.) don't count toward total failure.
 			if((!m_aMissionObjectives[i].m_bMoralityObjective))
 			{
 				(++iTotalMissionFailed);
 			}
 			// End:0xB0
+			// Some objectives are "abort on failure" (e.g., hostage killed) — end the mission immediately.
 			if(m_aMissionObjectives[i].isMissionAbortedOnFailure())
 			{
 				SetMissionObjStatus(2);
@@ -443,9 +457,11 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 	J0xD7:
 
 	// End:0x16E [Loop If]
+	// Second pass: count completions, skipping morality objectives entirely.
 	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x102
+		// Morality objectives are never counted toward "all objectives complete".
 		if(m_aMissionObjectives[i].m_bMoralityObjective)
 		{
 			// [Explicit Continue]
@@ -457,6 +473,7 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 		{
 			(++iCompleted);
 			// End:0x164
+			// Some objectives trigger instant mission success on completion (e.g., final extraction).
 			if(m_aMissionObjectives[i].isMissionCompletedOnSuccess())
 			{
 				SetMissionObjStatus(1);
@@ -478,6 +495,7 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 	if((iTotalMissionToComplete > 0))
 	{
 		// End:0x1B5
+		// Every non-morality objective has failed — the mission is lost.
 		if((iTotalMissionFailed == iTotalMissionToComplete))
 		{
 			SetMissionObjStatus(2);
@@ -486,6 +504,7 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 		else
 		{
 			// End:0x1D0
+			// Every non-morality objective is complete — the mission is won.
 			if((iCompleted == iTotalMissionToComplete))
 			{
 				CompleteMission();
@@ -511,13 +530,13 @@ function AbortMission()
 	// End:0x4F [Loop If]
 	if((i < m_aMissionObjectives.Length))
 	{
-		// End:0x32
+		// Morality objectives (civilian safety rules etc.) are not explicitly failed on abort — they retain their result.
 		if(m_aMissionObjectives[i].m_bMoralityObjective)
 		{
 			// [Explicit Continue]
 			goto J0x45;
 		}
-		SetMissionObjCompleted(m_aMissionObjectives[i], false, false);
+		SetMissionObjCompleted(m_aMissionObjectives[i], false, false); // Mark as failed with no HUD feedback.
 		J0x45:
 
 		(++i);
@@ -589,6 +608,8 @@ function ToggleLog(bool bToggle)
 //  We only check for one reason for the failure. This is why
 //  the moralities are checked last.
 //------------------------------------------------------------------
+// GetMObjFailed: returns the first failed objective with a displayable failure description.
+// Non-morality failures are checked first; morality failures (civilian casualties) are shown only as fallback.
 function R6MissionObjectiveBase GetMObjFailed()
 {
 	local int i;
@@ -627,6 +648,7 @@ function R6MissionObjectiveBase GetMObjFailed()
 	J0x88:
 
 	// End:0x104 [Loop If]
+	// Second pass: check morality failures (only reached if no primary objective has a failure description).
 	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0xB5
@@ -679,9 +701,12 @@ simulated event Destroyed()
 // SetMissionObjCompleted
 //	set completed or failed and check he need to send a feedback
 //------------------------------------------------------------------
+// SetMissionObjCompleted: marks an objective complete or failed and optionally broadcasts a localized feedback message.
+// bFeedback=false is used internally (AbortMission, CompleteMission) to suppress redundant messages.
 function SetMissionObjCompleted(R6MissionObjectiveBase mobj, bool bCompleted, bool bFeedback)
 {
 	// End:0x1E
+	// Objectives must not be updated during the pre-mission planning phase.
 	if((InPlanningMode() && (!Level.m_bInGamePlanningActive)))
 	{
 		return;
@@ -696,6 +721,7 @@ function SetMissionObjCompleted(R6MissionObjectiveBase mobj, bool bCompleted, bo
 		mobj.m_bFailed = true;
 	}
 	// End:0x81
+	// If feedback was suppressed or already sent, skip broadcasting to avoid duplicate messages.
 	if((((!bFeedback) || mobj.m_bFeedbackOnCompletionSend) || mobj.m_bFeedbackOnFailureSend))
 	{
 		return;
