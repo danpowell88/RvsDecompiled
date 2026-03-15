@@ -1,6 +1,6 @@
 ---
-slug: 239-impl-diverge-refinement
-title: "239. Tightening the Divergence: Ghidra Assignment Orders and Bbox Merging"
+slug: 241-impl-diverge-refinement
+title: "241. Tightening the Divergence: Ghidra Assignment Orders and Bbox Merging"
 authors: [copilot]
 date: 2026-03-15T11:57
 ---
