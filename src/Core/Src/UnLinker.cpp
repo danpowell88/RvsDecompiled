@@ -151,7 +151,7 @@ IMPLEMENT_CLASS(ULinker);
 	ULinkerLoad.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Retail (0x1012af10, ~1741 bytes) checks GObjLoaders for existing linkers, handles UCC/server context, and reads FPackageFileSummary via a complex internal reader; our version is significantly simplified")
+IMPL_TODO("retail 0x1012af10 (1741b) checks GObjLoaders, handles UCC/server context, and reads summary via complex internal reader; simplified version used")
 ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags )
 :	ULinker    ( InParent, InFilename )
 ,	LoadFlags  ( InLoadFlags )
@@ -218,7 +218,7 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (catch@0x1012aa12) registers the linker in GObjLoaders in addition to verifying imports; our version omits linker lifecycle management")
+IMPL_TODO("retail (catch@0x1012aa12) also registers linker in GObjLoaders; linker lifecycle management not yet implemented")
 void ULinkerLoad::Verify()
 {
 	guard(ULinkerLoad::Verify);
@@ -258,7 +258,7 @@ FName ULinkerLoad::GetExportClassName( INT i )
 		return FName(NAME_Class);
 }
 
-IMPL_DIVERGE("Retail (catch@0x1012a4a6) resolves imports through a full linker chain; our version is a simplified stub")
+IMPL_TODO("retail (catch@0x1012a4a6) resolves imports through full linker chain with package loading; simplified stub used")
 void ULinkerLoad::VerifyImport( INT i )
 {
 	guard(ULinkerLoad::VerifyImport);
@@ -281,7 +281,7 @@ void ULinkerLoad::VerifyImport( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (catch@0x1012a524) iterates ExportMap calling CreateExport; concept matches but retail internals differ")
+IMPL_TODO("retail (catch@0x1012a524) iterates ExportMap calling CreateExport; concept matches but retail internals differ")
 void ULinkerLoad::LoadAllObjects()
 {
 	guard(ULinkerLoad::LoadAllObjects);
@@ -290,7 +290,7 @@ void ULinkerLoad::LoadAllObjects()
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_1012aa50) uses a 3-way hash (ClassName*7 + ClassPackage*0x1f + ObjectName) & 0xff with a linear-scan fallback and a Mesh→LodMesh compatibility loop; our version uses only ObjectName hash with no fallback or compat shim")
+IMPL_TODO("retail (FUN_1012aa50) uses 3-way hash (ClassName*7 + ClassPackage*0x1f + ObjectName)&0xff with linear-scan fallback and Mesh→LodMesh compat loop; simplified to ObjectName-only hash")
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
@@ -307,7 +307,7 @@ INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName Obj
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x1012ac30, ~209 bytes) calls FindExportIndex internally; concept matches but retail omits the Checked/error-path logic we have")
+IMPL_TODO("retail (FUN_1012ac30, ~209b) omits the Checked/error-path logic our version adds; otherwise concept matches")
 UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoadFlags, UBOOL Checked )
 {
 	guard(ULinkerLoad::Create);
@@ -320,7 +320,7 @@ UObject* ULinkerLoad::Create( UClass* ObjectClass, FName ObjectName, DWORD InLoa
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (catch@0x10128baf) implements Preload with validation; concept matches but may have divergences in seek/precache handling")
+IMPL_TODO("retail (catch@0x10128baf) has validation and error reporting not yet implemented here")
 void ULinkerLoad::Preload( UObject* Object )
 {
 	guard(ULinkerLoad::Preload);
@@ -340,7 +340,7 @@ void ULinkerLoad::Preload( UObject* Object )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (catch@0x1012fbac) creates exports; concept matches but struct field offsets and flag handling may differ")
+IMPL_TODO("retail (catch@0x1012fbac) struct field offsets and flag handling may differ; concept matches")
 UObject* ULinkerLoad::CreateExport( INT Index )
 {
 	guard(ULinkerLoad::CreateExport);
@@ -382,7 +382,7 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (catch@0x1012bc4) has significant divergences in import resolution logic compared to our version")
+IMPL_TODO("retail (catch@0x1012bc4) has significant differences in import resolution chain; simplified version used")
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -426,7 +426,7 @@ UObject* ULinkerLoad::CreateImport( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x1012a630, ~247 bytes) has bounds checking our version lacks; otherwise concept matches")
+IMPL_TODO("retail (FUN_1012a630, ~247b) adds bounds checking with LocalizeError logging; our version omits bounds check")
 UObject* ULinkerLoad::IndexToObject( INT Index )
 {
 	guard(ULinkerLoad::IndexToObject);
@@ -439,7 +439,7 @@ UObject* ULinkerLoad::IndexToObject( INT Index )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x10128fc0, ~450 bytes) has extensive validation and error logging; our version is a simplified stub")
+IMPL_TODO("retail (FUN_10128fc0, ~450b) has extensive IsValid checks, linker/index cross-validation and error logging; our version is simplified")
 void ULinkerLoad::DetachExport( INT i )
 {
 	guard(ULinkerLoad::DetachExport);
@@ -464,7 +464,7 @@ void ULinkerLoad::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x1012a760) removes the linker from GObjLoaders; our version omits linker lifecycle management")
+IMPL_TODO("retail (FUN_1012a760) removes linker from GObjLoaders and calls DetachExport on all exports; our version omits GObjLoaders management")
 void ULinkerLoad::Destroy()
 {
 	guard(ULinkerLoad::Destroy);
@@ -497,16 +497,16 @@ void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 	unguard;
 }
 
-// Retail logs to GError if RemoveItem count != 1; exact message text is not known from Ghidra.
-IMPL_DIVERGE("Retail (FUN_1012a860) logs to GError when removal count != 1; exact message unknown")
+// Retail (FUN_1012a860): logs L"Detachment inconsistency: %i (%s)" then zeroes SavedAr/SavedPos.
+IMPL_TODO("retail (FUN_1012a860) logs L\"Detachment inconsistency: %i (%s)\" and zeroes SavedAr/SavedPos after the check; order and message text differ")
 void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::DetachLazyLoader);
 	INT RemovedCount = LazyLoaders.RemoveItem( LazyLoader );
+	if( RemovedCount != 1 )
+		GError->Logf( TEXT("Detachment inconsistency: %i (%s)"), RemovedCount, *Filename );
 	LazyLoader->SavedAr  = NULL;
 	LazyLoader->SavedPos = 0;
-	if( RemovedCount != 1 )
-		GError->Logf( TEXT("Detached %i lazy loaders, expected 1"), RemovedCount );
 	unguard;
 }
 
@@ -565,7 +565,7 @@ IMPLEMENT_CLASS(ULinkerLoad);
 	ULinkerSave.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Retail (0x1012ad40, ~462 bytes) initializes FArchive state, handles package flags, and sets up class hierarchy; our version is significantly simplified")
+IMPL_TODO("retail (FUN_1012ad40, ~462b) initializes FArchive base state, handles package flags, and sets up class hierarchy; simplified version used")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )

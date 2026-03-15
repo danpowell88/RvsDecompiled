@@ -35,7 +35,7 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "EngineDecls.h"
 
 // --- CBoneDescData ---
-IMPL_DIVERGE("DAT_10538e9c/DAT_10538e94 separators and FUN_1031f060/FUN_1031efc0 helpers unresolved; bone-name sub-parse omitted; retail 0x10355fa0 (877b)")
+IMPL_TODO("DAT_10538e9c/DAT_10538e94 separator strings and FUN_1031f060/FUN_1031efc0 helpers not yet identified; retail 0x10355fa0 (877b)")
 int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 {
 	guard(CBoneDescData::fn_bInitFromLbpFile);
@@ -84,7 +84,7 @@ int CBoneDescData::fn_bInitFromLbpFile(const TCHAR* param_1)
 	unguard;
 }
 
-IMPL_DIVERGE("separator is runtime global DAT_1052ec38 (0x10355c60); replaced with TEXT(\" \") at compile time")
+IMPL_TODO("DAT_1052ec38 separator string value not yet extracted from binary data; retail 0x10355c60")
 void CBoneDescData::m_vProcessLbpLine(int param1, int param2, FString& str)
 {
 	guard(CBoneDescData::m_vProcessLbpLine);
@@ -230,7 +230,7 @@ CCompressedLipDescData& CCompressedLipDescData::operator=(const CCompressedLipDe
 
 
 // --- ULodMesh ---
-IMPL_DIVERGE("calls FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340 (unresolved LOD TArray serializers); retail 0x103c7610 (558b)")
+IMPL_TODO("FUN_103c7240/FUN_103c7140/FUN_1031e600/FUN_1032d290/FUN_1032d090/FUN_103c7340 LOD TArray serializers unresolved; retail 0x103c7610 (558b)")
 void ULodMesh::Serialize(FArchive& Ar)
 {
 	// Retail: calls UMesh::Serialize, then serializes LOD version (+0x5C), LOD section arrays,
@@ -265,7 +265,7 @@ void UMesh::Serialize(FArchive& Ar)
 		Ar << *(UObject**)((BYTE*)this + 0x58);
 }
 
-IMPL_DIVERGE("simplified; retail 0x103ca620 (251b) creates instances via StaticConstructObject")
+IMPL_TODO("full instance-creation path (StaticConstructObject + vtable calls at +0x84/+0x8C/+0x90/+0x88) not yet written; retail 0x103ca620 (251b)")
 UMeshInstance * UMesh::MeshGetInstance(AActor const * Owner)
 {
 	// Retail: 0xca620, 96b. Gets or creates a mesh instance for the actor.
@@ -342,7 +342,7 @@ int UMeshAnimation::SequenceMemFootprint(FName Name)
 	unguard;
 }
 
-IMPL_DIVERGE("calls FUN_10437c90/FUN_1043fd50/FUN_1043f770 (unresolved TArray serializers at +0x30/+0x3C/+0x48); retail 0x1043fee0 (135b)")
+IMPL_TODO("FUN_10437c90/FUN_1043fd50/FUN_1043f770 TArray serializers at +0x30/+0x3C/+0x48 unresolved; retail 0x103fee0 (135b)")
 void UMeshAnimation::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13fee0: UObject::Serialize, ByteOrderSerialize at +0x2C (4b flags/version),
@@ -526,7 +526,7 @@ void UMeshAnimation::InitForDigestion()
 
 
 // --- UVertMesh ---
-IMPL_DIVERGE("FUN_1043d7e0 resolved: sets FAnimMeshVertexStream vtable (slot+0x14), FArray at slot+0x1C, resource ID via DAT_1060b564 counter (slot+0x28), FRawIndexBuffer at slot+0x40; DAT_1060b564 is Engine.dll runtime global, not accessible; retail 0x10474da0 (409b)")
+IMPL_TODO("FUN_1043d7e0 uses DAT_1060b564 resource-ID counter; counter needs own static in rebuilt DLL; retail 0x10474da0 (409b)")
 int UVertMesh::RenderPreProcess()
 {
 	guard(UVertMesh::RenderPreProcess);
@@ -584,7 +584,7 @@ int UVertMesh::RenderPreProcess()
 	unguard;
 }
 
-IMPL_DIVERGE("calls FUN_103c7240/FUN_10438000/FUN_1043f770/FUN_1032d5f0 (unresolved TArray serializers at +0xF4/+0x10C/+0x118/+0x100); retail 0x104758b0 (424b)")
+IMPL_TODO("FUN_103c7240/FUN_10438000/FUN_1043f770/FUN_1032d5f0 TArray serializers at +0xF4/+0x10C/+0x118/+0x100 unresolved; retail 0x104758b0 (424b)")
 void UVertMesh::Serialize(FArchive& Ar)
 {
 	guard(UVertMesh::Serialize);
@@ -615,7 +615,7 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("FUN_103ca8f0 is AnimNotify instantiator (iterates seq+0x1C Notifys, calls FUN_103ca880=StaticConstructObject wrapper for UAnimNotify_Script); AnimSets element stride unknown, ECX per entry unclear; retail 0x10472830 (124b)")
+IMPL_TODO("FUN_103ca8f0 AnimNotify instantiator identified but AnimSets element stride not yet confirmed; retail 0x10472830 (124b)")
 void UVertMesh::PostLoad()
 {
 	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
@@ -698,7 +698,7 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 	unguard;
 }
 
-IMPL_DIVERGE("retail 0x10436770 (865b) applies bone-to-world transform; requires GetTagCoords")
+IMPL_TODO("requires USkeletalMeshInstance::GetTagCoords and bone-to-world pipeline; retail 0x10436770 (865b)")
 int USkeletalMesh::SetAttachmentLocation(AActor* param_2, AActor* param_3)
 {
 	guard(USkeletalMesh::SetAttachmentLocation);
@@ -860,7 +860,7 @@ void USkeletalMesh::FlipFaces()
 	unguard;
 }
 
-IMPL_DIVERGE("progressive mesh reduction helpers unresolved; retail 0x10442d40 (1388b)")
+IMPL_TODO("FUN_10437c20 and related progressive-mesh reduction helpers unresolved; retail 0x10442d40 (1388b)")
 void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int param4, int param5)
 {
 	guard(USkeletalMesh::GenerateLodModel);
@@ -875,7 +875,7 @@ void USkeletalMesh::GenerateLodModel(int param1, float param2, float param3, int
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_1043f4c0 resolved: inits 4 FArrays, 2 FRawIndexBuffers, FSkinVertexStream vtable, counter (DAT_1060b564), and 4 vtable-table pointers in 0x11C slot; DAT_1060b564 Engine.dll runtime global blocks implementation; retail 0x10442970 (925b)")
+IMPL_TODO("FUN_1043f4c0 LOD-slot constructor uses DAT_1060b564 resource-ID counter; counter needs own static in rebuilt DLL; retail 0x10442970 (925b)")
 void USkeletalMesh::InsertLodModel(int param1, USkeletalMesh* param2, float param3, int param4)
 {
 	guard(USkeletalMesh::InsertLodModel);
@@ -909,7 +909,7 @@ int USkeletalMesh::UseCylinderCollision(const AActor* Actor)
 	return Actor->Physics != PHYS_KarmaRagDoll;
 }
 
-IMPL_DIVERGE("skeletal hit-cylinder path unresolved; retail 0x1043c980 (537b)")
+IMPL_TODO("skeletal hit-cylinder detection path not yet written; retail 0x1043c980 (537b)")
 int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector param_3, FVector param_4, FVector param_5, DWORD param_6, DWORD param_7)
 {
 	guard(USkeletalMesh::R6LineCheck);
@@ -923,7 +923,7 @@ int USkeletalMesh::R6LineCheck(FCheckResult& param_1, AActor* param_2, FVector p
 	unguard;
 }
 
-IMPL_DIVERGE("calls FUN_10321a80/FUN_104378f0/FUN_10415600/FUN_10321870 (unresolved bone/LOD TArray serializers); retail 0x1043ffb0 (746b)")
+IMPL_TODO("FUN_10321a80/FUN_104378f0/FUN_10415600/FUN_10321870 bone/LOD TArray serializers unresolved; retail 0x1043ffb0 (746b)")
 void USkeletalMesh::Serialize(FArchive& Ar)
 {
 	// Ghidra 0x13ffb0: ULodMesh::Serialize, then:
@@ -1035,7 +1035,7 @@ FSphere USkeletalMesh::GetRenderBoundingSphere(const AActor* Owner)
 
 
 // --- USkeletalMesh ---
-IMPL_DIVERGE("stream-clear vtable calls and per-LOD copy loops unresolved; retail 0x10441820 (1752b)")
+IMPL_TODO("stream-clear vtable calls and per-LOD copy loops blocked by unresolved render-stream helpers; retail 0x10441820 (1752b)")
 void USkeletalMesh::ReconstructRawMesh()
 {
 	guard(USkeletalMesh::ReconstructRawMesh);
@@ -1063,7 +1063,7 @@ UClass * USkeletalMesh::MeshGetInstanceClass()
 	return USkeletalMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("vtable stream-clear at this+0xF4 unresolved; retail 0x1042f4b0 (232b): LOD check and auto-generation added")
+IMPL_TODO("vtable call on render-stream at this+0xF4 (slot 0 = Clear) not yet resolved; retail 0x1042f4b0 (232b)")
 void USkeletalMesh::PostLoad()
 {
 	// Ghidra 0x12f4b0: UObject::PostLoad, then if LOD version (+0x5C) < 2 call the first
