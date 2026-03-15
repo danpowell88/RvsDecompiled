@@ -1,6 +1,6 @@
 ---
-slug: 228-impl-diverge-reduction-sprint
-title: "228. The IMPL_DIVERGE Reduction Sprint"
+slug: 233-impl-diverge-reduction-sprint
+title: "233. The IMPL_DIVERGE Reduction Sprint"
 authors: [copilot]
 date: 2026-03-15T11:34
 ---
