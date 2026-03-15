@@ -152,9 +152,11 @@ event PostBeginPlay()
 function UpdatePosture()
 {
 	// End:0xF3
+	// Only sync posture when the pace member has finished their own transition (no mid-animation mirroring)
 	if(((!m_PaceMember.m_bPostureTransition) && ((m_PaceMember.m_bIsProne != Pawn.m_bIsProne) || (m_PaceMember.bIsCrouched != Pawn.bIsCrouched))))
 	{
 		// End:0x9A
+		// Snipers who are prone stay prone; non-sniping prone members mirror the prone state
 		if((m_PaceMember.m_bIsProne && (!m_PaceMember.m_bIsSniping)))
 		{
 			Pawn.m_bWantsToProne = true;			
@@ -215,6 +217,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 	local bool bIndependantPace;
 
 	// End:0x55
+	// ePace == 0 means "inherit pace from the pace member" (team-follower mode)
 	if((int(ePace) == 0))
 	{
 		bIndependantPace = false;
@@ -230,6 +233,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 	{
 		bIndependantPace = true;
 		// End:0x97
+		// ePace 1 = PACE_Prone — request to go prone if not already
 		if(((!Pawn.m_bIsProne) && (int(ePace) == int(1))))
 		{
 			Pawn.m_bWantsToProne = true;			
@@ -237,6 +241,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 		else
 		{
 			// End:0xE0
+			// Transitioning out of prone always goes through crouch first
 			if((Pawn.m_bIsProne && (int(ePace) != int(1))))
 			{
 				Pawn.m_bWantsToProne = false;
@@ -311,6 +316,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 		m_bSlowedPace = false;
 	}
 	// End:0x2E4
+	// eHealth 1 = Wounded — force walking speed unless moving backwards (last-member backward run is the exception)
 	if(((int(m_pawn.m_eHealth) == int(1)) && (!m_bIsMovingBackwards)))
 	{
 		Pawn.SetWalking(true);		
@@ -321,6 +327,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 		if(((int(m_pawn.m_eMovementPace) == int(4)) || (int(m_pawn.m_eMovementPace) == int(2))))
 		{
 			// End:0x36A
+			// Sprint to catch up if more than 2x formation distance behind and not in a slowed-pace situation
 			if((((!m_bSlowedPace) && (DistanceTo(m_PaceMember) > (float(2) * GetFormationDistance()))) && (!m_TeamManager.m_bTeamIsSeparatedFromLeader)))
 			{
 				Pawn.SetWalking(false);				
@@ -350,6 +357,7 @@ function R6SetMovement(R6Pawn.eMovementPace ePace)
 function R6PreMoveTo(Vector vTargetPosition, Vector vFocus, optional R6Pawn.eMovementPace ePace)
 {
 	// End:0x1D
+	// If unproning is in progress, force prone pace first to complete the transition animation
 	if(Pawn.m_bTryToUnProne)
 	{
 		ePace = 1;		
@@ -432,15 +440,18 @@ function bool CanSeeGrenade(Vector vGrenadeLocation)
 	vDir = (vGrenadeLocation - Pawn.Location);
 	vDir.Z = 0.0000000;
 	// End:0x3D
+	// Grenade within 100 units (at feet) — always react regardless of facing
 	if((VSize(vDir) < float(100)))
 	{
 		return true;
 	}
 	vDir = (vGrenadeLocation - Pawn.Location);
 	// End:0xA4
+	// Dot product > PeripheralVision threshold means the grenade is in the pawn's field of view
 	if(((Dot(Normal(vDir), Vector(Pawn.Rotation)) - Pawn.PeripheralVision) > float(0)))
 	{
 		// End:0xA4
+		// Also require an unobstructed line of sight to the grenade
 		if(FastTrace(Pawn.Location, vGrenadeLocation))
 		{
 			return true;
@@ -474,6 +485,8 @@ function FragGrenadeInProximity(Vector vGrenadeLocation, float fTimeLeft, float 
 function ReactToFragGrenade(Vector vGrenadeLocation, float fTimeLeft, float fGrenadeDangerRadius)
 {
 	// End:0x52
+	// Skip if on a ladder, on a physics-driven vehicle (Physics 11 = PHYS_RootMotion/Karma),
+	// or if the grenade is already outside the danger radius
 	if(((m_pawn.m_bIsClimbingLadder || (int(Pawn.Physics) == int(11))) || (VSize((vGrenadeLocation - Pawn.Location)) > fGrenadeDangerRadius)))
 	{
 		return;
@@ -481,6 +494,7 @@ function ReactToFragGrenade(Vector vGrenadeLocation, float fTimeLeft, float fGre
 	m_vGrenadeLocation = vGrenadeLocation;
 	m_fGrenadeDangerRadius = fGrenadeDangerRadius;
 	GotoState('RunAwayFromGrenade');
+	// Timer fires when the grenade explodes, triggering GrenadeThreatIsOver()
 	SetTimer(fTimeLeft, false);
 	return;
 }
@@ -493,6 +507,7 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 	switch(eType)
 	{
 		// End:0x6D
+		// Case 1: flash grenade
 		case 1:
 			// End:0x4B
 			if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
@@ -506,6 +521,7 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 			// End:0x167
 			break;
 		// End:0x164
+		// Case 2: gas grenade
 		case 2:
 			// End:0xB1
 			if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
@@ -523,6 +539,7 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 					{
 						m_TeamManager.m_MultiCoopMemberVoicesMgr.PlayRainbowTeamVoices(m_pawn, 10);
 						m_TeamManager.m_bFirstTimeInGas = false;
+						// 60-second cooldown before playing the "first time in gas" voice again
 						m_TeamManager.SetTimer(60.0000000, false);
 					}
 				}
@@ -542,9 +559,11 @@ function PlaySoundAffectedByGrenade(Pawn.EGrenadeType eType)
 function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 {
 	// End:0x94
+	// eType 2 = gas grenade
 	if((int(eType) == int(2)))
 	{
 		// End:0x39
+		// If already playing a special animation, just update the timestamp to suppress further reactions
 		if(m_pawn.m_bPawnSpecificAnimInProgress)
 		{
 			m_fLastReactionToGas = Level.TimeSeconds;			
@@ -553,9 +572,11 @@ function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 		{
 			m_TeamManager.GasGrenadeInProximity(m_pawn);
 			// End:0x91
+			// Throttle the coughing/gagging animation to at most once every 2 seconds
 			if((m_fLastReactionToGas < (Level.TimeSeconds - 2.0000000)))
 			{
 				m_fLastReactionToGas = Level.TimeSeconds;
+				// Pending action 1 = play gas-reaction animation
 				m_pawn.SetNextPendingAction(1);
 			}
 		}		
@@ -563,11 +584,13 @@ function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 	else
 	{
 		// End:0xD7
+		// eType 3 = concussion/flash grenade — trigger flinch only if pawn is stationary and facing it
 		if((int(eType) == int(3)))
 		{
 			// End:0xD7
 			if((IsFacing(aGrenade) && m_pawn.IsStationary()))
 			{
+				// Pending action 3 = play flinch/concussion animation
 				m_pawn.SetNextPendingAction(3);
 			}
 		}
@@ -583,6 +606,7 @@ function PlaySoundInflictedDamage(Pawn DeadPawn)
 	switch(R6Pawn(DeadPawn).m_ePawnType)
 	{
 		// End:0xA3
+		// Pawn type 2 = terrorist
 		case 2:
 			// End:0x59
 			if((m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus))
@@ -715,6 +739,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 		switch(m_pawn.m_eHealth)
 		{
 			// End:0x51
+			// eHealth 2 = slightly wounded, eHealth 3 = critically wounded — both trigger teammate alert voices
 			case 2:
 			// End:0xEC
 			case 3:
@@ -735,6 +760,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 				// End:0x168
 				break;
 			// End:0x165
+			// eHealth 1 = dead — play friendly-fire or terrorist-killed-teammate voice
 			case 1:
 				// End:0x162
 				if((instigatedBy != none))
@@ -742,6 +768,7 @@ function PlaySoundDamage(Pawn instigatedBy)
 					switch(R6Pawn(instigatedBy).m_ePawnType)
 					{
 						// End:0x138
+						// Pawn type 1 = Rainbow member — report friendly fire casualty
 						case 1:
 							m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 24);
 							// End:0x162
@@ -807,6 +834,7 @@ function bool CanBeSeen(Pawn seen)
 
 	vSightDir = Normal((Pawn.Location - seen.Location));
 	// End:0x53
+	// If the AI is outside the seen pawn's peripheral vision cone, the AI cannot be seen
 	if((Dot(Vector(seen.GetViewRotation()), vSightDir) < Pawn.PeripheralVision))
 	{
 		return false;
@@ -821,6 +849,7 @@ function bool CanBeSeen(Pawn seen)
 function SetEnemy(Pawn newEnemy)
 {
 	// End:0x23
+	// Snipers engage silently — only non-snipers need to alert the team's engagement tracker
 	if((!m_pawn.m_bIsSniping))
 	{
 		m_TeamManager.RainbowIsEngagingEnemy();
@@ -844,6 +873,7 @@ function PlayVoiceTerroristSpotted(R6Terrorist aTerro)
 	if(((!aTerro.m_bEnteringView) && (m_TeamManager.m_bLeaderIsAPlayer || m_TeamManager.m_bPlayerHasFocus)))
 	{
 		// End:0x67
+		// Play a different voice line when covering the rear (rearguard) vs. facing forward
 		if(m_bIsMovingBackwards)
 		{
 			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 1);			
@@ -852,6 +882,7 @@ function PlayVoiceTerroristSpotted(R6Terrorist aTerro)
 		{
 			m_TeamManager.m_MemberVoicesMgr.PlayRainbowMemberVoices(m_pawn, 0);
 		}
+		// Flag prevents this terrorist from repeatedly triggering spotted-voice calls every AI tick
 		aTerro.m_bEnteringView = true;
 	}
 	return;
@@ -889,6 +920,7 @@ event SeePlayer(Pawn seen)
 			return;
 		}
 		// End:0x104
+		// Movement mode 2 = Ghost/Sabotage — team is trying to avoid detection; if enemy can see us, break stealth
 		if((int(m_TeamManager.m_eMovementMode) == int(2)))
 		{
 			// End:0xF0
@@ -902,6 +934,7 @@ event SeePlayer(Pawn seen)
 		else
 		{
 			// End:0x16E
+			// Movement mode 1 = Recon/Follow — engage if target can see us but silenced weapons can stay covert
 			if((int(m_TeamManager.m_eMovementMode) == int(1)))
 			{
 				// End:0x13F
@@ -931,6 +964,7 @@ event SeePlayer(Pawn seen)
 			return;
 		}
 		// End:0x21B
+		// Weapon type 6 = breaching/gadget — don't try to fire non-weapon equipment at enemies
 		if((AClearShotIsAvailable(seen, m_pawn.GetFiringStartPoint()) && (int(Pawn.EngineWeapon.m_eWeaponType) != int(6))))
 		{
 			// End:0x21B
@@ -946,6 +980,7 @@ event SeePlayer(Pawn seen)
 	else
 	{
 		// End:0x295
+		// Pawn type 3 = hostage — tag as rescue target if alive, not yet extracted, and not already escorted
 		if(((((int(aPawn.m_ePawnType) == int(3)) && aPawn.IsAlive()) && (!R6Hostage(aPawn).m_bExtracted)) && (R6Hostage(aPawn).m_escortedByRainbow == none)))
 		{
 			m_TeamManager.m_HostageToRescue = aPawn;
@@ -993,14 +1028,17 @@ event HearNoise(float Loudness, Actor aNoiseMaker, Actor.ENoiseType eType, optio
 	}
 	m_TeamManager.TeamHearNoise(aNoiseMaker);
 	// End:0x4C
+	// If already in combat mode (m_eMovementMode == 0), noise awareness doesn't change anything
 	if((int(m_TeamManager.m_eMovementMode) == int(0)))
 	{
 		return;
 	}
 	// End:0xA6
+	// eType 2 = weapon fire, eType 3 = footstep — hostile sounds escalate to combat mode
 	if(((int(eType) == int(2)) || (int(eType) == int(3))))
 	{
 		// End:0xA6
+		// Pawn type 1 = Rainbow (friendly) — don't escalate on friendly sounds
 		if((int(R6Pawn(aNoiseMaker.Owner).m_ePawnType) != int(1)))
 		{
 			m_TeamManager.m_eMovementMode = 0;
@@ -1015,6 +1053,7 @@ event HearNoise(float Loudness, Actor aNoiseMaker, Actor.ENoiseType eType, optio
 event EnemyNotVisible()
 {
 	// End:0x21
+	// Allow a 0.5-second grace period before disengaging, in case the enemy briefly steps behind cover
 	if(((Level.TimeSeconds - LastSeenTime) < 0.5000000))
 	{
 		return;
@@ -1056,6 +1095,7 @@ function bool EnemyIsAThreat()
 		return false;
 	}
 	// End:0x41
+	// A kneeling (surrendered) or dead enemy is no longer a threat worth engaging
 	if((R6Pawn(Enemy).m_bIsKneeling || (!R6Pawn(Enemy).IsAlive())))
 	{
 		return false;
@@ -1085,6 +1125,7 @@ function SetGunDirection(Actor aTarget)
 		else
 		{
 			// End:0x52
+			// Aim at last-known position rather than current (prevents aim from snapping through cover)
 			if((aTarget == Enemy))
 			{
 				vTarget = LastSeenPos;
@@ -1106,10 +1147,12 @@ function SetGunDirection(Actor aTarget)
 			vDirection = (vTarget - m_pawn.GetFiringStartPoint());
 			rDirection = Rotator(vDirection);
 		}
+		// Pack pitch into a byte: mask to 16-bit (& 65535) then divide by 256 (>> 8) to get the high byte
 		m_pawn.m_u8DesiredPitch = byte((int(byte((rDirection.Pitch & 65535))) / 256));
 		// End:0x14C
 		if((aTarget == Enemy))
 		{
+			// Yaw stored as relative offset from pawn's facing: subtract pawn yaw, mask to 16-bit, then >> 8
 			m_pawn.m_u8DesiredYaw = byte((int(byte((int(byte((rDirection.Yaw - Pawn.Rotation.Yaw))) & 65535))) / 256));			
 		}
 		else
@@ -1184,6 +1227,7 @@ function StopFiring()
 function bool PreEntryRoomIsAcceptablyLarge()
 {
 	// End:0x1B
+	// Movement mode 2 = Ghost/Sabotage — never spread out into room positions in stealth mode
 	if((int(m_TeamManager.m_eMovementMode) == int(2)))
 	{
 		return false;
@@ -1199,6 +1243,7 @@ function bool PreEntryRoomIsAcceptablyLarge()
 		return false;
 	}
 	// End:0xAE
+	// Room layout 3 = SMALL room — not enough space for the team to spread into positions
 	if((int(m_TeamManager.m_Door.m_CorrespondingDoor.m_eRoomLayout) == int(3)))
 	{
 		return false;
@@ -1243,6 +1288,7 @@ function float GetLeadershipReactionTime()
 {
 	local float fDelay;
 
+	// Skill index 6 = leadership; higher leadership means faster AI reaction (up to 2 second max delay reduced to 0)
 	fDelay = (2.0000000 - (m_pawn.GetSkill(6) * 2.0000000));
 	fDelay = FClamp(fDelay, 0.0000000, 2.0000000);
 	return fDelay;
@@ -1262,8 +1308,10 @@ function bool OnRightSideOfDoor(Actor aTarget)
 		return false;
 	}
 	vDir = Normal((Pawn.Location - aTarget.Location));
+	// Cross product of pawn direction and door forward gives a vector perpendicular to both; Z sign determines side
 	vResult = Cross(vDir, Vector(aTarget.Rotation));
 	// End:0x67
+	// Negative Z means the pawn is to the right of the door when viewed from its front
 	if((vResult.Z < float(0)))
 	{
 		return true;		
@@ -1293,6 +1341,7 @@ function bool AimingAt(Pawn Enemy)
 
 	vDir = Normal((Enemy.Location - Pawn.Location));
 	// End:0x5D
+	// Dot product > 0.5 means the gun is aimed within ~60 degrees of the target
 	if((Dot(vDir, Vector((Pawn.Rotation + m_pawn.m_rRotationOffset))) > 0.5000000))
 	{
 		return true;		
@@ -1310,6 +1359,7 @@ function bool AimingAt(Pawn Enemy)
 event AttackTimer()
 {
 	// End:0x17
+	// Weapon groups 1 and 2 are primary and secondary firearms; groups > 2 are gadgets (grenades, breaching charges)
 	if((m_pawn.m_iCurrentWeapon > 2))
 	{
 		return;
@@ -1363,6 +1413,7 @@ event AttackTimer()
 				{
 					return;
 				}
+				// SetRateOfFire(2) = burst fire for standard AI engagements
 				Pawn.EngineWeapon.SetRateOfFire(2);
 				StartFiring();
 			}
@@ -1483,6 +1534,7 @@ function FindPathToTargetLocation(Vector vTarget, optional Actor aTarget)
 	m_TeamManager.SetTeamState(3);
 	m_DesiredTarget = aTarget;
 	m_vDesiredLocation = vTarget;
+	// Save current state so FindPathToTarget knows where to resume after reaching the destination
 	m_PostFindPathToState = GetStateName();
 	GotoState('FindPathToTarget');
 	return;
@@ -1568,6 +1620,7 @@ function bool CanThrowGrenade(Vector vPawnLocation, bool bTraceActors, bool bChe
 	vDir = (m_vLocationOnTarget - vPawnLocation);
 	fDist = VSize(vDir);
 	// End:0x32
+	// 1500 units is approximately the maximum reliable throw range for a grenade
 	if((fDist > float(1500)))
 	{
 		return false;
@@ -1584,6 +1637,7 @@ function bool CanThrowGrenade(Vector vPawnLocation, bool bTraceActors, bool bChe
 	{
 		iTraceFlags = 1;
 	}
+	// Trace flag 1 = TraceActors, trace flag 4 = TraceWorld — combined to check both geometry and pawns
 	iTraceFlags = (iTraceFlags | 4);
 	HitActor = R6Trace(vHitLocation, vHitNormal, vTargetLoc, vPawnLocation, iTraceFlags, vect(20.0000000, 20.0000000, 10.0000000));
 	// End:0xDC
@@ -1646,6 +1700,7 @@ function ResetTeamMoveTo()
 		m_pawn.SetNextPendingAction(28);
 		m_pawn.PlayWeaponAnimation();
 	}
+	// Clamp weapon index to 1-4 in case it got set to an invalid value during the action
 	m_pawn.m_iCurrentWeapon = int(FClamp(float(m_pawn.m_iCurrentWeapon), 1.0000000, 4.0000000));
 	VerifyWeaponInventory();
 	EnsureRainbowIsArmed();
@@ -1659,6 +1714,7 @@ function R6Pawn.eMovementPace GetTeamPace()
 	switch(m_TeamManager.m_eMovementSpeed)
 	{
 		// End:0x3D
+		// Movement speed 0 = Fast: run normally, but walk if someone is wounded
 		case 0:
 			// End:0x32
 			if(m_TeamManager.AtLeastOneMemberIsWounded())
@@ -1672,11 +1728,13 @@ function R6Pawn.eMovementPace GetTeamPace()
 			// End:0x68
 			break;
 		// End:0x4D
+		// Movement speed 1 = Normal (walk): ePace 4 = PACE_Walk
 		case 1:
 			ePace = 4;
 			// End:0x68
 			break;
 		// End:0x5D
+		// Movement speed 2 = Slow (crouch-walk): ePace 2 = PACE_CrouchWalk
 		case 2:
 			ePace = 2;
 			// End:0x68
@@ -1836,21 +1894,25 @@ function name GetNextTeamActionState()
 		return 'FollowLeader';
 	}
 	// End:0x3B
+	// Team action bit 512 = TeamClimbLadder without leader
 	if(((m_TeamManager.m_iTeamAction & 512) > 0))
 	{
 		return 'TeamClimbStartNoLeader';
 	}
 	// End:0x5C
+	// Team action bit 1024 = TeamSecureTerrorist (arrest a surrendered enemy)
 	if(((m_TeamManager.m_iTeamAction & 1024) > 0))
 	{
 		return 'TeamSecureTerrorist';
 	}
 	// End:0xB7
+	// Bits 4096=InteractDevice, 8192=RescueHostage, 256=MoveToLocation — all handled by TeamMoveTo state
 	if(((((m_TeamManager.m_iTeamAction & 4096) > 0) || ((m_TeamManager.m_iTeamAction & 8192) > 0)) || ((m_TeamManager.m_iTeamAction & 256) > 0)))
 	{
 		return 'TeamMoveTo';
 	}
 	// End:0x123
+	// Bits 16=OpenDoor, 32=CloseDoor, 128=RoomEntry, 64=ThrowGrenade — all handled by PerformAction state
 	if((((((m_TeamManager.m_iTeamAction & 16) > 0) || ((m_TeamManager.m_iTeamAction & 32) > 0)) || ((m_TeamManager.m_iTeamAction & 128) > 0)) || ((m_TeamManager.m_iTeamAction & 64) > 0)))
 	{
 		return 'PerformAction';
@@ -2024,6 +2086,7 @@ function float GetFormationDistance()
 	if((m_PaceMember != none))
 	{
 		// End:0x67
+		// Double spacing when the pace member is prone or sniping — more room needed for everyone to take cover
 		if((m_PaceMember.m_bIsProne || ((m_PaceMember.Controller != none) && m_PaceMember.Controller.IsInState('SnipeUntilGoCode'))))
 		{
 			return float((m_TeamManager.m_iFormationDistance * 2));
@@ -2044,6 +2107,7 @@ function bool IsBumpBackUpStateFinish()
 	local R6Pawn aBumpPawn;
 
 	// End:0x21
+	// If 4 seconds have passed since the last bump, consider the BumpBackUp recovery complete regardless of position
 	if(((m_fLastBump + 4.0000000) < Level.TimeSeconds))
 	{
 		return true;
@@ -2122,11 +2186,13 @@ function bool NeedToReload()
 	local float fCutOff;
 
 	// End:0x17
+	// Weapon groups 1 and 2 are primary and secondary firearms; groups > 2 are gadgets (grenades, breaching charges)
 	if((m_pawn.m_iCurrentWeapon > 2))
 	{
 		return false;
 	}
 	// End:0x3E
+	// GoCode 4 = assault in progress — reload at 50% to stay in the fight; otherwise reload at 75% when safe
 	if((int(m_TeamManager.m_eGoCode) == int(4)))
 	{
 		fCutOff = 0.5000000;		
@@ -2315,6 +2381,7 @@ function Promote()
 	m_TeamLeader = m_TeamManager.m_TeamLeader;
 	(m_pawn.m_iID--);
 	// End:0x83
+	// After decrement, check if this pawn is now the team leader (iID == 0 means it's the new leader)
 	if((m_TeamLeader == Pawn))
 	{
 		m_pawn.ResetBoneRotation();
@@ -2365,6 +2432,7 @@ function Tick(float fDeltaTime)
 		return;
 	}
 	// End:0x31
+	// Keep weapon aimed at enemy every frame while engaged (smooth tracking)
 	if((Enemy != none))
 	{
 		SetGunDirection(Enemy);		
@@ -2378,6 +2446,7 @@ function Tick(float fDeltaTime)
 		}
 	}
 	// End:0xAD
+	// Non-leader pawns track the member directly ahead (m_iID - 1) as their pace reference
 	if((((m_TeamLeader != none) && (m_TeamManager != none)) && (m_pawn.m_iID != 0)))
 	{
 		m_PaceMember = m_TeamManager.m_Team[(m_pawn.m_iID - 1)];
@@ -2413,6 +2482,7 @@ state RunAwayFromGrenade
 		local Vector vDir, vLocation;
 
 		vDir = Normal((Pawn.Location - m_vGrenadeLocation));
+		// Target a spot 600 units beyond the danger radius on the far side of the grenade from the pawn
 		vLocation = (m_vGrenadeLocation + ((m_fGrenadeDangerRadius + float(600)) * vDir));
 		vLocation.Z = Pawn.Location.Z;
 		// End:0x6E
@@ -2521,6 +2591,7 @@ state BumpBackUp
 		switch(iTry)
 		{
 			// End:0xA7
+			// Rotation offsets in UE units (65536 = full circle): 16384=90°, 8192=45°, 4096=22.5°, 0=forward, negatives=right
 			case 0:
 				rOffset = rot(0, 16384, 0);
 				// End:0x14B
@@ -2669,6 +2740,7 @@ Begin:
 	Sleep(0.1000000);
 	m_RotatingDoor.PlayLockPickSound();
 	// End:0x12D
+	// Lock pick kit reduces base time by 2 seconds (clamped); ArmorSkillEffect() (0=slow, 1=fast) further scales it
 	if(m_pawn.m_bHasLockPickKit)
 	{
 		Sleep(((m_RotatingDoor.m_fUnlockBaseTime - 2.0000000) * (2.0000000 - m_pawn.ArmorSkillEffect())));		
@@ -2856,6 +2928,7 @@ MoveToActionTarget:
 	if(((((m_RotatingDoor != none) && (m_TeamManager.m_iTeamAction == 32)) && m_RotatingDoor.DoorOpenTowardsActor(m_ActionTarget)) && (!PreEntryRoomIsAcceptablyLarge())))
 	{
 		// End:0x282
+		// Position 85 units sideways (left or right depending on swing direction) to stand clear of the door arc
 		if(m_RotatingDoor.m_bIsOpeningClockWise)
 		{
 			m_vTargetPosition = ((m_ActionTarget.Location - (float(85) * Vector(m_ActionTarget.Rotation))) + (float(85) * Vector((m_ActionTarget.Rotation + rot(0, 16384, 0)))));			
@@ -2939,6 +3012,7 @@ WaitForZuluGoCode:
 
 
 	// End:0x54F
+	// 'Zulu GoCode' is the player-issued assault signal; team waits here in readiness (team state 1) until it is received
 	if(m_TeamManager.m_bCAWaitingForZuluGoCode)
 	{
 		m_TeamManager.SetTeamState(1);
@@ -2950,6 +3024,7 @@ performDoorAction:
 
 
 	// End:0x7F4
+	// Bit 16 = open door (first entry), bit 32 = close door — choose which door action to perform
 	if((((m_TeamManager.m_iTeamAction & 16) > 0) || ((m_TeamManager.m_iTeamAction & 32) > 0)))
 	{
 		// End:0x7DE
@@ -3067,10 +3142,12 @@ PerformGrenadeAction:
 		goto 'PerformClearAction';
 	}
 	// End:0x98D
+	// Bit 64 = pre-entry grenade: throw a grenade into the room before the team enters
 	if(((m_TeamManager.m_iTeamAction & 64) > 0))
 	{
 		m_TeamManager.SetTeamState(14);
 		Disable('NotifyBump');
+		// Teleport aim point 450 units through the door to simulate throwing a grenade into the room
 		m_vLocationOnTarget = (m_ActionTarget.Location + (float(450) * Vector(m_ActionTarget.Rotation)));
 		SetLocation(m_vLocationOnTarget);
 		// End:0x8EE
@@ -3639,6 +3716,7 @@ WaitOnLeader:
 		CoverRear();
 	}
 	// End:0x5ED
+	// Resume FollowLeader if pace member is moving and more than 200 units away, or unconditionally if 300+ units gap
 	if(((IsMoving(m_PaceMember) && (DistanceTo(m_PaceMember) > float(200))) || (DistanceTo(m_PaceMember) > float(300))))
 	{
 		// End:0x5DB
@@ -3690,6 +3768,7 @@ Hold:
 	VerifyWeaponInventory();
 	EnsureRainbowIsArmed();
 	// End:0xAE
+	// After 8 seconds of holding still, automatically crouch to present a smaller profile
 	if((((!Pawn.bIsCrouched) && (!Pawn.m_bIsProne)) && (float(m_iWaitCounter) > 8.0000000)))
 	{
 		Pawn.bWantsToCrouch = true;
@@ -3840,6 +3919,7 @@ state TeamMoveTo
 		SetTimer(0.0000000, false);
 		m_vTargetPosition = m_TeamManager.m_vActionLocation;
 		// End:0xD6
+		// Team action bit 64 = throw grenade — find a throwing position before moving to the target
 		if((((m_TeamManager.m_iTeamAction & 64) > 0) && (m_iStateProgress == 0)))
 		{
 			m_iStateProgress = 1;
@@ -3888,10 +3968,12 @@ state TeamMoveTo
 
 		J0x00:
 		// End:0xD8 [Loop If]
+		// Try up to 10 random nav points; return immediately if a throwable spot is found
 		if((i < 10))
 		{
 			Actor = FindRandomDest(true);
 			// End:0xCE
+			// Skip ladders and nav points more than 400 units above/below — avoid throwing across floors
 			if(((!Actor.IsA('R6Ladder')) && (Abs((Actor.Location.Z - Pawn.Location.Z)) < float(400))))
 			{
 				// End:0x96
@@ -3903,6 +3985,7 @@ state TeamMoveTo
 					goto J0xCE;
 				}
 				// End:0xCE
+				// Can't throw there yet (too close) — remember it as a fallback; will pick the farthest one after the loop
 				if(TooCloseToThrowGrenade(Actor.Location))
 				{
 					vLocationList[iLocationListIndex] = Actor.Location;
@@ -4300,6 +4383,7 @@ state Patrol
 		PathA = Normal((MoveTarget.Location - Pawn.Location));
 		PathB = Normal((m_NextMoveTarget.Location - MoveTarget.Location));
 		// End:0x64
+		// Dot product < 0.707 (cos 45°) means the next waypoint requires a sharp turn ahead
 		if((Dot(PathA, PathB) < 0.7070000))
 		{
 			return true;
@@ -4392,6 +4476,7 @@ state Patrol
 			return;
 		}
 		// End:0xEC
+		// Poll for nearby interactive objects every 10 timer ticks (10 seconds) to avoid per-frame overhead
 		if(((float(m_iWaitCounter) % float(10)) == float(0)))
 		{
 			DispatchInteractions();
@@ -4538,6 +4623,7 @@ PickActionPoint:
 		J0xF3:
 
 		// End:0x130 [Loop If]
+		// Don't advance if the last team member is more than 800 units back — keep the formation from fracturing
 		if((DistanceTo(m_TeamManager.m_Team[(m_TeamManager.m_iMemberCount - 1)]) > float(800)))
 		{
 			Sleep(0.5000000);
@@ -5598,11 +5684,13 @@ state SnipeUntilGoCode
 	function bool NoiseSourceIsVisible()
 	{
 		// End:0x22
+		// Too close to determine direction from — treat noise within 200 units as not being from a visible spot
 		if((VSize((m_vNoiseFocalPoint - Pawn.Location)) < float(200)))
 		{
 			return false;
 		}
 		// End:0x57
+		// Dot product > 0.3 means noise source is within ~73 degrees of the sniper's forward facing
 		if((Dot(Normal((m_vNoiseFocalPoint - Pawn.Location)), Vector(Pawn.Rotation)) > 0.3000000))
 		{
 			return true;
@@ -5670,13 +5758,16 @@ TakePosition:
 		FinishAnim(m_pawn.14);
 	}
 	// End:0xDD
+	// Already prone from a previous snipe cycle — no need to re-enter the crouch/prone setup
 	if(Pawn.m_bIsProne)
 	{
 		m_bIgnoreBackupBump = true;
 		goto 'LocateEnemy';
 	}
+	// Try prone position first (60 units lower) for a lower profile sniper stance
 	m_vTargetPosition = (Pawn.Location - vect(0.0000000, 0.0000000, 60.0000000));
 	// End:0x14E
+	// Best option: clear shot at prone height — go prone for maximum stability and lowest profile
 	if(ClearToSnipe(m_vTargetPosition, m_TeamManager.m_rSnipingDir))
 	{
 		Pawn.bWantsToCrouch = true;
@@ -5709,6 +5800,7 @@ LocateEnemy:
 
 
 	// End:0x233
+	// Only enter active sniping state (7) if not waiting for the Zulu GoCode signal
 	if((!m_TeamManager.m_bCAWaitingForZuluGoCode))
 	{
 		m_TeamManager.SetTeamState(7);
@@ -5727,6 +5819,7 @@ EngageEnemy:
 	// End:0x301
 	if(((!m_TeamManager.m_bSniperHold) && (Enemy != none)))
 	{
+		// SetRateOfFire(0) = single shot mode for precision sniping
 		Pawn.EngineWeapon.SetRateOfFire(0);
 		Focus = Enemy;
 		Target = Enemy;
@@ -6252,11 +6345,13 @@ state FollowLeader
 		(m_iWaitCounter++);
 		(m_iTurn++);
 		// End:0x21
+		// m_iTurn cycles 0-5 (wraps at 6) to stagger orientation checks across team members
 		if((m_iTurn == 6))
 		{
 			m_iTurn = 0;
 		}
 		// End:0x71
+		// Only members #1 and #2 (not the leader or rearguard) check for wall-hugging opportunities while moving
 		if(((((m_pawn.m_iID == 1) || (m_pawn.m_iID == 2)) && IsMoving(Pawn)) && (int(m_ePawnOrientation) != int(5))))
 		{
 			CheckEnvironment();
@@ -6278,6 +6373,7 @@ state FollowLeader
 		local float fDistance;
 
 		// End:0x49
+		// Fast-path: if pace member is moving normally at full height without slowing, always follow immediately
 		if(((((!m_bSlowedPace) && IsMoving(m_PaceMember)) && (!Pawn.m_bIsProne)) && (!Pawn.bIsCrouched)))
 		{
 			return false;
@@ -6289,11 +6385,13 @@ state FollowLeader
 		}
 		fDistance = GetFormationDistance();
 		// End:0x7A
+		// When pace member is walking backwards or strafing, double the wait distance to keep the formation loose
 		if(m_bSlowedPace)
 		{
 			(fDistance *= float(2));
 		}
 		// End:0x9A
+		// Add extra gap: 60 units for prone (low crawl needs more space), 35 units for upright (standard stride buffer)
 		if(m_pawn.m_bIsProne)
 		{
 			(fDistance += float(60));			
