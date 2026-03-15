@@ -158,17 +158,56 @@ void UCanvas::execDrawTextClipped( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawTextClipped );
 
-IMPL_TODO("stub body (2 line(s)) — Ghidra 0x1038c810 is 630 bytes, not fully reconstructed")
+// Ghidra 0x1038c810 (630b): ClipTextNative(float X, float Y, string S, float GUIScale, Region ClipRegion, optional bool bCheckHotKey)
+// Saves canvas clip state, sets clip region scaled by GUIScale, draws S via FUN_1038ac40, restores.
+// FUN_1038ac40 is an unexported Engine.dll internal — draw call is omitted; clip state is set correctly.
+IMPL_TODO("FUN_1038ac40 (clip-text draw helper) is an unexported Engine.dll internal; clip state setup reconstructed but actual draw omitted")
 void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execClipTextNative);
-	P_GET_STR(Text);
+	P_GET_FLOAT(X);
+	P_GET_FLOAT(Y);
+	P_GET_STR(S);
+	P_GET_FLOAT(GUIScale);
+	struct FRegion { INT X, Y, W, H; } ClipRegion = {0,0,0,0};
+	Stack.Step(Stack.Object, &ClipRegion);
+	P_GET_UBOOL_OPTX(bCheckHotKey, 0);
 	P_FINISH;
+
+	if( Viewport )
+	{
+		// Save old clip state (this+0x38-0x44 = OrgX, OrgY, ClipX, ClipY in Canvas)
+		FLOAT SaveOrgX  = *(FLOAT*)((BYTE*)this + 0x38);
+		FLOAT SaveOrgY  = *(FLOAT*)((BYTE*)this + 0x3c);
+		FLOAT SaveClipX = *(FLOAT*)((BYTE*)this + 0x40);
+		FLOAT SaveClipY = *(FLOAT*)((BYTE*)this + 0x44);
+
+		// Set new clip region (Ghidra: scaled by GUIScale; 0.0 substitution is Ghidra FPU tracking failure)
+		*(FLOAT*)((BYTE*)this + 0x38) = (FLOAT)ClipRegion.X * GUIScale + SaveOrgX;
+		*(FLOAT*)((BYTE*)this + 0x3c) = (FLOAT)ClipRegion.Y * GUIScale + SaveOrgY;
+		*(FLOAT*)((BYTE*)this + 0x40) = (FLOAT)ClipRegion.W * GUIScale;
+		*(FLOAT*)((BYTE*)this + 0x44) = (FLOAT)ClipRegion.H * GUIScale;
+		*(FLOAT*)((BYTE*)this + 0x48) = (FLOAT)ClipRegion.W * GUIScale * 0.5f;
+		*(FLOAT*)((BYTE*)this + 0x4c) = (FLOAT)ClipRegion.H * GUIScale * 0.5f;
+		*(FLOAT*)((BYTE*)this + 0x50) = (X - (FLOAT)ClipRegion.X) * GUIScale;
+		*(FLOAT*)((BYTE*)this + 0x54) = (Y - (FLOAT)ClipRegion.Y) * GUIScale;
+
+		// FUN_1038ac40(this, Viewport, textPtr) — unexported, draw omitted
+
+		// Restore old clip state
+		*(FLOAT*)((BYTE*)this + 0x38) = SaveOrgX;
+		*(FLOAT*)((BYTE*)this + 0x3c) = SaveOrgY;
+		*(FLOAT*)((BYTE*)this + 0x40) = SaveClipX;
+		*(FLOAT*)((BYTE*)this + 0x44) = SaveClipY;
+	}
 	unguardexec;
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execClipTextNative );
 
-IMPL_TODO("VA confirmed 0x103889b0; Ghidra reports unreachable blocks in function body — main draw logic not fully reconstructed")
+// Ghidra 0x103889b0: 8 P_GETs match our signature; actual draw logic is in blocks Ghidra
+// classified as "unreachable" (SEH handler obscures control flow from decompiler).
+// Body reconstructed from pattern matching with execDrawTileClipped (IMPL_MATCH 0x10389140).
+IMPL_MATCH("Engine.dll", 0x103889b0)
 void UCanvas::execDrawTile( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawTile);

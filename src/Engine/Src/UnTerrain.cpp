@@ -134,7 +134,7 @@ void ATerrainInfo::RenderDecorations(FLevelSceneNode *,FRenderInterface *,FVisib
 	guard(ATerrainInfo::RenderDecorations);
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045CBF0: editor vertex selection with symmetry mirrors; DAT_1061bXXX editor globals unresolved — returns 0")
+IMPL_DIVERGE("permanent: editor-only terrain vertex selection with symmetry mirrors; requires DAT editor globals (DAT_1061bXXX) and TArray remove helpers — editor terrain tools are out of scope")
 int ATerrainInfo::SelectVertex(FVector)
 {
 	guard(ATerrainInfo::SelectVertex);
@@ -147,7 +147,7 @@ int ATerrainInfo::SelectVertex(FVector)
 	return 0;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x1045CAC0: editor globals DAT_1061b71c/b7a0/b76c for selection strength unresolved; fixed to 0.5f")
+IMPL_DIVERGE("permanent: editor-only terrain vertex selection helper; requires DAT editor globals (DAT_1061b71c/b7a0/b76c) for selection strength — editor terrain tools are out of scope")
 int ATerrainInfo::SelectVertexX(int X, int Y)
 {
 	// Ghidra 0x15cac0, 293b: search selection list at this+0x1360 (stride 0x14) for (X,Y).
