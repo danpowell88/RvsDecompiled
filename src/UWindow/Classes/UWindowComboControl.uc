@@ -173,21 +173,15 @@ function string GetValue2()
 	return;
 }
 
-function SetValue(string NewValue, optional string NewValue2)
-{
-	EditBox.SetValue(NewValue, NewValue2);
-	return;
-}
-
-function SetMaxLength(int MaxLength)
+// Sets the value displayed in the edit box; bypasses the list selection.
+function SetValue(string NewValue, optional string NewValue2)(int MaxLength)
 {
 	EditBox.MaxLength = MaxLength;
 	return;
 }
 
+// Delegates painting to the LookAndFeel Combo_Draw function.
 function Paint(Canvas C, float X, float Y)
-{
-	LookAndFeel.Combo_Draw(self, C);
 	return;
 }
 
@@ -217,6 +211,7 @@ function DisableAllItems()
 	return;
 }
 
+// Called before Paint each frame; asks LookAndFeel to recalculate layout sizes.
 function BeforePaint(Canvas C, float X, float Y)
 {
 	super.BeforePaint(C, X, Y);
@@ -225,6 +220,7 @@ function BeforePaint(Canvas C, float X, float Y)
 	return;
 }
 
+// Collapses the dropdown list and restores the edit box to its normal editable state.
 function CloseUp()
 {
 	bListVisible = false;
@@ -235,6 +231,7 @@ function CloseUp()
 	return;
 }
 
+// Opens the dropdown list, locks the edit box, and captures mouse focus to the list.
 function DropDown()
 {
 	bListVisible = true;
@@ -272,6 +269,7 @@ function Clear()
 	return;
 }
 
+// Closes the dropdown list if focus moves to a window outside this combo control.
 function FocusOtherWindow(UWindowWindow W)
 {
 	super(UWindowWindow).FocusOtherWindow(W);
