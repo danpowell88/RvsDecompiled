@@ -3151,6 +3151,7 @@ PerformClearAction:
 		SetTimer(1.0000000, true);
 		LookAroundRoom(true);
 		m_iStateProgress = 11;
+		// 3-second room-clear pause while looking around — visually confirms the room is secure
 		Sleep(3.0000000);		
 	}
 	else
