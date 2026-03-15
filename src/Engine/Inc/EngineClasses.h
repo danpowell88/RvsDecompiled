@@ -5028,6 +5028,14 @@ public:
 };
 ENGINE_API extern UR6GameOptions* GGameOptions;
 
+// R6-specific font globals — GC roots serialized by UGameEngine::Serialize.
+// Initialized during HUD/rendering setup to cached UFont* objects.
+// Retail Engine.dll addresses: 0x10670d84, 0x10670d88, 0x10670d8c, 0x10670d90.
+ENGINE_API extern UObject* GR6Font_14pt;
+ENGINE_API extern UObject* GR6Font_15pt;
+ENGINE_API extern UObject* GR6Font_22pt;
+ENGINE_API extern UObject* GR6Font_36pt;
+
 class ENGINE_API UGlobalTempObjects : public UObject
 {
 public:

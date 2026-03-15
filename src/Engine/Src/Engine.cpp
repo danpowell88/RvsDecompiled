@@ -26,6 +26,7 @@
 =============================================================================*/
 
 #include "EnginePrivate.h"
+#include "EngineDecls.h"
 
 /*-----------------------------------------------------------------------------
 	Package implementation.
@@ -129,6 +130,14 @@ ENGINE_API UR6GameOptions*			GGameOptions			= NULL;
 ENGINE_API UGlobalTempObjects*		GGlobalTempObjects		= NULL;
 ENGINE_API AR6eviLTesting*			GEvilTest				= NULL;
 
+// R6-specific font globals — serialized by UGameEngine::Serialize as GC roots.
+// Initialized to cached UFont* during HUD setup; NULL until then.
+// Retail addresses: 0x10670d84 (14pt), 0x10670d88 (15pt), 0x10670d8c (22pt), 0x10670d90 (36pt).
+ENGINE_API UObject* GR6Font_14pt = NULL;
+ENGINE_API UObject* GR6Font_15pt = NULL;
+ENGINE_API UObject* GR6Font_22pt = NULL;
+ENGINE_API UObject* GR6Font_36pt = NULL;
+
 /*-----------------------------------------------------------------------------
 	FName event/callback tokens.
 	These are used by eventX() thunks to call UnrealScript event handlers.
@@ -159,15 +168,48 @@ COMPILE_CHECK(sizeof(UGameEngine) == 0x4d0, UGameEngine_layout_mismatch_adjust_u
 // UGameEngine (moved from EngineClassImpl.cpp)
 // =============================================================================
 
+// Declarations for Engine.dll-internal globals defined in other translation units.
+extern INT                bGameShutDown;  // UnCamera.cpp — Engine shutdown flag (0x10670d80)
+extern struct _KarmaGlobals* KGData;      // UnCamera.cpp — Karma physics world state
+extern void KTermGameKarma();             // EngineAux.cpp — tears down the Karma physics world
+
 // UGameEngine
 // =============================================================================
 
 IMPL_DIVERGE("retail 0xa3f00 is 3692 bytes of console-command dispatch (STAT, SHOW, OPEN, etc.); stub delegates to super")
 INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return Super::Exec( Cmd, Ar ); }
-IMPL_DIVERGE("retail 0x9edc0 (153b) sets GIsRequestingExit, destroys pending level, calls KTermGameKarma(); stub delegates to super")
-void UGameEngine::Destroy() { Super::Destroy(); }
-IMPL_DIVERGE("retail 0x9f1b0 (163b) serializes GLevel, GEntry, GPendingLevel and 4 global state vars; stub delegates to super")
-void UGameEngine::Serialize( FArchive& Ar ) { Super::Serialize( Ar ); }
+IMPL_MATCH("Engine.dll", 0x1039edc0)
+void UGameEngine::Destroy()
+{
+	guard(UGameEngine::Destroy);
+	// Ghidra 0x9edc0 (153b): set engine-shutdown flag, cancel any in-flight pending level,
+	// null out GLevel, log "Exit.", signal Karma teardown, then delegate to Super.
+	bGameShutDown = 1;
+	if (*(INT*)((BYTE*)this + 0x460))  // GPendingLevel (in _uge_unk[0])
+		CancelPending();
+	GLevel = NULL;
+	GLog->Logf(TEXT("Exit."));
+	if (KGData)
+		*(INT*)((BYTE*)KGData + 0x14218) = 1;  // KGData->bIsGameBeingDestroyed
+	KTermGameKarma();
+	Super::Destroy();
+	unguard;
+}
+IMPL_MATCH("Engine.dll", 0x1039f1b0)
+void UGameEngine::Serialize( FArchive& Ar )
+{
+	guard(UGameEngine::Serialize);
+	// Ghidra 0x9f1b0 (163b): chain-serialize level pointers and cached font globals as GC roots.
+	Super::Serialize(Ar);
+	Ar << (UObject*&)GLevel
+	   << (UObject*&)GEntry
+	   << *(UObject**)((BYTE*)this + 0x460)  // GPendingLevel (in _uge_unk[0])
+	   << GR6Font_14pt  // cached Rainbow6_14pt UFont* (retail 0x10670d84)
+	   << GR6Font_15pt  // cached Rainbow6_15pt UFont* (retail 0x10670d88)
+	   << GR6Font_22pt  // cached Rainbow6_22pt UFont* (retail 0x10670d8c)
+	   << GR6Font_36pt; // cached Rainbow6_36pt UFont* (retail 0x10670d90)
+	unguard;
+}
 // UGameEngine::Tick()   — implemented in UnGame.cpp
 // UGameEngine::Init()   — implemented in UnGame.cpp
 // UGameEngine::Browse() — implemented in UnGame.cpp
