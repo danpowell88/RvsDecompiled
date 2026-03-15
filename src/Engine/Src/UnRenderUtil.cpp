@@ -1557,27 +1557,47 @@ BYTE FConvexVolume::BoxCheck(FVector Origin, FVector Extent)
 	return Result;
 }
 
-IMPL_TODO("Ghidra 0x10413f90 (165b): FConvexVolume::ClipPolygon iterates half-space planes; FPoly class incomplete")
-FPoly FConvexVolume::ClipPolygon(FPoly)
+// For each outward-facing plane, negate normal so FPoly::Split keeps the interior half.
+// Base = N * W is a point on the plane (for unit N, dot(N, N*W) = W). Ghidra 0x10413f90.
+IMPL_MATCH("Engine.dll", 0x10413f90)
+FPoly FConvexVolume::ClipPolygon(FPoly Poly)
 {
-	return FPoly();
+  guard(FConvexVolume::ClipPolygon);
+  for (INT i = 0; i < NumPlanes; i++)
+  {
+    const FPlane& P = Planes[i];
+    FVector Normal(-P.X, -P.Y, -P.Z);               // negate: planes face outward, keep inside
+    FVector Base(P.X * P.W, P.Y * P.W, P.Z * P.W);  // N*W = point on plane
+    if (!Poly.Split(Normal, Base, 0))
+      return FPoly();
+  }
+  return Poly;
+  unguard;
 }
 
-IMPL_TODO("Ghidra 0x10414040 (165b): FConvexVolume::ClipPolygonPrecise — same as ClipPolygon with higher-precision plane tests; FPoly incomplete")
-FPoly FConvexVolume::ClipPolygonPrecise(FPoly)
+// Same as ClipPolygon but uses SplitPrecise for tighter floating-point plane tests.
+IMPL_MATCH("Engine.dll", 0x10414040)
+FPoly FConvexVolume::ClipPolygonPrecise(FPoly Poly)
 {
-	return FPoly();
+  guard(FConvexVolume::ClipPolygonPrecise);
+  for (INT i = 0; i < NumPlanes; i++)
+  {
+    const FPlane& P = Planes[i];
+    FVector Normal(-P.X, -P.Y, -P.Z);
+    FVector Base(P.X * P.W, P.Y * P.W, P.Z * P.W);
+    if (!Poly.SplitPrecise(Normal, Base, 0))
+      return FPoly();
+  }
+  return Poly;
+  unguard;
 }
-
 
 // --- FDynamicActor ---
 IMPL_TODO("retail 0x104038b0 (11290b): FDynamicActor::Render — full per-mesh render dispatch; pending complete decompilation")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
-	// Ghidra: deferred to mesh renderer via vtable; actual dispatch is in UMeshInstance::Render.
-	// INTENTIONALLY EMPTY: rendering dispatched via UMeshInstance::Render vtable; FDynamicActor::Render has no per-type render logic
+  // Ghidra 0x104038b0: too complex to fully decompile (GCache + mesh dispatch pipeline).
 }
-
 IMPL_MATCH("Engine.dll", 0x103135d0)
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)
 {
