@@ -428,7 +428,11 @@ FRebuildOptions * FRebuildTools::GetFromName(FString p0)
 }
 
 // ?Save@FRebuildTools@@QAEPAVFRebuildOptions@@VFString@@@Z
-IMPL_DIVERGE("Ghidra 0x103FD770: uses FArray::Add (realloc strategy differs) and value-copy of current options via operator=; FArray::Add address not resolved")
+// Ghidra 0x103FD770 (260b): uses FArray::Add (Core.dll 0x10101790) to append a slot,
+// placement-constructs FRebuildOptions, copies current options via operator=, overrides name.
+// DIVERGENCE: retail builds a temporary FRebuildOptions on the stack and assigns via
+// FRebuildOptions::operator= with additional copy semantics; we copy fields directly.
+IMPL_DIVERGE("Ghidra 0x103FD770: retail copies options via stack temp + operator=; we copy fields directly — same observable result")
 FRebuildOptions * FRebuildTools::Save(FString p0)
 {
 	guard(FRebuildTools::Save);
@@ -436,26 +440,19 @@ FRebuildOptions * FRebuildTools::Save(FString p0)
 	FRebuildOptions* result = GetFromName(p0);
 	if (!result)
 	{
-		// Grow the FArray at this+4 by one element
-		void*& pData   = *(void**)((BYTE*)this + 4);
-		INT&   count   = *(INT*)((BYTE*)this + 8);
-		INT&   maxCount= *(INT*)((BYTE*)this + 12);
-
-		INT idx = count;
-		if (count >= maxCount)
-		{
-			INT newMax = (count * 4) / 3 + 8;
-			pData = appRealloc(pData, newMax * 0x2C, TEXT("TArray"));
-			maxCount = newMax;
-		}
-		result = (FRebuildOptions*)((BYTE*)pData + idx * 0x2C);
-		new(result) FRebuildOptions();
-		count++;
-		// Re-read in case appRealloc moved the pointer
-		result = (FRebuildOptions*)((BYTE*)pData + (count - 1) * 0x2C);
+		// FArray::Add(arr, count=1, stride=0x2C) — Core.dll 0x10101790
+		typedef INT (__thiscall *FArrayAddFn)(FArray*, INT, INT);
+		FArray* arr = (FArray*)((BYTE*)this + 4);
+		INT idx = ((FArrayAddFn)0x10101790)(arr, 1, 0x2C);
+		result = (FRebuildOptions*)((BYTE*)*(BYTE**)arr + idx * 0x2C);
+		if (result)
+			new(result) FRebuildOptions();
+		// Re-read pointer in case realloc moved the buffer
+		INT n = arr->Num();
+		result = (FRebuildOptions*)((BYTE*)*(BYTE**)arr + (n - 1) * 0x2C);
 	}
 
-	// Copy current options then override name with p0 (matches retail logic)
+	// Copy current options then override name with p0
 	FRebuildOptions* cur = GetCurrent();
 	if (cur && result)
 	{

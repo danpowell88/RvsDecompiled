@@ -195,8 +195,50 @@ INT UGameEngine::ChallengeResponse( INT Challenge ) {
 	// Formula: ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE
 	return ((Challenge >> 16) ^ (Challenge * 237) ^ (Challenge << 16)) ^ 0x93FE92CE;
 }
-IMPL_DIVERGE("retail 0x9f480 (160b) reads MaxTickRate from GLevel->NetDriver->ServerConnection or GameInfo; stub returns 0.0f (uncapped)")
-FLOAT UGameEngine::GetMaxTickRate() { return 0.0f; }
+IMPL_MATCH("Engine.dll", 0x1039f480)
+FLOAT UGameEngine::GetMaxTickRate()
+{
+	// Ghidra: 0x9f480, 160 bytes
+	// Returns 0.0 (uncapped) if no level or no network driver.
+	// On the server: returns NetServerMaxTickRate or LanServerMaxTickRate clamped to [10,120],
+	//   depending on the game type byte at GGameOptions+0x2D.
+	// On a connected client: returns server-negotiated tick rate from ServerConnection+0x48.
+	INT iVar1 = *(INT*)((BYTE*)this + 0x458);  // GLevel
+	if (iVar1 != 0)
+	{
+		INT iVar2 = *(INT*)(iVar1 + 0x40);  // GLevel->NetDriver
+		if ((iVar2 != 0) && (GIsClient == 0))
+		{
+			// Server path: check game mode byte in GGameOptions
+			BYTE gameMode = GGameOptions ? *((BYTE*)GGameOptions + 0x2d) : 0;
+			if (gameMode != 0 && gameMode != 1)
+			{
+				// Internet/multi mode: use NetServerMaxTickRate
+				INT rate = *(INT*)(iVar2 + 0x6c);
+				if (rate < 10)  return 10.0f;
+				if (rate > 0x77) rate = 0x78;
+				return (FLOAT)rate;
+			}
+			// LAN mode: use LanServerMaxTickRate
+			INT rate = *(INT*)(iVar2 + 0x70);
+			if (rate < 10)  return 10.0f;
+			if (rate > 0x77) rate = 0x78;
+			return (FLOAT)rate;
+		}
+		// Client path: read server-negotiated tick rate from ServerConnection
+		if (iVar1 != 0)
+		{
+			INT driver = *(INT*)(iVar1 + 0x40);  // NetDriver
+			if (driver != 0)
+			{
+				INT conn = *(INT*)(driver + 0x3c);  // ServerConnection
+				if (conn != 0)
+					return (FLOAT)*(INT*)(conn + 0x48);  // server-negotiated tick rate
+			}
+		}
+	}
+	return 0.0f;
+}
 IMPL_EMPTY("retail body is also empty — base class no-op")
 void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
 IMPL_EMPTY("retail body is also empty — base class no-op")

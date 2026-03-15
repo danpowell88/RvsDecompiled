@@ -4000,10 +4000,15 @@ class ENGINE_API UNetDriver : public USubsystem
 public:
 DECLARE_CLASS(UNetDriver,USubsystem,0,Engine)
 
-// Layout from Ghidra (FlushNet, LowLevelSend reference Driver+0x3C):
+// Layout from Ghidra (FlushNet, LowLevelSend, GetMaxTickRate, StaticConstructor):
 // USubsystem = UObject(0x2C) + FExec vtable(0x04) = 0x30
 BYTE _NetDrvPad0[0x0C];              // 0x30..0x3B — undecoded fields
 UNetConnection* ServerConnection;     // 0x3C
+BYTE _NetDrvPad1[0x08];              // 0x40..0x47 — undecoded fields
+DOUBLE Time;                          // 0x48 — delta time accumulator (TickDispatch)
+BYTE _NetDrvPad2[0x1C];              // 0x50..0x6B — undecoded fields
+INT NetServerMaxTickRate;             // 0x6C — config: max tick rate for internet servers
+INT LanServerMaxTickRate;             // 0x70 — config: max tick rate for LAN servers
 
 void StaticConstructor();
 
