@@ -34,6 +34,52 @@ struct STDbgLine
 extern ENGINE_API STDbgLine* GDbgLine;
 extern ENGINE_API INT        GDbgLineIndex;
 
+// GServerBeacon: DAT_10793088 — global server-beacon FString
+static FString GServerBeacon;
+
+// GLoadActorTick: DAT_10666b50 — loading-progress counter (AActor::Serialize)
+static INT GLoadActorTick = 0;
+
+// PreNetReceive / PostNetReceive state snapshot — DAT_106666f4 through _DAT_10666778.
+// These MUST be contiguous within each FVector/FRotator group for the pointer casts
+// in PostNetReceive (e.g. FVector::operator!=(this_00, &GPreNet_Loc)).
+static FVector  GPreNet_Loc;          // DAT_106666f4-fc  Location
+static FVector  GPreNet_Field264;     // DAT_10666700-08  Actor+0x264 (3 floats)
+static FRotator GPreNet_Rot;          // DAT_1066670c-14  Rotation
+static FRotator GPreNet_Field270;     // DAT_10666718-20  Actor+0x270 (3 ints)
+static FVector  GPreNet_DrawScale3D;  // _DAT_10666770-78 Actor+0x24c (3 floats)
+static DWORD    GPreNet_Field384X;    // DAT_10666724  +0x384
+static DWORD    GPreNet_Field384Y;    // DAT_10666728  +0x388
+static DWORD    GPreNet_Field384Z;    // DAT_1066672c  +0x38c
+static DWORD    GPreNet_Field2bcX;    // DAT_1066673c  +0x2bc
+static DWORD    GPreNet_Field2bcY;    // DAT_10666740  +0x2c0
+static DWORD    GPreNet_Field2bcZ;    // DAT_10666744  +0x2c4
+static AActor*  GPreNet_Owner;        // DAT_1064ff78  Owner at +0x15c
+static DWORD    GPreNet_BitF74;       // DAT_1064ff74  bCollideWorld bit
+static FLOAT    GPreNet_F70;          // DAT_1064ff70  +0xf8 CollisionRadius
+static FLOAT    GPreNet_F6C;          // DAT_1064ff6c  +0xfc CollisionHeight
+static FLOAT    GPreNet_F68;          // DAT_1064ff68  +0xe0 DrawScale
+static BYTE     GPreNet_F67;          // DAT_1064ff67  +0x2f DrawType byte
+static BYTE     GPreNet_F64;          // DAT_1064ff64  +0x2c Physics byte
+
+// Deferred exec draw-queues (appended by execDrawDashedLine / execDrawText3D).
+// Struct sizes match retail allocations: 0x20 and 0x18 bytes respectively.
+struct FDashedLineEntry
+{
+	FVector Start;  // 0x00
+	FVector End;    // 0x0c
+	FColor  Color;  // 0x18
+	DWORD   Pad;    // 0x1c  (retail alloc is 0x20; 4 bytes padding)
+};
+static TArray<FDashedLineEntry*> GDashedLines;     // DAT_1066679c
+
+struct FDrawText3DEntry
+{
+	FVector Loc;    // 0x00
+	FString Text;   // 0x0c
+};
+static TArray<FDrawText3DEntry*> GDrawText3DEntries; // DAT_10666790
+
 /*-----------------------------------------------------------------------------
 	Class registration.
 -----------------------------------------------------------------------------*/
@@ -1847,17 +1893,17 @@ void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 	guard(AActor::execSetServerBeacon);
 	P_GET_STR(Beacon);
 	P_FINISH;
+	GServerBeacon = Beacon;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1311, execSetServerBeacon );
 
-IMPL_TODO("retail reads FString g_ServerBeacon global (DAT_10793088); declare and populate from execSetServerBeacon to implement (Ghidra 0x104240c0)")
+IMPL_MATCH("Engine.dll", 0x104240c0)
 void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerBeacon);
 	P_FINISH;
-	// Ghidra 0x104240c0: *(FString*)Result = DAT_10793088 (global beacon string)
-	*(FString*)Result = TEXT("");
+	*(FString*)Result = GServerBeacon;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 1312, execGetServerBeacon );
@@ -2336,7 +2382,7 @@ void AActor::execGarbageCollect( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2622, execGarbageCollect );
 
-IMPL_TODO("retail appends Start/End/Color to debug ring buffer DAT_1066679c; blocked pending struct declaration (Ghidra 0x1037b630)")
+IMPL_MATCH("Engine.dll", 0x1037b630)
 void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawDashedLine);
@@ -2344,30 +2390,40 @@ void AActor::execDrawDashedLine( FFrame& Stack, RESULT_DECL )
 	P_GET_VECTOR(End);
 	P_GET_STRUCT(FColor,Color);
 	P_FINISH;
-	// Ghidra 0x1037b630: FArray::Add(&DAT_1066679c, 1, 4) then fills entry with Start/End/Color.
+	FDashedLineEntry* Entry = new FDashedLineEntry;
+	Entry->Start = Start;
+	Entry->End   = End;
+	Entry->Color = Color;
+	Entry->Pad   = 0;
+	GDashedLines.AddItem(Entry);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2608, execDrawDashedLine );
 
-IMPL_TODO("retail appends Loc/Text/Color to debug ring buffer DAT_10666790; blocked pending struct declaration (Ghidra 0x10379ce0)")
+// Ghidra 0x10379ce0: 2 params only (Loc + Text). Retail struct is 0x18 = FVector+FString.
+// Note: original stub had a spurious P_GET_STRUCT(FColor,Color) not in the Ghidra.
+IMPL_MATCH("Engine.dll", 0x10379ce0)
 void AActor::execDrawText3D( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDrawText3D);
 	P_GET_VECTOR(Loc);
 	P_GET_STR(Text);
-	P_GET_STRUCT(FColor,Color);
 	P_FINISH;
-	// Ghidra 0x10379ce0: FArray::Add(&DAT_10666790, 1, 4) then fills entry with Loc/Text/Color.
+	FDrawText3DEntry* Entry = new FDrawText3DEntry;
+	Entry->Loc  = Loc;
+	Entry->Text = Text;
+	GDrawText3DEntries.AddItem(Entry);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2609, execDrawText3D );
 
-IMPL_TODO("retail stores render callback data in globals DAT_1066677c..10666788; blocked pending global declarations (Ghidra 0x103716a0)")
+IMPL_TODO("Ghidra 0x103716a0: stores stack-local pointers into render-callback globals (DAT_1066677c-10666788); deferred render callback system not implemented")
 void AActor::execRenderLevelFromMe( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execRenderLevelFromMe);
 	P_FINISH;
-	// Ghidra 0x103716a0: stores this-ptr and params to 5 consecutive global render-callback slots.
+	// Retail stores this-ptr and FFrame pointers into 5 global render-callback slots
+	// for synchronous use by the renderer in the same frame.
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, 2610, execRenderLevelFromMe );
@@ -2651,9 +2707,9 @@ void AActor::SetGameType( FString GameType )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-// Ghidra 0x1037c130 (139 bytes): retail increments binary-specific global DAT_10666b50
-// (& 0xF == 0 triggers GEngine->PaintProgress). Logic reproduced; address differs.
-IMPL_TODO("loading tick uses local static instead of retail binary global DAT_10666b50 (Ghidra 0x1037c130)")
+// Ghidra 0x1037c130: retail uses binary-specific global DAT_10666b50 as the
+// loading-tick counter; behavior is identical but the address differs permanently.
+IMPL_DIVERGE("counter address differs: retail uses DAT_10666b50 in .bss; we use file-scope GLoadActorTick — behavior identical")
 void AActor::Serialize( FArchive& Ar )
 {
 	guard(AActor::Serialize);
@@ -2662,8 +2718,7 @@ void AActor::Serialize( FArchive& Ar )
 		Ar << m_OutlineIndices;
 	if ( Ar.IsLoading() )
 	{
-		static INT LoadActorTick = 0;
-		if ( (++LoadActorTick & 0xF) == 0 )
+		if ( (++GLoadActorTick & 0xF) == 0 )
 			GEngine->PaintProgress();
 	}
 	unguard;
@@ -2784,29 +2839,221 @@ INT AActor::IsNetRelevantFor( APlayerController* RealViewer, AActor* Viewer, FVe
 	unguard;
 }
 
-// Ghidra 0x10377e30 (396 bytes): snapshots actor fields (Location+0x234, Rotation+0x240,
-// DrawScale3D+0x24c, etc.) into globals DAT_106666f4..DAT_10666728;
-// then calls XLevel replication interface. Blocked pending global declarations.
-IMPL_TODO("retail writes actor state snapshot to globals DAT_106666f4-1066672c; blocked pending declarations (Ghidra 0x10377e30)")
+IMPL_MATCH("Engine.dll", 0x10377e30)
 void AActor::PreNetReceive()
 {
-    // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
+	// Snapshot replicated actor fields for use by PostNetReceive comparison.
+	// Ghidra 0x10377e30 (396 bytes): saves 26 fields then conditionally notifies net system.
+	GPreNet_Loc.X = *(FLOAT*)((BYTE*)this + 0x234);
+	GPreNet_Loc.Y = *(FLOAT*)((BYTE*)this + 0x238);
+	GPreNet_Loc.Z = *(FLOAT*)((BYTE*)this + 0x23c);
+	GPreNet_Rot.Pitch = *(INT*)((BYTE*)this + 0x240);
+	GPreNet_Rot.Yaw   = *(INT*)((BYTE*)this + 0x244);
+	GPreNet_Rot.Roll  = *(INT*)((BYTE*)this + 0x248);
+	GPreNet_Field264.X = *(FLOAT*)((BYTE*)this + 0x264);
+	GPreNet_Field264.Y = *(FLOAT*)((BYTE*)this + 0x268);
+	GPreNet_Field264.Z = *(FLOAT*)((BYTE*)this + 0x26c);
+	GPreNet_Field270.Pitch = *(INT*)((BYTE*)this + 0x270);
+	GPreNet_Field270.Yaw   = *(INT*)((BYTE*)this + 0x274);
+	GPreNet_Field270.Roll  = *(INT*)((BYTE*)this + 0x278);
+	GPreNet_Owner  = *(AActor**)((BYTE*)this + 0x15c);
+	GPreNet_F70    = *(FLOAT*)((BYTE*)this + 0xf8);
+	GPreNet_BitF74 = (*(DWORD*)((BYTE*)this + 0xa8) >> 11) & 1;
+	GPreNet_F6C    = *(FLOAT*)((BYTE*)this + 0xfc);
+	GPreNet_Field384X = *(DWORD*)((BYTE*)this + 0x384);
+	GPreNet_Field384Y = *(DWORD*)((BYTE*)this + 0x388);
+	GPreNet_Field384Z = *(DWORD*)((BYTE*)this + 0x38c);
+	GPreNet_F68    = *(FLOAT*)((BYTE*)this + 0xe0);
+	GPreNet_Field2bcX = *(DWORD*)((BYTE*)this + 0x2bc);
+	GPreNet_Field2bcY = *(DWORD*)((BYTE*)this + 0x2c0);
+	GPreNet_Field2bcZ = *(DWORD*)((BYTE*)this + 0x2c4);
+	GPreNet_F67    = *((BYTE*)this + 0x2f);
+	GPreNet_F64    = *((BYTE*)this + 0x2c);
+	GPreNet_DrawScale3D.X = *(FLOAT*)((BYTE*)this + 0x24c);
+	GPreNet_DrawScale3D.Y = *(FLOAT*)((BYTE*)this + 0x250);
+	GPreNet_DrawScale3D.Z = *(FLOAT*)((BYTE*)this + 0x254);
+	if ( (*(DWORD*)((BYTE*)this + 0xa8) & 0x800) != 0 )
+	{
+		// Ghidra: (**(code **)(**(int **)(*(int *)(this+0x328)+0xf0)+0xc))(this)
+		// XLevel holds a net-interface pointer at +0xf0; call its vtable[3] with this actor.
+		INT  xlev_addr = *(INT*)((BYTE*)this + 0x328);
+		INT* iface     = *(INT**)(xlev_addr + 0xf0);
+		((void(__thiscall*)(INT*, AActor*))((*(INT**)iface)[3]))(iface, this);
+	}
 }
 
-// Ghidra 0x1037d070 (1939 bytes): reads snapshot globals saved by PreNetReceive, applies
-// position/rotation/physics changes via XLevel. Blocked pending same globals.
-IMPL_TODO("reads globals saved by PreNetReceive; blocked pending DAT_106666f4-* declarations (Ghidra 0x1037d070)")
+// Ghidra 0x1037d070 (1939 bytes): swaps all snapshotted fields back, then sends change
+// notifications. Field swap is fully implemented; the FCoords attachment-transform section
+// at 0x1037d5f2-0x1037d7e3 requires FCoords/TransformVectorBy integration.
+IMPL_TODO("FCoords attachment-transform section (Ghidra 0x1037d5f2) unimplemented; all other notifications complete")
 void AActor::PostNetReceive()
 {
-    // STUB: requires binary-specific globals (DAT_106666f4 etc.) from retail Engine.dll
+	// --- Swap Location (0x234) ---
+	FLOAT newLocX = *(FLOAT*)((BYTE*)this + 0x234);
+	FLOAT newLocY = *(FLOAT*)((BYTE*)this + 0x238);
+	FLOAT newLocZ = *(FLOAT*)((BYTE*)this + 0x23c);
+	*(FLOAT*)((BYTE*)this + 0x234) = GPreNet_Loc.X;
+	*(FLOAT*)((BYTE*)this + 0x238) = GPreNet_Loc.Y;
+	*(FLOAT*)((BYTE*)this + 0x23c) = GPreNet_Loc.Z;
+	GPreNet_Loc.X = newLocX; GPreNet_Loc.Y = newLocY; GPreNet_Loc.Z = newLocZ;
+
+	// --- Swap Rotation (0x240) ---
+	INT newRotP = *(INT*)((BYTE*)this + 0x240);
+	INT newRotY = *(INT*)((BYTE*)this + 0x244);
+	INT newRotR = *(INT*)((BYTE*)this + 0x248);
+	*(INT*)((BYTE*)this + 0x240) = GPreNet_Rot.Pitch;
+	*(INT*)((BYTE*)this + 0x244) = GPreNet_Rot.Yaw;
+	*(INT*)((BYTE*)this + 0x248) = GPreNet_Rot.Roll;
+	GPreNet_Rot.Pitch = newRotP; GPreNet_Rot.Yaw = newRotY; GPreNet_Rot.Roll = newRotR;
+
+	// --- Swap field at +0x264 ---
+	DWORD n264X = *(DWORD*)((BYTE*)this + 0x264);
+	DWORD n264Y = *(DWORD*)((BYTE*)this + 0x268);
+	DWORD n264Z = *(DWORD*)((BYTE*)this + 0x26c);
+	*(DWORD*)((BYTE*)this + 0x264) = *(DWORD*)&GPreNet_Field264.X;
+	*(DWORD*)((BYTE*)this + 0x268) = *(DWORD*)&GPreNet_Field264.Y;
+	*(DWORD*)((BYTE*)this + 0x26c) = *(DWORD*)&GPreNet_Field264.Z;
+	*(DWORD*)&GPreNet_Field264.X = n264X;
+	*(DWORD*)&GPreNet_Field264.Y = n264Y;
+	*(DWORD*)&GPreNet_Field264.Z = n264Z;
+
+	// --- Swap field at +0x270 ---
+	INT n270P = *(INT*)((BYTE*)this + 0x270);
+	INT n270Y = *(INT*)((BYTE*)this + 0x274);
+	INT n270R = *(INT*)((BYTE*)this + 0x278);
+	*(INT*)((BYTE*)this + 0x270) = GPreNet_Field270.Pitch;
+	*(INT*)((BYTE*)this + 0x274) = GPreNet_Field270.Yaw;
+	*(INT*)((BYTE*)this + 0x278) = GPreNet_Field270.Roll;
+	GPreNet_Field270.Pitch = n270P; GPreNet_Field270.Yaw = n270Y; GPreNet_Field270.Roll = n270R;
+
+	// --- Swap Owner at +0x15c ---
+	AActor* newOwner = *(AActor**)((BYTE*)this + 0x15c);
+	*(AActor**)((BYTE*)this + 0x15c) = GPreNet_Owner;
+	GPreNet_Owner = newOwner;
+
+	// --- Swap bCollideWorld bit ---
+	DWORD flags = *(DWORD*)((BYTE*)this + 0xa8);
+	DWORD savedBit = GPreNet_BitF74;
+	GPreNet_BitF74 = (flags >> 11) & 1;
+	*(DWORD*)((BYTE*)this + 0xa8) = (flags ^ ((flags ^ (savedBit << 11)) & 0x800));
+
+	// --- Swap CollisionRadius (+0xf8) ---
+	FLOAT newF70 = *(FLOAT*)((BYTE*)this + 0xf8);
+	*(FLOAT*)((BYTE*)this + 0xf8) = GPreNet_F70;
+	GPreNet_F70 = newF70;
+
+	// --- Swap CollisionHeight (+0xfc) ---
+	FLOAT newF6C = *(FLOAT*)((BYTE*)this + 0xfc);
+	*(FLOAT*)((BYTE*)this + 0xfc) = GPreNet_F6C;
+	GPreNet_F6C = newF6C;
+
+	// --- Swap DrawScale (+0xe0) ---
+	FLOAT newF68 = *(FLOAT*)((BYTE*)this + 0xe0);
+	*(FLOAT*)((BYTE*)this + 0xe0) = GPreNet_F68;
+	GPreNet_F68 = newF68;
+
+	// --- Swap field2bc +0x2bc/2c0/2c4 ---
+	DWORD n2bcX = *(DWORD*)((BYTE*)this + 0x2bc);
+	DWORD n2bcY = *(DWORD*)((BYTE*)this + 0x2c0);
+	DWORD n2bcZ = *(DWORD*)((BYTE*)this + 0x2c4);
+	*(DWORD*)((BYTE*)this + 0x2bc) = GPreNet_Field2bcX;
+	*(DWORD*)((BYTE*)this + 0x2c0) = GPreNet_Field2bcY;
+	*(DWORD*)((BYTE*)this + 0x2c4) = GPreNet_Field2bcZ;
+	GPreNet_Field2bcX = n2bcX; GPreNet_Field2bcY = n2bcY; GPreNet_Field2bcZ = n2bcZ;
+
+	// --- Swap DrawType byte (+0x2f) ---
+	BYTE new2f = *((BYTE*)this + 0x2f);
+	*((BYTE*)this + 0x2f) = GPreNet_F67;
+	GPreNet_F67 = new2f;
+
+	// --- Conditional net-interface notification (bCollideWorld changed) ---
+	if ( (*(DWORD*)((BYTE*)this + 0xa8) & 0x800) != 0 )
+	{
+		INT  xlev_addr = *(INT*)((BYTE*)this + 0x328);
+		INT* iface     = *(INT**)(xlev_addr + 0xf0);
+		((void(__thiscall*)(INT*, AActor*))((*(INT**)iface)[3]))(iface, this);
+	}
+
+	// --- Animation replication ---
+	if ( *(INT*)((BYTE*)this + 0x16c) != 0 )
+	{
+		if ( GPreNet_Field384X != *(DWORD*)((BYTE*)this + 0x384) ||
+		     GPreNet_Field384Y != *(DWORD*)((BYTE*)this + 0x388) ||
+		     GPreNet_Field384Z != *(DWORD*)((BYTE*)this + 0x38c) )
+		{
+			PlayReplicatedAnim();
+		}
+	}
+
+	// --- Location or DrawScale3D changed → actor vtable[0x9c/4=39] ---
+	FVector* curLoc = (FVector*)((BYTE*)this + 0x234);
+	FVector* curDsc = (FVector*)((BYTE*)this + 0x24c);
+	if ( *curLoc != GPreNet_Loc || *curDsc != GPreNet_DrawScale3D )
+	{
+		// Ghidra: (**(code **)(**(int **)this + 0x9c))()
+		// Actor's own vtable[39] (no explicit args) — likely SetBase/UpdateBones
+		((void(__thiscall*)(AActor*))((*(INT**)this)[0x9c/4]))(this);
+	}
+
+	// --- Physics byte (+0x2c) update ---
+	BYTE cur2c = *((BYTE*)this + 0x2c);
+	if ( cur2c != GPreNet_F64 )
+	{
+		if ( cur2c == 0xe || GPreNet_F64 == 0xe )
+			*((BYTE*)this + 0x2c) = GPreNet_F64;
+	}
+
+	// --- Rotation changed → MoveActor with zero delta ---
+	FRotator* curRot = (FRotator*)((BYTE*)this + 0x240);
+	if ( *curRot != GPreNet_Rot )
+	{
+		FCheckResult Hit;
+		XLevel->MoveActor( this, FVector(0,0,0), GPreNet_Rot, Hit, 0, 0, 0, 1, 0 );
+	}
+
+	// --- CollisionSize changed ---
+	if ( *(FLOAT*)((BYTE*)this + 0xf8) != GPreNet_F70 || *(FLOAT*)((BYTE*)this + 0xfc) != GPreNet_F6C )
+		SetCollisionSize( GPreNet_F70, GPreNet_F6C );
+
+	// --- bCollide changed ---
+	DWORD f = *(DWORD*)((BYTE*)this + 0xa8);
+	if ( ((f >> 11) & 1) != GPreNet_BitF74 )
+		SetCollision( (INT)GPreNet_BitF74, (INT)((f >> 13) & 1), (INT)((f >> 14) & 1) );
+
+	// --- DrawScale changed ---
+	if ( *(FLOAT*)((BYTE*)this + 0xe0) != GPreNet_F68 )
+		SetDrawScale( GPreNet_F68 );
+
+	// --- DrawScale3D changed ---
+	FVector* curDsc2 = (FVector*)((BYTE*)this + 0x2bc);
+	FVector savedDsc( *(FLOAT*)&GPreNet_Field2bcX, *(FLOAT*)&GPreNet_Field2bcY, *(FLOAT*)&GPreNet_Field2bcZ );
+	if ( *curDsc2 != savedDsc )
+		SetDrawScale3D( savedDsc );
+
+	// --- DrawType changed ---
+	if ( *((BYTE*)this + 0x2f) != GPreNet_F67 )
+		SetDrawType( (EDrawType)GPreNet_F67 );
+
+	// --- Owner changed → bump events + attachment ---
+	INT bOwnerChanged = (*(AActor**)((BYTE*)this + 0x15c) != GPreNet_Owner) ? 1 : 0;
+	if ( bOwnerChanged && GPreNet_Owner )
+	{
+		eventBump( GPreNet_Owner );
+		GPreNet_Owner->eventBump( this );
+		XLevel->FarMoveActor( GPreNet_Owner, FVector(0,0,1), 0, 1, 0 );
+	}
+
+	// --- Attachment transform (Ghidra 0x1037d5f2-0x1037d7e3) ---
+	// Requires FCoords::Transpose + FVector::TransformVectorBy to recompute attached
+	// actor position in world space. Deferred pending FCoords integration.
 }
 
-// Ghidra 0x10378210 (61 bytes): calls XLevel->MoveActor via vtable[0x9c] with
-// the pre-receive location saved in DAT_106666f4/f8/fc by PreNetReceive.
-IMPL_TODO("calls XLevel MoveActor via vtable[0x9c] with location from DAT_106666f4/f8/fc (Ghidra 0x10378210)")
+IMPL_MATCH("Engine.dll", 0x10378210)
 void AActor::PostNetReceiveLocation()
 {
-    // STUB: requires binary-specific globals from PreNetReceive (DAT_106666f4/f8/fc)
+	// Ghidra 0x10378210 (61 bytes): calls XLevel->FarMoveActor(this, savedLoc, 0,1,1,0)
+	// using the location saved by PreNetReceive (GPreNet_Loc = DAT_106666f4/f8/fc).
+	XLevel->FarMoveActor( this, GPreNet_Loc, 0, 1, 1, 0 );
 }
 
 IMPL_MATCH("Engine.dll", 0x10414310)
