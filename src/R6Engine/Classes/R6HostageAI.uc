@@ -2892,6 +2892,10 @@ UseMoveToward:
 	stop;	
 }
 
+//------------------------------------------------------------------
+// RunForCover: 
+//  exception when running away of grenade
+//------------------------------------------------------------------
 state RunForCover
 {
 	function BeginState()
@@ -3037,6 +3041,10 @@ ReturnToPath:
 	stop;		
 }
 
+//------------------------------------------------------------------
+// Civilian: base state for civilian
+//	
+//------------------------------------------------------------------
 state Civilian
 {
 	ignores SeePlayerMgr;
@@ -3059,6 +3067,10 @@ state Civilian
 	stop;
 }
 
+//------------------------------------------------------------------
+// CivPatrolArea: took from R6TerroristAI
+//	- inherited
+//------------------------------------------------------------------
 state CivPatrolArea extends Civilian
 {
 	function BeginState()
@@ -3084,6 +3096,10 @@ AtDestination:
 	stop;				
 }
 
+//------------------------------------------------------------------
+// CivGuardPoint: 
+// - inherited	
+//------------------------------------------------------------------
 state CivGuardPoint extends Civilian
 {
 	function BeginState()
@@ -3145,6 +3161,10 @@ state WaitForSomeTime
 	stop;	
 }
 
+//------------------------------------------------------------------
+// CivPatrolPath: took from R6TerroristAI
+//	- inherited 	
+//------------------------------------------------------------------
 state CivPatrolPath extends Civilian
 {
 	function BeginState()
@@ -3313,6 +3333,10 @@ ReachedTheNode:
 	stop;			
 }
 
+//------------------------------------------------------------------
+// EscortedByEnemy
+//
+//------------------------------------------------------------------
 state EscortedByEnemy
 {
 	function BeginState()
@@ -3417,6 +3441,10 @@ StartWaiting:
 	stop;			
 }
 
+//------------------------------------------------------------------
+// CivStayHere: the civilian as run away 
+//	- inherited 
+//------------------------------------------------------------------
 state CivStayHere extends Civilian
 {
 	function BeginState()
@@ -3428,6 +3456,10 @@ state CivStayHere extends Civilian
 	stop;
 }
 
+//------------------------------------------------------------------
+// GoCivScareToDeath
+//	- inherited 
+//------------------------------------------------------------------
 state GoCivScareToDeath
 {
 	function BeginState()
@@ -3443,6 +3475,10 @@ state GoCivScareToDeath
 	stop;
 }
 
+//------------------------------------------------------------------
+// CivScareToDeath: Initialized by GoCivScareToDeath
+//	
+//------------------------------------------------------------------
 state CivScareToDeath extends Civilian
 {
 	function BeginState()
@@ -3459,6 +3495,9 @@ Begin:
 	stop;			
 }
 
+//------------------------------------------------------------------
+// CivRunForCover
+//------------------------------------------------------------------
 state CivRunForCover
 {
 	function BeginState()
@@ -3607,6 +3646,9 @@ state CMCivStayHere extends Civilian
 	stop;
 }
 
+//------------------------------------------------------------------
+// CivRunTowardRainbow
+//------------------------------------------------------------------
 state CivRunTowardRainbow
 {
 	function BeginState()
@@ -3625,6 +3667,9 @@ state CivRunTowardRainbow
 	stop;
 }
 
+//------------------------------------------------------------------
+// CivSurrender: surrender to terrorist
+//------------------------------------------------------------------
 state CivSurrender
 {
 	function BeginState()
@@ -3656,6 +3701,9 @@ state OpenDoor
 {	stop;
 }
 
+//------------------------------------------------------------------
+// ReactToGrenade
+//------------------------------------------------------------------
 state ReactToGrenade
 {
 	function BeginState()
@@ -3681,6 +3729,9 @@ End:
 	stop;				
 }
 
+//------------------------------------------------------------------
+// GoHstFreedButSeeEnemy
+//------------------------------------------------------------------
 state GoHstFreedButSeeEnemy
 {
 	function BeginState()
@@ -3700,6 +3751,9 @@ state GoHstFreedButSeeEnemy
 	stop;
 }
 
+//------------------------------------------------------------------
+// GoHstRunTowardRainbow
+//------------------------------------------------------------------
 state GoHstRunTowardRainbow
 {
 	function BeginState()
@@ -3710,6 +3764,9 @@ state GoHstRunTowardRainbow
 	stop;
 }
 
+//------------------------------------------------------------------
+// GoHstRunForCover
+//------------------------------------------------------------------
 state GoHstRunForCover
 {
 	function BeginState()
@@ -3729,6 +3786,9 @@ state GoHstRunForCover
 	stop;
 }
 
+//------------------------------------------------------------------
+// DbgHostage: state used to debug
+//------------------------------------------------------------------
 state DbgHostage
 {
 	function BeginState()
@@ -3739,6 +3799,10 @@ state DbgHostage
 	stop;
 }
 
+//------------------------------------------------------------------
+// GotoExtraction
+//	run toward m_escort and ignore threats
+//------------------------------------------------------------------
 state GotoExtraction
 {
 	function BeginState()
@@ -3816,6 +3880,10 @@ ReturnToPath:
 	stop;				
 }
 
+//------------------------------------------------------------------
+// Extracted
+//	
+//------------------------------------------------------------------
 state Extracted
 {
 	ignores R6DamageAttitudeTo;
