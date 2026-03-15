@@ -358,7 +358,7 @@ function AddGameTypes(LevelInfo pLevelInfo)
 
 	pLevelInfo.m_aGameTypeInfo.Remove(0, pLevelInfo.m_aGameTypeInfo.Length);
 	// End:0x5A
-	if(__NFUN_130__(__NFUN_119__(m_pCurrentMod, m_pRVS), __NFUN_177__(m_pCurrentMod.m_fPriority, float(1))))
+	if(((m_pCurrentMod != m_pRVS) && (m_pCurrentMod.m_fPriority > float(1))))
 	{
 		m_pRVS.AddGameTypesFromCurrentMod(pLevelInfo);
 	}
@@ -367,10 +367,10 @@ function AddGameTypes(LevelInfo pLevelInfo)
 	J0x75:
 
 	// End:0xBB [Loop If]
-	if(__NFUN_150__(i, m_pCurrentMod.m_aExtraMods.Length))
+	if((i < m_pCurrentMod.m_aExtraMods.Length))
 	{
 		m_pCurrentMod.m_aExtraMods[i].AddGameTypesFromCurrentMod(pLevelInfo);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x75;
 	}
@@ -386,14 +386,14 @@ function bool IsGameTypeAvailable(string szGameType)
 	J0x07:
 
 	// End:0x4A [Loop If]
-	if(__NFUN_150__(i, m_pCurrentMod.m_szGameTypes.Length))
+	if((i < m_pCurrentMod.m_szGameTypes.Length))
 	{
 		// End:0x40
-		if(__NFUN_122__(szGameType, m_pCurrentMod.m_szGameTypes[i]))
+		if((szGameType == m_pCurrentMod.m_szGameTypes[i]))
 		{
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -423,13 +423,13 @@ event string GetDefaultCampaignDir()
 event string GetCampaignDir()
 {
 	// End:0x19
-	if(__NFUN_114__(m_pCurrentMod, m_pRVS))
+	if((m_pCurrentMod == m_pRVS))
 	{
 		return GetDefaultCampaignDir();		
 	}
 	else
 	{
-		return __NFUN_112__(__NFUN_112__(GetDefaultCampaignDir(), m_pCurrentMod.m_szKeyWord), "\\");
+		return ((GetDefaultCampaignDir() $ m_pCurrentMod.m_szKeyWord) $ "\\");
 	}
 	return;
 }
@@ -437,13 +437,13 @@ event string GetCampaignDir()
 event string GetIniFilesDir()
 {
 	// End:0x1B
-	if(__NFUN_114__(m_pCurrentMod, m_pRVS))
+	if((m_pCurrentMod == m_pRVS))
 	{
 		return "System";		
 	}
 	else
 	{
-		return __NFUN_112__(__NFUN_112__("mods\\", m_pCurrentMod.m_szKeyWord), "\\System");
+		return (("mods\\" $ m_pCurrentMod.m_szKeyWord) $ "\\System");
 	}
 	return;
 }
@@ -456,23 +456,23 @@ function string GetCampaignMapDir(string szIniCampaignName)
 	J0x07:
 
 	// End:0x97 [Loop If]
-	if(__NFUN_150__(i, m_aMods.Length))
+	if((i < m_aMods.Length))
 	{
 		// End:0x8D
-		if(__NFUN_124__(m_aMods[i].m_szCampaignIniFile, szIniCampaignName))
+		if((m_aMods[i].m_szCampaignIniFile ~= szIniCampaignName))
 		{
 			// End:0x62
-			if(__NFUN_124__(szIniCampaignName, "RavenshieldCampaign"))
+			if((szIniCampaignName ~= "RavenshieldCampaign"))
 			{
 				return "..\\Maps\\";
 				// [Explicit Continue]
 				goto J0x8D;
 			}
-			return __NFUN_112__(__NFUN_112__("..\\mods\\", m_aMods[i].m_szKeyWord), "\\MAPS\\");
+			return (("..\\mods\\" $ m_aMods[i].m_szKeyWord) $ "\\MAPS\\");
 		}
 		J0x8D:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -489,7 +489,7 @@ event string GetMapsDir()
 	}
 	else
 	{
-		return __NFUN_112__(__NFUN_112__("..\\mods\\", m_pCurrentMod.m_szKeyWord), "\\MAPS\\");
+		return (("..\\mods\\" $ m_pCurrentMod.m_szKeyWord) $ "\\MAPS\\");
 	}
 	return;
 }
@@ -497,7 +497,7 @@ event string GetMapsDir()
 function Class<HUD> GetDefaultHUD()
 {
 	// End:0x37
-	if(__NFUN_123__(m_pCurrentMod.m_GlobalHUDToSpawn, ""))
+	if((m_pCurrentMod.m_GlobalHUDToSpawn != ""))
 	{
 		return Class<HUD>(DynamicLoadObject(m_pCurrentMod.m_GlobalHUDToSpawn, Class'Core.Class'));		
 	}
@@ -513,7 +513,7 @@ function Class<Pawn> GetDefaultPilotPawn()
 	local string CurrentPawnClassName;
 
 	// End:0x2C
-	if(__NFUN_123__(m_pCurrentMod.m_DefaultPilotPawn, ""))
+	if((m_pCurrentMod.m_DefaultPilotPawn != ""))
 	{
 		CurrentPawnClassName = m_pCurrentMod.m_DefaultPilotPawn;		
 	}
@@ -530,10 +530,10 @@ function Class<Pawn> GetDefaultRainbowPawn(int Index)
 	local string CurrentPawnClassName;
 
 	// End:0x58
-	if(__NFUN_132__(__NFUN_154__(Index, 0), __NFUN_154__(Index, 1)))
+	if(((Index == 0) || (Index == 1)))
 	{
 		// End:0x44
-		if(__NFUN_123__(m_pCurrentMod.m_DefaultLightPawn, ""))
+		if((m_pCurrentMod.m_DefaultLightPawn != ""))
 		{
 			CurrentPawnClassName = m_pCurrentMod.m_DefaultLightPawn;			
 		}
@@ -543,10 +543,10 @@ function Class<Pawn> GetDefaultRainbowPawn(int Index)
 		}
 	}
 	// End:0xA4
-	if(__NFUN_154__(Index, 2))
+	if((Index == 2))
 	{
 		// End:0x90
-		if(__NFUN_123__(m_pCurrentMod.m_DefaultMediumPawn, ""))
+		if((m_pCurrentMod.m_DefaultMediumPawn != ""))
 		{
 			CurrentPawnClassName = m_pCurrentMod.m_DefaultMediumPawn;			
 		}
@@ -556,10 +556,10 @@ function Class<Pawn> GetDefaultRainbowPawn(int Index)
 		}
 	}
 	// End:0xF0
-	if(__NFUN_154__(Index, 3))
+	if((Index == 3))
 	{
 		// End:0xDC
-		if(__NFUN_123__(m_pCurrentMod.m_DefaultHeavyPawn, ""))
+		if((m_pCurrentMod.m_DefaultHeavyPawn != ""))
 		{
 			CurrentPawnClassName = m_pCurrentMod.m_DefaultHeavyPawn;			
 		}
@@ -575,7 +575,7 @@ function Class<Pawn> GetDefaultRainbowPawn(int Index)
 function Class<AIController> GetDefaultRainbowAI()
 {
 	// End:0x37
-	if(__NFUN_123__(m_pCurrentMod.m_DefaultRainbowAI, ""))
+	if((m_pCurrentMod.m_DefaultRainbowAI != ""))
 	{
 		return Class<AIController>(DynamicLoadObject(m_pCurrentMod.m_DefaultRainbowAI, Class'Core.Class'));		
 	}
@@ -588,13 +588,13 @@ function Class<AIController> GetDefaultRainbowAI()
 
 function string GetCreditsFile()
 {
-	return __NFUN_112__(__NFUN_112__(__NFUN_112__("..\\", GetIniFilesDir()), "\\"), m_pCurrentMod.m_szCreditsFile);
+	return ((("..\\" $ GetIniFilesDir()) $ "\\") $ m_pCurrentMod.m_szCreditsFile);
 	return;
 }
 
 function string GetMenuDefFile()
 {
-	return __NFUN_112__(__NFUN_112__(__NFUN_112__("..\\", GetIniFilesDir()), "\\"), m_pCurrentMod.m_szMenuDefinesFile);
+	return ((("..\\" $ GetIniFilesDir()) $ "\\") $ m_pCurrentMod.m_szMenuDefinesFile);
 	return;
 }
 
@@ -604,22 +604,22 @@ function Class<Actor> GetCurrentReticule(string ReticuleID)
 	local int i;
 
 	// End:0x84
-	if(__NFUN_155__(m_pCurrentMod.m_aReticuleList.Length, 0))
+	if((m_pCurrentMod.m_aReticuleList.Length != 0))
 	{
 		i = 0;
 		J0x1C:
 
 		// End:0x84 [Loop If]
-		if(__NFUN_150__(i, m_pCurrentMod.m_aReticuleList.Length))
+		if((i < m_pCurrentMod.m_aReticuleList.Length))
 		{
 			// End:0x7A
-			if(__NFUN_122__(ReticuleID, m_pCurrentMod.m_aReticuleList[i].m_szReticuleId))
+			if((ReticuleID == m_pCurrentMod.m_aReticuleList[i].m_szReticuleId))
 			{
 				ReticuleClassName = m_pCurrentMod.m_aReticuleList[i].m_szReticuleClassName;
 				// [Explicit Break]
 				goto J0x84;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1C;
 		}
@@ -627,20 +627,20 @@ function Class<Actor> GetCurrentReticule(string ReticuleID)
 	J0x84:
 
 	// End:0xFC
-	if(__NFUN_122__(ReticuleClassName, ""))
+	if((ReticuleClassName == ""))
 	{
 		i = 0;
 		J0x97:
 
 		// End:0xFC [Loop If]
-		if(__NFUN_150__(i, m_pRVS.m_aReticuleList.Length))
+		if((i < m_pRVS.m_aReticuleList.Length))
 		{
 			// End:0xF2
-			if(__NFUN_122__(ReticuleID, m_pRVS.m_aReticuleList[i].m_szReticuleId))
+			if((ReticuleID == m_pRVS.m_aReticuleList[i].m_szReticuleId))
 			{
 				ReticuleClassName = m_pRVS.m_aReticuleList[i].m_szReticuleClassName;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x97;
 		}
@@ -651,7 +651,7 @@ function Class<Actor> GetCurrentReticule(string ReticuleID)
 
 event string GetServerIni()
 {
-	return __NFUN_112__(__NFUN_112__(__NFUN_112__("..\\", GetIniFilesDir()), "\\"), m_pCurrentMod.m_szServerIni);
+	return ((("..\\" $ GetIniFilesDir()) $ "\\") $ m_pCurrentMod.m_szServerIni);
 	return;
 }
 
@@ -714,14 +714,14 @@ event int GetGameTypeIndex(string _szGameType)
 	J0x07:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeCorrTable.Length))
+	if((i < m_aGameTypeCorrTable.Length))
 	{
 		// End:0x32
-		if(__NFUN_122__(_szGameType, m_aGameTypeCorrTable[i]))
+		if((_szGameType == m_aGameTypeCorrTable[i]))
 		{
 			return i;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -732,10 +732,10 @@ event int GetGameTypeIndex(string _szGameType)
 event string GetGameTypeName(int _iIndex)
 {
 	// End:0x88
-	if(__NFUN_153__(_iIndex, m_aGameTypeCorrTable.Length))
+	if((_iIndex >= m_aGameTypeCorrTable.Length))
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("GetGameTypeName() return RGM_NoRulesMode because iIndex ", string(_iIndex)), ">= nb of gametype "), string(m_aGameTypeCorrTable.Length)));
-		return m_aGameTypeCorrTable[__NFUN_147__(m_aGameTypeCorrTable.Length, 1)];		
+		Log(((("GetGameTypeName() return RGM_NoRulesMode because iIndex " @ string(_iIndex)) @ ">= nb of gametype ") @ string(m_aGameTypeCorrTable.Length)));
+		return m_aGameTypeCorrTable[(m_aGameTypeCorrTable.Length - 1)];		
 	}
 	else
 	{

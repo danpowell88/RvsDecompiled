@@ -47,19 +47,19 @@ event Timer()
 	// End:0x61
 	if(((m_grenade != none) && (int(m_grenade.Physics) != int(0))))
 	{
-		__NFUN_267__((m_grenade.Location + vect(0.0000000, 0.0000000, 125.0000000))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+		SetLocation((m_grenade.Location + vect(0.0000000, 0.0000000, 125.0000000)));
 	}
 	// End:0x8C
-	if(__NFUN_176__(fElapsedTime, m_fExpansionTime))
+	if((fElapsedTime < m_fExpansionTime))
 	{
-		m_fCurrentRadius = __NFUN_171__(__NFUN_172__(fElapsedTime, m_fExpansionTime), m_fFinalRadius);		
+		m_fCurrentRadius = ((fElapsedTime / m_fExpansionTime) * m_fFinalRadius);		
 	}
 	else
 	{
 		m_fCurrentRadius = m_fFinalRadius;
-		__NFUN_280__(0.0000000, false);
+		SetTimer(0.0000000, false);
 	}
-	__NFUN_283__(m_fCurrentRadius, CollisionHeight);
+	SetCollisionSize(m_fCurrentRadius, CollisionHeight);
 	return;
 }
 

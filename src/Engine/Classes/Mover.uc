@@ -184,19 +184,19 @@ simulated function Timer()
 				// End:0x70
 				if((VSize((RealPosition - Location)) > float(3)))
 				{
-					__NFUN_267__(RealPosition) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;					
+					SetLocation(RealPosition);					
 				}
 				else
 				{
 					RealPosition = Location;
 				}
-				__NFUN_299__(RealRotation);
+				SetRotation(RealRotation);
 				bClientPause = false;				
 			}
 			else
 			{
 				// End:0xA5
-				if(__NFUN_218__(RealPosition, Location))
+				if((RealPosition != Location))
 				{
 					bClientPause = true;
 				}
@@ -221,17 +221,17 @@ final simulated function InterpolateTo(byte NewKeyNum, float Seconds)
 	local Mover M;
 
 	// End:0x20
-	foreach __NFUN_306__(Class'Engine.Mover', M)
+	foreach BasedActors(Class'Engine.Mover', M)
 	{
 		M.BaseStarted();		
 	}	
-	NewKeyNum = byte(__NFUN_251__(int(NewKeyNum), 0, __NFUN_147__(24, 1)));
+	NewKeyNum = byte(Clamp(int(NewKeyNum), 0, (24 - 1)));
 	// End:0xAA
-	if(__NFUN_130__(__NFUN_154__(int(NewKeyNum), int(PrevKeyNum)), __NFUN_155__(int(KeyNum), int(PrevKeyNum))))
+	if(((int(NewKeyNum) == int(PrevKeyNum)) && (int(KeyNum) != int(PrevKeyNum))))
 	{
-		PhysAlpha = __NFUN_175__(1.0000000, PhysAlpha);
-		OldPos = __NFUN_215__(BasePos, KeyPos[int(KeyNum)]);
-		OldRot = __NFUN_316__(BaseRot, KeyRot[int(KeyNum)]);		
+		PhysAlpha = (1.0000000 - PhysAlpha);
+		OldPos = (BasePos + KeyPos[int(KeyNum)]);
+		OldRot = (BaseRot + KeyRot[int(KeyNum)]);		
 	}
 	else
 	{
@@ -239,27 +239,27 @@ final simulated function InterpolateTo(byte NewKeyNum, float Seconds)
 		OldRot = Rotation;
 		PhysAlpha = 0.0000000;
 	}
-	__NFUN_3970__(8);
+	SetPhysics(8);
 	bInterpolating = true;
 	m_bTickOnlyWhenVisible = false;
 	PrevKeyNum = KeyNum;
 	KeyNum = NewKeyNum;
-	PhysRate = __NFUN_172__(1.0000000, __NFUN_245__(Seconds, 0.0050000));
-	__NFUN_165__(ClientUpdate);
+	PhysRate = (1.0000000 / FMax(Seconds, 0.0050000));
+	(ClientUpdate++);
 	SimOldPos = OldPos;
 	SimOldRotYaw = OldRot.Yaw;
 	SimOldRotPitch = OldRot.Pitch;
 	SimOldRotRoll = OldRot.Roll;
-	SimInterpolate.X = __NFUN_171__(100.0000000, PhysAlpha);
-	SimInterpolate.Y = __NFUN_171__(100.0000000, __NFUN_245__(0.0100000, PhysRate));
-	SimInterpolate.Z = __NFUN_174__(__NFUN_171__(256.0000000, float(PrevKeyNum)), float(KeyNum));
+	SimInterpolate.X = (100.0000000 * PhysAlpha);
+	SimInterpolate.Y = (100.0000000 * FMax(0.0100000, PhysRate));
+	SimInterpolate.Z = ((256.0000000 * float(PrevKeyNum)) + float(KeyNum));
 	return;
 }
 
 // Set the specified keyframe.
 final function SetKeyframe(byte NewKeyNum, Vector NewLocation, Rotator NewRotation)
 {
-	KeyNum = byte(__NFUN_251__(int(NewKeyNum), 0, __NFUN_147__(24, 1)));
+	KeyNum = byte(Clamp(int(NewKeyNum), 0, (24 - 1)));
 	KeyPos[int(KeyNum)] = NewLocation;
 	KeyRot[int(KeyNum)] = NewRotation;
 	return;
@@ -274,29 +274,29 @@ simulated event KeyFrameReached()
 	OldKeyNum = PrevKeyNum;
 	PrevKeyNum = KeyNum;
 	PhysAlpha = 0.0000000;
-	__NFUN_166__(ClientUpdate);
+	(ClientUpdate--);
 	// End:0x64
-	if(__NFUN_130__(__NFUN_151__(int(KeyNum), 0), __NFUN_150__(int(KeyNum), int(OldKeyNum))))
+	if(((int(KeyNum) > 0) && (int(KeyNum) < int(OldKeyNum))))
 	{
-		InterpolateTo(byte(__NFUN_147__(int(KeyNum), 1)), MoveTime);		
+		InterpolateTo(byte((int(KeyNum) - 1)), MoveTime);		
 	}
 	else
 	{
 		// End:0xA9
-		if(__NFUN_130__(__NFUN_150__(int(KeyNum), __NFUN_147__(int(NumKeys), 1)), __NFUN_151__(int(KeyNum), int(OldKeyNum))))
+		if(((int(KeyNum) < (int(NumKeys) - 1)) && (int(KeyNum) > int(OldKeyNum))))
 		{
-			InterpolateTo(byte(__NFUN_146__(int(KeyNum), 1)), MoveTime);			
+			InterpolateTo(byte((int(KeyNum) + 1)), MoveTime);			
 		}
 		else
 		{
 			AmbientSound = none;
 			// End:0x10D
-			if(__NFUN_130__(__NFUN_154__(ClientUpdate, 0), __NFUN_155__(int(Level.NetMode), int(NM_Client))))
+			if(((ClientUpdate == 0) && (int(Level.NetMode) != int(NM_Client))))
 			{
 				RealPosition = Location;
 				RealRotation = Rotation;
 				// End:0x10C
-				foreach __NFUN_306__(Class'Engine.Mover', M)
+				foreach BasedActors(Class'Engine.Mover', M)
 				{
 					M.BaseFinished();					
 				}				
@@ -315,10 +315,10 @@ function FinishNotify()
 	J0x14:
 
 	// End:0x6F [Loop If]
-	if(__NFUN_119__(C, none))
+	if((C != none))
 	{
 		// End:0x58
-		if(__NFUN_130__(__NFUN_119__(C.Pawn, none), __NFUN_114__(C.PendingMover, self)))
+		if(((C.Pawn != none) && (C.PendingMover == self)))
 		{
 			C.MoverFinished();
 		}
@@ -334,17 +334,17 @@ function FinishedClosing()
 {
 	local Mover M;
 
-	__NFUN_264__(ClosedSound, 3);
+	PlaySound(ClosedSound, 3);
 	TriggerEvent(ClosedEvent, self, Instigator);
 	// End:0x35
-	if(__NFUN_119__(SavedTrigger, none))
+	if((SavedTrigger != none))
 	{
 		SavedTrigger.EndEvent();
 	}
 	SavedTrigger = none;
 	Instigator = none;
 	// End:0x5D
-	if(__NFUN_119__(myMarker, none))
+	if((myMarker != none))
 	{
 		myMarker.MoverClosed();
 	}
@@ -354,10 +354,10 @@ function FinishedClosing()
 	J0x76:
 
 	// End:0xAE [Loop If]
-	if(__NFUN_119__(M, none))
+	if((M != none))
 	{
 		// End:0x97
-		if(__NFUN_129__(M.bClosed))
+		if((!M.bClosed))
 		{
 			return;
 		}
@@ -372,11 +372,11 @@ function FinishedClosing()
 // Handle when the mover finishes opening.
 function FinishedOpening()
 {
-	__NFUN_264__(OpenedSound, 3);
+	PlaySound(OpenedSound, 3);
 	TriggerEvent(Event, self, Instigator);
 	TriggerEvent(OpenedEvent, self, Instigator);
 	// End:0x46
-	if(__NFUN_119__(myMarker, none))
+	if((myMarker != none))
 	{
 		myMarker.MoverOpened();
 	}
@@ -390,12 +390,12 @@ function DoOpen()
 	bOpening = true;
 	bDelaying = false;
 	InterpolateTo(1, MoveTime);
-	__NFUN_512__(1.0000000);
-	__NFUN_264__(OpeningSound, 3);
+	MakeNoise(1.0000000);
+	PlaySound(OpeningSound, 3);
 	AmbientSound = MoveAmbientSound;
 	TriggerEvent(OpeningEvent, self, Instigator);
 	// End:0x65
-	if(__NFUN_119__(Follower, none))
+	if((Follower != none))
 	{
 		Follower.DoOpen();
 	}
@@ -407,14 +407,14 @@ function DoClose()
 {
 	bOpening = false;
 	bDelaying = false;
-	InterpolateTo(byte(__NFUN_250__(0, __NFUN_147__(int(KeyNum), 1))), MoveTime);
-	__NFUN_512__(1.0000000);
-	__NFUN_264__(ClosingSound, 3);
+	InterpolateTo(byte(Max(0, (int(KeyNum) - 1))), MoveTime);
+	MakeNoise(1.0000000);
+	PlaySound(ClosingSound, 3);
 	UntriggerEvent(Event, self, Instigator);
 	AmbientSound = MoveAmbientSound;
 	TriggerEvent(ClosingEvent, self, Instigator);
 	// End:0x83
-	if(__NFUN_119__(Follower, none))
+	if((Follower != none))
 	{
 		Follower.DoClose();
 	}
@@ -427,46 +427,46 @@ simulated function BeginPlay()
 	local AntiPortalActor AntiPortal;
 
 	// End:0x4B
-	if(__NFUN_255__(AntiPortalTag, 'None'))
+	if((AntiPortalTag != 'None'))
 	{
 		// End:0x4A
-		foreach __NFUN_304__(Class'Engine.AntiPortalActor', AntiPortal, AntiPortalTag)
+		foreach AllActors(Class'Engine.AntiPortalActor', AntiPortal, AntiPortalTag)
 		{
-			AntiPortals.Length = __NFUN_146__(AntiPortals.Length, 1);
-			AntiPortals[__NFUN_147__(AntiPortals.Length, 1)] = AntiPortal;			
+			AntiPortals.Length = (AntiPortals.Length + 1);
+			AntiPortals[(AntiPortals.Length - 1)] = AntiPortal;			
 		}		
 	}
 	// End:0xA4
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		// End:0x89
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) == int(NM_Client)))
 		{
-			__NFUN_280__(4.0000000, true);			
+			SetTimer(4.0000000, true);			
 		}
 		else
 		{
-			__NFUN_280__(1.0000000, true);
+			SetTimer(1.0000000, true);
 		}
 		// End:0xA4
-		if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+		if((int(Role) < int(ROLE_Authority)))
 		{
 			return;
 		}
 	}
 	// End:0xD3
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		RealPosition = Location;
 		RealRotation = Rotation;
 	}
 	super.BeginPlay();
-	KeyNum = byte(__NFUN_251__(int(KeyNum), 0, __NFUN_147__(24, 1)));
+	KeyNum = byte(Clamp(int(KeyNum), 0, (24 - 1)));
 	PhysAlpha = 0.0000000;
-	__NFUN_266__(__NFUN_216__(__NFUN_215__(BasePos, KeyPos[int(KeyNum)]), Location));
-	__NFUN_299__(__NFUN_316__(BaseRot, KeyRot[int(KeyNum)]));
+	Move(((BasePos + KeyPos[int(KeyNum)]) - Location));
+	SetRotation((BaseRot + KeyRot[int(KeyNum)]));
 	// End:0x14B
-	if(__NFUN_254__(ReturnGroup, 'None'))
+	if((ReturnGroup == 'None'))
 	{
 		ReturnGroup = Tag;
 	}
@@ -481,16 +481,16 @@ function PostBeginPlay()
 	local Mover M;
 
 	// End:0x51
-	if(__NFUN_129__(bSlave))
+	if((!bSlave))
 	{
 		// End:0x50
-		foreach __NFUN_313__(Class'Engine.Mover', M, Tag)
+		foreach DynamicActors(Class'Engine.Mover', M, Tag)
 		{
 			// End:0x4F
 			if(M.bSlave)
 			{
-				M.__NFUN_113__('None');
-				M.__NFUN_298__(self);
+				M.GotoState('None');
+				M.SetBase(self);
 			}			
 		}		
 	}
@@ -499,10 +499,10 @@ function PostBeginPlay()
 	{
 		Leader = self;
 		// End:0xC6
-		foreach __NFUN_313__(Class'Engine.Mover', M)
+		foreach DynamicActors(Class'Engine.Mover', M)
 		{
 			// End:0xC5
-			if(__NFUN_130__(__NFUN_119__(M, self), __NFUN_254__(M.ReturnGroup, ReturnGroup)))
+			if(((M != self) && (M.ReturnGroup == ReturnGroup)))
 			{
 				M.Leader = self;
 				M.Follower = Follower;
@@ -513,13 +513,13 @@ function PostBeginPlay()
 	else
 	{
 		// End:0x116
-		if(__NFUN_114__(Leader, none))
+		if((Leader == none))
 		{
 			// End:0x10E
-			foreach __NFUN_313__(Class'Engine.Mover', M)
+			foreach DynamicActors(Class'Engine.Mover', M)
 			{
 				// End:0x10D
-				if(__NFUN_130__(__NFUN_119__(M, self), __NFUN_254__(M.ReturnGroup, ReturnGroup)))
+				if(((M != self) && (M.ReturnGroup == ReturnGroup)))
 				{					
 					return;
 				}				
@@ -535,9 +535,9 @@ function MakeGroupStop()
 	bInterpolating = false;
 	m_bTickOnlyWhenVisible = default.m_bTickOnlyWhenVisible;
 	AmbientSound = none;
-	__NFUN_113__(, 'None');
+	GotoState(, 'None');
 	// End:0x3E
-	if(__NFUN_119__(Follower, none))
+	if((Follower != none))
 	{
 		Follower.MakeGroupStop();
 	}
@@ -550,20 +550,20 @@ function MakeGroupReturn()
 	m_bTickOnlyWhenVisible = default.m_bTickOnlyWhenVisible;
 	AmbientSound = none;
 	// End:0x58
-	if(__NFUN_132__(bIsLeader, __NFUN_114__(Leader, self)))
+	if((bIsLeader || (Leader == self)))
 	{
 		// End:0x50
-		if(__NFUN_150__(int(KeyNum), int(PrevKeyNum)))
+		if((int(KeyNum) < int(PrevKeyNum)))
 		{
-			__NFUN_113__(, 'Open');			
+			GotoState(, 'Open');			
 		}
 		else
 		{
-			__NFUN_113__(, 'Close');
+			GotoState(, 'Close');
 		}
 	}
 	// End:0x72
-	if(__NFUN_119__(Follower, none))
+	if((Follower != none))
 	{
 		Follower.MakeGroupReturn();
 	}
@@ -576,32 +576,32 @@ function bool EncroachingOn(Actor Other)
 	local Pawn P;
 
 	// End:0x0D
-	if(__NFUN_114__(Other, none))
+	if((Other == none))
 	{
 		return false;
 	}
 	// End:0x3A
-	if(__NFUN_130__(__NFUN_119__(Pawn(Other), none), __NFUN_114__(Pawn(Other).Controller, none)))
+	if(((Pawn(Other) != none) && (Pawn(Other).Controller == none)))
 	{
 		return false;
 	}
 	P = Pawn(Other);
 	// End:0xFB
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(P, none), __NFUN_119__(P.Controller, none)), P.IsPlayerPawn()))
+	if((((P != none) && (P.Controller != none)) && P.IsPlayerPawn()))
 	{
 		// End:0x99
-		if(__NFUN_255__(PlayerBumpEvent, 'None'))
+		if((PlayerBumpEvent != 'None'))
 		{
 			Bump(Other);
 		}
 		// End:0xFB
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(P.Controller, none), __NFUN_119__(P.Base, self)), __NFUN_114__(P.Controller.PendingMover, self)))
+		if((((P.Controller != none) && (P.Base != self)) && (P.Controller.PendingMover == self)))
 		{
 			P.Controller.UnderLift(self);
 		}
 	}
 	// End:0x11F
-	if(__NFUN_154__(int(MoverEncroachType), int(0)))
+	if((int(MoverEncroachType) == int(0)))
 	{
 		Leader.MakeGroupStop();
 		return true;		
@@ -609,11 +609,11 @@ function bool EncroachingOn(Actor Other)
 	else
 	{
 		// End:0x16B
-		if(__NFUN_154__(int(MoverEncroachType), int(1)))
+		if((int(MoverEncroachType) == int(1)))
 		{
 			Leader.MakeGroupReturn();
 			// End:0x166
-			if(Other.__NFUN_303__('Pawn'))
+			if(Other.IsA('Pawn'))
 			{
 				Pawn(Other).PlayMoverHitSound();
 			}
@@ -622,7 +622,7 @@ function bool EncroachingOn(Actor Other)
 		else
 		{
 			// End:0x194
-			if(__NFUN_154__(int(MoverEncroachType), int(2)))
+			if((int(MoverEncroachType) == int(2)))
 			{
 				Other.KilledBy(Instigator);
 				return false;				
@@ -630,7 +630,7 @@ function bool EncroachingOn(Actor Other)
 			else
 			{
 				// End:0x1A6
-				if(__NFUN_154__(int(MoverEncroachType), int(3)))
+				if((int(MoverEncroachType) == int(3)))
 				{
 					return false;
 				}
@@ -647,29 +647,29 @@ function Bump(Actor Other)
 
 	P = Pawn(Other);
 	// End:0x79
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bUseTriggered, __NFUN_119__(P, none)), __NFUN_129__(P.IsHumanControlled())), P.IsPlayerPawn()))
+	if((((bUseTriggered && (P != none)) && (!P.IsHumanControlled())) && P.IsPlayerPawn()))
 	{
 		Trigger(P, P);
 		P.Controller.WaitForMover(self);
 	}
 	// End:0x98
-	if(__NFUN_130__(__NFUN_155__(int(BumpType), int(2)), __NFUN_114__(P, none)))
+	if(((int(BumpType) != int(2)) && (P == none)))
 	{
 		return;
 	}
 	// End:0xC0
-	if(__NFUN_130__(__NFUN_154__(int(BumpType), int(0)), __NFUN_129__(P.IsPlayerPawn())))
+	if(((int(BumpType) == int(0)) && (!P.IsPlayerPawn())))
 	{
 		return;
 	}
 	// End:0xE6
-	if(__NFUN_130__(__NFUN_154__(int(BumpType), int(1)), P.bAmbientCreature))
+	if(((int(BumpType) == int(1)) && P.bAmbientCreature))
 	{
 		return;
 	}
 	TriggerEvent(BumpEvent, self, P);
 	// End:0x127
-	if(__NFUN_130__(__NFUN_119__(P, none), P.IsPlayerPawn()))
+	if(((P != none) && P.IsPlayerPawn()))
 	{
 		TriggerEvent(PlayerBumpEvent, self, P);
 	}
@@ -680,10 +680,10 @@ function Bump(Actor Other)
 function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
 	// End:0x7D
-	if(__NFUN_130__(bDamageTriggered, __NFUN_179__(float(iKillValue), DamageThreshold)))
+	if((bDamageTriggered && (float(iKillValue) >= DamageThreshold)))
 	{
 		// End:0x6C
-		if(__NFUN_130__(__NFUN_119__(AIController(instigatedBy.Controller), none), __NFUN_114__(instigatedBy.Controller.Focus, self)))
+		if(((AIController(instigatedBy.Controller) != none) && (instigatedBy.Controller.Focus == self)))
 		{
 			instigatedBy.Controller.StopFiring();
 		}
@@ -698,9 +698,9 @@ function MoverLooped()
 {
 	TriggerEvent(LoopEvent, self, Instigator);
 	// End:0x26
-	if(__NFUN_119__(LoopSound, none))
+	if((LoopSound != none))
 	{
-		__NFUN_264__(LoopSound, 3);
+		PlaySound(LoopSound, 3);
 	}
 	return;
 }
@@ -730,33 +730,33 @@ Open:
 	bClosed = false;
 	DisableTrigger();
 	// End:0x2B
-	if(__NFUN_177__(DelayTime, float(0)))
+	if((DelayTime > float(0)))
 	{
 		bDelaying = true;
-		__NFUN_256__(DelayTime);
+		Sleep(DelayTime);
 	}
 	DoOpen();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedOpening();
-	__NFUN_256__(StayOpenTime);
+	Sleep(StayOpenTime);
 	// End:0x52
 	if(bTriggerOnceOnly)
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 	}
 Close:
 
 
 	DoClose();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedClosing();
 	EnableTrigger();
-	__NFUN_256__(StayOpenTime);
+	Sleep(StayOpenTime);
 	// End:0x8B
 	if(ShouldReTrigger())
 	{
 		SavedTrigger = none;
-		__NFUN_113__('StandOpenTimed', 'Open');
+		GotoState('StandOpenTimed', 'Open');
 	}
 	stop;				
 }
@@ -772,14 +772,14 @@ state() StandOpenTimed extends OpenTimedMover
 		J0x07:
 
 		// End:0x37 [Loop If]
-		if(__NFUN_150__(i, Attached.Length))
+		if((i < Attached.Length))
 		{
 			// End:0x2D
 			if(CanTrigger(Attached[i]))
 			{
 				return true;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x07;
 		}
@@ -794,17 +794,17 @@ state() StandOpenTimed extends OpenTimedMover
 
 		P = Pawn(Other);
 		// End:0x2F
-		if(__NFUN_130__(__NFUN_155__(int(BumpType), int(2)), __NFUN_114__(P, none)))
+		if(((int(BumpType) != int(2)) && (P == none)))
 		{
 			return false;
 		}
 		// End:0x57
-		if(__NFUN_130__(__NFUN_154__(int(BumpType), int(0)), __NFUN_129__(P.IsPlayerPawn())))
+		if(((int(BumpType) == int(0)) && (!P.IsPlayerPawn())))
 		{
 			return false;
 		}
 		// End:0x82
-		if(__NFUN_130__(__NFUN_154__(int(BumpType), int(1)), __NFUN_176__(Other.Mass, float(10))))
+		if(((int(BumpType) == int(1)) && (Other.Mass < float(10))))
 		{
 			return false;
 		}
@@ -816,24 +816,24 @@ state() StandOpenTimed extends OpenTimedMover
 	function Attach(Actor Other)
 	{
 		// End:0x12
-		if(__NFUN_129__(CanTrigger(Other)))
+		if((!CanTrigger(Other)))
 		{
 			return;
 		}
 		SavedTrigger = none;
-		__NFUN_113__('StandOpenTimed', 'Open');
+		GotoState('StandOpenTimed', 'Open');
 		return;
 	}
 
 	function DisableTrigger()
 	{
-		__NFUN_118__('Attach');
+		Disable('Attach');
 		return;
 	}
 
 	function EnableTrigger()
 	{
-		__NFUN_117__('Attach');
+		Enable('Attach');
 		return;
 	}
 	stop;
@@ -845,17 +845,17 @@ state() BumpOpenTimed extends OpenTimedMover
 	function Bump(Actor Other)
 	{
 		// End:0x24
-		if(__NFUN_130__(__NFUN_155__(int(BumpType), int(2)), __NFUN_114__(Pawn(Other), none)))
+		if(((int(BumpType) != int(2)) && (Pawn(Other) == none)))
 		{
 			return;
 		}
 		// End:0x51
-		if(__NFUN_130__(__NFUN_154__(int(BumpType), int(0)), __NFUN_129__(Pawn(Other).IsPlayerPawn())))
+		if(((int(BumpType) == int(0)) && (!Pawn(Other).IsPlayerPawn())))
 		{
 			return;
 		}
 		// End:0x7C
-		if(__NFUN_130__(__NFUN_154__(int(BumpType), int(1)), __NFUN_176__(Other.Mass, float(10))))
+		if(((int(BumpType) == int(1)) && (Other.Mass < float(10))))
 		{
 			return;
 		}
@@ -863,23 +863,23 @@ state() BumpOpenTimed extends OpenTimedMover
 		SavedTrigger = none;
 		Instigator = Pawn(Other);
 		// End:0xC2
-		if(__NFUN_119__(Instigator, none))
+		if((Instigator != none))
 		{
 			Instigator.Controller.WaitForMover(self);
 		}
-		__NFUN_113__('BumpOpenTimed', 'Open');
+		GotoState('BumpOpenTimed', 'Open');
 		return;
 	}
 
 	function DisableTrigger()
 	{
-		__NFUN_118__('Bump');
+		Disable('Bump');
 		return;
 	}
 
 	function EnableTrigger()
 	{
-		__NFUN_117__('Bump');
+		Enable('Bump');
 		return;
 	}
 	stop;
@@ -892,23 +892,23 @@ state() TriggerOpenTimed extends OpenTimedMover
 		SavedTrigger = Other;
 		Instigator = EventInstigator;
 		// End:0x30
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.BeginEvent();
 		}
-		__NFUN_113__('TriggerOpenTimed', 'Open');
+		GotoState('TriggerOpenTimed', 'Open');
 		return;
 	}
 
 	function DisableTrigger()
 	{
-		__NFUN_118__('Trigger');
+		Disable('Trigger');
 		return;
 	}
 
 	function EnableTrigger()
 	{
-		__NFUN_117__('Trigger');
+		Enable('Trigger');
 		return;
 	}
 	stop;
@@ -918,29 +918,29 @@ state() LoopMove
 {
 	event Trigger(Actor Other, Pawn EventInstigator)
 	{
-		__NFUN_118__('Trigger');
-		__NFUN_117__('UnTrigger');
+		Disable('Trigger');
+		Enable('UnTrigger');
 		SavedTrigger = Other;
 		Instigator = EventInstigator;
 		// End:0x3E
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.BeginEvent();
 		}
 		bOpening = true;
-		__NFUN_264__(OpeningSound, 3);
+		PlaySound(OpeningSound, 3);
 		AmbientSound = MoveAmbientSound;
-		__NFUN_113__('LoopMove', 'Running');
+		GotoState('LoopMove', 'Running');
 		return;
 	}
 
 	event UnTrigger(Actor Other, Pawn EventInstigator)
 	{
-		__NFUN_118__('UnTrigger');
-		__NFUN_117__('Trigger');
+		Disable('UnTrigger');
+		Enable('Trigger');
 		SavedTrigger = Other;
 		Instigator = EventInstigator;
-		__NFUN_113__('LoopMove', 'Stopping');
+		GotoState('LoopMove', 'Stopping');
 		return;
 	}
 
@@ -958,13 +958,13 @@ state() LoopMove
 	}
 Running:
 
-	__NFUN_301__();
-	InterpolateTo(byte(__NFUN_173__(float(byte(__NFUN_146__(int(KeyNum), 1))), float(NumKeys))), MoveTime);
-	__NFUN_113__('LoopMove', 'Running');
+	FinishInterpolation();
+	InterpolateTo(byte((float(byte((int(KeyNum) + 1))) % float(NumKeys))), MoveTime);
+	GotoState('LoopMove', 'Running');
 Stopping:
 
 
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedOpening();
 	UntriggerEvent(Event, self, Instigator);
 	bOpening = false;
@@ -979,18 +979,18 @@ state() TriggerToggle
 		SavedTrigger = Other;
 		Instigator = EventInstigator;
 		// End:0x30
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.BeginEvent();
 		}
 		// End:0x61
-		if(__NFUN_132__(__NFUN_154__(int(KeyNum), 0), __NFUN_150__(int(KeyNum), int(PrevKeyNum))))
+		if(((int(KeyNum) == 0) || (int(KeyNum) < int(PrevKeyNum))))
 		{
-			__NFUN_113__('TriggerToggle', 'Open');			
+			GotoState('TriggerToggle', 'Open');			
 		}
 		else
 		{
-			__NFUN_113__('TriggerToggle', 'Close');
+			GotoState('TriggerToggle', 'Close');
 		}
 		return;
 	}
@@ -998,16 +998,16 @@ Open:
 
 	bClosed = false;
 	// End:0x25
-	if(__NFUN_177__(DelayTime, float(0)))
+	if((DelayTime > float(0)))
 	{
 		bDelaying = true;
-		__NFUN_256__(DelayTime);
+		Sleep(DelayTime);
 	}
 	DoOpen();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedOpening();
 	// End:0x4E
-	if(__NFUN_119__(SavedTrigger, none))
+	if((SavedTrigger != none))
 	{
 		SavedTrigger.EndEvent();
 	}
@@ -1016,7 +1016,7 @@ Close:
 
 
 	DoClose();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedClosing();
 	stop;	
 }
@@ -1025,29 +1025,29 @@ state() TriggerControl
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		__NFUN_165__(numTriggerEvents);
+		(numTriggerEvents++);
 		SavedTrigger = Other;
 		Instigator = EventInstigator;
 		// End:0x37
-		if(__NFUN_119__(SavedTrigger, none))
+		if((SavedTrigger != none))
 		{
 			SavedTrigger.BeginEvent();
 		}
-		__NFUN_113__('TriggerControl', 'Open');
+		GotoState('TriggerControl', 'Open');
 		return;
 	}
 
 	function UnTrigger(Actor Other, Pawn EventInstigator)
 	{
-		__NFUN_166__(numTriggerEvents);
+		(numTriggerEvents--);
 		// End:0x4A
-		if(__NFUN_152__(numTriggerEvents, 0))
+		if((numTriggerEvents <= 0))
 		{
 			numTriggerEvents = 0;
 			SavedTrigger = Other;
 			Instigator = EventInstigator;
 			SavedTrigger.BeginEvent();
-			__NFUN_113__('TriggerControl', 'Close');
+			GotoState('TriggerControl', 'Close');
 		}
 		return;
 	}
@@ -1061,26 +1061,26 @@ Open:
 
 	bClosed = false;
 	// End:0x25
-	if(__NFUN_177__(DelayTime, float(0)))
+	if((DelayTime > float(0)))
 	{
 		bDelaying = true;
-		__NFUN_256__(DelayTime);
+		Sleep(DelayTime);
 	}
 	DoOpen();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedOpening();
 	SavedTrigger.EndEvent();
 	// End:0x53
 	if(bTriggerOnceOnly)
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 	}
 	stop;
 Close:
 
 
 	DoClose();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedClosing();
 	stop;				
 }
@@ -1089,23 +1089,23 @@ state() TriggerPound
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		__NFUN_165__(numTriggerEvents);
+		(numTriggerEvents++);
 		SavedTrigger = Other;
 		Instigator = EventInstigator;
-		__NFUN_113__('TriggerPound', 'Open');
+		GotoState('TriggerPound', 'Open');
 		return;
 	}
 
 	function UnTrigger(Actor Other, Pawn EventInstigator)
 	{
-		__NFUN_166__(numTriggerEvents);
+		(numTriggerEvents--);
 		// End:0x33
-		if(__NFUN_152__(numTriggerEvents, 0))
+		if((numTriggerEvents <= 0))
 		{
 			numTriggerEvents = 0;
 			SavedTrigger = none;
 			Instigator = none;
-			__NFUN_113__('TriggerPound', 'Close');
+			GotoState('TriggerPound', 'Close');
 		}
 		return;
 	}
@@ -1119,27 +1119,27 @@ Open:
 
 	bClosed = false;
 	// End:0x25
-	if(__NFUN_177__(DelayTime, float(0)))
+	if((DelayTime > float(0)))
 	{
 		bDelaying = true;
-		__NFUN_256__(DelayTime);
+		Sleep(DelayTime);
 	}
 	DoOpen();
-	__NFUN_301__();
-	__NFUN_256__(OtherTime);
+	FinishInterpolation();
+	Sleep(OtherTime);
 Close:
 
 
 	DoClose();
-	__NFUN_301__();
-	__NFUN_256__(StayOpenTime);
+	FinishInterpolation();
+	Sleep(StayOpenTime);
 	// End:0x57
 	if(bTriggerOnceOnly)
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 	}
 	// End:0x68
-	if(__NFUN_119__(SavedTrigger, none))
+	if((SavedTrigger != none))
 	{
 		goto 'Open';
 	}
@@ -1152,17 +1152,17 @@ state() BumpButton
 	function Bump(Actor Other)
 	{
 		// End:0x24
-		if(__NFUN_130__(__NFUN_155__(int(BumpType), int(2)), __NFUN_114__(Pawn(Other), none)))
+		if(((int(BumpType) != int(2)) && (Pawn(Other) == none)))
 		{
 			return;
 		}
 		// End:0x51
-		if(__NFUN_130__(__NFUN_154__(int(BumpType), int(0)), __NFUN_129__(Pawn(Other).IsPlayerPawn())))
+		if(((int(BumpType) == int(0)) && (!Pawn(Other).IsPlayerPawn())))
 		{
 			return;
 		}
 		// End:0x7C
-		if(__NFUN_130__(__NFUN_154__(int(BumpType), int(1)), __NFUN_176__(Other.Mass, float(10))))
+		if(((int(BumpType) == int(1)) && (Other.Mass < float(10))))
 		{
 			return;
 		}
@@ -1170,7 +1170,7 @@ state() BumpButton
 		SavedTrigger = Other;
 		Instigator = Pawn(Other);
 		Instigator.Controller.WaitForMover(self);
-		__NFUN_113__('BumpButton', 'Open');
+		GotoState('BumpButton', 'Open');
 		return;
 	}
 
@@ -1184,26 +1184,26 @@ state() BumpButton
 	{
 		bSlave = false;
 		Instigator = none;
-		__NFUN_113__('BumpButton', 'Close');
+		GotoState('BumpButton', 'Close');
 		return;
 	}
 Open:
 
 	bClosed = false;
-	__NFUN_118__('Bump');
+	Disable('Bump');
 	// End:0x2C
-	if(__NFUN_177__(DelayTime, float(0)))
+	if((DelayTime > float(0)))
 	{
 		bDelaying = true;
-		__NFUN_256__(DelayTime);
+		Sleep(DelayTime);
 	}
 	DoOpen();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedOpening();
 	// End:0x4B
 	if(bTriggerOnceOnly)
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 	}
 	// End:0x55
 	if(bSlave)
@@ -1214,9 +1214,9 @@ Close:
 
 
 	DoClose();
-	__NFUN_301__();
+	FinishInterpolation();
 	FinishedClosing();
-	__NFUN_117__('Bump');
+	Enable('Bump');
 	stop;				
 }
 
@@ -1229,19 +1229,19 @@ state() ConstantLoop
 		if(bOscillatingLoop)
 		{
 			// End:0x42
-			if(__NFUN_132__(__NFUN_154__(int(KeyNum), 0), __NFUN_154__(int(KeyNum), __NFUN_147__(int(NumKeys), 1))))
+			if(((int(KeyNum) == 0) || (int(KeyNum) == (int(NumKeys) - 1))))
 			{
-				__NFUN_159__(StepDirection, float(-1));
+				(StepDirection *= float(-1));
 				MoverLooped();
 			}
-			__NFUN_135__(KeyNum, byte(StepDirection));
+			(KeyNum += byte(StepDirection));
 			InterpolateTo(KeyNum, MoveTime);			
 		}
 		else
 		{
-			InterpolateTo(byte(__NFUN_173__(float(byte(__NFUN_146__(int(KeyNum), 1))), float(NumKeys))), MoveTime);
+			InterpolateTo(byte((float(byte((int(KeyNum) + 1))) % float(NumKeys))), MoveTime);
 			// End:0x9A
-			if(__NFUN_154__(int(KeyNum), 0))
+			if((int(KeyNum) == 0))
 			{
 				MoverLooped();
 			}
@@ -1261,8 +1261,8 @@ Begin:
 Running:
 
 
-	__NFUN_301__();
-	__NFUN_113__('ConstantLoop', 'Running');
+	FinishInterpolation();
+	GotoState('ConstantLoop', 'Running');
 	stop;			
 }
 
@@ -1271,9 +1271,9 @@ state() LeadInOutLooper
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x42
-		if(__NFUN_150__(int(NumKeys), 3))
+		if((int(NumKeys) < 3))
 		{
-			__NFUN_231__("LeadInOutLooper detected with <3 movement keys");
+			Log("LeadInOutLooper detected with <3 movement keys");
 			return;
 		}
 		InterpolateTo(1, MoveTime);
@@ -1284,10 +1284,10 @@ state() LeadInOutLooper
 	event KeyFrameReached()
 	{
 		// End:0x21
-		if(__NFUN_155__(int(KeyNum), 0))
+		if((int(KeyNum) != 0))
 		{
 			InterpolateTo(2, MoveTime);
-			__NFUN_113__('LeadInOutLooping');
+			GotoState('LeadInOutLooping');
 		}
 		return;
 	}
@@ -1306,7 +1306,7 @@ state LeadInOutLooping
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		InterpolateTo(0, MoveTime);
-		__NFUN_113__('LeadInOutLooper');
+		GotoState('LeadInOutLooper');
 		return;
 	}
 
@@ -1317,19 +1317,19 @@ state LeadInOutLooping
 		if(bOscillatingLoop)
 		{
 			// End:0x42
-			if(__NFUN_132__(__NFUN_154__(int(KeyNum), 1), __NFUN_154__(int(KeyNum), __NFUN_147__(int(NumKeys), 1))))
+			if(((int(KeyNum) == 1) || (int(KeyNum) == (int(NumKeys) - 1))))
 			{
-				__NFUN_159__(StepDirection, float(-1));
+				(StepDirection *= float(-1));
 				MoverLooped();
 			}
-			__NFUN_135__(KeyNum, byte(StepDirection));
+			(KeyNum += byte(StepDirection));
 			InterpolateTo(KeyNum, MoveTime);			
 		}
 		else
 		{
-			__NFUN_139__(KeyNum);
+			(KeyNum++);
 			// End:0x8B
-			if(__NFUN_154__(int(KeyNum), int(NumKeys)))
+			if((int(KeyNum) == int(NumKeys)))
 			{
 				KeyNum = 1;
 				MoverLooped();
@@ -1350,8 +1350,8 @@ state() RotatingMover
 
 		bFixedRotationDir = true;
 		OldBase = Base;
-		__NFUN_3970__(5);
-		__NFUN_298__(OldBase);
+		SetPhysics(5);
+		SetBase(OldBase);
 		return;
 	}
 
@@ -1361,14 +1361,14 @@ state() RotatingMover
 		local Actor OldBase;
 
 		OldBase = Base;
-		__NFUN_3970__(0);
-		__NFUN_298__(OldBase);
+		SetPhysics(0);
+		SetBase(OldBase);
 		// End:0x5A
 		if(bToggleDirection)
 		{
-			__NFUN_159__(RotationRate.Yaw, float(-1));
-			__NFUN_159__(RotationRate.Pitch, float(-1));
-			__NFUN_159__(RotationRate.Roll, float(-1));
+			(RotationRate.Yaw *= float(-1));
+			(RotationRate.Pitch *= float(-1));
+			(RotationRate.Roll *= float(-1));
 		}
 		return;
 	}

@@ -520,11 +520,11 @@ function TKPopUpBox(string _KillerName)
 	if((R6PlayerController(m_PlayerController).m_bAlreadyPoppedTKPopUpBox == false))
 	{
 		// End:0x52
-		if(__NFUN_129__(m_pCurrentRoot.Console.__NFUN_281__('Game')))
+		if((!m_pCurrentRoot.Console.IsInState('Game')))
 		{
-			m_pCurrentRoot.Console.__NFUN_113__('Game');
+			m_pCurrentRoot.Console.GotoState('Game');
 		}
-		m_pCurrentRoot.SimplePopUp(Localize("MPMiscMessages", "TKPopUpBoxTitle", "R6GameInfo"), __NFUN_168__(_KillerName, Localize("MPMiscMessages", "DoYouWantToPenalize", "R6GameInfo")), 30);
+		m_pCurrentRoot.SimplePopUp(Localize("MPMiscMessages", "TKPopUpBoxTitle", "R6GameInfo"), (_KillerName @ Localize("MPMiscMessages", "DoYouWantToPenalize", "R6GameInfo")), 30);
 		R6PlayerController(m_PlayerController).m_bAlreadyPoppedTKPopUpBox = true;
 	}
 	return;
@@ -541,7 +541,7 @@ event CountDownPopUpBox()
 {
 	m_pCurrentRoot.Console.ViewportOwner.u8WaitLaunchStatingSound = 0;
 	// End:0x68
-	if(__NFUN_132__(__NFUN_154__(int(m_PlayerController.m_TeamSelection), int(2)), __NFUN_154__(int(m_PlayerController.m_TeamSelection), int(3))))
+	if(((int(m_PlayerController.m_TeamSelection) == int(2)) || (int(m_PlayerController.m_TeamSelection) == int(3))))
 	{
 		m_pCurrentRoot.ChangeCurrentWidget(34);
 	}
@@ -551,10 +551,10 @@ event CountDownPopUpBox()
 function CountDownPopUpBoxDone()
 {
 	// End:0x6C
-	if(__NFUN_155__(int(m_pCurrentRoot.m_eCurWidgetInUse), int(m_pCurrentRoot.34)))
+	if((int(m_pCurrentRoot.m_eCurWidgetInUse) != int(m_pCurrentRoot.34)))
 	{
 		// End:0x6A
-		if(__NFUN_130__(__NFUN_119__(m_pCurrentRoot.GetPlayerOwner().Pawn, none), m_pCurrentRoot.GetPlayerOwner().Pawn.IsAlive()))
+		if(((m_pCurrentRoot.GetPlayerOwner().Pawn != none) && m_pCurrentRoot.GetPlayerOwner().Pawn.IsAlive()))
 		{			
 		}
 		else
@@ -584,12 +584,12 @@ function SetVoteResult(bool _bKickPlayer)
 	if(_bKickPlayer)
 	{
 		R6PlayerController(m_PlayerController).Vote(1);
-		__NFUN_231__("KICK PLAYER YES");		
+		Log("KICK PLAYER YES");		
 	}
 	else
 	{
 		R6PlayerController(m_PlayerController).Vote(2);
-		__NFUN_231__("KICK PLAYER NO");
+		Log("KICK PLAYER NO");
 	}
 	return;
 }
@@ -599,13 +599,13 @@ function NewServerState()
 	local R6PlayerController _localPlayer;
 
 	// End:0x0D
-	if(__NFUN_114__(m_GameRepInfo, none))
+	if((m_GameRepInfo == none))
 	{
 		return;
 	}
 	super.NewServerState();
 	// End:0x54
-	if(__NFUN_154__(int(m_GameRepInfo.m_eCurrectServerState), m_GameRepInfo.4))
+	if((int(m_GameRepInfo.m_eCurrectServerState) == m_GameRepInfo.4))
 	{
 		m_pCurrentRoot.m_pIntermissionMenuWidget.m_pMPInterHeader.RefreshRoundInfo();
 	}
@@ -633,38 +633,38 @@ function int GetNbOfTeamPlayer(bool _bGreenTeam)
 	J0x28:
 
 	// End:0x8C [Loop If]
-	if(__NFUN_150__(i, m_iLastValidIndex))
+	if((i < m_iLastValidIndex))
 	{
 		iIndex = GeTTeamSelection(i);
 		// End:0x6B
 		if(_bGreenTeam)
 		{
 			// End:0x68
-			if(__NFUN_154__(iIndex, iGreenTeam))
+			if((iIndex == iGreenTeam))
 			{
-				__NFUN_161__(iNbOfPlayer, 1);
+				(iNbOfPlayer += 1);
 			}
 			// [Explicit Continue]
 			goto J0x82;
 		}
 		// End:0x82
-		if(__NFUN_154__(iIndex, iRedTeam))
+		if((iIndex == iRedTeam))
 		{
-			__NFUN_161__(iNbOfPlayer, 1);
+			(iNbOfPlayer += 1);
 		}
 		J0x82:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x28;
 	}
-	return __NFUN_249__(iNbOfPlayer, 8);
+	return Min(iNbOfPlayer, 8);
 	return;
 }
 
 simulated function bool IsInGame()
 {
-	return __NFUN_154__(int(m_pCurrentRoot.m_eCurWidgetInUse), int(0));
+	return (int(m_pCurrentRoot.m_eCurWidgetInUse) == int(0));
 	return;
 }
 

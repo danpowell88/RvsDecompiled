@@ -889,10 +889,10 @@ simulated function DisplayDebug(Canvas Canvas, out float YL, out float YPos)
 	// End:0x237
 	if((Controller == none))
 	{
-		Canvas.__NFUN_2626__(byte(255), 0, 0);
-		Canvas.__NFUN_465__("NO CONTROLLER");
-		__NFUN_184__(YPos, YL);
-		Canvas.__NFUN_2623__(4.0000000, YPos);		
+		Canvas.SetDrawColor(byte(255), 0, 0);
+		Canvas.DrawText("NO CONTROLLER");
+		(YPos += YL);
+		Canvas.SetPos(4.0000000, YPos);		
 	}
 	else
 	{
@@ -905,12 +905,12 @@ function Vector WeaponBob(float BobDamping)
 {
 	local Vector WBob;
 
-	WBob = __NFUN_213__(BobDamping, WalkBob);
-	WBob.Z = __NFUN_171__(__NFUN_174__(0.4500000, __NFUN_171__(0.5500000, BobDamping)), WalkBob.Z);
+	WBob = (BobDamping * WalkBob);
+	WBob.Z = ((0.4500000 + (0.5500000 * BobDamping)) * WalkBob.Z);
 	// End:0x6D
-	if(__NFUN_119__(PlayerController(Controller), none))
+	if((PlayerController(Controller) != none))
 	{
-		__NFUN_223__(WBob, __NFUN_213__(0.9000000, PlayerController(Controller).ShakeOffset));
+		(WBob += (0.9000000 * PlayerController(Controller).ShakeOffset));
 	}
 	return WBob;
 	return;
@@ -921,46 +921,46 @@ function CheckBob(float DeltaTime, Vector Y)
 	local float Speed2D;
 
 	// End:0x159
-	if(__NFUN_154__(int(Physics), int(1)))
+	if((int(Physics) == int(1)))
 	{
-		Speed2D = __NFUN_225__(Velocity);
+		Speed2D = VSize(Velocity);
 		// End:0x41
-		if(__NFUN_176__(Speed2D, float(10)))
+		if((Speed2D < float(10)))
 		{
-			__NFUN_184__(bobtime, __NFUN_171__(0.2000000, DeltaTime));			
+			(bobtime += (0.2000000 * DeltaTime));			
 		}
 		else
 		{
-			__NFUN_184__(bobtime, __NFUN_171__(DeltaTime, __NFUN_174__(0.3000000, __NFUN_172__(__NFUN_171__(0.7000000, Speed2D), GroundSpeed))));
+			(bobtime += (DeltaTime * (0.3000000 + ((0.7000000 * Speed2D) / GroundSpeed))));
 		}
-		WalkBob = __NFUN_212__(__NFUN_212__(__NFUN_212__(Y, Bob), Speed2D), __NFUN_187__(__NFUN_171__(8.0000000, bobtime)));
-		AppliedBob = __NFUN_171__(AppliedBob, __NFUN_175__(float(1), __NFUN_244__(1.0000000, __NFUN_171__(16.0000000, DeltaTime))));
+		WalkBob = (((Y * Bob) * Speed2D) * Sin((8.0000000 * bobtime)));
+		AppliedBob = (AppliedBob * (float(1) - FMin(1.0000000, (16.0000000 * DeltaTime))));
 		WalkBob.Z = AppliedBob;
 		// End:0x10F
-		if(__NFUN_177__(Speed2D, float(10)))
+		if((Speed2D > float(10)))
 		{
-			WalkBob.Z = __NFUN_174__(WalkBob.Z, __NFUN_171__(__NFUN_171__(__NFUN_171__(0.7500000, Bob), Speed2D), __NFUN_187__(__NFUN_171__(16.0000000, bobtime))));
+			WalkBob.Z = (WalkBob.Z + (((0.7500000 * Bob) * Speed2D) * Sin((16.0000000 * bobtime))));
 		}
 		// End:0x156
-		if(__NFUN_177__(LandBob, 0.0100000))
+		if((LandBob > 0.0100000))
 		{
-			__NFUN_184__(AppliedBob, __NFUN_171__(__NFUN_244__(1.0000000, __NFUN_171__(16.0000000, DeltaTime)), LandBob));
-			__NFUN_182__(LandBob, __NFUN_175__(float(1), __NFUN_171__(float(8), DeltaTime)));
+			(AppliedBob += (FMin(1.0000000, (16.0000000 * DeltaTime)) * LandBob));
+			(LandBob *= (float(1) - (float(8) * DeltaTime)));
 		}		
 	}
 	else
 	{
 		// End:0x212
-		if(__NFUN_154__(int(Physics), int(3)))
+		if((int(Physics) == int(3)))
 		{
-			Speed2D = __NFUN_193__(__NFUN_174__(__NFUN_171__(Velocity.X, Velocity.X), __NFUN_171__(Velocity.Y, Velocity.Y)));
-			WalkBob = __NFUN_212__(__NFUN_212__(__NFUN_212__(__NFUN_212__(Y, Bob), 0.5000000), Speed2D), __NFUN_187__(__NFUN_171__(4.0000000, Level.TimeSeconds)));
-			WalkBob.Z = __NFUN_171__(__NFUN_171__(__NFUN_171__(Bob, 1.5000000), Speed2D), __NFUN_187__(__NFUN_171__(8.0000000, Level.TimeSeconds)));			
+			Speed2D = Sqrt(((Velocity.X * Velocity.X) + (Velocity.Y * Velocity.Y)));
+			WalkBob = ((((Y * Bob) * 0.5000000) * Speed2D) * Sin((4.0000000 * Level.TimeSeconds)));
+			WalkBob.Z = (((Bob * 1.5000000) * Speed2D) * Sin((8.0000000 * Level.TimeSeconds)));			
 		}
 		else
 		{
 			bobtime = 0.0000000;
-			WalkBob = __NFUN_212__(WalkBob, __NFUN_175__(float(1), __NFUN_244__(1.0000000, __NFUN_171__(8.0000000, DeltaTime))));
+			WalkBob = (WalkBob * (float(1) - FMin(1.0000000, (8.0000000 * DeltaTime))));
 		}
 	}
 	return;
@@ -969,14 +969,14 @@ function CheckBob(float DeltaTime, Vector Y)
 // return true if controlled by a Player (AI or human)
 simulated function bool IsPlayerPawn()
 {
-	return __NFUN_130__(__NFUN_119__(Controller, none), Controller.bIsPlayer);
+	return ((Controller != none) && Controller.bIsPlayer);
 	return;
 }
 
 // return true if controlled by a real live human
 simulated function bool IsHumanControlled()
 {
-	return __NFUN_119__(PlayerController(Controller), none);
+	return (PlayerController(Controller) != none);
 	return;
 }
 
@@ -984,21 +984,21 @@ simulated function bool IsHumanControlled()
 simulated function bool IsLocallyControlled()
 {
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return true;
 	}
 	// End:0x28
-	if(__NFUN_114__(Controller, none))
+	if((Controller == none))
 	{
 		return false;
 	}
 	// End:0x3A
-	if(__NFUN_114__(PlayerController(Controller), none))
+	if((PlayerController(Controller) == none))
 	{
 		return true;
 	}
-	return __NFUN_119__(Viewport(PlayerController(Controller).Player), none);
+	return (Viewport(PlayerController(Controller).Player) != none);
 	return;
 }
 
@@ -1009,7 +1009,7 @@ simulated function bool IsLocallyControlled()
 simulated event Rotator GetViewRotation()
 {
 	// End:0x14
-	if(__NFUN_114__(Controller, none))
+	if((Controller == none))
 	{
 		return Rotation;		
 	}
@@ -1023,23 +1023,23 @@ simulated event Rotator GetViewRotation()
 simulated function SetViewRotation(Rotator NewRotation)
 {
 	// End:0x1C
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
-		Controller.__NFUN_299__(NewRotation);
+		Controller.SetRotation(NewRotation);
 	}
 	return;
 }
 
 final function bool InGodMode()
 {
-	return __NFUN_130__(__NFUN_119__(Controller, none), Controller.bGodMode);
+	return ((Controller != none) && Controller.bGodMode);
 	return;
 }
 
 function bool NearMoveTarget()
 {
 	// End:0x23
-	if(__NFUN_132__(__NFUN_114__(Controller, none), __NFUN_114__(Controller.MoveTarget, none)))
+	if(((Controller == none) || (Controller.MoveTarget == none)))
 	{
 		return false;
 	}
@@ -1049,20 +1049,20 @@ function bool NearMoveTarget()
 
 final simulated function bool PressingFire()
 {
-	return __NFUN_130__(__NFUN_119__(Controller, none), __NFUN_155__(int(Controller.bFire), 0));
+	return ((Controller != none) && (int(Controller.bFire) != 0));
 	return;
 }
 
 final simulated function bool PressingAltFire()
 {
-	return __NFUN_130__(__NFUN_119__(Controller, none), __NFUN_155__(int(Controller.bAltFire), 0));
+	return ((Controller != none) && (int(Controller.bAltFire) != 0));
 	return;
 }
 
 function Actor GetMoveTarget()
 {
 	// End:0x0D
-	if(__NFUN_114__(Controller, none))
+	if((Controller == none))
 	{
 		return none;
 	}
@@ -1073,7 +1073,7 @@ function Actor GetMoveTarget()
 function SetMoveTarget(Actor NewTarget)
 {
 	// End:0x1F
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.MoveTarget = NewTarget;
 	}
@@ -1082,14 +1082,14 @@ function SetMoveTarget(Actor NewTarget)
 
 function bool LineOfSightTo(Actor Other)
 {
-	return __NFUN_130__(__NFUN_119__(Controller, none), Controller.__NFUN_514__(Other));
+	return ((Controller != none) && Controller.LineOfSightTo(Other));
 	return;
 }
 
 function ReceiveLocalizedMessage(Class<LocalMessage> Message, optional int Switch, optional PlayerReplicationInfo RelatedPRI_1, optional PlayerReplicationInfo RelatedPRI_2, optional Object OptionalObject)
 {
 	// End:0x3D
-	if(__NFUN_119__(PlayerController(Controller), none))
+	if((PlayerController(Controller) != none))
 	{
 		PlayerController(Controller).ReceiveLocalizedMessage(Message, Switch, RelatedPRI_1, RelatedPRI_2, OptionalObject);
 	}
@@ -1099,7 +1099,7 @@ function ReceiveLocalizedMessage(Class<LocalMessage> Message, optional int Switc
 event ClientMessage(coerce string S, optional name type)
 {
 	// End:0x2E
-	if(__NFUN_119__(PlayerController(Controller), none))
+	if((PlayerController(Controller) != none))
 	{
 		PlayerController(Controller).ClientMessage(S, type);
 	}
@@ -1109,7 +1109,7 @@ event ClientMessage(coerce string S, optional name type)
 function Trigger(Actor Other, Pawn EventInstigator)
 {
 	// End:0x24
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.Trigger(Other, EventInstigator);
 	}
@@ -1149,9 +1149,9 @@ function FinishedInterpolation()
 function JumpOutOfWater(Vector jumpDir)
 {
 	Falling();
-	Velocity = __NFUN_212__(jumpDir, WaterSpeed);
-	Acceleration = __NFUN_212__(jumpDir, AccelRate);
-	Velocity.Z = __NFUN_245__(380.0000000, JumpZ);
+	Velocity = (jumpDir * WaterSpeed);
+	Acceleration = (jumpDir * AccelRate);
+	Velocity.Z = FMax(380.0000000, JumpZ);
 	bUpAndOut = true;
 	return;
 }
@@ -1159,12 +1159,12 @@ function JumpOutOfWater(Vector jumpDir)
 event FellOutOfWorld()
 {
 	// End:0x12
-	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	if((int(Role) < int(ROLE_Authority)))
 	{
 		return;
 	}
 	Health = -1;
-	__NFUN_3970__(0);
+	SetPhysics(0);
 	return;
 }
 
@@ -1199,16 +1199,16 @@ function AddVelocity(Vector NewVelocity)
 		return;
 	}
 	// End:0x5A
-	if(__NFUN_132__(__NFUN_154__(int(Physics), int(1)), __NFUN_130__(__NFUN_132__(__NFUN_154__(int(Physics), int(11)), __NFUN_154__(int(Physics), int(9))), __NFUN_177__(NewVelocity.Z, default.JumpZ))))
+	if(((int(Physics) == int(1)) || (((int(Physics) == int(11)) || (int(Physics) == int(9))) && (NewVelocity.Z > default.JumpZ))))
 	{
-		__NFUN_3970__(2);
+		SetPhysics(2);
 	}
 	// End:0x95
-	if(__NFUN_130__(__NFUN_177__(Velocity.Z, float(380)), __NFUN_177__(NewVelocity.Z, float(0))))
+	if(((Velocity.Z > float(380)) && (NewVelocity.Z > float(0))))
 	{
-		__NFUN_182__(NewVelocity.Z, 0.5000000);
+		(NewVelocity.Z *= 0.5000000);
 	}
-	__NFUN_223__(Velocity, NewVelocity);
+	(Velocity += NewVelocity);
 	return;
 }
 
@@ -1218,7 +1218,7 @@ function KilledBy(Pawn EventInstigator)
 
 	Health = 0;
 	// End:0x26
-	if(__NFUN_119__(EventInstigator, none))
+	if((EventInstigator != none))
 	{
 		Killer = EventInstigator.Controller;
 	}
@@ -1230,14 +1230,14 @@ function TakeFallingDamage()
 	local float Shake;
 
 	// End:0xCD
-	if(__NFUN_176__(Velocity.Z, __NFUN_171__(-0.5000000, MaxFallSpeed)))
+	if((Velocity.Z < (-0.5000000 * MaxFallSpeed)))
 	{
-		__NFUN_512__(__NFUN_244__(2.0000000, __NFUN_172__(__NFUN_171__(-0.5000000, Velocity.Z), __NFUN_245__(JumpZ, 150.0000000))));
+		MakeNoise(FMin(2.0000000, ((-0.5000000 * Velocity.Z) / FMax(JumpZ, 150.0000000))));
 		// End:0xCD
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
-			Shake = __NFUN_244__(1.0000000, __NFUN_172__(__NFUN_171__(-1.0000000, Velocity.Z), MaxFallSpeed));
-			Controller.ShakeView(__NFUN_174__(0.1750000, __NFUN_171__(0.1000000, Shake)), __NFUN_171__(850.0000000, Shake), __NFUN_213__(Shake, vect(0.0000000, 0.0000000, 1.5000000)), 120000.0000000, vect(0.0000000, 0.0000000, 10.0000000), 1.0000000);
+			Shake = FMin(1.0000000, ((-1.0000000 * Velocity.Z) / MaxFallSpeed));
+			Controller.ShakeView((0.1750000 + (0.1000000 * Shake)), (850.0000000 * Shake), (Shake * vect(0.0000000, 0.0000000, 1.5000000)), 120000.0000000, vect(0.0000000, 0.0000000, 10.0000000), 1.0000000);
 		}
 	}
 	return;
@@ -1254,7 +1254,7 @@ function ClientReStart()
 function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 {
 	// End:0x24
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.ClientSetLocation(NewLocation, NewRotation);
 	}
@@ -1264,7 +1264,7 @@ function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 function ClientSetRotation(Rotator NewRotation)
 {
 	// End:0x1F
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.ClientSetRotation(NewRotation);
 	}
@@ -1274,18 +1274,18 @@ function ClientSetRotation(Rotator NewRotation)
 simulated function FaceRotation(Rotator NewRotation, float DeltaTime)
 {
 	// End:0x24
-	if(__NFUN_154__(int(Physics), int(11)))
+	if((int(Physics) == int(11)))
 	{
-		__NFUN_299__(OnLadder.WallDir);		
+		SetRotation(OnLadder.WallDir);		
 	}
 	else
 	{
 		// End:0x52
-		if(__NFUN_132__(__NFUN_154__(int(Physics), int(1)), __NFUN_154__(int(Physics), int(2))))
+		if(((int(Physics) == int(1)) || (int(Physics) == int(2))))
 		{
 			NewRotation.Pitch = 0;
 		}
-		__NFUN_299__(NewRotation);
+		SetRotation(NewRotation);
 	}
 	return;
 }
@@ -1293,7 +1293,7 @@ simulated function FaceRotation(Rotator NewRotation, float DeltaTime)
 function ClientDying(Vector HitLocation)
 {
 	// End:0x1F
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.ClientDying(HitLocation);
 	}
@@ -1315,7 +1315,7 @@ event bool EncroachingOn(Actor Other)
 		return true;
 	}
 	// End:0x54
-	if(__NFUN_130__(__NFUN_132__(__NFUN_132__(__NFUN_114__(Controller, none), __NFUN_129__(Controller.bIsPlayer)), bWarping), __NFUN_119__(Pawn(Other), none)))
+	if(((((Controller == none) || (!Controller.bIsPlayer)) || bWarping) && (Pawn(Other) != none)))
 	{
 		return true;
 	}
@@ -1332,9 +1332,9 @@ event EncroachedBy(Actor Other)
 // Also, non-players will jump off pawns immediately
 function JumpOffPawn()
 {
-	__NFUN_223__(Velocity, __NFUN_213__(__NFUN_174__(float(100), CollisionRadius), __NFUN_252__()));
-	Velocity.Z = __NFUN_174__(200.0000000, CollisionHeight);
-	__NFUN_3970__(2);
+	(Velocity += ((float(100) + CollisionRadius) * VRand()));
+	Velocity.Z = (200.0000000 + CollisionHeight);
+	SetPhysics(2);
 	bNoJumpAdjust = true;
 	Controller.SetFall();
 	return;
@@ -1350,17 +1350,17 @@ singular event BaseChange()
 		return;
 	}
 	// End:0x30
-	if(__NFUN_130__(__NFUN_114__(Base, none), __NFUN_154__(int(Physics), int(0))))
+	if(((Base == none) && (int(Physics) == int(0))))
 	{
-		__NFUN_3970__(2);		
+		SetPhysics(2);		
 	}
 	else
 	{
 		// End:0x5F
-		if(__NFUN_119__(Pawn(Base), none))
+		if((Pawn(Base) != none))
 		{
 			// End:0x5F
-			if(__NFUN_129__(Pawn(Base).bCanBeBaseForPawns))
+			if((!Pawn(Base).bCanBeBaseForPawns))
 			{
 				JumpOffPawn();
 			}
@@ -1382,30 +1382,30 @@ event Vector EyePosition()
 simulated event Destroyed()
 {
 	// End:0x1E
-	if(__NFUN_119__(Shadow, none))
+	if((Shadow != none))
 	{
-		Shadow.__NFUN_279__();
+		Shadow.Destroy();
 		Shadow = none;
 	}
 	// End:0x38
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.PawnDied();
 	}
 	// End:0x4A
-	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	if((int(Role) < int(ROLE_Authority)))
 	{
 		return;
 	}
 	// End:0x61
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
-		EngineWeapon.__NFUN_279__();
+		EngineWeapon.Destroy();
 	}
 	// End:0x78
-	if(__NFUN_119__(PendingWeapon, none))
+	if((PendingWeapon != none))
 	{
-		PendingWeapon.__NFUN_279__();
+		PendingWeapon.Destroy();
 	}
 	EngineWeapon = none;
 	PendingWeapon = none;
@@ -1428,7 +1428,7 @@ event PreBeginPlay()
 		return;
 	}
 	// End:0x42
-	if(__NFUN_122__(MenuName, ""))
+	if((MenuName == ""))
 	{
 		MenuName = GetItemName(string(Class));
 	}
@@ -1443,38 +1443,38 @@ event PostBeginPlay()
 	SplashTime = 0.0000000;
 	OldRotYaw = float(Rotation.Yaw);
 	// End:0x10C
-	if(__NFUN_130__(__NFUN_130__(Level.bStartup, __NFUN_151__(Health, 0)), __NFUN_129__(bDontPossess)))
+	if(((Level.bStartup && (Health > 0)) && (!bDontPossess)))
 	{
 		// End:0xB1
-		if(__NFUN_130__(__NFUN_255__(AIScriptTag, 'None'), __NFUN_255__(AIScriptTag, 'None')))
+		if(((AIScriptTag != 'None') && (AIScriptTag != 'None')))
 		{
 			// End:0x88
-			foreach __NFUN_304__(Class'Engine.AIScript', A, AIScriptTag)
+			foreach AllActors(Class'Engine.AIScript', A, AIScriptTag)
 			{
 				// End:0x88
 				break;				
 			}			
 			// End:0xB1
-			if(__NFUN_119__(A, none))
+			if((A != none))
 			{
 				A.SpawnControllerFor(self);
 				// End:0xB1
-				if(__NFUN_119__(Controller, none))
+				if((Controller != none))
 				{
 					return;
 				}
 			}
 		}
 		// End:0xD7
-		if(__NFUN_130__(__NFUN_119__(ControllerClass, none), __NFUN_114__(Controller, none)))
+		if(((ControllerClass != none) && (Controller == none)))
 		{
-			Controller = __NFUN_278__(ControllerClass);
+			Controller = Spawn(ControllerClass);
 		}
 		// End:0x10C
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
 			Controller.Possess(self);
-			__NFUN_184__(AIController(Controller).Skill, SkillModifier);
+			(AIController(Controller).Skill += SkillModifier);
 		}
 	}
 	return;
@@ -1484,19 +1484,19 @@ event PostBeginPlay()
 simulated event PostNetBeginPlay()
 {
 	// End:0x12
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		return;
 	}
 	// End:0x2D
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.Pawn = self;
 	}
 	// End:0x5F
-	if(__NFUN_130__(__NFUN_119__(PlayerReplicationInfo, none), __NFUN_114__(PlayerReplicationInfo.Owner, none)))
+	if(((PlayerReplicationInfo != none) && (PlayerReplicationInfo.Owner == none)))
 	{
-		PlayerReplicationInfo.__NFUN_272__(Controller);
+		PlayerReplicationInfo.SetOwner(Controller);
 	}
 	PlayWaiting();
 	return;
@@ -1526,7 +1526,7 @@ function Died(Controller Killer, Vector HitLocation)
 		return;
 	}
 	// End:0x33
-	if(__NFUN_119__(Killer, none))
+	if((Killer != none))
 	{
 		TriggerEvent(Event, self, Killer.Pawn);		
 	}
@@ -1534,7 +1534,7 @@ function Died(Controller Killer, Vector HitLocation)
 	{
 		TriggerEvent(Event, self, none);
 	}
-	__NFUN_182__(Velocity.Z, 1.3000000);
+	(Velocity.Z *= 1.3000000);
 	// End:0x6E
 	if(IsHumanControlled())
 	{
@@ -1547,7 +1547,7 @@ function Died(Controller Killer, Vector HitLocation)
 		return;
 	}
 	// End:0xB9
-	if(__NFUN_130__(__NFUN_129__(bPhysicsAnimUpdate), __NFUN_129__(IsLocallyControlled())))
+	if(((!bPhysicsAnimUpdate) && (!IsLocallyControlled())))
 	{
 		ClientDying(HitLocation);
 	}
@@ -1557,7 +1557,7 @@ function Died(Controller Killer, Vector HitLocation)
 event Falling()
 {
 	// End:0x1A
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.SetFall();
 	}
@@ -1571,17 +1571,17 @@ event HitWall(Vector HitNormal, Actor Wall)
 
 event Landed(Vector HitNormal)
 {
-	LandBob = __NFUN_244__(50.0000000, __NFUN_171__(0.0550000, Velocity.Z));
+	LandBob = FMin(50.0000000, (0.0550000 * Velocity.Z));
 	TakeFallingDamage();
 	// End:0x3F
-	if(__NFUN_151__(Health, 0))
+	if((Health > 0))
 	{
 		PlayLanded(Velocity.Z);
 	}
 	// End:0x7C
-	if(__NFUN_176__(Velocity.Z, __NFUN_171__(-1.4000000, JumpZ)))
+	if((Velocity.Z < (-1.4000000 * JumpZ)))
 	{
-		__NFUN_512__(__NFUN_172__(__NFUN_171__(-0.5000000, Velocity.Z), __NFUN_245__(JumpZ, 150.0000000)));
+		MakeNoise(((-0.5000000 * Velocity.Z) / FMax(JumpZ, 150.0000000)));
 	}
 	bJustLanded = true;
 	return;
@@ -1590,7 +1590,7 @@ event Landed(Vector HitNormal)
 event HeadVolumeChange(PhysicsVolume newHeadVolume)
 {
 	// End:0x28
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_114__(Controller, none)))
+	if(((int(Level.NetMode) == int(NM_Client)) || (Controller == none)))
 	{
 		return;
 	}
@@ -1598,10 +1598,10 @@ event HeadVolumeChange(PhysicsVolume newHeadVolume)
 	if(HeadVolume.bWaterVolume)
 	{
 		// End:0x90
-		if(__NFUN_129__(newHeadVolume.bWaterVolume))
+		if((!newHeadVolume.bWaterVolume))
 		{
 			// End:0x85
-			if(__NFUN_130__(__NFUN_130__(Controller.bIsPlayer, __NFUN_177__(BreathTime, float(0))), __NFUN_176__(BreathTime, float(8))))
+			if(((Controller.bIsPlayer && (BreathTime > float(0))) && (BreathTime < float(8))))
 			{
 				Gasp();
 			}
@@ -1624,7 +1624,7 @@ function bool TouchingWaterVolume()
 	local PhysicsVolume V;
 
 	// End:0x26
-	foreach __NFUN_307__(Class'Engine.PhysicsVolume', V)
+	foreach TouchingActors(Class'Engine.PhysicsVolume', V)
 	{
 		// End:0x25
 		if(V.bWaterVolume)
@@ -1639,13 +1639,13 @@ function bool TouchingWaterVolume()
 event BreathTimer()
 {
 	// End:0x28
-	if(__NFUN_132__(__NFUN_150__(Health, 0), __NFUN_154__(int(Level.NetMode), int(NM_Client))))
+	if(((Health < 0) || (int(Level.NetMode) == int(NM_Client))))
 	{
 		return;
 	}
 	TakeDrowningDamage();
 	// End:0x44
-	if(__NFUN_151__(Health, 0))
+	if((Health > 0))
 	{
 		BreathTime = 2.0000000;
 	}
@@ -1664,21 +1664,21 @@ function bool CheckWaterJump(out Vector WallNormal)
 
 	checkpoint = Vector(Rotation);
 	checkpoint.Z = 0.0000000;
-	checkNorm = __NFUN_226__(checkpoint);
-	checkpoint = __NFUN_215__(Location, __NFUN_213__(CollisionRadius, checkNorm));
-	Extent = __NFUN_213__(CollisionRadius, vect(1.0000000, 1.0000000, 0.0000000));
+	checkNorm = Normal(checkpoint);
+	checkpoint = (Location + (CollisionRadius * checkNorm));
+	Extent = (CollisionRadius * vect(1.0000000, 1.0000000, 0.0000000));
 	Extent.Z = CollisionHeight;
-	HitActor = __NFUN_277__(HitLocation, HitNormal, checkpoint, Location, true, Extent);
+	HitActor = Trace(HitLocation, HitNormal, checkpoint, Location, true, Extent);
 	// End:0x12E
-	if(__NFUN_130__(__NFUN_119__(HitActor, none), __NFUN_114__(Pawn(HitActor), none)))
+	if(((HitActor != none) && (Pawn(HitActor) == none)))
 	{
-		WallNormal = __NFUN_213__(float(-1), HitNormal);
+		WallNormal = (float(-1) * HitNormal);
 		Start = Location;
-		__NFUN_184__(Start.Z, __NFUN_171__(1.1000000, 33.0000000));
-		checkpoint = __NFUN_215__(Start, __NFUN_213__(__NFUN_171__(float(2), CollisionRadius), checkNorm));
-		HitActor = __NFUN_277__(HitLocation, HitNormal, checkpoint, Start, true);
+		(Start.Z += (1.1000000 * 33.0000000));
+		checkpoint = (Start + ((float(2) * CollisionRadius) * checkNorm));
+		HitActor = Trace(HitLocation, HitNormal, checkpoint, Start, true);
 		// End:0x12E
-		if(__NFUN_114__(HitActor, none))
+		if((HitActor == none))
 		{
 			return true;
 		}
@@ -1691,26 +1691,26 @@ function bool CheckWaterJump(out Vector WallNormal)
 function DoJump(bool bUpdating)
 {
 	// End:0x16F
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bIsCrouched), __NFUN_129__(bWantsToCrouch)), __NFUN_132__(__NFUN_132__(__NFUN_154__(int(Physics), int(1)), __NFUN_154__(int(Physics), int(11))), __NFUN_154__(int(Physics), int(9)))))
+	if((((!bIsCrouched) && (!bWantsToCrouch)) && (((int(Physics) == int(1)) || (int(Physics) == int(11))) || (int(Physics) == int(9)))))
 	{
 		// End:0xB6
-		if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+		if((int(Role) == int(ROLE_Authority)))
 		{
 			// End:0xB6
-			if(__NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_151__(int(Level.Game.Difficulty), 0)))
+			if(((Level.Game != none) && (int(Level.Game.Difficulty) > 0)))
 			{
-				__NFUN_512__(__NFUN_171__(0.1000000, float(Level.Game.Difficulty)));
+				MakeNoise((0.1000000 * float(Level.Game.Difficulty)));
 			}
 		}
 		// End:0xDB
-		if(__NFUN_154__(int(Physics), int(9)))
+		if((int(Physics) == int(9)))
 		{
-			Velocity = __NFUN_213__(JumpZ, Floor);			
+			Velocity = (JumpZ * Floor);			
 		}
 		else
 		{
 			// End:0xFE
-			if(__NFUN_154__(int(Physics), int(11)))
+			if((int(Physics) == int(11)))
 			{
 				Velocity.Z = 0.0000000;				
 			}
@@ -1728,11 +1728,11 @@ function DoJump(bool bUpdating)
 			}
 		}
 		// End:0x16A
-		if(__NFUN_130__(__NFUN_119__(Base, none), __NFUN_129__(Base.bWorldGeometry)))
+		if(((Base != none) && (!Base.bWorldGeometry)))
 		{
-			__NFUN_184__(Velocity.Z, Base.Velocity.Z);
+			(Velocity.Z += Base.Velocity.Z);
 		}
-		__NFUN_3970__(2);
+		SetPhysics(2);
 	}
 	return;
 }
@@ -1746,7 +1746,7 @@ function PlayMoverHitSound()
 simulated function ChunkUp()
 {
 	// End:0x56
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Client)), __NFUN_119__(Controller, none)))
+	if(((int(Level.NetMode) != int(NM_Client)) && (Controller != none)))
 	{
 		// End:0x4A
 		if(Controller.bIsPlayer)
@@ -1755,10 +1755,10 @@ simulated function ChunkUp()
 		}
 		else
 		{
-			Controller.__NFUN_279__();
+			Controller.Destroy();
 		}
 	}
-	__NFUN_279__();
+	Destroy();
 	return;
 }
 
@@ -1770,7 +1770,7 @@ simulated event SetAnimAction(name NewAction)
 simulated function SetAnimStatus(name NewStatus)
 {
 	// End:0x20
-	if(__NFUN_255__(NewStatus, AnimStatus))
+	if((NewStatus != AnimStatus))
 	{
 		AnimStatus = NewStatus;
 		ChangeAnimation();
@@ -1780,14 +1780,14 @@ simulated function SetAnimStatus(name NewStatus)
 
 simulated event PlayDying(Vector HitLoc)
 {
-	__NFUN_113__('Dying');
+	GotoState('Dying');
 	// End:0x31
 	if(bPhysicsAnimUpdate)
 	{
 		bReplicateMovement = false;
 		bTearOff = true;
-		__NFUN_223__(Velocity, TearOffMomentum);
-		__NFUN_3970__(2);
+		(Velocity += TearOffMomentum);
+		SetPhysics(2);
 	}
 	bPlayedDeath = true;
 	return;
@@ -1807,7 +1807,7 @@ simulated event StopPlayFiring()
 simulated event ChangeAnimation()
 {
 	// End:0x21
-	if(__NFUN_130__(__NFUN_119__(Controller, none), Controller.bControlAnimations))
+	if(((Controller != none) && Controller.bControlAnimations))
 	{
 		return;
 	}
@@ -1819,7 +1819,7 @@ simulated event ChangeAnimation()
 simulated event AnimEnd(int Channel)
 {
 	// End:0x11
-	if(__NFUN_154__(Channel, 0))
+	if((Channel == 0))
 	{
 		PlayWaiting();
 	}
@@ -1855,7 +1855,7 @@ simulated function PlayWaiting()
 function PlayLanded(float impactVel)
 {
 	// End:0x16
-	if(__NFUN_129__(bPhysicsAnimUpdate))
+	if((!bPhysicsAnimUpdate))
 	{
 		PlayLandingAnimation(impactVel);
 	}
@@ -1899,13 +1899,13 @@ state Dying
 	function Timer()
 	{
 		// End:0x0E
-		if(__NFUN_129__(__NFUN_532__()))
+		if((!PlayerCanSeeMe()))
 		{
-			__NFUN_279__();			
+			Destroy();			
 		}
 		else
 		{
-			__NFUN_280__(2.0000000, false);
+			SetTimer(2.0000000, false);
 		}
 		return;
 	}
@@ -1914,15 +1914,15 @@ state Dying
 	{
 		local Rotator finalRot;
 
-		LandBob = __NFUN_244__(50.0000000, __NFUN_171__(0.0550000, Velocity.Z));
+		LandBob = FMin(50.0000000, (0.0550000 * Velocity.Z));
 		finalRot = Rotation;
 		finalRot.Roll = 0;
 		finalRot.Pitch = 0;
-		__NFUN_299__(finalRot);
-		__NFUN_3970__(0);
-		__NFUN_262__(true, false, false);
+		SetRotation(finalRot);
+		SetPhysics(0);
+		SetCollision(true, false, false);
 		// End:0x63
-		if(__NFUN_129__(__NFUN_282__(0)))
+		if((!IsAnimating(0)))
 		{
 			LieStill();
 		}
@@ -1935,37 +1935,37 @@ state Dying
 		local float OldHeight, OldRadius;
 		local Vector OldLocation;
 
-		__NFUN_262__(true, false, false);
+		SetCollision(true, false, false);
 		OldHeight = CollisionHeight;
 		OldRadius = CollisionRadius;
-		__NFUN_283__(__NFUN_171__(1.5000000, default.CollisionRadius), CarcassCollisionHeight);
-		PrePivot = __NFUN_212__(vect(0.0000000, 0.0000000, 1.0000000), __NFUN_175__(OldHeight, CollisionHeight));
+		SetCollisionSize((1.5000000 * default.CollisionRadius), CarcassCollisionHeight);
+		PrePivot = (vect(0.0000000, 0.0000000, 1.0000000) * (OldHeight - CollisionHeight));
 		OldLocation = Location;
 		// End:0xCA
-		if(__NFUN_129__(__NFUN_267__(__NFUN_216__(OldLocation, PrePivot))))
+		if((!SetLocation((OldLocation - PrePivot))))
 		{
-			__NFUN_283__(OldRadius, CollisionHeight);
+			SetCollisionSize(OldRadius, CollisionHeight);
 			// End:0xCA
-			if(__NFUN_129__(__NFUN_267__(__NFUN_216__(OldLocation, PrePivot))))
+			if((!SetLocation((OldLocation - PrePivot))))
 			{
-				__NFUN_283__(CollisionRadius, OldHeight);
-				__NFUN_262__(false, false, false);
+				SetCollisionSize(CollisionRadius, OldHeight);
+				SetCollision(false, false, false);
 				PrePivot = vect(0.0000000, 0.0000000, 0.0000000);
 				// End:0xCA
-				if(__NFUN_129__(__NFUN_267__(OldLocation)))
+				if((!SetLocation(OldLocation)))
 				{
 					ChunkUp();
 				}
 			}
 		}
-		PrePivot = __NFUN_215__(PrePivot, vect(0.0000000, 0.0000000, 3.0000000));
+		PrePivot = (PrePivot + vect(0.0000000, 0.0000000, 3.0000000));
 		return;
 	}
 
 	function LandThump()
 	{
 		// End:0x18
-		if(__NFUN_154__(int(Physics), int(0)))
+		if((int(Physics) == int(0)))
 		{
 			bThumped = true;
 		}
@@ -1975,12 +1975,12 @@ state Dying
 	event AnimEnd(int Channel)
 	{
 		// End:0x0D
-		if(__NFUN_155__(Channel, 0))
+		if((Channel != 0))
 		{
 			return;
 		}
 		// End:0x26
-		if(__NFUN_154__(int(Physics), int(0)))
+		if((int(Physics) == int(0)))
 		{
 			LieStill();			
 		}
@@ -1999,12 +1999,12 @@ state Dying
 	function LieStill()
 	{
 		// End:0x11
-		if(__NFUN_129__(bThumped))
+		if((!bThumped))
 		{
 			LandThump();
 		}
 		// End:0x26
-		if(__NFUN_181__(CollisionHeight, CarcassCollisionHeight))
+		if((CollisionHeight != CarcassCollisionHeight))
 		{
 			ReduceCylinder();
 		}
@@ -2014,14 +2014,14 @@ state Dying
 	singular function BaseChange()
 	{
 		// End:0x13
-		if(__NFUN_114__(Base, none))
+		if((Base == none))
 		{
-			__NFUN_3970__(2);			
+			SetPhysics(2);			
 		}
 		else
 		{
 			// End:0x29
-			if(__NFUN_119__(Pawn(Base), none))
+			if((Pawn(Base) != none))
 			{
 				ChunkUp();
 			}
@@ -2039,18 +2039,18 @@ state Dying
 	function BeginState()
 	{
 		// End:0x32
-		if(__NFUN_130__(bTearOff, __NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer))))
+		if((bTearOff && (int(Level.NetMode) == int(NM_DedicatedServer))))
 		{
 			LifeSpan = 1.0000000;			
 		}
 		else
 		{
-			__NFUN_280__(12.0000000, false);
+			SetTimer(12.0000000, false);
 		}
-		__NFUN_3970__(2);
+		SetPhysics(2);
 		bInvulnerableBody = true;
 		// End:0x83
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
 			// End:0x77
 			if(Controller.bIsPlayer)
@@ -2059,14 +2059,14 @@ state Dying
 			}
 			else
 			{
-				Controller.__NFUN_279__();
+				Controller.Destroy();
 			}
 		}
 		return;
 	}
 Begin:
 
-	__NFUN_256__(0.2000000);
+	Sleep(0.2000000);
 	bInvulnerableBody = false;
 	stop;			
 }

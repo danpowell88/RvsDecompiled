@@ -136,8 +136,8 @@ state DiscardWeapon
 		{
 			Log((((("HANDS - " $ string(self)) $ " -  IN:") @ string(self)) @ "::DiscardWeapon::BeginState()"));
 		}
-		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_UnEquipSnd, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-		__NFUN_259__('End', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
+		Owner.Owner.PlaySound(R6AbstractWeapon(Owner).m_UnEquipSnd, 3);
+		PlayAnim('End', (R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration));
 		return;
 	}
 	stop;

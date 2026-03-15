@@ -167,8 +167,8 @@ simulated function ServerPlaceCharge(Vector vLocation)
 	{
 		Log(((((("R6DemolitionsGadget :: ServerPlaceCharge() " $ string(BulletActor)) $ " rDesiredRotation=") $ string(rDesiredRotation)) $ " vLocation=") $ string(vLocation)));
 	}
-	BulletActor.__NFUN_267__((vLocation + vect(0.0000000, 0.0000000, 10.0000000))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-	BulletActor.__NFUN_299__(rDesiredRotation);
+	BulletActor.SetLocation((vLocation + vect(0.0000000, 0.0000000, 10.0000000)));
+	BulletActor.SetRotation(rDesiredRotation);
 	BulletActor.m_Weapon = self;
 	BulletActor.Instigator = Pawn(Owner);
 	BulletActor.SetSpeed(0.0000000);
@@ -201,7 +201,7 @@ function SetAmmoStaticMesh()
 function ServerDetonate()
 {
 	// End:0x15
-	if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+	if((int(m_iNbBulletsInWeapon) == 0))
 	{
 		m_bHide = true;
 	}
@@ -209,10 +209,10 @@ function ServerDetonate()
 	// End:0x4A
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(" Explode() BulletActor=", string(BulletActor)));
+		Log((" Explode() BulletActor=" $ string(BulletActor)));
 	}
 	BulletActor.Explode();
-	BulletActor.__NFUN_279__();
+	BulletActor.Destroy();
 	return;
 }
 
@@ -221,10 +221,10 @@ function Fire(float fValue)
 	// End:0x63
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("(R6DemolitionsGadget) WEAPON - R6Weapons.NoState::Fire(", string(fValue)), ") for weapon "), string(self)));
+		Log(((("(R6DemolitionsGadget) WEAPON - R6Weapons.NoState::Fire(", string(fValue)) $ ") for weapon " $ ???) $ string(self)));
 	}
 	// End:0x88
-	if(__NFUN_242__(Pawn(Owner).Controller.m_bLockWeaponActions, true))
+	if((Pawn(Owner).Controller.m_bLockWeaponActions == true))
 	{
 		return;
 	}
@@ -233,11 +233,11 @@ function Fire(float fValue)
 	if(m_bChargeInPosition)
 	{
 		m_bDetonated = false;
-		__NFUN_113__('ChargeArmed');		
+		GotoState('ChargeArmed');		
 	}
 	else
 	{
-		__NFUN_113__('ChargeReady');
+		GotoState('ChargeReady');
 	}
 	return;
 }
@@ -261,7 +261,7 @@ simulated function bool LoadFirstPersonWeapon(optional Pawn NetOwner, optional C
 {
 	super(R6Weapons).LoadFirstPersonWeapon(NetOwner, LocalPlayerController);
 	// End:0x3F
-	if(__NFUN_242__(m_bChargeInPosition, true))
+	if((m_bChargeInPosition == true))
 	{
 		SwitchToDetonatorHandAnimations();
 		m_FPWeapon.m_smGun.SetStaticMesh(m_DetonatorStaticMesh);
@@ -274,24 +274,24 @@ simulated function bool LoadFirstPersonWeapon(optional Pawn NetOwner, optional C
 function StartLoopingAnims()
 {
 	// End:0x2C
-	if(__NFUN_119__(m_FPHands, none))
+	if((m_FPHands != none))
 	{
 		m_FPHands.SetDrawType(2);
-		m_FPHands.__NFUN_113__('Waiting');
+		m_FPHands.GotoState('Waiting');
 	}
 	return;
 }
 
 function SwitchToDetonatorHandAnimations()
 {
-	m_FPHands.__NFUN_2210__();
+	m_FPHands.UnLinkSkelAnim();
 	m_FPHands.LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsGripDetonatorA');
 	return;
 }
 
 function SwitchToChargeHandAnimations()
 {
-	m_FPHands.__NFUN_2210__();
+	m_FPHands.UnLinkSkelAnim();
 	m_FPHands.LinkSkelAnim(MeshAnimation'R61stHands_UKX.R61stHandsGripBreachA');
 	return;
 }
@@ -300,20 +300,20 @@ function SwitchToChargeHandAnimations()
 simulated function RemoveFirstPersonWeapon()
 {
 	// End:0x17
-	if(__NFUN_119__(m_FPHands, none))
+	if((m_FPHands != none))
 	{
-		m_FPHands.__NFUN_279__();
+		m_FPHands.Destroy();
 	}
 	m_FPHands = none;
 	// End:0x44
-	if(__NFUN_119__(m_FPWeapon, none))
+	if((m_FPWeapon != none))
 	{
 		m_FPWeapon.DestroySM();
-		m_FPWeapon.__NFUN_279__();
+		m_FPWeapon.Destroy();
 	}
 	m_FPWeapon = none;
 	// End:0x6C
-	if(__NFUN_119__(m_MagazineGadget, none))
+	if((m_MagazineGadget != none))
 	{
 		m_MagazineGadget.DestroyFPGadget();
 		m_MagazineGadget = none;
@@ -335,23 +335,23 @@ function DestroyReticules()
 	aReticule = m_ReticuleConfirm;
 	m_ReticuleConfirm = none;
 	// End:0x29
-	if(__NFUN_119__(aReticule, none))
+	if((aReticule != none))
 	{
-		aReticule.__NFUN_279__();
+		aReticule.Destroy();
 	}
 	aReticule = m_ReticuleBlock;
 	m_ReticuleBlock = none;
 	// End:0x52
-	if(__NFUN_119__(aReticule, none))
+	if((aReticule != none))
 	{
-		aReticule.__NFUN_279__();
+		aReticule.Destroy();
 	}
 	aReticule = m_ReticuleDetonator;
 	m_ReticuleDetonator = none;
 	// End:0x7B
-	if(__NFUN_119__(aReticule, none))
+	if((aReticule != none))
 	{
-		aReticule.__NFUN_279__();
+		aReticule.Destroy();
 	}
 	m_ReticuleInstance = none;
 	return;
@@ -363,33 +363,33 @@ simulated function R6SetReticule(optional Controller LocalPlayerController)
 	local Class<Actor> ReticuleToSpawn;
 
 	// End:0x21E
-	if(Owner.__NFUN_303__('R6Rainbow'))
+	if(Owner.IsA('R6Rainbow'))
 	{
 		// End:0x21E
-		if(__NFUN_130__(__NFUN_123__(m_szReticuleClass, ""), __NFUN_114__(m_ReticuleInstance, none)))
+		if(((m_szReticuleClass != "") && (m_ReticuleInstance == none)))
 		{
-			ReticuleToSpawn = Class'Engine.Actor'.static.__NFUN_1524__().GetCurrentReticule(m_szReticuleClass);
-			m_ReticuleConfirm = R6Reticule(__NFUN_278__(ReticuleToSpawn));
-			ReticuleToSpawn = Class'Engine.Actor'.static.__NFUN_1524__().GetCurrentReticule(m_szReticuleBlockClass);
-			m_ReticuleBlock = R6Reticule(__NFUN_278__(ReticuleToSpawn));
-			ReticuleToSpawn = Class'Engine.Actor'.static.__NFUN_1524__().GetCurrentReticule(m_szDetonatorReticuleClass);
-			m_ReticuleDetonator = R6Reticule(__NFUN_278__(ReticuleToSpawn));
+			ReticuleToSpawn = Class'Engine.Actor'.static.GetModMgr().GetCurrentReticule(m_szReticuleClass);
+			m_ReticuleConfirm = R6Reticule(Spawn(ReticuleToSpawn));
+			ReticuleToSpawn = Class'Engine.Actor'.static.GetModMgr().GetCurrentReticule(m_szReticuleBlockClass);
+			m_ReticuleBlock = R6Reticule(Spawn(ReticuleToSpawn));
+			ReticuleToSpawn = Class'Engine.Actor'.static.GetModMgr().GetCurrentReticule(m_szDetonatorReticuleClass);
+			m_ReticuleDetonator = R6Reticule(Spawn(ReticuleToSpawn));
 			m_ReticuleInstance = m_ReticuleBlock;
-			m_ReticuleConfirm.__NFUN_272__(Owner);
-			m_ReticuleBlock.__NFUN_272__(Owner);
-			m_ReticuleDetonator.__NFUN_272__(Owner);
+			m_ReticuleConfirm.SetOwner(Owner);
+			m_ReticuleBlock.SetOwner(Owner);
+			m_ReticuleDetonator.SetOwner(Owner);
 			// End:0x17A
-			if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+			if((int(Level.NetMode) == int(NM_Standalone)))
 			{
-				m_ReticuleConfirm.m_bShowNames = __NFUN_1009__().HUDShowPlayersName;
-				m_ReticuleBlock.m_bShowNames = __NFUN_1009__().HUDShowPlayersName;
-				m_ReticuleDetonator.m_bShowNames = __NFUN_1009__().HUDShowPlayersName;				
+				m_ReticuleConfirm.m_bShowNames = GetGameOptions().HUDShowPlayersName;
+				m_ReticuleBlock.m_bShowNames = GetGameOptions().HUDShowPlayersName;
+				m_ReticuleDetonator.m_bShowNames = GetGameOptions().HUDShowPlayersName;				
 			}
 			else
 			{
 				PlayerCtrl = R6PlayerController(LocalPlayerController);
 				// End:0x1B3
-				if(__NFUN_114__(PlayerCtrl, none))
+				if((PlayerCtrl == none))
 				{
 					PlayerCtrl = R6PlayerController(R6Pawn(Owner).Controller);
 				}
@@ -412,7 +412,7 @@ simulated function bool CanPlaceCharge()
 	pawnOwner = R6Pawn(Owner);
 	PlayerCtrl = R6PlayerController(pawnOwner.Controller);
 	// End:0x4C
-	if(__NFUN_132__(__NFUN_114__(Owner, none), __NFUN_114__(pawnOwner.Controller, none)))
+	if(((Owner == none) || (pawnOwner.Controller == none)))
 	{
 		return false;
 	}
@@ -422,24 +422,24 @@ simulated function bool CanPlaceCharge()
 		return false;
 	}
 	// End:0x98
-	if(__NFUN_119__(PlayerCtrl, none))
+	if((PlayerCtrl != none))
 	{
 		vLookLocation = PlayerCtrl.m_vDefaultLocation;
 		// End:0x98
-		if(__NFUN_217__(vLookLocation, vect(0.0000000, 0.0000000, 0.0000000)))
+		if((vLookLocation == vect(0.0000000, 0.0000000, 0.0000000)))
 		{
 			return false;
 		}
 	}
 	// End:0xD1
-	if(__NFUN_132__(__NFUN_129__(pawnOwner.IsStationary()), __NFUN_181__(pawnOwner.m_fPeeking, pawnOwner.1000.0000000)))
+	if(((!pawnOwner.IsStationary()) || (pawnOwner.m_fPeeking != pawnOwner.1000.0000000)))
 	{
 		return false;
 	}
 	vFeetLocation = Owner.Location;
-	__NFUN_185__(vFeetLocation.Z, pawnOwner.CollisionHeight);
+	(vFeetLocation.Z -= pawnOwner.CollisionHeight);
 	// End:0x118
-	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(vLookLocation, vFeetLocation)), float(75)))
+	if((VSize((vLookLocation - vFeetLocation)) < float(75)))
 	{
 		return true;
 	}
@@ -450,7 +450,7 @@ simulated function bool CanPlaceCharge()
 function ServerGotoSetExplosive()
 {
 	R6Pawn(Owner).PlayWeaponSound(3);
-	R6PlayerController(Pawn(Owner).Controller).__NFUN_113__('PlayerSetExplosive');
+	R6PlayerController(Pawn(Owner).Controller).GotoState('PlayerSetExplosive');
 	return;
 }
 
@@ -459,17 +459,17 @@ function ServerCancelChargeInstallation()
 	// End:0x54
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("Server Cancel Charge Installation : ", string(R6PlayerController(Pawn(Owner).Controller).__NFUN_284__())));
+		Log(("Server Cancel Charge Installation : " $ string(R6PlayerController(Pawn(Owner).Controller).GetStateName())));
 	}
 	R6Pawn(Owner).PlayWeaponSound(4);
 	// End:0x119
 	if(R6Pawn(Owner).IsAlive())
 	{
-		R6Pawn(Owner).m_bToggleServerCancelPlacingCharge = __NFUN_129__(R6Pawn(Owner).m_bToggleServerCancelPlacingCharge);
+		R6Pawn(Owner).m_bToggleServerCancelPlacingCharge = (!R6Pawn(Owner).m_bToggleServerCancelPlacingCharge);
 		// End:0x119
-		if(__NFUN_129__(__NFUN_130__(__NFUN_130__(Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack(), Owner.__NFUN_303__('R6Rainbow')), R6Rainbow(Owner).m_bIsSurrended)))
+		if((!((Class'Engine.Actor'.static.GetModMgr().IsMissionPack() && Owner.IsA('R6Rainbow')) && R6Rainbow(Owner).m_bIsSurrended)))
 		{
-			R6PlayerController(Pawn(Owner).Controller).__NFUN_113__('PlayerWalking');
+			R6PlayerController(Pawn(Owner).Controller).GotoState('PlayerWalking');
 		}
 	}
 	return;
@@ -480,20 +480,20 @@ simulated function CancelChargeInstallation()
 	// End:0x27
 	if(bShowLog)
 	{
-		__NFUN_231__("Cancel Charge Installation");
+		Log("Cancel Charge Installation");
 	}
-	__NFUN_280__(0.0000000, false);
+	SetTimer(0.0000000, false);
 	m_bCancelChargeInstallation = true;
 	m_bInstallingCharge = false;
 	// End:0xD4
 	if(R6Pawn(Owner).IsAlive())
 	{
 		// End:0xC4
-		if(__NFUN_129__(__NFUN_130__(__NFUN_130__(Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack(), Owner.__NFUN_303__('R6Rainbow')), R6Rainbow(Owner).m_bIsSurrended)))
+		if((!((Class'Engine.Actor'.static.GetModMgr().IsMissionPack() && Owner.IsA('R6Rainbow')) && R6Rainbow(Owner).m_bIsSurrended)))
 		{
-			R6PlayerController(Pawn(Owner).Controller).__NFUN_113__('PlayerWalking');
+			R6PlayerController(Pawn(Owner).Controller).GotoState('PlayerWalking');
 		}
-		m_FPHands.__NFUN_113__('RaiseWeapon');
+		m_FPHands.GotoState('RaiseWeapon');
 	}
 	return;
 }
@@ -501,21 +501,21 @@ simulated function CancelChargeInstallation()
 simulated function Tick(float fDeltaTime)
 {
 	// End:0x28
-	if(__NFUN_132__(__NFUN_114__(Owner, none), __NFUN_119__(self, R6Pawn(Owner).EngineWeapon)))
+	if(((Owner == none) || (self != R6Pawn(Owner).EngineWeapon)))
 	{
 		return;
 	}
 	super(Actor).Tick(fDeltaTime);
 	// End:0x49
-	if(__NFUN_132__(m_bChargeInPosition, m_bDetonated))
+	if((m_bChargeInPosition || m_bDetonated))
 	{
 		return;
 	}
 	// End:0xD1
-	if(__NFUN_130__(m_bInstallingCharge, __NFUN_154__(int(Pawn(Owner).Controller.bFire), 0)))
+	if((m_bInstallingCharge && (int(Pawn(Owner).Controller.bFire) == 0)))
 	{
 		// End:0xCB
-		if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), R6Pawn(Owner).IsLocallyControlled())))
+		if(((int(Level.NetMode) == int(NM_Client)) || ((int(Level.NetMode) == int(NM_ListenServer)) && R6Pawn(Owner).IsLocallyControlled())))
 		{
 			ServerCancelChargeInstallation();
 		}
@@ -544,10 +544,10 @@ simulated event HideAttachment()
 	// End:0x41
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__("***** HideAttachment for", string(self)), "****** : "), string(m_bHide)));
+		Log(((("***** HideAttachment for" @ string(self)) @ "****** : ") $ string(m_bHide)));
 	}
 	// End:0x58
-	if(__NFUN_242__(m_bHide, true))
+	if((m_bHide == true))
 	{
 		SetDrawType(0);		
 	}
@@ -564,7 +564,7 @@ simulated event SetGadgetStaticMesh()
 	// End:0x46
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_168__(__NFUN_168__("***** SetGadgetStaticMesh for", string(self)), "****** : "), string(m_bDetonator)));
+		Log(((("***** SetGadgetStaticMesh for" @ string(self)) @ "****** : ") $ string(m_bDetonator)));
 	}
 	// End:0x82
 	if(m_bDetonator)
@@ -587,10 +587,10 @@ function bool CanSwitchToWeapon()
 	// End:0x51
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("***** CanSwitchToWeapon for", string(self)), string(m_bDetonator)), string(m_iNbBulletsInWeapon)), string(__NFUN_284__())), "******"));
+		Log(((((("***** CanSwitchToWeapon for" @ string(self)) @ string(m_bDetonator)) @ string(m_iNbBulletsInWeapon)) @ string(GetStateName())) @ "******"));
 	}
 	// End:0x7D
-	if(__NFUN_130__(__NFUN_132__(m_bDetonator, __NFUN_151__(int(m_iNbBulletsInWeapon), 0)), __NFUN_129__(__NFUN_281__('ChargeReady'))))
+	if(((m_bDetonator || (int(m_iNbBulletsInWeapon) > 0)) && (!IsInState('ChargeReady'))))
 	{
 		return true;		
 	}
@@ -640,18 +640,18 @@ state RaiseWeapon
 		// End:0x37
 		if(bShowLog)
 		{
-			__NFUN_231__("FirstPersonAnimOver()  R6DemolitionsGadget");
+			Log("FirstPersonAnimOver()  R6DemolitionsGadget");
 		}
 		R6PlayerController(Pawn(Owner).Controller).ServerWeaponUpAnimDone();
 		// End:0x74
 		if(m_bChargeInPosition)
 		{
 			m_bDetonated = false;
-			__NFUN_113__('ChargeArmed');			
+			GotoState('ChargeArmed');			
 		}
 		else
 		{
-			__NFUN_113__('ChargeReady');
+			GotoState('ChargeReady');
 		}
 		return;
 	}
@@ -661,14 +661,14 @@ state RaiseWeapon
 		// End:0x39
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("WEAPON - BeginState of RaiseWeapon for ", string(self)));
+			Log(("WEAPON - BeginState of RaiseWeapon for " $ string(self)));
 		}
 		Pawn(Owner).Controller.m_bLockWeaponActions = true;
 		// End:0x7B
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			m_bRaiseWeapon = true;
-			m_FPHands.__NFUN_113__('RaiseWeapon');
+			m_FPHands.GotoState('RaiseWeapon');
 		}
 		return;
 	}
@@ -684,14 +684,14 @@ state ChargeReady
 		// End:0x56
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(string(self), " entered state ChargeReady..."));
+			Log((string(self) $ " entered state ChargeReady..."));
 		}
 		m_AttachPoint = m_ChargeAttachPoint;
 		SetStaticMesh(m_ChargeStaticMesh);
 		Pawn(Owner).AttachToBone(self, m_AttachPoint);
 		m_bDetonated = false;
 		// End:0xCB
-		if(__NFUN_130__(__NFUN_154__(int(Pawn(Owner).Controller.bFire), 1), __NFUN_242__(CanPlaceCharge(), true)))
+		if(((int(Pawn(Owner).Controller.bFire) == 1) && (CanPlaceCharge() == true)))
 		{
 			Fire(0.0000000);
 		}
@@ -703,9 +703,9 @@ state ChargeReady
 		// End:0x2E
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(string(self), " exited state ChargeReady..."));
+			Log((string(self) $ " exited state ChargeReady..."));
 		}
-		__NFUN_280__(0.0000000, false);
+		SetTimer(0.0000000, false);
 		return;
 	}
 
@@ -718,14 +718,14 @@ state ChargeReady
 		pawnOwner = R6Pawn(Owner);
 		PlayerCtrl = R6PlayerController(pawnOwner.Controller);
 		// End:0x60
-		if(__NFUN_132__(__NFUN_132__(__NFUN_129__(pawnOwner.m_bIsPlayer), pawnOwner.m_bPostureTransition), __NFUN_129__(m_bInstallingCharge)))
+		if((((!pawnOwner.m_bIsPlayer) || pawnOwner.m_bPostureTransition) || (!m_bInstallingCharge)))
 		{
 			return;
 		}
 		// End:0xC5
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " state ChargeReady : Timer() has expired "), string(PlayerCtrl.m_bPlacedExplosive)), " : "), string(PlayerCtrl.__NFUN_284__())));
+			Log(((((string(self) $ " state ChargeReady : Timer() has expired ") $ string(PlayerCtrl.m_bPlacedExplosive)) $ " : ") $ string(PlayerCtrl.GetStateName())));
 		}
 		// End:0x11E
 		if(PlayerCtrl.m_bPlacedExplosive)
@@ -735,7 +735,7 @@ state ChargeReady
 			m_bInstallingCharge = false;
 			m_bRaiseWeapon = false;
 			m_FPWeapon.m_smGun.SetStaticMesh(m_DetonatorStaticMesh);
-			__NFUN_113__('ChargeArmed');
+			GotoState('ChargeArmed');
 		}
 		return;
 	}
@@ -746,7 +746,7 @@ state ChargeReady
 
 		PlayerCtrl = R6PlayerController(R6Pawn(Owner).Controller);
 		// End:0x4D
-		if(__NFUN_132__(__NFUN_132__(m_bChargeInPosition, __NFUN_129__(m_bCanPlaceCharge)), __NFUN_242__(PlayerCtrl.m_bLockWeaponActions, true)))
+		if(((m_bChargeInPosition || (!m_bCanPlaceCharge)) || (PlayerCtrl.m_bLockWeaponActions == true)))
 		{
 			return;
 		}
@@ -755,35 +755,35 @@ state ChargeReady
 		m_bInstallingCharge = true;
 		HideReticule();
 		// End:0x9B
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) == int(NM_Client)))
 		{
 			ServerGotoSetExplosive();
 		}
-		PlayerCtrl.__NFUN_113__('PlayerSetExplosive');
+		PlayerCtrl.GotoState('PlayerSetExplosive');
 		PlaceChargeAnimation();
 		m_vLocation = PlayerCtrl.m_vDefaultLocation;
 		// End:0x124
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " state ChargeReady : Remote Charge has been placed at m_vLocation = "), string(m_vLocation)));
+			Log(((string(self) $ " state ChargeReady : Remote Charge has been placed at m_vLocation = ") $ string(m_vLocation)));
 		}
 		// End:0x13F
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
-			m_FPHands.__NFUN_113__('DiscardWeapon');
+			m_FPHands.GotoState('DiscardWeapon');
 		}
-		__NFUN_280__(0.1000000, true);
+		SetTimer(0.1000000, true);
 		return;
 	}
 
 	function FirstPersonAnimOver()
 	{
 		// End:0x3C
-		if(__NFUN_242__(m_bCancelChargeInstallation, true))
+		if((m_bCancelChargeInstallation == true))
 		{
 			m_bCancelChargeInstallation = false;
 			Pawn(Owner).Controller.m_bLockWeaponActions = false;
-			__NFUN_280__(0.0000000, false);
+			SetTimer(0.0000000, false);
 		}
 		return;
 	}
@@ -797,19 +797,19 @@ state ChargeArmed
 		// End:0x3E
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " state ChargeArmed : beginState() "), string(m_bRaiseWeapon)));
+			Log(((string(self) $ " state ChargeArmed : beginState() ") $ string(m_bRaiseWeapon)));
 		}
 		m_ReticuleInstance = m_ReticuleDetonator;
 		Pawn(Owner).Controller.m_bHideReticule = false;
 		// End:0xAA
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			SwitchToDetonatorHandAnimations();
 			// End:0x9F
-			if(__NFUN_129__(m_bRaiseWeapon))
+			if((!m_bRaiseWeapon))
 			{
 				m_bRaiseWeapon = true;
-				m_FPHands.__NFUN_113__('RaiseWeapon');				
+				m_FPHands.GotoState('RaiseWeapon');				
 			}
 			else
 			{
@@ -828,7 +828,7 @@ state ChargeArmed
 		// End:0x4D
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(self), " state ChargeArmed : endState() "), string(m_bDetonated)), " : "), string(m_bChargeInPosition)));
+			Log(((((string(self) $ " state ChargeArmed : endState() ") $ string(m_bDetonated)) $ " : ") $ string(m_bChargeInPosition)));
 		}
 		return;
 	}
@@ -838,7 +838,7 @@ state ChargeArmed
 		// End:0x2E
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("First person anim over ", string(m_bRaiseWeapon)));
+			Log(("First person anim over " $ string(m_bRaiseWeapon)));
 		}
 		// End:0x63
 		if(m_bRaiseWeapon)
@@ -855,20 +855,20 @@ state ChargeArmed
 				// End:0xB7
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " state ChargeArmed : DETONATE CHARGE!!! # left :"), string(m_iNbBulletsInWeapon)));
+					Log(((string(self) $ " state ChargeArmed : DETONATE CHARGE!!! # left :") $ string(m_iNbBulletsInWeapon)));
 				}
 				ServerDetonate();
 				m_bChargeInPosition = false;
 				SetStaticMesh(none);
 				R6Pawn(Owner).m_bIsFiringState = false;
 				// End:0xF9
-				if(__NFUN_152__(int(m_iNbBulletsInWeapon), 0))
+				if((int(m_iNbBulletsInWeapon) <= 0))
 				{
-					__NFUN_113__('NoChargesLeft');					
+					GotoState('NoChargesLeft');					
 				}
 				else
 				{
-					__NFUN_113__('GetNextCharge');
+					GotoState('GetNextCharge');
 				}
 			}
 		}
@@ -878,18 +878,18 @@ state ChargeArmed
 	function Fire(float fValue)
 	{
 		// End:0xDA
-		if(__NFUN_129__(m_bRaiseWeapon))
+		if((!m_bRaiseWeapon))
 		{
 			// End:0x89
-			if(__NFUN_129__(m_bDetonated))
+			if((!m_bDetonated))
 			{
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
 				R6Pawn(Owner).m_bIsFiringState = true;
 				m_bDetonated = true;
 				// End:0x80
-				if(__NFUN_119__(m_FPHands, none))
+				if((m_FPHands != none))
 				{
-					m_FPHands.__NFUN_113__('FiringWeapon');
+					m_FPHands.GotoState('FiringWeapon');
 					m_FPHands.FireSingleShot();					
 				}
 				else
@@ -902,7 +902,7 @@ state ChargeArmed
 				// End:0xDA
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__(string(self), " state ChargeArmed : DO NOTHING, charge has already exploded..."));
+					Log((string(self) $ " state ChargeArmed : DO NOTHING));
 				}
 			}
 		}
@@ -933,7 +933,7 @@ state GetNextCharge
 		// End:0x36
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(string(self), " state GetNextCharge : beginState() "));
+			Log((string(self) $ " state GetNextCharge : beginState() "));
 		}
 		return;
 	}
@@ -943,12 +943,12 @@ state GetNextCharge
 		m_AttachPoint = m_ChargeAttachPoint;
 		SetAmmoStaticMesh();
 		// End:0x32
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			SwitchToChargeHandAnimations();
-			m_FPHands.__NFUN_113__('RaiseWeapon');
+			m_FPHands.GotoState('RaiseWeapon');
 		}
-		__NFUN_113__('ChargeReady');
+		GotoState('ChargeReady');
 		return;
 	}
 	stop;
@@ -961,7 +961,7 @@ state NoChargesLeft
 		// End:0x38
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(string(self), " state NoChargesLeft : BeginState()..."));
+			Log((string(self) $ " state NoChargesLeft : BeginState()..."));
 		}
 		Pawn(Owner).Controller.m_bHideReticule = true;
 		return;
@@ -989,10 +989,10 @@ state NoChargesLeft
 		Pawn(Owner).Controller.m_bLockWeaponActions = false;
 		PController = R6PlayerController(Pawn(Owner).Controller);
 		// End:0x84
-		if(__NFUN_119__(PController, none))
+		if((PController != none))
 		{
 			// End:0x75
-			if(__NFUN_119__(R6Pawn(Owner).m_WeaponsCarried[0], none))
+			if((R6Pawn(Owner).m_WeaponsCarried[0] != none))
 			{
 				PController.PrimaryWeapon();				
 			}
@@ -1037,23 +1037,23 @@ state DiscardWeapon
 	{
 		m_bRaiseWeapon = false;
 		// End:0xE1
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			// End:0x59
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("***** DiscardWeapon for", string(self)), string(m_bDetonator)), string(m_iNbBulletsInWeapon)), "******"));
+				Log((((("***** DiscardWeapon for" @ string(self)) @ string(m_bDetonator)) @ string(m_iNbBulletsInWeapon)) @ "******"));
 			}
 			// End:0xB0
-			if(__NFUN_119__(Pawn(Owner).Controller, none))
+			if((Pawn(Owner).Controller != none))
 			{
 				Pawn(Owner).Controller.m_bHideReticule = true;
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
 			}
 			// End:0xDB
-			if(__NFUN_132__(m_bDetonator, __NFUN_151__(int(m_iNbBulletsInWeapon), 0)))
+			if((m_bDetonator || (int(m_iNbBulletsInWeapon) > 0)))
 			{
-				m_FPHands.__NFUN_113__('DiscardWeapon');				
+				m_FPHands.GotoState('DiscardWeapon');				
 			}
 			else
 			{
@@ -1072,19 +1072,19 @@ state BringWeaponUp
 		// End:0x47
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WEAPON - ", string(self)), " - BeginState of BringWeaponUp for "), string(self)));
+			Log(((("WEAPON - " $ string(self)) $ " - BeginState of BringWeaponUp for ") $ string(self)));
 		}
 		// End:0x87
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			// End:0x74
-			if(__NFUN_130__(__NFUN_154__(int(m_iNbBulletsInWeapon), 0), m_bDetonated))
+			if(((int(m_iNbBulletsInWeapon) == 0) && m_bDetonated))
 			{
-				__NFUN_113__('NoChargesLeft');				
+				GotoState('NoChargesLeft');				
 			}
 			else
 			{
-				m_FPHands.__NFUN_113__('BringWeaponUp');
+				m_FPHands.GotoState('BringWeaponUp');
 			}			
 		}
 		else
@@ -1099,18 +1099,18 @@ state BringWeaponUp
 		// End:0x37
 		if(bShowLog)
 		{
-			__NFUN_231__("FirstPersonAnimOver()  R6DemolitionsGadget");
+			Log("FirstPersonAnimOver()  R6DemolitionsGadget");
 		}
 		R6PlayerController(Pawn(Owner).Controller).ServerWeaponUpAnimDone();
 		// End:0x74
 		if(m_bChargeInPosition)
 		{
 			m_bDetonated = false;
-			__NFUN_113__('ChargeArmed');			
+			GotoState('ChargeArmed');			
 		}
 		else
 		{
-			__NFUN_113__('ChargeReady');
+			GotoState('ChargeReady');
 		}
 		return;
 	}

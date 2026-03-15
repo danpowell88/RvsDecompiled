@@ -519,10 +519,10 @@ function Notify(UWindowDialogControl C, byte E)
 		if(C.IsA('R6WindowTextListBoxExt'))
 		{
 			// End:0x145
-			if(__NFUN_132__(__NFUN_154__(int(E), 2), __NFUN_154__(int(E), 11)))
+			if(((int(E) == 2) || (int(E) == 11)))
 			{
 				// End:0x145
-				if(__NFUN_119__(m_pMapList.GetSelectedItem(), none))
+				if((m_pMapList.GetSelectedItem() != none))
 				{
 					FillArmorList();
 					UpdateImages();
@@ -532,16 +532,16 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x231
-			if(C.__NFUN_303__('R6WindowTextListBox'))
+			if(C.IsA('R6WindowTextListBox'))
 			{
 				// End:0x231
-				if(__NFUN_132__(__NFUN_154__(int(E), 2), __NFUN_154__(int(E), 11)))
+				if(((int(E) == 2) || (int(E) == 11)))
 				{
 					// End:0x231
-					if(__NFUN_119__(m_ArmorListBox.GetSelectedItem(), none))
+					if((m_ArmorListBox.GetSelectedItem() != none))
 					{
 						// End:0x231
-						if(__NFUN_119__(m_pMapList.GetSelectedItem(), none))
+						if((m_pMapList.GetSelectedItem() != none))
 						{
 							// End:0x1E9
 							if(m_2DArmor.IsGreenArmorSelect())

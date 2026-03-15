@@ -407,7 +407,7 @@ function CreatePopUpFrame(float _X, float _Y, float _fWidth, float _fHeight)
 function SetBorderParam(int _iBorderType, float _X, float _Y, float _fWidth, float _fHeight, Color _vColor)
 {
 	m_sBorderForm[_iBorderType].fXPos = (_X + float(m_RWindowBorder.X));
-	m_sBorderForm[_iBorderType].fYPos = __NFUN_174__(_Y, float(m_RWindowBorder.Y));
+	m_sBorderForm[_iBorderType].fYPos = (_Y + float(m_RWindowBorder.Y));
 	m_sBorderForm[_iBorderType].fWidth = _fWidth;
 	m_sBorderForm[_iBorderType].fHeight = _fHeight;
 	m_sBorderForm[_iBorderType].vColor = _vColor;
@@ -431,7 +431,7 @@ function ActiveBorder(int _iBorderType, bool _Active)
 	J0x27:
 
 	// End:0x5C [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		// End:0x52
 		if(m_sBorderForm[_iBorderType].bActive)
@@ -440,7 +440,7 @@ function ActiveBorder(int _iBorderType, bool _Active)
 			// [Explicit Break]
 			goto J0x5C;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x27;
 	}
@@ -460,7 +460,7 @@ function SetNoBorder()
 function SetCornerColor(int _iCornerType, Color _Color)
 {
 	// End:0x2E
-	if(__NFUN_154__(_iCornerType, int(3)))
+	if((_iCornerType == int(3)))
 	{
 		m_eCornerColor[int(1)] = _Color;
 		m_eCornerColor[int(2)] = _Color;
@@ -477,8 +477,8 @@ function ResizePopUp(float _fNewWidth)
 	local float fTemp;
 	local int ITemp;
 
-	fTemp = __NFUN_171__(__NFUN_175__(640.0000000, _fNewWidth), 0.5000000);
-	__NFUN_184__(fTemp, 0.5000000);
+	fTemp = ((640.0000000 - _fNewWidth) * 0.5000000);
+	(fTemp += 0.5000000);
 	ITemp = int(fTemp);
 	m_bHideAllChild = true;
 	ModifyPopUpFrameWindow(m_pTextLabel.GetTextLabel(0), m_pTextLabel.WinHeight, float(ITemp), m_pTextLabel.WinTop, _fNewWidth, float(m_RWindowBorder.H), m_iPopUpButtonsType);
@@ -531,7 +531,7 @@ function SetButtonsType(int _iButtonsType)
 function SetupPopUpBox(UWindowBase.MessageBoxButtons Buttons, UWindowBase.MessageBoxResult InESCResult, optional UWindowBase.MessageBoxResult InEnterResult)
 {
 	// End:0x2E
-	if(__NFUN_119__(m_ButClientArea, none))
+	if((m_ButClientArea != none))
 	{
 		R6WindowPopUpBoxCW(m_ButClientArea).SetupPopUpBoxClient(Buttons, InESCResult, InEnterResult);
 	}
@@ -558,25 +558,25 @@ function Close(optional bool bByParent)
 	if(m_bDisablePopUpActive)
 	{
 		// End:0x132
-		if(__NFUN_119__(m_ButClientArea, none))
+		if((m_ButClientArea != none))
 		{
-			pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+			pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 			bGOSaveConfig = true;
 			switch(m_ePopUpID)
 			{
 				// End:0x83
 				case 39:
-					pGameOptions.PopUpQuickPlay = __NFUN_129__(R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected);
+					pGameOptions.PopUpQuickPlay = (!R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected);
 					// End:0x11D
 					break;
 				// End:0xBA
 				case 48:
-					pGameOptions.PopUpLoadPlan = __NFUN_129__(R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected);
+					pGameOptions.PopUpLoadPlan = (!R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected);
 					// End:0x11D
 					break;
 				// End:0xFFFF
 				default:
-					__NFUN_231__("Need to add your disable/enable pop-up ID in game options to have this feature ON");
+					Log("Need to add your disable/enable pop-up ID in game options to have this feature ON");
 					bGOSaveConfig = false;
 					// End:0x11D
 					break;
@@ -585,18 +585,18 @@ function Close(optional bool bByParent)
 			// End:0x132
 			if(bGOSaveConfig)
 			{
-				pGameOptions.__NFUN_536__();
+				pGameOptions.SaveConfig();
 			}
 		}
 	}
 	// End:0x151
-	if(__NFUN_119__(m_ButClientArea, none))
+	if((m_ButClientArea != none))
 	{
 		R6WindowPopUpBoxCW(m_ButClientArea).CancelAcceptsFocus();
 	}
 	OwnerWindow.PopUpBoxDone(Result, m_ePopUpID);
 	// End:0x18E
-	if(__NFUN_119__(m_ClientArea, none))
+	if((m_ClientArea != none))
 	{
 		m_ClientArea.PopUpBoxDone(Result, m_ePopUpID);
 	}
@@ -619,13 +619,13 @@ function ShowWindow()
 	if(m_bDetectKey)
 	{
 		// End:0x3F
-		if(__NFUN_119__(m_ButClientArea, none))
+		if((m_ButClientArea != none))
 		{
 			R6WindowPopUpBoxCW(m_ButClientArea).SetAcceptsFocus();
 		}
 	}
 	// End:0x59
-	if(__NFUN_119__(m_ClientArea, none))
+	if((m_ClientArea != none))
 	{
 		m_ClientArea.ShowWindow();
 	}
@@ -653,13 +653,13 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 	if(m_bDetectKey)
 	{
 		// End:0x7A
-		if(__NFUN_154__(int(Msg), int(9)))
+		if((int(Msg) == int(9)))
 		{
 			// End:0x7A
-			if(__NFUN_119__(m_ButClientArea, none))
+			if((m_ButClientArea != none))
 			{
 				// End:0x7A
-				if(m_ButClientArea.__NFUN_303__('R6WindowPopUpBoxCW'))
+				if(m_ButClientArea.IsA('R6WindowPopUpBoxCW'))
 				{
 					R6WindowPopUpBoxCW(m_ButClientArea).KeyDown(Key, X, Y);
 				}
@@ -677,20 +677,20 @@ function AddDisableDLG()
 	local R6GameOptions pGameOptions;
 
 	// End:0xAC
-	if(__NFUN_119__(m_ButClientArea, none))
+	if((m_ButClientArea != none))
 	{
 		R6WindowPopUpBoxCW(m_ButClientArea).AddDisablePopUpButton();
-		pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+		pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 		switch(m_ePopUpID)
 		{
 			// End:0x6F
 			case 39:
-				R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected = __NFUN_129__(pGameOptions.PopUpQuickPlay);
+				R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected = (!pGameOptions.PopUpQuickPlay);
 				// End:0xAC
 				break;
 			// End:0xA6
 			case 48:
-				R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected = __NFUN_129__(pGameOptions.PopUpLoadPlan);
+				R6WindowPopUpBoxCW(m_ButClientArea).m_pDisablePopUpButton.m_bSelected = (!pGameOptions.PopUpLoadPlan);
 				// End:0xAC
 				break;
 			// End:0xFFFF
@@ -710,7 +710,7 @@ function AddDisableDLG()
 function RemoveDisableDLG()
 {
 	// End:0x1F
-	if(__NFUN_119__(m_ButClientArea, none))
+	if((m_ButClientArea != none))
 	{
 		R6WindowPopUpBoxCW(m_ButClientArea).RemoveDisablePopUpButton();
 	}

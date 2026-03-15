@@ -85,21 +85,21 @@ function SpawnBullet(Vector VPosition, Rotator rRotation, float fBulletSpeed, bo
 	{
 		(m_iNextBulletGroupID++);
 	}
-	m_BulletArray[m_iCurrentBullet].__NFUN_267__(VPosition, true) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-	m_BulletArray[m_iCurrentBullet].__NFUN_299__(rRotation);
+	m_BulletArray[m_iCurrentBullet].SetLocation(VPosition, true);
+	m_BulletArray[m_iCurrentBullet].SetRotation(rRotation);
 	m_BulletArray[m_iCurrentBullet].m_vSpawnedPosition = VPosition;
 	m_BulletArray[m_iCurrentBullet].m_bBulletIsGone = true;
 	m_BulletArray[m_iCurrentBullet].SetSpeed(fBulletSpeed);
-	m_BulletArray[m_iCurrentBullet].__NFUN_262__(true, true, false);
-	m_BulletArray[m_iCurrentBullet].__NFUN_3970__(6);
+	m_BulletArray[m_iCurrentBullet].SetCollision(true, true, false);
+	m_BulletArray[m_iCurrentBullet].SetPhysics(6);
 	m_BulletArray[m_iCurrentBullet].bStasis = false;
 	m_BulletArray[m_iCurrentBullet].m_bBulletDeactivated = false;
 	m_BulletArray[m_iCurrentBullet].m_iBulletGroupID = m_iNextBulletGroupID;
 	m_BulletArray[m_iCurrentBullet].m_AffectedActor = none;
 	m_BulletArray[m_iCurrentBullet].m_iEnergy = m_iBulletEnergy;
-	__NFUN_165__(m_iCurrentBullet);
+	(m_iCurrentBullet++);
 	// End:0x148
-	if(__NFUN_154__(m_iCurrentBullet, 20))
+	if((m_iCurrentBullet == 20))
 	{
 		m_iCurrentBullet = 0;
 	}
@@ -116,27 +116,27 @@ function bool AffectActor(int BulletGroup, Actor ActorAffected)
 	J0x07:
 
 	// End:0x83 [Loop If]
-	if(__NFUN_150__(iBulletIndex, 20))
+	if((iBulletIndex < 20))
 	{
 		// End:0x79
-		if(__NFUN_154__(m_BulletArray[iBulletIndex].m_iBulletGroupID, BulletGroup))
+		if((m_BulletArray[iBulletIndex].m_iBulletGroupID == BulletGroup))
 		{
 			// End:0x54
-			if(__NFUN_114__(m_BulletArray[iBulletIndex].m_AffectedActor, ActorAffected))
+			if((m_BulletArray[iBulletIndex].m_AffectedActor == ActorAffected))
 			{
 				return false;
 				// [Explicit Continue]
 				goto J0x79;
 			}
 			// End:0x79
-			if(__NFUN_114__(m_BulletArray[iBulletIndex].m_AffectedActor, none))
+			if((m_BulletArray[iBulletIndex].m_AffectedActor == none))
 			{
 				iSaveBulletIndex = iBulletIndex;
 			}
 		}
 		J0x79:
 
-		__NFUN_165__(iBulletIndex);
+		(iBulletIndex++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -153,15 +153,15 @@ simulated event Destroyed()
 	J0x07:
 
 	// End:0x56 [Loop If]
-	if(__NFUN_150__(i, 20))
+	if((i < 20))
 	{
 		// End:0x4C
-		if(__NFUN_119__(m_BulletArray[i], none))
+		if((m_BulletArray[i] != none))
 		{
 			m_BulletArray[i].m_BulletManager = none;
-			m_BulletArray[i].__NFUN_279__();
+			m_BulletArray[i].Destroy();
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}

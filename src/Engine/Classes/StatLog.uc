@@ -315,23 +315,23 @@ function LogStandardInfo()
 	}
 	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Log_Version") $ Chr(9)) $ LogVersion));
 	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Log_Info_URL") $ Chr(9)) $ LogInfoURL));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Name"), __NFUN_236__(9)), GameName));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Version"), __NFUN_236__(9)), Level.EngineVersion));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Creator"), __NFUN_236__(9)), GameCreator));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Creator_URL"), __NFUN_236__(9)), GameCreatorURL));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Game_Decoder_Ring_URL"), __NFUN_236__(9)), DecoderRingURL));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Absolute_Time"), __NFUN_236__(9)), GetAbsoluteTime()));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Game_Name") $ Chr(9)) $ GameName));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Game_Version") $ Chr(9)) $ Level.EngineVersion));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Game_Creator") $ Chr(9)) $ GameCreator));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Game_Creator_URL") $ Chr(9)) $ GameCreatorURL));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Game_Decoder_Ring_URL") $ Chr(9)) $ DecoderRingURL));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Absolute_Time") $ Chr(9)) $ GetAbsoluteTime()));
 	// End:0x38C
 	if(bWorld)
 	{
 		// End:0x350
-		if(__NFUN_124__(Level.ConsoleCommand("get UdpServerUplink douplink"), string(true)))
+		if((Level.ConsoleCommand("get UdpServerUplink douplink") ~= string(true)))
 		{
-			LogWorldEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_Public"), __NFUN_236__(9)), "1"));			
+			LogWorldEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_Public") $ Chr(9)) $ "1"));			
 		}
 		else
 		{
-			LogWorldEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_Public"), __NFUN_236__(9)), "0"));
+			LogWorldEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_Public") $ Chr(9)) $ "0"));
 		}
 	}
 	return;
@@ -342,28 +342,28 @@ function LogServerInfo()
 	local string NetworkNumber;
 
 	NetworkNumber = Level.Game.GetNetworkNumber();
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_ServerName"), __NFUN_236__(9)), Level.Game.GameReplicationInfo.ServerName));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_AdminName"), __NFUN_236__(9)), Level.Game.GameReplicationInfo.AdminName));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_AdminEmail"), __NFUN_236__(9)), Level.Game.GameReplicationInfo.AdminEmail));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_Region"), __NFUN_236__(9)), string(Level.Game.GameReplicationInfo.ServerRegion)));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_MOTDLine1"), __NFUN_236__(9)), Level.Game.GameReplicationInfo.MOTDLine1));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_MOTDLine2"), __NFUN_236__(9)), Level.Game.GameReplicationInfo.MOTDLine2));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_MOTDLine3"), __NFUN_236__(9)), Level.Game.GameReplicationInfo.MOTDLine3));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_MOTDLine4"), __NFUN_236__(9)), Level.Game.GameReplicationInfo.MOTDLine4));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_IP"), __NFUN_236__(9)), NetworkNumber));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "info"), __NFUN_236__(9)), "Server_Port"), __NFUN_236__(9)), string(Level.Game.GetServerPort())));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_ServerName") $ Chr(9)) $ Level.Game.GameReplicationInfo.ServerName));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_AdminName") $ Chr(9)) $ Level.Game.GameReplicationInfo.AdminName));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_AdminEmail") $ Chr(9)) $ Level.Game.GameReplicationInfo.AdminEmail));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_Region") $ Chr(9)) $ string(Level.Game.GameReplicationInfo.ServerRegion)));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_MOTDLine1") $ Chr(9)) $ Level.Game.GameReplicationInfo.MOTDLine1));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_MOTDLine2") $ Chr(9)) $ Level.Game.GameReplicationInfo.MOTDLine2));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_MOTDLine3") $ Chr(9)) $ Level.Game.GameReplicationInfo.MOTDLine3));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_MOTDLine4") $ Chr(9)) $ Level.Game.GameReplicationInfo.MOTDLine4));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_IP") $ Chr(9)) $ NetworkNumber));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "info") $ Chr(9)) $ "Server_Port") $ Chr(9)) $ string(Level.Game.GetServerPort())));
 	return;
 }
 
 final event LogGameSpecial(string SpecialID, string SpecialParam)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), SpecialID), __NFUN_236__(9)), SpecialParam));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ SpecialID) $ Chr(9)) $ SpecialParam));
 	return;
 }
 
 final event LogGameSpecial2(string SpecialID, string SpecialParam, string SpecialParam2)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "game"), __NFUN_236__(9)), SpecialID), __NFUN_236__(9)), SpecialParam), __NFUN_236__(9)), SpecialParam2));
+	LogEventString(((((((((GetTimeStamp() $ Chr(9)) $ "game") $ Chr(9)) $ SpecialID) $ Chr(9)) $ SpecialParam) $ Chr(9)) $ SpecialParam2));
 	return;
 }
 
@@ -375,30 +375,30 @@ function LogMapParameters()
 	local string MapName;
 
 	MapName = GetMapFileName();
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "map"), __NFUN_236__(9)), "Name"), __NFUN_236__(9)), MapName));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "map"), __NFUN_236__(9)), "Title"), __NFUN_236__(9)), Level.Title));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "map"), __NFUN_236__(9)), "Author"), __NFUN_236__(9)), Level.Author));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "map"), __NFUN_236__(9)), "LevelEnterText"), __NFUN_236__(9)), Level.LevelEnterText));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "map") $ Chr(9)) $ "Name") $ Chr(9)) $ MapName));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "map") $ Chr(9)) $ "Title") $ Chr(9)) $ Level.Title));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "map") $ Chr(9)) $ "Author") $ Chr(9)) $ Level.Author));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "map") $ Chr(9)) $ "LevelEnterText") $ Chr(9)) $ Level.LevelEnterText));
 	return;
 }
 
 function LogPlayerConnect(Controller Player, optional string Checksum)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "player"), __NFUN_236__(9)), "Connect"), __NFUN_236__(9)), Player.PlayerReplicationInfo.PlayerName), __NFUN_236__(9)), string(Player.PlayerReplicationInfo.PlayerID)));
+	LogEventString(((((((((GetTimeStamp() $ Chr(9)) $ "player") $ Chr(9)) $ "Connect") $ Chr(9)) $ Player.PlayerReplicationInfo.PlayerName) $ Chr(9)) $ string(Player.PlayerReplicationInfo.PlayerID)));
 	LogPlayerInfo(Player);
 	return;
 }
 
 function LogPlayerInfo(Controller Player)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "player"), __NFUN_236__(9)), "TeamID"), __NFUN_236__(9)), string(Player.PlayerReplicationInfo.PlayerID)), __NFUN_236__(9)), string(Player.PlayerReplicationInfo.TeamID)));
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "player"), __NFUN_236__(9)), "Ping"), __NFUN_236__(9)), string(Player.PlayerReplicationInfo.PlayerID)), __NFUN_236__(9)), string(Player.PlayerReplicationInfo.Ping)));
+	LogEventString(((((((((GetTimeStamp() $ Chr(9)) $ "player") $ Chr(9)) $ "TeamID") $ Chr(9)) $ string(Player.PlayerReplicationInfo.PlayerID)) $ Chr(9)) $ string(Player.PlayerReplicationInfo.TeamID)));
+	LogEventString(((((((((GetTimeStamp() $ Chr(9)) $ "player") $ Chr(9)) $ "Ping") $ Chr(9)) $ string(Player.PlayerReplicationInfo.PlayerID)) $ Chr(9)) $ string(Player.PlayerReplicationInfo.Ping)));
 	return;
 }
 
 function LogPlayerDisconnect(Controller Player)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "player"), __NFUN_236__(9)), "Disconnect"), __NFUN_236__(9)), string(Player.PlayerReplicationInfo.PlayerID)));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "player") $ Chr(9)) $ "Disconnect") $ Chr(9)) $ string(Player.PlayerReplicationInfo.PlayerID)));
 	return;
 }
 
@@ -407,30 +407,30 @@ function LogKill(PlayerReplicationInfo KillerPRI, PlayerReplicationInfo VictimPR
 	local string KillType;
 
 	// End:0x0D
-	if(__NFUN_114__(VictimPRI, none))
+	if((VictimPRI == none))
 	{
 		return;
 	}
 	// End:0x74
-	if(__NFUN_114__(KillerPRI, VictimPRI))
+	if((KillerPRI == VictimPRI))
 	{
-		LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "suicide"), __NFUN_236__(9)), string(KillerPRI.PlayerID)), __NFUN_236__(9)), KillerWeaponName), __NFUN_236__(9)), __NFUN_236__(9)), "None"));
+		LogEventString((((((((((GetTimeStamp() $ Chr(9)) $ "suicide") $ Chr(9)) $ string(KillerPRI.PlayerID)) $ Chr(9)) $ KillerWeaponName) $ Chr(9)) $ Chr(9)) $ "None"));
 		return;
 	}
 	KillType = "kill";
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), KillType), __NFUN_236__(9)), string(KillerPRI.PlayerID)), __NFUN_236__(9)), KillerWeaponName), __NFUN_236__(9)), string(VictimPRI.PlayerID)), __NFUN_236__(9)), VictimWeaponName), __NFUN_236__(9)));
+	LogEventString((((((((((((GetTimeStamp() $ Chr(9)) $ KillType) $ Chr(9)) $ string(KillerPRI.PlayerID)) $ Chr(9)) $ KillerWeaponName) $ Chr(9)) $ string(VictimPRI.PlayerID)) $ Chr(9)) $ VictimWeaponName) $ Chr(9)));
 	return;
 }
 
 function LogNameChange(Controller Other)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "player"), __NFUN_236__(9)), "Rename"), __NFUN_236__(9)), Other.PlayerReplicationInfo.PlayerName), __NFUN_236__(9)), string(Other.PlayerReplicationInfo.PlayerID)));
+	LogEventString(((((((((GetTimeStamp() $ Chr(9)) $ "player") $ Chr(9)) $ "Rename") $ Chr(9)) $ Other.PlayerReplicationInfo.PlayerName) $ Chr(9)) $ string(Other.PlayerReplicationInfo.PlayerID)));
 	return;
 }
 
 function LogTypingEvent(bool bTyping, Controller Other)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "typing"), __NFUN_236__(9)), string(bTyping)), __NFUN_236__(9)), string(Other.PlayerReplicationInfo.PlayerID)));
+	LogEventString(((((((GetTimeStamp() $ Chr(9)) $ "typing") $ Chr(9)) $ string(bTyping)) $ Chr(9)) $ string(Other.PlayerReplicationInfo.PlayerID)));
 	return;
 }
 
@@ -440,26 +440,26 @@ function LogSpecialEvent(string EventType, coerce optional string Arg1, coerce o
 
 	Event = EventType;
 	// End:0x2F
-	if(__NFUN_123__(Arg1, ""))
+	if((Arg1 != ""))
 	{
-		Event = __NFUN_112__(__NFUN_112__(Event, __NFUN_236__(9)), Arg1);
+		Event = ((Event $ Chr(9)) $ Arg1);
 	}
 	// End:0x53
-	if(__NFUN_123__(Arg2, ""))
+	if((Arg2 != ""))
 	{
-		Event = __NFUN_112__(__NFUN_112__(Event, __NFUN_236__(9)), Arg2);
+		Event = ((Event $ Chr(9)) $ Arg2);
 	}
 	// End:0x77
-	if(__NFUN_123__(Arg3, ""))
+	if((Arg3 != ""))
 	{
-		Event = __NFUN_112__(__NFUN_112__(Event, __NFUN_236__(9)), Arg3);
+		Event = ((Event $ Chr(9)) $ Arg3);
 	}
 	// End:0x9B
-	if(__NFUN_123__(Arg4, ""))
+	if((Arg4 != ""))
 	{
-		Event = __NFUN_112__(__NFUN_112__(Event, __NFUN_236__(9)), Arg4);
+		Event = ((Event $ Chr(9)) $ Arg4);
 	}
-	LogEventString(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), Event));
+	LogEventString(((GetTimeStamp() $ Chr(9)) $ Event));
 	return;
 }
 
@@ -468,22 +468,22 @@ function LogPings()
 	local PlayerReplicationInfo PRI;
 
 	// End:0x6B
-	foreach __NFUN_313__(Class'Engine.PlayerReplicationInfo', PRI)
+	foreach DynamicActors(Class'Engine.PlayerReplicationInfo', PRI)
 	{
-		LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "player"), __NFUN_236__(9)), "Ping"), __NFUN_236__(9)), string(PRI.PlayerID)), __NFUN_236__(9)), string(PRI.Ping)));		
+		LogEventString(((((((((GetTimeStamp() $ Chr(9)) $ "player") $ Chr(9)) $ "Ping") $ Chr(9)) $ string(PRI.PlayerID)) $ Chr(9)) $ string(PRI.Ping)));		
 	}	
 	return;
 }
 
 function LogGameStart()
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "game_start"));
+	LogEventString(((GetTimeStamp() $ Chr(9)) $ "game_start"));
 	return;
 }
 
 function LogGameEnd(string Reason)
 {
-	LogEventString(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(GetTimeStamp(), __NFUN_236__(9)), "game_end"), __NFUN_236__(9)), Reason));
+	LogEventString(((((GetTimeStamp() $ Chr(9)) $ "game_end") $ Chr(9)) $ Reason));
 	return;
 }
 

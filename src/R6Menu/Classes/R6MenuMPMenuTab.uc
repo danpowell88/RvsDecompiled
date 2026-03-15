@@ -335,7 +335,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x4B
-		if(C.__NFUN_303__('R6WindowButtonBox'))
+		if(C.IsA('R6WindowButtonBox'))
 		{
 			ManageR6ButtonBoxNotify(C, E);
 		}
@@ -350,7 +350,7 @@ function Notify(UWindowDialogControl C, byte E)
 function ManageR6ComboControlNotify(UWindowDialogControl C, byte E)
 {
 	// End:0x37
-	if(__NFUN_154__(int(E), 1))
+	if((int(E) == 1))
 	{
 		R6MenuMultiPlayerWidget(OwnerWindow).SetServerFilterFasterThan(int(R6WindowComboControl(C).GetValue()));
 	}
@@ -364,14 +364,14 @@ function ManageR6ComboControlNotify(UWindowDialogControl C, byte E)
 function ManageR6ButtonBoxNotify(UWindowDialogControl C, byte E)
 {
 	// End:0x9B
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x9B
 		if(R6WindowButtonBox(C).GetSelectStatus())
 		{
-			R6WindowButtonBox(C).m_bSelected = __NFUN_129__(R6WindowButtonBox(C).m_bSelected);
+			R6WindowButtonBox(C).m_bSelected = (!R6WindowButtonBox(C).m_bSelected);
 			// End:0x9B
-			if(__NFUN_119__(R6MenuMultiPlayerWidget(OwnerWindow), none))
+			if((R6MenuMultiPlayerWidget(OwnerWindow) != none))
 			{
 				R6MenuMultiPlayerWidget(OwnerWindow).SetServerFilterBooleans(R6WindowButtonBox(C).m_iButtonID, R6WindowButtonBox(C).m_bSelected);
 			}

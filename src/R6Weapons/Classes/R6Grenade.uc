@@ -267,47 +267,47 @@ simulated function HitWall(Vector HitNormal, Actor Wall)
 		if((((Wall != none) && (Instigator != none)) && (Instigator.m_collisionBox == Wall)))
 		{
 			vTraceEnd = (Location + (float(10) * Normal(Velocity)));
-			__NFUN_267__(vTraceEnd, true) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+			SetLocation(vTraceEnd, true);
 			return;
 		}
 		// End:0xE5
-		if(__NFUN_114__(Wall, Level))
+		if((Wall == Level))
 		{
-			vTraceStart = __NFUN_215__(Location, __NFUN_213__(float(10), HitNormal));
-			vTraceEnd = __NFUN_216__(Location, __NFUN_213__(float(10), HitNormal));
-			pHit = __NFUN_1806__(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, __NFUN_158__(2, 16));
+			vTraceStart = (Location + (float(10) * HitNormal));
+			vTraceEnd = (Location - (float(10) * HitNormal));
+			pHit = R6Trace(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, (2 | 16));
 			// End:0xE5
-			if(__NFUN_114__(pHit, none))
+			if((pHit == none))
 			{
-				__NFUN_267__(vTraceEnd, true);
+				SetLocation(vTraceEnd, true);
 				return;
 			}
 		}
 		// End:0x172
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Wall, none), Wall.m_bBulletGoThrough), Wall.__NFUN_303__('R6InteractiveObject')))
+		if((((Wall != none) && Wall.m_bBulletGoThrough) && Wall.IsA('R6InteractiveObject')))
 		{
 			Wall.R6TakeDamage(10000, 10000, Instigator, vHitLocation, Velocity, 0);
-			vTraceEnd = __NFUN_216__(Location, __NFUN_213__(float(10), HitNormal));
-			__NFUN_267__(vTraceEnd, true);
-			__NFUN_221__(Velocity, 0.5000000);
+			vTraceEnd = (Location - (float(10) * HitNormal));
+			SetLocation(vTraceEnd, true);
+			(Velocity *= 0.5000000);
 			return;
 		}
-		DesiredRotation = __NFUN_320__();
-		Velocity = __NFUN_213__(0.2000000, __NFUN_300__(Velocity, HitNormal));
-		RotationRate.Yaw = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
-		RotationRate.Pitch = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
-		RotationRate.Roll = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+		DesiredRotation = RotRand();
+		Velocity = (0.2000000 * MirrorVectorByNormal(Velocity, HitNormal));
+		RotationRate.Yaw = int((((float(1000) * VSize(Velocity)) * FRand()) - (float(500) * VSize(Velocity))));
+		RotationRate.Pitch = int((((float(1000) * VSize(Velocity)) * FRand()) - (float(500) * VSize(Velocity))));
+		RotationRate.Roll = int((((float(1000) * VSize(Velocity)) * FRand()) - (float(500) * VSize(Velocity))));
 		// End:0x257
-		if(__NFUN_177__(Velocity.Z, float(400)))
+		if((Velocity.Z > float(400)))
 		{
 			Velocity.Z = 400.0000000;			
 		}
 		else
 		{
 			// End:0x287
-			if(__NFUN_176__(__NFUN_225__(Velocity), float(10)))
+			if((VSize(Velocity) < float(10)))
 			{
-				__NFUN_3970__(0);
+				SetPhysics(0);
 				bBounce = false;
 				RotationRate = rot(0, 0, 0);
 			}
@@ -317,13 +317,13 @@ simulated function HitWall(Vector HitNormal, Actor Wall)
 		{
 			m_bFirstImpact = false;
 			m_ImpactSound = m_ImpactGroundSound;
-			pHit = __NFUN_277__(vHitLocation, vHitNormal, __NFUN_216__(Location, vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
+			pHit = Trace(vHitLocation, vHitNormal, (Location - vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
 			// End:0x322
-			if(__NFUN_130__(__NFUN_119__(HitMaterial, none), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(12)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(13)))))
+			if(((HitMaterial != none) && ((int(HitMaterial.m_eSurfIdForSnd) == int(12)) || (int(HitMaterial.m_eSurfIdForSnd) == int(13)))))
 			{
 				m_ImpactSound = m_ImpactWaterSound;
 			}
-			__NFUN_264__(m_ImpactSound, 3);
+			PlaySound(m_ImpactSound, 3);
 		}
 		R6MakeNoise(3);
 	}
@@ -436,43 +436,43 @@ function R6Grenade.eGrenadeBoneTarget HitRandomBodyPart(R6Grenade.eGrenadePawnPo
 	local float fRandVal, fLeftArmVal, fRightArmVal, fLeftLegVal, fRighLegVal, fBodyVal,
 		fHeadVal;
 
-	fRandVal = __NFUN_195__();
+	fRandVal = FRand();
 	fLeftArmVal = GetLocalizedDamagePercentage(ePawnPose, 2);
-	fRightArmVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 3), fLeftArmVal);
-	fLeftLegVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 4), fRightArmVal);
-	fRighLegVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 5), fLeftLegVal);
-	fBodyVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 1), fRighLegVal);
-	fHeadVal = __NFUN_174__(GetLocalizedDamagePercentage(ePawnPose, 0), fBodyVal);
+	fRightArmVal = (GetLocalizedDamagePercentage(ePawnPose, 3) + fLeftArmVal);
+	fLeftLegVal = (GetLocalizedDamagePercentage(ePawnPose, 4) + fRightArmVal);
+	fRighLegVal = (GetLocalizedDamagePercentage(ePawnPose, 5) + fLeftLegVal);
+	fBodyVal = (GetLocalizedDamagePercentage(ePawnPose, 1) + fRighLegVal);
+	fHeadVal = (GetLocalizedDamagePercentage(ePawnPose, 0) + fBodyVal);
 	// End:0xB2
-	if(__NFUN_176__(fRandVal, fLeftArmVal))
+	if((fRandVal < fLeftArmVal))
 	{
 		return 2;		
 	}
 	else
 	{
 		// End:0xC7
-		if(__NFUN_176__(fRandVal, fRightArmVal))
+		if((fRandVal < fRightArmVal))
 		{
 			return 3;			
 		}
 		else
 		{
 			// End:0xDC
-			if(__NFUN_176__(fRandVal, fLeftLegVal))
+			if((fRandVal < fLeftLegVal))
 			{
 				return 4;				
 			}
 			else
 			{
 				// End:0xF1
-				if(__NFUN_176__(fRandVal, fRighLegVal))
+				if((fRandVal < fRighLegVal))
 				{
 					return 5;					
 				}
 				else
 				{
 					// End:0x103
-					if(__NFUN_176__(fRandVal, fBodyVal))
+					if((fRandVal < fBodyVal))
 					{
 						return 1;
 					}
@@ -494,10 +494,10 @@ function R6Grenade.eGrenadePawnPose GetPawnPose(R6Pawn aPawn)
 	{
 		vFeet = aPawn.GetBoneCoords('R6 L Foot').Origin;
 		vHead = aPawn.GetBoneCoords('R6 Head').Origin;
-		fDistHead = __NFUN_225__(__NFUN_216__(vHead, Location));
-		fDistFeet = __NFUN_225__(__NFUN_216__(vFeet, Location));
+		fDistHead = VSize((vHead - Location));
+		fDistFeet = VSize((vFeet - Location));
 		// End:0xA4
-		if(__NFUN_177__(__NFUN_175__(fDistFeet, fDistHead), __NFUN_171__(__NFUN_225__(__NFUN_216__(vFeet, vHead)), 0.7500000)))
+		if(((fDistFeet - fDistHead) > (VSize((vFeet - vHead)) * 0.7500000)))
 		{
 			return 2;			
 		}

@@ -182,7 +182,9 @@ NFUN_MAP = {
     261: ('func',     'FinishAnim'),
     262: ('func',     'SetCollision'),
     263: ('func',     'HasAnim'),
+    264: ('func',     'PlaySound'),    # native(264) - commented out in SDK
     266: ('func',     'Move'),
+    267: ('func',     'SetLocation'),  # native(267) - commented out in SDK
     272: ('func',     'SetOwner'),
     277: ('func',     'Trace'),
     278: ('func',     'Spawn'),
@@ -643,7 +645,8 @@ def transform_nfun(nfun_num: int, args_str: str, nfun_map: dict) -> str:
     """Transform __NFUN_NNN__(args_str) to proper UnrealScript."""
     args = split_args(args_str)
     if nfun_num not in nfun_map:
-        return f"__NFUN_{nfun_num}__({args_str}) /*unknown*/"
+        # Use NFUN_NNN(...) without underscores so rfind won't re-match.
+        return f"NFUN_{nfun_num}({args_str})"
 
     kind, name = nfun_map[nfun_num]
 
@@ -670,14 +673,25 @@ _NFUN_PATTERN = re.compile(r'__NFUN_(\d+)__\(')
 
 def resolve_all(text: str, nfun_map: dict) -> str:
     """
-    Iteratively replace all __NFUN_NNN__(...) calls in text.
-    Works inside-out: each pass resolves the innermost calls first
-    (those whose argument lists contain no further __NFUN__ references),
-    repeating until no calls remain.
+    Replace all __NFUN_NNN__(...) calls in text, processing inside-out.
+
+    Strategy: the LAST occurrence of __NFUN_ in the text is always the
+    innermost call (its argument span cannot contain any NFUN start that
+    comes *after* it in the string). We replace it, then repeat. This is
+    O(N) passes with no recursion, where N is the number of NFUN calls.
     """
+    marker = '__NFUN_'
     while True:
-        m = _NFUN_PATTERN.search(text)
+        last_pos = text.rfind(marker)
+        if last_pos == -1:
+            break
+
+        m = _NFUN_PATTERN.match(text, last_pos)
         if m is None:
+            # The __NFUN_ string doesn't match the full pattern here.
+            # This can only happen for the unknown-output format we emit
+            # below (we use 'NFUN_NNN' without leading underscores for
+            # unknowns, so rfind won't hit those again). Guard break.
             break
 
         nfun_num = int(m.group(1))
@@ -695,11 +709,8 @@ def resolve_all(text: str, nfun_map: dict) -> str:
         # text[paren_start+1 : i-1] is the raw args string.
         args_str = text[paren_start + 1:i - 1]
 
-        # Recursively resolve any nested NFUN calls inside the args first.
-        resolved_args = resolve_all(args_str, nfun_map)
-
-        replacement = transform_nfun(nfun_num, resolved_args, nfun_map)
-        text = text[:m.start()] + replacement + text[i:]
+        replacement = transform_nfun(nfun_num, args_str, nfun_map)
+        text = text[:last_pos] + replacement + text[i:]
 
     return text
 
@@ -712,15 +723,21 @@ def process_file(path: Path, nfun_map: dict) -> bool:
         print(f"  SKIP (read error): {path}: {e}")
         return False
 
-    if '__NFUN_' not in original:
+    text = original
+
+    # Resolve all __NFUN_NNN__(...) calls.
+    if '__NFUN_' in text:
+        text = resolve_all(text, nfun_map)
+
+    # Clean up /*unknown*/ artifacts left by earlier script versions
+    # that appended them for unresolved NFUNs.
+    if '/*unknown*/' in text:
+        text = re.sub(r'(\s*/\*unknown\*/)+', '', text)
+
+    if text == original:
         return False
 
-    resolved = resolve_all(original, nfun_map)
-
-    if resolved == original:
-        return False
-
-    path.write_text(resolved, encoding='utf-8')
+    path.write_text(text, encoding='utf-8')
     return True
 
 

@@ -490,7 +490,7 @@ function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<stri
 	if((i < 20))
 	{
 		// End:0x85
-		if(__NFUN_114__(_pAButtonBox[i], none))
+		if((_pAButtonBox[i] == none))
 		{
 			// [Explicit Break]
 			goto J0x1CA;
@@ -504,26 +504,26 @@ function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<stri
 			J0xD1:
 
 			// End:0x123 [Loop If]
-			if(__NFUN_150__(j, iTotOldMenuRest))
+			if((j < iTotOldMenuRest))
 			{
 				// End:0x119
-				if(__NFUN_122__(_ANextSrvRestriction[iRestToAdd], szAOldCopyOfSrvRest[j]))
+				if((_ANextSrvRestriction[iRestToAdd] == szAOldCopyOfSrvRest[j]))
 				{
 					szAOldCopyOfSrvRest.Remove(j, 1);
-					__NFUN_166__(iTotOldMenuRest);
+					(iTotOldMenuRest--);
 					bFindRes = true;
 					// [Explicit Break]
 					goto J0x123;
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0xD1;
 			}
 			J0x123:
 
-			__NFUN_165__(iRestToAdd);
+			(iRestToAdd++);
 			// End:0x19F
-			if(__NFUN_129__(bFindRes))
+			if((!bFindRes))
 			{
 				bSettingsChange = true;
 				// End:0x179
@@ -540,23 +540,23 @@ function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<stri
 			goto J0x1C0;
 		}
 		ARestToRemove[iRestToRemove] = _ACurServerRestKit[i];
-		__NFUN_165__(iRestToRemove);
+		(iRestToRemove++);
 		J0x1C0:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x65;
 	}
 	J0x1CA:
 
 	// End:0x265
-	if(__NFUN_151__(iTotOldMenuRest, 0))
+	if((iTotOldMenuRest > 0))
 	{
 		i = 0;
 		J0x1DC:
 
 		// End:0x265 [Loop If]
-		if(__NFUN_150__(i, ARestToRemove.Length))
+		if((i < ARestToRemove.Length))
 		{
 			bSettingsChange = true;
 			// End:0x235
@@ -569,7 +569,7 @@ function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<stri
 			R6PlayerController(GetPlayerOwner()).ServerNewKitRestSettings(_eRestKitID, true, ARestToRemove[i]);
 			J0x25B:
 
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1DC;
 		}
@@ -584,10 +584,10 @@ function bool CompareARestKit(UWindowBase.ERestKitID _eRestKitID, out array<stri
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x2D
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x2D
-		if(C.__NFUN_303__('R6WindowButtonBox'))
+		if(C.IsA('R6WindowButtonBox'))
 		{
 			ManageR6ButtonBoxNotify(C);
 		}
@@ -603,11 +603,11 @@ function ManageR6ButtonBoxNotify(UWindowDialogControl C)
 	local R6GameReplicationInfo pGameRepInfo;
 
 	// End:0x11B
-	if(__NFUN_119__(m_pSubMachinesGunsTab, none))
+	if((m_pSubMachinesGunsTab != none))
 	{
 		GetR6GameReplicationInfo(pGameRepInfo);
 		// End:0x30
-		if(__NFUN_119__(m_pCurrentSubKit, none))
+		if((m_pCurrentSubKit != none))
 		{
 			m_pCurrentSubKit.HideWindow();
 		}
@@ -671,7 +671,7 @@ function ManageR6ButtonBoxNotify(UWindowDialogControl C)
 	else
 	{
 		// End:0x135
-		if(__NFUN_119__(m_pCurrentSubKit, none))
+		if((m_pCurrentSubKit != none))
 		{
 			m_pCurrentSubKit.ShowWindow();
 		}
@@ -685,7 +685,7 @@ function GetR6GameReplicationInfo(out R6GameReplicationInfo pGameRepInfo)
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(Root);
 	// End:0x7A
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(r6Root, none), __NFUN_119__(r6Root.m_R6GameMenuCom, none)), __NFUN_119__(R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo), none)))
+	if((((r6Root != none) && (r6Root.m_R6GameMenuCom != none)) && (R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo) != none)))
 	{
 		pGameRepInfo = R6GameReplicationInfo(r6Root.m_R6GameMenuCom.m_GameRepInfo);		
 	}
@@ -699,7 +699,7 @@ function GetR6GameReplicationInfo(out R6GameReplicationInfo pGameRepInfo)
 function Tick(float _fDelta)
 {
 	// End:0x8A
-	if(__NFUN_119__(m_pCurrentSubKit, none))
+	if((m_pCurrentSubKit != none))
 	{
 		// End:0x8A
 		if(m_pRestKitOptFakeW.bWindowVisible)
@@ -707,11 +707,11 @@ function Tick(float _fDelta)
 			// End:0x5F
 			if(m_pCurrentSubKit.m_pRestKitButList.m_VertSB.isHidden())
 			{
-				m_pRestKitOptFakeW.WinWidth = __NFUN_171__(WinWidth, 0.5000000);				
+				m_pRestKitOptFakeW.WinWidth = (WinWidth * 0.5000000);				
 			}
 			else
 			{
-				m_pRestKitOptFakeW.WinWidth = __NFUN_175__(__NFUN_171__(WinWidth, 0.5000000), LookAndFeel.Size_ScrollbarWidth);
+				m_pRestKitOptFakeW.WinWidth = ((WinWidth * 0.5000000) - LookAndFeel.Size_ScrollbarWidth);
 			}
 		}
 	}
@@ -721,7 +721,7 @@ function Tick(float _fDelta)
 function MouseWheelDown(float X, float Y)
 {
 	// End:0x2D
-	if(__NFUN_119__(m_pCurrentSubKit, none))
+	if((m_pCurrentSubKit != none))
 	{
 		m_pCurrentSubKit.m_pRestKitButList.MouseWheelDown(X, Y);
 	}
@@ -731,7 +731,7 @@ function MouseWheelDown(float X, float Y)
 function MouseWheelUp(float X, float Y)
 {
 	// End:0x2D
-	if(__NFUN_119__(m_pCurrentSubKit, none))
+	if((m_pCurrentSubKit != none))
 	{
 		m_pCurrentSubKit.m_pRestKitButList.MouseWheelUp(X, Y);
 	}

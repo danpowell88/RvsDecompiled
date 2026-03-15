@@ -511,7 +511,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x278
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("Changing Primary Weapon Bullets for ", m_currentOperative.m_szPrimaryWeaponBullet));
+				Log(("Changing Primary Weapon Bullets for " @ m_currentOperative.m_szPrimaryWeaponBullet));
 			}
 			// End:0x5CE
 			break;
@@ -522,7 +522,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x2DF
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("Changing Primary Gadget for ", m_currentOperative.m_szPrimaryWeapon));
+				Log(("Changing Primary Gadget for " @ m_currentOperative.m_szPrimaryWeapon));
 			}
 			// End:0x5CE
 			break;
@@ -530,14 +530,14 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 		case 4:
 			inDescriptionClass = DecriptionClass;
 			// End:0x470
-			if(__NFUN_119__(m_OpSecondaryWeaponDesc, Class<R6SecondaryWeaponDescription>(DecriptionClass)))
+			if((m_OpSecondaryWeaponDesc != Class<R6SecondaryWeaponDescription>(DecriptionClass)))
 			{
 				m_currentOperative.m_szSecondaryWeapon = string(DecriptionClass);
 				m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DecriptionClass);
 				// End:0x367
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Changing Secondary Weapon for ", m_currentOperative.m_szSecondaryWeapon));
+					Log(("Changing Secondary Weapon for " @ m_currentOperative.m_szSecondaryWeapon));
 				}
 				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
 				m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.default.m_NameID;
@@ -545,7 +545,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x3E1
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Gadget for ", m_currentOperative.m_szSecondaryWeaponGadget));
+					Log(("Changing Secondary Weapon Gadget for " @ m_currentOperative.m_szSecondaryWeaponGadget));
 				}
 				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findSecondaryDefaultAmmo(Class<R6SecondaryWeaponDescription>(inDescriptionClass));
 				m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.default.m_NameTag;
@@ -553,7 +553,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x470
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Bullets for ", m_currentOperative.m_szSecondaryWeaponBullet));
+					Log(("Changing Secondary Weapon Bullets for " @ m_currentOperative.m_szSecondaryWeaponBullet));
 				}
 			}
 			// End:0x5CE
@@ -565,7 +565,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x4E7
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Gadget for ", m_currentOperative.m_szSecondaryWeaponGadget));
+				Log(("Changing Secondary Weapon Gadget for " @ m_currentOperative.m_szSecondaryWeaponGadget));
 			}
 			// End:0x5CE
 			break;
@@ -576,7 +576,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x55F
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("Changing Secondary Weapon Bullets for ", m_currentOperative.m_szSecondaryWeaponBullet));
+				Log(("Changing Secondary Weapon Bullets for " @ m_currentOperative.m_szSecondaryWeaponBullet));
 			}
 			// End:0x5CE
 			break;
@@ -587,7 +587,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x5C8
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("Changing Secondary Gadget for ", m_currentOperative.m_szSecondaryGadget));
+				Log(("Changing Secondary Gadget for " @ m_currentOperative.m_szSecondaryGadget));
 			}
 			// End:0x5CE
 			break;
@@ -608,10 +608,10 @@ function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 	local TexRegion TR;
 
 	// End:0xDB
-	if(__NFUN_114__(Class'R6Description.R6DescPrimaryMags', _CurrentGadget))
+	if((Class'R6Description.R6DescPrimaryMags' == _CurrentGadget))
 	{
 		// End:0xC4
-		if(__NFUN_122__(m_OpFirstWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+		if((m_OpFirstWeaponGadgetDesc.default.m_NameTag == "CMAG"))
 		{
 			bFound = true;
 			TR.t = m_OpFirstWeaponGadgetDesc.default.m_2DMenuTexture;
@@ -628,10 +628,10 @@ function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 	else
 	{
 		// End:0x1B3
-		if(__NFUN_114__(Class'R6Description.R6DescSecondaryMags', _CurrentGadget))
+		if((Class'R6Description.R6DescSecondaryMags' == _CurrentGadget))
 		{
 			// End:0x19F
-			if(__NFUN_122__(m_OpSecondWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+			if((m_OpSecondWeaponGadgetDesc.default.m_NameTag == "CMAG"))
 			{
 				bFound = true;
 				TR.t = m_OpSecondWeaponGadgetDesc.default.m_2DMenuTexture;
@@ -647,30 +647,30 @@ function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 		}
 	}
 	// End:0x23A
-	if(__NFUN_123__(Tag, ""))
+	if((Tag != ""))
 	{
 		i = 0;
 		J0x1C6:
 
 		// End:0x23A [Loop If]
-		if(__NFUN_130__(__NFUN_150__(i, m_PrimaryMagsGadget.m_MagTags.Length), __NFUN_242__(bFound, false)))
+		if(((i < m_PrimaryMagsGadget.m_MagTags.Length) && (bFound == false)))
 		{
 			// End:0x230
-			if(__NFUN_122__(m_PrimaryMagsGadget.m_MagTags[i], Tag))
+			if((m_PrimaryMagsGadget.m_MagTags[i] == Tag))
 			{
 				bFound = true;
 				TR = m_PrimaryMagsGadget.m_Mags[i];				
 			}
 			else
 			{
-				__NFUN_165__(i);
+				(i++);
 			}
 			// [Loop Continue]
 			goto J0x1C6;
 		}
 	}
 	// End:0x2D7
-	if(__NFUN_242__(bFound, false))
+	if((bFound == false))
 	{
 		TR.t = _CurrentGadget.default.m_2DMenuTexture;
 		TR.X = _CurrentGadget.default.m_2dMenuRegion.X;
@@ -688,7 +688,7 @@ function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 function RefreshGearInfo(bool _bForceUpdate)
 {
 	// End:0xB2
-	if(__NFUN_132__(__NFUN_151__(m_iCounter, 10), _bForceUpdate))
+	if(((m_iCounter > 10) || _bForceUpdate))
 	{
 		m_iCounter = 0;
 		m_EquipmentDetails.BuildAvailableEquipment();
@@ -697,7 +697,7 @@ function RefreshGearInfo(bool _bForceUpdate)
 		SetClassEquipment();
 		m_Equipment2dSelect.UpdateDetails();
 	}
-	__NFUN_165__(m_iCounter);
+	(m_iCounter++);
 	return;
 }
 
@@ -707,19 +707,19 @@ static function bool CheckGadget(string _gadgetDesc, UWindowWindow _caller, bool
 
 	r6Root = R6MenuInGameMultiPlayerRootWindow(_caller.Root);
 	// End:0x2A6
-	if(__NFUN_119__(r6Root, none))
+	if((r6Root != none))
 	{
 		// End:0x1C3
-		if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_CaptureTheEnemyAdvMode"))
+		if((r6Root.m_szCurrentGameType == "RGM_CaptureTheEnemyAdvMode"))
 		{
 			// End:0x1C0
-			if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_122__(_gadgetDesc, "R6Description.R6DescFragGrenadeGadget"), __NFUN_122__(_gadgetDesc, "R6Description.R6DescBreachingChargeGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescClaymoreGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescRemoteChargeGadget")))
+			if(((((_gadgetDesc == "R6Description.R6DescFragGrenadeGadget") || (_gadgetDesc == "R6Description.R6DescBreachingChargeGadget")) || (_gadgetDesc == "R6Description.R6DescClaymoreGadget")) || (_gadgetDesc == "R6Description.R6DescRemoteChargeGadget")))
 			{
 				// End:0x176
 				if(_isSecondGadget)
 				{
 					// End:0x168
-					if(__NFUN_122__(_otherGadget, "R6Description.R6DescSmokeGrenadeGadget"))
+					if((_otherGadget == "R6Description.R6DescSmokeGrenadeGadget"))
 					{
 						_replaceGadgetClass = Class'R6Description.R6DescFlashBangGadget';						
 					}
@@ -731,7 +731,7 @@ static function bool CheckGadget(string _gadgetDesc, UWindowWindow _caller, bool
 				else
 				{
 					// End:0x1B3
-					if(__NFUN_122__(_otherGadget, "R6Description.R6DescFlashBangGadget"))
+					if((_otherGadget == "R6Description.R6DescFlashBangGadget"))
 					{
 						_replaceGadgetClass = Class'R6Description.R6DescSmokeGrenadeGadget';						
 					}
@@ -746,10 +746,10 @@ static function bool CheckGadget(string _gadgetDesc, UWindowWindow _caller, bool
 		else
 		{
 			// End:0x2A6
-			if(__NFUN_122__(r6Root.m_szCurrentGameType, "RGM_KamikazeMode"))
+			if((r6Root.m_szCurrentGameType == "RGM_KamikazeMode"))
 			{
 				// End:0x2A6
-				if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_122__(_gadgetDesc, "R6Description.R6DescHBSGadget"), __NFUN_122__(_gadgetDesc, "R6Description.R6DescHBSJammerGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescHBSSAJammerGadget")), __NFUN_122__(_gadgetDesc, "R6Description.R6DescFalseHBGadget")))
+				if(((((_gadgetDesc == "R6Description.R6DescHBSGadget") || (_gadgetDesc == "R6Description.R6DescHBSJammerGadget")) || (_gadgetDesc == "R6Description.R6DescHBSSAJammerGadget")) || (_gadgetDesc == "R6Description.R6DescFalseHBGadget")))
 				{
 					return true;
 				}

@@ -436,7 +436,7 @@ function PostRender(Canvas C)
 				if((((int(m_Player.Level.NetMode) != int(NM_Standalone)) && m_Player.m_bReadyToEnterSpectatorMode) && (!m_Player.bOnlySpectator)))
 				{
 					DrawGotoSpectatorModeIcon(C);
-					C.__NFUN_1606__(false);
+					C.UseVirtualSize(false);
 					return;
 				}
 			}
@@ -444,16 +444,16 @@ function PostRender(Canvas C)
 	}
 	super(Interaction).PostRender(C);
 	DrawCircumstantialActionInfo(C);
-	C.__NFUN_1606__(false);
+	C.UseVirtualSize(false);
 	return;
 }
 
 function DrawGotoSpectatorModeIcon(Canvas C)
 {
 	C.Style = 5;
-	C.__NFUN_2626__(m_Player.m_SpectatorColor.R, m_Player.m_SpectatorColor.G, m_Player.m_SpectatorColor.B, m_Player.m_SpectatorColor.A);
-	C.__NFUN_2623__(__NFUN_175__(C.HalfClipX, float(16)), __NFUN_175__(C.ClipY, float(74)));
-	C.__NFUN_466__(Texture'R6ActionIcons.GoToSpectator', 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
+	C.SetDrawColor(m_Player.m_SpectatorColor.R, m_Player.m_SpectatorColor.G, m_Player.m_SpectatorColor.B, m_Player.m_SpectatorColor.A);
+	C.SetPos((C.HalfClipX - float(16)), (C.ClipY - float(74)));
+	C.DrawTile(Texture'R6ActionIcons.GoToSpectator', 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
 	return;
 }
 
@@ -463,20 +463,20 @@ function DrawDeadCircumstantialIcon(Canvas C)
 	local float W, H;
 
 	// End:0x200
-	if(__NFUN_119__(m_Player.m_TeamManager, none))
+	if((m_Player.m_TeamManager != none))
 	{
 		C.Style = 5;
-		C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
-		C.__NFUN_2623__(__NFUN_175__(C.HalfClipX, float(16)), __NFUN_175__(C.ClipY, float(74)));
-		C.__NFUN_466__(Texture'R6ActionIcons.NextTeamMate', 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
+		C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
+		C.SetPos((C.HalfClipX - float(16)), (C.ClipY - float(74)));
+		C.DrawTile(Texture'R6ActionIcons.NextTeamMate', 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
 		// End:0x200
-		if(__NFUN_154__(R6GameReplicationInfo(m_Player.GameReplicationInfo).m_iDiffLevel, 1))
+		if((R6GameReplicationInfo(m_Player.GameReplicationInfo).m_iDiffLevel == 1))
 		{
 			szNextTeamMate = Localize("Order", "NextTeamMate", "R6Menu");
-			szNextTeamMate = m_Player.__NFUN_1521__(szNextTeamMate, "Action");
-			C.__NFUN_470__(szNextTeamMate, W, H);
-			C.__NFUN_2623__(__NFUN_175__(__NFUN_175__(C.HalfClipX, float(16)), __NFUN_172__(W, float(2))), __NFUN_175__(C.ClipY, float(20)));
-			C.__NFUN_465__(szNextTeamMate);
+			szNextTeamMate = m_Player.GetLocStringWithActionKey(szNextTeamMate, "Action");
+			C.TextSize(szNextTeamMate, W, H);
+			C.SetPos(((C.HalfClipX - float(16)) - (W / float(2))), (C.ClipY - float(20)));
+			C.DrawText(szNextTeamMate);
 		}
 	}
 	return;
@@ -491,15 +491,15 @@ function DrawSpectatorReticule(Canvas C)
 
 	X = int(C.HalfClipX);
 	Y = int(C.HalfClipY);
-	C.__NFUN_2626__(byte(255), 0, 0);
+	C.SetDrawColor(byte(255), 0, 0);
 	C.Style = 5;
-	fScale = __NFUN_172__(16.0000000, float(m_TexFakeReticule.VSize));
-	C.__NFUN_2623__(__NFUN_174__(__NFUN_175__(float(X), __NFUN_172__(__NFUN_171__(float(m_TexFakeReticule.USize), fScale), float(2))), float(1)), __NFUN_174__(__NFUN_175__(float(Y), __NFUN_172__(__NFUN_171__(float(m_TexFakeReticule.VSize), fScale), float(2))), float(1)));
+	fScale = (16.0000000 / float(m_TexFakeReticule.VSize));
+	C.SetPos(((float(X) - ((float(m_TexFakeReticule.USize) * fScale) / float(2))) + float(1)), ((float(Y) - ((float(m_TexFakeReticule.VSize) * fScale) / float(2))) + float(1)));
 	C.DrawIcon(m_TexFakeReticule, fScale);
 	// End:0x148
-	if(__NFUN_130__(m_Player.bOnlySpectator, __NFUN_132__(__NFUN_129__(m_Player.bBehindView), m_Player.bCheatFlying)))
+	if((m_Player.bOnlySpectator && ((!m_Player.bBehindView) || m_Player.bCheatFlying)))
 	{
-		m_Player.__NFUN_2213__();
+		m_Player.UpdateSpectatorReticule();
 		characterName = m_Player.m_CharacterName;		
 	}
 	else
@@ -508,9 +508,9 @@ function DrawSpectatorReticule(Canvas C)
 		characterName = "";
 	}
 	C.Font = m_SmallFont_14pt;
-	C.__NFUN_464__(characterName, fStrSizeX, fStrSizeY);
-	C.__NFUN_2623__(__NFUN_175__(float(X), __NFUN_172__(fStrSizeX, float(2))), float(__NFUN_146__(Y, 20)));
-	C.__NFUN_465__(characterName);
+	C.StrLen(characterName, fStrSizeX, fStrSizeY);
+	C.SetPos((float(X) - (fStrSizeX / float(2))), float((Y + 20)));
+	C.DrawText(characterName);
 	return;
 }
 
@@ -528,42 +528,42 @@ function DrawCircumstantialActionInfo(Canvas C)
 	local R6GameOptions GameOptions;
 
 	// End:0x0D
-	if(__NFUN_114__(m_Player, none))
+	if((m_Player == none))
 	{
 		return;
 	}
 	// End:0x23
-	if(__NFUN_114__(m_Player.m_CurrentCircumstantialAction, none))
+	if((m_Player.m_CurrentCircumstantialAction == none))
 	{
 		return;
 	}
-	GameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
-	bHasAction = __NFUN_154__(int(m_Player.m_CurrentCircumstantialAction.iHasAction), 1);
+	GameOptions = Class'Engine.Actor'.static.GetGameOptions();
+	bHasAction = (int(m_Player.m_CurrentCircumstantialAction.iHasAction) == 1);
 	Query = m_Player.m_CurrentCircumstantialAction;
 	C.Style = 5;
 	// End:0x1DB
-	if(__NFUN_130__(m_Player.m_bDisplayMessage, GameOptions.HUDShowActionIcon))
+	if((m_Player.m_bDisplayMessage && GameOptions.HUDShowActionIcon))
 	{
-		C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
-		C.__NFUN_2623__(__NFUN_175__(C.HalfClipX, float(24)), __NFUN_175__(C.ClipY, float(82)));
-		C.__NFUN_466__(Texture'R6ActionIcons.SkipText', 48.0000000, 48.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
+		C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
+		C.SetPos((C.HalfClipX - float(24)), (C.ClipY - float(82)));
+		C.DrawTile(Texture'R6ActionIcons.SkipText', 48.0000000, 48.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
 		// End:0x1D9
-		if(__NFUN_132__(__NFUN_151__(m_Player.m_iPlayerCAProgress, 0), m_Player.m_bDisplayActionProgress))
+		if(((m_Player.m_iPlayerCAProgress > 0) || m_Player.m_bDisplayActionProgress))
 		{
 			SetPosAndDrawActionProgress(C);
 		}
 		return;
 	}
 	// End:0x255
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_Player.bOnlySpectator, __NFUN_129__(m_Player.bBehindView)), __NFUN_129__(m_Player.Level.m_bInGamePlanningActive)), __NFUN_132__(GameOptions.HUDShowReticule, m_Player.m_bShowCompleteHUD)))
+	if((((m_Player.bOnlySpectator && (!m_Player.bBehindView)) && (!m_Player.Level.m_bInGamePlanningActive)) && (GameOptions.HUDShowReticule || m_Player.m_bShowCompleteHUD)))
 	{
 		DrawSpectatorReticule(C);
 	}
 	// End:0x379
-	if(__NFUN_130__(m_Player.bOnlySpectator, __NFUN_132__(GameOptions.HUDShowActionIcon, m_Player.m_bShowCompleteHUD)))
+	if((m_Player.bOnlySpectator && (GameOptions.HUDShowActionIcon || m_Player.m_bShowCompleteHUD)))
 	{
 		// End:0x2CC
-		if(__NFUN_119__(m_Player.m_TeamManager, none))
+		if((m_Player.m_TeamManager != none))
 		{
 			TeamColor = m_Player.m_TeamManager.Colors.HUDWhite;			
 		}
@@ -571,53 +571,53 @@ function DrawCircumstantialActionInfo(Canvas C)
 		{
 			TeamColor = m_Player.m_SpectatorColor;
 		}
-		C.__NFUN_2626__(TeamColor.R, TeamColor.G, TeamColor.B, TeamColor.A);
-		C.__NFUN_2623__(__NFUN_175__(C.HalfClipX, float(16)), __NFUN_175__(C.ClipY, float(74)));
-		C.__NFUN_466__(Texture'R6ActionIcons.Spectator', 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
+		C.SetDrawColor(TeamColor.R, TeamColor.G, TeamColor.B, TeamColor.A);
+		C.SetPos((C.HalfClipX - float(16)), (C.ClipY - float(74)));
+		C.DrawTile(Texture'R6ActionIcons.Spectator', 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
 		return;
 	}
 	// End:0x38F
-	if(__NFUN_114__(m_Player.m_TeamManager, none))
+	if((m_Player.m_TeamManager == none))
 	{
 		return;
 	}
 	// End:0x3C5
-	if(__NFUN_132__(__NFUN_151__(m_Player.m_iPlayerCAProgress, 0), m_Player.m_bDisplayActionProgress))
+	if(((m_Player.m_iPlayerCAProgress > 0) || m_Player.m_bDisplayActionProgress))
 	{
 		SetPosAndDrawActionProgress(C);		
 	}
 	else
 	{
 		// End:0x66C
-		if(__NFUN_130__(bHasAction, __NFUN_129__(m_Player.m_bAMenuIsDisplayed)))
+		if((bHasAction && (!m_Player.m_bAMenuIsDisplayed)))
 		{
 			// End:0x4D1
-			if(__NFUN_154__(int(Query.iInRange), 0))
+			if((int(Query.iInRange) == 0))
 			{
 				// End:0x410
-				if(__NFUN_129__(m_Player.CanIssueTeamOrder()))
+				if((!m_Player.CanIssueTeamOrder()))
 				{
 					return;
 				}
 				TeamColor = m_Player.m_TeamManager.GetTeamColor();
-				C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDGrey.R, m_Player.m_TeamManager.Colors.HUDGrey.G, m_Player.m_TeamManager.Colors.HUDGrey.B, m_Player.m_TeamManager.Colors.HUDGrey.A);				
+				C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDGrey.R, m_Player.m_TeamManager.Colors.HUDGrey.G, m_Player.m_TeamManager.Colors.HUDGrey.B, m_Player.m_TeamManager.Colors.HUDGrey.A);				
 			}
 			else
 			{
 				// End:0x5D7
-				if(__NFUN_119__(m_Player.Pawn, none))
+				if((m_Player.Pawn != none))
 				{
 					// End:0x509
-					if(__NFUN_129__(R6Pawn(m_Player.Pawn).CanInteractWithObjects()))
+					if((!R6Pawn(m_Player.Pawn).CanInteractWithObjects()))
 					{
 						return;
 					}
-					C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
+					C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
 					// End:0x5D7
-					if(__NFUN_114__(Query.aQueryTarget, m_Player))
+					if((Query.aQueryTarget == m_Player))
 					{
 						// End:0x5D7
-						if(__NFUN_129__(m_Player.CanIssueTeamOrder()))
+						if((!m_Player.CanIssueTeamOrder()))
 						{
 							return;
 						}
@@ -625,19 +625,19 @@ function DrawCircumstantialActionInfo(Canvas C)
 				}
 			}
 			// End:0x669
-			if(__NFUN_132__(GameOptions.HUDShowActionIcon, m_Player.m_bShowCompleteHUD))
+			if((GameOptions.HUDShowActionIcon || m_Player.m_bShowCompleteHUD))
 			{
-				C.__NFUN_2623__(__NFUN_175__(C.HalfClipX, float(16)), __NFUN_175__(C.ClipY, float(74)));
-				C.__NFUN_466__(Query.textureIcon, 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
+				C.SetPos((C.HalfClipX - float(16)), (C.ClipY - float(74)));
+				C.DrawTile(Query.textureIcon, 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
 			}			
 		}
 		else
 		{
 			// End:0x6BE
-			if(__NFUN_130__(__NFUN_130__(bHasAction, bVisible), __NFUN_154__(int(Query.iInRange), 0)))
+			if(((bHasAction && bVisible) && (int(Query.iInRange) == 0)))
 			{
 				// End:0x6AE
-				if(__NFUN_129__(m_Player.CanIssueTeamOrder()))
+				if((!m_Player.CanIssueTeamOrder()))
 				{
 					return;
 				}
@@ -656,24 +656,24 @@ function SetPosAndDrawActionProgress(Canvas C)
 	local Color TeamColor;
 	local R6GameOptions GameOptions;
 
-	GameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	GameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	// End:0x242
-	if(__NFUN_129__(m_Player.Level.m_bInGamePlanningActive))
+	if((!m_Player.Level.m_bInGamePlanningActive))
 	{
 		TeamColor = m_Player.m_TeamManager.GetTeamColor();
-		C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
+		C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
 		// End:0x12E
-		if(__NFUN_132__(GameOptions.HUDShowReticule, m_Player.m_bShowCompleteHUD))
+		if((GameOptions.HUDShowReticule || m_Player.m_bShowCompleteHUD))
 		{
 			DrawActionProgress(C, float(m_Player.m_iPlayerCAProgress));
 		}
 		// End:0x242
-		if(__NFUN_130__(__NFUN_132__(GameOptions.HUDShowActionIcon, m_Player.m_bShowCompleteHUD), __NFUN_119__(m_Player.m_PlayerCurrentCA, none)))
+		if(((GameOptions.HUDShowActionIcon || m_Player.m_bShowCompleteHUD) && (m_Player.m_PlayerCurrentCA != none)))
 		{
-			C.__NFUN_2623__(__NFUN_175__(C.HalfClipX, float(16)), __NFUN_175__(C.ClipY, float(74)));
-			C.__NFUN_466__(m_Player.m_PlayerCurrentCA.textureIcon, 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
-			C.__NFUN_2623__(__NFUN_175__(C.HalfClipX, float(24)), __NFUN_175__(C.ClipY, float(82)));
-			C.__NFUN_466__(Texture'R6ActionIcons.CancelAction', 48.0000000, 48.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
+			C.SetPos((C.HalfClipX - float(16)), (C.ClipY - float(74)));
+			C.DrawTile(m_Player.m_PlayerCurrentCA.textureIcon, 32.0000000, 32.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
+			C.SetPos((C.HalfClipX - float(24)), (C.ClipY - float(82)));
+			C.DrawTile(Texture'R6ActionIcons.CancelAction', 48.0000000, 48.0000000, 0.0000000, 0.0000000, 32.0000000, 32.0000000);
 		}
 	}
 	return;
@@ -693,80 +693,80 @@ function DrawTeamActionMnu(Canvas C, R6CircumstantialActionQuery Query)
 	DrawRoseDesVents(C, m_iCurrentMnuChoice);
 	C.OrgX = 0.0000000;
 	C.OrgY = 0.0000000;
-	C.__NFUN_1606__(false);
-	fScaleX = __NFUN_172__(float(C.SizeX), 800.0000000);
-	fScaleY = __NFUN_172__(float(C.SizeY), 600.0000000);
+	C.UseVirtualSize(false);
+	fScaleX = (float(C.SizeX) / 800.0000000);
+	fScaleY = (float(C.SizeY) / 600.0000000);
 	TeamColor = m_Player.m_TeamManager.GetTeamColor();
-	fPosX = __NFUN_174__(__NFUN_172__(float(C.SizeX), 2.0000000), fScaleX);
-	fPosY = __NFUN_174__(__NFUN_172__(float(C.SizeY), 2.0000000), fScaleY);
+	fPosX = ((float(C.SizeX) / 2.0000000) + fScaleX);
+	fPosY = ((float(C.SizeY) / 2.0000000) + fScaleY);
 	fTextSizeX = 75.0000000;
 	fTextSizeY = 32.0000000;
 	iAction = 0;
 	J0x102:
 
 	// End:0x535 [Loop If]
-	if(__NFUN_150__(iAction, 4))
+	if((iAction < 4))
 	{
 		// End:0x271
 		if(MenuItemEnabled(iAction))
 		{
 			// End:0x1CE
-			if(__NFUN_155__(m_iCurrentMnuChoice, iAction))
+			if((m_iCurrentMnuChoice != iAction))
 			{
-				C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDGrey.R, m_Player.m_TeamManager.Colors.HUDGrey.G, m_Player.m_TeamManager.Colors.HUDGrey.B, m_Player.m_TeamManager.Colors.HUDGrey.A);				
+				C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDGrey.R, m_Player.m_TeamManager.Colors.HUDGrey.G, m_Player.m_TeamManager.Colors.HUDGrey.B, m_Player.m_TeamManager.Colors.HUDGrey.A);				
 			}
 			else
 			{
-				C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
+				C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDWhite.R, m_Player.m_TeamManager.Colors.HUDWhite.G, m_Player.m_TeamManager.Colors.HUDWhite.B, m_Player.m_TeamManager.Colors.HUDWhite.A);
 			}			
 		}
 		else
 		{
-			C.__NFUN_2626__(m_Player.m_TeamManager.Colors.HUDGrey.R, m_Player.m_TeamManager.Colors.HUDGrey.G, m_Player.m_TeamManager.Colors.HUDGrey.B, m_Player.m_TeamManager.Colors.HUDGrey.A);
+			C.SetDrawColor(m_Player.m_TeamManager.Colors.HUDGrey.R, m_Player.m_TeamManager.Colors.HUDGrey.G, m_Player.m_TeamManager.Colors.HUDGrey.B, m_Player.m_TeamManager.Colors.HUDGrey.A);
 		}
 		// End:0x357
-		if(__NFUN_154__(m_iCurrentSubMnuChoice, -1))
+		if((m_iCurrentSubMnuChoice == -1))
 		{
 			strAction = Query.aQueryTarget.R6GetCircumstantialActionString(int(Query.iTeamActionIDList[iAction]));			
 		}
 		else
 		{
-			strAction = Query.aQueryTarget.R6GetCircumstantialActionString(int(Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(m_iCurrentSubMnuChoice, 4), iAction)]));
+			strAction = Query.aQueryTarget.R6GetCircumstantialActionString(int(Query.iTeamSubActionsIDList[((m_iCurrentSubMnuChoice * 4) + iAction)]));
 		}
 		C.Style = 3;
 		switch(iAction)
 		{
 			// End:0x410
 			case 0:
-				DrawTextCenteredInBox(C, strAction, __NFUN_175__(fPosX, __NFUN_172__(__NFUN_171__(fTextSizeX, fScaleX), 2.0000000)), __NFUN_175__(fPosY, __NFUN_171__(__NFUN_174__(float(50), fTextSizeY), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strAction, (fPosX - ((fTextSizeX * fScaleX) / 2.0000000)), (fPosY - ((float(50) + fTextSizeY) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0x52B
 				break;
 			// End:0x46A
 			case 1:
-				DrawTextCenteredInBox(C, strAction, __NFUN_174__(fPosX, __NFUN_171__(float(35), fScaleX)), __NFUN_175__(fPosY, __NFUN_171__(__NFUN_172__(fTextSizeY, float(2)), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strAction, (fPosX + (float(35) * fScaleX)), (fPosY - ((fTextSizeY / float(2)) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0x52B
 				break;
 			// End:0x4C6
 			case 2:
-				DrawTextCenteredInBox(C, strAction, __NFUN_175__(fPosX, __NFUN_172__(__NFUN_171__(fTextSizeX, fScaleX), 2.0000000)), __NFUN_174__(fPosY, __NFUN_171__(float(50), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strAction, (fPosX - ((fTextSizeX * fScaleX) / 2.0000000)), (fPosY + (float(50) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0x52B
 				break;
 			// End:0x528
 			case 3:
-				DrawTextCenteredInBox(C, strAction, __NFUN_175__(fPosX, __NFUN_171__(__NFUN_174__(float(35), fTextSizeX), fScaleX)), __NFUN_175__(fPosY, __NFUN_171__(__NFUN_172__(fTextSizeY, float(2)), fScaleY)), __NFUN_171__(fTextSizeX, fScaleX), __NFUN_171__(fTextSizeY, fScaleY));
+				DrawTextCenteredInBox(C, strAction, (fPosX - ((float(35) + fTextSizeX) * fScaleX)), (fPosY - ((fTextSizeY / float(2)) * fScaleY)), (fTextSizeX * fScaleX), (fTextSizeY * fScaleY));
 				// End:0x52B
 				break;
 			// End:0xFFFF
 			default:
 				break;
 		}
-		__NFUN_165__(iAction);
+		(iAction++);
 		// [Loop Continue]
 		goto J0x102;
 	}
 	C.OrgX = 0.0000000;
 	C.OrgY = 0.0000000;
-	C.__NFUN_2626__(TeamColor.R, TeamColor.R, TeamColor.R, TeamColor.A);
+	C.SetDrawColor(TeamColor.R, TeamColor.R, TeamColor.R, TeamColor.A);
 	return;
 }
 
@@ -781,24 +781,24 @@ function DrawActionProgress(Canvas C, float fProgress)
 	J0x07:
 
 	// End:0xF3 [Loop If]
-	if(__NFUN_176__(float(__NFUN_144__(iItem, 30)), 360.0000000))
+	if((float((iItem * 30)) < 360.0000000))
 	{
-		C.__NFUN_2623__(__NFUN_171__(__NFUN_175__(C.ClipX, float(m_TexProgressCircle.USize)), 0.5000000), __NFUN_171__(__NFUN_175__(C.ClipY, float(m_TexProgressCircle.VSize)), 0.5000000));
-		C.__NFUN_466__(m_TexProgressCircle, float(m_TexProgressCircle.USize), float(m_TexProgressCircle.VSize), 0.0000000, 0.0000000, float(m_TexProgressCircle.USize), float(m_TexProgressCircle.VSize), __NFUN_172__(__NFUN_171__(float(__NFUN_144__(iItem, 30)), 3.1415930), float(180)));
-		__NFUN_165__(iItem);
+		C.SetPos(((C.ClipX - float(m_TexProgressCircle.USize)) * 0.5000000), ((C.ClipY - float(m_TexProgressCircle.VSize)) * 0.5000000));
+		C.DrawTile(m_TexProgressCircle, float(m_TexProgressCircle.USize), float(m_TexProgressCircle.VSize), 0.0000000, 0.0000000, float(m_TexProgressCircle.USize), float(m_TexProgressCircle.VSize), ((float((iItem * 30)) * 3.1415930) / float(180)));
+		(iItem++);
 		// [Loop Continue]
 		goto J0x07;
 	}
-	fDegreeProgress = int(__NFUN_171__(fProgress, 3.6000000));
+	fDegreeProgress = int((fProgress * 3.6000000));
 	iItem = 1;
 	J0x10E:
 
 	// End:0x1FD [Loop If]
-	if(__NFUN_150__(__NFUN_144__(iItem, 30), fDegreeProgress))
+	if(((iItem * 30) < fDegreeProgress))
 	{
-		C.__NFUN_2623__(__NFUN_171__(__NFUN_175__(C.ClipX, float(m_TexProgressItem.USize)), 0.5000000), __NFUN_171__(__NFUN_175__(C.ClipY, float(m_TexProgressItem.VSize)), 0.5000000));
-		C.__NFUN_466__(m_TexProgressItem, float(m_TexProgressItem.USize), float(m_TexProgressItem.VSize), 0.0000000, 0.0000000, float(m_TexProgressItem.USize), float(m_TexProgressItem.VSize), __NFUN_172__(__NFUN_171__(__NFUN_171__(float(__NFUN_147__(iItem, 1)), float(30)), 3.1415930), float(180)));
-		__NFUN_165__(iItem);
+		C.SetPos(((C.ClipX - float(m_TexProgressItem.USize)) * 0.5000000), ((C.ClipY - float(m_TexProgressItem.VSize)) * 0.5000000));
+		C.DrawTile(m_TexProgressItem, float(m_TexProgressItem.USize), float(m_TexProgressItem.VSize), 0.0000000, 0.0000000, float(m_TexProgressItem.USize), float(m_TexProgressItem.VSize), (((float((iItem - 1)) * float(30)) * 3.1415930) / float(180)));
+		(iItem++);
 		// [Loop Continue]
 		goto J0x10E;
 	}
@@ -810,19 +810,19 @@ state ActionProgress
 	function bool KeyEvent(Interactions.EInputKey eKey, Interactions.EInputAction eAction, float fDelta)
 	{
 		// End:0xE0
-		if(__NFUN_154__(int(eKey), int(m_Player.__NFUN_2706__(m_ActionKey))))
+		if((int(eKey) == int(m_Player.GetKey(m_ActionKey))))
 		{
 			// End:0xE0
-			if(__NFUN_154__(int(eAction), int(3)))
+			if((int(eAction) == int(3)))
 			{
 				m_Player.ServerActionProgressStop();
 				// End:0xA4
-				if(Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack())
+				if(Class'Engine.Actor'.static.GetModMgr().IsMissionPack())
 				{
 					// End:0xA1
-					if(__NFUN_130__(m_Player.Pawn.IsAlive(), __NFUN_129__(m_Player.m_pawn.m_bIsSurrended)))
+					if((m_Player.Pawn.IsAlive() && (!m_Player.m_pawn.m_bIsSurrended)))
 					{
-						m_Player.__NFUN_113__('PlayerWalking');
+						m_Player.GotoState('PlayerWalking');
 					}					
 				}
 				else
@@ -830,7 +830,7 @@ state ActionProgress
 					// End:0xCF
 					if(m_Player.Pawn.IsAlive())
 					{
-						m_Player.__NFUN_113__('PlayerWalking');
+						m_Player.GotoState('PlayerWalking');
 					}
 				}
 				DisplayMenu(false);

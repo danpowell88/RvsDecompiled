@@ -438,7 +438,7 @@ function bool isFailed()
 	local int i, iNum;
 
 	// End:0x1B
-	if(__NFUN_132__(m_bFailed, m_bCompleted))
+	if((m_bFailed || m_bCompleted))
 	{
 		return m_bFailed;
 	}
@@ -446,7 +446,7 @@ function bool isFailed()
 	J0x22:
 
 	// End:0xDB [Loop If]
-	if(__NFUN_150__(i, m_aSubMissionObjectives.Length))
+	if((i < m_aSubMissionObjectives.Length))
 	{
 		// End:0xD1
 		if(m_aSubMissionObjectives[i].isFailed())
@@ -458,12 +458,12 @@ function bool isFailed()
 				// End:0xCA
 				if(m_bShowLog)
 				{
-					logX(__NFUN_112__("is failed. Mission is aborted because of ", m_aSubMissionObjectives[i].getDescription()));
+					logX(("is failed. Mission is aborted because of " $ m_aSubMissionObjectives[i].getDescription()));
 				}
 			}
-			__NFUN_165__(iNum);
+			(iNum++);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x22;
 	}
@@ -473,19 +473,19 @@ function bool isFailed()
 		return m_bFailed;
 	}
 	// End:0xF8
-	if(__NFUN_154__(iNum, 0))
+	if((iNum == 0))
 	{
 		return false;
 	}
 	// End:0x11E
-	if(__NFUN_153__(iNum, m_iMaxFailedAccepted))
+	if((iNum >= m_iMaxFailedAccepted))
 	{
 		R6MissionObjectiveMgr(m_mgr).SetMissionObjCompleted(self, false, true);
 	}
 	// End:0x179
-	if(__NFUN_130__(m_bShowLog, m_bFailed))
+	if((m_bShowLog && m_bFailed))
 	{
-		logX(__NFUN_112__(__NFUN_112__(__NFUN_112__("is failed. num failed=", string(iNum)), " maxFailedAccepted="), string(m_iMaxFailedAccepted)));
+		logX(((("is failed. num failed=" $ string(iNum)) $ " maxFailedAccepted=") $ string(m_iMaxFailedAccepted)));
 	}
 	return m_bFailed;
 	return;
@@ -496,7 +496,7 @@ function string GetDescriptionFailure()
 	local int i, iNum;
 
 	// End:0x0E
-	if(__NFUN_129__(m_bFailed))
+	if((!m_bFailed))
 	{
 		return "";
 	}
@@ -504,14 +504,14 @@ function string GetDescriptionFailure()
 	J0x15:
 
 	// End:0x7B [Loop If]
-	if(__NFUN_150__(i, m_aSubMissionObjectives.Length))
+	if((i < m_aSubMissionObjectives.Length))
 	{
 		// End:0x71
-		if(__NFUN_130__(m_aSubMissionObjectives[i].isFailed(), __NFUN_123__(m_aSubMissionObjectives[i].GetDescriptionFailure(), "")))
+		if((m_aSubMissionObjectives[i].isFailed() && (m_aSubMissionObjectives[i].GetDescriptionFailure() != "")))
 		{
 			return m_aSubMissionObjectives[i].GetDescriptionFailure();
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x15;
 	}
@@ -523,7 +523,7 @@ function Sound GetSoundFailure()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_129__(m_bFailed))
+	if((!m_bFailed))
 	{
 		return none;
 	}
@@ -531,14 +531,14 @@ function Sound GetSoundFailure()
 	J0x14:
 
 	// End:0x5C [Loop If]
-	if(__NFUN_150__(i, m_aSubMissionObjectives.Length))
+	if((i < m_aSubMissionObjectives.Length))
 	{
 		// End:0x52
 		if(m_aSubMissionObjectives[i].isFailed())
 		{
 			return m_aSubMissionObjectives[i].GetSoundFailure();
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x14;
 	}
@@ -567,10 +567,10 @@ function SetMObjMgr(Actor aMObjMgr)
 	J0x12:
 
 	// End:0x46 [Loop If]
-	if(__NFUN_150__(i, m_aSubMissionObjectives.Length))
+	if((i < m_aSubMissionObjectives.Length))
 	{
 		m_aSubMissionObjectives[i].SetMObjMgr(aMObjMgr);
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x12;
 	}
@@ -586,10 +586,10 @@ function Reset()
 	J0x0D:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_150__(i, m_aSubMissionObjectives.Length))
+	if((i < m_aSubMissionObjectives.Length))
 	{
 		m_aSubMissionObjectives[i].Reset();
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x0D;
 	}

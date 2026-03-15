@@ -523,7 +523,7 @@ function DrawInGameTeamBar(Canvas C, float _fY, float _fHeight)
 	fXOffset = m_stMenuCoord[int(9)].fXPos;
 	fWidth = m_stMenuCoord[int(9)].fWidth;
 	AddIcon(C, fXOffset, _fY, fWidth, _fHeight, 8);
-	fXOffset = __NFUN_174__(fXOffset, fWidth);
+	fXOffset = (fXOffset + fWidth);
 	AddVerticalLine(C, fXOffset, _fY, float(m_BorderTextureRegion.W), WinHeight);
 	fXOffset = m_stMenuCoord[int(10)].fXPos;
 	fWidth = m_stMenuCoord[int(10)].fWidth;
@@ -641,9 +641,9 @@ function AddIcon(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight, 
 //=======================================================================================================
 function DrawInGameTeamBarUpBorder(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-	C.__NFUN_2626__(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
+	C.SetDrawColor(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
 	DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, _fX, __NFUN_174__(_fY, _fHeight), _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, _fX, (_fY + _fHeight), _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;
 }
 
@@ -652,7 +652,7 @@ function DrawInGameTeamBarUpBorder(Canvas C, float _fX, float _fY, float _fWidth
 //=======================================================================================================
 function DrawInGameTeamBarDownBorder(Canvas C, float _fX, float _fY, float _fWidth, float _fHeight)
 {
-	C.__NFUN_2626__(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
+	C.SetDrawColor(m_vTeamColor.R, m_vTeamColor.G, m_vTeamColor.B);
 	DrawStretchedTextureSegment(C, _fX, _fY, _fWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;
 }
@@ -667,7 +667,7 @@ function InitTeamBar()
 	local Font ButtonFont;
 
 	// End:0x96
-	if(__NFUN_114__(m_pTextTeamBar, none))
+	if((m_pTextTeamBar == none))
 	{
 		m_pTextTeamBar = R6WindowTextLabelExt(CreateWindow(Class'R6Window.R6WindowTextLabelExt', 0.0000000, 0.0000000, WinWidth, WinHeight, self));
 		m_pTextTeamBar.bAlwaysBehind = true;
@@ -682,7 +682,7 @@ function InitTeamBar()
 
 function InitIGPlayerInfoList()
 {
-	m_IGPlayerInfoListBox = R6WindowIGPlayerInfoListBox(CreateWindow(Class'R6Window.R6WindowIGPlayerInfoListBox', 0.0000000, 15.0000000, WinWidth, __NFUN_175__(WinHeight, GetPlayerListBorderHeight()), self));
+	m_IGPlayerInfoListBox = R6WindowIGPlayerInfoListBox(CreateWindow(Class'R6Window.R6WindowIGPlayerInfoListBox', 0.0000000, 15.0000000, WinWidth, (WinHeight - GetPlayerListBorderHeight()), self));
 	m_IGPlayerInfoListBox.SetCornerType(1);
 	m_IGPlayerInfoListBox.m_Font = Root.Fonts[6];
 	return;
@@ -697,7 +697,7 @@ function InitMissionWindows()
 	m_pTitleCoop.TextColor = Root.Colors.White;
 	m_pTitleCoop.m_fHBorderPadding = 2.0000000;
 	m_pTitleCoop.m_VBorderTexture = none;
-	m_pMissionObj = R6MenuMPInGameObj(CreateWindow(Root.MenuClassDefines.ClassInGameObjectives, 0.0000000, 20.0000000, WinWidth, __NFUN_175__(WinHeight, float(20)), self));
+	m_pMissionObj = R6MenuMPInGameObj(CreateWindow(Root.MenuClassDefines.ClassInGameObjectives, 0.0000000, 20.0000000, WinWidth, (WinHeight - float(20)), self));
 	return;
 }
 
@@ -708,55 +708,55 @@ function InitMenuLayout(int _MenuToDisplay)
 {
 	m_bTeamMenuLayout = false;
 	// End:0x2E9
-	if(__NFUN_154__(_MenuToDisplay, 1))
+	if((_MenuToDisplay == 1))
 	{
 		m_bTeamMenuLayout = true;
 		m_stMenuCoord[int(0)].fXPos = 4.0000000;
 		m_stMenuCoord[int(0)].fWidth = 15.0000000;
-		m_stMenuCoord[int(1)].fXPos = __NFUN_174__(m_stMenuCoord[int(0)].fXPos, m_stMenuCoord[int(0)].fWidth);
+		m_stMenuCoord[int(1)].fXPos = (m_stMenuCoord[int(0)].fXPos + m_stMenuCoord[int(0)].fWidth);
 		m_stMenuCoord[int(1)].fWidth = 21.0000000;
-		m_stMenuCoord[int(2)].fXPos = __NFUN_174__(m_stMenuCoord[int(1)].fXPos, m_stMenuCoord[int(1)].fWidth);
+		m_stMenuCoord[int(2)].fXPos = (m_stMenuCoord[int(1)].fXPos + m_stMenuCoord[int(1)].fWidth);
 		m_stMenuCoord[int(2)].fWidth = 153.0000000;
 		m_stMenuCoord[int(3)].fXPos = 0.0000000;
 		m_stMenuCoord[int(3)].fWidth = 0.0000000;
-		m_stMenuCoord[int(4)].fXPos = __NFUN_174__(m_stMenuCoord[int(2)].fXPos, m_stMenuCoord[int(2)].fWidth);
+		m_stMenuCoord[int(4)].fXPos = (m_stMenuCoord[int(2)].fXPos + m_stMenuCoord[int(2)].fWidth);
 		m_stMenuCoord[int(4)].fWidth = 42.0000000;
-		m_stMenuCoord[int(5)].fXPos = __NFUN_174__(m_stMenuCoord[int(4)].fXPos, m_stMenuCoord[int(4)].fWidth);
+		m_stMenuCoord[int(5)].fXPos = (m_stMenuCoord[int(4)].fXPos + m_stMenuCoord[int(4)].fWidth);
 		m_stMenuCoord[int(5)].fWidth = 41.0000000;
-		m_stMenuCoord[int(6)].fXPos = __NFUN_174__(m_stMenuCoord[int(5)].fXPos, m_stMenuCoord[int(5)].fWidth);
+		m_stMenuCoord[int(6)].fXPos = (m_stMenuCoord[int(5)].fXPos + m_stMenuCoord[int(5)].fWidth);
 		m_stMenuCoord[int(6)].fWidth = 40.0000000;
-		m_stMenuCoord[int(7)].fXPos = __NFUN_174__(m_stMenuCoord[int(6)].fXPos, m_stMenuCoord[int(6)].fWidth);
+		m_stMenuCoord[int(7)].fXPos = (m_stMenuCoord[int(6)].fXPos + m_stMenuCoord[int(6)].fWidth);
 		m_stMenuCoord[int(7)].fWidth = 40.0000000;
-		m_stMenuCoord[int(8)].fXPos = __NFUN_174__(m_stMenuCoord[int(7)].fXPos, m_stMenuCoord[int(7)].fWidth);
+		m_stMenuCoord[int(8)].fXPos = (m_stMenuCoord[int(7)].fXPos + m_stMenuCoord[int(7)].fWidth);
 		m_stMenuCoord[int(8)].fWidth = 40.0000000;
-		m_stMenuCoord[int(9)].fXPos = __NFUN_174__(m_stMenuCoord[int(8)].fXPos, m_stMenuCoord[int(8)].fWidth);
+		m_stMenuCoord[int(9)].fXPos = (m_stMenuCoord[int(8)].fXPos + m_stMenuCoord[int(8)].fWidth);
 		m_stMenuCoord[int(9)].fWidth = m_stMenuCoord[int(2)].fWidth;
-		m_stMenuCoord[int(10)].fXPos = __NFUN_174__(m_stMenuCoord[int(9)].fXPos, m_stMenuCoord[int(9)].fWidth);
+		m_stMenuCoord[int(10)].fXPos = (m_stMenuCoord[int(9)].fXPos + m_stMenuCoord[int(9)].fWidth);
 		m_stMenuCoord[int(10)].fWidth = 41.0000000;		
 	}
 	else
 	{
 		m_stMenuCoord[int(0)].fXPos = 2.0000000;
 		m_stMenuCoord[int(0)].fWidth = 15.0000000;
-		m_stMenuCoord[int(1)].fXPos = __NFUN_174__(m_stMenuCoord[int(0)].fXPos, m_stMenuCoord[int(0)].fWidth);
+		m_stMenuCoord[int(1)].fXPos = (m_stMenuCoord[int(0)].fXPos + m_stMenuCoord[int(0)].fWidth);
 		m_stMenuCoord[int(1)].fWidth = 15.0000000;
-		m_stMenuCoord[int(2)].fXPos = __NFUN_174__(m_stMenuCoord[int(1)].fXPos, m_stMenuCoord[int(1)].fWidth);
+		m_stMenuCoord[int(2)].fXPos = (m_stMenuCoord[int(1)].fXPos + m_stMenuCoord[int(1)].fWidth);
 		m_stMenuCoord[int(2)].fWidth = 153.0000000;
-		m_stMenuCoord[int(3)].fXPos = __NFUN_174__(m_stMenuCoord[int(2)].fXPos, m_stMenuCoord[int(2)].fWidth);
+		m_stMenuCoord[int(3)].fXPos = (m_stMenuCoord[int(2)].fXPos + m_stMenuCoord[int(2)].fWidth);
 		m_stMenuCoord[int(3)].fWidth = 37.0000000;
-		m_stMenuCoord[int(4)].fXPos = __NFUN_174__(m_stMenuCoord[int(3)].fXPos, m_stMenuCoord[int(3)].fWidth);
+		m_stMenuCoord[int(4)].fXPos = (m_stMenuCoord[int(3)].fXPos + m_stMenuCoord[int(3)].fWidth);
 		m_stMenuCoord[int(4)].fWidth = 36.0000000;
-		m_stMenuCoord[int(5)].fXPos = __NFUN_174__(m_stMenuCoord[int(4)].fXPos, m_stMenuCoord[int(4)].fWidth);
+		m_stMenuCoord[int(5)].fXPos = (m_stMenuCoord[int(4)].fXPos + m_stMenuCoord[int(4)].fWidth);
 		m_stMenuCoord[int(5)].fWidth = 36.0000000;
-		m_stMenuCoord[int(6)].fXPos = __NFUN_174__(m_stMenuCoord[int(5)].fXPos, m_stMenuCoord[int(5)].fWidth);
+		m_stMenuCoord[int(6)].fXPos = (m_stMenuCoord[int(5)].fXPos + m_stMenuCoord[int(5)].fWidth);
 		m_stMenuCoord[int(6)].fWidth = 36.0000000;
-		m_stMenuCoord[int(7)].fXPos = __NFUN_174__(m_stMenuCoord[int(6)].fXPos, m_stMenuCoord[int(6)].fWidth);
+		m_stMenuCoord[int(7)].fXPos = (m_stMenuCoord[int(6)].fXPos + m_stMenuCoord[int(6)].fWidth);
 		m_stMenuCoord[int(7)].fWidth = 36.0000000;
-		m_stMenuCoord[int(8)].fXPos = __NFUN_174__(m_stMenuCoord[int(7)].fXPos, m_stMenuCoord[int(7)].fWidth);
+		m_stMenuCoord[int(8)].fXPos = (m_stMenuCoord[int(7)].fXPos + m_stMenuCoord[int(7)].fWidth);
 		m_stMenuCoord[int(8)].fWidth = 36.0000000;
-		m_stMenuCoord[int(9)].fXPos = __NFUN_174__(m_stMenuCoord[int(8)].fXPos, m_stMenuCoord[int(8)].fWidth);
+		m_stMenuCoord[int(9)].fXPos = (m_stMenuCoord[int(8)].fXPos + m_stMenuCoord[int(8)].fWidth);
 		m_stMenuCoord[int(9)].fWidth = m_stMenuCoord[int(2)].fWidth;
-		m_stMenuCoord[int(10)].fXPos = __NFUN_174__(m_stMenuCoord[int(9)].fXPos, m_stMenuCoord[int(9)].fWidth);
+		m_stMenuCoord[int(10)].fXPos = (m_stMenuCoord[int(9)].fXPos + m_stMenuCoord[int(9)].fWidth);
 		m_stMenuCoord[int(10)].fWidth = 35.0000000;
 	}
 	return;

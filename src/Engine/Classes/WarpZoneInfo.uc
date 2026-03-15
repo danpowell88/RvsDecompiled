@@ -165,21 +165,21 @@ simulated function ActorEntered(Actor Other)
 			{
 				Pawn(Other).bWarping = bNoTeleFrag;
 				// End:0x1F5
-				if(Other.__NFUN_267__(L) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/)
+				if(Other.SetLocation(L))
 				{
 					// End:0x174
-					if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+					if((int(Role) == int(ROLE_Authority)))
 					{
 						P = Level.ControllerList;
 						J0x129:
 
 						// End:0x174 [Loop If]
-						if(__NFUN_119__(P, none))
+						if((P != none))
 						{
 							// End:0x15D
-							if(__NFUN_114__(P.Enemy, Other))
+							if((P.Enemy == Other))
 							{
-								P.__NFUN_514__(Other);
+								P.LineOfSightTo(Other);
 							}
 							P = P.nextController;
 							// [Loop Continue]
@@ -190,23 +190,23 @@ simulated function ActorEntered(Actor Other)
 					Pawn(Other).SetViewRotation(R);
 					Pawn(Other).ClientSetLocation(L, R);
 					// End:0x1F2
-					if(__NFUN_119__(Pawn(Other).Controller, none))
+					if((Pawn(Other).Controller != none))
 					{
 						Pawn(Other).Controller.MoveTimer = -1.0000000;
 					}					
 				}
 				else
 				{
-					__NFUN_113__('DelayedWarp');
+					GotoState('DelayedWarp');
 				}				
 			}
 			else
 			{
-				Other.__NFUN_267__(L);
-				Other.__NFUN_299__(R);
+				Other.SetLocation(L);
+				Other.SetRotation(R);
 			}
-			Other.__NFUN_117__('Touch');
-			Other.__NFUN_117__('UnTouch');
+			Other.Enable('Touch');
+			Other.Enable('UnTouch');
 		}
 	}
 	return;
@@ -215,7 +215,7 @@ simulated function ActorEntered(Actor Other)
 event ActorLeaving(Actor Other)
 {
 	// End:0x2A
-	if(Other.__NFUN_303__('Pawn'))
+	if(Other.IsA('Pawn'))
 	{
 		Pawn(Other).bWarping = false;
 	}
@@ -233,10 +233,10 @@ state DelayedWarp
 		J0x14:
 
 		// End:0x88 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x71
-			if(__NFUN_130__(P.Pawn.bWarping, __NFUN_114__(P.Pawn.Region.Zone, self)))
+			if((P.Pawn.bWarping && (P.Pawn.Region.Zone == self)))
 			{
 				bFound = true;
 				ActorEntered(P);
@@ -246,9 +246,9 @@ state DelayedWarp
 			goto J0x14;
 		}
 		// End:0x9A
-		if(__NFUN_129__(bFound))
+		if((!bFound))
 		{
-			__NFUN_113__('None');
+			GotoState('None');
 		}
 		return;
 	}

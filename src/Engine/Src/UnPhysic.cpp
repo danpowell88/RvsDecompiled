@@ -174,9 +174,11 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 			Scout->SetCollisionSize(40.0f, Scout->CollisionHeight);
 			if (!Scout->findStart(Scout->Location) || Scout->Region.Zone != Region.Zone)
 			{
-				// DIVERGENCE: Level vtable slot 0x9c ((**(code **)(**(int **)(this + 0x328) + 0x9c))())
-				// is called when the scout still cannot reach the zone after resize.
-				// The method is unidentified; execution resumes after the call in Ghidra.
+				// Ghidra: (**(code **)(**(int **)(this + 0x328) + 0x9c))()
+				// = XLevel->vtable[0x9c/4]() -- unidentified ULevel virtual, called with
+				// XLevel as implicit __thiscall receiver (no stack args).
+				void* XLev = *(void**)((BYTE*)this + 0x328);
+				((void(__thiscall*)(void*))(*(void***)XLev)[0x9c/4])(XLev);
 			}
 			Scout->SetCollisionSize(40.0f, Scout->CollisionHeight);
 		}
@@ -198,16 +200,61 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 
 
 // --- AWarpZoneMarker ---
-IMPL_DIVERGE("Ghidra 0x103D8360: FUN_103d7010 (UReachSpec constructor/allocator) unresolved by name")
+IMPL_MATCH("Engine.dll", 0x103D8360)
 void AWarpZoneMarker::addReachSpecs(APawn* Scout, int bOnlyWeightedPaths)
 {
 	guardSlow(AWarpZoneMarker::addReachSpecs);
 	// Ghidra 0xd8360 (393 bytes): iterate Level's actor list; for each other
-	// AWarpZoneMarker that shares the same WarpZone name, create a UReachSpec
-	// linking this to that marker and add it to the PathList. Then call base.
-	// FUN_103d7010(&UReachSpec::PrivateStaticClass, OuterPkg) allocates a new UReachSpec
-	// object; it is likely StaticConstructObject or ConstructObject — unresolved by name.
-	ANavigationPoint::addReachSpecs(Scout, bOnlyWeightedPaths);
+	// AWarpZoneMarker that shares the same WarpZone name (and at least one has bTwoWay set),
+	// create a UReachSpec linking this to that marker, add to PathList. Then call base.
+	// FUN_103d7010 = StaticConstructObject wrapper: constructs UReachSpec in the package
+	// that owns XLevel.
+	UObject* lvlOuter = UObject::GetOuter(*(UObject**)((BYTE*)this + 0x328));
+	UReachSpec* spec = (UReachSpec*)UObject::StaticConstructObject(
+		UReachSpec::StaticClass(), lvlOuter, NAME_None, 0, NULL, GError, NULL);
+
+	for (INT i = 0;;)
+	{
+		INT count = *(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x34); // Level.Actors.Num()
+		if (count <= i)
+		{
+			// LAB_103d84b9:
+			ANavigationPoint::addReachSpecs(Scout, bOnlyWeightedPaths);
+			return;
+		}
+		UObject* actor = *(UObject**)(*(INT*)(*(INT*)((BYTE*)this + 0x328) + 0x30) + i * 4);
+		if (actor != NULL && actor->IsA(AWarpZoneMarker::StaticClass()) && actor != (UObject*)this)
+		{
+			// FName of target WarpZone at warpzoneinfo + 0x430.
+			FName* otherFN = (FName*)(*(INT*)((BYTE*)actor + 1000) + 0x430);
+			const TCHAR* otherZoneName = *otherFN;
+			// FString of this WarpZone at warpzoneinfo + 0x464.
+			FString* thisFStr = (FString*)(*(INT*)((BYTE*)this + 1000) + 0x464);
+			INT match = (*thisFStr == otherZoneName) ? 1 : 0;
+			if (match != 0 &&
+				((*(UINT*)((BYTE*)this  + 0x3a4) & 0x800) != 0 ||
+				 (*(UINT*)((BYTE*)actor + 0x3a4) & 0x800) != 0))
+			{
+				spec->Init();
+				spec->End            = (ANavigationPoint*)actor;  // +0x4c
+				spec->CollisionRadius = 0x28;                      // +0x34
+				spec->CollisionHeight = 0x28;                      // +0x38
+				spec->reachFlags      = 0x20;                      // +0x3c
+				spec->Start           = this;                      // +0x48
+				spec->Distance        = 100;                       // +0x30
+				INT idx = PathList.Add();
+				PathList(idx) = spec;
+				// Ghidra: allocates another spec (discarded/leaked) before base call.
+				UObject::StaticConstructObject(UReachSpec::StaticClass(),
+					UObject::GetOuter(*(UObject**)((BYTE*)this + 0x328)),
+					NAME_None, 0, NULL, GError, NULL);
+				// goto LAB_103d84b9:
+				ANavigationPoint::addReachSpecs(Scout, bOnlyWeightedPaths);
+				return;
+			}
+		}
+		i++;
+	}
 	unguardSlow;
 }
 

@@ -37,35 +37,35 @@ simulated event HitWall(Vector HitNormal, Actor Wall)
 		if(((Instigator != none) && (Instigator.m_collisionBox == Wall)))
 		{
 			vTraceEnd = (Location + (float(10) * Normal(Velocity)));
-			__NFUN_267__(vTraceEnd, true) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+			SetLocation(vTraceEnd, true);
 			return;
 		}
 		// End:0xDE
-		if(__NFUN_130__(Wall.m_bBulletGoThrough, Wall.__NFUN_303__('R6InteractiveObject')))
+		if((Wall.m_bBulletGoThrough && Wall.IsA('R6InteractiveObject')))
 		{
 			Wall.R6TakeDamage(10000, 10000, Instigator, Wall.Location, Velocity, 0);
-			vTraceEnd = __NFUN_216__(Location, __NFUN_213__(float(10), HitNormal));
-			__NFUN_267__(vTraceEnd, true);
-			__NFUN_221__(Velocity, 0.5000000);
+			vTraceEnd = (Location - (float(10) * HitNormal));
+			SetLocation(vTraceEnd, true);
+			(Velocity *= 0.5000000);
 			return;
 		}
 	}
-	DesiredRotation = __NFUN_320__();
-	Velocity = __NFUN_213__(0.3300000, __NFUN_300__(Velocity, HitNormal));
-	RotationRate.Yaw = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
-	RotationRate.Pitch = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
-	RotationRate.Roll = int(__NFUN_175__(__NFUN_171__(__NFUN_171__(float(1000), __NFUN_225__(Velocity)), __NFUN_195__()), __NFUN_171__(float(500), __NFUN_225__(Velocity))));
+	DesiredRotation = RotRand();
+	Velocity = (0.3300000 * MirrorVectorByNormal(Velocity, HitNormal));
+	RotationRate.Yaw = int((((float(1000) * VSize(Velocity)) * FRand()) - (float(500) * VSize(Velocity))));
+	RotationRate.Pitch = int((((float(1000) * VSize(Velocity)) * FRand()) - (float(500) * VSize(Velocity))));
+	RotationRate.Roll = int((((float(1000) * VSize(Velocity)) * FRand()) - (float(500) * VSize(Velocity))));
 	// End:0x1C3
-	if(__NFUN_177__(Velocity.Z, float(400)))
+	if((Velocity.Z > float(400)))
 	{
 		Velocity.Z = 400.0000000;		
 	}
 	else
 	{
 		// End:0x1E0
-		if(__NFUN_176__(__NFUN_225__(Velocity), float(50)))
+		if((VSize(Velocity) < float(50)))
 		{
-			__NFUN_3970__(0);
+			SetPhysics(0);
 			bBounce = false;
 		}
 	}
@@ -74,16 +74,16 @@ simulated event HitWall(Vector HitNormal, Actor Wall)
 	{
 		m_bFirstImpact = false;
 		// End:0x29E
-		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		if((int(Level.NetMode) != int(NM_DedicatedServer)))
 		{
 			m_ImpactSound = m_ImpactGroundSound;
-			pHit = __NFUN_277__(vHitLocation, vHitNormal, __NFUN_216__(Location, vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
+			pHit = Trace(vHitLocation, vHitNormal, (Location - vect(0.0000000, 0.0000000, 40.0000000)), Location, false,, HitMaterial);
 			// End:0x294
-			if(__NFUN_130__(__NFUN_119__(HitMaterial, none), __NFUN_132__(__NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(12)), __NFUN_154__(int(HitMaterial.m_eSurfIdForSnd), int(13)))))
+			if(((HitMaterial != none) && ((int(HitMaterial.m_eSurfIdForSnd) == int(12)) || (int(HitMaterial.m_eSurfIdForSnd) == int(13)))))
 			{
 				m_ImpactSound = m_ImpactWaterSound;
 			}
-			__NFUN_264__(m_ImpactSound, 3);
+			PlaySound(m_ImpactSound, 3);
 		}
 	}
 	R6MakeNoise(4);

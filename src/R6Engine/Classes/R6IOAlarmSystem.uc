@@ -50,7 +50,7 @@ simulated function ToggleDevice(R6Pawn aPawn)
 	{
 		SetSkin(m_DisarmedTexture, 0);
 	}
-	__NFUN_264__(m_DisarmingSound, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+	PlaySound(m_DisarmingSound, 3);
 	m_bToggleType = false;
 	R6AbstractGameInfo(Level.Game).IObjectInteract(aPawn, self);
 	return;

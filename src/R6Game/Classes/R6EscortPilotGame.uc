@@ -482,7 +482,7 @@ auto state InBetweenRoundMenu
 							// End:0x350
 							if(bShowLog)
 							{
-								__NFUN_231__("InBetweenRoundMenu: set new pilot");
+								Log("InBetweenRoundMenu: set new pilot");
 							}
 							R6SetPilotClassInMultiPlayer(P);
 							m_pilotController.PlayerReplicationInfo.m_bIsEscortedPilot = true;
@@ -492,11 +492,11 @@ auto state InBetweenRoundMenu
 					}
 					else
 					{
-						__NFUN_165__(i);
+						(i++);
 					}
 				}
 				// End:0x3A1
-				if(__NFUN_119__(P, none))
+				if((P != none))
 				{
 					P = P.nextController;
 				}

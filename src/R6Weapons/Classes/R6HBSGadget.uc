@@ -79,14 +79,14 @@ function DisplayHeartBeat(bool bActivateHeartBeat)
 	// End:0x93
 	if(bActivateHeartBeat)
 	{
-		pawnOwner.__NFUN_264__(m_sndActivation, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;		
+		pawnOwner.PlaySound(m_sndActivation, 3);		
 	}
 	else
 	{
-		pawnOwner.__NFUN_264__(m_sndDesactivation, 3);
+		pawnOwner.PlaySound(m_sndDesactivation, 3);
 	}
 	ServerToggleHeartBeatProperties(bActivateHeartBeat);
-	__NFUN_2700__(bActivateHeartBeat);
+	ToggleHeartBeatProperties(bActivateHeartBeat);
 	return;
 }
 
@@ -98,7 +98,7 @@ simulated function RemoveFirstPersonWeapon()
 	// End:0x43
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("HBS - RemoveFirstPersonWeapon =", string(m_bHeartBeatOn)));
+		Log(("HBS - RemoveFirstPersonWeapon =" @ string(m_bHeartBeatOn)));
 	}
 	return;
 }
@@ -110,7 +110,7 @@ simulated function bool LoadFirstPersonWeapon(optional Pawn NetOwner, optional C
 	// End:0x44
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("HBS - LoadFirstPersonWeapon =", string(m_bHeartBeatOn)));
+		Log(("HBS - LoadFirstPersonWeapon =" @ string(m_bHeartBeatOn)));
 	}
 	DisplayHeartBeat(m_bHeartBeatOn);
 	return true;
@@ -124,7 +124,7 @@ simulated function DisableWeaponOrGadget()
 	// End:0x3B
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("HBS - DisableWeaponOrGadget =", string(m_bHeartBeatOn)));
+		Log(("HBS - DisableWeaponOrGadget =" @ string(m_bHeartBeatOn)));
 	}
 	return;
 }
@@ -132,12 +132,12 @@ simulated function DisableWeaponOrGadget()
 function StartLoopingAnims()
 {
 	// End:0x2C
-	if(__NFUN_119__(m_FPHands, none))
+	if((m_FPHands != none))
 	{
 		m_FPHands.SetDrawType(0);
-		m_FPHands.__NFUN_113__('Waiting');
+		m_FPHands.GotoState('Waiting');
 	}
-	__NFUN_113__('None');
+	GotoState('None');
 	return;
 }
 
@@ -146,16 +146,16 @@ state PutWeaponDown
 	simulated function BeginState()
 	{
 		// End:0x3A
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
-			m_FPHands.__NFUN_113__('PutWeaponDown');
+			m_FPHands.GotoState('PutWeaponDown');
 			Pawn(Owner).Controller.m_bLockWeaponActions = true;
 		}
 		DisplayHeartBeat(false);
 		// End:0x87
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBS - BeginState of PutWeaponDown for", string(self)), "="), string(m_bHeartBeatOn)));
+			Log(((("HBS - BeginState of PutWeaponDown for" @ string(self)) @ "=") @ string(m_bHeartBeatOn)));
 		}
 		return;
 	}
@@ -168,7 +168,7 @@ state BringWeaponUp
 	{
 		super.BeginState();
 		// End:0x34
-		if(__NFUN_242__(R6Pawn(Owner).m_bActivateNightVision, true))
+		if((R6Pawn(Owner).m_bActivateNightVision == true))
 		{
 			R6Pawn(Owner).ToggleNightVision();
 		}
@@ -183,12 +183,12 @@ state BringWeaponUp
 
 	function FirstPersonAnimOver()
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 		DisplayHeartBeat(true);
 		// End:0x5D
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBS - FirstPersonAnimOver of BringWeaponUp for", string(self)), "="), string(m_bHeartBeatOn)));
+			Log(((("HBS - FirstPersonAnimOver of BringWeaponUp for" @ string(self)) @ "=") @ string(m_bHeartBeatOn)));
 		}
 		return;
 	}
@@ -202,10 +202,10 @@ state RaiseWeapon
 		// End:0x3F
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("HBS - FirstPersonAnimOver in RaiseWeapon for ", string(self)));
+			Log(("HBS - FirstPersonAnimOver in RaiseWeapon for " $ string(self)));
 		}
 		R6PlayerController(Pawn(Owner).Controller).ServerWeaponUpAnimDone();
-		__NFUN_113__('None');
+		GotoState('None');
 		return;
 	}
 
@@ -214,11 +214,11 @@ state RaiseWeapon
 		// End:0x44
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBS - BeginState of RaiseWeapon for", string(self)), "="), string(m_bHeartBeatOn)));
+			Log(((("HBS - BeginState of RaiseWeapon for" @ string(self)) @ "=") @ string(m_bHeartBeatOn)));
 		}
 		super.BeginState();
 		// End:0x78
-		if(__NFUN_242__(R6Pawn(Owner).m_bActivateNightVision, true))
+		if((R6Pawn(Owner).m_bActivateNightVision == true))
 		{
 			R6Pawn(Owner).ToggleNightVision();
 		}
@@ -230,7 +230,7 @@ state RaiseWeapon
 		// End:0x42
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBS - EndState of RaiseWeapon for", string(self)), "="), string(m_bHeartBeatOn)));
+			Log(((("HBS - EndState of RaiseWeapon for" @ string(self)) @ "=") @ string(m_bHeartBeatOn)));
 		}
 		Pawn(Owner).Controller.m_bHideReticule = false;
 		Pawn(Owner).Controller.m_bLockWeaponActions = false;
@@ -250,19 +250,19 @@ state DiscardWeapon
 		// End:0x4D
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("HBS - BeginState of DiscardWeapon for", string(self)), "="), string(m_bHeartBeatOn)));
+			Log(((("HBS - BeginState of DiscardWeapon for" @ string(self)) @ "=") @ string(m_bHeartBeatOn)));
 		}
 		// End:0xC0
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			aPawn = Pawn(Owner);
 			// End:0xB0
-			if(__NFUN_119__(aPawn.Controller, none))
+			if((aPawn.Controller != none))
 			{
 				aPawn.Controller.m_bHideReticule = true;
 				aPawn.Controller.m_bLockWeaponActions = true;
 			}
-			m_FPHands.__NFUN_113__('DiscardWeapon');
+			m_FPHands.GotoState('DiscardWeapon');
 		}
 		return;
 	}
@@ -272,7 +272,7 @@ state DiscardWeapon
 		// End:0x34
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("IN:", string(self)), "::DiscardWeapon::EndState()"));
+			Log((("IN:" @ string(self)) @ "::DiscardWeapon::EndState()"));
 		}
 		return;
 	}
@@ -283,7 +283,7 @@ state NormalFire
 {
 	simulated function BeginState()
 	{
-		__NFUN_113__('None');
+		GotoState('None');
 		return;
 	}
 	stop;

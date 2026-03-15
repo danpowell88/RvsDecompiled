@@ -47,9 +47,9 @@ function Tick(float fDeltaTime)
 		(temp += (TempCoord.XAxis * 14.0000000));
 		(temp -= (TempCoord.YAxis * 2.0000000));
 		(temp += ((TempCoord.ZAxis * 8.0000000) * m_fMatrixMul));
-		__NFUN_267__(temp) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-		TempRot = OrthoRotation(__NFUN_212__(TempCoord.ZAxis, m_fMatrixMul), __NFUN_212__(TempCoord.YAxis, m_fMatrixMul), __NFUN_212__(TempCoord.XAxis, m_fMatrixMul));
-		__NFUN_299__(TempRot);
+		SetLocation(temp);
+		TempRot = OrthoRotation((TempCoord.ZAxis * m_fMatrixMul), (TempCoord.YAxis * m_fMatrixMul), (TempCoord.XAxis * m_fMatrixMul));
+		SetRotation(TempRot);
 		bCorona = true;
 		bHidden = false;
 	}

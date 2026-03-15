@@ -628,15 +628,15 @@ function PostBeginPlay()
 	{
 		AddSoundBankName("Common_Multiplayer");
 	}
-	__NFUN_280__(2.0000000, true);
+	SetTimer(2.0000000, true);
 	i = 0;
 	J0x3A8:
 
 	// End:0x474 [Loop If]
-	if(__NFUN_150__(i, R6GameReplicationInfo(GameReplicationInfo).32))
+	if((i < R6GameReplicationInfo(GameReplicationInfo).32))
 	{
 		// End:0x3FA
-		if(__NFUN_150__(i, m_mapList.Length))
+		if((i < m_mapList.Length))
 		{
 			R6GameReplicationInfo(GameReplicationInfo).m_mapArray[i] = m_mapList[i];			
 		}
@@ -645,7 +645,7 @@ function PostBeginPlay()
 			R6GameReplicationInfo(GameReplicationInfo).m_mapArray[i] = "";
 		}
 		// End:0x44E
-		if(__NFUN_150__(i, m_gameModeList.Length))
+		if((i < m_gameModeList.Length))
 		{
 			R6GameReplicationInfo(GameReplicationInfo).m_gameModeArray[i] = m_gameModeList[i];
 			// [Explicit Continue]
@@ -654,22 +654,22 @@ function PostBeginPlay()
 		R6GameReplicationInfo(GameReplicationInfo).m_gameModeArray[i] = "";
 		J0x46A:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x3A8;
 	}
 	UpdateRepResArrays();
 	// End:0x4A1
-	if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) == int(NM_DedicatedServer)))
 	{
 		m_PersistantGameService = m_GameService;		
 	}
 	else
 	{
 		// End:0x4EC
-		if(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))
+		if((int(Level.NetMode) == int(NM_ListenServer)))
 		{
-			m_PersistantGameService = R6Console(Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console).m_GameService;
+			m_PersistantGameService = R6Console(Class'Engine.Actor'.static.GetCanvas().Viewport.Console).m_GameService;
 		}
 	}
 	return;
@@ -693,16 +693,16 @@ function UpdateRepResArrays()
 	pServerOptions = Level.m_ServerSettings;
 	_GRI = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x6A9
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		i = 0;
 		J0x44:
 
 		// End:0x71 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szSubMachineGunsRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x44;
 		}
@@ -710,11 +710,11 @@ function UpdateRepResArrays()
 		J0x78:
 
 		// End:0xEE [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedSubMachineGuns.Length))
+		if((i < pServerOptions.RestrictedSubMachineGuns.Length))
 		{
-			SubGunClass = Class<R6SubGunDescription>(DynamicLoadObject(__NFUN_112__("", string(pServerOptions.RestrictedSubMachineGuns[i])), Class'Core.Class'));
+			SubGunClass = Class<R6SubGunDescription>(DynamicLoadObject(("" $ string(pServerOptions.RestrictedSubMachineGuns[i])), Class'Core.Class'));
 			_GRI.m_szSubMachineGunsRes[i] = SubGunClass.default.m_NameID;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x78;
 		}
@@ -722,10 +722,10 @@ function UpdateRepResArrays()
 		J0xF5:
 
 		// End:0x122 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szShotGunRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xF5;
 		}
@@ -733,11 +733,11 @@ function UpdateRepResArrays()
 		J0x129:
 
 		// End:0x19F [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedShotGuns.Length))
+		if((i < pServerOptions.RestrictedShotGuns.Length))
 		{
-			ShotGunClass = Class<R6ShotgunDescription>(DynamicLoadObject(__NFUN_112__("", string(pServerOptions.RestrictedShotGuns[i])), Class'Core.Class'));
+			ShotGunClass = Class<R6ShotgunDescription>(DynamicLoadObject(("" $ string(pServerOptions.RestrictedShotGuns[i])), Class'Core.Class'));
 			_GRI.m_szShotGunRes[i] = ShotGunClass.default.m_NameID;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x129;
 		}
@@ -745,10 +745,10 @@ function UpdateRepResArrays()
 		J0x1A6:
 
 		// End:0x1D3 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szAssRifleRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1A6;
 		}
@@ -756,11 +756,11 @@ function UpdateRepResArrays()
 		J0x1DA:
 
 		// End:0x250 [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedAssultRifles.Length))
+		if((i < pServerOptions.RestrictedAssultRifles.Length))
 		{
-			AssaultRifleClass = Class<R6AssaultDescription>(DynamicLoadObject(__NFUN_112__("", string(pServerOptions.RestrictedAssultRifles[i])), Class'Core.Class'));
+			AssaultRifleClass = Class<R6AssaultDescription>(DynamicLoadObject(("" $ string(pServerOptions.RestrictedAssultRifles[i])), Class'Core.Class'));
 			_GRI.m_szAssRifleRes[i] = AssaultRifleClass.default.m_NameID;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1DA;
 		}
@@ -768,10 +768,10 @@ function UpdateRepResArrays()
 		J0x257:
 
 		// End:0x284 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szMachGunRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x257;
 		}
@@ -779,11 +779,11 @@ function UpdateRepResArrays()
 		J0x28B:
 
 		// End:0x301 [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedMachineGuns.Length))
+		if((i < pServerOptions.RestrictedMachineGuns.Length))
 		{
-			MachGunClass = Class<R6LMGDescription>(DynamicLoadObject(__NFUN_112__("", string(pServerOptions.RestrictedMachineGuns[i])), Class'Core.Class'));
+			MachGunClass = Class<R6LMGDescription>(DynamicLoadObject(("" $ string(pServerOptions.RestrictedMachineGuns[i])), Class'Core.Class'));
 			_GRI.m_szMachGunRes[i] = MachGunClass.default.m_NameID;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x28B;
 		}
@@ -791,10 +791,10 @@ function UpdateRepResArrays()
 		J0x308:
 
 		// End:0x335 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szSnipRifleRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x308;
 		}
@@ -802,11 +802,11 @@ function UpdateRepResArrays()
 		J0x33C:
 
 		// End:0x3B2 [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedSniperRifles.Length))
+		if((i < pServerOptions.RestrictedSniperRifles.Length))
 		{
-			SniperRifleClass = Class<R6SniperDescription>(DynamicLoadObject(__NFUN_112__("", string(pServerOptions.RestrictedSniperRifles[i])), Class'Core.Class'));
+			SniperRifleClass = Class<R6SniperDescription>(DynamicLoadObject(("" $ string(pServerOptions.RestrictedSniperRifles[i])), Class'Core.Class'));
 			_GRI.m_szSnipRifleRes[i] = SniperRifleClass.default.m_NameID;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x33C;
 		}
@@ -814,10 +814,10 @@ function UpdateRepResArrays()
 		J0x3B9:
 
 		// End:0x3E6 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szPistolRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x3B9;
 		}
@@ -825,11 +825,11 @@ function UpdateRepResArrays()
 		J0x3ED:
 
 		// End:0x463 [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedPistols.Length))
+		if((i < pServerOptions.RestrictedPistols.Length))
 		{
-			PistolClass = Class<R6PistolsDescription>(DynamicLoadObject(__NFUN_112__("", string(pServerOptions.RestrictedPistols[i])), Class'Core.Class'));
+			PistolClass = Class<R6PistolsDescription>(DynamicLoadObject(("" $ string(pServerOptions.RestrictedPistols[i])), Class'Core.Class'));
 			_GRI.m_szPistolRes[i] = PistolClass.default.m_NameID;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x3ED;
 		}
@@ -837,10 +837,10 @@ function UpdateRepResArrays()
 		J0x46A:
 
 		// End:0x497 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szMachPistolRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x46A;
 		}
@@ -848,11 +848,11 @@ function UpdateRepResArrays()
 		J0x49E:
 
 		// End:0x514 [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedMachinePistols.Length))
+		if((i < pServerOptions.RestrictedMachinePistols.Length))
 		{
-			MachPistolClass = Class<R6MachinePistolsDescription>(DynamicLoadObject(__NFUN_112__("", string(pServerOptions.RestrictedMachinePistols[i])), Class'Core.Class'));
+			MachPistolClass = Class<R6MachinePistolsDescription>(DynamicLoadObject(("" $ string(pServerOptions.RestrictedMachinePistols[i])), Class'Core.Class'));
 			_GRI.m_szMachPistolRes[i] = MachPistolClass.default.m_NameID;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x49E;
 		}
@@ -860,10 +860,10 @@ function UpdateRepResArrays()
 		J0x51B:
 
 		// End:0x548 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szGadgPrimaryRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x51B;
 		}
@@ -871,10 +871,10 @@ function UpdateRepResArrays()
 		J0x54F:
 
 		// End:0x59B [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedPrimary.Length))
+		if((i < pServerOptions.RestrictedPrimary.Length))
 		{
 			_GRI.m_szGadgPrimaryRes[i] = pServerOptions.RestrictedPrimary[i];
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x54F;
 		}
@@ -882,10 +882,10 @@ function UpdateRepResArrays()
 		J0x5A2:
 
 		// End:0x5CF [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szGadgSecondayRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x5A2;
 		}
@@ -893,10 +893,10 @@ function UpdateRepResArrays()
 		J0x5D6:
 
 		// End:0x622 [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedSecondary.Length))
+		if((i < pServerOptions.RestrictedSecondary.Length))
 		{
 			_GRI.m_szGadgSecondayRes[i] = pServerOptions.RestrictedSecondary[i];
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x5D6;
 		}
@@ -904,10 +904,10 @@ function UpdateRepResArrays()
 		J0x629:
 
 		// End:0x656 [Loop If]
-		if(__NFUN_150__(i, 32))
+		if((i < 32))
 		{
 			_GRI.m_szGadgMiscRes[i] = "";
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x629;
 		}
@@ -915,10 +915,10 @@ function UpdateRepResArrays()
 		J0x65D:
 
 		// End:0x6A9 [Loop If]
-		if(__NFUN_150__(i, pServerOptions.RestrictedMiscGadgets.Length))
+		if((i < pServerOptions.RestrictedMiscGadgets.Length))
 		{
 			_GRI.m_szGadgMiscRes[i] = pServerOptions.RestrictedMiscGadgets[i];
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x65D;
 		}
@@ -943,9 +943,9 @@ event InitGame(string Options, out string Error)
 	local int iCounter;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	// End:0x2C
-	if(__NFUN_114__(pServerOptions, none))
+	if((pServerOptions == none))
 	{
 		pServerOptions = new Class'Engine.R6ServerInfo';
 	}
@@ -953,9 +953,9 @@ event InitGame(string Options, out string Error)
 	m_szGameOptions = Options;
 	super(GameInfo).InitGame(Options, Error);
 	// End:0x95
-	if(__NFUN_114__(pServerOptions.m_ServerMapList, none))
+	if((pServerOptions.m_ServerMapList == none))
 	{
-		myList = __NFUN_278__(Class'Engine.R6MapList');
+		myList = Spawn(Class'Engine.R6MapList');
 		pServerOptions.m_ServerMapList = R6MapList(myList);		
 	}
 	else
@@ -963,16 +963,16 @@ event InitGame(string Options, out string Error)
 		myList = pServerOptions.m_ServerMapList;
 	}
 	// End:0x106
-	if(__NFUN_114__(BroadcastHandler, none))
+	if((BroadcastHandler == none))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("failed to create BroadcastHandlerClass=", BroadcastHandlerClass), "  BroadcastHandler="), string(BroadcastHandler)));
+		Log(((("failed to create BroadcastHandlerClass=" $ BroadcastHandlerClass) $ "  BroadcastHandler=") $ string(BroadcastHandler)));
 	}
 	// End:0x14C
-	if(__NFUN_130__(pServerOptions.UsePassword, __NFUN_123__(pServerOptions.GamePassword, "")))
+	if((pServerOptions.UsePassword && (pServerOptions.GamePassword != "")))
 	{
 		AccessControl.SetGamePassword(pServerOptions.GamePassword);
 	}
-	MaxPlayers = __NFUN_249__(16, pServerOptions.MaxPlayers);
+	MaxPlayers = Min(16, pServerOptions.MaxPlayers);
 	m_szMessageOfDay = pServerOptions.MOTD;
 	m_szSvrName = pServerOptions.ServerName;
 	m_bInternetSvr = pServerOptions.InternetServer;
@@ -988,16 +988,16 @@ event InitGame(string Options, out string Error)
 	m_bShowNames = pServerOptions.ShowNames;
 	m_bAIBkp = pServerOptions.AIBkp;
 	// End:0x30B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		// End:0x2C9
-		if(__NFUN_303__('R6TrainingMgr'))
+		if(IsA('R6TrainingMgr'))
 		{
 			m_iDiffLevel = 1;			
 		}
 		else
 		{
-			m_iDiffLevel = Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_DifficultyLevel;
+			m_iDiffLevel = Class'Engine.Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_DifficultyLevel;
 		}		
 	}
 	else
@@ -1017,7 +1017,7 @@ event InitGame(string Options, out string Error)
 	// End:0x3DF
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("RADAR: m_bIsRadarAllowed =", string(m_bIsRadarAllowed)), " pServerOptions.AllowRadar="), string(pServerOptions.AllowRadar)), " m_bServerAllowRadarRep="), string(m_bServerAllowRadarRep)));
+		Log(((((("RADAR: m_bIsRadarAllowed =" $ string(m_bIsRadarAllowed)) $ " pServerOptions.AllowRadar=") $ string(pServerOptions.AllowRadar)) $ " m_bServerAllowRadarRep=") $ string(m_bServerAllowRadarRep)));
 	}
 	m_mapList.Remove(0, m_mapList.Length);
 	m_gameModeList.Remove(0, m_gameModeList.Length);
@@ -1025,17 +1025,17 @@ event InitGame(string Options, out string Error)
 	J0x400:
 
 	// End:0x4A5 [Loop If]
-	if(__NFUN_150__(iCounter, 32))
+	if((iCounter < 32))
 	{
 		Level.PreBeginPlay();
 		// End:0x456
-		if(__NFUN_154__(iCounter, __NFUN_1280__()))
+		if((iCounter == GetCurrentMapNum()))
 		{
 			m_szCurrGameType = Level.GetGameTypeFromClassName(R6MapList(myList).GameType[iCounter]);
 		}
 		m_mapList[iCounter] = myList.Maps[iCounter];
 		m_gameModeList[iCounter] = R6MapList(myList).GameType[iCounter];
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x400;
 	}
@@ -1049,25 +1049,25 @@ event InitGame(string Options, out string Error)
 	// End:0x50C
 	if(pServerOptions.CamThirdPerson)
 	{
-		m_iDeathCameraMode = __NFUN_158__(m_iDeathCameraMode, Level.2);
+		m_iDeathCameraMode = (m_iDeathCameraMode | Level.2);
 	}
 	// End:0x536
 	if(pServerOptions.CamFreeThirdP)
 	{
-		m_iDeathCameraMode = __NFUN_158__(m_iDeathCameraMode, Level.4);
+		m_iDeathCameraMode = (m_iDeathCameraMode | Level.4);
 	}
 	// End:0x560
 	if(pServerOptions.CamGhost)
 	{
-		m_iDeathCameraMode = __NFUN_158__(m_iDeathCameraMode, Level.8);
+		m_iDeathCameraMode = (m_iDeathCameraMode | Level.8);
 	}
 	// End:0x5D7
 	if(pServerOptions.CamTeamOnly)
 	{
 		// End:0x5D7
-		if(__NFUN_129__(__NFUN_130__(__NFUN_132__(Level.IsGameTypeAdversarial(m_szCurrGameType), Level.IsGameTypeSquad(m_szCurrGameType)), __NFUN_129__(Level.IsGameTypeTeamAdversarial(m_szCurrGameType)))))
+		if((!((Level.IsGameTypeAdversarial(m_szCurrGameType) || Level.IsGameTypeSquad(m_szCurrGameType)) && (!Level.IsGameTypeTeamAdversarial(m_szCurrGameType)))))
 		{
-			m_iDeathCameraMode = __NFUN_158__(m_iDeathCameraMode, Level.32);
+			m_iDeathCameraMode = (m_iDeathCameraMode | Level.32);
 		}
 	}
 	// End:0x5FA
@@ -1090,7 +1090,7 @@ event InitGame(string Options, out string Error)
 function SetGamePassword(string szPasswd)
 {
 	super(GameInfo).SetGamePassword(szPasswd);
-	m_GameService.__NFUN_3560__();
+	m_GameService.NativeUpdateServer();
 	return;
 }
 
@@ -1101,21 +1101,21 @@ function CreateBackupRainbowAI()
 	local R6ModMgr pModManager;
 
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return;
 	}
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	i = 0;
 	J0x34:
 
 	// End:0x8A [Loop If]
-	if(__NFUN_150__(i, 6))
+	if((i < 6))
 	{
-		rainbowAI = R6RainbowAI(__NFUN_278__(pModManager.GetDefaultRainbowAI()));
+		rainbowAI = R6RainbowAI(Spawn(pModManager.GetDefaultRainbowAI()));
 		rainbowAI.bStasis = true;
 		m_RainbowAIBackup[m_RainbowAIBackup.Length] = rainbowAI;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x34;
 	}
@@ -1131,12 +1131,12 @@ function Actor GetRainbowAIFromTable()
 	local int i;
 
 	// End:0x36
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Level.NetMode), int(NM_Client))))
+	if(((int(Level.NetMode) == int(NM_Standalone)) || (int(Level.NetMode) == int(NM_Client))))
 	{
 		return none;
 	}
 	// End:0x44
-	if(__NFUN_154__(m_RainbowAIBackup.Length, 0))
+	if((m_RainbowAIBackup.Length == 0))
 	{
 		return none;
 	}
@@ -1158,20 +1158,20 @@ function DeployRainbowTeam(PlayerController NewPlayer)
 	local R6RainbowStartInfo Info;
 
 	// End:0x4E9
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		// End:0x75
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("DeployRainbowTeam newPlayer=", string(NewPlayer)), " iNbOfRainbowAIToSpawn="), string(GetNbOfRainbowAIToSpawn(NewPlayer))));
+			Log(((("DeployRainbowTeam newPlayer=" $ string(NewPlayer)) $ " iNbOfRainbowAIToSpawn=") $ string(GetNbOfRainbowAIToSpawn(NewPlayer))));
 		}
-		newTeam = __NFUN_278__(Class'R6Engine.R6RainbowTeam');
-		newTeam.__NFUN_272__(NewPlayer);
+		newTeam = Spawn(Class'R6Engine.R6RainbowTeam');
+		newTeam.SetOwner(NewPlayer);
 		// End:0x132
-		if(__NFUN_130__(__NFUN_130__(m_bAIBkp, __NFUN_129__(R6PlayerController(NewPlayer).m_bPenaltyBox)), Level.IsGameTypeCooperative(m_szGameTypeFlag)))
+		if(((m_bAIBkp && (!R6PlayerController(NewPlayer).m_bPenaltyBox)) && Level.IsGameTypeCooperative(m_szGameTypeFlag)))
 		{
 			GetNbHumanPlayerInTeam(iActiveTotal, iActiveGreen);
-			__NFUN_161__(iActiveTotal, iActiveGreen);
+			(iActiveTotal += iActiveGreen);
 			switch(iActiveTotal)
 			{
 				// End:0xF8
@@ -1198,20 +1198,20 @@ function DeployRainbowTeam(PlayerController NewPlayer)
 			}
 		}
 		SetRainbowTeam(0, newTeam);
-		Info = __NFUN_278__(Class'Engine.R6RainbowStartInfo');
+		Info = Spawn(Class'Engine.R6RainbowStartInfo');
 		// End:0x186
-		if(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none))
+		if((NewPlayer.PlayerReplicationInfo != none))
 		{
 			Info.m_CharacterName = NewPlayer.PlayerReplicationInfo.PlayerName;
 		}
-		Info.m_ArmorName = __NFUN_112__("", string(NewPlayer.PawnClass));
+		Info.m_ArmorName = ("" $ string(NewPlayer.PawnClass));
 		// End:0x1EB
-		if(__NFUN_129__(IsPrimaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_WeaponName1)))
+		if((!IsPrimaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_WeaponName1)))
 		{
 			Info.m_WeaponName[0] = NewPlayer.m_PlayerPrefs.m_WeaponName1;
 		}
 		// End:0x230
-		if(__NFUN_129__(IsSecondaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_WeaponName2)))
+		if((!IsSecondaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_WeaponName2)))
 		{
 			Info.m_WeaponName[1] = NewPlayer.m_PlayerPrefs.m_WeaponName2;			
 		}
@@ -1222,27 +1222,27 @@ function DeployRainbowTeam(PlayerController NewPlayer)
 		Info.m_BulletType[0] = NewPlayer.m_PlayerPrefs.m_BulletType1;
 		Info.m_BulletType[1] = NewPlayer.m_PlayerPrefs.m_BulletType2;
 		// End:0x2EA
-		if(__NFUN_129__(IsPrimaryGadgetRestricted(NewPlayer.m_PlayerPrefs.m_WeaponGadgetName1)))
+		if((!IsPrimaryGadgetRestricted(NewPlayer.m_PlayerPrefs.m_WeaponGadgetName1)))
 		{
 			Info.m_WeaponGadgetName[0] = NewPlayer.m_PlayerPrefs.m_WeaponGadgetName1;
 		}
 		// End:0x32C
-		if(__NFUN_129__(IsSecondaryGadgetRestricted(NewPlayer.m_PlayerPrefs.m_WeaponGadgetName2)))
+		if((!IsSecondaryGadgetRestricted(NewPlayer.m_PlayerPrefs.m_WeaponGadgetName2)))
 		{
 			Info.m_WeaponGadgetName[1] = NewPlayer.m_PlayerPrefs.m_WeaponGadgetName2;
 		}
 		// End:0x36E
-		if(__NFUN_129__(IsTertiaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_GadgetName1)))
+		if((!IsTertiaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_GadgetName1)))
 		{
 			Info.m_GadgetName[0] = NewPlayer.m_PlayerPrefs.m_GadgetName1;
 		}
 		// End:0x3B0
-		if(__NFUN_129__(IsTertiaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_GadgetName2)))
+		if((!IsTertiaryWeaponRestricted(NewPlayer.m_PlayerPrefs.m_GadgetName2)))
 		{
 			Info.m_GadgetName[1] = NewPlayer.m_PlayerPrefs.m_GadgetName2;
 		}
 		Info.m_iOperativeID = R6Rainbow(NewPlayer.Pawn).m_iOperativeID;
-		Info.m_bIsMale = __NFUN_129__(NewPlayer.Pawn.bIsFemale);
+		Info.m_bIsMale = (!NewPlayer.Pawn.bIsFemale);
 		Info.m_iHealth = 0;
 		Info.m_FaceTexture = DefaultFaceTexture;
 		Info.m_FaceCoords = DefaultFaceCoords;
@@ -1270,62 +1270,62 @@ event PlayerController Login(string Portal, string Options, out string Error)
 
 	StartSpot = R6FindPlayerStart(none, iSpawnPointNum, Portal);
 	// End:0x60
-	if(__NFUN_114__(StartSpot, none))
+	if((StartSpot == none))
 	{
 		Error = Localize("MPMiscMessages", "FailedPlaceMessage", "R6GameInfo");
 		return none;
 	}
 	// End:0xB1
-	if(__NFUN_130__(__NFUN_114__(PlayerControllerClass, none), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	if(((PlayerControllerClass == none) && (int(Level.NetMode) == int(NM_Standalone))))
 	{
 		PlayerControllerClass = Class<PlayerController>(DynamicLoadObject(PlayerControllerClassName, Class'Core.Class'));
-		__NFUN_231__(__NFUN_168__(string(PlayerControllerClass), PlayerControllerClassName));
+		Log((string(PlayerControllerClass) @ PlayerControllerClassName));
 	}
 	rStartSpotRot = StartSpot.Rotation;
 	rStartSpotRot.Roll = 0;
-	NewPlayer = __NFUN_278__(PlayerControllerClass,,, StartSpot.Location, rStartSpotRot);
+	NewPlayer = Spawn(PlayerControllerClass,,, StartSpot.Location, rStartSpotRot);
 	NewPlayer.StartSpot = StartSpot;
 	// End:0x188
-	if(__NFUN_114__(NewPlayer, none))
+	if((NewPlayer == none))
 	{
-		__NFUN_231__(__NFUN_112__("Couldn't spawn player controller of class ", string(PlayerControllerClass)));
+		Log(("Couldn't spawn player controller of class " $ string(PlayerControllerClass)));
 		Error = Localize("MPMiscMessages", "FailedSpawnMessage", "R6GameInfo");
 		return none;
 	}
 	// End:0x19F
-	if(__NFUN_122__(InName, ""))
+	if((InName == ""))
 	{
 		InName = DefaultPlayerName;
 	}
 	// End:0x202
-	if(__NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_130__(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none), __NFUN_122__(NewPlayer.PlayerReplicationInfo.PlayerName, DefaultPlayerName))))
+	if(((int(Level.NetMode) != int(NM_Standalone)) || ((NewPlayer.PlayerReplicationInfo != none) && (NewPlayer.PlayerReplicationInfo.PlayerName == DefaultPlayerName))))
 	{
 		ChangeName(NewPlayer, InName, false);
 	}
 	NewPlayer.GameReplicationInfo = GameReplicationInfo;
-	NewPlayer.__NFUN_113__('Spectating');
+	NewPlayer.GotoState('Spectating');
 	// End:0x259
-	if(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none))
+	if((NewPlayer.PlayerReplicationInfo != none))
 	{
-		NewPlayer.PlayerReplicationInfo.PlayerID = __NFUN_165__(CurrentID);
+		NewPlayer.PlayerReplicationInfo.PlayerID = (CurrentID++);
 	}
 	// End:0x298
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_122__(InClass, "")))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && (InClass == "")))
 	{
 		InClass = ParseOption(Options, "Class");
 	}
 	// End:0x2C8
-	if(__NFUN_123__(InClass, ""))
+	if((InClass != ""))
 	{
 		NewPlayer.PawnClass = Class<Pawn>(DynamicLoadObject(InClass, Class'Core.Class'));
 	}
 	// End:0x2E7
-	if(__NFUN_119__(StatLog, none))
+	if((StatLog != none))
 	{
 		StatLog.LogPlayerConnect(NewPlayer);
 	}
-	NewPlayer.ReceivedSecretChecksum = __NFUN_129__(__NFUN_124__(InChecksum, "NoChecksum"));
-	__NFUN_165__(NumPlayers);
+	NewPlayer.ReceivedSecretChecksum = (!(InChecksum ~= "NoChecksum"));
+	(NumPlayers++);
 	bRestartLevel = false;
 	StartMatch();
 	NotifyMatchStart();
@@ -1334,7 +1334,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	// End:0x3A5
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" ********  Login() is called....playerCont = ", string(NewPlayer)), "  and pawn = "), string(NewPlayer.Pawn)));
+		Log((((" ********  Login() is called....playerCont = " $ string(NewPlayer)) $ "  and pawn = ") $ string(NewPlayer.Pawn)));
 	}
 	return NewPlayer;
 	return;
@@ -1352,7 +1352,7 @@ function RemoveAIBackup(R6PlayerController _playerController)
 	local int iMember, iMemberCount;
 
 	// End:0x16
-	if(__NFUN_114__(_playerController.m_TeamManager, none))
+	if((_playerController.m_TeamManager == none))
 	{
 		return;
 	}
@@ -1360,15 +1360,15 @@ function RemoveAIBackup(R6PlayerController _playerController)
 	J0x1D:
 
 	// End:0x99 [Loop If]
-	if(__NFUN_150__(iMember, 4))
+	if((iMember < 4))
 	{
 		// End:0x8F
-		if(__NFUN_119__(_playerController.m_TeamManager.m_Team[iMember], none))
+		if((_playerController.m_TeamManager.m_Team[iMember] != none))
 		{
-			_playerController.m_TeamManager.m_Team[iMember].__NFUN_279__();
+			_playerController.m_TeamManager.m_Team[iMember].Destroy();
 			_playerController.m_TeamManager.m_Team[iMember] = none;
 		}
-		__NFUN_165__(iMember);
+		(iMember++);
 		// [Loop Continue]
 		goto J0x1D;
 	}
@@ -1383,16 +1383,16 @@ function Logout(Controller Exiting)
 	local R6PlayerController _playerController, _iterController;
 	local int iAlphaNb, iBravoNb;
 
-	m_GameService.__NFUN_3560__();
+	m_GameService.NativeUpdateServer();
 	bMessage = true;
 	_playerController = R6PlayerController(Exiting);
 	// End:0x31
-	if(__NFUN_114__(_playerController, none))
+	if((_playerController == none))
 	{
 		return;
 	}
 	// End:0x48
-	if(__NFUN_242__(_playerController.m_PreLogOut, true))
+	if((_playerController.m_PreLogOut == true))
 	{
 		return;
 	}
@@ -1407,42 +1407,42 @@ function Logout(Controller Exiting)
 		// End:0xC4
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(Exiting), "Player has quit the game "), string(Exiting.Pawn)), ": suicide"));
+			Log((((string(Exiting) $ "Player has quit the game ") $ string(Exiting.Pawn)) $ ": suicide"));
 		}
 		// End:0xF1
-		if(__NFUN_130__(m_bAIBkp, Level.IsGameTypeCooperative(m_szGameTypeFlag)))
+		if((m_bAIBkp && Level.IsGameTypeCooperative(m_szGameTypeFlag)))
 		{
 			RemoveAIBackup(_playerController);
 		}
 		// End:0x151
-		if(__NFUN_130__(__NFUN_119__(Exiting.Pawn, none), R6Pawn(Exiting.Pawn).IsAlive()))
+		if(((Exiting.Pawn != none) && R6Pawn(Exiting.Pawn).IsAlive()))
 		{
 			// End:0x151
-			if(__NFUN_129__(bChangeLevels))
+			if((!bChangeLevels))
 			{
 				R6Pawn(Exiting.Pawn).ServerSuicidePawn(1);
 			}
 		}
 	}
-	__NFUN_166__(NumPlayers);
+	(NumPlayers--);
 	// End:0x244
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		GetNbHumanPlayerInTeam(iAlphaNb, iBravoNb);
 		// End:0x1BC
-		if(__NFUN_154__(int(_playerController.m_TeamSelection), int(2)))
+		if((int(_playerController.m_TeamSelection) == int(2)))
 		{
-			__NFUN_166__(iAlphaNb);
+			(iAlphaNb--);
 		}
 		// End:0x1EF
 		if(Level.IsGameTypeCooperative(m_szGameTypeFlag))
 		{
-			SetCompilingStats(__NFUN_151__(iAlphaNb, 0));
-			SetRoundRestartedByJoinFlag(__NFUN_154__(iAlphaNb, 0));
+			SetCompilingStats((iAlphaNb > 0));
+			SetRoundRestartedByJoinFlag((iAlphaNb == 0));
 		}
-		__NFUN_1244__(Exiting);
+		NativeRouterDisconnect(Exiting);
 		// End:0x220
-		if(__NFUN_114__(Exiting, m_PlayerKick))
+		if((Exiting == m_PlayerKick))
 		{
 			m_PlayerKick = none;
 			m_VoteInstigatorName = "";
@@ -1455,7 +1455,7 @@ function Logout(Controller Exiting)
 		}
 	}
 	// End:0x263
-	if(__NFUN_119__(StatLog, none))
+	if((StatLog != none))
 	{
 		StatLog.LogPlayerDisconnect(Exiting);
 	}
@@ -1472,25 +1472,25 @@ function bool SpawnNumberToNavPoint(int _iSpawnNumber, out NavigationPoint _Star
 	local float NextDist;
 
 	// End:0x191
-	foreach __NFUN_304__(Class'R6Abstract.R6AbstractInsertionZone', NavPoint)
+	foreach AllActors(Class'R6Abstract.R6AbstractInsertionZone', NavPoint)
 	{
 		// End:0x190
-		if(__NFUN_130__(__NFUN_154__(NavPoint.m_iInsertionNumber, _iSpawnNumber), NavPoint.__NFUN_1513__(m_szGameTypeFlag)))
+		if(((NavPoint.m_iInsertionNumber == _iSpawnNumber) && NavPoint.IsAvailableInGameType(m_szGameTypeFlag)))
 		{
 			OtherPlayer = Level.ControllerList;
 			J0x52:
 
 			// End:0x182 [Loop If]
-			if(__NFUN_119__(OtherPlayer, none))
+			if((OtherPlayer != none))
 			{
 				// End:0x16B
-				if(__NFUN_130__(__NFUN_130__(OtherPlayer.bIsPlayer, __NFUN_119__(OtherPlayer.Pawn, none)), __NFUN_114__(OtherPlayer.Pawn.Region.Zone, NavPoint.Region.Zone)))
+				if(((OtherPlayer.bIsPlayer && (OtherPlayer.Pawn != none)) && (OtherPlayer.Pawn.Region.Zone == NavPoint.Region.Zone)))
 				{
-					NextDist = __NFUN_225__(__NFUN_216__(OtherPlayer.Pawn.Location, NavPoint.Location));
+					NextDist = VSize((OtherPlayer.Pawn.Location - NavPoint.Location));
 					// End:0x16B
-					if(__NFUN_176__(NextDist, __NFUN_174__(OtherPlayer.Pawn.CollisionRadius, OtherPlayer.Pawn.CollisionHeight)))
+					if((NextDist < (OtherPlayer.Pawn.CollisionRadius + OtherPlayer.Pawn.CollisionHeight)))
 					{
-						__NFUN_231__(__NFUN_168__(__NFUN_168__("SPAWNNUMBERTONAVPOINT: Player", string(OtherPlayer.Pawn)), "is in the way"));						
+						Log((("SPAWNNUMBERTONAVPOINT: Player" @ string(OtherPlayer.Pawn)) @ "is in the way"));						
 						return false;
 					}
 				}
@@ -1517,7 +1517,7 @@ function NavigationPoint R6FindPlayerStart(Controller Player, optional int Spawn
 	// End:0x61
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(string(self), ": R6FindPlayerStart for"), string(Player)), "Name is"), incomingName), " spawn number is"), string(SpawnPointNumber)));
+		Log(((((((string(self) @ ": R6FindPlayerStart for") @ string(Player)) @ "Name is") @ incomingName) @ " spawn number is") @ string(SpawnPointNumber)));
 	}
 	return FindPlayerStart(Player, byte(SpawnPointNumber));
 	return;
@@ -1538,53 +1538,53 @@ function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam
 	// End:0x85
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(string(self), ": R6GameInfo FindPlayerStart for"), string(Player)), "Name is"), incomingName), "Spawn num"), string(InTeam)));
+		Log(((((((string(self) @ ": R6GameInfo FindPlayerStart for") @ string(Player)) @ "Name is") @ incomingName) @ "Spawn num") @ string(InTeam)));
 	}
 	// End:0x166
-	foreach __NFUN_304__(Class'Engine.PlayerStart', _checkStarts)
+	foreach AllActors(Class'Engine.PlayerStart', _checkStarts)
 	{
 		// End:0xBC
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("Found PlayerStart", string(_checkStarts)));
+			Log(("Found PlayerStart" @ string(_checkStarts)));
 		}
 		// End:0x165
-		if(__NFUN_129__(_checkStarts.__NFUN_303__('R6AbstractInsertionZone')))
+		if((!_checkStarts.IsA('R6AbstractInsertionZone')))
 		{
 			_tempStart = _checkStarts;
 			// End:0x165
-			if(__NFUN_129__(_checkStarts.__NFUN_303__('MP2FreeBackupInsertionZone')))
+			if((!_checkStarts.IsA('MP2FreeBackupInsertionZone')))
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__("WARNING - Please make sure that the PlayerStart ", string(_checkStarts)), " is replaced with an R6InsertionZone type instead"));
+				Log((("WARNING - Please make sure that the PlayerStart " $ string(_checkStarts)) $ " is replaced with an R6InsertionZone type instead"));
 			}
 		}		
 	}	
 	// End:0x1D2
-	foreach __NFUN_304__(Class'R6Abstract.R6AbstractInsertionZone', NavPoint)
+	foreach AllActors(Class'R6Abstract.R6AbstractInsertionZone', NavPoint)
 	{
 		// End:0x191
-		if(__NFUN_129__(NavPoint.__NFUN_1513__(m_szGameTypeFlag)))
+		if((!NavPoint.IsAvailableInGameType(m_szGameTypeFlag)))
 		{
 			continue;			
 		}
 		NewRating = RatePlayerStart(NavPoint, InTeam, Player);
 		// End:0x1D1
-		if(__NFUN_177__(NewRating, BestRating))
+		if((NewRating > BestRating))
 		{
 			BestRating = NewRating;
 			BestStart = NavPoint;
 		}		
 	}	
 	// End:0x26B
-	if(__NFUN_114__(BestStart, none))
+	if((BestStart == none))
 	{
-		__NFUN_231__("WARNING - NO R6INSERTIONZONE FOUND - WARNING");
-		__NFUN_231__("WARNING - Make sure you are using R6InsertionZone instead of PlayerStart");
+		Log("WARNING - NO R6INSERTIONZONE FOUND - WARNING");
+		Log("WARNING - Make sure you are using R6InsertionZone instead of PlayerStart");
 		LastStartSpot = _checkStarts;
 		return _tempStart;
 	}
 	// End:0x281
-	if(__NFUN_119__(BestStart, none))
+	if((BestStart != none))
 	{
 		LastStartSpot = BestStart;
 	}
@@ -1603,71 +1603,71 @@ function float RatePlayerStart(NavigationPoint NavPoint, byte Team, Controller P
 
 	_startPoint = R6AbstractInsertionZone(NavPoint);
 	// End:0x21
-	if(__NFUN_114__(_startPoint, none))
+	if((_startPoint == none))
 	{
 		return 0.0000000;
 	}
 	Score = 16000000.0000000;
 	// End:0x50
-	if(__NFUN_129__(_startPoint.__NFUN_1513__(m_szGameTypeFlag)))
+	if((!_startPoint.IsAvailableInGameType(m_szGameTypeFlag)))
 	{
-		__NFUN_185__(Score, float(1000000));
+		(Score -= float(1000000));
 	}
-	__NFUN_184__(Score, __NFUN_171__(float(10000), __NFUN_195__()));
+	(Score += (float(10000) * FRand()));
 	// End:0x8D
-	if(__NFUN_154__(_startPoint.m_iInsertionNumber, int(Team)))
+	if((_startPoint.m_iInsertionNumber == int(Team)))
 	{
-		__NFUN_184__(Score, float(40000));		
+		(Score += float(40000));		
 	}
 	else
 	{
-		__NFUN_185__(Score, float(1000000));
+		(Score -= float(1000000));
 	}
 	OtherPlayer = Level.ControllerList;
 	J0xAF:
 
 	// End:0x2E5 [Loop If]
-	if(__NFUN_119__(OtherPlayer, none))
+	if((OtherPlayer != none))
 	{
 		// End:0x2CE
-		if(__NFUN_130__(OtherPlayer.bIsPlayer, __NFUN_119__(OtherPlayer.Pawn, none)))
+		if((OtherPlayer.bIsPlayer && (OtherPlayer.Pawn != none)))
 		{
 			// End:0x296
-			if(__NFUN_114__(OtherPlayer.Pawn.Region.Zone, _startPoint.Region.Zone))
+			if((OtherPlayer.Pawn.Region.Zone == _startPoint.Region.Zone))
 			{
-				__NFUN_185__(Score, float(1500));
-				NextDist = __NFUN_225__(__NFUN_216__(OtherPlayer.Pawn.Location, _startPoint.Location));
+				(Score -= float(1500));
+				NextDist = VSize((OtherPlayer.Pawn.Location - _startPoint.Location));
 				// End:0x19C
-				if(__NFUN_176__(NextDist, __NFUN_174__(OtherPlayer.Pawn.CollisionRadius, OtherPlayer.Pawn.CollisionHeight)))
+				if((NextDist < (OtherPlayer.Pawn.CollisionRadius + OtherPlayer.Pawn.CollisionHeight)))
 				{
-					__NFUN_185__(Score, 1000000.0000000);					
+					(Score -= 1000000.0000000);					
 				}
 				else
 				{
 					// End:0x1F0
-					if(__NFUN_130__(__NFUN_176__(NextDist, float(3000)), __NFUN_548__(_startPoint.Location, OtherPlayer.Pawn.Location)))
+					if(((NextDist < float(3000)) && FastTrace(_startPoint.Location, OtherPlayer.Pawn.Location)))
 					{
-						__NFUN_185__(Score, __NFUN_175__(10000.0000000, NextDist));						
+						(Score -= (10000.0000000 - NextDist));						
 					}
 					else
 					{
 						// End:0x296
-						if(__NFUN_154__(__NFUN_146__(Level.Game.NumPlayers, Level.Game.NumBots), 2))
+						if(((Level.Game.NumPlayers + Level.Game.NumBots) == 2))
 						{
-							__NFUN_184__(Score, __NFUN_171__(float(2), __NFUN_225__(__NFUN_216__(OtherPlayer.Pawn.Location, _startPoint.Location))));
+							(Score += (float(2) * VSize((OtherPlayer.Pawn.Location - _startPoint.Location))));
 							// End:0x296
-							if(__NFUN_548__(_startPoint.Location, OtherPlayer.Pawn.Location))
+							if(FastTrace(_startPoint.Location, OtherPlayer.Pawn.Location))
 							{
-								__NFUN_185__(Score, float(10000));
+								(Score -= float(10000));
 							}
 						}
 					}
 				}
 			}
 			// End:0x2CE
-			if(__NFUN_130__(OtherPlayer.bIsPlayer, __NFUN_114__(OtherPlayer.StartSpot, _startPoint)))
+			if((OtherPlayer.bIsPlayer && (OtherPlayer.StartSpot == _startPoint)))
 			{
-				__NFUN_185__(Score, 1000000.0000000);
+				(Score -= 1000000.0000000);
 			}
 		}
 		OtherPlayer = OtherPlayer.nextController;
@@ -1687,23 +1687,23 @@ function bool Stats_getPlayerInfo(out string sz, R6Pawn pPawn, PlayerReplication
 	local int iKills;
 
 	// End:0x15
-	if(__NFUN_114__(pInfo, none))
+	if((pInfo == none))
 	{
 		sz = "";
 		return false;
 	}
 	// End:0x99
-	if(__NFUN_119__(pPawn, none))
+	if((pPawn != none))
 	{
 		// End:0x4B
-		if(__NFUN_154__(int(pPawn.m_eHealth), int(0)))
+		if((int(pPawn.m_eHealth) == int(0)))
 		{
 			szHealth = "healthy";			
 		}
 		else
 		{
 			// End:0x76
-			if(__NFUN_154__(int(pPawn.m_eHealth), int(1)))
+			if((int(pPawn.m_eHealth) == int(1)))
 			{
 				szHealth = "wounded";				
 			}
@@ -1718,7 +1718,7 @@ function bool Stats_getPlayerInfo(out string sz, R6Pawn pPawn, PlayerReplication
 	{
 		szHealth = "unknow";
 	}
-	sz = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", pInfo.PlayerName), " kills: "), string(iKills)), " (deaths: "), string(int(pInfo.Deaths))), ") status : "), szHealth);
+	sz = ((((((("" $ pInfo.PlayerName) $ " kills: ") $ string(iKills)) $ " (deaths: ")) $ ") status : " $ ???) $ szHealth);
 	return true;
 	return;
 }
@@ -1734,12 +1734,12 @@ function RestartPlayer(Controller aPlayer)
 	local Rotator rStartingPointRot;
 
 	// End:0x41
-	if(__NFUN_130__(__NFUN_130__(bRestartLevel, __NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer))), __NFUN_155__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((bRestartLevel && (int(Level.NetMode) != int(NM_DedicatedServer))) && (int(Level.NetMode) != int(NM_ListenServer))))
 	{
 		return;
 	}
 	// End:0x7B
-	if(__NFUN_130__(__NFUN_119__(R6PlayerController(aPlayer), none), __NFUN_154__(int(R6PlayerController(aPlayer).m_TeamSelection), int(3))))
+	if(((R6PlayerController(aPlayer) != none) && (int(R6PlayerController(aPlayer).m_TeamSelection) == int(3))))
 	{
 		iStartPos = 1;		
 	}
@@ -1749,19 +1749,19 @@ function RestartPlayer(Controller aPlayer)
 	}
 	StartSpot = FindPlayerStart(aPlayer, byte(iStartPos));
 	// End:0xC5
-	if(__NFUN_114__(StartSpot, none))
+	if((StartSpot == none))
 	{
-		__NFUN_231__(" Player start not found!!!");
+		Log(" Player start not found!!!");
 		return;
 	}
 	rStartingPointRot = StartSpot.Rotation;
 	rStartingPointRot.Roll = 0;
 	R6SetPawnClassInMultiPlayer(aPlayer);
 	// End:0x18E
-	if(__NFUN_119__(aPlayer.PawnClass, none))
+	if((aPlayer.PawnClass != none))
 	{
 		// End:0x13F
-		if(__NFUN_154__(int(R6PlayerController(aPlayer).m_TeamSelection), int(3)))
+		if((int(R6PlayerController(aPlayer).m_TeamSelection) == int(3)))
 		{
 			aPlayer.PawnClass.default.m_iDefaultTeam = 3;			
 		}
@@ -1769,19 +1769,19 @@ function RestartPlayer(Controller aPlayer)
 		{
 			aPlayer.PawnClass.default.m_iDefaultTeam = 2;
 		}
-		aPlayer.Pawn = __NFUN_278__(aPlayer.PawnClass,,, StartSpot.Location, rStartingPointRot);
+		aPlayer.Pawn = Spawn(aPlayer.PawnClass,,, StartSpot.Location, rStartingPointRot);
 	}
 	// End:0x1ED
-	if(__NFUN_114__(aPlayer.Pawn, none))
+	if((aPlayer.Pawn == none))
 	{
 		aPlayer.PawnClass = GetDefaultPlayerClass();
-		aPlayer.Pawn = __NFUN_278__(aPlayer.PawnClass,,, StartSpot.Location, rStartingPointRot, true);
+		aPlayer.Pawn = Spawn(aPlayer.PawnClass,,, StartSpot.Location, rStartingPointRot, true);
 	}
 	// End:0x258
-	if(__NFUN_114__(aPlayer.Pawn, none))
+	if((aPlayer.Pawn == none))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Couldn't spawn player of type ", string(aPlayer.PawnClass)), " at "), string(StartSpot)));
-		aPlayer.__NFUN_113__('Dead');
+		Log(((("Couldn't spawn player of type " $ string(aPlayer.PawnClass)) $ " at ") $ string(StartSpot)));
+		aPlayer.GotoState('Dead');
 		return;
 	}
 	aPlayer.StartSpot = StartSpot;
@@ -1792,7 +1792,7 @@ function RestartPlayer(Controller aPlayer)
 	aPlayer.ClientSetRotation(aPlayer.Pawn.Rotation);
 	TriggerEvent(StartSpot.Event, StartSpot, aPlayer.Pawn);
 	R6Pawn(aPlayer.Pawn).m_iUniqueID = m_iCurrentID;
-	__NFUN_165__(m_iCurrentID);
+	(m_iCurrentID++);
 	return;
 }
 
@@ -1806,16 +1806,16 @@ function R6SetPawnClassInMultiPlayer(Controller _playerController)
 	local R6ModMgr pModManager;
 
 	// End:0x38
-	if(__NFUN_129__(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))))
+	if((!((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer)))))
 	{
 		return;
 	}
 	// End:0xAC
-	if(__NFUN_154__(int(R6PlayerController(_playerController).m_TeamSelection), int(3)))
+	if((int(R6PlayerController(_playerController).m_TeamSelection) == int(3)))
 	{
 		CurrentPawnClass = Class<Pawn>(DynamicLoadObject(Level.RedTeamPawnClass, Class'Core.Class'));
 		// End:0xA9
-		if(__NFUN_114__(CurrentPawnClass, none))
+		if((CurrentPawnClass == none))
 		{
 			CurrentPawnClass = Class<Pawn>(DynamicLoadObject(Level.default.RedTeamPawnClass, Class'Core.Class'));
 		}		
@@ -1824,12 +1824,12 @@ function R6SetPawnClassInMultiPlayer(Controller _playerController)
 	{
 		CurrentPawnClass = Class<Pawn>(DynamicLoadObject(Level.GreenTeamPawnClass, Class'Core.Class'));
 		// End:0xFF
-		if(__NFUN_114__(CurrentPawnClass, none))
+		if((CurrentPawnClass == none))
 		{
 			CurrentPawnClass = Class<Pawn>(DynamicLoadObject(Level.default.GreenTeamPawnClass, Class'Core.Class'));
 		}
 	}
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	R6PlayerController(_playerController).PawnClass = pModManager.GetDefaultRainbowPawn(int(Class<R6Pawn>(CurrentPawnClass).default.m_eArmorType));
 	return;
 }
@@ -1842,22 +1842,22 @@ function Find2DTexture(string TeamClass, out Material MenuTexture, out Region Te
 	local R6Mod pCurrentMod;
 	local R6ModMgr pModManager;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	pCurrentMod = pModManager.m_pCurrentMod;
 	i = 0;
 	J0x2D:
 
 	// End:0xEB [Loop If]
-	if(__NFUN_150__(i, pCurrentMod.m_aDescriptionPackage.Length))
+	if((i < pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		DescriptionClass = Class<R6ArmorDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6ArmorDescription'));
+		DescriptionClass = Class<R6ArmorDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[i] $ ".u"), Class'R6Description.R6ArmorDescription'));
 		J0x73:
 
 		// End:0xE1 [Loop If]
-		if(__NFUN_119__(DescriptionClass, none))
+		if((DescriptionClass != none))
 		{
 			// End:0xD0
-			if(__NFUN_122__(DescriptionClass.default.m_ClassName, TeamClass))
+			if((DescriptionClass.default.m_ClassName == TeamClass))
 			{
 				bTeamFound = true;
 				MenuTexture = DescriptionClass.default.m_2DMenuTexture;
@@ -1866,32 +1866,32 @@ function Find2DTexture(string TeamClass, out Material MenuTexture, out Region Te
 			}
 			else
 			{
-				DescriptionClass = Class<R6ArmorDescription>(__NFUN_1006__());
+				DescriptionClass = Class<R6ArmorDescription>(GetNextClass());
 			}
 			// [Loop Continue]
 			goto J0x73;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x2D;
 	}
 	// End:0x1FE
-	if(__NFUN_130__(__NFUN_242__(bTeamFound, false), __NFUN_242__(pModManager.m_pCurrentMod.m_bUseCustomOperatives, true)))
+	if(((bTeamFound == false) && (pModManager.m_pCurrentMod.m_bUseCustomOperatives == true)))
 	{
 		i = 0;
 		J0x11E:
 
 		// End:0x1FE [Loop If]
-		if(__NFUN_150__(i, pModManager.GetPackageMgr().m_aPackageList.Length))
+		if((i < pModManager.GetPackageMgr().m_aPackageList.Length))
 		{
 			DescriptionClass = Class<R6ArmorDescription>(pModManager.GetPackageMgr().GetFirstClassFromPackage(i, Class'R6Description.R6ArmorDescription'));
 			J0x16F:
 
 			// End:0x1F4 [Loop If]
-			if(__NFUN_119__(DescriptionClass, none))
+			if((DescriptionClass != none))
 			{
 				// End:0x1E3
-				if(__NFUN_122__(DescriptionClass.default.m_ClassName, TeamClass))
+				if((DescriptionClass.default.m_ClassName == TeamClass))
 				{
 					MenuTexture = DescriptionClass.default.m_2DMenuTexture;
 					TextureRegion = DescriptionClass.default.m_2dMenuRegion;
@@ -1900,12 +1900,12 @@ function Find2DTexture(string TeamClass, out Material MenuTexture, out Region Te
 				}
 				else
 				{
-					DescriptionClass = Class<R6ArmorDescription>(__NFUN_1006__());
+					DescriptionClass = Class<R6ArmorDescription>(GetNextClass());
 				}
 				// [Loop Continue]
 				goto J0x16F;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x11E;
 		}
@@ -1927,54 +1927,54 @@ event PostLogin(PlayerController NewPlayer)
 
 	super(GameInfo).PostLogin(NewPlayer);
 	// End:0x33
-	if(NewPlayer.__NFUN_303__('R6PlanningCtrl'))
+	if(NewPlayer.IsA('R6PlanningCtrl'))
 	{
 		R6PlanningCtrl(NewPlayer).SetPlanningInfo();
 	}
 	// End:0x295
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		// End:0xC7
-		if(__NFUN_122__(NewPlayer.Player.Console.Master.m_StartGameInfo.m_GameMode, "R6Game.R6TrainingMgr"))
+		if((NewPlayer.Player.Console.Master.m_StartGameInfo.m_GameMode == "R6Game.R6TrainingMgr"))
 		{
 			LoadPlanningInTraining();
 			R6Console(NewPlayer.Player.Console).StartR6Game();
 			return;
 		}
 		// End:0x1FA
-		if(__NFUN_242__(NewPlayer.Player.Console.Master.m_StartGameInfo.m_ReloadPlanning, true))
+		if((NewPlayer.Player.Console.Master.m_StartGameInfo.m_ReloadPlanning == true))
 		{
 			pFileManager = new (none) Class'R6Game.R6FileManagerPlanning';
-			pFileManager.__NFUN_1416__("Backup", "Backup", "Backup", "", "Backup.pln", NewPlayer.Player.Console.Master.m_StartGameInfo);
+			pFileManager.LoadPlanning("Backup", "Backup", "Backup", "", "Backup.pln", NewPlayer.Player.Console.Master.m_StartGameInfo);
 			NewPlayer.Player.Console.Master.m_StartGameInfo.m_ReloadPlanning = false;
 			// End:0x1FA
-			if(__NFUN_242__(NewPlayer.Player.Console.Master.m_StartGameInfo.m_SkipPlanningPhase, false))
+			if((NewPlayer.Player.Console.Master.m_StartGameInfo.m_SkipPlanningPhase == false))
 			{
 				R6PlanningCtrl(NewPlayer).InitNewPlanning(pFileManager.m_iCurrentTeam);
 			}
 		}
 		// End:0x291
-		if(__NFUN_242__(NewPlayer.Player.Console.Master.m_StartGameInfo.m_SkipPlanningPhase, true))
+		if((NewPlayer.Player.Console.Master.m_StartGameInfo.m_SkipPlanningPhase == true))
 		{
 			R6Console(NewPlayer.Player.Console).StartR6Game();
 			NewPlayer.Player.Console.Master.m_StartGameInfo.m_SkipPlanningPhase = false;			
 		}
 		else
 		{
-			__NFUN_2011__(true);
+			SetPlanningMode(true);
 		}
 	}
 	// End:0x2F7
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		// End:0x2D1
-		if(__NFUN_119__(m_HudClass, none))
+		if((m_HudClass != none))
 		{
 			NewPlayer.ClientSetHUD(m_HudClass, none);			
 		}
 		else
 		{
-			NewPlayer.ClientSetHUD(Class'Engine.Actor'.static.__NFUN_1524__().GetDefaultHUD(), none);
+			NewPlayer.ClientSetHUD(Class'Engine.Actor'.static.GetModMgr().GetDefaultHUD(), none);
 		}
 	}
 	return;
@@ -1995,42 +1995,42 @@ function DeployCharacters(PlayerController ControlledByPlayer)
 	local int iSoundNb;
 	local R6ModMgr pModManager;
 
-	assert(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)));
+	assert((int(Level.NetMode) == int(NM_Standalone)));
 	CurrentPlayer = ControlledByPlayer.Player;
 	CurrentConsole = ControlledByPlayer.Player.Console;
 	// End:0xA2
-	if(__NFUN_119__(ControlledByPlayer.Pawn, none))
+	if((ControlledByPlayer.Pawn != none))
 	{
-		ControlledByPlayer.Pawn.__NFUN_262__(false, false, false);
-		ControlledByPlayer.Pawn.__NFUN_3970__(0);
-		ControlledByPlayer.Pawn.__NFUN_279__();
+		ControlledByPlayer.Pawn.SetCollision(false, false, false);
+		ControlledByPlayer.Pawn.SetPhysics(0);
+		ControlledByPlayer.Pawn.Destroy();
 	}
-	ControlledByPlayer.__NFUN_279__();
+	ControlledByPlayer.Destroy();
 	ControlledByPlayer = none;
 	StartGameInfo = CurrentConsole.Master.m_StartGameInfo;
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	// End:0x13C
-	if(__NFUN_123__(pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn, ""))
+	if((pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn != ""))
 	{
-		ControlledByPlayer = __NFUN_278__(Class<PlayerController>(DynamicLoadObject(pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn, Class'Core.Class')),,, Location);		
+		ControlledByPlayer = Spawn(Class<PlayerController>(DynamicLoadObject(pModManager.m_pCurrentMod.m_PlayerCtrlToSpawn, Class'Core.Class')),,, Location);		
 	}
 	else
 	{
-		ControlledByPlayer = __NFUN_278__(Class'R6Engine.R6PlayerController',,, Location);
+		ControlledByPlayer = Spawn(Class'R6Engine.R6PlayerController',,, Location);
 	}
 	CurrentTeam = 0;
 	J0x158:
 
 	// End:0x1F9 [Loop If]
-	if(__NFUN_150__(CurrentTeam, 3))
+	if((CurrentTeam < 3))
 	{
 		// End:0x1EF
-		if(__NFUN_151__(StartGameInfo.m_TeamInfo[CurrentTeam].m_iNumberOfMembers, 0))
+		if((StartGameInfo.m_TeamInfo[CurrentTeam].m_iNumberOfMembers > 0))
 		{
 			StartGameInfo.m_TeamInfo[CurrentTeam].m_pPlanning.ResetID();
 			CreateRainbowTeam(CurrentTeam, StartGameInfo.m_TeamInfo[CurrentTeam], StartGameInfo.m_bIsPlaying, StartGameInfo.m_iTeamStart, ControlledByPlayer);
 		}
-		__NFUN_165__(CurrentTeam);
+		(CurrentTeam++);
 		// [Loop Continue]
 		goto J0x158;
 	}
@@ -2038,48 +2038,48 @@ function DeployCharacters(PlayerController ControlledByPlayer)
 	if(StartGameInfo.m_bIsPlaying)
 	{
 		ControlledByPlayer = PlayerController(R6RainbowTeam(GetRainbowTeam(StartGameInfo.m_iTeamStart)).m_TeamLeader.Controller);
-		__NFUN_2010__(ControlledByPlayer, CurrentPlayer);		
+		SetController(ControlledByPlayer, CurrentPlayer);		
 	}
 	else
 	{
-		ControlledByPlayer.__NFUN_267__(R6RainbowTeam(GetRainbowTeam(StartGameInfo.m_iTeamStart)).m_TeamLeader.Location);
+		ControlledByPlayer.SetLocation(R6RainbowTeam(GetRainbowTeam(StartGameInfo.m_iTeamStart)).m_TeamLeader.Location);
 		ControlledByPlayer.m_CurrentAmbianceObject = R6RainbowTeam(GetRainbowTeam(StartGameInfo.m_iTeamStart)).m_TeamLeader.Region.Zone;
 		m_Player = ControlledByPlayer;
 		m_Player.GameReplicationInfo = GameReplicationInfo;
 		m_Player.bOnlySpectator = true;
-		__NFUN_2010__(ControlledByPlayer, CurrentPlayer);
-		m_Player.__NFUN_113__('CameraPlayer');
+		SetController(ControlledByPlayer, CurrentPlayer);
+		m_Player.GotoState('CameraPlayer');
 	}
 	CurrentTeam = 0;
 	J0x31B:
 
 	// End:0x394 [Loop If]
-	if(__NFUN_150__(CurrentTeam, 3))
+	if((CurrentTeam < 3))
 	{
 		// End:0x38A
-		if(__NFUN_154__(StartGameInfo.m_TeamInfo[CurrentTeam].m_iNumberOfMembers, 0))
+		if((StartGameInfo.m_TeamInfo[CurrentTeam].m_iNumberOfMembers == 0))
 		{
 			StartGameInfo.m_TeamInfo[CurrentTeam].m_pPlanning.m_pTeamManager = R6RainbowTeam(GetRainbowTeam(StartGameInfo.m_iTeamStart));
 		}
-		__NFUN_165__(CurrentTeam);
+		(CurrentTeam++);
 		// [Loop Continue]
 		goto J0x31B;
 	}
 	// End:0x3EB
-	foreach __NFUN_304__(Class'R6Game.R6ActionPoint', pActionPoint)
+	foreach AllActors(Class'R6Game.R6ActionPoint', pActionPoint)
 	{
 		pActionPoint.SetDrawType(0);
 		pActionPoint.bHidden = true;
 		// End:0x3EA
-		if(__NFUN_119__(pActionPoint.m_pActionIcon, none))
+		if((pActionPoint.m_pActionIcon != none))
 		{
 			pActionPoint.m_pActionIcon = none;
 		}		
 	}	
 	// End:0x409
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
-		__NFUN_2011__(false);
+		SetPlanningMode(false);
 	}
 	return;
 }
@@ -2092,16 +2092,16 @@ function CreateRainbowTeam(int NewTeamNumber, R6TeamStartInfo TeamInfo, bool bIs
 	local NavigationPoint StartingPoint;
 	local R6RainbowTeam newTeam;
 
-	newTeam = __NFUN_278__(Class'R6Engine.R6RainbowTeam');
+	newTeam = Spawn(Class'R6Engine.R6RainbowTeam');
 	TeamInfo.m_pPlanning.m_pTeamManager = newTeam;
 	newTeam.m_TeamPlanning = TeamInfo.m_pPlanning;
 	// End:0x7E
-	if(__NFUN_155__(newTeam.m_TeamPlanning.GetNbActionPoint(), 0))
+	if((newTeam.m_TeamPlanning.GetNbActionPoint() != 0))
 	{
 		newTeam.m_TeamPlanning.ResetPointsOrientation();
 	}
 	// End:0xE1
-	if(__NFUN_132__(__NFUN_151__(TeamInfo.m_pPlanning.m_NodeList.Length, 0), __NFUN_155__(TeamInfo.m_pPlanning.m_iStartingPointNumber, 0)))
+	if(((TeamInfo.m_pPlanning.m_NodeList.Length > 0) || (TeamInfo.m_pPlanning.m_iStartingPointNumber != 0)))
 	{
 		StartingPoint = FindTeamInsertionZone(TeamInfo.m_pPlanning.m_iStartingPointNumber);		
 	}
@@ -2110,23 +2110,23 @@ function CreateRainbowTeam(int NewTeamNumber, R6TeamStartInfo TeamInfo, bool bIs
 		StartingPoint = FindTeamInsertionZone(-1);
 	}
 	// End:0x18F
-	if(__NFUN_114__(StartingPoint, none))
+	if((StartingPoint == none))
 	{
 		// End:0x16C
 		if(bShowLog)
 		{
-			__NFUN_232__(__NFUN_112__(__NFUN_112__("Couldn't find insertion zone #", string(TeamInfo.m_pPlanning.m_iStartingPointNumber)), " Finding Insertion #0 or player start"));
+			Warn((("Couldn't find insertion zone #" $ string(TeamInfo.m_pPlanning.m_iStartingPointNumber)) $ " Finding Insertion #0 or player start"));
 		}
 		StartingPoint = FindTeamInsertionZone(0);
 		// End:0x18F
-		if(__NFUN_114__(StartingPoint, none))
+		if((StartingPoint == none))
 		{
 			FindPlayerStart(m_Player);
 		}
 	}
 	SetRainbowTeam(NewTeamNumber, newTeam);
 	// End:0x20A
-	if(__NFUN_130__(__NFUN_154__(NewTeamNumber, iTeamStart), bIsPlaying))
+	if(((NewTeamNumber == iTeamStart) && bIsPlaying))
 	{
 		newTeam.CreatePlayerTeam(TeamInfo, StartingPoint, aRainbowPC);
 		R6PlayerController(m_Player).m_TeamManager = newTeam;
@@ -2135,11 +2135,11 @@ function CreateRainbowTeam(int NewTeamNumber, R6TeamStartInfo TeamInfo, bool bIs
 	else
 	{
 		newTeam.CreateAITeam(TeamInfo, StartingPoint);
-		newTeam.SetVoicesMgr(self, false, __NFUN_154__(NewTeamNumber, iTeamStart), m_iIDVoicesMgr);
+		newTeam.SetVoicesMgr(self, false, (NewTeamNumber == iTeamStart), m_iIDVoicesMgr);
 		// End:0x26F
-		if(__NFUN_130__(__NFUN_155__(NewTeamNumber, iTeamStart), __NFUN_154__(__NFUN_1009__().SndQuality, 1)))
+		if(((NewTeamNumber != iTeamStart) && (GetGameOptions().SndQuality == 1)))
 		{
-			__NFUN_165__(m_iIDVoicesMgr);
+			(m_iIDVoicesMgr++);
 		}
 	}
 	newTeam.m_iRainbowTeamName = NewTeamNumber;
@@ -2157,13 +2157,13 @@ function R6InsertionZone FindTeamInsertionZone(int iSpawningPointNumber)
 	iCurrentZoneNumber = 2147483647;
 	pSelectedInsertionZone = none;
 	// End:0xE5
-	foreach __NFUN_304__(Class'R6Game.R6InsertionZone', anInsertionZone)
+	foreach AllActors(Class'R6Game.R6InsertionZone', anInsertionZone)
 	{
 		// End:0x98
-		if(__NFUN_154__(iSpawningPointNumber, -1))
+		if((iSpawningPointNumber == -1))
 		{
 			// End:0x95
-			if(__NFUN_130__(anInsertionZone.__NFUN_1513__(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag), __NFUN_150__(anInsertionZone.m_iInsertionNumber, iCurrentZoneNumber)))
+			if((anInsertionZone.IsAvailableInGameType(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag) && (anInsertionZone.m_iInsertionNumber < iCurrentZoneNumber)))
 			{
 				iCurrentZoneNumber = anInsertionZone.m_iInsertionNumber;
 				pSelectedInsertionZone = anInsertionZone;
@@ -2172,7 +2172,7 @@ function R6InsertionZone FindTeamInsertionZone(int iSpawningPointNumber)
 			continue;
 		}
 		// End:0xE4
-		if(__NFUN_130__(__NFUN_154__(anInsertionZone.m_iInsertionNumber, iSpawningPointNumber), anInsertionZone.__NFUN_1513__(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag)))
+		if(((anInsertionZone.m_iInsertionNumber == iSpawningPointNumber) && anInsertionZone.IsAvailableInGameType(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag)))
 		{			
 			return anInsertionZone;
 		}		
@@ -2190,17 +2190,17 @@ function bool RainbowOperativesStillAlive()
 
 	repInfo = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x49
-	if(__NFUN_130__(__NFUN_119__(repInfo.m_RainbowTeam[0], none), __NFUN_151__(repInfo.m_RainbowTeam[0].m_iMemberCount, 0)))
+	if(((repInfo.m_RainbowTeam[0] != none) && (repInfo.m_RainbowTeam[0].m_iMemberCount > 0)))
 	{
 		return true;
 	}
 	// End:0x82
-	if(__NFUN_130__(__NFUN_119__(repInfo.m_RainbowTeam[1], none), __NFUN_151__(repInfo.m_RainbowTeam[1].m_iMemberCount, 0)))
+	if(((repInfo.m_RainbowTeam[1] != none) && (repInfo.m_RainbowTeam[1].m_iMemberCount > 0)))
 	{
 		return true;
 	}
 	// End:0xBD
-	if(__NFUN_130__(__NFUN_119__(repInfo.m_RainbowTeam[2], none), __NFUN_151__(repInfo.m_RainbowTeam[2].m_iMemberCount, 0)))
+	if(((repInfo.m_RainbowTeam[2] != none) && (repInfo.m_RainbowTeam[2].m_iMemberCount > 0)))
 	{
 		return true;
 	}
@@ -2223,24 +2223,24 @@ function bool IsARainbowAlive()
 	J0x17:
 
 	// End:0xB3 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(iTeam, 3), __NFUN_119__(gInfo.m_RainbowTeam[iTeam], none)))
+	if(((iTeam < 3) && (gInfo.m_RainbowTeam[iTeam] != none)))
 	{
 		iRainbow = 0;
 		J0x46:
 
 		// End:0xA9 [Loop If]
-		if(__NFUN_150__(iRainbow, gInfo.m_RainbowTeam[iTeam].m_iMemberCount))
+		if((iRainbow < gInfo.m_RainbowTeam[iTeam].m_iMemberCount))
 		{
 			// End:0x9F
 			if(gInfo.m_RainbowTeam[iTeam].m_Team[iRainbow].IsAlive())
 			{
 				return true;
 			}
-			__NFUN_163__(iRainbow);
+			(++iRainbow);
 			// [Loop Continue]
 			goto J0x46;
 		}
-		__NFUN_163__(iTeam);
+		(++iTeam);
 		// [Loop Continue]
 		goto J0x17;
 	}
@@ -2257,7 +2257,7 @@ function Actor GetNewTeam(Actor aCurrentTeam, optional bool bNextTeam)
 	local int i, iCurrentTeam, iNewTeam;
 
 	// End:0x0D
-	if(__NFUN_114__(aCurrentTeam, none))
+	if((aCurrentTeam == none))
 	{
 		return none;
 	}
@@ -2265,25 +2265,25 @@ function Actor GetNewTeam(Actor aCurrentTeam, optional bool bNextTeam)
 	aRainbowTeam[1] = R6RainbowTeam(GetRainbowTeam(1));
 	aRainbowTeam[2] = R6RainbowTeam(GetRainbowTeam(2));
 	// End:0x77
-	if(__NFUN_130__(__NFUN_119__(aRainbowTeam[1], none), aRainbowTeam[1].m_bPreventUsingTeam))
+	if(((aRainbowTeam[1] != none) && aRainbowTeam[1].m_bPreventUsingTeam))
 	{
 		aRainbowTeam[1] = none;
 	}
 	// End:0xA6
-	if(__NFUN_130__(__NFUN_119__(aRainbowTeam[2], none), aRainbowTeam[2].m_bPreventUsingTeam))
+	if(((aRainbowTeam[2] != none) && aRainbowTeam[2].m_bPreventUsingTeam))
 	{
 		aRainbowTeam[2] = none;
 	}
 	// End:0xC5
-	if(__NFUN_130__(__NFUN_114__(aRainbowTeam[1], none), __NFUN_114__(aRainbowTeam[2], none)))
+	if(((aRainbowTeam[1] == none) && (aRainbowTeam[2] == none)))
 	{
 		return none;
 	}
 	// End:0x11A
-	if(__NFUN_114__(aRainbowTeam[2], none))
+	if((aRainbowTeam[2] == none))
 	{
 		// End:0xF4
-		if(__NFUN_114__(aCurrentTeam, aRainbowTeam[0]))
+		if((aCurrentTeam == aRainbowTeam[0]))
 		{
 			aNewTeam = aRainbowTeam[1];			
 		}
@@ -2292,7 +2292,7 @@ function Actor GetNewTeam(Actor aCurrentTeam, optional bool bNextTeam)
 			aNewTeam = aRainbowTeam[0];
 		}
 		// End:0x117
-		if(__NFUN_154__(aNewTeam.m_iMemberCount, 0))
+		if((aNewTeam.m_iMemberCount == 0))
 		{
 			return none;
 		}		
@@ -2303,16 +2303,16 @@ function Actor GetNewTeam(Actor aCurrentTeam, optional bool bNextTeam)
 		J0x121:
 
 		// End:0x15A [Loop If]
-		if(__NFUN_150__(i, 3))
+		if((i < 3))
 		{
 			// End:0x150
-			if(__NFUN_114__(aRainbowTeam[i], aCurrentTeam))
+			if((aRainbowTeam[i] == aCurrentTeam))
 			{
 				iCurrentTeam = i;
 				// [Explicit Break]
 				goto J0x15A;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x121;
 		}
@@ -2324,27 +2324,27 @@ function Actor GetNewTeam(Actor aCurrentTeam, optional bool bNextTeam)
 		// End:0x178 [Loop If]
 		if(bNextTeam)
 		{
-			__NFUN_165__(iNewTeam);
+			(iNewTeam++);
 			goto J0x17F;
 		}
-		__NFUN_166__(iNewTeam);
+		(iNewTeam--);
 		J0x17F:
 
 		// End:0x196
-		if(__NFUN_154__(iNewTeam, -1))
+		if((iNewTeam == -1))
 		{
 			iNewTeam = 2;
 		}
 		// End:0x1A9
-		if(__NFUN_154__(iNewTeam, 3))
+		if((iNewTeam == 3))
 		{
 			iNewTeam = 0;
 		}
 		// End:0x165
-		if(!(__NFUN_132__(__NFUN_130__(__NFUN_119__(aRainbowTeam[iNewTeam], none), __NFUN_155__(aRainbowTeam[iNewTeam].m_iMemberCount, 0)), __NFUN_114__(aRainbowTeam[iNewTeam], aCurrentTeam))))
+		if(!((((aRainbowTeam[iNewTeam] != none) && (aRainbowTeam[iNewTeam].m_iMemberCount != 0)) || (aRainbowTeam[iNewTeam] == aCurrentTeam))))
 			goto J0x165;
 		// End:0x204
-		if(__NFUN_114__(aRainbowTeam[iNewTeam], aCurrentTeam))
+		if((aRainbowTeam[iNewTeam] == aCurrentTeam))
 		{
 			return none;
 		}
@@ -2364,7 +2364,7 @@ function ChangeOperatives(PlayerController inPlayerController, int iTeamId, int 
 
 	aPlayerController = R6PlayerController(inPlayerController);
 	// End:0x40
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		aNewTeam = aPlayerController.m_TeamManager;		
 	}
@@ -2376,14 +2376,14 @@ function ChangeOperatives(PlayerController inPlayerController, int iTeamId, int 
 	if(aPlayerController.bOnlySpectator)
 	{
 		// End:0x83
-		if(__NFUN_154__(int(aPlayerController.m_eCameraMode), int(3)))
+		if((int(aPlayerController.m_eCameraMode) == int(3)))
 		{
 			return;
 		}
 		J0x83:
 
 		// End:0xAE [Loop If]
-		if(__NFUN_119__(aPlayerController.m_TeamManager, aNewTeam))
+		if((aPlayerController.m_TeamManager != aNewTeam))
 		{
 			aPlayerController.ChangeTeams(true);
 			// [Loop Continue]
@@ -2392,7 +2392,7 @@ function ChangeOperatives(PlayerController inPlayerController, int iTeamId, int 
 		J0xAE:
 
 		// End:0xE6 [Loop If]
-		if(__NFUN_155__(R6Pawn(aPlayerController.ViewTarget).m_iID, iOperativeID))
+		if((R6Pawn(aPlayerController.ViewTarget).m_iID != iOperativeID))
 		{
 			aPlayerController.NextMember();
 			// [Loop Continue]
@@ -2401,7 +2401,7 @@ function ChangeOperatives(PlayerController inPlayerController, int iTeamId, int 
 		return;
 	}
 	// End:0x120
-	if(__NFUN_114__(aPlayerController.m_TeamManager, aNewTeam))
+	if((aPlayerController.m_TeamManager == aNewTeam))
 	{
 		aPlayerController.m_TeamManager.SwapPlayerControlWithTeamMate(iOperativeID);		
 	}
@@ -2426,19 +2426,19 @@ function ChangeTeams(PlayerController inPlayerController, optional bool bNextTea
 
 	aPC = R6PlayerController(inPlayerController);
 	// End:0x2B
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		return;
 	}
 	// End:0x41
-	if(__NFUN_114__(aPC.Pawn, none))
+	if((aPC.Pawn == none))
 	{
 		return;
 	}
-	bPlayerDied = __NFUN_129__(aPC.Pawn.IsAlive());
+	bPlayerDied = (!aPC.Pawn.IsAlive());
 	aCurrentTeam = aPC.m_TeamManager;
 	// End:0xA0
-	if(__NFUN_114__(newRainbowTeam, none))
+	if((newRainbowTeam == none))
 	{
 		aNewTeam = R6RainbowTeam(GetNewTeam(aCurrentTeam, bNextTeam));		
 	}
@@ -2447,7 +2447,7 @@ function ChangeTeams(PlayerController inPlayerController, optional bool bNextTea
 		aNewTeam = R6RainbowTeam(newRainbowTeam);
 	}
 	// End:0xCA
-	if(__NFUN_132__(__NFUN_114__(aCurrentTeam, none), __NFUN_114__(aNewTeam, none)))
+	if(((aCurrentTeam == none) || (aNewTeam == none)))
 	{
 		return;
 	}
@@ -2468,7 +2468,7 @@ function ChangeTeams(PlayerController inPlayerController, optional bool bNextTea
 	aPC.m_CurrentAmbianceObject = tempAIController.Pawn.Region.Zone;
 	aPC.m_TeamManager = aNewTeam;
 	// End:0x21B
-	if(__NFUN_129__(bPlayerDied))
+	if((!bPlayerDied))
 	{
 		aCurrentTeam.m_TeamLeader.UnPossessed();
 	}
@@ -2481,7 +2481,7 @@ function ChangeTeams(PlayerController inPlayerController, optional bool bNextTea
 	// End:0x2B4
 	if(bPlayerDied)
 	{
-		tempAIController.__NFUN_279__();		
+		tempAIController.Destroy();		
 	}
 	else
 	{
@@ -2497,22 +2497,22 @@ function ChangeTeams(PlayerController inPlayerController, optional bool bNextTea
 			aCurrentTeam.AITeamHoldPosition();
 		}
 	}
-	aCurrentTeam.m_TeamLeader.__NFUN_2214__(rot(0, 0, 0));
+	aCurrentTeam.m_TeamLeader.PawnLook(rot(0, 0, 0));
 	aCurrentTeam.UpdateFirstPersonWeaponMemory(aCurrentTeam.m_TeamLeader, aNewTeam.m_TeamLeader);
 	aCurrentTeam.UpdatePlayerWeapon(aNewTeam.m_TeamLeader);
 	// End:0x45A
-	if(__NFUN_242__(aNewTeam.m_TeamLeader.m_bPawnIsReloading, true))
+	if((aNewTeam.m_TeamLeader.m_bPawnIsReloading == true))
 	{
 		aNewTeam.m_TeamLeader.ServerSwitchReloadingWeapon(false);
 		aNewTeam.m_TeamLeader.m_bPawnIsReloading = false;
-		aNewTeam.m_TeamLeader.__NFUN_113__('None');
+		aNewTeam.m_TeamLeader.GotoState('None');
 		aNewTeam.m_TeamLeader.PlayWeaponAnimation();
 	}
 	aCurrentTeam.SetVoicesMgr(self, false, false, aNewTeam.m_iIDVoicesMgr);
 	aNewTeam.SetVoicesMgr(self, true, true);
 	aNewTeam.UpdateTeamGrenadeStatus();
 	// End:0x4D6
-	if(__NFUN_130__(__NFUN_154__(aNewTeam.m_iMemberCount, 1), __NFUN_151__(aNewTeam.m_iMembersLost, 0)))
+	if(((aNewTeam.m_iMemberCount == 1) && (aNewTeam.m_iMembersLost > 0)))
 	{
 		aNewTeam.SetTeamState(21);
 	}
@@ -2532,15 +2532,15 @@ function InstructAllTeamsToHoldPosition()
 	J0x07:
 
 	// End:0x6D [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		aRainbowTeam[i] = R6RainbowTeam(GetRainbowTeam(i));
 		// End:0x63
-		if(__NFUN_130__(__NFUN_119__(aRainbowTeam[i], none), __NFUN_151__(aRainbowTeam[i].m_iMemberCount, 0)))
+		if(((aRainbowTeam[i] != none) && (aRainbowTeam[i].m_iMemberCount > 0)))
 		{
-			__NFUN_165__(iNbTeam);
+			(iNbTeam++);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -2548,15 +2548,15 @@ function InstructAllTeamsToHoldPosition()
 	J0x74:
 
 	// End:0xFF [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		// End:0xF5
-		if(__NFUN_119__(aRainbowTeam[i], none))
+		if((aRainbowTeam[i] != none))
 		{
 			// End:0xC9
 			if(aRainbowTeam[i].m_bLeaderIsAPlayer)
 			{
-				aRainbowTeam[i].InstructPlayerTeamToHoldPosition(__NFUN_151__(iNbTeam, 1));				
+				aRainbowTeam[i].InstructPlayerTeamToHoldPosition((iNbTeam > 1));				
 			}
 			else
 			{
@@ -2564,7 +2564,7 @@ function InstructAllTeamsToHoldPosition()
 			}
 			aRainbowTeam[i].m_bAllTeamsHold = true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x74;
 	}
@@ -2583,15 +2583,15 @@ function InstructAllTeamsToFollowPlanning()
 	J0x07:
 
 	// End:0x6D [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		aRainbowTeam[i] = R6RainbowTeam(GetRainbowTeam(i));
 		// End:0x63
-		if(__NFUN_130__(__NFUN_119__(aRainbowTeam[i], none), __NFUN_151__(aRainbowTeam[i].m_iMemberCount, 0)))
+		if(((aRainbowTeam[i] != none) && (aRainbowTeam[i].m_iMemberCount > 0)))
 		{
-			__NFUN_165__(iNbTeam);
+			(iNbTeam++);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -2599,15 +2599,15 @@ function InstructAllTeamsToFollowPlanning()
 	J0x74:
 
 	// End:0xFF [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		// End:0xF5
-		if(__NFUN_119__(aRainbowTeam[i], none))
+		if((aRainbowTeam[i] != none))
 		{
 			// End:0xC9
 			if(aRainbowTeam[i].m_bLeaderIsAPlayer)
 			{
-				aRainbowTeam[i].InstructPlayerTeamToFollowLead(__NFUN_151__(iNbTeam, 1));				
+				aRainbowTeam[i].InstructPlayerTeamToFollowLead((iNbTeam > 1));				
 			}
 			else
 			{
@@ -2615,7 +2615,7 @@ function InstructAllTeamsToFollowPlanning()
 			}
 			aRainbowTeam[i].m_bAllTeamsHold = false;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x74;
 	}
@@ -2661,12 +2661,12 @@ function Object GetMultiCoopPlayerVoicesMgr(int iTeam)
 			break;
 	}
 	// End:0x74
-	if(__NFUN_152__(m_MultiCoopPlayerVoicesMgr.Length, iIndex))
+	if((m_MultiCoopPlayerVoicesMgr.Length <= iIndex))
 	{
 		m_MultiCoopPlayerVoicesMgr[iIndex] = none;
 	}
 	// End:0xFA
-	if(__NFUN_114__(m_MultiCoopPlayerVoicesMgr[iIndex], none))
+	if((m_MultiCoopPlayerVoicesMgr[iIndex] == none))
 	{
 		switch(iIndex)
 		{
@@ -2700,7 +2700,7 @@ function Object GetMultiCoopPlayerVoicesMgr(int iTeam)
 function Object GetMultiCoopMemberVoicesMgr()
 {
 	// End:0x2A
-	if(__NFUN_114__(m_MultiCoopMemberVoicesMgr, none))
+	if((m_MultiCoopMemberVoicesMgr == none))
 	{
 		m_MultiCoopMemberVoicesMgr = new Class'R6Engine.R6MultiCoopMemberVoices';
 		m_MultiCoopMemberVoicesMgr.Init(self);
@@ -2714,7 +2714,7 @@ function Object GetMultiCoopMemberVoicesMgr()
 function Object GetPreRecordedMsgVoicesMgr()
 {
 	// End:0x2A
-	if(__NFUN_114__(m_PreRecordedMsgVoicesMgr, none))
+	if((m_PreRecordedMsgVoicesMgr == none))
 	{
 		m_PreRecordedMsgVoicesMgr = new Class'R6Engine.R6PreRecordedMsgVoices';
 		m_PreRecordedMsgVoicesMgr.Init(self);
@@ -2728,7 +2728,7 @@ function Object GetPreRecordedMsgVoicesMgr()
 function Object GetMultiCommonVoicesMgr()
 {
 	// End:0x2A
-	if(__NFUN_114__(m_MultiCommonVoicesMgr, none))
+	if((m_MultiCommonVoicesMgr == none))
 	{
 		m_MultiCommonVoicesMgr = new Class'R6Engine.R6MultiCommonVoices';
 		m_MultiCommonVoicesMgr.Init(self);
@@ -2743,7 +2743,7 @@ function Object GetMultiCommonVoicesMgr()
 function Object GetCommonRainbowPlayerVoicesMgr()
 {
 	// End:0x2A
-	if(__NFUN_114__(m_CommonRainbowPlayerVoicesMgr, none))
+	if((m_CommonRainbowPlayerVoicesMgr == none))
 	{
 		m_CommonRainbowPlayerVoicesMgr = new Class'R6Engine.R6CommonRainbowPlayerVoices';
 		m_CommonRainbowPlayerVoicesMgr.Init(self);
@@ -2758,7 +2758,7 @@ function Object GetCommonRainbowPlayerVoicesMgr()
 function Object GetCommonRainbowMemberVoicesMgr()
 {
 	// End:0x2A
-	if(__NFUN_114__(m_CommonRainbowMemberVoicesMgr, none))
+	if((m_CommonRainbowMemberVoicesMgr == none))
 	{
 		m_CommonRainbowMemberVoicesMgr = new Class'R6Engine.R6CommonRainbowMemberVoices';
 		m_CommonRainbowMemberVoicesMgr.Init(self);
@@ -2773,7 +2773,7 @@ function Object GetCommonRainbowMemberVoicesMgr()
 function Object GetRainbowPlayerVoicesMgr()
 {
 	// End:0x2A
-	if(__NFUN_114__(m_RainbowPlayerVoicesMgr, none))
+	if((m_RainbowPlayerVoicesMgr == none))
 	{
 		m_RainbowPlayerVoicesMgr = new Class'R6Engine.R6RainbowPlayerVoices';
 		m_RainbowPlayerVoicesMgr.Init(self);
@@ -2788,7 +2788,7 @@ function Object GetRainbowPlayerVoicesMgr()
 function Object GetRainbowMemberVoicesMgr()
 {
 	// End:0x2A
-	if(__NFUN_114__(m_RainbowMemberVoicesMgr, none))
+	if((m_RainbowMemberVoicesMgr == none))
 	{
 		m_RainbowMemberVoicesMgr = new Class'R6Engine.R6RainbowMemberVoices';
 		m_RainbowMemberVoicesMgr.Init(self);
@@ -2803,15 +2803,15 @@ function Object GetRainbowMemberVoicesMgr()
 function Object GetRainbowOtherTeamVoicesMgr(int iIDVoicesMgr)
 {
 	// End:0x1D
-	if(__NFUN_152__(m_RainbowOtherTeamVoicesMgr.Length, iIDVoicesMgr))
+	if((m_RainbowOtherTeamVoicesMgr.Length <= iIDVoicesMgr))
 	{
 		m_RainbowOtherTeamVoicesMgr[iIDVoicesMgr] = none;
 	}
 	// End:0x7C
-	if(__NFUN_114__(m_RainbowOtherTeamVoicesMgr[iIDVoicesMgr], none))
+	if((m_RainbowOtherTeamVoicesMgr[iIDVoicesMgr] == none))
 	{
 		// End:0x51
-		if(__NFUN_154__(iIDVoicesMgr, 0))
+		if((iIDVoicesMgr == 0))
 		{
 			m_RainbowOtherTeamVoicesMgr[iIDVoicesMgr] = new Class'R6Engine.R6RainbowOtherTeamVoices1';			
 		}
@@ -2831,12 +2831,12 @@ function Object GetRainbowOtherTeamVoicesMgr(int iIDVoicesMgr)
 function Object GetTerroristVoicesMgr(Actor.ETerroristNationality eNationality)
 {
 	// End:0x21
-	if(__NFUN_152__(m_TerroristVoicesMgr.Length, int(eNationality)))
+	if((m_TerroristVoicesMgr.Length <= int(eNationality)))
 	{
 		m_TerroristVoicesMgr[int(eNationality)] = none;
 	}
 	// End:0xF1
-	if(__NFUN_114__(m_TerroristVoicesMgr[int(eNationality)], none))
+	if((m_TerroristVoicesMgr[int(eNationality)] == none))
 	{
 		switch(eNationality)
 		{
@@ -2884,12 +2884,12 @@ function Object GetHostageVoicesMgr(Actor.EHostageNationality eNationality, bool
 	if(IsFemale)
 	{
 		// End:0x2A
-		if(__NFUN_152__(m_HostageVoicesFemaleMgr.Length, int(eNationality)))
+		if((m_HostageVoicesFemaleMgr.Length <= int(eNationality)))
 		{
 			m_HostageVoicesFemaleMgr[int(eNationality)] = none;
 		}
 		// End:0xFA
-		if(__NFUN_114__(m_HostageVoicesFemaleMgr[int(eNationality)], none))
+		if((m_HostageVoicesFemaleMgr[int(eNationality)] == none))
 		{
 			switch(eNationality)
 			{
@@ -2929,12 +2929,12 @@ function Object GetHostageVoicesMgr(Actor.EHostageNationality eNationality, bool
 	else
 	{
 		// End:0x12C
-		if(__NFUN_152__(m_HostageVoicesMaleMgr.Length, int(eNationality)))
+		if((m_HostageVoicesMaleMgr.Length <= int(eNationality)))
 		{
 			m_HostageVoicesMaleMgr[int(eNationality)] = none;
 		}
 		// End:0x1FC
-		if(__NFUN_114__(m_HostageVoicesMaleMgr[int(eNationality)], none))
+		if((m_HostageVoicesMaleMgr[int(eNationality)] == none))
 		{
 			switch(eNationality)
 			{
@@ -2989,7 +2989,7 @@ function R6TrainingMgr GetTrainingMgr(R6Pawn P)
 function R6AbstractNoiseMgr GetNoiseMgr()
 {
 	// End:0x29
-	if(__NFUN_114__(m_noiseMgr, none))
+	if((m_noiseMgr == none))
 	{
 		m_noiseMgr = new Class'R6Game.R6NoiseMgr';
 		m_noiseMgr.Init();
@@ -3008,7 +3008,7 @@ function RestartGame()
 	m_bStopPostBetweenRoundCountdown = true;
 	GameReplicationInfo.SetServerState(GameReplicationInfo.4);
 	// End:0x30
-	if(__NFUN_242__(bNoRestart, true))
+	if((bNoRestart == true))
 	{
 		return;
 	}
@@ -3016,13 +3016,13 @@ function RestartGame()
 	if(bChangeLevels)
 	{
 		// End:0x59
-		foreach __NFUN_313__(Class'R6Engine.R6PlayerController', P)
+		foreach DynamicActors(Class'R6Engine.R6PlayerController', P)
 		{
 			P.ClientChangeMap();			
 		}		
 	}
 	super(GameInfo).RestartGame();
-	Level.__NFUN_1515__();
+	Level.ResetLevelInNative();
 	DestroyBeacon();
 	return;
 }
@@ -3064,29 +3064,29 @@ function IncrementRoundsFired(Pawn Instigator, bool ForceIncrement)
 	local PlayerController _playerController;
 
 	// End:0x30
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		R6Pawn(Instigator).IncrementBulletsFired();		
 	}
 	else
 	{
 		// End:0xBA
-		if(__NFUN_132__(__NFUN_242__(m_bCompilingStats, true), __NFUN_242__(ForceIncrement, true)))
+		if(((m_bCompilingStats == true) || (ForceIncrement == true)))
 		{
 			// End:0x7A
-			if(__NFUN_119__(Instigator.PlayerReplicationInfo, none))
+			if((Instigator.PlayerReplicationInfo != none))
 			{
-				__NFUN_165__(Instigator.PlayerReplicationInfo.m_iRoundFired);				
+				(Instigator.PlayerReplicationInfo.m_iRoundFired++);				
 			}
 			else
 			{
 				_playerController = R6Pawn(Instigator).GetHumanLeaderForAIPawn();
 				// End:0xA1
-				if(__NFUN_114__(_playerController, none))
+				if((_playerController == none))
 				{
 					return;
 				}
-				__NFUN_165__(_playerController.PlayerReplicationInfo.m_iRoundFired);
+				(_playerController.PlayerReplicationInfo.m_iRoundFired++);
 			}
 		}
 	}
@@ -3109,7 +3109,7 @@ function SetPawnTeamFriendlies(Pawn aPawn)
 //------------------------------------------------------------------
 function int GetTeamNumBit(int Num)
 {
-	return __NFUN_148__(1, Num);
+	return (1 << Num);
 	return;
 }
 
@@ -3124,24 +3124,24 @@ function SetDefaultTeamFriendlies(Pawn aPawn)
 		// End:0xCE
 		case 1:
 			// End:0x86
-			if(__NFUN_155__(int(aPawn.m_ePawnType), int(2)))
+			if((int(aPawn.m_ePawnType) != int(2)))
 			{
-				__NFUN_231__(__NFUN_112__("WARNING SetDefaultTeamFriendlies m_ePawnType != PAWN_Terrorist for ", string(aPawn.Name)));
+				Log(("WARNING SetDefaultTeamFriendlies m_ePawnType != PAWN_Terrorist for " $ string(aPawn.Name)));
 			}
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(1);
 			aPawn.m_iEnemyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iEnemyTeams, GetTeamNumBit(3));
+			(aPawn.m_iEnemyTeams += GetTeamNumBit(3));
 			// End:0x2BD
 			break;
 		// End:0x18A
 		case 0:
 			// End:0x142
-			if(__NFUN_155__(int(aPawn.m_ePawnType), int(3)))
+			if((int(aPawn.m_ePawnType) != int(3)))
 			{
-				__NFUN_231__(__NFUN_112__("WARNING SetDefaultTeamFriendlies m_ePawnType != PAWN_Hostage for ", string(aPawn.Name)));
+				Log(("WARNING SetDefaultTeamFriendlies m_ePawnType != PAWN_Hostage for " $ string(aPawn.Name)));
 			}
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iFriendlyTeams, GetTeamNumBit(3));
+			(aPawn.m_iFriendlyTeams += GetTeamNumBit(3));
 			aPawn.m_iEnemyTeams = GetTeamNumBit(1);
 			// End:0x2BD
 			break;
@@ -3150,18 +3150,18 @@ function SetDefaultTeamFriendlies(Pawn aPawn)
 		// End:0x24C
 		case 3:
 			// End:0x204
-			if(__NFUN_155__(int(aPawn.m_ePawnType), int(1)))
+			if((int(aPawn.m_ePawnType) != int(1)))
 			{
-				__NFUN_231__(__NFUN_112__("WARNING SetDefaultTeamFriendlies m_ePawnType != PAWN_Rainbow for ", string(aPawn.Name)));
+				Log(("WARNING SetDefaultTeamFriendlies m_ePawnType != PAWN_Rainbow for " $ string(aPawn.Name)));
 			}
 			aPawn.m_iFriendlyTeams = GetTeamNumBit(2);
-			__NFUN_161__(aPawn.m_iFriendlyTeams, GetTeamNumBit(3));
+			(aPawn.m_iFriendlyTeams += GetTeamNumBit(3));
 			aPawn.m_iEnemyTeams = GetTeamNumBit(1);
 			// End:0x2BD
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("warning: SetDefaultTeamFriendlies team not supported for ", string(aPawn.Name)), " team="), string(aPawn.m_iTeam)));
+			Log(((("warning: SetDefaultTeamFriendlies team not supported for " $ string(aPawn.Name)) $ " team=") $ string(aPawn.m_iTeam)));
 			// End:0x2BD
 			break;
 			break;
@@ -3180,16 +3180,16 @@ function CheckForExtractionZone(R6MissionObjectiveBase mo)
 
 	iTotal = 0;
 	// End:0x22
-	foreach __NFUN_304__(Class'R6Game.R6ExtractionZone', aExtractZone)
+	foreach AllActors(Class'R6Game.R6ExtractionZone', aExtractZone)
 	{
-		__NFUN_165__(iTotal);
+		(iTotal++);
 		// End:0x22
 		break;		
 	}	
 	// End:0x85
-	if(__NFUN_154__(iTotal, 0))
+	if((iTotal == 0))
 	{
-		__NFUN_231__(__NFUN_112__("WARNING: there is no R6ExtractionZone to complete this objective: ", mo.getDescription()));
+		Log(("WARNING: there is no R6ExtractionZone to complete this objective: " $ mo.getDescription()));
 	}
 	return;
 }
@@ -3204,14 +3204,14 @@ function CheckForTerrorist(R6MissionObjectiveBase mo, int iMinNum)
 	local R6Terrorist aTerrorist;
 
 	// End:0x18
-	foreach __NFUN_313__(Class'R6Engine.R6Terrorist', aTerrorist)
+	foreach DynamicActors(Class'R6Engine.R6Terrorist', aTerrorist)
 	{
-		__NFUN_165__(iTotal);		
+		(iTotal++);		
 	}	
 	// End:0x80
-	if(__NFUN_150__(iTotal, iMinNum))
+	if((iTotal < iMinNum))
 	{
-		__NFUN_231__(__NFUN_112__("WARNING: there is no terrorist spawned to complete this objective: ", mo.getDescription()));
+		Log(("WARNING: there is no terrorist spawned to complete this objective: " $ mo.getDescription()));
 	}
 	return;
 }
@@ -3226,14 +3226,14 @@ function CheckForHostage(R6MissionObjectiveBase mo, int iMinNum)
 	local R6Hostage aHostage;
 
 	// End:0x18
-	foreach __NFUN_313__(Class'R6Engine.R6Hostage', aHostage)
+	foreach DynamicActors(Class'R6Engine.R6Hostage', aHostage)
 	{
-		__NFUN_165__(iTotal);		
+		(iTotal++);		
 	}	
 	// End:0x96
-	if(__NFUN_150__(iTotal, iMinNum))
+	if((iTotal < iMinNum))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WARNING: there is not enough (", string(iMinNum)), ") hostage spawned to complete this objective: "), mo.getDescription()));
+		Log(((("WARNING: there is not enough (", string(iMinNum)) $ ") hostage spawned to complete this objective: " $ ???) $ mo.getDescription()));
 	}
 	return;
 }
@@ -3251,15 +3251,15 @@ function InitObjectives()
 	{
 		Index = m_missionMgr.m_aMissionObjectives.Length;
 		m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjAcceptableCivilianLossesByRainbow';
-		__NFUN_165__(Index);
+		(Index++);
 		m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjAcceptableCivilianLossesByTerro';
-		__NFUN_165__(Index);
+		(Index++);
 		m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjAcceptableHostageLossesByRainbow';
-		__NFUN_165__(Index);
+		(Index++);
 		m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjAcceptableHostageLossesByTerro';
-		__NFUN_165__(Index);
+		(Index++);
 		m_missionMgr.m_aMissionObjectives[Index] = new (none) Class'R6Game.R6MObjAcceptableRainbowLosses';
-		__NFUN_165__(Index);
+		(Index++);
 	}
 	m_missionMgr.Init(self);
 	G = GameReplicationInfo;
@@ -3269,24 +3269,24 @@ function InitObjectives()
 	J0x11E:
 
 	// End:0x231 [Loop If]
-	if(__NFUN_150__(i, m_missionMgr.m_aMissionObjectives.Length))
+	if((i < m_missionMgr.m_aMissionObjectives.Length))
 	{
 		// End:0x227
-		if(__NFUN_130__(m_missionMgr.m_aMissionObjectives[i].m_bVisibleInMenu, __NFUN_129__(m_missionMgr.m_aMissionObjectives[i].m_bMoralityObjective)))
+		if((m_missionMgr.m_aMissionObjectives[i].m_bVisibleInMenu && (!m_missionMgr.m_aMissionObjectives[i].m_bMoralityObjective)))
 		{
 			// End:0x1EA
-			if(__NFUN_150__(i, iMaxRep))
+			if((i < iMaxRep))
 			{
 				G.SetRepMObjString(iRep, m_missionMgr.m_aMissionObjectives[i].m_szDescriptionInMenu, Level.GetMissionObjLocFile(m_missionMgr.m_aMissionObjectives[i]));
-				__NFUN_165__(iRep);
+				(iRep++);
 				// [Explicit Continue]
 				goto J0x227;
 			}
-			__NFUN_231__("Warning: array of m_aRepMObj is to small for this mission");
+			Log("Warning: array of m_aRepMObj is to small for this mission");
 		}
 		J0x227:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x11E;
 	}
@@ -3309,8 +3309,8 @@ function ResetRepMissionObjectives()
 //------------------------------------------------------------------
 function UpdateRepMissionObjectivesStatus()
 {
-	GameReplicationInfo.SetRepMObjInProgress(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(0)));
-	GameReplicationInfo.SetRepMObjSuccess(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(1)));
+	GameReplicationInfo.SetRepMObjInProgress((int(m_missionMgr.m_eMissionObjectiveStatus) == int(0)));
+	GameReplicationInfo.SetRepMObjSuccess((int(m_missionMgr.m_eMissionObjectiveStatus) == int(1)));
 	return;
 }
 
@@ -3327,15 +3327,15 @@ function UpdateRepMissionObjectives()
 	J0x0E:
 
 	// End:0xCE [Loop If]
-	if(__NFUN_150__(i, m_missionMgr.m_aMissionObjectives.Length))
+	if((i < m_missionMgr.m_aMissionObjectives.Length))
 	{
 		// End:0xC4
-		if(__NFUN_130__(m_missionMgr.m_aMissionObjectives[i].m_bVisibleInMenu, __NFUN_129__(m_missionMgr.m_aMissionObjectives[i].m_bMoralityObjective)))
+		if((m_missionMgr.m_aMissionObjectives[i].m_bVisibleInMenu && (!m_missionMgr.m_aMissionObjectives[i].m_bMoralityObjective)))
 		{
 			GameReplicationInfo.SetRepMObjInfo(iRep, m_missionMgr.m_aMissionObjectives[i].m_bFailed, m_missionMgr.m_aMissionObjectives[i].m_bCompleted);
-			__NFUN_165__(iRep);
+			(iRep++);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x0E;
 	}
@@ -3352,7 +3352,7 @@ function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 
 	m_missionMgr.Update();
 	UpdateRepMissionObjectives();
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	// End:0x44
 	if(pGameOptions.UnlimitedPractice)
 	{
@@ -3362,7 +3362,7 @@ function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 			return false;
 		}
 	}
-	return __NFUN_155__(int(m_missionMgr.m_eMissionObjectiveStatus), int(0));
+	return (int(m_missionMgr.m_eMissionObjectiveStatus) != int(0));
 	return;
 }
 
@@ -3379,10 +3379,10 @@ function BaseEndGame()
 	// End:0x41
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("***STATE: ", string(__NFUN_284__())));
+		Log(("***STATE: " $ string(GetStateName())));
 	}
 	// End:0x6B
-	if(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(0)))
+	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(0)))
 	{
 		m_missionMgr.SetMissionObjStatus(2);
 	}
@@ -3408,7 +3408,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	// End:0x39
 	if(bShowLog)
 	{
-		__NFUN_231__(" ** EndGame");
+		Log(" ** EndGame");
 	}
 	return;
 }
@@ -3421,16 +3421,16 @@ function InitObjectivesOfStoryMode()
 	J0x07:
 
 	// End:0x9B [Loop If]
-	if(__NFUN_150__(i, Level.m_aMissionObjectives.Length))
+	if((i < Level.m_aMissionObjectives.Length))
 	{
 		Level.m_aMissionObjectives[i].Reset();
 		// End:0x91
-		if(__NFUN_129__(Level.m_aMissionObjectives[i].m_bEndOfListOfObjectives))
+		if((!Level.m_aMissionObjectives[i].m_bEndOfListOfObjectives))
 		{
 			m_missionMgr.m_aMissionObjectives[Index] = Level.m_aMissionObjectives[i];
-			__NFUN_163__(Index);
+			(++Index);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -3438,15 +3438,15 @@ function InitObjectivesOfStoryMode()
 	J0xA2:
 
 	// End:0x116 [Loop If]
-	if(__NFUN_150__(i, Level.m_aMissionObjectives.Length))
+	if((i < Level.m_aMissionObjectives.Length))
 	{
 		// End:0x10C
 		if(Level.m_aMissionObjectives[i].m_bEndOfListOfObjectives)
 		{
 			m_missionMgr.m_aMissionObjectives[Index] = Level.m_aMissionObjectives[i];
-			__NFUN_163__(Index);
+			(++Index);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0xA2;
 	}
@@ -3459,7 +3459,7 @@ function PlayerReadySelected(PlayerController _Controller)
 	local int iHumanCount;
 
 	// End:0x1F
-	if(__NFUN_132__(__NFUN_114__(R6PlayerController(_Controller), none), __NFUN_281__('InBetweenRoundMenu')))
+	if(((R6PlayerController(_Controller) == none) || IsInState('InBetweenRoundMenu')))
 	{
 		return;
 	}
@@ -3467,19 +3467,19 @@ function PlayerReadySelected(PlayerController _Controller)
 	J0x33:
 
 	// End:0x8C [Loop If]
-	if(__NFUN_119__(_aController, none))
+	if((_aController != none))
 	{
 		// End:0x75
-		if(__NFUN_130__(__NFUN_119__(R6PlayerController(_aController), none), __NFUN_154__(int(R6PlayerController(_aController).m_TeamSelection), int(2))))
+		if(((R6PlayerController(_aController) != none) && (int(R6PlayerController(_aController).m_TeamSelection) == int(2))))
 		{
-			__NFUN_165__(iHumanCount);
+			(iHumanCount++);
 		}
 		_aController = _aController.nextController;
 		// [Loop Continue]
 		goto J0x33;
 	}
 	// End:0xB9
-	if(__NFUN_130__(__NFUN_129__(R6PlayerController(_Controller).IsPlayerPassiveSpectator()), __NFUN_152__(iHumanCount, 2)))
+	if(((!R6PlayerController(_Controller).IsPlayerPassiveSpectator()) && (iHumanCount <= 2)))
 	{
 		ResetRound();
 	}
@@ -3504,7 +3504,7 @@ function SetJumpingMaps(bool _flagSetting, int iNextMapIndex)
 function bool IsLastRoundOfTheMatch()
 {
 	// End:0x11
-	if(__NFUN_242__(m_bJumpingMaps, true))
+	if((m_bJumpingMaps == true))
 	{
 		return true;		
 	}
@@ -3516,7 +3516,7 @@ function bool IsLastRoundOfTheMatch()
 			return false;
 		}
 	}
-	return __NFUN_153__(__NFUN_146__(R6GameReplicationInfo(GameReplicationInfo).m_iCurrentRound, 1), R6GameReplicationInfo(GameReplicationInfo).m_iRoundsPerMatch);
+	return ((R6GameReplicationInfo(GameReplicationInfo).m_iCurrentRound + 1) >= R6GameReplicationInfo(GameReplicationInfo).m_iRoundsPerMatch);
 	return;
 }
 
@@ -3527,23 +3527,23 @@ function bool IsLastRoundOfTheMatch()
 function ProcessChangeLevelSystem()
 {
 	// End:0x24
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		bChangeLevels = true;		
 	}
 	else
 	{
 		// End:0x5B
-		if(__NFUN_130__(m_bRotateMap, __NFUN_242__(m_bJumpingMaps, false)))
+		if((m_bRotateMap && (m_bJumpingMaps == false)))
 		{
-			bChangeLevels = __NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(1));			
+			bChangeLevels = (int(m_missionMgr.m_eMissionObjectiveStatus) == int(1));			
 		}
 		else
 		{
 			bChangeLevels = IsLastRoundOfTheMatch();
 		}
 	}
-	__NFUN_165__(R6GameReplicationInfo(GameReplicationInfo).m_iCurrentRound);
+	(R6GameReplicationInfo(GameReplicationInfo).m_iCurrentRound++);
 	// End:0x9B
 	if(bChangeLevels)
 	{
@@ -3552,7 +3552,7 @@ function ProcessChangeLevelSystem()
 	// End:0xD9
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("ProcessChangeLevelSystem bChangeLevels=", string(bChangeLevels)));
+		Log(("ProcessChangeLevelSystem bChangeLevels=" $ string(bChangeLevels)));
 	}
 	return;
 }
@@ -3589,33 +3589,33 @@ function Tick(float DeltaTime)
 
 	super(Actor).Tick(DeltaTime);
 	// End:0x4E3
-	if(__NFUN_130__(m_bGameOver, __NFUN_129__(bChangeLevels)))
+	if((m_bGameOver && (!bChangeLevels)))
 	{
 		// End:0x46
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) != int(NM_Standalone)))
 		{
-			m_PersistantGameService.__NFUN_3563__();
+			m_PersistantGameService.HandleAnyLobbyConnectionFail();
 		}
 		// End:0x1B4
-		if(__NFUN_129__(m_bTimerStarted))
+		if((!m_bTimerStarted))
 		{
 			GameReplicationInfo.m_bGameOverRep = true;
-			bLoggedIntoGS = __NFUN_1245__();
+			bLoggedIntoGS = NativeServerLogin();
 			_playerController = Level.ControllerList;
 			J0x80:
 
 			// End:0x130 [Loop If]
-			if(__NFUN_119__(_playerController, none))
+			if((_playerController != none))
 			{
 				_R6PlayerController = R6PlayerController(_playerController);
 				// End:0x119
-				if(__NFUN_119__(_R6PlayerController, none))
+				if((_R6PlayerController != none))
 				{
 					// End:0x119
-					if(__NFUN_130__(__NFUN_119__(_R6PlayerController.Pawn, none), __NFUN_119__(_R6PlayerController.Pawn.EngineWeapon, none)))
+					if(((_R6PlayerController.Pawn != none) && (_R6PlayerController.Pawn.EngineWeapon != none)))
 					{
 						// End:0x119
-						if(__NFUN_155__(int(_R6PlayerController.Pawn.m_bIsFiringWeapon), 0))
+						if((int(_R6PlayerController.Pawn.m_bIsFiringWeapon) != 0))
 						{
 							_R6PlayerController.Pawn.EngineWeapon.LocalStopFire();
 						}
@@ -3626,24 +3626,24 @@ function Tick(float DeltaTime)
 				goto J0x80;
 			}
 			// End:0x196
-			if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+			if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 			{
 				// End:0x195
-				foreach __NFUN_313__(Class'R6Engine.R6HostageAI', CurrentHostage)
+				foreach DynamicActors(Class'R6Engine.R6HostageAI', CurrentHostage)
 				{
 					CurrentHostage.StopFollowingPawn(false);
-					CurrentHostage.__NFUN_113__('Freed');					
+					CurrentHostage.GotoState('Freed');					
 				}				
 			}
 			m_bTimerStarted = true;
 			m_fTimerStartTime = int(Level.TimeSeconds);
 		}
 		// End:0x316
-		if(__NFUN_130__(__NFUN_129__(m_bFadeStarted), __NFUN_177__(__NFUN_175__(Level.TimeSeconds, float(m_fTimerStartTime)), __NFUN_175__(GetEndGamePauseTime(), 2.0000000))))
+		if(((!m_bFadeStarted) && ((Level.TimeSeconds - float(m_fTimerStartTime)) > (GetEndGamePauseTime() - 2.0000000))))
 		{
 			m_bFadeStarted = true;
 			// End:0x282
-			if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+			if((int(Level.NetMode) == int(NM_Standalone)))
 			{
 				_R6PlayerController = R6PlayerController(m_Player);
 				R6AbstractHUD(m_Player.myHUD).StartFadeToBlack(2, 100);
@@ -3657,11 +3657,11 @@ function Tick(float DeltaTime)
 				J0x296:
 
 				// End:0x316 [Loop If]
-				if(__NFUN_119__(_playerController, none))
+				if((_playerController != none))
 				{
 					_R6PlayerController = R6PlayerController(_playerController);
 					// End:0x2FF
-					if(__NFUN_119__(_R6PlayerController, none))
+					if((_R6PlayerController != none))
 					{
 						_R6PlayerController.ClientFadeCommonSound(2.0000000, 0);
 						_R6PlayerController.ClientFadeSound(2.0000000, 0, 5);
@@ -3674,23 +3674,23 @@ function Tick(float DeltaTime)
 			}
 		}
 		// End:0x4E3
-		if(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, float(m_fTimerStartTime)), GetEndGamePauseTime()))
+		if(((Level.TimeSeconds - float(m_fTimerStartTime)) > GetEndGamePauseTime()))
 		{
 			// End:0x425
-			if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+			if((int(Level.NetMode) != int(NM_Standalone)))
 			{
 				_playerController = Level.ControllerList;
 				J0x365:
 
 				// End:0x3D0 [Loop If]
-				if(__NFUN_119__(_playerController, none))
+				if((_playerController != none))
 				{
 					_R6PlayerController = R6PlayerController(_playerController);
 					// End:0x3B9
-					if(__NFUN_119__(_R6PlayerController, none))
+					if((_R6PlayerController != none))
 					{
 						// End:0x3B9
-						if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bEndGameIgnoreGamePlayCheck), bLoggedIntoGS), __NFUN_129__(_R6PlayerController.m_bEndOfRoundDataReceived)))
+						if((((!m_bEndGameIgnoreGamePlayCheck) && bLoggedIntoGS) && (!_R6PlayerController.m_bEndOfRoundDataReceived)))
 						{
 							return;
 						}
@@ -3703,22 +3703,22 @@ function Tick(float DeltaTime)
 				if(bShowLog)
 				{
 					// End:0x425
-					if(__NFUN_130__(__NFUN_129__(m_bEndGameIgnoreGamePlayCheck), bLoggedIntoGS))
+					if(((!m_bEndGameIgnoreGamePlayCheck) && bLoggedIntoGS))
 					{
-						__NFUN_231__("Received ServerEndOfRoundDataSent from all clients");
+						Log("Received ServerEndOfRoundDataSent from all clients");
 					}
 				}
 			}
 			m_fTimerStartTime = 2147483647;
 			// End:0x4DA
-			if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+			if((int(Level.NetMode) == int(NM_Standalone)))
 			{
-				__NFUN_2712__();
+				StopAllSounds();
 				ResetBroadcastGameMsg();
 				// End:0x4A3
-				if(__NFUN_303__('R6TrainingMgr'))
+				if(IsA('R6TrainingMgr'))
 				{
-					aConsole = R6Console(Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console);
+					aConsole = R6Console(Class'Engine.Actor'.static.GetCanvas().Viewport.Console);
 					aConsole.LeaveR6Game(aConsole.2);					
 				}
 				else
@@ -3728,7 +3728,7 @@ function Tick(float DeltaTime)
 			}
 			else
 			{
-				__NFUN_1243__();
+				NativeRegisterServer();
 				RestartGameMgr();
 			}
 		}
@@ -3741,7 +3741,7 @@ function int SearchOperativesArray(bool bIsFemale, int iStartIndex)
 	local int i;
 
 	// End:0x12
-	if(__NFUN_150__(iStartIndex, 0))
+	if((iStartIndex < 0))
 	{
 		iStartIndex = 0;
 	}
@@ -3749,13 +3749,13 @@ function int SearchOperativesArray(bool bIsFemale, int iStartIndex)
 	J0x1D:
 
 	// End:0x71 [Loop If]
-	if(__NFUN_150__(i, 30))
+	if((i < 30))
 	{
 		// End:0x4E
 		if(bIsFemale)
 		{
 			// End:0x4B
-			if(__NFUN_151__(int(m_bRainbowFaces[i]), 0))
+			if((int(m_bRainbowFaces[i]) > 0))
 			{
 				return i;
 			}
@@ -3763,13 +3763,13 @@ function int SearchOperativesArray(bool bIsFemale, int iStartIndex)
 			goto J0x67;
 		}
 		// End:0x67
-		if(__NFUN_154__(int(m_bRainbowFaces[i]), 0))
+		if((int(m_bRainbowFaces[i]) == 0))
 		{
 			return i;
 		}
 		J0x67:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x1D;
 	}
@@ -3788,14 +3788,14 @@ function int MPSelectOperativeFace(bool bIsFemale)
 	{
 		iOperativeID = SearchOperativesArray(bIsFemale, int(m_bCurrentFemaleId));
 		// End:0x5D
-		if(__NFUN_154__(iOperativeID, -1))
+		if((iOperativeID == -1))
 		{
 			m_bCurrentFemaleId = 0;
 			iOperativeID = SearchOperativesArray(bIsFemale, int(m_bCurrentFemaleId));
 		}
-		m_bCurrentFemaleId = byte(__NFUN_146__(iOperativeID, 1));
+		m_bCurrentFemaleId = byte((iOperativeID + 1));
 		// End:0x83
-		if(__NFUN_153__(int(m_bCurrentFemaleId), 30))
+		if((int(m_bCurrentFemaleId) >= 30))
 		{
 			m_bCurrentFemaleId = 0;
 		}		
@@ -3804,14 +3804,14 @@ function int MPSelectOperativeFace(bool bIsFemale)
 	{
 		iOperativeID = SearchOperativesArray(bIsFemale, int(m_bCurrentMaleId));
 		// End:0xCF
-		if(__NFUN_154__(iOperativeID, -1))
+		if((iOperativeID == -1))
 		{
 			m_bCurrentMaleId = 0;
 			iOperativeID = SearchOperativesArray(bIsFemale, int(m_bCurrentMaleId));
 		}
-		m_bCurrentMaleId = byte(__NFUN_146__(iOperativeID, 1));
+		m_bCurrentMaleId = byte((iOperativeID + 1));
 		// End:0xF5
-		if(__NFUN_153__(int(m_bCurrentMaleId), 30))
+		if((int(m_bCurrentMaleId) >= 30))
 		{
 			m_bCurrentMaleId = 0;
 		}
@@ -3829,7 +3829,7 @@ function ResetMatchStat()
 	local PlayerReplicationInfo PRI;
 
 	// End:0x97
-	foreach __NFUN_313__(Class'Engine.PlayerReplicationInfo', PRI)
+	foreach DynamicActors(Class'Engine.PlayerReplicationInfo', PRI)
 	{
 		PRI.m_iKillCount = 0;
 		PRI.m_iRoundFired = 0;
@@ -3850,7 +3850,7 @@ function AdminResetRound()
 	local PlayerReplicationInfo _PRI;
 
 	// End:0x20
-	foreach __NFUN_304__(Class'Engine.PlayerReplicationInfo', _PRI)
+	foreach AllActors(Class'Engine.PlayerReplicationInfo', _PRI)
 	{
 		_PRI.AdminResetRound();		
 	}	
@@ -3892,7 +3892,7 @@ function SetPlayerInPenaltyBox()
 	local R6PlayerController PlayerController;
 
 	// End:0x98
-	foreach __NFUN_313__(Class'R6Engine.R6PlayerController', PlayerController)
+	foreach DynamicActors(Class'R6Engine.R6PlayerController', PlayerController)
 	{
 		PlayerController.m_bPenaltyBox = false;
 		// End:0x97
@@ -3900,7 +3900,7 @@ function SetPlayerInPenaltyBox()
 		{
 			PlayerController.m_bPenaltyBox = true;
 			// End:0x86
-			if(__NFUN_130__(__NFUN_119__(PlayerController.m_pawn, none), PlayerController.m_pawn.InGodMode()))
+			if(((PlayerController.m_pawn != none) && PlayerController.m_pawn.InGodMode()))
 			{
 				PlayerController.m_bPenaltyBox = false;
 			}
@@ -3919,7 +3919,7 @@ function ResetPlayerBlur()
 	local R6PlayerController PlayerController;
 
 	// End:0x20
-	foreach __NFUN_313__(Class'R6Engine.R6PlayerController', PlayerController)
+	foreach DynamicActors(Class'R6Engine.R6PlayerController', PlayerController)
 	{
 		PlayerController.ResetBlur();		
 	}	
@@ -3935,7 +3935,7 @@ function ResetPenalty()
 	local R6PlayerController PlayerController;
 
 	// End:0x33
-	foreach __NFUN_313__(Class'R6Engine.R6PlayerController', PlayerController)
+	foreach DynamicActors(Class'R6Engine.R6PlayerController', PlayerController)
 	{
 		PlayerController.m_bPenaltyBox = false;
 		PlayerController.m_bHasAPenalty = false;		
@@ -3956,16 +3956,16 @@ function RestartGameMgr()
 	local R6ServerInfo pServerOptions;
 
 	// End:0x4E
-	if(__NFUN_124__(Level.NextURL, "?Restart"))
+	if((Level.NextURL ~= "?Restart"))
 	{
 		// End:0x4C
 		if(bShowLog)
 		{
-			__NFUN_231__("You are ALREADY IN RESTART PROCESS");
+			Log("You are ALREADY IN RESTART PROCESS");
 		}
 		return;
 	}
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	ResetBroadcastGameMsg();
 	ProcessChangeLevelSystem();
 	SetPlayerInPenaltyBox();
@@ -3977,7 +3977,7 @@ function RestartGameMgr()
 		GameReplicationInfo.SetRepLastRoundSuccess(0);
 		ResetPenalty();
 		// End:0xC1
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) == int(NM_Standalone)))
 		{
 			bChangeLevelAllowed = false;
 		}
@@ -3986,20 +3986,20 @@ function RestartGameMgr()
 		{
 			myList = pServerOptions.m_ServerMapList;
 			// End:0x1FC
-			if(__NFUN_132__(__NFUN_242__(m_bJumpingMaps, true), __NFUN_242__(m_bChangedServerConfig, true)))
+			if(((m_bJumpingMaps == true) || (m_bChangedServerConfig == true)))
 			{
 				// End:0x19D
-				if(__NFUN_130__(__NFUN_130__(__NFUN_242__(m_bChangedServerConfig, false), __NFUN_122__(myList.CheckNextMapIndex(m_iJumpMapIndex), myList.CheckCurrentMap())), __NFUN_122__(myList.CheckNextGameTypeIndex(m_iJumpMapIndex), myList.CheckCurrentGameType())))
+				if((((m_bChangedServerConfig == false) && (myList.CheckNextMapIndex(m_iJumpMapIndex) == myList.CheckCurrentMap())) && (myList.CheckNextGameTypeIndex(m_iJumpMapIndex) == myList.CheckCurrentGameType())))
 				{
 					// End:0x195
 					if(bShowLog)
 					{
-						__NFUN_231__("RESET: it's the same map and the same game type ");
+						Log("RESET: it's the same map and the same game type ");
 					}
 					bChangeLevelAllowed = false;
 				}
 				// End:0x1D5
-				if(__NFUN_242__(m_bChangedServerConfig, true))
+				if((m_bChangedServerConfig == true))
 				{
 					BroadcastGameMsg("", "", "ServerOption");
 					myList.GetNextMap(1);					
@@ -4014,12 +4014,12 @@ function RestartGameMgr()
 			else
 			{
 				// End:0x2A7
-				if(__NFUN_130__(__NFUN_122__(myList.CheckNextMap(), myList.CheckCurrentMap()), __NFUN_122__(myList.CheckNextGameType(), myList.CheckCurrentGameType())))
+				if(((myList.CheckNextMap() == myList.CheckCurrentMap()) && (myList.CheckNextGameType() == myList.CheckCurrentGameType())))
 				{
 					// End:0x281
 					if(bShowLog)
 					{
-						__NFUN_231__("RESET: it's the same map and the same game type ");
+						Log("RESET: it's the same map and the same game type ");
 					}
 					bChangeLevelAllowed = false;
 					myList.GetNextMap(myList.-2);
@@ -4031,7 +4031,7 @@ function RestartGameMgr()
 			// End:0x2E5
 			if(bShowLog)
 			{
-				__NFUN_231__("RESET: game type does not allow changing level");
+				Log("RESET: game type does not allow changing level");
 			}
 			bChangeLevelAllowed = false;
 		}
@@ -4041,7 +4041,7 @@ function RestartGameMgr()
 			// End:0x319
 			if(bShowLog)
 			{
-				__NFUN_231__("RESET: changing level!");
+				Log("RESET: changing level!");
 			}
 			RestartGame();
 			ResetMatchStat();
@@ -4051,7 +4051,7 @@ function RestartGameMgr()
 		else
 		{
 			// End:0x392
-			foreach __NFUN_313__(Class'Engine.PlayerController', _playerController)
+			foreach DynamicActors(Class'Engine.PlayerController', _playerController)
 			{
 				_playerController.PlayerReplicationInfo.m_iRoundsPlayed = 0;
 				_playerController.PlayerReplicationInfo.m_iRoundsWon = 0;
@@ -4068,23 +4068,23 @@ function RestartGameMgr()
 function ResetRound()
 {
 	ResetOriginalData();
-	__NFUN_165__(m_iNbOfRestart);
+	(m_iNbOfRestart++);
 	Level.ResetLevel(m_iNbOfRestart);
 	// End:0x44
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
-		__NFUN_113__('None');		
+		GotoState('None');		
 	}
 	else
 	{
 		// End:0x58
-		if(__NFUN_281__('InBetweenRoundMenu'))
+		if(IsInState('InBetweenRoundMenu'))
 		{
 			BeginState();			
 		}
 		else
 		{
-			__NFUN_113__('InBetweenRoundMenu');
+			GotoState('InBetweenRoundMenu');
 		}
 	}
 	return;
@@ -4102,15 +4102,15 @@ function SpawnAI()
 	// End:0x35
 	if(bShowLog)
 	{
-		__NFUN_231__("SpawnAI: load terrorsit/hostage/civilian");
+		Log("SpawnAI: load terrorsit/hostage/civilian");
 	}
 	// End:0x55
-	foreach __NFUN_304__(Class'R6Engine.R6DeploymentZone', PZone)
+	foreach AllActors(Class'R6Engine.R6DeploymentZone', PZone)
 	{
 		PZone.InitZone();		
 	}	
 	// End:0x79
-	foreach __NFUN_313__(Class'R6Engine.R6Terrorist', pTerrorist)
+	foreach DynamicActors(Class'R6Engine.R6Terrorist', pTerrorist)
 	{
 		m_listAllTerrorists[m_listAllTerrorists.Length] = pTerrorist;		
 	}	
@@ -4128,7 +4128,7 @@ function SetGameTypeInLocal()
 	local Actor anActor;
 
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) == int(NM_DedicatedServer)))
 	{
 		return;
 	}
@@ -4136,20 +4136,20 @@ function SetGameTypeInLocal()
 	J0x2F:
 
 	// End:0xAB [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		PController = R6PlayerController(P);
 		// End:0x8D
-		if(__NFUN_119__(PController, none))
+		if((PController != none))
 		{
 			// End:0x71
-			if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+			if((int(Level.NetMode) == int(NM_Standalone)))
 			{
 				// [Explicit Break]
 				goto J0xAB;
 			}
 			// End:0x8D
-			if(__NFUN_119__(Viewport(PController.Player), none))
+			if((Viewport(PController.Player) != none))
 			{
 				// [Explicit Break]
 				goto J0xAB;
@@ -4163,7 +4163,7 @@ function SetGameTypeInLocal()
 	J0xAB:
 
 	// End:0xED
-	if(__NFUN_119__(PController, none))
+	if((PController != none))
 	{
 		PController.GameReplicationInfo.m_szGameTypeFlagRep = m_szGameTypeFlag;
 		PController.GameReplicationInfo.m_bReceivedGameType = 1;
@@ -4183,18 +4183,18 @@ function SpawnAIandInitGoInGame()
 	// End:0x23
 	if(bShowLog)
 	{
-		__NFUN_231__("SpawnAIandInitGoInGame");
+		Log("SpawnAIandInitGoInGame");
 	}
 	SpawnAI();
 	aMgr = m_missionMgr;
 	m_missionMgr = none;
 	// End:0x52
-	if(__NFUN_119__(aMgr, none))
+	if((aMgr != none))
 	{
-		aMgr.__NFUN_279__();
+		aMgr.Destroy();
 	}
 	// End:0x6C
-	if(__NFUN_119__(GameReplicationInfo, none))
+	if((GameReplicationInfo != none))
 	{
 		GameReplicationInfo.ResetRepMObjInfo();
 	}
@@ -4205,13 +4205,13 @@ function SpawnAIandInitGoInGame()
 	if(m_bUnlockAllDoors)
 	{
 		// End:0xB2
-		foreach __NFUN_304__(Class'R6Engine.R6IORotatingDoor', Door)
+		foreach AllActors(Class'R6Engine.R6IORotatingDoor', Door)
 		{
 			Door.UnlockDoor();			
 		}		
 	}
 	// End:0xE6
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		m_fRoundStartTime = Level.TimeSeconds;
 		SetGameTypeInLocal();
@@ -4231,13 +4231,13 @@ function SetTeamKillerPenalty(Pawn DeadPawn, Pawn KillerPawn)
 	}
 	pControllerKiller = R6PlayerController(R6Pawn(KillerPawn).Controller);
 	// End:0x5F
-	if(__NFUN_132__(__NFUN_114__(pControllerKiller, none), __NFUN_129__(Level.IsGameTypeMultiplayer(m_szGameTypeFlag))))
+	if(((pControllerKiller == none) || (!Level.IsGameTypeMultiplayer(m_szGameTypeFlag))))
 	{
 		return;
 	}
 	pControllerDead = R6PlayerController(R6Pawn(DeadPawn).Controller);
 	// End:0xD8
-	if(__NFUN_130__(__NFUN_154__(int(DeadPawn.m_ePawnType), int(3)), __NFUN_119__(KillerPawn, DeadPawn)))
+	if(((int(DeadPawn.m_ePawnType) == int(3)) && (KillerPawn != DeadPawn)))
 	{
 		pControllerKiller.m_ePenaltyForKillingAPawn = DeadPawn.m_ePawnType;
 		pControllerKiller.m_bHasAPenalty = true;		
@@ -4245,7 +4245,7 @@ function SetTeamKillerPenalty(Pawn DeadPawn, Pawn KillerPawn)
 	else
 	{
 		// End:0x189
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_bTKPenalty, KillerPawn.IsFriend(DeadPawn)), __NFUN_119__(KillerPawn, DeadPawn)), __NFUN_129__(pControllerDead.m_bAlreadyPoppedTKPopUpBox)))
+		if((((m_bTKPenalty && KillerPawn.IsFriend(DeadPawn)) && (KillerPawn != DeadPawn)) && (!pControllerDead.m_bAlreadyPoppedTKPopUpBox)))
 		{
 			pControllerDead.m_TeamKiller = pControllerKiller;
 			pControllerDead.TKPopUpBox(pControllerKiller.PlayerReplicationInfo.PlayerName);
@@ -4266,15 +4266,15 @@ function bool ProcessPlayerReadyStatus()
 	J0x14:
 
 	// End:0x8E [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		_playerController = R6PlayerController(P);
 		// End:0x77
-		if(__NFUN_130__(__NFUN_119__(_playerController, none), __NFUN_129__(_playerController.IsPlayerPassiveSpectator())))
+		if(((_playerController != none) && (!_playerController.IsPlayerPassiveSpectator())))
 		{
-			__NFUN_165__(_iCount);
+			(_iCount++);
 			// End:0x77
-			if(__NFUN_242__(_playerController.PlayerReplicationInfo.m_bPlayerReady, false))
+			if((_playerController.PlayerReplicationInfo.m_bPlayerReady == false))
 			{
 				return false;
 			}
@@ -4283,7 +4283,7 @@ function bool ProcessPlayerReadyStatus()
 		// [Loop Continue]
 		goto J0x14;
 	}
-	return __NFUN_151__(_iCount, 0);
+	return (_iCount > 0);
 	return;
 }
 
@@ -4300,14 +4300,14 @@ function BroadcastGameTypeDescription()
 	J0x14:
 
 	// End:0x98 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x81
-		if(P.__NFUN_303__('PlayerController'))
+		if(P.IsA('PlayerController'))
 		{
 			PlayerController = R6PlayerController(P);
 			// End:0x81
-			if(__NFUN_130__(__NFUN_129__(PlayerController.bOnlySpectator), __NFUN_129__(PlayerController.IsPlayerPassiveSpectator())))
+			if(((!PlayerController.bOnlySpectator) && (!PlayerController.IsPlayerPassiveSpectator())))
 			{
 				PlayerController.ClientGameTypeDescription(m_szGameTypeFlag);
 			}
@@ -4332,10 +4332,10 @@ function BroadcastGameMsg(string szLocFile, string szPreMsg, string szMsgID, opt
 	J0x14:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x6B
-		if(P.__NFUN_303__('PlayerController'))
+		if(P.IsA('PlayerController'))
 		{
 			PlayerController = R6PlayerController(P);
 			PlayerController.ClientGameMsg(szLocFile, szPreMsg, szMsgID, sndGameStatus, iLifeTime);
@@ -4360,10 +4360,10 @@ function BroadcastMissionObjMsg(string szLocFile, string szPreMsg, string szMsgI
 	J0x14:
 
 	// End:0x82 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x6B
-		if(P.__NFUN_303__('PlayerController'))
+		if(P.IsA('PlayerController'))
 		{
 			PlayerController = R6PlayerController(P);
 			PlayerController.ClientMissionObjMsg(szLocFile, szPreMsg, szMsgID, sndGameStatus, iLifeTime);
@@ -4384,10 +4384,10 @@ function ResetBroadcastGameMsg()
 	J0x14:
 
 	// End:0x69 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x52
-		if(P.__NFUN_303__('PlayerController'))
+		if(P.IsA('PlayerController'))
 		{
 			PlayerController = R6PlayerController(P);
 			PlayerController.ClientResetGameMsg();
@@ -4412,7 +4412,7 @@ function PawnKilled(Pawn killed)
 	{
 		hostage = R6Hostage(killed);
 		// End:0x124
-		if(__NFUN_119__(hostage, none))
+		if((hostage != none))
 		{
 			// End:0x60
 			if(hostage.m_bPoliceManMp1)
@@ -4436,7 +4436,7 @@ function PawnKilled(Pawn killed)
 					else
 					{
 						// End:0x124
-						if(__NFUN_130__(__NFUN_129__(__NFUN_154__(hostage.m_iPrisonierTeam, 5)), __NFUN_129__(__NFUN_154__(hostage.m_iPrisonierTeam, 6))))
+						if(((!(hostage.m_iPrisonierTeam == 5)) && (!(hostage.m_iPrisonierTeam == 6))))
 						{
 							BroadcastMissionObjMsg("", "", "HostageHasDied");
 						}
@@ -4459,29 +4459,29 @@ function RemoveTerroFromList(Pawn toRemove)
 
 	aTerrorist = R6Terrorist(toRemove);
 	// End:0x7D
-	if(__NFUN_119__(aTerrorist, none))
+	if((aTerrorist != none))
 	{
 		i = 0;
 		J0x22:
 
 		// End:0x60 [Loop If]
-		if(__NFUN_150__(i, m_listAllTerrorists.Length))
+		if((i < m_listAllTerrorists.Length))
 		{
 			// End:0x56
-			if(__NFUN_114__(m_listAllTerrorists[i], aTerrorist))
+			if((m_listAllTerrorists[i] == aTerrorist))
 			{
 				m_listAllTerrorists.Remove(i, 1);
 				// [Explicit Break]
 				goto J0x60;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x22;
 		}
 		J0x60:
 
 		// End:0x7D
-		if(__NFUN_154__(m_listAllTerrorists.Length, 1))
+		if((m_listAllTerrorists.Length == 1))
 		{
 			m_listAllTerrorists[0].StartHunting();
 		}
@@ -4493,7 +4493,7 @@ function bool IsUnlimitedPractice()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	return pGameOptions.UnlimitedPractice;
 	return;
 }
@@ -4503,17 +4503,17 @@ exec function SetUnlimitedPractice(bool bUnlimitedPractice, bool bInGameProcess)
 	local R6GameOptions pGameOptions;
 
 	// End:0x1B
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		return;
 	}
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	pGameOptions.UnlimitedPractice = bUnlimitedPractice;
 	// End:0xCD
 	if(bInGameProcess)
 	{
 		// End:0x75
-		if(__NFUN_129__(pGameOptions.UnlimitedPractice))
+		if((!pGameOptions.UnlimitedPractice))
 		{
 			// End:0x75
 			if(CheckEndGame(none, ""))
@@ -4539,9 +4539,9 @@ function DestroyBeacon()
 	local UdpBeacon aBeacon;
 
 	// End:0x1D
-	foreach __NFUN_304__(Class'IpDrv.UdpBeacon', aBeacon)
+	foreach AllActors(Class'IpDrv.UdpBeacon', aBeacon)
 	{
-		aBeacon.__NFUN_279__();		
+		aBeacon.Destroy();		
 	}	
 	return;
 }
@@ -4564,7 +4564,7 @@ function EnteredExtractionZone(Actor Other)
 	{
 		hostage = R6Hostage(Other);
 		// End:0xCB
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(hostage, none), hostage.IsAlive()), hostage.m_bExtracted), __NFUN_129__(hostage.m_bFeedbackExtracted)), __NFUN_129__(hostage.m_bPoliceManMp1)), __NFUN_129__(hostage.m_bCivilian)))
+		if(((((((hostage != none) && hostage.IsAlive()) && hostage.m_bExtracted) && (!hostage.m_bFeedbackExtracted)) && (!hostage.m_bPoliceManMp1)) && (!hostage.m_bCivilian)))
 		{
 			BroadcastMissionObjMsg("", "", "HostageHasBeenRescued");
 			hostage.m_bFeedbackExtracted = true;
@@ -4597,12 +4597,12 @@ event bool CanPlayIntroVideo()
 event bool CanPlayOutroVideo()
 {
 	// End:0x1A
-	if(__NFUN_132__(__NFUN_129__(m_bPlayOutroVideo), __NFUN_114__(m_missionMgr, none)))
+	if(((!m_bPlayOutroVideo) || (m_missionMgr == none)))
 	{
 		return false;
 	}
 	// End:0x3D
-	if(__NFUN_154__(int(m_missionMgr.m_eMissionObjectiveStatus), int(1)))
+	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
 		m_bPlayOutroVideo = false;
 		return true;
@@ -4621,12 +4621,12 @@ function int GetNbTerroNeutralized()
 	local int iTerroNeutralized;
 
 	// End:0x55
-	foreach __NFUN_313__(Class'R6Engine.R6Terrorist', aTerrorist)
+	foreach DynamicActors(Class'R6Engine.R6Terrorist', aTerrorist)
 	{
 		// End:0x54
-		if(__NFUN_132__(__NFUN_132__(__NFUN_129__(aTerrorist.IsAlive()), aTerrorist.m_bIsKneeling), aTerrorist.m_bIsUnderArrest))
+		if((((!aTerrorist.IsAlive()) || aTerrorist.m_bIsKneeling) || aTerrorist.m_bIsUnderArrest))
 		{
-			__NFUN_161__(iTerroNeutralized, 1);
+			(iTerroNeutralized += 1);
 		}		
 	}	
 	return iTerroNeutralized;
@@ -4643,15 +4643,15 @@ function ChangeName(Controller Other, coerce string S, bool bNameChange, optiona
 	szPreviousName = Other.PlayerReplicationInfo.PlayerName;
 	super(GameInfo).ChangeName(Other, S, bNameChange, bDontBroadcastNameChange);
 	// End:0x5C
-	if(__NFUN_122__(Other.PlayerReplicationInfo.PlayerName, szPreviousName))
+	if((Other.PlayerReplicationInfo.PlayerName == szPreviousName))
 	{
 		return;
 	}
 	// End:0xB3
-	if(__NFUN_242__(bDontBroadcastNameChange, false))
+	if((bDontBroadcastNameChange == false))
 	{
 		// End:0xB2
-		foreach __NFUN_313__(Class'R6Engine.R6PlayerController', P)
+		foreach DynamicActors(Class'R6Engine.R6PlayerController', P)
 		{
 			P.ClientMPMiscMessage("IsNowKnownAs", szPreviousName, Other.PlayerReplicationInfo.PlayerName);			
 		}		
@@ -4661,7 +4661,7 @@ function ChangeName(Controller Other, coerce string S, bool bNameChange, optiona
 
 event UpdateServer()
 {
-	m_GameService.__NFUN_3560__();
+	m_GameService.NativeUpdateServer();
 	return;
 }
 

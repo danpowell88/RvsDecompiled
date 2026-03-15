@@ -361,24 +361,24 @@ function ProcessAutoBalanceTeam()
 				// End:0x1B7
 				if(bShowLog)
 				{
-					__NFUN_231__("AutoBalance: Red to Green Team");
+					Log("AutoBalance: Red to Green Team");
 				}
 				P = Level.ControllerList;
 				J0x1CB:
 
 				// End:0x29F [Loop If]
-				if(__NFUN_130__(__NFUN_119__(P, none), __NFUN_151__(iBravoNb, __NFUN_146__(iAlphaNb, 1))))
+				if(((P != none) && (iBravoNb > (iAlphaNb + 1))))
 				{
 					// End:0x288
-					if(__NFUN_130__(P.__NFUN_303__('R6PlayerController'), __NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(3))))
+					if((P.IsA('R6PlayerController') && (int(R6PlayerController(P).m_TeamSelection) == int(3))))
 					{
 						// End:0x263
 						if(bShowLog)
 						{
-							__NFUN_231__(__NFUN_112__(__NFUN_112__("AutoBalance: ", P.PlayerReplicationInfo.PlayerName), " to Green Team"));
+							Log((("AutoBalance: " $ P.PlayerReplicationInfo.PlayerName) $ " to Green Team"));
 						}
-						__NFUN_165__(iAlphaNb);
-						__NFUN_166__(iBravoNb);
+						(iAlphaNb++);
+						(iBravoNb--);
 						R6PlayerController(P).ServerTeamRequested(2, true);
 					}
 					P = P.nextController;
@@ -406,7 +406,7 @@ function bool IsTeamSelectionLocked()
 function SetCompilingStats(bool bStatsSetting)
 {
 	super(GameInfo).SetCompilingStats(bStatsSetting);
-	__NFUN_1240__(bStatsSetting);
+	NativeInitRegServer(bStatsSetting);
 	return;
 }
 
@@ -415,23 +415,23 @@ function Logout(Controller Exiting)
 	local int iIdx;
 
 	// End:0xDD
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		UnPauseCountDown();
 		// End:0xD0
-		if(__NFUN_130__(Level.IsGameTypeCooperative(m_szGameTypeFlag), __NFUN_151__(m_RainbowAIBackup.Length, 0)))
+		if((Level.IsGameTypeCooperative(m_szGameTypeFlag) && (m_RainbowAIBackup.Length > 0)))
 		{
 			// End:0xD0
-			if(__NFUN_129__(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Level.NetMode), int(NM_Client)))))
+			if((!((int(Level.NetMode) == int(NM_Standalone)) || (int(Level.NetMode) == int(NM_Client)))))
 			{
 				// End:0xD0
-				if(__NFUN_130__(__NFUN_119__(R6PlayerController(Exiting), none), __NFUN_119__(R6PlayerController(Exiting).m_TeamManager, none)))
+				if(((R6PlayerController(Exiting) != none) && (R6PlayerController(Exiting).m_TeamManager != none)))
 				{
-					m_RainbowAIBackup.Remove(0, __NFUN_249__(m_RainbowAIBackup.Length, R6PlayerController(Exiting).m_TeamManager.m_iMemberCount));
+					m_RainbowAIBackup.Remove(0, Min(m_RainbowAIBackup.Length, R6PlayerController(Exiting).m_TeamManager.m_iMemberCount));
 				}
 			}
 		}
-		__NFUN_1502__(PlayerController(Exiting));
+		EnableCollision(PlayerController(Exiting));
 	}
 	super.Logout(Exiting);
 	return;
@@ -444,38 +444,38 @@ function Tick(float Delta)
 
 	super.Tick(Delta);
 	// End:0x18
-	if(__NFUN_281__('InBetweenRoundMenu'))
+	if(IsInState('InBetweenRoundMenu'))
 	{
 		return;
 	}
 	// End:0xF1
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		HandleVotesTick();
-		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int(__NFUN_175__(R6GameInfo(Level.Game).m_fEndingTime, Level.TimeSeconds));
-		__NFUN_184__(R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate, Delta);
+		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int((R6GameInfo(Level.Game).m_fEndingTime - Level.TimeSeconds));
+		(R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate += Delta);
 		// End:0xF1
-		if(__NFUN_179__(R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate, float(10)))
+		if((R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate >= float(10)))
 		{
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTimeLastUpdate = 0.0000000;
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime);
 		}
 	}
 	// End:0x1DB
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(m_missionObjTimer, none), __NFUN_177__(m_fEndingTime, float(0))), __NFUN_177__(Level.m_fTimeLimit, float(0))), __NFUN_177__(Level.TimeSeconds, m_fEndingTime)))
+	if(((((m_missionObjTimer != none) && (m_fEndingTime > float(0))) && (Level.m_fTimeLimit > float(0))) && (Level.TimeSeconds > m_fEndingTime)))
 	{
 		// End:0x1DB
-		if(__NFUN_129__(m_missionObjTimer.m_bFailed))
+		if((!m_missionObjTimer.m_bFailed))
 		{
 			C = Level.ControllerList;
 			J0x165:
 
 			// End:0x1C1 [Loop If]
-			if(__NFUN_119__(C, none))
+			if((C != none))
 			{
 				PlayerController = R6PlayerController(C);
 				// End:0x1AA
-				if(__NFUN_119__(PlayerController, none))
+				if((PlayerController != none))
 				{
 					PlayerController.ClientPlayVoices(none, m_sndSoundTimeFailure, 7, 5, true, 1.0000000);
 				}
@@ -505,10 +505,10 @@ function ResetPlayerReady()
 	J0x14:
 
 	// End:0x65 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x4E
-		if(__NFUN_119__(R6PlayerController(P), none))
+		if((R6PlayerController(P) != none))
 		{
 			R6PlayerController(P).PlayerReplicationInfo.m_bPlayerReady = false;
 		}
@@ -533,20 +533,20 @@ function GetNbHumanPlayerInTeam(out int iAlphaNb, out int iBravoNb)
 	J0x22:
 
 	// End:0x9E [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x87
-		if(__NFUN_119__(R6PlayerController(P), none))
+		if((R6PlayerController(P) != none))
 		{
 			// End:0x62
-			if(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(2)))
+			if((int(R6PlayerController(P).m_TeamSelection) == int(2)))
 			{
-				__NFUN_163__(iAlphaNb);
+				(++iAlphaNb);
 			}
 			// End:0x87
-			if(__NFUN_154__(int(R6PlayerController(P).m_TeamSelection), int(3)))
+			if((int(R6PlayerController(P).m_TeamSelection) == int(3)))
 			{
-				__NFUN_163__(iBravoNb);
+				(++iBravoNb);
 			}
 		}
 		P = P.nextController;
@@ -565,16 +565,16 @@ function IncrementRoundsPlayed()
 	J0x14:
 
 	// End:0xD3 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		_aPlayerController = R6PlayerController(P);
 		// End:0xBC
-		if(__NFUN_130__(__NFUN_119__(_aPlayerController, none), __NFUN_132__(__NFUN_154__(int(_aPlayerController.m_TeamSelection), int(2)), __NFUN_154__(int(_aPlayerController.m_TeamSelection), int(3)))))
+		if(((_aPlayerController != none) && ((int(_aPlayerController.m_TeamSelection) == int(2)) || (int(_aPlayerController.m_TeamSelection) == int(3)))))
 		{
 			// End:0x92
 			if(m_bCompilingStats)
 			{
-				__NFUN_165__(_aPlayerController.PlayerReplicationInfo.m_iRoundsPlayed);
+				(_aPlayerController.PlayerReplicationInfo.m_iRoundsPlayed++);
 			}
 			_aPlayerController.ServerSetPlayerReadyStatus(true);
 			_aPlayerController.PlayerReplicationInfo.bIsSpectator = false;
@@ -593,7 +593,7 @@ function bool ProcessChangeMapVote(string InstigatorName)
 	local R6PlayerController _playerController;
 
 	// End:0x0F
-	if(__NFUN_181__(m_fEndVoteTime, float(0)))
+	if((m_fEndVoteTime != float(0)))
 	{
 		return false;
 	}
@@ -601,11 +601,11 @@ function bool ProcessChangeMapVote(string InstigatorName)
 	J0x23:
 
 	// End:0x93 [Loop If]
-	if(__NFUN_119__(_itController, none))
+	if((_itController != none))
 	{
 		_playerController = R6PlayerController(_itController);
 		// End:0x7C
-		if(__NFUN_119__(_playerController, none))
+		if((_playerController != none))
 		{
 			_playerController.m_iVoteResult = R6PlayerController(_itController).3;
 			_playerController.ClientNextMapVoteMessage(InstigatorName);
@@ -614,7 +614,7 @@ function bool ProcessChangeMapVote(string InstigatorName)
 		// [Loop Continue]
 		goto J0x23;
 	}
-	m_fEndVoteTime = __NFUN_174__(Level.TimeSeconds, float(90));
+	m_fEndVoteTime = (Level.TimeSeconds + float(90));
 	return true;
 	return;
 }
@@ -625,7 +625,7 @@ function bool ProcessKickVote(PlayerController _KickPlayer, string InstigatorNam
 	local R6PlayerController _playerController;
 
 	// End:0x0F
-	if(__NFUN_181__(m_fEndVoteTime, float(0)))
+	if((m_fEndVoteTime != float(0)))
 	{
 		return false;
 	}
@@ -635,11 +635,11 @@ function bool ProcessKickVote(PlayerController _KickPlayer, string InstigatorNam
 	J0x39:
 
 	// End:0xB7 [Loop If]
-	if(__NFUN_119__(_itController, none))
+	if((_itController != none))
 	{
 		_playerController = R6PlayerController(_itController);
 		// End:0xA0
-		if(__NFUN_119__(_playerController, none))
+		if((_playerController != none))
 		{
 			_playerController.m_iVoteResult = R6PlayerController(_itController).3;
 			_playerController.ClientKickVoteMessage(m_PlayerKick.PlayerReplicationInfo, InstigatorName);
@@ -648,7 +648,7 @@ function bool ProcessKickVote(PlayerController _KickPlayer, string InstigatorNam
 		// [Loop Continue]
 		goto J0x39;
 	}
-	m_fEndVoteTime = __NFUN_174__(Level.TimeSeconds, float(90));
+	m_fEndVoteTime = (Level.TimeSeconds + float(90));
 	return true;
 	return;
 }
@@ -664,7 +664,7 @@ function HandleVotesTick()
 	local R6GameReplicationInfo pGRI;
 
 	// End:0x36
-	if(__NFUN_132__(__NFUN_132__(__NFUN_180__(m_fEndVoteTime, float(0)), __NFUN_177__(m_fEndVoteTime, Level.TimeSeconds)), __NFUN_154__(NumPlayers, 0)))
+	if((((m_fEndVoteTime == float(0)) || (m_fEndVoteTime > Level.TimeSeconds)) || (NumPlayers == 0)))
 	{
 		return;
 	}
@@ -675,24 +675,24 @@ function HandleVotesTick()
 	J0x63:
 
 	// End:0xF2 [Loop If]
-	if(__NFUN_119__(_itController, none))
+	if((_itController != none))
 	{
 		_playerController = R6PlayerController(_itController);
 		// End:0xDB
-		if(__NFUN_119__(_playerController, none))
+		if((_playerController != none))
 		{
 			switch(_playerController.m_iVoteResult)
 			{
 				// End:0xB0
 				case _playerController.1:
-					__NFUN_165__(_iForVotes);
+					(_iForVotes++);
 					// End:0xDB
 					break;
 				// End:0xBE
 				case _playerController.3:
 				// End:0xD6
 				case _playerController.2:
-					__NFUN_165__(_iAgainstVotes);
+					(_iAgainstVotes++);
 					// End:0xDB
 					break;
 				// End:0xFFFF
@@ -705,22 +705,22 @@ function HandleVotesTick()
 		// [Loop Continue]
 		goto J0x63;
 	}
-	bChangeMapVote = __NFUN_114__(m_PlayerKick, none);
+	bChangeMapVote = (m_PlayerKick == none);
 	// End:0x256
-	if(__NFUN_151__(_iForVotes, __NFUN_145__(__NFUN_146__(_iForVotes, _iAgainstVotes), 2)))
+	if((_iForVotes > ((_iForVotes + _iAgainstVotes) / 2)))
 	{
 		_bResult = true;
 		// End:0x1C2
-		if(__NFUN_242__(bChangeMapVote, true))
+		if((bChangeMapVote == true))
 		{
 			// End:0x1A5
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("<<ChangeMap>> HandleVotesTick ", string(_iForVotes)), " voted yes "), string(_iAgainstVotes)), " considered as voted no -- VOTE PASSES"));
+				Log((((("<<ChangeMap>> HandleVotesTick " $ string(_iForVotes)) $ " voted yes ") $ string(_iAgainstVotes)) $ " considered as voted no -- VOTE PASSES"));
 			}
 			bChangeLevels = true;
 			EndGame(none, "");
-			__NFUN_1210__();
+			AbortScoreSubmission();
 			RestartGame();			
 		}
 		else
@@ -728,40 +728,40 @@ function HandleVotesTick()
 			// End:0x233
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("<<KICK>> HandleVotesTick ", string(_iForVotes)), " voted yes "), string(_iAgainstVotes)), " considered as voted no -- VOTE PASSES"));
+				Log((((("<<KICK>> HandleVotesTick " $ string(_iForVotes)) $ " voted yes ") $ string(_iAgainstVotes)) $ " considered as voted no -- VOTE PASSES"));
 			}
 			R6PlayerController(m_PlayerKick).ClientKickedOut();
-			m_PlayerKick.__NFUN_1282__();
+			m_PlayerKick.SpecialDestroy();
 		}		
 	}
 	else
 	{
 		_bResult = false;
 		// End:0x2D9
-		if(__NFUN_242__(bChangeMapVote, true))
+		if((bChangeMapVote == true))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("<<ChangeMap>> HandleVotesTick ", string(_iForVotes)), " voted yes "), string(_iAgainstVotes)), " considered as voted no -- VOTE FAILS"));			
+			Log((((("<<ChangeMap>> HandleVotesTick " $ string(_iForVotes)) $ " voted yes ") $ string(_iAgainstVotes)) $ " considered as voted no -- VOTE FAILS"));			
 		}
 		else
 		{
 			// End:0x349
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("<<KICK>> HandleVotesTick ", string(_iForVotes)), " voted yes "), string(_iAgainstVotes)), " considered as voted no -- VOTE FAILS"));
+				Log((((("<<KICK>> HandleVotesTick " $ string(_iForVotes)) $ " voted yes ") $ string(_iAgainstVotes)) $ " considered as voted no -- VOTE FAILS"));
 			}
 		}
 	}
 	// End:0x3BC
-	if(__NFUN_242__(bChangeMapVote, true))
+	if((bChangeMapVote == true))
 	{
 		_itController = Level.ControllerList;
 		J0x369:
 
 		// End:0x3B9 [Loop If]
-		if(__NFUN_119__(_itController, none))
+		if((_itController != none))
 		{
 			// End:0x3A2
-			if(_itController.__NFUN_303__('R6PlayerController'))
+			if(_itController.IsA('R6PlayerController'))
 			{
 				R6PlayerController(_itController).ClientVoteResult(_bResult);
 			}
@@ -777,10 +777,10 @@ function HandleVotesTick()
 		J0x3ED:
 
 		// End:0x442 [Loop If]
-		if(__NFUN_119__(_itController, none))
+		if((_itController != none))
 		{
 			// End:0x42B
-			if(_itController.__NFUN_303__('R6PlayerController'))
+			if(_itController.IsA('R6PlayerController'))
 			{
 				R6PlayerController(_itController).ClientVoteResult(_bResult, szPlayerName);
 			}
@@ -809,21 +809,21 @@ auto state InBetweenRoundMenu
 		local R6IOSelfDetonatingBomb AIt;
 
 		// End:0x22
-		foreach __NFUN_304__(Class'R6Engine.R6IOSelfDetonatingBomb', AIt)
+		foreach AllActors(Class'R6Engine.R6IOSelfDetonatingBomb', AIt)
 		{
 			AIt.m_bIsActivated = false;			
 		}		
 		m_bGameStarted = false;
 		// End:0x4E
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) == int(NM_Standalone)))
 		{
-			__NFUN_113__('None');			
+			GotoState('None');			
 		}
 		else
 		{
-			Level.__NFUN_1319__();
+			Level.PBNotifyServerTravel();
 			// End:0x82
-			if(__NFUN_130__(m_bAIBkp, Level.IsGameTypeCooperative(m_szGameTypeFlag)))
+			if((m_bAIBkp && Level.IsGameTypeCooperative(m_szGameTypeFlag)))
 			{
 				CreateBackupRainbowAI();
 			}
@@ -832,10 +832,10 @@ auto state InBetweenRoundMenu
 		}
 		HandleVotesTick();
 		// End:0x127
-		if(__NFUN_177__(m_fTimeBetRounds, float(0)))
+		if((m_fTimeBetRounds > float(0)))
 		{
-			m_fRoundStartTime = __NFUN_174__(Level.TimeSeconds, m_fTimeBetRounds);
-			R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int(__NFUN_175__(m_fRoundStartTime, Level.TimeSeconds));
+			m_fRoundStartTime = (Level.TimeSeconds + m_fTimeBetRounds);
+			R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int((m_fRoundStartTime - Level.TimeSeconds));
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime);			
 		}
 		else
@@ -845,27 +845,27 @@ auto state InBetweenRoundMenu
 			R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = 0;
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = 0.0000000;
 		}
-		m_fNextCheckPlayerReadyTime = __NFUN_174__(Level.TimeSeconds, float(1));
+		m_fNextCheckPlayerReadyTime = (Level.TimeSeconds + float(1));
 		// End:0x1BE
 		if(bShowLog)
 		{
-			__NFUN_231__("GameInfo: begin InBetweenRoundMenu");
+			Log("GameInfo: begin InBetweenRoundMenu");
 		}
 		CamSpot = Level.GetCamSpot(m_szGameTypeFlag);
 		// End:0x288
-		if(__NFUN_119__(CamSpot, none))
+		if((CamSpot != none))
 		{
 			P = Level.ControllerList;
 			J0x1F7:
 
 			// End:0x288 [Loop If]
-			if(__NFUN_119__(P, none))
+			if((P != none))
 			{
 				PC = R6PlayerController(P);
 				// End:0x271
-				if(__NFUN_119__(PC, none))
+				if((PC != none))
 				{
-					PC.__NFUN_267__(CamSpot.Location);
+					PC.SetLocation(CamSpot.Location);
 					PC.ClientSetLocation(CamSpot.Location, CamSpot.Rotation);
 					PC.ClientStopFadeToBlack();
 				}
@@ -884,7 +884,7 @@ auto state InBetweenRoundMenu
     // depends on begin state of InBetweenRoundMenu
 	function bool UnlimitedTBRPassed()
 	{
-		return __NFUN_181__(m_fRoundStartTime, float(0));
+		return (m_fRoundStartTime != float(0));
 		return;
 	}
 
@@ -896,10 +896,10 @@ auto state InBetweenRoundMenu
 		HandleVotesTick();
 		_bAllActivePlayersReady = false;
 		// End:0x97
-		if(__NFUN_130__(__NFUN_176__(m_fNextCheckPlayerReadyTime, Level.TimeSeconds), __NFUN_132__(__NFUN_176__(Level.TimeSeconds, m_fRoundStartTime), __NFUN_129__(UnlimitedTBRPassed()))))
+		if(((m_fNextCheckPlayerReadyTime < Level.TimeSeconds) && ((Level.TimeSeconds < m_fRoundStartTime) || (!UnlimitedTBRPassed()))))
 		{
 			_bAllActivePlayersReady = ProcessPlayerReadyStatus();
-			m_fNextCheckPlayerReadyTime = __NFUN_174__(Level.TimeSeconds, float(1));
+			m_fNextCheckPlayerReadyTime = (Level.TimeSeconds + float(1));
 			// End:0x97
 			if(_bAllActivePlayersReady)
 			{
@@ -908,35 +908,35 @@ auto state InBetweenRoundMenu
 			}
 		}
 		// End:0x24A
-		if(__NFUN_130__(__NFUN_129__(R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused), __NFUN_132__(__NFUN_132__(__NFUN_129__(R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited), _bAllActivePlayersReady), __NFUN_177__(m_fRoundStartTime, float(0)))))
+		if(((!R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused) && (((!R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited) || _bAllActivePlayersReady) || (m_fRoundStartTime > float(0)))))
 		{
-			R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int(__NFUN_175__(m_fRoundStartTime, Level.TimeSeconds));
+			R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int((m_fRoundStartTime - Level.TimeSeconds));
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime);
 			// End:0x16E
-			if(__NFUN_176__(Level.TimeSeconds, m_fRoundStartTime))
+			if((Level.TimeSeconds < m_fRoundStartTime))
 			{
 				GameReplicationInfo.SetServerState(GameReplicationInfo.1);				
 			}
 			else
 			{
 				// End:0x1A8
-				if(__NFUN_176__(Level.TimeSeconds, __NFUN_174__(m_fRoundStartTime, float(1))))
+				if((Level.TimeSeconds < (m_fRoundStartTime + float(1))))
 				{
 					GameReplicationInfo.SetServerState(GameReplicationInfo.2);					
 				}
 				else
 				{
-					__NFUN_113__('PostBetweenRoundTime');
+					GotoState('PostBetweenRoundTime');
 					_playerController = Level.ControllerList;
 					J0x1C3:
 
 					// End:0x247 [Loop If]
-					if(__NFUN_119__(_playerController, none))
+					if((_playerController != none))
 					{
 						// End:0x230
-						if(__NFUN_130__(_playerController.__NFUN_303__('R6PlayerController'), __NFUN_129__(R6PlayerController(_playerController).IsPlayerPassiveSpectator())))
+						if((_playerController.IsA('R6PlayerController') && (!R6PlayerController(_playerController).IsPlayerPassiveSpectator())))
 						{
-							R6PlayerController(_playerController).__NFUN_113__('PauseController');
+							R6PlayerController(_playerController).GotoState('PauseController');
 							R6PlayerController(_playerController).ClientGotoState('PauseController', 'None');
 						}
 						_playerController = _playerController.nextController;
@@ -956,7 +956,7 @@ auto state InBetweenRoundMenu
 	function PauseCountDown()
 	{
 		// End:0x1C
-		if(__NFUN_242__(R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused, true))
+		if((R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused == true))
 		{
 			return;
 		}
@@ -970,7 +970,7 @@ auto state InBetweenRoundMenu
 		local Controller _Player;
 
 		// End:0x1C
-		if(__NFUN_242__(R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused, false))
+		if((R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused == false))
 		{
 			return;
 		}
@@ -978,10 +978,10 @@ auto state InBetweenRoundMenu
 		J0x30:
 
 		// End:0x84 [Loop If]
-		if(__NFUN_119__(_Player, none))
+		if((_Player != none))
 		{
 			// End:0x6D
-			if(__NFUN_130__(_Player.__NFUN_303__('R6PlayerController'), __NFUN_242__(R6PlayerController(_Player).m_bInAnOptionsPage, true)))
+			if((_Player.IsA('R6PlayerController') && (R6PlayerController(_Player).m_bInAnOptionsPage == true)))
 			{
 				return;
 			}
@@ -990,9 +990,9 @@ auto state InBetweenRoundMenu
 			goto J0x30;
 		}
 		// End:0xF1
-		if(__NFUN_129__(R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited))
+		if((!R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited))
 		{
-			m_fRoundStartTime = __NFUN_174__(float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime), Level.TimeSeconds);
+			m_fRoundStartTime = (float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime) + Level.TimeSeconds);
 			R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime);
 		}
 		R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimePaused = false;
@@ -1016,7 +1016,7 @@ auto state InBetweenRoundMenu
 		// End:0x89
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("GameInfo: EndState InBetweenRoundMenu m_GameService = ", string(m_GameService)), " m_iUbiComGameMode = "), string(m_iUbiComGameMode)));
+			Log(((("GameInfo: EndState InBetweenRoundMenu m_GameService = " $ string(m_GameService)) $ " m_iUbiComGameMode = ") $ string(m_iUbiComGameMode)));
 		}
 		R6GameReplicationInfo(GameReplicationInfo).m_bRepMenuCountDownTimeUnlimited = false;
 		ProcessAutoBalanceTeam();
@@ -1024,19 +1024,19 @@ auto state InBetweenRoundMenu
 		J0xB9:
 
 		// End:0x333 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x31C
-			if(P.__NFUN_303__('R6PlayerController'))
+			if(P.IsA('R6PlayerController'))
 			{
 				// End:0x1ED
-				if(__NFUN_129__(R6PlayerController(P).IsPlayerPassiveSpectator()))
+				if((!R6PlayerController(P).IsPlayerPassiveSpectator()))
 				{
 					R6PlayerController(P).bOnlySpectator = false;
 					ResetPlayerTeam(P);
 					R6PlayerController(P).m_TeamManager.SetTeamColor(GetRainbowTeamColourIndex(R6Pawn(P.Pawn).m_iTeam));
 					// End:0x1A6
-					if(__NFUN_119__(R6PlayerController(P).m_TeamManager, none))
+					if((R6PlayerController(P).m_TeamManager != none))
 					{
 						R6PlayerController(P).m_TeamManager.SetMemberTeamID(R6Pawn(P.Pawn).m_iTeam);						
 					}
@@ -1051,13 +1051,13 @@ auto state InBetweenRoundMenu
 					// End:0x264
 					if(bShowLog)
 					{
-						__NFUN_231__(__NFUN_112__(__NFUN_112__("In InBetweenRoundMenu::EndState() sending PlayerController ", string(P)), " to dead state"));
+						Log((("In InBetweenRoundMenu::EndState() sending PlayerController " $ string(P)) $ " to dead state"));
 						R6PlayerController(P).LogSpecialValues();
 					}
-					P.__NFUN_113__('Dead');
+					P.GotoState('Dead');
 				}
 				// End:0x2E8
-				if(__NFUN_119__(P.Pawn, none))
+				if((P.Pawn != none))
 				{
 					P.m_PawnRepInfo.m_PawnType = P.Pawn.m_ePawnType;
 					P.m_PawnRepInfo.m_bSex = P.Pawn.bIsFemale;
@@ -1073,24 +1073,24 @@ auto state InBetweenRoundMenu
 		J0x347:
 
 		// End:0x3F0 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x380
-			if(P.__NFUN_303__('R6PlayerController'))
+			if(P.IsA('R6PlayerController'))
 			{
 				R6PlayerControllerList[R6PlayerControllerList.Length] = R6PlayerController(P);				
 			}
 			else
 			{
 				// End:0x3AE
-				if(P.__NFUN_303__('R6RainbowAI'))
+				if(P.IsA('R6RainbowAI'))
 				{
 					R6RainbowAIList[R6RainbowAIList.Length] = R6RainbowAI(P);					
 				}
 				else
 				{
 					// End:0x3D9
-					if(P.__NFUN_303__('R6TerroristAI'))
+					if(P.IsA('R6TerroristAI'))
 					{
 						R6TerroristAIList[R6TerroristAIList.Length] = R6TerroristAI(P);
 					}
@@ -1104,27 +1104,27 @@ auto state InBetweenRoundMenu
 		J0x3F7:
 
 		// End:0x810 [Loop If]
-		if(__NFUN_150__(i, R6PlayerControllerList.Length))
+		if((i < R6PlayerControllerList.Length))
 		{
 			// End:0x46D
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Nb Terrorist =", string(R6TerroristAIList.Length)), "Nb RainbowAI ="), string(R6RainbowAIList.Length)), "Nb R6PlayerController ="), string(R6PlayerControllerList.Length)));
+				Log(((((("Nb Terrorist =" @ string(R6TerroristAIList.Length)) @ "Nb RainbowAI =") @ string(R6RainbowAIList.Length)) @ "Nb R6PlayerController =") @ string(R6PlayerControllerList.Length)));
 			}
 			j = 0;
 			J0x474:
 
 			// End:0x52A [Loop If]
-			if(__NFUN_150__(j, R6TerroristAIList.Length))
+			if((j < R6TerroristAIList.Length))
 			{
 				aTerrorist = R6Terrorist(R6TerroristAIList[j].Pawn);
 				// End:0x520
-				if(__NFUN_119__(aTerrorist, none))
+				if((aTerrorist != none))
 				{
 					R6PlayerControllerList[i].SetWeaponSound(R6TerroristAIList[j].m_PawnRepInfo, aTerrorist.m_szPrimaryWeapon, 0);
 					R6PlayerControllerList[i].SetWeaponSound(R6TerroristAIList[j].m_PawnRepInfo, aTerrorist.m_szGrenadeWeapon, 2);
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x474;
 			}
@@ -1132,18 +1132,18 @@ auto state InBetweenRoundMenu
 			J0x531:
 
 			// End:0x659 [Loop If]
-			if(__NFUN_150__(j, R6RainbowAIList.Length))
+			if((j < R6RainbowAIList.Length))
 			{
 				aRainbow = R6Rainbow(R6RainbowAIList[j].Pawn);
 				// End:0x64F
-				if(__NFUN_119__(aRainbow, none))
+				if((aRainbow != none))
 				{
 					R6PlayerControllerList[i].SetWeaponSound(R6RainbowAIList[j].m_PawnRepInfo, aRainbow.m_szPrimaryWeapon, 0);
 					R6PlayerControllerList[i].SetWeaponSound(R6RainbowAIList[j].m_PawnRepInfo, aRainbow.m_szSecondaryWeapon, 1);
 					R6PlayerControllerList[i].SetWeaponSound(R6RainbowAIList[j].m_PawnRepInfo, aRainbow.m_szPrimaryItem, 2);
 					R6PlayerControllerList[i].SetWeaponSound(R6RainbowAIList[j].m_PawnRepInfo, aRainbow.m_szSecondaryItem, 3);
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x531;
 			}
@@ -1151,23 +1151,23 @@ auto state InBetweenRoundMenu
 			J0x660:
 
 			// End:0x788 [Loop If]
-			if(__NFUN_150__(j, R6PlayerControllerList.Length))
+			if((j < R6PlayerControllerList.Length))
 			{
 				aRainbow = R6Rainbow(R6PlayerControllerList[j].Pawn);
 				// End:0x77E
-				if(__NFUN_119__(aRainbow, none))
+				if((aRainbow != none))
 				{
 					R6PlayerControllerList[i].SetWeaponSound(R6PlayerControllerList[j].m_PawnRepInfo, aRainbow.m_szPrimaryWeapon, 0);
 					R6PlayerControllerList[i].SetWeaponSound(R6PlayerControllerList[j].m_PawnRepInfo, aRainbow.m_szSecondaryWeapon, 1);
 					R6PlayerControllerList[i].SetWeaponSound(R6PlayerControllerList[j].m_PawnRepInfo, aRainbow.m_szPrimaryItem, 2);
 					R6PlayerControllerList[i].SetWeaponSound(R6PlayerControllerList[j].m_PawnRepInfo, aRainbow.m_szSecondaryItem, 3);
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x660;
 			}
 			// End:0x7CD
-			if(__NFUN_119__(R6PlayerControllerList[i].Pawn, none))
+			if((R6PlayerControllerList[i].Pawn != none))
 			{
 				aZoneInfo = R6PlayerControllerList[i].Pawn.Region.Zone;				
 			}
@@ -1176,34 +1176,34 @@ auto state InBetweenRoundMenu
 				aZoneInfo = R6PlayerControllerList[i].Region.Zone;
 			}
 			R6PlayerControllerList[i].ClientFinalizeLoading(aZoneInfo);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x3F7;
 		}
 		NotifyMatchStart();
-		Level.__NFUN_2612__();
+		Level.NotifyMatchStart();
 		GetNbHumanPlayerInTeam(iAlphaNb, iBravoNb);
 		// End:0x868
 		if(Level.IsGameTypeCooperative(m_szGameTypeFlag))
 		{
-			SetCompilingStats(__NFUN_151__(iAlphaNb, 0));
-			SetRoundRestartedByJoinFlag(__NFUN_150__(iAlphaNb, 1));			
+			SetCompilingStats((iAlphaNb > 0));
+			SetRoundRestartedByJoinFlag((iAlphaNb < 1));			
 		}
 		else
 		{
 			// End:0x8AA
 			if(_gameTypeTeamAdversarial)
 			{
-				SetCompilingStats(__NFUN_130__(__NFUN_151__(iAlphaNb, 0), __NFUN_151__(iBravoNb, 0)));
-				SetRoundRestartedByJoinFlag(__NFUN_132__(__NFUN_154__(iAlphaNb, 0), __NFUN_154__(iBravoNb, 0)));				
+				SetCompilingStats(((iAlphaNb > 0) && (iBravoNb > 0)));
+				SetRoundRestartedByJoinFlag(((iAlphaNb == 0) || (iBravoNb == 0)));				
 			}
 			else
 			{
-				SetCompilingStats(__NFUN_151__(iAlphaNb, 1));
-				SetRoundRestartedByJoinFlag(__NFUN_150__(iAlphaNb, 2));
+				SetCompilingStats((iAlphaNb > 1));
+				SetRoundRestartedByJoinFlag((iAlphaNb < 2));
 			}
 		}
-		__NFUN_1241__();
+		NativeRegServerRouterLogin();
 		IncrementRoundsPlayed();
 		SetGameTypeInLocal();
 		BroadcastGameTypeDescription();
@@ -1225,15 +1225,15 @@ state PostBetweenRoundTime
 		{
 			ResetMatchStat();
 		}
-		m_fInGameStartTime = __NFUN_174__(Level.TimeSeconds, float(5));
+		m_fInGameStartTime = (Level.TimeSeconds + float(5));
 		P = Level.ControllerList;
 		J0x5A:
 
 		// End:0xA4 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x8D
-			if(P.__NFUN_303__('R6PlayerController'))
+			if(P.IsA('R6PlayerController'))
 			{
 				R6PlayerController(P).CountDownPopUpBox();
 			}
@@ -1257,15 +1257,15 @@ state PostBetweenRoundTime
 			return;
 		}
 		HandleVotesTick();
-		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int(__NFUN_175__(m_fInGameStartTime, Level.TimeSeconds));
+		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int((m_fInGameStartTime - Level.TimeSeconds));
 		R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = float(R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime);
 		// End:0x6D
-		if(__NFUN_1242__())
+		if(NativeRegServerGetLobbies())
 		{
 			return;
 		}
 		// End:0x90
-		if(__NFUN_179__(Level.TimeSeconds, __NFUN_175__(m_fInGameStartTime, float(1))))
+		if((Level.TimeSeconds >= (m_fInGameStartTime - float(1))))
 		{
 			PostBetweenRoundTimeDone();
 		}
@@ -1282,20 +1282,20 @@ state PostBetweenRoundTime
 		J0x36:
 
 		// End:0x122 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0x10B
-			if(__NFUN_130__(__NFUN_130__(P.__NFUN_303__('R6PlayerController'), __NFUN_129__(PlayerController(P).bOnlySpectator)), __NFUN_129__(R6PlayerController(P).IsPlayerPassiveSpectator())))
+			if(((P.IsA('R6PlayerController') && (!PlayerController(P).bOnlySpectator)) && (!R6PlayerController(P).IsPlayerPassiveSpectator())))
 			{
 				// End:0xD8
 				if(R6PlayerController(P).m_bPenaltyBox)
 				{
-					R6PlayerController(P).__NFUN_113__('PenaltyBox');
+					R6PlayerController(P).GotoState('PenaltyBox');
 					R6PlayerController(P).ClientGotoState('PenaltyBox', 'None');					
 				}
 				else
 				{
-					R6PlayerController(P).__NFUN_113__('PlayerWalking');
+					R6PlayerController(P).GotoState('PlayerWalking');
 					R6PlayerController(P).ClientGotoState('PlayerWalking', 'None');
 				}
 			}
@@ -1304,11 +1304,11 @@ state PostBetweenRoundTime
 			goto J0x36;
 		}
 		// End:0x13B
-		if(__NFUN_151__(m_RainbowAIBackup.Length, 0))
+		if((m_RainbowAIBackup.Length > 0))
 		{
 			m_RainbowAIBackup.Remove(0, m_RainbowAIBackup.Length);
 		}
-		__NFUN_113__('None');
+		GotoState('None');
 		return;
 	}
 
@@ -1318,17 +1318,17 @@ state PostBetweenRoundTime
 		local R6IOSelfDetonatingBomb AIt;
 
 		GameReplicationInfo.m_bInPostBetweenRoundTime = false;
-		m_fEndingTime = __NFUN_174__(Level.TimeSeconds, Level.m_fTimeLimit);
+		m_fEndingTime = (Level.TimeSeconds + Level.m_fTimeLimit);
 		R6GameReplicationInfo(GameReplicationInfo).m_iMenuCountDownTime = int(Level.m_fTimeLimit);
 		R6GameReplicationInfo(GameReplicationInfo).m_fRepMenuCountDownTime = Level.m_fTimeLimit;
 		P = Level.ControllerList;
 		J0x8F:
 
 		// End:0xD9 [Loop If]
-		if(__NFUN_119__(P, none))
+		if((P != none))
 		{
 			// End:0xC2
-			if(P.__NFUN_303__('R6PlayerController'))
+			if(P.IsA('R6PlayerController'))
 			{
 				R6PlayerController(P).CountDownPopUpBoxDone();
 			}
@@ -1337,10 +1337,10 @@ state PostBetweenRoundTime
 			goto J0x8F;
 		}
 		// End:0x130
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			// End:0x12F
-			foreach __NFUN_304__(Class'R6Engine.R6IOSelfDetonatingBomb', AIt)
+			foreach AllActors(Class'R6Engine.R6IOSelfDetonatingBomb', AIt)
 			{
 				AIt.m_fSelfDetonationTime = Level.m_fTimeLimit;
 				AIt.StartTimer();				

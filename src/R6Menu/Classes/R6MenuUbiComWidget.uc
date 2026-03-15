@@ -199,7 +199,7 @@ function Tick(float Delta)
 				// End:0x330
 				if((pModManager.m_szPendingModName ~= pModManager.m_pCurrentMod.m_szKeyWord))
 				{
-					Root.Console.ViewportOwner.Actor.__NFUN_264__(Sound'Music.Play_theme_Musicsilence', 5) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+					Root.Console.ViewportOwner.Actor.PlaySound(Sound'Music.Play_theme_Musicsilence', 5);
 					Root.ChangeCurrentWidget(19);
 					R6MenuRootWindow(Root).InitBeaconService();
 					return;
@@ -229,22 +229,22 @@ function bool SwitchToAppropriateMod()
 	local bool bModExist;
 
 	// End:0x1B9
-	if(__NFUN_132__(m_bIsAnOfficialMod, m_bIsACustomMod))
+	if((m_bIsAnOfficialMod || m_bIsACustomMod))
 	{
-		pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+		pModManager = Class'Engine.Actor'.static.GetModMgr();
 		bModExist = false;
 		i = 0;
 		J0x35:
 
 		// End:0x90 [Loop If]
-		if(__NFUN_150__(i, pModManager.m_aMods.Length))
+		if((i < pModManager.m_aMods.Length))
 		{
 			// End:0x86
-			if(__NFUN_124__(pModManager.m_aMods[i].m_szKeyWord, pModManager.m_szPendingModName))
+			if((pModManager.m_aMods[i].m_szKeyWord ~= pModManager.m_szPendingModName))
 			{
 				bModExist = true;
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x35;
 		}
@@ -258,7 +258,7 @@ function bool SwitchToAppropriateMod()
 		else
 		{
 			szTemp = Localize("MultiPlayer", "PopUp_Error_InvalidMod", "R6Menu");
-			R6MenuRootWindow(Root).SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), __NFUN_168__(pModManager.m_szPendingModName, szTemp), 36, int(2), false, self);
+			R6MenuRootWindow(Root).SimplePopUp(Localize("MultiPlayer", "Popup_Error_Title", "R6Menu"), (pModManager.m_szPendingModName @ szTemp), 36, int(2), false, self);
 			m_bIsAnOfficialMod = false;
 			m_bIsACustomMod = false;
 		}		
@@ -308,19 +308,19 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 		// End:0x61
 		case 8:
 			m_bQueryServerInfoInProgress = false;
-			Class'Engine.Actor'.static.__NFUN_1524__().m_szPendingModName = m_GameService.m_ClientBeacon.PreJoinInfo.szPreJoinModName;
-			Class'Engine.Actor'.static.__NFUN_1551__().m_bQueryServerInfoDone = true;
+			Class'Engine.Actor'.static.GetModMgr().m_szPendingModName = m_GameService.m_ClientBeacon.PreJoinInfo.szPreJoinModName;
+			Class'Engine.Actor'.static.GetGameManager().m_bQueryServerInfoDone = true;
 			// End:0x9F
 			break;
 		// End:0x84
 		case 9:
 			m_bQueryServerInfoInProgress = false;
-			Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();
+			Class'Engine.Actor'.static.GetGameManager().RemoveFromIDList();
 			// End:0x9F
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("Msg not supported");
+			Log("Msg not supported");
 			// End:0x9F
 			break;
 			break;
@@ -343,16 +343,16 @@ function PromptConnectionError()
 	r6Root.m_RSimplePopUp.W = 360;
 	r6Root.m_RSimplePopUp.H = 77;
 	// End:0x1AD
-	if(__NFUN_123__(R6Console(Root.Console).m_szLastError, ""))
+	if((R6Console(Root.Console).m_szLastError != ""))
 	{
 		szTemp = Localize("Multiplayer", R6Console(Root.Console).m_szLastError, "R6Menu", true);
 		// End:0x113
-		if(__NFUN_122__(szTemp, ""))
+		if((szTemp == ""))
 		{
 			szTemp = Localize("Errors", R6Console(Root.Console).m_szLastError, "R6Engine", true);
 		}
 		// End:0x141
-		if(__NFUN_122__(szTemp, ""))
+		if((szTemp == ""))
 		{
 			szTemp = R6Console(Root.Console).m_szLastError;
 		}
@@ -372,7 +372,7 @@ function PromptConnectionError()
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
 	R6WindowRootWindow(Root).m_RSimplePopUp = R6WindowRootWindow(Root).default.m_RSimplePopUp;
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1290__();
+	Class'Engine.Actor'.static.GetGameManager().RemoveFromIDList();
 	return;
 }
 
@@ -382,22 +382,22 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x6A
-	if(C.__NFUN_303__('R6WindowButtonMainMenu'))
+	if(C.IsA('R6WindowButtonMainMenu'))
 	{
 		// End:0x6A
-		if(__NFUN_154__(int(E), 2))
+		if((int(E) == 2))
 		{
 			// End:0x43
-			if(__NFUN_114__(C, m_ButtonQuit))
+			if((C == m_ButtonQuit))
 			{
 				Root.DoQuitGame();				
 			}
 			else
 			{
 				// End:0x6A
-				if(__NFUN_114__(C, m_ButtonReturn))
+				if((C == m_ButtonReturn))
 				{
-					Class'Engine.Actor'.static.__NFUN_1551__().m_bReturnToGSClient = true;
+					Class'Engine.Actor'.static.GetGameManager().m_bReturnToGSClient = true;
 				}
 			}
 		}

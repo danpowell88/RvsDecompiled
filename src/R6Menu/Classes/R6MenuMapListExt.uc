@@ -380,7 +380,7 @@ function AssignParamsToNewItem(R6WindowListBoxItemExt NewItem, int _index, strin
 		NewItemDesc.fHeigth = float(R.H);
 		NewItemDesc.iLineNumber = _iLineNumber;
 		NewItemDesc.eAlignment = 0;
-		NewItemDesc.bDisplay = __NFUN_129__(_bNotDisplay);
+		NewItemDesc.bDisplay = (!_bNotDisplay);
 		NewItem.SetItemParam(_index, NewItemDesc);
 	}
 	return;
@@ -393,7 +393,7 @@ function byte FillGameTypeMapArray(out array<string> _SelectedMapList, out array
 
 	_SelectedMapList.Remove(0, _SelectedMapList.Length);
 	// End:0x2D
-	if(__NFUN_114__(m_pFinalMapList.Items.Next, none))
+	if((m_pFinalMapList.Items.Next == none))
 	{
 		return 0;
 	}
@@ -402,12 +402,12 @@ function byte FillGameTypeMapArray(out array<string> _SelectedMapList, out array
 	J0x56:
 
 	// End:0xC6 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		_SelectedMapList[i] = R6WindowListBoxItemExt(CurItem).GetItemMisc(0);
 		_SelectedGameTypeList[i] = R6WindowListBoxItemExt(CurItem).GetItemMisc(1);
 		CurItem = UWindowListBoxItem(CurItem.Next);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x56;
 	}
@@ -425,17 +425,17 @@ function Notify(UWindowDialogControl C, byte E)
 		return;
 	}
 	// End:0x106
-	if(C.__NFUN_303__('R6WindowTextListBoxExt'))
+	if(C.IsA('R6WindowTextListBoxExt'))
 	{
 		switch(E)
 		{
 			// End:0xEF
 			case 2:
 				// End:0x7D
-				if(__NFUN_114__(C, m_pStartMapList))
+				if((C == m_pStartMapList))
 				{
 					// End:0x64
-					if(__NFUN_119__(m_pStartMapList.GetSelectedItem(), none))
+					if((m_pStartMapList.GetSelectedItem() != none))
 					{
 						ManageAvailableGameTypes(m_pStartMapList.GetSelectedItem());
 					}
@@ -445,7 +445,7 @@ function Notify(UWindowDialogControl C, byte E)
 				else
 				{
 					// End:0xD6
-					if(__NFUN_119__(m_pFinalMapList.GetSelectedItem(), none))
+					if((m_pFinalMapList.GetSelectedItem() != none))
 					{
 						ManageAvailableGameTypes(m_pFinalMapList.GetSelectedItem(), true);
 						m_pGameTypeCombo.SetValue(R6WindowListBoxItemExt(m_pFinalMapList.GetSelectedItem()).GetItemText(1));
@@ -476,7 +476,7 @@ function Notify(UWindowDialogControl C, byte E)
 	if(m_bFinalListEmpty)
 	{
 		// End:0x142
-		if(__NFUN_129__(IsFinalMapListEmpty()))
+		if((!IsFinalMapListEmpty()))
 		{
 			m_bFinalListEmpty = false;
 			bUpdate = true;
@@ -495,7 +495,7 @@ function Notify(UWindowDialogControl C, byte E)
 	if(bUpdate)
 	{
 		// End:0x18B
-		if(__NFUN_119__(R6MenuMPCreateGameTabOptions(OwnerWindow), none))
+		if((R6MenuMPCreateGameTabOptions(OwnerWindow) != none))
 		{
 			R6MenuMPCreateGameTabOptions(OwnerWindow).UpdateSkinButton();
 		}
@@ -511,14 +511,14 @@ function ManageComboChange()
 
 	Item = R6WindowListBoxItemExt(m_pStartMapList.GetSelectedItem());
 	// End:0x89
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		pComboListItem = m_pGameTypeCombo.GetItem(m_pGameTypeCombo.GetValue());
 		// End:0x87
-		if(__NFUN_119__(pComboListItem, none))
+		if((pComboListItem != none))
 		{
 			// End:0x87
-			if(__NFUN_129__(pComboListItem.bDisabled))
+			if((!pComboListItem.bDisabled))
 			{
 				Item.SetItemMisc(1, m_pGameTypeCombo.GetValue());
 			}
@@ -527,14 +527,14 @@ function ManageComboChange()
 	}
 	Item = R6WindowListBoxItemExt(m_pFinalMapList.GetSelectedItem());
 	// End:0x1B6
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		pComboListItem = m_pGameTypeCombo.GetItem(m_pGameTypeCombo.GetValue());
 		// End:0x1B6
-		if(__NFUN_119__(pComboListItem, none))
+		if((pComboListItem != none))
 		{
 			// End:0x1B6
-			if(__NFUN_129__(pComboListItem.bDisabled))
+			if((!pComboListItem.bDisabled))
 			{
 				szTemp = GetLevel().GetGameTypeFromLocName(m_pGameTypeCombo.GetValue(), true);
 				Item.SetItemText(1, m_pGameTypeCombo.GetValue());
@@ -558,7 +558,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 	local bool bFind, bFindBothArmor, bFindGreenArmor, bFindRedArmor;
 	local R6ModMgr pModManager;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	R6Console = R6Console(Root.Console);
 	szGreenArmor = "";
 	szRedArmor = "";
@@ -566,23 +566,23 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 	J0x42:
 
 	// End:0xD1 [Loop If]
-	if(__NFUN_150__(i, R6Console.m_aMissionDescriptions.Length))
+	if((i < R6Console.m_aMissionDescriptions.Length))
 	{
 		CurrentMission = R6Console.m_aMissionDescriptions[i];
 		// End:0x83
-		if(__NFUN_114__(CurrentMission, none))
+		if((CurrentMission == none))
 		{
 			// [Explicit Break]
 			goto J0xD1;
 		}
 		// End:0xAD
-		if(__NFUN_129__(Root.GetMapNameLocalisation(CurrentMission.m_MapName, szTemp)))
+		if((!Root.GetMapNameLocalisation(CurrentMission.m_MapName, szTemp)))
 		{
 			// [Explicit Continue]
 			goto J0xC7;
 		}
 		// End:0xC7
-		if(__NFUN_122__(szTemp, _szMapName))
+		if((szTemp == _szMapName))
 		{
 			bFind = true;
 			// [Explicit Break]
@@ -590,7 +590,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 		}
 		J0xC7:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x42;
 	}
@@ -603,20 +603,20 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 		J0xE1:
 
 		// End:0x1B6 [Loop If]
-		if(__NFUN_150__(j, CurrentMission.SkinsPerGameTypes.Length))
+		if((j < CurrentMission.SkinsPerGameTypes.Length))
 		{
 			szTemp = GetLevel().GetGameTypeClassName(_szGameType);
-			i = __NFUN_126__(szTemp, ".");
-			szTemp = __NFUN_234__(szTemp, __NFUN_147__(__NFUN_147__(__NFUN_125__(szTemp), 1), __NFUN_126__(szTemp, ".")));
+			i = InStr(szTemp, ".");
+			szTemp = Right(szTemp, ((Len(szTemp) - 1) - InStr(szTemp, ".")));
 			// End:0x1AC
-			if(__NFUN_124__(CurrentMission.SkinsPerGameTypes[j].type, szTemp))
+			if((CurrentMission.SkinsPerGameTypes[j].type ~= szTemp))
 			{
 				szGreenArmor = CurrentMission.SkinsPerGameTypes[j].Green;
 				szRedArmor = CurrentMission.SkinsPerGameTypes[j].Red;
 				// [Explicit Break]
 				goto J0x1B6;
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0xE1;
 		}
@@ -625,30 +625,30 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 
 	bFind = false;
 	// End:0x5DA
-	if(__NFUN_123__(szGreenArmor, ""))
+	if((szGreenArmor != ""))
 	{
 		bFindBothArmor = GetLevel().IsGameTypeTeamAdversarial(_szGameType);
-		szGreenArmor = __NFUN_112__(__NFUN_112__(CurrentMission.SkinsPerGameTypes[j].greenPackage, "."), szGreenArmor);
-		szRedArmor = __NFUN_112__(__NFUN_112__(CurrentMission.SkinsPerGameTypes[j].redPackage, "."), szRedArmor);
+		szGreenArmor = ((CurrentMission.SkinsPerGameTypes[j].greenPackage $ ".") $ szGreenArmor);
+		szRedArmor = ((CurrentMission.SkinsPerGameTypes[j].redPackage $ ".") $ szRedArmor);
 		_szGreenPkg = szGreenArmor;
 		_szRedPkg = szRedArmor;
 		j = 0;
 		J0x259:
 
 		// End:0x413 [Loop If]
-		if(__NFUN_150__(j, pModManager.m_pCurrentMod.m_aDescriptionPackage.Length))
+		if((j < pModManager.m_pCurrentMod.m_aDescriptionPackage.Length))
 		{
-			ArmorDescriptionClass = Class<R6ArmorDescription>(__NFUN_1005__(__NFUN_112__(pModManager.m_pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6ArmorDescription'));
+			ArmorDescriptionClass = Class<R6ArmorDescription>(GetFirstPackageClass((pModManager.m_pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6ArmorDescription'));
 			J0x2B1:
 
 			// End:0x406 [Loop If]
-			if(__NFUN_119__(ArmorDescriptionClass, none))
+			if((ArmorDescriptionClass != none))
 			{
 				// End:0x3F5
-				if(__NFUN_123__(ArmorDescriptionClass.default.m_NameID, "NONE"))
+				if((ArmorDescriptionClass.default.m_NameID != "NONE"))
 				{
 					// End:0x324
-					if(__NFUN_122__(ArmorDescriptionClass.default.m_ClassName, szGreenArmor))
+					if((ArmorDescriptionClass.default.m_ClassName == szGreenArmor))
 					{
 						szGreenArmor = Localize(ArmorDescriptionClass.default.m_NameID, "ID_NAME", "R6Armor");
 						bFindGreenArmor = true;						
@@ -656,7 +656,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 					else
 					{
 						// End:0x37E
-						if(__NFUN_130__(bFindBothArmor, __NFUN_122__(ArmorDescriptionClass.default.m_ClassName, szRedArmor)))
+						if((bFindBothArmor && (ArmorDescriptionClass.default.m_ClassName == szRedArmor)))
 						{
 							szRedArmor = Localize(ArmorDescriptionClass.default.m_NameID, "ID_NAME", "R6Armor");
 							bFindRedArmor = true;							
@@ -664,7 +664,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 						else
 						{
 							// End:0x3B6
-							if(__NFUN_122__(szValidEntry, ""))
+							if((szValidEntry == ""))
 							{
 								szValidEntry = Localize(ArmorDescriptionClass.default.m_NameID, "ID_NAME", "R6Armor");
 							}
@@ -674,7 +674,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 					if(bFindBothArmor)
 					{
 						// End:0x3DE
-						if(__NFUN_130__(bFindGreenArmor, bFindRedArmor))
+						if((bFindGreenArmor && bFindRedArmor))
 						{
 							bFind = true;
 							// [Explicit Break]
@@ -692,25 +692,25 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 						}
 					}
 				}
-				ArmorDescriptionClass = Class<R6ArmorDescription>(__NFUN_1006__());
+				ArmorDescriptionClass = Class<R6ArmorDescription>(GetNextClass());
 				// [Loop Continue]
 				goto J0x2B1;
 			}
 			J0x406:
 
-			__NFUN_1007__();
-			__NFUN_165__(j);
+			FreePackageObjects();
+			(j++);
 			// [Loop Continue]
 			goto J0x259;
 		}
 		// End:0x5DA
-		if(__NFUN_130__(__NFUN_129__(bFind), __NFUN_242__(pModManager.m_pCurrentMod.m_bUseCustomOperatives, true)))
+		if(((!bFind) && (pModManager.m_pCurrentMod.m_bUseCustomOperatives == true)))
 		{
 			j = 0;
 			J0x445:
 
 			// End:0x5DA [Loop If]
-			if(__NFUN_150__(j, pModManager.GetPackageMgr().GetNbPackage()))
+			if((j < pModManager.GetPackageMgr().GetNbPackage()))
 			{
 				// End:0x474
 				if(bFind)
@@ -722,10 +722,10 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 				J0x4A2:
 
 				// End:0x5D0 [Loop If]
-				if(__NFUN_130__(__NFUN_119__(ArmorDescriptionClass, none), __NFUN_242__(ArmorDescriptionClass.default.m_bHideFromMenu, false)))
+				if(((ArmorDescriptionClass != none) && (ArmorDescriptionClass.default.m_bHideFromMenu == false)))
 				{
 					// End:0x513
-					if(__NFUN_122__(ArmorDescriptionClass.default.m_ClassName, szGreenArmor))
+					if((ArmorDescriptionClass.default.m_ClassName == szGreenArmor))
 					{
 						szGreenArmor = Localize(ArmorDescriptionClass.default.m_NameID, "ID_NAME", "R6Armor");
 						bFindGreenArmor = true;						
@@ -733,7 +733,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 					else
 					{
 						// End:0x56A
-						if(__NFUN_130__(bFindBothArmor, __NFUN_122__(ArmorDescriptionClass.default.m_ClassName, szRedArmor)))
+						if((bFindBothArmor && (ArmorDescriptionClass.default.m_ClassName == szRedArmor)))
 						{
 							szRedArmor = Localize(ArmorDescriptionClass.default.m_NameID, "ID_NAME", "R6Armor");
 							bFindRedArmor = true;
@@ -743,7 +743,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 					if(bFindBothArmor)
 					{
 						// End:0x592
-						if(__NFUN_130__(bFindGreenArmor, bFindRedArmor))
+						if((bFindGreenArmor && bFindRedArmor))
 						{
 							bFind = true;
 							// [Explicit Break]
@@ -766,7 +766,7 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 				}
 				J0x5D0:
 
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x445;
 			}
@@ -775,20 +775,20 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 	J0x5DA:
 
 	// End:0x6AB
-	if(__NFUN_129__(bFind))
+	if((!bFind))
 	{
 		// End:0x648
-		if(__NFUN_129__(bFindGreenArmor))
+		if((!bFindGreenArmor))
 		{
 			// End:0x612
-			if(__NFUN_130__(bFindBothArmor, bFindRedArmor))
+			if((bFindBothArmor && bFindRedArmor))
 			{
 				szGreenArmor = szRedArmor;				
 			}
 			else
 			{
 				// End:0x62C
-				if(__NFUN_123__(szValidEntry, ""))
+				if((szValidEntry != ""))
 				{
 					szGreenArmor = szValidEntry;					
 				}
@@ -799,17 +799,17 @@ function GetInitArmor(string _szMapName, string _szGameType, out string _szGreen
 			}
 		}
 		// End:0x6AB
-		if(__NFUN_129__(bFindRedArmor))
+		if((!bFindRedArmor))
 		{
 			// End:0x675
-			if(__NFUN_130__(bFindBothArmor, bFindGreenArmor))
+			if((bFindBothArmor && bFindGreenArmor))
 			{
 				szRedArmor = szGreenArmor;				
 			}
 			else
 			{
 				// End:0x68F
-				if(__NFUN_123__(szValidEntry, ""))
+				if((szValidEntry != ""))
 				{
 					szRedArmor = szValidEntry;					
 				}
@@ -846,7 +846,7 @@ function SetAllArmor()
 	J0x3B:
 
 	// End:0x136 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		szMapName = CurItem.GetItemMisc(0);
 		szItemGameType = CurItem.GetItemMisc(1);
@@ -856,15 +856,15 @@ function SetAllArmor()
 		J0xA7:
 
 		// End:0x11A [Loop If]
-		if(__NFUN_150__(i, R6Console.m_aMissionDescriptions.Length))
+		if((i < R6Console.m_aMissionDescriptions.Length))
 		{
 			mission = R6Console.m_aMissionDescriptions[i];
 			// End:0x110
-			if(__NFUN_122__(mission.m_MapName, szMapName))
+			if((mission.m_MapName == szMapName))
 			{
 				mission.SetSkins(szItemGameType, szGreenArmor, szRedArmor);
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0xA7;
 		}
@@ -878,12 +878,12 @@ function SetAllArmor()
 function SetOrderButtons(bool _bDisable)
 {
 	// End:0x1A
-	if(__NFUN_132__(__NFUN_114__(m_pSubButton, none), __NFUN_114__(m_pPlusButton, none)))
+	if(((m_pSubButton == none) || (m_pPlusButton == none)))
 	{
 		return;
 	}
 	// End:0xB4
-	if(__NFUN_132__(_bDisable, __NFUN_152__(m_pFinalMapList.Items.CountShown(), 1)))
+	if((_bDisable || (m_pFinalMapList.Items.CountShown() <= 1)))
 	{
 		m_pSubButton.m_BorderColor = Root.Colors.GrayLight;
 		m_pSubButton.bDisabled = true;

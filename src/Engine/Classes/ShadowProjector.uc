@@ -56,9 +56,9 @@ event UpdateShadow()
 			ShadowLocation = ShadowActor.Location;
 		}
 		ShadowTexture.m_LightLocation = ShadowLocation;
-		__NFUN_267__(ShadowLocation) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-		__NFUN_299__(Rotator(__NFUN_211__(LightDirection)));
-		SetDrawScale(__NFUN_172__(__NFUN_171__(LightDistance, __NFUN_189__(__NFUN_172__(__NFUN_171__(__NFUN_171__(0.5000000, float(FOV)), 3.1415930), float(180)))), __NFUN_171__(0.5000000, float(ShadowTexture.USize))));
+		SetLocation(ShadowLocation);
+		SetRotation(Rotator((-LightDirection)));
+		SetDrawScale(((LightDistance * Tan((((0.5000000 * float(FOV)) * 3.1415930) / float(180)))) / (0.5000000 * float(ShadowTexture.USize))));
 		ShadowTexture.ShadowActor = ShadowActor;
 		ShadowTexture.LightDirection = LightDirection;
 		ShadowTexture.LightDistance = LightDistance;
@@ -70,7 +70,7 @@ event UpdateShadow()
 		// End:0x1FE
 		if(bProjectActor)
 		{
-			__NFUN_262__(true, false, false);
+			SetCollision(true, false, false);
 		}
 	}
 	return;
@@ -90,7 +90,7 @@ simulated function Tick(float DeltaTime)
 event Touch(Actor Other)
 {
 	// End:0x39
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Other, ShadowActor), Other.bAcceptsProjectors), bProjectActor))
+	if((((Other != ShadowActor) && Other.bAcceptsProjectors) && bProjectActor))
 	{
 		AttachActor(Other);
 	}
@@ -108,7 +108,7 @@ simulated function LightUpdateDirect(Vector LightDir, float LightDist, byte bOpa
 simulated event Destroyed()
 {
 	// End:0x1B
-	if(__NFUN_119__(ShadowTexture, none))
+	if((ShadowTexture != none))
 	{
 		ShadowTexture.ShadowActor = none;
 	}

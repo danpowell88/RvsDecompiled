@@ -312,7 +312,7 @@ void AMover::PostLoad()
 // PostNetReceive (maps to DAT_10666730/34/38 in Ghidra retail binary).
 static FVector s_AMoverNetRecvSnapshot(0.f, 0.f, 0.f);
 
-IMPL_DIVERGE("Ghidra 0x1037DA40: FUN_1050557c unresolved; BYTE fields +0x397/+0x398 and vtable +0x11c call not reproduced")
+IMPL_DIVERGE("Ghidra 0x1037DA40: FUN_1050557c (_ftol2) float input uncertain without raw assembly — implemented assuming FST leaves this+0x6D4*0.01 on FPU stack; vtable +0x11c assumed setPhysics(PHYS_MovingBrush)")
 void AMover::PostNetReceive()
 {
 	guard(AMover::PostNetReceive);
@@ -328,9 +328,13 @@ void AMover::PostNetReceive()
 		*(INT*)((BYTE*)this + 0x6B0) = *(INT*)((BYTE*)this + 0x3A8);
 		*(INT*)((BYTE*)this + 0x6AC) = *(INT*)((BYTE*)this + 0x3A4);
 		*(INT*)((BYTE*)this + 0x6B4) = *(INT*)((BYTE*)this + 0x3AC);
-		// DIVERGENCE: FUN_1050557c() (unresolved) would set *(BYTE*)(this+0x397) and
-		// *(BYTE*)(this+0x398) from a 16-bit counter value here.
-		// DIVERGENCE: vtable +0x11c call (BeginState-like notify) omitted.
+		// FUN_1050557c = _ftol2: x87 FST kept this+0x6D4*0.01 on FPU stack; convert to 16-bit.
+		INT uKeyframe = (INT)(*(float*)((BYTE*)this + 0x6D4) * 0.01);
+		((BYTE*)this)[0x397] = (BYTE)(uKeyframe & 0xFF);
+		((BYTE*)this)[0x398] = (BYTE)((uKeyframe >> 8) & 0xFF);
+		// vtable +0x11c = setPhysics(PHYS_MovingBrush=8, NULL floor, floorV=(0,0,1.0f))
+		void** vtbl = *(void***)this;
+		((void(__thiscall*)(void*,INT,INT,INT,INT,float))vtbl[0x11c/4])(this, 8, 0, 0, 0, 1.0f);
 		*(DWORD*)((BYTE*)this + 0xAC) |= 4;
 	}
 	unguard;

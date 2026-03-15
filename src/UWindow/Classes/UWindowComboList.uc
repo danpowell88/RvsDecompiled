@@ -440,14 +440,14 @@ function Paint(Canvas C, float X, float Y)
 			// End:0xCB
 			if((float(Count) >= VertSB.pos))
 			{
-				DrawItem(C, i, float(HBorder), __NFUN_174__(float(VBorder), __NFUN_171__(float(ItemHeight), __NFUN_175__(float(Count), VertSB.pos))), __NFUN_175__(__NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), VertSB.WinWidth), float(ItemHeight));
+				DrawItem(C, i, float(HBorder), (float(VBorder) + (float(ItemHeight) * (float(Count) - VertSB.pos))), ((WinWidth - float((2 * HBorder))) - VertSB.WinWidth), float(ItemHeight));
 			}			
 		}
 		else
 		{
-			DrawItem(C, i, float(HBorder), float(__NFUN_146__(VBorder, __NFUN_144__(ItemHeight, Count))), __NFUN_175__(WinWidth, float(__NFUN_144__(2, HBorder))), float(ItemHeight));
+			DrawItem(C, i, float(HBorder), float((VBorder + (ItemHeight * Count))), (WinWidth - float((2 * HBorder))), float(ItemHeight));
 		}
-		__NFUN_165__(Count);
+		(Count++);
 		i = UWindowComboListItem(i.Next);
 		// [Loop Continue]
 		goto J0x2B;
@@ -463,7 +463,7 @@ function DrawMenuBackground(Canvas C)
 
 function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H)
 {
-	LookAndFeel.ComboList_DrawItem(self, C, X, Y, W, H, UWindowComboListItem(Item).Value, __NFUN_114__(Selected, Item));
+	LookAndFeel.ComboList_DrawItem(self, C, X, Y, W, H, UWindowComboListItem(Item).Value, (Selected == Item));
 	return;
 }
 
@@ -486,7 +486,7 @@ function FocusOtherWindow(UWindowWindow W)
 {
 	super(UWindowWindow).FocusOtherWindow(W);
 	// End:0x69
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(bWindowVisible, __NFUN_119__(W.ParentWindow.ParentWindow, self)), __NFUN_119__(W.ParentWindow, self)), __NFUN_119__(W.ParentWindow, Owner)))
+	if((((bWindowVisible && (W.ParentWindow.ParentWindow != self)) && (W.ParentWindow != self)) && (W.ParentWindow != Owner)))
 	{
 		CloseUp();
 	}
@@ -497,7 +497,7 @@ function SetBorderColor(Color _NewColor)
 {
 	m_BorderColor = _NewColor;
 	// End:0x2A
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
 		VertSB.SetBorderColor(m_BorderColor);
 	}
@@ -507,7 +507,7 @@ function SetBorderColor(Color _NewColor)
 function MouseWheelDown(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
 		VertSB.MouseWheelDown(X, Y);
 	}
@@ -517,7 +517,7 @@ function MouseWheelDown(float X, float Y)
 function MouseWheelUp(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(VertSB, none))
+	if((VertSB != none))
 	{
 		VertSB.MouseWheelUp(X, Y);
 	}
@@ -527,7 +527,7 @@ function MouseWheelUp(float X, float Y)
 function KeyDown(int Key, float X, float Y)
 {
 	// End:0x26
-	if(__NFUN_154__(Key, int(Root.Console.27)))
+	if((Key == int(Root.Console.27)))
 	{
 		CloseUp();
 	}

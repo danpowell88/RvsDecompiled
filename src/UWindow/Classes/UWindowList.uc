@@ -572,20 +572,20 @@ function Validate()
 		// End:0x170
 		if(((Last == i) && (i.Next != none)))
 		{
-			__NFUN_231__("   Item is Sentinel.Last but Item has valid Next");
+			Log("   Item is Sentinel.Last but Item has valid Next");
 		}
 		// End:0x1D4
-		if(__NFUN_130__(__NFUN_114__(i.Next, none), __NFUN_119__(Last, i)))
+		if(((i.Next == none) && (Last != i)))
 		{
-			__NFUN_231__("   Item is Item.Next is none, but Item is not Sentinel.Last");
+			Log("   Item is Item.Next is none, but Item is not Sentinel.Last");
 		}
 		Previous = i;
-		__NFUN_165__(Count);
+		(Count++);
 		i = i.Next;
 		// [Loop Continue]
 		goto J0x7E;
 	}
-	__NFUN_231__(__NFUN_112__("END Validate(): ", string(Class)));
+	Log(("END Validate(): " $ string(Class)));
 	return;
 }
 
@@ -609,10 +609,10 @@ function AppendItem(UWindowList NewElement)
 	if(bTreeSort)
 	{
 		// End:0xB8
-		if(__NFUN_130__(__NFUN_119__(Next, none), __NFUN_119__(Last, self)))
+		if(((Next != none) && (Last != self)))
 		{
 			// End:0x6D
-			if(__NFUN_153__(Compare(NewElement, Last), 0))
+			if((Compare(NewElement, Last) >= 0))
 			{
 				Node = Last;
 				Node.InsertItemAfter(NewElement, false);
@@ -620,7 +620,7 @@ function AppendItem(UWindowList NewElement)
 				return;
 			}
 			// End:0xB8
-			if(__NFUN_152__(Compare(NewElement, Next), 0))
+			if((Compare(NewElement, Next) <= 0))
 			{
 				Node = Next;
 				Node.InsertItemBefore(NewElement);
@@ -635,7 +635,7 @@ function AppendItem(UWindowList NewElement)
 		if(true)
 		{
 			// End:0xD8
-			if(__NFUN_114__(Node, self))
+			if((Node == self))
 			{
 				test = 1;				
 			}
@@ -644,7 +644,7 @@ function AppendItem(UWindowList NewElement)
 				test = Compare(NewElement, Node);
 			}
 			// End:0x113
-			if(__NFUN_154__(test, 0))
+			if((test == 0))
 			{
 				Node.InsertItemAfter(NewElement, false);
 				return;				
@@ -652,18 +652,18 @@ function AppendItem(UWindowList NewElement)
 			else
 			{
 				// End:0x1CB
-				if(__NFUN_151__(test, 0))
+				if((test > 0))
 				{
 					OldNode = Node;
 					Node = Node.BranchRight;
 					// End:0x1C8
-					if(__NFUN_114__(Node, none))
+					if((Node == none))
 					{
 						temp = OldNode;
 						J0x153:
 
 						// End:0x19D [Loop If]
-						if(__NFUN_130__(__NFUN_119__(temp.Next, none), __NFUN_114__(temp.Next.ParentNode, none)))
+						if(((temp.Next != none) && (temp.Next.ParentNode == none)))
 						{
 							temp = temp.Next;
 							// [Loop Continue]
@@ -679,7 +679,7 @@ function AppendItem(UWindowList NewElement)
 					OldNode = Node;
 					Node = Node.BranchLeft;
 					// End:0x21F
-					if(__NFUN_114__(Node, none))
+					if((Node == none))
 					{
 						OldNode.InsertItemBefore(NewElement);
 						OldNode.GraftLeft(NewElement);
@@ -708,7 +708,7 @@ function DoAppendItem(UWindowList NewElement)
 	NewElement.BranchRight = none;
 	NewElement.ParentNode = none;
 	Last = NewElement;
-	__NFUN_165__(Sentinel.InternalCount);
+	(Sentinel.InternalCount++);
 	Sentinel.bItemOrderChanged = true;
 	return;
 }
@@ -728,13 +728,13 @@ function InsertItem(UWindowList NewElement)
 {
 	NewElement.Next = Next;
 	// End:0x33
-	if(__NFUN_119__(Next, none))
+	if((Next != none))
 	{
 		Next.Prev = NewElement;
 	}
 	Next = NewElement;
 	// End:0x54
-	if(__NFUN_114__(Last, self))
+	if((Last == self))
 	{
 		Last = Next;
 	}
@@ -743,7 +743,7 @@ function InsertItem(UWindowList NewElement)
 	NewElement.BranchLeft = none;
 	NewElement.BranchRight = none;
 	NewElement.ParentNode = none;
-	__NFUN_165__(Sentinel.InternalCount);
+	(Sentinel.InternalCount++);
 	Sentinel.bItemOrderChanged = true;
 	return;
 }
@@ -759,15 +759,15 @@ function UWindowList FindEntry(int Index)
 	J0x12:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, Index))
+	if((i < Index))
 	{
 		L = L.Next;
 		// End:0x42
-		if(__NFUN_114__(L, none))
+		if((L == none))
 		{
 			return none;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x12;
 	}
@@ -778,7 +778,7 @@ function UWindowList FindEntry(int Index)
 function AppendListCopy(UWindowList L)
 {
 	// End:0x0D
-	if(__NFUN_114__(L, none))
+	if((L == none))
 	{
 		return;
 	}
@@ -786,7 +786,7 @@ function AppendListCopy(UWindowList L)
 	J0x21:
 
 	// End:0x5C [Loop If]
-	if(__NFUN_119__(L, none))
+	if((L != none))
 	{
 		CopyExistingListItem(L.Class, L);
 		L = L.Next;

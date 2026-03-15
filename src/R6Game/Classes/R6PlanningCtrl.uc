@@ -323,30 +323,30 @@ event PlayerTick(float fDeltaTime)
 	// End:0x4D0
 	if((m_bSetSnipeDirection == true))
 	{
-		vHitLocation = __NFUN_2016__(m_fLastMouseX, m_fLastMouseY, GetCurrentPoint().Location.Z);
+		vHitLocation = GetXYPoint(m_fLastMouseX, m_fLastMouseY, GetCurrentPoint().Location.Z);
 		m_pTeamInfo[m_iCurrentTeam].AjustSnipeDirection(vHitLocation);
 	}
-	m_vCurrentCameraPos.X = __NFUN_174__(m_vCamPosNoRot.X, __NFUN_171__(m_vCamPos.X, vAxisY.Y));
-	m_vCurrentCameraPos.Y = __NFUN_174__(m_vCamPosNoRot.Y, __NFUN_171__(m_vCamPos.X, vAxisZ.Y));
+	m_vCurrentCameraPos.X = (m_vCamPosNoRot.X + (m_vCamPos.X * vAxisY.Y));
+	m_vCurrentCameraPos.Y = (m_vCamPosNoRot.Y + (m_vCamPos.X * vAxisZ.Y));
 	m_vCurrentCameraPos.Z = m_vCamPos.Z;
 	// End:0x6AA
-	if(__NFUN_242__(m_bRender3DView, true))
+	if((m_bRender3DView == true))
 	{
 		// End:0x599
-		if(__NFUN_242__(m_bPlayMode, true))
+		if((m_bPlayMode == true))
 		{
 			m_pCameraDirIcon.bHidden = true;
-			R6PlanningPawn(Pawn).m_ArrowInPlanningView.__NFUN_2610__(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);			
+			R6PlanningPawn(Pawn).m_ArrowInPlanningView.RenderLevelFromMe(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);			
 		}
 		else
 		{
 			pCurrentPoint = GetCurrentPoint();
 			// End:0x655
-			if(__NFUN_119__(pCurrentPoint, none))
+			if((pCurrentPoint != none))
 			{
-				pCurrentPoint.__NFUN_2610__(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);
+				pCurrentPoint.RenderLevelFromMe(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);
 				m_pCameraDirIcon.bHidden = false;
-				m_pCameraDirIcon.__NFUN_267__(pCurrentPoint.Location);
+				m_pCameraDirIcon.SetLocation(pCurrentPoint.Location);
 				m_pCameraDirIcon.SetPlanningRotation(pCurrentPoint.Rotation);
 				m_pCameraDirIcon.m_iPlanningFloor_0 = pCurrentPoint.m_iPlanningFloor_0;
 				m_pCameraDirIcon.m_iPlanningFloor_1 = pCurrentPoint.m_iPlanningFloor_1;				
@@ -355,12 +355,12 @@ event PlayerTick(float fDeltaTime)
 			{
 				m_pCameraDirIcon.bHidden = true;
 				// End:0x693
-				if(__NFUN_119__(m_CamSpot, none))
+				if((m_CamSpot != none))
 				{
-					m_CamSpot.__NFUN_2610__(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);
+					m_CamSpot.RenderLevelFromMe(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);
 					return;
 				}
-				__NFUN_2610__(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);
+				RenderLevelFromMe(m_3DWindowPositionX, m_3DWindowPositionY, m_3DWindowPositionW, m_3DWindowPositionH);
 			}
 		}
 	}
@@ -373,7 +373,7 @@ event PlayerTick(float fDeltaTime)
 exec function DeleteWaypoint()
 {
 	// End:0x3D
-	if(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
+	if(((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
 	{
 		DeleteOneNode();
 	}
@@ -383,7 +383,7 @@ exec function DeleteWaypoint()
 exec function PrevWaypoint()
 {
 	// End:0x3D
-	if(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
+	if(((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
 	{
 		GotoPrevNode();
 	}
@@ -393,7 +393,7 @@ exec function PrevWaypoint()
 exec function NextWaypoint()
 {
 	// End:0x3D
-	if(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
+	if(((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
 	{
 		GoToNextNode();
 	}
@@ -403,7 +403,7 @@ exec function NextWaypoint()
 exec function FirstWaypoint()
 {
 	// End:0x3D
-	if(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
+	if(((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
 	{
 		GotoFirstNode();
 	}
@@ -413,7 +413,7 @@ exec function FirstWaypoint()
 exec function LastWaypoint()
 {
 	// End:0x3D
-	if(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
+	if(((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()))
 	{
 		GotoLastNode();
 	}
@@ -423,7 +423,7 @@ exec function LastWaypoint()
 exec function SwitchToRedTeam(optional bool bForceFunction)
 {
 	// End:0xDE
-	if(__NFUN_132__(__NFUN_242__(bForceFunction, true), __NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()), __NFUN_242__(m_bSetSnipeDirection, false)), __NFUN_242__(m_bClickToFindLocation, false))))
+	if(((bForceFunction == true) || ((((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()) && (m_bSetSnipeDirection == false)) && (m_bClickToFindLocation == false))))
 	{
 		m_iCurrentTeam = 0;
 		m_pTeamInfo[0].SelectTeam(true);
@@ -439,7 +439,7 @@ exec function SwitchToRedTeam(optional bool bForceFunction)
 exec function SwitchToGreenTeam(optional bool bForceFunction)
 {
 	// End:0xDE
-	if(__NFUN_132__(__NFUN_242__(bForceFunction, true), __NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()), __NFUN_242__(m_bSetSnipeDirection, false)), __NFUN_242__(m_bClickToFindLocation, false))))
+	if(((bForceFunction == true) || ((((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()) && (m_bSetSnipeDirection == false)) && (m_bClickToFindLocation == false))))
 	{
 		m_iCurrentTeam = 1;
 		m_pTeamInfo[0].SelectTeam(false);
@@ -455,7 +455,7 @@ exec function SwitchToGreenTeam(optional bool bForceFunction)
 exec function SwitchToGoldTeam(optional bool bForceFunction)
 {
 	// End:0xE1
-	if(__NFUN_132__(__NFUN_242__(bForceFunction, true), __NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_242__(m_bPlayMode, false), WindowConsole(Player.Console).Root.PlanningShouldProcessKey()), __NFUN_242__(m_bSetSnipeDirection, false)), __NFUN_242__(m_bClickToFindLocation, false))))
+	if(((bForceFunction == true) || ((((m_bPlayMode == false) && WindowConsole(Player.Console).Root.PlanningShouldProcessKey()) && (m_bSetSnipeDirection == false)) && (m_bClickToFindLocation == false))))
 	{
 		m_iCurrentTeam = 2;
 		m_pTeamInfo[0].SelectTeam(false);
@@ -471,9 +471,9 @@ exec function SwitchToGoldTeam(optional bool bForceFunction)
 exec function ViewRedTeam()
 {
 	// End:0x82
-	if(__NFUN_130__(WindowConsole(Player.Console).Root.PlanningShouldProcessKey(), __NFUN_155__(m_iCurrentTeam, 0)))
+	if((WindowConsole(Player.Console).Root.PlanningShouldProcessKey() && (m_iCurrentTeam != 0)))
 	{
-		m_pTeamInfo[0].SetPathDisplay(__NFUN_129__(m_pTeamInfo[0].m_bDisplayPath));
+		m_pTeamInfo[0].SetPathDisplay((!m_pTeamInfo[0].m_bDisplayPath));
 		WindowConsole(Player.Console).Root.UpdateMenus(3);
 	}
 	return;
@@ -482,9 +482,9 @@ exec function ViewRedTeam()
 exec function ViewGreenTeam()
 {
 	// End:0x82
-	if(__NFUN_130__(WindowConsole(Player.Console).Root.PlanningShouldProcessKey(), __NFUN_155__(m_iCurrentTeam, 1)))
+	if((WindowConsole(Player.Console).Root.PlanningShouldProcessKey() && (m_iCurrentTeam != 1)))
 	{
-		m_pTeamInfo[1].SetPathDisplay(__NFUN_129__(m_pTeamInfo[1].m_bDisplayPath));
+		m_pTeamInfo[1].SetPathDisplay((!m_pTeamInfo[1].m_bDisplayPath));
 		WindowConsole(Player.Console).Root.UpdateMenus(4);
 	}
 	return;
@@ -493,9 +493,9 @@ exec function ViewGreenTeam()
 exec function ViewGoldTeam()
 {
 	// End:0x85
-	if(__NFUN_130__(WindowConsole(Player.Console).Root.PlanningShouldProcessKey(), __NFUN_155__(m_iCurrentTeam, 2)))
+	if((WindowConsole(Player.Console).Root.PlanningShouldProcessKey() && (m_iCurrentTeam != 2)))
 	{
-		m_pTeamInfo[2].SetPathDisplay(__NFUN_129__(m_pTeamInfo[2].m_bDisplayPath));
+		m_pTeamInfo[2].SetPathDisplay((!m_pTeamInfo[2].m_bDisplayPath));
 		WindowConsole(Player.Console).Root.UpdateMenus(5);
 	}
 	return;
@@ -524,7 +524,7 @@ function AdjustView(float DeltaTime)
 function Toggle3DView()
 {
 	m_pCameraDirIcon.bHidden = m_bRender3DView;
-	m_bRender3DView = __NFUN_129__(m_bRender3DView);
+	m_bRender3DView = (!m_bRender3DView);
 	return;
 }
 
@@ -537,9 +537,9 @@ function TurnOff3DView()
 
 function TurnOn3DMove(float X, float Y)
 {
-	m_bMove3DView = __NFUN_129__(m_bMove3DView);
+	m_bMove3DView = (!m_bMove3DView);
 	// End:0x40
-	if(__NFUN_130__(m_bMove3DView, __NFUN_119__(GetCurrentPoint(), none)))
+	if((m_bMove3DView && (GetCurrentPoint() != none)))
 	{
 		GetCurrentPoint().Init3DView(X, Y);
 	}
@@ -555,7 +555,7 @@ function TurnOff3DMove()
 function Ajust3DRotation(float X, float Y)
 {
 	// End:0x26
-	if(__NFUN_119__(GetCurrentPoint(), none))
+	if((GetCurrentPoint() != none))
 	{
 		GetCurrentPoint().RotateView(X, Y);
 	}
@@ -566,22 +566,22 @@ function Ajust3DRotation(float X, float Y)
 function ChangeLevelDisplay(int iStep)
 {
 	// End:0x3A
-	if(__NFUN_151__(iStep, 0))
+	if((iStep > 0))
 	{
 		// End:0x37
-		if(__NFUN_150__(m_iLevelDisplay, Level.R6PlanningMaxLevel))
+		if((m_iLevelDisplay < Level.R6PlanningMaxLevel))
 		{
-			__NFUN_161__(m_iLevelDisplay, iStep);
-			__NFUN_2012__(m_iLevelDisplay);
+			(m_iLevelDisplay += iStep);
+			SetFloorToDraw(m_iLevelDisplay);
 		}		
 	}
 	else
 	{
 		// End:0x66
-		if(__NFUN_151__(m_iLevelDisplay, Level.R6PlanningMinLevel))
+		if((m_iLevelDisplay > Level.R6PlanningMinLevel))
 		{
-			__NFUN_161__(m_iLevelDisplay, iStep);
-			__NFUN_2012__(m_iLevelDisplay);
+			(m_iLevelDisplay += iStep);
+			SetFloorToDraw(m_iLevelDisplay);
 		}
 	}
 	return;
@@ -600,12 +600,12 @@ function LMouseDown(float X, float Y)
 	local R6ActionPoint pCurrentPoint;
 
 	// End:0x0E
-	if(__NFUN_242__(m_bPlayMode, true))
+	if((m_bPlayMode == true))
 	{
 		return;
 	}
 	// End:0x4C
-	if(__NFUN_242__(m_bSetSnipeDirection, true))
+	if((m_bSetSnipeDirection == true))
 	{
 		m_bSetSnipeDirection = false;
 		WindowConsole(Player.Console).Root.m_bUseAimIcon = false;
@@ -613,16 +613,16 @@ function LMouseDown(float X, float Y)
 	}
 	pCurrentPoint = GetCurrentPoint();
 	// End:0x770
-	if(__NFUN_242__(__NFUN_2013__(X, Y, vHitLocation, pHitActor, iChangeLevelTo), true))
+	if((GetClickResult(X, Y, vHitLocation, pHitActor, iChangeLevelTo) == true))
 	{
 		// End:0x251
-		if(__NFUN_242__(m_bClickToFindLocation, true))
+		if((m_bClickToFindLocation == true))
 		{
 			// End:0x153
-			if(__NFUN_242__(m_bClickedOnRange, false))
+			if((m_bClickedOnRange == false))
 			{
 				// End:0xF0
-				if(__NFUN_130__(__NFUN_119__(pHitActor, none), pHitActor.__NFUN_303__('R6PlanningRangeGrenade')))
+				if(((pHitActor != none) && pHitActor.IsA('R6PlanningRangeGrenade')))
 				{
 					m_bClickedOnRange = true;
 					pHitActor.bHidden = true;
@@ -632,7 +632,7 @@ function LMouseDown(float X, float Y)
 				else
 				{
 					// End:0x146
-					if(__NFUN_130__(__NFUN_119__(pHitActor, none), pHitActor.__NFUN_303__('R6CameraDirection')))
+					if(((pHitActor != none) && pHitActor.IsA('R6CameraDirection')))
 					{
 						pHitActor.bHidden = true;
 						LMouseDown(X, Y);
@@ -640,14 +640,14 @@ function LMouseDown(float X, float Y)
 					}
 					else
 					{
-						__NFUN_264__(m_PlanningBadClickSnd, 9);
+						PlaySound(m_PlanningBadClickSnd, 9);
 					}
 				}				
 			}
 			else
 			{
 				// End:0x1DA
-				if(__NFUN_130__(__NFUN_130__(__NFUN_119__(pHitActor, none), __NFUN_129__(__NFUN_130__(pHitActor.__NFUN_303__('StaticMeshActor'), __NFUN_242__(pHitActor.m_bIsWalkable, true)))), __NFUN_129__(pHitActor.__NFUN_303__('TerrainInfo'))))
+				if((((pHitActor != none) && (!(pHitActor.IsA('StaticMeshActor') && (pHitActor.m_bIsWalkable == true)))) && (!pHitActor.IsA('TerrainInfo'))))
 				{
 					pHitActor.bHidden = true;
 					LMouseDown(X, Y);
@@ -661,24 +661,24 @@ function LMouseDown(float X, float Y)
 						pCurrentPoint.bHidden = false;
 						m_bClickToFindLocation = false;
 						WindowConsole(Player.Console).Root.m_bUseAimIcon = false;
-						__NFUN_264__(m_PlanningGoodClickSnd, 9);						
+						PlaySound(m_PlanningGoodClickSnd, 9);						
 					}
 					else
 					{
-						__NFUN_264__(m_PlanningBadClickSnd, 9);
+						PlaySound(m_PlanningBadClickSnd, 9);
 					}
 				}
 			}
 			return;
 		}
 		// End:0x74A
-		if(__NFUN_119__(pHitActor, none))
+		if((pHitActor != none))
 		{
 			// End:0x2BF
-			if(pHitActor.__NFUN_303__('R6ActionPoint'))
+			if(pHitActor.IsA('R6ActionPoint'))
 			{
 				// End:0x2BC
-				if(__NFUN_154__(R6ActionPoint(pHitActor).m_iRainbowTeamName, m_iCurrentTeam))
+				if((R6ActionPoint(pHitActor).m_iRainbowTeamName == m_iCurrentTeam))
 				{
 					m_pTeamInfo[m_iCurrentTeam].SetAsCurrentNode(R6ActionPoint(pHitActor));
 					m_bCanMoveFirstPoint = false;
@@ -688,14 +688,14 @@ function LMouseDown(float X, float Y)
 			else
 			{
 				// End:0x2D8
-				if(pHitActor.__NFUN_303__('R6PathFlag'))
+				if(pHitActor.IsA('R6PathFlag'))
 				{
 					return;					
 				}
 				else
 				{
 					// End:0x32F
-					if(__NFUN_132__(pHitActor.__NFUN_303__('R6PlanningBreach'), pHitActor.__NFUN_303__('R6PlanningGrenade')))
+					if((pHitActor.IsA('R6PlanningBreach') || pHitActor.IsA('R6PlanningGrenade')))
 					{
 						m_pTeamInfo[m_iCurrentTeam].SetAsCurrentNode(R6ActionPoint(pHitActor.Owner));
 						return;						
@@ -703,26 +703,26 @@ function LMouseDown(float X, float Y)
 					else
 					{
 						// End:0x38B
-						if(pHitActor.__NFUN_303__('StaticMeshActor'))
+						if(pHitActor.IsA('StaticMeshActor'))
 						{
 							// End:0x37E
-							if(__NFUN_242__(pHitActor.m_bIsWalkable, true))
+							if((pHitActor.m_bIsWalkable == true))
 							{
 								CastActionPointAt(vHitLocation, m_iLevelDisplay, iChangeLevelTo, int(X), int(Y));								
 							}
 							else
 							{
-								__NFUN_264__(m_PlanningBadClickSnd, 9);
+								PlaySound(m_PlanningBadClickSnd, 9);
 							}							
 						}
 						else
 						{
 							// End:0x59A
-							if(pHitActor.__NFUN_303__('R6Ladder'))
+							if(pHitActor.IsA('R6Ladder'))
 							{
 								aHitActorLadder = R6Ladder(pHitActor);
 								// End:0x40E
-								if(__NFUN_154__(aHitActorLadder.m_iPlanningFloor_0, aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0))
+								if((aHitActorLadder.m_iPlanningFloor_0 == aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0))
 								{
 									pHitActor.bHidden = true;
 									LMouseDown(X, Y);
@@ -731,21 +731,21 @@ function LMouseDown(float X, float Y)
 								else
 								{
 									// End:0x462
-									if(__NFUN_129__(__NFUN_130__(__NFUN_242__(m_bPlayMode, true), __NFUN_242__(m_bLockCamera, true))))
+									if((!((m_bPlayMode == true) && (m_bLockCamera == true))))
 									{
-										ChangeLevelDisplay(__NFUN_147__(aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0, aHitActorLadder.m_iPlanningFloor_0));
+										ChangeLevelDisplay((aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0 - aHitActorLadder.m_iPlanningFloor_0));
 										m_vCamDesiredPos = m_vCamPosNoRot;
 									}
 									// End:0x4C4
-									if(__NFUN_242__(aHitActorLadder.m_bIsTopOfLadder, true))
+									if((aHitActorLadder.m_bIsTopOfLadder == true))
 									{
-										vSpawnOffset = __NFUN_212__(Vector(aHitActorLadder.m_pOtherFloor.Rotation), -100.0000000);
-										vHitLocation = __NFUN_215__(aHitActorLadder.m_pOtherFloor.Location, vSpawnOffset);										
+										vSpawnOffset = (Vector(aHitActorLadder.m_pOtherFloor.Rotation) * -100.0000000);
+										vHitLocation = (aHitActorLadder.m_pOtherFloor.Location + vSpawnOffset);										
 									}
 									else
 									{
-										vSpawnOffset = __NFUN_212__(Vector(aHitActorLadder.m_pOtherFloor.Rotation), 100.0000000);
-										__NFUN_277__(vHitLocation, vHitNormal, __NFUN_215__(__NFUN_215__(aHitActorLadder.m_pOtherFloor.Location, vSpawnOffset), vect(0.0000000, 0.0000000, -100.0000000)), __NFUN_215__(aHitActorLadder.m_pOtherFloor.Location, vSpawnOffset), true, vect(0.0000000, 0.0000000, 0.0000000));
+										vSpawnOffset = (Vector(aHitActorLadder.m_pOtherFloor.Rotation) * 100.0000000);
+										Trace(vHitLocation, vHitNormal, ((aHitActorLadder.m_pOtherFloor.Location + vSpawnOffset) + vect(0.0000000, 0.0000000, -100.0000000)), (aHitActorLadder.m_pOtherFloor.Location + vSpawnOffset), true, vect(0.0000000, 0.0000000, 0.0000000));
 									}
 									CastActionPointAt(vHitLocation, aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0, aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0, int(X), int(Y));
 								}								
@@ -753,10 +753,10 @@ function LMouseDown(float X, float Y)
 							else
 							{
 								// End:0x710
-								if(pHitActor.__NFUN_303__('R6InsertionZone'))
+								if(pHitActor.IsA('R6InsertionZone'))
 								{
 									// End:0x5E3
-									if(__NFUN_154__(m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode, -1))
+									if((m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode == -1))
 									{
 										m_pTeamInfo[m_iCurrentTeam].m_bPlacedFirstPoint = true;
 									}
@@ -764,16 +764,16 @@ function LMouseDown(float X, float Y)
 									LMouseDown(X, Y);
 									pHitActor.bHidden = false;
 									// End:0x70D
-									if(__NFUN_154__(m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode, -1))
+									if((m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode == -1))
 									{
 										// End:0x6F6
-										if(__NFUN_151__(m_pTeamInfo[m_iCurrentTeam].m_NodeList.Length, 0))
+										if((m_pTeamInfo[m_iCurrentTeam].m_NodeList.Length > 0))
 										{
 											pCurrentPoint = R6ActionPoint(m_pTeamInfo[m_iCurrentTeam].m_NodeList[0]);
 											m_pTeamInfo[m_iCurrentTeam].m_iStartingPointNumber = R6InsertionZone(pHitActor).m_iInsertionNumber;
 											m_pTeamInfo[m_iCurrentTeam].SetAsCurrentNode(pCurrentPoint);
-											pCurrentPoint.__NFUN_299__(pHitActor.Rotation);
-											pCurrentPoint.m_u8SpritePlanningAngle = byte(__NFUN_145__(pCurrentPoint.Rotation.Yaw, 255));											
+											pCurrentPoint.SetRotation(pHitActor.Rotation);
+											pCurrentPoint.m_u8SpritePlanningAngle = byte((pCurrentPoint.Rotation.Yaw / 255));											
 										}
 										else
 										{
@@ -784,7 +784,7 @@ function LMouseDown(float X, float Y)
 								else
 								{
 									// End:0x747
-									if(pHitActor.__NFUN_303__('TerrainInfo'))
+									if(pHitActor.IsA('TerrainInfo'))
 									{
 										CastActionPointAt(vHitLocation, iChangeLevelTo, iChangeLevelTo, int(X), int(Y));
 									}
@@ -802,7 +802,7 @@ function LMouseDown(float X, float Y)
 	}
 	else
 	{
-		__NFUN_264__(m_PlanningBadClickSnd, 9);
+		PlaySound(m_PlanningBadClickSnd, 9);
 	}
 	return;
 }
@@ -819,23 +819,23 @@ function LMouseUp(float X, float Y)
 	local int iChangeLevelTo;
 
 	// End:0x20C
-	if(__NFUN_130__(__NFUN_242__(m_bActionPointSelected, true), __NFUN_242__(WindowConsole(Player.Console).Root.m_bUseDragIcon, true)))
+	if(((m_bActionPointSelected == true) && (WindowConsole(Player.Console).Root.m_bUseDragIcon == true)))
 	{
 		m_pTeamInfo[m_iCurrentTeam].GetPoint().bHidden = true;
 		// End:0x1E1
-		if(__NFUN_242__(__NFUN_2013__(X, Y, vHitLocation, pHitActor, iChangeLevelTo), true))
+		if((GetClickResult(X, Y, vHitLocation, pHitActor, iChangeLevelTo) == true))
 		{
 			// End:0x1C9
-			if(__NFUN_119__(pHitActor, none))
+			if((pHitActor != none))
 			{
 				// End:0x1C6
-				if(__NFUN_129__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(pHitActor.__NFUN_303__('R6ActionPoint'), pHitActor.__NFUN_303__('R6PathFlag')), pHitActor.__NFUN_303__('R6PlanningBreach')), pHitActor.__NFUN_303__('R6PlanningGrenade')), pHitActor.__NFUN_303__('R6Ladder'))))
+				if((!((((pHitActor.IsA('R6ActionPoint') || pHitActor.IsA('R6PathFlag')) || pHitActor.IsA('R6PlanningBreach')) || pHitActor.IsA('R6PlanningGrenade')) || pHitActor.IsA('R6Ladder'))))
 				{
 					// End:0x137
-					if(pHitActor.__NFUN_303__('StaticMeshActor'))
+					if(pHitActor.IsA('StaticMeshActor'))
 					{
 						// End:0x134
-						if(__NFUN_242__(pHitActor.m_bIsWalkable, true))
+						if((pHitActor.m_bIsWalkable == true))
 						{
 							MoveActionPointTo(vHitLocation, m_iLevelDisplay, iChangeLevelTo);
 						}						
@@ -843,10 +843,10 @@ function LMouseUp(float X, float Y)
 					else
 					{
 						// End:0x178
-						if(pHitActor.__NFUN_303__('TerrainInfo'))
+						if(pHitActor.IsA('TerrainInfo'))
 						{
 							// End:0x175
-							if(__NFUN_242__(pHitActor.m_bIsWalkable, true))
+							if((pHitActor.m_bIsWalkable == true))
 							{
 								MoveActionPointTo(vHitLocation, iChangeLevelTo, iChangeLevelTo);
 							}							
@@ -854,7 +854,7 @@ function LMouseUp(float X, float Y)
 						else
 						{
 							// End:0x194
-							if(pHitActor.__NFUN_303__('R6InsertionZone'))
+							if(pHitActor.IsA('R6InsertionZone'))
 							{
 								m_bCanMoveFirstPoint = true;
 							}
@@ -872,7 +872,7 @@ function LMouseUp(float X, float Y)
 		}
 		else
 		{
-			__NFUN_264__(m_PlanningBadClickSnd, 9);
+			PlaySound(m_PlanningBadClickSnd, 9);
 		}
 		m_pTeamInfo[m_iCurrentTeam].GetPoint().bHidden = false;
 	}
@@ -891,28 +891,28 @@ function RMouseDown(float X, float Y)
 	local R6ActionPoint pCurrentPoint;
 
 	// End:0x0E
-	if(__NFUN_242__(m_bPlayMode, true))
+	if((m_bPlayMode == true))
 	{
 		return;
 	}
 	// End:0x30
-	if(__NFUN_132__(__NFUN_242__(m_bSetSnipeDirection, true), __NFUN_242__(m_bClickToFindLocation, true)))
+	if(((m_bSetSnipeDirection == true) || (m_bClickToFindLocation == true)))
 	{
 		CancelActionPointAction();
 		return;
 	}
 	pCurrentPoint = GetCurrentPoint();
 	// End:0x719
-	if(__NFUN_242__(__NFUN_2013__(X, Y, vHitLocation, pHitActor, iChangeLevelTo), true))
+	if((GetClickResult(X, Y, vHitLocation, pHitActor, iChangeLevelTo) == true))
 	{
 		// End:0x6BB
-		if(__NFUN_119__(pHitActor, none))
+		if((pHitActor != none))
 		{
 			// End:0xF1
-			if(pHitActor.__NFUN_303__('R6ActionPoint'))
+			if(pHitActor.IsA('R6ActionPoint'))
 			{
 				// End:0xEE
-				if(__NFUN_154__(R6ActionPoint(pHitActor).m_iRainbowTeamName, m_iCurrentTeam))
+				if((R6ActionPoint(pHitActor).m_iRainbowTeamName == m_iCurrentTeam))
 				{
 					m_pTeamInfo[m_iCurrentTeam].SetAsCurrentNode(R6ActionPoint(pHitActor));
 					WindowConsole(Player.Console).Root.KeyType(1024, X, Y);
@@ -921,10 +921,10 @@ function RMouseDown(float X, float Y)
 			else
 			{
 				// End:0x18B
-				if(pHitActor.__NFUN_303__('R6PathFlag'))
+				if(pHitActor.IsA('R6PathFlag'))
 				{
 					// End:0x188
-					if(__NFUN_154__(R6ActionPoint(pHitActor.Owner).m_iRainbowTeamName, m_iCurrentTeam))
+					if((R6ActionPoint(pHitActor.Owner).m_iRainbowTeamName == m_iCurrentTeam))
 					{
 						m_pTeamInfo[m_iCurrentTeam].SetAsCurrentNode(R6ActionPoint(pHitActor.Owner));
 						WindowConsole(Player.Console).Root.KeyType(1026, X, Y);
@@ -933,7 +933,7 @@ function RMouseDown(float X, float Y)
 				else
 				{
 					// End:0x1E2
-					if(__NFUN_132__(pHitActor.__NFUN_303__('R6PlanningBreach'), pHitActor.__NFUN_303__('R6PlanningGrenade')))
+					if((pHitActor.IsA('R6PlanningBreach') || pHitActor.IsA('R6PlanningGrenade')))
 					{
 						m_pTeamInfo[m_iCurrentTeam].SetAsCurrentNode(R6ActionPoint(pHitActor.Owner));
 						return;						
@@ -941,10 +941,10 @@ function RMouseDown(float X, float Y)
 					else
 					{
 						// End:0x276
-						if(pHitActor.__NFUN_303__('StaticMeshActor'))
+						if(pHitActor.IsA('StaticMeshActor'))
 						{
 							// End:0x269
-							if(__NFUN_242__(pHitActor.m_bIsWalkable, true))
+							if((pHitActor.m_bIsWalkable == true))
 							{
 								// End:0x266
 								if(CastActionPointAt(vHitLocation, m_iLevelDisplay, iChangeLevelTo, int(X), int(Y)))
@@ -954,17 +954,17 @@ function RMouseDown(float X, float Y)
 							}
 							else
 							{
-								__NFUN_264__(m_PlanningBadClickSnd, 9);
+								PlaySound(m_PlanningBadClickSnd, 9);
 							}							
 						}
 						else
 						{
 							// End:0x4BD
-							if(pHitActor.__NFUN_303__('R6Ladder'))
+							if(pHitActor.IsA('R6Ladder'))
 							{
 								aHitActorLadder = R6Ladder(pHitActor);
 								// End:0x2F9
-								if(__NFUN_154__(aHitActorLadder.m_iPlanningFloor_0, aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_1))
+								if((aHitActorLadder.m_iPlanningFloor_0 == aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_1))
 								{
 									pHitActor.bHidden = true;
 									RMouseDown(X, Y);
@@ -973,21 +973,21 @@ function RMouseDown(float X, float Y)
 								else
 								{
 									// End:0x34D
-									if(__NFUN_129__(__NFUN_130__(__NFUN_242__(m_bPlayMode, true), __NFUN_242__(m_bLockCamera, true))))
+									if((!((m_bPlayMode == true) && (m_bLockCamera == true))))
 									{
-										ChangeLevelDisplay(__NFUN_147__(aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0, aHitActorLadder.m_iPlanningFloor_0));
+										ChangeLevelDisplay((aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0 - aHitActorLadder.m_iPlanningFloor_0));
 										m_vCamDesiredPos = m_vCamPosNoRot;
 									}
 									// End:0x3AF
-									if(__NFUN_242__(aHitActorLadder.m_bIsTopOfLadder, true))
+									if((aHitActorLadder.m_bIsTopOfLadder == true))
 									{
-										vSpawnOffset = __NFUN_212__(Vector(aHitActorLadder.m_pOtherFloor.Rotation), -100.0000000);
-										vHitLocation = __NFUN_215__(aHitActorLadder.m_pOtherFloor.Location, vSpawnOffset);										
+										vSpawnOffset = (Vector(aHitActorLadder.m_pOtherFloor.Rotation) * -100.0000000);
+										vHitLocation = (aHitActorLadder.m_pOtherFloor.Location + vSpawnOffset);										
 									}
 									else
 									{
-										vSpawnOffset = __NFUN_212__(Vector(aHitActorLadder.m_pOtherFloor.Rotation), 100.0000000);
-										__NFUN_277__(vHitLocation, vHitNormal, __NFUN_215__(__NFUN_215__(aHitActorLadder.m_pOtherFloor.Location, vSpawnOffset), vect(0.0000000, 0.0000000, -100.0000000)), __NFUN_215__(aHitActorLadder.m_pOtherFloor.Location, vSpawnOffset), true, vect(0.0000000, 0.0000000, 0.0000000));
+										vSpawnOffset = (Vector(aHitActorLadder.m_pOtherFloor.Rotation) * 100.0000000);
+										Trace(vHitLocation, vHitNormal, ((aHitActorLadder.m_pOtherFloor.Location + vSpawnOffset) + vect(0.0000000, 0.0000000, -100.0000000)), (aHitActorLadder.m_pOtherFloor.Location + vSpawnOffset), true, vect(0.0000000, 0.0000000, 0.0000000));
 									}
 									// End:0x4BA
 									if(CastActionPointAt(vHitLocation, aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0, aHitActorLadder.m_pOtherFloor.m_iPlanningFloor_0, int(X), int(Y)))
@@ -999,10 +999,10 @@ function RMouseDown(float X, float Y)
 							else
 							{
 								// End:0x649
-								if(pHitActor.__NFUN_303__('R6InsertionZone'))
+								if(pHitActor.IsA('R6InsertionZone'))
 								{
 									// End:0x506
-									if(__NFUN_154__(m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode, -1))
+									if((m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode == -1))
 									{
 										m_pTeamInfo[m_iCurrentTeam].m_bPlacedFirstPoint = true;
 									}
@@ -1010,20 +1010,20 @@ function RMouseDown(float X, float Y)
 									LMouseDown(X, Y);
 									pHitActor.bHidden = false;
 									// End:0x611
-									if(__NFUN_154__(m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode, -1))
+									if((m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode == -1))
 									{
 										pCurrentPoint = R6ActionPoint(m_pTeamInfo[m_iCurrentTeam].m_NodeList[0]);
 										m_pTeamInfo[m_iCurrentTeam].m_iStartingPointNumber = R6InsertionZone(pHitActor).m_iInsertionNumber;
 										m_pTeamInfo[m_iCurrentTeam].SetAsCurrentNode(R6ActionPoint(m_pTeamInfo[m_iCurrentTeam].m_NodeList[0]));
-										pCurrentPoint.__NFUN_299__(pHitActor.Rotation);
-										pCurrentPoint.m_u8SpritePlanningAngle = byte(__NFUN_145__(pCurrentPoint.Rotation.Yaw, 255));
+										pCurrentPoint.SetRotation(pHitActor.Rotation);
+										pCurrentPoint.m_u8SpritePlanningAngle = byte((pCurrentPoint.Rotation.Yaw / 255));
 									}
 									WindowConsole(Player.Console).Root.KeyType(1024, X, Y);									
 								}
 								else
 								{
 									// End:0x6B8
-									if(pHitActor.__NFUN_303__('TerrainInfo'))
+									if(pHitActor.IsA('TerrainInfo'))
 									{
 										// End:0x6B8
 										if(CastActionPointAt(vHitLocation, iChangeLevelTo, iChangeLevelTo, int(X), int(Y)))
@@ -1049,7 +1049,7 @@ function RMouseDown(float X, float Y)
 	}
 	else
 	{
-		__NFUN_264__(m_PlanningBadClickSnd, 9);
+		PlaySound(m_PlanningBadClickSnd, 9);
 	}
 	return;
 }
@@ -1059,15 +1059,15 @@ function MouseMove(float X, float Y)
 	local Vector vHitLocation;
 
 	// End:0x63
-	if(__NFUN_242__(m_bSetSnipeDirection, true))
+	if((m_bSetSnipeDirection == true))
 	{
 		m_fLastMouseX = X;
 		m_fLastMouseY = Y;
-		vHitLocation = __NFUN_2016__(X, Y, GetCurrentPoint().Location.Z);
+		vHitLocation = GetXYPoint(X, Y, GetCurrentPoint().Location.Z);
 		m_pTeamInfo[m_iCurrentTeam].AjustSnipeDirection(vHitLocation);
 	}
 	// End:0x9A
-	if(__NFUN_242__(m_bActionPointSelected, true))
+	if((m_bActionPointSelected == true))
 	{
 		WindowConsole(Player.Console).Root.m_bUseDragIcon = true;		
 	}
@@ -1084,11 +1084,11 @@ function CancelActionPointAction()
 	local R6ActionPoint pCurrentPoint;
 
 	// End:0xA7
-	if(__NFUN_132__(__NFUN_242__(m_bSetSnipeDirection, true), __NFUN_242__(m_bClickToFindLocation, true)))
+	if(((m_bSetSnipeDirection == true) || (m_bClickToFindLocation == true)))
 	{
 		pCurrentPoint = GetCurrentPoint();
 		pCurrentPoint.m_eAction = 0;
-		pCurrentPoint.m_pActionIcon.__NFUN_279__();
+		pCurrentPoint.m_pActionIcon.Destroy();
 		pCurrentPoint.m_pActionIcon = none;
 		pCurrentPoint.bHidden = false;
 		m_bClickToFindLocation = false;
@@ -1137,7 +1137,7 @@ function Texture GetActionTypeTexture(Object.EPlanActionType EActionType, option
 			break;
 		// End:0x50
 		case 1:
-			return m_pIconTex[__NFUN_146__(2, iMilestone)];
+			return m_pIconTex[(2 + iMilestone)];
 			// End:0x53
 			break;
 		// End:0xFFFF
@@ -1154,28 +1154,28 @@ function MoveActionPointTo(Vector vHitLocation, int iFirstFloor, int iSecondFloo
 	local Vector vBackupLocation;
 
 	// End:0x34
-	if(__NFUN_130__(__NFUN_154__(m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode, 0), __NFUN_242__(m_bCanMoveFirstPoint, false)))
+	if(((m_pTeamInfo[m_iCurrentTeam].m_iCurrentNode == 0) && (m_bCanMoveFirstPoint == false)))
 	{
-		__NFUN_264__(m_PlanningBadClickSnd, 9);
+		PlaySound(m_PlanningBadClickSnd, 9);
 		return;
 	}
-	__NFUN_184__(vHitLocation.Z, m_fCastingHeight);
+	(vHitLocation.Z += m_fCastingHeight);
 	pCurrentActionPoint = GetCurrentPoint();
 	vBackupLocation = pCurrentActionPoint.Location;
-	pCurrentActionPoint.__NFUN_267__(vHitLocation);
+	pCurrentActionPoint.SetLocation(vHitLocation);
 	// End:0x16E
-	if(__NFUN_242__(m_pTeamInfo[m_iCurrentTeam].MoveCurrentPoint(), true))
+	if((m_pTeamInfo[m_iCurrentTeam].MoveCurrentPoint() == true))
 	{
 		pCurrentActionPoint.m_eAction = 0;
 		// End:0xDB
-		if(__NFUN_119__(pCurrentActionPoint.m_pActionIcon, none))
+		if((pCurrentActionPoint.m_pActionIcon != none))
 		{
-			pCurrentActionPoint.m_pActionIcon.__NFUN_279__();
+			pCurrentActionPoint.m_pActionIcon.Destroy();
 			pCurrentActionPoint.m_pActionIcon = none;
 		}
 		m_pTeamInfo[m_iCurrentTeam].SetPointRotation();
 		// End:0x12A
-		if(__NFUN_150__(iFirstFloor, iSecondFloor))
+		if((iFirstFloor < iSecondFloor))
 		{
 			pCurrentActionPoint.m_iPlanningFloor_0 = iFirstFloor;
 			pCurrentActionPoint.m_iPlanningFloor_1 = iSecondFloor;			
@@ -1186,12 +1186,12 @@ function MoveActionPointTo(Vector vHitLocation, int iFirstFloor, int iSecondFloo
 			pCurrentActionPoint.m_iPlanningFloor_1 = iFirstFloor;
 		}
 		pCurrentActionPoint.FindDoor();
-		__NFUN_264__(m_PlanningGoodClickSnd, 9);		
+		PlaySound(m_PlanningGoodClickSnd, 9);		
 	}
 	else
 	{
-		__NFUN_264__(m_PlanningBadClickSnd, 9);
-		pCurrentActionPoint.__NFUN_267__(vBackupLocation);
+		PlaySound(m_PlanningBadClickSnd, 9);
+		pCurrentActionPoint.SetLocation(vBackupLocation);
 		m_pTeamInfo[m_iCurrentTeam].MoveCurrentPoint();
 	}
 	return;
@@ -1209,32 +1209,32 @@ function bool CastActionPointAt(Vector vLocation, int iFirstFloor, int iSecondFl
 	bReturnValue = true;
 	pTeamInfo = m_pTeamInfo[m_iCurrentTeam];
 	// End:0x6B
-	if(__NFUN_242__(pTeamInfo.m_bPlacedFirstPoint, false))
+	if((pTeamInfo.m_bPlacedFirstPoint == false))
 	{
-		__NFUN_231__("-->First ActionPoint must be on an InsertionZone!");
+		Log("-->First ActionPoint must be on an InsertionZone!");
 		bReturnValue = false;
 	}
 	// End:0xAF
-	if(__NFUN_151__(pTeamInfo.m_NodeList.Length, 500))
+	if((pTeamInfo.m_NodeList.Length > 500))
 	{
-		__NFUN_231__("-->too Many points in planning!");
+		Log("-->too Many points in planning!");
 		bReturnValue = false;
 	}
 	// End:0x3AA
 	if(bReturnValue)
 	{
-		__NFUN_184__(vLocation.Z, m_fCastingHeight);
-		bResult = __NFUN_1800__(vLocation, vect(42.0000000, 42.0000000, 62.0000000));
+		(vLocation.Z += m_fCastingHeight);
+		bResult = FindSpot(vLocation, vect(42.0000000, 42.0000000, 62.0000000));
 		// End:0x374
-		if(__NFUN_242__(bResult, true))
+		if((bResult == true))
 		{
-			pNewActionPoint = __NFUN_278__(Class'R6Game.R6ActionPoint',,, vLocation);
+			pNewActionPoint = Spawn(Class'R6Game.R6ActionPoint',,, vLocation);
 			// End:0x349
-			if(__NFUN_119__(pNewActionPoint, none))
+			if((pNewActionPoint != none))
 			{
 				pNewActionPoint.m_pPlanningCtrl = self;
 				// End:0x15B
-				if(__NFUN_152__(iFirstFloor, iSecondFloor))
+				if((iFirstFloor <= iSecondFloor))
 				{
 					pNewActionPoint.m_iPlanningFloor_0 = iFirstFloor;
 					pNewActionPoint.m_iPlanningFloor_1 = iSecondFloor;					
@@ -1245,45 +1245,45 @@ function bool CastActionPointAt(Vector vLocation, int iFirstFloor, int iSecondFl
 					pNewActionPoint.m_iPlanningFloor_1 = iFirstFloor;
 				}
 				// End:0x1AA
-				if(__NFUN_154__(pTeamInfo.m_iCurrentNode, -1))
+				if((pTeamInfo.m_iCurrentNode == -1))
 				{
 					pNewActionPoint.SetFirstPointTexture();
 				}
 				pNewActionPoint.FindDoor();
 				// End:0x2A2
-				if(__NFUN_130__(__NFUN_155__(pTeamInfo.m_iCurrentNode, -1), __NFUN_155__(pTeamInfo.m_iCurrentNode, __NFUN_147__(pTeamInfo.m_NodeList.Length, 1))))
+				if(((pTeamInfo.m_iCurrentNode != -1) && (pTeamInfo.m_iCurrentNode != (pTeamInfo.m_NodeList.Length - 1))))
 				{
 					// End:0x271
-					if(__NFUN_242__(m_pTeamInfo[m_iCurrentTeam].InsertPoint(pNewActionPoint), true))
+					if((m_pTeamInfo[m_iCurrentTeam].InsertPoint(pNewActionPoint) == true))
 					{
 						pNewActionPoint.m_iRainbowTeamName = m_iCurrentTeam;
 						// End:0x26E
-						if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_150__(X, 100), __NFUN_151__(X, 544)), __NFUN_150__(Y, 54)), __NFUN_151__(Y, 326)))
+						if(((((X < 100) || (X > 544)) || (Y < 54)) || (Y > 326)))
 						{
 							MoveCamOver();
 						}						
 					}
 					else
 					{
-						__NFUN_231__("Could not Insert point at location");
+						Log("Could not Insert point at location");
 						bReturnValue = false;
 					}					
 				}
 				else
 				{
 					// End:0x31B
-					if(__NFUN_242__(m_pTeamInfo[m_iCurrentTeam].AddPoint(pNewActionPoint), true))
+					if((m_pTeamInfo[m_iCurrentTeam].AddPoint(pNewActionPoint) == true))
 					{
 						pNewActionPoint.m_iRainbowTeamName = m_iCurrentTeam;
 						// End:0x318
-						if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_150__(X, 100), __NFUN_151__(X, 544)), __NFUN_150__(Y, 54)), __NFUN_151__(Y, 326)))
+						if(((((X < 100) || (X > 544)) || (Y < 54)) || (Y > 326)))
 						{
 							MoveCamOver();
 						}						
 					}
 					else
 					{
-						__NFUN_231__("Could not add point at location");
+						Log("Could not add point at location");
 						bReturnValue = false;
 					}
 				}				
@@ -1291,23 +1291,23 @@ function bool CastActionPointAt(Vector vLocation, int iFirstFloor, int iSecondFl
 			else
 			{
 				bReturnValue = false;
-				__NFUN_231__("Could not spawn action point");
+				Log("Could not spawn action point");
 			}			
 		}
 		else
 		{
 			bReturnValue = false;
-			__NFUN_231__("Could not find place to spawn action point");
+			Log("Could not find place to spawn action point");
 		}
 	}
 	// End:0x3C0
 	if(bReturnValue)
 	{
-		__NFUN_264__(m_PlanningGoodClickSnd, 9);		
+		PlaySound(m_PlanningGoodClickSnd, 9);		
 	}
 	else
 	{
-		__NFUN_264__(m_PlanningBadClickSnd, 9);
+		PlaySound(m_PlanningBadClickSnd, 9);
 	}
 	return bReturnValue;
 	return;
@@ -1319,17 +1319,17 @@ function DeleteOneNode()
 	// End:0x2B
 	if(m_pTeamInfo[m_iCurrentTeam].DeleteNode())
 	{
-		__NFUN_264__(m_PlanningRemoveSnd, 9);		
+		PlaySound(m_PlanningRemoveSnd, 9);		
 	}
 	else
 	{
-		__NFUN_264__(m_PlanningBadClickSnd, 9);
+		PlaySound(m_PlanningBadClickSnd, 9);
 	}
 	// End:0x5E
-	if(__NFUN_119__(GetCurrentPoint(), none))
+	if((GetCurrentPoint() != none))
 	{
 		m_iLevelDisplay = GetCurrentPoint().m_iPlanningFloor_0;
-		__NFUN_2012__(m_iLevelDisplay);
+		SetFloorToDraw(m_iLevelDisplay);
 	}
 	return;
 }
@@ -1347,12 +1347,12 @@ function PositionCameraOnInsertionZone()
 	local R6InsertionZone anInsertionZone;
 
 	// End:0x9E
-	foreach __NFUN_304__(Class'R6Game.R6InsertionZone', anInsertionZone)
+	foreach AllActors(Class'R6Game.R6InsertionZone', anInsertionZone)
 	{
 		// End:0x9D
-		if(__NFUN_130__(__NFUN_154__(anInsertionZone.m_iInsertionNumber, 0), anInsertionZone.__NFUN_1513__(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag)))
+		if(((anInsertionZone.m_iInsertionNumber == 0) && anInsertionZone.IsAvailableInGameType(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag)))
 		{
-			__NFUN_2012__(anInsertionZone.m_iPlanningFloor_0);
+			SetFloorToDraw(anInsertionZone.m_iPlanningFloor_0);
 			m_iLevelDisplay = anInsertionZone.m_iPlanningFloor_0;
 			m_vCamDesiredPos = anInsertionZone.Location;
 			m_vCamDesiredPos.Z = 0.0000000;
@@ -1435,12 +1435,12 @@ function Object.EMovementMode GetMovementMode()
 function MoveCamOver()
 {
 	// End:0x67
-	if(__NFUN_119__(GetCurrentPoint(), none))
+	if((GetCurrentPoint() != none))
 	{
 		m_vCamDesiredPos.X = GetCurrentPoint().Location.X;
 		m_vCamDesiredPos.Y = GetCurrentPoint().Location.Y;
 		m_iLevelDisplay = GetCurrentPoint().m_iPlanningFloor_0;
-		__NFUN_2012__(m_iLevelDisplay);
+		SetFloorToDraw(m_iLevelDisplay);
 	}
 	return;
 }
@@ -1464,124 +1464,124 @@ state PlayerWalking
 	function ProcessMove(float DeltaTime, Vector NewAccel, Actor.EDoubleClickDir DoubleClickMove, Rotator DeltaRot)
 	{
 		// End:0x3B
-		if(__NFUN_132__(__NFUN_114__(Pawn, none), __NFUN_242__(WindowConsole(Player.Console).Root.PlanningShouldProcessKey(), false)))
+		if(((Pawn == none) || (WindowConsole(Player.Console).Root.PlanningShouldProcessKey() == false)))
 		{
 			return;
 		}
 		// End:0x5C
-		if(__NFUN_154__(int(m_bRotateCW), int(m_bRotateCCW)))
+		if((int(m_bRotateCW) == int(m_bRotateCCW)))
 		{
 			m_fRotateDelta = 0.0000000;			
 		}
 		else
 		{
 			// End:0x77
-			if(__NFUN_154__(int(m_bRotateCW), 1))
+			if((int(m_bRotateCW) == 1))
 			{
 				m_fRotateDelta = m_fRotateRate;				
 			}
 			else
 			{
 				// End:0x91
-				if(__NFUN_154__(int(m_bRotateCCW), 1))
+				if((int(m_bRotateCCW) == 1))
 				{
-					m_fRotateDelta = __NFUN_169__(m_fRotateRate);
+					m_fRotateDelta = (-m_fRotateRate);
 				}
 			}
 		}
 		// End:0xB7
-		if(__NFUN_154__(int(m_bMoveLeft), int(m_bMoveRight)))
+		if((int(m_bMoveLeft) == int(m_bMoveRight)))
 		{
 			m_vCamDelta.X = 0.0000000;			
 		}
 		else
 		{
 			// End:0xD7
-			if(__NFUN_154__(int(m_bMoveRight), 1))
+			if((int(m_bMoveRight) == 1))
 			{
 				m_vCamDelta.X = m_fCamRate;				
 			}
 			else
 			{
 				// End:0xF6
-				if(__NFUN_154__(int(m_bMoveLeft), 1))
+				if((int(m_bMoveLeft) == 1))
 				{
-					m_vCamDelta.X = __NFUN_169__(m_fCamRate);
+					m_vCamDelta.X = (-m_fCamRate);
 				}
 			}
 		}
 		// End:0x11C
-		if(__NFUN_154__(int(m_bMoveUp), int(m_bMoveDown)))
+		if((int(m_bMoveUp) == int(m_bMoveDown)))
 		{
 			m_vCamDelta.Y = 0.0000000;			
 		}
 		else
 		{
 			// End:0x13C
-			if(__NFUN_154__(int(m_bMoveUp), 1))
+			if((int(m_bMoveUp) == 1))
 			{
 				m_vCamDelta.Y = m_fCamRate;				
 			}
 			else
 			{
 				// End:0x15B
-				if(__NFUN_154__(int(m_bMoveDown), 1))
+				if((int(m_bMoveDown) == 1))
 				{
-					m_vCamDelta.Y = __NFUN_169__(m_fCamRate);
+					m_vCamDelta.Y = (-m_fCamRate);
 				}
 			}
 		}
 		// End:0x17C
-		if(__NFUN_154__(int(m_bAngleUp), int(m_bAngleDown)))
+		if((int(m_bAngleUp) == int(m_bAngleDown)))
 		{
 			m_fCameraAngle = 0.0000000;			
 		}
 		else
 		{
 			// End:0x197
-			if(__NFUN_154__(int(m_bAngleUp), 1))
+			if((int(m_bAngleUp) == 1))
 			{
 				m_fCameraAngle = m_fAngleRate;				
 			}
 			else
 			{
 				// End:0x1B1
-				if(__NFUN_154__(int(m_bAngleDown), 1))
+				if((int(m_bAngleDown) == 1))
 				{
-					m_fCameraAngle = __NFUN_169__(m_fAngleRate);
+					m_fCameraAngle = (-m_fAngleRate);
 				}
 			}
 		}
 		// End:0x1D2
-		if(__NFUN_154__(int(m_bZoomIn), int(m_bZoomOut)))
+		if((int(m_bZoomIn) == int(m_bZoomOut)))
 		{
 			m_fZoomDelta = 0.0000000;			
 		}
 		else
 		{
 			// End:0x1EF
-			if(__NFUN_154__(int(m_bZoomIn), 1))
+			if((int(m_bZoomIn) == 1))
 			{
-				m_fZoomDelta = __NFUN_169__(m_fZoomRate);				
+				m_fZoomDelta = (-m_fZoomRate);				
 			}
 			else
 			{
 				// End:0x207
-				if(__NFUN_154__(int(m_bZoomOut), 1))
+				if((int(m_bZoomOut) == 1))
 				{
 					m_fZoomDelta = m_fZoomRate;
 				}
 			}
 		}
 		// End:0x257
-		if(__NFUN_154__(int(m_bLevelUp), 1))
+		if((int(m_bLevelUp) == 1))
 		{
 			// End:0x257
-			if(__NFUN_154__(int(m_bGoLevelUp), 1))
+			if((int(m_bGoLevelUp) == 1))
 			{
 				m_bGoLevelUp = 0;
 				// End:0x257
-				if(__NFUN_129__(__NFUN_130__(__NFUN_242__(m_bPlayMode, true), __NFUN_242__(m_bLockCamera, true))))
+				if((!((m_bPlayMode == true) && (m_bLockCamera == true))))
 				{
 					ChangeLevelDisplay(1);
 					m_vCamDesiredPos = m_vCamPosNoRot;
@@ -1589,14 +1589,14 @@ state PlayerWalking
 			}
 		}
 		// End:0x2AB
-		if(__NFUN_154__(int(m_bLevelDown), 1))
+		if((int(m_bLevelDown) == 1))
 		{
 			// End:0x2AB
-			if(__NFUN_154__(int(m_bGoLevelDown), 1))
+			if((int(m_bGoLevelDown) == 1))
 			{
 				m_bGoLevelDown = 0;
 				// End:0x2AB
-				if(__NFUN_129__(__NFUN_130__(__NFUN_242__(m_bPlayMode, true), __NFUN_242__(m_bLockCamera, true))))
+				if((!((m_bPlayMode == true) && (m_bLockCamera == true))))
 				{
 					ChangeLevelDisplay(-1);
 					m_vCamDesiredPos = m_vCamPosNoRot;

@@ -224,7 +224,7 @@ function float SmoothMouse(float aMouse, float DeltaTime, out byte SampleCount, 
 				(sum += int((float((i + 1)) * 0.1000000)));
 				(aMouse += (float(sum) * OldSamples[i]));
 				OldSamples[i] = 0.0000000;
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x231;
 			}
@@ -232,17 +232,17 @@ function float SmoothMouse(float aMouse, float DeltaTime, out byte SampleCount, 
 		}
 		else
 		{
-			aMouse = __NFUN_171__(0.4000000, aMouse);
+			aMouse = (0.4000000 * aMouse);
 			OldSamples[3] = aMouse;
 			i = 0;
 			J0x2C5:
 
 			// End:0x31A [Loop If]
-			if(__NFUN_150__(i, 3))
+			if((i < 3))
 			{
-				__NFUN_184__(aMouse, __NFUN_171__(__NFUN_171__(float(__NFUN_146__(i, 1)), 0.1000000), OldSamples[i]));
-				OldSamples[i] = OldSamples[__NFUN_146__(i, 1)];
-				__NFUN_165__(i);
+				(aMouse += ((float((i + 1)) * 0.1000000) * OldSamples[i]));
+				OldSamples[i] = OldSamples[(i + 1)];
+				(i++);
 				// [Loop Continue]
 				goto J0x2C5;
 			}
@@ -254,8 +254,8 @@ function float SmoothMouse(float aMouse, float DeltaTime, out byte SampleCount, 
 
 function UpdateSensitivity(float f)
 {
-	MouseSensitivity = __NFUN_245__(0.0000000, f);
-	__NFUN_536__();
+	MouseSensitivity = FMax(0.0000000, f);
+	SaveConfig();
 	return;
 }
 
@@ -270,7 +270,7 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 	local Actor.EDoubleClickDir DoubleClickMove, OldDoubleClick;
 
 	// End:0x24
-	if(__NFUN_154__(int(Outer.DoubleClickDir), int(5)))
+	if((int(Outer.DoubleClickDir) == int(5)))
 	{
 		DoubleClickMove = 5;		
 	}
@@ -279,36 +279,36 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 		DoubleClickMove = 0;
 	}
 	// End:0x24E
-	if(__NFUN_177__(DoubleClickTime, 0.0000000))
+	if((DoubleClickTime > 0.0000000))
 	{
 		// End:0x192
-		if(__NFUN_150__(int(Outer.DoubleClickDir), int(5)))
+		if((int(Outer.DoubleClickDir) < int(5)))
 		{
 			OldDoubleClick = Outer.DoubleClickDir;
 			Outer.DoubleClickDir = 0;
 			// End:0xA1
-			if(__NFUN_130__(bEdgeForward, bWasForward))
+			if((bEdgeForward && bWasForward))
 			{
 				Outer.DoubleClickDir = 3;				
 			}
 			else
 			{
 				// End:0xC9
-				if(__NFUN_130__(bEdgeBack, bWasBack))
+				if((bEdgeBack && bWasBack))
 				{
 					Outer.DoubleClickDir = 4;					
 				}
 				else
 				{
 					// End:0xF1
-					if(__NFUN_130__(bEdgeLeft, bWasLeft))
+					if((bEdgeLeft && bWasLeft))
 					{
 						Outer.DoubleClickDir = 1;						
 					}
 					else
 					{
 						// End:0x116
-						if(__NFUN_130__(bEdgeRight, bWasRight))
+						if((bEdgeRight && bWasRight))
 						{
 							Outer.DoubleClickDir = 2;
 						}
@@ -316,16 +316,16 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 				}
 			}
 			// End:0x146
-			if(__NFUN_154__(int(Outer.DoubleClickDir), int(0)))
+			if((int(Outer.DoubleClickDir) == int(0)))
 			{
 				Outer.DoubleClickDir = OldDoubleClick;				
 			}
 			else
 			{
 				// End:0x17E
-				if(__NFUN_155__(int(Outer.DoubleClickDir), int(OldDoubleClick)))
+				if((int(Outer.DoubleClickDir) != int(OldDoubleClick)))
 				{
-					DoubleClickTimer = __NFUN_174__(DoubleClickTime, __NFUN_171__(0.5000000, DeltaTime));					
+					DoubleClickTimer = (DoubleClickTime + (0.5000000 * DeltaTime));					
 				}
 				else
 				{
@@ -334,11 +334,11 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 			}
 		}
 		// End:0x1E5
-		if(__NFUN_154__(int(Outer.DoubleClickDir), int(6)))
+		if((int(Outer.DoubleClickDir) == int(6)))
 		{
-			__NFUN_185__(DoubleClickTimer, DeltaTime);
+			(DoubleClickTimer -= DeltaTime);
 			// End:0x1E2
-			if(__NFUN_176__(DoubleClickTimer, -0.3500000))
+			if((DoubleClickTimer < -0.3500000))
 			{
 				Outer.DoubleClickDir = 0;
 				DoubleClickTimer = DoubleClickTime;
@@ -347,11 +347,11 @@ function Actor.EDoubleClickDir CheckForDoubleClickMove(float DeltaTime)
 		else
 		{
 			// End:0x24E
-			if(__NFUN_130__(__NFUN_155__(int(Outer.DoubleClickDir), int(0)), __NFUN_155__(int(Outer.DoubleClickDir), int(5))))
+			if(((int(Outer.DoubleClickDir) != int(0)) && (int(Outer.DoubleClickDir) != int(5))))
 			{
-				__NFUN_185__(DoubleClickTimer, DeltaTime);
+				(DoubleClickTimer -= DeltaTime);
 				// End:0x24E
-				if(__NFUN_176__(DoubleClickTimer, float(0)))
+				if((DoubleClickTimer < float(0)))
 				{
 					Outer.DoubleClickDir = 0;
 					DoubleClickTimer = DoubleClickTime;

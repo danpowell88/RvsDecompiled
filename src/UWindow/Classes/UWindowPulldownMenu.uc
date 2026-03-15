@@ -450,7 +450,7 @@ function KeyDown(int Key, float X, float Y)
 			else
 			{
 				// End:0x431
-				if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Selected, none), __NFUN_123__(Selected.Caption, "-")), __NFUN_129__(Selected.bDisabled)))
+				if((((Selected != none) && (Selected.Caption != "-")) && (!Selected.bDisabled)))
 				{
 					BeforeExecuteItem(Selected);
 					ExecuteItem(Selected);
@@ -470,20 +470,20 @@ function KeyUp(int Key, float X, float Y)
 	local UWindowPulldownMenuItem i;
 
 	// End:0xCE
-	if(__NFUN_130__(__NFUN_153__(Key, 65), __NFUN_152__(Key, 96)))
+	if(((Key >= 65) && (Key <= 96)))
 	{
 		i = UWindowPulldownMenuItem(Items.Next);
 		J0x33:
 
 		// End:0xCE [Loop If]
-		if(__NFUN_119__(i, none))
+		if((i != none))
 		{
 			// End:0xB2
-			if(__NFUN_154__(Key, int(i.HotKey)))
+			if((Key == int(i.HotKey)))
 			{
 				PerformSelect(i);
 				// End:0xB2
-				if(__NFUN_130__(__NFUN_130__(__NFUN_119__(i, none), __NFUN_123__(i.Caption, "-")), __NFUN_129__(i.bDisabled)))
+				if((((i != none) && (i.Caption != "-")) && (!i.bDisabled)))
 				{
 					BeforeExecuteItem(i);
 					ExecuteItem(i);
@@ -506,21 +506,21 @@ function MenuCmd(int Item)
 	J0x19:
 
 	// End:0xA5 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x82
-		if(__NFUN_154__(j, Item))
+		if((j == Item))
 		{
 			PerformSelect(i);
 			// End:0x80
-			if(__NFUN_130__(__NFUN_123__(i.Caption, "-"), __NFUN_129__(i.bDisabled)))
+			if(((i.Caption != "-") && (!i.bDisabled)))
 			{
 				BeforeExecuteItem(i);
 				ExecuteItem(i);
 			}
 			return;
 		}
-		__NFUN_165__(j);
+		(j++);
 		i = UWindowPulldownMenuItem(i.Next);
 		// [Loop Continue]
 		goto J0x19;

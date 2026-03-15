@@ -811,14 +811,14 @@ simulated function string GetGreenShortDescription(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szGreenShortDescription;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -838,14 +838,14 @@ simulated function string GetRedShortDescription(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szRedShortDescription;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -865,14 +865,14 @@ simulated function string GetGameTypeFromClassName(string szGameClassName)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szClassName, szGameClassName))
+		if((m_aGameTypeInfo[i].m_szClassName == szGameClassName))
 		{
 			return m_aGameTypeInfo[i].m_szGameType;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -892,14 +892,14 @@ simulated function string GetGameTypeClassName(string szGameType)
 	J0x07:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x42
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_szClassName;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -915,15 +915,15 @@ simulated function GetGameTypeSaveDirectories(out string SaveDirectory, out stri
 	J0x07:
 
 	// End:0x70 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x66
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, Game.m_szGameTypeFlag))
+		if((m_aGameTypeInfo[i].m_szGameType == Game.m_szGameTypeFlag))
 		{
 			SaveDirectory = m_aGameTypeInfo[i].m_szSaveDirectoryName;
 			EnglishSaveDir = m_aGameTypeInfo[i].m_szEnglishDirName;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -938,15 +938,15 @@ simulated function bool FindSaveDirectoryNameFromEnglish(out string SaveDirector
 	J0x07:
 
 	// End:0x53 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x49
-		if(__NFUN_122__(EnglishSaveDir, m_aGameTypeInfo[i].m_szEnglishDirName))
+		if((EnglishSaveDir == m_aGameTypeInfo[i].m_szEnglishDirName))
 		{
 			SaveDirectory = m_aGameTypeInfo[i].m_szSaveDirectoryName;
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -968,15 +968,15 @@ simulated function string GetGameTypeFromLocName(string szGameTypeLoc, optional 
 	J0x0F:
 
 	// End:0x85 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x7B
-		if(__NFUN_124__(m_aGameTypeInfo[i].m_szNameLocalization, szGameTypeLoc))
+		if((m_aGameTypeInfo[i].m_szNameLocalization ~= szGameTypeLoc))
 		{
 			// End:0x61
 			if(_bOnlyMulti)
 			{
-				bFind = __NFUN_155__(int(m_aGameTypeInfo[i].m_eGameModeInfo), int(1));
+				bFind = (int(m_aGameTypeInfo[i].m_eGameModeInfo) != int(1));
 			}
 			// End:0x7B
 			if(bFind)
@@ -984,7 +984,7 @@ simulated function string GetGameTypeFromLocName(string szGameTypeLoc, optional 
 				return m_aGameTypeInfo[i].m_szGameType;
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0F;
 	}
@@ -1002,11 +1002,11 @@ simulated function Actor GetHostageMgr()
 	local R6ModMgr pModManager;
 
 	// End:0xA6
-	if(__NFUN_114__(m_hostageMgr, none))
+	if((m_hostageMgr == none))
 	{
-		pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+		pModManager = Class'Engine.Actor'.static.GetModMgr();
 		// End:0x6B
-		if(__NFUN_123__(pModManager.m_pCurrentMod.m_HostageMgrToSpawn, ""))
+		if((pModManager.m_pCurrentMod.m_HostageMgrToSpawn != ""))
 		{
 			DesiredHostageMgrClass = Class<R6AbstractHostageMgr>(DynamicLoadObject(pModManager.m_pCurrentMod.m_HostageMgrToSpawn, Class'Core.Class'));			
 		}
@@ -1014,7 +1014,7 @@ simulated function Actor GetHostageMgr()
 		{
 			DesiredHostageMgrClass = Class<R6AbstractHostageMgr>(DynamicLoadObject("R6Engine.R6HostageMgr", Class'Core.Class'));
 		}
-		m_hostageMgr = __NFUN_278__(DesiredHostageMgrClass);
+		m_hostageMgr = Spawn(DesiredHostageMgrClass);
 	}
 	return m_hostageMgr;
 	return;
@@ -1028,7 +1028,7 @@ function Object GetTerroristMgr()
 	local Class<R6AbstractTerroristMgr> mgrClass;
 
 	// End:0x59
-	if(__NFUN_114__(m_terroristMgr, none))
+	if((m_terroristMgr == none))
 	{
 		mgrClass = Class<R6AbstractTerroristMgr>(DynamicLoadObject("R6Engine.R6TerroristMgr", Class'Core.Class'));
 		m_terroristMgr = new mgrClass;
@@ -1051,14 +1051,14 @@ simulated function GameTypeInfoAdd(string szGameType, string szDisplayAsGameType
 	J0x07:
 
 	// End:0x3D [Loop If]
-	if(__NFUN_150__(Index, m_aGameTypeInfo.Length))
+	if((Index < m_aGameTypeInfo.Length))
 	{
 		// End:0x33
-		if(__NFUN_122__(m_aGameTypeInfo[Index].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[Index].m_szGameType == szGameType))
 		{
 			return;
 		}
-		__NFUN_165__(Index);
+		(Index++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -1084,7 +1084,7 @@ simulated function GameTypeInfoAdd(string szGameType, string szDisplayAsGameType
 
 simulated function GameTypeSaveGameInfo(int iIndex, string szSaveDirectoryName, string szEnglishDirName)
 {
-	assert(__NFUN_150__(iIndex, m_aGameTypeInfo.Length));
+	assert((iIndex < m_aGameTypeInfo.Length));
 	m_aGameTypeInfo[iIndex].m_szSaveDirectoryName = szSaveDirectoryName;
 	m_aGameTypeInfo[iIndex].m_szEnglishDirName = szEnglishDirName;
 	return;
@@ -1102,29 +1102,29 @@ simulated function SetGameTypeStrings()
 	J0x07:
 
 	// End:0x191 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x73
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szGreenTeamObjective, ""))
+		if((m_aGameTypeInfo[i].m_szGreenTeamObjective != ""))
 		{
 			m_aGameTypeInfo[i].m_szGreenTeamObjective = Localize(m_aGameTypeInfo[i].m_szToString, "GreenTeamObj", m_aGameTypeInfo[i].m_szGreenTeamObjective);
 		}
 		// End:0xCD
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szRedTeamObjective, ""))
+		if((m_aGameTypeInfo[i].m_szRedTeamObjective != ""))
 		{
 			m_aGameTypeInfo[i].m_szRedTeamObjective = Localize(m_aGameTypeInfo[i].m_szToString, "RedTeamObj", m_aGameTypeInfo[i].m_szRedTeamObjective);
 		}
 		// End:0x12B
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szGreenShortDescription, ""))
+		if((m_aGameTypeInfo[i].m_szGreenShortDescription != ""))
 		{
 			m_aGameTypeInfo[i].m_szGreenShortDescription = Localize(m_aGameTypeInfo[i].m_szToString, "GreenShortDesc", m_aGameTypeInfo[i].m_szGreenShortDescription);
 		}
 		// End:0x187
-		if(__NFUN_123__(m_aGameTypeInfo[i].m_szRedShortDescription, ""))
+		if((m_aGameTypeInfo[i].m_szRedShortDescription != ""))
 		{
 			m_aGameTypeInfo[i].m_szRedShortDescription = Localize(m_aGameTypeInfo[i].m_szToString, "RedShortDesc", m_aGameTypeInfo[i].m_szRedShortDescription);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -1139,16 +1139,16 @@ simulated function SetGameTypeDisplayBombTimer(string szGameType)
 	J0x07:
 
 	// End:0x51 [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x47
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			m_aGameTypeInfo[i].m_bDisplayBombTimer = true;
 			// [Explicit Break]
 			goto J0x51;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -1165,14 +1165,14 @@ simulated function bool IsGameTypeDisplayBombTimer(string szGameType)
 	J0x07:
 
 	// End:0x4D [Loop If]
-	if(__NFUN_150__(i, m_aGameTypeInfo.Length))
+	if((i < m_aGameTypeInfo.Length))
 	{
 		// End:0x43
-		if(__NFUN_122__(m_aGameTypeInfo[i].m_szGameType, szGameType))
+		if((m_aGameTypeInfo[i].m_szGameType == szGameType))
 		{
 			return m_aGameTypeInfo[i].m_bDisplayBombTimer;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -1192,7 +1192,7 @@ simulated event PreBeginPlay()
 		return;
 	}
 	m_bGameTypesInitialized = true;
-	pModMgr = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModMgr = Class'Engine.Actor'.static.GetModMgr();
 	pModMgr.AddGameTypes(self);
 	return;
 }
@@ -1214,18 +1214,18 @@ simulated function ResetOriginalData()
 	aMgr = m_DecalManager;
 	m_DecalManager = none;
 	// End:0x3F
-	if(__NFUN_119__(aMgr, none))
+	if((aMgr != none))
 	{
-		aMgr.__NFUN_279__();
+		aMgr.Destroy();
 	}
 	m_bCanStartStartingSound = false;
 	// End:0x69
-	if(__NFUN_129__(Level.bKNoInit))
+	if((!Level.bKNoInit))
 	{
-		m_DecalManager = __NFUN_278__(Class'Engine.R6DecalManager');
+		m_DecalManager = Spawn(Class'Engine.R6DecalManager');
 	}
 	// End:0x83
-	if(__NFUN_119__(m_terroristMgr, none))
+	if((m_terroristMgr != none))
 	{
 		m_terroristMgr.ResetOriginalData();
 	}
@@ -1258,12 +1258,12 @@ native simulated function string GetAddressURL();
 event ServerTravel(string URL, bool bItems)
 {
 	// End:0x57
-	if(__NFUN_122__(NextURL, ""))
+	if((NextURL == ""))
 	{
 		bNextItems = bItems;
 		NextURL = URL;
 		// End:0x4C
-		if(__NFUN_119__(Game, none))
+		if((Game != none))
 		{
 			Game.ProcessServerTravel(URL, bItems);			
 		}
@@ -1288,7 +1288,7 @@ function ThisIsNeverExecuted()
 
 function Reset()
 {
-	__NFUN_2622__();
+	GarbageCollect();
 	super(Actor).Reset();
 	return;
 }
@@ -1301,10 +1301,10 @@ simulated function AddPhysicsVolume(PhysicsVolume NewPhysicsVolume)
 	J0x0B:
 
 	// End:0x3E [Loop If]
-	if(__NFUN_119__(V, none))
+	if((V != none))
 	{
 		// End:0x27
-		if(__NFUN_114__(V, NewPhysicsVolume))
+		if((V == NewPhysicsVolume))
 		{
 			return;
 		}
@@ -1325,13 +1325,13 @@ simulated function RemovePhysicsVolume(PhysicsVolume DeletedPhysicsVolume)
 	J0x0B:
 
 	// End:0x88 [Loop If]
-	if(__NFUN_119__(V, none))
+	if((V != none))
 	{
 		// End:0x66
-		if(__NFUN_114__(V, DeletedPhysicsVolume))
+		if((V == DeletedPhysicsVolume))
 		{
 			// End:0x47
-			if(__NFUN_114__(Prev, none))
+			if((Prev == none))
 			{
 				PhysicsVolumeList = V.NextPhysicsVolume;				
 			}
@@ -1362,10 +1362,10 @@ function Actor GetCamSpot(string szGameType)
 	local Actor StartSpot;
 
 	// End:0x42
-	foreach __NFUN_304__(Class'Engine.Actor', StartSpot)
+	foreach AllActors(Class'Engine.Actor', StartSpot)
 	{
 		// End:0x41
-		if(__NFUN_130__(StartSpot.__NFUN_303__('R6CameraSpot'), StartSpot.__NFUN_1513__(szGameType)))
+		if((StartSpot.IsA('R6CameraSpot') && StartSpot.IsAvailableInGameType(szGameType)))
 		{			
 			return StartSpot;
 		}		
@@ -1385,52 +1385,52 @@ simulated function ResetLevel(int iNbOfRestart)
 	local Controller C, pNextController;
 	local PlayerController PC;
 
-	__NFUN_231__(__NFUN_112__(__NFUN_112__("Resetting Level (total=", string(iNbOfRestart)), ")"));
+	Log((("Resetting Level (total=", string(iNbOfRestart)) $ ")" $ ???));
 	m_bIsResettingLevel = true;
 	// End:0x51
-	foreach __NFUN_304__(Class'Engine.Actor', aActor)
+	foreach AllActors(Class'Engine.Actor', aActor)
 	{
 		aActor.FirstPassReset();		
 	}	
 	// End:0x16A
-	if(__NFUN_155__(int(NetMode), int(NM_Client)))
+	if((int(NetMode) != int(NM_Client)))
 	{
 		C = Level.ControllerList;
 		J0x76:
 
 		// End:0x16A [Loop If]
-		if(__NFUN_119__(C, none))
+		if((C != none))
 		{
 			PC = PlayerController(C);
 			// End:0xB0
-			if(__NFUN_119__(PC, none))
+			if((PC != none))
 			{
 				PC.ResettingLevel(iNbOfRestart);
 			}
 			// End:0x10E
-			if(__NFUN_119__(C.Pawn, none))
+			if((C.Pawn != none))
 			{
 				aPawn = C.Pawn;
 				// End:0xF2
-				if(__NFUN_119__(PC, none))
+				if((PC != none))
 				{
 					PC.UnPossess();
 				}
-				aPawn.__NFUN_279__();
+				aPawn.Destroy();
 				C.Pawn = none;
 			}
 			pNextController = C.nextController;
 			// End:0x140
-			if(__NFUN_119__(PC, none))
+			if((PC != none))
 			{
-				C.__NFUN_113__('BaseSpectating');				
+				C.GotoState('BaseSpectating');				
 			}
 			else
 			{
 				// End:0x15C
-				if(__NFUN_119__(AIController(C), none))
+				if((AIController(C) != none))
 				{
-					C.__NFUN_279__();
+					C.Destroy();
 				}
 			}
 			C = pNextController;
@@ -1441,16 +1441,16 @@ simulated function ResetLevel(int iNbOfRestart)
 	// End:0x1A0
 	if(m_bResetSystemLog)
 	{
-		__NFUN_231__("RESET: ResetOriginalData of all actors...");
+		Log("RESET: ResetOriginalData of all actors...");
 	}
 	// End:0x1FA
-	foreach __NFUN_304__(Class'Engine.Actor', aActor)
+	foreach AllActors(Class'Engine.Actor', aActor)
 	{
 		// End:0x1EA
-		if(__NFUN_132__(aActor.bTearOff, aActor.m_bDeleteOnReset))
+		if((aActor.bTearOff || aActor.m_bDeleteOnReset))
 		{
 			// End:0x1E7
-			if(__NFUN_129__(aActor.__NFUN_279__()))
+			if((!aActor.Destroy()))
 			{
 			}
 			// End:0x1F9
@@ -1458,24 +1458,24 @@ simulated function ResetLevel(int iNbOfRestart)
 		}
 		aActor.ResetOriginalData();		
 	}	
-	__NFUN_1515__();
-	__NFUN_2622__();
+	ResetLevelInNative();
+	GarbageCollect();
 	// End:0x243
-	foreach __NFUN_304__(Class'Engine.Actor', aActor)
+	foreach AllActors(Class'Engine.Actor', aActor)
 	{
 		// End:0x242
-		if(__NFUN_130__(__NFUN_114__(PlayerController(aActor), none), __NFUN_114__(GameInfo(aActor), none)))
+		if(((PlayerController(aActor) == none) && (GameInfo(aActor) == none)))
 		{
 			aActor.SetInitialState();
 		}		
 	}	
-	__NFUN_2712__();
+	StopAllSounds();
 	// End:0x266
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		StopAllMusic();
 	}
-	__NFUN_2704__();
+	ResetVolume_AllTypeSound();
 	m_bIsResettingLevel = false;
 	return;
 }
@@ -1487,7 +1487,7 @@ simulated function ResetLevel(int iNbOfRestart)
 function string GetMissionObjLocFile(R6MissionObjectiveBase obj)
 {
 	// End:0x31
-	if(__NFUN_130__(__NFUN_119__(obj, none), __NFUN_123__(obj.m_szMissionObjLocalization, "")))
+	if(((obj != none) && (obj.m_szMissionObjLocalization != "")))
 	{
 		return obj.m_szMissionObjLocalization;
 	}
@@ -1499,14 +1499,14 @@ function string GetMissionObjLocFile(R6MissionObjectiveBase obj)
 simulated event PostBeginPlay()
 {
 	// End:0x1B
-	if(__NFUN_155__(int(NetMode), int(NM_Client)))
+	if((int(NetMode) != int(NM_Client)))
 	{
 		m_RepWeatherEmitterClass = m_WeatherEmitterClass;
 	}
 	// End:0x58
-	if(__NFUN_130__(__NFUN_132__(__NFUN_154__(int(NetMode), int(NM_Standalone)), __NFUN_154__(int(NetMode), int(NM_ListenServer))), __NFUN_119__(m_WeatherEmitterClass, none)))
+	if((((int(NetMode) == int(NM_Standalone)) || (int(NetMode) == int(NM_ListenServer))) && (m_WeatherEmitterClass != none)))
 	{
-		m_WeatherEmitter = __NFUN_278__(m_WeatherEmitterClass);
+		m_WeatherEmitter = Spawn(m_WeatherEmitterClass);
 	}
 	GetTerroristMgr();
 	return;
@@ -1515,7 +1515,7 @@ simulated event PostBeginPlay()
 simulated function SetWeatherActive(bool bWeatherActive)
 {
 	// End:0x64
-	if(__NFUN_130__(bWeatherActive, __NFUN_154__(m_WeatherEmitter.Emitters[0].m_iPaused, 1)))
+	if((bWeatherActive && (m_WeatherEmitter.Emitters[0].m_iPaused == 1)))
 	{
 		m_WeatherEmitter.Emitters[0].m_iPaused = 0;
 		m_WeatherEmitter.Emitters[0].AllParticlesDead = false;		
@@ -1523,7 +1523,7 @@ simulated function SetWeatherActive(bool bWeatherActive)
 	else
 	{
 		// End:0xC7
-		if(__NFUN_130__(__NFUN_129__(bWeatherActive), __NFUN_154__(m_WeatherEmitter.Emitters[0].m_iPaused, 0)))
+		if(((!bWeatherActive) && (m_WeatherEmitter.Emitters[0].m_iPaused == 0)))
 		{
 			m_WeatherEmitter.Emitters[0].m_iPaused = 1;
 			m_WeatherEmitter.Emitters[0].AllParticlesDead = false;

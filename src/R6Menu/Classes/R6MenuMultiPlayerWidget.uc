@@ -746,62 +746,62 @@ function UpdateFilters()
 			goto J0x503;
 		}
 		// End:0x1DB
-		if(__NFUN_130__(__NFUN_129__(m_bFilterHostageRescueAdv), __NFUN_122__(szTempGDGameType, "RGM_HostageRescueAdvMode")))
+		if(((!m_bFilterHostageRescueAdv) && (szTempGDGameType == "RGM_HostageRescueAdvMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x208
-		if(__NFUN_130__(__NFUN_129__(m_bFilterEscortPilot), __NFUN_122__(szTempGDGameType, "RGM_EscortAdvMode")))
+		if(((!m_bFilterEscortPilot) && (szTempGDGameType == "RGM_EscortAdvMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x233
-		if(__NFUN_130__(__NFUN_129__(m_bFilterMission), __NFUN_122__(szTempGDGameType, "RGM_MissionMode")))
+		if(((!m_bFilterMission) && (szTempGDGameType == "RGM_MissionMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x268
-		if(__NFUN_130__(__NFUN_129__(m_bFilterTerroristHunt), __NFUN_122__(szTempGDGameType, "RGM_TerroristHuntCoopMode")))
+		if(((!m_bFilterTerroristHunt) && (szTempGDGameType == "RGM_TerroristHuntCoopMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x29D
-		if(__NFUN_130__(__NFUN_129__(m_bFilterHostageRescueCoop), __NFUN_122__(szTempGDGameType, "RGM_HostageRescueCoopMode")))
+		if(((!m_bFilterHostageRescueCoop) && (szTempGDGameType == "RGM_HostageRescueCoopMode")))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x327
-		if(__NFUN_130__(__NFUN_123__(stTempGameServerItem.sGameData.szModName, ""), __NFUN_129__(__NFUN_124__(stTempGameServerItem.sGameData.szModName, szCurrentMod))))
+		if(((stTempGameServerItem.sGameData.szModName != "") && (!(stTempGameServerItem.sGameData.szModName ~= szCurrentMod))))
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("UpdateFilters() szModName is different than current MOD ", stTempGameServerItem.sGameData.szModName), szCurrentMod));
+			Log((("UpdateFilters() szModName is different than current MOD " @ stTempGameServerItem.sGameData.szModName) @ szCurrentMod));
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x348
-		if(__NFUN_130__(m_bFilterUnlockedOnly, stTempGameServerItem.sGameData.bUsePassword))
+		if((m_bFilterUnlockedOnly && stTempGameServerItem.sGameData.bUsePassword))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x366
-		if(__NFUN_130__(m_bFilterFavoritesOnly, __NFUN_129__(stTempGameServerItem.bFavorite)))
+		if((m_bFilterFavoritesOnly && (!stTempGameServerItem.bFavorite)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x389
-		if(__NFUN_130__(m_bFilterDedicatedServersOnly, __NFUN_129__(stTempGameServerItem.sGameData.bDedicatedServer)))
+		if((m_bFilterDedicatedServersOnly && (!stTempGameServerItem.sGameData.bDedicatedServer)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x3AC
-		if(__NFUN_130__(m_bFilterServersNotEmpty, __NFUN_154__(stTempGameServerItem.sGameData.iNbrPlayer, 0)))
+		if((m_bFilterServersNotEmpty && (stTempGameServerItem.sGameData.iNbrPlayer == 0)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
@@ -810,7 +810,7 @@ function UpdateFilters()
 		if(bIsLanServers)
 		{
 			// End:0x3F5
-			if(__NFUN_130__(m_bFilterServersNotFull, __NFUN_153__(stTempGameServerItem.sGameData.iNbrPlayer, m_LanServers.m_GameServerList[i].sGameData.iMaxPlayer)))
+			if((m_bFilterServersNotFull && (stTempGameServerItem.sGameData.iNbrPlayer >= m_LanServers.m_GameServerList[i].sGameData.iMaxPlayer)))
 			{
 				// [Explicit Continue]
 				goto J0x503;
@@ -819,32 +819,32 @@ function UpdateFilters()
 		else
 		{
 			// End:0x438
-			if(__NFUN_130__(m_bFilterServersNotFull, __NFUN_153__(stTempGameServerItem.sGameData.iNbrPlayer, m_GameService.m_GameServerList[i].sGameData.iMaxPlayer)))
+			if((m_bFilterServersNotFull && (stTempGameServerItem.sGameData.iNbrPlayer >= m_GameService.m_GameServerList[i].sGameData.iMaxPlayer)))
 			{
 				// [Explicit Continue]
 				goto J0x503;
 			}
 		}
 		// End:0x45B
-		if(__NFUN_130__(m_bFilterPunkBusterServerOnly, __NFUN_129__(stTempGameServerItem.sGameData.bPunkBuster)))
+		if((m_bFilterPunkBusterServerOnly && (!stTempGameServerItem.sGameData.bPunkBuster)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x47D
-		if(__NFUN_130__(m_bFilterResponding, __NFUN_153__(stTempGameServerItem.iPing, 1000)))
+		if((m_bFilterResponding && (stTempGameServerItem.iPing >= 1000)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x4A1
-		if(__NFUN_130__(__NFUN_151__(m_iFilterFasterThan, 0), __NFUN_151__(stTempGameServerItem.iPing, m_iFilterFasterThan)))
+		if(((m_iFilterFasterThan > 0) && (stTempGameServerItem.iPing > m_iFilterFasterThan)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x4BF
-		if(__NFUN_130__(m_bFilterSameVersion, __NFUN_129__(stTempGameServerItem.bSameVersion)))
+		if((m_bFilterSameVersion && (!stTempGameServerItem.bSameVersion)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
@@ -859,7 +859,7 @@ function UpdateFilters()
 		m_GameService.m_GameServerList[i].bDisplay = true;
 		J0x503:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x80;
 	}
@@ -879,7 +879,7 @@ function Refresh(bool bActivatedByUser)
 	if(bActivatedByUser)
 	{
 		// End:0x26
-		if(__NFUN_177__(m_fRefeshDeltaTime, 2.0000000))
+		if((m_fRefeshDeltaTime > 2.0000000))
 		{
 			m_fRefeshDeltaTime = 0.0000000;			
 		}
@@ -890,7 +890,7 @@ function Refresh(bool bActivatedByUser)
 	}
 	m_oldSelItem = none;
 	// End:0xB8
-	if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+	if((int(m_ConnectionTab) == int(0)))
 	{
 		m_LanServers.RefreshServers();
 		ResortServerList(m_iLastSortCategory, m_bLastTypeOfSort);
@@ -899,10 +899,10 @@ function Refresh(bool bActivatedByUser)
 		J0x6C:
 
 		// End:0xB5 [Loop If]
-		if(__NFUN_150__(i, m_LanServers.m_ClientBeacon.GetBeaconListSize()))
+		if((i < m_LanServers.m_ClientBeacon.GetBeaconListSize()))
 		{
 			m_LanServers.m_ClientBeacon.ClearBeacon(i);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x6C;
 		}		
@@ -912,7 +912,7 @@ function Refresh(bool bActivatedByUser)
 		// End:0xD6
 		if(m_GameService.m_bLoggedInUbiDotCom)
 		{
-			m_GameService.__NFUN_3520__();
+			m_GameService.RefreshServers();
 		}
 	}
 	return;
@@ -933,7 +933,7 @@ function GetLanServers()
 	Console = R6Console(Root.Console);
 	pLevel = GetLevel();
 	// End:0x5E
-	if(__NFUN_119__(m_ServerListBox.m_SelectedItem, none))
+	if((m_ServerListBox.m_SelectedItem != none))
 	{
 		szSelSvrIP = R6WindowListServerItem(m_ServerListBox.m_SelectedItem).szIPAddr;		
 	}
@@ -944,24 +944,24 @@ function GetLanServers()
 	m_ServerListBox.ClearListOfItems();
 	m_ServerListBox.m_SelectedItem = none;
 	iNumServers = m_LanServers.m_GameServerList.Length;
-	iNumServersDisplay = m_LanServers.__NFUN_1314__();
+	iNumServersDisplay = m_LanServers.GetDisplayListSize();
 	bFirstSvr = true;
-	iNbPages = __NFUN_145__(iNumServersDisplay, Console.iBrowserMaxNbServerPerPage);
-	__NFUN_161__(iNbPages, 1);
+	iNbPages = (iNumServersDisplay / Console.iBrowserMaxNbServerPerPage);
+	(iNbPages += 1);
 	// End:0x103
-	if(__NFUN_151__(m_PageCount.m_iCurrentPages, iNbPages))
+	if((m_PageCount.m_iCurrentPages > iNbPages))
 	{
 		m_PageCount.SetCurrentPage(iNbPages);
 	}
 	// End:0x12F
-	if(__NFUN_155__(iNbPages, m_PageCount.m_iTotalPages))
+	if((iNbPages != m_PageCount.m_iTotalPages))
 	{
 		m_PageCount.SetTotalPages(iNbPages);
 	}
-	iStartingIndex = __NFUN_144__(Console.iBrowserMaxNbServerPerPage, __NFUN_147__(m_PageCount.m_iCurrentPages, 1));
-	iEndIndex = __NFUN_146__(iStartingIndex, Console.iBrowserMaxNbServerPerPage);
+	iStartingIndex = (Console.iBrowserMaxNbServerPerPage * (m_PageCount.m_iCurrentPages - 1));
+	iEndIndex = (iStartingIndex + Console.iBrowserMaxNbServerPerPage);
 	// End:0x18B
-	if(__NFUN_151__(iEndIndex, iNumServersDisplay))
+	if((iEndIndex > iNumServersDisplay))
 	{
 		iEndIndex = iNumServersDisplay;
 	}
@@ -970,7 +970,7 @@ function GetLanServers()
 	J0x19D:
 
 	// End:0x52C [Loop If]
-	if(__NFUN_151__(iNumServersDisplay, 0))
+	if((iNumServersDisplay > 0))
 	{
 		// End:0x4F7
 		if(m_LanServers.m_GameServerList[m_LanServers.m_GSLSortIdx[i]].bDisplay)
@@ -1011,23 +1011,23 @@ function GetLanServers()
 				}
 			}
 			// End:0x4E8
-			if(__NFUN_132__(__NFUN_122__(NewItem.szIPAddr, szSelSvrIP), bFirstSvr))
+			if(((NewItem.szIPAddr == szSelSvrIP) || bFirstSvr))
 			{
 				m_ServerListBox.SetSelectedItem(NewItem);
 				m_LanServers.SetSelectedServer(i);
 			}
 			bFirstSvr = false;
-			__NFUN_165__(j);
+			(j++);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// End:0x517
-		if(__NFUN_153__(__NFUN_146__(iStartingIndex, j), iEndIndex))
+		if(((iStartingIndex + j) >= iEndIndex))
 		{
 			// [Explicit Break]
 			goto J0x52C;
 		}
 		// End:0x529
-		if(__NFUN_153__(i, iNumServers))
+		if((i >= iNumServers))
 		{
 			// [Explicit Break]
 			goto J0x52C;
@@ -1062,7 +1062,7 @@ function GetGSServers()
 	Console = R6Console(Root.Console);
 	pLevel = GetLevel();
 	// End:0x5E
-	if(__NFUN_119__(m_ServerListBox.m_SelectedItem, none))
+	if((m_ServerListBox.m_SelectedItem != none))
 	{
 		szSelSvrIP = R6WindowListServerItem(m_ServerListBox.m_SelectedItem).szIPAddr;		
 	}
@@ -1073,24 +1073,24 @@ function GetGSServers()
 	m_ServerListBox.ClearListOfItems();
 	m_ServerListBox.m_SelectedItem = none;
 	iNumServers = m_GameService.m_GameServerList.Length;
-	iNumServersDisplay = m_GameService.__NFUN_1314__();
+	iNumServersDisplay = m_GameService.GetDisplayListSize();
 	bFirstSvr = true;
-	iNbPages = __NFUN_145__(iNumServersDisplay, Console.iBrowserMaxNbServerPerPage);
-	__NFUN_161__(iNbPages, 1);
+	iNbPages = (iNumServersDisplay / Console.iBrowserMaxNbServerPerPage);
+	(iNbPages += 1);
 	// End:0x103
-	if(__NFUN_151__(m_PageCount.m_iCurrentPages, iNbPages))
+	if((m_PageCount.m_iCurrentPages > iNbPages))
 	{
 		m_PageCount.SetCurrentPage(iNbPages);
 	}
 	// End:0x12F
-	if(__NFUN_155__(iNbPages, m_PageCount.m_iTotalPages))
+	if((iNbPages != m_PageCount.m_iTotalPages))
 	{
 		m_PageCount.SetTotalPages(iNbPages);
 	}
-	iStartingIndex = __NFUN_144__(Console.iBrowserMaxNbServerPerPage, __NFUN_147__(m_PageCount.m_iCurrentPages, 1));
-	iEndIndex = __NFUN_146__(iStartingIndex, Console.iBrowserMaxNbServerPerPage);
+	iStartingIndex = (Console.iBrowserMaxNbServerPerPage * (m_PageCount.m_iCurrentPages - 1));
+	iEndIndex = (iStartingIndex + Console.iBrowserMaxNbServerPerPage);
 	// End:0x18B
-	if(__NFUN_151__(iEndIndex, iNumServersDisplay))
+	if((iEndIndex > iNumServersDisplay))
 	{
 		iEndIndex = iNumServersDisplay;
 	}
@@ -1099,7 +1099,7 @@ function GetGSServers()
 	J0x19D:
 
 	// End:0x518 [Loop If]
-	if(__NFUN_151__(iNumServersDisplay, 0))
+	if((iNumServersDisplay > 0))
 	{
 		// End:0x4E3
 		if(m_GameService.m_GameServerList[m_GameService.m_GSLSortIdx[i]].bDisplay)
@@ -1136,23 +1136,23 @@ function GetGSServers()
 				}
 			}
 			// End:0x4D4
-			if(__NFUN_132__(__NFUN_122__(NewItem.szIPAddr, szSelSvrIP), bFirstSvr))
+			if(((NewItem.szIPAddr == szSelSvrIP) || bFirstSvr))
 			{
 				m_ServerListBox.SetSelectedItem(NewItem);
 				m_GameService.SetSelectedServer(i);
 			}
 			bFirstSvr = false;
-			__NFUN_165__(j);
+			(j++);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// End:0x503
-		if(__NFUN_153__(__NFUN_146__(iStartingIndex, j), iEndIndex))
+		if(((iStartingIndex + j) >= iEndIndex))
 		{
 			// [Explicit Break]
 			goto J0x518;
 		}
 		// End:0x515
-		if(__NFUN_153__(i, iNumServers))
+		if((i >= iNumServers))
 		{
 			// [Explicit Break]
 			goto J0x518;
@@ -1176,7 +1176,7 @@ function GetServerInfo(R6ServerList pServerList)
 
 	ClearServerInfo();
 	// End:0x1D
-	if(__NFUN_154__(pServerList.m_GameServerList.Length, 0))
+	if((pServerList.m_GameServerList.Length == 0))
 	{
 		return;
 	}
@@ -1185,13 +1185,13 @@ function GetServerInfo(R6ServerList pServerList)
 	J0x52:
 
 	// End:0x148 [Loop If]
-	if(__NFUN_150__(i, iNum))
+	if((i < iNum))
 	{
 		NewItemMap = R6WindowListInfoMapItem(m_ServerInfoMapBox.GetItemAtIndex(i));
 		NewItemMap.szMap = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.gameMapList[i].szMap;
 		Root.GetMapNameLocalisation(NewItemMap.szMap, NewItemMap.szMap, true);
 		NewItemMap.szType = GetLevel().GetGameNameLocalization(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.gameMapList[i].szGameType);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x52;
 	}
@@ -1201,7 +1201,7 @@ function GetServerInfo(R6ServerList pServerList)
 	J0x19B:
 
 	// End:0x2E7 [Loop If]
-	if(__NFUN_150__(i, iNum))
+	if((i < iNum))
 	{
 		NewItemPlayer = R6WindowListInfoPlayerItem(m_ServerInfoPlayerBox.GetItemAtIndex(i));
 		NewItemPlayer.szPlName = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.PlayerList[i].szAlias;
@@ -1209,75 +1209,75 @@ function GetServerInfo(R6ServerList pServerList)
 		NewItemPlayer.szTime = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.PlayerList[i].szTime;
 		NewItemPlayer.iPing = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.PlayerList[i].iPing;
 		NewItemPlayer.iRank = 0;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x19B;
 	}
 	pButtonsDef = R6MenuButtonsDefines(GetButtonsDefinesUnique(Root.MenuClassDefines.ClassButtonsDefines));
 	i = 0;
-	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
-	NewItemOptions.szOptions = __NFUN_112__(__NFUN_112__(pButtonsDef.GetButtonLoc(int(1)), " = "), string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iRoundsPerMatch));
-	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
-	NewItemOptions.szOptions = __NFUN_112__(__NFUN_112__(pButtonsDef.GetButtonLoc(int(2)), " = "), Class'Engine.Actor'.static.__NFUN_1520__(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iRoundTime));
-	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
-	NewItemOptions.szOptions = __NFUN_112__(__NFUN_112__(pButtonsDef.GetButtonLoc(int(7)), " = "), string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBetTime));
+	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
+	NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(1)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iRoundsPerMatch));
+	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
+	NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(2)) $ " = ") $ Class'Engine.Actor'.static.ConvertIntTimeToString(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iRoundTime));
+	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
+	NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(7)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBetTime));
 	// End:0x522
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bAdversarial)
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
-		NewItemOptions.szOptions = __NFUN_112__(__NFUN_112__(pButtonsDef.GetButtonLoc(int(4)), " = "), string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBombTime));		
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
+		NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(4)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBombTime));		
 	}
 	else
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
-		NewItemOptions.szOptions = __NFUN_112__(__NFUN_112__(pButtonsDef.GetButtonLoc(int(8)), " = "), string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iNumTerro));
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
+		NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(8)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iNumTerro));
 		// End:0x605
 		if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bAIBkp)
 		{
-			NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+			NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 			NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(17));
 		}
 		// End:0x673
 		if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bRotateMap)
 		{
-			NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+			NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 			NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(16));
 		}
 	}
 	// End:0x6E1
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bShowNames)
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(12));
 	}
 	// End:0x74F
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bFriendlyFire)
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(11));
 	}
 	// End:0x7BD
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bAutoBalTeam)
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(13));
 	}
 	// End:0x82B
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bTKPenalty)
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(14));
 	}
 	// End:0x899
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bRadar)
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(15));
 	}
 	// End:0x907
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bForceFPWeapon)
 	{
-		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex(__NFUN_165__(i)));
+		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(18));
 	}
 	return;
@@ -1304,7 +1304,7 @@ function JoinSelectedServerRequested()
 	local int iBeaconPort;
 
 	// End:0x16
-	if(__NFUN_114__(m_ServerListBox.m_SelectedItem, none))
+	if((m_ServerListBox.m_SelectedItem == none))
 	{
 		return;
 	}
@@ -1312,7 +1312,7 @@ function JoinSelectedServerRequested()
 	if(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).bSameVersion)
 	{
 		// End:0x86
-		if(__NFUN_154__(int(m_ConnectionTab), int(1)))
+		if((int(m_ConnectionTab) == int(1)))
 		{
 			m_szServerIP = m_GameService.GetSelectedServerIP();
 			iBeaconPort = m_GameService.m_GameServerList[m_GameService.m_iSelSrvIndex].iBeaconPort;			
@@ -1332,9 +1332,9 @@ function QueryReceivedStartPreJoin()
 {
 	local bool bRoomValid;
 
-	bRoomValid = __NFUN_130__(__NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID, 0), __NFUN_155__(m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID, 0));
+	bRoomValid = ((m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID != 0) && (m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID != 0));
 	// End:0xEC
-	if(__NFUN_130__(__NFUN_154__(int(m_ConnectionTab), int(1)), __NFUN_129__(bRoomValid)))
+	if(((int(m_ConnectionTab) == int(1)) && (!bRoomValid)))
 	{
 		R6MenuRootWindow(Root).SimplePopUp(Localize("MultiPlayer", "PopUp_Error_RoomJoin", "R6Menu"), Localize("MultiPlayer", "PopUp_Error_NoServer", "R6Menu"), 32, int(2));
 		Refresh(false);
@@ -1359,7 +1359,7 @@ function Tick(float DeltaTime)
 	{
 		R6Console(Root.Console).m_bAutoLoginFirstPass = false;
 		// End:0x70
-		if(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient))
+		if((!R6Console(Root.Console).m_bStartedByGSClient))
 		{
 			m_GameService.StartAutoLogin();
 		}
@@ -1368,7 +1368,7 @@ function Tick(float DeltaTime)
 	if(m_bFPassWindowActv)
 	{
 		// End:0xE9
-		if(__NFUN_154__(m_iLastTabSel, int(1)))
+		if((m_iLastTabSel == int(1)))
 		{
 			m_pFirstTabManager.m_pMainTabControl.GotoTab(m_pFirstTabManager.m_pMainTabControl.GetTab(Localize("MultiPlayer", "Tab_InternetServer", "R6Menu")));			
 		}
@@ -1378,12 +1378,12 @@ function Tick(float DeltaTime)
 		}
 		m_bFPassWindowActv = false;
 	}
-	__NFUN_184__(m_fRefeshDeltaTime, DeltaTime);
+	(m_fRefeshDeltaTime += DeltaTime);
 	// End:0x196
 	if(m_GameService.m_bLoggedInUbiDotCom)
 	{
 		// End:0x193
-		if(__NFUN_155__(int(m_ButtonLogInOut.m_eButton_Action), int(31)))
+		if((int(m_ButtonLogInOut.m_eButton_Action) != int(31)))
 		{
 			m_ButtonLogInOut.SetButLogInOutState(31);
 		}		
@@ -1391,7 +1391,7 @@ function Tick(float DeltaTime)
 	else
 	{
 		// End:0x1C0
-		if(__NFUN_155__(int(m_ButtonLogInOut.m_eButton_Action), int(30)))
+		if((int(m_ButtonLogInOut.m_eButton_Action) != int(30)))
 		{
 			m_ButtonLogInOut.SetButLogInOutState(30);
 		}
@@ -1401,7 +1401,7 @@ function Tick(float DeltaTime)
 	{
 		m_GameService.m_bAutoLoginFailed = false;
 		// End:0x1FD
-		if(__NFUN_154__(int(m_ConnectionTab), int(1)))
+		if((int(m_ConnectionTab) == int(1)))
 		{
 			ManageTabSelection(int(1));
 		}
@@ -1410,7 +1410,7 @@ function Tick(float DeltaTime)
 	if(m_bLanRefreshFPass)
 	{
 		// End:0x225
-		if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+		if((int(m_ConnectionTab) == int(0)))
 		{
 			Refresh(false);
 			m_bLanRefreshFPass = false;
@@ -1420,14 +1420,14 @@ function Tick(float DeltaTime)
 	if(m_bIntRefreshFPass)
 	{
 		// End:0x261
-		if(__NFUN_130__(__NFUN_154__(int(m_ConnectionTab), int(1)), m_GameService.m_bLoggedInUbiDotCom))
+		if(((int(m_ConnectionTab) == int(1)) && m_GameService.m_bLoggedInUbiDotCom))
 		{
 			Refresh(false);
 			m_bIntRefreshFPass = false;
 		}
 	}
 	// End:0x291
-	if(__NFUN_130__(m_bNeedUpdateServerFilter, __NFUN_177__(GetTime(), __NFUN_174__(m_fLastUpdateServerFilterTime, 0.3000000))))
+	if((m_bNeedUpdateServerFilter && (GetTime() > (m_fLastUpdateServerFilterTime + 0.3000000))))
 	{
 		m_bNeedUpdateServerFilter = false;
 		UpdateServerFilters();
@@ -1438,7 +1438,7 @@ function Tick(float DeltaTime)
 function AddServerToFavorites()
 {
 	// End:0x3E
-	if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+	if((int(m_ConnectionTab) == int(0)))
 	{
 		m_LanServers.AddToFavorites(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);		
 	}
@@ -1452,7 +1452,7 @@ function AddServerToFavorites()
 function DelServerFromFavorites()
 {
 	// End:0x3E
-	if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+	if((int(m_ConnectionTab) == int(0)))
 	{
 		m_LanServers.DelFromFavorites(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);		
 	}
@@ -1474,16 +1474,16 @@ function PromptConnectionError()
 	r6Root.m_RSimplePopUp.W = 360;
 	r6Root.m_RSimplePopUp.H = 77;
 	// End:0x1AD
-	if(__NFUN_123__(R6Console(Root.Console).m_szLastError, ""))
+	if((R6Console(Root.Console).m_szLastError != ""))
 	{
 		szTemp = Localize("Multiplayer", R6Console(Root.Console).m_szLastError, "R6Menu", true);
 		// End:0x113
-		if(__NFUN_122__(szTemp, ""))
+		if((szTemp == ""))
 		{
 			szTemp = Localize("Errors", R6Console(Root.Console).m_szLastError, "R6Engine", true);
 		}
 		// End:0x141
-		if(__NFUN_122__(szTemp, ""))
+		if((szTemp == ""))
 		{
 			szTemp = R6Console(Root.Console).m_szLastError;
 		}
@@ -1519,36 +1519,36 @@ function DisplayRightClickMenu()
 function UpdateFavorites()
 {
 	// End:0x4B
-	if(__NFUN_122__(m_pRightClickMenu.GetValue(), Localize("MultiPlayer", "RightClick_AddFav", "R6Menu")))
+	if((m_pRightClickMenu.GetValue() == Localize("MultiPlayer", "RightClick_AddFav", "R6Menu")))
 	{
 		AddServerToFavorites();		
 	}
 	else
 	{
 		// End:0x96
-		if(__NFUN_122__(m_pRightClickMenu.GetValue(), Localize("MultiPlayer", "RightClick_SubFav", "R6Menu")))
+		if((m_pRightClickMenu.GetValue() == Localize("MultiPlayer", "RightClick_SubFav", "R6Menu")))
 		{
 			DelServerFromFavorites();			
 		}
 		else
 		{
 			// End:0x13C
-			if(__NFUN_122__(m_pRightClickMenu.GetValue(), Localize("MultiPlayer", "RightClick_Refr", "R6Menu")))
+			if((m_pRightClickMenu.GetValue() == Localize("MultiPlayer", "RightClick_Refr", "R6Menu")))
 			{
 				// End:0x114
-				if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+				if((int(m_ConnectionTab) == int(0)))
 				{
 					m_LanServers.RefreshOneServer(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);					
 				}
 				else
 				{
-					m_GameService.__NFUN_3521__(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);
+					m_GameService.RefreshOneServer(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);
 				}
 			}
 		}
 	}
 	// End:0x15B
-	if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+	if((int(m_ConnectionTab) == int(0)))
 	{
 		UpdateFilters();
 		GetLanServers();		
@@ -1565,10 +1565,10 @@ function ResortServerList(int iCategory, bool _bAscending)
 {
 	m_iLastSortCategory = iCategory;
 	m_bLastTypeOfSort = _bAscending;
-	m_GameService.__NFUN_1206__(iCategory, _bAscending);
-	m_LanServers.__NFUN_1206__(iCategory, _bAscending);
+	m_GameService.SortServers(iCategory, _bAscending);
+	m_LanServers.SortServers(iCategory, _bAscending);
 	// End:0x5F
-	if(__NFUN_154__(int(m_ConnectionTab), int(0)))
+	if((int(m_ConnectionTab) == int(0)))
 	{
 		GetLanServers();		
 	}
@@ -1584,7 +1584,7 @@ function ResortServerList(int iCategory, bool _bAscending)
 //*********************************
 function InitText()
 {
-	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, __NFUN_175__(WinWidth, float(8)), 25.0000000, self));
+	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("MultiPlayer", "Title", "R6Menu");
 	m_LMenuTitle.Align = 1;
 	m_LMenuTitle.m_Font = Root.Fonts[4];
@@ -1627,7 +1627,7 @@ function InitButton()
 	m_ButtonLogInOut.m_fFontSpacing = 0.0000000;
 	m_ButtonLogInOut.m_buttonFont = ButtonFont;
 	m_ButtonLogInOut.ResizeToText();
-	__NFUN_184__(fXOffset, fWidth);
+	(fXOffset += fWidth);
 	m_ButtonJoin = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, 400.0000000, 25.0000000, self));
 	m_ButtonJoin.ToolTipString = pButtonsDef.GetButtonLoc(int(32), true);
 	m_ButtonJoin.Text = pButtonsDef.GetButtonLoc(int(32));
@@ -1638,7 +1638,7 @@ function InitButton()
 	m_ButtonJoin.ResizeToText();
 	m_ButtonJoin.m_pPreviousButtonPos = m_ButtonLogInOut;
 	m_ButtonJoin.m_pRefButtonPos = m_ButtonLogInOut;
-	__NFUN_184__(fXOffset, fWidth);
+	(fXOffset += fWidth);
 	m_ButtonJoinIP = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, 400.0000000, 25.0000000, self));
 	m_ButtonJoinIP.ToolTipString = pButtonsDef.GetButtonLoc(int(33), true);
 	m_ButtonJoinIP.Text = pButtonsDef.GetButtonLoc(int(33));
@@ -1649,7 +1649,7 @@ function InitButton()
 	m_ButtonJoinIP.ResizeToText();
 	m_ButtonJoinIP.m_pPreviousButtonPos = m_ButtonJoin;
 	m_ButtonJoinIP.m_pRefButtonPos = m_ButtonLogInOut;
-	__NFUN_184__(fXOffset, fWidth);
+	(fXOffset += fWidth);
 	m_ButtonRefresh = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, 400.0000000, 25.0000000, self));
 	m_ButtonRefresh.ToolTipString = pButtonsDef.GetButtonLoc(int(34), true);
 	m_ButtonRefresh.Text = pButtonsDef.GetButtonLoc(int(34));
@@ -1660,7 +1660,7 @@ function InitButton()
 	m_ButtonRefresh.ResizeToText();
 	m_ButtonRefresh.m_pPreviousButtonPos = m_ButtonJoinIP;
 	m_ButtonRefresh.m_pRefButtonPos = m_ButtonLogInOut;
-	__NFUN_184__(fXOffset, fWidth);
+	(fXOffset += fWidth);
 	m_ButtonCreate = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, fWidth, 25.0000000, self));
 	m_ButtonCreate.ToolTipString = pButtonsDef.GetButtonLoc(int(35), true);
 	m_ButtonCreate.Text = pButtonsDef.GetButtonLoc(int(35));
@@ -1679,7 +1679,7 @@ function InitInfoBar()
 
 	fWidth = 15.0000000;
 	fPreviousPos = 0.0000000;
-	m_pButServerList = R6MenuMPButServerList(CreateWindow(Class'R6Menu.R6MenuMPButServerList', __NFUN_174__(10.0000000, float(1)), 114.0000000, __NFUN_175__(620.0000000, float(2)), 12.0000000, self));
+	m_pButServerList = R6MenuMPButServerList(CreateWindow(Class'R6Menu.R6MenuMPButServerList', (10.0000000 + float(1)), 114.0000000, (620.0000000 - float(2)), 12.0000000, self));
 	return;
 }
 
@@ -1706,7 +1706,7 @@ function InitServerList()
 	local int iFiles, i, j;
 
 	// End:0x0D
-	if(__NFUN_119__(m_ServerListBox, none))
+	if((m_ServerListBox != none))
 	{
 		return;
 	}
@@ -1714,7 +1714,7 @@ function InitServerList()
 	m_ServerListBox.Register(m_pFirstTabManager);
 	m_ServerListBox.SetCornerType(1);
 	m_ServerListBox.m_Font = Root.Fonts[10];
-	m_ServerListBox.m_iPingTimeOut = m_LanServers.__NFUN_1202__();
+	m_ServerListBox.m_iPingTimeOut = m_LanServers.NativeGetPingTimeOut();
 	return;
 }
 
@@ -1763,9 +1763,9 @@ function InitSecondTabWindow()
 
 	fWidth = 1.0000000;
 	// End:0x279
-	if(__NFUN_114__(m_pSecondWindowBorder, none))
+	if((m_pSecondWindowBorder == none))
 	{
-		m_pSecondWindowBorder = R6WindowSimpleFramedWindowExt(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindowExt', 10.0000000, __NFUN_174__(296.0000000, float(29)), 620.0000000, 90.0000000, self));
+		m_pSecondWindowBorder = R6WindowSimpleFramedWindowExt(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindowExt', 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowBorder.bAlwaysBehind = true;
 		m_pSecondWindowBorder.ActiveBorder(0, false);
 		m_pSecondWindowBorder.SetBorderParam(1, 7.0000000, 0.0000000, fWidth, Root.Colors.White);
@@ -1774,12 +1774,12 @@ function InitSecondTabWindow()
 		m_pSecondWindowBorder.m_eCornerType = 2;
 		m_pSecondWindowBorder.SetCornerColor(2, Root.Colors.White);
 		m_pSecondWindowBorder.ActiveBackGround(true, Root.Colors.Black);
-		m_pSecondWindowGameMode = R6MenuMPMenuTab(CreateWindow(Root.MenuClassDefines.ClassMPMenuTabGameModeFilters, 10.0000000, __NFUN_174__(296.0000000, float(29)), 620.0000000, 90.0000000, self));
+		m_pSecondWindowGameMode = R6MenuMPMenuTab(CreateWindow(Root.MenuClassDefines.ClassMPMenuTabGameModeFilters, 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowGameMode.InitGameModeTab();
-		m_pSecondWindowFilter = R6MenuMPMenuTab(CreateWindow(Class'R6Menu.R6MenuMPMenuTab', 10.0000000, __NFUN_174__(296.0000000, float(29)), 620.0000000, 90.0000000, self));
+		m_pSecondWindowFilter = R6MenuMPMenuTab(CreateWindow(Class'R6Menu.R6MenuMPMenuTab', 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowFilter.InitFilterTab();
 		m_pSecondWindowFilter.HideWindow();
-		m_pSecondWindowServerInfo = R6MenuMPMenuTab(CreateWindow(Class'R6Menu.R6MenuMPMenuTab', 10.0000000, __NFUN_174__(296.0000000, float(29)), 620.0000000, 90.0000000, self));
+		m_pSecondWindowServerInfo = R6MenuMPMenuTab(CreateWindow(Class'R6Menu.R6MenuMPMenuTab', 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowServerInfo.bAlwaysBehind = true;
 		m_pSecondWindowServerInfo.InitServerTab();
 		m_pSecondWindowServerInfo.HideWindow();
@@ -1834,7 +1834,7 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 				// End:0xD5
 				case 5:
 					// End:0xD5
-					if(__NFUN_154__(int(m_ConnectionTab), int(1)))
+					if((int(m_ConnectionTab) == int(1)))
 					{
 						Refresh(false);
 					}
@@ -1879,14 +1879,14 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 		case 4:
 		// End:0x214
 		case 5:
-			__NFUN_231__("R6MenuMultiplayerWidget SendMessage() not supposed to arrive here (should be in R6MenuCDKeyManager)!!!!");
+			Log("R6MenuMultiplayerWidget SendMessage() not supposed to arrive here (should be in R6MenuCDKeyManager)!!!!");
 			// End:0x2E8
 			break;
 		// End:0x282
 		case 6:
 			m_bJoinIPInProgress = false;
 			m_szPopUpIP = m_pJoinIPWindow.m_szIP;
-			__NFUN_536__();
+			SaveConfig();
 			// End:0x265
 			if(m_pJoinIPWindow.m_bRoomValid)
 			{
@@ -1935,7 +1935,7 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0xC6
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -1987,20 +1987,20 @@ function ResetMultiplayerMenu()
 	local ClientBeaconReceiver _BeaconReceiver;
 
 	// End:0x2F
-	if(__NFUN_119__(m_LanServers, none))
+	if((m_LanServers != none))
 	{
 		_BeaconReceiver = m_LanServers.m_ClientBeacon;
 		m_LanServers.m_ClientBeacon = none;
 	}
 	// End:0x4A
-	if(__NFUN_119__(m_GameService, none))
+	if((m_GameService != none))
 	{
 		m_GameService.m_ClientBeacon = none;
 	}
 	// End:0x61
-	if(__NFUN_119__(_BeaconReceiver, none))
+	if((_BeaconReceiver != none))
 	{
-		_BeaconReceiver.__NFUN_279__();
+		_BeaconReceiver.Destroy();
 	}
 	m_LanServers = none;
 	R6Console(Root.Console).m_LanServers = none;

@@ -121,7 +121,7 @@ function ShowWindow()
 {
 	super(UWindowWindow).ShowWindow();
 	UpdateOperativeItems();
-	GetPlayerOwner().__NFUN_264__(m_OperativeOpenSnd, 9) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+	GetPlayerOwner().PlaySound(m_OperativeOpenSnd, 9);
 	return;
 }
 
@@ -134,11 +134,11 @@ function HideWindow()
 	J0x0D:
 
 	// End:0x53 [Loop If]
-	if(__NFUN_150__(iOperativePos, aItems.Length))
+	if((iOperativePos < aItems.Length))
 	{
 		aItems[iOperativePos].m_Operative = none;
 		aItems[iOperativePos].m_MemberRepInfo = none;
-		__NFUN_165__(iOperativePos);
+		(iOperativePos++);
 		// [Loop Continue]
 		goto J0x0D;
 	}
@@ -160,31 +160,31 @@ function Paint(Canvas C, float X, float Y)
 		J0x10:
 
 		// End:0x36A [Loop If]
-		if(__NFUN_150__(iTeam, 3))
+		if((iTeam < 3))
 		{
 			C.Style = 5;
-			iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_144__(iTeam, __NFUN_146__(c_InsideMarginX, c_ColumnWidth)));
-			iPosY = __NFUN_146__(63, c_InsideMarginY);
+			iPosX = ((c_OutsideMarginX + c_InsideMarginX) + (iTeam * (c_InsideMarginX + c_ColumnWidth)));
+			iPosY = (63 + c_InsideMarginY);
 			C.DrawColor = Root.Colors.TeamColor[iTeam];
 			C.DrawColor.A = 51;
-			DrawStretchedTextureSegment(C, float(__NFUN_146__(iPosX, 1)), float(__NFUN_146__(iPosY, 1)), float(__NFUN_147__(c_ColumnWidth, 2)), 18.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			DrawStretchedTextureSegment(C, float((iPosX + 1)), float((iPosY + 1)), float((c_ColumnWidth - 2)), 18.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 			C.DrawColor.A = byte(255);
-			C.__NFUN_2623__(float(__NFUN_146__(iPosX, __NFUN_145__(c_ColumnWidth, 2))), float(__NFUN_146__(iPosY, 2)));
+			C.SetPos(float((iPosX + (c_ColumnWidth / 2))), float((iPosY + 2)));
 			switch(iTeam)
 			{
 				// End:0x163
 				case 0:
-					szTeam = __NFUN_235__(Localize("COLOR", "ID_RED", "R6COMMON"));
+					szTeam = Caps(Localize("COLOR", "ID_RED", "R6COMMON"));
 					// End:0x1C6
 					break;
 				// End:0x193
 				case 1:
-					szTeam = __NFUN_235__(Localize("COLOR", "ID_GREEN", "R6COMMON"));
+					szTeam = Caps(Localize("COLOR", "ID_GREEN", "R6COMMON"));
 					// End:0x1C6
 					break;
 				// End:0x1C3
 				case 2:
-					szTeam = __NFUN_235__(Localize("COLOR", "ID_GOLD", "R6COMMON"));
+					szTeam = Caps(Localize("COLOR", "ID_GOLD", "R6COMMON"));
 					// End:0x1C6
 					break;
 				// End:0xFFFF
@@ -192,24 +192,24 @@ function Paint(Canvas C, float X, float Y)
 					break;
 			}
 			TextSize(C, szTeam, fTeamPosX, fTeamPosY);
-			C.__NFUN_2623__(__NFUN_174__(float(iPosX), __NFUN_172__(__NFUN_175__(float(c_ColumnWidth), fTeamPosX), float(2))), float(__NFUN_146__(iPosY, 1)));
-			C.__NFUN_465__(szTeam);
+			C.SetPos((float(iPosX) + ((float(c_ColumnWidth) - fTeamPosX) / float(2))), float((iPosY + 1)));
+			C.DrawText(szTeam);
 			DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-			DrawStretchedTextureSegment(C, float(iPosX), float(__NFUN_147__(__NFUN_146__(iPosY, 17), 1)), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			DrawStretchedTextureSegment(C, float(iPosX), float(((iPosY + 17) - 1)), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 			DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-			DrawStretchedTextureSegment(C, float(__NFUN_147__(__NFUN_146__(iPosX, c_ColumnWidth), 1)), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+			DrawStretchedTextureSegment(C, float(((iPosX + c_ColumnWidth) - 1)), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 			iOperative = 0;
 			J0x331:
 
 			// End:0x360 [Loop If]
-			if(__NFUN_150__(iOperative, aItems.Length))
+			if((iOperative < aItems.Length))
 			{
 				aItems[iOperative].UpdatePosition();
-				__NFUN_165__(iOperative);
+				(iOperative++);
 				// [Loop Continue]
 				goto J0x331;
 			}
-			__NFUN_165__(iTeam);
+			(iTeam++);
 			// [Loop Continue]
 			goto J0x10;
 		}		
@@ -217,29 +217,29 @@ function Paint(Canvas C, float X, float Y)
 	else
 	{
 		C.Style = 5;
-		iPosX = __NFUN_146__(__NFUN_146__(c_OutsideMarginX, c_InsideMarginX), __NFUN_146__(c_InsideMarginX, c_ColumnWidth));
-		iPosY = __NFUN_146__(63, c_InsideMarginY);
+		iPosX = ((c_OutsideMarginX + c_InsideMarginX) + (c_InsideMarginX + c_ColumnWidth));
+		iPosY = (63 + c_InsideMarginY);
 		C.DrawColor = m_pGameOptions.HUDMPColor;
 		C.DrawColor.A = 51;
-		DrawStretchedTextureSegment(C, float(__NFUN_146__(iPosX, 1)), float(__NFUN_146__(iPosY, 1)), float(__NFUN_147__(c_ColumnWidth, 2)), 18.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		DrawStretchedTextureSegment(C, float((iPosX + 1)), float((iPosY + 1)), float((c_ColumnWidth - 2)), 18.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 		C.DrawColor.A = byte(255);
-		C.__NFUN_2623__(float(__NFUN_146__(iPosX, __NFUN_145__(c_ColumnWidth, 2))), float(__NFUN_146__(iPosY, 2)));
-		szTeam = __NFUN_235__(Localize("MISC", "Team", "R6Menu"));
+		C.SetPos(float((iPosX + (c_ColumnWidth / 2))), float((iPosY + 2)));
+		szTeam = Caps(Localize("MISC", "Team", "R6Menu"));
 		TextSize(C, szTeam, fTeamPosX, fTeamPosY);
-		C.__NFUN_2623__(__NFUN_174__(float(iPosX), __NFUN_172__(__NFUN_175__(float(c_ColumnWidth), fTeamPosX), float(2))), float(__NFUN_146__(iPosY, 1)));
-		C.__NFUN_465__(szTeam);
+		C.SetPos((float(iPosX) + ((float(c_ColumnWidth) - fTeamPosX) / float(2))), float((iPosY + 1)));
+		C.DrawText(szTeam);
 		DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-		DrawStretchedTextureSegment(C, float(iPosX), float(__NFUN_147__(__NFUN_146__(iPosY, 17), 1)), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		DrawStretchedTextureSegment(C, float(iPosX), float(((iPosY + 17) - 1)), float(c_ColumnWidth), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 		DrawStretchedTextureSegment(C, float(iPosX), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-		DrawStretchedTextureSegment(C, float(__NFUN_147__(__NFUN_146__(iPosX, c_ColumnWidth), 1)), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+		DrawStretchedTextureSegment(C, float(((iPosX + c_ColumnWidth) - 1)), float(iPosY), 1.0000000, 17.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 		iOperative = 0;
 		J0x5F6:
 
 		// End:0x625 [Loop If]
-		if(__NFUN_150__(iOperative, aItems.Length))
+		if((iOperative < aItems.Length))
 		{
 			aItems[iOperative].UpdatePositionMP();
-			__NFUN_165__(iOperative);
+			(iOperative++);
 			// [Loop Continue]
 			goto J0x5F6;
 		}

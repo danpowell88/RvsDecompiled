@@ -282,7 +282,7 @@ function HurtPawns()
 				// End:0x7D6
 				if((fDistFromGrenade < m_fShakeRadius))
 				{
-					aPC.R6Shake(1.0000000, __NFUN_175__(m_fShakeRadius, fDistFromGrenade), 0.0500000);
+					aPC.R6Shake(1.0000000, (m_fShakeRadius - fDistFromGrenade), 0.0500000);
 					aPC.ClientPlaySound(m_sndEarthQuake, 3);
 				}
 			}

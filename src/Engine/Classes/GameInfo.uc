@@ -474,37 +474,37 @@ event InitGame(string Options, out string Error)
 		ACClass = Class<AccessControl>(DynamicLoadObject(InOpt, Class'Core.Class'));
 	}
 	// End:0x135
-	if(__NFUN_119__(ACClass, none))
+	if((ACClass != none))
 	{
-		AccessControl = __NFUN_278__(ACClass);		
+		AccessControl = Spawn(ACClass);		
 	}
 	else
 	{
 		ACClass = Class<AccessControl>(DynamicLoadObject(AccessControlClass, Class'Core.Class'));
-		AccessControl = __NFUN_278__(ACClass);
+		AccessControl = Spawn(ACClass);
 	}
 	InOpt = ParseOption(Options, "AdminPassword");
 	// End:0x19E
-	if(__NFUN_123__(InOpt, ""))
+	if((InOpt != ""))
 	{
 		AccessControl.SetAdminPassword(InOpt);
 	}
 	InOpt = ParseOption(Options, "GamePassword");
 	// End:0x1F4
-	if(__NFUN_123__(InOpt, ""))
+	if((InOpt != ""))
 	{
 		AccessControl.SetGamePassword(InOpt);
-		__NFUN_231__(__NFUN_168__("GamePassword", InOpt));
+		Log(("GamePassword" @ InOpt));
 	}
 	InOpt = ParseOption(Options, "LocalLog");
 	// End:0x227
-	if(__NFUN_124__(InOpt, "true"))
+	if((InOpt ~= "true"))
 	{
 		bLocalLog = true;
 	}
 	InOpt = ParseOption(Options, "WorldLog");
 	// End:0x25A
-	if(__NFUN_124__(InOpt, "true"))
+	if((InOpt ~= "true"))
 	{
 		bWorldLog = true;
 	}
@@ -515,7 +515,7 @@ event InitGame(string Options, out string Error)
 //#ifdef R6BUILDPLANNINGPHASE
 function DeployCharacters(PlayerController PController)
 {
-	__NFUN_231__("Wrong Deploy character");
+	Log("Wrong Deploy character");
 	return;
 }
 
@@ -524,7 +524,7 @@ function DeployCharacters(PlayerController PController)
 //
 event string GetBeaconText()
 {
-	return __NFUN_112__(__NFUN_112__(__NFUN_168__(__NFUN_168__(__NFUN_168__(Level.ComputerName, __NFUN_128__(Level.Title, 24)), BeaconName), string(NumPlayers)), "/"), string(MaxPlayers));
+	return (((((Level.ComputerName @ Left(Level.Title, 24)) @ BeaconName) @ string(NumPlayers)) $ "/") $ string(MaxPlayers));
 	return;
 }
 
@@ -535,15 +535,15 @@ function ProcessServerTravel(string URL, bool bItems)
 	EndLogging("mapchange");
 	m_bPendingLevelExists = true;
 	// End:0xB4
-	foreach __NFUN_313__(Class'Engine.PlayerController', P)
+	foreach DynamicActors(Class'Engine.PlayerController', P)
 	{
 		// End:0xB3
-		if(__NFUN_119__(NetConnection(P.Player), none))
+		if((NetConnection(P.Player) != none))
 		{
 			// End:0x99
-			if(__NFUN_119__(NetConnection(P.Player), none))
+			if((NetConnection(P.Player) != none))
 			{
-				P.ClientTravel(__NFUN_112__(__NFUN_112__(URL, "?Password="), AccessControl.GetGamePassword()), 2, bItems);
+				P.ClientTravel(((URL $ "?Password=") $ AccessControl.GetGamePassword()), 2, bItems);
 				// End:0xB3
 				continue;
 			}
@@ -552,12 +552,12 @@ function ProcessServerTravel(string URL, bool bItems)
 		}		
 	}	
 	// End:0x1BE
-	if(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_119__(LocalPlayer, none)))
+	if(((int(Level.NetMode) == int(NM_ListenServer)) && (LocalPlayer != none)))
 	{
-		Level.NextURL = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(Level.NextURL, "?Skin="), LocalPlayer.GetDefaultURL("Skin")), "?Face="), LocalPlayer.GetDefaultURL("Face")), "?Team="), LocalPlayer.GetDefaultURL("Team")), "?Name="), LocalPlayer.GetDefaultURL("Name")), "?Class="), LocalPlayer.GetDefaultURL("Class")), "?Password="), AccessControl.GetGamePassword());
+		Level.NextURL = ((((((((((((Level.NextURL $ "?Skin=") $ LocalPlayer.GetDefaultURL("Skin")) $ "?Face=") $ LocalPlayer.GetDefaultURL("Face")) $ "?Team=") $ LocalPlayer.GetDefaultURL("Team")) $ "?Name=") $ LocalPlayer.GetDefaultURL("Name")) $ "?Class=") $ LocalPlayer.GetDefaultURL("Class")) $ "?Password=") $ AccessControl.GetGamePassword());
 	}
 	// End:0x206
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_155__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) != int(NM_DedicatedServer)) && (int(Level.NetMode) != int(NM_ListenServer))))
 	{
 		Level.NextSwitchCountdown = 0.0000000;
 	}
@@ -571,7 +571,7 @@ event PreLogin(string Options, string Address, out string Error, out string Fail
 	local string spec;
 
 	spec = ParseOption(Options, "SpectatorOnly");
-	bSpectator = __NFUN_123__(spec, "");
+	bSpectator = (spec != "");
 	AccessControl.PreLogin(Options, Address, Error, FailCode, bSpectator);
 	return;
 }
@@ -582,9 +582,9 @@ function int GetIntOption(string Options, string ParseString, int CurrentValue)
 
 	InOpt = ParseOption(Options, ParseString);
 	// End:0x38
-	if(__NFUN_123__(InOpt, ""))
+	if((InOpt != ""))
 	{
-		__NFUN_231__(__NFUN_168__(ParseString, InOpt));
+		Log((ParseString @ InOpt));
 		return int(InOpt);
 	}
 	return CurrentValue;
@@ -594,18 +594,18 @@ function int GetIntOption(string Options, string ParseString, int CurrentValue)
 function bool AtCapacity(bool bSpectator)
 {
 	// End:0x1B
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return false;
 	}
 	// End:0x5C
 	if(bSpectator)
 	{
-		return __NFUN_130__(__NFUN_153__(NumSpectators, MaxSpectators), __NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_151__(NumPlayers, 0)));		
+		return ((NumSpectators >= MaxSpectators) && ((int(Level.NetMode) != int(NM_ListenServer)) || (NumPlayers > 0)));		
 	}
 	else
 	{
-		return __NFUN_130__(__NFUN_151__(MaxPlayers, 0), __NFUN_153__(NumPlayers, MaxPlayers));
+		return ((MaxPlayers > 0) && (NumPlayers >= MaxPlayers));
 	}
 	return;
 }
@@ -621,110 +621,110 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	local byte InTeam;
 	local bool bSpectator;
 
-	bSpectator = __NFUN_123__(ParseOption(Options, "SpectatorOnly"), "");
+	bSpectator = (ParseOption(Options, "SpectatorOnly") != "");
 	// End:0x4A
 	if(AtCapacity(bSpectator))
 	{
 		Error = GameMessageClass.default.MaxedOutMessage;
 		return none;
 	}
-	InName = __NFUN_128__(ParseOption(Options, "Name"), 20);
+	InName = Left(ParseOption(Options, "Name"), 20);
 	InTeam = byte(GetIntOption(Options, "Team", 255));
 	InPassword = ParseOption(Options, "Password");
 	InChecksum = ParseOption(Options, "Checksum");
-	__NFUN_231__(__NFUN_168__("Login:", InName));
+	Log(("Login:" @ InName));
 	// End:0xE6
-	if(__NFUN_123__(InPassword, ""))
+	if((InPassword != ""))
 	{
-		__NFUN_231__(__NFUN_168__("Password", InPassword));
+		Log(("Password" @ InPassword));
 	}
 	StartSpot = FindPlayerStart(none, InTeam, Portal);
 	// End:0x146
-	if(__NFUN_114__(StartSpot, none))
+	if((StartSpot == none))
 	{
 		Error = Localize("MPMiscMessages", "FailedPlaceMessage", "R6GameInfo");
 		return none;
 	}
 	// End:0x16C
-	if(__NFUN_114__(PlayerControllerClass, none))
+	if((PlayerControllerClass == none))
 	{
 		PlayerControllerClass = Class<PlayerController>(DynamicLoadObject(PlayerControllerClassName, Class'Core.Class'));
 	}
-	NewPlayer = __NFUN_278__(PlayerControllerClass,,, StartSpot.Location, StartSpot.Rotation);
+	NewPlayer = Spawn(PlayerControllerClass,,, StartSpot.Location, StartSpot.Rotation);
 	// End:0x1F0
-	if(__NFUN_114__(NewPlayer, none))
+	if((NewPlayer == none))
 	{
-		__NFUN_231__(__NFUN_112__("Couldn't spawn player controller of class ", string(PlayerControllerClass)));
+		Log(("Couldn't spawn player controller of class " $ string(PlayerControllerClass)));
 		Error = GameMessageClass.default.FailedSpawnMessage;
 		return none;
 	}
 	NewPlayer.StartSpot = StartSpot;
 	// End:0x21B
-	if(__NFUN_122__(InName, ""))
+	if((InName == ""))
 	{
 		InName = DefaultPlayerName;
 	}
 	// End:0x290
-	if(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none))
+	if((NewPlayer.PlayerReplicationInfo != none))
 	{
 		// End:0x27C
-		if(__NFUN_132__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_122__(NewPlayer.PlayerReplicationInfo.PlayerName, DefaultPlayerName)))
+		if(((int(Level.NetMode) != int(NM_Standalone)) || (NewPlayer.PlayerReplicationInfo.PlayerName == DefaultPlayerName)))
 		{
 			ChangeName(NewPlayer, InName, false);
 		}
 		NewPlayer.GameReplicationInfo = GameReplicationInfo;
 	}
-	NewPlayer.__NFUN_113__('Spectating');
+	NewPlayer.GotoState('Spectating');
 	// End:0x2E1
 	if(bSpectator)
 	{
 		NewPlayer.bOnlySpectator = true;
 		NewPlayer.PlayerReplicationInfo.bIsSpectator = true;
-		__NFUN_165__(NumSpectators);
+		(NumSpectators++);
 		return NewPlayer;
 	}
 	// End:0x314
-	if(__NFUN_119__(NewPlayer.PlayerReplicationInfo, none))
+	if((NewPlayer.PlayerReplicationInfo != none))
 	{
-		NewPlayer.PlayerReplicationInfo.PlayerID = __NFUN_165__(CurrentID);
+		NewPlayer.PlayerReplicationInfo.PlayerID = (CurrentID++);
 	}
 	InClass = ParseOption(Options, "Class");
 	// End:0x372
-	if(__NFUN_123__(InClass, ""))
+	if((InClass != ""))
 	{
 		DesiredPawnClass = Class<Pawn>(DynamicLoadObject(InClass, Class'Core.Class'));
 		// End:0x372
-		if(__NFUN_119__(DesiredPawnClass, none))
+		if((DesiredPawnClass != none))
 		{
 			NewPlayer.PawnClass = DesiredPawnClass;
 		}
 	}
 	// End:0x391
-	if(__NFUN_119__(StatLog, none))
+	if((StatLog != none))
 	{
 		StatLog.LogPlayerConnect(NewPlayer);
 	}
-	NewPlayer.ReceivedSecretChecksum = __NFUN_129__(__NFUN_124__(InChecksum, "NoChecksum"));
-	__NFUN_165__(NumPlayers);
+	NewPlayer.ReceivedSecretChecksum = (!(InChecksum ~= "NoChecksum"));
+	(NumPlayers++);
 	// End:0x40B
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		BroadcastLocalizedMessage(GameMessageClass, 1, NewPlayer.PlayerReplicationInfo);
 	}
 	// End:0x42A
 	if(bDelayedStart)
 	{
-		NewPlayer.__NFUN_113__('BaseSpectating');
+		NewPlayer.GotoState('BaseSpectating');
 		return NewPlayer;
 	}
 	// End:0x519
-	foreach __NFUN_313__(Class'Engine.Pawn', TestPawn)
+	foreach DynamicActors(Class'Engine.Pawn', TestPawn)
 	{
 		// End:0x518
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(TestPawn, none), __NFUN_119__(PlayerController(TestPawn.Controller), none)), __NFUN_114__(PlayerController(TestPawn.Controller).Player, none)), __NFUN_151__(TestPawn.Health, 0)), __NFUN_124__(TestPawn.OwnerName, InName)))
+		if((((((TestPawn != none) && (PlayerController(TestPawn.Controller) != none)) && (PlayerController(TestPawn.Controller).Player == none)) && (TestPawn.Health > 0)) && (TestPawn.OwnerName ~= InName)))
 		{
-			NewPlayer.__NFUN_279__();
-			TestPawn.__NFUN_299__(TestPawn.Controller.Rotation);
+			NewPlayer.Destroy();
+			TestPawn.SetRotation(TestPawn.Controller.Rotation);
 			TestPawn.bInitializeAnimation = false;
 			TestPawn.PlayWaiting();			
 			return PlayerController(TestPawn.Controller);
@@ -740,12 +740,12 @@ function StartMatch()
 	local Actor A;
 
 	// End:0x1A
-	if(__NFUN_119__(StatLog, none))
+	if((StatLog != none))
 	{
 		StatLog.LogGameStart();
 	}
 	// End:0x3A
-	foreach __NFUN_304__(Class'Engine.Actor', A)
+	foreach AllActors(Class'Engine.Actor', A)
 	{
 		A.MatchStarting();		
 	}	
@@ -753,10 +753,10 @@ function StartMatch()
 	J0x4F:
 
 	// End:0xCD [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0xB6
-		if(__NFUN_130__(P.__NFUN_303__('PlayerController'), __NFUN_114__(P.Pawn, none)))
+		if((P.IsA('PlayerController') && (P.Pawn == none)))
 		{
 			// End:0x92
 			if(bGameEnded)
@@ -766,7 +766,7 @@ function StartMatch()
 			else
 			{
 				// End:0xB6
-				if(__NFUN_129__(PlayerController(P).bOnlySpectator))
+				if((!PlayerController(P).bOnlySpectator))
 				{
 					RestartPlayer(P);
 				}
@@ -803,7 +803,7 @@ event PostLogin(PlayerController NewPlayer)
 	local Class<HUD> H;
 
 	// End:0x3D
-	if(__NFUN_129__(bDelayedStart))
+	if((!bDelayedStart))
 	{
 		bRestartLevel = false;
 		// End:0x25
@@ -821,7 +821,7 @@ event PostLogin(PlayerController NewPlayer)
 	H = Class<HUD>(DynamicLoadObject(HUDType, Class'Core.Class'));
 	NewPlayer.ClientSetHUD(H, none);
 	// End:0xCF
-	if(__NFUN_119__(NewPlayer.Pawn, none))
+	if((NewPlayer.Pawn != none))
 	{
 		NewPlayer.Pawn.ClientSetRotation(NewPlayer.Pawn.Rotation);
 	}
@@ -837,30 +837,30 @@ function Logout(Controller Exiting)
 
 	bMessage = true;
 	// End:0x61
-	if(__NFUN_119__(PlayerController(Exiting), none))
+	if((PlayerController(Exiting) != none))
 	{
 		// End:0x5A
 		if(PlayerController(Exiting).bOnlySpectator)
 		{
 			bMessage = false;
 			// End:0x57
-			if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+			if((int(Level.NetMode) == int(NM_DedicatedServer)))
 			{
-				__NFUN_166__(NumSpectators);
+				(NumSpectators--);
 			}			
 		}
 		else
 		{
-			__NFUN_166__(NumPlayers);
+			(NumPlayers--);
 		}
 	}
 	// End:0xBB
-	if(__NFUN_130__(bMessage, __NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))))
+	if((bMessage && ((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer)))))
 	{
 		BroadcastLocalizedMessage(GameMessageClass, 4, Exiting.PlayerReplicationInfo);
 	}
 	// End:0xDA
-	if(__NFUN_119__(StatLog, none))
+	if((StatLog != none))
 	{
 		StatLog.LogPlayerDisconnect(Exiting);
 	}
@@ -918,23 +918,23 @@ function ChangeName(Controller Other, coerce string S, bool bNameChange, optiona
 
 	_szNewName = TransformName(Other.PlayerReplicationInfo, S);
 	// End:0x2D
-	if(__NFUN_122__(_szNewName, ""))
+	if((_szNewName == ""))
 	{
 		return;
 	}
 	// End:0x5A
-	if(__NFUN_122__(__NFUN_235__(Other.PlayerReplicationInfo.PlayerName), __NFUN_235__(_szNewName)))
+	if((Caps(Other.PlayerReplicationInfo.PlayerName) == Caps(_szNewName)))
 	{
 		bDontBroadcastNameChange = true;
 	}
 	// End:0x79
-	if(__NFUN_119__(StatLog, none))
+	if((StatLog != none))
 	{
 		StatLog.LogNameChange(Other);
 	}
 	Other.PlayerReplicationInfo.SetPlayerName(_szNewName);
 	// End:0xCC
-	if(__NFUN_130__(bNameChange, __NFUN_119__(PlayerController(Other), none)))
+	if((bNameChange && (PlayerController(Other) != none)))
 	{
 		BroadcastLocalizedMessage(GameMessageClass, 2, Other.PlayerReplicationInfo);
 	}
@@ -947,7 +947,7 @@ function string TransformName(PlayerReplicationInfo PRI, string NameRequested)
 	local int _index;
 
 	// End:0x1E
-	if(__NFUN_129__(NameInUse(PRI, NameRequested)))
+	if((!NameInUse(PRI, NameRequested)))
 	{
 		return NameRequested;		
 	}
@@ -957,13 +957,13 @@ function string TransformName(PlayerReplicationInfo PRI, string NameRequested)
 		J0x25:
 
 		// End:0x55 [Loop If]
-		if(NameInUse(PRI, __NFUN_112__(__NFUN_112__(__NFUN_112__(NameRequested, "("), string(_index)), ")")))
+		if(NameInUse(PRI, (((NameRequested $ "(")) $ ")" $ ???)))
 		{
-			__NFUN_165__(_index);
+			(_index++);
 			// [Loop Continue]
 			goto J0x25;
 		}
-		return __NFUN_112__(__NFUN_112__(__NFUN_112__(NameRequested, "("), string(_index)), ")");
+		return (((NameRequested $ "(")) $ ")" $ ???);
 	}
 	return;
 }
@@ -974,10 +974,10 @@ function bool NameInUse(PlayerReplicationInfo PRI, string NameRequested)
 	local PlayerReplicationInfo _PRI;
 
 	// End:0x41
-	foreach __NFUN_313__(Class'Engine.PlayerReplicationInfo', _PRI)
+	foreach DynamicActors(Class'Engine.PlayerReplicationInfo', _PRI)
 	{
 		// End:0x40
-		if(__NFUN_130__(__NFUN_119__(PRI, _PRI), __NFUN_122__(__NFUN_235__(_PRI.PlayerName), __NFUN_235__(NameRequested))))
+		if(((PRI != _PRI) && (Caps(_PRI.PlayerName) == Caps(NameRequested))))
 		{			
 			return true;
 		}		
@@ -1034,14 +1034,14 @@ function RestartGame()
 	local MapList myList;
 	local R6ServerInfo pServerOptions;
 
-	pServerOptions = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOptions = Class'Engine.Actor'.static.GetServerOptions();
 	// End:0xCF
-	if(__NFUN_130__(bChangeLevels, __NFUN_129__(bAlreadyChanged)))
+	if((bChangeLevels && (!bAlreadyChanged)))
 	{
 		bAlreadyChanged = true;
 		myList = pServerOptions.m_ServerMapList;
 		// End:0x69
-		if(__NFUN_242__(m_bChangedServerConfig, true))
+		if((m_bChangedServerConfig == true))
 		{
 			NextMap = myList.GetNextMap(1);			
 		}
@@ -1050,12 +1050,12 @@ function RestartGame()
 			NextMap = myList.GetNextMap(myList.-2);
 		}
 		// End:0xAC
-		if(__NFUN_122__(NextMap, ""))
+		if((NextMap == ""))
 		{
-			NextMap = __NFUN_539__(MapPrefix, NextMap, 1);
+			NextMap = GetMapName(MapPrefix, NextMap, 1);
 		}
 		// End:0xCF
-		if(__NFUN_123__(NextMap, ""))
+		if((NextMap != ""))
 		{
 			Level.ServerTravel(NextMap, false);
 			return;
@@ -1091,10 +1091,10 @@ function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 	J0x14:
 
 	// End:0x55 [Loop If]
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		P.ClientGameEnded();
-		P.__NFUN_113__('GameEnded');
+		P.GotoState('GameEnded');
 		P = P.nextController;
 		// [Loop Continue]
 		goto J0x14;
@@ -1106,7 +1106,7 @@ function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 function EndGame(PlayerReplicationInfo Winner, string Reason)
 {
 	// End:0x1F
-	if(__NFUN_129__(CheckEndGame(Winner, Reason)))
+	if((!CheckEndGame(Winner, Reason)))
 	{
 		bOverTime = true;
 		return;
@@ -1120,13 +1120,13 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 function EndLogging(string Reason)
 {
 	// End:0x0D
-	if(__NFUN_114__(StatLog, none))
+	if((StatLog == none))
 	{
 		return;
 	}
 	StatLog.LogGameEnd(Reason);
 	StatLog.StopLog();
-	StatLog.__NFUN_279__();
+	StatLog.Destroy();
 	StatLog = none;
 	return;
 }
@@ -1138,18 +1138,18 @@ function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam
 	local float BestRating, NewRating;
 
 	// End:0x6E
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Player, none), __NFUN_119__(Player.StartSpot, none)), __NFUN_132__(bWaitingToStartMatch, __NFUN_130__(__NFUN_119__(Player.PlayerReplicationInfo, none), Player.PlayerReplicationInfo.bWaitingPlayer))))
+	if((((Player != none) && (Player.StartSpot != none)) && (bWaitingToStartMatch || ((Player.PlayerReplicationInfo != none) && Player.PlayerReplicationInfo.bWaitingPlayer))))
 	{
 		return Player.StartSpot;
 	}
 	// End:0xAD
-	if(__NFUN_123__(incomingName, ""))
+	if((incomingName != ""))
 	{
 		// End:0xAC
-		foreach __NFUN_304__(Class'Engine.Teleporter', Tel)
+		foreach AllActors(Class'Engine.Teleporter', Tel)
 		{
 			// End:0xAB
-			if(__NFUN_124__(string(Tel.Tag), incomingName))
+			if((string(Tel.Tag) ~= incomingName))
 			{				
 				return Tel;
 			}			
@@ -1159,11 +1159,11 @@ function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam
 	J0xC1:
 
 	// End:0x123 [Loop If]
-	if(__NFUN_119__(N, none))
+	if((N != none))
 	{
 		NewRating = RatePlayerStart(N, InTeam, Player);
 		// End:0x10C
-		if(__NFUN_177__(NewRating, BestRating))
+		if((NewRating > BestRating))
 		{
 			BestRating = NewRating;
 			BestStart = N;
@@ -1173,15 +1173,15 @@ function NavigationPoint FindPlayerStart(Controller Player, optional byte InTeam
 		goto J0xC1;
 	}
 	// End:0x1AE
-	if(__NFUN_114__(BestStart, none))
+	if((BestStart == none))
 	{
-		__NFUN_231__("Warning - PATHS NOT DEFINED or NO PLAYERSTART");
+		Log("Warning - PATHS NOT DEFINED or NO PLAYERSTART");
 		// End:0x1AD
-		foreach __NFUN_304__(Class'Engine.NavigationPoint', N)
+		foreach AllActors(Class'Engine.NavigationPoint', N)
 		{
 			NewRating = RatePlayerStart(N, 0, Player);
 			// End:0x1AC
-			if(__NFUN_177__(NewRating, BestRating))
+			if((NewRating > BestRating))
 			{
 				BestRating = NewRating;
 				BestStart = N;
@@ -1198,7 +1198,7 @@ function float RatePlayerStart(NavigationPoint N, byte Team, Controller Player)
 
 	P = PlayerStart(N);
 	// End:0x51
-	if(__NFUN_119__(P, none))
+	if((P != none))
 	{
 		// End:0x4B
 		if(P.bSinglePlayerStart)

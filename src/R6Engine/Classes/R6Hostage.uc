@@ -698,7 +698,7 @@ simulated function PlayWaiting()
 				else
 				{
 					// End:0x107
-					if(__NFUN_150__(Result, 66))
+					if((Result < 66))
 					{
 						SetAnimInfo(m_mgr.ANIM_eKneelWait02);						
 					}
@@ -716,9 +716,9 @@ simulated function PlayWaiting()
 		// End:0x16F
 		if(m_bIsFoetus)
 		{
-			Result = __NFUN_167__(100);
+			Result = Rand(100);
 			// End:0x156
-			if(__NFUN_150__(Result, 50))
+			if((Result < 50))
 			{
 				SetAnimInfo(m_mgr.ANIM_eFoetusWait01);				
 			}
@@ -739,13 +739,13 @@ simulated function PlayWaiting()
 			else
 			{
 				// End:0x1F0
-				if(__NFUN_132__(bWantsToCrouch, bIsCrouched))
+				if((bWantsToCrouch || bIsCrouched))
 				{
 					// End:0x1EE
-					if(__NFUN_130__(bWantsToCrouch, bIsCrouched))
+					if((bWantsToCrouch && bIsCrouched))
 					{
 						// End:0x1DA
-						if(__NFUN_150__(__NFUN_167__(5), 1))
+						if((Rand(5) < 1))
 						{
 							SetAnimInfo(m_mgr.ANIM_eCrouchWait02);							
 						}
@@ -760,14 +760,14 @@ simulated function PlayWaiting()
 		}
 	}
 	// End:0x390
-	if(__NFUN_129__(m_bFreed))
+	if((!m_bFreed))
 	{
 		// End:0x23C
 		if(m_bFrozen)
 		{
 			SetAnimInfo(m_mgr.ANIM_eStandHandUpFreeze);
 			// End:0x239
-			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			if((int(Level.NetMode) != int(NM_Client)))
 			{
 				m_eHandsUpType = 2;
 			}			
@@ -790,7 +790,7 @@ simulated function PlayWaiting()
 			else
 			{
 				// End:0x2E5
-				if(__NFUN_154__(int(m_eHandsUpType), int(0)))
+				if((int(m_eHandsUpType) == int(0)))
 				{
 					// End:0x2A8
 					if(m_bClassicMissionCivilian)
@@ -802,7 +802,7 @@ simulated function PlayWaiting()
 						SetAnimTransition(m_mgr.ANIM_eStandHandDownToUp, 'None');
 					}
 					// End:0x2E2
-					if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+					if((int(Level.NetMode) != int(NM_Client)))
 					{
 						m_eHandsUpType = 2;
 					}					
@@ -810,7 +810,7 @@ simulated function PlayWaiting()
 				else
 				{
 					// End:0x38D
-					if(__NFUN_154__(int(m_eHandsUpType), int(2)))
+					if((int(m_eHandsUpType) == int(2)))
 					{
 						// End:0x379
 						if(m_bCivilian)
@@ -819,7 +819,7 @@ simulated function PlayWaiting()
 							if(m_bClassicMissionCivilian)
 							{
 								// End:0x329
-								if(__NFUN_150__(__NFUN_167__(100), 50))
+								if((Rand(100) < 50))
 								{
 									SetAnimInfo(m_mgr.ANIM_eStandWaitCough);									
 								}
@@ -831,7 +831,7 @@ simulated function PlayWaiting()
 							else
 							{
 								// End:0x362
-								if(__NFUN_150__(__NFUN_167__(100), 60))
+								if((Rand(100) < 60))
 								{
 									SetAnimInfo(m_mgr.ANIM_eScaredStandWait02);									
 								}
@@ -853,11 +853,11 @@ simulated function PlayWaiting()
 	else
 	{
 		// End:0x3DD
-		if(__NFUN_154__(int(m_eHandsUpType), int(2)))
+		if((int(m_eHandsUpType) == int(2)))
 		{
 			SetAnimTransition(m_mgr.ANIM_eStandHandUpToDown, 'None');
 			// End:0x3DA
-			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			if((int(Level.NetMode) != int(NM_Client)))
 			{
 				m_eHandsUpType = 0;
 			}			
@@ -865,17 +865,17 @@ simulated function PlayWaiting()
 		else
 		{
 			// End:0x451
-			if(__NFUN_119__(m_escortedByRainbow, none))
+			if((m_escortedByRainbow != none))
 			{
 				// End:0x40F
-				if(__NFUN_154__(int(Physics), int(11)))
+				if((int(Physics) == int(11)))
 				{
 					SetAnimInfo(m_mgr.ANIM_eStandWaitShiftWeight);					
 				}
 				else
 				{
 					// End:0x435
-					if(__NFUN_150__(__NFUN_167__(5), 1))
+					if((Rand(5) < 1))
 					{
 						SetAnimTransition(m_mgr.ANIM_eScaredStandWait02, 'None');						
 					}
@@ -888,7 +888,7 @@ simulated function PlayWaiting()
 			else
 			{
 				// End:0x473
-				if(__NFUN_150__(__NFUN_167__(100), 75))
+				if((Rand(100) < 75))
 				{
 					SetAnimInfo(m_mgr.ANIM_eStandWaitShiftWeight);					
 				}
@@ -906,14 +906,14 @@ simulated function PlayWaiting()
 simulated event GotoStand()
 {
 	setCrouch(false);
-	__NFUN_113__('None');
+	GotoState('None');
 	return;
 }
 
 ///////////////////////////////////////////////
 simulated event GotoCrouch()
 {
-	__NFUN_113__('Crouching');
+	GotoState('Crouching');
 	return;
 }
 
@@ -922,14 +922,14 @@ simulated event GotoKneel()
 {
 	setCrouch(false);
 	// End:0x28
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		m_eHandsUpType = 1;
 	}
 	// End:0x3B
 	if(m_bPoliceManMp1)
 	{
-		__NFUN_113__('Kneeling');		
+		GotoState('Kneeling');		
 	}
 	else
 	{
@@ -943,7 +943,7 @@ simulated event GotoFoetus()
 {
 	setCrouch(false);
 	// End:0x28
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		m_eHandsUpType = 0;
 	}
@@ -954,7 +954,7 @@ simulated event GotoFoetus()
 //////////////////////////////////////////////
 simulated event GotoProne()
 {
-	__NFUN_113__('Prone');
+	GotoState('Prone');
 	return;
 }
 
@@ -964,7 +964,7 @@ function GotoFrozen()
 	setFrozen(true);
 	SetAnimInfo(m_mgr.ANIM_eStandHandUpFreeze);
 	// End:0x3C
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		m_eHandsUpType = 2;
 	}
@@ -1019,7 +1019,7 @@ simulated function PlayProneToCrouch(optional bool bForcedByClient)
 {
 	SetAnimInfo(m_mgr.ANIM_eProneToCrouch);
 	// End:0x3D
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		m_bWantsToProne = false;
 		bWantsToCrouch = true;
@@ -1048,7 +1048,7 @@ simulated function PlayCoughing()
 		AnimBlendParams(16, 1.0000000,,, 'R6 Spine2');
 		animName = 'Gazed';
 	}
-	__NFUN_259__(animName, 1.0000000, 0.5000000, 16);
+	PlayAnim(animName, 1.0000000, 0.5000000, 16);
 	return;
 }
 
@@ -1073,7 +1073,7 @@ simulated function PlayBlinded()
 		AnimBlendParams(16, 1.0000000,,, 'R6 Spine2');
 		animName = 'Blinded';
 	}
-	__NFUN_259__(animName, 1.0000000, 0.5000000, 16);
+	PlayAnim(animName, 1.0000000, 0.5000000, 16);
 	return;
 }
 
@@ -1087,12 +1087,12 @@ simulated function bool CanBeAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType
 
 	bAffected = super.CanBeAffectedByGrenade(aGrenade, eType);
 	// End:0x24
-	if(__NFUN_129__(bAffected))
+	if((!bAffected))
 	{
 		return false;
 	}
 	// End:0x3C
-	if(__NFUN_132__(__NFUN_281__('Foetus'), m_bPostureTransition))
+	if((IsInState('Foetus') || m_bPostureTransition))
 	{
 		return false;
 	}
@@ -1110,11 +1110,11 @@ simulated function PlayDoorAnim(R6IORotatingDoor Door)
 	// End:0x53
 	if(bOpensTowardsPawn)
 	{
-		__NFUN_259__('StandDoorPull', 1.0000000, 0.2000000, 16);		
+		PlayAnim('StandDoorPull', 1.0000000, 0.2000000, 16);		
 	}
 	else
 	{
-		__NFUN_259__('StandDoorPush', 1.0000000, 0.2000000, 16);
+		PlayAnim('StandDoorPush', 1.0000000, 0.2000000, 16);
 	}
 	return;
 }
@@ -1122,7 +1122,7 @@ simulated function PlayDoorAnim(R6IORotatingDoor Door)
 event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialActionQuery Query, PlayerController PlayerController)
 {
 	// End:0x4E
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_129__(IsAlive()), m_bExtracted), IsEnemy(PlayerController.Pawn)), m_bClassicMissionCivilian))
+	if(((((!IsAlive()) || m_bExtracted) || IsEnemy(PlayerController.Pawn)) || m_bClassicMissionCivilian))
 	{
 		Query.iHasAction = 0;		
 	}
@@ -1130,7 +1130,7 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 	{
 		Query.iHasAction = 1;
 		// End:0x82
-		if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+		if((fDistance < m_fCircumstantialActionRange))
 		{
 			Query.iInRange = 1;			
 		}
@@ -1139,13 +1139,13 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 			Query.iInRange = 0;
 		}
 		// End:0x24F
-		if(__NFUN_122__(PlayerController.GameReplicationInfo.m_szGameTypeFlagRep, "RGM_LimitSeatsAdvMode"))
+		if((PlayerController.GameReplicationInfo.m_szGameTypeFlagRep == "RGM_LimitSeatsAdvMode"))
 		{
 			// End:0x197
 			if(m_controller.Order_canFollowMe())
 			{
 				// End:0x183
-				if(__NFUN_114__(R6PlayerController(PlayerController).m_pawn.m_aEscortedHostage[0], none))
+				if((R6PlayerController(PlayerController).m_pawn.m_aEscortedHostage[0] == none))
 				{
 					Query.textureIcon = Texture'R6ActionIcons.HostageFollowMe';
 					Query.iPlayerActionID = 1;
@@ -1163,7 +1163,7 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 			else
 			{
 				// End:0x1C8
-				if(__NFUN_119__(m_escortedByRainbow, R6PlayerController(PlayerController).m_pawn))
+				if((m_escortedByRainbow != R6PlayerController(PlayerController).m_pawn))
 				{
 					Query.iHasAction = 0;					
 				}
@@ -1229,10 +1229,10 @@ simulated function string R6GetCircumstantialActionString(int iAction)
 function EnteredExtractionZone(R6AbstractExtractionZone Zone)
 {
 	// End:0x32
-	if(__NFUN_130__(__NFUN_129__(m_bCivilian), __NFUN_129__(m_bPoliceManMp1)))
+	if(((!m_bCivilian) && (!m_bPoliceManMp1)))
 	{
 		// End:0x32
-		if(__NFUN_119__(m_controller, none))
+		if((m_controller != none))
 		{
 			m_controller.SetStateExtracted();
 		}
@@ -1247,13 +1247,13 @@ function EnteredExtractionZone(R6AbstractExtractionZone Zone)
 function bool ProcessBuildDeathMessage(Pawn Killer, out string szPlayerName)
 {
 	// End:0x83
-	if(__NFUN_154__(int(Killer.m_ePawnType), int(1)))
+	if((int(Killer.m_ePawnType) == int(1)))
 	{
 		// End:0x78
-		if(__NFUN_119__(Level.Game, none))
+		if((Level.Game != none))
 		{
 			// End:0x6D
-			if(__NFUN_129__(__NFUN_122__(Level.Game.m_szGameTypeFlag, "RGM_LimitSeatsAdvMode")))
+			if((!(Level.Game.m_szGameTypeFlag == "RGM_LimitSeatsAdvMode")))
 			{
 				m_bSuicideType = 6;				
 			}
@@ -1270,7 +1270,7 @@ function bool ProcessBuildDeathMessage(Pawn Killer, out string szPlayerName)
 	else
 	{
 		// End:0xA7
-		if(__NFUN_154__(int(Killer.m_ePawnType), int(2)))
+		if((int(Killer.m_ePawnType) == int(2)))
 		{
 			m_bSuicideType = 7;			
 		}
@@ -1337,14 +1337,14 @@ function SetToNormalWeapon()
 {
 	EngineWeapon = GetWeaponInGroup(1);
 	// End:0x4C
-	if(__NFUN_114__(EngineWeapon, none))
+	if((EngineWeapon == none))
 	{
 		logX("SetToNormalWeapon-No weapon!!!");
 		EngineWeapon = GetWeaponInGroup(2);
 	}
 	EngineWeapon.RemoteRole = ROLE_SimulatedProxy;
 	// End:0x9C
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
 		AttachWeapon(EngineWeapon, 'TagRightHand');
 		EngineWeapon.WeaponInitialization(self);
@@ -1363,7 +1363,7 @@ simulated state Crouching
 			setProne(false);
 		}
 		// End:0x2F
-		if(__NFUN_132__(__NFUN_129__(bWantsToCrouch), __NFUN_129__(bIsCrouched)))
+		if(((!bWantsToCrouch) || (!bIsCrouched)))
 		{
 			setCrouch(true);
 		}
@@ -1394,7 +1394,7 @@ simulated state Crouching
 //////////////////////////////////////////////
 	simulated event GotoProne()
 	{
-		__NFUN_113__('Prone');
+		GotoState('Prone');
 		return;
 	}
 
@@ -1413,7 +1413,7 @@ simulated state Kneeling
 	{
 		m_bIsKneeling = true;
 		// End:0x29
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			m_eHandsUpType = 1;
 		}
@@ -1424,7 +1424,7 @@ simulated state Kneeling
 	simulated function EndState()
 	{
 		// End:0x21
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			m_eHandsUpType = 0;
 		}
@@ -1441,20 +1441,20 @@ simulated state Kneeling
 		local int Result;
 
 		// End:0x16
-		if(__NFUN_132__(m_bFrozen, m_bReactionAnim))
+		if((m_bFrozen || m_bReactionAnim))
 		{
 			return;
 		}
-		Result = __NFUN_167__(100);
+		Result = Rand(100);
 		// End:0x43
-		if(__NFUN_150__(Result, 33))
+		if((Result < 33))
 		{
 			SetAnimInfo(m_mgr.ANIM_eKneelReact01);			
 		}
 		else
 		{
 			// End:0x66
-			if(__NFUN_150__(Result, 66))
+			if((Result < 66))
 			{
 				SetAnimInfo(m_mgr.ANIM_eKneelReact02);				
 			}
@@ -1515,7 +1515,7 @@ simulated state Prone
 	simulated function BeginState()
 	{
 		// End:0x1F
-		if(__NFUN_132__(__NFUN_129__(m_bWantsToProne), __NFUN_129__(m_bIsProne)))
+		if(((!m_bWantsToProne) || (!m_bIsProne)))
 		{
 			setProne(true);
 		}
@@ -1550,7 +1550,7 @@ simulated state Prone
 ///////////////////////////////////////////////
 	simulated event GotoCrouch()
 	{
-		__NFUN_113__('Crouching');
+		GotoState('Crouching');
 		return;
 	}
 	stop;

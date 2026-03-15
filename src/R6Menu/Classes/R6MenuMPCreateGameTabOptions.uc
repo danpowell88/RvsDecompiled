@@ -504,11 +504,11 @@ function UpdateSkinButton()
 	local R6MenuMapList pMapList;
 
 	// End:0x66
-	if(__NFUN_129__(m_bInGame))
+	if((!m_bInGame))
 	{
 		pMapList = R6MenuMapList(GetList(GetCurrentGameMode(), 3));
 		// End:0x66
-		if(__NFUN_119__(pMapList, none))
+		if((pMapList != none))
 		{
 			// End:0x55
 			if(pMapList.IsFinalMapListEmpty())
@@ -537,7 +537,7 @@ function byte FillSelectedMapList()
 
 	pCurrentMapList = R6MenuMapList(GetList(GetCurrentGameMode(), 3));
 	// End:0x27
-	if(__NFUN_114__(pCurrentMapList, none))
+	if((pCurrentMapList == none))
 	{
 		return 0;
 	}
@@ -553,7 +553,7 @@ function PopUpMOTDEditionBox()
 	local R6WindowEditBox pR6EditBoxTemp;
 
 	// End:0x131
-	if(__NFUN_114__(m_pMsgOfTheDayPopUp, none))
+	if((m_pMsgOfTheDayPopUp == none))
 	{
 		m_pMsgOfTheDayPopUp = R6WindowPopUpBox(R6MenuMPCreateGameWidget(OwnerWindow).CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000, self));
 		m_pMsgOfTheDayPopUp.CreateStdPopUpWindow(Localize("MPCreateGame", "WelcomeMsg", "R6Menu"), 30.0000000, 75.0000000, 150.0000000, 490.0000000, 70.0000000);
@@ -580,7 +580,7 @@ function PopUpSetSkins()
 	local R6MenuSkinsSelection pSkinsSelector;
 
 	// End:0xBD
-	if(__NFUN_114__(m_pPopUpChooseSkins, none))
+	if((m_pPopUpChooseSkins == none))
 	{
 		m_pPopUpChooseSkins = R6WindowPopUpBox(R6MenuMPCreateGameWidget(OwnerWindow).CreateWindow(Class'R6Window.R6WindowPopUpBox', 0.0000000, 0.0000000, 640.0000000, 480.0000000, self));
 		m_pPopUpChooseSkins.CreateStdPopUpWindow(Localize("MultiPlayer", "Popup_SetSkin", "R6Menu"), 30.0000000, 75.0000000, 50.0000000, 490.0000000, 350.0000000);
@@ -602,10 +602,10 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 	local R6MenuMapListExt pTempMapList;
 
 	// End:0xB1
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		// End:0x4C
-		if(__NFUN_154__(int(_ePopUpID), int(1)))
+		if((int(_ePopUpID) == int(1)))
 		{
 			m_szMsgOfTheDay = R6WindowEditBox(m_pMsgOfTheDayPopUp.m_ClientArea).GetValue();
 			SetServerOptions();			
@@ -613,7 +613,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 		else
 		{
 			// End:0xB1
-			if(__NFUN_154__(int(_ePopUpID), int(38)))
+			if((int(_ePopUpID) == int(38)))
 			{
 				pSkinsSelector = R6MenuSkinsSelection(m_pPopUpChooseSkins.m_ClientArea);
 				pTempMapList = R6MenuMapListExt(GetList(GetCurrentGameMode(), 3));
@@ -637,7 +637,7 @@ function bool IsAdminPasswordValid()
 	if(pAdminPassword.m_bSelected)
 	{
 		// End:0x4C
-		if(__NFUN_122__(pAdminPassword.m_pEditBox.GetValue(), ""))
+		if((pAdminPassword.m_pEditBox.GetValue() == ""))
 		{
 			return false;
 		}
@@ -783,7 +783,7 @@ function UpdateCamSpecialCase(bool _bButtonSel, bool _bUpdateDeathCam)
 	local R6WindowListGeneral pCamList;
 
 	// End:0x0D
-	if(__NFUN_129__(m_bInGame))
+	if((!m_bInGame))
 	{
 		return;
 	}
@@ -805,12 +805,12 @@ function UpdateCamSpecialCase(bool _bButtonSel, bool _bUpdateDeathCam)
 			m_bBkpCamFreeThirdP = m_pButtonsDef.GetButtonBoxValue(int(26), pCamList);
 			bCamGhostDis = m_pButtonsDef.IsButtonBoxDisabled(int(27), pCamList);
 			// End:0x113
-			if(__NFUN_129__(bCamGhostDis))
+			if((!bCamGhostDis))
 			{
 				m_bBkpCamGhost = m_pButtonsDef.GetButtonBoxValue(int(27), pCamList);
 			}
 			// End:0x148
-			if(__NFUN_154__(int(GetCurrentGameMode()), int(m_ANbOfGameMode[0])))
+			if((int(GetCurrentGameMode()) == int(m_ANbOfGameMode[0])))
 			{
 				m_bBkpCamTeamOnly = m_pButtonsDef.GetButtonBoxValue(int(29), pCamList);
 			}			
@@ -822,7 +822,7 @@ function UpdateCamSpecialCase(bool _bButtonSel, bool _bUpdateDeathCam)
 			bCamFreeThPerson = m_bBkpCamFreeThirdP;
 			bCamGhost = m_bBkpCamGhost;
 			// End:0x1A5
-			if(__NFUN_154__(int(GetCurrentGameMode()), int(m_ANbOfGameMode[0])))
+			if((int(GetCurrentGameMode()) == int(m_ANbOfGameMode[0])))
 			{
 				bCamGhostDis = m_bBkpCamTeamOnly;				
 			}
@@ -837,12 +837,12 @@ function UpdateCamSpecialCase(bool _bButtonSel, bool _bUpdateDeathCam)
 		UpdateCamera(int(25), bCamThirdPerson, bCamState, pCamList);
 		UpdateCamera(int(26), bCamFreeThPerson, bCamState, pCamList);
 		// End:0x247
-		if(__NFUN_129__(bCamGhostDis))
+		if((!bCamGhostDis))
 		{
 			UpdateCamera(int(27), bCamGhost, bCamState, pCamList);
 		}
 		// End:0x278
-		if(__NFUN_154__(int(GetCurrentGameMode()), int(m_ANbOfGameMode[0])))
+		if((int(GetCurrentGameMode()) == int(m_ANbOfGameMode[0])))
 		{
 			UpdateCamera(int(29), bCanTeamOnly, bCamState, pCamList);
 		}		
@@ -885,7 +885,7 @@ function UpdateMenuOptions(int _iButID, bool _bNewValue, R6WindowListGeneral _pO
 		case int(11):
 			bButState = false;
 			// End:0x6E
-			if(__NFUN_129__(m_bInitComplete))
+			if((!m_bInitComplete))
 			{
 				m_bBkpTKPenalty = m_pButtonsDef.GetButtonBoxValue(int(14), _pOptionsList);
 			}
@@ -902,7 +902,7 @@ function UpdateMenuOptions(int _iButID, bool _bNewValue, R6WindowListGeneral _pO
 					m_bBkpTKPenalty = m_pButtonsDef.GetButtonBoxValue(int(14), _pOptionsList);
 				}
 			}
-			m_pButtonsDef.ChangeButtonBoxValue(int(14), bButState, _pOptionsList, __NFUN_129__(_bNewValue));
+			m_pButtonsDef.ChangeButtonBoxValue(int(14), bButState, _pOptionsList, (!_bNewValue));
 			// End:0xDE
 			break;
 		// End:0xFFFF
@@ -926,15 +926,15 @@ function UpdateAllMapList()
 	J0x07:
 
 	// End:0x59 [Loop If]
-	if(__NFUN_150__(i, m_ANbOfGameMode.Length))
+	if((i < m_ANbOfGameMode.Length))
 	{
 		pTempList = R6MenuMapList(GetList(m_ANbOfGameMode[i], 3));
 		// End:0x4F
-		if(__NFUN_119__(pTempList, none))
+		if((pTempList != none))
 		{
 			pTempList.FillMapListItem();
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -953,7 +953,7 @@ function RefreshServerOpt(optional bool _bNewServerProfile)
 	local R6ServerInfo pServerOpt;
 	local R6MenuMapList pCurrentMapList;
 
-	pServerOpt = Class'Engine.Actor'.static.__NFUN_1273__();
+	pServerOpt = Class'Engine.Actor'.static.GetServerOptions();
 	m_bNewServerProfile = _bNewServerProfile;
 	// End:0x2E
 	if(m_bInitComplete)
@@ -971,7 +971,7 @@ function RefreshServerOpt(optional bool _bNewServerProfile)
 	iIndex = m_pOptionsGameMode.FindItemIndex2(pCurrentMapList.FillFinalMapList());
 	m_pOptionsGameMode.SetSelectedIndex(iIndex);
 	// End:0x13D
-	if(__NFUN_129__(R6Console(Root.Console).m_bStartedByGSClient))
+	if((!R6Console(Root.Console).m_bStartedByGSClient))
 	{
 		m_pServerNameEdit.SetValue(pServerOpt.ServerName);
 		SetButtonAndEditBox(4, pServerOpt.GamePassword, pServerOpt.UsePassword);
@@ -979,7 +979,7 @@ function RefreshServerOpt(optional bool _bNewServerProfile)
 	SetButtonAndEditBox(5, pServerOpt.AdminPassword, pServerOpt.UseAdminPassword);
 	m_szMsgOfTheDay = Localize("MPCreateGame", "Default_MsgOfTheDay", "R6Menu");
 	// End:0x1C2
-	if(__NFUN_123__(pServerOpt.MOTD, ""))
+	if((pServerOpt.MOTD != ""))
 	{
 		m_szMsgOfTheDay = pServerOpt.MOTD;
 	}
@@ -999,11 +999,11 @@ function SetServerOptions()
 	local R6MapList myList;
 	local int iButtonValue;
 
-	_ServerSettings = Class'Engine.Actor'.static.__NFUN_1273__();
+	_ServerSettings = Class'Engine.Actor'.static.GetServerOptions();
 	// End:0x47
-	if(__NFUN_114__(_ServerSettings.m_ServerMapList, none))
+	if((_ServerSettings.m_ServerMapList == none))
 	{
-		_ServerSettings.m_ServerMapList = GetLevel().__NFUN_278__(Class'Engine.R6MapList');
+		_ServerSettings.m_ServerMapList = GetLevel().Spawn(Class'Engine.R6MapList');
 	}
 	// End:0x95
 	if(R6Console(Root.Console).m_bStartedByGSClient)
@@ -1018,7 +1018,7 @@ function SetServerOptions()
 	// End:0x160
 	if(R6Console(Root.Console).m_bStartedByGSClient)
 	{
-		_ServerSettings.UsePassword = __NFUN_123__(R6Console(Root.Console).m_GameService.m_szGSPassword, "");
+		_ServerSettings.UsePassword = (R6Console(Root.Console).m_GameService.m_szGSPassword != "");
 		// End:0x15D
 		if(_ServerSettings.UsePassword)
 		{
@@ -1043,7 +1043,7 @@ function SetServerOptions()
 		_ServerSettings.CamFreeThirdP = GetCameraSelection(int(26), pListGen);
 		_ServerSettings.CamGhost = GetCameraSelection(int(27), pListGen);
 		// End:0x2F8
-		if(__NFUN_114__(m_pButtonsDef.FindButtonItem(int(28), pListGen), none))
+		if((m_pButtonsDef.FindButtonItem(int(28), pListGen) == none))
 		{
 			_ServerSettings.CamFadeToBlack = false;			
 		}
@@ -1052,7 +1052,7 @@ function SetServerOptions()
 			_ServerSettings.CamFadeToBlack = GetCameraSelection(int(28), pListGen);
 		}
 		// End:0x349
-		if(__NFUN_114__(m_pButtonsDef.FindButtonItem(int(29), pListGen), none))
+		if((m_pButtonsDef.FindButtonItem(int(29), pListGen) == none))
 		{
 			_ServerSettings.CamTeamOnly = false;			
 		}
@@ -1072,7 +1072,7 @@ function SetServerOptions()
 		iButtonValue = m_pButtonsDef.GetButtonCounterValue(int(3), pListGen);
 	}
 	// End:0x40F
-	if(__NFUN_151__(iButtonValue, 0))
+	if((iButtonValue > 0))
 	{
 		_ServerSettings.MaxPlayers = iButtonValue;		
 	}
@@ -1081,14 +1081,14 @@ function SetServerOptions()
 		_ServerSettings.MaxPlayers = 1;
 	}
 	// End:0x464
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(8), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(8), pListGen) != none))
 	{
 		_ServerSettings.NbTerro = m_pButtonsDef.GetButtonCounterValue(int(8), pListGen);
 	}
 	_ServerSettings.MOTD = m_szMsgOfTheDay;
-	_ServerSettings.RoundTime = __NFUN_144__(m_pButtonsDef.GetButtonCounterValue(int(2), pListGen), 60);
+	_ServerSettings.RoundTime = (m_pButtonsDef.GetButtonCounterValue(int(2), pListGen) * 60);
 	// End:0x4E3
-	if(__NFUN_154__(int(GetCurrentGameMode()), int(m_ANbOfGameMode[0])))
+	if((int(GetCurrentGameMode()) == int(m_ANbOfGameMode[0])))
 	{
 		_ServerSettings.RoundsPerMatch = m_pButtonsDef.GetButtonCounterValue(int(1), pListGen);		
 	}
@@ -1098,12 +1098,12 @@ function SetServerOptions()
 	}
 	_ServerSettings.BetweenRoundTime = m_pButtonsDef.GetButtonCounterValue(int(7), pListGen);
 	// End:0x576
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(4), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(4), pListGen) != none))
 	{
 		_ServerSettings.BombTime = m_pButtonsDef.GetButtonCounterValue(int(4), pListGen);
 	}
 	// End:0x5CC
-	if(__NFUN_132__(R6Console(Root.Console).m_bStartedByGSClient, R6Console(Root.Console).m_bNonUbiMatchMakingHost))
+	if((R6Console(Root.Console).m_bStartedByGSClient || R6Console(Root.Console).m_bNonUbiMatchMakingHost))
 	{
 		_ServerSettings.InternetServer = true;		
 	}
@@ -1114,12 +1114,12 @@ function SetServerOptions()
 	_ServerSettings.DedicatedServer = m_pButtonsDef.GetButtonBoxValue(int(10), pListGen);
 	_ServerSettings.FriendlyFire = m_pButtonsDef.GetButtonBoxValue(int(11), pListGen);
 	// End:0x68C
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(14), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(14), pListGen) != none))
 	{
 		_ServerSettings.TeamKillerPenalty = m_pButtonsDef.GetButtonBoxValue(int(14), pListGen);
 	}
 	// End:0x6D5
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(17), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(17), pListGen) != none))
 	{
 		_ServerSettings.AIBkp = m_pButtonsDef.GetButtonBoxValue(int(17), pListGen);		
 	}
@@ -1128,12 +1128,12 @@ function SetServerOptions()
 		_ServerSettings.AIBkp = false;
 	}
 	// End:0x72C
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(16), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(16), pListGen) != none))
 	{
 		_ServerSettings.RotateMap = m_pButtonsDef.GetButtonBoxValue(int(16), pListGen);
 	}
 	// End:0x772
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(13), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(13), pListGen) != none))
 	{
 		_ServerSettings.Autobalance = m_pButtonsDef.GetButtonBoxValue(int(13), pListGen);
 	}
@@ -1141,13 +1141,13 @@ function SetServerOptions()
 	_ServerSettings.ForceFPersonWeapon = m_pButtonsDef.GetButtonBoxValue(int(18), pListGen);
 	_ServerSettings.AllowRadar = m_pButtonsDef.GetButtonBoxValue(int(15), pListGen);
 	// End:0x831
-	if(__NFUN_119__(m_pButtonsDef.FindButtonItem(int(23), pListGen), none))
+	if((m_pButtonsDef.FindButtonItem(int(23), pListGen) != none))
 	{
 		_ServerSettings.DiffLevel = int(m_pButtonsDef.GetButtonComboValue(int(23), pListGen));
 	}
 	FillSelectedMapList();
 	// End:0x94F
-	if(__NFUN_155__(m_SelectedMapList.Length, 0))
+	if((m_SelectedMapList.Length != 0))
 	{
 		szGameType = m_SelectedModeList[0];
 		StartGameInfo = R6Console(Root.Console).Master.m_StartGameInfo;
@@ -1157,11 +1157,11 @@ function SetServerOptions()
 		J0x8AA:
 
 		// End:0x8EE [Loop If]
-		if(__NFUN_150__(iCounter, 32))
+		if((iCounter < 32))
 		{
 			myList.Maps[iCounter] = "";
 			myList.GameType[iCounter] = "";
-			__NFUN_165__(iCounter);
+			(iCounter++);
 			// [Loop Continue]
 			goto J0x8AA;
 		}
@@ -1169,11 +1169,11 @@ function SetServerOptions()
 		J0x8F5:
 
 		// End:0x94F [Loop If]
-		if(__NFUN_150__(iCounter, m_SelectedMapList.Length))
+		if((iCounter < m_SelectedMapList.Length))
 		{
 			myList.Maps[iCounter] = m_SelectedMapList[iCounter];
 			myList.GameType[iCounter] = m_SelectedModeList[iCounter];
-			__NFUN_165__(iCounter);
+			(iCounter++);
 			// [Loop Continue]
 			goto J0x8F5;
 		}
@@ -1192,17 +1192,17 @@ function Notify(UWindowDialogControl C, byte E)
 	local bool bProcessNotify;
 
 	// End:0x27
-	if(C.__NFUN_303__('R6WindowButton'))
+	if(C.IsA('R6WindowButton'))
 	{
 		ManageR6ButtonNotify(C, E);		
 	}
 	else
 	{
 		// End:0x89
-		if(__NFUN_154__(int(E), 2))
+		if((int(E) == 2))
 		{
 			// End:0x5F
-			if(C.__NFUN_303__('R6WindowButtonBox'))
+			if(C.IsA('R6WindowButtonBox'))
 			{
 				ManageR6ButtonBoxNotify(C);
 				bProcessNotify = true;				
@@ -1210,7 +1210,7 @@ function Notify(UWindowDialogControl C, byte E)
 			else
 			{
 				// End:0x86
-				if(C.__NFUN_303__('R6WindowButtonAndEditBox'))
+				if(C.IsA('R6WindowButtonAndEditBox'))
 				{
 					ManageR6ButtonAndEditBoxNotify(C);
 					bProcessNotify = true;
@@ -1220,13 +1220,13 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0xFD
-			if(__NFUN_154__(int(E), 1))
+			if((int(E) == 1))
 			{
 				// End:0xCB
-				if(C.__NFUN_303__('UWindowComboControl'))
+				if(C.IsA('UWindowComboControl'))
 				{
 					// End:0xC8
-					if(__NFUN_129__(m_bNewServerProfile))
+					if((!m_bNewServerProfile))
 					{
 						ManageComboControlNotify(C);
 						bProcessNotify = true;
@@ -1235,7 +1235,7 @@ function Notify(UWindowDialogControl C, byte E)
 				else
 				{
 					// End:0xFD
-					if(__NFUN_132__(C.__NFUN_303__('R6WindowButtonAndEditBox'), C.__NFUN_303__('R6WindowEditControl')))
+					if((C.IsA('R6WindowButtonAndEditBox') || C.IsA('R6WindowEditControl')))
 					{
 						bProcessNotify = true;
 					}
@@ -1244,7 +1244,7 @@ function Notify(UWindowDialogControl C, byte E)
 		}
 	}
 	// End:0x124
-	if(__NFUN_130__(__NFUN_130__(bProcessNotify, m_bInitComplete), __NFUN_129__(m_bNewServerProfile)))
+	if(((bProcessNotify && m_bInitComplete) && (!m_bNewServerProfile)))
 	{
 		SetServerOptions();
 	}
@@ -1258,17 +1258,17 @@ function ManageR6ButtonNotify(UWindowDialogControl C, byte E)
 {
 	super.ManageR6ButtonNotify(C, E);
 	// End:0x77
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x4C
-		if(__NFUN_154__(R6WindowButton(C).m_iButtonID, int(m_pButtonsDef.38)))
+		if((R6WindowButton(C).m_iButtonID == int(m_pButtonsDef.38)))
 		{
 			PopUpMOTDEditionBox();			
 		}
 		else
 		{
 			// End:0x77
-			if(__NFUN_154__(R6WindowButton(C).m_iButtonID, int(m_pButtonsDef.40)))
+			if((R6WindowButton(C).m_iButtonID == int(m_pButtonsDef.40)))
 			{
 				PopUpSetSkins();
 			}
@@ -1286,7 +1286,7 @@ function ManageComboControlNotify(UWindowDialogControl C)
 	local R6MenuMapList pCurrentMapList;
 
 	// End:0xC8
-	if(__NFUN_114__(R6WindowComboControl(C), m_pOptionsGameMode))
+	if((R6WindowComboControl(C) == m_pOptionsGameMode))
 	{
 		szTemp = m_pOptionsGameMode.GetValue2();
 		switch(szTemp)

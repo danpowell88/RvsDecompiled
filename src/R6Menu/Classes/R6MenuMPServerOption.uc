@@ -404,26 +404,26 @@ function bool SendNewServerSettings()
 		}
 		iTempValue = m_pButtonsDef.GetButtonCounterValue(int(4), pTempButList);
 		// End:0x6BD
-		if(__NFUN_181__(float(iTempValue), pGameRepInfo.m_fBombTime))
+		if((float(iTempValue) != pGameRepInfo.m_fBombTime))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(4,, iTempValue);
 			// End:0x6BD
 			if(bLogSettingsChange)
 			{
-				__NFUN_231__("EBN_BombTimer change");
+				Log("EBN_BombTimer change");
 			}
 		}
 		iTempValue = m_pButtonsDef.GetButtonCounterValue(int(1), pTempButList);
 		// End:0x712
-		if(__NFUN_155__(iTempValue, pGameRepInfo.m_iRoundsPerMatch))
+		if((iTempValue != pGameRepInfo.m_iRoundsPerMatch))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(1,, iTempValue);
 		}
 		bTempValue = m_pButtonsDef.GetButtonBoxValue(int(13), pTempButList);
 		// End:0x76A
-		if(__NFUN_243__(bTempValue, pGameRepInfo.m_bAutoBalance))
+		if((bTempValue != pGameRepInfo.m_bAutoBalance))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(13, bTempValue);
@@ -433,35 +433,35 @@ function bool SendNewServerSettings()
 	{
 		iTempValue = m_pButtonsDef.GetButtonCounterValue(int(6), pTempButList);
 		// End:0x7C2
-		if(__NFUN_155__(iTempValue, pGameRepInfo.m_iRoundsPerMatch))
+		if((iTempValue != pGameRepInfo.m_iRoundsPerMatch))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(6,, iTempValue);
 		}
 		iTempValue = m_pButtonsDef.GetButtonCounterValue(int(8), pTempButList);
 		// End:0x817
-		if(__NFUN_155__(iTempValue, pGameRepInfo.m_iNbOfTerro))
+		if((iTempValue != pGameRepInfo.m_iNbOfTerro))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(8,, iTempValue);
 		}
 		bTempValue = m_pButtonsDef.GetButtonBoxValue(int(17), pTempButList);
 		// End:0x86F
-		if(__NFUN_243__(bTempValue, pGameRepInfo.m_bAIBkp))
+		if((bTempValue != pGameRepInfo.m_bAIBkp))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(17, bTempValue);
 		}
 		bTempValue = m_pButtonsDef.GetButtonBoxValue(int(16), pTempButList);
 		// End:0x8C7
-		if(__NFUN_243__(bTempValue, pGameRepInfo.m_bRotateMap))
+		if((bTempValue != pGameRepInfo.m_bRotateMap))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(16, bTempValue);
 		}
 		iTempValue = int(m_pButtonsDef.GetButtonComboValue(int(23), pTempButList));
 		// End:0x91E
-		if(__NFUN_155__(iTempValue, pGameRepInfo.m_iDiffLevel))
+		if((iTempValue != pGameRepInfo.m_iDiffLevel))
 		{
 			bSettingsChange = true;
 			pPlayContr.ServerNewGeneralSettings(23,, iTempValue);
@@ -486,7 +486,7 @@ function bool SendNewMapSettings(out byte _bMapCount)
 	local bool bSettingsChange;
 
 	// End:0x0D
-	if(__NFUN_129__(m_bServerSettingsChange))
+	if((!m_bServerSettingsChange))
 	{
 		return false;
 	}
@@ -495,7 +495,7 @@ function bool SendNewMapSettings(out byte _bMapCount)
 	pPlayContr = R6PlayerController(GetPlayerOwner());
 	_bMapCount = FillSelectedMapList();
 	// End:0x6B
-	if(__NFUN_154__(int(_bMapCount), 0))
+	if((int(_bMapCount) == 0))
 	{
 		return true;
 	}
@@ -503,16 +503,16 @@ function bool SendNewMapSettings(out byte _bMapCount)
 	J0x72:
 
 	// End:0xAE [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, R6GameRepInfo.32), __NFUN_123__(R6GameRepInfo.m_mapArray[i], "")))
+	if(((i < R6GameRepInfo.32) && (R6GameRepInfo.m_mapArray[i] != "")))
 	{
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x72;
 	}
 	iTotGameRepItem = i;
 	iTotFinalListItem = m_SelectedMapList.Length;
 	// End:0xD9
-	if(__NFUN_151__(iTotFinalListItem, 32))
+	if((iTotFinalListItem > 32))
 	{
 		iTotFinalListItem = 32;
 	}
@@ -521,7 +521,7 @@ function bool SendNewMapSettings(out byte _bMapCount)
 	J0xEB:
 
 	// End:0x1E6 [Loop If]
-	if(__NFUN_150__(i, iTotalMax))
+	if((i < iTotalMax))
 	{
 		szCurrentSrvMap = R6GameRepInfo.m_mapArray[i];
 		szMenuMap = m_SelectedMapList[i];
@@ -529,27 +529,27 @@ function bool SendNewMapSettings(out byte _bMapCount)
 		szMenuGameType = m_SelectedModeList[i];
 		iUpdate = 0;
 		// End:0x17E
-		if(__NFUN_123__(szCurrentSrvMap, szMenuMap))
+		if((szCurrentSrvMap != szMenuMap))
 		{
-			__NFUN_161__(iUpdate, 1);
+			(iUpdate += 1);
 		}
 		// End:0x196
-		if(__NFUN_123__(szCurrentSrvGameType, szMenuGameType))
+		if((szCurrentSrvGameType != szMenuGameType))
 		{
-			__NFUN_161__(iUpdate, 2);
+			(iUpdate += 2);
 		}
 		// End:0x1DC
-		if(__NFUN_155__(iUpdate, 0))
+		if((iUpdate != 0))
 		{
 			pPlayContr.ServerNewMapListSettings(i, iUpdate, GetLevel().GetGameTypeClassName(szMenuGameType), szMenuMap);
 			bSettingsChange = true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xEB;
 	}
 	// End:0x231
-	if(__NFUN_151__(iTotGameRepItem, iTotFinalListItem))
+	if((iTotGameRepItem > iTotFinalListItem))
 	{
 		pPlayContr.ServerNewMapListSettings(i, 0, GetLevel().GetGameTypeClassName(szMenuGameType), szMenuMap, i);
 		bSettingsChange = true;
@@ -564,13 +564,13 @@ function bool SendNewMapSettings(out byte _bMapCount)
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0x39
-	if(__NFUN_129__(m_bImAnAdmin))
+	if((!m_bImAnAdmin))
 	{
 		// End:0x37
-		if(__NFUN_154__(int(E), 1))
+		if((int(E) == 1))
 		{
 			// End:0x37
-			if(C.__NFUN_303__('UWindowComboControl'))
+			if(C.IsA('UWindowComboControl'))
 			{
 				ManageComboControlNotify(C);
 			}
@@ -578,24 +578,24 @@ function Notify(UWindowDialogControl C, byte E)
 		return;
 	}
 	// End:0x60
-	if(C.__NFUN_303__('R6WindowButton'))
+	if(C.IsA('R6WindowButton'))
 	{
 		ManageR6ButtonNotify(C, E);		
 	}
 	else
 	{
 		// End:0xB2
-		if(__NFUN_154__(int(E), 2))
+		if((int(E) == 2))
 		{
 			// End:0x90
-			if(C.__NFUN_303__('R6WindowButtonBox'))
+			if(C.IsA('R6WindowButtonBox'))
 			{
 				ManageR6ButtonBoxNotify(C);				
 			}
 			else
 			{
 				// End:0xAF
-				if(C.__NFUN_303__('R6WindowButtonAndEditBox'))
+				if(C.IsA('R6WindowButtonAndEditBox'))
 				{
 					ManageR6ButtonAndEditBoxNotify(C);
 				}
@@ -604,10 +604,10 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0xDE
-			if(__NFUN_154__(int(E), 1))
+			if((int(E) == 1))
 			{
 				// End:0xDE
-				if(C.__NFUN_303__('UWindowComboControl'))
+				if(C.IsA('UWindowComboControl'))
 				{
 					ManageComboControlNotify(C);
 				}

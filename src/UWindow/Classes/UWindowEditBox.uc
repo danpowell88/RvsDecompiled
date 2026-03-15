@@ -506,12 +506,12 @@ function KeyDown(int Key, float X, float Y)
 						// End:0x113
 						if(bShowLog)
 						{
-							__NFUN_231__(__NFUN_168__("CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+							Log(("CurrentHistory.HistoryText" @ CurrentHistory.HistoryText));
 						}
 						// End:0x15D
 						if(bShowLog)
 						{
-							__NFUN_231__(__NFUN_168__("CurrentHistory.Next.HistoryText", UWindowEditBoxHistory(CurrentHistory.Next).HistoryText));
+							Log(("CurrentHistory.Next.HistoryText" @ UWindowEditBoxHistory(CurrentHistory.Next).HistoryText));
 						}
 						SetValue(UWindowEditBoxHistory(CurrentHistory.Next).HistoryText, "", true);
 					}
@@ -524,24 +524,24 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x279
 		case int(Root.Console.13):
 			// End:0x276
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				// End:0x1D7
-				if(__NFUN_129__(bHistory))
+				if((!bHistory))
 				{
 					OldValue = Value;					
 				}
 				else
 				{
 					// End:0x257
-					if(__NFUN_123__(Value, ""))
+					if((Value != ""))
 					{
 						CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(Class'UWindow.UWindowEditBoxHistory'));
 						CurrentHistory.HistoryText = Value;
 						// End:0x257
 						if(bShowLog)
 						{
-							__NFUN_231__(__NFUN_168__("Set value CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+							Log(("Set value CurrentHistory.HistoryText" @ CurrentHistory.HistoryText));
 						}
 					}
 					CurrentHistory = HistoryList;
@@ -573,7 +573,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x323
 		case int(Root.Console.39):
 			// End:0x320
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				// End:0x312
 				if(bControlDown)
@@ -591,7 +591,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x373
 		case int(Root.Console.37):
 			// End:0x370
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				// End:0x362
 				if(bControlDown)
@@ -609,11 +609,11 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x40D
 		case int(Root.Console.38):
 			// End:0x40A
-			if(__NFUN_130__(__NFUN_130__(bCanEdit, bHistory), m_CurrentlyEditing))
+			if(((bCanEdit && bHistory) && m_CurrentlyEditing))
 			{
 				bAllSelected = false;
 				// End:0x40A
-				if(__NFUN_130__(__NFUN_119__(CurrentHistory, none), __NFUN_119__(CurrentHistory.Next, none)))
+				if(((CurrentHistory != none) && (CurrentHistory.Next != none)))
 				{
 					CurrentHistory = UWindowEditBoxHistory(CurrentHistory.Next);
 					SetValue(CurrentHistory.HistoryText, "", true);
@@ -625,11 +625,11 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x4A7
 		case int(Root.Console.40):
 			// End:0x4A4
-			if(__NFUN_130__(__NFUN_130__(bCanEdit, bHistory), m_CurrentlyEditing))
+			if(((bCanEdit && bHistory) && m_CurrentlyEditing))
 			{
 				bAllSelected = false;
 				// End:0x4A4
-				if(__NFUN_130__(__NFUN_119__(CurrentHistory, none), __NFUN_119__(CurrentHistory.Prev, none)))
+				if(((CurrentHistory != none) && (CurrentHistory.Prev != none)))
 				{
 					CurrentHistory = UWindowEditBoxHistory(CurrentHistory.Prev);
 					SetValue(CurrentHistory.HistoryText, "", true);
@@ -641,7 +641,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x4E5
 		case int(Root.Console.36):
 			// End:0x4E2
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				MoveHome();
 				bAllSelected = false;
@@ -651,7 +651,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x523
 		case int(Root.Console.35):
 			// End:0x520
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				MoveEnd();
 				bAllSelected = false;
@@ -661,7 +661,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x573
 		case int(Root.Console.8):
 			// End:0x570
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				// End:0x562
 				if(bAllSelected)
@@ -679,7 +679,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x5C3
 		case int(Root.Console.46):
 			// End:0x5C0
-			if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+			if((bCanEdit && m_CurrentlyEditing))
 			{
 				// End:0x5B2
 				if(bAllSelected)
@@ -701,7 +701,7 @@ function KeyDown(int Key, float X, float Y)
 			// End:0x60B
 			if(bNumericFloat)
 			{
-				Insert(byte(__NFUN_237__(".")));
+				Insert(byte(Asc(".")));
 			}
 			// End:0x6D3
 			break;
@@ -711,17 +711,17 @@ function KeyDown(int Key, float X, float Y)
 			if(bControlDown)
 			{
 				// End:0x640
-				if(__NFUN_132__(__NFUN_154__(Key, __NFUN_237__("c")), __NFUN_154__(Key, __NFUN_237__("C"))))
+				if(((Key == Asc("c")) || (Key == Asc("C"))))
 				{
 					EditCopy();
 				}
 				// End:0x666
-				if(__NFUN_132__(__NFUN_154__(Key, __NFUN_237__("v")), __NFUN_154__(Key, __NFUN_237__("V"))))
+				if(((Key == Asc("v")) || (Key == Asc("V"))))
 				{
 					EditPaste();
 				}
 				// End:0x68C
-				if(__NFUN_132__(__NFUN_154__(Key, __NFUN_237__("x")), __NFUN_154__(Key, __NFUN_237__("X"))))
+				if(((Key == Asc("x")) || (Key == Asc("X"))))
 				{
 					EditCut();
 				}				
@@ -729,7 +729,7 @@ function KeyDown(int Key, float X, float Y)
 			else
 			{
 				// End:0x6BB
-				if(__NFUN_119__(NotifyOwner, none))
+				if((NotifyOwner != none))
 				{
 					NotifyOwner.KeyDown(Key, X, Y);					
 				}
@@ -751,7 +751,7 @@ function Click(float X, float Y)
 	// End:0x2A
 	if(bShowLog)
 	{
-		__NFUN_231__("UWindowEditBox::Click");
+		Log("UWindowEditBox::Click");
 	}
 	return;
 }
@@ -761,13 +761,13 @@ function LMouseDown(float X, float Y)
 	// End:0x27
 	if(bShowLog)
 	{
-		__NFUN_231__("UWindowEditBox::LMouseDown");
+		Log("UWindowEditBox::LMouseDown");
 	}
 	super(UWindowWindow).LMouseDown(X, Y);
 	// End:0x6C
 	if(bShowLog)
 	{
-		__NFUN_231__("UWindowEditBox::LMouseDown ->SelectAll()");
+		Log("UWindowEditBox::LMouseDown ->SelectAll()");
 	}
 	SelectAll();
 	Notify(10);
@@ -784,77 +784,77 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bUseNewPaint)
 	{
 		TextSize(C, Value, W, H);
-		TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
+		TextY = ((WinHeight - H) / float(2));
 		switch(Align)
 		{
 			// End:0xA9
 			case 2:
-				offset = __NFUN_172__(__NFUN_175__(__NFUN_175__(WinWidth, W), float(14)), float(2));
+				offset = (((WinWidth - W) - float(14)) / float(2));
 				// End:0xBF
 				break;
 			// End:0xFFFF
 			default:
-				offset = __NFUN_174__(offset, float(1));
+				offset = (offset + float(1));
 				// End:0xBF
 				break;
 				break;
 		}
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 		// End:0x17E
-		if(__NFUN_130__(m_CurrentlyEditing, bAllSelected))
+		if((m_CurrentlyEditing && bAllSelected))
 		{
 			DrawStretchedTexture(C, offset, TextY, W, H, Texture'UWindow.WhiteTexture');
-			C.__NFUN_2626__(byte(__NFUN_157__(255, int(C.DrawColor.R))), byte(__NFUN_157__(255, int(C.DrawColor.G))), byte(__NFUN_157__(255, int(C.DrawColor.B))));
+			C.SetDrawColor(byte((255 ^ int(C.DrawColor.R))), byte((255 ^ int(C.DrawColor.G))), byte((255 ^ int(C.DrawColor.B))));
 		}
 		ClipText(C, offset, TextY, Value);		
 	}
 	else
 	{
 		TextSize(C, "A", W, H);
-		TextY = __NFUN_172__(__NFUN_175__(WinHeight, H), float(2));
-		TextSize(C, __NFUN_128__(Value, CaretOffset), W, H);
+		TextY = ((WinHeight - H) / float(2));
+		TextSize(C, Left(Value, CaretOffset), W, H);
 		// End:0x20F
-		if(__NFUN_176__(__NFUN_174__(W, offset), float(0)))
+		if(((W + offset) < float(0)))
 		{
-			offset = __NFUN_169__(W);
+			offset = (-W);
 		}
 		// End:0x25B
-		if(__NFUN_177__(__NFUN_174__(W, offset), __NFUN_175__(WinWidth, float(2))))
+		if(((W + offset) > (WinWidth - float(2))))
 		{
-			offset = __NFUN_175__(__NFUN_175__(WinWidth, float(2)), W);
+			offset = ((WinWidth - float(2)) - W);
 			// End:0x25B
-			if(__NFUN_177__(offset, float(0)))
+			if((offset > float(0)))
 			{
 				offset = 0.0000000;
 			}
 		}
-		C.__NFUN_2626__(TextColor.R, TextColor.G, TextColor.B);
+		C.SetDrawColor(TextColor.R, TextColor.G, TextColor.B);
 		// End:0x31F
-		if(__NFUN_130__(m_CurrentlyEditing, bAllSelected))
+		if((m_CurrentlyEditing && bAllSelected))
 		{
-			DrawStretchedTexture(C, __NFUN_174__(offset, float(1)), TextY, W, H, Texture'UWindow.WhiteTexture');
-			C.__NFUN_2626__(byte(__NFUN_157__(255, int(C.DrawColor.R))), byte(__NFUN_157__(255, int(C.DrawColor.G))), byte(__NFUN_157__(255, int(C.DrawColor.B))));
+			DrawStretchedTexture(C, (offset + float(1)), TextY, W, H, Texture'UWindow.WhiteTexture');
+			C.SetDrawColor(byte((255 ^ int(C.DrawColor.R))), byte((255 ^ int(C.DrawColor.G))), byte((255 ^ int(C.DrawColor.B))));
 		}
-		ClipText(C, __NFUN_174__(offset, float(1)), TextY, Value);
+		ClipText(C, (offset + float(1)), TextY, Value);
 	}
 	// End:0x36E
-	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_CurrentlyEditing), __NFUN_129__(bHasKeyboardFocus)), __NFUN_129__(bCanEdit)))
+	if((((!m_CurrentlyEditing) || (!bHasKeyboardFocus)) || (!bCanEdit)))
 	{
 		bShowCaret = false;		
 	}
 	else
 	{
 		// End:0x3B2
-		if(__NFUN_132__(__NFUN_177__(GetTime(), __NFUN_174__(LastDrawTime, 0.3000000)), __NFUN_176__(GetTime(), LastDrawTime)))
+		if(((GetTime() > (LastDrawTime + 0.3000000)) || (GetTime() < LastDrawTime)))
 		{
 			LastDrawTime = GetTime();
-			bShowCaret = __NFUN_129__(bShowCaret);
+			bShowCaret = (!bShowCaret);
 		}
 	}
 	// End:0x3DF
 	if(bShowCaret)
 	{
-		ClipText(C, __NFUN_175__(__NFUN_174__(offset, W), float(1)), TextY, "|");
+		ClipText(C, ((offset + W) - float(1)), TextY, "|");
 	}
 	// End:0x3F3
 	if(m_bDrawEditBorders)
@@ -877,10 +877,10 @@ function FocusWindow()
 	// End:0x2C
 	if(bShowLog)
 	{
-		__NFUN_231__("FocusWindow ->SelectAll()");
+		Log("FocusWindow ->SelectAll()");
 	}
 	// End:0x3D
-	if(__NFUN_129__(m_CurrentlyEditing))
+	if((!m_CurrentlyEditing))
 	{
 		SelectAll();
 	}
@@ -892,11 +892,11 @@ function FocusOtherWindow(UWindowWindow W)
 	// End:0x1D
 	if(bShowLog)
 	{
-		__NFUN_231__("FocusOtherWindow");
+		Log("FocusOtherWindow");
 	}
 	DropSelection();
 	// End:0x45
-	if(__NFUN_119__(NotifyOwner, none))
+	if((NotifyOwner != none))
 	{
 		NotifyOwner.FocusOtherWindow(W);		
 	}
@@ -913,7 +913,7 @@ function DoubleClick(float X, float Y)
 	// End:0x36
 	if(bShowLog)
 	{
-		__NFUN_231__("DoubleClick ->SelectAll()");
+		Log("DoubleClick ->SelectAll()");
 	}
 	SelectAll();
 	return;
@@ -924,15 +924,15 @@ function KeyFocusEnter()
 	// End:0x2A
 	if(bShowLog)
 	{
-		__NFUN_231__("UWindowEditBox::KeyFocusEnter");
+		Log("UWindowEditBox::KeyFocusEnter");
 	}
 	// End:0x6E
-	if(__NFUN_130__(bSelectOnFocus, __NFUN_129__(bHasKeyboardFocus)))
+	if((bSelectOnFocus && (!bHasKeyboardFocus)))
 	{
 		// End:0x68
 		if(bShowLog)
 		{
-			__NFUN_231__("KeyFocusEnter ->SelectAll()");
+			Log("KeyFocusEnter ->SelectAll()");
 		}
 		SelectAll();
 	}
@@ -945,27 +945,27 @@ function KeyFocusExit()
 	// End:0x19
 	if(bShowLog)
 	{
-		__NFUN_231__("KeyFocusExit");
+		Log("KeyFocusExit");
 	}
 	// End:0xD1
-	if(__NFUN_130__(bCanEdit, m_CurrentlyEditing))
+	if((bCanEdit && m_CurrentlyEditing))
 	{
 		// End:0x46
-		if(__NFUN_129__(bHistory))
+		if((!bHistory))
 		{
 			OldValue = Value;			
 		}
 		else
 		{
 			// End:0xC6
-			if(__NFUN_123__(Value, ""))
+			if((Value != ""))
 			{
 				CurrentHistory = UWindowEditBoxHistory(HistoryList.Insert(Class'UWindow.UWindowEditBoxHistory'));
 				CurrentHistory.HistoryText = Value;
 				// End:0xC6
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__("Set value CurrentHistory.HistoryText", CurrentHistory.HistoryText));
+					Log(("Set value CurrentHistory.HistoryText" @ CurrentHistory.HistoryText));
 				}
 			}
 			CurrentHistory = HistoryList;

@@ -393,7 +393,7 @@ function LoadPlanningInTraining()
 			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.Z = float(Class'R6Game.R6RookieAssault'.default.m_RMenuFaceSmallW);
 			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_FaceCoords.W = float(Class'R6Game.R6RookieAssault'.default.m_RMenuFaceSmallH);
 			// End:0x4A0
-			if(__NFUN_130__(__NFUN_154__(i, 2), __NFUN_154__(j, 0)))
+			if(((i == 2) && (j == 0)))
 			{
 				StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_szSpecialityID = "ID_SNIPER";				
 			}
@@ -409,11 +409,11 @@ function LoadPlanningInTraining()
 			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillSelfControl = 0.8500000;
 			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillLeadership = 0.8500000;
 			StartGameInfo.m_TeamInfo[i].m_CharacterInTeam[j].m_fSkillObservation = 0.8500000;
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x294;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x1BC;
 	}
@@ -428,13 +428,13 @@ function LaunchAction(int iBoxNb, int iSoundIndex)
 	local R6GameReplicationInfo aGRI;
 
 	// End:0x28
-	if(__NFUN_132__(__NFUN_114__(m_Player, none), __NFUN_114__(R6Pawn(m_Player.Pawn), none)))
+	if(((m_Player == none) || (R6Pawn(m_Player.Pawn) == none)))
 	{
 		return;
 	}
 	aGRI = R6GameReplicationInfo(GameReplicationInfo);
 	// End:0x164
-	if(__NFUN_154__(iSoundIndex, 0))
+	if((iSoundIndex == 0))
 	{
 		switch(iBoxNb)
 		{
@@ -547,9 +547,9 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 	{
 		return;
 	}
-	Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_SkipPlanningPhase = false;
-	Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_ReloadPlanning = false;
-	Class'Engine.Actor'.static.__NFUN_2618__().Viewport.Console.Master.m_StartGameInfo.m_ReloadActionPointOnly = false;
+	Class'Engine.Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_SkipPlanningPhase = false;
+	Class'Engine.Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_ReloadPlanning = false;
+	Class'Engine.Actor'.static.GetCanvas().Viewport.Console.Master.m_StartGameInfo.m_ReloadActionPointOnly = false;
 	// End:0xD8
 	if(IsBasicMap())
 	{

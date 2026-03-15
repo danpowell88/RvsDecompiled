@@ -664,14 +664,14 @@ event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, option
 				(m_iChanceToDetectShooter += 20);
 			}
 			// End:0x14B
-			if(__NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), m_iChanceToDetectShooter))
+			if(((Rand(100) + 1) < m_iChanceToDetectShooter))
 			{
 				EngageBySight(NoiseMaker.Instigator);				
 			}
 			else
 			{
 				// End:0x175
-				if(__NFUN_129__(__NFUN_281__('EngageByThreat')))
+				if((!IsInState('EngageByThreat')))
 				{
 					GotoStateEngageByThreat(NoiseMaker.Instigator.Location);
 				}
@@ -680,13 +680,13 @@ event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, option
 		else
 		{
 			// End:0x268
-			if(__NFUN_130__(m_bHearGrenade, __NFUN_154__(int(eType), int(3))))
+			if((m_bHearGrenade && (int(eType) == int(3))))
 			{
 				// End:0x265
-				if(__NFUN_132__(__NFUN_150__(__NFUN_1851__(Rotator(__NFUN_216__(NoiseMaker.Location, Pawn.Location)).Yaw, Pawn.Rotation.Yaw), 16000), __NFUN_150__(__NFUN_1851__(Rotator(__NFUN_216__(NoiseMaker.Instigator.Location, Pawn.Location)).Yaw, Pawn.Rotation.Yaw), 16000)))
+				if(((ShortestAngle2D(Rotator((NoiseMaker.Location - Pawn.Location)).Yaw, Pawn.Rotation.Yaw) < 16000) || (ShortestAngle2D(Rotator((NoiseMaker.Instigator.Location - Pawn.Location)).Yaw, Pawn.Rotation.Yaw) < 16000)))
 				{
 					// End:0x251
-					if(__NFUN_129__(m_bHeardGrenade))
+					if((!m_bHeardGrenade))
 					{
 						m_VoicesManager.PlayTerroristVoices(m_pawn, 5);
 						m_bHeardGrenade = true;
@@ -697,11 +697,11 @@ event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, option
 			else
 			{
 				// End:0x2F5
-				if(__NFUN_130__(m_bHearInvestigate, __NFUN_154__(int(eType), int(4))))
+				if((m_bHearInvestigate && (int(eType) == int(4))))
 				{
 					pPawn = R6Pawn(NoiseMaker.Instigator);
 					// End:0x2ED
-					if(__NFUN_130__(__NFUN_119__(pPawn, none), __NFUN_129__(pPawn.m_bTerroSawMeDead)))
+					if(((pPawn != none) && (!pPawn.m_bTerroSawMeDead)))
 					{
 						pPawn.m_bTerroSawMeDead = true;
 						GotoPointAndSearch(NoiseMaker.Location, 4, true, 30.0000000);						
@@ -733,56 +733,56 @@ event EnemyNotVisible()
 		// End:0x47
 		case 1:
 			// End:0x44
-			if(__NFUN_130__(__NFUN_177__(__NFUN_175__(Level.TimeSeconds, LastSeenTime), float(2)), CanSafelyChangeState()))
+			if((((Level.TimeSeconds - LastSeenTime) > float(2)) && CanSafelyChangeState()))
 			{
-				__NFUN_113__('WaitForEnemy');
+				GotoState('WaitForEnemy');
 			}
 			// End:0x1EA
 			break;
 		// End:0x66
 		case 3:
 			FocalPoint = LastSeenPos;
-			__NFUN_113__('FindHostage', 'Pursues');
+			GotoState('FindHostage', 'Pursues');
 			// End:0x1EA
 			break;
 		// End:0x1E0
 		case 2:
 			// End:0x7D
-			if(__NFUN_154__(int(m_eAttackMode), int(4)))
+			if((int(m_eAttackMode) == int(4)))
 			{
 				return;
 			}
 			FocalPoint = LastSeenPos;
 			Focus = none;
 			// End:0x1AA
-			if(__NFUN_130__(__NFUN_154__(int(m_eAttackMode), int(3)), m_pawn.m_bAllowLeave))
+			if(((int(m_eAttackMode) == int(3)) && m_pawn.m_bAllowLeave))
 			{
 				m_vMovingDestination = LastSeenPos;
 				// End:0x1A8
-				if(__NFUN_177__(__NFUN_225__(__NFUN_216__(Pawn.Location, m_vMovingDestination)), __NFUN_171__(Pawn.CollisionRadius, float(2))))
+				if((VSize((Pawn.Location - m_vMovingDestination)) > (Pawn.CollisionRadius * float(2))))
 				{
 					// End:0x108
-					if(__NFUN_521__(m_vMovingDestination))
+					if(pointReachable(m_vMovingDestination))
 					{
-						__NFUN_113__('Attack', 'SprayFireMove');						
+						GotoState('Attack', 'SprayFireMove');						
 					}
 					else
 					{
-						vDir = __NFUN_226__(__NFUN_216__(m_vMovingDestination, m_pawn.Location));
-						vTest = __NFUN_212__(__NFUN_220__(vDir, vect(0.0000000, 0.0000000, 1.0000000)), float(200));
+						vDir = Normal((m_vMovingDestination - m_pawn.Location));
+						vTest = (Cross(vDir, vect(0.0000000, 0.0000000, 1.0000000)) * float(200));
 						// End:0x178
-						if(__NFUN_521__(__NFUN_215__(m_vMovingDestination, vTest)))
+						if(pointReachable((m_vMovingDestination + vTest)))
 						{
-							m_vMovingDestination = __NFUN_215__(m_vMovingDestination, vTest);
-							__NFUN_113__('Attack', 'SprayFireMove');							
+							m_vMovingDestination = (m_vMovingDestination + vTest);
+							GotoState('Attack', 'SprayFireMove');							
 						}
 						else
 						{
 							// End:0x1A8
-							if(__NFUN_521__(__NFUN_216__(m_vMovingDestination, vTest)))
+							if(pointReachable((m_vMovingDestination - vTest)))
 							{
-								m_vMovingDestination = __NFUN_216__(m_vMovingDestination, vTest);
-								__NFUN_113__('Attack', 'SprayFireMove');
+								m_vMovingDestination = (m_vMovingDestination - vTest);
+								GotoState('Attack', 'SprayFireMove');
 							}
 						}
 					}
@@ -790,9 +790,9 @@ event EnemyNotVisible()
 				return;
 			}
 			// End:0x1D2
-			if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+			if((int(m_pawn.m_ePersonality) == int(5)))
 			{
-				__NFUN_113__('Sniping', 'LostTrackOfEnemy');				
+				GotoState('Sniping', 'LostTrackOfEnemy');				
 			}
 			else
 			{
@@ -802,7 +802,7 @@ event EnemyNotVisible()
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_118__('EnemyNotVisible');
+			Disable('EnemyNotVisible');
 			break;
 	}
 	return;
@@ -814,7 +814,7 @@ event EnemyNotVisible()
 function GotoBumpBackUpState(name returnState)
 {
 	// End:0x23
-	if(__NFUN_130__(__NFUN_129__(m_pawn.m_bIsKneeling), __NFUN_129__(CanSafelyChangeState())))
+	if(((!m_pawn.m_bIsKneeling) && (!CanSafelyChangeState())))
 	{
 		return;
 	}
@@ -833,10 +833,10 @@ function SetGunDirection(Actor aTarget)
 	local Vector vTarget;
 
 	// End:0xB4
-	if(__NFUN_119__(aTarget, none))
+	if((aTarget != none))
 	{
 		// End:0x28
-		if(__NFUN_114__(aTarget, Enemy))
+		if((aTarget == Enemy))
 		{
 			vTarget = LastSeenPos;			
 		}
@@ -845,9 +845,9 @@ function SetGunDirection(Actor aTarget)
 			cTarget = aTarget.GetBoneCoords('R6 Spine');
 			vTarget = cTarget.Origin;
 		}
-		vDirection = __NFUN_216__(vTarget, m_pawn.GetFiringStartPoint());
+		vDirection = (vTarget - m_pawn.GetFiringStartPoint());
 		rDirection = Rotator(vDirection);
-		m_pawn.m_wWantedAimingPitch = byte(__NFUN_145__(rDirection.Pitch, 256));
+		m_pawn.m_wWantedAimingPitch = byte((rDirection.Pitch / 256));
 		m_pawn.m_rFiringRotation = rDirection;		
 	}
 	else
@@ -864,12 +864,12 @@ function SetGunDirection(Actor aTarget)
 function bool IsAnEnemy(R6Pawn Other)
 {
 	// End:0x28
-	if(__NFUN_130__(m_pawn.m_bDontSeePlayer, Other.m_bIsPlayer))
+	if((m_pawn.m_bDontSeePlayer && Other.m_bIsPlayer))
 	{
 		return false;
 	}
 	// End:0x55
-	if(__NFUN_130__(m_pawn.IsEnemy(Other), Other.IsAlive()))
+	if((m_pawn.IsEnemy(Other) && Other.IsAlive()))
 	{
 		return true;
 	}
@@ -883,7 +883,7 @@ function bool IsAnEnemy(R6Pawn Other)
 function bool IsAnHostage(R6Pawn Other)
 {
 	// End:0x2D
-	if(__NFUN_130__(m_pawn.IsNeutral(Other), Other.IsAlive()))
+	if((m_pawn.IsNeutral(Other) && Other.IsAlive()))
 	{
 		return true;
 	}
@@ -912,18 +912,18 @@ function bool IsMyHostage(R6Hostage hostage)
 
 	zonePoint = R6DZonePoint(m_pawn.m_DZone);
 	// End:0x7B
-	if(__NFUN_119__(zonePoint, none))
+	if((zonePoint != none))
 	{
-		HitActor = m_pawn.__NFUN_1806__(vHitLocation, vHitNormal, hostage.Location, zonePoint.Location, __NFUN_158__(1, 2));
+		HitActor = m_pawn.R6Trace(vHitLocation, vHitNormal, hostage.Location, zonePoint.Location, (1 | 2));
 		// End:0x78
-		if(__NFUN_114__(HitActor, hostage))
+		if((HitActor == hostage))
 		{
 			bResult = true;
 		}		
 	}
 	else
 	{
-		bResult = __NFUN_130__(m_pawn.m_DZone.__NFUN_1832__(m_pawn.Location), m_pawn.m_DZone.__NFUN_1832__(hostage.Location));
+		bResult = (m_pawn.m_DZone.IsPointInZone(m_pawn.Location) && m_pawn.m_DZone.IsPointInZone(hostage.Location));
 	}
 	return bResult;
 	return;
@@ -935,20 +935,20 @@ function bool IsMyHostage(R6Hostage hostage)
 function StartFiring()
 {
 	// End:0x80
-	if(__NFUN_130__(__NFUN_129__(Pawn.m_bDroppedWeapon), __NFUN_119__(Pawn.EngineWeapon, none)))
+	if(((!Pawn.m_bDroppedWeapon) && (Pawn.EngineWeapon != none)))
 	{
 		// End:0x49
-		if(__NFUN_129__(Pawn.EngineWeapon.HasAmmo()))
+		if((!Pawn.EngineWeapon.HasAmmo()))
 		{
 			return;
 		}
 		// End:0x5F
-		if(__NFUN_119__(Enemy, none))
+		if((Enemy != none))
 		{
 			Target = Enemy;
 		}
 		bFire = 1;
-		Pawn.EngineWeapon.__NFUN_113__('NormalFire');
+		Pawn.EngineWeapon.GotoState('NormalFire');
 	}
 	m_pawn.PlayWeaponAnimation();
 	return;
@@ -969,10 +969,10 @@ function StopFiring()
 //============================================================================
 function AIReloadWeapon()
 {
-	Pawn.EngineWeapon.__NFUN_113__('None');
+	Pawn.EngineWeapon.GotoState('None');
 	m_pawn.m_wWantedAimingPitch = 0;
 	// End:0x67
-	if(__NFUN_154__(int(Pawn.EngineWeapon.m_eWeaponType), int(5)))
+	if((int(Pawn.EngineWeapon.m_eWeaponType) == int(5)))
 	{
 		Pawn.EngineWeapon.FullCurrentClip();		
 	}
@@ -1043,47 +1043,47 @@ function bool SetLowestSnipingStance(optional Actor aTarget)
 	local Vector vStart, vTarget;
 
 	vStart = m_pawn.Location;
-	vStart.Z = __NFUN_174__(__NFUN_175__(m_pawn.Location.Z, m_pawn.CollisionHeight), float(15));
+	vStart.Z = ((m_pawn.Location.Z - m_pawn.CollisionHeight) + float(15));
 	// End:0x6A
-	if(__NFUN_119__(aTarget, none))
+	if((aTarget != none))
 	{
 		vTarget = aTarget.Location;		
 	}
 	else
 	{
-		vTarget = __NFUN_215__(vStart, __NFUN_212__(Vector(m_pawn.Rotation), float(500)));
+		vTarget = (vStart + (Vector(m_pawn.Rotation) * float(500)));
 	}
 	// End:0xC4
-	if(__NFUN_548__(vStart, vTarget))
+	if(FastTrace(vStart, vTarget))
 	{
 		m_pawn.m_bWantsToProne = true;
 		m_pawn.bWantsToCrouch = false;
 		return true;
 	}
-	vStart.Z = __NFUN_174__(__NFUN_175__(m_pawn.Location.Z, m_pawn.CollisionHeight), float(70));
+	vStart.Z = ((m_pawn.Location.Z - m_pawn.CollisionHeight) + float(70));
 	// End:0x11A
-	if(__NFUN_119__(aTarget, none))
+	if((aTarget != none))
 	{
 		vTarget = aTarget.Location;		
 	}
 	else
 	{
-		vTarget = __NFUN_215__(vStart, __NFUN_212__(Vector(m_pawn.Rotation), float(500)));
+		vTarget = (vStart + (Vector(m_pawn.Rotation) * float(500)));
 	}
 	// End:0x174
-	if(__NFUN_548__(vStart, vTarget))
+	if(FastTrace(vStart, vTarget))
 	{
 		m_pawn.m_bWantsToProne = false;
 		m_pawn.bWantsToCrouch = true;
 		return true;
 	}
 	// End:0x1FD
-	if(__NFUN_119__(aTarget, none))
+	if((aTarget != none))
 	{
-		vStart.Z = __NFUN_174__(__NFUN_175__(m_pawn.Location.Z, m_pawn.CollisionHeight), float(135));
+		vStart.Z = ((m_pawn.Location.Z - m_pawn.CollisionHeight) + float(135));
 		vTarget = aTarget.Location;
 		// End:0x1FB
-		if(__NFUN_548__(vStart, vTarget))
+		if(FastTrace(vStart, vTarget))
 		{
 			m_pawn.m_bWantsToProne = false;
 			m_pawn.bWantsToCrouch = false;
@@ -1109,7 +1109,7 @@ function ReactToGrenade(Vector vGrenadeLocation)
 
 	ChangeDefCon(1);
 	// End:0x2D
-	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_pawn.Location, vGrenadeLocation)), float(600)))
+	if((VSize((m_pawn.Location - vGrenadeLocation)) > float(600)))
 	{
 		return;
 	}
@@ -1118,31 +1118,31 @@ function ReactToGrenade(Vector vGrenadeLocation)
 	J0x4A:
 
 	// End:0x6D [Loop If]
-	if(__NFUN_150__(i, 10))
+	if((i < 10))
 	{
 		m_aLastNode[i] = none;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x4A;
 	}
-	aDest = __NFUN_1820__();
+	aDest = GetNextRandomNode();
 	i = 0;
 	J0x7D:
 
 	// End:0xBF [Loop If]
-	if(__NFUN_130__(__NFUN_176__(__NFUN_225__(__NFUN_216__(aDest.Location, vGrenadeLocation)), fDistance), __NFUN_150__(i, 10)))
+	if(((VSize((aDest.Location - vGrenadeLocation)) < fDistance) && (i < 10)))
 	{
-		__NFUN_165__(i);
-		aDest = __NFUN_1820__();
+		(i++);
+		aDest = GetNextRandomNode();
 		// [Loop Continue]
 		goto J0x7D;
 	}
 	SetReactionStatus(4, 0);
 	m_aMovingToDestination = aDest;
 	// End:0xED
-	if(__NFUN_129__(__NFUN_281__('TransientStateCode')))
+	if((!IsInState('TransientStateCode')))
 	{
-		__NFUN_113__('TransientStateCode', 'RunFromGrenade');
+		GotoState('TransientStateCode', 'RunFromGrenade');
 	}
 	return;
 }
@@ -1176,7 +1176,7 @@ function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 	ChangeDefCon(2);
 	m_pawn.m_vGrenadeLocation = aGrenade.Location;
 	// End:0x77
-	if(__NFUN_154__(int(eType), int(2)))
+	if((int(eType) == int(2)))
 	{
 		// End:0x74
 		if(CanSafelyChangeState())
@@ -1189,15 +1189,15 @@ function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 	else
 	{
 		// End:0xD3
-		if(__NFUN_132__(__NFUN_154__(int(eType), int(3)), __NFUN_154__(int(eType), int(4))))
+		if(((int(eType) == int(3)) || (int(eType) == int(4))))
 		{
 			// End:0xB3
-			if(__NFUN_130__(__NFUN_129__(m_bCantInterruptIO), __NFUN_129__(CanSafelyChangeState())))
+			if(((!m_bCantInterruptIO) && (!CanSafelyChangeState())))
 			{
 				return;
 			}
 			m_pawn.SetNextPendingAction(3);
-			__NFUN_113__('TransientStateCode', 'RecoverFromFlash');			
+			GotoState('TransientStateCode', 'RecoverFromFlash');			
 		}
 		else
 		{
@@ -1221,7 +1221,7 @@ function AIAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 function GotoSeeADead(Vector vDeadLocation)
 {
 	m_vThreatLocation = vDeadLocation;
-	__NFUN_113__('SeeADead');
+	GotoState('SeeADead');
 	return;
 }
 
@@ -1235,7 +1235,7 @@ function GotoSeeADead(Vector vDeadLocation)
 event GotoPointAndSearch(Vector vDestination, R6Pawn.eMovementPace ePace, bool bCallBackup, optional float fSearchTime, optional R6Terrorist.EDefCon eNewDefCon)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanSafelyChangeState()))
+	if((!CanSafelyChangeState()))
 	{
 		return;
 	}
@@ -1243,13 +1243,13 @@ event GotoPointAndSearch(Vector vDestination, R6Pawn.eMovementPace ePace, bool b
 	if(bCallBackup)
 	{
 		// End:0x29
-		if(__NFUN_1822__())
+		if(MakeBackupList())
 		{
-			__NFUN_1823__(vDestination, ePace);
+			CallBackupForInvestigation(vDestination, ePace);
 		}
 	}
 	// End:0x47
-	if(__NFUN_155__(int(eNewDefCon), int(0)))
+	if((int(eNewDefCon) != int(0)))
 	{
 		ChangeDefCon(eNewDefCon);		
 	}
@@ -1258,7 +1258,7 @@ event GotoPointAndSearch(Vector vDestination, R6Pawn.eMovementPace ePace, bool b
 		ChangeDefCon(1);
 	}
 	// End:0x67
-	if(__NFUN_180__(fSearchTime, float(0)))
+	if((fSearchTime == float(0)))
 	{
 		fSearchTime = 30.0000000;
 	}
@@ -1272,12 +1272,12 @@ event GotoPointAndSearch(Vector vDestination, R6Pawn.eMovementPace ePace, bool b
 event GotoPointToAttack(Vector vDestination, Actor PTarget)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanSafelyChangeState()))
+	if((!CanSafelyChangeState()))
 	{
 		return;
 	}
 	// End:0x47
-	if(__NFUN_119__(m_InteractionObject, none))
+	if((m_InteractionObject != none))
 	{
 		m_bCalledForBackup = true;
 		m_vThreatLocation = vDestination;
@@ -1296,7 +1296,7 @@ event GotoPointToAttack(Vector vDestination, Actor PTarget)
 	Target = PTarget;
 	SetActionSpot(none);
 	m_StateAfterInteraction = 'MovingToAttack';
-	__NFUN_113__('MovingToAttack');
+	GotoState('MovingToAttack');
 	return;
 }
 
@@ -1306,7 +1306,7 @@ event GotoPointToAttack(Vector vDestination, Actor PTarget)
 function GotoStateLostSight(Vector vLastSeen)
 {
 	m_vThreatLocation = vLastSeen;
-	__NFUN_113__('LostSight');
+	GotoState('LostSight');
 	return;
 }
 
@@ -1321,7 +1321,7 @@ function EngageBySight(Pawn aPawn)
 {
 	SetEnemy(aPawn);
 	Target = aPawn;
-	__NFUN_113__('PrecombatAction');
+	GotoState('PrecombatAction');
 	return;
 }
 
@@ -1330,31 +1330,31 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 	local bool bOutnumbered;
 
 	// End:0x16
-	if(__NFUN_155__(int(m_eEngageReaction), int(0)))
+	if((int(m_eEngageReaction) != int(0)))
 	{
 		return m_eEngageReaction;
 	}
 	// End:0x41
-	if(__NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(Pawn.EngineWeapon, none)))
+	if((Pawn.m_bDroppedWeapon || (Pawn.EngineWeapon == none)))
 	{
 		return 4;
 	}
 	// End:0x5D
-	if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+	if((int(m_pawn.m_ePersonality) == int(5)))
 	{
 		return 1;
 	}
-	m_iRandomNumber = __NFUN_146__(__NFUN_167__(100), 1);
+	m_iRandomNumber = (Rand(100) + 1);
 	switch(m_pawn.m_ePersonality)
 	{
 		// End:0x8B
 		case 0:
-			__NFUN_162__(m_iRandomNumber, 40);
+			(m_iRandomNumber -= 40);
 			// End:0xC9
 			break;
 		// End:0x9C
 		case 1:
-			__NFUN_162__(m_iRandomNumber, 20);
+			(m_iRandomNumber -= 20);
 			// End:0xC9
 			break;
 		// End:0xA4
@@ -1363,12 +1363,12 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 			break;
 		// End:0xB5
 		case 3:
-			__NFUN_161__(m_iRandomNumber, 20);
+			(m_iRandomNumber += 20);
 			// End:0xC9
 			break;
 		// End:0xC6
 		case 4:
-			__NFUN_161__(m_iRandomNumber, 40);
+			(m_iRandomNumber += 40);
 			// End:0xC9
 			break;
 		// End:0xFFFF
@@ -1376,7 +1376,7 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 			break;
 	}
 	// End:0xE7
-	if(__NFUN_150__(__NFUN_144__(__NFUN_146__(m_iTerroristInGroup, 1), 2), m_iRainbowInCombat))
+	if((((m_iTerroristInGroup + 1) * 2) < m_iRainbowInCombat))
 	{
 		bOutnumbered = true;
 	}
@@ -1384,24 +1384,24 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 	if(bOutnumbered)
 	{
 		// End:0xFF
-		if(__NFUN_153__(m_iRandomNumber, 81))
+		if((m_iRandomNumber >= 81))
 		{
 			return 1;
 		}
 		// End:0x10E
-		if(__NFUN_153__(m_iRandomNumber, 41))
+		if((m_iRandomNumber >= 41))
 		{
 			return 2;
 		}
 		// End:0x120
-		if(__NFUN_153__(m_iRandomNumber, 11))
+		if((m_iRandomNumber >= 11))
 		{
 			return 3;			
 		}
 		else
 		{
 			// End:0x152
-			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, pEnemy.Location)), float(1000)))
+			if((VSize((Pawn.Location - pEnemy.Location)) < float(1000)))
 			{
 				return 4;				
 			}
@@ -1414,12 +1414,12 @@ function R6TerroristAI.EEngageReaction GetEngageReaction(Pawn pEnemy, int iNbTer
 	else
 	{
 		// End:0x167
-		if(__NFUN_153__(m_iRandomNumber, 61))
+		if((m_iRandomNumber >= 61))
 		{
 			return 1;
 		}
 		// End:0x179
-		if(__NFUN_153__(m_iRandomNumber, 11))
+		if((m_iRandomNumber >= 11))
 		{
 			return 2;			
 		}
@@ -1437,12 +1437,12 @@ function bool CheckForInteraction()
 	local Actor aGoal;
 
 	// End:0x82
-	if(__NFUN_119__(m_TriggeredIO, none))
+	if((m_TriggeredIO != none))
 	{
 		m_bCantInterruptIO = true;
 		SetReactionStatus(5, 0);
 		// End:0x48
-		if(__NFUN_119__(m_TriggeredIO.m_Anchor, none))
+		if((m_TriggeredIO.m_Anchor != none))
 		{
 			aGoal = m_TriggeredIO.m_Anchor;			
 		}
@@ -1454,20 +1454,20 @@ function bool CheckForInteraction()
 		return true;
 	}
 	// End:0xAC
-	if(__NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(m_pawn.EngineWeapon, none)))
+	if((Pawn.m_bDroppedWeapon || (m_pawn.EngineWeapon == none)))
 	{
 		return false;
 	}
 	// End:0xE0
-	if(__NFUN_129__(UseRandomHostage()))
+	if((!UseRandomHostage()))
 	{
-		m_Hostage = m_pawn.m_DZone.__NFUN_1838__(m_pawn.Location);
+		m_Hostage = m_pawn.m_DZone.GetClosestHostage(m_pawn.Location);
 	}
 	// End:0x11D
-	if(__NFUN_130__(__NFUN_119__(m_Hostage, none), __NFUN_129__(m_Hostage.m_bExtracted)))
+	if(((m_Hostage != none) && (!m_Hostage.m_bExtracted)))
 	{
 		// End:0x11D
-		if(__NFUN_150__(__NFUN_167__(100), GetKillingHostageChance()))
+		if((Rand(100) < GetKillingHostageChance()))
 		{
 			GotoStateAttackHostage(m_Hostage);
 			return true;
@@ -1485,10 +1485,10 @@ function PlayAttackVoices()
 	local int iAngle;
 
 	// End:0x7B
-	if(__NFUN_151__(__NFUN_1851__(Enemy.Rotation.Yaw, m_pawn.Rotation.Yaw), 13000))
+	if((ShortestAngle2D(Enemy.Rotation.Yaw, m_pawn.Rotation.Yaw) > 13000))
 	{
 		// End:0x65
-		if(__NFUN_153__(int(m_pawn.m_eDefCon), int(3)))
+		if((int(m_pawn.m_eDefCon) >= int(3)))
 		{
 			m_VoicesManager.PlayTerroristVoices(m_pawn, 10);			
 		}
@@ -1506,7 +1506,7 @@ function PlayAttackVoices()
 function PawnDied()
 {
 	// End:0x33
-	if(__NFUN_130__(__NFUN_119__(m_path, none), __NFUN_129__(Level.m_bIsResettingLevel)))
+	if(((m_path != none) && (!Level.m_bIsResettingLevel)))
 	{
 		m_path.InformTerroTeam(5, self);
 	}
@@ -1523,7 +1523,7 @@ function bool AIPlayCallBackup(Actor pEnemy)
 	local int iShootingChance, iAnimID;
 
 	// End:0x37
-	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, pEnemy.Location)), float(400)))
+	if((VSize((Pawn.Location - pEnemy.Location)) < float(400)))
 	{
 		iShootingChance = 100;		
 	}
@@ -1552,7 +1552,7 @@ function bool AIPlayCallBackup(Actor pEnemy)
 		}
 	}
 	// End:0x91
-	if(__NFUN_150__(__NFUN_167__(100), iShootingChance))
+	if((Rand(100) < iShootingChance))
 	{
 		iAnimID = 0;		
 	}
@@ -1563,7 +1563,7 @@ function bool AIPlayCallBackup(Actor pEnemy)
 	m_pawn.SetNextPendingAction(34, iAnimID);
 	m_VoicesManager.PlayTerroristVoices(m_pawn, 8);
 	// End:0xD1
-	if(__NFUN_154__(iAnimID, 0))
+	if((iAnimID == 0))
 	{
 		return false;
 	}
@@ -1602,7 +1602,7 @@ function GotoStateThrowingGrenade(name nNextState, name nNextLabel)
 {
 	NextState = nNextState;
 	NextLabel = nNextLabel;
-	__NFUN_113__('ThrowingGrenade');
+	GotoState('ThrowingGrenade');
 	return;
 }
 
@@ -1618,11 +1618,11 @@ function GotoStateNoThreat()
 	// End:0x1C
 	if(m_pawn.IsAlive())
 	{
-		__NFUN_113__('NoThreat');		
+		GotoState('NoThreat');		
 	}
 	else
 	{
-		__NFUN_113__('Dead');
+		GotoState('Dead');
 	}
 	return;
 }
@@ -1635,24 +1635,24 @@ function GotoStateMovingTo(string sDebugString, R6Pawn.eMovementPace ePace, bool
 	local Vector vHitNormal;
 
 	// End:0x75
-	if(__NFUN_130__(__NFUN_114__(aMoveTarget, none), __NFUN_217__(vDestination, vect(0.0000000, 0.0000000, 0.0000000))))
+	if(((aMoveTarget == none) && (vDestination == vect(0.0000000, 0.0000000, 0.0000000))))
 	{
 		logX("Call to GotoStateMovingTo with no aMoveTarget or vDestination");
-		__NFUN_113__(stateAfter, labelAfter);
+		GotoState(stateAfter, labelAfter);
 	}
 	CheckPaceForInjury(ePace);
 	m_aMovingToDestination = aMoveTarget;
 	// End:0xAD
-	if(__NFUN_119__(m_aMovingToDestination, none))
+	if((m_aMovingToDestination != none))
 	{
 		m_vMovingDestination = m_aMovingToDestination.Location;		
 	}
 	else
 	{
 		// End:0xEC
-		if(__NFUN_119__(__NFUN_277__(m_vMovingDestination, vHitNormal, __NFUN_216__(vDestination, vect(0.0000000, 0.0000000, 200.0000000)), vDestination), none))
+		if((Trace(m_vMovingDestination, vHitNormal, (vDestination - vect(0.0000000, 0.0000000, 200.0000000)), vDestination) != none))
 		{
-			__NFUN_184__(m_vMovingDestination.Z, float(80));			
+			(m_vMovingDestination.Z += float(80));			
 		}
 		else
 		{
@@ -1665,12 +1665,12 @@ function GotoStateMovingTo(string sDebugString, R6Pawn.eMovementPace ePace, bool
 	m_labelAfterMovingTo = labelAfter;
 	m_bPreciseMove = bPreciseMove;
 	// End:0x207
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bDontCheckLeave), __NFUN_129__(m_pawn.m_bAllowLeave)), __NFUN_129__(m_pawn.m_DZone.__NFUN_1832__(m_vMovingDestination))))
+	if((((!bDontCheckLeave) && (!m_pawn.m_bAllowLeave)) && (!m_pawn.m_DZone.IsPointInZone(m_vMovingDestination))))
 	{
 		// End:0x1B9
-		if(__NFUN_114__(R6DZoneRandomPoints(m_pawn.m_DZone), none))
+		if((R6DZoneRandomPoints(m_pawn.m_DZone) == none))
 		{
-			m_vMovingDestination = m_pawn.m_DZone.__NFUN_1833__(m_vMovingDestination);			
+			m_vMovingDestination = m_pawn.m_DZone.FindClosestPointTo(m_vMovingDestination);			
 		}
 		else
 		{
@@ -1681,11 +1681,11 @@ function GotoStateMovingTo(string sDebugString, R6Pawn.eMovementPace ePace, bool
 			}
 			else
 			{
-				m_vMovingDestination = m_pawn.m_DZone.__NFUN_1833__(m_vMovingDestination);
+				m_vMovingDestination = m_pawn.m_DZone.FindClosestPointTo(m_vMovingDestination);
 			}
 		}
 	}
-	__NFUN_113__('MovingTo');
+	GotoState('MovingTo');
 	m_sDebugString = sDebugString;
 	return;
 }
@@ -1700,13 +1700,13 @@ function GotoStateMovingTo(string sDebugString, R6Pawn.eMovementPace ePace, bool
 event GotoStateEngageByThreat(Vector vThreathLocation)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanSafelyChangeState()))
+	if((!CanSafelyChangeState()))
 	{
 		return;
 	}
 	m_vThreatLocation = vThreathLocation;
-	m_fSearchTime = __NFUN_174__(Level.TimeSeconds, float(20));
-	__NFUN_113__('EngageByThreat');
+	m_fSearchTime = (Level.TimeSeconds + float(20));
+	GotoState('EngageByThreat');
 	return;
 }
 
@@ -1721,8 +1721,8 @@ function GotoStateEngageBySound(Vector vInvestigateDestination, R6Pawn.eMovement
 {
 	m_vThreatLocation = vInvestigateDestination;
 	m_pawn.m_eMovementPace = ePace;
-	m_fSearchTime = __NFUN_174__(Level.TimeSeconds, fSearchTime);
-	__NFUN_113__('EngageBySound');
+	m_fSearchTime = (Level.TimeSeconds + fSearchTime);
+	GotoState('EngageBySound');
 	return;
 }
 
@@ -1735,9 +1735,9 @@ function GotoStateEngageBySound(Vector vInvestigateDestination, R6Pawn.eMovement
 //============================================================================
 function SecureTerrorist(R6Pawn pOther)
 {
-	ChangeOrientationTo(Rotator(__NFUN_216__(Pawn.Location, pOther.Location)));
+	ChangeOrientationTo(Rotator((Pawn.Location - pOther.Location)));
 	SetEnemy(pOther);
-	__NFUN_113__('Surrender', 'Secure');
+	GotoState('Surrender', 'Secure');
 	return;
 }
 
@@ -1752,7 +1752,7 @@ function GotoStateAimedFire()
 {
 	m_eAttackMode = 1;
 	m_pawn.m_bSprayFire = false;
-	__NFUN_113__('Attack');
+	GotoState('Attack');
 	return;
 }
 
@@ -1760,7 +1760,7 @@ function GotoStateSprayFire()
 {
 	m_pawn.m_bSprayFire = true;
 	// End:0x38
-	if(__NFUN_130__(__NFUN_154__(int(m_eAttackMode), int(0)), __NFUN_154__(__NFUN_167__(2), 0)))
+	if(((int(m_eAttackMode) == int(0)) && (Rand(2) == 0)))
 	{
 		m_eAttackMode = 3;		
 	}
@@ -1768,7 +1768,7 @@ function GotoStateSprayFire()
 	{
 		m_eAttackMode = 2;
 	}
-	__NFUN_113__('Attack');
+	GotoState('Attack');
 	return;
 }
 
@@ -1777,7 +1777,7 @@ function GotoStateAttackHostage(R6Pawn hostage)
 	SetEnemy(hostage);
 	m_eAttackMode = 1;
 	m_pawn.m_bSprayFire = false;
-	__NFUN_113__('AttackHostage');
+	GotoState('AttackHostage');
 	return;
 }
 
@@ -1796,13 +1796,13 @@ function HostageSurrender(R6HostageAI hostageAI)
 	m_HostageAI = hostageAI;
 	m_Hostage = hostageAI.m_pawn;
 	m_Manager.AssignHostageTo(m_Hostage, self);
-	m_ZoneToEscort = m_Manager.__NFUN_1826__(m_pawn);
+	m_ZoneToEscort = m_Manager.FindNearestZoneForHostage(m_pawn);
 	// End:0x75
-	if(__NFUN_114__(m_ZoneToEscort, none))
+	if((m_ZoneToEscort == none))
 	{
 		m_ZoneToEscort = m_pawn.m_DZone;
 	}
-	vDestination = m_ZoneToEscort.__NFUN_1831__();
+	vDestination = m_ZoneToEscort.FindRandomPointInArea();
 	m_HostageAI.SetStateEscorted(m_pawn, vDestination, true);
 	GotoStateFollowPawn(R6Pawn(m_HostageAI.Pawn), 0, 100.0000000);
 	return;
@@ -1832,7 +1832,7 @@ function GotoStateFindHostage(R6Hostage hostage)
 	m_Hostage = hostage;
 	m_HostageAI = R6HostageAI(hostage.Controller);
 	m_Manager.AssignHostageTo(hostage, self);
-	__NFUN_113__('FindHostage');
+	GotoState('FindHostage');
 	return;
 }
 
@@ -1854,7 +1854,7 @@ function GotoStateFollowPawn(R6Pawn followedpawn, R6TerroristAI.EFollowMode eMod
 	m_eFollowMode = eMode;
 	m_fFollowDist = fDist;
 	m_iFollowYaw = iYaw;
-	__NFUN_113__('FollowPawn');
+	GotoState('FollowPawn');
 	return;
 }
 
@@ -1894,7 +1894,7 @@ function float GetWaitingTime()
 		default:
 			break;
 	}
-	return RandRange(fTemp, __NFUN_174__(fTemp, fTemp));
+	return RandRange(fTemp, (fTemp + fTemp));
 	return;
 }
 
@@ -1933,7 +1933,7 @@ function float GetFacingTime()
 		default:
 			break;
 	}
-	return RandRange(float(fTemp), float(__NFUN_146__(fTemp, fTemp)));
+	return RandRange(float(fTemp), float((fTemp + fTemp)));
 	return;
 }
 
@@ -1972,7 +1972,7 @@ function bool IsGoingBack()
 		default:
 			break;
 	}
-	return __NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), ITemp);
+	return ((Rand(100) + 1) < ITemp);
 	return;
 }
 
@@ -2041,7 +2041,7 @@ function GotoNode(Vector VPosition)
 function FollowLeader(R6Terrorist Leader, Vector VOffset)
 {
 	m_bWaiting = false;
-	GotoStateFollowPawn(Leader, 1, __NFUN_225__(VOffset), Rotator(VOffset).Yaw);
+	GotoStateFollowPawn(Leader, 1, VSize(VOffset), Rotator(VOffset).Yaw);
 	return;
 }
 
@@ -2051,7 +2051,7 @@ function WaitAtNode(float fWaitingTime, float fFacingTime, Rotator rOrientation)
 	m_fWaitingTime = fWaitingTime;
 	m_fFacingTime = fFacingTime;
 	m_rStandRotation = rOrientation;
-	__NFUN_113__('PatrolPath', 'WaitingAtNode');
+	GotoState('PatrolPath', 'WaitingAtNode');
 	return;
 }
 
@@ -2067,7 +2067,7 @@ function WaitAtNode(float fWaitingTime, float fFacingTime, Rotator rOrientation)
 function bool CanInteractWithObjects(R6InteractiveObject o)
 {
 	// End:0x76
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_114__(m_InteractionObject, none), __NFUN_119__(m_pawn, none)), m_pawn.IsAlive()), __NFUN_154__(int(m_eReactionStatus), int(0))), __NFUN_153__(int(m_pawn.m_eDefCon), int(3))), __NFUN_155__(int(m_pawn.m_eStrategy), int(3))))
+	if(((((((m_InteractionObject == none) && (m_pawn != none)) && m_pawn.IsAlive()) && (int(m_eReactionStatus) == int(0))) && (int(m_pawn.m_eDefCon) >= int(3))) && (int(m_pawn.m_eStrategy) != int(3))))
 	{
 		return true;
 	}
@@ -2078,13 +2078,13 @@ function bool CanInteractWithObjects(R6InteractiveObject o)
 function PerformAction_StopInteraction()
 {
 	// End:0x3D
-	if(__NFUN_132__(__NFUN_132__(m_bCalledForBackup, __NFUN_119__(m_InteractionObject.m_SeePlayerPawn, none)), __NFUN_119__(m_InteractionObject.m_HearNoiseNoiseMaker, none)))
+	if(((m_bCalledForBackup || (m_InteractionObject.m_SeePlayerPawn != none)) || (m_InteractionObject.m_HearNoiseNoiseMaker != none)))
 	{
 		ChangeDefCon(2);
 	}
 	super.PerformAction_StopInteraction();
 	// End:0x78
-	if(__NFUN_130__(m_bCalledForBackup, __NFUN_129__(m_bCantInterruptIO)))
+	if((m_bCalledForBackup && (!m_bCantInterruptIO)))
 	{
 		m_bCalledForBackup = false;
 		m_InteractionObject = none;
@@ -2102,15 +2102,15 @@ state test
 RandomRotation:
 
 
-	m_rStandRotation.Yaw = __NFUN_144__(__NFUN_167__(32767), 4);
-	logX(__NFUN_112__("Yaw: ", string(m_rStandRotation.Yaw)));
+	m_rStandRotation.Yaw = (Rand(32767) * 4);
+	logX(("Yaw: " $ string(m_rStandRotation.Yaw)));
 	ChangeOrientationTo(m_rStandRotation);
-	__NFUN_256__(2.0000000);
+	Sleep(2.0000000);
 	goto 'RandomRotation';
 Sequence:
 
 
-	__NFUN_256__(2.0000000);
+	Sleep(2.0000000);
 	goto 'Sequence';
 	stop;			
 }
@@ -2139,20 +2139,20 @@ state BumpBackUp
 		// End:0x44
 		if(MoveRight())
 		{
-			vTarget = __NFUN_215__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(__NFUN_316__(Rotator(m_vBumpedByVelocity), rot(0, 16384, 0)))));			
+			vTarget = (Pawn.Location + (float(c_iDistanceBumpBackUp) * Vector((Rotator(m_vBumpedByVelocity) + rot(0, 16384, 0)))));			
 		}
 		else
 		{
-			vTarget = __NFUN_215__(Pawn.Location, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(__NFUN_317__(Rotator(m_vBumpedByVelocity), rot(0, 16384, 0)))));
+			vTarget = (Pawn.Location + (float(c_iDistanceBumpBackUp) * Vector((Rotator(m_vBumpedByVelocity) - rot(0, 16384, 0)))));
 		}
 		vExtent.X = Pawn.CollisionRadius;
 		vExtent.Y = vExtent.Y;
 		vExtent.Z = Pawn.CollisionHeight;
-		HitActor = __NFUN_1806__(vHitLocation, vHitNormal, vTarget, Pawn.Location, __NFUN_158__(1, 2), vExtent);
+		HitActor = R6Trace(vHitLocation, vHitNormal, vTarget, Pawn.Location, (1 | 2), vExtent);
 		// End:0x11D
-		if(__NFUN_119__(HitActor, none))
+		if((HitActor != none))
 		{
-			vTarget = __NFUN_215__(vHitLocation, __NFUN_213__(float(c_iDistanceBumpBackUp), Vector(Rotator(m_vBumpedByVelocity))));
+			vTarget = (vHitLocation + (float(c_iDistanceBumpBackUp) * Vector(Rotator(m_vBumpedByVelocity))));
 		}
 		return true;
 		return;
@@ -2210,12 +2210,12 @@ RunFromGrenade:
 	{
 		// End:0x25
 		case 1:
-			__NFUN_256__(1.0000000);
+			Sleep(1.0000000);
 			// End:0x40
 			break;
 		// End:0x35
 		case 2:
-			__NFUN_256__(0.5000000);
+			Sleep(0.5000000);
 			// End:0x40
 			break;
 		// End:0x3D
@@ -2232,18 +2232,18 @@ AfterRunFromGrenade:
 
 	m_bHeardGrenade = false;
 	// End:0x85
-	if(__NFUN_114__(Enemy, none))
+	if((Enemy == none))
 	{
-		__NFUN_256__(3.0000000);
+		Sleep(3.0000000);
 	}
 	goto 'ResumeAction';
 RecoverFromFlash:
 
 
-	__NFUN_118__('HearNoise');
-	__NFUN_118__('SeePlayer');
+	Disable('HearNoise');
+	Disable('SeePlayer');
 	StopMoving();
-	__NFUN_256__(5.0000000);
+	Sleep(5.0000000);
 	// End:0xB6
 	if(m_bCantInterruptIO)
 	{
@@ -2253,9 +2253,9 @@ ResumeAction:
 
 
 	// End:0xCB
-	if(__NFUN_119__(Enemy, none))
+	if((Enemy != none))
 	{
-		__NFUN_113__('Attack');		
+		GotoState('Attack');		
 	}
 	else
 	{
@@ -2280,9 +2280,9 @@ state SeeADead
 Begin:
 
 	ChangeDefCon(2);
-	SetActionSpot(__NFUN_1817__(none, m_vThreatLocation, 2000.0000000));
+	SetActionSpot(FindPlaceToFire(none, m_vThreatLocation, 2000.0000000));
 	// End:0x53
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
 		GotoStateMovingTo("SeeADead:FireSpot", 5, true, m_pActionSpot,, 'SeeADead', 'AtSpot');
 	}
@@ -2291,7 +2291,7 @@ AtSpot:
 
 	StopMoving();
 	// End:0x7B
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
 		ChangeOrientationTo(m_pActionSpot.Rotation);		
 	}
@@ -2301,22 +2301,22 @@ AtSpot:
 		FocalPoint = m_vThreatLocation;
 	}
 	// End:0xC4
-	if(__NFUN_132__(__NFUN_114__(m_pActionSpot, none), __NFUN_154__(int(m_pActionSpot.m_eFire), int(2))))
+	if(((m_pActionSpot == none) || (int(m_pActionSpot.m_eFire) == int(2))))
 	{
 		Pawn.bWantsToCrouch = true;
 	}
-	m_fSearchTime = __NFUN_174__(Level.TimeSeconds, float(30));
+	m_fSearchTime = (Level.TimeSeconds + float(30));
 Wait:
 
 
 	// End:0x108
-	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	if((m_fSearchTime < Level.TimeSeconds))
 	{
 		GotoStateEngageBySound(m_vThreatLocation, 4, 30.0000000);
 	}
-	__NFUN_256__(RandRange(1.0000000, 3.0000000));
-	m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, 10000.0000000), float(256)));
-	__NFUN_256__(RandRange(0.5000000, 1.5000000));
+	Sleep(RandRange(1.0000000, 3.0000000));
+	m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, 10000.0000000) / float(256)));
+	Sleep(RandRange(0.5000000, 1.5000000));
 	m_pawn.m_wWantedHeadYaw = 0;
 	goto 'Wait';
 	stop;				
@@ -2332,12 +2332,12 @@ state MovingToAttack
 Begin:
 
 	// End:0x23
-	if(__NFUN_114__(m_pActionSpot, none))
+	if((m_pActionSpot == none))
 	{
-		SetActionSpot(__NFUN_1817__(Target, m_vThreatLocation, 2000.0000000));
+		SetActionSpot(FindPlaceToFire(Target, m_vThreatLocation, 2000.0000000));
 	}
 	// End:0x78
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
 		m_pActionSpot.m_pCurrentUser = m_pawn;
 		GotoStateMovingTo("MovingToAttackActionSpot", 5, true, m_pActionSpot,, 'MovingToAttack', 'AtActionSpot');		
@@ -2348,9 +2348,9 @@ Begin:
 	}
 	J0xA7:
 
-	__NFUN_2201__(m_pActionSpot.Location, Rotator(__NFUN_216__(Target.Location, m_pActionSpot.Location)));
+	MoveToPosition(m_pActionSpot.Location, Rotator((Target.Location - m_pActionSpot.Location)));
 	// End:0x105
-	if(__NFUN_154__(int(m_pActionSpot.m_eFire), int(2)))
+	if((int(m_pActionSpot.m_eFire) == int(2)))
 	{
 		m_pawn.bWantsToCrouch = true;		
 	}
@@ -2366,8 +2366,8 @@ AtPosition:
 Wait:
 
 
-	__NFUN_256__(30.0000000);
-	__NFUN_256__(RandRange(1.0000000, 3.0000000));
+	Sleep(30.0000000);
+	Sleep(RandRange(1.0000000, 3.0000000));
 	GotoStateEngageBySound(m_vThreatLocation, 4, 30.0000000);
 	stop;		
 }
@@ -2382,11 +2382,11 @@ state LostSight
 Begin:
 
 	// End:0x62
-	if(__NFUN_119__(Enemy, none))
+	if((Enemy != none))
 	{
-		m_vTargetPosition = __NFUN_1824__(Enemy);
+		m_vTargetPosition = FindBetterShotLocation(Enemy);
 		R6PreMoveTo(m_vTargetPosition, Enemy.Location, 5);
-		__NFUN_500__(m_vTargetPosition, Enemy);
+		MoveTo(m_vTargetPosition, Enemy);
 		Focus = none;
 		FocalPoint = Enemy.Location;
 		goto 'AtBetterLocation';
@@ -2406,9 +2406,9 @@ Grenade:
 EndThrowingGrenade:
 
 
-	SetActionSpot(__NFUN_1817__(none, m_vThreatLocation, 2000.0000000));
+	SetActionSpot(FindPlaceToFire(none, m_vThreatLocation, 2000.0000000));
 	// End:0x100
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
 		m_pActionSpot.m_pCurrentUser = m_pawn;
 		GotoStateMovingTo("LostSightActionSpot", 5, true, m_pActionSpot,, 'LostSight', 'AtActionSpot');
@@ -2419,9 +2419,9 @@ EndThrowingGrenade:
 AtActionSpot:
 
 
-	__NFUN_2201__(m_pActionSpot.Location, Rotator(__NFUN_216__(m_pActionSpot.Location, m_vThreatLocation)));
+	MoveToPosition(m_pActionSpot.Location, Rotator((m_pActionSpot.Location - m_vThreatLocation)));
 	// End:0x192
-	if(__NFUN_132__(__NFUN_154__(int(m_pActionSpot.m_eFire), int(2)), __NFUN_154__(int(m_pActionSpot.m_eCover), int(2))))
+	if(((int(m_pActionSpot.m_eFire) == int(2)) || (int(m_pActionSpot.m_eCover) == int(2))))
 	{
 		m_pawn.bWantsToCrouch = true;		
 	}
@@ -2431,9 +2431,9 @@ AtActionSpot:
 	}
 	J0x1A3:
 
-	__NFUN_256__(RandRange(0.0000000, 3.0000000));
+	Sleep(RandRange(0.0000000, 3.0000000));
 	// End:0x22D
-	if(__NFUN_176__(float(Pawn.EngineWeapon.NumberOfBulletsLeftInClip()), __NFUN_171__(0.5000000, float(Pawn.EngineWeapon.GetClipCapacity()))))
+	if((float(Pawn.EngineWeapon.NumberOfBulletsLeftInClip()) < (0.5000000 * float(Pawn.EngineWeapon.GetClipCapacity()))))
 	{
 		SetReactionStatus(5, 0);
 		AIReloadWeapon();
@@ -2442,7 +2442,7 @@ AtActionSpot:
 		// End:0x223 [Loop If]
 		if(m_pawn.m_bReloadingWeapon)
 		{
-			__NFUN_256__(0.1000000);
+			Sleep(0.1000000);
 			// [Loop Continue]
 			goto J0x206;
 		}
@@ -2472,25 +2472,25 @@ InteractiveObject:
 	J0x2B:
 
 	// End:0x83 [Loop If]
-	if(__NFUN_119__(m_TriggeredIO.m_InteractionOwner, none))
+	if((m_TriggeredIO.m_InteractionOwner != none))
 	{
 		// End:0x78
-		if(__NFUN_129__(m_TriggeredIO.m_InteractionOwner.Pawn.IsAlive()))
+		if((!m_TriggeredIO.m_InteractionOwner.Pawn.IsAlive()))
 		{
 			m_TriggeredIO.m_InteractionOwner = none;			
 		}
 		else
 		{
-			__NFUN_256__(0.5000000);
+			Sleep(0.5000000);
 		}
 		// [Loop Continue]
 		goto J0x2B;
 	}
 	m_TriggeredIO.PerformAction(m_pawn);
 	m_TriggeredIO = none;
-	__NFUN_256__(1.0000000);
+	Sleep(1.0000000);
 	// End:0xB7
-	if(__NFUN_114__(Enemy, none))
+	if((Enemy == none))
 	{
 		GotoStateNoThreat();
 	}
@@ -2498,40 +2498,40 @@ AfterInteraction:
 
 
 	// End:0xE4
-	if(__NFUN_132__(m_pawn.m_bIsKneeling, m_pawn.m_bIsUnderArrest))
+	if((m_pawn.m_bIsKneeling || m_pawn.m_bIsUnderArrest))
 	{
-		__NFUN_113__('Surrender');
+		GotoState('Surrender');
 	}
 	StopMoving();
 	LastSeenTime = Level.TimeSeconds;
 	LastSeenPos = Enemy.Location;
 	// End:0x16B
-	if(__NFUN_130__(__NFUN_129__(Pawn.m_bDroppedWeapon), __NFUN_119__(Pawn.EngineWeapon, none)))
+	if(((!Pawn.m_bDroppedWeapon) && (Pawn.EngineWeapon != none)))
 	{
 		// End:0x16B
-		if(__NFUN_155__(int(m_eAttackMode), int(0)))
+		if((int(m_eAttackMode) != int(0)))
 		{
 			// End:0x164
-			if(__NFUN_154__(int(m_eAttackMode), int(4)))
+			if((int(m_eAttackMode) == int(4)))
 			{
 				m_eAttackMode = 3;
 			}
-			__NFUN_113__('Attack');
+			GotoState('Attack');
 		}
 	}
 	// End:0x1BE
-	if(__NFUN_1822__())
+	if(MakeBackupList())
 	{
 		// End:0x1AB
 		if(AIPlayCallBackup(Enemy))
 		{
-			__NFUN_256__(1.0000000);
-			__NFUN_1821__(Enemy.Location, 5);
-			__NFUN_261__(m_pawn.16);			
+			Sleep(1.0000000);
+			CallBackupForAttack(Enemy.Location, 5);
+			FinishAnim(m_pawn.16);			
 		}
 		else
 		{
-			__NFUN_1821__(Enemy.Location, 5);
+			CallBackupForAttack(Enemy.Location, 5);
 		}
 	}
 	J0x1BE:
@@ -2543,7 +2543,7 @@ AfterInteraction:
 		if(m_pawn.m_DZone.m_bUseGrenade)
 		{
 			// End:0x21E
-			if(__NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), m_pawn.m_DZone.m_iChanceToUseGrenadeAtFirstReaction))
+			if(((Rand(100) + 1) < m_pawn.m_DZone.m_iChanceToUseGrenadeAtFirstReaction))
 			{
 				GotoStateThrowingGrenade('PrecombatAction', 'Reaction');
 			}
@@ -2553,14 +2553,14 @@ Reaction:
 
 
 	// End:0x265
-	if(__NFUN_119__(R6RainbowAI(Enemy.Controller), none))
+	if((R6RainbowAI(Enemy.Controller) != none))
 	{
 		m_iRainbowInCombat = R6RainbowAI(Enemy.Controller).m_TeamManager.m_iMemberCount;		
 	}
 	else
 	{
 		// End:0x2A9
-		if(__NFUN_119__(R6PlayerController(Enemy.Controller), none))
+		if((R6PlayerController(Enemy.Controller) != none))
 		{
 			m_iRainbowInCombat = R6PlayerController(Enemy.Controller).m_TeamManager.m_iMemberCount;
 		}
@@ -2582,13 +2582,13 @@ Reaction:
 		// End:0x30D
 		case 3:
 			m_VoicesManager.PlayTerroristVoices(m_pawn, 4);
-			__NFUN_113__('RunAway');
+			GotoState('RunAway');
 			// End:0x335
 			break;
 		// End:0x332
 		case 4:
 			m_VoicesManager.PlayTerroristVoices(m_pawn, 2);
-			__NFUN_113__('Surrender');
+			GotoState('Surrender');
 			// End:0x335
 			break;
 		// End:0xFFFF
@@ -2607,9 +2607,9 @@ auto state Configuration
 	J0x3A:
 
 	// End:0x59 [Loop If]
-	if(__NFUN_129__(m_pawn.m_bInitFinished))
+	if((!m_pawn.m_bInitFinished))
 	{
-		__NFUN_256__(0.5000000);
+		Sleep(0.5000000);
 		// [Loop Continue]
 		goto J0x3A;
 	}
@@ -2618,12 +2618,12 @@ auto state Configuration
 	m_eEngageReaction = m_pawn.m_DZone.m_eEngageReaction;
 	ChangeDefCon(m_pawn.m_eDefCon);
 	// End:0x116
-	if(__NFUN_154__(int(m_pawn.m_eStrategy), int(0)))
+	if((int(m_pawn.m_eStrategy) == int(0)))
 	{
 		m_path = R6DZonePath(m_pawn.m_DZone);
-		assert(__NFUN_119__(m_path, none));
+		assert((m_path != none));
 		// End:0x116
-		if(__NFUN_150__(m_path.m_aNode.Length, 2))
+		if((m_path.m_aNode.Length < 2))
 		{
 			m_pawn.m_eStrategy = 2;
 		}
@@ -2659,13 +2659,13 @@ state ThrowingGrenade
 		local Vector vDir;
 		local float fDist;
 
-		vDir = __NFUN_216__(Enemy.Location, m_pawn.Location);
-		fDist = __NFUN_225__(vDir);
+		vDir = (Enemy.Location - m_pawn.Location);
+		fDist = VSize(vDir);
 		// End:0xA4
-		if(__NFUN_177__(fDist, float(1500)))
+		if((fDist > float(1500)))
 		{
-			vDir = __NFUN_226__(vDir);
-			vDir = __NFUN_215__(m_pawn.Location, __NFUN_212__(vDir, __NFUN_175__(fDist, float(1400))));
+			vDir = Normal(vDir);
+			vDir = (m_pawn.Location + (vDir * (fDist - float(1400))));
 			GotoStateMovingTo("ThrowingGrenade", 5, true,, vDir, 'ThrowingGrenade', 'Throw');
 		}
 		return;
@@ -2683,7 +2683,7 @@ Throw:
 
 
 	// End:0x38
-	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(Enemy.Location, m_pawn.Location)), float(1500)))
+	if((VSize((Enemy.Location - m_pawn.Location)) > float(1500)))
 	{
 		goto 'Exit';
 	}
@@ -2693,20 +2693,20 @@ Throw:
 	if(m_pawn.bIsCrouched)
 	{
 		m_pawn.bWantsToCrouch = false;
-		__NFUN_256__(0.1000000);
+		Sleep(0.1000000);
 	}
-	__NFUN_508__();
+	FinishRotation();
 	m_pawn.SetToGrenade();
 	m_pawn.PlayWeaponAnimation();
 	m_pawn.SetNextPendingAction(30);
-	__NFUN_261__(m_pawn.16);
+	FinishAnim(m_pawn.16);
 	m_pawn.SetToNormalWeapon();
 	m_pawn.PlayWeaponAnimation();
-	__NFUN_256__(2.0000000);
+	Sleep(2.0000000);
 Exit:
 
 
-	__NFUN_113__(NextState, NextLabel);
+	GotoState(NextState, NextLabel);
 	stop;	
 }
 
@@ -2720,16 +2720,16 @@ state NoThreat
 Begin:
 
 	// End:0x2D
-	if(__NFUN_132__(m_pawn.m_bIsKneeling, m_pawn.m_bIsUnderArrest))
+	if((m_pawn.m_bIsKneeling || m_pawn.m_bIsUnderArrest))
 	{
-		__NFUN_113__('Surrender');
+		GotoState('Surrender');
 	}
 	Pawn.SetMovementPhysics();
 	m_eAttackMode = 0;
 	m_pawn.m_bSprayFire = false;
 	StopMoving();
 	// End:0x99
-	if(__NFUN_155__(int(m_pawn.m_ePersonality), int(5)))
+	if((int(m_pawn.m_ePersonality) != int(5)))
 	{
 		m_pawn.bWantsToCrouch = false;
 		m_pawn.m_bIsSniping = false;		
@@ -2751,12 +2751,12 @@ Begin:
 	m_iChanceToDetectShooter = 0;
 	SetActionSpot(none);
 	// End:0x143
-	if(__NFUN_129__(UseRandomHostage()))
+	if((!UseRandomHostage()))
 	{
 		m_Hostage = none;
 	}
 	// End:0x164
-	if(__NFUN_152__(int(m_pawn.m_eDefCon), int(2)))
+	if((int(m_pawn.m_eDefCon) <= int(2)))
 	{
 		ChangeDefCon(2);
 	}
@@ -2764,24 +2764,24 @@ Begin:
 	J0x16B:
 
 	// End:0x18E [Loop If]
-	if(__NFUN_150__(m_iRandomNumber, 10))
+	if((m_iRandomNumber < 10))
 	{
 		m_aLastNode[m_iRandomNumber] = none;
-		__NFUN_165__(m_iRandomNumber);
+		(m_iRandomNumber++);
 		// [Loop Continue]
 		goto J0x16B;
 	}
 	J0x18E:
 
 	// End:0x1B6 [Loop If]
-	if(__NFUN_129__(Level.Game.m_bGameStarted))
+	if((!Level.Game.m_bGameStarted))
 	{
-		__NFUN_256__(0.5000000);
+		Sleep(0.5000000);
 		// [Loop Continue]
 		goto J0x18E;
 	}
 	// End:0x201
-	if(__NFUN_132__(__NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(Pawn.EngineWeapon, none)), Pawn.EngineWeapon.GunIsFull()))
+	if(((Pawn.m_bDroppedWeapon || (Pawn.EngineWeapon == none)) || Pawn.EngineWeapon.GunIsFull()))
 	{
 		goto 'ChooseState';
 	}
@@ -2792,16 +2792,16 @@ Reload:
 	J0x20B:
 
 	// End:0x256 [Loop If]
-	if(__NFUN_129__(Pawn.EngineWeapon.GunIsFull()))
+	if((!Pawn.EngineWeapon.GunIsFull()))
 	{
-		__NFUN_256__(0.1000000);
+		Sleep(0.1000000);
 		AIReloadWeapon();
 		J0x236:
 
 		// End:0x253 [Loop If]
 		if(m_pawn.m_bReloadingWeapon)
 		{
-			__NFUN_256__(0.1000000);
+			Sleep(0.1000000);
 			// [Loop Continue]
 			goto J0x236;
 		}
@@ -2816,27 +2816,27 @@ ChooseState:
 	{
 		// End:0x27F
 		case 0:
-			__NFUN_113__('PatrolPath');
+			GotoState('PatrolPath');
 			// End:0x2BB
 			break;
 		// End:0x28E
 		case 1:
-			__NFUN_113__('PatrolArea');
+			GotoState('PatrolArea');
 			// End:0x2BB
 			break;
 		// End:0x29D
 		case 2:
-			__NFUN_113__('GuardPoint');
+			GotoState('GuardPoint');
 			// End:0x2BB
 			break;
 		// End:0x2AC
 		case 3:
-			__NFUN_113__('HuntRainbow');
+			GotoState('HuntRainbow');
 			// End:0x2BB
 			break;
 		// End:0x2B8
 		case 4:
-			__NFUN_113__('test');
+			GotoState('test');
 		// End:0xFFFF
 		default:
 			break;
@@ -2850,7 +2850,7 @@ state MovingTo
 	{
 		SetReactionStatus(m_eReactionStatus, m_eStateForEvent);
 		// End:0x49
-		if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)))
+		if((int(m_pawn.m_eMovementPace) == int(5)))
 		{
 			m_pawn.m_ePlayerIsUsingHands = 3;
 			m_pawn.PlayWeaponAnimation();
@@ -2861,12 +2861,12 @@ state MovingTo
 	function EndState()
 	{
 		// End:0x39
-		if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(5)))
+		if((int(m_pawn.m_eMovementPace) == int(5)))
 		{
 			m_pawn.m_ePlayerIsUsingHands = 0;
 			m_pawn.PlayWeaponAnimation();
 		}
-		__NFUN_280__(0.0000000, false);
+		SetTimer(0.0000000, false);
 		m_pawn.m_wWantedHeadYaw = 0;
 		return;
 	}
@@ -2877,20 +2877,20 @@ state MovingTo
 
 		aPawn = R6Pawn(Other);
 		// End:0x15C
-		if(__NFUN_119__(aPawn, none))
+		if((aPawn != none))
 		{
 			// End:0x43
-			if(__NFUN_154__(int(aPawn.m_ePawnType), int(1)))
+			if((int(aPawn.m_ePawnType) == int(1)))
 			{
-				__NFUN_113__('MovingTo', 'Exit');				
+				GotoState('MovingTo', 'Exit');				
 			}
 			else
 			{
 				// End:0x15C
-				if(__NFUN_154__(int(aPawn.m_ePawnType), int(2)))
+				if((int(aPawn.m_ePawnType) == int(2)))
 				{
 					// End:0x8D
-					if(__NFUN_119__(aPawn, m_LastBumped))
+					if((aPawn != m_LastBumped))
 					{
 						m_LastBumped = aPawn;
 						m_fLastBumpedTime = Level.TimeSeconds;						
@@ -2898,21 +2898,21 @@ state MovingTo
 					else
 					{
 						// End:0x15C
-						if(__NFUN_177__(Level.TimeSeconds, __NFUN_174__(__NFUN_174__(m_fLastBumpedTime, 0.3000000), RandRange(0.1000000, 0.3000000))))
+						if((Level.TimeSeconds > ((m_fLastBumpedTime + 0.3000000) + RandRange(0.1000000, 0.3000000))))
 						{
 							// End:0xF8
-							if(__NFUN_130__(m_bCanFailMovingTo, __NFUN_217__(m_LastBumped.Velocity, vect(0.0000000, 0.0000000, 0.0000000))))
+							if((m_bCanFailMovingTo && (m_LastBumped.Velocity == vect(0.0000000, 0.0000000, 0.0000000))))
 							{
-								__NFUN_113__('MovingTo', 'Exit');								
+								GotoState('MovingTo', 'Exit');								
 							}
 							else
 							{
 								// End:0x14E
-								if(__NFUN_130__(m_bCantInterruptIO, __NFUN_119__(R6TerroristAI(aPawn.Controller), none)))
+								if((m_bCantInterruptIO && (R6TerroristAI(aPawn.Controller) != none)))
 								{
-									R6TerroristAI(aPawn.Controller).GotoBumpBackUpState(aPawn.Controller.__NFUN_284__());
+									R6TerroristAI(aPawn.Controller).GotoBumpBackUpState(aPawn.Controller.GetStateName());
 								}
-								__NFUN_113__('MovingTo', 'WaitLastBumped');
+								GotoState('MovingTo', 'WaitLastBumped');
 							}
 							return true;
 						}
@@ -2929,29 +2929,29 @@ state MovingTo
 		local Vector vDirection;
 		local float fTemp;
 
-		vDirection = __NFUN_216__(Pawn.Location, m_LastBumped.Location);
+		vDirection = (Pawn.Location - m_LastBumped.Location);
 		vDirection.Z = 0.0000000;
-		vDirection = __NFUN_212__(__NFUN_212__(__NFUN_226__(vDirection), Pawn.CollisionRadius), float(4));
-		vTarget = __NFUN_215__(Pawn.Location, vDirection);
+		vDirection = ((Normal(vDirection) * Pawn.CollisionRadius) * float(4));
+		vTarget = (Pawn.Location + vDirection);
 		// End:0x7F
-		if(__NFUN_521__(vTarget))
+		if(pointReachable(vTarget))
 		{
 			return true;
 		}
-		fTemp = __NFUN_169__(vDirection.X);
+		fTemp = (-vDirection.X);
 		vDirection.X = vDirection.Y;
 		vDirection.Y = fTemp;
-		vTarget = __NFUN_215__(Pawn.Location, vDirection);
+		vTarget = (Pawn.Location + vDirection);
 		// End:0xDE
-		if(__NFUN_521__(vTarget))
+		if(pointReachable(vTarget))
 		{
 			return true;
 		}
-		vDirection.X = __NFUN_169__(vDirection.X);
-		vDirection.Y = __NFUN_169__(vDirection.Y);
-		vTarget = __NFUN_215__(Pawn.Location, vDirection);
+		vDirection.X = (-vDirection.X);
+		vDirection.Y = (-vDirection.Y);
+		vTarget = (Pawn.Location + vDirection);
 		// End:0x134
-		if(__NFUN_521__(vTarget))
+		if(pointReachable(vTarget))
 		{
 			return true;
 		}
@@ -2961,7 +2961,7 @@ state MovingTo
 
 	event Timer()
 	{
-		__NFUN_165__(m_iStateVariable);
+		(m_iStateVariable++);
 		switch(m_iStateVariable)
 		{
 			// End:0x1A
@@ -2972,19 +2972,19 @@ state MovingTo
 			// End:0x4B
 			case 2:
 				m_pawn.m_wWantedHeadYaw = 0;
-				__NFUN_280__(RandRange(1.0000000, 2.0000000), false);
+				SetTimer(RandRange(1.0000000, 2.0000000), false);
 				// End:0xD9
 				break;
 			// End:0x90
 			case 1:
-				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(3500.0000000, 10000.0000000), float(256)));
-				__NFUN_280__(RandRange(0.5000000, 1.5000000), false);
+				m_pawn.m_wWantedHeadYaw = byte((RandRange(3500.0000000, 10000.0000000) / float(256)));
+				SetTimer(RandRange(0.5000000, 1.5000000), false);
 				// End:0xD9
 				break;
 			// End:0xD6
 			case 3:
-				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -3500.0000000), float(256)));
-				__NFUN_280__(RandRange(0.5000000, 1.5000000), false);
+				m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, -3500.0000000) / float(256)));
+				SetTimer(RandRange(0.5000000, 1.5000000), false);
 				// End:0xD9
 				break;
 			// End:0xFFFF
@@ -2998,15 +2998,15 @@ Begin:
 	m_iRandomNumber = 0;
 	m_wBadMoveCount = 0;
 	// End:0x36
-	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, Pawn.Location)), 10.0000000))
+	if((VSize((m_vMovingDestination - Pawn.Location)) < 10.0000000))
 	{
 		goto 'Exit';
 	}
 	// End:0x7F
-	if(__NFUN_154__(int(m_pawn.m_eMovementPace), int(4)))
+	if((int(m_pawn.m_eMovementPace) == int(4)))
 	{
 		// End:0x63
-		if(__NFUN_154__(__NFUN_167__(2), 0))
+		if((Rand(2) == 0))
 		{
 			m_iStateVariable = 0;			
 		}
@@ -3014,53 +3014,53 @@ Begin:
 		{
 			m_iStateVariable = 2;
 		}
-		__NFUN_280__(RandRange(1.0000000, 2.0000000), false);
+		SetTimer(RandRange(1.0000000, 2.0000000), false);
 	}
 	// End:0xAA
 	if(m_pawn.bWantsToCrouch)
 	{
 		m_pawn.bWantsToCrouch = false;
-		__NFUN_256__(0.1000000);
+		Sleep(0.1000000);
 	}
 	m_iRandomNumber = 0;
 PathFinding:
 
 
 	// End:0xDC
-	if(__NFUN_132__(__NFUN_130__(__NFUN_119__(m_aMovingToDestination, none), __NFUN_520__(m_aMovingToDestination)), __NFUN_521__(m_vMovingDestination)))
+	if((((m_aMovingToDestination != none) && actorReachable(m_aMovingToDestination)) || pointReachable(m_vMovingDestination)))
 	{
 		goto 'EndPath';
 	}
 	// End:0xF8
-	if(__NFUN_119__(m_aMovingToDestination, none))
+	if((m_aMovingToDestination != none))
 	{
-		MoveTarget = __NFUN_517__(m_aMovingToDestination);		
+		MoveTarget = FindPathToward(m_aMovingToDestination);		
 	}
 	else
 	{
-		MoveTarget = __NFUN_518__(m_vMovingDestination, true);
+		MoveTarget = FindPathTo(m_vMovingDestination, true);
 	}
 	// End:0x120
-	if(__NFUN_114__(MoveTarget, none))
+	if((MoveTarget == none))
 	{
-		__NFUN_256__(0.5000000);
+		Sleep(0.5000000);
 		goto 'Exit';
 	}
 	// End:0x164
-	if(__NFUN_130__(__NFUN_154__(m_iRandomNumber, 0), __NFUN_151__(int(m_pawn.m_eDefCon), int(2))))
+	if(((m_iRandomNumber == 0) && (int(m_pawn.m_eDefCon) > int(2))))
 	{
 		m_iRandomNumber = 1;
 		FocalPoint = MoveTarget.Location;
-		__NFUN_508__();
+		FinishRotation();
 	}
 	R6PreMoveTo(MoveTarget.Location, MoveTarget.Location, m_pawn.m_eMovementPace);
-	__NFUN_502__(MoveTarget);
+	MoveToward(MoveTarget);
 	// End:0x1D5
-	if(__NFUN_154__(int(m_eMoveToResult), int(2)))
+	if((int(m_eMoveToResult) == int(2)))
 	{
-		__NFUN_139__(m_wBadMoveCount);
+		(m_wBadMoveCount++);
 		// End:0x1D2
-		if(__NFUN_130__(m_bCanFailMovingTo, __NFUN_151__(int(m_wBadMoveCount), 2)))
+		if((m_bCanFailMovingTo && (int(m_wBadMoveCount) > 2)))
 		{
 			goto 'Exit';
 		}		
@@ -3074,32 +3074,32 @@ EndPath:
 
 
 	// End:0x21E
-	if(__NFUN_130__(__NFUN_154__(m_iRandomNumber, 0), __NFUN_151__(int(m_pawn.m_eDefCon), int(2))))
+	if(((m_iRandomNumber == 0) && (int(m_pawn.m_eDefCon) > int(2))))
 	{
 		m_iRandomNumber = 1;
 		FocalPoint = m_vMovingDestination;
-		__NFUN_508__();
+		FinishRotation();
 	}
 	R6PreMoveTo(m_vMovingDestination, m_vMovingDestination, m_pawn.m_eMovementPace);
 	// End:0x252
-	if(__NFUN_119__(m_aMovingToDestination, none))
+	if((m_aMovingToDestination != none))
 	{
-		__NFUN_502__(m_aMovingToDestination);		
+		MoveToward(m_aMovingToDestination);		
 	}
 	else
 	{
-		__NFUN_500__(m_vMovingDestination);
+		MoveTo(m_vMovingDestination);
 	}
 	J0x25A:
 
 	// End:0x2F1
-	if(__NFUN_129__(m_bCanFailMovingTo))
+	if((!m_bCanFailMovingTo))
 	{
 		// End:0x2BA
-		if(__NFUN_119__(m_aMovingToDestination, none))
+		if((m_aMovingToDestination != none))
 		{
 			// End:0x2B7
-			if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, Pawn.Location)), __NFUN_174__(__NFUN_174__(Pawn.CollisionRadius, m_aMovingToDestination.CollisionRadius), 10.0000000)))
+			if((VSize((m_vMovingDestination - Pawn.Location)) > ((Pawn.CollisionRadius + m_aMovingToDestination.CollisionRadius) + 10.0000000)))
 			{
 				goto 'Begin';
 			}			
@@ -3107,14 +3107,14 @@ EndPath:
 		else
 		{
 			// End:0x2F1
-			if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, Pawn.Location)), __NFUN_171__(Pawn.CollisionRadius, 2.0000000)))
+			if((VSize((m_vMovingDestination - Pawn.Location)) > (Pawn.CollisionRadius * 2.0000000)))
 			{
 				goto 'Begin';
 			}
 		}
 	}
 	StopMoving();
-	__NFUN_113__(m_stateAfterMovingTo, m_labelAfterMovingTo);
+	GotoState(m_stateAfterMovingTo, m_labelAfterMovingTo);
 WaitLastBumped:
 
 
@@ -3123,11 +3123,11 @@ WaitLastBumped:
 	{
 		m_sDebugString = "Bumped away";
 		R6PreMoveTo(m_vTargetPosition, m_vTargetPosition, m_pawn.m_eMovementPace);
-		__NFUN_500__(m_vTargetPosition);
+		MoveTo(m_vTargetPosition);
 	}
 	StopMoving();
 	// End:0x36F
-	if(__NFUN_119__(MoveTarget, none))
+	if((MoveTarget != none))
 	{
 		FocalPoint = MoveTarget.Location;
 	}
@@ -3135,7 +3135,7 @@ WaitLastBumped:
 	// End:0x3A1
 	if(m_bCanFailMovingTo)
 	{
-		__NFUN_256__(RandRange(0.0000000, 2.0000000));
+		Sleep(RandRange(0.0000000, 2.0000000));
 	}
 	m_LastBumped = none;
 	m_sDebugString = "";
@@ -3160,18 +3160,18 @@ state EngageByThreat
 	}
 Begin:
 
-	__NFUN_256__(RandRange(0.1000000, 0.2000000));
+	Sleep(RandRange(0.1000000, 0.2000000));
 	ChangeDefCon(1);
-	SetActionSpot(__NFUN_1811__(m_vThreatLocation, 2000.0000000));
+	SetActionSpot(FindPlaceToTakeCover(m_vThreatLocation, 2000.0000000));
 	// End:0x67
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
 		GotoStateMovingTo("ThreatActionSpot", 5, true, m_pActionSpot,, 'EngageByThreat', 'ReachedCover');		
 	}
 	else
 	{
 		// End:0x8C
-		if(__NFUN_129__(m_pawn.m_bPreventCrouching))
+		if((!m_pawn.m_bPreventCrouching))
 		{
 			Pawn.bWantsToCrouch = true;
 		}
@@ -3184,10 +3184,10 @@ Begin:
 	J0xB4:
 
 	// End:0x10E
-	if(__NFUN_155__(int(m_pActionSpot.m_eCover), int(0)))
+	if((int(m_pActionSpot.m_eCover) != int(0)))
 	{
 		// End:0xFA
-		if(__NFUN_154__(int(m_pActionSpot.m_eCover), int(1)))
+		if((int(m_pActionSpot.m_eCover) == int(1)))
 		{
 			m_r6pawn.bWantsToCrouch = false;			
 		}
@@ -3199,7 +3199,7 @@ Begin:
 	else
 	{
 		// End:0x13B
-		if(__NFUN_154__(int(m_pActionSpot.m_eFire), int(1)))
+		if((int(m_pActionSpot.m_eFire) == int(1)))
 		{
 			m_r6pawn.bWantsToCrouch = false;			
 		}
@@ -3208,7 +3208,7 @@ Begin:
 			m_r6pawn.bWantsToCrouch = true;
 		}
 	}
-	__NFUN_2201__(m_pActionSpot.Location, m_pActionSpot.Rotation);
+	MoveToPosition(m_pActionSpot.Location, m_pActionSpot.Rotation);
 	Focus = none;
 	FocalPoint = m_vThreatLocation;
 	StopMoving();
@@ -3217,18 +3217,18 @@ Wait:
 
 
 	// End:0x1AB
-	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	if((m_fSearchTime < Level.TimeSeconds))
 	{
 		GotoStateNoThreat();
 	}
 	// End:0x1F2
-	if(__NFUN_154__(__NFUN_167__(3), 0))
+	if((Rand(3) == 0))
 	{
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, 10000.0000000), float(256)));
-		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, 10000.0000000) / float(256)));
+		Sleep(RandRange(1.0000000, 2.5000000));
 	}
 	m_pawn.m_wWantedHeadYaw = 0;
-	__NFUN_256__(RandRange(1.0000000, 5.0000000));
+	Sleep(RandRange(1.0000000, 5.0000000));
 	goto 'Wait';
 	stop;			
 }
@@ -3252,11 +3252,11 @@ state EngageBySound
 
 	function Vector ChooseARandomPoint()
 	{
-		SetActionSpot(__NFUN_1818__(m_iCurrentGroupID, 2000.0000000));
+		SetActionSpot(FindInvestigationPoint(m_iCurrentGroupID, 2000.0000000));
 		// End:0x2B
-		if(__NFUN_114__(m_pActionSpot, none))
+		if((m_pActionSpot == none))
 		{
-			return __NFUN_1820__().Location;
+			return GetNextRandomNode().Location;
 		}
 		m_pActionSpot.m_iLastInvestigateID = m_iCurrentGroupID;
 		return m_pActionSpot.Location;
@@ -3267,23 +3267,23 @@ Begin:
 	StopMoving();
 	Focus = none;
 	FocalPoint = m_vThreatLocation;
-	__NFUN_508__();
-	__NFUN_256__(RandRange(0.2500000, 0.5000000));
+	FinishRotation();
+	Sleep(RandRange(0.2500000, 0.5000000));
 	m_pawn.TurnAwayFromNearbyWalls();
-	__NFUN_256__(RandRange(0.2500000, 1.0000000));
+	Sleep(RandRange(0.2500000, 1.0000000));
 	// End:0x6E
-	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	if((m_fSearchTime < Level.TimeSeconds))
 	{
 		goto 'Exit';
 	}
 	// End:0x88
-	if(__NFUN_129__(m_pawn.m_bAllowLeave))
+	if((!m_pawn.m_bAllowLeave))
 	{
 		goto 'GoCloserAndLook';
 	}
-	SetActionSpot(__NFUN_1818__(m_iCurrentGroupID, 2000.0000000, true, m_vThreatLocation));
+	SetActionSpot(FindInvestigationPoint(m_iCurrentGroupID, 2000.0000000, true, m_vThreatLocation));
 	// End:0xF9
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
 		m_pActionSpot.m_iLastInvestigateID = m_iCurrentGroupID;
 		GotoStateMovingTo("SoundActionSpot", m_pawn.m_eMovementPace, true, m_pActionSpot,, 'EngageBySound', 'AtDestination');		
@@ -3300,30 +3300,30 @@ WaitHere:
 
 
 	// End:0x168
-	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	if((m_fSearchTime < Level.TimeSeconds))
 	{
 		goto 'Exit';
 	}
 	// End:0x193
-	if(__NFUN_154__(__NFUN_167__(4), 0))
+	if((Rand(4) == 0))
 	{
 		ChangeOrientationTo(ChooseRandomDirection(50));
-		__NFUN_256__(RandRange(2.0000000, 4.0000000));
+		Sleep(RandRange(2.0000000, 4.0000000));
 	}
 	// End:0x1EB
-	if(__NFUN_154__(__NFUN_167__(2), 0))
+	if((Rand(2) == 0))
 	{
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, 10000.0000000), float(256)));
-		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, 10000.0000000) / float(256)));
+		Sleep(RandRange(1.0000000, 2.5000000));
 		m_pawn.m_wWantedHeadYaw = 0;
 	}
-	__NFUN_256__(RandRange(1.0000000, 4.0000000));
+	Sleep(RandRange(1.0000000, 4.0000000));
 	goto 'WaitHere';
 ChooseDestination:
 
 
 	// End:0x222
-	if(__NFUN_176__(m_fSearchTime, Level.TimeSeconds))
+	if((m_fSearchTime < Level.TimeSeconds))
 	{
 		goto 'Exit';
 	}
@@ -3333,24 +3333,24 @@ AtRandomPoint:
 
 
 	// End:0x27F
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
 		ChangeOrientationTo(m_pActionSpot.Rotation);
 	}
 	// End:0x306
-	if(__NFUN_154__(__NFUN_167__(2), 0))
+	if((Rand(2) == 0))
 	{
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
-		__NFUN_256__(RandRange(1.0000000, 2.5000000));
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
-		__NFUN_256__(RandRange(1.0000000, 2.5000000));		
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
+		Sleep(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, -5000.0000000) / float(256)));
+		Sleep(RandRange(1.0000000, 2.5000000));		
 	}
 	else
 	{
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
-		__NFUN_256__(RandRange(1.0000000, 2.5000000));
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
-		__NFUN_256__(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, -5000.0000000) / float(256)));
+		Sleep(RandRange(1.0000000, 2.5000000));
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
+		Sleep(RandRange(1.0000000, 2.5000000));
 	}
 	m_pawn.m_wWantedHeadYaw = 0;
 	goto 'ChooseDestination';
@@ -3362,8 +3362,8 @@ AtClosest:
 
 
 	FocalPoint = m_vThreatLocation;
-	__NFUN_508__();
-	__NFUN_256__(RandRange(3.0000000, 5.0000000));
+	FinishRotation();
+	Sleep(RandRange(3.0000000, 5.0000000));
 Exit:
 
 
@@ -3395,24 +3395,24 @@ state Surrender
 Begin:
 
 	StopMoving();
-	__NFUN_508__();
+	FinishRotation();
 	// End:0x30
-	if(__NFUN_132__(m_pawn.m_bIsUnderArrest, m_pawn.m_bIsKneeling))
+	if((m_pawn.m_bIsUnderArrest || m_pawn.m_bIsKneeling))
 	{
 		stop;
 	}
 	m_pawn.m_bPreventWeaponAnimation = true;
 	m_pawn.SetNextPendingAction(31);
-	__NFUN_256__(0.3330000);
+	Sleep(0.3330000);
 	m_pawn.SetNextPendingAction(9);
-	__NFUN_261__(m_pawn.16);
+	FinishAnim(m_pawn.16);
 	m_pawn.SetNextPendingAction(32);
 	J0x8A:
 
 	// End:0xA9 [Loop If]
-	if(__NFUN_129__(m_pawn.m_bIsKneeling))
+	if((!m_pawn.m_bIsKneeling))
 	{
-		__NFUN_256__(1.0000000);
+		Sleep(1.0000000);
 		// [Loop Continue]
 		goto J0x8A;
 	}
@@ -3422,10 +3422,10 @@ Begin:
 Secure:
 
 
-	__NFUN_508__();
+	FinishRotation();
 	m_pawn.m_bIsUnderArrest = true;
 	R6AbstractGameInfo(Level.Game).PawnSecure(m_pawn);
-	m_pawn.__NFUN_262__(false, false, false);
+	m_pawn.SetCollision(false, false, false);
 	m_pawn.SetNextPendingAction(33);
 	stop;			
 }
@@ -3451,13 +3451,13 @@ Begin:
 	if(Pawn.bIsCrouched)
 	{
 		m_pawn.bWantsToCrouch = false;
-		__NFUN_256__(0.1000000);
+		Sleep(0.1000000);
 	}
 ChooseDestination:
 
 
 	// End:0x46
-	if(__NFUN_132__(__NFUN_129__(__NFUN_1810__()), __NFUN_114__(RouteGoal, none)))
+	if(((!MakePathToRun()) || (RouteGoal == none)))
 	{
 		GotoStateSprayFire();
 	}
@@ -3492,7 +3492,7 @@ state WaitForEnemy
 		{
 			SetEnemy(seen);
 			// End:0x31
-			if(__NFUN_154__(__NFUN_167__(2), 0))
+			if((Rand(2) == 0))
 			{
 				GotoStateSprayFire();				
 			}
@@ -3515,11 +3515,11 @@ Begin:
 	FocalPoint = LastSeenPos;
 	StopMoving();
 	// End:0x41
-	if(__NFUN_129__(m_pawn.m_bPreventCrouching))
+	if((!m_pawn.m_bPreventCrouching))
 	{
 		Pawn.bWantsToCrouch = true;
 	}
-	__NFUN_280__(10.0000000, false);
+	SetTimer(10.0000000, false);
 	m_pawn.m_bAvoidFacingWalls = true;
 Wait:
 
@@ -3533,13 +3533,13 @@ state Attack
 	{
 		SetReactionStatus(4, 2);
 		// End:0x91
-		if(__NFUN_130__(Pawn.IsAlive(), __NFUN_132__(Pawn.m_bDroppedWeapon, __NFUN_114__(Pawn.EngineWeapon, none))))
+		if((Pawn.IsAlive() && (Pawn.m_bDroppedWeapon || (Pawn.EngineWeapon == none))))
 		{
 			m_pawn.ServerForceKillResult(4);
 			m_pawn.R6TakeDamage(1000, 1000, m_pawn, m_pawn.Location, vect(0.0000000, 0.0000000, 0.0000000), 0);
 		}
 		// End:0xA9
-		if(__NFUN_154__(int(m_eAttackMode), int(0)))
+		if((int(m_eAttackMode) == int(0)))
 		{
 			GotoStateNoThreat();
 			return;
@@ -3558,7 +3558,7 @@ state Attack
 		StopFiring();
 		Focus = none;
 		// End:0x4E
-		if(__NFUN_119__(Enemy, none))
+		if((Enemy != none))
 		{
 			FocalPoint = Enemy.Location;
 		}
@@ -3569,12 +3569,12 @@ state Attack
 	function bool NeedToReload()
 	{
 		// End:0x20
-		if(__NFUN_154__(Pawn.EngineWeapon.NumberOfBulletsLeftInClip(), 0))
+		if((Pawn.EngineWeapon.NumberOfBulletsLeftInClip() == 0))
 		{
 			return true;
 		}
 		// End:0x7F
-		if(__NFUN_130__(__NFUN_154__(int(Pawn.EngineWeapon.m_eWeaponType), int(5)), __NFUN_150__(Pawn.EngineWeapon.NumberOfBulletsLeftInClip(), __NFUN_147__(Pawn.EngineWeapon.GetClipCapacity(), 50))))
+		if(((int(Pawn.EngineWeapon.m_eWeaponType) == int(5)) && (Pawn.EngineWeapon.NumberOfBulletsLeftInClip() < (Pawn.EngineWeapon.GetClipCapacity() - 50))))
 		{
 			return true;
 		}
@@ -3587,16 +3587,16 @@ state Attack
 		local R6Pawn aPawn;
 
 		// End:0x1F
-		if(__NFUN_119__(Enemy, none))
+		if((Enemy != none))
 		{
 			FocalPoint = Enemy.Location;
 		}
 		SetEnemy(none);
 		// End:0x8E
-		foreach __NFUN_312__(Class'R6Engine.R6Pawn', aPawn, 5000.0000000, m_pawn.Location)
+		foreach VisibleCollidingActors(Class'R6Engine.R6Pawn', aPawn, 5000.0000000, m_pawn.Location)
 		{
 			// End:0x8D
-			if(__NFUN_130__(m_pawn.IsEnemy(aPawn), aPawn.IsAlive()))
+			if((m_pawn.IsEnemy(aPawn) && aPawn.IsAlive()))
 			{
 				SetEnemy(aPawn);
 				Focus = Enemy;				
@@ -3604,13 +3604,13 @@ state Attack
 			}			
 		}		
 		// End:0xC4
-		if(__NFUN_154__(int(m_eAttackMode), int(3)))
+		if((int(m_eAttackMode) == int(3)))
 		{
 			// End:0xC1
-			if(__NFUN_521__(LastSeenPos))
+			if(pointReachable(LastSeenPos))
 			{
 				m_vMovingDestination = LastSeenPos;
-				__NFUN_113__('Attack', 'SprayFireMove');
+				GotoState('Attack', 'SprayFireMove');
 			}			
 		}
 		else
@@ -3628,7 +3628,7 @@ state Attack
 Begin:
 
 	// End:0x2D
-	if(__NFUN_155__(int(m_pawn.m_eEffectiveGrenade), int(0)))
+	if((int(m_pawn.m_eEffectiveGrenade) != int(0)))
 	{
 		ReactToGrenade(m_pawn.m_vGrenadeLocation);
 	}
@@ -3636,18 +3636,18 @@ Begin:
 	StopMoving();
 	m_bFireShort = false;
 	// End:0x90
-	if(__NFUN_119__(m_pActionSpot, none))
+	if((m_pActionSpot != none))
 	{
-		m_iRandomNumber = __NFUN_167__(100);
+		m_iRandomNumber = Rand(100);
 		// End:0x74
-		if(__NFUN_150__(m_iRandomNumber, 60))
+		if((m_iRandomNumber < 60))
 		{
 			m_bFireShort = true;			
 		}
 		else
 		{
 			// End:0x8A
-			if(__NFUN_150__(m_iRandomNumber, 80))
+			if((m_iRandomNumber < 80))
 			{
 				SetActionSpot(none);				
 			}
@@ -3658,14 +3658,14 @@ Begin:
 		}
 	}
 	// End:0xDF
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_129__(Pawn.bIsCrouched)), __NFUN_154__(__NFUN_167__(3), 0)))
+	if((((!m_pawn.m_bPreventCrouching) && (!Pawn.bIsCrouched)) && (Rand(3) == 0)))
 	{
 		Pawn.bWantsToCrouch = true;
-		__NFUN_256__(0.1000000);
+		Sleep(0.1000000);
 	}
 	Target = Enemy;
 	m_sDebugString = "FinishRotation2";
-	__NFUN_508__();
+	FinishRotation();
 ReactionTime:
 
 
@@ -3673,12 +3673,12 @@ ReactionTime:
 	{
 		// End:0x123
 		case 1:
-			__NFUN_256__(1.0000000);
+			Sleep(1.0000000);
 			// End:0x13E
 			break;
 		// End:0x133
 		case 2:
-			__NFUN_256__(0.5000000);
+			Sleep(0.5000000);
 			// End:0x13E
 			break;
 		// End:0x13B
@@ -3689,12 +3689,12 @@ ReactionTime:
 		default:
 			break;
 	}
-	__NFUN_1828__();
+	CallVisibleTerrorist();
 Fire:
 
 
 	// End:0x169
-	if(__NFUN_132__(__NFUN_155__(int(m_eAttackMode), int(3)), __NFUN_533__(Enemy)))
+	if(((int(m_eAttackMode) != int(3)) || CanSee(Enemy)))
 	{
 		Focus = Enemy;
 	}
@@ -3705,11 +3705,11 @@ Fire:
 		goto 'Reload';
 	}
 	// End:0x1DC
-	if(__NFUN_154__(int(m_eAttackMode), int(4)))
+	if((int(m_eAttackMode) == int(4)))
 	{
 		SetGunDirection(none);
 		// End:0x1D9
-		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Pawn.Location, Destination)), __NFUN_171__(Pawn.CollisionRadius, float(2))))
+		if((VSize((Pawn.Location - Destination)) < (Pawn.CollisionRadius * float(2))))
 		{
 			StopMoving();
 			m_eAttackMode = 3;
@@ -3718,10 +3718,10 @@ Fire:
 	else
 	{
 		// End:0x22A
-		if(__NFUN_132__(__NFUN_114__(Enemy, none), __NFUN_129__(R6Pawn(Enemy).IsAlive())))
+		if(((Enemy == none) || (!R6Pawn(Enemy).IsAlive())))
 		{
 			// End:0x224
-			if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+			if((int(m_pawn.m_ePersonality) == int(5)))
 			{
 				GotoStateNoThreat();				
 			}
@@ -3732,20 +3732,20 @@ Fire:
 		}
 		m_sDebugString = "CheckLineOfSight";
 		// End:0x2F0
-		if(__NFUN_130__(__NFUN_119__(Enemy, none), __NFUN_129__(__NFUN_1827__(m_pawn.GetFiringStartPoint(), Enemy))))
+		if(((Enemy != none) && (!HaveAClearShot(m_pawn.GetFiringStartPoint(), Enemy))))
 		{
 			// End:0x2A0
-			if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+			if((int(m_pawn.m_ePersonality) == int(5)))
 			{
 				SetLowestSnipingStance(Enemy);
-				__NFUN_256__(0.2000000);
+				Sleep(0.2000000);
 				goto 'Fire';				
 			}
 			else
 			{
-				m_vTargetPosition = __NFUN_1824__(Enemy);
+				m_vTargetPosition = FindBetterShotLocation(Enemy);
 				R6PreMoveTo(m_vTargetPosition, Enemy.Location, 5);
-				__NFUN_500__(m_vTargetPosition, Enemy);
+				MoveTo(m_vTargetPosition, Enemy);
 				FocalPoint = Enemy.Location;
 				goto 'Fire';
 			}
@@ -3754,84 +3754,84 @@ Fire:
 		J0x2FB:
 
 		// End:0x36C [Loop If]
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(Enemy, none), Enemy.IsAlive()), __NFUN_155__(int(m_pawn.m_wWantedAimingPitch), __NFUN_145__(__NFUN_156__(m_pawn.m_iCurrentAimingPitch, 65535), 256))))
+		if((((Enemy != none) && Enemy.IsAlive()) && (int(m_pawn.m_wWantedAimingPitch) != ((m_pawn.m_iCurrentAimingPitch & 65535) / 256))))
 		{
 			m_sDebugString = "SettingPitch";
-			__NFUN_256__(0.0500000);
+			Sleep(0.0500000);
 			// [Loop Continue]
 			goto J0x2FB;
 		}
 	}
 	// End:0x3AA
-	if(__NFUN_154__(int(m_eAttackMode), int(1)))
+	if((int(m_eAttackMode) == int(1)))
 	{
 		J0x37C:
 
 		// End:0x3AA [Loop If]
-		if(__NFUN_129__(IsReadyToFire(Enemy)))
+		if((!IsReadyToFire(Enemy)))
 		{
 			m_sDebugString = "ReadyToFire";
-			__NFUN_256__(0.2000000);
+			Sleep(0.2000000);
 			// [Loop Continue]
 			goto J0x37C;
 		}
 	}
 	// End:0x407
-	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(3)), __NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(4))), __NFUN_154__(int(m_pawn.m_eEffectiveGrenade), int(2))))
+	if((((int(m_pawn.m_eEffectiveGrenade) == int(3)) || (int(m_pawn.m_eEffectiveGrenade) == int(4))) || (int(m_pawn.m_eEffectiveGrenade) == int(2))))
 	{
-		__NFUN_256__(0.5000000);
+		Sleep(0.5000000);
 		goto 'ReactionTime';
 	}
 	m_sDebugString = "FinishRotation";
-	__NFUN_508__();
+	FinishRotation();
 	// End:0x493
-	if(__NFUN_154__(int(m_eAttackMode), int(1)))
+	if((int(m_eAttackMode) == int(1)))
 	{
 		StartFiring();
 		m_sDebugString = "AimedFiring";
 		// End:0x482
-		if(__NFUN_154__(int(Pawn.EngineWeapon.GetRateOfFire()), int(2)))
+		if((int(Pawn.EngineWeapon.GetRateOfFire()) == int(2)))
 		{
-			__NFUN_256__(RandRange(0.4000000, 1.0000000));			
+			Sleep(RandRange(0.4000000, 1.0000000));			
 		}
 		else
 		{
-			__NFUN_256__(0.2000000);
+			Sleep(0.2000000);
 		}
 		StopFiring();		
 	}
 	else
 	{
 		// End:0x51A
-		if(__NFUN_154__(int(Pawn.EngineWeapon.GetRateOfFire()), int(2)))
+		if((int(Pawn.EngineWeapon.GetRateOfFire()) == int(2)))
 		{
 			StartFiring();
 			m_sDebugString = "FiringAuto";
-			__NFUN_256__(RandRange(0.2000000, 1.5000000));
+			Sleep(RandRange(0.2000000, 1.5000000));
 			StopFiring();
 			SetGunDirection(Target);
 			m_sDebugString = "StopFiring";
-			__NFUN_256__(RandRange(0.0000000, 0.5000000));			
+			Sleep(RandRange(0.0000000, 0.5000000));			
 		}
 		else
 		{
-			m_iRandomNumber = __NFUN_146__(__NFUN_167__(4), 2);
+			m_iRandomNumber = (Rand(4) + 2);
 			J0x528:
 
 			// End:0x57B [Loop If]
-			if(__NFUN_151__(m_iRandomNumber, 0))
+			if((m_iRandomNumber > 0))
 			{
 				StartFiring();
 				m_sDebugString = "FiringSingle";
-				__NFUN_256__(RandRange(0.1000000, 0.2000000));
+				Sleep(RandRange(0.1000000, 0.2000000));
 				StopFiring();
 				SetGunDirection(Target);
-				__NFUN_166__(m_iRandomNumber);
+				(m_iRandomNumber--);
 				// [Loop Continue]
 				goto J0x528;
 			}
 			m_sDebugString = "StopFiring2";
-			__NFUN_256__(RandRange(0.0000000, 0.5000000));
+			Sleep(RandRange(0.0000000, 0.5000000));
 		}
 	}
 	// End:0x5B8
@@ -3847,29 +3847,29 @@ Reload:
 	m_sDebugString = "Reload";
 	SetReactionStatus(5, 0);
 	// End:0x5EE
-	if(__NFUN_151__(int(m_eAttackMode), int(2)))
+	if((int(m_eAttackMode) > int(2)))
 	{
 		m_eAttackMode = 2;
 	}
 	// End:0x6FD
-	if(__NFUN_130__(__NFUN_155__(int(m_pawn.m_ePersonality), int(5)), __NFUN_119__(Enemy, none)))
+	if(((int(m_pawn.m_ePersonality) != int(5)) && (Enemy != none)))
 	{
-		SetActionSpot(__NFUN_1811__(Enemy.Location, GetMaxCoverDistance()));
+		SetActionSpot(FindPlaceToTakeCover(Enemy.Location, GetMaxCoverDistance()));
 		// End:0x6B6
-		if(__NFUN_119__(m_pActionSpot, none))
+		if((m_pActionSpot != none))
 		{
 			GotoStateMovingTo("AttackReloadCover", 5, true, m_pActionSpot,, 'Attack', 'AtCover');
 AtCover:
 
 
 			SetReactionStatus(5, 0);
-			__NFUN_2201__(m_pActionSpot.Location, m_pActionSpot.Rotation);
+			MoveToPosition(m_pActionSpot.Location, m_pActionSpot.Rotation);
 			Focus = Enemy;
 			m_sDebugString = "FinishRotation3";
-			__NFUN_508__();
+			FinishRotation();
 		}
 		// End:0x6FD
-		if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_129__(Pawn.bIsCrouched)), __NFUN_154__(__NFUN_167__(2), 0)))
+		if((((!m_pawn.m_bPreventCrouching) && (!Pawn.bIsCrouched)) && (Rand(2) == 0)))
 		{
 			Pawn.bWantsToCrouch = true;
 		}
@@ -3883,14 +3883,14 @@ AtCover:
 	if(m_pawn.m_bReloadingWeapon)
 	{
 		m_sDebugString = "Reloading";
-		__NFUN_256__(0.1000000);
+		Sleep(0.1000000);
 		// [Loop Continue]
 		goto J0x710;
 	}
 	Target = Enemy;
 	SetGunDirection(Target);
 	m_sDebugString = "EndReloading";
-	__NFUN_256__(0.4000000);
+	Sleep(0.4000000);
 	SetReactionStatus(4, 2);
 	goto 'Fire';
 SprayFireMove:
@@ -3900,19 +3900,19 @@ SprayFireMove:
 	SetReactionStatus(3, 2);
 	m_eAttackMode = 4;
 	// End:0x829
-	if(__NFUN_177__(__NFUN_225__(__NFUN_216__(m_vMovingDestination, m_pawn.Location)), 100.0000000))
+	if((VSize((m_vMovingDestination - m_pawn.Location)) > 100.0000000))
 	{
 		R6PreMoveTo(m_vMovingDestination, m_vMovingDestination, 4);
-		Pawn.__NFUN_3970__(1);
+		Pawn.SetPhysics(1);
 		Destination = m_vMovingDestination;
-		Pawn.Acceleration = __NFUN_212__(__NFUN_226__(__NFUN_216__(Destination, Pawn.Location)), m_pawn.m_fWalkingSpeed);
+		Pawn.Acceleration = (Normal((Destination - Pawn.Location)) * m_pawn.m_fWalkingSpeed);
 	}
 	goto 'Fire';
 MoveToFireSpot:
 
 
 	// End:0x865
-	if(__NFUN_1829__())
+	if(IsAttackSpotStillValid())
 	{
 		GotoStateMovingTo("AttackFireSpot", 5, true, m_pActionSpot, m_vThreatLocation, 'Attack', 'AtFireSpot');		
 	}
@@ -3922,10 +3922,10 @@ MoveToFireSpot:
 	}
 	J0x86B:
 
-	__NFUN_2201__(m_pActionSpot.Location, Rotator(__NFUN_216__(m_pActionSpot.Location, Enemy.Location)));
+	MoveToPosition(m_pActionSpot.Location, Rotator((m_pActionSpot.Location - Enemy.Location)));
 	Focus = Enemy;
 	// End:0x8D1
-	if(__NFUN_154__(int(m_pActionSpot.m_eFire), int(2)))
+	if((int(m_pActionSpot.m_eFire) == int(2)))
 	{
 		m_pawn.bWantsToCrouch = true;
 	}
@@ -3937,12 +3937,12 @@ state AttackHostage extends Attack
 {Begin:
 
 	// End:0x2F
-	if(__NFUN_132__(__NFUN_114__(R6Hostage(Enemy), none), R6Hostage(Enemy).m_bExtracted))
+	if(((R6Hostage(Enemy) == none) || R6Hostage(Enemy).m_bExtracted))
 	{
 		FindNextEnemy();
 	}
 	// End:0x5B
-	if(__NFUN_132__(__NFUN_129__(R6Pawn(Enemy).IsAlive()), __NFUN_533__(Enemy)))
+	if(((!R6Pawn(Enemy).IsAlive()) || CanSee(Enemy)))
 	{
 		GotoStateAimedFire();
 	}
@@ -3972,14 +3972,14 @@ StartWaiting:
 
 	StopMoving();
 	ChangeOrientationTo(m_rSpawningRotation);
-	__NFUN_508__();
+	FinishRotation();
 	// End:0x5B
-	if(__NFUN_154__(int(m_pawn.m_ePersonality), int(5)))
+	if((int(m_pawn.m_ePersonality) == int(5)))
 	{
-		__NFUN_113__('Sniping');
+		GotoState('Sniping');
 	}
 	// End:0x9E
-	if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_154__(int(m_pawn.m_eStartingStance), int(2))))
+	if(((!m_pawn.m_bPreventCrouching) && (int(m_pawn.m_eStartingStance) == int(2))))
 	{
 		Pawn.bWantsToCrouch = true;		
 	}
@@ -3990,32 +3990,32 @@ StartWaiting:
 	J0xAF:
 
 	// End:0x188
-	if(__NFUN_154__(__NFUN_167__(3), 0))
+	if((Rand(3) == 0))
 	{
-		m_iRandomNumber = __NFUN_167__(2);
+		m_iRandomNumber = Rand(2);
 		// End:0xD9
-		if(__NFUN_154__(m_iRandomNumber, 0))
+		if((m_iRandomNumber == 0))
 		{
 			m_iRandomNumber = -1;
 		}
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(float(__NFUN_144__(m_iRandomNumber, 5000)), float(__NFUN_144__(m_iRandomNumber, 10000))), float(256)));
-		__NFUN_256__(RandRange(1.0000000, 1.5000000));
-		__NFUN_159__(m_iRandomNumber, float(-1));
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(float(__NFUN_144__(m_iRandomNumber, 5000)), float(__NFUN_144__(m_iRandomNumber, 10000))), float(256)));
-		__NFUN_256__(RandRange(1.2500000, 1.7500000));		
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(float((m_iRandomNumber * 5000)), float((m_iRandomNumber * 10000))) / float(256)));
+		Sleep(RandRange(1.0000000, 1.5000000));
+		(m_iRandomNumber *= float(-1));
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(float((m_iRandomNumber * 5000)), float((m_iRandomNumber * 10000))) / float(256)));
+		Sleep(RandRange(1.2500000, 1.7500000));		
 	}
 	else
 	{
-		m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
+		m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
 		// End:0x1DF
-		if(__NFUN_154__(__NFUN_167__(2), 0))
+		if((Rand(2) == 0))
 		{
-			m_pawn.m_wWantedHeadYaw = byte(__NFUN_143__(int(m_pawn.m_wWantedHeadYaw)));
+			m_pawn.m_wWantedHeadYaw = byte((-int(m_pawn.m_wWantedHeadYaw)));
 		}
-		__NFUN_256__(RandRange(1.0000000, 1.5000000));
+		Sleep(RandRange(1.0000000, 1.5000000));
 	}
 	m_pawn.m_wWantedHeadYaw = 0;
-	__NFUN_256__(RandRange(2.0000000, 6.0000000));
+	Sleep(RandRange(2.0000000, 6.0000000));
 	goto 'Waiting';
 	stop;			
 }
@@ -4037,20 +4037,20 @@ state Sniping
 
 		r6seen = R6Pawn(seen);
 		// End:0x1D
-		if(__NFUN_114__(r6seen, none))
+		if((r6seen == none))
 		{
 			return;
 		}
 		// End:0xEE
-		if(__NFUN_130__(m_bSeeRainbow, IsAnEnemy(r6seen)))
+		if((m_bSeeRainbow && IsAnEnemy(r6seen)))
 		{
 			ReconThreatCheck(r6seen, 0);
 			// End:0xB1
-			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(seen.Location, m_pawn.Location)), float(500)))
+			if((VSize((seen.Location - m_pawn.Location)) < float(500)))
 			{
 				m_pawn.m_bWantsToProne = false;
 				// End:0xB1
-				if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_155__(__NFUN_167__(4), 0)))
+				if(((!m_pawn.m_bPreventCrouching) && (Rand(4) != 0)))
 				{
 					m_pawn.bWantsToCrouch = true;
 				}
@@ -4058,9 +4058,9 @@ state Sniping
 			SetEnemy(r6seen);
 			Target = Enemy;
 			// End:0xE0
-			if(__NFUN_1822__())
+			if(MakeBackupList())
 			{
-				__NFUN_1821__(Enemy.Location, 5);
+				CallBackupForAttack(Enemy.Location, 5);
 			}
 			ChangeDefCon(1);
 			GotoStateAimedFire();
@@ -4074,7 +4074,7 @@ state Sniping
 	event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
 	{
 		// End:0x36
-		if(__NFUN_130__(m_pawn.m_bDontHearPlayer, R6Pawn(NoiseMaker.Instigator).m_bIsPlayer))
+		if((m_pawn.m_bDontHearPlayer && R6Pawn(NoiseMaker.Instigator).m_bIsPlayer))
 		{
 			return;
 		}
@@ -4085,22 +4085,22 @@ state Sniping
 			return;
 		}
 		// End:0x1CD
-		if(__NFUN_132__(__NFUN_130__(m_bHearInvestigate, __NFUN_154__(int(eType), int(1))), __NFUN_130__(m_bHearThreat, __NFUN_154__(int(eType), int(2)))))
+		if(((m_bHearInvestigate && (int(eType) == int(1))) || (m_bHearThreat && (int(eType) == int(2)))))
 		{
 			GotoPointAndSearch(NoiseMaker.Location, 4, true, 30.0000000, 2);
 			// End:0x13C
-			if(__NFUN_130__(m_bHearThreat, __NFUN_154__(int(eType), int(2))))
+			if((m_bHearThreat && (int(eType) == int(2))))
 			{
 				// End:0xEE
-				if(__NFUN_150__(m_iChanceToDetectShooter, 80))
+				if((m_iChanceToDetectShooter < 80))
 				{
-					__NFUN_161__(m_iChanceToDetectShooter, 20);
+					(m_iChanceToDetectShooter += 20);
 				}
 				// End:0x139
 				if(m_pawn.IsEnemy(NoiseMaker.Instigator))
 				{
 					// End:0x139
-					if(__NFUN_150__(__NFUN_146__(__NFUN_167__(100), 1), m_iChanceToDetectShooter))
+					if(((Rand(100) + 1) < m_iChanceToDetectShooter))
 					{
 						SetEnemy(NoiseMaker.Instigator);
 						GotoStateAimedFire();
@@ -4110,26 +4110,26 @@ state Sniping
 			else
 			{
 				// End:0x1CA
-				if(__NFUN_176__(__NFUN_225__(__NFUN_216__(NoiseMaker.Location, m_pawn.Location)), float(500)))
+				if((VSize((NoiseMaker.Location - m_pawn.Location)) < float(500)))
 				{
 					m_pawn.m_bWantsToProne = false;
 					// End:0x1AA
-					if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_155__(__NFUN_167__(4), 0)))
+					if(((!m_pawn.m_bPreventCrouching) && (Rand(4) != 0)))
 					{
 						m_pawn.bWantsToCrouch = true;
 					}
 					FocalPoint = NoiseMaker.Location;
-					__NFUN_113__('Sniping', 'CheckBehind');
+					GotoState('Sniping', 'CheckBehind');
 				}
 			}			
 		}
 		else
 		{
 			// End:0x225
-			if(__NFUN_130__(m_bHearGrenade, __NFUN_154__(int(eType), int(3))))
+			if((m_bHearGrenade && (int(eType) == int(3))))
 			{
 				// End:0x211
-				if(__NFUN_129__(m_bHeardGrenade))
+				if((!m_bHeardGrenade))
 				{
 					m_VoicesManager.PlayTerroristVoices(m_pawn, 5);
 					m_bHeardGrenade = true;
@@ -4142,7 +4142,7 @@ state Sniping
 Begin:
 
 	// End:0x22
-	if(__NFUN_114__(R6DZonePoint(m_pawn.m_DZone), none))
+	if((R6DZonePoint(m_pawn.m_DZone) == none))
 	{
 		SetLowestSnipingStance();		
 	}
@@ -4177,21 +4177,21 @@ Begin:
 LostTrackOfEnemy:
 
 
-	__NFUN_256__(RandRange(3.0000000, 7.0000000));
+	Sleep(RandRange(3.0000000, 7.0000000));
 	ChangeOrientationTo(m_pawn.m_DZone.Rotation);
-	__NFUN_508__();
+	FinishRotation();
 	GotoStateNoThreat();
 CheckBehind:
 
 
-	__NFUN_508__();
-	__NFUN_256__(RandRange(1.0000000, 3.0000000));
-	ChangeOrientationTo(__NFUN_316__(m_pawn.Rotation, rot(0, 10000, 0)));
-	__NFUN_256__(RandRange(1.0000000, 2.0000000));
-	ChangeOrientationTo(__NFUN_316__(m_pawn.Rotation, rot(0, -20000, 0)));
-	__NFUN_256__(RandRange(1.0000000, 2.0000000));
+	FinishRotation();
+	Sleep(RandRange(1.0000000, 3.0000000));
+	ChangeOrientationTo((m_pawn.Rotation + rot(0, 10000, 0)));
+	Sleep(RandRange(1.0000000, 2.0000000));
+	ChangeOrientationTo((m_pawn.Rotation + rot(0, -20000, 0)));
+	Sleep(RandRange(1.0000000, 2.0000000));
 	ChangeOrientationTo(m_pawn.m_DZone.Rotation);
-	__NFUN_508__();
+	FinishRotation();
 	GotoStateNoThreat();
 	stop;		
 }
@@ -4214,9 +4214,9 @@ state FindHostage
 	event bool NotifyBump(Actor Other)
 	{
 		// End:0x1B
-		if(__NFUN_114__(Other, Enemy))
+		if((Other == Enemy))
 		{
-			__NFUN_113__('FindHostage', 'Begin');
+			GotoState('FindHostage', 'Begin');
 		}
 		return global.NotifyBump(Other);
 		return;
@@ -4232,19 +4232,19 @@ AskToSurrender:
 
 
 	m_HostageAI.Order_Surrender(m_pawn);
-	Pawn.__NFUN_259__('StandYellAlarm');
-	__NFUN_261__();
-	m_iRandomNumber = __NFUN_167__(100);
+	Pawn.PlayAnim('StandYellAlarm');
+	FinishAnim();
+	m_iRandomNumber = Rand(100);
 	// End:0x93
-	if(__NFUN_150__(m_iRandomNumber, 50))
+	if((m_iRandomNumber < 50))
 	{
-		__NFUN_256__(2.0000000);
+		Sleep(2.0000000);
 		goto 'AskToSurrender';		
 	}
 	else
 	{
 		// End:0xA8
-		if(__NFUN_150__(m_iRandomNumber, 90))
+		if((m_iRandomNumber < 90))
 		{
 			goto 'Pursues';			
 		}
@@ -4256,43 +4256,43 @@ AskToSurrender:
 	J0xAE:
 
 	// End:0x13F
-	if(__NFUN_130__(__NFUN_533__(m_Hostage), m_Hostage.IsAlive()))
+	if((CanSee(m_Hostage) && m_Hostage.IsAlive()))
 	{
 		// End:0xE6
-		if(__NFUN_520__(Enemy))
+		if(actorReachable(Enemy))
 		{
 			MoveTarget = Enemy;			
 		}
 		else
 		{
-			MoveTarget = __NFUN_517__(Enemy);
+			MoveTarget = FindPathToward(Enemy);
 		}
 		// End:0x10A
-		if(__NFUN_114__(MoveTarget, none))
+		if((MoveTarget == none))
 		{
-			__NFUN_256__(1.0000000);			
+			Sleep(1.0000000);			
 		}
 		else
 		{
 			R6PreMoveTo(MoveTarget.Location, MoveTarget.Location, 5);
-			__NFUN_502__(MoveTarget);
+			MoveToward(MoveTarget);
 		}
 		goto 'Pursues';		
 	}
 	else
 	{
 		// End:0x158
-		if(__NFUN_521__(LastSeenPos))
+		if(pointReachable(LastSeenPos))
 		{
 			Destination = LastSeenPos;			
 		}
 		else
 		{
-			MoveTarget = __NFUN_518__(LastSeenPos);
+			MoveTarget = FindPathTo(LastSeenPos);
 			Destination = MoveTarget.Location;
 		}
 		R6PreMoveTo(Destination, Destination, 5);
-		__NFUN_500__(Destination);
+		MoveTo(Destination);
 		GotoStateEngageBySound(LastSeenPos, 5, 15.0000000);
 	}
 	J0x1A6:
@@ -4322,58 +4322,58 @@ state FollowPawn
 		local Rotator rOrientation;
 
 		// End:0x4B
-		if(__NFUN_154__(m_iFollowYaw, 0))
+		if((m_iFollowYaw == 0))
 		{
-			vTargetPos = __NFUN_215__(m_pawnToFollow.Location, __NFUN_212__(__NFUN_226__(__NFUN_216__(Pawn.Location, m_pawnToFollow.Location)), m_fFollowDist));			
+			vTargetPos = (m_pawnToFollow.Location + (Normal((Pawn.Location - m_pawnToFollow.Location)) * m_fFollowDist));			
 		}
 		else
 		{
-			rOrientation.Yaw = __NFUN_146__(m_pawnToFollow.Rotation.Yaw, m_iFollowYaw);
-			vTargetPos = __NFUN_216__(m_pawnToFollow.Location, __NFUN_212__(Vector(rOrientation), m_fFollowDist));
+			rOrientation.Yaw = (m_pawnToFollow.Rotation.Yaw + m_iFollowYaw);
+			vTargetPos = (m_pawnToFollow.Location - (Vector(rOrientation) * m_fFollowDist));
 		}
-		__NFUN_1800__(vTargetPos);
+		FindSpot(vTargetPos);
 		return vTargetPos;
 		return;
 	}
 Moving:
 
 	// End:0x1A
-	if(__NFUN_129__(m_pawnToFollow.IsAlive()))
+	if((!m_pawnToFollow.IsAlive()))
 	{
 		GotoStateNoThreat();
 	}
 	m_fPawnDistance = DistanceTo(m_pawnToFollow);
 	// End:0x9C
-	if(__NFUN_176__(m_fPawnDistance, __NFUN_174__(m_fFollowDist, Pawn.CollisionRadius)))
+	if((m_fPawnDistance < (m_fFollowDist + Pawn.CollisionRadius)))
 	{
 		StopMoving();
 		// End:0x8E
-		if(__NFUN_130__(__NFUN_154__(int(m_eFollowMode), int(1)), R6Terrorist(m_pawnToFollow).m_controller.m_bWaiting))
+		if(((int(m_eFollowMode) == int(1)) && R6Terrorist(m_pawnToFollow).m_controller.m_bWaiting))
 		{
-			__NFUN_113__('PatrolPath', 'ReachedNode');
+			GotoState('PatrolPath', 'ReachedNode');
 		}
-		__NFUN_256__(0.2000000);
+		Sleep(0.2000000);
 		goto 'Moving';
 	}
 	m_vMovingDestination = GetFollowDestination();
 	m_pawn.m_eMovementPace = 4;
 	// End:0xF3
-	if(__NFUN_129__(__NFUN_521__(m_vMovingDestination)))
+	if((!pointReachable(m_vMovingDestination)))
 	{
-		MoveTarget = __NFUN_518__(m_vMovingDestination);
+		MoveTarget = FindPathTo(m_vMovingDestination);
 		// End:0xF3
-		if(__NFUN_119__(MoveTarget, none))
+		if((MoveTarget != none))
 		{
 			m_vMovingDestination = MoveTarget.Location;
 		}
 	}
 	// End:0x113
-	if(__NFUN_177__(m_fPawnDistance, 500.0000000))
+	if((m_fPawnDistance > 500.0000000))
 	{
 		m_pawn.m_eMovementPace = 5;
 	}
 	R6PreMoveTo(m_vMovingDestination, m_vMovingDestination, m_pawn.m_eMovementPace);
-	__NFUN_500__(m_vMovingDestination);
+	MoveTo(m_vMovingDestination);
 	goto 'Moving';
 	stop;				
 }
@@ -4399,32 +4399,32 @@ Begin:
 ChooseDestination:
 
 
-	m_vTargetPosition = m_pawn.m_DZone.__NFUN_1831__();
+	m_vTargetPosition = m_pawn.m_DZone.FindRandomPointInArea();
 	GotoStateMovingTo("PatrolArea", 4, true,, m_vTargetPosition, 'PatrolArea', 'AtDestination');
 AtDestination:
 
 
 	// End:0x16D
-	if(__NFUN_155__(__NFUN_167__(3), 0))
+	if((Rand(3) != 0))
 	{
 		// End:0xE2
-		if(__NFUN_154__(__NFUN_167__(2), 0))
+		if((Rand(2) == 0))
 		{
-			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
-			__NFUN_256__(RandRange(1.0000000, 2.5000000));
-			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
-			__NFUN_256__(RandRange(1.0000000, 2.5000000));			
+			m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
+			Sleep(RandRange(1.0000000, 2.5000000));
+			m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, -5000.0000000) / float(256)));
+			Sleep(RandRange(1.0000000, 2.5000000));			
 		}
 		else
 		{
-			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
-			__NFUN_256__(RandRange(1.0000000, 2.5000000));
-			m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
-			__NFUN_256__(RandRange(1.0000000, 2.5000000));
+			m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, -5000.0000000) / float(256)));
+			Sleep(RandRange(1.0000000, 2.5000000));
+			m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
+			Sleep(RandRange(1.0000000, 2.5000000));
 		}
 		m_pawn.m_wWantedHeadYaw = 0;
 	}
-	__NFUN_256__(RandRange(1.0000000, 2.0000000));
+	Sleep(RandRange(1.0000000, 2.0000000));
 	goto 'ChooseDestination';
 	stop;	
 }
@@ -4441,13 +4441,13 @@ state PatrolPath
 	{
 		m_pawn.m_wWantedHeadYaw = 0;
 		m_pawn.m_bAvoidFacingWalls = false;
-		m_pawn.__NFUN_1805__(m_pawn.16);
+		m_pawn.ClearChannel(m_pawn.16);
 		return;
 	}
 Begin:
 
 	// End:0x15
-	if(__NFUN_255__(m_PatrolCurrentLabel, 'None'))
+	if((m_PatrolCurrentLabel != 'None'))
 	{
 		goto m_PatrolCurrentLabel;
 	}
@@ -4465,76 +4465,76 @@ WaitingAtNode:
 	m_PatrolCurrentLabel = 'WaitingAtNode';
 	StopMoving();
 	ChangeOrientationTo(m_rStandRotation);
-	__NFUN_508__();
+	FinishRotation();
 	// End:0x8D
 	if(m_currentNode.bDirectional)
 	{
-		m_pawn.m_wWantedAimingPitch = byte(__NFUN_145__(m_currentNode.Rotation.Pitch, 256));		
+		m_pawn.m_wWantedAimingPitch = byte((m_currentNode.Rotation.Pitch / 256));		
 	}
 	else
 	{
 		m_pawn.m_bAvoidFacingWalls = true;
 	}
 	// End:0x13B
-	if(__NFUN_255__(m_currentNode.m_AnimToPlay, 'None'))
+	if((m_currentNode.m_AnimToPlay != 'None'))
 	{
 		// End:0x13B
-		if(__NFUN_150__(__NFUN_167__(100), m_currentNode.m_AnimChance))
+		if((Rand(100) < m_currentNode.m_AnimChance))
 		{
 			// End:0xFF
-			if(__NFUN_119__(m_currentNode.m_SoundToPlay, none))
+			if((m_currentNode.m_SoundToPlay != none))
 			{
-				m_pawn.__NFUN_2730__(m_currentNode.m_SoundToPlay, 6, 15);
+				m_pawn.PlayVoices(m_currentNode.m_SoundToPlay, 6, 15);
 			}
 			m_pawn.m_szSpecialAnimName = m_currentNode.m_AnimToPlay;
 			m_pawn.SetNextPendingAction(35);
-			__NFUN_261__(m_pawn.16);
+			FinishAnim(m_pawn.16);
 		}
 	}
 	// End:0x194
-	if(__NFUN_130__(__NFUN_177__(m_fWaitingTime, float(0)), __NFUN_152__(int(m_pawn.m_eDefCon), int(2))))
+	if(((m_fWaitingTime > float(0)) && (int(m_pawn.m_eDefCon) <= int(2))))
 	{
 		// End:0x194
-		if(__NFUN_130__(__NFUN_129__(m_pawn.m_bPreventCrouching), __NFUN_154__(__NFUN_167__(2), 0)))
+		if(((!m_pawn.m_bPreventCrouching) && (Rand(2) == 0)))
 		{
 			m_pawn.bWantsToCrouch = true;
 		}
 	}
 	// End:0x1E2
-	if(__NFUN_176__(m_fFacingTime, m_fWaitingTime))
+	if((m_fFacingTime < m_fWaitingTime))
 	{
-		__NFUN_256__(m_fFacingTime);
+		Sleep(m_fFacingTime);
 		m_pawn.m_wWantedAimingPitch = 0;
 		ChangeOrientationTo(ChooseRandomDirection(-1));
-		__NFUN_256__(__NFUN_175__(m_fWaitingTime, m_fFacingTime));
-		__NFUN_508__();		
+		Sleep((m_fWaitingTime - m_fFacingTime));
+		FinishRotation();		
 	}
 	else
 	{
 		// End:0x311
-		if(__NFUN_130__(__NFUN_129__(m_currentNode.bDirectional), __NFUN_155__(__NFUN_167__(3), 0)))
+		if(((!m_currentNode.bDirectional) && (Rand(3) != 0)))
 		{
 			// End:0x27F
-			if(__NFUN_154__(__NFUN_167__(2), 0))
+			if((Rand(2) == 0))
 			{
-				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
-				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));
-				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
-				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));				
+				m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
+				Sleep((m_fWaitingTime / float(3)));
+				m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, -5000.0000000) / float(256)));
+				Sleep((m_fWaitingTime / float(3)));				
 			}
 			else
 			{
-				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(-10000.0000000, -5000.0000000), float(256)));
-				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));
-				m_pawn.m_wWantedHeadYaw = byte(__NFUN_172__(RandRange(5000.0000000, 10000.0000000), float(256)));
-				__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));
+				m_pawn.m_wWantedHeadYaw = byte((RandRange(-10000.0000000, -5000.0000000) / float(256)));
+				Sleep((m_fWaitingTime / float(3)));
+				m_pawn.m_wWantedHeadYaw = byte((RandRange(5000.0000000, 10000.0000000) / float(256)));
+				Sleep((m_fWaitingTime / float(3)));
 			}
 			m_pawn.m_wWantedHeadYaw = 0;
-			__NFUN_256__(__NFUN_172__(m_fWaitingTime, float(3)));			
+			Sleep((m_fWaitingTime / float(3)));			
 		}
 		else
 		{
-			__NFUN_256__(m_fWaitingTime);
+			Sleep(m_fWaitingTime);
 		}
 		m_pawn.m_wWantedAimingPitch = 0;
 	}
@@ -4558,14 +4558,14 @@ state HuntRainbow
 		local float fDist, fBestDist;
 
 		// End:0x96
-		foreach __NFUN_313__(Class'R6Engine.R6Pawn', aEnemy)
+		foreach DynamicActors(Class'R6Engine.R6Pawn', aEnemy)
 		{
 			// End:0x95
-			if(__NFUN_130__(m_pawn.IsEnemy(aEnemy), aEnemy.IsAlive()))
+			if((m_pawn.IsEnemy(aEnemy) && aEnemy.IsAlive()))
 			{
-				fDist = __NFUN_225__(__NFUN_216__(aEnemy.Location, Pawn.Location));
+				fDist = VSize((aEnemy.Location - Pawn.Location));
 				// End:0x95
-				if(__NFUN_132__(__NFUN_176__(fDist, fBestDist), __NFUN_180__(fBestDist, float(0))))
+				if(((fDist < fBestDist) || (fBestDist == float(0))))
 				{
 					fBestDist = fDist;
 					aClosestEnemy = aEnemy;
@@ -4578,12 +4578,12 @@ state HuntRainbow
 FindNewEnemy:
 
 	// End:0x28
-	if(__NFUN_130__(__NFUN_119__(m_huntedPawn, none), __NFUN_129__(m_huntedPawn.IsAlive())))
+	if(((m_huntedPawn != none) && (!m_huntedPawn.IsAlive())))
 	{
 		m_huntedPawn = none;
 	}
 	// End:0x42
-	if(__NFUN_114__(m_huntedPawn, none))
+	if((m_huntedPawn == none))
 	{
 		SetEnemy(GetClosestEnemy());		
 	}
@@ -4594,16 +4594,16 @@ FindNewEnemy:
 	J0x4D:
 
 	// End:0xB6
-	if(__NFUN_130__(__NFUN_119__(R6Pawn(Enemy), none), R6Pawn(Enemy).IsAlive()))
+	if(((R6Pawn(Enemy) != none) && R6Pawn(Enemy).IsAlive()))
 	{
-		MoveTarget = __NFUN_517__(Enemy);
+		MoveTarget = FindPathToward(Enemy);
 		// End:0xB6
-		if(__NFUN_119__(MoveTarget, none))
+		if((MoveTarget != none))
 		{
 			GotoStateMovingTo("HuntRainbow", 4, true, MoveTarget,, 'HuntRainbow', 'nextNode', true);
 		}
 	}
-	__NFUN_256__(1.0000000);
+	Sleep(1.0000000);
 	goto 'FindNewEnemy';
 	stop;			
 }
@@ -4620,7 +4620,7 @@ Begin:
 
 	m_pawn.m_szSpecialAnimName = m_AnimName;
 	m_pawn.SetNextPendingAction(35);
-	__NFUN_261__(m_pawn.16);
+	FinishAnim(m_pawn.16);
 	AnimBlendToAlpha(m_pawn.16, 0.0000000, 0.5000000);
 	m_pawn.m_ePlayerIsUsingHands = 0;
 	m_pawn.PlayWeaponAnimation();
@@ -4633,7 +4633,7 @@ state PA_LoopAnim
 {
 	function BeginState()
 	{
-		m_fSearchTime = __NFUN_174__(Level.TimeSeconds, m_fLoopAnimTime);
+		m_fSearchTime = (Level.TimeSeconds + m_fLoopAnimTime);
 		super(Object).BeginState();
 		return;
 	}
@@ -4649,9 +4649,9 @@ Begin:
 	m_pawn.m_szSpecialAnimName = m_AnimName;
 	m_pawn.SetNextPendingAction(36);
 	// End:0x3F
-	if(__NFUN_181__(m_fLoopAnimTime, 0.0000000))
+	if((m_fLoopAnimTime != 0.0000000))
 	{
-		__NFUN_256__(m_fLoopAnimTime);		
+		Sleep(m_fLoopAnimTime);		
 	}
 	else
 	{

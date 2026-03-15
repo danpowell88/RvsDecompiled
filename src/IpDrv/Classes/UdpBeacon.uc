@@ -303,33 +303,33 @@ function string BuildBeaconText()
 	J0x462:
 
 	// End:0x49A [Loop If]
-	if(__NFUN_150__(iCounter, iNumPlayers))
+	if((iCounter < iNumPlayers))
 	{
-		textData = __NFUN_112__(__NFUN_112__(textData, "/"), string(iPingTimeMS[iCounter]));
-		__NFUN_165__(iCounter);
+		textData = ((textData $ "/") $ string(iPingTimeMS[iCounter]));
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x462;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PlayerKillMarker), " ");
+	textData = (((textData $ " ") $ PlayerKillMarker) $ " ");
 	iCounter = 0;
 	J0x4BD:
 
 	// End:0x4F5 [Loop If]
-	if(__NFUN_150__(iCounter, iNumPlayers))
+	if((iCounter < iNumPlayers))
 	{
-		textData = __NFUN_112__(__NFUN_112__(textData, "/"), string(iKillCount[iCounter]));
-		__NFUN_165__(iCounter);
+		textData = ((textData $ "/") $ string(iKillCount[iCounter]));
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x4BD;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), NumPlayersMarker), " "), string(iNumPlayers));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), RoundsPerMatchMarker), " "), string(pServerOptions.RoundsPerMatch));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), RoundTimeMarker), " "), string(pServerOptions.RoundTime));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), BetTimeMarker), " "), string(pServerOptions.BetweenRoundTime));
+	textData = ((((textData $ " ") $ NumPlayersMarker) $ " ") $ string(iNumPlayers));
+	textData = ((((textData $ " ") $ RoundsPerMatchMarker) $ " ") $ string(pServerOptions.RoundsPerMatch));
+	textData = ((((textData $ " ") $ RoundTimeMarker) $ " ") $ string(pServerOptions.RoundTime));
+	textData = ((((textData $ " ") $ BetTimeMarker) $ " ") $ string(pServerOptions.BetweenRoundTime));
 	// End:0x5EA
-	if(__NFUN_151__(pServerOptions.BombTime, -1))
+	if((pServerOptions.BombTime > -1))
 	{
-		textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), BombTimeMarker), " "), string(pServerOptions.BombTime));
+		textData = ((((textData $ " ") $ BombTimeMarker) $ " ") $ string(pServerOptions.BombTime));
 	}
 	// End:0x606
 	if(pServerOptions.ShowNames)
@@ -340,7 +340,7 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), ShowNamesMarker), " "), string(integerData));
+	textData = ((((textData $ " ") $ ShowNamesMarker) $ " ") $ string(integerData));
 	// End:0x64E
 	if(pServerOptions.InternetServer)
 	{
@@ -350,7 +350,7 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), InternetServerMarker), " "), string(integerData));
+	textData = ((((textData $ " ") $ InternetServerMarker) $ " ") $ string(integerData));
 	// End:0x696
 	if(pServerOptions.FriendlyFire)
 	{
@@ -360,7 +360,7 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), FriendlyFireMarker), " "), string(integerData));
+	textData = ((((textData $ " ") $ FriendlyFireMarker) $ " ") $ string(integerData));
 	// End:0x6DE
 	if(pServerOptions.Autobalance)
 	{
@@ -370,7 +370,7 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), AutoBalTeamMarker), " "), string(integerData));
+	textData = ((((textData $ " ") $ AutoBalTeamMarker) $ " ") $ string(integerData));
 	// End:0x726
 	if(pServerOptions.TeamKillerPenalty)
 	{
@@ -380,8 +380,8 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), TKPenaltyMarker), " "), string(integerData));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), GameVersionMarker), " "), Level.__NFUN_1419__(false, __NFUN_129__(Class'Engine.Actor'.static.__NFUN_1524__().IsRavenShield())));
+	textData = ((((textData $ " ") $ TKPenaltyMarker) $ " ") $ string(integerData));
+	textData = ((((textData $ " ") $ GameVersionMarker) $ " ") $ Level.GetGameVersion(false, (!Class'Engine.Actor'.static.GetModMgr().IsRavenShield())));
 	// End:0x7B1
 	if(pServerOptions.AllowRadar)
 	{
@@ -391,11 +391,11 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), AllowRadarMarker), " "), string(integerData));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), LobbyServerIDMarker), " "), string(Level.Game.GameReplicationInfo.m_iGameSvrLobbyID));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), GroupIDMarker), " "), string(Level.Game.GameReplicationInfo.m_iGameSvrGroupID));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), BeaconPortMarker), " "), string(boundport));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), NumTerroMarker), " "), string(pServerOptions.NbTerro));
+	textData = ((((textData $ " ") $ AllowRadarMarker) $ " ") $ string(integerData));
+	textData = ((((textData $ " ") $ LobbyServerIDMarker) $ " ") $ string(Level.Game.GameReplicationInfo.m_iGameSvrLobbyID));
+	textData = ((((textData $ " ") $ GroupIDMarker) $ " ") $ string(Level.Game.GameReplicationInfo.m_iGameSvrGroupID));
+	textData = ((((textData $ " ") $ BeaconPortMarker) $ " ") $ string(boundport));
+	textData = ((((textData $ " ") $ NumTerroMarker) $ " ") $ string(pServerOptions.NbTerro));
 	// End:0x8CC
 	if(pServerOptions.AIBkp)
 	{
@@ -405,7 +405,7 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), AIBkpMarker), " "), string(integerData));
+	textData = ((((textData $ " ") $ AIBkpMarker) $ " ") $ string(integerData));
 	// End:0x914
 	if(pServerOptions.RotateMap)
 	{
@@ -415,7 +415,7 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), RotateMapMarker), " "), string(integerData));
+	textData = ((((textData $ " ") $ RotateMapMarker) $ " ") $ string(integerData));
 	// End:0x95C
 	if(pServerOptions.ForceFPersonWeapon)
 	{
@@ -425,58 +425,58 @@ function string BuildBeaconText()
 	{
 		integerData = 0;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), ForceFPWpnMarker), " "), string(integerData));
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), ModNameMarker), " "), Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod.m_szKeyWord);
+	textData = ((((textData $ " ") $ ForceFPWpnMarker) $ " ") $ string(integerData));
+	textData = ((((textData $ " ") $ ModNameMarker) $ " ") $ Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod.m_szKeyWord);
 	// End:0x9F6
 	if(Level.m_bPBSvRunning)
 	{
-		textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PunkBusterMarker), " 1");		
+		textData = (((textData $ " ") $ PunkBusterMarker) $ " 1");		
 	}
 	else
 	{
-		textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), PunkBusterMarker), " 0");
+		textData = (((textData $ " ") $ PunkBusterMarker) $ " 0");
 	}
 	MapListType = "Engine.R6MapList";
 	ML = Class<MapList>(DynamicLoadObject(MapListType, Class'Core.Class'));
-	myList = __NFUN_278__(ML);
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), MapListMarker), " ");
+	myList = Spawn(ML);
+	textData = (((textData $ " ") $ MapListMarker) $ " ");
 	iCounter = 0;
 	J0xA77:
 
 	// End:0xB35 [Loop If]
-	if(__NFUN_150__(iCounter, 32))
+	if((iCounter < 32))
 	{
 		// End:0xB2B
-		if(__NFUN_123__(myList.Maps[iCounter], ""))
+		if((myList.Maps[iCounter] != ""))
 		{
 			// End:0xAEA
-			if(__NFUN_154__(__NFUN_126__(myList.Maps[iCounter], "."), -1))
+			if((InStr(myList.Maps[iCounter], ".") == -1))
 			{
-				textData = __NFUN_112__(__NFUN_112__(textData, "/"), myList.Maps[iCounter]);
+				textData = ((textData $ "/") $ myList.Maps[iCounter]);
 				// [Explicit Continue]
 				goto J0xB2B;
 			}
-			textData = __NFUN_112__(__NFUN_112__(textData, "/"), __NFUN_128__(myList.Maps[iCounter], __NFUN_126__(myList.Maps[iCounter], ".")));
+			textData = ((textData $ "/") $ Left(myList.Maps[iCounter], InStr(myList.Maps[iCounter], ".")));
 		}
 		J0xB2B:
 
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0xA77;
 	}
-	textData = __NFUN_112__(__NFUN_112__(__NFUN_112__(textData, " "), MenuGmNameMarker), " ");
+	textData = (((textData $ " ") $ MenuGmNameMarker) $ " ");
 	iCounter = 0;
 	J0xB58:
 
 	// End:0xBA8 [Loop If]
-	if(__NFUN_150__(iCounter, 32))
+	if((iCounter < 32))
 	{
-		textData = __NFUN_112__(__NFUN_112__(textData, "/"), Level.GetGameTypeFromClassName(R6MapList(myList).GameType[iCounter]));
-		__NFUN_165__(iCounter);
+		textData = ((textData $ "/") $ Level.GetGameTypeFromClassName(R6MapList(myList).GameType[iCounter]));
+		(iCounter++);
 		// [Loop Continue]
 		goto J0xB58;
 	}
-	myList.__NFUN_279__();
+	myList.Destroy();
 	return textData;
 	return;
 }
@@ -486,16 +486,16 @@ function Timer()
 	local Controller aPC;
 
 	// End:0xD0
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		aPC = Level.ControllerList;
 		J0x48:
 
 		// End:0xD0 [Loop If]
-		if(__NFUN_119__(aPC, none))
+		if((aPC != none))
 		{
 			// End:0xB9
-			if(__NFUN_130__(__NFUN_119__(PlayerController(aPC), none), __NFUN_123__(PlayerController(aPC).m_szIpAddr, "")))
+			if(((PlayerController(aPC) != none) && (PlayerController(aPC).m_szIpAddr != "")))
 			{
 				SetPlayingTime(PlayerController(aPC).m_szIpAddr, PlayerController(aPC).m_fLoginTime, Level.TimeSeconds);
 			}
@@ -519,22 +519,22 @@ function string DisplayTime(int _iTimeToConvert)
 	iMin = 0;
 	iSec = _iTimeToConvert;
 	// End:0x54
-	if(__NFUN_153__(_iTimeToConvert, 60))
+	if((_iTimeToConvert >= 60))
 	{
-		fTemp = __NFUN_172__(float(_iTimeToConvert), float(60));
+		fTemp = (float(_iTimeToConvert) / float(60));
 		iMin = int(fTemp);
-		iSec = __NFUN_147__(_iTimeToConvert, __NFUN_144__(iMin, 60));
+		iSec = (_iTimeToConvert - (iMin * 60));
 	}
 	// End:0x7F
-	if(__NFUN_150__(iSec, 10))
+	if((iSec < 10))
 	{
-		szTime = __NFUN_112__(__NFUN_112__(string(iMin), ":0"), string(iSec));		
+		szTime = ((string(iMin) $ ":0") $ string(iSec));		
 	}
 	else
 	{
 		szTemp = string(iSec);
-		szTemp = __NFUN_128__(szTemp, 2);
-		szTime = __NFUN_112__(__NFUN_112__(string(iMin), ":"), szTemp);
+		szTemp = Left(szTemp, 2);
+		szTime = ((string(iMin) $ ":") $ szTemp);
 	}
 	return szTime;
 	return;

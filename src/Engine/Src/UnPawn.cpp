@@ -181,10 +181,11 @@ void AController::execFinishRotation( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 508, execFinishRotation );
 
-IMPL_TODO("Ghidra 0x1038eab0; 112 bytes; logic matches Ghidra exactly; guard/unguard frame overhead diverges")
+// Ghidra 0x1038eab0, 112b. No SEH in retail — no guard/unguard.
+// Pawn at +0x3d8, DesiredRotation.Yaw at +0x300, Rotation.Yaw at +0x244.
+IMPL_MATCH("Engine.dll", 0x1038eab0)
 void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execPollFinishRotation);
 	if( Pawn )
 	{
 		INT iYawDiff = *(INT*)((BYTE*)Pawn + 0x300) - (INT)(*(DWORD*)((BYTE*)Pawn + 0x244) & 0xffff);
@@ -198,7 +199,6 @@ void AController::execPollFinishRotation( FFrame& Stack, RESULT_DECL )
 		}
 	}
 	GetStateFrame()->LatentAction = 0;
-	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execPollFinishRotation );
 
@@ -532,10 +532,11 @@ void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 540, execFindBestInventoryPath );
 
-IMPL_TODO("Ghidra 0x10390890; retail has no guard; checks LatentAction==AI_PollMoveToward+ALadder overlap to set Pawn->Anchor; guard diverges")
+// Ghidra 0x10390890, 162b. No SEH in retail.
+// PrivateStaticClass direct ref in retail vs our StaticClass() call — minor asm divergence.
+IMPL_DIVERGE("Ghidra 0x10390890; retail uses &ALadder::PrivateStaticClass and &ANavigationPoint::PrivateStaticClass directly; our StaticClass() calls add one indirection each")
 void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 {
-	guard(AController::execEndClimbLadder);
 	P_FINISH;
 	if( GetStateFrame()->LatentAction == AI_PollMoveToward && Pawn && MoveTarget )
 	{
@@ -543,16 +544,14 @@ void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 		{
 			if( Pawn->IsOverlapping( MoveTarget, NULL ) )
 			{
-				// FUN_1038ef90: returns MoveTarget as ANavigationPoint* if IsA, else NULL
-				if( MoveTarget->IsA( ANavigationPoint::StaticClass() ) )
-					Pawn->Anchor = (ANavigationPoint*)MoveTarget;
-				else
-					Pawn->Anchor = NULL;
+				// FUN_1038ef90: returns MoveTarget as ANavigationPoint* if IsA, else NULL.
+				ANavigationPoint* nav = MoveTarget->IsA( ANavigationPoint::StaticClass() )
+					? (ANavigationPoint*)MoveTarget : NULL;
+				Pawn->Anchor = nav;
 			}
 			GetStateFrame()->LatentAction = 0;
 		}
 	}
-	unguard;
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execEndClimbLadder );
 
@@ -716,19 +715,19 @@ void APlayerController::execPasteFromClipboard( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execPasteFromClipboard );
 
-IMPL_TODO("Ghidra 0x10420230; 88b — marks UNetConnection bPendingDestroy when player is about to be destroyed")
+// Ghidra 0x10420230, 88b. No SEH in retail.
+// Retail: UObject::IsA(Player, &UNetConnection::PrivateStaticClass) — no null guard on Player.
+// Diverges: our StaticClass() call vs PrivateStaticClass direct ref; null guard on P (safety).
+IMPL_DIVERGE("Ghidra 0x10420230; retail uses &UNetConnection::PrivateStaticClass and has no null-check on Player before IsA — minor safety divergence")
 void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 {
-	guard(APlayerController::execSpecialDestroy);
 	P_FINISH;
-	// If the player is a net connection, signal it for destruction.
-	UPlayer* P = *(UPlayer**)(&_NativeData[50]);  // this+0x5b4
+	UPlayer* P = *(UPlayer**)((BYTE*)this + 0x5b4);
 	if( P && P->IsA(UNetConnection::StaticClass()) )
 	{
-		if( *(INT*)((BYTE*)P + 0x7c) )  // UNetConnection: pending close flag
-			*(INT*)((BYTE*)P + 0x80) = 1;  // UNetConnection: bPendingDestroy
+		if( *(INT*)((BYTE*)P + 0x7c) )
+			*(INT*)((BYTE*)P + 0x80) = 1;
 	}
-	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
 
@@ -859,16 +858,16 @@ void AAIController::execWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execWaitToSeeEnemy );
 
-IMPL_TODO("Ghidra 0x1038e7c0; 163b; logic matches Ghidra exactly (time+rotation checks); guard/unguard frame diverges")
+// Ghidra 0x1038e7c0, 163b. No SEH in retail — no guard/unguard.
+// Pawn at +0x3d8, Enemy at +0x400, XLevel at +0x144, XLevel->TimeSeconds at +0x45c,
+// LastSeenTime at +0x3c4. Yaw-diff check identical to PollFinishRotation.
+IMPL_MATCH("Engine.dll", 0x1038e7c0)
 void AAIController::execPollWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 {
-	guard(AAIController::execPollWaitToSeeEnemy);
 	if( Pawn && Enemy )
 	{
-		// Wait until Level->TimeSeconds is at most 0.1s ahead of LastSeenTime
 		if( Level->TimeSeconds - LastSeenTime > 0.1f )
 			return;
-		// Check if pawn has finished rotating toward enemy (same logic as PollFinishRotation)
 		INT iYawDiff = *(INT*)((BYTE*)Pawn + 0x300) - (INT)(*(DWORD*)((BYTE*)Pawn + 0x244) & 0xffff);
 		if( iYawDiff < 0 ) iYawDiff = -iYawDiff;
 		if( iYawDiff > 1999 )
@@ -880,7 +879,6 @@ void AAIController::execPollWaitToSeeEnemy( FFrame& Stack, RESULT_DECL )
 		}
 	}
 	GetStateFrame()->LatentAction = 0;
-	unguard;
 }
 IMPLEMENT_FUNCTION( AAIController, INDEX_NONE, execPollWaitToSeeEnemy );
 
@@ -911,16 +909,20 @@ INT APawn::PlayerControlled()
 	return 0;
 }
 
-IMPL_TODO("Ghidra 0x103e55b0: checks (byte)(this+0x3a2) < 2; m_eHealth enum where 0-1=alive, 2+=dead")
+// Ghidra 0x103e55b0, 14b. No guard/unguard. Casts field to BYTE before compare.
+// m_eHealth is a BYTE enum at APawn+0x3a2 (confirmed by Ghidra cast).
+IMPL_MATCH("Engine.dll", 0x103e55b0)
 INT APawn::IsAlive()
 {
 	return m_eHealth < 2;
 }
 
-IMPL_TODO("Ghidra 0x103ecae0; 77b — retail NaN-safe equality check: enters body only when CollisionHeight==CrouchHeight (+0x454), then confirms < default->CollisionHeight and m_ePeekingMode (+0x39c) != 2")
+// Ghidra 0x103ecae0, 77b. No guard/unguard. Uses NaN-safe IEEE equality pattern
+// (fcomi): enters body when CollisionHeight == CrouchHeight OR either is NaN.
+// Our code diverges on the NaN case (returns 0 if either is NaN; retail treats NaN == anything).
+IMPL_DIVERGE("Ghidra 0x103ecae0; NaN-safe fcomi equality check diverges — retail enters body when either float is NaN, our code does not")
 INT APawn::IsCrouched()
 {
-	// Outer check: only consider crouched if currently at exactly CrouchHeight
 	if( CollisionHeight != CrouchHeight )
 		return 0;
 	APawn* defObj = (APawn*)GetClass()->GetDefaultObject();
@@ -933,7 +935,10 @@ INT APawn::IsPlayer()
 	return Controller && Controller->bIsPlayer;
 }
 
-IMPL_TODO("Ghidra 0x103e5600: 34b — correct logic; retail uses direct &PrivateStaticClass ref instead of StaticClass() call")
+// Ghidra 0x103e5600, 34b. No guard/unguard.
+// Retail uses UObject::IsA(Controller, &APlayerController::PrivateStaticClass) directly;
+// our StaticClass() call is functionally equivalent but adds one extra call instruction.
+IMPL_DIVERGE("Ghidra 0x103e5600; retail uses &APlayerController::PrivateStaticClass direct reference vs our StaticClass() call — minor asm difference")
 INT APawn::IsHumanControlled()
 {
 	return Controller && Controller->IsA(APlayerController::StaticClass());
@@ -1185,11 +1190,10 @@ IMPL_MATCH("Engine.dll", 0x103b7420)
 void APawn::NotifyBump( AActor* Other )
 {
 	guard(APawn::NotifyBump);
-	// If Other has a m_CurrentVolumeSound actor and that actor has an AntiPortal,
-	// redirect the bump to the volume sound actor (R6 sound zone collision redirect).
-	AActor* bump_actor = Other->m_CurrentVolumeSound;
-	if( bump_actor && bump_actor->AntiPortal )
-		Other = bump_actor;
+	// Ghidra 0x103b7420 (63b): if Other is based on something with a collision
+	// box (Base at +0x15c, m_collisionBox at +0x180), redirect bump to the base.
+	if( Other->Base && Other->Base->m_collisionBox )
+		Other = Other->Base;
 	if( Controller && Controller->eventNotifyBump( Other ) != 0 )
 		return;
 	AActor::eventBump( Other );
@@ -1334,7 +1338,9 @@ INT APawn::ShouldTrace( AActor* SourceActor, DWORD TraceFlags )
 	unguard;
 }
 
-IMPL_TODO("AActor::SmoothHitWall at 0x103f15c0 (38b); APawn override not separately exported; delegates to processHitWall")
+// APawn::SmoothHitWall is not separately exported in Ghidra (0x103f15c0 is AActor::SmoothHitWall).
+// Ghidra analysis shows the APawn override delegates to processHitWall; logic correct.
+IMPL_DIVERGE("APawn::SmoothHitWall not in Ghidra export table — permanent; inlined or same RVA not separately exported")
 void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::SmoothHitWall);

@@ -501,7 +501,7 @@ function bool ExternalDragOver(UWindowDialogControl ExternalControl, float X, fl
 		OverItem = GetItemAt(X, Y);
 		B.m_SelectedItem.Remove();
 		// End:0x8A
-		if(__NFUN_119__(OverItem, none))
+		if((OverItem != none))
 		{
 			OverItem.InsertItemBefore(B.m_SelectedItem);			
 		}
@@ -514,7 +514,7 @@ function bool ExternalDragOver(UWindowDialogControl ExternalControl, float X, fl
 		B.Notify(1);
 		Notify(1);
 		// End:0x132
-		if(__NFUN_132__(m_bCanDrag, m_bCanDragExternal))
+		if((m_bCanDrag || m_bCanDragExternal))
 		{
 			Root.CancelCapture();
 			m_bDragging = true;
@@ -531,7 +531,7 @@ function bool ExternalDragOver(UWindowDialogControl ExternalControl, float X, fl
 function DropSelection()
 {
 	// End:0x1C
-	if(__NFUN_119__(m_SelectedItem, none))
+	if((m_SelectedItem != none))
 	{
 		m_SelectedItem.bSelected = false;
 	}
@@ -571,11 +571,11 @@ function Region CenterIconInBox(float _fX, float _fY, float _fWidth, float _fHei
 	local Region RTemp;
 	local float fTemp;
 
-	fTemp = __NFUN_172__(__NFUN_175__(_fWidth, float(_RIconRegion.W)), float(2));
-	RTemp.X = int(__NFUN_174__(_fX, float(int(__NFUN_174__(fTemp, 0.5000000)))));
-	fTemp = __NFUN_172__(__NFUN_175__(_fHeight, float(_RIconRegion.H)), float(2));
-	RTemp.Y = int(float(int(__NFUN_174__(fTemp, 0.5000000))));
-	__NFUN_161__(RTemp.Y, int(_fY));
+	fTemp = ((_fWidth - float(_RIconRegion.W)) / float(2));
+	RTemp.X = int((_fX + float(int((fTemp + 0.5000000)))));
+	fTemp = ((_fHeight - float(_RIconRegion.H)) / float(2));
+	RTemp.Y = int(float(int((fTemp + 0.5000000))));
+	(RTemp.Y += int(_fY));
 	return RTemp;
 	return;
 }
@@ -585,7 +585,7 @@ function Region CenterIconInBox(float _fX, float _fY, float _fWidth, float _fHei
 //=======================================================================================================
 function int GetCenterXPos(float _fTagWidth, float _fTextWidth)
 {
-	return int(__NFUN_174__(__NFUN_171__(__NFUN_175__(_fTagWidth, _fTextWidth), 0.5000000), 0.5000000));
+	return int((((_fTagWidth - _fTextWidth) * 0.5000000) + 0.5000000));
 	return;
 }
 
@@ -605,14 +605,14 @@ function KeyDown(int Key, float X, float Y)
 	local UWindowListBoxItem TempItem, OldSelection;
 
 	// End:0x57
-	if(__NFUN_114__(m_SelectedItem, none))
+	if((m_SelectedItem == none))
 	{
 		// End:0x55
-		if(__NFUN_151__(Items.Count(), 0))
+		if((Items.Count() > 0))
 		{
 			TempItem = CheckForNextItem(UWindowListBoxItem(Items.Next));
 			// End:0x55
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				SetSelectedItem(TempItem);
 			}
@@ -626,7 +626,7 @@ function KeyDown(int Key, float X, float Y)
 		case int(Root.Console.38):
 			TempItem = CheckForPrevItem(m_SelectedItem);
 			// End:0xA9
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				SetSelectedItem(TempItem);
 			}
@@ -636,7 +636,7 @@ function KeyDown(int Key, float X, float Y)
 		case int(Root.Console.40):
 			TempItem = CheckForNextItem(m_SelectedItem);
 			// End:0xEC
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				SetSelectedItem(TempItem);
 			}
@@ -646,7 +646,7 @@ function KeyDown(int Key, float X, float Y)
 		case int(Root.Console.36):
 			TempItem = CheckForNextItem(UWindowListBoxItem(Items));
 			// End:0x134
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				SetSelectedItem(TempItem);
 			}
@@ -656,7 +656,7 @@ function KeyDown(int Key, float X, float Y)
 		case int(Root.Console.35):
 			TempItem = CheckForLastItem(UWindowListBoxItem(Items.Last));
 			// End:0x185
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				SetSelectedItem(TempItem);
 			}
@@ -665,7 +665,7 @@ function KeyDown(int Key, float X, float Y)
 		// End:0x1BA
 		case int(Root.Console.13):
 			// End:0x1B7
-			if(__NFUN_129__(m_bIgnoreUserClicks))
+			if((!m_bIgnoreUserClicks))
 			{
 				DoubleClickItem(m_SelectedItem);
 			}
@@ -675,7 +675,7 @@ function KeyDown(int Key, float X, float Y)
 		case int(Root.Console.34):
 			TempItem = CheckForPageDown(m_SelectedItem);
 			// End:0x1FA
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				SetSelectedItem(TempItem);
 			}
@@ -685,7 +685,7 @@ function KeyDown(int Key, float X, float Y)
 		case int(Root.Console.33):
 			TempItem = CheckForPageUp(m_SelectedItem);
 			// End:0x23D
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				SetSelectedItem(TempItem);
 			}
@@ -703,7 +703,7 @@ function KeyDown(int Key, float X, float Y)
 			break;
 	}
 	// End:0x27D
-	if(__NFUN_119__(OldSelection, m_SelectedItem))
+	if((OldSelection != m_SelectedItem))
 	{
 		MakeSelectedVisible();
 	}
@@ -720,13 +720,13 @@ function UWindowListBoxItem CheckForNextItem(UWindowListBoxItem _StartItem)
 	local bool bIsASeparator;
 
 	// End:0x0D
-	if(__NFUN_114__(_StartItem, none))
+	if((_StartItem == none))
 	{
 		return none;
 	}
 	TempItem = UWindowListBoxItem(_StartItem.Next);
 	// End:0x49
-	if(__NFUN_132__(__NFUN_114__(TempItem, none), __NFUN_129__(TempItem.ShowThisItem())))
+	if(((TempItem == none) || (!TempItem.ShowThisItem())))
 	{
 		return none;
 	}
@@ -738,11 +738,11 @@ function UWindowListBoxItem CheckForNextItem(UWindowListBoxItem _StartItem)
 	J0x6D:
 
 	// End:0xED [Loop If]
-	if(__NFUN_132__(TempItem.m_bDisabled, bIsASeparator))
+	if((TempItem.m_bDisabled || bIsASeparator))
 	{
 		TempItem = UWindowListBoxItem(TempItem.Next);
 		// End:0xC6
-		if(__NFUN_132__(__NFUN_114__(TempItem, none), __NFUN_129__(TempItem.ShowThisItem())))
+		if(((TempItem == none) || (!TempItem.ShowThisItem())))
 		{
 			return none;
 		}
@@ -767,13 +767,13 @@ function UWindowListBoxItem CheckForPrevItem(UWindowListBoxItem _StartItem)
 	local bool bIsASeparator;
 
 	// End:0x0D
-	if(__NFUN_114__(_StartItem, none))
+	if((_StartItem == none))
 	{
 		return none;
 	}
 	TempItem = UWindowListBoxItem(_StartItem.Prev);
 	// End:0x4D
-	if(__NFUN_132__(__NFUN_114__(TempItem, Items.Sentinel), __NFUN_114__(TempItem, none)))
+	if(((TempItem == Items.Sentinel) || (TempItem == none)))
 	{
 		return none;
 	}
@@ -785,11 +785,11 @@ function UWindowListBoxItem CheckForPrevItem(UWindowListBoxItem _StartItem)
 	J0x71:
 
 	// End:0xF1 [Loop If]
-	if(__NFUN_132__(TempItem.m_bDisabled, bIsASeparator))
+	if((TempItem.m_bDisabled || bIsASeparator))
 	{
 		TempItem = UWindowListBoxItem(TempItem.Prev);
 		// End:0xCA
-		if(__NFUN_132__(__NFUN_114__(TempItem, none), __NFUN_114__(TempItem, UWindowListBoxItem(Items))))
+		if(((TempItem == none) || (TempItem == UWindowListBoxItem(Items))))
 		{
 			return none;
 		}
@@ -813,7 +813,7 @@ function UWindowListBoxItem CheckForLastItem(UWindowListBoxItem _LastItem)
 	local bool bIsASeparator;
 
 	// End:0x0D
-	if(__NFUN_114__(_LastItem, none))
+	if((_LastItem == none))
 	{
 		return none;
 	}
@@ -823,7 +823,7 @@ function UWindowListBoxItem CheckForLastItem(UWindowListBoxItem _LastItem)
 		bIsASeparator = R6WindowListBoxItem(_LastItem).m_IsSeparator;
 	}
 	// End:0x5A
-	if(__NFUN_132__(_LastItem.m_bDisabled, bIsASeparator))
+	if((_LastItem.m_bDisabled || bIsASeparator))
 	{
 		return CheckForPrevItem(_LastItem);
 	}
@@ -841,29 +841,29 @@ function UWindowListBoxItem CheckForPageDown(UWindowListBoxItem _StartItem)
 	local bool bIsASeparator;
 
 	// End:0x0D
-	if(__NFUN_114__(_StartItem, none))
+	if((_StartItem == none))
 	{
 		return none;
 	}
 	TempItem = _StartItem;
 	i = 1;
 	ValidItem = TempItem;
-	iMaxItemsDisplayed = int(__NFUN_172__(GetSizeOfList(), GetSizeOfAnItem(TempItem)));
+	iMaxItemsDisplayed = int((GetSizeOfList() / GetSizeOfAnItem(TempItem)));
 	J0x45:
 
 	// End:0xB6 [Loop If]
-	if(__NFUN_150__(i, iMaxItemsDisplayed))
+	if((i < iMaxItemsDisplayed))
 	{
 		TempItem = UWindowListBoxItem(TempItem.Next);
 		// End:0x8F
-		if(__NFUN_132__(__NFUN_114__(TempItem, none), __NFUN_154__(i, m_iTotItemsDisplayed)))
+		if(((TempItem == none) || (i == m_iTotItemsDisplayed)))
 		{
 			return ValidItem;
 		}
 		// End:0xB3
 		if(TempItem.ShowThisItem())
 		{
-			__NFUN_165__(i);
+			(i++);
 			ValidItem = TempItem;
 		}
 		// [Loop Continue]
@@ -883,29 +883,29 @@ function UWindowListBoxItem CheckForPageUp(UWindowListBoxItem _StartItem)
 	local bool bIsASeparator;
 
 	// End:0x0D
-	if(__NFUN_114__(_StartItem, none))
+	if((_StartItem == none))
 	{
 		return none;
 	}
 	TempItem = _StartItem;
 	i = 1;
 	ValidItem = TempItem;
-	iMaxItemsDisplayed = int(__NFUN_172__(GetSizeOfList(), GetSizeOfAnItem(TempItem)));
+	iMaxItemsDisplayed = int((GetSizeOfList() / GetSizeOfAnItem(TempItem)));
 	J0x45:
 
 	// End:0xCC [Loop If]
-	if(__NFUN_150__(i, iMaxItemsDisplayed))
+	if((i < iMaxItemsDisplayed))
 	{
 		TempItem = UWindowListBoxItem(TempItem.Prev);
 		// End:0xA5
-		if(__NFUN_132__(__NFUN_132__(__NFUN_114__(TempItem, none), __NFUN_154__(i, m_iTotItemsDisplayed)), __NFUN_114__(TempItem, UWindowListBoxItem(Items))))
+		if((((TempItem == none) || (i == m_iTotItemsDisplayed)) || (TempItem == UWindowListBoxItem(Items))))
 		{
 			return ValidItem;
 		}
 		// End:0xC9
 		if(TempItem.ShowThisItem())
 		{
-			__NFUN_165__(i);
+			(i++);
 			ValidItem = TempItem;
 		}
 		// [Loop Continue]
@@ -924,7 +924,7 @@ function bool SwapItem(UWindowListBoxItem _pItem, bool _bUp)
 	local UWindowListBoxItem TempItem, BkpItem;
 
 	// End:0x0D
-	if(__NFUN_114__(_pItem, none))
+	if((_pItem == none))
 	{
 		return false;
 	}
@@ -934,7 +934,7 @@ function bool SwapItem(UWindowListBoxItem _pItem, bool _bUp)
 	{
 		TempItem = UWindowListBoxItem(TempItem.Prev);
 		// End:0x5D
-		if(__NFUN_132__(__NFUN_114__(TempItem, none), __NFUN_114__(TempItem, UWindowListBoxItem(Items))))
+		if(((TempItem == none) || (TempItem == UWindowListBoxItem(Items))))
 		{
 			return false;
 		}
@@ -946,7 +946,7 @@ function bool SwapItem(UWindowListBoxItem _pItem, bool _bUp)
 	{
 		TempItem = UWindowListBoxItem(TempItem.Next);
 		// End:0xB4
-		if(__NFUN_114__(TempItem, none))
+		if((TempItem == none))
 		{
 			return false;
 		}
@@ -964,7 +964,7 @@ function bool SwapItem(UWindowListBoxItem _pItem, bool _bUp)
 //===================================================================================
 function bool IsASeparatorItem()
 {
-	return __NFUN_114__(ListClass, Class'R6Window.R6WindowListBoxItem');
+	return (ListClass == Class'R6Window.R6WindowListBoxItem');
 	return;
 }
 

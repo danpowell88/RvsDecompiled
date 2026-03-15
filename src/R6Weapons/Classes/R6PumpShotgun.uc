@@ -61,7 +61,7 @@ function ServerPutBulletInShotgun()
 		// End:0x40
 		if((m_ReloadSnd != none))
 		{
-			Owner.__NFUN_264__(m_ReloadSnd) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+			Owner.PlaySound(m_ReloadSnd);
 		}
 	}
 	return;
@@ -74,16 +74,16 @@ state Reloading
 		// End:0x1E
 		if(bShowLog)
 		{
-			__NFUN_231__("SHOTGUN - FPAOver");
+			Log("SHOTGUN - FPAOver");
 		}
 		// End:0x4C
-		if(__NFUN_154__(int(Pawn(Owner).Controller.bFire), 1))
+		if((int(Pawn(Owner).Controller.bFire) == 1))
 		{
-			__NFUN_113__('NormalFire');			
+			GotoState('NormalFire');			
 		}
 		else
 		{
-			__NFUN_113__('None');
+			GotoState('None');
 		}
 		return;
 	}
@@ -93,7 +93,7 @@ state Reloading
 		// End:0x21
 		if(bShowLog)
 		{
-			__NFUN_231__("SHOTGUN - ChangeClip");
+			Log("SHOTGUN - ChangeClip");
 		}
 		ServerPutBulletInShotgun();
 		return;
@@ -109,11 +109,11 @@ state Reloading
 		// End:0x57
 		if(bShowLog)
 		{
-			__NFUN_231__("SHOTGUN - Leaving State Reloading");
+			Log("SHOTGUN - Leaving State Reloading");
 		}
 		pawnOwner.ServerSwitchReloadingWeapon(false);
 		// End:0xA4
-		if(__NFUN_119__(PlayerCtrl, none))
+		if((PlayerCtrl != none))
 		{
 			PlayerCtrl.m_iPlayerCAProgress = 0;
 			PlayerCtrl.m_bLockWeaponActions = false;
@@ -132,13 +132,13 @@ state Reloading
 		// End:0x61
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("SHOTGUN - Begin State Reloading! ", string(GetNbOfClips())));
+			Log(("SHOTGUN - Begin State Reloading! " $ string(GetNbOfClips())));
 		}
 		// End:0x13E
-		if(__NFUN_130__(__NFUN_151__(GetNbOfClips(), 0), __NFUN_129__(GunIsFull())))
+		if(((GetNbOfClips() > 0) && (!GunIsFull())))
 		{
 			// End:0xA1
-			if(__NFUN_130__(__NFUN_119__(PlayerCtrl, none), __NFUN_129__(PlayerCtrl.m_bWantTriggerLag)))
+			if(((PlayerCtrl != none) && (!PlayerCtrl.m_bWantTriggerLag)))
 			{
 				ClientStartChangeClip();
 			}
@@ -147,14 +147,14 @@ state Reloading
 			if(pawnOwner.m_bIsPlayer)
 			{
 				// End:0x13B
-				if(__NFUN_130__(__NFUN_119__(PlayerCtrl, none), __NFUN_242__(PlayerCtrl.bBehindView, false)))
+				if(((PlayerCtrl != none) && (PlayerCtrl.bBehindView == false)))
 				{
 					// End:0xF9
-					if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+					if((int(m_iNbBulletsInWeapon) == 0))
 					{
 						m_FPHands.m_bReloadEmpty = true;
 					}
-					m_FPHands.__NFUN_113__('Reloading');
+					m_FPHands.GotoState('Reloading');
 					PlayerCtrl.m_iPlayerCAProgress = 0;
 					PlayerCtrl.m_bHideReticule = true;
 					PlayerCtrl.m_bLockWeaponActions = true;
@@ -163,7 +163,7 @@ state Reloading
 		}
 		else
 		{
-			__NFUN_113__('None');
+			GotoState('None');
 		}
 		return;
 	}
@@ -175,9 +175,9 @@ state Reloading
 
 		m_FPHands.GetAnimParams(0, Anim, fFrame, fRate);
 		// End:0x3F
-		if(__NFUN_255__(Anim, 'Reload_e'))
+		if((Anim != 'Reload_e'))
 		{
-			return int(__NFUN_171__(fFrame, float(110)));			
+			return int((fFrame * float(110)));			
 		}
 		else
 		{
@@ -192,7 +192,7 @@ state Reloading
 
 		PlayerCtrl = R6PlayerController(R6Pawn(Owner).Controller);
 		// End:0x55
-		if(__NFUN_130__(__NFUN_119__(PlayerCtrl, none), __NFUN_242__(PlayerCtrl.m_bUseFirstPersonWeapon, false)))
+		if(((PlayerCtrl != none) && (PlayerCtrl.m_bUseFirstPersonWeapon == false)))
 		{
 			PlayerCtrl.m_iPlayerCAProgress = GetReloadProgress();
 		}

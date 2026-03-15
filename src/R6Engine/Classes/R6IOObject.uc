@@ -221,7 +221,7 @@ function PerformSoundAction(R6IOObject.eStateIOObejct eState)
 			{
 				Log("****** PerformSoundAction SIO_Start");
 			}
-			__NFUN_264__(m_StartSnd, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+			PlaySound(m_StartSnd, 3);
 			// End:0xE2
 			break;
 		// End:0x9A
@@ -229,9 +229,9 @@ function PerformSoundAction(R6IOObject.eStateIOObejct eState)
 			// End:0x8D
 			if(bShowLog)
 			{
-				__NFUN_231__("****** PerformSoundAction SIO_Interrupt");
+				Log("****** PerformSoundAction SIO_Interrupt");
 			}
-			__NFUN_264__(m_InterruptedSnd, 3);
+			PlaySound(m_InterruptedSnd, 3);
 			// End:0xE2
 			break;
 		// End:0xDF
@@ -239,9 +239,9 @@ function PerformSoundAction(R6IOObject.eStateIOObejct eState)
 			// End:0xD2
 			if(bShowLog)
 			{
-				__NFUN_231__("****** PerformSoundAction SIO_Complete");
+				Log("****** PerformSoundAction SIO_Complete");
 			}
-			__NFUN_264__(m_CompletedSnd, 3);
+			PlaySound(m_CompletedSnd, 3);
 			// End:0xE2
 			break;
 		// End:0xFFFF

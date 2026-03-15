@@ -687,33 +687,33 @@ function FillRosterList()
 	if(bShowLog)
 	{
 		Log("R6MenuDynTeamListsControl:FillRosterListBox");
-		__NFUN_231__(__NFUN_168__("m_ListBox.Items.Count()", string(m_listBox.Items.Count())));
-		__NFUN_231__(__NFUN_168__("R6Root.m_GameOperatives.Length", string(r6Root.m_GameOperatives.Length)));
+		Log(("m_ListBox.Items.Count()" @ string(m_listBox.Items.Count())));
+		Log(("R6Root.m_GameOperatives.Length" @ string(r6Root.m_GameOperatives.Length)));
 	}
 	iUniqueID = -1;
 	i = 0;
 	J0x416:
 
 	// End:0x6D4 [Loop If]
-	if(__NFUN_150__(i, r6Root.m_GameOperatives.Length))
+	if((i < r6Root.m_GameOperatives.Length))
 	{
 		tmpOperative = r6Root.m_GameOperatives[i];
 		// End:0x46B
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("tmpOperative", string(tmpOperative)));
+			Log(("tmpOperative" @ string(tmpOperative)));
 		}
 		// End:0x6CA
-		if(__NFUN_119__(tmpOperative, none))
+		if((tmpOperative != none))
 		{
-			__NFUN_161__(iUniqueID, 1);
+			(iUniqueID += 1);
 			// End:0x4AA
-			if(__NFUN_154__(tmpOperative.m_iUniqueID, -1))
+			if((tmpOperative.m_iUniqueID == -1))
 			{
 				tmpOperative.m_iUniqueID = iUniqueID;
 			}
 			// End:0x4E9
-			if(__NFUN_122__(tmpOperative.m_szSpecialityID, "ID_ASSAULT"))
+			if((tmpOperative.m_szSpecialityID == "ID_ASSAULT"))
 			{
 				R = RAssault;
 				RS = RSAssault;
@@ -722,7 +722,7 @@ function FillRosterList()
 			else
 			{
 				// End:0x528
-				if(__NFUN_122__(tmpOperative.m_szSpecialityID, "ID_SNIPER"))
+				if((tmpOperative.m_szSpecialityID == "ID_SNIPER"))
 				{
 					R = RSniper;
 					RS = RSSniper;
@@ -731,7 +731,7 @@ function FillRosterList()
 				else
 				{
 					// End:0x56C
-					if(__NFUN_122__(tmpOperative.m_szSpecialityID, "ID_DEMOLITIONS"))
+					if((tmpOperative.m_szSpecialityID == "ID_DEMOLITIONS"))
 					{
 						R = RDemo;
 						RS = RSDemo;
@@ -740,7 +740,7 @@ function FillRosterList()
 					else
 					{
 						// End:0x5B0
-						if(__NFUN_122__(tmpOperative.m_szSpecialityID, "ID_ELECTRONICS"))
+						if((tmpOperative.m_szSpecialityID == "ID_ELECTRONICS"))
 						{
 							R = RElectro;
 							RS = RSElectro;
@@ -749,7 +749,7 @@ function FillRosterList()
 						else
 						{
 							// End:0x5EB
-							if(__NFUN_122__(tmpOperative.m_szSpecialityID, "ID_RECON"))
+							if((tmpOperative.m_szSpecialityID == "ID_RECON"))
 							{
 								R = RRecon;
 								RS = RSRecon;
@@ -761,14 +761,14 @@ function FillRosterList()
 			}
 			TempItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', SeparatorID);
 			// End:0x6CA
-			if(__NFUN_119__(TempItem, none))
+			if((TempItem != none))
 			{
 				TempItem.m_Icon = ButtonTexture;
 				TempItem.m_IconRegion = R;
 				TempItem.m_IconSelectedRegion = RS;
 				TempItem.HelpText = tmpOperative.GetName();
 				// End:0x6A2
-				if(__NFUN_151__(tmpOperative.m_iHealth, 1))
+				if((tmpOperative.m_iHealth > 1))
 				{
 					TempItem.m_addedToSubList = true;
 				}
@@ -776,7 +776,7 @@ function FillRosterList()
 				gearWidget.SetupOperative(tmpOperative);
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x416;
 	}
@@ -784,10 +784,10 @@ function FillRosterList()
 	J0x6F6:
 
 	// End:0x76E [Loop If]
-	if(__NFUN_130__(__NFUN_119__(TempItem, none), __NFUN_242__(Found, false)))
+	if(((TempItem != none) && (Found == false)))
 	{
 		// End:0x752
-		if(__NFUN_242__(TempItem.m_IsSeparator, false))
+		if((TempItem.m_IsSeparator == false))
 		{
 			m_listBox.SetSelectedItem(TempItem);
 			m_listBox.MakeSelectedVisible();
@@ -816,11 +816,11 @@ function Paint(Canvas C, float X, float Y)
 {
 	R6WindowLookAndFeel(LookAndFeel).DrawBGShading(self, C, m_listBox.WinLeft, m_listBox.WinTop, m_listBox.WinWidth, m_listBox.WinHeight);
 	C.Style = 5;
-	C.__NFUN_2626__(Root.Colors.GrayLight.R, Root.Colors.GrayLight.G, Root.Colors.GrayLight.B);
+	C.SetDrawColor(Root.Colors.GrayLight.R, Root.Colors.GrayLight.G, Root.Colors.GrayLight.B);
 	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, float(m_BorderRegion.H), float(m_BorderRegion.X), float(m_BorderRegion.Y), float(m_BorderRegion.W), float(m_BorderRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, 0.0000000, __NFUN_174__(m_ASSAULTButton.WinHeight, m_ASSAULTButton.WinTop), WinWidth, float(m_BorderRegion.H), float(m_BorderRegion.X), float(m_BorderRegion.Y), float(m_BorderRegion.W), float(m_BorderRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_BorderRegion.W), __NFUN_174__(m_ASSAULTButton.WinHeight, m_fHButtonOffset), float(m_BorderRegion.X), float(m_BorderRegion.Y), float(m_BorderRegion.W), float(m_BorderRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_BorderRegion.W)), 0.0000000, float(m_BorderRegion.W), __NFUN_174__(m_ASSAULTButton.WinHeight, m_fHButtonOffset), float(m_BorderRegion.X), float(m_BorderRegion.Y), float(m_BorderRegion.W), float(m_BorderRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, 0.0000000, (m_ASSAULTButton.WinHeight + m_ASSAULTButton.WinTop), WinWidth, float(m_BorderRegion.H), float(m_BorderRegion.X), float(m_BorderRegion.Y), float(m_BorderRegion.W), float(m_BorderRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_BorderRegion.W), (m_ASSAULTButton.WinHeight + m_fHButtonOffset), float(m_BorderRegion.X), float(m_BorderRegion.Y), float(m_BorderRegion.W), float(m_BorderRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, (WinWidth - float(m_BorderRegion.W)), 0.0000000, float(m_BorderRegion.W), (m_ASSAULTButton.WinHeight + m_fHButtonOffset), float(m_BorderRegion.X), float(m_BorderRegion.Y), float(m_BorderRegion.W), float(m_BorderRegion.H), m_BorderTexture);
 	return;
 }
 
@@ -828,20 +828,20 @@ function ResizeSubLists()
 {
 	local int iRedListBoxH, iGreenListBoxH, iGoldListBoxH, iAddSpace, iMaxListHeigth, iAvailableSpace;
 
-	iMaxListHeigth = __NFUN_146__(int(__NFUN_171__(float(4), m_SubListByItemHeight)), m_SubListTopHeight);
-	iRedListBoxH = __NFUN_146__(int(__NFUN_171__(float(m_RedListBox.m_listBox.Items.Count()), m_SubListByItemHeight)), m_SubListTopHeight);
-	iGreenListBoxH = __NFUN_146__(int(__NFUN_171__(float(m_GreenListBox.m_listBox.Items.Count()), m_SubListByItemHeight)), m_SubListTopHeight);
-	iGoldListBoxH = __NFUN_146__(int(__NFUN_171__(float(m_GoldListBox.m_listBox.Items.Count()), m_SubListByItemHeight)), m_SubListTopHeight);
-	iAvailableSpace = int(__NFUN_175__(TotalSublistsHeight, float(__NFUN_249__(__NFUN_146__(__NFUN_146__(iRedListBoxH, iGreenListBoxH), iGoldListBoxH), int(TotalSublistsHeight)))));
+	iMaxListHeigth = (int((float(4) * m_SubListByItemHeight)) + m_SubListTopHeight);
+	iRedListBoxH = (int((float(m_RedListBox.m_listBox.Items.Count()) * m_SubListByItemHeight)) + m_SubListTopHeight);
+	iGreenListBoxH = (int((float(m_GreenListBox.m_listBox.Items.Count()) * m_SubListByItemHeight)) + m_SubListTopHeight);
+	iGoldListBoxH = (int((float(m_GoldListBox.m_listBox.Items.Count()) * m_SubListByItemHeight)) + m_SubListTopHeight);
+	iAvailableSpace = int((TotalSublistsHeight - float(Min(((iRedListBoxH + iGreenListBoxH) + iGoldListBoxH), int(TotalSublistsHeight)))));
 	J0xF2:
 
 	// End:0x1EA [Loop If]
-	if(__NFUN_155__(iAvailableSpace, 0))
+	if((iAvailableSpace != 0))
 	{
-		iAddSpace = __NFUN_145__(iAvailableSpace, 3);
-		iAvailableSpace = __NFUN_147__(iAvailableSpace, __NFUN_144__(3, iAddSpace));
+		iAddSpace = (iAvailableSpace / 3);
+		iAvailableSpace = (iAvailableSpace - (3 * iAddSpace));
 		// End:0x193
-		if(__NFUN_154__(iAddSpace, 0))
+		if((iAddSpace == 0))
 		{
 			iAddSpace = iAvailableSpace;
 			iAvailableSpace = 0;
@@ -851,28 +851,28 @@ function ResizeSubLists()
 		}
 		else
 		{
-			__NFUN_161__(iAvailableSpace, DistributeSpaces(iAddSpace, iRedListBoxH, iMaxListHeigth));
-			__NFUN_161__(iAvailableSpace, DistributeSpaces(iAddSpace, iGreenListBoxH, iMaxListHeigth));
-			__NFUN_161__(iAvailableSpace, DistributeSpaces(iAddSpace, iGoldListBoxH, iMaxListHeigth));
+			(iAvailableSpace += DistributeSpaces(iAddSpace, iRedListBoxH, iMaxListHeigth));
+			(iAvailableSpace += DistributeSpaces(iAddSpace, iGreenListBoxH, iMaxListHeigth));
+			(iAvailableSpace += DistributeSpaces(iAddSpace, iGoldListBoxH, iMaxListHeigth));
 		}
 		// [Loop Continue]
 		goto J0xF2;
 	}
 	m_RedListBox.SetSize(m_RedListBox.WinWidth, float(iRedListBoxH));
-	m_GreenListBox.WinTop = __NFUN_174__(__NFUN_174__(m_RedListBox.WinTop, m_RedListBox.WinHeight), m_fVPadding);
+	m_GreenListBox.WinTop = ((m_RedListBox.WinTop + m_RedListBox.WinHeight) + m_fVPadding);
 	m_GreenListBox.SetSize(m_GreenListBox.WinWidth, float(iGreenListBoxH));
-	m_GoldListBox.WinTop = __NFUN_174__(__NFUN_174__(m_GreenListBox.WinTop, m_GreenListBox.WinHeight), m_fVPadding);
+	m_GoldListBox.WinTop = ((m_GreenListBox.WinTop + m_GreenListBox.WinHeight) + m_fVPadding);
 	m_GoldListBox.SetSize(m_GoldListBox.WinWidth, float(iGoldListBoxH));
 	// End:0x439
 	if(bShowLog)
 	{
-		__NFUN_231__("//////////////////////////////////////////////////////");
-		__NFUN_231__("// R6MenuDynTeamListsControl.ResizeSubLists()");
-		__NFUN_231__(__NFUN_168__("//m_RedListBox.WinHeight", string(m_RedListBox.WinHeight)));
-		__NFUN_231__(__NFUN_168__("//m_GoldListBox.WinHeight", string(m_GoldListBox.WinHeight)));
-		__NFUN_231__(__NFUN_168__("//m_GreenListBox.WinHeight", string(m_GreenListBox.WinHeight)));
-		__NFUN_231__(__NFUN_168__("//yo ", string(__NFUN_175__(__NFUN_174__(__NFUN_175__(__NFUN_175__(WinHeight, TotalSublistsHeight), m_ASSAULTButton.WinHeight), m_fHButtonOffset), m_listBox.WinHeight))));
-		__NFUN_231__("//////////////////////////////////////////////////////");
+		Log("//////////////////////////////////////////////////////");
+		Log("// R6MenuDynTeamListsControl.ResizeSubLists()");
+		Log(("//m_RedListBox.WinHeight" @ string(m_RedListBox.WinHeight)));
+		Log(("//m_GoldListBox.WinHeight" @ string(m_GoldListBox.WinHeight)));
+		Log(("//m_GreenListBox.WinHeight" @ string(m_GreenListBox.WinHeight)));
+		Log(("//yo " @ string(((((WinHeight - TotalSublistsHeight) - m_ASSAULTButton.WinHeight) + m_fHButtonOffset) - m_listBox.WinHeight))));
+		Log("//////////////////////////////////////////////////////");
 	}
 	return;
 }
@@ -882,14 +882,14 @@ function int DistributeSpaces(int _iSpaceToAdd, out int _iHList, int _iMaxListHe
 	local int iSpaceLeft;
 
 	// End:0x3D
-	if(__NFUN_151__(__NFUN_146__(_iHList, _iSpaceToAdd), _iMaxListHeigth))
+	if(((_iHList + _iSpaceToAdd) > _iMaxListHeigth))
 	{
-		iSpaceLeft = __NFUN_147__(_iSpaceToAdd, __NFUN_147__(_iMaxListHeigth, _iHList));
+		iSpaceLeft = (_iSpaceToAdd - (_iMaxListHeigth - _iHList));
 		_iHList = _iMaxListHeigth;		
 	}
 	else
 	{
-		__NFUN_161__(_iHList, _iSpaceToAdd);
+		(_iHList += _iSpaceToAdd);
 	}
 	return iSpaceLeft;
 	return;

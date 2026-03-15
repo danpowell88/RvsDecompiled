@@ -421,14 +421,14 @@ exec function God()
 	}
 	Outer.bGodMode = (!Outer.bGodMode);
 	R6Pawn(Outer.Pawn).ServerGod(Outer.bGodMode, false, false, Outer.PlayerReplicationInfo.PlayerName, false);
-	Outer.Player.Console.Message(__NFUN_112__("God ", string(Outer.bGodMode)), 6.0000000);
+	Outer.Player.Console.Message(("God " $ string(Outer.bGodMode)), 6.0000000);
 	return;
 }
 
 exec function GodTeam()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -436,24 +436,24 @@ exec function GodTeam()
 	if(Outer.bOnlySpectator)
 	{
 		// End:0xE1
-		if(Outer.ViewTarget.__NFUN_303__('R6Pawn'))
+		if(Outer.ViewTarget.IsA('R6Pawn'))
 		{
-			m_bTeamGodMode = __NFUN_129__(m_bTeamGodMode);
+			m_bTeamGodMode = (!m_bTeamGodMode);
 			Outer.bGodMode = m_bTeamGodMode;
 			R6Pawn(Outer.ViewTarget).ServerGod(m_bTeamGodMode, true, false, Outer.PlayerReplicationInfo.PlayerName, false);
-			Outer.Player.Console.Message(__NFUN_112__("GodTeam ", string(Outer.bGodMode)), 6.0000000);
+			Outer.Player.Console.Message(("GodTeam " $ string(Outer.bGodMode)), 6.0000000);
 		}		
 	}
 	else
 	{
 		// End:0xFF
-		if(__NFUN_114__(R6Pawn(Outer.Pawn), none))
+		if((R6Pawn(Outer.Pawn) == none))
 		{
 			return;
 		}
-		m_bTeamGodMode = __NFUN_129__(m_bTeamGodMode);
+		m_bTeamGodMode = (!m_bTeamGodMode);
 		R6Pawn(Outer.Pawn).ServerGod(m_bTeamGodMode, true, false, Outer.PlayerReplicationInfo.PlayerName, false);
-		Outer.Player.Console.Message(__NFUN_112__("GodTeam ", string(Outer.bGodMode)), 6.0000000);
+		Outer.Player.Console.Message(("GodTeam " $ string(Outer.bGodMode)), 6.0000000);
 	}
 	return;
 }
@@ -461,12 +461,12 @@ exec function GodTeam()
 exec function GodTerro()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x28
-	if(__NFUN_114__(R6Pawn(Outer.Pawn), none))
+	if((R6Pawn(Outer.Pawn) == none))
 	{
 		return;
 	}
@@ -478,12 +478,12 @@ exec function GodTerro()
 exec function GodHostage()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x28
-	if(__NFUN_114__(R6Pawn(Outer.Pawn), none))
+	if((R6Pawn(Outer.Pawn) == none))
 	{
 		return;
 	}
@@ -495,7 +495,7 @@ exec function GodHostage()
 exec function GodAll()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -507,7 +507,7 @@ exec function GodAll()
 exec function PerfectAim()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -522,17 +522,17 @@ exec function NeutralizeTerro()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x72
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Terrorist', t)
+	foreach Outer.AllActors(Class'R6Engine.R6Terrorist', t)
 	{
 		t.ServerForceKillResult(4);
 		t.R6TakeDamage(1000, 1000, t, t.Location, vect(0.0000000, 0.0000000, 0.0000000), 0);		
 	}	
-	Outer.Player.Console.Message(__NFUN_112__("Neutralized terro = ", string(i)), 6.0000000);
+	Outer.Player.Console.Message(("Neutralized terro = " $ string(i)), 6.0000000);
 	return;
 }
 
@@ -543,17 +543,17 @@ exec function DisarmBombs()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x50
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6IOBomb', bomb)
+	foreach Outer.AllActors(Class'R6Engine.R6IOBomb', bomb)
 	{
 		bomb.DisarmBomb(R6Pawn(Outer.Pawn));
-		__NFUN_165__(i);		
+		(i++);		
 	}	
-	Outer.Player.Console.Message(__NFUN_112__("Bomb disarmed = ", string(i)), 6.0000000);
+	Outer.Player.Console.Message(("Bomb disarmed = " $ string(i)), 6.0000000);
 	return;
 }
 
@@ -564,17 +564,17 @@ exec function DeactivateIODevice()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x50
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6IODevice', device)
+	foreach Outer.AllActors(Class'R6Engine.R6IODevice', device)
 	{
 		device.ToggleDevice(R6Pawn(Outer.Pawn));
-		__NFUN_165__(i);		
+		(i++);		
 	}	
-	Outer.Player.Console.Message(__NFUN_112__("Deactivated IODevice = ", string(i)), 6.0000000);
+	Outer.Player.Console.Message(("Deactivated IODevice = " $ string(i)), 6.0000000);
 	return;
 }
 
@@ -583,15 +583,15 @@ exec function ToggleObjectiveMgr()
 	local R6MissionObjectiveMgr moMgr;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	moMgr = R6AbstractGameInfo(Outer.Level.Game).m_missionMgr;
-	moMgr.m_bDontUpdateMgr = __NFUN_129__(moMgr.m_bDontUpdateMgr);
-	Outer.Player.Console.Message(__NFUN_112__("Dont update mission objective manager = ", string(moMgr.m_bDontUpdateMgr)), 6.0000000);
+	moMgr.m_bDontUpdateMgr = (!moMgr.m_bDontUpdateMgr);
+	Outer.Player.Console.Message(("Dont update mission objective manager = " $ string(moMgr.m_bDontUpdateMgr)), 6.0000000);
 	// End:0x11B
-	if(__NFUN_129__(moMgr.m_bDontUpdateMgr))
+	if((!moMgr.m_bDontUpdateMgr))
 	{
 		// End:0x11B
 		if(Outer.Level.Game.CheckEndGame(none, ""))
@@ -607,21 +607,21 @@ exec function RescueHostage()
 	local R6Hostage H;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x7E
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		// End:0x7D
-		if(__NFUN_119__(H.m_controller, none))
+		if((H.m_controller != none))
 		{
 			H.m_controller.SetStateExtracted();
 			R6AbstractGameInfo(Outer.Level.Game).EnteredExtractionZone(H);
 		}		
 	}	
-	__NFUN_231__("All hostages has been rescued");
+	Log("All hostages has been rescued");
 	return;
 }
 
@@ -631,7 +631,7 @@ exec function DisableMorality()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -639,7 +639,7 @@ exec function DisableMorality()
 	J0x38:
 
 	// End:0x94 [Loop If]
-	if(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length))
+	if((i < moMgr.m_aMissionObjectives.Length))
 	{
 		// End:0x8A
 		if(moMgr.m_aMissionObjectives[i].m_bMoralityObjective)
@@ -648,7 +648,7 @@ exec function DisableMorality()
 		}
 		else
 		{
-			__NFUN_163__(i);
+			(++i);
 		}
 		// [Loop Continue]
 		goto J0x38;
@@ -662,7 +662,7 @@ function DoCompleteMission()
 	local R6MissionObjectiveMgr moMgr;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -676,7 +676,7 @@ function DoAbortMission()
 	local R6MissionObjectiveMgr moMgr;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -688,7 +688,7 @@ function DoAbortMission()
 exec function KillTerro()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -699,7 +699,7 @@ exec function KillTerro()
 exec function KillHostage()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -712,22 +712,22 @@ exec function KillRagdoll()
 	local R6Pawn P;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x75
-	foreach Outer.__NFUN_313__(Class'R6Engine.R6Pawn', P)
+	foreach Outer.DynamicActors(Class'R6Engine.R6Pawn', P)
 	{
 		// End:0x74
-		if(__NFUN_154__(int(P.Physics), int(14)))
+		if((int(P.Physics) == int(14)))
 		{
 			// End:0x68
-			if(__NFUN_119__(P.Controller, none))
+			if((P.Controller != none))
 			{
-				P.Controller.__NFUN_279__();
+				P.Controller.Destroy();
 			}
-			P.__NFUN_279__();
+			P.Destroy();
 		}		
 	}	
 	return;
@@ -740,17 +740,17 @@ function KillRainbowTeam()
 	local bool bHuman;
 
 	// End:0xE2
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6RainbowTeam', Team)
+	foreach Outer.AllActors(Class'R6Engine.R6RainbowTeam', Team)
 	{
 		bHuman = false;
 		i = 0;
 		J0x28:
 
 		// End:0xC6 [Loop If]
-		if(__NFUN_150__(i, Team.m_iMemberCount))
+		if((i < Team.m_iMemberCount))
 		{
 			// End:0xA6
-			if(__NFUN_129__(Team.m_Team[i].m_bIsPlayer))
+			if((!Team.m_Team[i].m_bIsPlayer))
 			{
 				Team.m_Team[0] = Team.m_Team[i];
 				Team.m_iMemberCount = 1;
@@ -763,14 +763,14 @@ function KillRainbowTeam()
 			Team.m_Team[i] = none;
 			J0xBC:
 
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x28;
 		}
 		J0xC6:
 
 		// End:0xE1
-		if(__NFUN_129__(bHuman))
+		if((!bHuman))
 		{
 			Team.m_iMemberCount = 0;
 		}		
@@ -781,7 +781,7 @@ function KillRainbowTeam()
 exec function KillRainbow()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -793,7 +793,7 @@ exec function KillRainbow()
 exec function KillPawns()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -804,7 +804,7 @@ exec function KillPawns()
 
 exec function PlayerInvisible()
 {
-	m_bPlayerInvisble = __NFUN_129__(m_bPlayerInvisble);
+	m_bPlayerInvisble = (!m_bPlayerInvisble);
 	R6PlayerController(Outer.Pawn.Controller).ServerPlayerInvisible(m_bPlayerInvisble);
 	return;
 }
@@ -814,12 +814,12 @@ function DoPlayerInvisible(bool bInvisible)
 	local R6Terrorist t;
 
 	// End:0x46
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Terrorist', t)
+	foreach Outer.AllActors(Class'R6Engine.R6Terrorist', t)
 	{
 		t.m_bDontHearPlayer = bInvisible;
 		t.m_bDontSeePlayer = bInvisible;		
 	}	
-	Outer.Player.Console.Message(__NFUN_112__("PlayerInvisible = ", string(bInvisible)), 6.0000000);
+	Outer.Player.Console.Message(("PlayerInvisible = " $ string(bInvisible)), 6.0000000);
 	return;
 }
 
@@ -828,12 +828,12 @@ exec function GiveMag(int iNbOfExtraClips)
 	local int iWeaponIndex;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x31
-	if(__NFUN_155__(int(Outer.Level.NetMode), int(NM_Standalone)))
+	if((int(Outer.Level.NetMode) != int(NM_Standalone)))
 	{
 		return;
 	}
@@ -841,10 +841,10 @@ exec function GiveMag(int iNbOfExtraClips)
 	J0x38:
 
 	// End:0x7A [Loop If]
-	if(__NFUN_150__(iWeaponIndex, 4))
+	if((iWeaponIndex < 4))
 	{
 		Outer.Pawn.m_WeaponsCarried[iWeaponIndex].AddClips(iNbOfExtraClips);
-		__NFUN_165__(iWeaponIndex);
+		(iWeaponIndex++);
 		// [Loop Continue]
 		goto J0x38;
 	}
@@ -864,8 +864,8 @@ exec function HideAll()
 		m_bHideAll = true;
 		R6AbstractHUD(PlayerController(Outer.Pawn.Controller).myHUD).m_iCycleHUDLayer = 3;
 	}
-	R6PlayerController(Outer.Pawn.Controller).m_bUseFirstPersonWeapon = __NFUN_129__(m_bHideAll);
-	R6AbstractHUD(PlayerController(Outer.Pawn.Controller).myHUD).m_bToggleHelmet = __NFUN_129__(m_bHideAll);
+	R6PlayerController(Outer.Pawn.Controller).m_bUseFirstPersonWeapon = (!m_bHideAll);
+	R6AbstractHUD(PlayerController(Outer.Pawn.Controller).myHUD).m_bToggleHelmet = (!m_bHideAll);
 	R6PlayerController(Outer.Pawn.Controller).m_bHideReticule = m_bHideAll;
 	return;
 }
@@ -873,11 +873,11 @@ exec function HideAll()
 exec function ToggleReticule()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	R6PlayerController(Outer.Pawn.Controller).m_bHideReticule = __NFUN_129__(R6PlayerController(Outer.Pawn.Controller).m_bHideReticule);
+	R6PlayerController(Outer.Pawn.Controller).m_bHideReticule = (!R6PlayerController(Outer.Pawn.Controller).m_bHideReticule);
 	return;
 }
 
@@ -889,12 +889,12 @@ exec function tNoThreat()
 	local R6TerroristAI t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x36
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6TerroristAI', t)
+	foreach Outer.AllActors(Class'R6Engine.R6TerroristAI', t)
 	{
 		t.GotoStateNoThreat();		
 	}	
@@ -910,12 +910,12 @@ exec function tSurrender()
 	local R6TerroristAI t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x38
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6TerroristAI', t)
+	foreach Outer.AllActors(Class'R6Engine.R6TerroristAI', t)
 	{
 		t.m_eEngageReaction = 4;		
 	}	
@@ -931,12 +931,12 @@ exec function tRunAway()
 	local R6TerroristAI t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x38
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6TerroristAI', t)
+	foreach Outer.AllActors(Class'R6Engine.R6TerroristAI', t)
 	{
 		t.m_eEngageReaction = 3;		
 	}	
@@ -952,16 +952,16 @@ exec function tSpeed(float fSpeed)
 	local R6Terrorist t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x3B
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Terrorist', t)
+	foreach Outer.AllActors(Class'R6Engine.R6Terrorist', t)
 	{
 		t.m_fWalkingSpeed = fSpeed;		
 	}	
-	Outer.Player.Console.Message(__NFUN_112__("All terrorists walk at ", string(fSpeed)), 6.0000000);
+	Outer.Player.Console.Message(("All terrorists walk at " $ string(fSpeed)), 6.0000000);
 	return;
 }
 
@@ -973,12 +973,12 @@ exec function tSprayFire()
 	local R6TerroristAI t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x38
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6TerroristAI', t)
+	foreach Outer.AllActors(Class'R6Engine.R6TerroristAI', t)
 	{
 		t.m_eEngageReaction = 2;		
 	}	
@@ -994,12 +994,12 @@ exec function tAimedFire()
 	local R6TerroristAI t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x38
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6TerroristAI', t)
+	foreach Outer.AllActors(Class'R6Engine.R6TerroristAI', t)
 	{
 		t.m_eEngageReaction = 1;		
 	}	
@@ -1015,17 +1015,17 @@ exec function tTick(int iTickFrequency)
 	local R6Terrorist t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x60
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Terrorist', t)
+	foreach Outer.AllActors(Class'R6Engine.R6Terrorist', t)
 	{
 		t.m_wTickFrequency = byte(iTickFrequency);
 		t.m_wNbTickSkipped = byte(RandRange(0.0000000, float(iTickFrequency)));		
 	}	
-	Outer.Player.Console.Message(__NFUN_112__("Terrorists tick frequency ", string(iTickFrequency)), 6.0000000);
+	Outer.Player.Console.Message(("Terrorists tick frequency " $ string(iTickFrequency)), 6.0000000);
 	return;
 }
 
@@ -1037,16 +1037,16 @@ exec function ActorTick(int iTickFrequency)
 	local Actor A;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bSkipTick = __NFUN_129__(m_bSkipTick);
+	m_bSkipTick = (!m_bSkipTick);
 	// End:0xA4
-	foreach Outer.__NFUN_304__(Class'Engine.Actor', A)
+	foreach Outer.AllActors(Class'Engine.Actor', A)
 	{
 		// End:0x65
-		if(__NFUN_129__(m_bSkipTick))
+		if((!m_bSkipTick))
 		{
 			A.m_bSkipTick = false;
 			A.m_bTickOnlyWhenVisible = false;
@@ -1056,7 +1056,7 @@ exec function ActorTick(int iTickFrequency)
 		A.m_bSkipTick = A.default.m_bSkipTick;
 		A.m_bTickOnlyWhenVisible = A.default.m_bTickOnlyWhenVisible;		
 	}	
-	Outer.Player.Console.Message(__NFUN_112__("Actor m_bSkipTick: ", string(m_bSkipTick)), 6.0000000);
+	Outer.Player.Console.Message(("Actor m_bSkipTick: " $ string(m_bSkipTick)), 6.0000000);
 	return;
 }
 
@@ -1066,11 +1066,11 @@ exec function ActorTick(int iTickFrequency)
 exec function ToggleHitLog()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	R6PlayerController(Outer.Pawn.Controller).m_bShowHitLogs = __NFUN_129__(R6PlayerController(Outer.Pawn.Controller).m_bShowHitLogs);
+	R6PlayerController(Outer.Pawn.Controller).m_bShowHitLogs = (!R6PlayerController(Outer.Pawn.Controller).m_bShowHitLogs);
 	return;
 }
 
@@ -1082,17 +1082,17 @@ exec function CallTerro(optional int iGroup)
 	local R6TerroristAI AI;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0xBC
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6TerroristAI', AI)
+	foreach Outer.AllActors(Class'R6Engine.R6TerroristAI', AI)
 	{
 		// End:0xBB
-		if(__NFUN_154__(AI.m_pawn.m_iGroupID, iGroup))
+		if((AI.m_pawn.m_iGroupID == iGroup))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Calling terrorist ", string(AI.m_pawn)), " to "), string(Outer.Pawn.Location)));
+			Log(((("Calling terrorist " $ string(AI.m_pawn)) $ " to ") $ string(Outer.Pawn.Location)));
 			AI.GotoPointAndSearch(Outer.Pawn.Location, 5, false);
 		}		
 	}	
@@ -1107,14 +1107,14 @@ exec function UseKarma()
 	local R6Pawn P;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x48
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', P)
+	foreach Outer.AllActors(Class'R6Engine.R6Pawn', P)
 	{
-		P.m_bUseKarmaRagdoll = __NFUN_129__(P.m_bUseKarmaRagdoll);		
+		P.m_bUseKarmaRagdoll = (!P.m_bUseKarmaRagdoll);		
 	}	
 	Outer.Player.Console.Message("Toggled karma use", 6.0000000);
 	return;
@@ -1126,28 +1126,28 @@ exec function UseKarma()
 exec function AutoSelect(string _szSelection)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Class'Engine.Actor'.static.__NFUN_1009__().MPAutoSelection = _szSelection;
+	Class'Engine.Actor'.static.GetGameOptions().MPAutoSelection = _szSelection;
 	return;
 }
 
 exec function ToggleWalk()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x42
-	if(__NFUN_132__(__NFUN_114__(Outer.Pawn, none), __NFUN_114__(Outer.Pawn.Controller, none)))
+	if(((Outer.Pawn == none) || (Outer.Pawn.Controller == none)))
 	{
 		return;
 	}
 	// End:0x4F
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -1157,7 +1157,7 @@ exec function ToggleWalk()
 	{
 		R6PlayerController(Outer.Pawn.Controller).BehindView(true);
 	}
-	m_bFirstPersonPlayerView = __NFUN_129__(m_bFirstPersonPlayerView);
+	m_bFirstPersonPlayerView = (!m_bFirstPersonPlayerView);
 	return;
 }
 
@@ -1178,38 +1178,38 @@ event PostRender(Canvas Canvas)
 	if(m_bRendSpot)
 	{
 		// End:0x128
-		foreach Outer.__NFUN_304__(Class'Engine.R6ActionSpot', as)
+		foreach Outer.AllActors(Class'Engine.R6ActionSpot', as)
 		{
 			vTemp = as.Location;
-			Outer.__NFUN_2609__(vTemp, __NFUN_112__("ActionSpot ", string(as.Name)));
+			Outer.DrawText3D(vTemp, ("ActionSpot " $ string(as.Name)));
 			// End:0xA6
 			if(as.m_bInvestigate)
 			{
-				__NFUN_185__(vTemp.Z, float(10));
-				Outer.__NFUN_2609__(vTemp, "Investigate");
+				(vTemp.Z -= float(10));
+				Outer.DrawText3D(vTemp, "Investigate");
 			}
 			// End:0xE7
-			if(__NFUN_155__(int(as.m_eCover), int(0)))
+			if((int(as.m_eCover) != int(0)))
 			{
-				__NFUN_185__(vTemp.Z, float(10));
-				Outer.__NFUN_2609__(vTemp, "Cover");
+				(vTemp.Z -= float(10));
+				Outer.DrawText3D(vTemp, "Cover");
 			}
 			// End:0x127
-			if(__NFUN_155__(int(as.m_eFire), int(0)))
+			if((int(as.m_eFire) != int(0)))
 			{
-				__NFUN_185__(vTemp.Z, float(10));
-				Outer.__NFUN_2609__(vTemp, "Fire");
+				(vTemp.Z -= float(10));
+				Outer.DrawText3D(vTemp, "Fire");
 			}			
 		}		
 	}
 	// End:0x44C
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_bRenderViewDirection, m_bRenderGunDirection), m_bRendPawnState), m_bRendFocus))
+	if((((m_bRenderViewDirection || m_bRenderGunDirection) || m_bRendPawnState) || m_bRendFocus))
 	{
 		// End:0x44B
-		foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', P)
+		foreach Outer.AllActors(Class'R6Engine.R6Pawn', P)
 		{
 			// End:0x44A
-			if(__NFUN_130__(__NFUN_180__(P.LastRenderTime, Outer.Level.TimeSeconds), P.IsAlive()))
+			if(((P.LastRenderTime == Outer.Level.TimeSeconds) && P.IsAlive()))
 			{
 				// End:0x1C7
 				if(m_bRenderViewDirection)
@@ -1225,24 +1225,24 @@ event PostRender(Canvas Canvas)
 				if(m_bRendPawnState)
 				{
 					vTemp = P.Location;
-					__NFUN_184__(vTemp.Z, float(90));
-					Outer.__NFUN_2609__(vTemp, string(P.Name));
+					(vTemp.Z += float(90));
+					Outer.DrawText3D(vTemp, string(P.Name));
 					// End:0x289
-					if(__NFUN_255__(P.__NFUN_284__(), P.Class.Name))
+					if((P.GetStateName() != P.Class.Name))
 					{
-						__NFUN_185__(vTemp.Z, float(15));
-						Outer.__NFUN_2609__(vTemp, string(P.__NFUN_284__()));
+						(vTemp.Z -= float(15));
+						Outer.DrawText3D(vTemp, string(P.GetStateName()));
 					}
 					// End:0x369
-					if(__NFUN_119__(P.Controller, none))
+					if((P.Controller != none))
 					{
-						__NFUN_185__(vTemp.Z, float(15));
-						Outer.__NFUN_2609__(vTemp, string(P.Controller.__NFUN_284__()));
+						(vTemp.Z -= float(15));
+						Outer.DrawText3D(vTemp, string(P.Controller.GetStateName()));
 						// End:0x369
-						if(__NFUN_130__(__NFUN_154__(int(P.m_ePawnType), int(2)), __NFUN_132__(P.Controller.__NFUN_281__('MovingTo'), P.Controller.__NFUN_281__('Attack'))))
+						if(((int(P.m_ePawnType) == int(2)) && (P.Controller.IsInState('MovingTo') || P.Controller.IsInState('Attack'))))
 						{
-							__NFUN_185__(vTemp.Z, float(15));
-							Outer.__NFUN_2609__(vTemp, R6TerroristAI(P.Controller).m_sDebugString);
+							(vTemp.Z -= float(15));
+							Outer.DrawText3D(vTemp, R6TerroristAI(P.Controller).m_sDebugString);
 						}
 					}
 				}
@@ -1250,11 +1250,11 @@ event PostRender(Canvas Canvas)
 				if(m_bRendFocus)
 				{
 					// End:0x3F1
-					if(__NFUN_119__(P.Controller.Focus, none))
+					if((P.Controller.Focus != none))
 					{
-						Canvas.__NFUN_2403__(P.Controller.Focus.Location, __NFUN_215__(P.Location, P.EyePosition()), Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
+						Canvas.Draw3DLine(P.Controller.Focus.Location, (P.Location + P.EyePosition()), Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
 					}
-					Canvas.__NFUN_2403__(P.Controller.FocalPoint, __NFUN_215__(P.Location, P.EyePosition()), Class'Engine.Canvas'.static.MakeColor(byte(255), 150, 150));
+					Canvas.Draw3DLine(P.Controller.FocalPoint, (P.Location + P.EyePosition()), Class'Engine.Canvas'.static.MakeColor(byte(255), 150, 150));
 				}
 			}			
 		}		
@@ -1263,7 +1263,7 @@ event PostRender(Canvas Canvas)
 	if(m_bRenderBoneCorpse)
 	{
 		// End:0x483
-		foreach Outer.__NFUN_304__(Class'R6Abstract.R6AbstractCorpse', corpse)
+		foreach Outer.AllActors(Class'R6Abstract.R6AbstractCorpse', corpse)
 		{
 			corpse.RenderCorpseBones(Canvas);			
 		}		
@@ -1275,10 +1275,10 @@ event PostRender(Canvas Canvas)
 		J0x4AA:
 
 		// End:0x517 [Loop If]
-		if(__NFUN_119__(aController, none))
+		if((aController != none))
 		{
 			// End:0x500
-			if(__NFUN_130__(aController.__NFUN_303__('R6AIController'), R6AIController(aController).m_r6pawn.IsAlive()))
+			if((aController.IsA('R6AIController') && R6AIController(aController).m_r6pawn.IsAlive()))
 			{
 				DrawRoute(R6AIController(aController), Canvas);
 			}
@@ -1291,9 +1291,9 @@ event PostRender(Canvas Canvas)
 	if(m_bRenderNavPoint)
 	{
 		// End:0x580
-		foreach Outer.__NFUN_310__(Class'Engine.NavigationPoint', np, 1000.0000000, Outer.ViewTarget.Location)
+		foreach Outer.RadiusActors(Class'Engine.NavigationPoint', np, 1000.0000000, Outer.ViewTarget.Location)
 		{
-			Outer.__NFUN_2609__(np.Location, string(np.Name));			
+			Outer.DrawText3D(np.Location, string(np.Name));			
 		}		
 	}
 	// End:0x595
@@ -1333,13 +1333,13 @@ exec function ToggleHostageThreat()
 	local R6Hostage H;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bToggleHostageThreat = __NFUN_129__(m_bToggleHostageThreat);
+	m_bToggleHostageThreat = (!m_bToggleHostageThreat);
 	// End:0x5A
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		R6HostageAI(H.Controller).m_bDbgIgnoreThreat = m_bToggleHostageThreat;		
 	}	
@@ -1355,13 +1355,13 @@ exec function ToggleHostageLog()
 	local R6Hostage H;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bToggleHostageLog = __NFUN_129__(m_bToggleHostageLog);
+	m_bToggleHostageLog = (!m_bToggleHostageLog);
 	// End:0x9D
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		H.bShowLog = m_bToggleHostageLog;
 		R6HostageAI(H.Controller).bShowLog = m_bToggleHostageLog;
@@ -1379,13 +1379,13 @@ exec function ToggleTerroLog()
 	local R6Terrorist t;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bToggleTerroLog = __NFUN_129__(m_bToggleTerroLog);
+	m_bToggleTerroLog = (!m_bToggleTerroLog);
 	// End:0x70
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Terrorist', t)
+	foreach Outer.AllActors(Class'R6Engine.R6Terrorist', t)
 	{
 		t.bShowLog = m_bToggleTerroLog;
 		R6TerroristAI(t.Controller).bShowLog = m_bToggleTerroLog;		
@@ -1399,19 +1399,19 @@ exec function ToggleTerroLog()
 exec function RendSpot()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRendSpot = __NFUN_129__(m_bRendSpot);
-	Outer.Player.Console.Message(__NFUN_112__("RendSpot ", string(m_bRendSpot)), 6.0000000);
+	m_bRendSpot = (!m_bRendSpot);
+	Outer.Player.Console.Message(("RendSpot " $ string(m_bRendSpot)), 6.0000000);
 	return;
 }
 
 exec function TerroInfo()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -1430,16 +1430,16 @@ exec function ToggleRainbowLog()
 	local R6Rainbow Rainbow;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bToggleRainbowLog = __NFUN_129__(m_bToggleRainbowLog);
+	m_bToggleRainbowLog = (!m_bToggleRainbowLog);
 	// End:0x9B
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Rainbow', Rainbow)
+	foreach Outer.AllActors(Class'R6Engine.R6Rainbow', Rainbow)
 	{
 		// End:0x9A
-		if(__NFUN_129__(Rainbow.m_bIsPlayer))
+		if((!Rainbow.m_bIsPlayer))
 		{
 			R6RainbowAI(Rainbow.Controller).bShowLog = m_bToggleRainbowLog;
 			R6RainbowAI(Rainbow.Controller).m_TeamManager.bShowLog = m_bToggleRainbowLog;
@@ -1451,7 +1451,7 @@ exec function ToggleRainbowLog()
 function name GetNameOfActor(Actor aActor)
 {
 	// End:0x14
-	if(__NFUN_114__(aActor, none))
+	if((aActor == none))
 	{
 		return 'None';		
 	}
@@ -1469,7 +1469,7 @@ function Actor GetPointedActor(bool bVerboseLog, bool bTraceActor, optional out 
 	local Vector vViewDir, vTraceStart, vTraceEnd, vHit, vHitNormal;
 
 	// End:0x38
-	if(__NFUN_119__(Outer.ViewTarget, Outer.Pawn))
+	if((Outer.ViewTarget != Outer.Pawn))
 	{
 		anActor = Outer.ViewTarget;		
 	}
@@ -1477,27 +1477,27 @@ function Actor GetPointedActor(bool bVerboseLog, bool bTraceActor, optional out 
 	{
 		vViewDir = Vector(R6Pawn(Outer.Pawn).GetFiringRotation());
 		vTraceStart = R6Pawn(Outer.Pawn).GetFiringStartPoint();
-		__NFUN_223__(vTraceStart, __NFUN_212__(vViewDir, float(40)));
-		vTraceEnd = __NFUN_215__(vTraceStart, __NFUN_213__(float(10000), vViewDir));
-		anActor = Outer.__NFUN_277__(vHit, vHitNormal, vTraceEnd, vTraceStart, bTraceActor);
+		(vTraceStart += (vViewDir * float(40)));
+		vTraceEnd = (vTraceStart + (float(10000) * vViewDir));
+		anActor = Outer.Trace(vHit, vHitNormal, vTraceEnd, vTraceStart, bTraceActor);
 	}
 	// End:0x165
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(anActor, none), __NFUN_119__(Pawn(anActor), none)), __NFUN_119__(Pawn(anActor).Controller, none)))
+	if((((anActor != none) && (Pawn(anActor) != none)) && (Pawn(anActor).Controller != none)))
 	{
-		szController = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(Pawn(anActor).Controller.Name)), " ("), string(Pawn(anActor).Controller.__NFUN_284__())), ")");		
+		szController = (((("" $ string(Pawn(anActor).Controller.Name)) $ " (")) $ ")" $ ???);		
 	}
 	else
 	{
 		szController = "none";
 	}
-	szOutput = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Actor: ", string(anActor.Name)), "  Controller: "), szController), " class: "), string(anActor.Class));
-	__NFUN_231__(szOutput);
+	szOutput = ((((("Actor: " $ string(anActor.Name)) $ "  Controller: ") $ szController) $ " class: ") $ string(anActor.Class));
+	Log(szOutput);
 	// End:0x2B1
 	if(bVerboseLog)
 	{
-		Outer.Player.Console.Message(__NFUN_112__("Controller: ", szController), 6.0000000);
-		Outer.Player.Console.Message(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Actor: ", string(anActor.Name)), " ("), string(anActor.__NFUN_284__())), ")"), 6.0000000);
-		Outer.Player.Console.Message(__NFUN_112__("Class: ", string(anActor.Class)), 6.0000000);
+		Outer.Player.Console.Message(("Controller: " $ szController), 6.0000000);
+		Outer.Player.Console.Message((((("Actor: " $ string(anActor.Name)) $ " (")) $ ")" $ ???), 6.0000000);
+		Outer.Player.Console.Message(("Class: " $ string(anActor.Class)), 6.0000000);
 	}
 	vReturnHit = vHit;
 	return anActor;
@@ -1511,7 +1511,7 @@ function Actor GetPointedActor(bool bVerboseLog, bool bTraceActor, optional out 
 exec event LogThis(optional bool bDontTraceActor, optional Actor anActor)
 {
 	// End:0x26
-	if(__NFUN_132__(__NFUN_129__(bDontTraceActor), __NFUN_114__(anActor, none)))
+	if(((!bDontTraceActor) || (anActor == none)))
 	{
 		anActor = GetPointedActor(true, true);
 	}
@@ -1528,34 +1528,34 @@ exec function dbgThis(optional bool bTraceWorld)
 	local Actor anActor;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	anActor = GetPointedActor(true, __NFUN_129__(bTraceWorld));
+	anActor = GetPointedActor(true, (!bTraceWorld));
 	// End:0x45
-	if(__NFUN_119__(R6Hostage(anActor), none))
+	if((R6Hostage(anActor) != none))
 	{
 		LogHostage(R6Hostage(anActor));		
 	}
 	else
 	{
 		// End:0x68
-		if(__NFUN_119__(R6Terrorist(anActor), none))
+		if((R6Terrorist(anActor) != none))
 		{
 			LogTerro(R6Terrorist(anActor));			
 		}
 		else
 		{
 			// End:0x8B
-			if(__NFUN_119__(R6Rainbow(anActor), none))
+			if((R6Rainbow(anActor) != none))
 			{
 				LogRainbow(R6Rainbow(anActor));				
 			}
 			else
 			{
 				// End:0xAB
-				if(__NFUN_119__(R6IOBomb(anActor), none))
+				if((R6IOBomb(anActor) != none))
 				{
 					LogIOBomb(R6IOBomb(anActor));
 				}
@@ -1571,12 +1571,12 @@ exec function dbgEdit(optional bool bTraceWorld)
 	local Actor anActor;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	anActor = GetPointedActor(true, __NFUN_129__(bTraceWorld));
-	szCmd = __NFUN_112__("editactor Actor=", string(anActor.Name));
+	anActor = GetPointedActor(true, (!bTraceWorld));
+	szCmd = ("editactor Actor=" $ string(anActor.Name));
 	Outer.ConsoleCommand(szCmd);
 	return;
 }
@@ -1590,20 +1590,20 @@ function LogR6Pawn(R6Pawn P)
 	local string szTemp;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	AI = P.Controller;
 	// End:0x40
-	if(__NFUN_119__(AI, none))
+	if((AI != none))
 	{
 		aiName = AI.Name;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("== ", string(P.Name)), " ai: "), string(aiName)), " ==============="));
-	__NFUN_231__(__NFUN_112__("   Location.............: ", string(P.Location)));
-	__NFUN_231__(__NFUN_112__("   Pawn state...........: ", string(P.__NFUN_284__())));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   Coll. Height, Radius.: ", string(P.CollisionHeight)), ", "), string(P.CollisionRadius)));
+	Log((((("== " $ string(P.Name)) $ " ai: ") $ string(aiName)) $ " ==============="));
+	Log(("   Location.............: " $ string(P.Location)));
+	Log(("   Pawn state...........: " $ string(P.GetStateName())));
+	Log(((("   Coll. Height $ Radius.: ") $ ") $ string(P.CollisionRadius)));
 	switch(P.Physics)
 	{
 		// End:0x149
@@ -1638,7 +1638,7 @@ function LogR6Pawn(R6Pawn P)
 			break;
 			break;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   Physics..............: ", szTemp), " ("), string(P.Physics)), ")"));
+	Log((((("   Physics..............: " $ szTemp) $ " (")) $ ")" $ ???));
 	switch(P.m_eMovementPace)
 	{
 		// End:0x220
@@ -1678,7 +1678,7 @@ function LogR6Pawn(R6Pawn P)
 			break;
 			break;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_eMovementPace......: ", szTemp), " ("), string(P.m_eMovementPace)), ")"));
+	Log((((("   m_eMovementPace......: " $ szTemp) $ " (")) $ ")" $ ???));
 	switch(P.m_eHealth)
 	{
 		// End:0x30A
@@ -1708,24 +1708,24 @@ function LogR6Pawn(R6Pawn P)
 			break;
 			break;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   Health...............: ", szTemp), " ("), string(P.m_eHealth)), ")"));
-	__NFUN_231__(__NFUN_112__("   m_bPostureTransition.: ", string(P.m_bPostureTransition)));
-	__NFUN_231__(__NFUN_112__("   bIsWalking...........: ", __NFUN_128__(string(P.bIsWalking), 4)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   IsPeeking............: ", string(P.IsPeeking())), " left: "), string(P.IsPeekingLeft())), " rate()= "), string(P.GetPeekingRate())));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   bIsCrouched..........: ", __NFUN_128__(string(P.bIsCrouched), 4)), ",   bWantsToCrouch.......: "), __NFUN_128__(string(P.bWantsToCrouch), 4)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bIsProne...........: ", __NFUN_128__(string(P.m_bIsProne), 4)), ",   m_bWantsToProne......: "), __NFUN_128__(string(P.m_bWantsToProne), 4)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bIsClimbingStairs..: ", __NFUN_128__(string(P.m_bIsClimbingStairs), 4)), ",   m_bIsMovingUpStairs..: "), __NFUN_128__(string(P.m_bIsMovingUpStairs), 4)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bAutoClimbLadders..: ", __NFUN_128__(string(P.m_bAutoClimbLadders), 4)), ",   m_bIsClimbingLadder..: "), __NFUN_128__(string(P.m_bIsClimbingLadder), 4)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bAvoidFacingWalls..: ", __NFUN_128__(string(P.m_bAvoidFacingWalls), 4)), ",   m_bCanClimbObject....: "), __NFUN_128__(string(P.m_bCanClimbObject), 4)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bUseRagdoll........: ", string(P.m_bUseRagdoll)), " ("), string(P.m_ragdoll)), ")"));
-	__NFUN_231__(__NFUN_112__("   bCanWalkOffLedges....: ", string(P.bCanWalkOffLedges)));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bCanDisarmBomb.....: ", __NFUN_128__(string(P.m_bCanDisarmBomb), 4)), ",   m_bCanArmBomb........: "), __NFUN_128__(string(P.m_bCanArmBomb), 4)));
-	__NFUN_231__(__NFUN_112__("   m_iTeam..............: ", string(P.m_iTeam)));
-	__NFUN_231__(__NFUN_112__("   m_ladder.............: ", string(P.m_Ladder)));
+	Log((((("   Health...............: " $ szTemp) $ " (")) $ ")" $ ???));
+	Log(("   m_bPostureTransition.: " $ string(P.m_bPostureTransition)));
+	Log(("   bIsWalking...........: " $ Left(string(P.bIsWalking), 4)));
+	Log(((((("   IsPeeking............: " $ string(P.IsPeeking())) $ " left: ") $ string(P.IsPeekingLeft())) $ " rate()= ") $ string(P.GetPeekingRate())));
+	Log(((("   bIsCrouched..........: " $ Left(string(P.bIsCrouched), 4)) $ ") $ Left(string(P.bWantsToCrouch), 4)));
+	Log(((("   m_bIsProne...........: " $ Left(string(P.m_bIsProne), 4)) $ ") $ Left(string(P.m_bWantsToProne), 4)));
+	Log(((("   m_bIsClimbingStairs..: " $ Left(string(P.m_bIsClimbingStairs), 4)) $ ") $ Left(string(P.m_bIsMovingUpStairs), 4)));
+	Log(((("   m_bAutoClimbLadders..: " $ Left(string(P.m_bAutoClimbLadders), 4)) $ ") $ Left(string(P.m_bIsClimbingLadder), 4)));
+	Log(((("   m_bAvoidFacingWalls..: " $ Left(string(P.m_bAvoidFacingWalls), 4)) $ ") $ Left(string(P.m_bCanClimbObject), 4)));
+	Log((((("   m_bUseRagdoll........: " $ string(P.m_bUseRagdoll)) $ " (")) $ ")" $ ???));
+	Log(("   bCanWalkOffLedges....: " $ string(P.bCanWalkOffLedges)));
+	Log(((("   m_bCanDisarmBomb.....: " $ Left(string(P.m_bCanDisarmBomb), 4)) $ ") $ Left(string(P.m_bCanArmBomb), 4)));
+	Log(("   m_iTeam..............: " $ string(P.m_iTeam)));
+	Log(("   m_ladder.............: " $ string(P.m_Ladder)));
 	// End:0xB1A
-	if(__NFUN_119__(AI, none))
+	if((AI != none))
 	{
-		__NFUN_231__(__NFUN_112__("   ** ai state..........: ", string(AI.__NFUN_284__())));
+		Log(("   ** ai state..........: " $ string(AI.GetStateName())));
 		switch(AI.m_eMoveToResult)
 		{
 			// End:0x83F
@@ -1750,55 +1750,55 @@ function LogR6Pawn(R6Pawn P)
 				break;
 				break;
 		}
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_eMoveToResult......: ", szTemp), " ("), string(AI.m_eMoveToResult)), ")"));
-		__NFUN_231__(__NFUN_112__("   MoveTarget...........: ", string(GetNameOfActor(AI.MoveTarget))));
-		__NFUN_231__(__NFUN_112__("   Enemy................: ", string(GetNameOfActor(AI.Enemy))));
-		__NFUN_231__(__NFUN_112__("   bRotateToDesired.....: ", string(P.bRotateToDesired)));
-		__NFUN_231__(__NFUN_112__("   Focus................: ", string(GetNameOfActor(AI.Focus))));
-		__NFUN_231__(__NFUN_112__("   FocalPoint...........: ", string(AI.FocalPoint)));
-		__NFUN_231__(__NFUN_112__("   m_bCrawl.............: ", string(AI.m_bCrawl)));
-		__NFUN_231__(__NFUN_112__("   Can reach a navpoint.: ", string(AI.__NFUN_525__(true))));
+		Log((((("   m_eMoveToResult......: " $ szTemp) $ " (")) $ ")" $ ???));
+		Log(("   MoveTarget...........: " $ string(GetNameOfActor(AI.MoveTarget))));
+		Log(("   Enemy................: " $ string(GetNameOfActor(AI.Enemy))));
+		Log(("   bRotateToDesired.....: " $ string(P.bRotateToDesired)));
+		Log(("   Focus................: " $ string(GetNameOfActor(AI.Focus))));
+		Log(("   FocalPoint...........: " $ string(AI.FocalPoint)));
+		Log(("   m_bCrawl.............: " $ string(AI.m_bCrawl)));
+		Log(("   Can reach a navpoint.: " $ string(AI.FindRandomDest(true))));
 		r6ai = R6AIController(P.Controller);
 		// End:0xB17
-		if(__NFUN_119__(r6ai, none))
+		if((r6ai != none))
 		{
-			__NFUN_231__(__NFUN_112__("   m_BumpedBy...........: ", string(GetNameOfActor(r6ai.m_BumpedBy))));
-			__NFUN_231__(__NFUN_112__("   m_bIgnoreBackupBump..: ", string(r6ai.m_bIgnoreBackupBump)));
-			__NFUN_231__(__NFUN_112__("   m_climbingObject.....: ", string(GetNameOfActor(r6ai.m_climbingObject))));
-			__NFUN_231__(__NFUN_112__("   m_ActorTarget........: ", string(r6ai.m_ActorTarget)));
+			Log(("   m_BumpedBy...........: " $ string(GetNameOfActor(r6ai.m_BumpedBy))));
+			Log(("   m_bIgnoreBackupBump..: " $ string(r6ai.m_bIgnoreBackupBump)));
+			Log(("   m_climbingObject.....: " $ string(GetNameOfActor(r6ai.m_climbingObject))));
+			Log(("   m_ActorTarget........: " $ string(r6ai.m_ActorTarget)));
 		}		
 	}
 	else
 	{
-		__NFUN_231__("    no controller");
+		Log("    no controller");
 	}
 	PController = R6PlayerController(P.Controller);
 	// End:0xD30
-	if(__NFUN_119__(PController, none))
+	if((PController != none))
 	{
-		__NFUN_231__(__NFUN_112__("   ** PlayerController......: ", string(PController.__NFUN_284__())));
+		Log(("   ** PlayerController......: " $ string(PController.GetStateName())));
 		// End:0xBC4
-		if(__NFUN_154__(int(P.m_ePeekingMode), int(1)))
+		if((int(P.m_ePeekingMode) == int(1)))
 		{
-			__NFUN_231__("   Peeking..............: Full ");			
+			Log("   Peeking..............: Full ");			
 		}
 		else
 		{
 			// End:0xC03
-			if(__NFUN_154__(int(P.m_ePeekingMode), int(2)))
+			if((int(P.m_ePeekingMode) == int(2)))
 			{
-				__NFUN_231__("   Peeking..............: Fluid");				
+				Log("   Peeking..............: Fluid");				
 			}
 			else
 			{
-				__NFUN_231__("   Peeking..............: none");
+				Log("   Peeking..............: none");
 			}
 		}
-		__NFUN_231__(__NFUN_112__("   m_bPeekingLeft ......: ", string(P.m_bPeekingLeft)));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_fPeeking...........: ", string(P.m_fPeeking)), " / "), string(P.1000.0000000)));
-		__NFUN_231__(__NFUN_112__("   m_fLastValidPeeking..: ", string(P.m_fLastValidPeeking)));
-		__NFUN_231__(__NFUN_112__("   m_bPeekingToCenter...: ", string(P.m_bPeekingReturnToCenter)));
-		__NFUN_231__(__NFUN_112__("   m_fCrouchBlendRate...: ", string(P.m_fCrouchBlendRate)));
+		Log(("   m_bPeekingLeft ......: " $ string(P.m_bPeekingLeft)));
+		Log(((("   m_fPeeking...........: " $ string(P.m_fPeeking)) $ " / ") $ string(P.1000.0000000)));
+		Log(("   m_fLastValidPeeking..: " $ string(P.m_fLastValidPeeking)));
+		Log(("   m_bPeekingToCenter...: " $ string(P.m_bPeekingReturnToCenter)));
+		Log(("   m_fCrouchBlendRate...: " $ string(P.m_fCrouchBlendRate)));
 	}
 	return;
 }
@@ -1815,72 +1815,72 @@ function LogHostage(R6Hostage H)
 
 	AI = R6HostageAI(H.Controller);
 	// End:0x117
-	if(__NFUN_119__(AI, none))
+	if((AI != none))
 	{
 		aiName = AI.Name;
 		// End:0x69
-		if(__NFUN_119__(AI.m_terrorist, none))
+		if((AI.m_terrorist != none))
 		{
 			terroristName = AI.m_terrorist.Name;
 		}
 		// End:0xB5
-		if(__NFUN_119__(AI.m_pawnToFollow, none))
+		if((AI.m_pawnToFollow != none))
 		{
-			bFastTrace = Outer.__NFUN_548__(AI.m_pawnToFollow.Location, H.Location);
+			bFastTrace = Outer.FastTrace(AI.m_pawnToFollow.Location, H.Location);
 		}
 		// End:0xE6
-		if(__NFUN_119__(AI.m_lastSeenPawn, none))
+		if((AI.m_lastSeenPawn != none))
 		{
 			lastSeenPawnName = AI.m_lastSeenPawn.Name;
 		}
 		// End:0x117
-		if(__NFUN_119__(AI.m_escort, none))
+		if((AI.m_escort != none))
 		{
 			escortName = AI.m_escort.Name;
 		}
 	}
 	// End:0x170
-	if(__NFUN_130__(__NFUN_119__(Outer.Pawn, none), Outer.Pawn.Controller.__NFUN_303__('R6PlayerController')))
+	if(((Outer.Pawn != none) && Outer.Pawn.Controller.IsA('R6PlayerController')))
 	{
 		vPlayerLoc = Outer.Pawn.Location;
 	}
 	LogR6Pawn(H);
 	// End:0x6D2
-	if(__NFUN_119__(AI, none))
+	if((AI != none))
 	{
-		__NFUN_231__(__NFUN_168__("   UsedTemplate.........: ", H.m_szUsedTemplate));
-		__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__("   Rainbow (following)..: ", string(GetNameOfActor(H.m_escortedByRainbow))), " ("), string(GetNameOfActor(AI.m_pawnToFollow))), ")"));
-		__NFUN_231__(__NFUN_168__("   ForceToStayHere......: ", string(AI.m_bForceToStayHere)));
-		__NFUN_231__(__NFUN_168__("   Distance from human..: ", string(__NFUN_225__(__NFUN_216__(vPlayerLoc, H.Location)))));
-		__NFUN_231__(__NFUN_168__("   FastTrace............: ", string(bFastTrace)));
-		__NFUN_231__(__NFUN_168__("   RunningToward........: ", string(AI.m_bRunningToward)));
-		__NFUN_231__(__NFUN_168__("   RunToRainbowSuccess..: ", string(AI.m_bRunToRainbowSuccess)));
-		__NFUN_231__(__NFUN_168__("   bNeedToRunToCatchUp..: ", string(AI.m_bNeedToRunToCatchUp)));
-		__NFUN_231__(__NFUN_168__("   bStopDoTransition....: ", string(AI.m_bStopDoTransition)));
-		__NFUN_231__(__NFUN_168__("   Freed................: ", string(H.m_bFreed)));
-		__NFUN_231__(__NFUN_168__("   Personality..........: ", string(H.m_ePersonality)));
-		__NFUN_231__(__NFUN_168__("   Position.............: ", string(H.m_ePosition)));
-		__NFUN_231__(__NFUN_168__("   Start as civilian....: ", string(H.m_bStartAsCivilian)));
-		__NFUN_231__(__NFUN_168__("   Hands Up.............: ", string(H.m_eHandsUpType)));
-		__NFUN_231__(__NFUN_168__("   ThreatInfo...........: ", AI.m_mgr.GetThreatInfoLog(AI.m_threatInfo)));
-		__NFUN_231__(__NFUN_168__("   LastSeenPawn.........: ", string(lastSeenPawnName)));
-		__NFUN_231__(__NFUN_168__("   Escorted.............: ", string(H.m_bEscorted)));
-		__NFUN_231__(__NFUN_168__("   Escorted by..........: ", string(escortName)));
-		__NFUN_231__(__NFUN_168__("   Escorted by terro....: ", string(terroristName)));
-		__NFUN_231__(__NFUN_168__("   dbgIgnoreThreat......: ", string(AI.m_bDbgIgnoreThreat)));
-		__NFUN_231__(__NFUN_168__("   m_bSlowedPace........: ", string(AI.m_bSlowedPace)));
-		__NFUN_231__(__NFUN_168__("   m_bFollowIncreaseDist: ", string(AI.m_bFollowIncreaseDistance)));
-		__NFUN_231__(__NFUN_168__("   m_bExtracted.........: ", string(H.m_bExtracted)));
-		__NFUN_231__(__NFUN_168__("   m_bEscorted..........: ", string(H.m_bEscorted)));
-		__NFUN_231__(__NFUN_168__("   Number of orders.....: ", string(AI.m_iNbOrder)));
+		Log(("   UsedTemplate.........: " @ H.m_szUsedTemplate));
+		Log((((("   Rainbow (following)..: " @ string(GetNameOfActor(H.m_escortedByRainbow))) @ " (")) @ ")" @ ???));
+		Log(("   ForceToStayHere......: " @ string(AI.m_bForceToStayHere)));
+		Log(("   Distance from human..: " @ string(VSize((vPlayerLoc - H.Location)))));
+		Log(("   FastTrace............: " @ string(bFastTrace)));
+		Log(("   RunningToward........: " @ string(AI.m_bRunningToward)));
+		Log(("   RunToRainbowSuccess..: " @ string(AI.m_bRunToRainbowSuccess)));
+		Log(("   bNeedToRunToCatchUp..: " @ string(AI.m_bNeedToRunToCatchUp)));
+		Log(("   bStopDoTransition....: " @ string(AI.m_bStopDoTransition)));
+		Log(("   Freed................: " @ string(H.m_bFreed)));
+		Log(("   Personality..........: " @ string(H.m_ePersonality)));
+		Log(("   Position.............: " @ string(H.m_ePosition)));
+		Log(("   Start as civilian....: " @ string(H.m_bStartAsCivilian)));
+		Log(("   Hands Up.............: " @ string(H.m_eHandsUpType)));
+		Log(("   ThreatInfo...........: " @ AI.m_mgr.GetThreatInfoLog(AI.m_threatInfo)));
+		Log(("   LastSeenPawn.........: " @ string(lastSeenPawnName)));
+		Log(("   Escorted.............: " @ string(H.m_bEscorted)));
+		Log(("   Escorted by..........: " @ string(escortName)));
+		Log(("   Escorted by terro....: " @ string(terroristName)));
+		Log(("   dbgIgnoreThreat......: " @ string(AI.m_bDbgIgnoreThreat)));
+		Log(("   m_bSlowedPace........: " @ string(AI.m_bSlowedPace)));
+		Log(("   m_bFollowIncreaseDist: " @ string(AI.m_bFollowIncreaseDistance)));
+		Log(("   m_bExtracted.........: " @ string(H.m_bExtracted)));
+		Log(("   m_bEscorted..........: " @ string(H.m_bEscorted)));
+		Log(("   Number of orders.....: " @ string(AI.m_iNbOrder)));
 		i = 0;
 		J0x66D:
 
 		// End:0x6D2 [Loop If]
-		if(__NFUN_150__(i, AI.m_iNbOrder))
+		if((i < AI.m_iNbOrder))
 		{
-			__NFUN_231__(__NFUN_168__("                          ", AI.Order_GetLog(AI.m_aOrderInfo[i])));
-			__NFUN_163__(i);
+			Log(("                          " @ AI.Order_GetLog(AI.m_aOrderInfo[i])));
+			(++i);
 			// [Loop Continue]
 			goto J0x66D;
 		}
@@ -1894,18 +1894,18 @@ exec function DbgHostage()
 	local R6Hostage H;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__("-- ALL HOSTAGE DUMP --");
+	Log("-- ALL HOSTAGE DUMP --");
 	// End:0x53
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		LogHostage(H);
-		__NFUN_163__(Num);		
+		(++Num);		
 	}	
-	__NFUN_231__(__NFUN_168__(__NFUN_168__("   ", string(Num)), " hostage(s)"));
+	Log((("   " @ string(Num)) @ " hostage(s)"));
 	return;
 }
 
@@ -1914,12 +1914,12 @@ function InitTestHostageAnim()
 	local R6Hostage H;
 
 	// End:0x4C
-	if(__NFUN_129__(m_bHostageTestAnim))
+	if((!m_bHostageTestAnim))
 	{
 		// End:0x43
-		foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+		foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 		{
-			R6HostageAI(H.Controller).__NFUN_113__('DbgHostage');			
+			R6HostageAI(H.Controller).GotoState('DbgHostage');			
 		}		
 		m_bHostageTestAnim = true;
 	}
@@ -1934,11 +1934,11 @@ function HostageSetAnimIndex(int increment)
 	local int i;
 
 	mgr = R6HostageMgr(Outer.Level.GetHostageMgr());
-	__NFUN_161__(m_iHostageTestAnimIndex, increment);
+	(m_iHostageTestAnimIndex += increment);
 	// End:0x6D
-	if(__NFUN_154__(m_iHostageTestAnimIndex, mgr.GetAnimInfoSize()))
+	if((m_iHostageTestAnimIndex == mgr.GetAnimInfoSize()))
 	{
-		__NFUN_231__("TestHostageAnim: index = 0");
+		Log("TestHostageAnim: index = 0");
 		m_iHostageTestAnimIndex = 0;
 	}
 	HP();
@@ -1956,7 +1956,7 @@ exec function HLA()
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -1965,15 +1965,15 @@ exec function HLA()
 	J0x37:
 
 	// End:0xCC [Loop If]
-	if(__NFUN_150__(i, mgr.GetAnimInfoSize()))
+	if((i < mgr.GetAnimInfoSize()))
 	{
 		AnimInfo = mgr.GetAnimInfo(i);
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(i)), ": "), string(AnimInfo.m_name)), " rate: "), string(AnimInfo.m_fRate)), " play type: "), string(AnimInfo.m_ePlayType)));
-		__NFUN_165__(i);
+		Log(((((((("" $ string(i)) $ ": ") $ string(AnimInfo.m_name)) $ " rate: ") $ string(AnimInfo.m_fRate)) $ " play type: ") $ string(AnimInfo.m_ePlayType)));
+		(i++);
 		// [Loop Continue]
 		goto J0x37;
 	}
-	__NFUN_231__(__NFUN_112__("  total hostage anim: ", string(mgr.GetAnimInfoSize())));
+	Log(("  total hostage anim: " $ string(mgr.GetAnimInfoSize())));
 	return;
 }
 
@@ -1989,21 +1989,21 @@ exec function HP(optional bool bLoop)
 	local bool bFound;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	bFound = false;
 	InitTestHostageAnim();
 	// End:0x178
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		AI = R6HostageAI(H.Controller);
 		// End:0x10C
-		if(__NFUN_129__(bFound))
+		if((!bFound))
 		{
 			AnimInfo = AI.m_mgr.GetAnimInfo(m_iHostageTestAnimIndex);
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("play anim: ", string(AnimInfo.m_name)), " rate: "), string(AnimInfo.m_fRate)), " play type: "), string(AnimInfo.m_ePlayType)), " ("), string(m_iHostageTestAnimIndex)), "/"), string(AI.m_mgr.GetAnimInfoSize())), ")"));
+			Log((((((((((("play anim: " $ string(AnimInfo.m_name)) $ " rate: ") $ string(AnimInfo.m_fRate)) $ " play type: ") $ string(AnimInfo.m_ePlayType)) $ " (")) $ "/") $ string(AI.m_mgr.GetAnimInfoSize())) $ ")" $ ???));
 			bFound = true;
 		}
 		H.R6LoopAnim('None', 1.0000000);
@@ -2026,7 +2026,7 @@ exec function HP(optional bool bLoop)
 exec function HNA()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2041,7 +2041,7 @@ exec function HNA()
 exec function HPA()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2056,7 +2056,7 @@ exec function HPA()
 exec function HSA(int Index)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2074,22 +2074,22 @@ exec function dbgActor()
 	local int Num;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__("-- ALL ACTOR DUMP --");
+	Log("-- ALL ACTOR DUMP --");
 	// End:0x1A6
-	foreach Outer.__NFUN_304__(Class'Engine.Actor', A)
+	foreach Outer.AllActors(Class'Engine.Actor', A)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(string(A.Name), " current state :  "), string(A.__NFUN_284__())));
-		__NFUN_231__(__NFUN_112__("   position....................: ", string(A.Location)));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   bCollideActor, bCollideWorld: ", string(A.bCollideActors)), ", "), string(A.bCollideWorld)));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   bBlockActors, bProjTarget...: ", string(A.bBlockActors)), ", "), string(A.bProjTarget)));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   collision radius, height....: ", string(A.CollisionRadius)), ", "), string(A.CollisionHeight)));
-		__NFUN_165__(Num);		
+		Log(((string(A.Name) $ " current state :  ") $ string(A.GetStateName())));
+		Log(("   position....................: " $ string(A.Location)));
+		Log(((("   bCollideActor $ bCollideWorld: ") $ ") $ string(A.bCollideWorld)));
+		Log(((("   bBlockActors $ bProjTarget...: ") $ ") $ string(A.bProjTarget)));
+		Log(((("   collision radius $ height....: ") $ ") $ string(A.CollisionHeight)));
+		(Num++);		
 	}	
-	__NFUN_231__(__NFUN_112__(__NFUN_112__("   ", string(Num)), " actors"));
+	Log((("   " $ string(Num)) $ " actors"));
 	return;
 }
 
@@ -2099,23 +2099,23 @@ exec function dbgActor()
 function LogRainbow(R6Rainbow rb)
 {
 	LogR6Pawn(rb);
-	__NFUN_231__(__NFUN_112__("   m_bSlideEnd..........: ", string(rb.m_bSlideEnd)));
-	__NFUN_231__(__NFUN_112__("   m_bMovingDiagonally..: ", __NFUN_128__(string(rb.m_bMovingDiagonally), 5)));
-	__NFUN_231__(__NFUN_112__("   m_rRotationOffset....: ", string(rb.m_rRotationOffset)));
-	__NFUN_231__(__NFUN_112__("   R6 Bone Rotation.....: ", string(rb.GetBoneRotation('R6'))));
-	__NFUN_231__(__NFUN_112__("   Pelvis  Rotation.....: ", string(rb.GetBoneRotation('R6 Pelvis'))));
+	Log(("   m_bSlideEnd..........: " $ string(rb.m_bSlideEnd)));
+	Log(("   m_bMovingDiagonally..: " $ Left(string(rb.m_bMovingDiagonally), 5)));
+	Log(("   m_rRotationOffset....: " $ string(rb.m_rRotationOffset)));
+	Log(("   R6 Bone Rotation.....: " $ string(rb.GetBoneRotation('R6'))));
+	Log(("   Pelvis  Rotation.....: " $ string(rb.GetBoneRotation('R6 Pelvis'))));
 	return;
 }
 
 function LogIOBomb(R6IOBomb bomb)
 {
-	__NFUN_231__(__NFUN_112__("IOBomb: ", string(bomb)));
-	__NFUN_231__(__NFUN_112__("  m_bIsActivated..: ", string(bomb.m_bIsActivated)));
-	__NFUN_231__(__NFUN_112__("  CanToggle().....: ", string(bomb.CanToggle())));
-	__NFUN_231__(__NFUN_112__("  m_bExploded.....: ", string(bomb.m_bExploded)));
-	__NFUN_231__(__NFUN_112__("  m_fTimeLeft.....: ", string(bomb.m_fTimeLeft)));
-	__NFUN_231__(__NFUN_112__("  m_fRepTimeLeft..: ", string(bomb.m_fRepTimeLeft)));
-	__NFUN_231__(__NFUN_112__("  GetTimeLeft()...: ", string(bomb.GetTimeLeft())));
+	Log(("IOBomb: " $ string(bomb)));
+	Log(("  m_bIsActivated..: " $ string(bomb.m_bIsActivated)));
+	Log(("  CanToggle().....: " $ string(bomb.CanToggle())));
+	Log(("  m_bExploded.....: " $ string(bomb.m_bExploded)));
+	Log(("  m_fTimeLeft.....: " $ string(bomb.m_fTimeLeft)));
+	Log(("  m_fRepTimeLeft..: " $ string(bomb.m_fRepTimeLeft)));
+	Log(("  GetTimeLeft()...: " $ string(bomb.GetTimeLeft())));
 	return;
 }
 
@@ -2129,17 +2129,17 @@ function LogTerro(R6Terrorist t)
 
 	AI = R6TerroristAI(t.Controller);
 	LogR6Pawn(t);
-	__NFUN_231__(" -- Terrorist info --");
-	__NFUN_231__(__NFUN_112__("   Used Template........: ", t.m_szUsedTemplate));
-	__NFUN_231__(__NFUN_112__("   m_DZone..............: ", string(t.m_DZone.Name)));
+	Log(" -- Terrorist info --");
+	Log(("   Used Template........: " $ t.m_szUsedTemplate));
+	Log(("   m_DZone..............: " $ string(t.m_DZone.Name)));
 	// End:0xFD
-	if(__NFUN_119__(t.m_HeadAttachment, none))
+	if((t.m_HeadAttachment != none))
 	{
-		__NFUN_231__(__NFUN_112__("   Attachment mesh......: ", string(t.m_HeadAttachment.StaticMesh.Name)));		
+		Log(("   Attachment mesh......: " $ string(t.m_HeadAttachment.StaticMesh.Name)));		
 	}
 	else
 	{
-		__NFUN_231__("   Attachment mesh......: None");
+		Log("   Attachment mesh......: None");
 	}
 	switch(t.m_ePersonality)
 	{
@@ -2180,11 +2180,11 @@ function LogTerro(R6Terrorist t)
 			break;
 			break;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   Personality..........: ", szTemp), " ("), string(t.m_ePersonality)), ")"));
-	__NFUN_231__(__NFUN_112__("   FiringStartPoint.....: ", string(t.GetFiringStartPoint())));
-	__NFUN_231__(__NFUN_112__("   FiringDirection......: ", string(t.GetFiringRotation())));
-	__NFUN_231__(__NFUN_112__("   Group ID.............: ", string(t.m_iGroupID)));
-	__NFUN_231__(__NFUN_112__("   Current attack team..: ", string(AI.m_iCurrentGroupID)));
+	Log((((("   Personality..........: " $ szTemp) $ " (")) $ ")" $ ???));
+	Log(("   FiringStartPoint.....: " $ string(t.GetFiringStartPoint())));
+	Log(("   FiringDirection......: " $ string(t.GetFiringRotation())));
+	Log(("   Group ID.............: " $ string(t.m_iGroupID)));
+	Log(("   Current attack team..: " $ string(AI.m_iCurrentGroupID)));
 	switch(t.m_ePlayerIsUsingHands)
 	{
 		// End:0x321
@@ -2214,17 +2214,17 @@ function LogTerro(R6Terrorist t)
 			break;
 			break;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   PlayerIsUsingHands...: ", szTemp), " ("), string(t.m_ePlayerIsUsingHands)), ")"));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("    Assault.............: ", string(int(__NFUN_171__(t.m_fSkillAssault, float(100))))), ",    Demolitions.........: "), string(int(__NFUN_171__(t.m_fSkillDemolitions, float(100))))));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("    Electronics.........: ", string(int(__NFUN_171__(t.m_fSkillElectronics, float(100))))), ",    SSniper.............: "), string(int(__NFUN_171__(t.m_fSkillSniper, float(100))))));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("    Stealth.............: ", string(int(__NFUN_171__(t.m_fSkillStealth, float(100))))), ",    SelfControl.........: "), string(int(__NFUN_171__(t.m_fSkillSelfControl, float(100))))));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("    Leadership..........: ", string(int(__NFUN_171__(t.m_fSkillLeadership, float(100))))), ",    Observation.........: "), string(int(__NFUN_171__(t.m_fSkillObservation, float(100))))));
-	__NFUN_231__(__NFUN_112__("     Skills modifier.....: ", string(t.SkillModifier())));
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bAllowLeave........: ", __NFUN_128__(string(t.m_bAllowLeave), 4)), ",   m_bHaveAGrenade......: "), __NFUN_128__(string(t.m_bHaveAGrenade), 4)));
+	Log((((("   PlayerIsUsingHands...: " $ szTemp) $ " (")) $ ")" $ ???));
+	Log(((("    Assault.............: " $ string(int((t.m_fSkillAssault * float(100))))) $ ") $ string(int((t.m_fSkillDemolitions * float(100))))));
+	Log(((("    Electronics.........: " $ string(int((t.m_fSkillElectronics * float(100))))) $ ") $ string(int((t.m_fSkillSniper * float(100))))));
+	Log(((("    Stealth.............: " $ string(int((t.m_fSkillStealth * float(100))))) $ ") $ string(int((t.m_fSkillSelfControl * float(100))))));
+	Log(((("    Leadership..........: " $ string(int((t.m_fSkillLeadership * float(100))))) $ ") $ string(int((t.m_fSkillObservation * float(100))))));
+	Log(("     Skills modifier.....: " $ string(t.SkillModifier())));
+	Log(((("   m_bAllowLeave........: " $ Left(string(t.m_bAllowLeave), 4)) $ ") $ Left(string(t.m_bHaveAGrenade), 4)));
 	// End:0x92B
-	if(__NFUN_119__(AI, none))
+	if((AI != none))
 	{
-		__NFUN_231__("  -See and Hear variable:-");
+		Log("  -See and Hear variable:-");
 		switch(AI.m_eReactionStatus)
 		{
 			// End:0x66C
@@ -2264,13 +2264,13 @@ function LogTerro(R6Terrorist t)
 				break;
 				break;
 		}
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   ReactionState........: ", szTemp), " ("), string(AI.m_eReactionStatus)), ")"));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   SeePlayer............: ", __NFUN_128__(string(__NFUN_129__(t.m_bDontSeePlayer)), 4)), ",   HearPlayer...........: "), __NFUN_128__(string(__NFUN_129__(t.m_bDontHearPlayer)), 4)));
-		__NFUN_231__(__NFUN_112__("   m_eStateForEvent.....: ", __NFUN_128__(string(AI.m_eStateForEvent), 4)));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bHearInvestigate...: ", __NFUN_128__(string(AI.m_bHearInvestigate), 4)), ",   m_bSeeHostage........: "), __NFUN_128__(string(AI.m_bSeeHostage), 4)));
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bHearThreat........: ", __NFUN_128__(string(AI.m_bHearThreat), 4)), ",   m_bSeeRainbow........: "), __NFUN_128__(string(AI.m_bSeeRainbow), 4)));
-		__NFUN_231__(__NFUN_112__("   m_bHearGrenade.......: ", __NFUN_128__(string(AI.m_bHearGrenade), 4)));
-		__NFUN_231__(__NFUN_112__("   m_eStrategy..........: ", __NFUN_128__(string(t.m_eStrategy), 4)));
+		Log((((("   ReactionState........: " $ szTemp) $ " (")) $ ")" $ ???));
+		Log(((("   SeePlayer............: " $ Left(string((!t.m_bDontSeePlayer)), 4)) $ ") $ Left(string((!t.m_bDontHearPlayer)), 4)));
+		Log(("   m_eStateForEvent.....: " $ Left(string(AI.m_eStateForEvent), 4)));
+		Log(((("   m_bHearInvestigate...: " $ Left(string(AI.m_bHearInvestigate), 4)) $ ") $ Left(string(AI.m_bSeeHostage), 4)));
+		Log(((("   m_bHearThreat........: " $ Left(string(AI.m_bHearThreat), 4)) $ ") $ Left(string(AI.m_bSeeRainbow), 4)));
+		Log(("   m_bHearGrenade.......: " $ Left(string(AI.m_bHearGrenade), 4)));
+		Log(("   m_eStrategy..........: " $ Left(string(t.m_eStrategy), 4)));
 	}
 	return;
 }
@@ -2284,18 +2284,18 @@ exec function dbgRainbow()
 	local int Num;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__("-- ALL RAINBOW DUMP --");
+	Log("-- ALL RAINBOW DUMP --");
 	// End:0x53
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Rainbow', rb)
+	foreach Outer.AllActors(Class'R6Engine.R6Rainbow', rb)
 	{
 		LogRainbow(rb);
-		__NFUN_165__(Num);		
+		(Num++);		
 	}	
-	__NFUN_231__(__NFUN_112__(__NFUN_112__("   ", string(Num)), " rainbow"));
+	Log((("   " $ string(Num)) $ " rainbow"));
 	return;
 }
 
@@ -2308,18 +2308,18 @@ exec function dbgTerro()
 	local int Num;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__("-- ALL TERRO DUMP --");
+	Log("-- ALL TERRO DUMP --");
 	// End:0x51
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Terrorist', t)
+	foreach Outer.AllActors(Class'R6Engine.R6Terrorist', t)
 	{
 		LogTerro(t);
-		__NFUN_165__(Num);		
+		(Num++);		
 	}	
-	__NFUN_231__(__NFUN_112__(__NFUN_112__("   ", string(Num)), " terrorists"));
+	Log((("   " $ string(Num)) $ " terrorists"));
 	return;
 }
 
@@ -2331,16 +2331,16 @@ exec function SetPawn()
 	local Actor anActor;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	anActor = GetPointedActor(false, true);
 	// End:0x8B
-	if(__NFUN_119__(R6Pawn(anActor), none))
+	if((R6Pawn(anActor) != none))
 	{
 		m_curPawn = R6Pawn(anActor);
-		Outer.Player.Console.Message(__NFUN_112__("ESCORTED: ", string(m_curPawn.Controller.Name)), 6.0000000);		
+		Outer.Player.Console.Message(("ESCORTED: " $ string(m_curPawn.Controller.Name)), 6.0000000);		
 	}
 	else
 	{
@@ -2354,7 +2354,7 @@ exec function string SetPawnPace(int i, optional bool bHelp)
 	local string Text;
 
 	// End:0x0E
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return "";
 	}
@@ -2364,7 +2364,7 @@ exec function string SetPawnPace(int i, optional bool bHelp)
 		return "Set m_eMovementPace 0=none 1=prone 2=crouchwalk 3=crouchrun 4=walk 5=run";
 	}
 	// End:0x9C
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		Outer.Player.Console.Message("no pawn", 6.0000000);
 	}
@@ -2410,7 +2410,7 @@ exec function string SetPawnPace(int i, optional bool bHelp)
 		default:
 			break;
 	}
-	Outer.Player.Console.Message(__NFUN_112__("eMovementPace=", Text), 6.0000000);
+	Outer.Player.Console.Message(("eMovementPace=" $ Text), 6.0000000);
 	return "";
 	return;
 }
@@ -2418,23 +2418,23 @@ exec function string SetPawnPace(int i, optional bool bHelp)
 exec function SeeCurPawn()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		return;
 	}
 	// End:0x45
-	if(Outer.__NFUN_533__(m_curPawn))
+	if(Outer.CanSee(m_curPawn))
 	{
-		__NFUN_231__("SeePawn: success");		
+		Log("SeePawn: success");		
 	}
 	else
 	{
-		__NFUN_231__("SeePawn: fail");
+		Log("SeePawn: fail");
 	}
 	return;
 }
@@ -2447,19 +2447,19 @@ exec function UsePath(int i)
 	local R6Pawn.eMovementPace ePace;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x49
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		Outer.Player.Console.Message("no pawn", 6.0000000);
 		return;
 	}
 	Outer.Player.Console.Message("Use path", 6.0000000);
 	// End:0xBE
-	if(__NFUN_154__(i, 1))
+	if((i == 1))
 	{
 		// End:0xAA
 		if(m_curPawn.bIsCrouched)
@@ -2493,26 +2493,26 @@ exec function UsePath(int i)
 exec function CanWalk()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x49
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		Outer.Player.Console.Message("no pawn", 6.0000000);
 		return;
 	}
 	// End:0xCB
-	if(R6AIController(m_curPawn.Controller).__NFUN_1815__(Outer.Pawn.Location, true))
+	if(R6AIController(m_curPawn.Controller).CanWalkTo(Outer.Pawn.Location, true))
 	{
 		Outer.Player.Console.Message("CanWalkTo: true", 6.0000000);
-		__NFUN_231__("CanWalkTo: true");		
+		Log("CanWalkTo: true");		
 	}
 	else
 	{
 		Outer.Player.Console.Message("CanWalkTo: false", 6.0000000);
-		__NFUN_231__("CanWalkTo: false");
+		Log("CanWalkTo: false");
 	}
 	return;
 }
@@ -2523,18 +2523,18 @@ exec function CanWalk()
 exec function TestFindPathToMe()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x49
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		Outer.Player.Console.Message("no pawn", 6.0000000);
 		return;
 	}
 	// End:0xB9
-	if(__NFUN_114__(R6AIController(m_curPawn.Controller).__NFUN_517__(Outer.Pawn, true), none))
+	if((R6AIController(m_curPawn.Controller).FindPathToward(Outer.Pawn, true) == none))
 	{
 		Outer.Player.Console.Message("FindPathToward: failed", 6.0000000);		
 	}
@@ -2543,7 +2543,7 @@ exec function TestFindPathToMe()
 		Outer.Player.Console.Message("FindPathToward: ok", 6.0000000);
 	}
 	// End:0x168
-	if(__NFUN_114__(R6AIController(m_curPawn.Controller).__NFUN_518__(Outer.Pawn.Location, true), none))
+	if((R6AIController(m_curPawn.Controller).FindPathTo(Outer.Pawn.Location, true) == none))
 	{
 		Outer.Player.Console.Message("FindPathTo: failed", 6.0000000);		
 	}
@@ -2562,21 +2562,21 @@ exec function MoveEscort()
 	local Vector vHit;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x49
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		Outer.Player.Console.Message("no pawn", 6.0000000);
 		return;
 	}
 	// End:0x106
-	if(__NFUN_119__(R6Hostage(m_curPawn), none))
+	if((R6Hostage(m_curPawn) != none))
 	{
 		GetPointedActor(false, true, vHit);
-		__NFUN_184__(vHit.Z, __NFUN_172__(m_curPawn.CollisionHeight, float(2)));
+		(vHit.Z += (m_curPawn.CollisionHeight / float(2)));
 		R6HostageAI(m_curPawn.Controller).SetStateEscorted(R6Pawn(Outer.Pawn), vHit, false);
 		// End:0x106
 		if(R6Hostage(m_curPawn).m_bEscorted)
@@ -2595,16 +2595,16 @@ exec function MoveEscort()
 exec function SetPState(name stateToGo)
 {
 	// End:0x0D
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_curPawn.__NFUN_113__(stateToGo);
+	m_curPawn.GotoState(stateToGo);
 	return;
 }
 
@@ -2614,16 +2614,16 @@ exec function SetPState(name stateToGo)
 exec function SetCState(name stateToGo)
 {
 	// End:0x0D
-	if(__NFUN_114__(m_curPawn, none))
+	if((m_curPawn == none))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_curPawn.__NFUN_113__(stateToGo);
+	m_curPawn.GotoState(stateToGo);
 	return;
 }
 
@@ -2635,12 +2635,12 @@ exec function SetHPos(int iPos)
 	local R6Hostage.EStartingPosition ePos;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1F
-	if(__NFUN_114__(R6Hostage(m_curPawn), none))
+	if((R6Hostage(m_curPawn) == none))
 	{
 		return;
 	}
@@ -2685,25 +2685,25 @@ exec function SetHRoll(int iRoll)
 	local R6Hostage H;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x50
-	if(__NFUN_154__(iRoll, 0))
+	if((iRoll == 0))
 	{
 		Outer.Player.Console.Message("Roll disable ", 6.0000000);		
 	}
 	else
 	{
-		Outer.Player.Console.Message(__NFUN_112__("Roll: ", string(iRoll)), 6.0000000);
+		Outer.Player.Console.Message(("Roll: " $ string(iRoll)), 6.0000000);
 	}
 	// End:0x143
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
-		R6HostageAI(H.Controller).m_bDbgRoll = __NFUN_155__(iRoll, 0);
+		R6HostageAI(H.Controller).m_bDbgRoll = (iRoll != 0);
 		R6HostageAI(H.Controller).m_iDbgRoll = iRoll;
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("SetHRoll:", string(R6HostageAI(H.Controller).m_bDbgRoll)), " iRoll: "), string(R6HostageAI(H.Controller).m_iDbgRoll)));		
+		Log(((("SetHRoll:" $ string(R6HostageAI(H.Controller).m_bDbgRoll)) $ " iRoll: ") $ string(R6HostageAI(H.Controller).m_iDbgRoll)));		
 	}	
 	return;
 }
@@ -2714,7 +2714,7 @@ exec function SetHRoll(int iRoll)
 exec function DesignSF(float NewSpeedFactor)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2725,7 +2725,7 @@ exec function DesignSF(float NewSpeedFactor)
 exec function DesignJF(float NewJumpFactor)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2736,7 +2736,7 @@ exec function DesignJF(float NewJumpFactor)
 exec function SetShake(bool bSet)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2749,12 +2749,12 @@ exec function DesignMaxRand(int NewMax)
 	local R6Pawn CurrentPawn;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x3B
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', CurrentPawn)
+	foreach Outer.AllActors(Class'R6Engine.R6Pawn', CurrentPawn)
 	{
 		CurrentPawn.m_iDesignRandomTweak = NewMax;		
 	}	
@@ -2766,12 +2766,12 @@ exec function DesignArmor(int Light, int Medium, int Heavy)
 	local R6Pawn CurrentPawn;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x63
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', CurrentPawn)
+	foreach Outer.AllActors(Class'R6Engine.R6Pawn', CurrentPawn)
 	{
 		CurrentPawn.m_iDesignLightTweak = Light;
 		CurrentPawn.m_iDesignMediumTweak = Medium;
@@ -2785,14 +2785,14 @@ exec function DesignToggleLog()
 	local R6Pawn CurrentPawn;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x48
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', CurrentPawn)
+	foreach Outer.AllActors(Class'R6Engine.R6Pawn', CurrentPawn)
 	{
-		CurrentPawn.m_bDesignToggleLog = __NFUN_129__(CurrentPawn.m_bDesignToggleLog);		
+		CurrentPawn.m_bDesignToggleLog = (!CurrentPawn.m_bDesignToggleLog);		
 	}	
 	return;
 }
@@ -2800,7 +2800,7 @@ exec function DesignToggleLog()
 exec function DesignHBS(float fRange)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2815,29 +2815,29 @@ exec function DesignHBS(float fRange)
 exec function hHelp()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__("Hostage / Civ Debugger");
-	__NFUN_231__("======================");
-	__NFUN_231__("  hReset.......: reset current hostage ptr");
-	__NFUN_231__("  hLog.........: log hostage");
-	__NFUN_231__("  hCiv.........: set to civilian");
-	__NFUN_231__("  hHostage.....: set to hostage 0=Stand 1=Kneel");
-	__NFUN_231__("  hPos.........: set position: 0=Stand, 1=Kneel, 2=Prone, 3=Foetus, 4=Crouch, 5=Random");
-	__NFUN_231__("  hReact.......: react (Civ: 0=CivProne, 1=CivRunTowardRainbow, 2=CivRunForCover");
-	__NFUN_231__("  hReact.......: react (hostage: anim index from 0 to 2 ");
-	__NFUN_231__("  hFreeze......: go freeze");
-	__NFUN_231__("  hHurt........: set health to hurt ");
-	__NFUN_231__("  hWalkAnim....: set walk anim: 0=default 1=scared");
-	__NFUN_231__("  hGre.........: play grenade reaction anim: 0=reset 1=blinded 2=gas");
+	Log("Hostage / Civ Debugger");
+	Log("======================");
+	Log("  hReset.......: reset current hostage ptr");
+	Log("  hLog.........: log hostage");
+	Log("  hCiv.........: set to civilian");
+	Log("  hHostage.....: set to hostage 0=Stand 1=Kneel");
+	Log("  hPos.........: set position: 0=Stand, 1=Kneel, 2=Prone, 3=Foetus, 4=Crouch, 5=Random");
+	Log("  hReact.......: react (Civ: 0=CivProne, 1=CivRunTowardRainbow, 2=CivRunForCover");
+	Log("  hReact.......: react (hostage: anim index from 0 to 2 ");
+	Log("  hFreeze......: go freeze");
+	Log("  hHurt........: set health to hurt ");
+	Log("  hWalkAnim....: set walk anim: 0=default 1=scared");
+	Log("  hGre.........: play grenade reaction anim: 0=reset 1=blinded 2=gas");
 	return;
 }
 
 function hDebugLog(string sz)
 {
-	__NFUN_231__(__NFUN_112__("hDebug: ", sz));
+	Log(("hDebug: " $ sz));
 	return;
 }
 
@@ -2847,7 +2847,7 @@ function hDebugLog(string sz)
 exec function hReset()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -2861,12 +2861,12 @@ exec function hReset()
 exec function hLog()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
@@ -2883,34 +2883,34 @@ exec function bool hInit()
 	local R6Hostage H, hostage;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return false;
 	}
 	// End:0x1A
-	if(__NFUN_119__(m_Hostage, none))
+	if((m_Hostage != none))
 	{
 		return true;
 	}
 	iClosest = 999999;
 	hostage = none;
 	// End:0xB7
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		// End:0xB6
-		if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Outer.Pawn.Location, H.Location)), float(iClosest)))
+		if((VSize((Outer.Pawn.Location - H.Location)) < float(iClosest)))
 		{
-			iClosest = int(__NFUN_225__(__NFUN_216__(Outer.Pawn.Location, H.Location)));
+			iClosest = int(VSize((Outer.Pawn.Location - H.Location)));
 			hostage = H;
 		}		
 	}	
 	// End:0xFD
-	if(__NFUN_114__(hostage, none))
+	if((hostage == none))
 	{
 		Outer.Player.Console.Message("no hostage found", 6.0000000);
 		return false;
 	}
-	Outer.Player.Console.Message(__NFUN_112__("found: ", string(hostage.Name)), 6.0000000);
+	Outer.Player.Console.Message(("found: " $ string(hostage.Name)), 6.0000000);
 	m_Hostage = hostage;
 	m_Hostage.m_controller.m_bDbgIgnoreThreat = true;
 	m_Hostage.m_controller.m_bDbgIgnoreRainbow = true;
@@ -2924,12 +2924,12 @@ exec function bool hInit()
 exec function hCiv()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
@@ -2944,17 +2944,17 @@ exec function hCiv()
 exec function hHostage(int iPos)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
 	// End:0x6C
-	if(__NFUN_154__(iPos, 1))
+	if((iPos == 1))
 	{
 		hDebugLog("Hostage: kneel");
 		m_Hostage.m_controller.SetStateGuarded(1, m_Hostage.m_mgr.9);		
@@ -2975,12 +2975,12 @@ exec function hPos(int iPos)
 	local R6Hostage.EStartingPosition ePos;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
@@ -3029,12 +3029,12 @@ exec function hPos(int iPos)
 exec function hGre(int iGrenade)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
@@ -3064,37 +3064,37 @@ exec function hGre(int iGrenade)
 exec function hReact(int iReact)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
 	// End:0x10E
-	if(m_Hostage.m_controller.__NFUN_281__('Civilian'))
+	if(m_Hostage.m_controller.IsInState('Civilian'))
 	{
 		m_Hostage.m_controller.m_threatInfo.m_pawn = Outer.Pawn;
 		// End:0xA4
-		if(__NFUN_154__(iReact, 1))
+		if((iReact == 1))
 		{
 			hDebugLog("CivRunTowardRainbow");
-			m_Hostage.m_controller.__NFUN_113__('CivRunTowardRainbow');			
+			m_Hostage.m_controller.GotoState('CivRunTowardRainbow');			
 		}
 		else
 		{
 			// End:0xE2
-			if(__NFUN_154__(iReact, 2))
+			if((iReact == 2))
 			{
 				hDebugLog("CivRunForCover");
-				m_Hostage.m_controller.__NFUN_113__('CivRunForCover');				
+				m_Hostage.m_controller.GotoState('CivRunForCover');				
 			}
 			else
 			{
 				hDebugLog("CivProne");
-				m_Hostage.m_controller.__NFUN_113__('CivProne');
+				m_Hostage.m_controller.GotoState('CivProne');
 			}
 		}		
 	}
@@ -3104,7 +3104,7 @@ exec function hReact(int iReact)
 		if(m_Hostage.isStandingHandUp())
 		{
 			// End:0x17D
-			if(__NFUN_154__(iReact, 1))
+			if((iReact == 1))
 			{
 				hDebugLog("ANIM_eStandHandUpReact02");
 				m_Hostage.SetAnimInfo(m_Hostage.m_controller.m_mgr.ANIM_eStandHandUpReact02);				
@@ -3112,7 +3112,7 @@ exec function hReact(int iReact)
 			else
 			{
 				// End:0x1DB
-				if(__NFUN_154__(iReact, 2))
+				if((iReact == 2))
 				{
 					hDebugLog("ANIM_eStandHandUpReact03");
 					m_Hostage.SetAnimInfo(m_Hostage.m_controller.m_mgr.ANIM_eStandHandUpReact03);					
@@ -3127,10 +3127,10 @@ exec function hReact(int iReact)
 		else
 		{
 			// End:0x341
-			if(__NFUN_154__(int(m_Hostage.m_ePosition), int(1)))
+			if((int(m_Hostage.m_ePosition) == int(1)))
 			{
 				// End:0x29D
-				if(__NFUN_154__(iReact, 1))
+				if((iReact == 1))
 				{
 					hDebugLog("ANIM_eKneelReact02");
 					m_Hostage.SetAnimInfo(m_Hostage.m_controller.m_mgr.ANIM_eKneelReact02);					
@@ -3138,7 +3138,7 @@ exec function hReact(int iReact)
 				else
 				{
 					// End:0x2F5
-					if(__NFUN_154__(iReact, 2))
+					if((iReact == 2))
 					{
 						hDebugLog("ANIM_eKneelReact03");
 						m_Hostage.SetAnimInfo(m_Hostage.m_controller.m_mgr.ANIM_eKneelReact03);						
@@ -3165,20 +3165,20 @@ exec function hReact(int iReact)
 exec function hFreeze()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
 	// End:0x80
-	if(__NFUN_132__(m_Hostage.isStandingHandUp(), __NFUN_154__(int(m_Hostage.m_ePosition), int(1))))
+	if((m_Hostage.isStandingHandUp() || (int(m_Hostage.m_ePosition) == int(1))))
 	{
 		hDebugLog("State: Guarded_frozen");
-		m_Hostage.m_controller.__NFUN_113__('Guarded_frozen');		
+		m_Hostage.m_controller.GotoState('Guarded_frozen');		
 	}
 	else
 	{
@@ -3193,12 +3193,12 @@ exec function hFreeze()
 exec function hHurt()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
@@ -3213,17 +3213,17 @@ exec function hHurt()
 exec function hWalkAnim(int i)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x1A
-	if(__NFUN_129__(hInit()))
+	if((!hInit()))
 	{
 		return;
 	}
 	// End:0x43
-	if(__NFUN_154__(i, 1))
+	if((i == 1))
 	{
 		m_Hostage.SetStandWalkingAnim(m_Hostage.1, true);		
 	}
@@ -3243,32 +3243,32 @@ simulated function DrawRoute(R6AIController r6con, Canvas Canvas)
 	local Vector vTemp;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0xBE
-	if(__NFUN_119__(r6con.RouteCache[0], none))
+	if((r6con.RouteCache[0] != none))
 	{
 		i = 1;
 		J0x2A:
 
 		// End:0xBE [Loop If]
-		if(__NFUN_130__(__NFUN_150__(i, 16), __NFUN_119__(r6con.RouteCache[i], none)))
+		if(((i < 16) && (r6con.RouteCache[i] != none)))
 		{
-			Canvas.__NFUN_2403__(r6con.RouteCache[__NFUN_147__(i, 1)].Location, r6con.RouteCache[i].Location, Class'Engine.Canvas'.static.MakeColor(byte(255), byte(255), 0));
-			__NFUN_165__(i);
+			Canvas.Draw3DLine(r6con.RouteCache[(i - 1)].Location, r6con.RouteCache[i].Location, Class'Engine.Canvas'.static.MakeColor(byte(255), byte(255), 0));
+			(i++);
 			// [Loop Continue]
 			goto J0x2A;
 		}
 	}
 	// End:0x12A
-	if(__NFUN_218__(r6con.Destination, vect(0.0000000, 0.0000000, 0.0000000)))
+	if((r6con.Destination != vect(0.0000000, 0.0000000, 0.0000000)))
 	{
-		Canvas.__NFUN_2403__(r6con.Pawn.Location, r6con.Destination, Class'Engine.Canvas'.static.MakeColor(byte(255), byte(255), byte(255)));
+		Canvas.Draw3DLine(r6con.Pawn.Location, r6con.Destination, Class'Engine.Canvas'.static.MakeColor(byte(255), byte(255), byte(255)));
 	}
 	// End:0x15E
-	if(__NFUN_119__(r6con.Focus, none))
+	if((r6con.Focus != none))
 	{
 		vTemp = r6con.Focus.Location;		
 	}
@@ -3276,7 +3276,7 @@ simulated function DrawRoute(R6AIController r6con, Canvas Canvas)
 	{
 		vTemp = r6con.FocalPoint;
 	}
-	Canvas.__NFUN_2403__(__NFUN_215__(r6con.Pawn.Location, r6con.Pawn.EyePosition()), vTemp, Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
+	Canvas.Draw3DLine((r6con.Pawn.Location + r6con.Pawn.EyePosition()), vTemp, Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
 	return;
 }
 
@@ -3286,7 +3286,7 @@ exec function RotateMe(name BoneName, int Pitch, int Yaw, int Roll, float InTime
 	local Rotator rOffset;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -3294,14 +3294,14 @@ exec function RotateMe(name BoneName, int Pitch, int Yaw, int Roll, float InTime
 	rOffset.Yaw = Yaw;
 	rOffset.Roll = Roll;
 	R6Pawn(Outer.Pawn).SetBoneRotation(BoneName, rOffset,, 1.0000000, InTime);
-	__NFUN_231__(__NFUN_112__("RotateMe", string(BoneName)));
+	Log(("RotateMe" $ string(BoneName)));
 	return;
 }
 
 exec function ResetMeAll()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -3321,12 +3321,12 @@ exec function ResetMeAll()
 exec function toggleNav()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bEnableNavDebug = __NFUN_129__(m_bEnableNavDebug);
-	Outer.Player.Console.Message(__NFUN_112__("EnableNavPointDebug = ", string(m_bEnableNavDebug)), 6.0000000);
+	m_bEnableNavDebug = (!m_bEnableNavDebug);
+	Outer.Player.Console.Message(("EnableNavPointDebug = " $ string(m_bEnableNavDebug)), 6.0000000);
 	// End:0x73
 	if(m_bEnableNavDebug)
 	{
@@ -3348,48 +3348,48 @@ function processNavDebug(Canvas C)
 	local Vector vLoc;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x47
-	if(__NFUN_132__(__NFUN_114__(Outer.Pawn, none), __NFUN_155__(int(Outer.Pawn.Physics), int(1))))
+	if(((Outer.Pawn == none) || (int(Outer.Pawn.Physics) != int(1))))
 	{
 		return;
 	}
-	Path = Outer.__NFUN_525__(true);
+	Path = Outer.FindRandomDest(true);
 	// End:0x1D0
-	if(__NFUN_114__(Path, none))
+	if((Path == none))
 	{
 		i = 0;
 		J0x6C:
 
 		// End:0xF9 [Loop If]
-		if(__NFUN_150__(i, m_aNavPointLocation.Length))
+		if((i < m_aNavPointLocation.Length))
 		{
 			vLoc = m_aNavPointLocation[i];
 			// End:0xEF
-			if(__NFUN_130__(Outer.__NFUN_548__(vLoc, Outer.Pawn.Location), __NFUN_176__(__NFUN_225__(__NFUN_216__(Outer.Pawn.Location, vLoc)), m_fNavPointDistance)))
+			if((Outer.FastTrace(vLoc, Outer.Pawn.Location) && (VSize((Outer.Pawn.Location - vLoc)) < m_fNavPointDistance)))
 			{
 				bFound = true;
 				// [Explicit Break]
 				goto J0xF9;
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x6C;
 		}
 		J0xF9:
 
 		// End:0x1D0
-		if(__NFUN_129__(bFound))
+		if((!bFound))
 		{
 			m_aNavPointLocation[m_iCurNavPoint] = Outer.Pawn.Location;
-			szName = __NFUN_112__("Need NavPoint: ", string(m_iCurNavPoint));
-			Outer.Pawn.__NFUN_1506__(Outer.Pawn.Location, vect(40.0000000, 40.0000000, 80.0000000), __NFUN_146__(10, m_iCurNavPoint), szName);
-			__NFUN_231__(szName);
-			Outer.Player.Console.Message(__NFUN_112__("**** ", szName), 10.0000000);
-			__NFUN_165__(m_iCurNavPoint);
+			szName = ("Need NavPoint: " $ string(m_iCurNavPoint));
+			Outer.Pawn.DbgVectorAdd(Outer.Pawn.Location, vect(40.0000000, 40.0000000, 80.0000000), (10 + m_iCurNavPoint), szName);
+			Log(szName);
+			Outer.Player.Console.Message(("**** " $ szName), 10.0000000);
+			(m_iCurNavPoint++);
 		}
 	}
 	return;
@@ -3403,15 +3403,15 @@ exec function KillThemAll()
 	local R6Pawn P;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x8F
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', P)
+	foreach Outer.AllActors(Class'R6Engine.R6Pawn', P)
 	{
 		// End:0x8E
-		if(__NFUN_129__(P.m_bIsPlayer))
+		if((!P.m_bIsPlayer))
 		{
 			P.ServerForceKillResult(4);
 			P.R6TakeDamage(1000, 1000, Outer.Pawn, P.Location, vect(0.0000000, 0.0000000, 0.0000000), 0);
@@ -3423,12 +3423,12 @@ exec function KillThemAll()
 exec function dbgPeek()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bTogglePeek = __NFUN_129__(m_bTogglePeek);
-	Outer.Player.Console.Message(__NFUN_112__("DbgPeek = ", string(m_bTogglePeek)), 6.0000000);
+	m_bTogglePeek = (!m_bTogglePeek);
+	Outer.Player.Console.Message(("DbgPeek = " $ string(m_bTogglePeek)), 6.0000000);
 	return;
 }
 
@@ -3440,73 +3440,73 @@ function processDebugPeek(Canvas Canvas)
 	local Rotator rRotator;
 
 	// End:0x3A
-	if(__NFUN_132__(__NFUN_114__(Outer.Pawn, none), __NFUN_155__(int(Outer.Pawn.Physics), int(1))))
+	if(((Outer.Pawn == none) || (int(Outer.Pawn.Physics) != int(1))))
 	{
 		return;
 	}
-	Canvas.__NFUN_2626__(0, byte(255), 0);
+	Canvas.SetDrawColor(0, byte(255), 0);
 	P = R6Pawn(Outer.ViewTarget);
 	YPos = 350;
 	YL = 10;
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("IsPeeking:  ", string(P.IsPeeking())), " Left: "), string(P.IsPeekingLeft())));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_fCrouchBlendRate= ", string(P.m_fCrouchBlendRate)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   GetPeekingRate()= ", string(P.GetPeekingRate())));
-	__NFUN_161__(YPos, YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(((("IsPeeking:  " $ string(P.IsPeeking())) $ " Left: ") $ string(P.IsPeekingLeft())));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_fCrouchBlendRate= " $ string(P.m_fCrouchBlendRate)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   GetPeekingRate()= " $ string(P.GetPeekingRate())));
+	(YPos += YL);
 	// End:0x1C7
-	if(__NFUN_154__(int(P.m_ePeekingMode), int(2)))
+	if((int(P.m_ePeekingMode) == int(2)))
 	{
 		szPeek = "fluid";		
 	}
 	else
 	{
 		// End:0x1EC
-		if(__NFUN_154__(int(P.m_ePeekingMode), int(1)))
+		if((int(P.m_ePeekingMode) == int(1)))
 		{
 			szPeek = "full";
 		}
 	}
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_ePeekingMode= ", szPeek));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_fPeekingGoal= ", string(P.m_fPeekingGoal)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_fPeeking= ", string(P.m_fPeeking)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_fLastValidPeeking= ", string(P.m_fLastValidPeeking)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_bPeekingReturnToCenter= ", string(P.m_bPeekingReturnToCenter)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   bIsCrouched= ", string(P.bIsCrouched)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   PrepivotZ= ", string(P.PrePivot.Z)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   PrePivotProneBackupZ= ", string(P.m_vPrePivotProneBackup.Z)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_ePeekingMode= " $ szPeek));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_fPeekingGoal= " $ string(P.m_fPeekingGoal)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_fPeeking= " $ string(P.m_fPeeking)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_fLastValidPeeking= " $ string(P.m_fLastValidPeeking)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_bPeekingReturnToCenter= " $ string(P.m_bPeekingReturnToCenter)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   bIsCrouched= " $ string(P.bIsCrouched)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   PrepivotZ= " $ string(P.PrePivot.Z)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   PrePivotProneBackupZ= " $ string(P.m_vPrePivotProneBackup.Z)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
 	rRotator = P.GetBoneRotation('R6');
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   r6 bone y= ", string(rRotator.Yaw)), " p="), string(rRotator.Pitch)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_rRotationOffset= ", string(P.m_rRotationOffset)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__("   m_bPostureTransition= ", string(P.m_bPostureTransition)));
-	__NFUN_161__(YPos, YL);
-	Canvas.__NFUN_2623__(4.0000000, float(YPos));
-	Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   m_bPeekLeft= ", string(R6PlayerController(Outer.Pawn.Controller).m_bPeekLeft)), " m_bPeekRight="), string(R6PlayerController(Outer.Pawn.Controller).m_bPeekRight)));
-	__NFUN_161__(YPos, YL);
+	Canvas.DrawText(((("   r6 bone y= " $ string(rRotator.Yaw)) $ " p=") $ string(rRotator.Pitch)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_rRotationOffset= " $ string(P.m_rRotationOffset)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(("   m_bPostureTransition= " $ string(P.m_bPostureTransition)));
+	(YPos += YL);
+	Canvas.SetPos(4.0000000, float(YPos));
+	Canvas.DrawText(((("   m_bPeekLeft= " $ string(R6PlayerController(Outer.Pawn.Controller).m_bPeekLeft)) $ " m_bPeekRight=") $ string(R6PlayerController(Outer.Pawn.Controller).m_bPeekRight)));
+	(YPos += YL);
 	return;
 }
 
@@ -3516,12 +3516,12 @@ exec function resetThreat()
 	local R6Hostage H;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x67
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		AI = R6HostageAI(H.Controller);
 		AI.m_threatInfo = AI.m_mgr.getDefaulThreatInfo();		
@@ -3532,11 +3532,11 @@ exec function resetThreat()
 exec function toggleThreatInfo()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bToggleThreatInfo = __NFUN_129__(m_bToggleThreatInfo);
+	m_bToggleThreatInfo = (!m_bToggleThreatInfo);
 	return;
 }
 
@@ -3547,16 +3547,16 @@ function processThreatInfo(Canvas Canvas)
 	local R6HostageAI AI;
 	local R6Hostage H;
 
-	Canvas.__NFUN_2626__(0, byte(255), 0);
+	Canvas.SetDrawColor(0, byte(255), 0);
 	YPos = 100;
 	YL = 16;
 	// End:0xBF
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		AI = R6HostageAI(H.Controller);
-		Canvas.__NFUN_2623__(4.0000000, float(YPos));
-		Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(AI)), " "), AI.m_mgr.GetThreatInfoLog(AI.m_threatInfo)));
-		__NFUN_161__(YPos, YL);		
+		Canvas.SetPos(4.0000000, float(YPos));
+		Canvas.DrawText(((("" $ string(AI)) $ " ") $ AI.m_mgr.GetThreatInfoLog(AI.m_threatInfo)));
+		(YPos += YL);		
 	}	
 	return;
 }
@@ -3569,21 +3569,21 @@ function processDebugPG(Canvas Canvas)
 	local R6Hostage H;
 
 	// End:0x16
-	if(__NFUN_114__(Outer.Pawn, none))
+	if((Outer.Pawn == none))
 	{
 		return;
 	}
-	Canvas.__NFUN_2626__(0, byte(255), 0);
+	Canvas.SetDrawColor(0, byte(255), 0);
 	P = R6Pawn(Outer.Pawn);
 	YPos = 300;
 	YL = 16;
 	// End:0xF1
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		AI = R6HostageAI(H.Controller);
-		Canvas.__NFUN_2623__(4.0000000, float(YPos));
-		Canvas.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(AI)), " "), AI.m_mgr.GetThreatInfoLog(AI.m_threatInfo)));
-		__NFUN_161__(YPos, YL);		
+		Canvas.SetPos(4.0000000, float(YPos));
+		Canvas.DrawText(((("" $ string(AI)) $ " ") $ AI.m_mgr.GetThreatInfoLog(AI.m_threatInfo)));
+		(YPos += YL);		
 	}	
 	return;
 }
@@ -3591,7 +3591,7 @@ function processDebugPG(Canvas Canvas)
 exec function sgi(int iLevel)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -3602,11 +3602,11 @@ exec function sgi(int iLevel)
 exec function ShowGameInfo(int iLevel)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bToggleGameInfo = __NFUN_129__(m_bToggleGameInfo);
+	m_bToggleGameInfo = (!m_bToggleGameInfo);
 	m_iGameInfoLevel = iLevel;
 	return;
 }
@@ -3622,29 +3622,29 @@ function displayMissionObjective(int iVerbose, Canvas C, int YL, int XPos, out i
 	local bool bDisplay, bDisplayFailure;
 
 	// End:0x29
-	if(__NFUN_151__(iSubGroup, 0))
+	if((iSubGroup > 0))
 	{
-		szIndent = __NFUN_112__(__NFUN_112__("   (", string(iSubGroup)), ") ");		
+		szIndent = (("   (", string(iSubGroup)) $ ") " $ ???);		
 	}
 	else
 	{
 		szIndent = "   ";
 	}
 	// End:0xFA
-	if(__NFUN_153__(iVerbose, 1))
+	if((iVerbose >= 1))
 	{
 		// End:0xF7
 		if(mo.m_bVisibleInMenu)
 		{
 			bDisplay = true;
 			// End:0xA0
-			if(__NFUN_122__(mo.m_szDescriptionInMenu, ""))
+			if((mo.m_szDescriptionInMenu == ""))
 			{
 				szDesc = "warning: m_szDescriptionInMenu is empty";				
 			}
 			else
 			{
-				szDesc = __NFUN_112__(__NFUN_112__(__NFUN_112__("", mo.m_szDescriptionInMenu), "= "), Localize("Game", mo.m_szDescriptionInMenu, Outer.Level.GetMissionObjLocFile(mo)));
+				szDesc = ((("" $ mo.m_szDescriptionInMenu) $ "= ") $ Localize("Game", mo.m_szDescriptionInMenu, Outer.Level.GetMissionObjLocFile(mo)));
 			}
 		}		
 	}
@@ -3656,60 +3656,60 @@ function displayMissionObjective(int iVerbose, Canvas C, int YL, int XPos, out i
 	// End:0x25A
 	if(bDisplay)
 	{
-		C.__NFUN_2623__(float(XPos), float(YPos));
+		C.SetPos(float(XPos), float(YPos));
 		// End:0x1A2
 		if(mo.isCompleted())
 		{
-			C.__NFUN_2626__(0, byte(255), 0);
-			C.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", szIndent), ""), string(iLine)), "- "), szDesc), " : completed"));			
+			C.SetDrawColor(0, byte(255), 0);
+			C.DrawText((((((("" $ szIndent) $ "") $ string(iLine)) $ "- ") $ szDesc) $ " : completed"));			
 		}
 		else
 		{
 			// End:0x207
 			if(mo.isFailed())
 			{
-				C.__NFUN_2626__(byte(255), 0, 0);
-				C.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", szIndent), ""), string(iLine)), "- "), szDesc), " : failed"));				
+				C.SetDrawColor(byte(255), 0, 0);
+				C.DrawText((((((("" $ szIndent) $ "") $ string(iLine)) $ "- ") $ szDesc) $ " : failed"));				
 			}
 			else
 			{
-				C.__NFUN_2626__(byte(255), byte(255), byte(255));
-				C.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", szIndent), ""), string(iLine)), "- "), szDesc));
+				C.SetDrawColor(byte(255), byte(255), byte(255));
+				C.DrawText(((((("" $ szIndent) $ "") $ string(iLine)) $ "- ") $ szDesc));
 			}
 		}
-		__NFUN_161__(YPos, YL);
+		(YPos += YL);
 	}
 	// End:0x339
-	if(__NFUN_153__(iVerbose, 2))
+	if((iVerbose >= 2))
 	{
-		C.__NFUN_2623__(float(XPos), float(YPos));
+		C.SetPos(float(XPos), float(YPos));
 		// End:0x339
-		if(__NFUN_123__(mo.m_szDescriptionFailure, ""))
+		if((mo.m_szDescriptionFailure != ""))
 		{
-			C.__NFUN_2626__(0, byte(255), 0);
-			C.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", szIndent), ""), string(iLine)), " ("), mo.m_szDescriptionFailure), "= "), Localize("Game", mo.m_szDescriptionFailure, Outer.Level.GetMissionObjLocFile(mo))), ")"));
-			__NFUN_161__(YPos, YL);
+			C.SetDrawColor(0, byte(255), 0);
+			C.DrawText((((((((("" $ szIndent) $ "") $ string(iLine)) $ " (")) $ "= ") $ Localize("Game", mo.m_szDescriptionFailure, Outer.Level.GetMissionObjLocFile(mo))) $ ")" $ ???));
+			(YPos += YL);
 			bDisplay = true;
 		}
 	}
 	// End:0x349
 	if(bDisplay)
 	{
-		__NFUN_163__(iLine);
+		(++iLine);
 	}
 	// End:0x3DA
-	if(__NFUN_151__(mo.GetNumSubMission(), 0))
+	if((mo.GetNumSubMission() > 0))
 	{
-		__NFUN_165__(iSubGroup);
+		(iSubGroup++);
 		i = 0;
 		J0x36C:
 
 		// End:0x3DA [Loop If]
-		if(__NFUN_150__(i, mo.GetNumSubMission()))
+		if((i < mo.GetNumSubMission()))
 		{
-			iSubLine = __NFUN_146__(i, 1);
+			iSubLine = (i + 1);
 			displayMissionObjective(iVerbose, C, YL, XPos, YPos, iSubLine, mo.GetSubMissionObjective(i), iSubGroup);
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x36C;
 		}
@@ -3729,91 +3729,91 @@ function displayGameInfo(Canvas C)
 	XPos = 10;
 	YL = 13;
 	C.Font = C.MedFont;
-	C.__NFUN_2623__(float(XPos), float(YPos));
-	C.__NFUN_465__(__NFUN_112__(__NFUN_112__(__NFUN_112__("GameMode = ", Outer.Level.GetGameTypeClassName(R6AbstractGameInfo(Outer.Level.Game).m_szGameTypeFlag)), " m_bGameOver="), string(R6AbstractGameInfo(Outer.Level.Game).m_bGameOver)));
-	__NFUN_161__(YPos, YL);
+	C.SetPos(float(XPos), float(YPos));
+	C.DrawText(((("GameMode = " $ Outer.Level.GetGameTypeClassName(R6AbstractGameInfo(Outer.Level.Game).m_szGameTypeFlag)) $ " m_bGameOver=") $ string(R6AbstractGameInfo(Outer.Level.Game).m_bGameOver)));
+	(YPos += YL);
 	iDiffLevel = -1;
 	// End:0x149
-	if(__NFUN_119__(R6AbstractGameInfo(Outer.Level.Game), none))
+	if((R6AbstractGameInfo(Outer.Level.Game) != none))
 	{
 		iDiffLevel = R6AbstractGameInfo(Outer.Level.Game).m_iDiffLevel;		
 	}
 	else
 	{
 		// End:0x17F
-		if(__NFUN_119__(Outer.GameReplicationInfo, none))
+		if((Outer.GameReplicationInfo != none))
 		{
 			iDiffLevel = R6GameReplicationInfo(Outer.GameReplicationInfo).m_iDiffLevel;
 		}
 	}
 	// End:0x275
-	if(__NFUN_155__(iDiffLevel, -1))
+	if((iDiffLevel != -1))
 	{
-		C.__NFUN_2623__(float(XPos), float(YPos));
+		C.SetPos(float(XPos), float(YPos));
 		switch(iDiffLevel)
 		{
 			// End:0x1DF
 			case 1:
-				C.__NFUN_465__("Diffilculty level: recruit ");
+				C.DrawText("Diffilculty level: recruit ");
 				// End:0x269
 				break;
 			// End:0x210
 			case 2:
-				C.__NFUN_465__("Diffilculty level: veteran ");
+				C.DrawText("Diffilculty level: veteran ");
 				// End:0x269
 				break;
 			// End:0x23E
 			case 3:
-				C.__NFUN_465__("Diffilculty level: elite");
+				C.DrawText("Diffilculty level: elite");
 				// End:0x269
 				break;
 			// End:0xFFFF
 			default:
-				C.__NFUN_465__("Diffilculty level: unknown");
+				C.DrawText("Diffilculty level: unknown");
 				break;
 		}
-		__NFUN_161__(YPos, YL);
+		(YPos += YL);
 	}
 	moMgr = R6AbstractGameInfo(Outer.Level.Game).m_missionMgr;
 	// End:0x2AD
-	if(__NFUN_114__(moMgr, none))
+	if((moMgr == none))
 	{
 		return;
 	}
 	// End:0x330
-	if(__NFUN_154__(int(moMgr.m_eMissionObjectiveStatus), int(1)))
+	if((int(moMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
-		C.__NFUN_2626__(0, byte(255), 0);
-		C.__NFUN_2623__(float(XPos), float(YPos));
-		C.__NFUN_465__("-- MISSION OBJECTIVE: COMPLETED");
-		__NFUN_161__(YPos, YL);		
+		C.SetDrawColor(0, byte(255), 0);
+		C.SetPos(float(XPos), float(YPos));
+		C.DrawText("-- MISSION OBJECTIVE: COMPLETED");
+		(YPos += YL);		
 	}
 	else
 	{
 		// End:0x3B0
-		if(__NFUN_154__(int(moMgr.m_eMissionObjectiveStatus), int(2)))
+		if((int(moMgr.m_eMissionObjectiveStatus) == int(2)))
 		{
-			C.__NFUN_2626__(byte(255), 0, 0);
-			C.__NFUN_2623__(float(XPos), float(YPos));
-			C.__NFUN_465__("-- MISSION OBJECTIVE: FAILED");
-			__NFUN_161__(YPos, YL);			
+			C.SetDrawColor(byte(255), 0, 0);
+			C.SetPos(float(XPos), float(YPos));
+			C.DrawText("-- MISSION OBJECTIVE: FAILED");
+			(YPos += YL);			
 		}
 		else
 		{
-			C.__NFUN_2626__(byte(255), byte(255), byte(255));
-			C.__NFUN_2623__(float(XPos), float(YPos));
-			C.__NFUN_465__("-- MISSION OBJECTIVE: in progress ");
-			__NFUN_161__(YPos, YL);
+			C.SetDrawColor(byte(255), byte(255), byte(255));
+			C.SetPos(float(XPos), float(YPos));
+			C.DrawText("-- MISSION OBJECTIVE: in progress ");
+			(YPos += YL);
 		}
 	}
 	i = 0;
 	J0x425:
 
 	// End:0x4BA [Loop If]
-	if(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length))
+	if((i < moMgr.m_aMissionObjectives.Length))
 	{
 		// End:0x4A8
-		if(__NFUN_129__(moMgr.m_aMissionObjectives[i].m_bMoralityObjective))
+		if((!moMgr.m_aMissionObjectives[i].m_bMoralityObjective))
 		{
 			iSubGroup = 0;
 			displayMissionObjective(m_iGameInfoLevel, C, YL, XPos, YPos, iLine, moMgr.m_aMissionObjectives[i], iSubGroup);
@@ -3823,31 +3823,31 @@ function displayGameInfo(Canvas C)
 		bMoralityObj = true;
 		J0x4B0:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x425;
 	}
 	// End:0x52E
 	if(bMoralityObj)
 	{
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
-		C.__NFUN_2623__(float(XPos), float(YPos));
-		C.__NFUN_465__("-- MISSION OBJECTIVE: morality ");
-		__NFUN_161__(YPos, YL);
+		C.SetDrawColor(byte(255), byte(255), byte(255));
+		C.SetPos(float(XPos), float(YPos));
+		C.DrawText("-- MISSION OBJECTIVE: morality ");
+		(YPos += YL);
 	}
 	iLine = 0;
 	i = 0;
 	J0x53C:
 
 	// End:0x5BD [Loop If]
-	if(__NFUN_150__(i, moMgr.m_aMissionObjectives.Length))
+	if((i < moMgr.m_aMissionObjectives.Length))
 	{
 		// End:0x5B3
 		if(moMgr.m_aMissionObjectives[i].m_bMoralityObjective)
 		{
 			displayMissionObjective(m_iGameInfoLevel, C, YL, XPos, YPos, iLine, moMgr.m_aMissionObjectives[i], iSubGroup);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x53C;
 	}
@@ -3857,36 +3857,36 @@ function displayGameInfo(Canvas C)
 exec function RendPawnState()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRendPawnState = __NFUN_129__(m_bRendPawnState);
-	Outer.Player.Console.Message(__NFUN_112__("RendPawnState ", string(m_bRendPawnState)), 6.0000000);
+	m_bRendPawnState = (!m_bRendPawnState);
+	Outer.Player.Console.Message(("RendPawnState " $ string(m_bRendPawnState)), 6.0000000);
 	return;
 }
 
 exec function RendFocus()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bRendFocus = __NFUN_129__(m_bRendFocus);
-	Outer.Player.Console.Message(__NFUN_112__("RendFocus ", string(m_bRendFocus)), 6.0000000);
+	m_bRendFocus = (!m_bRendFocus);
+	Outer.Player.Console.Message(("RendFocus " $ string(m_bRendFocus)), 6.0000000);
 	return;
 }
 
 exec function SetRoundTime(int iSec)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x28
-	if(__NFUN_114__(R6Pawn(Outer.Pawn), none))
+	if((R6Pawn(Outer.Pawn) == none))
 	{
 		return;
 	}
@@ -3897,12 +3897,12 @@ exec function SetRoundTime(int iSec)
 exec function SetBetTime(int iSec)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x28
-	if(__NFUN_114__(R6Pawn(Outer.Pawn), none))
+	if((R6Pawn(Outer.Pawn) == none))
 	{
 		return;
 	}
@@ -3913,7 +3913,7 @@ exec function SetBetTime(int iSec)
 exec function ToggleCollision()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -3927,23 +3927,23 @@ exec function TestGetFrame()
 	local R6Pawn P;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	Outer.Player.Console.Message("TestGetFrame", 6.0000000);
-	__NFUN_231__("*** was skeleton updated *** ");
+	Log("*** was skeleton updated *** ");
 	// End:0xC3
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', P)
+	foreach Outer.AllActors(Class'R6Engine.R6Pawn', P)
 	{
 		// End:0xA8
-		if(P.__NFUN_1501__())
+		if(P.WasSkeletonUpdated())
 		{
-			__NFUN_231__(__NFUN_112__(string(P.Name), " yes "));
+			Log((string(P.Name) $ " yes "));
 			// End:0xC2
 			continue;
 		}
-		__NFUN_231__(__NFUN_112__(string(P.Name), " no "));		
+		Log((string(P.Name) $ " no "));		
 	}	
 	return;
 }
@@ -3957,37 +3957,37 @@ exec function CheckFrienship()
 	local Pawn p1, p2;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	Outer.Player.Console.Message("CheckFrienship", 6.0000000);
-	__NFUN_231__(" Check Friend/Enemy and Neutral relationship");
+	Log(" Check Friend/Enemy and Neutral relationship");
 	// End:0x2B7
-	foreach Outer.__NFUN_304__(Class'Engine.Pawn', p1)
+	foreach Outer.AllActors(Class'Engine.Pawn', p1)
 	{
 		// End:0x2B5
-		foreach Outer.__NFUN_304__(Class'Engine.Pawn', p2)
+		foreach Outer.AllActors(Class'Engine.Pawn', p2)
 		{
 			// End:0x125
-			if(__NFUN_114__(p1, p2))
+			if((p1 == p2))
 			{
 				// End:0x121
 				if(p1.IsEnemy(p2))
 				{
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("warning: ", string(p1.Name)), " is enemy with himself   m_iTeam="), string(p1.m_iTeam)));
+					Log(((("warning: " $ string(p1.Name)) $ " is enemy with himself   m_iTeam=") $ string(p1.m_iTeam)));
 				}
 				continue;				
 			}
 			// End:0x1E4
-			if(__NFUN_130__(p1.IsFriend(p2), p1.IsEnemy(p2)))
+			if((p1.IsFriend(p2) && p1.IsEnemy(p2)))
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("warning: ", string(p1.Name)), " is friend and enemy with "), string(p2.Name)), " m_iTeamA="), string(p1.m_iTeam)), " m_iTeamB="), string(p2.m_iTeam)));
+				Log(((((((("warning: " $ string(p1.Name)) $ " is friend and enemy with ") $ string(p2.Name)) $ " m_iTeamA=") $ string(p1.m_iTeam)) $ " m_iTeamB=") $ string(p2.m_iTeam)));
 			}
 			// End:0x2B4
-			if(__NFUN_130__(p1.IsFriend(p2), p2.IsEnemy(p1)))
+			if((p1.IsFriend(p2) && p2.IsEnemy(p1)))
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("warning: ", string(p1.Name)), " is friend with "), string(p2.Name)), ", and B consider A enemy    m_iTeamA="), string(p1.m_iTeam)), " m_iTeamB="), string(p2.m_iTeam)));
+				Log(((((((("warning: " $ string(p1.Name)) $ " is friend with ") $ string(p2.Name)) $ ") $ string(p1.m_iTeam)) $ " m_iTeamB=") $ string(p2.m_iTeam)));
 			}			
 		}				
 	}	
@@ -4000,19 +4000,19 @@ exec function LogFriendlyFire()
 	local bool bAI;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	Outer.Player.Console.Message("LogFriendlyFire", 6.0000000);
-	__NFUN_231__("LOGGING FriendlyFire");
+	Log("LOGGING FriendlyFire");
 	// End:0x122
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Pawn', p1)
+	foreach Outer.AllActors(Class'R6Engine.R6Pawn', p1)
 	{
-		bAI = p1.Controller.__NFUN_303__('AIController');
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(string(p1.Name), " AI Controller="), string(bAI)));
-		__NFUN_231__(__NFUN_112__("    m_bCanFireFriends =", string(p1.m_bCanFireFriends)));
-		__NFUN_231__(__NFUN_112__("    m_bCanFireNeutrals=", string(p1.m_bCanFireNeutrals)));		
+		bAI = p1.Controller.IsA('AIController');
+		Log(((string(p1.Name) $ " AI Controller=") $ string(bAI)));
+		Log(("    m_bCanFireFriends =" $ string(p1.m_bCanFireFriends)));
+		Log(("    m_bCanFireNeutrals=" $ string(p1.m_bCanFireNeutrals)));		
 	}	
 	return;
 }
@@ -4027,29 +4027,29 @@ exec function LogFriendship(optional bool bCheckIfAlive)
 	local int iFriends, iEnemy, iNeutrals;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Outer.Player.Console.Message(__NFUN_112__("LogFrienship bCheckIfAlive=", string(bCheckIfAlive)), 6.0000000);
-	__NFUN_231__(__NFUN_112__("LOGGING FRIENSHIP bCheckIfAlive=", string(bCheckIfAlive)));
+	Outer.Player.Console.Message(("LogFrienship bCheckIfAlive=" $ string(bCheckIfAlive)), 6.0000000);
+	Log(("LOGGING FRIENSHIP bCheckIfAlive=" $ string(bCheckIfAlive)));
 	// End:0x3A9
-	foreach Outer.__NFUN_304__(Class'Engine.Pawn', p1)
+	foreach Outer.AllActors(Class'Engine.Pawn', p1)
 	{
 		// End:0xC4
-		if(__NFUN_130__(bCheckIfAlive, __NFUN_129__(p1.IsAlive())))
+		if((bCheckIfAlive && (!p1.IsAlive())))
 		{
 			continue;			
 		}
 		iEnemy = 0;
 		iFriends = 0;
 		iNeutrals = 0;
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("", string(p1.Name)), "(team="), string(p1.m_iTeam)), ") is friend with: "));
+		Log((((("" $ string(p1.Name)) $ "(team=")) $ ") is friend with: " $ ???));
 		// End:0x1D0
-		foreach Outer.__NFUN_304__(Class'Engine.Pawn', p2)
+		foreach Outer.AllActors(Class'Engine.Pawn', p2)
 		{
 			// End:0x14D
-			if(__NFUN_114__(p1, p2))
+			if((p1 == p2))
 			{
 				continue;				
 			}
@@ -4057,19 +4057,19 @@ exec function LogFriendship(optional bool bCheckIfAlive)
 			if(p1.IsFriend(p2))
 			{
 				// End:0x1CF
-				if(__NFUN_132__(__NFUN_129__(bCheckIfAlive), __NFUN_130__(bCheckIfAlive, p2.IsAlive())))
+				if(((!bCheckIfAlive) || (bCheckIfAlive && p2.IsAlive())))
 				{
-					__NFUN_165__(iFriends);
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   ", string(p2.Name)), "(team="), string(p2.m_iTeam)), ")"));
+					(iFriends++);
+					Log((((("   " $ string(p2.Name)) $ "(team=")) $ ")" $ ???));
 				}
 			}			
 		}		
-		__NFUN_231__("  is enemy with: ");
+		Log("  is enemy with: ");
 		// End:0x295
-		foreach Outer.__NFUN_304__(Class'Engine.Pawn', p2)
+		foreach Outer.AllActors(Class'Engine.Pawn', p2)
 		{
 			// End:0x212
-			if(__NFUN_114__(p1, p2))
+			if((p1 == p2))
 			{
 				continue;				
 			}
@@ -4077,19 +4077,19 @@ exec function LogFriendship(optional bool bCheckIfAlive)
 			if(p1.IsEnemy(p2))
 			{
 				// End:0x294
-				if(__NFUN_132__(__NFUN_129__(bCheckIfAlive), __NFUN_130__(bCheckIfAlive, p2.IsAlive())))
+				if(((!bCheckIfAlive) || (bCheckIfAlive && p2.IsAlive())))
 				{
-					__NFUN_165__(iEnemy);
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   ", string(p2.Name)), "(team="), string(p2.m_iTeam)), ")"));
+					(iEnemy++);
+					Log((((("   " $ string(p2.Name)) $ "(team=")) $ ")" $ ???));
 				}
 			}			
 		}		
-		__NFUN_231__("   is neutral with: ");
+		Log("   is neutral with: ");
 		// End:0x35D
-		foreach Outer.__NFUN_304__(Class'Engine.Pawn', p2)
+		foreach Outer.AllActors(Class'Engine.Pawn', p2)
 		{
 			// End:0x2DA
-			if(__NFUN_114__(p1, p2))
+			if((p1 == p2))
 			{
 				continue;				
 			}
@@ -4097,14 +4097,14 @@ exec function LogFriendship(optional bool bCheckIfAlive)
 			if(p1.IsNeutral(p2))
 			{
 				// End:0x35C
-				if(__NFUN_132__(__NFUN_129__(bCheckIfAlive), __NFUN_130__(bCheckIfAlive, p2.IsAlive())))
+				if(((!bCheckIfAlive) || (bCheckIfAlive && p2.IsAlive())))
 				{
-					__NFUN_165__(iNeutrals);
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   ", string(p2.Name)), "(team="), string(p2.m_iTeam)), ")"));
+					(iNeutrals++);
+					Log((((("   " $ string(p2.Name)) $ "(team=")) $ ")" $ ???));
 				}
 			}			
 		}		
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("-- Total friends= ", string(iFriends)), " Enemy="), string(iEnemy)), " Neutrals="), string(iNeutrals)));		
+		Log(((((("-- Total friends= " $ string(iFriends)) $ " Enemy=") $ string(iEnemy)) $ " Neutrals=") $ string(iNeutrals)));		
 	}	
 	return;
 }
@@ -4112,13 +4112,13 @@ exec function LogFriendship(optional bool bCheckIfAlive)
 exec function ToggleMissionLog()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	m_bToggleMissionLog = __NFUN_129__(m_bToggleMissionLog);
+	m_bToggleMissionLog = (!m_bToggleMissionLog);
 	R6AbstractGameInfo(Outer.Level.Game).m_missionMgr.ToggleLog(m_bToggleMissionLog);
-	Outer.Player.Console.Message(__NFUN_112__("ToggleMissionLog =", string(m_bToggleMissionLog)), 6.0000000);
+	Outer.Player.Console.Message(("ToggleMissionLog =" $ string(m_bToggleMissionLog)), 6.0000000);
 	return;
 }
 
@@ -4127,14 +4127,14 @@ exec function listzone()
 	local R6AbstractInsertionZone aZone;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x5A
-	foreach Outer.__NFUN_304__(Class'R6Abstract.R6AbstractInsertionZone', aZone)
+	foreach Outer.AllActors(Class'R6Abstract.R6AbstractInsertionZone', aZone)
 	{
-		Outer.logX(__NFUN_112__("R6AbstractInsertionZone: ", string(aZone)));		
+		Outer.logX(("R6AbstractInsertionZone: " $ string(aZone)));		
 	}	
 	return;
 }
@@ -4145,25 +4145,25 @@ function ListActors(Class<Actor> ClassName, optional bool bNumber, optional int 
 	local Actor aActor;
 
 	// End:0x16
-	if(__NFUN_154__(iMax, 0))
+	if((iMax == 0))
 	{
 		iMax = 99999;
 	}
 	// End:0xA0
-	foreach Outer.__NFUN_304__(ClassName, aActor)
+	foreach Outer.AllActors(ClassName, aActor)
 	{
-		__NFUN_165__(i);
+		(i++);
 		// End:0x9F
-		if(__NFUN_130__(__NFUN_153__(i, iFrom), __NFUN_152__(i, iMax)))
+		if(((i >= iFrom) && (i <= iMax)))
 		{
 			// End:0x89
 			if(bNumber)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("  ", string(i)), "- "), string(aActor.Name)));
+				Log(((("  " $ string(i)) $ "- ") $ string(aActor.Name)));
 				// End:0x9F
 				continue;
 			}
-			__NFUN_231__(__NFUN_112__("", string(aActor.Name)));
+			Log(("" $ string(aActor.Name)));
 		}		
 	}	
 	return;
@@ -4172,33 +4172,33 @@ function ListActors(Class<Actor> ClassName, optional bool bNumber, optional int 
 exec function GetNbTerro()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Outer.Player.Console.Message(__NFUN_112__("Number of terro=", string(GetActorsNb(Class'R6Engine.R6Terrorist', true))), 6.0000000);
+	Outer.Player.Console.Message(("Number of terro=" $ string(GetActorsNb(Class'R6Engine.R6Terrorist', true))), 6.0000000);
 	return;
 }
 
 exec function GetNbHostage()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Outer.Player.Console.Message(__NFUN_112__("Number of hostage=", string(GetActorsNb(Class'R6Engine.R6Hostage', true))), 6.0000000);
+	Outer.Player.Console.Message(("Number of hostage=" $ string(GetActorsNb(Class'R6Engine.R6Hostage', true))), 6.0000000);
 	return;
 }
 
 exec function GetNbRainbow()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Outer.Player.Console.Message(__NFUN_112__("Number of rainbow=", string(GetActorsNb(Class'R6Engine.R6Rainbow', true))), 6.0000000);
+	Outer.Player.Console.Message(("Number of rainbow=" $ string(GetActorsNb(Class'R6Engine.R6Rainbow', true))), 6.0000000);
 	return;
 }
 
@@ -4208,14 +4208,14 @@ function int GetActorsNb(Class<Actor> ClassName, optional bool bNoLog)
 	local Actor aActor;
 
 	// End:0x21
-	foreach Outer.__NFUN_304__(ClassName, aActor)
+	foreach Outer.AllActors(ClassName, aActor)
 	{
-		__NFUN_165__(i);		
+		(i++);		
 	}	
 	// End:0x42
-	if(__NFUN_129__(bNoLog))
+	if((!bNoLog))
 	{
-		__NFUN_231__(__NFUN_112__(" total= ", string(i)));
+		Log((" total= " $ string(i)));
 	}
 	return i;
 	return;
@@ -4224,7 +4224,7 @@ function int GetActorsNb(Class<Actor> ClassName, optional bool bNoLog)
 exec function logActReset()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4236,16 +4236,16 @@ exec function logActReset()
 exec function logAct(int iNb, optional bool bNumber)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	ListActors(Class'Engine.Actor', bNumber, m_iCounterLog, __NFUN_146__(m_iCounterLog, iNb));
-	__NFUN_161__(m_iCounterLog, iNb);
+	ListActors(Class'Engine.Actor', bNumber, m_iCounterLog, (m_iCounterLog + iNb));
+	(m_iCounterLog += iNb);
 	// End:0x66
-	if(__NFUN_153__(m_iCounterLog, m_iCounterLogMax))
+	if((m_iCounterLog >= m_iCounterLogMax))
 	{
-		__NFUN_231__(__NFUN_112__(" total= ", string(GetActorsNb(Class'Engine.Actor', true))));
+		Log((" total= " $ string(GetActorsNb(Class'Engine.Actor', true))));
 	}
 	return;
 }
@@ -4257,28 +4257,28 @@ exec function ListEscort()
 	local name szFollow;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__("List Escorted Hostages");
-	__NFUN_231__("======================");
+	Log("List Escorted Hostages");
+	Log("======================");
 	// End:0x1E1
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Rainbow', R)
+	foreach Outer.AllActors(Class'R6Engine.R6Rainbow', R)
 	{
 		// End:0x74
-		if(__NFUN_114__(R.m_aEscortedHostage[0], none))
+		if((R.m_aEscortedHostage[0] == none))
 		{
 			continue;			
 		}
-		__NFUN_231__(__NFUN_112__("Rainbow= ", string(R.Name)));
+		Log(("Rainbow= " $ string(R.Name)));
 		J0x93:
 
 		// End:0x1E0 [Loop If]
-		if(__NFUN_130__(__NFUN_150__(i, 4), __NFUN_119__(R.m_aEscortedHostage[i], none)))
+		if(((i < 4) && (R.m_aEscortedHostage[i] != none)))
 		{
 			// End:0xF5
-			if(__NFUN_114__(R.m_aEscortedHostage[i].m_controller.m_pawnToFollow, none))
+			if((R.m_aEscortedHostage[i].m_controller.m_pawnToFollow == none))
 			{
 				szFollow = 'None';				
 			}
@@ -4286,13 +4286,13 @@ exec function ListEscort()
 			{
 				szFollow = R.m_aEscortedHostage[i].m_controller.m_pawnToFollow.Name;
 			}
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("   ", string(R.m_aEscortedHostage[i].Name)), " follows "), string(szFollow)));
+			Log(((("   " $ string(R.m_aEscortedHostage[i].Name)) $ " follows ") $ string(szFollow)));
 			// End:0x1D6
-			if(__NFUN_119__(R, R.m_aEscortedHostage[i].m_escortedByRainbow))
+			if((R != R.m_aEscortedHostage[i].m_escortedByRainbow))
 			{
-				__NFUN_231__(__NFUN_112__("    Warning: wrong owner=", string(R.m_aEscortedHostage[i].m_escortedByRainbow.Name)));
+				Log(("    Warning: wrong owner=" $ string(R.m_aEscortedHostage[i].m_escortedByRainbow.Name)));
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x93;
 		}		
@@ -4303,23 +4303,23 @@ exec function ListEscort()
 exec function DbgPlayerStates()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Outer.GameReplicationInfo.m_bShowPlayerStates = __NFUN_129__(Outer.GameReplicationInfo.m_bShowPlayerStates);
-	Outer.Player.Console.Message(__NFUN_112__("DbgPlayerStates = ", string(Outer.GameReplicationInfo.m_bShowPlayerStates)), 6.0000000);
+	Outer.GameReplicationInfo.m_bShowPlayerStates = (!Outer.GameReplicationInfo.m_bShowPlayerStates);
+	Outer.Player.Console.Message(("DbgPlayerStates = " $ string(Outer.GameReplicationInfo.m_bShowPlayerStates)), 6.0000000);
 	return;
 }
 
 exec function ForceKillResult(int iKillResult)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__(__NFUN_112__("New Force Kill = ", string(iKillResult)));
+	Log(("New Force Kill = " $ string(iKillResult)));
 	R6Pawn(Outer.Pawn).ServerForceKillResult(iKillResult);
 	return;
 }
@@ -4327,11 +4327,11 @@ exec function ForceKillResult(int iKillResult)
 exec function ForceStunResult(int iStunResult)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	__NFUN_231__(__NFUN_112__("New Force Stun = ", string(iStunResult)));
+	Log(("New Force Stun = " $ string(iStunResult)));
 	R6Pawn(Outer.Pawn).ServerForceStunResult(iStunResult);
 	return;
 }
@@ -4339,18 +4339,18 @@ exec function ForceStunResult(int iStunResult)
 exec function CallDebug()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	R6PlayerController(Outer.Pawn.Controller).__NFUN_1840__();
+	R6PlayerController(Outer.Pawn.Controller).DebugFunction();
 	return;
 }
 
 exec function shaketime(float fTime)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4361,7 +4361,7 @@ exec function shaketime(float fTime)
 exec function MaxShake(float f)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4372,7 +4372,7 @@ exec function MaxShake(float f)
 exec function MaxShakeTime(float f)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4384,23 +4384,23 @@ exec function MaxShakeTime(float f)
 exec function PlayDare(string SoundName)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Outer.__NFUN_264__(Sound(DynamicLoadObject(SoundName, Class'Engine.Sound')));
+	Outer.PlaySound(Sound(DynamicLoadObject(SoundName, Class'Engine.Sound')));
 	return;
 }
 
 exec function ResetRainbow()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x5E
-	if(__NFUN_154__(int(Outer.Pawn.m_ePawnType), int(1)))
+	if((int(Outer.Pawn.m_ePawnType) == int(1)))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_TeamManager.ResetRainbowTeam();
 	}
@@ -4410,144 +4410,144 @@ exec function ResetRainbow()
 exec function HitValue(int iWhich, float fValue)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x4A
-	if(__NFUN_154__(iWhich, 1))
+	if((iWhich == 1))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.iBlurIntensity = int(fValue);
 	}
 	// End:0x86
-	if(__NFUN_154__(iWhich, 2))
+	if((iWhich == 2))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.fReturnTime = fValue;
 	}
 	// End:0xC2
-	if(__NFUN_154__(iWhich, 3))
+	if((iWhich == 3))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.fRollMax = fValue;
 	}
 	// End:0xFE
-	if(__NFUN_154__(iWhich, 4))
+	if((iWhich == 4))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.fRollSpeed = fValue;
 	}
 	// End:0x13A
-	if(__NFUN_154__(iWhich, 5))
+	if((iWhich == 5))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.fWaveTime = fValue;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("New Hit Value = Blur:", string(R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.iBlurIntensity)), " Return Time:"), string(R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.fReturnTime)));
+	Log(((("New Hit Value = Blur:" $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.iBlurIntensity)) $ " Return Time:") $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactHit.fReturnTime)));
 	return;
 }
 
 exec function StunValue(int iWhich, float fValue)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x4A
-	if(__NFUN_154__(iWhich, 1))
+	if((iWhich == 1))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.iBlurIntensity = int(fValue);
 	}
 	// End:0x86
-	if(__NFUN_154__(iWhich, 2))
+	if((iWhich == 2))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.fReturnTime = fValue;
 	}
 	// End:0xC2
-	if(__NFUN_154__(iWhich, 3))
+	if((iWhich == 3))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.fRollMax = fValue;
 	}
 	// End:0xFE
-	if(__NFUN_154__(iWhich, 4))
+	if((iWhich == 4))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.fRollSpeed = fValue;
 	}
 	// End:0x13A
-	if(__NFUN_154__(iWhich, 5))
+	if((iWhich == 5))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.fWaveTime = fValue;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("New Stun Value: = Blur:", string(R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.iBlurIntensity)), " Return Time:"), string(R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.fReturnTime)));
+	Log(((("New Stun Value: = Blur:" $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.iBlurIntensity)) $ " Return Time:") $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactStun.fReturnTime)));
 	return;
 }
 
 exec function DazedValue(int iWhich, float fValue)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x4A
-	if(__NFUN_154__(iWhich, 1))
+	if((iWhich == 1))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.iBlurIntensity = int(fValue);
 	}
 	// End:0x86
-	if(__NFUN_154__(iWhich, 2))
+	if((iWhich == 2))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.fReturnTime = fValue;
 	}
 	// End:0xC2
-	if(__NFUN_154__(iWhich, 3))
+	if((iWhich == 3))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.fRollMax = fValue;
 	}
 	// End:0xFE
-	if(__NFUN_154__(iWhich, 4))
+	if((iWhich == 4))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.fRollSpeed = fValue;
 	}
 	// End:0x13A
-	if(__NFUN_154__(iWhich, 5))
+	if((iWhich == 5))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.fWaveTime = fValue;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("New Dazed Value: = Blur:", string(R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.iBlurIntensity)), " Return Time:"), string(R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.fReturnTime)));
+	Log(((("New Dazed Value: = Blur:" $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.iBlurIntensity)) $ " Return Time:") $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactDazed.fReturnTime)));
 	return;
 }
 
 exec function KOValue(int iWhich, float fValue)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x4A
-	if(__NFUN_154__(iWhich, 1))
+	if((iWhich == 1))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.iBlurIntensity = int(fValue);
 	}
 	// End:0x86
-	if(__NFUN_154__(iWhich, 2))
+	if((iWhich == 2))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.fReturnTime = fValue;
 	}
 	// End:0xC2
-	if(__NFUN_154__(iWhich, 3))
+	if((iWhich == 3))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.fRollMax = fValue;
 	}
 	// End:0xFE
-	if(__NFUN_154__(iWhich, 4))
+	if((iWhich == 4))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.fRollSpeed = fValue;
 	}
 	// End:0x13A
-	if(__NFUN_154__(iWhich, 5))
+	if((iWhich == 5))
 	{
 		R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.fWaveTime = fValue;
 	}
-	__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("New KO Value: = Blur:", string(R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.iBlurIntensity)), " Return Time:"), string(R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.fReturnTime)));
+	Log(((("New KO Value: = Blur:" $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.iBlurIntensity)) $ " Return Time:") $ string(R6PlayerController(Outer.Pawn.Controller).m_stImpactKO.fReturnTime)));
 	return;
 }
 
@@ -4558,7 +4558,7 @@ exec function KOValue(int iWhich, float fValue)
 exec function r6walk(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4569,7 +4569,7 @@ exec function r6walk(float speed)
 exec function r6walkbackstrafe(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4580,7 +4580,7 @@ exec function r6walkbackstrafe(float speed)
 exec function r6run(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4591,7 +4591,7 @@ exec function r6run(float speed)
 exec function r6runbackstrafe(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4602,7 +4602,7 @@ exec function r6runbackstrafe(float speed)
 exec function r6cwalk(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4613,7 +4613,7 @@ exec function r6cwalk(float speed)
 exec function r6cwalkbackstrafe(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4624,7 +4624,7 @@ exec function r6cwalkbackstrafe(float speed)
 exec function r6crun(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4635,7 +4635,7 @@ exec function r6crun(float speed)
 exec function r6crunbackstrafe(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4646,7 +4646,7 @@ exec function r6crunbackstrafe(float speed)
 exec function r6prone(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4657,7 +4657,7 @@ exec function r6prone(float speed)
 exec function R6Ladder(float speed)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4668,12 +4668,12 @@ exec function R6Ladder(float speed)
 exec function Armor(int armorType)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x71
-	if(__NFUN_154__(armorType, 0))
+	if((armorType == 0))
 	{
 		R6Pawn(Outer.Pawn).m_eArmorType = 1;
 		R6Pawn(Outer.Pawn).ClientMessage("Armor Class is now Light");		
@@ -4681,7 +4681,7 @@ exec function Armor(int armorType)
 	else
 	{
 		// End:0xD6
-		if(__NFUN_154__(armorType, 1))
+		if((armorType == 1))
 		{
 			R6Pawn(Outer.Pawn).m_eArmorType = 2;
 			R6Pawn(Outer.Pawn).ClientMessage("Armor Class is now Medium");			
@@ -4701,27 +4701,27 @@ exec function GetNetMode()
 	{
 		// End:0x3B
 		case NM_Standalone:
-			__NFUN_231__(__NFUN_112__(string(self), " is NM_Standalone"));
+			Log((string(self) $ " is NM_Standalone"));
 			// End:0xBC
 			break;
 		// End:0x62
 		case NM_DedicatedServer:
-			__NFUN_231__(__NFUN_112__(string(self), " is NM_DedicatedServer"));
+			Log((string(self) $ " is NM_DedicatedServer"));
 			// End:0xBC
 			break;
 		// End:0x86
 		case NM_ListenServer:
-			__NFUN_231__(__NFUN_112__(string(self), " is NM_ListenServer"));
+			Log((string(self) $ " is NM_ListenServer"));
 			// End:0xBC
 			break;
 		// End:0xA4
 		case NM_Client:
-			__NFUN_231__(__NFUN_112__(string(self), " is NM_Client"));
+			Log((string(self) $ " is NM_Client"));
 			// End:0xBC
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__(__NFUN_112__(string(self), " is other"));
+			Log((string(self) $ " is other"));
 			// End:0xBC
 			break;
 			break;
@@ -4735,7 +4735,7 @@ exec function GetNetMode()
 exec function UpdateBones()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4750,7 +4750,7 @@ exec function UpdateBones()
 exec function R6FixCamera()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4766,7 +4766,7 @@ exec function R6FixCamera()
 exec function R6FreeCamera()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4777,7 +4777,7 @@ exec function R6FreeCamera()
 exec function LogBandWidth(bool bLogBandWidth)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4791,15 +4791,15 @@ exec function NetLogServer()
 	local Actor ActorIterator;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x67
-	foreach Outer.__NFUN_304__(Class'Engine.Actor', ActorIterator)
+	foreach Outer.AllActors(Class'Engine.Actor', ActorIterator)
 	{
 		// End:0x66
-		if(__NFUN_242__(ActorIterator.m_bLogNetTraffic, true))
+		if((ActorIterator.m_bLogNetTraffic == true))
 		{
 			R6PlayerController(Outer.Pawn.Controller).ServerNetLogActor(ActorIterator);
 		}		
@@ -4810,13 +4810,13 @@ exec function NetLogServer()
 exec function LogActors()
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	R6PlayerController(Outer.Pawn.Controller).DoLogActors();
 	// End:0x7B
-	if(__NFUN_155__(int(Outer.Level.NetMode), int(NM_Standalone)))
+	if((int(Outer.Level.NetMode) != int(NM_Standalone)))
 	{
 		R6PlayerController(Outer.Pawn.Controller).ServerLogActors();
 	}
@@ -4834,14 +4834,14 @@ exec function Azimut()
 function DoWalk(Pawn aPawn)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	R6PlayerController(Outer.Pawn.Controller).bCheatFlying = false;
 	aPawn.UnderWaterTime = aPawn.default.UnderWaterTime;
-	aPawn.__NFUN_262__(true, true, true);
-	aPawn.__NFUN_3970__(1);
+	aPawn.SetCollision(true, true, true);
+	aPawn.SetPhysics(1);
 	aPawn.bCollideWorld = true;
 	R6PlayerController(Outer.Pawn.Controller).ClientReStart();
 	return;
@@ -4850,16 +4850,16 @@ function DoWalk(Pawn aPawn)
 function DoGhost(Pawn aPawn)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	aPawn.UnderWaterTime = -1.0000000;
 	R6PlayerController(Outer.Pawn.Controller).ClientMessage("You feel ethereal");
-	aPawn.__NFUN_262__(false, false, false);
+	aPawn.SetCollision(false, false, false);
 	aPawn.bCollideWorld = false;
 	R6PlayerController(Outer.Pawn.Controller).bCheatFlying = true;
-	R6PlayerController(Outer.Pawn.Controller).__NFUN_113__('PlayerFlying');
+	R6PlayerController(Outer.Pawn.Controller).GotoState('PlayerFlying');
 	R6PlayerController(Outer.Pawn.Controller).ClientGotoState('PlayerFlying', 'None');
 	return;
 }
@@ -4904,46 +4904,46 @@ exec function Alkoliq()
 exec function RainbowSkill(float fMul)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x27
-	if(__NFUN_178__(fMul, 0.0000000))
+	if((fMul <= 0.0000000))
 	{
 		fMul = 1.0000000;
 	}
 	Outer.Level.m_fRainbowSkillMultiplier = fMul;
-	Outer.Player.Console.Message(__NFUN_112__("Rainbow skill multiplier set to ", string(Outer.Level.m_fRainbowSkillMultiplier)), 6.0000000);
+	Outer.Player.Console.Message(("Rainbow skill multiplier set to " $ string(Outer.Level.m_fRainbowSkillMultiplier)), 6.0000000);
 	return;
 }
 
 exec function TerroSkill(float fMul)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0x27
-	if(__NFUN_178__(fMul, 0.0000000))
+	if((fMul <= 0.0000000))
 	{
 		fMul = 1.0000000;
 	}
 	Outer.Level.m_fTerroSkillMultiplier = fMul;
-	Outer.Player.Console.Message(__NFUN_112__("Terrorist skill multiplier set to ", string(Outer.Level.m_fTerroSkillMultiplier)), 6.0000000);
+	Outer.Player.Console.Message(("Terrorist skill multiplier set to " $ string(Outer.Level.m_fTerroSkillMultiplier)), 6.0000000);
 	return;
 }
 
 exec function ShowSkill(float fMul)
 {
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
-	Outer.Player.Console.Message(__NFUN_112__("Rainbow skill multiplier set to ", string(Outer.Level.m_fRainbowSkillMultiplier)), 6.0000000);
-	Outer.Player.Console.Message(__NFUN_112__("Terrorist skill multiplier set to ", string(Outer.Level.m_fTerroSkillMultiplier)), 6.0000000);
+	Outer.Player.Console.Message(("Rainbow skill multiplier set to " $ string(Outer.Level.m_fRainbowSkillMultiplier)), 6.0000000);
+	Outer.Player.Console.Message(("Terrorist skill multiplier set to " $ string(Outer.Level.m_fTerroSkillMultiplier)), 6.0000000);
 	return;
 }
 
@@ -4953,18 +4953,18 @@ exec function regroupHostages()
 	local R6Hostage H;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
 	// End:0xAF
-	foreach Outer.__NFUN_304__(Class'R6Engine.R6Hostage', H)
+	foreach Outer.AllActors(Class'R6Engine.R6Hostage', H)
 	{
 		// End:0xAE
-		if(__NFUN_119__(H.m_controller, none))
+		if((H.m_controller != none))
 		{
 			H.m_controller.Order_GotoExtraction(Outer.Pawn);
-			Outer.Player.Console.Message(__NFUN_112__(string(H.Name), " is regrouping on me"), 6.0000000);
+			Outer.Player.Console.Message((string(H.Name) $ " is regrouping on me"), 6.0000000);
 		}		
 	}	
 	return;
@@ -4985,7 +4985,7 @@ exec function FullAmmo()
 	local int iWeaponIndex;
 
 	// End:0x0D
-	if(__NFUN_129__(CanExec()))
+	if((!CanExec()))
 	{
 		return;
 	}
@@ -4993,10 +4993,10 @@ exec function FullAmmo()
 	J0x14:
 
 	// End:0x5B [Loop If]
-	if(__NFUN_150__(iWeaponIndex, 4))
+	if((iWeaponIndex < 4))
 	{
 		R6AbstractWeapon(R6Pawn(Outer.Pawn).m_WeaponsCarried[iWeaponIndex]).FullAmmo();
-		__NFUN_165__(iWeaponIndex);
+		(iWeaponIndex++);
 		// [Loop Continue]
 		goto J0x14;
 	}
@@ -5036,4 +5036,4 @@ defaultproperties
 // REMOVED IN 1.60: function Arsenic
 // REMOVED IN 1.60: function ToggleSoundLog
 // REMOVED IN 1.60: function pago
-// REMOVED IN 1.60: function deks
+// REMOVED IN 1.60: function deks)

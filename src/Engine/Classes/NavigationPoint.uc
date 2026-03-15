@@ -58,12 +58,12 @@ event int SpecialCost(Pawn Seeker, ReachSpec Path)
 // used for random spawning and initial placement of creatures
 event bool Accept(Actor Incoming, Actor Source)
 {
-	taken = Incoming.__NFUN_267__(Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+	taken = Incoming.SetLocation(Location);
 	// End:0x4E
 	if(taken)
 	{
 		Incoming.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
-		Incoming.__NFUN_299__(Rotation);
+		Incoming.SetRotation(Rotation);
 	}
 	Incoming.PlayTeleportEffect(true, false);
 	TriggerEvent(Event, self, Pawn(Incoming));

@@ -27,8 +27,8 @@ function bool InitActionFor(ScriptedController C)
 		}		
 	}
 	P = C.GetInstigator();
-	P.__NFUN_267__(Dest.Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-	P.__NFUN_299__(Dest.Rotation);
+	P.SetLocation(Dest.Location);
+	P.SetRotation(Dest.Rotation);
 	P.OldRotYaw = float(P.Rotation.Yaw);
 	return false;
 	return;

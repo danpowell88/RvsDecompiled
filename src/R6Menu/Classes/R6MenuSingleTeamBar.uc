@@ -302,21 +302,21 @@ function RefreshTeamBarInfo()
 		{
 			CurrentTeam = R6RainbowTeam(GameInfo.GetRainbowTeam(i));
 			// End:0x228
-			if(__NFUN_119__(CurrentTeam, none))
+			if((CurrentTeam != none))
 			{
-				__NFUN_161__(iRainbowDead, CurrentTeam.m_iMembersLost);
+				(iRainbowDead += CurrentTeam.m_iMembersLost);
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1DD;
 		}
-		__NFUN_231__(__NFUN_112__("-PLAYTEST- ", R6Console(Root.Console).Master.m_StartGameInfo.m_MapName));
-		__NFUN_231__(__NFUN_112__("-PLAYTEST- mode                 =", Root.Console.ViewportOwner.Actor.Level.GetGameTypeClassName(GameInfo.m_szGameTypeFlag)));
-		__NFUN_231__(__NFUN_112__("-PLAYTEST- difficulty level     =", string(GameInfo.m_iDiffLevel)));
-		__NFUN_231__(__NFUN_112__("-PLAYTEST- mission time length  =", m_TimeMissionValue.Text));
-		__NFUN_231__(__NFUN_112__("-PLAYTEST- terro neutralized    =", string(m_iTotalNeutralized)));
-		__NFUN_231__(__NFUN_112__("-PLAYTEST- rainbow killed       =", string(iRainbowDead)));
-		__NFUN_231__(__NFUN_112__("-PLAYTEST- nb of retries        =", string(R6GameInfo(GetLevel().Game).m_iNbOfRestart)));
+		Log(("-PLAYTEST- " $ R6Console(Root.Console).Master.m_StartGameInfo.m_MapName));
+		Log(("-PLAYTEST- mode                 =" $ Root.Console.ViewportOwner.Actor.Level.GetGameTypeClassName(GameInfo.m_szGameTypeFlag)));
+		Log(("-PLAYTEST- difficulty level     =" $ string(GameInfo.m_iDiffLevel)));
+		Log(("-PLAYTEST- mission time length  =" $ m_TimeMissionValue.Text));
+		Log(("-PLAYTEST- terro neutralized    =" $ string(m_iTotalNeutralized)));
+		Log(("-PLAYTEST- rainbow killed       =" $ string(iRainbowDead)));
+		Log(("-PLAYTEST- nb of retries        =" $ string(R6GameInfo(GetLevel().Game).m_iNbOfRestart)));
 	}
 	return;
 }
@@ -334,25 +334,25 @@ function AddItems()
 	J0x59:
 
 	// End:0x7A1 [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		CurrentTeam = R6RainbowTeam(GameInfo.GetRainbowTeam(i));
 		// End:0x797
-		if(__NFUN_119__(CurrentTeam, none))
+		if((CurrentTeam != none))
 		{
 			Y = 0;
 			J0x96:
 
 			// End:0x797 [Loop If]
-			if(__NFUN_150__(Y, __NFUN_146__(CurrentTeam.m_iMemberCount, CurrentTeam.m_iMembersLost)))
+			if((Y < (CurrentTeam.m_iMemberCount + CurrentTeam.m_iMembersLost)))
 			{
 				NewItem = R6WindowListIGPlayerInfoItem(m_IGPlayerInfoListBox.Items.Append(m_IGPlayerInfoListBox.ListClass));
 				NewItem.m_iRainbowTeam = i;
 				NewItem.stTagCoord[0].fXPos = 0.0000000;
 				NewItem.stTagCoord[0].fWidth = m_fTeamcolorWidth;
 				NewItem.szPlName = CurrentTeam.m_Team[Y].m_CharacterName;
-				NewItem.stTagCoord[1].fXPos = __NFUN_174__(__NFUN_174__(NewItem.stTagCoord[0].fXPos, NewItem.stTagCoord[0].fWidth), float(m_INameTextPadding));
-				NewItem.stTagCoord[1].fWidth = __NFUN_175__(m_fRainbowWidth, float(m_INameTextPadding));
+				NewItem.stTagCoord[1].fXPos = ((NewItem.stTagCoord[0].fXPos + NewItem.stTagCoord[0].fWidth) + float(m_INameTextPadding));
+				NewItem.stTagCoord[1].fWidth = (m_fRainbowWidth - float(m_INameTextPadding));
 				switch(CurrentTeam.m_Team[Y].m_eHealth)
 				{
 					// End:0x215
@@ -379,59 +379,59 @@ function AddItems()
 					default:
 						break;
 				}
-				NewItem.stTagCoord[2].fXPos = __NFUN_174__(NewItem.stTagCoord[1].fXPos, NewItem.stTagCoord[1].fWidth);
+				NewItem.stTagCoord[2].fXPos = (NewItem.stTagCoord[1].fXPos + NewItem.stTagCoord[1].fWidth);
 				NewItem.stTagCoord[2].fWidth = m_fHealthWidth;
 				NewItem.iKills = CurrentTeam.m_Team[Y].m_iKills;
-				NewItem.stTagCoord[3].fXPos = __NFUN_174__(NewItem.stTagCoord[2].fXPos, NewItem.stTagCoord[2].fWidth);
+				NewItem.stTagCoord[3].fXPos = (NewItem.stTagCoord[2].fXPos + NewItem.stTagCoord[2].fWidth);
 				NewItem.stTagCoord[3].fWidth = m_fSkullWidth;
 				// End:0x3EB
-				if(__NFUN_151__(CurrentTeam.m_Team[Y].m_iBulletsFired, 0))
+				if((CurrentTeam.m_Team[Y].m_iBulletsFired > 0))
 				{
-					NewItem.iEfficiency = __NFUN_249__(int(__NFUN_171__(__NFUN_172__(float(CurrentTeam.m_Team[Y].m_iBulletsHit), float(CurrentTeam.m_Team[Y].m_iBulletsFired)), float(100))), 100);					
+					NewItem.iEfficiency = Min(int(((float(CurrentTeam.m_Team[Y].m_iBulletsHit) / float(CurrentTeam.m_Team[Y].m_iBulletsFired)) * float(100))), 100);					
 				}
 				else
 				{
 					NewItem.iEfficiency = 0;
 				}
-				NewItem.stTagCoord[4].fXPos = __NFUN_174__(NewItem.stTagCoord[3].fXPos, NewItem.stTagCoord[3].fWidth);
+				NewItem.stTagCoord[4].fXPos = (NewItem.stTagCoord[3].fXPos + NewItem.stTagCoord[3].fWidth);
 				NewItem.stTagCoord[4].fWidth = m_fEfficiencyWidth;
 				NewItem.iRoundsFired = CurrentTeam.m_Team[Y].m_iBulletsFired;
-				NewItem.stTagCoord[5].fXPos = __NFUN_174__(NewItem.stTagCoord[4].fXPos, NewItem.stTagCoord[4].fWidth);
+				NewItem.stTagCoord[5].fXPos = (NewItem.stTagCoord[4].fXPos + NewItem.stTagCoord[4].fWidth);
 				NewItem.stTagCoord[5].fWidth = m_fShotsWidth;
 				NewItem.iRoundsHit = CurrentTeam.m_Team[Y].m_iBulletsHit;
-				NewItem.stTagCoord[6].fXPos = __NFUN_174__(NewItem.stTagCoord[5].fXPos, NewItem.stTagCoord[5].fWidth);
+				NewItem.stTagCoord[6].fXPos = (NewItem.stTagCoord[5].fXPos + NewItem.stTagCoord[5].fWidth);
 				NewItem.stTagCoord[6].fWidth = m_fHitsWidth;
 				NewItem.m_iOperativeID = CurrentTeam.m_Team[Y].m_iOperativeID;
-				__NFUN_161__(m_iTotalRoundsFired, NewItem.iRoundsFired);
-				__NFUN_161__(m_iTotalRoundsTaken, NewItem.iRoundsHit);
+				(m_iTotalRoundsFired += NewItem.iRoundsFired);
+				(m_iTotalRoundsTaken += NewItem.iRoundsHit);
 				// End:0x78D
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("CurrentTeam = ", string(CurrentTeam)), " y = "), string(Y)));
-					__NFUN_231__(__NFUN_168__("currentTeam.m_Team[y].m_CharacterName", CurrentTeam.m_Team[Y].m_CharacterName));
-					__NFUN_231__(__NFUN_168__("currentTeam.m_Team[y].m_eHealth", string(CurrentTeam.m_Team[Y].m_eHealth)));
-					__NFUN_231__(__NFUN_168__("currentTeam.m_Team[y]. m_iKills", string(CurrentTeam.m_Team[Y].m_iKills)));
-					__NFUN_231__(__NFUN_168__("currentTeam.m_Team[y].m_iBulletsFired", string(CurrentTeam.m_Team[Y].m_iBulletsFired)));
-					__NFUN_231__(__NFUN_168__("currentTeam.m_Team[y].m_iBulletsHit", string(CurrentTeam.m_Team[Y].m_iBulletsHit)));
-					__NFUN_231__(__NFUN_168__("NewItem.iEfficiency", string(NewItem.iEfficiency)));
+					Log(((("CurrentTeam = " $ string(CurrentTeam)) $ " y = ") $ string(Y)));
+					Log(("currentTeam.m_Team[y].m_CharacterName" @ CurrentTeam.m_Team[Y].m_CharacterName));
+					Log(("currentTeam.m_Team[y].m_eHealth" @ string(CurrentTeam.m_Team[Y].m_eHealth)));
+					Log(("currentTeam.m_Team[y]. m_iKills" @ string(CurrentTeam.m_Team[Y].m_iKills)));
+					Log(("currentTeam.m_Team[y].m_iBulletsFired" @ string(CurrentTeam.m_Team[Y].m_iBulletsFired)));
+					Log(("currentTeam.m_Team[y].m_iBulletsHit" @ string(CurrentTeam.m_Team[Y].m_iBulletsHit)));
+					Log(("NewItem.iEfficiency" @ string(NewItem.iEfficiency)));
 				}
-				__NFUN_165__(Y);
+				(Y++);
 				// [Loop Continue]
 				goto J0x96;
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x59;
 	}
 	// End:0x7B6
-	if(__NFUN_154__(m_iTotalRoundsFired, 0))
+	if((m_iTotalRoundsFired == 0))
 	{
 		m_iTotalEfficiency = 0;		
 	}
 	else
 	{
-		m_iTotalEfficiency = __NFUN_249__(int(__NFUN_171__(__NFUN_172__(float(m_iTotalRoundsTaken), float(m_iTotalRoundsFired)), float(100))), 100);
+		m_iTotalEfficiency = Min(int(((float(m_iTotalRoundsTaken) / float(m_iTotalRoundsFired)) * float(100))), 100);
 	}
 	return;
 }
@@ -455,13 +455,13 @@ function ClearListOfItem()
 //===============================================================================
 function float GetPlayerListBorderHeight()
 {
-	return __NFUN_174__(__NFUN_174__(__NFUN_174__(16.0000000, float(m_IFirstItempYOffset)), float(14)), float(15));
+	return (((16.0000000 + float(m_IFirstItempYOffset)) + float(14)) + float(15));
 	return;
 }
 
 function CreateIGPListBox()
 {
-	m_IGPlayerInfoListBox = R6WindowSimpleIGPlayerListBox(CreateWindow(Class'R6Window.R6WindowSimpleIGPlayerListBox', 0.0000000, __NFUN_174__(16.0000000, float(m_IFirstItempYOffset)), WinWidth, __NFUN_175__(WinHeight, GetPlayerListBorderHeight()), self));
+	m_IGPlayerInfoListBox = R6WindowSimpleIGPlayerListBox(CreateWindow(Class'R6Window.R6WindowSimpleIGPlayerListBox', 0.0000000, (16.0000000 + float(m_IFirstItempYOffset)), WinWidth, (WinHeight - GetPlayerListBorderHeight()), self));
 	m_IGPlayerInfoListBox.SetCornerType(1);
 	m_IGPlayerInfoListBox.m_Font = Root.Fonts[11];
 	return;
@@ -469,20 +469,20 @@ function CreateIGPListBox()
 
 function Resize()
 {
-	m_IGPlayerInfoListBox.WinTop = __NFUN_174__(16.0000000, float(m_IFirstItempYOffset));
-	m_IGPlayerInfoListBox.SetSize(WinWidth, __NFUN_175__(WinHeight, GetPlayerListBorderHeight()));
+	m_IGPlayerInfoListBox.WinTop = (16.0000000 + float(m_IFirstItempYOffset));
+	m_IGPlayerInfoListBox.SetSize(WinWidth, (WinHeight - GetPlayerListBorderHeight()));
 	m_TimeMissionTitle.WinWidth = m_fBottomTitleWidth;
 	m_TimeMissionValue.WinLeft = m_TimeMissionTitle.WinWidth;
-	m_TimeMissionValue.WinWidth = __NFUN_175__(WinWidth, m_TimeMissionTitle.WinWidth);
+	m_TimeMissionValue.WinWidth = (WinWidth - m_TimeMissionTitle.WinWidth);
 	m_BottomTitle.WinWidth = m_fBottomTitleWidth;
 	m_KillLabel.WinWidth = m_fSkullWidth;
-	m_KillLabel.WinLeft = __NFUN_174__(m_BottomTitle.WinLeft, m_BottomTitle.WinWidth);
+	m_KillLabel.WinLeft = (m_BottomTitle.WinLeft + m_BottomTitle.WinWidth);
 	m_EfficiencyLabel.WinWidth = m_fEfficiencyWidth;
-	m_EfficiencyLabel.WinLeft = __NFUN_174__(m_KillLabel.WinLeft, m_KillLabel.WinWidth);
+	m_EfficiencyLabel.WinLeft = (m_KillLabel.WinLeft + m_KillLabel.WinWidth);
 	m_RoundsFiredLabel.WinWidth = m_fShotsWidth;
-	m_RoundsFiredLabel.WinLeft = __NFUN_174__(m_EfficiencyLabel.WinLeft, m_EfficiencyLabel.WinWidth);
+	m_RoundsFiredLabel.WinLeft = (m_EfficiencyLabel.WinLeft + m_EfficiencyLabel.WinWidth);
 	m_RoundsTakenLabel.WinWidth = m_fHitsWidth;
-	m_RoundsTakenLabel.WinLeft = __NFUN_174__(m_RoundsFiredLabel.WinLeft, m_RoundsFiredLabel.WinWidth);
+	m_RoundsTakenLabel.WinLeft = (m_RoundsFiredLabel.WinLeft + m_RoundsFiredLabel.WinWidth);
 	m_TimeMissionTitle.WinWidth = m_fBottomTitleWidth;
 	m_TimeMissionTitle.m_bRefresh = true;
 	m_BottomTitle.WinWidth = m_fBottomTitleWidth;

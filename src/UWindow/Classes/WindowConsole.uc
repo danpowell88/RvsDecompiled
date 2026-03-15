@@ -407,22 +407,22 @@ function NotifyLevelChange()
 	// End:0x2C
 	if(bShowLog)
 	{
-		__NFUN_231__("WindowConsole NotifyLevelChange");
+		Log("WindowConsole NotifyLevelChange");
 	}
 	// End:0x5F
-	if(__NFUN_254__(__NFUN_284__(), 'Typing'))
+	if((GetStateName() == 'Typing'))
 	{
 		// End:0x58
-		if(__NFUN_123__(TypedStr, ""))
+		if((TypedStr != ""))
 		{
 			TypedStr = "";
 			HistoryCur = HistoryTop;
 		}
-		__NFUN_113__(ConsoleState);
+		GotoState(ConsoleState);
 	}
 	bLevelChange = true;
 	// End:0x81
-	if(__NFUN_119__(Root, none))
+	if((Root != none))
 	{
 		Root.NotifyBeforeLevelChange();
 	}
@@ -434,10 +434,10 @@ function NotifyAfterLevelChange()
 	// End:0x31
 	if(bShowLog)
 	{
-		__NFUN_231__("WindowConsole NotifyAfterLevelChange");
+		Log("WindowConsole NotifyAfterLevelChange");
 	}
 	// End:0x5E
-	if(__NFUN_130__(bLevelChange, __NFUN_119__(Root, none)))
+	if((bLevelChange && (Root != none)))
 	{
 		bLevelChange = false;
 		Root.NotifyAfterLevelChange();
@@ -461,9 +461,9 @@ state UWindowCanPlay
 		// End:0x27
 		if(bShowLog)
 		{
-			__NFUN_231__("UWindowCanPlay::BeginState");
+			Log("UWindowCanPlay::BeginState");
 		}
-		ConsoleState = __NFUN_284__();
+		ConsoleState = GetStateName();
 		return;
 	}
 
@@ -471,7 +471,7 @@ state UWindowCanPlay
 	{
 		global.Tick(Delta);
 		// End:0x2A
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.DoTick(Delta);
 		}
@@ -483,10 +483,10 @@ state UWindowCanPlay
 		// End:0x27
 		if(bShowLog)
 		{
-			__NFUN_231__("UWindowCanPlay::PostRender");
+			Log("UWindowCanPlay::PostRender");
 		}
 		// End:0x43
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.bUWindowActive = true;
 		}
@@ -499,10 +499,10 @@ state UWindowCanPlay
 		// End:0x44
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("WindowConsole state UWindowCanPlay KeyType Key", string(Key)));
+			Log(("WindowConsole state UWindowCanPlay KeyType Key" @ string(Key)));
 		}
 		// End:0x72
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.WindowEvent(10, none, MouseX, MouseY, int(Key));
 		}
@@ -518,14 +518,14 @@ state UWindowCanPlay
 		// End:0x64
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("WindowConsole state UWindowCanPlay KeyEvent eAction", string(Action)), "Key"), string(Key)));
+			Log(((("WindowConsole state UWindowCanPlay KeyEvent eAction" @ string(Action)) @ "Key") @ string(Key)));
 		}
 		switch(Action)
 		{
 			// End:0xA1
 			case 3:
 				// End:0x9E
-				if(__NFUN_119__(Root, none))
+				if((Root != none))
 				{
 					Root.WindowEvent(8, none, MouseX, MouseY, int(k));
 				}
@@ -534,7 +534,7 @@ state UWindowCanPlay
 			// End:0x141
 			case 1:
 				// End:0xE5
-				if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+				if((int(k) == int(ViewportOwner.Actor.GetKey("Console"))))
 				{
 					// End:0xDD
 					if(bLocked)
@@ -554,7 +554,7 @@ state UWindowCanPlay
 					// End:0xFFFF
 					default:
 						// End:0x13B
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(9, none, MouseX, MouseY, int(k));
 						}
@@ -571,7 +571,7 @@ state UWindowCanPlay
 				break;
 		}
 		// End:0x16E
-		if(__NFUN_130__(__NFUN_153__(int(k), int(48)), __NFUN_152__(int(k), int(57))))
+		if(((int(k) >= int(48)) && (int(k) <= int(57))))
 		{
 			return true;			
 		}
@@ -590,7 +590,7 @@ state UWindow
 	{
 		global.Tick(Delta);
 		// End:0x2A
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.DoTick(Delta);
 		}
@@ -602,10 +602,10 @@ state UWindow
 		// End:0x35
 		if(bShowLog)
 		{
-			__NFUN_231__("Window Console state UWindow::PostRender");
+			Log("Window Console state UWindow::PostRender");
 		}
 		// End:0x51
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.bUWindowActive = true;
 		}
@@ -618,10 +618,10 @@ state UWindow
 		// End:0x3D
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__("WindowConsole state UWindow KeyType Key", string(Key)));
+			Log(("WindowConsole state UWindow KeyType Key" @ string(Key)));
 		}
 		// End:0x6B
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.WindowEvent(10, none, MouseX, MouseY, int(Key));
 		}
@@ -637,7 +637,7 @@ state UWindow
 		// End:0x5D
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("WindowConsole state UWindow KeyEvent eAction", string(Action)), "Key"), string(Key)));
+			Log(((("WindowConsole state UWindow KeyEvent eAction" @ string(Action)) @ "Key") @ string(Key)));
 		}
 		switch(Action)
 		{
@@ -648,7 +648,7 @@ state UWindow
 					// End:0xA6
 					case 1:
 						// End:0xA3
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(1, none, MouseX, MouseY, int(k));
 						}
@@ -657,7 +657,7 @@ state UWindow
 					// End:0xDC
 					case 2:
 						// End:0xD9
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(5, none, MouseX, MouseY, int(k));
 						}
@@ -666,7 +666,7 @@ state UWindow
 					// End:0x112
 					case 4:
 						// End:0x10F
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(3, none, MouseX, MouseY, int(k));
 						}
@@ -675,7 +675,7 @@ state UWindow
 					// End:0xFFFF
 					default:
 						// End:0x143
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(8, none, MouseX, MouseY, int(k));
 						}
@@ -687,7 +687,7 @@ state UWindow
 			// End:0x2ED
 			case 1:
 				// End:0x1CD
-				if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+				if((int(k) == int(ViewportOwner.Actor.GetKey("Console"))))
 				{
 					// End:0x18C
 					if(bShowConsole)
@@ -719,7 +719,7 @@ state UWindow
 					// End:0x214
 					case 27:
 						// End:0x211
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.CloseActiveWindow();
 						}
@@ -728,7 +728,7 @@ state UWindow
 					// End:0x24A
 					case 1:
 						// End:0x247
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(0, none, MouseX, MouseY, int(k));
 						}
@@ -737,7 +737,7 @@ state UWindow
 					// End:0x280
 					case 2:
 						// End:0x27D
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(4, none, MouseX, MouseY, int(k));
 						}
@@ -746,7 +746,7 @@ state UWindow
 					// End:0x2B6
 					case 4:
 						// End:0x2B3
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(2, none, MouseX, MouseY, int(k));
 						}
@@ -755,7 +755,7 @@ state UWindow
 					// End:0xFFFF
 					default:
 						// End:0x2E7
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(9, none, MouseX, MouseY, int(k));
 						}
@@ -770,12 +770,12 @@ state UWindow
 				{
 					// End:0x31A
 					case 228:
-						MouseX = __NFUN_174__(MouseX, __NFUN_171__(MouseScale, Delta));
+						MouseX = (MouseX + (MouseScale * Delta));
 						// End:0x33E
 						break;
 					// End:0x33B
 					case 229:
-						MouseY = __NFUN_175__(MouseY, __NFUN_171__(MouseScale, Delta));
+						MouseY = (MouseY - (MouseScale * Delta));
 						// End:0x33E
 						break;
 					// End:0xFFFF

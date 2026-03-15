@@ -483,12 +483,12 @@ function SwitchToNextAction()
 			break;
 		// End:0x11E
 		case 4:
-			__NFUN_113__('PA_ExecuteLoopRandomAnim');
+			GotoState('PA_ExecuteLoopRandomAnim');
 			// End:0x130
 			break;
 		// End:0x12D
 		case 5:
-			__NFUN_113__('PA_ExecuteToggleDevice');
+			GotoState('PA_ExecuteToggleDevice');
 			// End:0x130
 			break;
 		// End:0xFFFF
@@ -518,19 +518,19 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		return 0;
 	}
 	// End:0x136
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	if(((int(Level.NetMode) == int(NM_Standalone)) || (int(Role) == int(ROLE_Authority))))
 	{
 		// End:0x78
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("m_iCurrentHitPoints = ", string(m_iCurrentHitPoints)), " Damage: "), string(iKillValue)));
+			Log(((("m_iCurrentHitPoints = " $ string(m_iCurrentHitPoints)) $ " Damage: ") $ string(iKillValue)));
 		}
-		m_iCurrentHitPoints = __NFUN_250__(__NFUN_147__(m_iCurrentHitPoints, iKillValue), 0);
-		fPercentage = float(__NFUN_145__(__NFUN_144__(m_iCurrentHitPoints, 100), m_iHitPoints));
+		m_iCurrentHitPoints = Max((m_iCurrentHitPoints - iKillValue), 0);
+		fPercentage = float(((m_iCurrentHitPoints * 100) / m_iHitPoints));
 		// End:0xE5
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("New Hit Point = ", string(m_iCurrentHitPoints)), " Percentage: "), string(fPercentage)));
+			Log(((("New Hit Point = " $ string(m_iCurrentHitPoints)) $ " Percentage: ") $ string(fPercentage)));
 		}
 		SetNewDamageState(fPercentage);
 		// End:0x136
@@ -542,7 +542,7 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		}
 	}
 	// End:0x14B
-	if(__NFUN_242__(m_bBulletGoThrough, true))
+	if((m_bBulletGoThrough == true))
 	{
 		return iKillValue;		
 	}
@@ -564,7 +564,7 @@ simulated event SetNewDamageState(float fPercentage)
 	local Actor SpawnedActor;
 
 	// End:0x3F
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer))))
+	if(((int(Level.NetMode) == int(NM_ListenServer)) || (int(Level.NetMode) == int(NM_DedicatedServer))))
 	{
 		m_fNetDamagePercentage = fPercentage;
 	}
@@ -573,153 +573,153 @@ simulated event SetNewDamageState(float fPercentage)
 	J0x51:
 
 	// End:0xBC [Loop If]
-	if(__NFUN_150__(iState, m_StateList.Length))
+	if((iState < m_StateList.Length))
 	{
 		stState = m_StateList[iState];
 		// End:0xB2
-		if(__NFUN_130__(__NFUN_178__(fPercentage, stState.fDamagePercentage), __NFUN_178__(stState.fDamagePercentage, m_StateList[iState].fDamagePercentage)))
+		if(((fPercentage <= stState.fDamagePercentage) && (stState.fDamagePercentage <= m_StateList[iState].fDamagePercentage)))
 		{
 			iStateToUse = iState;
 		}
-		__NFUN_165__(iState);
+		(iState++);
 		// [Loop Continue]
 		goto J0x51;
 	}
 	// End:0xDE
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("New State = ", string(iState)));
+		Log(("New State = " $ string(iState)));
 	}
 	// End:0xEF
-	if(__NFUN_154__(iStateToUse, m_iCurrentState))
+	if((iStateToUse == m_iCurrentState))
 	{
 		return;
 	}
 	// End:0x108
-	if(__NFUN_154__(iStateToUse, __NFUN_147__(m_StateList.Length, 1)))
+	if((iStateToUse == (m_StateList.Length - 1)))
 	{
 		SetBroken();
 	}
 	// End:0x133
-	if(__NFUN_155__(iStateToUse, -1))
+	if((iStateToUse != -1))
 	{
 		stState = m_StateList[iStateToUse];
 		m_iCurrentState = iStateToUse;
 	}
-	fRandValue = __NFUN_171__(__NFUN_195__(), 100.0000000);
+	fRandValue = (FRand() * 100.0000000);
 	// End:0x1F1
-	if(__NFUN_155__(stState.RandomMeshes.Length, 0))
+	if((stState.RandomMeshes.Length != 0))
 	{
 		iRandomMesh = 0;
 		J0x15A:
 
 		// End:0x1C0 [Loop If]
-		if(__NFUN_150__(iRandomMesh, stState.RandomMeshes.Length))
+		if((iRandomMesh < stState.RandomMeshes.Length))
 		{
-			__NFUN_185__(fRandValue, stState.RandomMeshes[iRandomMesh].fPercentage);
+			(fRandValue -= stState.RandomMeshes[iRandomMesh].fPercentage);
 			// End:0x1B6
-			if(__NFUN_176__(fRandValue, float(0)))
+			if((fRandValue < float(0)))
 			{
 				ChangeStaticMesh(stState.RandomMeshes[iRandomMesh].Mesh);
 				// [Explicit Break]
 				goto J0x1C0;
 			}
-			__NFUN_165__(iRandomMesh);
+			(iRandomMesh++);
 			// [Loop Continue]
 			goto J0x15A;
 		}
 		J0x1C0:
 
 		// End:0x1F1
-		if(__NFUN_177__(fRandValue, float(0)))
+		if((fRandValue > float(0)))
 		{
-			ChangeStaticMesh(stState.RandomMeshes[__NFUN_147__(stState.RandomMeshes.Length, 1)].Mesh);
+			ChangeStaticMesh(stState.RandomMeshes[(stState.RandomMeshes.Length - 1)].Mesh);
 		}
 	}
 	// End:0x321
-	if(__NFUN_155__(stState.RandomSkins.Length, 0))
+	if((stState.RandomSkins.Length != 0))
 	{
 		iRandomSkin = 0;
 		J0x209:
 
 		// End:0x2AB [Loop If]
-		if(__NFUN_150__(iRandomSkin, stState.RandomSkins.Length))
+		if((iRandomSkin < stState.RandomSkins.Length))
 		{
-			__NFUN_185__(fRandValue, stState.RandomSkins[iRandomSkin].fPercentage);
+			(fRandValue -= stState.RandomSkins[iRandomSkin].fPercentage);
 			// End:0x2A1
-			if(__NFUN_176__(fRandValue, float(0)))
+			if((fRandValue < float(0)))
 			{
 				iSkin = 0;
 				J0x24E:
 
 				// End:0x29E [Loop If]
-				if(__NFUN_150__(iSkin, stState.RandomSkins[iRandomSkin].Skin.Length))
+				if((iSkin < stState.RandomSkins[iRandomSkin].Skin.Length))
 				{
 					SetSkin(stState.RandomSkins[iRandomSkin].Skin[iSkin], iSkin);
-					__NFUN_165__(iSkin);
+					(iSkin++);
 					// [Loop Continue]
 					goto J0x24E;
 				}
 				// [Explicit Break]
 				goto J0x2AB;
 			}
-			__NFUN_165__(iRandomSkin);
+			(iRandomSkin++);
 			// [Loop Continue]
 			goto J0x209;
 		}
 		J0x2AB:
 
 		// End:0x321
-		if(__NFUN_177__(fRandValue, float(0)))
+		if((fRandValue > float(0)))
 		{
 			iSkin = 0;
 			J0x2BF:
 
 			// End:0x321 [Loop If]
-			if(__NFUN_150__(iSkin, stState.RandomSkins[__NFUN_147__(stState.RandomSkins.Length, 1)].Skin.Length))
+			if((iSkin < stState.RandomSkins[(stState.RandomSkins.Length - 1)].Skin.Length))
 			{
-				SetSkin(stState.RandomSkins[__NFUN_147__(stState.RandomSkins.Length, 1)].Skin[iSkin], iSkin);
-				__NFUN_165__(iSkin);
+				SetSkin(stState.RandomSkins[(stState.RandomSkins.Length - 1)].Skin[iSkin], iSkin);
+				(iSkin++);
 				// [Loop Continue]
 				goto J0x2BF;
 			}
 		}
 	}
 	// End:0x411
-	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) != int(NM_DedicatedServer)))
 	{
 		iActor = 0;
 		J0x341:
 
 		// End:0x411 [Loop If]
-		if(__NFUN_150__(iActor, stState.ActorList.Length))
+		if((iActor < stState.ActorList.Length))
 		{
 			// End:0x374
-			if(__NFUN_114__(stState.ActorList[iActor].ActorToSpawn, none))
+			if((stState.ActorList[iActor].ActorToSpawn == none))
 			{
 				// [Explicit Continue]
 				goto J0x407;
 			}
 			// End:0x3B2
-			if(__NFUN_123__(stState.ActorList[iActor].HelperName, ""))
+			if((stState.ActorList[iActor].HelperName != ""))
 			{
-				__NFUN_2008__(stState.ActorList[iActor].HelperName, vTagLocation, rTagRotator);
+				GetTagInformations(stState.ActorList[iActor].HelperName, vTagLocation, rTagRotator);
 			}
-			SpawnedActor = __NFUN_278__(stState.ActorList[iActor].ActorToSpawn,,, __NFUN_215__(Location, vTagLocation), __NFUN_316__(Rotation, rTagRotator));
+			SpawnedActor = Spawn(stState.ActorList[iActor].ActorToSpawn,,, (Location + vTagLocation), (Rotation + rTagRotator));
 			// End:0x407
-			if(__NFUN_119__(SpawnedActor, none))
+			if((SpawnedActor != none))
 			{
 				SpawnedActor.RemoteRole = ROLE_None;
 			}
 			J0x407:
 
-			__NFUN_165__(iActor);
+			(iActor++);
 			// [Loop Continue]
 			goto J0x341;
 		}
 	}
 	// End:0x42C
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		PlayInteractiveObjectSound(stState);
 	}
@@ -734,10 +734,10 @@ function PlayInteractiveObjectSound(stDamageState stState)
 	J0x07:
 
 	// End:0x3B [Loop If]
-	if(__NFUN_150__(iSound, stState.SoundList.Length))
+	if((iSound < stState.SoundList.Length))
 	{
-		__NFUN_264__(stState.SoundList[iSound], 3);
-		__NFUN_165__(iSound);
+		PlaySound(stState.SoundList[iSound], 3);
+		(iSound++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -795,10 +795,10 @@ state PA_ExecuteToggleDevice extends PA_Execute
 		J0x10:
 
 		// End:0x64 [Loop If]
-		if(__NFUN_150__(i, ioAction.m_aIOBombs.Length))
+		if((i < ioAction.m_aIOBombs.Length))
 		{
 			ioAction.m_aIOBombs[i].DetonateBomb(R6Pawn(m_InteractionOwner.Pawn));
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x10;
 		}
@@ -811,7 +811,7 @@ state PA_ExecuteToggleDevice extends PA_Execute
 
 		ioAction = R6InteractiveObjectActionToggleDevice(m_CurrentInteractiveObject);
 		// End:0x4F
-		if(__NFUN_119__(ioAction.m_iodevice, none))
+		if((ioAction.m_iodevice != none))
 		{
 			ioAction.m_iodevice.ToggleDevice(R6Pawn(m_InteractionOwner.Pawn));
 		}
@@ -853,13 +853,13 @@ state PA_ExecuteLoopRandomAnim extends PA_Execute
 	function FinishAction()
 	{
 		// End:0x18
-		if(__NFUN_153__(m_iActionIndex, m_iActionNumber))
+		if((m_iActionIndex >= m_iActionNumber))
 		{
 			SwitchToNextAction();			
 		}
 		else
 		{
-			__NFUN_113__('PA_ExecuteLoopRandomAnim');
+			GotoState('PA_ExecuteLoopRandomAnim');
 		}
 		return;
 	}
@@ -882,13 +882,13 @@ state PA_ExecutePlayEnding extends PA_Execute
 //===========================================================================================================
 	function FinishAction()
 	{
-		__NFUN_113__('PA_ExecuteGotoEnding');
+		GotoState('PA_ExecuteGotoEnding');
 		return;
 	}
 Begin:
 
 	// End:0x26
-	if(__NFUN_255__(m_vEndActionAnimName, 'None'))
+	if((m_vEndActionAnimName != 'None'))
 	{
 		m_InteractionOwner.PerformAction_PlayAnim(m_vEndActionAnimName);		
 	}
@@ -918,7 +918,7 @@ state PA_ExecuteGotoEnding extends PA_Execute
 Begin:
 
 	// End:0x33
-	if(__NFUN_119__(m_vEndActionGoto, none))
+	if((m_vEndActionGoto != none))
 	{
 		m_InteractionOwner.R6SetMovement(5);
 		m_InteractionOwner.PerformAction_Goto(m_vEndActionGoto);		
