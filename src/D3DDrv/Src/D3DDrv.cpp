@@ -908,7 +908,7 @@ static BinkCopyToBufferFunc GBinkCopyToBuffer = NULL;
 static BinkNextFrameFunc    GBinkNextFrame    = NULL;
 static BinkWaitFunc         GBinkWait         = NULL;
 
-IMPL_DIVERGE("Helper to dynamically load binkw32.dll and resolve Bink function pointers at runtime; retail links statically (binkw32.lib unavailable) — no Ghidra address (static helper not exported)")
+IMPL_DIVERGE("binkw32 proprietary API: retail links binkw32.dll statically via import table; this build uses dynamic LoadLibrary+GetProcAddress since binkw32.lib is unavailable (no Ghidra VA — static helper, not exported)")
 static UBOOL LoadBinkDLL()
 {
 	if( GBinkDLL )
@@ -939,7 +939,7 @@ static UBOOL LoadBinkDLL()
 #define BINKSURFACE32    3
 #define BINKCOPYALL      0x80000000L
 
-IMPL_DIVERGE("Ghidra 0x10009850: retail stores Bink handle in Canvas+0x80 and texture in Canvas+0x84; we use GBinkHandle/GBinkTexture globals. Also loads DLL dynamically vs retail's static import.")
+IMPL_DIVERGE("binkw32 proprietary API: Ghidra 0x10009850 — retail calls _BinkOpen@8 directly (static import), stores HBINK in Canvas+0x80, does multi-path file resolution (language/CD). Our build uses dynamic DLL load and GBinkHandle global instead of Canvas fields.")
 INT UD3DRenderDevice::OpenVideo(UCanvas* Canvas, char* VideoFile, char* AudioTrack, INT Flags)
 {
 	guard(UD3DRenderDevice::OpenVideo);
