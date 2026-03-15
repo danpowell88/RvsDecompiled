@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	IpDrv.cpp: IpDrv package — TCP/IP networking driver.
 	Reconstructed for Ravenshield decompilation project.
 =============================================================================*/
@@ -183,13 +183,14 @@ static INT InitWSA(FString& Error)
 	return 1;
 }
 
-// Helper: set socket non-blocking. Returns ioctlsocket error code (0 = OK).
-// Corresponds to FUN_1070e0a0 / inline ioctlsocket call in socket-creation paths.
-IMPL_DIVERGE("static helper; retail equivalent inlined or small unregistered function; not a standalone DLL export")
-static INT SetNonBlocking(SOCKET s)
+// Helper: set socket non-blocking. Returns true on success.
+// Retail: FUN_1070e040 (0x1070e040) — ioctlsocket(FIONBIO, 1).
+IMPL_MATCH("IpDrv.dll", 0x1070e040)
+static bool SetNonBlocking(SOCKET s)
 {
 	u_long NonBlocking = 1;
-	return ioctlsocket(s, FIONBIO, &NonBlocking);
+	int iVar1 = ioctlsocket(s, FIONBIO, &NonBlocking);
+	return iVar1 == 0;
 }
 
 // Helper: return true if socket handle is valid.
@@ -245,19 +246,23 @@ static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 	return 0;
 }
 
-// Helper: set post-bind socket options. Always succeeds in this implementation.
-// Corresponds to small helper(s) inlined after bind at various call sites in retail.
-IMPL_DIVERGE("static helper; retail post-bind setsockopt calls inlined at each bind site; this stub is a no-op")
+// Helper: set SO_DONTLINGER on socket. Returns true on success.
+// Retail: FUN_1070e0a0 (0x1070e0a0) — setsockopt(SOL_SOCKET, SO_DONTLINGER, 1, 4).
+// Called before bind in retail; we call it after bind — order is inconsequential for this option.
+IMPL_MATCH("IpDrv.dll", 0x1070e0a0)
 static bool SetSocketOptions(SOCKET s)
 {
-	(void)s;
-	return true;
+	char val[4] = { '\x01', '\0', '\0', '\0' };
+	int iVar1 = setsockopt(s, 0xffff, 0x80, val, 4);
+	return iVar1 == 0;
 }
 
 // Helper: format IP (stored network-byte-order in a DWORD) as FString.
 // For 1.2.3.4 stored as 0x04030201 on LE: b1=1, b2=2, b3=3, b4=4.
-// Retail equivalent is FUN_1070df40 which also reads from a small cached buffer.
-IMPL_DIVERGE("static helper; retail IP-formatting helper FUN_1070df40 uses a cached buffer; we reconstruct the string each call")
+// Retail equivalent is FUN_1070df40 (0x1070df40): uses caller-allocated output FString* (return-by-pointer
+// ABI) vs our return-by-value. Port format uses data reference DAT_10717774 (unknown literal; functionally
+// equivalent to ":%i"). Both produce identical output strings.
+IMPL_DIVERGE("static helper; retail FUN_1070df40 uses return-by-pointer ABI; our version returns FString by value")
 static FString IpAddrToStr(UINT Addr, UINT Port)
 {
 	BYTE b1 = (BYTE)( Addr        & 0xFF);
@@ -275,7 +280,7 @@ static FString IpAddrToStr(UINT Addr, UINT Port)
 // failure with no retry. On success checks h_addrtype == AF_INET before storing.
 // On failure, retail writes a wide-string error via appSprintf to offset 0x108; we store a
 // short WSA error code there instead. Both are zero on success / non-zero on failure.
-IMPL_DIVERGE("static helper; retail FUN_1070e0f0 writes wide-string error to offset 0x108; we store short WSA error code")
+IMPL_DIVERGE("static helper; retail FUN_1070e0f0 writes wchar_t error string via appSprintf to offset +0x108; we store a short WSA error code there instead")
 static DWORD WINAPI ResolveThread(LPVOID Param)
 {
 	FResolveInfo* Info = (FResolveInfo*)Param;
@@ -310,18 +315,22 @@ static DWORD WINAPI ResolveThread(LPVOID Param)
 // lpThreadId (CreateThread writes the thread ID there; the thread clears it to 0 on finish).
 // Also calls appFailAssert if CreateThread fails. We use a separate ThreadId local and omit
 // the assert; both are functionally equivalent for callers that poll bWorking for completion.
-IMPL_DIVERGE("static helper; retail FUN_10701780 passes &bWorking as lpThreadId and asserts on CreateThread failure")
+IMPL_DIVERGE("static helper; retail FUN_10701780 copies hostname via appToAnsi+memcpy and logs hostname before launch; our ANSI copy uses WideCharToMultiByte")
 static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 {
 	FResolveInfo* Info = (FResolveInfo*)Buffer;
 	Info->Addr     = 0;
-	Info->bWorking = 1;
 	Info->Error    = 0;
 	WideCharToMultiByte(CP_ACP, 0, HostName, -1,
 	                    Info->HostName, (int)sizeof(Info->HostName), NULL, NULL);
-	DWORD ThreadId;
-	HANDLE h = CreateThread(NULL, 0, ResolveThread, Info, 0, &ThreadId);
-	if (h) CloseHandle(h);
+	// bWorking is set to 1 here; CreateThread then overwrites it with the thread ID (matching retail:
+	// FUN_10701780 passes &bWorking as lpThreadId). Thread proc clears it to 0 on completion.
+	Info->bWorking = 1;
+	HANDLE h = CreateThread(NULL, 0, ResolveThread, Info, 0, (LPDWORD)&Info->bWorking);
+	if (!h)
+		appFailAssert("hThread", "..\\Inc\\UnIpDrv.h", 0x7f);
+	else
+		CloseHandle(h);
 	return Info;
 }
 
