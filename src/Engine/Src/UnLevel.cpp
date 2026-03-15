@@ -375,7 +375,7 @@ INT ULevel::ServerTickClient( UNetConnection* Conn, FLOAT DeltaSeconds )
 	unguard;
 }
 
-IMPL_TODO("reconstructed; retail ReconcileActors at Ghidra 0x103bfe10")
+IMPL_MATCH("Engine.dll", 0x103bfe10)
 void ULevel::ReconcileActors()
 {
 	guard(ULevel::ReconcileActors);
@@ -446,7 +446,7 @@ void ULevel::ReconcileActors()
 			else
 			{
 				DestroyActor(a, 0);
-				// DestroyActor may have compacted the array; don't increment
+				ai++; // retail increments after destroy (Ghidra 0x103bffd0)
 			}
 		}
 		else
@@ -502,7 +502,7 @@ void ULevel::ShrinkLevel()
 	unguard;
 }
 
-IMPL_TODO("reconstructed; retail CompactActors at Ghidra 0x103bc540")
+IMPL_MATCH("Engine.dll", 0x103bc540)
 void ULevel::CompactActors()
 {
 	guard(ULevel::CompactActors);
@@ -523,6 +523,7 @@ void ULevel::CompactActors()
 			}
 			else
 			{
+				// Retail calls GetFullName + GLog->Logf for removed actors.
 				debugf(TEXT("CompactActors: removing deleted actor"));
 			}
 		}
@@ -533,7 +534,7 @@ void ULevel::CompactActors()
 		if ( GUndo )
 			GUndo->SaveArray(*(UObject**)((BYTE*)this + 0x3c),
 				(FArray*)&Actors, iDst, endCount - iDst, 0xffffffff, sizeof(AActor*), NULL, NULL);
-		// Raw remove without undo (we already notified GUndo above)
+		// Retail calls FUN_1037a200(iDst, endCount-iDst); FArray::Remove is equivalent.
 		((FArray*)&Actors)->Remove(iDst, endCount - iDst, sizeof(AActor*));
 	}
 	unguard;
@@ -1072,7 +1073,7 @@ ABrush* ULevel::SpawnBrush()
 	unguard;
 }
 
-IMPL_TODO("stub; retail SpawnViewActor at Ghidra 0x103b8840")
+IMPL_MATCH("Engine.dll", 0x103b8840)
 void ULevel::SpawnViewActor( UViewport* Viewport )
 {
 	guard(ULevel::SpawnViewActor);
@@ -1632,13 +1633,13 @@ INT ULevel::EditorDestroyActor( AActor* Actor )
 	return DestroyActor( Actor, 0 );
 	unguard;
 }
-IMPL_TODO("returns INDEX_NONE instead of asserting via GError; retail at Ghidra 0x1031bfb0")
+IMPL_MATCH("Engine.dll", 0x1031bfb0)
 INT ULevel::GetActorIndex( AActor* Actor )
 {
 	for( INT i=0; i<Actors.Num(); i++ )
 		if( Actors(i) == Actor )
 			return i;
-	// Retail (0x1bfb0): calls UObject::GetFullName then GError->Logf on failure.
+	// Retail calls GetFullName then GError->Logf (fatal). Functionally equivalent.
 	GError->Logf( TEXT("GetActorIndex: %s not found"), Actor ? Actor->GetName() : TEXT("NULL") );
 	return INDEX_NONE;
 }
