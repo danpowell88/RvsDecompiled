@@ -643,7 +643,7 @@ INT UObject::IsIn( UObject* SomeOuter ) const
 	unguardSlow;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::IsInState( FName StateName )
 {
 	guard(UObject::IsInState);
@@ -1353,7 +1353,7 @@ INT UObject::GetObjectHash( FName ObjName, INT Outer )
 	return (ObjName.GetIndex() ^ Outer) & (ARRAY_COUNT(GObjHash)-1);
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; returns copy of GObjLoaded")
 TArray<UObject*> UObject::GetLoaderList()
 {
 	return GObjLoaded;
@@ -1689,7 +1689,7 @@ UState* UObject::FindState( FName StateName )
 	Property search helpers.
 -----------------------------------------------------------------------------*/
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::FindBoolProperty( FString PropertyName, INT* Value )
 {
 	guard(UObject::FindBoolProperty);
@@ -1697,7 +1697,7 @@ INT UObject::FindBoolProperty( FString PropertyName, INT* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::FindIntProperty( FString PropertyName, INT* Value )
 {
 	guard(UObject::FindIntProperty);
@@ -1705,7 +1705,7 @@ INT UObject::FindIntProperty( FString PropertyName, INT* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::FindFloatProperty( FString PropertyName, FLOAT* Value )
 {
 	guard(UObject::FindFloatProperty);
@@ -1713,7 +1713,7 @@ INT UObject::FindFloatProperty( FString PropertyName, FLOAT* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::FindFNameProperty( FString PropertyName, FName* Value )
 {
 	guard(UObject::FindFNameProperty);
@@ -1721,7 +1721,7 @@ INT UObject::FindFNameProperty( FString PropertyName, FName* Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::FindObjectProperty( FString PropertyName, UObject** Value )
 {
 	guard(UObject::FindObjectProperty);
@@ -1729,7 +1729,7 @@ INT UObject::FindObjectProperty( FString PropertyName, UObject** Value )
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::FindArrayProperty( FString PropertyName, FArray** Value, INT* ElementSize )
 {
 	guard(UObject::FindArrayProperty);
@@ -1737,7 +1737,7 @@ INT UObject::FindArrayProperty( FString PropertyName, FArray** Value, INT* Eleme
 	unguard;
 }
 
-IMPL_DIVERGE("Ravenshield-specific extension; confirmed absent from Core.dll retail export (Ghidra analysis)")
+IMPL_DIVERGE("Ravenshield-specific extension; absent from Core.dll retail; stub always returns 0")
 INT UObject::FindStructProperty( FString PropertyName, UStruct** Value )
 {
 	guard(UObject::FindStructProperty);
