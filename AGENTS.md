@@ -13,8 +13,12 @@ The blog uses Docusaurus with MDX. In blog post prose (outside of code blocks), 
 Blog post titles must follow the format `"NN. Title Text"` where NN is the post number matching the filename prefix (e.g. file `47-foo.md` → title `"47. Foo"`). Do not use alternative prefixes like "Batch NNN:", "Dev Blog #NN:", or "Post NN:".
 
 ## Blog Frontmatter Rules
+
+**Use `python tools/new_blog_post.py "Title" --tags tag1,tag2` to create every new post.**
+It handles numbering and date assignment automatically.
+
 1. **Every post MUST have a `date:` field.** A missing date causes the post to be silently omitted or mis-sorted.
-2. Use the current date and time for the value
+2. **Dates must be unique.** The script guarantees this by incrementing +15 minutes from the latest post.
 3. **Never copy frontmatter from an earlier post without updating the date.** This is the most common source of duplicates.
 4. **Every post MUST have a `slug:` field.**
 
