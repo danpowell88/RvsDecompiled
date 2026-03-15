@@ -8,6 +8,8 @@
 //  Revision history:
 //    august 8th, 2001 * Created by Chaouky Garram
 //=============================================================================
+// R6AbstractGameInfo: abstract base for all Ravenshield game modes (singleplayer, co-op, multiplayer).
+// Provides the shared interface consumed by the mission objective manager and game-event hooks.
 class R6AbstractGameInfo extends GameInfo
     abstract
     native
@@ -213,6 +215,7 @@ function int GetNbOfRainbowAIToSpawn(PlayerController aController)
 	return;
 }
 
+// Lazy-spawn the singleton mission objective manager if it hasn't been created yet.
 function CreateMissionObjectiveMgr()
 {
 	// End:0x19
@@ -264,6 +267,7 @@ function RemoveObjectives()
 	return;
 }
 
+// Delegates kill notification to the objective manager, then checks whether the game should end.
 function PawnKilled(Pawn killed)
 {
 	// End:0x0B
@@ -285,6 +289,7 @@ function RemoveTerroFromList(Pawn toRemove)
 	return;
 }
 
+// Delegates sight event to the objective manager (e.g., for "don't be detected" objectives).
 function PawnSeen(Pawn seen, Pawn witness)
 {
 	// End:0x0B
@@ -301,6 +306,7 @@ function PawnSeen(Pawn seen, Pawn witness)
 	return;
 }
 
+// Delegates sound-detection event to the objective manager (e.g., stealth/noise objectives).
 function PawnHeard(Pawn heard, Pawn witness)
 {
 	// End:0x0B
@@ -317,6 +323,7 @@ function PawnHeard(Pawn heard, Pawn witness)
 	return;
 }
 
+// Delegates hostage-secured event to the objective manager (rescue missions use this to track extractions).
 function PawnSecure(Pawn secured)
 {
 	// End:0x0B
@@ -345,7 +352,7 @@ function bool IsLastRoundOfTheMatch()
 //------------------------------------------------------------------
 function float GetEndGamePauseTime()
 {
-	// End:0x2B
+	// Standalone uses the level-configured value; co-op and last MP round both show 6s; normal MP rounds show 4s.
 	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		return Level.m_fEndGamePauseTime;		
@@ -379,7 +386,7 @@ function float GetEndGamePauseTime()
 //------------------------------------------------------------------
 function float GetGameMsgLifeTime()
 {
-	// End:0x2D
+	// Last round of a match gets 10s so clients can finish reading the end-match scoreboard message.
 	if((IsLastRoundOfTheMatch() && (int(Level.NetMode) != int(NM_Standalone))))
 	{
 		return 10.0000000;		
@@ -401,6 +408,7 @@ function BaseEndGame()
 //	set info to jump to a map, end game by aborting the mission without 
 //  game stats effect
 //------------------------------------------------------------------
+// Jumps to a specific map by ID without recording game stats — used by admin map-change commands.
 function EndGameAndJumpToMapID(int iGotoMapId)
 {
 	local R6ServerInfo pServerOptions;
@@ -414,6 +422,7 @@ function EndGameAndJumpToMapID(int iGotoMapId)
 	AbortScoreSubmission();
 	SetJumpingMaps(true, iGotoMapId);
 	// End:0x81
+	// If already between rounds, restart the round manager directly; otherwise end the current game.
 	if((IsInState('InBetweenRoundMenu') || IsInState('PostBetweenRoundTime')))
 	{
 		RestartGameMgr();		
@@ -426,25 +435,27 @@ function EndGameAndJumpToMapID(int iGotoMapId)
 	return;
 }
 
+// Forces a mission failure: marks all objectives failed, ends the game, and skips the normal pause delay.
 function AbortMission()
 {
 	m_missionMgr.AbortMission();
 	CheckEndGame(none, "");
 	EndGame(none, "");
 	m_bTimerStarted = true;
+	// Wind the clock back so the end-game timer expires nearly immediately (skips the pause wait).
 	m_fTimerStartTime = int(((Level.TimeSeconds - GetEndGamePauseTime()) - float(1)));
 	m_fTimerStartTime = Clamp(m_fTimerStartTime, 0, int(Level.TimeSeconds));
 	return;
 }
 
+// Forces mission success: marks all objectives complete and ends the game immediately.
 function CompleteMission()
-{
-	m_missionMgr.CompleteMission();
 	CheckEndGame(none, "");
 	EndGame(none, "");
 	return;
 }
 
+// Notifies the objective manager that a pawn entered an extraction zone (may satisfy extraction objectives).
 function EnteredExtractionZone(Actor Other)
 {
 	// End:0x0B
@@ -461,6 +472,7 @@ function EnteredExtractionZone(Actor Other)
 	return;
 }
 
+// Notifies the objective manager that a pawn left an extraction zone (may revert partial extraction progress).
 function LeftExtractionZone(Actor Other)
 {
 	// End:0x0B
@@ -477,6 +489,7 @@ function LeftExtractionZone(Actor Other)
 	return;
 }
 
+// Notifies the objective manager that a pawn interacted with an object (e.g., defusing a bomb).
 function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 {
 	// End:0x0B
@@ -498,6 +511,7 @@ function IObjectInteract(Pawn aPawn, Actor anInteractiveObject)
 	return;
 }
 
+// Notifies the objective manager that a destructible object was destroyed (may fail a "protect" objective).
 function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 {
 	// End:0x0B
@@ -514,6 +528,7 @@ function IObjectDestroyed(Pawn aPawn, Actor anInteractiveObject)
 	return;
 }
 
+// Called each timer tick while a round countdown is active; ends the game if the time limit is reached.
 function TimerCountdown()
 {
 	// End:0x0B
@@ -565,6 +580,7 @@ function ApplyTeamKillerPenalty(Pawn aPawn)
 	return;
 }
 
+// Base implementation always returns false; subclasses must override to implement actual win/lose conditions.
  // if this function has not been defined then always return false
 function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 {
@@ -574,6 +590,7 @@ function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 
 function PostBeginPlay()
 {
+	// Unreal's GameInfo enables its tick-timer by default; Ravenshield uses its own timer management.
 	SetTimer(0.0000000, false);
 	return;
 }
