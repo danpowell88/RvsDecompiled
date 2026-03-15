@@ -19,7 +19,7 @@ class R6GameInfo extends R6
 const CMaxRainbowAI = 6;
 const CMaxPlayers = 16;  // the absolut maximum number of players that we allow
 const CMaxCoOpPlayers = 8;
-const K_InGamePauseTime = 5;
+const K_InGamePauseTime = 5;  // seconds the game pauses to display end-game results before transitioning
 
 var byte R6DefaultWeaponInput;
 var UWindowRootWindow.eGameWidgetID m_eEndGameWidgetID;
@@ -245,10 +245,12 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x118
 			if(((m_PlayerPrefs.m_WeaponGadgetName1 != "") && IsPrimaryGadgetRestricted(m_PlayerPrefs.m_WeaponGadgetName1)))
 			{
+				// gadget is restricted — give primary weapon (slot 1) without its weapon gadget
 				aPawn.ServerGivesWeaponToClient(m_PlayerPrefs.m_WeaponName1, 1, m_PlayerPrefs.m_BulletType1);				
 			}
 			else
 			{
+				// slot 1 = primary weapon, with optional under-barrel weapon gadget
 				aPawn.ServerGivesWeaponToClient(m_PlayerPrefs.m_WeaponName1, 1, m_PlayerPrefs.m_BulletType1, m_PlayerPrefs.m_WeaponGadgetName1);
 			}
 			// End:0x17E
@@ -263,6 +265,7 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x1DC
 			if(IsSecondaryWeaponRestricted(m_PlayerPrefs.m_WeaponName2))
 			{
+				// fallback to Beretta 92FS when the preferred sidearm is restricted
 				szSecWeapon = "R63rdWeapons.NormalPistol92FS";				
 			}
 			else
@@ -277,10 +280,12 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x26E
 			if(((m_PlayerPrefs.m_WeaponGadgetName2 != "") && IsSecondaryGadgetRestricted(m_PlayerPrefs.m_WeaponGadgetName2)))
 			{
+				// gadget is restricted — give secondary weapon (slot 2) without its gadget
 				aPawn.ServerGivesWeaponToClient(szSecWeapon, 2, m_PlayerPrefs.m_BulletType2);				
 			}
 			else
 			{
+				// slot 2 = secondary weapon with optional gadget
 				aPawn.ServerGivesWeaponToClient(szSecWeapon, 2, m_PlayerPrefs.m_BulletType2, m_PlayerPrefs.m_WeaponGadgetName2);
 			}
 			// End:0x2CE
@@ -297,6 +302,7 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			{
 				Log(((" AND " $ m_PlayerPrefs.m_GadgetName1) $ "  (gadget 1)"));
 			}
+			// slot 3 = first gadget (grenades, flashbangs, etc.); gadgets have no bullet type
 			aPawn.ServerGivesWeaponToClient(m_PlayerPrefs.m_GadgetName1, 3);
 			// End:0x3A2
 			if(bShowLog)
@@ -316,10 +322,12 @@ simulated event AcceptInventory(Pawn PlayerPawn)
 			// End:0x4A4
 			if((((caps_szSecGadget != "PRIMARYMAGS") && (caps_szSecGadget != "SECONDARYMAGS")) && (caps_szSecGadget == Caps(m_PlayerPrefs.m_GadgetName1))))
 			{
+				// identical gadgets (excluding extra-mags) are merged into a DoubleGadget, stacking the item
 				aPawn.ServerGivesWeaponToClient("DoubleGadget", 4);				
 			}
 			else
 			{
+				// slot 4 = second gadget
 				aPawn.ServerGivesWeaponToClient(m_PlayerPrefs.m_GadgetName2, 4);
 			}
 			// End:0x4F4
@@ -607,6 +615,7 @@ function PostBeginPlay()
 	R6GameReplicationInfo(GameReplicationInfo).m_bFriendlyFire = m_bFriendlyFire;
 	R6GameReplicationInfo(GameReplicationInfo).m_bAutoBalance = m_bAutoBalance;
 	R6GameReplicationInfo(GameReplicationInfo).m_bMenuTKPenaltySetting = m_bTKPenalty;
+	// team-kill penalty only applies in adversarial team modes, not cooperative
 	m_bTKPenalty = (m_bTKPenalty && Level.IsGameTypeTeamAdversarial(m_szGameTypeFlag));
 	R6GameReplicationInfo(GameReplicationInfo).m_bTKPenalty = m_bTKPenalty;
 	R6GameReplicationInfo(GameReplicationInfo).m_bShowNames = m_bShowNames;
@@ -623,13 +632,16 @@ function PostBeginPlay()
 	// End:0x398
 	if(m_bIsWritableMapAllowed)
 	{
+		// writable map (in-game drawing tools) requires the common multiplayer sound bank
 		AddSoundBankName("Common_Multiplayer");
 	}
+	// fire Timer() every 2 seconds to throttle chat message flooding
 	SetTimer(2.0000000, true);
 	i = 0;
 	J0x3A8:
 
 	// End:0x474 [Loop If]
+	// 32 = m_MapLength: the maximum number of maps that can be replicated to clients
 	if((i < R6GameReplicationInfo(GameReplicationInfo).32))
 	{
 		// End:0x3FA
@@ -969,6 +981,7 @@ event InitGame(string Options, out string Error)
 	{
 		AccessControl.SetGamePassword(pServerOptions.GamePassword);
 	}
+	// CMaxPlayers=16 hard-cap applied here regardless of server config
 	MaxPlayers = Min(16, pServerOptions.MaxPlayers);
 	m_szMessageOfDay = pServerOptions.MOTD;
 	m_szSvrName = pServerOptions.ServerName;
@@ -990,6 +1003,7 @@ event InitGame(string Options, out string Error)
 		// End:0x2C9
 		if(IsA('R6TrainingMgr'))
 		{
+			// 1 = rookie difficulty; training always forces rookie so the UI hints are visible
 			m_iDiffLevel = 1;			
 		}
 		else
@@ -1037,42 +1051,45 @@ event InitGame(string Options, out string Error)
 		goto J0x400;
 	}
 	m_iNbOfTerroristToSpawn = pServerOptions.NbTerro;
+	// m_iDeathCameraMode is a bitmask of allowed spectator camera modes after death
 	m_iDeathCameraMode = 0;
 	// End:0x4E2
 	if(pServerOptions.CamFirstPerson)
 	{
-		m_iDeathCameraMode = Level.1;
+		m_iDeathCameraMode = Level.1;  // bit 1 = RDC_CamFirstPerson
 	}
 	// End:0x50C
 	if(pServerOptions.CamThirdPerson)
 	{
-		m_iDeathCameraMode = (m_iDeathCameraMode | Level.2);
+		m_iDeathCameraMode = (m_iDeathCameraMode | Level.2);  // bit 2 = RDC_CamThirdPerson
 	}
 	// End:0x536
 	if(pServerOptions.CamFreeThirdP)
 	{
-		m_iDeathCameraMode = (m_iDeathCameraMode | Level.4);
+		m_iDeathCameraMode = (m_iDeathCameraMode | Level.4);  // bit 4 = RDC_CamFreeThirdP
 	}
 	// End:0x560
 	if(pServerOptions.CamGhost)
 	{
-		m_iDeathCameraMode = (m_iDeathCameraMode | Level.8);
+		m_iDeathCameraMode = (m_iDeathCameraMode | Level.8);  // bit 8 = RDC_CamGhost
 	}
 	// End:0x5D7
 	if(pServerOptions.CamTeamOnly)
 	{
 		// End:0x5D7
+		// CamTeamOnly is suppressed in pure deathmatch (non-team adversarial / squad) modes
 		if((!((Level.IsGameTypeAdversarial(m_szCurrGameType) || Level.IsGameTypeSquad(m_szCurrGameType)) && (!Level.IsGameTypeTeamAdversarial(m_szCurrGameType)))))
 		{
-			m_iDeathCameraMode = (m_iDeathCameraMode | Level.32);
+			m_iDeathCameraMode = (m_iDeathCameraMode | Level.32);  // bit 32 = RDC_CamTeamOnly
 		}
 	}
 	// End:0x5FA
 	if(pServerOptions.CamFadeToBlack)
 	{
-		m_iDeathCameraMode = Level.16;
+		m_iDeathCameraMode = Level.16;  // 16 = RDC_CamFadeToBk; overwrites all other modes
 	}
 	// End:0x62A
+	// RotateMap is only valid in cooperative game types
 	if(Level.IsGameTypeCooperative(m_szGameTypeFlag))
 	{
 		m_bRotateMap = pServerOptions.RotateMap;		
@@ -1110,6 +1127,7 @@ function CreateBackupRainbowAI()
 	if((i < 6))
 	{
 		rainbowAI = R6RainbowAI(Spawn(pModManager.GetDefaultRainbowAI()));
+		// hold in stasis until a player requests an AI teammate
 		rainbowAI.bStasis = true;
 		m_RainbowAIBackup[m_RainbowAIBackup.Length] = rainbowAI;
 		(i++);
@@ -1138,6 +1156,7 @@ function Actor GetRainbowAIFromTable()
 		return none;
 	}
 	rainbowAI = m_RainbowAIBackup[0];
+	// wake the AI from stasis and remove it from the pre-spawned pool
 	rainbowAI.bStasis = false;
 	m_RainbowAIBackup.Remove(0, 1);
 	return rainbowAI;
@@ -1165,6 +1184,8 @@ function DeployRainbowTeam(PlayerController NewPlayer)
 		newTeam = Spawn(Class'R6Engine.R6RainbowTeam');
 		newTeam.SetOwner(NewPlayer);
 		// End:0x132
+		// determine how many AI backup teammates to give this player based on current server population
+		// iMembers = total team size (1 player + N AI); scales down as more humans join
 		if(((m_bAIBkp && (!R6PlayerController(NewPlayer).m_bPenaltyBox)) && Level.IsGameTypeCooperative(m_szGameTypeFlag)))
 		{
 			GetNbHumanPlayerInTeam(iActiveTotal, iActiveGreen);
@@ -1175,22 +1196,22 @@ function DeployRainbowTeam(PlayerController NewPlayer)
 				case 1:
 				// End:0x108
 				case 2:
-					iMembers = 4;
+					iMembers = 4;  // 1-2 humans: 3 AI backup (4 total)
 					// End:0x132
 					break;
 				// End:0x118
 				case 3:
-					iMembers = 2;
+					iMembers = 2;  // 3 humans: 1 AI backup
 					// End:0x132
 					break;
 				// End:0x128
 				case 4:
-					iMembers = 2;
+					iMembers = 2;  // 4 humans: 1 AI backup
 					// End:0x132
 					break;
 				// End:0xFFFF
 				default:
-					iMembers = 1;
+					iMembers = 1;  // 5+ humans: no AI backup (player alone on team)
 					break;
 			}
 		}
@@ -1323,6 +1344,7 @@ event PlayerController Login(string Portal, string Options, out string Error)
 	}
 	NewPlayer.ReceivedSecretChecksum = (!(InChecksum ~= "NoChecksum"));
 	(NumPlayers++);
+	// temporarily clear bRestartLevel so the joining player can spawn once even in levels that restart on death
 	bRestartLevel = false;
 	StartMatch();
 	NotifyMatchStart();
@@ -1417,6 +1439,7 @@ function Logout(Controller Exiting)
 			// End:0x151
 			if((!bChangeLevels))
 			{
+				// 1 = DEATHMSG_CONNECTIONLOST: records disconnection rather than a normal kill
 				R6Pawn(Exiting.Pawn).ServerSuicidePawn(1);
 			}
 		}
@@ -1426,7 +1449,7 @@ function Logout(Controller Exiting)
 	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		GetNbHumanPlayerInTeam(iAlphaNb, iBravoNb);
-		// End:0x1BC
+		// 2 = PTS_Alpha: adjust alpha count before checking if coop round should restart
 		if((int(_playerController.m_TeamSelection) == int(2)))
 		{
 			(iAlphaNb--);
@@ -1434,6 +1457,7 @@ function Logout(Controller Exiting)
 		// End:0x1EF
 		if(Level.IsGameTypeCooperative(m_szGameTypeFlag))
 		{
+			// stop tracking stats and flag round as restarted-by-join if the last human left
 			SetCompilingStats((iAlphaNb > 0));
 			SetRoundRestartedByJoinFlag((iAlphaNb == 0));
 		}
@@ -1736,6 +1760,7 @@ function RestartPlayer(Controller aPlayer)
 		return;
 	}
 	// End:0x7B
+	// 3 = PTS_Bravo: Bravo team spawns at insertion point 1, Alpha at point 0
 	if(((R6PlayerController(aPlayer) != none) && (int(R6PlayerController(aPlayer).m_TeamSelection) == int(3))))
 	{
 		iStartPos = 1;		
@@ -1808,6 +1833,7 @@ function R6SetPawnClassInMultiPlayer(Controller _playerController)
 		return;
 	}
 	// End:0xAC
+	// 3 = PTS_Bravo: Bravo team uses the 'Red' pawn class; all others use the 'Green' class
 	if((int(R6PlayerController(_playerController).m_TeamSelection) == int(3)))
 	{
 		CurrentPawnClass = Class<Pawn>(DynamicLoadObject(Level.RedTeamPawnClass, Class'Core.Class'));
@@ -2151,12 +2177,13 @@ function R6InsertionZone FindTeamInsertionZone(int iSpawningPointNumber)
 	local int iCurrentZoneNumber;
 	local R6InsertionZone anInsertionZone, pSelectedInsertionZone;
 
-	iCurrentZoneNumber = 2147483647;
+	iCurrentZoneNumber = 2147483647;  // INT_MAX: any real insertion number will be lower
 	pSelectedInsertionZone = none;
 	// End:0xE5
 	foreach AllActors(Class'R6Game.R6InsertionZone', anInsertionZone)
 	{
 		// End:0x98
+		// -1 is a sentinel meaning "find any available zone with the lowest insertion number"
 		if((iSpawningPointNumber == -1))
 		{
 			// End:0x95
@@ -2186,6 +2213,7 @@ function bool RainbowOperativesStillAlive()
 	local R6GameReplicationInfo repInfo;
 
 	repInfo = R6GameReplicationInfo(GameReplicationInfo);
+	// checks all three team slots (Rainbow supports up to 3 simultaneous teams in single player)
 	// End:0x49
 	if(((repInfo.m_RainbowTeam[0] != none) && (repInfo.m_RainbowTeam[0].m_iMemberCount > 0)))
 	{
@@ -2458,6 +2486,7 @@ function ChangeTeams(PlayerController inPlayerController, optional bool bNextTea
 	aPC.m_bLockWeaponActions = false;
 	tempAIController = R6RainbowAI(aNewTeam.m_TeamLeader.Controller);
 	aPawnRepInfo = tempAIController.m_PawnRepInfo;
+	// exchange replication info so the player inherits the AI pawn's network identity
 	tempAIController.m_PawnRepInfo = aPC.m_PawnRepInfo;
 	tempAIController.m_PawnRepInfo.m_ControllerOwner = tempAIController;
 	aPC.m_PawnRepInfo = aPawnRepInfo;
@@ -2511,6 +2540,7 @@ function ChangeTeams(PlayerController inPlayerController, optional bool bNextTea
 	// End:0x4D6
 	if(((aNewTeam.m_iMemberCount == 1) && (aNewTeam.m_iMembersLost > 0)))
 	{
+		// 21 = eTeamState_LastManStanding: alerts the team AI it has no backup remaining
 		aNewTeam.SetTeamState(21);
 	}
 	aPC.UpdatePlayerPostureAfterSwitch();
@@ -2625,6 +2655,7 @@ function Object GetMultiCoopPlayerVoicesMgr(int iTeam)
 {
 	local int iIndex;
 
+	// map team IDs to a voice manager index: Alpha variants (1/4/7)→0, Bravo variants (2/5/8)→1, third team (3/6)→2
 	switch(iTeam)
 	{
 		// End:0x0B
@@ -3003,6 +3034,7 @@ function RestartGame()
 	local R6PlayerController P;
 
 	m_bStopPostBetweenRoundCountdown = true;
+	// 4 = RSS_EndOfMatch: signals all clients that the match has ended
 	GameReplicationInfo.SetServerState(GameReplicationInfo.4);
 	// End:0x30
 	if((bNoRestart == true))
@@ -3116,9 +3148,11 @@ function int GetTeamNumBit(int Num)
 //------------------------------------------------------------------
 function SetDefaultTeamFriendlies(Pawn aPawn)
 {
+	// team 0=Hostage, 1=Terrorist, 2=Alpha(Rainbow), 3=Bravo(Rainbow)
 	switch(aPawn.m_iTeam)
 	{
 		// End:0xCE
+		// terrorists are friendly with each other and hostile to all Rainbow teams
 		case 1:
 			// End:0x86
 			if((int(aPawn.m_ePawnType) != int(2)))
@@ -3302,7 +3336,7 @@ function ResetRepMissionObjectives()
 
 //------------------------------------------------------------------
 // UpdateRepMissionObjectivesStatus
-//	
+// eMissionObjStatus: 0=in progress (none), 1=success, 2=failed
 //------------------------------------------------------------------
 function UpdateRepMissionObjectivesStatus()
 {
@@ -3359,6 +3393,7 @@ function bool CheckEndGame(PlayerReplicationInfo Winner, string Reason)
 			return false;
 		}
 	}
+	// returns true when mission has concluded (any status other than "in progress")
 	return (int(m_missionMgr.m_eMissionObjectiveStatus) != int(0));
 	return;
 }
@@ -3379,8 +3414,10 @@ function BaseEndGame()
 		Log(("***STATE: " $ string(GetStateName())));
 	}
 	// End:0x6B
+	// if game ended while still in progress (e.g. team wiped), force it to failed
 	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(0)))
 	{
+		// 2 = eMissionObjStatus_failed
 		m_missionMgr.SetMissionObjStatus(2);
 	}
 	GameReplicationInfo.SetRepLastRoundSuccess(m_missionMgr.m_eMissionObjectiveStatus);
@@ -3414,6 +3451,7 @@ function InitObjectivesOfStoryMode()
 {
 	local int i, Index;
 
+	// first pass: add all regular objectives (excluding end-of-list sentinels)
 	i = 0;
 	J0x07:
 
@@ -3431,6 +3469,7 @@ function InitObjectivesOfStoryMode()
 		// [Loop Continue]
 		goto J0x07;
 	}
+	// second pass: append end-of-list objectives last; they act as mission completion triggers
 	i = 0;
 	J0xA2:
 
@@ -3531,6 +3570,7 @@ function ProcessChangeLevelSystem()
 	else
 	{
 		// End:0x5B
+		// in rotate-map coop mode, only advance to next map on a successful mission
 		if((m_bRotateMap && (m_bJumpingMaps == false)))
 		{
 			bChangeLevels = (int(m_missionMgr.m_eMissionObjectiveStatus) == int(1));			
@@ -3542,6 +3582,7 @@ function ProcessChangeLevelSystem()
 	}
 	(R6GameReplicationInfo(GameReplicationInfo).m_iCurrentRound++);
 	// End:0x9B
+	// reset round counter to 0 when the match is over (level is changing)
 	if(bChangeLevels)
 	{
 		R6GameReplicationInfo(GameReplicationInfo).m_iCurrentRound = 0;
@@ -3636,6 +3677,7 @@ function Tick(float DeltaTime)
 			m_fTimerStartTime = int(Level.TimeSeconds);
 		}
 		// End:0x316
+		// begin the 2-second audio/visual fade two seconds before the end-game pause expires
 		if(((!m_bFadeStarted) && ((Level.TimeSeconds - float(m_fTimerStartTime)) > (GetEndGamePauseTime() - 2.0000000))))
 		{
 			m_bFadeStarted = true;
@@ -3706,7 +3748,7 @@ function Tick(float DeltaTime)
 					}
 				}
 			}
-			m_fTimerStartTime = 2147483647;
+			m_fTimerStartTime = 2147483647;  // INT_MAX sentinel: prevents this block from re-triggering
 			// End:0x4DA
 			if((int(Level.NetMode) == int(NM_Standalone)))
 			{
@@ -3752,6 +3794,7 @@ function int SearchOperativesArray(bool bIsFemale, int iStartIndex)
 		if(bIsFemale)
 		{
 			// End:0x4B
+			// non-zero m_bRainbowFaces entry marks this operative slot as female
 			if((int(m_bRainbowFaces[i]) > 0))
 			{
 				return i;
@@ -4183,6 +4226,7 @@ function SpawnAIandInitGoInGame()
 		Log("SpawnAIandInitGoInGame");
 	}
 	SpawnAI();
+	// destroy the planning-phase mission manager so a fresh one can be built from spawned AI
 	aMgr = m_missionMgr;
 	m_missionMgr = none;
 	// End:0x52
@@ -4433,6 +4477,7 @@ function PawnKilled(Pawn killed)
 					else
 					{
 						// End:0x124
+						// teams 5 and 6 are special prisoner categories that don't warrant a hostage-died message
 						if(((!(hostage.m_iPrisonierTeam == 5)) && (!(hostage.m_iPrisonierTeam == 6))))
 						{
 							BroadcastMissionObjMsg("", "", "HostageHasDied");
@@ -4478,6 +4523,7 @@ function RemoveTerroFromList(Pawn toRemove)
 		J0x60:
 
 		// End:0x7D
+		// when only one terrorist remains alive, switch them to aggressive hunting behaviour
 		if((m_listAllTerrorists.Length == 1))
 		{
 			m_listAllTerrorists[0].StartHunting();
@@ -4599,6 +4645,7 @@ event bool CanPlayOutroVideo()
 		return false;
 	}
 	// End:0x3D
+	// 1 = eMissionObjStatus_success: only play the victory outro on a successful mission
 	if((int(m_missionMgr.m_eMissionObjectiveStatus) == int(1)))
 	{
 		m_bPlayOutroVideo = false;
@@ -4664,7 +4711,9 @@ event UpdateServer()
 
 defaultproperties
 {
+	// 2 = InGameID_Debriefing: the debrief screen shown after mission end
 	m_eEndGameWidgetID=2
+	// operative face-slot indices where the value is 1 mark female operatives
 	m_bRainbowFaces[7]=1
 	m_bRainbowFaces[11]=1
 	m_bRainbowFaces[23]=1
