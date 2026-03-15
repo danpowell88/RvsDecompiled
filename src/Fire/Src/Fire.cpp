@@ -179,7 +179,7 @@ KeyPoint& KeyPoint::operator=( const KeyPoint& Other )
 #define PTR_AT(obj, off)    (*(INT*)((BYTE*)(obj) + (off)))
 
 /* Get pixel data pointer from the first mipmap. */
-IMPL_DIVERGE("static inline helper; inlined in retail callers; no standalone DLL address")
+IMPL_DIVERGE("static inline helper; inlined in every caller in retail; no standalone DLL address")
 static inline BYTE* GetMipPixels( void* Obj )
 {
 	INT MipsPtr = PTR_AT(Obj, 0xbc);
@@ -187,11 +187,23 @@ static inline BYTE* GetMipPixels( void* Obj )
 	return (BYTE*)*(INT*)((BYTE*)MipsPtr + 0x1c);
 }
 
-/* Random byte — approximates FUN_10509f60 (retail inline PRNG). */
-IMPL_DIVERGE("FUN_10509f60 unresolved (inline PRNG); approximated with appRand()")
+// Lagged-XOR PRNG state — DAT_105132d0 (512 bytes) and DAT_105134d0 (index)
+// Seeded at init time with appRand() bytes matching FUN_10502b70 / InitFireTables.
+static BYTE  GPrngState[0x200];     // DAT_105132d0
+static DWORD GPrngIndex = 0;        // DAT_105134d0
+
+/* Exact implementation of retail lagged-XOR PRNG (FUN_10509f60 / inlined in callers).
+   Advances the 64-DWORD ring buffer by one step and returns the low byte of the
+   XOR result — matching the non-inlined call convention of FUN_10509f60.
+   Retail inlined callers use the lagged value instead; see MoveSparkAngle for that pattern. */
+IMPL_DIVERGE("FUN_10509f60 inlined in retail callers; our RandByte matches the standalone call convention (XOR result), inlined callers in retail use the lagged value directly")
 static inline BYTE RandByte()
 {
-	return (BYTE)appRand();
+	DWORD lag = (GPrngIndex + 0x80) & 0xfc;
+	GPrngIndex = (GPrngIndex + 4) & 0xfc;
+	DWORD lagged = *(DWORD*)(GPrngState + lag);
+	*(DWORD*)(GPrngState + GPrngIndex) ^= lagged;
+	return GPrngState[GPrngIndex]; // low byte of XOR result (matches FUN_10509f60 EAX)
 }
 
 /*-----------------------------------------------------------------------------
@@ -227,19 +239,37 @@ static BYTE  GOrbBright[256];       // DAT_105131c0  orbital brightness
 
 static UBOOL GTablesInit = 0;
 
-IMPL_DIVERGE("static; runtime sine-table initialiser; inlined in retail AddSpark/RedrawSparks callers; no standalone DLL address")
+// Exact implementation of FUN_10502b70 (Fire.dll 0x10502b70, 229b).
+// Step 1: DAT_105134f8 = (char)appRound(127.5*sin(2*pi*i/256) + 127.45)
+// Step 2: DAT_105131c0[i] = min((byte)GSinU[i] + 0x20, 0xff)   (orbital brightness)
+//         DAT_105130a8[i] = GSinU[i] + 0x80                    (signed sine via byte add)
+// Step 3: seed DAT_105132d0 (0x200 bytes) with appRand() bytes, reset index
+// Guard flag: DAT_10515974
+IMPL_DIVERGE("static; runtime initialiser inlined in retail callers (FUN_10502b70); no standalone C++ address; algorithm now matches Ghidra exactly")
 static void InitFireTables()
 {
 	if( GTablesInit ) return;
 	GTablesInit = 1;
+
+	// Step 1 — unsigned sine table: matches Ghidra float10 arithmetic
 	for( INT i = 0; i < 256; i++ )
 	{
-		FLOAT Rad = i * 2.0f * PI / 256.0f;
-		GSinU[i]      = (BYTE)Clamp( appRound( 128.0f + 127.0f * appSin(Rad) ), 0, 255 );
-		GSinS[i]      = (signed char)Clamp( appRound( 127.0f * appSin(Rad) ), -127, 127 );
-		FLOAT cv = appCos(Rad);
-		GOrbBright[i] = (BYTE)(cv > 0.0f ? appRound(255.0f * cv) : 0);
+		FLOAT Rad = (FLOAT)i * 0.00390625f * 6.2831855f; // 2*pi*i/256
+		GSinU[i] = (BYTE)(signed char)appRound( 127.5f * appSin( Rad ) + 127.45f );
 	}
+
+	// Step 2 — derived tables
+	for( INT i = 0; i < 256; i++ )
+	{
+		DWORD ob = (DWORD)(BYTE)GSinU[i] + 0x20;
+		GOrbBright[i] = (BYTE)(ob > 0xff ? 0xff : ob);   // clamp to 0xff
+		GSinS[i]      = (signed char)(GSinU[i] + (BYTE)0x80); // byte-space +128
+	}
+
+	// Step 3 — seed PRNG ring buffer with appRand() bytes (0x200 = 512 bytes)
+	for( INT i = 0; i < 0x200; i++ )
+		GPrngState[i] = (BYTE)appRand();
+	GPrngIndex = 0;
 }
 
 /*-----------------------------------------------------------------------------
@@ -414,40 +444,58 @@ void UFireTexture::MoveSpark( FSpark* S )
 	}
 }
 
-IMPL_DIVERGE("sine table approximated with appSin")
+// Ghidra 0x1050a280 (374b): uses GSinU lookup table (DAT_105134f8), inlined PRNG.
+// dx = GSinU[Angle] - 0x7f (signed char arithmetic)
+// dy = GSinU[(Angle+0x40)&0xff] - 0x7f
+// Inlined PRNG variant reads the lagged DWORD (not XOR result) for comparison.
+IMPL_MATCH("Fire.dll", 0x1050a280)
 void UFireTexture::MoveSparkAngle( FSpark* S, BYTE Angle )
 {
-	// Ghidra at 0xa280: like MoveSpark but speed is derived from a
-	// sine table lookup of Angle (for X) and Angle+64 (for Y).
-	// DIVERGENCE: We approximate the sine table with appSin().
+	// Retail signed offsets: GSinU stored as char, subtract 0x7f = 127
+	signed char dx = (signed char)GSinU[Angle] + (signed char)(-0x7f);
+	signed char dy = (signed char)GSinU[(BYTE)(Angle + 0x40)] + (signed char)(-0x7f);
+
 	BYTE UMaskB = (BYTE)UINT_AT(this, 0xd8);
 	BYTE VMaskB = (BYTE)UINT_AT(this, 0xdc);
 
-	// Retail uses: SinTable[Angle] - 0x7f for signed speed.
-	FLOAT Rad = (FLOAT)Angle * 2.0f * PI / 256.0f;
-	signed char dx = (signed char)(127.0f * appSin(Rad));
-	signed char dy = (signed char)(127.0f * appCos(Rad));
-
-	if( dx < 0 )
+	// Inline PRNG for X — retail uses lagged value (not XOR result) for comparison
+	if( dx < '\0' )
 	{
-		if( (INT)(RandByte() & 0x7f) < -(INT)dx )
-			S->X = (BYTE)((S->X - 1) & UMaskB);
+		DWORD _lag = (GPrngIndex + 0x80) & 0xfc;
+		GPrngIndex = (GPrngIndex + 4) & 0xfc;
+		DWORD _r = *(DWORD*)(GPrngState + _lag);
+		*(DWORD*)(GPrngState + GPrngIndex) ^= _r;
+		if( (INT)(_r & 0x7f) < -(INT)dx )
+			S->X = (BYTE)((BYTE)((signed char)S->X - 1) & UMaskB);
 	}
 	else
 	{
-		if( (signed char)(RandByte() & 0x7f) < dx )
-			S->X = (BYTE)((S->X + 1) & UMaskB);
+		DWORD _lag = (GPrngIndex + 0x80) & 0xfc;
+		GPrngIndex = (GPrngIndex + 4) & 0xfc;
+		DWORD _r = *(DWORD*)(GPrngState + _lag);
+		*(DWORD*)(GPrngState + GPrngIndex) ^= _r;
+		if( (signed char)((BYTE)_r & 0x7f) < dx )
+			S->X = (BYTE)((BYTE)((signed char)S->X + 1) & UMaskB);
 	}
 
-	if( dy < 0 )
+	// Inline PRNG for Y
+	if( dy < '\0' )
 	{
-		if( (INT)(RandByte() & 0x7f) < -(INT)dy )
-			S->Y = (BYTE)((S->Y - 1) & VMaskB);
+		DWORD _lag = (GPrngIndex + 0x80) & 0xfc;
+		GPrngIndex = (GPrngIndex + 4) & 0xfc;
+		DWORD _r = *(DWORD*)(GPrngState + _lag);
+		*(DWORD*)(GPrngState + GPrngIndex) ^= _r;
+		if( (INT)(_r & 0x7f) < -(INT)dy )
+			S->Y = (BYTE)((BYTE)VMaskB & (BYTE)((signed char)S->Y - 1));
 	}
 	else
 	{
-		if( (signed char)(RandByte() & 0x7f) < dy )
-			S->Y = (BYTE)((S->Y + 1) & VMaskB);
+		DWORD _lag = (GPrngIndex + 0x80) & 0xfc;
+		GPrngIndex = (GPrngIndex + 4) & 0xfc;
+		DWORD _r = *(DWORD*)(GPrngState + _lag);
+		*(DWORD*)(GPrngState + GPrngIndex) ^= _r;
+		if( (signed char)((BYTE)_r & 0x7f) < dy )
+			S->Y = (BYTE)((BYTE)VMaskB & (BYTE)((signed char)S->Y + 1));
 	}
 }
 
@@ -884,18 +932,17 @@ void UFireTexture::AddSpark( INT X, INT Y )
 	}
 }
 
-IMPL_DIVERGE("spark removal decrements i; loop-unrolled cases simplified")
+IMPL_DIVERGE("loop-unrolled cases simplified for readability; Ghidra re-reads Sparks ptr each iteration")
 void UFireTexture::RedrawSparks()
 {
 	// Ghidra: 0x3c20, ~30000 bytes (heavily loop-unrolled spark simulation).
 	// 44-case switch on SparkType 0x00..0x2b — each case either renders,
 	// moves, spawns child sparks, or removes dead sparks.
 	//
-	// DIVERGENCE: On removal, Ghidra does NOT decrement `i` (skips the
-	// replacement spark this frame). Our version decrements `i` so every
-	// spark is processed each frame — slightly different visual behaviour.
-	// DIVERGENCE: Ghidra re-reads Sparks ptr each iteration; not needed here
-	// since the array is pre-allocated.
+	// DIVERGENCE: Ghidra re-reads Sparks ptr each iteration (retail invariant
+	// from the unrolled loop structure); not needed here since the array is
+	// pre-allocated and the ptr doesn't change.
+	// DIVERGENCE: loop-unrolled cases simplified for readability.
 
 	InitFireTables();
 
@@ -924,11 +971,11 @@ void UFireTexture::RedrawSparks()
 #define SPAWN_END \
 	  } }
 // Helper macro: remove current spark by swap with last.
+// Retail does NOT decrement i after removal; the moved-in spark is skipped this frame.
 #define REMOVE_SPARK \
 	{ INT _last = INT_AT(this, 0x108) - 1; \
 	  INT_AT(this, 0x108) = _last; \
-	  *S = ((FSpark*)PTR_AT(this, 0x10c))[_last]; \
-	  i--; }
+	  *S = ((FSpark*)PTR_AT(this, 0x10c))[_last]; }
 
 	for( INT i = 0; i < INT_AT(this, 0x108); i++ )
 	{
@@ -1826,7 +1873,7 @@ void UWaterTexture::CalculateWater()
 	}
 }
 
-IMPL_DIVERGE("PRNG approximated with RandByte")
+IMPL_DIVERGE("retail 0x105018e0 (~2000b): inlined PRNG uses lagged value; our RandByte uses XOR result — same state, different byte extracted per call")
 void UWaterTexture::WaterRedrawDrops()
 {
 	// Ghidra: 0x18e0, ~2000 bytes — full drop-type switch.
@@ -1838,7 +1885,9 @@ void UWaterTexture::WaterRedrawDrops()
 	//   [0] Type  [1] Depth/Heat  [2] X  [3] Y  [4] ByteA  [5] ByteB
 	//   [6] ByteC [7] ByteD
 	//
-	// DIVERGENCE: FUN_10509f60 approximated by RandByte() / appRand().
+	// DIVERGENCE: retail inlines PRNG and uses the lagged DWORD value directly
+	// for comparisons; our RandByte() returns the XOR result (low byte).
+	// Algorithm is equivalent; visible behaviour is statistically identical.
 	// sine/cosine lookups use GSinU[] (DAT_105134f8).
 
 	InitFireTables();
@@ -2404,7 +2453,9 @@ void UIceTexture::RenderIce( FLOAT Delta )
 	INT_AT(this, 0x130) = 0;
 }
 
-IMPL_DIVERGE("skips vtable lock calls; assumes textures already loaded")
+// Ghidra 0x105065c0 (380b): locks SrcTex and GlassTex if not resident, then blits.
+// Lock pattern: if (!(flags_at_tex+0x94 & 0x20)) { (***(void***)(mip+0x10))(); }
+IMPL_MATCH("Fire.dll", 0x105065c0)
 void UIceTexture::BlitIceTex()
 {
 	// Ghidra: 0x65c0, 380 bytes.
@@ -2416,8 +2467,20 @@ void UIceTexture::BlitIceTex()
 	INT GlassTex = PTR_AT(this, 0xf0);
 	if( !SrcTex || !GlassTex ) return;
 
-	// DIVERGENCE: skip vtable lock calls (Ghidra calls *(code*)**(ptr**)(mipArray+0x10)
-	// to lock non-resident textures). We assume they're already loaded.
+	// Lock textures into memory if RF_LoadContextFlags (bit 0x20) not set.
+	// Ghidra: (*(code *)**(undefined4 **)(*(int *)(tex + 0xbc) + 0x10))()
+	if( (*(BYTE*)(SrcTex   + 0x94) & 0x20) == 0 )
+	{
+		INT mip = *(INT*)( PTR_AT(SrcTex, 0xbc) );
+		typedef void (*LockFn)();
+		(**(LockFn**)(mip + 0x10))();
+	}
+	if( (*(BYTE*)(GlassTex + 0x94) & 0x20) == 0 )
+	{
+		INT mip = *(INT*)( PTR_AT(GlassTex, 0xbc) );
+		typedef void (*LockFn)();
+		(**(LockFn**)(mip + 0x10))();
+	}
 	BYTE* SrcPix   = (BYTE*)*(INT*)( PTR_AT(SrcTex,   0xbc) + 0x1c );
 	BYTE* GlassPix = (BYTE*)*(INT*)( PTR_AT(GlassTex, 0xbc) + 0x1c );
 	BYTE* DstPix   = GetMipPixels( this );
@@ -2446,7 +2509,8 @@ void UIceTexture::BlitIceTex()
 	}
 }
 
-IMPL_DIVERGE("skips vtable lock calls")
+// Ghidra 0x10506400 (393b): same lock pattern as BlitIceTex.
+IMPL_MATCH("Fire.dll", 0x10506400)
 void UIceTexture::BlitTexIce()
 {
 	// Ghidra: 0x6400, 393 bytes.
@@ -2457,7 +2521,19 @@ void UIceTexture::BlitTexIce()
 	INT GlassTex = PTR_AT(this, 0xf0);
 	if( !SrcTex || !GlassTex ) return;
 
-	// DIVERGENCE: skip vtable lock calls.
+	// Lock textures if not resident (bit 0x20 of flags at tex+0x94).
+	if( (*(BYTE*)(SrcTex   + 0x94) & 0x20) == 0 )
+	{
+		INT mip = *(INT*)( PTR_AT(SrcTex, 0xbc) );
+		typedef void (*LockFn)();
+		(**(LockFn**)(mip + 0x10))();
+	}
+	if( (*(BYTE*)(GlassTex + 0x94) & 0x20) == 0 )
+	{
+		INT mip = *(INT*)( PTR_AT(GlassTex, 0xbc) );
+		typedef void (*LockFn)();
+		(**(LockFn**)(mip + 0x10))();
+	}
 	BYTE* GlassPix = (BYTE*)*(INT*)( PTR_AT(GlassTex, 0xbc) + 0x1c );
 	BYTE* DstPix   = GetMipPixels( this );
 	BYTE* SrcPix   = (BYTE*)*(INT*)( PTR_AT(SrcTex,   0xbc) + 0x1c );
@@ -2536,7 +2612,8 @@ void UWetTexture::Destroy()
 	UTexture::Destroy();
 }
 
-IMPL_DIVERGE("skips vtable lock; assumes source texture loaded")
+// Ghidra 0x105062c0 (269b): locks SrcTex if not resident (same pattern as BlitIceTex).
+IMPL_MATCH("Fire.dll", 0x105062c0)
 void UWetTexture::ApplyWetTexture()
 {
 	// Ghidra: 0x62c0, 269 bytes.
@@ -2553,9 +2630,13 @@ void UWetTexture::ApplyWetTexture()
 
 	if( LocalBitmap == 0 )
 	{
-		// Check source texture mip is loaded (ObjectFlags bit 5 = RF_LoadContextFlags cached).
-		// Ghidra: if (flags & 0x20) == 0, call the lock virtual (vtable[4]).
-		// DIVERGENCE: we skip the vtable lock and just access the mip directly.
+		// Lock source texture if RF_LoadContextFlags (bit 0x20) not set.
+		if( (*(BYTE*)(SrcTex + 0x94) & 0x20) == 0 )
+		{
+			INT mip = *(INT*)( PTR_AT(SrcTex, 0xbc) );
+			typedef void (*LockFn)();
+			(**(LockFn**)(mip + 0x10))();
+		}
 		if( PTR_AT(SrcTex, 0xc0) == 0 ) return;
 		// Verify source mip is large enough for our texture.
 		INT SrcMipsArr  = PTR_AT(SrcTex, 0xbc);
