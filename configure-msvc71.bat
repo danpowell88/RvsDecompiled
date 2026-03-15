@@ -91,6 +91,7 @@ if not exist "%ROOT%\build-71" mkdir "%ROOT%\build-71"
     -G "NMake Makefiles" ^
     -DCMAKE_TOOLCHAIN_FILE="%ROOT%\cmake\msvc71.cmake" ^
     -DCMAKE_BUILD_TYPE=Release ^
+    -DCMAKE_RC_COMPILER="%WINKITS_BIN%\rc.exe" ^
     "%ROOT%"
 
 if errorlevel 1 (
