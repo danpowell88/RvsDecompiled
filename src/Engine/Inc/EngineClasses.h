@@ -5266,6 +5266,13 @@ class ENGINE_API UKarmaParamsCollision : public UObject
 public:
 	DECLARE_CLASS(UKarmaParamsCollision,UObject,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsCollision)
+	// Layout from KarmaParamsCollision.uc; offsets verified via Ghidra exec function analysis.
+	FLOAT   KScale;            // 0x2c — DrawScale multiplier (const in UC)
+	FLOAT   KFriction;         // 0x30 — Ghidra: execKGetFriction reads KParams+0x30
+	FLOAT   KRestitution;      // 0x34 — Ghidra: execKGetRestitution reads KParams+0x34
+	FLOAT   KImpactThreshold;  // 0x38 — Ghidra: execKGetImpactThreshold reads KParams+0x38
+	FVector KScale3D;          // 0x3c — 12 bytes
+	INT     KarmaData;         // 0x48 — transient, Karma SDK internal
 };
 
 class ENGINE_API UVertexStreamBase : public URenderResource
@@ -6181,6 +6188,27 @@ public:
 	DECLARE_CLASS(UKarmaParams,UKarmaParamsCollision,0,Engine)
 	// Auto-generated method declarations
 	virtual void PostEditChange();
+	// Layout from KarmaParams.uc; offsets verified via Ghidra exec function analysis.
+	// Bitfield DWORD at 0x4c — 8 bool properties packed bits 0-7.
+	BITFIELD KStartEnabled          : 1;  // bit 0
+	BITFIELD bKNonSphericalInertia  : 1;  // bit 1
+	BITFIELD bHighDetailOnly        : 1;  // bit 2
+	BITFIELD bClientOnly            : 1;  // bit 3
+	BITFIELD bKDoubleTickRate       : 1;  // bit 4
+	BITFIELD bKStayUpright          : 1;  // bit 5 = 0x20; Ghidra: execKSetStayUpright
+	BITFIELD bKAllowRotate          : 1;  // bit 6 = 0x40; Ghidra: execKSetStayUpright
+	BITFIELD bDestroyOnSimError     : 1;  // bit 7
+	FLOAT   KMass;               // 0x50 — Ghidra: execKGetMass reads KParams+0x50
+	FLOAT   KLinearDamping;      // 0x54 — Ghidra: execKSetDampingProps writes KParams+0x54
+	FLOAT   KAngularDamping;     // 0x58 — Ghidra: execKSetDampingProps writes KParams+0x58
+	FLOAT   KBuoyancy;           // 0x5c
+	FLOAT   KActorGravScale;     // 0x60 — Ghidra: execKGetActorGravScale reads KParams+0x60
+	FLOAT   KVelDropBelowThreshold; // 0x64
+	FVector KStartLinVel;        // 0x68
+	FVector KStartAngVel;        // 0x74
+	INT     KAng3;               // 0x80 — transient
+	INT     KTriList;            // 0x84 — transient
+	FLOAT   KLastVel;            // 0x88 — transient
 };
 
 class ENGINE_API UKarmaParamsRBFull : public UKarmaParams
@@ -6188,6 +6216,9 @@ class ENGINE_API UKarmaParamsRBFull : public UKarmaParams
 public:
 	DECLARE_CLASS(UKarmaParamsRBFull,UKarmaParams,0,Engine)
 	NO_DEFAULT_CONSTRUCTOR(UKarmaParamsRBFull)
+	// Layout from KarmaParamsRBFull.uc; offsets verified via Ghidra exec function analysis.
+	FLOAT   KInertiaTensor[6];  // 0x8c — 6*4=24 bytes; Ghidra: execKSetInertiaTensor writes 0x8c..0xa0
+	FVector KCOMOffset;         // 0xa4 — Ghidra: execKSetCOMOffset writes 0xa4..0xac
 };
 
 class ENGINE_API UKarmaParamsSkel : public UKarmaParams
