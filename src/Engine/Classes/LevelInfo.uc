@@ -16,12 +16,12 @@ class LevelInfo extends ZoneInfo
     placeable
     hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force,R6Weather);
 
-const RDC_CamFirstPerson = 0x01;
-const RDC_CamThirdPerson = 0x02;
-const RDC_CamFreeThirdP = 0x04;
-const RDC_CamGhost = 0x08;
-const RDC_CamFadeToBk = 0x10;
-const RDC_CamTeamOnly = 0x20;
+const RDC_CamFirstPerson = 0x01;  // 1st person death camera
+const RDC_CamThirdPerson = 0x02;  // 3rd person death camera
+const RDC_CamFreeThirdP = 0x04;   // Free 3rd person death camera
+const RDC_CamGhost = 0x08;        // camera ghost
+const RDC_CamFadeToBk = 0x10;     // fade to black
+const RDC_CamTeamOnly = 0x20;     // team only
 
 enum EPhysicsDetailLevel
 {
