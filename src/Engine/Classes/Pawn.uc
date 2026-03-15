@@ -506,6 +506,7 @@ var float m_fDistanceFlashBang;
 var float m_fLastCommunicationTime;  // last time player sent a voice message for in-game map
 //#ifdef R6CODE
 var float m_fPrePivotPawnInitialOffset;
+// The AI or Player controller driving this pawn's behavior and input.
 var Controller Controller;
 var PlayerController LastRealViewer;
 var Actor LastViewer;
@@ -515,7 +516,9 @@ var R6EngineWeapon EngineWeapon;  // Current weapon the character is using
 var R6EngineWeapon PendingWeapon;  // Will become weapon once current weapon is put down
 var R6EngineWeapon m_WeaponsCarried[4];  // Weapons carried by the character, max 4 (primary, handgun, 2 types of grenades)
 //R6CODE var float			OldZ;			// Old Z Location - used for eyeheight smoothing
+// Physics volume enclosing the pawn's head (used for underwater/hazard detection).
 var PhysicsVolume HeadVolume;  // physics volume of head
+// Network-replicated player info (name, score, ping); populated when possessed by a PlayerController.
 var PlayerReplicationInfo PlayerReplicationInfo;
 var LadderVolume OnLadder;  // ladder currently being climbed
 // #ifdef R6CODE
@@ -578,11 +581,14 @@ var localized string MenuName;  // Name used for this pawn type in menus (e.g. p
 //R6CODE
 var string m_CharacterName;  // Name of the character
 //UT2K3
-var transient CompressedPosition PawnPosition;
+var transient CompressedPosition PawnPosition; // Compressed position sent to non-owners for remote interpolation.
 
+// Replication block: variables synced from server to clients.
+// 'reliable' guarantees delivery; condition evaluated server-side each tick.
 replication
 {
 	// Pos:0x000
+	// Server-side: replicate general pawn state to all connected clients.
 	reliable if((bNetDirty && (int(Role) == int(ROLE_Authority))))
 		AnimAction, AnimStatus, 
 		Controller, OnLadder, 
@@ -596,6 +602,7 @@ replication
 		m_iFriendlyTeams, m_iTeam;
 
 	// Pos:0x018
+	// Movement stats sent only to the owning client (their own speed/health).
 	reliable if(((bNetDirty && bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		AccelRate, AirControl, 
 		AirSpeed, GroundSpeed, 
@@ -603,41 +610,50 @@ replication
 		WaterSpeed;
 
 	// Pos:0x03B
+	// Weapon state sent to non-owning clients (opponents/spectators).
 	reliable if((bNetDirty && ((!bNetOwner) && (int(Role) == int(ROLE_Authority)))))
 		EngineWeapon, PendingWeapon, 
 		bSteadyFiring;
 
 	// Pos:0x060
+	// Player identity flags replicated every tick from server, not gated on bNetDirty.
 	reliable if((int(Role) == int(ROLE_Authority)))
 		m_bIsPlayer, m_fFallingHeight;
 
 	// Pos:0x06D
+	// Peek/crouch state sent to non-owners so they render the correct posture.
 	reliable if(((!bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		m_bPeekingLeft, m_ePeekingMode, 
 		m_fCrouchBlendRate;
 
 	// Pos:0x087
+	// Shotgun finish anim and rotation offset only needed for real player pawns seen by others.
 	reliable if((((!bNetOwner) && (int(Role) == int(ROLE_Authority))) && m_bIsPlayer))
 		m_bRepFinishShotgun, m_rRotationOffset;
 
 	// Pos:0x0AC
+	// Firing/turning flags: owner pushes to server; server pushes to non-owners.
 	reliable if(((bNetOwner && (int(Role) < int(ROLE_Authority))) || ((!bNetOwner) && (int(Role) == int(ROLE_Authority)))))
 		m_bIsFiringWeapon, m_bTurnLeft, 
 		m_bTurnRight;
 
 	// Pos:0x0E3
+	// Ragdoll momentum replicated once when pawn tears off from network ownership.
 	reliable if((((bTearOff || m_bUseRagdoll) && bNetDirty) && (int(Role) == int(ROLE_Authority))))
 		TearOffMomentum;
 
 	// Pos:0x111
+	// RPCs sent from owning client up to server (client → server channel).
 	reliable if((int(Role) < int(ROLE_Authority)))
 		ServerChangedWeapon, ServerFinishShotgunAnimation;
 
 	// Pos:0x11E
+	// Blur/flashbang value replicated from server to all clients.
 	reliable if((int(Role) == int(ROLE_Authority)))
 		m_fRepDecrementalBlurValue;
 
 	// Pos:0x12B
+	// Compressed position sent to non-owners for smooth remote pawn movement.
 	reliable if(((!bNetOwner) && (int(Role) == int(ROLE_Authority))))
 		PawnPosition;
 }
@@ -698,6 +714,7 @@ function ServerFinishShotgunAnimation()
 	return;
 }
 
+// Reset to initial state; player pawns are destroyed, AI pawns are reset via super.
 function Reset()
 {
 	// End:0x25
@@ -787,6 +804,7 @@ function BecomeViewTarget()
 	return;
 }
 
+// Drops the pawn into the world under gravity; called when interpolated movement ends.
 function DropToGround()
 {
 	bCollideWorld = true;
@@ -795,7 +813,7 @@ function DropToGround()
 	if((Health > 0))
 	{
 		SetCollision(true, true, true);
-		SetPhysics(2);
+		SetPhysics(2); // PHYS_Falling=2: let gravity take over.
 		AmbientSound = none;
 		// End:0x46
 		if(IsHumanControlled())
@@ -806,8 +824,10 @@ function DropToGround()
 	return;
 }
 
+// Returns true if pawn can start climbing a ladder (not already on one, not falling too fast).
 function bool CanGrabLadder()
 {
+	// PHYS_Ladder=11, PHYS_Falling=2; vertical speed must be within JumpZ to grab while falling.
 	return (((bCanClimbLadders && (Controller != none)) && (int(Physics) != int(11))) && ((int(Physics) != int(2)) || (Abs(Velocity.Z) <= JumpZ)));
 	return;
 }
@@ -823,9 +843,11 @@ event SetWalking(bool bNewIsWalking)
 	return;
 }
 
+// Returns true if velocity is sufficient to create a water splash (debounced by 0.25s).
 function bool CanSplash()
 {
 	// End:0x70
+	// PHYS_Falling=2, PHYS_Flying=4; require >100 UU/s downward speed for a splash.
 	if(((((Level.TimeSeconds - SplashTime) > 0.2500000) && ((int(Physics) == int(2)) || (int(Physics) == int(4)))) && (Abs(Velocity.Z) > float(100))))
 	{
 		SplashTime = Level.TimeSeconds;
@@ -915,11 +937,13 @@ function Vector WeaponBob(float BobDamping)
 	return;
 }
 
+// Update camera bob vectors each tick based on physics mode and horizontal speed.
 function CheckBob(float DeltaTime, Vector Y)
 {
 	local float Speed2D;
 
 	// End:0x159
+	// PHYS_Walking=1: classic side-to-side foot-bob scaled by movement speed.
 	if((int(Physics) == int(1)))
 	{
 		Speed2D = VSize(Velocity);
@@ -950,6 +974,7 @@ function CheckBob(float DeltaTime, Vector Y)
 	else
 	{
 		// End:0x212
+		// PHYS_Swimming=3: slower, sinusoidal floating bob while swimming.
 		if((int(Physics) == int(3)))
 		{
 			Speed2D = Sqrt(((Velocity.X * Velocity.X) + (Velocity.Y * Velocity.Y)));
@@ -1005,6 +1030,7 @@ simulated function bool IsLocallyControlled()
 // #ifdef R6CODE - this function was converted to an event so that it can be called from the native 
 //					code for SeePawn(), LineOfSightTo()...
 // simulated function rotator GetViewRotation()
+// Returns the controller's view rotation; falls back to pawn rotation if uncontrolled.
 simulated event Rotator GetViewRotation()
 {
 	// End:0x14
@@ -1155,6 +1181,7 @@ function JumpOutOfWater(Vector jumpDir)
 	return;
 }
 
+// Only the server handles falling out of the world; clients return early to avoid desync.
 event FellOutOfWorld()
 {
 	// End:0x12
@@ -1190,6 +1217,7 @@ function RestartPlayer()
 	return;
 }
 
+// Adds an external impulse; transitions pawn to PHYS_Falling if currently on the ground.
 function AddVelocity(Vector NewVelocity)
 {
 	// End:0x0B
@@ -1198,6 +1226,7 @@ function AddVelocity(Vector NewVelocity)
 		return;
 	}
 	// End:0x5A
+	// PHYS_Walking=1, PHYS_Ladder=11, PHYS_Spider=9; upward impulse kicks pawn off surface.
 	if(((int(Physics) == int(1)) || (((int(Physics) == int(11)) || (int(Physics) == int(9))) && (NewVelocity.Z > default.JumpZ))))
 	{
 		SetPhysics(2);
@@ -1211,6 +1240,7 @@ function AddVelocity(Vector NewVelocity)
 	return;
 }
 
+// Directly kills this pawn (e.g. kill volume); EventInstigator is credited.
 function KilledBy(Pawn EventInstigator)
 {
 	local Controller Killer;
@@ -1224,6 +1254,7 @@ function KilledBy(Pawn EventInstigator)
 	return;
 }
 
+// Apply fall damage and camera shake if landing speed exceeds half of MaxFallSpeed.
 function TakeFallingDamage()
 {
 	local float Shake;
@@ -1270,6 +1301,7 @@ function ClientSetRotation(Rotator NewRotation)
 	return;
 }
 
+// Orient pawn to face the desired rotation; strips pitch when walking or falling.
 simulated function FaceRotation(Rotator NewRotation, float DeltaTime)
 {
 	// End:0x24
@@ -1282,6 +1314,7 @@ simulated function FaceRotation(Rotator NewRotation, float DeltaTime)
 		// End:0x52
 		if(((int(Physics) == int(1)) || (int(Physics) == int(2))))
 		{
+			// Zero pitch so the pawn mesh doesn't tilt with the view direction.
 			NewRotation.Pitch = 0;
 		}
 		SetRotation(NewRotation);
@@ -1306,6 +1339,7 @@ function ServerChangedWeapon(R6EngineWeapon OldWeapon, R6EngineWeapon W)
 
 //==============
 // Encroachment
+// Returns true if this pawn is encroaching on Other and should block/push it.
 event bool EncroachingOn(Actor Other)
 {
 	// End:0x14
@@ -1314,6 +1348,7 @@ event bool EncroachingOn(Actor Other)
 		return true;
 	}
 	// End:0x54
+	// AI pawns and warping pawns do not block other pawns (prevents accidental telefragging).
 	if(((((Controller == none) || (!Controller.bIsPlayer)) || bWarping) && (Pawn(Other) != none)))
 	{
 		return true;
@@ -1329,6 +1364,7 @@ event EncroachedBy(Actor Other)
 
 //Base change - if new base is pawn or decoration, damage based on relative mass and old velocity
 // Also, non-players will jump off pawns immediately
+// Bounces pawn off another pawn they are standing on (non-player only).
 function JumpOffPawn()
 {
 	(Velocity += ((float(100) + CollisionRadius) * VRand()));
@@ -1372,12 +1408,14 @@ singular event BaseChange()
 // #ifdef R6CODE - this function was converted to an event so that it can be called from the native 
 //					code for SeePawn(), LineOfSightTo()...
 // function vector EyePosition()
+// Camera origin offset; R6 version returns only WalkBob (EyeHeight removed from base code).
 event Vector EyePosition()
 {
 	return WalkBob;
 	return;
 }
 
+// Cleanup on destroy: notify controller, and destroy attached weapon actors server-side.
 simulated event Destroyed()
 {
 	// End:0x1E
@@ -1392,6 +1430,7 @@ simulated event Destroyed()
 		Controller.PawnDied();
 	}
 	// End:0x4A
+	// Weapon cleanup only on server; clients skip to avoid double-destroy.
 	if((int(Role) < int(ROLE_Authority)))
 	{
 		return;
@@ -1419,7 +1458,7 @@ simulated event Destroyed()
 event PreBeginPlay()
 {
 	super.PreBeginPlay();
-	Instigator = self;
+	Instigator = self; // Pawn is its own instigator until possessed by a controller.
 	DesiredRotation = Rotation;
 	// End:0x23
 	if(bDeleteMe)
@@ -1434,6 +1473,8 @@ event PreBeginPlay()
 	return;
 }
 
+// PostBeginPlay: called after the actor is fully initialized in the world.
+// Automatically spawns and possesses an AI controller for pawns placed in the editor.
 event PostBeginPlay()
 {
 	local AIScript A;
@@ -1448,6 +1489,7 @@ event PostBeginPlay()
 		if(((AIScriptTag != 'None') && (AIScriptTag != 'None')))
 		{
 			// End:0x88
+			// AllActors iterator: search the world for an AIScript matching this pawn's tag.
 			foreach AllActors(Class'Engine.AIScript', A, AIScriptTag)
 			{
 				// End:0x88
@@ -1480,6 +1522,7 @@ event PostBeginPlay()
 }
 
 // called after PostBeginPlay on net client
+// Called on net clients after initial replication; re-links controller back-pointer.
 simulated event PostNetBeginPlay()
 {
 	// End:0x12
@@ -1517,6 +1560,7 @@ function SetMovementPhysics()
 	return;
 }
 
+// Called when pawn health reaches zero; triggers death sequence, events, and controller cleanup.
 function Died(Controller Killer, Vector HitLocation)
 {
 	// End:0x0B
@@ -1553,6 +1597,7 @@ function Died(Controller Killer, Vector HitLocation)
 	return;
 }
 
+// Notifies controller that the pawn has begun falling (walked off a ledge, etc.).
 event Falling()
 {
 	// End:0x1A
@@ -1568,9 +1613,10 @@ event HitWall(Vector HitNormal, Actor Wall)
 	return;
 }
 
+// Called when pawn touches ground after a fall; applies landing bob and checks for damage.
 event Landed(Vector HitNormal)
 {
-	LandBob = FMin(50.0000000, (0.0550000 * Velocity.Z));
+	LandBob = FMin(50.0000000, (0.0550000 * Velocity.Z)); // Scale landing bob by impact speed; capped at 50 UU.
 	TakeFallingDamage();
 	// End:0x3F
 	if((Health > 0))
@@ -1586,6 +1632,7 @@ event Landed(Vector HitNormal)
 	return;
 }
 
+// Called when the volume containing the pawn's head changes (e.g. submerging or surfacing).
 event HeadVolumeChange(PhysicsVolume newHeadVolume)
 {
 	// End:0x28
@@ -1604,6 +1651,7 @@ event HeadVolumeChange(PhysicsVolume newHeadVolume)
 			{
 				Gasp();
 			}
+			// Negative signals "just surfaced"; Gasp() plays if breath was critically low.
 			BreathTime = -1.0000000;
 		}		
 	}
@@ -1618,6 +1666,7 @@ event HeadVolumeChange(PhysicsVolume newHeadVolume)
 	return;
 }
 
+// Uses TouchingActors iterator to check if any overlapping physics volume is a water volume.
 function bool TouchingWaterVolume()
 {
 	local PhysicsVolume V;
@@ -1635,6 +1684,7 @@ function bool TouchingWaterVolume()
 	return;
 }
 
+// Fires while pawn is submerged; deals periodic drowning damage and resets the breath clock.
 event BreathTimer()
 {
 	// End:0x28
@@ -1656,6 +1706,7 @@ function TakeDrowningDamage()
 	return;
 }
 
+// Check if the pawn is near a surface that allows jumping out of water.
 function bool CheckWaterJump(out Vector WallNormal)
 {
 	local Actor HitActor;
@@ -1687,12 +1738,15 @@ function bool CheckWaterJump(out Vector WallNormal)
 }
 
 //Player Jumped
+// Executes a jump if the pawn is on a walkable surface and not crouching.
 function DoJump(bool bUpdating)
 {
 	// End:0x16F
+	// PHYS_Walking=1, PHYS_Ladder=11, PHYS_Spider=9; crouching blocks jump.
 	if((((!bIsCrouched) && (!bWantsToCrouch)) && (((int(Physics) == int(1)) || (int(Physics) == int(11))) || (int(Physics) == int(9)))))
 	{
 		// End:0xB6
+		// Server-side only: make noise proportional to game difficulty when jumping.
 		if((int(Role) == int(ROLE_Authority)))
 		{
 			// End:0xB6
@@ -1702,6 +1756,7 @@ function DoJump(bool bUpdating)
 			}
 		}
 		// End:0xDB
+		// PHYS_Spider=9: launch in the floor-normal direction for wall-walking.
 		if((int(Physics) == int(9)))
 		{
 			Velocity = (JumpZ * Floor);			
@@ -1709,6 +1764,7 @@ function DoJump(bool bUpdating)
 		else
 		{
 			// End:0xFE
+			// PHYS_Ladder=11: zero Z velocity so pawn jumps straight off ladder.
 			if((int(Physics) == int(11)))
 			{
 				Velocity.Z = 0.0000000;				
@@ -1716,6 +1772,7 @@ function DoJump(bool bUpdating)
 			else
 			{
 				// End:0x11A
+				// Walking mode uses default JumpZ for a weaker jump (no run-up).
 				if(bIsWalking)
 				{
 					Velocity.Z = default.JumpZ;					
@@ -1742,6 +1799,7 @@ function PlayMoverHitSound()
 }
 
 // blow up into little pieces (implemented in subclass)		
+// Destroy this pawn and notify or destroy its controller.
 simulated function ChunkUp()
 {
 	// End:0x56
@@ -1777,12 +1835,15 @@ simulated function SetAnimStatus(name NewStatus)
 	return;
 }
 
+// Transition pawn into the Dying state; enable ragdoll physics if bPhysicsAnimUpdate is set.
 simulated event PlayDying(Vector HitLoc)
 {
+	// Enter the Dying state machine; suppresses most gameplay events.
 	GotoState('Dying');
 	// End:0x31
 	if(bPhysicsAnimUpdate)
 	{
+		// Tear off from network replication so ragdoll runs independently on each client.
 		bReplicateMovement = false;
 		bTearOff = true;
 		(Velocity += TearOffMomentum);
@@ -1803,6 +1864,7 @@ simulated event StopPlayFiring()
 	return;
 }
 
+// Re-evaluate and blend to the correct animation for the current movement/stance state.
 simulated event ChangeAnimation()
 {
 	// End:0x21
@@ -1815,6 +1877,7 @@ simulated event ChangeAnimation()
 	return;
 }
 
+// Animation notify: when the base channel (0) finishes, return to idle.
 simulated event AnimEnd(int Channel)
 {
 	// End:0x11
@@ -1831,6 +1894,7 @@ function bool CannotJumpNow()
 	return;
 }
 
+// Override in subclasses to play a jump animation notify.
 simulated event PlayJump()
 {
 	return;
@@ -1851,6 +1915,7 @@ simulated function PlayWaiting()
 	return;
 }
 
+// Plays the landing animation if physics-driven animation is not in use.
 function PlayLanded(float impactVel)
 {
 	// End:0x16
@@ -1866,6 +1931,8 @@ simulated event PlayLandingAnimation(float impactVel)
 	return;
 }
 
+// Dying state: entered via PlayDying(); pawn becomes a corpse.
+// Most gameplay events (BreathTimer, etc.) are suppressed in this state.
 state Dying
 {
 	ignores BreathTimer;
@@ -1895,6 +1962,7 @@ state Dying
 		return;
 	}
 
+	// Periodically check visibility; destroy corpse when no player can see it.
 	function Timer()
 	{
 		// End:0x0E
@@ -1909,6 +1977,7 @@ state Dying
 		return;
 	}
 
+	// Corpse landed: flatten rotation, switch to PHYS_None, and settle.
 	function Landed(Vector HitNormal)
 	{
 		local Rotator finalRot;
@@ -1929,6 +1998,7 @@ state Dying
 	}
 
 	// prone body should have low height, wider radius
+	// Squash the collision cylinder to CarcassCollisionHeight so the corpse lies flat.
 	function ReduceCylinder()
 	{
 		local float OldHeight, OldRadius;
@@ -1961,6 +2031,7 @@ state Dying
 		return;
 	}
 
+	// Animation notify: mark the body as having hit the ground.
 	function LandThump()
 	{
 		// End:0x18
@@ -1995,6 +2066,7 @@ state Dying
 		return;
 	}
 
+	// Final rest: play thump sound/notify then shrink collision cylinder.
 	function LieStill()
 	{
 		// End:0x11
@@ -2035,6 +2107,7 @@ state Dying
 		return;
 	}
 
+	// On entering Dying: set a destroy timer, release the controller, mark body invulnerable briefly.
 	function BeginState()
 	{
 		// End:0x32
@@ -2073,7 +2146,7 @@ Begin:
 defaultproperties
 {
 	Visibility=128
-	Health=100
+	Health=100 // Starting hit points.
 	bCanJump=true
 	bCanWalk=true
 	bLOSHearing=true
@@ -2083,18 +2156,18 @@ defaultproperties
 	MaxDesiredSpeed=1.0000000
 	SightRadius=5000.0000000
 	AvgPhysicsTime=0.1000000
-	GroundSpeed=600.0000000
-	WaterSpeed=300.0000000
-	AirSpeed=600.0000000
+	GroundSpeed=600.0000000 // Default run speed in Unreal Units/s.
+	WaterSpeed=300.0000000 // Half of GroundSpeed while swimming.
+	AirSpeed=600.0000000 // Same as GroundSpeed; used by flying physics.
 	LadderSpeed=200.0000000
 	AccelRate=2048.0000000
-	JumpZ=420.0000000
+	JumpZ=420.0000000 // Vertical impulse (UU/s) on jump.
 	AirControl=0.0500000
 	WalkingPct=0.5000000
 	CrouchedPct=0.5000000
-	MaxFallSpeed=1200.0000000
-	CrouchHeight=40.0000000
-	CrouchRadius=34.0000000
+	MaxFallSpeed=1200.0000000 // Impact speed above this causes fatal damage.
+	CrouchHeight=40.0000000 // Collision half-height when crouched (UU).
+	CrouchRadius=34.0000000 // Collision radius when crouched (same as standing).
 	Bob=0.0160000
 	SoundDampening=1.0000000
 	DamageScaling=1.0000000
@@ -2114,8 +2187,8 @@ defaultproperties
 	bUpdateSimulatedPosition=true
 	bTravel=true
 	bShouldBaseAtStartup=true
-	bCollideActors=true
-	bCollideWorld=true
+	bCollideActors=true // Enables collision with other actors.
+	bCollideWorld=true // Enables collision with world geometry.
 	bBlockActors=true
 	bBlockPlayers=true
 	bProjTarget=true
