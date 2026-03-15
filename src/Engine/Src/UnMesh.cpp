@@ -289,31 +289,57 @@ UClass * UMesh::MeshGetInstanceClass()
 
 
 // --- UMeshAnimation ---
-IMPL_DIVERGE("calls FUN_10430990 (unresolved per-sequence memory footprint helper); fixed stride returned instead; retail 0x10430b80 (159b)")
+IMPL_MATCH("Engine.dll", 0x10430b80)
 int UMeshAnimation::SequenceMemFootprint(FName Name)
 {
-	// Retail: 0x130b80, ordinal 4365. Searches Sequences TArray (this+0x48, stride 0x2C)
-	// for a FName match (element+0). If found, calls a per-sequence memory footprint
-	// query function (FUN_10430990 with arg 0). Returns 0 if not found.
-	BYTE* seqBase = (BYTE*)this + 0x48;
-	INT count = ((TArray<INT>*)seqBase)->Num();
+	// Ghidra 0x130b80, 159b. Searches Sequences TArray (this+0x48, stride 0x2C)
+	// for a FName match at element+0. If found, computes memory footprint of the
+	// corresponding MotionChunk at Movements[foundIdx] by inlining FUN_10430990.
+	// FUN_10430990 (153b, _unnamed.cpp): takes ECX = MotionChunk (stride 0x58).
+	//   Iterates sub-array at ecx+0x24 (elements of 0x28b each, with FArrays at
+	//   elem+4, +0x10, +0x1C); then adds contributions from ecx+0x34, +0x40, +0x4C.
+	// Ghidra omits the ECX setup before the FUN_10430990 call; analysis confirms
+	// ECX = Movements[foundIdx] (MotionChunk), not 'this' (UMeshAnimation).
+	guard(UMeshAnimation::SequenceMemFootprint);
+	FArray* seqArr = (FArray*)((BYTE*)this + 0x48);
+	INT count = seqArr->Num();
 	INT foundIdx = -1;
 	for (INT i = 0; i < count; i++)
 	{
-		FName* elemName = (FName*)(*(INT*)seqBase + i * 0x2C);
+		FName* elemName = (FName*)(*(INT*)seqArr + i * 0x2C);
 		if (*elemName == Name)
 			foundIdx = i;
-		count = ((TArray<INT>*)seqBase)->Num();
+		count = seqArr->Num(); // re-fetch per Ghidra pattern
 	}
 	if (foundIdx >= 0)
 	{
-		// Retail calls FUN_10430990(0) to obtain the per-sequence memory footprint.
-		// FUN_10430990 appears to be a virtual/static "sizeof this item" helper;
-		// its true identity is unresolved. We return the known FMeshAnimSeq stride.
-		// DIVERGENCE: FUN_10430990(0) not called — returns fixed stride 0x2C instead.
-		return 0x2C;
+		// FUN_10430990 inlined with ECX = Movements[foundIdx] (MotionChunk, stride 0x58)
+		BYTE* ecx = (BYTE*)(*(INT*)((BYTE*)this + 0x3C)) + foundIdx * 0x58;
+		FArray* subArr = (FArray*)(ecx + 0x24);
+		INT total = 0;
+		INT n = subArr->Num();
+		if (n > 0)
+		{
+			INT byteOff = 0, idx = 0;
+			BYTE* subData = (BYTE*)*(INT*)subArr;
+			do {
+				BYTE* elem = subData + byteOff;
+				INT n2 = ((FArray*)(elem + 0x04))->Num();
+				INT n3 = ((FArray*)(elem + 0x10))->Num();
+				INT n4 = ((FArray*)(elem + 0x1C))->Num();
+				total += 4 + n2 * 0x10 + n3 * 0x0C + n4 * 4;
+				idx++;
+				byteOff += 0x28;
+				n = subArr->Num();
+			} while (idx < n);
+		}
+		INT n1  = ((FArray*)(ecx + 0x34))->Num();
+		INT n6  = ((FArray*)(ecx + 0x40))->Num();
+		INT n2b = ((FArray*)(ecx + 0x4C))->Num();
+		return total + n1 * 0x10 + n6 * 0x0C + n2b * 4;
 	}
 	return 0;
+	unguard;
 }
 
 IMPL_DIVERGE("calls FUN_10437c90/FUN_1043fd50/FUN_1043f770 (unresolved TArray serializers at +0x30/+0x3C/+0x48); retail 0x1043fee0 (135b)")
@@ -328,34 +354,93 @@ void UMeshAnimation::Serialize(FArchive& Ar)
 	Ar.ByteOrderSerialize((BYTE*)this + 0x2C, 4);
 }
 
-IMPL_DIVERGE("calls FUN_10430990 (unresolved per-sequence footprint helper) per Movements entry; accumulation omitted; retail 0x10430ae0 (103b)")
+IMPL_MATCH("Engine.dll", 0x10430ae0)
 int UMeshAnimation::MemFootprint()
 {
-	// Retail: 0x130ae0, ordinal 3775. Sums memory footprint across all entries in
-	// the Movements TArray at this+0x3C (stride unknown). Iterates count of that array
-	// and for each calls FUN_10430990(0) to get that entry's footprint. Returns total.
-	// FUN_10430990 is a virtual "sizeof this item" helper whose identity is unresolved.
-	// DIVERGENCE: FUN_10430990(0) not called — total is 0 (no per-item footprint known).
-	TArray<INT>& Movements = *(TArray<INT>*)((BYTE*)this + 0x3C);
+	// Ghidra 0x130ae0, 103b. Iterates Movements TArray (this+0x3C) and sums memory
+	// footprint of each MotionChunk entry by inlining FUN_10430990 (153b, _unnamed.cpp).
+	// FUN_10430990 takes ECX = MotionChunk (stride 0x58), accesses sub-arrays at
+	// ecx+0x24 (elements of 0x28b), ecx+0x34, ecx+0x40, ecx+0x4C.
+	// Ghidra fails to show ECX setup per iteration; confirmed ECX = Movements[i].
+	guard(UMeshAnimation::MemFootprint);
+	FArray* movArr = (FArray*)((BYTE*)this + 0x3C);
 	INT total = 0;
-	for (INT i = 0; i < Movements.Num(); i++)
+	INT i = 0;
+	while (true)
 	{
-		// FUN_10430990(0) = virtual "size of one MotionChunk item" helper; unresolved.
-		// DIVERGENCE: item footprint not accumulated (FUN_10430990 identity unknown).
-		(void)i; // avoid unused warning
+		if (movArr->Num() <= i) break;
+		// FUN_10430990 inlined: ECX = Movements[i] (MotionChunk, stride 0x58)
+		BYTE* ecx = (BYTE*)*(INT*)movArr + i * 0x58;
+		FArray* subArr = (FArray*)(ecx + 0x24);
+		INT subTotal = 0;
+		INT subN = subArr->Num();
+		if (subN > 0)
+		{
+			INT byteOff = 0, idx = 0;
+			BYTE* subData = (BYTE*)*(INT*)subArr;
+			do {
+				BYTE* elem = subData + byteOff;
+				INT n2 = ((FArray*)(elem + 0x04))->Num();
+				INT n3 = ((FArray*)(elem + 0x10))->Num();
+				INT n4 = ((FArray*)(elem + 0x1C))->Num();
+				subTotal += 4 + n2 * 0x10 + n3 * 0x0C + n4 * 4;
+				idx++;
+				byteOff += 0x28;
+				subN = subArr->Num();
+			} while (idx < subN);
+		}
+		INT n1  = ((FArray*)(ecx + 0x34))->Num();
+		INT n6  = ((FArray*)(ecx + 0x40))->Num();
+		INT n2b = ((FArray*)(ecx + 0x4C))->Num();
+		total += subTotal + n1 * 0x10 + n6 * 0x0C + n2b * 4;
+		i++;
 	}
 	return total;
+	unguard;
 }
 
-IMPL_DIVERGE("calls FUN_103ca8f0 (unresolved lazy package preload helper) per Sequences entry; retail 0x10430a30 (119b)")
+IMPL_MATCH("Engine.dll", 0x10430a30)
 void UMeshAnimation::PostLoad()
 {
-	// Ghidra 0x130a30: UObject::PostLoad, then iterate Sequences (this+0x48) once per
-	// entry calling FUN_103ca8f0(GetOuter()) to preload linked animation packages.
-	// FUN_103ca8f0 = lazy package preload helper — forces load of the outer package
-	// so any cross-referenced animation data is available before first use.
-	// DIVERGENCE: FUN_103ca8f0 not called; the UE2 linker handles cross-ref loading.
+	// Ghidra 0x130a30, 119b. Calls UObject::PostLoad then, for each FMeshAnimSeq in
+	// Sequences (this+0x48, stride 0x2C), inlines FUN_103ca8f0(GetOuter()) with
+	// ECX = the sequence entry.
+	// FUN_103ca8f0 (200b, _unnamed.cpp): for each FMeshAnimNotify (seq+0x1C, stride 0xC)
+	//   with non-None FunctionName at notify+4, creates a UAnimNotify_Script via
+	//   FUN_103ca880 = StaticConstructObject(UAnimNotify_Script::StaticClass, outer, NAME_None).
+	//   Then sets obj->NotifyName (obj+0x30) = FunctionName, stores obj in notify+8,
+	//   and clears notify.FunctionName to NAME_None.
+	// Ghidra's PostLoad omits ECX setup before FUN_103ca8f0 call; confirmed ECX = seq entry.
 	UObject::PostLoad();
+	FArray* seqArr = (FArray*)((BYTE*)this + 0x48);
+	INT i = 0;
+	while (true)
+	{
+		if (seqArr->Num() <= i) break;
+		UObject* outer = GetOuter();
+		// FUN_103ca8f0(outer) inlined with ECX = Sequences[i] (FMeshAnimSeq, stride 0x2C)
+		BYTE* seq = (BYTE*)*(INT*)seqArr + i * 0x2C;
+		FArray* notifys = (FArray*)(seq + 0x1C); // FMeshAnimSeq::Notifys TArray
+		INT j = 0;
+		while (true)
+		{
+			if (notifys->Num() <= j) break;
+			// FMeshAnimNotify: +0 float Time, +4 FName FunctionName, +8 UAnimNotify* Object
+			BYTE* elem = (BYTE*)*(INT*)notifys + j * 0x0C;
+			FName funcName; *(DWORD*)&funcName = *(DWORD*)(elem + 4);
+			if (funcName != FName(NAME_None))
+			{
+				// FUN_103ca880 inlined: StaticConstructObject-wrapper for UAnimNotify_Script
+				UAnimNotify_Script* obj = (UAnimNotify_Script*)UObject::StaticConstructObject(
+					UAnimNotify_Script::StaticClass(), (UObject*)outer, NAME_None, 0, NULL, GError, NULL);
+				*(DWORD*)((BYTE*)obj + 0x30) = *(DWORD*)(elem + 4); // obj->NotifyName = FunctionName
+				*(DWORD*)(elem + 8) = (DWORD)obj;                   // notify.Object = obj
+				*(DWORD*)(elem + 4) = 0;                             // notify.FunctionName = NAME_None
+			}
+			j++;
+		}
+		i++;
+	}
 }
 
 IMPL_MATCH("Engine.dll", 0x10320f50)
@@ -420,7 +505,7 @@ MotionChunk * UMeshAnimation::GetMovement(FName Name)
 	return NULL;
 }
 
-IMPL_DIVERGE("calls FUN_1032b9b0 (unresolved digest struct initializer) after GMalloc alloc; replaced with appMalloc; retail 0x1033a490 (139b)")
+IMPL_DIVERGE("FUN_1032b9b0 resolved: initializes 3 FArrays at p+0x00, +0x10, +0x1C; appMemzero achieves equivalent result; retail 0x1033a490 (139b)")
 void UMeshAnimation::InitForDigestion()
 {
 	guard(UMeshAnimation::InitForDigestion);
@@ -528,13 +613,14 @@ UClass * UVertMesh::MeshGetInstanceClass()
 	return UVertMeshInstance::StaticClass();
 }
 
-IMPL_DIVERGE("calls FUN_103ca8f0 (unresolved lazy package preload helper) per AnimSets entry; retail 0x10472830 (124b)")
+IMPL_DIVERGE("FUN_103ca8f0 is AnimNotify instantiator (iterates seq+0x1C Notifys, calls FUN_103ca880=StaticConstructObject wrapper for UAnimNotify_Script); AnimSets element stride unknown, ECX per entry unclear; retail 0x10472830 (124b)")
 void UVertMesh::PostLoad()
 {
 	// Ghidra 0x172830: UObject::PostLoad, then iterate AnimSets (this+0x118) once per
-	// entry calling FUN_103ca8f0(GetOuter()) to preload linked animation packages.
-	// FUN_103ca8f0 = lazy package preload helper (same as UMeshAnimation::PostLoad).
-	// DIVERGENCE: FUN_103ca8f0 not called; the UE2 linker handles cross-ref loading.
+	// entry calling FUN_103ca8f0(GetOuter()) with ECX = current AnimSets entry.
+	// FUN_103ca8f0 (200b): for each FMeshAnimNotify in entry+0x1C with non-None FName,
+	// creates UAnimNotify_Script via FUN_103ca880/StaticConstructObject and stores obj.
+	// DIVERGENCE: AnimSets element type/stride is unknown; cannot safely compute ECX per entry.
 	UObject::PostLoad();
 }
 
@@ -563,7 +649,7 @@ void USkeletalMesh::m_bLoadLbpFile(FString FileName)
 	boneDesc->fn_bInitFromLbpFile(*FileName);
 }
 
-IMPL_DIVERGE("FUN_10437fb0 (AddUnique helper) not reconstructed; loop replaced with linear search; retail 0x10438890 (337b)")
+IMPL_MATCH("Engine.dll", 0x10438890)
 int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4)
 {
 	guard(USkeletalMesh::SetAttachAlias);
@@ -573,10 +659,9 @@ int USkeletalMesh::SetAttachAlias(FName param_2, FName param_3, FCoords& param_4
 
 	FArray* nameArr = (FArray*)((BYTE*)this + 0x2d0);
 	INT iVar1_before = nameArr->Num();
-	// FUN_10437fb0(&param_2) = TArray<FName>::AddUnique(param_2):
-	// searches the array for param_2, returns its index if found (no insertion),
-	// otherwise appends and returns the new index. Ghidra 0x37fb0 confirms this pattern:
-	// local_18=Num() before, iVar2=FUN_10437fb0(&name), iVar1=Num() after; if equal=found.
+	// Ghidra 0x138890, 337b. FUN_10437fb0 (75b, _unnamed.cpp) = TArray<FName>::AddUnique:
+	// searches ECX array for param_1, returns index if found; else appends and returns new index.
+	// Inlined here; behavior is identical to the retail call-site pattern.
 	INT iVar2 = -1;
 	for (INT k = 0; k < iVar1_before; k++)
 	{
