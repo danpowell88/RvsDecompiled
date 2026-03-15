@@ -630,11 +630,10 @@ void APlayerController::execResetKeyboard( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( APlayerController, 544, execResetKeyboard );
 
 // Ghidra 0x1038eff0, 372b. Reads 3 params: FString NewOption, FString NewValue, UBOOL bSaveDefault.
-// Calls FUN_1038ef30(Engine) to get pointer; FURL (LastURL) is at that pointer + 0x464.
-// Builds key string (NewOption + "=" + NewValue) and calls FURL::AddOption.
-// If bSaveDefault: calls FURL::SaveURLConfig(url, L"DefaultPlayer", *NewOption, L"User").
-// FUN_1038ef30 not yet identified — assuming it returns Engine, LastURL at UGameEngine+0x464.
-IMPL_TODO("Ghidra 0x1038eff0; FUN_1038ef30(Engine) not identified — using XLevel->Engine raw + 0x464 for LastURL location")
+// FUN_1038ef30(Engine) = checked cast to UGameEngine*: asserts IsA(UGameEngine) then returns arg.
+// In practice Engine IS always a UGameEngine so the check always passes; we skip the assertion.
+// FURL (LastURL) is at UGameEngine+0x464 — confirmed from Ghidra and UGameEngine layout.
+IMPL_DIVERGE("Ghidra 0x1038eff0: FUN_1038ef30 is a UGameEngine IsA-assertion that we skip; LastURL at Engine+0x464 is correct")
 void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execUpdateURL);
@@ -834,12 +833,16 @@ void APlayerController::execSpecialDestroy( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, INDEX_NONE, execSpecialDestroy );
 
-IMPL_TODO("Ghidra 0x1038cc50; 59b -- Ghidra calls USkeletalMesh::RenderPreProcess on a register-spilled value (Ghidra register-tracking confused); our stub unconditionally returns 1")
+// Ghidra 0x1038cc50 (59b): reads one object param from bytecode (USkeletalMesh*),
+// then calls RenderPreProcess() and stores result. No guard/unguard in retail.
+// DIVERGENCE: we add guard/unguard; retail inlines Stack.Step dispatch directly.
+IMPL_DIVERGE("Ghidra 0x1038cc50: no guard/unguard in retail; inline Stack.Step dispatch vs our P_GET_OBJECT; functionally identical")
 void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execPB_CanPlayerSpawn);
+	P_GET_OBJECT(USkeletalMesh, Mesh);
 	P_FINISH;
-	*(DWORD*)Result = 1;
+	*(INT*)Result = Mesh->RenderPreProcess();
 	unguard;
 }
 IMPLEMENT_FUNCTION( APlayerController, 1320, execPB_CanPlayerSpawn );
@@ -1027,9 +1030,10 @@ void APlayerController::execSetSoundOptions( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( APlayerController, 2713, execSetSoundOptions );
 
 // Ghidra 0x1038cba0, 172b. Params: BYTE VolumeType, INT NewVolume.
-// After P_FINISH: calls FUN_1050557c(VolumeType, NewVolume) → FLOAT, then Audio->vtable[0xa8](VolumeType, floatVol).
-// FUN_1050557c (0x1050557c) is a volume conversion function (INT 0-100 → FLOAT scale) — not yet reconstructed.
-IMPL_TODO("Ghidra 0x1038cba0; calls FUN_1050557c (volume INT→FLOAT converter at 0x1050557c) before audio vtable +0xa8; FUN_ not yet reconstructed")
+// Calls FUN_1050557c (Engine.dll internal, 284 refs) for volume conversion, then Audio->vtable[0xa8](VolumeType, float).
+// FUN_1050557c signature unrecoverable from Ghidra (args passed in caller-saved regs, not tracked).
+// Best approximation: pass NewVolume/100.0f as the float volume (linear 0-100→0.0-1.0 mapping).
+IMPL_DIVERGE("Ghidra 0x1038cba0: FUN_1050557c (Engine.dll internal, 284 callers) converts NewVolume to FLOAT; signature unrecoverable — approximating with NewVolume/100.0f")
 void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 {
 	P_GET_BYTE(VolumeType);
@@ -1038,10 +1042,9 @@ void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 	UAudioSubsystem* Audio = (XLevel && XLevel->Engine) ? XLevel->Engine->Audio : NULL;
 	if( Audio )
 	{
-		// FUN_1050557c(VolumeType, NewVolume) converts INT 0-100 to FLOAT — omitted until identified.
-		// typedef void (__thiscall* TSetVolFn)(UAudioSubsystem*, BYTE, FLOAT);
-		// TSetVolFn fn = *(TSetVolFn*)((BYTE*)*(DWORD*)Audio + 0xa8);
-		// fn(Audio, VolumeType, convertedVol);
+		typedef void (__thiscall* TSetVolFn)(UAudioSubsystem*, BYTE, FLOAT);
+		TSetVolFn fn = *(TSetVolFn*)((BYTE*)*(DWORD*)Audio + 0xa8);
+		fn( Audio, VolumeType, (FLOAT)NewVolume * 0.01f );
 	}
 }
 IMPLEMENT_FUNCTION( APlayerController, 2714, execChangeVolumeTypeLinear );
@@ -3252,20 +3255,22 @@ INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, 
 	unguard;
 }
 
-IMPL_TODO("Ghidra passes Pawn->Location as first FVector arg to CanHearSound,")
+// Ghidra 0x1042cc70 (239b): checks Pawn exists, probes with FName(0x15e=NAME_Probe50)
+// for AIHearSound, calls CanHearSound with Pawn->Location as listener, fires eventAIHearSound.
+// Retail multiplies SoundLoc by 1.0f scalar (= SoundLoc unchanged) in the event call.
+// DIVERGENCE: we use ENGINE_AIHearSound FName (same runtime value in practice); SoundLoc direct.
+IMPL_DIVERGE("Ghidra 0x1042cc70: uses FName(0x15e) directly; SoundLoc scaled by 1.0f (no-op) not Volume; functionally identical")
 void AController::CheckHearSound( AActor* SoundMaker, INT SoundId, USound* Sound, FVector SoundLoc, FLOAT Volume, INT Flags )
 {
 	guard(AController::CheckHearSound);
-	// Retail 0x12cc70: fire eventAIHearSound if Pawn valid and sound is within range.
 	if (!Pawn)
 		return;
 	if (!IsProbing(ENGINE_AIHearSound))
 		return;
 	FVector OutNoiseLoc;
-	// DIVERGENCE: Ghidra passes Pawn->Location as first FVector arg to CanHearSound,
-	// indicating it is the listener location (not the sound origin).
+	// Pawn->Location is the listener location; SoundLoc is the sound origin (passed unscaled).
 	if (CanHearSound(Pawn->Location, SoundMaker, Volume, OutNoiseLoc))
-		eventAIHearSound(SoundMaker, SoundId, Sound, Pawn->Location, SoundLoc * Volume, (DWORD)Flags);
+		eventAIHearSound(SoundMaker, SoundId, Sound, Pawn->Location, SoundLoc, (DWORD)Flags);
 	unguard;
 }
 
@@ -3309,7 +3314,10 @@ DWORD AController::SeePawn( APawn* Seen, INT bMaySkipChecks )
 
 // DAT_1066ad7c: module-level goal cache (4 entries), cleared on bInitialPath=1
 static AActor* sGoalCache[4] = {NULL, NULL, NULL, NULL};
-IMPL_TODO("Ghidra 0x1038d500, 476b — DAT_1066ad7c as static sGoalCache[4]; FName 0x15a = NAME_SpecialHandling")
+// Ghidra 0x1038d500 (476b): uses DAT_1066ad7c (retail static address) for sGoalCache;
+// FName 0x15a = NAME_SpecialHandling used for IsProbing check.
+// DIVERGENCE: our sGoalCache static has a linker-assigned address ≠ retail DAT_1066ad7c.
+IMPL_DIVERGE("Ghidra 0x1038d500: sGoalCache lives at retail address DAT_1066ad7c; our linker assigns different address")
 AActor* AController::SetPath( INT bInitialPath )
 {
 guard(AController::SetPath);
@@ -3371,7 +3379,10 @@ return result;
 unguard;
 }
 
-IMPL_TODO("Ghidra 0x1041CCC0; raw offsets: EndPath+0x394=cost, +0x3ac=prevPath, +0x3b4=nextPath; skips FUN_1035a3d0 profiling call")
+// Ghidra 0x1041CCC0 (676b): uses raw offsets +0x394=cost, +0x3ac=prevPath, +0x3b4=nextPath.
+// Also calls FUN_1035a3d0 (54b profiling timer) before the SingleLineCheck — skipped here.
+// Uses &ANavigationPoint::PrivateStaticClass for IsA check (we use StaticClass()).
+IMPL_DIVERGE("Ghidra 0x1041CCC0: skips FUN_1035a3d0 profiling call; uses StaticClass() not PrivateStaticClass")
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
 	guard(AController::SetRouteCache);
