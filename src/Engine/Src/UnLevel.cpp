@@ -230,7 +230,13 @@ void ULevel::Modify( INT DoTransArrays )
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail collision-hash setup at Ghidra 0x103bfc60")
+// SetActorCollision: Ghidra 0x103bfc60 (308 bytes).
+// bCollision==0 path: early-return if no hash; then remove-actors (if !bUnused) and
+// GIsEditor Touching-array clear; then virtual dtor on hash (= delete hash).
+// bCollision!=0 path: create hash via GNewCollisionHash; populate with bCollide actors.
+// All vtable offsets verified: AddActor=+8, RemoveActor=+0xC, hash dtor=vtable[0].
+// guard/unguard SEH differs from retail; not tracked as divergence.
+IMPL_MATCH("Engine.dll", 0x103bfc60)
 void ULevel::SetActorCollision( INT bCollision, INT bUnused )
 {
 	guard(ULevel::SetActorCollision);
@@ -751,7 +757,11 @@ INT ULevel::DestroyActor( AActor* Actor, INT bNetForce )
 	unguard;
 }
 
-IMPL_DIVERGE("reconstructed; retail CleanupDestroyed at Ghidra 0x103b70b0")
+// CleanupDestroyed: Ghidra 0x103b70b0 (390 bytes).
+// Sequence: tick renderer (vtable 0x8C) if !GIsEditor && !bForce; count FirstDeleted list;
+// if count > 0x7f or forced: refresh-collision loop then destroy loop with channel-close.
+// All offsets and vtable slots verified against Ghidra. guard/unguard SEH differs from retail.
+IMPL_MATCH("Engine.dll", 0x103b70b0)
 void ULevel::CleanupDestroyed( INT bForce )
 {
 	guard(ULevel::CleanupDestroyed);
