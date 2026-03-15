@@ -430,7 +430,11 @@ void UTexture::Tick(float DeltaSeconds)
 // TEXF_RGBA8 textures.  BGRA layout: B=byte[0], G=byte[1], R=byte[2], A=byte[3].
 // FUN_1050557c rounds FP-stack value to INT; callers load loop vars via fild,
 // so iVar6 = Y and iVar7 = X of the current pixel in param_1.
-IMPL_MATCH("Engine.dll", 0x10469500)
+// Divergences from Ghidra 0x10469500 (523b):
+//   1. Initial vtable[4] lock/prefetch call on param_1->Mips.Data[0] is omitted.
+//   2. FUN_1050557c FPU-to-INT round-trip on loop counters replaced with direct INT.
+//   3. Sub-byte struct assignments in cases 6–9 are expressed as mask-and-OR instead.
+IMPL_DIVERGE("Ghidra 0x10469500 (523b): vtable[4] mip-lock on param_1 omitted; FUN_1050557c FPU round-trip on loop vars replaced with direct INT; sub-byte struct ops in cases 6-9 differ in emitted asm")
 void UTexture::ArithOp(UTexture* param_1, ETextureArithOp param_2)
 {
 	guard(UTexture::ArithOp);
