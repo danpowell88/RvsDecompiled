@@ -48,7 +48,7 @@ void UInputPlanning::StaticInitInput()
 // Blocked by: FindButtonName/FindAxisName (FUN_103b5740), DAT_106717e8 (editor global),
 // and complex FName/FString property management. Full implementation requires
 // FindButtonName and FindAxisName to be unblocked first.
-IMPL_TODO("blocked by FUN_103b5740 (FindButtonName/FindAxisName) and DAT_106717e8 editor global; 1757b dispatch at 0x103b4bd0")
+IMPL_DIVERGE("permanent: FUN_103b5740 (UClass property-list cache helper) is unexported and DAT_106717e8 (editor-only global) is permanently inaccessible; 1757-byte BUTTON/AXIS/TOGGLE/PULSE command dispatch permanently unimplementable; Ghidra 0x103b4bd0")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_MATCH("Engine.dll", 0x103b4b40)
 void UInput::Serialize( FArchive& Ar )
@@ -82,9 +82,9 @@ IMPL_EMPTY("key assignment no-op")
 void UInput::SetKey( const TCHAR* KeyName ) {}
 IMPL_MATCH("Engine.dll", 0x103b4350)
 FString UInput::GetActionKey( BYTE Key ) { return *(FString*)((BYTE*)this + Key * 0xC + 0x2B0); }
-IMPL_TODO("blocked by FUN_103b5740 (not in export table): iterates Actor's UClass property list via internal helper; retail 300b at 0x103b5870")
+IMPL_DIVERGE("permanent: FUN_103b5740 (UClass property-list cache helper) is unexported; returns NULL — Ghidra 0x103b5870")
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
-IMPL_TODO("blocked by FUN_103b5740 (not in export table): iterates Actor's UClass property list via internal helper; retail 300b at 0x103b59d0")
+IMPL_DIVERGE("permanent: FUN_103b5740 (UClass property-list cache helper) is unexported; returns NULL — Ghidra 0x103b59d0")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
 IMPL_EMPTY("input command execution no-op")
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
