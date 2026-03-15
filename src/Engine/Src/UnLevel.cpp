@@ -1931,12 +1931,16 @@ void AGameInfo::execParseKillMessage( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execParseKillMessage );
 
-// ProcessR6Availabilty() - processes R6-specific game type availability.
-IMPL_DIVERGE("stub; retail R6 availability check not decompiled; Ghidra 0xa7070")
+// ProcessR6Availabilty() - reads FString GameType, then calls static ProcessR6Availabilty.
+// Ghidra 0x103a7070 (185b): P_GET_STR(GameType), P_FINISH, then copies GameType and calls
+// AGameInfo::ProcessR6Availabilty(XLevel, gameCopy). SEH frame tracking state differs.
+IMPL_DIVERGE("SEH frame state tracking differs for FString temporary; Ghidra 0x103a7070")
 void AGameInfo::execProcessR6Availabilty( FFrame& Stack, RESULT_DECL )
 {
 	guard(AGameInfo::execProcessR6Availabilty);
+	P_GET_STR(GameType);
 	P_FINISH;
+	ProcessR6Availabilty( XLevel, GameType );
 	unguard;
 }
 IMPLEMENT_FUNCTION( AGameInfo, INDEX_NONE, execProcessR6Availabilty );

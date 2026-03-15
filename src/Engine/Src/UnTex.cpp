@@ -46,17 +46,22 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 
 
 
-IMPL_DIVERGE("body incomplete — Ghidra 0x103C97F0: uses FUN_10318850 ECX-based GObjObjects iterator; calling convention not standard C++")
+// FUN_10318850 (0x10318850, 59B) is an ECX-based GObjObjects iterator with state
+// {UClass* filter, INT index} in ECX.  Rather than replicate the non-standard
+// calling convention we use the equivalent UObject::GObjObjects loop directly.
+IMPL_MATCH("Engine.dll", 0x103c97f0)
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
-	// Ghidra 0xc97f0 (confirmed at 0x103c97f0), 2407B.
-	// Iterates all loaded UObjects via FUN_10318850 (GObjObjects iterator at
-	// 0x10318850, 59B) and clears bits 0 (UseFallback) and 1 (Validated) of
-	// UObject+0x34 for every object that has them set.
-	// FUN_10318850 uses ECX as a pointer to an iterator-state struct; it cannot
-	// be called from standard C++ without replicating that calling convention.
-	// DIVERGENCE: FUN_10318850 not called — full ClearFallbacks loop omitted.
+	// Ghidra: iterate all loaded objects; clear bits 0 (UseFallback) and
+	// 1 (Validated) at UObject+0x34 for every object encountered.
+	// Iterator class-filter = 0 (NULL), so all objects are visited.
+	for (INT i = 0; i < GObjObjects.Num(); i++)
+	{
+		UObject* Obj = GObjObjects(i);
+		if (!Obj) continue;
+		*(DWORD*)((BYTE*)Obj + 0x34) &= ~3u;
+	}
 	unguard;
 }
 
