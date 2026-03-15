@@ -161,7 +161,7 @@ IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execDrawTextClipped );
 // Ghidra 0x1038c810 (630b): ClipTextNative(float X, float Y, string S, float GUIScale, Region ClipRegion, optional bool bCheckHotKey)
 // Saves canvas clip state, sets clip region scaled by GUIScale, draws S via FUN_1038ac40, restores.
 // FUN_1038ac40 is an unexported Engine.dll internal — draw call is omitted; clip state is set correctly.
-IMPL_TODO("FUN_1038ac40 (clip-text draw helper) is an unexported Engine.dll internal; clip state setup reconstructed but actual draw omitted")
+IMPL_DIVERGE("permanent: FUN_1038ac40 is an unexported Engine.dll text-clip draw helper; clip state is correctly reconstructed but the actual draw call requires this unexported function which is not available")
 void UCanvas::execClipTextNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execClipTextNative);
