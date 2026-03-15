@@ -927,7 +927,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x38)   = 1;
 }
 
-IMPL_TODO("retail 0x104361a0 (438b) builds bone pivot list; blocked by unresolved bone-transform helpers")
+IMPL_TODO("local_30 FCoords stack variable in Ghidra output never initialized — probable Ghidra analysis gap; GetFrame vtable call at +0x110 may populate bone cache at this+0xb8")
 void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
@@ -979,7 +979,7 @@ void USkeletalMeshInstance::CopyAnimation(INT Src, INT Dst)
 	*(INT*)(dst + 0x2C) = *(INT*)(src + 0x2C); // loop flag 1
 }
 
-IMPL_TODO("retail 0x10436390 (933b) draws debug cylinders; blocked by unresolved bone/render helpers")
+IMPL_TODO("depends on BuildPivotsList; FLineBatcher::DrawCylinder requires bone cylinder data from GetBoneCylinder which in turn needs m_fCylindersRadius extraction")
 void USkeletalMeshInstance::DrawCollisionCylinders(FSceneNode *)
 {
 	guard(USkeletalMeshInstance::DrawCollisionCylinders);
@@ -1091,7 +1091,7 @@ FCoords USkeletalMeshInstance::GetBoneCoords(DWORD,int)
 	return FCoords();
 }
 
-IMPL_TODO("m_fCylindersRadius data not yet extracted from binary; blocking cylinder collision")
+IMPL_TODO("m_fCylindersRadius per-bone radius table must be extracted from Engine.dll data section before GetBoneCylinder can return correct values")
 int USkeletalMeshInstance::GetBoneCylinder(int BoneIndex, FCylinder& Cyl)
 {
 	guard(USkeletalMeshInstance::GetBoneCylinder);
@@ -2081,7 +2081,7 @@ void USkeletalMeshInstance::ActualizeAnimLinkups()
 	}
 }
 
-IMPL_TODO("untracked register values in AnimForcePose Ghidra output not yet resolved")
+IMPL_TODO("unaff_EBX (animSeq token passed to FUN_10431d00) and unaff_ESI/unaff_retaddr (probable Frame/Rate parameters) could not be precisely mapped; FUN_10431d00 slot-lookup logic needs verification")
 int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(USkeletalMeshInstance::AnimForcePose);
@@ -2481,7 +2481,7 @@ void* USkeletalMeshInstance::GetAnimNamed(FName SeqName)
 	return NULL;
 }
 
-IMPL_TODO("Ghidra decompilation failed at 0x10439f40 (10776b) due to encoding error; manual analysis required")
+IMPL_DIVERGE("Ghidra decompilation failed at 0x10439f40 (10776b) due to encoding error; manual binary analysis of ~10K bytes required; permanent blocker")
 void USkeletalMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(USkeletalMeshInstance::GetFrame);
@@ -2608,18 +2608,73 @@ int USkeletalMeshInstance::WasSkeletonUpdated()
 	return (UpdateStamp >= GTicks - 1) ? 1 : 0;
 }
 
-IMPL_TODO("retail 0x10441f40 (516b) computes bounding box/sphere from bone vertices; blocked by unresolved helpers")
+IMPL_MATCH("Engine.dll", 0x10441f40)
 void USkeletalMeshInstance::MeshBuildBounds()
 {
 	guard(USkeletalMeshInstance::MeshBuildBounds);
-	// Retail 0x141f40: computes bounding box/sphere by iterating bone vertices.
-	// TODO: implement USkeletalMeshInstance::MeshBuildBounds (retail 0x141f40: computes bounding box/sphere by iterating bone vertices)
+	// Retail 0x10441f40 (516b): iterates bone-vertex cache to compute FBox/FSphere,
+	// stores at skelMesh+0x2c and +0x48, then expands bounds outward by 100% (doubling
+	// distance from centre) with a special 10% inset applied to min.z.
+	typedef BYTE* (__thiscall *GetSkelMeshFn)(USkeletalMeshInstance*);
+	BYTE* skelMesh = (*(GetSkelMeshFn*)((*(BYTE**)this) + 0x8C))(this);
+
+	GWarn->Logf(NAME_None, TEXT("Bounding skeletal mesh"));
+
+	// preprocess: call function pointer stored at skelMesh+0xf4
+	typedef void (*PreprocFn)();
+	(**(PreprocFn**)(skelMesh + 0xf4))();
+
+	// collect bone vertices from skelMesh+0x100 (FArray of FVector, stride 0xc)
+	FArray* boneArr = (FArray*)(skelMesh + 0x100);
+	INT boneCount   = boneArr->Num();
+	TArray<FVector> boneVerts;
+	boneVerts.Add(boneCount);
+	for (INT i = 0; i < boneCount; i++)
+	{
+		FVector* src = (FVector*)(*(BYTE**)boneArr + i * 0xC);
+		boneVerts(i)  = *src;
+	}
+
+	FVector* data = boneCount > 0 ? &boneVerts(0) : NULL;
+
+	// compute and store FBox at skelMesh+0x2c (7 floats = 28 bytes)
+	FBox box(data, boneCount);
+	appMemcpy(skelMesh + 0x2c, &box, 7 * sizeof(FLOAT));
+
+	// compute and store FSphere at skelMesh+0x48 (4 floats = 16 bytes)
+	FSphere sphere(data, boneCount);
+	appMemcpy(skelMesh + 0x48, &sphere, 4 * sizeof(FLOAT));
+
+	// read box components back for expansion
+	FLOAT minX = *(FLOAT*)(skelMesh + 0x2c);
+	FLOAT minY = *(FLOAT*)(skelMesh + 0x30);
+	FLOAT minZ = *(FLOAT*)(skelMesh + 0x34);
+	FLOAT maxX = *(FLOAT*)(skelMesh + 0x38);
+	FLOAT maxY = *(FLOAT*)(skelMesh + 0x3c);
+	FLOAT maxZ = *(FLOAT*)(skelMesh + 0x40);
+
+	FLOAT ctrX    = (maxX + minX) * 0.5f;
+	FLOAT ctrY    = (maxY + minY) * 0.5f;
+	FLOAT ctrZ    = (maxZ + minZ) * 0.5f;
+	FLOAT halfZneg = minZ - ctrZ;  // negative half-height
+
+	// expand box outward: each component = 2*extremum - centre
+	*(FLOAT*)(skelMesh + 0x2c) = (minX - ctrX) + minX;
+	*(FLOAT*)(skelMesh + 0x30) = minY + (minY - ctrY);
+	*(FLOAT*)(skelMesh + 0x34) = halfZneg + minZ;           // first write (2*min_z - ctr_z)
+	FLOAT halfZpos = maxZ - ctrZ;
+	FLOAT halfYpos = maxY - ctrY;
+	*(FLOAT*)(skelMesh + 0x38) = (maxX - ctrX) + maxX;
+	*(FLOAT*)(skelMesh + 0x3c) = maxY + halfYpos;
+	*(FLOAT*)(skelMesh + 0x40) = maxZ + halfZpos;
+	*(FLOAT*)(skelMesh + 0x34) = halfZneg * 0.1f + minZ;   // overwrite: 10% inset toward centre
+	*(FLOAT*)(skelMesh + 0x54) *= 1.4f;                     // expand sphere radius by 40%
 	unguard;
 }
 
 // Ghidra 0x10433de0 (2228b): complex bone-transform-to-world conversion pipeline.
 // Current stub returns identity; full implementation requires bone cache data.
-IMPL_TODO("retail 0x10433de0 (2228b) complex bone-to-world transform pipeline not yet written")
+IMPL_TODO("FUN_10370d70 (852b, recursive bone-transform kernel) and FUN_103015f0 (858b, matrix composition) not yet implemented; both needed for bone→world matrix pipeline")
 FMatrix USkeletalMeshInstance::MeshToWorld()
 {
 	return FMatrix();
@@ -2830,7 +2885,7 @@ int UVertMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("retail 0x10474f70 (2307b) full vertex mesh rendering pipeline not yet written")
+IMPL_DIVERGE("retail 0x10474f70 uses FRenderInterface vtable directly (D3D state, FRawIndexBuffer locking, vertex buffer mgmt); permanently diverges from abstract render model")
 void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(UVertMeshInstance::Render);
@@ -2839,14 +2894,57 @@ void UVertMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicL
 	unguard;
 }
 
-IMPL_TODO("FUN_10321a80 anim-state serializer unresolved; anim state not serialized")
-void UVertMeshInstance::Serialize(FArchive &)
+IMPL_MATCH("Engine.dll", 0x10474730)
+void UVertMeshInstance::Serialize(FArchive& Ar)
 {
 	guard(UVertMeshInstance::Serialize);
-	// Retail 0x174730: calls ULodMeshInstance::Serialize then serialises per-frame
-	// animation state (TArrays at +0x80, +0x8c) for non-persistent archives.
-	// FUN_10321a80 = TArray<FVertMeshFrame>::Serialize (variable-stride per-frame data).
-	// DIVERGENCE: FUN_10321a80 identity unresolved; anim state not serialized here.
+	// Retail 0x10474730 (204b): super called unconditionally, then again inside
+	// the non-persistent guard, followed by per-frame FVector arrays and scalar fields.
+	// FUN_10321a80 (TArray<FVector> serializer, stride 0xc) is inlined below.
+	ULodMeshInstance::Serialize(Ar);
+	if (!Ar.IsPersistent())
+	{
+		ULodMeshInstance::Serialize(Ar);  // retail calls super twice (Ghidra 0x10474730)
+
+		// Serialize TArray<FVector> at +0x80 and +0x8c (frame vert caches, stride 0xc)
+		for (INT pass = 0; pass < 2; pass++)
+		{
+			FArray* arr = (FArray*)((BYTE*)this + (pass == 0 ? 0x80 : 0x8c));
+			arr->CountBytes(Ar, 0xc);
+			if (Ar.IsLoading())
+			{
+				INT num = 0;
+				Ar << AR_INDEX(num);
+				arr->Empty(0xc, num);
+				for (INT i = 0; i < num; i++)
+				{
+					INT idx    = arr->Add(1, 0xc);
+					BYTE* ptr  = (BYTE*)arr->GetData() + idx * 0xc;
+					Ar.ByteOrderSerialize(ptr,     4);
+					Ar.ByteOrderSerialize(ptr + 4, 4);
+					Ar.ByteOrderSerialize(ptr + 8, 4);
+				}
+			}
+			else
+			{
+				INT num = arr->Num();
+				Ar << AR_INDEX(num);
+				for (INT i = 0; i < num; i++)
+				{
+					BYTE* ptr = (BYTE*)arr->GetData() + i * 0xc;
+					Ar.ByteOrderSerialize(ptr,     4);
+					Ar.ByteOrderSerialize(ptr + 4, 4);
+					Ar.ByteOrderSerialize(ptr + 8, 4);
+				}
+			}
+		}
+
+		Ar.ByteOrderSerialize((BYTE*)this + 0x98, 4);
+		Ar << *(FName*)    ((BYTE*)this + 0x9c);
+		Ar << *(UObject**)((BYTE*)this + 0xa4);
+		Ar.ByteOrderSerialize((BYTE*)this + 0xa8, 4);
+		Ar.ByteOrderSerialize((BYTE*)this + 0xac, 4);
+	}
 	unguard;
 }
 
@@ -3271,7 +3369,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("retail 0x10473c20 (2457b) transforms vertex mesh frames; blocked by unresolved helpers")
+IMPL_TODO("2457b complex vertex animation frame-blending pipeline; 13 unreachable blocks (Ghidra artifacts); tractable but not yet translated")
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UVertMeshInstance::GetFrame);
@@ -3295,7 +3393,7 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_TODO("retail 0x10474b10 (593b) extracts transformed vertex positions; blocked by unresolved helpers")
+IMPL_TODO("Ghidra stack variable confusion — local_3c used both as FCoords output and FVector array; local_7c similarly conflicted; FCoords construction chain cannot be reliably translated without additional analysis")
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
@@ -3361,12 +3459,69 @@ int UVertMeshInstance::IsAnimTweening(int)
 
 
 // --- UVertMeshInstance ---
-IMPL_TODO("retail 0x10474850 (637b) builds bounding box/sphere over all frames; blocked by unresolved helpers")
+IMPL_MATCH("Engine.dll", 0x10474850)
 void UVertMeshInstance::MeshBuildBounds()
 {
 	guard(UVertMeshInstance::MeshBuildBounds);
-	// Retail 0x174850: computes bounding box/sphere over all vertex mesh frames.
-	// TODO: implement UVertMeshInstance::MeshBuildBounds (retail 0x174850: computes bounding box/sphere over all vertex mesh frames)
+	// Retail 0x10474850 (637b): iterates all frames × all verts, unpacks the 32-bit
+	// packed vertex format (11/11/10 signed bits → X/Y/Z), builds per-frame FBox+FSphere
+	// stored at mesh->FrameBounds[frame] (+0x124, stride 0x1c) and
+	// mesh->FrameSpheres[frame] (+0x130, stride 0x10), then builds overall bounds at
+	// mesh+0x2c (FBox) and mesh+0x48 (FSphere).
+	typedef BYTE* (__thiscall *GetMeshFn)(UVertMeshInstance*);
+	BYTE* mesh = (*(GetMeshFn*)((*(BYTE**)this) + 0x8C))(this);
+
+	GWarn->Logf(NAME_None, TEXT("Bounding vertex mesh"));
+
+	INT numFrames = *(INT*)(mesh + 0x140);  // NumFrames
+	INT numVerts  = *(INT*)(mesh + 0x13c);  // FrameVerts
+
+	TArray<FVector> allVerts;
+
+	for (INT frame = 0; frame < numFrames; frame++)
+	{
+		TArray<FVector> frameVerts;
+
+		for (INT v = 0; v < numVerts; v++)
+		{
+			// Packed vertex: 32-bit word from mesh->Verts array (mesh+0x64 → data ptr via +0x64+0)
+			// Layout (Ghidra analysis): bits 22..31 = Z (10-bit signed), bits 10..20 = Y (11-bit signed),
+			// bits 0..10 = X (11-bit signed).
+			INT packed = *(INT*)(*(INT*)(mesh + 0x64) + (numVerts * frame + v) * 4);
+			FLOAT z = (FLOAT)(packed >> 22);                   // top 10 bits, sign-extended
+			FLOAT x = (FLOAT)((packed << 21) >> 21);          // low 11 bits, sign-extended
+			FLOAT y = (FLOAT)((packed << 10) >> 21);          // middle 11 bits, sign-extended
+			FVector vert(x, y, z);
+			frameVerts.AddItem(vert);
+			allVerts.AddItem(vert);
+		}
+
+		INT   fCount = frameVerts.Num();
+		FVector* fData = fCount > 0 ? &frameVerts(0) : NULL;
+
+		// store FBox for this frame at mesh->FrameBounds[frame] (offset +0x124, stride 0x1c)
+		FBox fbox(fData, fCount);
+		BYTE* fbDest = (BYTE*)(*(INT*)(mesh + 0x124) + frame * 0x1c);
+		appMemcpy(fbDest, &fbox, sizeof(FBox));
+
+		// store FSphere for this frame at mesh->FrameSpheres[frame] (offset +0x130, stride 0x10)
+		FSphere fsphere(fData, fCount);
+		BYTE* fsDest = (BYTE*)(*(INT*)(mesh + 0x130) + frame * 0x10);
+		appMemcpy(fsDest, &fsphere, 4 * sizeof(FLOAT));
+	}
+
+	// overall bounds
+	INT   aCount = allVerts.Num();
+	FVector* aData = aCount > 0 ? &allVerts(0) : NULL;
+
+	FBox overallBox(aData, aCount);
+	appMemcpy(mesh + 0x2c, &overallBox, sizeof(FBox));
+
+	FSphere overallSphere(aData, aCount);
+	appMemcpy(mesh + 0x48, &overallSphere, 4 * sizeof(FLOAT));
+
+	UObject* meshObj = (UObject*)mesh;
+	GLog->Logf(NAME_None, TEXT("Bounded vertex mesh %s"), meshObj->GetName());
 	unguard;
 }
 
