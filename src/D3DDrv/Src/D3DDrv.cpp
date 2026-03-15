@@ -143,7 +143,7 @@ static const TCHAR* D3DError( HRESULT hr )
 	}
 }
 
-IMPL_DIVERGE("Default constructor initialising config bitfields and zeroing render caps; no dedicated Ghidra address identified")
+IMPL_DIVERGE("Ghidra 0x1000f350 (184b): calls URenderDevice ctor, constructs FArrays at +0x4634/+0x4658, constructs FRenderInterface at +0x46c4 (FUN_10010db0), memsets 0xD0 bytes to 0xFF at +0x31aa0, zeros 8 DWORDs — our stub sets config defaults instead")
 UD3DRenderDevice::UD3DRenderDevice()
 {
 	// Set default config values. Bitfields cannot be initialised via
@@ -187,7 +187,7 @@ UD3DRenderDevice::UD3DRenderDevice(const UD3DRenderDevice& Other)
 	unguard;
 }
 
-IMPL_DIVERGE("Reconstructed; no Ghidra match found")
+IMPL_DIVERGE("Ghidra 0x100020a0 (921b): copies +0xC8 DWORD, memcpy 0x4000b from +0xCC, 24 DWORDs at +0x40CC..+0x4128, TArray deep-copies at +0x4634/+0x4658 via FUN_10001a80/FUN_10001ba0, FRenderInterface copy at +0x46c4 via FUN_100012d0, and multiple state blocks — our stub only copies config fields")
 UD3DRenderDevice& UD3DRenderDevice::operator=(const UD3DRenderDevice& Other)
 {
 	if (this != &Other)

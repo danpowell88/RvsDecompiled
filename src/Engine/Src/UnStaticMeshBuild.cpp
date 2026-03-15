@@ -18,14 +18,39 @@ inline void  operator delete(void*, void*) noexcept {}
 ENGINE_API FArchive& operator<<(FArchive& Ar, FRawColorStream& V);
 
 // --- UStaticMesh ---
-IMPL_DIVERGE("Ghidra 0x10446A90: registers 3 UBoolProperty + 1 UArrayProperty<FStaticMeshMaterial> via UProperty ctor calls; UProperty reflection infrastructure not yet decompiled")
+IMPL_DIVERGE("Ghidra 0x10446A90 (747b): placement-new property registration generates different binary than low-level UBoolProperty ctors; HideCategories(NAME_Object) uses non-SDK UClass field at +0x4e8")
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);
-	// Retail: registers UseSimpleLineCollision (+0x128), UseSimpleBoxCollision (+0x2BC),
-	// UseVertexColor (+0x130) as UBoolProperty, and Materials as UArrayProperty<UStaticMeshMaterial>.
-	// All require UBoolProperty::UBoolProperty / UObjectProperty::UObjectProperty ctors
-	// which are not yet decompiled.
+	// Hide the "Object" category in the editor (FName index 0x97 = NAME_Object).
+	// Retail accesses UClass::HideCategories directly at UClass+0x4e8; not exposed in SDK.
+	FArray* HC = (FArray*)((BYTE*)GetClass() + 0x4e8);
+	INT hcIdx = HC->Add(1, 4); // 4 = sizeof(FName)
+	FName* slot = (FName*)((BYTE*)HC->GetData() + hcIdx * 4);
+	if (slot) new(slot) FName(NAME_Object);
+
+	// Register UBoolProperty instances for the three collision/color flags.
+	new(GetClass(), TEXT("UseSimpleLineCollision"), RF_Public) UBoolProperty(EC_CppProperty, 0x128, TEXT(""), CPF_Edit);
+	new(GetClass(), TEXT("UseSimpleBoxCollision"),  RF_Public) UBoolProperty(EC_CppProperty, 0x12c, TEXT(""), CPF_Edit);
+	new(GetClass(), TEXT("UseVertexColor"),         RF_Public) UBoolProperty(EC_CppProperty, 0x130, TEXT(""), CPF_Edit);
+
+	// Create the FStaticMeshMaterial struct descriptor and register it as the
+	// inner type of the Materials TArray.
+	FArchive DummyAr;
+	UStruct* MatStruct = new(NULL, TEXT("StaticMeshMaterial"), RF_Public) UStruct((UStruct*)NULL);
+	new(MatStruct, TEXT("Material"),         RF_Public) UObjectProperty(EC_CppProperty, 0, TEXT(""), CPF_Edit, UMaterial::StaticClass());
+	new(MatStruct, TEXT("EnableCollision"),  RF_Public) UBoolProperty  (EC_CppProperty, 4, TEXT(""), CPF_Edit);
+	MatStruct->SetPropertiesSize(0xc);
+	MatStruct->Link(DummyAr, 1);
+
+	UArrayProperty* PA = new(GetClass(), TEXT("Materials"), RF_Public) UArrayProperty(EC_CppProperty, 0xfc, TEXT(""), 0x41);
+	PA->Inner = new(PA, TEXT("StructProperty0"), RF_Public) UStructProperty(EC_CppProperty, 0, TEXT(""), CPF_Edit, MatStruct);
+
+	// Set default values on the CDO (this is the Class Default Object here).
+	*(DWORD*)((BYTE*)this + 0x128) = 0; // UseSimpleLineCollision = false
+	*(DWORD*)((BYTE*)this + 0x12c) = 1; // UseSimpleBoxCollision  = true
+	*(DWORD*)((BYTE*)this + 0x130) = 0; // UseVertexColor         = false
+	*(DWORD*)((BYTE*)this + 0x134) = 1; // bUseSimpleKarmaCollision? = true (unidentified bool at +0x134)
 	unguard;
 }
 
@@ -440,16 +465,13 @@ FRebuildOptions * FRebuildTools::Save(FString p0)
 	FRebuildOptions* result = GetFromName(p0);
 	if (!result)
 	{
-		// FArray::Add(arr, count=1, stride=0x2C) — Core.dll 0x10101790
-		typedef INT (__thiscall *FArrayAddFn)(FArray*, INT, INT);
 		FArray* arr = (FArray*)((BYTE*)this + 4);
-		INT idx = ((FArrayAddFn)0x10101790)(arr, 1, 0x2C);
-		result = (FRebuildOptions*)((BYTE*)*(BYTE**)arr + idx * 0x2C);
+		INT idx = arr->Add(1, 0x2C);  // FArray::Add — exported from Core.dll; resolved via import table
+		result = (FRebuildOptions*)((BYTE*)arr->GetData() + idx * 0x2C);
 		if (result)
 			new(result) FRebuildOptions();
-		// Re-read pointer in case realloc moved the buffer
-		INT n = arr->Num();
-		result = (FRebuildOptions*)((BYTE*)*(BYTE**)arr + (n - 1) * 0x2C);
+		// Re-read in case Add() reallocated the buffer
+		result = (FRebuildOptions*)((BYTE*)arr->GetData() + (arr->Num() - 1) * 0x2C);
 	}
 
 	// Copy current options then override name with p0

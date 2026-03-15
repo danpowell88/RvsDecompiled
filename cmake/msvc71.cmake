@@ -97,7 +97,10 @@ set(CMAKE_SHARED_LINKER_FLAGS_INIT "/MACHINE:X86 /NOLOGO")
 # VS2019_X86 must also be in PATH because MSVC 7.1 link.exe delegates .rc
 # file conversion to cvtres.exe, which is not shipped with MSVC 7.1 but IS
 # present in VS2019 Build Tools.
-set(ENV{PATH} "${MSVC71_BIN};${VS2019_X86};$ENV{PATH}")
+# rc.exe (Resource Compiler) is in the Windows 10 SDK bin, not the old Platform SDK.
+set(WINSDK10_RC "C:/Program Files (x86)/Windows Kits/10/bin/10.0.19041.0/x86")
+set(CMAKE_RC_COMPILER "${WINSDK10_RC}/rc.exe" CACHE FILEPATH "Windows Resource Compiler")
+set(ENV{PATH} "${MSVC71_BIN};${VS2019_X86};${WINSDK10_RC};$ENV{PATH}")
 set(ENV{INCLUDE} "${MSVC71_INC};${WINSDK_INC};${DXSDK_INC}")
 set(ENV{LIB}     "${MSVC71_LIB};${WINSDK_LIB};${DXSDK_LIB}")
 

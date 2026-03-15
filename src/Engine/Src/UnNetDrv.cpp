@@ -253,15 +253,14 @@ unguard;
 }
 
 // Ghidra 0x10487f20 (84b): constructs FString from runtime global DAT_10529f90 (WCHAR const*).
-// DAT_10529f90 is referenced as the empty-string constant (L"") throughout Engine.dll
-// (e.g. UMeshInstance::AnimGetNotifyText returns it directly). Retail body has SEH.
-// We return FString() which equals FString(L"") — functionally equivalent.
-// Staying IMPL_DIVERGE: we cannot confirm DAT_10529f90 at .rdata:0x10529f90 at compile-time.
-IMPL_DIVERGE("retail 0x10487f20: returns FString(DAT_10529f90); DAT_10529f90 appears to be L\"\" but unconfirmed")
+// DAT_10529f90 is confirmed L"" — UMeshInstance::AnimGetNotifyText returns it as TEXT(""),
+// and AnimGetNotifyText at 0x103145C0 directly returns (ushort*)&DAT_10529f90.
+// FString(TEXT("")) matches the retail call FString::FString(&ret, DAT_10529f90).
+IMPL_MATCH("Engine.dll", 0x10487f20)
 FString UDemoRecDriver::LowLevelGetNetworkNumber()
 {
 guard(UDemoRecDriver::LowLevelGetNetworkNumber);
-return FString();
+return FString(TEXT(""));
 unguard;
 }
 
