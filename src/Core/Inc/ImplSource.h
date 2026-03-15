@@ -5,12 +5,24 @@
     exactly one IMPL_xxx macro. These macros expand to nothing at compile time
     (zero overhead) but are machine-parseable by tools/verify_impl_sources.py.
 
-    The classification is binary: either the function body was derived from
-    Ghidra analysis of the retail binary (IMPL_MATCH), or it wasn't (IMPL_APPROX).
-    Everything else is a variant of those two, or a documented special case.
+    VALID MACROS (use one of these):
 
-    BUILD RULE: IMPL_TODO and IMPL_APPROX are BOTH forbidden — build fails (IMPL_STRICT mode is ON).
-    IMPL_MATCH, IMPL_EMPTY, and IMPL_DIVERGE are the only valid macros.
+      IMPL_MATCH(dll, addr)   — Exact decompilation from Ghidra. Claims byte parity.
+      IMPL_EMPTY(reason)      — Retail is also empty/trivial (Ghidra confirmed).
+      IMPL_DIVERGE(reason)    — PERMANENT divergence only. Not for pending work.
+      IMPL_TODO(reason)       — Temporary: Ghidra body identified, implementation
+                                 pending. Must NOT be used for permanent divergences.
+
+    BANNED MACROS (build fails if present):
+
+      IMPL_APPROX             — Never use. Replaced by IMPL_MATCH + IMPL_DIVERGE.
+
+    KEY DISTINCTION — IMPL_TODO vs IMPL_DIVERGE:
+      Use IMPL_TODO when:  the Ghidra export is found and the function CAN be
+                           implemented, but hasn't been yet. These are work items.
+      Use IMPL_DIVERGE when: the function will NEVER match retail (defunct live
+                           services, Karma/MeSDK proprietary, not in export table,
+                           rdtsc profiling with hardware-specific CPUID chains).
 
     See AGENTS.md for authoring guidance.
 =============================================================================*/
@@ -35,9 +47,27 @@
 #define IMPL_MATCH(dll, addr)
 
 // ---------------------------------------------------------------------------
+// IMPL_TODO(reason)
+//   Temporary placeholder. The Ghidra body for this function has been
+//   identified and the implementation is planned but not yet written.
+//   Use this when:
+//     - The function is in the Ghidra export at a known address
+//     - The implementation would be correct but needs more work
+//     - The function is blocked by an unresolved helper (FUN_xxx)
+//       that is itself being tracked as a TODO
+//
+//   Do NOT use for functions that will never match retail — use IMPL_DIVERGE.
+//
+//   Example:
+//     IMPL_TODO("Ghidra 0x10318850: DXT decompressor — dispatch table not yet mapped")
+//     void UTexture::Decompress() { guard(UTexture::Decompress); unguard; }
+// ---------------------------------------------------------------------------
+#define IMPL_TODO(reason)
+
+// ---------------------------------------------------------------------------
 // IMPL_APPROX(reason) — BANNED. BUILD FAILS when present (IMPL_STRICT mode).
-//   Never use this in committed code. It is only here so the verifier can
-//   detect and reject it. Use IMPL_MATCH, IMPL_EMPTY, or IMPL_DIVERGE instead.
+//   Never use this in committed code. Use IMPL_MATCH, IMPL_EMPTY, IMPL_DIVERGE,
+//   or IMPL_TODO instead.
 // ---------------------------------------------------------------------------
 #define IMPL_APPROX(reason)
 
@@ -54,13 +84,19 @@
 
 // ---------------------------------------------------------------------------
 // IMPL_PERMANENT_DIVERGENCE(reason)
-//   Implementation exists and is the best achievable, but will never match
-//   the retail binary exactly. Must document why.
-//   Common cases: defunct live services (GameSpy), hardware-specific globals.
+//   Implementation exists and is the best achievable, but will NEVER match
+//   the retail binary exactly. Must document why this is permanent.
 //
-//   Note: "proprietary SDK unavailable" is NOT a valid reason here — if a
-//   function is statically linked into a retail DLL it can be decompiled.
-//   Use IMPL_APPROX for functions pending decompilation instead.
+//   Valid reasons (must be genuinely permanent):
+//     - Defunct live services (GameSpy, CD-key servers shut down)
+//     - Karma/MeSDK proprietary — binary-only SDK, no source
+//     - rdtsc profiling chains referencing hardware CPUID results
+//     - Function not in Ghidra export table (inlined/static in retail)
+//
+//   NOT valid reasons (use IMPL_TODO instead):
+//     - "Not yet implemented"
+//     - "Pending decompilation"
+//     - "FUN_xxx helper not yet resolved" (unless the helper itself is permanent)
 //
 //   Example:
 //     IMPL_PERMANENT_DIVERGENCE("GameSpy servers shut down 2014; auth always fails")
@@ -80,13 +116,6 @@
 
 // IMPL_DIVERGE — alias for IMPL_PERMANENT_DIVERGENCE
 #define IMPL_DIVERGE(reason)
-
-// ---------------------------------------------------------------------------
-// IMPL_TODO(reason) — BANNED. BUILD FAILS when present (IMPL_STRICT mode).
-//   Never use this in committed code. It is only here so the verifier can
-//   detect and reject it. Use IMPL_MATCH, IMPL_EMPTY, or IMPL_DIVERGE.
-// ---------------------------------------------------------------------------
-#define IMPL_TODO(reason)
 
 
 // ---------------------------------------------------------------------------
