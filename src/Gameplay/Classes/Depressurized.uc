@@ -1,5 +1,8 @@
+//=============================================================================
 // Damage type applied by explosive decompression or vacuum exposure.
 // Bypasses armour and guarantees gibbing (GibModifier=100).
+//=============================================================================
+
 class Depressurized extends DamageType abstract;
 
 defaultproperties

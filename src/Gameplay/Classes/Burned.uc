@@ -1,5 +1,8 @@
+//=============================================================================
 // Damage type applied when a pawn is killed by fire or extreme heat.
 // Applies a warm orange-red view fog and uses the "sauteed" kill message.
+//=============================================================================
+
 class Burned extends DamageType abstract;
 
 defaultproperties

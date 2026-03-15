@@ -1,4 +1,6 @@
+//=============================================================================
 // Generic 'Karma Vehicle' base class that can be controlled by a Pawn.
+//=============================================================================
 
 class KVehicle extends Pawn
     native

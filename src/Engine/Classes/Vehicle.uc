@@ -1,9 +1,12 @@
+//=============================================================================
 // Vehicle — abstract base class for multi-part vehicles.
 // Spawns up to 16 VehiclePart actors at relative offsets, ticks their update
 // loop each frame, and uses PHYS_Rotating while any part is still animating.
 // Not directly used in Ravenshield (no driveable vehicles), but retained as
 // an engine class for completeness.
 // Extracted from retail Engine.u.
+//=============================================================================
+
 class Vehicle extends Pawn
 	abstract
 	native;

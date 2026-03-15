@@ -1,6 +1,9 @@
+//=============================================================================
 // Physics volume simulating lava: deals 40 damage/sec (Burned type), slows movement via
 // fluid friction, and tints the view with a warm orange fog.
 // Marked obsolete; prefer R6-specific volume subclasses in new maps.
+//=============================================================================
+
 class LavaVolume extends PhysicsVolume notplaceable;
 
 defaultproperties

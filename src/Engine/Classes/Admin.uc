@@ -1,9 +1,12 @@
+//=============================================================================
 // Admin — server administrator controller.
 // Extends PlayerController with privileged exec commands: kick, ban, restart map,
 // server travel, and raw console command passthrough.
 // Note: R6 stripped the script body (R6CODE+ block) — the defaultproperties only
 // remain. bOnlySpectator=True means admins spectate rather than play.
 // Extracted from retail Engine.u.
+//=============================================================================
+
 class Admin extends PlayerController;
 
 /* R6CODE+
