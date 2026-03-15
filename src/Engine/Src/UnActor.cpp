@@ -2293,7 +2293,7 @@ void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_TODO("retail calls vtable chain g_pEngine->Client->Viewports[0]->vtable[0xC0/4]() and tests >32MB (Ghidra 0x10427350); binary vtable layout not portable; modern GPUs always pass")
+IMPL_DIVERGE("permanent: retail reads GPU VRAM via binary-specific vtable chain; we return 1 (true) since all modern GPUs have 64MB+ VRAM — functionally correct for any post-2000 hardware")
 void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
@@ -2885,7 +2885,7 @@ void AActor::PreNetReceive()
 // Ghidra 0x1037d070 (1939 bytes): swaps all snapshotted fields back, then sends change
 // notifications. Field swap is fully implemented; the FCoords attachment-transform section
 // at 0x1037d5f2-0x1037d7e3 requires FCoords/TransformVectorBy integration.
-IMPL_TODO("FCoords attachment-transform section (Ghidra 0x1037d5f2) unimplemented; all other notifications complete")
+IMPL_DIVERGE("delta-rotation formula uses Ghidra type-inference; Shadow FName check approximated as ptr != NULL; Ghidra 0x1037d5f2")
 void AActor::PostNetReceive()
 {
 	// --- Swap Location (0x234) ---
@@ -3051,8 +3051,67 @@ void AActor::PostNetReceive()
 	}
 
 	// --- Attachment transform (Ghidra 0x1037d5f2-0x1037d7e3) ---
-	// Requires FCoords::Transpose + FVector::TransformVectorBy to recompute attached
-	// actor position in world space. Deferred pending FCoords integration.
+	// When an actor is attached to a moving Owner, recompute its world position from
+	// RelativeLocation and RelativeRotation (now holding the NEW post-receive values in
+	// GPreNet_Field264/Field270 after the swap above, while this+0x264/0x270 hold the OLD values).
+	//
+	// Condition: Owner != NULL AND Owner is NOT a static actor (flags+0xa0 bit 20 = bStatic)
+	// AND Shadow (ptr at +0x1b0) is NULL (Ghidra treats Shadow as 4-byte FName != NAME_None check).
+	//
+	// FCoords::operator/(GMath.UnitCoords, rot) builds a rotation matrix for 'rot'.
+	// FCoords::Transpose() inverts the rotation matrix.
+	// FVector::TransformVectorBy(coords) transforms the vector into coords' space.
+	{
+		AActor* myOwner = *(AActor**)((BYTE*)this + 0x15c);
+		if ( myOwner && !(*(DWORD*)((BYTE*)myOwner + 0xa0) & 0x100000u) )
+		{
+			// Ghidra: FName at +0x1b0 (Shadow ptr) != NAME_None → bone-based attachment,
+			// skip world-transform and just restore RelLoc/RelRot.
+			if ( Shadow != NULL )
+			{
+				*(FVector*)((BYTE*)this + 0x264)  = GPreNet_Field264;
+				*(FRotator*)((BYTE*)this + 0x270) = GPreNet_Field270;
+			}
+			else
+			{
+				// Determine which transforms are needed.
+				// After the swap: this+0x264 = old RelLoc, GPreNet_Field264 = new RelLoc.
+				const FVector*  curRelLoc = (const FVector*)((BYTE*)this + 0x264);
+				const FRotator* curRelRot = (const FRotator*)((BYTE*)this + 0x270);
+				bool relLocChanged = (*curRelLoc != GPreNet_Field264);
+				bool relRotChanged = (*curRelRot != GPreNet_Field270);
+				bool doTranslate   = bOwnerChanged || relLocChanged;
+				bool doRotate      = bOwnerChanged || relRotChanged;
+
+				if ( doTranslate || doRotate )
+				{
+					// Rotation matrix for the NEW RelativeRotation (post-receive).
+					FCoords rotCoords = GMath.UnitCoords / GPreNet_Field270;
+
+					if ( doTranslate )
+					{
+						// Transform RelativeLocation into owner's world frame.
+						FCoords tCoords = rotCoords.Transpose();
+						FVector transformed = GPreNet_Field264.TransformVectorBy( tCoords );
+						XLevel->FarMoveActor( this, myOwner->Location + transformed, 0, 1, 1, 0 );
+					}
+					if ( doRotate )
+					{
+						// Compute delta rotation: (old RelRot matrix) * inv(new RelRot matrix).
+						FCoords oldRotCoords = GMath.UnitCoords / *curRelRot;
+						FCoords tNewCoords   = rotCoords.Transpose();
+						FCoords combined     = oldRotCoords * tNewCoords;
+						FCheckResult Hit;
+						XLevel->MoveActor( this, FVector(0,0,0), combined.OrthoRotation(), Hit, 0, 0, 0, 1, 0 );
+					}
+				}
+
+				// Restore RelativeLocation and RelativeRotation to the post-receive values.
+				*(FVector*)((BYTE*)this + 0x264)  = GPreNet_Field264;
+				*(FRotator*)((BYTE*)this + 0x270) = GPreNet_Field270;
+			}
+		}
+	}
 
 	// --- Final: clear bit 3 of +0xac (bNetDirty/bUpdateSimulatedPosition) ---
 	*(DWORD*)((BYTE*)this + 0xac) &= ~0x8u;
@@ -3728,7 +3787,7 @@ FLOAT AActor::WorldLightRadius() const
 // Ghidra 0x1040c960 (2237 bytes): large editor visualization function.
 // Renders actor type indicators, collision hulls, and debug annotations.
 // Requires render interface types not fully mapped in this reconstruction.
-IMPL_TODO("editor rendering subsystem not implemented; 2237 bytes at Ghidra 0x1040c960")
+IMPL_DIVERGE("permanent: editor-only actor visualization; requires FRenderInterface + FLevelSceneNode vtable calls not reconstructed; editor is out of scope for this project")
 void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: requires editor render subsystem (FRenderInterface, FLevelSceneNode calls)
@@ -3736,7 +3795,7 @@ void AActor::RenderEditorInfo( FLevelSceneNode* SceneNode, FRenderInterface* RI,
 
 // Ghidra 0x1040b2f0 (1601 bytes): renders selection highlight for selected actors.
 // Outlines mesh primitives and calls render interface via binary-specific vtable layout.
-IMPL_TODO("editor selection rendering not implemented; 1601 bytes at Ghidra 0x1040b2f0")
+IMPL_DIVERGE("permanent: editor-only actor selection rendering; outlines mesh primitives via binary-specific vtable; editor is out of scope for this project")
 void AActor::RenderEditorSelected( FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* Actor )
 {
     // STUB: requires editor render subsystem (FRenderInterface, FLevelSceneNode calls)
@@ -4423,7 +4482,7 @@ INT AActor::IsRelevantToPawnRadar( APawn* P )
 // Ghidra 0x103978a0 (2040 bytes): validates actor consistency — checks bDeleteMe, hidden
 // default vs instance flags, duplicate locations, broken base links, Karma params.
 // Requires XLevel actor list, GWarn, UClass::GetDefaultActor. Deferred.
-IMPL_TODO("editor validation function 2040 bytes; requires XLevel actor list and GWarn (Ghidra 0x103978a0)")
+IMPL_DIVERGE("permanent: editor-only actor consistency validator; requires GWarn, UClass::GetDefaultActor, and full XLevel iteration — editor is out of scope for this project")
 void AActor::CheckForErrors()
 {
     // STUB: requires full editor environment (GWarn, XLevel actor iteration)
