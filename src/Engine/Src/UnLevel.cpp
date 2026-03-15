@@ -209,7 +209,7 @@ void ULevel::PostLoad()
 	UObject::PostLoad();
 }
 
-IMPL_TODO("calls FUN_10358ca0 and FUN_1031fc20 omitted; retail at Ghidra 0x103c10c0")
+IMPL_DIVERGE("calls FUN_1047c020 (Karma physics teardown; MeSDK binary-only) and FUN_10358ca0 (unresolved BSP cleanup); Karma call is permanent blocker (Ghidra 0x103c10c0)")
 void ULevel::Destroy()
 {
 	guard(ULevel::Destroy);
@@ -1811,7 +1811,7 @@ INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 	return 0;
 	unguard;
 }
-IMPL_TODO("partial; terrain zone registration helper unresolved at Ghidra 0x103c11a0")
+IMPL_DIVERGE("calls FUN_10481dd0 (Karma terrain registration; MeSDK binary-only); permanent blocker (Ghidra 0x103c11a0)")
 void ULevel::UpdateTerrainArrays()
 {
 	guard(ULevel::UpdateTerrainArrays);
