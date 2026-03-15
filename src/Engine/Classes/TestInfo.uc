@@ -20,24 +20,24 @@ struct STest
 	var bool b3;
 };
 
-var() int xnum;
-var int MyArray[2];
-var() bool bTrue1;
-var() bool bFalse1;
-var() bool bTrue2;
-var() bool bFalse2;
-var bool bBool1;
-var bool bBool2;
-var float ppp;
-var Vector v1;
+var() int xnum;  // Test integer; default 777, used by static function assertions
+var int MyArray[2];  // Two-element test array indexed via bool cast
+var() bool bTrue1;  // Test bool, default true
+var() bool bFalse1;  // Test bool, default false
+var() bool bTrue2;  // Test bool, default true
+var() bool bFalse2;  // Test bool, default false
+var bool bBool1;  // Scratch bool set by RecurseTest
+var bool bBool2;  // Stores the return value from RecurseTest
+var float ppp;  // Test float; default 3.14 (matches the Pie constant)
+var Vector v1;  // Test vector used in vector comparison assertions
 // NEW IN 1.60
 var Vector v2;
 // NEW IN 1.60
-var STest ST;
-var string sxx;
-var string TestRepStr;
+var STest ST;  // Test struct instance for bool bit-packing validation
+var string sxx;  // Test string; default "Tim" (matches the Str constant)
+var string TestRepStr;  // Placeholder string for replication tests
 
-function TestQ()
+function TestQ()  // Tests vector field assignment and component comparison
 {
 	local Vector V;
 
@@ -51,13 +51,13 @@ function TestQ()
 	return;
 }
 
-static function test()
+static function test()  // Static helper: sets default v1 via static class reference
 {
 	Class'Engine.TestInfo'.default.v1 = vect(1.0000000, 2.0000000, 3.0000000);
 	return;
 }
 
-function PostBeginPlay()
+function PostBeginPlay()  // Runs IsA and default-property assertions on startup
 {
 	local Object o;
 	local Actor TempActor;
@@ -76,7 +76,7 @@ function PostBeginPlay()
 	return;
 }
 
-function TestStructBools()
+function TestStructBools()  // Verifies bit-packed bool fields in STest struct
 {
 	assert((ST.b1 == false));
 	assert((ST.b2 == false));
@@ -99,7 +99,7 @@ function TestStructBools()
 	return;
 }
 
-function BeginPlay()
+function BeginPlay()  // Instantiates TestObj and runs struct bool tests
 {
 	local TestObj to;
 	local Object oo;
@@ -114,7 +114,7 @@ function BeginPlay()
 	return;
 }
 
-function TestX(bool bResource)
+function TestX(bool bResource)  // Tests bool-to-int cast and bool-indexed array access
 {
 	local int N;
 
@@ -124,14 +124,14 @@ function TestX(bool bResource)
 	return;
 }
 
-function bool RecurseTest()
+function bool RecurseTest()  // Sets bBool1=true then returns false; used to test return values
 {
 	bBool1 = true;
 	return false;
 	return;
 }
 
-function TestLimitor(Class C)
+function TestLimitor(Class C)  // Tests class cast to Class<Actor>
 {
 	local Class<Actor> NewClass;
 
@@ -139,7 +139,7 @@ function TestLimitor(Class C)
 	return;
 }
 
-static function int OtherStatic(int i)
+static function int OtherStatic(int i)  // Asserts i==246 and default.xnum==777; returns 555
 {
 	assert((i == 246));
 	assert((default.xnum == 777));
@@ -147,7 +147,7 @@ static function int OtherStatic(int i)
 	return;
 }
 
-static function int TestStatic(int i)
+static function int TestStatic(int i)  // Asserts i==123 and calls OtherStatic(i*2)
 {
 	assert((i == 123));
 	assert((default.xnum == 777));
@@ -156,7 +156,7 @@ static function int TestStatic(int i)
 	return;
 }
 
-function TestContinueFor()
+function TestContinueFor()  // Tests continue statement behaviour inside a for loop
 {
 	local int i;
 
@@ -185,7 +185,7 @@ function TestContinueFor()
 	return;
 }
 
-function TestContinueWhile()
+function TestContinueWhile()  // Tests continue statement behaviour inside a while loop
 {
 	local int i;
 
@@ -211,7 +211,7 @@ function TestContinueWhile()
 	return;
 }
 
-function TestContinueDoUntil()
+function TestContinueDoUntil()  // Tests continue inside a do-until loop
 {
 	local int i;
 
@@ -235,7 +235,7 @@ function TestContinueDoUntil()
 	return;
 }
 
-function TestContinueForEach()
+function TestContinueForEach()  // Tests continue inside a foreach AllActors loop
 {
 	local Actor A;
 
@@ -255,7 +255,7 @@ function TestContinueForEach()
 	return;
 }
 
-function SubTestOptionalOut(optional out int A, optional out int B, optional out int C)
+function SubTestOptionalOut(optional out int A, optional out int B, optional out int C)  // Helper: doubles each supplied out parameter
 {
 	(A *= float(2));
 	B = (B * 2);
@@ -263,7 +263,7 @@ function SubTestOptionalOut(optional out int A, optional out int B, optional out
 	return;
 }
 
-function TestOptionalOut()
+function TestOptionalOut()  // Verifies optional out-parameter passing and skipping
 {
 	local int A, B, C;
 
@@ -294,14 +294,14 @@ function TestOptionalOut()
 	return;
 }
 
-function TestNullContext(Actor A)
+function TestNullContext(Actor A)  // Tests property access when A may be None
 {
 	bHidden = A.bHidden;
 	A.bHidden = bHidden;
 	return;
 }
 
-function TestSwitch()
+function TestSwitch()  // Tests switch/case on int and string types
 {
 	local string S;
 	local int i;
@@ -353,7 +353,7 @@ function TestSwitch()
 	return;
 }
 
-function Tick(float DeltaTime)
+function Tick(float DeltaTime)  // Main test runner: invokes all sub-tests every frame
 {
 	local Class C;
 	local Class<TestInfo> TC;
@@ -420,12 +420,12 @@ function Tick(float DeltaTime)
 	return;
 }
 
-function f()
+function f()  // Empty stub overridden in state machine tests
 {
 	return;
 }
 
-function temp()
+function temp()  // Scratch function; not called in production
 {
 	local int i;
 	local PlayerController PlayerOwner;

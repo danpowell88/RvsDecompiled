@@ -167,31 +167,31 @@ struct GameTypeInfo
 };
 
 // NEW IN 1.60
-var LevelInfo.EPhysicsDetailLevel PhysicsDetailLevel;
+var LevelInfo.EPhysicsDetailLevel PhysicsDetailLevel;  // Physics simulation detail level (Low/Medium/High)
 // NEW IN 1.60
-var LevelInfo.ENetMode NetMode;
+var LevelInfo.ENetMode NetMode;  // Current network mode (Standalone/DedicatedServer/ListenServer/Client)
 var(R6Sound) Actor.ETerroristNationality m_eTerroristVoices;  // Terrorist voice for the map.
 var(R6Sound) Actor.EHostageNationality m_eHostageVoices;  // Terrorist voice for the map.
 // NEW IN 1.60
-var(R6GazAlertMode) int m_iCoughTimes;
+var(R6GazAlertMode) int m_iCoughTimes;  // Number of cough events triggered per gas-alert cycle
 // NEW IN 1.60
-var(FreeBackupMode) int m_iNbOfFreeBackupToSpawn;
+var(FreeBackupMode) int m_iNbOfFreeBackupToSpawn;  // Number of free-backup NPCs to spawn in free-backup game mode
 // NEW IN 1.60
-var(FreeBackupMode) int m_iNbOfFBToSpawnBasedOnNbPlayers;
+var(FreeBackupMode) int m_iNbOfFBToSpawnBasedOnNbPlayers;  // Additional free-backup NPCs scaled to the current player count
 var int MaxRagdolls;  // Maximum number of simultaneous rag-dolls.
-var int HubStackLevel;
+var int HubStackLevel;  // Level index in the hub travel stack
 //R6 change level in planning
-var(R6Planning) int R6PlanningMaxLevel;
-var(R6Planning) int R6PlanningMinLevel;
-var int m_iMotionBlurIntensity;
-var int m_iLimitedSFXCount;
+var(R6Planning) int R6PlanningMaxLevel;  // Highest floor level index available in the planning map
+var(R6Planning) int R6PlanningMinLevel;  // Lowest floor level index available in the planning map
+var int m_iMotionBlurIntensity;  // Motion blur strength (0 = disabled)
+var int m_iLimitedSFXCount;  // Maximum number of simultaneous limited-budget sound effects
 //#ifdef R6PUNKBUSTER
 //__WITH_PB__
 var int iPBEnabled;  // 1 means PB server is running, 0 means not activated or deactivate cmd given but still running
 // NEW IN 1.60
-var bool m_bShowFloppy;
+var bool m_bShowFloppy;  // If true, show the saving-in-progress floppy disk icon
 // NEW IN 1.60
-var(ClassicMission) bool m_bIsClassicMission;
+var(ClassicMission) bool m_bIsClassicMission;  // True for Classic-mode missions (original R6 rules)
 var bool bKStaticFriction;  // Better rag-doll/ground friction model, but more CPU.
 var() bool bKNoInit;  // Start _NO_ Karma for this level. Only really for the Entry level.
 var() bool bLonePlayer;  // No multiplayer coordination, i.e. for entranceways.
@@ -203,82 +203,82 @@ var bool bAggressiveLOD;  // frame rate is well below DesiredFrameRate, so make 
 var bool bStartup;  // Starting gameplay.
 var bool bPathsRebuilt;  // True if path network is valid
 //R6InGamePLanning
-var bool m_bInGamePlanningActive;
-var bool m_bInGamePlanningZoomingIn;
-var bool m_bInGamePlanningZoomingOut;
-var bool m_bGameTypesInitialized;
+var bool m_bInGamePlanningActive;  // True while the in-game planning overlay is open
+var bool m_bInGamePlanningZoomingIn;  // True while the planning overlay is animating a zoom-in
+var bool m_bInGamePlanningZoomingOut;  // True while the planning overlay is animating a zoom-out
+var bool m_bGameTypesInitialized;  // True after the game-type info array has been populated
 //-----------------------------------------------------------------------------
 // Renderer Management.
-var() bool bNeverPrecache;
+var() bool bNeverPrecache;  // If true, skip texture/mesh pre-caching for this level
 var bool m_bLogBandWidth;  // this bool says whether we want to log bwidth usage
-var bool bNextItems;
+var bool bNextItems;  // Internal flag used during sequential item iteration
 //R6MissionObjectives 
-var(R6MissionObjectives) bool m_bUseDefaultMoralityRules;
+var(R6MissionObjectives) bool m_bUseDefaultMoralityRules;  // If true, apply default morality scoring rules for this mission
 //#ifdef R6DBGVECTORINFO
-var bool m_bShowDebugLine;
+var bool m_bShowDebugLine;  // Debug: render the debug vector line each frame
 //R6NEWRENDERERFEATURES
-var bool m_bShowDebugLights;
-var bool m_bShowDebugLODs;
-var bool m_bShowOnlyTransparentSM;
-var bool m_bNightVisionActive;
-var bool m_bHeatVisionActive;
-var bool m_bScopeVisionActive;
-var bool m_bAllow3DRendering;
+var bool m_bShowDebugLights;  // Debug: visualise dynamic light sources
+var bool m_bShowDebugLODs;  // Debug: visualise level-of-detail transitions
+var bool m_bShowOnlyTransparentSM;  // Debug: render only transparent static meshes
+var bool m_bNightVisionActive;  // True while night-vision post-process is active
+var bool m_bHeatVisionActive;  // True while heat-vision (thermal) post-process is active
+var bool m_bScopeVisionActive;  // True while a weapon scope view is active
+var bool m_bAllow3DRendering;  // Master switch; false disables the 3D scene render
 var bool m_bSkipMotionBlur;  // used to avoid blur in menus
 // R6SOUND
-var bool m_bPlaySound;
-var bool m_bCanStartStartingSound;
-var bool m_bSoundFadeFinish;
-var bool m_bIsResettingLevel;
+var bool m_bPlaySound;  // If false, all level audio is suppressed
+var bool m_bCanStartStartingSound;  // True once the engine is ready to play the level intro sound
+var bool m_bSoundFadeFinish;  // True when the sound fade-out has completed
+var bool m_bIsResettingLevel;  // True while the level is in the process of a full reset
 var bool m_bPBSvRunning;  // true means running, false means not running
 //R6HEARTBEAT
-var bool m_bHeartBeatOn;
+var bool m_bHeartBeatOn;  // True while the heartbeat sensor is active
 // Time passage.
 var() float TimeDilation;  // Normally 1 - scales real time passage.
 // Current time.
 var float TimeSeconds;  // Time in seconds since level began play.
 var float PauseDelay;  // time at which to start pause
 // NEW IN 1.60
-var float m_fCompteurFrameDetection;
+var float m_fCompteurFrameDetection;  // Frame counter used by the virus-upload detection timer
 // NEW IN 1.60
-var(MP2VirusUpload) float m_fTempsDetection;
+var(MP2VirusUpload) float m_fTempsDetection;  // Time in seconds required for virus upload detection
 // NEW IN 1.60
-var(MP2VirusUpload) float m_fClignoteTime;
+var(MP2VirusUpload) float m_fClignoteTime;  // Blink interval in seconds for the virus-upload indicator
 // NEW IN 1.60
-var(R6GazAlertMode) float m_fOxygeneTopLevel;
+var(R6GazAlertMode) float m_fOxygeneTopLevel;  // Maximum oxygen level before gas alert begins decreasing it
 // NEW IN 1.60
-var(R6GazAlertMode) float m_iCoughSeuil;
+var(R6GazAlertMode) float m_iCoughSeuil;  // Oxygen threshold at which pawns begin coughing
 // NEW IN 1.60
-var(R6GazAlertMode) float m_fOxygeneStepDecrease;
+var(R6GazAlertMode) float m_fOxygeneStepDecrease;  // Amount oxygen decreases per step in gas alert mode
 // Karma - jag
 var float KarmaTimeScale;  // Karma physics timestep scaling.
 var float RagdollTimeScale;  // Ragdoll physics timestep scaling. This is applied on top of KarmaTimeScale.
 var float KarmaGravScale;  // Allows you to make ragdolls use lower friction than normal.
-var float m_fInGamePlanningZoomDistance;
+var float m_fInGamePlanningZoomDistance;  // Camera distance used when the planning overlay is zoomed in
 var(Audio) float PlayerDoppler;  // Player doppler shift, 0=none, 1=full.
-var() float Brightness;
-var float m_fRainbowSkillMultiplier;
-var float m_fTerroSkillMultiplier;
-var float NextSwitchCountdown;
-var(R6MissionObjectives) float m_fTimeLimit;
-var(R6Sound) float m_fEndGamePauseTime;
+var() float Brightness;  // Ambient brightness for the level (0.0-1.0)
+var float m_fRainbowSkillMultiplier;  // Global skill scaling factor applied to Rainbow operators
+var float m_fTerroSkillMultiplier;  // Global skill scaling factor applied to terrorist NPCs
+var float NextSwitchCountdown;  // Remaining time in seconds before the next map switch
+var(R6MissionObjectives) float m_fTimeLimit;  // Mission time limit in seconds (0 = no limit)
+var(R6Sound) float m_fEndGamePauseTime;  // Pause duration in seconds before end-of-game state transition
 var float m_fDbgNavPointDistance;  // debug: max distance to player for displaying nav point.
-var float m_fDistanceHeartBeatVisible;
+var float m_fDistanceHeartBeatVisible;  // Maximum distance at which heartbeat sensor blips are visible
 var PlayerReplicationInfo Pauser;  // If paused, name of person pausing the game.
-var LevelSummary Summary;
-var() Texture Screenshot;
-var Texture DefaultTexture;
-var Texture WireframeTexture;
-var Texture WhiteSquareTexture;
-var Texture LargeVertex;
-var GameInfo Game;
-var const NavigationPoint NavigationPointList;
-var const Controller ControllerList;
-var PhysicsVolume PhysicsVolumeList;
+var LevelSummary Summary;  // Level summary info (title, author, description)
+var() Texture Screenshot;  // Screenshot texture displayed on the level selection screen
+var Texture DefaultTexture;  // Fallback texture applied to surfaces with no material
+var Texture WireframeTexture;  // Texture used to render surfaces in wireframe editor mode
+var Texture WhiteSquareTexture;  // Solid white utility texture used for debug rendering
+var Texture LargeVertex;  // Large vertex indicator texture used in editor selection
+var GameInfo Game;  // Reference to the active GameInfo actor controlling the current game rules
+var const NavigationPoint NavigationPointList;  // Linked list of all navigation points in the level
+var const Controller ControllerList;  // Linked list of all active controllers in the level
+var PhysicsVolume PhysicsVolumeList;  // Linked list of all physics volumes in the level
 //#ifdef R6ACTIONSPOT
-var const R6ActionSpot m_ActionSpotList;
+var const R6ActionSpot m_ActionSpotList;  // Linked list of all R6ActionSpot actors in the level
 //Skin names received by the client. If package does not exist, it will be downloaded.
-var Material GreenTeamSkin;
+var Material GreenTeamSkin;  // Skin assets received by the client; missing packages are downloaded on connect
 var Material GreenHeadSkin;
 var Material GreenGogglesSkin;
 var Material GreenHandSkin;
@@ -294,74 +294,74 @@ var Material RedMenuSkin;
 var Mesh RedMesh;
 var StaticMesh RedHelmetMesh;
 var Material RedHelmetSkin;
-var(R6MissionObjectives) Sound m_sndMissionComplete;
+var(R6MissionObjectives) Sound m_sndMissionComplete;  // Sound played on mission success
 //R6Weather
-var Emitter m_WeatherEmitter;
-var Actor m_WeatherViewTarget;
-var Sound m_sndPlayMissionIntro;
-var Sound m_sndPlayMissionExtro;
+var Emitter m_WeatherEmitter;  // Spawned weather particle emitter actor
+var Actor m_WeatherViewTarget;  // Actor used as the weather emitter's view reference
+var Sound m_sndPlayMissionIntro;  // Sound played at the start of the mission briefing
+var Sound m_sndPlayMissionExtro;  // Sound played at the end-of-mission debriefing
 var(R6Sound) Sound m_SurfaceSwitchSnd;  // Sound event containing all the surface sounds - EB April 6th, 2002
 var(R6Sound) Sound m_SurfaceSwitchForOtherPawnSnd;  // Sound event containing all the surface sounds for the other pawn- SD July 30th, 2002
 var(R6Sound) Sound m_BodyFallSwitchSnd;  // Sound contain only the body fall sounds for player - SD
 var(R6Sound) Sound m_BodyFallSwitchForOtherPawnSnd;  // Sound contain only the body fall sounds for the other pawn- SD
 var(R6Sound) Sound m_StartingMusic;  // When the Music is set in the level the music is play at the beginning of the game.
-var R6DecalManager m_DecalManager;
-var Texture m_pScopeMaskTexture;
-var Texture m_pScopeAddTexture;
+var R6DecalManager m_DecalManager;  // Manager actor for bullet-hole and blood decals
+var Texture m_pScopeMaskTexture;  // Mask texture applied around the scope view
+var Texture m_pScopeAddTexture;  // Additive texture for the scope lens overlay
 var R6AbstractHostageMgr m_hostageMgr;  // there's only one instance of hostageMgr
-var R6AbstractTerroristMgr m_terroristMgr;
-var(R6SFX) Material m_pProneTrailMaterial;
-var R6ServerInfo m_ServerSettings;
-var R6LimitedSFX m_aLimitedSFX[6];
+var R6AbstractTerroristMgr m_terroristMgr;  // Manager actor coordinating all terrorist NPCs
+var(R6SFX) Material m_pProneTrailMaterial;  // Material rendered as the pawn's prone crawl trail
+var R6ServerInfo m_ServerSettings;  // Server configuration info actor
+var R6LimitedSFX m_aLimitedSFX[6];  // Pool of limited-budget SFX slots to cap simultaneous sound effects
 // #ifdef R6WRITABLEMAP
-var(R6DrawingTool) Texture m_tWritableMapTexture;
+var(R6DrawingTool) Texture m_tWritableMapTexture;  // Runtime render target texture for the writable tactical map
 // NEW IN 1.60
 var Class<StaticMeshActor> GreenHelmet;
 // NEW IN 1.60
 var Class<StaticMeshActor> RedHelmet;
-var(R6LevelWeather) Class<R6WeatherEmitter> m_WeatherEmitterClass;
-var Class<R6WeatherEmitter> m_RepWeatherEmitterClass;
+var(R6LevelWeather) Class<R6WeatherEmitter> m_WeatherEmitterClass;  // Emitter class used to spawn the level weather effect
+var Class<R6WeatherEmitter> m_RepWeatherEmitterClass;  // Replicated weather emitter class (sent to clients)
 //R6Breathing
-var(R6Breathing) Class<Emitter> m_BreathingEmitterClass;
-var(R6MissionObjectives) editinline array<editinline R6MissionObjectiveBase> m_aMissionObjectives;
-var array<WritableMapVertex> m_aCurrentStrip;
-var array<WritableMapVertex> m_aWritableMapStrip;
-var array<WritableMapStroke> m_aWritableMapTimeStamp;
-var array<WritableMapIcon> m_aWritableMapIcons;
-var array<GameTypeInfo> m_aGameTypeInfo;
+var(R6Breathing) Class<Emitter> m_BreathingEmitterClass;  // Emitter class for visible breath fog in cold environments
+var(R6MissionObjectives) editinline array<editinline R6MissionObjectiveBase> m_aMissionObjectives;  // List of mission objective actors for this level
+var array<WritableMapVertex> m_aCurrentStrip;  // Vertex buffer for the stroke currently being drawn on the map
+var array<WritableMapVertex> m_aWritableMapStrip;  // Committed vertex strips on the writable map
+var array<WritableMapStroke> m_aWritableMapTimeStamp;  // Timestamps for each committed map stroke (for timed fade-out)
+var array<WritableMapIcon> m_aWritableMapIcons;  // Icon stamps placed on the writable tactical map
+var array<GameTypeInfo> m_aGameTypeInfo;  // Descriptions of all available game-types for this level
 //-----------------------------------------------------------------------------
 // Legend - used for saving the viewport camera positions
-var() Vector CameraLocationDynamic;
-var() Vector CameraLocationTop;
-var() Vector CameraLocationFront;
-var() Vector CameraLocationSide;
-var() Rotator CameraRotationDynamic;
-var(R6Planning) Vector R6PlanningMaxVector;
-var(R6Planning) Vector R6PlanningMinVector;
-var Region GreenMenuRegion;
-var Region RedMenuRegion;
-var(R6Sound) SoundZoneAudibleZones m_SoundZoneAudibleZones[64];
-var Vector m_vPredVector;
-var Vector m_vPredPredVector;
-var() localized string Title;
+var() Vector CameraLocationDynamic;  // Editor viewport camera position for the dynamic (perspective) view
+var() Vector CameraLocationTop;  // Editor viewport camera position for the top-down orthographic view
+var() Vector CameraLocationFront;  // Editor viewport camera position for the front orthographic view
+var() Vector CameraLocationSide;  // Editor viewport camera position for the side orthographic view
+var() Rotator CameraRotationDynamic;  // Editor viewport camera rotation for the dynamic (perspective) view
+var(R6Planning) Vector R6PlanningMaxVector;  // World-space AABB maximum corner for the planning map extent
+var(R6Planning) Vector R6PlanningMinVector;  // World-space AABB minimum corner for the planning map extent
+var Region GreenMenuRegion;  // Zone region used by the Green team menu/insertion display
+var Region RedMenuRegion;  // Zone region used by the Red team menu/insertion display
+var(R6Sound) SoundZoneAudibleZones m_SoundZoneAudibleZones[64];  // Per-zone bitmask arrays defining which zones are acoustically connected
+var Vector m_vPredVector;  // Prediction vector used for extrapolating movement in network play
+var Vector m_vPredPredVector;  // Second-order prediction vector for smoother network extrapolation
+var() localized string Title;  // Localised display name of this level
 var() string Author;  // Who built it.
 var() localized string LevelEnterText;  // Message to tell players when they enter.
 var() string LocalizedPkg;  // Package to look in for localizations.
 var string VisibleGroups;  // List of the group names which were checked when the level was last saved
 var(Audio) string Song;  // Filename of the streaming song.
-var string m_szGameTypeShown;
+var string m_szGameTypeShown;  // Display string of the current game type shown in UI
 var string ComputerName;  // Machine's name according to the OS.
 var string EngineVersion;  // Engine version.
 var string MinNetVersion;  // Min engine version that is net compatible.
-var() string DefaultGameType;
-var string NextURL;
+var() string DefaultGameType;  // Class name of the default game-type to use if none is specified
+var string NextURL;  // URL to travel to at end-of-round or map switch
 //R6 Multiplayer SKINS
-var(R6MultiPlayerSkins) string GreenTeamPawnClass;
-var(R6MultiPlayerSkins) string RedTeamPawnClass;
-var(R6MissionObjectives) string m_szMissionObjLocalization;
-var(R6Sound) string m_csVoicesOneLinersBankName;
+var(R6MultiPlayerSkins) string GreenTeamPawnClass;  // Class name of the Green team pawn for multiplayer
+var(R6MultiPlayerSkins) string RedTeamPawnClass;  // Class name of the Red team pawn for multiplayer
+var(R6MissionObjectives) string m_szMissionObjLocalization;  // Localisation key prefix for mission objective text strings
+var(R6Sound) string m_csVoicesOneLinersBankName;  // Sound bank name for NPC one-liner voice clips
 // NEW IN 1.60
-var transient LevelInfo.ELevelAction LevelAction;
+var transient LevelInfo.ELevelAction LevelAction;  // Current loading/saving/connecting state (used by HUD level-action display)
 var transient int Year;  // Year.
 var transient int Month;  // Month.
 var transient int Day;  // Day of month.

@@ -229,26 +229,26 @@ var(Velocity) RangeVector AddVelocityMultiplierRange;
 var(Local) string Name;
 var transient int ParticleIndex;  // index into circular list of particles
 var transient int ActiveParticles;  // currently active particles
-var transient int OtherIndex;
-var transient int PS2Data;
-var transient int MaxActiveParticles;
-var transient int CurrentCollisionSoundIndex;
-var transient int KillPending;
-var transient bool Initialized;
-var transient bool Inactive;
-var transient bool RealDisableFogging;
-var transient bool AllParticlesDead;
-var transient bool WarmedUp;
-var transient float InactiveTime;
+var transient int OtherIndex;  // Scratch index used for cross-emitter references (AddVelocityFromOtherEmitter / AddLocationFromOtherEmitter)
+var transient int PS2Data;  // PS2-platform specific data handle; unused on PC
+var transient int MaxActiveParticles;  // Peak simultaneously active particle count observed since last reset
+var transient int CurrentCollisionSoundIndex;  // Index into the Sounds array for the currently selected collision sound
+var transient int KillPending;  // Number of particles queued for removal at end of current tick
+var transient bool Initialized;  // True once the emitter has completed its first-frame initialisation
+var transient bool Inactive;  // True when all particles are dead and SecondsBeforeInactive has elapsed
+var transient bool RealDisableFogging;  // Resolved disable-fogging flag, accounting for parent emitter settings
+var transient bool AllParticlesDead;  // True when every spawned particle has expired this cycle
+var transient bool WarmedUp;  // True after the warmup simulation ticks have completed
+var transient float InactiveTime;  // Elapsed time since the emitter last became inactive
 var transient float PPSFraction;  // used to keep track of fractional PPTick
-var transient float InitialDelay;
-var transient float TimeTillReset;
-var transient float MaxSizeScale;
-var transient Emitter Owner;
-var transient array<Particle> Particles;
-var transient Box BoundingBox;
-var transient Vector RealExtentMultiplier;
-var transient Vector GlobalOffset;
+var transient float InitialDelay;  // Remaining time before the first particle may be spawned
+var transient float TimeTillReset;  // Remaining time until AutoReset triggers a full restart
+var transient float MaxSizeScale;  // Largest RelativeSize value in the SizeScale array, cached at init
+var transient Emitter Owner;  // The owning Emitter actor that contains this sub-emitter
+var transient array<Particle> Particles;  // Live particle instance data; size = MaxParticles
+var transient Box BoundingBox;  // World-space bounding box enclosing all active particles
+var transient Vector RealExtentMultiplier;  // Resolved extent multiplier used for particle collision traces
+var transient Vector GlobalOffset;  // Additional world-space offset applied to all particle spawn positions
 
 // Export UParticleEmitter::execSpawnParticle(FFrame&, void* const)
 native function SpawnParticle(int Amount);
