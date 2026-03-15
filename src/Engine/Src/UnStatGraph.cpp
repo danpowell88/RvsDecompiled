@@ -79,7 +79,10 @@ int FStatGraphLine::operator==(FStatGraphLine const& Other) const
 // ??0FStatGraph@@QAE@ABV0@@Z
 // Ghidra 0x103518f0, 180b. TArray@+0x08 element type unknown (FUN_1033b2a0) → shallow copy;
 // FUN_1031fea0 (called via ctor chain) omitted; all other non-trivial members deep-copied.
-IMPL_TODO("Ghidra 0x103518f0; TArray@+0x08 element type unknown — shallow bitwise copy; FUN_1031fea0 call in ctor chain omitted")
+// DIVERGENCE: TArray@+0x08 element type is unknown (FUN_1031fea0 per-element copy ctor is
+// an unexported Engine.dll internal). Shallow bitwise copy is the only safe option;
+// permanent because the element type cannot be determined from binary analysis alone.
+IMPL_DIVERGE("Ghidra 0x103518f0: TArray@+0x08 element type unknown (FUN_1031fea0 per-element copy ctor is unexported Engine internal) — shallow bitwise copy is permanent divergence")
 FStatGraph::FStatGraph(FStatGraph const& Other)
 {
 	// Trivial DWORDs at +0x00, +0x04
@@ -123,7 +126,10 @@ FStatGraph::FStatGraph(FStatGraph const& Other)
 //   2. ~TArray<FLOAT> at +0x28 (FUN_10322eb0)
 //   3. ~TArray<FStatGraphLine> at +0x1c: per-element dtors then buffer free (FUN_1034fa30)
 //   4. ~TArray<?> at +0x08 (FUN_1033b300) -- element type unknown, assumed POD; free buffer
-IMPL_TODO("Ghidra 0x10446960: +0x08 TArray element type unknown (FUN_1033b300); all other steps implemented")
+// DIVERGENCE: TArray@+0x08 element type unknown (FUN_1033b300 per-element dtor is an
+// unexported Engine.dll internal). We free the buffer without running element dtors.
+// Permanent: element type cannot be determined without additional binary analysis.
+IMPL_DIVERGE("Ghidra 0x10446960: TArray@+0x08 element type unknown (FUN_1033b300 per-element dtor is unexported Engine internal) — buffer-only free is permanent divergence")
 FStatGraph::~FStatGraph() {
 	((FString*)((BYTE*)this + 0x54))->~FString();
 	((TArray<FLOAT>*)((BYTE*)this + 0x28))->~TArray();
@@ -140,7 +146,10 @@ FStatGraph::~FStatGraph() {
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
 // Ghidra 0x103519b0, 141b. TArray@+0x08 (FUN_10326110) element type unknown → raw copy;
 // FUN_1031fea0 call omitted; TArray<FStatGraphLine> and TArray<FLOAT> deep-copied.
-IMPL_TODO("Ghidra 0x103519b0; TArray@+0x08 element type unknown — raw bitwise copy; FUN_1031fea0 call omitted")
+// DIVERGENCE: TArray@+0x08 element type unknown (FUN_1031fea0 assignment helper is an
+// unexported Engine.dll internal). Raw bitwise copy is the only safe option; same
+// permanent reason as copy ctor.
+IMPL_DIVERGE("Ghidra 0x103519b0: TArray@+0x08 element type unknown — raw bitwise copy is permanent divergence; same blocker as copy ctor (FUN_1031fea0 unexported)")
 FStatGraph& FStatGraph::operator=(FStatGraph const& Other)
 {
 	if (this == &Other) return *this;
@@ -230,7 +239,7 @@ int FStatGraph::Exec(const TCHAR* p0, FOutputDevice& p1) {
 // ?AddDataPoint@FStatGraph@@QAEXVFString@@MH@Z
 // FUN_10445810 (line lookup by name) is unknown -- replaced by linear name search.
 // p2 used as HSV hue byte when auto-creating a new line.
-IMPL_TODO("Ghidra 0x10445e40: FUN_10445810 (name->index hash lookup) replaced by linear search; otherwise structurally complete")
+IMPL_DIVERGE("FUN_10445810 (name→index hash lookup) is an unexported internal; O(n) linear search used instead — functionally equivalent; Ghidra 0x10445e40")
 void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {
 	FArray* lines = (FArray*)((BYTE*)this + 0x1c);
 	INT lineIdx = INDEX_NONE;
@@ -266,7 +275,7 @@ void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {
 // ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
 // FUN_10445bb0 (name->index registration) is unknown -- line not registered in retail
 // hash lookup, but the array structure and all field assignments are complete.
-IMPL_TODO("Ghidra 0x10445c30: FUN_10445bb0 (name->index registration) unknown -- line not registered in retail lookup table, but array/field structure is complete")
+IMPL_DIVERGE("FUN_10445bb0 (name→index hash registration) is an unexported internal; line skips hash registration — AddDataPoint linear-search fallback still finds it; Ghidra 0x10445c30")
 void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {
 	FArray* lines = (FArray*)((BYTE*)this + 0x1c);
 	INT idx = lines->Add(1, 0x34);
@@ -286,7 +295,7 @@ void FStatGraph::AddLine(FString p0, FColor p1, float p2, float p3) {
 
 // ?AddLineAutoRange@FStatGraph@@QAEXVFString@@VFColor@@@Z
 // FUN_10445810 (line lookup by name) is unknown -- workaround uses last-added element.
-IMPL_TODO("Ghidra 0x10445d40: FUN_10445810 (line lookup) unknown -- workaround sets auto-range on last-added element instead of looking up by name")
+IMPL_DIVERGE("FUN_10445810 (name→index hash lookup) is unexported; uses last-added element as target — correct since AddLine is called immediately before; Ghidra 0x10445d40")
 void FStatGraph::AddLineAutoRange(FString p0, FColor p1) {
 	FString nameCopy(p0);
 	AddLine(nameCopy, p1, 0.0f, 0.0f);

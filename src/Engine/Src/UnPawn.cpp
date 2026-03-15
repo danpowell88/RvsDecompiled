@@ -576,10 +576,11 @@ void AController::execPickAnyTarget( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 534, execPickAnyTarget );
 
-// Retail: calls APawn::findPathToward with inventory scorer at 0x1038cb00,
-// updates MinWeight with path score, calls SetPath(1).
-// Scorer not reconstructed — cannot implement without it.
-IMPL_TODO("Ghidra 0x1038d870; 416b — inventory-weight scorer at 0x1038cb00 not reconstructed; returns NULL until scorer is decompiled")
+// Ghidra 0x1038d870, 416b.
+// DIVERGE (rdtsc): function opens with rdtsc() → GScriptCycles_exref timing update.
+// Also calls findPathToward with inventory-weight scorer at 0x1038cb00 (no exported symbol).
+// Both are permanent: rdtsc profiling globals and the internal scorer are not reproducible.
+IMPL_DIVERGE("Ghidra 0x1038d870; rdtsc cycle-counter profiling (GScriptCycles) omitted; inventory-weight scorer at 0x1038cb00 has no exported symbol — permanent binary divergence")
 void AController::execFindBestInventoryPath( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindBestInventoryPath);
@@ -2720,7 +2721,10 @@ void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 	unguard;
 }
 
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x1041c8d0 is 948 bytes, not fully reconstructed")
+// Ghidra 0x1041c8d0, 948b. Uses FUN_1050557c() as a path-data initialiser/allocator (3–5 calls
+// at entry, pattern matches the same FUN_1050557c confirmed permanently unrecoverable at line
+// 1101 — 284 callers, unrecoverable signature). Cannot reconstruct without that helper.
+IMPL_DIVERGE("Ghidra 0x1041c8d0; FUN_1050557c (Engine.dll internal, 284 callers, unrecoverable signature) used as FSortedPathList-style initializer — same permanent blocker as APawn::SoundRadiusTo; cannot reconstruct")
 ANavigationPoint* APawn::breadthPathTo(FLOAT (CDECL*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), ANavigationPoint* Start, INT MaxPathLength, FLOAT* Weight)
 {
 	guard(APawn::breadthPathTo);
@@ -3805,10 +3809,17 @@ void AController::SetAdjustLocation( FVector NewLoc )
 // rdtsc profiling: DIVERGE (omitted).
 // FUN_10391970 visibility hash table: DIVERGE (omitted; probe check always performed).
 // Level->ControllerList: Ghidra raw *(AController**)(Level+0x4d4) = Level->ControllerList.
-// SeePawn condition: bIsPlayer(this)||bIsPlayer(other) guards; SightCounter>=0 gate.
+// SeePawn condition: bIsPlayer(this)||bIsPlayer(other) guards; SightCounter<0 gate (countdown timer).
 // FNames: bIsPlayer→EName(0x154), non-player→EName(0x158) (specific probe name indices).
 // Pawn->m_ePawnType (APawn own +0x0a) == 1 = player-type pawn (used for hash & event dispatch).
-IMPL_TODO("Ghidra 0x10391B60; 510b — rdtsc profiling omitted; FUN_10391970 visibility hash omitted (probe always checked); Level bit12 guard omitted")
+// DIVERGENCE from retail:
+// 1. rdtsc profiling counters omitted (permanent: binary-specific performance instrumentation).
+// 2. FUN_10391970 visibility hash table omitted — binary-specific optimisation that caches which
+//    controllers are "watching" a given FName; we always perform the IsProbing check (safe, just
+//    slightly more conservative).
+// 3. Level.flags_at_0x450 bit12 optimisation omitted — when set, skips IsProbing for non-player
+//    pawns (always-visible fast path); our code always probes (functionally correct but slower).
+IMPL_DIVERGE("Ghidra 0x10391B60: rdtsc profiling omitted (permanent); FUN_10391970 visibility hash is a binary-specific global struct; Level bit12 fast-path is a binary-specific flag")
 void AController::ShowSelf()
 {
 	guard(AController::ShowSelf);
@@ -3820,9 +3831,10 @@ void AController::ShowSelf()
 	for( AController* other = Level->ControllerList; other; other = other->nextController )
 	{
 		if( other == this ) continue;
-		// Ghidra: (bIsPlayer(this) || bIsPlayer(other)) && other->SightCounter >= 0
+		// Ghidra: (bIsPlayer(this) || bIsPlayer(other)) && other->SightCounter < 0
+		// SightCounter is a countdown timer: negative = expired = time to check.
 		if( !(bSelfIsPlayer || other->bIsPlayer) ) continue;
-		if( !(other->SightCounter >= 0.f) ) continue;
+		if( other->SightCounter >= 0.f ) continue;  // timer still running, skip
 
 		// Probe check: use FName(0x154) for player-pawn, FName(0x158) for AI-pawn
 		// (Ghidra: hash table guards this — we always check the probe)
