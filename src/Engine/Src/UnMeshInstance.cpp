@@ -1645,13 +1645,12 @@ int USkeletalMeshInstance::UpdateAnimation(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("calls FUN_10481dd0 (FUN_104xxxxx range; unresolved Karma/MeSDK helper); retail 0x1043da80")
+IMPL_TODO("retail 0x1043da80 (6631b) full skeletal mesh rendering pipeline; blocked by unresolved GPU skinning and stream helpers")
 void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
 	guard(USkeletalMeshInstance::Render);
-	// Retail 0x1043da80 (6631b): full skeletal mesh rendering pipeline.
-	// DIVERGENCE: calls FUN_10481dd0 (FUN_104xxxxx Karma/MeSDK range); permanently unresolvable
-	// without MeSDK sources.
+	// Retail 0x174f70: full skeletal mesh rendering pipeline.
+	// TODO: implement USkeletalMeshInstance::Render (retail 0x174f70: full skeletal mesh rendering pipeline)
 	unguard;
 }
 
@@ -1662,7 +1661,7 @@ void USkeletalMeshInstance::Render(FDynamicActor *,FLevelSceneNode *,TList<FDyna
 // FUN_103218c0 etc.), and AnimObjects TArray (+0xB8 via FUN_104371c0).
 // Divergence: FUN_104372f0/FUN_10437430/FUN_104375d0/FUN_10438100/FUN_10321a80/FUN_103218c0/
 // FUN_104371c0 are unresolved TArray serializers; only the two scalar fields are serialized here.
-IMPL_DIVERGE("calls FUN_104372f0/FUN_10437430/FUN_104375d0/FUN_10438100/FUN_104371c0 (FUN_104xxxxx TArray serializers; Karma/MeSDK range); retail 0x10438750")
+IMPL_TODO("FUN_104372f0 and related TArray serializers unresolved; retail 0x10438750 (264b)")
 void USkeletalMeshInstance::Serialize(FArchive& Ar)
 {
 	ULodMeshInstance::Serialize(Ar);
@@ -1797,7 +1796,7 @@ int USkeletalMeshInstance::LineCheck(FCheckResult& Hit, AActor* Owner, FVector E
 	unguard;
 }
 
-IMPL_DIVERGE("calls FUN_10438ce0 (FUN_104xxxxx GPU-skinning transform; Karma/MeSDK range); retail 0x1043da50")
+IMPL_TODO("FUN_10438ce0 GPU-skinning transform not yet identified; identity used as placeholder")
 void USkeletalMeshInstance::MeshSkinVertsCallback(void *)
 {
 	guard(USkeletalMeshInstance::MeshSkinVertsCallback);
@@ -2504,7 +2503,7 @@ UMaterial * USkeletalMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_DIVERGE("calls FUN_10438ce0 (FUN_104xxxxx GPU-skinning transform; Karma/MeSDK range); retail 0x1043d8e0")
+IMPL_TODO("FUN_10438ce0 GPU-skinning transform identity unresolved; no vertex output")
 void USkeletalMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(USkeletalMeshInstance::GetMeshVerts);

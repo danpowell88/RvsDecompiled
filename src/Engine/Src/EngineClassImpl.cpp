@@ -295,7 +295,7 @@ void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddImpulse );
 
-IMPL_DIVERGE("permanent: Karma pair collision — calls FUN_10361100 (KEnablePairCollision @ 0x10361100), an internal Karma/MeSDK wrapper not in export table")
+IMPL_TODO("Ghidra 0x10363090 (187 bytes): calls FUN_10361100 (unresolved collision pair helper)")
 void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKDisableCollision);
@@ -305,7 +305,7 @@ void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKDisableCollision );
 
-IMPL_DIVERGE("permanent: Karma pair collision — calls FUN_10361060 (KEnablePairCollision @ 0x10361060), an internal Karma/MeSDK wrapper not in export table")
+IMPL_TODO("Ghidra 0x10363180 (187 bytes): calls FUN_10361060 (unresolved collision pair helper)")
 void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKEnableCollision);
@@ -337,40 +337,12 @@ void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetActorGravScale );
 
-IMPL_MATCH("Engine.dll", 0x10363870)
+IMPL_TODO("Ghidra 0x10363870 (295 bytes): reads COM offset from UKarmaParamsRBFull with StaticMesh fallback — complex branching")
 void AActor::execKGetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMOffset);
 	P_GET_VECTOR_REF(offset);
 	P_FINISH;
-	UObject* kpBase = KParams;
-	if (kpBase)
-	{
-		UKarmaParamsRBFull* kp = Cast<UKarmaParamsRBFull>(kpBase);
-		if (kp)
-		{
-			*offset = kp->KCOMOffset;
-		}
-		else
-		{
-			// StaticMesh fallback: read default KCOMOffset from mesh's embedded Karma body.
-			// this+0x170 = StaticMesh* (valid when DrawType == DT_StaticMesh).
-			// StaticMesh+0x160 = pointer to default Karma body geometry.
-			// KarmaBody+0x44..+0x4c = XYZ of the default COM offset.
-			BYTE* sm = (BYTE*)*(INT*)((BYTE*)this + 0x170);
-			if (sm)
-			{
-				BYTE* kb = (BYTE*)*(INT*)(sm + 0x160);
-				if (kb)
-				{
-					offset->X = *(FLOAT*)(kb + 0x44);
-					offset->Y = *(FLOAT*)(kb + 0x48);
-					offset->Z = *(FLOAT*)(kb + 0x4c);
-					return;
-				}
-			}
-		}
-	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetCOMOffset );
@@ -424,46 +396,13 @@ void AActor::execKGetImpactThreshold( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetImpactThreshold );
 
-IMPL_MATCH("Engine.dll", 0x10363440)
+IMPL_TODO("Ghidra 0x10363440 (446 bytes): reads 6-element inertia tensor from UKarmaParamsRBFull with StaticMesh fallback — complex branching")
 void AActor::execKGetInertiaTensor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetInertiaTensor);
 	P_GET_VECTOR_REF(it1);
 	P_GET_VECTOR_REF(it2);
 	P_FINISH;
-	UObject* kpBase = KParams;
-	if (kpBase)
-	{
-		UKarmaParamsRBFull* kp = Cast<UKarmaParamsRBFull>(kpBase);
-		if (kp)
-		{
-			// KInertiaTensor[0..2] -> it2 (second output), [3..5] -> it1 (first output).
-			it2->X = kp->KInertiaTensor[0];
-			it2->Y = kp->KInertiaTensor[1];
-			it2->Z = kp->KInertiaTensor[2];
-			it1->X = kp->KInertiaTensor[3];
-			it1->Y = kp->KInertiaTensor[4];
-			it1->Z = kp->KInertiaTensor[5];
-		}
-		else
-		{
-			// StaticMesh fallback: read inertia tensor from mesh's embedded Karma body.
-			// this+0x170 = StaticMesh*; StaticMesh+0x160 = default Karma body geometry.
-			// KarmaBody+0x2c..+0x34 = it2 XYZ; +0x38..+0x40 = it1 XYZ.
-			BYTE* sm = (BYTE*)*(INT*)((BYTE*)this + 0x170);
-			if (!sm)
-				return;
-			BYTE* kb = (BYTE*)*(INT*)(sm + 0x160);
-			if (!kb)
-				return;
-			it2->X = *(FLOAT*)(kb + 0x2c);
-			it2->Y = *(FLOAT*)(kb + 0x30);
-			it2->Z = *(FLOAT*)(kb + 0x34);
-			it1->X = *(FLOAT*)(kb + 0x38);
-			it1->Y = *(FLOAT*)(kb + 0x3c);
-			it1->Z = *(FLOAT*)(kb + 0x40);
-		}
-	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetInertiaTensor );
@@ -511,22 +450,11 @@ void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsAwake );
 
-IMPL_MATCH("Engine.dll", 0x10362e00)
+IMPL_TODO("Ghidra 0x10362e00 (180 bytes): checks this+0x328 (KarmaActor handle) and MeshInstance+0x434 bone count — raw offsets not typed")
 void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsRagdollAvailable);
 	P_FINISH;
-	// this+0x328 = Karma actor data handle; +0x1012c = bone FArray within that struct.
-	// this+0x144 = MeshInstance; +0x434 = target bone count for ragdoll readiness.
-	if (*(INT*)((BYTE*)this + 0x328) != 0 && *(INT*)((BYTE*)this + 0x144) != 0)
-	{
-		INT n = ((FArray*)((BYTE*)*(INT*)((BYTE*)this + 0x328) + 0x1012c))->Num();
-		if (n < *(INT*)((BYTE*)*(INT*)((BYTE*)this + 0x144) + 0x434))
-		{
-			*(DWORD*)Result = 1;
-			return;
-		}
-	}
 	*(DWORD*)Result = 0;
 	unguard;
 }
@@ -582,7 +510,7 @@ void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetActorGravScale );
 
-IMPL_DIVERGE("permanent: Karma actor collision — calls FUN_10359960 (KSetActorCollision @ 0x10359960), an internal Karma/MeSDK wrapper not in export table")
+IMPL_TODO("Ghidra 0x10362f80 (209 bytes): sets bBlockKarma bitfield then calls FUN_10359960 (unresolved Karma collision enable/disable)")
 void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetBlockKarma);
@@ -877,7 +805,7 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_TODO("Ghidra 0x1041f610 (137 bytes): calls FUN_103db080 (unresolved Engine.dll internal; appears to be a TArray remove-item helper used for scene manager teardown)")
+IMPL_TODO("Ghidra 0x1041f610 (137 bytes): calls GLog->Logf() and FUN_103db080 scene teardown; blocked pending scene manager implementation")
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
@@ -1006,7 +934,7 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_TODO("Ghidra 0x1032f0c0 (1867 bytes): calls FUN_10318850 (unresolved object iterator) and FUN_10322eb0 (unresolved cleanup helper); blocked pending resolution of Engine.dll internals")
+IMPL_TODO("Ghidra 0x1032f0c0 (1867 bytes): large function; FMD5Context computations + UClass lookup + FString comparisons; pending full stat system implementation")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);

@@ -301,7 +301,7 @@ static void bspPrecomputeSphereFilterHelper( UModel* Model, INT iNode, const FPl
 // Non-trans path: CountBytes, ByteOrderSerialize Num+Max, stream each FPoly.
 // Trans path: retail calls FUN_1032c490 which immediately returns when IsTrans()
 // is true — the undo system does not record raw poly data. We match that no-op.
-IMPL_DIVERGE("permanent: FUN_103222e0/FUN_10322330 are unexported FArray helpers that allocate all N slots at once then iterate; our implementation adds one at a time — equivalent result, different bytecode")
+IMPL_TODO("Ghidra 0x1032f9c0: non-trans loading path calls FUN_103222e0/FUN_10322330 (GUndo helpers) not yet extracted")
 void UPolys::Serialize( FArchive& Ar )
 {
 guard(UPolys::Serialize);
@@ -654,7 +654,7 @@ unguard;
 // If sections non-empty: optionally releases GPU resources via RenDev vtable[0x78/4],
 // clears FirstRenderSection (+0x78) and NumRenderSections (+0x7c) on all nodes to -1,
 // calls FUN_10324a50 (unnamed) per section, then empties the sections array.
-IMPL_DIVERGE("permanent: FUN_10324a50 is an unexported section destructor that must be called per section before emptying — cannot call it without the source; sections are freed without per-section cleanup (acceptable for runtime; editor undo path skipped)")
+IMPL_TODO("Ghidra 0x103cef10: calls FUN_10324a50 (unnamed section destructor) per section before emptying; pending extraction")
 void UModel::ClearRenderData( URenderDevice* RenDev )
 {
 guard(UModel::ClearRenderData);

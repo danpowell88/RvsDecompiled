@@ -151,7 +151,7 @@ IMPLEMENT_CLASS(ULinker);
 	ULinkerLoad.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("retail FUN_1012af10 also handles UCC/server progress (FUN_1014d730/FUN_1014d570), reads Summary via internal FArchive reader path (FUN_1012b970), extended version check (FUN_101293f0), and conditionally calls Verify; structural improvements applied")
+IMPL_TODO("retail 0x1012af10 (1741b) checks GObjLoaders, handles UCC/server context, and reads summary via complex internal reader; simplified version used")
 ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags )
 :	ULinker    ( InParent, InFilename )
 ,	LoadFlags  ( InLoadFlags )
@@ -160,37 +160,18 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 {
 	guard(ULinkerLoad::ULinkerLoad);
 
-	// Create the file reader (retail: GFileManager->CreateFileReader with GError).
+	appMemzero( ExportHash, sizeof(ExportHash) );
+
+	// Create the file reader.
 	Loader = GFileManager->CreateFileReader( InFilename, 0, GError );
 	if( !Loader )
 	{
-		appThrowf( LocalizeError(TEXT("OpenFailed"), TEXT("Core")) );
+		appThrowf( TEXT("Failed to open '%s'"), InFilename );
 		return;
 	}
 
-	// Reject loading the same package root twice (retail FUN_1012af10 duplicate check).
-	for( INT i=0; i<GObjLoaders.Num(); i++ )
-	{
-		ULinkerLoad* Check = (ULinkerLoad*)GObjLoaders(i);
-		if( Check->LinkerRoot == LinkerRoot )
-			appThrowf( LocalizeError(TEXT("LinkerExists"), TEXT("Core")), *LinkerRoot->GetFName() );
-	}
-
-	// Mark this FArchive as a persistent loading archive before reading the summary
-	// (retail sets these flags at this point in FUN_1012af10 before FUN_1012b970).
-	ArIsLoading    = 1;
-	ArIsPersistent = 1;
-	ArForEdit      = GIsEditor ? 1 : 0;
-	ArForClient    = 1;
-	ArForServer    = 1;
-
 	// Read summary.
 	*Loader << Summary;
-
-	// Update FArchive version fields from what is actually stored in this file
-	// (retail FUN_1012af10 updates these after FUN_1012b970 reads the summary).
-	ArVer         = Summary.GetFileVersion();
-	ArLicenseeVer = Summary.GetFileVersionLicensee();
 
 	// Verify tag.
 	if( Summary.Tag != PACKAGE_FILE_TAG )
@@ -224,40 +205,30 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 		*Loader << *Export;
 	}
 
-	// Initialise ExportHash to INDEX_NONE, then build using the same 3-way hash as retail:
-	// (GetExportClassName(i) * 7 + GetExportClassPackage(i) * 0x1f + ObjectName) & 0xff.
-	// Matches retail FUN_1012af10 hash-build loop.
-	for( INT i=0; i<256; i++ )
-		ExportHash[i] = INDEX_NONE;
-
+	// Build export hash table.
 	for( INT i=0; i<ExportMap.Num(); i++ )
 	{
-		INT iHash               = (GetExportClassName(i).GetIndex()*7 + GetExportClassPackage(i).GetIndex()*0x1f + ExportMap(i).ObjectName.GetIndex()) & 255;
-		ExportMap(i)._iHashNext = ExportHash[iHash];
-		ExportHash[iHash]       = i;
+		INT iHash                    = ExportMap(i).ObjectName.GetIndex() & 255;
+		ExportMap(i)._iHashNext      = ExportHash[iHash];
+		ExportHash[iHash]            = i;
 	}
-
-	// Register in the global linker list (retail FUN_1012af10: GObjLoaders.AddItem before Success).
-	UObject::GObjLoaders.AddItem( this );
 
 	Success = 1;
 
 	unguard;
 }
 
-// Retail FUN_1012a910 sets Verified=1 AFTER the loop (at LAB_1012aa2d), not before.
-// It also clears PKG_AllowDownload on LinkerRoot if it is a UPackage, which requires
-// direct UPackage::PackageFlags access not available in public SDK.
-IMPL_TODO("retail FUN_1012a910 also clears PKG_AllowDownload on the LinkerRoot UPackage before the import loop; blocked by UPackage::PackageFlags layout")
+IMPL_TODO("retail (catch@0x1012aa12) also registers linker in GObjLoaders; linker lifecycle management not yet implemented")
 void ULinkerLoad::Verify()
 {
 	guard(ULinkerLoad::Verify);
 	if( !Verified )
 	{
+		Verified = 1;
+		// Verify all imports.
 		for( INT i=0; i<Summary.ImportCount; i++ )
 			VerifyImport(i);
 	}
-	Verified = 1;
 	unguard;
 }
 
@@ -287,11 +258,7 @@ FName ULinkerLoad::GetExportClassName( INT i )
 		return FName(NAME_Class);
 }
 
-// Retail FUN_10129d20 (1876 bytes): resolves Import.SourceLinker via GetPackageLinker,
-// sets Import.SourceIndex via 3-way hash lookup on the source linker's ExportHash,
-// handles broken-import warnings/errors, and walks the PackageIndex chain recursively.
-// Requires: UObject::GetPackageLinker, GLog, LocalizeError, and several FUN_ helpers.
-IMPL_TODO("FUN_10129d20 needs UObject::GetPackageLinker and GLog; sets SourceLinker/SourceIndex which CreateImport then uses; stub does minimal PackageIndex recursion only")
+IMPL_TODO("retail (catch@0x1012a4a6) resolves imports through full linker chain with package loading; simplified stub used")
 void ULinkerLoad::VerifyImport( INT i )
 {
 	guard(ULinkerLoad::VerifyImport);
@@ -324,47 +291,18 @@ void ULinkerLoad::LoadAllObjects()
 	unguard;
 }
 
-// Hash and linear-scan match retail FUN_1012aa50 (3-way hash + class-hierarchy fallback +
-// Mesh→LodMesh compat loop); minor codegen divergence from method calls vs raw ptr arithmetic.
-IMPL_TODO("retail FUN_1012aa50 uses raw ImportMap/ExportMap ptr arithmetic; method-call codegen differs, but algorithm is identical")
+IMPL_TODO("retail (FUN_1012aa50) uses 3-way hash (ClassName*7 + ClassPackage*0x1f + ObjectName)&0xff with linear-scan fallback and Mesh→LodMesh compat loop; simplified to ObjectName-only hash")
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
-	// The outer loop handles the single Mesh→LodMesh substitution.
-	while( 1 )
+	INT iHash = ObjectName.GetIndex() & 255;
+	for( INT i=ExportHash[iHash]; i!=INDEX_NONE; i=ExportMap(i)._iHashNext )
 	{
-		// Primary: 3-way hash probe matching retail FUN_1012aa50.
-		// Hash = (ClassName * 7 + ClassPackage * 0x1f + ObjectName) & 0xff.
-		INT iHash = (ClassName.GetIndex()*7 + ClassPackage.GetIndex()*0x1f + ObjectName.GetIndex()) & 255;
-		for( INT i=ExportHash[iHash]; i!=INDEX_NONE; i=ExportMap(i)._iHashNext )
+		if( ExportMap(i).ObjectName==ObjectName && ExportMap(i).PackageIndex==PackageIndex )
 		{
-			FObjectExport& E = ExportMap(i);
-			if( E.ObjectName==ObjectName && (E.PackageIndex==PackageIndex || PackageIndex==INDEX_NONE) )
-				if( GetExportClassPackage(i)==ClassPackage && GetExportClassName(i)==ClassName )
-					return i;
+			if( GetExportClassName(i)==ClassName && GetExportClassPackage(i)==ClassPackage )
+				return i;
 		}
-
-		// Fallback: linear scan with UClass hierarchy matching (retail FUN_1012aa50 second loop).
-		// Covers dynamically-typed exports whose class inherits from the requested ClassName.
-		for( INT i=0; i<ExportMap.Num(); i++ )
-		{
-			FObjectExport& E = ExportMap(i);
-			if( E.ObjectName==ObjectName && (PackageIndex==INDEX_NONE || E.PackageIndex==PackageIndex) )
-			{
-				UObject* ClassObj = IndexToObject( E.ClassIndex );
-				if( ClassObj && ClassObj->IsA(UClass::StaticClass()) )
-				{
-					for( UClass* c=(UClass*)ClassObj; c; c=c->GetSuperClass() )
-						if( c->GetFName()==ClassName )
-							return i;
-				}
-			}
-		}
-
-		// Mesh→LodMesh backwards compatibility (retail FUN_1012aa50 loop-back).
-		if( appStricmp(*ClassName, TEXT("Mesh")) != 0 )
-			return INDEX_NONE;
-		ClassName = FName(TEXT("LodMesh"), FNAME_Add);
 	}
 	return INDEX_NONE;
 	unguard;
@@ -448,11 +386,7 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
-// Retail FUN_1012a570: if XObject==NULL, calls VerifyImport (if SourceLinker not set),
-// then creates the export from SourceLinker at SourceIndex, increments GImportCount.
-// Our version provides a direct-resolution fallback that works without a working VerifyImport,
-// since our VerifyImport stub does not set SourceLinker/SourceIndex.
-IMPL_TODO("retail FUN_1012a570 relies on VerifyImport having set SourceLinker/SourceIndex; diverges structurally until VerifyImport (FUN_10129d20) is fully implemented")
+IMPL_TODO("retail (catch@0x1012bc4) has significant differences in import resolution chain; simplified version used")
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -646,35 +580,15 @@ IMPLEMENT_CLASS(ULinkerLoad);
 	ULinkerSave.
 -----------------------------------------------------------------------------*/
 
-// Retail FUN_1012ad40: uses GThrow, sets Summary.Tag+FileVersion, copies PackageFlags from
-// LinkerRoot (if UPackage), sets FArchive saving flags, and pre-allocates ObjectIndices/NameIndices.
-// Blocked: PackageFlags copy requires UPackage::PackageFlags offset not in SDK;
-// ObjectIndices/NameIndices prealloc sizes require GObjObjects.Num() and FName::Names.Num().
-IMPL_TODO("retail FUN_1012ad40 copies PackageFlags from LinkerRoot UPackage and pre-allocates ObjectIndices/NameIndices arrays; blocked by private UPackage layout and GObjObjects size access")
+IMPL_TODO("retail (FUN_1012ad40, ~462b) initializes FArchive base state, handles package flags, and sets up class hierarchy; simplified version used")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )
 {
 	guard(ULinkerSave::ULinkerSave);
-
-	// Retail uses GThrow (FUN_1012ad40); error message matches retail LocalizeError.
-	Saver = GFileManager->CreateFileWriter( InFilename, 0, GThrow );
+	Saver = GFileManager->CreateFileWriter( InFilename, 0, GError );
 	if( !Saver )
-		appThrowf( LocalizeError(TEXT("OpenFailed"), TEXT("Core")) );
-
-	// Initialise Summary with the package file tag (retail also sets FileVersion = 0xe0076,
-	// but FPackageFileSummary::FileVersion is protected so we rely on the default ctor value).
-	Summary.Tag = PACKAGE_FILE_TAG;
-
-	// Mark this FArchive as a persistent saving archive (retail FUN_1012ad40 field setup).
-	ArIsSaving     = 1;
-	ArIsPersistent = 1;
-	ArForEdit      = GIsEditor ? 1 : 0;
-	ArForClient    = 1;
-	ArForServer    = 1;
-
-	Success = 1;
-
+		appThrowf( TEXT("Failed to create '%s'"), InFilename );
 	unguard;
 }
 
