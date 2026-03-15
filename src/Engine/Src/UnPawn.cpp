@@ -1758,17 +1758,18 @@ void APawn::SmoothHitWall( FVector HitNormal, AActor* HitActor )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103c36c0; 145b — main path verified: Acceleration=SafeNormal(Velocity)+moveSmooth+eventTick; bInterpolating vtable+0x120 branch unknown; guard/unguard diverges")
+// vtable+0x120 on APawn = performPhysics(FLOAT): slot 72 in the vtable
+// (21 UObject slots + 51 AActor-new slots before performPhysics).
+// Ghidra shows 2 stack args (DeltaTime + spurious local FVector) but
+// APawn::performPhysics takes only 1 FLOAT — the second is a Ghidra artifact.
+IMPL_MATCH("Engine.dll", 0x103c36c0)
 void APawn::TickSimulated( FLOAT DeltaTime )
 {
 	guard(APawn::TickSimulated);
-	// Cache movement direction into Acceleration (Ghidra: this+0x258 = Acceleration)
 	Acceleration = Velocity.SafeNormal();
 	if( bInterpolating )
 	{
-		// Retail calls vtable+0x120 with DeltaTime here; function not identified
-		// Fall back to AActor path to avoid moveSmooth on an interpolating pawn
-		AActor::TickSimulated( DeltaTime );
+		performPhysics( DeltaTime );
 		return;
 	}
 	moveSmooth( Velocity * DeltaTime );
@@ -2551,7 +2552,11 @@ INT APawn::ValidAnchor()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e9f00: second loop calls vtable+0x100 on USkeletalMeshInstance with (index,0) after SetAnimRate — vtable slot not yet mapped; first loop also has no null-guard inside body (Ghidra calls unconditionally after top null check)")
+// vtable+0x100 on USkeletalMeshInstance = SetAnimFrame(INT channel, FLOAT frame):
+// confirmed by a second Ghidra call site that passes (channel, float_value).
+// Retail has no null-guard inside the loops; if mi is NULL the loops crash,
+// but ZeroMovementAlpha is only called when a valid skeletal mesh exists.
+IMPL_MATCH("Engine.dll", 0x103e9f00)
 void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 {
 	guard(APawn::ZeroMovementAlpha);
@@ -2562,7 +2567,8 @@ void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 	UBOOL bAllZero = 1;
 	for ( INT i = bZeroX; i < bZeroY; i++ )
 	{
-		if ( mi && mi->GetBlendAlpha(i) > 0.f )
+		FLOAT alpha = mi->GetBlendAlpha(i);
+		if ( alpha > 0.f )
 		{
 			bAllZero = 0;
 			mi->UpdateBlendAlpha(i, 0.f, Alpha);
@@ -2572,8 +2578,8 @@ void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 	{
 		for ( INT i = bZeroX; i < bZeroY; i++ )
 		{
-			if ( mi ) mi->SetAnimRate(i, 0.f);
-			// DIVERGENCE: Ghidra vtable[0x100] on USkeletalMeshInstance not mapped
+			mi->SetAnimRate(i, 0.f);
+			mi->SetAnimFrame(i, 0.0f);
 		}
 	}
 	unguard;
@@ -2604,17 +2610,19 @@ INT APawn::calcMoveFlags()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103f06e0: passes NULL (not this) as Actor arg; trace flags 0x86 (Movers|Level|LevelGeometry) vs TRACE_AllBlocking; hit dispatch via vtable[0xd0] not processHitWall")
+IMPL_MATCH("Engine.dll", 0x103f06e0)
 INT APawn::checkFloor(FVector Dir, FCheckResult& Hit)
 {
 	guard(APawn::checkFloor);
-	// Trace 33 units in Dir direction from Location
+	// Trace 33 units in Dir direction from Location.
+	// Ghidra: actor arg is NULL (not this), flags are 0x86 = TRACE_World.
 	FVector End = Location - Dir * 33.f;
-	XLevel->SingleLineCheck(Hit, this, End, Location, TRACE_AllBlocking,
+	XLevel->SingleLineCheck(Hit, NULL, End, Location, TRACE_World,
 		FVector(CollisionRadius, CollisionRadius, CollisionHeight));
-	if ( Hit.Time < 1.f )
+	if (Hit.Time < 1.f)
 	{
-		processHitWall(Hit.Normal, Hit.Actor);
+		// vtable[0xd0] = SetBase(HitActor, HitNormal, bNotify=1)
+		SetBase(Hit.Actor, Hit.Normal, 1);
 		return 1;
 	}
 	return 0;
@@ -3379,19 +3387,23 @@ void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLO
 		RouteCache[i] = p;
 		if (p) p = *(ANavigationPoint**)((BYTE*)p + 0x3ac);
 	}
-	// Set Pawn->NextPathRadius from reachspec between RouteCache[0] and RouteCache[1]
-	if (RouteCache[0] && RouteCache[0]->IsA(ANavigationPoint::StaticClass()) &&
-	    RouteCache[1] && RouteCache[1]->IsA(ANavigationPoint::StaticClass()))
+	// Set Pawn->NextPathRadius from reachspec between RouteCache[0] and RouteCache[1].
+	// Ghidra: only resets when Pawn AND RouteCache[1] are both non-null.
+	if (Pawn && RouteCache[1])
 	{
-		UReachSpec* spec = ((ANavigationPoint*)RouteCache[0])->GetReachSpecTo((ANavigationPoint*)RouteCache[1]);
-		if (spec)
+		if (RouteCache[0] && RouteCache[0]->IsA(ANavigationPoint::StaticClass()) &&
+		    RouteCache[1]->IsA(ANavigationPoint::StaticClass()))
 		{
-			// spec+0x34 = reachability radius (INT cast to float)
-			Pawn->NextPathRadius = (FLOAT)*(INT*)((BYTE*)spec + 0x34);
-			return;
+			UReachSpec* spec = ((ANavigationPoint*)RouteCache[0])->GetReachSpecTo((ANavigationPoint*)RouteCache[1]);
+			if (spec)
+			{
+				// spec+0x34 = reachability radius (INT cast to float)
+				Pawn->NextPathRadius = (FLOAT)*(INT*)((BYTE*)spec + 0x34);
+				return;
+			}
 		}
+		Pawn->NextPathRadius = 0.f;
 	}
-	if (Pawn) Pawn->NextPathRadius = 0.f;
 	unguard;
 }
 
