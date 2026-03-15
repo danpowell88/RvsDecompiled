@@ -1,4 +1,4 @@
-/*=============================================================================
+﻿/*=============================================================================
 	UnActor.cpp: AActor and subclass implementation.
 	Reconstructed for Ravenshield decompilation project.
 
@@ -1712,14 +1712,21 @@ void AActor::execGetNextSkin( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 545, execGetNextSkin );
 
-IMPL_TODO("always returns empty string — locale int lookup not implemented")
+IMPL_MATCH("Engine.dll", 0x103afad0)
 void AActor::execGetNextInt( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNextInt);
 	P_GET_STR(ClassName);
 	P_GET_INT(Idx);
 	P_FINISH;
-	*(FString*)Result = TEXT("");
+	UClass* Class = (UClass*)UObject::StaticFindObjectChecked(
+		UClass::StaticClass(), (UObject*)(DWORD)0xFFFFFFFF, *ClassName, 0 );
+	TArray<FRegistryObjectInfo> List;
+	UObject::GetRegistryObjects( List, UClass::StaticClass(), Class, 0 );
+	if( Idx < List.Num() )
+		*(FString*)Result = List(Idx).Object;
+	else
+		*(FString*)Result = TEXT("");
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetNextInt );
@@ -1749,7 +1756,7 @@ void AActor::execGetCacheEntry( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetCacheEntry );
 
-IMPL_TODO("always returns 0 — cache entry move not implemented")
+IMPL_TODO("cache.ini file operations via FUN_103b1d90/FUN_103b1980 unresolved (Ghidra 0x103b37d0)")
 void AActor::execMoveCacheEntry( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execMoveCacheEntry);
@@ -1841,11 +1848,12 @@ void AActor::execSetServerBeacon( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1311, execSetServerBeacon );
 
-IMPL_TODO("always returns empty string — server beacon not implemented")
+IMPL_DIVERGE("returns binary-specific global DAT_10793088 (server beacon string; Ghidra 0x104240c0)")
 void AActor::execGetServerBeacon( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetServerBeacon);
 	P_FINISH;
+	// Ghidra 0x104240c0: *(FString*)Result = DAT_10793088 (global beacon string)
 	*(FString*)Result = TEXT("");
 	unguard;
 }
@@ -1991,7 +1999,7 @@ void AActor::execConvertIntTimeToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1520, execConvertIntTimeToString );
 
-IMPL_TODO("returns input GUID string unchanged — GlobalID lookup not implemented")
+IMPL_TODO("byte-array parameter extraction via GPropAddr not yet matched; retail calls GlobalIDToString(16-byte GUID) helper (Ghidra 0x10423380)")
 void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToString);
@@ -2002,7 +2010,7 @@ void AActor::execGlobalIDToString( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1522, execGlobalIDToString );
 
-IMPL_TODO("parses GUID string but performs no action — GlobalID byte conversion not implemented")
+IMPL_TODO("hex parsing via FUN_10423060 unresolved; retail parses FString GUID hex chars into byte array at GPropAddr (Ghidra 0x104234a0)")
 void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGlobalIDToBytes);
@@ -2012,7 +2020,7 @@ void AActor::execGlobalIDToBytes( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1523, execGlobalIDToBytes );
 
-IMPL_TODO("always returns empty string — tag informations not implemented")
+IMPL_TODO("626-byte function; FTags struct, FVector, FRotator params via GPropAddr; unresolved (Ghidra 0x10425250)")
 void AActor::execGetTagInformations( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetTagInformations);
@@ -2060,7 +2068,7 @@ void AActor::execDbgAddLine( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1801, execDbgAddLine );
 
-IMPL_TODO("parses Index but performs no action — player menu info not implemented")
+IMPL_TODO("FUN_10421aa0/FUN_10421790 (player menu fill/sort helpers) unresolved (Ghidra 0x10426f70)")
 void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetFPlayerMenuInfo);
@@ -2070,7 +2078,7 @@ void AActor::execGetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1230, execGetFPlayerMenuInfo );
 
-IMPL_TODO("parses Index but performs no action — set player menu info not implemented")
+IMPL_TODO("FUN_10421aa0/FUN_10421790 (player menu fill/sort helpers) unresolved (Ghidra 0x10421b40)")
 void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetFPlayerMenuInfo);
@@ -2080,7 +2088,7 @@ void AActor::execSetFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1231, execSetFPlayerMenuInfo );
 
-IMPL_TODO("parses Index but performs no action — player setup info not implemented")
+IMPL_TODO("Ghidra decompilation failed (1829 bytes at 0x10421c60); binary-specific struct layout")
 void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetPlayerSetupInfo);
@@ -2090,7 +2098,7 @@ void AActor::execGetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1232, execGetPlayerSetupInfo );
 
-IMPL_TODO("parses Index but performs no action — set player setup info not implemented")
+IMPL_TODO("Ghidra decompilation failed (2004 bytes at 0x10422390); binary-specific struct layout")
 void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSetPlayerSetupInfo);
@@ -2100,7 +2108,7 @@ void AActor::execSetPlayerSetupInfo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 1233, execSetPlayerSetupInfo );
 
-IMPL_TODO("no-op stub — player menu sort not implemented")
+IMPL_TODO("appQsort on binary-specific global array DAT_10793090 (player menu, stride 0x44); Ghidra 0x10421970")
 void AActor::execSortFPlayerMenuInfo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execSortFPlayerMenuInfo);
@@ -2183,7 +2191,7 @@ void AActor::execInPlanningMode( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2014, execInPlanningMode );
 
-IMPL_TODO("parses ScreenName but performs no action — loading screen not implemented")
+IMPL_TODO("calls UR6ModMgr::eventGetMapsDir then engine vtable[0xD0/4] to load texture; Ghidra 0x1042cb10")
 void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadLoadingScreen);
@@ -2193,7 +2201,7 @@ void AActor::execLoadLoadingScreen( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2613, execLoadLoadingScreen );
 
-IMPL_TODO("no-op stub — random background image loading not implemented")
+IMPL_TODO("calls UR6ModMgr::eventGetBackgroundsRoot and loads random background; Ghidra 0x1042c4c0")
 void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execLoadRandomBackgroundImage);
@@ -2202,7 +2210,7 @@ void AActor::execLoadRandomBackgroundImage( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2607, execLoadRandomBackgroundImage );
 
-IMPL_TODO("always returns 0 — resolution enumeration not implemented")
+IMPL_DIVERGE("calls vtable chain g_pEngine->Client->??->vtable[0xBC/4]() to populate resolution array (Ghidra 0x1042c6f0); binary vtable layout not portable")
 void AActor::execGetNbAvailableResolutions( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execGetNbAvailableResolutions);
@@ -2236,7 +2244,7 @@ void AActor::execReplaceTexture( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 2616, execReplaceTexture );
 
-IMPL_TODO("DIVERGENCE: retail queries VRAM via UViewport vtable chain at 0xC0 and tests >32 MB (Ghidra 0x10427350); returns 1 as safe default for modern GPUs")
+IMPL_DIVERGE("retail calls vtable chain g_pEngine->Client->Viewports[0]->vtable[0xC0/4]() and tests >32MB (Ghidra 0x10427350); binary vtable layout not portable; modern GPUs always pass")
 void AActor::execIsVideoHardwareAtLeast64M( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execIsVideoHardwareAtLeast64M);
