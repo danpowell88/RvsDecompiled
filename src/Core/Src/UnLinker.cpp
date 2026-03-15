@@ -470,24 +470,33 @@ void ULinkerLoad::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_TODO("retail (FUN_1012a760) removes linker from GObjLoaders and calls DetachExport on all exports; our version omits GObjLoaders management")
+// Retail (FUN_1012a760, 182 bytes): DetachAllLazyLoaders(0) first, then DetachExport
+// for non-null exports, then removes this from GObjLoaders, then deletes Loader,
+// then UObject::Destroy.  Our version matches this order; GObjLoaders.RemoveItem uses
+// TArray::Remove internally just like retail's FUN_1012b810(&GObjLoaders, i, 1) loop.
+IMPL_TODO("retail (FUN_1012a760) uses Remove(i,1)+i-- loop for GObjLoaders; we use RemoveItem which is functionally equivalent but generates different bytecode")
 void ULinkerLoad::Destroy()
 {
 	guard(ULinkerLoad::Destroy);
 
-	// Detach all exports.
-	for( INT i=0; i<ExportMap.Num(); i++ )
-		DetachExport(i);
-
-	// Detach lazy loaders.
+	// Retail order: DetachAllLazyLoaders first, then per-export DetachExport.
 	DetachAllLazyLoaders(0);
+
+	for( INT i=0; i<ExportMap.Num(); i++ )
+	{
+		if( ExportMap(i)._Object )
+			DetachExport(i);
+	}
+
+	// Remove this linker from the global loaders list.
+	UObject::GObjLoaders.RemoveItem( this );
 
 	// Delete loader.
 	if( Loader )
 		delete Loader;
 	Loader = NULL;
 
-	ULinker::Destroy();
+	UObject::Destroy();
 	unguard;
 }
 

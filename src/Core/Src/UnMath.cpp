@@ -582,72 +582,180 @@ CORE_API void appMD5Decode( DWORD* Output, BYTE* Input, INT Len )
 	Misc geometry / utility functions.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x1012ca00 (992 bytes): slab-test AABB sweep; our algorithm differs; ordinal 1650")
+// Faithful translation of Ghidra FUN_1012ca00 (992 bytes).
+// The retail algorithm is NOT a standard "ray vs AABB" slab test; it uses a
+// different per-axis structure described in the comments below.
+//
+// Variable name correspondence with Ghidra decompilation:
+//   fVar1  = tX,   fVar2 = savedTY,  fVar3 = tZ
+//   fVar4  = ExpMaxX, fVar5 = ExpMaxY, fVar6 = ExpMaxZ
+//   fVar7  = ExpMinX, fVar8 = ExpMinY, fVar9 = ExpMinZ
+//   fVar10 = DirX,  fVar11 = DirY, fVar12 = DirZ
+//   local_34 = NormalX, local_30 = NormalY, local_2c = NormalZ
+//   bVar13 = bInside, local_24 = tY (reused as outNormalY at LAB_1012cbb5)
+IMPL_MATCH("Core.dll", 0x1012ca00)
 CORE_API INT FLineExtentBoxIntersection( const FBox& Box, const FVector& Start, const FVector& End, const FVector& Extent, FVector& HitLocation, FVector& HitNormal, FLOAT& HitTime )
 {
-	// Expand the AABB by the sweep half-extents (Minkowski sum).
-	// A point moving from Start to End through this expanded box is equivalent
-	// to the swept box hitting the original box.
-	FVector ExpandedMin( Box.Min.X - Extent.X, Box.Min.Y - Extent.Y, Box.Min.Z - Extent.Z );
-	FVector ExpandedMax( Box.Max.X + Extent.X, Box.Max.Y + Extent.Y, Box.Max.Z + Extent.Z );
-	FVector Dir( End.X - Start.X, End.Y - Start.Y, End.Z - Start.Z );
+	// Retail copies the 7 float-sized fields of FBox (Min.XYZ, Max.XYZ, IsValid)
+	// into a local stack array via a 7-iteration loop.  We name them directly.
+	FLOAT MinX = Box.Min.X,  MinY = Box.Min.Y,  MinZ = Box.Min.Z;
+	FLOAT MaxX = Box.Max.X,  MaxY = Box.Max.Y,  MaxZ = Box.Max.Z;
 
-	FLOAT tMin = 0.0f;    // entry time (clamp to [0,1])
-	FLOAT tMax = 1.0f;    // exit  time
-	INT   HitAxis = -1;
-	INT   HitSign = 0;
+	// fVar4/5/6 — expanded max; fVar7/8/9 — expanded min
+	FLOAT ExpMaxX = MaxX + Extent.X;
+	FLOAT ExpMaxY = MaxY + Extent.Y;
+	FLOAT ExpMaxZ = MaxZ + Extent.Z;
 
-	// Slab test: for each axis independently compute entry/exit times.
-	for( INT i = 0; i < 3; i++ )
+	// local_34/30/2c: per-axis entry normals, start at +1.0f, flip to -1.0f when
+	// the start point is inside or above that axis's expanded min.
+	FLOAT NormalX = 1.0f;
+	FLOAT NormalY = 1.0f;
+	FLOAT NormalZ = 1.0f;
+
+	FLOAT ExpMinX = MinX - Extent.X;
+	FLOAT ExpMinY = MinY - Extent.Y;
+	FLOAT ExpMinZ = MinZ - Extent.Z;
+
+	FLOAT DirX = End.X - Start.X;
+	FLOAT DirY = End.Y - Start.Y;
+	FLOAT DirZ = End.Z - Start.Z;
+
+	UBOOL bInside = TRUE;  // bVar13: true while all axes set tN = 0
+
+	// --- X slab (fVar1 = tX) ---
+	FLOAT tX;
+	if( Start.X < ExpMinX )
 	{
-		FLOAT Origin = (&Start.X)[i];
-		FLOAT D      = (&Dir.X)[i];
-		FLOAT bMin   = (&ExpandedMin.X)[i];
-		FLOAT bMax   = (&ExpandedMax.X)[i];
-
-		if( Abs(D) < 0.0001f )
+		if( Start.X <= ExpMaxX )
 		{
-			// Ray is parallel to slab — check if origin is inside.
-			if( Origin < bMin || Origin > bMax )
-				return 0; // parallel and outside: no hit
+			tX = 0.0f;
 		}
 		else
 		{
-			FLOAT OOD = 1.0f / D;
-			FLOAT t1  = (bMin - Origin) * OOD;
-			FLOAT t2  = (bMax - Origin) * OOD;
-			INT   sign = 1;
-			if( t1 > t2 ) { FLOAT Tmp=t1; t1=t2; t2=Tmp; sign=-1; }
-
-			if( t1 > tMin )
-			{
-				tMin    = t1;
-				HitAxis = i;
-				HitSign = (D > 0.0f) ? -sign : sign;
-			}
-			if( t2 < tMax )
-				tMax = t2;
-
-			if( tMin > tMax )
-				return 0; // slabs separated: no hit
+			if( DirX >= 0.0f ) return 0;
+			bInside = FALSE;
+			tX = (ExpMaxX - Start.X) / DirX;
 		}
 	}
+	else
+	{
+		// (DirX < 0) != (DirX == 0) is the NaN-safe form of DirX <= 0
+		if( DirX <= 0.0f ) return 0;
+		bInside = FALSE;
+		NormalX = -1.0f;
+		tX = (ExpMinX - Start.X) / DirX;
+	}
 
-	if( tMax < 0.0f || tMin > 1.0f )
-		return 0; // segment misses (behind start or beyond end)
+	// --- Y slab (local_24 = tY) ---
+	FLOAT tY;
+	if( Start.Y < ExpMinY )
+	{
+		if( Start.Y <= ExpMaxY )
+		{
+			tY = 0.0f;
+		}
+		else
+		{
+			if( DirY >= 0.0f ) return 0;
+			bInside = FALSE;
+			tY = (ExpMaxY - Start.Y) / DirY;
+		}
+	}
+	else
+	{
+		if( DirY <= 0.0f ) return 0;
+		bInside = FALSE;
+		NormalY = -1.0f;
+		tY = (ExpMinY - Start.Y) / DirY;
+	}
+	FLOAT savedTY = tY;  // fVar2 = local_24 (saved before local_24 is reused as outNormalY)
 
-	HitTime = Clamp( tMin, 0.0f, 1.0f );
-	HitLocation = FVector(
-		Start.X + Dir.X * HitTime,
-		Start.Y + Dir.Y * HitTime,
-		Start.Z + Dir.Z * HitTime );
+	// --- Z slab (fVar3 = tZ) ---
+	// The "goto LAB_1012cbb5" path sets tZ = 0 and skips the division below.
+	FLOAT tZ = 0.0f;
+	if( Start.Z < ExpMinZ )
+	{
+		if( Start.Z <= ExpMaxZ )
+		{
+			// tZ = 0 (goto LAB_1012cbb5 in retail, skipping the division)
+			if( bInside )
+			{
+				// All three axes: Start is outside the expanded box from the negative
+				// direction on every axis — report immediate hit at Start.
+				HitLocation.X = Start.X;
+				HitLocation.Y = Start.Y;
+				HitLocation.Z = Start.Z;
+				HitNormal.X   = 0.0f;
+				HitNormal.Y   = 0.0f;
+				HitNormal.Z   = 1.0f;
+				HitTime       = 0.0f;
+				return 1;
+			}
+			// tZ stays 0.0f; fall through to LAB_1012cbb5 block
+		}
+		else
+		{
+			if( DirZ >= 0.0f ) return 0;
+			tZ = (ExpMaxZ - Start.Z) / DirZ;
+		}
+	}
+	else
+	{
+		if( DirZ <= 0.0f ) return 0;
+		NormalZ = -1.0f;
+		tZ = (ExpMinZ - Start.Z) / DirZ;
+	}
 
-	// Normal points outward from the hit face.
-	HitNormal = FVector(0,0,0);
-	if( HitAxis >= 0 )
-		(&HitNormal.X)[HitAxis] = (FLOAT)HitSign;
+	// LAB_1012cbb5: select max(tY, tZ) and choose the winning axis normal.
+	// local_24 is reused here as the Y component of the output normal.
+	FLOAT outNormalY, outNormalZ;
+	if( tY <= tZ )
+	{
+		outNormalY = 0.0f;
+		outNormalZ = NormalZ;
+		// tZ is already the greater value; HitTime = tZ below
+	}
+	else
+	{
+		outNormalY = NormalY;
+		outNormalZ = 0.0f;
+		tZ = savedTY;  // fVar3 = fVar2: use Y entry time
+	}
 
-	return 1;
+	HitTime    = tZ;
+	HitNormal.X = 0.0f;
+	HitNormal.Y = outNormalY;
+	HitNormal.Z = outNormalZ;
+
+	// If X entry time is the largest, it determines the hit face.
+	if( HitTime < tX )
+	{
+		HitTime    = tX;
+		HitNormal.X = NormalX;
+		HitNormal.Y = 0.0f;
+		HitNormal.Z = 0.0f;
+	}
+
+	// Validate: entry time must be in [0, 1).
+	if( 0.0f <= HitTime && HitTime < 1.0f )
+	{
+		FLOAT t      = HitTime;
+		FLOAT StartY = Start.Y;
+		FLOAT StartZ = Start.Z;
+		HitLocation.X = DirX * t + Start.X;
+		HitLocation.Y = t * DirY + StartY;
+		HitLocation.Z = t * DirZ + StartZ;
+
+		// Retail validates that the computed hit point is inside the expanded
+		// box with a 0.1-unit tolerance (NaN-safe comparisons in original).
+		if( ExpMinX - 0.1f < HitLocation.X && HitLocation.X < ExpMaxX + 0.1f &&
+		    ExpMinY - 0.1f < HitLocation.Y && HitLocation.Y < ExpMaxY + 0.1f &&
+		    ExpMinZ - 0.1f < HitLocation.Z && HitLocation.Z < ExpMaxZ + 0.1f )
+		{
+			return 1;
+		}
+	}
+	return 0;
 }
 
 IMPL_DIVERGE("Not in Core.dll export table; absent from Ghidra; likely a Ravenshield addition")

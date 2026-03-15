@@ -8,18 +8,36 @@
 
 #include "CorePrivate.h"
 
+// Helper: convert a single hex character to its numeric value (0-15).
+// Matches retail FUN_10143840 at Core.dll 0x10143840.
+static INT HexDigit( TCHAR Ch )
+{
+	if( Ch >= '0' && Ch <= '9' ) return Ch - '0';
+	if( Ch >= 'a' && Ch <= 'f' ) return Ch - 'a' + 10;
+	if( Ch >= 'A' && Ch <= 'F' ) return Ch - 'A' + 10;
+	return 0;
+}
+
 // ReadToken: Read a single token (alphanumeric word or quoted string) from
-// a text buffer. Returns pointer past the token, or NULL on failure.
-// Retail (Core.dll _unnamed) has fuller parsing: escape sequences, broader
-// character class, and GWarn error messages; our simplified version is
-// sufficient for the property import paths we exercise.
-IMPL_TODO("static file-scope helper; retail version (Core.dll _unnamed) has escape-sequence parsing and GWarn error messages not present here")
+// a text buffer.  Returns pointer past the token, or NULL on failure.
+//
+// Retail (Core.dll _unnamed, FUN_101455f0, 491 bytes) does NOT skip leading
+// whitespace; callers are responsible for pre-skipping.  Our version adds
+// whitespace-skipping so existing callers do not need to change.
+// Retail also accepts a bAllowDots flag; we omit it (effectively bAllowDots=0).
+//
+// Implemented features from retail:
+//   - Alphanumeric tokens accept a-z, A-Z, 0-9, '_', '-' (matching retail).
+//   - Quoted strings handle backslash escape sequences: \XX (two hex chars,
+//     low nibble first) and \\ (literal backslash).
+//   - GLog error on overflow; GWarn error on bad/unterminated quoted string.
+IMPL_TODO("static file-scope helper; DIVERGENCE from retail FUN_101455f0: retail does not skip leading whitespace and accepts non-alphanumeric single-char tokens; bAllowDots param omitted")
 static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 {
 	if( !Buffer )
 		return NULL;
 
-	// Skip whitespace.
+	// DIVERGENCE: skip leading whitespace (retail callers pre-skip).
 	while( *Buffer == ' ' || *Buffer == '\t' )
 		Buffer++;
 
@@ -29,18 +47,68 @@ static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 	INT Len = 0;
 	if( *Buffer == '"' )
 	{
-		// Quoted string.
+		// Quoted string — advance past the opening quote.
 		Buffer++;
-		while( *Buffer && *Buffer != '"' && Len < MaxLen - 1 )
-			Result[Len++] = *Buffer++;
-		if( *Buffer == '"' )
-			Buffer++;
+		for( ;; )
+		{
+			TCHAR Ch = *Buffer;
+			// Terminate on NUL, CR, LF, or overflow.
+			if( Ch == 0 || Ch == '\r' || Ch == '\n' || Len >= MaxLen - 1 )
+			{
+				if( Len >= MaxLen - 1 )
+				{
+					GLog->Logf( TEXT("ReadToken: Quoted string too long") );
+					return NULL;
+				}
+				GWarn->Logf( TEXT("ReadToken: Bad quoted string") );
+				return NULL;
+			}
+			if( Ch == '"' )
+			{
+				Buffer++;  // consume closing quote
+				break;
+			}
+			if( Ch == '\\' )
+			{
+				// Escape sequence.
+				Buffer++;
+				if( *Buffer == '\\' )
+				{
+					Result[Len++] = '\\';
+					Buffer++;
+				}
+				else
+				{
+					// \XY — two hex digits; retail encodes as Lo nibble first, Hi nibble second.
+					INT Lo = HexDigit( *Buffer++ );
+					INT Hi = HexDigit( *Buffer++ );
+					Result[Len++] = (TCHAR)( Lo + (Hi << 4) );
+				}
+			}
+			else
+			{
+				Result[Len++] = Ch;
+				Buffer++;
+			}
+		}
 	}
 	else
 	{
-		// Unquoted token — delimited by whitespace, comma, paren, etc.
-		while( *Buffer && *Buffer != ' ' && *Buffer != '\t' && *Buffer != ',' && *Buffer != ')' && *Buffer != '(' && Len < MaxLen - 1 )
-			Result[Len++] = *Buffer++;
+		// Unquoted alphanumeric token: a-z, A-Z, 0-9, '_', '-'.
+		for( ; *Buffer && Len < MaxLen - 1; Buffer++ )
+		{
+			TCHAR Ch = *Buffer;
+			if( (Ch >= 'a' && Ch <= 'z') || (Ch >= 'A' && Ch <= 'Z') ||
+			    (Ch >= '0' && Ch <= '9') || Ch == '_' || Ch == '-' )
+				Result[Len++] = Ch;
+			else
+				break;
+		}
+		if( Len == MaxLen - 1 )
+		{
+			GLog->Logf( TEXT("ReadToken: Alphanumeric overflow") );
+			return NULL;
+		}
 	}
 	Result[Len] = 0;
 	return Len > 0 ? Buffer : NULL;
