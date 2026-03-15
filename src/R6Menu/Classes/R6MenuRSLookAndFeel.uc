@@ -10,11 +10,15 @@
 //=============================================================================
 class R6MenuRSLookAndFeel extends R6WindowLookAndFeel;
 
+// SIZEBORDER: narrow 3px zone used for N/S/E/W edge resize hit-testing.
+// BRSIZEBORDER: wider 15px corner zone; both axis conditions overlap to detect a diagonal corner.
 const SIZEBORDER = 3;
 const BRSIZEBORDER = 15;
-const RadioButtonHeight = 17;
+const RadioButtonHeight = 17; // Fixed pixel dimensions for radio button sprites in Gui_BoxScroll
 const RadioButtonWidth = 16;
 
+// ERSBLButton: the three visual states of the bottom-left button group.
+// ERSBL_BLActive = illuminated/active; BLLeft/BLRight select adjacent items.
 enum ERSBLButton
 {
 	ERSBL_BLActive,                 // 0
@@ -22,6 +26,8 @@ enum ERSBLButton
 	ERSBL_BLRight                   // 2
 };
 
+// ENavBarButton: named indices for every slot in the navigation bar.
+// These map to m_NavBarBack[] atlas regions and to the hardcoded separator line positions.
 enum ENavBarButton
 {
 	NBB_Home,                       // 0
@@ -36,12 +42,16 @@ enum ENavBarButton
 	NBB_Save                        // 9
 };
 
+// eSignChoiceButton: the two-button accept/cancel pair (OK vs X close).
+// Used to index m_RBAcceptCancel[] in Button_SetupEnumSignChoice.
 enum eSignChoiceButton
 {
 	eSCB_Accept,                    // 0
 	eSCB_Cancel                     // 1
 };
 
+// STWindowFrame: UV atlas regions for a standard 9-patch window border.
+// TL/TR/BL/BR are fixed corner sprites; T/B tile horizontally; L/R tile vertically to fill any size.
 struct STWindowFrame
 {
 	var Region TL;
@@ -54,6 +64,9 @@ struct STWindowFrame
 	var Region BR;
 };
 
+// STFrameColor: centralised colour palette for a single window frame.
+// Separating colours into a struct lets different window types override their theme independently
+// without touching the look-and-feel class itself.
 struct STFrameColor
 {
 	var Color TextColor;
@@ -66,6 +79,9 @@ struct STFrameColor
 	var Color ButtonLine;
 };
 
+// STLapTopFrame: extended 9-patch for the "laptop" decorative window style.
+// Adds three extra left/right strip pairs (L2/R2, L3/R3, L4/R4) beyond a standard 9-patch
+// to render the multi-layer side panels of the laptop border chrome.
 struct STLapTopFrame
 {
 	var Region TL;
@@ -84,6 +100,8 @@ struct STLapTopFrame
 	var Region R4;
 };
 
+// STLapTopFramePlus: top-bar decorative strips for the laptop frame (T1–T4).
+// T4On/T4Off represent the active/inactive states of the rightmost tab-style decoration.
 struct STLapTopFramePlus
 {
 	var Region T1;
@@ -153,12 +171,15 @@ var Region m_RSquareBgLeft;   // Square border left edge region
 var Region m_RSquareBgMid;    // Square border middle region
 var Region m_RSquareBgRight;  // Square border right edge region
 
+// Setup: dynamically loads the three texture atlases used throughout this look-and-feel.
+// Called once at startup before any drawing occurs. DynamicLoadObject is used rather than
+// a static reference so the package is only pulled in when the menu is actually needed.
 function Setup()
 {
 	super(UWindowLookAndFeel).Setup();
-	m_NavBarTex = Texture(DynamicLoadObject("R6MenuTextures.GUI_01", Class'Engine.Texture'));
-	m_R6ScrollTexture = Texture(DynamicLoadObject("R6MenuTextures.Gui_BoxScroll", Class'Engine.Texture'));
-	m_TIcon = Texture(DynamicLoadObject("R6MenuTextures.TeamBarIcon", Class'Engine.Texture'));
+	m_NavBarTex = Texture(DynamicLoadObject("R6MenuTextures.GUI_01", Class'Engine.Texture'));         // Navigation bar atlas
+	m_R6ScrollTexture = Texture(DynamicLoadObject("R6MenuTextures.Gui_BoxScroll", Class'Engine.Texture')); // Main UI atlas used by almost all widgets
+	m_TIcon = Texture(DynamicLoadObject("R6MenuTextures.TeamBarIcon", Class'Engine.Texture'));             // In-game HUD team/health icon atlas
 	return;
 }
 
@@ -179,6 +200,9 @@ function Button_SetupEnumSignChoice(UWindowButton W, int eRegionId)
 	return;
 }
 
+// Button_SetupMapList: configures the map-list navigation arrow buttons.
+// When _bInverseTex is true, RegionScale=-1 horizontally mirrors the arrow sprite so the same
+// right-arrow region in the atlas can serve as the left-arrow without a separate art asset.
 function Button_SetupMapList(UWindowButton W, bool _bInverseTex)
 {
 	local RegionButton RTemp;
@@ -191,7 +215,7 @@ function Button_SetupMapList(UWindowButton W, bool _bInverseTex)
 	// End:0xED
 	if(_bInverseTex)
 	{
-		W.RegionScale = -1.0000000;
+		W.RegionScale = -1.0000000; // Flip sprite horizontally: reuses the right-arrow as a left-arrow
 		W.UpRegion = m_RArrow[1].Up;
 		W.DownRegion = m_RArrow[1].Down;
 		W.OverRegion = m_RArrow[1].Over;
@@ -208,6 +232,8 @@ function Button_SetupMapList(UWindowButton W, bool _bInverseTex)
 	return;
 }
 
+// R6GetTexture: returns the Active or Inactive look-and-feel texture based on window focus.
+// Used by frame-drawing functions to shade the border differently for the active window.
 function Texture R6GetTexture(R6WindowFramedWindow W)
 {
 	// End:0x1B
@@ -222,6 +248,10 @@ function Texture R6GetTexture(R6WindowFramedWindow W)
 	return;
 }
 
+// FW_DrawWindowFrame: renders the 9-patch border for a standard UWindowFramedWindow.
+// Corners are drawn at their natural size; top/bottom edges tile horizontally; left/right tile vertically.
+// When W.bStatusBar is true the bottom row of pieces switches to the shorter status-bar variants
+// (m_FrameSBL/SB/SBR), leaving room for status text at the bottom of the window.
 function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 {
 	local Texture t;
@@ -236,6 +266,7 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 	R = FrameTR;
 	W.DrawStretchedTextureSegment(C, (W.WinWidth - float(R.W)), 0.0000000, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	// End:0x1EB
+	// Use status-bar-specific bottom corners when the window carries a status strip
 	if(W.bStatusBar)
 	{
 		temp = m_FrameSBL;		
@@ -281,6 +312,8 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 	W.DrawStretchedTextureSegment(C, (W.WinWidth - float(R.W)), (W.WinHeight - float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	C.Font = W.Root.Fonts[W.0];
 	// End:0x6AC
+	// Active window gets the bright title colour; inactive windows use the same white here,
+	// though the parent class may differentiate them in other themes.
 	if((W.ParentWindow.ActiveWindow == W))
 	{
 		C.SetDrawColor(FrameActiveTitleColor.R, FrameActiveTitleColor.G, FrameActiveTitleColor.B);		
@@ -300,6 +333,9 @@ function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 	return;
 }
 
+// R6FW_DrawWindowFrame: same 9-patch border logic as FW_DrawWindowFrame but for R6WindowFramedWindow.
+// Does NOT support a status bar variant — always uses the standard FrameBL/B/BR corners.
+// Uses W.m_szWindowTitle and W.m_fTitleOffSet instead of WindowTitle / FrameTitleX.
 function R6FW_DrawWindowFrame(R6WindowFramedWindow W, Canvas C)
 {
 	local Texture t;
@@ -347,7 +383,7 @@ function DrawPopUpFrameWindow(R6WindowPopUpBox W, Canvas C)
 	local Color vBorderColor, vCornerColor;
 
 	TBackGround = Texture'UWindow.WhiteTexture';
-	C.Style = 5;
+	C.Style = 5; // STY_Alpha: alpha-blend all subsequent draws for translucent overlays
 	// End:0x59
 	if(W.m_bBGFullScreen)
 	{
@@ -360,6 +396,8 @@ function DrawPopUpFrameWindow(R6WindowPopUpBox W, Canvas C)
 		W.DrawStretchedTextureSegment(C, float((W.m_RWindowBorder.X + 2)), (W.m_pTextLabel.WinTop + float(1)), float((W.m_RWindowBorder.W - 4)), ((W.m_pTextLabel.WinHeight + float(W.m_RWindowBorder.H)) - float(2)), 0.0000000, 0.0000000, 10.0000000, 10.0000000, TBackGround);
 	}
 	// End:0x7FE
+	// Draw up to 4 border segments (top, bottom, left, right) stored in m_sBorderForm[0..3].
+	// W.0..W.3 are decompiler artefacts for enum indices 0–3; bActive guards each side independently.
 	if((!W.m_bNoBorderToDraw))
 	{
 		// End:0x324
@@ -413,9 +451,13 @@ function DrawPopUpFrameWindow(R6WindowPopUpBox W, Canvas C)
 	// End:0xE23
 	if((int(W.m_eCornerType) != int(0)))
 	{
+		// Each case draws tinted corner sprites from m_topLeftCornerT.
+		// Negating srcW or srcH in DrawStretchedTextureSegment mirrors the same TL sprite to the
+		// opposite corner, avoiding the need for separate TR/BL/BR art assets.
 		switch(W.m_eCornerType)
 		{
 			// End:0x8C8
+			// Case 3 falls through into case 1 to draw BOTH top AND bottom corners in one pass.
 			case 3:
 				// End:0x8C8
 				if(W.m_eCornerColor[int(W.3)] != vCornerColor)
@@ -424,6 +466,7 @@ function DrawPopUpFrameWindow(R6WindowPopUpBox W, Canvas C)
 					C.SetDrawColor(vCornerColor.R, vCornerColor.G, vCornerColor.B);
 				}
 			// End:0xB3E
+			// Case 1: top corners only. TL drawn normally; TR uses negative srcW to mirror it.
 			case 1:
 				// End:0x942
 				if(W.m_eCornerColor[int(W.1)] != vCornerColor)
@@ -444,6 +487,7 @@ function DrawPopUpFrameWindow(R6WindowPopUpBox W, Canvas C)
 					break;
 				}
 			// End:0xE1D
+			// Case 2: bottom corners only. Negative srcH flips TL vertically for BL; both axes flipped for BR.
 			case 2:
 				// End:0xBB8
 				if(W.m_eCornerColor[int(W.2)] != vCornerColor)
@@ -469,6 +513,8 @@ function DrawPopUpFrameWindow(R6WindowPopUpBox W, Canvas C)
 	return;
 }
 
+// FW_SetupFrameButtons: positions and configures the close-box (X) button on a UWindowFramedWindow.
+// Placement is calculated from the top-right corner using m_iCloseBoxOffsetX/Y.
 function FW_SetupFrameButtons(UWindowFramedWindow W, Canvas C)
 {
 	local Texture t;
@@ -489,6 +535,8 @@ function FW_SetupFrameButtons(UWindowFramedWindow W, Canvas C)
 	return;
 }
 
+// R6FW_SetupFrameButtons: same as FW_SetupFrameButtons but for R6WindowFramedWindow.
+// Uses W.m_CloseBoxButton instead of W.CloseBox; size is driven from the atlas region dimensions.
 function R6FW_SetupFrameButtons(R6WindowFramedWindow W, Canvas C)
 {
 	local Texture t;
@@ -507,6 +555,9 @@ function R6FW_SetupFrameButtons(R6WindowFramedWindow W, Canvas C)
 	return;
 }
 
+// FW_GetClientArea: returns the usable interior rectangle after subtracting frame border widths.
+// When bStatusBar is true the bottom edge shrinks by the status-bar height (m_FrameSB.H)
+// instead of the normal bottom frame height (FrameB.H), preserving room for status text.
 function Region FW_GetClientArea(UWindowFramedWindow W)
 {
 	local Region R;
@@ -527,6 +578,7 @@ function Region FW_GetClientArea(UWindowFramedWindow W)
 	return;
 }
 
+// R6FW_GetClientArea: client area for R6WindowFramedWindow — always uses FrameB (no status bar variant).
 function Region R6FW_GetClientArea(R6WindowFramedWindow W)
 {
 	local Region R;
@@ -539,6 +591,10 @@ function Region R6FW_GetClientArea(R6WindowFramedWindow W)
 	return;
 }
 
+// FW_HitTest: maps a cursor position to a window resize/drag zone for UWindowFramedWindow.
+// Return values: 0=NW corner, 1=N edge, 2=NE corner, 3=W edge, 4=E edge,
+//                5=SW corner, 6=S edge, 7=SE corner, 8=TitleBar (drag), 10=client area (no action).
+// SIZEBORDER (3px) defines the thin edge zones; BRSIZEBORDER (15px) defines the wider corner overlap zones.
 function UWindowBase.FrameHitTest FW_HitTest(UWindowFramedWindow W, float X, float Y)
 {
 	// End:0x51
@@ -590,6 +646,8 @@ function UWindowBase.FrameHitTest FW_HitTest(UWindowFramedWindow W, float X, flo
 	return;
 }
 
+// R6FW_HitTest: identical hit-test logic to FW_HitTest but typed for R6WindowFramedWindow.
+// Return values: 0=NW, 1=N, 2=NE, 3=W, 4=E, 5=SW, 6=S, 7=SE, 8=TitleBar, 10=client (no-op).
 function UWindowBase.FrameHitTest R6FW_HitTest(R6WindowFramedWindow W, float X, float Y)
 {
 	// End:0x51
@@ -642,6 +700,7 @@ function UWindowBase.FrameHitTest R6FW_HitTest(R6WindowFramedWindow W, float X, 
 }
 
 // ****** Client Area Drawing Functions *******
+// DrawClientArea: fills the client window background solid black.
 function DrawClientArea(UWindowClientWindow W, Canvas C)
 {
 	W.DrawStretchedTexture(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, Texture'UWindow.BlackTexture');
@@ -649,28 +708,32 @@ function DrawClientArea(UWindowClientWindow W, Canvas C)
 }
 
 // ****** Combo Drawing Functions ******
+// Combo_SetupSizes: calculates pixel positions for the combo box edit field, dropdown button,
+// and optional left/right spinner buttons. The Align value shifts where the label and edit area sit
+// within the total control width. MiscBevel padding is subtracted so the edit field appears inset.
 function Combo_SetupSizes(UWindowComboControl W, Canvas C)
 {
 	local float fTW, fTH;
 
 	C.Font = W.Root.Fonts[W.Font];
 	W.TextSize(C, W.Text, fTW, fTH);
+	// Placement of the edit box and label depends on text alignment: left(0), right(1), or centre(2)
 	switch(W.Align)
 	{
 		// End:0xBB
-		case 0:
+		case 0: // Left-aligned: label on left, edit area pushed to the right
 			W.EditAreaDrawX = (W.WinWidth - W.EditBoxWidth);
 			W.TextX = 0.0000000;
 			// End:0x163
 			break;
 		// End:0xFB
-		case 1:
+		case 1: // Right-aligned: edit area on left, label text pushed to the right
 			W.EditAreaDrawX = 0.0000000;
 			W.TextX = (W.WinWidth - fTW);
 			// End:0x163
 			break;
 		// End:0x160
-		case 2:
+		case 2: // Centre-aligned: both edit area and label are centred in the control
 			W.EditAreaDrawX = ((W.WinWidth - W.EditBoxWidth) / float(2));
 			W.TextX = ((W.WinWidth - fTW) / float(2));
 			// End:0x163
@@ -711,12 +774,14 @@ function Combo_SetupSizes(UWindowComboControl W, Canvas C)
 	return;
 }
 
+// Combo_Draw: renders the four sides of the combo box border by stretching a single 1px border
+// region to each side. STY_Alpha blending lets the dark grey (120,120,120) tint show through.
 function Combo_Draw(UWindowComboControl W, Canvas C)
 {
 	local Texture t;
 
 	t = W.GetLookAndFeelTexture();
-	C.Style = 5;
+	C.Style = 5; // STY_Alpha: blend the grey border tint over whatever is behind the combo
 	C.SetDrawColor(120, 120, 120);
 	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
 	W.DrawStretchedTextureSegment(C, 0.0000000, (W.WinHeight - float(W.m_BorderTextureRegion.H)), W.WinWidth, float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
@@ -731,6 +796,13 @@ function Combo_Draw(UWindowComboControl W, Canvas C)
 	return;
 }
 
+// R6List_DrawBackground: draws a decorative corner frame around a list box using Gui_BoxScroll.
+// m_eCornerType selects which corners and border strips are rendered:
+//   0 = plain border via DrawSimpleBorder
+//   1 = no border at all (caller handles its own framing)
+//   2 = top corners only (TL/TR); TR is mirrored from TL using negative srcW
+//   3 = bottom corners only (BL/BR); flipped vertically from TL using negative srcH
+//   4 = all four corners plus all four border strips — full decorative frame
 function R6List_DrawBackground(R6WindowListBox W, Canvas C)
 {
 	local Texture t;
@@ -746,7 +818,7 @@ function R6List_DrawBackground(R6WindowListBox W, Canvas C)
 			// End:0xEFF
 			break;
 		// End:0x4CD
-		case 2:
+		case 2: // Top corners: TL drawn normally; TR is TL mirrored with negative srcW
 			W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(m_topLeftCornerR.Y), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), m_R6ScrollTexture);
 			W.DrawStretchedTextureSegment(C, (W.WinWidth - float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float((-m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_R6ScrollTexture);
 			W.DrawStretchedTextureSegment(C, float((m_topLeftCornerR.W + m_iListHPadding)), 0.0000000, ((W.WinWidth - float((2 * m_iListHPadding))) - float((2 * m_topLeftCornerR.W))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
@@ -756,7 +828,7 @@ function R6List_DrawBackground(R6WindowListBox W, Canvas C)
 			// End:0xEFF
 			break;
 		// End:0x949
-		case 3:
+		case 3: // Bottom corners: BL uses negative srcH (flip vertical); BR flips both axes
 			W.DrawStretchedTextureSegment(C, 0.0000000, (W.WinHeight - float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float((m_topLeftCornerR.Y + m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float((-m_topLeftCornerR.H)), m_R6ScrollTexture);
 			W.DrawStretchedTextureSegment(C, (W.WinWidth - float(m_topLeftCornerR.W)), (W.WinHeight - float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float((m_topLeftCornerR.Y + m_topLeftCornerR.H)), float((-m_topLeftCornerR.W)), float((-m_topLeftCornerR.H)), m_R6ScrollTexture);
 			W.DrawStretchedTextureSegment(C, float(m_iListVPadding), 0.0000000, (W.WinWidth - float((2 * m_iListVPadding))), float(W.m_BorderTextureRegion.H), float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
@@ -766,7 +838,7 @@ function R6List_DrawBackground(R6WindowListBox W, Canvas C)
 			// End:0xEFF
 			break;
 		// End:0xEF4
-		case 4:
+		case 4: // All four corners plus all four border strips — full decorative frame
 			W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float(m_topLeftCornerR.Y), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), m_R6ScrollTexture);
 			W.DrawStretchedTextureSegment(C, (W.WinWidth - float(m_topLeftCornerR.W)), 0.0000000, float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float((m_topLeftCornerR.X + m_topLeftCornerR.W)), float(m_topLeftCornerR.Y), float((-m_topLeftCornerR.W)), float(m_topLeftCornerR.H), m_R6ScrollTexture);
 			W.DrawStretchedTextureSegment(C, 0.0000000, (W.WinHeight - float(m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float(m_topLeftCornerR.H), float(m_topLeftCornerR.X), float((m_topLeftCornerR.Y + m_topLeftCornerR.H)), float(m_topLeftCornerR.W), float((-m_topLeftCornerR.H)), m_R6ScrollTexture);
@@ -778,7 +850,7 @@ function R6List_DrawBackground(R6WindowListBox W, Canvas C)
 			// End:0xEFF
 			break;
 		// End:0xEFC
-		case 1:
+		case 1: // No border drawn — the caller is responsible for its own framing
 			// End:0xEFF
 			break;
 		// End:0xFFFF
@@ -788,6 +860,7 @@ function R6List_DrawBackground(R6WindowListBox W, Canvas C)
 	return;
 }
 
+// List_DrawBackground: fills a UWindowListControl background with the Active bevel texture.
 function List_DrawBackground(UWindowListControl W, Canvas C)
 {
 	local Texture t;
@@ -809,6 +882,9 @@ function ComboList_DrawBackground(UWindowComboList W, Canvas C)
 //=================================================================================
 // This is draw a combo list item
 //=================================================================================
+// ComboList_DrawItem: renders one row in a combo dropdown list.
+// Selected row: black background with white text.
+// Unselected row: dark grey (22,22,22) background with the R6 signature teal text (15,136,176).
 function ComboList_DrawItem(UWindowComboList Combo, Canvas C, float X, float Y, float W, float H, string Text, bool bSelected)
 {
 	local Texture t;
@@ -831,6 +907,8 @@ function ComboList_DrawItem(UWindowComboList Combo, Canvas C, float X, float Y, 
 	return;
 }
 
+// Combo_SetupButton: configures the dropdown arrow button at the right side of a combo box.
+// All four states (Up/Down/Over/Disabled) are sourced from Gui_BoxScroll via ComboBtnXxx regions.
 function Combo_SetupButton(UWindowComboButton W)
 {
 	local Texture t;
@@ -850,6 +928,8 @@ function Combo_SetupButton(UWindowComboButton W)
 	return;
 }
 
+// Editbox_SetupSizes: sizes and positions the edit sub-window within the control.
+// Total height is fixed at 12px of text content plus the bevel top/bottom padding from MiscBevel.
 function Editbox_SetupSizes(UWindowEditControl W, Canvas C)
 {
 	local float fTW, fTH;
@@ -892,12 +972,19 @@ function Editbox_SetupSizes(UWindowEditControl W, Canvas C)
 	return;
 }
 
+// Editbox_Draw: renders the bevel border around the edit area using EditBoxBevel as the style index.
 function Editbox_Draw(UWindowEditControl W, Canvas C)
 {
 	W.DrawMiscBevel(C, W.EditAreaDrawX, 0.0000000, W.EditBoxWidth, W.WinHeight, Active, EditBoxBevel);
 	return;
 }
 
+// Tab_DrawTab: renders a single tab as a 3-piece horizontal strip (Left cap / Middle / Right cap).
+// The active tab gets a blue-lit highlight colour; inactive tabs are dimmed.
+// For inactive tabs, m_eTabCase selects which cap sprites to use, allowing seamless joins when
+// an inactive tab is adjacent to the active one (shared border transitions).
+// Text is vertically centred using a +0.5 round-to-nearest trick and rendered with STY_Normal
+// to avoid the edge artefacts that alpha-blending causes on thin font glyphs.
 function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bool bLeftmostTab, float X, float Y, float W, float H, string Text, bool bShowText)
 {
 	local Region R, Temp_RTabLeft, Temp_RTabRight;
@@ -905,7 +992,7 @@ function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bo
 	local float fTW, fTH, fXOffset;
 
 	fXOffset = Size_TabTextOffset;
-	C.Style = 5;
+	C.Style = 5; // STY_Alpha: blend the tab sprite over the panel background
 	szText = Text;
 	// End:0x39D
 	if(bActiveTab)
@@ -925,39 +1012,41 @@ function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bo
 		// End:0x39A
 		if(bShowText)
 		{
-			C.Style = 1;
+			C.Style = 1; // STY_Normal for text: alpha-blending thin font glyphs causes edge artefacts
 			C.Font = Tab.Root.Fonts[7];
 			C.SpaceX = 0.0000000;
 			szText = Tab.TextSize(C, szText, fTW, fTH, int(((W - fXOffset) - float(TabSelectedR.W))));
 			Y = ((Tab.WinHeight - fTH) / float(2));
-			Y = float(int((Y + 0.5000000)));
+			Y = float(int((Y + 0.5000000))); // Round to nearest pixel: int(y+0.5) avoids subpixel wobble
 			Tab.ClipText(C, (X + fXOffset), Y, szText, true);
 		}		
 	}
 	else
 	{
+		// m_eTabCase controls which end-cap sprites bound this tab, allowing clean transitions
+		// at the edges of a row where inactive tabs border the active one or the strip ends.
 		switch(Tab.m_eTabCase)
 		{
 			// End:0x3D4
-			case Tab.0:
+			case Tab.0: // Both caps: selected-style — used for an isolated or inner inactive tab
 				Temp_RTabLeft = TabSelectedL;
 				Temp_RTabRight = TabSelectedR;
 				// End:0x465
 				break;
 			// End:0x3FB
-			case Tab.3:
+			case Tab.3: // Left cap selected, right cap unselected (inactive tab just before the active one)
 				Temp_RTabLeft = TabSelectedL;
 				Temp_RTabRight = TabUnselectedR;
 				// End:0x465
 				break;
 			// End:0x422
-			case Tab.1:
+			case Tab.1: // Left cap unselected, right cap selected (inactive tab just after the active one)
 				Temp_RTabLeft = TabUnselectedL;
 				Temp_RTabRight = TabSelectedR;
 				// End:0x465
 				break;
 			// End:0x449
-			case Tab.4:
+			case Tab.4: // Both caps unselected — fully inactive tab with no adjacency to the active tab
 				Temp_RTabLeft = TabUnselectedL;
 				Temp_RTabRight = TabUnselectedR;
 				// End:0x465
@@ -985,12 +1074,12 @@ function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bo
 		// End:0x7CF
 		if(bShowText)
 		{
-			C.Style = 1;
+			C.Style = 1; // STY_Normal: same reason as active tab — cleaner text rendering
 			C.Font = Tab.Root.Fonts[7];
 			C.SpaceX = 0.0000000;
 			szText = Tab.TextSize(C, szText, fTW, fTH, int(((W - fXOffset) - float(TabSelectedR.W))));
 			Y = ((Tab.WinHeight - fTH) / float(2));
-			Y = float(int((Y + 0.5000000)));
+			Y = float(int((Y + 0.5000000))); // Round to nearest pixel
 			Tab.ClipText(C, (X + fXOffset), Y, szText, true);
 		}
 	}
@@ -998,6 +1087,9 @@ function Tab_DrawTab(UWindowTabControlTabArea Tab, Canvas C, bool bActiveTab, bo
 }
 
 // ****** Scroll Bar ******
+// SB_SetupUpButton: configures the scroll-up arrow on a vertical scrollbar.
+// When the owning scrollbar has m_bUseSpecialEffect set, the standard arrow is replaced
+// by a gear icon (m_SBUpGear), used on planning/equipment screens for a mechanical look.
 function SB_SetupUpButton(UWindowSBUpButton W)
 {
 	local Texture t;
@@ -1009,6 +1101,7 @@ function SB_SetupUpButton(UWindowSBUpButton W)
 	W.OverTexture = t;
 	W.DisabledTexture = t;
 	// End:0xA6
+	// Special effect: swap the arrow for a gear icon (used in equipment/planning screens)
 	if((UWindowVScrollbar(W.OwnerWindow).m_bUseSpecialEffect == true))
 	{
 		W.UpRegion = m_SBUpGear;		
@@ -1026,6 +1119,8 @@ function SB_SetupUpButton(UWindowSBUpButton W)
 	return;
 }
 
+// SB_SetupDownButton: mirrors SB_SetupUpButton for the down-arrow button.
+// m_SBDownGear replaces the standard arrow when m_bUseSpecialEffect is active.
 function SB_SetupDownButton(UWindowSBDownButton W)
 {
 	local Texture t;
@@ -1037,6 +1132,7 @@ function SB_SetupDownButton(UWindowSBDownButton W)
 	W.OverTexture = t;
 	W.DisabledTexture = t;
 	// End:0xA6
+	// Same special-effect gear-icon swap as SB_SetupUpButton, but for the down direction
 	if((UWindowVScrollbar(W.OwnerWindow).m_bUseSpecialEffect == true))
 	{
 		W.UpRegion = m_SBDownGear;		
@@ -1054,6 +1150,8 @@ function SB_SetupDownButton(UWindowSBDownButton W)
 	return;
 }
 
+// SB_SetupLeftButton: configures the left arrow for a horizontal scrollbar.
+// Uses m_fHSBButtonImageX/Y (different offsets from the vertical bar) for image alignment.
 function SB_SetupLeftButton(UWindowSBLeftButton W)
 {
 	local Texture t;
@@ -1074,6 +1172,7 @@ function SB_SetupLeftButton(UWindowSBLeftButton W)
 	return;
 }
 
+// SB_SetupRightButton: configures the right arrow for a horizontal scrollbar.
 function SB_SetupRightButton(UWindowSBRightButton W)
 {
 	local Texture t;
@@ -1094,16 +1193,23 @@ function SB_SetupRightButton(UWindowSBRightButton W)
 	return;
 }
 
+// SB_VDraw: draws the vertical scrollbar trough border and the drag thumb.
+// BoxHeight subtracts the two button heights then adds back their border overlap so the trough
+// tile connects flush to the buttons without a visible gap.
+// When m_bUseSpecialEffect is true the thumb is tinted GrayLight instead of White,
+// visually de-emphasising scrolling on screens where it is decorative rather than interactive.
 function SB_VDraw(UWindowVScrollbar W, Canvas C)
 {
 	local int BoxHeight;
 
+	// Add back one border thickness per button so the trough seamlessly overlaps the button borders
 	BoxHeight = int(((((W.WinHeight - W.UpButton.WinHeight) - W.DownButton.WinHeight) + float(W.UpButton.m_BorderTextureRegion.H)) + float(W.DownButton.m_BorderTextureRegion.H)));
 	C.SetDrawColor(W.m_BorderColor.R, W.m_BorderColor.G, W.m_BorderColor.B);
 	DrawBox(W, C, 0.0000000, (W.UpButton.WinHeight - float(W.UpButton.m_BorderTextureRegion.H)), W.WinWidth, float(BoxHeight));
-	C.Style = 5;
+	C.Style = 5; // STY_Alpha: blend the thumb over the trough background
 	C.SetDrawColor(W.Root.Colors.White.R, W.Root.Colors.White.G, W.Root.Colors.White.B, W.Root.Colors.White.A);
 	// End:0x291
+	// When special-effect is on, dim the thumb to gray so it recedes visually
 	if(W.m_bUseSpecialEffect)
 	{
 		C.SetDrawColor(W.Root.Colors.GrayLight.R, W.Root.Colors.GrayLight.G, W.Root.Colors.GrayLight.B, W.Root.Colors.GrayLight.A);
@@ -1112,6 +1218,9 @@ function SB_VDraw(UWindowVScrollbar W, Canvas C)
 	return;
 }
 
+// SB_HDraw: draws the horizontal scrollbar trough border and drag thumb.
+// BoxWidth is computed identically to SB_VDraw's BoxHeight — adds back button border overlaps
+// so the trough tile connects flush to the left/right arrow buttons.
 function SB_HDraw(UWindowHScrollbar W, Canvas C)
 {
 	local int BoxWidth;
@@ -1123,6 +1232,8 @@ function SB_HDraw(UWindowHScrollbar W, Canvas C)
 	return;
 }
 
+// Tab_SetupLeftButton: positions and configures the left scroll arrow for the tab strip.
+// Placed at the right edge of the tab area so clicking it scrolls the visible tab range leftward.
 function Tab_SetupLeftButton(UWindowTabControlLeftButton W)
 {
 	local Texture t;
@@ -1144,6 +1255,7 @@ function Tab_SetupLeftButton(UWindowTabControlLeftButton W)
 	return;
 }
 
+// Tab_SetupRightButton: positions the right scroll arrow just to the right of the left button.
 function Tab_SetupRightButton(UWindowTabControlRightButton W)
 {
 	local Texture t;
@@ -1165,6 +1277,9 @@ function Tab_SetupRightButton(UWindowTabControlRightButton W)
 	return;
 }
 
+// Tab_SetTabPageSize: sizes the page content area that sits below the tab strip.
+// The top offset accounts for the active tab being taller than inactive tabs
+// (TabSelectedM.H - TabUnselectedM.H pixels of overlap between tab and page area).
 function Tab_SetTabPageSize(UWindowPageControl W, UWindowPageWindow P)
 {
 	P.WinLeft = 2.0000000;
@@ -1173,12 +1288,15 @@ function Tab_SetTabPageSize(UWindowPageControl W, UWindowPageWindow P)
 	return;
 }
 
+// Tab_DrawTabPageArea: draws the bevel background for the page content area beneath the tab strip.
 function Tab_DrawTabPageArea(UWindowPageControl W, Canvas C, UWindowPageWindow P)
 {
 	W.DrawUpBevel(C, 0.0000000, Size_TabAreaHeight, W.WinWidth, (W.WinHeight - Size_TabAreaHeight), Active);
 	return;
 }
 
+// Tab_GetTabSize: measures the pixel width a tab needs for its label text.
+// Adds fixed spacing, a text-indent constant, and the right-cap sprite width to the measured text width.
 function Tab_GetTabSize(UWindowTabControlTabArea Tab, Canvas C, string Text, out float W, out float H)
 {
 	local float fTW, fTH;
@@ -1190,12 +1308,16 @@ function Tab_GetTabSize(UWindowTabControlTabArea Tab, Canvas C, string Text, out
 	return;
 }
 
+// Menu_DrawMenuBar: draws the menu bar background using a hardcoded UV region from the Active texture.
+// Coordinates (srcX=11, srcY=0, srcW=106, srcH=16) are fixed; the region stretches to the full bar width.
 function Menu_DrawMenuBar(UWindowMenuBar W, Canvas C)
 {
 	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, W.WinWidth, 16.0000000, 11.0000000, 0.0000000, 106.0000000, 16.0000000, Active);
 	return;
 }
 
+// Menu_DrawMenuBarItem: highlights the selected menu bar item with a black filled box
+// (one pixel thinner on each side than the item rect) and draws the item caption over it.
 function Menu_DrawMenuBarItem(UWindowMenuBar B, UWindowMenuBarItem i, float X, float Y, float W, float H, Canvas C)
 {
 	// End:0xA2
@@ -1211,17 +1333,21 @@ function Menu_DrawMenuBarItem(UWindowMenuBar B, UWindowMenuBarItem i, float X, f
 	return;
 }
 
+// Menu_DrawPulldownMenuBackground: stub — pulldown menus are not used in Ravenshield's R6 UI.
 function Menu_DrawPulldownMenuBackground(UWindowPulldownMenu W, Canvas C)
 {
 	return;
 }
 
+// Menu_DrawPulldownMenuItem: stub — not used; the R6 navigation bar replaces pulldown menus.
 function Menu_DrawPulldownMenuItem(UWindowPulldownMenu M, UWindowPulldownMenuItem Item, Canvas C, float X, float Y, float W, float H, bool bSelected)
 {
 	return;
 }
 
 // ****** R6 Add-On ******
+// DrawWinTop: draws a three-piece top-edge bar using the standard FrameTL/T/TR regions.
+// Used by R6WindowHSplitter to give the top panel a window-style top edge without a full frame.
 function DrawWinTop(R6WindowHSplitter W, Canvas C)
 {
 	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, float(FrameTL.W), W.WinHeight, float(FrameTL.X), float(FrameTL.Y), float(FrameTL.W), float(FrameTL.H), Active);
@@ -1230,6 +1356,8 @@ function DrawWinTop(R6WindowHSplitter W, Canvas C)
 	return;
 }
 
+// DrawHSplitterT: draws the top half of a horizontal splitter divider using hardcoded UV coords.
+// Three pieces: left cap (srcX=30, W=12), tiling middle (srcX=42, W=2), right cap (srcX=49, W=12), all at srcY=5.
 function DrawHSplitterT(R6WindowHSplitter W, Canvas C)
 {
 	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, 12.0000000, W.WinHeight, 30.0000000, 5.0000000, 12.0000000, 6.0000000, Active);
@@ -1238,6 +1366,8 @@ function DrawHSplitterT(R6WindowHSplitter W, Canvas C)
 	return;
 }
 
+// DrawHSplitterB: draws the bottom half of the splitter divider — a complementary strip below DrawHSplitterT.
+// Same 3-piece structure but at different X offsets (srcX=61/73/80) forming a visual pair with DrawHSplitterT.
 function DrawHSplitterB(R6WindowHSplitter W, Canvas C)
 {
 	W.DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, 12.0000000, W.WinHeight, 61.0000000, 5.0000000, 12.0000000, 6.0000000, Active);
@@ -1246,14 +1376,19 @@ function DrawHSplitterB(R6WindowHSplitter W, Canvas C)
 	return;
 }
 
+// DrawPopupButtonDown: renders the pressed/latched state of a popup action-point button.
+// Background is a darkened version of the current team colour (each channel halved) drawn with
+// STY_Normal so it is fully opaque. Text is then drawn in white over it.
+// An optional sub-menu arrow sprite is drawn at the right edge if m_bSubMenu is set.
 function DrawPopupButtonDown(R6MenuPopUpStayDownButton W, Canvas C)
 {
 	local int iColor;
 	local Color MenuColor;
 
 	iColor = R6PlanningCtrl(W.GetPlayerOwner()).m_iCurrentTeam;
-	C.Style = 1;
+	C.Style = 1; // STY_Normal: solid fill — team colour must be fully opaque for the pressed state
 	MenuColor = W.Root.Colors.TeamColorLight[iColor];
+	// Halve each channel to produce a darker tint (the pressed/down state is visually muted)
 	(MenuColor.R /= byte(2));
 	(MenuColor.G /= byte(2));
 	(MenuColor.B /= byte(2));
@@ -1266,7 +1401,7 @@ function DrawPopupButtonDown(R6MenuPopUpStayDownButton W, Canvas C)
 	{
 		W.ClipText(C, W.TextX, W.TextY, W.Text, true);
 	}
-	C.Style = 5;
+	C.Style = 5; // STY_Alpha: switch back to alpha for the sub-menu arrow sprite
 	// End:0x264
 	if(W.m_bSubMenu)
 	{
@@ -1276,13 +1411,16 @@ function DrawPopupButtonDown(R6MenuPopUpStayDownButton W, Canvas C)
 	return;
 }
 
+// DrawPopupButtonUp: renders the idle/normal state of a popup button.
+// Text is drawn semi-transparent (alpha = PopUpAlphaFactor) with STY_Alpha, giving a ghosted look
+// so the HUD beneath shows through. No coloured background is drawn in this state.
 function DrawPopupButtonUp(R6MenuPopUpStayDownButton W, Canvas C)
 {
 	local Color MenuColor;
 
 	MenuColor = W.Root.Colors.White;
-	C.SetDrawColor(MenuColor.R, MenuColor.G, MenuColor.B, byte(W.Root.Colors.PopUpAlphaFactor));
-	C.Style = 5;
+	C.SetDrawColor(MenuColor.R, MenuColor.G, MenuColor.B, byte(W.Root.Colors.PopUpAlphaFactor)); // Semi-transparent white
+	C.Style = 5; // STY_Alpha: the alpha channel produces the ghosted idle appearance
 	// End:0xD7
 	if((W.Text != ""))
 	{
@@ -1293,11 +1431,13 @@ function DrawPopupButtonUp(R6MenuPopUpStayDownButton W, Canvas C)
 	{
 		W.DrawStretchedTextureSegment(C, (W.WinWidth - float((2 + m_PopupArrowDown.H))), ((W.WinHeight - float(m_PopupArrowUp.H)) * 0.5000000), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), float(m_PopupArrowUp.X), float(m_PopupArrowUp.Y), float(m_PopupArrowUp.W), float(m_PopupArrowUp.H), m_R6ScrollTexture);
 	}
-	C.Style = 1;
+	C.Style = 1; // STY_Normal: restore after sub-menu arrow so subsequent draws are unaffected
 	C.SetDrawColor(byte(255), byte(255), byte(255));
 	return;
 }
 
+// DrawPopupButtonOver: renders the hover state — fully opaque white text with STY_Normal,
+// making the button visually pop when the cursor moves over it.
 function DrawPopupButtonOver(R6MenuPopUpStayDownButton W, Canvas C)
 {
 	local Color MenuColor;
@@ -1320,12 +1460,14 @@ function DrawPopupButtonOver(R6MenuPopUpStayDownButton W, Canvas C)
 	return;
 }
 
+// DrawPopupButtonDisable: renders the disabled state with 50/255 (~20%) alpha on the text,
+// making the button clearly dimmed and non-interactive.
 function DrawPopupButtonDisable(R6MenuPopUpStayDownButton W, Canvas C)
 {
 	local Color MenuColor;
 
 	MenuColor = W.Root.Colors.White;
-	C.SetDrawColor(MenuColor.R, MenuColor.G, MenuColor.B, 50);
+	C.SetDrawColor(MenuColor.R, MenuColor.G, MenuColor.B, 50); // ~20% opacity: clearly disabled
 	C.Style = 5;
 	// End:0xB7
 	if((W.Text != ""))
@@ -1353,14 +1495,16 @@ function DrawNavigationBar(R6MenuNavigationBar W, Canvas C)
 
 	cTemp = W.m_BorderColor;
 	W.m_BorderColor = W.Root.Colors.BlueLight;
-	W.DrawSimpleBorder(C);
+	W.DrawSimpleBorder(C); // Draw the outer border in the R6 blue-light colour
 	W.m_BorderColor = cTemp;
-	C.Style = 5;
+	C.Style = 5; // STY_Alpha: blend the separator lines and background sprites
 	C.SetDrawColor(W.Root.Colors.BlueLight.R, W.Root.Colors.BlueLight.G, W.Root.Colors.BlueLight.B);
+	// Hardcoded 1px vertical separator lines that visually group the navigation buttons:
+	// X=120 separates Option/Home from the middle group; X=414/450 bracket Play; X=554 follows Load
 	W.DrawStretchedTextureSegment(C, 120.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
-	W.DrawStretchedTextureSegment(C, 414.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
-	W.DrawStretchedTextureSegment(C, 450.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
-	W.DrawStretchedTextureSegment(C, 554.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture);
+	W.DrawStretchedTextureSegment(C, 414.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture); // Before Play
+	W.DrawStretchedTextureSegment(C, 450.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture); // After Play
+	W.DrawStretchedTextureSegment(C, 554.0000000, 0.0000000, 1.0000000, 33.0000000, float(W.m_BorderTextureRegion.X), float(W.m_BorderTextureRegion.Y), float(W.m_BorderTextureRegion.W), float(W.m_BorderTextureRegion.H), W.m_BorderTexture); // After Load
 	iXStart = 120;
 	iXTexSize = 12;
 	iXWidth = 318;
@@ -1369,11 +1513,14 @@ function DrawNavigationBar(R6MenuNavigationBar W, Canvas C)
 	W.DrawStretchedTextureSegment(C, float((iXStart + iXTexSize)), -1.0000000, float((iXWidth - iXTexSize)), float(iYTexSize), float(R.X), float(R.Y), float(R.W), float(R.H), m_NavBarTex);
 	R = m_NavBarBack[1];
 	W.DrawStretchedTextureSegment(C, float(iXStart), -1.0000000, float(iXTexSize), float(iYTexSize), float(R.X), float(R.Y), float(R.W), float(R.H), m_NavBarTex);
-	W.DrawStretchedTextureSegment(C, float((iXStart + iXWidth)), -1.0000000, float(iXTexSize), float(iYTexSize), float((R.X + iXTexSize)), float(R.Y), float((-R.W)), float(R.H), m_NavBarTex);
+	W.DrawStretchedTextureSegment(C, float((iXStart + iXWidth)), -1.0000000, float(iXTexSize), float(iYTexSize), float((R.X + iXTexSize)), float(R.Y), float((-R.W)), float(R.H), m_NavBarTex); // Right end cap: mirror the left cap with negative srcW
 	C.Style = 1;
 	return;
 }
 
+// DrawButtonBorder: draws the button background texture stretched over the button's full rect.
+// If _bDefineBorderColor is true, uses the window's own m_BorderColor tint; otherwise uses the
+// global m_CBorder (the R6 signature teal colour defined in defaultproperties).
 function DrawButtonBorder(UWindowWindow W, Canvas C, optional bool _bDefineBorderColor)
 {
 	// End:0x106
@@ -1395,6 +1542,8 @@ function DrawButtonBorder(UWindowWindow W, Canvas C, optional bool _bDefineBorde
 }
 
 //Function to draw a different background then the basic SimpleBorder
+// DrawSpecialButtonBorder: draws a 3-piece horizontal button background (Left cap / Middle / Right cap).
+// The middle section is stretched to fill the remaining space between the two fixed-width end caps.
 function DrawSpecialButtonBorder(R6WindowButton Button, Canvas C, float X, float Y)
 {
 	local int XPos, MidWidth;
@@ -1411,6 +1560,9 @@ function DrawSpecialButtonBorder(R6WindowButton Button, Canvas C, float X, float
 	return;
 }
 
+// DrawBox: draws a 4-sided border rectangle by tiling the window's own 1px border texture strip
+// to each of the four sides. The top and bottom strips span the full width; the left and right
+// strips fill the gap between them to avoid double-drawing at the corners.
 function DrawBox(UWindowWindow W, Canvas C, float X, float Y, float Width, float Height)
 {
 	C.Style = 5;
@@ -1422,6 +1574,8 @@ function DrawBox(UWindowWindow W, Canvas C, float X, float Y, float Width, float
 	return;
 }
 
+// DrawBGShading: draws a semi-transparent black rectangle over an area.
+// DarkBGAlpha controls the opacity, creating a dark scrim effect that dims the scene underneath.
 function DrawBGShading(UWindowWindow Window, Canvas C, float X, float Y, float W, float H)
 {
 	C.Style = 5;
@@ -1430,6 +1584,10 @@ function DrawBGShading(UWindowWindow Window, Canvas C, float X, float Y, float W
 	return;
 }
 
+// DrawPopUpTextBackGround: draws a narrow 13px horizontal header band at the top of a popup window.
+// Uses a 2x13 region from Gui_BoxScroll (srcX=114, srcY=47) stretched to full window width.
+// If _fHeight fits inside the window, the band is vertically centred; otherwise it pins to the top.
+// The height is clamped to at least the source texture height to prevent degenerate zero-height draws.
 function DrawPopUpTextBackGround(UWindowWindow W, Canvas C, float _fHeight)
 {
 	local Region RTexture;
@@ -1442,6 +1600,7 @@ function DrawPopUpTextBackGround(UWindowWindow W, Canvas C, float _fHeight)
 	C.Style = 5;
 	fHeight = _fHeight;
 	// End:0x8C
+	// If the text block is shorter than the window height, centre it vertically; otherwise pin to top
 	if((fHeight < W.WinHeight))
 	{
 		fY = ((W.WinHeight - fHeight) / float(2));		
@@ -1459,6 +1618,13 @@ function DrawPopUpTextBackGround(UWindowWindow W, Canvas C, float _fHeight)
 	return;
 }
 
+// DrawInGamePlayerStats: draws a 10x10 status icon from the TeamBarIcon atlas, centred in a box.
+// _iPlayerStats selects the icon row/column:
+//   1 = full health   (atlas X=31, Y=29)
+//   2 = half health   (atlas X=42, Y=29)
+//   3 = empty health  (atlas X=53, Y=29)
+//   4 = team icon     (atlas X=53, Y=40 — different row)
+//   default = unknown fallback icon (atlas X=49, Y=14)
 function DrawInGamePlayerStats(UWindowWindow W, Canvas C, int _iPlayerStats, float _fX, float _fY, float _fHeight, float _fWidth)
 {
 	local float fXOffset;
@@ -1472,25 +1638,25 @@ function DrawInGamePlayerStats(UWindowWindow W, Canvas C, int _iPlayerStats, flo
 	{
 		// End:0x72
 		case 1:
-			RIconToDraw.X = 31;
+			RIconToDraw.X = 31; // Full-health icon: X=31 in TeamBarIcon atlas (Y=29 set above)
 			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
 			// End:0x1A6
 			break;
 		// End:0xAC
 		case 2:
-			RIconToDraw.X = 42;
+			RIconToDraw.X = 42; // Half-health icon
 			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
 			// End:0x1A6
 			break;
 		// End:0xE6
 		case 3:
-			RIconToDraw.X = 53;
+			RIconToDraw.X = 53; // Empty-health icon (same X as team icon but different row Y=29 vs Y=40)
 			RIconRegion = CenterIconInBox(fXOffset, _fY, _fWidth, _fHeight, RIconToDraw);
 			// End:0x1A6
 			break;
 		// End:0x147
 		case 4:
-			RIconToDraw.X = 53;
+			RIconToDraw.X = 53; // Team icon shares X=53 but lives on the Y=40 row
 			RIconToDraw.Y = 40;
 			RIconToDraw.W = 10;
 			RIconToDraw.H = 10;
@@ -1522,9 +1688,9 @@ function Region CenterIconInBox(float _fX, float _fY, float _fWidth, float _fHei
 	local float fTemp;
 
 	fTemp = ((_fWidth - float(_RIconRegion.W)) / float(2));
-	RTemp.X = int((_fX + float(int((fTemp + 0.5000000)))));
+	RTemp.X = int((_fX + float(int((fTemp + 0.5000000))))); // int(x + 0.5) rounds to nearest pixel — cheaper than Round()
 	fTemp = ((_fHeight - float(_RIconRegion.H)) / float(2));
-	RTemp.Y = int(float(int((fTemp + 0.5000000))));
+	RTemp.Y = int(float(int((fTemp + 0.5000000)))); // Same nearest-pixel rounding for Y
 	(RTemp.Y += int(_fY));
 	return RTemp;
 	return;
@@ -1533,24 +1699,32 @@ function Region CenterIconInBox(float _fX, float _fY, float _fWidth, float _fHei
 //=================================================================================================
 // Get the size (height) of the header window (interwidget menu)
 //=================================================================================================
+// GetTextHeaderSize: exposes the in-game intermission text header height to layout code.
+// Returns m_fTextHeaderHeight, which is set to 30px in defaultproperties.
 function float GetTextHeaderSize()
 {
 	return m_fTextHeaderHeight;
 	return;
 }
 
+// defaultproperties: UV atlas coordinates and scalar constants for the entire look-and-feel.
+// Region structs are encoded by the UE-Explorer decompiler as Zone/iLeaf/ZoneNumber — these are
+// artefacts of the struct packing; the actual UV values come from the explicit X=, Y=, W=, H= fields.
 defaultproperties
 {
 	m_iMultiplyer=-1
+	// Pixel offsets for the arrow image within scroll bar buttons (V=vertical, H=horizontal)
 	m_fVSBButtonImageX=1
 	m_fHSBButtonImageX=2
 	m_fVSBButtonImageY=2
 	m_fHSBButtonImageY=2
+	// Pixel offsets for the combo box dropdown arrow image within its button rect
 	m_fComboImageX=1
 	m_fComboImageY=2
-	m_fScrollRate=200.0000000
-	m_fTextHeaderHeight=30.0000000
+	m_fScrollRate=200.0000000 // Pixels-per-second animation rate for the main menu button scroll
+	m_fTextHeaderHeight=30.0000000 // Height in pixels of the in-game intermission header band
 	m_TSquareBg=Texture'R6MenuTextures.Gui_BoxScroll'
+	// Status bar frame bottom-edge variants — shorter than normal FrameBL/B/BR to leave room for status text
 	m_FrameSBL=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=290,ZoneNumber=0)
 	m_FrameSB=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=27426,ZoneNumber=0)
 	m_FrameSBR=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=290,ZoneNumber=0)
@@ -1561,6 +1735,7 @@ defaultproperties
 	m_PopupArrowDown=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=20514,ZoneNumber=0)
 	m_stLapTopFrame=(TL=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=65570,ZoneNumber=0),H=32)
 	m_stLapTopFramePlus=(T1=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=8226,ZoneNumber=0),W=38,H=32)
+	// Navigation bar background atlas regions (one slot per button) — sourced from GUI_01
 	m_NavBarBack[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=63010,ZoneNumber=0)
 	m_NavBarBack[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=62498,ZoneNumber=0)
 	m_NavBarBack[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=56354,ZoneNumber=0)
@@ -1592,6 +1767,7 @@ defaultproperties
 	m_iVScrollerWidth=9
 	m_iScrollerOffset=1
 	m_TButtonBackGround=Texture'R6MenuTextures.Gui_BoxScroll'
+	// Scroll bar button arrow regions — Up/Down for vertical bars, Left/Right for horizontal bars
 	m_SBUp=(Up=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=2850,ZoneNumber=0),H=8)
 	m_SBDown=(Up=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=2082,ZoneNumber=0),W=11,H=-8)
 	m_SBRight=(Up=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2338,ZoneNumber=0),Y=25,W=-8,H=9)
@@ -1600,10 +1776,11 @@ defaultproperties
 	m_SBVBorder=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=16418,ZoneNumber=0)
 	m_SBHBorder=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=16418,ZoneNumber=0)
 	m_SBScroller=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=13090,ZoneNumber=0)
+	// Close box (X button) — Up and Down share the same atlas region (no visual difference when pressed)
 	m_CloseBoxUp=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=21026,ZoneNumber=0)
 	m_CloseBoxDown=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=21026,ZoneNumber=0)
 	m_RButtonBackGround=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3106,ZoneNumber=0)
-	m_CBorder=(R=15,G=136,B=176,A=0)
+	m_CBorder=(R=15,G=136,B=176,A=0) // R6 signature teal/blue — the default button border tint
 	FrameTitleX=6
 	FrameTitleY=4
 	ColumnHeadingHeight=13
@@ -1621,6 +1798,7 @@ defaultproperties
 	Pulldown_VBorder=3.0000000
 	Pulldown_HBorder=3.0000000
 	Pulldown_TextBorder=9.0000000
+	// Standard 9-patch window frame regions from Gui_BoxScroll
 	FrameTL=(Zone=Class'R6Menu.R6MenuRootWindow',iLeaf=3106,ZoneNumber=0)
 	FrameT=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3106,ZoneNumber=0)
 	FrameTR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=29730,ZoneNumber=0)
@@ -1629,8 +1807,9 @@ defaultproperties
 	FrameBL=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=32290,ZoneNumber=0)
 	FrameB=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=546,ZoneNumber=0)
 	FrameBR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=31778,ZoneNumber=0)
-	FrameActiveTitleColor=(R=255,G=255,B=255,A=0)
-	FrameInactiveTitleColor=(R=255,G=255,B=255,A=0)
+	FrameActiveTitleColor=(R=255,G=255,B=255,A=0)   // Both active and inactive use white title text
+	FrameInactiveTitleColor=(R=255,G=255,B=255,A=0) // (R6's theme does not dim inactive window titles)
+	// Bevel regions for DrawUpBevel (the raised inner border drawn around panels and list boxes)
 	BevelUpTL=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=1058,ZoneNumber=0)
 	BevelUpT=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2594,ZoneNumber=0)
 	BevelUpTR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=4642,ZoneNumber=0)
@@ -1640,6 +1819,7 @@ defaultproperties
 	BevelUpB=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2594,ZoneNumber=0)
 	BevelUpBR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=4642,ZoneNumber=0)
 	BevelUpArea=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2082,ZoneNumber=0)
+	// MiscBevel arrays [0..2] provide three bevel style variants for edit boxes and combo borders
 	MiscBevelTL[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
 	MiscBevelTL[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
 	MiscBevelTL[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=2850,ZoneNumber=0)
@@ -1667,12 +1847,14 @@ defaultproperties
 	MiscBevelArea[0]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=3106,ZoneNumber=0)
 	MiscBevelArea[1]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=5154,ZoneNumber=0)
 	MiscBevelArea[2]=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=5154,ZoneNumber=0)
+	// Combo dropdown arrow button regions (the small arrow sprite at the right of a combo box)
 	ComboBtnUp=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=2082,ZoneNumber=0)
 	ComboBtnDown=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=6178,ZoneNumber=0)
 	ComboBtnDisabled=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=6178,ZoneNumber=0)
 	ComboBtnOver=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=4130,ZoneNumber=0)
 	HLine=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=1314,ZoneNumber=0)
-	EditBoxTextColor=(R=255,G=255,B=255,A=0)
+	EditBoxTextColor=(R=255,G=255,B=255,A=0) // White text in all edit boxes
+	// Tab control end-cap regions: Selected* uses the active highlight sprite; Unselected* is the dim version
 	TabSelectedL=(Zone=ObjectProperty'R6Menu.R6MenuMPCreateGameTab.m_pButtonsDef',iLeaf=16418,ZoneNumber=0)
 	TabSelectedM=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=10530,ZoneNumber=0)
 	TabSelectedR=(Zone=Class'R6Menu.R6MenuOperativeSkillsLabel',iLeaf=13858,ZoneNumber=0)
