@@ -111,6 +111,7 @@ function Tick(float fDeltaTime)
 	// End:0x81
 	if((Pawn != none))
 	{
+		// bFire is the UE fire axis input; mirror it to the pawn so animations know the weapon is firing.
 		Pawn.m_bIsFiringWeapon = bFire;
 		// End:0x81
 		if((m_r6pawn.m_TrackActor != none))
@@ -132,6 +133,7 @@ function Tick(float fDeltaTime)
 function bool IsActorInView(Actor Actor)
 {
 	// End:0x3D
+	// Negative dot product means the actor is behind the pawn's forward-facing direction.
 	if((Dot((Actor.Location - Pawn.Location), Vector(Pawn.Rotation)) < float(0)))
 	{
 		return false;		
@@ -143,6 +145,7 @@ function bool IsActorInView(Actor Actor)
 	return;
 }
 
+// Note: body is identical to IsActorInView; tests in-front/behind, not left/right.
 function bool IsActorRightOfView(Actor Actor)
 {
 	// End:0x3D
@@ -157,6 +160,7 @@ function bool IsActorRightOfView(Actor Actor)
 	return;
 }
 
+// eMovementPace: 1=Prone, 2=CrouchWalk, 3=CrouchRun, 4=Walk, 5=Run. Updates stance flags and SetWalking.
 event R6SetMovement(R6Pawn.eMovementPace ePace)
 {
 	// End:0x3A
@@ -194,6 +198,7 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 		}
 	}
 	// End:0x159
+	// Walk (4), CrouchWalk (2), and Prone (1) all use slow animation; Run/CrouchRun use fast.
 	if((((int(ePace) == int(4)) || (int(ePace) == int(2))) || (int(ePace) == int(1))))
 	{
 		// End:0x156
@@ -226,6 +231,7 @@ event R6SetMovement(R6Pawn.eMovementPace ePace)
 function CheckPaceForInjury(out R6Pawn.eMovementPace ePace)
 {
 	// End:0x4C
+	// m_eHealth == 1 is HEALTH_Wounded; a wounded pawn cannot run, downgrade pace to walk.
 	if((int(m_r6pawn.m_eHealth) == int(1)))
 	{
 		// End:0x34
@@ -269,6 +275,7 @@ function R6PreMoveToward(Actor Target, Actor pFocus, R6Pawn.eMovementPace ePace)
 }
 
 // override the version in AIController.uc so that only depend on focalpoint and destination...
+// Returns animation direction: 0=forward, 16384=right, 32768=backward, 49152=left (16-bit yaw space).
 function int GetFacingDirection()
 {
 	local float fStrafeMag;
@@ -289,9 +296,11 @@ function int GetFacingDirection()
 	vDir = Normal((vDest2D - vLoc2D));
 	fStrafeMag = Dot(vLookDir, vDir);
 	// End:0x110
+	// cos(~41°): if the dot product is below 0.75 the pawn is moving mostly sideways or backward.
 	if((fStrafeMag < 0.7500000))
 	{
 		// End:0xCC
+		// cos(>135°): movement is mostly opposed to facing — pawn is running backward.
 		if((fStrafeMag < -0.7500000))
 		{
 			return 32768;			
@@ -300,6 +309,7 @@ function int GetFacingDirection()
 		{
 			vY = Cross(vLookDir, vect(0.0000000, 0.0000000, 1.0000000));
 			// End:0x10A
+			// Cross(forward, up) gives the left-perpendicular in UE2's left-handed axes; positive dot = strafing left.
 			if((Dot(vY, (vDest2D - vLoc2D)) > float(0)))
 			{
 				return 49152;				
@@ -355,6 +365,7 @@ function bool LadderIsAvailable()
 		return false;
 	}
 	// End:0x73
+	// For short ladders approached from the top, also verify there is floor space at the bottom.
 	if(((m_TargetLadder.m_bIsTopOfLadder && ladderVol.IsAShortLadder()) && (!ladderVol.SpaceIsAvailableAtBottomOfLadder(true))))
 	{
 		return false;
@@ -409,11 +420,13 @@ function StopMoving()
 event bool NotifyBump(Actor Other)
 {
 	// End:0x18
+	// Only R6Pawn collisions are handled; ignore geometry, props, etc.
 	if((!Other.IsA('R6Pawn')))
 	{
 		return false;
 	}
 	// End:0xA3
+	// Stationary pawn yields right-of-way; also yield if the bumping pawn has movement priority.
 	if((m_r6pawn.IsStationary() || (!m_r6pawn.HasBumpPriority(R6Pawn(Other)))))
 	{
 		// End:0x9E
@@ -422,6 +435,7 @@ event bool NotifyBump(Actor Other)
 			StopMoving();
 			m_BumpedBy = Other;
 			// End:0x8E
+			// Already backing up: preserve the saved return state rather than overwriting it with 'BumpBackUp'.
 			if((GetStateName() != 'BumpBackUp'))
 			{
 				GotoBumpBackUpState(GetStateName());				
@@ -457,6 +471,7 @@ function bool IsInCrouchedPosture()
 function GotoBumpBackUpState(name returnState)
 {
 	// End:0x11
+	// Guard: passing 'BumpBackUp' as the return state would cause infinite recursion.
 	if((returnState == 'BumpBackUp'))
 	{
 		return;
@@ -473,6 +488,7 @@ function GotoBumpBackUpState(name returnState)
 function bool IsBumpBackUpStateFinish()
 {
 	// End:0x21
+	// C_fMaxBumpTime = 1.0s: exit if at least one second has elapsed since the pawn was last bumped.
 	if(((m_fLastBump + 1.0000000) < Level.TimeSeconds))
 	{
 		return true;
@@ -541,6 +557,7 @@ function SetStateTestMakePath(Pawn anEnemy, R6Pawn.eMovementPace ePace)
 {
 	Enemy = anEnemy;
 	m_r6pawn.m_eMovementPace = ePace;
+	// Initialize LastSeenTime so the 20-second "give up" timeout in EnemyNotVisible starts from now.
 	LastSeenTime = Level.TimeSeconds;
 	GotoState('TestMakePath');
 	return;
@@ -558,10 +575,12 @@ function float GetCurrentChanceToHit(Actor aTarget)
 	{
 		return 0.0000000;
 	}
+	// 0.0174533 = pi/180: converts weapon spread angle from degrees to radians for Tan().
 	fAngle = (Pawn.EngineWeapon.GetCurrentMaxAngle() * 0.0174533);
 	fAngle = Tan(fAngle);
 	fDistance = VSize((Pawn.Location - aTarget.Location));
 	fError = (fAngle * fDistance);
+	// Probability: chance = target collision radius / error cone radius at that range.
 	return (aTarget.CollisionRadius / fError);
 	return;
 }
@@ -574,11 +593,14 @@ function bool IsReadyToFire(Actor aTarget)
 	local float fNeededChanceToHit, fSelfControl;
 
 	// End:0x1D
+	// Best accuracy means weapon sway/spread has fully settled; fire immediately in that case.
 	if(Pawn.EngineWeapon.IsAtBestAccuracy())
 	{
 		return true;
 	}
+	// Skill index 5 = aim control (patience/self-control); higher value = AI waits for better shots.
 	fSelfControl = m_r6pawn.GetSkill(5);
+	// Squaring the skill (0–1 range) raises the accuracy threshold non-linearly; high-skill AI is more patient.
 	fNeededChanceToHit = (fSelfControl * fSelfControl);
 	// End:0x60
 	if((fNeededChanceToHit > 1.0000000))
@@ -598,11 +620,13 @@ function bool IsFocusLeft()
 	local Rotator rFocus;
 
 	// End:0x0D
+	// No focus actor set; treat as left by default (conservative).
 	if((Focus == none))
 	{
 		return true;
 	}
 	rFocus = Rotator((Focus.Location - Pawn.Location));
+	// Clamp both relative yaw values into 0-65535 range and compare; smaller value = left hemisphere.
 	iLeft = Clamp((rFocus.Yaw - Pawn.Rotation.Yaw), 0, 65535);
 	iRight = Clamp((rFocus.Yaw + Pawn.Rotation.Yaw), 0, 65535);
 	return (iLeft < iRight);
@@ -633,12 +657,15 @@ function Rotator ChooseRandomDirection(int iLookBackChance)
 	bLookBack = ((Rand(100) + 1) < iLookBackChance);
 	bTurnLeft = (Rand(2) == 1);
 	// End:0x43
+	// bLookBack: turns 90°-180° (large pivot); else turns 45°-90° (moderate sidestep).
 	if(bLookBack)
 	{
-		ITemp = (Rand(16383) + 16383);		
+		// 16383 ≈ 90°, so Rand(16383)+16383 gives a yaw delta in the 90°-180° range.
+		ITemp = (Rand(16383) + 16383);
 	}
 	else
 	{
+		// 8192 ≈ 45°, so Rand(8192)+8192 gives a yaw delta in the 45°-90° range.
 		ITemp = (Rand(8192) + 8192);
 	}
 	rRot = Pawn.Rotation;
@@ -730,6 +757,7 @@ function bool CanInteractWithObjects(R6InteractiveObject o)
 function PerformAction_StartInteraction()
 {
 	m_StateAfterInteraction = GetStateName();
+	// Clear deferred event buffers so stale events from a previous interaction don't replay.
 	m_InteractionObject.m_SeePlayerPawn = none;
 	m_InteractionObject.m_HearNoiseNoiseMaker = none;
 	m_InteractionObject.m_bPawnDied = false;
@@ -783,12 +811,14 @@ function PerformAction_StopInteraction()
 	else
 	{
 		// End:0x55
+		// Replay the SeePlayer event that was deferred while the interactive object animation played.
 		if((m_InteractionObject.m_SeePlayerPawn != none))
 		{
 			SeePlayer(m_InteractionObject.m_SeePlayerPawn);
 		}
 	}
 	// End:0x99
+	// Replay the HearNoise event that was deferred while the interactive object animation played.
 	if((m_InteractionObject.m_HearNoiseNoiseMaker != none))
 	{
 		HearNoise(m_InteractionObject.m_HearNoiseLoudness, m_InteractionObject.m_HearNoiseNoiseMaker, m_InteractionObject.m_HearNoiseType);
@@ -870,6 +900,7 @@ state ApproachLadder
 	{
 		Pawn.m_bCanProne = true;
 		// End:0x4C
+		// int(11) = PHYS_Ladder: only remove the climber record if we left before actually climbing.
 		if((int(Pawn.Physics) != int(11)))
 		{
 			R6LadderVolume(m_TargetLadder.MyLadder).RemoveClimber(m_r6pawn);
@@ -884,6 +915,7 @@ state ApproachLadder
 		rainbowAI = R6RainbowAI(m_r6pawn.Controller);
 		rainbowAI.m_TeamManager.SetTeamIsClimbingLadder(true);
 		// End:0x75
+		// Bit 512 = TEAM_ClimbLadder action flag; wait for Zulu GoCode if the team is holding for assault signal.
 		if((((rainbowAI.m_TeamManager.m_iTeamAction & 512) > 0) && rainbowAI.m_TeamManager.m_bCAWaitingForZuluGoCode))
 		{
 			return false;
@@ -923,6 +955,7 @@ WaitForZuluGoCode:
 
 
 	// End:0xF2
+	// PAWN_Rainbow == 1: only Rainbow team members wait for the Zulu GoCode before climbing.
 	if((int(m_r6pawn.m_ePawnType) == int(1)))
 	{
 		// End:0xF2
@@ -947,9 +980,11 @@ Wait:
 	{
 		Destination = (m_TargetLadder.Location + (float(50) * Vector(m_TargetLadder.Rotation)));
 		Destination.Z = Pawn.Location.Z;
+		// rot(0, 32768, 0) = 180° yaw rotation: pawn faces back to grab the top rung from above.
 		MoveToPosition(Destination, (m_TargetLadder.Rotation + rot(0, 32768, 0)));
 	}
 	// End:0x1F7
+	// Keep retrying MoveToPosition until within 10 UU for precise ladder-foot alignment.
 	if((VSize((Pawn.Location - Destination)) >= float(10)))
 	{
 		Sleep(1.0000000);
@@ -1006,6 +1041,7 @@ state BeginClimbingLadder
 		m_BumpedBy = Other;
 		bumpingPawn = R6Pawn(Other);
 		// End:0x147
+		// Opposing climbers on the ladder: yield to the one closer to the end they're heading.
 		if((bumpingPawn.m_bIsClimbingLadder && (!AreClimbingInSameDirection(m_r6pawn, bumpingPawn))))
 		{
 			// End:0xB6
@@ -1019,6 +1055,7 @@ state BeginClimbingLadder
 			}
 			Pawn.LadderSpeed = 200.0000000;
 			// End:0x10A
+			// Climbing up (positive Z velocity) = retreat to bottom; climbing down = retreat to top.
 			if((Pawn.Velocity.Z > float(0)))
 			{
 				MoveTarget = R6LadderVolume(Pawn.OnLadder).m_BottomLadder;				
@@ -1050,6 +1087,7 @@ Begin:
 	// End:0xC7
 	if((int(Pawn.m_ePawnType) == int(1)))
 	{
+		// 27 = PENDING_SecureWeapon: holster weapon before grabbing the ladder.
 		m_r6pawn.SetNextPendingAction(27);
 		FinishAnim(m_r6pawn.14);
 		// End:0xC7
@@ -1057,13 +1095,16 @@ Begin:
 		{
 			m_r6pawn.m_bIsClimbingLadder = false;
 			R6LadderVolume(m_TargetLadder.MyLadder).RemoveClimber(m_r6pawn);
+			// SetPhysics(1) = PHYS_Walking: restore normal gravity before returning to wait state.
 			Pawn.SetPhysics(1);
+			// 28 = PENDING_EquipWeapon: re-equip weapon since we aborted the climb.
 			m_r6pawn.SetNextPendingAction(28);
 			GotoState('WaitToClimbLadder');
 		}
 	}
 	m_r6pawn.m_bIsClimbingLadder = true;
 	Pawn.LockRootMotion(1, true);
+	// 5 = PENDING_StartClimbingLadder: trigger the climb-start animation blend.
 	m_r6pawn.SetNextPendingAction(5);
 WaitForStartClimbingAnimToEnd:
 
@@ -1083,6 +1124,7 @@ StartLadder:
 		goto 'MoveTowardEndOfLadder';
 	}
 	// End:0x1FF
+	// Approaching from the top: nudge pawn 15 UU forward so it aligns with the rung correctly.
 	if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)
 	{
 		Pawn.SetLocation((Pawn.Location + (float(15) * Vector(Pawn.Rotation))));
@@ -1091,6 +1133,7 @@ StartLadder:
 	else
 	{
 		// End:0x24A
+		// Non-hostage (type != 3): pull back 20 UU to prevent the root bone from clipping into the wall.
 		if((int(m_r6pawn.m_ePawnType) != int(3)))
 		{
 			Pawn.SetLocation((Pawn.Location - (float(20) * Vector(Pawn.Rotation))));
@@ -1162,6 +1205,7 @@ state EndClimbingLadder
 		J0x20:
 
 		// End:0x43 [Loop If]
+		// Clear all 16 RouteCache slots to discard the stale navigation path used to reach the ladder.
 		if((i < 16))
 		{
 			RouteCache[i] = none;
@@ -1225,6 +1269,7 @@ End:
 
 
 	// End:0x24E
+	// Walk 120 UU along the ladder's look direction to step fully clear of the platform edge.
 	if(m_r6pawn.m_Ladder.m_bIsTopOfLadder)
 	{
 		Destination = (Pawn.Location + (float(120) * Pawn.OnLadder.LookDir));
@@ -1239,6 +1284,7 @@ End:
 	}
 	StopMoving();
 	// End:0x313
+	// PAWN_Rainbow == 1: notify team manager so the next member can begin their climb.
 	if((int(m_r6pawn.m_ePawnType) == int(1)))
 	{
 		// End:0x310
@@ -1332,6 +1378,7 @@ state BumpBackUp
 
 		m_vBumpedByLocation = m_BumpedBy.Location;
 		m_vBumpedByLocation.Z = Pawn.Location.Z;
+		// Cross product of bumper velocity and direction-to-self; positive Z component = step right clears the path.
 		vProduct = Cross(Normal(m_BumpedBy.Velocity), Normal((Pawn.Location - m_vBumpedByLocation)));
 		// End:0x75
 		if((vProduct.Z > float(0)))
@@ -1373,6 +1420,7 @@ state BumpBackUp
 		local Vector vDest;
 
 		// End:0x24
+		// Hostages (PAWN_Hostage == 3) get more search attempts to find a clear spot to step aside.
 		if((int(m_r6pawn.m_ePawnType) == int(3)))
 		{
 			iTryMax = 7;			
@@ -1382,9 +1430,12 @@ state BumpBackUp
 			iTryMax = 1;
 		}
 		iStartingYaw = 16384;
+		// 16384 = 90° in UE's 16-bit yaw space; start sweep perpendicular to the bumper's travel.
 		iYawIncrement = (16384 / 3);
+		// Divides the 90° quadrant into ~3 equal steps (~30° each).
 		iTryOnAQuadrantMax = ((16384 / iYawIncrement) + 1);
 		// End:0x81
+		// Bumper passing on our left: mirror the sweep to the left quadrant instead.
 		if((!MoveRight()))
 		{
 			(iStartingYaw *= float(-1));
@@ -1444,7 +1495,8 @@ Begin:
 	{
 		GetReacheablePoint(m_vTargetPosition, true);
 	}
-	// End:0xF8
+	// End:0xC8
+	// Prefer to keep current posture during backup; pace 1=Prone, 2=CrouchWalk, 3=CrouchRun, 4=Walk, 5=Run.
 	if(Pawn.m_bIsProne)
 	{
 		R6PreMoveTo(m_vTargetPosition, m_BumpedBy.Location, 1);		
@@ -1487,6 +1539,7 @@ Begin:
 	}
 	MoveTo(m_vTargetPosition, m_BumpedBy);
 	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
+	// Record the bump timestamp so IsBumpBackUpStateFinish can apply the 1-second timeout.
 	m_fLastBump = Level.TimeSeconds;
 Wait:
 
@@ -1507,6 +1560,7 @@ Wait:
 	if((m_bumpBackUpNextState != 'None'))
 	{
 		// End:0x270
+		// Restoring ladder approach: re-set MoveTarget since MoveTo cleared it during the backup.
 		if((m_bumpBackUpNextState == 'ApproachLadder'))
 		{
 			MoveTarget = m_TargetLadder;
@@ -1521,11 +1575,13 @@ Wait:
 
 	m_r6pawn.m_bAvoidFacingWalls = false;
 	SetLocation(Pawn.Location);
+	// 225 UU offset: enough clearance for the door to swing open without hitting the pawn.
 	m_vTargetPosition = R6IORotatingDoor(m_BumpedBy).GetTarget(Pawn, 225.0000000, true);
 	R6PreMoveTo(m_vTargetPosition, Location, m_r6pawn.m_eMovementPace);
 	MoveTo(m_vTargetPosition, self);
 	Pawn.Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
 	// End:0x324
+	// About to open this door: use a short pause (0.2s) so the pawn resumes quickly.
 	if((m_bumpBackUpNextState == 'OpenDoor'))
 	{
 		Sleep(0.2000000);		
@@ -1540,6 +1596,7 @@ BackupFromActor:
 
 	m_r6pawn.m_bAvoidFacingWalls = false;
 	SetLocation(Pawn.Location);
+	// Step 120 UU directly away from the blocking actor.
 	m_vTargetPosition = (Pawn.Location - (float(120) * Normal((m_BumpedBy.Location - Pawn.Location))));
 	m_vTargetPosition.Z = Pawn.Location.Z;
 	R6PreMoveTo(m_vTargetPosition, Location, m_r6pawn.m_eMovementPace);
@@ -1586,6 +1643,7 @@ state OpenDoor
 	}
 
     // so the pawn won't collide with door
+	// 128 UU = approximate door half-width; add pawn collision radius plus 10 UU safety buffer.
 	function int GetFurthestOffsetFromDoor(Actor Actor)
 	{
 		return int(((float(128) + Actor.CollisionRadius) + float(10)));
@@ -1599,6 +1657,7 @@ Begin:
 		goto 'End';
 	}
 	// End:0x6D
+	// Skip if door is already open or currently opening — nothing to do.
 	if(((m_r6pawn.m_Door.m_RotatingDoor.m_bIsDoorClosed == false) || m_r6pawn.m_Door.m_RotatingDoor.m_bInProcessOfOpening))
 	{
 		goto 'End';
@@ -1618,6 +1677,7 @@ Begin:
 		goto 'End';
 	}
 	// End:0x180
+	// Locked door: play the door-check animation (4,1) before attempting to force it open.
 	if(m_r6pawn.m_Door.m_RotatingDoor.m_bIsDoorLocked)
 	{
 		m_r6pawn.SetNextPendingAction(4, 1);
@@ -1631,6 +1691,7 @@ Begin:
 		goto 'CloseDoor';
 	}
 	// End:0x295
+	// Pawn is on the push side: step back further so the door doesn't swing into them.
 	if((!m_r6pawn.m_Door.m_RotatingDoor.ActorIsOnSideA(Pawn)))
 	{
 		m_vTargetPosition = m_r6pawn.m_Door.m_RotatingDoor.GetTarget(Pawn, float(GetFurthestOffsetFromDoor(Pawn)), true);
@@ -1678,6 +1739,7 @@ CloseDoor:
 
 
 	// End:0x4EE
+	// Only terrorists (PAWN_Terrorist==2) re-close doors, and only when not at DefCon 1 (maximum alert).
 	if(((((m_closeDoor != none) && (int(m_r6pawn.m_ePawnType) == int(2))) && (int(R6Terrorist(m_r6pawn).m_eDefCon) != int(1))) && ((!m_closeDoor.m_bIsDoorClosed) || m_closeDoor.m_bInProcessOfOpening)))
 	{
 		// End:0x46E
@@ -1728,6 +1790,7 @@ state TestMakePath
 	function EnemyNotVisible()
 	{
 		// End:0x5C
+		// Give up the test if enemy has been out of sight for more than 20 seconds.
 		if(((Level.TimeSeconds - LastSeenTime) > float(20)))
 		{
 			logX("Not seen for at least 20 seconds. GotoState('')");
@@ -1828,6 +1891,7 @@ state PA_Interaction
 	event EndState()
 	{
 		// End:0x17
+		// m_bChangingState=true means we deliberately switched state; false means externally interrupted (e.g. death).
 		if((m_bChangingState == true))
 		{
 			m_bChangingState = false;			
