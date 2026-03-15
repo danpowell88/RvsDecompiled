@@ -2248,11 +2248,40 @@ void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103ec3f0 is 516 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; omits rdtsc")
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 {
 	guard(APawn::pointReachable);
-	return 0;
+	if (!GIsEditor)
+	{
+		// 2D range check (XY only): > 1200 units → unreachable
+		FVector flat(Dest.X - Location.X, Dest.Y - Location.Y, 0.f);
+		if (flat.SizeSquared() > 1440000.0f)
+			return 0;
+	}
+	if (!bKnowVisible)
+	{
+		// LOS check from eye position to destination
+		FVector Eye = Location + eventEyePosition();
+		FCheckResult Hit(1.0f);
+		XLevel->SingleLineCheck(Hit, this, Dest, Eye, 0x286, FVector(0.f,0.f,0.f));
+		if (Hit.Actor)
+			return 0;
+	}
+	// Teleport to destination and back to get actual reachable position
+	FVector SavedLoc = Location;
+	INT moved = XLevel->FarMoveActor(this, Dest, 1, 0);
+	FVector ActualDest;
+	if (moved)
+	{
+		ActualDest = Location;
+		XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+	}
+	else
+	{
+		ActualDest = Dest;
+	}
+	return Reachable(ActualDest, NULL);
 	unguard;
 }
 
