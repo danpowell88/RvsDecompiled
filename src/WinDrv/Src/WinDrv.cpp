@@ -850,7 +850,7 @@ INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOA
 	unguard;
 }
 
-IMPL_TODO("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
+IMPL_DIVERGE("omits WWindowsViewportWindow wrapper, HoldCount fast-path, and all GIsEditor code branches — permanent: editor paths not needed for runtime")
 LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	guard(UWindowsViewport::ViewportWndProc);
