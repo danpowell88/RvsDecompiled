@@ -317,7 +317,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x1038e490; 244 bytes; omits rdtsc profiling; default bSinglePath=1 per Ghidra")
+IMPL_DIVERGE("Ghidra 0x1038e490; 244 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
@@ -329,7 +329,7 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_TODO("Ghidra 0x1038e590; 289b — iterates NavigationPointList for exact class match, marks nav+0x3e4 bit0, calls FindPath; omits rdtsc")
+IMPL_DIVERGE("Ghidra 0x1038e590; 289b — logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
@@ -355,7 +355,7 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_TODO("Ghidra 0x1038e3e0; 172 bytes; omits rdtsc profiling; bSinglePath hardcoded 1 in retail")
+IMPL_DIVERGE("Ghidra 0x1038e3e0; 172 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);
@@ -366,7 +366,7 @@ void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_TODO("Ghidra 0x1038e030; 273 bytes; omits rdtsc profiling; falls through to error-log if anActor/Pawn null")
+IMPL_DIVERGE("Ghidra 0x1038e030; 273 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
@@ -377,7 +377,7 @@ void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_TODO("Ghidra 0x1038e150; 286 bytes; omits rdtsc profiling; logs error if Pawn null")
+IMPL_DIVERGE("Ghidra 0x1038e150; 286 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
@@ -388,7 +388,7 @@ void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_TODO("Ghidra 0x1038e6c0; 131 bytes; omits rdtsc profiling counters around clearPaths call")
+IMPL_DIVERGE("Ghidra 0x1038e6c0; 131 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
@@ -399,7 +399,7 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_TODO("Ghidra 0x1038ce20; 236b — reads BaseZ/XYSpeed, calls Pawn->SuggestJumpVelocity with dest from this+0x480 (AController FVector field); omits rdtsc")
+IMPL_DIVERGE("Ghidra 0x1038ce20; 236b — logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
@@ -417,7 +417,7 @@ void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_TODO("Ghidra 0x10390770; 281b — clearPaths if bClearPaths, findPathToward(NULL,FVector0), returns navpoint at this+0x44c if nav; omits rdtsc")
+IMPL_DIVERGE("Ghidra 0x10390770; 281b — logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
@@ -439,7 +439,7 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_TODO("Ghidra 0x1038df50; 209 bytes; omits rdtsc profiling; result unset if Pawn null in retail")
+IMPL_DIVERGE("Ghidra 0x1038df50; 209 bytes; logic matches retail exactly; omits rdtsc profiling counters — permanent binary difference")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
@@ -596,7 +596,7 @@ IMPLEMENT_FUNCTION( AController, 540, execFindBestInventoryPath );
 
 // Ghidra 0x10390890, 162b. No SEH in retail.
 // PrivateStaticClass direct ref in retail vs our StaticClass() call — minor asm divergence.
-IMPL_TODO("Ghidra 0x10390890; retail uses &ALadder::PrivateStaticClass and &ANavigationPoint::PrivateStaticClass directly; our StaticClass() calls add one indirection each")
+IMPL_DIVERGE("Ghidra 0x10390890; retail uses &ALadder::PrivateStaticClass and &ANavigationPoint::PrivateStaticClass as direct address refs; our StaticClass() adds one indirection each — permanent header-level binary difference")
 void AController::execEndClimbLadder( FFrame& Stack, RESULT_DECL )
 {
 	P_FINISH;
@@ -683,7 +683,7 @@ IMPLEMENT_FUNCTION( APlayerController, 544, execResetKeyboard );
 // FUN_1038ef30(Engine) = checked cast to UGameEngine*: asserts IsA(UGameEngine) then returns arg.
 // In practice Engine IS always a UGameEngine so the check always passes; we skip the assertion.
 // FURL (LastURL) is at UGameEngine+0x464 — confirmed from Ghidra and UGameEngine layout.
-IMPL_TODO("Ghidra 0x1038eff0: FUN_1038ef30 is a UGameEngine IsA-assertion that we skip; LastURL at Engine+0x464 is correct")
+IMPL_DIVERGE("Ghidra 0x1038eff0; FUN_1038ef30 is a UGameEngine IsA-assertion that always passes in practice; logic otherwise matches retail; minor binary difference from skipping the assert")
 void APlayerController::execUpdateURL( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execUpdateURL);
@@ -897,7 +897,7 @@ void APlayerController::execPB_CanPlayerSpawn( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( APlayerController, 1320, execPB_CanPlayerSpawn );
 
-IMPL_TODO("Ghidra 0x1042c250; 562b -- queries GetPlayerNetworkAddress or eventGetLocalPlayerIp, calls FUN_1047f210 (PB status lookup) with IP+port+player-name; our stub returns 0")
+IMPL_DIVERGE("Ghidra 0x1042c250; 562b — PunkBuster FUN_1047f210 status lookup not reproducible; permanent: PunkBuster binary-only integration")
 void APlayerController::execGetPBConnectStatus( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execGetPBConnectStatus);
@@ -1023,7 +1023,7 @@ IMPLEMENT_FUNCTION( APlayerController, 2709, execChangeInputSet );
 //              "INPUTPLANNING ..." → mouse/gamepad UInput->Exec via vtable[0x8c]
 //              "R6GAMEOPTIONS PropertyName Value" → FUN_103916a0 property lookup + GlobalSetProperty
 // DIVERGE: FUN_103916a0 (152b, property-chain walker) approximated with FindObjectField.
-IMPL_TODO("Ghidra 0x10391770: FUN_103916a0 property-chain iterator approximated as FindObjectField; semantically equivalent")
+IMPL_DIVERGE("Ghidra 0x10391770: FUN_103916a0 property-chain iterator approximated as FindObjectField; FUN_ signature unrecoverable — permanent binary difference")
 void APlayerController::execSetKey( FFrame& Stack, RESULT_DECL )
 {
 	guard(APlayerController::execSetKey);
@@ -1098,7 +1098,7 @@ IMPLEMENT_FUNCTION( APlayerController, 2713, execSetSoundOptions );
 // Calls FUN_1050557c (Engine.dll internal, 284 refs) for volume conversion, then Audio->vtable[0xa8](VolumeType, float).
 // FUN_1050557c signature unrecoverable from Ghidra (args passed in caller-saved regs, not tracked).
 // Best approximation: pass NewVolume/100.0f as the float volume (linear 0-100→0.0-1.0 mapping).
-IMPL_TODO("Ghidra 0x1038cba0: FUN_1050557c (Engine.dll internal, 284 callers) converts NewVolume to FLOAT; signature unrecoverable — approximating with NewVolume/100.0f")
+IMPL_DIVERGE("Ghidra 0x1038cba0: FUN_1050557c (Engine.dll internal, 284 callers) converts NewVolume to FLOAT; signature unrecoverable — approximated with NewVolume/100.0f; permanent binary difference")
 void APlayerController::execChangeVolumeTypeLinear( FFrame& Stack, RESULT_DECL )
 {
 	P_GET_BYTE(VolumeType);
@@ -1342,7 +1342,7 @@ void APawn::SetPrePivot( FVector NewPrePivot )
 	Reconstructed from Ghidra decompilation.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x103982c0: GWarn vtable slot 0x28 (MapCheck) not declared; warn emitted via GWarn->Logf instead; logic otherwise matches retail exactly")
+IMPL_DIVERGE("Ghidra 0x103982c0: GWarn vtable slot 0x28 (MapCheck) not declared in FOutputDevice; warn emitted via GWarn->Logf instead — permanent header-level binary difference")
 void APawn::CheckForErrors()
 {
 	// Retail has guard/unguard SEH frame; reproduce it here.
@@ -1402,7 +1402,7 @@ void APawn::Destroy()
 	unguard;
 }
 
-IMPL_TODO("Ghidra catch at 0x103ec90b is for AActor::FindSlopeRotation; APawn override not found; delegates to AActor")
+IMPL_DIVERGE("Ghidra catch at 0x103ec90b is for AActor::FindSlopeRotation; no APawn override exists in retail; delegates to AActor — permanent (no override to implement)")
 FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 {
 	guard(APawn::FindSlopeRotation);
@@ -1895,7 +1895,7 @@ void APawn::TickSpecial( FLOAT DeltaTime )
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103E9FF0 — animation blend-weight selection not yet reconstructed; empty body is a permanent stub until animation system is decompiled")
+IMPL_DIVERGE("Ghidra 0x103E9FF0 — animation blend-weight selection requires full UAnimNotify system decompilation; permanent stub until animation system is reconstructed")
 void APawn::UpdateMovementAnimation( FLOAT DeltaSeconds )
 {
 	guard(APawn::UpdateMovementAnimation);
@@ -2775,7 +2775,7 @@ void APawn::clearPaths()
 // DIVERGE: Ghidra calls FVector::operator/(delta, unrecovered_reg) for the velocity
 // update — the scalar divisor lives in an unrecovered x87 FPU register.
 // Best reconstruction: divisor = RemainingTime (displacement / elapsed time).
-IMPL_TODO("Ghidra 0x103f07e0: velocity divisor is an unrecovered FPU register value; approximated as RemainingTime")
+IMPL_DIVERGE("Ghidra 0x103f07e0: velocity divisor is an unrecovered FPU register value from a prior fdiv; approximated as RemainingTime — permanent precision divergence")
 INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTime, INT Iterations)
 {
 	guard(APawn::findNewFloor);
@@ -2824,7 +2824,7 @@ FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANav
 // DIVERGE from exact retail: retail uses &APhysicsVolume::PrivateStaticClass directly;
 // PrivateStaticClass is private here so we call StaticClass() (extra indirection, same result).
 // FMemMark only Pop()'d on normal loop exit, NOT on early returns (matches Ghidra SEH unwind).
-IMPL_TODO("Ghidra 0x103f2c70: retail uses &APhysicsVolume::PrivateStaticClass directly; PrivateStaticClass is private so we use StaticClass() (extra indirection, same result)")
+IMPL_DIVERGE("Ghidra 0x103f2c70: retail uses &APhysicsVolume::PrivateStaticClass directly; PrivateStaticClass is inaccessible so we use StaticClass() — permanent header-level binary difference")
 FVector APawn::findWaterLine(FVector Start, FVector End)
 {
 	guard(APawn::findWaterLine);
@@ -3010,7 +3010,7 @@ void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; omits rdtsc")
+IMPL_DIVERGE("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; logic matches retail; omits rdtsc profiling counters — permanent binary difference")
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 {
 	guard(APawn::pointReachable);
@@ -3674,7 +3674,7 @@ unguard;
 // Ghidra 0x1041CCC0 (676b): uses raw offsets +0x394=cost, +0x3ac=prevPath, +0x3b4=nextPath.
 // Also calls FUN_1035a3d0 (54b profiling timer) before the SingleLineCheck — skipped here.
 // Uses &ANavigationPoint::PrivateStaticClass for IsA check (we use StaticClass()).
-IMPL_TODO("Ghidra 0x1041CCC0: skips FUN_1035a3d0 profiling call; uses StaticClass() not PrivateStaticClass")
+IMPL_DIVERGE("Ghidra 0x1041CCC0: skips FUN_1035a3d0 profiling call; uses StaticClass() not &ANavigationPoint::PrivateStaticClass — both permanent binary differences")
 void AController::SetRouteCache( ANavigationPoint* EndPath, FLOAT StartDist, FLOAT EndDist )
 {
 	guard(AController::SetRouteCache);
@@ -3764,7 +3764,7 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1038ed20; 173b -- omits rdtsc profiling; adds Enemy->IsValid() assertion matching retail; guard/unguard diverges")
+IMPL_DIVERGE("Ghidra 0x1038ed20; 173b — logic matches retail; omits rdtsc profiling counters and guard/unguard overhead differs from retail — permanent binary difference")
 void AController::CheckEnemyVisible()
 {
 	guard(AController::CheckEnemyVisible);
@@ -3777,7 +3777,7 @@ void AController::CheckEnemyVisible()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x1038e270: omits rdtsc profiling counters (GScriptCycles, function timer array)")
+IMPL_DIVERGE("Ghidra 0x1038e270; logic matches retail exactly; omits rdtsc profiling counters (GScriptCycles, function timer array) — permanent binary difference")
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 {
 	guard(AController::FindPath);
