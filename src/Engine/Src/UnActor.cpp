@@ -4385,13 +4385,29 @@ void AActor::SecondsToString( INT TotalSeconds, INT bAlignMinOnTwoDigits, FStrin
 	unguard;
 }
 
-// Ghidra 0x1042c8e0 (268 bytes): checks if FileName matches the mod config path (via
-// GModMgr->eventGetServerIni()), then calls UObject::SaveConfig on GServerOptions.
-// Requires GModMgr and GServerOptions globals not in this reconstruction.
-IMPL_DIVERGE("requires GModMgr and GServerOptions globals not in reconstruction (Ghidra 0x1042c8e0)")
+// Ghidra 0x1042c8e0 (268 bytes): if FileName is empty, fills it from
+// GModMgr->eventGetServerIni() + ".ini"; then calls UObject::SaveConfig(0x4000, filename)
+// on GServerOptions and the sub-options object at GServerOptions+0x58.
+IMPL_MATCH("Engine.dll", 0x1042c8e0)
 void AActor::SaveServerOptions( FString FileName )
 {
-    // STUB: requires GModMgr->eventGetServerIni() and GServerOptions->SaveConfig() chain
+    guard(AActor::SaveServerOptions);
+    // If no filename supplied, derive it from the mod manager's server INI path.
+    if( FileName.Len() == 0 )
+    {
+        FString Base = GModMgr->eventGetServerIni();
+        FileName = FString::Printf( TEXT("%s.ini"), *Base );
+    }
+    if( GServerOptions )
+    {
+        GServerOptions->SaveConfig( 0x4000, *FileName );
+        // Sub-options object lives at offset +0x58 in UR6ServerInfo (not mapped in class
+        // decl but confirmed by Ghidra; same SaveConfig call chain as retail).
+        UObject* pSub = *(UObject**)( (BYTE*)GServerOptions + 0x58 );
+        if( pSub )
+            pSub->SaveConfig( 0x4000, *FileName );
+    }
+    unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x1037aed0)
@@ -4447,13 +4463,28 @@ void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
     GDbgLine[ GDbgLineIndex ].Color = Color;
 }
 
-// Ghidra 0x103794d0 (428 bytes): manages a per-actor debug vector cache (m_dbgVectorInfo).
-// Searches/creates entries by VectorIndex, copies Point/Cylinder/Color/Label.
-// Uses binary-specific FDbgVectorInfo struct layout and copy-constructor.
-IMPL_DIVERGE("manages m_dbgVectorInfo cache entries; FDbgVectorInfo layout partially unknown (Ghidra 0x103794d0)")
+// Ghidra 0x103794d0 (428 bytes): stores debug vector data at VectorIndex in m_dbgVectorInfo.
+// Retail uses a binary-specific color lookup table (DAT_10666b2c, 8-slot pointer array
+// indexed by (VectorIndex>>2)&7) when Color==NULL; we fall back to white.
+// All other logic (array growth, field assignment, FString copy) matches Ghidra exactly.
+IMPL_DIVERGE("default color when Color==NULL differs: retail reads from binary globals DAT_10666b2c table (Ghidra 0x103794d0)")
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
-    // STUB: FDbgVectorInfo struct layout not fully mapped
+    if( VectorIndex < 0 )
+        return;
+    // Retail initialises with 10 zeroed slots on first use, then extends as needed.
+    if( m_dbgVectorInfo.Num() == 0 )
+        m_dbgVectorInfo.AddZeroed( 10 );
+    while( m_dbgVectorInfo.Num() <= VectorIndex )
+        m_dbgVectorInfo.AddZeroed( 1 );
+    FDbgVectorInfo& info = m_dbgVectorInfo( VectorIndex );
+    info.m_bDisplay  = 1;
+    info.m_vLocation = Point;
+    info.m_vCylinder = Cylinder;
+    // Retail: if Color==NULL, reads from a 8-slot binary-global FColor* table.
+    // DIVERGENCE: use white as fallback instead of binary-specific table lookup.
+    info.m_color     = Color ? *Color : FColor(255,255,255,255);
+    info.m_szDef     = Def;
 }
 
 // Ghidra 0x103791f0 (681 bytes): iterates m_dbgVectorInfo entries and draws each as a

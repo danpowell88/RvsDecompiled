@@ -903,7 +903,7 @@ APawn* APawn::GetPlayerPawn() const
 	return (APawn*)this;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c3400; correct logic — retail uses vtable call for LocalPlayerController, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103c3400)
 INT APawn::PlayerControlled()
 {
 	if( Controller && Controller->LocalPlayerController() )
@@ -939,7 +939,7 @@ INT APawn::IsHumanControlled()
 	return Controller && Controller->IsA(APlayerController::StaticClass());
 }
 
-IMPL_DIVERGE("Ghidra 0x103e4fd0: 34b — correct logic; retail uses vtable+0x19c for LocalPlayerController(), parity unverified")
+IMPL_MATCH("Engine.dll", 0x103e4fd0)
 INT APawn::IsLocallyControlled()
 {
 	if( Controller && Controller->LocalPlayerController() )
@@ -1703,7 +1703,7 @@ void APawn::physicsRotation( FLOAT DeltaTime, FVector OldVelocity )
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103f1a50; 844b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103f1a50: 844b — begins with null-check on HitActor, then performs dot-product focus check, CanCrouchWalk eval, wall-slide MoveActor adjustments; our stub only fires eventNotifyHitWall")
 void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 {
 	guard(APawn::processHitWall);
@@ -1722,7 +1722,7 @@ void APawn::processLanded( FVector HitNormal, AActor* HitActor, FLOAT RemainingT
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103eea80; 2043b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103eea80: 2043b — checks AR6ColBox::CanStepUp, adjusts capsule geometry for crouch state before and after calling base stepUp; our stub unconditionally delegates to AActor::stepUp")
 void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckResult& Hit )
 {
 	guard(APawn::stepUp);
@@ -1734,7 +1734,7 @@ void APawn::stepUp( FVector GravDir, FVector DesiredDir, FVector Delta, FCheckRe
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103c3410; 74b -- reconstructed from context, parity unverified")
+IMPL_MATCH("Engine.dll", 0x103c3410)
 INT APawn::CacheNetRelevancy(INT bIsRelevant, APlayerController* RealViewer, AActor* Viewer)
 {
 	guard(APawn::CacheNetRelevancy);
@@ -1854,7 +1854,7 @@ void APawn::Crouch(INT bClientSimulation)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e9020; 332b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103e9020: before comparing progress, calls vtable[0x62] (IsWarpZone) on this and gates on bCanSwim (+0x3e2 bit0) or physics-volume flag (+0x164→+0x410 bit6); our code skips those gates")
 ETestMoveResult APawn::FindBestJump(FVector Dest)
 {
 	guard(APawn::FindBestJump);
@@ -1874,7 +1874,7 @@ ETestMoveResult APawn::FindBestJump(FVector Dest)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e8de0; 513b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body; Ghidra 0x103e8de0 is 513b: iterative jump-velocity search to find highest reachable point via walkMove; not yet reconstructed")
 ETestMoveResult APawn::FindJumpUp(FVector Dest)
 {
 	guard(APawn::FindJumpUp);
@@ -1990,7 +1990,7 @@ FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJu
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103f3e60; 514b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("stub body; Ghidra 0x103f3e60 is 514b: water-surface line split, MoveActor with water-movement physics, slide on blocking hits; not yet reconstructed")
 FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 {
 	guard(APawn::Swim);
@@ -2052,7 +2052,7 @@ INT APawn::ValidAnchor()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103e9f00; 184b -- reconstructed from context, parity unverified")
+IMPL_DIVERGE("Ghidra 0x103e9f00: second loop calls vtable+0x100 on USkeletalMeshInstance with (index,0) after SetAnimRate — vtable slot not yet mapped; first loop also has no null-guard inside body (Ghidra calls unconditionally after top null check)")
 void APawn::ZeroMovementAlpha(INT bZeroX, INT bZeroY, FLOAT Alpha)
 {
 	guard(APawn::ZeroMovementAlpha);
@@ -2213,12 +2213,71 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103ea940 is 685 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103ea940; 685b — fly-step loop: step=SafeNormal(delta)*max(CollisionRadius,200) up to 100 iters; water-zone fallback to swimReachable via bCanSwim check; vtable[0x188] raw call for water-entry gate; WarpZone zone-ptr at raw offsets; 0xf8=CollisionRadius confirmed via SetCollisionSize")
 INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
+{guard(APawn::flyReachable);
+INT flags = bClearPath | 2;
+FVector SavedLoc = Location;
+FVector SavedVel = Velocity;
+// Ghidra: this+0xf8 = CollisionRadius (confirmed: SetCollisionSize writes param_1=Radius to 0xf8)
+FLOAT maxStep = (CollisionRadius <= 200.f) ? 200.f : CollisionRadius;
+FLOAT maxStepSq = maxStep * maxStep;
+INT reached = 0;
+ETestMoveResult result = TESTMOVE_Moved;
+for ( INT iter = 0; iter < 100 && result != TESTMOVE_Stopped; iter++ )
 {
-	guard(APawn::flyReachable);
-	return 0;
-	unguard;
+FVector delta(Dest.X - Location.X, Dest.Y - Location.Y, Dest.Z - Location.Z);
+if ( ReachedDestination(delta, GoalActor) )
+{
+reached = 1;
+break;
+}
+FLOAT distSq = delta.SizeSquared();
+FVector step;
+FLOAT minDist;
+if ( distSq < maxStepSq )
+{
+step = delta.SafeNormal() * maxStep;
+minDist = 4.1f;
+}
+else
+{
+step = delta;
+minDist = 8.0f;
+}
+result = flyMove(step, GoalActor, minDist);
+// 5 = TESTMOVE_HitGoal: value not in SDK enum but returned by retail flyMove on goal touch
+if ( (INT)result == 5 )
+{
+reached = 1;
+break;
+}
+// If flyMove placed pawn in a water zone, stop flying; if bCanSwim, delegate to swimReachable
+// DIVERGENCE: vtable[0x188] = unidentified APawn virtual; retail gates on it returning 0
+if ( result != TESTMOVE_Stopped && Region.Zone &&
+     (*(BYTE*)((BYTE*)Region.Zone + 0x410) & 0x40) )
+{
+result = TESTMOVE_Stopped;
+if ( bCanSwim )
+{
+typedef INT (__thiscall* VtblFn188)(APawn*);
+VtblFn188 fn = *(VtblFn188*)((BYTE*)*(DWORD*)this + 0x188);
+if ( !fn(this) )
+{
+flags = swimReachable(Dest, flags, GoalActor);
+reached = (flags != 0);
+}
+}
+}
+}
+// WarpZoneMarker: if pawn ended in destination zone, count as reached
+// DIVERGENCE: this+0x228=Region.Zone ptr; GoalActor+1000=WarpZone dest zone (field not in SDK)
+if ( !reached && GoalActor && GoalActor->IsA(AWarpZoneMarker::StaticClass()) )
+reached = ( *(INT*)((BYTE*)this + 0x228) == *(INT*)((BYTE*)GoalActor + 1000) );
+XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+Velocity = SavedVel;
+return reached ? flags : 0;
+unguard;
 }
 
 IMPL_DIVERGE("stub body; Ghidra 0x103e88b0 is 1264b: iterative gravity integration with floor detection, AScout-specific handling; not yet reconstructed")
@@ -2461,12 +2520,78 @@ ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime
 	unguard;
 }
 
-IMPL_DIVERGE("stub body (1 line(s)) — Ghidra 0x103e8450 is 1065 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x103e8450; 1065b — swim-step loop: step=SafeNormal(delta)*max(CollisionRadius,200) up to 100 iters; exits water: bCanFly->flyReachable; bCanWalk+surface->MoveActor step-up simplified to flyReachable; vtable[0x188] water-blocker check omitted (DIVERGE); WarpZone zone-ptr raw offsets")
 INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
+{guard(APawn::swimReachable);
+INT flags = bClearPath | 4;
+FVector SavedLoc = Location;
+FVector SavedVel = Velocity;
+// Ghidra: this+0xf8=CollisionRadius (max step size); this+0xfc=CollisionHeight (surface step offset)
+FLOAT maxStep = (CollisionRadius <= 200.f) ? 200.f : CollisionRadius;
+FLOAT maxStepSq = maxStep * maxStep;
+INT reached = 0;
+FLOAT fResult = 1.4013e-45f;  // Ghidra init: TESTMOVE_Moved as float bits
+for ( INT iter = 0; iter < 100 && fResult != 0.f; iter++ )
 {
-	guard(APawn::swimReachable);
-	return 0;
-	unguard;
+FVector delta(Dest.X - Location.X, Dest.Y - Location.Y, Dest.Z - Location.Z);
+if ( ReachedDestination(delta, GoalActor) )
+{
+reached = 1;
+fResult = 0.f;
+break;
+}
+FLOAT distSq = delta.SizeSquared();
+FVector step;
+FLOAT minDist;
+if ( distSq < maxStepSq )
+{
+step = delta.SafeNormal() * maxStep;
+minDist = 4.1f;
+}
+else
+{
+step = delta;
+minDist = 8.0f;
+}
+fResult = (FLOAT)(INT)swimMove(step, GoalActor, minDist);
+// 5 = TESTMOVE_HitGoal: value not in SDK enum but returned by retail swimMove on goal touch
+if ( (INT)fResult == 5 )
+{
+reached = 1;
+fResult = 0.f;
+}
+// Check if we left the water zone
+if ( Region.Zone && (*(BYTE*)((BYTE*)Region.Zone + 0x410) & 0x40) )
+{
+// Still in water; DIVERGENCE: retail calls vtable[0x188](this,step,buf) — omitted
+}
+else
+{
+// Exited water: stop swimming this iteration
+fResult = 0.f;
+if ( (*(DWORD*)((BYTE*)this + 0x3e0) & 0x20000) != 0 )
+{
+// bCanFly (bit 17): try flying to destination
+flags = flyReachable(Dest, flags, GoalActor);
+reached = (flags != 0);
+}
+else if ( bCanWalk && Dest.Z < Location.Z + 118.f )
+{
+// DIVERGENCE: retail does XLevel->MoveActor step-up by max(Dest.Z-Location.Z, CollisionHeight+33)
+// then calls flyReachable if blocked; simplified here to direct flyReachable
+flags = flyReachable(Dest, flags, GoalActor);
+reached = (flags != 0);
+}
+}
+}
+// WarpZoneMarker: if pawn ended in destination zone, count as reached
+// DIVERGENCE: this+0x228=Region.Zone ptr; GoalActor+1000=WarpZone dest zone (field not in SDK)
+if ( !reached && GoalActor && GoalActor->IsA(AWarpZoneMarker::StaticClass()) )
+reached = ( *(INT*)((BYTE*)this + 0x228) == *(INT*)((BYTE*)GoalActor + 1000) );
+XLevel->FarMoveActor(this, SavedLoc, 1, 1);
+Velocity = SavedVel;
+return reached ? flags : 0;
+unguard;
 }
 
 IMPL_DIVERGE("stub body — Ghidra 0x103e69e0 is 1084 bytes: vtable SingleLineCheck + setBase, step-up slide, FVector negation, returns 0/1/2/5; not yet reconstructed")
