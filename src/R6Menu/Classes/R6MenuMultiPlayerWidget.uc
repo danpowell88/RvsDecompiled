@@ -12,32 +12,48 @@
 class R6MenuMultiPlayerWidget extends R6MenuWidget
     config(User);
 
+// Pixel X origin for the main framed areas (server list, filter panels)
 const K_XSTARTPOS = 10;
+// Full width of the main content panels (fits within 640 wide screen)
 const K_WINDOWWIDTH = 620;
+// Inner origin/width strip borders for lists that have no drawn border frame
 const K_XSTARTPOS_NOBORDER = 12;
 const K_WINDOWWIDTH_NOBORDER = 616;
+// Tab label strip is inset by this many pixels from the frame edge
 const K_XTABOFFSET = 5;
+// Width of the connection-type tab row (Internet / LAN) — narrower to leave room for page switcher
 const K_FIRST_TABWINDOW_WIDTH = 500;
+// Width of the filter/server-info tab row (Game Mode / Tech Filter / Server Info)
 const K_SEC_TABWINDOW_WIDTH = 600;
-const K_FFIRST_WINDOWHEIGHT = 154;
-const K_FSECOND_WINDOWHEIGHT = 90;
+// Pixel heights of the two content panels below their respective tab rows
+const K_FFIRST_WINDOWHEIGHT = 154;   // Server list panel height
+const K_FSECOND_WINDOWHEIGHT = 90;   // Filter / server-info panel height
+// Y positions of the two tab-panel areas (measured from widget top)
 const K_YPOS_FIRST_TABWINDOW = 126;
 const K_YPOS_SECOND_TABWINDOW = 296;
+// Y position of the help/status text bar at the bottom
 const K_YPOS_HELPTEXT_WINDOW = 430;
+// Vertical spacing between action buttons (Login, Join, JoinIP, Refresh, Create)
 const C_fDIST_BETWEEN_BUTTON = 30;
+// Minimum milliseconds between server-list display refreshes (throttles UI churn)
 const K_LIST_UPDATE_TIME = 1000;
+// Seconds the user must wait between manual Refresh presses (prevents spam)
 const K_REFRESH_TIMEOUT = 2.0;
+// Minimum seconds between filter-apply passes when checkboxes change rapidly
 const K_UPDATE_FILTER_INTERVAL = 0.3;
 
+// Which of the two top-level connection tabs is active (LAN or Internet)
 enum MultiPlayerTabID
 {
-	TAB_Lan_Server,                 // 0
-	TAB_Internet_Server,            // 1
-	TAB_Game_Mode,                  // 2
-	TAB_Tech_Filter,                // 3
-	TAB_Server_Info                 // 4
+	TAB_Lan_Server,                 // 0 — Local Area Network server browser
+	TAB_Internet_Server,            // 1 — GameSpy / ubi.com internet browser
+	TAB_Game_Mode,                  // 2 — Game type filter panel (second tab row)
+	TAB_Tech_Filter,                // 3 — Technical filters panel (ping, version, etc.)
+	TAB_Server_Info                 // 4 — Selected-server details panel
 };
 
+// Indices into the eServerInfoID enum mirror the eServerInfoID_ values.
+// Used to identify which filter checkbox was toggled in SetServerFilterBooleans().
 enum eServerInfoID
 {
 	eServerInfoID_DeathMatch,       // 0
@@ -57,43 +73,47 @@ enum eServerInfoID
 	eServerInfoID_NotEmpty,         // 14
 	eServerInfoID_NotFull,          // 15
 	eServerInfoID_Responding,       // 16
-	eServerInfoID_HasPlayer,        // 17
+	eServerInfoID_HasPlayer,        // 17 — REMOVED IN 1.60 (was szHasPlayer text filter)
 	eServerInfoID_SameVersion       // 18
 };
 
+// Controls what happens after the ubi.com login dialog completes successfully.
+// SendMessage() reads this flag to decide which step to take next.
 enum eLoginSuccessAction
 {
-	eLSAct_None,                    // 0
-	eLSAct_JoinIP,                  // 1
-	eLSAct_Join,                    // 2
-	eLSAct_InternetTab,             // 3
-	eLSAct_LaunchServer,            // 4
-	eLSAct_CloseWindow,             // 5
-	eLSAct_SwitchToInternetTab      // 6
+	eLSAct_None,                    // 0 — no pending action
+	eLSAct_JoinIP,                  // 1 — finish a Join-by-IP flow
+	eLSAct_Join,                    // 2 — finish a Join-from-list flow
+	eLSAct_InternetTab,             // 3 — refresh internet server list after login
+	eLSAct_LaunchServer,            // 4 — launch a dedicated server after login
+	eLSAct_CloseWindow,             // 5 — re-login after router disconnect, refresh if on internet tab
+	eLSAct_SwitchToInternetTab      // 6 — navigate to internet tab after login
 };
 
-var R6MenuMultiPlayerWidget.MultiPlayerTabID m_ConnectionTab;
-var R6MenuMultiPlayerWidget.MultiPlayerTabID m_FilterTab;
+var R6MenuMultiPlayerWidget.MultiPlayerTabID m_ConnectionTab; // Active connection tab (LAN=0 / Internet=1)
+var R6MenuMultiPlayerWidget.MultiPlayerTabID m_FilterTab;    // Active bottom-panel tab (Game Mode / Tech Filter / Server Info)
 var R6MenuMultiPlayerWidget.eLoginSuccessAction m_LoginSuccessAction;  // Action to take after login procedure succeeds
 var int m_FrameCounter;  // Counter to schedule slower processes
                                                                  // keeps a history of pop up to return to./
-var int m_iTimeLastUpdate;  // Time in ms of the last server list update
-var int m_iLastSortCategory;  // the last sort we did
-var config int m_iLastTabSel;  // The last tab selected between Internet and LAN
-var int m_iTotalPlayers;  // total players
+var int m_iTimeLastUpdate;  // Time in ms of the last server list update (used to throttle redraws)
+var int m_iLastSortCategory;  // the last sort column/category applied
+var config int m_iLastTabSel;  // The last tab selected between Internet and LAN (persisted to User.ini)
+var int m_iTotalPlayers;  // total players across all visible servers (shown in status bar)
 // NEW IN 1.60
-var config int m_iFilterFasterThan;
+var config int m_iFilterFasterThan; // Hide servers with ping above this value (0 = disabled)
 var bool m_bListUpdateReq;  // the server list needs to be updated
-var bool m_bLastTypeOfSort;
-var bool m_bFPassWindowActv;  // First pass flag used for when window is first activated
-var bool m_bJoinIPInProgress;
-var bool m_bQueryServerInfoInProgress;
-var bool m_bGetServerInfo;  // Need to get the server info for the selected server
-var bool m_bLanRefreshFPass;  // First pass flag for LAN server refresh
-var bool m_bIntRefreshFPass;  // First pass flag for Internet server refresh
-// NEW IN 1.60
+var bool m_bLastTypeOfSort; // true = ascending sort order
+var bool m_bFPassWindowActv;  // First pass flag used for when window is first activated (restores last tab)
+var bool m_bJoinIPInProgress; // A Join-by-IP popup dialog is currently active
+var bool m_bQueryServerInfoInProgress; // A pre-join server query popup is currently active
+var bool m_bGetServerInfo;  // Need to get the server info for the selected server (deferred request)
+var bool m_bLanRefreshFPass;  // First pass flag for LAN server refresh (triggers auto-refresh on first visit)
+var bool m_bIntRefreshFPass;  // First pass flag for Internet server refresh (triggers auto-refresh on first visit)
+// NEW IN 1.60 — rate-limiting flag: a filter update is pending but was deferred
 var bool m_bNeedUpdateServerFilter;
-// NEW IN 1.60
+// NEW IN 1.60 — per-game-mode and per-tech filter booleans (config = saved to User.ini).
+// In SDK 1.56 these were stored directly on the server list filter structs;
+// in 1.60 they live here and are applied by UpdateFilters() each frame.
 var config bool m_bFilterDeathMatch;
 // NEW IN 1.60
 var config bool m_bFilterTeamDeathMatch;
@@ -125,10 +145,10 @@ var config bool m_bFilterResponding;
 var config bool m_bFilterSameVersion;
 // NEW IN 1.60
 var config bool m_bFilterPunkBusterServerOnly;
-var float m_fMouseX;  // X position of mouse
+var float m_fMouseX;  // X position of mouse (saved each frame to position the right-click menu)
 var float m_fMouseY;  // Y position of mouse
-var float m_fRefeshDeltaTime;  // Time since refresh button last hit
-// NEW IN 1.60
+var float m_fRefeshDeltaTime;  // Seconds since the Refresh button was last pressed (guards against spam)
+// NEW IN 1.60 — timestamp of last filter update; paired with m_bNeedUpdateServerFilter for debounce
 var float m_fLastUpdateServerFilterTime;
 var R6WindowTextLabel m_LMenuTitle;
 var R6WindowButton m_ButtonMainMenu;
@@ -163,20 +183,28 @@ var R6WindowUbiLogIn m_pLoginWindow;  // Windows and logic for ubi.com login
 var R6WindowJoinIP m_pJoinIPWindow;  // Windows and login for Join IP steps
 var R6WindowQueryServerInfo m_pQueryServerInfo;  // Windows and login for logic to query a server for information
 var R6WindowRightClickMenu m_pRightClickMenu;  // Used when user right clicks on a server
-var string m_szGamePwd;
+var string m_szGamePwd; // Password for the server being joined (empty if server is unlocked)
 var config string m_szPopUpIP;  // IP adress entered in pop up
-var string m_szServerIP;  // IP of server
-var string m_szMultiLoc[2];  // array of text localization
+var string m_szServerIP;  // IP of server being joined (set before starting pre-join flow)
+var string m_szMultiLoc[2];  // Cached localisation strings: [0]="N Servers", [1]="N Players"
 
+// Called once when the widget is instantiated. Creates all child windows,
+// buttons, popup dialogs, and tab panels. Does NOT create the server list or
+// second tab content — those are deferred to ShowWindow() to avoid spawning
+// actors (ClientBeaconReceiver) before they are needed.
 function Created()
 {
+	// Grab the shared game service object that talks to ubi.com / GameSpy
 	m_GameService = R6Console(Root.Console).m_GameService;
 	InitText();
 	InitButton();
+	// Curved decorative frame strip that sits behind the tab labels
 	m_FirstTabWindow = R6WindowTextLabelCurved(CreateWindow(Class'R6Window.R6WindowTextLabelCurved', 10.0000000, 85.0000000, 620.0000000, 30.0000000, self));
 	m_FirstTabWindow.bAlwaysBehind = true;
 	m_FirstTabWindow.Text = "";
 	m_FirstTabWindow.m_BGTexture = none;
+	// First tab row: Internet Server | LAN Server
+	// Internet is added first so it appears as the leftmost tab
 	m_pFirstTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', (10.0000000 + float(5)), 90.0000000, 500.0000000, 25.0000000, self));
 	m_pFirstTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_InternetServer", "R6Menu"), Localize("Tip", "Tab_InternetServer", "R6Menu"), int(1));
 	m_pFirstTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_LanServer", "R6Menu"), Localize("Tip", "Tab_LanServer", "R6Menu"), int(0));
@@ -186,16 +214,20 @@ function Created()
 	InitServerInfoMap();
 	InitServerInfoOptions();
 	InitRightClickMenu();
+	// Curved frame strip behind the second row of tabs (filter / server info)
 	m_SecondTabWindow = R6WindowTextLabelCurved(CreateWindow(Class'R6Window.R6WindowTextLabelCurved', 10.0000000, 296.0000000, 620.0000000, 30.0000000, self));
 	m_SecondTabWindow.bAlwaysBehind = true;
 	m_SecondTabWindow.Text = "";
 	m_SecondTabWindow.m_BGTexture = none;
+	// Second tab row: Game Mode Filter | Tech Filter | Server Info
 	m_pSecondTabManager = R6MenuMPManageTab(CreateWindow(Class'R6Menu.R6MenuMPManageTab', (10.0000000 + float(5)), (296.0000000 + float(5)), 600.0000000, 25.0000000, self));
 	m_pSecondTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_GameFilter", "R6Menu"), Localize("Tip", "Tab_GameFilter", "R6Menu"), int(2));
 	m_pSecondTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_TechFilter", "R6Menu"), Localize("Tip", "Tab_TechFilter", "R6Menu"), int(3));
 	m_pSecondTabManager.AddTabInControl(Localize("MultiPlayer", "Tab_ServerInfo", "R6Menu"), Localize("Tip", "Tab_ServerInfo", "R6Menu"), int(4));
 	m_pHelpTextWindow = R6MenuHelpWindow(CreateWindow(Class'R6Menu.R6MenuHelpWindow', 150.0000000, 429.0000000, 340.0000000, 42.0000000, self));
 	m_pHelpTextWindow.m_bForceRefreshOnSameTip = true;
+	// Popup windows are created at full-screen size (640x480) but hidden.
+	// They are shown on demand and managed via Manager() calls in Paint().
 	m_pLoginWindow = R6WindowUbiLogIn(CreateWindow(Root.MenuClassDefines.ClassUbiLogIn, 0.0000000, 0.0000000, 640.0000000, 480.0000000, self, true));
 	m_pLoginWindow.m_GameService = m_GameService;
 	m_pLoginWindow.PopUpBoxCreate();
@@ -208,20 +240,26 @@ function Created()
 	m_pQueryServerInfo.m_GameService = m_GameService;
 	m_pQueryServerInfo.PopUpBoxCreate();
 	m_pQueryServerInfo.HideWindow();
+	// On first Tick(), restore the last tab the user had open
 	m_bFPassWindowActv = true;
 	// End:0x519
+	// 31 = EBN_LogOut, 30 = EBN_LogIn (numeric enum values for the toggle button state)
 	if(m_GameService.m_bLoggedInUbiDotCom)
 	{
-		m_ButtonLogInOut.SetButLogInOutState(31);		
+		m_ButtonLogInOut.SetButLogInOutState(31); // Show "Log Out"		
 	}
 	else
 	{
-		m_ButtonLogInOut.SetButLogInOutState(30);
+		m_ButtonLogInOut.SetButLogInOutState(30); // Show "Log In"
 	}
+	// Pre-fill the cooldown so the user can refresh immediately when the menu opens
 	m_fRefeshDeltaTime = 2.0000000;
+	// Ensure any in-progress refresh from a previous session is stopped before we arrive
 	m_GameService.StopRefreshServers();
+	// Cache localisation strings used in the status bar to avoid per-frame Localize() calls
 	m_szMultiLoc[0] = Localize("MultiPlayer", "NbOfServers", "R6Menu");
 	m_szMultiLoc[1] = Localize("MultiPlayer", "NbOfPlayers", "R6Menu");
+	// Page-switcher positioned to the right of the first tab row
 	m_PageCount = R6WindowPageSwitch(CreateWindow(Class'R6Window.R6WindowPageSwitch', 530.0000000, 90.0000000, 90.0000000, 25.0000000, self));
 	m_fLastUpdateServerFilterTime = GetTime();
 	m_bNeedUpdateServerFilter = false;
@@ -230,20 +268,28 @@ function Created()
 
 /////////////////////////////////////////////////////////////////
 // display the background
+// Paint() is called every frame. As well as drawing, it acts as a per-frame
+// tick for several state machines: server list polling, cursor feedback,
+// selection-change detection, server info requests, and popup window management.
 /////////////////////////////////////////////////////////////////
 function Paint(Canvas C, float X, float Y)
 {
 	local R6WindowTextLabel pR6TextLabelTemp;
 
 	Root.PaintBackground(C, self);
+	// Track mouse position so DisplayRightClickMenu() can place the menu at the cursor
 	m_fMouseX = X;
 	m_fMouseY = Y;
 	// End:0x4A
+	// The LAN server manager must be pumped every frame (it polls the beacon socket).
+	// The GameSpy service is pumped by R6Console, so we only need to handle LAN here.
 	if((int(m_ConnectionTab) == int(0)))
 	{
 		m_LanServers.LANSeversManager();
 	}
 	// End:0xFF
+	// Throttle display updates to once per second even if server data changes faster.
+	// This prevents thrashing the list UI on every incoming beacon packet.
 	if(((m_LanServers.m_bServerListChanged || m_GameService.m_bServerListChanged) && ((m_GameService.NativeGetMilliSeconds() - m_iTimeLastUpdate) > 1000)))
 	{
 		m_iTimeLastUpdate = m_GameService.NativeGetMilliSeconds();
@@ -263,17 +309,20 @@ function Paint(Canvas C, float X, float Y)
 		}
 	}
 	// End:0x18E
+	// Internet tab: handle end-of-refresh and cursor feedback
 	if((int(m_ConnectionTab) == int(1)))
 	{
 		// End:0x151
+		// When GameSpy finishes a full server refresh, re-sort and repopulate the list
 		if(m_GameService.m_bRefreshFinished)
 		{
 			m_GameService.m_bRefreshFinished = false;
 			ResortServerList(m_iLastSortCategory, m_bLastTypeOfSort);
 			GetGSServers();
-			m_bGetServerInfo = true;
+			m_bGetServerInfo = true; // request updated detail info for currently selected server
 		}
 		// End:0x177
+		// Show wait cursor while a GameSpy refresh is in-flight
 		if(m_GameService.IsRefreshServersInProgress())
 		{
 			SetCursor(Root.WaitCursor);			
@@ -288,6 +337,7 @@ function Paint(Canvas C, float X, float Y)
 		SetCursor(Root.NormalCursor);
 	}
 	// End:0x272
+	// Detect server selection changes by comparing against the cached previous selection
 	if((m_ServerListBox.m_SelectedItem != m_oldSelItem))
 	{
 		m_oldSelItem = m_ServerListBox.m_SelectedItem;
@@ -299,7 +349,7 @@ function Paint(Canvas C, float X, float Y)
 			{
 				m_LanServers.SetSelectedServer(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);
 			}
-			GetServerInfo(m_LanServers);			
+			GetServerInfo(m_LanServers); // LAN: info comes directly from beacon data		
 		}
 		else
 		{
@@ -308,10 +358,13 @@ function Paint(Canvas C, float X, float Y)
 			{
 				m_GameService.SetSelectedServer(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).iMainSvrListIdx);
 			}
+			// Internet: detailed info must be fetched asynchronously from ubi.com
 			m_bGetServerInfo = true;
 		}
 	}
 	// End:0x325
+	// If Server Info tab is visible and info is needed, request it from ubi.com (NativeMSClientReqAltInfo).
+	// Only request when no refresh is in progress — the SDK comment notes this limitation may change.
 	if((((m_bGetServerInfo && (!m_GameService.IsRefreshServersInProgress())) && (int(m_ConnectionTab) == int(1))) && (int(m_FilterTab) == int(4))))
 	{
 		// End:0x317
@@ -323,33 +376,39 @@ function Paint(Canvas C, float X, float Y)
 		m_bGetServerInfo = false;
 	}
 	// End:0x365
+	// When the detailed server info arrives asynchronously, refresh the display
 	if((m_GameService.m_bServerInfoChanged && (int(m_ConnectionTab) == int(1))))
 	{
 		GetServerInfo(m_GameService);
 		m_GameService.m_bServerInfoChanged = false;
 	}
 	// End:0x38C
+	// If the ubi.com router dropped us, force a re-login (eLSAct_CloseWindow = 5)
 	if(m_GameService.NativeIsRouterDisconnect())
 	{
 		m_LoginSuccessAction = 5;
 		m_pLoginWindow.LogInAfterDisconnect(self);
 	}
 	// End:0x3AC
+	// Drive the login popup state machine while a login action is pending
 	if((int(m_LoginSuccessAction) != int(0)))
 	{
 		m_pLoginWindow.Manager(self);
 	}
 	// End:0x3C5
+	// Drive the Join-by-IP popup state machine while it is active
 	if(m_bJoinIPInProgress)
 	{
 		m_pJoinIPWindow.Manager(self);
 	}
 	// End:0x3DE
+	// Drive the pre-join server query popup state machine while it is active
 	if(m_bQueryServerInfoInProgress)
 	{
 		m_pQueryServerInfo.Manager(self);
 	}
 	// End:0x406
+	// Disable the Join button if no server is selected or the server is a different game version
 	if((m_ServerListBox.m_SelectedItem == none))
 	{
 		m_ButtonJoin.bDisabled = true;		
@@ -359,7 +418,7 @@ function Paint(Canvas C, float X, float Y)
 		// End:0x43C
 		if((!R6WindowListServerItem(m_ServerListBox.m_SelectedItem).bSameVersion))
 		{
-			m_ButtonJoin.bDisabled = true;			
+			m_ButtonJoin.bDisabled = true; // Version mismatch — joining would fail			
 		}
 		else
 		{
@@ -369,32 +428,48 @@ function Paint(Canvas C, float X, float Y)
 	return;
 }
 
+// Called when the widget becomes visible (e.g. user navigates to the multiplayer screen).
+// The LanServers object and the ClientBeaconReceiver actor are created here rather than
+// in Created(), because actors are destroyed on level changes — so we must re-spawn them
+// whenever the menu is shown after a level transition.
 function ShowWindow()
 {
 	local string _szIPAddress;
 
+	// Registering the CD key manager user slot 15 links this widget as the recipient
+	// of CD key validation results
 	R6MenuRootWindow(Root).m_pMenuCDKeyManager.SetWindowUser(Root.15, self);
 	// End:0x97
+	// Create the LAN server manager on first show (deferred to avoid wasting memory
+	// when the user never visits the multiplayer screen)
 	if((m_LanServers == none))
 	{
 		m_LanServers = new (none) Class<R6LanServers>(Root.MenuClassDefines.ClassLanServer);
 		R6Console(Root.Console).m_LanServers = m_LanServers;
 		m_LanServers.Created();
-		InitServerList();
-		InitSecondTabWindow();
+		InitServerList();      // Creates the scrollable server list box
+		InitSecondTabWindow(); // Creates game-mode, tech-filter, and server-info panels
 	}
 	// End:0xE6
+	// ClientBeaconReceiver is an Actor, so it gets destroyed with levels.
+	// Re-spawn it here whenever it is missing.
 	if((m_LanServers.m_ClientBeacon == none))
 	{
 		m_LanServers.m_ClientBeacon = Root.Console.ViewportOwner.Actor.Spawn(Class'IpDrv.ClientBeaconReceiver');
 	}
+	// Share the beacon reference with the GameSpy service so both can use the same socket
 	m_GameService.m_ClientBeacon = m_LanServers.m_ClientBeacon;
+	// Default sort is by ping time, ascending
 	m_iLastSortCategory = int(m_LanServers.4);
 	m_bLastTypeOfSort = true;
 	super(UWindowWindow).ShowWindow();
+	// Initialise the CD key on the GameSpy client (needed before any internet join)
 	R6Console(Root.Console).m_GameService.InitGSCDKey();
+	// Pick a random multiplayer background image for this session
 	Root.SetLoadRandomBackgroundImage("Multiplayer");
 	// End:0x1B5
+	// Non-ubi.com match making (e.g. ASE/All-Seeing Eye) provides the server IP
+	// via a command-line argument; bypass the normal join flow and go direct
 	if(R6Console(Root.Console).m_bNonUbiMatchMaking)
 	{
 		Class'Engine.Actor'.static.NativeNonUbiMatchMakingAddress(_szIPAddress);
@@ -407,12 +482,16 @@ function ShowWindow()
 /////////////////////////////////////////////////////////////////
 // display the help text in the m_pHelpTextWindow (derivate for uwindowwindow
 /////////////////////////////////////////////////////////////////
+// UWindow calls this when a child widget provides a tool-tip string.
 function ToolTip(string strTip)
 {
 	ManageToolTip(strTip);
 	return;
 }
 
+// Displays server count and total-player count in the help text bar.
+// When _bForceATip is true the player count is refreshed even if a tooltip string is provided.
+// When _strTip is empty the default "N Servers / N Players" status text is shown.
 function ManageToolTip(string _strTip, optional bool _bForceATip)
 {
 	local string szTemp1, szTemp2;
@@ -464,30 +543,34 @@ function ManageToolTip(string _strTip, optional bool _bForceATip)
 
 /////////////////////////////////////////////////////////////////
 // manage the tab selection (the call of the fct come from R6MenuMPManageTab
+// Handles both the top connection tabs (LAN / Internet) and the bottom filter tabs.
 /////////////////////////////////////////////////////////////////
 function ManageTabSelection(int _MPTabChoiceID)
 {
 	switch(_MPTabChoiceID)
 	{
 		// End:0x59
+		// TAB_Lan_Server (0): switch to LAN browser, auto-refresh if list is empty
 		case int(0):
 			m_ConnectionTab = 0;
 			// End:0x32
 			if((m_LanServers.m_GameServerList.Length == 0))
 			{
-				Refresh(false);
+				Refresh(false); // Not user-initiated, so the cooldown doesn't apply
 			}
 			GetLanServers();
 			GetServerInfo(m_LanServers);
 			UpdateServerFilters();
 			m_iLastTabSel = int(0);
-			SaveConfig();
+			SaveConfig(); // Persist tab choice so we return here next session
 			// End:0x22E
 			break;
 		// End:0xB8
+		// TAB_Internet_Server (1): begin login flow before showing internet servers
+		// m_LoginSuccessAction = 3 (eLSAct_InternetTab) tells login success handler to do a Refresh
 		case int(1):
 			m_ConnectionTab = 1;
-			m_LoginSuccessAction = 3;
+			m_LoginSuccessAction = 3; // eLSAct_InternetTab — refresh list after login
 			m_pLoginWindow.StartLogInProcedure(self);
 			// End:0x9C
 			if((m_GameService.m_GameServerList.Length == 0))
@@ -501,6 +584,7 @@ function ManageTabSelection(int _MPTabChoiceID)
 			// End:0x22E
 			break;
 		// End:0x120
+		// TAB_Game_Mode (2): show game-type checkboxes, hide server detail panels
 		case int(2):
 			m_FilterTab = 2;
 			m_ServerInfoPlayerBox.HideWindow();
@@ -512,6 +596,7 @@ function ManageTabSelection(int _MPTabChoiceID)
 			// End:0x22E
 			break;
 		// End:0x188
+		// TAB_Tech_Filter (3): show technical filter checkboxes (ping, dedicated, PunkBuster, etc.)
 		case int(3):
 			m_FilterTab = 3;
 			m_ServerInfoPlayerBox.HideWindow();
@@ -523,6 +608,7 @@ function ManageTabSelection(int _MPTabChoiceID)
 			// End:0x22E
 			break;
 		// End:0x1F0
+		// TAB_Server_Info (4): show the three server detail boxes (players, maps, options)
 		case int(4):
 			m_FilterTab = 4;
 			m_pSecondWindow.HideWindow();
@@ -545,88 +631,94 @@ function ManageTabSelection(int _MPTabChoiceID)
 
 /////////////////////////////////////////////////////////////////
 // set the button choice from game mode, tech filters
+// Called by child tab panels when a filter checkbox is toggled.
+// DIVERGENCE from SDK 1.56: In 1.56 this function wrote directly to
+// m_LanServers.m_Filters and m_GameService.m_Filters structs. In 1.60
+// the filter state is stored as local config booleans on this widget,
+// and UpdateFilters() reads them during its per-server sweep. This
+// allows the filters to be saved to User.ini via SaveConfig().
 /////////////////////////////////////////////////////////////////
 function SetServerFilterBooleans(int _iServerInfoID, bool _bNewChoice)
 {
 	switch(_iServerInfoID)
 	{
 		// End:0x1E
-		case int(0):
+		case int(0): // eServerInfoID_DeathMatch
 			m_bFilterDeathMatch = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x35
-		case int(1):
+		case int(1): // eServerInfoID_TeamDeathMatch
 			m_bFilterTeamDeathMatch = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x4C
-		case int(2):
+		case int(2): // eServerInfoID_Bomb
 			m_bFilterDisarmBomb = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x63
-		case int(3):
+		case int(3): // eServerInfoID_HostageAdv
 			m_bFilterHostageRescueAdv = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x7A
-		case int(4):
+		case int(4): // eServerInfoID_Escort
 			m_bFilterEscortPilot = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x91
-		case int(5):
+		case int(5): // eServerInfoID_Mission
 			m_bFilterMission = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0xA8
-		case int(6):
+		case int(6): // eServerInfoID_Terrorist
 			m_bFilterTerroristHunt = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0xBF
-		case int(7):
+		case int(7): // eServerInfoID_HostageCoop
 			m_bFilterHostageRescueCoop = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0xD6
-		case int(10):
+		case int(10): // eServerInfoID_Unlocked — note: no cases 8 or 9 (Defend/Recon removed in 1.60)
 			m_bFilterUnlockedOnly = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0xED
-		case int(11):
+		case int(11): // eServerInfoID_Favorites
 			m_bFilterFavoritesOnly = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x104
-		case int(12):
+		case int(12): // eServerInfoID_Dedicated
 			m_bFilterDedicatedServersOnly = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x11B
-		case int(13):
+		case int(13): // eServerInfoID_PunkBuster
 			m_bFilterPunkBusterServerOnly = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x132
-		case int(14):
+		case int(14): // eServerInfoID_NotEmpty
 			m_bFilterServersNotEmpty = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x149
-		case int(15):
+		case int(15): // eServerInfoID_NotFull
 			m_bFilterServersNotFull = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x160
-		case int(16):
+		case int(16): // eServerInfoID_Responding (ping < 1000 ms)
 			m_bFilterResponding = _bNewChoice;
 			// End:0x1B1
 			break;
 		// End:0x177
-		case int(18):
+		case int(18): // eServerInfoID_SameVersion
 			m_bFilterSameVersion = _bNewChoice;
 			// End:0x1B1
 			break;
@@ -637,7 +729,8 @@ function SetServerFilterBooleans(int _iServerInfoID, bool _bNewChoice)
 			break;
 			break;
 	}
-	// End:0x1D2
+	// Debounce: if another filter was changed very recently, defer the full update.
+	// This prevents cascading filter passes when the user rapidly clicks checkboxes.
 	if((GetTime() < (m_fLastUpdateServerFilterTime + 0.3000000)))
 	{
 		m_bNeedUpdateServerFilter = true;
@@ -650,7 +743,8 @@ function SetServerFilterBooleans(int _iServerInfoID, bool _bNewChoice)
 
 //-------------------------------------------------------
 // SetServerFilterFasterThan - Set the "Faster Than" filter
-// setting (ping time)
+// setting (ping time). Servers with ping above this value
+// are hidden; 0 disables the filter.
 //-------------------------------------------------------
 function SetServerFilterFasterThan(int iFasterThan)
 {
@@ -663,17 +757,20 @@ function SetServerFilterFasterThan(int iFasterThan)
 // UpdateServerFilters - Call this every time one of the
 // filter settings changes, it we check the list of servers
 // to see whcih ones should be displayed.
+// Also updates the visual state of the checkbox buttons
+// in both filter panels, then re-sorts and saves config.
 //-------------------------------------------------------
 function UpdateServerFilters()
 {
+	// Sync checkbox button visual states with the current filter booleans
 	m_pSecondWindowGameMode.UpdateGameTypeFilter();
 	m_pSecondWindowFilter.UpdateGameTypeFilter();
 	// End:0x40
 	if((int(m_ConnectionTab) == int(0)))
 	{
-		UpdateFilters();
-		SaveConfig();
-		GetLanServers();		
+		UpdateFilters(); // Mark each server as visible/hidden based on active filters
+		SaveConfig();    // Persist filter settings to User.ini
+		GetLanServers(); // Rebuild the displayed list		
 	}
 	else
 	{
@@ -681,11 +778,16 @@ function UpdateServerFilters()
 		SaveConfig();
 		GetGSServers();
 	}
-	m_fLastUpdateServerFilterTime = GetTime();
+	m_fLastUpdateServerFilterTime = GetTime(); // Update debounce timestamp
 	return;
 }
 
 // NEW IN 1.60
+// UpdateFilters - Iterates over the entire server list (LAN or Internet) and sets
+// each entry's bDisplay flag. This replaced the SDK 1.56 approach of calling
+// UpdateFilters() on the server list objects themselves; the filter booleans are
+// now owned by this widget so they can be persisted to User.ini via SaveConfig().
+// The goto J0x503 pattern is the decompiler's representation of a loop `continue`.
 function UpdateFilters()
 {
 	local R6ModMgr pModMgr;
@@ -695,7 +797,7 @@ function UpdateFilters()
 	local stGameServer stTempGameServerItem;
 
 	pModMgr = Class'Engine.Actor'.static.GetModMgr();
-	szCurrentMod = pModMgr.m_pCurrentMod.m_szKeyWord;
+	szCurrentMod = pModMgr.m_pCurrentMod.m_szKeyWord; // e.g. "RavenShield" or a mod name
 	bIsLanServers = (int(m_ConnectionTab) == int(0));
 	// End:0x64
 	if(bIsLanServers)
@@ -712,7 +814,7 @@ function UpdateFilters()
 	// End:0x50D [Loop If]
 	if((i < iNbOfServers))
 	{
-		// End:0xD1
+		// Default each server to hidden; only set bDisplay=true if it passes all filters
 		if(bIsLanServers)
 		{
 			m_LanServers.m_GameServerList[i].bDisplay = false;
@@ -725,6 +827,8 @@ function UpdateFilters()
 		}
 		szTempGDGameType = stTempGameServerItem.sGameData.szGameDataGameType;
 		// End:0x14A
+		// Skip (continue) if the game type filter is OFF for this game mode.
+		// Each check below is: "if this type is disabled AND the server is running it, skip it"
 		if(((!m_bFilterDeathMatch) && (szTempGDGameType == "RGM_DeathmatchMode")))
 		{
 			// [Explicit Continue]
@@ -773,6 +877,7 @@ function UpdateFilters()
 			goto J0x503;
 		}
 		// End:0x327
+		// Hide servers running a different mod than the currently active one
 		if(((stTempGameServerItem.sGameData.szModName != "") && (!(stTempGameServerItem.sGameData.szModName ~= szCurrentMod))))
 		{
 			Log((("UpdateFilters() szModName is different than current MOD " @ stTempGameServerItem.sGameData.szModName) @ szCurrentMod));
@@ -780,6 +885,7 @@ function UpdateFilters()
 			goto J0x503;
 		}
 		// End:0x348
+		// "Unlocked Only" hides password-protected servers
 		if((m_bFilterUnlockedOnly && stTempGameServerItem.sGameData.bUsePassword))
 		{
 			// [Explicit Continue]
@@ -804,6 +910,7 @@ function UpdateFilters()
 			goto J0x503;
 		}
 		// End:0x3F8
+		// "Not Full" check uses the list-item's iMaxPlayer field (LAN and Internet differ)
 		if(bIsLanServers)
 		{
 			// End:0x3F5
@@ -829,12 +936,14 @@ function UpdateFilters()
 			goto J0x503;
 		}
 		// End:0x47D
+		// "Responding" means the server replied within 1000 ms
 		if((m_bFilterResponding && (stTempGameServerItem.iPing >= 1000)))
 		{
 			// [Explicit Continue]
 			goto J0x503;
 		}
 		// End:0x4A1
+		// "Faster Than" is a user-set ping ceiling (0 = disabled)
 		if(((m_iFilterFasterThan > 0) && (stTempGameServerItem.iPing > m_iFilterFasterThan)))
 		{
 			// [Explicit Continue]
@@ -847,6 +956,7 @@ function UpdateFilters()
 			goto J0x503;
 		}
 		// End:0x4E7
+		// Server passed all filters — mark it visible
 		if(bIsLanServers)
 		{
 			m_LanServers.m_GameServerList[i].bDisplay = true;
@@ -864,34 +974,39 @@ function UpdateFilters()
 }
 
 //==============================================================================
-// Refresh -  Refresh the list of servers.  CLears the list then calls the
-// appropriate function to completetly rebuild the list of servers with 
+// Refresh - Refresh the list of servers. Clears the list then calls the
+// appropriate function to completely rebuild the list of servers with
 // fresh data.
+// bActivatedByUser: true when the player presses the Refresh button.
+// The K_REFRESH_TIMEOUT cooldown prevents spamming when user-activated.
 //==============================================================================
 function Refresh(bool bActivatedByUser)
 {
 	local int i;
 
 	// End:0x28
+	// Guard against rapid button presses: only allow user-initiated refresh
+	// if enough time has elapsed since the last one
 	if(bActivatedByUser)
 	{
 		// End:0x26
 		if((m_fRefeshDeltaTime > 2.0000000))
 		{
-			m_fRefeshDeltaTime = 0.0000000;			
+			m_fRefeshDeltaTime = 0.0000000; // Reset cooldown timer			
 		}
 		else
 		{
-			return;
+			return; // Too soon — ignore
 		}
 	}
-	m_oldSelItem = none;
+	m_oldSelItem = none; // Clear the cached selection so it doesn't confuse the selection-change logic
 	// End:0xB8
 	if((int(m_ConnectionTab) == int(0)))
 	{
 		m_LanServers.RefreshServers();
 		ResortServerList(m_iLastSortCategory, m_bLastTypeOfSort);
 		GetLanServers();
+		// Clear all pending beacon entries so stale data doesn't appear
 		i = 0;
 		J0x6C:
 
@@ -907,6 +1022,7 @@ function Refresh(bool bActivatedByUser)
 	else
 	{
 		// End:0xD6
+		// Internet refresh only possible when logged in to ubi.com
 		if(m_GameService.m_bLoggedInUbiDotCom)
 		{
 			m_GameService.RefreshServers();
@@ -915,12 +1031,18 @@ function Refresh(bool bActivatedByUser)
 	return;
 }
 
+//==============================================================================
+// GetLanServers - Reads the pre-built LAN server list from m_LanServers and
+// populates the scrollable server list box. Does not request new data.
+// Only entries flagged bDisplay=true (by UpdateFilters) are shown.
+// Pagination: only entries for the current page window are created as list items.
+//==============================================================================
 function GetLanServers()
 {
 	local R6WindowListServerItem NewItem;
 	local int i, j, iNumServers, iNumServersDisplay;
-	local string szSelSvrIP;
-	local bool bFirstSvr;
+	local string szSelSvrIP; // IP of currently selected server (preserved across rebuilds)
+	local bool bFirstSvr;    // First visible server auto-selected as default
 	local string szGameType;
 	local LevelInfo pLevel;
 	local R6Console Console;
@@ -930,6 +1052,7 @@ function GetLanServers()
 	Console = R6Console(Root.Console);
 	pLevel = GetLevel();
 	// End:0x5E
+	// Remember the selected server's IP so we can re-select it after rebuilding the list
 	if((m_ServerListBox.m_SelectedItem != none))
 	{
 		szSelSvrIP = R6WindowListServerItem(m_ServerListBox.m_SelectedItem).szIPAddr;		
@@ -938,14 +1061,16 @@ function GetLanServers()
 	{
 		szSelSvrIP = "";
 	}
-	m_ServerListBox.ClearListOfItems();
+	m_ServerListBox.ClearListOfItems(); // Wipe all current list entries
 	m_ServerListBox.m_SelectedItem = none;
 	iNumServers = m_LanServers.m_GameServerList.Length;
-	iNumServersDisplay = m_LanServers.GetDisplayListSize();
+	iNumServersDisplay = m_LanServers.GetDisplayListSize(); // Count after filter
 	bFirstSvr = true;
+	// Calculate pagination: page indices are 1-based
 	iNbPages = (iNumServersDisplay / Console.iBrowserMaxNbServerPerPage);
 	(iNbPages += 1);
 	// End:0x103
+	// Cap current page to the new total (prevents being on page 5 of 2)
 	if((m_PageCount.m_iCurrentPages > iNbPages))
 	{
 		m_PageCount.SetCurrentPage(iNbPages);
@@ -970,6 +1095,7 @@ function GetLanServers()
 	if((iNumServersDisplay > 0))
 	{
 		// End:0x4F7
+		// m_GSLSortIdx is the sort-order indirection array; use it to walk servers in sorted order
 		if(m_LanServers.m_GameServerList[m_LanServers.m_GSLSortIdx[i]].bDisplay)
 		{
 			NewItem = R6WindowListServerItem(m_ServerListBox.GetNextItem(j, NewItem));
@@ -977,7 +1103,7 @@ function GetLanServers()
 			NewItem.iMainSvrListIdx = i;
 			m_LanServers.getServerListItem(i, _stGameServer);
 			NewItem.bFavorite = _stGameServer.bFavorite;
-			NewItem.bSameVersion = _stGameServer.bSameVersion;
+			NewItem.bSameVersion = _stGameServer.bSameVersion; // Used to disable Join button
 			NewItem.szIPAddr = _stGameServer.szIPAddress;
 			NewItem.iPing = _stGameServer.iPing;
 			NewItem.szName = _stGameServer.sGameData.szName;
@@ -988,9 +1114,10 @@ function GetLanServers()
 			NewItem.bLocked = _stGameServer.sGameData.bUsePassword;
 			NewItem.bDedicated = _stGameServer.sGameData.bDedicatedServer;
 			NewItem.bPunkBuster = _stGameServer.sGameData.bPunkBuster;
-			Root.GetMapNameLocalisation(NewItem.szMap, NewItem.szMap, true);
-			NewItem.szGameType = pLevel.GetGameNameLocalization(szGameType);
+			Root.GetMapNameLocalisation(NewItem.szMap, NewItem.szMap, true); // Localise map display name
+			NewItem.szGameType = pLevel.GetGameNameLocalization(szGameType);  // e.g. "Deathmatch"
 			// End:0x432
+			// "Game Mode" in UI = Adversarial or Cooperative; "Game Type" = specific mode within that
 			if(pLevel.IsGameTypeAdversarial(szGameType))
 			{
 				NewItem.szGameMode = Localize("MultiPlayer", "GameMode_Adversarial", "R6Menu");				
@@ -1004,10 +1131,12 @@ function GetLanServers()
 				}
 				else
 				{
-					NewItem.szGameMode = "";
+					NewItem.szGameMode = ""; // Unknown/unsupported game type
 				}
 			}
 			// End:0x4E8
+			// Re-select this server if its IP matches the previously selected one,
+			// or select it as default if it's the first visible entry
 			if(((NewItem.szIPAddr == szSelSvrIP) || bFirstSvr))
 			{
 				m_ServerListBox.SetSelectedItem(NewItem);
@@ -1039,10 +1168,8 @@ function GetLanServers()
 }
 
 //==============================================================================
-// GetGSServers - This functions gets the current list of servers from the 
-// game service code, it does not refresh this list, it is simply used for
-// passing a list that has already been built.  It will only get the elements
-// in the list that have been flagged to be displayed.
+// GetGSServers - Same as GetLanServers but reads from the GameSpy / ubi.com
+// server list (m_GameService). Only called when on the Internet tab.
 //==============================================================================
 function GetGSServers()
 {
@@ -1163,6 +1290,14 @@ function GetGSServers()
 	return;
 }
 
+//==============================================================================
+// GetServerInfo - Populates the three Server Info panels (players, maps, options)
+// with data from the currently selected server in the given server list.
+// Does not request new data from the network; just reads what is cached.
+// Button enum values: 1=RoundsPerMatch, 2=RoundTime, 4=BombTimer, 7=TimeBetweenRounds,
+//   8=NbTerro, 11=FriendlyFire, 12=AllowTeamNames, 13=AutoBalTeam, 14=TKPenalty,
+//   15=AllowRadar, 16=RotateMap, 17=AIBkp, 18=ForceFPWeapon
+//==============================================================================
 function GetServerInfo(R6ServerList pServerList)
 {
 	local R6WindowListInfoPlayerItem NewItemPlayer;
@@ -1193,6 +1328,7 @@ function GetServerInfo(R6ServerList pServerList)
 		goto J0x52;
 	}
 	iNum = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.PlayerList.Length;
+	// Sort players by kills descending before displaying
 	pServerList.SortPlayersByKills(false, pServerList.m_iSelSrvIndex);
 	i = 0;
 	J0x19B:
@@ -1205,83 +1341,86 @@ function GetServerInfo(R6ServerList pServerList)
 		NewItemPlayer.iSkills = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.PlayerList[i].iSkills;
 		NewItemPlayer.szTime = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.PlayerList[i].szTime;
 		NewItemPlayer.iPing = pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.PlayerList[i].iPing;
-		NewItemPlayer.iRank = 0;
+		NewItemPlayer.iRank = 0; // Rank display was TODO in 1.56; still unimplemented in 1.60
 		(i++);
 		// [Loop Continue]
 		goto J0x19B;
 	}
 	pButtonsDef = R6MenuButtonsDefines(GetButtonsDefinesUnique(Root.MenuClassDefines.ClassButtonsDefines));
 	i = 0;
+	// Options display: always-shown items first, then conditional items only if enabled on this server
 	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 	NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(1)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iRoundsPerMatch));
 	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
 	NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(2)) $ " = ") $ Class'Engine.Actor'.static.ConvertIntTimeToString(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iRoundTime));
 	NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-	NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(7)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBetTime));
+	NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(7)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBetTime)); // Time between rounds
 	// End:0x522
+	// Adversarial modes show bomb timer; co-op modes show terrorist count and AI backup options
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bAdversarial)
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(4)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBombTime));		
+		NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(4)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iBombTime)); // EBN_BombTimer
 	}
 	else
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(8)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iNumTerro));
+		NewItemOptions.szOptions = ((pButtonsDef.GetButtonLoc(int(8)) $ " = ") $ string(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.iNumTerro)); // EBN_NB_of_Terro
 		// End:0x605
 		if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bAIBkp)
 		{
 			NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-			NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(17));
+			NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(17)); // EBN_AIBkp — AI fills empty player slots
 		}
 		// End:0x673
 		if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bRotateMap)
 		{
 			NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-			NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(16));
+			NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(16)); // EBN_RotateMap
 		}
 	}
 	// End:0x6E1
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bShowNames)
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(12));
+		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(12)); // EBN_AllowTeamNames
 	}
 	// End:0x74F
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bFriendlyFire)
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(11));
+		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(11)); // EBN_FriendlyFire
 	}
 	// End:0x7BD
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bAutoBalTeam)
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(13));
+		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(13)); // EBN_AutoBalTeam
 	}
 	// End:0x82B
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bTKPenalty)
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(14));
+		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(14)); // EBN_TKPenalty
 	}
 	// End:0x899
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bRadar)
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(15));
+		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(15)); // EBN_AllowRadar
 	}
 	// End:0x907
 	if(pServerList.m_GameServerList[pServerList.m_iSelSrvIndex].sGameData.bForceFPWeapon)
 	{
 		NewItemOptions = R6WindowListInfoOptionsItem(m_ServerInfoOptionsBox.GetItemAtIndex((i++)));
-		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(18));
+		NewItemOptions.szOptions = pButtonsDef.GetButtonLoc(int(18)); // EBN_ForceFPersonWp
 	}
 	return;
 }
 
 //==============================================================================
 // ClearServerInfo - clear all of the information in the server info tab.
+// Called before repopulating or when the selection changes.
 //==============================================================================
 function ClearServerInfo()
 {
@@ -1291,11 +1430,17 @@ function ClearServerInfo()
 	return;
 }
 
+// QuickJoin was removed from the design between SDK 1.56 and 1.60.
+// In 1.56 it joined the first server in the list; in 1.60 it is an empty stub.
 function QuickJoin()
 {
 	return;
 }
 
+// JoinSelectedServerRequested - Called when the user clicks Join or double-clicks
+// a server. Initiates the pre-join query: first we query the server's beacon port
+// to get lobby/room IDs and the server password requirement, then we decide
+// whether a ubi.com login is needed before proceeding.
 function JoinSelectedServerRequested()
 {
 	local int iBeaconPort;
@@ -1306,6 +1451,7 @@ function JoinSelectedServerRequested()
 		return;
 	}
 	// End:0xFC
+	// Only join if the server version matches ours
 	if(R6WindowListServerItem(m_ServerListBox.m_SelectedItem).bSameVersion)
 	{
 		// End:0x86
@@ -1319,18 +1465,27 @@ function JoinSelectedServerRequested()
 			m_szServerIP = m_LanServers.m_GameServerList[m_LanServers.m_iSelSrvIndex].szIPAddress;
 			iBeaconPort = m_LanServers.m_GameServerList[m_LanServers.m_iSelSrvIndex].iBeaconPort;
 		}
+		// Query the server on its beacon port to get pre-join info (lobby ID, password needed, etc.)
 		m_pQueryServerInfo.StartQueryServerInfoProcedure(OwnerWindow, m_szServerIP, iBeaconPort);
 		m_bQueryServerInfoInProgress = true;
 	}
 	return;
 }
 
+// QueryReceivedStartPreJoin - The beacon query to the server completed successfully.
+// Now determine whether to join a ubi.com lobby room or join directly by IP.
+// DIVERGENCE from SDK 1.56: 1.56 used m_pCDKeyCheckWindow.StartPreJoinProcedure().
+// In 1.60, m_pCDKeyCheckWindow was removed and this function now calls
+// R6MenuRootWindow.m_pMenuCDKeyManager.StartCDKeyProcess() directly.
 function QueryReceivedStartPreJoin()
 {
 	local bool bRoomValid;
 
+	// A valid ubi.com room requires both a lobby server ID and a group ID
 	bRoomValid = ((m_GameService.m_ClientBeacon.PreJoinInfo.iLobbyID != 0) && (m_GameService.m_ClientBeacon.PreJoinInfo.iGroupID != 0));
 	// End:0xEC
+	// Internet join with no valid room ID means the server is not registered on ubi.com —
+	// show an error and refresh the list
 	if(((int(m_ConnectionTab) == int(1)) && (!bRoomValid)))
 	{
 		R6MenuRootWindow(Root).SimplePopUp(Localize("MultiPlayer", "PopUp_Error_RoomJoin", "R6Menu"), Localize("MultiPlayer", "PopUp_Error_NoServer", "R6Menu"), 32, int(2));
@@ -1338,6 +1493,7 @@ function QueryReceivedStartPreJoin()
 		return;
 	}
 	// End:0x12E
+	// 1 = EJRC_BY_LOBBY_AND_ROOM_ID, 0 = EJRC_NO — tells the CD key manager whether to join a room
 	if(bRoomValid)
 	{
 		R6MenuRootWindow(Root).m_pMenuCDKeyManager.StartCDKeyProcess(1, m_GameService.m_ClientBeacon.PreJoinInfo);		
@@ -1349,9 +1505,15 @@ function QueryReceivedStartPreJoin()
 	return;
 }
 
+// Tick() is called every game frame. It handles deferred first-frame initialization
+// and drives several per-frame timers that do not belong in Paint().
 function Tick(float DeltaTime)
 {
 	// End:0x70
+	// On the very first frame, attempt auto-login if credentials are stored.
+	// m_bAutoLoginFirstPass is cleared to ensure this only fires once per session.
+	// The !m_bStartedByGSClient guard skips this when launched from the GameSpy client
+	// (which handles its own login flow)
 	if(R6Console(Root.Console).m_bAutoLoginFirstPass)
 	{
 		R6Console(Root.Console).m_bAutoLoginFirstPass = false;
@@ -1362,6 +1524,7 @@ function Tick(float DeltaTime)
 		}
 	}
 	// End:0x14B
+	// m_bFPassWindowActv fires once to restore the last-used tab (Internet or LAN)
 	if(m_bFPassWindowActv)
 	{
 		// End:0xE9
@@ -1375,11 +1538,15 @@ function Tick(float DeltaTime)
 		}
 		m_bFPassWindowActv = false;
 	}
+	// Advance the refresh cooldown timer
 	(m_fRefeshDeltaTime += DeltaTime);
 	// End:0x196
+	// Keep the Login/Logout toggle button state in sync with the actual login status
+	// (login state can change asynchronously from the GameSpy service)
 	if(m_GameService.m_bLoggedInUbiDotCom)
 	{
 		// End:0x193
+		// 31 = EBN_LogOut
 		if((int(m_ButtonLogInOut.m_eButton_Action) != int(31)))
 		{
 			m_ButtonLogInOut.SetButLogInOutState(31);
@@ -1388,12 +1555,15 @@ function Tick(float DeltaTime)
 	else
 	{
 		// End:0x1C0
+		// 30 = EBN_LogIn
 		if((int(m_ButtonLogInOut.m_eButton_Action) != int(30)))
 		{
 			m_ButtonLogInOut.SetButLogInOutState(30);
 		}
 	}
 	// End:0x1FD
+	// If auto-login failed while on the internet tab, re-trigger the tab selection
+	// so the login dialog is shown again (prompting the user to log in manually)
 	if(m_GameService.m_bAutoLoginFailed)
 	{
 		m_GameService.m_bAutoLoginFailed = false;
@@ -1404,6 +1574,7 @@ function Tick(float DeltaTime)
 		}
 	}
 	// End:0x225
+	// Automatic first-time refresh for LAN tab: fires once when the tab is first opened
 	if(m_bLanRefreshFPass)
 	{
 		// End:0x225
@@ -1414,6 +1585,7 @@ function Tick(float DeltaTime)
 		}
 	}
 	// End:0x261
+	// Automatic first-time refresh for Internet tab: fires once after login completes
 	if(m_bIntRefreshFPass)
 	{
 		// End:0x261
@@ -1424,6 +1596,7 @@ function Tick(float DeltaTime)
 		}
 	}
 	// End:0x291
+	// Process a deferred filter update (debounced in SetServerFilterBooleans)
 	if((m_bNeedUpdateServerFilter && (GetTime() > (m_fLastUpdateServerFilterTime + 0.3000000))))
 	{
 		m_bNeedUpdateServerFilter = false;
@@ -1460,12 +1633,16 @@ function DelServerFromFavorites()
 	return;
 }
 
+// PromptConnectionError - Displays an error popup when a server connection fails.
+// Tries to find a localised message for the error code; falls back to the raw
+// error string if no localisation entry exists.
 function PromptConnectionError()
 {
 	local R6MenuRootWindow r6Root;
 	local string szTemp;
 
 	r6Root = R6MenuRootWindow(Root);
+	// Override the default popup size/position for this specific error dialog
 	r6Root.m_RSimplePopUp.X = 140;
 	r6Root.m_RSimplePopUp.Y = 170;
 	r6Root.m_RSimplePopUp.W = 360;
@@ -1496,6 +1673,8 @@ function PromptConnectionError()
 
 //==============================================================================
 // PopUpBoxDone -  receive the result of the popup box  
+// Restores the popup's size/position to default after any popup (error or otherwise)
+// is dismissed, since PromptConnectionError() overrides it.
 //==============================================================================
 function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID _ePopUpID)
 {
@@ -1513,6 +1692,10 @@ function DisplayRightClickMenu()
 	return;
 }
 
+//---------------------------------------------------------------------------------
+// UpdateFavorites - Called when the user picks an option from the right-click menu.
+// Handles Add to Favorites, Remove from Favorites, and Refresh Single Server.
+//---------------------------------------------------------------------------------
 function UpdateFavorites()
 {
 	// End:0x4B
@@ -1558,6 +1741,9 @@ function UpdateFavorites()
 	return;
 }
 
+// ResortServerList - Re-sort both the LAN and Internet lists by the given
+// category and direction, then refresh the displayed list for the active tab.
+// Both lists are always sorted so switching tabs shows pre-sorted results.
 function ResortServerList(int iCategory, bool _bAscending)
 {
 	m_iLastSortCategory = iCategory;
@@ -1579,12 +1765,13 @@ function ResortServerList(int iCategory, bool _bAscending)
 //*********************************
 //      INIT CREATE FUNCTION
 //*********************************
+// InitText - Creates the page title label ("MULTI PLAYER") at the top of the widget.
 function InitText()
 {
 	m_LMenuTitle = R6WindowTextLabel(CreateWindow(Class'R6Window.R6WindowTextLabel', 0.0000000, 18.0000000, (WinWidth - float(8)), 25.0000000, self));
 	m_LMenuTitle.Text = Localize("MultiPlayer", "Title", "R6Menu");
-	m_LMenuTitle.Align = 1;
-	m_LMenuTitle.m_Font = Root.Fonts[4];
+	m_LMenuTitle.Align = 1; // TA_Right
+	m_LMenuTitle.m_Font = Root.Fonts[4]; // F_MenuMainTitle
 	m_LMenuTitle.TextColor = Root.Colors.White;
 	m_LMenuTitle.m_BGTexture = none;
 	m_LMenuTitle.m_HBorderTexture = none;
@@ -1592,18 +1779,24 @@ function InitText()
 	return;
 }
 
+// InitButton - Creates all the action buttons in the button row:
+// [Login/Out] [Join] [Join IP] [Refresh] [Create]
+// fWidth=124 is 620 / 5 buttons = 124 pixels each.
+// Buttons are laid out left-to-right using m_pPreviousButtonPos for auto-spacing,
+// with m_pRefButtonPos pointing back to the first button as the layout anchor.
 function InitButton()
 {
 	local Font ButtonFont;
 	local float fXOffset, fYOffset, fWidth;
 	local R6MenuButtonsDefines pButtonsDef;
 
+	// Main Menu and Options are small navigation buttons at the bottom-left (y=425, y=447)
 	m_ButtonMainMenu = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', 10.0000000, 425.0000000, 250.0000000, 25.0000000, self));
 	m_ButtonMainMenu.ToolTipString = Localize("Tip", "ButtonMainMenu", "R6Menu");
 	m_ButtonMainMenu.Text = Localize("SinglePlayer", "ButtonMainMenu", "R6Menu");
-	m_ButtonMainMenu.Align = 0;
+	m_ButtonMainMenu.Align = 0; // TA_Left
 	m_ButtonMainMenu.m_fFontSpacing = 0.0000000;
-	m_ButtonMainMenu.m_buttonFont = Root.Fonts[15];
+	m_ButtonMainMenu.m_buttonFont = Root.Fonts[15]; // F_MainButton
 	m_ButtonMainMenu.ResizeToText();
 	m_ButtonOptions = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', 10.0000000, 447.0000000, 250.0000000, 25.0000000, self));
 	m_ButtonOptions.ToolTipString = Localize("Tip", "ButtonOptions", "R6Menu");
@@ -1611,35 +1804,38 @@ function InitButton()
 	m_ButtonOptions.Align = 0;
 	m_ButtonOptions.m_fFontSpacing = 0.0000000;
 	m_ButtonOptions.m_buttonFont = Root.Fonts[15];
-	ButtonFont = Root.Fonts[16];
+	ButtonFont = Root.Fonts[16]; // F_PrincipalButton — slightly larger font for the main action row
 	pButtonsDef = R6MenuButtonsDefines(GetButtonsDefinesUnique(Root.MenuClassDefines.ClassButtonsDefines));
-	fXOffset = 10.0000000;
-	fYOffset = 50.0000000;
-	fWidth = 124.0000000;
+	fXOffset = 10.0000000; // Start at left edge (K_XSTARTPOS)
+	fYOffset = 50.0000000; // Action row Y position
+	fWidth = 124.0000000;  // 620 / 5 = 124 px per button
+	// EBN_LogIn=30, EBN_LogOut=31 (toggled based on login state in Tick)
 	m_ButtonLogInOut = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, 400.0000000, 25.0000000, self));
 	m_ButtonLogInOut.ToolTipString = pButtonsDef.GetButtonLoc(int(30), true);
 	m_ButtonLogInOut.Text = pButtonsDef.GetButtonLoc(int(30));
-	m_ButtonLogInOut.m_eButton_Action = 30;
+	m_ButtonLogInOut.m_eButton_Action = 30; // EBN_LogIn
 	m_ButtonLogInOut.Align = 0;
 	m_ButtonLogInOut.m_fFontSpacing = 0.0000000;
 	m_ButtonLogInOut.m_buttonFont = ButtonFont;
 	m_ButtonLogInOut.ResizeToText();
-	(fXOffset += fWidth);
+	(fXOffset += fWidth); // Advance to next button slot
+	// EBN_Join=32
 	m_ButtonJoin = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, 400.0000000, 25.0000000, self));
 	m_ButtonJoin.ToolTipString = pButtonsDef.GetButtonLoc(int(32), true);
 	m_ButtonJoin.Text = pButtonsDef.GetButtonLoc(int(32));
-	m_ButtonJoin.m_eButton_Action = 32;
+	m_ButtonJoin.m_eButton_Action = 32; // EBN_Join
 	m_ButtonJoin.Align = 0;
 	m_ButtonJoin.m_fFontSpacing = 0.0000000;
 	m_ButtonJoin.m_buttonFont = ButtonFont;
 	m_ButtonJoin.ResizeToText();
-	m_ButtonJoin.m_pPreviousButtonPos = m_ButtonLogInOut;
-	m_ButtonJoin.m_pRefButtonPos = m_ButtonLogInOut;
+	m_ButtonJoin.m_pPreviousButtonPos = m_ButtonLogInOut; // Position relative to previous button
+	m_ButtonJoin.m_pRefButtonPos = m_ButtonLogInOut;      // Anchor for alignment
 	(fXOffset += fWidth);
+	// EBN_JoinIP=33
 	m_ButtonJoinIP = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, 400.0000000, 25.0000000, self));
 	m_ButtonJoinIP.ToolTipString = pButtonsDef.GetButtonLoc(int(33), true);
 	m_ButtonJoinIP.Text = pButtonsDef.GetButtonLoc(int(33));
-	m_ButtonJoinIP.m_eButton_Action = 33;
+	m_ButtonJoinIP.m_eButton_Action = 33; // EBN_JoinIP
 	m_ButtonJoinIP.Align = 0;
 	m_ButtonJoinIP.m_fFontSpacing = 0.0000000;
 	m_ButtonJoinIP.m_buttonFont = ButtonFont;
@@ -1647,10 +1843,11 @@ function InitButton()
 	m_ButtonJoinIP.m_pPreviousButtonPos = m_ButtonJoin;
 	m_ButtonJoinIP.m_pRefButtonPos = m_ButtonLogInOut;
 	(fXOffset += fWidth);
+	// EBN_Refresh=34
 	m_ButtonRefresh = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, 400.0000000, 25.0000000, self));
 	m_ButtonRefresh.ToolTipString = pButtonsDef.GetButtonLoc(int(34), true);
 	m_ButtonRefresh.Text = pButtonsDef.GetButtonLoc(int(34));
-	m_ButtonRefresh.m_eButton_Action = 34;
+	m_ButtonRefresh.m_eButton_Action = 34; // EBN_Refresh
 	m_ButtonRefresh.Align = 0;
 	m_ButtonRefresh.m_fFontSpacing = 0.0000000;
 	m_ButtonRefresh.m_buttonFont = ButtonFont;
@@ -1658,11 +1855,12 @@ function InitButton()
 	m_ButtonRefresh.m_pPreviousButtonPos = m_ButtonJoinIP;
 	m_ButtonRefresh.m_pRefButtonPos = m_ButtonLogInOut;
 	(fXOffset += fWidth);
+	// EBN_Create=35 — launches the host server flow
 	m_ButtonCreate = R6WindowButtonMultiMenu(CreateWindow(Class'R6Menu.R6WindowButtonMultiMenu', fXOffset, fYOffset, fWidth, 25.0000000, self));
 	m_ButtonCreate.ToolTipString = pButtonsDef.GetButtonLoc(int(35), true);
 	m_ButtonCreate.Text = pButtonsDef.GetButtonLoc(int(35));
-	m_ButtonCreate.m_eButton_Action = 35;
-	m_ButtonCreate.Align = 1;
+	m_ButtonCreate.m_eButton_Action = 35; // EBN_Create
+	m_ButtonCreate.Align = 1; // TA_Right
 	m_ButtonCreate.m_fFontSpacing = 0.0000000;
 	m_ButtonCreate.m_buttonFont = ButtonFont;
 	m_ButtonCreate.ResizeToText();
@@ -1670,33 +1868,44 @@ function InitButton()
 	return;
 }
 
+// InitInfoBar - Creates the sortable column header row (server name, ping, players, etc.)
+// that sits between the tab row and the server list at y=114.
 function InitInfoBar()
 {
 	local float fWidth, fPreviousPos;
 
 	fWidth = 15.0000000;
 	fPreviousPos = 0.0000000;
+	// x=11 is K_XSTARTPOS+1; width is K_WINDOWWIDTH-2 — slight inset from frame border
 	m_pButServerList = R6MenuMPButServerList(CreateWindow(Class'R6Menu.R6MenuMPButServerList', (10.0000000 + float(1)), 114.0000000, (620.0000000 - float(2)), 12.0000000, self));
 	return;
 }
 
+// InitFirstTabWindow - Creates the decorative border frame for the server list area.
+// SetBorderParam(side, style, offset, width, color): sides 0=top, 1=bottom, 2=left, 3=right.
+// Top border (side 0) is disabled; the tab row visually fills that edge.
+// m_eCornerType=2 = Bottom_Corners — only the bottom two corners are rounded.
 function InitFirstTabWindow()
 {
 	local float fWidth;
 
-	fWidth = 1.0000000;
+	fWidth = 1.0000000; // 1-pixel border lines
+	// Position matches K_XSTARTPOS, K_YPOS_FIRST_TABWINDOW, K_WINDOWWIDTH, K_FFIRST_WINDOWHEIGHT
 	m_pFirstWindowBorder = R6WindowSimpleFramedWindowExt(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindowExt', 10.0000000, 126.0000000, 620.0000000, 154.0000000, self));
 	m_pFirstWindowBorder.bAlwaysBehind = true;
-	m_pFirstWindowBorder.ActiveBorder(0, false);
-	m_pFirstWindowBorder.SetBorderParam(1, 7.0000000, 0.0000000, fWidth, Root.Colors.White);
-	m_pFirstWindowBorder.SetBorderParam(2, 1.0000000, 0.0000000, fWidth, Root.Colors.White);
-	m_pFirstWindowBorder.SetBorderParam(3, 1.0000000, 0.0000000, fWidth, Root.Colors.White);
-	m_pFirstWindowBorder.m_eCornerType = 2;
+	m_pFirstWindowBorder.ActiveBorder(0, false); // Disable top border (replaced by tab row)
+	m_pFirstWindowBorder.SetBorderParam(1, 7.0000000, 0.0000000, fWidth, Root.Colors.White); // Bottom: style 7 (thicker)
+	m_pFirstWindowBorder.SetBorderParam(2, 1.0000000, 0.0000000, fWidth, Root.Colors.White); // Left
+	m_pFirstWindowBorder.SetBorderParam(3, 1.0000000, 0.0000000, fWidth, Root.Colors.White); // Right
+	m_pFirstWindowBorder.m_eCornerType = 2; // Bottom_Corners
 	m_pFirstWindowBorder.SetCornerColor(2, Root.Colors.White);
-	m_pFirstWindowBorder.ActiveBackGround(true, Root.Colors.Black);
+	m_pFirstWindowBorder.ActiveBackGround(true, Root.Colors.Black); // Black fill behind server list
 	return;
 }
 
+// InitServerList - Creates the scrollable server list box. Called from ShowWindow()
+// rather than Created() because m_LanServers (needed for ping timeout) is also
+// created in ShowWindow(). Guard prevents double-creation on subsequent ShowWindow calls.
 function InitServerList()
 {
 	local Font ButtonFont;
@@ -1707,14 +1916,18 @@ function InitServerList()
 	{
 		return;
 	}
+	// K_XSTARTPOS_NOBORDER=12, K_YPOS_FIRST_TABWINDOW=126, K_WINDOWWIDTH_NOBORDER=616, K_FFIRST_WINDOWHEIGHT=154
 	m_ServerListBox = R6WindowServerListBox(CreateWindow(Class'R6Window.R6WindowServerListBox', 12.0000000, 126.0000000, 616.0000000, 154.0000000, self));
-	m_ServerListBox.Register(m_pFirstTabManager);
-	m_ServerListBox.SetCornerType(1);
-	m_ServerListBox.m_Font = Root.Fonts[10];
-	m_ServerListBox.m_iPingTimeOut = m_LanServers.NativeGetPingTimeOut();
+	m_ServerListBox.Register(m_pFirstTabManager); // Tab manager gets notified of list events
+	m_ServerListBox.SetCornerType(1); // No_Borders — list fills the frame with no extra border
+	m_ServerListBox.m_Font = Root.Fonts[10]; // F_ListItemSmall
+	m_ServerListBox.m_iPingTimeOut = m_LanServers.NativeGetPingTimeOut(); // Highlight servers above this ping
 	return;
 }
 
+// InitServerInfoPlayer - Creates the player list panel in the Server Info tab.
+// Positioned at x=10, y=336 (below the second tab row area), width=245, height=79.
+// Hidden by default; shown when TAB_Server_Info is active.
 function InitServerInfoPlayer()
 {
 	local Font ButtonFont;
@@ -1722,12 +1935,14 @@ function InitServerInfoPlayer()
 
 	m_ServerInfoPlayerBox = R6WindowServerInfoPlayerBox(CreateWindow(Class'R6Window.R6WindowServerInfoPlayerBox', 10.0000000, 336.0000000, 245.0000000, 79.0000000, self));
 	m_ServerInfoPlayerBox.ToolTipString = Localize("Tip", "InfoBar_ServerInfo_Player", "R6Menu");
-	m_ServerInfoPlayerBox.SetCornerType(1);
-	m_ServerInfoPlayerBox.m_Font = Root.Fonts[10];
+	m_ServerInfoPlayerBox.SetCornerType(1); // No_Borders
+	m_ServerInfoPlayerBox.m_Font = Root.Fonts[10]; // F_ListItemSmall
 	m_ServerInfoPlayerBox.HideWindow();
 	return;
 }
 
+// InitServerInfoMap - Creates the map rotation list panel in the Server Info tab.
+// Positioned at x=255 (beside the player box), same height row. Hidden by default.
 function InitServerInfoMap()
 {
 	local Font ButtonFont;
@@ -1735,12 +1950,14 @@ function InitServerInfoMap()
 
 	m_ServerInfoMapBox = R6WindowServerInfoMapBox(CreateWindow(Class'R6Window.R6WindowServerInfoMapBox', 255.0000000, 336.0000000, 174.0000000, 79.0000000, self));
 	m_ServerInfoMapBox.ToolTipString = Localize("Tip", "InfoBar_ServerInfo_Map", "R6Menu");
-	m_ServerInfoMapBox.SetCornerType(0);
+	m_ServerInfoMapBox.SetCornerType(0); // No_Corners
 	m_ServerInfoMapBox.m_Font = Root.Fonts[10];
 	m_ServerInfoMapBox.HideWindow();
 	return;
 }
 
+// InitServerInfoOptions - Creates the server options list panel in the Server Info tab.
+// Positioned at x=429 (beside the map box), same height row. Hidden by default.
 function InitServerInfoOptions()
 {
 	local Font ButtonFont;
@@ -1748,12 +1965,16 @@ function InitServerInfoOptions()
 
 	m_ServerInfoOptionsBox = R6WindowServerInfoOptionsBox(CreateWindow(Class'R6Window.R6WindowServerInfoOptionsBox', 429.0000000, 336.0000000, 200.0000000, 79.0000000, self));
 	m_ServerInfoOptionsBox.ToolTipString = Localize("Tip", "InfoBar_ServerInfo_Opt", "R6Menu");
-	m_ServerInfoOptionsBox.SetCornerType(0);
+	m_ServerInfoOptionsBox.SetCornerType(0); // No_Corners
 	m_ServerInfoOptionsBox.m_Font = Root.Fonts[10];
 	m_ServerInfoOptionsBox.HideWindow();
 	return;
 }
 
+// InitSecondTabWindow - Creates the bottom content area: the decorative frame and the
+// three interchangeable panels (Game Mode filters, Tech filters, Server Info header).
+// Deferred to ShowWindow() like the server list. Guard prevents double-creation.
+// Y offset is K_YPOS_SECOND_TABWINDOW (296) + 29 = 325, placing content below the tab strip.
 function InitSecondTabWindow()
 {
 	local float fWidth;
@@ -1762,35 +1983,46 @@ function InitSecondTabWindow()
 	// End:0x279
 	if((m_pSecondWindowBorder == none))
 	{
+		// K_YPOS_SECOND_TABWINDOW + 29 = 325 (below the tab label strip)
 		m_pSecondWindowBorder = R6WindowSimpleFramedWindowExt(CreateWindow(Class'R6Window.R6WindowSimpleFramedWindowExt', 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowBorder.bAlwaysBehind = true;
-		m_pSecondWindowBorder.ActiveBorder(0, false);
-		m_pSecondWindowBorder.SetBorderParam(1, 7.0000000, 0.0000000, fWidth, Root.Colors.White);
-		m_pSecondWindowBorder.SetBorderParam(2, 1.0000000, 1.0000000, fWidth, Root.Colors.White);
-		m_pSecondWindowBorder.SetBorderParam(3, 1.0000000, 1.0000000, fWidth, Root.Colors.White);
-		m_pSecondWindowBorder.m_eCornerType = 2;
+		m_pSecondWindowBorder.ActiveBorder(0, false); // No top border; tab row fills it
+		m_pSecondWindowBorder.SetBorderParam(1, 7.0000000, 0.0000000, fWidth, Root.Colors.White); // Bottom
+		m_pSecondWindowBorder.SetBorderParam(2, 1.0000000, 1.0000000, fWidth, Root.Colors.White); // Left
+		m_pSecondWindowBorder.SetBorderParam(3, 1.0000000, 1.0000000, fWidth, Root.Colors.White); // Right
+		m_pSecondWindowBorder.m_eCornerType = 2; // Bottom_Corners
 		m_pSecondWindowBorder.SetCornerColor(2, Root.Colors.White);
 		m_pSecondWindowBorder.ActiveBackGround(true, Root.Colors.Black);
+		// Game Mode filter panel (shown by default — first tab in the second row)
 		m_pSecondWindowGameMode = R6MenuMPMenuTab(CreateWindow(Root.MenuClassDefines.ClassMPMenuTabGameModeFilters, 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowGameMode.InitGameModeTab();
+		// Tech Filter panel (ping, dedicated, PunkBuster, etc.) — hidden initially
 		m_pSecondWindowFilter = R6MenuMPMenuTab(CreateWindow(Class'R6Menu.R6MenuMPMenuTab', 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowFilter.InitFilterTab();
 		m_pSecondWindowFilter.HideWindow();
+		// Server Info header bar — hidden initially (shown alongside the three detail boxes)
 		m_pSecondWindowServerInfo = R6MenuMPMenuTab(CreateWindow(Class'R6Menu.R6MenuMPMenuTab', 10.0000000, (296.0000000 + float(29)), 620.0000000, 90.0000000, self));
 		m_pSecondWindowServerInfo.bAlwaysBehind = true;
 		m_pSecondWindowServerInfo.InitServerTab();
 		m_pSecondWindowServerInfo.HideWindow();
+		// Start with the Game Mode filter panel active
 		m_pSecondWindow = m_pSecondWindowGameMode;
 	}
 	return;
 }
 
+///////////////////////////////////////////////////////////////
+// Initialize values for right-click menu, used in the server list.
+// The menu has three items: Add to Favorites, Remove from Favorites, Refresh One Server.
+// It is registered on m_pFirstTabManager so it can intercept clicks in that area.
+///////////////////////////////////////////////////////////////
 function InitRightClickMenu()
 {
+	// 100,150 is initial position; it will be repositioned to the mouse cursor before display
 	m_pRightClickMenu = R6WindowRightClickMenu(CreateControl(Class'R6Window.R6WindowRightClickMenu', 100.0000000, 150.0000000, 140.0000000, 14.0000000));
 	m_pRightClickMenu.Register(m_pFirstTabManager);
 	m_pRightClickMenu.EditBoxWidth = 140.0000000;
-	m_pRightClickMenu.SetFont(6);
+	m_pRightClickMenu.SetFont(6); // F_VerySmallTitle
 	m_pRightClickMenu.SetValue("");
 	m_pRightClickMenu.AddItem(Localize("MultiPlayer", "RightClick_AddFav", "R6Menu"));
 	m_pRightClickMenu.AddItem(Localize("MultiPlayer", "RightClick_SubFav", "R6Menu"));
@@ -1799,36 +2031,61 @@ function InitRightClickMenu()
 	return;
 }
 
+// SendMessage - IPC hub for receiving completion messages from popup sub-windows.
+// Each popup (login, join-IP, query-server, CD key check) calls SendMessage()
+// when it finishes, passing a numeric message code. This function dispatches
+// to the appropriate next step based on the code and m_LoginSuccessAction.
+//
+// Message codes (eR6MenuWidgetMessage):
+//   0 = MWM_UBI_LOGIN_SUCCESS  — ubi.com login succeeded
+//   1 = MWM_UBI_LOGIN_FAIL     — ubi.com login failed; fall back to LAN tab
+//   2 = MWM_UBI_LOGIN_SKIPPED  — already logged in, skip login dialog
+//   3 = MWM_CDKEYVAL_SKIPPED   — CD key check not required (LAN join)
+//   4 = MWM_CDKEYVAL_SUCCESS   — CD key validated; JoinServer()
+//   5 = MWM_CDKEYVAL_FAIL      — CD key invalid; abort join
+//   6 = MWM_UBI_JOINIP_SUCCESS — Join-by-IP query succeeded; continue to login/CDKey
+//   7 = MWM_UBI_JOINIP_FAIL    — Join-by-IP cancelled or timed out
+//   8 = MWM_QUERYSERVER_SUCCESS — Pre-join server query succeeded; continue to login/CDKey
+//   9 = MWM_QUERYSERVER_FAIL   — Pre-join query failed
+//
+// NOTE: Cases 3,4,5 (CD key) are logged as errors — in 1.60 they are handled
+// by R6MenuCDKeyManager, not directly by this widget.
 function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 {
 	switch(eMessage)
 	{
 		// End:0xE3
+		// MWM_UBI_LOGIN_SUCCESS (0) — login succeeded; act on m_LoginSuccessAction
 		case 0:
 			switch(m_LoginSuccessAction)
 			{
 				// End:0x35
+				// eLSAct_JoinIP: user was joining by IP, continue to pre-join phase
 				case 1:
 					m_szServerIP = m_pJoinIPWindow.m_szIP;
 					QueryReceivedStartPreJoin();
 					// End:0xD8
 					break;
 				// End:0x43
+				// eLSAct_Join: user was joining from list, continue to pre-join phase
 				case 2:
 					QueryReceivedStartPreJoin();
 					// End:0xD8
 					break;
 				// End:0x52
+				// eLSAct_InternetTab: user selected internet tab, now refresh the server list
 				case 3:
 					Refresh(false);
 					// End:0xD8
 					break;
 				// End:0xB9
+				// eLSAct_SwitchToInternetTab: navigate to the Internet tab after login
 				case 6:
 					m_pFirstTabManager.m_pMainTabControl.GotoTab(m_pFirstTabManager.m_pMainTabControl.GetTab(Localize("MultiPlayer", "Tab_InternetServer", "R6Menu")));
 					// End:0xD8
 					break;
 				// End:0xD5
+				// eLSAct_CloseWindow: reconnected after router drop; refresh if on internet tab
 				case 5:
 					// End:0xD5
 					if((int(m_ConnectionTab) == int(1)))
@@ -1839,27 +2096,29 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 				default:
 					break;
 			}
-			m_LoginSuccessAction = 0;
+			m_LoginSuccessAction = 0; // eLSAct_None — clear pending action
 			// End:0x2E8
 			break;
 		// End:0x14D
+		// MWM_UBI_LOGIN_FAIL (1) — login failed; revert to LAN tab
 		case 1:
 			m_pFirstTabManager.m_pMainTabControl.GotoTab(m_pFirstTabManager.m_pMainTabControl.GetTab(Localize("MultiPlayer", "Tab_LanServer", "R6Menu")));
 			m_LoginSuccessAction = 0;
 			// End:0x2E8
 			break;
 		// End:0x197
+		// MWM_UBI_LOGIN_SKIPPED (2) — already logged in; act on m_LoginSuccessAction same as success
 		case 2:
 			switch(m_LoginSuccessAction)
 			{
 				// End:0x17B
-				case 1:
+				case 1: // eLSAct_JoinIP
 					m_szServerIP = m_pJoinIPWindow.m_szIP;
 					QueryReceivedStartPreJoin();
 					// End:0x18C
 					break;
 				// End:0x189
-				case 2:
+				case 2: // eLSAct_Join
 					QueryReceivedStartPreJoin();
 					// End:0x18C
 					break;
@@ -1871,6 +2130,8 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 			// End:0x2E8
 			break;
 		// End:0x19C
+		// MWM_CDKEYVAL_SKIPPED (3), MWM_CDKEYVAL_SUCCESS (4), MWM_CDKEYVAL_FAIL (5)
+		// These should not arrive here in 1.60 — they are handled by R6MenuCDKeyManager
 		case 3:
 		// End:0x1A1
 		case 4:
@@ -1880,44 +2141,51 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 			// End:0x2E8
 			break;
 		// End:0x282
+		// MWM_UBI_JOINIP_SUCCESS (6) — Join-by-IP query completed; continue join flow
 		case 6:
 			m_bJoinIPInProgress = false;
-			m_szPopUpIP = m_pJoinIPWindow.m_szIP;
+			m_szPopUpIP = m_pJoinIPWindow.m_szIP; // Save for next session
 			SaveConfig();
 			// End:0x265
+			// If the server is registered on ubi.com, require login before joining
 			if(m_pJoinIPWindow.m_bRoomValid)
 			{
-				m_LoginSuccessAction = 1;
+				m_LoginSuccessAction = 1; // eLSAct_JoinIP
 				m_pLoginWindow.StartLogInProcedure(self);				
 			}
 			else
 			{
+				// LAN/non-ubi server: skip login, go straight to CD key check
 				m_szServerIP = m_pJoinIPWindow.m_szIP;
 				QueryReceivedStartPreJoin();
 			}
 			// End:0x2E8
 			break;
 		// End:0x292
+		// MWM_UBI_JOINIP_FAIL (7) — user cancelled Join-by-IP or it timed out
 		case 7:
 			m_bJoinIPInProgress = false;
 			// End:0x2E8
 			break;
 		// End:0x2D5
+		// MWM_QUERYSERVER_SUCCESS (8) — pre-join beacon query succeeded
 		case 8:
 			// End:0x2C4
+			// If the server is on ubi.com, login is required before joining
 			if(m_pQueryServerInfo.m_bRoomValid)
 			{
-				m_LoginSuccessAction = 2;
+				m_LoginSuccessAction = 2; // eLSAct_Join
 				m_pLoginWindow.StartLogInProcedure(self);				
 			}
 			else
 			{
-				QueryReceivedStartPreJoin();
+				QueryReceivedStartPreJoin(); // Not on ubi.com: go directly to CD key check
 			}
 			m_bQueryServerInfoInProgress = false;
 			// End:0x2E8
 			break;
 		// End:0x2E5
+		// MWM_QUERYSERVER_FAIL (9) — pre-join query failed or timed out
 		case 9:
 			m_bQueryServerInfoInProgress = false;
 			// End:0x2E8
@@ -1929,28 +2197,32 @@ function SendMessage(UWindowWindow.eR6MenuWidgetMessage eMessage)
 	return;
 }
 
+// Notify - Standard UWindow button click handler (DE_Click = event 2).
+// Routes button clicks to the appropriate action.
+// Widget IDs: 7 = MainMenuWidgetID, 16 = OptionsWidgetID.
 function Notify(UWindowDialogControl C, byte E)
 {
 	// End:0xC6
-	if((int(E) == 2))
+	if((int(E) == 2)) // DE_Click
 	{
 		switch(C)
 		{
 			// End:0x31
 			case m_ButtonMainMenu:
-				Root.ChangeCurrentWidget(7);
+				Root.ChangeCurrentWidget(7); // MainMenuWidgetID
 				// End:0xC6
 				break;
 			// End:0x4D
 			case m_ButtonOptions:
-				Root.ChangeCurrentWidget(16);
+				Root.ChangeCurrentWidget(16); // OptionsWidgetID
 				// End:0xC6
 				break;
 			// End:0x88
+			// Page navigation buttons force a list refresh by resetting the update timestamp
 			case m_PageCount.m_pNextButton:
 				m_PageCount.NextPage();
 				m_GameService.m_bServerListChanged = true;
-				m_iTimeLastUpdate = 0;
+				m_iTimeLastUpdate = 0; // Force immediate redraw on next Paint() call
 				// End:0xC6
 				break;
 			// End:0xC3
@@ -1971,6 +2243,8 @@ function Notify(UWindowDialogControl C, byte E)
 	}
 }
 
+// BackToMainMenu - Called when the user navigates away from the multiplayer screen.
+// Delegates to ResetMultiplayerMenu() to clean up network resources.
 function BackToMainMenu()
 {
 	local ClientBeaconReceiver _BeaconReceiver;
@@ -1979,6 +2253,10 @@ function BackToMainMenu()
 	return;
 }
 
+// ResetMultiplayerMenu - Tears down the LAN discovery infrastructure.
+// The ClientBeaconReceiver is an Actor that must be explicitly destroyed;
+// if it is left alive it will continue broadcasting LAN queries.
+// m_LanServers is set to none so it will be re-created on the next ShowWindow() call.
 function ResetMultiplayerMenu()
 {
 	local ClientBeaconReceiver _BeaconReceiver;
@@ -1987,23 +2265,27 @@ function ResetMultiplayerMenu()
 	if((m_LanServers != none))
 	{
 		_BeaconReceiver = m_LanServers.m_ClientBeacon;
-		m_LanServers.m_ClientBeacon = none;
+		m_LanServers.m_ClientBeacon = none; // Detach before destroy to avoid use-after-free
 	}
 	// End:0x4A
 	if((m_GameService != none))
 	{
-		m_GameService.m_ClientBeacon = none;
+		m_GameService.m_ClientBeacon = none; // GameSpy service shared this reference
 	}
 	// End:0x61
 	if((_BeaconReceiver != none))
 	{
-		_BeaconReceiver.Destroy();
+		_BeaconReceiver.Destroy(); // Kills the UDP beacon Actor
 	}
 	m_LanServers = none;
-	R6Console(Root.Console).m_LanServers = none;
+	R6Console(Root.Console).m_LanServers = none; // Clear console reference too
 	return;
 }
 
+// All game mode filter booleans default to true so the list shows all game types
+// when the user opens multiplayer for the first time (or after resetting User.ini).
+// m_bLanRefreshFPass and m_bIntRefreshFPass default to true to trigger an
+// automatic server list refresh the first time each tab is visited.
 defaultproperties
 {
 	m_bLanRefreshFPass=true
