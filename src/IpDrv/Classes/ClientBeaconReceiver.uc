@@ -2,9 +2,6 @@
 // ClientBeaconReceiver - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // ClientBeaconReceiver: Receives LAN beacons from servers.
 //=============================================================================
 class ClientBeaconReceiver extends UdpBeacon
@@ -14,70 +11,70 @@ class ClientBeaconReceiver extends UdpBeacon
 
 struct BeaconInfo
 {
-	var IpAddr Addr;
-	var float Time;
-	var string Text;
+	var IpAddr Addr;  // IP address and port of the beacon sender
+	var float Time;   // Level.TimeSeconds when this beacon was last received
+	var string Text;  // Raw beacon text string
 //#ifdef R6CODE // added by John Bennett - April 2002
-	var int iNumPlayers;
-	var int iMaxPlayers;
-	var string szCurrGameType;
-	var string szMapName;
-	var string szSvrName;
-	var bool bDedicated;
-	var bool bLocked;
-	var string MapList[32];
-	var string szGameType[32];
-	var string szPlayerName[32];
-	var string szPlayerTime[32];
-	var int iPlayerPingTime[32];
-	var int iPlayerKillCount[32];
+	var int iNumPlayers;        // Current player count
+	var int iMaxPlayers;        // Maximum allowed players
+	var string szCurrGameType;  // Currently active game type
+	var string szMapName;       // Name of the current map
+	var string szSvrName;       // Server name displayed in the browser
+	var bool bDedicated;        // True if this is a dedicated server
+	var bool bLocked;           // True if the server requires a password
+	var string MapList[32];     // List of maps in the server rotation
+	var string szGameType[32];  // Game type for each map in the rotation
+	var string szPlayerName[32];      // Names of connected players
+	var string szPlayerTime[32];      // Session time for each connected player
+	var int iPlayerPingTime[32];      // Ping (ms) for each connected player
+	var int iPlayerKillCount[32];     // Kill count for each connected player
 //    var string              szGameName[32];         //Actually an array of game types
 //    var FLOAT               fMapTime;
-	var int iRoundsPerMap;
-	var float fRndTime;
-	var float fBetTime;
-	var float fBombTime;
-	var bool bShowNames;
-	var bool bInternetServer;
-	var bool bFriendlyFire;
-	var bool bAutoBalTeam;
-	var bool bTKPenalty;
+	var int iRoundsPerMap;      // Number of rounds played per map
+	var float fRndTime;         // Round duration in seconds
+	var float fBetTime;         // Time between rounds in seconds
+	var float fBombTime;        // Bomb timer duration in seconds
+	var bool bShowNames;        // Show enemy names during gameplay
+	var bool bInternetServer;   // Server is listed on the internet (not LAN-only)
+	var bool bFriendlyFire;     // Friendly fire is enabled
+	var bool bAutoBalTeam;      // Auto-balance teams between rounds
+	var bool bTKPenalty;        // Team-kill penalty is enabled
 	var bool bNewData;  // Flag indicating new data has been received
-	var bool bRadar;
-	var int iPort;
-	var string szGameVersion;
-	var int iLobbyID;
-	var int iGroupID;
-	var int iBeaconPort;
-	var int iNumTerro;
-	var bool bAIBkp;
-	var bool bRotateMap;
-	var bool bForceFPWpn;
+	var bool bRadar;            // Radar/minimap is enabled
+	var int iPort;              // Game port number
+	var string szGameVersion;   // Game version string from the server
+	var int iLobbyID;           // Lobby server identifier
+	var int iGroupID;           // Game group identifier
+	var int iBeaconPort;        // Port used for beacon communication
+	var int iNumTerro;          // Number of terrorists in the game
+	var bool bAIBkp;            // AI backup bots enabled
+	var bool bRotateMap;        // Map rotation enabled after each match
+	var bool bForceFPWpn;       // Force first-person weapon view
 	var string szModName;  // MPF
 //#ifdef R6PUNKBUSTER
-	var bool bPunkBuster;
+	var bool bPunkBuster;  // PunkBuster anti-cheat is enabled
 };
 
 struct PreJoinResponseInfo
 {
-	var bool bResponseRcvd;
-	var int iLobbyID;
-	var int iGroupID;
-	var bool bLocked;
-	var string szGameVersion;
+	var bool bResponseRcvd;    // True once a PREJOIN response has been received
+	var int iLobbyID;          // Lobby server identifier from the response
+	var int iGroupID;          // Game group identifier from the response
+	var bool bLocked;          // Server requires a password
+	var string szGameVersion;  // Server game version
 // NEW IN 1.60
-	var string szPreJoinModName;
-	var bool bInternetServer;
+	var string szPreJoinModName;  // Mod name used by the server
+	var bool bInternetServer;     // Server is registered on the internet
 //#ifdef R6CODE // added by John Bennett - April 2002
-	var int iNumPlayers;
-	var int iMaxPlayers;
-	var int iPunkBusterEnabled;
+	var int iNumPlayers;          // Current player count on the server
+	var int iMaxPlayers;          // Maximum allowed players
+	var int iPunkBusterEnabled;   // Non-zero if PunkBuster is active
 };
 
 // NEW IN 1.60
-var BeaconInfo Beacons[32];
+var BeaconInfo Beacons[32];        // Array of beacon data for all discovered servers (up to 32)
 // NEW IN 1.60
-var PreJoinResponseInfo PreJoinInfo;
+var PreJoinResponseInfo PreJoinInfo;  // Pre-join query response for the server being joined
 
 function string GetBeaconAddress(int i)
 {

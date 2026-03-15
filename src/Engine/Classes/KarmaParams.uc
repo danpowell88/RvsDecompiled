@@ -2,9 +2,6 @@
 // KarmaParams - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // The Karma physics parameters class.
 // This provides 'extra' parameters needed by Karma physics to the Actor class.
 // Need one of these (or a subclass) to set Physics to PHYS_Karma.

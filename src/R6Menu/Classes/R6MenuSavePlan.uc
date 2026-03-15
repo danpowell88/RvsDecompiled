@@ -2,9 +2,6 @@
 // R6MenuSavePlan - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuSavePlan.uc : This is the class where you manage the save plan. You have an edit box to edit
 //						the name of the save file and a text list box where we displaying the other save files
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.

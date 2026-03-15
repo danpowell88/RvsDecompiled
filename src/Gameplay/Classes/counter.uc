@@ -2,9 +2,6 @@
 // counter - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // Counter: waits until it has been triggered 'NumToCount' times, and then
 // it sends Trigger/UnTrigger events to actors whose names match 'EventName'.
 //=============================================================================

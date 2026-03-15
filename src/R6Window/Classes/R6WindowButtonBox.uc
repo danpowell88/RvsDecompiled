@@ -2,9 +2,6 @@
 // R6WindowButtonBox - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowButtonBox.uc : This class create a window with differents buttons region that
 //                         you can specify and return to the parent a msg when a region is click
 //                         Possibility to have a text in front and a tooltip associate with it

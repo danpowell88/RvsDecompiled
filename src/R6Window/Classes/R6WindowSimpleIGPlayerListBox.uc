@@ -2,9 +2,6 @@
 // R6WindowSimpleIGPlayerListBox - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowSimpleIGPlayerListBox.uc : This version of the list box is for single player
 //                                      Rainbow team stats, the parent class is for multi-player
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.

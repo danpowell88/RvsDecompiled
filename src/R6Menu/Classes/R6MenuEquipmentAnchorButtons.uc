@@ -2,9 +2,6 @@
 // R6MenuEquipmentAnchorButtons - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuEquipmentAnchorButtons.uc : The top buttons needed for quick find a equipment category
 //                                    in the list box        
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.

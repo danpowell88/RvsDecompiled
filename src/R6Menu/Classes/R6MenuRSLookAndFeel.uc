@@ -2,9 +2,6 @@
 // R6MenuRSLookAndFeel - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuRSLookAndFeel.uc : (add small description)
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -96,65 +93,65 @@ struct STLapTopFramePlus
 	var Region T4Off;
 };
 
-var int m_iMultiplyer;
+var int m_iMultiplyer;  // General-purpose scale multiplier
 //-----------------------------------------------
 //Scroll Bar
-var int m_fVSBButtonImageX;
+var int m_fVSBButtonImageX;  // Vertical scroll bar button image X coordinate
 // NEW IN 1.60
-var int m_fHSBButtonImageX;
-var int m_fVSBButtonImageY;
+var int m_fHSBButtonImageX;  // Horizontal scroll bar button image X coordinate
+var int m_fVSBButtonImageY;  // Vertical scroll bar button image Y coordinate
 // NEW IN 1.60
-var int m_fHSBButtonImageY;
+var int m_fHSBButtonImageY;  // Horizontal scroll bar button image Y coordinate
 //-----------------------------------------------
 //Combo
-var int m_fComboImageX;
+var int m_fComboImageX;  // Combo box image X coordinate
 // NEW IN 1.60
-var int m_fComboImageY;
+var int m_fComboImageY;  // Combo box image Y coordinate
 //-----------------------------------------------
 //R6WindowButtonMainMenu
-var float m_fCurrentPct;
+var float m_fCurrentPct;  // Current scroll percentage for the main menu button
 // NEW IN 1.60
-var float m_fScrollRate;
+var float m_fScrollRate;  // Main menu button scroll animation rate
 var float m_fTextHeaderHeight;  // the in-game menu intermission text header
 // Menu Texture
-var Texture m_NavBarTex;
+var Texture m_NavBarTex;  // Navigation bar texture (GUI_01)
 //-----------------------------------------------
 // In-Game Menu
-var Texture m_TIcon;
-var Texture m_TSquareBg;
-var Region m_FrameSBL;
-var Region m_FrameSB;
-var Region m_FrameSBR;
-var RegionButton m_BLTitleL;
-var RegionButton m_BLTitleC;
-var RegionButton m_BLTitleR;
+var Texture m_TIcon;      // Team icon texture (TeamBarIcon)
+var Texture m_TSquareBg;  // Square background texture
+var Region m_FrameSBL;    // Status bar frame bottom-left corner region
+var Region m_FrameSB;     // Status bar frame bottom middle region
+var Region m_FrameSBR;    // Status bar frame bottom-right corner region
+var RegionButton m_BLTitleL;  // Title bar left button region
+var RegionButton m_BLTitleC;  // Title bar centre button region
+var RegionButton m_BLTitleR;  // Title bar right button region
 // Popup ActionPoint menu
-var Region m_PopupArrowUp;
-var Region m_PopupArrowDown;
+var Region m_PopupArrowUp;    // Popup action point menu up-arrow region
+var Region m_PopupArrowDown;  // Popup action point menu down-arrow region
 //-----------------------------------------------
 // Laptop frame
-var STLapTopFrame m_stLapTopFrame;
-var STLapTopFramePlus m_stLapTopFramePlus;
+var STLapTopFrame m_stLapTopFrame;        // Laptop-style window frame texture regions
+var STLapTopFramePlus m_stLapTopFramePlus;  // Additional laptop frame top-bar regions
 //-----------------------------------------------
 // Navigation Bar
-var Region m_NavBarBack[12];
+var Region m_NavBarBack[12];  // Navigation bar background regions (one per button slot)
 //-----------------------------------------------
 //ListBox
-var Region m_topLeftCornerR;
+var Region m_topLeftCornerR;  // List box top-left corner region
 //-----------------------------------------------
 // Simple Pop-up Window (ex. JoinIp window with an edit box)
 var RegionButton m_RBAcceptCancel[2];  // accept button, cancel button
 //-----------------------------------------------
 // Create game menu
 var RegionButton m_RArrow[2];  // the region of the arrow button for map list
-var Region m_SBScrollerActive;
-var Region m_SBUpGear;
-var Region m_SBDownGear;
+var Region m_SBScrollerActive;  // Scroll bar active scroller thumb region
+var Region m_SBUpGear;          // Scroll bar up gear button region
+var Region m_SBDownGear;        // Scroll bar down gear button region
 //-----------------------------------------------
 //Square Border
-var Region m_RSquareBgLeft;
-var Region m_RSquareBgMid;
-var Region m_RSquareBgRight;
+var Region m_RSquareBgLeft;   // Square border left edge region
+var Region m_RSquareBgMid;    // Square border middle region
+var Region m_RSquareBgRight;  // Square border right edge region
 
 function Setup()
 {

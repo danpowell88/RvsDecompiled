@@ -2,9 +2,6 @@
 // ScriptedSequence - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // ScriptedSequence
 // used for setting up scripted sequences for pawns.
 // A ScriptedController is spawned to carry out the scripted sequence.
@@ -14,6 +11,9 @@ class ScriptedSequence extends AIScript;
 var Class<ScriptedController> ScriptControllerClass;
 var(AIScript) export editinline array<export editinline ScriptedAction> Actions;
 
+/* SpawnControllerFor()
+Spawn and initialize an AI Controller (called by a non-player controlled Pawn at level startup)
+*/
 function SpawnControllerFor(Pawn P)
 {
 	super.SpawnControllerFor(P);
@@ -21,6 +21,10 @@ function SpawnControllerFor(Pawn P)
 	return;
 }
 
+/* TakeOver()
+Spawn a scripted controller, which temporarily takes over the actions of the pawn,
+unless pawn is currently controlled by a scripted controller - then just change its script
+*/
 function TakeOver(Pawn P)
 {
 	local ScriptedController S;

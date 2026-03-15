@@ -2,9 +2,6 @@
 // R6MenuGearPrimaryWeapon - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuGearPrimaryWeapon.uc : This will display the current 2D model
 //                        of the Primary weapon for the current 
 //                        operative

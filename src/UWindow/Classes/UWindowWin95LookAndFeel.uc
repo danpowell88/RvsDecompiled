@@ -8,27 +8,33 @@ class UWindowWin95LookAndFeel extends UWindowLookAndFeel;
 const SIZEBORDER = 3;
 const BRSIZEBORDER = 15;
 
-var() int CloseBoxOffsetX;
-var() int CloseBoxOffsetY;
+var() int CloseBoxOffsetX;      // Close button horizontal offset from the window's right edge
+var() int CloseBoxOffsetY;      // Close button vertical offset from the window's top edge
+// Scrollbar up-arrow button regions (normal, pressed, disabled)
 var() Region SBUpUp;
 var() Region SBUpDown;
 var() Region SBUpDisabled;
+// Scrollbar down-arrow button regions (normal, pressed, disabled)
 var() Region SBDownUp;
 var() Region SBDownDown;
 var() Region SBDownDisabled;
+// Scrollbar left-arrow button regions (normal, pressed, disabled)
 var() Region SBLeftUp;
 var() Region SBLeftDown;
 var() Region SBLeftDisabled;
+// Scrollbar right-arrow button regions (normal, pressed, disabled)
 var() Region SBRightUp;
 var() Region SBRightDown;
 var() Region SBRightDisabled;
-var() Region SBBackground;
+var() Region SBBackground;      // Scrollbar trough (track) background region
+// Status bar frame bottom edge regions (left cap, stretched middle, right cap)
 var() Region FrameSBL;
 var() Region FrameSB;
 var() Region FrameSBR;
-var() Region CloseBoxUp;
-var() Region CloseBoxDown;
+var() Region CloseBoxUp;        // Close button normal state region
+var() Region CloseBoxDown;      // Close button pressed state region
 
+/* Framed Window Drawing Functions */
 function FW_DrawWindowFrame(UWindowFramedWindow W, Canvas C)
 {
 	local Texture t;
@@ -204,12 +210,14 @@ function UWindowBase.FrameHitTest FW_HitTest(UWindowFramedWindow W, float X, flo
 	return;
 }
 
+/* Client Area Drawing Functions */
 function DrawClientArea(UWindowClientWindow W, Canvas C)
 {
 	W.DrawStretchedTexture(C, 0.0000000, 0.0000000, W.WinWidth, W.WinHeight, Texture'UWindow.BlackTexture');
 	return;
 }
 
+/* Combo Drawing Functions */
 function Combo_SetupSizes(UWindowComboControl W, Canvas C)
 {
 	local float tW, tH;

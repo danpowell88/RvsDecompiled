@@ -27,7 +27,8 @@ SRC_BASE = Path("src")
 # ─── Task 1: Remove "verify still applicable" placeholder ──────────────────
 
 PLACEHOLDER_PATTERN = re.compile(
-    r"//={10,}\n// From SDK 1\.56 - verify still applicable\n//={10,}\n",
+    # Matches the placeholder line with optional preceding //===== line and following separator line
+    r"(?://={10,}\r?\n)?// From SDK 1\.56 - verify still applicable\r?\n(?:(?://+[ =]{10,}|/\*[ =]{10,})\r?\n)?",
     re.MULTILINE,
 )
 

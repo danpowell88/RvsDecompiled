@@ -2,9 +2,6 @@
 // R6MenuEscObjectives - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuEscObjectives.uc : Objectives window in the esc menu of single player
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //

@@ -2,9 +2,6 @@
 // LineOfSightTrigger - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // LineOfSightTrigger
 // triggers its event when player looks at it from close enough
 // ONLY WORKS IN SINGLE PLAYER (or for the local client on a listen server)

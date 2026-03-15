@@ -2,9 +2,6 @@
 // R6MenuInGameMultiPlayerRootWindow - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuInGameRootMultiPlayerRootWindow.uc : This ingame root menu should provide us with
 //                              uwindow support in the multiplayer game
 //

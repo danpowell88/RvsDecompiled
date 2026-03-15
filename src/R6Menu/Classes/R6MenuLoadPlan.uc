@@ -2,9 +2,6 @@
 // R6MenuLoadPlan - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuLoadPlan.uc : Window that pops up with all plans that can be loaded
 //  Copyright 2003 Ubi Soft, Inc. All Rights Reserved.
 //

@@ -2,9 +2,6 @@
 // TerrainBuilder - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // TerrainBuilder: Builds a 3D cube brush, with a tessellated bottom.
 //=============================================================================
 class TerrainBuilder extends BrushBuilder;

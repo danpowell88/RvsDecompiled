@@ -2,9 +2,6 @@
 // KarmaParamsRBFull - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 // This is the full set of Karma parameters, including inertia tensor and 
 // centre-of-mass position, which are normally stored with the StaticMesh.
 // This gives you a chance to overrids these values.

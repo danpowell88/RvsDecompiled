@@ -2,9 +2,6 @@
 // R6ServerList - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6GameServices.uc : This class is used to manage server lists.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -128,20 +125,20 @@ struct stGameServer
 	var stGameData sGameData;
 };
 
-var int m_iSelSrvIndex;
+var int m_iSelSrvIndex;  // Index of the currently selected server in m_GameServerList
 var int m_iIndRefrIndex;  // Index of server on which we are doing an individual refresh
-var bool m_bDedicatedServer;
+var bool m_bDedicatedServer;  // True if this instance is running as a dedicated server
 var bool m_bServerListChanged;  // Flag to indicate that a change in the server list was detected
 var bool m_bServerInfoChanged;  // Flag to indicate that a change in the server info was detected
 var config bool m_bSavePWSave;  // Save password saved value
 var config bool m_bAutoLISave;  // Auto login saved value
-var ClientBeaconReceiver m_ClientBeacon;
-var array<string> m_favoriteServersList;
-var array<stGameServer> m_GameServerList;
-var array<stValidationResponse> m_ValidResponseList;
-var array<stValidationResponse> m_ModValidResponseList;
-var array<int> m_GSLSortIdx;
-var stGameServer m_CrGameSrvInfo;
+var ClientBeaconReceiver m_ClientBeacon;  // LAN beacon receiver used for server discovery
+var array<string> m_favoriteServersList;  // Favourite server IP addresses, persisted to r6gameservice.ini
+var array<stGameServer> m_GameServerList;  // Full list of discovered/known game servers
+var array<stValidationResponse> m_ValidResponseList;  // Queued CD-key validation responses
+var array<stValidationResponse> m_ModValidResponseList;  // Queued CD-key validation responses for mod verification
+var array<int> m_GSLSortIdx;  // Sorted index mapping display positions to m_GameServerList entries
+var stGameServer m_CrGameSrvInfo;  // Server settings for a game the user wishes to create
 var string m_szGameVersion;  // Game version as indicated in R6RSVersion.h
 
 // Export UR6ServerList::execNativeInitFavorites(FFrame&, void* const)

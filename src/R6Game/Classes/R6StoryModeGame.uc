@@ -2,9 +2,6 @@
 // R6StoryModeGame - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6StoryModeGame.uc : Single player and Coop game info.
 //						 See mission objectives and morality design docs.
 //

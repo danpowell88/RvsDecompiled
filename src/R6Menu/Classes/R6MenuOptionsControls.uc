@@ -2,9 +2,6 @@
 // R6MenuOptionsControls - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6MenuOptionsControls.uc : For mapping key, this class is specific, work with R6MenuOptionsTab
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //

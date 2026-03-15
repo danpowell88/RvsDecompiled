@@ -2,9 +2,6 @@
 // R6WindowTeamSummary - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6WindowTeamSummary.uc : Team summary in execute screen there is one for each team
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //

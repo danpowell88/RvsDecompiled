@@ -2,9 +2,6 @@
 // R6Operative - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6Operative.uc : This class describes a rainbow officer
 //  Copyright 2002 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -16,22 +13,18 @@ class R6Operative extends Object
 
 var int m_iUniqueID;  // According to the index of the operative in the operative collection
 var int m_iRookieID;  // According to the index of the rockie operative
+// Menu face region coords (hack because Region is UWindowBase) — all four existed in SDK 1.56
 var int m_RMenuFaceX;  // God this is ugly, hack cuz Region is Uwindowbase
-// NEW IN 1.60
 var int m_RMenuFaceY;
-// NEW IN 1.60
 var int m_RMenuFaceW;
-// NEW IN 1.60
 var int m_RMenuFaceH;
 var int m_RMenuFaceSmallX;
-// NEW IN 1.60
 var int m_RMenuFaceSmallY;
-// NEW IN 1.60
 var int m_RMenuFaceSmallW;
-// NEW IN 1.60
 var int m_RMenuFaceSmallH;
 //Status
 var int m_iHealth;  // 0= Ready, 1=Wounded, 2=Incapacitated, 3=Dead
+//Stats
 var int m_iNbMissionPlayed;
 var int m_iTerrokilled;
 var int m_iRoundsfired;
@@ -500,7 +493,6 @@ defaultproperties
 	m_szGender="M"
 }
 
-// --- Symbols present in SDK 1.56 but NOT found in 1.60 decompile ----------
-// REMOVED IN 1.60: var Y
-// REMOVED IN 1.60: var W
-// REMOVED IN 1.60: var H
+// --- Notes on SDK 1.56 vs 1.60 differences ---
+// In SDK 1.56, m_RMenuFaceX/Y/W/H were declared on a single line; 1.60 decompile splits them.
+// Same applies to m_RMenuFaceSmallX/Y/W/H — all eight vars existed in SDK 1.56.

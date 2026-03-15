@@ -2,9 +2,6 @@
 // R6AbstractPawn - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6AbstractPawn.uc : This is the abstract class for the r6pawn class.  We
 //                      use an abstract class without any declared function.  
 //                      This is useful to avoid circular references

@@ -2,9 +2,6 @@
 // WaterTexture - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=======================================================================================
 //  WaterTexture: Base class for fractal water textures. Parent of Wave- and WetTexture.
 //  This is a built-in Unreal class and it shouldn't be modified.
 //=======================================================================================

@@ -2,9 +2,6 @@
 // R6GameInfo - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
-//=============================================================================
-// From SDK 1.56 - verify still applicable
-//=============================================================================
 //  R6GameInfo.uc : This is class where all the Rainbow game rules will be defined.
 //  Copyright 2001 Ubi Soft, Inc. All Rights Reserved.
 //
@@ -20,7 +17,7 @@ class R6GameInfo extends R6
     hidecategories(Movement,Collision,Lighting,LightColor,Karma,Force);
 
 const CMaxRainbowAI = 6;
-const CMaxPlayers = 16;
+const CMaxPlayers = 16;  // the absolut maximum number of players that we allow
 const CMaxCoOpPlayers = 8;
 const K_InGamePauseTime = 5;
 
