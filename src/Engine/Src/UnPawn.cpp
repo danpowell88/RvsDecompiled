@@ -1661,7 +1661,9 @@ void APawn::SetZone( INT bTest, INT bForceRefresh )
 	}
 
 	// Compute new zone for current location via BSP point-region test.
-	FPointRegion newRegion = XLevel->Model->PointRegion(Level, Location);
+	// ULevel::Model is at raw offset +0x90 (not declared as a named member in EngineClasses.h).
+	UModel* pModel = *(UModel**)((BYTE*)XLevel + 0x90);
+	FPointRegion newRegion = pModel ? pModel->PointRegion(Level, Location) : FPointRegion(Level);
 	AZoneInfo* oldZone = *(AZoneInfo**)((BYTE*)this + 0x228);
 
 	if (newRegion.Zone == oldZone)
@@ -1669,24 +1671,24 @@ void APawn::SetZone( INT bTest, INT bForceRefresh )
 		// Same zone: just refresh all three region fields.
 		*(AZoneInfo**)((BYTE*)this + 0x228) = newRegion.Zone;
 		*(INT*)((BYTE*)this + 0x22c)        = newRegion.iLeaf;
-		*(DWORD*)((BYTE*)this + 0x230)      = *(DWORD*)&newRegion.iLeaf + 4; // ZoneNumber byte
+		*(DWORD*)((BYTE*)this + 0x230)      = (DWORD)newRegion.ZoneNumber;
 	}
 	else
 	{
 		if (!bTest)
 		{
-			AZoneInfo::eventActorLeaving(oldZone, this);
+			oldZone->eventActorLeaving((AActor*)this);
 			eventZoneChange(newRegion.Zone);
 		}
 		*(AZoneInfo**)((BYTE*)this + 0x228) = newRegion.Zone;
 		*(INT*)((BYTE*)this + 0x22c)        = newRegion.iLeaf;
-		*(DWORD*)((BYTE*)this + 0x230)      = *(DWORD*)&newRegion.iLeaf + 4;
+		*(DWORD*)((BYTE*)this + 0x230)      = (DWORD)newRegion.ZoneNumber;
 		if (!bTest)
-			AZoneInfo::eventActorEntered(newRegion.Zone, this);
+			newRegion.Zone->eventActorEntered((AActor*)this);
 	}
 
-	// bForceVolumeCheck: 1 only when bCollideActors && !bTest && !bForceRefresh.
-	INT bForceVolumeCheck = (bCollideActors && !bTest && !bForceRefresh) ? 1 : 0;
+	// bForceVolumeCheck: 1 only when bit 0x800 of flags at +0xa8 is set (bCollideActors) AND !bTest AND !bForceRefresh.
+	INT bForceVolumeCheck = ((*(DWORD*)((BYTE*)this + 0xa8) & 0x800) && !bTest && !bForceRefresh) ? 1 : 0;
 
 	// Body physics volume.
 	APhysicsVolume* newVol = Level->GetPhysicsVolume(Location, this, bForceVolumeCheck);
@@ -1700,20 +1702,20 @@ void APawn::SetZone( INT bTest, INT bForceRefresh )
 		if (!bTest)
 		{
 			if (oldVol)
-				APhysicsVolume::eventPawnLeavingVolume(oldVol, this);
+				oldVol->eventPawnLeavingVolume(this);
 			eventPhysicsVolumeChange(newVol);
 			if (Controller)
-				AController::eventNotifyPhysicsVolumeChange(Controller, newVol);
+				Controller->eventNotifyPhysicsVolumeChange(newVol);
 		}
 		*(APhysicsVolume**)((BYTE*)this + 0x164) = newVol;
 		if (!bTest)
-			APhysicsVolume::eventPawnEnteredVolume(newVol, this);
+			newVol->eventPawnEnteredVolume(this);
 	}
 
 	APhysicsVolume* oldHeadVol = *(APhysicsVolume**)((BYTE*)this + 0x514);
 	if (newHeadVol != oldHeadVol)
 	{
-		if (!bTest && (!Controller || !AController::eventNotifyHeadVolumeChange(Controller, newHeadVol)))
+		if (!bTest && (!Controller || !Controller->eventNotifyHeadVolumeChange(newHeadVol)))
 			eventHeadVolumeChange(newHeadVol);
 		*(APhysicsVolume**)((BYTE*)this + 0x514) = newHeadVol;
 	}
@@ -2158,7 +2160,7 @@ void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 		if (Controller->MinHitWall < (hitN | focalDir)) return;
 
 		// Notify controller of the wall hit; if it returns non-zero, done.
-		if (AController::eventNotifyHitWall(Controller, HitNormal, HitActor)) return;
+		if (Controller->eventNotifyHitWall(HitNormal, HitActor)) return;
 
 		if (Physics != PHYS_Swimming)
 		{
@@ -2166,10 +2168,10 @@ void APawn::processHitWall( FVector HitNormal, AActor* HitActor )
 			// whether to skip wall adjustments; that slot is unidentified so we proceed unconditionally.
 
 			// Crouch-walk attempt: AI-controlled walking pawn that can crouch but isn't crouched.
-			BOOL bDidCrouch = FALSE;
+			UBOOL bDidCrouch = 0;
 			if (Physics == PHYS_Walking && !IsHumanControlled() && bCanCrouch && !IsCrouched())
 			{
-				bDidCrouch = TRUE;
+				bDidCrouch = 1;
 				FVector testLoc = Location + focalDir * CollisionRadius;
 				if (CanCrouchWalk(Location, testLoc)) return;
 			}
@@ -2358,7 +2360,7 @@ ETestMoveResult APawn::FindBestJump(FVector Dest)
 		// bCanSwim: bit16 of APawn flags = byte at this+0x3e2, bit0
 		// PhysicsVolume->bWaterVolume: bit6 of byte at PhysVol+0x410
 		APhysicsVolume* physVol = *(APhysicsVolume**)((BYTE*)this + 0x164);
-		BOOL bInWater = physVol && ((*(BYTE*)((BYTE*)physVol + 0x410)) & 0x40);
+		UBOOL bInWater = physVol && ((*(BYTE*)((BYTE*)physVol + 0x410)) & 0x40);
 		if (bCanSwim || !bInWater)
 		{
 			FVector vSaved = Dest - SavedLoc;
