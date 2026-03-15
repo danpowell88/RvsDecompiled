@@ -35,26 +35,26 @@ static INT*   s_iTeamSubActionsIDList = NULL;
 typedef INT* (__thiscall *PackageMapFn)(UPackageMap*, INT);
 PackageMapFn pfnMap = *(PackageMapFn*)(*(INT*)Map + 0x64);
 
-Ptr = AActor::GetOptimizedRepList((AActor*)this, Mem, Retire, Ptr, Map, Chan);
+Ptr = AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 
-if ((BYTE)*(BYTE*)((BYTE*)this + 0x2d) == 4)
+if (*(BYTE*)((BYTE*)this + 0x2d) == 4)
 {
 if (*(BYTE*)((BYTE*)this + 0x394) != *(BYTE*)(Mem + 0x394))
 {
 if (!(s_InitFlags & 1)) { s_InitFlags |= 1; s_iHasAction = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iHasAction"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_iHasAction + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_iHasAction + 0x4a);
 }
 if (*(BYTE*)((BYTE*)this + 0x395) != *(BYTE*)(Mem + 0x395))
 {
 if (!(s_InitFlags & 2)) { s_InitFlags |= 2; s_iInRange = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iInRange"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_iInRange + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_iInRange + 0x4a);
 }
 {
 INT iOwner1 = *(INT*)((BYTE*)this + 0x3c0), iOwner2 = *(INT*)(Mem + 0x3c0);
 bool bSameOwner = pfnMap(Map, iOwner1) ? (iOwner1 == iOwner2) : (*(INT*)(Chan + 0x8c) = 1, iOwner2 == 0);
 if (!bSameOwner) {
 if (!(s_InitFlags & 4)) { s_InitFlags |= 4; s_aQueryOwner = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("aQueryOwner"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_aQueryOwner + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_aQueryOwner + 0x4a);
 }
 }
 {
@@ -62,7 +62,7 @@ INT iTgt1 = *(INT*)((BYTE*)this + 0x3c4), iTgt2 = *(INT*)(Mem + 0x3c4);
 bool bSameTgt = pfnMap(Map, iTgt1) ? (iTgt1 == iTgt2) : (*(INT*)(Chan + 0x8c) = 1, iTgt2 == 0);
 if (!bSameTgt) {
 if (!(s_InitFlags & 8)) { s_InitFlags |= 8; s_aQueryTarget = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("aQueryTarget"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_aQueryTarget + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_aQueryTarget + 0x4a);
 }
 }
 {
@@ -70,32 +70,32 @@ INT iIco1 = *(INT*)((BYTE*)this + 0x3c8), iIco2 = *(INT*)(Mem + 0x3c8);
 bool bSameIco = pfnMap(Map, iIco1) ? (iIco1 == iIco2) : (*(INT*)(Chan + 0x8c) = 1, iIco2 == 0);
 if (!bSameIco) {
 if (!(s_InitFlags & 0x10)) { s_InitFlags |= 0x10; s_textureIcon = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("textureIcon"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_textureIcon + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_textureIcon + 0x4a);
 }
 }
 if ((*(DWORD*)((BYTE*)this + 0x3b4) ^ *(DWORD*)(Mem + 0x3b4)) & 1)
 {
 if (!(s_InitFlags & 0x20)) { s_InitFlags |= 0x20; s_bCanBeInterrupted = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("bCanBeInterrupted"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_bCanBeInterrupted + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_bCanBeInterrupted + 0x4a);
 }
 if (*(INT*)((BYTE*)this + 0x3b8) != *(INT*)(Mem + 0x3b8))
 {
 if (!(s_InitFlags & 0x40)) { s_InitFlags |= 0x40; s_fPlayerActionTime = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("fPlayerActionTimeRequired"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_fPlayerActionTime + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_fPlayerActionTime + 0x4a);
 }
 if (*(BYTE*)((BYTE*)this + 0x396) != *(BYTE*)(Mem + 0x396))
 {
 if (!(s_InitFlags & 0x80)) { s_InitFlags |= 0x80; s_iPlayerActionID = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iPlayerActionID"), 0); }
-*Ptr++ = *(WORD*)((BYTE*)s_iPlayerActionID + 0x4a);
+*Ptr++ = *(unsigned short*)((BYTE*)s_iPlayerActionID + 0x4a);
 }
 if (!(s_InitFlags & 0x100)) { s_InitFlags |= 0x100; s_iTeamActionIDList = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iTeamActionIDList"), 0); }
 for (DWORD i = 0; i < 4; i++)
 if (*(BYTE*)((BYTE*)this + 0x398 + i) != *(BYTE*)(Mem + 0x398 + i))
-*Ptr++ = *(WORD*)((BYTE*)s_iTeamActionIDList + 0x4a) + (INT)i;
+*Ptr++ = *(unsigned short*)((BYTE*)s_iTeamActionIDList + 0x4a) + (INT)i;
 if (!(s_InitFlags & 0x200)) { s_InitFlags |= 0x200; s_iTeamSubActionsIDList = (INT*)UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("iTeamSubActionsIDList"), 0); }
 for (DWORD i = 0; i < 16; i++)
 if (*(BYTE*)((BYTE*)this + 0x39c + i) != *(BYTE*)(Mem + 0x39c + i))
-*Ptr++ = *(WORD*)((BYTE*)s_iTeamSubActionsIDList + 0x4a) + (INT)i;
+*Ptr++ = *(unsigned short*)((BYTE*)s_iTeamSubActionsIDList + 0x4a) + (INT)i;
 }
 return Ptr;
 }
@@ -333,7 +333,7 @@ void AR6DecalGroup::ActivateGroup()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x176fb0: groupType==3 blood-decal FName/scale init and groupType==0 bullet life/randomness flags not reconstructed")
+IMPL_DIVERGE("FUN_1050557c (unexported PRNG returning decal ID) and FUN_10301000 (timestamp, possibly appSeconds but unexported) are permanently unresolvable; groupType==2 and main paths implemented; Ghidra 0x10476fb0")
 int AR6DecalGroup::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, int param_4,
 	float param_5, float param_6, float param_7, float param_8, int param_9)
 {
@@ -415,7 +415,7 @@ void AR6DecalManager::Spawned()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x177880: type-1 viewport/global-counter distance-cull requires inaccessible Engine internals")
+IMPL_DIVERGE("type-1 bullet-decal frequency/distance cull uses DAT_1079dedc/ded8/ded4 (unexported Engine.dll counters) and viewport camera offsets not in our headers; non-type-1 path fully implemented; Ghidra 0x10477880")
 int AR6DecalManager::AddDecal(FVector* param_1, FRotator* param_2, UTexture* param_3, eDecalType param_4,
 	int param_5, float param_6, float param_7, float param_8, float param_9, int param_10)
 {
