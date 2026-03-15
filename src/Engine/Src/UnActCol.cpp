@@ -924,7 +924,7 @@ void FCollisionOctree::AddActor(AActor* Actor)
 }
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
-IMPL_TODO("Ghidra 0x103DBEC0: walks Level->Actors array, builds FBox per actor, calls FOctreeNode::FilterTest for overlap; FilterTest child-node recursion unresolved")
+IMPL_TODO("Ghidra 0x103DBEC0 (278 bytes): walks Level->Actors, copies actor->ColLocation FBox, calls FilterTest then FUN_103dafe0 (node-check) + FUN_103db230 (cleanup); those FUN_ helpers unresolved")
 void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
@@ -1060,7 +1060,7 @@ void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane 
 }
 
 // ?ActorOverlapCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_TODO("Ghidra 0x103DA390: clips actor extent against node planes, recurses into overlapping child nodes via FOctreeNode::ActorOverlapCheck; FUN_ child-clip helpers unresolved")
+IMPL_TODO("Ghidra 0x103DA390 (371 bytes): iterates actor list, deduplicates via frame-tag at actor+0x60, calls FUN_103d8b80 (query-box clip against node bounds); FUN_103d8b80 unresolved")
 void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
@@ -1217,14 +1217,14 @@ void FOctreeNode::CheckIsEmpty()
 }
 
 // ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
-IMPL_TODO("Ghidra 0x103DB6C0: draws node bounding-box wireframe via FTempLineBatcher::AddLine, then recurses into child nodes; GTempLineBatcher global access not reproduced")
+IMPL_TODO("Ghidra 0x103DB6C0 (322 bytes): builds node FBox via FUN_103d8be0 then appends box to GTempLineBatcher.Boxes array and recurses into 8 children; FUN_103d8be0 + GTempLineBatcher global not reproduced")
 void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
 IMPL_TODO("Ghidra 0x103DB840: iterates node actors, draws those with flag 0x4000000 via FOctreeNode::Draw + FTempLineBatcher line append; GTempLineBatcher access and child recursion not reproduced")
 void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
 
-IMPL_TODO("Ghidra 0x103DB0C0: recursive child-node routing — clips FBox against node plane boundaries and recurses into matching children; FUN_ plane-clip helpers unresolved")
+IMPL_TODO("Ghidra 0x103DB0C0 (311 bytes): routes FBox filter through node planes; when no children (this+0xc==0) adds node to output list; FUN_103d8e50 (child-overlap test) + FUN_103d8d50/FUN_103d8c80/FUN_103d8ce0 (plane-clip helpers) unresolved")
 void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPlane const * p3) {}
 
 // ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z

@@ -1147,16 +1147,75 @@ APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole,
 	unguard;
 }
 
-IMPL_TODO("stub; retail FindSpot at Ghidra 0x103b9020")
+IMPL_TODO("Ghidra 0x103b9020: depends on CheckSlice which is still a stub; TraceLen semantics in grid-adjustment path unverified")
 INT ULevel::FindSpot( FVector Extent, FVector& Location, INT bCheckActors, AActor* Requester )
 {
 	guard(ULevel::FindSpot);
-	// TODO: implement ULevel::FindSpot (BSP + actor collision-free spawn point search)
-	return 1;
+	FCheckResult Hit;
+	ALevelInfo* Level = GetLevelInfo();
+
+	if ( EncroachingWorldGeometry(Hit, Location, Extent, 0, Level, Requester) == 0 )
+		return 1;
+
+	if ( Extent == FVector(0.f, 0.f, 0.f) )
+		return 0;
+
+	FVector Saved = Location;
+	INT TraceLen = 1;
+
+	if ( CheckSlice(Location, Extent, TraceLen, Requester) )
+		return 1;
+
+	if ( TraceLen != 0 && bCheckActors == 0 )
+	{
+		FVector HalfExtent(Extent.X * 0.5f, Extent.Y * 0.5f, 1.0f);
+		INT numFound = 0;
+
+		INT dx, dy;
+		for ( dx = -1; dx <= 1; dx += 2 )
+		{
+			for ( dy = -1; dy <= 1; dy += 2 )
+			{
+				if ( numFound < 2 )
+				{
+					FVector TestLoc(
+						Saved.X + dx * Extent.X * 0.55f,
+						Saved.Y + dy * Extent.Y * 0.55f,
+						Saved.Z);
+					Level = GetLevelInfo();
+					if ( EncroachingWorldGeometry(Hit, TestLoc, HalfExtent, 0, Level, Requester) == 0 )
+					{
+						numFound++;
+						Location.X += dx * Extent.X * 0.605f;
+						Location.Y += dy * Extent.Y * 0.605f;
+					}
+				}
+			}
+		}
+
+		if ( numFound != 0 )
+		{
+			if ( numFound == 1 )
+				Location = Saved;
+
+			if ( EncroachingWorldGeometry(Hit, Location, Extent, 0, GetLevelInfo(), Requester) == 0 )
+			{
+				FVector TraceStart = Saved + (Saved - Location) * 0.2f;
+				FCheckResult Hit2;
+				SingleLineCheck(Hit2, NULL, TraceStart, Location, 0x86, Extent);
+				if ( Hit2.Actor == NULL )
+					return 1;
+				Location = Hit2.Location;
+				return 1;
+			}
+		}
+	}
+
+	return 0;
 	unguard;
 }
 
-IMPL_TODO("stub; retail CheckSlice at Ghidra 0x103b8b30")
+IMPL_TODO("Ghidra 0x103b8b30 (1256 bytes): calls EncroachingWorldGeometry + SingleLineCheck + FVector plane math; complex normal-adjustment and partial-hit state; full translation pending")
 INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AActor* Actor )
 {
 	guard(ULevel::CheckSlice);
@@ -1165,7 +1224,7 @@ INT ULevel::CheckSlice( FVector& Adjusted, FVector TraceDest, INT& TraceLen, AAc
 	unguard;
 }
 
-IMPL_TODO("stub; retail CheckEncroachment at Ghidra 0x103bad70")
+IMPL_TODO("Ghidra 0x103bad70 (1594 bytes): builds FMatrix from actor transforms, iterates hash query results, calls moveSmooth + IsJoinedTo + IsVolumeBrush; FUN_1036d760/FUN_1035a3d0 unresolved")
 INT ULevel::CheckEncroachment( AActor* Actor, FVector TestLocation, FRotator TestRotation, INT bTouchNotify )
 {
 	guard(ULevel::CheckEncroachment);
@@ -1712,8 +1771,46 @@ INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bIgnorePawns, INT bTest, 
 	return 0;
 	unguard;
 }
-IMPL_TODO("stub; retail ToFloor at Ghidra 0x103c0140")
-INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor ) { return 0; }
+IMPL_TODO("Ghidra 0x103c0140 (740 bytes): LevelInfo-hit branch routes through physics-volume vtable chain at LevelInfo+0x328; that chain is unresolved")
+INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
+{
+	guard(ULevel::ToFloor);
+	check(Actor);
+
+	FVector Extent(Actor->CollisionRadius, Actor->CollisionRadius, Actor->CollisionHeight);
+
+	// For zero-extent static mesh actors with a valid primitive, derive extent from the collision bounding box.
+	UPrimitive* Prim = Actor->GetPrimitive();
+	if ( Extent.IsZero() && Actor->DrawType == DT_StaticMesh && Prim )
+	{
+		FBox Box = Prim->GetCollisionBoundingBox(Actor);
+		FVector HalfExt = Box.GetExtent();
+		Extent.X = Extent.Y = HalfExt.X;
+		Extent.Z = HalfExt.Z;
+	}
+
+	FCheckResult Hit;
+	FVector TraceEnd = Actor->Location + FVector(0.f, 0.f, -524288.f);
+	if ( SingleLineCheck(Hit, Actor, TraceEnd, Actor->Location, 0x86, Extent) == 0 )
+	{
+		ALevelInfo* LI = GetLevelInfo();
+		if ( Hit.Actor == LI )
+		{
+			// Physics-volume vtable chain through LevelInfo+0x328 is unresolved.
+			return 0;
+		}
+		FarMoveActor(Actor, Hit.Location, 0, 0, 0, 0);
+		if ( bTest != 0 )
+		{
+			FRotator FloorRot = Hit.Normal.Rotation();
+			Actor->Rotation = FloorRot;
+			Actor->Rotation.Pitch -= 16384;
+		}
+		return 1;
+	}
+	return 0;
+	unguard;
+}
 IMPL_TODO("partial; terrain zone registration helper unresolved at Ghidra 0x103c11a0")
 void ULevel::UpdateTerrainArrays()
 {
