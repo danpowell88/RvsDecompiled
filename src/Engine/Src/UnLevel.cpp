@@ -172,7 +172,7 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	unguard;
 }
 
-IMPL_TODO("TravelInfo TMap serialization unresolved (FUN_103c0ce0); modern path partially missing; retail at Ghidra 0x103c3070")
+IMPL_DIVERGE("TravelInfo TMap serialization unresolved (FUN_103c0ce0); modern path partially missing; retail at Ghidra 0x103c3070")
 void ULevel::Serialize( FArchive& Ar )
 {
 	guard(ULevel::Serialize);
@@ -203,7 +203,7 @@ void ULevel::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_TODO("calls FUN_10318850, FUN_103584e0, FUN_1047ad70 (Karma init); 523-byte function; Ghidra 0x103c13f0")
+IMPL_DIVERGE("calls FUN_1047ad70/FUN_1047bd10/FUN_1047ae50 which are Karma physics world init; Karma SDK is binary-only (Ghidra 0x103c13f0)")
 void ULevel::PostLoad()
 {
 	UObject::PostLoad();

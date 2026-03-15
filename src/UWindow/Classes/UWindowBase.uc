@@ -5,24 +5,24 @@
 //=============================================================================
 class UWindowBase extends Object;
 
-const F_Normal = 0;
-const F_Bold = 1;
-const F_Large = 2;
-const F_LargeBold = 3;
+const F_Normal = 0;              // Normal font
+const F_Bold = 1;                // Bold font
+const F_Large = 2;               // Large font
+const F_LargeBold = 3;           // Large, Bold font
 const F_ocraext17 = 0;
-const F_MenuMainTitle = 4;
-const F_SmallTitle = 5;
-const F_VerySmallTitle = 6;
-const F_TabMainTitle = 7;
-const F_PopUpTitle = 8;
-const F_IntelTitle = 9;
-const F_ListItemSmall = 10;
-const F_ListItemBig = 11;
-const F_HelpWindow = 12;
-const F_FirstMenuButton = 14;
-const F_MainButton = 15;
-const F_PrincipalButton = 16;
-const F_CheckBoxButton = 17;
+const F_MenuMainTitle = 4;       // 40pt: font for main title
+const F_SmallTitle = 5;          // 14pt: font for small title
+const F_VerySmallTitle = 6;      // 12pt: font for very small title
+const F_TabMainTitle = 7;        // 15pt: font for tab main title
+const F_PopUpTitle = 8;          // 15pt: font for popup title
+const F_IntelTitle = 9;          // 17pt: font for intel title (OCR-A, specific to intel window)
+const F_ListItemSmall = 10;      // 10pt: font for list items
+const F_ListItemBig = 11;        // 14pt: font for list items (large)
+const F_HelpWindow = 12;         // 12pt: font for the help window
+const F_FirstMenuButton = 14;    // 36pt: font for first menu buttons
+const F_MainButton = 15;         // 20pt: font for major buttons (main menu, options, start)
+const F_PrincipalButton = 16;    // 17pt: font for principal buttons (e.g. Join in multiplayer)
+const F_CheckBoxButton = 17;     // 12pt: font for common buttons (checkboxes, etc.)
 
 enum TextAlign
 {
@@ -256,6 +256,7 @@ struct HTMLStyle
 // NEW IN 1.60
 var(Display) UWindowBase.ERenderStyle Style;
 
+// Creates a Region struct from float X, Y, W, H coordinates.
 function Region NewRegion(float X, float Y, float W, float H)
 {
 	local Region R;
@@ -268,6 +269,7 @@ function Region NewRegion(float X, float Y, float W, float H)
 	return;
 }
 
+// Creates a TexRegion struct from float coordinates and a texture reference.
 function TexRegion NewTexRegion(float X, float Y, float W, float H, Texture t)
 {
 	local TexRegion R;
@@ -281,6 +283,7 @@ function TexRegion NewTexRegion(float X, float Y, float W, float H, Texture t)
 	return;
 }
 
+// Converts a TexRegion to a Region, discarding the texture reference.
 function Region GetRegion(TexRegion t)
 {
 	local Region R;
@@ -293,6 +296,7 @@ function Region GetRegion(TexRegion t)
 	return;
 }
 
+// Searches for Match in Text starting at byte position Pos; returns absolute index or -1.
 static function int InStrAfter(string Text, string Match, int pos)
 {
 	local int i;
@@ -307,6 +311,8 @@ static function int InStrAfter(string Text, string Match, int pos)
 	return;
 }
 
+// Dynamically creates an object of the given class and populates its properties from a
+// comma-separated "ClassName,Prop1=Val1,Prop2=Val2,..." string.
 static function Object BuildObjectWithProperties(string Text)
 {
 	local int i;

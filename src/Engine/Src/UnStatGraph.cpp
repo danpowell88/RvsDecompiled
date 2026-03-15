@@ -78,10 +78,23 @@ IMPL_TODO("Ghidra 0x103518f0: copy ctor — FUN_1033b2a0/FUN_1032dff0/FUN_1031ce
 FStatGraph::FStatGraph(FStatGraph const & p0) {}
 
 // ??1FStatGraph@@QAE@XZ
-IMPL_TODO("Ghidra 0x10446960: dtor — FString@+0x54 and TArray@+0x28/+0x1c/+0x08 per-type helpers; element dtors for TArray<FStatGraphLine>@+0x1c not yet resolved")
+// Destruction order from Ghidra EH state analysis:
+//   1. ~FString at +0x54
+//   2. ~TArray<FLOAT> at +0x28 (FUN_10322eb0)
+//   3. ~TArray<FStatGraphLine> at +0x1c: per-element dtors then buffer free (FUN_1034fa30)
+//   4. ~TArray<?> at +0x08 (FUN_1033b300) -- element type unknown, assumed POD; free buffer
+IMPL_TODO("Ghidra 0x10446960: +0x08 TArray element type unknown (FUN_1033b300); all other steps implemented")
 FStatGraph::~FStatGraph() {
 	((FString*)((BYTE*)this + 0x54))->~FString();
-	// TArray<FStatGraphLine> at +0x1c requires per-element ~FStatGraphLine() before freeing
+	((TArray<FLOAT>*)((BYTE*)this + 0x28))->~TArray();
+	FArray* linesArr = (FArray*)((BYTE*)this + 0x1c);
+	INT numLines = linesArr->Num();
+	BYTE* linesData = (BYTE*)linesArr->GetData();
+	for (INT i = numLines - 1; i >= 0; i--)
+		((FStatGraphLine*)(linesData + i * 0x34))->~FStatGraphLine();
+	linesArr->Empty(0x34, 0);
+	// +0x08 TArray: element type unknown (FUN_1033b300); free buffer only
+	((FArray*)((BYTE*)this + 0x08))->Empty(4, 0);
 }
 
 // ??4FStatGraph@@QAEAAV0@ABV0@@Z
@@ -92,12 +105,78 @@ FStatGraph & FStatGraph::operator=(FStatGraph const & p0) {
 }
 
 // ?Exec@FStatGraph@@QAEHPBGAAVFOutputDevice@@@Z
-IMPL_TODO("Ghidra 0x10445880: 533 bytes — command dispatch with FUN_ calls not yet resolved")
-int FStatGraph::Exec(const TCHAR* p0, FOutputDevice & p1) { return 0; }
+// DAT_1055e67c assumed to be L"AUTOCYCLE".
+// FUN_104455d0 (rescale), FUN_10445540 (line lookup), FUN_103601f0 (stat registration) -- stubs.
+IMPL_TODO("Ghidra 0x10445880: DAT_1055e67c=L\"AUTOCYCLE\" assumed; FUN_104455d0/FUN_10445540/FUN_103601f0 are unknown helpers -- rescale and stat-add paths not implemented")
+int FStatGraph::Exec(const TCHAR* p0, FOutputDevice& p1) {
+	const TCHAR* Cmd = p0;
+	if (ParseCommand(&Cmd, TEXT("GRAPH"))) {
+		if (ParseCommand(&Cmd, TEXT("SHOW"))) {
+			DWORD& show = *(DWORD*)((BYTE*)this + 0x00);
+			show = (show == 0) ? 1 : 0;
+		} else if (ParseCommand(&Cmd, TEXT("AUTOCYCLE"))) {
+			DWORD& ac = *(DWORD*)((BYTE*)this + 0x48);
+			ac = (ac == 0) ? 1 : 0;
+		} else if (ParseCommand(&Cmd, TEXT("LOCKSCALE"))) {
+			DWORD& ls = *(DWORD*)((BYTE*)this + 0x04);
+			ls = (ls == 0) ? 1 : 0;
+		} else if (ParseCommand(&Cmd, TEXT("RESCALE"))) {
+			// FUN_104455d0: rescale helper -- unknown, stub
+		} else {
+			Parse(Cmd, TEXT("XRANGE="), *(INT*)((BYTE*)this + 0x44));
+			Parse(Cmd, TEXT("XSIZE="),  *(FLOAT*)((BYTE*)this + 0x34));
+			Parse(Cmd, TEXT("YSIZE="),  *(FLOAT*)((BYTE*)this + 0x38));
+			Parse(Cmd, TEXT("XPOS="),   *(FLOAT*)((BYTE*)this + 0x3c));
+			Parse(Cmd, TEXT("YPOS="),   *(FLOAT*)((BYTE*)this + 0x40));
+			Parse(Cmd, TEXT("ALPHA="),  *(BYTE*)((BYTE*)this + 0x50));
+			FString& filter = *(FString*)((BYTE*)this + 0x54);
+			Parse(Cmd, TEXT("FILTER="), filter);
+			FString none(TEXT("None"));
+			if (filter == none) filter = FString(TEXT(""));
+			FString addstat;
+			Parse(Cmd, TEXT("ADDSTAT="), addstat);
+			// FUN_10445540 (line lookup) and FUN_103601f0 (stat registration) -- stubs
+		}
+		return 1;
+	}
+	return 0;
+}
 
 // ?AddDataPoint@FStatGraph@@QAEXVFString@@MH@Z
-IMPL_TODO("Ghidra 0x10445e40: 386 bytes — adds float data to a named graph line; FUN_ blockers")
-void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {}
+// FUN_10445810 (line lookup by name) is unknown -- replaced by linear name search.
+// p2 used as HSV hue byte when auto-creating a new line.
+IMPL_TODO("Ghidra 0x10445e40: FUN_10445810 (name->index hash lookup) replaced by linear search; otherwise structurally complete")
+void FStatGraph::AddDataPoint(FString p0, float p1, int p2) {
+	FArray* lines = (FArray*)((BYTE*)this + 0x1c);
+	INT lineIdx = INDEX_NONE;
+	for (INT i = 0; i < lines->Num(); i++) {
+		FStatGraphLine* l = (FStatGraphLine*)((BYTE*)lines->GetData() + i * 0x34);
+		if (*(FString*)((BYTE*)l + 0x18) == p0) { lineIdx = i; break; }
+	}
+	if (lineIdx == INDEX_NONE) {
+		if (p0.Len() == 0) return;
+		FColor color = FColor(FGetHSV((BYTE)p2, 0x80, 0xFF));
+		FString nameCopy(p0);
+		AddLineAutoRange(nameCopy, color);
+		for (INT i = 0; i < lines->Num(); i++) {
+			FStatGraphLine* l = (FStatGraphLine*)((BYTE*)lines->GetData() + i * 0x34);
+			if (*(FString*)((BYTE*)l + 0x18) == p0) { lineIdx = i; break; }
+		}
+		if (lineIdx == INDEX_NONE) return;
+	}
+	FStatGraphLine* line = (FStatGraphLine*)((BYTE*)lines->GetData() + lineIdx * 0x34);
+	check(line != NULL);
+	FLOAT* bufData = *(FLOAT**)((BYTE*)line + 0x04);
+	INT writeIdx = *(INT*)((BYTE*)line + 0x10);
+	bufData[writeIdx] = p1;
+	writeIdx++;
+	if (writeIdx > 0xFF) writeIdx = 0;
+	*(INT*)((BYTE*)line + 0x10) = writeIdx;
+	if (*(INT*)((BYTE*)line + 0x30) != 0) {
+		if (p1 < *(FLOAT*)((BYTE*)line + 0x24)) *(FLOAT*)((BYTE*)line + 0x24) = p1;
+		if (p1 > *(FLOAT*)((BYTE*)line + 0x28)) *(FLOAT*)((BYTE*)line + 0x28) = p1;
+	}
+}
 
 // ?AddLine@FStatGraph@@QAEXVFString@@VFColor@@MM@Z
 IMPL_TODO("Ghidra 0x10445c30: 219 bytes — adds graph line with color/range; FUN_ blockers")
