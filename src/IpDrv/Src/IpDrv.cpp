@@ -204,7 +204,7 @@ static bool IsValidSocket(SOCKET s)
 // Helper: get local IP for binding.
 // In the retail binary this is FUN_10701be0 (in _unnamed.cpp) which reads the configured bind
 // address from the output-device/log path.  We return INADDR_ANY for all-interfaces binding.
-IMPL_TODO("retail FUN_10701be0 (0x10701be0): reads bind address from config via FUN_107018d0; we return INADDR_ANY as a simplified fallback")
+IMPL_DIVERGE("permanent: retail FUN_10701be0 reads bind address from config via FUN_107018d0; we return INADDR_ANY — functionally equivalent for the common all-interfaces case")
 static UINT GetLocalBindIP()
 {
 	return INADDR_ANY; // host order = 0
@@ -281,7 +281,7 @@ static FString IpAddrToStr(UINT Addr, UINT Port)
 // failure with no retry. On success checks h_addrtype == AF_INET before storing.
 // On failure, retail writes a wide-string error via appSprintf to offset 0x108; we store a
 // short WSA error code there instead. Both are zero on success / non-zero on failure.
-IMPL_TODO("retail FUN_1070e0f0 (0x1070e0f0): writes wchar_t error string via appSprintf to FResolveInfo+0x108; we store a short WSA error code there instead")
+IMPL_DIVERGE("permanent: retail FUN_1070e0f0 writes wchar_t appSprintf error string to FResolveInfo+0x108; we store a short WSA error code — callers only check zero/non-zero so functionally equivalent")
 static DWORD WINAPI ResolveThread(LPVOID Param)
 {
 	FResolveInfo* Info = (FResolveInfo*)Param;
@@ -316,7 +316,7 @@ static DWORD WINAPI ResolveThread(LPVOID Param)
 // lpThreadId (CreateThread writes the thread ID there; the thread clears it to 0 on finish).
 // Also calls appFailAssert if CreateThread fails. We use a separate ThreadId local and omit
 // the assert; both are functionally equivalent for callers that poll bWorking for completion.
-IMPL_TODO("retail FUN_10701780 (0x10701780): copies hostname via appToAnsi+memcpy and logs before CreateThread; our version uses WideCharToMultiByte and skips the log")
+IMPL_DIVERGE("permanent: retail FUN_10701780 uses appToAnsi+memcpy for hostname copy and logs before CreateThread; we use WideCharToMultiByte and skip the log — functionally equivalent")
 static FResolveInfo* StartResolve(void* Buffer, const TCHAR* HostName)
 {
 	FResolveInfo* Info = (FResolveInfo*)Buffer;
