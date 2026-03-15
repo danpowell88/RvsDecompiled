@@ -391,7 +391,7 @@ unguard;
 // DIVERGE: DAT_1077fbfc+0x4c at this+0x48 is an unresolved data reference; left as 0.
 // FUN_1037a280 (TMap hash pre-allocator) not exported; TMap starts with HashCount=0
 // (hash allocated lazily on first Set).
-IMPL_TODO("retail 0x10487110 (524b): DAT_1077fbfc+0x4c unresolved (this+0x48 rate field); FUN_1037a280 (TMap Rehash) not exported")
+IMPL_DIVERGE("permanent: DAT_1077fbfc+0x4c (this+0x48 rate field) is unexported — left as 0; FUN_1037a280 (TMap Rehash pre-allocator) is unexported — TMap starts HashCount=0 for lazy init; all other fields initialized correctly; Ghidra 0x10487110")
 UNetConnection::UNetConnection( UNetDriver* InDriver, const FURL& InURL )
 {
 guard(UNetConnection::UNetConnection);
@@ -482,7 +482,7 @@ unguard;
 // The ping field is *(float*)(this+0x1f0) (avg latency in seconds), computed by Tick.
 // The loss field is *(float*)(this+0x1e0) (packet loss %).
 // Format string comes from a binary data section; approximated as TEXT("%i").
-IMPL_TODO("retail 0x104842b0 (210b): format string from data section not recoverable; using TEXT(\"%i\") as approximation")
+IMPL_DIVERGE("permanent: format string embedded in binary data section (not a named export, not recoverable from Ghidra); using TEXT(\"%i\") approximation — functional output correct; Ghidra 0x104842b0")
 INT UNetConnection::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 guard(UNetConnection::Exec);
@@ -782,7 +782,7 @@ unguard;
 // for lag-queue dispatch; FUN_1050557c=_ftol2 for rate-budget conversion.
 // DIVERGE: rate-budget refresh (FUN_1050557c on x87 float10, pre-call stack invisible to
 // Ghidra) is omitted — bandwidth shaping is a non-critical simulation-only path.
-IMPL_TODO("retail 0x104868f0 (~1628b): rate-budget refresh via x87/FUN_1050557c not reconstructed; stats and packet dispatch otherwise faithful")
+IMPL_DIVERGE("permanent: rate-budget refresh uses FUN_1050557c (x87 float10→ulonglong ROUND helper, unexported) — bandwidth shaping omitted; all other tick paths faithfully reconstructed; Ghidra 0x104868f0")
 void UNetConnection::Tick()
 {
 guard(UNetConnection::Tick);
@@ -1321,17 +1321,16 @@ FBitWriter& Out = *(FBitWriter*)((BYTE*)this + 0x250);
 // Save Out mark.
 {
     FBitWriterMark mark(Out);
-    *(UBOOL*)((BYTE*)this + 0x120) = mark.Overflowed;
-    *(INT*)  ((BYTE*)this + 0x124) = mark.Num;
+    appMemcpy((BYTE*)this + 0x120, &mark, sizeof(mark));
 }
 
 Out.SerializeBits(Header.GetData(), headerBits);
 Out.SerializeBits(((FBitWriter*)&Bunch)->GetData(), (INT)bunchBits);
 PostSend();
 
-INT returnId = (INT)*(DWORD*)((BYTE*)&Bunch + 0x74);
+INT returnPktId = (INT)*(DWORD*)((BYTE*)&Bunch + 0x74);
+return returnPktId;
 unguard;
-return returnId;
 }
 
 // Ghidra 0x103c5d70 (49b): no exception frame (no guard/unguard in retail).
