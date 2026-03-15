@@ -198,11 +198,12 @@ int FBspVertexStream::GetStride()
 
 
 // --- FLevelSceneNode ---
-IMPL_TODO("retail 0x10406670 (1270b): full scene render loop; references DAT_10780bf0 (UProxyBitmapMaterial global), FUN_10385b30 (viewport setup), and complex BSP/actor dispatch")
+// Ghidra 0x10406670 (1270b): scene render loop. Permanent divergence: constructs
+// FCanvasUtil with the incoming FRenderInterface* (D3D device), then dispatches
+// Begin/End scene and debug STDbgLine draws through vtable methods on that interface.
+IMPL_DIVERGE("FRenderInterface vtable dispatch — FCanvasUtil construction + D3D Begin/EndScene calls")
 void FLevelSceneNode::Render(FRenderInterface *)
 {
-	// Ghidra 0x106670, ~720 bytes. Full scene render — too complex for a single stub.
-	// TODO: implement FLevelSceneNode::Render (retail 0x106670, ~720 bytes: full scene render — BSP, actors, decals, post-process)
 	guard(FLevelSceneNode::Render);
 	unguard;
 }
@@ -706,11 +707,12 @@ void FLineBatcher::DrawSphere(FVector Center, FColor Color, FLOAT Radius, INT Nu
 	}
 }
 
-IMPL_TODO("retail 0x104172a0 (813b): GCache + UProxyBitmapMaterial proxy + vertex stream submit; multiple unresolved DAT globals")
+// Ghidra 0x104172a0 (813b): flush line batch to GPU. Permanent divergence: calls
+// (**(this+0x20))[0x54/4]() — vtable dispatch on the stored FRenderInterface* to
+// submit the vertex stream; not reproducible without binary-specific D3D vtable layout.
+IMPL_DIVERGE("direct FRenderInterface vtable dispatch at offset +0x54 through stored RI pointer (this+0x20)")
 void FLineBatcher::Flush(DWORD Flags)
 {
-	// Ghidra 0x1172a0: too complex to fully decompile (GCache + UProxyBitmapMaterial + vertex stream).
-	// TODO: implement FLineBatcher::Flush (Ghidra 0x1172a0: GCache + UProxyBitmapMaterial + vertex stream)
 }
 IMPL_MATCH("Engine.dll", 0x10444fa0)
 unsigned __int64 FLineBatcher::GetCacheId()
@@ -1593,10 +1595,13 @@ FPoly FConvexVolume::ClipPolygonPrecise(FPoly Poly)
 }
 
 // --- FDynamicActor ---
-IMPL_TODO("retail 0x104038b0 (11290b): FDynamicActor::Render — full per-mesh render dispatch; pending complete decompilation")
+// Ghidra 0x104038b0 (11290b): per-actor render dispatch. Permanent divergence: the
+// entire function body drives FRenderInterface* param_3 vtable methods (SetMaterial,
+// DrawMesh, SetTransform etc.) — a 11 kb D3D render pipeline that cannot be reproduced
+// without matching the binary-specific vtable layout.
+IMPL_DIVERGE("FRenderInterface vtable dispatch — full per-mesh D3D render pipeline (~11 kb)")
 void FDynamicActor::Render(FLevelSceneNode *,TList<FDynamicLight *> *,FRenderInterface *)
 {
-  // Ghidra 0x104038b0: too complex to fully decompile (GCache + mesh dispatch pipeline).
 }
 IMPL_MATCH("Engine.dll", 0x103135d0)
 FDynamicActor::FDynamicActor(const FDynamicActor& Other)

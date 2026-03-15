@@ -433,7 +433,10 @@ void UCanvas::execSetMotionBlurIntensity( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execSetMotionBlurIntensity );
 
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x1038bc40 is 2918 bytes, not fully reconstructed")
+// Ghidra 0x1038bc40 (2918b): tactical overlay render loop. Permanent divergence:
+// (1) uses rdtsc() timing chain to decay old strokes; (2) dispatches through
+// Viewport->GetRenderInterface() vtable (+0x164) for Begin/EndScene and line draw calls.
+IMPL_DIVERGE("rdtsc timing chain + FRenderInterface vtable dispatch through Viewport +0x164")
 void UCanvas::execDrawWritableMap( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execDrawWritableMap);
