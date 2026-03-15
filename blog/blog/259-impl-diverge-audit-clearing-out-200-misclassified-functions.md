@@ -162,7 +162,7 @@ entries, many were property accessors that read or write cached values on `UKarm
 at all**. Functions like `execKGetMass` just read `KarmaParams->KMass`; `execKSetStayUpright` just
 flips a bitfield. Those are fully implementable today.
 
-A dedicated [Karma rebuild sprint](../267-karma-physics-rebuilding-what-we-can) is now in progress,
+A dedicated [Karma rebuild sprint](./267-karma-physics-rebuilding-what-we-can) is now in progress,
 targeting all 36 exec functions in `EngineClassImpl.cpp` and 8 in `KarmaSupport.cpp`. The ones
 genuinely blocked by proprietary MeSDK functions (`FUN_104xxxxx` addresses) stay as `IMPL_TODO`
 with a FUN_ blocker note; only the truly irreplaceable MeSDK physics simulation calls remain
