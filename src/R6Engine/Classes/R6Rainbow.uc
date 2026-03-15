@@ -1,4 +1,4 @@
-//=============================================================================
+﻿//=============================================================================
 // R6Rainbow - extracted from retail RavenShield 1.60
 // Original decompile by Eliot.UELib (UE-Explorer 1.6.1)
 // Comments from Ubisoft SDK 1.56 where applicable
@@ -285,6 +285,7 @@ simulated function SetRainbowFaceTexture()
 simulated function AttachNightVision()
 {
 	// End:0x1A
+	// Spawn only once; NVG persists on the pawn and is toggled via bHidden
 	if((m_NightVision == none))
 	{
 		m_NightVision = Spawn(m_NightVisionClass, self);
@@ -301,7 +302,7 @@ simulated event PostBeginPlay()
 	// End:0x33
 	if((int(Level.NetMode) != int(NM_Client)))
 	{
-		AttachCollisionBox(2);
+		AttachCollisionBox(2); // 2 = standard full-body collision box type
 		AttachNightVision();
 	}
 	// End:0x4A
@@ -317,6 +318,7 @@ simulated event PostBeginPlay()
 	else
 	{
 		// End:0xB4
+		// Team index 3 uses the red helmet variant in multiplayer; all other teams get green
 		if(((m_iDefaultTeam == 3) && (int(Level.NetMode) != int(NM_Standalone))))
 		{
 			m_Helmet = R6AbstractHelmet(Spawn(Level.RedHelmet, self));			
@@ -444,6 +446,7 @@ function PossessedBy(Controller C)
 function UnPossessed()
 {
 	// End:0x58
+	// If still on a ladder when control is lost, remove the climber registration and re-enable collisions
 	if(((!m_bIsClimbingLadder) && (m_Ladder != none)))
 	{
 		R6LadderVolume(m_Ladder.MyLadder).RemoveClimber(self);
@@ -465,6 +468,7 @@ simulated event AnimEnd(int iChannel)
 		}
 	}
 	// End:0x9B
+	// Channel 0 = main full-body animation channel (locomotion, idles)
 	if((iChannel == 0))
 	{
 		m_bInitRainbow = false;
@@ -474,6 +478,7 @@ simulated event AnimEnd(int iChannel)
 			m_bSlideEnd = false;
 		}
 		// End:0x98
+		// Physics 12 is a custom R6 physics mode (e.g. root-motion); don't reset to idle in that state
 		if((int(Physics) != int(12)))
 		{
 			PlayWaiting();
@@ -482,6 +487,7 @@ simulated event AnimEnd(int iChannel)
 	else
 	{
 		// End:0x110
+		// Channel 1 = upper-body posture transition (crouch ↔ stand ↔ prone)
 		if((iChannel == 1))
 		{
 			// End:0xFE
@@ -507,6 +513,7 @@ simulated event AnimEnd(int iChannel)
 		else
 		{
 			// End:0x132
+			// Channel 16 = full-body pawn-specific actions (surrender, arrest animations)
 			if(((iChannel == 16) && m_bPawnSpecificAnimInProgress))
 			{
 				m_bPawnSpecificAnimInProgress = false;				
@@ -514,6 +521,7 @@ simulated event AnimEnd(int iChannel)
 			else
 			{
 				// End:0x1A7
+				// Channel 15 = left-arm channel for communication gestures and night-vision toggling
 				if((iChannel == 15))
 				{
 					// End:0x15A
@@ -542,6 +550,7 @@ simulated event AnimEnd(int iChannel)
 				else
 				{
 					// End:0x211
+					// Channel 14 = weapon state machine transition (draw/holster/change weapon)
 					if(((iChannel == 14) && m_bWeaponTransition))
 					{
 						m_bWeaponTransition = false;
@@ -549,6 +558,7 @@ simulated event AnimEnd(int iChannel)
 						if((int(Role) == int(ROLE_Authority)))
 						{
 							// End:0x1EC
+							// m_eGrenadeThrow 3 = PullPin; hold off on resuming weapon idle pose until the grenade is thrown
 							if((int(m_eGrenadeThrow) != int(3)))
 							{
 								PlayWeaponAnimation();
@@ -705,6 +715,7 @@ simulated function DeactivateNightVision()
 exec function ToggleNightVision()
 {
 	// End:0x28
+	// Physics 1 = PHYS_Walking; block NVG toggle when airborne, on a ladder, or mid-crouch transition
 	if((((int(Physics) != int(1)) || m_bIsLanding) || m_bPostureTransition))
 	{
 		return;
@@ -754,16 +765,17 @@ function ClientFinishAnimation()
 simulated function float ArmorSkillEffect()
 {
 	// End:0x19
+	// Returns a speed multiplier for animations: heavy armor (type 3) = 0.6, medium (type 2) = 0.8, light = 1.0
 	if((int(m_eArmorType) == int(3)))
 	{
-		return 0.6000000;		
+		return 0.6000000; // heavy armor: 40% speed penalty on weapon draw and grenade throws		
 	}
 	else
 	{
 		// End:0x2F
 		if((int(m_eArmorType) == int(2)))
 		{
-			return 0.8000000;
+			return 0.8000000; // medium armor: 20% speed penalty
 		}
 	}
 	return 1.0000000;
@@ -792,6 +804,7 @@ event EndOfGrenadeEffect(Pawn.EGrenadeType eType)
 		return;
 	}
 	// End:0x3C
+	// eType 2 = gas grenade; notify AI team manager so it can track gas cloud clearance
 	if((int(eType) == int(2)))
 	{
 		R6RainbowAI(Controller).m_TeamManager.GasGrenadeCleared(self);		
@@ -841,6 +854,7 @@ simulated function PlayEndClimbing()
 simulated function ClimbStairs(Vector vStairDirection)
 {
 	// End:0x2E
+	// Staggered formation spacing doesn't work on stairs; disable it while climbing
 	if(((!m_bIsPlayer) && (Controller != none)))
 	{
 		R6RainbowAI(Controller).m_bUseStaggeredFormation = false;
@@ -855,6 +869,7 @@ simulated function ClimbStairs(Vector vStairDirection)
 simulated function EndClimbStairs()
 {
 	// End:0x2E
+	// Staircase traversal finished; restore normal staggered column formation
 	if(((!m_bIsPlayer) && (Controller != none)))
 	{
 		R6RainbowAI(Controller).m_bUseStaggeredFormation = true;
@@ -1197,6 +1212,7 @@ simulated function SetCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 	return;
 }
 
+// Maps eComAnimation values to pending action IDs 20-24 which trigger the matching gesture animation on all clients
 simulated function ServerSetComAnim(R6Rainbow.eComAnimation eComAnim)
 {
 	switch(eComAnim)
@@ -1242,7 +1258,7 @@ simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 	}
 	m_ePlayerIsUsingHands = 2;
 	PlayWeaponAnimation();
-	AnimBlendParams(15, 1.0000000,,, 'R6 L Clavicle');
+	AnimBlendParams(15, 1.0000000,,, 'R6 L Clavicle'); // blend from left shoulder so only the left arm gestures; right arm stays on the weapon
 	m_bPlayingComAnimation = true;
 	switch(eComAnim)
 	{
@@ -1342,6 +1358,7 @@ simulated function RainbowEquipWeapon()
 	return;
 }
 
+// Passive gadgets (extra mags, kits, gas mask) are not spawned as world actors; they only set flags on the operative
 simulated function bool CheckForPassiveGadget(string aClassName)
 {
 	// End:0x23
@@ -1740,6 +1757,7 @@ simulated function PlayWaiting()
 		m_ePlayerIsUsingHands = 0;
 	}
 	// End:0xE6
+	// 1000.0 is the sentinel value for "not peeking"; any other value means the pawn is actively peeking
 	if((((m_fPeeking != 1000.0000000) || IsPeeking()) || (int(m_u8CurrentYaw) != 0)))
 	{
 		// End:0xB6
@@ -1774,7 +1792,7 @@ simulated function PlayWaiting()
 		}
 		return;
 	}
-	SetRandomWaiting(12);
+	SetRandomWaiting(12); // pick from 12 idle animation variants; result stored in m_bRepPlayWaitAnim and replicated
 	switch(m_bRepPlayWaitAnim)
 	{
 		// End:0x14F
@@ -1919,6 +1937,7 @@ simulated function PlayCrouchWaiting()
 		m_ePlayerIsUsingHands = 0;
 	}
 	// End:0x8E
+	// 1000.0 sentinel = not peeking; check both value and state since they can briefly diverge
 	if(((m_fPeeking != 1000.0000000) || IsPeeking()))
 	{
 		// End:0x5E
@@ -1976,6 +1995,7 @@ simulated function PlayCrouchWaiting()
 		}
 	}
 	// End:0x14E
+	// Skip knee-down blend when in root-motion physics (12) or when no weapon is equipped (EQUIP_NoWeapon = 2)
 	if(((int(Physics) != int(12)) && (int(m_eEquipWeapon) != int(2))))
 	{
 		BlendKneeOnGround();
@@ -2073,9 +2093,11 @@ function Rotator GetFiringRotation()
 	}
 	AI = R6RainbowAI(Controller);
 	// End:0x8A
+	// Weapon type 6 = grenade weapon; compute an arc toward the target rather than using the stored firing rotation
 	if((int(EngineWeapon.m_eWeaponType) == int(6)))
 	{
 		// End:0x7B
+		// If no target location has been selected, fall back to the controller's current facing
 		if((AI.m_vLocationOnTarget != vect(0.0000000, 0.0000000, 0.0000000)))
 		{
 			return AI.GetGrenadeDirection(none, AI.m_vLocationOnTarget);			
@@ -2189,6 +2211,7 @@ function FinishedReloadingWeapon()
 		return;
 	}
 	// End:0x79
+	// Pump shotguns load one shell at a time; if still not full and no enemy nearby, keep reloading
 	if((((EngineWeapon.IsPumpShotGun() && (Controller.Enemy == none)) && (!EngineWeapon.GunIsFull())) && (EngineWeapon.GetNbOfClips() > 0)))
 	{
 		R6RainbowAI(Controller).RainbowReloadWeapon();		
@@ -2220,6 +2243,7 @@ simulated function bool GetNormalWeaponAnimation(out STWeaponAnim stAnim)
 	}
 	stAnim.fRate = 1.0000000;
 	// End:0x81
+	// Heartbeat sensor is held with both hands; blend from spine so the whole upper body animates
 	if(IsUsingHeartBeatSensor())
 	{
 		stAnim.nBlendName = 'R6 Spine2';		
@@ -2245,6 +2269,7 @@ simulated function bool GetNormalWeaponAnimation(out STWeaponAnim stAnim)
 	else
 	{
 		// End:0x11A
+		// EQUIP_NoWeapon (2) = weapon is secured/holstered; play the unarmed standing idle
 		if(((int(m_eEquipWeapon) == int(2)) || (EngineWeapon == none)))
 		{
 			stAnim.nAnimToPlay = 'StandNoGun_nt';			
@@ -2320,6 +2345,7 @@ simulated function bool GetReloadWeaponAnimation(out STWeaponAnim stAnim)
 		}
 	}
 	// End:0xBA
+	// If the reload anim requested is already playing, bail out to avoid restarting it mid-cycle
 	if((stAnim.nAnimToPlay == m_WeaponAnimPlaying))
 	{
 		return false;
@@ -2344,7 +2370,7 @@ simulated function bool GetChangeWeaponAnimation(out STWeaponAnim stAnim)
 	m_WeaponAnimPlaying = 'None';
 	stAnim.bBackward = false;
 	stAnim.bPlayOnce = true;
-	stAnim.fRate = ((ArmorSkillEffect() * 2.5000000) * m_fGunswitchSpeedMultiplier);
+	stAnim.fRate = ((ArmorSkillEffect() * 2.5000000) * m_fGunswitchSpeedMultiplier); // 2.5 = base switch speed; scaled down by armor penalty and specialty multiplier
 	stAnim.fTweenTime = 0.1000000;
 	stAnim.nBlendName = 'R6 Spine2';
 	// End:0x79
@@ -2682,8 +2708,9 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 			// End:0x2A5
 			break;
 		// End:0x1D1
-		case 4:
+		case 4: // peek-left roll (grenade thrown with left hand from left cover)
 			// End:0x1B6
+			// AI operatives need a wider blend origin (R6 Spine) so the whole upper body turns with the peek
 			if((!m_bIsPlayer))
 			{
 				stAnim.nBlendName = 'R6 Spine';
@@ -2732,6 +2759,7 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 			break;
 	}
 	// End:0x2BB
+	// Avoid restarting the same throw animation if it's already active (prevents double-notify bug)
 	if((stAnim.nAnimToPlay == m_WeaponAnimPlaying))
 	{
 		return false;
@@ -2750,7 +2778,7 @@ simulated function bool GetPawnSpecificAnimation(out STWeaponAnim stAnim)
 	m_bWeaponIsSecured = false;
 	m_WeaponAnimPlaying = 'None';
 	stAnim.bPlayOnce = true;
-	stAnim.fRate = (ArmorSkillEffect() * 1.5000000);
+	stAnim.fRate = (ArmorSkillEffect() * 1.5000000); // 1.5 = base secure/equip speed; scaled by armor weight
 	stAnim.fTweenTime = 0.1000000;
 	stAnim.nBlendName = 'R6 Spine2';
 	stAnim.bBackward = false;
@@ -2834,7 +2862,7 @@ simulated function GetWeapon(R6AbstractWeapon NewWeapon)
 // We have to check the current weapon state to know which transition we are doing
 simulated function SubToHand_Step1()
 {
-	m_preSwitchWeapon = EngineWeapon;
+	m_preSwitchWeapon = EngineWeapon; // remember outgoing weapon so Step2 can move it to the holster attach point
 	// End:0x18
 	if((EngineWeapon == none))
 	{
@@ -2950,12 +2978,14 @@ function ChangingWeaponEnd()
 		return;
 	}
 	// End:0x47
+	// Non-owning clients and non-authority peers must not advance weapon state; only the owner or server does
 	if((((int(Level.NetMode) != int(NM_Standalone)) && (!bNetOwner)) && (int(Role) != int(ROLE_Authority))))
 	{
 		return;
 	}
 	m_bChangingWeapon = false;
 	// End:0x9C
+	// In standalone first-person view, the weapon switch is driven by the FP camera system; don't advance here
 	if(((Controller.IsA('R6PlayerController') && (R6PlayerController(Controller).bBehindView == false)) && (int(Level.NetMode) == int(NM_Standalone))))
 	{
 		return;
@@ -3122,7 +3152,7 @@ function ResetArrest()
 		R6PlayerController(Controller).ServerStartSurrended();
 	}
 	R6PlayerController(Controller).GotoState('PlayerSurrended');
-	R6PlayerController(Controller).m_fStartSurrenderTime = Level.TimeSeconds;
+	R6PlayerController(Controller).m_fStartSurrenderTime = Level.TimeSeconds; // Level.TimeSeconds = game clock; record when surrender began for timeout logic
 	m_bIsBeingArrestedOrFreed = false;
 	PlayWaiting();
 	return;
@@ -3144,6 +3174,7 @@ function ClientSetCrouch(bool bCrouch)
 function bool HasBumpPriority(R6Pawn bumpedBy)
 {
 	// End:0x22
+	// Live grenade nearby: everyone must clear the area regardless of seniority order
 	if(R6RainbowAI(Controller).m_TeamManager.m_bGrenadeInProximity)
 	{
 		return true;
@@ -3154,6 +3185,7 @@ function bool HasBumpPriority(R6Pawn bumpedBy)
 		return true;
 	}
 	// End:0x82
+	// Lower m_iID means more senior operative; if bumpedBy is as senior or more, yield movement priority
 	if(((bumpedBy.m_iID <= m_iID) && (!bumpedBy.IsStationary())))
 	{
 		return false;
@@ -3183,9 +3215,10 @@ function UpdateRainbowSkills()
 	{
 		return;
 	}
-	iD5 = (Rand(5) + 1);
-	iD2 = (Rand(2) + 1);
+	iD5 = (Rand(5) + 1); // d5 roll (1-5): specialty gets iD5+5 = 6-10% gain
+	iD2 = (Rand(2) + 1); // d2 roll (1-2): cross-training gets iD2+2 = 3-4% gain
 	// End:0x73
+	// Exponential approach formula: skill += gain * (1 - skill), so skills asymptotically approach 1.0
 	if((m_szSpecialityID == "ID_ASSAULT"))
 	{
 		(m_fSkillAssault += ((float((iD5 + 5)) / 100.0000000) * (float(1) - m_fSkillAssault)));		
@@ -3202,6 +3235,7 @@ function UpdateRainbowSkills()
 	else
 	{
 		// End:0xFE
+		// 20% chance of cross-training: +2% gain toward out-of-specialty skill
 		if((FRand() <= 0.2000000))
 		{
 			(m_fSkillDemolitions += (0.0200000 * (float(1) - m_fSkillDemolitions)));
@@ -3300,6 +3334,7 @@ function GrenadeThrow()
 
 	iChannel = GetNotifyChannel();
 	// End:0x1A
+	// Channel 15 is the left-arm animation channel; if it's active the throw anim notification fired early - skip
 	if((iChannel == 15))
 	{
 		return;
@@ -3325,9 +3360,11 @@ simulated function Tick(float DeltaTime)
 {
 	super.Tick(DeltaTime);
 	// End:0x4E
+	// Sliding starts when on a ladder, moving faster than walk speed, and accelerating downward
 	if(((m_bIsClimbingLadder && (!bIsWalking)) && (Acceleration.Z < float(0))))
 	{
 		// End:0x4B
+		// SLIDE_None (3) means not currently sliding; begin the slide sequence
 		if((int(m_eLadderSlide) == int(3)))
 		{
 			StartSliding();
@@ -3336,6 +3373,7 @@ simulated function Tick(float DeltaTime)
 	else
 	{
 		// End:0x64
+		// Slide is active but conditions no longer met; play the slide-end animation
 		if((int(m_eLadderSlide) != int(3)))
 		{
 			EndSliding();
@@ -3603,6 +3641,7 @@ function Escort_UpdateCloserToLead()
 	local float fShortestDistance, fDistance;
 	local R6Hostage closerToLead;
 
+	// Hostages form a chain: find the one closest to this Rainbow, then build a greedy nearest-neighbor sequence
 	closerToLead = m_aEscortedHostage[0];
 	// End:0xF3
 	if((closerToLead != none))
@@ -3636,7 +3675,7 @@ function Escort_UpdateCloserToLead()
 		return;
 	}
 	closerToLead = none;
-	fShortestDistance = 999999.0000000;
+	fShortestDistance = 999999.0000000; // sentinel 'infinity' for nearest-neighbor search
 	Index = 0;
 	J0x11B:
 
@@ -3665,7 +3704,7 @@ function Escort_UpdateCloserToLead()
 	if((Index < (nbEscortedHostage - 1)))
 	{
 		hostage = none;
-		fShortestDistance = 999999.0000000;
+		fShortestDistance = 999999.0000000; // sentinel 'infinity' for nearest-neighbor search
 		searchIndex = 0;
 		J0x21E:
 
@@ -4011,6 +4050,7 @@ function bool ProcessBuildDeathMessage(Pawn Killer, out string szPlayerName)
 function bool CanInteractWithObjects()
 {
 	// End:0x4B
+	// Level.m_bInGamePlanningActive = GoCode hasn't been given yet; block interaction during mission planning phase
 	if((((((m_bIsProne || m_bChangingWeapon) || m_bReloadingWeapon) || m_bIsFiringState) || m_bIsSurrended) || Level.m_bInGamePlanningActive))
 	{
 		return false;
