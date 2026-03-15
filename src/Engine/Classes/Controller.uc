@@ -23,6 +23,7 @@ class Controller extends Actor
     nativereplication
     notplaceable;
 
+// Numeric ID for the MoveToward latent action; pass to InLatentExecution() to test if a MoveToward is active.
 const LATENT_MOVETOWARD = 503;
 
 enum EAttitude
@@ -135,6 +136,7 @@ var NavigationPoint home;  // set when begin play, used for retreating and attit
 var Pawn Enemy;
 var Actor Target;
 // Route Cache for Navigation
+// Ordered list of NavigationPoints forming the path to RouteGoal; populated by FindPathTo/FindPathToward.
 var Actor RouteCache[16];
 var ReachSpec CurrentPath;
 var Actor RouteGoal;  // final destination for current route
@@ -163,6 +165,8 @@ var Vector ViewZ;
 var Vector MonitorStartLoc;  // used by latent function MonitorPawn()
 var string VoiceType;  // for speech
 
+// Replication block: variables synced from server to owning/all clients.
+// 'reliable' guarantees delivery; condition evaluated server-side each tick.
 replication
 {
 	// Pos:0x000
@@ -189,12 +193,16 @@ replication
 }
 
 // Export UController::execMoveTo(FFrame&, void* const)
+// Latent (multi-frame) function; drives the possessed pawn to a world-space point (sets Destination).
+// Pawn rotates toward Destination unless ViewFocus is specified.
 native(500) final latent function MoveTo(Vector NewDestination, optional Actor ViewFocus, optional float speed, optional bool bShouldWalk);
 
 // Export UController::execMoveToward(FFrame&, void* const)
+// Latent function; drives the pawn toward an actor (sets MoveTarget), optionally strafing toward a separate ViewFocus.
 native(502) final latent function MoveToward(Actor NewTarget, optional Actor ViewFocus, optional float speed, optional float DestinationOffset, optional bool bUseStrafing, optional bool bShouldWalk);
 
 // Export UController::execFinishRotation(FFrame&, void* const)
+// Latent function; blocks script execution until the pawn has finished rotating to its desired heading.
 native(508) final latent function FinishRotation();
 
 // Export UController::execLineOfSightTo(FFrame&, void* const)
@@ -234,6 +242,7 @@ native(520) final function bool actorReachable(Actor anActor);
 native(526) final function bool PickWallAdjust(Vector HitNormal);
 
 // Export UController::execWaitForLanding(FFrame&, void* const)
+// Latent function; resumes script execution when the pawn's physics state is no longer PHYS_Falling.
 native(527) final latent function WaitForLanding();
 
 // Export UController::execFindBestInventoryPath(FFrame&, void* const)
@@ -253,6 +262,7 @@ native(531) final function Pawn PickTarget(out float bestAim, out float bestDist
 native(534) final function Actor PickAnyTarget(out float bestAim, out float bestDist, Vector FireDir, Vector projStart);
 
 // Export UController::execInLatentExecution(FFrame&, void* const)
+// Returns true if the given latent action (e.g. LATENT_MOVETOWARD) is currently active on this controller.
 native final function bool InLatentExecution(int LatentActionNumber);
 
 // Export UController::execStopWaiting(FFrame&, void* const)
@@ -348,10 +358,12 @@ function Reset()
 	return;
 }
 
+// Replicated RPC: server forces the client to teleport to a new location and rotation.
 function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 {
 	SetRotation(NewRotation);
 	// End:0x8B
+	// In Unreal rotators, 65536 = 360°, 32768 = 180°. This clamps pitch to within ±RotationRate.Pitch of level.
 	if(((Rotation.Pitch > RotationRate.Pitch) && (Rotation.Pitch < (65536 - RotationRate.Pitch))))
 	{
 		// End:0x6F
@@ -374,6 +386,7 @@ function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 	return;
 }
 
+// Replicated RPC: server forces the client to adopt a new rotation (zeroes pitch/roll on the pawn).
 function ClientSetRotation(Rotator NewRotation)
 {
 	SetRotation(NewRotation);
@@ -387,6 +400,7 @@ function ClientSetRotation(Rotator NewRotation)
 	return;
 }
 
+// Replicated RPC: server notifies the client its pawn is dying; triggers death animation and Dying state.
 function ClientDying(Vector HitLocation)
 {
 	// End:0x2F
@@ -403,6 +417,7 @@ event AIHearSound(Actor Actor, int ID, Sound S, Vector SoundLocation, Vector Par
 	return;
 }
 
+// Links this controller to aPawn; notifies the pawn via PossessedBy() so it can configure itself.
 function Possess(Pawn aPawn)
 {
 	aPawn.PossessedBy(self);
@@ -412,11 +427,13 @@ function Possess(Pawn aPawn)
 	{
 		PlayerReplicationInfo.bIsFemale = Pawn.bIsFemale;
 	}
+	// Initialize FocalPoint 512 units ahead so the pawn faces the right way from the first frame.
 	FocalPoint = (Pawn.Location + (float(512) * Vector(Pawn.Rotation)));
 	Restart();
 	return;
 }
 
+// Called when the possessed pawn has died; player controllers enter the Dead state to await respawn, AI controllers self-destruct.
 function PawnDied()
 {
 	// End:0x2B
@@ -452,6 +469,7 @@ event LongFall()
 
 // notifications of pawn events (from C++)
 // if return true, then pawn won't get notified 
+// C++ calls the controller first, allowing it to intercept and suppress the pawn's default response.
 event bool NotifyPhysicsVolumeChange(PhysicsVolume NewVolume)
 {
 	return;
@@ -487,6 +505,7 @@ function SetFall()
 	return;
 }
 
+// Called before the actor is fully initialized; registers this controller in Level.ControllerList via AddController().
 event PreBeginPlay()
 {
 	AddController();
@@ -498,6 +517,7 @@ event PreBeginPlay()
 	{
 		return;
 	}
+	// Randomize initial value so all AI controllers don't check player visibility on the same frame.
 	SightCounter = (0.2000000 * FRand());
 	return;
 }
@@ -521,6 +541,7 @@ function InitPlayerReplicationInfo()
 simulated event Destroyed()
 {
 	// End:0x12
+	// Only the authority (server) should perform cleanup; clients skip to avoid duplicate side-effects.
 	if((int(Role) < int(ROLE_Authority)))
 	{
 		return;
@@ -546,6 +567,8 @@ simulated event Destroyed()
 	return;
 }
 
+// Walks Level.ControllerList; returns early if any PlayerController has this pawn as its ViewTarget.
+// (nextController is the linked-list link traversed here; J0x14/goto is the decompiler's representation of a for-loop.)
 function AdjustView(float DeltaTime)
 {
 	local Controller C;
@@ -568,6 +591,7 @@ function AdjustView(float DeltaTime)
 	return;
 }
 
+// Returns true if the view should use smooth interpolation; Physics 1 = PHYS_Walking, 9 = PHYS_Spider (both ground-contact states).
 function bool WantsSmoothedView()
 {
 	return (((int(Pawn.Physics) == int(1)) || (int(Pawn.Physics) == int(9))) && (!Pawn.bJustLanded));
@@ -619,11 +643,13 @@ function FearThisSpot(Actor ASpot)
 	return;
 }
 
+// Called just before the pawn begins traversing a navigation edge; lets the controller set up animations or state.
 event PrepareForMove(NavigationPoint Goal, ReachSpec Path)
 {
 	return;
 }
 
+// Called when a Mover (door/lift/platform) blocks the path; pawn waits for M to finish its move sequence.
 function WaitForMover(Mover M)
 {
 	return;
@@ -640,21 +666,25 @@ function UnderLift(Mover M)
 }
 
 // #ifdef R6NOISE
+// Called by the engine's perception system when the pawn detects a nearby sound; Loudness is 0.0–1.0.
 event HearNoise(float Loudness, Actor NoiseMaker, Actor.ENoiseType eType, optional Actor.ESoundType ESoundType)
 {
 	return;
 }
 
+// Called by the engine's AI perception system when a player pawn enters the controller's sight cone.
 event SeePlayer(Pawn seen)
 {
 	return;
 }
 
+// Called when a non-player pawn (monster/bot) enters the sight cone.
 event SeeMonster(Pawn seen)
 {
 	return;
 }
 
+// Called each tick when Enemy is no longer in line of sight; auto-updates LastSeenPos/LastSeeingPos when enabled.
 event EnemyNotVisible()
 {
 	return;
@@ -665,6 +695,7 @@ function ShakeView(float shaketime, float RollMag, Vector OffsetMag, float RollR
 	return;
 }
 
+// Returns the controller's attitude toward Other; 4 = ATTITUDE_Ignore for non-player pawns.
 function Controller.EAttitude AttitudeTo(Pawn Other)
 {
 	// End:0x1B
@@ -674,7 +705,7 @@ function Controller.EAttitude AttitudeTo(Pawn Other)
 	}
 	else
 	{
-		return 4;
+		return 4; // ATTITUDE_Ignore
 	}
 	return;
 }
@@ -712,11 +743,12 @@ event MonitoredPawnAlert()
 	return;
 }
 
+// Begins tracking P's movement; fires MonitoredPawnAlert() if P moves more than MaxDist units from its start.
 function StartMonitoring(Pawn P, float MaxDist)
 {
 	MonitoredPawn = P;
 	MonitorStartLoc = P.Location;
-	MonitorMaxDistSq = (MaxDist * MaxDist);
+	MonitorMaxDistSq = (MaxDist * MaxDist); // Stored as squared distance to avoid sqrt in per-tick comparisons.
 	return;
 }
 
@@ -751,6 +783,7 @@ function SetWeaponSound(R6PawnReplicationInfo PawnRepInfo, string szCurrentWeapo
 	return;
 }
 
+// FSM state: entered by player controllers after PawnDied(); controller idles here until the server calls RestartPlayer().
 state Dead
 {
 	ignores KilledBy;
@@ -760,6 +793,7 @@ state Dead
 		return;
 	}
 
+	// Replicated RPC; only the server (non-NM_Client) actually calls Level.Game.RestartPlayer.
 	function ServerReStartPlayer()
 	{
 		// End:0x1B
@@ -773,6 +807,7 @@ state Dead
 	stop;
 }
 
+// FSM state: entered when the match ends; freezes the pawn in place and destroys non-player controllers.
 state GameEnded
 {
 	ignores ReceiveWarning, KilledBy;
@@ -787,7 +822,7 @@ state GameEnded
 			Pawn.SimAnim.AnimRate = 0;
 			Pawn.SetCollision(false, false, false);
 			Pawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
-			Pawn.SetPhysics(0);
+			Pawn.SetPhysics(0); // PHYS_None
 			Pawn.UnPossessed();
 		}
 		// End:0x97
@@ -802,7 +837,7 @@ state GameEnded
 
 defaultproperties
 {
-	AttitudeToPlayer=1
+	AttitudeToPlayer=1  // ATTITUDE_Hate: default AI stance toward the player
 	m_bHideReticule=true
 	FovAngle=90.0000000
 	MinHitWall=-1.0000000
