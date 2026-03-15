@@ -121,7 +121,7 @@ The formula is simple: **VA = RVA + 0x10300000** for Engine.dll functions.
 
 Zero violations means the attribution sprint is complete, but there's still real implementation work ahead. The 12 `IMPL_DIVERGE` functions in `UnModel.cpp` need those internal BSP helpers decompiled before they can be implemented properly. The same pattern repeats across other complex systems.
 
-The roadmap (covered in detail in the [plan](../../../docs/intro)):
+The roadmap (covered in detail in the [plan](/RvsDecompiled/docs/intro)):
 - **Phase A** — First Launch: `UGameEngine::Init`, `ULevel::SpawnActor`, getting to the main menu
 - **Phase B** — Rendering: D3D render interface, material pipeline, getting geometry on screen
 - **Phase C** — Engine stubs: the remaining complex functions across UnLevel, UnPawn, UnActCol, UnRender, etc.

@@ -13,13 +13,13 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://ravenshield-decomp.dev',
-  baseUrl: '/',
+  url: 'https://danpowell88.github.io',
+  baseUrl: '/RvsDecompiled/',
 
-  organizationName: 'youi-insurance',
-  projectName: 'rvs',
+  organizationName: 'danpowell88',
+  projectName: 'RvsDecompiled',
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
