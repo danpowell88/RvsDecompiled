@@ -4447,16 +4447,21 @@ void AActor::DbgAddLine( FVector Start, FVector End, FColor Color )
     GDbgLine[ GDbgLineIndex ].Color = Color;
 }
 
-IMPL_DIVERGE("Uses binary-specific global cache — address not stable across builds")
+// Ghidra 0x103794d0 (428 bytes): manages a per-actor debug vector cache (m_dbgVectorInfo).
+// Searches/creates entries by VectorIndex, copies Point/Cylinder/Color/Label.
+// Uses binary-specific FDbgVectorInfo struct layout and copy-constructor.
+IMPL_DIVERGE("manages m_dbgVectorInfo cache entries; FDbgVectorInfo layout partially unknown (Ghidra 0x103794d0)")
 void AActor::DbgVectorAdd( FVector Point, FVector Cylinder, INT VectorIndex, FString Def, FColor* Color )
 {
-    // STUB: too complex (uses binary-specific global caching)
+    // STUB: FDbgVectorInfo struct layout not fully mapped
 }
 
-IMPL_DIVERGE("Complex function >150 lines in Ghidra — partial reconstruction or needs dedicated analysis pass")
+// Ghidra 0x103791f0 (681 bytes): iterates m_dbgVectorInfo entries and draws each as a
+// cylinder + label via FRenderInterface. Requires render interface not fully mapped.
+IMPL_DIVERGE("iterates m_dbgVectorInfo and draws via FRenderInterface; render types not mapped (Ghidra 0x103791f0)")
 void AActor::DbgVectorDraw( FLevelSceneNode* SceneNode, FRenderInterface& RI )
 {
-    // STUB: too complex (>150 lines in Ghidra)
+    // STUB: requires FRenderInterface draw calls (cylinder, text label)
 }
 
 IMPL_MATCH("Engine.dll", 0x103794a0)
@@ -4559,7 +4564,10 @@ FLOAT ABrush::BuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 	return 0.0f;
 	unguard;
 }
-IMPL_DIVERGE("DIVERGENCE: OldBuildCoords applies TempScale/Location/Rotation and hidden FScale fields at this+0x3B0/0x3C4 (Ghidra 0x10307930); intermediates not recoverable from Ghidra pseudo-C alone")
+// Ghidra 0x10307930 (471 bytes): builds model coords from TempScale (FScale at +0x3B0) and
+// a second FScale at +0x3C4, combined with Location/Rotation. Returns product of their
+// FScale::Orientation() values. FScale field layout at +0x3B0/0x3C4 not yet confirmed.
+IMPL_DIVERGE("FScale fields at +0x3B0/0x3C4 not confirmed; falls back to identity transforms (Ghidra 0x10307930)")
 FLOAT ABrush::OldBuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 {
 	// Retail RVA 0x7930 (0x10307930): builds model coords from brush TempScale, Location
