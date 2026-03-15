@@ -996,7 +996,7 @@ void AActor::execPlaySound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, 264, execPlaySound );
 
-IMPL_DIVERGE("UAudioSubsystem::PlayOwnedSound not declared; DareAudio/SNDDSound3D runtime-only DLL")
+IMPL_DIVERGE("UAudioSubsystem::PlayOwnedSound not declared; DareAudio/SNDDSound3D runtime-only DLL (Ghidra 0x104284d0)")
 void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execPlayOwnedSound);
@@ -1014,7 +1014,7 @@ void AActor::execPlayOwnedSound( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execPlayOwnedSound );
 
-IMPL_DIVERGE("UAudioSubsystem::DemoPlaySound not declared; DareAudio/SNDDSound3D runtime-only DLL")
+IMPL_DIVERGE("UAudioSubsystem::DemoPlaySound not declared; DareAudio/SNDDSound3D runtime-only DLL (Ghidra 0x104277b0)")
 void AActor::execDemoPlaySound( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execDemoPlaySound);
@@ -4048,7 +4048,7 @@ struct _McdModel* AActor::getKModel() const
     return *( struct _McdModel** )( (BYTE*)KParams + 0x48 );
 }
 
-IMPL_DIVERGE("Karma physics wrapper; omits binary-specific rdtsc profiling counter update")
+IMPL_DIVERGE("Karma physics wrapper; omits rdtsc profiling counter update; callee uses Karma SDK (Ghidra 0x10361e90)")
 void AActor::physKarma( FLOAT DeltaTime )
 {
     // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
@@ -4057,13 +4057,13 @@ void AActor::physKarma( FLOAT DeltaTime )
     unguard;
 }
 
-IMPL_DIVERGE("Karma physics; stub; too complex to reconstruct without full Karma SDK")
+IMPL_DIVERGE("Karma physics; MeSDK/Karma proprietary binary SDK required (Ghidra 0x10361d50)")
 void AActor::physKarma_internal( FLOAT DeltaTime )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_DIVERGE("Karma ragdoll physics wrapper; omits binary-specific rdtsc profiling counter update")
+IMPL_DIVERGE("Karma ragdoll wrapper; omits rdtsc profiling counter update; callee uses Karma SDK (Ghidra 0x10367d20)")
 void AActor::physKarmaRagDoll( FLOAT DeltaTime )
 {
     // DIVERGENCE: omits original rdtsc profiling counter update (binary-specific globals)
@@ -4072,31 +4072,31 @@ void AActor::physKarmaRagDoll( FLOAT DeltaTime )
     unguard;
 }
 
-IMPL_DIVERGE("Karma ragdoll physics; stub; too complex to reconstruct without full Karma SDK")
+IMPL_DIVERGE("Karma ragdoll physics; MeSDK/Karma proprietary binary SDK required (Ghidra 0x10367670)")
 void AActor::physKarmaRagDoll_internal( FLOAT DeltaTime )
 {
     // STUB: too complex (1600 bytes in Ghidra)
 }
 
-IMPL_DIVERGE("Karma pre-step; stub; requires full Karma SDK")
+IMPL_DIVERGE("Karma pre-step; MeSDK/Karma proprietary binary SDK required (Ghidra 0x103624b0)")
 void AActor::preKarmaStep( FLOAT DeltaTime )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_DIVERGE("Karma post-step; stub; requires full Karma SDK")
+IMPL_DIVERGE("Karma post-step; MeSDK/Karma proprietary binary SDK required (Ghidra 0x103619b0)")
 void AActor::postKarmaStep()
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_DIVERGE("Karma skeletal pre-step; stub; requires full Karma SDK")
+IMPL_DIVERGE("Karma skeletal pre-step; MeSDK/Karma proprietary binary SDK required (Ghidra 0x10365bd0)")
 void AActor::preKarmaStep_skeletal( FLOAT DeltaTime )
 {
     // STUB: too complex (complex, Ghidra)
 }
 
-IMPL_DIVERGE("Karma skeletal post-step; stub; requires full Karma SDK")
+IMPL_DIVERGE("Karma skeletal post-step; MeSDK/Karma proprietary binary SDK required (Ghidra 0x10365e60)")
 void AActor::postKarmaStep_skeletal()
 {
     // STUB: too complex (complex, Ghidra)

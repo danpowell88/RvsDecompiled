@@ -5,29 +5,30 @@
 //=============================================================================
 class UWindowLookAndFeel extends UWindowBase;
 
-var() int FrameTitleX;
-var() int FrameTitleY;
-var() int ColumnHeadingHeight;
-var() int EditBoxBevel;
-var() float Size_ComboHeight;
-var() float Size_ComboButtonWidth;
+var() int FrameTitleX;                   // X pixel offset of the title text in the title bar
+var() int FrameTitleY;                   // Y pixel offset of the title text in the title bar
+var() int ColumnHeadingHeight;           // Height in pixels of column header rows in list controls
+var() int EditBoxBevel;                  // MiscBevel style index used for edit box chrome (0-3)
+var() float Size_ComboHeight;            // Height of a combo box control
+var() float Size_ComboButtonWidth;       // Width of the combo dropdown arrow button
 var() float Size_ScrollbarWidth;
 var() float Size_ScrollbarButtonHeight;  // Interchange W and H for horizontal SB's
-var() float Size_MinScrollbarHeight;
+var() float Size_MinScrollbarHeight;     // Minimum scrollbar thumb height
 var() float Size_TabAreaHeight;  // The height of the clickable tab area
 var() float Size_TabAreaOverhangHeight;  // The height of the tab area overhang
-var() float Size_TabSpacing;
-var() float Size_TabXOffset;
-var() float Size_TabTextOffset;
-var() float Pulldown_ItemHeight;
-var() float Pulldown_VBorder;
-var() float Pulldown_HBorder;
-var() float Pulldown_TextBorder;
+var() float Size_TabSpacing;             // Extra horizontal spacing added per tab
+var() float Size_TabXOffset;             // Horizontal offset of the first tab
+var() float Size_TabTextOffset;          // Vertical text offset within a tab
+var() float Pulldown_ItemHeight;         // Height of each item row in a pulldown menu
+var() float Pulldown_VBorder;            // Vertical padding inside a pulldown menu
+var() float Pulldown_HBorder;            // Horizontal padding inside a pulldown menu
+var() float Pulldown_TextBorder;         // Left indent for text inside a pulldown menu item
 var() Texture Active;  // Active widgets, window frames, etc.
 var() Texture Inactive;  // Inactive Widgets, window frames, etc.
-var() Texture ActiveS;
-var() Texture InactiveS;
+var() Texture ActiveS;    // Active texture variant for status bar windows
+var() Texture InactiveS;  // Inactive texture variant for status bar windows
 var() Texture Misc;  // Miscellaneous: backgrounds, bevels, etc.
+// 9-patch window frame regions: TL/T/TR=top corners+edge, L/R=sides, BL/B/BR=bottom corners+edge
 var() Region FrameTL;
 var() Region FrameT;
 var() Region FrameTR;
@@ -36,10 +37,11 @@ var() Region FrameR;
 var() Region FrameBL;
 var() Region FrameB;
 var() Region FrameBR;
-var() Color FrameActiveTitleColor;
-var() Color FrameInactiveTitleColor;
-var() Color HeadingActiveTitleColor;
-var() Color HeadingInActiveTitleColor;
+var() Color FrameActiveTitleColor;       // Title text color when the window is active
+var() Color FrameInactiveTitleColor;     // Title text color when the window is inactive
+var() Color HeadingActiveTitleColor;     // Column heading text color (active state)
+var() Color HeadingInActiveTitleColor;   // Column heading text color (inactive state)
+// 9-patch regions for a raised bevel (used for buttons and panels)
 var() Region BevelUpTL;
 var() Region BevelUpT;
 var() Region BevelUpTR;
@@ -49,6 +51,7 @@ var() Region BevelUpBL;
 var() Region BevelUpB;
 var() Region BevelUpBR;
 var() Region BevelUpArea;
+// 4 styles of miscellaneous bevels (indices 0-3); used for edit boxes, combos, panels
 var() Region MiscBevelTL[4];
 var() Region MiscBevelT[4];
 var() Region MiscBevelTR[4];
@@ -58,19 +61,21 @@ var() Region MiscBevelBL[4];
 var() Region MiscBevelB[4];
 var() Region MiscBevelBR[4];
 var() Region MiscBevelArea[4];
-var() Region ComboBtnUp;
-var() Region ComboBtnDown;
-var() Region ComboBtnDisabled;
-var() Region ComboBtnOver;
-var() Region HLine;
-var() Color EditBoxTextColor;
+var() Region ComboBtnUp;        // Combo dropdown arrow button, normal state
+var() Region ComboBtnDown;      // Combo dropdown arrow button, pressed state
+var() Region ComboBtnDisabled;  // Combo dropdown arrow button, disabled state
+var() Region ComboBtnOver;      // Combo dropdown arrow button, hover state
+var() Region HLine;             // Horizontal divider line region used in menus and lists
+var() Color EditBoxTextColor;   // Default text color for edit box content
+// 3-patch regions for the currently selected tab (left cap, stretched middle, right cap)
 var() Region TabSelectedL;
 var() Region TabSelectedM;
 var() Region TabSelectedR;
+// 3-patch regions for unselected tabs
 var() Region TabUnselectedL;
 var() Region TabUnselectedM;
 var() Region TabUnselectedR;
-var() Region TabBackground;
+var() Region TabBackground;     // Tiled background region for the tab control area
 
 function Texture GetTexture(UWindowFramedWindow W)
 {

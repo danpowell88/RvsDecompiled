@@ -2559,14 +2559,13 @@ FVector APawn::SuggestJumpVelocity(FVector Dest, FLOAT DesiredSpeed, FLOAT MaxJu
 
 // Ghidra 0x103f3e60, 514b.
 // MoveActor vtable call: XLevel->vtable[0x98/4=38] = MoveActor(pawn, delta, rot, hit, ...).
-// Zone check: this+0x164 = some zone pointer; bit6 (0x40) at zone+0x410 = bWaterZone.
+// Zone check: this+0x164 = PhysicsVolume; bit6 (0x40) at PhysicsVolume+0x410 = bWaterZone.
 // If exited water: findWaterLine(OldLoc, Location) → surface crossing point;
 //   result = (WaterLine - Location).Size() / Delta.Size()
 //   if (move.dot.(waterLine-Location) > 0) → result = 0 (still crossing, not yet exited)
 //   second MoveActor to snap pawn to water surface.
-// DIVERGE: Zone ptr at this+0x164 unidentified (approx'd via Region.Zone); MoveActor
-// call signature exact (matches retail vtable[0x98/4]).
-IMPL_TODO("Ghidra 0x103f3e60; 514b — zone ptr at this+0x164 approx'd via Region.Zone; otherwise water-surface split logic faithfully implemented")
+// DIVERGE: bWaterZone at PhysicsVolume+0x410 bit6 accessed via raw offset (field not declared in header).
+IMPL_DIVERGE("Ghidra 0x103f3e60; 514b — bWaterZone at PhysicsVolume+0x410 bit6 accessed via raw offset (not declared in APhysicsVolume header) — permanent header-level binary difference")
 FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 {
 	guard(APawn::Swim);
@@ -2574,8 +2573,8 @@ FLOAT APawn::Swim(FVector Delta, FCheckResult& Hit)
 	FLOAT result = 0.f;
 	XLevel->MoveActor(this, Delta, Rotation, Hit, 0, 0, 0, 0);
 	// Ghidra: checks *(byte*)(this+0x164+0x410) & 0x40 for bWaterZone.
-	// this+0x164 is an unidentified zone pointer; approximate with Region.Zone.
-	AZoneInfo* CurrZone = Region.Zone;
+	// this+0x164 = PhysicsVolume (the AActor field); bWaterZone at +0x410 not declared in header.
+	APhysicsVolume* CurrZone = PhysicsVolume;
 	if (!CurrZone || !(*(BYTE*)((BYTE*)CurrZone + 0x410) & 0x40))
 	{
 		// Exited water — find where we crossed the surface

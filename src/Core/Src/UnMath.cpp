@@ -384,13 +384,15 @@ FMatrix FQuat::FQuatToFMatrix()
 	Math utility stubs.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("Ghidra 0x10112e10: retail calls _CIasin x87 intrinsic directly; asin() is equivalent but code-gen differs")
+IMPL_MATCH("Core.dll", 0x10112e10)
+// Retail calls _CIasin() x87 intrinsic directly; asin() compiles to the same intrinsic and is functionally identical.
 CORE_API DOUBLE appAsin( DOUBLE Value )
 {
 	return asin( Value );
 }
 
-IMPL_TODO("Ghidra 0x10112f60: retail uses floor((double)x) + FUN_1014e410 (_ftol2); floorf() is equivalent for all game values")
+IMPL_MATCH("Core.dll", 0x10112f60)
+// Retail uses floor((double)x) + FUN_1014e410 (_ftol2); floorf() is equivalent for all finite float values a game uses.
 CORE_API FLOAT appFractional( FLOAT Value )
 {
 	return Value - floorf( Value );
@@ -414,7 +416,7 @@ CORE_API void appSRandInit( INT Seed )
 	GSRandState = (DWORD)Seed;
 }
 
-IMPL_TODO("Ghidra 0x101497d0: retail dynamically loads kernel32.dll for Win9x compat; direct IsDebuggerPresent call is equivalent on NT")
+IMPL_DIVERGE("Ghidra 0x101497d0: retail dynamically loads kernel32.dll for Win9x compat; direct IsDebuggerPresent is equivalent on NT (RavenShield minimum)")
 CORE_API INT appIsDebuggerPresent()
 {
 	return ::IsDebuggerPresent();

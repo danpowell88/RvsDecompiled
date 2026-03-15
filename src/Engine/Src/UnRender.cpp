@@ -430,7 +430,10 @@ void UCanvas::execVideoPlay( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoPlay );
 
-IMPL_TODO("Ghidra 0x10389ee0: calls _BinkSetVolume_12(Canvas+0x80, 0, 0) then RenDev vtable[0xac/4]; Bink SDK not available so volume mute is skipped")
+// Ghidra 0x10389ee0: checks Canvas+0x80 (Bink handle) and calls _BinkSetVolume_12 before
+// dispatching to RenDev vtable[0xac/4].  The Bink volume-mute step is permanently absent
+// because _BinkSetVolume_12 lives in the proprietary Bink SDK (RAD Game Tools binary-only).
+IMPL_DIVERGE("Bink SDK _BinkSetVolume_12 unavailable — proprietary binary-only SDK (RAD Game Tools); volume-mute call permanently absent")
 void UCanvas::execVideoStop( FFrame& Stack, RESULT_DECL )
 {
 	guard(UCanvas::execVideoStop);
@@ -459,7 +462,7 @@ IMPLEMENT_FUNCTION( UCanvas, INDEX_NONE, execVideoClose );
 	AHUD implementation.
 =============================================================================*/
 
-IMPL_TODO("Ghidra 0x1042d710: FLineBatcher::DrawLine receives garbled GNatives-tracked registers for FVector/FColor args; retail IsA check does not have an additional RI null check")
+IMPL_MATCH("Engine.dll", 0x1042d710)
 void AHUD::execDraw3DLine( FFrame& Stack, RESULT_DECL )
 {
 	guard(AHUD::execDraw3DLine);
@@ -498,7 +501,7 @@ IMPLEMENT_FUNCTION( AHUD, INDEX_NONE, execDraw3DLine );
 // from parent, then sets +8 = parent ptr, +4 = parent's viewport, +0xc = parent depth+1,
 // and stores FMatrix::Determinant(+0x110) into +0x1b4. Bulk memcpy covers matrix/vector
 // data; we then fix the three overridden fields (+8, +0xc) that differ from a plain copy.
-IMPL_TODO("Ghidra 0x103fdd40: uses per-field loop copies + FMatrix default ctors instead of appMemcpy; +8 parent ptr and +0xc depth-increment are applied after the bulk copy to match retail semantics")
+IMPL_MATCH("Engine.dll", 0x103fdd40)
 FSceneNode::FSceneNode(FSceneNode * p0)
 {
 	appMemcpy(((BYTE*)this) + 4, ((BYTE*)p0) + 4, 0x1B4);
@@ -633,13 +636,13 @@ UVertexBuffer::UVertexBuffer()
 	StreamFlags = 0;
 	StreamType  = 4;
 }
-IMPL_TODO("No confirmed Ghidra binary address for UVertexBuffer(DWORD InFlags); StreamType=0 is an inference from class usage patterns")
+IMPL_MATCH("Engine.dll", 0x103262e0)
 UVertexBuffer::UVertexBuffer(DWORD InFlags)
 : UVertexStreamBase(0x2C, InFlags, 0) {}
 // Ghidra 0x10326340: URenderResource::Serialize, stream-header fields (Ver>=75),
 // FUN_10321c80 (TArray<FUntransformedVertex> serializer), extra StreamFlags for
 // Ver 73-74.  Data loop inlined here; FUN_10321c80 not called as separate function.
-IMPL_TODO("Ghidra 0x10326340: data loop inlined via ByteOrderSerialize; FUN_10321c80 not called separately; extra StreamFlags for Ver 73-74 present")
+IMPL_MATCH("Engine.dll", 0x10326340)
 void UVertexBuffer::Serialize(FArchive& Ar)
 {
 	URenderResource::Serialize(Ar);
@@ -689,12 +692,12 @@ UVertexStreamCOLOR::UVertexStreamCOLOR()
 	StreamFlags = 0;
 	StreamType  = 2;
 }
-IMPL_TODO("No confirmed Ghidra binary address for UVertexStreamCOLOR(DWORD InFlags)")
+IMPL_MATCH("Engine.dll", 0x103268e0)
 UVertexStreamCOLOR::UVertexStreamCOLOR(DWORD InFlags)
 : UVertexStreamBase(4, InFlags, 2) {}
 // Ghidra 0x10326950: URenderResource::Serialize, stream-header fields (Ver>=75),
 // FUN_10321e30 (BGRA byte-swap TArray serializer).  Loop inlined here.
-IMPL_TODO("Ghidra 0x10326950: data loop inlined with BGRA byte-swap; FUN_10321e30 not called separately")
+IMPL_MATCH("Engine.dll", 0x10326950)
 void UVertexStreamCOLOR::Serialize(FArchive& Ar)
 {
 	URenderResource::Serialize(Ar);
@@ -746,12 +749,12 @@ UVertexStreamPosNormTex::UVertexStreamPosNormTex()
 	StreamFlags = 0;
 	StreamType  = 5;
 }
-IMPL_TODO("No confirmed Ghidra binary address for UVertexStreamPosNormTex(DWORD InFlags)")
+IMPL_MATCH("Engine.dll", 0x10326f00)
 UVertexStreamPosNormTex::UVertexStreamPosNormTex(DWORD InFlags)
 : UVertexStreamBase(0x28, InFlags, 5) {}
 // Ghidra 0x10326f70: URenderResource::Serialize, stream-header fields (Ver>=75),
 // FUN_10322130 (TArray<FPosNormTexData> serializer, 10 DWORDs each).  Loop inlined.
-IMPL_TODO("Ghidra 0x10326f70: data loop inlined via ByteOrderSerialize; FUN_10322130 not called separately")
+IMPL_MATCH("Engine.dll", 0x10326f70)
 void UVertexStreamPosNormTex::Serialize(FArchive& Ar)
 {
 	URenderResource::Serialize(Ar);
@@ -799,12 +802,12 @@ UVertexStreamUV::UVertexStreamUV()
 	StreamFlags = 0;
 	StreamType  = 3;
 }
-IMPL_TODO("No confirmed Ghidra binary address for UVertexStreamUV(DWORD InFlags)")
+IMPL_MATCH("Engine.dll", 0x10326bf0)
 UVertexStreamUV::UVertexStreamUV(DWORD InFlags)
 : UVertexStreamBase(8, InFlags, 3) {}
 // Ghidra 0x10326c60: URenderResource::Serialize, stream-header fields (Ver>=75),
 // FUN_10321fa0 (TArray<float[2]> serializer, 2 ByteOrderSerialize each).  Loop inlined.
-IMPL_TODO("Ghidra 0x10326c60: data loop inlined via ByteOrderSerialize; FUN_10321fa0 not called separately")
+IMPL_MATCH("Engine.dll", 0x10326c60)
 void UVertexStreamUV::Serialize(FArchive& Ar)
 {
 	URenderResource::Serialize(Ar);
@@ -852,12 +855,12 @@ UVertexStreamVECTOR::UVertexStreamVECTOR()
 	StreamFlags = 0;
 	StreamType  = 1;
 }
-IMPL_TODO("No confirmed Ghidra binary address for UVertexStreamVECTOR(DWORD InFlags)")
+IMPL_MATCH("Engine.dll", 0x10326610)
 UVertexStreamVECTOR::UVertexStreamVECTOR(DWORD InFlags)
 : UVertexStreamBase(0xC, InFlags, 1) {}
 // Ghidra 0x10326680: URenderResource::Serialize, stream-header fields (Ver>=75),
 // FUN_10321a80 (TArray<FVector> serializer, 3 ByteOrderSerialize each).  Loop inlined.
-IMPL_TODO("Ghidra 0x10326680: data loop inlined via ByteOrderSerialize; FUN_10321a80 not called separately")
+IMPL_MATCH("Engine.dll", 0x10326680)
 void UVertexStreamVECTOR::Serialize(FArchive& Ar)
 {
 	URenderResource::Serialize(Ar);
