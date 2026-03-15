@@ -50,7 +50,7 @@ INT AR6SoundReplicationInfo::IsNetRelevantFor(APlayerController* Viewer, AActor*
 	return 1;
 }
 
-IMPL_DIVERGE("audio dispatch via vtable (AudioSub+0x84) and per-case sound refs (weapon info offsets 0x3a0..0x460) not reconstructed; AudioSub object layout not fully mapped")
+IMPL_TODO("audio dispatch via vtable (AudioSub+0x84) and per-case sound refs (weapon info offsets 0x3a0..0x460) not reconstructed; AudioSub object layout not fully mapped")
 void AR6SoundReplicationInfo::PlayWeaponSound(enum EWeaponSound WeaponSound, BYTE CurrentWeapon)
 {
 	guard(AR6SoundReplicationInfo::PlayWeaponSound);
@@ -96,7 +96,7 @@ Done:
 	unguard;
 }
 
-IMPL_DIVERGE("retail checks weapon owner via IsA; decodes m_NewWeaponSound (low nibble = sound enum, bit 4 = fire flag); AudioSub vtable dispatch not reconstructed")
+IMPL_TODO("retail checks weapon owner via IsA; decodes m_NewWeaponSound (low nibble = sound enum, bit 4 = fire flag); AudioSub vtable dispatch not reconstructed")
 void AR6SoundReplicationInfo::PostNetReceive()
 {
 	guard(AR6SoundReplicationInfo::PostNetReceive);

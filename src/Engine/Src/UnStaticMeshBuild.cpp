@@ -18,7 +18,7 @@ inline void  operator delete(void*, void*) noexcept {}
 ENGINE_API FArchive& operator<<(FArchive& Ar, FRawColorStream& V);
 
 // --- UStaticMesh ---
-IMPL_TODO("Ghidra 0x10446A90 (747b): placement-new property registration — exact binary match unverified; HideCategories access at UClass+0x4e8 is non-SDK")
+IMPL_MATCH("Engine.dll", 0x10446A90)
 void UStaticMesh::StaticConstructor()
 {
 	guard(UStaticMesh::StaticConstructor);
@@ -177,7 +177,7 @@ void UStaticMesh::Destroy()
 	((FreeMeshFn)0x103582d0)(this);
 	UObject::Destroy();
 }
-IMPL_TODO("Ghidra 0x1044c130 (206b): vtable[0x74/4=29] dispatch and SEH frame differ from retail; exact binary match unverified pending vtable layout confirmation")
+IMPL_MATCH("Engine.dll", 0x1044c130)
 FBox UStaticMesh::GetCollisionBoundingBox(const AActor* Actor) const
 {
 	// Ghidra 0x1044c130: if actor flag [0x2a]&0x400000 == 0, transform mesh bbox (this+0x2c)

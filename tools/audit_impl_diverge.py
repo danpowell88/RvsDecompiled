@@ -16,37 +16,90 @@ DRY_RUN = "--dry-run" in sys.argv
 
 # Patterns that indicate a TRUE permanent divergence (keep IMPL_DIVERGE)
 PERMANENT_PATTERNS = [
-    re.compile(r"Karma|MeSDK|MathEngine|physKarma|physRagDoll|ragdoll", re.IGNORECASE),
+    re.compile(r"Karma|MeSDK|MathEngine|physKarma|physRagDoll", re.IGNORECASE),
     re.compile(r"GameSpy|CDKey|cdkey|master server", re.IGNORECASE),
     re.compile(r"binkw32|Bink Video", re.IGNORECASE),
     re.compile(r"PunkBuster", re.IGNORECASE),
-    re.compile(r"SafeDisc", re.IGNORECASE),
+    re.compile(r"SafeDisc|no Ghidra match found", re.IGNORECASE),
     re.compile(r"rdtsc|CPUID", re.IGNORECASE),
-    re.compile(r"absent from export|not in.*export|free func.*inlined|static.*inlined|not exported", re.IGNORECASE),
+    re.compile(r"absent from.*export|not in.*export|absent from retail|absent from Core\.dll|absent from Engine\.dll", re.IGNORECASE),
+    re.compile(r"free func.*inlined|static.*inlined|not exported|no.*standalone retail.*export|no retail equivalent function", re.IGNORECASE),
     re.compile(r"NullDrv|null renderer", re.IGNORECASE),
     re.compile(r"Ogg Vorbis.*not available", re.IGNORECASE),
+    re.compile(r"CPP_PROPERTY cannot address bitfield", re.IGNORECASE),
+    re.compile(r"PERMANENT:", re.IGNORECASE),
+    re.compile(r"intentionally disabled", re.IGNORECASE),
+    re.compile(r"UMaterial does not override PostEditChange in retail"),
+    re.compile(r"C\+\+ compiler-generated.*no corresponding"),
+    re.compile(r"uses FCoordsFromFMatrix instead of FMatrix::Coords\(\) to avoid Core\.dll link dependency"),
+    re.compile(r"template instantiation helper; no retail equivalent"),
+    re.compile(r"not a standalone function in the retail DLL"),
+    re.compile(r"field layout diverges from binary; Paths/Suppress"),  # struct layout, complex fix
 ]
 
-# Patterns that indicate should be IMPL_TODO (Ghidra body exists)
+# Patterns that indicate should be IMPL_TODO (Ghidra body exists, or retail behavior known)
 TODO_PATTERNS = [
+    # Has Ghidra / retail address reference
     re.compile(r"Ghidra 0x[0-9a-fA-F]+"),
+    re.compile(r"Ghidra ~"),
+    re.compile(r"Ghidra catch at 0x"),
     re.compile(r"retail 0x[0-9a-fA-F]+"),
     re.compile(r"R6Engine\.dll 0x[0-9a-fA-F]+"),
     re.compile(r"Core\.dll 0x[0-9a-fA-F]+"),
     re.compile(r"Window\.dll 0x[0-9a-fA-F]+"),
     re.compile(r"found at 0x[0-9a-fA-F]+"),
     re.compile(r"found at Core\.dll"),
-    re.compile(r"FUN_[0-9a-fA-F]{6,}"),  # blocked by unresolved FUN_ helper
+    re.compile(r"\(0x[0-9a-fA-F]+\)"),  # e.g., "(0x103b4bd0)"
+    # Blocked by unresolved FUN_ helper
+    re.compile(r"FUN_[0-9a-fA-F]{3,}"),
+    re.compile(r"FUN_ blocker"),
+    # Retail behavior described (can be implemented once we understand it)
+    re.compile(r"retail is \d+-byte"),
+    re.compile(r"retail calls"),
+    re.compile(r"retail checks"),
+    re.compile(r"retail busy-waits"),
+    re.compile(r"retail registers"),
+    re.compile(r"retail writes"),
+    re.compile(r"retail appends"),
+    re.compile(r"retail stores"),
+    re.compile(r"retail rebuilds"),
+    re.compile(r"retail reads"),
+    re.compile(r"retail uses"),
+    re.compile(r"DIVERGENCE: retail"),
+    # Audio stubs — audio phase will implement
     re.compile(r"audio subsystem not implemented"),
     re.compile(r"audio.*not.*implement", re.IGNORECASE),
+    re.compile(r"DIVERGENCE: UAudioSubsystem::"),
+    re.compile(r"always returns 0 — music"),
+    re.compile(r"always returns 0 — PunkBuster"),
+    re.compile(r"EAX toggle is handled at Init"),
+    re.compile(r"audio dispatch via vtable"),
+    # Structural issues (fixable)
     re.compile(r"vtable.*slot.*not declared"),
     re.compile(r"not declared.*vtable"),
+    re.compile(r"vtable\[0x[0-9a-fA-F]+\]"),
+    re.compile(r"vtable\[\d+\]"),
+    re.compile(r"PrivateStaticClass_exref unresolved"),
+    re.compile(r"static file-scope helper"),
+    re.compile(r"field layout diverges from binary"),
+    # Functional description without explicit permanence
+    re.compile(r"MaybeDestroy not called"),
+    re.compile(r"DIVERGENCE: uses GViewportHWnd"),
+    re.compile(r"complex FCanvasUtil"),
+    re.compile(r"875-byte spawn function"),
+    re.compile(r"uses unnamed DAT_[0-9a-fA-F]+"),
+    re.compile(r"spawn function; FCoords"),
 ]
 
 def is_permanent(reason: str) -> bool:
     return any(p.search(reason) for p in PERMANENT_PATTERNS)
 
 def should_be_todo(reason: str) -> bool:
+    # Special case: "omits rdtsc profiling" with a Ghidra address means the function
+    # logic IS implemented but profiling counters are omitted. rdtsc profiling CAN be
+    # added back once globals are identified → IMPL_TODO, not a permanent divergence.
+    if re.search(r"omits rdtsc", reason, re.IGNORECASE) and re.search(r"Ghidra 0x[0-9a-fA-F]+", reason):
+        return True
     if is_permanent(reason):
         return False
     return any(p.search(reason) for p in TODO_PATTERNS)

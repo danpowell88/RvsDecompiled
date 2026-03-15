@@ -55,7 +55,7 @@ WWindowsViewportWindow& WWindowsViewportWindow::operator=(const WWindowsViewport
 	return *this;
 }
 
-IMPL_DIVERGE("MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
+IMPL_TODO("MaybeDestroy not called; WWindowsViewportWindow does not inherit WWindow in reconstructed headers")
 WWindowsViewportWindow::~WWindowsViewportWindow()
 {
 	guard(WWindowsViewportWindow::~WWindowsViewportWindow);
@@ -850,7 +850,7 @@ INT UWindowsViewport::JoystickInputEvent(FLOAT DeltaSeconds, EInputKey Key, FLOA
 	unguard;
 }
 
-IMPL_DIVERGE("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
+IMPL_TODO("DIVERGENCE: uses GViewportHWnd directly, omits HoldCount check and editor code paths")
 LONG UWindowsViewport::ViewportWndProc(UINT Message, UINT wParam, LONG lParam)
 {
 	guard(UWindowsViewport::ViewportWndProc);

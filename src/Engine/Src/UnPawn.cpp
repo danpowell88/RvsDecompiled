@@ -317,7 +317,7 @@ IMPLEMENT_FUNCTION( AController, INDEX_NONE, execCanSee );
 
 /*-- AController pathfinding -------------------------------------------*/
 
-IMPL_DIVERGE("Ghidra 0x1038e490; 244 bytes; omits rdtsc profiling; default bSinglePath=1 per Ghidra")
+IMPL_TODO("Ghidra 0x1038e490; 244 bytes; omits rdtsc profiling; default bSinglePath=1 per Ghidra")
 void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathToward);
@@ -329,7 +329,7 @@ void AController::execFindPathToward( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 517, execFindPathToward );
 
-IMPL_DIVERGE("Ghidra 0x1038e590; 289b — iterates NavigationPointList for exact class match, marks nav+0x3e4 bit0, calls FindPath; omits rdtsc")
+IMPL_TODO("Ghidra 0x1038e590; 289b — iterates NavigationPointList for exact class match, marks nav+0x3e4 bit0, calls FindPath; omits rdtsc")
 void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTowardNearest);
@@ -355,7 +355,7 @@ void AController::execFindPathTowardNearest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, INDEX_NONE, execFindPathTowardNearest );
 
-IMPL_DIVERGE("Ghidra 0x1038e3e0; 172 bytes; omits rdtsc profiling; bSinglePath hardcoded 1 in retail")
+IMPL_TODO("Ghidra 0x1038e3e0; 172 bytes; omits rdtsc profiling; bSinglePath hardcoded 1 in retail")
 void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindPathTo);
@@ -366,7 +366,7 @@ void AController::execFindPathTo( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 518, execFindPathTo );
 
-IMPL_DIVERGE("Ghidra 0x1038e030; 273 bytes; omits rdtsc profiling; falls through to error-log if anActor/Pawn null")
+IMPL_TODO("Ghidra 0x1038e030; 273 bytes; omits rdtsc profiling; falls through to error-log if anActor/Pawn null")
 void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execactorReachable);
@@ -377,7 +377,7 @@ void AController::execactorReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 520, execactorReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e150; 286 bytes; omits rdtsc profiling; logs error if Pawn null")
+IMPL_TODO("Ghidra 0x1038e150; 286 bytes; omits rdtsc profiling; logs error if Pawn null")
 void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execpointReachable);
@@ -388,7 +388,7 @@ void AController::execpointReachable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 521, execpointReachable );
 
-IMPL_DIVERGE("Ghidra 0x1038e6c0; 131 bytes; omits rdtsc profiling counters around clearPaths call")
+IMPL_TODO("Ghidra 0x1038e6c0; 131 bytes; omits rdtsc profiling counters around clearPaths call")
 void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execClearPaths);
@@ -399,7 +399,7 @@ void AController::execClearPaths( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 522, execClearPaths );
 
-IMPL_DIVERGE("Ghidra 0x1038ce20; 236b — reads BaseZ/XYSpeed, calls Pawn->SuggestJumpVelocity with dest from this+0x480 (AController FVector field); omits rdtsc")
+IMPL_TODO("Ghidra 0x1038ce20; 236b — reads BaseZ/XYSpeed, calls Pawn->SuggestJumpVelocity with dest from this+0x480 (AController FVector field); omits rdtsc")
 void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execEAdjustJump);
@@ -417,7 +417,7 @@ void AController::execEAdjustJump( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 523, execEAdjustJump );
 
-IMPL_DIVERGE("Ghidra 0x10390770; 281b — clearPaths if bClearPaths, findPathToward(NULL,FVector0), returns navpoint at this+0x44c if nav; omits rdtsc")
+IMPL_TODO("Ghidra 0x10390770; 281b — clearPaths if bClearPaths, findPathToward(NULL,FVector0), returns navpoint at this+0x44c if nav; omits rdtsc")
 void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execFindRandomDest);
@@ -439,7 +439,7 @@ void AController::execFindRandomDest( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AController, 525, execFindRandomDest );
 
-IMPL_DIVERGE("Ghidra 0x1038df50; 209 bytes; omits rdtsc profiling; result unset if Pawn null in retail")
+IMPL_TODO("Ghidra 0x1038df50; 209 bytes; omits rdtsc profiling; result unset if Pawn null in retail")
 void AController::execPickWallAdjust( FFrame& Stack, RESULT_DECL )
 {
 	guard(AController::execPickWallAdjust);
@@ -1402,7 +1402,7 @@ void APawn::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra catch at 0x103ec90b is for AActor::FindSlopeRotation; APawn override not found; delegates to AActor")
+IMPL_TODO("Ghidra catch at 0x103ec90b is for AActor::FindSlopeRotation; APawn override not found; delegates to AActor")
 FRotator APawn::FindSlopeRotation( FVector FloorNormal, FRotator NewRotation )
 {
 	guard(APawn::FindSlopeRotation);
@@ -3010,7 +3010,7 @@ void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; omits rdtsc")
+IMPL_TODO("Ghidra 0x103ec3f0; 516b — GIsEditor 2D range check, LOS SingleLineCheck, FarMoveActor+Reachable; omits rdtsc")
 INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 {
 	guard(APawn::pointReachable);
@@ -3764,7 +3764,7 @@ INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudn
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038ed20; 173b -- omits rdtsc profiling; adds Enemy->IsValid() assertion matching retail; guard/unguard diverges")
+IMPL_TODO("Ghidra 0x1038ed20; 173b -- omits rdtsc profiling; adds Enemy->IsValid() assertion matching retail; guard/unguard diverges")
 void AController::CheckEnemyVisible()
 {
 	guard(AController::CheckEnemyVisible);
@@ -3777,7 +3777,7 @@ void AController::CheckEnemyVisible()
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x1038e270: omits rdtsc profiling counters (GScriptCycles, function timer array)")
+IMPL_TODO("Ghidra 0x1038e270: omits rdtsc profiling counters (GScriptCycles, function timer array)")
 AActor* AController::FindPath( FVector Dest, AActor* Goal, INT bSinglePath )
 {
 	guard(AController::FindPath);

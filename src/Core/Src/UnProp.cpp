@@ -13,7 +13,7 @@
 // Retail (Core.dll _unnamed) has fuller parsing: escape sequences, broader
 // character class, and GWarn error messages; our simplified version is
 // sufficient for the property import paths we exercise.
-IMPL_DIVERGE("static file-scope helper; retail version (Core.dll _unnamed) has escape-sequence parsing and GWarn error messages not present here")
+IMPL_TODO("static file-scope helper; retail version (Core.dll _unnamed) has escape-sequence parsing and GWarn error messages not present here")
 static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 {
 	if( !Buffer )

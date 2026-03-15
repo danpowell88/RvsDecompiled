@@ -86,7 +86,7 @@ FFileStream* FFileStream::Init( INT InMaxStreams )
 	return Instance;
 }
 
-IMPL_DIVERGE("retail busy-waits for background streaming thread; no thread in reconstruction")
+IMPL_TODO("retail busy-waits for background streaming thread; no thread in reconstruction")
 void FFileStream::Destroy()
 {
 	// DIVERGENCE: The retail binary sets Destroyed=1 and then busy-waits for a
