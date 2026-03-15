@@ -4606,13 +4606,16 @@ FLOAT ABrush::BuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 // Ghidra 0x10307930 (471 bytes): builds model coords from TempScale (FScale at +0x3B0) and
 // a second FScale at +0x3C4, combined with Location/Rotation. Returns product of their
 // FScale::Orientation() values. FScale field layout at +0x3B0/0x3C4 not yet confirmed.
-IMPL_TODO("FScale fields at +0x3B0/0x3C4 not confirmed; falls back to identity transforms (Ghidra 0x10307930)")
+// Ghidra 0x10307930 (471 bytes): builds model coords from hidden FScale fields at +0x3B0/0x3C4
+// plus Rotation (as FVector), Location (as FRotator), and TempScale-derived components.
+// Fields at +0x3B0 and +0x3C4 confirmed identical to OldToLocal/OldToWorld (IMPL_MATCH).
+// Ghidra failed to show initialization of 4 local FCoords variables (local_b0, local_80,
+// local_50, local_e0 on stack). Without that init code the exact transform chain is unknown.
+// Returns: s3c4.Orientation() * s3b0.Orientation() (confirmed from Ghidra).
+IMPL_TODO("Ghidra missed initialization of 4 local FCoords stack vars; transform chain unknown (Ghidra 0x10307930)")
 FLOAT ABrush::OldBuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 {
-	// Retail RVA 0x7930 (0x10307930): builds model coords from brush TempScale, Location
-	// (as FRotator), Rotation (as FVector), and two hidden FScale fields at +0x3B0 and +0x3C4.
-	// Returns FScale::Orientation(s3b0) * FScale::Orientation(s3c4).
-	// Approximation: fall back to identity transforms until full field layout is confirmed.
+	// Falls back to identity transforms; only the return value matches retail exactly.
 	if( Coords )
 	{
 		Coords->PointXform  = GMath.UnitCoords;
@@ -4625,7 +4628,7 @@ FLOAT ABrush::OldBuildCoords( FModelCoords* Coords, FModelCoords* UnCoords )
 	}
 	FScale& s3b0 = *(FScale*)((BYTE*)this + 0x3B0);
 	FScale& s3c4 = *(FScale*)((BYTE*)this + 0x3C4);
-	return s3b0.Orientation() * s3c4.Orientation();
+	return s3c4.Orientation() * s3b0.Orientation();
 }
 IMPL_MATCH("Engine.dll", 0x103077d0)
 FCoords ABrush::OldToLocal() const
