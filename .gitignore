@@ -19,6 +19,7 @@ ghidra/exports/
 build/
 build-*/
 out/
+bin/
 *.obj
 *.pdb
 *.ilk
