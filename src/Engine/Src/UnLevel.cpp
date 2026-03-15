@@ -54,7 +54,7 @@ void ULevelBase::Destroy()
 	unguard;
 }
 
-IMPL_TODO("manual Actors path differs; retail uses ByteOrderSerialize instead of Ar<<Actors at Ghidra 0x103c0f60")
+IMPL_TODO("IsTrans path calls FUN_103c0ab0 (unresolved); non-IsTrans uses ByteOrderSerialize; Ghidra 0x103c0f60")
 void ULevelBase::Serialize( FArchive& Ar )
 {
 	UObject::Serialize( Ar );
@@ -203,7 +203,7 @@ void ULevel::Serialize( FArchive& Ar )
 	unguard;
 }
 
-IMPL_TODO("stub; retail PostLoad at Ghidra 0x103c13f0")
+IMPL_TODO("calls FUN_10318850, FUN_103584e0, FUN_1047ad70 (Karma init); 523-byte function; Ghidra 0x103c13f0")
 void ULevel::PostLoad()
 {
 	UObject::PostLoad();
@@ -1790,7 +1790,7 @@ void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetLocalURL );
 
 // GetMapNameLocalisation() - returns the localised map name.
-IMPL_TODO("stub; retail execGetMapNameLocalisation at Ghidra 0x103bdb70")
+IMPL_TODO("1212-byte function; creates UR6MissionDescription via StaticAllocateObject to get localised map name; Ghidra 0x103bdb70")
 void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetMapNameLocalisation);
@@ -1820,7 +1820,7 @@ void ALevelInfo::execFinalizeLoading( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execFinalizeLoading );
 
 // ResetLevelInNative() - resets native-side level state.
-IMPL_TODO("stub; retail execResetLevelInNative at Ghidra 0x103bd770")
+IMPL_TODO("795-byte function; clears game state arrays, viewport state, calls FUN_1031fb80; Ghidra 0x103bd770")
 void ALevelInfo::execResetLevelInNative( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execResetLevelInNative);
@@ -1849,7 +1849,7 @@ void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execSetBankSound );
 
 // NotifyMatchStart() - notifies native code that a match has begun.
-IMPL_TODO("stub; retail execNotifyMatchStart at Ghidra 0x103bc230")
+IMPL_TODO("611-byte function; FGuid generation via engine vtable, sets session state; Ghidra 0x103bc230")
 void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execNotifyMatchStart);
@@ -2062,7 +2062,7 @@ IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::PreNetReceive() {}
 IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::CheckForErrors() {}
-IMPL_TODO("partial; retail includes replication change detection; Ghidra 0x756b0")
+IMPL_TODO("FUN_10370830 (rep-object compare) and FUN_10371990 (lazy property lookup) unresolved; Ghidra 0x103756b0")
 INT* ALevelInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
@@ -2180,14 +2180,14 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void AGameReplicationInfo::PostNetReceive() {}
-IMPL_TODO("partial; retail includes replication change detection; Ghidra 0x76620")
+IMPL_TODO("FUN_10370870 (string diff for rep arrays) and FUN_10371990 unresolved; 4039-byte function (Ghidra 0x10376620)")
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void APlayerReplicationInfo::PostNetReceive() {}
-IMPL_TODO("partial; retail includes replication change detection; Ghidra 0x759a0")
+IMPL_TODO("FUN_10370830 (rep-object compare), FUN_10371990 unresolved; 3146-byte function (Ghidra 0x103759a0)")
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
