@@ -2969,9 +2969,10 @@ void AActor::PostNetReceive()
 	// --- Conditional net-interface notification (bCollideWorld changed) ---
 	if ( (*(DWORD*)((BYTE*)this + 0xa8) & 0x800) != 0 )
 	{
+		// Ghidra: (**(code**)(**(int**)(*(int*)(this+0x328)+0xf0)+8))(this) — vtable[2]
 		INT  xlev_addr = *(INT*)((BYTE*)this + 0x328);
 		INT* iface     = *(INT**)(xlev_addr + 0xf0);
-		((void(__thiscall*)(INT*, AActor*))((*(INT**)iface)[3]))(iface, this);
+		((void(__thiscall*)(INT*, AActor*))((*(INT**)iface)[2]))(iface, this);
 	}
 
 	// --- Animation replication ---
@@ -3034,18 +3035,27 @@ void AActor::PostNetReceive()
 	if ( *((BYTE*)this + 0x2f) != GPreNet_F67 )
 		SetDrawType( (EDrawType)GPreNet_F67 );
 
-	// --- Owner changed → bump events + attachment ---
+	// --- Owner changed → bump events + base re-attachment ---
 	INT bOwnerChanged = (*(AActor**)((BYTE*)this + 0x15c) != GPreNet_Owner) ? 1 : 0;
-	if ( bOwnerChanged && GPreNet_Owner )
+	if ( bOwnerChanged )
 	{
-		eventBump( GPreNet_Owner );
-		GPreNet_Owner->eventBump( this );
-		XLevel->FarMoveActor( GPreNet_Owner, FVector(0,0,1), 0, 1, 0 );
+		if ( GPreNet_Owner )
+		{
+			eventBump( GPreNet_Owner );
+			GPreNet_Owner->eventBump( this );
+		}
+		// Ghidra: (**(code**)(*(int*)this + 0xd0))(GPreNet_Owner, 0, 0, 1.0f, 1) with ECX=this
+		// Actor vtable[0xd0/4=52] — likely SetBase(newOwner, FVector(0,0,1), 1)
+		typedef void (__thiscall* Fn52)(AActor*, AActor*, FLOAT, FLOAT, FLOAT, INT);
+		((Fn52)(*(INT*)(*(INT*)this + 0xd0)))(this, GPreNet_Owner, 0.0f, 0.0f, 1.0f, 1);
 	}
 
 	// --- Attachment transform (Ghidra 0x1037d5f2-0x1037d7e3) ---
 	// Requires FCoords::Transpose + FVector::TransformVectorBy to recompute attached
 	// actor position in world space. Deferred pending FCoords integration.
+
+	// --- Final: clear bit 3 of +0xac (bNetDirty/bUpdateSimulatedPosition) ---
+	*(DWORD*)((BYTE*)this + 0xac) &= ~0x8u;
 }
 
 IMPL_MATCH("Engine.dll", 0x10378210)
