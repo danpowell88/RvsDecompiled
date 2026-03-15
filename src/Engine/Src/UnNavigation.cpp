@@ -670,15 +670,19 @@ void APlayerStart::addReachSpecs(APawn* Scout, int bOnlyChanged)
 
 
 // --- AScout ---
-IMPL_TODO("calls XLevel vtable[0x9C] (FarMoveActor-like) and vtable[0x98] (MoveActor-like) on XLevel; also AActor::TwoWallAdjust; 787-byte body not fully translated")
+IMPL_TODO("787-byte wall-slide loop (Ghidra 0xe0940): FarMoveActor/MoveActor confirmed; FCheckResult struct layout and FVector ops need full translation")
 int AScout::findStart(FVector Loc)
 {
 	guard(AScout::findStart);
-	// Ghidra 0xe0940: tries to place the Scout at Loc via XLevel vtable[0x9c] (FarMoveActor),
-	// then iterates wall-slide adjustments using XLevel vtable[0x98] and AActor::TwoWallAdjust.
+	// Ghidra 0xe0940: places Scout at Loc via XLevel->FarMoveActor, then iterates up to 10
+	// wall-slide adjustments using XLevel->MoveActor + AActor::TwoWallAdjust + FVector::SafeNormal.
 	// Returns 1 if a valid collision-free start was found, 0 otherwise.
-	// Diverge: XLevel vtable[0x9c] and vtable[0x98] method names unresolved.
-	return 0;
+	// FarMoveActor = vtable[0x9c/4], MoveActor = vtable[0x98/4] (confirmed from PostNetReceive).
+	INT result = XLevel->FarMoveActor( this, Loc, 0, 0, 0, 0 );
+	if ( result == 0 )
+		return 0;
+	// TODO: wall-slide loop (10 iterations with MoveActor + TwoWallAdjust)
+	return 1;
 	unguard;
 }
 
