@@ -172,10 +172,35 @@ ULevel::ULevel( UEngine* InEngine, INT InRootOutside )
 	unguard;
 }
 
-IMPL_TODO("stub; retail serializes Level-specific fields at Ghidra 0x103c3070")
+IMPL_DIVERGE("TravelInfo TMap serialization unresolved (FUN_103c0ce0); modern path partially missing; retail at Ghidra 0x103c3070")
 void ULevel::Serialize( FArchive& Ar )
 {
+	guard(ULevel::Serialize);
 	ULevelBase::Serialize( Ar );
+
+	// Ar << Model (UModel* at this+0x90)
+	Ar << *(UObject**)((BYTE*)this + 0x90);
+
+	// Ghidra: if ver < 0x62: old path with FUN_103c0bd0/FUN_103c0b40 (ancient format, skip)
+
+	// ByteOrderSerialize TimeSeconds (FLOAT at this+0xd4)
+	Ar.ByteOrderSerialize( (void*)((BYTE*)this + 0xd4), 4 );
+
+	// Ar << FirstDeleted (AActor* at this+0xf4)
+	Ar << *(UObject**)((BYTE*)this + 0xf4);
+
+	// Ar << TextBlocks[0..15] (16 x UTextBuffer* at this+0x94..+0xd0)
+	for ( INT i = 0; i < 16; i++ )
+		Ar << *(UObject**)((BYTE*)this + 0x94 + i * 4);
+
+	// Ghidra: if ver < 0x3f: very old path (FUN_103c0e40 etc.), skip for modern archives
+	// Modern path (ver >= 0x3f):
+	//   FUN_103c0ce0(Ar, this+0xdc) — serialize TravelInfo TMap (unresolved loader)
+	//   if loading: FUN_1031f850() — post-load action (unresolved)
+	//   if Model && !IsTrans: Ar.vtable[4](Model) — Preload(Model) (unresolved)
+	//   if LicenseeVer > 0xc && (IsSaving||IsLoading): FUN_103c0ce0(Ar, this+0x101ac)
+
+	unguard;
 }
 
 IMPL_TODO("stub; retail PostLoad at Ghidra 0x103c13f0")
@@ -1859,7 +1884,7 @@ void ALevelInfo::execCallLogThisActor( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execCallLogThisActor );
 
 // AddWritableMapPoint() - adds a point to the writable minimap overlay.
-IMPL_TODO("stub; retail renders map point; Ghidra 0xbbbd0")
+IMPL_DIVERGE("R6-specific minimap module (R6Engine.dll ~0xbbbd0); not in Engine.dll export table")
 void ALevelInfo::execAddWritableMapPoint( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddWritableMapPoint);
@@ -1871,7 +1896,7 @@ void ALevelInfo::execAddWritableMapPoint( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddWritableMapPoint );
 
 // AddWritableMapIcon() - adds an icon to the writable minimap overlay.
-IMPL_TODO("stub; retail parses icon string with swscanf; Ghidra 0xbc060")
+IMPL_DIVERGE("R6-specific minimap module (R6Engine.dll ~0xbc060); not in Engine.dll export table")
 void ALevelInfo::execAddWritableMapIcon( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddWritableMapIcon);
@@ -1883,7 +1908,7 @@ void ALevelInfo::execAddWritableMapIcon( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execAddWritableMapIcon );
 
 // AddEncodedWritableMapStrip() - adds an encoded strip to the writable minimap.
-IMPL_TODO("stub; retail decodes and renders strip; Ghidra 0xbbe00")
+IMPL_DIVERGE("R6-specific minimap module (R6Engine.dll ~0xbbe00); not in Engine.dll export table")
 void ALevelInfo::execAddEncodedWritableMapStrip( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execAddEncodedWritableMapStrip);

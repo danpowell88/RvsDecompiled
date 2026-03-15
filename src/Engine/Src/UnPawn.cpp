@@ -1077,12 +1077,29 @@ FVector APawn::CheckForLedges( AActor* HitActor, FVector Loc, FVector Delta, FVe
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ea860; retail walks Controller->PawnList array removing self, then frees object at this+0x3d8 via GMalloc if non-null, then calls AActor::Destroy; our stub nulls Controller->Pawn instead which is wrong")
+IMPL_DIVERGE("Ghidra 0x103ea860; FUN_1047c5b0(KarmaData) Karma pre-free cleanup call (73b, unregisters object from global Karma table) not reconstructed — permanent: Karma/MeSDK binary-only")
 void APawn::Destroy()
 {
 	guard(APawn::Destroy);
-	if( Controller )
-		Controller->Pawn = NULL;
+	// Walk XLevel->PawnList (TArray<APawn*> at XLevel+0x101c0) removing self.
+	// ULevel::PawnList is not in our headers; raw offset confirmed by Ghidra.
+	TArray<APawn*>& PawnList = *(TArray<APawn*>*)((BYTE*)XLevel + 0x101c0);
+	for ( INT i = 0; i < PawnList.Num(); i++ )
+	{
+		if ( PawnList(i) == this )
+		{
+			PawnList.Remove(i);
+			i--;
+		}
+	}
+	// Free Karma body data at this+0x3d8.
+	// DIVERGE: retail calls FUN_1047c5b0(KarmaData) here first (Karma cleanup).
+	void* karmaData = *(void**)((BYTE*)this + 0x3d8);
+	if ( karmaData != NULL )
+	{
+		GMalloc->Free(karmaData);
+		*(void**)((BYTE*)this + 0x3d8) = NULL;
+	}
 	AActor::Destroy();
 	unguard;
 }
@@ -2674,7 +2691,11 @@ void AController::StartAnimPoll()
 			GetStateFrame()->LatentAction = EPOLL_FinishAnim;
 }
 
-IMPL_TODO("Ghidra 0x10420b10; 108b — guard/unguard overhead and struct layout offset shift cause parity failure")
+// Ghidra 0x10420b10, 108b. No guard/unguard (no SEH in retail). unaff_retaddr = Channel.
+// MeshGetInstance called on Pawn->Mesh with this (Controller) as the Actor arg; return
+// value discarded — side-effect populates Pawn->MeshInstance. IsAnimating is the non-virtual
+// AActor:: overload (const). IsAnimLooping is vtable[0xec] on UMeshInstance.
+IMPL_MATCH("Engine.dll", 0x10420b10)
 INT AController::CheckAnimFinished( INT Channel )
 {
 	if( Pawn && Pawn->Mesh )
