@@ -52,7 +52,7 @@ static UObject* FUN_10386790(UClass* cls, UObject* outer, DWORD name, DWORD flag
 // UObject::GObjObjects is private; UMaterial (Engine module) cannot access it directly.
 // Use FObjectIterator (friend of UObject) which is semantically equivalent but adds
 // an IsA(UObject) check per element — functionally identical for all real objects.
-IMPL_TODO("Ghidra 0x103c97f0: uses FUN_10318850 (ECX-based GObjObjects iterator with custom calling convention); replaced with FObjectIterator — semantically identical but generates different asm")
+IMPL_DIVERGE("Ghidra 0x103c97f0: retail uses ECX-based FUN_10318850 (GObjObjects iterator with non-standard calling convention); FObjectIterator is functionally equivalent but permanent asm-level divergence")
 void UMaterial::ClearFallbacks()
 {
 	guard(UMaterial::ClearFallbacks);
@@ -1012,7 +1012,7 @@ UBOOL UMaterialSwitch::CheckCircularReferences( TArray<UMaterial*>& History )
 // Ghidra 0x16aea0, 297B: finds a UPalette with the same outer and identical
 // 256-entry colour data; logs the match, schedules this for destruction, and
 // returns the found duplicate.  Falls through to 'this' if none found.
-IMPL_TODO("Ghidra 0x1046aea0 (297b): FUN_10318850 ECX-based GObjObjects iterator replaced by TObjectIterator<UPalette> — semantically equivalent for UPalette filter but generates different asm")
+IMPL_DIVERGE("Ghidra 0x1046aea0: retail uses ECX-based FUN_10318850 (GObjObjects iterator); TObjectIterator<UPalette> is functionally equivalent for UPalette filter — permanent asm-level divergence")
 UPalette* UPalette::ReplaceWithExisting()
 {
 	guard(UPalette::ReplaceWithExisting);

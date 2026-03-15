@@ -913,10 +913,11 @@ FArchive & operator<<(FArchive & Ar, FStaticMeshUV & V) {
 }
 
 // ??6@YAAAVFArchive@@AAV0@AAUFStaticMeshVertex@@@Z
-// Ghidra 0x10316110: legacy paths for Ver<0x70 serialize garbage stack bytes (ancient compiler bug).
-// Ver==0x6f paths serialize Ghidra stack-frame artifacts not reconstructable. 
-// All Ravenshield assets use Ver >= 0x70, so legacy paths are dead code.
-IMPL_TODO("Ghidra 0x10316110: omits legacy Ver<0x70 and Ver==0x6f paths — these serialize garbage stack data from ancient compiler bug; dead code for all Ravenshield assets (Ver>=0x70)")
+// Ghidra 0x10316110: legacy paths for Ver<0x70 and Ver==0x6f serialize garbage stack
+// bytes — retail code accidentally serializes &param_1/&param_2 (stack addresses)
+// and calls Serialize() on stack-frame offsets, an ancient compiler bug.
+// All Ravenshield assets use Ver >= 0x70, so the buggy legacy paths are dead code.
+IMPL_DIVERGE("Ghidra 0x10316110: Ver<0x70 and Ver==0x6f paths serialize garbage stack addresses (retail compiler bug); permanently omitted — dead code for all Ravenshield assets (Ver>=0x70)")
 FArchive & operator<<(FArchive & Ar, FStaticMeshVertex & V) {
 	// 6 floats: Position (3) + Normal (3)
 	for (INT i = 0; i < 6; i++)
