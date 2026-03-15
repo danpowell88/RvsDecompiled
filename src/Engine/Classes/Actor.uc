@@ -65,6 +65,7 @@ const DEATHMSG_KILLED_BY_BOMB = 9;
 const DEATHMSG_PRISONER_KILLEDBY = 10;
 const DEATHMSG_RAINBOW_SUFFOCATE = 11;
 const DEATHMSG_INTRUDER_KILLEDBY = 12;
+// Trace flags - bitmask controlling which actors/surfaces are tested during line traces
 const TF_TraceActors = 0x0001;
 const TF_Visibility = 0x0002;
 const TF_LineOfFire = 0x0004;
@@ -115,6 +116,7 @@ enum EPhysics
 	PHYS_KarmaRagDoll               // 14
 };
 
+// Authority = server owns it; AutonomousProxy = local player (client-predicted); SimulatedProxy = remote copy extrapolated by client; DumbProxy = no simulation.
 enum ENetRole
 {
 	ROLE_None,                      // 0
@@ -427,6 +429,7 @@ struct KRBVec
 	var float Z;
 };
 
+// Network-replicated animation state; byte fields are compressed (rate/tween max 4.0/4s).
 struct AnimRep
 {
 	var name AnimSequence;
@@ -533,6 +536,7 @@ var(Lighting) byte LightCone;
 var(Force) Actor.EForceType ForceType;
 var(R6Planning) Actor.EDisplayFlag m_eDisplayFlag;
 var(R6Planning) byte m_u8SpritePlanningAngle;
+// Per-actor game-mode availability; MFO_Available = included, MFO_NotAvailable = excluded from that mode.
 var(R6Availability) const Actor.EModeFlagOption m_eStoryMode;
 var(R6Availability) const Actor.EModeFlagOption m_eMissionMode;
 var(R6Availability) const Actor.EModeFlagOption m_eTerroristHunt;
