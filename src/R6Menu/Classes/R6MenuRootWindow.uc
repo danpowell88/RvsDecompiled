@@ -717,7 +717,7 @@ function GotoCampaignPlanning(bool _bRetrying)
 	// End:0x75
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("start GotoPlanning PlayerCampaign.m_FileName=", PlayerCampaign.m_FileName));
+		Log(("start GotoPlanning PlayerCampaign.m_FileName=" $ PlayerCampaign.m_FileName));
 	}
 	CurrentConsole.m_CurrentCampaign = new (none) Class'R6Game.R6Campaign';
 	CurrentConsole.m_CurrentCampaign.InitCampaign(GetLevel(), PlayerCampaign.m_CampaignFileName, CurrentConsole);
@@ -726,48 +726,48 @@ function GotoCampaignPlanning(bool _bRetrying)
 	// End:0x140
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("m_CurrentCampaign", string(CurrentConsole.m_CurrentCampaign)));
+		Log(("m_CurrentCampaign" @ string(CurrentConsole.m_CurrentCampaign)));
 	}
 	// End:0x164
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("currentMission", string(CurrentMission)));
+		Log(("currentMission" @ string(CurrentMission)));
 	}
 	CurrentConsole.Master.m_StartGameInfo.m_MapName = CurrentMission.m_MapName;
 	// End:0x1C8
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("currentMission.m_MapName", CurrentMission.m_MapName));
+		Log(("currentMission.m_MapName" @ CurrentMission.m_MapName));
 	}
 	CurrentConsole.Master.m_StartGameInfo.m_DifficultyLevel = PlayerCampaign.m_iDifficultyLevel;
 	// End:0x237
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("PlayerCampaign.m_iDifficultyLevel", string(PlayerCampaign.m_iDifficultyLevel)));
+		Log(("PlayerCampaign.m_iDifficultyLevel" @ string(PlayerCampaign.m_iDifficultyLevel)));
 	}
 	CurrentConsole.Master.m_StartGameInfo.m_GameMode = "R6Game.R6StoryModeGame";
 	iNbArrayElements = PlayerCampaign.m_OperativesMissionDetails.m_MissionOperatives.Length;
 	// End:0x2D1
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("m_MissionOperatives.Length", string(PlayerCampaign.m_OperativesMissionDetails.m_MissionOperatives.Length)));
+		Log(("m_MissionOperatives.Length" @ string(PlayerCampaign.m_OperativesMissionDetails.m_MissionOperatives.Length)));
 	}
 	m_GameOperatives.Remove(0, m_GameOperatives.Length);
 	i = 0;
 	J0x2E5:
 
 	// End:0x327 [Loop If]
-	if(__NFUN_150__(i, iNbArrayElements))
+	if((i < iNbArrayElements))
 	{
 		m_GameOperatives[i] = PlayerCampaign.m_OperativesMissionDetails.m_MissionOperatives[i];
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x2E5;
 	}
 	// End:0x344
 	if(bShowLog)
 	{
-		__NFUN_231__("end GotoPlanning");
+		Log("end GotoPlanning");
 	}
 	m_bLoadingPlanning = true;
 	// End:0x35E
@@ -797,16 +797,16 @@ function GotoPlanning()
 		{
 			R6GameInfo(GetLevel().Game).RestartGameMgr();
 			CurrentPlayer = GetPlayerOwner().Player;
-			GetPlayerOwner().__NFUN_279__();
-			NewController = GetLevel().__NFUN_278__(Class'R6Game.R6PlanningCtrl');
-			R6GameInfo(GetLevel().Game).__NFUN_2010__(NewController, CurrentPlayer);
+			GetPlayerOwner().Destroy();
+			NewController = GetLevel().Spawn(Class'R6Game.R6PlanningCtrl');
+			R6GameInfo(GetLevel().Game).SetController(NewController, CurrentPlayer);
 			R6GameInfo(GetLevel().Game).bRestartLevel = false;
 			R6GameInfo(GetLevel().Game).RestartPlayer(NewController);
 			R6PlanningCtrl(NewController).SetPlanningInfo();
 			NewController.SpawnDefaultHUD();
-			NewController.__NFUN_2709__(1);
+			NewController.ChangeInputSet(1);
 			R6PlanningCtrl(GetPlayerOwner()).DeleteEverySingleNode();
-			R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.__NFUN_1416__("Backup", "Backup", "Backup", "", "Backup.pln", Console.Master.m_StartGameInfo);
+			R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.LoadPlanning("Backup", "Backup", "Backup", "", "Backup.pln", Console.Master.m_StartGameInfo);
 			R6PlanningCtrl(GetPlayerOwner()).InitNewPlanning(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.m_iCurrentTeam);
 			m_GearRoomWidget.LoadRosterFromStartInfo();
 			m_bReloadPlan = false;			
@@ -826,9 +826,9 @@ function LaunchQuickPlay()
 	local string szFileName;
 
 	szFileName = R6MissionDescription(R6Console(Console).Master.m_StartGameInfo.m_CurrentMission).m_ShortName;
-	szFileName = __NFUN_112__(szFileName, R6AbstractGameInfo(GetLevel().Game).m_szDefaultActionPlan);
+	szFileName = (szFileName $ R6AbstractGameInfo(GetLevel().Game).m_szDefaultActionPlan);
 	// End:0x11C
-	if(LoadAPlanning(__NFUN_235__(szFileName)))
+	if(LoadAPlanning(Caps(szFileName)))
 	{
 		// End:0xB7
 		if(m_GearRoomWidget.IsTeamConfigValid())
@@ -897,7 +897,7 @@ function PopUpMenu(optional bool _bautoLoadPrompt)
 function SimplePopUp(string _szTitle, string _szText, UWindowBase.EPopUpID _ePopUpID, optional int _iButtonsType, optional bool bAddDisableDlg, optional UWindowWindow OwnerWindow)
 {
 	// End:0x2F
-	if(__NFUN_114__(OwnerWindow, none))
+	if((OwnerWindow == none))
 	{
 		super.SimplePopUp(_szTitle, _szText, _ePopUpID, _iButtonsType, bAddDisableDlg, self);		
 	}
@@ -922,7 +922,7 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 
 	super.PopUpBoxDone(Result, _ePopUpID);
 	// End:0x56F
-	if(__NFUN_154__(int(Result), int(3)))
+	if((int(Result) == int(3)))
 	{
 		switch(_ePopUpID)
 		{
@@ -932,10 +932,10 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			case 47:
 				szFileName = R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pEditSaveNameBox.GetValue();
 				// End:0x2AB
-				if(__NFUN_123__(szFileName, ""))
+				if((szFileName != ""))
 				{
 					// End:0x8B
-					if(__NFUN_154__(int(_ePopUpID), int(4)))
+					if((int(_ePopUpID) == int(4)))
 					{
 						m_PopUpSavePlan.HideWindow();						
 					}
@@ -957,15 +957,15 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 					mission = R6MissionDescription(StartGameInfo.m_CurrentMission);
 					szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 					// End:0x1EA
-					if(__NFUN_122__(szMapName, ""))
+					if((szMapName == ""))
 					{
 						szMapName = string(GetLevel().Outer.Name);
 					}
 					GetLevel().GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
 					// End:0x2AB
-					if(__NFUN_242__(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.__NFUN_1417__(mission.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, szFileName, StartGameInfo), false))
+					if((R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.SavePlanning(mission.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, szFileName, StartGameInfo) == false))
 					{
-						SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), __NFUN_168__(__NFUN_168__(szFileName, ":"), Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, int(2));
+						SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), ((szFileName @ ":") @ Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, int(2));
 					}
 				}
 				// End:0x56C
@@ -974,11 +974,11 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			case 48:
 				SavedPlanningListBox = R6MenuLoadPlan(m_PopUpLoadPlan.m_ClientArea).m_pListOfSavedPlan;
 				// End:0x325
-				if(__NFUN_119__(SavedPlanningListBox.m_SelectedItem, none))
+				if((SavedPlanningListBox.m_SelectedItem != none))
 				{
 					szFileName = R6WindowListBoxItem(SavedPlanningListBox.m_SelectedItem).HelpText;
 					// End:0x31A
-					if(__NFUN_122__(szFileName, ""))
+					if((szFileName == ""))
 					{
 						// [Explicit Continue]
 						goto J0x56C;
@@ -991,11 +991,11 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			case 41:
 				SavedPlanningListBox = R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pListOfSavedPlan;
 				// End:0x3C4
-				if(__NFUN_119__(SavedPlanningListBox.m_SelectedItem, none))
+				if((SavedPlanningListBox.m_SelectedItem != none))
 				{
 					szFileName = R6WindowListBoxItem(SavedPlanningListBox.m_SelectedItem).HelpText;
 					// End:0x394
-					if(__NFUN_122__(szFileName, ""))
+					if((szFileName == ""))
 					{
 						// [Explicit Continue]
 						goto J0x56C;
@@ -1014,11 +1014,11 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 			case 40:
 				SavedPlanningListBox = R6MenuLoadPlan(m_PopUpLoadPlan.m_ClientArea).m_pListOfSavedPlan;
 				// End:0x474
-				if(__NFUN_119__(SavedPlanningListBox.m_SelectedItem, none))
+				if((SavedPlanningListBox.m_SelectedItem != none))
 				{
 					szFileName = R6WindowListBoxItem(SavedPlanningListBox.m_SelectedItem).HelpText;
 					// End:0x444
-					if(__NFUN_122__(szFileName, ""))
+					if((szFileName == ""))
 					{
 						// [Explicit Continue]
 						goto J0x56C;
@@ -1118,20 +1118,20 @@ function PopUpBoxDone(UWindowBase.MessageBoxResult Result, UWindowBase.EPopUpID 
 		}
 	}
 	// End:0x623
-	if(__NFUN_130__(__NFUN_114__(m_CurrentWidget, m_PlanningWidget), __NFUN_129__(m_bPlayerDoNotWant3DView)))
+	if(((m_CurrentWidget == m_PlanningWidget) && (!m_bPlayerDoNotWant3DView)))
 	{
 		m_PlanningWidget.m_3DButton.m_bSelected = true;
 		m_PlanningWidget.m_3DWindow.Toggle3DWindow();
 		R6PlanningCtrl(GetPlayerOwner()).Toggle3DView();
 	}
 	// End:0x66F
-	if(__NFUN_130__(__NFUN_114__(m_CurrentWidget, m_PlanningWidget), m_bPlayerWantLegend))
+	if(((m_CurrentWidget == m_PlanningWidget) && m_bPlayerWantLegend))
 	{
 		m_PlanningWidget.m_LegendWindow.ToggleLegend();
 		m_PlanningWidget.m_LegendButton.m_bSelected = true;
 	}
 	// End:0x6A2
-	if(__NFUN_154__(int(_ePopUpID), int(3)))
+	if((int(_ePopUpID) == int(3)))
 	{
 		m_GearRoomWidget.SetStartTeamInfo();
 		R6Console(Console).LaunchR6Game();
@@ -1152,7 +1152,7 @@ function StopPlayMode()
 function StopWidgetSound()
 {
 	// End:0x1F
-	if(__NFUN_154__(int(m_eCurWidgetInUse), int(8)))
+	if((int(m_eCurWidgetInUse) == int(8)))
 	{
 		m_IntelWidget.StopIntelWidgetSound();
 	}
@@ -1162,7 +1162,7 @@ function StopWidgetSound()
 function SetServerOptions()
 {
 	// End:0x39
-	if(__NFUN_130__(__NFUN_119__(m_pMPCreateGameWidget, none), __NFUN_119__(m_pMPCreateGameWidget.m_pCreateTabOptions, none)))
+	if(((m_pMPCreateGameWidget != none) && (m_pMPCreateGameWidget.m_pCreateTabOptions != none)))
 	{
 		m_pMPCreateGameWidget.m_pCreateTabOptions.SetServerOptions();
 	}
@@ -1187,26 +1187,26 @@ function FillListOfSavedPlan(R6WindowTextListBox _pListOfSavedPlan)
 	GetLevel().GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
 	szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 	// End:0xC1
-	if(__NFUN_122__(szMapName, ""))
+	if((szMapName == ""))
 	{
 		szMapName = string(GetLevel().Outer.Name);
 	}
-	iMax = R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.__NFUN_1418__(szMapName, szGameTypeDirName);
+	iMax = R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.GetNumberOfFiles(szMapName, szGameTypeDirName);
 	i = 0;
 	J0xF3:
 
 	// End:0x193 [Loop If]
-	if(__NFUN_150__(i, iMax))
+	if((i < iMax))
 	{
-		R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.__NFUN_1526__(i, szFileName);
+		R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.GetFileName(i, szFileName);
 		// End:0x189
-		if(__NFUN_123__(szFileName, ""))
+		if((szFileName != ""))
 		{
-			szFileName = __NFUN_128__(szFileName, __NFUN_126__(szFileName, ".PLN"));
+			szFileName = Left(szFileName, InStr(szFileName, ".PLN"));
 			NewItem = R6WindowListBoxItem(_pListOfSavedPlan.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 			NewItem.HelpText = szFileName;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xF3;
 	}
@@ -1229,13 +1229,13 @@ function bool IsSaveFileAlreadyExist(string _szFileName)
 	GetLevel().GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
 	szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 	// End:0xB2
-	if(__NFUN_122__(szMapName, ""))
+	if((szMapName == ""))
 	{
 		szMapName = string(GetLevel().Outer.Name);
 	}
-	szPathAndFilename = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("..\\save\\plan\\", szMapName), "\\"), szGameTypeDirName), "\\"), _szFileName), ".PLN");
+	szPathAndFilename = (((((("..\\save\\plan\\" $ szMapName) $ "\\") $ szGameTypeDirName) $ "\\") $ _szFileName) $ ".PLN");
 	// End:0x104
-	if(m_pFileManager.__NFUN_1528__(szPathAndFilename))
+	if(m_pFileManager.FindFile(szPathAndFilename))
 	{
 		return true;
 	}
@@ -1260,13 +1260,13 @@ function bool LoadAPlanning(string _szFileName)
 	mission = R6MissionDescription(StartGameInfo.m_CurrentMission);
 	szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 	// End:0xAD
-	if(__NFUN_122__(szMapName, ""))
+	if((szMapName == ""))
 	{
 		szMapName = string(GetLevel().Outer.Name);
 	}
 	GetLevel().GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
 	// End:0x167
-	if(__NFUN_242__(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.__NFUN_1416__(mission.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, _szFileName, StartGameInfo, szLoadErrorMsgMapName, szLoadErrorMsgGameType), true))
+	if((R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.LoadPlanning(mission.m_MapName, szMapName, szEnglishGTDirectory, szGameTypeDirName, _szFileName, StartGameInfo, szLoadErrorMsgMapName, szLoadErrorMsgGameType) == true))
 	{
 		R6PlanningCtrl(GetPlayerOwner()).InitNewPlanning(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.m_iCurrentTeam);
 		m_GearRoomWidget.LoadRosterFromStartInfo();
@@ -1280,32 +1280,32 @@ function bool LoadAPlanning(string _szFileName)
 		J0x176:
 
 		// End:0x216 [Loop If]
-		if(__NFUN_150__(iMission, R6Console(Root.Console).m_aMissionDescriptions.Length))
+		if((iMission < R6Console(Root.Console).m_aMissionDescriptions.Length))
 		{
 			mission = R6Console(Root.Console).m_aMissionDescriptions[iMission];
 			// End:0x20C
-			if(__NFUN_122__(__NFUN_235__(mission.m_MapName), __NFUN_235__(szLoadErrorMsgMapName)))
+			if((Caps(mission.m_MapName) == Caps(szLoadErrorMsgMapName)))
 			{
 				bFoundMission = true;
 				iMission = R6Console(Root.Console).m_aMissionDescriptions.Length;
 			}
-			__NFUN_165__(iMission);
+			(iMission++);
 			// [Loop Continue]
 			goto J0x176;
 		}
 		szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 		// End:0x296
-		if(__NFUN_132__(__NFUN_122__(szMapName, ""), __NFUN_242__(bFoundMission, false)))
+		if(((szMapName == "") || (bFoundMission == false)))
 		{
 			szMapName = Localize("POPUP", "LOADERRORMAPUNKNOWN", "R6Menu");
 		}
 		// End:0x2E6
-		if(__NFUN_242__(GetLevel().FindSaveDirectoryNameFromEnglish(szGameTypeDirName, szLoadErrorMsgGameType), false))
+		if((GetLevel().FindSaveDirectoryNameFromEnglish(szGameTypeDirName, szLoadErrorMsgGameType) == false))
 		{
 			szGameTypeDirName = Localize("POPUP", "LOADERRORMAPUNKNOWN", "R6Menu");
 		}
-		szLoadErrorMsg = __NFUN_168__(__NFUN_168__(__NFUN_168__(Localize("POPUP", "LOADERRORPROBLEM", "R6Menu"), szMapName), Localize("POPUP", "LOADERRORPROBLEM2", "R6Menu")), szGameTypeDirName);
-		SimplePopUp(Localize("POPUP", "LOADERROR", "R6Menu"), __NFUN_168__(_szFileName, szLoadErrorMsg), 6, int(2));
+		szLoadErrorMsg = (((Localize("POPUP", "LOADERRORPROBLEM", "R6Menu") @ szMapName) @ Localize("POPUP", "LOADERRORPROBLEM2", "R6Menu")) @ szGameTypeDirName);
+		SimplePopUp(Localize("POPUP", "LOADERROR", "R6Menu"), (_szFileName @ szLoadErrorMsg), 6, int(2));
 		return false;
 	}
 	return;
@@ -1327,17 +1327,17 @@ function bool DeleteAPlanning(string szFileName)
 	GetLevel().GetGameTypeSaveDirectories(szGameTypeDirName, szEnglishGTDirectory);
 	szMapName = Localize(mission.m_MapName, "ID_MENUNAME", mission.LocalizationFile, true);
 	// End:0xB2
-	if(__NFUN_122__(szMapName, ""))
+	if((szMapName == ""))
 	{
 		szMapName = string(GetLevel().Outer.Name);
 	}
-	szPathAndFilename = __NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("..\\save\\plan\\", szMapName), "\\"), szGameTypeDirName), "\\"), szFileName), ".PLN");
+	szPathAndFilename = (((((("..\\save\\plan\\" $ szMapName) $ "\\") $ szGameTypeDirName) $ "\\") $ szFileName) $ ".PLN");
 	// End:0x104
-	if(m_pFileManager.__NFUN_1527__(szPathAndFilename))
+	if(m_pFileManager.DeleteFile(szPathAndFilename))
 	{
 		return true;
 	}
-	ErrorMsg = __NFUN_168__(__NFUN_168__(__NFUN_168__(__NFUN_168__(Localize("POPUP", "PLANDELETEERRORPROBLEM", "R6Menu"), ":"), szFileName), "\\n"), Localize("POPUP", "PLANDELETEERRORMSG", "R6Menu"));
+	ErrorMsg = ((((Localize("POPUP", "PLANDELETEERRORPROBLEM", "R6Menu") @ ":") @ szFileName) @ "\\n") @ Localize("POPUP", "PLANDELETEERRORMSG", "R6Menu"));
 	SimplePopUp(Localize("POPUP", "PLANDELETEERROR", "R6Menu"), ErrorMsg, 5, int(2));
 	return false;
 	return;
@@ -1357,15 +1357,15 @@ function bool IsPlanningEmpty()
 	J0x0F:
 
 	// End:0x7C [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		PlanningInfo = R6PlanningInfo(Console.Master.m_StartGameInfo.m_TeamInfo[i].m_pPlanning);
 		// End:0x72
-		if(__NFUN_151__(PlanningInfo.m_NodeList.Length, 0))
+		if((PlanningInfo.m_NodeList.Length > 0))
 		{
 			Result = false;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0F;
 	}
@@ -1381,14 +1381,14 @@ function LeaveForGame(bool _ObserverMode, int _iTeamStart)
 	local R6StartGameInfo StartGameInfo;
 
 	StartGameInfo = Console.Master.m_StartGameInfo;
-	StartGameInfo.m_bIsPlaying = __NFUN_129__(_ObserverMode);
+	StartGameInfo.m_bIsPlaying = (!_ObserverMode);
 	StartGameInfo.m_iTeamStart = _iTeamStart;
 	m_GearRoomWidget.SetStartTeamInfoForSaving();
 	R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.m_iCurrentTeam = R6PlanningCtrl(GetPlayerOwner()).m_iCurrentTeam;
 	// End:0x13F
-	if(__NFUN_242__(R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.__NFUN_1417__("Backup", "Backup", "Backup", "", "Backup.pln", StartGameInfo), false))
+	if((R6PlanningCtrl(GetPlayerOwner()).m_pFileManager.SavePlanning("Backup", "Backup", "Backup", "", "Backup.pln", StartGameInfo) == false))
 	{
-		SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), __NFUN_168__(__NFUN_168__("Backup.pln", ":"), Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, int(2));		
+		SimplePopUp(Localize("POPUP", "FILEERROR", "R6Menu"), (("Backup.pln" @ ":") @ Localize("POPUP", "FILEERRORPROBLEM", "R6Menu")), 2, int(2));		
 	}
 	else
 	{
@@ -1408,14 +1408,14 @@ function PartialResetOriginalData()
 	aMgr = GetLevel().m_DecalManager;
 	GetLevel().m_DecalManager = none;
 	// End:0x3D
-	if(__NFUN_119__(aMgr, none))
+	if((aMgr != none))
 	{
-		aMgr.__NFUN_279__();
+		aMgr.Destroy();
 	}
 	// End:0x74
-	if(__NFUN_129__(GetLevel().bKNoInit))
+	if((!GetLevel().bKNoInit))
 	{
-		GetLevel().m_DecalManager = GetLevel().__NFUN_278__(Class'Engine.R6DecalManager');
+		GetLevel().m_DecalManager = GetLevel().Spawn(Class'Engine.R6DecalManager');
 	}
 	return;
 }
@@ -1439,7 +1439,7 @@ function HarmonizeMenuFonts()
 	m_CustomMissionWidget.CreateButtons();
 	m_TrainingWidget.CreateButtons();
 	// End:0x13A
-	if(__NFUN_132__(__NFUN_132__(m_SinglePlayerWidget.ButtonsUsingDownSizeFont(), m_CustomMissionWidget.ButtonsUsingDownSizeFont()), m_TrainingWidget.ButtonsUsingDownSizeFont()))
+	if(((m_SinglePlayerWidget.ButtonsUsingDownSizeFont() || m_CustomMissionWidget.ButtonsUsingDownSizeFont()) || m_TrainingWidget.ButtonsUsingDownSizeFont()))
 	{
 		m_SinglePlayerWidget.ForceFontDownSizing();
 		m_CustomMissionWidget.ForceFontDownSizing();
@@ -1471,10 +1471,10 @@ function MenuLoadProfile(bool _bServerProfile)
 function NotifyWindow(UWindowWindow C, byte E)
 {
 	// End:0x9D
-	if(__NFUN_154__(int(E), 11))
+	if((int(E) == 11))
 	{
 		// End:0x57
-		if(__NFUN_114__(C, R6MenuLoadPlan(m_PopUpLoadPlan.m_ClientArea).m_pListOfSavedPlan))
+		if((C == R6MenuLoadPlan(m_PopUpLoadPlan.m_ClientArea).m_pListOfSavedPlan))
 		{
 			m_PopUpLoadPlan.Result = 3;
 			m_PopUpLoadPlan.Close();			
@@ -1482,7 +1482,7 @@ function NotifyWindow(UWindowWindow C, byte E)
 		else
 		{
 			// End:0x9D
-			if(__NFUN_114__(C, R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pListOfSavedPlan))
+			if((C == R6MenuSavePlan(m_PopUpSavePlan.m_ClientArea).m_pListOfSavedPlan))
 			{
 				m_PopUpSavePlan.Result = 3;
 				m_PopUpSavePlan.Close();
@@ -1508,15 +1508,15 @@ function SetNewMODS(string _szNewBkgFolder, optional bool _bForceRefresh)
 function InitBeaconService()
 {
 	// End:0x6A
-	if(__NFUN_114__(R6Console(Console).m_LanServers, none))
+	if((R6Console(Console).m_LanServers == none))
 	{
 		R6Console(Console).m_LanServers = new (none) Class<R6LanServers>(Root.MenuClassDefines.ClassLanServer);
 		R6Console(Console).m_LanServers.Created();
 	}
 	// End:0xCC
-	if(__NFUN_114__(R6Console(Console).m_LanServers.m_ClientBeacon, none))
+	if((R6Console(Console).m_LanServers.m_ClientBeacon == none))
 	{
-		R6Console(Console).m_LanServers.m_ClientBeacon = Console.ViewportOwner.Actor.__NFUN_278__(Class'IpDrv.ClientBeaconReceiver');
+		R6Console(Console).m_LanServers.m_ClientBeacon = Console.ViewportOwner.Actor.Spawn(Class'IpDrv.ClientBeaconReceiver');
 	}
 	R6Console(Console).m_GameService.m_ClientBeacon = R6Console(Console).m_LanServers.m_ClientBeacon;
 	return;

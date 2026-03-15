@@ -348,15 +348,15 @@ function Paint(Canvas C, float X, float Y)
 						bNextTabSelected = true;
 					}
 					// End:0x160
-					if(__NFUN_114__(UWindowTabControlItem(i.Prev), UWindowTabControl(ParentWindow).SelectedTab))
+					if((UWindowTabControlItem(i.Prev) == UWindowTabControl(ParentWindow).SelectedTab))
 					{
 						bPrevTabSelected = true;
 					}
 					// End:0x1A4
-					if(__NFUN_151__(iTabNumber, 0))
+					if((iTabNumber > 0))
 					{
 						// End:0x188
-						if(__NFUN_154__(iTabNumber, __NFUN_147__(m_iTotalTab, 1)))
+						if((iTabNumber == (m_iTotalTab - 1)))
 						{
 							m_eTabCase = 2;							
 						}
@@ -378,15 +378,15 @@ function Paint(Canvas C, float X, float Y)
 							m_eTabCase = 3;
 						}
 					}
-					DrawItem(C, i, i.TabLeft, i.TabTop, i.TabWidth, i.TabHeight, __NFUN_132__(__NFUN_129__(i.bFlash), bFlashShown));
-					__NFUN_165__(iTabNumber);
+					DrawItem(C, i, i.TabLeft, i.TabTop, i.TabWidth, i.TabHeight, ((!i.bFlash) || bFlashShown));
+					(iTabNumber++);
 				}
 			}
 			i = UWindowTabControlItem(i.Next);
 			// [Loop Continue]
 			goto J0xB6;
 		}
-		__NFUN_165__(Row);
+		(Row++);
 		// [Loop Continue]
 		goto J0x6A;
 	}
@@ -404,20 +404,20 @@ function LMouseDown(float X, float Y)
 	J0x3E:
 
 	// End:0x166 [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x62
-		if(__NFUN_150__(Count, TabOffset))
+		if((Count < TabOffset))
 		{
-			__NFUN_165__(Count);			
+			(Count++);			
 		}
 		else
 		{
 			// End:0x14A
-			if(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, i.TabLeft), __NFUN_178__(X, __NFUN_174__(i.TabLeft, i.TabWidth))), __NFUN_132__(__NFUN_154__(TabRows, 1), __NFUN_130__(__NFUN_179__(Y, i.TabTop), __NFUN_178__(Y, __NFUN_174__(i.TabTop, i.TabHeight))))))
+			if((((X >= i.TabLeft) && (X <= (i.TabLeft + i.TabWidth))) && ((TabRows == 1) || ((Y >= i.TabTop) && (Y <= (i.TabTop + i.TabHeight))))))
 			{
 				// End:0x130
-				if(__NFUN_129__(UWindowTabControl(ParentWindow).bMultiLine))
+				if((!UWindowTabControl(ParentWindow).bMultiLine))
 				{
 					bDragging = true;
 					DragTab = i;
@@ -444,17 +444,17 @@ function MouseMove(float X, float Y)
 {
 	CheckToolTip(X, Y);
 	// End:0x82
-	if(__NFUN_130__(bDragging, bMouseDown))
+	if((bDragging && bMouseDown))
 	{
 		// End:0x43
-		if(__NFUN_176__(X, DragTab.TabLeft))
+		if((X < DragTab.TabLeft))
 		{
-			__NFUN_165__(TabOffset);
+			(TabOffset++);
 		}
 		// End:0x7F
-		if(__NFUN_130__(__NFUN_177__(X, __NFUN_174__(DragTab.TabLeft, DragTab.TabWidth)), __NFUN_151__(TabOffset, 0)))
+		if(((X > (DragTab.TabLeft + DragTab.TabWidth)) && (TabOffset > 0)))
 		{
-			__NFUN_166__(TabOffset);
+			(TabOffset--);
 		}		
 	}
 	else
@@ -475,17 +475,17 @@ function RMouseDown(float X, float Y)
 	J0x3E:
 
 	// End:0xCF [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x62
-		if(__NFUN_150__(Count, TabOffset))
+		if((Count < TabOffset))
 		{
-			__NFUN_165__(Count);			
+			(Count++);			
 		}
 		else
 		{
 			// End:0xB3
-			if(__NFUN_130__(__NFUN_179__(X, i.TabLeft), __NFUN_178__(X, __NFUN_174__(i.TabLeft, i.TabWidth))))
+			if(((X >= i.TabLeft) && (X <= (i.TabLeft + i.TabWidth))))
 			{
 				i.RightClickTab();
 			}
@@ -507,22 +507,22 @@ function DrawItem(Canvas C, UWindowList Item, float X, float Y, float W, float H
 	pTabControlItem = UWindowTabControlItem(Item);
 	m_bDisplayToolTip = pTabControlItem.m_bMouseOverItem;
 	// End:0xA4
-	if(__NFUN_114__(Item, UWindowTabControl(ParentWindow).SelectedTab))
+	if((Item == UWindowTabControl(ParentWindow).SelectedTab))
 	{
 		m_vEffectColor = pTabControlItem.m_vSelectedColor;
-		LookAndFeel.Tab_DrawTab(self, C, true, __NFUN_114__(FirstShown, Item), X, Y, W, H, pTabControlItem.Caption, bShowText);		
+		LookAndFeel.Tab_DrawTab(self, C, true, (FirstShown == Item), X, Y, W, H, pTabControlItem.Caption, bShowText);		
 	}
 	else
 	{
 		m_vEffectColor = pTabControlItem.m_vNormalColor;
-		LookAndFeel.Tab_DrawTab(self, C, false, __NFUN_114__(FirstShown, Item), X, Y, W, H, pTabControlItem.Caption, bShowText);
+		LookAndFeel.Tab_DrawTab(self, C, false, (FirstShown == Item), X, Y, W, H, pTabControlItem.Caption, bShowText);
 	}
 	return;
 }
 
 function bool CheckMousePassThrough(float X, float Y)
 {
-	return __NFUN_179__(Y, __NFUN_171__(LookAndFeel.Size_TabAreaHeight, float(TabRows)));
+	return (Y >= (LookAndFeel.Size_TabAreaHeight * float(TabRows)));
 	return;
 }
 
@@ -541,19 +541,19 @@ function UWindowTabControlItem CheckMouseOverOnItem(float _fX, float _fY)
 	J0x35:
 
 	// End:0x15A [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x59
-		if(__NFUN_150__(Count, TabOffset))
+		if((Count < TabOffset))
 		{
-			__NFUN_165__(Count);			
+			(Count++);			
 		}
 		else
 		{
-			fXMin = __NFUN_174__(i.TabLeft, float(10));
-			fXMax = __NFUN_175__(__NFUN_174__(i.TabLeft, i.TabWidth), float(18));
+			fXMin = (i.TabLeft + float(10));
+			fXMax = ((i.TabLeft + i.TabWidth) - float(18));
 			// End:0x12D
-			if(__NFUN_130__(__NFUN_130__(__NFUN_179__(_fX, fXMin), __NFUN_178__(_fX, fXMax)), __NFUN_132__(__NFUN_154__(TabRows, 1), __NFUN_130__(__NFUN_179__(_fY, i.TabTop), __NFUN_178__(_fY, __NFUN_174__(i.TabTop, i.TabHeight))))))
+			if((((_fX >= fXMin) && (_fX <= fXMax)) && ((TabRows == 1) || ((_fY >= i.TabTop) && (_fY <= (i.TabTop + i.TabHeight))))))
 			{
 				ItemTemp = i;
 				i.m_bMouseOverItem = true;				
@@ -584,12 +584,12 @@ function ResetMouseOverOnItem()
 	J0x2E:
 
 	// End:0x7F [Loop If]
-	if(__NFUN_119__(i, none))
+	if((i != none))
 	{
 		// End:0x52
-		if(__NFUN_150__(Count, TabOffset))
+		if((Count < TabOffset))
 		{
-			__NFUN_165__(Count);			
+			(Count++);			
 		}
 		else
 		{
@@ -612,10 +612,10 @@ function CheckToolTip(float _fX, float _fY)
 
 	Item = CheckMouseOverOnItem(_fX, _fY);
 	// End:0x6A
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		// End:0x67
-		if(__NFUN_130__(Item.m_bMouseOverItem, __NFUN_123__(Item.HelpText, "")))
+		if((Item.m_bMouseOverItem && (Item.HelpText != "")))
 		{
 			ParentWindow.ToolTip(Item.HelpText);
 		}		

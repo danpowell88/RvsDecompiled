@@ -298,7 +298,7 @@ function DrawInventoryMenu(Canvas C)
 			default:
 				break;
 		}
-		__NFUN_165__(iWeapon);
+		(iWeapon++);
 		// [Loop Continue]
 		goto J0x80F;
 	}

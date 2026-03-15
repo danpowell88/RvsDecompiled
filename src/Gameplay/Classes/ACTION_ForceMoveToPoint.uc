@@ -28,9 +28,9 @@ function bool InitActionFor(ScriptedController C)
 	originalPhys = C.Pawn.Physics;
 	C.Pawn.SetCollision(false, false, false);
 	C.Pawn.bCollideWorld = false;
-	C.Pawn.__NFUN_267__(Dest.Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-	C.Pawn.__NFUN_299__(Dest.Rotation);
-	C.Pawn.__NFUN_3970__(0);
+	C.Pawn.SetLocation(Dest.Location);
+	C.Pawn.SetRotation(Dest.Rotation);
+	C.Pawn.SetPhysics(0);
 	return false;
 	return;
 }

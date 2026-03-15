@@ -479,7 +479,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x2E6
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Weapon Bullets for "), m_currentOperative.m_szPrimaryWeaponBullet));
+				Log(((("Changing" @ string(m_currentOperative.Class)) @ " Primary Weapon Bullets for ") @ m_currentOperative.m_szPrimaryWeaponBullet));
 			}
 			// End:0x74A
 			break;
@@ -490,7 +490,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x363
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Primary Gadget for "), m_currentOperative.m_szPrimaryWeapon));
+				Log(((("Changing" @ string(m_currentOperative.Class)) @ " Primary Gadget for ") @ m_currentOperative.m_szPrimaryWeapon));
 			}
 			// End:0x74A
 			break;
@@ -498,14 +498,14 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 		case 4:
 			inDescriptionClass = DecriptionClass;
 			// End:0x536
-			if(__NFUN_119__(m_OpSecondaryWeaponDesc, Class<R6SecondaryWeaponDescription>(DecriptionClass)))
+			if((m_OpSecondaryWeaponDesc != Class<R6SecondaryWeaponDescription>(DecriptionClass)))
 			{
 				m_currentOperative.m_szSecondaryWeapon = string(DecriptionClass);
 				m_OpSecondaryWeaponDesc = Class<R6SecondaryWeaponDescription>(DecriptionClass);
 				// End:0x401
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon for "), m_currentOperative.m_szSecondaryWeapon));
+					Log(((("Changing" @ string(m_currentOperative.Class)) @ " Secondary Weapon for ") @ m_currentOperative.m_szSecondaryWeapon));
 				}
 				DecriptionClass = Class'R6Description.R6DescWeaponGadgetNone';
 				m_currentOperative.m_szSecondaryWeaponGadget = DecriptionClass.default.m_NameID;
@@ -513,7 +513,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x491
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Gadget for "), m_currentOperative.m_szSecondaryWeaponGadget));
+					Log(((("Changing" @ string(m_currentOperative.Class)) @ " Secondary Weapon Gadget for ") @ m_currentOperative.m_szSecondaryWeaponGadget));
 				}
 				DecriptionClass = Class'R6Description.R6DescriptionManager'.static.findSecondaryDefaultAmmo(Class<R6SecondaryWeaponDescription>(inDescriptionClass));
 				m_currentOperative.m_szSecondaryWeaponBullet = DecriptionClass.default.m_NameTag;
@@ -521,7 +521,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 				// End:0x536
 				if(bShowLog)
 				{
-					__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Bullets for "), m_currentOperative.m_szSecondaryWeaponBullet));
+					Log(((("Changing" @ string(m_currentOperative.Class)) @ " Secondary Weapon Bullets for ") @ m_currentOperative.m_szSecondaryWeaponBullet));
 				}
 			}
 			// End:0x74A
@@ -533,7 +533,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x5C3
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Gadget for "), m_currentOperative.m_szSecondaryWeaponGadget));
+				Log(((("Changing" @ string(m_currentOperative.Class)) @ " Secondary Weapon Gadget for ") @ m_currentOperative.m_szSecondaryWeaponGadget));
 			}
 			// End:0x74A
 			break;
@@ -544,7 +544,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x651
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Weapon Bullets for "), m_currentOperative.m_szSecondaryWeaponBullet));
+				Log(((("Changing" @ string(m_currentOperative.Class)) @ " Secondary Weapon Bullets for ") @ m_currentOperative.m_szSecondaryWeaponBullet));
 			}
 			// End:0x74A
 			break;
@@ -555,7 +555,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x6D0
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Secondary Gadget for "), m_currentOperative.m_szSecondaryGadget));
+				Log(((("Changing" @ string(m_currentOperative.Class)) @ " Secondary Gadget for ") @ m_currentOperative.m_szSecondaryGadget));
 			}
 			// End:0x74A
 			break;
@@ -566,7 +566,7 @@ function EquipmentChanged(int EquipmentSelected, Class<R6Description> Decription
 			// End:0x744
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("Changing", string(m_currentOperative.Class)), " Armor for "), m_currentOperative.m_szArmor));
+				Log(((("Changing" @ string(m_currentOperative.Class)) @ " Armor for ") @ m_currentOperative.m_szArmor));
 			}
 			// End:0x74A
 			break;
@@ -587,10 +587,10 @@ function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 	local TexRegion TR;
 
 	// End:0xDB
-	if(__NFUN_114__(Class'R6Description.R6DescPrimaryMags', _CurrentGadget))
+	if((Class'R6Description.R6DescPrimaryMags' == _CurrentGadget))
 	{
 		// End:0xC4
-		if(__NFUN_122__(m_OpFirstWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+		if((m_OpFirstWeaponGadgetDesc.default.m_NameTag == "CMAG"))
 		{
 			bFound = true;
 			TR.t = m_OpFirstWeaponGadgetDesc.default.m_2DMenuTexture;
@@ -607,10 +607,10 @@ function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 	else
 	{
 		// End:0x1B3
-		if(__NFUN_114__(Class'R6Description.R6DescSecondaryMags', _CurrentGadget))
+		if((Class'R6Description.R6DescSecondaryMags' == _CurrentGadget))
 		{
 			// End:0x19F
-			if(__NFUN_122__(m_OpSecondWeaponGadgetDesc.default.m_NameTag, "CMAG"))
+			if((m_OpSecondWeaponGadgetDesc.default.m_NameTag == "CMAG"))
 			{
 				bFound = true;
 				TR.t = m_OpSecondWeaponGadgetDesc.default.m_2DMenuTexture;
@@ -626,30 +626,30 @@ function TexRegion GetGadgetTexture(Class<R6GadgetDescription> _CurrentGadget)
 		}
 	}
 	// End:0x23A
-	if(__NFUN_123__(Tag, ""))
+	if((Tag != ""))
 	{
 		i = 0;
 		J0x1C6:
 
 		// End:0x23A [Loop If]
-		if(__NFUN_130__(__NFUN_150__(i, m_PrimaryMagsGadget.m_MagTags.Length), __NFUN_242__(bFound, false)))
+		if(((i < m_PrimaryMagsGadget.m_MagTags.Length) && (bFound == false)))
 		{
 			// End:0x230
-			if(__NFUN_122__(m_PrimaryMagsGadget.m_MagTags[i], Tag))
+			if((m_PrimaryMagsGadget.m_MagTags[i] == Tag))
 			{
 				bFound = true;
 				TR = m_PrimaryMagsGadget.m_Mags[i];				
 			}
 			else
 			{
-				__NFUN_165__(i);
+				(i++);
 			}
 			// [Loop Continue]
 			goto J0x1C6;
 		}
 	}
 	// End:0x2D7
-	if(__NFUN_242__(bFound, false))
+	if((bFound == false))
 	{
 		TR.t = _CurrentGadget.default.m_2DMenuTexture;
 		TR.X = _CurrentGadget.default.m_2dMenuRegion.X;
@@ -685,7 +685,7 @@ function SetStartTeamInfo()
 	J0x90:
 
 	// End:0xD4E [Loop If]
-	if(__NFUN_150__(j, 3))
+	if((j < 3))
 	{
 		currentListBox = tmpListBox[j];
 		tmpItem = R6WindowListBoxItem(currentListBox.Items.Next);
@@ -694,11 +694,11 @@ function SetStartTeamInfo()
 		J0xDD:
 
 		// End:0xD21 [Loop If]
-		if(__NFUN_150__(i, currentListBox.Items.Count()))
+		if((i < currentListBox.Items.Count()))
 		{
 			tmpOperative = R6Operative(tmpItem.m_Object);
 			// End:0xD17
-			if(__NFUN_119__(tmpOperative, none))
+			if((tmpOperative != none))
 			{
 				PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(DynamicLoadObject(tmpOperative.m_szPrimaryWeapon, Class'Core.Class'));
 				PrimaryWeaponBulletClass = Class'R6Description.R6DescriptionManager'.static.GetPrimaryBulletDesc(PrimaryWeaponClass, tmpOperative.m_szPrimaryWeaponBullet);
@@ -723,16 +723,16 @@ function SetStartTeamInfo()
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.Z = float(tmpOperative.m_RMenuFaceSmallW);
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_FaceCoords.W = float(tmpOperative.m_RMenuFaceSmallH);
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID = tmpOperative.m_szSpecialityID;
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillAssault = __NFUN_171__(tmpOperative.m_fAssault, 0.0100000);
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillDemolitions = __NFUN_171__(tmpOperative.m_fDemolitions, 0.0100000);
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillElectronics = __NFUN_171__(tmpOperative.m_fElectronics, 0.0100000);
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSniper = __NFUN_171__(tmpOperative.m_fSniper, 0.0100000);
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillStealth = __NFUN_171__(tmpOperative.m_fStealth, 0.0100000);
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSelfControl = __NFUN_171__(tmpOperative.m_fSelfControl, 0.0100000);
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillLeadership = __NFUN_171__(tmpOperative.m_fLeadership, 0.0100000);
-				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillObservation = __NFUN_171__(tmpOperative.m_fObservation, 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillAssault = (tmpOperative.m_fAssault * 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillDemolitions = (tmpOperative.m_fDemolitions * 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillElectronics = (tmpOperative.m_fElectronics * 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSniper = (tmpOperative.m_fSniper * 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillStealth = (tmpOperative.m_fStealth * 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillSelfControl = (tmpOperative.m_fSelfControl * 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillLeadership = (tmpOperative.m_fLeadership * 0.0100000);
+				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_fSkillObservation = (tmpOperative.m_fObservation * 0.0100000);
 				// End:0x82E
-				if(__NFUN_122__(tmpOperative.m_szGender, "M"))
+				if((tmpOperative.m_szGender == "M"))
 				{
 					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_bIsMale = true;					
 				}
@@ -745,10 +745,10 @@ function SetStartTeamInfo()
 				J0x86C:
 
 				// End:0x9B8 [Loop If]
-				if(__NFUN_130__(__NFUN_150__(k, PrimaryWeaponClass.default.m_WeaponTags.Length), __NFUN_242__(Found, false)))
+				if(((k < PrimaryWeaponClass.default.m_WeaponTags.Length) && (Found == false)))
 				{
 					// End:0x922
-					if(__NFUN_122__(PrimaryWeaponClass.default.m_WeaponTags[k], PrimaryWeaponGadgetClass.default.m_NameTag))
+					if((PrimaryWeaponClass.default.m_WeaponTags[k] == PrimaryWeaponGadgetClass.default.m_NameTag))
 					{
 						Found = true;
 						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[k];
@@ -757,7 +757,7 @@ function SetStartTeamInfo()
 						goto J0x9AE;
 					}
 					// End:0x9AE
-					if(__NFUN_122__(PrimaryWeaponClass.default.m_WeaponTags[k], PrimaryWeaponBulletClass.default.m_NameTag))
+					if((PrimaryWeaponClass.default.m_WeaponTags[k] == PrimaryWeaponBulletClass.default.m_NameTag))
 					{
 						Found = true;
 						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[k];
@@ -765,18 +765,18 @@ function SetStartTeamInfo()
 					}
 					J0x9AE:
 
-					__NFUN_165__(k);
+					(k++);
 					// [Loop Continue]
 					goto J0x86C;
 				}
 				// End:0xA19
-				if(__NFUN_242__(Found, false))
+				if((Found == false))
 				{
 					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = PrimaryWeaponClass.default.m_WeaponClasses[0];
 					Tag = PrimaryWeaponClass.default.m_WeaponTags[0];
 				}
 				// End:0xA6D
-				if(__NFUN_122__(Tag, "SILENCED"))
+				if((Tag == "SILENCED"))
 				{
 					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[0] = PrimaryWeaponBulletClass.default.m_SubsonicClassName;					
 				}
@@ -789,10 +789,10 @@ function SetStartTeamInfo()
 				J0xAB9:
 
 				// End:0xC05 [Loop If]
-				if(__NFUN_130__(__NFUN_150__(k, SecondaryWeaponClass.default.m_WeaponTags.Length), __NFUN_242__(Found, false)))
+				if(((k < SecondaryWeaponClass.default.m_WeaponTags.Length) && (Found == false)))
 				{
 					// End:0xB6F
-					if(__NFUN_122__(SecondaryWeaponClass.default.m_WeaponTags[k], SecondaryWeaponGadgetClass.default.m_NameTag))
+					if((SecondaryWeaponClass.default.m_WeaponTags[k] == SecondaryWeaponGadgetClass.default.m_NameTag))
 					{
 						Found = true;
 						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[k];
@@ -801,7 +801,7 @@ function SetStartTeamInfo()
 						goto J0xBFB;
 					}
 					// End:0xBFB
-					if(__NFUN_122__(SecondaryWeaponClass.default.m_WeaponTags[k], SecondaryWeaponBulletClass.default.m_NameTag))
+					if((SecondaryWeaponClass.default.m_WeaponTags[k] == SecondaryWeaponBulletClass.default.m_NameTag))
 					{
 						Found = true;
 						StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[k];
@@ -809,18 +809,18 @@ function SetStartTeamInfo()
 					}
 					J0xBFB:
 
-					__NFUN_165__(k);
+					(k++);
 					// [Loop Continue]
 					goto J0xAB9;
 				}
 				// End:0xC66
-				if(__NFUN_242__(Found, false))
+				if((Found == false))
 				{
 					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[1] = SecondaryWeaponClass.default.m_WeaponClasses[0];
 					Tag = SecondaryWeaponClass.default.m_WeaponTags[0];
 				}
 				// End:0xCBA
-				if(__NFUN_122__(Tag, "SILENCED"))
+				if((Tag == "SILENCED"))
 				{
 					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1] = SecondaryWeaponBulletClass.default.m_SubsonicClassName;					
 				}
@@ -829,14 +829,14 @@ function SetStartTeamInfo()
 					StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_BulletType[1] = SecondaryWeaponBulletClass.default.m_ClassName;
 				}
 				tmpItem = R6WindowListBoxItem(tmpItem.Next);
-				__NFUN_165__(rainbowAdded);
+				(rainbowAdded++);
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xDD;
 		}
 		StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers = rainbowAdded;
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x90;
 	}
@@ -860,7 +860,7 @@ function SetStartTeamInfoForSaving()
 	J0x90:
 
 	// End:0x420 [Loop If]
-	if(__NFUN_150__(j, 3))
+	if((j < 3))
 	{
 		currentListBox = tmpListBox[j];
 		tmpItem = R6WindowListBoxItem(currentListBox.Items.Next);
@@ -869,11 +869,11 @@ function SetStartTeamInfoForSaving()
 		J0xF5:
 
 		// End:0x416 [Loop If]
-		if(__NFUN_150__(i, currentListBox.Items.Count()))
+		if((i < currentListBox.Items.Count()))
 		{
 			tmpOperative = R6Operative(tmpItem.m_Object);
 			// End:0x3F3
-			if(__NFUN_119__(tmpOperative, none))
+			if((tmpOperative != none))
 			{
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_ArmorName = tmpOperative.m_szArmor;
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_WeaponName[0] = tmpOperative.m_szPrimaryWeapon;
@@ -886,14 +886,14 @@ function SetStartTeamInfoForSaving()
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_GadgetName[1] = tmpOperative.m_szSecondaryGadget;
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID = tmpOperative.m_iUniqueID;
 				StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID = tmpOperative.m_szSpecialityID;
-				__NFUN_165__(StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers);
+				(StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers++);
 			}
 			tmpItem = R6WindowListBoxItem(tmpItem.Next);
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xF5;
 		}
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x90;
 	}
@@ -922,21 +922,21 @@ function LoadRosterFromStartInfo()
 	J0x82:
 
 	// End:0x10F [Loop If]
-	if(__NFUN_150__(j, 3))
+	if((j < 3))
 	{
 		i = 0;
 		J0x95:
 
 		// End:0x105 [Loop If]
-		if(__NFUN_150__(i, StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers))
+		if((i < StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers))
 		{
 			TeamIDs[k] = StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID;
-			__NFUN_165__(k);
-			__NFUN_165__(i);
+			(k++);
+			(i++);
 			// [Loop Continue]
 			goto J0x95;
 		}
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x82;
 	}
@@ -944,14 +944,14 @@ function LoadRosterFromStartInfo()
 	J0x116:
 
 	// End:0x809 [Loop If]
-	if(__NFUN_150__(j, 3))
+	if((j < 3))
 	{
 		currentListBox = tmpListBox[j];
 		i = 0;
 		J0x13A:
 
 		// End:0x7FF [Loop If]
-		if(__NFUN_150__(i, StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers))
+		if((i < StartGameInfo.m_TeamInfo[j].m_iNumberOfMembers))
 		{
 			k = 0;
 			Found = false;
@@ -961,38 +961,38 @@ function LoadRosterFromStartInfo()
 			bkpValidItem = none;
 			SelectedItem = R6WindowListBoxItem(m_RosterListCtrl.m_listBox.Items.Next);
 			// End:0x218
-			if(__NFUN_151__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID, __NFUN_147__(m_RosterListCtrl.m_listBox.Items.Count(), 5)))
+			if((StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID > (m_RosterListCtrl.m_listBox.Items.Count() - 5)))
 			{
 				bRookieCase = true;
 			}
 			J0x218:
 
 			// End:0x7F5 [Loop If]
-			if(__NFUN_130__(__NFUN_242__(Found, false), __NFUN_150__(k, m_RosterListCtrl.m_listBox.Items.Count())))
+			if(((Found == false) && (k < m_RosterListCtrl.m_listBox.Items.Count())))
 			{
 				tmpOperative = R6Operative(SelectedItem.m_Object);
 				// End:0x485
-				if(__NFUN_119__(tmpOperative, none))
+				if((tmpOperative != none))
 				{
-					bIDMatch = __NFUN_154__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID, tmpOperative.m_iUniqueID);
+					bIDMatch = (StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_iOperativeID == tmpOperative.m_iUniqueID);
 					// End:0x322
 					if(bIDMatch)
 					{
 						// End:0x322
-						if(__NFUN_155__(tmpOperative.m_iRookieID, -1))
+						if((tmpOperative.m_iRookieID != -1))
 						{
 							// End:0x322
-							if(__NFUN_129__(__NFUN_124__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID, tmpOperative.m_szSpecialityID)))
+							if((!(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID ~= tmpOperative.m_szSpecialityID)))
 							{
 								bRookieCase = true;
 							}
 						}
 					}
 					// End:0x376
-					if(__NFUN_130__(bIDMatch, __NFUN_129__(bRookieCase)))
+					if((bIDMatch && (!bRookieCase)))
 					{
 						// End:0x36B
-						if(__NFUN_132__(__NFUN_129__(tmpOperative.IsOperativeReady()), SelectedItem.m_addedToSubList))
+						if(((!tmpOperative.IsOperativeReady()) || SelectedItem.m_addedToSubList))
 						{
 							bOperativeIsNotReady = true;							
 						}
@@ -1004,26 +1004,26 @@ function LoadRosterFromStartInfo()
 					else
 					{
 						// End:0x43A
-						if(__NFUN_124__(StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID, tmpOperative.m_szSpecialityID))
+						if((StartGameInfo.m_TeamInfo[j].m_CharacterInTeam[i].m_szSpecialityID ~= tmpOperative.m_szSpecialityID))
 						{
 							// End:0x43A
-							if(__NFUN_130__(__NFUN_114__(bkpValidItem, none), __NFUN_130__(tmpOperative.IsOperativeReady(), __NFUN_129__(SelectedItem.m_addedToSubList))))
+							if(((bkpValidItem == none) && (tmpOperative.IsOperativeReady() && (!SelectedItem.m_addedToSubList))))
 							{
 								bkpValidItem = SelectedItem;
 								L = 0;
 								J0x3FC:
 
 								// End:0x43A [Loop If]
-								if(__NFUN_150__(L, 8))
+								if((L < 8))
 								{
 									// End:0x430
-									if(__NFUN_154__(TeamIDs[L], tmpOperative.m_iUniqueID))
+									if((TeamIDs[L] == tmpOperative.m_iUniqueID))
 									{
 										bkpValidItem = none;
 										// [Explicit Break]
 										goto J0x43A;
 									}
-									__NFUN_165__(L);
+									(L++);
 									// [Loop Continue]
 									goto J0x3FC;
 								}
@@ -1033,10 +1033,10 @@ function LoadRosterFromStartInfo()
 					J0x43A:
 
 					// End:0x485
-					if(__NFUN_132__(bOperativeIsNotReady, bRookieCase))
+					if((bOperativeIsNotReady || bRookieCase))
 					{
 						// End:0x485
-						if(__NFUN_119__(bkpValidItem, none))
+						if((bkpValidItem != none))
 						{
 							SelectedItem = bkpValidItem;
 							tmpOperative = R6Operative(SelectedItem.m_Object);
@@ -1059,7 +1059,7 @@ function LoadRosterFromStartInfo()
 					SetupOperative(tmpOperative);
 					TempItem = R6WindowListBoxItem(currentListBox.m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 					// End:0x7AE
-					if(__NFUN_119__(TempItem, none))
+					if((TempItem != none))
 					{
 						TempItem.m_Icon = SelectedItem.m_Icon;
 						TempItem.m_IconRegion = SelectedItem.m_IconRegion;
@@ -1070,7 +1070,7 @@ function LoadRosterFromStartInfo()
 						SelectedItem.m_addedToSubList = true;
 					}
 					// End:0x7CF
-					if(__NFUN_114__(selectedOperativeItem, none))
+					if((selectedOperativeItem == none))
 					{
 						selectedOperativeItem = TempItem;
 						selectedOperativeTeamId = j;
@@ -1078,24 +1078,24 @@ function LoadRosterFromStartInfo()
 				}
 				else
 				{
-					__NFUN_165__(k);
+					(k++);
 					SelectedItem = R6WindowListBoxItem(SelectedItem.Next);
 				}
 				// [Loop Continue]
 				goto J0x218;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x13A;
 		}
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x116;
 	}
 	m_RosterListCtrl.RefreshButtons();
 	m_RosterListCtrl.ResizeSubLists();
 	// End:0x858
-	if(__NFUN_119__(selectedOperativeItem, none))
+	if((selectedOperativeItem != none))
 	{
 		tmpListBox[selectedOperativeTeamId].m_listBox.SetSelectedItem(selectedOperativeItem);		
 	}
@@ -1109,12 +1109,12 @@ function LoadRosterFromStartInfo()
 function bool IsTeamConfigValid()
 {
 	// End:0x0D
-	if(__NFUN_114__(m_RosterListCtrl, none))
+	if((m_RosterListCtrl == none))
 	{
 		return false;
 	}
 	// End:0x9A
-	if(__NFUN_152__(__NFUN_146__(__NFUN_146__(m_RosterListCtrl.m_RedListBox.m_listBox.Items.Count(), m_RosterListCtrl.m_GreenListBox.m_listBox.Items.Count()), m_RosterListCtrl.m_GoldListBox.m_listBox.Items.Count()), 0))
+	if((((m_RosterListCtrl.m_RedListBox.m_listBox.Items.Count() + m_RosterListCtrl.m_GreenListBox.m_listBox.Items.Count()) + m_RosterListCtrl.m_GoldListBox.m_listBox.Items.Count()) <= 0))
 	{
 		return false;		
 	}

@@ -297,8 +297,8 @@ function LogInfo()
 	// End:0x28A [Loop If]
 	if((i < m_MissionArmorTypes.Length))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" m_MissionArmorTypes ", string(i)), "="), string(m_MissionArmorTypes[i])));
-		__NFUN_163__(i);
+		Log((((" m_MissionArmorTypes " $ string(i)) $ "=") $ string(m_MissionArmorTypes[i])));
+		(++i);
 		// [Loop Continue]
 		goto J0x23A;
 	}
@@ -306,10 +306,10 @@ function LogInfo()
 	J0x291:
 
 	// End:0x32E [Loop If]
-	if(__NFUN_150__(i, GameTypes.Length))
+	if((i < GameTypes.Length))
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" GameTypes ", string(i)), "="), GameTypes[i].Package), "."), GameTypes[i].type), " ID="), m_szGameTypes[i]), " max nb players="), string(GameTypes[i].maxNb)));
-		__NFUN_163__(i);
+		Log((((((((((" GameTypes " $ string(i)) $ "=") $ GameTypes[i].Package) $ ".") $ GameTypes[i].type) $ " ID=") $ m_szGameTypes[i]) $ " max nb players=") $ string(GameTypes[i].maxNb)));
+		(++i);
 		// [Loop Continue]
 		goto J0x291;
 	}
@@ -317,13 +317,13 @@ function LogInfo()
 	J0x335:
 
 	// End:0x425 [Loop If]
-	if(__NFUN_150__(i, SkinsPerGameTypes.Length))
+	if((i < SkinsPerGameTypes.Length))
 	{
-		szClassName = __NFUN_112__(__NFUN_112__(SkinsPerGameTypes[i].Package, "."), SkinsPerGameTypes[i].type);
-		szGreen = __NFUN_112__(__NFUN_112__(SkinsPerGameTypes[i].greenPackage, "."), SkinsPerGameTypes[i].Green);
-		szRed = __NFUN_112__(__NFUN_112__(SkinsPerGameTypes[i].redPackage, "."), SkinsPerGameTypes[i].Red);
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" SkinsPerGameTypes ", string(i)), "- "), szClassName), " green="), szGreen), " red="), szRed));
-		__NFUN_163__(i);
+		szClassName = ((SkinsPerGameTypes[i].Package $ ".") $ SkinsPerGameTypes[i].type);
+		szGreen = ((SkinsPerGameTypes[i].greenPackage $ ".") $ SkinsPerGameTypes[i].Green);
+		szRed = ((SkinsPerGameTypes[i].redPackage $ ".") $ SkinsPerGameTypes[i].Red);
+		Log((((((((" SkinsPerGameTypes " $ string(i)) $ "- ") $ szClassName) $ " green=") $ szGreen) $ " red=") $ szRed));
+		(++i);
 		// [Loop Continue]
 		goto J0x335;
 	}
@@ -340,14 +340,14 @@ function bool IsAvailableInGameType(string szGameType)
 
 	J0x00:
 	// End:0x31 [Loop If]
-	if(__NFUN_150__(i, m_szGameTypes.Length))
+	if((i < m_szGameTypes.Length))
 	{
 		// End:0x27
-		if(__NFUN_122__(m_szGameTypes[i], szGameType))
+		if((m_szGameTypes[i] == szGameType))
 		{
 			return true;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x00;
 	}
@@ -365,14 +365,14 @@ function int GetMaxNbPlayers(string szGameType)
 
 	J0x00:
 	// End:0x40 [Loop If]
-	if(__NFUN_150__(i, m_szGameTypes.Length))
+	if((i < m_szGameTypes.Length))
 	{
 		// End:0x36
-		if(__NFUN_122__(m_szGameTypes[i], szGameType))
+		if((m_szGameTypes[i] == szGameType))
 		{
 			return GameTypes[i].maxNb;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x00;
 	}

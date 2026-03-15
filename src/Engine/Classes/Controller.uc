@@ -372,20 +372,20 @@ function ClientSetLocation(Vector NewLocation, Rotator NewRotation)
 	{
 		NewRotation.Roll = 0;
 		Pawn.SetRotation(NewRotation);
-		Pawn.__NFUN_267__(NewLocation) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+		Pawn.SetLocation(NewLocation);
 	}
 	return;
 }
 
 function ClientSetRotation(Rotator NewRotation)
 {
-	__NFUN_299__(NewRotation);
+	SetRotation(NewRotation);
 	// End:0x3C
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		NewRotation.Pitch = 0;
 		NewRotation.Roll = 0;
-		Pawn.__NFUN_299__(NewRotation);
+		Pawn.SetRotation(NewRotation);
 	}
 	return;
 }
@@ -393,10 +393,10 @@ function ClientSetRotation(Rotator NewRotation)
 function ClientDying(Vector HitLocation)
 {
 	// End:0x2F
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		Pawn.PlayDying(HitLocation);
-		Pawn.__NFUN_113__('Dying');
+		Pawn.GotoState('Dying');
 	}
 	return;
 }
@@ -411,11 +411,11 @@ function Possess(Pawn aPawn)
 	aPawn.PossessedBy(self);
 	Pawn = aPawn;
 	// End:0x45
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		PlayerReplicationInfo.bIsFemale = Pawn.bIsFemale;
 	}
-	FocalPoint = __NFUN_215__(Pawn.Location, __NFUN_213__(float(512), Vector(Pawn.Rotation)));
+	FocalPoint = (Pawn.Location + (float(512) * Vector(Pawn.Rotation)));
 	Restart();
 	return;
 }
@@ -423,9 +423,9 @@ function Possess(Pawn aPawn)
 function PawnDied()
 {
 	// End:0x2B
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
-		__NFUN_267__(Pawn.Location);
+		SetLocation(Pawn.Location);
 		Pawn.UnPossessed();
 	}
 	Pawn = none;
@@ -433,11 +433,11 @@ function PawnDied()
 	// End:0x4C
 	if(bIsPlayer)
 	{
-		__NFUN_113__('Dead');		
+		GotoState('Dead');		
 	}
 	else
 	{
-		__NFUN_279__();
+		Destroy();
 	}
 	return;
 }
@@ -492,8 +492,8 @@ function SetFall()
 
 event PreBeginPlay()
 {
-	__NFUN_529__();
-	m_PawnRepInfo = __NFUN_278__(Class'Engine.R6PawnReplicationInfo');
+	AddController();
+	m_PawnRepInfo = Spawn(Class'Engine.R6PawnReplicationInfo');
 	m_PawnRepInfo.m_ControllerOwner = self;
 	super.PreBeginPlay();
 	// End:0x32
@@ -501,7 +501,7 @@ event PreBeginPlay()
 	{
 		return;
 	}
-	SightCounter = __NFUN_171__(0.2000000, __NFUN_195__());
+	SightCounter = (0.2000000 * FRand());
 	return;
 }
 
@@ -514,7 +514,7 @@ event PostBeginPlay()
 function InitPlayerReplicationInfo()
 {
 	// End:0x32
-	if(__NFUN_122__(PlayerReplicationInfo.PlayerName, ""))
+	if((PlayerReplicationInfo.PlayerName == ""))
 	{
 		PlayerReplicationInfo.SetPlayerName(Class'Engine.GameInfo'.default.DefaultPlayerName);
 	}
@@ -524,25 +524,25 @@ function InitPlayerReplicationInfo()
 simulated event Destroyed()
 {
 	// End:0x12
-	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	if((int(Role) < int(ROLE_Authority)))
 	{
 		return;
 	}
-	__NFUN_530__();
+	RemoveController();
 	// End:0x4D
-	if(__NFUN_130__(bIsPlayer, __NFUN_119__(Level.Game, none)))
+	if((bIsPlayer && (Level.Game != none)))
 	{
 		Level.Game.Logout(self);
 	}
 	// End:0x64
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
-		PlayerReplicationInfo.__NFUN_279__();
+		PlayerReplicationInfo.Destroy();
 	}
 	// End:0x82
-	if(__NFUN_119__(m_PawnRepInfo, none))
+	if((m_PawnRepInfo != none))
 	{
-		m_PawnRepInfo.__NFUN_279__();
+		m_PawnRepInfo.Destroy();
 		m_PawnRepInfo = none;
 	}
 	super.Destroyed();
@@ -557,10 +557,10 @@ function AdjustView(float DeltaTime)
 	J0x14:
 
 	// End:0x6B [Loop If]
-	if(__NFUN_119__(C, none))
+	if((C != none))
 	{
 		// End:0x54
-		if(__NFUN_130__(C.__NFUN_303__('PlayerController'), __NFUN_114__(PlayerController(C).ViewTarget, Pawn)))
+		if((C.IsA('PlayerController') && (PlayerController(C).ViewTarget == Pawn)))
 		{
 			return;
 		}
@@ -573,20 +573,20 @@ function AdjustView(float DeltaTime)
 
 function bool WantsSmoothedView()
 {
-	return __NFUN_130__(__NFUN_132__(__NFUN_154__(int(Pawn.Physics), int(1)), __NFUN_154__(int(Pawn.Physics), int(9))), __NFUN_129__(Pawn.bJustLanded));
+	return (((int(Pawn.Physics) == int(1)) || (int(Pawn.Physics) == int(9))) && (!Pawn.bJustLanded));
 	return;
 }
 
 function ClientGameEnded()
 {
-	__NFUN_113__('GameEnded');
+	GotoState('GameEnded');
 	return;
 }
 
 simulated event RenderOverlays(Canvas Canvas)
 {
 	// End:0x31
-	if(__NFUN_119__(Pawn.EngineWeapon, none))
+	if((Pawn.EngineWeapon != none))
 	{
 		Pawn.EngineWeapon.RenderOverlays(Canvas);
 	}
@@ -719,7 +719,7 @@ function StartMonitoring(Pawn P, float MaxDist)
 {
 	MonitoredPawn = P;
 	MonitorStartLoc = P.Location;
-	MonitorMaxDistSq = __NFUN_171__(MaxDist, MaxDist);
+	MonitorMaxDistSq = (MaxDist * MaxDist);
 	return;
 }
 
@@ -766,7 +766,7 @@ state Dead
 	function ServerReStartPlayer()
 	{
 		// End:0x1B
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) == int(NM_Client)))
 		{
 			return;
 		}
@@ -783,20 +783,20 @@ state GameEnded
 	function BeginState()
 	{
 		// End:0x89
-		if(__NFUN_119__(Pawn, none))
+		if((Pawn != none))
 		{
 			Pawn.bPhysicsAnimUpdate = false;
 			Pawn.StopAnimating();
 			Pawn.SimAnim.AnimRate = 0;
-			Pawn.__NFUN_262__(false, false, false);
+			Pawn.SetCollision(false, false, false);
 			Pawn.Velocity = vect(0.0000000, 0.0000000, 0.0000000);
-			Pawn.__NFUN_3970__(0);
+			Pawn.SetPhysics(0);
 			Pawn.UnPossessed();
 		}
 		// End:0x97
-		if(__NFUN_129__(bIsPlayer))
+		if((!bIsPlayer))
 		{
-			__NFUN_279__();
+			Destroy();
 		}
 		return;
 	}

@@ -93,31 +93,31 @@ function HurtPawns()
 		// End:0x79
 		if((m_pEmmiter != none))
 		{
-			m_pEmmiter.__NFUN_267__(Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+			m_pEmmiter.SetLocation(Location);
 		}
 	}
 	// End:0xBD
-	if(__NFUN_176__(fElapsedTime, m_fExpansionTime))
+	if((fElapsedTime < m_fExpansionTime))
 	{
-		fElapsedTime = __NFUN_172__(fElapsedTime, m_fExpansionTime);
-		fMessageRadius = __NFUN_174__(m_fKillBlastRadius, __NFUN_171__(fElapsedTime, __NFUN_175__(m_fExplosionRadius, m_fKillBlastRadius)));		
+		fElapsedTime = (fElapsedTime / m_fExpansionTime);
+		fMessageRadius = (m_fKillBlastRadius + (fElapsedTime * (m_fExplosionRadius - m_fKillBlastRadius)));		
 	}
 	else
 	{
 		fMessageRadius = m_fExplosionRadius;
 	}
 	// End:0x1A1
-	foreach __NFUN_312__(Class'R6Engine.R6Pawn', aPawn, fMessageRadius, __NFUN_215__(Location, vect(0.0000000, 0.0000000, 125.0000000)))
+	foreach VisibleCollidingActors(Class'R6Engine.R6Pawn', aPawn, fMessageRadius, (Location + vect(0.0000000, 0.0000000, 125.0000000)))
 	{
 		// End:0x1A0
-		if(__NFUN_130__(aPawn.IsAlive(), __NFUN_129__(aPawn.m_bHaveGasMask)))
+		if((aPawn.IsAlive() && (!aPawn.m_bHaveGasMask)))
 		{
 			aPawn.AffectedByGrenade(self, m_eGrenadeType);
 			// End:0x1A0
-			if(__NFUN_154__(int(m_eGrenadeType), int(2)))
+			if((int(m_eGrenadeType) == int(2)))
 			{
 				// End:0x16F
-				if(__NFUN_180__(aPawn.m_fRepDecrementalBlurValue, float(300)))
+				if((aPawn.m_fRepDecrementalBlurValue == float(300)))
 				{
 					aPawn.m_fRepDecrementalBlurValue = 301.0000000;					
 				}

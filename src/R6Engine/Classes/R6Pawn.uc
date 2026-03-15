@@ -985,9 +985,9 @@ simulated event R6DeadEndedMoving()
 
 	bProjTarget = false;
 	// End:0x181
-	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) != int(NM_DedicatedServer)))
 	{
-		__NFUN_2729__(m_sndDeathClothesStop, 3);
+		SendPlaySound(m_sndDeathClothesStop, 3);
 		switch(m_eLastHitPart)
 		{
 			// End:0x59
@@ -1023,17 +1023,17 @@ simulated event R6DeadEndedMoving()
 				break;
 		}
 		// End:0x181
-		if(__NFUN_242__(bSpawnBloodBath, true))
+		if((bSpawnBloodBath == true))
 		{
 			rBloodBathRotation.Pitch = -16384;
 			rBloodBathRotation.Yaw = 0;
-			rBloodBathRotation.Roll = __NFUN_167__(65535);
-			vTraceEnd = __NFUN_215__(vBloodBathLocation, __NFUN_212__(Vector(rBloodBathRotation), float(250)));
+			rBloodBathRotation.Roll = Rand(65535);
+			vTraceEnd = (vBloodBathLocation + (Vector(rBloodBathRotation) * float(250)));
 			// End:0x181
-			if(__NFUN_119__(__NFUN_277__(vFloorLocation, vFloorNormal, vTraceEnd, vBloodBathLocation), none))
+			if((Trace(vFloorLocation, vFloorNormal, vTraceEnd, vBloodBathLocation) != none))
 			{
-				__NFUN_184__(vFloorLocation.Z, float(4));
-				Level.m_DecalManager.__NFUN_2900__(vFloorLocation, rBloodBathRotation, Texture'Inventory_t.BloodSplats.BloodBath', 3, 1, 0.0000000, 0.0000000, 50.0000000);
+				(vFloorLocation.Z += float(4));
+				Level.m_DecalManager.AddDecal(vFloorLocation, rBloodBathRotation, Texture'Inventory_t.BloodSplats.BloodBath', 3, 1, 0.0000000, 0.0000000, 50.0000000);
 			}
 		}
 	}
@@ -1046,20 +1046,20 @@ simulated function DestroyShadow()
 	local ShadowProjector aShadowProjector;
 
 	// End:0x76
-	if(__NFUN_119__(Shadow, none))
+	if((Shadow != none))
 	{
 		aShadowProjector = ShadowProjector(Shadow);
 		// End:0x63
-		if(__NFUN_119__(aShadowProjector, none))
+		if((aShadowProjector != none))
 		{
 			aShadowProjector.ShadowActor = none;
 			// End:0x63
-			if(__NFUN_119__(aShadowProjector.ShadowTexture, none))
+			if((aShadowProjector.ShadowTexture != none))
 			{
 				aShadowProjector.ShadowTexture.ShadowActor = none;
 			}
 		}
-		Shadow.__NFUN_279__();
+		Shadow.Destroy();
 		Shadow = none;
 	}
 	return;
@@ -1078,24 +1078,24 @@ simulated event Destroyed()
 	local R6PlayerController aPC;
 
 	// End:0x30
-	if(__NFUN_119__(m_collisionBox, none))
+	if((m_collisionBox != none))
 	{
 		A = m_collisionBox;
 		m_collisionBox = none;
-		A.__NFUN_279__();
+		A.Destroy();
 		A = none;
 	}
 	// End:0x60
-	if(__NFUN_119__(m_collisionBox2, none))
+	if((m_collisionBox2 != none))
 	{
 		A = m_collisionBox2;
 		m_collisionBox2 = none;
-		A.__NFUN_279__();
+		A.Destroy();
 		A = none;
 	}
 	aPC = R6PlayerController(Controller);
 	// End:0xA9
-	if(__NFUN_130__(__NFUN_119__(aPC, none), __NFUN_119__(aPC.m_TeamManager, none)))
+	if(((aPC != none) && (aPC.m_TeamManager != none)))
 	{
 		aPC.m_TeamManager.ResetTeam();
 	}
@@ -1104,15 +1104,15 @@ simulated event Destroyed()
 	J0xB6:
 
 	// End:0xFC [Loop If]
-	if(__NFUN_150__(iCounter, 4))
+	if((iCounter < 4))
 	{
 		// End:0xF2
-		if(__NFUN_119__(m_WeaponsCarried[iCounter], none))
+		if((m_WeaponsCarried[iCounter] != none))
 		{
-			m_WeaponsCarried[iCounter].__NFUN_279__();
+			m_WeaponsCarried[iCounter].Destroy();
 			m_WeaponsCarried[iCounter] = none;
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0xB6;
 	}
@@ -1120,60 +1120,60 @@ simulated event Destroyed()
 	J0x103:
 
 	// End:0x149 [Loop If]
-	if(__NFUN_150__(iCounter, 2))
+	if((iCounter < 2))
 	{
 		// End:0x13F
-		if(__NFUN_119__(m_ArmPatches[iCounter], none))
+		if((m_ArmPatches[iCounter] != none))
 		{
-			m_ArmPatches[iCounter].__NFUN_279__();
+			m_ArmPatches[iCounter].Destroy();
 			m_ArmPatches[iCounter] = none;
 		}
-		__NFUN_165__(iCounter);
+		(iCounter++);
 		// [Loop Continue]
 		goto J0x103;
 	}
 	// End:0x167
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
-		m_SoundRepInfo.__NFUN_279__();
+		m_SoundRepInfo.Destroy();
 		m_SoundRepInfo = none;
 	}
 	// End:0x185
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
-		EngineWeapon.__NFUN_279__();
+		EngineWeapon.Destroy();
 		EngineWeapon = none;
 	}
 	// End:0x1A3
-	if(__NFUN_119__(m_pBulletManager, none))
+	if((m_pBulletManager != none))
 	{
-		m_pBulletManager.__NFUN_279__();
+		m_pBulletManager.Destroy();
 		m_pBulletManager = none;
 	}
 	// End:0x1C1
-	if(__NFUN_119__(m_TeamMemberRepInfo, none))
+	if((m_TeamMemberRepInfo != none))
 	{
-		m_TeamMemberRepInfo.__NFUN_279__();
+		m_TeamMemberRepInfo.Destroy();
 		m_TeamMemberRepInfo = none;
 	}
 	// End:0x236
-	if(__NFUN_119__(m_BreathingEmitter, none))
+	if((m_BreathingEmitter != none))
 	{
 		// End:0x218
-		if(__NFUN_155__(m_BreathingEmitter.Emitters.Length, 0))
+		if((m_BreathingEmitter.Emitters.Length != 0))
 		{
 			m_BreathingEmitter.Emitters[0].AllParticlesDead = false;
 			m_BreathingEmitter.Emitters[0].m_iPaused = 1;
 		}
 		DetachFromBone(m_BreathingEmitter);
-		m_BreathingEmitter.__NFUN_279__();
+		m_BreathingEmitter.Destroy();
 		m_BreathingEmitter = none;
 	}
 	// End:0x26B
-	foreach __NFUN_304__(Class'Engine.Actor', A)
+	foreach AllActors(Class'Engine.Actor', A)
 	{
 		// End:0x26A
-		if(__NFUN_114__(A.Instigator, self))
+		if((A.Instigator == self))
 		{
 			A.Instigator = none;
 		}		
@@ -1196,10 +1196,10 @@ function Vector GetHandLocation()
 event Vector GetFiringStartPoint()
 {
 	// End:0x3F
-	if(__NFUN_181__(m_fLastFSPUpdate, Level.TimeSeconds))
+	if((m_fLastFSPUpdate != Level.TimeSeconds))
 	{
 		m_fLastFSPUpdate = Level.TimeSeconds;
-		m_vFiringStartPoint = __NFUN_215__(Location, EyePosition());
+		m_vFiringStartPoint = (Location + EyePosition());
 	}
 	return m_vFiringStartPoint;
 	return;
@@ -1209,25 +1209,25 @@ function Vector GetGrenadeStartLocation(Pawn.eGrenadeThrow eThrow)
 {
 	local Vector vStart;
 
-	vStart = __NFUN_215__(Location, EyePosition());
+	vStart = (Location + EyePosition());
 	// End:0x9B
-	if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eThrow), int(4)), __NFUN_154__(int(eThrow), int(5))), __NFUN_154__(int(eThrow), int(2))))
+	if((((int(eThrow) == int(4)) || (int(eThrow) == int(5))) || (int(eThrow) == int(2))))
 	{
 		// End:0x67
 		if(m_bIsProne)
 		{
-			__NFUN_224__(vStart, vect(0.0000000, 0.0000000, 10.0000000));			
+			(vStart -= vect(0.0000000, 0.0000000, 10.0000000));			
 		}
 		else
 		{
 			// End:0x87
 			if(bIsCrouched)
 			{
-				__NFUN_224__(vStart, vect(0.0000000, 0.0000000, 30.0000000));				
+				(vStart -= vect(0.0000000, 0.0000000, 30.0000000));				
 			}
 			else
 			{
-				__NFUN_224__(vStart, vect(0.0000000, 0.0000000, 40.0000000));
+				(vStart -= vect(0.0000000, 0.0000000, 40.0000000));
 			}
 		}
 	}
@@ -1237,45 +1237,45 @@ function Vector GetGrenadeStartLocation(Pawn.eGrenadeThrow eThrow)
 
 function RenderGunDirection(Canvas C)
 {
-	C.__NFUN_2403__(GetFiringStartPoint(), __NFUN_215__(GetFiringStartPoint(), __NFUN_212__(Vector(GetFiringRotation()), float(10000))), Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
+	C.Draw3DLine(GetFiringStartPoint(), (GetFiringStartPoint() + (Vector(GetFiringRotation()) * float(10000))), Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
 	return;
 }
 
 function DrawViewRotation(Canvas C)
 {
-	C.__NFUN_2403__(__NFUN_215__(Location, EyePosition()), __NFUN_215__(__NFUN_215__(Location, EyePosition()), __NFUN_213__(float(70), Vector(GetViewRotation()))), Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
+	C.Draw3DLine((Location + EyePosition()), ((Location + EyePosition()) + (float(70) * Vector(GetViewRotation()))), Class'Engine.Canvas'.static.MakeColor(byte(255), 0, 0));
 	return;
 }
 
 simulated function FaceRotation(Rotator NewRotation, float DeltaTime)
 {
 	// End:0x68
-	if(__NFUN_154__(int(Physics), int(11)))
+	if((int(Physics) == int(11)))
 	{
 		// End:0x38
-		if(__NFUN_119__(OnLadder, none))
+		if((OnLadder != none))
 		{
-			__NFUN_299__(OnLadder.LadderList.Rotation);			
+			SetRotation(OnLadder.LadderList.Rotation);			
 		}
 		else
 		{
 			// End:0x65
-			if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+			if((int(Level.NetMode) != int(NM_Standalone)))
 			{
 				m_bPostureTransition = false;
 				R6ResetAnimBlendParams(1);
-				__NFUN_3970__(1);
+				SetPhysics(1);
 			}
 		}		
 	}
 	else
 	{
 		// End:0xA8
-		if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(Physics), int(1)), __NFUN_154__(int(Physics), int(2))), __NFUN_154__(int(Physics), int(12))))
+		if((((int(Physics) == int(1)) || (int(Physics) == int(2))) || (int(Physics) == int(12))))
 		{
 			NewRotation.Pitch = 0;
 		}
-		__NFUN_299__(NewRotation);
+		SetRotation(NewRotation);
 	}
 	return;
 }
@@ -1287,7 +1287,7 @@ function PossessedBy(Controller C)
 {
 	super(Pawn).PossessedBy(C);
 	// End:0x31
-	if(Controller.__NFUN_303__('PlayerController'))
+	if(Controller.IsA('PlayerController'))
 	{
 		m_bIsPlayer = true;
 		AvoidLedges(false);		
@@ -1297,11 +1297,11 @@ function PossessedBy(Controller C)
 		AvoidLedges(true);
 	}
 	// End:0x60
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
 		m_SoundRepInfo.m_PawnRepInfo = Controller.m_PawnRepInfo;
 	}
-	Controller.FocalPoint = __NFUN_215__(Location, Vector(Rotation));
+	Controller.FocalPoint = (Location + Vector(Rotation));
 	return;
 }
 
@@ -1336,18 +1336,18 @@ simulated event PostNetBeginPlay()
 {
 	super(Pawn).PostNetBeginPlay();
 	// End:0x2F
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		m_iLocalCurrentActionIndex = 0;
 		m_iNetCurrentActionIndex = 0;
 	}
 	// End:0x3C
-	if(__NFUN_114__(Controller, none))
+	if((Controller == none))
 	{
 		return;
 	}
 	// End:0x97
-	if(__NFUN_130__(__NFUN_130__(Controller.__NFUN_303__('PlayerController'), __NFUN_119__(PlayerController(Controller).Player, none)), PlayerController(Controller).Player.__NFUN_303__('Viewport')))
+	if(((Controller.IsA('PlayerController') && (PlayerController(Controller).Player != none)) && PlayerController(Controller).Player.IsA('Viewport')))
 	{
 		m_bIsPlayer = true;
 	}
@@ -1359,63 +1359,63 @@ simulated event PostBeginPlay()
 	local int iCounter;
 	local R6GameOptions GameOptions;
 
-	GameOptions = __NFUN_1009__();
+	GameOptions = GetGameOptions();
 	super(Pawn).PostBeginPlay();
 	// End:0xA8
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		R6AbstractGameInfo(Level.Game).SetPawnTeamFriendlies(self);
 		// End:0x56
-		if(__NFUN_114__(m_SoundRepInfo, none))
+		if((m_SoundRepInfo == none))
 		{
-			m_SoundRepInfo = __NFUN_278__(Class'R6Engine.R6SoundReplicationInfo');
+			m_SoundRepInfo = Spawn(Class'R6Engine.R6SoundReplicationInfo');
 		}
 		m_SoundRepInfo.m_pawnOwner = self;
 		m_SoundRepInfo.m_NewWeaponSound = 1;
-		m_fHeartBeatTime[0] = float(__NFUN_167__(int(__NFUN_172__(float(1000), __NFUN_172__(m_fHeartBeatFrequency, float(60))))));
+		m_fHeartBeatTime[0] = float(Rand(int((float(1000) / (m_fHeartBeatFrequency / float(60))))));
 		m_fHeartBeatTime[1] = m_fHeartBeatTime[0];
 	}
 	// End:0x374
-	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) != int(NM_DedicatedServer)))
 	{
 		// End:0x180
 		if(m_bHasArmPatches)
 		{
 			// End:0xE7
-			if(__NFUN_114__(m_ArmPatches[0], none))
+			if((m_ArmPatches[0] == none))
 			{
-				m_ArmPatches[0] = __NFUN_278__(Class'R6Engine.R6ArmPatchGlow');
+				m_ArmPatches[0] = Spawn(Class'R6Engine.R6ArmPatchGlow');
 			}
 			m_ArmPatches[0].m_pOwnerNightVision = self;
 			m_ArmPatches[0].m_AttachedBoneName = 'R6 L UpperArm';
 			m_ArmPatches[0].m_fMatrixMul = 1.0000000;
 			// End:0x142
-			if(__NFUN_114__(m_ArmPatches[1], none))
+			if((m_ArmPatches[1] == none))
 			{
-				m_ArmPatches[1] = __NFUN_278__(Class'R6Engine.R6ArmPatchGlow');
+				m_ArmPatches[1] = Spawn(Class'R6Engine.R6ArmPatchGlow');
 			}
 			m_ArmPatches[1].m_pOwnerNightVision = self;
 			m_ArmPatches[1].m_AttachedBoneName = 'R6 R UpperArm';
 			m_ArmPatches[1].m_fMatrixMul = -1.0000000;
 		}
 		// End:0x1EF
-		if(__NFUN_130__(__NFUN_119__(Level.m_BreathingEmitterClass, none), __NFUN_114__(m_BreathingEmitter, none)))
+		if(((Level.m_BreathingEmitterClass != none) && (m_BreathingEmitter == none)))
 		{
-			m_BreathingEmitter = __NFUN_278__(Level.m_BreathingEmitterClass);
+			m_BreathingEmitter = Spawn(Level.m_BreathingEmitterClass);
 			// End:0x1EF
-			if(__NFUN_119__(m_BreathingEmitter, none))
+			if((m_BreathingEmitter != none))
 			{
 				AttachToBone(m_BreathingEmitter, 'R6 Head');
 				m_BreathingEmitter.SetRelativeLocation(vect(0.0000000, -20.0000000, 0.0000000));
 			}
 		}
 		// End:0x2D5
-		if(__NFUN_130__(Class'Engine.Actor'.static.__NFUN_2617__(), __NFUN_132__(__NFUN_132__(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), __NFUN_154__(int(GameOptions.RainbowsShadowLevel), int(3))), __NFUN_130__(__NFUN_154__(int(m_ePawnType), int(3)), __NFUN_154__(int(GameOptions.HostagesShadowLevel), int(3)))), __NFUN_130__(__NFUN_154__(int(m_ePawnType), int(2)), __NFUN_154__(int(GameOptions.TerrosShadowLevel), int(3))))))
+		if((Class'Engine.Actor'.static.IsVideoHardwareAtLeast64M() && ((((int(m_ePawnType) == int(1)) && (int(GameOptions.RainbowsShadowLevel) == int(3))) || ((int(m_ePawnType) == int(3)) && (int(GameOptions.HostagesShadowLevel) == int(3)))) || ((int(m_ePawnType) == int(2)) && (int(GameOptions.TerrosShadowLevel) == int(3))))))
 		{
 			// End:0x2D2
-			if(__NFUN_114__(Shadow, none))
+			if((Shadow == none))
 			{
-				Shadow = __NFUN_278__(Class'Engine.ShadowProjector', self, 'None', Location);
+				Shadow = Spawn(Class'Engine.ShadowProjector', self, 'None', Location);
 				ShadowProjector(Shadow).ShadowActor = self;
 				ShadowProjector(Shadow).UpdateShadow();
 			}			
@@ -1423,20 +1423,20 @@ simulated event PostBeginPlay()
 		else
 		{
 			// End:0x374
-			if(__NFUN_132__(__NFUN_132__(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), __NFUN_155__(int(GameOptions.RainbowsShadowLevel), int(0))), __NFUN_130__(__NFUN_154__(int(m_ePawnType), int(3)), __NFUN_155__(int(GameOptions.HostagesShadowLevel), int(0)))), __NFUN_130__(__NFUN_154__(int(m_ePawnType), int(2)), __NFUN_155__(int(GameOptions.TerrosShadowLevel), int(0)))))
+			if(((((int(m_ePawnType) == int(1)) && (int(GameOptions.RainbowsShadowLevel) != int(0))) || ((int(m_ePawnType) == int(3)) && (int(GameOptions.HostagesShadowLevel) != int(0)))) || ((int(m_ePawnType) == int(2)) && (int(GameOptions.TerrosShadowLevel) != int(0)))))
 			{
 				// End:0x374
-				if(__NFUN_114__(Shadow, none))
+				if((Shadow == none))
 				{
-					Shadow = __NFUN_278__(Class'R6Engine.R6ShadowProjector', self);
+					Shadow = Spawn(Class'R6Engine.R6ShadowProjector', self);
 				}
 			}
 		}
 	}
-	m_iMaxRotationOffset = __NFUN_1512__();
+	m_iMaxRotationOffset = GetMaxRotationOffset();
 	R6BlendAnim(m_standDefaultAnimName, 13, 0.0000000, 'R6 Spine', 0.0000000, 0.0000000, true);
 	m_vEyeLocation = Location;
-	__NFUN_184__(m_vEyeLocation.Z, float(70));
+	(m_vEyeLocation.Z += float(70));
 	return;
 }
 
@@ -1449,14 +1449,14 @@ event TornOff()
 	J0x0D:
 
 	// End:0x4A [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		// End:0x40
-		if(__NFUN_119__(m_WeaponsCarried[i], none))
+		if((m_WeaponsCarried[i] != none))
 		{
 			m_WeaponsCarried[i].SetTearOff(true);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0D;
 	}
@@ -1466,28 +1466,28 @@ event TornOff()
 simulated function UpdateVisualEffects(float fDeltaTime)
 {
 	// End:0x57
-	if(__NFUN_119__(m_BreathingEmitter, none))
+	if((m_BreathingEmitter != none))
 	{
 		m_BreathingEmitter.Emitters[0].AllParticlesDead = false;
 		m_BreathingEmitter.Emitters[0].m_iPaused = int(Region.Zone.m_bInDoor);
 	}
 	// End:0x8F
-	if(__NFUN_119__(m_LeftDirtyFootStep, none))
+	if((m_LeftDirtyFootStep != none))
 	{
-		__NFUN_185__(m_fLeftDirtyFootStepRemainingTime, fDeltaTime);
+		(m_fLeftDirtyFootStepRemainingTime -= fDeltaTime);
 		// End:0x8F
-		if(__NFUN_178__(m_fLeftDirtyFootStepRemainingTime, 0.0000000))
+		if((m_fLeftDirtyFootStepRemainingTime <= 0.0000000))
 		{
 			m_LeftDirtyFootStep = none;
 			m_fLeftDirtyFootStepRemainingTime = 0.0000000;
 		}
 	}
 	// End:0xC7
-	if(__NFUN_119__(m_RightDirtyFootStep, none))
+	if((m_RightDirtyFootStep != none))
 	{
-		__NFUN_185__(m_fRightDirtyFootStepRemainingTime, fDeltaTime);
+		(m_fRightDirtyFootStepRemainingTime -= fDeltaTime);
 		// End:0xC7
-		if(__NFUN_178__(m_fRightDirtyFootStepRemainingTime, 0.0000000))
+		if((m_fRightDirtyFootStepRemainingTime <= 0.0000000))
 		{
 			m_RightDirtyFootStep = none;
 			m_fRightDirtyFootStepRemainingTime = 0.0000000;
@@ -1502,33 +1502,33 @@ simulated function Tick(float DeltaTime)
 
 	super(Actor).Tick(DeltaTime);
 	// End:0x3D
-	if(__NFUN_177__(m_fDecrementalBlurValue, float(0)))
+	if((m_fDecrementalBlurValue > float(0)))
 	{
-		__NFUN_185__(m_fDecrementalBlurValue, __NFUN_171__(DeltaTime, 8.0000000));
-		m_fDecrementalBlurValue = float(__NFUN_250__(int(m_fDecrementalBlurValue), 0));
+		(m_fDecrementalBlurValue -= (DeltaTime * 8.0000000));
+		m_fDecrementalBlurValue = float(Max(int(m_fDecrementalBlurValue), 0));
 	}
 	// End:0x71
-	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	if((int(Role) < int(ROLE_Authority)))
 	{
 		// End:0x71
-		if(__NFUN_155__(int(m_bRepPlayWaitAnim), int(m_bSavedPlayWaitAnim)))
+		if((int(m_bRepPlayWaitAnim) != int(m_bSavedPlayWaitAnim)))
 		{
 			m_bSavedPlayWaitAnim = m_bRepPlayWaitAnim;
 			PlayWaiting();
 		}
 	}
 	// End:0x97
-	if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_242__(m_bHelmetWasHit, true)))
+	if(((int(Role) == int(ROLE_Authority)) && (m_bHelmetWasHit == true)))
 	{
 		m_bHelmetWasHit = false;
 	}
-	__NFUN_184__(m_fHBTime, DeltaTime);
+	(m_fHBTime += DeltaTime);
 	// End:0x188
-	if(__NFUN_177__(m_fHBTime, 1.0000000))
+	if((m_fHBTime > 1.0000000))
 	{
-		m_fHBTime = __NFUN_175__(m_fHBTime, 1.0000000);
+		m_fHBTime = (m_fHBTime - 1.0000000);
 		// End:0xED
-		if(__NFUN_154__(int(m_ePawnType), int(2)))
+		if((int(m_ePawnType) == int(2)))
 		{
 			fHeartBeatRateMAX = 184.0000000;
 			fHeartBeatRateMIN = 65.0000000;			
@@ -1538,18 +1538,18 @@ simulated function Tick(float DeltaTime)
 			fHeartBeatRateMAX = 182.0000000;
 			fHeartBeatRateMIN = 90.0000000;
 		}
-		fHeartBeatFrequency = __NFUN_171__(__NFUN_171__(__NFUN_171__(fHeartBeatRateMIN, m_fHBMove), m_fHBWound), m_fHBDefcon);
+		fHeartBeatFrequency = (((fHeartBeatRateMIN * m_fHBMove) * m_fHBWound) * m_fHBDefcon);
 		// End:0x138
 		if(m_bEngaged)
 		{
-			__NFUN_182__(fHeartBeatFrequency, 1.2000000);
+			(fHeartBeatFrequency *= 1.2000000);
 		}
 		// End:0x16F
-		if(__NFUN_177__(fHeartBeatFrequency, m_fHeartBeatFrequency))
+		if((fHeartBeatFrequency > m_fHeartBeatFrequency))
 		{
-			__NFUN_184__(m_fHeartBeatFrequency, float(5));
+			(m_fHeartBeatFrequency += float(5));
 			// End:0x16C
-			if(__NFUN_177__(m_fHeartBeatFrequency, fHeartBeatRateMAX))
+			if((m_fHeartBeatFrequency > fHeartBeatRateMAX))
 			{
 				m_fHeartBeatFrequency = fHeartBeatRateMAX;
 			}			
@@ -1557,9 +1557,9 @@ simulated function Tick(float DeltaTime)
 		else
 		{
 			// End:0x188
-			if(__NFUN_176__(fHeartBeatFrequency, m_fHeartBeatFrequency))
+			if((fHeartBeatFrequency < m_fHeartBeatFrequency))
 			{
-				__NFUN_185__(m_fHeartBeatFrequency, float(1));
+				(m_fHeartBeatFrequency -= float(1));
 			}
 		}
 	}
@@ -1572,7 +1572,7 @@ simulated function Tick(float DeltaTime)
 //============================================================================
 simulated event Rotator GetViewRotation()
 {
-	return __NFUN_1841__();
+	return R6GetViewRotation();
 	return;
 }
 
@@ -1609,9 +1609,9 @@ simulated event Vector EyePosition()
 	{
 		PC = PlayerController(Controller);
 		// End:0x5D
-		if(__NFUN_130__(__NFUN_130__(__NFUN_119__(PC, none), __NFUN_129__(PC.bBehindView)), __NFUN_114__(PC.ViewTarget, self)))
+		if((((PC != none) && (!PC.bBehindView)) && (PC.ViewTarget == self)))
 		{
-			return __NFUN_216__(m_vEyeLocation, Location);
+			return (m_vEyeLocation - Location);
 		}
 	}
 	// End:0x79
@@ -1655,9 +1655,9 @@ simulated function Vector R6CalcDrawLocation(R6EngineWeapon Wep, out Rotator Mov
 
 	drawLocation = Location;
 	// End:0x61
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)), __NFUN_154__(int(RemoteRole), int(ROLE_AutonomousProxy)))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || ((int(Level.NetMode) == int(NM_ListenServer)) && (int(RemoteRole) == int(ROLE_AutonomousProxy)))))
 	{
-		__NFUN_223__(drawLocation, EyePosition());		
+		(drawLocation += EyePosition());		
 	}
 	else
 	{
@@ -1668,12 +1668,12 @@ simulated function Vector R6CalcDrawLocation(R6EngineWeapon Wep, out Rotator Mov
 		}
 		else
 		{
-			drawLocation = __NFUN_215__(Location, EyePosition());
+			drawLocation = (Location + EyePosition());
 		}
-		__NFUN_229__(GetViewRotation(), vAxisX, vAxisY, vAxisZ);
-		__NFUN_184__(drawLocation.X, __NFUN_174__(__NFUN_174__(__NFUN_171__(vAxisX.X, offset.X), __NFUN_171__(vAxisY.X, offset.Y)), __NFUN_171__(vAxisZ.X, offset.Z)));
-		__NFUN_184__(drawLocation.Y, __NFUN_174__(__NFUN_174__(__NFUN_171__(vAxisX.Y, offset.X), __NFUN_171__(vAxisY.Y, offset.Y)), __NFUN_171__(vAxisZ.Y, offset.Z)));
-		__NFUN_184__(drawLocation.Z, __NFUN_174__(__NFUN_174__(__NFUN_171__(vAxisX.Z, offset.X), __NFUN_171__(vAxisY.Z, offset.Y)), __NFUN_171__(vAxisZ.Z, offset.Z)));
+		GetAxes(GetViewRotation(), vAxisX, vAxisY, vAxisZ);
+		(drawLocation.X += (((vAxisX.X * offset.X) + (vAxisY.X * offset.Y)) + (vAxisZ.X * offset.Z)));
+		(drawLocation.Y += (((vAxisX.Y * offset.X) + (vAxisY.Y * offset.Y)) + (vAxisZ.Y * offset.Z)));
+		(drawLocation.Z += (((vAxisX.Z * offset.X) + (vAxisY.Z * offset.Y)) + (vAxisZ.Z * offset.Z)));
 	}
 	return drawLocation;
 	return;
@@ -1720,25 +1720,25 @@ function AimDown()
 
 function bool IsWalking()
 {
-	return __NFUN_130__(bIsWalking, __NFUN_177__(__NFUN_174__(__NFUN_174__(__NFUN_171__(Velocity.X, Velocity.X), __NFUN_171__(Velocity.Y, Velocity.Y)), __NFUN_171__(Velocity.Z, Velocity.Z)), float(1000)));
+	return (bIsWalking && ((((Velocity.X * Velocity.X) + (Velocity.Y * Velocity.Y)) + (Velocity.Z * Velocity.Z)) > float(1000)));
 	return;
 }
 
 function bool IsRunning()
 {
-	return __NFUN_130__(__NFUN_129__(bIsWalking), __NFUN_177__(__NFUN_174__(__NFUN_174__(__NFUN_171__(Velocity.X, Velocity.X), __NFUN_171__(Velocity.Y, Velocity.Y)), __NFUN_171__(Velocity.Z, Velocity.Z)), float(1000)));
+	return ((!bIsWalking) && ((((Velocity.X * Velocity.X) + (Velocity.Y * Velocity.Y)) + (Velocity.Z * Velocity.Z)) > float(1000)));
 	return;
 }
 
 function bool IsMovingForward()
 {
 	// End:0x19
-	if(__NFUN_217__(Velocity, vect(0.0000000, 0.0000000, 0.0000000)))
+	if((Velocity == vect(0.0000000, 0.0000000, 0.0000000)))
 	{
 		return true;
 	}
 	// End:0x38
-	if(__NFUN_177__(__NFUN_219__(__NFUN_226__(Velocity), Vector(Rotation)), 0.5000000))
+	if((Dot(Normal(Velocity), Vector(Rotation)) > 0.5000000))
 	{
 		return true;		
 	}
@@ -1752,7 +1752,7 @@ function bool IsMovingForward()
 function bool IsMovingUpLadder()
 {
 	// End:0x17
-	if(__NFUN_177__(Velocity.Z, float(0)))
+	if((Velocity.Z > float(0)))
 	{
 		return true;		
 	}
@@ -1766,10 +1766,10 @@ function bool IsMovingUpLadder()
 simulated event AnimEnd(int iChannel)
 {
 	// End:0x24
-	if(__NFUN_154__(iChannel, 0))
+	if((iChannel == 0))
 	{
 		// End:0x21
-		if(__NFUN_155__(int(Physics), int(12)))
+		if((int(Physics) != int(12)))
 		{
 			PlayWaiting();
 		}		
@@ -1777,7 +1777,7 @@ simulated event AnimEnd(int iChannel)
 	else
 	{
 		// End:0x55
-		if(__NFUN_130__(__NFUN_154__(iChannel, 1), m_bPostureTransition))
+		if(((iChannel == 1) && m_bPostureTransition))
 		{
 			m_bSoundChangePosture = false;
 			m_bIsLanding = false;
@@ -1786,11 +1786,11 @@ simulated event AnimEnd(int iChannel)
 		else
 		{
 			// End:0x8A
-			if(__NFUN_130__(__NFUN_154__(iChannel, 14), m_bWeaponTransition))
+			if(((iChannel == 14) && m_bWeaponTransition))
 			{
 				m_bWeaponTransition = false;
 				// End:0x8A
-				if(__NFUN_155__(int(m_eGrenadeThrow), int(3)))
+				if((int(m_eGrenadeThrow) != int(3)))
 				{
 					PlayWeaponAnimation();
 				}
@@ -1808,16 +1808,16 @@ simulated event AnimEnd(int iChannel)
 simulated function R6LoopAnim(name animName, optional float fRate, optional float fTween)
 {
 	// End:0x18
-	if(__NFUN_180__(fRate, float(0)))
+	if((fRate == float(0)))
 	{
 		fRate = 1.0000000;
 	}
 	// End:0x30
-	if(__NFUN_180__(fTween, float(0)))
+	if((fTween == float(0)))
 	{
 		fTween = 0.2500000;
 	}
-	__NFUN_260__(animName, fRate, fTween);
+	LoopAnim(animName, fRate, fTween);
 	return;
 }
 
@@ -1829,16 +1829,16 @@ simulated function R6LoopAnim(name animName, optional float fRate, optional floa
 simulated function R6PlayAnim(name animName, optional float fRate, optional float fTween)
 {
 	// End:0x18
-	if(__NFUN_180__(fRate, float(0)))
+	if((fRate == float(0)))
 	{
 		fRate = 1.0000000;
 	}
 	// End:0x30
-	if(__NFUN_180__(fTween, float(0)))
+	if((fTween == float(0)))
 	{
 		fTween = 0.2500000;
 	}
-	__NFUN_259__(animName, fRate, fTween);
+	PlayAnim(animName, fRate, fTween);
 	return;
 }
 
@@ -1848,24 +1848,24 @@ simulated function R6PlayAnim(name animName, optional float fRate, optional floa
 simulated function R6BlendAnim(name animName, int iBlendChannel, float fBlendAlpha, optional name BoneName, optional float fRate, optional float fTween, optional bool bPlayOnce)
 {
 	// End:0x1A
-	if(__NFUN_180__(fRate, 0.0000000))
+	if((fRate == 0.0000000))
 	{
 		fRate = 1.0000000;
 	}
 	// End:0x34
-	if(__NFUN_180__(fTween, 0.0000000))
+	if((fTween == 0.0000000))
 	{
 		fTween = 0.2000000;
 	}
 	AnimBlendParams(iBlendChannel, fBlendAlpha, 0.0000000, 0.0000000, BoneName);
 	// End:0x78
-	if(__NFUN_129__(bPlayOnce))
+	if((!bPlayOnce))
 	{
-		__NFUN_260__(animName, fRate, fTween, iBlendChannel);		
+		LoopAnim(animName, fRate, fTween, iBlendChannel);		
 	}
 	else
 	{
-		__NFUN_259__(animName, fRate, fTween, iBlendChannel);
+		PlayAnim(animName, fRate, fTween, iBlendChannel);
 	}
 	return;
 }
@@ -1877,7 +1877,7 @@ simulated function R6BlendAnim(name animName, int iBlendChannel, float fBlendAlp
 simulated function R6ResetAnimBlendParams(int iBlendChannel)
 {
 	AnimBlendParams(iBlendChannel, 0.0000000, 0.0000000, 0.0000000);
-	__NFUN_1805__(iBlendChannel);
+	ClearChannel(iBlendChannel);
 	return;
 }
 
@@ -1889,14 +1889,14 @@ simulated function R6ResetAnimBlendParams(int iBlendChannel)
 simulated function PlayRootMotionAnimation(name animName, optional float fRate)
 {
 	// End:0x1A
-	if(__NFUN_180__(fRate, 0.0000000))
+	if((fRate == 0.0000000))
 	{
 		fRate = 1.0000000;
 	}
 	m_bPostureTransition = false;
 	R6ResetAnimBlendParams(1);
-	__NFUN_259__(animName, fRate);
-	__NFUN_3970__(12);
+	PlayAnim(animName, fRate);
+	SetPhysics(12);
 	bCollideWorld = false;
 	return;
 }
@@ -1910,10 +1910,10 @@ simulated function PlayPostRootMotionAnimation(name animName)
 {
 	m_ePlayerIsUsingHands = 0;
 	bCollideWorld = true;
-	__NFUN_3970__(1);
+	SetPhysics(1);
 	m_bPostureTransition = true;
 	AnimBlendParams(1, 1.0000000, 0.0000000, 0.0000000);
-	__NFUN_259__(animName, 1.4000000, 0.0000000, 1);
+	PlayAnim(animName, 1.4000000, 0.0000000, 1);
 	return;
 }
 
@@ -1926,18 +1926,18 @@ simulated function PlayPostStartLadder()
 {
 	m_ePlayerIsUsingHands = 3;
 	bCollideWorld = true;
-	__NFUN_3970__(11);
+	SetPhysics(11);
 	m_bPostureTransition = true;
 	AnimBlendParams(1, 1.0000000, 0.0000000, 0.0000000);
-	__NFUN_259__('StandLadder_nt', 1.0000000, 0.0000000, 1);
+	PlayAnim('StandLadder_nt', 1.0000000, 0.0000000, 1);
 	// End:0x93
 	if(m_Ladder.m_bIsTopOfLadder)
 	{
-		__NFUN_267__(__NFUN_216__(__NFUN_216__(m_Ladder.Location, __NFUN_213__(float(38), Vector(m_Ladder.Rotation))), vect(0.0000000, 0.0000000, 126.0000000)));		
+		SetLocation(((m_Ladder.Location - (float(38) * Vector(m_Ladder.Rotation))) - vect(0.0000000, 0.0000000, 126.0000000)));		
 	}
 	else
 	{
-		__NFUN_267__(__NFUN_215__(__NFUN_215__(m_Ladder.Location, __NFUN_213__(float(4), Vector(m_Ladder.Rotation))), vect(0.0000000, 0.0000000, 100.0000000)));
+		SetLocation(((m_Ladder.Location + (float(4) * Vector(m_Ladder.Rotation))) + vect(0.0000000, 0.0000000, 100.0000000)));
 	}
 	return;
 }
@@ -1946,9 +1946,9 @@ simulated function PlayPostEndLadder()
 {
 	m_ePlayerIsUsingHands = 3;
 	// End:0x3D
-	if(__NFUN_154__(int(m_ePawnType), int(3)))
+	if((int(m_ePawnType) == int(3)))
 	{
-		__NFUN_267__(__NFUN_215__(Location, vect(0.0000000, 0.0000000, 15.0000000)));
+		SetLocation((Location + vect(0.0000000, 0.0000000, 15.0000000)));
 		PlayPostRootMotionAnimation(default.m_standDefaultAnimName);		
 	}
 	else
@@ -1961,7 +1961,7 @@ simulated function PlayPostEndLadder()
 function bool IsValidClimber()
 {
 	// End:0x1F
-	if(__NFUN_130__(__NFUN_129__(m_bIsClimbingLadder), __NFUN_154__(int(Physics), int(1))))
+	if(((!m_bIsClimbingLadder) && (int(Physics) == int(1))))
 	{
 		return false;
 	}
@@ -1978,22 +1978,22 @@ simulated event SetPeekingInfo(Pawn.ePeekingMode eMode, float fPeeking, optional
 	m_fPeekingGoal = fPeeking;
 	m_ePeekingMode = eMode;
 	// End:0x3C
-	if(__NFUN_154__(int(m_ePeekingMode), int(2)))
+	if((int(m_ePeekingMode) == int(2)))
 	{
-		m_bPeekingLeft = __NFUN_176__(fPeeking, 1000.0000000);		
+		m_bPeekingLeft = (fPeeking < 1000.0000000);		
 	}
 	else
 	{
 		// End:0x59
-		if(__NFUN_155__(int(m_ePeekingMode), int(0)))
+		if((int(m_ePeekingMode) != int(0)))
 		{
 			m_bPeekingLeft = bPeekLeft;
 		}
 	}
 	// End:0x95
-	if(__NFUN_130__(__NFUN_129__(m_bIsPlayer), __NFUN_181__(m_fPeekingGoal, 1000.0000000)))
+	if(((!m_bIsPlayer) && (m_fPeekingGoal != 1000.0000000)))
 	{
-		m_fPeekingGoal = __NFUN_174__(__NFUN_171__(__NFUN_175__(1000.0000000, m_fPeekingGoal), m_fPeekingGoalModifier), 1000.0000000);
+		m_fPeekingGoal = (((1000.0000000 - m_fPeekingGoal) * m_fPeekingGoalModifier) + 1000.0000000);
 	}
 	return;
 }
@@ -2020,7 +2020,7 @@ simulated event bool IsPeekingLeft()
 //===================================================================================================
 simulated function float GetPeekingRate()
 {
-	return __NFUN_1508__(m_fPeeking);
+	return GetPeekingRatioNorm(m_fPeeking);
 	return;
 }
 
@@ -2030,7 +2030,7 @@ simulated function float GetPeekingRate()
 //------------------------------------------------------------------
 simulated function bool IsPeeking()
 {
-	return __NFUN_155__(int(m_ePeekingMode), int(0));
+	return (int(m_ePeekingMode) != int(0));
 	return;
 }
 
@@ -2060,7 +2060,7 @@ simulated function name GetPeekAnimName(float fPeeking, bool bPeekingLeft)
 			if(bPeekingLeft)
 			{
 				// End:0x35
-				if(__NFUN_176__(fPeeking, 400.0000000))
+				if((fPeeking < 400.0000000))
 				{
 					fPeeking = 400.0000000;
 				}				
@@ -2068,13 +2068,13 @@ simulated function name GetPeekAnimName(float fPeeking, bool bPeekingLeft)
 			else
 			{
 				// End:0x52
-				if(__NFUN_177__(fPeeking, 1600.0000000))
+				if((fPeeking > 1600.0000000))
 				{
 					fPeeking = 1600.0000000;
 				}
 			}
 		}
-		fPeeking = __NFUN_171__(__NFUN_186__(__NFUN_1508__(fPeeking)), float(100));		
+		fPeeking = (Abs(GetPeekingRatioNorm(fPeeking)) * float(100));		
 	}
 	else
 	{
@@ -2084,35 +2084,35 @@ simulated function name GetPeekAnimName(float fPeeking, bool bPeekingLeft)
 	if(m_bPeekingLeft)
 	{
 		// End:0xA7
-		if(__NFUN_130__(__NFUN_178__(fPeeking, float(15)), __NFUN_176__(m_fCrouchBlendRate, 0.5000000)))
+		if(((fPeeking <= float(15)) && (m_fCrouchBlendRate < 0.5000000)))
 		{
 			return 'None';			
 		}
 		else
 		{
 			// End:0xBE
-			if(__NFUN_178__(fPeeking, float(25)))
+			if((fPeeking <= float(25)))
 			{
 				return 'PeekLeft_nt_20';				
 			}
 			else
 			{
 				// End:0xD5
-				if(__NFUN_178__(fPeeking, float(45)))
+				if((fPeeking <= float(45)))
 				{
 					return 'PeekLeft_nt_40';					
 				}
 				else
 				{
 					// End:0xEC
-					if(__NFUN_178__(fPeeking, float(65)))
+					if((fPeeking <= float(65)))
 					{
 						return 'PeekLeft_nt_60';						
 					}
 					else
 					{
 						// End:0x103
-						if(__NFUN_178__(fPeeking, float(85)))
+						if((fPeeking <= float(85)))
 						{
 							return 'PeekLeft_nt_80';							
 						}
@@ -2128,35 +2128,35 @@ simulated function name GetPeekAnimName(float fPeeking, bool bPeekingLeft)
 	else
 	{
 		// End:0x134
-		if(__NFUN_130__(__NFUN_178__(fPeeking, float(15)), __NFUN_176__(m_fCrouchBlendRate, 0.5000000)))
+		if(((fPeeking <= float(15)) && (m_fCrouchBlendRate < 0.5000000)))
 		{
 			return 'None';			
 		}
 		else
 		{
 			// End:0x14B
-			if(__NFUN_178__(fPeeking, float(25)))
+			if((fPeeking <= float(25)))
 			{
 				return 'PeekRight_nt_20';				
 			}
 			else
 			{
 				// End:0x162
-				if(__NFUN_178__(fPeeking, float(45)))
+				if((fPeeking <= float(45)))
 				{
 					return 'PeekRight_nt_40';					
 				}
 				else
 				{
 					// End:0x179
-					if(__NFUN_178__(fPeeking, float(65)))
+					if((fPeeking <= float(65)))
 					{
 						return 'PeekRight_nt_60';						
 					}
 					else
 					{
 						// End:0x190
-						if(__NFUN_178__(fPeeking, float(85)))
+						if((fPeeking <= float(85)))
 						{
 							return 'PeekRight_nt_80';							
 						}
@@ -2195,7 +2195,7 @@ simulated event StartFullPeeking()
 		}
 	}
 	// End:0xAE
-	if(__NFUN_130__(__NFUN_129__(m_bIsPlayer), __NFUN_129__(m_bIsProne)))
+	if(((!m_bIsPlayer) && (!m_bIsProne)))
 	{
 		// End:0x82
 		if(m_bPeekingLeft)
@@ -2218,13 +2218,13 @@ simulated event StartFullPeeking()
 simulated event EndPeekingMode(Pawn.ePeekingMode eMode)
 {
 	// End:0x13
-	if(__NFUN_154__(int(eMode), int(2)))
+	if((int(eMode) == int(2)))
 	{		
 	}
 	else
 	{
 		// End:0x36
-		if(__NFUN_154__(int(eMode), int(1)))
+		if((int(eMode) == int(1)))
 		{
 			RotateBone('R6 Spine1', 0, 0, 0, 0.6000000);
 		}
@@ -2246,14 +2246,14 @@ simulated event bool IsFullPeekingOver()
 	if(bIsCrouched)
 	{
 		// End:0x26
-		if(__NFUN_178__(m_fPeekingGoal, 400.0000000))
+		if((m_fPeekingGoal <= 400.0000000))
 		{
 			fGoal = 400.0000000;			
 		}
 		else
 		{
 			// End:0x43
-			if(__NFUN_179__(m_fPeekingGoal, 1600.0000000))
+			if((m_fPeekingGoal >= 1600.0000000))
 			{
 				fGoal = 1600.0000000;				
 			}
@@ -2267,7 +2267,7 @@ simulated event bool IsFullPeekingOver()
 	{
 		fGoal = m_fPeekingGoal;
 	}
-	return __NFUN_180__(fGoal, m_fPeeking);
+	return (fGoal == m_fPeeking);
 	return;
 }
 
@@ -2282,29 +2282,29 @@ simulated event PlayPeekingAnim(optional bool bUseSpecialPeekAnim)
 	local float fPeekingAdjust;
 
 	// End:0x0D
-	if(__NFUN_129__(m_bIsPlayer))
+	if((!m_bIsPlayer))
 	{
 		return;
 	}
 	// End:0xE1
-	if(__NFUN_130__(__NFUN_129__(m_bPostureTransition), __NFUN_129__(m_bIsProne)))
+	if(((!m_bPostureTransition) && (!m_bIsProne)))
 	{
 		// End:0x6D
 		if(bUseSpecialPeekAnim)
 		{
-			animName = GetPeekAnimName(m_fPeeking, __NFUN_176__(m_fPeeking, 1000.0000000));
+			animName = GetPeekAnimName(m_fPeeking, (m_fPeeking < 1000.0000000));
 			fRatio = 1.0000000;
 			// End:0x6D
-			if(__NFUN_254__(animName, 'None'))
+			if((animName == 'None'))
 			{
 				bUseSpecialPeekAnim = false;
 			}
 		}
 		// End:0xB1
-		if(__NFUN_242__(bUseSpecialPeekAnim, false))
+		if((bUseSpecialPeekAnim == false))
 		{
 			// End:0x96
-			if(__NFUN_176__(m_fPeeking, 1000.0000000))
+			if((m_fPeeking < 1000.0000000))
 			{
 				animName = 'PeekLeft_nt';				
 			}
@@ -2312,10 +2312,10 @@ simulated event PlayPeekingAnim(optional bool bUseSpecialPeekAnim)
 			{
 				animName = 'PeekRight_nt';
 			}
-			fRatio = __NFUN_186__(__NFUN_1508__(m_fPeeking));
+			fRatio = Abs(GetPeekingRatioNorm(m_fPeeking));
 		}
 		AnimBlendParams(13, fRatio, 0.0000000, 0.0000000, 'R6 Spine');
-		__NFUN_260__(animName, 1.0000000, 0.0000000, 13);
+		LoopAnim(animName, 1.0000000, 0.0000000, 13);
 	}
 	return;
 }
@@ -2340,27 +2340,27 @@ simulated event PlayFluidPeekingAnim(float fForwardPct, float fLeftPct, float fD
 	fCrouchAnimRate = 1.0000000;
 	fAnimRateAdjustment = 0.0000000;
 	AnimBlendParams(2, m_fCrouchBlendRate, 0.0000000, 0.0000000);
-	__NFUN_260__('CrouchRun_nt', 1.0000000, 0.0000000, 2);
+	LoopAnim('CrouchRun_nt', 1.0000000, 0.0000000, 2);
 	// End:0x17B
-	if(__NFUN_132__(__NFUN_181__(fForwardPct, 0.0000000), __NFUN_181__(fLeftPct, float(0))))
+	if(((fForwardPct != 0.0000000) || (fLeftPct != float(0))))
 	{
 		// End:0x11C
-		if(__NFUN_177__(__NFUN_186__(fForwardPct), __NFUN_186__(fLeftPct)))
+		if((Abs(fForwardPct) > Abs(fLeftPct)))
 		{
 			// End:0xEC
-			if(__NFUN_177__(fForwardPct, float(0)))
+			if((fForwardPct > float(0)))
 			{
 				// End:0xBA
 				if(bIsWalking)
 				{
 					crouchAnim = m_crouchWalkForwardName;
-					fAnimRateAdjustment = __NFUN_172__(__NFUN_175__(m_fWalkingSpeed, m_fCrouchedWalkingSpeed), m_fCrouchedWalkingSpeed);					
+					fAnimRateAdjustment = ((m_fWalkingSpeed - m_fCrouchedWalkingSpeed) / m_fCrouchedWalkingSpeed);					
 				}
 				else
 				{
 					crouchAnim = 'CrouchRunForward';
 					fCrouchAnimRate = 1.5000000;
-					fAnimRateAdjustment = __NFUN_172__(__NFUN_175__(m_fRunningSpeed, m_fCrouchedRunningSpeed), m_fCrouchedRunningSpeed);
+					fAnimRateAdjustment = ((m_fRunningSpeed - m_fCrouchedRunningSpeed) / m_fCrouchedRunningSpeed);
 				}				
 			}
 			else
@@ -2380,7 +2380,7 @@ simulated event PlayFluidPeekingAnim(float fForwardPct, float fLeftPct, float fD
 		else
 		{
 			// End:0x14E
-			if(__NFUN_177__(fLeftPct, float(0)))
+			if((fLeftPct > float(0)))
 			{
 				// End:0x140
 				if(bIsWalking)
@@ -2408,19 +2408,19 @@ simulated event PlayFluidPeekingAnim(float fForwardPct, float fLeftPct, float fD
 		}
 	}
 	// End:0x195
-	if(__NFUN_254__(crouchAnim, 'None'))
+	if((crouchAnim == 'None'))
 	{
 		crouchAnim = m_crouchWalkForwardName;
 	}
 	// End:0x1C1
-	if(__NFUN_217__(Acceleration, vect(0.0000000, 0.0000000, 0.0000000)))
+	if((Acceleration == vect(0.0000000, 0.0000000, 0.0000000)))
 	{
 		AnimBlendToAlpha(12, 0.0000000, 0.3000000);		
 	}
 	else
 	{
 		AnimBlendToAlpha(12, m_fCrouchBlendRate, 0.1000000);
-		__NFUN_260__(crouchAnim, fCrouchAnimRate, 0.0000000, 12,, true);
+		LoopAnim(crouchAnim, fCrouchAnimRate, 0.0000000, 12,, true);
 	}
 	return;
 }
@@ -2433,7 +2433,7 @@ simulated event PlayFluidPeekingAnim(float fForwardPct, float fLeftPct, float fD
 //===================================================================================================
 function AvoidLedges(bool bAvoid)
 {
-	bCanWalkOffLedges = __NFUN_129__(bAvoid);
+	bCanWalkOffLedges = (!bAvoid);
 	bAvoidLedges = bAvoid;
 	return;
 }
@@ -2463,59 +2463,59 @@ function TurnAwayFromNearbyWalls()
 
 	rViewDir = GetViewRotation();
 	vViewDir = Vector(rViewDir);
-	vTraceStart = __NFUN_215__(Location, EyePosition());
-	vTraceEnd = __NFUN_215__(vTraceStart, __NFUN_213__(__NFUN_174__(CollisionRadius, m_fWallCheckDistance), vViewDir));
+	vTraceStart = (Location + EyePosition());
+	vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 	// End:0x6C
-	if(__NFUN_114__(__NFUN_277__(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false), none))
+	if((Trace(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false) == none))
 	{
 		return;
 	}
-	fDistFarthest = __NFUN_225__(__NFUN_216__(vHitLocation, vTraceStart));
+	fDistFarthest = VSize((vHitLocation - vTraceStart));
 	vDirFarthest = vViewDir;
-	vViewDir = Vector(__NFUN_316__(rViewDir, rot(0, 32768, 0)));
-	vTraceEnd = __NFUN_215__(vTraceStart, __NFUN_213__(__NFUN_174__(CollisionRadius, m_fWallCheckDistance), vViewDir));
+	vViewDir = Vector((rViewDir + rot(0, 32768, 0)));
+	vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 	// End:0xF4
-	if(__NFUN_114__(__NFUN_277__(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false), none))
+	if((Trace(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false) == none))
 	{
 		vDir = vViewDir;		
 	}
 	else
 	{
-		fDist = __NFUN_225__(__NFUN_216__(vHitLocation, vTraceStart));
+		fDist = VSize((vHitLocation - vTraceStart));
 		// End:0x136
-		if(__NFUN_177__(fDistFarthest, fDist))
+		if((fDistFarthest > fDist))
 		{
-			fDistFarthest = __NFUN_225__(__NFUN_216__(vHitLocation, vTraceStart));
+			fDistFarthest = VSize((vHitLocation - vTraceStart));
 			vDirFarthest = vViewDir;
 		}
-		vViewDir = Vector(__NFUN_316__(rViewDir, rot(0, 16384, 0)));
-		vTraceEnd = __NFUN_215__(vTraceStart, __NFUN_213__(__NFUN_174__(CollisionRadius, m_fWallCheckDistance), vViewDir));
+		vViewDir = Vector((rViewDir + rot(0, 16384, 0)));
+		vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 		// End:0x19F
-		if(__NFUN_114__(__NFUN_277__(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false), none))
+		if((Trace(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false) == none))
 		{
 			vDir = vViewDir;			
 		}
 		else
 		{
-			fDist = __NFUN_225__(__NFUN_216__(vHitLocation, vTraceStart));
+			fDist = VSize((vHitLocation - vTraceStart));
 			// End:0x1D8
-			if(__NFUN_177__(fDistFarthest, fDist))
+			if((fDistFarthest > fDist))
 			{
 				fDistFarthest = fDist;
 				vDirFarthest = vViewDir;
 			}
-			vViewDir = Vector(__NFUN_317__(rViewDir, rot(0, 16384, 0)));
-			vTraceEnd = __NFUN_215__(vTraceStart, __NFUN_213__(__NFUN_174__(CollisionRadius, m_fWallCheckDistance), vViewDir));
+			vViewDir = Vector((rViewDir - rot(0, 16384, 0)));
+			vTraceEnd = (vTraceStart + ((CollisionRadius + m_fWallCheckDistance) * vViewDir));
 			// End:0x241
-			if(__NFUN_114__(__NFUN_277__(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false), none))
+			if((Trace(vHitLocation, vHitNormal, vTraceEnd, vTraceStart, false) == none))
 			{
 				vDir = vViewDir;				
 			}
 			else
 			{
-				fDist = __NFUN_225__(__NFUN_216__(vHitLocation, vTraceStart));
+				fDist = VSize((vHitLocation - vTraceStart));
 				// End:0x26F
-				if(__NFUN_177__(fDistFarthest, fDist))
+				if((fDistFarthest > fDist))
 				{
 					vDirFarthest = vViewDir;
 				}
@@ -2524,10 +2524,10 @@ function TurnAwayFromNearbyWalls()
 		}
 	}
 	// End:0x2B6
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.Focus = none;
-		Controller.FocalPoint = __NFUN_215__(Location, __NFUN_213__(float(100), vDir));
+		Controller.FocalPoint = (Location + (float(100) * vDir));
 	}
 	return;
 }
@@ -2538,19 +2538,19 @@ function TurnAwayFromNearbyWalls()
 simulated event ChangeAnimation()
 {
 	// End:0x21
-	if(__NFUN_130__(__NFUN_119__(Controller, none), Controller.bControlAnimations))
+	if(((Controller != none) && Controller.bControlAnimations))
 	{
 		return;
 	}
 	PlayWeaponAnimation();
 	// End:0x3D
-	if(__NFUN_155__(int(Physics), int(12)))
+	if((int(Physics) != int(12)))
 	{
 		PlayWaiting();
 	}
 	PlayMoving();
 	// End:0xAC
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bWallAdjustmentDone), __NFUN_217__(Acceleration, vect(0.0000000, 0.0000000, 0.0000000))), __NFUN_154__(int(Physics), int(1))), __NFUN_129__(m_bIsPlayer)), m_bAvoidFacingWalls), __NFUN_129__(m_bPostureTransition)))
+	if(((((((!m_bWallAdjustmentDone) && (Acceleration == vect(0.0000000, 0.0000000, 0.0000000))) && (int(Physics) == int(1))) && (!m_bIsPlayer)) && m_bAvoidFacingWalls) && (!m_bPostureTransition)))
 	{
 		TurnAwayFromNearbyWalls();
 		m_bWallAdjustmentDone = true;
@@ -2564,17 +2564,17 @@ simulated event ChangeAnimation()
 simulated function PlayMoving()
 {
 	// End:0x39
-	if(__NFUN_132__(__NFUN_154__(int(Physics), int(0)), __NFUN_130__(__NFUN_119__(Controller, none), Controller.bPreparingMove)))
+	if(((int(Physics) == int(0)) || ((Controller != none) && Controller.bPreparingMove)))
 	{
 		PlayWaiting();
 		return;
 	}
 	m_bWallAdjustmentDone = false;
 	// End:0x90
-	if(__NFUN_130__(m_bIsClimbingStairs, __NFUN_218__(Velocity, vect(0.0000000, 0.0000000, 0.0000000))))
+	if((m_bIsClimbingStairs && (Velocity != vect(0.0000000, 0.0000000, 0.0000000))))
 	{
 		// End:0x88
-		if(__NFUN_178__(__NFUN_219__(__NFUN_226__(Velocity), __NFUN_226__(m_vStairDirection)), 0.0000000))
+		if((Dot(Normal(Velocity), Normal(m_vStairDirection)) <= 0.0000000))
 		{
 			m_bIsMovingUpStairs = false;			
 		}
@@ -2584,7 +2584,7 @@ simulated function PlayMoving()
 		}
 	}
 	// End:0xA9
-	if(__NFUN_154__(int(Physics), int(11)))
+	if((int(Physics) == int(11)))
 	{
 		AnimateClimbing();		
 	}
@@ -2736,10 +2736,10 @@ simulated function InitBackwardAnims()
 	J0x07:
 
 	// End:0x2B [Loop If]
-	if(__NFUN_150__(i, 4))
+	if((i < 4))
 	{
 		AnimPlayBackward[i] = 0;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -2750,7 +2750,7 @@ simulated function InitBackwardAnims()
 simulated function AnimateWalking()
 {
 	// End:0x49
-	if(__NFUN_154__(int(m_eHealth), int(1)))
+	if((int(m_eHealth) == int(1)))
 	{
 		MovementAnims[0] = 'HurtStandWalkForward';
 		MovementAnims[1] = m_hurtStandWalkLeftName;
@@ -2915,11 +2915,11 @@ simulated function AnimateClimbing()
 		J0x1B:
 
 		// End:0x50 [Loop If]
-		if(__NFUN_150__(i, 4))
+		if((i < 4))
 		{
 			MovementAnims[i] = ladderAnim;
 			AnimPlayBackward[i] = 0;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1B;
 		}
@@ -2931,16 +2931,16 @@ simulated function AnimateClimbing()
 		J0x65:
 
 		// End:0x9A [Loop If]
-		if(__NFUN_150__(i, 4))
+		if((i < 4))
 		{
 			MovementAnims[i] = ladderAnim;
 			AnimPlayBackward[i] = 0;
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x65;
 		}
 		// End:0xC6
-		if(__NFUN_154__(int(m_ePawnType), int(1)))
+		if((int(m_ePawnType) == int(1)))
 		{
 			MovementAnims[2] = 'StandLadderSlide_nt';
 			AnimPlayBackward[2] = 0;			
@@ -2958,7 +2958,7 @@ simulated function AnimateClimbing()
 simulated function AnimateStoppedOnLadder()
 {
 	m_ePlayerIsUsingHands = 3;
-	__NFUN_294__('StandLadder_nt', 0.2000000);
+	TweenAnim('StandLadder_nt', 0.2000000);
 	return;
 }
 
@@ -3004,10 +3004,10 @@ event Landed(Vector HitNormal)
 	local bool bGameOver;
 
 	// End:0x77
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		// End:0x74
-		if(__NFUN_130__(m_bIsPlayer, R6PlayerController(Controller).GameReplicationInfo.m_bGameOverRep))
+		if((m_bIsPlayer && R6PlayerController(Controller).GameReplicationInfo.m_bGameOverRep))
 		{
 			m_bIsLanding = true;
 			Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
@@ -3018,7 +3018,7 @@ event Landed(Vector HitNormal)
 	else
 	{
 		// End:0xE6
-		if(__NFUN_130__(Level.Game.m_bGameOver, __NFUN_129__(R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath)))
+		if((Level.Game.m_bGameOver && (!R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath)))
 		{
 			m_bIsLanding = true;
 			Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
@@ -3027,13 +3027,13 @@ event Landed(Vector HitNormal)
 		}
 	}
 	// End:0x1B6
-	if(Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack())
+	if(Class'Engine.Actor'.static.GetModMgr().IsMissionPack())
 	{
 		// End:0x1B6
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_122__(PlayerController(Controller).GameReplicationInfo.m_szGameTypeFlagRep, "RGM_CaptureTheEnemyAdvMode"), __NFUN_155__(int(m_bSuicideType), 3)), __NFUN_155__(int(m_bSuicideType), 1)), __NFUN_155__(int(m_bSuicideType), 2)))
+		if(((((PlayerController(Controller).GameReplicationInfo.m_szGameTypeFlagRep == "RGM_CaptureTheEnemyAdvMode") && (int(m_bSuicideType) != 3)) && (int(m_bSuicideType) != 1)) && (int(m_bSuicideType) != 2)))
 		{
 			// End:0x1B4
-			if(__NFUN_179__(__NFUN_175__(m_fFallingHeight, Location.Z), 128.0000000))
+			if(((m_fFallingHeight - Location.Z) >= 128.0000000))
 			{
 				m_bIsLanding = true;
 				Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
@@ -3043,23 +3043,23 @@ event Landed(Vector HitNormal)
 		}
 	}
 	// End:0x1C5
-	if(__NFUN_180__(m_fFallingHeight, float(0)))
+	if((m_fFallingHeight == float(0)))
 	{
 		return;
 	}
 	ePreviousHealth = m_eHealth;
-	fDistanceFallen = __NFUN_175__(m_fFallingHeight, Location.Z);
+	fDistanceFallen = (m_fFallingHeight - Location.Z);
 	// End:0x2B6
-	if(__NFUN_130__(__NFUN_129__(InGodMode()), __NFUN_132__(__NFUN_179__(fDistanceFallen, float(600)), __NFUN_130__(__NFUN_179__(fDistanceFallen, float(300)), __NFUN_132__(__NFUN_154__(int(m_eHealth), int(1)), __NFUN_154__(int(m_eHealth), int(2)))))))
+	if(((!InGodMode()) && ((fDistanceFallen >= float(600)) || ((fDistanceFallen >= float(300)) && ((int(m_eHealth) == int(1)) || (int(m_eHealth) == int(2)))))))
 	{
 		m_eHealth = 3;
 		// End:0x271
-		if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_119__(Controller, none)))
+		if(((int(Role) == int(ROLE_Authority)) && (Controller != none)))
 		{
 			Controller.PlaySoundDamage(self);
 		}
 		// End:0x2B3
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			TakeHitLocation = vect(0.0000000, 0.0000000, 0.0000000);
 			R6Died(self, 3, vect(0.0000000, 0.0000000, 0.0000000));
@@ -3068,15 +3068,15 @@ event Landed(Vector HitNormal)
 	else
 	{
 		// End:0x361
-		if(__NFUN_130__(__NFUN_179__(fDistanceFallen, 128.0000000), __NFUN_155__(int(m_eHealth), int(3))))
+		if(((fDistanceFallen >= 128.0000000) && (int(m_eHealth) != int(3))))
 		{
 			// End:0x333
-			if(__NFUN_130__(__NFUN_129__(InGodMode()), __NFUN_179__(fDistanceFallen, 300.0000000)))
+			if(((!InGodMode()) && (fDistanceFallen >= 300.0000000)))
 			{
 				m_eHealth = 1;
 				m_fHBWound = 1.2000000;
 				// End:0x333
-				if(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_119__(Controller, none)))
+				if(((int(Role) == int(ROLE_Authority)) && (Controller != none)))
 				{
 					Controller.PlaySoundDamage(self);
 				}
@@ -3087,21 +3087,21 @@ event Landed(Vector HitNormal)
 		}
 	}
 	// End:0x382
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		PlayerReplicationInfo.m_iHealth = int(m_eHealth);
 	}
 	// End:0x41F
-	if(__NFUN_155__(int(ePreviousHealth), int(m_eHealth)))
+	if((int(ePreviousHealth) != int(m_eHealth)))
 	{
 		// End:0x41F
-		if(__NFUN_154__(int(m_ePawnType), int(1)))
+		if((int(m_ePawnType) == int(1)))
 		{
 			// End:0x3E8
 			if(m_bIsPlayer)
 			{
 				// End:0x3E5
-				if(__NFUN_119__(R6PlayerController(Controller).m_TeamManager, none))
+				if((R6PlayerController(Controller).m_TeamManager != none))
 				{
 					R6PlayerController(Controller).m_TeamManager.UpdateTeamStatus(self);
 				}				
@@ -3109,7 +3109,7 @@ event Landed(Vector HitNormal)
 			else
 			{
 				// End:0x41F
-				if(__NFUN_119__(R6RainbowAI(Controller).m_TeamManager, none))
+				if((R6RainbowAI(Controller).m_TeamManager != none))
 				{
 					R6RainbowAI(Controller).m_TeamManager.UpdateTeamStatus(self);
 				}
@@ -3128,12 +3128,12 @@ event Landed(Vector HitNormal)
 simulated event PlayLandingAnimation(float impactVel)
 {
 	// End:0x12
-	if(__NFUN_154__(int(m_eHealth), int(3)))
+	if((int(m_eHealth) == int(3)))
 	{
 		return;
 	}
 	// End:0x36
-	if(__NFUN_176__(__NFUN_175__(m_fFallingHeight, Location.Z), float(128)))
+	if(((m_fFallingHeight - Location.Z) < float(128)))
 	{
 		m_bIsLanding = false;
 		return;
@@ -3142,7 +3142,7 @@ simulated event PlayLandingAnimation(float impactVel)
 	m_fFallingHeight = 0.0000000;
 	m_ePlayerIsUsingHands = 3;
 	// End:0x67
-	if(__NFUN_154__(int(m_eHealth), int(1)))
+	if((int(m_eHealth) == int(1)))
 	{
 		ChangeAnimation();
 	}
@@ -3151,11 +3151,11 @@ simulated event PlayLandingAnimation(float impactVel)
 	// End:0xA4
 	if(bWantsToCrouch)
 	{
-		__NFUN_259__(m_crouchLandName, 1.5000000, 0.1000000, 1);		
+		PlayAnim(m_crouchLandName, 1.5000000, 0.1000000, 1);		
 	}
 	else
 	{
-		__NFUN_259__(m_standLandName, 1.5000000, 0.1000000, 1);
+		PlayAnim(m_standLandName, 1.5000000, 0.1000000, 1);
 	}
 	return;
 }
@@ -3173,17 +3173,17 @@ singular event BaseChange()
 		return;
 	}
 	// End:0x30
-	if(__NFUN_130__(__NFUN_114__(Base, none), __NFUN_154__(int(Physics), int(0))))
+	if(((Base == none) && (int(Physics) == int(0))))
 	{
-		__NFUN_3970__(2);		
+		SetPhysics(2);		
 	}
 	else
 	{
 		// End:0x7D
-		if(__NFUN_132__(__NFUN_119__(Pawn(Base), none), __NFUN_119__(R6ColBox(Base), none)))
+		if(((Pawn(Base) != none) || (R6ColBox(Base) != none)))
 		{
 			// End:0x7D
-			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			if((int(Level.NetMode) != int(NM_Client)))
 			{
 				R6JumpOffPawn();
 				Falling();
@@ -3203,27 +3203,27 @@ function R6JumpOffPawn()
 	local int i;
 
 	i = 200;
-	__NFUN_223__(Velocity, __NFUN_213__(float(i), __NFUN_252__()));
+	(Velocity += (float(i) * VRand()));
 	// End:0x53
-	if(__NFUN_176__(Velocity.X, float(0)))
+	if((Velocity.X < float(0)))
 	{
-		Velocity.X = __NFUN_171__(float(__NFUN_146__(__NFUN_167__(i), i)), float(-1));		
+		Velocity.X = (float((Rand(i) + i)) * float(-1));		
 	}
 	else
 	{
-		Velocity.X = float(__NFUN_146__(__NFUN_167__(i), i));
+		Velocity.X = float((Rand(i) + i));
 	}
 	// End:0xA7
-	if(__NFUN_176__(Velocity.Y, float(0)))
+	if((Velocity.Y < float(0)))
 	{
-		Velocity.Y = __NFUN_171__(float(__NFUN_146__(__NFUN_167__(i), i)), float(-1));		
+		Velocity.Y = (float((Rand(i) + i)) * float(-1));		
 	}
 	else
 	{
-		Velocity.Y = float(__NFUN_146__(__NFUN_167__(i), i));
+		Velocity.Y = float((Rand(i) + i));
 	}
 	Velocity.Z = 25.0000000;
-	__NFUN_3970__(2);
+	SetPhysics(2);
 	bNoJumpAdjust = true;
 	Controller.SetFall();
 	return;
@@ -3289,7 +3289,7 @@ simulated event PlayCrouchToProne(optional bool bForcedByClient)
 	local Vector vHitLocation, vHitNormal, vPositionEnd;
 
 	// End:0x3A
-	if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_129__(bForcedByClient)), __NFUN_154__(int(Role), int(ROLE_AutonomousProxy))))
+	if((((int(Level.NetMode) == int(NM_Client)) && (!bForcedByClient)) && (int(Role) == int(ROLE_AutonomousProxy))))
 	{
 		return;
 	}
@@ -3298,20 +3298,20 @@ simulated event PlayCrouchToProne(optional bool bForcedByClient)
 	m_bPostureTransition = true;
 	m_bSoundChangePosture = true;
 	vPositionEnd = Location;
-	__NFUN_185__(vPositionEnd.Z, CollisionHeight);
-	__NFUN_185__(vPositionEnd.Z, float(50));
-	__NFUN_1806__(vHitLocation, vHitNormal, vPositionEnd, Location, 8,, m_HitMaterial);
+	(vPositionEnd.Z -= CollisionHeight);
+	(vPositionEnd.Z -= float(50));
+	R6Trace(vHitLocation, vHitNormal, vPositionEnd, Location, 8,, m_HitMaterial);
 	PlaySurfaceSwitch();
 	AnimBlendParams(1, 1.0000000, 0.0000000, 0.0000000);
 	// End:0x11E
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(EngineWeapon, none), __NFUN_154__(int(m_ePawnType), int(1))), EngineWeapon.GotBipod()))
+	if((((EngineWeapon != none) && (int(m_ePawnType) == int(1))) && EngineWeapon.GotBipod()))
 	{
-		EngineWeapon.__NFUN_113__('DeployBipod');
-		__NFUN_259__('CrouchToProneBipod', __NFUN_171__(1.4000000, ArmorSkillEffect()), 0.1000000, 1);		
+		EngineWeapon.GotoState('DeployBipod');
+		PlayAnim('CrouchToProneBipod', (1.4000000 * ArmorSkillEffect()), 0.1000000, 1);		
 	}
 	else
 	{
-		__NFUN_259__('CrouchToProne', __NFUN_171__(1.4000000, ArmorSkillEffect()), 0.1000000, 1);
+		PlayAnim('CrouchToProne', (1.4000000 * ArmorSkillEffect()), 0.1000000, 1);
 	}
 	return;
 }
@@ -3321,7 +3321,7 @@ simulated event PlayProneToCrouch(optional bool bForcedByClient)
 	local Vector vHitLocation, vHitNormal, vPositionEnd;
 
 	// End:0x3A
-	if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_129__(bForcedByClient)), __NFUN_154__(int(Role), int(ROLE_AutonomousProxy))))
+	if((((int(Level.NetMode) == int(NM_Client)) && (!bForcedByClient)) && (int(Role) == int(ROLE_AutonomousProxy))))
 	{
 		return;
 	}
@@ -3332,20 +3332,20 @@ simulated event PlayProneToCrouch(optional bool bForcedByClient)
 	m_bPostureTransition = true;
 	m_bSoundChangePosture = true;
 	vPositionEnd = Location;
-	__NFUN_185__(vPositionEnd.Z, CollisionHeight);
-	__NFUN_185__(vPositionEnd.Z, float(50));
-	__NFUN_1806__(vHitLocation, vHitNormal, vPositionEnd, Location, 8,, m_HitMaterial);
+	(vPositionEnd.Z -= CollisionHeight);
+	(vPositionEnd.Z -= float(50));
+	R6Trace(vHitLocation, vHitNormal, vPositionEnd, Location, 8,, m_HitMaterial);
 	PlaySurfaceSwitch();
 	AnimBlendParams(1, 1.0000000, 0.0000000, 0.0000000);
 	// End:0x165
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(EngineWeapon, none), __NFUN_154__(int(m_ePawnType), int(1))), EngineWeapon.GotBipod()))
+	if((((EngineWeapon != none) && (int(m_ePawnType) == int(1))) && EngineWeapon.GotBipod()))
 	{
-		EngineWeapon.__NFUN_113__('CloseBipod');
-		__NFUN_259__('CrouchToProneBipod', __NFUN_171__(1.4000000, ArmorSkillEffect()), 0.0000000, 1, true);		
+		EngineWeapon.GotoState('CloseBipod');
+		PlayAnim('CrouchToProneBipod', (1.4000000 * ArmorSkillEffect()), 0.0000000, 1, true);		
 	}
 	else
 	{
-		__NFUN_259__('CrouchToProne', __NFUN_171__(1.4000000, ArmorSkillEffect()), 0.0000000, 1, true);
+		PlayAnim('CrouchToProne', (1.4000000 * ArmorSkillEffect()), 0.0000000, 1, true);
 	}
 	return;
 }
@@ -3367,7 +3367,7 @@ event StartCrawl()
 {
 	Visibility = 38;
 	// End:0x2C
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		SetNextPendingAction();		
 	}
@@ -3382,7 +3382,7 @@ event EndCrawl()
 {
 	Visibility = 64;
 	// End:0x2C
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		SetNextPendingAction();		
 	}
@@ -3399,27 +3399,27 @@ function ServerGod(bool bIsGod, bool bUpdateTeam, bool bForHostage, string szPla
 	local string szMsg;
 
 	// End:0xA1
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bUpdateTeam), __NFUN_129__(bForHostage)), __NFUN_129__(bForTerro)))
+	if((((!bUpdateTeam) && (!bForHostage)) && (!bForTerro)))
 	{
 		Controller.bGodMode = bIsGod;
 		// End:0x7A
 		if(Controller.bGodMode)
 		{
-			szMsg = __NFUN_112__(szPlayerName, " activated GOD mode");
+			szMsg = (szPlayerName $ " activated GOD mode");
 			m_eHealth = 0;			
 		}
 		else
 		{
-			szMsg = __NFUN_112__(szPlayerName, " deactivated GOD mode");
+			szMsg = (szPlayerName $ " deactivated GOD mode");
 		}		
 	}
 	else
 	{
 		// End:0x21D
-		foreach __NFUN_304__(Class'R6Engine.R6Pawn', P)
+		foreach AllActors(Class'R6Engine.R6Pawn', P)
 		{
 			// End:0xC9
-			if(__NFUN_129__(P.IsAlive()))
+			if((!P.IsAlive()))
 			{
 				continue;				
 			}
@@ -3427,11 +3427,11 @@ function ServerGod(bool bIsGod, bool bUpdateTeam, bool bForHostage, string szPla
 			if(bForTerro)
 			{
 				// End:0xEF
-				if(__NFUN_155__(int(P.m_ePawnType), int(2)))
+				if((int(P.m_ePawnType) != int(2)))
 				{
 					continue;					
 				}
-				bIsGod = __NFUN_129__(P.Controller.bGodMode);				
+				bIsGod = (!P.Controller.bGodMode);				
 			}
 			else
 			{
@@ -3439,23 +3439,23 @@ function ServerGod(bool bIsGod, bool bUpdateTeam, bool bForHostage, string szPla
 				if(bForHostage)
 				{
 					// End:0x139
-					if(__NFUN_155__(int(P.m_ePawnType), int(3)))
+					if((int(P.m_ePawnType) != int(3)))
 					{
 						continue;						
 					}
-					bIsGod = __NFUN_129__(P.Controller.bGodMode);					
+					bIsGod = (!P.Controller.bGodMode);					
 				}
 				else
 				{
 					// End:0x17D
-					if(__NFUN_155__(int(P.m_ePawnType), int(1)))
+					if((int(P.m_ePawnType) != int(1)))
 					{
 						continue;												
 					}
 					else
 					{
 						// End:0x1BD
-						if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_155__(P.m_iTeam, P.m_iTeam)))
+						if(((int(Level.NetMode) != int(NM_Standalone)) && (P.m_iTeam != P.m_iTeam)))
 						{
 							continue;							
 						}
@@ -3463,7 +3463,7 @@ function ServerGod(bool bIsGod, bool bUpdateTeam, bool bForHostage, string szPla
 				}
 			}
 			// End:0x21C
-			if(__NFUN_119__(P.Controller, none))
+			if((P.Controller != none))
 			{
 				P.Controller.bGodMode = bIsGod;
 				// End:0x21C
@@ -3479,11 +3479,11 @@ function ServerGod(bool bIsGod, bool bUpdateTeam, bool bForHostage, string szPla
 			// End:0x25F
 			if(bIsGod)
 			{
-				szMsg = __NFUN_112__(szPlayerName, " activated TERRORIST GOD mode");				
+				szMsg = (szPlayerName $ " activated TERRORIST GOD mode");				
 			}
 			else
 			{
-				szMsg = __NFUN_112__(szPlayerName, " deactivated TERRORIST GOD mode");
+				szMsg = (szPlayerName $ " deactivated TERRORIST GOD mode");
 			}			
 		}
 		else
@@ -3494,11 +3494,11 @@ function ServerGod(bool bIsGod, bool bUpdateTeam, bool bForHostage, string szPla
 				// End:0x2CF
 				if(bIsGod)
 				{
-					szMsg = __NFUN_112__(szPlayerName, " activated HOSTAGE GOD mode");					
+					szMsg = (szPlayerName $ " activated HOSTAGE GOD mode");					
 				}
 				else
 				{
-					szMsg = __NFUN_112__(szPlayerName, " deactivated HOSTAGE GOD mode");
+					szMsg = (szPlayerName $ " deactivated HOSTAGE GOD mode");
 				}				
 			}
 			else
@@ -3506,11 +3506,11 @@ function ServerGod(bool bIsGod, bool bUpdateTeam, bool bForHostage, string szPla
 				// End:0x331
 				if(bIsGod)
 				{
-					szMsg = __NFUN_112__(szPlayerName, " activated TEAM GOD mode");					
+					szMsg = (szPlayerName $ " activated TEAM GOD mode");					
 				}
 				else
 				{
-					szMsg = __NFUN_112__(szPlayerName, " deactivated TEAM GOD mode");
+					szMsg = (szPlayerName $ " deactivated TEAM GOD mode");
 				}
 			}
 		}
@@ -3533,27 +3533,27 @@ function ServerSuicidePawn(byte bSuicidedType)
 	m_bSuicideType = bSuicidedType;
 	Velocity = vect(0.0000000, 0.0000000, 0.0000000);
 	Acceleration = vect(0.0000000, 0.0000000, 0.0000000);
-	m_fFallingHeight = __NFUN_174__(Location.Z, float(1000));
+	m_fFallingHeight = (Location.Z + float(1000));
 	Landed(vect(0.0000000, 0.0000000, 0.0000000));
 	return;
 }
 
 function ServerSetRoundTime(int iTime)
 {
-	Level.Game.Broadcast(none, __NFUN_112__(__NFUN_112__("ServerSetRoundTime: ", string(iTime)), " seconds"), 'ServerMessage');
+	Level.Game.Broadcast(none, (("ServerSetRoundTime: " $ string(iTime)) $ " seconds"), 'ServerMessage');
 	// End:0x96
-	if(__NFUN_119__(R6AbstractGameInfo(Level.Game), none))
+	if((R6AbstractGameInfo(Level.Game) != none))
 	{
-		R6AbstractGameInfo(Level.Game).m_fEndingTime = __NFUN_174__(Level.TimeSeconds, float(iTime));
+		R6AbstractGameInfo(Level.Game).m_fEndingTime = (Level.TimeSeconds + float(iTime));
 	}
 	return;
 }
 
 function ServerSetBetTime(int iTime)
 {
-	Level.Game.Broadcast(none, __NFUN_112__(__NFUN_112__("ServerSetBetTime: ", string(iTime)), " seconds"), 'ServerMessage');
+	Level.Game.Broadcast(none, (("ServerSetBetTime: " $ string(iTime)) $ " seconds"), 'ServerMessage');
 	// End:0x84
-	if(__NFUN_119__(R6AbstractGameInfo(Level.Game), none))
+	if((R6AbstractGameInfo(Level.Game) != none))
 	{
 		R6AbstractGameInfo(Level.Game).m_fTimeBetRounds = float(iTime);
 	}
@@ -3568,8 +3568,8 @@ function ServerToggleCollision()
 {
 	local bool bValue;
 
-	bValue = __NFUN_129__(bCollideActors);
-	__NFUN_262__(bValue, bValue, bValue);
+	bValue = (!bCollideActors);
+	SetCollision(bValue, bValue, bValue);
 	return;
 }
 
@@ -3577,7 +3577,7 @@ function ServerSwitchReloadingWeapon(bool NewValue)
 {
 	m_bReloadingWeapon = NewValue;
 	// End:0x24
-	if(__NFUN_242__(m_bReloadingWeapon, false))
+	if((m_bReloadingWeapon == false))
 	{
 		m_WeaponAnimPlaying = 'None';
 	}
@@ -3600,11 +3600,11 @@ function bool PawnHaveFinishedRotation()
 {
 	local bool bSuccess;
 
-	bSuccess = __NFUN_176__(__NFUN_186__(float(__NFUN_147__(DesiredRotation.Yaw, __NFUN_156__(Rotation.Yaw, 65535)))), float(2000));
+	bSuccess = (Abs(float((DesiredRotation.Yaw - (Rotation.Yaw & 65535)))) < float(2000));
 	// End:0x6D
-	if(__NFUN_129__(bSuccess))
+	if((!bSuccess))
 	{
-		bSuccess = __NFUN_177__(__NFUN_186__(float(__NFUN_147__(DesiredRotation.Yaw, __NFUN_156__(Rotation.Yaw, 65535)))), float(63535));
+		bSuccess = (Abs(float((DesiredRotation.Yaw - (Rotation.Yaw & 65535)))) > float(63535));
 	}
 	return bSuccess;
 	return;
@@ -3616,7 +3616,7 @@ function bool PawnHaveFinishedRotation()
 function bool CanInteractWithObjects()
 {
 	// End:0x40
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_bIsProne, m_bChangingWeapon), m_bReloadingWeapon), m_bIsFiringState), Level.m_bInGamePlanningActive))
+	if(((((m_bIsProne || m_bChangingWeapon) || m_bReloadingWeapon) || m_bIsFiringState) || Level.m_bInGamePlanningActive))
 	{
 		return false;
 	}
@@ -3628,12 +3628,12 @@ function bool CanInteractWithObjects()
 simulated function ServerActionRequest(R6CircumstantialActionQuery actionRequested)
 {
 	// End:0x23
-	if(__NFUN_132__(__NFUN_129__(m_bIsPlayer), __NFUN_114__(actionRequested.aQueryTarget, none)))
+	if(((!m_bIsPlayer) || (actionRequested.aQueryTarget == none)))
 	{
 		return;
 	}
 	// End:0x89
-	if(actionRequested.aQueryTarget.__NFUN_303__('R6IORotatingDoor'))
+	if(actionRequested.aQueryTarget.IsA('R6IORotatingDoor'))
 	{
 		actionRequested.aQueryTarget.Instigator = self;
 		R6IORotatingDoor(actionRequested.aQueryTarget).performDoorAction(int(actionRequested.iPlayerActionID));		
@@ -3641,24 +3641,24 @@ simulated function ServerActionRequest(R6CircumstantialActionQuery actionRequest
 	else
 	{
 		// End:0xC7
-		if(actionRequested.aQueryTarget.__NFUN_303__('R6IOObject'))
+		if(actionRequested.aQueryTarget.IsA('R6IOObject'))
 		{
 			R6IOObject(actionRequested.aQueryTarget).ToggleDevice(self);			
 		}
 		else
 		{
 			// End:0x11E
-			if(actionRequested.aQueryTarget.__NFUN_303__('R6Hostage'))
+			if(actionRequested.aQueryTarget.IsA('R6Hostage'))
 			{
 				R6Hostage(actionRequested.aQueryTarget).m_controller.DispatchOrder(int(actionRequested.iPlayerActionID), self);				
 			}
 			else
 			{
 				// End:0x178
-				if(actionRequested.aQueryTarget.__NFUN_303__('R6LadderVolume'))
+				if(actionRequested.aQueryTarget.IsA('R6LadderVolume'))
 				{
 					// End:0x178
-					if(__NFUN_129__(m_bIsClimbingLadder))
+					if((!m_bIsClimbingLadder))
 					{
 						PotentialClimbLadder(LadderVolume(actionRequested.aQueryTarget));
 						ClimbLadder(LadderVolume(actionRequested.aQueryTarget));
@@ -3673,29 +3673,29 @@ simulated function ServerActionRequest(R6CircumstantialActionQuery actionRequest
 simulated function ActionRequest(R6CircumstantialActionQuery actionRequested)
 {
 	// End:0x30
-	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(m_bIsPlayer), __NFUN_114__(actionRequested, none)), __NFUN_114__(actionRequested.aQueryTarget, none)))
+	if((((!m_bIsPlayer) || (actionRequested == none)) || (actionRequested.aQueryTarget == none)))
 	{
 		return;
 	}
 	ServerActionRequest(actionRequested);
 	// End:0x74
-	if(actionRequested.aQueryTarget.__NFUN_303__('R6IORotatingDoor'))
+	if(actionRequested.aQueryTarget.IsA('R6IORotatingDoor'))
 	{
 		PlayDoorAnim(R6IORotatingDoor(actionRequested.aQueryTarget));		
 	}
 	else
 	{
 		// End:0xB3
-		if(__NFUN_132__(actionRequested.aQueryTarget.__NFUN_303__('R6IOObject'), actionRequested.aQueryTarget.__NFUN_303__('R6Hostage')))
+		if((actionRequested.aQueryTarget.IsA('R6IOObject') || actionRequested.aQueryTarget.IsA('R6Hostage')))
 		{			
 		}
 		else
 		{
 			// End:0x128
-			if(actionRequested.aQueryTarget.__NFUN_303__('R6LadderVolume'))
+			if(actionRequested.aQueryTarget.IsA('R6LadderVolume'))
 			{
 				// End:0x128
-				if(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_Client)), __NFUN_129__(m_bIsClimbingLadder)))
+				if(((int(Level.NetMode) == int(NM_Client)) && (!m_bIsClimbingLadder)))
 				{
 					PotentialClimbLadder(LadderVolume(actionRequested.aQueryTarget));
 					ClimbLadder(LadderVolume(actionRequested.aQueryTarget));
@@ -3741,10 +3741,10 @@ function bool IsTouching(R6Door Door)
 	local R6Door aDoor;
 
 	// End:0x23
-	foreach __NFUN_307__(Class'R6Engine.R6Door', aDoor)
+	foreach TouchingActors(Class'R6Engine.R6Door', aDoor)
 	{
 		// End:0x22
-		if(__NFUN_114__(Door, aDoor))
+		if((Door == aDoor))
 		{			
 			return true;
 		}		
@@ -3759,15 +3759,15 @@ function bool IsTouching(R6Door Door)
 event PotentialOpenDoor(R6Door Door)
 {
 	// End:0x16
-	if(__NFUN_114__(Door.m_RotatingDoor, none))
+	if((Door.m_RotatingDoor == none))
 	{
 		return;
 	}
 	// End:0x50
-	if(__NFUN_119__(m_Door, none))
+	if((m_Door != none))
 	{
 		// End:0x4D
-		if(__NFUN_119__(m_Door.m_RotatingDoor, Door.m_RotatingDoor))
+		if((m_Door.m_RotatingDoor != Door.m_RotatingDoor))
 		{
 			m_Door2 = Door;
 		}		
@@ -3778,13 +3778,13 @@ event PotentialOpenDoor(R6Door Door)
 		m_potentialActionActor = Door.m_RotatingDoor;
 	}
 	// End:0x112
-	if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), Door.m_RotatingDoor.m_bIsDoorClosed), __NFUN_129__(Door.m_RotatingDoor.m_bTreatDoorAsWindow)))
+	if((((int(m_ePawnType) == int(1)) && Door.m_RotatingDoor.m_bIsDoorClosed) && (!Door.m_RotatingDoor.m_bTreatDoorAsWindow)))
 	{
 		// End:0x112
 		if(m_bIsPlayer)
 		{
 			// End:0x112
-			if(__NFUN_130__(__NFUN_119__(R6PlayerController(Controller), none), __NFUN_119__(R6PlayerController(Controller).m_TeamManager, none)))
+			if(((R6PlayerController(Controller) != none) && (R6PlayerController(Controller).m_TeamManager != none)))
 			{
 				R6PlayerController(Controller).m_TeamManager.RainbowIsInFrontOfAClosedDoor(self, m_Door);
 			}
@@ -3799,7 +3799,7 @@ event PotentialOpenDoor(R6Door Door)
 event RemovePotentialOpenDoor(R6Door Door)
 {
 	// End:0xC8
-	if(__NFUN_114__(m_Door, Door))
+	if((m_Door == Door))
 	{
 		// End:0x51
 		if(IsTouching(Door.m_CorrespondingDoor))
@@ -3810,14 +3810,14 @@ event RemovePotentialOpenDoor(R6Door Door)
 		else
 		{
 			// End:0x86
-			if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(2)), __NFUN_119__(Controller, none)), Controller.__NFUN_281__('OpenDoor')))
+			if((((int(m_ePawnType) == int(2)) && (Controller != none)) && Controller.IsInState('OpenDoor')))
 			{
 				return;
 			}
 			m_potentialActionActor = none;
 			m_Door = none;
 			// End:0xC5
-			if(__NFUN_119__(m_Door2, none))
+			if((m_Door2 != none))
 			{
 				m_Door = m_Door2;
 				m_Door2 = none;
@@ -3828,7 +3828,7 @@ event RemovePotentialOpenDoor(R6Door Door)
 	else
 	{
 		// End:0xE1
-		if(__NFUN_114__(m_Door2, Door))
+		if((m_Door2 == Door))
 		{
 			m_Door2 = none;			
 		}
@@ -3838,7 +3838,7 @@ event RemovePotentialOpenDoor(R6Door Door)
 		}
 	}
 	// End:0x132
-	if(__NFUN_130__(__NFUN_130__(m_bIsPlayer, __NFUN_119__(Controller, none)), __NFUN_119__(R6PlayerController(Controller).m_TeamManager, none)))
+	if(((m_bIsPlayer && (Controller != none)) && (R6PlayerController(Controller).m_TeamManager != none)))
 	{
 		R6PlayerController(Controller).m_TeamManager.RainbowHasLeftDoor(self);
 	}
@@ -3866,11 +3866,11 @@ simulated function PlayDoorAnim(R6IORotatingDoor Door)
 		// End:0x65
 		if(bOpensTowardsPawn)
 		{
-			__NFUN_259__('StandDoorPull', 1.0000000, 0.2000000);			
+			PlayAnim('StandDoorPull', 1.0000000, 0.2000000);			
 		}
 		else
 		{
-			__NFUN_259__('StandDoorPush', 1.0000000, 0.2000000);
+			PlayAnim('StandDoorPush', 1.0000000, 0.2000000);
 		}		
 	}
 	else
@@ -3878,11 +3878,11 @@ simulated function PlayDoorAnim(R6IORotatingDoor Door)
 		// End:0x98
 		if(bOpensTowardsPawn)
 		{
-			__NFUN_259__('StandDoorPush', 1.0000000, 0.2000000);			
+			PlayAnim('StandDoorPush', 1.0000000, 0.2000000);			
 		}
 		else
 		{
-			__NFUN_259__('StandDoorPull', 1.0000000, 0.2000000);
+			PlayAnim('StandDoorPull', 1.0000000, 0.2000000);
 		}
 	}
 	return;
@@ -3903,11 +3903,11 @@ simulated function PlayCrouchedDoorAnim(R6IORotatingDoor Door)
 		// End:0x4F
 		if(bOpensTowardsPawn)
 		{
-			__NFUN_259__('CrouchDoorPull', 1.0000000, 0.2000000);			
+			PlayAnim('CrouchDoorPull', 1.0000000, 0.2000000);			
 		}
 		else
 		{
-			__NFUN_259__('CrouchDoorPush', 1.0000000, 0.2000000);
+			PlayAnim('CrouchDoorPush', 1.0000000, 0.2000000);
 		}		
 	}
 	else
@@ -3915,11 +3915,11 @@ simulated function PlayCrouchedDoorAnim(R6IORotatingDoor Door)
 		// End:0x82
 		if(bOpensTowardsPawn)
 		{
-			__NFUN_259__('CrouchDoorPush', 1.0000000, 0.2000000);			
+			PlayAnim('CrouchDoorPush', 1.0000000, 0.2000000);			
 		}
 		else
 		{
-			__NFUN_259__('CrouchDoorPull', 1.0000000, 0.2000000);
+			PlayAnim('CrouchDoorPull', 1.0000000, 0.2000000);
 		}
 	}
 	return;
@@ -3933,12 +3933,12 @@ simulated function PlayCrouchedDoorAnim(R6IORotatingDoor Door)
 function Ladder LocateLadderActor(LadderVolume L)
 {
 	// End:0x0D
-	if(__NFUN_114__(L, none))
+	if((L == none))
 	{
 		return none;
 	}
 	// End:0x73
-	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(R6LadderVolume(L).m_TopLadder.Location, Location)), __NFUN_225__(__NFUN_216__(R6LadderVolume(L).m_BottomLadder.Location, Location))))
+	if((VSize((R6LadderVolume(L).m_TopLadder.Location - Location)) < VSize((R6LadderVolume(L).m_BottomLadder.Location - Location))))
 	{
 		return R6LadderVolume(L).m_TopLadder;		
 	}
@@ -3952,7 +3952,7 @@ function Ladder LocateLadderActor(LadderVolume L)
 function ServerClimbLadder(LadderVolume L, R6Ladder Ladder)
 {
 	// End:0x11
-	if(__NFUN_114__(OnLadder, L))
+	if((OnLadder == L))
 	{
 		return;
 	}
@@ -3974,45 +3974,45 @@ function ClimbLadder(LadderVolume L)
 		return;
 	}
 	// End:0x1D
-	if(__NFUN_154__(int(Physics), int(2)))
+	if((int(Physics) == int(2)))
 	{
 		return;
 	}
 	OnLadder = L;
 	// End:0x49
-	if(__NFUN_114__(m_Ladder, none))
+	if((m_Ladder == none))
 	{
 		m_Ladder = R6Ladder(LocateLadderActor(L));
 	}
 	// End:0x72
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		ServerClimbLadder(L, m_Ladder);
 	}
 	// End:0xF2
 	if(m_Ladder.m_bIsTopOfLadder)
 	{
-		vStartPosition = __NFUN_215__(m_Ladder.Location, __NFUN_213__(float(50), Vector(OnLadder.LadderList.Rotation)));
+		vStartPosition = (m_Ladder.Location + (float(50) * Vector(OnLadder.LadderList.Rotation)));
 		vStartPosition.Z = Location.Z;
-		__NFUN_299__(__NFUN_316__(m_Ladder.Rotation, rot(0, 32768, 0)));		
+		SetRotation((m_Ladder.Rotation + rot(0, 32768, 0)));		
 	}
 	else
 	{
 		vStartPosition = m_Ladder.Location;
 		vStartPosition.Z = Location.Z;
-		__NFUN_299__(m_Ladder.Rotation);
+		SetRotation(m_Ladder.Rotation);
 	}
-	__NFUN_267__(vStartPosition);
-	__NFUN_3970__(11);
+	SetLocation(vStartPosition);
+	SetPhysics(11);
 	R6LadderVolume(L).AddClimber(self);
 	// End:0x16F
 	if(m_bIsPlayer)
 	{
-		R6PlayerController(Controller).__NFUN_113__('PreBeginClimbingLadder');		
+		R6PlayerController(Controller).GotoState('PreBeginClimbingLadder');		
 	}
 	else
 	{
-		R6AIController(Controller).__NFUN_113__('BeginClimbingLadder');
+		R6AIController(Controller).GotoState('BeginClimbingLadder');
 	}
 	return;
 }
@@ -4024,12 +4024,12 @@ simulated function PlayStartClimbing()
 	AnimBlendToAlpha(16, 0.0000000, 0.5000000);
 	m_bSlideEnd = false;
 	// End:0x74
-	if(__NFUN_114__(m_Ladder, none))
+	if((m_Ladder == none))
 	{
-		logWarning(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("PlayStartClimbing() ", string(self)), " m_Ladder="), string(m_Ladder)), " onLadder="), string(OnLadder)));
+		logWarning(((((("PlayStartClimbing() " $ string(self)) $ " m_Ladder=") $ string(m_Ladder)) $ " onLadder=") $ string(OnLadder)));
 	}
 	// End:0xA1
-	if(__NFUN_130__(__NFUN_119__(m_Ladder, none), m_Ladder.m_bIsTopOfLadder))
+	if(((m_Ladder != none) && m_Ladder.m_bIsTopOfLadder))
 	{
 		animName = 'StandLadderDown_b';		
 	}
@@ -4038,19 +4038,19 @@ simulated function PlayStartClimbing()
 		animName = 'StandLadderUp_b';
 	}
 	m_ePlayerIsUsingHands = 3;
-	PlayRootMotionAnimation(animName, __NFUN_171__(ArmorSkillEffect(), 1.5000000));
+	PlayRootMotionAnimation(animName, (ArmorSkillEffect() * 1.5000000));
 	return;
 }
 
 simulated function bool EndOfLadderSlide()
 {
 	// End:0x0D
-	if(__NFUN_114__(m_Ladder, none))
+	if((m_Ladder == none))
 	{
 		return false;
 	}
 	// End:0x3B
-	if(__NFUN_177__(__NFUN_175__(Location.Z, CollisionHeight), m_Ladder.Location.Z))
+	if(((Location.Z - CollisionHeight) > m_Ladder.Location.Z))
 	{
 		return false;		
 	}
@@ -4066,7 +4066,7 @@ simulated function PlayEndClimbing()
 	local name animName;
 
 	// End:0x12
-	if(__NFUN_154__(int(Physics), int(1)))
+	if((int(Physics) == int(1)))
 	{
 		return;
 	}
@@ -4074,20 +4074,20 @@ simulated function PlayEndClimbing()
 	if(m_Ladder.m_bIsTopOfLadder)
 	{
 		m_ePlayerIsUsingHands = 3;
-		PlayRootMotionAnimation('StandLadderUp_e', __NFUN_171__(ArmorSkillEffect(), 1.5000000));		
+		PlayRootMotionAnimation('StandLadderUp_e', (ArmorSkillEffect() * 1.5000000));		
 	}
 	else
 	{
 		// End:0x87
-		if(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), EndOfLadderSlide()))
+		if(((int(m_ePawnType) == int(1)) && EndOfLadderSlide()))
 		{
 			m_bSlideEnd = true;
-			__NFUN_259__('StandLadderSlide_e', __NFUN_171__(1.5000000, ArmorSkillEffect()), 0.0000000);			
+			PlayAnim('StandLadderSlide_e', (1.5000000 * ArmorSkillEffect()), 0.0000000);			
 		}
 		else
 		{
 			m_ePlayerIsUsingHands = 3;
-			PlayRootMotionAnimation('StandLadderDown_e', __NFUN_171__(ArmorSkillEffect(), 1.5000000));
+			PlayRootMotionAnimation('StandLadderDown_e', (ArmorSkillEffect() * 1.5000000));
 		}
 	}
 	return;
@@ -4098,7 +4098,7 @@ event EndClimbLadder(LadderVolume OldLadder)
 	local int iFacing;
 
 	// End:0x0D
-	if(__NFUN_114__(OnLadder, none))
+	if((OnLadder == none))
 	{
 		return;
 	}
@@ -4107,7 +4107,7 @@ event EndClimbLadder(LadderVolume OldLadder)
 	if(m_bIsPlayer)
 	{
 		// End:0x38
-		if(__NFUN_129__(m_bIsClimbingLadder))
+		if((!m_bIsClimbingLadder))
 		{
 			return;
 		}		
@@ -4115,9 +4115,9 @@ event EndClimbLadder(LadderVolume OldLadder)
 	else
 	{
 		// End:0x56
-		if(Controller.__NFUN_281__('EndClimbingLadder'))
+		if(Controller.IsInState('EndClimbingLadder'))
 		{
-			__NFUN_3970__(1);
+			SetPhysics(1);
 			return;
 		}
 	}
@@ -4125,15 +4125,15 @@ event EndClimbLadder(LadderVolume OldLadder)
 	if(m_bIsPlayer)
 	{
 		// End:0xA3
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			R6PlayerController(Controller).m_bSkipBeginState = false;
-			R6PlayerController(Controller).__NFUN_113__('PlayerEndClimbingLadder');
+			R6PlayerController(Controller).GotoState('PlayerEndClimbingLadder');
 		}		
 	}
 	else
 	{
-		R6AIController(Controller).__NFUN_113__('EndClimbingLadder');
+		R6AIController(Controller).GotoState('EndClimbingLadder');
 	}
 	return;
 }
@@ -4144,8 +4144,8 @@ event EndClimbLadder(LadderVolume OldLadder)
 //===================================================================================================
 simulated function ClimbStairs(Vector vStairDirection)
 {
-	__NFUN_185__(PrePivot.Z, 5.0000000);
-	__NFUN_185__(m_vPrePivotProneBackup.Z, 5.0000000);
+	(PrePivot.Z -= 5.0000000);
+	(m_vPrePivotProneBackup.Z -= 5.0000000);
 	m_vStairDirection = vStairDirection;
 	ChangeAnimation();
 	return;
@@ -4156,8 +4156,8 @@ simulated function ClimbStairs(Vector vStairDirection)
 //===================================================================================================
 simulated function EndClimbStairs()
 {
-	__NFUN_184__(PrePivot.Z, 5.0000000);
-	__NFUN_184__(m_vPrePivotProneBackup.Z, 5.0000000);
+	(PrePivot.Z += 5.0000000);
+	(m_vPrePivotProneBackup.Z += 5.0000000);
 	ChangeAnimation();
 	return;
 }
@@ -4165,12 +4165,12 @@ simulated function EndClimbStairs()
 simulated function bool IsUsingHeartBeatSensor()
 {
 	// End:0x0D
-	if(__NFUN_129__(m_bIsPlayer))
+	if((!m_bIsPlayer))
 	{
 		return false;
 	}
 	// End:0x2E
-	if(__NFUN_130__(__NFUN_119__(EngineWeapon, none), EngineWeapon.IsGoggles()))
+	if(((EngineWeapon != none) && EngineWeapon.IsGoggles()))
 	{
 		return true;
 	}
@@ -4185,7 +4185,7 @@ simulated function bool IsUsingHeartBeatSensor()
 simulated function bool GunShouldFollowHead()
 {
 	// End:0x1D
-	if(__NFUN_132__(__NFUN_154__(int(Physics), int(12)), m_bIsClimbingLadder))
+	if(((int(Physics) == int(12)) || m_bIsClimbingLadder))
 	{
 		return false;
 	}
@@ -4195,7 +4195,7 @@ simulated function bool GunShouldFollowHead()
 		return true;
 	}
 	// End:0x37
-	if(__NFUN_177__(m_fFiringTimer, float(0)))
+	if((m_fFiringTimer > float(0)))
 	{
 		return true;
 	}
@@ -4218,7 +4218,7 @@ simulated event AdjustPawnForDiagonalStrafing()
 	local int iOffset;
 
 	// End:0x18
-	if(__NFUN_132__(__NFUN_129__(m_bMovingDiagonally), m_bIsProne))
+	if(((!m_bMovingDiagonally) || m_bIsProne))
 	{
 		return;
 	}
@@ -4226,18 +4226,18 @@ simulated event AdjustPawnForDiagonalStrafing()
 	iOffset = 5825;
 	rBoneRotation.Yaw = iOffset;
 	// End:0xA8
-	if(__NFUN_132__(__NFUN_154__(int(m_eStrafeDirection), int(1)), __NFUN_154__(int(m_eStrafeDirection), int(4))))
+	if(((int(m_eStrafeDirection) == int(1)) || (int(m_eStrafeDirection) == int(4))))
 	{
 		SetBoneRotation('R6', rBoneRotation,, 1.0000000, 0.4000000);
-		rDirection.Yaw = __NFUN_143__(rBoneRotation.Yaw);
-		__NFUN_2214__(rDirection, true);		
+		rDirection.Yaw = (-rBoneRotation.Yaw);
+		PawnLook(rDirection, true);		
 	}
 	else
 	{
-		__NFUN_159__(rBoneRotation.Yaw, float(-1));
+		(rBoneRotation.Yaw *= float(-1));
 		SetBoneRotation('R6', rBoneRotation,, 1.0000000, 0.4000000);
-		rDirection.Yaw = __NFUN_143__(rBoneRotation.Yaw);
-		__NFUN_2214__(rDirection, true);
+		rDirection.Yaw = (-rBoneRotation.Yaw);
+		PawnLook(rDirection, true);
 	}
 	return;
 }
@@ -4260,29 +4260,29 @@ event TurnToFaceActor(Actor Target)
 	local Rotator rDesiredRotation;
 	local int iYawDiff;
 
-	rDesiredRotation = Rotator(__NFUN_216__(Target.Location, Location));
+	rDesiredRotation = Rotator((Target.Location - Location));
 	// End:0x41
-	if(__NFUN_150__(rDesiredRotation.Yaw, 0))
+	if((rDesiredRotation.Yaw < 0))
 	{
-		__NFUN_161__(rDesiredRotation.Yaw, 65536);		
+		(rDesiredRotation.Yaw += 65536);		
 	}
 	else
 	{
 		// End:0x62
-		if(__NFUN_150__(rDesiredRotation.Yaw, 0))
+		if((rDesiredRotation.Yaw < 0))
 		{
-			__NFUN_162__(rDesiredRotation.Yaw, 65536);
+			(rDesiredRotation.Yaw -= 65536);
 		}
 	}
-	iYawDiff = __NFUN_147__(rDesiredRotation.Yaw, Rotation.Yaw);
+	iYawDiff = (rDesiredRotation.Yaw - Rotation.Yaw);
 	// End:0xC8
-	if(__NFUN_132__(__NFUN_151__(iYawDiff, 32768), __NFUN_130__(__NFUN_151__(iYawDiff, -32768), __NFUN_150__(iYawDiff, 0))))
+	if(((iYawDiff > 32768) || ((iYawDiff > -32768) && (iYawDiff < 0))))
 	{
-		Controller.__NFUN_267__(Target.Location);		
+		Controller.SetLocation(Target.Location);		
 	}
 	else
 	{
-		Controller.__NFUN_267__(Target.Location);
+		Controller.SetLocation(Target.Location);
 	}
 	SetRotationOffset(0, 0, 0);
 	Controller.Focus = Controller;
@@ -4306,13 +4306,13 @@ function R6Pawn.eBodyPart WhichBodyPartWasHit(Vector vHitLocation, Vector vBulle
 	local int iHitDistanceFromGround;
 
 	// End:0x1E
-	if(__NFUN_155__(int(m_iTracedBone), 0))
+	if((int(m_iTracedBone) != 0))
 	{
 		return GetBodyPartFromBoneID(m_iTracedBone, vBulletDirection);
 	}
-	iHitDistanceFromGround = int(__NFUN_174__(__NFUN_175__(vHitLocation.Z, Location.Z), CollisionHeight));
+	iHitDistanceFromGround = int(((vHitLocation.Z - Location.Z) + CollisionHeight));
 	// End:0x72
-	if(__NFUN_177__(float(iHitDistanceFromGround), __NFUN_171__(__NFUN_171__(0.8000000, float(2)), CollisionHeight)))
+	if((float(iHitDistanceFromGround) > ((0.8000000 * float(2)) * CollisionHeight)))
 	{
 		CheckForHelmet(vBulletDirection);
 		return 0;		
@@ -4320,14 +4320,14 @@ function R6Pawn.eBodyPart WhichBodyPartWasHit(Vector vHitLocation, Vector vBulle
 	else
 	{
 		// End:0x96
-		if(__NFUN_177__(float(iHitDistanceFromGround), __NFUN_171__(__NFUN_171__(0.6000000, float(2)), CollisionHeight)))
+		if((float(iHitDistanceFromGround) > ((0.6000000 * float(2)) * CollisionHeight)))
 		{
 			return 1;			
 		}
 		else
 		{
 			// End:0xBA
-			if(__NFUN_177__(float(iHitDistanceFromGround), __NFUN_171__(__NFUN_171__(0.4500000, float(2)), CollisionHeight)))
+			if((float(iHitDistanceFromGround) > ((0.4500000 * float(2)) * CollisionHeight)))
 			{
 				return 2;				
 			}
@@ -4343,14 +4343,14 @@ function R6Pawn.eBodyPart WhichBodyPartWasHit(Vector vHitLocation, Vector vBulle
 function R6Pawn.eBodyPart GetBodyPartFromBoneID(byte iBone, Vector vBulletDirection)
 {
 	// End:0x34
-	if(__NFUN_132__(__NFUN_132__(__NFUN_152__(int(iBone), 5), __NFUN_154__(int(iBone), 15)), __NFUN_154__(int(iBone), 10)))
+	if((((int(iBone) <= 5) || (int(iBone) == 15)) || (int(iBone) == 10)))
 	{
 		return 1;		
 	}
 	else
 	{
 		// End:0x63
-		if(__NFUN_130__(__NFUN_153__(int(iBone), 6), __NFUN_152__(int(iBone), 9)))
+		if(((int(iBone) >= 6) && (int(iBone) <= 9)))
 		{
 			CheckForHelmet(vBulletDirection);
 			return 0;			
@@ -4358,7 +4358,7 @@ function R6Pawn.eBodyPart GetBodyPartFromBoneID(byte iBone, Vector vBulletDirect
 		else
 		{
 			// End:0x97
-			if(__NFUN_130__(__NFUN_130__(__NFUN_153__(int(iBone), 11), __NFUN_152__(int(iBone), 19)), __NFUN_155__(int(iBone), 15)))
+			if((((int(iBone) >= 11) && (int(iBone) <= 19)) && (int(iBone) != 15)))
 			{
 				return 4;				
 			}
@@ -4378,9 +4378,9 @@ function CheckForHelmet(Vector vBulletDirection)
 
 	rHeadRotator = GetBoneRotation('R6 Head');
 	rBulletRotator = Rotator(vBulletDirection);
-	iYawDiff = __NFUN_1851__(rBulletRotator.Yaw, rHeadRotator.Yaw);
+	iYawDiff = ShortestAngle2D(rBulletRotator.Yaw, rHeadRotator.Yaw);
 	// End:0x55
-	if(__NFUN_151__(iYawDiff, 24576))
+	if((iYawDiff > 24576))
 	{
 		m_bHelmetWasHit = false;		
 	}
@@ -4396,13 +4396,13 @@ function PlayerController GetHumanLeaderForAIPawn()
 	local R6RainbowTeam _TeamManager;
 
 	// End:0x12
-	if(__NFUN_114__(R6RainbowAI(Controller), none))
+	if((R6RainbowAI(Controller) == none))
 	{
 		return none;
 	}
 	_TeamManager = R6RainbowAI(Controller).m_TeamManager;
 	// End:0x6D
-	if(__NFUN_132__(__NFUN_132__(__NFUN_114__(_TeamManager, none), __NFUN_114__(_TeamManager.m_TeamLeader, none)), __NFUN_114__(_TeamManager.m_TeamLeader.Owner, none)))
+	if((((_TeamManager == none) || (_TeamManager.m_TeamLeader == none)) || (_TeamManager.m_TeamLeader.Owner == none)))
 	{
 		return none;
 	}
@@ -4426,12 +4426,12 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	local PlayerController _playerController;
 
 	// End:0x94
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(PlayerController(Controller), none), __NFUN_119__(PlayerController(Controller).GameReplicationInfo, none)), __NFUN_122__(PlayerController(Controller).GameReplicationInfo.m_szGameTypeFlagRep, "RGM_CaptureTheEnemyAdvMode")))
+	if((((PlayerController(Controller) != none) && (PlayerController(Controller).GameReplicationInfo != none)) && (PlayerController(Controller).GameReplicationInfo.m_szGameTypeFlagRep == "RGM_CaptureTheEnemyAdvMode")))
 	{
 		return R6TakeDamageCTE(iKillValue, iStunValue, instigatedBy, vHitLocation, vMomentum, iBulletToArmorModifier, iBulletGoup);
 	}
 	// End:0xDD
-	if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_119__(instigatedBy.EngineWeapon, none)))
+	if(((instigatedBy != none) && (instigatedBy.EngineWeapon != none)))
 	{
 		_bAffectedActor = instigatedBy.EngineWeapon.AffectActor(iBulletGoup, self);		
 	}
@@ -4440,13 +4440,13 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		_bAffectedActor = false;
 	}
 	// End:0x1ED
-	if(__NFUN_130__(IsEnemy(instigatedBy), _bAffectedActor))
+	if((IsEnemy(instigatedBy) && _bAffectedActor))
 	{
 		// End:0x154
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) == int(NM_Standalone)))
 		{
 			// End:0x151
-			if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_154__(int(instigatedBy.m_ePawnType), int(1))))
+			if(((instigatedBy != none) && (int(instigatedBy.m_ePawnType) == int(1))))
 			{
 				R6Rainbow(instigatedBy).IncrementRoundsHit();
 			}			
@@ -4454,20 +4454,20 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		else
 		{
 			// End:0x1ED
-			if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_242__(Level.Game.m_bCompilingStats, true)))
+			if(((instigatedBy != none) && (Level.Game.m_bCompilingStats == true)))
 			{
 				// End:0x1AF
-				if(__NFUN_119__(instigatedBy.PlayerReplicationInfo, none))
+				if((instigatedBy.PlayerReplicationInfo != none))
 				{
-					__NFUN_165__(instigatedBy.PlayerReplicationInfo.m_iRoundsHit);					
+					(instigatedBy.PlayerReplicationInfo.m_iRoundsHit++);					
 				}
 				else
 				{
 					_playerController = R6Pawn(instigatedBy).GetHumanLeaderForAIPawn();
 					// End:0x1ED
-					if(__NFUN_119__(_playerController, none))
+					if((_playerController != none))
 					{
-						__NFUN_165__(_playerController.PlayerReplicationInfo.m_iRoundsHit);
+						(_playerController.PlayerReplicationInfo.m_iRoundsHit++);
 					}
 				}
 			}
@@ -4475,20 +4475,20 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	}
 	TakeHitLocation = vHitLocation;
 	// End:0x239
-	if(__NFUN_129__(IsAlive()))
+	if((!IsAlive()))
 	{
 		// End:0x237
-		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		if((int(Level.NetMode) != int(NM_DedicatedServer)))
 		{
-			KAddImpulse(__NFUN_212__(__NFUN_226__(vMomentum), float(50000)), vHitLocation);
+			KAddImpulse((Normal(vMomentum) * float(50000)), vHitLocation);
 		}
 		return 0;
 	}
 	// End:0x282
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		// End:0x27F
-		if(__NFUN_130__(m_bIsPlayer, R6PlayerController(Controller).GameReplicationInfo.m_bGameOverRep))
+		if((m_bIsPlayer && R6PlayerController(Controller).GameReplicationInfo.m_bGameOverRep))
 		{
 			return 0;
 		}		
@@ -4496,13 +4496,13 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	else
 	{
 		// End:0x2C3
-		if(__NFUN_130__(Level.Game.m_bGameOver, __NFUN_129__(R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath)))
+		if((Level.Game.m_bGameOver && (!R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath)))
 		{
 			return 0;
 		}
 	}
 	// End:0x2F9
-	if(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), __NFUN_129__(m_bIsPlayer)))
+	if(((int(m_ePawnType) == int(1)) && (!m_bIsPlayer)))
 	{
 		R6RainbowAI(Controller).IsBeingAttacked(instigatedBy);
 	}
@@ -4514,7 +4514,7 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	eHitPart = WhichBodyPartWasHit(vHitLocation, vMomentum);
 	m_eLastHitPart = eHitPart;
 	// End:0x368
-	if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_119__(instigatedBy.EngineWeapon, none)))
+	if(((instigatedBy != none) && (instigatedBy.EngineWeapon != none)))
 	{
 		bIsSilenced = instigatedBy.EngineWeapon.m_bIsSilenced;		
 	}
@@ -4523,10 +4523,10 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		bIsSilenced = false;
 	}
 	// End:0x8CE
-	if(__NFUN_155__(int(m_eHealth), int(3)))
+	if((int(m_eHealth) != int(3)))
 	{
 		// End:0x3D7
-		if(__NFUN_155__(m_iForceKill, 0))
+		if((m_iForceKill != 0))
 		{
 			switch(m_iForceKill)
 			{
@@ -4557,10 +4557,10 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		}
 		else
 		{
-			eKillFromTable = __NFUN_2002__(iKillValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
+			eKillFromTable = GetKillResult(iKillValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
 		}
 		// End:0x463
-		if(__NFUN_130__(__NFUN_155__(m_iForceStun, 0), __NFUN_150__(m_iForceStun, 5)))
+		if(((m_iForceStun != 0) && (m_iForceStun < 5)))
 		{
 			switch(m_iForceStun)
 			{
@@ -4591,60 +4591,60 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 		}
 		else
 		{
-			eStunFromTable = __NFUN_2003__(iStunValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
+			eStunFromTable = GetStunResult(iStunValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
 		}
-		vBulletDirection = __NFUN_226__(vMomentum);
+		vBulletDirection = Normal(vMomentum);
 		BloodRotation = Rotator(vBulletDirection);
 		BloodRotation.Roll = 0;
 		// End:0x50B
-		if(__NFUN_130__(__NFUN_129__(InGodMode()), __NFUN_155__(int(eKillFromTable), int(0))))
+		if(((!InGodMode()) && (int(eKillFromTable) != int(0))))
 		{
-			aBloodEffect = __NFUN_278__(Class'R6SFX.R6BloodEffect',,, vHitLocation);
+			aBloodEffect = Spawn(Class'R6SFX.R6BloodEffect',,, vHitLocation);
 			// End:0x50B
-			if(__NFUN_130__(__NFUN_119__(aBloodEffect, none), __NFUN_129__(_bAffectedActor)))
+			if(((aBloodEffect != none) && (!_bAffectedActor)))
 			{
 				aBloodEffect.m_bPlayEffectSound = false;
 			}
 		}
 		// End:0x538
-		if(__NFUN_154__(int(eKillFromTable), int(3)))
+		if((int(eKillFromTable) == int(3)))
 		{
-			BloodSplat = __NFUN_278__(Class'R6Engine.R6BloodSplat',,, vHitLocation, BloodRotation);			
+			BloodSplat = Spawn(Class'R6Engine.R6BloodSplat',,, vHitLocation, BloodRotation);			
 		}
 		else
 		{
 			// End:0x562
-			if(__NFUN_155__(int(eKillFromTable), int(0)))
+			if((int(eKillFromTable) != int(0)))
 			{
-				BloodSplat = __NFUN_278__(Class'R6Engine.R6BloodSplatSmall',,, vHitLocation, BloodRotation);
+				BloodSplat = Spawn(Class'R6Engine.R6BloodSplatSmall',,, vHitLocation, BloodRotation);
 			}
 		}
 		// End:0x5A4
-		if(__NFUN_155__(int(m_iTracedBone), 0))
+		if((int(m_iTracedBone) != 0))
 		{
 			m_rHitDirection = Rotator(vBulletDirection);
 			// End:0x5A4
-			if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+			if((int(Level.NetMode) != int(NM_Client)))
 			{
 				SetNextPendingAction(, int(m_iTracedBone));
 			}
 		}
 		// End:0x619
-		if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(eKillFromTable), int(3)), __NFUN_130__(__NFUN_132__(__NFUN_154__(int(eKillFromTable), int(2)), __NFUN_154__(int(eKillFromTable), int(1))), __NFUN_154__(int(m_eHealth), int(2)))), __NFUN_130__(__NFUN_154__(int(eKillFromTable), int(2)), __NFUN_154__(int(m_eHealth), int(1)))))
+		if((((int(eKillFromTable) == int(3)) || (((int(eKillFromTable) == int(2)) || (int(eKillFromTable) == int(1))) && (int(m_eHealth) == int(2)))) || ((int(eKillFromTable) == int(2)) && (int(m_eHealth) == int(1)))))
 		{
 			m_eHealth = 3;			
 		}
 		else
 		{
 			// End:0x658
-			if(__NFUN_132__(__NFUN_154__(int(eKillFromTable), int(2)), __NFUN_130__(__NFUN_154__(int(eKillFromTable), int(1)), __NFUN_154__(int(m_eHealth), int(1)))))
+			if(((int(eKillFromTable) == int(2)) || ((int(eKillFromTable) == int(1)) && (int(m_eHealth) == int(1)))))
 			{
 				m_eHealth = 2;				
 			}
 			else
 			{
 				// End:0x692
-				if(__NFUN_154__(int(eKillFromTable), int(1)))
+				if((int(eKillFromTable) == int(1)))
 				{
 					m_eHealth = 1;
 					m_fHBWound = 1.2000000;
@@ -4658,16 +4658,16 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 			}
 		}
 		// End:0x75C
-		if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_119__(R6PlayerController(instigatedBy.Controller), none)))
+		if(((instigatedBy != none) && (R6PlayerController(instigatedBy.Controller) != none)))
 		{
 			// End:0x75C
 			if(R6PlayerController(instigatedBy.Controller).m_bShowHitLogs)
 			{
-				__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Player HIT : ", string(self)), " Bullet Energy : "), string(iKillValue)), " body part : "), string(eHitPart)), " KillResult : "), string(eKillFromTable)), " Armor type : "), string(m_eArmorType)));
+				Log(((((((((("Player HIT : " $ string(self)) $ " Bullet Energy : ") $ string(iKillValue)) $ " body part : ") $ string(eHitPart)) $ " KillResult : ") $ string(eKillFromTable)) $ " Armor type : ") $ string(m_eArmorType)));
 			}
 		}
 		// End:0x81D
-		if(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), __NFUN_155__(int(eKillFromTable), int(0))))
+		if(((int(m_ePawnType) == int(1)) && (int(eKillFromTable) != int(0))))
 		{
 			// End:0x7C7
 			if(m_bIsPlayer)
@@ -4678,7 +4678,7 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 			else
 			{
 				// End:0x81D
-				if(__NFUN_119__(R6RainbowAI(Controller).m_TeamManager, none))
+				if((R6RainbowAI(Controller).m_TeamManager != none))
 				{
 					R6RainbowAI(Controller).m_TeamManager.m_eMovementMode = 0;
 					R6RainbowAI(Controller).m_TeamManager.UpdateTeamStatus(self);
@@ -4686,30 +4686,30 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 			}
 		}
 		// End:0x872
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
 			Controller.R6DamageAttitudeTo(instigatedBy, eKillFromTable, eStunFromTable, vMomentum);
 			// End:0x86F
-			if(__NFUN_155__(int(eKillFromTable), int(0)))
+			if((int(eKillFromTable) != int(0)))
 			{
 				Controller.PlaySoundDamage(instigatedBy);
 			}			
 		}
 		// End:0x8CE
-		if(__NFUN_155__(int(eKillFromTable), int(0)))
+		if((int(eKillFromTable) != int(0)))
 		{
-			iStunValue = __NFUN_249__(iStunValue, 5000);
-			vMomentum = __NFUN_212__(__NFUN_226__(vMomentum), float(__NFUN_144__(iStunValue, 100)));
+			iStunValue = Min(iStunValue, 5000);
+			vMomentum = (Normal(vMomentum) * float((iStunValue * 100)));
 			// End:0x8CE
-			if(__NFUN_129__(IsAlive()))
+			if((!IsAlive()))
 			{
 				R6Died(instigatedBy, eHitPart, vMomentum);
 			}
 		}
 	}
-	iKillFromHit = __NFUN_2006__(iKillValue, int(eHitPart), vMomentum);
+	iKillFromHit = GetThroughResult(iKillValue, int(eHitPart), vMomentum);
 	// End:0x94B
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		switch(m_eHealth)
 		{
@@ -4755,12 +4755,12 @@ function R6Died(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	local string KillerName, szPlayerName;
 
 	// End:0x30
-	if(__NFUN_114__(Killer, none))
+	if((Killer == none))
 	{
-		__NFUN_231__(" R6Died() : WARNING : Killer=none");
+		Log(" R6Died() : WARNING : Killer=none");
 	}
 	// End:0x64
-	if(__NFUN_119__(Killer.PlayerReplicationInfo, none))
+	if((Killer.PlayerReplicationInfo != none))
 	{
 		KillerName = Killer.PlayerReplicationInfo.PlayerName;		
 	}
@@ -4769,27 +4769,27 @@ function R6Died(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 		KillerName = Killer.m_CharacterName;
 	}
 	// End:0x15F
-	if(__NFUN_132__(m_bIsClimbingLadder, __NFUN_154__(int(Physics), int(11))))
+	if((m_bIsClimbingLadder || (int(Physics) == int(11))))
 	{
 		// End:0x109
-		if(__NFUN_132__(__NFUN_114__(m_Ladder, none), __NFUN_114__(m_Ladder.MyLadder, none)))
+		if(((m_Ladder == none) || (m_Ladder.MyLadder == none)))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" R6Died() : WARNING : m_Ladder=", string(m_Ladder)), " m_Ladder.myLadder="), string(m_Ladder.MyLadder)));
+			Log((((" R6Died() : WARNING : m_Ladder=" $ string(m_Ladder)) $ " m_Ladder.myLadder=") $ string(m_Ladder.MyLadder)));
 		}
 		R6LadderVolume(m_Ladder.MyLadder).RemoveClimber(self);
 		// End:0x15F
-		if(__NFUN_130__(m_bIsPlayer, __NFUN_119__(m_Ladder, none)))
+		if((m_bIsPlayer && (m_Ladder != none)))
 		{
 			R6LadderVolume(m_Ladder.MyLadder).DisableCollisions(m_Ladder);
 		}
 	}
 	// End:0x1AC
-	if(__NFUN_154__(int(Physics), int(12)))
+	if((int(Physics) == int(12)))
 	{
 		// End:0x18A
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
-			Controller.__NFUN_113__('None');
+			Controller.GotoState('None');
 		}
 		// End:0x1A1
 		if(bIsCrouched)
@@ -4803,12 +4803,12 @@ function R6Died(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	}
 	AWeapon = R6AbstractWeapon(EngineWeapon);
 	// End:0x1F6
-	if(__NFUN_130__(__NFUN_119__(AWeapon, none), __NFUN_119__(AWeapon.m_SelectedWeaponGadget, none)))
+	if(((AWeapon != none) && (AWeapon.m_SelectedWeaponGadget != none)))
 	{
 		AWeapon.m_SelectedWeaponGadget.ActivateGadget(false);
 	}
 	// End:0x220
-	if(__NFUN_217__(vMomentum, vect(0.0000000, 0.0000000, 0.0000000)))
+	if((vMomentum == vect(0.0000000, 0.0000000, 0.0000000)))
 	{
 		vMomentum = vect(1.0000000, 1.0000000, 1.0000000);
 	}
@@ -4818,14 +4818,14 @@ function R6Died(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	J0x23A:
 
 	// End:0x277 [Loop If]
-	if(__NFUN_152__(i, 3))
+	if((i <= 3))
 	{
 		// End:0x26D
-		if(__NFUN_119__(m_WeaponsCarried[i], none))
+		if((m_WeaponsCarried[i] != none))
 		{
 			m_WeaponsCarried[i].SetRelevant(true);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x23A;
 	}
@@ -4837,18 +4837,18 @@ function R6Died(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	if(ProcessBuildDeathMessage(Killer, szPlayerName))
 	{
 		// End:0x2DF
-		foreach __NFUN_313__(Class'R6Engine.R6PlayerController', P)
+		foreach DynamicActors(Class'R6Engine.R6PlayerController', P)
 		{
 			P.ClientDeathMessage(KillerName, szPlayerName, m_bSuicideType);			
 		}		
 	}
 	// End:0x31B
-	if(__NFUN_114__(m_KilledBy, none))
+	if((m_KilledBy == none))
 	{
-		__NFUN_231__(__NFUN_112__("  R6Died() : Warning!!  m_KilledBy=", string(m_KilledBy)));
+		Log(("  R6Died() : Warning!!  m_KilledBy=" $ string(m_KilledBy)));
 	}
 	// End:0x331
-	if(__NFUN_114__(m_KilledBy, self))
+	if((m_KilledBy == self))
 	{
 		m_bSuicided = true;		
 	}
@@ -4861,35 +4861,35 @@ function R6Died(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 		}
 	}
 	// End:0x394
-	if(__NFUN_119__(R6PlayerController(Controller), none))
+	if((R6PlayerController(Controller) != none))
 	{
 		R6PlayerController(Controller).ClientDisableFirstPersonViewEffects();
 		R6PlayerController(Controller).PlayerReplicationInfo.m_szKillersName = KillerName;
 	}
 	pGameInfo = R6AbstractGameInfo(Level.Game);
 	// End:0x4FD
-	if(__NFUN_119__(pGameInfo, none))
+	if((pGameInfo != none))
 	{
 		// End:0x4D8
-		if(__NFUN_132__(__NFUN_242__(pGameInfo.m_bCompilingStats, true), __NFUN_130__(pGameInfo.m_bGameOver, pGameInfo.m_bGameOverButAllowDeath)))
+		if(((pGameInfo.m_bCompilingStats == true) || (pGameInfo.m_bGameOver && pGameInfo.m_bGameOverButAllowDeath)))
 		{
 			// End:0x49E
-			if(__NFUN_119__(Controller.PlayerReplicationInfo, none))
+			if((Controller.PlayerReplicationInfo != none))
 			{
-				__NFUN_184__(Controller.PlayerReplicationInfo.Deaths, 1.0000000);
+				(Controller.PlayerReplicationInfo.Deaths += 1.0000000);
 				// End:0x49B
-				if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bSuicided), __NFUN_119__(m_KilledBy, none)), __NFUN_119__(m_KilledBy.Controller, none)), __NFUN_119__(m_KilledBy.Controller.PlayerReplicationInfo, none)))
+				if(((((!m_bSuicided) && (m_KilledBy != none)) && (m_KilledBy.Controller != none)) && (m_KilledBy.Controller.PlayerReplicationInfo != none)))
 				{
-					__NFUN_184__(m_KilledBy.Controller.PlayerReplicationInfo.Score, 1.0000000);
+					(m_KilledBy.Controller.PlayerReplicationInfo.Score += 1.0000000);
 				}				
 			}
 			else
 			{
 				P = R6PlayerController(GetHumanLeaderForAIPawn());
 				// End:0x4D8
-				if(__NFUN_119__(P, none))
+				if((P != none))
 				{
-					__NFUN_184__(P.PlayerReplicationInfo.Deaths, 1.0000000);
+					(P.PlayerReplicationInfo.Deaths += 1.0000000);
 				}
 			}
 		}
@@ -4905,10 +4905,10 @@ function IncrementFragCount()
 	local PlayerController _playerController;
 
 	// End:0x44
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		// End:0x41
-		if(Instigator.__NFUN_303__('R6Rainbow'))
+		if(Instigator.IsA('R6Rainbow'))
 		{
 			R6Rainbow(Instigator).IncrementKillCount();
 		}		
@@ -4916,22 +4916,22 @@ function IncrementFragCount()
 	else
 	{
 		// End:0xF1
-		if(__NFUN_130__(__NFUN_119__(Level.Game, none), __NFUN_242__(Level.Game.m_bCompilingStats, true)))
+		if(((Level.Game != none) && (Level.Game.m_bCompilingStats == true)))
 		{
 			// End:0xA8
-			if(__NFUN_119__(PlayerReplicationInfo, none))
+			if((PlayerReplicationInfo != none))
 			{
-				__NFUN_161__(PlayerReplicationInfo.m_iKillCount, 1);
-				__NFUN_161__(PlayerReplicationInfo.m_iRoundKillCount, 1);				
+				(PlayerReplicationInfo.m_iKillCount += 1);
+				(PlayerReplicationInfo.m_iRoundKillCount += 1);				
 			}
 			else
 			{
 				_playerController = GetHumanLeaderForAIPawn();
 				// End:0xF1
-				if(__NFUN_119__(_playerController, none))
+				if((_playerController != none))
 				{
-					__NFUN_165__(_playerController.PlayerReplicationInfo.m_iKillCount);
-					__NFUN_165__(_playerController.PlayerReplicationInfo.m_iRoundKillCount);
+					(_playerController.PlayerReplicationInfo.m_iKillCount++);
+					(_playerController.PlayerReplicationInfo.m_iRoundKillCount++);
 				}
 			}
 		}
@@ -4954,38 +4954,38 @@ function ServerForceStunResult(int iStunResult)
 function ToggleHeatVision()
 {
 	// End:0x17
-	if(__NFUN_242__(Level.m_bHeartBeatOn, true))
+	if((Level.m_bHeartBeatOn == true))
 	{
 		return;
 	}
 	// End:0x14C
-	if(__NFUN_242__(m_bActivateScopeVision, true))
+	if((m_bActivateScopeVision == true))
 	{
-		m_bActivateHeatVision = __NFUN_129__(m_bActivateHeatVision);
+		m_bActivateHeatVision = (!m_bActivateHeatVision);
 		R6PlayerController(Controller).m_bHeatVisionActive = m_bActivateHeatVision;
 		R6PlayerController(Controller).ServerToggleHeatVision(m_bActivateHeatVision);
 		// End:0x9C
-		if(__NFUN_242__(m_bActivateNightVision, true))
+		if((m_bActivateNightVision == true))
 		{
 			m_bActivateNightVision = false;
-			__NFUN_2600__(false, none, none);
+			ToggleNightProperties(false, none, none);
 			R6PlayerController(Controller).ClientPlaySound(m_sndNightVisionDeactivation, 3);
 		}
 		// End:0xF1
-		if(__NFUN_242__(m_bActivateHeatVision, true))
+		if((m_bActivateHeatVision == true))
 		{
-			__NFUN_2605__(false, none, none);
-			__NFUN_2004__(m_bActivateHeatVision, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);
+			ToggleScopeProperties(false, none, none);
+			ToggleHeatProperties(m_bActivateHeatVision, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);
 			R6PlayerController(Controller).ClientPlaySound(m_sndThermalScopeActivation, 3);			
 		}
 		else
 		{
 			// End:0x14C
-			if(__NFUN_130__(__NFUN_242__(m_bActivateScopeVision, true), __NFUN_242__(m_bActivateHeatVision, false)))
+			if(((m_bActivateScopeVision == true) && (m_bActivateHeatVision == false)))
 			{
 				R6PlayerController(Controller).ClientPlaySound(m_sndThermalScopeDeactivation, 3);
-				__NFUN_2004__(false, none, none);
-				__NFUN_2605__(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);
+				ToggleHeatProperties(false, none, none);
+				ToggleScopeProperties(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);
 			}
 		}
 	}
@@ -4995,40 +4995,40 @@ function ToggleHeatVision()
 exec function ToggleNightVision()
 {
 	// End:0x17
-	if(__NFUN_242__(Level.m_bHeartBeatOn, true))
+	if((Level.m_bHeartBeatOn == true))
 	{
 		return;
 	}
-	m_bActivateNightVision = __NFUN_129__(m_bActivateNightVision);
+	m_bActivateNightVision = (!m_bActivateNightVision);
 	// End:0x48
-	if(__NFUN_119__(R6Rainbow(self), none))
+	if((R6Rainbow(self) != none))
 	{
 		R6Rainbow(self).ServerToggleNightVision(m_bActivateNightVision);
 	}
 	// End:0xB2
-	if(__NFUN_242__(m_bActivateHeatVision, true))
+	if((m_bActivateHeatVision == true))
 	{
 		m_bActivateHeatVision = false;
 		R6PlayerController(Controller).m_bHeatVisionActive = m_bActivateHeatVision;
 		R6PlayerController(Controller).ServerToggleHeatVision(m_bActivateHeatVision);
-		__NFUN_2004__(false, none, none);
+		ToggleHeatProperties(false, none, none);
 		R6PlayerController(Controller).ClientPlaySound(m_sndThermalScopeDeactivation, 3);
 	}
 	// End:0x12B
-	if(__NFUN_130__(__NFUN_130__(__NFUN_242__(m_bActivateScopeVision, true), __NFUN_242__(m_bActivateNightVision, true)), __NFUN_119__(EngineWeapon.m_ScopeTexture, none)))
+	if((((m_bActivateScopeVision == true) && (m_bActivateNightVision == true)) && (EngineWeapon.m_ScopeTexture != none)))
 	{
 		R6PlayerController(Controller).ClientPlaySound(m_sndNightVisionActivation, 3);
-		__NFUN_2605__(false, none, none);
-		__NFUN_2600__(m_bActivateNightVision, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);		
+		ToggleScopeProperties(false, none, none);
+		ToggleNightProperties(m_bActivateNightVision, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);		
 	}
 	else
 	{
 		// End:0x189
-		if(__NFUN_130__(__NFUN_242__(m_bActivateScopeVision, true), __NFUN_242__(m_bActivateNightVision, false)))
+		if(((m_bActivateScopeVision == true) && (m_bActivateNightVision == false)))
 		{
 			R6PlayerController(Controller).ClientPlaySound(m_sndNightVisionDeactivation, 3);
-			__NFUN_2600__(false, none, none);
-			__NFUN_2605__(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);			
+			ToggleNightProperties(false, none, none);
+			ToggleScopeProperties(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);			
 		}
 		else
 		{
@@ -5041,7 +5041,7 @@ exec function ToggleNightVision()
 			{
 				R6PlayerController(Controller).ClientPlaySound(m_sndNightVisionDeactivation, 3);
 			}
-			__NFUN_2600__(m_bActivateNightVision, Texture'Inventory_t.NightVision.NightVisionTex', none);
+			ToggleNightProperties(m_bActivateNightVision, Texture'Inventory_t.NightVision.NightVisionTex', none);
 		}
 	}
 	return;
@@ -5050,52 +5050,52 @@ exec function ToggleNightVision()
 function ToggleScopeVision()
 {
 	// End:0x17
-	if(__NFUN_242__(Level.m_bHeartBeatOn, true))
+	if((Level.m_bHeartBeatOn == true))
 	{
 		return;
 	}
 	// End:0x32
-	if(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) == int(NM_DedicatedServer)))
 	{
 		return;
 	}
-	m_bActivateScopeVision = __NFUN_129__(m_bActivateScopeVision);
+	m_bActivateScopeVision = (!m_bActivateScopeVision);
 	// End:0x83
-	if(__NFUN_130__(__NFUN_242__(m_bActivateNightVision, false), __NFUN_242__(m_bActivateHeatVision, false)))
+	if(((m_bActivateNightVision == false) && (m_bActivateHeatVision == false)))
 	{
-		__NFUN_2605__(m_bActivateScopeVision, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);		
+		ToggleScopeProperties(m_bActivateScopeVision, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);		
 	}
 	else
 	{
 		// End:0xE1
-		if(__NFUN_242__(m_bActivateNightVision, true))
+		if((m_bActivateNightVision == true))
 		{
 			// End:0xD4
-			if(__NFUN_130__(__NFUN_242__(m_bActivateScopeVision, true), __NFUN_119__(EngineWeapon.m_ScopeTexture, none)))
+			if(((m_bActivateScopeVision == true) && (EngineWeapon.m_ScopeTexture != none)))
 			{
-				__NFUN_2600__(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);				
+				ToggleNightProperties(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);				
 			}
 			else
 			{
-				__NFUN_2600__(true, Texture'Inventory_t.NightVision.NightVisionTex', none);
+				ToggleNightProperties(true, Texture'Inventory_t.NightVision.NightVisionTex', none);
 			}			
 		}
 		else
 		{
 			// End:0x15F
-			if(__NFUN_242__(m_bActivateHeatVision, true))
+			if((m_bActivateHeatVision == true))
 			{
 				// End:0x11C
-				if(__NFUN_242__(m_bActivateScopeVision, true))
+				if((m_bActivateScopeVision == true))
 				{
-					__NFUN_2004__(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);					
+					ToggleHeatProperties(true, EngineWeapon.m_ScopeTexture, EngineWeapon.m_ScopeAdd);					
 				}
 				else
 				{
 					m_bActivateHeatVision = false;
 					R6PlayerController(Controller).m_bHeatVisionActive = m_bActivateHeatVision;
 					R6PlayerController(Controller).ServerToggleHeatVision(m_bActivateHeatVision);
-					__NFUN_2004__(false, none, none);
+					ToggleHeatProperties(false, none, none);
 				}
 			}
 		}
@@ -5109,9 +5109,9 @@ exec function ToggleGadget()
 
 	AWeapon = R6AbstractWeapon(EngineWeapon);
 	// End:0x72
-	if(__NFUN_130__(__NFUN_119__(AWeapon, none), __NFUN_119__(AWeapon.m_SelectedWeaponGadget, none)))
+	if(((AWeapon != none) && (AWeapon.m_SelectedWeaponGadget != none)))
 	{
-		m_bWeaponGadgetActivated = __NFUN_129__(m_bWeaponGadgetActivated);
+		m_bWeaponGadgetActivated = (!m_bWeaponGadgetActivated);
 		AWeapon.m_SelectedWeaponGadget.ActivateGadget(m_bWeaponGadgetActivated, R6PlayerController(Controller).bBehindView);
 	}
 	return;
@@ -5130,10 +5130,10 @@ function ReloadWeapon()
 simulated function ReloadingWeaponEnd()
 {
 	// End:0x55
-	if(__NFUN_132__(__NFUN_129__(m_bIsPlayer), __NFUN_129__(__NFUN_130__(__NFUN_119__(Controller, none), __NFUN_242__(R6PlayerController(Controller).bBehindView, false)))))
+	if(((!m_bIsPlayer) || (!((Controller != none) && (R6PlayerController(Controller).bBehindView == false)))))
 	{
 		EngineWeapon.ChangeClip();
-		EngineWeapon.__NFUN_113__('None');
+		EngineWeapon.GotoState('None');
 	}
 	return;
 }
@@ -5153,17 +5153,17 @@ simulated function WeaponBipod()
 
 	pWeaponWithTheBipod = R6AbstractWeapon(EngineWeapon);
 	// End:0x34
-	if(__NFUN_132__(__NFUN_114__(EngineWeapon, PendingWeapon), __NFUN_114__(PendingWeapon, none)))
+	if(((EngineWeapon == PendingWeapon) || (PendingWeapon == none)))
 	{
 		bSetBipod = false;
 	}
 	// End:0x7E
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		pWeaponWithTheBipod.m_bDeployBipod = bSetBipod;
 	}
 	// End:0xC7
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_Standalone)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		pWeaponWithTheBipod.DeployWeaponBipod(bSetBipod);
 	}
@@ -5178,7 +5178,7 @@ simulated function WeaponBipodLast()
 
 	pWeaponWithTheBipod = R6AbstractWeapon(EngineWeapon);
 	// End:0x3C
-	if(__NFUN_132__(__NFUN_114__(EngineWeapon, PendingWeapon), __NFUN_114__(PendingWeapon, none)))
+	if(((EngineWeapon == PendingWeapon) || (PendingWeapon == none)))
 	{
 		bSetBipod = m_bWantsToProne;		
 	}
@@ -5192,12 +5192,12 @@ simulated function WeaponBipodLast()
 		}
 	}
 	// End:0xB0
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		pWeaponWithTheBipod.m_bDeployBipod = bSetBipod;
 	}
 	// End:0xF9
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+	if(((int(Level.NetMode) == int(NM_Standalone)) || (int(Level.NetMode) == int(NM_ListenServer))))
 	{
 		pWeaponWithTheBipod.DeployWeaponBipod(bSetBipod);
 	}
@@ -5206,14 +5206,14 @@ simulated function WeaponBipodLast()
 
 function ServerPlayReloadAnimAgain()
 {
-	m_bReloadAnimLoop = __NFUN_129__(m_bReloadAnimLoop);
+	m_bReloadAnimLoop = (!m_bReloadAnimLoop);
 	return;
 }
 
 simulated function PutShellInWeapon()
 {
 	// End:0x45
-	if(__NFUN_132__(__NFUN_129__(m_bIsPlayer), __NFUN_129__(__NFUN_130__(__NFUN_119__(Controller, none), __NFUN_242__(R6PlayerController(Controller).bBehindView, false)))))
+	if(((!m_bIsPlayer) || (!((Controller != none) && (R6PlayerController(Controller).bBehindView == false)))))
 	{
 		EngineWeapon.ServerPutBulletInShotgun();
 	}
@@ -5231,18 +5231,18 @@ simulated function float PrepareDemolitionsAnimation()
 	m_bPostureTransition = true;
 	AnimBlendParams(1, 1.0000000, 0.0000000, 0.0000000);
 	// End:0x5E
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.PlaySoundCurrentAction(6);
 	}
 	// End:0x76
-	if(__NFUN_176__(fSkillDemolitions, 0.6000000))
+	if((fSkillDemolitions < 0.6000000))
 	{
 		return 0.8000000;		
 	}
 	else
 	{
-		return __NFUN_174__(0.8000000, __NFUN_171__(__NFUN_172__(__NFUN_175__(fSkillDemolitions, 0.6000000), 0.4000000), 0.4500000));
+		return (0.8000000 + (((fSkillDemolitions - 0.6000000) / 0.4000000) * 0.4500000));
 	}
 	return;
 }
@@ -5252,12 +5252,12 @@ simulated function PlayClaymoreAnimation()
 	local float fAnimRate, fTween;
 
 	// End:0x4E
-	if(__NFUN_130__(__NFUN_119__(Controller, none), __NFUN_129__(Controller.__NFUN_281__('PlayerSetExplosive'))))
+	if(((Controller != none) && (!Controller.IsInState('PlayerSetExplosive'))))
 	{
 		// End:0x4C
-		if(__NFUN_154__(int(Controller.bFire), 1))
+		if((int(Controller.bFire) == 1))
 		{
-			Controller.__NFUN_113__('PlayerSetExplosive');			
+			Controller.GotoState('PlayerSetExplosive');			
 		}
 		else
 		{
@@ -5268,17 +5268,17 @@ simulated function PlayClaymoreAnimation()
 	// End:0x92
 	if(m_bIsProne)
 	{
-		fTween = __NFUN_172__(0.2000000, m_fGadgetSpeedMultiplier);
-		__NFUN_259__('ProneClaymore', __NFUN_171__(fAnimRate, m_fGadgetSpeedMultiplier), fTween, 1);		
+		fTween = (0.2000000 / m_fGadgetSpeedMultiplier);
+		PlayAnim('ProneClaymore', (fAnimRate * m_fGadgetSpeedMultiplier), fTween, 1);		
 	}
 	else
 	{
 		// End:0xAF
-		if(__NFUN_129__(bIsCrouched))
+		if((!bIsCrouched))
 		{
-			fTween = __NFUN_172__(1.0000000, m_fGadgetSpeedMultiplier);
+			fTween = (1.0000000 / m_fGadgetSpeedMultiplier);
 		}
-		__NFUN_259__('CrouchClaymore', __NFUN_171__(fAnimRate, m_fGadgetSpeedMultiplier), fTween, 1);
+		PlayAnim('CrouchClaymore', (fAnimRate * m_fGadgetSpeedMultiplier), fTween, 1);
 	}
 	return;
 }
@@ -5288,12 +5288,12 @@ simulated function PlayRemoteChargeAnimation()
 	local float fAnimRate, fTween;
 
 	// End:0x4E
-	if(__NFUN_130__(__NFUN_119__(Controller, none), __NFUN_129__(Controller.__NFUN_281__('PlayerSetExplosive'))))
+	if(((Controller != none) && (!Controller.IsInState('PlayerSetExplosive'))))
 	{
 		// End:0x4C
-		if(__NFUN_154__(int(Controller.bFire), 1))
+		if((int(Controller.bFire) == 1))
 		{
-			Controller.__NFUN_113__('PlayerSetExplosive');			
+			Controller.GotoState('PlayerSetExplosive');			
 		}
 		else
 		{
@@ -5304,17 +5304,17 @@ simulated function PlayRemoteChargeAnimation()
 	// End:0x92
 	if(m_bIsProne)
 	{
-		fTween = __NFUN_172__(0.2000000, m_fGadgetSpeedMultiplier);
-		__NFUN_259__('ProneC4', __NFUN_171__(fAnimRate, m_fGadgetSpeedMultiplier), fTween, 1);		
+		fTween = (0.2000000 / m_fGadgetSpeedMultiplier);
+		PlayAnim('ProneC4', (fAnimRate * m_fGadgetSpeedMultiplier), fTween, 1);		
 	}
 	else
 	{
 		// End:0xAF
-		if(__NFUN_129__(bIsCrouched))
+		if((!bIsCrouched))
 		{
-			fTween = __NFUN_172__(1.0000000, m_fGadgetSpeedMultiplier);
+			fTween = (1.0000000 / m_fGadgetSpeedMultiplier);
 		}
-		__NFUN_259__('CrouchC4', __NFUN_171__(fAnimRate, m_fGadgetSpeedMultiplier), fTween, 1);
+		PlayAnim('CrouchC4', (fAnimRate * m_fGadgetSpeedMultiplier), fTween, 1);
 	}
 	return;
 }
@@ -5324,12 +5324,12 @@ simulated function PlayBreachDoorAnimation()
 	local float fAnimRate;
 
 	// End:0x59
-	if(__NFUN_130__(__NFUN_130__(m_bIsPlayer, __NFUN_119__(Controller, none)), __NFUN_129__(Controller.__NFUN_281__('PlayerSetExplosive'))))
+	if(((m_bIsPlayer && (Controller != none)) && (!Controller.IsInState('PlayerSetExplosive'))))
 	{
 		// End:0x57
-		if(__NFUN_154__(int(Controller.bFire), 1))
+		if((int(Controller.bFire) == 1))
 		{
-			Controller.__NFUN_113__('PlayerSetExplosive');			
+			Controller.GotoState('PlayerSetExplosive');			
 		}
 		else
 		{
@@ -5340,11 +5340,11 @@ simulated function PlayBreachDoorAnimation()
 	// End:0x8B
 	if(bIsCrouched)
 	{
-		__NFUN_259__('CrouchPlaceBreach', __NFUN_171__(fAnimRate, m_fGadgetSpeedMultiplier), 0.0000000, 1);		
+		PlayAnim('CrouchPlaceBreach', (fAnimRate * m_fGadgetSpeedMultiplier), 0.0000000, 1);		
 	}
 	else
 	{
-		__NFUN_259__('StandPlaceBreach', __NFUN_171__(fAnimRate, m_fGadgetSpeedMultiplier), 0.0000000, 1);
+		PlayAnim('StandPlaceBreach', (fAnimRate * m_fGadgetSpeedMultiplier), 0.0000000, 1);
 	}
 	return;
 }
@@ -5354,7 +5354,7 @@ simulated function PlayInteractWithDeviceAnimation()
 	local float fAnimRate, fSkillDevice;
 
 	// End:0x33
-	if(__NFUN_132__(__NFUN_154__(int(m_eDeviceAnim), int(1)), __NFUN_154__(int(m_eDeviceAnim), int(0))))
+	if(((int(m_eDeviceAnim) == int(1)) || (int(m_eDeviceAnim) == int(0))))
 	{
 		fSkillDevice = GetSkill(1);		
 	}
@@ -5363,13 +5363,13 @@ simulated function PlayInteractWithDeviceAnimation()
 		fSkillDevice = GetSkill(2);
 	}
 	// End:0x7A
-	if(__NFUN_176__(fSkillDevice, 0.8000000))
+	if((fSkillDevice < 0.8000000))
 	{
-		fAnimRate = __NFUN_174__(1.0000000, __NFUN_171__(__NFUN_172__(__NFUN_175__(0.8000000, fSkillDevice), 0.8000000), 0.2500000));		
+		fAnimRate = (1.0000000 + (((0.8000000 - fSkillDevice) / 0.8000000) * 0.2500000));		
 	}
 	else
 	{
-		fAnimRate = __NFUN_174__(0.8000000, __NFUN_171__(__NFUN_172__(__NFUN_175__(float(1), fSkillDevice), 0.2000000), 0.2000000));
+		fAnimRate = (0.8000000 + (((float(1) - fSkillDevice) / 0.2000000) * 0.2000000));
 	}
 	R6ResetAnimBlendParams(13);
 	m_ePlayerIsUsingHands = 3;
@@ -5381,18 +5381,18 @@ simulated function PlayInteractWithDeviceAnimation()
 		// End:0x130
 		case 2:
 			// End:0xFB
-			if(__NFUN_119__(Controller, none))
+			if((Controller != none))
 			{
 				Controller.PlaySoundCurrentAction(8);
 			}
 			// End:0x11A
 			if(bIsCrouched)
 			{
-				__NFUN_260__('CrouchKeyPad_c', fAnimRate, 0.5000000, 1);				
+				LoopAnim('CrouchKeyPad_c', fAnimRate, 0.5000000, 1);				
 			}
 			else
 			{
-				__NFUN_260__('StandKeyPad_c', fAnimRate, 0.5000000, 1);
+				LoopAnim('StandKeyPad_c', fAnimRate, 0.5000000, 1);
 			}
 			// End:0x1FF
 			break;
@@ -5400,42 +5400,42 @@ simulated function PlayInteractWithDeviceAnimation()
 		case 0:
 		// End:0x150
 		case 1:
-			__NFUN_260__('CrouchDisarmBomb_c', fAnimRate, 0.5000000, 1);
+			LoopAnim('CrouchDisarmBomb_c', fAnimRate, 0.5000000, 1);
 			// End:0x1FF
 			break;
 		// End:0x1A6
 		case 3:
 			// End:0x171
-			if(__NFUN_119__(Controller, none))
+			if((Controller != none))
 			{
 				Controller.PlaySoundCurrentAction(0);
 			}
 			// End:0x190
 			if(bIsCrouched)
 			{
-				__NFUN_260__('CrouchPlaceBug_c', fAnimRate, 0.5000000, 1);				
+				LoopAnim('CrouchPlaceBug_c', fAnimRate, 0.5000000, 1);				
 			}
 			else
 			{
-				__NFUN_260__('StandPlaceBug_c', fAnimRate, 0.5000000, 1);
+				LoopAnim('StandPlaceBug_c', fAnimRate, 0.5000000, 1);
 			}
 			// End:0x1FF
 			break;
 		// End:0x1FC
 		case 4:
 			// End:0x1C7
-			if(__NFUN_119__(Controller, none))
+			if((Controller != none))
 			{
 				Controller.PlaySoundCurrentAction(2);
 			}
 			// End:0x1E6
 			if(bIsCrouched)
 			{
-				__NFUN_260__('CrouchKeyboard_c', fAnimRate, 0.5000000, 1);				
+				LoopAnim('CrouchKeyboard_c', fAnimRate, 0.5000000, 1);				
 			}
 			else
 			{
-				__NFUN_260__('StandKeyboard_c', fAnimRate, 0.5000000, 1);
+				LoopAnim('StandKeyboard_c', fAnimRate, 0.5000000, 1);
 			}
 			// End:0x1FF
 			break;
@@ -5455,23 +5455,23 @@ simulated function PlayProneFireAnimation()
 	local float fRatio;
 
 	// End:0x12
-	if(__NFUN_154__(int(m_ePawnType), int(2)))
+	if((int(m_ePawnType) == int(2)))
 	{
 		return;
 	}
 	fRatio = 100.0000000;
 	// End:0x80
-	if(__NFUN_151__(m_iRepBipodRotationRatio, 0))
+	if((m_iRepBipodRotationRatio > 0))
 	{
 		// End:0x4B
-		if(__NFUN_242__(EngineWeapon.IsLMG(), true))
+		if((EngineWeapon.IsLMG() == true))
 		{
 			animName = 'ProneBipodRightFireLMG';			
 		}
 		else
 		{
 			// End:0x72
-			if(__NFUN_254__(EngineWeapon.GetProneFiringAnimName(), 'ProneBipodFireAndBoltRifle'))
+			if((EngineWeapon.GetProneFiringAnimName() == 'ProneBipodFireAndBoltRifle'))
 			{
 				animName = 'ProneBipodRightFireAndBoltRifle';				
 			}
@@ -5484,14 +5484,14 @@ simulated function PlayProneFireAnimation()
 	else
 	{
 		// End:0xA3
-		if(__NFUN_242__(EngineWeapon.IsLMG(), true))
+		if((EngineWeapon.IsLMG() == true))
 		{
 			animName = 'ProneBipodLeftFireLMG';			
 		}
 		else
 		{
 			// End:0xCA
-			if(__NFUN_254__(EngineWeapon.GetProneFiringAnimName(), 'ProneBipodFireAndBoltRifle'))
+			if((EngineWeapon.GetProneFiringAnimName() == 'ProneBipodFireAndBoltRifle'))
 			{
 				animName = 'ProneBipodLeftFireAndBoltRifle';				
 			}
@@ -5502,16 +5502,16 @@ simulated function PlayProneFireAnimation()
 		}
 	}
 	// End:0x112
-	if(__NFUN_130__(IsLocallyControlled(), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+	if((IsLocallyControlled() && (int(Level.NetMode) != int(NM_Standalone))))
 	{
-		fRatio = __NFUN_186__(__NFUN_172__(m_fBipodRotation, float(5600)));		
+		fRatio = Abs((m_fBipodRotation / float(5600)));		
 	}
 	else
 	{
-		fRatio = __NFUN_186__(__NFUN_172__(float(m_iRepBipodRotationRatio), fRatio));
+		fRatio = Abs((float(m_iRepBipodRotationRatio) / fRatio));
 	}
 	AnimBlendParams(12, fRatio, 0.0000000, 0.0000000, 'R6');
-	__NFUN_259__(animName, 1.5000000, 0.0000000, 12);
+	PlayAnim(animName, 1.5000000, 0.0000000, 12);
 	return;
 }
 
@@ -5567,15 +5567,15 @@ simulated event PlayWeaponAnimation()
 	local bool bContinue;
 
 	// End:0x16
-	if(__NFUN_132__(m_bWeaponTransition, m_bPostureTransition))
+	if((m_bWeaponTransition || m_bPostureTransition))
 	{
 		return;
 	}
 	// End:0x56
-	if(__NFUN_154__(int(m_ePlayerIsUsingHands), int(3)))
+	if((int(m_ePlayerIsUsingHands) == int(3)))
 	{
 		// End:0x54
-		if(__NFUN_155__(int(m_eLastUsingHands), int(m_ePlayerIsUsingHands)))
+		if((int(m_eLastUsingHands) != int(m_ePlayerIsUsingHands)))
 		{
 			m_eLastUsingHands = m_ePlayerIsUsingHands;
 			R6ResetAnimBlendParams(14);
@@ -5584,7 +5584,7 @@ simulated event PlayWeaponAnimation()
 		return;
 	}
 	// End:0x76
-	if(__NFUN_114__(EngineWeapon, none))
+	if((EngineWeapon == none))
 	{
 		bContinue = GetNormalWeaponAnimation(stAnim);		
 	}
@@ -5612,7 +5612,7 @@ simulated event PlayWeaponAnimation()
 				else
 				{
 					// End:0x10B
-					if(__NFUN_242__(EngineWeapon.bFiredABullet, true))
+					if((EngineWeapon.bFiredABullet == true))
 					{
 						bContinue = GetFireWeaponAnimation(stAnim);
 						EngineWeapon.bFiredABullet = false;						
@@ -5620,7 +5620,7 @@ simulated event PlayWeaponAnimation()
 					else
 					{
 						// End:0x130
-						if(__NFUN_155__(int(m_eGrenadeThrow), int(0)))
+						if((int(m_eGrenadeThrow) != int(0)))
 						{
 							bContinue = GetThrowGrenadeAnimation(stAnim);							
 						}
@@ -5634,7 +5634,7 @@ simulated event PlayWeaponAnimation()
 		}
 	}
 	// End:0x154
-	if(__NFUN_242__(m_bReAttachToRightHand, true))
+	if((m_bReAttachToRightHand == true))
 	{
 		BoltActionSwitchToRight();
 	}
@@ -5642,52 +5642,52 @@ simulated event PlayWeaponAnimation()
 	if(bContinue)
 	{
 		// End:0x345
-		if(__NFUN_132__(__NFUN_132__(m_bPreviousAnimPlayOnce, __NFUN_255__(m_WeaponAnimPlaying, stAnim.nAnimToPlay)), __NFUN_155__(int(m_eLastUsingHands), int(m_ePlayerIsUsingHands))))
+		if(((m_bPreviousAnimPlayOnce || (m_WeaponAnimPlaying != stAnim.nAnimToPlay)) || (int(m_eLastUsingHands) != int(m_ePlayerIsUsingHands))))
 		{
 			m_bPreviousAnimPlayOnce = stAnim.bPlayOnce;
 			m_eLastUsingHands = m_ePlayerIsUsingHands;
 			// End:0x25E
-			if(__NFUN_132__(__NFUN_154__(int(m_ePlayerIsUsingHands), int(0)), __NFUN_154__(int(m_ePlayerIsUsingHands), int(2))))
+			if(((int(m_ePlayerIsUsingHands) == int(0)) || (int(m_ePlayerIsUsingHands) == int(2))))
 			{
 				AnimBlendParams(14, 1.0000000,,, stAnim.nBlendName);
 				// End:0x228
 				if(stAnim.bPlayOnce)
 				{
-					__NFUN_259__(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 14, stAnim.bBackward);					
+					PlayAnim(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 14, stAnim.bBackward);					
 				}
 				else
 				{
-					__NFUN_260__(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 14);
+					LoopAnim(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 14);
 				}
 				m_WeaponAnimPlaying = stAnim.nAnimToPlay;				
 			}
 			else
 			{
 				// End:0x271
-				if(__NFUN_129__(m_bNightVisionAnimation))
+				if((!m_bNightVisionAnimation))
 				{
 					R6ResetAnimBlendParams(14);
 				}
 			}
 			// End:0x332
-			if(__NFUN_130__(__NFUN_132__(__NFUN_154__(int(m_ePlayerIsUsingHands), int(0)), __NFUN_154__(int(m_ePlayerIsUsingHands), int(1))), __NFUN_254__(stAnim.nBlendName, 'R6 R Clavicle')))
+			if((((int(m_ePlayerIsUsingHands) == int(0)) || (int(m_ePlayerIsUsingHands) == int(1))) && (stAnim.nBlendName == 'R6 R Clavicle')))
 			{
 				AnimBlendParams(15, 1.0000000,,, 'R6 L Clavicle');
 				// End:0x2FC
 				if(stAnim.bPlayOnce)
 				{
-					__NFUN_259__(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 15, stAnim.bBackward);					
+					PlayAnim(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 15, stAnim.bBackward);					
 				}
 				else
 				{
-					__NFUN_260__(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 15);
+					LoopAnim(stAnim.nAnimToPlay, stAnim.fRate, stAnim.fTweenTime, 15);
 					m_WeaponAnimPlaying = stAnim.nAnimToPlay;
 				}				
 			}
 			else
 			{
 				// End:0x345
-				if(__NFUN_129__(m_bNightVisionAnimation))
+				if((!m_bNightVisionAnimation))
 				{
 					R6ResetAnimBlendParams(15);
 				}
@@ -5706,12 +5706,12 @@ function ServerChangedWeapon(R6EngineWeapon OldWeapon, R6EngineWeapon W)
 	local Rotator rTagRotator;
 
 	// End:0x0D
-	if(__NFUN_114__(W, none))
+	if((W == none))
 	{
 		return;
 	}
 	// End:0x32
-	if(__NFUN_119__(OldWeapon, none))
+	if((OldWeapon != none))
 	{
 		OldWeapon.SetDefaultDisplayProperties();
 		DetachFromBone(OldWeapon);
@@ -5721,7 +5721,7 @@ function ServerChangedWeapon(R6EngineWeapon OldWeapon, R6EngineWeapon W)
 	AttachWeapon(EngineWeapon, EngineWeapon.m_AttachPoint);
 	EngineWeapon.SetRelativeLocation(vect(0.0000000, 0.0000000, 0.0000000));
 	// End:0xA5
-	if(__NFUN_154__(int(Level.NetMode), int(NM_ListenServer)))
+	if((int(Level.NetMode) == int(NM_ListenServer)))
 	{
 		PlayWeaponAnimation();
 	}
@@ -5732,9 +5732,9 @@ function ServerChangedWeapon(R6EngineWeapon OldWeapon, R6EngineWeapon W)
 simulated function GetClipInHand()
 {
 	// End:0xB8
-	if(__NFUN_130__(__NFUN_119__(R6AbstractWeapon(EngineWeapon), none), __NFUN_119__(R6AbstractWeapon(EngineWeapon).m_MagazineGadget, none)))
+	if(((R6AbstractWeapon(EngineWeapon) != none) && (R6AbstractWeapon(EngineWeapon).m_MagazineGadget != none)))
 	{
-		R6AbstractWeapon(EngineWeapon).m_MagazineGadget.__NFUN_298__(none);
+		R6AbstractWeapon(EngineWeapon).m_MagazineGadget.SetBase(none);
 		AttachToBone(R6AbstractWeapon(EngineWeapon).m_MagazineGadget, 'TagMagazineHand');
 		R6AbstractWeapon(EngineWeapon).m_MagazineGadget.SetRelativeLocation(vect(0.0000000, 0.0000000, 0.0000000));
 		R6AbstractWeapon(EngineWeapon).m_MagazineGadget.SetRelativeRotation(rot(0, 0, 0));
@@ -5746,7 +5746,7 @@ simulated function GetClipInHand()
 simulated function AttachClipToWeapon()
 {
 	// End:0x54
-	if(__NFUN_119__(R6AbstractWeapon(EngineWeapon).m_MagazineGadget, none))
+	if((R6AbstractWeapon(EngineWeapon).m_MagazineGadget != none))
 	{
 		DetachFromBone(R6AbstractWeapon(EngineWeapon).m_MagazineGadget);
 		R6AbstractWeapon(EngineWeapon).m_MagazineGadget.UpdateAttachment(EngineWeapon);
@@ -5758,9 +5758,9 @@ simulated function AttachClipToWeapon()
 simulated function FootStepLadder()
 {
 	// End:0x2C
-	if(__NFUN_119__(m_Ladder, none))
+	if((m_Ladder != none))
 	{
-		__NFUN_2729__(R6LadderVolume(m_Ladder.MyLadder).m_FootSound, 3);
+		SendPlaySound(R6LadderVolume(m_Ladder.MyLadder).m_FootSound, 3);
 	}
 	return;
 }
@@ -5769,9 +5769,9 @@ simulated function FootStepLadder()
 simulated function HandGripLadder()
 {
 	// End:0x2C
-	if(__NFUN_119__(m_Ladder, none))
+	if((m_Ladder != none))
 	{
-		__NFUN_2729__(R6LadderVolume(m_Ladder.MyLadder).m_HandSound, 3);
+		SendPlaySound(R6LadderVolume(m_Ladder.MyLadder).m_HandSound, 3);
 	}
 	return;
 }
@@ -5780,7 +5780,7 @@ simulated function HandGripLadder()
 simulated function FootStepRight()
 {
 	m_bLeftFootDown = false;
-	__NFUN_1844__('R6 R Foot', false);
+	FootStep('R6 R Foot', false);
 	return;
 }
 
@@ -5788,7 +5788,7 @@ simulated function FootStepRight()
 simulated function FootStepLeft()
 {
 	m_bLeftFootDown = true;
-	__NFUN_1844__('R6 L Foot', true);
+	FootStep('R6 L Foot', true);
 	return;
 }
 
@@ -5796,13 +5796,13 @@ simulated function FootStepLeft()
 simulated event PlaySurfaceSwitch()
 {
 	// End:0x26
-	if(__NFUN_154__(int(m_ePawnType), int(1)))
+	if((int(m_ePawnType) == int(1)))
 	{
-		__NFUN_2729__(Level.m_SurfaceSwitchSnd, 3);		
+		SendPlaySound(Level.m_SurfaceSwitchSnd, 3);		
 	}
 	else
 	{
-		__NFUN_2729__(Level.m_SurfaceSwitchForOtherPawnSnd, 3);
+		SendPlaySound(Level.m_SurfaceSwitchForOtherPawnSnd, 3);
 	}
 	return;
 }
@@ -5823,7 +5823,7 @@ function bool IsFighting()
 function bool IsStationary()
 {
 	// End:0x35
-	if(__NFUN_130__(__NFUN_217__(Velocity, vect(0.0000000, 0.0000000, 0.0000000)), __NFUN_217__(Acceleration, vect(0.0000000, 0.0000000, 0.0000000))))
+	if(((Velocity == vect(0.0000000, 0.0000000, 0.0000000)) && (Acceleration == vect(0.0000000, 0.0000000, 0.0000000))))
 	{
 		return true;		
 	}
@@ -5845,9 +5845,9 @@ function CreateBulletManager()
 	local Class<R6AbstractBulletManager> aBulletMgrClass;
 
 	aBulletMgrClass = Class<R6AbstractBulletManager>(DynamicLoadObject("R6Weapons.R6BulletManager", Class'Core.Class'));
-	m_pBulletManager = __NFUN_278__(aBulletMgrClass);
+	m_pBulletManager = Spawn(aBulletMgrClass);
 	// End:0x5A
-	if(__NFUN_119__(m_pBulletManager, none))
+	if((m_pBulletManager != none))
 	{
 		m_pBulletManager.InitBulletMgr(self);
 	}
@@ -5860,15 +5860,15 @@ simulated function ServerGivesWeaponToClient(string aClassName, int iWeaponOrIte
 	local R6AbstractWeapon NewWeapon;
 
 	// End:0x11
-	if(__NFUN_114__(m_pBulletManager, none))
+	if((m_pBulletManager == none))
 	{
 		CreateBulletManager();
 	}
 	// End:0x40
-	if(__NFUN_154__(iWeaponOrItemSlot, 4))
+	if((iWeaponOrItemSlot == 4))
 	{
 		// End:0x3D
-		if(__NFUN_130__(__NFUN_119__(m_WeaponsCarried[2], none), __NFUN_119__(m_WeaponsCarried[3], none)))
+		if(((m_WeaponsCarried[2] != none) && (m_WeaponsCarried[3] != none)))
 		{
 			return;
 		}		
@@ -5876,23 +5876,23 @@ simulated function ServerGivesWeaponToClient(string aClassName, int iWeaponOrIte
 	else
 	{
 		// End:0x56
-		if(__NFUN_119__(m_WeaponsCarried[__NFUN_147__(iWeaponOrItemSlot, 1)], none))
+		if((m_WeaponsCarried[(iWeaponOrItemSlot - 1)] != none))
 		{
 			return;
 		}
 	}
 	// End:0xAC
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
 		// End:0x90
-		if(__NFUN_130__(__NFUN_154__(iWeaponOrItemSlot, 2), __NFUN_114__(m_WeaponsCarried[0], none)))
+		if(((iWeaponOrItemSlot == 2) && (m_WeaponsCarried[0] == none)))
 		{
 			m_SoundRepInfo.m_CurrentWeapon = 1;			
 		}
 		else
 		{
 			// End:0xAC
-			if(__NFUN_154__(iWeaponOrItemSlot, 1))
+			if((iWeaponOrItemSlot == 1))
 			{
 				m_SoundRepInfo.m_CurrentWeapon = 0;
 			}
@@ -5904,25 +5904,25 @@ simulated function ServerGivesWeaponToClient(string aClassName, int iWeaponOrIte
 		return;
 	}
 	WeaponClass = Class<R6AbstractWeapon>(DynamicLoadObject(aClassName, Class'Core.Class'));
-	NewWeapon = __NFUN_278__(WeaponClass, self);
+	NewWeapon = Spawn(WeaponClass, self);
 	// End:0x25C
-	if(__NFUN_119__(NewWeapon, none))
+	if((NewWeapon != none))
 	{
 		NewWeapon.m_InventoryGroup = iWeaponOrItemSlot;
 		// End:0x132
-		if(__NFUN_130__(__NFUN_154__(iWeaponOrItemSlot, 4), __NFUN_114__(m_WeaponsCarried[2], none)))
+		if(((iWeaponOrItemSlot == 4) && (m_WeaponsCarried[2] == none)))
 		{
 			NewWeapon.m_InventoryGroup = 3;
 		}
 		NewWeapon.SetHoldAttachPoint();
 		// End:0x16B
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) != int(NM_Standalone)))
 		{
 			NewWeapon.RemoteRole = ROLE_AutonomousProxy;
 		}
 		NewWeapon.Instigator = self;
 		// End:0x1C7
-		if(__NFUN_154__(int(m_ePawnType), int(1)))
+		if((int(m_ePawnType) == int(1)))
 		{
 			AttachWeapon(NewWeapon, NewWeapon.m_HoldAttachPoint);
 			// End:0x1C7
@@ -5932,21 +5932,21 @@ simulated function ServerGivesWeaponToClient(string aClassName, int iWeaponOrIte
 			}
 		}
 		// End:0x1F7
-		if(__NFUN_123__(weaponGadget, ""))
+		if((weaponGadget != ""))
 		{
 			NewWeapon.m_WeaponGadgetClass = Class<R6AbstractGadget>(DynamicLoadObject(weaponGadget, Class'Core.Class'));
 		}
 		// End:0x21F
-		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		if((int(Level.NetMode) != int(NM_DedicatedServer)))
 		{
 			NewWeapon.SetGadgets();
 		}
 		// End:0x23F
-		if(__NFUN_123__(bulletType, ""))
+		if((bulletType != ""))
 		{
 			NewWeapon.GiveBulletToWeapon(bulletType);
 		}
-		m_WeaponsCarried[__NFUN_147__(NewWeapon.m_InventoryGroup, 1)] = NewWeapon;
+		m_WeaponsCarried[(NewWeapon.m_InventoryGroup - 1)] = NewWeapon;
 	}
 	return;
 }
@@ -5960,24 +5960,24 @@ simulated function GetWeapon(R6AbstractWeapon NewWeapon)
 simulated function R6EngineWeapon GetWeaponInGroup(int iGroup)
 {
 	// End:0x5F
-	if(__NFUN_154__(iGroup, 0))
+	if((iGroup == 0))
 	{
-		__NFUN_231__(__NFUN_112__(string(self), "  Error : GetWeaponInGroup() : iGroup==0, iGroup must be between 1 and 4 "));
+		Log((string(self) $ "  Error : GetWeaponInGroup() : iGroup==0));
 		return none;
 	}
-	return m_WeaponsCarried[__NFUN_147__(iGroup, 1)];
+	return m_WeaponsCarried[(iGroup - 1)];
 	return;
 }
 
 simulated function AttachWeapon(R6EngineWeapon WeaponToAttach, name Attachment)
 {
 	// End:0x0D
-	if(__NFUN_114__(WeaponToAttach, none))
+	if((WeaponToAttach == none))
 	{
 		return;
 	}
 	// End:0x4A
-	if(__NFUN_132__(WeaponToAttach.bNetOwner, __NFUN_154__(int(WeaponToAttach.Role), int(ROLE_Authority))))
+	if((WeaponToAttach.bNetOwner || (int(WeaponToAttach.Role) == int(ROLE_Authority))))
 	{
 		AttachToBone(WeaponToAttach, Attachment);
 	}
@@ -5991,15 +5991,15 @@ simulated function AttachWeapon(R6EngineWeapon WeaponToAttach, name Attachment)
 simulated function AttachCollisionBox(int iNbOfColBox)
 {
 	// End:0x27
-	if(__NFUN_130__(__NFUN_114__(m_collisionBox, none), __NFUN_152__(1, iNbOfColBox)))
+	if(((m_collisionBox == none) && (1 <= iNbOfColBox)))
 	{
-		m_collisionBox = __NFUN_278__(Class'Engine.R6ColBox', self);
+		m_collisionBox = Spawn(Class'Engine.R6ColBox', self);
 	}
 	// End:0xB6
-	if(__NFUN_130__(__NFUN_130__(__NFUN_114__(m_collisionBox2, none), __NFUN_119__(m_collisionBox, none)), __NFUN_152__(2, iNbOfColBox)))
+	if((((m_collisionBox2 == none) && (m_collisionBox != none)) && (2 <= iNbOfColBox)))
 	{
-		m_collisionBox2 = __NFUN_278__(Class'Engine.R6ColBox', m_collisionBox);
-		m_collisionBox2.__NFUN_262__(false, false, false);
+		m_collisionBox2 = Spawn(Class'Engine.R6ColBox', m_collisionBox);
+		m_collisionBox2.SetCollision(false, false, false);
 		m_collisionBox2.bCollideWorld = false;
 		m_collisionBox2.bBlockActors = false;
 		m_collisionBox2.bBlockPlayers = false;
@@ -6069,7 +6069,7 @@ function float GetStanceJumpModifier()
 simulated function bool CanBeAffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 {
 	// End:0x18
-	if(__NFUN_132__(m_bIsClimbingLadder, __NFUN_119__(m_climbObject, none)))
+	if((m_bIsClimbingLadder || (m_climbObject != none)))
 	{
 		return false;
 	}
@@ -6098,10 +6098,10 @@ function AffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 
 	m_fRemainingGrenadeTime = 5.0000000;
 	// End:0x58
-	if(__NFUN_155__(int(m_eEffectiveGrenade), int(eType)))
+	if((int(m_eEffectiveGrenade) != int(eType)))
 	{
 		// End:0x39
-		if(__NFUN_155__(int(m_eEffectiveGrenade), int(0)))
+		if((int(m_eEffectiveGrenade) != int(0)))
 		{
 			EndOfGrenadeEffect(m_eEffectiveGrenade);
 		}
@@ -6109,27 +6109,27 @@ function AffectedByGrenade(Actor aGrenade, Pawn.EGrenadeType eType)
 		m_fTimeGrenadeEffectBeforeSound = Level.TimeSeconds;
 	}
 	// End:0xBE
-	if(__NFUN_130__(__NFUN_132__(__NFUN_155__(int(eType), int(2)), __NFUN_129__(m_bHaveGasMask)), CanBeAffectedByGrenade(aGrenade, eType)))
+	if((((int(eType) != int(2)) || (!m_bHaveGasMask)) && CanBeAffectedByGrenade(aGrenade, eType)))
 	{
 		AIController = R6AIController(Controller);
 		// End:0xBE
-		if(__NFUN_119__(AIController, none))
+		if((AIController != none))
 		{
 			AIController.AIAffectedByGrenade(aGrenade, eType);
 		}
 	}
 	// End:0xF8
-	if(__NFUN_130__(__NFUN_154__(int(eType), int(3)), m_bIsPlayer))
+	if(((int(eType) == int(3)) && m_bIsPlayer))
 	{
 		m_vGrenadeLocation = aGrenade.Location;
 		R6ClientAffectedByFlashbang(m_vGrenadeLocation);
 	}
 	// End:0x169
-	if(__NFUN_130__(__NFUN_129__(m_bHaveGasMask), __NFUN_177__(Level.TimeSeconds, m_fTimeGrenadeEffectBeforeSound)))
+	if(((!m_bHaveGasMask) && (Level.TimeSeconds > m_fTimeGrenadeEffectBeforeSound)))
 	{
-		m_fTimeGrenadeEffectBeforeSound = __NFUN_174__(__NFUN_174__(Level.TimeSeconds, 7.0000000), RandRange(0.0000000, 6.0000000));
+		m_fTimeGrenadeEffectBeforeSound = ((Level.TimeSeconds + 7.0000000) + RandRange(0.0000000, 6.0000000));
 		// End:0x169
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
 			Controller.PlaySoundAffectedByGrenade(eType);
 		}
@@ -6148,7 +6148,7 @@ event EndOfGrenadeEffect(Pawn.EGrenadeType eType)
 function SetRandomWaiting(int iMax, optional bool bDontUseWaitZero)
 {
 	// End:0x6C
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		// End:0x24
 		if(m_bEngaged)
@@ -6158,14 +6158,14 @@ function SetRandomWaiting(int iMax, optional bool bDontUseWaitZero)
 		else
 		{
 			// End:0x5D
-			if(__NFUN_132__(bDontUseWaitZero, __NFUN_152__(int(m_byRemainingWaitZero), 0)))
+			if((bDontUseWaitZero || (int(m_byRemainingWaitZero) <= 0)))
 			{
-				m_byRemainingWaitZero = byte(__NFUN_146__(__NFUN_167__(5), 1));
-				m_bRepPlayWaitAnim = byte(__NFUN_167__(iMax));				
+				m_byRemainingWaitZero = byte((Rand(5) + 1));
+				m_bRepPlayWaitAnim = byte(Rand(iMax));				
 			}
 			else
 			{
-				__NFUN_140__(m_byRemainingWaitZero);
+				(m_byRemainingWaitZero--);
 				m_bRepPlayWaitAnim = 0;
 			}
 		}
@@ -6179,25 +6179,25 @@ function SetRandomWaiting(int iMax, optional bool bDontUseWaitZero)
 function SetNextPendingAction(R6Pawn.EPendingAction eAction, optional int i)
 {
 	// End:0x58
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
-		logWarning(__NFUN_112__(" client shouldn't call SetNextPendingAction ", string(eAction)));
+		logWarning((" client shouldn't call SetNextPendingAction " $ string(eAction)));
 		return;
 	}
-	__NFUN_139__(m_iNetCurrentActionIndex);
+	(m_iNetCurrentActionIndex++);
 	// End:0x75
-	if(__NFUN_153__(int(m_iNetCurrentActionIndex), 5))
+	if((int(m_iNetCurrentActionIndex) >= 5))
 	{
 		m_iNetCurrentActionIndex = 0;
 	}
 	m_ePendingAction[int(m_iNetCurrentActionIndex)] = eAction;
 	m_iPendingActionInt[int(m_iNetCurrentActionIndex)] = i;
 	// End:0xFA
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
-		__NFUN_139__(m_iLocalCurrentActionIndex);
+		(m_iLocalCurrentActionIndex++);
 		// End:0xD1
-		if(__NFUN_153__(int(m_iLocalCurrentActionIndex), 5))
+		if((int(m_iLocalCurrentActionIndex) >= 5))
 		{
 			m_iLocalCurrentActionIndex = 0;
 		}
@@ -6235,7 +6235,7 @@ simulated event PlaySpecialPendingAction(R6Pawn.EPendingAction eAction, int iAct
 		// End:0x52
 		case 4:
 			// End:0x4F
-			if(__NFUN_119__(m_Door, none))
+			if((m_Door != none))
 			{
 				PlayDoorAnim(m_Door.m_RotatingDoor);
 			}
@@ -6283,12 +6283,12 @@ simulated event PlaySpecialPendingAction(R6Pawn.EPendingAction eAction, int iAct
 			break;
 		// End:0xDF
 		case 12:
-			__NFUN_1846__(m_rHitDirection, m_iPendingActionInt[int(m_iLocalCurrentActionIndex)]);
+			MoveHitBone(m_rHitDirection, m_iPendingActionInt[int(m_iLocalCurrentActionIndex)]);
 			// End:0x12E
 			break;
 		// End:0xFFFF
 		default:
-			logWarning(__NFUN_168__(__NFUN_112__("Received PlaySpecialPendingAction not defined for ", string(eAction)), string(iActionInt)));
+			logWarning((("Received PlaySpecialPendingAction not defined for " $ string(eAction)) @ string(iActionInt)));
 			break;
 	}
 	return;
@@ -6312,23 +6312,23 @@ event KImpact(Actor Other, Vector pos, Vector impactVel, Vector impactNorm)
 	local Vector vHitLocation, vHitNormal;
 
 	// End:0xC8
-	if(__NFUN_177__(Level.TimeSeconds, m_fTimeStartBodyFallSound))
+	if((Level.TimeSeconds > m_fTimeStartBodyFallSound))
 	{
 		// End:0x39
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			R6MakeNoise();
 		}
-		__NFUN_1806__(vHitLocation, vHitNormal, __NFUN_216__(pos, vect(0.0000000, 0.0000000, 50.0000000)), __NFUN_215__(pos, vect(0.0000000, 0.0000000, 10.0000000)), 8,, m_HitMaterial);
-		m_fTimeStartBodyFallSound = __NFUN_174__(Level.TimeSeconds, float(1));
+		R6Trace(vHitLocation, vHitNormal, (pos - vect(0.0000000, 0.0000000, 50.0000000)), (pos + vect(0.0000000, 0.0000000, 10.0000000)), 8,, m_HitMaterial);
+		m_fTimeStartBodyFallSound = (Level.TimeSeconds + float(1));
 		// End:0xB5
-		if(__NFUN_154__(int(m_ePawnType), int(1)))
+		if((int(m_ePawnType) == int(1)))
 		{
-			__NFUN_2729__(Level.m_BodyFallSwitchSnd, 3);			
+			SendPlaySound(Level.m_BodyFallSwitchSnd, 3);			
 		}
 		else
 		{
-			__NFUN_2729__(Level.m_BodyFallSwitchForOtherPawnSnd, 3);
+			SendPlaySound(Level.m_BodyFallSwitchForOtherPawnSnd, 3);
 		}
 	}
 	return;
@@ -6340,7 +6340,7 @@ event KImpact(Actor Other, Vector pos, Vector impactVel, Vector impactNorm)
 simulated function DropWeaponToGround()
 {
 	// End:0x22
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
 		EngineWeapon.StartFalling();
 		m_bDroppedWeapon = true;
@@ -6362,59 +6362,59 @@ simulated event SpawnRagDoll()
 	StopWeaponSound();
 	DropWeaponToGround();
 	bPlayedDeath = true;
-	m_fTimeStartBodyFallSound = __NFUN_174__(Level.TimeSeconds, 0.5000000);
-	__NFUN_2729__(m_sndDeathClothes, 3);
+	m_fTimeStartBodyFallSound = (Level.TimeSeconds + 0.5000000);
+	SendPlaySound(m_sndDeathClothes, 3);
 	// End:0x73
-	if(__NFUN_129__(m_bUseKarmaRagdoll))
+	if((!m_bUseKarmaRagdoll))
 	{
-		__NFUN_3970__(0);
-		m_ragdoll = __NFUN_278__(Class'R6Engine.R6RagDoll', self,, Location, Rotation);
-		m_ragdoll.__NFUN_1803__(self);		
+		SetPhysics(0);
+		m_ragdoll = Spawn(Class'R6Engine.R6RagDoll', self,, Location, Rotation);
+		m_ragdoll.FirstInit(self);		
 	}
 	else
 	{
 		// End:0x252
-		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		if((int(Level.NetMode) != int(NM_DedicatedServer)))
 		{
 			KMakeRagdollAvailable();
 			// End:0x252
 			if(KIsRagdollAvailable())
 			{
 				skelParams = KarmaParamsSkel(KParams);
-				shotDir = __NFUN_226__(TearOffMomentum);
+				shotDir = Normal(TearOffMomentum);
 				// End:0x13B
-				if(__NFUN_218__(TakeHitLocation, vect(0.0000000, 0.0000000, 0.0000000)))
+				if((TakeHitLocation != vect(0.0000000, 0.0000000, 0.0000000)))
 				{
-					hitLocRel = __NFUN_212__(__NFUN_216__(TakeHitLocation, GetBoneCoords('R6 Spine').Origin), 1000.0000000);
+					hitLocRel = ((TakeHitLocation - GetBoneCoords('R6 Spine').Origin) * 1000.0000000);
 					hitLocRel.Z = 0.0000000;
 					shotDir2D = shotDir;
 					shotDir2D.Z = 0.0000000;
-					skelParams.KStartAngVel = __NFUN_220__(hitLocRel, __NFUN_226__(shotDir2D));
+					skelParams.KStartAngVel = Cross(hitLocRel, Normal(shotDir2D));
 				}
-				skelParams.KStartLinVel.X = __NFUN_171__(0.6000000, Velocity.X);
-				skelParams.KStartLinVel.Y = __NFUN_171__(0.6000000, Velocity.Y);
-				skelParams.KStartLinVel.Z = __NFUN_171__(1.0000000, Velocity.Z);
-				__NFUN_223__(skelParams.KStartLinVel, __NFUN_212__(shotDir, float(200)));
-				maxDim = float(__NFUN_250__(int(CollisionRadius), int(CollisionHeight)));
-				skelParams.KShotStart = __NFUN_216__(TakeHitLocation, __NFUN_213__(float(1), shotDir));
-				skelParams.KShotEnd = __NFUN_215__(TakeHitLocation, __NFUN_213__(__NFUN_171__(float(2), maxDim), shotDir));
-				skelParams.KShotStrength = __NFUN_225__(TearOffMomentum);
+				skelParams.KStartLinVel.X = (0.6000000 * Velocity.X);
+				skelParams.KStartLinVel.Y = (0.6000000 * Velocity.Y);
+				skelParams.KStartLinVel.Z = (1.0000000 * Velocity.Z);
+				(skelParams.KStartLinVel += (shotDir * float(200)));
+				maxDim = float(Max(int(CollisionRadius), int(CollisionHeight)));
+				skelParams.KShotStart = (TakeHitLocation - (float(1) * shotDir));
+				skelParams.KShotEnd = (TakeHitLocation + ((float(2) * maxDim) * shotDir));
+				skelParams.KShotStrength = VSize(TearOffMomentum);
 				KParams = skelParams;
 				KSetBlockKarma(true);
-				__NFUN_3970__(14);
+				SetPhysics(14);
 			}
 		}
 	}
 	// End:0x2B2
-	if(__NFUN_119__(m_BreathingEmitter, none))
+	if((m_BreathingEmitter != none))
 	{
 		m_BreathingEmitter.Emitters[0].AllParticlesDead = false;
 		m_BreathingEmitter.Emitters[0].m_iPaused = 1;
 		DetachFromBone(m_BreathingEmitter);
-		m_BreathingEmitter.__NFUN_279__();
+		m_BreathingEmitter.Destroy();
 		m_BreathingEmitter = none;
 	}
-	__NFUN_113__('Dead');
+	GotoState('Dead');
 	return;
 }
 
@@ -6441,11 +6441,11 @@ simulated event InitBiPodPosture(bool bEnable)
 	ResetBipodPosture();
 	m_bUsingBipod = bEnable;
 	// End:0x3B
-	if(__NFUN_130__(m_bUsingBipod, __NFUN_155__(int(m_ePeekingMode), int(0))))
+	if((m_bUsingBipod && (int(m_ePeekingMode) != int(0))))
 	{
 		SetPeekingInfo(0, 1000.0000000);
 	}
-	m_iMaxRotationOffset = __NFUN_1512__();
+	m_iMaxRotationOffset = GetMaxRotationOffset();
 	return;
 }
 
@@ -6471,22 +6471,22 @@ simulated event UpdateBipodPosture()
 	local float fRatio;
 
 	// End:0x2E
-	if(__NFUN_242__(EngineWeapon.bFiredABullet, true))
+	if((EngineWeapon.bFiredABullet == true))
 	{
 		PlayProneFireAnimation();
 		EngineWeapon.bFiredABullet = false;
 		return;
 	}
 	// End:0x3F
-	if(__NFUN_154__(m_iLastBipodRotation, m_iRepBipodRotationRatio))
+	if((m_iLastBipodRotation == m_iRepBipodRotationRatio))
 	{
 		return;
 	}
 	// End:0x7B
-	if(__NFUN_151__(m_iRepBipodRotationRatio, 0))
+	if((m_iRepBipodRotationRatio > 0))
 	{
 		// End:0x6D
-		if(__NFUN_242__(EngineWeapon.IsLMG(), true))
+		if((EngineWeapon.IsLMG() == true))
 		{
 			animName = 'ProneBipodRightLMGBreathe';			
 		}
@@ -6498,7 +6498,7 @@ simulated event UpdateBipodPosture()
 	else
 	{
 		// End:0x9E
-		if(__NFUN_242__(EngineWeapon.IsLMG(), true))
+		if((EngineWeapon.IsLMG() == true))
 		{
 			animName = 'ProneBipodLeftLMGBreathe';			
 		}
@@ -6509,16 +6509,16 @@ simulated event UpdateBipodPosture()
 	}
 	fRatio = 100.0000000;
 	// End:0xF1
-	if(__NFUN_130__(IsLocallyControlled(), __NFUN_155__(int(Level.NetMode), int(NM_Standalone))))
+	if((IsLocallyControlled() && (int(Level.NetMode) != int(NM_Standalone))))
 	{
-		fRatio = __NFUN_186__(__NFUN_172__(m_fBipodRotation, float(5600)));		
+		fRatio = Abs((m_fBipodRotation / float(5600)));		
 	}
 	else
 	{
-		fRatio = __NFUN_186__(__NFUN_172__(float(m_iRepBipodRotationRatio), fRatio));
+		fRatio = Abs((float(m_iRepBipodRotationRatio) / fRatio));
 	}
 	AnimBlendParams(12, fRatio, 0.0000000, 0.0000000, 'R6');
-	__NFUN_259__(animName, 1.0000000, 0.0000000, 12);
+	PlayAnim(animName, 1.0000000, 0.0000000, 12);
 	m_iLastBipodRotation = m_iRepBipodRotationRatio;
 	return;
 }
@@ -6529,7 +6529,7 @@ simulated event UpdateBipodPosture()
 //------------------------------------------------------------------
 function bool CanPeek()
 {
-	return __NFUN_129__(m_bUsingBipod);
+	return (!m_bUsingBipod);
 	return;
 }
 
@@ -6558,7 +6558,7 @@ function SetFriendlyFire()
 	local bool bFriendlyFire;
 
 	// End:0x31
-	if(Controller.__NFUN_303__('AIController'))
+	if(Controller.IsA('AIController'))
 	{
 		m_bCanFireFriends = default.m_bCanFireFriends;
 		m_bCanFireNeutrals = default.m_bCanFireNeutrals;		
@@ -6566,9 +6566,9 @@ function SetFriendlyFire()
 	else
 	{
 		// End:0x7A
-		if(__NFUN_155__(int(m_ePawnType), int(1)))
+		if((int(m_ePawnType) != int(1)))
 		{
-			__NFUN_231__(__NFUN_112__("WARNING: SetFriendlyFire unknow m_ePawnType for ", string(self)));
+			Log(("WARNING: SetFriendlyFire unknow m_ePawnType for " $ string(self)));
 		}
 		// End:0xCF
 		if(Level.IsGameTypeMultiplayer(R6AbstractGameInfo(Level.Game).m_szGameTypeFlag))
@@ -6588,23 +6588,23 @@ function SetFriendlyFire()
 // Play sound because no animation here just interpolation
 simulated function CrouchToStand()
 {
-	__NFUN_2729__(m_sndCrouchToStand, 3);
+	SendPlaySound(m_sndCrouchToStand, 3);
 	return;
 }
 
 // Play sound because no animation here just interpolation
 simulated function StandToCrouch()
 {
-	__NFUN_2729__(m_sndStandToCrouch, 3);
+	SendPlaySound(m_sndStandToCrouch, 3);
 	return;
 }
 
 function PlayLocalWeaponSound(R6EngineWeapon.EWeaponSound EWeaponSound)
 {
 	// End:0x1C
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
-		m_SoundRepInfo.__NFUN_3000__(EWeaponSound);
+		m_SoundRepInfo.PlayLocalWeaponSound(EWeaponSound);
 	}
 	return;
 }
@@ -6613,10 +6613,10 @@ function PlayLocalWeaponSound(R6EngineWeapon.EWeaponSound EWeaponSound)
 function PlayWeaponSound(R6EngineWeapon.EWeaponSound EWeaponSound)
 {
 	// End:0x1F
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
-		__NFUN_2731__();
-		m_SoundRepInfo.__NFUN_2727__(EWeaponSound);
+		SetAudioInfo();
+		m_SoundRepInfo.PlayWeaponSound(EWeaponSound);
 	}
 	return;
 }
@@ -6625,9 +6625,9 @@ function PlayWeaponSound(R6EngineWeapon.EWeaponSound EWeaponSound)
 simulated function StopWeaponSound()
 {
 	// End:0x17
-	if(__NFUN_119__(m_SoundRepInfo, none))
+	if((m_SoundRepInfo != none))
 	{
-		m_SoundRepInfo.__NFUN_2728__();
+		m_SoundRepInfo.StopWeaponSound();
 	}
 	return;
 }
@@ -6638,12 +6638,12 @@ simulated function StopWeaponSound()
 event FellOutOfWorld()
 {
 	// End:0x12
-	if(__NFUN_150__(int(Role), int(ROLE_Authority)))
+	if((int(Role) < int(ROLE_Authority)))
 	{
 		return;
 	}
 	// End:0x25
-	if(__NFUN_129__(m_bIsPlayer))
+	if((!m_bIsPlayer))
 	{
 		ServerSuicidePawn(3);
 	}
@@ -6667,12 +6667,12 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 	local bool _bAffectedActor;
 
 	// End:0x2D
-	if(__NFUN_132__(bInvulnerableBody, __NFUN_130__(__NFUN_303__('R6Rainbow'), R6Rainbow(self).m_bIsSurrended)))
+	if((bInvulnerableBody || (IsA('R6Rainbow') && R6Rainbow(self).m_bIsSurrended)))
 	{
 		return 0;
 	}
 	// End:0x76
-	if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_119__(instigatedBy.EngineWeapon, none)))
+	if(((instigatedBy != none) && (instigatedBy.EngineWeapon != none)))
 	{
 		_bAffectedActor = instigatedBy.EngineWeapon.AffectActor(iBulletGoup, self);		
 	}
@@ -6681,13 +6681,13 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 		_bAffectedActor = false;
 	}
 	// End:0x14A
-	if(__NFUN_130__(IsEnemy(instigatedBy), _bAffectedActor))
+	if((IsEnemy(instigatedBy) && _bAffectedActor))
 	{
 		// End:0xED
-		if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+		if((int(Level.NetMode) == int(NM_Standalone)))
 		{
 			// End:0xEA
-			if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_154__(int(instigatedBy.m_ePawnType), int(1))))
+			if(((instigatedBy != none) && (int(instigatedBy.m_ePawnType) == int(1))))
 			{
 				R6Rainbow(instigatedBy).IncrementRoundsHit();
 			}			
@@ -6695,9 +6695,9 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 		else
 		{
 			// End:0x147
-			if(__NFUN_130__(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_119__(instigatedBy.PlayerReplicationInfo, none)), __NFUN_242__(Level.Game.m_bCompilingStats, true)))
+			if((((instigatedBy != none) && (instigatedBy.PlayerReplicationInfo != none)) && (Level.Game.m_bCompilingStats == true)))
 			{
-				__NFUN_165__(instigatedBy.PlayerReplicationInfo.m_iRoundsHit);
+				(instigatedBy.PlayerReplicationInfo.m_iRoundsHit++);
 			}
 		}		
 	}
@@ -6707,10 +6707,10 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 	}
 	TakeHitLocation = vHitLocation;
 	// End:0x1A0
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		// End:0x19D
-		if(__NFUN_130__(m_bIsPlayer, R6PlayerController(Controller).GameReplicationInfo.m_bGameOverRep))
+		if((m_bIsPlayer && R6PlayerController(Controller).GameReplicationInfo.m_bGameOverRep))
 		{
 			return 0;
 		}		
@@ -6718,23 +6718,23 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 	else
 	{
 		// End:0x1E1
-		if(__NFUN_130__(Level.Game.m_bGameOver, __NFUN_129__(R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath)))
+		if((Level.Game.m_bGameOver && (!R6AbstractGameInfo(Level.Game).m_bGameOverButAllowDeath)))
 		{
 			return 0;
 		}
 	}
 	// End:0x237
-	if(__NFUN_130__(__NFUN_129__(InGodMode()), __NFUN_155__(iKillValue, 0)))
+	if(((!InGodMode()) && (iKillValue != 0)))
 	{
-		aBloodEffect = __NFUN_278__(Class'R6SFX.R6BloodEffect',,, vHitLocation);
+		aBloodEffect = Spawn(Class'R6SFX.R6BloodEffect',,, vHitLocation);
 		// End:0x237
-		if(__NFUN_130__(__NFUN_119__(aBloodEffect, none), __NFUN_129__(_bAffectedActor)))
+		if(((aBloodEffect != none) && (!_bAffectedActor)))
 		{
 			aBloodEffect.m_bPlayEffectSound = false;
 		}
 	}
 	// End:0x26D
-	if(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), __NFUN_129__(m_bIsPlayer)))
+	if(((int(m_ePawnType) == int(1)) && (!m_bIsPlayer)))
 	{
 		R6RainbowAI(Controller).IsBeingAttacked(instigatedBy);
 	}
@@ -6746,7 +6746,7 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 	eHitPart = WhichBodyPartWasHit(vHitLocation, vMomentum);
 	m_eLastHitPart = eHitPart;
 	// End:0x2DC
-	if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_119__(instigatedBy.EngineWeapon, none)))
+	if(((instigatedBy != none) && (instigatedBy.EngineWeapon != none)))
 	{
 		bIsSilenced = instigatedBy.EngineWeapon.m_bIsSilenced;		
 	}
@@ -6755,7 +6755,7 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 		bIsSilenced = false;
 	}
 	// End:0x33B
-	if(__NFUN_155__(m_iForceKill, 0))
+	if((m_iForceKill != 0))
 	{
 		switch(m_iForceKill)
 		{
@@ -6786,16 +6786,16 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 	}
 	else
 	{
-		eKillFromTable = __NFUN_2002__(iKillValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
+		eKillFromTable = GetKillResult(iKillValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
 	}
 	// End:0x394
-	if(__NFUN_132__(__NFUN_154__(int(eKillFromTable), int(3)), __NFUN_154__(int(eKillFromTable), int(2))))
+	if(((int(eKillFromTable) == int(3)) || (int(eKillFromTable) == int(2))))
 	{
 		eKillFromTable = 1;
 		bIsSurrended = true;
 	}
 	// End:0x3F9
-	if(__NFUN_130__(__NFUN_155__(m_iForceStun, 0), __NFUN_150__(m_iForceStun, 5)))
+	if(((m_iForceStun != 0) && (m_iForceStun < 5)))
 	{
 		switch(m_iForceStun)
 		{
@@ -6826,18 +6826,18 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 	}
 	else
 	{
-		eStunFromTable = __NFUN_2003__(iStunValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
+		eStunFromTable = GetStunResult(iStunValue, int(eHitPart), int(m_eArmorType), iBulletToArmorModifier, bIsSilenced);
 	}
-	vBulletDirection = __NFUN_226__(vMomentum);
+	vBulletDirection = Normal(vMomentum);
 	BloodRotation = Rotator(vBulletDirection);
 	BloodRotation.Roll = 0;
 	// End:0x470
-	if(__NFUN_155__(int(eKillFromTable), int(0)))
+	if((int(eKillFromTable) != int(0)))
 	{
-		BloodSplat = __NFUN_278__(Class'R6Engine.R6BloodSplatSmall',,, vHitLocation, BloodRotation);
+		BloodSplat = Spawn(Class'R6Engine.R6BloodSplatSmall',,, vHitLocation, BloodRotation);
 	}
 	// End:0x48A
-	if(__NFUN_155__(int(m_iTracedBone), 0))
+	if((int(m_iTracedBone) != 0))
 	{
 		m_rHitDirection = Rotator(vBulletDirection);
 	}
@@ -6850,7 +6850,7 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 	else
 	{
 		// End:0x4DD
-		if(__NFUN_154__(int(eKillFromTable), int(1)))
+		if((int(eKillFromTable) == int(1)))
 		{
 			m_eHealth = 1;
 			m_fHBWound = 1.2000000;
@@ -6862,16 +6862,16 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 		}
 	}
 	// End:0x5A7
-	if(__NFUN_130__(__NFUN_119__(instigatedBy, none), __NFUN_119__(R6PlayerController(instigatedBy.Controller), none)))
+	if(((instigatedBy != none) && (R6PlayerController(instigatedBy.Controller) != none)))
 	{
 		// End:0x5A7
 		if(R6PlayerController(instigatedBy.Controller).m_bShowHitLogs)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Player HIT : ", string(self)), " Bullet Energy : "), string(iKillValue)), " body part : "), string(eHitPart)), " KillResult : "), string(eKillFromTable)), " Armor type : "), string(m_eArmorType)));
+			Log(((((((((("Player HIT : " $ string(self)) $ " Bullet Energy : ") $ string(iKillValue)) $ " body part : ") $ string(eHitPart)) $ " KillResult : ") $ string(eKillFromTable)) $ " Armor type : ") $ string(m_eArmorType)));
 		}
 	}
 	// End:0x60F
-	if(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), __NFUN_155__(int(eKillFromTable), int(0))))
+	if(((int(m_ePawnType) == int(1)) && (int(eKillFromTable) != int(0))))
 	{
 		// End:0x60F
 		if(m_bIsPlayer)
@@ -6881,33 +6881,33 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 		}
 	}
 	// End:0x664
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.R6DamageAttitudeTo(instigatedBy, eKillFromTable, eStunFromTable, vMomentum);
 		// End:0x661
-		if(__NFUN_155__(int(eKillFromTable), int(0)))
+		if((int(eKillFromTable) != int(0)))
 		{
 			Controller.PlaySoundDamage(instigatedBy);
 		}		
 	}
 	// End:0x6D9
-	if(__NFUN_155__(int(eKillFromTable), int(0)))
+	if((int(eKillFromTable) != int(0)))
 	{
-		iStunValue = __NFUN_249__(iStunValue, 5000);
-		vMomentum = __NFUN_212__(__NFUN_226__(vMomentum), float(__NFUN_144__(iStunValue, 100)));
+		iStunValue = Min(iStunValue, 5000);
+		vMomentum = (Normal(vMomentum) * float((iStunValue * 100)));
 		// End:0x6D9
 		if(bIsSurrended)
 		{
 			// End:0x6D9
-			if(__NFUN_130__(__NFUN_154__(int(m_ePawnType), int(1)), m_bIsPlayer))
+			if(((int(m_ePawnType) == int(1)) && m_bIsPlayer))
 			{
 				R6Surrender(instigatedBy, eHitPart, vMomentum);
 			}
 		}
 	}
-	iKillFromHit = __NFUN_2006__(iKillValue, int(eHitPart), vMomentum);
+	iKillFromHit = GetThroughResult(iKillValue, int(eHitPart), vMomentum);
 	// End:0x751
-	if(__NFUN_119__(PlayerReplicationInfo, none))
+	if((PlayerReplicationInfo != none))
 	{
 		switch(m_eHealth)
 		{
@@ -6942,7 +6942,7 @@ function int R6TakeDamageCTE(int iKillValue, int iStunValue, Pawn instigatedBy, 
 function ServerSurrender()
 {
 	// End:0x28
-	if(__NFUN_130__(__NFUN_303__('R6Rainbow'), R6PlayerController(Controller).__NFUN_281__('PlayerStartSurrenderSequence')))
+	if((IsA('R6Rainbow') && R6PlayerController(Controller).IsInState('PlayerStartSurrenderSequence')))
 	{
 		return;
 	}
@@ -6953,7 +6953,7 @@ function ServerSurrender()
 function ClientSurrender()
 {
 	// End:0x28
-	if(__NFUN_130__(__NFUN_303__('R6Rainbow'), R6PlayerController(Controller).__NFUN_281__('PlayerStartSurrenderSequence')))
+	if((IsA('R6Rainbow') && R6PlayerController(Controller).IsInState('PlayerStartSurrenderSequence')))
 	{
 		return;
 	}
@@ -6964,23 +6964,23 @@ function ClientSurrender()
 function Surrender()
 {
 	// End:0x22
-	if(__NFUN_130__(__NFUN_303__('R6Rainbow'), R6Rainbow(self).m_bIsSurrended))
+	if((IsA('R6Rainbow') && R6Rainbow(self).m_bIsSurrended))
 	{
 		return;
 	}
 	// End:0x4A
-	if(__NFUN_130__(__NFUN_303__('R6Rainbow'), R6PlayerController(Controller).__NFUN_281__('PlayerStartSurrenderSequence')))
+	if((IsA('R6Rainbow') && R6PlayerController(Controller).IsInState('PlayerStartSurrenderSequence')))
 	{
 		return;
 	}
-	R6PlayerController(Controller).__NFUN_113__('PlayerStartSurrenderSequence');
+	R6PlayerController(Controller).GotoState('PlayerStartSurrenderSequence');
 	// End:0x7C
-	if(__NFUN_303__('R6Rainbow'))
+	if(IsA('R6Rainbow'))
 	{
 		R6Rainbow(self).m_bIsSurrended = true;
 	}
 	// End:0x92
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		ClientSurrender();
 	}
@@ -6993,7 +6993,7 @@ function Surrender()
 simulated function Arrested()
 {
 	R6Rainbow(self).m_bIsBeingArrestedOrFreed = true;
-	R6PlayerController(Controller).__NFUN_113__('PlayerStartArrest');
+	R6PlayerController(Controller).GotoState('PlayerStartArrest');
 	return;
 }
 
@@ -7020,11 +7020,11 @@ function SetFree()
 	}
 	R6Rainbow(self).m_bIsBeingArrestedOrFreed = true;
 	// End:0x46
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		ClientSetFree();
 	}
-	R6PlayerController(Controller).__NFUN_113__('PlayerSetFree');
+	R6PlayerController(Controller).GotoState('PlayerSetFree');
 	return;
 }
 
@@ -7041,12 +7041,12 @@ function R6Surrender(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	local string KillerName, szPlayerName;
 
 	// End:0x35
-	if(__NFUN_114__(Killer, none))
+	if((Killer == none))
 	{
-		__NFUN_231__(" R6Surrender() : WARNING : Killer=none");
+		Log(" R6Surrender() : WARNING : Killer=none");
 	}
 	// End:0x69
-	if(__NFUN_119__(Killer.PlayerReplicationInfo, none))
+	if((Killer.PlayerReplicationInfo != none))
 	{
 		KillerName = Killer.PlayerReplicationInfo.PlayerName;		
 	}
@@ -7055,27 +7055,27 @@ function R6Surrender(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 		KillerName = Killer.m_CharacterName;
 	}
 	// End:0x169
-	if(__NFUN_132__(m_bIsClimbingLadder, __NFUN_154__(int(Physics), int(11))))
+	if((m_bIsClimbingLadder || (int(Physics) == int(11))))
 	{
 		// End:0x113
-		if(__NFUN_132__(__NFUN_114__(m_Ladder, none), __NFUN_114__(m_Ladder.MyLadder, none)))
+		if(((m_Ladder == none) || (m_Ladder.MyLadder == none)))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(" R6Surrender() : WARNING : m_Ladder=", string(m_Ladder)), " m_Ladder.myLadder="), string(m_Ladder.MyLadder)));
+			Log((((" R6Surrender() : WARNING : m_Ladder=" $ string(m_Ladder)) $ " m_Ladder.myLadder=") $ string(m_Ladder.MyLadder)));
 		}
 		R6LadderVolume(m_Ladder.MyLadder).RemoveClimber(self);
 		// End:0x169
-		if(__NFUN_130__(m_bIsPlayer, __NFUN_119__(m_Ladder, none)))
+		if((m_bIsPlayer && (m_Ladder != none)))
 		{
 			R6LadderVolume(m_Ladder.MyLadder).DisableCollisions(m_Ladder);
 		}
 	}
 	// End:0x1B6
-	if(__NFUN_154__(int(Physics), int(12)))
+	if((int(Physics) == int(12)))
 	{
 		// End:0x194
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
-			Controller.__NFUN_113__('None');
+			Controller.GotoState('None');
 		}
 		// End:0x1AB
 		if(bIsCrouched)
@@ -7089,12 +7089,12 @@ function R6Surrender(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	}
 	AWeapon = R6AbstractWeapon(EngineWeapon);
 	// End:0x200
-	if(__NFUN_130__(__NFUN_119__(AWeapon, none), __NFUN_119__(AWeapon.m_SelectedWeaponGadget, none)))
+	if(((AWeapon != none) && (AWeapon.m_SelectedWeaponGadget != none)))
 	{
 		AWeapon.m_SelectedWeaponGadget.ActivateGadget(false);
 	}
 	// End:0x22A
-	if(__NFUN_217__(vMomentum, vect(0.0000000, 0.0000000, 0.0000000)))
+	if((vMomentum == vect(0.0000000, 0.0000000, 0.0000000)))
 	{
 		vMomentum = vect(1.0000000, 1.0000000, 1.0000000);
 	}
@@ -7104,14 +7104,14 @@ function R6Surrender(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	J0x244:
 
 	// End:0x281 [Loop If]
-	if(__NFUN_152__(i, 3))
+	if((i <= 3))
 	{
 		// End:0x277
-		if(__NFUN_119__(m_WeaponsCarried[i], none))
+		if((m_WeaponsCarried[i] != none))
 		{
 			m_WeaponsCarried[i].SetRelevant(true);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x244;
 	}
@@ -7121,15 +7121,15 @@ function R6Surrender(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 	if(ProcessBuildDeathMessage(Killer, szPlayerName))
 	{
 		// End:0x2DB
-		foreach __NFUN_313__(Class'R6Engine.R6PlayerController', P)
+		foreach DynamicActors(Class'R6Engine.R6PlayerController', P)
 		{
 			P.ClientDeathMessage(KillerName, szPlayerName, m_bSuicideType);			
 		}		
 	}
 	// End:0x31C
-	if(__NFUN_114__(m_KilledBy, none))
+	if((m_KilledBy == none))
 	{
-		__NFUN_231__(__NFUN_112__("  R6Surrender() : Warning!!  m_KilledBy=", string(m_KilledBy)));
+		Log(("  R6Surrender() : Warning!!  m_KilledBy=" $ string(m_KilledBy)));
 	}
 	// End:0x339
 	if(IsEnemy(m_KilledBy))
@@ -7137,7 +7137,7 @@ function R6Surrender(Pawn Killer, R6Pawn.eBodyPart eHitPart, Vector vMomentum)
 		m_KilledBy.IncrementFragCount();
 	}
 	// End:0x36B
-	if(__NFUN_119__(R6PlayerController(Controller), none))
+	if((R6PlayerController(Controller) != none))
 	{
 		R6PlayerController(Controller).PlayerReplicationInfo.m_szKillersName = KillerName;
 	}
@@ -7161,7 +7161,7 @@ simulated state Dead
 //===================================================================================================
 	event Vector EyePosition()
 	{
-		return __NFUN_216__(GetBoneCoords('R6 Head').Origin, Location);
+		return (GetBoneCoords('R6 Head').Origin - Location);
 		return;
 	}
 
@@ -7178,21 +7178,21 @@ Begin:
 		SetPeekingInfo(0, 1000.0000000);
 	}
 	bProjTarget = true;
-	__NFUN_262__(true, false, false);
-	__NFUN_283__(__NFUN_171__(1.5000000, default.CollisionRadius), __NFUN_171__(1.0000000, default.CollisionHeight));
-	__NFUN_280__(0.5000000, false);
+	SetCollision(true, false, false);
+	SetCollisionSize((1.5000000 * default.CollisionRadius), (1.0000000 * default.CollisionHeight));
+	SetTimer(0.5000000, false);
 	// End:0x60
-	if(__NFUN_119__(m_collisionBox, none))
+	if((m_collisionBox != none))
 	{
-		m_collisionBox.__NFUN_1503__(false);
+		m_collisionBox.EnableCollision(false);
 	}
 	// End:0x78
-	if(__NFUN_119__(m_collisionBox2, none))
+	if((m_collisionBox2 != none))
 	{
-		m_collisionBox2.__NFUN_1503__(false);
+		m_collisionBox2.EnableCollision(false);
 	}
 	// End:0xCF
-	if(__NFUN_119__(Controller, none))
+	if((Controller != none))
 	{
 		Controller.FocalPoint = vect(0.0000000, 0.0000000, 0.0000000);
 		Controller.Focus = none;
@@ -7201,7 +7201,7 @@ Begin:
 	}
 	bRotateToDesired = false;
 	// End:0xF8
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) != int(NM_Client)))
 	{
 		R6MakeNoise();
 	}

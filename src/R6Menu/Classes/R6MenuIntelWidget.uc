@@ -342,8 +342,8 @@ function ManageButtonSelection(int _eButtonSelection)
 	// End:0x30F
 	if((m_sndPlayEvent != none))
 	{
-		GetPlayerOwner().__NFUN_264__(m_sndPlayEvent, 7) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-		GetPlayerOwner().__NFUN_2721__(3.0000000, 15, 5);
+		GetPlayerOwner().PlaySound(m_sndPlayEvent, 7);
+		GetPlayerOwner().FadeSound(3.0000000, 15, 5);
 	}
 	m_SrcrollingTextArea.Clear();
 	DisplayText(10.0000000, 4.0000000, Root.Fonts[10], Root.Colors.White, m_SrcrollingTextArea);
@@ -353,7 +353,7 @@ function ManageButtonSelection(int _eButtonSelection)
 function StopIntelWidgetSound()
 {
 	m_MissionDesc.StopVideo();
-	GetPlayerOwner().__NFUN_2725__(m_sndPlayEvent);
+	GetPlayerOwner().StopSound(m_sndPlayEvent);
 	m_sndPlayEvent = none;
 	return;
 }

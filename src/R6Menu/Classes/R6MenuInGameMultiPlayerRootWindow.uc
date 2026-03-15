@@ -609,21 +609,21 @@ function MoveMouse(float X, float Y)
 	// End:0x48
 	if((!bMouseCapture))
 	{
-		NewMouseWindow = FindWindowUnder(__NFUN_171__(X, m_fWindowScaleX), __NFUN_171__(Y, m_fWindowScaleY));		
+		NewMouseWindow = FindWindowUnder((X * m_fWindowScaleX), (Y * m_fWindowScaleY));		
 	}
 	else
 	{
 		NewMouseWindow = MouseWindow;
 	}
 	// End:0x8B
-	if(__NFUN_119__(NewMouseWindow, MouseWindow))
+	if((NewMouseWindow != MouseWindow))
 	{
 		MouseWindow.MouseLeave();
 		NewMouseWindow.MouseEnter();
 		MouseWindow = NewMouseWindow;
 	}
 	// End:0xF3
-	if(__NFUN_132__(__NFUN_181__(MouseX, OldMouseX), __NFUN_181__(MouseY, OldMouseY)))
+	if(((MouseX != OldMouseX) || (MouseY != OldMouseY)))
 	{
 		OldMouseX = MouseX;
 		OldMouseY = MouseY;
@@ -645,14 +645,14 @@ function DrawMouse(Canvas C)
 	}
 	else
 	{
-		C.__NFUN_2626__(byte(255), byte(255), byte(255));
+		C.SetDrawColor(byte(255), byte(255), byte(255));
 		C.Style = 5;
-		C.__NFUN_2623__(__NFUN_175__(MouseX, float(MouseWindow.Cursor.HotX)), __NFUN_175__(MouseY, float(MouseWindow.Cursor.HotY)));
+		C.SetPos((MouseX - float(MouseWindow.Cursor.HotX)), (MouseY - float(MouseWindow.Cursor.HotY)));
 		// End:0x143
-		if(__NFUN_119__(MouseWindow.Cursor.Tex, none))
+		if((MouseWindow.Cursor.Tex != none))
 		{
 			MouseTex = MouseWindow.Cursor.Tex;
-			C.__NFUN_466__(MouseTex, float(MouseTex.USize), float(MouseTex.VSize), 0.0000000, 0.0000000, float(MouseTex.USize), float(MouseTex.VSize));
+			C.DrawTile(MouseTex, float(MouseTex.USize), float(MouseTex.VSize), 0.0000000, 0.0000000, float(MouseTex.USize), float(MouseTex.VSize));
 		}
 		C.Style = 1;
 	}
@@ -682,16 +682,16 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bJoinTeamWidget)
 	{
 		C.Style = 5;
-		C.__NFUN_2626__(Root.Colors.Black.R, Root.Colors.Black.G, Root.Colors.Black.B);
+		C.SetDrawColor(Root.Colors.Black.R, Root.Colors.Black.G, Root.Colors.Black.B);
 		DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, WinHeight, 0.0000000, 0.0000000, 10.0000000, 10.0000000, Texture'UWindow.WhiteTexture');
 		szTemp = Localize("MP", "WaitingForServer", "R6Engine");
 		C.Font = Root.Fonts[14];
-		C.__NFUN_2626__(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
+		C.SetDrawColor(Root.Colors.White.R, Root.Colors.White.G, Root.Colors.White.B);
 		TextSize(C, szTemp, W, H);
-		W = __NFUN_171__(__NFUN_175__(WinWidth, W), 0.5000000);
-		H = __NFUN_171__(__NFUN_175__(WinHeight, H), 0.5000000);
-		C.__NFUN_2623__(W, H);
-		C.__NFUN_465__(szTemp);
+		W = ((WinWidth - W) * 0.5000000);
+		H = ((WinHeight - H) * 0.5000000);
+		C.SetPos(W, H);
+		C.DrawText(szTemp);
 	}
 	return;
 }
@@ -699,7 +699,7 @@ function Paint(Canvas C, float X, float Y)
 function bool IsGameMenuComInitialized()
 {
 	// End:0x21
-	if(__NFUN_130__(__NFUN_119__(m_R6GameMenuCom, none), m_R6GameMenuCom.IsInitialisationCompleted()))
+	if(((m_R6GameMenuCom != none) && m_R6GameMenuCom.IsInitialisationCompleted()))
 	{
 		return true;
 	}
@@ -710,15 +710,15 @@ function bool IsGameMenuComInitialized()
 function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, int Key)
 {
 	// End:0xC2
-	if(__NFUN_155__(int(Msg), int(11)))
+	if((int(Msg) != int(11)))
 	{
 		// End:0xA0
-		if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_129__(IsGameMenuComInitialized()), __NFUN_114__(GetPlayerOwner(), none)), __NFUN_114__(GetLevel(), none)), __NFUN_114__(Console, none)))
+		if(((((!IsGameMenuComInitialized()) || (GetPlayerOwner() == none)) || (GetLevel() == none)) || (Console == none)))
 		{
 			// End:0x82
-			if(__NFUN_154__(int(GetSimplePopUpID()), int(33)))
+			if((int(GetSimplePopUpID()) == int(33)))
 			{
-				super(UWindowRootWindow).WindowEvent(Msg, C, __NFUN_171__(X, m_fWindowScaleX), __NFUN_171__(Y, m_fWindowScaleY), Key);
+				super(UWindowRootWindow).WindowEvent(Msg, C, (X * m_fWindowScaleX), (Y * m_fWindowScaleY), Key);
 			}
 			m_bMenuInvalid = true;
 			m_pIntermissionMenuWidget.SetNavBarInActive(true, true);
@@ -741,16 +741,16 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 			// End:0x16B
 			if(m_bScaleWindowToRoot)
 			{
-				C.__NFUN_1606__(true, 640.0000000, 480.0000000);
-				m_fWindowScaleX = __NFUN_172__(C.GetVirtualSizeX(), float(C.SizeX));
-				m_fWindowScaleY = __NFUN_172__(C.GetVirtualSizeY(), float(C.SizeY));
+				C.UseVirtualSize(true, 640.0000000, 480.0000000);
+				m_fWindowScaleX = (C.GetVirtualSizeX() / float(C.SizeX));
+				m_fWindowScaleY = (C.GetVirtualSizeY() / float(C.SizeY));
 				super(UWindowRootWindow).WindowEvent(Msg, C, X, Y, Key);
-				C.__NFUN_1606__(false);				
+				C.UseVirtualSize(false);				
 			}
 			else
 			{
 				// End:0x1C7
-				if(__NFUN_132__(__NFUN_181__(WinWidth, float(C.SizeX)), __NFUN_181__(WinHeight, float(C.SizeY))))
+				if(((WinWidth != float(C.SizeX)) || (WinHeight != float(C.SizeY))))
 				{
 					SetResolution(float(C.SizeX), float(C.SizeY));
 				}
@@ -763,27 +763,27 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x257
 		case 9:
 			// End:0x227
-			if(__NFUN_155__(int(m_eCurWidgetInUse), int(16)))
+			if((int(m_eCurWidgetInUse) != int(16)))
 			{
 				// End:0x227
-				if(__NFUN_129__(ProcessKeyDown(Key)))
+				if((!ProcessKeyDown(Key)))
 				{
 					// [Explicit Continue]
 					goto J0x320;
 				}
 			}
-			super(UWindowRootWindow).WindowEvent(Msg, C, __NFUN_171__(X, m_fWindowScaleX), __NFUN_171__(Y, m_fWindowScaleY), Key);
+			super(UWindowRootWindow).WindowEvent(Msg, C, (X * m_fWindowScaleX), (Y * m_fWindowScaleY), Key);
 			// End:0x320
 			break;
 		// End:0x29F
 		case 8:
 			// End:0x26F
-			if(__NFUN_129__(ProcessKeyUp(Key)))
+			if((!ProcessKeyUp(Key)))
 			{
 				// [Explicit Continue]
 				goto J0x320;
 			}
-			super(UWindowRootWindow).WindowEvent(Msg, C, __NFUN_171__(X, m_fWindowScaleX), __NFUN_171__(Y, m_fWindowScaleY), Key);
+			super(UWindowRootWindow).WindowEvent(Msg, C, (X * m_fWindowScaleX), (Y * m_fWindowScaleY), Key);
 			// End:0x320
 			break;
 		// End:0x2A4
@@ -798,12 +798,12 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		case 4:
 		// End:0x2ED
 		case 5:
-			super(UWindowRootWindow).WindowEvent(Msg, C, __NFUN_171__(X, m_fWindowScaleX), __NFUN_171__(Y, m_fWindowScaleY), Key);
+			super(UWindowRootWindow).WindowEvent(Msg, C, (X * m_fWindowScaleX), (Y * m_fWindowScaleY), Key);
 			// End:0x320
 			break;
 		// End:0xFFFF
 		default:
-			super(UWindowRootWindow).WindowEvent(Msg, C, __NFUN_171__(X, m_fWindowScaleX), __NFUN_171__(Y, m_fWindowScaleY), Key);
+			super(UWindowRootWindow).WindowEvent(Msg, C, (X * m_fWindowScaleX), (Y * m_fWindowScaleY), Key);
 			// End:0x320
 			break;
 			break;
@@ -822,7 +822,7 @@ function bool ProcessKeyDown(int Key)
 
 	PC = GetPlayerOwner();
 	// End:0x1D
-	if(__NFUN_155__(m_iLastKeyDown, -1))
+	if((m_iLastKeyDown != -1))
 	{
 		return true;
 	}
@@ -833,16 +833,16 @@ function bool ProcessKeyDown(int Key)
 	J0x40:
 
 	// End:0xB5 [Loop If]
-	if(__NFUN_150__(i, iNbOfKeys))
+	if((i < iNbOfKeys))
 	{
 		// End:0xAB
-		if(__NFUN_154__(m_pListOfKeyAvailability[i].iKey, Key))
+		if((m_pListOfKeyAvailability[i].iKey == Key))
 		{
 			// End:0xA4
-			if(__NFUN_151__(__NFUN_156__(m_pListOfKeyAvailability[i].iWidgetKA, m_iWidgetKA), 0))
+			if(((m_pListOfKeyAvailability[i].iWidgetKA & m_iWidgetKA) > 0))
 			{
 				// End:0x9E
-				if(__NFUN_154__(int(m_eCurWidgetInUse), int(34)))
+				if((int(m_eCurWidgetInUse) == int(34)))
 				{
 					m_bTrapKey = false;
 				}
@@ -855,7 +855,7 @@ function bool ProcessKeyDown(int Key)
 		}
 		J0xAB:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x40;
 	}
@@ -865,17 +865,17 @@ function bool ProcessKeyDown(int Key)
 	switch(Key)
 	{
 		// End:0xFB
-		case int(PC.__NFUN_2706__("Talk")):
+		case int(PC.GetKey("Talk")):
 			Console.Talk();
 			// End:0x564
 			break;
 		// End:0x128
-		case int(PC.__NFUN_2706__("TeamTalk")):
+		case int(PC.GetKey("TeamTalk")):
 			Console.TeamTalk();
 			// End:0x564
 			break;
 		// End:0x1BB
-		case int(PC.__NFUN_2706__("ToggleGameStats")):
+		case int(PC.GetKey("ToggleGameStats")):
 			R6Console(Root.Console).bCancelFire = false;
 			eNextWidgetIDUp = 25;
 			// End:0x1A8
@@ -896,17 +896,17 @@ function bool ProcessKeyDown(int Key)
 			// End:0x564
 			break;
 		// End:0x315
-		case int(PC.__NFUN_2706__("DrawingTool")):
+		case int(PC.GetKey("DrawingTool")):
 			// End:0x312
-			if(__NFUN_130__(R6GameReplicationInfo(PC.GameReplicationInfo).m_bIsWritableMapAllowed, m_R6GameMenuCom.IsAPlayerSelection()))
+			if((R6GameReplicationInfo(PC.GameReplicationInfo).m_bIsWritableMapAllowed && m_R6GameMenuCom.IsAPlayerSelection()))
 			{
 				// End:0x312
-				if(__NFUN_132__(__NFUN_130__(__NFUN_119__(PC.Pawn, none), PC.Pawn.IsAlive()), bIsInBetweenRound))
+				if((((PC.Pawn != none) && PC.Pawn.IsAlive()) || bIsInBetweenRound))
 				{
 					eNextWidgetIDUp = 23;
 					eNextWidgetIDDown = 0;
 					// End:0x2B0
-					if(__NFUN_154__(int(m_eCurWidgetInUse), int(23)))
+					if((int(m_eCurWidgetInUse) == int(23)))
 					{
 						// End:0x27D
 						if(bIsInBetweenRound)
@@ -914,9 +914,9 @@ function bool ProcessKeyDown(int Key)
 							eNextWidgetIDDown = m_ePrevWidgetInUse;
 						}
 						// End:0x2AD
-						if(__NFUN_119__(PC.Pawn, none))
+						if((PC.Pawn != none))
 						{
-							PC.Pawn.__NFUN_264__(m_sndCloseDrawingTool, 9);
+							PC.Pawn.PlaySound(m_sndCloseDrawingTool, 9);
 						}						
 					}
 					else
@@ -929,16 +929,16 @@ function bool ProcessKeyDown(int Key)
 						else
 						{
 							// End:0x2DA
-							if(__NFUN_155__(int(m_eCurWidgetInUse), int(0)))
+							if((int(m_eCurWidgetInUse) != int(0)))
 							{
 								// [Explicit Continue]
 								goto J0x564;
 							}
 						}
 						// End:0x30A
-						if(__NFUN_119__(PC.Pawn, none))
+						if((PC.Pawn != none))
 						{
-							PC.Pawn.__NFUN_264__(m_sndOpenDrawingTool, 9);
+							PC.Pawn.PlaySound(m_sndOpenDrawingTool, 9);
 						}
 					}
 					bProcessWChange = true;
@@ -952,10 +952,10 @@ function bool ProcessKeyDown(int Key)
 			eNextWidgetIDDown = 0;
 			bProcessWChange = true;
 			// End:0x389
-			if(__NFUN_154__(int(m_eCurWidgetInUse), int(27)))
+			if((int(m_eCurWidgetInUse) == int(27)))
 			{
 				// End:0x37E
-				if(R6MenuMPInGameEsc(m_pListOfActiveWidget[__NFUN_147__(m_pListOfActiveWidget.Length, 1)].m_pWidget).m_bEscAvailable)
+				if(R6MenuMPInGameEsc(m_pListOfActiveWidget[(m_pListOfActiveWidget.Length - 1)].m_pWidget).m_bEscAvailable)
 				{
 					bProcessKeyToAllMenu = false;					
 				}
@@ -967,7 +967,7 @@ function bool ProcessKeyDown(int Key)
 			else
 			{
 				// End:0x3B8
-				if(__NFUN_154__(int(m_eCurWidgetInUse), int(23)))
+				if((int(m_eCurWidgetInUse) == int(23)))
 				{
 					// End:0x3B0
 					if(bIsInBetweenRound)
@@ -983,7 +983,7 @@ function bool ProcessKeyDown(int Key)
 			// End:0x564
 			break;
 		// End:0x41B
-		case int(PC.__NFUN_2706__("VotingMenu")):
+		case int(PC.GetKey("VotingMenu")):
 			// End:0x418
 			if(m_bActiveVoteMenu)
 			{
@@ -995,9 +995,9 @@ function bool ProcessKeyDown(int Key)
 			// End:0x564
 			break;
 		// End:0x4C2
-		case int(PC.__NFUN_2706__("PreRecMessages")):
+		case int(PC.GetKey("PreRecMessages")):
 			// End:0x4BF
-			if(__NFUN_130__(__NFUN_130__(__NFUN_123__(m_szCurrentGameType, "RGM_DeathmatchMode"), __NFUN_129__(PC.__NFUN_281__('Dead'))), __NFUN_129__(PC.bOnlySpectator)))
+			if((((m_szCurrentGameType != "RGM_DeathmatchMode") && (!PC.IsInState('Dead'))) && (!PC.bOnlySpectator)))
 			{
 				R6Console(Root.Console).bCancelFire = false;
 				eNextWidgetIDUp = 28;
@@ -1007,9 +1007,9 @@ function bool ProcessKeyDown(int Key)
 			// End:0x564
 			break;
 		// End:0x55E
-		case int(PC.__NFUN_2706__("OperativeSelector")):
+		case int(PC.GetKey("OperativeSelector")):
 			// End:0x55B
-			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(GetLevel().IsGameTypeCooperative(m_R6GameMenuCom.GetGameType()), __NFUN_154__(int(m_eCurWidgetInUse), int(0))), __NFUN_129__(PC.bOnlySpectator)), m_bCanDisplayOperativeSelector))
+			if((((GetLevel().IsGameTypeCooperative(m_R6GameMenuCom.GetGameType()) && (int(m_eCurWidgetInUse) == int(0))) && (!PC.bOnlySpectator)) && m_bCanDisplayOperativeSelector))
 			{
 				m_bCanDisplayOperativeSelector = false;
 				eNextWidgetIDUp = 35;
@@ -1030,7 +1030,7 @@ function bool ProcessKeyDown(int Key)
 	if(bProcessWChange)
 	{
 		// End:0x599
-		if(__NFUN_154__(int(m_eCurWidgetInUse), int(eNextWidgetIDUp)))
+		if((int(m_eCurWidgetInUse) == int(eNextWidgetIDUp)))
 		{
 			ChangeCurrentWidget(eNextWidgetIDDown);
 			m_iLastKeyDown = -1;			
@@ -1048,15 +1048,15 @@ function bool ProcessKeyDown(int Key)
 function bool ProcessKeyUp(int Key)
 {
 	// End:0x2B
-	if(__NFUN_130__(__NFUN_155__(m_iLastKeyDown, -1), __NFUN_154__(m_iLastKeyDown, Key)))
+	if(((m_iLastKeyDown != -1) && (m_iLastKeyDown == Key)))
 	{
 		m_iLastKeyDown = -1;
 	}
 	// End:0x79
-	if(__NFUN_154__(Key, int(GetPlayerOwner().__NFUN_2706__("OperativeSelector"))))
+	if((Key == int(GetPlayerOwner().GetKey("OperativeSelector"))))
 	{
 		// End:0x6F
-		if(__NFUN_154__(int(m_eCurWidgetInUse), int(35)))
+		if((int(m_eCurWidgetInUse) == int(35)))
 		{
 			ChangeCurrentWidget(0);
 		}
@@ -1076,7 +1076,7 @@ function bool TrapKey(bool _bIncludeMouseMove)
 	if(_bIncludeMouseMove)
 	{
 		// End:0x1B
-		if(__NFUN_154__(int(m_eCurWidgetInUse), int(34)))
+		if((int(m_eCurWidgetInUse) == int(34)))
 		{
 			return false;
 		}
@@ -1097,16 +1097,16 @@ function UpdateTimeInBetRound(int _iNewTime, optional string _StringInstead)
 	J0x13:
 
 	// End:0x8B [Loop If]
-	if(__NFUN_150__(i, iNbOfWindow))
+	if((i < iNbOfWindow))
 	{
 		// End:0x81
-		if(__NFUN_132__(__NFUN_154__(int(m_pListOfActiveWidget[i].m_eGameWidgetID), int(26)), __NFUN_154__(int(m_pListOfActiveWidget[i].m_eGameWidgetID), int(25))))
+		if(((int(m_pListOfActiveWidget[i].m_eGameWidgetID) == int(26)) || (int(m_pListOfActiveWidget[i].m_eGameWidgetID) == int(25))))
 		{
 			m_pListOfActiveWidget[i].m_pPopUpFrame.UpdateTimeInTextLabel(_iNewTime, _StringInstead);
 			// [Explicit Break]
 			goto J0x8B;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x13;
 	}
@@ -1121,7 +1121,7 @@ function UpdateTimeInBetRound(int _iNewTime, optional string _StringInstead)
 function MenuLoadProfile(bool _bServerProfile)
 {
 	// End:0x1A
-	if(__NFUN_129__(_bServerProfile))
+	if((!_bServerProfile))
 	{
 		m_pOptionsWidget.MenuOptionsLoadProfile();
 	}

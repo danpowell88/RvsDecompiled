@@ -494,9 +494,9 @@ function int GetTotalTeamFrag(int iTeamId)
 		// End:0x8F
 		if(((PController.m_pawn != none) && (!PController.m_pawn.m_bSuicided)))
 		{
-			__NFUN_161__(iFragCount, PController.PlayerReplicationInfo.m_iRoundKillCount);
+			(iFragCount += PController.PlayerReplicationInfo.m_iRoundKillCount);
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -511,18 +511,18 @@ function int GetTotalTeamFrag(int iTeamId)
 function AddTeamWonRound(int iTeamId)
 {
 	// End:0x0E
-	if(__NFUN_242__(m_bCompilingStats, false))
+	if((m_bCompilingStats == false))
 	{
 		return;
 	}
 	// End:0x38
-	if(__NFUN_150__(iTeamId, 2))
+	if((iTeamId < 2))
 	{
-		__NFUN_165__(R6GameReplicationInfo(GameReplicationInfo).m_aTeamScore[iTeamId]);		
+		(R6GameReplicationInfo(GameReplicationInfo).m_aTeamScore[iTeamId]++);		
 	}
 	else
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Warning: AddTeamWonRound teamID=", string(iTeamId)), " and m_aTeamScore size is= "), string(2)));
+		Log(((("Warning: AddTeamWonRound teamID=" $ string(iTeamId)) $ " and m_aTeamScore size is= ") $ string(2)));
 	}
 	return;
 }
@@ -545,17 +545,17 @@ function int GetNbRoundWinner()
 	J0x2D:
 
 	// End:0xB7 [Loop If]
-	if(__NFUN_150__(iTeam, 2))
+	if((iTeam < 2))
 	{
 		// End:0x62
-		if(__NFUN_154__(repGameInfo.m_aTeamScore[iTeam], iCurWinnerScore))
+		if((repGameInfo.m_aTeamScore[iTeam] == iCurWinnerScore))
 		{
 			bDraw = true;
 			// [Explicit Continue]
 			goto J0xAD;
 		}
 		// End:0xAD
-		if(__NFUN_151__(repGameInfo.m_aTeamScore[iTeam], iCurWinnerScore))
+		if((repGameInfo.m_aTeamScore[iTeam] > iCurWinnerScore))
 		{
 			iCurWinner = iTeam;
 			iCurWinnerScore = repGameInfo.m_aTeamScore[iTeam];
@@ -563,7 +563,7 @@ function int GetNbRoundWinner()
 		}
 		J0xAD:
 
-		__NFUN_163__(iTeam);
+		(++iTeam);
 		// [Loop Continue]
 		goto J0x2D;
 	}
@@ -593,10 +593,10 @@ function ResetMatchStat()
 	J0x17:
 
 	// End:0x43 [Loop If]
-	if(__NFUN_150__(iTeam, 2))
+	if((iTeam < 2))
 	{
 		repGameInfo.m_aTeamScore[iTeam] = 0;
-		__NFUN_163__(iTeam);
+		(++iTeam);
 		// [Loop Continue]
 		goto J0x17;
 	}
@@ -614,10 +614,10 @@ function string GetDeathMatchWinner()
 	local PlayerMenuInfo playerMenuInfo1, playerMenuInfo2;
 
 	R6GameReplicationInfo(GameReplicationInfo).RefreshMPInfoPlayerStats();
-	__NFUN_1230__(0, playerMenuInfo1);
-	__NFUN_1230__(1, playerMenuInfo2);
+	GetFPlayerMenuInfo(0, playerMenuInfo1);
+	GetFPlayerMenuInfo(1, playerMenuInfo2);
 	// End:0x4A
-	if(__NFUN_151__(playerMenuInfo1.iRoundsWon, playerMenuInfo2.iRoundsWon))
+	if((playerMenuInfo1.iRoundsWon > playerMenuInfo2.iRoundsWon))
 	{
 		return playerMenuInfo1.szPlayerName;
 	}
@@ -650,27 +650,27 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 		{
 			iWinnerID = GetNbRoundWinner();
 			// End:0x7E
-			if(__NFUN_154__(iWinnerID, -1))
+			if((iWinnerID == -1))
 			{
 				BroadcastGameMsg("", "", "MatchIsADraw", m_sndMatchIsADraw, int(GetGameMsgLifeTime()));				
 			}
 			else
 			{
 				// End:0xBA
-				if(__NFUN_154__(iWinnerID, c_iAlphaTeam))
+				if((iWinnerID == c_iAlphaTeam))
 				{
 					BroadcastGameMsg("", "", "GreenTeamWonMatch", m_sndGreenTeamWonMatch, int(GetGameMsgLifeTime()));					
 				}
 				else
 				{
 					// End:0xF4
-					if(__NFUN_154__(iWinnerID, c_iBravoTeam))
+					if((iWinnerID == c_iBravoTeam))
 					{
 						BroadcastGameMsg("", "", "RedTeamWonMatch", m_sndRedTeamWonMatch, int(GetGameMsgLifeTime()));						
 					}
 					else
 					{
-						__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Warning: GetNbRoundWinner unknow id= ", string(iWinnerID)), " in "), string(Class.Name)));
+						Log(((("Warning: GetNbRoundWinner unknow id= " $ string(iWinnerID)) $ " in ") $ string(Class.Name)));
 					}
 				}
 			}			
@@ -682,7 +682,7 @@ function EndGame(PlayerReplicationInfo Winner, string Reason)
 			{
 				szWinner = GetDeathMatchWinner();
 				// End:0x196
-				if(__NFUN_122__(szWinner, ""))
+				if((szWinner == ""))
 				{
 					BroadcastGameMsg("", "", "MatchIsADraw", none, int(GetGameMsgLifeTime()));					
 				}

@@ -480,13 +480,13 @@ function AddDeathTextMessage(string M, Class<LocalMessage> MessageClass)
 	if((i < (4 - 1)))
 	{
 		TextKillMessages[i] = TextKillMessages[(i + 1)];
-		MessageKillLife[i] = MessageKillLife[__NFUN_146__(i, 1)];
-		__NFUN_165__(i);
+		MessageKillLife[i] = MessageKillLife[(i + 1)];
+		(i++);
 		// [Loop Continue]
 		goto J0xAC;
 	}
-	TextKillMessages[__NFUN_147__(4, 1)] = M;
-	MessageKillLife[__NFUN_147__(4, 1)] = float(MessageClass.default.Lifetime);
+	TextKillMessages[(4 - 1)] = M;
+	MessageKillLife[(4 - 1)] = float(MessageClass.default.Lifetime);
 	return;
 }
 
@@ -496,20 +496,20 @@ function AddTextServerMessage(string M, Class<LocalMessage> MessageClass, option
 {
 	local int i;
 
-	Class'Engine.Actor'.static.__NFUN_2620__(M, m_ServerMessagesColor, bMessageUseBigFont);
+	Class'Engine.Actor'.static.AddMessageToConsole(M, m_ServerMessagesColor, bMessageUseBigFont);
 	i = 0;
 	J0x22:
 
 	// End:0xAB [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		// End:0xA1
-		if(__NFUN_122__(TextServerMessages[i], ""))
+		if((TextServerMessages[i] == ""))
 		{
 			TextServerMessages[i] = M;
 			MessageUseBigFont[i] = bMessageUseBigFont;
 			// End:0x8C
-			if(__NFUN_152__(iLifeTime, 0))
+			if((iLifeTime <= 0))
 			{
 				MessageServerLife[i] = float(MessageClass.default.Lifetime);				
 			}
@@ -519,7 +519,7 @@ function AddTextServerMessage(string M, Class<LocalMessage> MessageClass, option
 			}
 			return;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x22;
 	}
@@ -527,25 +527,25 @@ function AddTextServerMessage(string M, Class<LocalMessage> MessageClass, option
 	J0xB2:
 
 	// End:0x119 [Loop If]
-	if(__NFUN_150__(i, __NFUN_147__(3, 1)))
+	if((i < (3 - 1)))
 	{
-		TextServerMessages[i] = TextServerMessages[__NFUN_146__(i, 1)];
-		MessageServerLife[i] = MessageServerLife[__NFUN_146__(i, 1)];
-		MessageUseBigFont[i] = MessageUseBigFont[__NFUN_146__(i, 1)];
-		__NFUN_165__(i);
+		TextServerMessages[i] = TextServerMessages[(i + 1)];
+		MessageServerLife[i] = MessageServerLife[(i + 1)];
+		MessageUseBigFont[i] = MessageUseBigFont[(i + 1)];
+		(i++);
 		// [Loop Continue]
 		goto J0xB2;
 	}
-	TextServerMessages[__NFUN_147__(3, 1)] = M;
-	MessageUseBigFont[__NFUN_147__(3, 1)] = bMessageUseBigFont;
-	MessageServerLife[__NFUN_147__(3, 1)] = float(MessageClass.default.Lifetime);
+	TextServerMessages[(3 - 1)] = M;
+	MessageUseBigFont[(3 - 1)] = bMessageUseBigFont;
+	MessageServerLife[(3 - 1)] = float(MessageClass.default.Lifetime);
 	return;
 }
 
 function UseSmallFont(Canvas Canvas)
 {
 	// End:0x31
-	if(__NFUN_178__(Canvas.ClipX, float(640)))
+	if((Canvas.ClipX <= float(640)))
 	{
 		Canvas.Font = SmallFont;		
 	}
@@ -559,7 +559,7 @@ function UseSmallFont(Canvas Canvas)
 function UseMediumFont(Canvas Canvas)
 {
 	// End:0x31
-	if(__NFUN_178__(Canvas.ClipX, float(640)))
+	if((Canvas.ClipX <= float(640)))
 	{
 		Canvas.Font = MedFont;		
 	}
@@ -573,7 +573,7 @@ function UseMediumFont(Canvas Canvas)
 function UseLargeFont(Canvas Canvas)
 {
 	// End:0x31
-	if(__NFUN_178__(Canvas.ClipX, float(640)))
+	if((Canvas.ClipX <= float(640)))
 	{
 		Canvas.Font = BigFont;		
 	}

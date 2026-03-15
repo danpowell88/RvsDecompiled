@@ -381,57 +381,57 @@ function UpdateSkills()
 		// End:0x239
 		if((fDecision <= 0.2000000))
 		{
-			__NFUN_184__(m_fStealth, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fStealth))));
+			(m_fStealth += (fIncreaseSkill * (0.0200000 * (float(100) - m_fStealth))));
 		}
-		fDecision = __NFUN_195__();
+		fDecision = FRand();
 	}
 	// End:0x286
-	if(__NFUN_122__(m_szSpecialityID, "ID_SNIPER"))
+	if((m_szSpecialityID == "ID_SNIPER"))
 	{
-		__NFUN_184__(m_fSniper, __NFUN_171__(__NFUN_171__(fIncreaseSkill, __NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000)), __NFUN_175__(float(100), m_fSniper)));		
+		(m_fSniper += ((fIncreaseSkill * (float((iD5 + 5)) / 100.0000000)) * (float(100) - m_fSniper)));		
 	}
 	else
 	{
 		// End:0x2B5
-		if(__NFUN_178__(fDecision, 0.2000000))
+		if((fDecision <= 0.2000000))
 		{
-			__NFUN_184__(m_fSniper, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fSniper))));
+			(m_fSniper += (fIncreaseSkill * (0.0200000 * (float(100) - m_fSniper))));
 		}
-		fDecision = __NFUN_195__();
+		fDecision = FRand();
 	}
 	// End:0x2EC
-	if(__NFUN_178__(fDecision, 0.2000000))
+	if((fDecision <= 0.2000000))
 	{
-		__NFUN_184__(m_fSelfControl, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fSelfControl))));
+		(m_fSelfControl += (fIncreaseSkill * (0.0200000 * (float(100) - m_fSelfControl))));
 	}
-	fDecision = __NFUN_195__();
+	fDecision = FRand();
 	// End:0x323
-	if(__NFUN_178__(fDecision, 0.2000000))
+	if((fDecision <= 0.2000000))
 	{
-		__NFUN_184__(m_fLeadership, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fLeadership))));
+		(m_fLeadership += (fIncreaseSkill * (0.0200000 * (float(100) - m_fLeadership))));
 	}
-	fDecision = __NFUN_195__();
+	fDecision = FRand();
 	// End:0x35A
-	if(__NFUN_178__(fDecision, 0.2000000))
+	if((fDecision <= 0.2000000))
 	{
-		__NFUN_184__(m_fObservation, __NFUN_171__(fIncreaseSkill, __NFUN_171__(0.0200000, __NFUN_175__(float(100), m_fObservation))));
+		(m_fObservation += (fIncreaseSkill * (0.0200000 * (float(100) - m_fObservation))));
 	}
-	fDecision = __NFUN_195__();
+	fDecision = FRand();
 	return;
 }
 
 function DisplayStats()
 {
-	__NFUN_231__("------------------------");
-	__NFUN_231__(GetName());
-	__NFUN_231__(__NFUN_168__("m_fAssault     =", string(m_fAssault)));
-	__NFUN_231__(__NFUN_168__("m_fElectronics =", string(m_fElectronics)));
-	__NFUN_231__(__NFUN_168__("m_fSniper      =", string(m_fSniper)));
-	__NFUN_231__(__NFUN_168__("m_fStealth     =", string(m_fStealth)));
-	__NFUN_231__(__NFUN_168__("m_fSelfControl =", string(m_fSelfControl)));
-	__NFUN_231__(__NFUN_168__("m_fLeadership  =", string(m_fLeadership)));
-	__NFUN_231__(__NFUN_168__("m_fObservation =", string(m_fObservation)));
-	__NFUN_231__("========================");
+	Log("------------------------");
+	Log(GetName());
+	Log(("m_fAssault     =" @ string(m_fAssault)));
+	Log(("m_fElectronics =" @ string(m_fElectronics)));
+	Log(("m_fSniper      =" @ string(m_fSniper)));
+	Log(("m_fStealth     =" @ string(m_fStealth)));
+	Log(("m_fSelfControl =" @ string(m_fSelfControl)));
+	Log(("m_fLeadership  =" @ string(m_fLeadership)));
+	Log(("m_fObservation =" @ string(m_fObservation)));
+	Log("========================");
 	return;
 }
 
@@ -452,10 +452,10 @@ function CopyOperative(R6Operative aOperative)
 	J0xBB:
 
 	// End:0xFF [Loop If]
-	if(__NFUN_150__(i, m_OperativeFaces.Length))
+	if((i < m_OperativeFaces.Length))
 	{
 		aOperative.m_OperativeFaces[aOperative.m_OperativeFaces.Length] = m_OperativeFaces[i];
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xBB;
 	}

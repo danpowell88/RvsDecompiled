@@ -61,8 +61,8 @@ simulated event Touch(Actor Other)
 				// End:0x127 [Loop If]
 				if((iSoundIndex < m_EntrySound.Length))
 				{
-					__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-					__NFUN_165__(iSoundIndex);
+					PlaySound(m_EntrySound[iSoundIndex], m_eSoundSlot);
+					(iSoundIndex++);
 					// [Loop Continue]
 					goto J0xFA;
 				}				
@@ -73,24 +73,24 @@ simulated event Touch(Actor Other)
 				J0x131:
 
 				// End:0x190 [Loop If]
-				if(__NFUN_150__(iSoundIndex, m_EntrySound.Length))
+				if((iSoundIndex < m_EntrySound.Length))
 				{
 					// End:0x173
 					if(m_bPlayOnlyOnce)
 					{
 						// End:0x170
-						if(__NFUN_129__(m_bSoundWasPlayed))
+						if((!m_bSoundWasPlayed))
 						{
-							__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot);
+							PlaySound(m_EntrySound[iSoundIndex], m_eSoundSlot);
 							m_bSoundWasPlayed = true;
 						}
 						// [Explicit Continue]
 						goto J0x186;
 					}
-					__NFUN_264__(m_EntrySound[iSoundIndex], m_eSoundSlot);
+					PlaySound(m_EntrySound[iSoundIndex], m_eSoundSlot);
 					J0x186:
 
-					__NFUN_165__(iSoundIndex);
+					(iSoundIndex++);
 					// [Loop Continue]
 					goto J0x131;
 				}
@@ -107,35 +107,35 @@ simulated event UnTouch(Actor Other)
 
 	super(Actor).UnTouch(Other);
 	// End:0x3B
-	if(Other.__NFUN_303__('R6Pawn'))
+	if(Other.IsA('R6Pawn'))
 	{
 		C = Pawn(Other).Controller;		
 	}
 	else
 	{
 		// End:0x5F
-		if(Other.__NFUN_303__('R6PlayerController'))
+		if(Other.IsA('R6PlayerController'))
 		{
 			C = Controller(Other);
 		}
 	}
 	// End:0xFF
-	if(__NFUN_119__(C, none))
+	if((C != none))
 	{
 		C.m_CurrentAmbianceObject = self;
 		C.m_CurrentVolumeSound = self;
 		C.m_bUseExitSounds = true;
 		// End:0xFF
-		if(__NFUN_130__(__NFUN_119__(PlayerController(C), none), __NFUN_119__(Viewport(PlayerController(C).Player), none)))
+		if(((PlayerController(C) != none) && (Viewport(PlayerController(C).Player) != none)))
 		{
 			iSoundIndex = 0;
 			J0xD2:
 
 			// End:0xFF [Loop If]
-			if(__NFUN_150__(iSoundIndex, m_ExitSound.Length))
+			if((iSoundIndex < m_ExitSound.Length))
 			{
-				__NFUN_264__(m_ExitSound[iSoundIndex], m_eSoundSlot);
-				__NFUN_165__(iSoundIndex);
+				PlaySound(m_ExitSound[iSoundIndex], m_eSoundSlot);
+				(iSoundIndex++);
 				// [Loop Continue]
 				goto J0xD2;
 			}

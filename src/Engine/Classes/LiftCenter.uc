@@ -70,10 +70,10 @@ function bool SuggestMovePreparation(Pawn Other)
 	{
 		return false;
 	}
-	__NFUN_267__((MyLift.Location + LiftOffset)) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-	__NFUN_298__(MyLift);
+	SetLocation((MyLift.Location + LiftOffset));
+	SetBase(MyLift);
 	// End:0x7D
-	if(__NFUN_132__(MyLift.bInterpolating, __NFUN_129__(ProceedWithMove(Other))))
+	if((MyLift.bInterpolating || (!ProceedWithMove(Other))))
 	{
 		Other.Controller.WaitForMover(MyLift);
 		return true;
@@ -90,21 +90,21 @@ function bool ProceedWithMove(Pawn Other)
 
 	Start = LiftExit(Other.Anchor);
 	// End:0x67
-	if(__NFUN_130__(__NFUN_119__(Start, none), __NFUN_155__(int(Start.KeyFrame), 255)))
+	if(((Start != none) && (int(Start.KeyFrame) != 255)))
 	{
 		// End:0x64
-		if(__NFUN_154__(int(MyLift.KeyNum), int(Start.KeyFrame)))
+		if((int(MyLift.KeyNum) == int(Start.KeyFrame)))
 		{
 			return true;
 		}		
 	}
 	else
 	{
-		Dir = __NFUN_216__(Location, Other.Location);
+		Dir = (Location - Other.Location);
 		Dir.Z = 0.0000000;
-		Dist2D = __NFUN_225__(Dir);
+		Dist2D = VSize(Dir);
 		// End:0x136
-		if(__NFUN_130__(__NFUN_130__(__NFUN_176__(__NFUN_175__(Location.Z, CollisionHeight), __NFUN_174__(__NFUN_175__(Other.Location.Z, Other.CollisionHeight), 33.0000000)), __NFUN_177__(__NFUN_175__(Location.Z, CollisionHeight), __NFUN_175__(__NFUN_175__(Other.Location.Z, Other.CollisionHeight), float(1200)))), __NFUN_176__(Dist2D, MaxDist2D)))
+		if(((((Location.Z - CollisionHeight) < ((Other.Location.Z - Other.CollisionHeight) + 33.0000000)) && ((Location.Z - CollisionHeight) > ((Other.Location.Z - Other.CollisionHeight) - float(1200)))) && (Dist2D < MaxDist2D)))
 		{
 			return true;
 		}

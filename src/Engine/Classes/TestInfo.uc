@@ -234,7 +234,7 @@ function TestContinueDoUntil()
 	// End:0x10
 	if(!((i > 20)))
 		goto J0x10;
-	__NFUN_231__("DoneContinue");
+	Log("DoneContinue");
 	return;
 }
 
@@ -242,27 +242,27 @@ function TestContinueForEach()
 {
 	local Actor A;
 
-	__NFUN_231__("TestContinue");
+	Log("TestContinue");
 	// End:0x4F
-	foreach __NFUN_304__(Class'Engine.Actor', A)
+	foreach AllActors(Class'Engine.Actor', A)
 	{
-		__NFUN_231__(__NFUN_112__("actor ", string(A)));
+		Log(("actor " $ string(A)));
 		// End:0x47
-		if(__NFUN_114__(Light(A), none))
+		if((Light(A) == none))
 		{
 			continue;			
 		}
-		__NFUN_231__("...");		
+		Log("...");		
 	}	
-	__NFUN_231__("DoneContinue");
+	Log("DoneContinue");
 	return;
 }
 
 function SubTestOptionalOut(optional out int A, optional out int B, optional out int C)
 {
-	__NFUN_159__(A, float(2));
-	B = __NFUN_144__(B, 2);
-	__NFUN_161__(C, C);
+	(A *= float(2));
+	B = (B * 2);
+	(C += C);
 	return;
 }
 
@@ -274,26 +274,26 @@ function TestOptionalOut()
 	B = 2;
 	C = 3;
 	SubTestOptionalOut(A, B, C);
-	assert(__NFUN_154__(A, 2));
-	assert(__NFUN_154__(B, 4));
-	assert(__NFUN_154__(C, 6));
+	assert((A == 2));
+	assert((B == 4));
+	assert((C == 6));
 	SubTestOptionalOut(A, B);
-	assert(__NFUN_154__(A, 4));
-	assert(__NFUN_154__(B, 8));
-	assert(__NFUN_154__(C, 6));
+	assert((A == 4));
+	assert((B == 8));
+	assert((C == 6));
 	SubTestOptionalOut(, B, C);
-	assert(__NFUN_154__(A, 4));
-	assert(__NFUN_154__(B, 16));
-	assert(__NFUN_154__(C, 12));
+	assert((A == 4));
+	assert((B == 16));
+	assert((C == 12));
 	SubTestOptionalOut();
-	assert(__NFUN_154__(A, 4));
-	assert(__NFUN_154__(B, 16));
-	assert(__NFUN_154__(C, 12));
+	assert((A == 4));
+	assert((B == 16));
+	assert((C == 12));
 	SubTestOptionalOut(A, B, C);
-	assert(__NFUN_154__(A, 8));
-	assert(__NFUN_154__(B, 32));
-	assert(__NFUN_154__(C, 24));
-	__NFUN_231__("TestOptionalOut ok!");
+	assert((A == 8));
+	assert((B == 32));
+	assert((C == 24));
+	Log("TestOptionalOut ok!");
 	return;
 }
 
@@ -351,8 +351,8 @@ function TestSwitch()
 			break;
 			break;
 	}
-	assert(__NFUN_129__(B));
-	__NFUN_231__("testswitch succeeded");
+	assert((!B));
+	Log("testswitch succeeded");
 	return;
 }
 
@@ -362,64 +362,64 @@ function Tick(float DeltaTime)
 	local Class<TestInfo> TC;
 	local Actor A;
 
-	__NFUN_231__(__NFUN_112__("time=", string(Level.TimeSeconds)));
+	Log(("time=" $ string(Level.TimeSeconds)));
 	TestOptionalOut();
 	TestNullContext(self);
 	TestNullContext(none);
 	TestSwitch();
 	v1 = vect(1.0000000, 2.0000000, 3.0000000);
 	v2 = vect(2.0000000, 4.0000000, 6.0000000);
-	assert(__NFUN_218__(v1, v2));
-	assert(__NFUN_129__(__NFUN_217__(v1, v2)));
-	assert(__NFUN_217__(v1, vect(1.0000000, 2.0000000, 3.0000000)));
-	assert(__NFUN_217__(v2, vect(2.0000000, 4.0000000, 6.0000000)));
-	assert(__NFUN_218__(vect(1.0000000, 2.0000000, 5.0000000), v1));
-	assert(__NFUN_217__(__NFUN_212__(v1, float(2)), v2));
-	assert(__NFUN_217__(v1, __NFUN_214__(v2, float(2))));
-	assert(__NFUN_180__(3.1400000, 3.1400000));
-	assert(__NFUN_181__(3.1400000, float(2)));
-	assert(__NFUN_122__("Tim", "Tim"));
-	assert(__NFUN_123__("Tim", "Bob"));
-	assert(__NFUN_217__(vect(1.0000000, 2.0000000, 3.0000000), vect(1.0000000, 2.0000000, 3.0000000)));
-	assert(__NFUN_122__(GetPropertyText("sxx"), "Tim"));
-	assert(__NFUN_123__(GetPropertyText("ppp"), "123"));
-	assert(__NFUN_122__(GetPropertyText("bogus"), ""));
+	assert((v1 != v2));
+	assert((!(v1 == v2)));
+	assert((v1 == vect(1.0000000, 2.0000000, 3.0000000)));
+	assert((v2 == vect(2.0000000, 4.0000000, 6.0000000)));
+	assert((vect(1.0000000, 2.0000000, 5.0000000) != v1));
+	assert(((v1 * float(2)) == v2));
+	assert((v1 == (v2 / float(2))));
+	assert((3.1400000 == 3.1400000));
+	assert((3.1400000 != float(2)));
+	assert(("Tim" == "Tim"));
+	assert(("Tim" != "Bob"));
+	assert((vect(1.0000000, 2.0000000, 3.0000000) == vect(1.0000000, 2.0000000, 3.0000000)));
+	assert((GetPropertyText("sxx") == "Tim"));
+	assert((GetPropertyText("ppp") != "123"));
+	assert((GetPropertyText("bogus") == ""));
 	xnum = 345;
-	assert(__NFUN_122__(GetPropertyText("xnum"), "345"));
+	assert((GetPropertyText("xnum") == "345"));
 	SetPropertyText("xnum", "999");
-	assert(__NFUN_154__(xnum, 999));
-	assert(__NFUN_155__(xnum, 666));
-	assert(__NFUN_242__(bTrue1, true));
-	assert(__NFUN_242__(bFalse1, false));
-	assert(__NFUN_242__(bTrue2, true));
-	assert(__NFUN_242__(bFalse2, false));
-	assert(__NFUN_242__(default.bTrue1, true));
-	assert(__NFUN_242__(default.bFalse1, false));
-	assert(__NFUN_242__(default.bTrue2, true));
-	assert(__NFUN_242__(default.bFalse2, false));
-	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bTrue1, true));
-	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bFalse1, false));
-	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bTrue2, true));
-	assert(__NFUN_242__(Class'Engine.TestInfo'.default.bFalse2, false));
+	assert((xnum == 999));
+	assert((xnum != 666));
+	assert((bTrue1 == true));
+	assert((bFalse1 == false));
+	assert((bTrue2 == true));
+	assert((bFalse2 == false));
+	assert((default.bTrue1 == true));
+	assert((default.bFalse1 == false));
+	assert((default.bTrue2 == true));
+	assert((default.bFalse2 == false));
+	assert((Class'Engine.TestInfo'.default.bTrue1 == true));
+	assert((Class'Engine.TestInfo'.default.bFalse1 == false));
+	assert((Class'Engine.TestInfo'.default.bTrue2 == true));
+	assert((Class'Engine.TestInfo'.default.bFalse2 == false));
 	TC = Class;
-	assert(__NFUN_242__(TC.default.bTrue1, true));
-	assert(__NFUN_242__(TC.default.bFalse1, false));
-	assert(__NFUN_242__(TC.default.bTrue2, true));
-	assert(__NFUN_242__(TC.default.bFalse2, false));
+	assert((TC.default.bTrue1 == true));
+	assert((TC.default.bFalse1 == false));
+	assert((TC.default.bTrue2 == true));
+	assert((TC.default.bFalse2 == false));
 	C = Class;
-	assert(__NFUN_242__(Class<TestInfo>(C).default.bTrue1, true));
-	assert(__NFUN_242__(Class<TestInfo>(C).default.bFalse1, false));
-	assert(__NFUN_242__(Class<TestInfo>(C).default.bTrue2, true));
-	assert(__NFUN_242__(Class<TestInfo>(C).default.bFalse2, false));
-	assert(__NFUN_154__(default.xnum, 777));
+	assert((Class<TestInfo>(C).default.bTrue1 == true));
+	assert((Class<TestInfo>(C).default.bFalse1 == false));
+	assert((Class<TestInfo>(C).default.bTrue2 == true));
+	assert((Class<TestInfo>(C).default.bFalse2 == false));
+	assert((default.xnum == 777));
 	TestStatic(123);
 	TC.static.TestStatic(123);
 	Class<TestInfo>(C).static.TestStatic(123);
 	bBool2 = RecurseTest();
-	assert(__NFUN_242__(bBool2, false));
+	assert((bBool2 == false));
 	TestStructBools();
 	TestQ();
-	__NFUN_231__("All tests passed");
+	Log("All tests passed");
 	return;
 }
 

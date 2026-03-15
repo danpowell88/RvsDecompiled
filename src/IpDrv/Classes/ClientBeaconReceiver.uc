@@ -322,75 +322,75 @@ event ReceivedText(IpAddr Addr, string Text)
 					{
 						(pos += 1);
 						szOneKWMessage = Left(szPreJoinString, (pos - 1));
-						szPreJoinString = __NFUN_127__(szPreJoinString, pos);						
+						szPreJoinString = Mid(szPreJoinString, pos);						
 					}
 					else
 					{
 						szOneKWMessage = szPreJoinString;
 					}
 					// End:0x396
-					if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(LobbyServerIDMarker)), LobbyServerIDMarker))
+					if((Left(szOneKWMessage, Len(LobbyServerIDMarker)) ~= LobbyServerIDMarker))
 					{
-						PreJoinInfo.iLobbyID = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));						
+						PreJoinInfo.iLobbyID = int(Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1)));						
 					}
 					else
 					{
 						// End:0x3D2
-						if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(GroupIDMarker)), GroupIDMarker))
+						if((Left(szOneKWMessage, Len(GroupIDMarker)) ~= GroupIDMarker))
 						{
-							PreJoinInfo.iGroupID = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));							
+							PreJoinInfo.iGroupID = int(Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1)));							
 						}
 						else
 						{
 							// End:0x41E
-							if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(LockedMarker)), LockedMarker))
+							if((Left(szOneKWMessage, Len(LockedMarker)) ~= LockedMarker))
 							{
-								bBooleanValue = bool(int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1))));
+								bBooleanValue = bool(int(Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1))));
 								PreJoinInfo.bLocked = bBooleanValue;								
 							}
 							else
 							{
 								// End:0x463
-								if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(GameVersionMarker)), GameVersionMarker))
+								if((Left(szOneKWMessage, Len(GameVersionMarker)) ~= GameVersionMarker))
 								{
-									szStringValue = __NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1));
+									szStringValue = Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1));
 									PreJoinInfo.szGameVersion = szStringValue;									
 								}
 								else
 								{
 									// End:0x4AF
-									if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(InternetServerMarker)), InternetServerMarker))
+									if((Left(szOneKWMessage, Len(InternetServerMarker)) ~= InternetServerMarker))
 									{
-										bBooleanValue = bool(int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1))));
+										bBooleanValue = bool(int(Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1))));
 										PreJoinInfo.bInternetServer = bBooleanValue;										
 									}
 									else
 									{
 										// End:0x4EB
-										if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(NumPlayersMarker)), NumPlayersMarker))
+										if((Left(szOneKWMessage, Len(NumPlayersMarker)) ~= NumPlayersMarker))
 										{
-											PreJoinInfo.iNumPlayers = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));											
+											PreJoinInfo.iNumPlayers = int(Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1)));											
 										}
 										else
 										{
 											// End:0x527
-											if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(MaxPlayersMarker)), MaxPlayersMarker))
+											if((Left(szOneKWMessage, Len(MaxPlayersMarker)) ~= MaxPlayersMarker))
 											{
-												PreJoinInfo.iMaxPlayers = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));												
+												PreJoinInfo.iMaxPlayers = int(Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1)));												
 											}
 											else
 											{
 												// End:0x563
-												if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(PunkBusterMarker)), PunkBusterMarker))
+												if((Left(szOneKWMessage, Len(PunkBusterMarker)) ~= PunkBusterMarker))
 												{
-													PreJoinInfo.iPunkBusterEnabled = int(__NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1)));													
+													PreJoinInfo.iPunkBusterEnabled = int(Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1)));													
 												}
 												else
 												{
 													// End:0x59A
-													if(__NFUN_124__(__NFUN_128__(szOneKWMessage, __NFUN_125__(ModNameMarker)), ModNameMarker))
+													if((Left(szOneKWMessage, Len(ModNameMarker)) ~= ModNameMarker))
 													{
-														PreJoinInfo.szPreJoinModName = __NFUN_127__(szOneKWMessage, __NFUN_146__(__NFUN_126__(szOneKWMessage, " "), 1));
+														PreJoinInfo.szPreJoinModName = Mid(szOneKWMessage, (InStr(szOneKWMessage, " ") + 1));
 													}
 												}
 											}
@@ -508,15 +508,15 @@ function int GetMapListSize(int i)
 	J0x07:
 
 	// End:0x3D [Loop If]
-	if(__NFUN_150__(j, 32))
+	if((j < 32))
 	{
 		// End:0x33
-		if(__NFUN_122__(Beacons[i].MapList[j], ""))
+		if((Beacons[i].MapList[j] == ""))
 		{
 			// [Explicit Break]
 			goto J0x3D;
 		}
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -540,15 +540,15 @@ function int GetPlayerListSize(int i)
 	J0x07:
 
 	// End:0x3D [Loop If]
-	if(__NFUN_150__(j, 32))
+	if((j < 32))
 	{
 		// End:0x33
-		if(__NFUN_122__(Beacons[i].szPlayerName[j], ""))
+		if((Beacons[i].szPlayerName[j] == ""))
 		{
 			// [Explicit Break]
 			goto J0x3D;
 		}
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -720,10 +720,10 @@ function ClearBeacon(int i)
 	J0xAC:
 
 	// End:0xDB [Loop If]
-	if(__NFUN_150__(j, 32))
+	if((j < 32))
 	{
 		Beacons[i].MapList[j] = "";
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0xAC;
 	}
@@ -731,10 +731,10 @@ function ClearBeacon(int i)
 	J0xE2:
 
 	// End:0x111 [Loop If]
-	if(__NFUN_150__(j, 32))
+	if((j < 32))
 	{
 		Beacons[i].szPlayerName[j] = "";
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0xE2;
 	}
@@ -742,10 +742,10 @@ function ClearBeacon(int i)
 	J0x118:
 
 	// End:0x147 [Loop If]
-	if(__NFUN_150__(j, 32))
+	if((j < 32))
 	{
 		Beacons[i].szPlayerTime[j] = "";
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x118;
 	}
@@ -777,10 +777,10 @@ function RefreshServers()
 	J0x07:
 
 	// End:0x34 [Loop If]
-	if(__NFUN_150__(i, 32))
+	if((i < 32))
 	{
 		Beacons[i].Addr.Addr = 0;
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -796,19 +796,19 @@ function RefreshServers()
 function bool GrabOption(out string Options, out string Result)
 {
 	// End:0x8A
-	if(__NFUN_122__(__NFUN_128__(Options, 1), "¶"))
+	if((Left(Options, 1) == "¶"))
 	{
-		Result = __NFUN_127__(Options, 1);
+		Result = Mid(Options, 1);
 		// End:0x45
-		if(__NFUN_153__(__NFUN_126__(Result, "¶"), 0))
+		if((InStr(Result, "¶") >= 0))
 		{
-			Result = __NFUN_128__(Result, __NFUN_126__(Result, "¶"));
+			Result = Left(Result, InStr(Result, "¶"));
 		}
-		Options = __NFUN_127__(Options, 1);
+		Options = Mid(Options, 1);
 		// End:0x7D
-		if(__NFUN_153__(__NFUN_126__(Options, "¶"), 0))
+		if((InStr(Options, "¶") >= 0))
 		{
-			Options = __NFUN_127__(Options, __NFUN_126__(Options, "¶"));			
+			Options = Mid(Options, InStr(Options, "¶"));			
 		}
 		else
 		{
@@ -829,10 +829,10 @@ function bool GrabOption(out string Options, out string Result)
 function GetKeyValue(string Pair, out string Key, out string Value)
 {
 	// End:0x44
-	if(__NFUN_153__(__NFUN_126__(Pair, "="), 0))
+	if((InStr(Pair, "=") >= 0))
 	{
-		Key = __NFUN_128__(Pair, __NFUN_126__(Pair, "="));
-		Value = __NFUN_127__(Pair, __NFUN_146__(__NFUN_126__(Pair, "="), 1));		
+		Key = Left(Pair, InStr(Pair, "="));
+		Value = Mid(Pair, (InStr(Pair, "=") + 1));		
 	}
 	else
 	{
@@ -852,7 +852,7 @@ function string ParseOption(string Options, string InKey)
 	{
 		GetKeyValue(Pair, Key, Value);
 		// End:0x3D
-		if(__NFUN_124__(Key, InKey))
+		if((Key ~= InKey))
 		{
 			return Value;
 		}
@@ -873,26 +873,26 @@ function DecodeKeyWordString(int iBeaconIdx, string szKewWordString)
 	local int pos, counter, i;
 	local string szOneKWMessage;
 
-	pos = __NFUN_126__(szKewWordString, "¶");
+	pos = InStr(szKewWordString, "¶");
 	// End:0x31
-	if(__NFUN_155__(pos, -1))
+	if((pos != -1))
 	{
-		szKewWordString = __NFUN_127__(szKewWordString, pos);
+		szKewWordString = Mid(szKewWordString, pos);
 	}
 	counter = 0;
 	J0x38:
 
 	// End:0xDD [Loop If]
-	if(__NFUN_130__(__NFUN_151__(pos, 0), __NFUN_150__(counter, 255)))
+	if(((pos > 0) && (counter < 255)))
 	{
-		__NFUN_165__(counter);
-		pos = __NFUN_126__(__NFUN_127__(szKewWordString, 1), "¶");
+		(counter++);
+		pos = InStr(Mid(szKewWordString, 1), "¶");
 		// End:0xAC
-		if(__NFUN_155__(pos, -1))
+		if((pos != -1))
 		{
-			__NFUN_161__(pos, 1);
-			szOneKWMessage = __NFUN_128__(szKewWordString, __NFUN_147__(pos, 1));
-			szKewWordString = __NFUN_127__(szKewWordString, pos);			
+			(pos += 1);
+			szOneKWMessage = Left(szKewWordString, (pos - 1));
+			szKewWordString = Mid(szKewWordString, pos);			
 		}
 		else
 		{
@@ -920,79 +920,79 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 	local string InOpt, LeftOpt;
 
 	// End:0x4A
-	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GamePortMarker)), GamePortMarker))
+	if((Left(szKeyWord, Len(GamePortMarker)) ~= GamePortMarker))
 	{
-		iIntegerValue = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));
+		iIntegerValue = int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1)));
 		Beacons[iIndex].iPort = iIntegerValue;
 	}
 	// End:0x97
-	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(NumPlayersMarker)), NumPlayersMarker))
+	if((Left(szKeyWord, Len(NumPlayersMarker)) ~= NumPlayersMarker))
 	{
-		iIntegerValue = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));
+		iIntegerValue = int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1)));
 		Beacons[iIndex].iNumPlayers = iIntegerValue;		
 	}
 	else
 	{
 		// End:0xE4
-		if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MaxPlayersMarker)), MaxPlayersMarker))
+		if((Left(szKeyWord, Len(MaxPlayersMarker)) ~= MaxPlayersMarker))
 		{
-			iIntegerValue = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));
+			iIntegerValue = int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1)));
 			Beacons[iIndex].iMaxPlayers = iIntegerValue;			
 		}
 		else
 		{
 			// End:0x12F
-			if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MapNameMarker)), MapNameMarker))
+			if((Left(szKeyWord, Len(MapNameMarker)) ~= MapNameMarker))
 			{
-				szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+				szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 				Beacons[iIndex].szMapName = szStringValue;				
 			}
 			else
 			{
 				// End:0x17A
-				if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(SvrNameMarker)), SvrNameMarker))
+				if((Left(szKeyWord, Len(SvrNameMarker)) ~= SvrNameMarker))
 				{
-					szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+					szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 					Beacons[iIndex].szSvrName = szStringValue;					
 				}
 				else
 				{
 					// End:0x1C5
-					if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GameTypeMarker)), GameTypeMarker))
+					if((Left(szKeyWord, Len(GameTypeMarker)) ~= GameTypeMarker))
 					{
-						szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+						szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 						Beacons[iIndex].szCurrGameType = szStringValue;						
 					}
 					else
 					{
 						// End:0x217
-						if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(DecicatedMarker)), DecicatedMarker))
+						if((Left(szKeyWord, Len(DecicatedMarker)) ~= DecicatedMarker))
 						{
-							bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+							bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 							Beacons[iIndex].bDedicated = bBooleanValue;							
 						}
 						else
 						{
 							// End:0x269
-							if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(LockedMarker)), LockedMarker))
+							if((Left(szKeyWord, Len(LockedMarker)) ~= LockedMarker))
 							{
-								bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+								bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 								Beacons[iIndex].bLocked = bBooleanValue;								
 							}
 							else
 							{
 								// End:0x374
-								if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MapListMarker)), MapListMarker))
+								if((Left(szKeyWord, Len(MapListMarker)) ~= MapListMarker))
 								{
-									szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+									szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 									j = 0;
 									J0x2A2:
 
 									// End:0x2D1 [Loop If]
-									if(__NFUN_150__(j, 32))
+									if((j < 32))
 									{
 										Beacons[iIndex].MapList[j] = "";
-										__NFUN_165__(j);
+										(j++);
 										// [Loop Continue]
 										goto J0x2A2;
 									}
@@ -1000,21 +1000,21 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 									J0x2D8:
 
 									// End:0x371 [Loop If]
-									if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+									if((InStr(szStringValue, "/") != -1))
 									{
-										szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
-										pos = __NFUN_126__(szStringValue, "/");
+										szStringValue = Mid(szStringValue, (InStr(szStringValue, "/") + 1));
+										pos = InStr(szStringValue, "/");
 										// End:0x34B
-										if(__NFUN_155__(pos, -1))
+										if((pos != -1))
 										{
-											Beacons[iIndex].MapList[j] = __NFUN_128__(szStringValue, pos);
+											Beacons[iIndex].MapList[j] = Left(szStringValue, pos);
 											// [Explicit Continue]
 											goto J0x367;
 										}
 										Beacons[iIndex].MapList[j] = szStringValue;
 										J0x367:
 
-										__NFUN_165__(j);
+										(j++);
 										// [Loop Continue]
 										goto J0x2D8;
 									}									
@@ -1022,17 +1022,17 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 								else
 								{
 									// End:0x48A
-									if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(MenuGmNameMarker)), MenuGmNameMarker))
+									if((Left(szKeyWord, Len(MenuGmNameMarker)) ~= MenuGmNameMarker))
 									{
-										szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+										szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 										j = 0;
 										J0x3AD:
 
 										// End:0x3E7 [Loop If]
-										if(__NFUN_150__(j, 32))
+										if((j < 32))
 										{
 											Beacons[iIndex].szGameType[j] = "RGM_AllMode";
-											__NFUN_165__(j);
+											(j++);
 											// [Loop Continue]
 											goto J0x3AD;
 										}
@@ -1040,21 +1040,21 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 										J0x3EE:
 
 										// End:0x487 [Loop If]
-										if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+										if((InStr(szStringValue, "/") != -1))
 										{
-											szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
-											pos = __NFUN_126__(szStringValue, "/");
+											szStringValue = Mid(szStringValue, (InStr(szStringValue, "/") + 1));
+											pos = InStr(szStringValue, "/");
 											// End:0x461
-											if(__NFUN_155__(pos, -1))
+											if((pos != -1))
 											{
-												Beacons[iIndex].szGameType[j] = __NFUN_128__(szStringValue, pos);
+												Beacons[iIndex].szGameType[j] = Left(szStringValue, pos);
 												// [Explicit Continue]
 												goto J0x47D;
 											}
 											Beacons[iIndex].szGameType[j] = szStringValue;
 											J0x47D:
 
-											__NFUN_165__(j);
+											(j++);
 											// [Loop Continue]
 											goto J0x3EE;
 										}										
@@ -1062,17 +1062,17 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 									else
 									{
 										// End:0x595
-										if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerListMarker)), PlayerListMarker))
+										if((Left(szKeyWord, Len(PlayerListMarker)) ~= PlayerListMarker))
 										{
-											szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+											szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 											j = 0;
 											J0x4C3:
 
 											// End:0x4F2 [Loop If]
-											if(__NFUN_150__(j, 32))
+											if((j < 32))
 											{
 												Beacons[iIndex].szPlayerName[j] = "";
-												__NFUN_165__(j);
+												(j++);
 												// [Loop Continue]
 												goto J0x4C3;
 											}
@@ -1080,21 +1080,21 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 											J0x4F9:
 
 											// End:0x592 [Loop If]
-											if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+											if((InStr(szStringValue, "/") != -1))
 											{
-												szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
-												pos = __NFUN_126__(szStringValue, "/");
+												szStringValue = Mid(szStringValue, (InStr(szStringValue, "/") + 1));
+												pos = InStr(szStringValue, "/");
 												// End:0x56C
-												if(__NFUN_155__(pos, -1))
+												if((pos != -1))
 												{
-													Beacons[iIndex].szPlayerName[j] = __NFUN_128__(szStringValue, pos);
+													Beacons[iIndex].szPlayerName[j] = Left(szStringValue, pos);
 													// [Explicit Continue]
 													goto J0x588;
 												}
 												Beacons[iIndex].szPlayerName[j] = szStringValue;
 												J0x588:
 
-												__NFUN_165__(j);
+												(j++);
 												// [Loop Continue]
 												goto J0x4F9;
 											}											
@@ -1102,17 +1102,17 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 										else
 										{
 											// End:0x6A0
-											if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerTimeMarker)), PlayerTimeMarker))
+											if((Left(szKeyWord, Len(PlayerTimeMarker)) ~= PlayerTimeMarker))
 											{
-												szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+												szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 												j = 0;
 												J0x5CE:
 
 												// End:0x5FD [Loop If]
-												if(__NFUN_150__(j, 32))
+												if((j < 32))
 												{
 													Beacons[iIndex].szPlayerTime[j] = "";
-													__NFUN_165__(j);
+													(j++);
 													// [Loop Continue]
 													goto J0x5CE;
 												}
@@ -1120,21 +1120,21 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 												J0x604:
 
 												// End:0x69D [Loop If]
-												if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+												if((InStr(szStringValue, "/") != -1))
 												{
-													szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
-													pos = __NFUN_126__(szStringValue, "/");
+													szStringValue = Mid(szStringValue, (InStr(szStringValue, "/") + 1));
+													pos = InStr(szStringValue, "/");
 													// End:0x677
-													if(__NFUN_155__(pos, -1))
+													if((pos != -1))
 													{
-														Beacons[iIndex].szPlayerTime[j] = __NFUN_128__(szStringValue, pos);
+														Beacons[iIndex].szPlayerTime[j] = Left(szStringValue, pos);
 														// [Explicit Continue]
 														goto J0x693;
 													}
 													Beacons[iIndex].szPlayerTime[j] = szStringValue;
 													J0x693:
 
-													__NFUN_165__(j);
+													(j++);
 													// [Loop Continue]
 													goto J0x604;
 												}												
@@ -1142,17 +1142,17 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 											else
 											{
 												// End:0x7AE
-												if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerPingMarker)), PlayerPingMarker))
+												if((Left(szKeyWord, Len(PlayerPingMarker)) ~= PlayerPingMarker))
 												{
-													szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+													szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 													j = 0;
 													J0x6D9:
 
 													// End:0x707 [Loop If]
-													if(__NFUN_150__(j, 32))
+													if((j < 32))
 													{
 														Beacons[iIndex].iPlayerPingTime[j] = 0;
-														__NFUN_165__(j);
+														(j++);
 														// [Loop Continue]
 														goto J0x6D9;
 													}
@@ -1160,21 +1160,21 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 													J0x70E:
 
 													// End:0x7AB [Loop If]
-													if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+													if((InStr(szStringValue, "/") != -1))
 													{
-														szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
-														pos = __NFUN_126__(szStringValue, "/");
+														szStringValue = Mid(szStringValue, (InStr(szStringValue, "/") + 1));
+														pos = InStr(szStringValue, "/");
 														// End:0x783
-														if(__NFUN_155__(pos, -1))
+														if((pos != -1))
 														{
-															Beacons[iIndex].iPlayerPingTime[j] = int(__NFUN_128__(szStringValue, pos));
+															Beacons[iIndex].iPlayerPingTime[j] = int(Left(szStringValue, pos));
 															// [Explicit Continue]
 															goto J0x7A1;
 														}
 														Beacons[iIndex].iPlayerPingTime[j] = int(szStringValue);
 														J0x7A1:
 
-														__NFUN_165__(j);
+														(j++);
 														// [Loop Continue]
 														goto J0x70E;
 													}													
@@ -1182,17 +1182,17 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 												else
 												{
 													// End:0x8BC
-													if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PlayerKillMarker)), PlayerKillMarker))
+													if((Left(szKeyWord, Len(PlayerKillMarker)) ~= PlayerKillMarker))
 													{
-														szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+														szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 														j = 0;
 														J0x7E7:
 
 														// End:0x815 [Loop If]
-														if(__NFUN_150__(j, 32))
+														if((j < 32))
 														{
 															Beacons[iIndex].iPlayerKillCount[j] = 0;
-															__NFUN_165__(j);
+															(j++);
 															// [Loop Continue]
 															goto J0x7E7;
 														}
@@ -1200,21 +1200,21 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 														J0x81C:
 
 														// End:0x8B9 [Loop If]
-														if(__NFUN_155__(__NFUN_126__(szStringValue, "/"), -1))
+														if((InStr(szStringValue, "/") != -1))
 														{
-															szStringValue = __NFUN_127__(szStringValue, __NFUN_146__(__NFUN_126__(szStringValue, "/"), 1));
-															pos = __NFUN_126__(szStringValue, "/");
+															szStringValue = Mid(szStringValue, (InStr(szStringValue, "/") + 1));
+															pos = InStr(szStringValue, "/");
 															// End:0x891
-															if(__NFUN_155__(pos, -1))
+															if((pos != -1))
 															{
-																Beacons[iIndex].iPlayerKillCount[j] = int(__NFUN_128__(szStringValue, pos));
+																Beacons[iIndex].iPlayerKillCount[j] = int(Left(szStringValue, pos));
 																// [Explicit Continue]
 																goto J0x8AF;
 															}
 															Beacons[iIndex].iPlayerKillCount[j] = int(szStringValue);
 															J0x8AF:
 
-															__NFUN_165__(j);
+															(j++);
 															// [Loop Continue]
 															goto J0x81C;
 														}														
@@ -1222,154 +1222,154 @@ function DecodeKeyWordPair(string szKeyWord, int iIndex)
 													else
 													{
 														// End:0x90B
-														if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(RoundsPerMatchMarker)), RoundsPerMatchMarker))
+														if((Left(szKeyWord, Len(RoundsPerMatchMarker)) ~= RoundsPerMatchMarker))
 														{
-															iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+															iIntegerValue = int(float(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 															Beacons[iIndex].iRoundsPerMap = iIntegerValue;															
 														}
 														else
 														{
 															// End:0x95C
-															if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(RoundTimeMarker)), RoundTimeMarker))
+															if((Left(szKeyWord, Len(RoundTimeMarker)) ~= RoundTimeMarker))
 															{
-																iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																iIntegerValue = int(float(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																Beacons[iIndex].fRndTime = float(iIntegerValue);																
 															}
 															else
 															{
 																// End:0x9AD
-																if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(BetTimeMarker)), BetTimeMarker))
+																if((Left(szKeyWord, Len(BetTimeMarker)) ~= BetTimeMarker))
 																{
-																	iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																	iIntegerValue = int(float(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																	Beacons[iIndex].fBetTime = float(iIntegerValue);																	
 																}
 																else
 																{
 																	// End:0x9FE
-																	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(BombTimeMarker)), BombTimeMarker))
+																	if((Left(szKeyWord, Len(BombTimeMarker)) ~= BombTimeMarker))
 																	{
-																		iIntegerValue = int(float(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																		iIntegerValue = int(float(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																		Beacons[iIndex].fBombTime = float(iIntegerValue);																		
 																	}
 																	else
 																	{
 																		// End:0xA50
-																		if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(ShowNamesMarker)), ShowNamesMarker))
+																		if((Left(szKeyWord, Len(ShowNamesMarker)) ~= ShowNamesMarker))
 																		{
-																			bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																			bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																			Beacons[iIndex].bShowNames = bBooleanValue;																			
 																		}
 																		else
 																		{
 																			// End:0xAA2
-																			if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(InternetServerMarker)), InternetServerMarker))
+																			if((Left(szKeyWord, Len(InternetServerMarker)) ~= InternetServerMarker))
 																			{
-																				bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																				bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																				Beacons[iIndex].bInternetServer = bBooleanValue;																				
 																			}
 																			else
 																			{
 																				// End:0xAF4
-																				if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(FriendlyFireMarker)), FriendlyFireMarker))
+																				if((Left(szKeyWord, Len(FriendlyFireMarker)) ~= FriendlyFireMarker))
 																				{
-																					bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																					bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																					Beacons[iIndex].bFriendlyFire = bBooleanValue;																					
 																				}
 																				else
 																				{
 																					// End:0xB46
-																					if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(AutoBalTeamMarker)), AutoBalTeamMarker))
+																					if((Left(szKeyWord, Len(AutoBalTeamMarker)) ~= AutoBalTeamMarker))
 																					{
-																						bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																						bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																						Beacons[iIndex].bAutoBalTeam = bBooleanValue;																						
 																					}
 																					else
 																					{
 																						// End:0xB98
-																						if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(TKPenaltyMarker)), TKPenaltyMarker))
+																						if((Left(szKeyWord, Len(TKPenaltyMarker)) ~= TKPenaltyMarker))
 																						{
-																							bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																							bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																							Beacons[iIndex].bTKPenalty = bBooleanValue;																							
 																						}
 																						else
 																						{
 																							// End:0xBEA
-																							if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(AllowRadarMarker)), AllowRadarMarker))
+																							if((Left(szKeyWord, Len(AllowRadarMarker)) ~= AllowRadarMarker))
 																							{
-																								bBooleanValue = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																								bBooleanValue = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																								Beacons[iIndex].bRadar = bBooleanValue;																								
 																							}
 																							else
 																							{
 																								// End:0xC35
-																								if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GameVersionMarker)), GameVersionMarker))
+																								if((Left(szKeyWord, Len(GameVersionMarker)) ~= GameVersionMarker))
 																								{
-																									szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+																									szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 																									Beacons[iIndex].szGameVersion = szStringValue;																									
 																								}
 																								else
 																								{
 																									// End:0xC77
-																									if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(LobbyServerIDMarker)), LobbyServerIDMarker))
+																									if((Left(szKeyWord, Len(LobbyServerIDMarker)) ~= LobbyServerIDMarker))
 																									{
-																										Beacons[iIndex].iLobbyID = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																										
+																										Beacons[iIndex].iLobbyID = int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1)));																										
 																									}
 																									else
 																									{
 																										// End:0xCB9
-																										if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(GroupIDMarker)), GroupIDMarker))
+																										if((Left(szKeyWord, Len(GroupIDMarker)) ~= GroupIDMarker))
 																										{
-																											Beacons[iIndex].iGroupID = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																											
+																											Beacons[iIndex].iGroupID = int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1)));																											
 																										}
 																										else
 																										{
 																											// End:0xCFB
-																											if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(BeaconPortMarker)), BeaconPortMarker))
+																											if((Left(szKeyWord, Len(BeaconPortMarker)) ~= BeaconPortMarker))
 																											{
-																												Beacons[iIndex].iBeaconPort = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																												
+																												Beacons[iIndex].iBeaconPort = int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1)));																												
 																											}
 																											else
 																											{
 																												// End:0xD3D
-																												if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(NumTerroMarker)), NumTerroMarker))
+																												if((Left(szKeyWord, Len(NumTerroMarker)) ~= NumTerroMarker))
 																												{
-																													Beacons[iIndex].iNumTerro = int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1)));																													
+																													Beacons[iIndex].iNumTerro = int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1)));																													
 																												}
 																												else
 																												{
 																													// End:0xD82
-																													if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(AIBkpMarker)), AIBkpMarker))
+																													if((Left(szKeyWord, Len(AIBkpMarker)) ~= AIBkpMarker))
 																													{
-																														Beacons[iIndex].bAIBkp = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));																														
+																														Beacons[iIndex].bAIBkp = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));																														
 																													}
 																													else
 																													{
 																														// End:0xDC7
-																														if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(RotateMapMarker)), RotateMapMarker))
+																														if((Left(szKeyWord, Len(RotateMapMarker)) ~= RotateMapMarker))
 																														{
-																															Beacons[iIndex].bRotateMap = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));																															
+																															Beacons[iIndex].bRotateMap = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));																															
 																														}
 																														else
 																														{
 																															// End:0xE0C
-																															if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(ForceFPWpnMarker)), ForceFPWpnMarker))
+																															if((Left(szKeyWord, Len(ForceFPWpnMarker)) ~= ForceFPWpnMarker))
 																															{
-																																Beacons[iIndex].bForceFPWpn = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));																																
+																																Beacons[iIndex].bForceFPWpn = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));																																
 																															}
 																															else
 																															{
 																																// End:0xE57
-																																if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(ModNameMarker)), ModNameMarker))
+																																if((Left(szKeyWord, Len(ModNameMarker)) ~= ModNameMarker))
 																																{
-																																	szStringValue = __NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1));
+																																	szStringValue = Mid(szKeyWord, (InStr(szKeyWord, " ") + 1));
 																																	Beacons[iIndex].szModName = szStringValue;																																	
 																																}
 																																else
 																																{
 																																	// End:0xE99
-																																	if(__NFUN_124__(__NFUN_128__(szKeyWord, __NFUN_125__(PunkBusterMarker)), PunkBusterMarker))
+																																	if((Left(szKeyWord, Len(PunkBusterMarker)) ~= PunkBusterMarker))
 																																	{
-																																		Beacons[iIndex].bPunkBuster = bool(int(__NFUN_127__(szKeyWord, __NFUN_146__(__NFUN_126__(szKeyWord, " "), 1))));
+																																		Beacons[iIndex].bPunkBuster = bool(int(Mid(szKeyWord, (InStr(szKeyWord, " ") + 1))));
 																																	}
 																																}
 																															}

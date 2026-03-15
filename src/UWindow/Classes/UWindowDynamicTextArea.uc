@@ -472,10 +472,10 @@ function int GetWrapPos(Canvas C, UWindowDynamicTextRow L, float MaxWidth)
 		}
 		else
 		{
-			__NFUN_161__(WrapPos, __NFUN_125__(NextWord));
-			__NFUN_184__(LineWidth, NextWordWidth);
+			(WrapPos += Len(NextWord));
+			(LineWidth += NextWordWidth);
 			NextWord = "";
-			__NFUN_165__(WordsThisRow);
+			(WordsThisRow++);
 		}
 		// [Loop Continue]
 		goto J0x6D;
@@ -490,7 +490,7 @@ function UWindowDynamicTextRow SplitRowAt(UWindowDynamicTextRow L, int SplitPos)
 
 	N = UWindowDynamicTextRow(L.InsertAfter(RowClass));
 	// End:0x4A
-	if(__NFUN_114__(L.WrapParent, none))
+	if((L.WrapParent == none))
 	{
 		N.WrapParent = L;		
 	}
@@ -498,8 +498,8 @@ function UWindowDynamicTextRow SplitRowAt(UWindowDynamicTextRow L, int SplitPos)
 	{
 		N.WrapParent = L.WrapParent;
 	}
-	N.Text = __NFUN_127__(L.Text, SplitPos);
-	L.Text = __NFUN_128__(L.Text, SplitPos);
+	N.Text = Mid(L.Text, SplitPos);
+	L.Text = Left(L.Text, SplitPos);
 	return N;
 	return;
 }
@@ -508,9 +508,9 @@ function RemoveNextWord(out string Text, out string NextWord)
 {
 	local int i;
 
-	i = __NFUN_126__(Text, " ");
+	i = InStr(Text, " ");
 	// End:0x35
-	if(__NFUN_154__(i, -1))
+	if((i == -1))
 	{
 		NextWord = Text;
 		Text = "";		
@@ -520,14 +520,14 @@ function RemoveNextWord(out string Text, out string NextWord)
 		J0x35:
 
 		// End:0x54 [Loop If]
-		if(__NFUN_122__(__NFUN_127__(Text, i, 1), " "))
+		if((Mid(Text, i, 1) == " "))
 		{
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x35;
 		}
-		NextWord = __NFUN_128__(Text, i);
-		Text = __NFUN_127__(Text, i);
+		NextWord = Left(Text, i);
+		Text = Mid(Text, i);
 	}
 	return;
 }
@@ -540,9 +540,9 @@ function RemoveWrap(UWindowDynamicTextRow L)
 	J0x19:
 
 	// End:0x96 [Loop If]
-	if(__NFUN_130__(__NFUN_119__(N, none), __NFUN_114__(N.WrapParent, L)))
+	if(((N != none) && (N.WrapParent == L)))
 	{
-		L.Text = __NFUN_112__(L.Text, N.Text);
+		L.Text = (L.Text $ N.Text);
 		N.Remove();
 		N = UWindowDynamicTextRow(L.Next);
 		// [Loop Continue]

@@ -379,7 +379,7 @@ function FindDoor()
 	// End:0x145
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__("Kept door : ", string(pDoor)));
+		Log(("Kept door : " $ string(pDoor)));
 	}
 	return;
 }
@@ -387,10 +387,10 @@ function FindDoor()
 function SetMileStoneIcon(int iMilestone)
 {
 	// End:0x71
-	if(__NFUN_119__(m_pPlanningCtrl, none))
+	if((m_pPlanningCtrl != none))
 	{
 		// End:0x50
-		if(__NFUN_155__(int(m_eActionType), int(0)))
+		if((int(m_eActionType) != int(0)))
 		{
 			m_pCurrentTexture = m_pPlanningCtrl.GetActionTypeTexture(1, iMilestone);
 			m_pSelected = m_pCurrentTexture;
@@ -410,25 +410,25 @@ function bool SetGrenade(Vector vHitLocation)
 {
 	local R6PlanningGrenade pGrenadeIcon;
 
-	pGrenadeIcon = __NFUN_278__(Class'R6Game.R6PlanningGrenade', self,, vHitLocation);
+	pGrenadeIcon = Spawn(Class'R6Game.R6PlanningGrenade', self,, vHitLocation);
 	pGrenadeIcon.SetGrenadeType(m_eAction);
 	pGrenadeIcon.m_iPlanningFloor_0 = m_iPlanningFloor_0;
 	pGrenadeIcon.m_iPlanningFloor_1 = m_iPlanningFloor_1;
-	m_pPlanningCtrl.Pawn.__NFUN_267__(Location);
+	m_pPlanningCtrl.Pawn.SetLocation(Location);
 	// End:0xAF
-	if(__NFUN_242__(m_pPlanningCtrl.__NFUN_2017__(Location, pGrenadeIcon.Location), false))
+	if((m_pPlanningCtrl.PlanningTrace(Location, pGrenadeIcon.Location) == false))
 	{
 		// End:0xAF
-		if(__NFUN_242__(CanIThrowGrenadeThroughDoor(vHitLocation), false))
+		if((CanIThrowGrenadeThroughDoor(vHitLocation) == false))
 		{
-			pGrenadeIcon.__NFUN_279__();
+			pGrenadeIcon.Destroy();
 			return false;
 		}
 	}
 	// End:0xC6
-	if(__NFUN_119__(m_pActionIcon, none))
+	if((m_pActionIcon != none))
 	{
-		m_pActionIcon.__NFUN_279__();
+		m_pActionIcon.Destroy();
 	}
 	m_vActionDirection = vHitLocation;
 	m_pActionIcon = pGrenadeIcon;
@@ -442,26 +442,26 @@ function bool CanIThrowGrenadeThroughDoor(Vector vHitLocation)
 	local R6Door pDoorNav;
 
 	// End:0xE0
-	foreach __NFUN_312__(Class'R6Engine.R6IORotatingDoor', pRotatingDoor, 300.0000000, Location)
+	foreach VisibleCollidingActors(Class'R6Engine.R6IORotatingDoor', pRotatingDoor, 300.0000000, Location)
 	{
 		// End:0x5F
-		if(__NFUN_242__(m_pPlanningCtrl.__NFUN_2017__(Location, pRotatingDoor.m_DoorActorA.Location), true))
+		if((m_pPlanningCtrl.PlanningTrace(Location, pRotatingDoor.m_DoorActorA.Location) == true))
 		{
 			pDoorNav = pRotatingDoor.m_DoorActorB;			
 		}
 		else
 		{
 			// End:0xA1
-			if(__NFUN_242__(m_pPlanningCtrl.__NFUN_2017__(Location, pRotatingDoor.m_DoorActorB.Location), true))
+			if((m_pPlanningCtrl.PlanningTrace(Location, pRotatingDoor.m_DoorActorB.Location) == true))
 			{
 				pDoorNav = pRotatingDoor.m_DoorActorA;
 			}
 		}
 		// End:0xDF
-		if(__NFUN_119__(pDoorNav, none))
+		if((pDoorNav != none))
 		{
 			// End:0xDF
-			if(__NFUN_242__(m_pPlanningCtrl.__NFUN_2017__(vHitLocation, pDoorNav.Location), true))
+			if((m_pPlanningCtrl.PlanningTrace(vHitLocation, pDoorNav.Location) == true))
 			{
 				pDoor = pRotatingDoor;				
 				return true;
@@ -482,18 +482,18 @@ function UnselectPoint()
 {
 	m_PlanningColor = m_CurrentColor;
 	Texture = m_pCurrentTexture;
-	__NFUN_280__(0.0000000, false);
+	SetTimer(0.0000000, false);
 	return;
 }
 
 function SelectPoint()
 {
 	// End:0x1A
-	if(__NFUN_119__(m_pCurrentTexture, m_pSelected))
+	if((m_pCurrentTexture != m_pSelected))
 	{
 		Texture = m_pSelected;
 	}
-	__NFUN_280__(0.5000000, true);
+	SetTimer(0.5000000, true);
 	return;
 }
 
@@ -537,13 +537,13 @@ function RotateView(float X, float Y)
 	// End:0x1A
 	if(bShowLog)
 	{
-		__NFUN_231__("-->RotateView");
+		Log("-->RotateView");
 	}
-	fDeltaX = __NFUN_172__(__NFUN_175__(float(m_iInitialMousePosX), X), 640.0000000);
-	fDeltaY = __NFUN_172__(__NFUN_175__(float(m_iInitialMousePosY), Y), 480.0000000);
-	NodeRotation.Pitch = int(__NFUN_174__(float(Rotation.Pitch), __NFUN_171__(fDeltaY, 32768.0000000)));
-	NodeRotation.Yaw = int(__NFUN_175__(float(Rotation.Yaw), __NFUN_171__(fDeltaX, 65536.0000000)));
-	__NFUN_299__(NodeRotation);
+	fDeltaX = ((float(m_iInitialMousePosX) - X) / 640.0000000);
+	fDeltaY = ((float(m_iInitialMousePosY) - Y) / 480.0000000);
+	NodeRotation.Pitch = int((float(Rotation.Pitch) + (fDeltaY * 32768.0000000)));
+	NodeRotation.Yaw = int((float(Rotation.Yaw) - (fDeltaX * 65536.0000000)));
+	SetRotation(NodeRotation);
 	return;
 }
 

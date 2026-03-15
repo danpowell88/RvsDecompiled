@@ -473,14 +473,14 @@ function AddVideoResolution(R6WindowComboControl _pR6WindowComboControl)
 		// End:0xA3
 		if(pGameOptions.ShowRefreshRates)
 		{
-			_pR6WindowComboControl.AddItem(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(iWidth), "x"), string(iHeight)), "@"), string(iRefreshRate)), "");
+			_pR6WindowComboControl.AddItem(((((string(iWidth) $ "x") $ string(iHeight)) $ "@") $ string(iRefreshRate)), "");
 			// [Explicit Continue]
 			goto J0xC9;
 		}
-		_pR6WindowComboControl.AddItem(__NFUN_112__(__NFUN_112__(string(iWidth), "x"), string(iHeight)), "");
+		_pR6WindowComboControl.AddItem(((string(iWidth) $ "x") $ string(iHeight)), "");
 		J0xC9:
 
-		__NFUN_165__(j);
+		(j++);
 		// [Loop Continue]
 		goto J0x2B;
 	}
@@ -493,19 +493,19 @@ function GetResolutionXY(out int iSX, out int iSY, out int iRR)
 	local string szTemp, szTemp2;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	szTemp = m_pVideoRes.GetValue();
-	iX = __NFUN_126__(szTemp, "x");
-	szTemp2 = __NFUN_128__(szTemp, iX);
+	iX = InStr(szTemp, "x");
+	szTemp2 = Left(szTemp, iX);
 	iSX = int(szTemp2);
-	szTemp = __NFUN_234__(szTemp, __NFUN_147__(__NFUN_147__(__NFUN_125__(szTemp), iX), 1));
+	szTemp = Right(szTemp, ((Len(szTemp) - iX) - 1));
 	// End:0xE3
 	if(pGameOptions.ShowRefreshRates)
 	{
-		iX = __NFUN_126__(szTemp, "@");
-		szTemp2 = __NFUN_128__(szTemp, iX);
+		iX = InStr(szTemp, "@");
+		szTemp2 = Left(szTemp, iX);
 		iSY = int(szTemp2);
-		szTemp = __NFUN_234__(szTemp, __NFUN_147__(__NFUN_147__(__NFUN_125__(szTemp), iX), 1));
+		szTemp = Right(szTemp, ((Len(szTemp) - iX) - 1));
 		iRR = int(szTemp);		
 	}
 	else
@@ -520,7 +520,7 @@ function RestoreDefaultValue()
 {
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	pGameOptions.ResetGraphicsToDefault(m_bInGame);
 	UpdateOptionsInPage();
 	return;
@@ -532,28 +532,28 @@ function Notify(UWindowDialogControl C, byte E)
 	local bool bUpdateGameOptions;
 	local R6GameOptions pGameOptions;
 
-	pGameOptions = Class'Engine.Actor'.static.__NFUN_1009__();
+	pGameOptions = Class'Engine.Actor'.static.GetGameOptions();
 	OptionsWidget = R6MenuOptionsWidget(OwnerWindow);
 	// End:0x120
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		// End:0x91
-		if(C.__NFUN_303__('R6WindowButtonBox'))
+		if(C.IsA('R6WindowButtonBox'))
 		{
 			// End:0x8E
 			if(R6WindowButtonBox(C).GetSelectStatus())
 			{
-				R6WindowButtonBox(C).m_bSelected = __NFUN_129__(R6WindowButtonBox(C).m_bSelected);
+				R6WindowButtonBox(C).m_bSelected = (!R6WindowButtonBox(C).m_bSelected);
 				bUpdateGameOptions = true;
 			}			
 		}
 		else
 		{
 			// End:0x11D
-			if(C.__NFUN_303__('R6WindowButton'))
+			if(C.IsA('R6WindowButton'))
 			{
 				// End:0x11D
-				if(__NFUN_114__(C, m_pGeneralButUse))
+				if((C == m_pGeneralButUse))
 				{
 					Root.SimplePopUp(Localize("Options", "ResetToDefault", "R6Menu"), Localize("Options", "ResetToDefaultConfirm", "R6Menu"), 55, 0, false, self);
 				}
@@ -563,13 +563,13 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x16B
-		if(C.__NFUN_303__('R6WindowComboControl'))
+		if(C.IsA('R6WindowComboControl'))
 		{
 			// End:0x16B
-			if(__NFUN_154__(int(E), 1))
+			if((int(E) == 1))
 			{
 				// End:0x16B
-				if(__NFUN_130__(m_bInitComplete, R6WindowComboControl(C).m_bSelectedByUser))
+				if((m_bInitComplete && R6WindowComboControl(C).m_bSelectedByUser))
 				{
 					bUpdateGameOptions = true;
 				}
@@ -582,7 +582,7 @@ function Notify(UWindowDialogControl C, byte E)
 		m_bUpdateFileOnly = true;
 		UpdateOptionsInEngine();
 		m_bUpdateFileOnly = false;
-		pGameOptions.__NFUN_536__();
+		pGameOptions.SaveConfig();
 	}
 	return;
 }

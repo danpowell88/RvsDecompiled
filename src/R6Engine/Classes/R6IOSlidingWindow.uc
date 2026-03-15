@@ -83,54 +83,54 @@ simulated function ResetOriginalData()
 	}
 	super(R6InteractiveObject).ResetOriginalData();
 	m_ActionInstigator = none;
-	__NFUN_267__(sm_Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+	SetLocation(sm_Location);
 	m_iInitialOpening = sm_iInitialOpening;
 	m_bIsWindowLocked = sm_bIsWindowLocked;
 	// End:0x14F
-	if(__NFUN_151__(m_iInitialOpening, 0))
+	if((m_iInitialOpening > 0))
 	{
 		vNewLocation = Location;
-		__NFUN_229__(Rotation, vX, vY, vZ);
+		GetAxes(Rotation, vX, vY, vZ);
 		switch(eOpening)
 		{
 			// End:0xA3
 			case 0:
 				m_TotalMovement = float(m_iInitialOpening);
-				vNewLocation.Z = __NFUN_174__(Location.Z, float(m_iInitialOpening));
+				vNewLocation.Z = (Location.Z + float(m_iInitialOpening));
 				// End:0x147
 				break;
 			// End:0xDD
 			case 1:
-				m_TotalMovement = __NFUN_175__(m_iMaxOpening, float(m_iInitialOpening));
-				vNewLocation.Z = __NFUN_175__(Location.Z, float(m_iInitialOpening));
+				m_TotalMovement = (m_iMaxOpening - float(m_iInitialOpening));
+				vNewLocation.Z = (Location.Z - float(m_iInitialOpening));
 				// End:0x147
 				break;
 			// End:0x114
 			case 2:
-				m_TotalMovement = __NFUN_175__(m_iMaxOpening, float(m_iInitialOpening));
-				vNewLocation = __NFUN_216__(Location, __NFUN_213__(float(m_iInitialOpening), vX));
+				m_TotalMovement = (m_iMaxOpening - float(m_iInitialOpening));
+				vNewLocation = (Location - (float(m_iInitialOpening) * vX));
 				// End:0x147
 				break;
 			// End:0x144
 			case 3:
 				m_TotalMovement = float(m_iInitialOpening);
-				vNewLocation = __NFUN_215__(Location, __NFUN_213__(float(m_iInitialOpening), vX));
+				vNewLocation = (Location + (float(m_iInitialOpening) * vX));
 				// End:0x147
 				break;
 			// End:0xFFFF
 			default:
 				break;
 		}
-		__NFUN_267__(vNewLocation);
+		SetLocation(vNewLocation);
 	}
-	m_bIsWindowClosed = __NFUN_151__(m_iInitialOpening, 0);
+	m_bIsWindowClosed = (m_iInitialOpening > 0);
 	return;
 }
 
 function bool startAction(float fDeltaMouse, Actor actionInstigator)
 {
 	// End:0x0D
-	if(__NFUN_119__(m_ActionInstigator, none))
+	if((m_ActionInstigator != none))
 	{
 		return false;
 	}
@@ -145,64 +145,64 @@ function bool updateAction(float fDeltaMouse, Actor actionInstigator)
 	local float fWindowMovement;
 
 	// End:0x11
-	if(__NFUN_119__(actionInstigator, m_ActionInstigator))
+	if((actionInstigator != m_ActionInstigator))
 	{
 		return false;
 	}
-	fWindowMovement = __NFUN_246__(__NFUN_186__(fDeltaMouse), m_fMinMouseMove, m_fMaxMouseMove);
-	fWindowMovement = __NFUN_172__(__NFUN_171__(fWindowMovement, m_iMaxOpening), m_fMaxMouseMove);
+	fWindowMovement = FClamp(Abs(fDeltaMouse), m_fMinMouseMove, m_fMaxMouseMove);
+	fWindowMovement = ((fWindowMovement * m_iMaxOpening) / m_fMaxMouseMove);
 	// End:0x78
-	if(__NFUN_130__(__NFUN_181__(default.Mass, float(0)), __NFUN_181__(Mass, float(0))))
+	if(((default.Mass != float(0)) && (Mass != float(0))))
 	{
-		fWindowMovement = __NFUN_172__(__NFUN_171__(fWindowMovement, default.Mass), Mass);
+		fWindowMovement = ((fWindowMovement * default.Mass) / Mass);
 	}
 	// End:0x97
-	if(__NFUN_176__(fDeltaMouse, float(0)))
+	if((fDeltaMouse < float(0)))
 	{
-		fWindowMovement = __NFUN_171__(fWindowMovement, -1.0000000);
+		fWindowMovement = (fWindowMovement * -1.0000000);
 	}
-	m_TotalMovement = __NFUN_174__(m_TotalMovement, fWindowMovement);
+	m_TotalMovement = (m_TotalMovement + fWindowMovement);
 	// End:0xD6
-	if(__NFUN_176__(m_TotalMovement, float(0)))
+	if((m_TotalMovement < float(0)))
 	{
-		fWindowMovement = __NFUN_175__(fWindowMovement, m_TotalMovement);
+		fWindowMovement = (fWindowMovement - m_TotalMovement);
 		m_TotalMovement = 0.0000000;		
 	}
 	else
 	{
 		// End:0x109
-		if(__NFUN_177__(m_TotalMovement, m_iMaxOpening))
+		if((m_TotalMovement > m_iMaxOpening))
 		{
-			fWindowMovement = __NFUN_175__(fWindowMovement, __NFUN_175__(m_TotalMovement, m_iMaxOpening));
+			fWindowMovement = (fWindowMovement - (m_TotalMovement - m_iMaxOpening));
 			m_TotalMovement = m_iMaxOpening;
 		}
 	}
-	__NFUN_229__(Rotation, vX, vY, vZ);
+	GetAxes(Rotation, vX, vY, vZ);
 	vNewLocation = Location;
 	switch(eOpening)
 	{
 		// End:0x155
 		case 0:
-			vNewLocation.Z = __NFUN_174__(Location.Z, fWindowMovement);
+			vNewLocation.Z = (Location.Z + fWindowMovement);
 			// End:0x1A2
 			break;
 		// End:0x179
 		case 1:
-			vNewLocation.Z = __NFUN_174__(Location.Z, fWindowMovement);
+			vNewLocation.Z = (Location.Z + fWindowMovement);
 			// End:0x1A2
 			break;
 		// End:0x17E
 		case 2:
 		// End:0x19F
 		case 3:
-			vNewLocation = __NFUN_215__(Location, __NFUN_213__(fWindowMovement, vX));
+			vNewLocation = (Location + (fWindowMovement * vX));
 			// End:0x1A2
 			break;
 		// End:0xFFFF
 		default:
 			break;
 	}
-	__NFUN_267__(vNewLocation);
+	SetLocation(vNewLocation);
 	return true;
 	return;
 }
@@ -218,7 +218,7 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 	local bool bIsOpen;
 
 	// End:0x32
-	if(__NFUN_177__(m_TotalMovement, __NFUN_171__(m_iMaxOpening, C_fWindowOpen)))
+	if((m_TotalMovement > (m_iMaxOpening * C_fWindowOpen)))
 	{
 		Query.iHasAction = 1;
 		bIsOpen = true;		
@@ -229,7 +229,7 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 		bIsOpen = false;
 	}
 	// End:0x6E
-	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	if((fDistance < m_fCircumstantialActionRange))
 	{
 		Query.iInRange = 1;		
 	}
@@ -275,35 +275,35 @@ function R6FillGrenadeSubAction(out R6AbstractCircumstantialActionQuery Query, i
 	// End:0x3B
 	if(R6ActionCanBeExecuted(int(6), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 6;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 6;
+		(i++);
 	}
 	// End:0x76
 	if(R6ActionCanBeExecuted(int(7), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 7;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 7;
+		(i++);
 	}
 	// End:0xB1
 	if(R6ActionCanBeExecuted(int(8), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 8;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 8;
+		(i++);
 	}
 	// End:0xEC
 	if(R6ActionCanBeExecuted(int(9), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 9;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 9;
+		(i++);
 	}
 	j = i;
 	J0xF7:
 
 	// End:0x12F [Loop If]
-	if(__NFUN_150__(j, 4))
+	if((j < 4))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), j)] = 0;
-		__NFUN_165__(j);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + j)] = 0;
+		(j++);
 		// [Loop Continue]
 		goto J0xF7;
 	}

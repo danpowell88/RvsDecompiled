@@ -133,13 +133,13 @@ simulated event ActorEntered(Actor Other)
 				// End:0x101 [Loop If]
 				if((iSoundNb < m_EnterSounds.Length))
 				{
-					__NFUN_264__(m_EnterSounds[iSoundNb], 11) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-					__NFUN_165__(iSoundNb);
+					PlaySound(m_EnterSounds[iSoundNb], 11);
+					(iSoundNb++);
 					// [Loop Continue]
 					goto J0xD7;
 				}
 				// End:0x13A
-				if(__NFUN_130__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_129__(m_bAlreadyPlayMusic)))
+				if(((int(Level.NetMode) == int(NM_Standalone)) && (!m_bAlreadyPlayMusic)))
 				{
 					m_bAlreadyPlayMusic = true;
 					PlayMusic(m_SinglePlayerMusic);
@@ -157,37 +157,37 @@ simulated event ActorLeaving(Actor Other)
 	local Controller C;
 
 	// End:0x101
-	if(__NFUN_130__(Level.m_bPlaySound, __NFUN_155__(m_ExitSounds.Length, 0)))
+	if((Level.m_bPlaySound && (m_ExitSounds.Length != 0)))
 	{
 		// End:0x50
-		if(Other.__NFUN_303__('R6Pawn'))
+		if(Other.IsA('R6Pawn'))
 		{
 			C = Pawn(Other).Controller;			
 		}
 		else
 		{
 			// End:0x74
-			if(Other.__NFUN_303__('R6PlayerController'))
+			if(Other.IsA('R6PlayerController'))
 			{
 				C = Controller(Other);
 			}
 		}
 		// End:0x101
-		if(__NFUN_119__(C, none))
+		if((C != none))
 		{
 			C.m_CurrentAmbianceObject = self;
 			C.m_bUseExitSounds = true;
 			// End:0x101
-			if(__NFUN_130__(__NFUN_119__(PlayerController(C), none), __NFUN_119__(Viewport(PlayerController(C).Player), none)))
+			if(((PlayerController(C) != none) && (Viewport(PlayerController(C).Player) != none)))
 			{
 				iSoundNb = 0;
 				J0xD7:
 
 				// End:0x101 [Loop If]
-				if(__NFUN_150__(iSoundNb, m_ExitSounds.Length))
+				if((iSoundNb < m_ExitSounds.Length))
 				{
-					__NFUN_264__(m_ExitSounds[iSoundNb], 11);
-					__NFUN_165__(iSoundNb);
+					PlaySound(m_ExitSounds[iSoundNb], 11);
+					(iSoundNb++);
 					// [Loop Continue]
 					goto J0xD7;
 				}

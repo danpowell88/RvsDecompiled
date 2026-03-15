@@ -63,21 +63,21 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		}
 		else
 		{
-			__NFUN_264__(Sound, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+			PlaySound(Sound, 3);
 		}
 	}
 	// End:0xFC
-	if(__NFUN_151__(Damage, 0))
+	if((Damage > 0))
 	{
 		Other.R6TakeDamage(Damage, Damage, EventInstigator, EventInstigator.Location, vect(0.0000000, 0.0000000, 0.0000000), 0);
 	}
 	// End:0x109
-	if(__NFUN_114__(EventInstigator, none))
+	if((EventInstigator == none))
 	{
 		return;
 	}
 	// End:0x128
-	if(__NFUN_119__(AmbientSound, none))
+	if((AmbientSound != none))
 	{
 		EventInstigator.AmbientSound = AmbientSound;
 	}
@@ -87,10 +87,10 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		EventInstigator.Died(none, EventInstigator.Location);
 	}
 	// End:0x300
-	if(__NFUN_130__(__NFUN_130__(__NFUN_255__(Event, 'None'), __NFUN_255__(Event, 'None')), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	if((((Event != 'None') && (Event != 'None')) && (int(Level.NetMode) == int(NM_Standalone))))
 	{
 		// End:0x1E3
-		if(__NFUN_132__(__NFUN_254__(InterpolatedActorTag, 'None'), __NFUN_254__(InterpolatedActorTag, 'None')))
+		if(((InterpolatedActorTag == 'None') || (InterpolatedActorTag == 'None')))
 		{
 			// End:0x1DE
 			if(EventInstigator.IsPlayerPawn())
@@ -110,35 +110,35 @@ function Trigger(Actor Other, Pawn EventInstigator)
 		else
 		{
 			// End:0x1FC
-			foreach __NFUN_313__(Class'Engine.Actor', A, InterpolatedActorTag)
+			foreach DynamicActors(Class'Engine.Actor', A, InterpolatedActorTag)
 			{
 				// End:0x1FC
 				break;				
 			}			
 			// End:0x21E
-			if(__NFUN_132__(__NFUN_114__(A, none), A.bInterpolating))
+			if(((A == none) || A.bInterpolating))
 			{
 				return;
 			}
 			// End:0x300
-			if(__NFUN_130__(bViewTargetInterpolatedActor, EventInstigator.IsHumanControlled()))
+			if((bViewTargetInterpolatedActor && EventInstigator.IsHumanControlled()))
 			{
 				PlayerController(EventInstigator.Controller).SetViewTarget(A);
 				PlayerController(EventInstigator.Controller).bBehindView = bThirdPersonViewTarget;
 				// End:0x300
-				if(__NFUN_255__(PlayerScriptTag, 'None'))
+				if((PlayerScriptTag != 'None'))
 				{
 					// End:0x2A9
-					foreach __NFUN_313__(Class'Gameplay.ScriptedSequence', S, PlayerScriptTag)
+					foreach DynamicActors(Class'Gameplay.ScriptedSequence', S, PlayerScriptTag)
 					{
 						// End:0x2A9
 						break;						
 					}					
 					// End:0x300
-					if(__NFUN_119__(S, none))
+					if((S != none))
 					{
 						EventInstigator.Controller.Pawn = none;
-						PlayerController(EventInstigator.Controller).__NFUN_113__('Spectating');
+						PlayerController(EventInstigator.Controller).GotoState('Spectating');
 						S.TakeOver(EventInstigator);
 					}
 				}

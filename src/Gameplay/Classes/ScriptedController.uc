@@ -419,7 +419,7 @@ KeepMoving:
 					FocalPoint = (Pawn.Location + (float(1000) * Vector(SequenceScript.Rotation)));
 				}
 			}
-			__NFUN_508__();
+			FinishRotation();
 			MayShootTarget();
 		}
 	}
@@ -429,11 +429,11 @@ KeepMoving:
 state Broken
 {Begin:
 
-	__NFUN_232__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(string(Pawn), " Scripted Sequence BROKEN "), string(SequenceScript)), " ACTION "), string(CurrentAction)));
+	Warn(((((string(Pawn) $ " Scripted Sequence BROKEN ") $ string(SequenceScript)) $ " ACTION ") $ string(CurrentAction)));
 	Pawn.bPhysicsAnimUpdate = false;
 	Pawn.StopAnimating();
 	// End:0x94
-	if(__NFUN_119__(GetMyPlayer(), none))
+	if((GetMyPlayer() != none))
 	{
 		PlayerController(GetMyPlayer().Controller).SetViewTarget(Pawn);
 	}

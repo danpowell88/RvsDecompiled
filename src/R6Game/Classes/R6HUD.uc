@@ -456,11 +456,11 @@ function DisplayRemainingTime(Canvas C)
 	szTime = (Localize("MPInGame", "Round", "R6Menu") $ " ");
 	C.TextSize(szTime, W, H);
 	C.SetPos((fDefaultNamePosX - W), fPosY);
-	C.__NFUN_465__(szTime);
-	C.__NFUN_2623__(fDefaultNamePosX, fPosY);
-	C.__NFUN_465__(__NFUN_1520__(int(m_GameRepInfo.GetRoundTime()), true));
-	C.__NFUN_1606__(false);
-	C.__NFUN_2624__(fBkpOrigX, fBkpOrigY);
+	C.DrawText(szTime);
+	C.SetPos(fDefaultNamePosX, fPosY);
+	C.DrawText(ConvertIntTimeToString(int(m_GameRepInfo.GetRoundTime()), true));
+	C.UseVirtualSize(false);
+	C.SetOrigin(fBkpOrigX, fBkpOrigY);
 	return;
 }
 
@@ -476,7 +476,7 @@ function DisplayBombTimer(Canvas C)
 	local string szTime, szBomb;
 	local R6IOBomb pBomb;
 
-	C.__NFUN_1606__(true, 640.0000000, 480.0000000);
+	C.UseVirtualSize(true, 640.0000000, 480.0000000);
 	fDefaultNamePosX = 600.0000000;
 	fPosYDelta = 16.0000000;
 	fPosY = 380.0000000;
@@ -486,7 +486,7 @@ function DisplayBombTimer(Canvas C)
 	J0x64:
 
 	// End:0x13C [Loop If]
-	if(__NFUN_150__(i, __NFUN_147__(m_aIOBombs.Length, 1)))
+	if((i < (m_aIOBombs.Length - 1)))
 	{
 		// End:0x132
 		if(m_aIOBombs[i].m_bIsActivated)
@@ -495,63 +495,63 @@ function DisplayBombTimer(Canvas C)
 			J0x96:
 
 			// End:0x132 [Loop If]
-			if(__NFUN_150__(j, m_aIOBombs.Length))
+			if((j < m_aIOBombs.Length))
 			{
 				// End:0x128
-				if(__NFUN_130__(m_aIOBombs[j].m_bIsActivated, __NFUN_176__(m_aIOBombs[j].GetTimeLeft(), m_aIOBombs[i].GetTimeLeft())))
+				if((m_aIOBombs[j].m_bIsActivated && (m_aIOBombs[j].GetTimeLeft() < m_aIOBombs[i].GetTimeLeft())))
 				{
 					pBomb = m_aIOBombs[i];
 					m_aIOBombs[i] = m_aIOBombs[j];
 					m_aIOBombs[j] = pBomb;
 				}
-				__NFUN_163__(j);
+				(++j);
 				// [Loop Continue]
 				goto J0x96;
 			}
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x64;
 	}
-	i = __NFUN_147__(m_aIOBombs.Length, 1);
+	i = (m_aIOBombs.Length - 1);
 	J0x14B:
 
 	// End:0x2AE [Loop If]
-	if(__NFUN_153__(i, 0))
+	if((i >= 0))
 	{
 		// End:0x2A4
 		if(m_aIOBombs[i].m_bIsActivated)
 		{
 			// End:0x1A7
-			if(__NFUN_177__(m_aIOBombs[i].GetTimeLeft(), float(20)))
+			if((m_aIOBombs[i].GetTimeLeft() > float(20)))
 			{
-				C.__NFUN_2626__(byte(255), byte(255), byte(255));				
+				C.SetDrawColor(byte(255), byte(255), byte(255));				
 			}
 			else
 			{
 				// End:0x1DE
-				if(__NFUN_177__(m_aIOBombs[i].GetTimeLeft(), float(10)))
+				if((m_aIOBombs[i].GetTimeLeft() > float(10)))
 				{
-					C.__NFUN_2626__(byte(255), byte(255), 0);					
+					C.SetDrawColor(byte(255), byte(255), 0);					
 				}
 				else
 				{
-					C.__NFUN_2626__(byte(255), 0, 0);
+					C.SetDrawColor(byte(255), 0, 0);
 				}
 			}
-			szBomb = __NFUN_112__(m_aIOBombs[i].m_szIdentity, " ");
-			C.__NFUN_470__(szBomb, W, H);
-			C.__NFUN_2623__(__NFUN_175__(fDefaultNamePosX, W), fPosY);
-			C.__NFUN_465__(szBomb);
-			C.__NFUN_2623__(fDefaultNamePosX, fPosY);
-			C.__NFUN_465__(__NFUN_1520__(int(m_aIOBombs[i].GetTimeLeft()), true));
-			__NFUN_185__(fPosY, fPosYDelta);
+			szBomb = (m_aIOBombs[i].m_szIdentity $ " ");
+			C.TextSize(szBomb, W, H);
+			C.SetPos((fDefaultNamePosX - W), fPosY);
+			C.DrawText(szBomb);
+			C.SetPos(fDefaultNamePosX, fPosY);
+			C.DrawText(ConvertIntTimeToString(int(m_aIOBombs[i].GetTimeLeft()), true));
+			(fPosY -= fPosYDelta);
 		}
-		__NFUN_164__(i);
+		(--i);
 		// [Loop Continue]
 		goto J0x14B;
 	}
-	C.__NFUN_1606__(false);
+	C.UseVirtualSize(false);
 	return;
 }
 
@@ -565,21 +565,21 @@ function StartFadeToBlack(int iSec, int iPercentageOfBlack)
 	local int iBlack;
 	local float fAlpha;
 
-	C = Class'Engine.Actor'.static.__NFUN_2618__();
+	C = Class'Engine.Actor'.static.GetCanvas();
 	// End:0x163
 	if(C.m_bFading)
 	{
-		fAlpha = __NFUN_172__(C.m_fFadeCurrentTime, C.m_fFadeTotalTime);
-		fAlpha = float(__NFUN_251__(int(fAlpha), 0, 1));
-		C.m_FadeStartColor.R = byte(__NFUN_174__(__NFUN_171__(float(C.m_FadeEndColor.R), fAlpha), __NFUN_171__(float(C.m_FadeStartColor.R), __NFUN_175__(1.0000000, fAlpha))));
-		C.m_FadeStartColor.G = byte(__NFUN_174__(__NFUN_171__(float(C.m_FadeEndColor.G), fAlpha), __NFUN_171__(float(C.m_FadeStartColor.G), __NFUN_175__(1.0000000, fAlpha))));
-		C.m_FadeStartColor.B = byte(__NFUN_174__(__NFUN_171__(float(C.m_FadeEndColor.B), fAlpha), __NFUN_171__(float(C.m_FadeStartColor.B), __NFUN_175__(1.0000000, fAlpha))));		
+		fAlpha = (C.m_fFadeCurrentTime / C.m_fFadeTotalTime);
+		fAlpha = float(Clamp(int(fAlpha), 0, 1));
+		C.m_FadeStartColor.R = byte(((float(C.m_FadeEndColor.R) * fAlpha) + (float(C.m_FadeStartColor.R) * (1.0000000 - fAlpha))));
+		C.m_FadeStartColor.G = byte(((float(C.m_FadeEndColor.G) * fAlpha) + (float(C.m_FadeStartColor.G) * (1.0000000 - fAlpha))));
+		C.m_FadeStartColor.B = byte(((float(C.m_FadeEndColor.B) * fAlpha) + (float(C.m_FadeStartColor.B) * (1.0000000 - fAlpha))));		
 	}
 	else
 	{
 		C.m_FadeStartColor = C.MakeColor(byte(255), byte(255), byte(255));
 	}
-	iBlack = __NFUN_145__(__NFUN_144__(255, __NFUN_147__(100, iPercentageOfBlack)), 100);
+	iBlack = ((255 * (100 - iPercentageOfBlack)) / 100);
 	C.m_bFading = true;
 	C.m_fFadeCurrentTime = 0.0000000;
 	C.m_fFadeTotalTime = float(iSec);
@@ -596,7 +596,7 @@ function StopFadeToBlack()
 {
 	local Canvas C;
 
-	C = Class'Engine.Actor'.static.__NFUN_2618__();
+	C = Class'Engine.Actor'.static.GetCanvas();
 	C.m_bFading = true;
 	C.m_fFadeCurrentTime = 0.0000000;
 	C.m_fFadeTotalTime = 0.0000000;
@@ -613,7 +613,7 @@ function StopFadeToBlack()
 simulated function Message(PlayerReplicationInfo PRI, coerce string Msg, name MsgType)
 {
 	// End:0x51
-	if(__NFUN_130__(__NFUN_254__(MsgType, 'Console'), __NFUN_132__(__NFUN_122__("SAY", __NFUN_235__(__NFUN_128__(Msg, __NFUN_125__("Say")))), __NFUN_122__("TEAMSAY", __NFUN_235__(__NFUN_128__(Msg, __NFUN_125__("TeamSay")))))))
+	if(((MsgType == 'Console') && (("SAY" == Caps(Left(Msg, Len("Say")))) || ("TEAMSAY" == Caps(Left(Msg, Len("TeamSay")))))))
 	{
 		return;
 	}
@@ -627,7 +627,7 @@ simulated function Message(PlayerReplicationInfo PRI, coerce string Msg, name Ms
 //===========================================================================//
 simulated function DisplayMessages(Canvas C)
 {
-	C.__NFUN_2626__(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
+	C.SetDrawColor(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
 	C.Style = 5;
 	C.Font = m_FontRainbow6_14pt;
 	super(HUD).DisplayMessages(C);
@@ -639,7 +639,7 @@ simulated function DisplayMessages(Canvas C)
 //===========================================================================//
 function SetDefaultFontSettings(Canvas C)
 {
-	C.__NFUN_2626__(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
+	C.SetDrawColor(m_iCurrentTeamColor.R, m_iCurrentTeamColor.G, m_iCurrentTeamColor.B, m_iCurrentTeamColor.A);
 	C.Style = 5;
 	C.Font = m_FontRainbow6_22pt;
 	return;

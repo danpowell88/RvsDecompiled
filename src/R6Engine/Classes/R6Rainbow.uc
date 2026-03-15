@@ -404,16 +404,16 @@ simulated function InitializeRainbowAnimations()
 	}
 	PlayWeaponAnimation();
 	// End:0x9D
-	if(__NFUN_154__(int(m_ePeekingMode), int(1)))
+	if((int(m_ePeekingMode) == int(1)))
 	{
 		// End:0x8D
 		if(m_bPeekingLeft)
 		{
-			m_fPeeking = __NFUN_174__(m_fPeekingGoal, float(1));			
+			m_fPeeking = (m_fPeekingGoal + float(1));			
 		}
 		else
 		{
-			m_fPeeking = __NFUN_175__(m_fPeekingGoal, float(1));
+			m_fPeeking = (m_fPeekingGoal - float(1));
 		}
 	}
 	return;
@@ -423,17 +423,17 @@ function PossessedBy(Controller C)
 {
 	super.PossessedBy(C);
 	// End:0x21
-	if(__NFUN_129__(m_bIsPlayer))
+	if((!m_bIsPlayer))
 	{
 		bCanStrafe = false;		
 	}
 	else
 	{
 		// End:0x90
-		if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_DedicatedServer)), __NFUN_154__(int(Level.NetMode), int(NM_ListenServer))))
+		if(((int(Level.NetMode) == int(NM_DedicatedServer)) || (int(Level.NetMode) == int(NM_ListenServer))))
 		{
 			// End:0x90
-			if(__NFUN_119__(PlayerReplicationInfo, none))
+			if((PlayerReplicationInfo != none))
 			{
 				bIsFemale = PlayerReplicationInfo.bIsFemale;
 				m_iOperativeID = PlayerReplicationInfo.iOperativeID;
@@ -447,7 +447,7 @@ function PossessedBy(Controller C)
 function UnPossessed()
 {
 	// End:0x58
-	if(__NFUN_130__(__NFUN_129__(m_bIsClimbingLadder), __NFUN_119__(m_Ladder, none)))
+	if(((!m_bIsClimbingLadder) && (m_Ladder != none)))
 	{
 		R6LadderVolume(m_Ladder.MyLadder).RemoveClimber(self);
 		R6LadderVolume(m_Ladder.MyLadder).DisableCollisions(m_Ladder);
@@ -459,7 +459,7 @@ function UnPossessed()
 simulated event AnimEnd(int iChannel)
 {
 	// End:0x53
-	if(__NFUN_130__(__NFUN_130__(__NFUN_151__(int(m_bIsFiringWeapon), 0), __NFUN_130__(__NFUN_119__(EngineWeapon, none), __NFUN_129__(EngineWeapon.__NFUN_303__('R6GrenadeWeapon')))), __NFUN_155__(int(m_ePlayerIsUsingHands), int(0))))
+	if((((int(m_bIsFiringWeapon) > 0) && ((EngineWeapon != none) && (!EngineWeapon.IsA('R6GrenadeWeapon')))) && (int(m_ePlayerIsUsingHands) != int(0))))
 	{
 		// End:0x53
 		if(m_bNightVisionAnimation)
@@ -468,16 +468,16 @@ simulated event AnimEnd(int iChannel)
 		}
 	}
 	// End:0x9B
-	if(__NFUN_154__(iChannel, 0))
+	if((iChannel == 0))
 	{
 		m_bInitRainbow = false;
 		// End:0x82
-		if(__NFUN_130__(m_bIsPlayer, m_bSlideEnd))
+		if((m_bIsPlayer && m_bSlideEnd))
 		{
 			m_bSlideEnd = false;
 		}
 		// End:0x98
-		if(__NFUN_155__(int(Physics), int(12)))
+		if((int(Physics) != int(12)))
 		{
 			PlayWaiting();
 		}		
@@ -485,10 +485,10 @@ simulated event AnimEnd(int iChannel)
 	else
 	{
 		// End:0x110
-		if(__NFUN_154__(iChannel, 1))
+		if((iChannel == 1))
 		{
 			// End:0xFE
-			if(__NFUN_130__(__NFUN_130__(m_bPostureTransition, __NFUN_129__(m_bInteractingWithDevice)), __NFUN_129__(m_bIsLockPicking)))
+			if(((m_bPostureTransition && (!m_bInteractingWithDevice)) && (!m_bIsLockPicking)))
 			{
 				// End:0xD8
 				if(m_bNightVisionAnimation)
@@ -510,22 +510,22 @@ simulated event AnimEnd(int iChannel)
 		else
 		{
 			// End:0x132
-			if(__NFUN_130__(__NFUN_154__(iChannel, 16), m_bPawnSpecificAnimInProgress))
+			if(((iChannel == 16) && m_bPawnSpecificAnimInProgress))
 			{
 				m_bPawnSpecificAnimInProgress = false;				
 			}
 			else
 			{
 				// End:0x1A7
-				if(__NFUN_154__(iChannel, 15))
+				if((iChannel == 15))
 				{
 					// End:0x15A
-					if(__NFUN_130__(__NFUN_129__(m_bIsPlayer), m_bReloadToFullAmmo))
+					if(((!m_bIsPlayer) && m_bReloadToFullAmmo))
 					{
 						FinishedReloadingWeapon();
 					}
 					// End:0x1A4
-					if(__NFUN_132__(m_bPlayingComAnimation, m_bNightVisionAnimation))
+					if((m_bPlayingComAnimation || m_bNightVisionAnimation))
 					{
 						m_bPlayingComAnimation = false;
 						// End:0x196
@@ -545,19 +545,19 @@ simulated event AnimEnd(int iChannel)
 				else
 				{
 					// End:0x211
-					if(__NFUN_130__(__NFUN_154__(iChannel, 14), m_bWeaponTransition))
+					if(((iChannel == 14) && m_bWeaponTransition))
 					{
 						m_bWeaponTransition = false;
 						// End:0x20B
-						if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+						if((int(Role) == int(ROLE_Authority)))
 						{
 							// End:0x1EC
-							if(__NFUN_155__(int(m_eGrenadeThrow), int(3)))
+							if((int(m_eGrenadeThrow) != int(3)))
 							{
 								PlayWeaponAnimation();
 							}
 							// End:0x20B
-							if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+							if((int(Level.NetMode) != int(NM_Standalone)))
 							{
 								ClientFinishAnimation();
 							}
@@ -582,7 +582,7 @@ simulated function SecureNightVisionGoggles()
 		m_NightVision.bHidden = false;
 		AttachToBone(m_NightVision, 'R6 Head');
 		// End:0x52
-		if(__NFUN_154__(int(m_eArmorType), int(3)))
+		if((int(m_eArmorType) == int(3)))
 		{
 			m_Helmet.SetHelmetStaticMesh(true);
 		}		
@@ -591,7 +591,7 @@ simulated function SecureNightVisionGoggles()
 	{
 		m_NightVision.bHidden = true;
 		// End:0x93
-		if(__NFUN_130__(__NFUN_154__(int(m_eArmorType), int(3)), __NFUN_129__(m_bHaveGasMask)))
+		if(((int(m_eArmorType) == int(3)) && (!m_bHaveGasMask)))
 		{
 			m_Helmet.SetHelmetStaticMesh(false);
 		}
@@ -611,11 +611,11 @@ simulated function PlayActivateNightVisionAnimation()
 	// End:0x52
 	if(m_bIsProne)
 	{
-		__NFUN_259__('ProneNightVision', 1.0000000, 0.2000000, 15);		
+		PlayAnim('ProneNightVision', 1.0000000, 0.2000000, 15);		
 	}
 	else
 	{
-		__NFUN_259__('CrouchNightVision', 1.0000000, 0.2000000, 15);
+		PlayAnim('CrouchNightVision', 1.0000000, 0.2000000, 15);
 	}
 	return;
 }
@@ -630,11 +630,11 @@ simulated function PlayDeactivateNightVisionAnimation()
 	// End:0x53
 	if(m_bIsProne)
 	{
-		__NFUN_259__('ProneNightVision', 1.0000000, 0.2000000, 15, true);		
+		PlayAnim('ProneNightVision', 1.0000000, 0.2000000, 15, true);		
 	}
 	else
 	{
-		__NFUN_259__('CrouchNightVision', 1.0000000, 0.2000000, 15, true);
+		PlayAnim('CrouchNightVision', 1.0000000, 0.2000000, 15, true);
 	}
 	return;
 }
@@ -642,7 +642,7 @@ simulated function PlayDeactivateNightVisionAnimation()
 simulated function GetNightVision()
 {
 	// End:0x0D
-	if(__NFUN_129__(m_bActivateNightVision))
+	if((!m_bActivateNightVision))
 	{
 		return;
 	}
@@ -654,12 +654,12 @@ simulated function GetNightVision()
 simulated function RaiseHelmetVisor()
 {
 	// End:0x0D
-	if(__NFUN_129__(m_bActivateNightVision))
+	if((!m_bActivateNightVision))
 	{
 		return;
 	}
 	// End:0x2D
-	if(__NFUN_154__(int(m_eArmorType), int(3)))
+	if((int(m_eArmorType) == int(3)))
 	{
 		m_Helmet.SetHelmetStaticMesh(true);
 	}
@@ -669,7 +669,7 @@ simulated function RaiseHelmetVisor()
 simulated function ActivateNightVision()
 {
 	// End:0x0D
-	if(__NFUN_129__(m_bActivateNightVision))
+	if((!m_bActivateNightVision))
 	{
 		return;
 	}
@@ -697,7 +697,7 @@ simulated function DeactivateNightVision()
 		return;
 	}
 	// End:0x38
-	if(__NFUN_130__(__NFUN_154__(int(m_eArmorType), int(3)), __NFUN_129__(m_bHaveGasMask)))
+	if(((int(m_eArmorType) == int(3)) && (!m_bHaveGasMask)))
 	{
 		m_Helmet.SetHelmetStaticMesh(false);
 	}
@@ -708,7 +708,7 @@ simulated function DeactivateNightVision()
 exec function ToggleNightVision()
 {
 	// End:0x28
-	if(__NFUN_132__(__NFUN_132__(__NFUN_155__(int(Physics), int(1)), m_bIsLanding), m_bPostureTransition))
+	if((((int(Physics) != int(1)) || m_bIsLanding) || m_bPostureTransition))
 	{
 		return;
 	}
@@ -747,7 +747,7 @@ function ClientFinishAnimation()
 {
 	m_bWeaponTransition = false;
 	// End:0x1E
-	if(__NFUN_155__(int(m_eGrenadeThrow), int(3)))
+	if((int(m_eGrenadeThrow) != int(3)))
 	{
 		PlayWeaponAnimation();
 	}
@@ -757,14 +757,14 @@ function ClientFinishAnimation()
 simulated function float ArmorSkillEffect()
 {
 	// End:0x19
-	if(__NFUN_154__(int(m_eArmorType), int(3)))
+	if((int(m_eArmorType) == int(3)))
 	{
 		return 0.6000000;		
 	}
 	else
 	{
 		// End:0x2F
-		if(__NFUN_154__(int(m_eArmorType), int(2)))
+		if((int(m_eArmorType) == int(2)))
 		{
 			return 0.8000000;
 		}
@@ -795,14 +795,14 @@ event EndOfGrenadeEffect(Pawn.EGrenadeType eType)
 		return;
 	}
 	// End:0x3C
-	if(__NFUN_154__(int(eType), int(2)))
+	if((int(eType) == int(2)))
 	{
 		R6RainbowAI(Controller).m_TeamManager.GasGrenadeCleared(self);		
 	}
 	else
 	{
 		// End:0x4C
-		if(__NFUN_154__(int(eType), int(3)))
+		if((int(eType) == int(3)))
 		{
 		}
 	}
@@ -812,12 +812,12 @@ event EndOfGrenadeEffect(Pawn.EGrenadeType eType)
 function TurnAwayFromNearbyWalls()
 {
 	// End:0x1F
-	if(__NFUN_132__(__NFUN_114__(Controller, none), __NFUN_114__(R6RainbowAI(Controller), none)))
+	if(((Controller == none) || (R6RainbowAI(Controller) == none)))
 	{
 		return;
 	}
 	// End:0x5D
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bIsProne), __NFUN_129__(m_bIsClimbingStairs)), __NFUN_155__(int(R6RainbowAI(Controller).m_eFormation), int(1))))
+	if((((!m_bIsProne) && (!m_bIsClimbingStairs)) && (int(R6RainbowAI(Controller).m_eFormation) != int(1))))
 	{
 		super.TurnAwayFromNearbyWalls();
 	}
@@ -844,7 +844,7 @@ simulated function PlayEndClimbing()
 simulated function ClimbStairs(Vector vStairDirection)
 {
 	// End:0x2E
-	if(__NFUN_130__(__NFUN_129__(m_bIsPlayer), __NFUN_119__(Controller, none)))
+	if(((!m_bIsPlayer) && (Controller != none)))
 	{
 		R6RainbowAI(Controller).m_bUseStaggeredFormation = false;
 	}
@@ -858,7 +858,7 @@ simulated function ClimbStairs(Vector vStairDirection)
 simulated function EndClimbStairs()
 {
 	// End:0x2E
-	if(__NFUN_130__(__NFUN_129__(m_bIsPlayer), __NFUN_119__(Controller, none)))
+	if(((!m_bIsPlayer) && (Controller != none)))
 	{
 		R6RainbowAI(Controller).m_bUseStaggeredFormation = true;
 	}
@@ -873,7 +873,7 @@ simulated function PlaySecureTerrorist()
 	PlayWeaponAnimation();
 	m_bPostureTransition = true;
 	AnimBlendParams(1, 1.0000000, 0.0000000, 0.0000000);
-	__NFUN_259__('StandArrest', 1.0000000, 0.2000000, 1);
+	PlayAnim('StandArrest', 1.0000000, 0.2000000, 1);
 	return;
 }
 
@@ -881,10 +881,10 @@ simulated function PlaySecureTerrorist()
 simulated function PlayStartSurrender()
 {
 	R6ResetAnimBlendParams(16);
-	__NFUN_1805__(16);
+	ClearChannel(16);
 	AnimBlendParams(16, 1.0000000);
 	m_ePlayerIsUsingHands = 3;
-	__NFUN_259__('RelaxToSurrender', 1.0000000, 0.2000000, 16);
+	PlayAnim('RelaxToSurrender', 1.0000000, 0.2000000, 16);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
@@ -893,7 +893,7 @@ simulated function PlaySurrender()
 {
 	m_ePlayerIsUsingHands = 3;
 	AnimBlendParams(16, 1.0000000);
-	__NFUN_259__('SurrenderWaitBreathe', 1.0000000, 0.0000000, 16);
+	PlayAnim('SurrenderWaitBreathe', 1.0000000, 0.0000000, 16);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
@@ -902,17 +902,17 @@ simulated function PlayEndSurrender()
 {
 	AnimBlendParams(16, 1.0000000);
 	m_ePlayerIsUsingHands = 0;
-	__NFUN_259__('RelaxToSurrender', 1.0000000, 0.2000000, 16, true);
+	PlayAnim('RelaxToSurrender', 1.0000000, 0.2000000, 16, true);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
 
 simulated function PlayArrest()
 {
-	__NFUN_1805__(16);
+	ClearChannel(16);
 	AnimBlendParams(16, 1.0000000);
 	m_ePlayerIsUsingHands = 3;
-	__NFUN_259__('SurrenderToKneel', 1.0000000, 0.2000000, 16);
+	PlayAnim('SurrenderToKneel', 1.0000000, 0.2000000, 16);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
@@ -921,7 +921,7 @@ simulated function PlayArrestKneel()
 {
 	AnimBlendParams(16, 1.0000000);
 	m_ePlayerIsUsingHands = 3;
-	__NFUN_259__('KneelArrest', 1.0000000, 0.2000000, 16);
+	PlayAnim('KneelArrest', 1.0000000, 0.2000000, 16);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
@@ -946,7 +946,7 @@ simulated function PlayArrestWaiting()
 	}
 	AnimBlendParams(16, 1.0000000);
 	m_ePlayerIsUsingHands = 3;
-	__NFUN_259__(Anim, 1.0000000, 0.2000000, 16);
+	PlayAnim(Anim, 1.0000000, 0.2000000, 16);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
@@ -956,7 +956,7 @@ simulated function PlayEndArrest()
 {
 	AnimBlendParams(16, 1.0000000);
 	m_ePlayerIsUsingHands = 3;
-	__NFUN_259__('KneelArrest', 1.0000000, 0.2000000, 16, true);
+	PlayAnim('KneelArrest', 1.0000000, 0.2000000, 16, true);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
@@ -965,7 +965,7 @@ simulated function PlaySetFree()
 {
 	AnimBlendParams(16, 1.0000000);
 	m_ePlayerIsUsingHands = 3;
-	__NFUN_259__('SurrenderToKneel', 1.0000000, 0.2000000, 16, true);
+	PlayAnim('SurrenderToKneel', 1.0000000, 0.2000000, 16, true);
 	m_bPawnSpecificAnimInProgress = true;
 	return;
 }
@@ -986,11 +986,11 @@ simulated function PlayLockPickDoorAnim()
 	// End:0x53
 	if(bIsCrouched)
 	{
-		__NFUN_260__('CrouchLockPick_c', 2.0000000, 0.2000000, 1);		
+		LoopAnim('CrouchLockPick_c', 2.0000000, 0.2000000, 1);		
 	}
 	else
 	{
-		__NFUN_260__('StandLockPick_c', 2.0000000, 0.2000000, 1);
+		LoopAnim('StandLockPick_c', 2.0000000, 0.2000000, 1);
 	}
 	return;
 }
@@ -1137,7 +1137,7 @@ simulated function ResetPawnSpecificAnimation()
 simulated function PlayCoughing()
 {
 	// End:0x16
-	if(__NFUN_132__(m_bIsClimbingLadder, m_bWeaponTransition))
+	if((m_bIsClimbingLadder || m_bWeaponTransition))
 	{
 		return;
 	}
@@ -1147,18 +1147,18 @@ simulated function PlayCoughing()
 	// End:0x62
 	if(m_bIsProne)
 	{
-		__NFUN_259__('ProneGazed', 1.0000000, 0.0000000, 16);		
+		PlayAnim('ProneGazed', 1.0000000, 0.0000000, 16);		
 	}
 	else
 	{
 		// End:0x82
 		if(bIsCrouched)
 		{
-			__NFUN_259__('CrouchGazed', 1.0000000, 0.0000000, 16);			
+			PlayAnim('CrouchGazed', 1.0000000, 0.0000000, 16);			
 		}
 		else
 		{
-			__NFUN_259__('StandGazed', 1.0000000, 0.0000000, 16);
+			PlayAnim('StandGazed', 1.0000000, 0.0000000, 16);
 		}
 	}
 	return;
@@ -1167,7 +1167,7 @@ simulated function PlayCoughing()
 simulated function PlayBlinded()
 {
 	// End:0x16
-	if(__NFUN_132__(m_bIsClimbingLadder, m_bWeaponTransition))
+	if((m_bIsClimbingLadder || m_bWeaponTransition))
 	{
 		return;
 	}
@@ -1177,18 +1177,18 @@ simulated function PlayBlinded()
 	// End:0x62
 	if(m_bIsProne)
 	{
-		__NFUN_259__('ProneBlinded', 1.0000000, 0.0000000, 16);		
+		PlayAnim('ProneBlinded', 1.0000000, 0.0000000, 16);		
 	}
 	else
 	{
 		// End:0x82
 		if(bIsCrouched)
 		{
-			__NFUN_259__('CrouchBlinded', 1.0000000, 0.0000000, 16);			
+			PlayAnim('CrouchBlinded', 1.0000000, 0.0000000, 16);			
 		}
 		else
 		{
-			__NFUN_259__('StandBlinded', 1.0000000, 0.0000000, 16);
+			PlayAnim('StandBlinded', 1.0000000, 0.0000000, 16);
 		}
 	}
 	return;
@@ -1239,7 +1239,7 @@ simulated function ServerSetComAnim(R6Rainbow.eComAnimation eComAnim)
 simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 {
 	// End:0x16
-	if(__NFUN_132__(m_bReloadingWeapon, m_bChangingWeapon))
+	if((m_bReloadingWeapon || m_bChangingWeapon))
 	{
 		return;
 	}
@@ -1254,11 +1254,11 @@ simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 			// End:0x6C
 			if(m_bIsProne)
 			{
-				__NFUN_259__('ProneComFollowMe', 1.0000000, 0.2000000, 15);				
+				PlayAnim('ProneComFollowMe', 1.0000000, 0.2000000, 15);				
 			}
 			else
 			{
-				__NFUN_259__('StandComFollowMe', 1.0000000, 0.2000000, 15);
+				PlayAnim('StandComFollowMe', 1.0000000, 0.2000000, 15);
 			}
 			// End:0x176
 			break;
@@ -1267,11 +1267,11 @@ simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 			// End:0xA8
 			if(m_bIsProne)
 			{
-				__NFUN_259__('ProneComCover', 1.0000000, 0.2000000, 15);				
+				PlayAnim('ProneComCover', 1.0000000, 0.2000000, 15);				
 			}
 			else
 			{
-				__NFUN_259__('StandComCover', 1.0000000, 0.2000000, 15);
+				PlayAnim('StandComCover', 1.0000000, 0.2000000, 15);
 			}
 			// End:0x176
 			break;
@@ -1280,11 +1280,11 @@ simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 			// End:0xE4
 			if(m_bIsProne)
 			{
-				__NFUN_259__('ProneComGo', 1.0000000, 0.2000000, 15);				
+				PlayAnim('ProneComGo', 1.0000000, 0.2000000, 15);				
 			}
 			else
 			{
-				__NFUN_259__('StandComGo', 1.0000000, 0.2000000, 15);
+				PlayAnim('StandComGo', 1.0000000, 0.2000000, 15);
 			}
 			// End:0x176
 			break;
@@ -1293,11 +1293,11 @@ simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 			// End:0x120
 			if(m_bIsProne)
 			{
-				__NFUN_259__('ProneComRegroup', 1.0000000, 0.2000000, 15);				
+				PlayAnim('ProneComRegroup', 1.0000000, 0.2000000, 15);				
 			}
 			else
 			{
-				__NFUN_259__('StandComRegroup', 1.0000000, 0.2000000, 15);
+				PlayAnim('StandComRegroup', 1.0000000, 0.2000000, 15);
 			}
 			// End:0x176
 			break;
@@ -1306,11 +1306,11 @@ simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 			// End:0x15C
 			if(m_bIsProne)
 			{
-				__NFUN_259__('ProneComHold', 1.0000000, 0.2000000, 15);				
+				PlayAnim('ProneComHold', 1.0000000, 0.2000000, 15);				
 			}
 			else
 			{
-				__NFUN_259__('StandComHold', 1.0000000, 0.2000000, 15);
+				PlayAnim('StandComHold', 1.0000000, 0.2000000, 15);
 			}
 			// End:0x176
 			break;
@@ -1324,9 +1324,9 @@ simulated function PlayCommunicationAnimation(R6Rainbow.eComAnimation eComAnim)
 simulated function RainbowSecureWeapon()
 {
 	// End:0x28
-	if(__NFUN_130__(__NFUN_129__(m_bIsPlayer), __NFUN_119__(EngineWeapon, none)))
+	if(((!m_bIsPlayer) && (EngineWeapon != none)))
 	{
-		EngineWeapon.__NFUN_113__('PutWeaponDown');
+		EngineWeapon.GotoState('PutWeaponDown');
 	}
 	m_eEquipWeapon = 0;
 	PlayWeaponAnimation();
@@ -1336,9 +1336,9 @@ simulated function RainbowSecureWeapon()
 simulated function RainbowEquipWeapon()
 {
 	// End:0x28
-	if(__NFUN_130__(__NFUN_129__(m_bIsPlayer), __NFUN_119__(EngineWeapon, none)))
+	if(((!m_bIsPlayer) && (EngineWeapon != none)))
 	{
-		EngineWeapon.__NFUN_113__('BringWeaponUp');
+		EngineWeapon.GotoState('BringWeaponUp');
 	}
 	m_eEquipWeapon = 1;
 	PlayWeaponAnimation();
@@ -1348,23 +1348,23 @@ simulated function RainbowEquipWeapon()
 simulated function bool CheckForPassiveGadget(string aClassName)
 {
 	// End:0x23
-	if(__NFUN_122__(aClassName, "PRIMARYMAGS"))
+	if((aClassName == "PRIMARYMAGS"))
 	{
-		__NFUN_165__(m_iExtraPrimaryClips);
+		(m_iExtraPrimaryClips++);
 		return true;		
 	}
 	else
 	{
 		// End:0x48
-		if(__NFUN_122__(aClassName, "SECONDARYMAGS"))
+		if((aClassName == "SECONDARYMAGS"))
 		{
-			__NFUN_165__(m_iExtraSecondaryClips);
+			(m_iExtraSecondaryClips++);
 			return true;			
 		}
 		else
 		{
 			// End:0x6C
-			if(__NFUN_122__(aClassName, "LOCKPICKKIT"))
+			if((aClassName == "LOCKPICKKIT"))
 			{
 				m_bHasLockPickKit = true;
 				return true;				
@@ -1372,7 +1372,7 @@ simulated function bool CheckForPassiveGadget(string aClassName)
 			else
 			{
 				// End:0x8F
-				if(__NFUN_122__(aClassName, "DIFFUSEKIT"))
+				if((aClassName == "DIFFUSEKIT"))
 				{
 					m_bHasDiffuseKit = true;
 					return true;					
@@ -1380,7 +1380,7 @@ simulated function bool CheckForPassiveGadget(string aClassName)
 				else
 				{
 					// End:0xB5
-					if(__NFUN_122__(aClassName, "ELECTRONICKIT"))
+					if((aClassName == "ELECTRONICKIT"))
 					{
 						m_bHasElectronicsKit = true;
 						return true;						
@@ -1388,7 +1388,7 @@ simulated function bool CheckForPassiveGadget(string aClassName)
 					else
 					{
 						// End:0xD5
-						if(__NFUN_122__(aClassName, "GASMASK"))
+						if((aClassName == "GASMASK"))
 						{
 							m_bHaveGasMask = true;
 							return true;							
@@ -1396,10 +1396,10 @@ simulated function bool CheckForPassiveGadget(string aClassName)
 						else
 						{
 							// End:0x10F
-							if(__NFUN_122__(aClassName, "DoubleGadget"))
+							if((aClassName == "DoubleGadget"))
 							{
 								// End:0x10D
-								if(__NFUN_119__(GetWeaponInGroup(3), none))
+								if((GetWeaponInGroup(3) != none))
 								{
 									GetWeaponInGroup(3).GiveMoreAmmo();
 								}
@@ -1421,17 +1421,17 @@ simulated function GiveDefaultWeapon()
 	local string szCurrentGadget, caps_szPrimaryWeapon, caps_szSecondaryWeapon, caps_szCurrentGadget;
 
 	// End:0x2B8
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_129__(m_bIsPlayer)))
+	if(((int(Level.NetMode) == int(NM_Standalone)) || (!m_bIsPlayer)))
 	{
-		caps_szPrimaryWeapon = __NFUN_235__(m_szPrimaryWeapon);
+		caps_szPrimaryWeapon = Caps(m_szPrimaryWeapon);
 		// End:0x71
-		if(__NFUN_130__(__NFUN_123__(caps_szPrimaryWeapon, "R6WEAPONS.NONE"), __NFUN_123__(caps_szPrimaryWeapon, "")))
+		if(((caps_szPrimaryWeapon != "R6WEAPONS.NONE") && (caps_szPrimaryWeapon != "")))
 		{
 			ServerGivesWeaponToClient(m_szPrimaryWeapon, 1, m_szPrimaryBulletType, m_szPrimaryGadget);
 		}
-		caps_szSecondaryWeapon = __NFUN_235__(m_szSecondaryWeapon);
+		caps_szSecondaryWeapon = Caps(m_szSecondaryWeapon);
 		// End:0xBD
-		if(__NFUN_130__(__NFUN_123__(caps_szSecondaryWeapon, "R6WEAPONS.NONE"), __NFUN_123__(caps_szSecondaryWeapon, "")))
+		if(((caps_szSecondaryWeapon != "R6WEAPONS.NONE") && (caps_szSecondaryWeapon != "")))
 		{
 			ServerGivesWeaponToClient(m_szSecondaryWeapon, 2, m_szSecondaryBulletType, m_szSecondaryGadget);
 		}
@@ -1440,10 +1440,10 @@ simulated function GiveDefaultWeapon()
 		J0xCC:
 
 		// End:0x26B [Loop If]
-		if(__NFUN_150__(i, 2))
+		if((i < 2))
 		{
 			// End:0xF1
-			if(__NFUN_154__(i, 0))
+			if((i == 0))
 			{
 				szCurrentGadget = m_szPrimaryItem;				
 			}
@@ -1451,70 +1451,70 @@ simulated function GiveDefaultWeapon()
 			{
 				szCurrentGadget = m_szSecondaryItem;
 			}
-			caps_szCurrentGadget = __NFUN_235__(szCurrentGadget);
+			caps_szCurrentGadget = Caps(szCurrentGadget);
 			// End:0x261
-			if(__NFUN_130__(__NFUN_123__(caps_szCurrentGadget, "R6WEAPONGADGETS.NONE"), __NFUN_123__(caps_szCurrentGadget, "")))
+			if(((caps_szCurrentGadget != "R6WEAPONGADGETS.NONE") && (caps_szCurrentGadget != "")))
 			{
 				// End:0x162
-				if(__NFUN_122__(caps_szCurrentGadget, "PRIMARYMAGS"))
+				if((caps_szCurrentGadget == "PRIMARYMAGS"))
 				{
 					GetWeaponInGroup(1).AddExtraClip();
 					// [Explicit Continue]
 					goto J0x261;
 				}
 				// End:0x190
-				if(__NFUN_122__(caps_szCurrentGadget, "SECONDARYMAGS"))
+				if((caps_szCurrentGadget == "SECONDARYMAGS"))
 				{
 					GetWeaponInGroup(2).AddExtraClip();
 					// [Explicit Continue]
 					goto J0x261;
 				}
 				// End:0x1B2
-				if(__NFUN_122__(caps_szCurrentGadget, "LOCKPICKKIT"))
+				if((caps_szCurrentGadget == "LOCKPICKKIT"))
 				{
 					m_bHasLockPickKit = true;
 					// [Explicit Continue]
 					goto J0x261;
 				}
 				// End:0x1D3
-				if(__NFUN_122__(caps_szCurrentGadget, "DIFFUSEKIT"))
+				if((caps_szCurrentGadget == "DIFFUSEKIT"))
 				{
 					m_bHasDiffuseKit = true;
 					// [Explicit Continue]
 					goto J0x261;
 				}
 				// End:0x1F7
-				if(__NFUN_122__(caps_szCurrentGadget, "ELECTRONICKIT"))
+				if((caps_szCurrentGadget == "ELECTRONICKIT"))
 				{
 					m_bHasElectronicsKit = true;
 					// [Explicit Continue]
 					goto J0x261;
 				}
 				// End:0x215
-				if(__NFUN_122__(caps_szCurrentGadget, "GASMASK"))
+				if((caps_szCurrentGadget == "GASMASK"))
 				{
 					m_bHaveGasMask = true;
 					// [Explicit Continue]
 					goto J0x261;
 				}
 				// End:0x24A
-				if(__NFUN_130__(__NFUN_154__(i, 1), __NFUN_122__(__NFUN_235__(m_szPrimaryItem), __NFUN_235__(m_szSecondaryItem))))
+				if(((i == 1) && (Caps(m_szPrimaryItem) == Caps(m_szSecondaryItem))))
 				{
 					GetWeaponInGroup(3).GiveMoreAmmo();
 					// [Explicit Continue]
 					goto J0x261;
 				}
 				ServerGivesWeaponToClient(szCurrentGadget, iLastAllocated);
-				__NFUN_165__(iLastAllocated);
+				(iLastAllocated++);
 			}
 			J0x261:
 
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xCC;
 		}
 		// End:0x2B2
-		if(__NFUN_119__(Controller, none))
+		if((Controller != none))
 		{
 			Controller.m_PawnRepInfo.m_PawnType = m_ePawnType;
 			Controller.m_PawnRepInfo.m_bSex = bIsFemale;
@@ -1532,22 +1532,22 @@ simulated function GiveDefaultWeapon()
 simulated function AttachGasMask()
 {
 	// End:0x2B
-	if(__NFUN_119__(m_Helmet, none))
+	if((m_Helmet != none))
 	{
 		// End:0x2B
-		if(__NFUN_154__(int(m_eArmorType), int(3)))
+		if((int(m_eArmorType) == int(3)))
 		{
 			m_Helmet.SetHelmetStaticMesh(true);
 		}
 	}
 	// End:0x54
-	if(__NFUN_114__(m_GasMask, none))
+	if((m_GasMask == none))
 	{
-		m_GasMask = __NFUN_278__(m_GasMaskClass);
+		m_GasMask = Spawn(m_GasMaskClass);
 		AttachToBone(m_GasMask, 'R6 Head');
 	}
 	// End:0x7C
-	if(__NFUN_130__(bIsFemale, m_bScaleGasMaskForFemale))
+	if((bIsFemale && m_bScaleGasMaskForFemale))
 	{
 		m_GasMask.DrawScale = 1.0000000;
 	}
@@ -1564,7 +1564,7 @@ simulated event ReceivedEngineWeapon()
 simulated event PlayWeaponAnimation()
 {
 	// End:0x4B
-	if(__NFUN_130__(m_bPawnSpecificAnimInProgress, __NFUN_132__(__NFUN_132__(__NFUN_132__(m_bReloadingWeapon, m_bChangingWeapon), EngineWeapon.bFiredABullet), __NFUN_155__(int(m_eGrenadeThrow), int(0)))))
+	if((m_bPawnSpecificAnimInProgress && (((m_bReloadingWeapon || m_bChangingWeapon) || EngineWeapon.bFiredABullet) || (int(m_eGrenadeThrow) != int(0)))))
 	{
 		ResetPawnSpecificAnimation();
 	}
@@ -1578,7 +1578,7 @@ simulated event ReceivedWeapons()
 	local R6EngineWeapon AWeapon;
 
 	// End:0x2A
-	if(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), m_bHaveGasMask))
+	if(((int(Level.NetMode) != int(NM_Standalone)) && m_bHaveGasMask))
 	{
 		AttachGasMask();
 	}
@@ -1586,14 +1586,14 @@ simulated event ReceivedWeapons()
 	J0x31:
 
 	// End:0x153 [Loop If]
-	if(__NFUN_152__(i, 4))
+	if((i <= 4))
 	{
 		AWeapon = GetWeaponInGroup(i);
 		// End:0x149
-		if(__NFUN_119__(AWeapon, none))
+		if((AWeapon != none))
 		{
 			// End:0x82
-			if(__NFUN_154__(i, 4))
+			if((i == 4))
 			{
 				AWeapon.m_HoldAttachPoint = AWeapon.m_HoldAttachPoint2;
 			}
@@ -1612,7 +1612,7 @@ simulated event ReceivedWeapons()
 					AWeapon.RemoteRole = ROLE_SimulatedProxy;
 				}
 				// End:0x119
-				if(__NFUN_154__(i, 1))
+				if((i == 1))
 				{
 					// End:0x119
 					if(m_bIsPlayer)
@@ -1620,32 +1620,32 @@ simulated event ReceivedWeapons()
 						J0xF5:
 
 						// End:0x119 [Loop If]
-						if(__NFUN_151__(m_iExtraPrimaryClips, 0))
+						if((m_iExtraPrimaryClips > 0))
 						{
 							AWeapon.AddExtraClip();
-							__NFUN_166__(m_iExtraPrimaryClips);
+							(m_iExtraPrimaryClips--);
 							// [Loop Continue]
 							goto J0xF5;
 						}
 					}
 				}
 				// End:0x149
-				if(__NFUN_154__(i, 2))
+				if((i == 2))
 				{
 					J0x125:
 
 					// End:0x149 [Loop If]
-					if(__NFUN_151__(m_iExtraSecondaryClips, 0))
+					if((m_iExtraSecondaryClips > 0))
 					{
 						AWeapon.AddExtraClip();
-						__NFUN_166__(m_iExtraSecondaryClips);
+						(m_iExtraSecondaryClips--);
 						// [Loop Continue]
 						goto J0x125;
 					}
 				}
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x31;
 	}
@@ -1655,38 +1655,38 @@ simulated event ReceivedWeapons()
 		EngineWeapon = GetWeaponInGroup(1);
 		m_iCurrentWeapon = 1;
 		// End:0x18C
-		if(__NFUN_119__(m_SoundRepInfo, none))
+		if((m_SoundRepInfo != none))
 		{
 			m_SoundRepInfo.m_CurrentWeapon = 0;
 		}
 		// End:0x1C9
-		if(__NFUN_114__(EngineWeapon, none))
+		if((EngineWeapon == none))
 		{
 			EngineWeapon = GetWeaponInGroup(2);
 			// End:0x1C1
-			if(__NFUN_119__(m_SoundRepInfo, none))
+			if((m_SoundRepInfo != none))
 			{
 				m_SoundRepInfo.m_CurrentWeapon = 1;
 			}
 			m_iCurrentWeapon = 2;
 		}
 		// End:0x20C
-		if(__NFUN_119__(EngineWeapon, none))
+		if((EngineWeapon != none))
 		{
 			ServerChangedWeapon(none, EngineWeapon);
 			// End:0x1FC
 			if(m_bIsPlayer)
 			{
-				EngineWeapon.__NFUN_113__('RaiseWeapon');				
+				EngineWeapon.GotoState('RaiseWeapon');				
 			}
 			else
 			{
-				EngineWeapon.__NFUN_113__('None');
+				EngineWeapon.GotoState('None');
 			}
 		}
 	}
 	// End:0x230
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
 		AttachWeapon(EngineWeapon, EngineWeapon.m_AttachPoint);
 	}
@@ -1696,7 +1696,7 @@ simulated event ReceivedWeapons()
 
 function SetMovementPhysics()
 {
-	__NFUN_3970__(1);
+	SetPhysics(1);
 	return;
 }
 
@@ -1714,7 +1714,7 @@ simulated function PlayWaiting()
 		return;
 	}
 	// End:0x2E
-	if(__NFUN_154__(int(Physics), int(2)))
+	if((int(Physics) == int(2)))
 	{
 		PlayFalling();
 		return;
@@ -1738,15 +1738,15 @@ simulated function PlayWaiting()
 		return;
 	}
 	// End:0x74
-	if(__NFUN_129__(m_bNightVisionAnimation))
+	if((!m_bNightVisionAnimation))
 	{
 		m_ePlayerIsUsingHands = 0;
 	}
 	// End:0xE6
-	if(__NFUN_132__(__NFUN_132__(__NFUN_181__(m_fPeeking, 1000.0000000), IsPeeking()), __NFUN_155__(int(m_u8CurrentYaw), 0)))
+	if((((m_fPeeking != 1000.0000000) || IsPeeking()) || (int(m_u8CurrentYaw) != 0)))
 	{
 		// End:0xB6
-		if(__NFUN_243__(bIsCrouched, bWasCrouched))
+		if((bIsCrouched != bWasCrouched))
 		{
 			m_bTweenFirstTimeOnly = true;
 		}
@@ -1759,15 +1759,15 @@ simulated function PlayWaiting()
 		}
 		else
 		{
-			__NFUN_259__('StandWaitBreathe');
+			PlayAnim('StandWaitBreathe');
 		}
 		return;
 	}
 	// End:0x12D
-	if(__NFUN_132__(__NFUN_132__(m_bIsPlayer, __NFUN_119__(m_TrackActor, none)), m_bIsSniping))
+	if(((m_bIsPlayer || (m_TrackActor != none)) || m_bIsSniping))
 	{
 		// End:0x120
-		if(__NFUN_119__(EngineWeapon, none))
+		if((EngineWeapon != none))
 		{
 			R6PlayAnim('StandWaitBreathe');			
 		}
@@ -1849,14 +1849,14 @@ simulated event SetAnimAction(name NewAction)
 {
 	AnimAction = NewAction;
 	AnimBlendParams(14, 1.0000000, 0.2000000, 0.0000000, 'R6 Spine2');
-	__NFUN_259__(NewAction, 1.0000000, 0.0000000, 14);
+	PlayAnim(NewAction, 1.0000000, 0.0000000, 14);
 	return;
 }
 
 simulated function StopPeeking()
 {
 	// End:0x1D
-	if(__NFUN_154__(int(m_ePeekingMode), int(1)))
+	if((int(m_ePeekingMode) == int(1)))
 	{
 		SetPeekingInfo(0, 1000.0000000);
 	}
@@ -1891,13 +1891,13 @@ simulated function BlendKneeOnGround()
 		return;
 	}
 	AnimBlendParams(1, 1.0000000, 0.0000000, 0.0000000, 'R6 R Thigh');
-	__NFUN_260__('Kneel_nt', 1.0000000, 0.2000000, 1);
+	LoopAnim('Kneel_nt', 1.0000000, 0.2000000, 1);
 	return;
 }
 
 simulated function EndKneeDown()
 {
-	__NFUN_259__('CrouchSubGunLow_nt', 1.0000000, 0.2000000, 1);
+	PlayAnim('CrouchSubGunLow_nt', 1.0000000, 0.2000000, 1);
 	AnimBlendToAlpha(1, 0.0000000, 0.5000000);
 	return;
 }
@@ -1911,21 +1911,21 @@ event StartCrouch(float HeightAdjust)
 simulated function PlayCrouchWaiting()
 {
 	// End:0x18
-	if(__NFUN_154__(int(Physics), int(2)))
+	if((int(Physics) == int(2)))
 	{
 		PlayFalling();
 		return;
 	}
 	// End:0x2B
-	if(__NFUN_129__(m_bNightVisionAnimation))
+	if((!m_bNightVisionAnimation))
 	{
 		m_ePlayerIsUsingHands = 0;
 	}
 	// End:0x8E
-	if(__NFUN_132__(__NFUN_181__(m_fPeeking, 1000.0000000), IsPeeking()))
+	if(((m_fPeeking != 1000.0000000) || IsPeeking()))
 	{
 		// End:0x5E
-		if(__NFUN_243__(bIsCrouched, bWasCrouched))
+		if((bIsCrouched != bWasCrouched))
 		{
 			m_bTweenFirstTimeOnly = true;
 		}
@@ -1938,12 +1938,12 @@ simulated function PlayCrouchWaiting()
 		}
 		else
 		{
-			__NFUN_259__('CrouchWaitBreathe01');
+			PlayAnim('CrouchWaitBreathe01');
 		}
 		return;
 	}
 	// End:0xBD
-	if(__NFUN_132__(__NFUN_132__(m_bIsPlayer, __NFUN_119__(m_TrackActor, none)), m_bIsSniping))
+	if(((m_bIsPlayer || (m_TrackActor != none)) || m_bIsSniping))
 	{
 		R6PlayAnim('CrouchWaitBreathe01');		
 	}
@@ -1979,7 +1979,7 @@ simulated function PlayCrouchWaiting()
 		}
 	}
 	// End:0x14E
-	if(__NFUN_130__(__NFUN_155__(int(Physics), int(12)), __NFUN_155__(int(m_eEquipWeapon), int(2))))
+	if(((int(Physics) != int(12)) && (int(m_eEquipWeapon) != int(2))))
 	{
 		BlendKneeOnGround();
 	}
@@ -1989,24 +1989,24 @@ simulated function PlayCrouchWaiting()
 simulated function PlayProneWaiting()
 {
 	// End:0x96
-	if(__NFUN_132__(__NFUN_132__(m_bIsPlayer, __NFUN_119__(m_TrackActor, none)), m_bIsSniping))
+	if(((m_bIsPlayer || (m_TrackActor != none)) || m_bIsSniping))
 	{
 		// End:0x3A
-		if(__NFUN_114__(EngineWeapon, none))
+		if((EngineWeapon == none))
 		{
 			R6LoopAnim('ProneWaitBreathe');			
 		}
 		else
 		{
 			// End:0x61
-			if(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(5)))
+			if((int(EngineWeapon.m_eWeaponType) == int(5)))
 			{
 				R6LoopAnim('ProneBipodLMGBreathe');				
 			}
 			else
 			{
 				// End:0x88
-				if(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(4)))
+				if((int(EngineWeapon.m_eWeaponType) == int(4)))
 				{
 					R6LoopAnim('ProneBipodSniperBreathe');					
 				}
@@ -2025,21 +2025,21 @@ simulated function PlayProneWaiting()
 			// End:0x11F
 			case 0:
 				// End:0xC3
-				if(__NFUN_114__(EngineWeapon, none))
+				if((EngineWeapon == none))
 				{
 					R6LoopAnim('ProneWaitBreathe');					
 				}
 				else
 				{
 					// End:0xEA
-					if(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(5)))
+					if((int(EngineWeapon.m_eWeaponType) == int(5)))
 					{
 						R6LoopAnim('ProneBipodLMGBreathe');						
 					}
 					else
 					{
 						// End:0x111
-						if(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(4)))
+						if((int(EngineWeapon.m_eWeaponType) == int(4)))
 						{
 							R6LoopAnim('ProneBipodSniperBreathe');							
 						}
@@ -2076,10 +2076,10 @@ function Rotator GetFiringRotation()
 	}
 	AI = R6RainbowAI(Controller);
 	// End:0x8A
-	if(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(6)))
+	if((int(EngineWeapon.m_eWeaponType) == int(6)))
 	{
 		// End:0x7B
-		if(__NFUN_218__(AI.m_vLocationOnTarget, vect(0.0000000, 0.0000000, 0.0000000)))
+		if((AI.m_vLocationOnTarget != vect(0.0000000, 0.0000000, 0.0000000)))
 		{
 			return AI.GetGrenadeDirection(none, AI.m_vLocationOnTarget);			
 		}
@@ -2095,7 +2095,7 @@ function Rotator GetFiringRotation()
 simulated function bool HasPawnSpecificWeaponAnimation()
 {
 	// End:0x24
-	if(__NFUN_132__(__NFUN_154__(int(m_eEquipWeapon), int(1)), __NFUN_154__(int(m_eEquipWeapon), int(0))))
+	if(((int(m_eEquipWeapon) == int(1)) || (int(m_eEquipWeapon) == int(0))))
 	{
 		return true;
 	}
@@ -2131,14 +2131,14 @@ simulated function SecureWeapon()
 {
 	m_bWeaponTransition = false;
 	// End:0x28
-	if(__NFUN_154__(int(m_eEquipWeapon), int(1)))
+	if((int(m_eEquipWeapon) == int(1)))
 	{
 		m_eEquipWeapon = 3;
 		PlayWeaponAnimation();
 		return;
 	}
 	// End:0x4C
-	if(__NFUN_119__(EngineWeapon, none))
+	if((EngineWeapon != none))
 	{
 		AttachWeapon(EngineWeapon, EngineWeapon.m_HoldAttachPoint);
 	}
@@ -2149,12 +2149,12 @@ simulated function SecureWeapon()
 simulated function EquipWeapon()
 {
 	// End:0x12
-	if(__NFUN_154__(int(m_eEquipWeapon), int(0)))
+	if((int(m_eEquipWeapon) == int(0)))
 	{
 		return;
 	}
 	// End:0x62
-	if(__NFUN_132__(__NFUN_154__(int(EngineWeapon.m_eWeaponType), int(0)), __NFUN_154__(int(EngineWeapon.m_eWeaponType), int(7))))
+	if(((int(EngineWeapon.m_eWeaponType) == int(0)) || (int(EngineWeapon.m_eWeaponType) == int(7))))
 	{
 		AttachWeapon(EngineWeapon, EngineWeapon.m_AttachPoint);		
 	}
@@ -2169,14 +2169,14 @@ simulated function EquipWeapon()
 simulated function EquipHands()
 {
 	// End:0x2C
-	if(__NFUN_154__(int(m_eEquipWeapon), int(1)))
+	if((int(m_eEquipWeapon) == int(1)))
 	{
 		AttachWeapon(EngineWeapon, EngineWeapon.m_AttachPoint);		
 	}
 	else
 	{
 		// End:0x4C
-		if(__NFUN_154__(int(m_eEquipWeapon), int(0)))
+		if((int(m_eEquipWeapon) == int(0)))
 		{
 			AttachWeapon(EngineWeapon, 'TagLeftHand');
 		}
@@ -2187,12 +2187,12 @@ simulated function EquipHands()
 function FinishedReloadingWeapon()
 {
 	// End:0x0D
-	if(__NFUN_114__(Controller, none))
+	if((Controller == none))
 	{
 		return;
 	}
 	// End:0x79
-	if(__NFUN_130__(__NFUN_130__(__NFUN_130__(EngineWeapon.IsPumpShotGun(), __NFUN_114__(Controller.Enemy, none)), __NFUN_129__(EngineWeapon.GunIsFull())), __NFUN_151__(EngineWeapon.GetNbOfClips(), 0)))
+	if((((EngineWeapon.IsPumpShotGun() && (Controller.Enemy == none)) && (!EngineWeapon.GunIsFull())) && (EngineWeapon.GetNbOfClips() > 0)))
 	{
 		R6RainbowAI(Controller).RainbowReloadWeapon();		
 	}
@@ -2213,7 +2213,7 @@ simulated function bool GetNormalWeaponAnimation(out STWeaponAnim stAnim)
 	stAnim.bBackward = false;
 	stAnim.bPlayOnce = false;
 	// End:0x45
-	if(__NFUN_151__(int(m_bIsFiringWeapon), 0))
+	if((int(m_bIsFiringWeapon) > 0))
 	{
 		stAnim.fTweenTime = 0.0000000;		
 	}
@@ -2235,7 +2235,7 @@ simulated function bool GetNormalWeaponAnimation(out STWeaponAnim stAnim)
 	if(m_bIsProne)
 	{
 		// End:0xDD
-		if(__NFUN_130__(__NFUN_119__(EngineWeapon, none), __NFUN_114__(R6AbstractWeapon(EngineWeapon).m_BipodGadget, none)))
+		if(((EngineWeapon != none) && (R6AbstractWeapon(EngineWeapon).m_BipodGadget == none)))
 		{
 			stAnim.nAnimToPlay = EngineWeapon.GetProneWaitAnimName();			
 		}
@@ -2248,7 +2248,7 @@ simulated function bool GetNormalWeaponAnimation(out STWeaponAnim stAnim)
 	else
 	{
 		// End:0x11A
-		if(__NFUN_132__(__NFUN_154__(int(m_eEquipWeapon), int(2)), __NFUN_114__(EngineWeapon, none)))
+		if(((int(m_eEquipWeapon) == int(2)) || (EngineWeapon == none)))
 		{
 			stAnim.nAnimToPlay = 'StandNoGun_nt';			
 		}
@@ -2301,7 +2301,7 @@ simulated function bool GetReloadWeaponAnimation(out STWeaponAnim stAnim)
 	if(m_bIsProne)
 	{
 		// End:0x3B
-		if(__NFUN_155__(EngineWeapon.NumberOfBulletsLeftInClip(), 0))
+		if((EngineWeapon.NumberOfBulletsLeftInClip() != 0))
 		{
 			stAnim.nAnimToPlay = EngineWeapon.GetProneReloadAnimTacticalName();			
 		}
@@ -2313,7 +2313,7 @@ simulated function bool GetReloadWeaponAnimation(out STWeaponAnim stAnim)
 	else
 	{
 		// End:0x8A
-		if(__NFUN_155__(EngineWeapon.NumberOfBulletsLeftInClip(), 0))
+		if((EngineWeapon.NumberOfBulletsLeftInClip() != 0))
 		{
 			stAnim.nAnimToPlay = EngineWeapon.GetReloadAnimTacticalName();			
 		}
@@ -2323,7 +2323,7 @@ simulated function bool GetReloadWeaponAnimation(out STWeaponAnim stAnim)
 		}
 	}
 	// End:0xBA
-	if(__NFUN_254__(stAnim.nAnimToPlay, m_WeaponAnimPlaying))
+	if((stAnim.nAnimToPlay == m_WeaponAnimPlaying))
 	{
 		return false;
 	}
@@ -2347,23 +2347,23 @@ simulated function bool GetChangeWeaponAnimation(out STWeaponAnim stAnim)
 	m_WeaponAnimPlaying = 'None';
 	stAnim.bBackward = false;
 	stAnim.bPlayOnce = true;
-	stAnim.fRate = __NFUN_171__(__NFUN_171__(ArmorSkillEffect(), 2.5000000), m_fGunswitchSpeedMultiplier);
+	stAnim.fRate = ((ArmorSkillEffect() * 2.5000000) * m_fGunswitchSpeedMultiplier);
 	stAnim.fTweenTime = 0.1000000;
 	stAnim.nBlendName = 'R6 Spine2';
 	// End:0x79
-	if(__NFUN_114__(EngineWeapon, none))
+	if((EngineWeapon == none))
 	{
 		return false;
 	}
 	// End:0xA9
-	if(__NFUN_114__(PendingWeapon, none))
+	if((PendingWeapon == none))
 	{
 		m_bPreviousAnimPlayOnce = false;
 		stAnim.nAnimToPlay = m_WeaponAnimPlaying;
 		m_eLastUsingHands = m_ePlayerIsUsingHands;
 		return true;
 	}
-	__NFUN_2729__(EngineWeapon.m_UnEquipSnd, 3, true);
+	SendPlaySound(EngineWeapon.m_UnEquipSnd, 3, true);
 	switch(EngineWeapon.m_eWeaponType)
 	{
 		// End:0xD2
@@ -2627,19 +2627,19 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 	stAnim.nBlendName = 'R6 R Clavicle';
 	m_bThrowGrenadeWithLeftHand = false;
 	// End:0xE3
-	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) != int(NM_DedicatedServer)))
 	{
 		// End:0xE3
-		if(__NFUN_132__(__NFUN_114__(R6PlayerController(Controller), none), __NFUN_129__(R6PlayerController(Controller).Player.__NFUN_303__('Viewport'))))
+		if(((R6PlayerController(Controller) == none) || (!R6PlayerController(Controller).Player.IsA('Viewport'))))
 		{
 			// End:0xD0
-			if(__NFUN_154__(int(m_eGrenadeThrow), int(3)))
+			if((int(m_eGrenadeThrow) == int(3)))
 			{
-				__NFUN_264__(EngineWeapon.m_ReloadSnd, 3);				
+				PlaySound(EngineWeapon.m_ReloadSnd, 3);				
 			}
 			else
 			{
-				__NFUN_264__(EngineWeapon.m_BurstFireStereoSnd, 3);
+				PlaySound(EngineWeapon.m_BurstFireStereoSnd, 3);
 			}
 		}
 	}
@@ -2687,7 +2687,7 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 		// End:0x1D1
 		case 4:
 			// End:0x1B6
-			if(__NFUN_129__(m_bIsPlayer))
+			if((!m_bIsPlayer))
 			{
 				stAnim.nBlendName = 'R6 Spine';
 				stAnim.fTweenTime = 0.5000000;
@@ -2699,7 +2699,7 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 		// End:0x21C
 		case 6:
 			// End:0x201
-			if(__NFUN_129__(m_bIsPlayer))
+			if((!m_bIsPlayer))
 			{
 				stAnim.nBlendName = 'R6 Spine';
 				stAnim.fTweenTime = 0.5000000;
@@ -2711,7 +2711,7 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 		// End:0x25F
 		case 5:
 			// End:0x24C
-			if(__NFUN_129__(m_bIsPlayer))
+			if((!m_bIsPlayer))
 			{
 				stAnim.nBlendName = 'R6 Spine';
 				stAnim.fTweenTime = 0.5000000;
@@ -2722,7 +2722,7 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 		// End:0x2A2
 		case 7:
 			// End:0x28F
-			if(__NFUN_129__(m_bIsPlayer))
+			if((!m_bIsPlayer))
 			{
 				stAnim.nBlendName = 'R6 Spine';
 				stAnim.fTweenTime = 0.5000000;
@@ -2735,7 +2735,7 @@ simulated function bool GetThrowGrenadeAnimation(out STWeaponAnim stAnim)
 			break;
 	}
 	// End:0x2BB
-	if(__NFUN_254__(stAnim.nAnimToPlay, m_WeaponAnimPlaying))
+	if((stAnim.nAnimToPlay == m_WeaponAnimPlaying))
 	{
 		return false;
 	}
@@ -2753,7 +2753,7 @@ simulated function bool GetPawnSpecificAnimation(out STWeaponAnim stAnim)
 	m_bWeaponIsSecured = false;
 	m_WeaponAnimPlaying = 'None';
 	stAnim.bPlayOnce = true;
-	stAnim.fRate = __NFUN_171__(ArmorSkillEffect(), 1.5000000);
+	stAnim.fRate = (ArmorSkillEffect() * 1.5000000);
 	stAnim.fTweenTime = 0.1000000;
 	stAnim.nBlendName = 'R6 Spine2';
 	stAnim.bBackward = false;
@@ -2788,15 +2788,15 @@ simulated function bool GetPawnSpecificAnimation(out STWeaponAnim stAnim)
 			break;
 	}
 	// End:0x120
-	if(__NFUN_154__(int(m_eEquipWeapon), int(0)))
+	if((int(m_eEquipWeapon) == int(0)))
 	{
-		__NFUN_2729__(EngineWeapon.m_UnEquipSnd, 3, true);
+		SendPlaySound(EngineWeapon.m_UnEquipSnd, 3, true);
 		m_bWeaponIsSecured = true;
 		stAnim.bBackward = true;		
 	}
 	else
 	{
-		__NFUN_2729__(EngineWeapon.m_EquipSnd, 3, true);
+		SendPlaySound(EngineWeapon.m_EquipSnd, 3, true);
 	}
 	return true;
 	return;
@@ -2805,26 +2805,26 @@ simulated function bool GetPawnSpecificAnimation(out STWeaponAnim stAnim)
 simulated function GetWeapon(R6AbstractWeapon NewWeapon)
 {
 	// End:0xA6
-	if(__NFUN_119__(NewWeapon, EngineWeapon))
+	if((NewWeapon != EngineWeapon))
 	{
 		// End:0x3C
-		if(__NFUN_155__(int(Level.NetMode), int(NM_Client)))
+		if((int(Level.NetMode) != int(NM_Client)))
 		{
 			m_pBulletManager.SetBulletParameter(NewWeapon);
 		}
 		// End:0xA6
-		if(__NFUN_119__(EngineWeapon, none))
+		if((EngineWeapon != none))
 		{
 			EngineWeapon.DisableWeaponOrGadget();
 			// End:0x88
-			if(__NFUN_242__(m_bWeaponGadgetActivated, true))
+			if((m_bWeaponGadgetActivated == true))
 			{
 				m_bWeaponGadgetActivated = false;
 				R6AbstractWeapon(EngineWeapon).m_SelectedWeaponGadget.ActivateGadget(false);
 			}
 			PendingWeapon = NewWeapon;
 			// End:0xA6
-			if(__NFUN_129__(m_bIsPlayer))
+			if((!m_bIsPlayer))
 			{
 				m_bChangingWeapon = true;
 			}
@@ -2839,7 +2839,7 @@ simulated function SubToHand_Step1()
 {
 	m_preSwitchWeapon = EngineWeapon;
 	// End:0x18
-	if(__NFUN_114__(EngineWeapon, none))
+	if((EngineWeapon == none))
 	{
 		return;
 	}
@@ -2909,18 +2909,18 @@ simulated function SubToHand_Step1()
 simulated function SubToHand_Step2()
 {
 	// End:0x0D
-	if(__NFUN_114__(EngineWeapon, none))
+	if((EngineWeapon == none))
 	{
 		return;
 	}
 	PendingWeapon.bHidden = false;
-	__NFUN_2729__(PendingWeapon.m_EquipSnd, 3, true);
+	SendPlaySound(PendingWeapon.m_EquipSnd, 3, true);
 	// End:0x89
-	if(__NFUN_119__(m_preSwitchWeapon, none))
+	if((m_preSwitchWeapon != none))
 	{
 		AttachWeapon(m_preSwitchWeapon, m_preSwitchWeapon.m_HoldAttachPoint);
 		// End:0x7F
-		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		if((int(Level.NetMode) != int(NM_DedicatedServer)))
 		{
 			m_preSwitchWeapon.TurnOffEmitters(true);
 		}
@@ -2930,14 +2930,14 @@ simulated function SubToHand_Step2()
 	{
 		AttachWeapon(EngineWeapon, EngineWeapon.m_HoldAttachPoint);
 		// End:0xCB
-		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		if((int(Level.NetMode) != int(NM_DedicatedServer)))
 		{
 			EngineWeapon.TurnOffEmitters(true);
 		}
 	}
 	AttachWeapon(PendingWeapon, PendingWeapon.m_AttachPoint);
 	// End:0x10D
-	if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+	if((int(Level.NetMode) != int(NM_DedicatedServer)))
 	{
 		PendingWeapon.TurnOffEmitters(false);
 	}
@@ -2948,24 +2948,24 @@ simulated function SubToHand_Step2()
 function ChangingWeaponEnd()
 {
 	// End:0x0D
-	if(__NFUN_114__(EngineWeapon, none))
+	if((EngineWeapon == none))
 	{
 		return;
 	}
 	// End:0x47
-	if(__NFUN_130__(__NFUN_130__(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)), __NFUN_129__(bNetOwner)), __NFUN_155__(int(Role), int(ROLE_Authority))))
+	if((((int(Level.NetMode) != int(NM_Standalone)) && (!bNetOwner)) && (int(Role) != int(ROLE_Authority))))
 	{
 		return;
 	}
 	m_bChangingWeapon = false;
 	// End:0x9C
-	if(__NFUN_130__(__NFUN_130__(Controller.__NFUN_303__('R6PlayerController'), __NFUN_242__(R6PlayerController(Controller).bBehindView, false)), __NFUN_154__(int(Level.NetMode), int(NM_Standalone))))
+	if(((Controller.IsA('R6PlayerController') && (R6PlayerController(Controller).bBehindView == false)) && (int(Level.NetMode) == int(NM_Standalone))))
 	{
 		return;
 	}
 	EngineWeapon = PendingWeapon;
 	// End:0xC7
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) == int(NM_Standalone)))
 	{
 		PendingWeapon = none;
 	}
@@ -2975,10 +2975,10 @@ function ChangingWeaponEnd()
 function ChangeProneAttach()
 {
 	// End:0x9A
-	if(__NFUN_119__(m_WeaponsCarried[0], none))
+	if((m_WeaponsCarried[0] != none))
 	{
 		// End:0x4B
-		if(__NFUN_254__(m_WeaponsCarried[0].m_HoldAttachPoint, m_WeaponsCarried[0].default.m_HoldAttachPoint))
+		if((m_WeaponsCarried[0].m_HoldAttachPoint == m_WeaponsCarried[0].default.m_HoldAttachPoint))
 		{
 			m_WeaponsCarried[0].m_HoldAttachPoint = 'TagBackProne';			
 		}
@@ -2987,7 +2987,7 @@ function ChangeProneAttach()
 			m_WeaponsCarried[0].m_HoldAttachPoint = m_WeaponsCarried[0].default.m_HoldAttachPoint;
 		}
 		// End:0x9A
-		if(__NFUN_119__(m_WeaponsCarried[0], EngineWeapon))
+		if((m_WeaponsCarried[0] != EngineWeapon))
 		{
 			AttachWeapon(m_WeaponsCarried[0], m_WeaponsCarried[0].m_HoldAttachPoint);
 		}
@@ -3000,18 +3000,18 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 	local R6Rainbow pInteractor;
 
 	// End:0x393
-	if(Class'Engine.Actor'.static.__NFUN_1524__().IsMissionPack())
+	if(Class'Engine.Actor'.static.GetModMgr().IsMissionPack())
 	{
 		// End:0x390
-		if(__NFUN_130__(__NFUN_130__(Query.aQueryOwner.__NFUN_303__('R6PlayerController'), Query.aQueryTarget.__NFUN_303__('R6Rainbow')), IsAlive()))
+		if(((Query.aQueryOwner.IsA('R6PlayerController') && Query.aQueryTarget.IsA('R6Rainbow')) && IsAlive()))
 		{
 			pInteractor = R6PlayerController(Query.aQueryOwner).m_pawn;
 			// End:0x212
-			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(m_bIsSurrended, __NFUN_129__(m_bIsUnderArrest)), __NFUN_155__(pInteractor.m_iTeam, R6Rainbow(Query.aQueryTarget).m_iTeam)), __NFUN_129__(pInteractor.m_bIsSurrended)), __NFUN_129__(pInteractor.m_bIsClimbingLadder)))
+			if(((((m_bIsSurrended && (!m_bIsUnderArrest)) && (pInteractor.m_iTeam != R6Rainbow(Query.aQueryTarget).m_iTeam)) && (!pInteractor.m_bIsSurrended)) && (!pInteractor.m_bIsClimbingLadder)))
 			{
 				Query.iHasAction = 1;
 				// End:0x155
-				if(__NFUN_130__(__NFUN_176__(fDistance, m_fCircumstantialActionRange), __NFUN_176__(__NFUN_186__(__NFUN_175__(Location.Z, pInteractor.Location.Z)), float(110))))
+				if(((fDistance < m_fCircumstantialActionRange) && (Abs((Location.Z - pInteractor.Location.Z)) < float(110))))
 				{
 					Query.iInRange = 1;					
 				}
@@ -3032,11 +3032,11 @@ event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircumstantialA
 			else
 			{
 				// End:0x37F
-				if(__NFUN_130__(__NFUN_130__(m_bIsUnderArrest, __NFUN_154__(pInteractor.m_iTeam, R6Rainbow(Query.aQueryTarget).m_iTeam)), __NFUN_129__(pInteractor.m_bIsClimbingLadder)))
+				if(((m_bIsUnderArrest && (pInteractor.m_iTeam == R6Rainbow(Query.aQueryTarget).m_iTeam)) && (!pInteractor.m_bIsClimbingLadder)))
 				{
 					Query.iHasAction = 1;
 					// End:0x2C2
-					if(__NFUN_130__(__NFUN_176__(fDistance, m_fCircumstantialActionRange), __NFUN_176__(__NFUN_186__(__NFUN_175__(Location.Z, pInteractor.Location.Z)), float(110))))
+					if(((fDistance < m_fCircumstantialActionRange) && (Abs((Location.Z - pInteractor.Location.Z)) < float(110))))
 					{
 						Query.iInRange = 1;						
 					}
@@ -3098,8 +3098,8 @@ function int R6GetCircumstantialActionProgress(R6AbstractCircumstantialActionQue
 	local float fFrame, fRate;
 
 	actingPawn.GetAnimParams(1, Anim, fFrame, fRate);
-	__NFUN_251__(int(fFrame), 0, 100);
-	return int(__NFUN_171__(fFrame, float(100)));
+	Clamp(int(fFrame), 0, 100);
+	return int((fFrame * float(100)));
 	return;
 }
 
@@ -3120,11 +3120,11 @@ function ResetArrest()
 	m_ePlayerIsUsingHands = 3;
 	m_bIsUnderArrest = false;
 	// End:0x4F
-	if(__NFUN_154__(int(Level.NetMode), int(NM_Client)))
+	if((int(Level.NetMode) == int(NM_Client)))
 	{
 		R6PlayerController(Controller).ServerStartSurrended();
 	}
-	R6PlayerController(Controller).__NFUN_113__('PlayerSurrended');
+	R6PlayerController(Controller).GotoState('PlayerSurrended');
 	R6PlayerController(Controller).m_fStartSurrenderTime = Level.TimeSeconds;
 	m_bIsBeingArrestedOrFreed = false;
 	PlayWaiting();
@@ -3152,12 +3152,12 @@ function bool HasBumpPriority(R6Pawn bumpedBy)
 		return true;
 	}
 	// End:0x52
-	if(__NFUN_130__(__NFUN_155__(m_iTeam, bumpedBy.m_iTeam), __NFUN_129__(bumpedBy.m_bIsPlayer)))
+	if(((m_iTeam != bumpedBy.m_iTeam) && (!bumpedBy.m_bIsPlayer)))
 	{
 		return true;
 	}
 	// End:0x82
-	if(__NFUN_130__(__NFUN_152__(bumpedBy.m_iID, m_iID), __NFUN_129__(bumpedBy.IsStationary())))
+	if(((bumpedBy.m_iID <= m_iID) && (!bumpedBy.IsStationary())))
 	{
 		return false;
 	}
@@ -3177,92 +3177,92 @@ function UpdateRainbowSkills()
 	local int iD5, iD2;
 
 	// End:0x0D
-	if(__NFUN_129__(IsAlive()))
+	if((!IsAlive()))
 	{
 		return;
 	}
 	// End:0x1B
-	if(__NFUN_122__(m_szSpecialityID, ""))
+	if((m_szSpecialityID == ""))
 	{
 		return;
 	}
-	iD5 = __NFUN_146__(__NFUN_167__(5), 1);
-	iD2 = __NFUN_146__(__NFUN_167__(2), 1);
+	iD5 = (Rand(5) + 1);
+	iD2 = (Rand(2) + 1);
 	// End:0x73
-	if(__NFUN_122__(m_szSpecialityID, "ID_ASSAULT"))
+	if((m_szSpecialityID == "ID_ASSAULT"))
 	{
-		__NFUN_184__(m_fSkillAssault, __NFUN_171__(__NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000), __NFUN_175__(float(1), m_fSkillAssault)));		
+		(m_fSkillAssault += ((float((iD5 + 5)) / 100.0000000) * (float(1) - m_fSkillAssault)));		
 	}
 	else
 	{
-		__NFUN_184__(m_fSkillAssault, __NFUN_171__(__NFUN_172__(float(__NFUN_146__(iD2, 2)), 100.0000000), __NFUN_175__(float(1), m_fSkillAssault)));
+		(m_fSkillAssault += ((float((iD2 + 2)) / 100.0000000) * (float(1) - m_fSkillAssault)));
 	}
 	// End:0xDA
-	if(__NFUN_122__(m_szSpecialityID, "ID_DEMOLITIONS"))
+	if((m_szSpecialityID == "ID_DEMOLITIONS"))
 	{
-		__NFUN_184__(m_fSkillDemolitions, __NFUN_171__(__NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000), __NFUN_175__(float(1), m_fSkillDemolitions)));		
+		(m_fSkillDemolitions += ((float((iD5 + 5)) / 100.0000000) * (float(1) - m_fSkillDemolitions)));		
 	}
 	else
 	{
 		// End:0xFE
-		if(__NFUN_178__(__NFUN_195__(), 0.2000000))
+		if((FRand() <= 0.2000000))
 		{
-			__NFUN_184__(m_fSkillDemolitions, __NFUN_171__(0.0200000, __NFUN_175__(float(1), m_fSkillDemolitions)));
+			(m_fSkillDemolitions += (0.0200000 * (float(1) - m_fSkillDemolitions)));
 		}
 	}
 	// End:0x140
-	if(__NFUN_122__(m_szSpecialityID, "ID_ELECTRONICS"))
+	if((m_szSpecialityID == "ID_ELECTRONICS"))
 	{
-		__NFUN_184__(m_fSkillElectronics, __NFUN_171__(__NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000), __NFUN_175__(float(1), m_fSkillElectronics)));		
+		(m_fSkillElectronics += ((float((iD5 + 5)) / 100.0000000) * (float(1) - m_fSkillElectronics)));		
 	}
 	else
 	{
 		// End:0x164
-		if(__NFUN_178__(__NFUN_195__(), 0.2000000))
+		if((FRand() <= 0.2000000))
 		{
-			__NFUN_184__(m_fSkillElectronics, __NFUN_171__(0.0200000, __NFUN_175__(float(1), m_fSkillElectronics)));
+			(m_fSkillElectronics += (0.0200000 * (float(1) - m_fSkillElectronics)));
 		}
 	}
 	// End:0x1A0
-	if(__NFUN_122__(m_szSpecialityID, "ID_RECON"))
+	if((m_szSpecialityID == "ID_RECON"))
 	{
-		__NFUN_184__(m_fSkillStealth, __NFUN_171__(__NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000), __NFUN_175__(float(1), m_fSkillStealth)));		
+		(m_fSkillStealth += ((float((iD5 + 5)) / 100.0000000) * (float(1) - m_fSkillStealth)));		
 	}
 	else
 	{
 		// End:0x1C4
-		if(__NFUN_178__(__NFUN_195__(), 0.2000000))
+		if((FRand() <= 0.2000000))
 		{
-			__NFUN_184__(m_fSkillStealth, __NFUN_171__(0.0200000, __NFUN_175__(float(1), m_fSkillStealth)));
+			(m_fSkillStealth += (0.0200000 * (float(1) - m_fSkillStealth)));
 		}
 	}
 	// End:0x201
-	if(__NFUN_122__(m_szSpecialityID, "ID_SNIPER"))
+	if((m_szSpecialityID == "ID_SNIPER"))
 	{
-		__NFUN_184__(m_fSkillSniper, __NFUN_171__(__NFUN_172__(float(__NFUN_146__(iD5, 5)), 100.0000000), __NFUN_175__(float(1), m_fSkillSniper)));		
+		(m_fSkillSniper += ((float((iD5 + 5)) / 100.0000000) * (float(1) - m_fSkillSniper)));		
 	}
 	else
 	{
 		// End:0x225
-		if(__NFUN_178__(__NFUN_195__(), 0.2000000))
+		if((FRand() <= 0.2000000))
 		{
-			__NFUN_184__(m_fSkillSniper, __NFUN_171__(0.0200000, __NFUN_175__(float(1), m_fSkillSniper)));
+			(m_fSkillSniper += (0.0200000 * (float(1) - m_fSkillSniper)));
 		}
 	}
 	// End:0x249
-	if(__NFUN_178__(__NFUN_195__(), 0.2000000))
+	if((FRand() <= 0.2000000))
 	{
-		__NFUN_184__(m_fSkillSelfControl, __NFUN_171__(0.0200000, __NFUN_175__(float(1), m_fSkillSelfControl)));
+		(m_fSkillSelfControl += (0.0200000 * (float(1) - m_fSkillSelfControl)));
 	}
 	// End:0x26D
-	if(__NFUN_178__(__NFUN_195__(), 0.2000000))
+	if((FRand() <= 0.2000000))
 	{
-		__NFUN_184__(m_fSkillLeadership, __NFUN_171__(0.0200000, __NFUN_175__(float(1), m_fSkillLeadership)));
+		(m_fSkillLeadership += (0.0200000 * (float(1) - m_fSkillLeadership)));
 	}
 	// End:0x291
-	if(__NFUN_178__(__NFUN_195__(), 0.2000000))
+	if((FRand() <= 0.2000000))
 	{
-		__NFUN_184__(m_fSkillObservation, __NFUN_171__(0.0200000, __NFUN_175__(float(1), m_fSkillObservation)));
+		(m_fSkillObservation += (0.0200000 * (float(1) - m_fSkillObservation)));
 	}
 	return;
 }
@@ -3274,17 +3274,17 @@ function UpdateRainbowSkills()
 function bool IsFighting()
 {
 	// End:0x0D
-	if(__NFUN_129__(IsAlive()))
+	if((!IsAlive()))
 	{
 		return false;
 	}
 	// End:0x1C
-	if(__NFUN_154__(int(m_bIsFiringWeapon), 1))
+	if((int(m_bIsFiringWeapon) == 1))
 	{
 		return true;
 	}
 	// End:0x32
-	if(__NFUN_119__(Controller.Enemy, none))
+	if((Controller.Enemy != none))
 	{
 		return true;
 	}
@@ -3303,12 +3303,12 @@ function GrenadeThrow()
 
 	iChannel = GetNotifyChannel();
 	// End:0x1A
-	if(__NFUN_154__(iChannel, 15))
+	if((iChannel == 15))
 	{
 		return;
 	}
 	// End:0x39
-	if(__NFUN_154__(int(Role), int(ROLE_Authority)))
+	if((int(Role) == int(ROLE_Authority)))
 	{
 		EngineWeapon.ThrowGrenade();
 	}
@@ -3328,10 +3328,10 @@ simulated function Tick(float DeltaTime)
 {
 	super.Tick(DeltaTime);
 	// End:0x4E
-	if(__NFUN_130__(__NFUN_130__(m_bIsClimbingLadder, __NFUN_129__(bIsWalking)), __NFUN_176__(Acceleration.Z, float(0))))
+	if(((m_bIsClimbingLadder && (!bIsWalking)) && (Acceleration.Z < float(0))))
 	{
 		// End:0x4B
-		if(__NFUN_154__(int(m_eLadderSlide), int(3)))
+		if((int(m_eLadderSlide) == int(3)))
 		{
 			StartSliding();
 		}		
@@ -3339,7 +3339,7 @@ simulated function Tick(float DeltaTime)
 	else
 	{
 		// End:0x64
-		if(__NFUN_155__(int(m_eLadderSlide), int(3)))
+		if((int(m_eLadderSlide) != int(3)))
 		{
 			EndSliding();
 		}
@@ -3354,7 +3354,7 @@ simulated function Tick(float DeltaTime)
 function R6RainbowTeam GetTeamMgr()
 {
 	// End:0x0D
-	if(__NFUN_114__(Controller, none))
+	if((Controller == none))
 	{
 		return none;
 	}
@@ -3380,7 +3380,7 @@ function R6Rainbow Escort_GetPawnToFollow(optional bool bRunningTowardMe)
 
 	Team = GetTeamMgr();
 	// End:0x2E
-	if(__NFUN_119__(Team, none))
+	if((Team != none))
 	{
 		return Team.Escort_GetPawnToFollow(self, bRunningTowardMe);
 	}
@@ -3404,22 +3404,22 @@ function bool Escort_AddHostage(R6Hostage hostage, optional bool bNoFeedbackByHo
 	J0x1B:
 
 	// End:0x5C [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, 4), __NFUN_119__(m_aEscortedHostage[i], none)))
+	if(((i < 4) && (m_aEscortedHostage[i] != none)))
 	{
 		// End:0x52
-		if(__NFUN_114__(m_aEscortedHostage[i], hostage))
+		if((m_aEscortedHostage[i] == hostage))
 		{
 			// [Explicit Break]
 			goto J0x5C;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x1B;
 	}
 	J0x5C:
 
 	// End:0x6A
-	if(__NFUN_153__(i, 4))
+	if((i >= 4))
 	{
 		return false;
 	}
@@ -3428,7 +3428,7 @@ function bool Escort_AddHostage(R6Hostage hostage, optional bool bNoFeedbackByHo
 	Escort_UpdateTeamSpeed();
 	Escort_UpdateList();
 	// End:0x1FA
-	if(__NFUN_130__(__NFUN_129__(bNoFeedbackByHostage), hostage.IsAlive()))
+	if(((!bNoFeedbackByHostage) && hostage.IsAlive()))
 	{
 		// End:0x14C
 		if(m_bIsPlayer)
@@ -3437,7 +3437,7 @@ function bool Escort_AddHostage(R6Hostage hostage, optional bool bNoFeedbackByHo
 			if(bOrderedByRainbow)
 			{
 				// End:0xF9
-				if(__NFUN_119__(GetTeamMgr().m_PlayerVoicesMgr, none))
+				if((GetTeamMgr().m_PlayerVoicesMgr != none))
 				{
 					GetTeamMgr().m_PlayerVoicesMgr.PlayRainbowPlayerVoices(self, 38);
 				}				
@@ -3445,13 +3445,13 @@ function bool Escort_AddHostage(R6Hostage hostage, optional bool bNoFeedbackByHo
 			else
 			{
 				// End:0x12D
-				if(__NFUN_119__(GetTeamMgr().m_PlayerVoicesMgr, none))
+				if((GetTeamMgr().m_PlayerVoicesMgr != none))
 				{
 					GetTeamMgr().m_PlayerVoicesMgr.PlayRainbowPlayerVoices(self, 40);
 				}
 			}
 			// End:0x149
-			if(__NFUN_119__(Controller, none))
+			if((Controller != none))
 			{
 				Controller.PlaySoundCurrentAction(4);
 			}			
@@ -3462,7 +3462,7 @@ function bool Escort_AddHostage(R6Hostage hostage, optional bool bNoFeedbackByHo
 			if(bOrderedByRainbow)
 			{
 				// End:0x186
-				if(__NFUN_119__(GetTeamMgr().m_MemberVoicesMgr, none))
+				if((GetTeamMgr().m_MemberVoicesMgr != none))
 				{
 					GetTeamMgr().m_MemberVoicesMgr.PlayRainbowMemberVoices(self, 20);
 				}				
@@ -3470,14 +3470,14 @@ function bool Escort_AddHostage(R6Hostage hostage, optional bool bNoFeedbackByHo
 			else
 			{
 				// End:0x1BA
-				if(__NFUN_119__(GetTeamMgr().m_MemberVoicesMgr, none))
+				if((GetTeamMgr().m_MemberVoicesMgr != none))
 				{
 					GetTeamMgr().m_MemberVoicesMgr.PlayRainbowMemberVoices(self, 22);
 				}
 			}
 		}
 		// End:0x1FA
-		if(__NFUN_119__(hostage.m_controller, none))
+		if((hostage.m_controller != none))
 		{
 			hostage.m_controller.ProcessPlaySndInfo(hostage.m_mgr.8);
 		}
@@ -3497,7 +3497,7 @@ function bool Escort_RemoveHostage(R6Hostage hostage, optional bool bNoFeedbackB
 	local R6RainbowTeam teamMgr;
 
 	// End:0x16
-	if(__NFUN_114__(hostage.m_escortedByRainbow, none))
+	if((hostage.m_escortedByRainbow == none))
 	{
 		return false;
 	}
@@ -3505,15 +3505,15 @@ function bool Escort_RemoveHostage(R6Hostage hostage, optional bool bNoFeedbackB
 	J0x1D:
 
 	// End:0x5E [Loop If]
-	if(__NFUN_130__(__NFUN_150__(removeIndex, 4), __NFUN_119__(m_aEscortedHostage[removeIndex], none)))
+	if(((removeIndex < 4) && (m_aEscortedHostage[removeIndex] != none)))
 	{
 		// End:0x54
-		if(__NFUN_114__(m_aEscortedHostage[removeIndex], hostage))
+		if((m_aEscortedHostage[removeIndex] == hostage))
 		{
 			// [Explicit Break]
 			goto J0x5E;
 		}
-		__NFUN_163__(removeIndex);
+		(++removeIndex);
 		// [Loop Continue]
 		goto J0x1D;
 	}
@@ -3521,7 +3521,7 @@ function bool Escort_RemoveHostage(R6Hostage hostage, optional bool bNoFeedbackB
 
 	hostage.m_escortedByRainbow = none;
 	// End:0x93
-	if(__NFUN_132__(__NFUN_153__(removeIndex, 4), __NFUN_119__(m_aEscortedHostage[removeIndex], hostage)))
+	if(((removeIndex >= 4) || (m_aEscortedHostage[removeIndex] != hostage)))
 	{
 		return false;
 	}
@@ -3529,30 +3529,30 @@ function bool Escort_RemoveHostage(R6Hostage hostage, optional bool bNoFeedbackB
 	J0x9E:
 
 	// End:0x100 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(escortIndex, 4), __NFUN_119__(m_aEscortedHostage[escortIndex], none)))
+	if(((escortIndex < 4) && (m_aEscortedHostage[escortIndex] != none)))
 	{
 		// End:0xDC
-		if(__NFUN_154__(escortIndex, __NFUN_147__(4, 1)))
+		if((escortIndex == (4 - 1)))
 		{
 			m_aEscortedHostage[escortIndex] = none;
 			// [Explicit Continue]
 			goto J0xF6;
 		}
-		m_aEscortedHostage[escortIndex] = m_aEscortedHostage[__NFUN_146__(escortIndex, 1)];
+		m_aEscortedHostage[escortIndex] = m_aEscortedHostage[(escortIndex + 1)];
 		J0xF6:
 
-		__NFUN_163__(escortIndex);
+		(++escortIndex);
 		// [Loop Continue]
 		goto J0x9E;
 	}
 	Escort_UpdateTeamSpeed();
 	Escort_UpdateList();
 	// End:0x21D
-	if(__NFUN_130__(hostage.IsAlive(), __NFUN_129__(bNoFeedbackByHostage)))
+	if((hostage.IsAlive() && (!bNoFeedbackByHostage)))
 	{
 		teamMgr = GetTeamMgr();
 		// End:0x201
-		if(__NFUN_129__(hostage.m_bExtracted))
+		if((!hostage.m_bExtracted))
 		{
 			// End:0x1BE
 			if(bOrderedByRainbow)
@@ -3561,7 +3561,7 @@ function bool Escort_RemoveHostage(R6Hostage hostage, optional bool bNoFeedbackB
 				if(m_bIsPlayer)
 				{
 					// End:0x18C
-					if(__NFUN_119__(teamMgr.m_PlayerVoicesMgr, none))
+					if((teamMgr.m_PlayerVoicesMgr != none))
 					{
 						teamMgr.m_PlayerVoicesMgr.PlayRainbowPlayerVoices(self, 39);
 					}					
@@ -3569,14 +3569,14 @@ function bool Escort_RemoveHostage(R6Hostage hostage, optional bool bNoFeedbackB
 				else
 				{
 					// End:0x1BE
-					if(__NFUN_119__(teamMgr.m_MemberVoicesMgr, none))
+					if((teamMgr.m_MemberVoicesMgr != none))
 					{
 						teamMgr.m_MemberVoicesMgr.PlayRainbowMemberVoices(self, 21);
 					}
 				}
 			}
 			// End:0x1FE
-			if(__NFUN_119__(hostage.m_controller, none))
+			if((hostage.m_controller != none))
 			{
 				hostage.m_controller.ProcessPlaySndInfo(hostage.m_mgr.9);
 			}			
@@ -3584,7 +3584,7 @@ function bool Escort_RemoveHostage(R6Hostage hostage, optional bool bNoFeedbackB
 		else
 		{
 			// End:0x21D
-			if(__NFUN_119__(Controller, none))
+			if((Controller != none))
 			{
 				Controller.PlaySoundCurrentAction(5);
 			}
@@ -3608,24 +3608,24 @@ function Escort_UpdateCloserToLead()
 
 	closerToLead = m_aEscortedHostage[0];
 	// End:0xF3
-	if(__NFUN_119__(closerToLead, none))
+	if((closerToLead != none))
 	{
 		closerAI = R6HostageAI(closerToLead.Controller);
 		// End:0xF3
-		if(__NFUN_119__(closerAI.m_pawnToFollow, none))
+		if((closerAI.m_pawnToFollow != none))
 		{
 			// End:0x88
-			if(__NFUN_178__(__NFUN_225__(__NFUN_216__(closerAI.m_pawnToFollow.Location, closerToLead.Location)), float(closerAI.c_iDistanceMax)))
+			if((VSize((closerAI.m_pawnToFollow.Location - closerToLead.Location)) <= float(closerAI.c_iDistanceMax)))
 			{
 				return;				
 			}
 			else
 			{
 				// End:0xF3
-				if(__NFUN_154__(int(closerAI.m_pawnToFollow.m_eMovementPace), int(1)))
+				if((int(closerAI.m_pawnToFollow.m_eMovementPace) == int(1)))
 				{
 					// End:0xF3
-					if(__NFUN_178__(__NFUN_225__(__NFUN_216__(closerAI.m_pawnToFollow.m_collisionBox.Location, closerToLead.Location)), float(closerAI.c_iDistanceMax)))
+					if((VSize((closerAI.m_pawnToFollow.m_collisionBox.Location - closerToLead.Location)) <= float(closerAI.c_iDistanceMax)))
 					{
 						return;
 					}
@@ -3634,7 +3634,7 @@ function Escort_UpdateCloserToLead()
 		}
 	}
 	// End:0x102
-	if(__NFUN_114__(m_aEscortedHostage[0], none))
+	if((m_aEscortedHostage[0] == none))
 	{
 		return;
 	}
@@ -3644,17 +3644,17 @@ function Escort_UpdateCloserToLead()
 	J0x11B:
 
 	// End:0x1B6 [Loop If]
-	if(__NFUN_130__(__NFUN_150__(Index, 4), __NFUN_119__(m_aEscortedHostage[Index], none)))
+	if(((Index < 4) && (m_aEscortedHostage[Index] != none)))
 	{
-		fDistance = __NFUN_225__(__NFUN_216__(m_aEscortedHostage[Index].Location, Location));
+		fDistance = VSize((m_aEscortedHostage[Index].Location - Location));
 		// End:0x188
-		if(__NFUN_176__(fDistance, fShortestDistance))
+		if((fDistance < fShortestDistance))
 		{
 			fShortestDistance = fDistance;
 			closerToLead = m_aEscortedHostage[Index];
 		}
 		R6HostageAI(m_aEscortedHostage[Index].Controller).m_pawnToFollow = none;
-		__NFUN_165__(Index);
+		(Index++);
 		// [Loop Continue]
 		goto J0x11B;
 	}
@@ -3665,7 +3665,7 @@ function Escort_UpdateCloserToLead()
 	J0x1F3:
 
 	// End:0x334 [Loop If]
-	if(__NFUN_150__(Index, __NFUN_147__(nbEscortedHostage, 1)))
+	if((Index < (nbEscortedHostage - 1)))
 	{
 		hostage = none;
 		fShortestDistance = 999999.0000000;
@@ -3673,10 +3673,10 @@ function Escort_UpdateCloserToLead()
 		J0x21E:
 
 		// End:0x2E3 [Loop If]
-		if(__NFUN_150__(searchIndex, nbEscortedHostage))
+		if((searchIndex < nbEscortedHostage))
 		{
 			// End:0x24E
-			if(__NFUN_114__(m_aEscortedHostage[searchIndex], aNewList[Index]))
+			if((m_aEscortedHostage[searchIndex] == aNewList[Index]))
 			{
 				// [Explicit Continue]
 				goto J0x2D9;
@@ -3684,33 +3684,33 @@ function Escort_UpdateCloserToLead()
 				goto J0x2D9;
 			}
 			// End:0x27C
-			if(__NFUN_119__(R6HostageAI(m_aEscortedHostage[searchIndex].Controller).m_pawnToFollow, none))
+			if((R6HostageAI(m_aEscortedHostage[searchIndex].Controller).m_pawnToFollow != none))
 			{
 				// [Explicit Continue]
 				goto J0x2D9;
 				// [Explicit Continue]
 				goto J0x2D9;
 			}
-			fDistance = __NFUN_225__(__NFUN_216__(m_aEscortedHostage[searchIndex].Location, aNewList[Index].Location));
+			fDistance = VSize((m_aEscortedHostage[searchIndex].Location - aNewList[Index].Location));
 			// End:0x2D9
-			if(__NFUN_176__(fDistance, fShortestDistance))
+			if((fDistance < fShortestDistance))
 			{
 				fShortestDistance = fDistance;
 				hostage = m_aEscortedHostage[searchIndex];
 			}
 			J0x2D9:
 
-			__NFUN_165__(searchIndex);
+			(searchIndex++);
 			// [Loop Continue]
 			goto J0x21E;
 		}
 		// End:0x32A
-		if(__NFUN_119__(hostage, none))
+		if((hostage != none))
 		{
 			R6HostageAI(hostage.Controller).m_pawnToFollow = aNewList[Index];
-			aNewList[__NFUN_146__(Index, 1)] = hostage;
+			aNewList[(Index + 1)] = hostage;
 		}
-		__NFUN_165__(Index);
+		(Index++);
 		// [Loop Continue]
 		goto J0x1F3;
 	}
@@ -3718,10 +3718,10 @@ function Escort_UpdateCloserToLead()
 	J0x33B:
 
 	// End:0x36B [Loop If]
-	if(__NFUN_150__(Index, nbEscortedHostage))
+	if((Index < nbEscortedHostage))
 	{
 		m_aEscortedHostage[Index] = aNewList[Index];
-		__NFUN_165__(Index);
+		(Index++);
 		// [Loop Continue]
 		goto J0x33B;
 	}
@@ -3742,26 +3742,26 @@ function Escort_UpdateList()
 	local R6RainbowTeam teamMgr;
 
 	// End:0x0F
-	if(__NFUN_114__(m_aEscortedHostage[0], none))
+	if((m_aEscortedHostage[0] == none))
 	{
 		return;
 	}
 	// End:0x114
-	if(__NFUN_129__(IsAlive()))
+	if((!IsAlive()))
 	{
 		newLeadRainbow = Escort_FindRainbow(m_aEscortedHostage[0]);
 		// End:0x9A
-		if(__NFUN_114__(newLeadRainbow, none))
+		if((newLeadRainbow == none))
 		{
 			i = 0;
 			J0x3F:
 
 			// End:0x97 [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, 4), __NFUN_119__(m_aEscortedHostage[i], none)))
+			if(((i < 4) && (m_aEscortedHostage[i] != none)))
 			{
 				hostageAI = R6HostageAI(m_aEscortedHostage[i].Controller);
 				hostageAI.Order_StayHere(false);
-				__NFUN_163__(i);
+				(++i);
 				// [Loop Continue]
 				goto J0x3F;
 			}			
@@ -3773,12 +3773,12 @@ function Escort_UpdateList()
 			J0xB6:
 
 			// End:0x112 [Loop If]
-			if(__NFUN_130__(__NFUN_150__(i, 4), __NFUN_119__(m_aEscortedHostage[i], none)))
+			if(((i < 4) && (m_aEscortedHostage[i] != none)))
 			{
 				hostage = m_aEscortedHostage[i];
 				newLeadRainbow.Escort_AddHostage(hostage, true);
 				m_aEscortedHostage[i] = none;
-				__NFUN_163__(i);
+				(++i);
 				// [Loop Continue]
 				goto J0xB6;
 			}
@@ -3789,19 +3789,19 @@ function Escort_UpdateList()
 	J0x11B:
 
 	// End:0x1AC [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, 4), __NFUN_119__(m_aEscortedHostage[i], none)))
+	if(((i < 4) && (m_aEscortedHostage[i] != none)))
 	{
 		// End:0x1A2
-		if(__NFUN_129__(m_aEscortedHostage[i].IsAlive()))
+		if((!m_aEscortedHostage[i].IsAlive()))
 		{
 			j = i;
 			J0x15F:
 
 			// End:0x192 [Loop If]
-			if(__NFUN_150__(__NFUN_146__(j, 1), 4))
+			if(((j + 1) < 4))
 			{
-				m_aEscortedHostage[j] = m_aEscortedHostage[__NFUN_146__(j, 1)];
-				__NFUN_165__(j);
+				m_aEscortedHostage[j] = m_aEscortedHostage[(j + 1)];
+				(j++);
 				// [Loop Continue]
 				goto J0x15F;
 			}
@@ -3809,7 +3809,7 @@ function Escort_UpdateList()
 		}
 		else
 		{
-			__NFUN_165__(i);
+			(i++);
 		}
 		// [Loop Continue]
 		goto J0x11B;
@@ -3819,20 +3819,20 @@ function Escort_UpdateList()
 	J0x1B9:
 
 	// End:0x23C [Loop If]
-	if(__NFUN_130__(__NFUN_150__(i, 4), __NFUN_119__(m_aEscortedHostage[i], none)))
+	if(((i < 4) && (m_aEscortedHostage[i] != none)))
 	{
 		hostageAI = R6HostageAI(m_aEscortedHostage[i].Controller);
 		// End:0x215
-		if(__NFUN_154__(i, 0))
+		if((i == 0))
 		{
 			hostageAI.m_pawnToFollow = self;
 			// [Explicit Continue]
 			goto J0x232;
 		}
-		hostageAI.m_pawnToFollow = m_aEscortedHostage[__NFUN_147__(i, 1)];
+		hostageAI.m_pawnToFollow = m_aEscortedHostage[(i - 1)];
 		J0x232:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x1B9;
 	}
@@ -3855,34 +3855,34 @@ function bool Escort_IsPawnCloseToMe(R6Hostage me, float fMyRadius)
 	J0x07:
 
 	// End:0xCF [Loop If]
-	if(__NFUN_130__(__NFUN_150__(Index, 4), __NFUN_119__(m_aEscortedHostage[Index], none)))
+	if(((Index < 4) && (m_aEscortedHostage[Index] != none)))
 	{
 		H = m_aEscortedHostage[Index];
 		// End:0x77
-		if(__NFUN_130__(__NFUN_119__(me, H), __NFUN_176__(__NFUN_225__(__NFUN_216__(H.Location, me.Location)), fMyRadius)))
+		if(((me != H) && (VSize((H.Location - me.Location)) < fMyRadius)))
 		{
 			return true;
 			// [Explicit Continue]
 			goto J0xC5;
 		}
 		// End:0xC5
-		if(__NFUN_154__(int(H.m_eMovementPace), int(1)))
+		if((int(H.m_eMovementPace) == int(1)))
 		{
 			// End:0xC5
-			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(H.m_collisionBox.Location, me.Location)), fMyRadius))
+			if((VSize((H.m_collisionBox.Location - me.Location)) < fMyRadius))
 			{
 				return true;
 			}
 		}
 		J0xC5:
 
-		__NFUN_165__(Index);
+		(Index++);
 		// [Loop Continue]
 		goto J0x07;
 	}
 	Team = GetTeamMgr();
 	// End:0xE8
-	if(__NFUN_114__(Team, none))
+	if((Team == none))
 	{
 		return true;
 	}
@@ -3891,35 +3891,35 @@ function bool Escort_IsPawnCloseToMe(R6Hostage me, float fMyRadius)
 	J0x105:
 
 	// End:0x1EE [Loop If]
-	if(__NFUN_130__(__NFUN_150__(Index, 4), __NFUN_119__(Team.m_Team[Index], none)))
+	if(((Index < 4) && (Team.m_Team[Index] != none)))
 	{
 		Rainbow = Team.m_Team[Index];
 		// End:0x167
-		if(__NFUN_130__(bSeparated, __NFUN_119__(Rainbow, self)))
+		if((bSeparated && (Rainbow != self)))
 		{
-			__NFUN_165__(Index);			
+			(Index++);			
 		}
 		else
 		{
 			// End:0x196
-			if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Rainbow.Location, me.Location)), fMyRadius))
+			if((VSize((Rainbow.Location - me.Location)) < fMyRadius))
 			{
 				return true;
 				// [Explicit Continue]
 				goto J0x1E4;
 			}
 			// End:0x1E4
-			if(__NFUN_154__(int(Rainbow.m_eMovementPace), int(1)))
+			if((int(Rainbow.m_eMovementPace) == int(1)))
 			{
 				// End:0x1E4
-				if(__NFUN_176__(__NFUN_225__(__NFUN_216__(Rainbow.m_collisionBox.Location, me.Location)), fMyRadius))
+				if((VSize((Rainbow.m_collisionBox.Location - me.Location)) < fMyRadius))
 				{
 					return true;
 				}
 			}
 			J0x1E4:
 
-			__NFUN_165__(Index);
+			(Index++);
 		}
 		// [Loop Continue]
 		goto J0x105;
@@ -3938,7 +3938,7 @@ function Escort_UpdateTeamSpeed()
 
 	Team = GetTeamMgr();
 	// End:0x26
-	if(__NFUN_119__(Team, none))
+	if((Team != none))
 	{
 		Team.Escort_UpdateTeamSpeed();
 	}
@@ -3955,25 +3955,25 @@ function R6Rainbow Escort_FindRainbow(R6Hostage hostage)
 	local R6Hostage H;
 
 	// End:0xE0
-	foreach __NFUN_311__(Class'R6Engine.R6Pawn', P, hostage.SightRadius, hostage.Location)
+	foreach VisibleActors(Class'R6Engine.R6Pawn', P, hostage.SightRadius, hostage.Location)
 	{
 		// End:0x5D
-		if(__NFUN_129__(__NFUN_130__(hostage.IsFriend(P), P.IsAlive())))
+		if((!(hostage.IsFriend(P) && P.IsAlive())))
 		{
 			continue;			
 		}
 		// End:0x85
-		if(__NFUN_154__(int(P.m_ePawnType), int(1)))
+		if((int(P.m_ePawnType) == int(1)))
 		{			
 			return R6Rainbow(P);
 			// End:0xDF
 			continue;
 		}
 		// End:0xDF
-		if(__NFUN_154__(int(P.m_ePawnType), int(3)))
+		if((int(P.m_ePawnType) == int(3)))
 		{
 			// End:0xDF
-			if(__NFUN_130__(__NFUN_119__(H.m_escortedByRainbow, none), H.m_escortedByRainbow.IsAlive()))
+			if(((H.m_escortedByRainbow != none) && H.m_escortedByRainbow.IsAlive()))
 			{				
 				return H.m_escortedByRainbow;
 			}
@@ -3990,15 +3990,15 @@ function R6Rainbow Escort_FindRainbow(R6Hostage hostage)
 function bool ProcessBuildDeathMessage(Pawn Killer, out string szPlayerName)
 {
 	// End:0x62
-	if(__NFUN_155__(int(Level.NetMode), int(NM_Standalone)))
+	if((int(Level.NetMode) != int(NM_Standalone)))
 	{
 		// End:0x3A
-		if(__NFUN_154__(int(Killer.m_ePawnType), int(2)))
+		if((int(Killer.m_ePawnType) == int(2)))
 		{
 			m_bSuicideType = 8;
 		}
 		// End:0x62
-		if(__NFUN_130__(__NFUN_154__(int(Killer.m_ePawnType), int(1)), __NFUN_129__(m_bIsPlayer)))
+		if(((int(Killer.m_ePawnType) == int(1)) && (!m_bIsPlayer)))
 		{
 			return false;
 		}
@@ -4014,7 +4014,7 @@ function bool ProcessBuildDeathMessage(Pawn Killer, out string szPlayerName)
 function bool CanInteractWithObjects()
 {
 	// End:0x4B
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_bIsProne, m_bChangingWeapon), m_bReloadingWeapon), m_bIsFiringState), m_bIsSurrended), Level.m_bInGamePlanningActive))
+	if((((((m_bIsProne || m_bChangingWeapon) || m_bReloadingWeapon) || m_bIsFiringState) || m_bIsSurrended) || Level.m_bInGamePlanningActive))
 	{
 		return false;
 	}

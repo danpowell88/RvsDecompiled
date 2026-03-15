@@ -47,16 +47,16 @@ function LMouseDown(float X, float Y)
 		return;
 	}
 	PlayerOwner = R6PlayerController(GetPlayerOwner());
-	PlayerOwner.__NFUN_264__(m_OperativeSelectSnd, 9) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+	PlayerOwner.PlaySound(m_OperativeSelectSnd, 9);
 	// End:0x5D
-	if(__NFUN_129__(m_bIsSinglePlayer))
+	if((!m_bIsSinglePlayer))
 	{
 		PlayerOwner.ChangeOperative(0, int(m_MemberRepInfo.m_iTeamPosition));		
 	}
 	else
 	{
 		// End:0x96
-		if(__NFUN_129__(m_Operative.m_bIsPlayer))
+		if((!m_Operative.m_bIsPlayer))
 		{
 			teamManager = R6RainbowAI(m_Operative.Controller).m_TeamManager;			
 		}
@@ -81,30 +81,30 @@ function SetCharacterInfo(R6Rainbow Character)
 	J0x21:
 
 	// End:0x12E [Loop If]
-	if(__NFUN_150__(iWeapon, 4))
+	if((iWeapon < 4))
 	{
 		// End:0x73
-		if(__NFUN_119__(m_Operative.m_WeaponsCarried[iWeapon], none))
+		if((m_Operative.m_WeaponsCarried[iWeapon] != none))
 		{
 			m_WeaponsName[iWeapon] = m_Operative.m_WeaponsCarried[iWeapon].m_WeaponShortName;
 			// [Explicit Continue]
 			goto J0x124;
 		}
 		// End:0xCD
-		if(__NFUN_130__(__NFUN_154__(iWeapon, 2), __NFUN_123__(m_Operative.m_szPrimaryItem, "")))
+		if(((iWeapon == 2) && (m_Operative.m_szPrimaryItem != "")))
 		{
 			m_WeaponsName[iWeapon] = Localize(m_Operative.m_szPrimaryItem, "ID_NAME", "R6Gadgets");
 			// [Explicit Continue]
 			goto J0x124;
 		}
 		// End:0x124
-		if(__NFUN_130__(__NFUN_154__(iWeapon, 3), __NFUN_123__(m_Operative.m_szSecondaryItem, "")))
+		if(((iWeapon == 3) && (m_Operative.m_szSecondaryItem != "")))
 		{
 			m_WeaponsName[iWeapon] = Localize(m_Operative.m_szSecondaryItem, "ID_NAME", "R6Gadgets");
 		}
 		J0x124:
 
-		__NFUN_165__(iWeapon);
+		(iWeapon++);
 		// [Loop Continue]
 		goto J0x21;
 	}
@@ -117,7 +117,7 @@ function SetCharacterInfoMP(R6TeamMemberReplicationInfo repInfo)
 	m_Operative = none;
 	m_bIsSinglePlayer = false;
 	// End:0x62
-	if(__NFUN_123__(m_MemberRepInfo.m_PrimaryWeapon, ""))
+	if((m_MemberRepInfo.m_PrimaryWeapon != ""))
 	{
 		m_WeaponsName[0] = Localize(m_MemberRepInfo.m_PrimaryWeapon, "ID_NAME", "R6Weapons");		
 	}
@@ -126,7 +126,7 @@ function SetCharacterInfoMP(R6TeamMemberReplicationInfo repInfo)
 		m_WeaponsName[0] = Localize("MISC", "ID_EMPTY", "R6Common");
 	}
 	// End:0xD2
-	if(__NFUN_123__(m_MemberRepInfo.m_SecondaryWeapon, ""))
+	if((m_MemberRepInfo.m_SecondaryWeapon != ""))
 	{
 		m_WeaponsName[1] = Localize(m_MemberRepInfo.m_SecondaryWeapon, "ID_NAME", "R6Weapons");		
 	}
@@ -135,12 +135,12 @@ function SetCharacterInfoMP(R6TeamMemberReplicationInfo repInfo)
 		m_WeaponsName[1] = Localize("MISC", "ID_EMPTY", "R6Common");
 	}
 	// End:0x140
-	if(__NFUN_123__(m_MemberRepInfo.m_PrimaryGadget, ""))
+	if((m_MemberRepInfo.m_PrimaryGadget != ""))
 	{
 		m_WeaponsName[2] = Localize(m_MemberRepInfo.m_PrimaryGadget, "ID_NAME", "R6Gadgets");
 	}
 	// End:0x186
-	if(__NFUN_123__(m_MemberRepInfo.m_SecondaryGadget, ""))
+	if((m_MemberRepInfo.m_SecondaryGadget != ""))
 	{
 		m_WeaponsName[3] = Localize(m_MemberRepInfo.m_SecondaryGadget, "ID_NAME", "R6Gadgets");
 	}
@@ -166,7 +166,7 @@ function UpdateGadgets()
 	local bool bIsPrimaryGadgetEmpty, bIsPrimaryGadgetSet, bIsSecondaryGadgetEmpty, bIsSecondaryGadgetSet;
 
 	// End:0xA6
-	if(__NFUN_119__(m_Operative.m_WeaponsCarried[2], none))
+	if((m_Operative.m_WeaponsCarried[2] != none))
 	{
 		// End:0x75
 		if(m_Operative.m_WeaponsCarried[2].HasAmmo())
@@ -180,7 +180,7 @@ function UpdateGadgets()
 		bIsPrimaryGadgetSet = true;
 	}
 	// End:0x14C
-	if(__NFUN_119__(m_Operative.m_WeaponsCarried[3], none))
+	if((m_Operative.m_WeaponsCarried[3] != none))
 	{
 		// End:0x11B
 		if(m_Operative.m_WeaponsCarried[3].HasAmmo())
@@ -197,7 +197,7 @@ function UpdateGadgets()
 	if(m_Operative.m_bHasLockPickKit)
 	{
 		// End:0x1A4
-		if(__NFUN_129__(bIsPrimaryGadgetSet))
+		if((!bIsPrimaryGadgetSet))
 		{
 			m_WeaponsName[2] = Localize("LOCKPICKKIT", "ID_NAME", "R6Gadgets");
 			bIsPrimaryGadgetSet = true;			
@@ -205,7 +205,7 @@ function UpdateGadgets()
 		else
 		{
 			// End:0x1E7
-			if(__NFUN_129__(bIsSecondaryGadgetSet))
+			if((!bIsSecondaryGadgetSet))
 			{
 				m_WeaponsName[3] = Localize("LOCKPICKKIT", "ID_NAME", "R6Gadgets");
 				bIsSecondaryGadgetSet = true;
@@ -216,7 +216,7 @@ function UpdateGadgets()
 	if(m_Operative.m_bHasDiffuseKit)
 	{
 		// End:0x23E
-		if(__NFUN_129__(bIsPrimaryGadgetSet))
+		if((!bIsPrimaryGadgetSet))
 		{
 			m_WeaponsName[2] = Localize("DIFFUSEKIT", "ID_NAME", "R6Gadgets");
 			bIsPrimaryGadgetSet = true;			
@@ -224,7 +224,7 @@ function UpdateGadgets()
 		else
 		{
 			// End:0x280
-			if(__NFUN_129__(bIsSecondaryGadgetSet))
+			if((!bIsSecondaryGadgetSet))
 			{
 				m_WeaponsName[3] = Localize("DIFFUSEKIT", "ID_NAME", "R6Gadgets");
 				bIsSecondaryGadgetSet = true;
@@ -235,7 +235,7 @@ function UpdateGadgets()
 	if(m_Operative.m_bHasElectronicsKit)
 	{
 		// End:0x2DA
-		if(__NFUN_129__(bIsPrimaryGadgetSet))
+		if((!bIsPrimaryGadgetSet))
 		{
 			m_WeaponsName[2] = Localize("ELECTRONICKIT", "ID_NAME", "R6Gadgets");
 			bIsPrimaryGadgetSet = true;			
@@ -243,7 +243,7 @@ function UpdateGadgets()
 		else
 		{
 			// End:0x31F
-			if(__NFUN_129__(bIsSecondaryGadgetSet))
+			if((!bIsSecondaryGadgetSet))
 			{
 				m_WeaponsName[3] = Localize("ELECTRONICKIT", "ID_NAME", "R6Gadgets");
 				bIsSecondaryGadgetSet = true;
@@ -254,7 +254,7 @@ function UpdateGadgets()
 	if(m_Operative.m_bHaveGasMask)
 	{
 		// End:0x373
-		if(__NFUN_129__(bIsPrimaryGadgetSet))
+		if((!bIsPrimaryGadgetSet))
 		{
 			m_WeaponsName[2] = Localize("GASMASK", "ID_NAME", "R6Gadgets");
 			bIsPrimaryGadgetSet = true;			
@@ -262,7 +262,7 @@ function UpdateGadgets()
 		else
 		{
 			// End:0x3B2
-			if(__NFUN_129__(bIsSecondaryGadgetSet))
+			if((!bIsSecondaryGadgetSet))
 			{
 				m_WeaponsName[3] = Localize("GASMASK", "ID_NAME", "R6Gadgets");
 				bIsSecondaryGadgetSet = true;
@@ -270,12 +270,12 @@ function UpdateGadgets()
 		}
 	}
 	// End:0x3E6
-	if(__NFUN_129__(bIsPrimaryGadgetSet))
+	if((!bIsPrimaryGadgetSet))
 	{
 		m_WeaponsName[2] = Localize("MISC", "ID_EMPTY", "R6Common");
 	}
 	// End:0x41A
-	if(__NFUN_129__(bIsSecondaryGadgetSet))
+	if((!bIsSecondaryGadgetSet))
 	{
 		m_WeaponsName[3] = Localize("MISC", "ID_EMPTY", "R6Common");
 	}
@@ -284,16 +284,16 @@ function UpdateGadgets()
 
 function UpdatePosition()
 {
-	WinTop = float(__NFUN_146__(__NFUN_146__(Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_OutsideMarginY, Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY), __NFUN_144__(m_Operative.m_iID, __NFUN_146__(Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY, Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_RowHeight))));
+	WinTop = float(((Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_OutsideMarginY + Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY) + (m_Operative.m_iID * (Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY + Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_RowHeight))));
 	return;
 }
 
 function UpdatePositionMP()
 {
 	// End:0x63
-	if(__NFUN_119__(m_MemberRepInfo, none))
+	if((m_MemberRepInfo != none))
 	{
-		WinTop = float(__NFUN_146__(__NFUN_146__(Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_OutsideMarginY, Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY), __NFUN_144__(int(m_MemberRepInfo.m_iTeamPosition), __NFUN_146__(Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY, Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_RowHeight))));
+		WinTop = float(((Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_OutsideMarginY + Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY) + (int(m_MemberRepInfo.m_iTeamPosition) * (Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_InsideMarginY + Class'R6Menu.R6MenuInGameOperativeSelectorWidget'.default.c_RowHeight))));
 	}
 	return;
 }
@@ -321,7 +321,7 @@ function Paint(Canvas C, float X, float Y)
 	if(m_bIsSinglePlayer)
 	{
 		// End:0x38
-		if(__NFUN_114__(PlayerOwner.ViewTarget, m_Operative))
+		if((PlayerOwner.ViewTarget == m_Operative))
 		{
 			bCurrentSelection = true;			
 		}
@@ -330,7 +330,7 @@ function Paint(Canvas C, float X, float Y)
 			bCurrentSelection = false;
 		}
 		m_eHealth = m_Operative.m_eHealth;
-		m_bIsDead = __NFUN_153__(int(m_eHealth), int(m_Operative.2));
+		m_bIsDead = (int(m_eHealth) >= int(m_Operative.2));
 		UpdateGadgets();
 		bIsPrimaryGadgetEmpty = false;
 		bIsSecondaryGadgetEmpty = false;		
@@ -338,7 +338,7 @@ function Paint(Canvas C, float X, float Y)
 	else
 	{
 		// End:0xBB
-		if(__NFUN_114__(m_MemberRepInfo, R6Pawn(PlayerOwner.Pawn).m_TeamMemberRepInfo))
+		if((m_MemberRepInfo == R6Pawn(PlayerOwner.Pawn).m_TeamMemberRepInfo))
 		{
 			bCurrentSelection = true;			
 		}
@@ -347,15 +347,15 @@ function Paint(Canvas C, float X, float Y)
 			bCurrentSelection = false;
 		}
 		m_eHealth = m_MemberRepInfo.m_eHealth;
-		m_bIsDead = __NFUN_153__(int(m_eHealth), int(PlayerOwner.Pawn.2));
+		m_bIsDead = (int(m_eHealth) >= int(PlayerOwner.Pawn.2));
 		bIsPrimaryGadgetEmpty = m_MemberRepInfo.m_bIsPrimaryGadgetEmpty;
 		bIsSecondaryGadgetEmpty = m_MemberRepInfo.m_bIsSecondaryGadgetEmpty;
 	}
-	iLifeU = __NFUN_249__(int(m_eHealth), 2);
+	iLifeU = Min(int(m_eHealth), 2);
 	C.Style = 5;
 	LineColor = m_NormalColor;
 	// End:0x1D6
-	if(__NFUN_242__(m_bIsDead, true))
+	if((m_bIsDead == true))
 	{
 		NameColor = m_NormalColor;
 		NameAlpha = 128;
@@ -425,45 +425,45 @@ function Paint(Canvas C, float X, float Y)
 	}
 	C.DrawColor = NameBackgroundColor;
 	C.DrawColor.A = NameBackgroundAlpha;
-	DrawStretchedTextureSegment(C, 40.0000000, 1.0000000, __NFUN_175__(WinWidth, float(41)), 21.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, 40.0000000, 1.0000000, (WinWidth - float(41)), 21.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 	Name = GetCharacterName();
-	C.__NFUN_470__(Name, fPosX, fPosY);
-	C.__NFUN_2623__(__NFUN_175__(float(NameX), __NFUN_172__(fPosX, 2.0000000)), float(NameY));
+	C.TextSize(Name, fPosX, fPosY);
+	C.SetPos((float(NameX) - (fPosX / 2.0000000)), float(NameY));
 	C.Font = Root.Fonts[8];
 	C.DrawColor = NameColor;
 	C.DrawColor.A = NameAlpha;
-	C.__NFUN_465__(Name);
-	C.__NFUN_2623__(float(LifeX), float(LifeY));
-	C.__NFUN_466__(HealthIconTexture, 10.0000000, 10.0000000, __NFUN_174__(31.0000000, float(__NFUN_144__(11, iLifeU))), 29.0000000, 10.0000000, 10.0000000);
+	C.DrawText(Name);
+	C.SetPos(float(LifeX), float(LifeY));
+	C.DrawTile(HealthIconTexture, 10.0000000, 10.0000000, (31.0000000 + float((11 * iLifeU))), 29.0000000, 10.0000000, 10.0000000);
 	C.DrawColor = SpecAndWeaponBackgroundColor;
 	C.DrawColor.A = SpecAndWeaponBackgroundAlpha;
-	DrawStretchedTextureSegment(C, 40.0000000, 23.0000000, __NFUN_175__(WinWidth, float(40)), 20.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-	DrawStretchedTextureSegment(C, 1.0000000, 44.0000000, __NFUN_175__(WinWidth, float(2)), 44.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, 40.0000000, 23.0000000, (WinWidth - float(40)), 20.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, 1.0000000, 44.0000000, (WinWidth - float(2)), 44.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 	C.DrawColor = LineColor;
 	C.DrawColor.A = LineAlpha;
-	DrawStretchedTextureSegment(C, 1.0000000, 0.0000000, __NFUN_175__(WinWidth, float(2)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-	DrawStretchedTextureSegment(C, 1.0000000, 43.0000000, __NFUN_175__(WinWidth, float(2)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-	DrawStretchedTextureSegment(C, 1.0000000, __NFUN_175__(WinHeight, float(1)), __NFUN_175__(WinWidth, float(2)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-	DrawStretchedTextureSegment(C, 40.0000000, 22.0000000, __NFUN_175__(WinWidth, float(38)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, 1.0000000, 0.0000000, (WinWidth - float(2)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, 1.0000000, 43.0000000, (WinWidth - float(2)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, 1.0000000, (WinHeight - float(1)), (WinWidth - float(2)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, 40.0000000, 22.0000000, (WinWidth - float(38)), 1.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, 1.0000000, WinHeight, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-	DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(1)), 0.0000000, 1.0000000, WinHeight, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
+	DrawStretchedTextureSegment(C, (WinWidth - float(1)), 0.0000000, 1.0000000, WinHeight, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
 	DrawStretchedTextureSegment(C, 39.0000000, 0.0000000, 1.0000000, 43.0000000, 0.0000000, 0.0000000, 1.0000000, 1.0000000, Texture'Color.Color.White');
-	C.__NFUN_2623__(1.0000000, 1.0000000);
+	C.SetPos(1.0000000, 1.0000000);
 	C.DrawColor = Root.Colors.White;
 	C.DrawColor.A = FaceAlpha;
 	// End:0x8FB
 	if(m_bIsSinglePlayer)
 	{
-		C.__NFUN_466__(m_Operative.m_FaceTexture, 38.0000000, 42.0000000, m_Operative.m_FaceCoords.X, m_Operative.m_FaceCoords.Y, m_Operative.m_FaceCoords.Z, m_Operative.m_FaceCoords.W);
+		C.DrawTile(m_Operative.m_FaceTexture, 38.0000000, 42.0000000, m_Operative.m_FaceCoords.X, m_Operative.m_FaceCoords.Y, m_Operative.m_FaceCoords.Z, m_Operative.m_FaceCoords.W);
 		C.DrawColor = SpecColor;
 		C.DrawColor.A = SpecAlpha;
-		C.__NFUN_470__(m_szSpeciality, fPosX, fPosY);
-		C.__NFUN_2623__(__NFUN_175__(float(SpecX), __NFUN_172__(fPosX, 2.0000000)), float(SpecY));
-		C.__NFUN_465__(m_szSpeciality);		
+		C.TextSize(m_szSpeciality, fPosX, fPosY);
+		C.SetPos((float(SpecX) - (fPosX / 2.0000000)), float(SpecY));
+		C.DrawText(m_szSpeciality);		
 	}
 	else
 	{
-		C.__NFUN_466__(DefaultFaceTexture, 38.0000000, 42.0000000, DefaultFaceCoords.X, DefaultFaceCoords.Y, DefaultFaceCoords.Z, DefaultFaceCoords.W);
+		C.DrawTile(DefaultFaceTexture, 38.0000000, 42.0000000, DefaultFaceCoords.X, DefaultFaceCoords.Y, DefaultFaceCoords.Z, DefaultFaceCoords.W);
 	}
 	C.DrawColor = WeaponColor;
 	C.DrawColor.A = WeaponAlpha;
@@ -472,33 +472,33 @@ function Paint(Canvas C, float X, float Y)
 	J0x992:
 
 	// End:0x9E7 [Loop If]
-	if(__NFUN_150__(iWeapon, 2))
+	if((iWeapon < 2))
 	{
-		C.__NFUN_2623__(float(WeaponX), float(__NFUN_146__(WeaponY, __NFUN_144__(WeaponHeight, iWeapon))));
-		C.__NFUN_465__(m_WeaponsName[iWeapon]);
-		__NFUN_165__(iWeapon);
+		C.SetPos(float(WeaponX), float((WeaponY + (WeaponHeight * iWeapon))));
+		C.DrawText(m_WeaponsName[iWeapon]);
+		(iWeapon++);
 		// [Loop Continue]
 		goto J0x992;
 	}
-	C.__NFUN_2623__(float(WeaponX), float(__NFUN_146__(WeaponY, __NFUN_144__(WeaponHeight, 2))));
+	C.SetPos(float(WeaponX), float((WeaponY + (WeaponHeight * 2))));
 	// End:0xA44
 	if(bIsPrimaryGadgetEmpty)
 	{
-		C.__NFUN_465__(Localize("MISC", "ID_EMPTY", "R6Common"));		
+		C.DrawText(Localize("MISC", "ID_EMPTY", "R6Common"));		
 	}
 	else
 	{
-		C.__NFUN_465__(m_WeaponsName[iWeapon]);
+		C.DrawText(m_WeaponsName[iWeapon]);
 	}
-	C.__NFUN_2623__(float(WeaponX), float(__NFUN_146__(WeaponY, __NFUN_144__(WeaponHeight, 3))));
+	C.SetPos(float(WeaponX), float((WeaponY + (WeaponHeight * 3))));
 	// End:0xAB8
 	if(bIsSecondaryGadgetEmpty)
 	{
-		C.__NFUN_465__(Localize("MISC", "ID_EMPTY", "R6Common"));		
+		C.DrawText(Localize("MISC", "ID_EMPTY", "R6Common"));		
 	}
 	else
 	{
-		C.__NFUN_465__(m_WeaponsName[3]);
+		C.DrawText(m_WeaponsName[3]);
 	}
 	return;
 }
@@ -509,7 +509,7 @@ function string GetCharacterName()
 	if(m_bIsSinglePlayer)
 	{
 		// End:0x23
-		if(__NFUN_119__(m_Operative, none))
+		if((m_Operative != none))
 		{
 			return m_Operative.m_CharacterName;
 		}		

@@ -146,19 +146,19 @@ simulated function bool Accept(Actor Incoming, Actor Source)
 			}
 		}
 		// End:0x154
-		if((!Pawn(Incoming).__NFUN_267__(Location) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/))
+		if((!Pawn(Incoming).SetLocation(Location)))
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(string(self), " Teleport failed for "), string(Incoming)));
+			Log(((string(self) $ " Teleport failed for ") $ string(Incoming)));
 		}
 		// End:0x1C8
-		if(__NFUN_132__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_177__(__NFUN_175__(Level.TimeSeconds, LastFired), 0.5000000)))
+		if(((int(Role) == int(ROLE_Authority)) || ((Level.TimeSeconds - LastFired) > 0.5000000)))
 		{
-			Pawn(Incoming).__NFUN_299__(newRot);
+			Pawn(Incoming).SetRotation(newRot);
 			Pawn(Incoming).SetViewRotation(newRot);
 			LastFired = Level.TimeSeconds;
 		}
 		// End:0x218
-		if(__NFUN_119__(Pawn(Incoming).Controller, none))
+		if((Pawn(Incoming).Controller != none))
 		{
 			Pawn(Incoming).Controller.MoveTimer = -1.0000000;
 			Pawn(Incoming).SetMoveTarget(self);
@@ -168,18 +168,18 @@ simulated function bool Accept(Actor Incoming, Actor Source)
 	else
 	{
 		// End:0x24B
-		if(__NFUN_129__(Incoming.__NFUN_267__(Location)))
+		if((!Incoming.SetLocation(Location)))
 		{
-			__NFUN_117__('Touch');
+			Enable('Touch');
 			return false;
 		}
 		// End:0x265
 		if(bChangesYaw)
 		{
-			Incoming.__NFUN_299__(newRot);
+			Incoming.SetRotation(newRot);
 		}
 	}
-	__NFUN_117__('Touch');
+	Enable('Touch');
 	// End:0x28C
 	if(bChangesVelocity)
 	{
@@ -191,28 +191,28 @@ simulated function bool Accept(Actor Incoming, Actor Source)
 		if(bChangesYaw)
 		{
 			// End:0x2BA
-			if(__NFUN_154__(int(Incoming.Physics), int(1)))
+			if((int(Incoming.Physics) == int(1)))
 			{
 				OldRot.Pitch = 0;
 			}
 			oldDir = Vector(OldRot);
-			mag = __NFUN_219__(Incoming.Velocity, oldDir);
-			Incoming.Velocity = __NFUN_215__(__NFUN_216__(Incoming.Velocity, __NFUN_213__(mag, oldDir)), __NFUN_213__(mag, Vector(Incoming.Rotation)));
+			mag = Dot(Incoming.Velocity, oldDir);
+			Incoming.Velocity = ((Incoming.Velocity - (mag * oldDir)) + (mag * Vector(Incoming.Rotation)));
 		}
 		// End:0x349
 		if(bReversesX)
 		{
-			__NFUN_182__(Incoming.Velocity.X, -1.0000000);
+			(Incoming.Velocity.X *= -1.0000000);
 		}
 		// End:0x36C
 		if(bReversesY)
 		{
-			__NFUN_182__(Incoming.Velocity.Y, -1.0000000);
+			(Incoming.Velocity.Y *= -1.0000000);
 		}
 		// End:0x38F
 		if(bReversesZ)
 		{
-			__NFUN_182__(Incoming.Velocity.Z, -1.0000000);
+			(Incoming.Velocity.Z *= -1.0000000);
 		}
 	}
 	return true;
@@ -223,12 +223,12 @@ function Trigger(Actor Other, Pawn EventInstigator)
 {
 	local Actor A;
 
-	bEnabled = __NFUN_129__(bEnabled);
+	bEnabled = (!bEnabled);
 	// End:0x35
 	if(bEnabled)
 	{
 		// End:0x34
-		foreach __NFUN_307__(Class'Engine.Actor', A)
+		foreach TouchingActors(Class'Engine.Actor', A)
 		{
 			Touch(A);			
 		}		
@@ -243,18 +243,18 @@ simulated function Touch(Actor Other)
 	local int i;
 
 	// End:0x0D
-	if(__NFUN_129__(bEnabled))
+	if((!bEnabled))
 	{
 		return;
 	}
 	// End:0x1B0
-	if(__NFUN_130__(Other.bCanTeleport, __NFUN_242__(Other.PreTeleport(self), false)))
+	if((Other.bCanTeleport && (Other.PreTeleport(self) == false)))
 	{
 		// End:0xCC
-		if(__NFUN_132__(__NFUN_153__(__NFUN_126__(URL, "/"), 0), __NFUN_153__(__NFUN_126__(URL, "#"), 0)))
+		if(((InStr(URL, "/") >= 0) || (InStr(URL, "#") >= 0)))
 		{
 			// End:0xC9
-			if(__NFUN_130__(__NFUN_130__(__NFUN_154__(int(Role), int(ROLE_Authority)), __NFUN_119__(Pawn(Other), none)), Pawn(Other).IsHumanControlled()))
+			if((((int(Role) == int(ROLE_Authority)) && (Pawn(Other) != none)) && Pawn(Other).IsHumanControlled()))
 			{
 				Level.Game.SendPlayer(PlayerController(Pawn(Other).Controller), URL);
 			}			
@@ -262,33 +262,33 @@ simulated function Touch(Actor Other)
 		else
 		{
 			// End:0x12B
-			foreach __NFUN_304__(Class'Engine.Teleporter', D)
+			foreach AllActors(Class'Engine.Teleporter', D)
 			{
 				// End:0x12A
-				if(__NFUN_130__(__NFUN_124__(string(D.Tag), URL), __NFUN_119__(D, self)))
+				if(((string(D.Tag) ~= URL) && (D != self)))
 				{
 					Dest[i] = D;
-					__NFUN_165__(i);
+					(i++);
 					// End:0x12A
-					if(__NFUN_151__(i, 16))
+					if((i > 16))
 					{
 						// End:0x12B
 						break;
 					}
 				}				
 			}			
-			i = __NFUN_167__(i);
+			i = Rand(i);
 			// End:0x1B0
-			if(__NFUN_119__(Dest[i], none))
+			if((Dest[i] != none))
 			{
 				// End:0x16F
-				if(Other.__NFUN_303__('Pawn'))
+				if(Other.IsA('Pawn'))
 				{
 					Other.PlayTeleportEffect(false, true);
 				}
 				Dest[i].Accept(Other, self);
 				// End:0x1B0
-				if(__NFUN_119__(Pawn(Other), none))
+				if((Pawn(Other) != none))
 				{
 					TriggerEvent(Event, self, Pawn(Other));
 				}
@@ -303,15 +303,15 @@ function Actor SpecialHandling(Pawn Other)
 	local Vector Dist2D;
 
 	// End:0xF3
-	if(__NFUN_130__(__NFUN_130__(bEnabled, __NFUN_119__(Teleporter(Other.Controller.RouteCache[1]), none)), __NFUN_124__(string(Other.Controller.RouteCache[1].Tag), URL)))
+	if(((bEnabled && (Teleporter(Other.Controller.RouteCache[1]) != none)) && (string(Other.Controller.RouteCache[1].Tag) ~= URL)))
 	{
 		// End:0xF1
-		if(__NFUN_176__(__NFUN_186__(__NFUN_175__(Location.Z, Other.Location.Z)), __NFUN_174__(CollisionHeight, Other.CollisionHeight)))
+		if((Abs((Location.Z - Other.Location.Z)) < (CollisionHeight + Other.CollisionHeight)))
 		{
-			Dist2D = __NFUN_216__(Location, Other.Location);
+			Dist2D = (Location - Other.Location);
 			Dist2D.Z = 0.0000000;
 			// End:0xF1
-			if(__NFUN_176__(__NFUN_225__(Dist2D), __NFUN_174__(CollisionRadius, Other.CollisionRadius)))
+			if((VSize(Dist2D) < (CollisionRadius + Other.CollisionRadius)))
 			{
 				Touch(Other);
 			}
@@ -319,17 +319,17 @@ function Actor SpecialHandling(Pawn Other)
 		return self;
 	}
 	// End:0x111
-	if(__NFUN_114__(TriggerActor, none))
+	if((TriggerActor == none))
 	{
 		FindTriggerActor();
 		// End:0x111
-		if(__NFUN_114__(TriggerActor, none))
+		if((TriggerActor == none))
 		{
 			return none;
 		}
 	}
 	// End:0x169
-	if(__NFUN_130__(__NFUN_119__(TriggerActor2, none), __NFUN_176__(__NFUN_225__(__NFUN_216__(TriggerActor2.Location, Other.Location)), __NFUN_225__(__NFUN_216__(TriggerActor.Location, Other.Location)))))
+	if(((TriggerActor2 != none) && (VSize((TriggerActor2.Location - Other.Location)) < VSize((TriggerActor.Location - Other.Location)))))
 	{
 		return TriggerActor2;
 	}

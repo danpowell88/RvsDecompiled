@@ -527,7 +527,7 @@ function FillListBox(int _equipmentType)
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0xE21;
 			}
@@ -546,7 +546,7 @@ function FillListBox(int _equipmentType)
 			NewItem.HelpText = Localize(GadgetClass.default.m_NameID, "ID_NAME", "R6Gadgets");
 			NewItem.m_Object = GadgetClass;
 			// End:0x101A
-			if(__NFUN_114__(GetCurrentGadget(false), GadgetClass))
+			if((GetCurrentGadget(false) == GadgetClass))
 			{
 				SelectedItem = NewItem;
 			}
@@ -555,35 +555,35 @@ function FillListBox(int _equipmentType)
 			J0x102D:
 
 			// End:0x11FE [Loop If]
-			if(__NFUN_150__(i, m_AGadgets.Length))
+			if((i < m_AGadgets.Length))
 			{
 				GadgetClass = Class<R6GadgetDescription>(m_AGadgets[i]);
 				// End:0x11F4
-				if(__NFUN_129__(Class'R6Menu.R6MenuMPAdvGearWidget'.static.CheckGadget(string(GadgetClass), self, false)))
+				if((!Class'R6Menu.R6MenuMPAdvGearWidget'.static.CheckGadget(string(GadgetClass), self, false)))
 				{
 					// End:0x10AC
-					if(__NFUN_119__(Class<R6GrenadeDescription>(GadgetClass), none))
+					if((Class<R6GrenadeDescription>(GadgetClass) != none))
 					{
 						NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 1);						
 					}
 					else
 					{
 						// End:0x10E9
-						if(__NFUN_119__(Class<R6ExplosiveDescription>(GadgetClass), none))
+						if((Class<R6ExplosiveDescription>(GadgetClass) != none))
 						{
 							NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 2);							
 						}
 						else
 						{
 							// End:0x1126
-							if(__NFUN_119__(Class<R6HBDeviceDescription>(GadgetClass), none))
+							if((Class<R6HBDeviceDescription>(GadgetClass) != none))
 							{
 								NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 3);								
 							}
 							else
 							{
 								// End:0x1163
-								if(__NFUN_119__(Class<R6KitDescription>(GadgetClass), none))
+								if((Class<R6KitDescription>(GadgetClass) != none))
 								{
 									NewItem = R6WindowListBoxItem(m_listBox.Items).InsertLastAfterSeparator(Class'R6Window.R6WindowListBoxItem', 4);									
 								}
@@ -597,12 +597,12 @@ function FillListBox(int _equipmentType)
 					NewItem.HelpText = Localize(GadgetClass.default.m_NameID, "ID_NAME", "R6Gadgets");
 					NewItem.m_Object = GadgetClass;
 					// End:0x11F4
-					if(__NFUN_114__(GetCurrentGadget(false), GadgetClass))
+					if((GetCurrentGadget(false) == GadgetClass))
 					{
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x102D;
 			}
@@ -619,23 +619,23 @@ function FillListBox(int _equipmentType)
 			J0x1265:
 
 			// End:0x1385 [Loop If]
-			if(__NFUN_150__(i, m_AArmors.Length))
+			if((i < m_AArmors.Length))
 			{
 				ArmorDescriptionClass = Class<R6ArmorDescription>(m_AArmors[i]);
 				ArmorForAvailabilityTest = new (none) ArmorDescriptionClass;
 				// End:0x137B
-				if(__NFUN_130__(__NFUN_130__(__NFUN_242__(ArmorDescriptionClass.default.m_bHideFromMenu, false), GetCurrentOperative().__NFUN_303__(ArmorDescriptionClass.default.m_LimitedToClass)), ArmorForAvailabilityTest.__NFUN_303__(GetCurrentOperative().m_CanUseArmorType)))
+				if((((ArmorDescriptionClass.default.m_bHideFromMenu == false) && GetCurrentOperative().IsA(ArmorDescriptionClass.default.m_LimitedToClass)) && ArmorForAvailabilityTest.IsA(GetCurrentOperative().m_CanUseArmorType)))
 				{
 					NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
 					NewItem.HelpText = Localize(ArmorDescriptionClass.default.m_NameID, "ID_NAME", "R6Armor");
 					NewItem.m_Object = ArmorDescriptionClass;
 					// End:0x137B
-					if(__NFUN_114__(GetCurrentArmor(), ArmorDescriptionClass))
+					if((GetCurrentArmor() == ArmorDescriptionClass))
 					{
 						SelectedItem = NewItem;
 					}
 				}
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x1265;
 			}
@@ -648,7 +648,7 @@ function FillListBox(int _equipmentType)
 			break;
 	}
 	// End:0x13CB
-	if(__NFUN_119__(SelectedItem, none))
+	if((SelectedItem != none))
 	{
 		m_listBox.SetSelectedItem(SelectedItem);
 		m_listBox.MakeSelectedVisible();
@@ -660,20 +660,20 @@ function FillListBox(int _equipmentType)
 function UpdateAnchorButtons(R6MenuEquipmentAnchorButtons.eAnchorEquipmentType _AEType)
 {
 	// End:0x8A
-	if(__NFUN_154__(int(_AEType), int(3)))
+	if((int(_AEType) == int(3)))
 	{
 		m_AnchorButtons.HideWindow();
 		m_Title.WinTop = 0.0000000;
-		m_listBox.WinTop = __NFUN_175__(__NFUN_174__(m_Title.WinTop, m_Title.WinHeight), float(1));
+		m_listBox.WinTop = ((m_Title.WinTop + m_Title.WinHeight) - float(1));
 		m_listBox.SetSize(m_listBox.WinWidth, m_fListBoxHeight);		
 	}
 	else
 	{
 		m_AnchorButtons.ShowWindow();
 		m_AnchorButtons.DisplayButtons(_AEType);
-		m_Title.WinTop = __NFUN_175__(__NFUN_174__(m_AnchorButtons.WinTop, m_AnchorButtons.WinHeight), float(1));
-		m_listBox.WinTop = __NFUN_175__(__NFUN_174__(m_Title.WinTop, m_Title.WinHeight), float(1));
-		m_listBox.SetSize(m_listBox.WinWidth, __NFUN_174__(__NFUN_175__(m_fListBoxHeight, m_AnchorButtons.WinHeight), float(1)));
+		m_Title.WinTop = ((m_AnchorButtons.WinTop + m_AnchorButtons.WinHeight) - float(1));
+		m_listBox.WinTop = ((m_Title.WinTop + m_Title.WinHeight) - float(1));
+		m_listBox.SetSize(m_listBox.WinWidth, ((m_fListBoxHeight - m_AnchorButtons.WinHeight) + float(1)));
 	}
 	return;
 }
@@ -691,31 +691,31 @@ function BuildAvailableEquipment()
 	m_ASecondaryWeapons.Remove(0, m_ASecondaryWeapons.Length);
 	m_AGadgets.Remove(0, m_AGadgets.Length);
 	i = 0;
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	j = 0;
 	J0x50:
 
 	// End:0xF0 [Loop If]
-	if(__NFUN_150__(j, pCurrentMod.m_aDescriptionPackage.Length))
+	if((j < pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6PrimaryWeaponDescription'));
+		PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6PrimaryWeaponDescription'));
 		J0x96:
 
 		// End:0xE3 [Loop If]
-		if(__NFUN_119__(PrimaryWeaponClass, none))
+		if((PrimaryWeaponClass != none))
 		{
 			// End:0xD2
-			if(__NFUN_123__(PrimaryWeaponClass.default.m_NameID, "NONE"))
+			if((PrimaryWeaponClass.default.m_NameID != "NONE"))
 			{
 				m_APrimaryWeapons[i] = PrimaryWeaponClass;
-				__NFUN_165__(i);
+				(i++);
 			}
-			PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(__NFUN_1006__());
+			PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(GetNextClass());
 			// [Loop Continue]
 			goto J0x96;
 		}
-		__NFUN_1007__();
-		__NFUN_165__(j);
+		FreePackageObjects();
+		(j++);
 		// [Loop Continue]
 		goto J0x50;
 	}
@@ -725,26 +725,26 @@ function BuildAvailableEquipment()
 	J0x115:
 
 	// End:0x1B5 [Loop If]
-	if(__NFUN_150__(j, pCurrentMod.m_aDescriptionPackage.Length))
+	if((j < pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		GadgetClass = Class<R6GadgetDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6GadgetDescription'));
+		GadgetClass = Class<R6GadgetDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6GadgetDescription'));
 		J0x15B:
 
 		// End:0x1A8 [Loop If]
-		if(__NFUN_119__(GadgetClass, none))
+		if((GadgetClass != none))
 		{
 			// End:0x197
-			if(__NFUN_123__(GadgetClass.default.m_NameID, "NONE"))
+			if((GadgetClass.default.m_NameID != "NONE"))
 			{
 				m_AGadgets[i] = GadgetClass;
-				__NFUN_165__(i);
+				(i++);
 			}
-			GadgetClass = Class<R6GadgetDescription>(__NFUN_1006__());
+			GadgetClass = Class<R6GadgetDescription>(GetNextClass());
 			// [Loop Continue]
 			goto J0x15B;
 		}
-		__NFUN_1007__();
-		__NFUN_165__(j);
+		FreePackageObjects();
+		(j++);
 		// [Loop Continue]
 		goto J0x115;
 	}
@@ -754,26 +754,26 @@ function BuildAvailableEquipment()
 	J0x1DA:
 
 	// End:0x27A [Loop If]
-	if(__NFUN_150__(j, pCurrentMod.m_aDescriptionPackage.Length))
+	if((j < pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6SecondaryWeaponDescription'));
+		SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6SecondaryWeaponDescription'));
 		J0x220:
 
 		// End:0x26D [Loop If]
-		if(__NFUN_119__(SecondaryWeaponClass, none))
+		if((SecondaryWeaponClass != none))
 		{
 			// End:0x25C
-			if(__NFUN_123__(SecondaryWeaponClass.default.m_NameID, "NONE"))
+			if((SecondaryWeaponClass.default.m_NameID != "NONE"))
 			{
 				m_ASecondaryWeapons[i] = SecondaryWeaponClass;
-				__NFUN_165__(i);
+				(i++);
 			}
-			SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(__NFUN_1006__());
+			SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(GetNextClass());
 			// [Loop Continue]
 			goto J0x220;
 		}
-		__NFUN_1007__();
-		__NFUN_165__(j);
+		FreePackageObjects();
+		(j++);
 		// [Loop Continue]
 		goto J0x1DA;
 	}
@@ -786,27 +786,27 @@ function R6WindowListBoxItem CreatePrimaryWeaponsSeparators()
 	local R6WindowListBoxItem NewItem, FirstInsertedItem;
 
 	FirstInsertedItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	FirstInsertedItem.HelpText = __NFUN_235__(Localize("SUBGUN", "ID_NAME", "R6Weapons"));
+	FirstInsertedItem.HelpText = Caps(Localize("SUBGUN", "ID_NAME", "R6Weapons"));
 	FirstInsertedItem.m_IsSeparator = true;
 	FirstInsertedItem.m_iSeparatorID = 1;
 	m_AnchorButtons.m_SUBGUNButton.AnchoredElement = FirstInsertedItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("ASSAULT", "ID_NAME", "R6Weapons"));
+	NewItem.HelpText = Caps(Localize("ASSAULT", "ID_NAME", "R6Weapons"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 2;
 	m_AnchorButtons.m_ASSAULTButton.AnchoredElement = NewItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("SHOTGUN", "ID_NAME", "R6Weapons"));
+	NewItem.HelpText = Caps(Localize("SHOTGUN", "ID_NAME", "R6Weapons"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 3;
 	m_AnchorButtons.m_SHOTGUNButton.AnchoredElement = NewItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("SNIPER", "ID_NAME", "R6Weapons"));
+	NewItem.HelpText = Caps(Localize("SNIPER", "ID_NAME", "R6Weapons"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 4;
 	m_AnchorButtons.m_SNIPERButton.AnchoredElement = NewItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("LMG", "ID_NAME", "R6Weapons"));
+	NewItem.HelpText = Caps(Localize("LMG", "ID_NAME", "R6Weapons"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 5;
 	m_AnchorButtons.m_LMGButton.AnchoredElement = NewItem;
@@ -819,12 +819,12 @@ function R6WindowListBoxItem CreateSecondaryWeaponsSeparators()
 	local R6WindowListBoxItem NewItem, FirstInsertedItem;
 
 	FirstInsertedItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	FirstInsertedItem.HelpText = __NFUN_235__(Localize("PISTOLS", "ID_NAME", "R6Weapons"));
+	FirstInsertedItem.HelpText = Caps(Localize("PISTOLS", "ID_NAME", "R6Weapons"));
 	FirstInsertedItem.m_IsSeparator = true;
 	FirstInsertedItem.m_iSeparatorID = 1;
 	m_AnchorButtons.m_PISTOLSButton.AnchoredElement = FirstInsertedItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("MACHINEPISTOLS", "ID_NAME", "R6Weapons"));
+	NewItem.HelpText = Caps(Localize("MACHINEPISTOLS", "ID_NAME", "R6Weapons"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 2;
 	m_AnchorButtons.m_MACHINEPISTOLSButton.AnchoredElement = NewItem;
@@ -837,27 +837,27 @@ function R6WindowListBoxItem CreateGadgetsSeparators()
 	local R6WindowListBoxItem NewItem, FirstInsertedItem;
 
 	FirstInsertedItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	FirstInsertedItem.HelpText = __NFUN_235__(Localize("CATEGORIES", "GRENADES", "R6Gadgets"));
+	FirstInsertedItem.HelpText = Caps(Localize("CATEGORIES", "GRENADES", "R6Gadgets"));
 	FirstInsertedItem.m_IsSeparator = true;
 	FirstInsertedItem.m_iSeparatorID = 1;
 	m_AnchorButtons.m_GRENADESButton.AnchoredElement = FirstInsertedItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("CATEGORIES", "EXPLOSIVES", "R6Gadgets"));
+	NewItem.HelpText = Caps(Localize("CATEGORIES", "EXPLOSIVES", "R6Gadgets"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 2;
 	m_AnchorButtons.m_EXPLOSIVESButton.AnchoredElement = NewItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("CATEGORIES", "HBDEVICE", "R6Gadgets"));
+	NewItem.HelpText = Caps(Localize("CATEGORIES", "HBDEVICE", "R6Gadgets"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 3;
 	m_AnchorButtons.m_HBDEVICEButton.AnchoredElement = NewItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("CATEGORIES", "KITS", "R6Gadgets"));
+	NewItem.HelpText = Caps(Localize("CATEGORIES", "KITS", "R6Gadgets"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 4;
 	m_AnchorButtons.m_KITSButton.AnchoredElement = NewItem;
 	NewItem = R6WindowListBoxItem(m_listBox.Items.Append(Class'R6Window.R6WindowListBoxItem'));
-	NewItem.HelpText = __NFUN_235__(Localize("CATEGORIES", "GENERAL", "R6Gadgets"));
+	NewItem.HelpText = Caps(Localize("CATEGORIES", "GENERAL", "R6Gadgets"));
 	NewItem.m_IsSeparator = true;
 	NewItem.m_iSeparatorID = 5;
 	m_AnchorButtons.m_GENERALButton.AnchoredElement = NewItem;
@@ -872,11 +872,11 @@ function BuildAvailableMissionArmors()
 	local R6MissionDescription CurrentMission;
 	local R6ModMgr pModManager;
 
-	pModManager = Class'Engine.Actor'.static.__NFUN_1524__();
+	pModManager = Class'Engine.Actor'.static.GetModMgr();
 	m_AArmors.Remove(0, m_AArmors.Length);
 	CurrentMission = R6MissionDescription(R6Console(Root.Console).Master.m_StartGameInfo.m_CurrentMission);
 	// End:0x65
-	if(__NFUN_114__(CurrentMission, none))
+	if((CurrentMission == none))
 	{
 		return;
 	}
@@ -885,75 +885,75 @@ function BuildAvailableMissionArmors()
 	J0x73:
 
 	// End:0xE6 [Loop If]
-	if(__NFUN_150__(i, CurrentMission.m_MissionArmorTypes.Length))
+	if((i < CurrentMission.m_MissionArmorTypes.Length))
 	{
 		ArmorDescriptionClass = Class<R6ArmorDescription>(CurrentMission.m_MissionArmorTypes[i]);
 		// End:0xDC
-		if(__NFUN_123__(ArmorDescriptionClass.default.m_NameID, "NONE"))
+		if((ArmorDescriptionClass.default.m_NameID != "NONE"))
 		{
 			m_AArmors[nbArmor] = ArmorDescriptionClass;
-			__NFUN_165__(nbArmor);
+			(nbArmor++);
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x73;
 	}
 	// End:0x1F8
-	if(__NFUN_129__(pModManager.IsRavenShield()))
+	if((!pModManager.IsRavenShield()))
 	{
 		i = 0;
 		J0x101:
 
 		// End:0x1F8 [Loop If]
-		if(__NFUN_150__(i, pModManager.m_pCurrentMod.m_aDescriptionPackage.Length))
+		if((i < pModManager.m_pCurrentMod.m_aDescriptionPackage.Length))
 		{
 			// End:0x1EE
-			if(__NFUN_123__(pModManager.m_pCurrentMod.m_aDescriptionPackage[i], "R6Description"))
+			if((pModManager.m_pCurrentMod.m_aDescriptionPackage[i] != "R6Description"))
 			{
-				ArmorDescriptionClass = Class<R6ArmorDescription>(__NFUN_1005__(__NFUN_112__(pModManager.m_pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6ArmorDescription'));
+				ArmorDescriptionClass = Class<R6ArmorDescription>(GetFirstPackageClass((pModManager.m_pCurrentMod.m_aDescriptionPackage[i] $ ".u"), Class'R6Description.R6ArmorDescription'));
 				J0x18A:
 
 				// End:0x1EE [Loop If]
-				if(__NFUN_130__(__NFUN_119__(ArmorDescriptionClass, none), __NFUN_242__(ArmorDescriptionClass.default.m_bHideFromMenu, false)))
+				if(((ArmorDescriptionClass != none) && (ArmorDescriptionClass.default.m_bHideFromMenu == false)))
 				{
 					// End:0x1DD
-					if(__NFUN_123__(ArmorDescriptionClass.default.m_NameID, "NONE"))
+					if((ArmorDescriptionClass.default.m_NameID != "NONE"))
 					{
 						m_AArmors[nbArmor] = ArmorDescriptionClass;
-						__NFUN_165__(nbArmor);
+						(nbArmor++);
 					}
-					ArmorDescriptionClass = Class<R6ArmorDescription>(__NFUN_1006__());
+					ArmorDescriptionClass = Class<R6ArmorDescription>(GetNextClass());
 					// [Loop Continue]
 					goto J0x18A;
 				}
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x101;
 		}
 	}
 	// End:0x2D9
-	if(__NFUN_242__(pModManager.m_pCurrentMod.m_bUseCustomOperatives, true))
+	if((pModManager.m_pCurrentMod.m_bUseCustomOperatives == true))
 	{
 		i = 0;
 		J0x21D:
 
 		// End:0x2D9 [Loop If]
-		if(__NFUN_150__(i, pModManager.GetPackageMgr().GetNbPackage()))
+		if((i < pModManager.GetPackageMgr().GetNbPackage()))
 		{
 			ArmorDescriptionClass = Class<R6ArmorDescription>(pModManager.GetPackageMgr().GetFirstClassFromPackage(i, Class'R6Description.R6ArmorDescription'));
 			J0x26E:
 
 			// End:0x2CF [Loop If]
-			if(__NFUN_130__(__NFUN_119__(ArmorDescriptionClass, none), __NFUN_242__(ArmorDescriptionClass.default.m_bHideFromMenu, false)))
+			if(((ArmorDescriptionClass != none) && (ArmorDescriptionClass.default.m_bHideFromMenu == false)))
 			{
 				m_AArmors[nbArmor] = ArmorDescriptionClass;
-				__NFUN_165__(nbArmor);
+				(nbArmor++);
 				ArmorDescriptionClass = Class<R6ArmorDescription>(pModManager.GetPackageMgr().GetNextClassFromPackage());
 				// [Loop Continue]
 				goto J0x26E;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x21D;
 		}
@@ -965,7 +965,7 @@ function BuildAvailableMissionArmors()
 function Class<R6ArmorDescription> GetDefaultArmor()
 {
 	// End:0x1C
-	if(__NFUN_151__(m_AArmors.Length, 0))
+	if((m_AArmors.Length > 0))
 	{
 		return Class<R6ArmorDescription>(m_AArmors[0]);		
 	}
@@ -984,21 +984,21 @@ function bool IsAmorAvailable(Class<R6ArmorDescription> lookedUpArmor, R6Operati
 	bArmorIsAvailble = false;
 	i = 0;
 	// End:0x30
-	if(__NFUN_129__(currentOperative.__NFUN_303__(lookedUpArmor.default.m_LimitedToClass)))
+	if((!currentOperative.IsA(lookedUpArmor.default.m_LimitedToClass)))
 	{
 		return false;
 	}
 	J0x30:
 
 	// End:0x7A [Loop If]
-	if(__NFUN_130__(__NFUN_242__(bArmorIsAvailble, false), __NFUN_150__(i, m_AArmors.Length)))
+	if(((bArmorIsAvailble == false) && (i < m_AArmors.Length)))
 	{
 		// End:0x70
-		if(__NFUN_114__(lookedUpArmor, Class<R6ArmorDescription>(m_AArmors[i])))
+		if((lookedUpArmor == Class<R6ArmorDescription>(m_AArmors[i])))
 		{
 			bArmorIsAvailble = true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x30;
 	}
@@ -1019,7 +1019,7 @@ function Notify(UWindowDialogControl C, byte E)
 	local int itemPos, i;
 
 	// End:0x969
-	if(__NFUN_154__(int(E), 2))
+	if((int(E) == 2))
 	{
 		switch(C)
 		{
@@ -1045,16 +1045,16 @@ function Notify(UWindowDialogControl C, byte E)
 						m_WeaponStats.m_fRecoveryPercent = m_WeaponStats.m_fInitRecoveryPercent;
 						WeaponGadgetDescriptionClass = GetCurrentWeaponGadget(true);
 						// End:0x300
-						if(__NFUN_119__(WeaponGadgetDescriptionClass, Class'R6Description.R6DescWeaponGadgetNone'))
+						if((WeaponGadgetDescriptionClass != Class'R6Description.R6DescWeaponGadgetNone'))
 						{
 							i = 0;
 							J0x1FA:
 
 							// End:0x300 [Loop If]
-							if(__NFUN_150__(i, PrimaryWeaponClass.default.m_WeaponTags.Length))
+							if((i < PrimaryWeaponClass.default.m_WeaponTags.Length))
 							{
 								// End:0x2F6
-								if(__NFUN_122__(PrimaryWeaponClass.default.m_WeaponTags[i], WeaponGadgetDescriptionClass.default.m_NameTag))
+								if((PrimaryWeaponClass.default.m_WeaponTags[i] == WeaponGadgetDescriptionClass.default.m_NameTag))
 								{
 									m_WeaponStats.m_fRangePercent = float(PrimaryWeaponClass.default.m_ARangePercent[i]);
 									m_WeaponStats.m_fDamagePercent = float(PrimaryWeaponClass.default.m_ADamagePercent[i]);
@@ -1064,7 +1064,7 @@ function Notify(UWindowDialogControl C, byte E)
 									// [Explicit Break]
 									goto J0x300;
 								}
-								__NFUN_165__(i);
+								(i++);
 								// [Loop Continue]
 								goto J0x1FA;
 							}
@@ -1122,16 +1122,16 @@ function Notify(UWindowDialogControl C, byte E)
 						m_WeaponStats.m_fRecoveryPercent = m_WeaponStats.m_fInitRecoveryPercent;
 						WeaponGadgetDescriptionClass = GetCurrentWeaponGadget(false);
 						// End:0x783
-						if(__NFUN_119__(WeaponGadgetDescriptionClass, Class'R6Description.R6DescWeaponGadgetNone'))
+						if((WeaponGadgetDescriptionClass != Class'R6Description.R6DescWeaponGadgetNone'))
 						{
 							i = 0;
 							J0x67D:
 
 							// End:0x783 [Loop If]
-							if(__NFUN_150__(i, SecondaryWeaponClass.default.m_WeaponTags.Length))
+							if((i < SecondaryWeaponClass.default.m_WeaponTags.Length))
 							{
 								// End:0x779
-								if(__NFUN_122__(SecondaryWeaponClass.default.m_WeaponTags[i], WeaponGadgetDescriptionClass.default.m_NameTag))
+								if((SecondaryWeaponClass.default.m_WeaponTags[i] == WeaponGadgetDescriptionClass.default.m_NameTag))
 								{
 									m_WeaponStats.m_fRangePercent = float(SecondaryWeaponClass.default.m_ARangePercent[i]);
 									m_WeaponStats.m_fDamagePercent = float(SecondaryWeaponClass.default.m_ADamagePercent[i]);
@@ -1141,7 +1141,7 @@ function Notify(UWindowDialogControl C, byte E)
 									// [Explicit Break]
 									goto J0x783;
 								}
-								__NFUN_165__(i);
+								(i++);
 								// [Loop Continue]
 								goto J0x67D;
 							}
@@ -1191,7 +1191,7 @@ function Notify(UWindowDialogControl C, byte E)
 			case m_AnchorButtons.m_GENERALButton:
 				itemPos = R6WindowListBoxItem(m_listBox.Items).FindItemIndex(R6WindowListBoxAnchorButton(C).AnchoredElement);
 				// End:0x963
-				if(__NFUN_153__(itemPos, 0))
+				if((itemPos >= 0))
 				{
 					m_listBox.m_VertSB.pos = 0.0000000;
 					m_listBox.m_VertSB.Scroll(float(itemPos));
@@ -1206,7 +1206,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x9B1
-		if(__NFUN_130__(__NFUN_119__(m_EquipmentText, none), __NFUN_123__(NewString, "")))
+		if(((m_EquipmentText != none) && (NewString != "")))
 		{
 			m_EquipmentText.Clear(true, true);
 			m_EquipmentText.AddText(NewString, m_DescriptionTextColor, m_DescriptionTextFont);
@@ -1229,8 +1229,8 @@ function enableWeaponStats(bool _enable)
 	else
 	{
 		m_WeaponStats.HideWindow();
-		m_EquipmentText.WinTop = __NFUN_175__(__NFUN_174__(m_listBox.WinTop, m_listBox.WinHeight), float(1));
-		m_EquipmentText.WinHeight = __NFUN_175__(WinHeight, m_EquipmentText.WinTop);
+		m_EquipmentText.WinTop = ((m_listBox.WinTop + m_listBox.WinHeight) - float(1));
+		m_EquipmentText.WinHeight = (WinHeight - m_EquipmentText.WinTop);
 		m_EquipmentText.Resize();
 		m_EquipmentText.ShowWindow();
 		m_Buttons.HideWindow();
@@ -1286,13 +1286,13 @@ static function SortDescriptions(bool _bAscending, out array< Class > Descriptio
 	J0x07:
 
 	// End:0x213 [Loop If]
-	if(__NFUN_150__(i, __NFUN_147__(Descriptions.Length, 1)))
+	if((i < (Descriptions.Length - 1)))
 	{
 		j = 0;
 		J0x21:
 
 		// End:0x209 [Loop If]
-		if(__NFUN_150__(j, __NFUN_147__(__NFUN_147__(Descriptions.Length, 1), i)))
+		if((j < ((Descriptions.Length - 1) - i)))
 		{
 			// End:0xD7
 			if(bUseTags)
@@ -1300,11 +1300,11 @@ static function SortDescriptions(bool _bAscending, out array< Class > Descriptio
 				// End:0x92
 				if(_bAscending)
 				{
-					bSwap = __NFUN_116__(__NFUN_235__(Class<R6Description>(Descriptions[j]).default.m_NameTag), __NFUN_235__(Class<R6Description>(Descriptions[static.__NFUN_146__(j, 1)]).default.m_NameTag));					
+					bSwap = (Caps(Class<R6Description>(Descriptions[j]).default.m_NameTag) > Caps(Class<R6Description>(Descriptions[static.(j + 1)]).default.m_NameTag));					
 				}
 				else
 				{
-					bSwap = __NFUN_115__(__NFUN_235__(Class<R6Description>(Descriptions[j]).default.m_NameTag), __NFUN_235__(Class<R6Description>(Descriptions[static.__NFUN_146__(j, 1)]).default.m_NameTag));
+					bSwap = (Caps(Class<R6Description>(Descriptions[j]).default.m_NameTag) < Caps(Class<R6Description>(Descriptions[static.(j + 1)]).default.m_NameTag));
 				}				
 			}
 			else
@@ -1312,25 +1312,25 @@ static function SortDescriptions(bool _bAscending, out array< Class > Descriptio
 				// End:0x14D
 				if(_bAscending)
 				{
-					bSwap = __NFUN_116__(__NFUN_235__(Localize(Class<R6Description>(Descriptions[j]).default.m_NameID, "ID_NAME", LocalizationFile)), __NFUN_235__(Localize(Class<R6Description>(Descriptions[static.__NFUN_146__(j, 1)]).default.m_NameID, "ID_NAME", LocalizationFile)));					
+					bSwap = (Caps(Localize(Class<R6Description>(Descriptions[j]).default.m_NameID, "ID_NAME", LocalizationFile)) > Caps(Localize(Class<R6Description>(Descriptions[static.(j + 1)]).default.m_NameID, "ID_NAME", LocalizationFile)));					
 				}
 				else
 				{
-					bSwap = __NFUN_115__(__NFUN_235__(Localize(Class<R6Description>(Descriptions[j]).default.m_NameID, "ID_NAME", LocalizationFile)), __NFUN_235__(Localize(Class<R6Description>(Descriptions[static.__NFUN_146__(j, 1)]).default.m_NameID, "ID_NAME", LocalizationFile)));
+					bSwap = (Caps(Localize(Class<R6Description>(Descriptions[j]).default.m_NameID, "ID_NAME", LocalizationFile)) < Caps(Localize(Class<R6Description>(Descriptions[static.(j + 1)]).default.m_NameID, "ID_NAME", LocalizationFile)));
 				}
 			}
 			// End:0x1FF
 			if(bSwap)
 			{
 				temp = Descriptions[j];
-				Descriptions[j] = Descriptions[__NFUN_146__(j, 1)];
-				Descriptions[__NFUN_146__(j, 1)] = temp;
+				Descriptions[j] = Descriptions[(j + 1)];
+				Descriptions[(j + 1)] = temp;
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x21;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}

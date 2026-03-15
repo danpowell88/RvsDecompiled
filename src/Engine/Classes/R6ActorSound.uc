@@ -29,20 +29,20 @@ simulated function Timer()
 	// End:0x2D
 	if((m_ImpactSoundStop != none))
 	{
-		__NFUN_264__(m_ImpactSoundStop, m_eTypeSound) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+		PlaySound(m_ImpactSoundStop, m_eTypeSound);
 		m_ImpactSound = m_ImpactSoundStop;
 		m_ImpactSoundStop = none;		
 	}
 	else
 	{
 		// End:0x45
-		if(__NFUN_2703__(self, m_ImpactSound))
+		if(IsPlayingSound(self, m_ImpactSound))
 		{
-			__NFUN_280__(2.0000000, false);			
+			SetTimer(2.0000000, false);			
 		}
 		else
 		{
-			__NFUN_280__(0.0000000, false);
+			SetTimer(0.0000000, false);
 		}
 	}
 	return;
@@ -50,14 +50,14 @@ simulated function Timer()
 
 simulated function SpawnSound()
 {
-	__NFUN_264__(m_ImpactSound, m_eTypeSound);
-	__NFUN_280__(m_fExplosionDelay, false);
+	PlaySound(m_ImpactSound, m_eTypeSound);
+	SetTimer(m_fExplosionDelay, false);
 	return;
 }
 
 simulated function FirstPassReset()
 {
-	__NFUN_279__();
+	Destroy();
 	return;
 }
 
@@ -66,12 +66,12 @@ auto state StartUp
 	simulated function Tick(float DeltaTime)
 	{
 		// End:0x1F
-		if(__NFUN_155__(int(Level.NetMode), int(NM_DedicatedServer)))
+		if((int(Level.NetMode) != int(NM_DedicatedServer)))
 		{
 			SpawnSound();
 		}
-		LifeSpan = __NFUN_174__(m_fExplosionDelay, float(10));
-		__NFUN_118__('Tick');
+		LifeSpan = (m_fExplosionDelay + float(10));
+		Disable('Tick');
 		return;
 	}
 	stop;

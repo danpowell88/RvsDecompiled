@@ -476,9 +476,9 @@ simulated function Click(float X, float Y)
 	if(GetSelectStatus())
 	{
 		// End:0x51
-		if(__NFUN_130__(m_bPlayButtonSnd, __NFUN_119__(DownSound, none)))
+		if((m_bPlayButtonSnd && (DownSound != none)))
 		{
-			GetPlayerOwner().__NFUN_264__(DownSound, 9);
+			GetPlayerOwner().PlaySound(DownSound, 9);
 			// End:0x51
 			if(m_bWaitSoundFinish)
 			{
@@ -497,7 +497,7 @@ simulated function Click(float X, float Y)
 function MouseWheelDown(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(m_AdviceWindow, none))
+	if((m_AdviceWindow != none))
 	{
 		m_AdviceWindow.MouseWheelDown(X, Y);
 	}
@@ -510,7 +510,7 @@ function MouseWheelDown(float X, float Y)
 function MouseWheelUp(float X, float Y)
 {
 	// End:0x24
-	if(__NFUN_119__(m_AdviceWindow, none))
+	if((m_AdviceWindow != none))
 	{
 		m_AdviceWindow.MouseWheelUp(X, Y);
 	}

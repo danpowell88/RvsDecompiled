@@ -446,7 +446,7 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 	J0xD7:
 
 	// End:0x16E [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x102
 		if(m_aMissionObjectives[i].m_bMoralityObjective)
@@ -454,11 +454,11 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 			// [Explicit Continue]
 			goto J0x164;
 		}
-		__NFUN_163__(iTotalMissionToComplete);
+		(++iTotalMissionToComplete);
 		// End:0x164
-		if(__NFUN_130__(__NFUN_129__(m_aMissionObjectives[i].isFailed()), m_aMissionObjectives[i].isCompleted()))
+		if(((!m_aMissionObjectives[i].isFailed()) && m_aMissionObjectives[i].isCompleted()))
 		{
-			__NFUN_163__(iCompleted);
+			(++iCompleted);
 			// End:0x164
 			if(m_aMissionObjectives[i].isMissionCompletedOnSuccess())
 			{
@@ -467,21 +467,21 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 		}
 		J0x164:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0xD7;
 	}
 	// End:0x18A
-	if(__NFUN_154__(int(m_eMissionObjectiveStatus), int(1)))
+	if((int(m_eMissionObjectiveStatus) == int(1)))
 	{
 		CompleteMission();
 		return m_eMissionObjectiveStatus;
 	}
 	// End:0x1D0
-	if(__NFUN_151__(iTotalMissionToComplete, 0))
+	if((iTotalMissionToComplete > 0))
 	{
 		// End:0x1B5
-		if(__NFUN_154__(iTotalMissionFailed, iTotalMissionToComplete))
+		if((iTotalMissionFailed == iTotalMissionToComplete))
 		{
 			SetMissionObjStatus(2);
 			return m_eMissionObjectiveStatus;			
@@ -489,7 +489,7 @@ function R6MissionObjectiveMgr.EMissionObjectiveStatus Update()
 		else
 		{
 			// End:0x1D0
-			if(__NFUN_154__(iCompleted, iTotalMissionToComplete))
+			if((iCompleted == iTotalMissionToComplete))
 			{
 				CompleteMission();
 				return m_eMissionObjectiveStatus;
@@ -512,7 +512,7 @@ function AbortMission()
 	J0x07:
 
 	// End:0x4F [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x32
 		if(m_aMissionObjectives[i].m_bMoralityObjective)
@@ -523,7 +523,7 @@ function AbortMission()
 		SetMissionObjCompleted(m_aMissionObjectives[i], false, false);
 		J0x45:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -547,14 +547,14 @@ function CompleteMission()
 		J0x10:
 
 		// End:0x57 [Loop If]
-		if(__NFUN_150__(i, m_aMissionObjectives.Length))
+		if((i < m_aMissionObjectives.Length))
 		{
 			// End:0x4D
-			if(__NFUN_129__(m_aMissionObjectives[i].m_bFailed))
+			if((!m_aMissionObjectives[i].m_bFailed))
 			{
 				SetMissionObjCompleted(m_aMissionObjectives[i], true, false);
 			}
-			__NFUN_163__(i);
+			(++i);
 			// [Loop Continue]
 			goto J0x10;
 		}
@@ -577,10 +577,10 @@ function ToggleLog(bool bToggle)
 	J0x14:
 
 	// End:0x49 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		m_aMissionObjectives[i].ToggleLog(bToggle);
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x14;
 	}
@@ -601,10 +601,10 @@ function R6MissionObjectiveBase GetMObjFailed()
 	J0x07:
 
 	// End:0x81 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0x34
-		if(__NFUN_129__(m_aMissionObjectives[i].isFailed()))
+		if((!m_aMissionObjectives[i].isFailed()))
 		{
 			// [Explicit Continue]
 			goto J0x77;
@@ -616,13 +616,13 @@ function R6MissionObjectiveBase GetMObjFailed()
 			goto J0x77;
 		}
 		// End:0x77
-		if(__NFUN_123__(m_aMissionObjectives[i].GetDescriptionFailure(), ""))
+		if((m_aMissionObjectives[i].GetDescriptionFailure() != ""))
 		{
 			return m_aMissionObjectives[i];
 		}
 		J0x77:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -630,28 +630,28 @@ function R6MissionObjectiveBase GetMObjFailed()
 	J0x88:
 
 	// End:0x104 [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		// End:0xB5
-		if(__NFUN_129__(m_aMissionObjectives[i].isFailed()))
+		if((!m_aMissionObjectives[i].isFailed()))
 		{
 			// [Explicit Continue]
 			goto J0xFA;
 		}
 		// End:0xD2
-		if(__NFUN_129__(m_aMissionObjectives[i].m_bMoralityObjective))
+		if((!m_aMissionObjectives[i].m_bMoralityObjective))
 		{
 			// [Explicit Continue]
 			goto J0xFA;
 		}
 		// End:0xFA
-		if(__NFUN_123__(m_aMissionObjectives[i].GetDescriptionFailure(), ""))
+		if((m_aMissionObjectives[i].GetDescriptionFailure() != ""))
 		{
 			return m_aMissionObjectives[i];
 		}
 		J0xFA:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x88;
 	}
@@ -667,10 +667,10 @@ simulated event Destroyed()
 	J0x0D:
 
 	// End:0x3D [Loop If]
-	if(__NFUN_150__(i, m_aMissionObjectives.Length))
+	if((i < m_aMissionObjectives.Length))
 	{
 		m_aMissionObjectives[i].SetMObjMgr(none);
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x0D;
 	}
@@ -685,7 +685,7 @@ simulated event Destroyed()
 function SetMissionObjCompleted(R6MissionObjectiveBase mobj, bool bCompleted, bool bFeedback)
 {
 	// End:0x1E
-	if(__NFUN_130__(__NFUN_2014__(), __NFUN_129__(Level.m_bInGamePlanningActive)))
+	if((InPlanningMode() && (!Level.m_bInGamePlanningActive)))
 	{
 		return;
 	}
@@ -699,7 +699,7 @@ function SetMissionObjCompleted(R6MissionObjectiveBase mobj, bool bCompleted, bo
 		mobj.m_bFailed = true;
 	}
 	// End:0x81
-	if(__NFUN_132__(__NFUN_132__(__NFUN_129__(bFeedback), mobj.m_bFeedbackOnCompletionSend), mobj.m_bFeedbackOnFailureSend))
+	if((((!bFeedback) || mobj.m_bFeedbackOnCompletionSend) || mobj.m_bFeedbackOnFailureSend))
 	{
 		return;
 	}
@@ -707,7 +707,7 @@ function SetMissionObjCompleted(R6MissionObjectiveBase mobj, bool bCompleted, bo
 	if(mobj.m_bCompleted)
 	{
 		// End:0xEC
-		if(__NFUN_123__(mobj.m_szFeedbackOnCompletion, ""))
+		if((mobj.m_szFeedbackOnCompletion != ""))
 		{
 			m_GameInfo.BroadcastMissionObjMsg(Level.GetMissionObjLocFile(mobj), "", mobj.m_szFeedbackOnCompletion);
 			mobj.m_bFeedbackOnCompletionSend = true;
@@ -716,7 +716,7 @@ function SetMissionObjCompleted(R6MissionObjectiveBase mobj, bool bCompleted, bo
 	else
 	{
 		// End:0x148
-		if(__NFUN_123__(mobj.m_szFeedbackOnFailure, ""))
+		if((mobj.m_szFeedbackOnFailure != ""))
 		{
 			m_GameInfo.BroadcastMissionObjMsg(Level.GetMissionObjLocFile(mobj), "", mobj.m_szFeedbackOnFailure);
 			mobj.m_bFeedbackOnFailureSend = true;

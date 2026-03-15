@@ -150,8 +150,8 @@ function DisplayMenu(bool bDisplay, optional bool bOpen)
 	}
 	else
 	{
-		m_Player.__NFUN_264__(m_RoseOpenSnd, 9) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-		__NFUN_113__('MenuDisplayed');
+		m_Player.PlaySound(m_RoseOpenSnd, 9);
+		GotoState('MenuDisplayed');
 		SetMenuChoice(0);
 	}
 	return;
@@ -163,20 +163,20 @@ function DisplayMenu(bool bDisplay, optional bool bOpen)
 function bool KeyEvent(Interactions.EInputKey eKey, Interactions.EInputAction eAction, float fDelta)
 {
 	// End:0x8D
-	if(__NFUN_154__(int(eKey), int(m_Player.__NFUN_2706__(m_ActionKey))))
+	if((int(eKey) == int(m_Player.GetKey(m_ActionKey))))
 	{
 		// End:0x4C
-		if(__NFUN_130__(__NFUN_154__(int(eAction), int(1)), __NFUN_129__(m_bActionKeyDown)))
+		if(((int(eAction) == int(1)) && (!m_bActionKeyDown)))
 		{
 			m_bActionKeyDown = true;
 			ActionKeyPressed();
 			return true;
 		}
 		// End:0x8D
-		if(__NFUN_130__(__NFUN_154__(int(eAction), int(3)), m_bActionKeyDown))
+		if(((int(eAction) == int(3)) && m_bActionKeyDown))
 		{
 			// End:0x7B
-			if(__NFUN_129__(m_bIgnoreNextActionKeyRelease))
+			if((!m_bIgnoreNextActionKeyRelease))
 			{
 				ActionKeyReleased();				
 			}
@@ -205,24 +205,24 @@ function DrawRoseDesVents(Canvas C, int iMnuChoice)
 	local bool bFlip, bHasSubMenu, bIsCurrent;
 
 	TeamColor = m_color;
-	C.__NFUN_1606__(false);
-	fScaleX = __NFUN_172__(float(C.SizeX), 800.0000000);
-	fScaleY = __NFUN_172__(float(C.SizeY), 600.0000000);
-	fCenterX = __NFUN_174__(__NFUN_172__(float(C.SizeX), 2.0000000), fScaleX);
-	fCenterY = __NFUN_174__(__NFUN_172__(float(C.SizeY), 2.0000000), fScaleY);
+	C.UseVirtualSize(false);
+	fScaleX = (float(C.SizeX) / 800.0000000);
+	fScaleY = (float(C.SizeY) / 600.0000000);
+	fCenterX = ((float(C.SizeX) / 2.0000000) + fScaleX);
+	fCenterY = ((float(C.SizeY) / 2.0000000) + fScaleY);
 	C.Font = m_Font;
-	C.__NFUN_2626__(TeamColor.R, TeamColor.G, TeamColor.B, byte(255));
+	C.SetDrawColor(TeamColor.R, TeamColor.G, TeamColor.B, byte(255));
 	C.Style = 5;
-	C.__NFUN_2623__(__NFUN_175__(fCenterX, __NFUN_171__(float(__NFUN_146__(150, 5)), fScaleX)), __NFUN_175__(fCenterY, __NFUN_171__(float(__NFUN_146__(150, 5)), fScaleY)));
-	C.__NFUN_466__(m_TexMNU, __NFUN_171__(__NFUN_174__(__NFUN_171__(150.0000000, float(2)), float(10)), fScaleX), __NFUN_171__(__NFUN_174__(__NFUN_171__(150.0000000, float(2)), float(10)), fScaleY), 0.0000000, 0.0000000, 512.0000000, 512.0000000);
+	C.SetPos((fCenterX - (float((150 + 5)) * fScaleX)), (fCenterY - (float((150 + 5)) * fScaleY)));
+	C.DrawTile(m_TexMNU, (((150.0000000 * float(2)) + float(10)) * fScaleX), (((150.0000000 * float(2)) + float(10)) * fScaleY), 0.0000000, 0.0000000, 512.0000000, 512.0000000);
 	iItem = 0;
 	J0x181:
 
 	// End:0x511 [Loop If]
-	if(__NFUN_150__(iItem, 4))
+	if((iItem < 4))
 	{
 		// End:0x1A7
-		if(__NFUN_154__(iItem, iMnuChoice))
+		if((iItem == iMnuChoice))
 		{
 			bIsCurrent = true;			
 		}
@@ -235,13 +235,13 @@ function DrawRoseDesVents(Canvas C, int iMnuChoice)
 		{
 			// End:0x271
 			case 0:
-				fPosX = __NFUN_175__(fCenterX, __NFUN_171__(float(__NFUN_145__(150, 2)), fScaleX));
-				fPosY = __NFUN_175__(fCenterY, __NFUN_171__(float(150), fScaleY));
+				fPosX = (fCenterX - (float((150 / 2)) * fScaleX));
+				fPosY = (fCenterY - (float(150) * fScaleY));
 				// End:0x263
 				if(MenuItemEnabled(iItem))
 				{
 					// End:0x23E
-					if(__NFUN_129__(bHasSubMenu))
+					if((!bHasSubMenu))
 					{
 						// End:0x230
 						if(bIsCurrent)
@@ -275,12 +275,12 @@ function DrawRoseDesVents(Canvas C, int iMnuChoice)
 			// End:0x30D
 			case 1:
 				fPosX = fCenterX;
-				fPosY = __NFUN_175__(fCenterY, __NFUN_171__(float(__NFUN_145__(150, 2)), fScaleY));
+				fPosY = (fCenterY - (float((150 / 2)) * fScaleY));
 				// End:0x2FF
 				if(MenuItemEnabled(iItem))
 				{
 					// End:0x2DA
-					if(__NFUN_129__(bHasSubMenu))
+					if((!bHasSubMenu))
 					{
 						// End:0x2CC
 						if(bIsCurrent)
@@ -313,14 +313,14 @@ function DrawRoseDesVents(Canvas C, int iMnuChoice)
 				break;
 			// End:0x3B2
 			case 2:
-				fPosX = __NFUN_175__(fCenterX, __NFUN_171__(float(__NFUN_145__(150, 2)), fScaleX));
+				fPosX = (fCenterX - (float((150 / 2)) * fScaleX));
 				fPosY = fCenterY;
 				bFlip = true;
 				// End:0x3A4
 				if(MenuItemEnabled(iItem))
 				{
 					// End:0x37F
-					if(__NFUN_129__(bHasSubMenu))
+					if((!bHasSubMenu))
 					{
 						// End:0x371
 						if(bIsCurrent)
@@ -353,14 +353,14 @@ function DrawRoseDesVents(Canvas C, int iMnuChoice)
 				break;
 			// End:0x464
 			case 3:
-				fPosX = __NFUN_175__(fCenterX, __NFUN_171__(float(150), fScaleX));
-				fPosY = __NFUN_175__(fCenterY, __NFUN_171__(float(__NFUN_145__(150, 2)), fScaleY));
+				fPosX = (fCenterX - (float(150) * fScaleX));
+				fPosY = (fCenterY - (float((150 / 2)) * fScaleY));
 				bFlip = true;
 				// End:0x456
 				if(MenuItemEnabled(iItem))
 				{
 					// End:0x431
-					if(__NFUN_129__(bHasSubMenu))
+					if((!bHasSubMenu))
 					{
 						// End:0x423
 						if(bIsCurrent)
@@ -395,18 +395,18 @@ function DrawRoseDesVents(Canvas C, int iMnuChoice)
 			default:
 				break;
 		}
-		C.__NFUN_2623__(fPosX, fPosY);
+		C.SetPos(fPosX, fPosY);
 		// End:0x4CA
 		if(bFlip)
 		{
-			C.__NFUN_466__(CurrentTexture, __NFUN_171__(150.0000000, fScaleX), __NFUN_171__(150.0000000, fScaleY), m_iTextureWidth, m_iTextureHeight, __NFUN_169__(m_iTextureWidth), __NFUN_169__(m_iTextureHeight));
+			C.DrawTile(CurrentTexture, (150.0000000 * fScaleX), (150.0000000 * fScaleY), m_iTextureWidth, m_iTextureHeight, (-m_iTextureWidth), (-m_iTextureHeight));
 			// [Explicit Continue]
 			goto J0x507;
 		}
-		C.__NFUN_466__(CurrentTexture, __NFUN_171__(150.0000000, fScaleX), __NFUN_171__(150.0000000, fScaleY), 0.0000000, 0.0000000, m_iTextureWidth, m_iTextureHeight);
+		C.DrawTile(CurrentTexture, (150.0000000 * fScaleX), (150.0000000 * fScaleY), 0.0000000, 0.0000000, m_iTextureWidth, m_iTextureHeight);
 		J0x507:
 
-		__NFUN_165__(iItem);
+		(iItem++);
 		// [Loop Continue]
 		goto J0x181;
 	}
@@ -432,9 +432,9 @@ function DrawTextCenteredInBox(Canvas C, string strText, float fPosX, float fPos
 	C.OrgY = fPosY;
 	C.ClipX = fWidth;
 	C.ClipY = fHeight;
-	C.__NFUN_464__(strText, fTextWidth, fTextHeight);
-	C.__NFUN_2623__(0.0000000, __NFUN_172__(__NFUN_175__(fHeight, fTextHeight), 2.0000000));
-	C.__NFUN_465__(strText);
+	C.StrLen(strText, fTextWidth, fTextHeight);
+	C.SetPos(0.0000000, ((fHeight - fTextHeight) / 2.0000000));
+	C.DrawText(strText);
 	C.bCenter = bBackCenter;
 	C.OrgX = fBackOrgX;
 	C.OrgY = fBackOrgY;
@@ -453,7 +453,7 @@ state MenuDisplayed
 		local int iCurrentMnuChoice;
 
 		// End:0x50
-		if(__NFUN_130__(__NFUN_154__(int(eKey), int(m_Player.__NFUN_2706__(m_ActionKey))), __NFUN_154__(int(eAction), int(3))))
+		if(((int(eKey) == int(m_Player.GetKey(m_ActionKey))) && (int(eAction) == int(3))))
 		{
 			NoItemSelected();
 			DisplayMenu(false);
@@ -462,10 +462,10 @@ state MenuDisplayed
 			return true;
 		}
 		// End:0x111
-		if(__NFUN_130__(__NFUN_154__(int(eKey), int(1)), __NFUN_154__(int(eAction), int(1))))
+		if(((int(eKey) == int(1)) && (int(eAction) == int(1))))
 		{
 			// End:0x87
-			if(__NFUN_129__(MenuItemEnabled(m_iCurrentMnuChoice)))
+			if((!MenuItemEnabled(m_iCurrentMnuChoice)))
 			{
 				return true;				
 			}
@@ -474,17 +474,17 @@ state MenuDisplayed
 				// End:0xE2
 				if(CurrentItemHasSubMenu())
 				{
-					m_Player.__NFUN_264__(m_RoseSelectSnd, 9);
+					m_Player.PlaySound(m_RoseSelectSnd, 9);
 					GotoSubMenu();
 					// End:0xDF
 					if(bShowLog)
 					{
-						__NFUN_231__("**** LeftMouse -> Move to sub menu ! ****");
+						Log("**** LeftMouse -> Move to sub menu ! ****");
 					}					
 				}
 				else
 				{
-					m_Player.__NFUN_264__(m_RoseSelectSnd, 9);
+					m_Player.PlaySound(m_RoseSelectSnd, 9);
 					ItemClicked(m_iCurrentMnuChoice);
 					DisplayMenu(false);
 					m_bIgnoreNextActionKeyRelease = true;
@@ -493,10 +493,10 @@ state MenuDisplayed
 			return true;
 		}
 		// End:0x19C
-		if(__NFUN_130__(__NFUN_154__(int(eKey), int(2)), __NFUN_154__(int(eAction), int(1))))
+		if(((int(eKey) == int(2)) && (int(eAction) == int(1))))
 		{
 			// End:0x148
-			if(__NFUN_129__(MenuItemEnabled(m_iCurrentMnuChoice)))
+			if((!MenuItemEnabled(m_iCurrentMnuChoice)))
 			{
 				return true;				
 			}
@@ -505,12 +505,12 @@ state MenuDisplayed
 				// End:0x16D
 				if(CurrentItemHasSubMenu())
 				{
-					m_Player.__NFUN_264__(m_RoseSelectSnd, 9);
+					m_Player.PlaySound(m_RoseSelectSnd, 9);
 					GotoSubMenu();					
 				}
 				else
 				{
-					m_Player.__NFUN_264__(m_RoseSelectSnd, 9);
+					m_Player.PlaySound(m_RoseSelectSnd, 9);
 					ItemRightClicked(m_iCurrentMnuChoice);
 					DisplayMenu(false);
 					m_bIgnoreNextActionKeyRelease = true;
@@ -519,17 +519,17 @@ state MenuDisplayed
 			return true;
 		}
 		// End:0x22E
-		if(__NFUN_154__(int(eAction), int(4)))
+		if((int(eAction) == int(4)))
 		{
 			switch(eKey)
 			{
 				// End:0x1EF
 				case 228:
 					// End:0x1EA
-					if(__NFUN_177__(__NFUN_186__(fDelta), float(C_iMouseDelta)))
+					if((Abs(fDelta) > float(C_iMouseDelta)))
 					{
 						// End:0x1E2
-						if(__NFUN_177__(fDelta, float(0)))
+						if((fDelta > float(0)))
 						{
 							SetMenuChoice(1);							
 						}
@@ -544,10 +544,10 @@ state MenuDisplayed
 				// End:0x22B
 				case 229:
 					// End:0x226
-					if(__NFUN_177__(__NFUN_186__(fDelta), float(C_iMouseDelta)))
+					if((Abs(fDelta) > float(C_iMouseDelta)))
 					{
 						// End:0x21E
-						if(__NFUN_177__(fDelta, float(0)))
+						if((fDelta > float(0)))
 						{
 							SetMenuChoice(0);							
 						}
@@ -567,22 +567,22 @@ state MenuDisplayed
 		else
 		{
 			// End:0x276
-			if(__NFUN_130__(__NFUN_154__(int(eKey), int(236)), __NFUN_154__(int(eAction), int(1))))
+			if(((int(eKey) == int(236)) && (int(eAction) == int(1))))
 			{
-				SetMenuChoice(__NFUN_146__(m_iCurrentMnuChoice, 1));
+				SetMenuChoice((m_iCurrentMnuChoice + 1));
 				// End:0x274
-				if(__NFUN_154__(m_iCurrentMnuChoice, -1))
+				if((m_iCurrentMnuChoice == -1))
 				{
 					SetMenuChoice(0);
 				}
 				return true;
 			}
 			// End:0x2BF
-			if(__NFUN_130__(__NFUN_154__(int(eKey), int(237)), __NFUN_154__(int(eAction), int(1))))
+			if(((int(eKey) == int(237)) && (int(eAction) == int(1))))
 			{
-				SetMenuChoice(__NFUN_147__(m_iCurrentMnuChoice, 1));
+				SetMenuChoice((m_iCurrentMnuChoice - 1));
 				// End:0x2BD
-				if(__NFUN_154__(m_iCurrentMnuChoice, -1))
+				if((m_iCurrentMnuChoice == -1))
 				{
 					SetMenuChoice(3);
 				}

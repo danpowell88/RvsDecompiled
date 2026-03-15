@@ -263,50 +263,50 @@ function AddTextWithCanvas(Canvas C, float _fXOffSet, float _fYOffset, string Ne
 			if((XWordPos == _fXOffSet))
 			{
 				temp = szTSResult;
-				WordPos = __NFUN_125__(temp);
-				Out = __NFUN_127__(Out, WordPos);
-				__NFUN_161__(TotalPos, WordPos);
-				__NFUN_161__(TotalLinePos, WordPos);
+				WordPos = Len(temp);
+				Out = Mid(Out, WordPos);
+				(TotalPos += WordPos);
+				(TotalLinePos += WordPos);
 			}
 			XWordPos = _fXOffSet;
-			__NFUN_165__(numLines);			
+			(numLines++);			
 		}
 		else
 		{
-			__NFUN_184__(XWordPos, WordWidth);
-			__NFUN_161__(TotalPos, __NFUN_146__(WordPos, 1));
-			__NFUN_161__(TotalLinePos, __NFUN_146__(WordPos, 1));
-			Out = __NFUN_127__(Out, __NFUN_125__(temp));
+			(XWordPos += WordWidth);
+			(TotalPos += (WordPos + 1));
+			(TotalLinePos += (WordPos + 1));
+			Out = Mid(Out, Len(temp));
 		}
 		// End:0x2F8
-		if(__NFUN_130__(__NFUN_122__(Out, ""), __NFUN_151__(i, 0)))
+		if(((Out == "") && (i > 0)))
 		{
 			bSentry = false;
 		}
 		// End:0x436
-		if(__NFUN_132__(__NFUN_155__(numLines, PrevNumLines), __NFUN_129__(bSentry)))
+		if(((numLines != PrevNumLines) || (!bSentry)))
 		{
 			// End:0x377
-			if(__NFUN_153__(Lines, 80))
+			if((Lines >= 80))
 			{
-				__NFUN_231__("Small problem over here, string array overloaded in UWindowTextAreaControl.uc");
+				Log("Small problem over here, string array overloaded in UWindowTextAreaControl.uc");
 				// [Explicit Break]
 				goto J0x439;				
 			}
 			else
 			{
 				PrevNumLines = numLines;
-				temp = __NFUN_127__(szTempTextArea[iNbLineTemp], PrevPos);
-				TextArea[Lines] = __NFUN_128__(temp, TotalLinePos);
+				temp = Mid(szTempTextArea[iNbLineTemp], PrevPos);
+				TextArea[Lines] = Left(temp, TotalLinePos);
 				TextColorArea[Lines] = FontColor;
 				TextFontArea[Lines] = C.Font;
 				PrevPos = TotalPos;
 				TotalLinePos = 0;
-				__NFUN_161__(Lines, 1);
+				(Lines += 1);
 				// End:0x436
-				if(__NFUN_130__(__NFUN_150__(iNbLineTemp, iNbLineTempTotal), __NFUN_129__(bSentry)))
+				if(((iNbLineTemp < iNbLineTempTotal) && (!bSentry)))
 				{
-					__NFUN_161__(iNbLineTemp, 1);
+					(iNbLineTemp += 1);
 					Out = "";
 					bSentry = true;
 					XWordPos = _fXOffSet;
@@ -347,24 +347,24 @@ function Clear(optional bool _bClearArrayOnly, optional bool _bWrapText)
 	local int i;
 
 	// End:0x59
-	if(__NFUN_155__(Lines, 0))
+	if((Lines != 0))
 	{
 		i = 0;
 		J0x12:
 
 		// End:0x59 [Loop If]
-		if(__NFUN_150__(i, 80))
+		if((i < 80))
 		{
 			TextArea[i] = "";
 			TextFontArea[i] = none;
-			__NFUN_162__(Lines, 1);
+			(Lines -= 1);
 			// End:0x4F
-			if(__NFUN_154__(Lines, 0))
+			if((Lines == 0))
 			{
 				// [Explicit Break]
 				goto J0x59;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x12;
 		}
@@ -384,7 +384,7 @@ function Clear(optional bool _bClearArrayOnly, optional bool _bWrapText)
 		m_bWrapClipText = true;
 	}
 	// End:0xD1
-	if(__NFUN_129__(_bClearArrayOnly))
+	if((!_bClearArrayOnly))
 	{
 		Head = 0;
 		Tail = 0;

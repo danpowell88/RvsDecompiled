@@ -660,10 +660,10 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 				if((aPawn != none))
 				{
 					// End:0x12A
-					if(__NFUN_154__(int(m_aThreatDefinition[i].m_eThreatType), int(4)))
+					if((int(m_aThreatDefinition[i].m_eThreatType) == int(4)))
 					{
 						// End:0x127
-						if(__NFUN_130__(__NFUN_130__(hostage.IsEnemy(aPawn), aPawn.IsAlive()), __NFUN_129__(aPawn.m_bIsKneeling)))
+						if(((hostage.IsEnemy(aPawn) && aPawn.IsAlive()) && (!aPawn.m_bIsKneeling)))
 						{
 							bCheckDistance = true;
 						}						
@@ -671,10 +671,10 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 					else
 					{
 						// End:0x17B
-						if(__NFUN_154__(int(m_aThreatDefinition[i].m_eThreatType), int(1)))
+						if((int(m_aThreatDefinition[i].m_eThreatType) == int(1)))
 						{
 							// End:0x178
-							if(__NFUN_130__(hostage.IsFriend(aPawn), aPawn.IsAlive()))
+							if((hostage.IsFriend(aPawn) && aPawn.IsAlive()))
 							{
 								bCheckDistance = true;
 							}							
@@ -682,10 +682,10 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 						else
 						{
 							// End:0x1C9
-							if(__NFUN_154__(int(m_aThreatDefinition[i].m_eThreatType), int(6)))
+							if((int(m_aThreatDefinition[i].m_eThreatType) == int(6)))
 							{
 								// End:0x1C9
-								if(__NFUN_130__(hostage.IsNeutral(aPawn), aPawn.IsAlive()))
+								if((hostage.IsNeutral(aPawn) && aPawn.IsAlive()))
 								{
 									bCheckDistance = true;
 								}
@@ -699,10 +699,10 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 		if(bCheckDistance)
 		{
 			// End:0x28D
-			if(__NFUN_132__(__NFUN_154__(m_aThreatDefinition[i].m_iCaringDistance, 2147483647), __NFUN_178__(__NFUN_225__(__NFUN_216__(hostage.Location, threat.Location)), float(m_aThreatDefinition[i].m_iCaringDistance))))
+			if(((m_aThreatDefinition[i].m_iCaringDistance == 2147483647) || (VSize((hostage.Location - threat.Location)) <= float(m_aThreatDefinition[i].m_iCaringDistance))))
 			{
 				// End:0x282
-				if(__NFUN_255__(m_aThreatDefinition[i].m_considerThreat, 'None'))
+				if((m_aThreatDefinition[i].m_considerThreat != 'None'))
 				{
 					// End:0x27F
 					if(hostage.m_controller.CanConsiderThreat(aPawn, threat, m_aThreatDefinition[i].m_considerThreat))
@@ -721,7 +721,7 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 		}
 		J0x28D:
 
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x4B;
 	}
@@ -735,11 +735,11 @@ function bool GetThreatInfoFromThreat(name threatGroupName, R6Hostage hostage, A
 		oThreatInfo.m_originalLocation = threat.Location;
 		oThreatInfo.m_iThreatLevel = m_aThreatDefinition[i].m_iThreatLevel;
 		// End:0x34D
-		if(__NFUN_155__(int(eType), int(0)))
+		if((int(eType) != int(0)))
 		{
 			oThreatInfo.m_pawn = aPawn;
 			// End:0x34A
-			if(__NFUN_154__(int(m_aThreatDefinition[i].m_eNoiseType), int(3)))
+			if((int(m_aThreatDefinition[i].m_eNoiseType) == int(3)))
 			{
 				oThreatInfo.m_actorExt = threat;
 			}			
@@ -779,12 +779,12 @@ function GetThreatInfoFromThreatSurrender(Pawn threat, out ThreatInfo oThreatInf
 //------------------------------------------------------------------
 function InsertReaction(name GroupName, int iLevel, int iRoll, name stateName)
 {
-	assert(__NFUN_150__(m_iReactionIndex, 24));
+	assert((m_iReactionIndex < 24));
 	m_aReactions[m_iReactionIndex].m_groupName = GroupName;
 	m_aReactions[m_iReactionIndex].m_iThreatLevel = iLevel;
 	m_aReactions[m_iReactionIndex].m_iChance = iRoll;
 	m_aReactions[m_iReactionIndex].m_gotoState = stateName;
-	__NFUN_165__(m_iReactionIndex);
+	(m_iReactionIndex++);
 	return;
 }
 
@@ -826,8 +826,8 @@ function InitThreatDefinition()
 	InsertThreatDefinition(c_ThreatGroup_HstBait, "see friend", 1, 0, 1, 2147483647);
 	InsertThreatDefinition(c_ThreatGroup_HstBait, "hear sound", 2, 2, 1, 2147483647);
 	InsertThreatDefinition(c_ThreatGroup_HstBait, "hear sound", 2, 4, 1, 2147483647);
-	assert(__NFUN_154__(m_aThreatDefinition[0].m_iThreatLevel, 0));
-	assert(__NFUN_154__(m_iThreatDefinitionIndex, 27));
+	assert((m_aThreatDefinition[0].m_iThreatLevel == 0));
+	assert((m_iThreatDefinitionIndex == 27));
 	return;
 }
 
@@ -865,7 +865,7 @@ function InitReaction()
 	InsertReaction(c_ThreatGroup_HstFreed, 4, 100, 'GoHstRunForCover');
 	InsertReaction(c_ThreatGroup_HstBait, 1, 100, 'BaitPlayReaction');
 	InsertReaction(c_ThreatGroup_HstBait, 2, 100, 'GoHstRunForCover');
-	assert(__NFUN_154__(m_iReactionIndex, 24));
+	assert((m_iReactionIndex == 24));
 	return;
 }
 
@@ -900,7 +900,7 @@ function InitReactionForClassicMissionCivilian()
 	InsertReaction(c_ThreatGroup_HstFreed, 4, 100, 'GoHstRunForCover');
 	InsertReaction(c_ThreatGroup_HstBait, 1, 100, 'BaitPlayReaction');
 	InsertReaction(c_ThreatGroup_HstBait, 2, 100, 'GoHstRunForCover');
-	assert(__NFUN_154__(m_iReactionIndex, 24));
+	assert((m_iReactionIndex == 24));
 	return;
 }
 
@@ -919,16 +919,16 @@ function name GetReaction(name GroupName, int iLevel, int iRoll)
 	J0x0F:
 
 	// End:0x9E [Loop If]
-	if(__NFUN_150__(i, 24))
+	if((i < 24))
 	{
 		// End:0x94
-		if(__NFUN_254__(m_aReactions[i].m_groupName, GroupName))
+		if((m_aReactions[i].m_groupName == GroupName))
 		{
 			// End:0x77
-			if(__NFUN_154__(m_aReactions[i].m_iThreatLevel, iLevel))
+			if((m_aReactions[i].m_iThreatLevel == iLevel))
 			{
 				// End:0x74
-				if(__NFUN_152__(iRoll, m_aReactions[i].m_iChance))
+				if((iRoll <= m_aReactions[i].m_iChance))
 				{
 					bFound = true;
 					// [Explicit Break]
@@ -938,7 +938,7 @@ function name GetReaction(name GroupName, int iLevel, int iRoll)
 				goto J0x94;
 			}
 			// End:0x94
-			if(__NFUN_151__(m_aReactions[i].m_iThreatLevel, iLevel))
+			if((m_aReactions[i].m_iThreatLevel > iLevel))
 			{
 				// [Explicit Break]
 				goto J0x9E;
@@ -946,7 +946,7 @@ function name GetReaction(name GroupName, int iLevel, int iRoll)
 		}
 		J0x94:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0F;
 	}
@@ -993,7 +993,7 @@ function int GetHostageSndEvent(int iSndEvent, R6Hostage H)
 
 	ePerso = H.m_ePersonality;
 	// End:0x2C
-	if(__NFUN_154__(int(ePerso), int(3)))
+	if((int(ePerso) == int(3)))
 	{
 		ePerso = 0;
 	}
@@ -1001,23 +1001,23 @@ function int GetHostageSndEvent(int iSndEvent, R6Hostage H)
 	J0x33:
 
 	// End:0x6E [Loop If]
-	if(__NFUN_150__(i, 24))
+	if((i < 24))
 	{
 		// End:0x64
-		if(__NFUN_154__(m_aHstSndEventInfo[i].m_iHstSndEvent, iSndEvent))
+		if((m_aHstSndEventInfo[i].m_iHstSndEvent == iSndEvent))
 		{
 			bFound = true;
 			// [Explicit Break]
 			goto J0x6E;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x33;
 	}
 	J0x6E:
 
 	// End:0x7B
-	if(__NFUN_129__(bFound))
+	if((!bFound))
 	{
 		return 0;
 	}
@@ -1047,13 +1047,13 @@ function InitSndEventInfo()
 {
 	local int Index;
 
-	InsertSndEventInfo(__NFUN_165__(Index), 1, 4, 3);
-	InsertSndEventInfo(__NFUN_165__(Index), 6, 4, 1);
-	InsertSndEventInfo(__NFUN_165__(Index), 5, 4, 0);
-	InsertSndEventInfo(__NFUN_165__(Index), 7, 4, 2);
-	InsertSndEventInfo(__NFUN_165__(Index), 8, 4, 4);
-	InsertSndEventInfo(__NFUN_165__(Index), 9, 4, 5);
-	InsertSndEventInfo(__NFUN_165__(Index), 10, 2, 6);
+	InsertSndEventInfo((Index++), 1, 4, 3);
+	InsertSndEventInfo((Index++), 6, 4, 1);
+	InsertSndEventInfo((Index++), 5, 4, 0);
+	InsertSndEventInfo((Index++), 7, 4, 2);
+	InsertSndEventInfo((Index++), 8, 4, 4);
+	InsertSndEventInfo((Index++), 9, 4, 5);
+	InsertSndEventInfo((Index++), 10, 2, 6);
 	return;
 }
 

@@ -366,13 +366,13 @@ function UWindowList FindCurrentMOD()
 	J0x14:
 
 	// End:0x6E [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0x57
-		if(__NFUN_129__(R6WindowListBoxItem(CurItem).m_IsSeparator))
+		if((!R6WindowListBoxItem(CurItem).m_IsSeparator))
 		{
 			// End:0x57
-			if(__NFUN_154__(R6WindowListBoxItem(CurItem).m_iItemID, int(3)))
+			if((R6WindowListBoxItem(CurItem).m_iItemID == int(3)))
 			{
 				// [Explicit Break]
 				goto J0x6E;

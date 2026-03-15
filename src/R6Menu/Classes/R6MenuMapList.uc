@@ -541,7 +541,7 @@ function InitMode(string _szIndex)
 					break;
 				// End:0xFFFF
 				default:
-					__NFUN_231__("GAME MODE NOT DEFINED");
+					Log("GAME MODE NOT DEFINED");
 					// End:0x10B
 					break;
 					break;
@@ -549,14 +549,14 @@ function InitMode(string _szIndex)
 			// End:0x136
 			if(bFindGameType)
 			{
-				bFindGameType = Class'Engine.Actor'.static.__NFUN_1524__().IsGameTypeAvailable(szGameTypeFind);
+				bFindGameType = Class'Engine.Actor'.static.GetModMgr().IsGameTypeAvailable(szGameTypeFind);
 			}
 			// End:0x185
 			if(bFindGameType)
 			{
 				m_pGameTypeCombo.AddItem(pLevel.GetGameNameLocalization(szGameTypeFind), szGameTypeFind);
 				// End:0x185
-				if(__NFUN_129__(bFirstValue))
+				if((!bFirstValue))
 				{
 					bFirstValue = true;
 					szFirstGameType = szGameTypeFind;
@@ -564,13 +564,13 @@ function InitMode(string _szIndex)
 			}
 			bFindGameType = false;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x13;
 	}
 	ManageAvailableGameTypes(m_pStartMapList.GetSelectedItem());
 	// End:0x1EC
-	if(__NFUN_114__(m_pFinalMapList.GetSelectedItem(), none))
+	if((m_pFinalMapList.GetSelectedItem() == none))
 	{
 		m_pGameTypeCombo.SetValue(pLevel.GetGameNameLocalization(szFirstGameType), szFirstGameType);		
 	}
@@ -595,7 +595,7 @@ function ManageAvailableGameTypes(UWindowList _pSelectItem, optional bool _bKeep
 	pLevel = GetLevel();
 	R6Console = R6Console(Root.Console);
 	// End:0x32
-	if(__NFUN_114__(_pSelectItem, none))
+	if((_pSelectItem == none))
 	{
 		return;
 	}
@@ -605,23 +605,23 @@ function ManageAvailableGameTypes(UWindowList _pSelectItem, optional bool _bKeep
 	J0x7F:
 
 	// End:0xE6 [Loop If]
-	if(__NFUN_150__(i, R6Console.m_aMissionDescriptions.Length))
+	if((i < R6Console.m_aMissionDescriptions.Length))
 	{
 		// End:0xDC
-		if(__NFUN_122__(szMapName, R6Console.m_aMissionDescriptions[i].m_MapName))
+		if((szMapName == R6Console.m_aMissionDescriptions[i].m_MapName))
 		{
 			pCurMissionDesc = R6Console.m_aMissionDescriptions[i];
 			// [Explicit Break]
 			goto J0xE6;
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x7F;
 	}
 	J0xE6:
 
 	// End:0x229
-	if(__NFUN_119__(pCurMissionDesc, none))
+	if((pCurMissionDesc != none))
 	{
 		m_pGameTypeCombo.DisableAllItems();
 		szEditBoxValue = m_pGameTypeCombo.GetValue();
@@ -630,41 +630,41 @@ function ManageAvailableGameTypes(UWindowList _pSelectItem, optional bool _bKeep
 		J0x133:
 
 		// End:0x229 [Loop If]
-		if(__NFUN_150__(i, pCurMissionDesc.m_szGameTypes.Length))
+		if((i < pCurMissionDesc.m_szGameTypes.Length))
 		{
 			szGameTypeFind = pCurMissionDesc.m_szGameTypes[i];
 			pComboListItem = m_pGameTypeCombo.GetItem(pLevel.GetGameNameLocalization(szGameTypeFind));
 			// End:0x21F
-			if(__NFUN_119__(pComboListItem, none))
+			if((pComboListItem != none))
 			{
 				pComboListItem.bDisabled = false;
 				// End:0x1D1
-				if(__NFUN_122__(szFirstGameTypeFound, "RGM_NoRulesMode"))
+				if((szFirstGameTypeFound == "RGM_NoRulesMode"))
 				{
 					szFirstGameTypeFound = szGameTypeFind;
 				}
 				// End:0x1F9
-				if(__NFUN_130__(_bKeepItemGameType, __NFUN_122__(szItemGameType, szGameTypeFind)))
+				if((_bKeepItemGameType && (szItemGameType == szGameTypeFind)))
 				{
 					szFirstGameTypeFound = szGameTypeFind;
 					// [Explicit Continue]
 					goto J0x21F;
 				}
 				// End:0x21F
-				if(__NFUN_122__(szEditBoxValue, pLevel.GetGameNameLocalization(szGameTypeFind)))
+				if((szEditBoxValue == pLevel.GetGameNameLocalization(szGameTypeFind)))
 				{
 					bUseSameGameType = true;
 				}
 			}
 			J0x21F:
 
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x133;
 		}
 	}
 	// End:0x279
-	if(__NFUN_130__(__NFUN_129__(bUseSameGameType), __NFUN_123__(szFirstGameTypeFound, "RGM_NoRulesMode")))
+	if(((!bUseSameGameType) && (szFirstGameTypeFound != "RGM_NoRulesMode")))
 	{
 		m_pGameTypeCombo.SetValue(pLevel.GetGameNameLocalization(szFirstGameTypeFound), szFirstGameTypeFound);
 	}
@@ -679,7 +679,7 @@ function CopyAndAddItemInList(UWindowListBoxItem _ItemToAdd, UWindowListControl 
 	local UWindowListBoxItem NewItem;
 
 	// End:0x11F
-	if(__NFUN_150__(_ListAddItem.Items.Count(), 32))
+	if((_ListAddItem.Items.Count() < 32))
 	{
 		NewItem = UWindowListBoxItem(_ListAddItem.Items.Append(_ListAddItem.ListClass));
 		NewItem.HelpText = _ItemToAdd.HelpText;
@@ -701,10 +701,10 @@ function bool FindMapInStartMapList(string _szMapName)
 	J0x22:
 
 	// End:0x68 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		// End:0x4C
-		if(__NFUN_122__(R6WindowListBoxItem(CurItem).m_szMisc, _szMapName))
+		if((R6WindowListBoxItem(CurItem).m_szMisc == _szMapName))
 		{
 			return true;
 		}
@@ -724,7 +724,7 @@ function byte FillGameTypeMapArray(out array<string> _SelectedMapList, out array
 
 	_SelectedMapList.Remove(0, _SelectedMapList.Length);
 	// End:0x2D
-	if(__NFUN_114__(m_pFinalMapList.Items.Next, none))
+	if((m_pFinalMapList.Items.Next == none))
 	{
 		return 0;
 	}
@@ -733,12 +733,12 @@ function byte FillGameTypeMapArray(out array<string> _SelectedMapList, out array
 	J0x56:
 
 	// End:0xD3 [Loop If]
-	if(__NFUN_119__(CurItem, none))
+	if((CurItem != none))
 	{
 		_SelectedMapList[i] = R6WindowListBoxItem(CurItem).m_szMisc;
 		_SelectedGameTypeList[i] = GetLevel().GetGameTypeFromLocName(CurItem.m_stSubText.szGameTypeSelect, true);
 		CurItem = UWindowListBoxItem(CurItem.Next);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x56;
 	}
@@ -755,23 +755,23 @@ function Notify(UWindowDialogControl C, byte E)
 	if(m_bInGame)
 	{
 		// End:0x35
-		if(__NFUN_129__(R6PlayerController(GetPlayerOwner()).CheckAuthority(R6PlayerController(GetPlayerOwner()).1)))
+		if((!R6PlayerController(GetPlayerOwner()).CheckAuthority(R6PlayerController(GetPlayerOwner()).1)))
 		{
 			return;
 		}
 	}
 	// End:0x12E
-	if(C.__NFUN_303__('R6WindowTextListBox'))
+	if(C.IsA('R6WindowTextListBox'))
 	{
 		switch(E)
 		{
 			// End:0x117
 			case 2:
 				// End:0xA7
-				if(__NFUN_114__(C, m_pStartMapList))
+				if((C == m_pStartMapList))
 				{
 					// End:0x8E
-					if(__NFUN_119__(m_pStartMapList.GetSelectedItem(), none))
+					if((m_pStartMapList.GetSelectedItem() != none))
 					{
 						ManageAvailableGameTypes(m_pStartMapList.GetSelectedItem());
 					}
@@ -781,7 +781,7 @@ function Notify(UWindowDialogControl C, byte E)
 				else
 				{
 					// End:0xFE
-					if(__NFUN_119__(m_pFinalMapList.GetSelectedItem(), none))
+					if((m_pFinalMapList.GetSelectedItem() != none))
 					{
 						ManageAvailableGameTypes(m_pFinalMapList.GetSelectedItem(), true);
 						m_pGameTypeCombo.SetValue(m_pFinalMapList.GetSelectedItem().m_stSubText.szGameTypeSelect);
@@ -806,7 +806,7 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x160
-		if(C.__NFUN_303__('R6WindowComboControl'))
+		if(C.IsA('R6WindowComboControl'))
 		{
 			switch(E)
 			{
@@ -825,10 +825,10 @@ function Notify(UWindowDialogControl C, byte E)
 		else
 		{
 			// End:0x26F
-			if(C.__NFUN_303__('UWindowButton'))
+			if(C.IsA('UWindowButton'))
 			{
 				// End:0x1B5
-				if(__NFUN_132__(UWindowButton(C).bDisabled, __NFUN_130__(__NFUN_119__(C, m_pSelectButton), __NFUN_114__(m_pFinalMapList.GetSelectedItem(), none))))
+				if((UWindowButton(C).bDisabled || ((C != m_pSelectButton) && (m_pFinalMapList.GetSelectedItem() == none))))
 				{
 					return;
 				}
@@ -837,13 +837,13 @@ function Notify(UWindowDialogControl C, byte E)
 					// End:0x206
 					case 2:
 						// End:0x1D9
-						if(__NFUN_114__(C, m_pSelectButton))
+						if((C == m_pSelectButton))
 						{
 							ManageTextListBox();							
 						}
 						else
 						{
-							m_pFinalMapList.SwapItem(m_pFinalMapList.GetSelectedItem(), __NFUN_119__(C, m_pPlusButton));
+							m_pFinalMapList.SwapItem(m_pFinalMapList.GetSelectedItem(), (C != m_pPlusButton));
 						}
 						// End:0x26F
 						break;
@@ -879,10 +879,10 @@ function ManageTextListBox()
 
 	Item = m_pStartMapList.GetSelectedItem();
 	// End:0x49
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		// End:0x46
-		if(__NFUN_123__(m_pGameTypeCombo.GetValue(), ""))
+		if((m_pGameTypeCombo.GetValue() != ""))
 		{
 			CopyAndAddItemInList(Item, m_pFinalMapList);
 		}		
@@ -891,14 +891,14 @@ function ManageTextListBox()
 	{
 		Item = m_pFinalMapList.GetSelectedItem();
 		// End:0x15E
-		if(__NFUN_119__(Item, none))
+		if((Item != none))
 		{
 			prevItem = m_pFinalMapList.CheckForPrevItem(Item);
 			NextItem = m_pFinalMapList.CheckForNextItem(Item);
 			Item.Remove();
 			m_pFinalMapList.DropSelection();
 			// End:0xFA
-			if(__NFUN_114__(m_pFinalMapList.Items.Next, none))
+			if((m_pFinalMapList.Items.Next == none))
 			{
 				m_pFinalMapList.Items.Clear();
 				SetButtonRegion(true);				
@@ -906,20 +906,20 @@ function ManageTextListBox()
 			else
 			{
 				// End:0x113
-				if(__NFUN_119__(NextItem, none))
+				if((NextItem != none))
 				{
 					Item = NextItem;					
 				}
 				else
 				{
 					// End:0x129
-					if(__NFUN_119__(prevItem, none))
+					if((prevItem != none))
 					{
 						Item = prevItem;
 					}
 				}
 				// End:0x157
-				if(__NFUN_119__(Item, none))
+				if((Item != none))
 				{
 					m_pFinalMapList.SetSelectedItem(Item);
 					m_pFinalMapList.MakeSelectedVisible();
@@ -937,7 +937,7 @@ function WindowStateChange()
 
 	Item = m_pFinalMapList.GetSelectedItem();
 	// End:0x2B
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		m_bFromStartList = false;		
 	}
@@ -945,7 +945,7 @@ function WindowStateChange()
 	{
 		m_bFromStartList = true;
 	}
-	SetButtonRegion(__NFUN_129__(m_bFromStartList));
+	SetButtonRegion((!m_bFromStartList));
 	return;
 }
 
@@ -959,14 +959,14 @@ function ManageComboChange()
 
 	Item = m_pStartMapList.GetSelectedItem();
 	// End:0x88
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		pComboListItem = m_pGameTypeCombo.GetItem(m_pGameTypeCombo.GetValue());
 		// End:0x86
-		if(__NFUN_119__(pComboListItem, none))
+		if((pComboListItem != none))
 		{
 			// End:0x86
-			if(__NFUN_129__(pComboListItem.bDisabled))
+			if((!pComboListItem.bDisabled))
 			{
 				Item.m_stSubText.szGameTypeSelect = m_pGameTypeCombo.GetValue();
 			}
@@ -975,14 +975,14 @@ function ManageComboChange()
 	}
 	Item = m_pFinalMapList.GetSelectedItem();
 	// End:0x10E
-	if(__NFUN_119__(Item, none))
+	if((Item != none))
 	{
 		pComboListItem = m_pGameTypeCombo.GetItem(m_pGameTypeCombo.GetValue());
 		// End:0x10E
-		if(__NFUN_119__(pComboListItem, none))
+		if((pComboListItem != none))
 		{
 			// End:0x10E
-			if(__NFUN_129__(pComboListItem.bDisabled))
+			if((!pComboListItem.bDisabled))
 			{
 				Item.m_stSubText.szGameTypeSelect = m_pGameTypeCombo.GetValue();
 			}
@@ -1026,12 +1026,12 @@ function SetButtonRegion(bool _bInverseTex)
 function SetOrderButtons(bool _bDisable)
 {
 	// End:0x1A
-	if(__NFUN_132__(__NFUN_114__(m_pSubButton, none), __NFUN_114__(m_pPlusButton, none)))
+	if(((m_pSubButton == none) || (m_pPlusButton == none)))
 	{
 		return;
 	}
 	// End:0xB4
-	if(__NFUN_132__(_bDisable, __NFUN_152__(m_pFinalMapList.Items.CountShown(), 1)))
+	if((_bDisable || (m_pFinalMapList.Items.CountShown() <= 1)))
 	{
 		m_pSubButton.m_BorderColor = Root.Colors.GrayLight;
 		m_pSubButton.bDisabled = true;

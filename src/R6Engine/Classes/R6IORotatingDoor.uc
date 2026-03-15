@@ -281,7 +281,7 @@ function bool updateAction(float fDeltaMouse, Actor actionInstigator)
 		// End:0x190
 		if((m_OpeningWheelSound != none))
 		{
-			__NFUN_264__(m_OpeningWheelSound, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+			PlaySound(m_OpeningWheelSound, 3);
 		}
 		AmbientSound = m_MoveAmbientSound;
 		AmbientSoundStop = m_MoveAmbientSoundStop;
@@ -307,38 +307,38 @@ simulated function R6CircumstantialActionCancel()
 function performDoorAction(int iActionID)
 {
 	// End:0x18
-	if(__NFUN_154__(iActionID, int(5)))
+	if((iActionID == int(5)))
 	{
 		CloseDoor(none);		
 	}
 	else
 	{
 		// End:0x30
-		if(__NFUN_154__(iActionID, int(1)))
+		if((iActionID == int(1)))
 		{
 			OpenDoor(none);			
 		}
 		else
 		{
 			// End:0x51
-			if(__NFUN_154__(iActionID, int(13)))
+			if((iActionID == int(13)))
 			{
 				UnlockDoor();
-				__NFUN_264__(m_UnlockSound, 3);				
+				PlaySound(m_UnlockSound, 3);				
 			}
 			else
 			{
 				// End:0x6C
-				if(__NFUN_154__(iActionID, int(14)))
+				if((iActionID == int(14)))
 				{
-					__NFUN_264__(m_LockSound, 3);					
+					PlaySound(m_LockSound, 3);					
 				}
 				else
 				{
 					// End:0x84
-					if(__NFUN_154__(iActionID, int(15)))
+					if((iActionID == int(15)))
 					{
-						__NFUN_264__(m_LockPickSoundStop, 3);
+						PlaySound(m_LockPickSoundStop, 3);
 					}
 				}
 			}
@@ -350,9 +350,9 @@ function performDoorAction(int iActionID)
 function ClientSetDoor(Rotator rNewRotation, optional bool bForce)
 {
 	// End:0x34
-	if(__NFUN_132__(bForce, __NFUN_203__(DesiredRotation, rNewRotation)))
+	if((bForce || (DesiredRotation != rNewRotation)))
 	{
-		__NFUN_117__('Tick');
+		Enable('Tick');
 		bRotateToDesired = true;
 		DesiredRotation = rNewRotation;
 	}
@@ -366,14 +366,14 @@ simulated event bool EncroachingOn(Actor Other)
 
 	P = R6Pawn(Other);
 	// End:0x89
-	if(__NFUN_130__(__NFUN_119__(P, none), P.IsAlive()))
+	if(((P != none) && P.IsAlive()))
 	{
 		// End:0x87
-		if(__NFUN_129__(P.m_bIsPlayer))
+		if((!P.m_bIsPlayer))
 		{
 			AI = R6AIController(P.Controller);
 			AI.m_BumpedBy = self;
-			AI.GotoBumpBackUpState(AI.__NFUN_284__());
+			AI.GotoBumpBackUpState(AI.GetStateName());
 		}
 		return true;
 	}
@@ -386,46 +386,46 @@ function OpenDoor(Pawn opener, optional int iRotationRate)
 	local Rotator rNewRotation;
 
 	// End:0x1B
-	if(__NFUN_154__(iRotationRate, 0))
+	if((iRotationRate == 0))
 	{
 		iRotationRate = default.RotationRate.Yaw;
 	}
 	RotationRate.Yaw = iRotationRate;
 	// End:0x41
-	if(__NFUN_119__(opener, none))
+	if((opener != none))
 	{
 		Instigator = opener;
 	}
 	// End:0x5D
-	if(__NFUN_119__(Instigator, none))
+	if((Instigator != none))
 	{
 		Instigator.R6MakeNoise(13);
 	}
 	rNewRotation = Rotation;
 	// End:0x9F
-	if(__NFUN_150__(m_iYawInit, m_iYawMax))
+	if((m_iYawInit < m_iYawMax))
 	{
 		// End:0x9C
-		if(__NFUN_151__(Rotation.Yaw, m_iYawMax))
+		if((Rotation.Yaw > m_iYawMax))
 		{
-			__NFUN_162__(rNewRotation.Yaw, 65536);
+			(rNewRotation.Yaw -= 65536);
 		}		
 	}
 	else
 	{
 		// End:0xC4
-		if(__NFUN_151__(Rotation.Yaw, m_iYawInit))
+		if((Rotation.Yaw > m_iYawInit))
 		{
-			__NFUN_162__(rNewRotation.Yaw, 65536);
+			(rNewRotation.Yaw -= 65536);
 		}
 	}
 	// End:0x118
-	if(__NFUN_130__(__NFUN_129__(m_bUseWheel), __NFUN_154__(rNewRotation.Yaw, m_iYawInit)))
+	if(((!m_bUseWheel) && (rNewRotation.Yaw == m_iYawInit)))
 	{
 		// End:0xFA
-		if(__NFUN_119__(m_OpeningSound, none))
+		if((m_OpeningSound != none))
 		{
-			__NFUN_264__(m_OpeningSound, 3);
+			PlaySound(m_OpeningSound, 3);
 		}
 		AmbientSound = m_MoveAmbientSound;
 		AmbientSoundStop = m_MoveAmbientSoundStop;
@@ -444,18 +444,18 @@ simulated function CloseDoor(R6Pawn Pawn, optional int iRotationRate)
 	local Rotator rNewRotation;
 
 	// End:0x1B
-	if(__NFUN_154__(iRotationRate, 0))
+	if((iRotationRate == 0))
 	{
 		iRotationRate = default.RotationRate.Yaw;
 	}
 	RotationRate.Yaw = iRotationRate;
 	// End:0x41
-	if(__NFUN_119__(Pawn, none))
+	if((Pawn != none))
 	{
 		Instigator = Pawn;
 	}
 	// End:0x5D
-	if(__NFUN_119__(Instigator, none))
+	if((Instigator != none))
 	{
 		Instigator.R6MakeNoise(13);
 	}
@@ -471,7 +471,7 @@ simulated function CloseDoor(R6Pawn Pawn, optional int iRotationRate)
 function bool DoorOpenTowardsActor(Actor aActor)
 {
 	// End:0x32
-	if(__NFUN_177__(__NFUN_219__(Vector(aActor.Rotation), m_vNormal), float(0)))
+	if((Dot(Vector(aActor.Rotation), m_vNormal) > float(0)))
 	{
 		// End:0x2D
 		if(m_bIsOpeningClockWise)
@@ -504,68 +504,68 @@ function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vec
 	local int i;
 
 	// End:0x25E
-	if(__NFUN_132__(__NFUN_154__(int(Level.NetMode), int(NM_Standalone)), __NFUN_154__(int(Role), int(ROLE_Authority))))
+	if(((int(Level.NetMode) == int(NM_Standalone)) || (int(Role) == int(ROLE_Authority))))
 	{
 		// End:0x166
-		if(__NFUN_154__(iBulletGroup, -1))
+		if((iBulletGroup == -1))
 		{
 			// End:0x60
-			if(__NFUN_150__(m_iHitPoints, 2500))
+			if((m_iHitPoints < 2500))
 			{
-				fBulletDamMultiplier = __NFUN_171__(0.0500000, float(iPenetrationFactor));				
+				fBulletDamMultiplier = (0.0500000 * float(iPenetrationFactor));				
 			}
 			else
 			{
-				fBulletDamMultiplier = __NFUN_171__(0.0050000, float(iPenetrationFactor));
+				fBulletDamMultiplier = (0.0050000 * float(iPenetrationFactor));
 			}
 			// End:0x103
-			if(__NFUN_130__(__NFUN_155__(m_iCurrentLockHP, 0), HitLock(vHitLocation)))
+			if(((m_iCurrentLockHP != 0) && HitLock(vHitLocation)))
 			{
-				m_iCurrentLockHP = __NFUN_250__(__NFUN_147__(m_iCurrentLockHP, __NFUN_250__(int(__NFUN_171__(__NFUN_171__(float(iKillValue), fBulletDamMultiplier), float(10))), 400)), 0);
+				m_iCurrentLockHP = Max((m_iCurrentLockHP - Max(int(((float(iKillValue) * fBulletDamMultiplier) * float(10))), 400)), 0);
 				// End:0x100
-				if(__NFUN_132__(__NFUN_155__(m_iYawInit, Rotation.Yaw), __NFUN_154__(m_iCurrentLockHP, 0)))
+				if(((m_iYawInit != Rotation.Yaw) || (m_iCurrentLockHP == 0)))
 				{
 					UnlockDoor();
-					OpenDoorWhenHit(vHitLocation, vMomentum, __NFUN_144__(2048, iPenetrationFactor), false);
+					OpenDoorWhenHit(vHitLocation, vMomentum, (2048 * iPenetrationFactor), false);
 				}				
 			}
 			else
 			{
-				m_iCurrentHitPoints = __NFUN_250__(int(__NFUN_175__(float(m_iCurrentHitPoints), __NFUN_171__(float(iKillValue), fBulletDamMultiplier))), 0);
+				m_iCurrentHitPoints = Max(int((float(m_iCurrentHitPoints) - (float(iKillValue) * fBulletDamMultiplier))), 0);
 				// End:0x163
-				if(__NFUN_132__(__NFUN_155__(m_iYawInit, Rotation.Yaw), __NFUN_154__(m_iCurrentLockHP, 0)))
+				if(((m_iYawInit != Rotation.Yaw) || (m_iCurrentLockHP == 0)))
 				{
-					OpenDoorWhenHit(vHitLocation, vMomentum, __NFUN_144__(2048, iPenetrationFactor), false);
+					OpenDoorWhenHit(vHitLocation, vMomentum, (2048 * iPenetrationFactor), false);
 				}
 			}			
 		}
 		else
 		{
-			m_iCurrentHitPoints = __NFUN_250__(__NFUN_147__(m_iCurrentHitPoints, iKillValue), 0);
-			m_iCurrentLockHP = __NFUN_250__(__NFUN_147__(m_iCurrentLockHP, iKillValue), 0);
+			m_iCurrentHitPoints = Max((m_iCurrentHitPoints - iKillValue), 0);
+			m_iCurrentLockHP = Max((m_iCurrentLockHP - iKillValue), 0);
 			// End:0x1B3
-			if(__NFUN_154__(m_iCurrentLockHP, 0))
+			if((m_iCurrentLockHP == 0))
 			{
 				UnlockDoor();
 				OpenDoorWhenHit(vHitLocation, vMomentum, 0, true);
 			}
 		}
-		fPercentage = float(__NFUN_145__(__NFUN_144__(m_iCurrentHitPoints, 100), m_iHitPoints));
+		fPercentage = float(((m_iCurrentHitPoints * 100) / m_iHitPoints));
 		SetNewDamageState(fPercentage);
 		// End:0x25E
 		if(m_bBroken)
 		{
-			__NFUN_264__(m_ExplosionSound, 3);
+			PlaySound(m_ExplosionSound, 3);
 			R6AbstractGameInfo(Level.Game).IObjectDestroyed(instigatedBy, self);
 			Instigator = instigatedBy;
 			R6MakeNoise2(m_fAIBreakNoiseRadius, 2, 4);
 			J0x226:
 
 			// End:0x25E [Loop If]
-			if(__NFUN_155__(m_BreachAttached.Length, 0))
+			if((m_BreachAttached.Length != 0))
 			{
 				// End:0x24A
-				if(__NFUN_114__(m_BreachAttached[0], none))
+				if((m_BreachAttached[0] == none))
 				{
 					m_BreachAttached.Remove(0, 1);					
 				}
@@ -589,14 +589,14 @@ function bool HitLock(Vector vHitVector)
 	vTemp2 = vHitVector;
 	vTemp3 = Location;
 	// End:0x5E
-	if(__NFUN_132__(__NFUN_177__(__NFUN_175__(vTemp2.Z, vTemp3.Z), float(-8)), __NFUN_176__(__NFUN_175__(vTemp2.Z, vTemp3.Z), float(-24))))
+	if((((vTemp2.Z - vTemp3.Z) > float(-8)) || ((vTemp2.Z - vTemp3.Z) < float(-24))))
 	{
 		return false;
 	}
 	vTemp2.Z = 0.0000000;
 	vTemp3.Z = 0.0000000;
 	// End:0x97
-	if(__NFUN_176__(__NFUN_225__(__NFUN_216__(vTemp2, vTemp3)), float(112)))
+	if((VSize((vTemp2 - vTemp3)) < float(112)))
 	{
 		return false;
 	}
@@ -616,41 +616,41 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 	vTemp3 = Location;
 	vTemp3.Z = 0.0000000;
 	// End:0x5C
-	if(__NFUN_130__(__NFUN_176__(__NFUN_225__(__NFUN_216__(vTemp2, vTemp3)), float(96)), __NFUN_129__(bExplosion)))
+	if(((VSize((vTemp2 - vTemp3)) < float(96)) && (!bExplosion)))
 	{
 		return;
 	}
 	rBulletAsRotator = Rotator(vBulletDirection);
 	// End:0x8A
-	if(__NFUN_150__(rBulletAsRotator.Yaw, 0))
+	if((rBulletAsRotator.Yaw < 0))
 	{
-		__NFUN_161__(rBulletAsRotator.Yaw, 65536);
+		(rBulletAsRotator.Yaw += 65536);
 	}
-	iYawDifference = __NFUN_147__(rBulletAsRotator.Yaw, Rotation.Yaw);
+	iYawDifference = (rBulletAsRotator.Yaw - Rotation.Yaw);
 	// End:0xBD
-	if(__NFUN_150__(iYawDifference, 0))
+	if((iYawDifference < 0))
 	{
-		__NFUN_161__(iYawDifference, 65536);
+		(iYawDifference += 65536);
 	}
 	// End:0xE1
-	if(__NFUN_150__(iYawDifference, 32768))
+	if((iYawDifference < 32768))
 	{
-		YawVariation = __NFUN_143__(YawVariation);
+		YawVariation = (-YawVariation);
 		bShootTurnCCW = true;
 	}
-	__NFUN_161__(DesiredRotation.Yaw, YawVariation);
+	(DesiredRotation.Yaw += YawVariation);
 	RotationRate.Yaw = 65000;
 	// End:0x484
-	if(__NFUN_242__(bExplosion, false))
+	if((bExplosion == false))
 	{
 		// End:0x2BB
 		if(m_bIsOpeningClockWise)
 		{
 			// End:0x154
-			if(__NFUN_242__(m_bInProcessOfClosing, true))
+			if((m_bInProcessOfClosing == true))
 			{
 				// End:0x151
-				if(__NFUN_242__(bShootTurnCCW, false))
+				if((bShootTurnCCW == false))
 				{
 					SetDoorProcessStates(m_bInProcessOfOpening, false);
 					DesiredRotation.Yaw = Rotation.Yaw;
@@ -659,10 +659,10 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 			else
 			{
 				// End:0x189
-				if(__NFUN_242__(m_bInProcessOfOpening, true))
+				if((m_bInProcessOfOpening == true))
 				{
 					// End:0x189
-					if(__NFUN_242__(bShootTurnCCW, true))
+					if((bShootTurnCCW == true))
 					{
 						SetDoorProcessStates(false, false);
 						DesiredRotation.Yaw = Rotation.Yaw;
@@ -670,16 +670,16 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 				}
 			}
 			// End:0x289
-			if(__NFUN_129__(__NFUN_132__(__NFUN_130__(__NFUN_242__(bShootTurnCCW, true), __NFUN_154__(m_iYawInit, Rotation.Yaw)), __NFUN_130__(__NFUN_242__(bShootTurnCCW, false), __NFUN_154__(m_iYawMax, Rotation.Yaw)))))
+			if((!(((bShootTurnCCW == true) && (m_iYawInit == Rotation.Yaw)) || ((bShootTurnCCW == false) && (m_iYawMax == Rotation.Yaw)))))
 			{
 				// End:0x23B
-				if(__NFUN_151__(m_iYawInit, m_iYawMax))
+				if((m_iYawInit > m_iYawMax))
 				{
 					// End:0x238
-					if(__NFUN_130__(__NFUN_151__(DesiredRotation.Yaw, m_iYawMax), __NFUN_150__(DesiredRotation.Yaw, m_iYawInit)))
+					if(((DesiredRotation.Yaw > m_iYawMax) && (DesiredRotation.Yaw < m_iYawInit)))
 					{
 						// End:0x228
-						if(__NFUN_151__(YawVariation, 0))
+						if((YawVariation > 0))
 						{
 							DesiredRotation.Yaw = m_iYawMax;							
 						}
@@ -692,14 +692,14 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 				else
 				{
 					// End:0x262
-					if(__NFUN_151__(DesiredRotation.Yaw, m_iYawMax))
+					if((DesiredRotation.Yaw > m_iYawMax))
 					{
 						DesiredRotation.Yaw = m_iYawMax;						
 					}
 					else
 					{
 						// End:0x286
-						if(__NFUN_150__(DesiredRotation.Yaw, m_iYawInit))
+						if((DesiredRotation.Yaw < m_iYawInit))
 						{
 							DesiredRotation.Yaw = m_iYawInit;
 						}
@@ -709,7 +709,7 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 			else
 			{
 				// End:0x2A8
-				if(__NFUN_242__(bShootTurnCCW, true))
+				if((bShootTurnCCW == true))
 				{
 					DesiredRotation.Yaw = m_iYawInit;					
 				}
@@ -722,10 +722,10 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 		else
 		{
 			// End:0x2F8
-			if(__NFUN_242__(m_bInProcessOfClosing, true))
+			if((m_bInProcessOfClosing == true))
 			{
 				// End:0x2F5
-				if(__NFUN_242__(bShootTurnCCW, true))
+				if((bShootTurnCCW == true))
 				{
 					SetDoorProcessStates(m_bInProcessOfOpening, false);
 					DesiredRotation.Yaw = Rotation.Yaw;
@@ -734,10 +734,10 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 			else
 			{
 				// End:0x32D
-				if(__NFUN_242__(m_bInProcessOfOpening, true))
+				if((m_bInProcessOfOpening == true))
 				{
 					// End:0x32D
-					if(__NFUN_242__(bShootTurnCCW, false))
+					if((bShootTurnCCW == false))
 					{
 						SetDoorProcessStates(false, false);
 						DesiredRotation.Yaw = Rotation.Yaw;
@@ -745,21 +745,21 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 				}
 			}
 			// End:0x452
-			if(__NFUN_129__(__NFUN_132__(__NFUN_130__(__NFUN_242__(bShootTurnCCW, false), __NFUN_154__(m_iYawInit, Rotation.Yaw)), __NFUN_130__(__NFUN_242__(bShootTurnCCW, true), __NFUN_154__(m_iYawMax, Rotation.Yaw)))))
+			if((!(((bShootTurnCCW == false) && (m_iYawInit == Rotation.Yaw)) || ((bShootTurnCCW == true) && (m_iYawMax == Rotation.Yaw)))))
 			{
 				// End:0x404
-				if(__NFUN_150__(m_iYawInit, m_iYawMax))
+				if((m_iYawInit < m_iYawMax))
 				{
 					// End:0x3A9
-					if(__NFUN_151__(DesiredRotation.Yaw, 65536))
+					if((DesiredRotation.Yaw > 65536))
 					{
-						__NFUN_162__(DesiredRotation.Yaw, 65536);
+						(DesiredRotation.Yaw -= 65536);
 					}
 					// End:0x401
-					if(__NFUN_130__(__NFUN_150__(DesiredRotation.Yaw, m_iYawMax), __NFUN_151__(DesiredRotation.Yaw, m_iYawInit)))
+					if(((DesiredRotation.Yaw < m_iYawMax) && (DesiredRotation.Yaw > m_iYawInit)))
 					{
 						// End:0x3F1
-						if(__NFUN_150__(YawVariation, 0))
+						if((YawVariation < 0))
 						{
 							DesiredRotation.Yaw = m_iYawMax;							
 						}
@@ -772,14 +772,14 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 				else
 				{
 					// End:0x42B
-					if(__NFUN_150__(DesiredRotation.Yaw, m_iYawMax))
+					if((DesiredRotation.Yaw < m_iYawMax))
 					{
 						DesiredRotation.Yaw = m_iYawMax;						
 					}
 					else
 					{
 						// End:0x44F
-						if(__NFUN_151__(DesiredRotation.Yaw, m_iYawInit))
+						if((DesiredRotation.Yaw > m_iYawInit))
 						{
 							DesiredRotation.Yaw = m_iYawInit;
 						}
@@ -789,7 +789,7 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 			else
 			{
 				// End:0x471
-				if(__NFUN_242__(bShootTurnCCW, false))
+				if((bShootTurnCCW == false))
 				{
 					DesiredRotation.Yaw = m_iYawInit;					
 				}
@@ -804,10 +804,10 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 	{
 		SetDoorProcessStates(false, false);
 		// End:0x594
-		if(__NFUN_154__(Rotation.Yaw, m_iYawInit))
+		if((Rotation.Yaw == m_iYawInit))
 		{
 			// End:0x4E7
-			if(__NFUN_132__(__NFUN_130__(m_bIsOpeningClockWise, __NFUN_151__(iYawDifference, 32768)), __NFUN_130__(__NFUN_129__(m_bIsOpeningClockWise), __NFUN_150__(iYawDifference, 32768))))
+			if(((m_bIsOpeningClockWise && (iYawDifference > 32768)) || ((!m_bIsOpeningClockWise) && (iYawDifference < 32768))))
 			{
 				OpenDoor(none, 65000);				
 			}
@@ -817,25 +817,25 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 				if(m_bIsOpeningClockWise)
 				{
 					// End:0x524
-					if(__NFUN_151__(m_iYawInit, m_iYawMax))
+					if((m_iYawInit > m_iYawMax))
 					{
-						DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);						
+						DesiredRotation.Yaw = (((m_iYawMax + m_iYawInit) / 2) + 32768);						
 					}
 					else
 					{
-						DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+						DesiredRotation.Yaw = ((m_iYawMax + m_iYawInit) / 2);
 					}					
 				}
 				else
 				{
 					// End:0x576
-					if(__NFUN_150__(m_iYawInit, m_iYawMax))
+					if((m_iYawInit < m_iYawMax))
 					{
-						DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);						
+						DesiredRotation.Yaw = (((m_iYawMax + m_iYawInit) / 2) + 32768);						
 					}
 					else
 					{
-						DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+						DesiredRotation.Yaw = ((m_iYawMax + m_iYawInit) / 2);
 					}
 				}
 			}			
@@ -843,38 +843,38 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 		else
 		{
 			// End:0x69E
-			if(__NFUN_154__(Rotation.Yaw, m_iYawMax))
+			if((Rotation.Yaw == m_iYawMax))
 			{
 				// End:0x5EF
-				if(__NFUN_132__(__NFUN_130__(m_bIsOpeningClockWise, __NFUN_150__(iYawDifference, 32768)), __NFUN_130__(__NFUN_129__(m_bIsOpeningClockWise), __NFUN_151__(iYawDifference, 32768))))
+				if(((m_bIsOpeningClockWise && (iYawDifference < 32768)) || ((!m_bIsOpeningClockWise) && (iYawDifference > 32768))))
 				{
 					CloseDoor(none, 65000);					
 				}
 				else
 				{
 					// End:0x64C
-					if(__NFUN_129__(m_bIsOpeningClockWise))
+					if((!m_bIsOpeningClockWise))
 					{
 						// End:0x62E
-						if(__NFUN_150__(m_iYawInit, m_iYawMax))
+						if((m_iYawInit < m_iYawMax))
 						{
-							DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);							
+							DesiredRotation.Yaw = (((m_iYawMax + m_iYawInit) / 2) + 32768);							
 						}
 						else
 						{
-							DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+							DesiredRotation.Yaw = ((m_iYawMax + m_iYawInit) / 2);
 						}						
 					}
 					else
 					{
 						// End:0x680
-						if(__NFUN_151__(m_iYawInit, m_iYawMax))
+						if((m_iYawInit > m_iYawMax))
 						{
-							DesiredRotation.Yaw = __NFUN_146__(__NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2), 32768);							
+							DesiredRotation.Yaw = (((m_iYawMax + m_iYawInit) / 2) + 32768);							
 						}
 						else
 						{
-							DesiredRotation.Yaw = __NFUN_145__(__NFUN_146__(m_iYawMax, m_iYawInit), 2);
+							DesiredRotation.Yaw = ((m_iYawMax + m_iYawInit) / 2);
 						}
 					}
 				}				
@@ -882,7 +882,7 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 			else
 			{
 				// End:0x6E5
-				if(__NFUN_132__(__NFUN_130__(m_bIsOpeningClockWise, __NFUN_150__(iYawDifference, 32768)), __NFUN_130__(__NFUN_129__(m_bIsOpeningClockWise), __NFUN_151__(iYawDifference, 32768))))
+				if(((m_bIsOpeningClockWise && (iYawDifference < 32768)) || ((!m_bIsOpeningClockWise) && (iYawDifference > 32768))))
 				{
 					CloseDoor(none, 65000);					
 				}
@@ -894,27 +894,27 @@ function OpenDoorWhenHit(Vector vHitLocation, Vector vBulletDirection, int YawVa
 		}
 	}
 	bRotateToDesired = true;
-	__NFUN_117__('Tick');
+	Enable('Tick');
 	// End:0x728
-	if(__NFUN_151__(DesiredRotation.Yaw, 65536))
+	if((DesiredRotation.Yaw > 65536))
 	{
-		__NFUN_162__(DesiredRotation.Yaw, 65536);		
+		(DesiredRotation.Yaw -= 65536);		
 	}
 	else
 	{
 		// End:0x749
-		if(__NFUN_150__(DesiredRotation.Yaw, 0))
+		if((DesiredRotation.Yaw < 0))
 		{
-			__NFUN_161__(DesiredRotation.Yaw, 65536);
+			(DesiredRotation.Yaw += 65536);
 		}
 	}
 	// End:0x7A6
-	if(__NFUN_130__(__NFUN_154__(Rotation.Yaw, m_iYawInit), __NFUN_155__(DesiredRotation.Yaw, m_iYawInit)))
+	if(((Rotation.Yaw == m_iYawInit) && (DesiredRotation.Yaw != m_iYawInit)))
 	{
 		// End:0x788
-		if(__NFUN_119__(m_OpeningWheelSound, none))
+		if((m_OpeningWheelSound != none))
 		{
-			__NFUN_264__(m_OpeningWheelSound, 3);
+			PlaySound(m_OpeningWheelSound, 3);
 		}
 		AmbientSound = m_MoveAmbientSound;
 		AmbientSoundStop = m_MoveAmbientSoundStop;
@@ -933,12 +933,12 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 	// End:0x5B
 	if(m_bIsDoorClosed)
 	{
-		vDistance = __NFUN_216__(m_vVisibleCenter, PlayerController.Pawn.Location);
+		vDistance = (m_vVisibleCenter - PlayerController.Pawn.Location);
 		vDistance.Z = 0.0000000;
-		fDistance = __NFUN_225__(vDistance);
+		fDistance = VSize(vDistance);
 	}
 	// End:0x7E
-	if(__NFUN_176__(fDistance, m_fCircumstantialActionRange))
+	if((fDistance < m_fCircumstantialActionRange))
 	{
 		Query.iInRange = 1;		
 	}
@@ -972,7 +972,7 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 		}
 	}
 	// End:0x126
-	if(__NFUN_129__(bDisplayOpenIcon))
+	if((!bDisplayOpenIcon))
 	{
 		// End:0xFE
 		if(m_bTreatDoorAsWindow)
@@ -991,7 +991,7 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 		// End:0x17A
 		if(R6Rainbow(PlayerController.Pawn).m_bHasLockPickKit)
 		{
-			Query.fPlayerActionTimeRequired = __NFUN_172__(m_fUnlockBaseTime, 2.0000000);			
+			Query.fPlayerActionTimeRequired = (m_fUnlockBaseTime / 2.0000000);			
 		}
 		else
 		{
@@ -1072,7 +1072,7 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 		Query.iTeamActionID = 1;
 		Query.iTeamActionIDList[0] = 1;
 		// End:0x399
-		if(__NFUN_129__(m_bTreatDoorAsWindow))
+		if((!m_bTreatDoorAsWindow))
 		{
 			Query.iTeamActionIDList[1] = 2;
 			Query.iTeamActionIDList[2] = 3;
@@ -1094,7 +1094,7 @@ simulated event R6QueryCircumstantialAction(float fDistance, out R6AbstractCircu
 		Query.iTeamActionID = 5;
 		Query.iTeamActionIDList[0] = 5;
 		// End:0x488
-		if(__NFUN_129__(m_bTreatDoorAsWindow))
+		if((!m_bTreatDoorAsWindow))
 		{
 			Query.iTeamActionIDList[1] = 6;
 			Query.iTeamActionIDList[2] = 7;
@@ -1121,35 +1121,35 @@ function R6FillGrenadeSubAction(out R6AbstractCircumstantialActionQuery Query, i
 	// End:0x3B
 	if(R6ActionCanBeExecuted(int(9), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 9;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 9;
+		(i++);
 	}
 	// End:0x76
 	if(R6ActionCanBeExecuted(int(10), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 10;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 10;
+		(i++);
 	}
 	// End:0xB1
 	if(R6ActionCanBeExecuted(int(11), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 11;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 11;
+		(i++);
 	}
 	// End:0xEC
 	if(R6ActionCanBeExecuted(int(12), PlayerController))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), i)] = 12;
-		__NFUN_165__(i);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + i)] = 12;
+		(i++);
 	}
 	j = i;
 	J0xF7:
 
 	// End:0x12F [Loop If]
-	if(__NFUN_150__(j, 4))
+	if((j < 4))
 	{
-		Query.iTeamSubActionsIDList[__NFUN_146__(__NFUN_144__(iSubMenu, 4), j)] = 0;
-		__NFUN_165__(j);
+		Query.iTeamSubActionsIDList[((iSubMenu * 4) + j)] = 0;
+		(j++);
 		// [Loop Continue]
 		goto J0xF7;
 	}
@@ -1181,7 +1181,7 @@ function bool ShouldBeBreached()
 		return false;
 	}
 	// End:0x30
-	if(__NFUN_132__(__NFUN_129__(m_bIsDoorClosed), __NFUN_155__(m_iCurrentOpening, 0)))
+	if(((!m_bIsDoorClosed) || (m_iCurrentOpening != 0)))
 	{
 		return false;
 	}
@@ -1202,41 +1202,41 @@ event Tick(float fDelta)
 	// End:0x12
 	if(m_bBroken)
 	{
-		__NFUN_118__('Tick');
+		Disable('Tick');
 		return;
 	}
 	// End:0x3E
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(m_bInProcessOfOpening), __NFUN_129__(m_bInProcessOfClosing)), __NFUN_129__(bRotateToDesired)))
+	if((((!m_bInProcessOfOpening) && (!m_bInProcessOfClosing)) && (!bRotateToDesired)))
 	{
-		__NFUN_118__('Tick');
+		Disable('Tick');
 	}
 	rDesYaw = DesiredRotation.Yaw;
 	// End:0x68
-	if(__NFUN_150__(rDesYaw, 0))
+	if((rDesYaw < 0))
 	{
-		__NFUN_161__(rDesYaw, 65536);		
+		(rDesYaw += 65536);		
 	}
 	else
 	{
 		// End:0x83
-		if(__NFUN_151__(rDesYaw, 65536))
+		if((rDesYaw > 65536))
 		{
-			__NFUN_162__(rDesYaw, 65536);
+			(rDesYaw -= 65536);
 		}
 	}
 	// End:0x123
-	if(__NFUN_154__(Rotation.Yaw, rDesYaw))
+	if((Rotation.Yaw == rDesYaw))
 	{
 		// End:0xE0
-		if(__NFUN_132__(m_bInProcessOfClosing, m_bInProcessOfOpening))
+		if((m_bInProcessOfClosing || m_bInProcessOfOpening))
 		{
 			// End:0xD8
 			if(m_bInProcessOfClosing)
 			{
 				// End:0xC9
-				if(__NFUN_119__(m_ClosingSound, none))
+				if((m_ClosingSound != none))
 				{
-					__NFUN_264__(m_ClosingSound, 3);
+					PlaySound(m_ClosingSound, 3);
 				}
 				AmbientSound = none;
 				m_bUseWheel = false;
@@ -1244,12 +1244,12 @@ event Tick(float fDelta)
 			SetDoorProcessStates(false, false);
 		}
 		// End:0x123
-		if(__NFUN_130__(m_bUseWheel, __NFUN_154__(DesiredRotation.Yaw, m_iYawInit)))
+		if((m_bUseWheel && (DesiredRotation.Yaw == m_iYawInit)))
 		{
 			// End:0x114
-			if(__NFUN_119__(m_ClosingWheelSound, none))
+			if((m_ClosingWheelSound != none))
 			{
-				__NFUN_264__(m_ClosingWheelSound, 3);
+				PlaySound(m_ClosingWheelSound, 3);
 			}
 			AmbientSound = none;
 			m_bUseWheel = false;
@@ -1258,30 +1258,30 @@ event Tick(float fDelta)
 	// End:0x14D
 	if(m_bIsOpeningClockWise)
 	{
-		m_iCurrentOpening = __NFUN_156__(__NFUN_147__(Rotation.Yaw, m_iYawInit), 65535);		
+		m_iCurrentOpening = ((Rotation.Yaw - m_iYawInit) & 65535);		
 	}
 	else
 	{
-		m_iCurrentOpening = __NFUN_156__(__NFUN_147__(m_iYawInit, Rotation.Yaw), 65535);
+		m_iCurrentOpening = ((m_iYawInit - Rotation.Yaw) & 65535);
 	}
-	SetDoorState(__NFUN_150__(m_iCurrentOpening, 16384));
+	SetDoorState((m_iCurrentOpening < 16384));
 	// End:0x1A5
-	if(__NFUN_129__(m_bTreatDoorAsWindow))
+	if((!m_bTreatDoorAsWindow))
 	{
-		m_vVisibleCenter = __NFUN_216__(Location, __NFUN_213__(float(64), Vector(Rotation)));		
+		m_vVisibleCenter = (Location - (float(64) * Vector(Rotation)));		
 	}
 	else
 	{
-		m_vVisibleCenter = __NFUN_216__(Location, __NFUN_213__(__NFUN_171__(m_fWindowWidth, 0.5000000), Vector(Rotation)));
+		m_vVisibleCenter = (Location - ((m_fWindowWidth * 0.5000000) * Vector(Rotation)));
 	}
-	m_bHidePortal = __NFUN_154__(m_iCurrentOpening, 0);
+	m_bHidePortal = (m_iCurrentOpening == 0);
 	return;
 }
 
 simulated function UnlockDoor()
 {
 	// End:0x0D
-	if(__NFUN_129__(m_bIsDoorLocked))
+	if((!m_bIsDoorLocked))
 	{
 		return;
 	}
@@ -1385,7 +1385,7 @@ function R6CircumstantialActionProgressStart(R6AbstractCircumstantialActionQuery
 
 function PlayLockPickSound()
 {
-	__NFUN_264__(m_LockPickSound, 3);
+	PlaySound(m_LockPickSound, 3);
 	return;
 }
 
@@ -1401,13 +1401,13 @@ function int R6GetCircumstantialActionProgress(R6AbstractCircumstantialActionQue
 	// End:0x54
 	if(m_bIsDoorLocked)
 	{
-		fPercentage = __NFUN_172__(__NFUN_175__(Level.TimeSeconds, m_fPlayerCAStartTime), __NFUN_171__(Query.fPlayerActionTimeRequired, __NFUN_175__(2.0000000, R6Pawn(actingPawn).ArmorSkillEffect())));		
+		fPercentage = ((Level.TimeSeconds - m_fPlayerCAStartTime) / (Query.fPlayerActionTimeRequired * (2.0000000 - R6Pawn(actingPawn).ArmorSkillEffect())));		
 	}
 	else
 	{
 		fPercentage = 1.0000000;
 	}
-	return int(__NFUN_171__(fPercentage, float(100)));
+	return int((fPercentage * float(100)));
 	return;
 }
 
@@ -1421,13 +1421,13 @@ simulated function bool R6ActionCanBeExecuted(int iAction, PlayerController Play
 	local R6PlayerController pPlayerCtrl;
 
 	// End:0x10
-	if(__NFUN_154__(iAction, int(0)))
+	if((iAction == int(0)))
 	{
 		return false;
 	}
 	pPlayerCtrl = R6PlayerController(PlayerController);
 	// End:0x43
-	if(__NFUN_132__(__NFUN_114__(pPlayerCtrl, none), __NFUN_114__(pPlayerCtrl.m_TeamManager, none)))
+	if(((pPlayerCtrl == none) || (pPlayerCtrl.m_TeamManager == none)))
 	{
 		return false;
 	}
@@ -1473,12 +1473,12 @@ event Bump(Actor Other)
 
 	Pawn = R6Pawn(Other);
 	// End:0x1D
-	if(__NFUN_114__(Pawn, none))
+	if((Pawn == none))
 	{
 		return;
 	}
 	// End:0x35
-	if(__NFUN_1511__(Pawn))
+	if(WillOpenOnTouch(Pawn))
 	{
 		OpenDoor(Pawn);
 		return;
@@ -1493,10 +1493,10 @@ function bool ActorIsOnSideA(Actor aActor)
 {
 	local Vector vActorDir2D;
 
-	vActorDir2D = __NFUN_216__(aActor.Location, m_vCenterOfDoor);
+	vActorDir2D = (aActor.Location - m_vCenterOfDoor);
 	vActorDir2D.Z = 0.0000000;
-	vActorDir2D = __NFUN_226__(vActorDir2D);
-	return __NFUN_177__(__NFUN_219__(vActorDir2D, m_vDoorADir2D), float(0));
+	vActorDir2D = Normal(vActorDir2D);
+	return (Dot(vActorDir2D, m_vDoorADir2D) > float(0));
 	return;
 }
 
@@ -1507,17 +1507,17 @@ function Vector GetTarget(Actor aActor, float fDistanceFromDoor, optional bool b
 	// End:0x17
 	if(bBackup)
 	{
-		__NFUN_182__(fDistanceFromDoor, float(-1));
+		(fDistanceFromDoor *= float(-1));
 	}
 	vTarget = m_vCenterOfDoor;
 	// End:0x46
 	if(ActorIsOnSideA(aActor))
 	{
-		__NFUN_224__(vTarget, __NFUN_213__(fDistanceFromDoor, m_vDoorADir2D));		
+		(vTarget -= (fDistanceFromDoor * m_vDoorADir2D));		
 	}
 	else
 	{
-		__NFUN_223__(vTarget, __NFUN_213__(fDistanceFromDoor, m_vDoorADir2D));
+		(vTarget += (fDistanceFromDoor * m_vDoorADir2D));
 	}
 	vTarget.Z = aActor.Location.Z;
 	return vTarget;

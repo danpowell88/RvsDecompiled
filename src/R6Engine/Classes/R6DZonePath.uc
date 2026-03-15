@@ -435,7 +435,7 @@ function InformTerroTeam(R6DZonePath.EInformTeam eInfo, R6TerroristAI terroAI)
 			if((i < m_aTerrorist.Length))
 			{
 				m_aTerrorist[i].m_controller.GotoPointAndSearch(terroAI.Pawn.Location, 5, false, 30.0000000);
-				__NFUN_165__(i);
+				(i++);
 				// [Loop Continue]
 				goto J0x87;
 			}

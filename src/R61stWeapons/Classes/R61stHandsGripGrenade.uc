@@ -39,8 +39,8 @@ state RaiseWeapon
 		SetDrawType(2);
 		AssociatedWeapon.SetDrawType(2);
 		AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
-		Owner.Owner.__NFUN_264__(R6AbstractWeapon(Owner).m_EquipSnd, 3) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
-		__NFUN_259__('Begin', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), m_fAnimAcceleration));
+		Owner.Owner.PlaySound(R6AbstractWeapon(Owner).m_EquipSnd, 3);
+		PlayAnim('Begin', (R6Pawn(Owner.Owner).ArmorSkillEffect() * m_fAnimAcceleration));
 		return;
 	}
 	stop;
@@ -60,7 +60,7 @@ simulated state FiringWeapon
 
 	function BeginState()
 	{
-		__NFUN_260__('Neutral',,, 1);
+		LoopAnim('Neutral',,, 1);
 		return;
 	}
 
@@ -69,33 +69,33 @@ simulated state FiringWeapon
 		// End:0x1A
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("animEnd ", string(self)));
+			Log(("animEnd " $ string(self)));
 		}
 		// End:0x34
-		if(__NFUN_132__(__NFUN_155__(iChannel, 0), __NFUN_114__(Owner, none)))
+		if(((iChannel != 0) || (Owner == none)))
 		{
 			return;
 		}
 		// End:0x90
-		if(__NFUN_242__(m_bCanQuitOnAnimEnd, true))
+		if((m_bCanQuitOnAnimEnd == true))
 		{
-			AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_WeaponNeutralAnim);
+			AssociatedWeapon.PlayAnim(AssociatedWeapon.m_WeaponNeutralAnim);
 			AnimBlendParams(1, 0.0000000);
-			__NFUN_260__('Empty_nt');
+			LoopAnim('Empty_nt');
 			m_bCanQuitOnAnimEnd = false;
 			m_bCannotPlayEmpty = false;
 			m_bInBurst = false;
-			__NFUN_113__('None');			
+			GotoState('None');			
 		}
 		else
 		{
 			AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-			__NFUN_260__('Fire_nt', R6AbstractWeapon(Owner).m_fFireAnimRate, 0.1000000);
+			LoopAnim('Fire_nt', R6AbstractWeapon(Owner).m_fFireAnimRate, 0.1000000);
 		}
 		// End:0xE3
 		if(bShowLog)
 		{
-			__NFUN_231__("Calling FPAO");
+			Log("Calling FPAO");
 		}
 		R6AbstractWeapon(Owner).FirstPersonAnimOver();
 		return;
@@ -105,12 +105,12 @@ simulated state FiringWeapon
 	{
 		AssociatedWeapon.SetDrawType(0);
 		AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-		__NFUN_259__('Fire_Up', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), 0.8000000));
+		PlayAnim('Fire_Up', (R6Pawn(Owner.Owner).ArmorSkillEffect() * 0.8000000));
 		m_bCanQuitOnAnimEnd = true;
 		// End:0x82
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("FireGrenadeThrow ", string(self)));
+			Log(("FireGrenadeThrow " $ string(self)));
 		}
 		return;
 	}
@@ -119,26 +119,26 @@ simulated state FiringWeapon
 	{
 		AssociatedWeapon.SetDrawType(0);
 		AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-		__NFUN_259__('Fire_Down', __NFUN_171__(R6Pawn(Owner.Owner).ArmorSkillEffect(), 0.8000000));
+		PlayAnim('Fire_Down', (R6Pawn(Owner.Owner).ArmorSkillEffect() * 0.8000000));
 		m_bCanQuitOnAnimEnd = true;
 		// End:0x81
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("FireGrenadeRoll ", string(self)));
+			Log(("FireGrenadeRoll " $ string(self)));
 		}
 		return;
 	}
 
 	simulated function FireSingleShot()
 	{
-		AssociatedWeapon.__NFUN_259__(AssociatedWeapon.m_Fire, R6Pawn(Owner.Owner).ArmorSkillEffect());
+		AssociatedWeapon.PlayAnim(AssociatedWeapon.m_Fire, R6Pawn(Owner.Owner).ArmorSkillEffect());
 		AnimBlendParams(1, R6AbstractWeapon(Owner).m_fFPBlend);
-		__NFUN_259__('Fire', R6Pawn(Owner.Owner).ArmorSkillEffect());
+		PlayAnim('Fire', R6Pawn(Owner.Owner).ArmorSkillEffect());
 		m_bCanQuitOnAnimEnd = false;
 		// End:0x9F
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("FireSingleShot ", string(self)));
+			Log(("FireSingleShot " $ string(self)));
 		}
 		return;
 	}

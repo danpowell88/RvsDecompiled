@@ -377,7 +377,7 @@ function PostRender(Canvas Canvas)
 	// End:0x40
 	if(bShowLog)
 	{
-		__NFUN_231__("ERROR!!!!!!!!!!!!!!!!!!! IN R6Console >> PostRender");
+		Log("ERROR!!!!!!!!!!!!!!!!!!! IN R6Console >> PostRender");
 	}
 	return;
 }
@@ -396,7 +396,7 @@ event LaunchR6MainMenu()
 	// End:0x27
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console LaunchR6MainMenu");
+		Log("R6Console LaunchR6MainMenu");
 	}
 	bVisible = true;
 	bUWindowActive = true;
@@ -413,11 +413,11 @@ function NotifyLevelChange()
 	// End:0x28
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console NotifyLevelChange");
+		Log("R6Console NotifyLevelChange");
 	}
 	super.NotifyLevelChange();
 	// End:0x64
-	if(__NFUN_119__(R6PlayerController(ViewportOwner.Actor), none))
+	if((R6PlayerController(ViewportOwner.Actor) != none))
 	{
 		R6PlayerController(ViewportOwner.Actor).ClearReferences();
 	}
@@ -429,7 +429,7 @@ function CleanAndChangeMod(array<UWindowRootWindow.eGameWidgetID> _AWIDListToUse
 	m_AWIDList = _AWIDListToUse;
 	m_bChangeModInProgress = true;
 	LeaveR6Game(9);
-	R6GSServers(Class'Engine.Actor'.static.__NFUN_1551__().GetGameMgrGameService()).InitializeMod();
+	R6GSServers(Class'Engine.Actor'.static.GetGameManager().GetGameMgrGameService()).InitializeMod();
 	return;
 }
 
@@ -442,7 +442,7 @@ function LeaveR6Game(R6Console.eLeaveGame _bwhatToDo)
 	// End:0x22
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console LeaveR6Game");
+		Log("R6Console LeaveR6Game");
 	}
 	// End:0x2D
 	if(bReturnToMenu)
@@ -454,12 +454,12 @@ function LeaveR6Game(R6Console.eLeaveGame _bwhatToDo)
 	Master.m_MenuCommunication = none;
 	CloseR6MainMenu(true);
 	LaunchR6MainMenu();
-	C = Class'Engine.Actor'.static.__NFUN_2618__();
+	C = Class'Engine.Actor'.static.GetCanvas();
 	C.m_iNewResolutionX = 640;
 	C.m_iNewResolutionY = 480;
 	C.m_bChangeResRequested = true;
 	C.m_bFading = false;
-	ServerInfo = Class'Engine.Actor'.static.__NFUN_1273__();
+	ServerInfo = Class'Engine.Actor'.static.GetServerOptions();
 	ServerInfo.m_ServerMapList = none;
 	ServerInfo.m_GameInfo = none;
 	switch(_bwhatToDo)
@@ -469,7 +469,7 @@ function LeaveR6Game(R6Console.eLeaveGame _bwhatToDo)
 			m_eNextStep = 1;
 			CleanPlanning();
 			// End:0x123
-			if(__NFUN_154__(int(m_PlayerCampaign.m_bCampaignCompleted), 1))
+			if((int(m_PlayerCampaign.m_bCampaignCompleted) == 1))
 			{
 				bCleanUp = true;
 			}
@@ -485,10 +485,10 @@ function LeaveR6Game(R6Console.eLeaveGame _bwhatToDo)
 		case 4:
 			CleanPlanning();
 			Master.m_StartGameInfo.m_ReloadPlanning = true;
-			ViewportOwner.Actor.__NFUN_2011__(true);
+			ViewportOwner.Actor.SetPlanningMode(true);
 			m_eNextStep = 4;
 			// End:0x1B7
-			if(__NFUN_119__(R6PlayerController(ViewportOwner.Actor), none))
+			if((R6PlayerController(ViewportOwner.Actor) != none))
 			{
 				R6PlayerController(ViewportOwner.Actor).ClearReferences();
 			}
@@ -505,10 +505,10 @@ function LeaveR6Game(R6Console.eLeaveGame _bwhatToDo)
 		case 6:
 			CleanPlanning();
 			Master.m_StartGameInfo.m_ReloadPlanning = true;
-			ViewportOwner.Actor.__NFUN_2011__(true);
+			ViewportOwner.Actor.SetPlanningMode(true);
 			m_eNextStep = 6;
 			// End:0x251
-			if(__NFUN_119__(R6PlayerController(ViewportOwner.Actor), none))
+			if((R6PlayerController(ViewportOwner.Actor) != none))
 			{
 				R6PlayerController(ViewportOwner.Actor).ClearReferences();
 			}
@@ -556,10 +556,10 @@ function LeaveR6Game(R6Console.eLeaveGame _bwhatToDo)
 	if(bCleanUp)
 	{
 		// End:0x38D
-		if(__NFUN_130__(__NFUN_119__(ViewportOwner.Actor, none), __NFUN_154__(int(ViewportOwner.Actor.Level.NetMode), int(NM_Standalone))))
+		if(((ViewportOwner.Actor != none) && (int(ViewportOwner.Actor.Level.NetMode) == int(NM_Standalone))))
 		{
 			// End:0x38A
-			if(__NFUN_119__(ViewportOwner.Actor.Level, ViewportOwner.Actor.GetEntryLevel()))
+			if((ViewportOwner.Actor.Level != ViewportOwner.Actor.GetEntryLevel()))
 			{
 				Master.m_StartGameInfo.m_MapName = "Entry";
 				PreloadMapForPlanning();
@@ -570,20 +570,20 @@ function LeaveR6Game(R6Console.eLeaveGame _bwhatToDo)
 			ConsoleCommand("DISCONNECT");
 		}
 	}
-	Class'Engine.Actor'.static.__NFUN_1551__().__NFUN_1286__();
+	Class'Engine.Actor'.static.GetGameManager().GetIDListSize();
 	ViewportOwner.Actor.SpawnDefaultHUD();
 	return;
 }
 
 function CleanSound(R6Console.eLeaveGame _bwhatToDo)
 {
-	ViewportOwner.Actor.__NFUN_2712__();
-	ViewportOwner.Actor.__NFUN_2704__();
+	ViewportOwner.Actor.StopAllSounds();
+	ViewportOwner.Actor.ResetVolume_AllTypeSound();
 	switch(_bwhatToDo)
 	{
 		// End:0x54
 		case 4:
-			ViewportOwner.Actor.__NFUN_2721__(0.0000000, 25, 5);
+			ViewportOwner.Actor.FadeSound(0.0000000, 25, 5);
 		// End:0x59
 		case 5:
 		// End:0x61
@@ -593,12 +593,12 @@ function CleanSound(R6Console.eLeaveGame _bwhatToDo)
 		// End:0xEA
 		case 1:
 			// End:0xA9
-			if(__NFUN_155__(int(ViewportOwner.Actor.Level.NetMode), int(NM_Standalone)))
+			if((int(ViewportOwner.Actor.Level.NetMode) != int(NM_Standalone)))
 			{
 				ViewportOwner.Actor.StopAllMusic();
 			}
-			ViewportOwner.Actor.Level.__NFUN_2711__(1);
-			ViewportOwner.Actor.Level.__NFUN_1604__();
+			ViewportOwner.Actor.Level.SetBankSound(1);
+			ViewportOwner.Actor.Level.FinalizeLoading();
 			// End:0x15F
 			break;
 		// End:0xEF
@@ -614,8 +614,8 @@ function CleanSound(R6Console.eLeaveGame _bwhatToDo)
 		case 0:
 		// End:0xFFFF
 		default:
-			ViewportOwner.Actor.Level.__NFUN_2711__(1);
-			ViewportOwner.Actor.Level.__NFUN_1604__();
+			ViewportOwner.Actor.Level.SetBankSound(1);
+			ViewportOwner.Actor.Level.FinalizeLoading();
 			// End:0x15F
 			break;
 			break;
@@ -626,10 +626,10 @@ function CleanSound(R6Console.eLeaveGame _bwhatToDo)
 function CleanPlanning()
 {
 	// End:0x1F2
-	if(__NFUN_154__(int(ViewportOwner.Actor.Level.NetMode), int(NM_Standalone)))
+	if((int(ViewportOwner.Actor.Level.NetMode) == int(NM_Standalone)))
 	{
 		// End:0x4E
-		if(__NFUN_132__(__NFUN_114__(Master, none), __NFUN_114__(Master.m_StartGameInfo, none)))
+		if(((Master == none) || (Master.m_StartGameInfo == none)))
 		{
 			return;
 		}
@@ -637,7 +637,7 @@ function CleanPlanning()
 		Master.m_StartGameInfo.m_TeamInfo[1].m_iNumberOfMembers = 0;
 		Master.m_StartGameInfo.m_TeamInfo[2].m_iNumberOfMembers = 0;
 		// End:0xE5
-		if(__NFUN_114__(Master.m_StartGameInfo.m_TeamInfo[0].m_pPlanning, none))
+		if((Master.m_StartGameInfo.m_TeamInfo[0].m_pPlanning == none))
 		{
 			return;
 		}
@@ -656,16 +656,16 @@ function CloseR6MainMenu(optional bool bKeepInputSystem)
 	// End:0x26
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console CloseR6MainMenu");
+		Log("R6Console CloseR6MainMenu");
 	}
 	// End:0x6C
-	if(__NFUN_130__(__NFUN_119__(m_LanServers, none), __NFUN_119__(m_LanServers.m_ClientBeacon, none)))
+	if(((m_LanServers != none) && (m_LanServers.m_ClientBeacon != none)))
 	{
-		m_LanServers.m_ClientBeacon.__NFUN_279__();
+		m_LanServers.m_ClientBeacon.Destroy();
 		m_LanServers.m_ClientBeacon = none;
 	}
 	// End:0x9D
-	if(__NFUN_130__(__NFUN_119__(m_GameService, none), __NFUN_119__(m_GameService.m_ClientBeacon, none)))
+	if(((m_GameService != none) && (m_GameService.m_ClientBeacon != none)))
 	{
 		m_GameService.m_ClientBeacon = none;
 	}
@@ -673,9 +673,9 @@ function CloseR6MainMenu(optional bool bKeepInputSystem)
 	bVisible = false;
 	ResetUWindow();
 	// End:0xF8
-	if(__NFUN_242__(bKeepInputSystem, false))
+	if((bKeepInputSystem == false))
 	{
-		ViewportOwner.Actor.__NFUN_2709__(0);
+		ViewportOwner.Actor.ChangeInputSet(0);
 		ViewportOwner.Actor.Level.m_bPlaySound = true;
 	}
 	return;
@@ -685,8 +685,8 @@ function PreloadMapForPlanning()
 {
 	local int iPlayerSpawnNumber;
 
-	ConsoleCommand(__NFUN_112__(__NFUN_112__(__NFUN_112__("Start ", Master.m_StartGameInfo.m_MapName), "?SpawnNum="), string(iPlayerSpawnNumber)));
-	ViewportOwner.Actor.__NFUN_2709__(1);
+	ConsoleCommand(((("Start " $ Master.m_StartGameInfo.m_MapName) $ "?SpawnNum=") $ string(iPlayerSpawnNumber)));
+	ViewportOwner.Actor.ChangeInputSet(1);
 	return;
 }
 
@@ -694,7 +694,7 @@ function CreateInGameMenus()
 {
 	local UWindowMenuClassDefines pMenuDefGSServers;
 
-	__NFUN_231__(__NFUN_168__("R6Console CreateInGameMenus bLaunchMultiPlayer", string(bLaunchMultiPlayer)));
+	Log(("R6Console CreateInGameMenus bLaunchMultiPlayer" @ string(bLaunchMultiPlayer)));
 	pMenuDefGSServers = new (none) Class'UWindow.UWindowMenuClassDefines';
 	pMenuDefGSServers.Created();
 	// End:0x8F
@@ -718,7 +718,7 @@ function ResetR6Game()
 	// End:0x22
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console ResetR6Game");
+		Log("R6Console ResetR6Game");
 	}
 	bLaunchWasCalled = true;
 	bResetLevel = true;
@@ -730,7 +730,7 @@ function LaunchR6Game(optional bool bSkipFrameAndStart_)
 	// End:0x23
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console LaunchR6Game");
+		Log("R6Console LaunchR6Game");
 	}
 	bLaunchWasCalled = true;
 	m_bSkipAFrameAndStart = bSkipFrameAndStart_;
@@ -742,7 +742,7 @@ function LaunchR6MultiPlayerGame()
 	// End:0x2E
 	if(bShowLog)
 	{
-		__NFUN_231__("R6Console LaunchR6MultiPlayerGame");
+		Log("R6Console LaunchR6MultiPlayerGame");
 	}
 	bLaunchWasCalled = true;
 	bLaunchMultiPlayer = true;
@@ -767,49 +767,49 @@ function StartR6Game(optional bool bResetLevel)
 	// End:0x39
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_168__("R6Console StartR6Game bResetLevel=", string(bResetLevel)));
+		Log(("R6Console StartR6Game bResetLevel=" @ string(bResetLevel)));
 	}
 	ViewportOwner.Actor.StopMusic(m_StopMainMenuMusic);
 	m_bStartR6GameInProgress = true;
 	// End:0xAF
-	if(__NFUN_129__(bResetLevel))
+	if((!bResetLevel))
 	{
-		Class'Engine.Actor'.static.__NFUN_2618__().m_iNewResolutionX = 0;
-		Class'Engine.Actor'.static.__NFUN_2618__().m_iNewResolutionY = 0;
-		Class'Engine.Actor'.static.__NFUN_2618__().m_bChangeResRequested = true;
+		Class'Engine.Actor'.static.GetCanvas().m_iNewResolutionX = 0;
+		Class'Engine.Actor'.static.GetCanvas().m_iNewResolutionY = 0;
+		Class'Engine.Actor'.static.GetCanvas().m_bChangeResRequested = true;
 	}
 	// End:0xC0
-	if(__NFUN_129__(bResetLevel))
+	if((!bResetLevel))
 	{
 		CloseR6MainMenu();
 	}
 	// End:0xD1
-	if(__NFUN_129__(bResetLevel))
+	if((!bResetLevel))
 	{
 		CreateInGameMenus();
 	}
 	// End:0x144
-	if(__NFUN_242__(bLaunchMultiPlayer, false))
+	if((bLaunchMultiPlayer == false))
 	{
 		// End:0x144
-		if(ViewportOwner.Actor.Level.Game.__NFUN_303__('R6GameInfo'))
+		if(ViewportOwner.Actor.Level.Game.IsA('R6GameInfo'))
 		{
 			ViewportOwner.Actor.Level.Game.DeployCharacters(ViewportOwner.Actor);
 		}
 	}
 	pGameInfo = R6GameInfo(ViewportOwner.Actor.Level.Game);
 	// End:0x1DA
-	if(__NFUN_130__(__NFUN_119__(pGameInfo, none), __NFUN_119__(pGameInfo.m_HudClass, none)))
+	if(((pGameInfo != none) && (pGameInfo.m_HudClass != none)))
 	{
 		ViewportOwner.Actor.ClientSetHUD(R6GameInfo(ViewportOwner.Actor.Level.Game).m_HudClass, none);		
 	}
 	else
 	{
-		ViewportOwner.Actor.ClientSetHUD(Class'Engine.Actor'.static.__NFUN_1524__().GetDefaultHUD(), none);
+		ViewportOwner.Actor.ClientSetHUD(Class'Engine.Actor'.static.GetModMgr().GetDefaultHUD(), none);
 	}
-	Class'Engine.Actor'.static.__NFUN_2622__();
+	Class'Engine.Actor'.static.GarbageCollect();
 	// End:0x2CC
-	if(__NFUN_130__(__NFUN_154__(int(ViewportOwner.Actor.Level.NetMode), int(NM_Standalone)), ViewportOwner.Actor.Level.Game.__NFUN_303__('R6AbstractGameInfo')))
+	if(((int(ViewportOwner.Actor.Level.NetMode) == int(NM_Standalone)) && ViewportOwner.Actor.Level.Game.IsA('R6AbstractGameInfo')))
 	{
 		R6AbstractGameInfo(ViewportOwner.Actor.Level.Game).SpawnAIandInitGoInGame();
 		ViewportOwner.Actor.Level.Game.m_bGameStarted = true;
@@ -817,13 +817,13 @@ function StartR6Game(optional bool bResetLevel)
 	// End:0x2F0
 	if(bLaunchMultiPlayer)
 	{
-		Class'Engine.Actor'.static.__NFUN_1551__().m_bMultiPlayerGameActive = true;		
+		Class'Engine.Actor'.static.GetGameManager().m_bMultiPlayerGameActive = true;		
 	}
 	else
 	{
 		aPC = R6PlayerController(ViewportOwner.Actor);
 		// End:0x472
-		if(__NFUN_119__(aPC, none))
+		if((aPC != none))
 		{
 			// End:0x44B
 			if(R6GameInfo(ViewportOwner.Actor.Level.Game).m_bUseClarkVoice)
@@ -849,20 +849,20 @@ exec function unlock()
 	J0x07:
 
 	// End:0x77 [Loop If]
-	if(__NFUN_150__(i, m_aCampaigns.Length))
+	if((i < m_aCampaigns.Length))
 	{
 		j = 0;
 		J0x1E:
 
 		// End:0x6D [Loop If]
-		if(__NFUN_150__(j, m_aCampaigns[i].m_missions.Length))
+		if((j < m_aCampaigns[i].m_missions.Length))
 		{
 			m_aCampaigns[i].m_missions[j].m_bIsLocked = false;
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x1E;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -877,10 +877,10 @@ function SendGoCode(Object.EGoCode eGo)
 	J0x07:
 
 	// End:0x54 [Loop If]
-	if(__NFUN_150__(i, 3))
+	if((i < 3))
 	{
 		Master.m_StartGameInfo.m_TeamInfo[i].m_pPlanning.NotifyActionPoint(4, eGo);
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -896,12 +896,12 @@ function int GetSpawnNumber()
 
 	StartGameInfo = Master.m_StartGameInfo;
 	// End:0x21
-	if(__NFUN_114__(StartGameInfo, none))
+	if((StartGameInfo == none))
 	{
 		return 0;
 	}
 	// End:0x37
-	if(__NFUN_129__(StartGameInfo.m_bIsPlaying))
+	if((!StartGameInfo.m_bIsPlaying))
 	{
 		return 0;
 	}
@@ -919,14 +919,14 @@ function R6Campaign GetCampaignFromString(string szName)
 
 	J0x00:
 	// End:0x48 [Loop If]
-	if(__NFUN_150__(i, m_aCampaigns.Length))
+	if((i < m_aCampaigns.Length))
 	{
 		// End:0x3E
-		if(__NFUN_122__(__NFUN_235__(m_aCampaigns[i].m_szCampaignFile), __NFUN_235__(szName)))
+		if((Caps(m_aCampaigns[i].m_szCampaignFile) == Caps(szName)))
 		{
 			return m_aCampaigns[i];
 		}
-		__NFUN_163__(i);
+		(++i);
 		// [Loop Continue]
 		goto J0x00;
 	}
@@ -944,7 +944,7 @@ function UnlockMissions()
 	local R6Campaign campaign;
 
 	// End:0x0D
-	if(__NFUN_114__(m_playerCustomMission, none))
+	if((m_playerCustomMission == none))
 	{
 		return;
 	}
@@ -952,28 +952,28 @@ function UnlockMissions()
 	J0x14:
 
 	// End:0xE0 [Loop If]
-	if(__NFUN_150__(i, m_playerCustomMission.m_aCampaignFileName.Length))
+	if((i < m_playerCustomMission.m_aCampaignFileName.Length))
 	{
 		campaign = GetCampaignFromString(m_playerCustomMission.m_aCampaignFileName[i]);
 		// End:0xD6
-		if(__NFUN_119__(campaign, none))
+		if((campaign != none))
 		{
 			iMaxMissionIndex = m_playerCustomMission.m_iNbMapUnlock[i];
-			__NFUN_165__(iMaxMissionIndex);
-			iMaxMissionIndex = __NFUN_251__(iMaxMissionIndex, 0, campaign.m_missions.Length);
+			(iMaxMissionIndex++);
+			iMaxMissionIndex = Clamp(iMaxMissionIndex, 0, campaign.m_missions.Length);
 			iMissionIndex = 0;
 			J0x9D:
 
 			// End:0xD6 [Loop If]
-			if(__NFUN_150__(iMissionIndex, iMaxMissionIndex))
+			if((iMissionIndex < iMaxMissionIndex))
 			{
 				campaign.m_missions[iMissionIndex].m_bIsLocked = false;
-				__NFUN_163__(iMissionIndex);
+				(++iMissionIndex);
 				// [Loop Continue]
 				goto J0x9D;
 			}
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x14;
 	}
@@ -995,14 +995,14 @@ function bool UpdateCurrentMapAvailable(R6PlayerCampaign pCampaign, optional boo
 	J0x07:
 
 	// End:0xAE [Loop If]
-	if(__NFUN_150__(i, m_playerCustomMission.m_aCampaignFileName.Length))
+	if((i < m_playerCustomMission.m_aCampaignFileName.Length))
 	{
 		// End:0xA4
-		if(__NFUN_122__(m_playerCustomMission.m_aCampaignFileName[i], pCampaign.m_CampaignFileName))
+		if((m_playerCustomMission.m_aCampaignFileName[i] == pCampaign.m_CampaignFileName))
 		{
 			bInTab = true;
 			// End:0xA1
-			if(__NFUN_150__(m_playerCustomMission.m_iNbMapUnlock[i], pCampaign.m_iNoMission))
+			if((m_playerCustomMission.m_iNbMapUnlock[i] < pCampaign.m_iNoMission))
 			{
 				bFileChange = true;
 				m_playerCustomMission.m_iNbMapUnlock[i] = pCampaign.m_iNoMission;
@@ -1010,36 +1010,36 @@ function bool UpdateCurrentMapAvailable(R6PlayerCampaign pCampaign, optional boo
 			// [Explicit Break]
 			goto J0xAE;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
 	J0xAE:
 
 	// End:0x132
-	if(__NFUN_130__(__NFUN_129__(bInTab), __NFUN_123__(pCampaign.m_CampaignFileName, "")))
+	if(((!bInTab) && (pCampaign.m_CampaignFileName != "")))
 	{
 		m_playerCustomMission.m_aCampaignFileName[m_playerCustomMission.m_aCampaignFileName.Length] = pCampaign.m_CampaignFileName;
 		m_playerCustomMission.m_iNbMapUnlock[m_playerCustomMission.m_iNbMapUnlock.Length] = pCampaign.m_iNoMission;
 		bFileChange = true;
 	}
 	// End:0x277
-	if(__NFUN_242__(bCheckCampaignMission, true))
+	if((bCheckCampaignMission == true))
 	{
 		i = 0;
 		J0x145:
 
 		// End:0x19A [Loop If]
-		if(__NFUN_150__(i, m_aCampaigns.Length))
+		if((i < m_aCampaigns.Length))
 		{
 			// End:0x190
-			if(__NFUN_122__(pCampaign.m_CampaignFileName, m_aCampaigns[i].m_szCampaignFile))
+			if((pCampaign.m_CampaignFileName == m_aCampaigns[i].m_szCampaignFile))
 			{
 				pCampaignMatch = m_aCampaigns[i];
 				// [Explicit Break]
 				goto J0x19A;
 			}
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x145;
 		}
@@ -1049,30 +1049,30 @@ function bool UpdateCurrentMapAvailable(R6PlayerCampaign pCampaign, optional boo
 		J0x1A1:
 
 		// End:0x277 [Loop If]
-		if(__NFUN_130__(__NFUN_119__(pCampaignMatch, none), __NFUN_150__(i, pCampaignMatch.missions.Length)))
+		if(((pCampaignMatch != none) && (i < pCampaignMatch.missions.Length)))
 		{
-			pCampaignMatch.missions[i] = __NFUN_235__(pCampaignMatch.missions[i]);
-			szIniFile = __NFUN_112__(pCampaignMatch.missions[i], ".INI");
+			pCampaignMatch.missions[i] = Caps(pCampaignMatch.missions[i]);
+			szIniFile = (pCampaignMatch.missions[i] $ ".INI");
 			j = 0;
 			J0x21B:
 
 			// End:0x26D [Loop If]
-			if(__NFUN_150__(j, m_aMissionDescriptions.Length))
+			if((j < m_aMissionDescriptions.Length))
 			{
 				// End:0x263
-				if(__NFUN_122__(m_aMissionDescriptions[j].m_missionIniFile, szIniFile))
+				if((m_aMissionDescriptions[j].m_missionIniFile == szIniFile))
 				{
 					m_aMissionDescriptions[j].m_bCampaignMission = true;
 					// [Explicit Break]
 					goto J0x26D;
 				}
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x21B;
 			}
 			J0x26D:
 
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1A1;
 		}
@@ -1094,14 +1094,14 @@ function bool MapAlreadyInList(string szIniFilename)
 	J0x07:
 
 	// End:0x41 [Loop If]
-	if(__NFUN_150__(i, m_aMissionDescriptions.Length))
+	if((i < m_aMissionDescriptions.Length))
 	{
 		// End:0x37
-		if(__NFUN_122__(szIniFilename, m_aMissionDescriptions[i].m_missionIniFile))
+		if((szIniFilename == m_aMissionDescriptions[i].m_missionIniFile))
 		{
 			return true;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -1124,22 +1124,22 @@ function GetAllMissionDescriptions(string szCurrentMapDir)
 
 	pIniFileManager = new (none) Class'Engine.R6FileManager';
 	pFileManager = new (none) Class'Engine.R6FileManager';
-	iIniFiles = pIniFileManager.__NFUN_1525__(szCurrentMapDir, "ini");
-	iFiles = pFileManager.__NFUN_1525__(szCurrentMapDir, Class'Engine.Actor'.static.__NFUN_1519__());
+	iIniFiles = pIniFileManager.GetNbFile(szCurrentMapDir, "ini");
+	iFiles = pFileManager.GetNbFile(szCurrentMapDir, Class'Engine.Actor'.static.GetMapNameExt());
 	// End:0xCB
 	if(bShowLog)
 	{
-		__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__(__NFUN_112__("Looking for maps In Dir : ", szCurrentMapDir), ", found : "), string(iIniFiles)), " .ini files"), " and "), string(iFiles)), ".rsm"));
+		Log(((((((("Looking for maps In Dir : " $ szCurrentMapDir) $ ") $ string(iIniFiles)) $ " .ini files") $ " and ") $ string(iFiles)) $ ".rsm"));
 	}
 	i = 0;
 	J0xD2:
 
 	// End:0x25B [Loop If]
-	if(__NFUN_150__(i, iIniFiles))
+	if((i < iIniFiles))
 	{
-		pIniFileManager.__NFUN_1526__(i, szIniFilename);
+		pIniFileManager.GetFileName(i, szIniFilename);
 		// End:0x106
-		if(__NFUN_122__(szIniFilename, ""))
+		if((szIniFilename == ""))
 		{
 			// [Explicit Continue]
 			goto J0x251;
@@ -1153,28 +1153,28 @@ function GetAllMissionDescriptions(string szCurrentMapDir)
 			goto J0x251;
 		}
 		m_aMissionDescriptions[Index] = new (none) Class'Engine.R6MissionDescription';
-		m_aMissionDescriptions[Index].Init(ViewportOwner.Actor.Level, __NFUN_112__(szCurrentMapDir, szIniFilename));
+		m_aMissionDescriptions[Index].Init(ViewportOwner.Actor.Level, (szCurrentMapDir $ szIniFilename));
 		// End:0x232
-		if(__NFUN_123__(m_aMissionDescriptions[Index].m_MapName, ""))
+		if((m_aMissionDescriptions[Index].m_MapName != ""))
 		{
 			j = 0;
 			J0x19A:
 
 			// End:0x22F [Loop If]
-			if(__NFUN_150__(j, iFiles))
+			if((j < iFiles))
 			{
 				bMissionIsValid = false;
-				pFileManager.__NFUN_1526__(j, szFileName);
+				pFileManager.GetFileName(j, szFileName);
 				// End:0x1D6
-				if(__NFUN_122__(szFileName, ""))
+				if((szFileName == ""))
 				{
 					// [Explicit Continue]
 					goto J0x225;
 				}
-				szName = __NFUN_128__(szFileName, __NFUN_126__(szFileName, "."));
-				szName = __NFUN_235__(szName);
+				szName = Left(szFileName, InStr(szFileName, "."));
+				szName = Caps(szName);
 				// End:0x225
-				if(__NFUN_122__(szName, __NFUN_235__(m_aMissionDescriptions[Index].m_MapName)))
+				if((szName == Caps(m_aMissionDescriptions[Index].m_MapName)))
 				{
 					bMissionIsValid = true;
 					// [Explicit Break]
@@ -1182,7 +1182,7 @@ function GetAllMissionDescriptions(string szCurrentMapDir)
 				}
 				J0x225:
 
-				__NFUN_165__(j);
+				(j++);
 				// [Loop Continue]
 				goto J0x19A;
 			}
@@ -1194,13 +1194,13 @@ function GetAllMissionDescriptions(string szCurrentMapDir)
 			bMissionIsValid = false;
 		}
 		// End:0x251
-		if(__NFUN_129__(bMissionIsValid))
+		if((!bMissionIsValid))
 		{
 			m_aMissionDescriptions.Remove(Index, 1);
 		}
 		J0x251:
 
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0xD2;
 	}
@@ -1217,39 +1217,39 @@ function GetRestKitDescName(GameReplicationInfo gameRepInfo, R6ServerInfo pServe
 	local R6Mod pCurrentMod;
 	local int i;
 
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	_GRI = R6GameReplicationInfo(gameRepInfo);
 	i = 0;
 	J0x32:
 
 	// End:0x5DA [Loop If]
-	if(__NFUN_150__(i, pCurrentMod.m_aDescriptionPackage.Length))
+	if((i < pCurrentMod.m_aDescriptionPackage.Length))
 	{
-		WeaponClass = Class<R6Description>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[i], ".u"), Class'R6Description.R6Description'));
+		WeaponClass = Class<R6Description>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[i] $ ".u"), Class'R6Description.R6Description'));
 		_iCount = 0;
 		J0x7F:
 
 		// End:0x13B [Loop If]
-		if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(_GRI.m_szSubMachineGunsRes[_iCount], "")))
+		if(((_iCount < 32) && (_GRI.m_szSubMachineGunsRes[_iCount] != "")))
 		{
 			_bFound = false;
 			J0xB0:
 
 			// End:0x123 [Loop If]
-			if(__NFUN_130__(__NFUN_119__(WeaponClass, none), __NFUN_242__(_bFound, false)))
+			if(((WeaponClass != none) && (_bFound == false)))
 			{
 				// End:0x112
-				if(__NFUN_122__(WeaponClass.default.m_NameID, _GRI.m_szSubMachineGunsRes[_iCount]))
+				if((WeaponClass.default.m_NameID == _GRI.m_szSubMachineGunsRes[_iCount]))
 				{
 					pServerOptions.RestrictedSubMachineGuns[_iCount] = WeaponClass;
 					_bFound = true;
 				}
-				WeaponClass = Class<R6Description>(__NFUN_1006__());
+				WeaponClass = Class<R6Description>(GetNextClass());
 				// [Loop Continue]
 				goto J0xB0;
 			}
-			WeaponClass = Class<R6Description>(__NFUN_1301__());
-			__NFUN_165__(_iCount);
+			WeaponClass = Class<R6Description>(RewindToFirstClass());
+			(_iCount++);
 			// [Loop Continue]
 			goto J0x7F;
 		}
@@ -1257,26 +1257,26 @@ function GetRestKitDescName(GameReplicationInfo gameRepInfo, R6ServerInfo pServe
 		J0x142:
 
 		// End:0x1FE [Loop If]
-		if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(_GRI.m_szShotGunRes[_iCount], "")))
+		if(((_iCount < 32) && (_GRI.m_szShotGunRes[_iCount] != "")))
 		{
 			_bFound = false;
 			J0x173:
 
 			// End:0x1E6 [Loop If]
-			if(__NFUN_130__(__NFUN_119__(WeaponClass, none), __NFUN_242__(_bFound, false)))
+			if(((WeaponClass != none) && (_bFound == false)))
 			{
 				// End:0x1D5
-				if(__NFUN_122__(WeaponClass.default.m_NameID, _GRI.m_szShotGunRes[_iCount]))
+				if((WeaponClass.default.m_NameID == _GRI.m_szShotGunRes[_iCount]))
 				{
 					pServerOptions.RestrictedShotGuns[_iCount] = WeaponClass;
 					_bFound = true;
 				}
-				WeaponClass = Class<R6Description>(__NFUN_1006__());
+				WeaponClass = Class<R6Description>(GetNextClass());
 				// [Loop Continue]
 				goto J0x173;
 			}
-			WeaponClass = Class<R6Description>(__NFUN_1301__());
-			__NFUN_165__(_iCount);
+			WeaponClass = Class<R6Description>(RewindToFirstClass());
+			(_iCount++);
 			// [Loop Continue]
 			goto J0x142;
 		}
@@ -1284,26 +1284,26 @@ function GetRestKitDescName(GameReplicationInfo gameRepInfo, R6ServerInfo pServe
 		J0x205:
 
 		// End:0x2C1 [Loop If]
-		if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(_GRI.m_szAssRifleRes[_iCount], "")))
+		if(((_iCount < 32) && (_GRI.m_szAssRifleRes[_iCount] != "")))
 		{
 			_bFound = false;
 			J0x236:
 
 			// End:0x2A9 [Loop If]
-			if(__NFUN_130__(__NFUN_119__(WeaponClass, none), __NFUN_242__(_bFound, false)))
+			if(((WeaponClass != none) && (_bFound == false)))
 			{
 				// End:0x298
-				if(__NFUN_122__(WeaponClass.default.m_NameID, _GRI.m_szAssRifleRes[_iCount]))
+				if((WeaponClass.default.m_NameID == _GRI.m_szAssRifleRes[_iCount]))
 				{
 					pServerOptions.RestrictedAssultRifles[_iCount] = WeaponClass;
 					_bFound = true;
 				}
-				WeaponClass = Class<R6Description>(__NFUN_1006__());
+				WeaponClass = Class<R6Description>(GetNextClass());
 				// [Loop Continue]
 				goto J0x236;
 			}
-			WeaponClass = Class<R6Description>(__NFUN_1301__());
-			__NFUN_165__(_iCount);
+			WeaponClass = Class<R6Description>(RewindToFirstClass());
+			(_iCount++);
 			// [Loop Continue]
 			goto J0x205;
 		}
@@ -1311,26 +1311,26 @@ function GetRestKitDescName(GameReplicationInfo gameRepInfo, R6ServerInfo pServe
 		J0x2C8:
 
 		// End:0x384 [Loop If]
-		if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(_GRI.m_szMachGunRes[_iCount], "")))
+		if(((_iCount < 32) && (_GRI.m_szMachGunRes[_iCount] != "")))
 		{
 			_bFound = false;
 			J0x2F9:
 
 			// End:0x36C [Loop If]
-			if(__NFUN_130__(__NFUN_119__(WeaponClass, none), __NFUN_242__(_bFound, false)))
+			if(((WeaponClass != none) && (_bFound == false)))
 			{
 				// End:0x35B
-				if(__NFUN_122__(WeaponClass.default.m_NameID, _GRI.m_szMachGunRes[_iCount]))
+				if((WeaponClass.default.m_NameID == _GRI.m_szMachGunRes[_iCount]))
 				{
 					pServerOptions.RestrictedMachineGuns[_iCount] = WeaponClass;
 					_bFound = true;
 				}
-				WeaponClass = Class<R6Description>(__NFUN_1006__());
+				WeaponClass = Class<R6Description>(GetNextClass());
 				// [Loop Continue]
 				goto J0x2F9;
 			}
-			WeaponClass = Class<R6Description>(__NFUN_1301__());
-			__NFUN_165__(_iCount);
+			WeaponClass = Class<R6Description>(RewindToFirstClass());
+			(_iCount++);
 			// [Loop Continue]
 			goto J0x2C8;
 		}
@@ -1338,26 +1338,26 @@ function GetRestKitDescName(GameReplicationInfo gameRepInfo, R6ServerInfo pServe
 		J0x38B:
 
 		// End:0x447 [Loop If]
-		if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(_GRI.m_szSnipRifleRes[_iCount], "")))
+		if(((_iCount < 32) && (_GRI.m_szSnipRifleRes[_iCount] != "")))
 		{
 			_bFound = false;
 			J0x3BC:
 
 			// End:0x42F [Loop If]
-			if(__NFUN_130__(__NFUN_119__(WeaponClass, none), __NFUN_242__(_bFound, false)))
+			if(((WeaponClass != none) && (_bFound == false)))
 			{
 				// End:0x41E
-				if(__NFUN_122__(WeaponClass.default.m_NameID, _GRI.m_szSnipRifleRes[_iCount]))
+				if((WeaponClass.default.m_NameID == _GRI.m_szSnipRifleRes[_iCount]))
 				{
 					pServerOptions.RestrictedSniperRifles[_iCount] = WeaponClass;
 					_bFound = true;
 				}
-				WeaponClass = Class<R6Description>(__NFUN_1006__());
+				WeaponClass = Class<R6Description>(GetNextClass());
 				// [Loop Continue]
 				goto J0x3BC;
 			}
-			WeaponClass = Class<R6Description>(__NFUN_1301__());
-			__NFUN_165__(_iCount);
+			WeaponClass = Class<R6Description>(RewindToFirstClass());
+			(_iCount++);
 			// [Loop Continue]
 			goto J0x38B;
 		}
@@ -1365,26 +1365,26 @@ function GetRestKitDescName(GameReplicationInfo gameRepInfo, R6ServerInfo pServe
 		J0x44E:
 
 		// End:0x50A [Loop If]
-		if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(_GRI.m_szPistolRes[_iCount], "")))
+		if(((_iCount < 32) && (_GRI.m_szPistolRes[_iCount] != "")))
 		{
 			_bFound = false;
 			J0x47F:
 
 			// End:0x4F2 [Loop If]
-			if(__NFUN_130__(__NFUN_119__(WeaponClass, none), __NFUN_242__(_bFound, false)))
+			if(((WeaponClass != none) && (_bFound == false)))
 			{
 				// End:0x4E1
-				if(__NFUN_122__(WeaponClass.default.m_NameID, _GRI.m_szPistolRes[_iCount]))
+				if((WeaponClass.default.m_NameID == _GRI.m_szPistolRes[_iCount]))
 				{
 					pServerOptions.RestrictedPistols[_iCount] = WeaponClass;
 					_bFound = true;
 				}
-				WeaponClass = Class<R6Description>(__NFUN_1006__());
+				WeaponClass = Class<R6Description>(GetNextClass());
 				// [Loop Continue]
 				goto J0x47F;
 			}
-			WeaponClass = Class<R6Description>(__NFUN_1301__());
-			__NFUN_165__(_iCount);
+			WeaponClass = Class<R6Description>(RewindToFirstClass());
+			(_iCount++);
 			// [Loop Continue]
 			goto J0x44E;
 		}
@@ -1392,31 +1392,31 @@ function GetRestKitDescName(GameReplicationInfo gameRepInfo, R6ServerInfo pServe
 		J0x511:
 
 		// End:0x5CD [Loop If]
-		if(__NFUN_130__(__NFUN_150__(_iCount, 32), __NFUN_123__(_GRI.m_szMachPistolRes[_iCount], "")))
+		if(((_iCount < 32) && (_GRI.m_szMachPistolRes[_iCount] != "")))
 		{
 			_bFound = false;
 			J0x542:
 
 			// End:0x5B5 [Loop If]
-			if(__NFUN_130__(__NFUN_119__(WeaponClass, none), __NFUN_242__(_bFound, false)))
+			if(((WeaponClass != none) && (_bFound == false)))
 			{
 				// End:0x5A4
-				if(__NFUN_122__(WeaponClass.default.m_NameID, _GRI.m_szMachPistolRes[_iCount]))
+				if((WeaponClass.default.m_NameID == _GRI.m_szMachPistolRes[_iCount]))
 				{
 					pServerOptions.RestrictedMachinePistols[_iCount] = WeaponClass;
 					_bFound = true;
 				}
-				WeaponClass = Class<R6Description>(__NFUN_1006__());
+				WeaponClass = Class<R6Description>(GetNextClass());
 				// [Loop Continue]
 				goto J0x542;
 			}
-			WeaponClass = Class<R6Description>(__NFUN_1301__());
-			__NFUN_165__(_iCount);
+			WeaponClass = Class<R6Description>(RewindToFirstClass());
+			(_iCount++);
 			// [Loop Continue]
 			goto J0x511;
 		}
-		__NFUN_1007__();
-		__NFUN_165__(i);
+		FreePackageObjects();
+		(i++);
 		// [Loop Continue]
 		goto J0x32;
 	}
@@ -1427,7 +1427,7 @@ state UWindow
 {
 	function BeginState()
 	{
-		ConsoleState = __NFUN_284__();
+		ConsoleState = GetStateName();
 		return;
 	}
 
@@ -1449,7 +1449,7 @@ state UWindow
 			}
 		}
 		// End:0x209
-		if(__NFUN_130__(__NFUN_242__(bReturnToMenu, true), __NFUN_119__(Root, none)))
+		if(((bReturnToMenu == true) && (Root != none)))
 		{
 			bReturnToMenu = false;
 			// End:0x57
@@ -1465,10 +1465,10 @@ state UWindow
 					J0x6A:
 
 					// End:0x9E [Loop If]
-					if(__NFUN_150__(i, m_AWIDList.Length))
+					if((i < m_AWIDList.Length))
 					{
 						Root.ChangeCurrentWidget(m_AWIDList[i]);
-						__NFUN_165__(i);
+						(i++);
 						// [Loop Continue]
 						goto J0x6A;
 					}
@@ -1488,7 +1488,7 @@ state UWindow
 				// End:0x12F
 				case 1:
 					// End:0x11B
-					if(__NFUN_154__(int(m_PlayerCampaign.m_bCampaignCompleted), 1))
+					if((int(m_PlayerCampaign.m_bCampaignCompleted) == 1))
 					{
 						Root.ChangeCurrentWidget(18);
 						Canvas.m_bDisplayGameOutroVideo = true;						
@@ -1505,7 +1505,7 @@ state UWindow
 					if(m_bStartedByGSClient)
 					{
 						Root.ChangeCurrentWidget(20);
-						Class'Engine.Actor'.static.__NFUN_1551__().m_bReturnToGSClient = true;						
+						Class'Engine.Actor'.static.GetGameManager().m_bReturnToGSClient = true;						
 					}
 					else
 					{
@@ -1535,7 +1535,7 @@ state UWindow
 					break;
 				// End:0x206
 				case 8:
-					Class'Engine.Actor'.static.__NFUN_2622__();
+					Class'Engine.Actor'.static.GarbageCollect();
 					Root.ChangeCurrentWidget(36);
 					// End:0x209
 					break;
@@ -1547,12 +1547,12 @@ state UWindow
 		else
 		{
 			// End:0x2BA
-			if(__NFUN_130__(__NFUN_242__(bLaunchWasCalled, true), __NFUN_242__(m_bSkipAFrameAndStart, false)))
+			if(((bLaunchWasCalled == true) && (m_bSkipAFrameAndStart == false)))
 			{
 				// End:0x2A3
 				if(bResetLevel)
 				{
-					ViewportOwner.Actor.Level.__NFUN_2711__(0);
+					ViewportOwner.Actor.Level.SetBankSound(0);
 					R6GameInfo(ViewportOwner.Actor.Level.Game).RestartGameMgr();
 					StartR6Game(bResetLevel);
 					Root.ChangeCurrentWidget(0);
@@ -1568,7 +1568,7 @@ state UWindow
 			{
 				m_bSkipAFrameAndStart = false;
 				// End:0x2DE
-				if(__NFUN_119__(Root, none))
+				if((Root != none))
 				{
 					Root.bUWindowActive = true;
 				}
@@ -1586,7 +1586,7 @@ state UWindow
 		// End:0x59
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("R6Console state Uwindow KeyEvent eAction", string(eAction)), "Key"), string(eKey)));
+			Log(((("R6Console state Uwindow KeyEvent eAction" @ string(eAction)) @ "Key") @ string(eKey)));
 		}
 		switch(eAction)
 		{
@@ -1597,7 +1597,7 @@ state UWindow
 					// End:0xA1
 					case 1:
 						// End:0x9F
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(1, none, MouseX, MouseY, int(k));
 						}
@@ -1605,7 +1605,7 @@ state UWindow
 					// End:0xD6
 					case 2:
 						// End:0xD4
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(5, none, MouseX, MouseY, int(k));
 						}
@@ -1613,7 +1613,7 @@ state UWindow
 					// End:0x10B
 					case 4:
 						// End:0x109
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(3, none, MouseX, MouseY, int(k));
 						}
@@ -1621,19 +1621,19 @@ state UWindow
 					// End:0xFFFF
 					default:
 						// End:0x13C
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(8, none, MouseX, MouseY, int(k));
 						}
 						// End:0x159
-						if(ViewportOwner.Actor.__NFUN_2014__())
+						if(ViewportOwner.Actor.InPlanningMode())
 						{
 							return false;							
 						}
 						else
 						{
 							// End:0x178
-							if(__NFUN_119__(Root, none))
+							if((Root != none))
 							{
 								return Root.TrapKey(false);								
 							}
@@ -1651,7 +1651,7 @@ state UWindow
 			// End:0x349
 			case 1:
 				// End:0x1C4
-				if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+				if((int(k) == int(ViewportOwner.Actor.GetKey("Console"))))
 				{
 					// End:0x1BC
 					if(bLocked)
@@ -1666,7 +1666,7 @@ state UWindow
 					// End:0x200
 					case 1:
 						// End:0x1FE
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(0, none, MouseX, MouseY, int(k));
 						}
@@ -1674,7 +1674,7 @@ state UWindow
 					// End:0x235
 					case 2:
 						// End:0x233
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(4, none, MouseX, MouseY, int(k));
 						}
@@ -1682,7 +1682,7 @@ state UWindow
 					// End:0x26A
 					case 4:
 						// End:0x268
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(2, none, MouseX, MouseY, int(k));
 						}
@@ -1690,7 +1690,7 @@ state UWindow
 					// End:0x29F
 					case 237:
 						// End:0x29D
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(6, none, MouseX, MouseY, int(k));
 						}
@@ -1698,7 +1698,7 @@ state UWindow
 					// End:0x2D4
 					case 236:
 						// End:0x2D2
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(7, none, MouseX, MouseY, int(k));
 						}
@@ -1706,19 +1706,19 @@ state UWindow
 					// End:0xFFFF
 					default:
 						// End:0x305
-						if(__NFUN_119__(Root, none))
+						if((Root != none))
 						{
 							Root.WindowEvent(9, none, MouseX, MouseY, int(k));
 						}
 						// End:0x322
-						if(ViewportOwner.Actor.__NFUN_2014__())
+						if(ViewportOwner.Actor.InPlanningMode())
 						{
 							return false;							
 						}
 						else
 						{
 							// End:0x341
-							if(__NFUN_119__(Root, none))
+							if((Root != none))
 							{
 								return Root.TrapKey(false);								
 							}
@@ -1739,12 +1739,12 @@ state UWindow
 				{
 					// End:0x376
 					case 228:
-						MouseX = __NFUN_174__(MouseX, __NFUN_171__(MouseScale, fDelta));
+						MouseX = (MouseX + (MouseScale * fDelta));
 						// End:0x39A
 						break;
 					// End:0x397
 					case 229:
-						MouseY = __NFUN_175__(MouseY, __NFUN_171__(MouseScale, fDelta));
+						MouseY = (MouseY - (MouseScale * fDelta));
 						// End:0x39A
 						break;
 					// End:0xFFFF
@@ -1760,14 +1760,14 @@ state UWindow
 				break;
 		}
 		// End:0x3C0
-		if(ViewportOwner.Actor.__NFUN_2014__())
+		if(ViewportOwner.Actor.InPlanningMode())
 		{
 			return false;			
 		}
 		else
 		{
 			// End:0x3DF
-			if(__NFUN_119__(Root, none))
+			if((Root != none))
 			{
 				return Root.TrapKey(true);				
 			}
@@ -1786,7 +1786,7 @@ state Typing
 	function PostRender(Canvas Canvas)
 	{
 		// End:0x1C
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.bUWindowActive = true;
 		}
@@ -1803,67 +1803,67 @@ state Typing
 		// End:0x4C
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("R6Console state Typing KeyEvent Action", string(Action)), "Key"), string(Key)));
+			Log(((("R6Console state Typing KeyEvent Action" @ string(Action)) @ "Key") @ string(Key)));
 		}
 		// End:0x64
-		if(__NFUN_154__(int(Action), int(1)))
+		if((int(Action) == int(1)))
 		{
 			bIgnoreKeys = false;
 		}
 		// End:0xAB
-		if(__NFUN_130__(__NFUN_154__(int(Action), int(1)), __NFUN_154__(int(Key), int(ViewportOwner.Actor.__NFUN_2706__("Console")))))
+		if(((int(Action) == int(1)) && (int(Key) == int(ViewportOwner.Actor.GetKey("Console")))))
 		{
-			__NFUN_113__(ConsoleState);
+			GotoState(ConsoleState);
 			return true;
 		}
 		// End:0xE7
-		if(__NFUN_154__(int(Key), int(27)))
+		if((int(Key) == int(27)))
 		{
 			// End:0xDD
-			if(__NFUN_123__(TypedStr, ""))
+			if((TypedStr != ""))
 			{
 				TypedStr = "";
 				HistoryCur = HistoryTop;				
 			}
 			else
 			{
-				__NFUN_113__(ConsoleState);
+				GotoState(ConsoleState);
 			}			
 		}
 		else
 		{
 			// End:0x3D4
-			if(__NFUN_130__(__NFUN_154__(int(Key), int(13)), __NFUN_154__(int(Action), int(3))))
+			if(((int(Key) == int(13)) && (int(Action) == int(3))))
 			{
 				// End:0x3CA
-				if(__NFUN_123__(TypedStr, ""))
+				if((TypedStr != ""))
 				{
 					// End:0x212
-					if(__NFUN_122__(__NFUN_235__(__NFUN_128__(TypedStr, __NFUN_125__("WRITESERVER"))), "WRITESERVER"))
+					if((Caps(Left(TypedStr, Len("WRITESERVER"))) == "WRITESERVER"))
 					{
-						FileName = __NFUN_112__(__NFUN_112__("..\\", Class'Engine.Actor'.static.__NFUN_1524__().GetIniFilesDir()), "\\");
-						FileName = __NFUN_112__(FileName, __NFUN_234__(TypedStr, __NFUN_147__(__NFUN_125__(TypedStr), __NFUN_125__("WRITESERVER "))));
+						FileName = (("..\\" $ Class'Engine.Actor'.static.GetModMgr().GetIniFilesDir()) $ "\\");
+						FileName = (FileName $ Right(TypedStr, (Len(TypedStr) - Len("WRITESERVER "))));
 						// End:0x212
-						if(__NFUN_154__(int(Root.m_eCurWidgetInUse), int(Root.19)))
+						if((int(Root.m_eCurWidgetInUse) == int(Root.19)))
 						{
 							Root.SetServerOptions();
-							Class'Engine.Actor'.static.__NFUN_1283__(FileName);
+							Class'Engine.Actor'.static.SaveServerOptions(FileName);
 							Message(Localize("Errors", "SaveSuccessful", "R6Engine"), 6.0000000);
-							__NFUN_113__(ConsoleState);
+							GotoState(ConsoleState);
 							return true;
 						}
 					}
 					// End:0x23E
-					if(__NFUN_123__(__NFUN_235__(__NFUN_128__(TypedStr, __NFUN_125__("SHOT"))), "SHOT"))
+					if((Caps(Left(TypedStr, Len("SHOT"))) != "SHOT"))
 					{
 						Message(TypedStr, 6.0000000);
 					}
 					History[HistoryTop] = TypedStr;
-					HistoryTop = int(__NFUN_173__(float(__NFUN_146__(HistoryTop, 1)), float(16)));
+					HistoryTop = int((float((HistoryTop + 1)) % float(16)));
 					// End:0x29F
-					if(__NFUN_132__(__NFUN_154__(HistoryBot, -1), __NFUN_154__(HistoryBot, HistoryTop)))
+					if(((HistoryBot == -1) || (HistoryBot == HistoryTop)))
 					{
-						HistoryBot = int(__NFUN_173__(float(__NFUN_146__(HistoryBot, 1)), float(16)));
+						HistoryBot = int((float((HistoryBot + 1)) % float(16)));
 					}
 					HistoryCur = HistoryTop;
 					temp = TypedStr;
@@ -1872,72 +1872,72 @@ state Typing
 					J0x2C8:
 
 					// End:0x301 [Loop If]
-					if(__NFUN_130__(__NFUN_151__(__NFUN_125__(Temp1), 0), __NFUN_122__(__NFUN_128__(Temp1, 1), " ")))
+					if(((Len(Temp1) > 0) && (Left(Temp1, 1) == " ")))
 					{
-						Temp1 = __NFUN_234__(Temp1, __NFUN_147__(__NFUN_125__(Temp1), 1));
+						Temp1 = Right(Temp1, (Len(Temp1) - 1));
 						// [Loop Continue]
 						goto J0x2C8;
 					}
 					// End:0x349
-					if(__NFUN_122__(__NFUN_235__(__NFUN_128__(Temp1, __NFUN_125__("TYPE"))), "TYPE"))
+					if((Caps(Left(Temp1, Len("TYPE"))) == "TYPE"))
 					{
 						Message(Localize("Errors", "Exec", "R6Engine"), 6.0000000);						
 					}
 					else
 					{
 						// End:0x382
-						if(__NFUN_129__(ConsoleCommand(temp)))
+						if((!ConsoleCommand(temp)))
 						{
 							Message(Localize("Errors", "Exec", "R6Engine"), 6.0000000);
 						}
 					}
 					Message("", 6.0000000);
 					// End:0x3B5
-					if(__NFUN_122__(__NFUN_235__(__NFUN_128__(temp, __NFUN_125__("SHOT"))), "SHOT"))
+					if((Caps(Left(temp, Len("SHOT"))) == "SHOT"))
 					{
-						__NFUN_113__(ConsoleState);						
+						GotoState(ConsoleState);						
 					}
 					else
 					{
 						// End:0x3C7
-						if(__NFUN_129__(bShowConsoleLog))
+						if((!bShowConsoleLog))
 						{
-							__NFUN_113__(ConsoleState);
+							GotoState(ConsoleState);
 						}
 					}					
 				}
 				else
 				{
-					__NFUN_113__(ConsoleState);
+					GotoState(ConsoleState);
 				}				
 			}
 			else
 			{
 				// End:0x3E9
-				if(__NFUN_154__(int(Action), int(3)))
+				if((int(Action) == int(3)))
 				{
 					return true;					
 				}
 				else
 				{
 					// End:0x452
-					if(__NFUN_154__(int(Key), int(38)))
+					if((int(Key) == int(38)))
 					{
 						// End:0x44F
-						if(__NFUN_153__(HistoryBot, 0))
+						if((HistoryBot >= 0))
 						{
 							// End:0x421
-							if(__NFUN_154__(HistoryCur, HistoryBot))
+							if((HistoryCur == HistoryBot))
 							{
 								HistoryCur = HistoryTop;								
 							}
 							else
 							{
-								__NFUN_166__(HistoryCur);
+								(HistoryCur--);
 								// End:0x43E
-								if(__NFUN_150__(HistoryCur, 0))
+								if((HistoryCur < 0))
 								{
-									HistoryCur = __NFUN_147__(16, 1);
+									HistoryCur = (16 - 1);
 								}
 							}
 							TypedStr = History[HistoryCur];
@@ -1946,19 +1946,19 @@ state Typing
 					else
 					{
 						// End:0x4B6
-						if(__NFUN_154__(int(Key), int(40)))
+						if((int(Key) == int(40)))
 						{
 							// End:0x4B3
-							if(__NFUN_153__(HistoryBot, 0))
+							if((HistoryBot >= 0))
 							{
 								// End:0x48A
-								if(__NFUN_154__(HistoryCur, HistoryTop))
+								if((HistoryCur == HistoryTop))
 								{
 									HistoryCur = HistoryBot;									
 								}
 								else
 								{
-									HistoryCur = int(__NFUN_173__(float(__NFUN_146__(HistoryCur, 1)), float(16)));
+									HistoryCur = int((float((HistoryCur + 1)) % float(16)));
 								}
 								TypedStr = History[HistoryCur];
 							}							
@@ -1966,13 +1966,13 @@ state Typing
 						else
 						{
 							// End:0x504
-							if(__NFUN_132__(__NFUN_154__(int(Key), int(8)), __NFUN_154__(int(Key), int(37))))
+							if(((int(Key) == int(8)) || (int(Key) == int(37))))
 							{
 								m_bStringIsTooLong = false;
 								// End:0x504
-								if(__NFUN_151__(__NFUN_125__(TypedStr), 0))
+								if((Len(TypedStr) > 0))
 								{
-									TypedStr = __NFUN_128__(TypedStr, __NFUN_147__(__NFUN_125__(TypedStr), 1));
+									TypedStr = Left(TypedStr, (Len(TypedStr) - 1));
 								}
 							}
 						}
@@ -1993,17 +1993,17 @@ state Game
 		// End:0x28
 		if(bShowLog)
 		{
-			__NFUN_231__("R6Console  Game::BeginState");
+			Log("R6Console  Game::BeginState");
 		}
 		bCancelFire = true;
-		ConsoleState = __NFUN_284__();
+		ConsoleState = GetStateName();
 		return;
 	}
 
 	function PostRender(Canvas Canvas)
 	{
 		// End:0x27
-		if(__NFUN_119__(Root, none))
+		if((Root != none))
 		{
 			Root.bUWindowActive = true;
 			RenderUWindow(Canvas);
@@ -2016,22 +2016,22 @@ state Game
 		// End:0x26
 		if(bShowLog)
 		{
-			__NFUN_231__("R6Console  Game::EndState");
+			Log("R6Console  Game::EndState");
 		}
 		// End:0xE1
-		if(__NFUN_119__(ViewportOwner.Actor, none))
+		if((ViewportOwner.Actor != none))
 		{
 			// End:0x7E
-			if(__NFUN_119__(R6PlayerController(ViewportOwner.Actor), none))
+			if((R6PlayerController(ViewportOwner.Actor) != none))
 			{
 				// End:0x7E
-				if(__NFUN_242__(bCancelFire, true))
+				if((bCancelFire == true))
 				{
 					R6PlayerController(ViewportOwner.Actor).bFire = 0;
 				}
 			}
 			// End:0xE1
-			if(__NFUN_119__(ViewportOwner.Actor.Level, none))
+			if((ViewportOwner.Actor.Level != none))
 			{
 				ViewportOwner.Actor.Level.m_bInGamePlanningZoomingIn = false;
 				ViewportOwner.Actor.Level.m_bInGamePlanningZoomingOut = false;
@@ -2049,20 +2049,20 @@ state Game
 		// End:0x56
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("R6Console state Game KeyEvent eAction", string(eAction)), "Key"), string(eKey)));
+			Log(((("R6Console state Game KeyEvent eAction" @ string(eAction)) @ "Key") @ string(eKey)));
 		}
 		// End:0x720
-		if(__NFUN_129__(bTyping))
+		if((!bTyping))
 		{
 			// End:0x414
-			if(__NFUN_130__(__NFUN_119__(ViewportOwner.Actor, none), __NFUN_129__(ViewportOwner.Actor.__NFUN_281__('Dead'))))
+			if(((ViewportOwner.Actor != none) && (!ViewportOwner.Actor.IsInState('Dead'))))
 			{
 				switch(eAction)
 				{
 					// End:0x1D2
 					case 3:
 						// End:0xDD
-						if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("ToggleMap"))))
+						if((int(k) == int(ViewportOwner.Actor.GetKey("ToggleMap"))))
 						{
 							m_bInGamePlanningKeyDown = false;
 							return true;							
@@ -2070,7 +2070,7 @@ state Game
 						else
 						{
 							// End:0x157
-							if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("MapZoomIn"))))
+							if((int(k) == int(ViewportOwner.Actor.GetKey("MapZoomIn"))))
 							{
 								// End:0x154
 								if(ViewportOwner.Actor.Level.m_bInGamePlanningActive)
@@ -2082,7 +2082,7 @@ state Game
 							else
 							{
 								// End:0x1CF
-								if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("MapZoomOut"))))
+								if((int(k) == int(ViewportOwner.Actor.GetKey("MapZoomOut"))))
 								{
 									// End:0x1CF
 									if(ViewportOwner.Actor.Level.m_bInGamePlanningActive)
@@ -2098,10 +2098,10 @@ state Game
 					// End:0x411
 					case 1:
 						// End:0x31C
-						if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("ToggleMap"))))
+						if((int(k) == int(ViewportOwner.Actor.GetKey("ToggleMap"))))
 						{
 							// End:0x2A2
-							if(__NFUN_242__(ViewportOwner.Actor.Level.m_bInGamePlanningActive, false))
+							if((ViewportOwner.Actor.Level.m_bInGamePlanningActive == false))
 							{
 								ViewportOwner.Actor.Level.m_bInGamePlanningActive = true;
 								ViewportOwner.Actor.Level.m_bInGamePlanningZoomingIn = false;
@@ -2112,7 +2112,7 @@ state Game
 							else
 							{
 								// End:0x319
-								if(__NFUN_242__(m_bInGamePlanningKeyDown, false))
+								if((m_bInGamePlanningKeyDown == false))
 								{
 									ViewportOwner.Actor.Level.m_bInGamePlanningActive = false;
 									ViewportOwner.Actor.Level.m_bInGamePlanningZoomingIn = false;
@@ -2124,7 +2124,7 @@ state Game
 						else
 						{
 							// End:0x396
-							if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("MapZoomIn"))))
+							if((int(k) == int(ViewportOwner.Actor.GetKey("MapZoomIn"))))
 							{
 								// End:0x393
 								if(ViewportOwner.Actor.Level.m_bInGamePlanningActive)
@@ -2136,7 +2136,7 @@ state Game
 							else
 							{
 								// End:0x40E
-								if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("MapZoomOut"))))
+								if((int(k) == int(ViewportOwner.Actor.GetKey("MapZoomOut"))))
 								{
 									// End:0x40E
 									if(ViewportOwner.Actor.Level.m_bInGamePlanningActive)
@@ -2161,7 +2161,7 @@ state Game
 					// End:0x555
 					case 3:
 						// End:0x475
-						if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("ShowCompleteHUD"))))
+						if((int(k) == int(ViewportOwner.Actor.GetKey("ShowCompleteHUD"))))
 						{
 							R6PlayerController(ViewportOwner.Actor).m_bShowCompleteHUD = false;
 							return true;
@@ -2171,7 +2171,7 @@ state Game
 							// End:0x4B2
 							case 1:
 								// End:0x4AF
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(1, none, MouseX, MouseY, int(k));
 								}
@@ -2180,7 +2180,7 @@ state Game
 							// End:0x4E8
 							case 2:
 								// End:0x4E5
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(5, none, MouseX, MouseY, int(k));
 								}
@@ -2189,7 +2189,7 @@ state Game
 							// End:0x51E
 							case 4:
 								// End:0x51B
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(3, none, MouseX, MouseY, int(k));
 								}
@@ -2198,7 +2198,7 @@ state Game
 							// End:0xFFFF
 							default:
 								// End:0x54F
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(8, none, MouseX, MouseY, int(k));
 								}
@@ -2211,7 +2211,7 @@ state Game
 					// End:0x6C6
 					case 1:
 						// End:0x591
-						if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+						if((int(k) == int(ViewportOwner.Actor.GetKey("Console"))))
 						{
 							type();
 							return true;							
@@ -2219,7 +2219,7 @@ state Game
 						else
 						{
 							// End:0x5E6
-							if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("ShowCompleteHUD"))))
+							if((int(k) == int(ViewportOwner.Actor.GetKey("ShowCompleteHUD"))))
 							{
 								R6PlayerController(ViewportOwner.Actor).m_bShowCompleteHUD = true;
 								return true;
@@ -2230,7 +2230,7 @@ state Game
 							// End:0x623
 							case 1:
 								// End:0x620
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(0, none, MouseX, MouseY, int(k));
 								}
@@ -2239,7 +2239,7 @@ state Game
 							// End:0x659
 							case 2:
 								// End:0x656
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(4, none, MouseX, MouseY, int(k));
 								}
@@ -2248,7 +2248,7 @@ state Game
 							// End:0x68F
 							case 4:
 								// End:0x68C
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(2, none, MouseX, MouseY, int(k));
 								}
@@ -2257,7 +2257,7 @@ state Game
 							// End:0xFFFF
 							default:
 								// End:0x6C0
-								if(__NFUN_119__(Root, none))
+								if((Root != none))
 								{
 									Root.WindowEvent(9, none, MouseX, MouseY, int(k));
 								}
@@ -2273,12 +2273,12 @@ state Game
 						{
 							// End:0x6F3
 							case 228:
-								MouseX = __NFUN_174__(MouseX, __NFUN_171__(MouseScale, fDelta));
+								MouseX = (MouseX + (MouseScale * fDelta));
 								// End:0x717
 								break;
 							// End:0x714
 							case 229:
-								MouseY = __NFUN_175__(MouseY, __NFUN_171__(MouseScale, fDelta));
+								MouseY = (MouseY - (MouseScale * fDelta));
 								// End:0x717
 								break;
 							// End:0xFFFF
@@ -2311,17 +2311,17 @@ state TrainingInstruction extends UWindowCanPlay
 		// End:0x65
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__(__NFUN_168__("R6Console state TrainingInstruction KeyEvent eAction", string(Action)), "Key"), string(Key)));
+			Log(((("R6Console state TrainingInstruction KeyEvent eAction" @ string(Action)) @ "Key") @ string(Key)));
 		}
 		switch(Action)
 		{
 			// End:0xE1
 			case 3:
 				// End:0xDE
-				if(__NFUN_132__(__NFUN_154__(int(k), int(27)), __NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Action")))))
+				if(((int(k) == int(27)) || (int(k) == int(ViewportOwner.Actor.GetKey("Action")))))
 				{
 					// End:0xDC
-					if(__NFUN_119__(Root, none))
+					if((Root != none))
 					{
 						Root.WindowEvent(8, none, MouseX, MouseY, int(k));
 					}
@@ -2332,7 +2332,7 @@ state TrainingInstruction extends UWindowCanPlay
 			// End:0x183
 			case 1:
 				// End:0x125
-				if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Console"))))
+				if((int(k) == int(ViewportOwner.Actor.GetKey("Console"))))
 				{
 					// End:0x11D
 					if(bLocked)
@@ -2343,12 +2343,12 @@ state TrainingInstruction extends UWindowCanPlay
 					return true;
 				}
 				// End:0x152
-				if(__NFUN_154__(int(k), int(ViewportOwner.Actor.__NFUN_2706__("Action"))))
+				if((int(k) == int(ViewportOwner.Actor.GetKey("Action"))))
 				{
 					return true;
 				}
 				// End:0x180
-				if(__NFUN_119__(Root, none))
+				if((Root != none))
 				{
 					Root.WindowEvent(9, none, MouseX, MouseY, int(k));
 				}

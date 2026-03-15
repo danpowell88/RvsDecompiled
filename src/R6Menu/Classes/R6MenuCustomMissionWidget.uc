@@ -506,7 +506,7 @@ function Notify(UWindowDialogControl C, byte E)
 				}
 				CurrentMission = R6MissionDescription(SelectedItem.m_Object);
 				// End:0x165
-				if(__NFUN_114__(CurrentMission, none))
+				if((CurrentMission == none))
 				{
 					// [Explicit Continue]
 					goto J0x1A8;
@@ -527,10 +527,10 @@ function Notify(UWindowDialogControl C, byte E)
 	else
 	{
 		// End:0x1D7
-		if(__NFUN_154__(int(E), 11))
+		if((int(E) == 11))
 		{
 			// End:0x1D7
-			if(__NFUN_114__(C, m_GameLevelBox))
+			if((C == m_GameLevelBox))
 			{
 				// End:0x1D7
 				if(ValidateBeforePlanning())
@@ -555,34 +555,34 @@ function CreateButtons()
 	m_pButPraticeMission = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButPraticeMission.ToolTipString = Localize("Tip", "GameType_Practice", "R6Menu");
 	m_pButPraticeMission.Text = Localize("CustomMission", "ButtonPractice", "R6Menu");
-	m_pButPraticeMission.m_iButtonID = GetLevel().__NFUN_2015__("RGM_PracticeMode");
+	m_pButPraticeMission.m_iButtonID = GetLevel().ConvertGameTypeToInt("RGM_PracticeMode");
 	m_pButPraticeMission.Align = 0;
 	m_pButPraticeMission.m_buttonFont = m_LeftButtonFont;
 	m_pButPraticeMission.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButPraticeMission.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButLoneWolf = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButLoneWolf.ToolTipString = Localize("Tip", "GameType_LoneWolf", "R6Menu");
 	m_pButLoneWolf.Text = Localize("CustomMission", "ButtonLoneWolf", "R6Menu");
-	m_pButLoneWolf.m_iButtonID = GetLevel().__NFUN_2015__("RGM_LoneWolfMode");
+	m_pButLoneWolf.m_iButtonID = GetLevel().ConvertGameTypeToInt("RGM_LoneWolfMode");
 	m_pButLoneWolf.Align = 0;
 	m_pButLoneWolf.m_buttonFont = m_LeftButtonFont;
 	m_pButLoneWolf.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButLoneWolf.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButTerroHunt = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButTerroHunt.ToolTipString = Localize("Tip", "GameType_TerroristHunt", "R6Menu");
 	m_pButTerroHunt.Text = Localize("CustomMission", "ButtonTerroHunt", "R6Menu");
-	m_pButTerroHunt.m_iButtonID = GetLevel().__NFUN_2015__("RGM_TerroristHuntMode");
+	m_pButTerroHunt.m_iButtonID = GetLevel().ConvertGameTypeToInt("RGM_TerroristHuntMode");
 	m_pButTerroHunt.Align = 0;
 	m_pButTerroHunt.m_buttonFont = m_LeftButtonFont;
 	m_pButTerroHunt.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
 	m_pButTerroHunt.ResizeToText();
-	__NFUN_184__(fYPos, fYOffset);
+	(fYPos += fYOffset);
 	m_pButHostageRescue = R6WindowButton(CreateControl(Class'R6Window.R6WindowButton', fXOffset, fYPos, fWidth, fHeight, self));
 	m_pButHostageRescue.ToolTipString = Localize("Tip", "GameType_HostageRescue", "R6Menu");
 	m_pButHostageRescue.Text = Localize("CustomMission", "ButtonHostageRescue", "R6Menu");
-	m_pButHostageRescue.m_iButtonID = GetLevel().__NFUN_2015__("RGM_HostageRescueMode");
+	m_pButHostageRescue.m_iButtonID = GetLevel().ConvertGameTypeToInt("RGM_HostageRescueMode");
 	m_pButHostageRescue.Align = 0;
 	m_pButHostageRescue.m_buttonFont = m_LeftButtonFont;
 	m_pButHostageRescue.CheckToDownSizeFont(m_LeftDownSizeFont, 0.0000000);
@@ -623,7 +623,7 @@ function bool ButtonsUsingDownSizeFont()
 	local bool Result;
 
 	// End:0x56
-	if(__NFUN_132__(__NFUN_132__(__NFUN_132__(m_pButPraticeMission.IsFontDownSizingNeeded(), m_pButLoneWolf.IsFontDownSizingNeeded()), m_pButTerroHunt.IsFontDownSizingNeeded()), m_pButHostageRescue.IsFontDownSizingNeeded()))
+	if((((m_pButPraticeMission.IsFontDownSizingNeeded() || m_pButLoneWolf.IsFontDownSizingNeeded()) || m_pButTerroHunt.IsFontDownSizingNeeded()) || m_pButHostageRescue.IsFontDownSizingNeeded()))
 	{
 		Result = true;
 	}

@@ -268,7 +268,7 @@ simulated function Click(float X, float Y)
 	// End:0x48
 	if((m_bPlayButtonSnd && (DownSound != none)))
 	{
-		GetPlayerOwner().__NFUN_264__(DownSound, 9) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/;
+		GetPlayerOwner().PlaySound(DownSound, 9);
 		// End:0x48
 		if(m_bWaitSoundFinish)
 		{
@@ -283,7 +283,7 @@ simulated function Click(float X, float Y)
 function DoubleClick(float X, float Y)
 {
 	// End:0x13
-	if(__NFUN_129__(bDisabled))
+	if((!bDisabled))
 	{
 		Notify(11);
 	}
@@ -293,7 +293,7 @@ function DoubleClick(float X, float Y)
 function RClick(float X, float Y)
 {
 	// End:0x13
-	if(__NFUN_129__(bDisabled))
+	if((!bDisabled))
 	{
 		Notify(6);
 	}
@@ -303,7 +303,7 @@ function RClick(float X, float Y)
 function MClick(float X, float Y)
 {
 	// End:0x13
-	if(__NFUN_129__(bDisabled))
+	if((!bDisabled))
 	{
 		Notify(5);
 	}

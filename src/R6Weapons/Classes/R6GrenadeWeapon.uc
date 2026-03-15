@@ -485,28 +485,28 @@ state ReadyToThrow
 
 		pawnOwner = R6Pawn(Owner);
 		// End:0x180
-		if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_119__(pawnOwner.Controller, none), __NFUN_154__(int(pawnOwner.Controller.bFire), 0)), __NFUN_154__(int(pawnOwner.Controller.bAltFire), 0)), __NFUN_242__(pawnOwner.m_bWeaponTransition, false)), m_bFistPersonAnimFinish))
+		if((((((pawnOwner.Controller != none) && (int(pawnOwner.Controller.bFire) == 0)) && (int(pawnOwner.Controller.bAltFire) == 0)) && (pawnOwner.m_bWeaponTransition == false)) && m_bFistPersonAnimFinish))
 		{
 			m_bCanThrowGrenade = false;
 			m_bFistPersonAnimFinish = false;
 			// End:0xD1
 			if(bShowLog)
 			{
-				__NFUN_231__("!!!!!!!!!!!!!!! THROW GRENADE!!!!!!!!!!!!!!!");
+				Log("!!!!!!!!!!!!!!! THROW GRENADE!!!!!!!!!!!!!!!");
 			}
 			ServerSetGrenade(m_eThrow);
 			// End:0x179
 			if(pawnOwner.m_bIsPlayer)
 			{
 				// End:0x179
-				if(__NFUN_242__(R6PlayerController(pawnOwner.Controller).bBehindView, false))
+				if((R6PlayerController(pawnOwner.Controller).bBehindView == false))
 				{
 					// End:0x179
-					if(__NFUN_119__(m_FPHands, none))
+					if((m_FPHands != none))
 					{
 						m_bFistPersonAnimFinish = false;
 						// End:0x16A
-						if(__NFUN_132__(__NFUN_132__(__NFUN_154__(int(m_eThrow), int(1)), __NFUN_154__(int(m_eThrow), int(6))), __NFUN_154__(int(m_eThrow), int(7))))
+						if((((int(m_eThrow) == int(1)) || (int(m_eThrow) == int(6))) || (int(m_eThrow) == int(7))))
 						{
 							m_FPHands.FireGrenadeThrow();							
 						}
@@ -517,7 +517,7 @@ state ReadyToThrow
 					}
 				}
 			}
-			__NFUN_113__('WaitEndOfThrow');
+			GotoState('WaitEndOfThrow');
 		}
 		return;
 	}
@@ -552,7 +552,7 @@ state WaitEndOfThrow
 		// End:0x39
 		if(bShowLog)
 		{
-			__NFUN_231__("ReadyToThrow = FirstPersonAnimFinish");
+			Log("ReadyToThrow = FirstPersonAnimFinish");
 		}
 		return;
 	}
@@ -560,40 +560,40 @@ state WaitEndOfThrow
 	simulated function Tick(float fDeltaTime)
 	{
 		// End:0xCD
-		if(__NFUN_130__(m_bFistPersonAnimFinish, m_bCanThrowGrenade))
+		if((m_bFistPersonAnimFinish && m_bCanThrowGrenade))
 		{
 			ServerSetGrenade(0);
 			// End:0x46
 			if(bShowLog)
 			{
-				__NFUN_231__(__NFUN_168__("ClientThrowGrenade()", string(m_iNbBulletsInWeapon)));
+				Log(("ClientThrowGrenade()" @ string(m_iNbBulletsInWeapon)));
 			}
 			// End:0x85
-			if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+			if((int(m_iNbBulletsInWeapon) == 0))
 			{
 				SetStaticMesh(none);
 				m_PawnWaitAnimLow = 'StandNoGun_nt';
 				m_PawnWaitAnimHigh = 'StandNoGun_nt';
 				m_PawnWaitAnimProne = 'StandNoGun_nt';
-				__NFUN_113__('NoGrenadeLeft');				
+				GotoState('NoGrenadeLeft');				
 			}
 			else
 			{
 				// End:0xC6
-				if(__NFUN_119__(m_FPHands, none))
+				if((m_FPHands != none))
 				{
 					// End:0xB6
-					if(m_FPHands.__NFUN_281__('RaiseWeapon'))
+					if(m_FPHands.IsInState('RaiseWeapon'))
 					{
 						m_FPHands.BeginState();						
 					}
 					else
 					{
-						m_FPHands.__NFUN_113__('RaiseWeapon');
+						m_FPHands.GotoState('RaiseWeapon');
 					}
 				}
 			}
-			__NFUN_113__('StandByToThrow');
+			GotoState('StandByToThrow');
 		}
 		return;
 	}
@@ -603,7 +603,7 @@ state WaitEndOfThrow
 		// End:0x3C
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("WEAPON - BeginState of WaitEndOfThrow for ", string(self)));
+			Log(("WEAPON - BeginState of WaitEndOfThrow for " $ string(self)));
 		}
 		return;
 	}
@@ -633,7 +633,7 @@ state NoGrenadeLeft
 		// End:0x4E
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(string(self), " state NoChargesLeft : BeginState()..."));
+			Log((string(self) $ " state NoChargesLeft : BeginState()..."));
 		}
 		Pawn(Owner).Controller.m_bHideReticule = true;
 		Pawn(Owner).Controller.m_bLockWeaponActions = false;
@@ -649,10 +649,10 @@ state RaiseWeapon
 		// End:0x30
 		if(bShowLog)
 		{
-			__NFUN_231__("GRENADE - RaiseWeapon Calling SWUAD");
+			Log("GRENADE - RaiseWeapon Calling SWUAD");
 		}
 		R6PlayerController(Pawn(Owner).Controller).ServerWeaponUpAnimDone();
-		__NFUN_113__('StandByToThrow');
+		GotoState('StandByToThrow');
 		R6Pawn(Owner).m_fWeaponJump = m_stAccuracyValues.fWeaponJump;
 		return;
 	}
@@ -662,7 +662,7 @@ state RaiseWeapon
 		// End:0x31
 		if(bShowLog)
 		{
-			__NFUN_231__("GRENADE - Leaving state Raise Weapon");
+			Log("GRENADE - Leaving state Raise Weapon");
 		}
 		Pawn(Owner).Controller.m_bHideReticule = false;
 		Pawn(Owner).Controller.m_bLockWeaponActions = false;
@@ -675,20 +675,20 @@ state RaiseWeapon
 		// End:0x39
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__("WEAPON - BeginState of RaiseWeapon for ", string(self)));
+			Log(("WEAPON - BeginState of RaiseWeapon for " $ string(self)));
 		}
 		Pawn(Owner).Controller.m_bLockWeaponActions = true;
 		// End:0xB6
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			// End:0x89
-			if(m_FPHands.__NFUN_281__('RaiseWeapon'))
+			if(m_FPHands.IsInState('RaiseWeapon'))
 			{
 				m_FPHands.BeginState();				
 			}
 			else
 			{
-				m_FPHands.__NFUN_113__('RaiseWeapon');
+				m_FPHands.GotoState('RaiseWeapon');
 			}
 			m_FPWeapon.m_smGun.bHidden = false;			
 		}
@@ -735,22 +735,22 @@ state DiscardWeapon
 		// End:0x36
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("IN:", string(self)), "::DiscardWeapon::BeginState()"));
+			Log((("IN:" @ string(self)) @ "::DiscardWeapon::BeginState()"));
 		}
 		// End:0xBF
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			aPawn = Pawn(Owner);
 			// End:0x99
-			if(__NFUN_119__(aPawn.Controller, none))
+			if((aPawn.Controller != none))
 			{
 				aPawn.Controller.m_bLockWeaponActions = true;
 				aPawn.Controller.m_bHideReticule = true;
 			}
 			// End:0xB9
-			if(__NFUN_151__(int(m_iNbBulletsInWeapon), 0))
+			if((int(m_iNbBulletsInWeapon) > 0))
 			{
-				m_FPHands.__NFUN_113__('DiscardWeapon');				
+				m_FPHands.GotoState('DiscardWeapon');				
 			}
 			else
 			{
@@ -765,7 +765,7 @@ state DiscardWeapon
 		// End:0x34
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_168__(__NFUN_168__("IN:", string(self)), "::DiscardWeapon::EndState()"));
+			Log((("IN:" @ string(self)) @ "::DiscardWeapon::EndState()"));
 		}
 		return;
 	}
@@ -779,26 +779,26 @@ state PutWeaponDown
 		// End:0x47
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WEAPON - ", string(self)), " - BeginState of PutWeaponDown for "), string(self)));
+			Log(((("WEAPON - " $ string(self)) $ " - BeginState of PutWeaponDown for ") $ string(self)));
 		}
 		// End:0xB5
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			// End:0x69
-			if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+			if((int(m_iNbBulletsInWeapon) == 0))
 			{
-				__NFUN_113__('NoGrenadeLeft');				
+				GotoState('NoGrenadeLeft');				
 			}
 			else
 			{
 				// End:0x86
-				if(m_FPHands.__NFUN_281__('FiringWeapon'))
+				if(m_FPHands.IsInState('FiringWeapon'))
 				{
-					__NFUN_113__('None');
+					GotoState('None');
 					return;
 				}
 				Pawn(Owner).Controller.m_bLockWeaponActions = true;
-				m_FPHands.__NFUN_113__('PutWeaponDown');
+				m_FPHands.GotoState('PutWeaponDown');
 			}
 		}
 		return;
@@ -813,19 +813,19 @@ state BringWeaponUp
 		// End:0x47
 		if(bShowLog)
 		{
-			__NFUN_231__(__NFUN_112__(__NFUN_112__(__NFUN_112__("WEAPON - ", string(self)), " - BeginState of BringWeaponUp for "), string(self)));
+			Log(((("WEAPON - " $ string(self)) $ " - BeginState of BringWeaponUp for ") $ string(self)));
 		}
 		// End:0x7C
-		if(__NFUN_119__(m_FPHands, none))
+		if((m_FPHands != none))
 		{
 			// End:0x69
-			if(__NFUN_154__(int(m_iNbBulletsInWeapon), 0))
+			if((int(m_iNbBulletsInWeapon) == 0))
 			{
-				__NFUN_113__('NoGrenadeLeft');				
+				GotoState('NoGrenadeLeft');				
 			}
 			else
 			{
-				m_FPHands.__NFUN_113__('BringWeaponUp');
+				m_FPHands.GotoState('BringWeaponUp');
 			}			
 		}
 		else
@@ -838,13 +838,13 @@ state BringWeaponUp
 	function FirstPersonAnimOver()
 	{
 		// End:0x49
-		if(__NFUN_130__(__NFUN_119__(Pawn(Owner).Controller, none), __NFUN_154__(int(Pawn(Owner).Controller.bFire), 1)))
+		if(((Pawn(Owner).Controller != none) && (int(Pawn(Owner).Controller.bFire) == 1)))
 		{
-			__NFUN_113__('NormalFire');			
+			GotoState('NormalFire');			
 		}
 		else
 		{
-			__NFUN_113__('StandByToThrow');
+			GotoState('StandByToThrow');
 		}
 		return;
 	}

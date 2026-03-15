@@ -494,19 +494,19 @@ function CompareGearItemsWithServerRest(string _AServerRest[32], out array< Clas
 		J0x2D:
 
 		// End:0x91 [Loop If]
-		if(__NFUN_130__(__NFUN_150__(j, _AGearItems.Length), __NFUN_129__(bFound)))
+		if(((j < _AGearItems.Length) && (!bFound)))
 		{
 			// End:0x87
-			if(__NFUN_122__(_AServerRest[i], Class<R6Description>(_AGearItems[j]).default.m_NameID))
+			if((_AServerRest[i] == Class<R6Description>(_AGearItems[j]).default.m_NameID))
 			{
 				bFound = true;
 				_AGearItems.Remove(j, 1);
 			}
-			__NFUN_165__(j);
+			(j++);
 			// [Loop Continue]
 			goto J0x2D;
 		}
-		__NFUN_165__(i);
+		(i++);
 		// [Loop Continue]
 		goto J0x0F;
 	}
@@ -524,37 +524,37 @@ function GetAllPrimaryWeapon()
 	local int j;
 	local R6Mod pCurrentMod;
 
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	// End:0xF6
-	if(__NFUN_154__(m_ADefaultPrimaryWeapons.Length, 0))
+	if((m_ADefaultPrimaryWeapons.Length == 0))
 	{
 		i = 0;
 		j = 0;
 		J0x35:
 
 		// End:0xF3 [Loop If]
-		if(__NFUN_150__(j, pCurrentMod.m_aDescriptionPackage.Length))
+		if((j < pCurrentMod.m_aDescriptionPackage.Length))
 		{
-			PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6PrimaryWeaponDescription'));
+			PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6PrimaryWeaponDescription'));
 			J0x7B:
 
 			// End:0xE6 [Loop If]
-			if(__NFUN_119__(PrimaryWeaponClass, none))
+			if((PrimaryWeaponClass != none))
 			{
-				bEquipValid = __NFUN_123__(PrimaryWeaponClass.default.m_NameID, "NONE");
+				bEquipValid = (PrimaryWeaponClass.default.m_NameID != "NONE");
 				// End:0xD5
 				if(bEquipValid)
 				{
 					m_APrimaryWeapons[i] = PrimaryWeaponClass;
 					m_ADefaultPrimaryWeapons[i] = PrimaryWeaponClass;
-					__NFUN_165__(i);
+					(i++);
 				}
-				PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(__NFUN_1006__());
+				PrimaryWeaponClass = Class<R6PrimaryWeaponDescription>(GetNextClass());
 				// [Loop Continue]
 				goto J0x7B;
 			}
-			__NFUN_1007__();
-			__NFUN_165__(j);
+			FreePackageObjects();
+			(j++);
 			// [Loop Continue]
 			goto J0x35;
 		}		
@@ -565,10 +565,10 @@ function GetAllPrimaryWeapon()
 		J0xFD:
 
 		// End:0x12E [Loop If]
-		if(__NFUN_150__(i, m_ADefaultPrimaryWeapons.Length))
+		if((i < m_ADefaultPrimaryWeapons.Length))
 		{
 			m_APrimaryWeapons[i] = m_ADefaultPrimaryWeapons[i];
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xFD;
 		}
@@ -587,37 +587,37 @@ function GetAllSecondaryWeapon()
 	local int j;
 	local R6Mod pCurrentMod;
 
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	// End:0xF6
-	if(__NFUN_154__(m_ADefaultSecondaryWeapons.Length, 0))
+	if((m_ADefaultSecondaryWeapons.Length == 0))
 	{
 		i = 0;
 		j = 0;
 		J0x35:
 
 		// End:0xF3 [Loop If]
-		if(__NFUN_150__(j, pCurrentMod.m_aDescriptionPackage.Length))
+		if((j < pCurrentMod.m_aDescriptionPackage.Length))
 		{
-			SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6SecondaryWeaponDescription'));
+			SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6SecondaryWeaponDescription'));
 			J0x7B:
 
 			// End:0xE6 [Loop If]
-			if(__NFUN_119__(SecondaryWeaponClass, none))
+			if((SecondaryWeaponClass != none))
 			{
-				bEquipValid = __NFUN_123__(SecondaryWeaponClass.default.m_NameID, "NONE");
+				bEquipValid = (SecondaryWeaponClass.default.m_NameID != "NONE");
 				// End:0xD5
 				if(bEquipValid)
 				{
 					m_ASecondaryWeapons[i] = SecondaryWeaponClass;
 					m_ADefaultSecondaryWeapons[i] = SecondaryWeaponClass;
-					__NFUN_165__(i);
+					(i++);
 				}
-				SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(__NFUN_1006__());
+				SecondaryWeaponClass = Class<R6SecondaryWeaponDescription>(GetNextClass());
 				// [Loop Continue]
 				goto J0x7B;
 			}
-			__NFUN_1007__();
-			__NFUN_165__(j);
+			FreePackageObjects();
+			(j++);
 			// [Loop Continue]
 			goto J0x35;
 		}		
@@ -628,10 +628,10 @@ function GetAllSecondaryWeapon()
 		J0xFD:
 
 		// End:0x12E [Loop If]
-		if(__NFUN_150__(i, m_ADefaultSecondaryWeapons.Length))
+		if((i < m_ADefaultSecondaryWeapons.Length))
 		{
 			m_ASecondaryWeapons[i] = m_ADefaultSecondaryWeapons[i];
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xFD;
 		}
@@ -650,37 +650,37 @@ function GetAllGadgets()
 	local int j;
 	local R6Mod pCurrentMod;
 
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	// End:0xF6
-	if(__NFUN_154__(m_ADefaultGadgets.Length, 0))
+	if((m_ADefaultGadgets.Length == 0))
 	{
 		i = 0;
 		j = 0;
 		J0x35:
 
 		// End:0xF3 [Loop If]
-		if(__NFUN_150__(j, pCurrentMod.m_aDescriptionPackage.Length))
+		if((j < pCurrentMod.m_aDescriptionPackage.Length))
 		{
-			GadgetClass = Class<R6GadgetDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6GadgetDescription'));
+			GadgetClass = Class<R6GadgetDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6GadgetDescription'));
 			J0x7B:
 
 			// End:0xE6 [Loop If]
-			if(__NFUN_119__(GadgetClass, none))
+			if((GadgetClass != none))
 			{
-				bEquipValid = __NFUN_123__(GadgetClass.default.m_NameID, "NONE");
+				bEquipValid = (GadgetClass.default.m_NameID != "NONE");
 				// End:0xD5
 				if(bEquipValid)
 				{
 					m_AGadgets[i] = GadgetClass;
 					m_ADefaultGadgets[i] = GadgetClass;
-					__NFUN_165__(i);
+					(i++);
 				}
-				GadgetClass = Class<R6GadgetDescription>(__NFUN_1006__());
+				GadgetClass = Class<R6GadgetDescription>(GetNextClass());
 				// [Loop Continue]
 				goto J0x7B;
 			}
-			__NFUN_1007__();
-			__NFUN_165__(j);
+			FreePackageObjects();
+			(j++);
 			// [Loop Continue]
 			goto J0x35;
 		}		
@@ -691,10 +691,10 @@ function GetAllGadgets()
 		J0xFD:
 
 		// End:0x12E [Loop If]
-		if(__NFUN_150__(i, m_ADefaultGadgets.Length))
+		if((i < m_ADefaultGadgets.Length))
 		{
 			m_AGadgets[i] = m_ADefaultGadgets[i];
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0xFD;
 		}
@@ -714,9 +714,9 @@ function GetAllWeaponGadget()
 	local int j;
 	local R6Mod pCurrentMod;
 
-	pCurrentMod = Class'Engine.Actor'.static.__NFUN_1524__().m_pCurrentMod;
+	pCurrentMod = Class'Engine.Actor'.static.GetModMgr().m_pCurrentMod;
 	// End:0x1E3
-	if(__NFUN_154__(m_ADefaultWpnGadget.Length, 0))
+	if((m_ADefaultWpnGadget.Length == 0))
 	{
 		WeaponGadgetClass = Class'R6Description.R6DescWeaponGadgetNone';
 		m_APriWpnGadget[0] = WeaponGadgetClass.default.m_NameID;
@@ -727,15 +727,15 @@ function GetAllWeaponGadget()
 		J0x7B:
 
 		// End:0x1E0 [Loop If]
-		if(__NFUN_150__(j, pCurrentMod.m_aDescriptionPackage.Length))
+		if((j < pCurrentMod.m_aDescriptionPackage.Length))
 		{
-			WeaponGadgetClass = Class<R6WeaponGadgetDescription>(__NFUN_1005__(__NFUN_112__(pCurrentMod.m_aDescriptionPackage[j], ".u"), Class'R6Description.R6WeaponGadgetDescription'));
+			WeaponGadgetClass = Class<R6WeaponGadgetDescription>(GetFirstPackageClass((pCurrentMod.m_aDescriptionPackage[j] $ ".u"), Class'R6Description.R6WeaponGadgetDescription'));
 			J0xC1:
 
 			// End:0x1D3 [Loop If]
-			if(__NFUN_119__(WeaponGadgetClass, none))
+			if((WeaponGadgetClass != none))
 			{
-				bEquipValid = __NFUN_130__(__NFUN_123__(WeaponGadgetClass.default.m_NameID, "NONE"), WeaponGadgetClass.default.m_bPriGadgetWAvailable);
+				bEquipValid = ((WeaponGadgetClass.default.m_NameID != "NONE") && WeaponGadgetClass.default.m_bPriGadgetWAvailable);
 				// End:0x1C2
 				if(bEquipValid)
 				{
@@ -744,32 +744,32 @@ function GetAllWeaponGadget()
 					J0x115:
 
 					// End:0x162 [Loop If]
-					if(__NFUN_130__(__NFUN_150__(k, m_APriWpnGadget.Length), __NFUN_129__(bFound)))
+					if(((k < m_APriWpnGadget.Length) && (!bFound)))
 					{
 						// End:0x158
-						if(__NFUN_122__(WeaponGadgetClass.default.m_NameID, m_APriWpnGadget[k]))
+						if((WeaponGadgetClass.default.m_NameID == m_APriWpnGadget[k]))
 						{
 							bFound = true;
 						}
-						__NFUN_165__(k);
+						(k++);
 						// [Loop Continue]
 						goto J0x115;
 					}
 					// End:0x1C2
-					if(__NFUN_129__(bFound))
+					if((!bFound))
 					{
 						m_APriWpnGadget[i] = WeaponGadgetClass.default.m_NameID;
 						m_ASecWpnGadget[i] = WeaponGadgetClass.default.m_NameID;
 						m_ADefaultWpnGadget[i] = WeaponGadgetClass.default.m_NameID;
-						__NFUN_165__(i);
+						(i++);
 					}
 				}
-				WeaponGadgetClass = Class<R6WeaponGadgetDescription>(__NFUN_1006__());
+				WeaponGadgetClass = Class<R6WeaponGadgetDescription>(GetNextClass());
 				// [Loop Continue]
 				goto J0xC1;
 			}
-			__NFUN_1007__();
-			__NFUN_165__(j);
+			FreePackageObjects();
+			(j++);
 			// [Loop Continue]
 			goto J0x7B;
 		}		
@@ -780,11 +780,11 @@ function GetAllWeaponGadget()
 		J0x1EA:
 
 		// End:0x232 [Loop If]
-		if(__NFUN_150__(i, m_ADefaultWpnGadget.Length))
+		if((i < m_ADefaultWpnGadget.Length))
 		{
 			m_APriWpnGadget[i] = m_ADefaultWpnGadget[i];
 			m_ASecWpnGadget[i] = m_ADefaultWpnGadget[i];
-			__NFUN_165__(i);
+			(i++);
 			// [Loop Continue]
 			goto J0x1EA;
 		}

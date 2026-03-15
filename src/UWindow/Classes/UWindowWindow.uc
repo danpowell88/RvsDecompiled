@@ -699,10 +699,10 @@ final function PaintClients(Canvas C, float X, float Y)
 			if(((Child.ClippingRegion.W > 0) && (Child.ClippingRegion.H > 0)))
 			{
 				// End:0x5C7
-				if(__NFUN_129__(Child.m_bPreCalculatePos))
+				if((!Child.m_bPreCalculatePos))
 				{
-					Child.WindowEvent(11, C, __NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop), 0);
-					Child.AfterPaint(C, __NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop));
+					Child.WindowEvent(11, C, (X - Child.WinLeft), (Y - Child.WinTop), 0);
+					Child.AfterPaint(C, (X - Child.WinLeft), (Y - Child.WinTop));
 				}
 				Child.m_bPreCalculatePos = false;
 			}
@@ -715,8 +715,8 @@ final function PaintClients(Canvas C, float X, float Y)
 	}
 	C.ClipX = ClipX;
 	C.ClipY = ClipY;
-	C.HalfClipX = __NFUN_171__(C.ClipX, 0.5000000);
-	C.HalfClipY = __NFUN_171__(C.ClipY, 0.5000000);
+	C.HalfClipX = (C.ClipX * 0.5000000);
+	C.HalfClipY = (C.ClipY * 0.5000000);
 	return;
 }
 
@@ -728,7 +728,7 @@ final function UWindowWindow FindWindowUnder(float X, float Y)
 	J0x0B:
 
 	// End:0x17A [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.bUWindowActive = bUWindowActive;
 		// End:0x46
@@ -737,12 +737,12 @@ final function UWindowWindow FindWindowUnder(float X, float Y)
 			Child.bLeaveOnscreen = true;
 		}
 		// End:0x163
-		if(__NFUN_132__(bUWindowActive, Child.bLeaveOnscreen))
+		if((bUWindowActive || Child.bLeaveOnscreen))
 		{
 			// End:0x163
-			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, Child.WinLeft), __NFUN_178__(X, __NFUN_174__(Child.WinLeft, Child.WinWidth))), __NFUN_179__(Y, Child.WinTop)), __NFUN_178__(Y, __NFUN_174__(Child.WinTop, Child.WinHeight))), __NFUN_129__(Child.CheckMousePassThrough(__NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop)))))
+			if((((((X >= Child.WinLeft) && (X <= (Child.WinLeft + Child.WinWidth))) && (Y >= Child.WinTop)) && (Y <= (Child.WinTop + Child.WinHeight))) && (!Child.CheckMousePassThrough((X - Child.WinLeft), (Y - Child.WinTop)))))
 			{
-				return Child.super(UWindowWindow).FindWindowUnder(__NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop));
+				return Child.super(UWindowWindow).FindWindowUnder((X - Child.WinLeft), (Y - Child.WinTop));
 			}
 		}
 		Child = Child.PrevSiblingWindow;
@@ -765,7 +765,7 @@ function ApplyResolutionOnWindowsPos(float X, float Y)
 	J0x0B:
 
 	// End:0x1A6 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.bUWindowActive = bUWindowActive;
 		// End:0x46
@@ -779,23 +779,23 @@ function ApplyResolutionOnWindowsPos(float X, float Y)
 			return;
 		}
 		// End:0x18F
-		if(__NFUN_132__(bUWindowActive, Child.bLeaveOnscreen))
+		if((bUWindowActive || Child.bLeaveOnscreen))
 		{
-			fX = __NFUN_171__(__NFUN_175__(Root.WinWidth, float(640)), 0.5000000);
-			fY = __NFUN_171__(__NFUN_175__(Root.WinHeight, float(480)), 0.5000000);
+			fX = ((Root.WinWidth - float(640)) * 0.5000000);
+			fY = ((Root.WinHeight - float(480)) * 0.5000000);
 			// End:0x127
-			if(__NFUN_181__(Child.OrgXOffset, fX))
+			if((Child.OrgXOffset != fX))
 			{
-				__NFUN_185__(Child.WinLeft, Child.OrgXOffset);
+				(Child.WinLeft -= Child.OrgXOffset);
 				Child.OrgXOffset = fX;
-				__NFUN_184__(Child.WinLeft, Child.OrgXOffset);
+				(Child.WinLeft += Child.OrgXOffset);
 			}
 			// End:0x18F
-			if(__NFUN_181__(Child.OrgYOffset, fY))
+			if((Child.OrgYOffset != fY))
 			{
-				__NFUN_185__(Child.WinTop, Child.OrgYOffset);
+				(Child.WinTop -= Child.OrgYOffset);
 				Child.OrgYOffset = fY;
-				__NFUN_184__(Child.WinTop, Child.OrgYOffset);
+				(Child.WinTop += Child.OrgYOffset);
 			}
 		}
 		Child = Child.PrevSiblingWindow;
@@ -812,14 +812,14 @@ function bool PropagateKey(UWindowWindow.WinMessage Msg, Canvas C, float X, floa
 
 	Child = LastChildWindow;
 	// End:0x48
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(ActiveWindow, none), __NFUN_119__(Child, ActiveWindow)), __NFUN_129__(Child.bTransient)))
+	if((((ActiveWindow != none) && (Child != ActiveWindow)) && (!Child.bTransient)))
 	{
 		Child = ActiveWindow;
 	}
 	J0x48:
 
 	// End:0x115 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.bUWindowActive = bUWindowActive;
 		// End:0x83
@@ -828,9 +828,9 @@ function bool PropagateKey(UWindowWindow.WinMessage Msg, Canvas C, float X, floa
 			Child.bLeaveOnscreen = true;
 		}
 		// End:0xFE
-		if(__NFUN_130__(__NFUN_132__(bUWindowActive, Child.bLeaveOnscreen), Child.bAcceptsFocus))
+		if(((bUWindowActive || Child.bLeaveOnscreen) && Child.bAcceptsFocus))
 		{
-			Child.WindowEvent(Msg, C, __NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop), Key);
+			Child.WindowEvent(Msg, C, (X - Child.WinLeft), (Y - Child.WinTop), Key);
 			return true;
 		}
 		Child = Child.PrevSiblingWindow;
@@ -847,14 +847,14 @@ final function UWindowWindow CheckKeyFocusWindow()
 
 	Child = LastChildWindow;
 	// End:0x48
-	if(__NFUN_130__(__NFUN_130__(__NFUN_119__(ActiveWindow, none), __NFUN_119__(Child, ActiveWindow)), __NFUN_129__(Child.bTransient)))
+	if((((ActiveWindow != none) && (Child != ActiveWindow)) && (!Child.bTransient)))
 	{
 		Child = ActiveWindow;
 	}
 	J0x48:
 
 	// End:0xD9 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.bUWindowActive = bUWindowActive;
 		// End:0x83
@@ -863,7 +863,7 @@ final function UWindowWindow CheckKeyFocusWindow()
 			Child.bLeaveOnscreen = true;
 		}
 		// End:0xC2
-		if(__NFUN_132__(bUWindowActive, Child.bLeaveOnscreen))
+		if((bUWindowActive || Child.bLeaveOnscreen))
 		{
 			// End:0xC2
 			if(Child.bAcceptsFocus)
@@ -887,7 +887,7 @@ final function bool MessageClients(UWindowWindow.WinMessage Msg, Canvas C, float
 	J0x0B:
 
 	// End:0x18A [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.bUWindowActive = bUWindowActive;
 		// End:0x46
@@ -896,12 +896,12 @@ final function bool MessageClients(UWindowWindow.WinMessage Msg, Canvas C, float
 			Child.bLeaveOnscreen = true;
 		}
 		// End:0x173
-		if(__NFUN_132__(bUWindowActive, Child.bLeaveOnscreen))
+		if((bUWindowActive || Child.bLeaveOnscreen))
 		{
 			// End:0x173
-			if(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_130__(__NFUN_179__(X, Child.WinLeft), __NFUN_178__(X, __NFUN_174__(Child.WinLeft, Child.WinWidth))), __NFUN_179__(Y, Child.WinTop)), __NFUN_178__(Y, __NFUN_174__(Child.WinTop, Child.WinHeight))), __NFUN_129__(Child.CheckMousePassThrough(__NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop)))))
+			if((((((X >= Child.WinLeft) && (X <= (Child.WinLeft + Child.WinWidth))) && (Y >= Child.WinTop)) && (Y <= (Child.WinTop + Child.WinHeight))) && (!Child.CheckMousePassThrough((X - Child.WinLeft), (Y - Child.WinTop)))))
 			{
-				Child.WindowEvent(Msg, C, __NFUN_175__(X, Child.WinLeft), __NFUN_175__(Y, Child.WinTop), Key);
+				Child.WindowEvent(Msg, C, (X - Child.WinLeft), (Y - Child.WinTop), Key);
 				return true;
 			}
 		}
@@ -919,10 +919,10 @@ final function bool MessageClients(UWindowWindow.WinMessage Msg, Canvas C, float
 final function ActivateWindow(int Depth, bool bTransientNoDeactivate)
 {
 	// End:0x1E
-	if(__NFUN_114__(self, Root))
+	if((self == Root))
 	{
 		// End:0x1C
-		if(__NFUN_154__(Depth, 0))
+		if((Depth == 0))
 		{
 			FocusWindow();
 		}
@@ -934,29 +934,29 @@ final function ActivateWindow(int Depth, bool bTransientNoDeactivate)
 		return;
 	}
 	// End:0x54
-	if(__NFUN_129__(bAlwaysBehind))
+	if((!bAlwaysBehind))
 	{
 		ParentWindow.HideChildWindow(self);
 		ParentWindow.ShowChildWindow(self);
 	}
 	// End:0xDD
-	if(__NFUN_129__(__NFUN_132__(bTransient, bTransientNoDeactivate)))
+	if((!(bTransient || bTransientNoDeactivate)))
 	{
 		// End:0xAC
-		if(__NFUN_130__(__NFUN_119__(ParentWindow.ActiveWindow, none), __NFUN_119__(ParentWindow.ActiveWindow, self)))
+		if(((ParentWindow.ActiveWindow != none) && (ParentWindow.ActiveWindow != self)))
 		{
 			ParentWindow.ActiveWindow.Deactivated();
 		}
 		ParentWindow.ActiveWindow = self;
-		ParentWindow.super(UWindowWindow).ActivateWindow(__NFUN_146__(Depth, 1), false);
+		ParentWindow.super(UWindowWindow).ActivateWindow((Depth + 1), false);
 		Activated();		
 	}
 	else
 	{
-		ParentWindow.super(UWindowWindow).ActivateWindow(__NFUN_146__(Depth, 1), true);
+		ParentWindow.super(UWindowWindow).ActivateWindow((Depth + 1), true);
 	}
 	// End:0x106
-	if(__NFUN_154__(Depth, 0))
+	if((Depth == 0))
 	{
 		FocusWindow();
 	}
@@ -967,12 +967,12 @@ final function ActivateWindow(int Depth, bool bTransientNoDeactivate)
 final function BringToFront()
 {
 	// End:0x0D
-	if(__NFUN_114__(self, Root))
+	if((self == Root))
 	{
 		return;
 	}
 	// End:0x45
-	if(__NFUN_130__(__NFUN_129__(bAlwaysBehind), __NFUN_129__(WaitModal())))
+	if(((!bAlwaysBehind) && (!WaitModal())))
 	{
 		ParentWindow.HideChildWindow(self);
 		ParentWindow.ShowChildWindow(self);
@@ -994,7 +994,7 @@ final function HideChildWindow(UWindowWindow Child)
 	local UWindowWindow Window;
 
 	// End:0x16
-	if(__NFUN_129__(Child.bWindowVisible))
+	if((!Child.bWindowVisible))
 	{
 		return;
 	}
@@ -1005,11 +1005,11 @@ final function HideChildWindow(UWindowWindow Child)
 		Root.RemoveHotkeyWindow(Child);
 	}
 	// End:0x98
-	if(__NFUN_114__(LastChildWindow, Child))
+	if((LastChildWindow == Child))
 	{
 		LastChildWindow = Child.PrevSiblingWindow;
 		// End:0x8E
-		if(__NFUN_119__(LastChildWindow, none))
+		if((LastChildWindow != none))
 		{
 			LastChildWindow.NextSiblingWindow = none;			
 		}
@@ -1021,11 +1021,11 @@ final function HideChildWindow(UWindowWindow Child)
 	else
 	{
 		// End:0xE3
-		if(__NFUN_114__(FirstChildWindow, Child))
+		if((FirstChildWindow == Child))
 		{
 			FirstChildWindow = Child.NextSiblingWindow;
 			// End:0xD9
-			if(__NFUN_119__(FirstChildWindow, none))
+			if((FirstChildWindow != none))
 			{
 				FirstChildWindow.PrevSiblingWindow = none;				
 			}
@@ -1040,10 +1040,10 @@ final function HideChildWindow(UWindowWindow Child)
 			J0xEE:
 
 			// End:0x165 [Loop If]
-			if(__NFUN_119__(Window, none))
+			if((Window != none))
 			{
 				// End:0x14E
-				if(__NFUN_114__(Window.NextSiblingWindow, Child))
+				if((Window.NextSiblingWindow == Child))
 				{
 					Window.NextSiblingWindow = Child.NextSiblingWindow;
 					Window.NextSiblingWindow.PrevSiblingWindow = Window;
@@ -1063,10 +1063,10 @@ final function HideChildWindow(UWindowWindow Child)
 	J0x177:
 
 	// End:0x1BB [Loop If]
-	if(__NFUN_119__(Window, none))
+	if((Window != none))
 	{
 		// End:0x1A4
-		if(__NFUN_129__(Window.bAlwaysOnTop))
+		if((!Window.bAlwaysOnTop))
 		{
 			ActiveWindow = Window;
 			// [Explicit Break]
@@ -1079,7 +1079,7 @@ final function HideChildWindow(UWindowWindow Child)
 	J0x1BB:
 
 	// End:0x1D1
-	if(__NFUN_114__(ActiveWindow, none))
+	if((ActiveWindow == none))
 	{
 		ActiveWindow = LastChildWindow;
 	}
@@ -1095,7 +1095,7 @@ final function SetAcceptsFocus()
 	}
 	bAcceptsFocus = true;
 	// End:0x2B
-	if(__NFUN_119__(self, Root))
+	if((self != Root))
 	{
 		ParentWindow.super(UWindowWindow).SetAcceptsFocus();
 	}
@@ -1105,13 +1105,13 @@ final function SetAcceptsFocus()
 final function CancelAcceptsFocus()
 {
 	// End:0x18
-	if(__NFUN_132__(__NFUN_129__(bAcceptsFocus), bAlwaysAcceptsFocus))
+	if(((!bAcceptsFocus) || bAlwaysAcceptsFocus))
 	{
 		return;
 	}
 	bAcceptsFocus = false;
 	// End:0x3A
-	if(__NFUN_119__(self, Root))
+	if((self != Root))
 	{
 		ParentWindow.super(UWindowWindow).CancelAcceptsFocus();
 	}
@@ -1122,16 +1122,16 @@ final function GetMouseXY(out float X, out float Y)
 {
 	local UWindowWindow P;
 
-	X = float(int(__NFUN_171__(Root.MouseX, Root.m_fWindowScaleX)));
-	Y = float(int(__NFUN_171__(Root.MouseY, Root.m_fWindowScaleY)));
+	X = float(int((Root.MouseX * Root.m_fWindowScaleX)));
+	Y = float(int((Root.MouseY * Root.m_fWindowScaleY)));
 	P = self;
 	J0x57:
 
 	// End:0xB3 [Loop If]
-	if(__NFUN_119__(P, Root))
+	if((P != Root))
 	{
-		X = __NFUN_175__(X, P.WinLeft);
-		Y = __NFUN_175__(Y, P.WinTop);
+		X = (X - P.WinLeft);
+		Y = (Y - P.WinTop);
 		P = P.ParentWindow;
 		// [Loop Continue]
 		goto J0x57;
@@ -1150,10 +1150,10 @@ final function GlobalToWindow(float GlobalX, float GlobalY, out float WinX, out 
 	J0x1D:
 
 	// End:0x6D [Loop If]
-	if(__NFUN_119__(P, Root))
+	if((P != Root))
 	{
-		__NFUN_185__(WinX, P.WinLeft);
-		__NFUN_185__(WinY, P.WinTop);
+		(WinX -= P.WinLeft);
+		(WinY -= P.WinTop);
 		P = P.ParentWindow;
 		// [Loop Continue]
 		goto J0x1D;
@@ -1171,10 +1171,10 @@ final function WindowToGlobal(float WinX, float WinY, out float GlobalX, out flo
 	J0x1D:
 
 	// End:0x6D [Loop If]
-	if(__NFUN_119__(P, Root))
+	if((P != Root))
 	{
-		__NFUN_184__(GlobalX, P.WinLeft);
-		__NFUN_184__(GlobalY, P.WinTop);
+		(GlobalX += P.WinLeft);
+		(GlobalY += P.WinTop);
 		P = P.ParentWindow;
 		// [Loop Continue]
 		goto J0x1D;
@@ -1187,7 +1187,7 @@ final function ShowChildWindow(UWindowWindow Child, optional bool bAtBack)
 	local UWindowWindow W;
 
 	// End:0x1F
-	if(__NFUN_129__(Child.bTransient))
+	if((!Child.bTransient))
 	{
 		ActiveWindow = Child;
 	}
@@ -1206,7 +1206,7 @@ final function ShowChildWindow(UWindowWindow Child, optional bool bAtBack)
 	if(bAtBack)
 	{
 		// End:0xB7
-		if(__NFUN_114__(FirstChildWindow, none))
+		if((FirstChildWindow == none))
 		{
 			Child.NextSiblingWindow = none;
 			Child.PrevSiblingWindow = none;
@@ -1230,13 +1230,13 @@ final function ShowChildWindow(UWindowWindow Child, optional bool bAtBack)
 		if(true)
 		{
 			// End:0x25D
-			if(__NFUN_132__(__NFUN_132__(Child.bAlwaysOnTop, __NFUN_114__(W, none)), __NFUN_129__(W.bAlwaysOnTop)))
+			if(((Child.bAlwaysOnTop || (W == none)) || (!W.bAlwaysOnTop)))
 			{
 				// End:0x1D6
-				if(__NFUN_114__(W, none))
+				if((W == none))
 				{
 					// End:0x190
-					if(__NFUN_114__(LastChildWindow, none))
+					if((LastChildWindow == none))
 					{
 						Child.NextSiblingWindow = none;
 						Child.PrevSiblingWindow = none;
@@ -1256,7 +1256,7 @@ final function ShowChildWindow(UWindowWindow Child, optional bool bAtBack)
 					Child.NextSiblingWindow = W.NextSiblingWindow;
 					Child.PrevSiblingWindow = W;
 					// End:0x23B
-					if(__NFUN_119__(W.NextSiblingWindow, none))
+					if((W.NextSiblingWindow != none))
 					{
 						W.NextSiblingWindow.PrevSiblingWindow = Child;						
 					}
@@ -1302,7 +1302,7 @@ final function UWindowWindow CreateWindow(Class<UWindowWindow> WndClass, float X
 	{
 		Child = Root.FindChildWindow(WndClass, true);
 		// End:0x53
-		if(__NFUN_119__(Child, none))
+		if((Child != none))
 		{
 			Child.ShowWindow();
 			Child.BringToFront();
@@ -1310,7 +1310,7 @@ final function UWindowWindow CreateWindow(Class<UWindowWindow> WndClass, float X
 		}
 	}
 	// End:0x7A
-	if(__NFUN_255__(ObjectName, 'None'))
+	if((ObjectName != 'None'))
 	{
 		Child = new (none, string(ObjectName)) WndClass;		
 	}
@@ -1327,7 +1327,7 @@ final function UWindowWindow CreateWindow(Class<UWindowWindow> WndClass, float X
 	Child.ParentWindow = self;
 	Child.OwnerWindow = OwnerW;
 	// End:0x154
-	if(__NFUN_114__(Child.OwnerWindow, none))
+	if((Child.OwnerWindow == none))
 	{
 		Child.OwnerWindow = self;
 	}
@@ -1348,31 +1348,31 @@ final function DrawHorizTiledPieces(Canvas C, float DestX, float DestY, float De
 
 	Pieces[0] = T1;
 	// End:0x24
-	if(__NFUN_119__(T1.t, none))
+	if((T1.t != none))
 	{
 		PieceCount = 1;
 	}
 	Pieces[1] = T2;
 	// End:0x49
-	if(__NFUN_119__(T2.t, none))
+	if((T2.t != none))
 	{
 		PieceCount = 2;
 	}
 	Pieces[2] = T3;
 	// End:0x6F
-	if(__NFUN_119__(T3.t, none))
+	if((T3.t != none))
 	{
 		PieceCount = 3;
 	}
 	Pieces[3] = T4;
 	// End:0x95
-	if(__NFUN_119__(T4.t, none))
+	if((T4.t != none))
 	{
 		PieceCount = 4;
 	}
 	Pieces[4] = T5;
 	// End:0xBB
-	if(__NFUN_119__(T5.t, none))
+	if((T5.t != none))
 	{
 		PieceCount = 5;
 	}
@@ -1381,13 +1381,13 @@ final function DrawHorizTiledPieces(Canvas C, float DestX, float DestY, float De
 	J0xCD:
 
 	// End:0x1D6 [Loop If]
-	if(__NFUN_176__(X, __NFUN_174__(DestX, DestW)))
+	if((X < (DestX + DestW)))
 	{
-		L = __NFUN_175__(DestW, __NFUN_175__(X, DestX));
+		L = (DestW - (X - DestX));
 		R = Pieces[j];
-		DrawStretchedTextureSegment(C, X, DestY, __NFUN_244__(__NFUN_171__(float(R.W), Scale), L), __NFUN_171__(float(R.H), Scale), float(R.X), float(R.Y), __NFUN_244__(float(R.W), __NFUN_172__(L, Scale)), float(R.H), R.t);
-		__NFUN_184__(X, __NFUN_244__(__NFUN_171__(float(R.W), Scale), L));
-		j = int(__NFUN_173__(float(__NFUN_146__(j, 1)), float(PieceCount)));
+		DrawStretchedTextureSegment(C, X, DestY, FMin((float(R.W) * Scale), L), (float(R.H) * Scale), float(R.X), float(R.Y), FMin(float(R.W), (L / Scale)), float(R.H), R.t);
+		(X += FMin((float(R.W) * Scale), L));
+		j = int((float((j + 1)) % float(PieceCount)));
 		// [Loop Continue]
 		goto J0xCD;
 	}
@@ -1402,31 +1402,31 @@ final function DrawVertTiledPieces(Canvas C, float DestX, float DestY, float Des
 
 	Pieces[0] = T1;
 	// End:0x24
-	if(__NFUN_119__(T1.t, none))
+	if((T1.t != none))
 	{
 		PieceCount = 1;
 	}
 	Pieces[1] = T2;
 	// End:0x49
-	if(__NFUN_119__(T2.t, none))
+	if((T2.t != none))
 	{
 		PieceCount = 2;
 	}
 	Pieces[2] = T3;
 	// End:0x6F
-	if(__NFUN_119__(T3.t, none))
+	if((T3.t != none))
 	{
 		PieceCount = 3;
 	}
 	Pieces[3] = T4;
 	// End:0x95
-	if(__NFUN_119__(T4.t, none))
+	if((T4.t != none))
 	{
 		PieceCount = 4;
 	}
 	Pieces[4] = T5;
 	// End:0xBB
-	if(__NFUN_119__(T5.t, none))
+	if((T5.t != none))
 	{
 		PieceCount = 5;
 	}
@@ -1435,13 +1435,13 @@ final function DrawVertTiledPieces(Canvas C, float DestX, float DestY, float Des
 	J0xCD:
 
 	// End:0x1D6 [Loop If]
-	if(__NFUN_176__(Y, __NFUN_174__(DestY, DestH)))
+	if((Y < (DestY + DestH)))
 	{
-		L = __NFUN_175__(DestH, __NFUN_175__(Y, DestY));
+		L = (DestH - (Y - DestY));
 		R = Pieces[j];
-		DrawStretchedTextureSegment(C, DestX, Y, __NFUN_171__(float(R.W), Scale), __NFUN_244__(__NFUN_171__(float(R.H), Scale), L), float(R.X), float(R.Y), float(R.W), __NFUN_244__(float(R.H), __NFUN_172__(L, Scale)), R.t);
-		__NFUN_184__(Y, __NFUN_244__(__NFUN_171__(float(R.H), Scale), L));
-		j = int(__NFUN_173__(float(__NFUN_146__(j, 1)), float(PieceCount)));
+		DrawStretchedTextureSegment(C, DestX, Y, (float(R.W) * Scale), FMin((float(R.H) * Scale), L), float(R.X), float(R.Y), float(R.W), FMin(float(R.H), (L / Scale)), R.t);
+		(Y += FMin((float(R.H) * Scale), L));
+		j = int((float((j + 1)) % float(PieceCount)));
 		// [Loop Continue]
 		goto J0xCD;
 	}
@@ -1462,7 +1462,7 @@ final function DrawStretchedTexture(Canvas C, float X, float Y, float W, float H
 
 final function DrawStretchedTextureSegment(Canvas C, float X, float Y, float W, float H, float tX, float tY, float tW, float tH, Texture Tex)
 {
-	C.__NFUN_2627__(X, Y, W, H, tX, tY, tW, tH, Root.GUIScale, ClippingRegion, Tex);
+	C.DrawStretchedTextureSegmentNative(X, Y, W, H, tX, tY, tW, tH, Root.GUIScale, ClippingRegion, Tex);
 	return;
 }
 
@@ -1474,12 +1474,12 @@ final function DrawStretchedTextureSegmentRot(Canvas C, float X, float Y, float 
 	OrgY = C.OrgY;
 	ClipX = C.ClipX;
 	ClipY = C.ClipY;
-	C.__NFUN_2624__(__NFUN_174__(OrgX, __NFUN_171__(float(ClippingRegion.X), Root.GUIScale)), __NFUN_174__(OrgY, __NFUN_171__(float(ClippingRegion.Y), Root.GUIScale)));
-	C.__NFUN_2625__(__NFUN_171__(float(ClippingRegion.W), Root.GUIScale), __NFUN_171__(float(ClippingRegion.H), Root.GUIScale));
-	C.__NFUN_2623__(__NFUN_171__(__NFUN_175__(X, float(ClippingRegion.X)), Root.GUIScale), __NFUN_171__(__NFUN_175__(Y, float(ClippingRegion.Y)), Root.GUIScale));
-	C.__NFUN_466__(Tex, __NFUN_171__(W, Root.GUIScale), __NFUN_171__(H, Root.GUIScale), tX, tY, tW, tH, fTexRotation);
-	C.__NFUN_2625__(ClipX, ClipY);
-	C.__NFUN_2624__(OrgX, OrgY);
+	C.SetOrigin((OrgX + (float(ClippingRegion.X) * Root.GUIScale)), (OrgY + (float(ClippingRegion.Y) * Root.GUIScale)));
+	C.SetClip((float(ClippingRegion.W) * Root.GUIScale), (float(ClippingRegion.H) * Root.GUIScale));
+	C.SetPos(((X - float(ClippingRegion.X)) * Root.GUIScale), ((Y - float(ClippingRegion.Y)) * Root.GUIScale));
+	C.DrawTile(Tex, (W * Root.GUIScale), (H * Root.GUIScale), tX, tY, tW, tH, fTexRotation);
+	C.SetClip(ClipX, ClipY);
+	C.SetOrigin(OrgX, OrgY);
 	return;
 }
 
@@ -1487,11 +1487,11 @@ final function DrawStretchedTextureSegmentRot(Canvas C, float X, float Y, float 
 function DrawSimpleBorder(Canvas C)
 {
 	C.Style = byte(m_BorderStyle);
-	C.__NFUN_2626__(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
+	C.SetDrawColor(m_BorderColor.R, m_BorderColor.G, m_BorderColor.B);
 	DrawStretchedTextureSegment(C, 0.0000000, 0.0000000, WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, 0.0000000, __NFUN_175__(WinHeight, float(m_BorderTextureRegion.H)), WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, 0.0000000, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), __NFUN_175__(WinHeight, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
-	DrawStretchedTextureSegment(C, __NFUN_175__(WinWidth, float(m_BorderTextureRegion.W)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), __NFUN_175__(WinHeight, float(__NFUN_144__(2, m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, 0.0000000, (WinHeight - float(m_BorderTextureRegion.H)), WinWidth, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, 0.0000000, float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), (WinHeight - float((2 * m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
+	DrawStretchedTextureSegment(C, (WinWidth - float(m_BorderTextureRegion.W)), float(m_BorderTextureRegion.H), float(m_BorderTextureRegion.W), (WinHeight - float((2 * m_BorderTextureRegion.H))), float(m_BorderTextureRegion.X), float(m_BorderTextureRegion.Y), float(m_BorderTextureRegion.W), float(m_BorderTextureRegion.H), m_BorderTexture);
 	return;
 }
 
@@ -1507,14 +1507,14 @@ function DrawSimpleBackGround(Canvas C, float X, float Y, float W, float H, Colo
 	BGTextureRegion.W = 8;
 	BGTextureRegion.H = 8;
 	C.Style = 5;
-	C.__NFUN_2626__(_BGColor.R, _BGColor.G, _BGColor.B, Alpha);
+	C.SetDrawColor(_BGColor.R, _BGColor.G, _BGColor.B, Alpha);
 	DrawStretchedTextureSegment(C, X, Y, W, H, float(BGTextureRegion.X), float(BGTextureRegion.Y), float(BGTextureRegion.W), float(BGTextureRegion.H), BGTexture);
 	return;
 }
 
 final function ClipText(Canvas C, float X, float Y, coerce string S, optional bool bCheckHotKey)
 {
-	C.__NFUN_2628__(X, Y, S, Root.GUIScale, ClippingRegion, bCheckHotKey);
+	C.ClipTextNative(X, Y, S, Root.GUIScale, ClippingRegion, bCheckHotKey);
 	return;
 }
 
@@ -1528,14 +1528,14 @@ final function int WrapClipText(Canvas C, float X, float Y, coerce string S, opt
 	local float pW, pH;
 
 	Xdefault = X;
-	i = __NFUN_126__(S, "\\n");
+	i = InStr(S, "\\n");
 	J0x1C:
 
 	// End:0x69 [Loop If]
-	if(__NFUN_155__(i, -1))
+	if((i != -1))
 	{
-		S = __NFUN_112__(__NFUN_112__(__NFUN_128__(S, i), __NFUN_236__(13)), __NFUN_127__(S, __NFUN_146__(i, 2)));
-		i = __NFUN_126__(S, "\\n");
+		S = ((Left(S, i) $ Chr(13)) $ Mid(S, (i + 2)));
+		i = InStr(S, "\\n");
 		// [Loop Continue]
 		goto J0x1C;
 	}
@@ -1546,27 +1546,27 @@ final function int WrapClipText(Canvas C, float X, float Y, coerce string S, opt
 	J0x87:
 
 	// End:0x345 [Loop If]
-	if(__NFUN_130__(bSentry, __NFUN_176__(Y, WinHeight)))
+	if((bSentry && (Y < WinHeight)))
 	{
 		// End:0xDF
-		if(__NFUN_122__(Out, ""))
+		if((Out == ""))
 		{
-			__NFUN_165__(i);
+			(i++);
 			// End:0xD4
-			if(__NFUN_151__(Length, 0))
+			if((Length > 0))
 			{
-				Out = __NFUN_128__(S, Length);				
+				Out = Left(S, Length);				
 			}
 			else
 			{
 				Out = S;
 			}
 		}
-		SpacePos = __NFUN_126__(Out, " ");
-		CRPos = __NFUN_126__(Out, __NFUN_236__(13));
+		SpacePos = InStr(Out, " ");
+		CRPos = InStr(Out, Chr(13));
 		bCR = false;
 		// End:0x14F
-		if(__NFUN_130__(__NFUN_155__(CRPos, -1), __NFUN_132__(__NFUN_150__(CRPos, SpacePos), __NFUN_154__(SpacePos, -1))))
+		if(((CRPos != -1) && ((CRPos < SpacePos) || (SpacePos == -1))))
 		{
 			WordPos = CRPos;
 			bCR = true;			
@@ -1575,57 +1575,57 @@ final function int WrapClipText(Canvas C, float X, float Y, coerce string S, opt
 		{
 			WordPos = SpacePos;
 		}
-		C.__NFUN_2623__(0.0000000, 0.0000000);
+		C.SetPos(0.0000000, 0.0000000);
 		// End:0x18D
-		if(__NFUN_154__(WordPos, -1))
+		if((WordPos == -1))
 		{
 			temp = Out;			
 		}
 		else
 		{
-			temp = __NFUN_112__(__NFUN_128__(Out, WordPos), " ");
+			temp = (Left(Out, WordPos) $ " ");
 		}
-		__NFUN_161__(TotalPos, WordPos);
+		(TotalPos += WordPos);
 		TextSize(C, temp, W, H);
 		// End:0x26C
-		if(__NFUN_130__(__NFUN_122__(__NFUN_127__(Out, __NFUN_125__(temp)), ""), __NFUN_151__(PaddingLength, 0)))
+		if(((Mid(Out, Len(temp)) == "") && (PaddingLength > 0)))
 		{
-			Padding = __NFUN_127__(S, Length, PaddingLength);
+			Padding = Mid(S, Length, PaddingLength);
 			TextSize(C, Padding, pW, pH);
 			// End:0x269
-			if(__NFUN_130__(__NFUN_177__(__NFUN_174__(__NFUN_174__(W, X), pW), WinWidth), __NFUN_177__(X, float(0))))
+			if(((((W + X) + pW) > WinWidth) && (X > float(0))))
 			{
 				X = Xdefault;
-				__NFUN_184__(Y, H);
-				__NFUN_165__(numLines);
+				(Y += H);
+				(numLines++);
 			}			
 		}
 		else
 		{
 			// End:0x2AF
-			if(__NFUN_130__(__NFUN_177__(__NFUN_174__(W, X), WinWidth), __NFUN_177__(X, float(0))))
+			if((((W + X) > WinWidth) && (X > float(0))))
 			{
 				X = Xdefault;
-				__NFUN_184__(Y, H);
-				__NFUN_165__(numLines);
+				(Y += H);
+				(numLines++);
 			}
 		}
 		// End:0x2DA
-		if(__NFUN_129__(bNoDraw))
+		if((!bNoDraw))
 		{
 			ClipText(C, X, Y, temp, bCheckHotKey);
 		}
-		__NFUN_184__(X, W);
+		(X += W);
 		// End:0x30D
 		if(bCR)
 		{
 			X = Xdefault;
-			__NFUN_184__(Y, H);
-			__NFUN_165__(numLines);
+			(Y += H);
+			(numLines++);
 		}
-		Out = __NFUN_127__(Out, __NFUN_125__(temp));
+		Out = Mid(Out, Len(temp));
 		// End:0x342
-		if(__NFUN_130__(__NFUN_122__(Out, ""), __NFUN_151__(i, 0)))
+		if(((Out == "") && (i > 0)))
 		{
 			bSentry = false;
 		}
@@ -1644,13 +1644,13 @@ final function ClipTextWidth(Canvas C, float X, float Y, coerce string S, float 
 	OrgY = C.OrgY;
 	ClipX = C.ClipX;
 	ClipY = C.ClipY;
-	finalWidth = float(__NFUN_249__(int(W), int(__NFUN_171__(WinWidth, Root.GUIScale))));
-	C.__NFUN_2624__(__NFUN_174__(OrgX, __NFUN_171__(float(ClippingRegion.X), Root.GUIScale)), __NFUN_174__(OrgY, __NFUN_171__(float(ClippingRegion.Y), Root.GUIScale)));
-	C.__NFUN_2625__(finalWidth, __NFUN_171__(float(ClippingRegion.H), Root.GUIScale));
-	C.__NFUN_2623__(__NFUN_171__(__NFUN_175__(X, float(ClippingRegion.X)), Root.GUIScale), __NFUN_171__(__NFUN_175__(Y, float(ClippingRegion.Y)), Root.GUIScale));
-	C.__NFUN_469__(S, false);
-	C.__NFUN_2625__(ClipX, ClipY);
-	C.__NFUN_2624__(OrgX, OrgY);
+	finalWidth = float(Min(int(W), int((WinWidth * Root.GUIScale))));
+	C.SetOrigin((OrgX + (float(ClippingRegion.X) * Root.GUIScale)), (OrgY + (float(ClippingRegion.Y) * Root.GUIScale)));
+	C.SetClip(finalWidth, (float(ClippingRegion.H) * Root.GUIScale));
+	C.SetPos(((X - float(ClippingRegion.X)) * Root.GUIScale), ((Y - float(ClippingRegion.Y)) * Root.GUIScale));
+	C.DrawTextClipped(S, false);
+	C.SetClip(ClipX, ClipY);
+	C.SetOrigin(OrgX, OrgY);
 	return;
 }
 
@@ -1661,21 +1661,21 @@ final function DrawUpBevel(Canvas C, float X, float Y, float W, float H, Texture
 	R = LookAndFeel.BevelUpTL;
 	DrawStretchedTextureSegment(C, X, Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpT;
-	DrawStretchedTextureSegment(C, __NFUN_174__(X, float(LookAndFeel.BevelUpTL.W)), Y, __NFUN_175__(__NFUN_175__(W, float(LookAndFeel.BevelUpTL.W)), float(LookAndFeel.BevelUpTR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, (X + float(LookAndFeel.BevelUpTL.W)), Y, ((W - float(LookAndFeel.BevelUpTL.W)) - float(LookAndFeel.BevelUpTR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpTR;
-	DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, W), float(R.W)), Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, ((X + W) - float(R.W)), Y, float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpL;
-	DrawStretchedTextureSegment(C, X, __NFUN_174__(Y, float(LookAndFeel.BevelUpTL.H)), float(R.W), __NFUN_175__(__NFUN_175__(H, float(LookAndFeel.BevelUpTL.H)), float(LookAndFeel.BevelUpBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, X, (Y + float(LookAndFeel.BevelUpTL.H)), float(R.W), ((H - float(LookAndFeel.BevelUpTL.H)) - float(LookAndFeel.BevelUpBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpR;
-	DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, W), float(R.W)), __NFUN_174__(Y, float(LookAndFeel.BevelUpTL.H)), float(R.W), __NFUN_175__(__NFUN_175__(H, float(LookAndFeel.BevelUpTL.H)), float(LookAndFeel.BevelUpBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, ((X + W) - float(R.W)), (Y + float(LookAndFeel.BevelUpTL.H)), float(R.W), ((H - float(LookAndFeel.BevelUpTL.H)) - float(LookAndFeel.BevelUpBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpBL;
-	DrawStretchedTextureSegment(C, X, __NFUN_175__(__NFUN_174__(Y, H), float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, X, ((Y + H) - float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpB;
-	DrawStretchedTextureSegment(C, __NFUN_174__(X, float(LookAndFeel.BevelUpBL.W)), __NFUN_175__(__NFUN_174__(Y, H), float(R.H)), __NFUN_175__(__NFUN_175__(W, float(LookAndFeel.BevelUpBL.W)), float(LookAndFeel.BevelUpBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, (X + float(LookAndFeel.BevelUpBL.W)), ((Y + H) - float(R.H)), ((W - float(LookAndFeel.BevelUpBL.W)) - float(LookAndFeel.BevelUpBR.W)), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpBR;
-	DrawStretchedTextureSegment(C, __NFUN_175__(__NFUN_174__(X, W), float(R.W)), __NFUN_175__(__NFUN_174__(Y, H), float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, ((X + W) - float(R.W)), ((Y + H) - float(R.H)), float(R.W), float(R.H), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	R = LookAndFeel.BevelUpArea;
-	DrawStretchedTextureSegment(C, __NFUN_174__(X, float(LookAndFeel.BevelUpTL.W)), __NFUN_174__(Y, float(LookAndFeel.BevelUpTL.H)), __NFUN_175__(__NFUN_175__(W, float(LookAndFeel.BevelUpBL.W)), float(LookAndFeel.BevelUpBR.W)), __NFUN_175__(__NFUN_175__(H, float(LookAndFeel.BevelUpTL.H)), float(LookAndFeel.BevelUpBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, (X + float(LookAndFeel.BevelUpTL.W)), (Y + float(LookAndFeel.BevelUpTL.H)), ((W - float(LookAndFeel.BevelUpBL.W)) - float(LookAndFeel.BevelUpBR.W)), ((H - float(LookAndFeel.BevelUpTL.H)) - float(LookAndFeel.BevelUpBL.H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	return;
 }
 
@@ -1684,9 +1684,9 @@ final function DrawMiscBevel(Canvas C, float X, float Y, float W, float H, Textu
 	local Region R;
 
 	C.Style = 5;
-	C.__NFUN_2626__(31, 34, 39);
+	C.SetDrawColor(31, 34, 39);
 	R = LookAndFeel.MiscBevelArea[BevelType];
-	DrawStretchedTextureSegment(C, __NFUN_174__(X, float(LookAndFeel.MiscBevelTL[BevelType].W)), __NFUN_174__(Y, float(LookAndFeel.MiscBevelTL[BevelType].H)), __NFUN_175__(__NFUN_175__(W, float(LookAndFeel.MiscBevelBL[BevelType].W)), float(LookAndFeel.MiscBevelBR[BevelType].W)), __NFUN_175__(__NFUN_175__(H, float(LookAndFeel.MiscBevelTL[BevelType].H)), float(LookAndFeel.MiscBevelBL[BevelType].H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
+	DrawStretchedTextureSegment(C, (X + float(LookAndFeel.MiscBevelTL[BevelType].W)), (Y + float(LookAndFeel.MiscBevelTL[BevelType].H)), ((W - float(LookAndFeel.MiscBevelBL[BevelType].W)) - float(LookAndFeel.MiscBevelBR[BevelType].W)), ((H - float(LookAndFeel.MiscBevelTL[BevelType].H)) - float(LookAndFeel.MiscBevelBL[BevelType].H)), float(R.X), float(R.Y), float(R.W), float(R.H), t);
 	return;
 }
 
@@ -1714,34 +1714,34 @@ final function byte ParseAmpersand(string S, out string Result, out string Under
 	// End:0x154 [Loop If]
 	if(true)
 	{
-		temp = __NFUN_127__(S, pos);
-		NewPos = __NFUN_126__(temp, "&");
+		temp = Mid(S, pos);
+		NewPos = InStr(temp, "&");
 		// End:0x57
-		if(__NFUN_154__(NewPos, -1))
+		if((NewPos == -1))
 		{
 			// [Explicit Break]
 			goto J0x154;
 		}
-		__NFUN_161__(pos, NewPos);
+		(pos += NewPos);
 		// End:0xBC
-		if(__NFUN_122__(__NFUN_127__(temp, __NFUN_146__(NewPos, 1), 1), "&"))
+		if((Mid(temp, (NewPos + 1), 1) == "&"))
 		{
-			Result = __NFUN_112__(__NFUN_112__(Result, __NFUN_128__(temp, NewPos)), "&");
+			Result = ((Result $ Left(temp, NewPos)) $ "&");
 			// End:0xB2
 			if(bCalcUnderline)
 			{
-				Underline = __NFUN_112__(Underline, " ");
+				Underline = (Underline $ " ");
 			}
-			__NFUN_165__(pos);
+			(pos++);
 			// [Explicit Continue]
 			goto J0x14A;
 		}
 		// End:0xE5
-		if(__NFUN_154__(int(HotKey), 0))
+		if((int(HotKey) == 0))
 		{
-			HotKey = byte(__NFUN_237__(__NFUN_235__(__NFUN_127__(temp, __NFUN_146__(NewPos, 1), 1))));
+			HotKey = byte(Asc(Caps(Mid(temp, (NewPos + 1), 1))));
 		}
-		Result = __NFUN_112__(Result, __NFUN_128__(temp, NewPos));
+		Result = (Result $ Left(temp, NewPos));
 		// End:0x14A
 		if(bCalcUnderline)
 		{
@@ -1749,38 +1749,38 @@ final function byte ParseAmpersand(string S, out string Result, out string Under
 			J0x10E:
 
 			// End:0x13A [Loop If]
-			if(__NFUN_150__(i, __NFUN_147__(NewPos, 1)))
+			if((i < (NewPos - 1)))
 			{
-				Underline = __NFUN_112__(Underline, " ");
-				__NFUN_165__(i);
+				Underline = (Underline $ " ");
+				(i++);
 				// [Loop Continue]
 				goto J0x10E;
 			}
-			Underline = __NFUN_112__(Underline, "_");
+			Underline = (Underline $ "_");
 		}
 		J0x14A:
 
-		__NFUN_165__(pos);
+		(pos++);
 		// [Loop Continue]
 		goto J0x1F;
 	}
 	J0x154:
 
-	Result = __NFUN_112__(Result, temp);
+	Result = (Result $ temp);
 	return HotKey;
 	return;
 }
 
 final function bool MouseIsOver()
 {
-	return __NFUN_114__(Root.MouseWindow, self);
+	return (Root.MouseWindow == self);
 	return;
 }
 
 function ToolTip(string strTip)
 {
 	// End:0x23
-	if(__NFUN_119__(ParentWindow, Root))
+	if((ParentWindow != Root))
 	{
 		ParentWindow.ToolTip(strTip);
 	}
@@ -1809,12 +1809,12 @@ function bool IsActive()
 function SetAcceptsHotKeys(bool bNewAccpetsHotKeys)
 {
 	// End:0x31
-	if(__NFUN_130__(__NFUN_130__(bNewAccpetsHotKeys, __NFUN_129__(bAcceptsHotKeys)), bWindowVisible))
+	if(((bNewAccpetsHotKeys && (!bAcceptsHotKeys)) && bWindowVisible))
 	{
 		Root.AddHotkeyWindow(self);
 	}
 	// End:0x62
-	if(__NFUN_130__(__NFUN_130__(__NFUN_129__(bNewAccpetsHotKeys), bAcceptsHotKeys), bWindowVisible))
+	if((((!bNewAccpetsHotKeys) && bAcceptsHotKeys) && bWindowVisible))
 	{
 		Root.RemoveHotkeyWindow(self);
 	}
@@ -1830,13 +1830,13 @@ final function UWindowWindow GetParent(Class<UWindowWindow> ParentClass, optiona
 	J0x0B:
 
 	// End:0x7A [Loop If]
-	if(__NFUN_119__(P, Root))
+	if((P != Root))
 	{
 		// End:0x44
 		if(bExactClass)
 		{
 			// End:0x41
-			if(__NFUN_114__(P.Class, ParentClass))
+			if((P.Class == ParentClass))
 			{
 				return P;
 			}			
@@ -1844,7 +1844,7 @@ final function UWindowWindow GetParent(Class<UWindowWindow> ParentClass, optiona
 		else
 		{
 			// End:0x63
-			if(__NFUN_258__(P.Class, ParentClass))
+			if(ClassIsChildOf(P.Class, ParentClass))
 			{
 				return P;
 			}
@@ -1865,13 +1865,13 @@ final function UWindowWindow FindChildWindow(Class<UWindowWindow> ChildClass, op
 	J0x0B:
 
 	// End:0xA1 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		// End:0x40
 		if(bExactClass)
 		{
 			// End:0x3D
-			if(__NFUN_114__(Child.Class, ChildClass))
+			if((Child.Class == ChildClass))
 			{
 				return Child;
 			}			
@@ -1879,14 +1879,14 @@ final function UWindowWindow FindChildWindow(Class<UWindowWindow> ChildClass, op
 		else
 		{
 			// End:0x5F
-			if(__NFUN_258__(Child.Class, ChildClass))
+			if(ClassIsChildOf(Child.Class, ChildClass))
 			{
 				return Child;
 			}
 		}
 		Found = Child.super(UWindowWindow).FindChildWindow(ChildClass);
 		// End:0x8A
-		if(__NFUN_119__(Found, none))
+		if((Found != none))
 		{
 			return Found;
 		}
@@ -1909,16 +1909,16 @@ function GetDesiredDimensions(out float W, out float H)
 	J0x21:
 
 	// End:0x90 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.GetDesiredDimensions(tW, tH);
 		// End:0x5F
-		if(__NFUN_177__(tW, MaxW))
+		if((tW > MaxW))
 		{
 			MaxW = tW;
 		}
 		// End:0x79
-		if(__NFUN_177__(tH, MaxH))
+		if((tH > MaxH))
 		{
 			MaxH = tH;
 		}
@@ -1935,10 +1935,10 @@ final function string TextSize(Canvas C, string Text, out float W, out float H, 
 {
 	local string szResult;
 
-	C.__NFUN_2623__(0.0000000, 0.0000000);
-	szResult = C.__NFUN_470__(Text, W, H, _TotalWidth, _SpaceWidth);
-	W = __NFUN_172__(W, Root.GUIScale);
-	H = __NFUN_172__(H, Root.GUIScale);
+	C.SetPos(0.0000000, 0.0000000);
+	szResult = C.TextSize(Text, W, H, _TotalWidth, _SpaceWidth);
+	W = (W / Root.GUIScale);
+	H = (H / Root.GUIScale);
 	return szResult;
 	return;
 }
@@ -1951,7 +1951,7 @@ function ResolutionChanged(float W, float H)
 	J0x0B:
 
 	// End:0x46 [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.ResolutionChanged(W, H);
 		Child = Child.PrevSiblingWindow;
@@ -1972,7 +1972,7 @@ function ShowModal(UWindowWindow W)
 function bool WaitModal()
 {
 	// End:0x21
-	if(__NFUN_130__(__NFUN_119__(ModalWindow, none), ModalWindow.bWindowVisible))
+	if(((ModalWindow != none) && ModalWindow.bWindowVisible))
 	{
 		return true;
 	}
@@ -1989,7 +1989,7 @@ function WindowHidden()
 	J0x0B:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.WindowHidden();
 		Child = Child.PrevSiblingWindow;
@@ -2007,7 +2007,7 @@ function WindowShown()
 	J0x0B:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.WindowShown();
 		Child = Child.PrevSiblingWindow;
@@ -2027,12 +2027,12 @@ function bool CheckMousePassThrough(float X, float Y)
 final function bool WindowIsVisible()
 {
 	// End:0x0D
-	if(__NFUN_114__(self, Root))
+	if((self == Root))
 	{
 		return true;
 	}
 	// End:0x1A
-	if(__NFUN_129__(bWindowVisible))
+	if((!bWindowVisible))
 	{
 		return false;
 	}
@@ -2057,7 +2057,7 @@ function UWindowMessageBox MessageBox(string Title, string Message, UWindowBase.
 	W.SetupMessageBox(Title, Message, Buttons, ESCResult, EnterResult, TimeOut);
 	f = UWindowFramedWindow(GetParent(Class'UWindow.UWindowFramedWindow'));
 	// End:0x99
-	if(__NFUN_119__(f, none))
+	if((f != none))
 	{
 		f.ShowModal(W);		
 	}
@@ -2093,7 +2093,7 @@ function NotifyQuitUnreal()
 	J0x0B:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.NotifyQuitUnreal();
 		Child = Child.PrevSiblingWindow;
@@ -2111,7 +2111,7 @@ function NotifyBeforeLevelChange()
 	J0x0B:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.NotifyBeforeLevelChange();
 		Child = Child.PrevSiblingWindow;
@@ -2129,7 +2129,7 @@ function NotifyAfterLevelChange()
 	J0x0B:
 
 	// End:0x3C [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.NotifyAfterLevelChange();
 		Child = Child.PrevSiblingWindow;
@@ -2153,7 +2153,7 @@ function SetCursor(MouseCursor C)
 	J0x16:
 
 	// End:0x4C [Loop If]
-	if(__NFUN_119__(Child, none))
+	if((Child != none))
 	{
 		Child.SetCursor(C);
 		Child = Child.PrevSiblingWindow;
@@ -2170,27 +2170,27 @@ final function ReplaceText(out string Text, string Replace, string With)
 
 	Input = Text;
 	Text = "";
-	i = __NFUN_126__(Input, Replace);
+	i = InStr(Input, Replace);
 	J0x25:
 
 	// End:0x84 [Loop If]
-	if(__NFUN_155__(i, -1))
+	if((i != -1))
 	{
-		Text = __NFUN_112__(__NFUN_112__(Text, __NFUN_128__(Input, i)), With);
-		Input = __NFUN_127__(Input, __NFUN_146__(i, __NFUN_125__(Replace)));
-		i = __NFUN_126__(Input, Replace);
+		Text = ((Text $ Left(Input, i)) $ With);
+		Input = Mid(Input, (i + Len(Replace)));
+		i = InStr(Input, Replace);
 		// [Loop Continue]
 		goto J0x25;
 	}
-	Text = __NFUN_112__(Text, Input);
+	Text = (Text $ Input);
 	return;
 }
 
 function StripCRLF(out string Text)
 {
-	ReplaceText(Text, __NFUN_112__(__NFUN_236__(13), __NFUN_236__(10)), "");
-	ReplaceText(Text, __NFUN_236__(13), "");
-	ReplaceText(Text, __NFUN_236__(10), "");
+	ReplaceText(Text, (Chr(13) $ Chr(10)), "");
+	ReplaceText(Text, Chr(13), "");
+	ReplaceText(Text, Chr(10), "");
 	return;
 }
 

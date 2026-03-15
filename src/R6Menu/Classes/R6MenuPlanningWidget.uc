@@ -240,7 +240,7 @@ function Tick(float fDelta)
 				else
 				{
 					// End:0x110
-					if(__NFUN_242__(m_bMoveRLByLaptop, true))
+					if((m_bMoveRLByLaptop == true))
 					{
 						m_bMoveRLByLaptop = false;
 						PlanningCtrl.m_bMoveLeft = 0;
@@ -250,7 +250,7 @@ function Tick(float fDelta)
 				}
 			}
 			// End:0x15A
-			if(__NFUN_176__(Root.MouseY, __NFUN_174__(m_Top.WinHeight, float(1))))
+			if((Root.MouseY < (m_Top.WinHeight + float(1))))
 			{
 				PlanningCtrl.m_bMoveUp = 1;
 				m_bMoveUDByLaptop = true;
@@ -259,7 +259,7 @@ function Tick(float fDelta)
 			else
 			{
 				// End:0x1A4
-				if(__NFUN_177__(Root.MouseY, __NFUN_175__(m_Bottom.WinTop, float(1))))
+				if((Root.MouseY > (m_Bottom.WinTop - float(1))))
 				{
 					PlanningCtrl.m_bMoveDown = 1;
 					m_bMoveUDByLaptop = true;
@@ -268,7 +268,7 @@ function Tick(float fDelta)
 				else
 				{
 					// End:0x1E2
-					if(__NFUN_242__(m_bMoveUDByLaptop, true))
+					if((m_bMoveUDByLaptop == true))
 					{
 						m_bMoveUDByLaptop = false;
 						PlanningCtrl.m_bMoveDown = 0;
@@ -281,7 +281,7 @@ function Tick(float fDelta)
 		else
 		{
 			// End:0x220
-			if(__NFUN_176__(Root.MouseX, float(23)))
+			if((Root.MouseX < float(23)))
 			{
 				PlanningCtrl.m_bMoveLeft = 1;
 				m_bMoveRLByLaptop = true;
@@ -290,7 +290,7 @@ function Tick(float fDelta)
 			else
 			{
 				// End:0x256
-				if(__NFUN_177__(Root.MouseX, float(616)))
+				if((Root.MouseX > float(616)))
 				{
 					PlanningCtrl.m_bMoveRight = 1;
 					m_bMoveRLByLaptop = true;					
@@ -298,7 +298,7 @@ function Tick(float fDelta)
 				else
 				{
 					// End:0x294
-					if(__NFUN_242__(m_bMoveRLByLaptop, true))
+					if((m_bMoveRLByLaptop == true))
 					{
 						m_bMoveRLByLaptop = false;
 						PlanningCtrl.m_bMoveLeft = 0;
@@ -308,7 +308,7 @@ function Tick(float fDelta)
 				}
 			}
 			// End:0x2CF
-			if(__NFUN_176__(Root.MouseY, float(52)))
+			if((Root.MouseY < float(52)))
 			{
 				PlanningCtrl.m_bMoveUp = 1;
 				m_bMoveUDByLaptop = true;
@@ -317,7 +317,7 @@ function Tick(float fDelta)
 			else
 			{
 				// End:0x30D
-				if(__NFUN_177__(Root.MouseY, float(362)))
+				if((Root.MouseY > float(362)))
 				{
 					PlanningCtrl.m_bMoveDown = 1;
 					m_bMoveUDByLaptop = true;
@@ -326,7 +326,7 @@ function Tick(float fDelta)
 				else
 				{
 					// End:0x34B
-					if(__NFUN_242__(m_bMoveUDByLaptop, true))
+					if((m_bMoveUDByLaptop == true))
 					{
 						m_bMoveUDByLaptop = false;
 						PlanningCtrl.m_bMoveDown = 0;
@@ -337,13 +337,13 @@ function Tick(float fDelta)
 			}
 		}
 		// End:0x44F
-		if(__NFUN_242__(PlanningCtrl.m_bFirstTick, true))
+		if((PlanningCtrl.m_bFirstTick == true))
 		{
 			PlanningCtrl.m_bFirstTick = false;
-			TheRegion.W = __NFUN_145__(int(__NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 3);
-			TheRegion.H = __NFUN_145__(int(__NFUN_175__(m_Bottom.WinTop, m_Top.WinHeight)), 3);
-			TheRegion.X = int(__NFUN_174__(m_Left.WinWidth, float(3)));
-			TheRegion.Y = int(__NFUN_174__(__NFUN_174__(m_Top.WinHeight, m_fLabelHeight), float(2)));
+			TheRegion.W = (int((m_Right.WinLeft - m_Left.WinWidth)) / 3);
+			TheRegion.H = (int((m_Bottom.WinTop - m_Top.WinHeight)) / 3);
+			TheRegion.X = int((m_Left.WinWidth + float(3)));
+			TheRegion.Y = int(((m_Top.WinHeight + m_fLabelHeight) + float(2)));
 			PlanningCtrl.Set3DViewPosition(TheRegion.X, TheRegion.Y, TheRegion.H, TheRegion.W);
 		}
 	}
@@ -362,7 +362,7 @@ function LMouseDown(float fMouseX, float fMouseY)
 
 	super(UWindowWindow).LMouseDown(fMouseX, fMouseY);
 	// End:0x2D
-	if(__NFUN_132__(m_bPopUpMenuPoint, m_bPopUpMenuSpeed))
+	if((m_bPopUpMenuPoint || m_bPopUpMenuSpeed))
 	{
 		CloseAllPopup();		
 	}
@@ -370,9 +370,9 @@ function LMouseDown(float fMouseX, float fMouseY)
 	{
 		PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 		// End:0x82
-		if(__NFUN_119__(PlanningCtrl, none))
+		if((PlanningCtrl != none))
 		{
-			PlanningCtrl.LMouseDown(__NFUN_171__(fMouseX, Root.GUIScale), __NFUN_171__(fMouseY, Root.GUIScale));
+			PlanningCtrl.LMouseDown((fMouseX * Root.GUIScale), (fMouseY * Root.GUIScale));
 		}
 	}
 	return;
@@ -385,9 +385,9 @@ function LMouseUp(float fMouseX, float fMouseY)
 	super(UWindowWindow).LMouseUp(fMouseX, fMouseY);
 	PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 	// End:0x65
-	if(__NFUN_119__(PlanningCtrl, none))
+	if((PlanningCtrl != none))
 	{
-		PlanningCtrl.LMouseUp(__NFUN_171__(fMouseX, Root.GUIScale), __NFUN_171__(fMouseY, Root.GUIScale));
+		PlanningCtrl.LMouseUp((fMouseX * Root.GUIScale), (fMouseY * Root.GUIScale));
 	}
 	return;
 }
@@ -398,7 +398,7 @@ function RMouseDown(float fMouseX, float fMouseY)
 
 	super(UWindowWindow).RMouseDown(fMouseX, fMouseY);
 	// End:0x2D
-	if(__NFUN_132__(m_bPopUpMenuPoint, m_bPopUpMenuSpeed))
+	if((m_bPopUpMenuPoint || m_bPopUpMenuSpeed))
 	{
 		CloseAllPopup();		
 	}
@@ -406,9 +406,9 @@ function RMouseDown(float fMouseX, float fMouseY)
 	{
 		PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 		// End:0x82
-		if(__NFUN_119__(PlanningCtrl, none))
+		if((PlanningCtrl != none))
 		{
-			PlanningCtrl.RMouseDown(__NFUN_171__(fMouseX, Root.GUIScale), __NFUN_171__(fMouseY, Root.GUIScale));
+			PlanningCtrl.RMouseDown((fMouseX * Root.GUIScale), (fMouseY * Root.GUIScale));
 		}
 	}
 	return;
@@ -421,9 +421,9 @@ function RMouseUp(float fMouseX, float fMouseY)
 	super(UWindowWindow).RMouseUp(fMouseX, fMouseY);
 	PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 	// End:0x65
-	if(__NFUN_119__(PlanningCtrl, none))
+	if((PlanningCtrl != none))
 	{
-		PlanningCtrl.RMouseUp(__NFUN_171__(fMouseX, Root.GUIScale), __NFUN_171__(fMouseY, Root.GUIScale));
+		PlanningCtrl.RMouseUp((fMouseX * Root.GUIScale), (fMouseY * Root.GUIScale));
 	}
 	return;
 }
@@ -435,9 +435,9 @@ function MouseMove(float fMouseX, float fMouseY)
 	super(UWindowWindow).MouseMove(fMouseX, fMouseY);
 	PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 	// End:0x65
-	if(__NFUN_119__(PlanningCtrl, none))
+	if((PlanningCtrl != none))
 	{
-		PlanningCtrl.MouseMove(__NFUN_171__(fMouseX, Root.GUIScale), __NFUN_171__(fMouseY, Root.GUIScale));
+		PlanningCtrl.MouseMove((fMouseX * Root.GUIScale), (fMouseY * Root.GUIScale));
 	}
 	return;
 }
@@ -450,32 +450,32 @@ function SetMousePos(float X, float Y)
 	local float fMouseX, fMouseY;
 
 	// End:0xD8
-	if(__NFUN_242__(Root.m_bUseDragIcon, true))
+	if((Root.m_bUseDragIcon == true))
 	{
 		fMouseX = X;
 		fMouseY = Y;
 		// End:0x47
-		if(__NFUN_176__(fMouseX, float(22)))
+		if((fMouseX < float(22)))
 		{
 			fMouseX = 22.0000000;			
 		}
 		else
 		{
 			// End:0x63
-			if(__NFUN_177__(fMouseX, float(617)))
+			if((fMouseX > float(617)))
 			{
 				fMouseX = 617.0000000;
 			}
 		}
 		// End:0x7F
-		if(__NFUN_176__(fMouseY, float(51)))
+		if((fMouseY < float(51)))
 		{
 			fMouseY = 51.0000000;			
 		}
 		else
 		{
 			// End:0x9B
-			if(__NFUN_177__(fMouseY, float(363)))
+			if((fMouseY > float(363)))
 			{
 				fMouseY = 363.0000000;
 			}
@@ -517,23 +517,23 @@ function DisplayActionTypePopUp(float X, float Y)
 	local bool bDisplayUp, bDisplayLeft;
 
 	// End:0x37
-	if(__NFUN_177__(__NFUN_172__(X, __NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 0.5000000))
+	if(((X / (m_Right.WinLeft - m_Left.WinWidth)) > 0.5000000))
 	{
 		bDisplayLeft = true;
 	}
 	// End:0x6E
-	if(__NFUN_177__(__NFUN_172__(Y, __NFUN_175__(m_Bottom.WinTop, m_Top.WinHeight)), 0.5000000))
+	if(((Y / (m_Bottom.WinTop - m_Top.WinHeight)) > 0.5000000))
 	{
 		bDisplayUp = true;
 	}
 	// End:0x96
-	if(__NFUN_242__(m_3DButton.m_bSelected, true))
+	if((m_3DButton.m_bSelected == true))
 	{
 		Y = 200.0000000;
 		bDisplayUp = false;
 	}
 	// End:0xE1
-	if(__NFUN_114__(m_PopUpMenuPoint, none))
+	if((m_PopUpMenuPoint == none))
 	{
 		m_PopUpMenuPoint = R6MenuActionPointMenu(CreateWindow(Root.MenuClassDefines.ClassActionPointPupUpMenu, X, Y, 100.0000000, 100.0000000, self));		
 	}
@@ -554,23 +554,23 @@ function DisplayPathFlagPopUp(float X, float Y)
 	local bool bDisplayUp, bDisplayLeft;
 
 	// End:0x37
-	if(__NFUN_177__(__NFUN_172__(X, __NFUN_175__(m_Right.WinLeft, m_Left.WinWidth)), 0.5000000))
+	if(((X / (m_Right.WinLeft - m_Left.WinWidth)) > 0.5000000))
 	{
 		bDisplayLeft = true;
 	}
 	// End:0x6E
-	if(__NFUN_177__(__NFUN_172__(Y, __NFUN_175__(m_Bottom.WinTop, m_Top.WinHeight)), 0.5000000))
+	if(((Y / (m_Bottom.WinTop - m_Top.WinHeight)) > 0.5000000))
 	{
 		bDisplayUp = true;
 	}
 	// End:0x96
-	if(__NFUN_242__(m_3DButton.m_bSelected, true))
+	if((m_3DButton.m_bSelected == true))
 	{
 		Y = 200.0000000;
 		bDisplayUp = false;
 	}
 	// End:0xFC
-	if(__NFUN_114__(m_PopUpMenuMode, none))
+	if((m_PopUpMenuMode == none))
 	{
 		m_PopUpMenuMode = R6MenuModeMenu(CreateWindow(Root.MenuClassDefines.ClassMovementModePupUpMenu, X, Y, 100.0000000, 100.0000000, self));
 		m_PopUpMenuMode.AjustPosition(bDisplayUp, bDisplayLeft);		
@@ -591,16 +591,16 @@ function CloseAllPopup()
 	// End:0x20
 	if(bShowLog)
 	{
-		__NFUN_231__("Closing all Popups!");
+		Log("Closing all Popups!");
 	}
 	// End:0x56
-	if(__NFUN_130__(__NFUN_119__(m_PopUpMenuPoint, none), m_PopUpMenuPoint.bWindowVisible))
+	if(((m_PopUpMenuPoint != none) && m_PopUpMenuPoint.bWindowVisible))
 	{
 		m_PopUpMenuPoint.HideWindow();
 		m_bPopUpMenuPoint = false;
 	}
 	// End:0x8C
-	if(__NFUN_130__(__NFUN_119__(m_PopUpMenuMode, none), m_PopUpMenuMode.bWindowVisible))
+	if(((m_PopUpMenuMode != none) && m_PopUpMenuMode.bWindowVisible))
 	{
 		m_PopUpMenuMode.HideWindow();
 		m_bPopUpMenuSpeed = false;
@@ -614,7 +614,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 	local R6PlanningCtrl PlanningCtrl;
 
 	// End:0x3F
-	if(__NFUN_155__(int(R6MenuRootWindow(Root).m_ePopUpID), int(0)))
+	if((int(R6MenuRootWindow(Root).m_ePopUpID) != int(0)))
 	{
 		super(UWindowWindow).WindowEvent(Msg, C, X, Y, Key);
 		return;
@@ -624,7 +624,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0x7A
 		case 9:
 			// End:0x77
-			if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+			if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 			{
 				PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 				CloseAllPopup();
@@ -634,7 +634,7 @@ function WindowEvent(UWindowWindow.WinMessage Msg, Canvas C, float X, float Y, i
 		// End:0xAE
 		case 8:
 			// End:0xAB
-			if(GetPlayerOwner().__NFUN_303__('R6PlanningCtrl'))
+			if(GetPlayerOwner().IsA('R6PlanningCtrl'))
 			{
 				PlanningCtrl = R6PlanningCtrl(GetPlayerOwner());
 				CloseAllPopup();

@@ -251,7 +251,7 @@ simulated event HitWall(Vector vHitNormal, Actor Wall)
 			SpawnSFX(CurrentHitEffect, vRealHitLocation, Rotator(vHitNormal), Wall, 0);
 			SpawnSFX(ExitHitEffect, vexitLocation, Rotator(vexitNormal), Wall, 2);
 			// End:0x149
-			if((!__NFUN_267__((vexitLocation + (vexitNormal * float(2)))) /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/ /*unknown*/))
+			if((!SetLocation((vexitLocation + (vexitNormal * float(2))))))
 			{
 				DeactivateBullet();
 			}
@@ -276,7 +276,7 @@ simulated event HitWall(Vector vHitNormal, Actor Wall)
 			break;
 		// End:0xFFFF
 		default:
-			__NFUN_231__("!!! We have a serious problem HERE !!!");
+			Log("!!! We have a serious problem HERE !!!");
 			break;
 	}
 	return;
@@ -284,13 +284,13 @@ simulated event HitWall(Vector vHitNormal, Actor Wall)
 
 function float RangeConversion(float fRange)
 {
-	return __NFUN_174__(__NFUN_171__(__NFUN_171__(fRange, fRange), m_fRangeConversionConst), m_fRangeConversionConst);
+	return (((fRange * fRange) * m_fRangeConversionConst) + m_fRangeConversionConst);
 	return;
 }
 
 function float StunLoss(float fRange)
 {
-	return __NFUN_171__(__NFUN_171__(fRange, fRange), m_fRangeConversionConst);
+	return ((fRange * fRange) * m_fRangeConversionConst);
 	return;
 }
 

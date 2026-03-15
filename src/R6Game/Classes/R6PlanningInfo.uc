@@ -352,7 +352,7 @@ function SetLastPointRotation()
 			}			
 		}		
 		pCurrentPoint.SetRotation(rFirstPointRotation);
-		pCurrentPoint.m_u8SpritePlanningAngle = byte(__NFUN_145__(pCurrentPoint.Rotation.Yaw, 255));
+		pCurrentPoint.m_u8SpritePlanningAngle = byte((pCurrentPoint.Rotation.Yaw / 255));
 	}
 	return;
 }
@@ -366,21 +366,21 @@ function SetPointRotation()
 	pCurrentPoint.m_bActionCompleted = false;
 	pCurrentPoint.m_bActionPointReached = false;
 	// End:0x101
-	if(__NFUN_119__(GetNextPoint(), none))
+	if((GetNextPoint() != none))
 	{
 		// End:0x81
-		if(__NFUN_155__(pCurrentPoint.m_PathToNextPoint.Length, 0))
+		if((pCurrentPoint.m_PathToNextPoint.Length != 0))
 		{
-			vDirection = __NFUN_216__(pCurrentPoint.m_PathToNextPoint[0].Location, pCurrentPoint.Location);			
+			vDirection = (pCurrentPoint.m_PathToNextPoint[0].Location - pCurrentPoint.Location);			
 		}
 		else
 		{
-			vDirection = __NFUN_216__(GetNextPoint().Location, pCurrentPoint.Location);
+			vDirection = (GetNextPoint().Location - pCurrentPoint.Location);
 		}
 		vDirection.Z = 0.0000000;
-		vDirection = __NFUN_226__(vDirection);
-		pCurrentPoint.__NFUN_299__(Rotator(vDirection));
-		pCurrentPoint.m_u8SpritePlanningAngle = byte(__NFUN_145__(pCurrentPoint.Rotation.Yaw, 255));		
+		vDirection = Normal(vDirection);
+		pCurrentPoint.SetRotation(Rotator(vDirection));
+		pCurrentPoint.m_u8SpritePlanningAngle = byte((pCurrentPoint.Rotation.Yaw / 255));		
 	}
 	else
 	{
@@ -392,10 +392,10 @@ function SetPointRotation()
 function SetToPrevNode()
 {
 	// End:0x32
-	if(__NFUN_151__(m_iCurrentNode, 0))
+	if((m_iCurrentNode > 0))
 	{
 		GetPoint().UnselectPoint();
-		__NFUN_166__(m_iCurrentNode);
+		(m_iCurrentNode--);
 		GetPoint().SelectPoint();
 	}
 	return;
@@ -404,10 +404,10 @@ function SetToPrevNode()
 function SetToNextNode()
 {
 	// End:0x3A
-	if(__NFUN_155__(m_iCurrentNode, __NFUN_147__(m_NodeList.Length, 1)))
+	if((m_iCurrentNode != (m_NodeList.Length - 1)))
 	{
 		GetPoint().UnselectPoint();
-		__NFUN_165__(m_iCurrentNode);
+		(m_iCurrentNode++);
 		GetPoint().SelectPoint();
 	}
 	return;
@@ -416,10 +416,10 @@ function SetToNextNode()
 function SetToStartNode()
 {
 	// End:0x4C
-	if(__NFUN_155__(m_iNbNode, 0))
+	if((m_iNbNode != 0))
 	{
 		// End:0x2A
-		if(__NFUN_155__(m_iCurrentNode, -1))
+		if((m_iCurrentNode != -1))
 		{
 			GetPoint().UnselectPoint();
 		}
@@ -433,10 +433,10 @@ function SetToStartNode()
 function SetToEndNode()
 {
 	// End:0x3E
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		GetPoint().UnselectPoint();
-		m_iCurrentNode = __NFUN_147__(m_NodeList.Length, 1);
+		m_iCurrentNode = (m_NodeList.Length - 1);
 		GetPoint().SelectPoint();
 	}
 	return;
@@ -451,11 +451,11 @@ function RemovePointsRefsToCtrl()
 	J0x07:
 
 	// End:0x47 [Loop If]
-	if(__NFUN_150__(iCurrentNode, m_NodeList.Length))
+	if((iCurrentNode < m_NodeList.Length))
 	{
 		pActionPoint = R6ActionPoint(m_NodeList[iCurrentNode]);
 		pActionPoint.m_pPlanningCtrl = none;
-		__NFUN_165__(iCurrentNode);
+		(iCurrentNode++);
 		// [Loop Continue]
 		goto J0x07;
 	}
@@ -472,18 +472,18 @@ function ResetID()
 	J0x0E:
 
 	// End:0x9A [Loop If]
-	if(__NFUN_150__(m_iNbNode, m_NodeList.Length))
+	if((m_iNbNode < m_NodeList.Length))
 	{
 		pNode = R6ActionPoint(m_NodeList[m_iNbNode]);
 		pNode.m_iNodeID = m_iNbNode;
 		// End:0x90
-		if(__NFUN_154__(int(pNode.m_eActionType), int(1)))
+		if((int(pNode.m_eActionType) == int(1)))
 		{
-			__NFUN_165__(m_iNbMilestone);
+			(m_iNbMilestone++);
 			pNode.m_iMileStoneNum = m_iNbMilestone;
 			pNode.SetMileStoneIcon(m_iNbMilestone);
 		}
-		__NFUN_165__(m_iNbNode);
+		(m_iNbNode++);
 		// [Loop Continue]
 		goto J0x0E;
 	}
@@ -493,7 +493,7 @@ function ResetID()
 function bool SetAsCurrentNode(R6ActionPoint pSelectedNode)
 {
 	// End:0x1F
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		GetPoint().UnselectPoint();
 	}
@@ -501,20 +501,20 @@ function bool SetAsCurrentNode(R6ActionPoint pSelectedNode)
 	J0x26:
 
 	// End:0x62 [Loop If]
-	if(__NFUN_150__(m_iCurrentNode, m_NodeList.Length))
+	if((m_iCurrentNode < m_NodeList.Length))
 	{
 		// End:0x58
-		if(__NFUN_114__(GetPoint(), pSelectedNode))
+		if((GetPoint() == pSelectedNode))
 		{
 			GetPoint().SelectPoint();
 			return true;
 		}
-		__NFUN_165__(m_iCurrentNode);
+		(m_iCurrentNode++);
 		// [Loop Continue]
 		goto J0x26;
 	}
 	m_iCurrentNode = 0;
-	__NFUN_231__("WARNING - Could not find current node in Planning Info!!");
+	Log("WARNING - Could not find current node in Planning Info!!");
 	return false;
 	return;
 }
@@ -527,42 +527,42 @@ function bool DeleteNode()
 	local R6PathFlag tempPF;
 
 	// End:0x11
-	if(__NFUN_154__(m_iCurrentNode, -1))
+	if((m_iCurrentNode == -1))
 	{
 		return false;
 	}
 	pCurrentPoint = GetPoint();
 	// End:0x1BD
-	if(__NFUN_129__(__NFUN_130__(__NFUN_154__(m_iCurrentNode, 0), __NFUN_151__(m_NodeList.Length, 1))))
+	if((!((m_iCurrentNode == 0) && (m_NodeList.Length > 1))))
 	{
 		// End:0x98
-		if(__NFUN_119__(pCurrentPoint.m_pActionIcon, none))
+		if((pCurrentPoint.m_pActionIcon != none))
 		{
 			tempAI = pCurrentPoint.m_pActionIcon;
 			pCurrentPoint.m_pActionIcon = none;
-			tempAI.__NFUN_279__();
+			tempAI.Destroy();
 			pCurrentPoint.m_vActionDirection = vect(0.0000000, 0.0000000, 0.0000000);
 		}
 		// End:0xDC
-		if(__NFUN_119__(pCurrentPoint.m_pMyPathFlag, none))
+		if((pCurrentPoint.m_pMyPathFlag != none))
 		{
 			tempPF = pCurrentPoint.m_pMyPathFlag;
 			pCurrentPoint.m_pMyPathFlag = none;
-			tempPF.__NFUN_279__();
+			tempPF.Destroy();
 		}
 		// End:0xEF
-		if(__NFUN_154__(m_iCurrentNode, 0))
+		if((m_iCurrentNode == 0))
 		{
 			m_bPlacedFirstPoint = false;
 		}
-		__NFUN_1413__();
+		DeletePoint();
 		ResetID();
 		// End:0x144
-		if(__NFUN_154__(m_iCurrentNode, m_NodeList.Length))
+		if((m_iCurrentNode == m_NodeList.Length))
 		{
-			__NFUN_166__(m_iCurrentNode);
+			(m_iCurrentNode--);
 			// End:0x120
-			if(__NFUN_154__(m_iCurrentNode, -1))
+			if((m_iCurrentNode == -1))
 			{
 				return true;
 			}
@@ -572,10 +572,10 @@ function bool DeleteNode()
 		}
 		else
 		{
-			__NFUN_166__(m_iCurrentNode);
+			(m_iCurrentNode--);
 			pCurrentPoint = GetPoint();
 			GetNextPoint().prevActionPoint = pCurrentPoint;
-			__NFUN_2007__(pCurrentPoint, GetNextPoint());
+			FindPathToNextPoint(pCurrentPoint, GetNextPoint());
 			GetNextPoint().m_pMyPathFlag.RefreshLocation();
 			pCurrentPoint.SelectPoint();
 			SetPointRotation();
@@ -586,7 +586,7 @@ function bool DeleteNode()
 	}
 	else
 	{
-		__NFUN_231__("Cannot delete start location, when there's other points in the list");
+		Log("Cannot delete start location, when there's other points in the list");
 		return false;
 	}
 	return true;
@@ -596,11 +596,11 @@ function bool DeleteNode()
 // Delete all ActionPoint in the Team
 function DeleteAllNode()
 {
-	m_iCurrentNode = __NFUN_147__(m_NodeList.Length, 1);
+	m_iCurrentNode = (m_NodeList.Length - 1);
 	J0x0F:
 
 	// End:0x27 [Loop If]
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		DeleteNode();
 		// [Loop Continue]
@@ -614,9 +614,9 @@ function DeleteAllNode()
 function SetCurrentPointAction(Object.EPlanAction eAction)
 {
 	// End:0x2B
-	if(__NFUN_114__(GetPoint(), none))
+	if((GetPoint() == none))
 	{
-		__NFUN_231__("WARNING: CurrentNode null");
+		Log("WARNING: CurrentNode null");
 		return;
 	}
 	GetPoint().SetPointAction(eAction);
@@ -626,7 +626,7 @@ function SetCurrentPointAction(Object.EPlanAction eAction)
 function AjustSnipeDirection(Vector vHitLocation)
 {
 	// End:0x42
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		GetPoint().m_rActionRotation = R6PlanningSnipe(GetPoint().m_pActionIcon).SetDirectionRotator(vHitLocation);
 	}
@@ -651,13 +651,13 @@ function Actor GetNextDoorToBreach(Actor aPoint)
 	local R6ActionPoint nextActionPoint;
 
 	// End:0x24
-	if(__NFUN_119__(R6ActionPoint(aPoint), none))
+	if((R6ActionPoint(aPoint) != none))
 	{
 		return R6ActionPoint(aPoint).pDoor;
 	}
 	nextActionPoint = GetNextPoint();
 	// End:0x4A
-	if(__NFUN_119__(nextActionPoint, none))
+	if((nextActionPoint != none))
 	{
 		return nextActionPoint.pDoor;
 	}
@@ -667,9 +667,9 @@ function Actor GetNextDoorToBreach(Actor aPoint)
 function bool SetGrenadeLocation(Vector vHitLocation)
 {
 	// End:0x32
-	if(__NFUN_119__(GetPoint(), none))
+	if((GetPoint() != none))
 	{
-		__NFUN_184__(vHitLocation.Z, float(100));
+		(vHitLocation.Z += float(100));
 		return GetPoint().SetGrenade(vHitLocation);
 	}
 	return false;
@@ -679,7 +679,7 @@ function bool SetGrenadeLocation(Vector vHitLocation)
 function SetActionType(Object.EPlanActionType eNewType)
 {
 	// End:0x24
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		GetPoint().ChangeActionType(eNewType);
 	}
@@ -689,7 +689,7 @@ function SetActionType(Object.EPlanActionType eNewType)
 function R6ActionPoint GetPoint()
 {
 	// End:0x20
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		return R6ActionPoint(m_NodeList[m_iCurrentNode]);
 	}
@@ -700,9 +700,9 @@ function R6ActionPoint GetPoint()
 function R6ActionPoint GetNextPoint()
 {
 	// End:0x38
-	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_155__(__NFUN_146__(m_iCurrentNode, 1), m_NodeList.Length)))
+	if(((m_iCurrentNode != -1) && ((m_iCurrentNode + 1) != m_NodeList.Length)))
 	{
-		return R6ActionPoint(m_NodeList[__NFUN_146__(m_iCurrentNode, 1)]);
+		return R6ActionPoint(m_NodeList[(m_iCurrentNode + 1)]);
 	}
 	return none;
 	return;
@@ -711,7 +711,7 @@ function R6ActionPoint GetNextPoint()
 function Object.EPlanActionType GetActionType()
 {
 	// End:0x1F
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		return GetPoint().m_eActionType;
 	}
@@ -722,7 +722,7 @@ function Object.EPlanActionType GetActionType()
 function SetAction(Object.EPlanAction eNewAction)
 {
 	// End:0x24
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		GetPoint().m_eAction = eNewAction;
 	}
@@ -732,7 +732,7 @@ function SetAction(Object.EPlanAction eNewAction)
 function Object.EPlanAction GetAction()
 {
 	// End:0x1F
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		return GetPoint().m_eAction;
 	}
@@ -746,11 +746,11 @@ function Object.EPlanAction NextActionPointHasAction(Actor aPoint)
 
 	actionPoint = R6ActionPoint(aPoint);
 	// End:0x75
-	if(__NFUN_114__(actionPoint, none))
+	if((actionPoint == none))
 	{
 		nextActionPoint = GetNextPoint();
 		// End:0x72
-		if(__NFUN_130__(__NFUN_119__(nextActionPoint, none), __NFUN_176__(__NFUN_225__(__NFUN_216__(nextActionPoint.Location, aPoint.Location)), float(300))))
+		if(((nextActionPoint != none) && (VSize((nextActionPoint.Location - aPoint.Location)) < float(300))))
 		{
 			return nextActionPoint.m_eAction;			
 		}
@@ -766,7 +766,7 @@ function Object.EPlanAction NextActionPointHasAction(Actor aPoint)
 function SetMovementMode(Object.EMovementMode eNewMode)
 {
 	// End:0x42
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		GetPoint().m_eMovementMode = eNewMode;
 		GetPoint().m_pMyPathFlag.SetModeDisplay(eNewMode);
@@ -777,10 +777,10 @@ function SetMovementMode(Object.EMovementMode eNewMode)
 function Object.EMovementMode GetMovementMode()
 {
 	// End:0x41
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		// End:0x31
-		if(__NFUN_155__(m_iCurrentPathIndex, -1))
+		if((m_iCurrentPathIndex != -1))
 		{
 			return GetNextPoint().m_eMovementMode;			
 		}
@@ -796,7 +796,7 @@ function Object.EMovementMode GetMovementMode()
 function SetMovementSpeed(Object.EMovementSpeed eNewSpeed)
 {
 	// End:0x24
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		GetPoint().m_eMovementSpeed = eNewSpeed;
 	}
@@ -806,10 +806,10 @@ function SetMovementSpeed(Object.EMovementSpeed eNewSpeed)
 function Object.EMovementSpeed GetMovementSpeed()
 {
 	// End:0x41
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		// End:0x31
-		if(__NFUN_155__(m_iCurrentPathIndex, -1))
+		if((m_iCurrentPathIndex != -1))
 		{
 			return GetNextPoint().m_eMovementSpeed;			
 		}
@@ -836,30 +836,30 @@ function SkipCurrentDestination()
 	pCurrentPoint = GetPoint();
 	pCurrentTeam = R6RainbowTeam(m_pTeamManager);
 	// End:0x1A9
-	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_155__(m_iCurrentNode, __NFUN_147__(m_NodeList.Length, 1))))
+	if(((m_iCurrentNode != -1) && (m_iCurrentNode != (m_NodeList.Length - 1))))
 	{
 		// End:0x8D
-		if(__NFUN_154__(m_iCurrentPathIndex, __NFUN_147__(pCurrentPoint.m_PathToNextPoint.Length, 1)))
+		if((m_iCurrentPathIndex == (pCurrentPoint.m_PathToNextPoint.Length - 1)))
 		{
 			pPrevPoint = pCurrentPoint;
 			pCurrentPoint.m_bActionCompleted = true;
 			m_iCurrentPathIndex = -1;
-			__NFUN_165__(m_iCurrentNode);			
+			(m_iCurrentNode++);			
 		}
 		else
 		{
-			__NFUN_165__(m_iCurrentPathIndex);
+			(m_iCurrentPathIndex++);
 		}
 		// End:0x116
-		if(__NFUN_154__(m_iCurrentPathIndex, -1))
+		if((m_iCurrentPathIndex == -1))
 		{
 			// End:0xDB
-			if(__NFUN_155__(int(pPrevPoint.m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+			if((int(pPrevPoint.m_eMovementMode) != int(pCurrentPoint.m_eMovementMode)))
 			{
 				pCurrentTeam.TeamNotifyActionPoint(1, 4);
 			}
 			// End:0x113
-			if(__NFUN_155__(int(pPrevPoint.m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+			if((int(pPrevPoint.m_eMovementSpeed) != int(pCurrentPoint.m_eMovementSpeed)))
 			{
 				pCurrentTeam.TeamNotifyActionPoint(2, 4);
 			}			
@@ -867,15 +867,15 @@ function SkipCurrentDestination()
 		else
 		{
 			// End:0x193
-			if(__NFUN_154__(m_iCurrentPathIndex, 0))
+			if((m_iCurrentPathIndex == 0))
 			{
 				// End:0x15A
-				if(__NFUN_155__(int(GetNextPoint().m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+				if((int(GetNextPoint().m_eMovementMode) != int(pCurrentPoint.m_eMovementMode)))
 				{
 					pCurrentTeam.TeamNotifyActionPoint(1, 4);
 				}
 				// End:0x193
-				if(__NFUN_155__(int(GetNextPoint().m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+				if((int(GetNextPoint().m_eMovementSpeed) != int(pCurrentPoint.m_eMovementSpeed)))
 				{
 					pCurrentTeam.TeamNotifyActionPoint(2, 4);
 				}
@@ -897,10 +897,10 @@ function Actor GetNextActionPoint()
 
 	pCurrentPoint = GetPoint();
 	// End:0x82
-	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_150__(m_iCurrentNode, m_NodeList.Length)))
+	if(((m_iCurrentNode != -1) && (m_iCurrentNode < m_NodeList.Length)))
 	{
 		// End:0x74
-		if(__NFUN_130__(__NFUN_155__(m_iCurrentPathIndex, -1), __NFUN_150__(m_iCurrentPathIndex, pCurrentPoint.m_PathToNextPoint.Length)))
+		if(((m_iCurrentPathIndex != -1) && (m_iCurrentPathIndex < pCurrentPoint.m_PathToNextPoint.Length)))
 		{
 			pPointToReturn = pCurrentPoint.m_PathToNextPoint[m_iCurrentPathIndex];			
 		}
@@ -922,12 +922,12 @@ function Actor PreviewNextActionPoint()
 	local Actor pPointToReturn;
 
 	// End:0x59
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		// End:0x4D
-		if(__NFUN_150__(__NFUN_146__(m_iCurrentPathIndex, 1), GetPoint().m_PathToNextPoint.Length))
+		if(((m_iCurrentPathIndex + 1) < GetPoint().m_PathToNextPoint.Length))
 		{
-			pPointToReturn = GetPoint().m_PathToNextPoint[__NFUN_146__(m_iCurrentPathIndex, 1)];			
+			pPointToReturn = GetPoint().m_PathToNextPoint[(m_iCurrentPathIndex + 1)];			
 		}
 		else
 		{
@@ -941,22 +941,22 @@ function Actor PreviewNextActionPoint()
 function SetToPreviousActionPoint()
 {
 	// End:0x51
-	if(__NFUN_132__(GetPoint().m_bActionPointReached, __NFUN_176__(__NFUN_225__(__NFUN_216__(R6RainbowTeam(m_pTeamManager).m_Team[0].Location, GetPoint().Location)), float(200))))
+	if((GetPoint().m_bActionPointReached || (VSize((R6RainbowTeam(m_pTeamManager).m_Team[0].Location - GetPoint().Location)) < float(200))))
 	{
 		return;
 	}
 	// End:0xBA
-	if(__NFUN_130__(__NFUN_155__(m_iCurrentNode, -1), __NFUN_129__(__NFUN_130__(__NFUN_154__(m_iCurrentNode, 0), __NFUN_154__(m_iCurrentPathIndex, -1)))))
+	if(((m_iCurrentNode != -1) && (!((m_iCurrentNode == 0) && (m_iCurrentPathIndex == -1)))))
 	{
 		// End:0x9A
-		if(__NFUN_155__(m_iCurrentPathIndex, -1))
+		if((m_iCurrentPathIndex != -1))
 		{
-			__NFUN_162__(m_iCurrentPathIndex, 1);			
+			(m_iCurrentPathIndex -= 1);			
 		}
 		else
 		{
-			__NFUN_166__(m_iCurrentNode);
-			m_iCurrentPathIndex = __NFUN_147__(GetPoint().m_PathToNextPoint.Length, 1);
+			(m_iCurrentNode--);
+			m_iCurrentPathIndex = (GetPoint().m_PathToNextPoint.Length - 1);
 		}
 	}
 	return;
@@ -965,7 +965,7 @@ function SetToPreviousActionPoint()
 function int GetActionPointID()
 {
 	// End:0x1F
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		return GetPoint().m_iNodeID;
 	}
@@ -982,7 +982,7 @@ function int GetNbActionPoint()
 function Vector GetActionLocation()
 {
 	// End:0x1F
-	if(__NFUN_155__(m_iCurrentNode, -1))
+	if((m_iCurrentNode != -1))
 	{
 		return GetPoint().m_vActionDirection;
 	}
@@ -1000,7 +1000,7 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 	pCurrentTeam = R6RainbowTeam(m_pTeamManager);
 	pCurrentPoint = GetPoint();
 	// End:0x3D8
-	if(__NFUN_130__(__NFUN_119__(pCurrentTeam, none), __NFUN_155__(m_iCurrentNode, -1)))
+	if(((pCurrentTeam != none) && (m_iCurrentNode != -1)))
 	{
 		switch(eMsg)
 		{
@@ -1013,16 +1013,16 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 			// End:0x174
 			case 4:
 				// End:0x6D
-				if(__NFUN_154__(int(pCurrentTeam.m_eGoCode), int(3)))
+				if((int(pCurrentTeam.m_eGoCode) == int(3)))
 				{
 					return;
 				}
 				// End:0xE0
-				if(__NFUN_154__(int(m_eGoCodeState[int(eCode)]), int(1)))
+				if((int(m_eGoCodeState[int(eCode)]) == int(1)))
 				{
 					m_eGoCodeState[int(eCode)] = 0;
 					// End:0xC4
-					if(__NFUN_155__(int(pCurrentPoint.m_eAction), int(0)))
+					if((int(pCurrentPoint.m_eAction) != int(0)))
 					{
 						pCurrentTeam.TeamNotifyActionPoint(0, 4);						
 					}
@@ -1035,7 +1035,7 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 				else
 				{
 					// End:0x129
-					if(__NFUN_154__(int(m_eGoCodeState[int(eCode)]), int(2)))
+					if((int(m_eGoCodeState[int(eCode)]) == int(2)))
 					{
 						m_eGoCodeState[int(eCode)] = 0;
 						pCurrentTeam.TeamSnipingOver();
@@ -1044,7 +1044,7 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 					else
 					{
 						// End:0x172
-						if(__NFUN_154__(int(m_eGoCodeState[int(eCode)]), int(3)))
+						if((int(m_eGoCodeState[int(eCode)]) == int(3)))
 						{
 							m_eGoCodeState[int(eCode)] = 0;
 							pCurrentTeam.BreachDoor();
@@ -1056,31 +1056,31 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 			// End:0x30D
 			case 5:
 				// End:0x300
-				if(__NFUN_155__(m_iCurrentNode, __NFUN_147__(m_iNbNode, 1)))
+				if((m_iCurrentNode != (m_iNbNode - 1)))
 				{
 					pCurrentPoint.m_bActionCompleted = true;
 					pPrevPoint = pCurrentPoint;
 					// End:0x1E4
-					if(__NFUN_154__(m_iCurrentPathIndex, __NFUN_147__(pCurrentPoint.m_PathToNextPoint.Length, 1)))
+					if((m_iCurrentPathIndex == (pCurrentPoint.m_PathToNextPoint.Length - 1)))
 					{
 						m_iCurrentPathIndex = -1;
-						__NFUN_165__(m_iCurrentNode);
+						(m_iCurrentNode++);
 						pCurrentPoint = GetPoint();						
 					}
 					else
 					{
-						__NFUN_165__(m_iCurrentPathIndex);
+						(m_iCurrentPathIndex++);
 					}
 					// End:0x26D
-					if(__NFUN_154__(m_iCurrentPathIndex, -1))
+					if((m_iCurrentPathIndex == -1))
 					{
 						// End:0x232
-						if(__NFUN_155__(int(pPrevPoint.m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+						if((int(pPrevPoint.m_eMovementMode) != int(pCurrentPoint.m_eMovementMode)))
 						{
 							pCurrentTeam.TeamNotifyActionPoint(1, 4);
 						}
 						// End:0x26A
-						if(__NFUN_155__(int(pPrevPoint.m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+						if((int(pPrevPoint.m_eMovementSpeed) != int(pCurrentPoint.m_eMovementSpeed)))
 						{
 							pCurrentTeam.TeamNotifyActionPoint(2, 4);
 						}						
@@ -1088,15 +1088,15 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 					else
 					{
 						// End:0x2EA
-						if(__NFUN_154__(m_iCurrentPathIndex, 0))
+						if((m_iCurrentPathIndex == 0))
 						{
 							// End:0x2B1
-							if(__NFUN_155__(int(GetNextPoint().m_eMovementMode), int(pCurrentPoint.m_eMovementMode)))
+							if((int(GetNextPoint().m_eMovementMode) != int(pCurrentPoint.m_eMovementMode)))
 							{
 								pCurrentTeam.TeamNotifyActionPoint(1, 4);
 							}
 							// End:0x2EA
-							if(__NFUN_155__(int(GetNextPoint().m_eMovementSpeed), int(pCurrentPoint.m_eMovementSpeed)))
+							if((int(GetNextPoint().m_eMovementSpeed) != int(pCurrentPoint.m_eMovementSpeed)))
 							{
 								pCurrentTeam.TeamNotifyActionPoint(2, 4);
 							}
@@ -1152,19 +1152,19 @@ function bool MemberReached(R6ActionPoint PTarget)
 	local float fZDiff;
 
 	// End:0xA3
-	if(__NFUN_119__(PTarget, none))
+	if((PTarget != none))
 	{
 		// End:0xA3
-		if(__NFUN_119__(m_pTeamManager, none))
+		if((m_pTeamManager != none))
 		{
 			// End:0xA3
 			if(R6RainbowTeam(m_pTeamManager).m_bLeaderIsAPlayer)
 			{
-				vDiff = __NFUN_216__(R6RainbowTeam(m_pTeamManager).m_TeamLeader.Location, PTarget.Location);
+				vDiff = (R6RainbowTeam(m_pTeamManager).m_TeamLeader.Location - PTarget.Location);
 				fZDiff = vDiff.Z;
 				vDiff.Z = 0.0000000;
 				// End:0xA3
-				if(__NFUN_130__(__NFUN_176__(__NFUN_225__(vDiff), m_fReachRange), __NFUN_176__(fZDiff, m_fZReachRange)))
+				if(((VSize(vDiff) < m_fReachRange) && (fZDiff < m_fZReachRange)))
 				{
 					return true;
 				}
@@ -1186,21 +1186,21 @@ function ReadNode()
 	pCurrentPoint = GetPoint();
 	pCurrentTeam = R6RainbowTeam(m_pTeamManager);
 	// End:0x1F6
-	if(__NFUN_243__(pCurrentPoint.m_bActionCompleted, true))
+	if((pCurrentPoint.m_bActionCompleted != true))
 	{
 		switch(pCurrentPoint.m_eActionType)
 		{
 			// End:0x95
 			case 1:
 				// End:0x94
-				foreach m_pTeamManager.Level.__NFUN_304__(Class'R6Engine.R6PlayerController', pMyPlayer)
+				foreach m_pTeamManager.Level.AllActors(Class'R6Engine.R6PlayerController', pMyPlayer)
 				{
 					pMyPlayer.DisplayMilestoneMessage(pCurrentTeam.m_iRainbowTeamName, pCurrentPoint.m_iMileStoneNum);					
 				}				
 			// End:0xD6
 			case 0:
 				// End:0xC9
-				if(__NFUN_155__(int(pCurrentPoint.m_eAction), int(0)))
+				if((int(pCurrentPoint.m_eAction) != int(0)))
 				{
 					pCurrentTeam.TeamNotifyActionPoint(0, 4);					
 				}
@@ -1213,14 +1213,14 @@ function ReadNode()
 			// End:0x134
 			case 2:
 				// End:0x101
-				if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(5)))
+				if((int(pCurrentPoint.m_eAction) == int(5)))
 				{
 					NotifyActionPoint(9, 0);					
 				}
 				else
 				{
 					// End:0x127
-					if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(6)))
+					if((int(pCurrentPoint.m_eAction) == int(6)))
 					{
 						NotifyActionPoint(10, 0);						
 					}
@@ -1234,14 +1234,14 @@ function ReadNode()
 			// End:0x192
 			case 3:
 				// End:0x15F
-				if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(5)))
+				if((int(pCurrentPoint.m_eAction) == int(5)))
 				{
 					NotifyActionPoint(9, 1);					
 				}
 				else
 				{
 					// End:0x185
-					if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(6)))
+					if((int(pCurrentPoint.m_eAction) == int(6)))
 					{
 						NotifyActionPoint(10, 1);						
 					}
@@ -1255,14 +1255,14 @@ function ReadNode()
 			// End:0x1F0
 			case 4:
 				// End:0x1BD
-				if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(5)))
+				if((int(pCurrentPoint.m_eAction) == int(5)))
 				{
 					NotifyActionPoint(9, 2);					
 				}
 				else
 				{
 					// End:0x1E3
-					if(__NFUN_154__(int(pCurrentPoint.m_eAction), int(6)))
+					if((int(pCurrentPoint.m_eAction) == int(6)))
 					{
 						NotifyActionPoint(10, 2);						
 					}
