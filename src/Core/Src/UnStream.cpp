@@ -86,7 +86,7 @@ FFileStream* FFileStream::Init( INT InMaxStreams )
 	return Instance;
 }
 
-IMPL_TODO("retail busy-waits for background streaming thread; no thread in reconstruction")
+IMPL_DIVERGE("permanent: retail busy-waits for background streaming thread to drain (Destroyed→0); our reconstruction has no streaming thread so the wait is skipped — functionally equivalent at shutdown")
 void FFileStream::Destroy()
 {
 	// DIVERGENCE: The retail binary sets Destroyed=1 and then busy-waits for a
@@ -565,7 +565,7 @@ INT FString::ParseIntoArray( const TCHAR* Delim, TArray<FString>* Array )
 	FArchive << FString operator.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("found at Core.dll 0x101314d0; retail serialises via raw vtable calls; C++ virtual dispatch is functionally equivalent but not byte-identical")
+IMPL_DIVERGE("permanent: retail 0x101314d0 serialises via raw vtable slot calls (call dword ptr [vtbl+N]); C++ virtual dispatch is functionally equivalent but produces different codegen")
 CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 {
 	if( Ar.IsLoading() )
@@ -613,7 +613,7 @@ CORE_API FArchive& operator<<( FArchive& Ar, FString& S )
 	Explicit template instantiations for .def export.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("found at Core.dll 0x1010a900; retail uses direct FArray::Realloc; AddItem loop is functionally equivalent but not byte-identical")
+IMPL_DIVERGE("permanent: retail 0x1010a900 uses direct FArray::Realloc for the append; AddItem loop is functionally equivalent but generates different bytecode")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 {
@@ -622,7 +622,7 @@ TArray<TCHAR>& TArray<TCHAR>::operator+( const TArray<TCHAR>& Other )
 	return *this;
 }
 
-IMPL_TODO("found at Core.dll 0x1010e520; retail calls operator+ then operator=(this,this); single-call equivalent is functionally identical")
+IMPL_DIVERGE("permanent: retail 0x1010e520 calls operator+(Other) then operator=(this,this) as two separate ops; single-call forward is functionally identical but not byte-accurate")
 template<>
 TArray<TCHAR>& TArray<TCHAR>::operator+=( const TArray<TCHAR>& Other )
 {

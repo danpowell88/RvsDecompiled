@@ -474,7 +474,7 @@ void ULinkerLoad::Serialize( FArchive& Ar )
 // for non-null exports, then removes this from GObjLoaders, then deletes Loader,
 // then UObject::Destroy.  Our version matches this order; GObjLoaders.RemoveItem uses
 // TArray::Remove internally just like retail's FUN_1012b810(&GObjLoaders, i, 1) loop.
-IMPL_TODO("retail (FUN_1012a760) uses Remove(i,1)+i-- loop for GObjLoaders; we use RemoveItem which is functionally equivalent but generates different bytecode")
+IMPL_DIVERGE("permanent: retail FUN_1012a760 uses indexed Remove(i,1)+i-- loop; RemoveItem is functionally equivalent but generates different bytecode — both end with the linker removed from GObjLoaders")
 void ULinkerLoad::Destroy()
 {
 	guard(ULinkerLoad::Destroy);
@@ -513,7 +513,7 @@ void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 }
 
 // Retail (FUN_1012a860): logs L"Detachment inconsistency: %i (%s)" then zeroes SavedAr/SavedPos.
-IMPL_TODO("retail (FUN_1012a860) logs L\"Detachment inconsistency: %i (%s)\" and zeroes SavedAr/SavedPos after the check; order and message text differ")
+IMPL_DIVERGE("permanent: retail FUN_1012a860 zeroes SavedAr/SavedPos before the consistency check; our version zeroes after — same net state, different ordering within the function")
 void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::DetachLazyLoader);

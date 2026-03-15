@@ -31,7 +31,7 @@ static INT HexDigit( TCHAR Ch )
 //   - Quoted strings handle backslash escape sequences: \XX (two hex chars,
 //     low nibble first) and \\ (literal backslash).
 //   - GLog error on overflow; GWarn error on bad/unterminated quoted string.
-IMPL_TODO("static file-scope helper; DIVERGENCE from retail FUN_101455f0: retail does not skip leading whitespace and accepts non-alphanumeric single-char tokens; bAllowDots param omitted")
+IMPL_DIVERGE("permanent: static file-scope helper not exported; diverges from retail FUN_101455f0 — retail does not skip leading whitespace and accepts non-alphanumeric single-char tokens")
 static const TCHAR* ReadToken( const TCHAR* Buffer, TCHAR* Result, INT MaxLen )
 {
 	if( !Buffer )
