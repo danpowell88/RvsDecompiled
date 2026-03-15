@@ -153,3 +153,17 @@ With the audit done, the path forward is clear:
 4. **Audio phase** — the ~8 audio stubs will become IMPL_MATCH once SNDDSound3D is implemented
 
 The 202 remaining `IMPL_DIVERGE` entries? Those we leave alone. Karma will always be Karma.
+
+---
+
+**Update — March 2026:** After a closer look at what "Karma not implemented" actually means in each case,
+it turned out Karma was more partially rebuilt than we thought. Out of the 62 Karma-tagged `IMPL_DIVERGE`
+entries, many were property accessors that read or write cached values on `UKarmaParams` — **no MeSDK call
+at all**. Functions like `execKGetMass` just read `KarmaParams->KMass`; `execKSetStayUpright` just
+flips a bitfield. Those are fully implementable today.
+
+A dedicated [Karma rebuild sprint](../karma-physics-rebuilding-what-we-can) is now in progress,
+targeting all 36 exec functions in `EngineClassImpl.cpp` and 8 in `KarmaSupport.cpp`. The ones
+genuinely blocked by proprietary MeSDK functions (`FUN_104xxxxx` addresses) stay as `IMPL_TODO`
+with a FUN_ blocker note; only the truly irreplaceable MeSDK physics simulation calls remain
+`IMPL_DIVERGE`.
