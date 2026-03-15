@@ -215,7 +215,8 @@ static UINT GetLocalBindIP()
 //   u_short FUN_10701810(SOCKET s, sockaddr* addr, int num_attempts, int port_increment).
 // Our wrapper has different parameter semantics (mask flags + bReuseAddr vs attempt count +
 // port increment) and calls setsockopt(SO_REUSEADDR) which retail does not.
-IMPL_TODO("retail FUN_10701810 (0x10701810): uses attempt-count/port-increment params without SO_REUSEADDR; our wrapper adds different semantics")
+// All callers in this file use our interface — the retail ABI cannot be matched.
+IMPL_DIVERGE("permanent: our callers use mask/bReuseAddr params; retail FUN_10701810 takes attempt-count/port-increment — incompatible interface")
 static WORD BindSocket(SOCKET s, sockaddr_in* Addr, INT mask, INT bReuseAddr)
 {
 	if (bReuseAddr)
@@ -262,7 +263,7 @@ static bool SetSocketOptions(SOCKET s)
 // Retail equivalent is FUN_1070df40 (0x1070df40): uses caller-allocated output FString* (return-by-pointer
 // ABI) vs our return-by-value. Port format uses data reference DAT_10717774 (unknown literal; functionally
 // equivalent to ":%i"). Both produce identical output strings.
-IMPL_TODO("retail FUN_1070df40 (0x1070df40): uses return-by-pointer ABI; our version returns FString by value — functionally equivalent output")
+IMPL_DIVERGE("permanent: retail FUN_1070df40 uses explicit FString* out-param ABI; C++ return-by-value generates different calling convention — functionally equivalent")
 static FString IpAddrToStr(UINT Addr, UINT Port)
 {
 	BYTE b1 = (BYTE)( Addr        & 0xFF);

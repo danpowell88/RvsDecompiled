@@ -653,16 +653,28 @@ void ATerrainInfo::Destroy()
 	}
 	AActor::Destroy();
 }
-IMPL_TODO("Ghidra 0x103155C0: lazy-creates UTerrainPrimitive via StaticAllocateObject; creation path omitted — returns existing ptr only")
-UPrimitive * ATerrainInfo::GetPrimitive()
+IMPL_MATCH("Engine.dll", 0x103155c0)
+UPrimitive* ATerrainInfo::GetPrimitive()
 {
-	// Retail: 0x155c0. If sector list at this+0x12C8 is empty, defer to AActor.
-	// Otherwise return cached UTerrainPrimitive at this+0x12F0.
-	// Divergence: lazy creation of UTerrainPrimitive via StaticAllocateObject is omitted.
+	// Ghidra 0x155c0 (119b): if sector list empty defer to AActor; otherwise return/lazy-create
+	// UTerrainPrimitive at this+0x12f0 via StaticAllocateObject + placement-new constructor.
 	TArray<INT>* sectors = (TArray<INT>*)((BYTE*)this + 0x12C8);
 	if (sectors->Num() == 0)
 		return AActor::GetPrimitive();
-	return *(UPrimitive**)((BYTE*)this + 0x12F0);
+	UPrimitive*& cached = *(UPrimitive**)((BYTE*)this + 0x12F0);
+	if (!cached)
+	{
+		UObject* obj = UObject::StaticAllocateObject(
+			UTerrainPrimitive::StaticClass(), this, NAME_None, 0, NULL, GError);
+		if (obj)
+		{
+			cached = new(obj) UTerrainPrimitive(this);
+			return cached;
+		}
+		cached = NULL;
+		return NULL;
+	}
+	return cached;
 }
 
 
