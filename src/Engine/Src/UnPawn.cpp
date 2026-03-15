@@ -2879,9 +2879,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	FVector NegNorm = -(FVector(0.f, 0.f, -1.f).SafeNormal());
 
 	FCheckResult Hit(1.f);
-
-	FLOAT fStep33 = 33.f;
-	XLevel->MoveActor(this, Delta, Rotation, Hit, 1, 1, 0, 0, 0, fStep33);
+	XLevel->MoveActor(this, Delta, Rotation, Hit, 1, 1, 0, 0, 0);
 
 	if (HitActor != NULL && Hit.Actor == HitActor)
 		return (ETestMoveResult)5;  // HitGoal
@@ -2896,7 +2894,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 		FVector SlideDir = Delta.SafeNormal();
 
 		// Wall-reaction: push in NegNorm=(0,0,1) direction by remaining fraction.
-		XLevel->MoveActor(this, NegNorm, Rotation, Hit, 1, 1, 0, 0, 0, fRemaining);
+		XLevel->MoveActor(this, NegNorm, Rotation, Hit, 1, 1, 0, 0, 0);
 
 		// Continue slide.
 		XLevel->MoveActor(this, SlideDir, Rotation, Hit, 1, 1, 0, 0, 0);
@@ -3333,10 +3331,9 @@ ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitAct
 
 	// GravDir = SafeNormal((0,0,gravSign)) = (0,0,gravSign).
 	FVector GravDir(0.f, 0.f, gravSign);
-	FLOAT fStep33 = 33.f;
 
 	// Move 1: attempt XY move.
-	XLevel->MoveActor(this, Delta, Rotation, Hit, 1, 1, 0, 0, 0, fStep33);
+	XLevel->MoveActor(this, Delta, Rotation, Hit, 1, 1, 0, 0, 0);
 
 	if (HitActor != NULL && Hit.Actor == HitActor)
 		return (ETestMoveResult)5;  // HitGoal
@@ -3361,7 +3358,7 @@ ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitAct
 		FVector StepUp(0.f, 0.f, antiGravZ);
 
 		// Move 2: step up in anti-gravity direction, fStepDist = remaining fraction.
-		XLevel->MoveActor(this, StepUp, Rotation, Hit, 1, 1, 0, 0, 0, fRemaining);
+		XLevel->MoveActor(this, StepUp, Rotation, Hit, 1, 1, 0, 0, 0);
 
 		// Move 3: slide.
 		XLevel->MoveActor(this, SlideDir, Rotation, Hit, 1, 1, 0, 0, 0);
@@ -3385,10 +3382,9 @@ ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitAct
 
 	// Recompute SafeNormal(GravDir) — retail calls FVector::operator* again here.
 	// SafeNormal((0,0,gravSign)) = (0,0,gravSign), same as GravDir.
-	FLOAT fStep35 = 35.f;
 
 	// Move 5: settle on floor — step down 35 units in gravity direction.
-	XLevel->MoveActor(this, GravDir, Rotation, Hit, 1, 1, 0, 0, 0, fStep35);
+	XLevel->MoveActor(this, GravDir, Rotation, Hit, 1, 1, 0, 0, 0);
 
 	// If no floor found (Time == 1.0) OR floor too steep — fell.
 	if (*(INT*)&Hit.Time == 0x3f800000 || Hit.Normal.Z < 0.7f)
