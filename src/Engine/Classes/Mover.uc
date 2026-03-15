@@ -39,6 +39,7 @@ var() Mover.EMoverEncroachType MoverEncroachType;
 // NEW IN 1.60
 var() Mover.EMoverGlideType MoverGlideType;
 // NEW IN 1.60
+// Controls which class of actor can bump-trigger this mover (player only, any pawn, or any solid actor).
 var() Mover.EBumpType BumpType;
 //-----------------------------------------------------------------------------
 // Keyframe numbers.
@@ -54,11 +55,11 @@ var int SimOldRotPitch;
 var int SimOldRotYaw;
 // NEW IN 1.60
 var int SimOldRotRoll;
-var int ClientUpdate;
+var int ClientUpdate; // Counts in-progress client moves; RealPosition sync is skipped while non-zero.
 // NEW IN 1.60
-var int StepDirection;
+var int StepDirection; // Oscillation direction for ConstantLoop/LeadInOutLooping: +1 (forward) or -1 (backward).
 // NEW IN 1.60
-var() bool bToggleDirection;
+var() bool bToggleDirection; // RotatingMover only: reverses RotationRate sign after each completion.
 //-----------------------------------------------------------------------------
 // Mover state.
 var() bool bTriggerOnceOnly;  // Go dormant after first trigger.
@@ -67,18 +68,18 @@ var() bool bUseTriggered;  // Triggered by player grab
 var() bool bDamageTriggered;  // Triggered by taking damage
 var() bool bDynamicLightMover;  // Apply dynamic lighting to mover.
 // NEW IN 1.60
-var() bool bUseShortestRotation;
+var() bool bUseShortestRotation; // Interpolate rotations via the shortest angular arc between keyframes.
 // NEW IN 1.60
-var(ReturnGroup) bool bIsLeader;
+var(ReturnGroup) bool bIsLeader; // Designates this mover as the ReturnGroup leader responsible for linking followers.
 // NEW IN 1.60
-var() bool bOscillatingLoop;
+var() bool bOscillatingLoop; // ConstantLoop/LeadInOutLooping: bounce between endpoint keys instead of wrapping.
 var bool bOpening;
 // NEW IN 1.60
 var bool bDelaying;
 // NEW IN 1.60
 var bool bClientPause;
 var bool bClosed;  // mover is in closed position, and no longer moving
-var bool bPlayerOnly;
+var bool bPlayerOnly; // If true, only the human player pawn can use this mover.
 var(AI) bool bNoAIRelevance;  // don't warn about this mover during path review
 //-----------------------------------------------------------------------------
 // Movement parameters.
@@ -117,13 +118,16 @@ var(MoverEvents) name ClosedEvent;
 // NEW IN 1.60
 var(MoverEvents) name LoopEvent;
 // NEW IN 1.60
-var() name AntiPortalTag;
+var() name AntiPortalTag; // Tag of AntiPortalActors to link; they will move with the brush to block portal visibility.
 // NEW IN 1.60
-var array<AntiPortalActor> AntiPortals;
+var array<AntiPortalActor> AntiPortals; // Runtime list of linked AntiPortalActors, populated in BeginPlay.
 // NEW IN 1.60
+// KeyPos[0] is the closed/base position; KeyPos[1] is the open/destination. Higher indices chain multi-step paths.
 var Vector KeyPos[24];
 // NEW IN 1.60
+// Rotation offset at each keyframe, added to BaseRot at runtime. Corresponds 1:1 with KeyPos indices.
 var Rotator KeyRot[24];
+// World-space position of the brush at spawn; KeyPos offsets are relative to this origin.
 var Vector BasePos;
 // NEW IN 1.60
 var Vector OldPos;
@@ -131,21 +135,23 @@ var Vector OldPos;
 var Vector OldPrePivot;
 // NEW IN 1.60
 var Vector SavedPos;
+// Rotation of the brush at spawn; KeyRot offsets are added to this at runtime.
 var Rotator BaseRot;
 // NEW IN 1.60
 var Rotator OldRot;
 // NEW IN 1.60
 var Rotator SavedRot;
 // for client side replication
-var Vector SimOldPos;
-var Vector SimInterpolate;
-var Vector RealPosition;
-var Rotator RealRotation;
+var Vector SimOldPos;      // Starting position of the current move, replicated for client-side interpolation.
+var Vector SimInterpolate; // Packs PhysAlpha (X*100), PhysRate (Y*100), and key indices (Z: PrevKey*256+Key).
+var Vector RealPosition;   // Authoritative server position; clients snap here if they drift too far.
+var Rotator RealRotation;  // Authoritative server rotation; clients correct to this on Timer().
 
+// Replication block: variables synced from server to clients.
 replication
 {
 	// Pos:0x000
-	reliable if((int(Role) == int(ROLE_Authority)))
+	reliable if((int(Role) == int(ROLE_Authority))) // ROLE_Authority = server only; clients receive these vars.
 		RealPosition, RealRotation, 
 		SimInterpolate, SimOldPos, 
 		SimOldRotPitch, SimOldRotRoll, 
@@ -217,12 +223,15 @@ final simulated function InterpolateTo(byte NewKeyNum, float Seconds)
 {
 	local Mover M;
 
+	// Notify any movers standing on top of this one that movement is starting.
 	// End:0x20
 	foreach BasedActors(Class'Engine.Mover', M)
 	{
 		M.BaseStarted();		
 	}	
+	// Clamp to valid keyframe range [0, 23].
 	NewKeyNum = byte(Clamp(int(NewKeyNum), 0, (24 - 1)));
+	// If reversing mid-move (going back to PrevKeyNum while still in motion), mirror PhysAlpha for a smooth reversal.
 	// End:0xAA
 	if(((int(NewKeyNum) == int(PrevKeyNum)) && (int(KeyNum) != int(PrevKeyNum))))
 	{
@@ -236,20 +245,21 @@ final simulated function InterpolateTo(byte NewKeyNum, float Seconds)
 		OldRot = Rotation;
 		PhysAlpha = 0.0000000;
 	}
-	SetPhysics(8);
+	SetPhysics(8); // 8 = PHYS_MovingBrush: brush sweeps through world geometry and fires EncroachingOn on overlap.
 	bInterpolating = true;
 	m_bTickOnlyWhenVisible = false;
 	PrevKeyNum = KeyNum;
 	KeyNum = NewKeyNum;
-	PhysRate = (1.0000000 / FMax(Seconds, 0.0050000));
+	PhysRate = (1.0000000 / FMax(Seconds, 0.0050000)); // Rate = 1/seconds; FMax(,0.005) prevents division by zero.
 	(ClientUpdate++);
 	SimOldPos = OldPos;
 	SimOldRotYaw = OldRot.Yaw;
 	SimOldRotPitch = OldRot.Pitch;
 	SimOldRotRoll = OldRot.Roll;
+	// Pack interpolation state into a Vector for network replication (no extra bandwidth).
 	SimInterpolate.X = (100.0000000 * PhysAlpha);
 	SimInterpolate.Y = (100.0000000 * FMax(0.0100000, PhysRate));
-	SimInterpolate.Z = ((256.0000000 * float(PrevKeyNum)) + float(KeyNum));
+	SimInterpolate.Z = ((256.0000000 * float(PrevKeyNum)) + float(KeyNum)); // Z encodes both keys: PrevKey*256 + Key.
 	return;
 }
 
@@ -272,6 +282,7 @@ simulated event KeyFrameReached()
 	PrevKeyNum = KeyNum;
 	PhysAlpha = 0.0000000;
 	(ClientUpdate--);
+	// If moving towards key 0, chain to the next lower keyframe (multi-key closing sequence).
 	// End:0x64
 	if(((int(KeyNum) > 0) && (int(KeyNum) < int(OldKeyNum))))
 	{
@@ -280,12 +291,14 @@ simulated event KeyFrameReached()
 	else
 	{
 		// End:0xA9
+		// If moving towards NumKeys-1, chain to the next higher keyframe (multi-key opening sequence).
 		if(((int(KeyNum) < (int(NumKeys) - 1)) && (int(KeyNum) > int(OldKeyNum))))
 		{
 			InterpolateTo(byte((int(KeyNum) + 1)), MoveTime);			
 		}
 		else
 		{
+			// Reached the final destination keyframe; silence ambient sound and sync authoritative position.
 			AmbientSound = none;
 			// End:0x10D
 			if(((ClientUpdate == 0) && (int(Level.NetMode) != int(NM_Client))))
@@ -386,7 +399,7 @@ function DoOpen()
 {
 	bOpening = true;
 	bDelaying = false;
-	InterpolateTo(1, MoveTime);
+	InterpolateTo(1, MoveTime); // Always opens towards keyframe 1 (the "open" destination).
 	MakeNoise(1.0000000);
 	PlaySound(OpeningSound, 3);
 	AmbientSound = MoveAmbientSound;
@@ -404,7 +417,7 @@ function DoClose()
 {
 	bOpening = false;
 	bDelaying = false;
-	InterpolateTo(byte(Max(0, (int(KeyNum) - 1))), MoveTime);
+	InterpolateTo(byte(Max(0, (int(KeyNum) - 1))), MoveTime); // Step back one keyframe toward 0 (closed position).
 	MakeNoise(1.0000000);
 	PlaySound(ClosingSound, 3);
 	UntriggerEvent(Event, self, Instigator);
@@ -460,7 +473,9 @@ simulated function BeginPlay()
 	super.BeginPlay();
 	KeyNum = byte(Clamp(int(KeyNum), 0, (24 - 1)));
 	PhysAlpha = 0.0000000;
+	// Place the brush at its initial keyframe position: BasePos + KeyPos[KeyNum] offset from spawn origin.
 	Move(((BasePos + KeyPos[int(KeyNum)]) - Location));
+	// Apply the keyframe rotation on top of the spawn-time base rotation.
 	SetRotation((BaseRot + KeyRot[int(KeyNum)]));
 	// End:0x14B
 	if((ReturnGroup == 'None'))
@@ -477,6 +492,7 @@ function PostBeginPlay()
 {
 	local Mover M;
 
+	// Wire up any movers with the same Tag that are marked as slaves; they will track this mover's movement.
 	// End:0x51
 	if((!bSlave))
 	{
@@ -491,6 +507,7 @@ function PostBeginPlay()
 			}			
 		}		
 	}
+	// Build the linked follower list so all movers in the same ReturnGroup move and return together.
 	// End:0xCA
 	if(bIsLeader)
 	{
@@ -527,6 +544,7 @@ function PostBeginPlay()
 	return;
 }
 
+// Immediately halts all movers in this ReturnGroup without reversing.
 function MakeGroupStop()
 {
 	bInterpolating = false;
@@ -541,6 +559,7 @@ function MakeGroupStop()
 	return;
 }
 
+// Reverses all movers in this ReturnGroup by jumping to the opposite Open or Close label.
 function MakeGroupReturn()
 {
 	bInterpolating = false;
@@ -598,7 +617,7 @@ function bool EncroachingOn(Actor Other)
 		}
 	}
 	// End:0x11F
-	if((int(MoverEncroachType) == int(0)))
+	if((int(MoverEncroachType) == int(0))) // ME_StopWhenEncroach: halt the entire group.
 	{
 		Leader.MakeGroupStop();
 		return true;		
@@ -606,7 +625,7 @@ function bool EncroachingOn(Actor Other)
 	else
 	{
 		// End:0x16B
-		if((int(MoverEncroachType) == int(1)))
+		if((int(MoverEncroachType) == int(1))) // ME_ReturnWhenEncroach: reverse the group back.
 		{
 			Leader.MakeGroupReturn();
 			// End:0x166
@@ -619,7 +638,7 @@ function bool EncroachingOn(Actor Other)
 		else
 		{
 			// End:0x194
-			if((int(MoverEncroachType) == int(2)))
+			if((int(MoverEncroachType) == int(2))) // ME_CrushWhenEncroach: kill the blocking actor.
 			{
 				Other.KilledBy(Instigator);
 				return false;				
@@ -627,7 +646,7 @@ function bool EncroachingOn(Actor Other)
 			else
 			{
 				// End:0x1A6
-				if((int(MoverEncroachType) == int(3)))
+				if((int(MoverEncroachType) == int(3))) // ME_IgnoreWhenEncroach: pass through the actor.
 				{
 					return false;
 				}
@@ -649,16 +668,19 @@ function Bump(Actor Other)
 		Trigger(P, P);
 		P.Controller.WaitForMover(self);
 	}
+	// BT_PlayerBump/BT_PawnBump (not BT_AnyBump=2): non-pawn actors cannot trigger.
 	// End:0x98
 	if(((int(BumpType) != int(2)) && (P == none)))
 	{
 		return;
 	}
+	// BT_PlayerBump (0): only the human player pawn can trigger.
 	// End:0xC0
 	if(((int(BumpType) == int(0)) && (!P.IsPlayerPawn())))
 	{
 		return;
 	}
+	// BT_PawnBump (1): ambient creatures (non-combat pawns moving on scripted paths) cannot trigger.
 	// End:0xE6
 	if(((int(BumpType) == int(1)) && P.bAmbientCreature))
 	{
@@ -676,9 +698,11 @@ function Bump(Actor Other)
 // NEW IN 1.60
 function int R6TakeDamage(int iKillValue, int iStunValue, Pawn instigatedBy, Vector vHitLocation, Vector vMomentum, int iBulletToArmorModifier, optional int iBulletGoup)
 {
+	// Only activate if the mover is damage-triggered and the hit exceeded the required threshold.
 	// End:0x7D
 	if((bDamageTriggered && (float(iKillValue) >= DamageThreshold)))
 	{
+		// Stop AI from continuing to shoot at the mover once it has already been triggered.
 		// End:0x6C
 		if(((AIController(instigatedBy.Controller) != none) && (instigatedBy.Controller.Focus == self)))
 		{
@@ -714,6 +738,7 @@ function BaseFinished()
 	return;
 }
 
+// Base FSM state for timed movers: open, wait StayOpenTime, then close. Subclasses override the trigger method.
 state OpenTimedMover
 {
 // NEW IN 1.60
@@ -730,12 +755,12 @@ Open:
 	if((DelayTime > float(0)))
 	{
 		bDelaying = true;
-		Sleep(DelayTime);
+		Sleep(DelayTime); // LatentAction: suspends this state coroutine for DelayTime seconds before opening.
 	}
 	DoOpen();
-	FinishInterpolation();
+	FinishInterpolation(); // LatentAction: suspends here until the keyframe interpolation completes.
 	FinishedOpening();
-	Sleep(StayOpenTime);
+	Sleep(StayOpenTime); // LatentAction: hold open for StayOpenTime seconds before closing.
 	// End:0x52
 	if(bTriggerOnceOnly)
 	{
@@ -758,6 +783,7 @@ Close:
 	stop;				
 }
 
+// FSM state: opens when an actor stands on the mover (Attach event), waits StayOpenTime, then closes.
 state() StandOpenTimed extends OpenTimedMover
 {
 // NEW IN 1.60
@@ -836,6 +862,7 @@ state() StandOpenTimed extends OpenTimedMover
 	stop;
 }
 
+// FSM state: opens when physically bumped by a qualifying actor, waits StayOpenTime, then closes.
 state() BumpOpenTimed extends OpenTimedMover
 {
 // When bumped by player.
@@ -882,6 +909,7 @@ state() BumpOpenTimed extends OpenTimedMover
 	stop;
 }
 
+// FSM state: opens when a Trigger actor fires it, waits StayOpenTime, then closes.
 state() TriggerOpenTimed extends OpenTimedMover
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
@@ -911,6 +939,7 @@ state() TriggerOpenTimed extends OpenTimedMover
 	stop;
 }
 
+// FSM state: continuously cycles through all keyframes while triggered; stops at the current key on UnTrigger.
 state() LoopMove
 {
 	event Trigger(Actor Other, Pawn EventInstigator)
@@ -955,13 +984,13 @@ state() LoopMove
 	}
 Running:
 
-	FinishInterpolation();
-	InterpolateTo(byte((float(byte((int(KeyNum) + 1))) % float(NumKeys))), MoveTime);
+	FinishInterpolation(); // LatentAction: wait until the current keyframe move completes.
+	InterpolateTo(byte((float(byte((int(KeyNum) + 1))) % float(NumKeys))), MoveTime); // Advance to next key, wrapping circularly.
 	GotoState('LoopMove', 'Running');
 Stopping:
 
 
-	FinishInterpolation();
+	FinishInterpolation(); // LatentAction: wait for the in-progress move to finish before signalling open.
 	FinishedOpening();
 	UntriggerEvent(Event, self, Instigator);
 	bOpening = false;
@@ -969,6 +998,7 @@ Stopping:
 	stop;	
 }
 
+// FSM state: each Trigger call toggles the mover between open and closed.
 state() TriggerToggle
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
@@ -980,6 +1010,7 @@ state() TriggerToggle
 		{
 			SavedTrigger.BeginEvent();
 		}
+		// If at key 0 or moving backwards (closing), open; otherwise close.
 		// End:0x61
 		if(((int(KeyNum) == 0) || (int(KeyNum) < int(PrevKeyNum))))
 		{
@@ -1018,11 +1049,12 @@ Close:
 	stop;	
 }
 
+// FSM state: stays open while triggered; supports multiple simultaneous triggers via a ref-count (numTriggerEvents).
 state() TriggerControl
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
-		(numTriggerEvents++);
+		(numTriggerEvents++); // Increment ref-count; mover won't close until all triggers have un-triggered.
 		SavedTrigger = Other;
 		Instigator = EventInstigator;
 		// End:0x37
@@ -1082,6 +1114,7 @@ Close:
 	stop;				
 }
 
+// FSM state: bounces rapidly between open and closed while triggered; OtherTime is the stay-open duration at each peak.
 state() TriggerPound
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
@@ -1123,7 +1156,7 @@ Open:
 	}
 	DoOpen();
 	FinishInterpolation();
-	Sleep(OtherTime);
+	Sleep(OtherTime); // OtherTime is the TriggerPound-specific stay-open duration; StayOpenTime is used on the close side.
 Close:
 
 
@@ -1135,6 +1168,7 @@ Close:
 	{
 		GotoState('None');
 	}
+	// If still triggered, bounce back open for another pound cycle.
 	// End:0x68
 	if((SavedTrigger != none))
 	{
@@ -1143,6 +1177,7 @@ Close:
 	stop;			
 }
 
+// FSM state: opens when bumped, stays open until EndEvent is received (typically from a linked Trigger actor).
 state() BumpButton
 {
 // When bumped by player.
@@ -1217,18 +1252,20 @@ Close:
 	stop;				
 }
 
+// FSM state: loops through all keyframes indefinitely from BeginPlay without needing a trigger.
 state() ConstantLoop
 {
 // Interpolation ended.
 	event KeyFrameReached()
 	{
 		// End:0x63
+		// Oscillating mode: bounce between key 0 and NumKeys-1 instead of wrapping around circularly.
 		if(bOscillatingLoop)
 		{
 			// End:0x42
 			if(((int(KeyNum) == 0) || (int(KeyNum) == (int(NumKeys) - 1))))
 			{
-				(StepDirection *= float(-1));
+				(StepDirection *= float(-1)); // Flip direction (+1 or -1) when hitting either endpoint key.
 				MoverLooped();
 			}
 			(KeyNum += byte(StepDirection));
@@ -1236,11 +1273,11 @@ state() ConstantLoop
 		}
 		else
 		{
-			InterpolateTo(byte((float(byte((int(KeyNum) + 1))) % float(NumKeys))), MoveTime);
+			InterpolateTo(byte((float(byte((int(KeyNum) + 1))) % float(NumKeys))), MoveTime); // Advance circularly: 0→1→2→…→0.
 			// End:0x9A
 			if((int(KeyNum) == 0))
 			{
-				MoverLooped();
+				MoverLooped(); // Fires LoopEvent and plays LoopSound once per complete cycle.
 			}
 		}
 		return;
@@ -1263,17 +1300,19 @@ Running:
 	stop;			
 }
 
+// FSM state: on trigger plays a lead-in from key 0 to key 1, then hands off to LeadInOutLooping for the main loop.
 state() LeadInOutLooper
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
 	{
 		// End:0x42
+		// Requires at least 3 keys: key 0 = idle/lead-out end, key 1 = loop start, key 2+ = loop body.
 		if((int(NumKeys) < 3))
 		{
 			Log("LeadInOutLooper detected with <3 movement keys");
 			return;
 		}
-		InterpolateTo(1, MoveTime);
+		InterpolateTo(1, MoveTime); // Lead-in: move from idle position (key 0) to the start of the loop (key 1).
 		return;
 	}
 
@@ -1281,6 +1320,7 @@ state() LeadInOutLooper
 	event KeyFrameReached()
 	{
 		// End:0x21
+		// Once at key 1 (not returned to idle key 0), advance to key 2 and enter the looping state.
 		if((int(KeyNum) != 0))
 		{
 			InterpolateTo(2, MoveTime);
@@ -1298,6 +1338,7 @@ state() LeadInOutLooper
 	stop;
 }
 
+// Non-exported state: the sustained loop after the lead-in; Trigger here plays the lead-out back to key 0.
 state LeadInOutLooping
 {
 	function Trigger(Actor Other, Pawn EventInstigator)
@@ -1338,6 +1379,7 @@ state LeadInOutLooping
 	stop;
 }
 
+// FSM state: continuously rotates the brush using PHYS_Rotating; bToggleDirection reverses spin on each completion.
 state() RotatingMover
 {
 // NEW IN 1.60
@@ -1347,7 +1389,7 @@ state() RotatingMover
 
 		bFixedRotationDir = true;
 		OldBase = Base;
-		SetPhysics(5);
+		SetPhysics(5); // 5 = PHYS_Rotating: engine applies RotationRate each tick.
 		SetBase(OldBase);
 		return;
 	}
@@ -1358,12 +1400,12 @@ state() RotatingMover
 		local Actor OldBase;
 
 		OldBase = Base;
-		SetPhysics(0);
+		SetPhysics(0); // 0 = PHYS_None: stop physics-driven rotation.
 		SetBase(OldBase);
 		// End:0x5A
 		if(bToggleDirection)
 		{
-			(RotationRate.Yaw *= float(-1));
+			(RotationRate.Yaw *= float(-1)); // Reverse all rotation axes to spin the opposite way next time.
 			(RotationRate.Pitch *= float(-1));
 			(RotationRate.Roll *= float(-1));
 		}
@@ -1381,23 +1423,23 @@ state() RotatingMover
 
 defaultproperties
 {
-	MoverEncroachType=1
-	MoverGlideType=1
-	NumKeys=2
-	StepDirection=1
+	MoverEncroachType=1 // ME_ReturnWhenEncroach
+	MoverGlideType=1 // MV_GlideByTime: smooth acceleration curve
+	NumKeys=2 // Minimum useful config: key 0 (closed) and key 1 (open).
+	StepDirection=1 // Initial oscillation direction: +1 (forward through keys).
 	bToggleDirection=true
 	bClosed=true
 	MoveTime=1.0000000
 	StayOpenTime=4.0000000
-	Physics=8
-	RemoteRole=2
+	Physics=8 // PHYS_MovingBrush
+	RemoteRole=2 // ROLE_SimulatedProxy: clients predict movement between server updates.
 	bNoDelete=true
 	bAcceptsProjectors=true
 	m_bHandleRelativeProjectors=true
 	bAlwaysRelevant=true
 	bOnlyDirtyReplication=true
 	bShadowCast=true
-	bCollideActors=true
+	bCollideActors=true // Enables collision event callbacks (Bump, Touch, Attach) with other actors.
 	bBlockActors=true
 	bBlockPlayers=true
 	bEdShouldSnap=true
