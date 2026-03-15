@@ -264,13 +264,119 @@ void UTexture::CreateMips(int param1, int param2)
 	(void)param1; (void)param2;
 	unguard;
 }
-IMPL_DIVERGE("body incomplete — Ghidra 0x1046B0C0 not yet fully reconstructed")
-int UTexture::Decompress(ETextureFormat)
+// Ghidra 0x1046B0C0, 1332 bytes.
+// Decompresses a 16-bytes-per-block DXT texture (format 7) to BGRA8 (format 5).
+// Each block: 8 bytes ignored, then 2×RGB565 colour endpoints at [8..11],
+// then 4 bytes of 2-bit selectors at [12..15] for the 4×4 pixel grid.
+// Colour expansion: 5-bit → 8-bit via << 3; 6-bit green via << 2.
+// If endpoint1 < endpoint0 → 4-colour mode (2 lerped colours, all opaque).
+// If endpoint0 <= endpoint1 → 3-colour mode (midpoint + transparent black).
+// After decoding, sets bit 6 of the DWORD at +0x94 and advances Format to 5.
+IMPL_MATCH("Engine.dll", 0x1046B0C0)
+int UTexture::Decompress(ETextureFormat TargetFormat)
 {
 	guard(UTexture::Decompress);
-	// Retail: 0x16b0c0, ~250b. DXT1 block decompression — too complex to decompile.
-	// TODO: implement UTexture::Decompress (retail 0x16b0c0, ~250 bytes: DXT1 block decompression)
-	return 0;
+
+	if (*(BYTE*)((BYTE*)this + 0x58) != 7 || (INT)TargetFormat != 5)
+		return 0;
+
+	INT MipCount = ((FArray*)((BYTE*)this + 0xBC))->Num();
+	if (MipCount > 0)
+	{
+		BYTE* MipsBase = *(BYTE**)((BYTE*)this + 0xBC);
+
+		for (INT MipIdx = 0; MipIdx < MipCount; MipIdx++)
+		{
+			INT W = *(INT*)((BYTE*)this + 0x60) >> MipIdx;
+			INT H = *(INT*)((BYTE*)this + 0x64) >> MipIdx;
+
+			BYTE* MipEntry = MipsBase + MipIdx * 0x28;
+
+			// Skip if mip data not present
+			FArray* DataArray = (FArray*)(MipEntry + 0x1C);
+			if (DataArray->Num() == 0 || !DataArray->GetData())
+				continue;
+			BYTE* SrcData = (BYTE*)DataArray->GetData();
+
+			INT   OutBytes  = W * H * 4;
+			INT   BlocksW   = W >> 2;  // blocks per row (W always multiple of 4 for DXT)
+			BYTE* Out       = new(TEXT("Decompress")) BYTE[OutBytes];
+
+			for (INT yb = 0; yb < H; yb += 4)
+			{
+				for (INT xb = 0; xb < W; xb += 4)
+				{
+					// Block is 16 bytes; first 8 bytes are not decoded (alpha table or padding).
+					// Colour endpoints as RGB565 at [8] and [10]; selectors at [12..15].
+					BYTE* blk = SrcData + ((xb >> 2) + (yb >> 2) * BlocksW) * 16;
+
+					_WORD c0 = *(_WORD*)(blk + 8);
+					_WORD c1 = *(_WORD*)(blk + 10);
+
+					// Decode RGB565 → BGRA8 palette (B=low5, G=mid6, R=high5)
+					BYTE pal[4][4];
+					pal[0][0] = (BYTE)(  c0         << 3);
+					pal[0][1] = (BYTE)(( c0 >>  5)  << 2);
+					pal[0][2] = (BYTE)(( c0 >> 11)  << 3);
+					pal[0][3] = 0xFF;
+					pal[1][0] = (BYTE)(  c1         << 3);
+					pal[1][1] = (BYTE)(( c1 >>  5)  << 2);
+					pal[1][2] = (BYTE)(( c1 >> 11)  << 3);
+					pal[1][3] = 0xFF;
+
+					if (c1 < c0)
+					{
+						// 4-colour mode: c2 = (2·c0 + c1) / 3,  c3 = (c0 + 2·c1) / 3
+						for (INT ch = 0; ch < 3; ch++)
+						{
+							pal[2][ch] = (BYTE)(((DWORD)pal[1][ch] + (DWORD)pal[0][ch] * 2) / 3);
+							pal[3][ch] = (BYTE)(((DWORD)pal[0][ch] + (DWORD)pal[1][ch] * 2) / 3);
+						}
+						pal[2][3] = 0xFF;
+						pal[3][3] = 0xFF;
+					}
+					else
+					{
+						// 3-colour mode: c2 = avg(c0,c1),  c3 = transparent black
+						for (INT ch = 0; ch < 3; ch++)
+							pal[2][ch] = (BYTE)(((DWORD)pal[0][ch] + (DWORD)pal[1][ch]) / 2);
+						pal[2][3] = 0xFF;
+						pal[3][0] = 0xFF;
+						pal[3][1] = 0xFF;
+						pal[3][2] = 0xFF;
+						pal[3][3] = 0;
+					}
+
+					// Write 4 rows × 4 pixels; each row's selectors are packed 2-bits-per-pixel
+					for (INT row = 0; row < 4 && (yb + row) < H; row++)
+					{
+						BYTE sel = blk[12 + row];
+						for (INT col = 0; col < 4 && (xb + col) < W; col++)
+						{
+							BYTE* entry = pal[(sel >> (col * 2)) & 3];
+							BYTE* dst   = Out + ((yb + row) * W + (xb + col)) * 4;
+							dst[0] = entry[0];
+							dst[1] = entry[1];
+							dst[2] = entry[2];
+							dst[3] = entry[3];
+						}
+					}
+				}
+			}
+
+			// Replace mip DataArray contents with RGBA8 output
+			DataArray->Empty(1, OutBytes);
+			DataArray->Add(OutBytes, 1);
+			appMemcpy(DataArray->GetData(), Out, OutBytes);
+
+			delete[] Out;
+		}
+
+		*(DWORD*)((BYTE*)this + 0x94) |= 0x40u;
+		*(BYTE*)((BYTE*)this + 0x58) = 5;
+	}
+
+	return 1;
 	unguard;
 }
 IMPL_MATCH("Engine.dll", 0x104691d0)
