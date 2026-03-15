@@ -1514,7 +1514,8 @@ ANavigationPoint* FSortedPathList::findStartAnchor(APawn* Scout)
 }
 
 // ??4FPathBuilder@@QAEAAV0@ABV0@@Z
-IMPL_DIVERGE("FPathBuilder::operator= not found in Ghidra export — cannot confirm VA")
+// Ghidra 0x16250: copies two DWORDs (8 bytes = two pointer-sized fields).
+IMPL_MATCH("Engine.dll", 0x10316250)
 FPathBuilder & FPathBuilder::operator=(FPathBuilder const & Other) { appMemcpy(this, &Other, 8); return *this; }
 
 // --- Moved from EngineStubs.cpp ---
@@ -2068,7 +2069,8 @@ void FPathBuilder::undefinePaths(ULevel* Level) {
 // ============================================================================
 IMPL_MATCH("Engine.dll", 0x1038caf0)
 FSortedPathList::FSortedPathList() { appMemzero(this, sizeof(*this)); }
-IMPL_DIVERGE("FSortedPathList::operator= not found in Ghidra export — cannot confirm VA")
+// Ghidra 0x16320: loops copying 0x41 DWORDs (65*4 = 260 bytes).
+IMPL_MATCH("Engine.dll", 0x10316320)
 FSortedPathList& FSortedPathList::operator=(const FSortedPathList& Other) { appMemcpy(this, &Other, 260); return *this; } // 65 dwords
 IMPL_MATCH("Engine.dll", 0x1041c2f0)
 void FSortedPathList::addPath(ANavigationPoint* Path, INT Cost)

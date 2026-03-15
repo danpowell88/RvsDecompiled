@@ -455,11 +455,12 @@ void ULinkerLoad::DetachExport( INT i )
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x101291c0) calls CountBytes for LazyLoaders after ULinker::Serialize; our version omits this step")
+IMPL_DIVERGE("Retail (FUN_101291c0 at 0x101291c0) calls ULinker::Serialize then Ar.CountBytes(LazyLoaders.Num()*4, LazyLoaders.Max()*4); our version matches this logic but generates different code (register allocation differs between MSVC 7.1 and MSVC 2019)")
 void ULinkerLoad::Serialize( FArchive& Ar )
 {
 	guard(ULinkerLoad::Serialize_FArchive);
 	ULinker::Serialize( Ar );
+	LazyLoaders.CountBytes( Ar );
 	unguard;
 }
 
@@ -484,24 +485,28 @@ void ULinkerLoad::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_10129260) sets Linker and Offset on FLazyLoader and appends unconditionally; our version uses AddUniqueItem and omits field initialization")
+IMPL_DIVERGE("Retail (FUN_10129260 at 0x10129260) appends unconditionally then sets LazyLoader->SavedAr = this (FArchive*) and SavedPos = Tell(); our version matches this logic but TArray growth code generation differs from retail MSVC 7.1")
 void ULinkerLoad::AttachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::AttachLazyLoader);
 	check(LazyLoader);
-	LazyLoaders.AddUniqueItem( LazyLoader );
+	LazyLoaders.AddItem( LazyLoader );
+	LazyLoader->SavedAr  = this;
+	LazyLoader->SavedPos = Tell();
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (0x1012a860) zeros Linker/Offset fields on the loader and logs inconsistency warnings; our version is simplified")
+IMPL_DIVERGE("Retail (FUN_1012a860 at 0x1012a860) removes from the array then unconditionally zeros SavedAr/SavedPos, and logs to GError if removal count != 1; our version omits the warning log")
 void ULinkerLoad::DetachLazyLoader( FLazyLoader* LazyLoader )
 {
 	guard(ULinkerLoad::DetachLazyLoader);
 	LazyLoaders.RemoveItem( LazyLoader );
+	LazyLoader->SavedAr  = NULL;
+	LazyLoader->SavedPos = 0;
 	unguard;
 }
 
-IMPL_DIVERGE("Retail (FUN_10129330) zeros Linker/Offset fields directly on each loader; concept matches but field manipulation details differ")
+IMPL_DIVERGE("Retail (FUN_10129330 at 0x10129330) iterates the array calling Load() if requested, then directly zeroes SavedAr/SavedPos on each loader, then calls FArray::Realloc to free; our version is functionally equivalent — Detach() zeroes the same fields, Empty() frees the array — but the generated code differs from retail")
 void ULinkerLoad::DetachAllLazyLoaders( UBOOL Load )
 {
 	guard(ULinkerLoad::DetachAllLazyLoaders);
