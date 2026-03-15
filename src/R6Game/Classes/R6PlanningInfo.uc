@@ -17,15 +17,19 @@ class R6PlanningInfo extends R6
     native;
 
 // Export UR6PlanningInfo::execAddToTeam(FFrame&, void* const)
+// Appends a new action point at the end of the team's waypoint list (implemented in C++)
 native(1411) final function bool AddToTeam(R6ActionPoint pNewPoint);
 
 // Export UR6PlanningInfo::execInsertToTeam(FFrame&, void* const)
+// Inserts a new action point at the current position in the waypoint list (implemented in C++)
 private native(1412) final function bool InsertToTeam(R6ActionPoint pNewPoint);
 
 // Export UR6PlanningInfo::execDeletePoint(FFrame&, void* const)
+// Removes the current action point from the list and frees its native memory (implemented in C++)
 private native(1413) final function bool DeletePoint();
 
 // Export UR6PlanningInfo::execFindPathToNextPoint(FFrame&, void* const)
+// Queries the nav-mesh to find a walkable route from pStartPoint to pPointToReach, storing intermediate nodes in m_PathToNextPoint (implemented in C++)
 private native(2007) final function bool FindPathToNextPoint(R6ActionPoint pStartPoint, R6ActionPoint pPointToReach);
 
 // Super Function
@@ -37,6 +41,7 @@ function Tick(float fDelta)
 	// End:0x5E
 	if(((m_iNbNode > 1) && m_NodeList[0].InPlanningMode()))
 	{
+		// DrawPath starts at node 1 because the path segment is owned by the destination node, not the source
 		iCurrentActionPoint = 1;
 		J0x25:
 
@@ -49,6 +54,7 @@ function Tick(float fDelta)
 			goto J0x25;
 		}
 	}
+	// Debug path display is a one-frame flag; clear it here so the visualisation only renders for a single tick
 	// End:0x72
 	if((bDisplayDbgInfo == true))
 	{
@@ -67,6 +73,7 @@ function InitPlanning(int iTeamId, R6PlanningCtrl pPlanningCtrl)
 	{
 		return;
 	}
+	// Preserve the previously selected node index so it can be re-selected after re-initialisation
 	iBackupLastNode = m_iCurrentNode;
 	iLoadedNumberOfNodes = m_iNbNode;
 	iCurrentActionPoint = 0;
@@ -76,6 +83,7 @@ function InitPlanning(int iTeamId, R6PlanningCtrl pPlanningCtrl)
 	if((iCurrentActionPoint < iLoadedNumberOfNodes))
 	{
 		pCurrentPoint = R6ActionPoint(m_NodeList[iCurrentActionPoint]);
+		// The first point uses a special insertion-zone texture to distinguish it from subsequent waypoints
 		// End:0x78
 		if((iCurrentActionPoint == 0))
 		{
@@ -84,6 +92,7 @@ function InitPlanning(int iTeamId, R6PlanningCtrl pPlanningCtrl)
 		}
 		pCurrentPoint.m_pPlanningCtrl = pPlanningCtrl;
 		pCurrentPoint.m_iRainbowTeamName = iTeamId;
+		// Calculate the nav-mesh path to the next waypoint; the last node has no successor path to compute
 		// End:0xEC
 		if((iCurrentActionPoint != (iLoadedNumberOfNodes - 1)))
 		{
@@ -92,6 +101,7 @@ function InitPlanning(int iTeamId, R6PlanningCtrl pPlanningCtrl)
 			FindPathToNextPoint(pCurrentPoint, pNextPoint);
 		}
 		pCurrentPoint.SetDrawColor(m_TeamColor);
+		// The first point has no incoming path flag; all other points display the directional arrow behind them
 		// End:0x13C
 		if((iCurrentActionPoint != 0))
 		{
@@ -104,6 +114,7 @@ function InitPlanning(int iTeamId, R6PlanningCtrl pPlanningCtrl)
 		// [Loop Continue]
 		goto J0x2A;
 	}
+	// Recalculate all waypoint facing directions based on the loaded path geometry
 	ResetPointsOrientation();
 	// End:0x1AC
 	if((iBackupLastNode != -1))
@@ -172,6 +183,7 @@ function SelectTeam(bool bIsSelected)
 	local R6ActionPoint pCurrentPoint;
 
 	pCurrentPoint = GetPoint();
+	// Selected team flashes its current waypoint via a 0.5-second repeating timer; deselecting stops it
 	// End:0x6A
 	if((pCurrentPoint != none))
 	{
@@ -202,6 +214,7 @@ function bool InsertPoint(R6ActionPoint pNewPoint)
 
 	BehindMe = GetPoint();
 	FrontMe = GetNextPoint();
+	// Both path legs (behind→new and new→front) must be routable; if either fails, the point is rejected and destroyed
 	// End:0x108
 	if(((FindPathToNextPoint(BehindMe, pNewPoint) == true) && (FindPathToNextPoint(pNewPoint, FrontMe) == true)))
 	{
@@ -241,6 +254,7 @@ function bool AddPoint(R6ActionPoint pNewPoint)
 	{
 		BehindMe = GetPoint();
 	}
+	// If there is a previous point, validate the nav-mesh path before committing; first-ever point skips this check
 	// End:0xD1
 	if((BehindMe != none))
 	{
@@ -264,6 +278,7 @@ function bool AddPoint(R6ActionPoint pNewPoint)
 			return false;
 		}		
 	}
+	// First point in the route: no predecessor, no path flag; just add to list and select it
 	else
 	{
 		AddToTeam(pNewPoint);
@@ -275,6 +290,7 @@ function bool AddPoint(R6ActionPoint pNewPoint)
 	return;
 }
 
+// Re-validates both incoming and outgoing nav-mesh paths after a waypoint is dragged to a new position
 function bool MoveCurrentPoint()
 {
 	local R6ActionPoint BehindMe, FrontMe, CurrentPoint;
@@ -320,6 +336,7 @@ function SetLastPointRotation()
 	local R6ActionPoint pCurrentPoint;
 
 	pCurrentPoint = GetPoint();
+	// For the final waypoint, face back along the arrival direction; if alone, borrow the insertion zone's rotation
 	// End:0x113
 	if((m_NodeList.Length > 1))
 	{
@@ -362,6 +379,7 @@ function SetPointRotation()
 	pCurrentPoint = GetPoint();
 	pCurrentPoint.m_bActionCompleted = false;
 	pCurrentPoint.m_bActionPointReached = false;
+	// Orient toward the first intermediate nav-mesh node if one exists, otherwise face the next waypoint directly
 	// End:0x101
 	if((GetNextPoint() != none))
 	{
@@ -422,6 +440,7 @@ function SetToStartNode()
 		}
 		m_iCurrentNode = 0;
 		GetPoint().SelectPoint();
+		// -1 means we are positioned at an action point node, not an intermediate nav-mesh step
 		m_iCurrentPathIndex = -1;
 	}
 	return;
@@ -439,6 +458,7 @@ function SetToEndNode()
 	return;
 }
 
+// Clears back-references to the planning controller from all waypoints (called before the controller is destroyed)
 function RemovePointsRefsToCtrl()
 {
 	local R6ActionPoint pActionPoint;
@@ -464,6 +484,7 @@ function ResetID()
 {
 	local R6ActionPoint pNode;
 
+	// Renumber all nodes sequentially; milestone nodes get an additional badge number for HUD display
 	m_iNbMilestone = 0;
 	m_iNbNode = 0;
 	J0x0E:
@@ -487,6 +508,7 @@ function ResetID()
 	return;
 }
 
+// Linear scan to locate and select the specified waypoint; logs a warning if not found
 function bool SetAsCurrentNode(R6ActionPoint pSelectedNode)
 {
 	// End:0x1F
@@ -529,6 +551,7 @@ function bool DeleteNode()
 		return false;
 	}
 	pCurrentPoint = GetPoint();
+	// Guard: the first waypoint (insertion point) cannot be deleted while other waypoints still exist
 	// End:0x1BD
 	if((!((m_iCurrentNode == 0) && (m_NodeList.Length > 1))))
 	{
@@ -620,6 +643,7 @@ function SetCurrentPointAction(Object.EPlanAction eAction)
 	return;
 }
 
+// Updates the sniper waypoint's aim rotation based on the current mouse cursor world-space position
 function AjustSnipeDirection(Vector vHitLocation)
 {
 	// End:0x42
@@ -637,6 +661,7 @@ function GetSnipingCoordinates(out Vector vLocation, out Rotator rRotation)
 	return;
 }
 
+// Returns the door actor associated with the current waypoint for breach actions
 function Actor GetDoorToBreach()
 {
 	return GetPoint().pDoor;
@@ -666,6 +691,7 @@ function bool SetGrenadeLocation(Vector vHitLocation)
 	// End:0x32
 	if((GetPoint() != none))
 	{
+		// Offset Z by 100 Unreal units so the grenade spawns above the floor, not intersecting geometry
 		(vHitLocation.Z += float(100));
 		return GetPoint().SetGrenade(vHitLocation);
 	}
@@ -760,6 +786,7 @@ function Object.EPlanAction NextActionPointHasAction(Actor aPoint)
 	return;
 }
 
+// Sets the movement mode for the current waypoint and updates the path flag icon to reflect the change
 function SetMovementMode(Object.EMovementMode eNewMode)
 {
 	// End:0x42
@@ -776,6 +803,7 @@ function Object.EMovementMode GetMovementMode()
 	// End:0x41
 	if((m_iCurrentNode != -1))
 	{
+		// While traversing intermediate nav-mesh steps, the next action point's movement mode takes precedence
 		// End:0x31
 		if((m_iCurrentPathIndex != -1))
 		{
@@ -819,12 +847,14 @@ function Object.EMovementSpeed GetMovementSpeed()
 	return;
 }
 
+// Returns the current action point, which at runtime is the team's next objective (used by AI)
 function Actor GetFirstActionPoint()
 {
 	return GetPoint();
 	return;
 }
 
+// Advances the runtime path cursor; m_iCurrentPathIndex tracks intermediate nav-mesh nodes between two user-placed waypoints (-1 = at an action point)
 function SkipCurrentDestination()
 {
 	local R6ActionPoint pPrevPoint, pCurrentPoint;
@@ -835,6 +865,7 @@ function SkipCurrentDestination()
 	// End:0x1A9
 	if(((m_iCurrentNode != -1) && (m_iCurrentNode != (m_NodeList.Length - 1))))
 	{
+		// Reached the last intermediate node of this segment; promote to the next action point
 		// End:0x8D
 		if((m_iCurrentPathIndex == (pCurrentPoint.m_PathToNextPoint.Length - 1)))
 		{
@@ -999,6 +1030,7 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 	// End:0x3D8
 	if(((pCurrentTeam != none) && (m_iCurrentNode != -1)))
 	{
+		// ENodeNotify dispatch: each case represents an event triggered by the AI team or runtime path logic
 		switch(eMsg)
 		{
 			// End:0x46
@@ -1007,6 +1039,7 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 			// End:0x4D
 			case 1:
 				return;
+			// case 4 (EGoCode): team has arrived and a pending GoCode action must be resolved (stand-by, snipe, or breach)
 			// End:0x174
 			case 4:
 				// End:0x6D
@@ -1050,6 +1083,7 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 					}
 				}
 				return;
+			// case 5: action complete; advance the path index to the next intermediate node or action point
 			// End:0x30D
 			case 5:
 				// End:0x300
@@ -1106,26 +1140,31 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 					m_iCurrentNode = -1;
 				}
 				return;
+			// case 6: enter stand-by GoCode wait state (m_eGoCodeState = 1); team holds position until Go
 			// End:0x33A
 			case 6:
 				m_eGoCodeState[int(eCode)] = 1;
 				pCurrentTeam.TeamNotifyActionPoint(6, eCode);
 				return;
+			// case 9: enter sniping GoCode wait state (m_eGoCodeState = 2); team waits while sniper engages
 			// End:0x367
 			case 9:
 				m_eGoCodeState[int(eCode)] = 2;
 				pCurrentTeam.TeamNotifyActionPoint(9, eCode);
 				return;
+			// case 10: enter breach GoCode wait state (m_eGoCodeState = 3); team waits for breach signal
 			// End:0x394
 			case 10:
 				m_eGoCodeState[int(eCode)] = 3;
 				pCurrentTeam.TeamNotifyActionPoint(10, eCode);
 				return;
+			// case 7: team physically arrived at the waypoint; mark it reached and read its assigned action
 			// End:0x3B2
 			case 7:
 				pCurrentPoint.m_bActionPointReached = true;
 				ReadNode();
 				return;
+			// case 8: back-track one step (e.g., after a failed action); re-notify to resume movement
 			// End:0x3D2
 			case 8:
 				SetToPreviousActionPoint();
@@ -1141,6 +1180,7 @@ function NotifyActionPoint(Object.ENodeNotify eMsg, Object.EGoCode eCode)
 	return;
 }
 
+// Only checks reach for player-led teams; AI-led teams perform their own reach detection in C++
 // check if this team has reach this action point
 function bool MemberReached(R6ActionPoint PTarget)
 {
@@ -1172,6 +1212,7 @@ function bool MemberReached(R6ActionPoint PTarget)
 	return;
 }
 
+// Interprets the action assigned to the current waypoint and fires the appropriate GoCode or team event
 // Read info in the node
 function ReadNode()
 {
@@ -1185,8 +1226,10 @@ function ReadNode()
 	// End:0x1F6
 	if((pCurrentPoint.m_bActionCompleted != true))
 	{
+		// Dispatch based on waypoint type: Normal (0), Milestone (1), or Go-code zone (2/3/4 = Alpha/Bravo/Charlie)
 		switch(pCurrentPoint.m_eActionType)
 		{
+			// Milestone: broadcast a HUD message to all players, then fall through to execute any assigned action
 			// End:0x95
 			case 1:
 				// End:0x94
@@ -1207,6 +1250,7 @@ function ReadNode()
 				}
 				// End:0x1F3
 				break;
+			// Go-code zone (Alpha team slot): dispatch snipe (5), breach (6), or standard Go-code (6 default)
 			// End:0x134
 			case 2:
 				// End:0x101
