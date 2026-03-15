@@ -270,7 +270,7 @@ void AActor::execGetServerOptionsRefreshed( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execGetServerOptionsRefreshed );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364340 (582 bytes): retail calls MeSDK KAddBoneLifter")
+IMPL_TODO("Ghidra 0x10364340 (582 bytes): calls MeSDK KAddBoneLifter — FUN_104xxxxx blocker")
 void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddBoneLifter);
@@ -283,7 +283,7 @@ void AActor::execKAddBoneLifter( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddBoneLifter );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363f00 (622 bytes): retail calls MeSDK KAddImpulse")
+IMPL_TODO("Ghidra 0x10363f00 (622 bytes): calls MeSDK KAddImpulse — FUN_104xxxxx blocker")
 void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKAddImpulse);
@@ -295,7 +295,7 @@ void AActor::execKAddImpulse( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKAddImpulse );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363090 (187 bytes): retail calls MeSDK KDisableCollision")
+IMPL_TODO("Ghidra 0x10363090 (187 bytes): calls FUN_10361100 (unresolved collision pair helper)")
 void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKDisableCollision);
@@ -305,7 +305,7 @@ void AActor::execKDisableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKDisableCollision );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363180 (187 bytes): retail calls MeSDK KEnableCollision")
+IMPL_TODO("Ghidra 0x10363180 (187 bytes): calls FUN_10361060 (unresolved collision pair helper)")
 void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKEnableCollision);
@@ -315,110 +315,122 @@ void AActor::execKEnableCollision( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKEnableCollision );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362d60 (104 bytes): retail calls KFreezeRagdoll(this)")
+IMPL_MATCH("Engine.dll", 0x10362d60)
 void AActor::execKFreezeRagdoll( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKFreezeRagdoll);
 	P_FINISH;
+	KFreezeRagdoll();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKFreezeRagdoll );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363d30 (132 bytes): retail reads grav scale from KarmaParams")
+IMPL_MATCH("Engine.dll", 0x10363d30)
 void AActor::execKGetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetActorGravScale);
 	P_FINISH;
-	*(FLOAT*)Result = 1.f;
+	UKarmaParams* kp = Cast<UKarmaParams>(KParams);
+	if (kp)
+		*(FLOAT*)Result = kp->KActorGravScale;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetActorGravScale );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363870 (295 bytes): retail reads COM offset from KarmaParams")
+IMPL_TODO("Ghidra 0x10363870 (295 bytes): reads COM offset from UKarmaParamsRBFull with StaticMesh fallback — complex branching")
 void AActor::execKGetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMOffset);
+	P_GET_VECTOR_REF(offset);
 	P_FINISH;
-	*(FVector*)Result = FVector(0,0,0);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetCOMOffset );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103626d0 (235 bytes): retail calls vtable KGetCOMPosition")
+IMPL_TODO("Ghidra 0x103626d0 (235 bytes): calls vtable KGetCOMPosition — blocked by MeSDK FUN_104xxxxx")
 void AActor::execKGetCOMPosition( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetCOMPosition);
+	P_GET_VECTOR_REF(pos);
 	P_FINISH;
-	*(FVector*)Result = Location;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetCOMPosition );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363ae0 (313 bytes): retail reads lin/ang damping from KarmaParams")
+IMPL_MATCH("Engine.dll", 0x10363ae0)
 void AActor::execKGetDampingProps( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetDampingProps);
 	P_GET_FLOAT_REF(LinDamping);
 	P_GET_FLOAT_REF(AngDamping);
 	P_FINISH;
-	*LinDamping = 0.f;
-	*AngDamping = 0.f;
+	UKarmaParams* kp = Cast<UKarmaParams>(KParams);
+	if (kp)
+	{
+		*LinDamping = kp->KLinearDamping;
+		*AngDamping = kp->KAngularDamping;
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetDampingProps );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362a40 (115 bytes): retail reads friction from KarmaParams+0x30")
+IMPL_MATCH("Engine.dll", 0x10362a40)
 void AActor::execKGetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetFriction);
 	P_FINISH;
-	*(FLOAT*)Result = 0.f;
+	if (KParams)
+		*(FLOAT*)Result = KParams->KFriction;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetFriction );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362bc0 (115 bytes): retail reads impact threshold from KarmaParams")
+IMPL_MATCH("Engine.dll", 0x10362bc0)
 void AActor::execKGetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetImpactThreshold);
 	P_FINISH;
-	*(FLOAT*)Result = 0.f;
+	if (KParams)
+		*(FLOAT*)Result = KParams->KImpactThreshold;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetImpactThreshold );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363440 (446 bytes): retail reads inertia tensor from KarmaParams")
+IMPL_TODO("Ghidra 0x10363440 (446 bytes): reads 6-element inertia tensor from UKarmaParamsRBFull with StaticMesh fallback — complex branching")
 void AActor::execKGetInertiaTensor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetInertiaTensor);
-	P_GET_VECTOR_REF(InertiaTensor);
+	P_GET_VECTOR_REF(it1);
+	P_GET_VECTOR_REF(it2);
 	P_FINISH;
-	*InertiaTensor = FVector(1,1,1);
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetInertiaTensor );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363380 (132 bytes): retail reads mass from UKarmaParams")
+IMPL_MATCH("Engine.dll", 0x10363380)
 void AActor::execKGetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetMass);
 	P_FINISH;
-	*(FLOAT*)Result = 1.f;
+	UKarmaParams* kp = Cast<UKarmaParams>(KParams);
+	if (kp)
+		*(FLOAT*)Result = kp->KMass;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetMass );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103628c0 (115 bytes): retail reads restitution from KarmaParams")
+IMPL_MATCH("Engine.dll", 0x103628c0)
 void AActor::execKGetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetRestitution);
 	P_FINISH;
-	*(FLOAT*)Result = 0.f;
+	if (KParams)
+		*(FLOAT*)Result = KParams->KRestitution;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetRestitution );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103645c0 (324 bytes): retail calls MeSDK KGetSkelMass")
+IMPL_TODO("Ghidra 0x103645c0 (324 bytes): calls MeSDK KGetSkelMass — FUN_104xxxxx blocker")
 void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKGetSkelMass);
@@ -428,7 +440,7 @@ void AActor::execKGetSkelMass( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKGetSkelMass );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362c70 (190 bytes): retail calls MeSDK KIsAwake")
+IMPL_TODO("Ghidra 0x10362c70 (190 bytes): calls FUN_104c3660 (MeSDK body handle) and FUN_10494230 (MdtBodyIsEnabled)")
 void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsAwake);
@@ -438,7 +450,7 @@ void AActor::execKIsAwake( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsAwake );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362e00 (180 bytes): retail checks ragdoll availability via MeSDK")
+IMPL_TODO("Ghidra 0x10362e00 (180 bytes): checks this+0x328 (KarmaActor handle) and MeshInstance+0x434 bone count — raw offsets not typed")
 void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKIsRagdollAvailable);
@@ -448,7 +460,7 @@ void AActor::execKIsRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKIsRagdollAvailable );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364740 (440 bytes): retail calls MeSDK KMakeRagdollAvailable")
+IMPL_TODO("Ghidra 0x10364740 (440 bytes): calls MeSDK KMakeRagdollAvailable — FUN_104xxxxx blockers")
 void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMakeRagdollAvailable);
@@ -457,7 +469,7 @@ void AActor::execKMakeRagdollAvailable( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMakeRagdollAvailable );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364a60 (1445 bytes): large MeSDK IO dispatch function")
+IMPL_TODO("Ghidra 0x10364a60 (1445 bytes): large MeSDK IO dispatch — FUN_104xxxxx blockers throughout")
 void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKMP2IOKarmaAllNativeFct);
@@ -466,7 +478,7 @@ void AActor::execKMP2IOKarmaAllNativeFct( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKMP2IOKarmaAllNativeFct );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103651f0 (300 bytes): retail calls MeSDK KRemoveAllBoneLifters")
+IMPL_TODO("Ghidra 0x103651f0 (300 bytes): calls MeSDK KRemoveAllBoneLifters — FUN_104xxxxx blocker")
 void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveAllBoneLifters);
@@ -475,7 +487,7 @@ void AActor::execKRemoveAllBoneLifters( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveAllBoneLifters );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10365040 (368 bytes): retail calls MeSDK KRemoveLifterFromBone")
+IMPL_TODO("Ghidra 0x10365040 (368 bytes): calls MeSDK KRemoveLifterFromBone — FUN_104xxxxx blocker")
 void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKRemoveLifterFromBone);
@@ -485,17 +497,20 @@ void AActor::execKRemoveLifterFromBone( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKRemoveLifterFromBone );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363c50 (166 bytes): retail sets grav scale via MeSDK")
+IMPL_MATCH("Engine.dll", 0x10363c50)
 void AActor::execKSetActorGravScale( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetActorGravScale);
 	P_GET_FLOAT(NewGravScale);
 	P_FINISH;
+	UKarmaParams* kp = Cast<UKarmaParams>(KParams);
+	if (kp)
+		kp->KActorGravScale = NewGravScale;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetActorGravScale );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362f80 (209 bytes): retail calls MeSDK KSetBlockKarma")
+IMPL_TODO("Ghidra 0x10362f80 (209 bytes): sets bBlockKarma bitfield then calls FUN_10359960 (unresolved Karma collision enable/disable)")
 void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetBlockKarma);
@@ -505,78 +520,111 @@ void AActor::execKSetBlockKarma( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetBlockKarma );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363770 (196 bytes): retail sets COM offset via MeSDK")
+IMPL_MATCH("Engine.dll", 0x10363770)
 void AActor::execKSetCOMOffset( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetCOMOffset);
 	P_GET_VECTOR(Offset);
 	P_FINISH;
+	UKarmaParamsRBFull* kp = Cast<UKarmaParamsRBFull>(KParams);
+	if (kp)
+	{
+		kp->KCOMOffset = Offset;
+		kp->PostEditChange();
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetCOMOffset );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103639d0 (212 bytes): retail sets lin/ang damping via MeSDK")
+IMPL_MATCH("Engine.dll", 0x103639d0)
 void AActor::execKSetDampingProps( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetDampingProps);
 	P_GET_FLOAT(LinDamping);
 	P_GET_FLOAT(AngDamping);
 	P_FINISH;
+	UKarmaParams* kp = Cast<UKarmaParams>(KParams);
+	if (kp)
+	{
+		kp->KLinearDamping = LinDamping;
+		kp->KAngularDamping = AngDamping;
+		kp->PostEditChange();
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetDampingProps );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362970 (149 bytes): retail sets friction via MeSDK")
+IMPL_MATCH("Engine.dll", 0x10362970)
 void AActor::execKSetFriction( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetFriction);
 	P_GET_FLOAT(Friction);
 	P_FINISH;
+	if (KParams)
+		KParams->KFriction = Friction;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetFriction );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10362af0 (149 bytes): retail sets impact threshold via MeSDK")
+IMPL_MATCH("Engine.dll", 0x10362af0)
 void AActor::execKSetImpactThreshold( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetImpactThreshold);
 	P_GET_FLOAT(Threshold);
 	P_FINISH;
+	if (KParams)
+		KParams->KImpactThreshold = Threshold;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetImpactThreshold );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363630 (262 bytes): retail sets inertia tensor via MeSDK")
+IMPL_MATCH("Engine.dll", 0x10363630)
 void AActor::execKSetInertiaTensor( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetInertiaTensor);
-	P_GET_VECTOR(InertiaTensor);
+	P_GET_VECTOR(it1);
+	P_GET_VECTOR(it2);
 	P_FINISH;
+	UKarmaParamsRBFull* kp = Cast<UKarmaParamsRBFull>(KParams);
+	if (kp)
+	{
+		kp->KInertiaTensor[0] = it1.X; kp->KInertiaTensor[1] = it1.Y; kp->KInertiaTensor[2] = it1.Z;
+		kp->KInertiaTensor[3] = it2.X; kp->KInertiaTensor[4] = it2.Y; kp->KInertiaTensor[5] = it2.Z;
+		kp->PostEditChange();
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetInertiaTensor );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103632a0 (173 bytes): retail sets mass via MeSDK")
+IMPL_MATCH("Engine.dll", 0x103632a0)
 void AActor::execKSetMass( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetMass);
 	P_GET_FLOAT(Mass);
 	P_FINISH;
+	UKarmaParams* kp = Cast<UKarmaParams>(KParams);
+	if (kp)
+	{
+		kp->KMass = Mass;
+		kp->PostEditChange();
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetMass );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103627f0 (149 bytes): retail sets restitution via MeSDK")
+IMPL_MATCH("Engine.dll", 0x103627f0)
 void AActor::execKSetRestitution( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetRestitution);
 	P_GET_FLOAT(Restitution);
 	P_FINISH;
+	if (KParams)
+		KParams->KRestitution = Restitution;
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetRestitution );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x103641a0 (366 bytes): retail sets skeletal velocity via MeSDK")
+IMPL_TODO("Ghidra 0x103641a0 (366 bytes): sets skeletal mesh Karma velocity — FUN_104xxxxx blocker")
 void AActor::execKSetSkelVel( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetSkelVel);
@@ -587,18 +635,25 @@ void AActor::execKSetSkelVel( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetSkelVel );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10364940 (228 bytes): retail sets stay-upright params via MeSDK")
+IMPL_MATCH("Engine.dll", 0x10364940)
 void AActor::execKSetStayUpright( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKSetStayUpright);
 	P_GET_UBOOL(bStayUpright);
 	P_GET_UBOOL_OPTX(bSpin,0);
 	P_FINISH;
+	UKarmaParams* kp = Cast<UKarmaParams>(KParams);
+	if (kp)
+	{
+		kp->bKStayUpright = bStayUpright ? 1 : 0;
+		kp->bKAllowRotate = bSpin ? 1 : 0;
+		kp->PostEditChange();
+	}
 	unguard;
 }
 IMPLEMENT_FUNCTION( AActor, INDEX_NONE, execKSetStayUpright );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10363df0 (219 bytes): retail calls KWake vtable on KarmaParams")
+IMPL_TODO("Ghidra 0x10363df0 (219 bytes): calls FUN_104c3660 (MeSDK body handle) to wake rigid body")
 void AActor::execKWake( FFrame& Stack, RESULT_DECL )
 {
 	guard(AActor::execKWake);
@@ -708,7 +763,7 @@ IMPLEMENT_FUNCTION( AFluidSurfaceInfo, INDEX_NONE, execPling );
 
 /*-- AKConstraint ------------------------------------------------------*/
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10359ea0 (227 bytes): retail reads constraint force via MeSDK")
+IMPL_TODO("Ghidra 0x10359ea0 (227 bytes): reads constraint force via MeSDK getKConstraint() — FUN_104xxxxx blocker")
 void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintForce);
@@ -718,7 +773,7 @@ void AKConstraint::execKGetConstraintForce( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintForce );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x10359fc0 (227 bytes): retail reads constraint torque via MeSDK")
+IMPL_TODO("Ghidra 0x10359fc0 (227 bytes): reads constraint torque via MeSDK getKConstraint() — FUN_104xxxxx blocker")
 void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKGetConstraintTorque);
@@ -728,11 +783,12 @@ void AKConstraint::execKGetConstraintTorque( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKGetConstraintTorque );
 
-IMPL_DIVERGE("Karma physics not implemented; Ghidra 0x1035a0e0 (107 bytes): retail calls virtual KUpdateConstraintParams")
+IMPL_MATCH("Engine.dll", 0x1035a0e0)
 void AKConstraint::execKUpdateConstraintParams( FFrame& Stack, RESULT_DECL )
 {
 	guard(AKConstraint::execKUpdateConstraintParams);
 	P_FINISH;
+	KUpdateConstraintParams();
 	unguard;
 }
 IMPLEMENT_FUNCTION( AKConstraint, INDEX_NONE, execKUpdateConstraintParams );

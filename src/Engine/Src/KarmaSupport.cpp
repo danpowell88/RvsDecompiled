@@ -31,7 +31,7 @@ unguard;
 
 
 // --- AKConeLimit ---
-IMPL_DIVERGE("Karma MeSDK not integrated: calls FUN_104969c0/e0/c0/a10 in Karma SDK range")
+IMPL_TODO("calls FUN_104969c0/e0/c0/a10 in Karma SDK range — MeSDK constraint params unresolved")
 void AKConeLimit::KUpdateConstraintParams()
 {
 guard(AKConeLimit::KUpdateConstraintParams);
@@ -56,7 +56,7 @@ return NULL;
 unguard;
 }
 
-IMPL_DIVERGE("Karma MeSDK not integrated: physKarma uses RDTSC profiling and Karma SDK calls (0x5a510)")
+IMPL_TODO("Ghidra 0x5a510: physKarma uses RDTSC profiling and Karma SDK FUN_104xxxxx calls")
 void AKConstraint::physKarma(float)
 {
 guard(AKConstraint::physKarma);
@@ -73,7 +73,7 @@ void AKConstraint::preKarmaStep(float)
 {
 }
 
-IMPL_DIVERGE("Karma MeSDK not integrated: editor constraint rendering requires Karma SDK (0x10c6c0)")
+IMPL_TODO("Ghidra 0x10c6c0: editor constraint rendering requires Karma SDK FUN_104xxxxx calls")
 void AKConstraint::RenderEditorSelected(FLevelSceneNode *,FRenderInterface *,FDynamicActor *)
 {
 guard(AKConstraint::RenderEditorSelected);
@@ -98,7 +98,7 @@ if (GIsEditor)
 unguard;
 }
 
-IMPL_DIVERGE("Karma MeSDK not integrated: PostEditMove uses KU2METransform/KU2MEPosition/KME2UVecCopy to update constraint body transforms (0x5a710)")
+IMPL_TODO("Ghidra 0x5a710: PostEditMove uses KU2METransform/KU2MEPosition/KME2UVecCopy — FUN_104xxxxx blockers")
 void AKConstraint::PostEditMove()
 {
 guard(AKConstraint::PostEditMove);
@@ -163,14 +163,14 @@ unguard;
 
 
 // --- AKHinge ---
-IMPL_DIVERGE("Karma MeSDK not integrated: preKarmaStep calls FUN_104935c0/FUN_10505fc0/FUN_10496720 in Karma SDK range (0x59c20)")
+IMPL_TODO("Ghidra 0x59c20: preKarmaStep calls FUN_104935c0/FUN_10505fc0/FUN_10496720 in Karma SDK range")
 void AKHinge::preKarmaStep(float)
 {
 guard(AKHinge::preKarmaStep);
 unguard;
 }
 
-IMPL_DIVERGE("Karma MeSDK not integrated: KUpdateConstraintParams calls FUN_104935c0/FUN_104961e0/FUN_10496120 in Karma SDK range (0x5a250)")
+IMPL_TODO("Ghidra 0x5a250: KUpdateConstraintParams calls FUN_104935c0/FUN_104961e0/FUN_10496120 in Karma SDK range")
 void AKHinge::KUpdateConstraintParams()
 {
 guard(AKHinge::KUpdateConstraintParams);
@@ -408,7 +408,7 @@ Ar.ByteOrderSerialize((BYTE*)this + 0x48, 4);
 Ar.ByteOrderSerialize((BYTE*)this + 0x4C, 4);
 }
 
-IMPL_DIVERGE("Karma mesh props draw - editor visualization requires Karma SDK")
+IMPL_TODO("editor mesh props visualization calls Karma SDK FUN_104xxxxx drawing routines")
 void UKMeshProps::Draw(FRenderInterface *,int)
 {
 guard(UKMeshProps::Draw);
@@ -417,7 +417,7 @@ unguard;
 
 
 // --- UKarmaParams ---
-IMPL_DIVERGE("Karma MeSDK not integrated: PostEditChange updates live Karma body params via FUN_104c3660 and MdtBody API (0x62210)")
+IMPL_TODO("Ghidra 0x62210: PostEditChange updates live Karma body params via FUN_104c3660 (MdtBody handle) and MdtBody API")
 void UKarmaParams::PostEditChange()
 {
 guard(UKarmaParams::PostEditChange);

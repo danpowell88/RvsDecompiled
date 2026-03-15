@@ -18,7 +18,7 @@ void AMP2IOKarma::CheckForErrors()
 	unguard;
 }
 
-IMPL_DIVERGE("FCoords rotation and ZDR impulse — FCoords::operator/ + ZDR spring list")
+IMPL_TODO("Ghidra: FCoords rotation and ZDR impulse — FCoords::operator/ and ZDR spring list FUN_ blockers")
 INT AMP2IOKarma::KMP2DynKarmaInterface(INT Cmd, FVector P, FRotator R, AActor* A)
 {
 	guard(AMP2IOKarma::KMP2DynKarmaInterface);
@@ -87,7 +87,7 @@ INT AMP2IOKarma::KMP2DynKarmaInterface(INT Cmd, FVector P, FRotator R, AActor* A
 	unguard;
 }
 
-IMPL_DIVERGE("editor constraint visualization — iterates karma constraint list")
+IMPL_TODO("editor constraint visualization — FUN_1000d610/FUN_1000ea00 (line batcher helpers) unresolved")
 void AMP2IOKarma::RenderEditorInfo(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AMP2IOKarma::RenderEditorInfo);
@@ -141,7 +141,7 @@ void AMP2IOKarma::eventZDRSetDamageState(INT A, FLOAT B, FVector C)
 	ProcessEvent(FindFunctionChecked(R6ENGINE_ZDRSetDamageState), &Parms);
 }
 
-IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
+IMPL_TODO("Ghidra: AMP2IOKarma MeSDK IO dispatch — FUN_104xxxxx blockers throughout")
 void AMP2IOKarma::execMP2IOKarmaAllNativeFct(FFrame& Stack, RESULT_DECL)
 {
 	P_FINISH;

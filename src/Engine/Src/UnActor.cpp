@@ -4127,7 +4127,7 @@ INT AActor::HasAssociatedLevelGeometry( AActor* Other )
 	return (bWorldGeometry && Other == this) ? 1 : 0;
 }
 
-IMPL_DIVERGE("Calls FUN_10367df0 (unresolved Karma internal) and XLevel+0xf0 chain — see Ghidra 0x10361fb0")
+IMPL_TODO("Ghidra 0x10361fb0: checks USkeletalMeshInstance at this+0x324 then calls FUN_10367df0 (unresolved Karma freeze routine)")
 void AActor::KFreezeRagdoll()
 {
 	guard(AActor::KFreezeRagdoll);
