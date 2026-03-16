@@ -34,6 +34,67 @@ void UInputPlanning::StaticInitInput()
 // UInput (moved from EngineClassImpl.cpp)
 // =============================================================================
 
+namespace
+{
+	enum { INPUT_PROPERTY_CACHE_TAG = 0x1F };
+	enum { CPF_InputFlag = 0x00000004 };
+
+	struct FInputPropertyCache
+	{
+		INT Count;
+		UProperty* Properties[1];
+	};
+
+	static FInputPropertyCache* GetInputPropertyCache(UClass* Class, FMemCache::FCacheItem*& Item)
+	{
+		QWORD CacheId = INPUT_PROPERTY_CACHE_TAG;
+		if (Class)
+		{
+			CacheId += (QWORD)Class->GetIndex() * 0x100;
+		}
+
+		FInputPropertyCache* Cache = (FInputPropertyCache*)GCache.Get(CacheId, Item, 8);
+		if (!Cache)
+		{
+			INT Count = 0;
+			if (Class)
+			{
+				for (TFieldIterator<UProperty> It(Class); It; ++It)
+				{
+					if (It->PropertyFlags & CPF_InputFlag)
+					{
+						++Count;
+					}
+				}
+			}
+
+			INT CacheSize = sizeof(FInputPropertyCache);
+			if (Count > 1)
+			{
+				CacheSize += (Count - 1) * sizeof(UProperty*);
+			}
+
+			Cache = (FInputPropertyCache*)GCache.Create(CacheId, Item, CacheSize, 8);
+			check(Cache);
+			Cache->Count = Count;
+
+			if (Class)
+			{
+				INT Index = 0;
+				for (TFieldIterator<UProperty> It(Class); It; ++It)
+				{
+					if (It->PropertyFlags & CPF_InputFlag)
+					{
+						Cache->Properties[Index++] = *It;
+					}
+				}
+			}
+		}
+
+		return Cache;
+	}
+}
+
 // UInput
 // =============================================================================
 
@@ -106,10 +167,70 @@ void UInput::SetKey( const TCHAR* KeyName )
 }
 IMPL_MATCH("Engine.dll", 0x103b4350)
 FString UInput::GetActionKey( BYTE Key ) { return *(FString*)((BYTE*)this + Key * 0xC + 0x2B0); }
-IMPL_TODO("Ghidra 0x103b5870 (300b): asserts Viewport/Actor, creates FName from ButtonName, calls FUN_103b5740 to get cached UByteProperty list, scans for matching FName; blocked by: FUN_103b5740 (GCache-based property-list cache — replicable as local static helper)")
-BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
-IMPL_TODO("Ghidra 0x103b59d0 (300b): asserts Viewport/Actor, creates FName from AxisName, calls FUN_103b5740 to get cached UFloatProperty list, scans for matching FName; blocked by: FUN_103b5740 (same helper as FindButtonName)")
-FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
+IMPL_MATCH("Engine.dll", 0x103b5870)
+BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const
+{
+	guard(UInput::FindButtonName);
+	check(*(UViewport**)((BYTE*)this + 0xEA4));
+	check(Actor);
+
+	FName Button(ButtonName, FNAME_Find);
+	if (Button != NAME_None)
+	{
+		FMemCache::FCacheItem* Item = NULL;
+		FInputPropertyCache* Cache = GetInputPropertyCache(Actor->GetClass(), Item);
+		INT Index = 0;
+		for (; Index < Cache->Count; ++Index)
+		{
+			UProperty* Property = Cache->Properties[Index];
+			if (Property->GetFName() == Button && Property->IsA(UByteProperty::StaticClass()))
+			{
+				break;
+			}
+		}
+		Item->Unlock();
+
+		if (Index < Cache->Count)
+		{
+			return (BYTE*)Actor + Cache->Properties[Index]->Offset;
+		}
+	}
+
+	return NULL;
+	unguard;
+}
+IMPL_MATCH("Engine.dll", 0x103b59d0)
+FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const
+{
+	guard(UInput::FindAxisName);
+	check(*(UViewport**)((BYTE*)this + 0xEA4));
+	check(Actor);
+
+	FName Axis(AxisName, FNAME_Find);
+	if (Axis != NAME_None)
+	{
+		FMemCache::FCacheItem* Item = NULL;
+		FInputPropertyCache* Cache = GetInputPropertyCache(Actor->GetClass(), Item);
+		INT Index = 0;
+		for (; Index < Cache->Count; ++Index)
+		{
+			UProperty* Property = Cache->Properties[Index];
+			if (Property->GetFName() == Axis && Property->IsA(UFloatProperty::StaticClass()))
+			{
+				break;
+			}
+		}
+		Item->Unlock();
+
+		if (Index < Cache->Count)
+		{
+			return (FLOAT*)((BYTE*)Actor + Cache->Properties[Index]->Offset);
+		}
+	}
+
+	return NULL;
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103b3e50)
 void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar )
 {
