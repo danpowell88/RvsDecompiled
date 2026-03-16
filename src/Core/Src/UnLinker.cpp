@@ -297,30 +297,170 @@ FName ULinkerLoad::GetExportClassName( INT i )
 }
 
 // Retail FUN_10129d20 (1876 bytes): resolves Import.SourceLinker via
-// UObject::GetPackageLinker, then locates SourceIndex via a 3-way hash lookup
-// on the source linker's ExportHash.  Handles broken-import warnings/errors
-// (logged via GLog) and walks the PackageIndex chain recursively.
-// UObject::GetPackageLinker is not yet implemented; until it is, SourceLinker
-// and SourceIndex remain unset, making CreateImport's source-linker path dead.
-IMPL_TODO("FUN_10129d20 body is 1876 bytes; needs UObject::GetPackageLinker to resolve SourceLinker/SourceIndex; stub keeps PackageIndex recursion only until GetPackageLinker is available")
+// UObject::GetPackageLinker, then locates SourceIndex via the source linker's
+// 3-way ExportHash probe.  The editor-only load-error path builds the message
+// via intermediate FString concatenation; our direct EdLoadErrorf text is equivalent.
+IMPL_MATCH("Core.dll", 0x10129d20)
 void ULinkerLoad::VerifyImport( INT i )
 {
 	guard(ULinkerLoad::VerifyImport);
 	FObjectImport& Import = ImportMap(i);
-	if( !Import.XObject )
+
+	if( (Import.SourceLinker && Import.SourceIndex != INDEX_NONE)
+	 || Import.ClassPackage == NAME_None
+	 || Import.ClassName    == NAME_None
+	 || Import.ObjectName   == NAME_None )
+		return;
+
+	UPackage* CurrentTopPackage = NULL;
+	if( Import.PackageIndex == 0 )
 	{
-		// Resolve the import's source linker.
-		if( Import.SourceLinker == NULL )
+		check( Import.ClassName    == NAME_Package );
+		check( Import.ClassPackage == NAME_Core );
+		UObject* SourcePackage = UObject::CreatePackage( NULL, *Import.ObjectName );
+		Import.SourceLinker = UObject::GetPackageLinker( SourcePackage, NULL, LOAD_Throw, NULL, NULL );
+	}
+	else
+	{
+		check( Import.PackageIndex < 0 );
+		VerifyImport( -Import.PackageIndex - 1 );
+		Import.SourceLinker = ImportMap( -Import.PackageIndex - 1 ).SourceLinker;
+		if( Import.SourceLinker )
 		{
-			// Find the package this import comes from.
-			INT PackageIndex = Import.PackageIndex;
-			if( PackageIndex != 0 )
+			FObjectImport* TopImport = &Import;
+			while( TopImport->PackageIndex < 0 )
+				TopImport = &ImportMap( -TopImport->PackageIndex - 1 );
+			CurrentTopPackage = UObject::CreatePackage( NULL, *TopImport->ObjectName );
+		}
+	}
+
+	UBOOL bLoggedMissing = 0;
+	for( ; ; )
+	{
+		if( Import.SourceLinker )
+		{
+			INT iHash = (Import.ClassName.GetIndex()*7 + Import.ClassPackage.GetIndex()*0x1f + Import.ObjectName.GetIndex()) & 255;
+			for( INT SourceIndex = Import.SourceLinker->ExportHash[iHash]; SourceIndex != INDEX_NONE; SourceIndex = Import.SourceLinker->ExportMap(SourceIndex)._iHashNext )
 			{
-				// Resolve the outer import first.
-				if( PackageIndex < 0 )
-					VerifyImport( -PackageIndex - 1 );
+				FObjectExport& SourceExport = Import.SourceLinker->ExportMap(SourceIndex);
+				if( SourceExport.ObjectName != Import.ObjectName )
+					continue;
+				if( Import.SourceLinker->GetExportClassName(SourceIndex)    != Import.ClassName )
+					continue;
+				if( Import.SourceLinker->GetExportClassPackage(SourceIndex) != Import.ClassPackage )
+					continue;
+
+				if( Import.PackageIndex < 0 )
+				{
+					FObjectImport& OuterImport = ImportMap( -Import.PackageIndex - 1 );
+					if( OuterImport.SourceLinker )
+					{
+						INT ExpectedPackageIndex = SourceExport.PackageIndex;
+						if( OuterImport.SourceIndex == INDEX_NONE )
+						{
+							if( ExpectedPackageIndex != 0 )
+								continue;
+						}
+						else if( OuterImport.SourceIndex + 1 != ExpectedPackageIndex && ExpectedPackageIndex != 0 )
+						{
+							continue;
+						}
+					}
+				}
+
+				if( !(SourceExport.ObjectFlags & RF_Public) )
+				{
+					FString FullName = GetImportFullName(i);
+					if( LoadFlags & LOAD_Forgiving )
+					{
+						UObject* TopOuter = LinkerRoot;
+						while( TopOuter && TopOuter->GetOuter() )
+							TopOuter = TopOuter->GetOuter();
+						if( TopOuter && TopOuter->IsA(UPackage::StaticClass()) )
+							((UPackage*)TopOuter)->PackageFlags |= (DWORD)PKG_BrokenLinks;
+
+						GLog->Logf( TEXT("Broken import: %s %s (file %s)"),
+							*Import.ClassName,
+							*FullName,
+							Import.SourceLinker->Filename.Len() ? *Import.SourceLinker->Filename : TEXT("") );
+						return;
+					}
+					appThrowf( LocalizeError(TEXT("FailedImportPrivate"), TEXT("Core")), *Import.ClassName, *FullName );
+				}
+
+				Import.SourceIndex = SourceIndex;
+				break;
 			}
 		}
+
+		if( appStricmp(*Import.ClassName, TEXT("Mesh")) != 0 )
+		{
+			if( Import.SourceIndex != INDEX_NONE )
+				return;
+			if( !CurrentTopPackage )
+				return;
+
+			UPackage* ClassPackage = (UPackage*)UObject::StaticFindObject( UPackage::StaticClass(), NULL, *Import.ClassPackage, 0 );
+			if( ClassPackage )
+			{
+				UClass* ImportClass = (UClass*)UObject::StaticFindObject( UClass::StaticClass(), ClassPackage, *Import.ClassName, 0 );
+				if( ImportClass )
+				{
+					UObject* FoundObject = UObject::StaticFindObject( ImportClass, CurrentTopPackage, *Import.ObjectName, 0 );
+					if( FoundObject
+					 && (FoundObject->GetFlags() & RF_Public)
+					 && (FoundObject->GetFlags() & RF_Native)
+					 && (FoundObject->GetFlags() & RF_Transient) )
+					{
+						Import.XObject = FoundObject;
+						UObject::GImportCount++;
+					}
+					else
+					{
+						UObject* TopOuter = LinkerRoot;
+						while( TopOuter && TopOuter->GetOuter() )
+							TopOuter = TopOuter->GetOuter();
+
+						const TCHAR* RootName = TEXT("----");
+						if( TopOuter && TopOuter->IsA(UPackage::StaticClass()) )
+							RootName = *TopOuter->GetFName();
+
+						FString FullName = GetImportFullName(i);
+						if( GIsEditor && !GIsUCC )
+							EdLoadErrorf( 1, TEXT("Missing %s %s [%s]"), *ImportClass->GetFName(), *FullName, RootName );
+						GLog->Logf( TEXT("Missing %s %s [%s]"), *ImportClass->GetFName(), *FullName, RootName );
+						bLoggedMissing = 1;
+					}
+				}
+			}
+
+			if( Import.XObject )
+				return;
+			if( bLoggedMissing )
+				return;
+
+			FString FullName = GetImportFullName(i);
+			GLog->Logf( TEXT("Failed import: %s %s (file %s)"),
+				*Import.ClassName,
+				*FullName,
+				(Import.SourceLinker && Import.SourceLinker->Filename.Len()) ? *Import.SourceLinker->Filename : TEXT("") );
+			if( !(LoadFlags & LOAD_Forgiving) )
+				appThrowf( LocalizeError(TEXT("FailedImport"), TEXT("Core")), *Import.ClassName, *FullName );
+
+			UObject* TopOuter = LinkerRoot;
+			while( TopOuter && TopOuter->GetOuter() )
+				TopOuter = TopOuter->GetOuter();
+			if( TopOuter && TopOuter->IsA(UPackage::StaticClass()) )
+				((UPackage*)TopOuter)->PackageFlags |= (DWORD)PKG_BrokenLinks;
+
+			GLog->Logf( TEXT("Broken import: %s %s (file %s)"),
+				*Import.ClassName,
+				*FullName,
+				(Import.SourceLinker && Import.SourceLinker->Filename.Len()) ? *Import.SourceLinker->Filename : TEXT("") );
+			return;
+		}
+
+		Import.ClassName = FName( TEXT("LodMesh"), FNAME_Add );
 	}
 	unguard;
 }
@@ -462,13 +602,10 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
-// Retail FUN_1012a570 (136 bytes): if XObject != NULL return it; otherwise call
-// VerifyImport (inside BeginLoad/EndLoad) if SourceLinker is unset, then return
-// SourceLinker->FUN_10128d30(SourceIndex) and increment GImportCount.
-// Our version provides a manual resolution fallback because VerifyImport never sets
-// SourceLinker/SourceIndex in the current stub.  Once VerifyImport (FUN_10129d20)
-// is fully implemented this function should be simplified to match the retail 136-byte body.
-IMPL_TODO("FUN_1012a570 is 136 bytes in retail; our expanded fallback replaces the SourceLinker path until VerifyImport (FUN_10129d20) sets SourceLinker/SourceIndex correctly")
+// Retail body is tiny once VerifyImport resolves SourceLinker/SourceIndex:
+// BeginLoad/EndLoad around VerifyImport, then CreateExport(SourceIndex) on the
+// source linker and bump GImportCount.
+IMPL_MATCH("Core.dll", 0x1012a570)
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -476,36 +613,17 @@ UObject* ULinkerLoad::CreateImport( INT Index )
 	if( Import.XObject )
 		return Import.XObject;
 
-	// Find the import's outer.
-	UObject* ClassPackage = NULL;
-	UObject* ImportOuter = NULL;
-	if( Import.PackageIndex == 0 )
+	if( Import.SourceLinker == NULL )
 	{
-		// Top-level import — find the package.
-		ImportOuter = UObject::CreatePackage( NULL, *Import.ObjectName );
-		Import.XObject = ImportOuter;
-		return Import.XObject;
-	}
-	else if( Import.PackageIndex < 0 )
-	{
-		// Outer is another import.
-		ImportOuter = CreateImport( -Import.PackageIndex - 1 );
-	}
-	else
-	{
-		// Outer is an export.
-		ImportOuter = CreateExport( Import.PackageIndex - 1 );
+		UObject::BeginLoad();
+		VerifyImport( Index );
+		UObject::EndLoad();
 	}
 
-	// Find the imported object.
-	if( ImportOuter )
+	if( Import.SourceIndex != INDEX_NONE )
 	{
-		Import.XObject = UObject::StaticFindObject( NULL, ImportOuter, *Import.ObjectName, 0 );
-		if( !Import.XObject )
-		{
-			// Try loading through the package linker.
-			Import.XObject = UObject::StaticLoadObject( NULL, ImportOuter, *Import.ObjectName, NULL, LOAD_NoWarn, NULL );
-		}
+		Import.XObject = Import.SourceLinker->CreateExport( Import.SourceIndex );
+		UObject::GImportCount++;
 	}
 
 	return Import.XObject;
