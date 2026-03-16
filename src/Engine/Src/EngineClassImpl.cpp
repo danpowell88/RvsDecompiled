@@ -877,7 +877,7 @@ void ASceneManager::execGetTotalSceneTime( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( ASceneManager, INDEX_NONE, execGetTotalSceneTime );
 
-IMPL_DIVERGE("FUN_103db080 (scene manager teardown helper) is an unexported Engine.dll internal")
+IMPL_TODO("FUN_103db080 (scene manager teardown helper) confirmed in _unnamed.cpp — tractable; pending implementation")
 void ASceneManager::execSceneDestroyed( FFrame& Stack, RESULT_DECL )
 {
 	guard(ASceneManager::execSceneDestroyed);
@@ -1006,7 +1006,7 @@ void AStatLog::execGetPlayerChecksum( FFrame& Stack, RESULT_DECL )
 }
 IMPLEMENT_FUNCTION( AStatLog, INDEX_NONE, execGetPlayerChecksum );
 
-IMPL_DIVERGE("FUN_10318850 (object iterator) and FUN_10322eb0 (cleanup helper) are unexported Engine.dll internals; 1867-byte stat-log check permanently blocked")
+IMPL_TODO("FUN_10318850 (object iterator) and FUN_10322eb0 (cleanup helper) confirmed in _unnamed.cpp — tractable; pending implementation")
 void AStatLog::execInitialCheck( FFrame& Stack, RESULT_DECL )
 {
 	guard(AStatLog::execInitialCheck);
