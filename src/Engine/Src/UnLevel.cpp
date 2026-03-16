@@ -2462,7 +2462,7 @@ IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::PreNetReceive() {}
 IMPL_EMPTY("base no-op — subclass implements")
 void ALevelInfo::CheckForErrors() {}
-IMPL_TODO("Ghidra 0x103756b0; helpers RepObjectChanged/FindRepProperty resolved; diverges: DAT_10656444 gate assumed set, property caches use function-local statics instead of fixed globals")
+IMPL_DIVERGE("Ghidra 0x103756b0: DAT_10656444 is ALevelInfo::PrivateStaticClass ClassFlags (CLASS_NativeReplication=0x800); assumed always set (correct for gameplay). Property caches use function-local statics instead of fixed data-segment globals at 0x106669e8-fc. Functionally equivalent.")
 INT* ALevelInfo::GetOptimizedRepList( BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan )
 {
 	guard(ALevelInfo::GetOptimizedRepList);
