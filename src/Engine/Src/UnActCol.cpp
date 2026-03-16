@@ -23,6 +23,119 @@ static TArray<FBox>    GDbgOctreeBoxes;      // DAT_1077e2d0: bounding boxes    
 
 extern ENGINE_API FTempLineBatcher* GTempLineBatcher;  // defined in Engine.cpp
 
+// DAT_1077e2a8..b4: root octree center (0,0,0) + half-size 262144 UU.
+static const FPlane GOctreeRootPlane(0.f, 0.f, 0.f, 262144.f);
+
+static FOctreeNode* GetOctreeChild(FOctreeNode* ChildrenBase, INT ChildIndex)
+{
+	return (FOctreeNode*)((BYTE*)ChildrenBase + ChildIndex * 0x10);
+}
+
+static FPlane MakeOctreeChildPlane(const FPlane& ParentPlane, INT ChildIndex)
+{
+	const FLOAT Half = ParentPlane.W * 0.5f;
+	return FPlane(
+		(((ChildIndex >> 1) & 2) ? 1.f : -1.f) * Half + ParentPlane.X,
+		((ChildIndex & 2) ? 1.f : -1.f) * Half + ParentPlane.Y,
+		((ChildIndex & 1) ? 1.f : -1.f) * Half + ParentPlane.Z,
+		Half);
+}
+
+static UBOOL BoxesOverlap(const FBox& A, const FBox& B)
+{
+	return
+		A.Min.X <= B.Max.X && B.Min.X <= A.Max.X &&
+		A.Min.Y <= B.Max.Y && B.Min.Y <= A.Max.Y &&
+		A.Min.Z <= B.Max.Z && B.Min.Z <= A.Max.Z;
+}
+
+static UBOOL BoxOverlapsPlaneBounds(const FBox& Box, const FPlane& Plane)
+{
+	const FLOAT MinX = Plane.X - Plane.W;
+	const FLOAT MaxX = Plane.X + Plane.W;
+	const FLOAT MinY = Plane.Y - Plane.W;
+	const FLOAT MaxY = Plane.Y + Plane.W;
+	const FLOAT MinZ = Plane.Z - Plane.W;
+	const FLOAT MaxZ = Plane.Z + Plane.W;
+
+	return
+		Box.Min.X <= MaxX && MinX <= Box.Max.X &&
+		Box.Min.Y <= MaxY && MinY <= Box.Max.Y &&
+		Box.Min.Z <= MaxZ && MinZ <= Box.Max.Z;
+}
+
+static UBOOL PlaneFullyInsideBox(const FPlane& Plane, const FBox& Box)
+{
+	const FLOAT MinX = Plane.X - Plane.W;
+	const FLOAT MaxX = Plane.X + Plane.W;
+	const FLOAT MinY = Plane.Y - Plane.W;
+	const FLOAT MaxY = Plane.Y + Plane.W;
+	const FLOAT MinZ = Plane.Z - Plane.W;
+	const FLOAT MaxZ = Plane.Z + Plane.W;
+
+	return
+		Box.Min.X <= MinX && MaxX <= Box.Max.X &&
+		Box.Min.Y <= MinY && MaxY <= Box.Max.Y &&
+		Box.Min.Z <= MinZ && MaxZ <= Box.Max.Z;
+}
+
+static INT PickSingleChildForBox(const FBox& Box, const FPlane& Plane)
+{
+	INT ChildIndex = 0;
+
+	if (Box.Min.X <= Plane.X)
+	{
+		if (Plane.X < Box.Max.X)
+			return -1;
+	}
+	else
+	{
+		ChildIndex |= 4;
+	}
+
+	if (Box.Min.Y <= Plane.Y)
+	{
+		if (Plane.Y < Box.Max.Y)
+			return -1;
+	}
+	else
+	{
+		ChildIndex |= 2;
+	}
+
+	if (Box.Min.Z <= Plane.Z)
+	{
+		if (Plane.Z < Box.Max.Z)
+			return -1;
+	}
+	else
+	{
+		ChildIndex |= 1;
+	}
+
+	return ChildIndex;
+}
+
+static UBOOL NodeListContainsAll(const TArray<FOctreeNode*>& ExpectedNodes, const TArray<FOctreeNode*>& CurrentNodes)
+{
+	for (INT ExpectedIndex = 0; ExpectedIndex < ExpectedNodes.Num(); ++ExpectedIndex)
+	{
+		FOctreeNode* ExpectedNode = ExpectedNodes(ExpectedIndex);
+		UBOOL bFound = 0;
+		for (INT CurrentIndex = 0; CurrentIndex < CurrentNodes.Num(); ++CurrentIndex)
+		{
+			if (CurrentNodes(CurrentIndex) == ExpectedNode)
+			{
+				bFound = 1;
+				break;
+			}
+		}
+		if (!bFound)
+			return 0;
+	}
+	return 1;
+}
+
 // --- FReachSpec ---
 IMPL_MATCH("Engine.dll", 0x103115e0)
 FReachSpec& FReachSpec::operator=(const FReachSpec& Other)
@@ -932,8 +1045,32 @@ void FCollisionOctree::AddActor(AActor* Actor)
 }
 
 // ?CheckActorLocations@FCollisionOctree@@UAEXPAVULevel@@@Z
-IMPL_TODO("FUN_103dafe0 (node-membership test) and FUN_103db230 (cleanup) confirmed in _unnamed.cpp — tractable; pending implementation; Ghidra 0x103dbec0")
-void FCollisionOctree::CheckActorLocations(ULevel * p0) {}
+IMPL_MATCH("Engine.dll", 0x103dbec0)
+void FCollisionOctree::CheckActorLocations(ULevel* Level)
+{
+	FOctreeNode* Root = *(FOctreeNode**)Pad;
+	if (!Root || !Level)
+		return;
+
+	for (INT ActorIndex = 0; ActorIndex < Level->Actors.Num(); ++ActorIndex)
+	{
+		AActor* Actor = Level->Actors(ActorIndex);
+		if (!Actor)
+			continue;
+		if ((*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800) == 0)
+			continue;
+		if (*(SBYTE*)((BYTE*)Actor + 0xa0) < 0)
+			continue;
+
+		FBox ActorBox = *(FBox*)((BYTE*)Actor + 0x350);
+		TArray<FOctreeNode*> ExpectedNodes;
+		Root->FilterTest(&ActorBox, ((*(DWORD*)((BYTE*)Actor + 0xa0) & 0x08000000u) == 0), &ExpectedNodes, &GOctreeRootPlane);
+
+		TArray<FOctreeNode*>& CurrentNodes = *(TArray<FOctreeNode*>*)((BYTE*)Actor + 0x338);
+		if (!NodeListContainsAll(ExpectedNodes, CurrentNodes))
+			GLog->Logf(TEXT("%s"), Actor->GetName());
+	}
+}
 
 // ?CheckActorNotReferenced@FCollisionOctree@@UAEXPAVAActor@@@Z
 // retail: empty (ordinal 2354 shares address 0x1651d0 — shared no-op stub)
@@ -1077,8 +1214,54 @@ void FOctreeNode::ActorNonZeroExtentLineCheck(FCollisionOctree* OctHash, FPlane 
 }
 
 // ?ActorOverlapCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_TODO("FUN_103d8b80 (query-box clip against node bounds) confirmed in _unnamed.cpp — tractable; pending implementation; Ghidra 0x103da390")
-void FOctreeNode::ActorOverlapCheck(FCollisionOctree * p0, FPlane const * p1) {}
+IMPL_MATCH("Engine.dll", 0x103da390)
+void FOctreeNode::ActorOverlapCheck(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	INT Frame = *(INT*)(OctHash->Pad + 4);
+	FCheckResult*& List = *(FCheckResult**)(OctHash->Pad + 8);
+	FMemStack* Mem = *(FMemStack**)(OctHash->Pad + 0xc);
+	AActor* SourceActor = *(AActor**)(OctHash->Pad + 96);
+	FBox& QueryBox = *(FBox*)(OctHash->Pad + 0x68);
+	INT bSingleResult = *(INT*)(OctHash->Pad + 0x84);
+
+	TArray<AActor*>& ActorList = *(TArray<AActor*>*)this;
+	for (INT ActorIndex = 0; ActorIndex < ActorList.Num(); ++ActorIndex)
+	{
+		AActor* Actor = ActorList(ActorIndex);
+		if (!Actor || Actor == SourceActor)
+			continue;
+		if (*(INT*)((BYTE*)Actor + 0x60) == Frame)
+			continue;
+
+		*(INT*)((BYTE*)Actor + 0x60) = Frame;
+		if (bSingleResult && ((*(DWORD*)((BYTE*)Actor + 0xa8) & 0x800000) == 0))
+			continue;
+
+		const FBox& ActorBox = *(const FBox*)((BYTE*)Actor + 0x350);
+		if (BoxesOverlap(ActorBox, QueryBox))
+		{
+			FCheckResult* Result = (FCheckResult*)Mem->PushBytes(sizeof(FCheckResult), 8);
+			if (Result)
+			{
+				appMemzero(Result, sizeof(FCheckResult));
+				Result->Actor = Actor;
+				Result->GetNext() = List;
+				List = Result;
+			}
+		}
+	}
+
+	FOctreeNode* Children = *(FOctreeNode**)(Pad + 0xc);
+	if (Children)
+	{
+		for (INT ChildIndex = 0; ChildIndex < 8; ++ChildIndex)
+		{
+			FPlane ChildPlane = MakeOctreeChildPlane(*NodePlane, ChildIndex);
+			if (BoxOverlapsPlaneBounds(QueryBox, ChildPlane))
+				GetOctreeChild(Children, ChildIndex)->ActorOverlapCheck(OctHash, &ChildPlane);
+		}
+	}
+}
 
 // ?ActorPointCheck@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@PAVAActor@@@Z
 IMPL_MATCH("Engine.dll", 0x103d9f50)
@@ -1241,8 +1424,36 @@ void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
 IMPL_DIVERGE("Ghidra 0x103DB840: editor/debug visualization only — draws actors flagged 0x4000000 via FTempLineBatcher line append; FTempLineBatcher is an editor-only debug draw path")
 void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
 
-IMPL_TODO("FUN_103d8e50/FUN_103d8d50/FUN_103d8c80/FUN_103d8ce0 (plane-clip and child-overlap helpers) confirmed in _unnamed.cpp — tractable; pending implementation; Ghidra 0x103db0c0")
-void FOctreeNode::FilterTest(FBox * p0, int p1, TArray<FOctreeNode *> * p2, FPlane const * p3) {}
+IMPL_MATCH("Engine.dll", 0x103db0c0)
+void FOctreeNode::FilterTest(FBox* Box, INT bMultiNode, TArray<FOctreeNode*>* Nodes, FPlane const* NodePlane)
+{
+	FOctreeNode* Children = *(FOctreeNode**)(Pad + 0xc);
+	if (!bMultiNode)
+	{
+		const INT ChildIndex = PickSingleChildForBox(*Box, *NodePlane);
+		if (!Children || ChildIndex == -1)
+		{
+			Nodes->AddItem(this);
+			return;
+		}
+
+		FPlane ChildPlane = MakeOctreeChildPlane(*NodePlane, ChildIndex);
+		GetOctreeChild(Children, ChildIndex)->FilterTest(Box, 0, Nodes, &ChildPlane);
+		return;
+	}
+
+	if (Children && !PlaneFullyInsideBox(*NodePlane, *Box))
+	{
+		for (INT ChildIndex = 0; ChildIndex < 8; ++ChildIndex)
+		{
+			FPlane ChildPlane = MakeOctreeChildPlane(*NodePlane, ChildIndex);
+			GetOctreeChild(Children, ChildIndex)->FilterTest(Box, 1, Nodes, &ChildPlane);
+		}
+		return;
+	}
+
+	Nodes->AddItem(this);
+}
 
 // ?MultiNodeFilter@FOctreeNode@@QAEXPAVAActor@@PAVFCollisionOctree@@PBVFPlane@@@Z
 // Ghidra (0xd8ec0): In the full octree, routes actor to all overlapping child nodes.
