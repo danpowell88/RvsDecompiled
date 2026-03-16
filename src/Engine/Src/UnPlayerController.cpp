@@ -5,6 +5,20 @@ struct FPropertyRetirement;
 static INT  s_prevViewTarget = 0;
 static BYTE s_prevViewState  = 0;
 
+// FUN_10370830 (59 bytes): check whether an object reference changed for replication.
+// Returns TRUE when the property should be added to the rep list:
+//   - If newObj is already mapped on this connection → FALSE (client already knows).
+//   - If not mapped → mark channel dirty and return (newObj != NULL).
+static UBOOL RepObjectChanged( INT newObj, INT /*oldObj*/, UPackageMap* Map, UActorChannel* Chan )
+{
+	DWORD* vtbl = *(DWORD**)Map;
+	typedef INT (__thiscall* MapObjectFn)(UPackageMap*, INT);
+	if ( ((MapObjectFn)vtbl[25])( Map, newObj ) != 0 )
+		return 0;
+	*(INT*)((BYTE*)Chan + 0x8c) = 1;
+	return (newObj != 0);
+}
+
 // --- APlayerController ---
 IMPL_MATCH("Engine.dll", 0x104201f0)
 void APlayerController::SpecialDestroy()
@@ -230,14 +244,116 @@ void APlayerController::CheckHearSound(AActor* SoundMaker, INT SoundId, USound* 
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10371990 and FUN_10370830 are unexported Engine.dll internals; DAT_10661f94 gating flag address cannot be reproduced — permanent divergence from retail replication logic")
+IMPL_TODO("Ghidra 0x10374b00: body fully implemented; ClassFlags gate (DAT_10661f94 & 0x800) assumed always-on per AMover/APhysicsVolume precedent — verify byte parity once class metadata reconstruction is complete")
 INT* APlayerController::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	// Ghidra 0x74b00 (1025b): calls AController::GetOptimizedRepList, then conditionally
-	// adds replicated property indices for 6 R6-specific fields when bNetOwner && bNetDirty.
-	// DIVERGENCE: uses static DAT_ caches for property FName indices; those DAT_ addresses
-	// not yet resolved to named globals. Delegates to parent only.
-	return AController::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+	guard(APlayerController::GetOptimizedRepList);
+	// Ghidra 0x74b00 (1025 bytes): R6-extended replication list.
+	// Calls parent, then conditionally adds up to 9 R6-specific property indices
+	// based on bNetOwner, bNetDirty, Role==ROLE_Authority checks.
+	// Static property caches (DAT_1066698c–DAT_106669a4) are function-local statics.
+	static DWORD    s_InitFlags              = 0;
+	static UObject* s_RadarActiveProp        = NULL;  // DAT_106669a0
+	static UObject* s_ViewTargetProp         = NULL;  // DAT_1066699c
+	static UObject* s_GameRepInfoProp        = NULL;  // DAT_10666998
+	static UObject* s_OnlySpectatorProp      = NULL;  // DAT_10666994
+	static UObject* s_TeamSelectionProp      = NULL;  // DAT_10666990
+	static UObject* s_CameraModeProp         = NULL;  // DAT_1066698c
+	static UObject* s_TargetViewRotProp      = NULL;  // DAT_10666988
+	static UObject* s_TargetEyeHeightProp    = NULL;  // DAT_10666984
+	static UObject* s_TargetWeaponViewProp   = NULL;  // DAT_10666980
+
+	Ptr = AController::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+
+	// DAT_10661f94 = APlayerController::PrivateStaticClass.ClassFlags & 0x800 (CLASS_NativeReplication).
+	// Always set for this class; gate assumed true per AMover/APhysicsVolume precedent.
+
+	// --- m_bRadarActive: bNetOwner && Role==ROLE_Authority && byte 0x527 bit 0 changed ---
+	if ((*(DWORD*)((BYTE*)this + 0xa0) & 0x40000000) &&
+		((BYTE*)this)[0x2d] == 4 &&
+		((Mem[0x527] ^ ((BYTE*)this)[0x527]) & 1))
+	{
+		if (!(s_InitFlags & 1)) { s_InitFlags |= 1; s_RadarActiveProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("m_bRadarActive"), 0); }
+		*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_RadarActiveProp + 0x4A));
+	}
+
+	// --- bNetDirty && Role==ROLE_Authority block ---
+	if ((((BYTE*)this)[0xac] & 0x40) && ((BYTE*)this)[0x2d] == 4)
+	{
+		// Owner-only properties: bNetOwner gate
+		if (*(DWORD*)((BYTE*)this + 0xa0) & 0x40000000)
+		{
+			// ViewTarget object ref
+			if (RepObjectChanged(*(INT*)((BYTE*)this + 0x5b8), *(INT*)(Mem + 0x5b8), Map, Chan))
+			{
+				if (!(s_InitFlags & 2)) { s_InitFlags |= 2; s_ViewTargetProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("ViewTarget"), 0); }
+				*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_ViewTargetProp + 0x4A));
+			}
+			// GameReplicationInfo object ref
+			if (RepObjectChanged(*(INT*)((BYTE*)this + 0x5cc), *(INT*)(Mem + 0x5cc), Map, Chan))
+			{
+				if (!(s_InitFlags & 4)) { s_InitFlags |= 4; s_GameRepInfoProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("GameReplicationInfo"), 0); }
+				*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_GameRepInfoProp + 0x4A));
+			}
+			// bOnlySpectator (bit 0x4000 at offset 0x524)
+			if ((*(DWORD*)(Mem + 0x524) ^ *(DWORD*)((BYTE*)this + 0x524)) & 0x4000)
+			{
+				if (!(s_InitFlags & 8)) { s_InitFlags |= 8; s_OnlySpectatorProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("bOnlySpectator"), 0); }
+				*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_OnlySpectatorProp + 0x4A));
+			}
+			// m_TeamSelection (byte at 0x4f6)
+			if (((BYTE*)this)[0x4f6] != Mem[0x4f6])
+			{
+				if (!(s_InitFlags & 0x10)) { s_InitFlags |= 0x10; s_TeamSelectionProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("m_TeamSelection"), 0); }
+				*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_TeamSelectionProp + 0x4A));
+			}
+			// m_eCameraMode (byte at 0x4f7)
+			if (((BYTE*)this)[0x4f7] != Mem[0x4f7])
+			{
+				if (!(s_InitFlags & 0x20)) { s_InitFlags |= 0x20; s_CameraModeProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("m_eCameraMode"), 0); }
+				*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_CameraModeProp + 0x4A));
+			}
+		}
+
+		// View target spectator props (replicated to all connections, not just owner)
+		// vtable[99] (0x18c) returns current controlled actor; compare with Pawn at 0x3d8
+		typedef INT (__thiscall* IntFn0)(APlayerController*);
+		typedef INT (__thiscall* IntVFn)(void*);
+		INT controlled = ((IntFn0)(*(INT*)(*(INT*)this + 0x18c)))(this);
+		if (controlled != *(INT*)((BYTE*)this + 0x3d8))
+		{
+			// vtable[26] (0x68) on ViewTarget: check if view target actor is valid/moving
+			INT* vtObj = *(INT**)((BYTE*)this + 0x5b8);
+			if (((IntVFn)(*(INT*)(*(INT*)vtObj + 0x68)))((void*)vtObj))
+			{
+				// TargetViewRotation (FRotator at 0x628, 3 ints)
+				if (*(INT*)((BYTE*)this + 0x628) != *(INT*)(Mem + 0x628) ||
+					*(INT*)((BYTE*)this + 0x62c) != *(INT*)(Mem + 0x62c) ||
+					*(INT*)((BYTE*)this + 0x630) != *(INT*)(Mem + 0x630))
+				{
+					if (!(s_InitFlags & 0x40)) { s_InitFlags |= 0x40; s_TargetViewRotProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("TargetViewRotation"), 0); }
+					*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_TargetViewRotProp + 0x4A));
+				}
+				// TargetEyeHeight (float at 0x578)
+				if (*(INT*)((BYTE*)this + 0x578) != *(INT*)(Mem + 0x578))
+				{
+					if (!(s_InitFlags & 0x80)) { s_InitFlags |= 0x80; s_TargetEyeHeightProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("TargetEyeHeight"), 0); }
+					*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_TargetEyeHeightProp + 0x4A));
+				}
+				// TargetWeaponViewOffset (FVector at 0x634, 3 ints)
+				if (*(INT*)((BYTE*)this + 0x634) != *(INT*)(Mem + 0x634) ||
+					*(INT*)((BYTE*)this + 0x638) != *(INT*)(Mem + 0x638) ||
+					*(INT*)((BYTE*)this + 0x63c) != *(INT*)(Mem + 0x63c))
+				{
+					if (!(s_InitFlags & 0x100)) { s_InitFlags |= 0x100; s_TargetWeaponViewProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("TargetWeaponViewOffset"), 0); }
+					*Ptr++ = (INT)(*(_WORD*)((BYTE*)s_TargetWeaponViewProp + 0x4A));
+				}
+			}
+		}
+	}
+
+	return Ptr;
+	unguard;
 }
 
 IMPL_MATCH("Engine.dll", 0x10425a40)

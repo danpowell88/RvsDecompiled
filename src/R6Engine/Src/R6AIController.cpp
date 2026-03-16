@@ -578,7 +578,7 @@ void AR6AIController::execFollowPath(FFrame& Stack, RESULT_DECL)
 	FollowPath((enum eMovementPace)ePace, returnLabel, bContinuePath);
 }
 
-IMPL_DIVERGE("retail calls XLevel vtable[39] on vDestination before FindPath; vtable slot semantics unknown — preprocessing call omitted")
+IMPL_TODO("blocked: XLevel->vtable[0x9c/4] call before FindPath unresolved (likely FarMoveActor); debug Logf format string on path failure unknown")
 void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_STRUCT(FVector, vDestination);
@@ -586,8 +586,9 @@ void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 	P_GET_OBJECT(AActor, aTarget);
 	P_FINISH;
 
-	// DIVERGENCE: retail calls XLevel vtable[39] on vDestination before FindPath.
-	// Exact semantics of this navigation helper are unknown; call is omitted.
+	// TODO: retail calls XLevel->vtable[0x9c/4](this, &vDestination, 0, ???, 0, 0, 0, 0)
+	// here before FindPath. Likely ULevel::FarMoveActor but param mapping unconfirmed.
+
 	// When a target actor is given, path toward it using a zero origin;
 	// otherwise path toward vDestination using the controller as anchor.
 	FVector dest(0.f, 0.f, 0.f);
@@ -600,19 +601,20 @@ void AR6AIController::execFollowPathTo(FFrame& Stack, RESULT_DECL)
 
 	if (!found)
 	{
+		// TODO: retail logs via GLog->Logf with Pawn name and Pawn+0x4f8 name here.
+		// Format string address unknown from Ghidra.
 		GetStateFrame()->LatentAction = 0;
 		m_eMoveToResult = 2;
 		return;
 	}
 
-	// Scan RouteCache for first empty or self-referential slot.
+	// Scan RouteCache for first empty or self-referential slot, set sentinel.
 	INT i;
 	for (i = 0; i <= 15; i++)
 	{
 		if (RouteCache[i] == NULL || RouteCache[i] == (AActor*)this)
 			break;
 	}
-	// DIVERGENCE: Ghidra sets sentinel value 1 at the found slot before calling FollowPath.
 	if (i <= 15)
 		RouteCache[i] = (AActor*)1;
 
@@ -677,7 +679,7 @@ void AR6AIController::execNeedToOpenDoor(FFrame& Stack, RESULT_DECL)
 	*(DWORD*)Result = NeedToOpenDoor(Target);
 }
 
-IMPL_DIVERGE("Karma physics pending MeSDK decompilation")
+IMPL_MATCH("R6Engine.dll", 0x100012c0)
 void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 {
 	P_GET_OBJECT(AActor, pActor);
@@ -702,7 +704,7 @@ void AR6AIController::execPickActorAdjust(FFrame& Stack, RESULT_DECL)
 	}
 }
 
-IMPL_DIVERGE("FUN_100017c0 (0x100017c0): class hierarchy check via linked list at param+0x24/+0x2c against PrivateStaticClass_exref; non-exported internal class — call omitted permanently")
+IMPL_TODO("blocked: FUN_100017c0 (0x100017c0) is IsA check on route cache nav-point against unresolved PrivateStaticClass_exref; need to identify which UClass for the IsA + store at Pawn+0x4f8")
 void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 {
 	void* pPawn = *(void**)((BYTE*)this + 0x3d8);
@@ -736,11 +738,14 @@ void AR6AIController::execPollFollowPath(FFrame& Stack, RESULT_DECL)
 			INT curRoute = *(INT*)((BYTE*)this + *(INT*)((BYTE*)this + 0x4fc) * 4 + 0x408);
 			if (curRoute != 0)
 			{
-				// DIVERGENCE: FUN_100017c0 unresolved (navigation-point initialiser).
-				// Retail walks class hierarchy (checking PrivateStaticClass_exref) and calls
-				// FUN_100017c0(curRoute) to initialise the nav-point, then stores result at
-				// Pawn+0x4f8. Skipped here as both FUN_100017c0 and the reference class are
-				// unresolved external symbols.
+				// TODO: Retail walks class hierarchy at curRoute+0x24 (UClass*),
+				// following +0x2c (SuperField) links, checking against an imported
+				// PrivateStaticClass_exref. If the nav-point IsA that class (or the
+				// class ref is NULL), calls FUN_100017c0(curRoute) — which is itself
+				// the same IsA check returning curRoute on match, 0 otherwise —
+				// and stores the result at Pawn+0x4f8.
+				// Blocked: the target UClass is an external reference whose identity
+				// has not been determined from Ghidra cross-references yet.
 			}
 
 			if (SetDestinationToNextInCache())

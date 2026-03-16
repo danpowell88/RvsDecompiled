@@ -447,8 +447,9 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
     }
 
     // ── BIGHEAD (cheat: scale actor bone sizes) ───────────────────────────────
-    // IMPL_TODO: FUN_103a0540 (actor iterator, retail 0x103a0540) not yet identified;
-    // bone-scale loop body omitted until helper is reconstructed.
+    // FUN_103a0540 (retail 0x103a0540) = APawn IsA filter; BIGHEAD iterates level actors,
+    // checks APawn type + skeletal mesh at +0x16c, scales bones "R6 Head", "R6 L/R Hand/Foot".
+    // Blocked: bone-scale API (SetBoneScale) and actor iteration pattern not yet reconstructed.
     {
         ALevelInfo* LI = pLevel ? pLevel->GetLevelInfo() : NULL;
         // Only available in standalone (NetMode==0)
@@ -475,10 +476,13 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
     // ── SAVEGAME ──────────────────────────────────────────────────────────────
     if ( ParseCommand(&Cmd, TEXT("SAVEGAME")) )
     {
-        // FUN_1039eb00: internal save-availability check (retail 0x1039eb00, not exported).
-        // IMPL_TODO: FUN_1039eb00 identity unconfirmed; skipping check and calling SaveGame directly.
-        INT slot = appAtoi(Cmd);
-        SaveGame(slot);
+        // FUN_1039eb00 (retail 0x1039eb00, not exported): validates first char is ASCII digit '0'-'9'.
+        TCHAR ch = *Cmd;
+        if ( ch > 0x2f && ch < 0x3a )
+        {
+            INT slot = appAtoi(Cmd);
+            SaveGame(slot);
+        }
         return 1;
     }
 
@@ -511,8 +515,9 @@ INT UGameEngine::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
     }
 
     // ── SET gametype class validation (NM_Client guard) ───────────────────────
-    // IMPL_TODO: FUN_1038d760 (retail 0x1038d760) not yet identified; SET class check omitted.
-    // Retail: on NM_Client, SET <ActorSubclass (not AGameInfo)> returns 0.
+    // FUN_1038d760 (retail 0x1038d760) = StaticFindObject(UClass::StaticClass(), ...) wrapper.
+    // Full logic: ParseToken → StaticFindObject → IsChildOf(AActor) && !IsChildOf(AGameInfo) → return 0.
+    // Blocked: ParseToken integration and exact argument mapping not yet confirmed.
     if ( pLevel )
     {
         ALevelInfo* LI = pLevel->GetLevelInfo();
@@ -591,21 +596,46 @@ void UGameEngine::Serialize( FArchive& Ar )
 // UGameEngine::Browse() — implemented in UnGame.cpp
 // UGameEngine::LoadMap()— implemented in UnGame.cpp
 // UGameEngine::Draw()   — implemented in UnGame.cpp
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_EMPTY("Ghidra: 1b shared ret thunk at 0x10476d60")
 void UGameEngine::UpdateConnectingMessage() {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
-void UGameEngine::Exit() {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_MATCH("Engine.dll", 0x1039ed20)
+void UGameEngine::Exit()
+{
+	guard(UGameEngine::Exit);
+	Super::Exit();
+	// Destroy GLevel->NetDriver (level + 0x40)
+	typedef void (__thiscall *tDestroyObj)(void*, INT);
+	BYTE* pLevel = *(BYTE**)((BYTE*)this + 0x458);
+	if (*(INT*)(pLevel + 0x40) != 0) {
+		void* pNetDriver = (void*)*(INT*)(pLevel + 0x40);
+		((tDestroyObj)(*(void***)pNetDriver)[0xc/4])(pNetDriver, 1);
+		*(INT*)(pLevel + 0x40) = 0;
+	}
+	// Destroy GRenDev (this + 0x4c)
+	if (*(INT*)((BYTE*)this + 0x4c) != 0) {
+		void* pRenDev = (void*)*(INT*)((BYTE*)this + 0x4c);
+		((tDestroyObj)(*(void***)pRenDev)[0xc/4])(pRenDev, 1);
+		*(INT*)((BYTE*)this + 0x4c) = 0;
+	}
+	unguard;
+}
+IMPL_TODO("0x1039f520 186b — complex button/viewport state dispatch; needs vtable offset cross-check")
 void UGameEngine::MouseDelta( UViewport* Viewport, DWORD Buttons, FLOAT DX, FLOAT DY ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
-void UGameEngine::MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_MATCH("Engine.dll", 0x1039efc0)
+void UGameEngine::MousePosition( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y )
+{
+	if (Viewport) {
+		*(FLOAT*)((BYTE*)Viewport + 0x40) = X;
+		*(FLOAT*)((BYTE*)Viewport + 0x44) = Y;
+	}
+}
+IMPL_EMPTY("Ghidra: 3b shared ret thunk at 0x1040b2e0")
 void UGameEngine::MouseWheel( UViewport* Viewport, DWORD Buttons, INT Delta ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_EMPTY("Ghidra: 3b shared ret thunk at 0x10314770")
 void UGameEngine::Click( UViewport* Viewport, DWORD Buttons, FLOAT X, FLOAT Y ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_EMPTY("Ghidra: 3b shared ret thunk at 0x10314770")
 void UGameEngine::UnClick( UViewport* Viewport, DWORD Buttons, INT MouseX, INT MouseY ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_TODO("0x103a1440 135b — blocked by FUN_103a0610 (viewport lookup helper)")
 void UGameEngine::SetClientTravel( UPlayer* Viewport, const TCHAR* NextURL, INT bItems, ETravelType TravelType ) {}
 IMPL_MATCH("Engine.dll", 0x1039eb60)
 INT UGameEngine::ChallengeResponse( INT Challenge ) {
@@ -657,18 +687,52 @@ FLOAT UGameEngine::GetMaxTickRate()
 	}
 	return 0.0f;
 }
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_TODO("0x103a0dd0 280b — UConsole IsA + eventR6ProgressMsg + HUD + ProcessEvent chain")
 void UGameEngine::SetProgress( const TCHAR* Str1, const TCHAR* Str2, FLOAT Seconds ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_TODO("0x103a5890 807b — complex save I/O, mover reset loop, file management")
 void UGameEngine::SaveGame( INT Position ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
-void UGameEngine::CancelPending() {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
+IMPL_MATCH("Engine.dll", 0x1039ee90)
+void UGameEngine::CancelPending()
+{
+	guard(UGameEngine::CancelPending);
+	INT pending = *(INT*)((BYTE*)this + 0x460);
+	if (pending != 0) {
+		CloseNetLevel((BYTE*)pending);
+		// ConditionalDestroy the pending level object (vtable slot 3)
+		typedef void (__thiscall *tDestroyObj)(void*, INT);
+		if (*(INT*)((BYTE*)this + 0x460) != 0) {
+			void* p = (void*)*(INT*)((BYTE*)this + 0x460);
+			((tDestroyObj)(*(void***)p)[0xc/4])(p, 1);
+		}
+		*(INT*)((BYTE*)this + 0x460) = 0;
+	}
+	unguard;
+}
+IMPL_TODO("0x103a1d60 3022b — massive FCanvasUtil-based loading screen render")
 void UGameEngine::PaintProgress( const FURL& URL ) {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
-void UGameEngine::NotifyLevelChange() {}
-IMPL_EMPTY("retail body is also empty — base class no-op")
-void UGameEngine::FixUpLevel() {}
+IMPL_MATCH("Engine.dll", 0x1039f3d0)
+void UGameEngine::NotifyLevelChange()
+{
+	guard(UGameEngine::NotifyLevelChange);
+	if (Client) {
+		if (Client->Viewports.Num() != 0) {
+			// Console/Interaction pointer at viewport + 0x38
+			UObject* pConsole = *(UObject**)((BYTE*)Client->Viewports(0) + 0x38);
+			if (pConsole) {
+				UFunction* func = pConsole->FindFunctionChecked(ENGINE_NotifyLevelChange, 0);
+				pConsole->ProcessEvent(func, NULL, NULL);
+			}
+		}
+	}
+	unguard;
+}
+IMPL_MATCH("Engine.dll", 0x1039ef60)
+void UGameEngine::FixUpLevel()
+{
+	// Retail 38b: debug stub — logs the level's full name
+	const TCHAR* Name = GLevel->GetFullName();
+	GLog->Logf(Name);
+}
 
 // =============================================================================
 

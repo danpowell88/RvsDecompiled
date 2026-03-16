@@ -145,12 +145,12 @@ void AProjector::Abandon()
 	}
 }
 
-IMPL_DIVERGE("FUN_103f82f0 (FProjectorRenderInfo initialiser) is unexported Engine.dll internal; terrain-sector and BSP attachment loops permanently omitted")
+IMPL_TODO("Ghidra 0x103FB160: RenderInfo alloc section done; missing terrain loop (bit 1 of +0x3A0 — needs UTerrainSector::AttachProjector), BSP loop (bit 0 — needs UModel::ConvexVolumeMultiCheck + UModel::AttachProjector + FUN_10322eb0 cleanup), actor loop (bit 2 — needs AActor::AttachProjector + FMemMark). FUN_103f82f0 is a __thiscall FProjectorRenderInfo ctor (ECX=allocated mem, param1=AProjector*, param2=float); currently called via hardcoded address.")
 void AProjector::Attach()
 {
 	// Ghidra 0xfb160 (1291b): CalcMatrix(), editor snapshot, allocate FProjectorRenderInfo,
-	// copy colour tints, then iterate terrain sectors (bit 1 of +0x3A0) and BSP surfaces
-	// (bit 0 of +0x3A0) via FUN_103f82f0. Terrain/BSP loops not reconstructed.
+	// copy colour tints, then iterate terrain sectors (bit 1 of +0x3A0), BSP surfaces
+	// (bit 0 of +0x3A0), and actors (bit 2 of +0x3A0).
 
 	// Recalculate projection matrix
 	CalcMatrix();
@@ -168,45 +168,75 @@ void AProjector::Attach()
 	if (*(INT*)((BYTE*)this + 0x48c) == 0)
 	{
 		// Allocate and initialise a FProjectorRenderInfo (200 bytes)
-		void* mem = GMalloc->Malloc(200, TEXT("FProjectorRenderInfo"));
+		INT iVar4 = (INT)GMalloc->Malloc(200, TEXT("FProjectorRenderInfo"));
 		INT* piVar5;
-		if (!mem)
+		if (iVar4 == 0)
 		{
 			piVar5 = NULL;
 		}
 		else
 		{
+			// FUN_103f82f0 is __thiscall: ECX = allocated mem, stack: (AProjector*, float)
 			typedef INT* (*InitFn)(AProjector*, INT);
 			piVar5 = ((InitFn)0x103f82f0)(this, 0);
 		}
 		*(INT**)((BYTE*)this + 0x48c) = piVar5;
-		if (piVar5)
-			*piVar5 += 1;
+		// Retail: no null-check — if Malloc succeeded, FUN_103f82f0 always returns non-NULL.
+		*piVar5 += 1;
 
-		// Copy base colour tint vectors
+		// Copy base colour tint vectors (retail: unconditional, no null-check on ri)
 		INT ri = *(INT*)((BYTE*)this + 0x48c);
-		if (ri)
-		{
-			*(DWORD*)(ri + 0xb0) = *(DWORD*)((BYTE*)this + 0x240);
-			*(DWORD*)(ri + 0xb4) = *(DWORD*)((BYTE*)this + 0x244);
-			*(DWORD*)(ri + 0xb8) = *(DWORD*)((BYTE*)this + 0x248);
-			*(DWORD*)(ri + 0xbc) = *(DWORD*)((BYTE*)this + 0x234);
-			*(DWORD*)(ri + 0xc0) = *(DWORD*)((BYTE*)this + 0x238);
-			*(DWORD*)(ri + 0xc4) = *(DWORD*)((BYTE*)this + 0x23c);
-		}
+		*(DWORD*)(ri + 0xb0) = *(DWORD*)((BYTE*)this + 0x240);
+		*(DWORD*)(ri + 0xb4) = *(DWORD*)((BYTE*)this + 0x244);
+		*(DWORD*)(ri + 0xb8) = *(DWORD*)((BYTE*)this + 0x248);
+		ri = *(INT*)((BYTE*)this + 0x48c);
+		*(DWORD*)(ri + 0xbc) = *(DWORD*)((BYTE*)this + 0x234);
+		*(DWORD*)(ri + 0xc0) = *(DWORD*)((BYTE*)this + 0x238);
+		*(DWORD*)(ri + 0xc4) = *(DWORD*)((BYTE*)this + 0x23c);
 	}
 
-	// DIVERGENCE: terrain attachment (bit 1 of this+0x3A0) and
-	// BSP attachment (bit 0 of this+0x3A0) loops not reconstructed.
+	// TODO: terrain attachment loop (bit 1 of this+0x3A0)
+	// Iterates level terrain sectors, calls FBox::Intersect on sector bounding box
+	// vs projector box at this+0x470, then UTerrainSector::AttachProjector for hits.
+
+	// TODO: BSP attachment loop (bit 0 of this+0x3A0)
+	// Builds FArray of candidate surfaces via UModel::ConvexVolumeMultiCheck,
+	// filters by material flags (0x800/0x1000 bits), then UModel::AttachProjector.
+	// Cleanup via FUN_10322eb0 (FArray destructor helper).
+
+	// TODO: actor attachment loop (bit 2 of this+0x3A0)
+	// Uses FMemMark + hash query to find overlapping actors,
+	// two modes: closest-only (flag 0x20000) vs all-matching.
+	// Calls AActor::AttachProjector for each qualifying actor.
 }
 
-IMPL_TODO("Ghidra 0x103F8F90: 4699-byte FCoords/FMatrix projection-matrix build — no FUN_ blockers found; blocked by complexity of FCoords rotation decomposition and 8 frustum-corner generation")
+IMPL_TODO("Ghidra 0x103F8F90: 4699-byte function. All math infra available (FCoords::operator/, FPlane ctors, FVector::SafeNormal, FCoords::Matrix, appSqrt/appTan/appCos). Orthographic branch (FOV==0) and frustum corner/plane generation are tractable. Perspective branch blocked by FUN_103f86b0 (internal 4x4 matrix multiply, 169b) and complex animated-texture offset section (flags & 0x4000). No permanent blockers — purely decompilation effort.")
 void AProjector::CalcMatrix()
 {
-	// Ghidra 0xf8f90 (4699b): builds AProjector's projection matrix from Position/Rotation/FOV
-	// and generates the 8 frustum corner points. Requires FCoords rotation helpers and
-	// several FMatrix multiply functions that are not yet decompiled.
-	// DIVERGENCE: all matrix/coord helper calls (FUN_1038e680, FUN_103906b0 etc.) unresolved.
+	// Ghidra 0xf8f90 (4699b): builds AProjector's projection matrix from
+	// Position/Rotation/FOV and generates the 8 frustum corner points + 6 clip planes.
+	//
+	// Structure:
+	//   1. Early-out if no texture (this+0x3a4 == 0)
+	//   2. Decompose rotation: FCoords Coords = GMath.UnitCoords / FRotator(this+0x240)
+	//      Extract Forward (XAxis), Right (-YAxis), Up (ZAxis)
+	//   3. Get texture USize/VSize via vtable[0x70/4] and [0x74/4]
+	//      Width  = USize * this+0x2bc * DrawScale(this+0xe0)
+	//      Height = VSize * this+0x2c0 * DrawScale(this+0xe0)
+	//      HalfDiag = sqrt(Width^2/4 + Height^2/4)
+	//   4. Compute 4 far corners (this+0x410) and 4 near corners (this+0x434):
+	//      - If PHYS_Rotating: Position + direction * HalfDiag (unnormalized)
+	//      - Else: Position + SafeNormal(direction) * HalfDiag
+	//   5. Build 6 frustum clip planes (this+0x3b0..0x40c):
+	//      Plane[0] = near plane from Position with Forward normal
+	//      Planes[1-4] = side planes (ortho: point+negated normal; persp: 3-point ctor)
+	//      Plane[5] = far plane from back corners with -Forward normal
+	//   6. Build projection FMatrix (this+0x4d0):
+	//      - Ortho: FCoords(center, halfRight, halfUp, Forward).Matrix()
+	//      - Persp: FCoords(apex, -Right, Up, Forward).Matrix() * scale matrix
+	//        via FUN_103f86b0 (4x4 matrix multiply helper)
+	//   7. Compute 4 far-extent corners (this+0x440..0x46c) offset along Forward by this+0x39c
+	//   8. Optional animated-texture offset (flags & 0x4000 at this+0x3a0)
 }
 
 IMPL_MATCH("Engine.dll", 0x103060a0)

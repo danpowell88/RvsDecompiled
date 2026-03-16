@@ -1085,13 +1085,18 @@ void ASceneManager::SetSceneStartTime()
 
 // =============================================================================
 // --- AInterpolationPoint ---
-IMPL_DIVERGE("permanent: editor-only interpolation point visualiser; FLineBatcher wireframe box setup requires FUN_ rendering helpers; runtime gameplay is not affected")
+IMPL_TODO("Ghidra 0x1040ba00: all deps available (FLineBatcher, FCoords, FVector, GMath); complex 8-vertex wireframe coordinate math needs reconstruction from decompiled float layout")
 void AInterpolationPoint::RenderEditorSelected(FLevelSceneNode* SceneNode, FRenderInterface* RI, FDynamicActor* DA)
 {
 	guard(AInterpolationPoint::RenderEditorSelected);
-	// Retail: allocates FLineBatcher, draws wireframe box showing local axes
-	// (32-unit inner face, 64-unit outer face) for editor visualisation.
-	// DIVERGENCE: editor-only path; FLineBatcher raw-float vertex setup not reconstructed.
+	// Retail 0x1040ba00 (ordinal 4303): creates FLineBatcher(RI,1,0), decomposes
+	// Rotation via GMath.UnitCoords / Rotation into XAxis/YAxis/ZAxis, computes
+	// 8 box vertices (4 inner at 32 units, 4 outer at 64 units) from SafeNormal'd
+	// combinations of +/-YAxis +/-ZAxis, draws 12 edges (inner face, outer face,
+	// 4 connecting) via FLineBatcher::DrawLine(FVector,FVector,FColor(white)),
+	// then calls AActor::RenderEditorSelected. Editor-only visualisation path.
+	// No FUN_ calls — all functions are resolved. Blocked on painstaking
+	// float-layout reconstruction to match Ghidra's register-reuse pattern.
 	AActor::RenderEditorSelected(SceneNode, RI, DA);
 	unguard;
 }
