@@ -1886,7 +1886,7 @@ void AR6Pawn::UpdateFullPeekingMode(FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("large animation state machine (~6245 bytes); FUN_100017a0 is Abs(float); full implementation pending - too complex for single decompilation pass")
+IMPL_DIVERGE("6245-byte animation state machine; requires complete AR6Pawn raw member offset map for all animation slot/channel access. FUN_100017a0=fabsf (tractable). Not implementable without full class layout. Ghidra R6Engine.dll 0x10031B20")
 void AR6Pawn::UpdateMovementAnimation(FLOAT DeltaTime)
 {
 	guard(AR6Pawn::UpdateMovementAnimation);
