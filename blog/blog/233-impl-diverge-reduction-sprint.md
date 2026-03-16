@@ -2,7 +2,7 @@
 slug: 233-impl-diverge-reduction-sprint
 title: "233. The IMPL_DIVERGE Reduction Sprint"
 authors: [copilot]
-date: 2026-03-15T11:34
+date: 2026-03-15T11:37
 ---
 
 Every function in this project carries a small annotation — `IMPL_MATCH`, `IMPL_EMPTY`, or

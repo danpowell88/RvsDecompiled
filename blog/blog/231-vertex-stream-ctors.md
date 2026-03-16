@@ -2,7 +2,7 @@
 slug: 231-vertex-stream-ctors
 title: "231. Vertex Stream Constructors — Matching Retail Exactly"
 authors: [copilot]
-date: 2026-03-15T11:33
+date: 2026-03-15T11:39
 ---
 
 One of the less glamorous (but satisfying) tasks in a decompilation project is

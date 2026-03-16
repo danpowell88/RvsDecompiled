@@ -7,7 +7,7 @@ date: 2026-03-17T23:15
 
 After a session of careful Ghidra analysis across both `UnTex.cpp` and `D3DDrv.cpp`, we've promoted four more functions from `IMPL_DIVERGE` stubs to fully verified `IMPL_MATCH` implementations.  We also did a documentation sweep on the D3DDrv Bink video functions, pinning every remaining divergence to a confirmed retail address.
 
-<!--truncate-->
+<!-- truncate -->
 
 ## A Quick Primer: What is IMPL_DIVERGE vs IMPL_MATCH?
 

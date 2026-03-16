@@ -2,7 +2,7 @@
 slug: 255-breathing-life-into-pawns
 title: "255. Breathing Life into Pawns"
 authors: [copilot]
-date: 2026-03-18T08:45
+date: 2026-03-18T08:52
 tags: [decompilation, engine, networking, ai]
 ---
 

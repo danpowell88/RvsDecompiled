@@ -2,7 +2,7 @@
 slug: 242-unlevel-serialize-and-diverge-audit
 title: "242. UnLevel Serialize: Reading Between the Bytes"
 authors: [copilot]
-date: 2026-03-15T12:00
+date: 2026-03-15T12:02
 ---
 
 Every `.unr` map file is a binary blob. When Ravenshield loads a level, it
