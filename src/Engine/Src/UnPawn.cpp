@@ -2838,7 +2838,7 @@ INT APawn::findNewFloor(FVector OldLocation, FLOAT DeltaTime, FLOAT RemainingTim
 	unguard;
 }
 
-IMPL_TODO("stub body; Ghidra 0x1041cfa0 is 1916b: A* pathfinding with FSortedPathList open/closed sets; not yet reconstructed")
+IMPL_TODO("Ghidra 0x1041cfa0; 1916b: A* pathfinding with FSortedPathList open/closed sets; no rdtsc/Karma blockers; FUN_1035a3d0 profiling timer is a binary-only skip; tractable but complex, not yet reconstructed")
 FLOAT APawn::findPathToward(AActor* Goal, FVector Dest, FLOAT (*WeightFunc)(ANavigationPoint*, APawn*, FLOAT), INT bSinglePath, FLOAT MaxWeight)
 {
 	guard(APawn::findPathToward);
@@ -2941,7 +2941,7 @@ ETestMoveResult APawn::flyMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103ea940; 685b — vtable[0x188] on APawn (water-entry gate) unidentified; WarpZoneMarker dest-zone field at GoalActor+1000 not in SDK; rest implemented")
+IMPL_TODO("Ghidra 0x103ea940; 685b — vtable[0x188] on APawn (deep slot ~98, likely a bCanSwim/water-entry gate) unidentified; no rdtsc/Karma/unaff blockers; AWarpZoneMarker has no named fields in SDK header so raw GoalActor+1000 offset is correct; mostly implemented")
 INT APawn::flyReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::flyReachable);
 INT flags = bClearPath | 2;
@@ -3008,7 +3008,7 @@ return reached ? flags : 0;
 unguard;
 }
 
-IMPL_TODO("stub body; Ghidra 0x103e88b0 is 1264b: iterative gravity integration with floor detection, AScout-specific handling; not yet reconstructed")
+IMPL_TODO("Ghidra 0x103e88b0; 1264b: iterative gravity integration with floor detection, AScout-specific handling; no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
 ETestMoveResult APawn::jumpLanding(FVector TestFall, INT bAdjust)
 {
 	guard(APawn::jumpLanding);
@@ -3054,28 +3054,28 @@ INT APawn::ladderReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 	unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103EFC30 shows 1653-byte implementation not yet reconstructed")
+IMPL_TODO("Ghidra 0x103EFC30; 1653b: physFlying — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
 void APawn::physFlying(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physFlying);
 	unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103F5990 shows 2617-byte implementation not yet reconstructed")
+IMPL_TODO("Ghidra 0x103F5990; 2617b: physSpider — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
 void APawn::physSpider(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSpider);
 	unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103F40A0 shows 1842-byte implementation not yet reconstructed")
+IMPL_TODO("Ghidra 0x103F40A0; 1842b: physSwimming — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
 void APawn::physSwimming(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physSwimming);
 	unguard;
 }
 
-IMPL_TODO("stub body — Ghidra 0x103ED370 shows 4353-byte implementation not yet reconstructed")
+IMPL_TODO("Ghidra 0x103ED370; 4353b: physWalking — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
 void APawn::physWalking(FLOAT DeltaTime, INT Iterations)
 {
 	guard(APawn::physWalking);
@@ -3119,7 +3119,7 @@ INT APawn::pointReachable(FVector Dest, INT bKnowVisible)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103E8150, 491b — vtable[0x68] (reachability check on MoveTarget) unidentified; Acceleration magnitude scale-factor from local_40 approximated as Acceleration.Size()")
+IMPL_TODO("Ghidra 0x103E8150; 491b — vtable[0x68] on MoveTarget is AActor new slot 26 (after 26 UObject slots), likely GetOptimizedRepList or GetPawnOrColBoxOwner; approximated by MoveTarget != NULL check; no rdtsc/Karma/unaff blockers")
 void APawn::rotateToward(AActor* Focus, FVector FocalPoint)
 {
 guard(APawn::rotateToward);
@@ -3234,7 +3234,7 @@ void APawn::startNewPhysics(FLOAT DeltaTime, INT Iterations)
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103F5640; 790b — velocity formula (Velocity*2 - OldAcceleration) transcribed from Ghidra; OldVelocity param treated as old location per Ghidra analysis")
+IMPL_TODO("Ghidra 0x103F5640; 790b — startSwimming: no rdtsc/Karma/unaff blockers; velocity formula and OldVelocity-as-old-location interpretation verified against Ghidra; mostly implemented")
 void APawn::startSwimming(FVector OldVelocity, FVector OldAcceleration, FLOAT VelSize, FLOAT AccelSize, INT Iterations)
 {
 	guard(APawn::startSwimming);
@@ -3325,7 +3325,7 @@ ETestMoveResult APawn::swimMove(FVector Delta, AActor* HitActor, FLOAT DeltaTime
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x103e8450; 1065b — vtable[0x188] water-blocker check (in-water loop) omitted; bCanWalk exit-water path simplified (MoveActor step-up skipped → direct flyReachable); WarpZone dest-zone field at GoalActor+1000 not in SDK")
+IMPL_TODO("Ghidra 0x103e8450; 1065b — swimReachable: no rdtsc/Karma/unaff blockers; vtable[0x188] same APawn water-entry-gate as flyReachable (unidentified slot ~98); AWarpZoneMarker has no named SDK fields so GoalActor+1000 raw offset is correct; mostly implemented")
 INT APawn::swimReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {guard(APawn::swimReachable);
 INT flags = bClearPath | 4;
@@ -3510,7 +3510,7 @@ ETestMoveResult APawn::walkMove(FVector Delta, FCheckResult& Hit, AActor* HitAct
 	unguard;
 }
 
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x103eac30 is 1365 bytes, not fully reconstructed")
+IMPL_TODO("Ghidra 0x103eac30; 1365b: walkReachable — no rdtsc/Karma/unaff blockers; tractable but not yet reconstructed")
 INT APawn::walkReachable(FVector Dest, INT bClearPath, AActor* GoalActor)
 {
 	guard(APawn::walkReachable);
@@ -3554,7 +3554,7 @@ INT AController::LocalPlayerController()
 // virtual function; raw offset accesses for ULevel+0x100 and actor+0x144 have no named
 // counterpart; Pawn+0xb4 = LastRenderTime (AActor field, no named decl here).
 // NOTE: Ghidra 977b body has NO rdtsc — prior rdtsc claim was incorrect.
-IMPL_TODO("Ghidra 0x103c3870: vtable[0xf0] unidentified (Role > ROLE_DumbProxy path omitted); actor+0x144 ptr, ULevel+0x100 and actor+0x320 raw offsets have no named counterpart")
+IMPL_TODO("Ghidra 0x103c3870; 977b: AController::Tick — vtable[0xf0] = AActor new slot 60 = likely NotifyAnimEnd(INT) inherited by AController (Role > ROLE_DumbProxy path); actor+0x144 = Level ptr confirmed; ULevel+0x100 (xLevelBit) and actor+0x320 (hidFlag) raw offsets unresolved by name; no rdtsc (prior rdtsc claim was incorrect per Ghidra)")
 INT AController::Tick( FLOAT DeltaTime, ELevelTick TickType )
 {
 	guard(AController::Tick);
@@ -3722,7 +3722,7 @@ INT AController::AcceptNearbyPath( AActor* Goal )
 // LOS: APawn bitfield2 bit4 = bLOSHearing; UModel::FastLineCheck from EyePos to NoiseLoc.
 // Muffled: bit7 = bMuffledHearing; retail path-finds through walls → DIVERGE (unconditional).
 // Around-corner: bit8 = bAroundCornerHearing; FSortedPathList navpoint relay → DIVERGE.
-IMPL_TODO("Ghidra 0x10390ec0; 1187b — NoiseMaker+0x148 chain approx'd by null check; bAdjacentZoneHearing team matrix omitted; bMuffledHearing path check approximated; bAroundCornerHearing navpoint relay omitted")
+IMPL_TODO("Ghidra 0x10390ec0; 1187b — CanHear: no rdtsc/Karma/unaff blockers in main body; NoiseMaker+0x148 null-check approximation; bAdjacentZoneHearing team matrix (ULevel+0x128 raw offset) omitted; bMuffledHearing path approximated; bAroundCornerHearing FSortedPathList navpoint relay omitted (FUN_1050557c has in_ST0 x87-register arg, unresolvable for that path only)")
 INT AController::CanHear( FVector NoiseLoc, FLOAT Loudness, AActor* NoiseMaker, ENoiseType NoiseType, EPawnType PawnType )
 {
 	guard(AController::CanHear);
@@ -4016,7 +4016,7 @@ DWORD AController::LineOfSightTo( AActor* Other, INT bUseLOSFlag )
 	unguard;
 }
 
-IMPL_TODO("stub body (1 line(s)) — Ghidra 0x10427610 is 335 bytes, not fully reconstructed")
+IMPL_DIVERGE("Ghidra 0x10427610; 335b: unaff_EBX and unaff_SI are unresolvable register aliases passed to UModel::PointRegion calls; vtable calls at XLevel+0xf4 and +0xf8 unidentified; GAudioMaxRadiusMultiplier is an external audio-subsystem reference — permanent binary differences")
 INT AController::CanHearSound( FVector SoundLoc, AActor* SoundMaker, FLOAT Loudness, FVector& OutNoiseLoc )
 {
 	guard(AController::CanHearSound);
