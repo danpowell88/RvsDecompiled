@@ -6304,6 +6304,16 @@ class ENGINE_API UAnimNotify_Effect : public UAnimNotify
 {
 public:
 	DECLARE_CLASS(UAnimNotify_Effect,UAnimNotify,0,Engine)
+	// Fields at 0x30 (Ghidra-derived; FName = 4 bytes in this build)
+	BITFIELD   bAttach:1;          // 0x30 — attach effect to bone after spawn
+	FLOAT      DrawScale;          // 0x34
+	FName      Bone;               // 0x38 — bone to transform through (or NAME_None)
+	FName      Tag;                // 0x3c — tag to assign to spawned actor
+	UClass*    EffectClass;        // 0x40 — actor class to spawn
+	FVector    OffsetLocation;     // 0x44 — offset applied in bone/world space
+	FRotator   OffsetRotation;     // 0x50
+	FVector    DrawScale3D;        // 0x5c
+	AActor*    LastSpawnedEffect;  // 0x68 — editor only; transient
 	// Auto-generated method declarations
 	virtual void Notify(UMeshInstance *,AActor *);
 };

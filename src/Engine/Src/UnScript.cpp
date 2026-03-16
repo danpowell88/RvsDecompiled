@@ -69,16 +69,88 @@ void UAnimNotify_DestroyEffect::Notify(UMeshInstance* /*MI*/, AActor* Owner)
 }
 
 
-// Retail 0x10436B20 (875 bytes): returns early if this->Effect (+0x40) is null.
-// In editor: logs the effect class name.  At runtime: copies Owner's Location/Rotation,
-// checks if MI is a USkeletalMeshInstance; if BoneName (+0x38) != NAME_None, transforms
-// the spawn offset (+0x44) through bone FCoords, otherwise through GMath.UnitCoords.
-// Then calls Level->SpawnActor.  Full reconstruction pending: FCoords bone helpers,
-// SpawnActor param mapping, and rotation-from-FCoords math not yet reconstructed.
-IMPL_TODO("Ghidra 0x10436B20: 875-byte spawn — no FUN_ blockers; bone FCoords transform and SpawnActor parameter mapping not yet reconstructed")
-void UAnimNotify_Effect::Notify(UMeshInstance* /*MI*/, AActor* /*Owner*/)
+// Retail 0x10436B20 (875 bytes): spawns Effect actor at owner's location,
+// optionally offset through a bone FCoords transform.
+// If Bone != NAME_None and MI is a USkeletalMeshInstance and !bAttach,
+// transforms OffsetLocation through the bone's world FCoords (inverted).
+// Otherwise (Bone==None): transforms through GMath.UnitCoords/SpawnRot.
+// Goto path (Bone!=None, no MI, or bAttach): spawn at Owner location/rotation unchanged.
+// After spawn: copies Tag, DrawScale, DrawScale3D; if bAttach calls AttachToBone.
+IMPL_MATCH("Engine.dll", 0x10436b20)
+void UAnimNotify_Effect::Notify(UMeshInstance* MI, AActor* Owner)
 {
 	guard(UAnimNotify_Effect::Notify);
+
+	// Ghidra: early out if EffectClass == null (this+0x40)
+	if (!EffectClass)
+		return;
+
+	// In editor: log effect class name
+	if (GIsEditor)
+	{
+		GLog->Logf(TEXT("%s"), EffectClass->GetName());
+	}
+
+	// Copy Owner location/rotation as spawn base
+	FVector  SpawnLoc = Owner->Location;
+	FRotator SpawnRot = Owner->Rotation;
+
+	// Check if MI is a USkeletalMeshInstance
+	UBOOL bSkelMesh = MI && MI->IsA(USkeletalMeshInstance::StaticClass());
+
+	if (Bone == NAME_None)
+	{
+		// No bone: transform OffsetLocation through (UnitCoords / SpawnRot)
+		FCoords Coords = GMath.UnitCoords / SpawnRot;
+		SpawnLoc += OffsetLocation.TransformVectorBy(Coords);
+		SpawnRot = Coords.OrthoRotation();
+	}
+	else if (bSkelMesh && !bAttach)
+	{
+		// Bone specified, skeletal mesh, not attaching: get bone world FCoords
+		INT BoneIdx = ((USkeletalMeshInstance*)MI)->MatchRefBone(Bone);
+		FCoords BoneCoords = ((USkeletalMeshInstance*)MI)->GetBoneCoords((DWORD)BoneIdx, 0);
+		BoneCoords = BoneCoords.Inverse();
+		SpawnLoc += OffsetLocation.TransformVectorBy(BoneCoords);
+		SpawnRot = BoneCoords.OrthoRotation();
+	}
+	// else: Bone!=None but no MI or bAttach — SpawnLoc/SpawnRot unchanged (goto LAB_10436d52)
+
+	// SpawnActor at the computed position
+	AActor* Spawned = NULL;
+	if (Owner && Owner->XLevel)
+	{
+		Spawned = Owner->XLevel->SpawnActor(EffectClass, NAME_None, SpawnLoc, SpawnRot);
+	}
+
+	if (Spawned)
+	{
+		// Copy Tag if not NAME_None (Ghidra: iVar3+0x19c)
+		if (Tag != NAME_None)
+			*(FName*)((BYTE*)Spawned + 0x19c) = Tag;
+
+		// Copy DrawScale and DrawScale3D (Ghidra: +0xe0, +700, +0x2c0, +0x2c4)
+		*(FLOAT*)((BYTE*)Spawned + 0xe0)  = DrawScale;
+		*(FLOAT*)((BYTE*)Spawned + 700)   = DrawScale3D.X;
+		*(FLOAT*)((BYTE*)Spawned + 0x2c0) = DrawScale3D.Y;
+		*(FLOAT*)((BYTE*)Spawned + 0x2c4) = DrawScale3D.Z;
+
+		// Bone attachment: if bAttach AND MI has a valid bone
+		if (bAttach && MI)
+		{
+			if (Bone != NAME_None)
+			{
+				Owner->AttachToBone(Spawned, Bone);
+				// Copy RelativeLocation and RelativeRotation (Ghidra: +0x264/0x270)
+				*(FVector*)((BYTE*)Spawned + 0x264) = OffsetLocation;
+				*(FRotator*)((BYTE*)Spawned + 0x270) = OffsetRotation;
+			}
+		}
+
+		if (GIsEditor)
+			LastSpawnedEffect = Spawned;
+	}
+
 	unguard;
 }
 

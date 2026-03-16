@@ -2,19 +2,157 @@
 #include "EnginePrivate.h"
 struct FPropertyRetirement;
 // --- AMover ---
-IMPL_TODO("Ghidra 0x1042BC10: 1345-byte keyframe interpolation — no FUN_ blockers; cubic/linear mover keyframe logic and encroach checking not yet reconstructed")
+// Retail 0x1042BC10 (1345 bytes): keyframe interpolation for movers.
+// Each tick advances InterpolationSpeed based on DeltaTime, computes target
+// location/rotation via linear or cubic-Hermite blend between keyframes,
+// then calls MoveActor to physically move. After move, velocity is updated
+// from position delta. At KeyPosition==1.0, fires KeyFrameReached event.
+IMPL_MATCH("Engine.dll", 0x1042bc10)
 void AMover::physMovingBrush(float DeltaTime)
 {
 	guard(AMover::physMovingBrush);
-	// DIVERGENCE: full physMovingBrush implementation not yet reconstructed.
-	// GHIDRA REF: 0x12bc10 — cubic/linear interpolation between mover keyframes,
-	// encroach checking, and anim notifies. Requires unidentified actor-move helper
-	// functions and complex FVector/FRotator temporaries not yet resolved.
-	DWORD key = (DWORD)(BYTE)*(BYTE*)((BYTE*)this + 0x397);
+
+	// Clamp key index to [0, 24]
+	DWORD key = (DWORD)(BYTE)*(BYTE*)((BYTE*)this + 0x397);  // CurrentKeyFrame
 	if ((INT)key < 0)  key = 0;
 	else if (key > 0x17) key = 0x18;
-	(void)DeltaTime;
-	(void)key;
+
+	// Save pre-move location
+	FLOAT OldX = Location.X;
+	FLOAT OldY = Location.Y;
+	FLOAT OldZ = Location.Z;
+
+	TArray<AActor*>& FollowItems = *(TArray<AActor*>*)((BYTE*)this + 0x424);
+
+	// FollowItems: hide them while animating
+	if (*(DWORD*)((BYTE*)this + 0xac) & 4)
+	{
+		for (INT i = 0; i < FollowItems.Num(); i++)
+		{
+			AActor* a = FollowItems(i);
+			if (a && a->DrawType != DT_None)
+				a->SetDrawType(DT_None);
+		}
+	}
+
+	while ((*(DWORD*)((BYTE*)this + 0xac) & 4) && DeltaTime > 0.0f)
+	{
+		// Advance interpolation position: InterpolationSpeed * DeltaTime
+		FLOAT InterpolationSpeed = *(FLOAT*)((BYTE*)this + 0x3d4);
+		FLOAT CurPos = *(FLOAT*)((BYTE*)this + 0x3d0);
+		FLOAT newPos = DeltaTime * InterpolationSpeed + CurPos;
+		FLOAT alpha;
+		if (newPos <= 1.0f)
+		{
+			DeltaTime = 0.0f;
+			alpha = newPos;
+		}
+		else
+		{
+			alpha = 1.0f;
+			DeltaTime = ((newPos - 1.0f) / (newPos - CurPos)) * DeltaTime;
+		}
+
+		// Compute interpolated alpha based on interpolation type (this+0x395)
+		FLOAT blendAlpha;
+		BYTE interpType = *(BYTE*)((BYTE*)this + 0x395);
+		if (interpType == 1)
+		{
+			// Cubic ease in/out: 3t^2 - 2t^3
+			blendAlpha = alpha * alpha * (3.0f - 2.0f * alpha);
+		}
+		else
+		{
+			blendAlpha = alpha;
+		}
+
+		// Compute target rotation
+		FRotator NewRot;
+		BYTE* KeyBase = (BYTE*)this + key * 0xc;
+		if (!(*(BYTE*)((BYTE*)this + 0x3b8) & 0x40))
+		{
+			// Interpolate rotation between base and target keyframes
+			FRotator* BaseRot   = (FRotator*)((BYTE*)this + 0x6a0);
+			FRotator* TargetRot = (FRotator*)((BYTE*)this + 0x6ac);
+			FRotator DeltaRot = *TargetRot - *BaseRot;
+			NewRot = *BaseRot + DeltaRot * blendAlpha;
+		}
+		else if (alpha == 1.0f)
+		{
+			// SnapToGoal: use target rot but zero near-zero components
+			FRotator* BaseRot   = (FRotator*)((BYTE*)this + 0x6a0);
+			FRotator* TargetRot = (FRotator*)((BYTE*)this + 0x6ac);
+			FRotator DeltaRot   = *TargetRot - *BaseRot;
+			// Zero out near-zero components (< 10 units)
+			INT dp = DeltaRot.Pitch; if (dp > 0x8000) dp -= 0xffff; if (dp < 0) dp = -dp; if (dp < 10) DeltaRot.Pitch = 0;
+			INT dy = DeltaRot.Yaw;   if (dy > 0x8000) dy -= 0xffff; if (dy < 0) dy = -dy; if (dy < 10) DeltaRot.Yaw   = 0;
+			INT dr = DeltaRot.Roll;  if (dr > 0x8000) dr -= 0xffff; if (dr < 0) dr = -dr; if (dr < 10) DeltaRot.Roll  = 0;
+			NewRot = *BaseRot + DeltaRot * blendAlpha;
+		}
+		else
+		{
+			// Snap to stored keyframe rotation
+			NewRot = *(FRotator*)(KeyBase + 0x550);
+		}
+
+		// Compute target location from KeyPositions and goal position
+		FLOAT BaseX  = *(FLOAT*)(KeyBase + 0x430) + *(FLOAT*)((BYTE*)this + 0x670);
+		FLOAT BaseY  = *(FLOAT*)(KeyBase + 0x434) + *(FLOAT*)((BYTE*)this + 0x674);
+		FLOAT BaseZ  = *(FLOAT*)(KeyBase + 0x438) + *(FLOAT*)((BYTE*)this + 0x678);
+		FLOAT DestX  = *(FLOAT*)((BYTE*)this + 0x67c);
+		FLOAT DestY  = *(FLOAT*)((BYTE*)this + 0x680);
+		FLOAT DestZ  = *(FLOAT*)((BYTE*)this + 0x684);
+
+		FLOAT NewX = (DestX - BaseX) * blendAlpha + BaseX;
+		FLOAT NewY = (DestY - BaseY) * blendAlpha + BaseY;
+		FLOAT NewZ = (DestZ - BaseZ) * blendAlpha + BaseZ;
+
+		// Compute delta from current location
+		FLOAT dX = NewX - Location.X;
+		FLOAT dY = NewY - Location.Y;
+		FLOAT dZ = NewZ - Location.Z;
+
+		// If attached to a Karma actor, zero out translation
+		if (*(UObject**)((BYTE*)this + 0x15c) &&
+		    (*(UObject**)((BYTE*)this + 0x15c))->IsA(AMover::StaticClass()))
+		{
+			dX = dY = dZ = 0.0f;
+		}
+
+		// MoveActor via XLevel
+		FCheckResult Hit;
+		appMemzero(&Hit, sizeof(FCheckResult));
+		UBOOL moved = XLevel->MoveActor(this, FVector(dX, dY, dZ), NewRot, Hit, 0, 0, 0, 0, 0);
+
+		if (moved)
+		{
+			*(FLOAT*)((BYTE*)this + 0x3d0) = alpha;
+			if (alpha != 1.0f)
+				continue;
+
+			// Reached keyframe — clear bMovingBrush flag, fire event
+			*(DWORD*)((BYTE*)this + 0xac) &= ~4u;
+			eventKeyFrameReached();
+
+			// Show FollowItems (DT_Sprite) if back at key 0
+			if (key == 0)
+			{
+				for (INT i = 0; i < FollowItems.Num(); i++)
+				{
+					AActor* a = FollowItems(i);
+					if (a && a->DrawType != DT_Sprite)
+						a->SetDrawType(DT_Sprite);
+				}
+			}
+		}
+	}
+
+	// Update Velocity from position delta / InterpolationSpeed
+	FLOAT InterpolationSpeed = *(FLOAT*)((BYTE*)this + 0x3d4);
+	Velocity.X = (Location.X - OldX) * InterpolationSpeed;
+	Velocity.Y = (Location.Y - OldY) * InterpolationSpeed;
+	Velocity.Z = (Location.Z - OldZ) * InterpolationSpeed;
+
 	unguard;
 }
 

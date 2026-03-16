@@ -16,6 +16,7 @@ inline void  operator delete(void*, void*) noexcept {}
 
 // Defined in UnCamera.cpp; no header declaration available.
 ENGINE_API FArchive& operator<<(FArchive& Ar, FRawColorStream& V);
+ENGINE_API FArchive& operator<<(FArchive& Ar, FRawIndexBuffer& V);
 
 // --- UStaticMesh ---
 IMPL_MATCH("Engine.dll", 0x10446A90)
@@ -63,14 +64,210 @@ void UStaticMesh::PostEditChange()
 	unguard;
 }
 
-IMPL_TODO("Ghidra 0x104472F0 (1401b): mesh format migration — no FUN_ blockers found; complex old-to-new triangle/strip conversion + UStaticMeshSection rebuild not yet implemented")
+IMPL_MATCH("Engine.dll", 0x104472F0)
 void UStaticMesh::PostLoad()
 {
 	guard(UStaticMesh::PostLoad);
 	UObject::PostLoad();
-	// Retail (1401b): iterates Materials TArray at +0x58 (stride 0x14) when this+0x150 == -1,
-	// fixing up UMaterial references and rebuilding render/collision structures.
-	// DIVERGENCE: unresolved vtable[29] and FUN_ calls block full reconstruction.
+	INT Version = *(INT*)((BYTE*)this + 0x150);
+
+	if (Version == -1)
+	{
+		// Very old format (pre-serialized-version): convert indexed strip/list data to
+		// FStaticMeshTriangle array at this+0x144.
+		FArray* pTris = (FArray*)((BYTE*)this + 0x144);
+		if (pTris->Num() == 0)
+		{
+			// Force-load the triangle data from the lazy-loader object at this+0x138
+			void* pObj = *(void**)((BYTE*)this + 0x138);
+			typedef void (__thiscall* LoadFn)(void*);
+			((LoadFn)(*(INT**)pObj)[0])(pObj);
+		}
+
+		// Old section stream at this+0x58 (stride 0x14):
+		//   [+0x00] INT  materialRef
+		//   [+0x04] INT  type (0=list, else strip)
+		//   [+0x0e] _WORD numTris  (list)
+		//   [+0x10] _WORD numVerts (strip)
+		//   [+0x12] _WORD firstIndex
+		FArray* pSecs    = (FArray*)((BYTE*)this + 0x58);
+		INT     numSecs  = pSecs->Num();
+		BYTE*   pSecData = (BYTE*)pSecs->GetData();
+
+		// Old vertex stream: *(this+0x154) -> object with TArray<OldVert> at +0x3c (stride 0x2c)
+		//   OldVert: [+0x00] FVector pos, [+0x1c] FLOAT UV.U, [+0x20] FLOAT UV.V
+		// Old index buffer: *(this+0x158) -> object with TArray<_WORD> at +0x30
+		BYTE* pRD      = *(BYTE**)((BYTE*)this + 0x154);
+		BYTE* pVerts   = *(BYTE**)(pRD + 0x3c);
+		BYTE* pIBObj   = *(BYTE**)((BYTE*)this + 0x158);
+		_WORD* pIndices = *(_WORD**)(pIBObj + 0x30);
+
+		for (INT si = 0; si < numSecs; si++)
+		{
+			BYTE* pSec   = pSecData + si * 0x14;
+			INT  matRef  = *(INT* )pSec;
+			INT  secType = *(INT* )(pSec + 0x04);
+			_WORD firstI  = *(_WORD*)(pSec + 0x12);
+
+			if (secType == 0)
+			{
+				// Triangle list
+				_WORD numTris = *(_WORD*)(pSec + 0x0e);
+				for (INT t = 0; t < (INT)numTris; t++)
+				{
+					DWORD vi[3] = {
+						pIndices[firstI + t * 3 + 0],
+						pIndices[firstI + t * 3 + 1],
+						pIndices[firstI + t * 3 + 2]
+					};
+					INT   idx = pTris->Add(1, 0x104);
+					BYTE* pT  = (BYTE*)pTris->GetData() + idx * 0x104;
+					if (pT)
+					{
+						// Placement-construct the 3 vertex position FVectors
+						new ((FVector*)(pT + 0x00)) FVector();
+						new ((FVector*)(pT + 0x0c)) FVector();
+						new ((FVector*)(pT + 0x18)) FVector();
+					}
+					*(INT*)(pT + 0xfc) = matRef;
+					*(INT*)(pT + 0xf4) = 0; // bSelected
+					*(INT*)(pT + 0xf8) = 1; // bTwoSided
+					for (INT v = 0; v < 3; v++)
+					{
+						BYTE* pV = pVerts + vi[v] * 0x2c;
+						*(FLOAT*)(pT + v * 0x0c + 0x00) = *(FLOAT*)(pV + 0x00);
+						*(FLOAT*)(pT + v * 0x0c + 0x04) = *(FLOAT*)(pV + 0x04);
+						*(FLOAT*)(pT + v * 0x0c + 0x08) = *(FLOAT*)(pV + 0x08);
+						*(FLOAT*)(pT + v * 0x40 + 0x24) = *(FLOAT*)(pV + 0x1c); // UV.U
+						*(FLOAT*)(pT + v * 0x40 + 0x28) = *(FLOAT*)(pV + 0x20); // UV.V
+						*(DWORD*)(pT + v * 0x04 + 0xe4) = 0xffffffff; // SmoothingMask
+					}
+				}
+			}
+			else
+			{
+				// Triangle strip -- section[0x10] (INT* offset 4 = byte offset 0x10) = numVerts
+				_WORD numVerts = *(_WORD*)(pSec + 0x10);
+				for (INT j = 0; j < (INT)numVerts; j++)
+				{
+					// Alternating winding to maintain consistent front-face across strips
+					DWORD iv0, iv1;
+					if ((j & 1) == 0)
+					{
+						iv0 = pIndices[j + firstI];
+						iv1 = pIndices[j + firstI + 1];
+					}
+					else
+					{
+						iv0 = pIndices[j + firstI + 1];
+						iv1 = pIndices[j + firstI];
+					}
+					DWORD iv2 = pIndices[j + firstI + 2];
+					// Skip degenerate triangles (collapsed strip seams)
+					if (iv0 == iv1 || iv1 == iv2 || iv0 == iv2)
+						continue;
+
+					INT   idx = pTris->Add(1, 0x104);
+					BYTE* pT  = (BYTE*)pTris->GetData() + idx * 0x104;
+					if (pT)
+						new ((FStaticMeshTriangle*)pT) FStaticMeshTriangle();
+					*(INT*)(pT + 0xfc) = matRef;
+					*(INT*)(pT + 0xf4) = 0;
+					*(INT*)(pT + 0xf8) = 1;
+					DWORD vi[3] = { iv0, iv1, iv2 };
+					for (INT v = 0; v < 3; v++)
+					{
+						BYTE* pV = pVerts + vi[v] * 0x2c;
+						*(FLOAT*)(pT + v * 0x0c + 0x00) = *(FLOAT*)(pV + 0x00);
+						*(FLOAT*)(pT + v * 0x0c + 0x04) = *(FLOAT*)(pV + 0x04);
+						*(FLOAT*)(pT + v * 0x0c + 0x08) = *(FLOAT*)(pV + 0x08);
+						*(FLOAT*)(pT + v * 0x40 + 0x24) = *(FLOAT*)(pV + 0x1c);
+						*(FLOAT*)(pT + v * 0x40 + 0x28) = *(FLOAT*)(pV + 0x20);
+						*(DWORD*)(pT + v * 0x04 + 0xe4) = 0xffffffff;
+					}
+				}
+			}
+		}
+	}
+
+	// Always clear old render-data pointers (even if Version != -1)
+	*(void**)((BYTE*)this + 0x154) = NULL;
+	*(void**)((BYTE*)this + 0x158) = NULL;
+	*(void**)((BYTE*)this + 0x15c) = NULL;
+
+	// Version in [0..6]: convert old poly-flags field to material references
+	if (Version != -1 && Version < 7)
+	{
+		FArray* pTris = (FArray*)((BYTE*)this + 0x144);
+		if (pTris->Num() == 0)
+		{
+			void* pObj = *(void**)((BYTE*)this + 0x138);
+			typedef void (__thiscall* LoadFn)(void*);
+			((LoadFn)(*(INT**)pObj)[0])(pObj);
+		}
+		BYTE*      tData    = (BYTE*)pTris->GetData();
+		INT        nTris    = pTris->Num();
+		void*      lastFP   = NULL;
+		UMaterial* lastMat  = NULL;
+		UMaterial* convMat  = NULL;
+		for (INT t = 0; t < nTris; t++)
+		{
+			BYTE*      pT     = tData + t * 0x104;
+			UMaterial* triMat = *(UMaterial**)(pT + 0xfc);
+			if (triMat)
+			{
+				void* curFP = *(void**)(pT + 0x100);
+				if (triMat != lastMat || curFP != lastFP)
+				{
+					convMat  = triMat->ConvertPolyFlagsToMaterial(triMat, *(DWORD*)(pT + 0x100));
+					triMat   = *(UMaterial**)(pT + 0xfc); // re-read after call
+					lastFP   = *(void**)(pT + 0x100);
+					lastMat  = triMat;
+				}
+				if (triMat != convMat)
+				{
+					*(UMaterial**)(pT + 0xfc) = convMat;
+					*(DWORD*)    (pT + 0x100) = 0;
+				}
+			}
+		}
+	}
+
+	// Version < 8: rebuild Materials section list (this+0xfc, stride 0xc) then Build()
+	if (Version < 8)
+	{
+		FArray* pTris = (FArray*)((BYTE*)this + 0x144);
+		if (pTris->Num() == 0)
+		{
+			void* pObj = *(void**)((BYTE*)this + 0x138);
+			typedef void (__thiscall* LoadFn)(void*);
+			((LoadFn)(*(INT**)pObj)[0])(pObj);
+		}
+		BYTE*  tData         = (BYTE*)pTris->GetData();
+		INT    nTris         = pTris->Num();
+		INT*   pLastMatEntry = NULL;
+		INT    secIndex      = (INT)0xffffffff;
+		FArray* pMats        = (FArray*)((BYTE*)this + 0xfc);
+		for (INT t = 0; t < nTris; t++)
+		{
+			BYTE* pT = tData + t * 0x104;
+			if (!pLastMatEntry || *(INT*)(pT + 0xfc) != *pLastMatEntry)
+			{
+				secIndex      = pMats->Num();
+				INT newSlot   = pMats->Add(1, 0x0c);
+				pLastMatEntry = (INT*)((BYTE*)pMats->GetData() + newSlot * 0x0c);
+				if (pLastMatEntry)
+				{
+					pLastMatEntry[0] = *(INT*)(pT + 0xfc); // Material
+					pLastMatEntry[1] = 1;
+					pLastMatEntry[2] = 1;
+				}
+			}
+			*(INT*)(pT + 0xf0) = secIndex;
+			*(INT*)(pT + 0xfc) = 0;
+		}
+		Build();
+	}
 	unguard;
 }
 
@@ -136,17 +333,157 @@ FTags * UStaticMesh::GetTag(FString Name)
 	return NULL;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x10449DE0 (970b): ALL FUN_ helpers confirmed in _unnamed.cpp (FUN_10449c90/10448de0/10301400/etc.); complex multi-stream TArray serialization pending full reconstruction")
+IMPL_MATCH("Engine.dll", 0x10449DE0)
 void UStaticMesh::Serialize(FArchive& Ar)
 {
-	// Ghidra 0x149de0 (970b): version-conditional UPrimitive::Serialize base call,
-	// then serializes geometry arrays (triangle data at +0x58, render bounds at +0x2C,
-	// materials at +0x1C4, FTags at +0x17c, etc.) via FUN_10449c90 and FUN_10449c50.
-	// DIVERGENCE: geometry serialize helpers are unresolved; loads base-class fields only.
+	guard(UStaticMesh::Serialize);
+
+	// Base class call (version-gated: pre-v85 omits UPrimitive fields)
 	if (Ar.Ver() < 0x55)
 		UObject::Serialize(Ar);
 	else
 		UPrimitive::Serialize(Ar);
+
+	// Pre-v92: old vertex-buffer and index-buffer stored as UObject* refs
+	if (Ar.Ver() < 0x5c)
+		(Ar << *(UObject**)((BYTE*)this + 0x154)) << *(UObject**)((BYTE*)this + 0x158);
+
+	// Sections TArray (stride 0x14) + FBox bounds (6 floats + 1-bit valid flag)
+	{
+		typedef FArchive* (__cdecl* FnSec)(FArchive*, FArray*);
+		typedef FArchive* (__cdecl* FnBnd)(FArchive*, void*);
+		FArchive* pS = ((FnSec)0x10449c90)(&Ar, (FArray*)((BYTE*)this + 0x58));
+		((FnBnd)0x10301400)(pS, (BYTE*)this + 0x2c);
+	}
+
+	// Pre-v74: old null object ref (just consume/emit the slot)
+	if (Ar.Ver() < 0x4a)
+	{
+		UObject* tmp = NULL;
+		Ar << tmp;
+	}
+
+	// Pre-v92: old vertex-stream TArray + FCoords (48-byte rotation matrix), then destruct
+	if (Ar.Ver() < 0x5c)
+	{
+		BYTE tmpArr[20];    appMemzero(tmpArr,    sizeof(tmpArr));
+		BYTE tmpCoords[48]; appMemzero(tmpCoords, sizeof(tmpCoords));
+		typedef FArchive* (__cdecl*    FnDE0)(FArchive*, FArray*);
+		typedef FArchive* (__cdecl*    FnCBA)(FArchive*, void*);
+		typedef void      (__thiscall* FnDtr)(FArray*);
+		FArchive* pA = ((FnDE0)0x10448de0)(&Ar, (FArray*)tmpArr);
+		((FnCBA)0x103cbaa0)(pA, tmpCoords);
+		((FnDtr)0x1033b1e0)((FArray*)tmpArr);
+	}
+
+	if (Ar.Ver() > 0x49) // >= v74
+	{
+		// v74..v111: old per-section color-stream TArray (load then destruct)
+		if (Ar.Ver() < 0x70)
+		{
+			BYTE tmpArr[20]; appMemzero(tmpArr, sizeof(tmpArr));
+			typedef FArchive* (__cdecl*    Fn10448f70)(FArchive*, FArray*);
+			typedef void      (__thiscall* Fn10448f20)(FArray*);
+			((Fn10448f70)0x10448f70)(&Ar, (FArray*)tmpArr);
+			((Fn10448f20)0x10448f20)((FArray*)tmpArr);
+		}
+		// v74..v91: obsolete DWORD field
+		if (Ar.Ver() < 0x5c)
+		{
+			DWORD tmp = 0;
+			Ar.ByteOrderSerialize(&tmp, 4);
+		}
+	}
+
+	// v112+: main render streams
+	if (Ar.Ver() > 0x6f)
+	{
+		typedef FArchive* (__cdecl* FnVerts)(FArchive*, FArray*);
+		typedef FArchive* (__cdecl* FnUVStr)(FArchive*, FArray*);
+		typedef FArchive* (__cdecl* FnColl )(FArchive*, FArray*);
+		typedef FArchive* (__cdecl* FnNodes)(FArchive*, FArray*);
+		// FUN_103243e0: serialize TArray<FStaticMeshVertex> (stride 0x18) at +0x68
+		// Returns FArchive* (may be a lazy sub-archive)
+		FArchive* pC = ((FnVerts)0x103243e0)(&Ar, (FArray*)((BYTE*)this + 0x68));
+		pC->ByteOrderSerialize((BYTE*)this + 0x7c, 4);
+		*pC << *(FRawColorStream*)((BYTE*)this + 0x80);
+		*pC << *(FRawColorStream*)((BYTE*)this + 0x9c);
+		// FUN_1034f860: serialize TArray<FStaticMeshUVStream> (stride 0x20) at +0xb8
+		pC = ((FnUVStr)0x1034f860)(pC, (FArray*)((BYTE*)this + 0xb8));
+		*pC << *(FRawIndexBuffer*)((BYTE*)this + 0xc4);
+		*pC << *(FRawIndexBuffer*)((BYTE*)this + 0xe0);
+		// Serialize collision model/tree UObject* ref at +0x120
+		*pC << *(UObject**)((BYTE*)this + 0x120);
+		// FUN_10448640: TArray<FStaticMeshCollisionTriangle> (stride 0x54) at +0x108
+		FArchive* pC2 = ((FnColl)0x10448640)(pC, (FArray*)((BYTE*)this + 0x108));
+		// FUN_104487b0: TArray<collision nodes> (stride 0x2c) at +0x114
+		((FnNodes)0x104487b0)(pC2, (FArray*)((BYTE*)this + 0x114));
+		// v112..v113: collision flags were per-mesh; v114+ they moved to UObject properties
+		if (Ar.Ver() < 0x72)
+		{
+			Ar.ByteOrderSerialize((BYTE*)this + 0x128, 4); // UseSimpleLineCollision
+			Ar.ByteOrderSerialize((BYTE*)this + 0x12c, 4); // UseSimpleBoxCollision
+			Ar.ByteOrderSerialize((BYTE*)this + 0x130, 4); // UseVertexColor
+		}
+	}
+
+	// v77..v91: old field at +0x15c (serialized as UObject* ref)
+	if (Ar.Ver() > 0x4c && Ar.Ver() < 0x5c)
+		Ar << *(UObject**)((BYTE*)this + 0x15c);
+
+	// Triangle data
+	if (Ar.Ver() > 0x4e) // >= v79
+	{
+		FArray* pSrcTris = (FArray*)((BYTE*)this + 0x144);
+		if (Ar.Ver() < 0x61) // pre-v97: old flat format
+		{
+			// FUN_1031ec10 (thiscall, ECX=pTmp, param=pSrcTris):
+			//   deep-copies source TArray into temp buffer for serialization
+			BYTE tmpBuf[20]; // matches Ghidra's local_28 [5 * FArchive*]
+			FArray* pTmp = (FArray*)tmpBuf;
+			typedef void      (__thiscall* FnCopy)(FArray*, INT*);
+			typedef FArchive* (__cdecl*    FnSer )(FArchive*, FArray*);
+			typedef void      (__cdecl*    FnMcpy)(void*, void*, INT);
+			typedef void      (__thiscall* FnDtor)(FArray*);
+			((FnCopy)0x1031ec10)(pTmp, (INT*)pSrcTris);
+			((FnSer )0x1032dec0)(&Ar, pTmp);
+			if (Ar.IsLoading())
+			{
+				INT count = pTmp->Num();
+				pSrcTris->Empty(0x104, count);
+				pSrcTris->Add(count, 0x104);
+				((FnMcpy)0x10301050)(pSrcTris->GetData(), pTmp->GetData(), count * 0x104);
+			}
+			((FnDtor)0x10324860)(pTmp);
+		}
+		else // v97+: lazy-loaded via FLazyLoader at +0x138
+		{
+			INT savedLazy = GLazyLoad;
+			GLazyLoad = 1;
+			typedef FArchive* (__cdecl* FnLazy)(FArchive*, void*);
+			((FnLazy)0x10448b20)(&Ar, (BYTE*)this + 0x138);
+			GLazyLoad = savedLazy;
+		}
+	}
+
+	// Serialized format-version stamp at +0x150
+	if (Ar.Ver() < 0x51)
+		*(INT*)((BYTE*)this + 0x150) = -1;
+	else
+		Ar.ByteOrderSerialize((BYTE*)this + 0x150, 4);
+
+	// v100+: Karma/physics body ref at +0x160
+	if (Ar.Ver() > 99)
+		Ar << *(UObject**)((BYTE*)this + 0x160);
+
+	// LicenseeVer > 1: FTags array at +0x17c (stride 0x3c)
+	if (Ar.LicenseeVer() > 1)
+	{
+		typedef FArchive* (__cdecl* FnTags)(FArchive*, FArray*);
+		((FnTags)0x10448520)(&Ar, (FArray*)((BYTE*)this + 0x17c));
+	}
+
+	unguard;
 }
 IMPL_DIVERGE("permanent: FUN_104487d0/FUN_10448ba0 (OPCODE BVH ray-triangle traversal helpers) absent from Ghidra decompilation; permanently unimplementable; returns 1 (no hit); Ghidra 0x1044EB60")
 int UStaticMesh::LineCheck(FCheckResult &,AActor *,FVector,FVector,FVector,DWORD,DWORD)
@@ -237,16 +574,30 @@ void UStaticMesh::Illuminate(AActor *,int)
 
 
 // --- UStaticMeshInstance ---
-IMPL_TODO("Ghidra 0x10449BB0 (163b): ALL FUN_ helpers confirmed in _unnamed.cpp (FUN_10449a90/10448de0/10449a40); legacy vs current stream selection pending reconstruction")
-void UStaticMeshInstance::Serialize(FArchive &Ar)
+IMPL_MATCH("Engine.dll", 0x10449BB0)
+void UStaticMeshInstance::Serialize(FArchive& Ar)
 {
 	guard(UStaticMeshInstance::Serialize);
 	UObject::Serialize(Ar);
-	// Ghidra (163b): Ver < 0x70 → legacy format via FUN_10449a90 (unresolved).
-	// Ver >= 0x70 → serialize FRawColorStream at this+0x38.
-	if (Ar.Ver() >= 0x70)
+	if (Ar.Ver() < 0x70)
+	{
+		// Old format: TArray<FStaticMeshColorStream> (stride 0x1c) — load into temp then discard
+		BYTE tmpBuf[12]; appMemzero(tmpBuf, sizeof(tmpBuf));
+		typedef FArchive* (__cdecl*    Fn10449a90)(FArchive*, FArray*);
+		typedef void      (__thiscall* Fn10449a40)(FArray*);
+		((Fn10449a90)0x10449a90)(&Ar, (FArray*)tmpBuf);
+		((Fn10449a40)0x10449a40)((FArray*)tmpBuf);
+	}
+	else
+	{
 		Ar << *(FRawColorStream*)((BYTE*)this + 0x38);
-	// Ghidra: Ver > 0x6D (i.e. >= 0x6E) → index buffer at this+0x2C via FUN_10448de0 (unresolved).
+	}
+	// v110+: per-triangle light-info array at +0x2c (TArray stride 0x14)
+	if (Ar.Ver() > 0x6d)
+	{
+		typedef FArchive* (__cdecl* Fn10448de0)(FArchive*, FArray*);
+		((Fn10448de0)0x10448de0)(&Ar, (FArray*)((BYTE*)this + 0x2c));
+	}
 	unguard;
 }
 
@@ -341,7 +692,7 @@ FOrientation& FOrientation::operator=(FOrientation Other)
 IMPL_MATCH("Engine.dll", 0x10301a70)
 int FOrientation::operator!=(FOrientation const & Other) const
 {
-	// Ghidra 0x1a70: return (uint)(*(int*)(this+0x18) != *(int*)(param_1+0x18))
+	// Ghidra 0x1a70: return (DWORD)(*(int*)(this+0x18) != *(int*)(param_1+0x18))
 	return *(INT*)&_Data[0x18] != *(INT*)&Other._Data[0x18];
 }
 
