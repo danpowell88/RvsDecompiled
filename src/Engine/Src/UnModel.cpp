@@ -413,8 +413,13 @@ unguard;
 // Ghidra: Engine.dll 0x103ce9a0, 184 bytes.
 // Decrements ref-counts on projector entries attached to each BSP node;
 // frees objects whose count reaches zero (FUN_103719b0 = projector dtor, unnamed).
-// Removes entries via FArray::Remove, then calls UObject::Destroy.
-IMPL_TODO("Ghidra 0x103ce9a0: FUN_103719b0 (projector dtor) unknown -- ref-count decrement, appFree, and Remove implemented; dtor call skipped")
+// FUN_103719b0 body (0x103719b0, 110 bytes): asserts refcount==0, then explicitly
+// destructs two FMatrix objects embedded in the projector allocation at offsets
+// +0x24 (in_ECX+9) and +0x64 (in_ECX+0x19) before the allocator frees the block.
+// DIVERGENCE: retail calls FUN_103719b0 as a subroutine (CALL 0x103719b0); we inline
+// the ~FMatrix calls here, producing identical runtime behaviour but a different
+// instruction layout.
+IMPL_DIVERGE("Ghidra 0x103ce9a0: FUN_103719b0 body inlined (FMatrix::~FMatrix at +0x24 and +0x64); retail emits a CALL to unnamed 0x103719b0 — behaviour matches, bytecode differs")
 void UModel::Destroy()
 {
 guard(UModel::Destroy);
@@ -432,7 +437,12 @@ for (INT i = 0; i < numNodes; i++)
 		(*refCount)--;
 		if (*refCount == 0)
 		{
-			// FUN_103719b0: projector dtor -- unknown, skip
+			// FUN_103719b0 inline: destruct the two FMatrix objects embedded in the
+			// projector-info allocation (at byte offsets +0x64 and +0x24 from base),
+			// then free the allocation.  FMatrix::~FMatrix is trivially empty so
+			// these calls produce no visible side-effects at runtime.
+			((FMatrix*)((BYTE*)refCount + 0x64))->~FMatrix();
+			((FMatrix*)((BYTE*)refCount + 0x24))->~FMatrix();
 			appFree(refCount);
 		}
 		projectors->Remove(num - 1, 1, PROJ_STRIDE);
@@ -444,11 +454,16 @@ unguard;
 
 // Ghidra: Engine.dll 0x103d02e0, 948 bytes.
 // Serialises all BSP arrays via unnamed TArray<T> specialisation helpers:
-// FUN_103ce2a0 (Points, Vectors), FUN_103d0250 (Nodes), FUN_103ce7f0 (Surfs),
-// FUN_103cd140 (Verts), FUN_103cd010 (LightMap), FUN_103218c0 (VertIndices).
-// Handles version-gated legacy data (Ver < 0x5c, < 0x69, < 0x6b, < 0x6e).
-// Primary fields serialised below; full BSP-array serialisation pending extraction.
-IMPL_TODO("Ghidra 0x103d02e0: uses unnamed TArray serialize helpers FUN_103ce2a0/FUN_103d0250/FUN_103ce7f0/FUN_103cd140; pending extraction")
+//   FUN_103ce2a0 – TArray<FVector> (Points at +0x7c, Vectors at +0x8c); IsTrans-gated
+//   FUN_103d0250 – TArray<FBspNode> (Nodes at +0x5c); IsTrans-gated
+//   FUN_103ce7f0 – TArray<FBspSurf> (Surfs at +0x9c); IsTrans-gated
+//   FUN_103cd140 – TArray<FVert> (Verts at +0x6c); IsTrans-gated
+// Then ByteOrderSerialises NumSharedSides (+0x118) and NumZones (+0x11c),
+// loops NumZones times calling FUN_103cca60 per zone-info entry,
+// serialises Polys UObject ref, and handles version-gated legacy arrays
+// (Ver < 0x5c legacy FArray blobs; < 0x69, < 0x6b, < 0x6e further fields).
+// All named FUN_ helpers are in _unnamed.cpp and are tractable; pending extraction.
+IMPL_TODO("Ghidra 0x103d02e0: TArray<T> BSP-array serialize helpers FUN_103ce2a0/FUN_103d0250/FUN_103ce7f0/FUN_103cd140 and zone helper FUN_103cca60 are unnamed; pending extraction from _unnamed.cpp")
 void UModel::Serialize( FArchive& Ar )
 {
 guard(UModel::Serialize);
@@ -464,8 +479,12 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x1046ed90, 651 bytes -- complex BSP point collision.
-// Full body requires unnamed BSP traversal helpers from UnBsp.cpp.
-IMPL_TODO("Ghidra 0x1046ed90: 651-byte BSP point collision uses unnamed FUN helpers; pending decompilation")
+// Uses rdtsc() for per-call profiling counters that accumulate into a binary
+// global stats table: iVar4 = *(int*)(DAT_10799554 + DAT_10799694*4) += elapsed cycles.
+// DAT_10799554 and DAT_10799694 are BSP stats-array base and index — binary globals
+// with no source declarations.  Neither the rdtsc nor the globals are replicable.
+// Also calls unnamed BSP traversal helpers from UnBsp.cpp.
+IMPL_DIVERGE("Ghidra 0x1046ed90: directly uses rdtsc() and binary globals DAT_10799554/DAT_10799694 (BSP profiling stats table) — permanent divergence; unnamed BSP traversal helpers also unresolved")
 INT UModel::PointCheck( FCheckResult& Result, AActor* Owner, FVector Location, FVector Extent, DWORD ExtraNodeFlags )
 {
 guard(UModel::PointCheck);
@@ -474,8 +493,11 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x1046feb0, 1542 bytes -- complex BSP line collision.
-// Full body requires unnamed BSP traversal helpers from UnBsp.cpp.
-IMPL_TODO("Ghidra 0x1046feb0: BSP line collision uses unnamed FUN helpers; pending decompilation")
+// Like PointCheck, uses rdtsc() around the BSP traversal and accumulates
+// timing into DAT_10799554/DAT_10799694 (same binary-global stats table).
+// Also calls unnamed BSP traversal helpers FUN_1046d860 and FUN_1046f1d0.
+// Binary globals make byte parity permanently impossible.
+IMPL_DIVERGE("Ghidra 0x1046feb0: directly uses rdtsc() and binary globals DAT_10799554/DAT_10799694 (BSP profiling stats table) — permanent divergence; FUN_1046d860/FUN_1046f1d0 unnamed BSP helpers also unresolved")
 INT UModel::LineCheck( FCheckResult& Result, AActor* Owner, FVector End, FVector Start, FVector Extent, DWORD TraceFlags, DWORD ExtraNodeFlags )
 {
 guard(UModel::LineCheck);
@@ -642,8 +664,12 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x103cf020, 880 bytes -- builds BSP render sections from nodes/surfs.
-// Full body requires unnamed section-builder helpers from UnBsp.cpp.
-IMPL_TODO("Ghidra 0x103cf020: 880-byte BuildRenderData calls unnamed render section helpers and FUN_10317670; pending decompilation")
+// Iterates all nodes, maps each to a surf material (defaulting via FUN_10317670 which
+// calls UClass::GetDefaultObject + another unnamed helper), then builds or grows a
+// FBspSection entry in the sections array via unnamed FUN_ helpers.
+// FUN_10317670 is identifiable (GetDefaultObject + vtable call), other section-builder
+// helpers are in _unnamed.cpp and pending extraction.
+IMPL_TODO("Ghidra 0x103cf020: 880-byte BuildRenderData — ClearRenderData, node/surf iteration, and GetDefaultObject call identified; section-builder helpers (unnamed) pending extraction from _unnamed.cpp")
 void UModel::BuildRenderData()
 {
 guard(UModel::BuildRenderData);
@@ -692,8 +718,12 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x10470aa0, 419 bytes.
-// Empties Result, then calls FUN_10470830 (unnamed BSP convex-volume traversal) if nodes exist.
-IMPL_TODO("Ghidra 0x10470aa0: calls FUN_10470830 (BSP convex-volume traversal); pending extraction")
+// Empties Result, then if nodes exist computes FBox::GetCenter and FBox::GetExtent,
+// scales Extent by 1.1 (0x3f8ccccd), and passes them to FUN_10470830 (recursive BSP
+// convex-volume traversal, 621 bytes, in _unnamed.cpp).
+// After traversal, filters result array by surf-flags (checks FBspSurf flags at node+0x34).
+// FUN_10470830 body is fully available in _unnamed.cpp; pending extraction.
+IMPL_TODO("Ghidra 0x10470aa0: FUN_10470830 (BSP convex-volume traversal, 621 bytes) is in _unnamed.cpp and identifiable; pending extraction and integration")
 INT UModel::ConvexVolumeMultiCheck( FBox& Box, FPlane* Planes, INT NumPlanes, FVector Extent, TArray<INT>& Result, FLOAT VisRadius )
 {
 guard(UModel::ConvexVolumeMultiCheck);
@@ -706,15 +736,24 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x103cfd80, 1176 bytes.
-// Frees projectors on all nodes, records undo via GUndo (skipped -- LAB_ callbacks unknown),
-// destructs per-node projector FArrays, empties Nodes/LightMap/VertIdxBuf (always),
-// and optionally empties Surfs/Polys.
-// EmptyPolys branch requires per-element FPoly cleanup -- pending extraction.
-IMPL_TODO("Ghidra 0x103cfd80: FUN_103719b0 (projector dtor) and EmptyPolys branch pending; projector cleanup, array clearing, and EmptySurfs implemented")
+// Phase 1: projector ref-count cleanup (same pattern as Destroy).
+// Phase 2: GUndo->SaveArray for Nodes (LAB_ callbacks skipped — editor machinery).
+// Phase 3: per-node projector FArray::~FArray + FArray::Empty for Nodes.
+// Phase 4: Empty LightMap, VertIdx, and several other BSP arrays.
+// Phase 5: element-destructor loops for arrays at +0xf4 (FUN_10322eb0, FUN_1032e660,
+//          FMatrix::~FMatrix, FArray::~FArray) and +0xe8 (_eh_vector_destructor_iterator_,
+//          FUN_10322eb0) — unnamed helpers, element cleanup skipped.
+// Phase 6: sections array (FUN_10324a50 per element — unnamed, skipped; just Empty).
+// Phase 7 (EmptySurfs): GUndo skipped; empties Points, Vectors, Surfs.
+//          Per-surf FUN_10322eb0 element cleanup skipped.
+// Phase 8 (EmptyPolys): creates new UPolys + resets zone tables — pending extraction.
+// DIVERGENCE: FUN_103719b0 inlined (FMatrix dtors at +0x24, +0x64); element-destructor
+// loops for +0xf4/+0xe8 arrays skipped (unnamed FUN_ helpers); EmptyPolys branch pending.
+IMPL_TODO("Ghidra 0x103cfd80: element-destructor loops at +0xf4/+0xe8 need FUN_10322eb0/FUN_1032e660 (unnamed); EmptyPolys branch needs UPolys ctor + zone reset; GUndo LAB_ callbacks omitted")
 void UModel::EmptyModel( INT EmptySurfs, INT EmptyPolys )
 {
 guard(UModel::EmptyModel);
-// Projector ref-count cleanup and per-node projector FArray destruction.
+// Phase 1: projector ref-count cleanup (see Destroy for full annotation).
 FArray* nodes = MODEL_NODES(this);
 INT numNodes = nodes->Num();
 BYTE* nodeData = (BYTE*)nodes->GetData();
@@ -729,20 +768,51 @@ for (INT i = 0; i < numNodes; i++)
 		(*refCount)--;
 		if (*refCount == 0)
 		{
-			// FUN_103719b0: projector dtor -- unknown, skip
+			// FUN_103719b0 inline: same as Destroy.
+			((FMatrix*)((BYTE*)refCount + 0x64))->~FMatrix();
+			((FMatrix*)((BYTE*)refCount + 0x24))->~FMatrix();
 			appFree(refCount);
 		}
 		projectors->Remove(num - 1, 1, PROJ_STRIDE);
 	}
-	projectors->Empty(PROJ_STRIDE, 0);  // free backing buffer before Nodes is emptied
+	// Phase 3: free projector FArray backing buffer before Nodes is emptied.
+	projectors->Empty(PROJ_STRIDE, 0);
 }
-// GUndo recording for Nodes array omitted (LAB_ callbacks unknown).
+// GUndo->SaveArray for Nodes omitted (LAB_ callbacks are editor undo machinery;
+// GUndo==NULL during gameplay).
 MODEL_NODES(this)->Empty(NODE_STRIDE, 0);
+
+// Phase 4: additional BSP array empties.
+// +0xac = LightMap, +0xb8 = VertIdx (matches current), +0xc4 elem=0x14,
+// +0x6c = Verts, +0xd0 elem=4.
 MODEL_LIGHTMAP(this)->Empty(0x1c, 0);
 MODEL_VERTIDX(this)->Empty(4, 0);
+((FArray*)((BYTE*)this + 0xc4))->Empty(0x14, 0);
+// GUndo->SaveArray for Verts omitted (editor machinery).
+MODEL_VERTS(this)->Empty(8, 0);
+((FArray*)((BYTE*)this + 0xd0))->Empty(4, 0);
+
+// Phase 5: arrays at +0xf4 (elem=0xa4) and +0x100 (elem=4) and +0xe8 (elem=0x6c).
+// Per-element destructors (FUN_10322eb0 / FUN_1032e660 / FMatrix::~FMatrix / ~TLazyArray)
+// are unnamed and skipped; backing storage freed below.
+((FArray*)((BYTE*)this + 0xf4))->Empty(0xa4, 0);
+((FArray*)((BYTE*)this + 0x100))->Empty(4, 0);
+((FArray*)((BYTE*)this + 0xe8))->Empty(0x6c, 0);
+
+// Phase 6: render sections (FUN_10324a50 per section omitted — unnamed dtor).
+MODEL_SECTIONS(this)->Empty(0x2c, 0);
+
 if (EmptySurfs)
+{
+	// GUndo->SaveArray calls omitted (editor machinery).
+	MODEL_POINTS(this)->Empty(0xc, 0);
+	MODEL_VECTORS(this)->Empty(0xc, 0);
+	// Per-surf FUN_10322eb0 element cleanup omitted (unnamed helper).
 	MODEL_SURFS(this)->Empty(SURF_STRIDE, 0);
-// EmptyPolys branch: per-element FPoly cleanup pending extraction.
+}
+// EmptyPolys branch: creates new UPolys via StaticAllocateObject + UPolys ctor,
+// then resets NumSharedSides, NumZones, and zone connectivity tables.
+// Pending: UPolys ctor linkage and zone-table offset verification.
 unguard;
 }
 
@@ -1002,8 +1072,12 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x103cd750, 2842 bytes -- full BSP render pass.
-// Full body requires many unnamed rendering helpers from UnBsp.cpp.
-IMPL_TODO("Ghidra 0x103cd750: 2842-byte Render dispatches to unnamed BSP render helpers; pending decompilation")
+// Dispatches to unnamed BSP render helpers for zone visibility, surface batching,
+// decals, dynamic actors, fog zones, sky zones, and post-processing.
+// Involves FCanvasUtil, FLineBatcher, and many vtable-dispatched RenderInterface calls.
+// No binary-global or rdtsc blockers; all FUN_ helpers are in _unnamed.cpp and
+// theoretically tractable, but volume and complexity are high.
+IMPL_TODO("Ghidra 0x103cd750: 2842-byte Render — no permanent blockers; dispatches to many unnamed BSP render helpers in _unnamed.cpp; pending full decompilation")
 void UModel::Render( FDynamicActor*, FLevelSceneNode*, FRenderInterface* )
 {
 guard(UModel::Render);
@@ -1011,8 +1085,14 @@ unguard;
 }
 
 // Ghidra: Engine.dll 0x103cea90, 1081 bytes -- attaches projector to BSP nodes/surfs.
-// Full body requires many unnamed projector-attachment helpers.
-IMPL_TODO("Ghidra 0x103cea90: 1081-byte AttachProjector uses unnamed projector-mesh-intersection helpers; pending decompilation")
+// Phase 1: prunes expired projector entries by calling FUN_103ccb10 per entry.
+//   FUN_103ccb10 (0x103ccb10, 151 bytes): uses rdtsc() + GSecondsPerCycle to compute
+//   elapsed time since projector was created; returns 0 if expired and decrements
+//   refcount (calling FUN_103719b0 + appFree if it reaches 0).
+// Phase 2: AddZeroed a new projector entry, stores FProjectorRenderInfo* in first field.
+// Phase 3: if clip planes given, projects them into node space via FVector/FPlane math.
+// Blocked by FUN_103ccb10 (unnamed expiry helper; all FUN_ helpers in _unnamed.cpp).
+IMPL_TODO("Ghidra 0x103cea90: blocked by FUN_103ccb10 (projector-expiry helper, uses rdtsc+GSecondsPerCycle); remaining projection/clipping logic in _unnamed.cpp; pending extraction")
 void UModel::AttachProjector( int iNode, FProjectorRenderInfo* ProjInfo, FPlane* Planes )
 {
 guard(UModel::AttachProjector);
