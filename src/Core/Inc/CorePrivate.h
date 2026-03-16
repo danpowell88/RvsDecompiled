@@ -53,6 +53,13 @@
 
 #include "Core.h"
 
+// Ravenshield retail package version (Ghidra 0x1012ad40: writes ver=118=0x76, licenseeVer=14=0xe).
+// The SDK ships with 69/0x00, which is the UT99 value. Override for correctness.
+#undef  PACKAGE_FILE_VERSION
+#define PACKAGE_FILE_VERSION          118
+#undef  PACKAGE_FILE_VERSION_LICENSEE
+#define PACKAGE_FILE_VERSION_LICENSEE 14
+
 // Additional headers NOT included by Core.h.
 #include "UnLinker.h"
 #include "UnCoreNative.h"
