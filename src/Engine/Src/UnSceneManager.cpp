@@ -18,6 +18,17 @@ inline void  operator delete(void*, void*) noexcept {}
 #include "ImplSource.h"
 #include "EngineDecls.h"
 
+static void RegisterSceneManager(ASceneManager* Scene)
+{
+	for (INT i = 0; i < GSceneManagers.Num(); ++i)
+	{
+		if (GSceneManagers(i) == Scene)
+			return;
+	}
+
+	GSceneManagers.AddItem(Scene);
+}
+
 // --- ASceneManager ---
 IMPL_MATCH("Engine.dll", 0x1041f6d0)
 void ASceneManager::UpdateViewerFromPct(float Pct)
@@ -140,6 +151,7 @@ void ASceneManager::SceneStarted()
 	extern ENGINE_API INT GNumActiveScenes;
 	InitializeActions();
 	*(DWORD*)((BYTE*)this + 0x3C0) |= 2;
+	SetSceneStartTime();
 	eventSceneStarted();
 	if (*(INT*)((BYTE*)this + 0x3DC) == 0)
 		return;
@@ -203,6 +215,8 @@ void ASceneManager::PreparePath()
 	}
 	// if (GIsEditor)
 	//     SetSceneStartTime(this);
+	if (GIsEditor)
+		SetSceneStartTime();
 }
 
 IMPL_MATCH("Engine.dll", 0x1041e1e0)
@@ -852,7 +866,11 @@ FString USubActionTrigger::GetStatString()
 // =============================================================================
 
 IMPL_MATCH("Engine.dll", 0x1041fa50)
-void ASceneManager::PostEditChange() { Super::PostEditChange(); }
+void ASceneManager::PostEditChange()
+{
+	Super::PostEditChange();
+	PreparePath();
+}
 
 IMPL_MATCH("Engine.dll", 0x1041fee0)
 INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType )
@@ -949,8 +967,15 @@ INT ASceneManager::Tick( FLOAT DeltaTime, ELevelTick TickType )
 	return 1;
 }
 
-IMPL_EMPTY("scene manager post-begin-play no-op")
-void ASceneManager::PostBeginPlay() {}
+IMPL_MATCH("Engine.dll", 0x1041fe20)
+void ASceneManager::PostBeginPlay()
+{
+	Super::PostBeginPlay();
+	*(DWORD*)((BYTE*)this + 0x3DC) = 0;
+	RegisterSceneManager(this);
+	InitializeActions();
+	PreparePath();
+}
 
 IMPL_MATCH("Engine.dll", 0x1041e930)
 void ASceneManager::CheckForErrors()
@@ -997,8 +1022,66 @@ void ASceneManager::SetCurrentTime( FLOAT NewTime ) {
 	*(INT*)((BYTE*)this + 0x448) = 0;
 	RefreshSubActions( NewTime / *(FLOAT*)((BYTE*)this + 0x3CC) );
 }
-IMPL_EMPTY("set scene start time no-op")
-void ASceneManager::SetSceneStartTime() {}
+IMPL_MATCH("Engine.dll", 0x1041f400)
+void ASceneManager::SetSceneStartTime()
+{
+	RegisterSceneManager(this);
+
+	FLOAT totalSceneTime = GetTotalSceneTime();
+	*(FLOAT*)((BYTE*)this + 0x3CC) = totalSceneTime;
+	if (!GIsEditor)
+		*(FLOAT*)((BYTE*)this + 0x3D0) = 0.0f;
+
+	TArray<UMatSubAction*>& SceneSubActions = *(TArray<UMatSubAction*>*)((BYTE*)this + 0x3F0);
+	SceneSubActions.Empty();
+
+	FLOAT actionTime = 0.0f;
+	TArray<UMatAction*>& Actions = *(TArray<UMatAction*>*)((BYTE*)this + 0x3A8);
+	for (INT actionIndex = 0; actionIndex < Actions.Num(); ++actionIndex)
+	{
+		UMatAction* Action = Actions(actionIndex);
+		*(FLOAT*)((BYTE*)Action + 0x78) = actionTime / totalSceneTime;
+
+		FLOAT actionEndPct = (actionTime + *(FLOAT*)((BYTE*)Action + 0x34)) / totalSceneTime;
+		*(FLOAT*)((BYTE*)Action + 0x7C) = actionEndPct;
+		*(FLOAT*)((BYTE*)Action + 0x80) = actionEndPct - *(FLOAT*)((BYTE*)Action + 0x78);
+
+		TArray<UMatSubAction*>& ActionSubActions = *(TArray<UMatSubAction*>*)((BYTE*)Action + 0x48);
+		for (INT subIndex = 0; subIndex < ActionSubActions.Num(); ++subIndex)
+		{
+			UMatSubAction* SubAction = ActionSubActions(subIndex);
+			*(ASceneManager**)((BYTE*)SubAction + 0x3C) = this;
+
+			if (GIsEditor)
+				SubAction->PreBeginPreview();
+
+			*(BYTE*)((BYTE*)SubAction + 0x2C) = 0;
+			*(FLOAT*)((BYTE*)SubAction + 0x4C) =
+				(actionTime + *(FLOAT*)((BYTE*)SubAction + 0x30)) / totalSceneTime;
+
+			FLOAT subEndPct =
+				(actionTime + *(FLOAT*)((BYTE*)SubAction + 0x30) + *(FLOAT*)((BYTE*)SubAction + 0x34)) /
+				totalSceneTime;
+			*(FLOAT*)((BYTE*)SubAction + 0x50) = subEndPct;
+			*(FLOAT*)((BYTE*)SubAction + 0x54) = subEndPct - *(FLOAT*)((BYTE*)SubAction + 0x4C);
+
+			if (SubAction->IsA(USubActionOrientation::StaticClass()))
+			{
+				*(UMatSubAction**)((BYTE*)SubAction + 0x70) = SubAction;
+				*(FLOAT*)((BYTE*)SubAction + 0x74) = *(FLOAT*)((BYTE*)SubAction + 0x4C);
+
+				FLOAT easeInEndPct =
+					*(FLOAT*)((BYTE*)SubAction + 0x4C) + (*(FLOAT*)((BYTE*)SubAction + 0x60) / totalSceneTime);
+				*(FLOAT*)((BYTE*)SubAction + 0x78) = easeInEndPct;
+				*(FLOAT*)((BYTE*)SubAction + 0x7C) = easeInEndPct - *(FLOAT*)((BYTE*)SubAction + 0x74);
+			}
+
+			SceneSubActions.AddItem(SubAction);
+		}
+
+		actionTime += *(FLOAT*)((BYTE*)Action + 0x34);
+	}
+}
 
 // =============================================================================
 // --- AInterpolationPoint ---
