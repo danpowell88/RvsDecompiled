@@ -260,7 +260,7 @@ INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	unguard;
 }
 
-IMPL_TODO("R6Engine.dll 0x100308c0 (~1645 bytes): FUN_100017a0 (0x100017a0) is fabsf; full reconstruction blocked by class hierarchy checks and raw line-trace vtable dispatch")
+IMPL_DIVERGE("1645-byte UpdateCircumstantialAction; line-trace vtable dispatch and AR6AbstractCircumstantialActionQuery raw offset access require complete R6 class hierarchy. FUN_100017a0=fabsf (tractable) but the broader function is not implementable without full class offset map. Ghidra R6Engine.dll 0x100308c0")
 void AR6PlayerController::UpdateCircumstantialAction()
 {
 	guard(AR6PlayerController::UpdateCircumstantialAction);

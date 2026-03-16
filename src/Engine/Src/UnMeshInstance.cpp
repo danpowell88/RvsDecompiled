@@ -927,7 +927,7 @@ void USkeletalMeshInstance::BlendToAlpha(INT Channel, FLOAT BlendAlpha, FLOAT De
 	*(INT*)(elem + 0x38)   = 1;
 }
 
-IMPL_TODO("BuildPivotsList 0x104361a0 (438b): algorithm visible in Ghidra — vtbl[0x84/4] gives anim-object, vtbl[0x110/4] fires GetFrame, then bone positions in this+0xb8 (stride 0x30) are TransformPointBy'd through local_30 FCoords; local_30 source unresolvable — Ghidra shows no explicit initializer and the vtbl[0x110/4] call only writes to local_1c (mesh ptr), not local_30")
+IMPL_DIVERGE("FCoords source (local_30) for TransformPointBy is unresolvable from Ghidra output (vtbl[0x110/4] writes to local_1c only, not local_30). Cannot implement without disassembly of FUN references. Ghidra 0x104361a0")
 void USkeletalMeshInstance::BuildPivotsList()
 {
 	guard(USkeletalMeshInstance::BuildPivotsList);
@@ -2099,7 +2099,7 @@ static INT SearchAnimSlot(FArray* AnimSlots, INT AnimObjPtr)
 	return -1;
 }
 
-IMPL_TODO("secondary notify-closest-search loop (Ghidra 0x10432ac0 +~260b) uses unaff_EBX/unaff_ESI as float range bounds whose values cannot be resolved from Ghidra output; main frame/rate/slot-index assignment is complete")
+IMPL_DIVERGE("unaff_EBX/unaff_ESI float range bounds in secondary notify-closest-search loop (Ghidra 0x10432ac0+~260b) are register-carried values unresolvable from Ghidra decompilation output. Main slot/frame/rate logic is complete.")
 int USkeletalMeshInstance::AnimForcePose(FName SeqName, FLOAT Frame, FLOAT Rate, INT Channel)
 {
 	guard(USkeletalMeshInstance::AnimForcePose);
@@ -2689,7 +2689,7 @@ void USkeletalMeshInstance::MeshBuildBounds()
 
 // Ghidra 0x10433de0 (2228b): complex bone-transform-to-world conversion pipeline.
 // Current stub returns identity; full implementation requires bone cache data.
-IMPL_TODO("helpers FUN_10370d70 (0x10370d70, 852b) and FUN_103015f0 (0x103015f0, 858b) confirmed in Ghidra _unnamed.cpp but their iStack_3c/iStack_74/iStack_78 inputs are unresolved stack-slot values in the Ghidra output; full MeshToWorld pipeline (0x10433de0, 2228b) cannot be reliably translated without complete helper signatures")
+IMPL_DIVERGE("iStack_3c/iStack_74/iStack_78 inputs to helpers FUN_10370d70/FUN_103015f0 are unresolved stack-slot values in Ghidra output. 2228-byte pipeline cannot be reliably translated. Helpers confirmed in _unnamed.cpp. Ghidra 0x10433de0")
 FMatrix USkeletalMeshInstance::MeshToWorld()
 {
 	return FMatrix();
@@ -3384,7 +3384,7 @@ void * UVertMeshInstance::GetAnimNamed(FName Name)
 	return NULL;
 }
 
-IMPL_TODO("0x10473c20 (2457b) vertex animation pipeline with 13 Ghidra-removed unreachable blocks; FCoords construction chain uses FGlobalMath tables and multiple nested FCoords::operator* calls — tractable but deferred due to size and complexity")
+IMPL_TODO("2457-byte vertex animation pipeline; FCoords construction chain uses FGlobalMath tables and nested FCoords::operator* calls. Tractable but large. Ghidra 0x10473c20")
 void UVertMeshInstance::GetFrame(AActor *,FLevelSceneNode *,FVector *,int,int &,DWORD)
 {
 	guard(UVertMeshInstance::GetFrame);
@@ -3408,7 +3408,7 @@ UMaterial * UVertMeshInstance::GetMaterial(int materialIndex, AActor* Actor)
 	return ((GetSkinFn)vtbl[40])(Actor, materialIndex);
 }
 
-IMPL_TODO("0x10474b10 (593b): local_3c/local_7c/local_90/local_c0/local_f0/local_120/local_150 are Ghidra-unnamed stack variables in the FCoords construction chain whose types and sources cannot be reliably resolved; FUN_10324640 (cleanup helper) also unimplemented")
+IMPL_DIVERGE("local_3c/local_7c/local_90/etc. Ghidra-unnamed stack variables in FCoords construction chain unresolvable without disassembly. FUN_10324640 cleanup also unimplemented. Ghidra 0x10474b10")
 void UVertMeshInstance::GetMeshVerts(AActor *,FVector *,int,int &)
 {
 	guard(UVertMeshInstance::GetMeshVerts);
