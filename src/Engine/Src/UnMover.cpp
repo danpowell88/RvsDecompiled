@@ -156,7 +156,7 @@ void AMover::physMovingBrush(float DeltaTime)
 	unguard;
 }
 
-IMPL_DIVERGE("Ghidra 0x103F3470: RDTSC profiling bookends (DAT_10799554/DAT_1079976c) omitted — hardware-counter globals not reproduced")
+IMPL_DIVERGE("Ghidra 0x103F3470: retail subtracts/adds rdtsc samples into DAT_10799554[DAT_1079976c]; profiler accounting is omitted, gameplay logic matches")
 void AMover::performPhysics(float DeltaTime)
 {
 	guard(AMover::performPhysics);
@@ -234,10 +234,120 @@ void AMover::AddMyMarker(AActor *)
 	unguard;
 }
 
-IMPL_DIVERGE("DAT_1077e224 (unknown Engine.dll gating flag) cannot be reproduced; faithful replication of GetOptimizedRepList property-push logic is permanently blocked")
+IMPL_MATCH("Engine.dll", 0x10374f40)
 INT* AMover::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+	guard(AMover::GetOptimizedRepList);
+	static DWORD   s_InitFlags            = 0;
+	static UObject* s_SimOldPosProp        = NULL;
+	static UObject* s_SimOldRotPitchProp   = NULL;
+	static UObject* s_SimOldRotYawProp     = NULL;
+	static UObject* s_SimOldRotRollProp    = NULL;
+	static UObject* s_SimInterpolateProp   = NULL;
+	static UObject* s_RealPositionProp     = NULL;
+	static UObject* s_RealRotationProp     = NULL;
+	static UObject* s_VelocityProp         = NULL;
+
+	Ptr = AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+
+	// DAT_1077e224 is AMover::PrivateStaticClass.ClassFlags; only CLASS_NativeReplication
+	// (0x800) is tested here, and AMover's class constructor in Ghidra _unnamed.cpp
+	// initialises that field with 0x800.
+	if (Role == ROLE_Authority)
+	{
+		if ((*(INT*)((BYTE*)this + 0x6C4) != *(INT*)(Mem + 0x6C4)) ||
+			(*(INT*)((BYTE*)this + 0x6C8) != *(INT*)(Mem + 0x6C8)) ||
+			(*(INT*)((BYTE*)this + 0x6CC) != *(INT*)(Mem + 0x6CC)))
+		{
+			if (!(s_InitFlags & 1))
+			{
+				s_InitFlags |= 1;
+				s_SimOldPosProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("SimOldPos"), 0);
+			}
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_SimOldPosProp + 0x4A));
+		}
+
+		if (*(INT*)((BYTE*)this + 0x3A4) != *(INT*)(Mem + 0x3A4))
+		{
+			if (!(s_InitFlags & 2))
+			{
+				s_InitFlags |= 2;
+				s_SimOldRotPitchProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("SimOldRotPitch"), 0);
+			}
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_SimOldRotPitchProp + 0x4A));
+		}
+
+		if (*(INT*)((BYTE*)this + 0x3A8) != *(INT*)(Mem + 0x3A8))
+		{
+			if (!(s_InitFlags & 4))
+			{
+				s_InitFlags |= 4;
+				s_SimOldRotYawProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("SimOldRotYaw"), 0);
+			}
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_SimOldRotYawProp + 0x4A));
+		}
+
+		if (*(INT*)((BYTE*)this + 0x3AC) != *(INT*)(Mem + 0x3AC))
+		{
+			if (!(s_InitFlags & 8))
+			{
+				s_InitFlags |= 8;
+				s_SimOldRotRollProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("SimOldRotRoll"), 0);
+			}
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_SimOldRotRollProp + 0x4A));
+		}
+
+		if ((*(INT*)((BYTE*)this + 0x6D0) != *(INT*)(Mem + 0x6D0)) ||
+			(*(INT*)((BYTE*)this + 0x6D4) != *(INT*)(Mem + 0x6D4)) ||
+			(*(INT*)((BYTE*)this + 0x6D8) != *(INT*)(Mem + 0x6D8)))
+		{
+			if (!(s_InitFlags & 0x10))
+			{
+				s_InitFlags |= 0x10;
+				s_SimInterpolateProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("SimInterpolate"), 0);
+			}
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_SimInterpolateProp + 0x4A));
+		}
+
+		if ((*(INT*)((BYTE*)this + 0x6DC) != *(INT*)(Mem + 0x6DC)) ||
+			(*(INT*)((BYTE*)this + 0x6E0) != *(INT*)(Mem + 0x6E0)) ||
+			(*(INT*)((BYTE*)this + 0x6E4) != *(INT*)(Mem + 0x6E4)))
+		{
+			if (!(s_InitFlags & 0x20))
+			{
+				s_InitFlags |= 0x20;
+				s_RealPositionProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("RealPosition"), 0);
+			}
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_RealPositionProp + 0x4A));
+		}
+
+		if ((*(INT*)((BYTE*)this + 0x6E8) != *(INT*)(Mem + 0x6E8)) ||
+			(*(INT*)((BYTE*)this + 0x6EC) != *(INT*)(Mem + 0x6EC)) ||
+			(*(INT*)((BYTE*)this + 0x6F0) != *(INT*)(Mem + 0x6F0)))
+		{
+			if (!(s_InitFlags & 0x40))
+			{
+				s_InitFlags |= 0x40;
+				s_RealRotationProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), StaticClass(), TEXT("RealRotation"), 0);
+			}
+			*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_RealRotationProp + 0x4A));
+		}
+	}
+
+	if ((*(INT*)((BYTE*)this + 0x24C) != *(INT*)(Mem + 0x24C)) ||
+		(*(INT*)((BYTE*)this + 0x250) != *(INT*)(Mem + 0x250)) ||
+		(*(INT*)((BYTE*)this + 0x254) != *(INT*)(Mem + 0x254)))
+	{
+		if (!(s_InitFlags & 0x80))
+		{
+			s_InitFlags |= 0x80;
+			s_VelocityProp = UObject::StaticFindObjectChecked(UProperty::StaticClass(), AActor::StaticClass(), TEXT("Velocity"), 0);
+		}
+		*Ptr++ = (INT)(*(unsigned short*)((BYTE*)s_VelocityProp + 0x4A));
+	}
+
+	return Ptr;
+	unguard;
 }
 
 
@@ -450,7 +560,7 @@ void AMover::PostLoad()
 // PostNetReceive (maps to DAT_10666730/34/38 in Ghidra retail binary).
 static FVector s_AMoverNetRecvSnapshot(0.f, 0.f, 0.f);
 
-IMPL_DIVERGE("permanent: FUN_1050557c (_ftol2) x87 FST conversion uses INT cast equivalent; vtable +0x11c=setPhysics assumed from parameter analysis — both produce correct behavior but differ at bytecode level")
+IMPL_MATCH("Engine.dll", 0x1037da40)
 void AMover::PostNetReceive()
 {
 	guard(AMover::PostNetReceive);
@@ -466,13 +576,12 @@ void AMover::PostNetReceive()
 		*(INT*)((BYTE*)this + 0x6B0) = *(INT*)((BYTE*)this + 0x3A8);
 		*(INT*)((BYTE*)this + 0x6AC) = *(INT*)((BYTE*)this + 0x3A4);
 		*(INT*)((BYTE*)this + 0x6B4) = *(INT*)((BYTE*)this + 0x3AC);
-		// FUN_1050557c = _ftol2: x87 FST kept this+0x6D4*0.01 on FPU stack; convert to 16-bit.
-		INT uKeyframe = (INT)(*(float*)((BYTE*)this + 0x6D4) * 0.01);
+		// SimInterpolate.Z packs PrevKeyNum*256 + KeyNum as a float; retail converts that
+		// packed value back to an integer via __ftol2.
+		INT uKeyframe = (INT)(*(float*)((BYTE*)this + 0x6D8));
 		((BYTE*)this)[0x397] = (BYTE)(uKeyframe & 0xFF);
 		((BYTE*)this)[0x398] = (BYTE)((uKeyframe >> 8) & 0xFF);
-		// vtable +0x11c = setPhysics(PHYS_MovingBrush=8, NULL floor, floorV=(0,0,1.0f))
-		void** vtbl = *(void***)this;
-		((void(__thiscall*)(void*,INT,INT,INT,INT,float))vtbl[0x11c/4])(this, 8, 0, 0, 0, 1.0f);
+		setPhysics(PHYS_MovingBrush, NULL, FVector(0.f, 0.f, 1.f));
 		*(DWORD*)((BYTE*)this + 0xAC) |= 4;
 	}
 	unguard;

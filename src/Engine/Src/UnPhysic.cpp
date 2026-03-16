@@ -14,6 +14,28 @@ inline void  operator delete(void*, void*) noexcept {}
 
 #include "EngineDecls.h"
 
+static UBOOL RepTripleChanged(const void* NewValue, const void* OldValue)
+{
+	const DWORD* A = (const DWORD*)NewValue;
+	const DWORD* B = (const DWORD*)OldValue;
+	return A[0] != B[0] || A[1] != B[1] || A[2] != B[2];
+}
+
+static UBOOL RepObjectChanged(INT NewObj, UPackageMap* Map, UActorChannel* Chan)
+{
+	typedef INT (__thiscall* MapObjectFn)(UPackageMap*, INT);
+	DWORD* Vtbl = *(DWORD**)Map;
+	if (((MapObjectFn)Vtbl[25])(Map, NewObj) != 0)
+		return 0;
+	*(INT*)((BYTE*)Chan + 0x8c) = 1;
+	return (NewObj != 0);
+}
+
+static UObject* FindRepProperty(UObject* Outer, const TCHAR* PropName)
+{
+	return UObject::StaticFindObjectChecked(UProperty::StaticClass(), Outer, PropName, 0);
+}
+
 // --- APhysicsVolume ---
 IMPL_MATCH("Engine.dll", 0x103b77a0)
 void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
@@ -54,20 +76,104 @@ void APhysicsVolume::SetZone(INT bTest, INT bJustTeleported)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_10370800 (FVector dirty-check) and FUN_10371990 (UClass property-handle cache) are unexported Engine.dll internals; permanently unresolvable; Ghidra 0x10375370")
+IMPL_TODO("Ghidra 0x10375370: replication body is implemented, but exact retail parity still needs the APhysicsVolume native-replication class-flag gate fixed in reconstructed class metadata; property caches still use function-local statics instead of DAT_106669cc-e0.")
 INT* APhysicsVolume::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
-	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+	guard(APhysicsVolume::GetOptimizedRepList);
+	static DWORD    s_RepFlags            = 0;
+	static UObject* s_LocationProp        = NULL;
+	static UObject* s_RotationProp        = NULL;
+	static UObject* s_BaseProp            = NULL;
+	static UObject* s_RelativeLocationProp = NULL;
+	static UObject* s_RelativeRotationProp = NULL;
+	static UObject* s_AttachmentBoneProp  = NULL;
+
+	Ptr = AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
+
+	// Retail also checks APhysicsVolume::PrivateStaticClass.ClassFlags & CLASS_NativeReplication.
+	// Our generated class metadata is still missing that script flag, so we mirror the runtime path
+	// directly and treat the gate as enabled until the declaration is corrected.
+	if (Role == ROLE_Authority &&
+		((*(DWORD*)((BYTE*)this + 0xa4) & 4) != 0) &&
+		((*(DWORD*)((BYTE*)this + 0xac) & 0x20) == 0))
+	{
+		if (RepTripleChanged((BYTE*)this + 0x234, Mem + 0x234))
+		{
+			if (!(s_RepFlags & 1))
+			{
+				s_RepFlags |= 1;
+				s_LocationProp = FindRepProperty(AActor::StaticClass(), TEXT("Location"));
+			}
+			*Ptr++ = *(unsigned short*)((BYTE*)s_LocationProp + 0x4a);
+		}
+
+		if (RepTripleChanged((BYTE*)this + 0x240, Mem + 0x240))
+		{
+			if (!(s_RepFlags & 2))
+			{
+				s_RepFlags |= 2;
+				s_RotationProp = FindRepProperty(AActor::StaticClass(), TEXT("Rotation"));
+			}
+			*Ptr++ = *(unsigned short*)((BYTE*)s_RotationProp + 0x4a);
+		}
+
+		if (RepObjectChanged(*(INT*)((BYTE*)this + 0x15c), Map, Chan))
+		{
+			if (!(s_RepFlags & 4))
+			{
+				s_RepFlags |= 4;
+				s_BaseProp = FindRepProperty(AActor::StaticClass(), TEXT("Base"));
+			}
+			*Ptr++ = *(unsigned short*)((BYTE*)s_BaseProp + 0x4a);
+		}
+
+		if (*(INT*)((BYTE*)this + 0x15c) != 0 &&
+			((*(DWORD*)(*(INT*)((BYTE*)this + 0x15c) + 0xa0) & 0x100000) == 0))
+		{
+			if (RepTripleChanged((BYTE*)this + 0x264, Mem + 0x264))
+			{
+				if (!(s_RepFlags & 8))
+				{
+					s_RepFlags |= 8;
+					s_RelativeLocationProp = FindRepProperty(AActor::StaticClass(), TEXT("RelativeLocation"));
+				}
+				*Ptr++ = *(unsigned short*)((BYTE*)s_RelativeLocationProp + 0x4a);
+			}
+
+			if (RepTripleChanged((BYTE*)this + 0x270, Mem + 0x270))
+			{
+				if (!(s_RepFlags & 0x10))
+				{
+					s_RepFlags |= 0x10;
+					s_RelativeRotationProp = FindRepProperty(AActor::StaticClass(), TEXT("RelativeRotation"));
+				}
+				*Ptr++ = *(unsigned short*)((BYTE*)s_RelativeRotationProp + 0x4a);
+			}
+
+			if (*(INT*)((BYTE*)this + 0x1b0) != *(INT*)(Mem + 0x1b0))
+			{
+				if (!(s_RepFlags & 0x20))
+				{
+					s_RepFlags |= 0x20;
+					s_AttachmentBoneProp = FindRepProperty(AActor::StaticClass(), TEXT("AttachmentBone"));
+				}
+				*Ptr++ = *(unsigned short*)((BYTE*)s_AttachmentBoneProp + 0x4a);
+			}
+		}
+	}
+
+	return Ptr;
+	unguard;
 }
 
 
 // --- AVolume ---
-IMPL_EMPTY("SetVolumes(array) — no volume tracking required for minimal playback; Ghidra analysis pending")
+IMPL_EMPTY("Retail shares the 0x104651d0 no-op stub with AActor::AddMyMarker and other empty helpers")
 void AVolume::SetVolumes(TArray<AVolume *> const &)
 {
 }
 
-IMPL_EMPTY("SetVolumes() — no-arg override; Ghidra analysis pending")
+IMPL_EMPTY("Retail shares the 0x10476d60 no-op stub with AActor::PostBeginPlay and AKConstraint::postKarmaStep")
 void AVolume::SetVolumes()
 {
 }
@@ -128,14 +234,13 @@ int AVolume::ShouldTrace(AActor* Other, DWORD TraceFlags)
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_1050557c (unexported PRNG/format helper) and R6 decoration struct layout at +0x3f8 are permanently unresolvable; Ghidra 0x10475ab0")
+IMPL_TODO("Ghidra 0x10475ab0: decoration-volume spawn loop is identified, and FUN_1050557c is just appRound(); remaining blockers are the exact Brush local-bounds extraction path and the ULevel vtable+0xa0 cleanup call after ToFloor fails.")
 void AVolume::PostBeginPlay()
 {
 	guard(AVolume::PostBeginPlay);
-	// Ghidra 0x175ab0 (886 bytes): calls AKConstraint::postKarmaStep, then when a
-	// decoration-spec array is attached at +0x3f8, iterates specs and randomly places
-	// ADecoVolumeObject actors within the brush bounds using ULevel::ToFloor.
-	// FUN_1050557c() is an unresolved PRNG call that determines spawn count per spec.
+	// Ghidra 0x175ab0 begins with the shared 0x176d60 empty stub (equivalent to Super::PostBeginPlay()).
+	// The remaining body spawns DecoList entries inside the brush bounds; FUN_1050557c()
+	// is only the x87 rounding helper used to convert FRange::GetRand() counts to INTs.
 	Super::PostBeginPlay();
 	unguard;
 }
@@ -157,7 +262,7 @@ int AVolume::Encompasses(FVector Location)
 
 
 // --- AWarpZoneInfo ---
-IMPL_DIVERGE("Ghidra 0x103e12c0: ULevel vtable slot 0x9c (error-path call after both findStart attempts fail) is unidentified — ULevel vtable not fully mapped; error path is non-critical for gameplay")
+IMPL_MATCH("Engine.dll", 0x103e12c0)
 void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 {
 	guard(AWarpZoneInfo::AddMyMarker);
@@ -174,9 +279,8 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 			Scout->SetCollisionSize(40.0f, Scout->CollisionHeight);
 			if (!Scout->findStart(Scout->Location) || Scout->Region.Zone != Region.Zone)
 			{
-				// Ghidra: (**(code **)(**(int **)(this + 0x328) + 0x9c))()
-				// = XLevel->vtable[0x9c/4]() -- unidentified ULevel virtual, called with
-				// XLevel as implicit __thiscall receiver (no stack args).
+				// Ghidra: XLevel->vtable[0x9c/4] unnamed no-arg error-path dispatch.
+				// Matching retail via the raw slot call until the virtual is named.
 				void* XLev = *(void**)((BYTE*)this + 0x328);
 				((void(__thiscall*)(void*))(*(void***)XLev)[0x9c/4])(XLev);
 			}
@@ -186,8 +290,7 @@ void AWarpZoneInfo::AddMyMarker(AActor* param_1)
 		// Find the WarpZoneMarker class and spawn one at the scout's position.
 		UClass* WZMClass = (UClass*)UObject::StaticFindObjectChecked(
 			UClass::StaticClass(), (UObject*)-1, TEXT("WarpZoneMarker"), 0);
-		// Ghidra: Level->vtable[0xa8/4] = SpawnActor (WZMClass, NAME_None, Scout->Location, FRotator(0,0,0))
-		// Divergence: using XLevel->SpawnActor() which maps to the same vtable slot.
+		// Ghidra: Level->vtable[0xa8/4] = SpawnActor(WZMClass, NAME_None, Scout->Location, FRotator(0,0,0)).
 		AActor* Marker = XLevel->SpawnActor(WZMClass, NAME_None, Scout->Location);
 		if (Marker && !Marker->IsA(AWarpZoneMarker::StaticClass()))
 			Marker = NULL;

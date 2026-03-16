@@ -392,24 +392,25 @@ FCanvasVertex& FCanvasVertex::operator=(const FCanvasVertex& Other)
 
 // UCanvas
 // ---------------------------------------------------------------------------
-// UCanvas does not override Destroy, Serialize, or Exec in retail (Ghidra: absent from
-// Engine.dll export table). However, removing these definitions breaks the MSVC build
-// due to COMDAT folding of identical virtual stubs. Keep as IMPL_DIVERGE.
-IMPL_DIVERGE("Ghidra: UCanvas::Destroy not found in Engine.dll export table; Super::Destroy() is correct")
+// Retail Engine.dll does not emit standalone UCanvas::Destroy/Serialize/Exec symbols.
+// Destroy and Serialize fall straight through to UObject, while Exec has no recovered
+// UCanvas-specific body either. The generated headers still declare these methods, so
+// the current Engine build needs local shims even though retail does not.
+IMPL_DIVERGE("permanent: retail emits no standalone UCanvas::Destroy symbol; vtable resolves to UObject::Destroy")
 void UCanvas::Destroy()
 {
 	Super::Destroy();
 }
 
-IMPL_DIVERGE("Ghidra: UCanvas::Serialize not found in Engine.dll export table; Super::Serialize(Ar) is correct")
+IMPL_DIVERGE("permanent: retail emits no standalone UCanvas::Serialize symbol; vtable resolves to UObject::Serialize")
 void UCanvas::Serialize(FArchive& Ar)
 {
 	Super::Serialize(Ar);
 }
 
-// Ghidra: not present in Ghidra export — shared null stub, no SEH frame.
-// Returns 0 (MSVC requires a return value in non-void functions).
-IMPL_DIVERGE("Ghidra: UCanvas::Exec not found in Engine.dll export table; returns 0 per standard UObject stub; removing this definition breaks the MSVC build due to COMDAT folding")
+// Retail Engine.dll does not recover a named UCanvas::Exec body. Keep the local
+// guardless fallback so the current declaration remains linkable.
+IMPL_DIVERGE("permanent: retail emits no standalone UCanvas::Exec symbol/body; required local shim returns 0")
 UBOOL UCanvas::Exec(const TCHAR* Cmd, FOutputDevice& Ar)
 {
 	return 0;

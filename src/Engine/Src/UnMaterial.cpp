@@ -15,6 +15,12 @@
 
 #include "EnginePrivate.h"
 
+#pragma warning(push)
+#pragma warning(disable: 4291)
+inline void* operator new(size_t, void* p) noexcept { return p; }
+inline void  operator delete(void*, void*) noexcept {}
+#pragma warning(pop)
+
 /*-----------------------------------------------------------------------------
 	Class registration.
 -----------------------------------------------------------------------------*/
@@ -178,6 +184,217 @@ INT UBitmapMaterial::MaterialVSize()
 	UTexture implementation.
 =============================================================================*/
 
+namespace
+{
+	static FArchive& SerializeByteArray( FArchive& Ar, FArray& Bytes );
+
+	// Retail TLazyArray<BYTE> layout in Engine.dll:
+	//   +0x00 vftable
+	//   +0x04 SavedAr
+	//   +0x08 SavedPos
+	//   +0x0C FArray bytes
+	class FSerializedLazyByteArray : public FLazyLoader
+	{
+	public:
+		FArray Bytes;
+
+		FSerializedLazyByteArray()
+			: FLazyLoader()
+			, Bytes()
+		{
+		}
+
+		virtual ~FSerializedLazyByteArray()
+		{
+			DetachIfAttached();
+		}
+
+		virtual void Load()
+		{
+			if( SavedPos > 0 )
+			{
+				INT PushedPos = SavedAr->Tell();
+				SavedAr->Seek( SavedPos );
+				SerializeByteArray( *SavedAr, Bytes );
+				SavedPos *= -1;
+				SavedAr->Seek( PushedPos );
+			}
+		}
+
+		virtual void Unload()
+		{
+			if( SavedPos < 0 )
+			{
+				Bytes.Empty( 1, 0 );
+				SavedPos *= -1;
+			}
+		}
+
+		void DetachIfAttached()
+		{
+			if( SavedAr )
+				SavedAr->DetachLazyLoader( this );
+		}
+	};
+
+	struct FSerializedMipmap
+	{
+		BYTE* DataPtr;
+		INT   USize;
+		INT   VSize;
+		BYTE  UBits;
+		BYTE  VBits;
+		BYTE  Pad0;
+		BYTE  Pad1;
+		FSerializedLazyByteArray DataArray;
+
+		FSerializedMipmap()
+			: DataPtr( NULL )
+			, USize( 0 )
+			, VSize( 0 )
+			, UBits( 0 )
+			, VBits( 0 )
+			, Pad0( 0 )
+			, Pad1( 0 )
+			, DataArray()
+		{
+		}
+	};
+
+	class FScopedSerializedMipArray
+	{
+	public:
+		FArray Array;
+
+		~FScopedSerializedMipArray();
+	};
+
+	static void DestroySerializedMipmap( FSerializedMipmap& Mip )
+	{
+		Mip.DataArray.DetachIfAttached();
+		Mip.DataArray.Bytes.~FArray();
+	}
+
+	static void EmptySerializedMipmapArray( FArray& Mips, INT Slack )
+	{
+		BYTE* Data = (BYTE*)Mips.GetData();
+		for( INT i = 0; i < Mips.Num(); ++i )
+			DestroySerializedMipmap( *(FSerializedMipmap*)(Data + i * 0x28) );
+		Mips.Empty( 0x28, Slack );
+	}
+
+	FScopedSerializedMipArray::~FScopedSerializedMipArray()
+	{
+		EmptySerializedMipmapArray( Array, 0 );
+	}
+
+	static FArchive& SerializeByteArray( FArchive& Ar, FArray& Bytes )
+	{
+		Bytes.CountBytes( Ar, 1 );
+
+		INT Count = Bytes.Num();
+		Ar << AR_INDEX( Count );
+		if( Ar.IsLoading() )
+		{
+			Bytes.Empty( 1, Count );
+			Bytes.Add( Count, 1 );
+		}
+
+		Ar.Serialize( Bytes.GetData(), Bytes.Num() );
+		return Ar;
+	}
+
+	static FArchive& SerializeLazyByteArray( FArchive& Ar, FSerializedLazyByteArray& LazyArray )
+	{
+		INT SeekPos = 0;
+
+		if( Ar.IsLoading() )
+		{
+			if( Ar.Ver() < 0x3E )
+			{
+				Ar.AttachLazyLoader( &LazyArray );
+				INT SkipCount = 0;
+				Ar << AR_INDEX( SkipCount );
+				SeekPos = Ar.Tell() + SkipCount;
+			}
+			else
+			{
+				Ar.ByteOrderSerialize( &SeekPos, 4 );
+				if( (GUglyHackFlags & 8) == 0 )
+					Ar.AttachLazyLoader( &LazyArray );
+				else
+					SerializeByteArray( Ar, LazyArray.Bytes );
+			}
+
+			if( !GLazyLoad )
+				LazyArray.Load();
+
+			Ar.Seek( SeekPos );
+		}
+		else if( Ar.IsSaving() && Ar.Ver() > 0x3D )
+		{
+			INT CountPos = Ar.Tell();
+			Ar.ByteOrderSerialize( &CountPos, 4 );
+			SerializeByteArray( Ar, LazyArray.Bytes );
+
+			INT EndPos = Ar.Tell();
+			Ar.Seek( CountPos );
+			Ar.ByteOrderSerialize( &EndPos, 4 );
+			Ar.Seek( EndPos );
+		}
+		else
+		{
+			SerializeByteArray( Ar, LazyArray.Bytes );
+		}
+
+		return Ar;
+	}
+
+	static FArchive& SerializeMipmap( FArchive& Ar, FSerializedMipmap& Mip )
+	{
+		SerializeLazyByteArray( Ar, Mip.DataArray );
+		Ar.ByteOrderSerialize( &Mip.USize, 4 );
+		Ar.ByteOrderSerialize( &Mip.VSize, 4 );
+		Ar.Serialize( &Mip.UBits, 1 );
+		Ar.Serialize( &Mip.VBits, 1 );
+		return Ar;
+	}
+
+	static void SerializeMipmapArray( FArray& Mips, UTexture& Texture, FArchive& Ar )
+	{
+		Mips.CountBytes( Ar, 0x28 );
+
+		if( !Ar.IsLoading() )
+		{
+			INT Count = Mips.Num();
+			Ar << AR_INDEX( Count );
+			for( INT i = 0; i < Count; ++i )
+				SerializeMipmap( Ar, *(FSerializedMipmap*)((BYTE*)Mips.GetData() + i * 0x28) );
+			return;
+		}
+
+		INT NewCount = 0;
+		Ar << AR_INDEX( NewCount );
+		EmptySerializedMipmapArray( Mips, NewCount );
+
+		INT DefaultLod = Texture.DefaultLOD();
+		for( INT i = 0; i < NewCount; ++i )
+		{
+			UBOOL SavedLazyLoad = GLazyLoad;
+			if( (GUglyHackFlags & 0x20) == 0 || i < DefaultLod )
+				GLazyLoad = 1;
+			if( (GUglyHackFlags & 8) != 0 )
+				GLazyLoad = 0;
+
+			INT Index = Mips.Add( 1, 0x28 );
+			FSerializedMipmap* Mip = new ((BYTE*)Mips.GetData() + Index * 0x28) FSerializedMipmap();
+			SerializeMipmap( Ar, *Mip );
+
+			GLazyLoad = SavedLazyLoad;
+		}
+	}
+}
+
 IMPL_MATCH("Engine.dll", 0x1046b790)
 void UTexture::PostLoad()
 {
@@ -211,11 +428,55 @@ void UTexture::Destroy()
 	unguard;
 }
 
-IMPL_DIVERGE("FUN_1046b600 (mip-array serializer) and FUN_1046ace0 (per-mip-element serializer) are unexported Engine.dll internals; mip-level TArray serialization permanently omitted")
+IMPL_MATCH("Engine.dll", 0x1046c940)
 void UTexture::Serialize( FArchive& Ar )
 {
 	guard(UTexture::Serialize);
-	UBitmapMaterial::Serialize( Ar );
+	UMaterial::Serialize( Ar );
+
+	if( (Ar.IsSaving() || Ar.IsLoading()) && bParametric )
+	{
+		BYTE* MipData = (BYTE*)((FArray*)((BYTE*)this + 0xBC))->GetData();
+		for( INT i = 0; i < Mips.Num(); ++i )
+			((FSerializedMipmap*)(MipData + i * 0x28))->DataArray.Bytes.Empty( 1, 0 );
+	}
+
+	FArray& MipArray = *(FArray*)((BYTE*)this + 0xBC);
+	if( Ar.Ver() < 0x54 )
+	{
+		if( bHasComp )
+		{
+			// Legacy packages serialized the old native mip chain first and the old
+			// compressed chain second. 1.60 keeps only the latter.
+			FScopedSerializedMipArray LegacyMips;
+			SerializeMipmapArray( LegacyMips.Array, *this, Ar );
+			SerializeMipmapArray( MipArray, *this, Ar );
+			Format   = CompFormat;
+			bHasComp = 0;
+		}
+		else
+		{
+			SerializeMipmapArray( MipArray, *this, Ar );
+		}
+	}
+	else
+	{
+		if( bHasComp )
+			appFailAssert( "!OLDbHasComp", ".\\UnTex.cpp", 0x11c );
+		SerializeMipmapArray( MipArray, *this, Ar );
+	}
+
+	if( (Ar.IsSaving() || Ar.IsLoading()) && bParametric )
+	{
+		BYTE* MipData = (BYTE*)MipArray.GetData();
+		for( INT i = 0; i < Mips.Num(); ++i )
+		{
+			FSerializedMipmap& Mip = *(FSerializedMipmap*)(MipData + i * 0x28);
+			INT ByteCount = Mip.USize * Mip.VSize;
+			Mip.DataArray.Bytes.Empty( 1, ByteCount );
+			Mip.DataArray.Bytes.AddZeroed( 1, ByteCount );
+		}
+	}
 	unguard;
 }
 
@@ -579,7 +840,7 @@ void UPalette::Serialize( FArchive& Ar )
 
 // UMaterial
 // ---------------------------------------------------------------------------
-IMPL_DIVERGE("UMaterial does not override PostEditChange in retail; vtable slot resolves to UObject::PostEditChange")
+IMPL_DIVERGE("permanent: retail Engine.dll has no ?PostEditChange@UMaterial@@UAEXXZ export; UMaterial inherits UObject::PostEditChange and only reconstructed subclasses override it")
 void UMaterial::PostEditChange()
 {
 	Super::PostEditChange();
