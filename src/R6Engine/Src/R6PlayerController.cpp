@@ -260,29 +260,43 @@ INT AR6PlayerController::Tick(FLOAT DeltaTime, enum ELevelTick TickType)
 	unguard;
 }
 
-IMPL_DIVERGE("1645-byte UpdateCircumstantialAction; line-trace vtable dispatch and AR6AbstractCircumstantialActionQuery raw offset access require complete R6 class hierarchy. FUN_100017a0=fabsf (tractable) but the broader function is not implementable without full class offset map. Ghidra R6Engine.dll 0x100308c0")
+IMPL_TODO("1645-byte body at 0x100308c0; blocked by: (1) multiple unresolved PrivateStaticClass_exref IsA checks — target R6 class names unknown, (2) AR6AbstractCircumstantialActionQuery class layout at this+0x8b4, (3) FVector0_exref global identity. FUN_100017a0=fabsf resolved, vtable 0x19c=IsLocalPlayerController resolved.")
 void AR6PlayerController::UpdateCircumstantialAction()
 {
 	guard(AR6PlayerController::UpdateCircumstantialAction);
 
-	// DIVERGENCE: FUN_100017a0 (unresolved navigation helper); ~1645-byte function (Ghidra 0x100308c0).
-	// Queries circumtstantial action system (m_CircumstantialAction at this+0x8b4): fires a line
-	// trace from eye position, checks hit actor class hierarchy for interactive/pawn types, extracts
-	// material/bone info for reticule, calls eventR6QueryCircumstantialAction, updates reticule
-	// target at (this+0x9bc/0x9c0/0x9c4). Blocked by FUN_100017a0 unresolved reference.
+	// TODO: 1645-byte function (Ghidra 0x100308c0).
+	// Resolved: FUN_100017a0 = fabsf, vtable slot 0x19c = IsLocalPlayerController().
+	// Remaining blockers:
+	//   - PrivateStaticClass_exref: multiple class hierarchy IsA checks on hit actor
+	//     (walks +0x24/+0x2c chain); target class names are not in the export table.
+	//   - AR6AbstractCircumstantialActionQuery layout (this+0x8b4): raw offset access
+	//     at +0x394, +0x395, +0x3ac, +0x3b0, +0x3b4, +0x3b8, +0x3c4.
+	//   - FVector0_exref: global zero-vector used for clearing reticule target.
+	// Logic: queries circumtstantial action system — fires line trace from eye position,
+	// checks hit actor class hierarchy for interactive/pawn types, extracts material/bone
+	// info, calls eventR6QueryCircumstantialAction, updates reticule at (this+0x9bc/0x9c0/0x9c4).
 
 	unguard;
 }
 
-IMPL_DIVERGE("R6Engine.dll 0x10031010 (~1298 bytes): calls unexported FUN_1002ff80 (0x1002ff80, 729-byte __cdecl viewport renderer projection using FCameraSceneNode/FCanvasUtil, not in export table)")
+IMPL_TODO("1298-byte body at 0x10031010; blocked by FUN_1002ff80 — unexported 729-byte viewport projection helper (FCameraSceneNode/FCanvasUtil/FSceneNode::Project, reconstructible from Ghidra at 0x1002ff80). FUN_10001750=FCheckResult ctor resolved, vtable 0x19c=IsLocalPlayerController resolved.")
 void AR6PlayerController::UpdateReticule(FLOAT DeltaTime)
 {
 	guard(AR6PlayerController::UpdateReticule);
 
-	// DIVERGENCE: FUN_10001750/FUN_1002ff80 unresolved; ~1298-byte function (Ghidra 0x10031010).
-	// Iterates level actors for alive terrorists, gets bone positions via
-	// USkeletalMeshInstance::GetBoneCoords ("R6 PonyTail1"), projects to screen via FUN_1002ff80,
-	// finds closest in reticule radius. Updates aim info at (this+0x8b0/0x918/0x91c/0x920/0x86c/0x870).
+	// TODO: 1298-byte function (Ghidra 0x10031010).
+	// Resolved: FUN_10001750 = FCheckResult(1.0f) ctor, FUN_100017a0 = fabsf,
+	//           vtable slot 0x19c = IsLocalPlayerController().
+	// Remaining blocker:
+	//   - FUN_1002ff80: unexported 729-byte __cdecl viewport projection helper at 0x1002ff80.
+	//     Creates FCameraSceneNode, FCanvasUtil, calls FSceneNode::Project, returns 1 if
+	//     projected point is on-screen. Full Ghidra decompilation available — reconstructible
+	//     but requires FCameraSceneNode/FCanvasUtil/FSceneNode class availability.
+	// Logic: iterates level actors for alive terrorists (role byte == 0x2), gets bone positions
+	// via USkeletalMeshInstance::GetBoneCoords("R6 PonyTail1"), projects to screen via
+	// FUN_1002ff80, finds closest in reticule radius. Updates aim info at
+	// (this+0x8b0/0x918/0x91c/0x920/0x86c/0x870). Lerps reticule position over time.
 
 	unguard;
 }

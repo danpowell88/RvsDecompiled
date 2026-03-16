@@ -1417,12 +1417,63 @@ void FOctreeNode::CheckIsEmpty()
 }
 
 // ?Draw@FOctreeNode@@QAEXVFColor@@HPBVFPlane@@@Z
-IMPL_DIVERGE("Ghidra 0x103DB6C0: editor/debug visualization only — builds node FBox and appends to GTempLineBatcher.Boxes debug line-renderer; GTempLineBatcher is an editor-only global not present in the runtime path")
-void FOctreeNode::Draw(FColor p0, int p1, FPlane const * p2) {}
+// Ghidra 0x103DB6C0 (322 bytes): builds FBox from NodePlane, appends to GTempLineBatcher,
+// then optionally recurses into all 8 children.
+IMPL_TODO("Ghidra 0x103DB6C0: functionally correct; retail inlines AddBox array ops — not byte-exact with #pragma optimize off")
+void FOctreeNode::Draw(FColor Color, int bRecurse, FPlane const* NodePlane)
+{
+	guard(FOctreeNode::Draw);
+	FBox Box(
+		FVector(NodePlane->X - NodePlane->W, NodePlane->Y - NodePlane->W, NodePlane->Z - NodePlane->W),
+		FVector(NodePlane->X + NodePlane->W, NodePlane->Y + NodePlane->W, NodePlane->Z + NodePlane->W)
+	);
+	GTempLineBatcher->AddBox(Box, Color);
+
+	FOctreeNode* Children = *(FOctreeNode**)(Pad + 0xc);
+	if (Children && bRecurse)
+	{
+		for (DWORD i = 0; i < 8; i++)
+		{
+			FPlane ChildPlane = MakeOctreeChildPlane(*NodePlane, i);
+			GetOctreeChild(Children, i)->Draw(Color, bRecurse, &ChildPlane);
+		}
+	}
+	unguard;
+}
 
 // ?DrawFlaggedActors@FOctreeNode@@QAEXPAVFCollisionOctree@@PBVFPlane@@@Z
-IMPL_DIVERGE("Ghidra 0x103DB840: editor/debug visualization only — draws actors flagged 0x4000000 via FTempLineBatcher line append; FTempLineBatcher is an editor-only debug draw path")
-void FOctreeNode::DrawFlaggedActors(FCollisionOctree * p0, FPlane const * p1) {}
+// Ghidra 0x103DB840 (413 bytes): for actors with flag 0x4000000, highlights the node
+// in red and draws each actor's OctreeBox in magenta via GTempLineBatcher.
+IMPL_TODO("Ghidra 0x103DB840: functionally correct; retail inlines AddBox array ops — not byte-exact with #pragma optimize off")
+void FOctreeNode::DrawFlaggedActors(FCollisionOctree* OctHash, FPlane const* NodePlane)
+{
+	UBOOL bDrawnNode = 0;
+	TArray<AActor*>& ActorList = *(TArray<AActor*>*)this;
+	for (INT i = 0; i < ActorList.Num(); i++)
+	{
+		AActor* Actor = ActorList(i);
+		if (*(DWORD*)((BYTE*)Actor + 0xa0) & 0x4000000)
+		{
+			if (!bDrawnNode)
+			{
+				Draw(FColor(0xffff3c32), 0, NodePlane);
+				bDrawnNode = 1;
+			}
+			FBox ActorBox = *(FBox*)((BYTE*)Actor + 0x350);
+			GTempLineBatcher->AddBox(ActorBox, FColor(0xffff00ff));
+		}
+	}
+
+	FOctreeNode* Children = *(FOctreeNode**)(Pad + 0xc);
+	if (Children)
+	{
+		for (DWORD i = 0; i < 8; i++)
+		{
+			FPlane ChildPlane = MakeOctreeChildPlane(*NodePlane, i);
+			GetOctreeChild(Children, i)->DrawFlaggedActors(OctHash, &ChildPlane);
+		}
+	}
+}
 
 IMPL_MATCH("Engine.dll", 0x103db0c0)
 void FOctreeNode::FilterTest(FBox* Box, INT bMultiNode, TArray<FOctreeNode*>* Nodes, FPlane const* NodePlane)

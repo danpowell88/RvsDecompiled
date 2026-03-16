@@ -22,16 +22,10 @@ const TCHAR* UInputPlanning::StaticConfigName()
 	return TEXT("User");
 }
 
-IMPL_EMPTY("Alias UStruct property registration not yet implemented; requires Alias struct header support")
+IMPL_TODO("Ghidra 0x103b44a0 (591b): builds Alias UStruct with FName+FString properties, registers Aliases array on UInputPlanning, populates EInputKey FName table; blocked by: UStruct/UNameProperty/UStrProperty construction APIs and CPP_PROPERTY macro support for Alias struct layout")
 void UInputPlanning::StaticInitInput()
 {
 	guard(UInputPlanning::StaticInitInput);
-	// TODO: implement UInputPlanning::StaticInitInput (retail 0xb47c0: registers Alias UStruct with FName/FString properties on UInput)
-	// GHIDRA REF: 0xb47c0 ?StaticInitInput@UInput@@SAXXZ — builds Alias UStruct with
-	// FName "Alias" and FString "Command" properties, then registers "Aliases"
-	// array property on UInput. Called once at engine startup.
-	// The property registration requires CPP_PROPERTY macros to work correctly
-	// with the Alias struct layout, which is not yet part of the reconstructed headers.
 	unguard;
 }
 
@@ -45,10 +39,7 @@ void UInputPlanning::StaticInitInput()
 
 // 1757-byte input command dispatch at 0x103b4bd0.
 // Handles BUTTON/PULSE/TOGGLE/AXIS/COUNT/KEYNAME/KEYBINDING and key-binding execution.
-// Blocked by: FindButtonName/FindAxisName (FUN_103b5740), DAT_106717e8 (editor global),
-// and complex FName/FString property management. Full implementation requires
-// FindButtonName and FindAxisName to be unblocked first.
-IMPL_DIVERGE("permanent: FUN_103b5740 (UClass property-list cache helper) is unexported and DAT_106717e8 (editor-only global) is permanently inaccessible; 1757-byte BUTTON/AXIS/TOGGLE/PULSE command dispatch permanently unimplementable; Ghidra 0x103b4bd0")
+IMPL_TODO("Ghidra 0x103b4bd0 (1757b): BUTTON/AXIS/TOGGLE/PULSE/COUNT/KEYNAME/KEYBINDING dispatch; blocked by: FUN_103b5740 (property-list cache helper, uses GCache — replicable locally), DAT_106717e8 (unidentified editor-mode global), and alias FName array iteration at this+0x04")
 INT UInput::Exec( const TCHAR* Cmd, FOutputDevice& Ar ) { return 0; }
 IMPL_MATCH("Engine.dll", 0x103b4b40)
 void UInput::Serialize( FArchive& Ar )
@@ -57,11 +48,11 @@ void UInput::Serialize( FArchive& Ar )
 	// Serialize the UViewport* stored at offset 0xEA8
 	Ar << *(UViewport**)((BYTE*)this + 0xEA8);
 }
-IMPL_EMPTY("viewport initialization no-op")
+IMPL_TODO("Ghidra 0x103b3f50 (344b): sets Viewport at this+0xEA4, iterates 40 alias slots checking AXIS+FIRE keywords via FString::Caps/InStr, clears fire-axis bindings; blocked by: alias slot layout at this+0x34 (FName+FString per 0x10-byte slot) and vtable call at offset 0x7c (ResetInput?)")
 void UInput::Init( UViewport* InViewport ) {}
-IMPL_EMPTY("input polling no-op")
+IMPL_TODO("Ghidra 0x103b5b30 (289b): checks GIsRunning, releases held keys via Process vtable call, scales axis values by 20/DeltaSeconds, uses FUN_103b5740 property cache; blocked by: FUN_103b5740 (GCache-based property-list cache helper — replicable locally)")
 void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar ) {}
-IMPL_EMPTY("input state reset no-op")
+IMPL_TODO("Ghidra 0x103b5c90 (297b): asserts Viewport, clears KeyDownMap[0..254], walks UClass property chain zeroing UByteProperty and UFloatProperty members; blocked by: FUN_103b43e0/FUN_103b4430 (byte/float property iterators — replicable locally) and vtable call at offset 0x90")
 void UInput::ResetInput() {}
 IMPL_MATCH("Engine.dll", 0x103b4130)
 BYTE UInput::GetKey( const TCHAR* KeyName )
@@ -78,16 +69,76 @@ BYTE UInput::GetKey( const TCHAR* KeyName )
 	}
 	return found;
 }
-IMPL_EMPTY("key assignment no-op")
-void UInput::SetKey( const TCHAR* KeyName ) {}
+IMPL_TODO("Ghidra 0x103b41e0 (318b): implemented — structure matches Ghidra; bindings array uses FStringNoInit in retail (we use FString, identical operator=); binary parity unverified")
+void UInput::SetKey( const TCHAR* KeyName )
+{
+	guard(UInput::SetKey);
+	TCHAR Token[256];
+	FString NewBinding;
+	EInputKey Key = (EInputKey)0;
+
+	if (ParseToken(KeyName, Token, 256, 0))
+	{
+		if (FindKeyName(Token, Key))
+		{
+			if (ParseToken(KeyName, Token, 256, 0))
+			{
+				NewBinding = Token;
+			}
+		}
+	}
+
+	if (NewBinding.Len() > 0)
+	{
+		for (BYTE i = 0; i != 0xFF; i++)
+		{
+			FString& Binding = *(FString*)((BYTE*)this + (DWORD)i * 0xC + 0x2B0);
+			if (appStricmp(*NewBinding, *Binding) == 0)
+			{
+				Binding = TEXT("");
+			}
+		}
+	}
+
+	*(FString*)((BYTE*)this + (INT)Key * 0xC + 0x2B0) = NewBinding;
+	SaveConfig(CPF_Config, NULL);
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103b4350)
 FString UInput::GetActionKey( BYTE Key ) { return *(FString*)((BYTE*)this + Key * 0xC + 0x2B0); }
-IMPL_DIVERGE("permanent: FUN_103b5740 (UClass property-list cache helper) is unexported; returns NULL — Ghidra 0x103b5870")
+IMPL_TODO("Ghidra 0x103b5870 (300b): asserts Viewport/Actor, creates FName from ButtonName, calls FUN_103b5740 to get cached UByteProperty list, scans for matching FName; blocked by: FUN_103b5740 (GCache-based property-list cache — replicable as local static helper)")
 BYTE* UInput::FindButtonName( AActor* Actor, const TCHAR* ButtonName ) const { return NULL; }
-IMPL_DIVERGE("permanent: FUN_103b5740 (UClass property-list cache helper) is unexported; returns NULL — Ghidra 0x103b59d0")
+IMPL_TODO("Ghidra 0x103b59d0 (300b): asserts Viewport/Actor, creates FName from AxisName, calls FUN_103b5740 to get cached UFloatProperty list, scans for matching FName; blocked by: FUN_103b5740 (same helper as FindButtonName)")
 FLOAT* UInput::FindAxisName( AActor* Actor, const TCHAR* AxisName ) const { return NULL; }
-IMPL_EMPTY("input command execution no-op")
-void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar ) {}
+IMPL_TODO("Ghidra 0x103b3e50 (188b): implemented — dispatches parsed lines through FExec secondary vtable; IST_Press and IST_Release+OnRelease go to Viewport->Exec, others to this->Exec; binary parity unverified (FExec vtable dispatch path via static_cast may differ from retail)")
+void UInput::ExecInputCommands( const TCHAR* Cmd, FOutputDevice& Ar )
+{
+	guard(UInput::ExecInputCommands);
+	TCHAR Line[256];
+	UViewport* Viewport = *(UViewport**)((BYTE*)this + 0xEA4);
+	const TCHAR* LineCmd;
+
+	do
+	{
+		while (1)
+		{
+			if (!ParseLine(&Cmd, Line, 256, 0))
+				return;
+			LineCmd = Line;
+			if (*(EInputAction*)((BYTE*)this + 0xEAC) != IST_Press)
+				break;
+		DispatchViewport:
+			static_cast<FExec*>(Viewport)->Exec(LineCmd, Ar);
+		}
+		if (*(EInputAction*)((BYTE*)this + 0xEAC) == IST_Release)
+		{
+			if (ParseCommand(&LineCmd, TEXT("OnRelease")))
+				goto DispatchViewport;
+		}
+		static_cast<FExec*>(this)->Exec(LineCmd, Ar);
+	} while (1);
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x1031c190)
 BYTE UInput::KeyDown( INT Key )
 {
@@ -149,19 +200,14 @@ INT UInput::Process(FOutputDevice& Ar, EInputKey Key, EInputAction Action, FLOAT
 	}
 	return 0;
 }
-IMPL_EMPTY("direct axis injection no-op")
+IMPL_TODO("Ghidra 0x103b5400 (455b): splits binding string on '|', appends 'Speed=<Value>' to each part, dispatches each through Exec vtable with IST_Axis action; blocked by: FString::Split not declared in local headers (SDK-only), FString::Printf, vtable call at offset 0x9c")
 void UInput::DirectAxis(EInputKey Key, FLOAT Value, FLOAT Delta) {}
 
-// ?GetKeyName@UInput@@QBEPBGHHPAVEInputKey@@@Z   (returns display name for a virtual-key code)
-// Key names match the DefUser.ini binding keys (retail verified).
-// Letters A-Z and digits 0-9 are their single character.
-// Numpad, Function keys and special keys use the standard Unreal names.
-// Unrecognised codes return "Unknown%02X" format (e.g. "Unknown3A").
 // Retail 0x103b55d0 (162b): reads FName from property array at *(*(this+0xea8)+0x38)[Key*4],
 // strips "IK_" prefix (skips +3 chars), returns pointer into FName table.
 // Our static table produces identical display strings without the FName reflection.
-// Divergence is permanent: FName property array at +0xea8 requires live UClass reflection.
-IMPL_DIVERGE("permanent: retail reads FName property array via UClass reflection at this+0xea8; static table produces identical display strings; 0x103b55d0")
+// Matchable once StaticInitInput populates the EInputKey FName array.
+IMPL_TODO("Ghidra 0x103b55d0 (162b): retail reads FName property array populated by StaticInitInput at *(*(this+0xea8)+0x38)[Key*4], strips IK_ prefix; current static table returns identical strings; blocked by: StaticInitInput not yet implemented (needed to populate FName array)")
 const TCHAR* UInput::GetKeyName(EInputKey Key) const
 {
 	static TCHAR GenBuf[16]; // used for dynamically generated names
@@ -224,11 +270,10 @@ const TCHAR* UInput::GetKeyName(EInputKey Key) const
 	return GenBuf;
 }
 
-// ?FindKeyName@UInput@@QBEHPBGAAHPAVEInputKey@@@Z (reverse lookup: name → EInputKey)
 // Retail 0x103b5df0 (178b): prepends "IK_" to KeyName, creates FName, calls FUN_103b56b0
-// (not in export table) to do the actual reverse property lookup. Our fallback iterates
-// GetKeyName() which yields the same display strings — functionally equivalent.
-IMPL_DIVERGE("permanent: input key name reverse-lookup; retail uses FUN_103b56b0 (unexported internal); current linear-search over GetKeyName() static table produces identical results — permanent code-path divergence; Ghidra 0x103b5df0")
+// (not exported, but simple FName comparison loop — replicable locally) to do reverse lookup.
+// Current linear-search over GetKeyName() produces identical results.
+IMPL_TODO("Ghidra 0x103b5df0 (178b): prepends IK_ prefix, creates FName, calls FUN_103b56b0 (simple FName scan loop — replicable as local helper); current GetKeyName() linear search returns identical results; blocked by: StaticInitInput (populates FName table) and FUN_103b56b0 local helper")
 INT UInput::FindKeyName(const TCHAR* KeyName, EInputKey& Key) const
 {
 	for (INT i = 1; i < 256; i++)
@@ -259,5 +304,5 @@ FLOAT UInput::GetInputDelta()
 }
 IMPL_MATCH("Engine.dll", 0x103116d0)
 const TCHAR* UInput::StaticConfigName() { return TEXT("User"); }
-IMPL_EMPTY("UInput static input initialization no-op")
+IMPL_TODO("Ghidra 0x103b47c0 (591b): identical to UInputPlanning::StaticInitInput — builds Alias UStruct, registers Aliases array property, populates EInputKey FName table from EInputKey enum; blocked by: UStruct/UNameProperty/UStrProperty construction APIs and CPP_PROPERTY macro support")
 void UInput::StaticInitInput() {}
