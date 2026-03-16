@@ -149,8 +149,42 @@ void UInput::ReadInput( FLOAT DeltaSeconds, FOutputDevice& Ar )
 	}
 	unguard;
 }
-IMPL_TODO("Ghidra 0x103b5c90 (297b): asserts Viewport, clears KeyDownMap[0..254], walks UClass property chain zeroing UByteProperty and UFloatProperty members; blocked by: FUN_103b43e0/FUN_103b4430 (byte/float property iterators — replicable locally) and vtable call at offset 0x90")
-void UInput::ResetInput() {}
+IMPL_MATCH("Engine.dll", 0x103b5c90)
+void UInput::ResetInput()
+{
+	guard(UInput::ResetInput);
+	UViewport* Viewport = *(UViewport**)((BYTE*)this + 0xEA4);
+	check(Viewport);
+
+	BYTE* KeyDownMap = (BYTE*)this + 0xEB4;
+	for (INT Key = 0; Key < 0xFF; ++Key)
+	{
+		KeyDownMap[Key] = 0;
+	}
+
+	AActor* Actor = *(AActor**)((BYTE*)Viewport + 0x34);
+	for (TFieldIterator<UByteProperty> ItB(Actor->GetClass()); ItB; ++ItB)
+	{
+		if (ItB->PropertyFlags & CPF_InputFlag)
+		{
+			*(BYTE*)((BYTE*)Actor + ItB->Offset) = 0;
+		}
+	}
+
+	for (TFieldIterator<UFloatProperty> ItF(Actor->GetClass()); ItF; ++ItF)
+	{
+		if (ItF->PropertyFlags & CPF_InputFlag)
+		{
+			*(FLOAT*)((BYTE*)Actor + ItF->Offset) = 0.0f;
+		}
+	}
+
+	SetInputAction(IST_None, 0.0f);
+
+	typedef void (__thiscall *FViewportUpdateInputFn)(UViewport*, INT, FLOAT);
+	((FViewportUpdateInputFn)(*(DWORD*)Viewport + 0x90))(Viewport, 1, 0.0f);
+	unguard;
+}
 IMPL_MATCH("Engine.dll", 0x103b4130)
 BYTE UInput::GetKey( const TCHAR* KeyName )
 {
