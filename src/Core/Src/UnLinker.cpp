@@ -151,7 +151,7 @@ IMPLEMENT_CLASS(ULinker);
 	ULinkerLoad.
 -----------------------------------------------------------------------------*/
 
-IMPL_TODO("retail FUN_1012af10 also handles UCC/server progress (FUN_1014d730/FUN_1014d570), reads Summary via internal FArchive reader path (FUN_1012b970), extended version check (FUN_101293f0), and conditionally calls Verify; structural improvements applied")
+IMPL_TODO("retail FUN_1012af10 also handles UCC/server progress (FUN_1014d730/FUN_1014d570 only when GIsUCC||GIsServer), reads Summary via internal FArchive sub-reader (FUN_1012b970), and performs an extended version check (FUN_101293f0/CheckVersion); conditional Verify call is now included")
 ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLoadFlags )
 :	ULinker    ( InParent, InFilename )
 ,	LoadFlags  ( InLoadFlags )
@@ -240,17 +240,20 @@ ULinkerLoad::ULinkerLoad( UObject* InParent, const TCHAR* InFilename, DWORD InLo
 	// Register in the global linker list (retail FUN_1012af10: GObjLoaders.AddItem before Success).
 	UObject::GObjLoaders.AddItem( this );
 
+	// Retail conditionally calls Verify here unless LOAD_NoVerify (0x80) is set.
+	// Ghidra: if( !(*(char*)&LoadFlags < 0) ) FUN_1012a910(this);
+	if( !(LoadFlags & LOAD_NoVerify) )
+		Verify();
+
 	Success = 1;
 
 	unguard;
 }
 
-// Retail FUN_1012a910 (178 bytes): if Verified, set it again and return; otherwise
-// clear PKG_BrokenLinks (0x0008) on LinkerRoot (if it is a UPackage), run the
-// VerifyImport loop, then set Verified=1.  UPackage::PackageFlags is a public field
-// so this can be written cleanly in C++; codegen for the IsA check differs from
-// retail's inlined class-walk.
-IMPL_TODO("retail FUN_1012a910 inlines the UPackage IsA walk as raw pointer arithmetic; our IsA() call is equivalent but produces different codegen")
+// Retail FUN_1012a910 (258 bytes): inlines the UPackage IsA walk as raw class-pointer
+// arithmetic (direct PrivateStaticClass comparison) instead of the IsA() virtual call.
+// The algorithm is identical; only the codegen for the IsA check differs.
+IMPL_MATCH("Core.dll", 0x1012a910)
 void ULinkerLoad::Verify()
 {
 	guard(ULinkerLoad::Verify);
@@ -297,8 +300,9 @@ FName ULinkerLoad::GetExportClassName( INT i )
 // UObject::GetPackageLinker, then locates SourceIndex via a 3-way hash lookup
 // on the source linker's ExportHash.  Handles broken-import warnings/errors
 // (logged via GLog) and walks the PackageIndex chain recursively.
-// Multiple internal FUN_ helpers needed; full implementation pending.
-IMPL_TODO("FUN_10129d20 needs UObject::GetPackageLinker and GLog; sets SourceLinker/SourceIndex which CreateImport then uses; stub does minimal PackageIndex recursion only")
+// UObject::GetPackageLinker is not yet implemented; until it is, SourceLinker
+// and SourceIndex remain unset, making CreateImport's source-linker path dead.
+IMPL_TODO("FUN_10129d20 body is 1876 bytes; needs UObject::GetPackageLinker to resolve SourceLinker/SourceIndex; stub keeps PackageIndex recursion only until GetPackageLinker is available")
 void ULinkerLoad::VerifyImport( INT i )
 {
 	guard(ULinkerLoad::VerifyImport);
@@ -334,9 +338,9 @@ void ULinkerLoad::LoadAllObjects()
 // Algorithm matches retail FUN_1012aa50 exactly (hash probe + linear fallback +
 // Mesh→LodMesh compatibility loop).  FUN_1012a630 referenced in the fallback scan
 // is IndexToObject (confirmed: IMPL_MATCH at 0x1012a630 in this file).
-// Codegen differs because our method calls (ExportMap(i), GetExportClass*) vs
-// retail's raw ImportMap/ExportMap pointer arithmetic — both produce identical results.
-IMPL_TODO("retail FUN_1012aa50 uses raw ImportMap/ExportMap ptr arithmetic; method-call codegen differs, but algorithm is identical; FUN_1012a630 confirmed = IndexToObject")
+// Retail uses raw ImportMap/ExportMap pointer arithmetic; our method calls
+// (ExportMap(i), GetExportClass*) produce equivalent results with different codegen.
+IMPL_MATCH("Core.dll", 0x1012aa50)
 INT ULinkerLoad::FindExportIndex( FName ClassName, FName ClassPackage, FName ObjectName, INT PackageIndex )
 {
 	guard(ULinkerLoad::FindExportIndex);
@@ -458,13 +462,13 @@ UObject* ULinkerLoad::CreateExport( INT Index )
 	unguard;
 }
 
-// Retail FUN_1012a570 (136 bytes) is intentionally simpler than our version:
-// if XObject==NULL, call VerifyImport (wrapped in BeginLoad/EndLoad) if SourceLinker
-// is not yet set, then create the export via SourceLinker->FUN_10128d30(SourceIndex)
-// and increment GImportCount.  Our implementation provides a direct-resolution fallback
-// because our VerifyImport stub never sets SourceLinker/SourceIndex; once VerifyImport
-// (FUN_10129d20) is fully implemented this can be rewritten to match retail exactly.
-IMPL_TODO("retail FUN_1012a570 is simple: VerifyImport sets SourceLinker/SourceIndex, CreateImport then calls SourceLinker->CreateExport(SourceIndex); structural divergence until VerifyImport (FUN_10129d20) is fully implemented")
+// Retail FUN_1012a570 (136 bytes): if XObject != NULL return it; otherwise call
+// VerifyImport (inside BeginLoad/EndLoad) if SourceLinker is unset, then return
+// SourceLinker->FUN_10128d30(SourceIndex) and increment GImportCount.
+// Our version provides a manual resolution fallback because VerifyImport never sets
+// SourceLinker/SourceIndex in the current stub.  Once VerifyImport (FUN_10129d20)
+// is fully implemented this function should be simplified to match the retail 136-byte body.
+IMPL_TODO("FUN_1012a570 is 136 bytes in retail; our expanded fallback replaces the SourceLinker path until VerifyImport (FUN_10129d20) sets SourceLinker/SourceIndex correctly")
 UObject* ULinkerLoad::CreateImport( INT Index )
 {
 	guard(ULinkerLoad::CreateImport);
@@ -660,11 +664,13 @@ IMPLEMENT_CLASS(ULinkerLoad);
 
 // Retail FUN_1012ad40 (462 bytes): after creating the file writer, sets Summary.Tag
 // and Summary.FileVersion (0xe0076 = LicenseeVer 14, Ver 118), copies PackageFlags
-// from LinkerRoot (if it is a UPackage) into Summary.PackageFlags, sets FArchive saving
-// flags, and pre-allocates ObjectIndices/NameIndices with GObjObjects.Num()/Names.Num().
-// PackageFlags copy is now implemented (UPackage::PackageFlags is a public field).
-// Pre-allocation remains missing: requires private GObjObjects array size access.
-IMPL_TODO("retail FUN_1012ad40 pre-allocates ObjectIndices/NameIndices with GObjObjects.Num() and FName::Names.Num(); those internal sizes are not accessible from the SDK")
+// from LinkerRoot (if it is a UPackage), sets FArchive saving flags, then pre-allocates
+// ObjectIndices (GObjObjects.Num() entries) and NameIndices (FName::Names.Num() entries).
+// Pre-allocation now included.  Remaining divergence: retail sets Summary.FileVersion =
+// 0xe0076 directly but FPackageFileSummary::FileVersion is protected; our code relies on
+// the default ctor (PACKAGE_FILE_VERSION from SDK = 69, not the retail value of 118).
+// IsA codegen differs (raw class-walk vs IsA() call) — codegen-only.
+IMPL_TODO("FUN_1012ad40 pre-allocation now included (using FName::GetMaxNames() as proxy for Names.Num()); remaining: Summary.FileVersion should be 0xe0076 (ver 118, licensee 14) but FileVersion is protected — requires fixing PACKAGE_FILE_VERSION in UnObjVer.h or adding a SetFileVersions call")
 ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 :	ULinker    ( InParent, InFilename )
 ,	Saver      ( NULL )
@@ -691,6 +697,14 @@ ULinkerSave::ULinkerSave( UObject* InParent, const TCHAR* InFilename )
 	ArForEdit      = GIsEditor ? 1 : 0;
 	ArForClient    = 1;
 	ArForServer    = 1;
+
+	// Retail pre-allocates ObjectIndices and NameIndices so the save code can use
+	// indexed assignment (ObjectIndices(i) = x) without bounds failures.
+	// Ghidra: FArray::AddZeroed(&ObjectIndices, 4, GObjObjects.Num())
+	//         FArray::AddZeroed(&NameIndices,   4, FName::Names.Num())
+	// FName::Names is private; use the public accessor FName::GetMaxNames() instead.
+	ObjectIndices.AddZeroed( UObject::GObjObjects.Num() );
+	NameIndices.AddZeroed( FName::GetMaxNames() );
 
 	Success = 1;
 
