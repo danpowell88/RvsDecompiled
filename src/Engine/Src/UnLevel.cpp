@@ -699,7 +699,7 @@ void ULevel::RememberActors()
 	unguard;
 }
 
-IMPL_TODO("stub; retail command dispatch at Ghidra 0x103c1630")
+IMPL_TODO("1728-byte ULevel::Exec command dispatch; no permanent blockers (no Karma/rdtsc/FUNs); complex string/command routing. Ghidra 0x103c1630")
 INT ULevel::Exec( const TCHAR* Cmd, FOutputDevice& Ar )
 {
 	guard(ULevel::Exec);
@@ -755,7 +755,7 @@ void ULevel::CompactActors()
 	unguard;
 }
 
-IMPL_TODO("partial stub; retail Listen at Ghidra 0x103c0460")
+IMPL_TODO("801-byte ULevel::Listen; no permanent blockers (no Karma/rdtsc/FUNs); partial stub pending URL-parse and NetDriver init. Ghidra 0x103c0460")
 INT ULevel::Listen( FString& Error )
 {
 	guard(ULevel::Listen);
@@ -779,7 +779,7 @@ INT ULevel::IsServer()
 		return 1;
 	return 0;
 }
-IMPL_TODO("stub; retail sweep/collision at Ghidra 0x103b9750")
+IMPL_TODO("5565-byte ULevel::MoveActor sweep/collision loop; no permanent blockers (no Karma/rdtsc/FUNs); large complex function. Ghidra 0x103b9750")
 INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FCheckResult& Hit, INT bTest, INT bIgnorePawns, INT bIgnoreBases, INT bNoFail, INT bExtra )
 {
 	guard(ULevel::MoveActor);
@@ -788,7 +788,7 @@ INT ULevel::MoveActor( AActor* Actor, FVector Delta, FRotator NewRotation, FChec
 	unguard;
 }
 
-IMPL_TODO("partial stub; retail FarMoveActor at Ghidra 0x103b93e0")
+IMPL_TODO("828-byte ULevel::FarMoveActor; no permanent blockers (no DATs/FUNs in function body); tractable. Ghidra 0x103b93e0")
 INT ULevel::FarMoveActor( AActor* Actor, FVector DestLocation, INT bTest, INT bNoCheck, INT bAttachedMove, INT bExtra )
 {
 	guard(ULevel::FarMoveActor);
@@ -1353,7 +1353,7 @@ void ULevel::SpawnViewActor( UViewport* Viewport )
 	unguard;
 }
 
-IMPL_TODO("stub; retail SpawnPlayActor at Ghidra 0x103be0c0")
+IMPL_TODO("3578-byte ULevel::SpawnPlayActor; DAT_10529f90/DAT_1052a448 are wide-string literals (not profiling globals); no permanent blockers. Ghidra 0x103be0c0")
 APlayerController* ULevel::SpawnPlayActor( UPlayer* Player, ENetRole RemoteRole, const FURL& URL, FString& Error )
 {
 	guard(ULevel::SpawnPlayActor);
@@ -1605,7 +1605,7 @@ INT ULevel::EncroachingWorldGeometry( FCheckResult& Hit, FVector Location, FVect
 	unguard;
 }
 
-IMPL_TODO("stub; retail MultiPointCheck at Ghidra 0x103bc6f0")
+IMPL_TODO("966-byte ULevel::MultiPointCheck; rdtsc call confirmed dead code (local_1c overwritten before read); no permanent blockers. Ghidra 0x103bc6f0")
 FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector Extent, DWORD ExtraNodeFlags, ALevelInfo* Level, INT bActors, INT bOnlyWorldGeometry, INT bSingleResult, AActor* Requester )
 {
 	guard(ULevel::MultiPointCheck);
@@ -1614,7 +1614,7 @@ FCheckResult* ULevel::MultiPointCheck( FMemStack& Mem, FVector Location, FVector
 	unguard;
 }
 
-IMPL_TODO("stub; retail MultiLineCheck at Ghidra 0x103bcb00")
+IMPL_TODO("stub; retail MultiLineCheck at Ghidra 0x103bcb00; no permanent blockers (no Karma/rdtsc/FUNs)")
 FCheckResult* ULevel::MultiLineCheck( FMemStack& Mem, FVector End, FVector Start, FVector Extent, ALevelInfo* Level, DWORD TraceFlags, AActor* SourceActor )
 {
 	guard(ULevel::MultiLineCheck);
@@ -1641,7 +1641,7 @@ void ULevel::DetailChange( INT NewDetail )
 	unguard;
 }
 
-IMPL_TODO("partial stub; retail TickDemoRecord at Ghidra 0x103c62f0")
+IMPL_TODO("621-byte ULevel::TickDemoRecord; FUN_103b7b70 (role/channel-find helper) confirmed in Engine _unnamed.cpp; no permanent blockers. Ghidra 0x103c62f0")
 INT ULevel::TickDemoRecord( FLOAT DeltaSeconds )
 {
 	guard(ULevel::TickDemoRecord);
@@ -1716,7 +1716,7 @@ INT ULevel::IsPaused()
 	unguard;
 }
 
-IMPL_TODO("UPackageMap::Copy omitted; retail WelcomePlayer at Ghidra 0x103c0890")
+IMPL_TODO("227-byte ULevel::WelcomePlayer; UPackageMap::Copy not yet declared in our codebase (exists in retail Engine.dll but not exported; needs virtual method declaration); tractable. Ghidra 0x103c0890")
 void ULevel::WelcomePlayer( UNetConnection* Connection, TCHAR* Optional )
 {
 	guard(ULevel::WelcomePlayer);
@@ -1843,7 +1843,7 @@ INT ULevel::NotifyAcceptingChannel( UChannel* Channel )
 }
 IMPL_MATCH("Engine.dll", 0x103116c0)
 ULevel* ULevel::NotifyGetLevel() { return this; }
-IMPL_TODO("stub; retail dispatches network protocol commands at Ghidra 0x103c1d30")
+IMPL_TODO("3802-byte ULevel::NotifyReceivedText network protocol dispatcher; FUN_103bef10/FUN_103bfaf0 confirmed in Engine _unnamed.cpp; DAT_1077fbfc is UNetDriver ptr (settings field +0x4c); no permanent blockers. Ghidra 0x103c1d30")
 void ULevel::NotifyReceivedText( UNetConnection* Connection, const TCHAR* Text )
 {
 	guard(ULevel::NotifyReceivedText);
@@ -1986,7 +1986,7 @@ INT ULevel::MoveActorFirstBlocking( AActor* Actor, INT bIgnorePawns, INT bTest, 
 	return 0;
 	unguard;
 }
-IMPL_TODO("Ghidra 0x103c0140 (740 bytes): LevelInfo-hit branch routes through physics-volume vtable chain at LevelInfo+0x328; that chain is unresolved")
+IMPL_TODO("740-byte ULevel::ToFloor; dispatches through vtable of object at actor+0x170 (collision component, slots 0x6c/0x70); no Karma/rdtsc; tractable once component vtable slots are identified. Ghidra 0x103c0140")
 INT ULevel::ToFloor( AActor* Actor, INT bTest, AActor* IgnoreActor )
 {
 	guard(ULevel::ToFloor);
@@ -2103,7 +2103,7 @@ void ALevelInfo::execGetLocalURL( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execGetLocalURL );
 
 // GetMapNameLocalisation() - returns the localised map name.
-IMPL_TODO("1212-byte function; creates UR6MissionDescription via StaticAllocateObject to get localised map name; Ghidra 0x103bdb70")
+IMPL_TODO("1212-byte ALevelInfo::execGetMapNameLocalisation; creates UR6MissionDescription via StaticAllocateObject; no permanent blockers (no Karma/rdtsc/FUNs); tractable. Ghidra 0x103bdb70")
 void ALevelInfo::execGetMapNameLocalisation( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execGetMapNameLocalisation);
@@ -2249,7 +2249,7 @@ void ALevelInfo::execSetBankSound( FFrame& Stack, RESULT_DECL )
 IMPLEMENT_FUNCTION( ALevelInfo, INDEX_NONE, execSetBankSound );
 
 // NotifyMatchStart() - notifies native code that a match has begun.
-IMPL_TODO("611-byte function; generates FGuid via engine vtable, initialises R6-specific match session state, caches arm-patches data; R6Engine helpers not yet analysed; tractable once R6Engine.dll exports are mapped; Ghidra 0x103bc230")
+IMPL_TODO("611-byte ALevelInfo::execNotifyMatchStart; FUN_103866c0 (R6 session helper) confirmed in Engine _unnamed.cpp; dispatches through R6GameInfo vtable at LevelInfo+0x328; tractable. Ghidra 0x103bc230")
 void ALevelInfo::execNotifyMatchStart( FFrame& Stack, RESULT_DECL )
 {
 	guard(ALevelInfo::execNotifyMatchStart);
@@ -2684,14 +2684,14 @@ INT ALevelInfo::IsSoundAudibleFromZone(INT Zone1, INT Zone2)
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void AGameReplicationInfo::PostNetReceive() {}
-IMPL_TODO("4039-byte function; helpers now resolved (RepObjectChanged=FUN_10370830, FindRepProperty=FUN_10371990, string-array diff=FUN_10370870); tractable but large translation pending; Ghidra 0x10376620")
+IMPL_TODO("4039-byte AGameReplicationInfo::GetOptimizedRepList; DATs (0x10666ax) are function-local static property caches (bit-flags + UProperty* ptrs, not profiling globals); FUN_10370870 (string diff) in _unnamed.cpp; tractable. Ghidra 0x10376620")
 INT* AGameReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
 }
 IMPL_EMPTY("base no-op — subclass implements")
 void APlayerReplicationInfo::PostNetReceive() {}
-IMPL_TODO("3146-byte function; helpers now resolved (RepObjectChanged=FUN_10370830, FindRepProperty=FUN_10371990); tractable but large translation pending; Ghidra 0x103759a0")
+IMPL_TODO("3146-byte APlayerReplicationInfo::GetOptimizedRepList; DATs (0x10666a40-0x10666a80) are function-local static property caches (bit-flags + UProperty* ptrs, not profiling globals); FUN_10370830/870/71990 all in _unnamed.cpp; tractable. Ghidra 0x103759a0")
 INT* APlayerReplicationInfo::GetOptimizedRepList(BYTE* Mem, FPropertyRetirement* Retire, INT* Ptr, UPackageMap* Map, UActorChannel* Chan)
 {
 	return AActor::GetOptimizedRepList(Mem, Retire, Ptr, Map, Chan);
